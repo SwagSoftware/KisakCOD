@@ -162,7 +162,6 @@ static byte virtualKeyConvert[0x92][2] =
 	{ K_KP_NUMLOCK,		K_KP_NUMLOCK	}, // VK_NUMLOCK 90 NUM LOCK key  
 	{ 0,				0				}  // VK_SCROLL 91 
 };
-
 static byte extendedVirtualKeyConvert[21][2] =
 {
 	{ K_F15,			K_ASCII_181		},

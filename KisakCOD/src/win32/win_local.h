@@ -113,8 +113,18 @@ enum CriticalSection : int
 	CRITSECT_COUNT = 0x16,
 };
 
+
+struct FastCriticalSection
+{
+	volatile unsigned int readCount;
+	volatile unsigned int writeCount;
+};
+
 void Sys_InitializeCriticalSections();
 void Sys_EnterCriticalSection(int critSect);
 void Sys_LeaveCriticalSection(int critSect);
+void Sys_LockWrite(FastCriticalSection* critSect);
+void Sys_UnlockWrite(FastCriticalSection* critSect);
+
 
 void Sys_InitMainThread();

@@ -24,3 +24,50 @@ void I_strncpyz(char* dest, char* src, int destsize)
     strncpy(dest, src, destsize - 1);
     dest[destsize - 1] = 0;
 }
+
+int I_stricmp(const char* s0, const char* s1)
+{
+    iassert(s0);
+    iassert(s1);
+
+    return I_strnicmp(s0, s1, 0x7FFFFFFF);
+}
+
+int I_strnicmp(const char* s0, const char* s1, int n)
+{
+    int c1; // [esp+0h] [ebp-8h]
+    int c0; // [esp+4h] [ebp-4h]
+
+    do
+    {
+        c0 = *(unsigned __int8*)s0;
+        c1 = *(unsigned __int8*)s1;
+        ++s0;
+        ++s1;
+        if (!n--)
+            return 0;
+        if (c0 != c1)
+        {
+            if (I_isupper(c0))
+                c0 += 32;
+            if (I_isupper(c1))
+                c1 += 32;
+            if (c0 != c1)
+                return 2 * (c0 >= c1) - 1;
+        }
+    } while (c0);
+    return 0;
+}
+
+bool I_islower(int c)
+{
+    return c >= 'a' && c <= 'z';
+}
+bool I_isupper(int c)
+{
+    return c >= 'A' && c <= 'Z';
+}
+bool I_isalpha(int c)
+{
+    return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+}

@@ -1,6 +1,7 @@
 #include "../win32/win_local.h"
 
 #include "../universal/assertive.h"
+#include <qcommon/qcommon.h>
 
 _RTL_CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
 
@@ -21,6 +22,28 @@ void Sys_LeaveCriticalSection(int critSect)
 {
 	iassert(critSect >= 0 && critSect < CRITSECT_COUNT);
 	LeaveCriticalSection(&s_criticalSections[critSect]);
+}
+
+void Sys_LockWrite(FastCriticalSection* critSect)
+{
+    while (1)
+    {
+        if (critSect->readCount == 0)
+        {
+            if (InterlockedIncrement(&critSect->writeCount) == 1 && critSect->readCount == 0)
+            {
+                break;
+            }
+            InterlockedDecrement(&critSect->writeCount);
+        }
+        NET_Sleep(0);
+    }
+}
+
+void Sys_UnlockWrite(FastCriticalSection* critSect)
+{
+    iassert(critSect->writeCount > 0);
+    InterlockedDecrement(&critSect->writeCount);
 }
 
 static int threadId[7];

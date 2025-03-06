@@ -1221,7 +1221,10 @@ NET_Sleep
 sleeps msec or until net socket is ready
 ====================
 */
-void NET_Sleep( int msec ) {
+// LWSS: Done
+void NET_Sleep( int msec ) 
+{
+	Sleep(msec);
 }
 
 

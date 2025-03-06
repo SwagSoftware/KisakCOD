@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -127,7 +130,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\client_mp\cl_input.cpp" />
+    <ClCompile Include="src\qcommon\cmd.cpp" />
     <ClCompile Include="src\qcommon\common.cpp" />
+    <ClCompile Include="src\script\scr_animtree.cpp" />
+    <ClCompile Include="src\script\scr_compiler.cpp" />
+    <ClCompile Include="src\script\scr_debugger.cpp" />
+    <ClCompile Include="src\script\scr_evaluate.cpp" />
+    <ClCompile Include="src\script\scr_main.cpp" />
+    <ClCompile Include="src\script\scr_memorytree.cpp" />
+    <ClCompile Include="src\script\scr_parser.cpp" />
+    <ClCompile Include="src\script\scr_parsetree.cpp" />
+    <ClCompile Include="src\script\scr_stringlist.cpp" />
+    <ClCompile Include="src\script\scr_variable.cpp" />
+    <ClCompile Include="src\script\scr_vm.cpp" />
+    <ClCompile Include="src\universal\com_memory.cpp" />
+    <ClCompile Include="src\universal\dvar.cpp" />
     <ClCompile Include="src\universal\q_shared.cpp" />
     <ClCompile Include="src\universal\win_common.cpp" />
     <ClCompile Include="src\win32\win_input.cpp" />
@@ -137,9 +155,12 @@
     <ClCompile Include="src\win32\win_wndproc.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\client_mp\client_mp.h" />
     <ClInclude Include="src\qcommon\qcommon.h" />
+    <ClInclude Include="src\script\scr_stringlist.h" />
     <ClInclude Include="src\ui\keycodes.h" />
     <ClInclude Include="src\universal\assertive.h" />
+    <ClInclude Include="src\universal\profile.h" />
     <ClInclude Include="src\universal\q_shared.h" />
     <ClInclude Include="src\win32\win_input.h" />
     <ClInclude Include="src\win32\win_local.h" />

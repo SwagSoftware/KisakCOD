@@ -215,3 +215,95 @@ typedef enum {
 //=============================================
 void I_strncat(char* dest, int size, char* src);
 void I_strncpyz(char* dest, char* src, int destsize);
+int I_stricmp(const char* s0, const char* s1);
+int I_strnicmp(const char* s0, const char* s1, int n);
+
+bool I_islower(int c);
+bool I_isupper(int c);
+bool I_isalpha(int c);
+
+
+//=============================================
+#define DVAR_WRITEPROTECT	0x10			
+#define	DVAR_LATCH			0x20			// will only change when C code next does
+											// a Cvar_Get(), so it can't be changed
+											// without proper initialization.  modified
+											// will be set, even though the value hasn't
+											// changed yet
+#define DVAR_ROM   0x40						// display only, cannot be set by user at all (can be set by code)
+#define DVAR_CHEAT 0x80						// can not be changed if cheats are disabled
+
+#define DVAR_AUTOEXEC 0x200 // not 100% sure
+#define DVAR_NORESTART 0x400		// do not clear when a cvar_restart is issued
+
+#define DVAR_SAVED 0x1000 // not 100% sure
+#define DVAR_EXTERNAL 0x4000
+
+#define DVAR_CHANGEABLE_RESET 0x8000 // not 100% sure
+
+enum
+{
+	DVAR_TYPE_BOOL = 0x0,
+	DVAR_TYPE_FLOAT = 0x1,
+	DVAR_TYPE_FLOAT_2 = 0x2,
+	DVAR_TYPE_FLOAT_3 = 0x3,
+	DVAR_TYPE_FLOAT_4 = 0x4,
+	DVAR_TYPE_INT = 0x5,
+	DVAR_TYPE_ENUM = 0x6,
+	DVAR_TYPE_STRING = 0x7,
+	DVAR_TYPE_COLOR = 0x8,
+	DVAR_TYPE_COUNT = 0x9,
+};
+
+union DvarValue 
+{                
+    bool enabled;
+    int integer;
+    unsigned int unsignedInt;
+    float value;
+    float vector[4];
+    const char *string;
+    byte color[4];
+};
+struct DvarLimits_Enumeration
+{
+	int stringCount;
+	const char** strings;
+};
+struct DvarLimits_Integer
+{
+	int min;
+	int max;
+};
+struct DvarLimits_Value
+{
+	float min; 
+	float max;
+};
+struct DvarLimits_Vector
+{
+	float min;
+	float max;
+};
+union DvarLimits
+{
+	DvarLimits_Enumeration enumeration;
+	DvarLimits_Integer integer;
+	DvarLimits_Value value;
+	DvarLimits_Vector vector;
+};
+
+// nothing outside the Dvar_*() functions should modify these fields!
+typedef struct dvar_s {
+	const char *name;
+	const char *description;
+	word flags;
+	byte type;
+	bool modified;
+	DvarValue current;
+	DvarValue latched;
+	DvarValue reset;
+	DvarLimits domain;
+	bool (__cdecl *domainFunc)(dvar_s *, DvarValue);
+	dvar_s *hashNext;
+} dvar_t;
