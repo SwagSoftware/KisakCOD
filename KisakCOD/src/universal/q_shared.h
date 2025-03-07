@@ -222,6 +222,10 @@ bool I_islower(int c);
 bool I_isupper(int c);
 bool I_isalpha(int c);
 
+//=============================================
+void Com_Memset(void* dest, const int val, const size_t count);
+void Com_Memcpy(void* dest, const void* src, const size_t count);
+
 
 //=============================================
 #define DVAR_WRITEPROTECT	0x10			

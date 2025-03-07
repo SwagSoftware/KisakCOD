@@ -29,7 +29,6 @@ void Cmd_AddCommandInternal(const char* cmdName, void(__cdecl* function)(), cmd_
 cmd_function_s* Cmd_FindCommand(const char* cmdName);
 
 
-
 /*
 ==============================================================
 
