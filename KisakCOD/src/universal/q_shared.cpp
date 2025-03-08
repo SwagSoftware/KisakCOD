@@ -71,3 +71,28 @@ bool I_isalpha(int c)
 {
     return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
 }
+
+/*
+============
+va
+
+does a varargs printf into a temp buffer, so I don't need to have
+varargs versions of all text functions.
+FIXME: make this buffer size safe someday
+============
+*/
+char* QDECL va(const char* format, ...) {
+    va_list		argptr;
+    static char		string[2][32000];	// in case va is called by nested functions
+    static int		index = 0;
+    char* buf;
+
+    buf = string[index & 1];
+    index++;
+
+    va_start(argptr, format);
+    vsprintf(buf, format, argptr);
+    va_end(argptr);
+
+    return buf;
+}

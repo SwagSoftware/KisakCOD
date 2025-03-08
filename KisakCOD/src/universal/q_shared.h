@@ -223,8 +223,124 @@ bool I_isupper(int c);
 bool I_isalpha(int c);
 
 //=============================================
+// LWSS: IDA Macros.
+#define BYTEn(x, n)   (*((BYTE*)&(x)+n))
+#define WORDn(x, n)   (*((WORD*)&(x)+n))
+#define DWORDn(x, n)  (*((DWORD*)&(x)+n))
+
+#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN
+#  define LOW_IND(x,part_type)   LAST_IND(x,part_type)
+#  define HIGH_IND(x,part_type)  0
+#else
+#  define HIGH_IND(x,part_type)  LAST_IND(x,part_type)
+#  define LOW_IND(x,part_type)   0
+#endif
+
+// lwss: fcking winblows!
+#undef MAKEWORD
+#undef MAKELONG
+#undef LOWORD
+#undef HIWORD
+#undef LOBYTE
+#undef HIBYTE
+
+#if defined(__GNUC__)
+typedef          long long ll;
+typedef unsigned long long ull;
+#define __int64 long long
+#define __int32 int
+#define __int16 short
+#define __int8  char
+#define MAKELL(num) num ## LL
+#define FMT_64 "ll"
+#elif defined(_MSC_VER)
+typedef          __int64 ll;
+typedef unsigned __int64 ull;
+#define MAKELL(num) num ## i64
+#define FMT_64 "I64"
+#elif defined (__BORLANDC__)
+typedef          __int64 ll;
+typedef unsigned __int64 ull;
+#define MAKELL(num) num ## i64
+#define FMT_64 "L"
+#else
+#error "unknown compiler"
+#endif
+typedef unsigned int uint;
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned long ulong;
+
+typedef          char   int8;
+typedef   signed char   sint8;
+typedef unsigned char   uint8;
+typedef          short  int16;
+typedef   signed short  sint16;
+typedef unsigned short  uint16;
+typedef long				int32;
+typedef unsigned long		uint32;
+typedef signed long			sint32;
+typedef ll              int64;
+typedef ll              sint64;
+typedef ull             uint64;
+
+// Partially defined types. They are used when the decompiler does not know
+// anything about the type except its size.
+#define _BYTE  uint8
+#define _WORD  uint16
+#define _DWORD uint32
+#define _QWORD uint64
+#if !defined(_MSC_VER)
+#define _LONGLONG __int128
+#endif
+
+// Some convenience macros to make partial accesses nicer
+#define LAST_IND(x,part_type)    (sizeof(x)/sizeof(part_type) - 1)
+#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN
+#  define LOW_IND(x,part_type)   LAST_IND(x,part_type)
+#  define HIGH_IND(x,part_type)  0
+#else
+#  define HIGH_IND(x,part_type)  LAST_IND(x,part_type)
+#  define LOW_IND(x,part_type)   0
+#endif
+// first unsigned macros:
+#define BYTEn(x, n)   (*((_BYTE*)&(x)+n))
+#define WORDn(x, n)   (*((_WORD*)&(x)+n))
+#define DWORDn(x, n)  (*((_DWORD*)&(x)+n))
+
+#define LOBYTE(x)  BYTEn(x,LOW_IND(x,_BYTE))
+#define LOWORD(x)  WORDn(x,LOW_IND(x,_WORD))
+#define LODWORD(x) DWORDn(x,LOW_IND(x,_DWORD))
+#define HIBYTE(x)  BYTEn(x,HIGH_IND(x,_BYTE))
+#define HIWORD(x)  WORDn(x,HIGH_IND(x,_WORD))
+#define HIDWORD(x) DWORDn(x,HIGH_IND(x,_DWORD))
+#define BYTE1(x)   BYTEn(x,  1)         // byte 1 (counting from 0)
+#define BYTE2(x)   BYTEn(x,  2)
+#define BYTE3(x)   BYTEn(x,  3)
+#define BYTE4(x)   BYTEn(x,  4)
+#define BYTE5(x)   BYTEn(x,  5)
+#define BYTE6(x)   BYTEn(x,  6)
+#define BYTE7(x)   BYTEn(x,  7)
+#define BYTE8(x)   BYTEn(x,  8)
+#define BYTE9(x)   BYTEn(x,  9)
+#define BYTE10(x)  BYTEn(x, 10)
+#define BYTE11(x)  BYTEn(x, 11)
+#define BYTE12(x)  BYTEn(x, 12)
+#define BYTE13(x)  BYTEn(x, 13)
+#define BYTE14(x)  BYTEn(x, 14)
+#define BYTE15(x)  BYTEn(x, 15)
+#define WORD1(x)   WORDn(x,  1)
+#define WORD2(x)   WORDn(x,  2)         // third word of the object, unsigned
+#define WORD3(x)   WORDn(x,  3)
+#define WORD4(x)   WORDn(x,  4)
+#define WORD5(x)   WORDn(x,  5)
+#define WORD6(x)   WORDn(x,  6)
+#define WORD7(x)   WORDn(x,  7)
+//=============================================
 void Com_Memset(void* dest, const int val, const size_t count);
 void Com_Memcpy(void* dest, const void* src, const size_t count);
+
+char* QDECL va(const char* format, ...);
 
 
 //=============================================
