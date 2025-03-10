@@ -359,3 +359,28 @@ void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type)
 		break;
 	}
 }
+
+
+/*
+=================
+Com_Init
+=================
+*/
+void Com_Init(char* commandLine) {
+	char* s;
+
+	try
+	{
+		Com_Printf(16, "%s %s build %s %s\n", "KisakCOD", "1.0", "win-x86", __DATE__); // KISAKTODO: incorporate CPUSTRING 
+
+
+
+		com_fullyInitialized = qtrue;
+		Com_Printf(16, "--- Common Initialization Complete ---\n");
+	}
+
+	catch (const char* reason) 
+	{
+		Sys_Error("Error during initialization: %s", reason);
+	}
+}

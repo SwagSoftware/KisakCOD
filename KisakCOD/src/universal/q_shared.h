@@ -222,6 +222,8 @@ bool I_islower(int c);
 bool I_isupper(int c);
 bool I_isalpha(int c);
 
+bool I_iscsym(int c);
+
 //=============================================
 // LWSS: IDA Macros.
 #define BYTEn(x, n)   (*((BYTE*)&(x)+n))

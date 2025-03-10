@@ -13,6 +13,11 @@ typedef enum
 void QDECL Com_Printf(int channel, const char* fmt, ...);
 void QDECL Com_Error(int code, const char* fmt, ...);
 
+// commandLine should not include the executable name (argv[0])
+void Com_Init(char* commandLine);
+void Com_Frame(void);
+void Com_Shutdown(void);
+
 struct cmd_function_s
 {
     cmd_function_s *next;

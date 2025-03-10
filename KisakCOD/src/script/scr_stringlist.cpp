@@ -10,14 +10,7 @@
 
 #include "scr_memorytree.h"
 
-struct scrStringDebugGlob_t 
-{                           
-    volatile unsigned int refCount[65536];
-    volatile unsigned int totalRefCount;
-    int ignoreLeaks;
-};
-
-static scrStringDebugGlob_t* scrStringDebugGlob;
+scrStringDebugGlob_t* scrStringDebugGlob;
 static scrStringDebugGlob_t scrStringDebugGlobBuf;
 static scrMemTreePub_t scrMemTreePub;
 static scrStringGlob_t scrStringGlob; // 0x244E300

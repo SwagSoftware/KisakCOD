@@ -158,8 +158,11 @@
   <ItemGroup>
     <ClInclude Include="src\client_mp\client_mp.h" />
     <ClInclude Include="src\qcommon\qcommon.h" />
+    <ClInclude Include="src\script\scr_main.h" />
     <ClInclude Include="src\script\scr_memorytree.h" />
     <ClInclude Include="src\script\scr_stringlist.h" />
+    <ClInclude Include="src\script\scr_variable.h" />
+    <ClInclude Include="src\script\scr_vm.h" />
     <ClInclude Include="src\ui\keycodes.h" />
     <ClInclude Include="src\universal\assertive.h" />
     <ClInclude Include="src\universal\profile.h" />

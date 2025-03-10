@@ -5,6 +5,8 @@
 #define HASH_STAT_HEAD      0x20000
 #define HASH_STAT_MASK      0x30000
 
+#define SL_MAX_STRING_INDEX 0x10000
+
 union HashEntry_unnamed_type_u
 {                     
     HashEntry_unnamed_type_u(unsigned int val)
@@ -53,6 +55,13 @@ struct __declspec(align(128)) scrStringGlob_t
 struct scrMemTreePub_t
 {                     
     char *mt_buffer;  
+};
+
+struct scrStringDebugGlob_t
+{
+    volatile unsigned int refCount[65536];
+    volatile unsigned int totalRefCount;
+    int ignoreLeaks;
 };
 
 void SL_Init();

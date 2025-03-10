@@ -4,7 +4,7 @@
 #include <win32/win_local.h>
 #include <qcommon/qcommon.h>
 
-struct scrMemTreePub_t scrMemTreePub;
+scrMemTreePub_t scrMemTreePub;
 int marker_scr_memorytree;
 
 static scrMemTreeGlob_t scrMemTreeGlob;

@@ -7,3 +7,6 @@ void MyAssertHandler(const char* filename, int line, int type, const char* fmt, 
             (MyAssertHandler(__FILE__, (unsigned)(__LINE__), 0, "%s", #expression), 0) \
         )
 
+
+
+#define alwaysfails 0

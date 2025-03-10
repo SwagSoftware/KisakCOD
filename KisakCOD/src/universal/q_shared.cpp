@@ -71,6 +71,16 @@ bool I_isalpha(int c)
 {
     return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
 }
+bool I_iscsym(int c)
+{
+    if (c >= 'a' && c <= 'z')
+        return 1;
+    if (c >= 'A' && c <= 'Z')
+        return 1;
+    if (c < '0' || c > '9')
+        return c == '_';
+    return 1;
+}
 
 /*
 ============

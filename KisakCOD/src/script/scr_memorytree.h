@@ -69,12 +69,13 @@ unsigned short MT_AllocIndex(int numBytes, int type);
 void* MT_Alloc(int numBytes, int type);
 
 //void TRACK_scr_memorytree(void);
-unsigned int Scr_GetStringUsage(void);
+//unsigned int Scr_GetStringUsage(void);
+
 char const* MT_NodeInfoString(unsigned int nodeNum);
 void MT_InitBits(void);
 int MT_GetScore(int num);
 void MT_AddMemoryNode(int newNode, int size);
-bool MT_RemoveMemoryNode(int oldNode, int size);
+bool MT_RemoveMemoryNode(int oldNode, unsigned int size);
 void MT_RemoveHeadMemoryNode(int size);
 void MT_Error(char const* funcName, int numBytes);
 int MT_GetSize(int numBytes);

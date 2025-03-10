@@ -119,5 +119,14 @@
     <ClInclude Include="src\script\scr_memorytree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\script\scr_main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\script\scr_variable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\script\scr_vm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
