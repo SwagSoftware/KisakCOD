@@ -132,6 +132,13 @@
   <ItemGroup>
     <ClCompile Include="src\client_mp\cl_input.cpp" />
     <ClCompile Include="src\client_mp\cl_main_mp.cpp" />
+    <ClCompile Include="src\database\db_assetnames.cpp" />
+    <ClCompile Include="src\database\db_auth.cpp" />
+    <ClCompile Include="src\database\db_file_load.cpp" />
+    <ClCompile Include="src\database\db_memory.cpp" />
+    <ClCompile Include="src\database\db_registry.cpp" />
+    <ClCompile Include="src\database\db_stream.cpp" />
+    <ClCompile Include="src\database\db_stream_load.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
     <ClCompile Include="src\qcommon\common.cpp" />
     <ClCompile Include="src\script\scr_animtree.cpp" />
@@ -157,6 +164,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\client_mp\client_mp.h" />
+    <ClInclude Include="src\gfx_d3d\r_image_load_db.h" />
+    <ClInclude Include="src\gfx_d3d\r_material_load_db.h" />
     <ClInclude Include="src\qcommon\qcommon.h" />
     <ClInclude Include="src\script\scr_main.h" />
     <ClInclude Include="src\script\scr_memorytree.h" />
@@ -169,6 +178,7 @@
     <ClInclude Include="src\universal\q_shared.h" />
     <ClInclude Include="src\win32\win_input.h" />
     <ClInclude Include="src\win32\win_local.h" />
+    <ClInclude Include="src\xanim\xanim_load_db.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
