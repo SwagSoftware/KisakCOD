@@ -161,6 +161,15 @@
     <ClCompile Include="src\win32\win_net.cpp" />
     <ClCompile Include="src\win32\win_syscon.cpp" />
     <ClCompile Include="src\win32\win_wndproc.cpp" />
+    <ClCompile Include="src\xanim\dobj.cpp" />
+    <ClCompile Include="src\xanim\dobj_skel.cpp" />
+    <ClCompile Include="src\xanim\dobj_utils.cpp" />
+    <ClCompile Include="src\xanim\xanim.cpp" />
+    <ClCompile Include="src\xanim\xanim_calc.cpp" />
+    <ClCompile Include="src\xanim\xanim_load_obj.cpp" />
+    <ClCompile Include="src\xanim\xmodel.cpp" />
+    <ClCompile Include="src\xanim\xmodel_load_obj.cpp" />
+    <ClCompile Include="src\xanim\xmodel_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\client_mp\client_mp.h" />
@@ -178,7 +187,9 @@
     <ClInclude Include="src\universal\q_shared.h" />
     <ClInclude Include="src\win32\win_input.h" />
     <ClInclude Include="src\win32\win_local.h" />
+    <ClInclude Include="src\xanim\xanim.h" />
     <ClInclude Include="src\xanim\xanim_load_db.h" />
+    <ClInclude Include="src\xanim\xanim_public.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

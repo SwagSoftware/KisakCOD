@@ -1,44 +1,7 @@
 #pragma once
+#include "scr_variable.h"
 
-enum XAssetType : __int32
-{
-    ASSET_TYPE_XMODELPIECES = 0x0,
-    ASSET_TYPE_PHYSPRESET = 0x1,
-    ASSET_TYPE_XANIMPARTS = 0x2,
-    ASSET_TYPE_XMODEL = 0x3,
-    ASSET_TYPE_MATERIAL = 0x4,
-    ASSET_TYPE_TECHNIQUE_SET = 0x5,
-    ASSET_TYPE_IMAGE = 0x6,
-    ASSET_TYPE_SOUND = 0x7,
-    ASSET_TYPE_SOUND_CURVE = 0x8,
-    ASSET_TYPE_LOADED_SOUND = 0x9,
-    ASSET_TYPE_CLIPMAP = 0xA,
-    ASSET_TYPE_CLIPMAP_PVS = 0xB,
-    ASSET_TYPE_COMWORLD = 0xC,
-    ASSET_TYPE_GAMEWORLD_SP = 0xD,
-    ASSET_TYPE_GAMEWORLD_MP = 0xE,
-    ASSET_TYPE_MAP_ENTS = 0xF,
-    ASSET_TYPE_GFXWORLD = 0x10,
-    ASSET_TYPE_LIGHT_DEF = 0x11,
-    ASSET_TYPE_UI_MAP = 0x12,
-    ASSET_TYPE_FONT = 0x13,
-    ASSET_TYPE_MENULIST = 0x14,
-    ASSET_TYPE_MENU = 0x15,
-    ASSET_TYPE_LOCALIZE_ENTRY = 0x16,
-    ASSET_TYPE_WEAPON = 0x17,
-    ASSET_TYPE_SNDDRIVER_GLOBALS = 0x18,
-    ASSET_TYPE_FX = 0x19,
-    ASSET_TYPE_IMPACT_FX = 0x1A,
-    ASSET_TYPE_AITYPE = 0x1B,
-    ASSET_TYPE_MPTYPE = 0x1C,
-    ASSET_TYPE_CHARACTER = 0x1D,
-    ASSET_TYPE_XMODELALIAS = 0x1E,
-    ASSET_TYPE_RAWFILE = 0x1F,
-    ASSET_TYPE_STRINGTABLE = 0x20,
-    ASSET_TYPE_COUNT = 0x21,
-    ASSET_TYPE_STRING = 0x21,
-    ASSET_TYPE_ASSETLIST = 0x22,
-};
+#include <xanim/xanim_public.h>
 
 void Scr_Error(const char* error);
 
@@ -74,12 +37,12 @@ unsigned int __cdecl Scr_GetFunctionInfo(const char* buf, unsigned int sourcePos
 void __cdecl Scr_InitAllocNode();
 void __cdecl Scr_ShutdownAllocNode();
 void __cdecl Scr_ShutdownGameStrings();
-void __cdecl Scr_InitVariables_DONE();
-void __cdecl Scr_InitVariableRange_DONE(unsigned int begin, unsigned int end);
-void __cdecl Scr_InitClassMap_DONE();
-void __cdecl Scr_ShutdownVariables_DONE();
+void __cdecl Scr_InitVariables();
+void __cdecl Scr_InitVariableRange(unsigned int begin, unsigned int end);
+void __cdecl Scr_InitClassMap();
+void __cdecl Scr_ShutdownVariables();
 void __cdecl Scr_AddArrayKeys(unsigned int parentId);
-double __cdecl Scr_GetObjectUsage_DONE(unsigned int parentId);
+double __cdecl Scr_GetObjectUsage(unsigned int parentId);
 void __cdecl TRACK_scr_vm();
 void __cdecl Scr_ClearErrorMessage();
 void __cdecl Scr_Init();

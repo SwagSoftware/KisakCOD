@@ -78,10 +78,10 @@ def main() -> None:
 
             pseudoCodeOBJ: ida_pro.strvec_t = decompileFunction(func)
             pseudoCodeString = pseudoCodeObjToString(pseudoCodeOBJ)
-            decompglob += pseudoCodeString
+            decompglob += pseudoCodeString.replace('_DONE', '').replace("BOOL", "bool").replace ('__usercall', '')
             decompglob += "\n"
             
-            first_line = pseudoCodeString.split("{")[0]
+            first_line = pseudoCodeString.split("{")[0].replace('_DONE', '').replace("BOOL", "bool").replace('__usercall', '')
             decompheaderglob += remove_last_occurrence(first_line, "\n")
             decompheaderglob += ";\n"
 
