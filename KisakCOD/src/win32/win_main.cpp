@@ -13,6 +13,8 @@
 
 #include <Windows.h>
 #include "../qcommon/qcommon.h"
+
+#include <qcommon/threads.h>
 //#include "../qcommon/stringed_ingame.h"
 
 static void PrintWorkingDir()

@@ -60,12 +60,17 @@ def main() -> None:
     for func in idautils.Functions():
         funcName: str = idc.get_func_name(func)
         funcNameStripped: str = re.sub(r"\s+", "", funcName)
+        demangled_name = idc.demangle_name(funcNameStripped, idc.get_inf_attr(idc.INF_SHORT_DEMNAMES))
         
+        if demangled_name is None:
+            demangled_name = funcNameStripped
+            
         shouldDump = False
-
+        
         for line in inputlines:
             lineStripped: str = re.sub(r"\s+", "", line)
-            if lineStripped.lower() in funcNameStripped.lower():
+            if lineStripped in demangled_name:
+                IDAConsolePrint("found str: " + lineStripped + " in " + demangled_name)
                 shouldDump = True
                 break
         
@@ -78,10 +83,10 @@ def main() -> None:
 
             pseudoCodeOBJ: ida_pro.strvec_t = decompileFunction(func)
             pseudoCodeString = pseudoCodeObjToString(pseudoCodeOBJ)
-            decompglob += pseudoCodeString.replace('_DONE', '').replace("BOOL", "bool").replace ('__usercall', '')
+            decompglob += pseudoCodeString.replace('_DONE', '').replace("BOOL", "bool").replace ('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_') 
             decompglob += "\n"
             
-            first_line = pseudoCodeString.split("{")[0].replace('_DONE', '').replace("BOOL", "bool").replace('__usercall', '')
+            first_line = pseudoCodeString.split("{")[0].replace('_DONE', '').replace("BOOL", "bool").replace('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_') 
             decompheaderglob += remove_last_occurrence(first_line, "\n")
             decompheaderglob += ";\n"
 

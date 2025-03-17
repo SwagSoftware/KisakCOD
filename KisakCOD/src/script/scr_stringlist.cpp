@@ -15,7 +15,7 @@ static scrStringDebugGlob_t scrStringDebugGlobBuf;
 static scrMemTreePub_t scrMemTreePub;
 static scrStringGlob_t scrStringGlob; // 0x244E300
 
-static unsigned int GetHashCode(const char* str, unsigned int len)
+unsigned int GetHashCode(const char* str, unsigned int len)
 {
 	unsigned int hash;
 

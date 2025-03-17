@@ -126,6 +126,3 @@ void Sys_EnterCriticalSection(int critSect);
 void Sys_LeaveCriticalSection(int critSect);
 void Sys_LockWrite(FastCriticalSection* critSect);
 void Sys_UnlockWrite(FastCriticalSection* critSect);
-
-
-void Sys_InitMainThread();

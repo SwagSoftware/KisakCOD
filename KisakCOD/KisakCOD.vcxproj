@@ -73,6 +73,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -130,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cgame\cg_localents.cpp" />
     <ClCompile Include="src\client_mp\cl_input.cpp" />
     <ClCompile Include="src\client_mp\cl_main_mp.cpp" />
     <ClCompile Include="src\database\db_assetnames.cpp" />
@@ -139,8 +143,11 @@
     <ClCompile Include="src\database\db_registry.cpp" />
     <ClCompile Include="src\database\db_stream.cpp" />
     <ClCompile Include="src\database\db_stream_load.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_cinematic.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
     <ClCompile Include="src\qcommon\common.cpp" />
+    <ClCompile Include="src\qcommon\com_memory.cpp" />
+    <ClCompile Include="src\qcommon\threads.cpp" />
     <ClCompile Include="src\script\scr_animtree.cpp" />
     <ClCompile Include="src\script\scr_compiler.cpp" />
     <ClCompile Include="src\script\scr_debugger.cpp" />
@@ -172,10 +179,16 @@
     <ClCompile Include="src\xanim\xmodel_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\cgame_mp\cg_local_mp.h" />
     <ClInclude Include="src\client_mp\client_mp.h" />
+    <ClInclude Include="src\gfx_d3d\r_cinematic.h" />
     <ClInclude Include="src\gfx_d3d\r_image_load_db.h" />
     <ClInclude Include="src\gfx_d3d\r_material_load_db.h" />
+    <ClInclude Include="src\qcommon\bitarray.h" />
+    <ClInclude Include="src\qcommon\com_memory.h" />
     <ClInclude Include="src\qcommon\qcommon.h" />
+    <ClInclude Include="src\qcommon\threads.h" />
+    <ClInclude Include="src\qcommon\threads_interlock.h" />
     <ClInclude Include="src\script\scr_main.h" />
     <ClInclude Include="src\script\scr_memorytree.h" />
     <ClInclude Include="src\script\scr_stringlist.h" />

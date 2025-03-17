@@ -1,5 +1,16 @@
 #include "xanim.h"
+#include <qcommon/qcommon.h>
 
+
+static int g_info_usage;
+static int g_info_high_usage;
+
+static unsigned int g_endNotetrackName;
+
+static bool g_anim_developer;
+
+static XAnimNotify_s g_notifyList[0x80];
+static XAnimInfo g_xAnimInfo[0x1000];
 
 void __cdecl SV_DObjInitServerTime(gentity_s* ent, float dtime)
 {
@@ -31,8 +42,8 @@ int __cdecl XAnimGetTreeMemUsage()
 
 void __cdecl TRACK_xanim()
 {
-    track_static_alloc_internal(g_xAnimInfo, 0x40000, "g_xAnimInfo", 11);
-    track_static_alloc_internal(g_notifyList, 1536, "g_notifyList", 11);
+    //track_static_alloc_internal(g_xAnimInfo, 0x40000, "g_xAnimInfo", 11);
+    //track_static_alloc_internal(g_notifyList, 1536, "g_notifyList", 11);
 }
 
 int __cdecl XAnimGetTreeMaxMemUsage()
@@ -51,13 +62,13 @@ void __cdecl XAnimInit()
     }
     g_xAnimInfo[0].state.currentAnimTime = 0.0;
     g_xAnimInfo[0].state.oldTime = 0.0;
-    *(_DWORD*)&g_xAnimInfo[0].state.cycleCount = 0;
+    *(DWORD*)&g_xAnimInfo[0].state.cycleCount = 0;
     g_xAnimInfo[0].state.goalTime = 0.0;
     g_xAnimInfo[0].state.goalWeight = 0.0;
     g_xAnimInfo[0].state.weight = 0.0;
     g_xAnimInfo[0].state.rate = 0.0;
-    *(_DWORD*)&g_xAnimInfo[0].state.instantWeightChange = 0;
-    g_endNotetrackName = SL_GetString_("end", 0, 3).prev;
+    *(DWORD*)&g_xAnimInfo[0].state.instantWeightChange = 0;
+    g_endNotetrackName = SL_GetString_("end", 0, 3);
     g_anim_developer = 1;
     g_info_usage = 1;
     g_info_high_usage = 1;
@@ -68,7 +79,7 @@ void __cdecl XAnimShutdown()
     if (g_endNotetrackName)
     {
         XAnimCheckTreeLeak();
-        _SL_RemoveRefToString(g_endNotetrackName);
+        SL_RemoveRefToString(g_endNotetrackName);
         g_endNotetrackName = 0;
     }
 }
@@ -168,7 +179,7 @@ void __cdecl XAnimBlend(
         for (parentIndex = anims->entries[animIndex].parent; parentIndex; parentIndex = anims->entries[parentIndex].parent)
         {
             if (IsNodeAdditive(&anims->entries[parentIndex]))
-                Com_Error(ERR_DROP, &byte_8CC048);
+                Com_Error(ERR_DROP, "Do not nest additives");
         }
     }
     if (anims->debugAnimNames)

@@ -2,6 +2,9 @@
 
 #include "../universal/assertive.h"
 #include <qcommon/qcommon.h>
+#include <qcommon/threads.h>
+
+
 
 _RTL_CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
 
@@ -53,21 +56,16 @@ static unsigned int s_affinityMaskForProcess;
 static unsigned int s_cpuCount;
 static unsigned int s_affinityMaskForCpu[4];
 
-static DWORD Sys_GetCurrentThreadId()
-{
-	return GetCurrentThreadId();
-}
-
-static unsigned int Win_InitThreads()
+unsigned int Win_InitThreads()
 {
     HANDLE CurrentProcess;
-    unsigned int result; 
-    unsigned int cpuCount; 
-    unsigned int systemAffinityMask; 
-    unsigned int cpuOffset; 
-    unsigned int threadAffinityMask; 
-    unsigned int affinityMaskBits[33];
-    unsigned int processAffinityMask; 
+    unsigned long result; 
+    unsigned long cpuCount; 
+    unsigned long systemAffinityMask; 
+    unsigned long cpuOffset; 
+    unsigned long threadAffinityMask; 
+    unsigned long affinityMaskBits[33];
+    unsigned long processAffinityMask; 
 
     CurrentProcess = GetCurrentProcess();
     result = GetProcessAffinityMask(CurrentProcess, &processAffinityMask, &systemAffinityMask);
@@ -151,17 +149,9 @@ static void Sys_SetValue(int valueIndex, void* data)
     g_threadValues[valueIndex][0] = data;
 }
 
-static void Com_InitThreadData(int threadContext)
+void Com_InitThreadData(int threadContext)
 {
     Sys_SetValue(1, &va_info[threadContext]);
     Sys_SetValue(2, g_com_error[threadContext]);
     Sys_SetValue(3, &g_traceThreadInfo[threadContext]);
-}
-
-void Sys_InitMainThread()
-{
-	threadId[0] = Sys_GetCurrentThreadId();
-	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &threadHandle[0], 0, 0, 2);
-	Win_InitThreads();
-    Com_InitThreadData(0);
 }
