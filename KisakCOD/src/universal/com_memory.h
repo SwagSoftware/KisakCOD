@@ -11,6 +11,8 @@ unsigned __int8* __cdecl Hunk_AllocXAnimServer(unsigned int size);
 
 //void __cdecl TRACK_com_memory();
 
+// LWSS: Note that the Z_ prefix comes from the fact that it uses the "Zone" memory pool.
+// There are a few memory pools of fixed size that allocations come from.
 void* __cdecl Z_VirtualReserve(int size);
 void __cdecl Z_VirtualDecommitInternal(void* ptr, int size);
 void __cdecl Z_VirtualFreeInternal(void* ptr);
@@ -23,7 +25,13 @@ char* __cdecl Z_TryVirtualAlloc(int size, const char* name, int type);
 char* __cdecl Z_VirtualAlloc(int size, const char* name, int type);
 void __cdecl Z_VirtualCommit(void* ptr, int size);
 
-char* __cdecl CopyString(char* in);
+
+// LWSS: COD4 notably removes the memtag_t (Doom3BFG has these as well)
+// Instead they use a per-file memory tracking system that links to qcommon\\mem_track.cpp (Anything starting with track_)
+void* Z_Malloc(int size, const char* name, int type);
+void  Z_Free(void* ptr, int type);
+
+char* CopyString(char* in);
 void __cdecl ReplaceString(const char** str, char* in);
 void __cdecl FreeString(const char* str);
 
@@ -105,6 +113,9 @@ class LargeLocal
     ~LargeLocal();
 
     unsigned __int8* GetBuf();
+
+    int startPos;
+    int size;
 };
 
 int __cdecl LargeLocalBegin(int size);

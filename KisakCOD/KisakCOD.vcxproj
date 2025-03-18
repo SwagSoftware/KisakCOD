@@ -146,7 +146,7 @@
     <ClCompile Include="src\gfx_d3d\r_cinematic.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
     <ClCompile Include="src\qcommon\common.cpp" />
-    <ClCompile Include="src\qcommon\com_memory.cpp" />
+    <ClCompile Include="src\qcommon\mem_track.cpp" />
     <ClCompile Include="src\qcommon\threads.cpp" />
     <ClCompile Include="src\script\scr_animtree.cpp" />
     <ClCompile Include="src\script\scr_compiler.cpp" />
@@ -185,7 +185,8 @@
     <ClInclude Include="src\gfx_d3d\r_image_load_db.h" />
     <ClInclude Include="src\gfx_d3d\r_material_load_db.h" />
     <ClInclude Include="src\qcommon\bitarray.h" />
-    <ClInclude Include="src\qcommon\com_memory.h" />
+    <ClInclude Include="src\qcommon\mem_track.h" />
+    <ClInclude Include="src\universal\com_memory.h" />
     <ClInclude Include="src\qcommon\qcommon.h" />
     <ClInclude Include="src\qcommon\threads.h" />
     <ClInclude Include="src\qcommon\threads_interlock.h" />

@@ -138,13 +138,13 @@
     <ClCompile Include="src\cgame\cg_localents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\qcommon\com_memory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gfx_d3d\r_cinematic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\qcommon\threads.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\qcommon\mem_track.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -209,7 +209,7 @@
     <ClInclude Include="src\qcommon\bitarray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\qcommon\com_memory.h">
+    <ClInclude Include="src\universal\com_memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gfx_d3d\r_cinematic.h">
@@ -219,6 +219,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\qcommon\threads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qcommon\mem_track.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -54,7 +54,7 @@ const dvar_s* Dvar_RegisterVariant(
 	word flags,
 	DvarValue value,
 	DvarLimits domain,
-	const char* description)
+	const char* description);
 /*
 ==============================================================
 
@@ -124,6 +124,3 @@ MISC
 
 #define RoundUp(N, M) ((N) + ((unsigned int)(M)) - (((unsigned int)(N)) % ((unsigned int)(M))))
 #define RoundDown(N, M) ((N) - (((unsigned int)(N)) % ((unsigned int)(M))))
-
-char* CopyString(const char* in);
-void FreeString(const char* str);

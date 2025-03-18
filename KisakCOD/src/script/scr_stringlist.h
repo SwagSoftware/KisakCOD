@@ -8,7 +8,11 @@
 #define SL_MAX_STRING_INDEX 0x10000
 
 union HashEntry_unnamed_type_u
-{                     
+{           
+    HashEntry_unnamed_type_u()
+    {
+        prev = 0;
+    }
     HashEntry_unnamed_type_u(unsigned int val)
     {
         prev = val;
