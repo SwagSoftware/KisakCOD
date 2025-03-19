@@ -9,6 +9,7 @@
 #include <qcommon/threads.h>
 
 #include <qcommon/mem_track.h>
+#include <win32/win_local.h>
 
 static HunkUser* g_debugUser;
 static int g_largeLocalPos;

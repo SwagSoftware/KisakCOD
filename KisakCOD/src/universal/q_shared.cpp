@@ -15,7 +15,7 @@ void I_strncat(char* dest, int size, char* src)
     I_strncpyz(&dest[destLen], src, size - destLen);
 }
 
-void I_strncpyz(char* dest, char* src, int destsize)
+void I_strncpyz(char* dest, const char* src, int destsize)
 {
     iassert(src);
     iassert(dest);

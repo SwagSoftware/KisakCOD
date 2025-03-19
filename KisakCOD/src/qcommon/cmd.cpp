@@ -1,3 +1,5 @@
+#include "cmd.h"
+
 #include <universal/assertive.h>
 
 #include "qcommon.h"

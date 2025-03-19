@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\cgame\cg_localents.cpp" />
+    <ClCompile Include="src\client\cl_console.cpp" />
     <ClCompile Include="src\client_mp\cl_input.cpp" />
     <ClCompile Include="src\client_mp\cl_main_mp.cpp" />
     <ClCompile Include="src\database\db_assetnames.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="src\universal\q_shared.cpp" />
     <ClCompile Include="src\universal\win_common.cpp" />
     <ClCompile Include="src\win32\win_input.cpp" />
+    <ClCompile Include="src\win32\win_localize.cpp" />
     <ClCompile Include="src\win32\win_main.cpp" />
     <ClCompile Include="src\win32\win_net.cpp" />
     <ClCompile Include="src\win32\win_syscon.cpp" />
@@ -185,6 +187,7 @@
     <ClInclude Include="src\gfx_d3d\r_image_load_db.h" />
     <ClInclude Include="src\gfx_d3d\r_material_load_db.h" />
     <ClInclude Include="src\qcommon\bitarray.h" />
+    <ClInclude Include="src\qcommon\cmd.h" />
     <ClInclude Include="src\qcommon\mem_track.h" />
     <ClInclude Include="src\universal\com_memory.h" />
     <ClInclude Include="src\qcommon\qcommon.h" />
@@ -201,6 +204,7 @@
     <ClInclude Include="src\universal\q_shared.h" />
     <ClInclude Include="src\win32\win_input.h" />
     <ClInclude Include="src\win32\win_local.h" />
+    <ClInclude Include="src\win32\win_localize.h" />
     <ClInclude Include="src\xanim\xanim.h" />
     <ClInclude Include="src\xanim\xanim_load_db.h" />
     <ClInclude Include="src\xanim\xanim_public.h" />

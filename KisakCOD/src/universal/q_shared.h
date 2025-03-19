@@ -214,7 +214,7 @@ typedef enum {
 
 //=============================================
 void I_strncat(char* dest, int size, char* src);
-void I_strncpyz(char* dest, char* src, int destsize);
+void I_strncpyz(char* dest, const char* src, int destsize);
 int I_stricmp(const char* s0, const char* s1);
 int I_strnicmp(const char* s0, const char* s1, int n);
 

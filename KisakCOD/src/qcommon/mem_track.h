@@ -18,8 +18,6 @@ struct __declspec(align(4)) mem_track_t // sizeof=0x14
     unsigned __int8 usageType;          // ...
     // padding byte
     // padding byte
-
-    void track_init();
 };
 
 struct mem_track_node_s // sizeof=0x20
@@ -30,6 +28,7 @@ struct mem_track_node_s // sizeof=0x20
     mem_track_node_s* next;
 };
 
+void track_init();
 void track_static_alloc_internal(void* ptr, int size, const char* name, int type);
 
 void __cdecl CG_track_init();

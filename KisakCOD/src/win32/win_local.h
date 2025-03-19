@@ -114,6 +114,16 @@ enum CriticalSection : int
 	CRITSECT_COUNT = 0x16,
 };
 
+struct sysEvent_t // sizeof=0x18
+{                                       // ...
+	int evTime;                         // ...
+	sysEventType_t evType;              // ...
+	int evValue;                        // ...
+	int evValue2;                       // ...
+	int evPtrLength;                    // ...
+	void *evPtr;                        // ...
+};
+
 
 struct FastCriticalSection
 {
@@ -126,3 +136,21 @@ void Sys_EnterCriticalSection(int critSect);
 void Sys_LeaveCriticalSection(int critSect);
 void Sys_LockWrite(FastCriticalSection* critSect);
 void Sys_UnlockWrite(FastCriticalSection* critSect);
+
+void Sys_Error(const char *error, ...);
+void __cdecl Sys_OutOfMemErrorInternal(const char* filename, int line);
+
+double __cdecl ConvertToMB(int bytes);
+void __cdecl Sys_OpenURL(const char *url, int doexit);
+void  Sys_Error(char *error, ...);
+void __cdecl  Sys_Quit();
+void __cdecl Sys_Print(char *msg);
+char *__cdecl Sys_GetClipboardData();
+int __cdecl Sys_SetClipboardData(const char *text);
+void __cdecl Sys_QueEvent(unsigned int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr);
+void Sys_ShutdownEvents();
+void __cdecl Sys_LoadingKeepAlive();
+sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result);
+void __cdecl Sys_Init();
+void __cdecl Sys_In_Restart_f();
+void __cdecl Sys_Net_Restart_f();

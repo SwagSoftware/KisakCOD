@@ -593,7 +593,7 @@ void __cdecl track_hunk_ClearToStart()
     LeaveCriticalSection(&g_crit);
 }
 
-void mem_track_t::track_init()
+void track_init()
 {
     mem_track_t* mem_track; // [esp+0h] [ebp-4h]
 
