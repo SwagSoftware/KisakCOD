@@ -42,8 +42,8 @@ void(__cdecl* __cdecl Scr_GetFunction(const char** pName, int* type))()
         if (!strcmp(*pName, functions[i].actionString))
         {
             *pName = functions[i].actionString;
-            *type = dword_946DA0[3 * i];
-            return (void(__cdecl*)()) * (&off_946D9C + 3 * i);
+            *type = functions[i].type;
+            return functions[i].actionFunc;
         }
     }
     return 0;

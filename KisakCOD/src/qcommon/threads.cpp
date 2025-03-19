@@ -6,8 +6,7 @@
 void Com_InitThreadData(int threadContext);
 unsigned int Win_InitThreads();
 
-static int s_cpuCount;
-static int threadId[7];
+static DWORD threadId[7];
 static HANDLE threadHandle[7];
 
 static void* g_threadValues[7][4];
@@ -116,7 +115,7 @@ void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), unsigned in
         (LPTHREAD_START_ROUTINE)Sys_ThreadMain,
         (LPVOID)threadContext,
         4u,
-        (LPDWORD)(4 * threadContext + 37008660));
+        &threadId[threadContext]);
     SetThreadName(threadId[threadContext], s_threadNames[threadContext]);
 }
 
