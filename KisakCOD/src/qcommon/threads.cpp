@@ -11,6 +11,7 @@ static int threadId[7];
 static HANDLE threadHandle[7];
 
 static void* g_threadValues[7][4];
+static void *g_threadLocals[4];
 static int g_com_error[7][16];
 
 typedef void (*ThreadFuncFn)(unsigned int);
@@ -52,6 +53,7 @@ void __cdecl Sys_InitMainThread()
     DuplicateHandle(process, pseudoHandle, process, threadHandle, 0, 0, 2u);
     Win_InitThreads();
     //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues;
+    g_threadLocals[0] = g_threadValues[0];
     Com_InitThreadData(0);
 }
 
@@ -63,6 +65,7 @@ unsigned int __cdecl Sys_GetCurrentThreadId()
 void __cdecl Sys_InitThread(int threadContext)
 {
     //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues[threadContext];
+    g_threadLocals[0] = g_threadValues[0];
     Com_InitThreadData(threadContext);
     //Profile_InitContext(threadContext);
 }
@@ -452,11 +455,13 @@ bool __cdecl Sys_IsMainThread()
 void __cdecl Sys_SetValue(int valueIndex, void* data)
 {
     //*(unsigned int*)(*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) + 4 * valueIndex) = data;
+    g_threadLocals[valueIndex] = data;
 }
 
 void* __cdecl Sys_GetValue(int valueIndex)
 {
     //return *(void**)(*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) + 4 * valueIndex);
+    return g_threadLocals[valueIndex];
 }
 
 void __cdecl Sys_WaitForWorkerCmd()

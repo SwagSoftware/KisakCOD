@@ -6,89 +6,47 @@
 
 #include <universal/com_memory.h>
 
-//00751404       struct dvar_s const* const com_developer 82f01404     common.obj
 dvar_t *com_developer;
-//00751408       int marker_common        82f01408     common.obj
 int marker_common;
-//0075140c       struct dvar_s const* const com_maxFrameTime 82f0140c     common.obj
 dvar_t *com_maxFrameTime;
-//00751410       struct dvar_s const* const com_statmon 82f01410     common.obj
 dvar_t *com_statmon;
-//00751418       struct dvar_s const* const com_filter_output 82f01418     common.obj
 dvar_t *com_filter_output;
-//0075141c       int com_skelTimeStamp    82f0141c     common.obj
 int com_skelTimeStamp;
-//00751420       struct dvar_s const* const com_useConfig 82f01420     common.obj
 dvar_t *com_useConfig;
-//00751424       unsigned int com_errorPrintsCount 82f01424     common.obj
 unsigned int com_errorPrintsCount;
-//00751428       struct dvar_s const* const com_fixedtime 82f01428     common.obj
 dvar_t *com_fixedtime;
-//0075142c       struct dvar_s const* const fastfile_allowNoAuth 82f0142c     common.obj
 dvar_t *fastfile_allowNoAuth;
-//00751430       struct dvar_s const* const com_logfile 82f01430     common.obj
 dvar_t *com_logfile;
-//00751434       struct dvar_s const* const cl_paused  82f01434     common.obj
 dvar_t *cl_paused;
-//00751438       struct dvar_s const* const com_timescale 82f01438     common.obj
 dvar_t *com_timescale;
-//0075143c       struct dvar_s const* const nextmap    82f0143c     common.obj
 dvar_t *nextmap;
-//00751444       struct dvar_s const* const version    82f01444     common.obj
 dvar_t *version;
-//00751448       struct dvar_s const* const com_sv_running 82f01448     common.obj
 dvar_t *com_sv_running;
-//0075144c       float com_timescaleValue   82f0144c     common.obj
 float com_timescaleValue;
 //00751450       struct _iobuf* debuglogfile 82f01450     common.obj
-//00751454       struct dvar_s const* const ui_errorTitle 82f01454     common.obj
 dvar_t *ui_errorTitle;
-//00751458       struct dvar_s const* const shortversion 82f01458     common.obj
 dvar_t *shortversion;
-//0075145c       struct dvar_s const* const com_attractmodeduration 82f0145c     common.obj
 dvar_t *com_attractmodeduration;
-//00751460       struct dvar_s const* const com_attractmode 82f01460     common.obj
 dvar_t *com_attractmode;
-//0075146c       struct dvar_s const* const cl_paused_simple 82f0146c     common.obj
 dvar_t *cl_paused_simple;
-//00751470       struct dvar_s const* const sv_paused  82f01470     common.obj
 dvar_t *sv_paused;
-//00751474       int com_fixedConsolePosition 82f01474     common.obj
 int com_fixedConsolePosition;
-//00751478       struct dvar_s const* const com_hiDef  82f01478     common.obj
 dvar_t *com_hiDef;
-//0075147c       struct dvar_s const* const com_animCheck 82f0147c     common.obj
 dvar_t *com_animCheck;
-//007995cc       struct dvar_s const* const com_developer_script 82f495cc     common.obj
 dvar_t *com_developer_script;
-//0079a5d0       struct dvar_s const* const dev_timescale 82f4a5d0     common.obj
 dvar_t *dev_timescale;
-//0079a5d4       struct dvar_s const* const cl_useMapPreloading 82f4a5d4     common.obj
 dvar_t *cl_useMapPreloading;
-//0079a5e0       struct dvar_s const* const com_maxfps 82f4a5e0     common.obj
 dvar_t *com_maxfps;
-//0079a5e4       int com_frameTime        82f4a5e4     common.obj
 dvar_t *com_frameTime;
-//0079a5e8       struct dvar_s const* const com_recommendedSet 82f4a5e8     common.obj
 dvar_t *com_recommendedSet;
-//0079a5ec       struct dvar_s const* const sv_useMapPreloading 82f4a5ec     common.obj
 dvar_t *sv_useMapPreloading;
-//0079a5f0       struct dvar_s const* const ui_errorMessage 82f4a5f0     common.obj
 dvar_t *ui_errorMessage;
-//0079a5f4       struct dvar_s const* const com_introPlayed 82f4a5f4     common.obj
 dvar_t *com_introPlayed;
-//0079a5f8       struct dvar_s const* const com_wideScreen 82f4a5f8     common.obj
 dvar_t *com_wideScreen;
-//0079a600       int com_errorEntered     82f4a600     common.obj
 int com_errorEntered;
-//0079a610       int com_frameNumber      82f4a610     common.obj
 int com_frameNumber;
-//0079a614       int com_consoleLogOpenFailed 82f4a614     common.obj
 int com_consoleLogOpenFailed;
-//0079a618       int com_missingAssetOpenFailed 82f4a618     common.obj
 int com_missingAssetOpenFailed;
-
-
 dvar_t *com_dedicated;
 
 #define MAX_NUM_ARGVS	50
@@ -613,10 +571,10 @@ void Com_DPrintf(int channel, char* fmt, ...)
     }
 }
 
-void Com_PrintError(int channel, char* fmt, ...)
+void Com_PrintError(int channel, const char* fmt, ...)
 {
     char dest; // [esp+14h] [ebp-1008h] BYREF
-    _BYTE v3[4095]; // [esp+15h] [ebp-1007h] BYREF
+    char v3[4095]; // [esp+15h] [ebp-1007h] BYREF
     int v4; // [esp+1018h] [ebp-4h]
     va_list va; // [esp+102Ch] [ebp+10h] BYREF
 
@@ -875,11 +833,11 @@ int __cdecl Com_SafeMode()
     for (i = 0; i < com_numConsoleLines; ++i)
     {
         Cmd_TokenizeString(com_consoleLines[i]);
-        v0 = _Cmd_Argv(0);
+        v0 = Cmd_Argv(0);
         v3 = 1;
         if (I_stricmp(v0, "safe"))
         {
-            v1 = _Cmd_Argv(0);
+            v1 = Cmd_Argv(0);
             if (I_stricmp(v1, "dvar_restart"))
                 v3 = 0;
         }
@@ -907,12 +865,12 @@ void __cdecl Com_StartupVariable(const char* match)
     for (lineIndex = 0; lineIndex < com_numConsoleLines; ++lineIndex)
     {
         Cmd_TokenizeString(com_consoleLines[lineIndex]);
-        if (!match || !strcmp(_Cmd_Argv(1), match))
+        if (!match || !strcmp(Cmd_Argv(1), match))
         {
-            v1 = _Cmd_Argv(0);
+            v1 = Cmd_Argv(0);
             if (I_stricmp(v1, "set"))
             {
-                v2 = _Cmd_Argv(0);
+                v2 = Cmd_Argv(0);
                 if (!I_stricmp(v2, "seta"))
                     Dvar_SetA_f();
             }
@@ -1393,7 +1351,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 
 void __cdecl Com_Error_f()
 {
-    if (_Cmd_Argc() <= 1)
+    if (Cmd_Argc() <= 1)
         Com_Error(ERR_FATAL, &byte_8975D0);
     else
         Com_Error(ERR_DROP, &byte_8975E8);
@@ -1405,9 +1363,9 @@ void __cdecl Com_Freeze_f()
     unsigned int start; // [esp+4h] [ebp-Ch]
     float s; // [esp+Ch] [ebp-4h]
 
-    if (_Cmd_Argc() == 2)
+    if (Cmd_Argc() == 2)
     {
-        v0 = _Cmd_Argv(1);
+        v0 = Cmd_Argv(1);
         s = atof(v0);
         start = Sys_Milliseconds();
         while (s >= (double)(int)(Sys_Milliseconds() - start) * 0.001)
@@ -1543,9 +1501,9 @@ void __cdecl Com_WriteConfig_f()
     char* v0; // eax
     char filename[68]; // [esp+0h] [ebp-48h] BYREF
 
-    if (_Cmd_Argc() == 2)
+    if (Cmd_Argc() == 2)
     {
-        v0 = (char*)_Cmd_Argv(1);
+        v0 = (char*)Cmd_Argv(1);
         I_strncpyz(filename, v0, 64);
         Com_DefaultExtension(filename, 0x40u, ".cfg");
         Com_Printf(0, "Writing %s.\n", filename);
@@ -1582,9 +1540,9 @@ void __cdecl Com_WriteDefaults_f()
     char* v0; // eax
     char filename[68]; // [esp+0h] [ebp-48h] BYREF
 
-    if (_Cmd_Argc() == 2)
+    if (Cmd_Argc() == 2)
     {
-        v0 = (char*)_Cmd_Argv(1);
+        v0 = (char*)Cmd_Argv(1);
         I_strncpyz(filename, v0, 64);
         Com_DefaultExtension(filename, 0x40u, ".cfg");
         Com_Printf(0, "Writing %s.\n", filename);

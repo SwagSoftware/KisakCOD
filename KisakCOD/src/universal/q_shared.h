@@ -217,6 +217,7 @@ void I_strncat(char* dest, int size, char* src);
 void I_strncpyz(char* dest, const char* src, int destsize);
 int I_stricmp(const char* s0, const char* s1);
 int I_strnicmp(const char* s0, const char* s1, int n);
+const char *__cdecl I_stristr(const char *s0, const char *substr);
 
 bool I_islower(int c);
 bool I_isupper(int c);

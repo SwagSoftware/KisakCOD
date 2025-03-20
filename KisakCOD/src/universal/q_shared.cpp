@@ -33,6 +33,29 @@ int I_stricmp(const char* s0, const char* s1)
     return I_strnicmp(s0, s1, 0x7FFFFFFF);
 }
 
+const char *__cdecl I_stristr(const char *s0, const char *substr)
+{
+    int v3; // esi
+    int s0Char; // [esp+4h] [ebp-8h]
+    int substrChar; // [esp+8h] [ebp-4h]
+
+    iassert(s0);
+    iassert(substr);
+
+    for (s0Char = 0; s0[s0Char]; ++s0Char)
+    {
+        substrChar = -1;
+        do
+        {
+            if (!substr[++substrChar])
+                return &s0[s0Char];
+            v3 = tolower(s0[substrChar + s0Char]);
+        } while (v3 == tolower(substr[substrChar]));
+    }
+
+    return 0;
+}
+
 int I_strnicmp(const char* s0, const char* s1, int n)
 {
     int c1; // [esp+0h] [ebp-8h]

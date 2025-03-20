@@ -54,6 +54,45 @@ struct parseInfo_t // sizeof=0x420
 };
 
 extern dvar_t *com_developer;
+extern int marker_common;
+extern dvar_t *com_maxFrameTime;
+extern dvar_t *com_statmon;
+extern dvar_t *com_filter_output;
+extern int com_skelTimeStamp;
+extern dvar_t *com_useConfig;
+extern unsigned int com_errorPrintsCount;
+extern dvar_t *com_fixedtime;
+extern dvar_t *fastfile_allowNoAuth;
+extern dvar_t *com_logfile;
+extern dvar_t *cl_paused;
+extern dvar_t *com_timescale;
+extern dvar_t *nextmap;
+extern dvar_t *version;
+extern dvar_t *com_sv_running;
+extern float com_timescaleValue;
+extern dvar_t *ui_errorTitle;
+extern dvar_t *shortversion;
+extern dvar_t *com_attractmodeduration;
+extern dvar_t *com_attractmode;
+extern dvar_t *cl_paused_simple;
+extern dvar_t *sv_paused;
+extern int com_fixedConsolePosition;
+extern dvar_t *com_hiDef;
+extern dvar_t *com_animCheck;
+extern dvar_t *com_developer_script;
+extern dvar_t *dev_timescale;
+extern dvar_t *cl_useMapPreloading;
+extern dvar_t *com_maxfps;
+extern dvar_t *com_frameTime;
+extern dvar_t *com_recommendedSet;
+extern dvar_t *sv_useMapPreloading;
+extern dvar_t *ui_errorMessage;
+extern dvar_t *com_introPlayed;
+extern dvar_t *com_wideScreen;
+extern int com_errorEntered;
+extern int com_frameNumber;
+extern int com_consoleLogOpenFailed;
+extern int com_missingAssetOpenFailed;
 extern dvar_t *com_dedicated;
 
 void QDECL Com_Printf(int channel, const char* fmt, ...);
@@ -72,7 +111,7 @@ void __cdecl Com_PrintMessage(int channel, char* msg, int error);
 void __cdecl Com_LogPrintMessage(int channel, char* msg);
 void Com_OpenLogFile();
 void Com_DPrintf(int channel, char* fmt, ...);
-void Com_PrintError(int channel, char* fmt, ...);
+void Com_PrintError(int channel, const char* fmt, ...);
 void Com_PrintWarning(int channel, char* fmt, ...);
 void __cdecl Com_SetLocalizedErrorMessage(char* localizedErrorMessage, const char* titleToken);
 void __cdecl Com_SetErrorMessage(char* errorMessage);
@@ -88,8 +127,7 @@ void __cdecl Com_StartupVariable(const char* match);
 void __cdecl Info_Print(const char* s);
 unsigned int* __cdecl Com_AllocEvent(int size);
 void __cdecl Com_ClientPacketEvent();
-void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg);
-void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg);
+
 void __cdecl Com_ServerPacketEvent();
 void __cdecl Com_EventLoop();
 void __cdecl Com_SetScriptSettings();
@@ -154,22 +192,6 @@ void __cdecl Com_InitParse();
 void __cdecl Com_InitParseInfo(parseInfo_t* pi);
 void __cdecl Com_InitThreadData(int threadContext);
 void __cdecl Com_FreeEvent(char* ptr);
-
-
-struct cmd_function_s
-{
-    cmd_function_s *next;
-    const char *name;
-    const char *autoCompleteDir;
-    const char *autoCompleteExt;
-    void (__cdecl *function)();
-};
-
-void Cmd_Init();
-
-void Cmd_AddCommandInternal(const char* cmdName, void(__cdecl* function)(), cmd_function_s* allocedCmd);
-
-cmd_function_s* Cmd_FindCommand(const char* cmdName);
 
 
 /*
@@ -252,6 +274,9 @@ qboolean	NET_StringToAdr(const char* s, netadr_t* a);
 qboolean	NET_GetLoopPacket(netsrc_t sock, netadr_t* net_from, msg_t* net_message);
 void		NET_Sleep(int msec);
 
+
+void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t *netmsg);
+void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t *netmsg);
 /*
 ==============================================================
 

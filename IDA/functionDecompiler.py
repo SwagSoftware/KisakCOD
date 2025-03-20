@@ -64,12 +64,18 @@ def main() -> None:
         
         if demangled_name is None:
             demangled_name = funcNameStripped
-            
+        
+        demangled_name = demangled_name.split("(")[0]
+        
+        IDAConsolePrint("cuck: " + demangled_name + "\n")
+        
         shouldDump = False
         
         for line in inputlines:
             lineStripped: str = re.sub(r"\s+", "", line)
-            if lineStripped in demangled_name:
+            lineStripped = lineStripped.replace('_', '')
+            demangled_and_detarded: str = demangled_name.replace('_DONE', '').replace('_', '')
+            if lineStripped == demangled_and_detarded:
                 IDAConsolePrint("found str: " + lineStripped + " in " + demangled_name)
                 shouldDump = True
                 break
@@ -83,10 +89,10 @@ def main() -> None:
 
             pseudoCodeOBJ: ida_pro.strvec_t = decompileFunction(func)
             pseudoCodeString = pseudoCodeObjToString(pseudoCodeOBJ)
-            decompglob += pseudoCodeString.replace('_DONE', '').replace("BOOL", "bool").replace ('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";')
+            decompglob += pseudoCodeString.replace('_DONE', '').replace("BOOL", "bool").replace ('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";').replace('&String,', '"",').replace('qmemcpy(', 'memcpy(')
             decompglob += "\n"
             
-            first_line = pseudoCodeString.split("{")[0].replace('_DONE', '').replace("BOOL", "bool").replace('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";')
+            first_line = pseudoCodeString.split("{")[0].replace('_DONE', '').replace("BOOL", "bool").replace('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";').replace('&String', '"",').replace('qmemcpy(', 'memcpy(')
             decompheaderglob += remove_last_occurrence(first_line, "\n")
             decompheaderglob += ";\n"
 

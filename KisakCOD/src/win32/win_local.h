@@ -85,6 +85,7 @@ extern WinVars_t	g_wv;
 // LWSS add
 
 extern _RTL_CRITICAL_SECTION s_criticalSections[];
+extern int client_state; // LWSS ADD. This looks similar to signonstate
 
 enum CriticalSection : int
 {

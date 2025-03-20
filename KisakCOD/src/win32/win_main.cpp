@@ -28,6 +28,22 @@ static void PrintWorkingDir()
 	Com_Printf(16, "Working directory: %s\n", cwd);
 }
 
+static void Win_RegisterClass()
+{
+	tagWNDCLASSEXA wce; // [esp+0h] [ebp-30h] BYREF
+
+	memset((unsigned __int8 *)&wce, 0, sizeof(wce));
+	wce.cbSize = 48;
+	wce.lpfnWndProc = MainWndProc;
+	wce.hInstance = g_wv.hInstance;
+	wce.hIcon = LoadIconA(g_wv.hInstance, (LPCSTR)1);
+	wce.hCursor = LoadCursorA(0, (LPCSTR)0x7F00);
+	wce.hbrBackground = CreateSolidBrush(0);
+	wce.lpszClassName = "CoD4";
+	if (!RegisterClassExA(&wce))
+		Com_Error(ERR_FATAL, "EXE_ERR_COULDNT_REGISTER_WINDOW");
+}
+
 /*
 ==================
 WinMain
@@ -153,39 +169,6 @@ void Sys_Error(const char *error, ...)
 	exit(0);
 }
 
-void __cdecl PMem_DumpMemStats()
-{
-	double v0; // st7
-	int FreeAmount; // eax
-	double v2; // st7
-	double v3; // st7
-	signed int j; // [esp+8h] [ebp-14h]
-	unsigned int i; // [esp+Ch] [ebp-10h]
-	unsigned int top; // [esp+14h] [ebp-8h]
-	unsigned int bottom; // [esp+18h] [ebp-4h]
-
-	for (i = 0; i < g_mem.prim[1].allocListCount; ++i)
-	{
-		if (i == g_mem.prim[1].allocListCount - 1)
-			bottom = g_mem.prim[1].pos;
-		else
-			bottom = g_mem.prim[1].allocList[i + 1].pos;
-		v0 = ConvertToMB(g_mem.prim[1].allocList[i].pos - bottom);
-		Com_Printf(16, "%-18.18s %5.1f\n", g_mem.prim[1].allocList[i].name, v0);
-	}
-	FreeAmount = PMem_GetFreeAmount();
-	v2 = ConvertToMB(FreeAmount);
-	Com_Printf(16, "free physical      %5.1f\n", v2);
-	top = g_mem.prim[0].pos;
-	for (j = g_mem.prim[0].allocListCount - 1; j >= 0; --j)
-	{
-		v3 = ConvertToMB(top - g_mem.prim[0].allocList[j].pos);
-		Com_Printf(16, "%-18.18s %5.1f\n", g_mem.prim[0].allocList[j].name, v3);
-		top = g_mem.prim[0].allocList[j].pos;
-	}
-	Com_Printf(16, "------------------------\n");
-}
-
 double __cdecl ConvertToMB(int bytes)
 {
 	return (float)((double)bytes / 1048576.0);
@@ -198,7 +181,7 @@ void __cdecl Sys_OpenURL(const char *url, int doexit)
 
 	if (!ShellExecuteA(0, "open", url, 0, 0, 9))
 	{
-		v2 = va(aExeErrCouldntO, url);
+		v2 = va("EXE_ERR_COULDNT_OPEN_URL", url);
 		Com_Error(ERR_DROP, v2);
 	}
 	wnd = GetForegroundWindow();
@@ -379,11 +362,11 @@ void __cdecl Sys_Init()
 	Com_Printf(16, "CPU vendor is \"%s\"\n", sys_info.cpuVendor);
 	Com_Printf(16, "CPU name is \"%s\"\n", sys_info.cpuName);
 	if (sys_info.logicalCpuCount == 1)
-		Com_Printf(16, "%i logical CPU%s reported\n", 1, &String);
+		Com_Printf(16, "%i logical CPU%s reported\n", 1, "");
 	else
 		Com_Printf(16, "%i logical CPU%s reported\n", sys_info.logicalCpuCount, "s");
 	if (sys_info.physicalCpuCount == 1)
-		Com_Printf(16, "%i physical CPU%s detected\n", 1, &String);
+		Com_Printf(16, "%i physical CPU%s detected\n", 1, "");
 	else
 		Com_Printf(16, "%i physical CPU%s detected\n", sys_info.physicalCpuCount, "s");
 	Com_Printf(16, "Measured CPU speed is %.2lf GHz\n", sys_info.cpuGHz);
@@ -391,7 +374,7 @@ void __cdecl Sys_Init()
 	Com_Printf(16, "System memory is %i MB (capped at 1 GB)\n", sys_info.sysMB);
 	Com_Printf(16, "Video card is \"%s\"\n", sys_info.gpuDescription);
 	if (sys_info.SSE)
-		Com_Printf(16, "Streaming SIMD Extensions (SSE) %ssupported\n", &String);
+		Com_Printf(16, "Streaming SIMD Extensions (SSE) %ssupported\n", "");
 	else
 		Com_Printf(16, "Streaming SIMD Extensions (SSE) %ssupported\n", "not ");
 	Com_Printf(16, "\n");

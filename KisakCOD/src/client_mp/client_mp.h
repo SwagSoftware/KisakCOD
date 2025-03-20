@@ -1,4 +1,5 @@
 #pragma once
+#include <qcommon/qcommon.h>
 
 union hudelem_color_t // sizeof=0x4
 {                                       // XREF: DrawSingleHudElem2d+114/r
@@ -666,3 +667,475 @@ struct clientActive_t // sizeof=0x1B1BDC
 };
 
 extern	clientActive_t*	clients;
+
+
+struct netProfilePacket_t // sizeof=0xC
+{                                       // ...
+    int iTime;
+    int iSize;
+    int bFragment;
+};
+struct netProfileStream_t // sizeof=0x2F0
+{                                       // ...
+    netProfilePacket_t packets[60];
+    int iCurrPacket;
+    int iBytesPerSecond;
+    int iLastBPSCalcTime;
+    int iCountedPackets;
+    int iCountedFragments;
+    int iFragmentPercentage;
+    int iLargestPacket;
+    int iSmallestPacket;
+};
+struct netProfileInfo_t // sizeof=0x5E0
+{                                       // ...
+    netProfileStream_t send;
+    netProfileStream_t recieve;         // ...
+};
+
+struct netchan_t // sizeof=0x62C
+{                                       // ...
+    int outgoingSequence;
+    netsrc_t sock;
+    int dropped;
+    int incomingSequence;
+    netadr_t remoteAddress;             // ...
+    int qport;
+    int fragmentSequence;
+    int fragmentLength;
+    unsigned __int8 *fragmentBuffer;
+    int fragmentBufferSize;
+    int unsentFragments;
+    int unsentFragmentStart;
+    int unsentLength;
+    unsigned __int8 *unsentBuffer;
+    int unsentBufferSize;
+    netProfileInfo_t prof;
+};
+
+struct clientConnection_t // sizeof=0x615E8
+{                                       // ...
+    int qport;
+    int clientNum;
+    int lastPacketSentTime;
+    int lastPacketTime;
+    netadr_t serverAddress;
+    int connectTime;
+    int connectPacketCount;
+    char serverMessage[256];
+    int challenge;
+    int checksumFeed;
+    int reliableSequence;
+    int reliableAcknowledge;
+    char reliableCommands[128][1024];
+    int serverMessageSequence;
+    int serverCommandSequence;
+    int lastExecutedServerCommand;
+    char serverCommands[128][1024];     // ...
+    bool isServerRestarting;
+    // padding byte
+    // padding byte
+    // padding byte
+    int lastClientArchiveIndex;
+    char demoName[64];
+    int demorecording;
+    int demoplaying;
+    int isTimeDemo;
+    int demowaiting;
+    int firstDemoFrameSkipped;
+    int demofile;
+    int timeDemoLog;
+    int timeDemoFrames;
+    int timeDemoStart;
+    int timeDemoPrev;
+    int timeDemoBaseTime;
+    netchan_t netchan;
+    char netchanOutgoingBuffer[2048];
+    char netchanIncomingBuffer[131072];
+    netProfileInfo_t OOBProf;
+    unsigned __int8 statPacketsToSend;
+    // padding byte
+    // padding byte
+    // padding byte
+    int statPacketSendTime[7];
+};
+
+struct GfxConfiguration // sizeof=0x30
+{                                       // ...
+    unsigned int maxClientViews;        // ...
+    unsigned int entCount;              // ...
+    unsigned int entnumNone;            // ...
+    unsigned int entnumOrdinaryEnd;     // ...
+    int threadContextCount;             // ...
+    int critSectCount;
+    const char *codeFastFileName;       // ...
+    const char *uiFastFileName;         // ...
+    const char *commonFastFileName;     // ...
+    const char *localizedCodeFastFileName; // ...
+    const char *localizedCommonFastFileName; // ...
+    const char *modFastFileName;        // ...
+};
+
+struct ScreenPlacement // sizeof=0x44
+{                                       // ...
+    float scaleVirtualToReal[2];        // ...
+    float scaleVirtualToFull[2];        // ...
+    float scaleRealToVirtual[2];
+    float virtualViewableMin[2];
+    float virtualViewableMax[2];
+    float realViewportSize[2];
+    float realViewableMin[2];
+    float realViewableMax[2];
+    float subScreenLeft;
+};
+
+struct __declspec(align(4)) serverInfo_t // sizeof=0x94
+{                                       // ...
+    netadr_t adr;                       // ...
+    unsigned __int8 allowAnonymous;     // ...
+    unsigned __int8 bPassword;
+    unsigned __int8 pure;
+    char consoleDisabled;
+    unsigned __int8 netType;            // ...
+    unsigned __int8 clients;            // ...
+    unsigned __int8 maxClients;         // ...
+    unsigned __int8 dirty;              // ...
+    char friendlyfire;
+    char killcam;
+    unsigned __int8 hardware;
+    unsigned __int8 mod;
+    unsigned __int8 voice;
+    unsigned __int8 punkbuster;         // ...
+    unsigned __int8 requestCount;       // ...
+    // padding byte
+    __int16 minPing;                    // ...
+    __int16 maxPing;                    // ...
+    __int16 ping;                       // ...
+    char hostName[32];                  // ...
+    char mapName[32];                   // ...
+    char game[24];                      // ...
+    char gameType[16];                  // ...
+    // padding byte
+    // padding byte
+};
+
+struct clientLogo_t // sizeof=0x18
+{                                       // ...
+    int startTime;                      // ...
+    int duration;                       // ...
+    int fadein;                         // ...
+    int fadeout;                        // ...
+    Material *material[2];              // ...
+};
+struct __declspec(align(4)) vidConfig_t // sizeof=0x30
+{                                       // ...
+    unsigned int sceneWidth;            // ...
+    unsigned int sceneHeight;           // ...
+    unsigned int displayWidth;          // ...
+    unsigned int displayHeight;         // ...
+    unsigned int displayFrequency;      // ...
+    int isFullscreen;                   // ...
+    float aspectRatioWindow;            // ...
+    float aspectRatioScenePixel;        // ...
+    float aspectRatioDisplayPixel;      // ...
+    unsigned int maxTextureSize;        // ...
+    unsigned int maxTextureMaps;        // ...
+    bool deviceSupportsGamma;           // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+
+struct trDebugString_t // sizeof=0x80
+{
+    float xyz[3];
+    float color[4];
+    float scale;
+    char text[96];
+};
+struct clientDebugStringInfo_t // sizeof=0x10
+{                                       // ...
+    int max;                            // ...
+    int num;                            // ...
+    trDebugString_t *strings;           // ...
+    int *durations;                     // ...
+};
+struct trDebugLine_t // sizeof=0x2C
+{
+    float start[3];
+    float end[3];
+    float color[4];
+    int depthTest;
+};
+struct clientDebugLineInfo_t // sizeof=0x10
+{                                       // ...
+    int max;                            // ...
+    int num;                            // ...
+    trDebugLine_t *lines;               // ...
+    int *durations;                     // ...
+};
+struct clientDebug_t // sizeof=0x68
+{                                       // ...
+    int prevFromServer;
+    int fromServer;                     // ...
+    clientDebugStringInfo_t clStrings;  // ...
+    clientDebugStringInfo_t svStringsBuffer; // ...
+    clientDebugStringInfo_t svStrings;  // ...
+    clientDebugLineInfo_t clLines;      // ...
+    clientDebugLineInfo_t svLinesBuffer; // ...
+    clientDebugLineInfo_t svLines;      // ...
+};
+
+struct clientStatic_t // sizeof=0x2DD070
+{                                       // ...
+    int quit;                           // ...
+    int hunkUsersStarted;               // ...
+    char servername[256];               // ...
+    int rendererStarted;                // ...
+    int soundStarted;                   // ...
+    int uiStarted;                      // ...
+    int devGuiStarted;                  // ...
+    int frametime;                      // ...
+    int realtime;                       // ...
+    int realFrametime;                  // ...
+    clientLogo_t logo;                  // ...
+    float mapCenter[3];                 // ...
+    int numlocalservers;                // ...
+    serverInfo_t localServers[128];     // ...
+    int waitglobalserverresponse;       // ...
+    int numglobalservers;               // ...
+    serverInfo_t globalServers[20000];  // ...
+    int numfavoriteservers;             // ...
+    serverInfo_t favoriteServers[128];  // ...
+    int pingUpdateSource;               // ...
+    netadr_t updateServer;
+    char updateChallenge[1024];
+    char updateInfoString[1024];        // ...
+    netadr_t authorizeServer;           // ...
+    Material *whiteMaterial;            // ...
+    Material *consoleMaterial;          // ...
+    Font_s *consoleFont;                // ...
+    char autoupdateServerNames[5][64];  // ...
+    netadr_t autoupdateServer;          // ...
+    vidConfig_t vidConfig;              // ...
+    clientDebug_t debug;                // ...
+    int download;                       // ...
+    char downloadTempName[256];         // ...
+    char downloadName[256];             // ...
+    int downloadNumber;
+    int downloadBlock;                  // ...
+    int downloadCount;                  // ...
+    int downloadSize;                   // ...
+    char downloadList[1024];            // ...
+    int downloadRestart;                // ...
+    int gameDirChanged;                 // ...
+    int wwwDlDisconnected;              // ...
+    int wwwDlInProgress;                // ...
+    int downloadFlags;                  // ...
+    char originalDownloadName[64];      // ...
+    float debugRenderPos[3];            // ...
+};
+
+enum connstate_t : __int32
+{                                       // ...
+    CA_DISCONNECTED = 0x0,
+    CA_CINEMATIC = 0x1,
+    CA_LOGO = 0x2,
+    CA_CONNECTING = 0x3,
+    CA_CHALLENGING = 0x4,
+    CA_CONNECTED = 0x5,
+    CA_SENDINGSTATS = 0x6,
+    CA_LOADING = 0x7,
+    CA_PRIMED = 0x8,
+    CA_ACTIVE = 0x9,
+};
+
+struct clientUIActive_t // sizeof=0x10
+{
+    bool active;
+    bool isRunning;
+    bool cgameInitialized;
+    bool cgameInitCalled;
+    int keyCatchers;
+    bool displayHUDWithKeycatchUI;
+    // padding byte
+    // padding byte
+    // padding byte
+    connstate_t connectionState;
+#ifdef _XBOX
+    int nextScrollTime;
+    bool invited;                       // XREF: CL_CheckForResend(int)+29C/r
+                                         // Live_MPAcceptInvite+208/w ...
+    // padding byte
+    // padding byte
+    // padding byte
+    int numVoicePacketsSent;
+#endif
+};
+
+//void __cdecl TRACK_cl_main();
+char __cdecl CL_IsLocalClientActive(int localClientNum);
+int __cdecl CL_LocalActiveIndexFromClientNum(int localClientNum);
+int __cdecl CL_ControllerIndexFromClientNum(int clientIndex);
+char __cdecl CL_AllLocalClientsDisconnected();
+char __cdecl CL_AnyLocalClientChallenging();
+const char *__cdecl CL_GetUsernameForLocalClient();
+void __cdecl CL_AddReliableCommand(int localClientNum, const char *cmd);
+void __cdecl CL_ShutdownDevGui();
+void __cdecl CL_ShutdownHunkUsers();
+void __cdecl CL_ShutdownAll();
+char __cdecl CL_AnyLocalClientsRunning();
+void __cdecl CL_MapLoading(const char *mapname);
+void __cdecl CL_ResetSkeletonCache(int localClientNum);
+void __cdecl CL_ClearState(int localClientNum);
+void __cdecl CL_Disconnect(int localClientNum);
+void __cdecl CL_ForwardCommandToServer(int localClientNum, const char *string);
+void __cdecl CL_RequestAuthorization(netsrc_t localClientNum);
+void __cdecl CL_ForwardToServer_f();
+void __cdecl CL_Setenv_f();
+void __cdecl CL_DisconnectLocalClient(int localClientNum);
+void __cdecl CL_Reconnect_f();
+void __cdecl CL_Vid_Restart_f();
+void __cdecl CL_Snd_Restart_f();
+void __cdecl CL_Configstrings_f();
+void __cdecl CL_Clientinfo_f();
+void __cdecl CL_DownloadsComplete(int localClientNum);
+void __cdecl CL_CheckForResend(netsrc_t localClientNum);
+int __cdecl CL_HighestPriorityStatPacket(clientConnection_t *clc);
+void __cdecl CL_DisconnectError(char *message);
+char __cdecl CL_ConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg_t *msg, int time);
+char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg_t *msg, int time);
+void __cdecl CL_DisconnectPacket(int localClientNum, netadr_t from, char *reason);
+void __cdecl CL_InitLoad(const char *mapname, const char *gametype);
+char __cdecl CL_PacketEvent(netsrc_t localClientNum, netadr_t from, msg_t *msg, int time);
+void __cdecl CL_VoiceTransmit(int localClientNum);
+void __cdecl CL_RunOncePerClientFrame(int localClientNum, int msec);
+void __cdecl CL_Frame(netsrc_t localClientNum);
+void __cdecl CL_CheckTimeout(int localClientNum);
+void __cdecl CL_ServerTimedOut();
+void __cdecl CL_CheckUserinfo(int localClientNum);
+void __cdecl CL_UpdateInGameState(int localClientNum);
+void __cdecl CL_VoiceFrame(int localClientNum);
+bool __cdecl CL_IsLocalClientInGame(int localClientNum);
+char __cdecl CL_IsClientLocal(int clientNum);
+void __cdecl CL_ParseBadPacket_f();
+void __cdecl CL_ShutdownRef();
+void __cdecl CL_InitRenderer();
+void __cdecl CL_ShutdownRenderer(int destroyWindow);
+void __cdecl CL_StartHunkUsers();
+void CL_InitDevGui();
+void __cdecl CL_DevGuiDvar_f();
+void __cdecl CL_DevGuiCmd_f();
+void __cdecl CL_DevGuiOpen_f();
+int __cdecl CL_ScaledMilliseconds();
+void __cdecl CL_InitRef();
+void __cdecl SetupGfxConfig(GfxConfiguration *config);
+void __cdecl CL_startSingleplayer_f();
+void __cdecl CL_DrawLogo(int localClientNum);
+void __cdecl CL_StopLogo(int localClientNum);
+void __cdecl CL_PlayLogo_f();
+void __cdecl CL_StopLogoOrCinematic(int localClientNum);
+void __cdecl CL_ToggleMenu_f();
+void __cdecl CL_InitOnceForAllClients();
+void __cdecl CL_Disconnect_f();
+void __cdecl CL_Init(int localClientNum);
+int __cdecl CountBitsEnabled(unsigned int num);
+void __cdecl CL_Shutdown(int localClientNum);
+void __cdecl CL_LocalServers_f();
+void __cdecl CL_GetPing(int n, char *buf, int buflen, int *pingtime);
+void __cdecl CL_ClearPing(unsigned int n);
+int __cdecl CL_GetPingQueueCount();
+int __cdecl CL_UpdateDirtyPings(netsrc_t localClientNum, unsigned int source);
+void __cdecl CL_ShowIP_f();
+void __cdecl CL_SetupForNewServerMap(char *pszMapName, char *pszGametype);
+bool __cdecl CL_IsServerLoadingMap();
+bool __cdecl CL_IsWaitingOnServerToLoadMap(int localClientNum);
+void __cdecl CL_SetWaitingOnServerToLoadMap(int localClientNum, bool waiting);
+void __cdecl CL_DrawTextPhysical(
+    char *text,
+    int maxChars,
+    Font_s *font,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
+    const float *color,
+    int style);
+void __cdecl CL_DrawTextPhysicalWithEffects(
+    char *text,
+    int maxChars,
+    Font_s *font,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
+    const float *color,
+    int style,
+    const float *glowColor,
+    struct Material *fxMaterial,
+    struct Material *fxMaterialGlow,
+    int fxBirthTime,
+    int fxLetterTime,
+    int fxDecayStartTime,
+    int fxDecayDuration);
+void __cdecl CL_DrawText(
+    const ScreenPlacement *scrPlace,
+    char *text,
+    int maxChars,
+    Font_s *font,
+    float x,
+    float y,
+    int horzAlign,
+    int vertAlign,
+    float xScale,
+    float yScale,
+    const float *color,
+    int style);
+void __cdecl CL_DrawTextRotate(
+    const ScreenPlacement *scrPlace,
+    char *text,
+    int maxChars,
+    Font_s *font,
+    float x,
+    float y,
+    float rotation,
+    int horzAlign,
+    int vertAlign,
+    float xScale,
+    float yScale,
+    const float *color,
+    int style);
+void __cdecl CL_DrawTextPhysicalWithCursor(
+    char *text,
+    int maxChars,
+    Font_s *font,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
+    const float *color,
+    int style,
+    int cursorPos,
+    char cursor);
+void __cdecl CL_DrawTextWithCursor(
+    const ScreenPlacement *scrPlace,
+    char *text,
+    int maxChars,
+    Font_s *font,
+    float x,
+    float y,
+    int horzAlign,
+    int vertAlign,
+    float xScale,
+    float yScale,
+    const float *color,
+    int style,
+    int cursorPos,
+    char cursor);
+bool __cdecl CL_ShouldDisplayHud(int localClientNum);
+bool __cdecl CL_IsUIActive(int localClientNum);
+struct Font_s *__cdecl CL_RegisterFont(const char *fontName, int imageTrack);
+void __cdecl CL_UpdateSound();
+float (*__cdecl CL_GetMapCenter())[3];
+void __cdecl CL_ResetStats_f();
+int __cdecl CL_GetLocalClientActiveCount();

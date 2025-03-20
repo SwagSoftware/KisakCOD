@@ -10,8 +10,6 @@ static UINT MSH_MOUSEWHEEL;
 #define MK_BUTTON4L		0x0020
 #define MK_BUTTON4R		0x0040
 
-extern int client_state; // LWSS ADD. This looks similar to signonstate
-
 // LWSS: Updated for Cod4
 static byte virtualKeyConvert[0x92][2] =
 {
