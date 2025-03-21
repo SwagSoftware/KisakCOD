@@ -7,7 +7,7 @@
 #include <d3d9.h> // KISAKTODO: move to gfx I think
 #include <script/scr_stringlist.h>
 #include <cgame_mp/cg_local_mp.h>
-
+#include <cgame/cg_local.h>
 enum MapType
 {                                       // ...
     MAPTYPE_NONE = 0x0,
@@ -567,15 +567,6 @@ struct __declspec(align(4)) PhysPreset // sizeof=0x2C
     // padding byte
     // padding byte
     // padding byte
-};
-
-struct cplane_s // sizeof=0x14
-{                                       // ...
-    float normal[3];                    // ...
-    float dist;
-    unsigned __int8 type;
-    unsigned __int8 signbits;
-    unsigned __int8 pad[2];
 };
 
 struct __declspec(align(2)) cbrushside_t // sizeof=0xC
@@ -1287,17 +1278,6 @@ const struct FxElemDef // sizeof=0xFC
     unsigned __int8 lightingFrac;
     unsigned __int8 useItemClip;
     unsigned __int8 unused[1];
-};
-struct FxEffectDef // sizeof=0x20
-{                                       // ...
-    const char* name;
-    int flags;
-    int totalSize;
-    int msecLoopingLife;
-    int elemDefCountLooping;
-    int elemDefCountOneShot;
-    int elemDefCountEmission;
-    const FxElemDef* elemDefs;
 };
 union FxEffectDefRef // sizeof=0x4
 {                                       // ...

@@ -110,9 +110,9 @@ void __cdecl Com_InitPlayerProfiles(int localClientNum);
 void __cdecl Com_PrintMessage(int channel, char* msg, int error);
 void __cdecl Com_LogPrintMessage(int channel, char* msg);
 void Com_OpenLogFile();
-void Com_DPrintf(int channel, char* fmt, ...);
+void Com_DPrintf(int channel, const char* fmt, ...);
 void Com_PrintError(int channel, const char* fmt, ...);
-void Com_PrintWarning(int channel, char* fmt, ...);
+void Com_PrintWarning(int channel, const char* fmt, ...);
 void __cdecl Com_SetLocalizedErrorMessage(char* localizedErrorMessage, const char* titleToken);
 void __cdecl Com_SetErrorMessage(char* errorMessage);
 char __cdecl Com_ErrorIsNotice(const char* errorMessage);
@@ -243,10 +243,13 @@ typedef enum {
 	NA_BROADCAST_IPX
 } netadrtype_t;
 
-typedef enum {
-	NS_CLIENT,
-	NS_SERVER
-} netsrc_t;
+enum netsrc_t : __int32
+{                                       // ...
+	NS_CLIENT1 = 0x0,
+	NS_SERVER = 0x1,
+	NS_MAXCLIENTS = 0x1,
+	NS_PACKET = 0x2,
+};
 
 typedef struct {
 	netadrtype_t	type;

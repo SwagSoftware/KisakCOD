@@ -543,7 +543,7 @@ void Com_OpenLogFile()
     }
 }
 
-void Com_Printf(int channel, char* fmt, ...)
+void Com_Printf(int channel, const char* fmt, ...)
 {
     char string[4100]; // [esp+4h] [ebp-1008h] BYREF
     va_list va; // [esp+101Ch] [ebp+10h] BYREF
@@ -554,7 +554,7 @@ void Com_Printf(int channel, char* fmt, ...)
     Com_PrintMessage(channel, string, 0);
 }
 
-void Com_DPrintf(int channel, char* fmt, ...)
+void Com_DPrintf(int channel, const char* fmt, ...)
 {
     char string[4100]; // [esp+4h] [ebp-1008h] BYREF
     va_list va; // [esp+101Ch] [ebp+10h] BYREF
@@ -590,7 +590,7 @@ void Com_PrintError(int channel, const char* fmt, ...)
     Com_PrintMessage(channel, &dest, 3);
 }
 
-void Com_PrintWarning(int channel, char* fmt, ...)
+void Com_PrintWarning(int channel, const char* fmt, ...)
 {
     char dest; // [esp+14h] [ebp-1008h] BYREF
     char v3[4095]; // [esp+15h] [ebp-1007h] BYREF

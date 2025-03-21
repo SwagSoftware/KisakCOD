@@ -121,28 +121,6 @@ unsigned int Win_InitThreads()
 
 // *(_DWORD *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4)
 static void* g_threadValues[7][4];
-static int g_com_error[7][16];
-
-struct va_info_t
-{                       
-    char va_string[2][1024];
-    int index;
-};
-static va_info_t va_info[7];
-
-struct TraceCheckCount
-{                                    
-    int global;                      
-    int *partitions;                 
-};
-struct TraceThreadInfo
-{                                       
-    TraceCheckCount checkcount;         
-    struct cbrush_t *box_brush;                
-    struct cmodel_t *box_model;                
-};
-
-static TraceThreadInfo g_traceThreadInfo[7];
 
 static void Sys_SetValue(int valueIndex, void* data)
 {

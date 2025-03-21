@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\aim_assist\aim_assist.cpp" />
     <ClCompile Include="src\cgame\cg_localents.cpp" />
     <ClCompile Include="src\client\cl_console.cpp" />
     <ClCompile Include="src\client_mp\cl_input.cpp" />
@@ -147,6 +148,8 @@
     <ClCompile Include="src\gfx_d3d\r_cinematic.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
     <ClCompile Include="src\qcommon\common.cpp" />
+    <ClCompile Include="src\qcommon\files.cpp" />
+    <ClCompile Include="src\qcommon\graph.cpp" />
     <ClCompile Include="src\qcommon\mem_track.cpp" />
     <ClCompile Include="src\qcommon\threads.cpp" />
     <ClCompile Include="src\script\scr_animtree.cpp" />
@@ -160,6 +163,9 @@
     <ClCompile Include="src\script\scr_stringlist.cpp" />
     <ClCompile Include="src\script\scr_variable.cpp" />
     <ClCompile Include="src\script\scr_vm.cpp" />
+    <ClCompile Include="src\universal\com_files.cpp" />
+    <ClCompile Include="src\universal\com_math.cpp" />
+    <ClCompile Include="src\universal\com_math_anglevectors.cpp" />
     <ClCompile Include="src\universal\com_memory.cpp" />
     <ClCompile Include="src\universal\dvar.cpp" />
     <ClCompile Include="src\universal\q_shared.cpp" />
@@ -181,6 +187,8 @@
     <ClCompile Include="src\xanim\xmodel_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\aim_assist\aim_assist.h" />
+    <ClInclude Include="src\cgame\cg_local.h" />
     <ClInclude Include="src\cgame_mp\cg_local_mp.h" />
     <ClInclude Include="src\client_mp\client_mp.h" />
     <ClInclude Include="src\gfx_d3d\r_cinematic.h" />
@@ -188,7 +196,11 @@
     <ClInclude Include="src\gfx_d3d\r_material_load_db.h" />
     <ClInclude Include="src\qcommon\bitarray.h" />
     <ClInclude Include="src\qcommon\cmd.h" />
+    <ClInclude Include="src\qcommon\files.h" />
+    <ClInclude Include="src\qcommon\graph.h" />
     <ClInclude Include="src\qcommon\mem_track.h" />
+    <ClInclude Include="src\universal\com_files.h" />
+    <ClInclude Include="src\universal\com_math.h" />
     <ClInclude Include="src\universal\com_memory.h" />
     <ClInclude Include="src\qcommon\qcommon.h" />
     <ClInclude Include="src\qcommon\threads.h" />

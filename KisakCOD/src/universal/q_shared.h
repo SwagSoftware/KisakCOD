@@ -213,7 +213,7 @@ typedef enum {
 
 
 //=============================================
-void I_strncat(char* dest, int size, char* src);
+void I_strncat(char* dest, int size, const char* src);
 void I_strncpyz(char* dest, const char* src, int destsize);
 int I_stricmp(const char* s0, const char* s1);
 int I_strnicmp(const char* s0, const char* s1, int n);
@@ -224,6 +224,18 @@ bool I_isupper(int c);
 bool I_isalpha(int c);
 
 bool I_iscsym(int c);
+
+bool __cdecl I_isdigit(int c);
+bool __cdecl I_isalnum(int c);
+bool __cdecl I_isforfilename(int c);
+int __cdecl I_strncmp(const char *s0, const char *s1, int n);
+int __cdecl I_strcmp(const char *s0, const char *s1);
+int __cdecl I_stricmpwild(const char *wild, const char *s);
+char *__cdecl I_strlwr(char *s);
+char *__cdecl I_strupr(char *s);
+int __cdecl I_DrawStrlen(const char *str);
+char *__cdecl I_CleanStr(char *string);
+unsigned __int8 __cdecl I_CleanChar(unsigned __int8 character);
 
 //=============================================
 // LWSS: IDA Macros.
@@ -430,3 +442,106 @@ typedef struct dvar_s {
 	bool (__cdecl *domainFunc)(dvar_s *, DvarValue);
 	dvar_s *hashNext;
 } dvar_t;
+
+//=============================================
+
+struct cspField_t // sizeof=0xC
+{                                       // ...
+	const char *szName;                 // ...
+	int iOffset;                        // ...
+	int iFieldType;                     // ...
+};
+
+union FloatWriteSwap_union // sizeof=0x4
+{                                       // ...
+	float f;
+	int n;
+	unsigned __int8 b[4];
+};
+
+union FloatReadSwap_union // sizeof=0x4
+{                                       // ...
+	float f;
+	int n;
+	unsigned __int8 b[4];
+};
+
+void __cdecl TRACK_q_shared();
+unsigned __int8 __cdecl ColorIndex(unsigned __int8 c);
+const char *__cdecl Com_GetFilenameSubString(const char *pathname);
+void __cdecl Com_AssembleFilepath(char *folder, char *name, char *extension, char *path, int maxCharCount);
+const char *__cdecl Com_GetExtensionSubString(const char *filename);
+void __cdecl Com_StripExtension(char *in, char *out);
+void __cdecl Com_DefaultExtension(char *path, unsigned int maxSize, const char *extension);
+__int16 __cdecl BigShort(__int16 l);
+int __cdecl ShortSwap(__int16 l);
+__int16 __cdecl ShortNoSwap(__int16 l);
+int __cdecl LongSwap(int l);
+unsigned __int64 __cdecl Long64Swap(unsigned __int64 l);
+unsigned __int64 __cdecl Long64NoSwap(unsigned __int64 ll);
+double __cdecl FloatReadSwap(int n);
+double __cdecl FloatReadNoSwap(int n);
+FloatWriteSwap_union __cdecl FloatWriteSwap(float f);
+void __cdecl Swap_InitLittleEndian();
+void __cdecl Swap_InitBigEndian();
+void __cdecl Swap_Init();
+
+
+int Com_sprintf(char *dest, unsigned int size, const char *fmt, ...);
+int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...);
+
+bool __cdecl CanKeepStringPointer(char *string);
+void __cdecl Com_InitThreadData(int threadContext);
+char *__cdecl Info_ValueForKey(char *s, char *key);
+void __cdecl Info_NextPair(const char **head, char *key, char *value);
+void __cdecl Info_RemoveKey(char *s, char *key);
+void __cdecl Info_RemoveKey_Big(char *s, char *key);
+bool __cdecl Info_Validate(char *s);
+void __cdecl Info_SetValueForKey(char *s, char *key, const char *value);
+void __cdecl Info_SetValueForKey_Big(char *s, char *key, const char *value);
+bool __cdecl ParseConfigStringToStruct(
+	unsigned __int8 *pStruct,
+	const cspField_t *pFieldList,
+	int iNumFields,
+	char *pszBuffer,
+	int iMaxFieldTypes,
+	int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
+	void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *));
+bool __cdecl ParseConfigStringToStructCustomSize(
+	unsigned __int8 *pStruct,
+	const cspField_t *pFieldList,
+	int iNumFields,
+	char *pszBuffer,
+	int iMaxFieldTypes,
+	int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
+	void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *));
+double __cdecl GetLeanFraction(float fFrac);
+double __cdecl UnGetLeanFraction(float fFrac);
+void __cdecl AddLeanToPosition(float *position, float fViewYaw, float fLeanFrac, float fViewRoll, float fLeanDist);
+bool __cdecl Com_IsLegacyXModelName(const char *name);
+unsigned int __cdecl LongNoSwap(unsigned int color);
+
+
+struct va_info_t
+{
+	char va_string[2][1024];
+	int index;
+};
+extern va_info_t va_info[7];
+
+
+struct TraceCheckCount
+{
+	int global;
+	int *partitions;
+};
+struct TraceThreadInfo
+{
+	TraceCheckCount checkcount;
+	struct cbrush_t *box_brush;
+	struct cmodel_t *box_model;
+};
+
+extern TraceThreadInfo g_traceThreadInfo[7];
+
+extern int g_com_error[7][16];

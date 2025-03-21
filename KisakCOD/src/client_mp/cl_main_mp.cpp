@@ -3,84 +3,81 @@
 #include <xanim/xanim.h>
 #include <universal/assertive.h>
 #include <qcommon/threads.h>
+#include <qcommon/cmd.h>
 #include <qcommon/mem_track.h>
+
+#include <universal/com_memory.h>
+
+dvar_t *cl_conXOffset;
+dvar_t *cl_hudDrawsBehindsUI;
+dvar_t *cl_showSend;
+dvar_t *input_invertPitch;
+dvar_t *cl_avidemo;
+dvar_t *cl_nodelta;
+dvar_t *cl_showServerCommands;
+dvar_t *motd;
+dvar_t *cl_connectTimeout;
+dvar_t *cl_sensitivity;
+dvar_t *cl_forceavidemo;
+dvar_t *cl_timeout;
+dvar_t *m_yaw;
+dvar_t **customclass;
+dvar_t *m_pitch;
+dvar_t *cl_activeAction;
+dvar_t *playlist;
+dvar_t *cl_debugMessageKey;
+dvar_t *systemlink;
+dvar_t *nextdemo;
+dvar_t *cl_connectionAttempts;
+dvar_t *onlinegame;
+dvar_t *cl_showMouseRate;
+dvar_t *m_forward;
+dvar_t *cl_packetdup;
+dvar_t *cl_mouseAccel;
+dvar_t *cl_maxpackets;
+dvar_t *cl_motdString;
+dvar_t *onlinegameandhost;
+dvar_t *cl_freezeDemo;
+dvar_t *cl_showTimeDelta;
+dvar_t *input_viewSensitivity;
+dvar_t *input_autoAim;
+dvar_t *cl_ingame;
+dvar_t *cl_inGameVideo;
+dvar_t *cl_noprint; 
+dvar_t *m_side;
+dvar_t *cl_profileTextY;
+dvar_t *cl_serverStatusResendTime;
+dvar_t *m_filter;
+dvar_t *cl_profileTextHeight;
+dvar_t *cl_shownuments;
+dvar_t *splitscreen;
+dvar_t *onlineunreankedgameandhost;
+dvar_t *cl_freelook;
+dvar_t *cl_shownet;
+
+const char **customClassDvars;
+
+BOOL g_waitingForServer;
+BOOL cl_serverLoadingMap;
+voiceCommunication_t cl_voiceCommunication;
+
+ping_t *cl_pinglist;
+
+BOOL *cl_waitingOnServerToLoadMap;
+
+int cl_maxLocalClients;
+int old_com_frameTime;
+unsigned int frame_msec;
 
 #define MAX_CLIENTS 1 // LWSS Add
 
-//char const **customClassDvars 827b3184     cl_main_mp.obj
-//struct dvar_s const *const cl_conXOffset 8287aa48     cl_main_mp.obj
-//struct dvar_s const *const cl_hudDrawsBehindUI 8287aa4c     cl_main_mp.obj
-//struct dvar_s const *const cl_showSend 8287aa50     cl_main_mp.obj
-//struct dvar_s const *const input_invertPitch 8287aa54     cl_main_mp.obj
-//struct clientConnection_t *clientConnections 8287aa58     cl_main_mp.obj
 clientConnection_t clientConnections[MAX_CLIENTS];
-//BOOL g_waitingForServer  8287aa5c     cl_main_mp.obj
-//BOOL cl_serverLoadingMap 8287aa5d     cl_main_mp.obj
-//struct voiceCommunication_t cl_voiceCommunication 8287aa60     cl_main_mp.obj
-//struct dvar_s const *const cl_avidemo 8287aacc     cl_main_mp.obj
-//struct dvar_s const *const cl_nodelta 8287aad0     cl_main_mp.obj
-//struct dvar_s const *const cl_showServerCommands 8287aad4     cl_main_mp.obj
-//struct dvar_s const *const motd       8287aad8     cl_main_mp.obj
-//struct dvar_s const *const cl_connectTimeout 8287aadc     cl_main_mp.obj
-//struct dvar_s const *const cl_sensitivity 8287aae0     cl_main_mp.obj
-//struct dvar_s const *const cl_forceavidemo 8287aae4     cl_main_mp.obj
-//struct dvar_s const *const cl_timeout 8287aae8     cl_main_mp.obj
-//struct dvar_s const *const m_yaw      8287aaec     cl_main_mp.obj
-//struct dvar_s const **customclass 8287aaf0     cl_main_mp.obj
-//struct dvar_s const *const m_pitch    8287ab04     cl_main_mp.obj
-//struct dvar_s const *const cl_activeAction 8287ab08     cl_main_mp.obj
-//struct dvar_s const *const playlist   8287ab0c     cl_main_mp.obj
-//struct dvar_s const *const cl_debugMessageKey 8287ab10     cl_main_mp.obj
-//struct dvar_s const *const systemlink 8287ab14     cl_main_mp.obj
-//struct dvar_s const *const nextdemo   8287ab18     cl_main_mp.obj
-//int cl_maxLocalClients   8287ab1c     cl_main_mp.obj
-//struct clientStatic_t cls  8287ab20     cl_main_mp.obj
-static clientStatic_t cls;
-//struct ping_t *cl_pinglist 8287bdc8     cl_main_mp.obj
-//struct dvar_s const *const cl_connectionAttempts 82880148     cl_main_mp.obj
-//int old_com_frameTime    8288014c     cl_main_mp.obj
-//struct dvar_s const *const onlinegame 82880150     cl_main_mp.obj
-//struct dvar_s const *const cl_showMouseRate 82880154     cl_main_mp.obj
-//unsigned int frame_msec           82880158     cl_main_mp.obj
-//struct dvar_s const *const m_forward  8288015c     cl_main_mp.obj
-//struct dvar_s const *const cl_packetdup 82880160     cl_main_mp.obj
-//struct dvar_s const *const cl_mouseAccel 82880164     cl_main_mp.obj
-//struct dvar_s const *const cl_maxpackets 82880168     cl_main_mp.obj
-//struct dvar_s const *const cl_motdString 8288016c     cl_main_mp.obj
-//struct dvar_s const *const onlinegameandhost 82880170     cl_main_mp.obj
-//struct dvar_s const *const cl_freezeDemo 82880174     cl_main_mp.obj
-//struct dvar_s const *const cl_showTimeDelta 82880178     cl_main_mp.obj
-//BOOL * cl_waitingOnServerToLoadMap 8288017c     cl_main_mp.obj
-//struct dvar_s const *const input_viewSensitivity 82880180     cl_main_mp.obj
-//struct dvar_s const *const input_autoAim 82880184     cl_main_mp.obj
-//struct dvar_s const *const cl_ingame  82880188     cl_main_mp.obj
-//struct dvar_s const *const cl_inGameVideo 8288018c     cl_main_mp.obj
-//struct clientUIActive_t *clientUIActives 82880190     cl_main_mp.obj
 clientUIActive_t clientUIActives[MAX_CLIENTS];
-//struct dvar_s const *const name       82880220     cl_main_mp.obj
-dvar_t *name;
-//struct dvar_s const *const cl_noprint 82880224     cl_main_mp.obj
-//struct dvar_s const *const m_side     82880228     cl_main_mp.obj
-//struct dvar_s const *const cl_profileTextY 8288022c     cl_main_mp.obj
-//struct dvar_s const *const cl_serverStatusResendTime 82880230     cl_main_mp.obj
-//struct dvar_s const *const m_filter   82880234     cl_main_mp.obj
-//struct dvar_s const *const cl_profileTextHeight 82880238     cl_main_mp.obj
-//struct clientActive_t *clients 8288023c     cl_main_mp.obj
 clientActive_t clients[MAX_CLIENTS];
-//struct dvar_s const *const cl_shownuments 82880240     cl_main_mp.obj
-//struct dvar_s const *const splitscreen 82880244     cl_main_mp.obj
-//struct dvar_s const *const onlineunrankedgameandhost 8288024c     cl_main_mp.obj
-//struct dvar_s const *const cl_freelook 82880250     cl_main_mp.obj
-//struct dvar_s const *const cl_shownet 82880254     cl_main_mp.obj
+dvar_t *name;
 
+static clientStatic_t cls;
 
-//void __cdecl TRACK_cl_main()
-//{
-//    track_static_alloc_internal(clients, 1776604, "clients", 9);
-//    track_static_alloc_internal(clientConnections, 398824, "clientConnections", 9);
-//    track_static_alloc_internal(clientUIActives, 16, "clientUIActives", 9);
-//    track_static_alloc_internal(&cls, 3002480, "cls", 9);
-//}
 
 void __cdecl TRACK_cl_main()
 {
@@ -88,6 +85,14 @@ void __cdecl TRACK_cl_main()
     track_static_alloc_internal(clientConnections, sizeof(clientConnection_t) * MAX_CLIENTS /*398824*/, "clientConnections", 9);
     track_static_alloc_internal(clientUIActives, sizeof(clientUIActive_t) * MAX_CLIENTS, "clientUIActives", 9);
     track_static_alloc_internal(&cls, sizeof(clientStatic_t)/*3002480*/, "cls", 9);
+}
+
+void __cdecl TRACK_cl_main()
+{
+    track_static_alloc_internal(clients, 1776604, "clients", 9);
+    track_static_alloc_internal(clientConnections, 398824, "clientConnections", 9);
+    track_static_alloc_internal(clientUIActives, 16, "clientUIActives", 9);
+    track_static_alloc_internal(&cls, 3002480, "cls", 9);
 }
 
 char __cdecl CL_IsLocalClientActive(int localClientNum)
@@ -169,10 +174,8 @@ void __cdecl CL_AddReliableCommand(int localClientNum, const char *cmd)
     clientConnection_t *clc; // [esp+0h] [ebp-8h]
 
     clc = CL_GetLocalClientConnection(localClientNum);
-
     if (clc->reliableSequence - clc->reliableAcknowledge > 128)
         Com_Error(ERR_DROP, "EXE_ERR_CLIENT_CMD_OVERFLOW");
-
     MSG_WriteReliableCommandToBuffer(cmd, clc->reliableCommands[++clc->reliableSequence & 0x7F], 1024);
 }
 
@@ -226,7 +229,7 @@ char __cdecl CL_AnyLocalClientsRunning()
 
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
     {
-        if (byte_E7A7C1[16 * localClientNum])
+        if (clientUIActives[localClientNum].isRunning)
             return 1;
     }
     return 0;
@@ -247,15 +250,15 @@ void __cdecl CL_MapLoading(const char *mapname)
         for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         {
             Con_Close(localClientNum);
-            dword_E7A7C4[4 * localClientNum] = 0;
-            byte_E7A7C8[16 * localClientNum] = 0;
+            clientUIActives[localClientNum].keyCatchers = 0;
+            clientUIActives[localClientNum].displayHUDWithKeycatchUI = 0;
         }
         LiveStorage_UploadStats();
         UI_CloseAllMenus(0);
         cl_serverLoadingMap = 1;
         if (!com_sv_running->current.enabled)
             Cbuf_ExecuteBuffer(0, 0, "selectStringTableEntryInDvar mp/didyouknow.csv 0 didyouknow");
-        if (client_state[0] >= 5 && !I_stricmp(cls.servername, "localhost"))
+        if (clientUIActives[0].connectionState >= 5 && !I_stricmp(cls.servername, "localhost"))
         {
             memset((unsigned __int8 *)cls.updateInfoString, 0, sizeof(cls.updateInfoString));
             for (localClientNuma = 0; localClientNuma < 1; ++localClientNuma)
@@ -264,7 +267,7 @@ void __cdecl CL_MapLoading(const char *mapname)
                 {
                     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNuma);
                     clc = CL_GetLocalClientConnection(localClientNuma);
-                    client_state[4 * localClientNuma] = 5;
+                    clientUIActives[localClientNuma].connectionState = CA_CONNECTED;
                     memset((unsigned __int8 *)clc->serverMessage, 0, sizeof(clc->serverMessage));
                     memset((unsigned __int8 *)&LocalClientGlobals->gameState, 0, sizeof(LocalClientGlobals->gameState));
                     clc->lastPacketSentTime = -9999;
@@ -276,7 +279,7 @@ void __cdecl CL_MapLoading(const char *mapname)
         }
         else
         {
-            Dvar_SetString((dvar_s *)nextmap, (char *)&String);
+            Dvar_SetString((dvar_s *)nextmap, (char *)"");
             I_strncpyz(cls.servername, "localhost", 256);
             for (localClientNumb = NS_CLIENT1; localClientNumb < NS_SERVER; ++localClientNumb)
             {
@@ -285,7 +288,7 @@ void __cdecl CL_MapLoading(const char *mapname)
                     CL_Disconnect(localClientNumb);
                     CL_ResetStats_f();
                     UI_CloseAll(localClientNumb);
-                    client_state[4 * localClientNumb] = 4;
+                    clientUIActives[localClientNumb].connectionState = CA_CHALLENGING;
                     clca = CL_GetLocalClientConnection(localClientNumb);
                     clca->connectTime = -3000;
                     clca->qport = localClientNumb + g_qport;
@@ -362,8 +365,8 @@ void __cdecl CL_Disconnect(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        connstate = client_state[0];
-        if (client_state[0] < 5)
+        connstate = clientUIActives[0].connectionState;
+        if (clientUIActives[0].connectionState < CA_CONNECTED)
             clc = 0;
         else
             clc = CL_GetLocalClientConnection(localClientNum);
@@ -404,7 +407,7 @@ void __cdecl CL_Disconnect(int localClientNum)
         CL_ClearMutedList();
         if (connstate >= CA_CONNECTED)
             memset((unsigned __int8 *)clc, 0, sizeof(clientConnection_t));
-        client_state[4 * localClientNum] = 0;
+        clientUIActives[localClientNum].connectionState = CA_DISCONNECTED;
         if (!cls.wwwDlDisconnected)
             CL_ClearStaticDownload();
         DynEntCl_Shutdown(localClientNum);
@@ -419,7 +422,7 @@ void __cdecl CL_Disconnect(int localClientNum)
             Dvar_SetBool(sv_disableClientConsole, 0);
             cl_connectedToPureServer = 0;
             fs_checksumFeed = 0;
-            LiveStorage_UploadStats(0);
+            LiveStorage_UploadStats();
         }
     }
 }
@@ -439,7 +442,7 @@ void __cdecl CL_ForwardCommandToServer(int localClientNum, const char *string)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (client_state[0] < 5 || *cmd == 43 || CL_GetLocalClientConnection(localClientNum)->demoplaying)
+        if (clientUIActives[0].connectionState < 5 || *cmd == 43 || CL_GetLocalClientConnection(localClientNum)->demoplaying)
         {
             Com_Printf(14, "Unknown command \"%s\"\n", cmd);
         }
@@ -525,7 +528,7 @@ void __cdecl CL_ForwardToServer_f()
 {
     char command[1028]; // [esp+Ch] [ebp-408h] BYREF
 
-    if (CL_GetLocalClientConnection(0)->demoplaying || client_state[0] != 9)
+    if (CL_GetLocalClientConnection(0)->demoplaying || clientUIActives[0].connectionState != 9)
     {
         Com_Printf(0, "Not connected to a server.\n");
     }
@@ -595,7 +598,7 @@ void __cdecl CL_DisconnectLocalClient(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v1 = client_state[0] > 2u;
+    v1 = clientUIActives[0].connectionState > (unsigned int)CA_LOGO;
     CL_Disconnect(localClientNum);
     if (v1)
     {
@@ -648,7 +651,7 @@ void __cdecl CL_Vid_Restart_f()
         LocalClientGlobals = CL_GetLocalClientGlobals(0);
         clientUIActive = clientUIActives;
         clc = CL_GetLocalClientConnection(0);
-        connstate = client_state[0];
+        connstate = clientUIActives[0].connectionState;
         clientStateBuf = 0;
         clientStateBytes = 0;
         if (byte_E7A7C2)
@@ -751,7 +754,7 @@ void __cdecl CL_Configstrings_f()
     int ofs; // [esp+4h] [ebp-Ch]
     int i; // [esp+Ch] [ebp-4h]
 
-    if (client_state[0] == 9)
+    if (clientUIActives[0].connectionState == 9)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(0);
         for (i = 0; i < 2442; ++i)
@@ -772,7 +775,7 @@ void __cdecl CL_Clientinfo_f()
     char *v0; // eax
 
     Com_Printf(0, "--------- Client Information ---------\n");
-    Com_Printf(0, "state: %i\n", client_state[0]);
+    Com_Printf(0, "state: %i\n", clientUIActives[0].connectionState);
     Com_Printf(0, "Server: %s\n", cls.servername);
     Com_Printf(0, "User info settings:\n");
     v0 = Dvar_InfoString(0, 2);
@@ -823,7 +826,7 @@ void __cdecl CL_DownloadsComplete(int localClientNum)
     Com_SyncThreads();
     if (cls.wwwDlDisconnected)
         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2604, 0, "%s", "!cls.wwwDlDisconnected");
-    client_state[4 * localClientNum] = 7;
+    clientUIActives[localClientNum].connectionState = CA_LOADING;
     Com_Printf(14, "Setting state to CA_LOADING in CL_DownloadsComplete\n");
     if (!CL_WasMapAlreadyLoaded())
     {
@@ -846,7 +849,7 @@ void __cdecl CL_DownloadsComplete(int localClientNum)
         CL_StartHunkUsers();
         SCR_UpdateScreen();
     LABEL_25:
-        Dvar_SetInt((dvar_s *)cl_paused, 1);
+        Dvar_SetInt(cl_paused, 1);
         CL_InitCGame(localClientNum);
         CL_SendPureChecksums(localClientNum);
         CL_WritePacket(localClientNum);
@@ -870,7 +873,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
     int v6; // [esp+0h] [ebp-1188h]
     char md5Str[36]; // [esp+2Ch] [ebp-115Ch] BYREF
     unsigned __int8 v8[1244]; // [esp+50h] [ebp-1138h] BYREF
-    int v9; // [esp+52Ch] [ebp-C5Ch]
+    connstate_t connectionState; // [esp+52Ch] [ebp-C5Ch]
     char dest; // [esp+530h] [ebp-C58h] BYREF
     _BYTE v11[3]; // [esp+531h] [ebp-C57h] BYREF
     int pktlen; // [esp+934h] [ebp-854h] BYREF
@@ -892,11 +895,13 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v9 = client_state[0];
-    if (client_state[0] == 3 || v9 == 4 || v9 == 6)
+    connectionState = clientUIActives[0].connectionState;
+    if (clientUIActives[0].connectionState == CA_CONNECTING
+        || connectionState == CA_CHALLENGING
+        || connectionState == CA_SENDINGSTATS)
     {
         clc = CL_GetLocalClientConnection(localClientNum);
-        if (v9 == 6)
+        if (connectionState == CA_SENDINGSTATS)
         {
             if (cls.realtime - clc->lastPacketSentTime < 100)
                 return;
@@ -909,9 +914,9 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
         {
             clc->connectTime = cls.realtime;
             ++clc->connectPacketCount;
-            switch (v9)
+            switch (connectionState)
             {
-            case 3:
+            case CA_CONNECTING:
                 if (net_lanauthorize->current.enabled || !Sys_IsLANAddress(clc->serverAddress))
                     CL_RequestAuthorization(localClientNum);
                 strcpy(pkt, "getchallenge");
@@ -921,7 +926,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 v1 = va("getchallenge 0 \"%s\"", md5Str);
                 NET_OutOfBandPrint(localClientNum, clc->serverAddress, v1);
                 break;
-            case 4:
+            case CA_CHALLENGING:
                 v2 = Dvar_InfoString(localClientNum, 2);
                 I_strncpyz(&dest, v2, 1024);
                 v3 = va("%i", 1);
@@ -943,7 +948,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 NET_OutOfBandData(localClientNum, clc->serverAddress, src, count + 10);
                 dvar_modifiedFlags &= ~2u;
                 break;
-            case 6:
+            case CA_SENDINGSTATS:
                 MSG_Init(&buf, msgBuffer, 2048);
                 MSG_WriteString(&buf, "stats");
                 c = CL_HighestPriorityStatPacket(clc);
@@ -981,7 +986,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 NET_OutOfBandData(localClientNum, clc->serverAddress, buf.data, buf.cursize);
                 break;
             default:
-                Com_Error(ERR_FATAL, &byte_874D98);
+                Com_Error(ERR_FATAL, "CL_CheckForResend: bad connstate");
                 break;
             }
         }
@@ -1030,7 +1035,7 @@ void __cdecl CL_DisconnectError(char *message)
 
 char __cdecl CL_ConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg_t *msg, int time)
 {
-    char *v5; // eax
+    const char *v5; // eax
     char success; // [esp+3h] [ebp-9h]
     char *s; // [esp+4h] [ebp-8h]
 
@@ -1105,7 +1110,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    connstate = client_state[0];
+    connstate = clientUIActives[0].connectionState;
     if (I_stricmp(c, "challengeResponse"))
     {
         if (I_stricmp(c, "connectResponse"))
@@ -1177,7 +1182,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
                                         "%s\n\t(localClientNum) = %i",
                                         "(localClientNum == 0)",
                                         localClientNum);
-                                if (client_state[0] != 6)
+                                if (clientUIActives[0].connectionState != CA_SENDINGSTATS)
                                 {
                                     if (localClientNum)
                                         MyAssertHandler(
@@ -1187,7 +1192,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
                                             "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                                             localClientNum,
                                             1);
-                                    client_state[4 * localClientNum] = 6;
+                                    clientUIActives[localClientNum].connectionState = CA_SENDINGSTATS;
                                     LocalClientConnection = CL_GetLocalClientConnection(localClientNum);
                                     LocalClientConnection->statPacketSendTime[0] = 0;
                                     LocalClientConnection->statPacketSendTime[1] = 0;
@@ -1216,7 +1221,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
                                         "%s\n\t(localClientNum) = %i",
                                         "(localClientNum == 0)",
                                         localClientNum);
-                                v17 = client_state[0] == 9 && NET_CompareBaseAdr(from, clcb->serverAddress);
+                                v17 = clientUIActives[0].connectionState == CA_ACTIVE && NET_CompareBaseAdr(from, clcb->serverAddress);
                                 clcb->isServerRestarting = v17;
                                 return 1;
                             }
@@ -1232,7 +1237,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
                                 Cbuf_AddText(localClientNum, "uploadStats\n");
                                 StringLine = MSG_ReadStringLine(msg);
                                 I_strncpyz(mapname, StringLine, 64);
-                                client_state[4 * localClientNum] = 5;
+                                clientUIActives[localClientNum].connectionState = CA_CONNECTED;
                                 v12 = MSG_ReadStringLine(msg);
                                 CL_SetupForNewServerMap(mapname, v12);
                             }
@@ -1286,7 +1291,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
                                 "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                                 localClientNum,
                                 1);
-                        client_state[4 * localClientNum] = 5;
+                        clientUIActives[localClientNum].connectionState = CA_CONNECTED;
                         clca->statPacketsToSend = 0;
                     }
                     clca->lastPacketTime = cls.realtime;
@@ -1341,7 +1346,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
                             "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                             localClientNum,
                             1);
-                    client_state[4 * localClientNum] = 6;
+                    clientUIActives[localClientNum].connectionState = CA_SENDINGSTATS;
                     clc->statPacketSendTime[0] = 0;
                     clc->statPacketSendTime[1] = 0;
                     clc->statPacketSendTime[2] = 0;
@@ -1380,7 +1385,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
         clcc = CL_GetLocalClientConnection(localClientNum);
         v5 = Cmd_Argv(1);
         clcc->challenge = atoi(v5);
-        client_state[4 * localClientNum] = 4;
+        clientUIActives[localClientNum].connectionState = CA_CHALLENGING;
         clcc->connectPacketCount = 0;
         clcc->connectTime = -99999;
         clcc->serverAddress = from;
@@ -1406,7 +1411,7 @@ void __cdecl CL_DisconnectPacket(int localClientNum, netadr_t from, char *reason
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (client_state[0] >= 3)
+    if (clientUIActives[0].connectionState >= 3)
     {
         clc = CL_GetLocalClientConnection(localClientNum);
         if (NET_CompareAdr(from, clc->netchan.remoteAddress))
@@ -1436,7 +1441,7 @@ void __cdecl CL_InitLoad(const char *mapname, const char *gametype)
     {
         com_expectedHunkUsage = 0;
         UI_SetMap(mapname, gametype);
-        client_state[0] = client_state[0] < 5 ? 0 : 5;
+        clientUIActives[0].connectionState = clientUIActives[0].connectionState < 5 ? 0 : 5;
         SCR_UpdateScreen();
     }
 }
@@ -1463,8 +1468,8 @@ char __cdecl CL_PacketEvent(netsrc_t localClientNum, netadr_t from, msg_t *msg, 
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    connstate = client_state[0];
-    if (client_state[0] >= 5)
+    connstate = clientUIActives[0].connectionState;
+    if (clientUIActives[0].connectionState >= 5)
     {
         clc = CL_GetLocalClientConnection(localClientNum);
         if (msg->cursize >= 4)
@@ -1569,7 +1574,7 @@ void __cdecl CL_RunOncePerClientFrame(int localClientNum, int msec)
     IN_Frame();
     if (cl_avidemo->current.integer && msec)
     {
-        if (client_state[0] == 9 || cl_forceavidemo->current.enabled)
+        if (clientUIActives[0].connectionState == 9 || cl_forceavidemo->current.enabled)
         {
             v2 = CL_ControllerIndexFromClientNum(localClientNum);
             Cmd_ExecuteSingleCommand(0, v2, "screenshot silent\n");
@@ -1610,7 +1615,7 @@ void __cdecl CL_Frame(netsrc_t localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     }
-    connstate = client_state[0];
+    connstate = clientUIActives[0].connectionState;
     Hunk_CheckTempMemoryClear();
     Hunk_CheckTempMemoryHighClear();
     if (byte_E7A7C1[0])
@@ -1648,8 +1653,8 @@ void __cdecl CL_CheckTimeout(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    connstate = client_state[0];
-    if (client_state[0] >= 3)
+    connstate = clientUIActives[0].connectionState;
+    if (clientUIActives[0].connectionState >= 3)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         clc = CL_GetLocalClientConnection(localClientNum);
@@ -1708,7 +1713,7 @@ void __cdecl CL_CheckUserinfo(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (client_state[0] >= 4 && !cl_paused->current.integer && (dvar_modifiedFlags & 2) != 0)
+    if (clientUIActives[0].connectionState >= 4 && !cl_paused->current.integer && (dvar_modifiedFlags & 2) != 0)
     {
         v1 = Dvar_InfoString(localClientNum, 2);
         v2 = va("userinfo \"%s\"", v1);
@@ -1726,7 +1731,7 @@ void __cdecl CL_UpdateInGameState(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (client_state[0] == 9)
+    if (clientUIActives[0].connectionState == 9)
     {
         if (!cl_ingame->current.enabled)
             Dvar_SetBool((dvar_s *)cl_ingame, 1);
@@ -1761,7 +1766,7 @@ bool __cdecl CL_IsLocalClientInGame(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return client_state[0] == 9;
+    return clientUIActives[0].connectionState == 9;
 }
 
 char __cdecl CL_IsClientLocal(int clientNum)
@@ -1778,7 +1783,7 @@ char __cdecl CL_IsClientLocal(int clientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 client);
-        if (client_state[0] > 7 && CG_GetClientNum(client) == clientNum)
+        if (clientUIActives[0].connectionState > 7 && CG_GetClientNum(client) == clientNum)
             return 1;
     }
     return 0;
@@ -2007,7 +2012,7 @@ void __cdecl CL_DrawLogo(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (client_state[0] != 2)
+    if (clientUIActives[0].connectionState != 2)
         MyAssertHandler(
             ".\\client_mp\\cl_main_mp.cpp",
             4644,
@@ -2050,7 +2055,7 @@ void __cdecl CL_DrawLogo(int localClientNum)
 
 void __cdecl CL_StopLogo(int localClientNum)
 {
-    client_state[4 * localClientNum] = 0;
+    clientUIActives[localClientNum].connectionState = CA_DISCONNECTED;
 }
 
 void __cdecl CL_PlayLogo_f()
@@ -2074,19 +2079,19 @@ void __cdecl CL_PlayLogo_f()
         return;
     }
     Com_DPrintf(0, "CL_PlayLogo_f\n");
-    if (client_state[0] == 1)
+    if (clientUIActives[0].connectionState == CA_CINEMATIC)
     {
         SCR_StopCinematic(0);
     }
-    else if (client_state[0] == 2)
+    else if (clientUIActives[0].connectionState == CA_LOGO)
     {
         CL_StopLogo(0);
     }
-    else if (client_state[0])
+    else if (clientUIActives[0].connectionState)
     {
         return;
     }
-    client_state[0] = 2;
+    clientUIActives[0].connectionState = CA_LOGO;
     if (cls.uiStarted)
         UI_SetActiveMenu(0, 0);
     SND_StopSounds(SND_STOP_ALL);
@@ -2124,14 +2129,14 @@ void __cdecl CL_StopLogoOrCinematic(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    clcState = client_state[0];
-    if (client_state[0] == 1)
+    clcState = clientUIActives[0].connectionState;
+    if (clientUIActives[0].connectionState == 1)
     {
         SCR_StopCinematic(localClientNum);
     }
     else
     {
-        if (client_state[0] != 2)
+        if (clientUIActives[0].connectionState != 2)
             MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 4744, 0, "%s", "clcState == CA_LOGO");
         CL_StopLogo(localClientNum);
     }
@@ -2149,7 +2154,7 @@ void __cdecl CL_ToggleMenu_f()
     clientConnection_t *clc; // [esp+10h] [ebp-8h]
 
     clc = CL_GetLocalClientConnection(0);
-    connstate = client_state[0];
+    connstate = clientUIActives[0].connectionState;
     if ((dword_E7A7C4[0] & 0x10) != 0)
         ActiveMenu = UI_GetActiveMenu(0);
     else
@@ -2423,7 +2428,7 @@ void __cdecl CL_Init(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    client_state[0] = 0;
+    clientUIActives[0].connectionState = 0;
     cls.realtime = 0;
     clientUIActives[0].active = 1;
     cl_serverLoadingMap = 0;
@@ -2617,7 +2622,7 @@ int __cdecl CL_UpdateDirtyPings(netsrc_t localClientNum, unsigned int source)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (client_state[0])
+    if (clientUIActives[0].connectionState)
         return 0;
     if (source > 2)
         return 0;
@@ -2712,7 +2717,7 @@ void __cdecl CL_SetupForNewServerMap(char *pszMapName, char *pszGametype)
     {
         com_expectedHunkUsage = 0;
         g_waitingForServer = 1;
-        UI_SetMap((char *)"", (char *)&String);
+        UI_SetMap((char *)"", (char *)"");
         LoadMapLoadscreen(pszMapName);
         UI_SetMap(pszMapName, pszGametype);
     }
@@ -2900,7 +2905,7 @@ bool __cdecl CL_IsUIActive(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (dword_E7A7C4[0] & 0x10) != 0;
+    return (clientUIActives[0].keyCatchers & 0x10) != 0;
 }
 
 Font_s *__cdecl CL_RegisterFont(const char *fontName, int imageTrack)

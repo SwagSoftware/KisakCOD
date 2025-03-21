@@ -1,5 +1,6 @@
 #pragma once
 #include <qcommon/qcommon.h>
+#include <xanim/xanim.h>
 
 union hudelem_color_t // sizeof=0x4
 {                                       // XREF: DrawSingleHudElem2d+114/r
@@ -948,6 +949,8 @@ enum connstate_t : __int32
     CA_LOADING = 0x7,
     CA_PRIMED = 0x8,
     CA_ACTIVE = 0x9,
+
+
 };
 
 struct clientUIActive_t // sizeof=0x10
@@ -971,6 +974,26 @@ struct clientUIActive_t // sizeof=0x10
     // padding byte
     int numVoicePacketsSent;
 #endif
+};
+
+struct ClientVoicePacket_t // sizeof=0x104
+{                                       // ...
+    unsigned __int8 data[256];
+    int dataSize;
+};
+struct voiceCommunication_t // sizeof=0xA30
+{                                       // ...
+    ClientVoicePacket_t voicePackets[10];
+    int voicePacketCount;
+    int voicePacketLastTransmit;
+};
+
+struct ping_t // sizeof=0x41C
+{                                       // ...
+    netadr_t adr;                       // ...
+    int start;                          // ...
+    int time;                           // ...
+    char info[1024];                    // ...
 };
 
 //void __cdecl TRACK_cl_main();

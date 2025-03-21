@@ -12,7 +12,6 @@ static HANDLE threadHandle[7];
 
 static void* g_threadValues[7][4];
 static void *g_threadLocals[4];
-static int g_com_error[7][16];
 
 typedef void (*ThreadFuncFn)(unsigned int);
 static ThreadFuncFn threadFunc[7];

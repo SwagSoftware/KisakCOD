@@ -67,8 +67,6 @@ def main() -> None:
         
         demangled_name = demangled_name.split("(")[0]
         
-        IDAConsolePrint("cuck: " + demangled_name + "\n")
-        
         shouldDump = False
         
         for line in inputlines:
