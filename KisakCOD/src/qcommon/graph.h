@@ -1,5 +1,15 @@
 #pragma once
 
+enum DevEventType : __int32
+{                                       // ...
+    EVENT_ACTIVATE = 0x0,
+    EVENT_DEACTIVATE = 0x1,
+    EVENT_ACCEPT = 0x2,
+    EVENT_UPDATE = 0x3,
+    EVENT_DRAW = 0x4,
+    EVENT_SAVE = 0x5,
+};
+
 struct __declspec(align(4)) DevGraph // sizeof=0x20
 {                                       // ...
     float (*knots)[2];                  // ...

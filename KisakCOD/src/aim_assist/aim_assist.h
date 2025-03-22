@@ -108,16 +108,6 @@ struct __declspec(align(4)) AimOutput // sizeof=0x10
     // padding byte
 };
 
-enum DevEventType : __int32
-{                                       // ...
-    EVENT_ACTIVATE = 0x0,
-    EVENT_DEACTIVATE = 0x1,
-    EVENT_ACCEPT = 0x2,
-    EVENT_UPDATE = 0x3,
-    EVENT_DRAW = 0x4,
-    EVENT_SAVE = 0x5,
-};
-
 void __cdecl TRACK_aim_assist();
 void __cdecl AimAssist_Init(int localClientNum);
 const dvar_s *AimAssist_RegisterDvars();

@@ -3,6 +3,10 @@
 #include <universal/assertive.h>
 #include "qcommon.h"
 
+#include <universal/com_files.h>
+#include <win32/win_local.h>
+#include <universal/q_parse.h>
+
 void __cdecl GraphFloat_Load(GraphFloat *graph, char *fileName, float scale)
 {
     char *InfoString; // eax
@@ -50,13 +54,13 @@ void __cdecl GraphFloat_ParseBuffer(GraphFloat *graph, const char *buffer, char 
             break;
         knots_4 = atof(tokena->token);
         if (knotIndex >= 32)
-            Com_Error(ERR_DROP, &byte_898FF8, fileName, 32);
+            Com_Error(ERR_DROP, "GraphFloat_ParseBuffer: File[% s] has too many knots.Max is[% d]", fileName, 32);
         graph->knots[knotIndex][0] = knots;
         graph->knots[knotIndex][1] = knots_4;
     }
     Com_EndParseSession();
     if (knotIndex != graph->knotCount)
-        Com_Error(ERR_DROP, &byte_898FC0, fileName);
+        Com_Error(ERR_DROP, "GraphFloat_ParseBuffer: Error parsing graph file [%s]", fileName);
 }
 
 void __cdecl GraphFloat_CreateDevGui(GraphFloat *graph, const char *devguiPath)

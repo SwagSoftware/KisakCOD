@@ -80,6 +80,7 @@ void SL_TransferSystem(unsigned int from, unsigned int to);
 
 int SL_BeginLoadScripts();
 
+void __cdecl SL_AddUser(unsigned int stringValue, unsigned int user);
 void SL_AddUserInternal(RefString* refStr, unsigned int user);
 
 void SL_AddRefToString(unsigned int stringValue);

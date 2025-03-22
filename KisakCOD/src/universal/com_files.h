@@ -91,7 +91,7 @@ int __cdecl FS_CreatePath(char *OSPath);
 void __cdecl FS_FCloseFile(int h);
 void __cdecl FS_FCloseLogFile(int h);
 int __cdecl FS_FOpenFileWrite(char *filename);
-int __cdecl FS_FOpenTextFileWrite(char *filename);
+int __cdecl FS_FOpenTextFileWrite(const char *filename);
 int __cdecl FS_FOpenFileAppend(char *filename);
 unsigned int __cdecl FS_FOpenFileReadStream(const char *filename, int *file);
 unsigned int __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsThread thread);

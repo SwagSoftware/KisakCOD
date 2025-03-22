@@ -705,3 +705,11 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 		}
 	}
 }
+
+void __cdecl SL_AddUser(unsigned int stringValue, unsigned int user)
+{
+	RefString *RefString; // eax
+
+	RefString = GetRefString(stringValue);
+	SL_AddUserInternal(RefString, user);
+}

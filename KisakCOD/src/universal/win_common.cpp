@@ -3,6 +3,7 @@
 #include "../universal/assertive.h"
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
+#include <direct.h>
 
 
 
@@ -132,4 +133,50 @@ void Com_InitThreadData(int threadContext)
     Sys_SetValue(1, &va_info[threadContext]);
     Sys_SetValue(2, g_com_error[threadContext]);
     Sys_SetValue(3, &g_traceThreadInfo[threadContext]);
+}
+
+void __cdecl Sys_Mkdir(const char *path)
+{
+    mkdir(path);
+}
+
+char cwd[256];
+char *__cdecl Sys_Cwd()
+{
+    _getcwd(cwd, 255);
+    cwd[255] = 0;
+    return cwd;
+}
+
+const char *__cdecl Sys_DefaultCDPath()
+{
+    return "";
+}
+
+char exePath[256];
+char *__cdecl Sys_DefaultInstallPath()
+{
+    char *v0; // eax
+    unsigned int len; // [esp+0h] [ebp-8h]
+    HINSTANCE__ *hinst; // [esp+4h] [ebp-4h]
+
+    if (!exePath[0])
+    {
+        if (IsDebuggerPresent())
+        {
+            v0 = Sys_Cwd();
+            I_strncpyz(exePath, v0, 256);
+        }
+        else
+        {
+            hinst = GetModuleHandleA(0);
+            len = GetModuleFileNameA(hinst, exePath, 0x100u);
+            if (len == 256)
+                len = 255;
+            while (len && exePath[len] != 92 && exePath[len] != 47 && exePath[len] != 58)
+                --len;
+            exePath[len] = 0;
+        }
+    }
+    return exePath;
 }

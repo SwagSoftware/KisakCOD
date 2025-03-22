@@ -145,6 +145,8 @@
     <ClCompile Include="src\database\db_registry.cpp" />
     <ClCompile Include="src\database\db_stream.cpp" />
     <ClCompile Include="src\database\db_stream_load.cpp" />
+    <ClCompile Include="src\database\db_stringtable_load.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_buffers.cpp" />
     <ClCompile Include="src\gfx_d3d\r_cinematic.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
     <ClCompile Include="src\qcommon\common.cpp" />
@@ -164,10 +166,13 @@
     <ClCompile Include="src\script\scr_variable.cpp" />
     <ClCompile Include="src\script\scr_vm.cpp" />
     <ClCompile Include="src\universal\com_files.cpp" />
+    <ClCompile Include="src\universal\com_loadutils.cpp" />
     <ClCompile Include="src\universal\com_math.cpp" />
     <ClCompile Include="src\universal\com_math_anglevectors.cpp" />
     <ClCompile Include="src\universal\com_memory.cpp" />
     <ClCompile Include="src\universal\dvar.cpp" />
+    <ClCompile Include="src\universal\physicalmemory.cpp" />
+    <ClCompile Include="src\universal\q_parse.cpp" />
     <ClCompile Include="src\universal\q_shared.cpp" />
     <ClCompile Include="src\universal\win_common.cpp" />
     <ClCompile Include="src\win32\win_input.cpp" />
@@ -185,12 +190,30 @@
     <ClCompile Include="src\xanim\xmodel.cpp" />
     <ClCompile Include="src\xanim\xmodel_load_obj.cpp" />
     <ClCompile Include="src\xanim\xmodel_utils.cpp" />
+    <ClCompile Include="src\zlib\adler32.c" />
+    <ClCompile Include="src\zlib\compress.c" />
+    <ClCompile Include="src\zlib\crc32.c" />
+    <ClCompile Include="src\zlib\deflate.c" />
+    <ClCompile Include="src\zlib\example.c" />
+    <ClCompile Include="src\zlib\gzio.c" />
+    <ClCompile Include="src\zlib\infblock.c" />
+    <ClCompile Include="src\zlib\infcodes.c" />
+    <ClCompile Include="src\zlib\inffast.c" />
+    <ClCompile Include="src\zlib\inflate.c" />
+    <ClCompile Include="src\zlib\inftrees.c" />
+    <ClCompile Include="src\zlib\infutil.c" />
+    <ClCompile Include="src\zlib\maketree.c" />
+    <ClCompile Include="src\zlib\minigzip.c" />
+    <ClCompile Include="src\zlib\trees.c" />
+    <ClCompile Include="src\zlib\uncompr.c" />
+    <ClCompile Include="src\zlib\zutil.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\aim_assist\aim_assist.h" />
     <ClInclude Include="src\cgame\cg_local.h" />
     <ClInclude Include="src\cgame_mp\cg_local_mp.h" />
     <ClInclude Include="src\client_mp\client_mp.h" />
+    <ClInclude Include="src\database\database.h" />
     <ClInclude Include="src\gfx_d3d\r_cinematic.h" />
     <ClInclude Include="src\gfx_d3d\r_image_load_db.h" />
     <ClInclude Include="src\gfx_d3d\r_material_load_db.h" />
@@ -212,7 +235,9 @@
     <ClInclude Include="src\script\scr_vm.h" />
     <ClInclude Include="src\ui\keycodes.h" />
     <ClInclude Include="src\universal\assertive.h" />
+    <ClInclude Include="src\universal\physicalmemory.h" />
     <ClInclude Include="src\universal\profile.h" />
+    <ClInclude Include="src\universal\q_parse.h" />
     <ClInclude Include="src\universal\q_shared.h" />
     <ClInclude Include="src\win32\win_input.h" />
     <ClInclude Include="src\win32\win_local.h" />
@@ -220,6 +245,17 @@
     <ClInclude Include="src\xanim\xanim.h" />
     <ClInclude Include="src\xanim\xanim_load_db.h" />
     <ClInclude Include="src\xanim\xanim_public.h" />
+    <ClInclude Include="src\zlib\deflate.h" />
+    <ClInclude Include="src\zlib\infblock.h" />
+    <ClInclude Include="src\zlib\infcodes.h" />
+    <ClInclude Include="src\zlib\inffast.h" />
+    <ClInclude Include="src\zlib\inffixed.h" />
+    <ClInclude Include="src\zlib\inftrees.h" />
+    <ClInclude Include="src\zlib\infutil.h" />
+    <ClInclude Include="src\zlib\trees.h" />
+    <ClInclude Include="src\zlib\zconf.h" />
+    <ClInclude Include="src\zlib\zlib.h" />
+    <ClInclude Include="src\zlib\zutil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -192,7 +192,7 @@ int __cdecl FS_FOpenFileWrite(char *filename)
     return FS_FOpenFileWriteToDirForThread(filename, fs_gamedir, FS_THREAD_MAIN);
 }
 
-int __cdecl FS_FOpenTextFileWrite(char *filename)
+int __cdecl FS_FOpenTextFileWrite(const char *filename)
 {
     char ospath[260]; // [esp+0h] [ebp-110h] BYREF
     _iobuf *f; // [esp+108h] [ebp-8h]

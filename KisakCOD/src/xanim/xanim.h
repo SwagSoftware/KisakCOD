@@ -8,6 +8,9 @@
 #include <script/scr_stringlist.h>
 #include <cgame_mp/cg_local_mp.h>
 #include <cgame/cg_local.h>
+#include <database/database.h>
+#include <universal/com_math.h>
+
 enum MapType
 {                                       // ...
     MAPTYPE_NONE = 0x0,
@@ -881,17 +884,7 @@ struct XModel // sizeof=0xDC
     PhysGeomList* physGeoms;
 };
 
-struct XModelPiece // sizeof=0x10
-{
-    XModel* model;
-    float offset[3];
-};
-struct XModelPieces // sizeof=0xC
-{                                       // ...
-    const char* name;
-    int numpieces;
-    XModelPiece* pieces;
-};
+
 struct _AILSOUNDINFO // sizeof=0x24
 {                                       // ...
     int format;
@@ -2529,40 +2522,6 @@ struct StringTable // sizeof=0x10
     int columnCount;
     int rowCount;
     const char** values;
-};
-
-union XAssetHeader // sizeof=0x4
-{                                       // ...
-    XModelPieces* xmodelPieces;
-    PhysPreset* physPreset;
-    XAnimParts* parts;
-    XModel* model;
-    Material* material;
-    MaterialPixelShader* pixelShader;
-    MaterialVertexShader* vertexShader;
-    MaterialTechniqueSet* techniqueSet;
-    GfxImage* image;
-    snd_alias_list_t* sound;
-    SndCurve* sndCurve;
-    LoadedSound* loadSnd;
-    clipMap_t* clipMap;
-    ComWorld* comWorld;
-    GameWorldSp* gameWorldSp;
-    GameWorldMp* gameWorldMp;
-    MapEnts* mapEnts;
-    GfxWorld* gfxWorld;
-    GfxLightDef* lightDef;
-    Font_s* font;
-    MenuList* menuList;
-    menuDef_t* menu;
-    LocalizeEntry* localize;
-    WeaponDef* weapon;
-    SndDriverGlobals* sndDriverGlobals;
-    const FxEffectDef* fx;
-    FxImpactTable* impactFx;
-    RawFile* rawfile;
-    StringTable* stringTable;
-    void* data;
 };
 
 void __cdecl SV_DObjInitServerTime(gentity_s* ent, float dtime);

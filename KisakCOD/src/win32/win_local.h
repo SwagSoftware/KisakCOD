@@ -18,6 +18,7 @@
 #include <wsipx.h>
 #endif
 #include <universal/q_shared.h>
+#include <qcommon/qcommon.h>
 
 void	IN_MouseEvent (int mstate);
 
@@ -155,3 +156,8 @@ sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result);
 void __cdecl Sys_Init();
 void __cdecl Sys_In_Restart_f();
 void __cdecl Sys_Net_Restart_f();
+
+void __cdecl Sys_Mkdir(const char *path);
+char *__cdecl Sys_Cwd();
+const char *__cdecl Sys_DefaultCDPath();
+char *__cdecl Sys_DefaultInstallPath();

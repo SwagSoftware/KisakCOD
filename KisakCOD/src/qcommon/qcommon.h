@@ -34,24 +34,6 @@ struct field_t // sizeof=0x118
 	int fixedSize;                      // ...
 	char buffer[256];                   // ...
 };
-struct parseInfo_t // sizeof=0x420
-{                                       // ...
-	char token[1024];
-	int lines;
-	bool ungetToken;
-	bool spaceDelimited;
-	bool keepStringQuotes;
-	bool csv;
-	bool negativeNumbers;
-	// padding byte
-	// padding byte
-	// padding byte
-	const char* errorPrefix;
-	const char* warningPrefix;
-	int backup_lines;
-	const char* backup_text;
-	const char* parseFile;
-};
 
 extern dvar_t *com_developer;
 extern int marker_common;
@@ -188,10 +170,18 @@ void __cdecl Com_InitSoundAlias();
 void Com_InitEntChannels(char* file);
 void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve* sndCurve);
 void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo* info);
-void __cdecl Com_InitParse();
-void __cdecl Com_InitParseInfo(parseInfo_t* pi);
 void __cdecl Com_InitThreadData(int threadContext);
 void __cdecl Com_FreeEvent(char* ptr);
+
+// com_loadutils.cpp
+char *__cdecl Com_LoadInfoString(char *fileName, const char *fileDesc, const char *ident, char *loadBuffer);
+const char *__cdecl Com_LoadInfoString_FastFile(const char *fileName, const char *fileDesc, const char *ident);
+char *__cdecl Com_LoadInfoString_LoadObj(char *fileName, const char *fileDesc, const char *ident, char *loadBuffer);
+char *__cdecl Com_LoadRawTextFile(const char *fullpath);
+XModelPiece *__cdecl Com_LoadRawTextFile_FastFile(const char *fullpath);
+char *__cdecl Com_LoadRawTextFile_LoadObj(const char *fullpath);
+void __cdecl Com_UnloadRawTextFile(char *filebuf);
+
 
 
 /*
