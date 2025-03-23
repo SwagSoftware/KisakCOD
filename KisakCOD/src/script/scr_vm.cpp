@@ -42,8 +42,8 @@ void(__cdecl* __cdecl Scr_GetFunction(const char** pName, int* type))()
         if (!strcmp(*pName, functions[i].actionString))
         {
             *pName = functions[i].actionString;
-            *type = dword_946DA0[3 * i];
-            return (void(__cdecl*)()) * (&off_946D9C + 3 * i);
+            *type = functions[i].type;
+            return functions[i].actionFunc;
         }
     }
     return 0;
@@ -784,26 +784,6 @@ void __cdecl Scr_AddArrayKeys(unsigned int parentId)
         }
         Scr_AddArray();
     }
-}
-
-double __cdecl Scr_GetObjectUsage(unsigned int parentId)
-{
-    float usage; // [esp+4h] [ebp-8h]
-    unsigned int id; // [esp+8h] [ebp-4h]
-
-    if ((scrVarGlob.variableList[parentId + 1].w.status & 0x60) == 0)
-        MyAssertHandler(
-            ".\\script\\scr_variable.cpp",
-            4966,
-            0,
-            "%s",
-            "(parentValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE");
-    if (!IsObject(&scrVarGlob.variableList[parentId + 1]))
-        MyAssertHandler(".\\script\\scr_variable.cpp", 4967, 0, "%s", "IsObject( parentValue )");
-    usage = 1.0;
-    for (id = FindFirstSibling(parentId); id; id = FindNextSibling(id))
-        usage = Scr_GetEntryUsage(&scrVarGlob.variableList[id + 32770]) + usage;
-    return usage;
 }
 
 void __cdecl TRACK_scr_vm()

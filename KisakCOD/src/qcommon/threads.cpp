@@ -6,8 +6,7 @@
 void Com_InitThreadData(int threadContext);
 unsigned int Win_InitThreads();
 
-static int s_cpuCount;
-static int threadId[7];
+static DWORD threadId[7];
 static HANDLE threadHandle[7];
 
 static void* g_threadValues[7][4];
@@ -116,30 +115,35 @@ void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), unsigned in
         (LPTHREAD_START_ROUTINE)Sys_ThreadMain,
         (LPVOID)threadContext,
         4u,
-        (LPDWORD)(4 * threadContext + 37008660));
+        &threadId[threadContext]);
     SetThreadName(threadId[threadContext], s_threadNames[threadContext]);
 }
 
 #define MS_VC_EXCEPTION 0x406d1388
 struct tagTHREADNAME_INFO // sizeof=0x10
 {                                     
-    ULONG type;                       
-    const char* name;                 
-    unsigned int threadId;            
-    unsigned int flags;               
+    DWORD dwType; // Must be 0x1000.
+    LPCSTR szName; // Pointer to name (in user addr space).
+    DWORD dwThreadID; // Thread ID (-1=caller thread).
+    DWORD dwFlags; // Reserved for future use, must be zero.          
 };
 
+// https://learn.microsoft.com/en-us/visualstudio/debugger/tips-for-debugging-threads?view=vs-2022&tabs=csharp
 void __cdecl SetThreadName(unsigned int threadId, const char* threadName)
 {
     tagTHREADNAME_INFO info; // [esp+10h] [ebp-28h] BYREF
     //CPPEH_RECORD ms_exc; // [esp+20h] [ebp-18h]
 
-    info.type = 4096;
-    info.name = threadName;
-    info.threadId = threadId;
-    info.flags = 0;
-    //ms_exc.registration.TryLevel = 0;
-    RaiseException(MS_VC_EXCEPTION, 0, 4u, &info.type);
+    info.dwType = 0x1000;
+    info.szName = threadName;
+    info.dwThreadID = threadId;
+    info.dwFlags = 0;
+    
+    __try {
+        RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+    }
 }
 
 unsigned int __stdcall Sys_ThreadMain(int parameter)

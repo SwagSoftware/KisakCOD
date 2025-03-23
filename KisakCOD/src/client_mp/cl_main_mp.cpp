@@ -85,14 +85,6 @@ void __cdecl TRACK_cl_main()
     track_static_alloc_internal(&cls, sizeof(clientStatic_t)/*3002480*/, "cls", 9);
 }
 
-void __cdecl TRACK_cl_main()
-{
-    track_static_alloc_internal(clients, 1776604, "clients", 9);
-    track_static_alloc_internal(clientConnections, 398824, "clientConnections", 9);
-    track_static_alloc_internal(clientUIActives, 16, "clientUIActives", 9);
-    track_static_alloc_internal(&cls, 3002480, "cls", 9);
-}
-
 char __cdecl CL_IsLocalClientActive(int localClientNum)
 {
     if (localClientNum)

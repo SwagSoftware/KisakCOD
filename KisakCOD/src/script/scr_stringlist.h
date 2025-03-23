@@ -78,7 +78,8 @@ void SL_ShutdownSystem(unsigned int user);
 
 void SL_TransferSystem(unsigned int from, unsigned int to);
 
-int SL_BeginLoadScripts();
+void SL_BeginLoadScripts();
+void SL_EndLoadScripts();
 
 void __cdecl SL_AddUser(unsigned int stringValue, unsigned int user);
 void SL_AddUserInternal(RefString* refStr, unsigned int user);

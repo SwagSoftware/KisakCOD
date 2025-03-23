@@ -94,8 +94,6 @@ void Scr_PrecacheAnimTrees(void* (__cdecl*)(int), int);
 void Scr_EndLoadAnimTrees(void);
 void Scr_FreeScripts(unsigned char);
 void Scr_BeginLoadScripts(void);
-void SL_BeginLoadScripts(void);
-void SL_EndLoadScripts(void);
 
 
 //int marker_scr_main      83043248     scr_main.obj

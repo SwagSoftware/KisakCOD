@@ -291,18 +291,6 @@ void __cdecl ReplaceString(const char** str, char* in)
     *str = newStr;
 }
 
-void __cdecl FreeString(const char* str)
-{
-    unsigned int out; // [esp+0h] [ebp-4h]
-
-    if (!str)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 864, 0, "%s", "str");
-    out = SL_FindString(str);
-    if (!out)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 866, 0, "%s", "out");
-    SL_RemoveRefToString(out);
-}
-
 void Com_InitHunkMemory()
 {
     if (!Sys_IsMainThread())
@@ -444,11 +432,7 @@ void __cdecl DB_EnumXAssets(
     if (useFastFile->current.enabled)
         DB_EnumXAssets_FastFile(type, func, inData, includeOverride);
     else
-        ((void(__cdecl*)(XAssetType, void(__cdecl*)(XAssetHeader, void*), void*, bool))DB_EnumXAssets_LoadObj)(
-            type,
-            func,
-            inData,
-            includeOverride);
+        DB_EnumXAssets_LoadObj(type, func, inData);
 }
 
 void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(__cdecl* func)(void*, void*), void* inData)

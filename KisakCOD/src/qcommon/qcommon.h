@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../universal/q_shared.h"
-#include <xanim/xanim.h> // KISAKTODO: move SndCurve
 
 typedef enum
 {
@@ -192,6 +191,11 @@ void Com_InitDefaultSpeakerMap();
 void Com_InitCurves();
 void __cdecl Com_InitSoundAlias();
 void Com_InitEntChannels(char* file);
+
+struct SndCurve;
+struct SpeakerMapInfo;
+struct XModelPiece;
+
 void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve* sndCurve);
 void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo* info);
 void __cdecl Com_InitThreadData(int threadContext);
@@ -517,7 +521,7 @@ NET
 
 #define	MAX_RELIABLE_COMMANDS	128			// max string commands buffered for restransmit
 
-typedef enum {
+enum netadrtype_t {
 	NA_BOT,
 	NA_BAD,					// an address lookup failed
 	NA_LOOPBACK,
@@ -525,7 +529,7 @@ typedef enum {
 	NA_IP,
 	NA_IPX,
 	NA_BROADCAST_IPX
-} netadrtype_t;
+};
 
 enum netsrc_t : __int32
 {                                       // ...
@@ -535,14 +539,14 @@ enum netsrc_t : __int32
 	NS_PACKET = 0x2,
 };
 
-typedef struct {
+struct netadr_t  {
 	netadrtype_t	type;
 
 	byte	ip[4];
 	byte	ipx[10];
 
 	unsigned short	port;
-} netadr_t;
+};
 
 void		NET_Init(void);
 void		NET_Shutdown(void);

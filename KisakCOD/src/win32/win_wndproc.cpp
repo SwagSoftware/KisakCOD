@@ -217,7 +217,7 @@ static unsigned char MapKey(int key, unsigned int wParam)
 	return result;
 }
 
-LONG WINAPI MainWndProc(
+LRESULT WINAPI MainWndProc(
     HWND    hWnd,
     UINT    uMsg,
     WPARAM  wParam,

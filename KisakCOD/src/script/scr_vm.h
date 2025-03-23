@@ -1,7 +1,12 @@
 #pragma once
 #include "scr_variable.h"
 
-#include <xanim/xanim_public.h>
+#include <xanim/xanim.h>
+
+#include <universal/q_shared.h>
+
+struct scr_block_s;
+struct Scr_StringNode_s;
 
 void Scr_Error(const char* error);
 
@@ -42,7 +47,6 @@ void __cdecl Scr_InitVariableRange(unsigned int begin, unsigned int end);
 void __cdecl Scr_InitClassMap();
 void __cdecl Scr_ShutdownVariables();
 void __cdecl Scr_AddArrayKeys(unsigned int parentId);
-double __cdecl Scr_GetObjectUsage(unsigned int parentId);
 void __cdecl TRACK_scr_vm();
 void __cdecl Scr_ClearErrorMessage();
 void __cdecl Scr_Init();
