@@ -418,15 +418,14 @@ void __cdecl DB_EnumXAssets_FastFile(
             assetEntry = &g_assetEntryPool[assetEntryIndex];
             if (assetEntry->entry.asset.type == type)
             {
-                ((void(__cdecl *)(unsigned int, unsigned int))func)((XAssetHeader)assetEntry->entry.asset.header.xmodelPieces, inData);
+                func((XAssetHeader)assetEntry->entry.asset.header.xmodelPieces, inData);
                 if (includeOverride)
                 {
                     for (overrideAssetEntryIndex = assetEntry->entry.nextOverride;
                         overrideAssetEntryIndex;
                         overrideAssetEntryIndex = g_assetEntryPool[overrideAssetEntryIndex].entry.nextOverride)
                     {
-                        ((void(__cdecl *)(unsigned int, unsigned int))func)(
-                            (XAssetHeader)g_assetEntryPool[overrideAssetEntryIndex].entry.asset.header.xmodelPieces,
+                        func((XAssetHeader)g_assetEntryPool[overrideAssetEntryIndex].entry.asset.header.xmodelPieces,
                             inData);
                     }
                 }
@@ -645,6 +644,7 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
 unsigned __int32 __cdecl DB_HashForName(const char *name, XAssetType type)
 {
     int c; // [esp+8h] [ebp-4h]
+    int out_val = (int)type;
 
     while (1)
     {
@@ -653,10 +653,10 @@ unsigned __int32 __cdecl DB_HashForName(const char *name, XAssetType type)
             c = 47;
         if (!c)
             break;
-        type = c + 31 * type;
+        out_val = c + 31 * out_val;
         ++name;
     }
-    return type % 0x8000u;
+    return out_val % 0x8000u;
 }
 
 XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
@@ -783,7 +783,7 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
     return assetEntry->entry.asset.header;
 }
 
-void __cdecl PrintWaitedError(XAssetType type, char *name, int waitedMsec)
+void __cdecl PrintWaitedError(XAssetType type, const char *name, int waitedMsec)
 {
     if (waitedMsec > 100)
     {

@@ -480,7 +480,7 @@ void MT_Error(const char* funcName, int numBytes)
 {
     MT_DumpTree();
     Com_Printf(23, "%s: failed memory allocation of %d bytes for script usage\n", funcName, numBytes);
-    Com_Error(1, "MT_Error (KISAK)\n");
+    Com_Error(ERR_FATAL, "MT_Error (KISAK)\n");
     //Scr_TerminalError("failed memory allocation for script usage");
 }
 

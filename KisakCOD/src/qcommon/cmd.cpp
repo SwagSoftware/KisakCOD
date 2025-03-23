@@ -30,7 +30,6 @@ CmdText sv_cmd_text;
 CmdText cmd_textArray[1];
 unsigned __int8 cmd_text_buf[1][65536];
 unsigned __int8 sv_cmd_text_buf[65536];
-static int cmd_wait;
 
 int marker_cmd;
 int cmd_wait;

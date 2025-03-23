@@ -5,10 +5,12 @@
 #include "xanim_public.h"
 
 #include <d3d9.h> // KISAKTODO: move to gfx I think
+
 #include <script/scr_stringlist.h>
+
 #include <cgame_mp/cg_local_mp.h>
 #include <cgame/cg_local.h>
-#include <database/database.h>
+
 #include <universal/com_math.h>
 
 enum MapType
@@ -158,8 +160,8 @@ struct __declspec(align(4)) XAnimTree_s // sizeof=0x14
 {
     XAnim_s *anims;
     int info_usage;
-    volatile int calcRefCount;
-    volatile int modifyRefCount;
+    volatile long calcRefCount;
+    volatile long modifyRefCount;
     unsigned __int16 children;
     // padding byte
     // padding byte
@@ -605,23 +607,6 @@ struct PhysMass // sizeof=0x24
     float productsOfInertia[3];
 };
 
-__declspec(align(4)) struct PhysPreset // sizeof=0x2C
-{                                       // ...
-    const char* name;                   // ...
-    int type;                           // ...
-    float mass;                         // ...
-    float bounce;                       // ...
-    float friction;                     // ...
-    float bulletForceScale;             // ...
-    float explosiveForceScale;          // ...
-    const char* sndAliasPrefix;         // ...
-    float piecesSpreadFraction;
-    float piecesUpwardVelocity;
-    bool tempDefaultToCylinder;
-    // padding byte
-    // padding byte
-    // padding byte
-};
 struct PhysGeomInfo // sizeof=0x44
 {
     BrushWrapper* brush;
@@ -676,6 +661,18 @@ struct XModel // sizeof=0xDC
     PhysGeomList *physGeoms;
 };
 
+struct XModelPiece // sizeof=0x10
+{
+    XModel* model;
+    float offset[3];
+};
+struct XModelPieces // sizeof=0xC
+{                                       // ...
+    const char* name;
+    int numpieces;
+    XModelPiece* pieces;
+};
+
 struct __declspec(align(4)) XAnimState // sizeof=0x20
 {                                       // ...
     float currentAnimTime;              // ...
@@ -691,21 +688,7 @@ struct __declspec(align(4)) XAnimState // sizeof=0x20
     // padding byte
     // padding byte
 };
-struct __declspec(align(4)) XAnimState // sizeof=0x20
-{                                       // ...
-    float currentAnimTime;              // ...
-    float oldTime;                      // ...
-    __int16 cycleCount;                 // ...
-    __int16 oldCycleCount;              // ...
-    float goalTime;                     // ...
-    float goalWeight;                   // ...
-    float weight;                       // ...
-    float rate;                         // ...
-    bool instantWeightChange;           // ...
-    // padding byte
-    // padding byte
-    // padding byte
-};
+
 struct XAnimInfo // sizeof=0x40
 {                                       // ...
     unsigned __int16 notifyChild;
@@ -777,111 +760,11 @@ struct XAnimDeltaInfo // sizeof=0x4
     bool bUseGoalWeight;                // ...
 };
 
-struct XAnimParent // sizeof=0x4
-{                                       // ...
-    unsigned __int16 flags;
-    unsigned __int16 children;
-};
-struct XAnimEntry // sizeof=0x8
-{                                       // ...
-    unsigned __int16 numAnims;
-    unsigned __int16 parent;
-    //$7F333398CC08E12E110886895274CBFC ___u2;
-    union
-    {
-        XAnimParts* parts;
-        XAnimParent animParent;
-    };
-};
-struct XAnim_s // sizeof=0x14
-{
-    const char* debugName;
-    unsigned int size;
-    const char** debugAnimNames;
-    XAnimEntry entries[1];
-};
-
 struct XAnimNotify_s // sizeof=0xC
 {                                       // ...
     const char* name;
     unsigned int type;
     float timeFrac;
-};
-
-struct DObjAnimMat // sizeof=0x20
-{                                       // ...
-    float quat[4];                      // ...
-    float trans[3];                     // ...
-    float transWeight;                  // ...
-};
-struct XSurfaceVertexInfo // sizeof=0xC
-{                                       // ...
-    __int16 vertCount[4];
-    unsigned __int16* vertsBlend;
-};
-struct GfxPackedVertex // sizeof=0x20
-{                                       // ...
-    float xyz[3];
-    float binormalSign;
-    GfxColor color;
-    PackedTexCoords texCoord;
-    PackedUnitVec normal;
-    PackedUnitVec tangent;
-};
-struct XSurface // sizeof=0x38
-{
-    unsigned __int8 tileMode;
-    bool deformed;
-    unsigned __int16 vertCount;
-    unsigned __int16 triCount;
-    unsigned __int8 zoneHandle;
-    // padding byte
-    unsigned __int16 baseTriIndex;
-    unsigned __int16 baseVertIndex;
-    unsigned __int16* triIndices;
-    XSurfaceVertexInfo vertInfo;
-    GfxPackedVertex* verts0;
-    unsigned int vertListCount;
-    XRigidVertList* vertList;
-    int partBits[4];
-};
-
-struct XModel // sizeof=0xDC
-{                                       // ...
-    const char* name;
-    unsigned __int8 numBones;
-    unsigned __int8 numRootBones;
-    unsigned __int8 numsurfs;
-    unsigned __int8 lodRampType;
-    unsigned __int16* boneNames;
-    unsigned __int8* parentList;
-    __int16* quats;
-    float* trans;
-    unsigned __int8* partClassification;
-    DObjAnimMat* baseMat;
-    XSurface* surfs;
-    Material** materialHandles;
-    XModelLodInfo lodInfo[4];
-    XModelCollSurf_s* collSurfs;
-    int numCollSurfs;
-    int contents;
-    XBoneInfo* boneInfo;
-    float radius;
-    float mins[3];
-    float maxs[3];
-    __int16 numLods;
-    __int16 collLod;
-    XModelStreamInfo streamInfo;
-    // padding byte
-    // padding byte
-    // padding byte
-    int memUsage;
-    unsigned __int8 flags;
-    bool bad;
-    // padding byte
-    // padding byte
-    PhysPreset* physPreset;
-    PhysGeomList* physGeoms;
 };
 
 
@@ -1272,11 +1155,7 @@ const struct FxElemDef // sizeof=0xFC
     unsigned __int8 useItemClip;
     unsigned __int8 unused[1];
 };
-union FxEffectDefRef // sizeof=0x4
-{                                       // ...
-    const FxEffectDef* handle;
-    const char* name;
-};
+
 struct DynEntityDef // sizeof=0x60
 {
     DynEntityType type;

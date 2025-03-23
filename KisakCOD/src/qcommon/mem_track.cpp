@@ -82,7 +82,6 @@ void TRACK_cg_predict() {}
 void TRACK_CG_CollWorld() {}
 void TRACK_cg_view() {}
 void TRACK_cg_localents() {}
-void TRACK_cg_main() {}
 void CL_ResetStats_f() {}
 void TRACK_aim_assist() {}
 void TRACK_aim_target() {}

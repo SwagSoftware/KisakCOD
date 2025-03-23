@@ -1,32 +1,7 @@
 #pragma once
 #include <client_mp/client_mp.h>
 
-enum trType_t : __int32
-{                                       // ...
-    TR_STATIONARY = 0x0,
-    TR_INTERPOLATE = 0x1,
-    TR_LINEAR = 0x2,
-    TR_LINEAR_STOP = 0x3,
-    TR_SINE = 0x4,
-    TR_GRAVITY = 0x5,
-    TR_ACCELERATE = 0x6,
-    TR_DECELERATE = 0x7,
-    TR_PHYSICS = 0x8,
-    TR_FIRST_RAGDOLL = 0x9,
-    TR_RAGDOLL = 0x9,
-    TR_RAGDOLL_GRAVITY = 0xA,
-    TR_RAGDOLL_INTERPOLATE = 0xB,
-    TR_LAST_RAGDOLL = 0xB,
-};
-
-enum team_t : __int32
-{                                       // ...
-    TEAM_FREE = 0x0,
-    TEAM_AXIS = 0x1,
-    TEAM_ALLIES = 0x2,
-    TEAM_SPECTATOR = 0x3,
-    TEAM_NUM_TEAMS = 0x4,
-};
+struct gentity_s;
 
 enum sessionState_t : __int32
 {                                       // ...
@@ -43,29 +18,6 @@ enum clientConnected_t : __int32
     CON_CONNECTED = 0x2,
 };
 
-enum OffhandSecondaryClass : __int32
-{                                       // ...
-    PLAYER_OFFHAND_SECONDARY_SMOKE = 0x0,
-    PLAYER_OFFHAND_SECONDARY_FLASH = 0x1,
-    PLAYER_OFFHAND_SECONDARIES_TOTAL = 0x2,
-};
-
-enum ViewLockTypes : __int32
-{                                       // ...
-    PLAYERVIEWLOCK_NONE = 0x0,
-    PLAYERVIEWLOCK_FULL = 0x1,
-    PLAYERVIEWLOCK_WEAPONJITTER = 0x2,
-    PLAYERVIEWLOCKCOUNT = 0x3,
-};
-enum ActionSlotType : __int32
-{                                       // ...
-    ACTIONSLOTTYPE_DONOTHING = 0x0,
-    ACTIONSLOTTYPE_SPECIFYWEAPON = 0x1,
-    ACTIONSLOTTYPE_ALTWEAPONTOGGLE = 0x2,
-    ACTIONSLOTTYPE_NIGHTVISION = 0x3,
-    ACTIONSLOTTYPECOUNT = 0x4,
-};
-
 enum VehicleMoveState : __int32
 {                                       // ...
     VEH_MOVESTATE_STOP = 0x0,
@@ -78,192 +30,6 @@ enum VehicleTurretState : __int32
     VEH_TURRET_STOPPED = 0x0,
     VEH_TURRET_STOPPING = 0x1,
     VEH_TURRET_MOVING = 0x2,
-};
-
-struct ActionSlotParam_SpecifyWeapon // sizeof=0x4
-{                                       // ...
-    unsigned int index;
-};
-struct ActionSlotParam // sizeof=0x4
-{                                       // ...
-    ActionSlotParam_SpecifyWeapon specifyWeapon;
-};
-
-struct SprintState // sizeof=0x14
-{                                       // ...
-    int sprintButtonUpRequired;
-    int sprintDelay;
-    int lastSprintStart;
-    int lastSprintEnd;
-    int sprintStartMaxLength;
-};
-struct MantleState // sizeof=0x10
-{                                       // ...
-    float yaw;
-    int timer;
-    int transIndex;
-    int flags;
-};
-
-struct LerpEntityStateTurret // sizeof=0xC
-{                                       // ...
-    float gunAngles[3];
-};
-struct LerpEntityStateLoopFx // sizeof=0x8
-{                                       // ...
-    float cullDist;
-    int period;
-};
-struct LerpEntityStateCustomExplode // sizeof=0x4
-{                                       // ...
-    int startTime;
-};
-struct LerpEntityStateTurret // sizeof=0xC
-{                                       // ...
-    float gunAngles[3];
-};
-struct LerpEntityStateAnonymous // sizeof=0x1C
-{                                       // ...
-    int data[7];
-};
-struct LerpEntityStateExplosion // sizeof=0x8
-{                                       // ...
-    float innerRadius;
-    float magnitude;
-};
-struct LerpEntityStateBulletHit // sizeof=0xC
-{                                       // ...
-    float start[3];
-};
-struct LerpEntityStatePrimaryLight // sizeof=0x14
-{                                       // ...
-    unsigned __int8 colorAndExp[4];
-    float intensity;
-    float radius;
-    float cosHalfFovOuter;
-    float cosHalfFovInner;
-};
-struct LerpEntityStatePlayer // sizeof=0x8
-{                                       // ...
-    float leanf;
-    int movementDir;
-};
-struct LerpEntityStateVehicle // sizeof=0x1C
-{                                       // ...
-    float bodyPitch;
-    float bodyRoll;
-    float steerYaw;
-    int materialTime;
-    float gunPitch;
-    float gunYaw;
-    int teamAndOwnerIndex;
-};
-struct LerpEntityStateMissile // sizeof=0x4
-{                                       // ...
-    int launchTime;
-};
-struct LerpEntityStateSoundBlend // sizeof=0x4
-{                                       // ...
-    float lerp;
-};
-struct LerpEntityStateEarthquake // sizeof=0xC
-{                                       // ...
-    float scale;
-    float radius;
-    int duration;
-};
-struct LerpEntityStateExplosionJolt // sizeof=0x10
-{                                       // ...
-    float innerRadius;
-    float impulse[3];
-};
-struct LerpEntityStatePhysicsJitter // sizeof=0xC
-{                                       // ...
-    float innerRadius;
-    float minDisplacement;
-    float maxDisplacement;
-};
-
-union LerpEntityStateTypeUnion // sizeof=0x1C
-{                                       // ...
-    LerpEntityStateTurret turret;
-    LerpEntityStateLoopFx loopFx;
-    LerpEntityStatePrimaryLight primaryLight;
-    LerpEntityStatePlayer player;
-    LerpEntityStateVehicle vehicle;
-    LerpEntityStateMissile missile;
-    LerpEntityStateSoundBlend soundBlend;
-    LerpEntityStateBulletHit bulletHit;
-    LerpEntityStateEarthquake earthquake;
-    LerpEntityStateCustomExplode customExplode;
-    LerpEntityStateExplosion explosion;
-    LerpEntityStateExplosionJolt explosionJolt;
-    LerpEntityStatePhysicsJitter physicsJitter;
-    LerpEntityStateAnonymous anonymous;
-};
-
-struct trajectory_t // sizeof=0x24
-{                                       // ...
-    trType_t trType;                    // ...
-    int trTime;                         // ...
-    int trDuration;                     // ...
-    float trBase[3];                    // ...
-    float trDelta[3];                   // ...
-};
-struct LerpEntityState // sizeof=0x68
-{                                       // ...
-    int eFlags;                         // ...
-    trajectory_t pos;                   // ...
-    trajectory_t apos;                  // ...
-    LerpEntityStateTypeUnion u;
-};
-union entityState_s_type_index // sizeof=0x4
-{                                       // ...
-    int brushmodel;
-    int item;
-    int xmodel;
-    int primaryLight;
-};
-union entityState_s_un1 // sizeof=0x4
-{                                       // ...
-    int scale;
-    int eventParm2;
-    int helicopterStage;
-};
-union entityState_s_un2 // sizeof=0x4
-{                                       // ...
-    int hintString;
-    int vehicleXModel;
-};
-struct entityState_s // sizeof=0xF4
-{                                       // ...
-    int number;
-    int eType;                          // ...
-    LerpEntityState lerp;               // ...
-    int time2;
-    int otherEntityNum;                 // ...
-    int attackerEntityNum;
-    int groundEntityNum;
-    int loopSound;
-    int surfType;
-    entityState_s_type_index index;     // ...
-    int clientNum;
-    int iHeadIcon;
-    int iHeadIconTeam;                  // ...
-    int solid;
-    unsigned int eventParm;
-    int eventSequence;
-    int events[4];                      // ...
-    int eventParms[4];
-    int weapon;
-    int weaponModel;
-    int legsAnim;
-    int torsoAnim;
-    entityState_s_un1 un1;              // ...
-    entityState_s_un2 un2;
-    float fTorsoPitch;
-    float fWaistPitch;
-    unsigned int partBits[4];           // ...
 };
 
 struct EntHandle // sizeof=0x4
@@ -295,40 +61,9 @@ struct entityShared_t // sizeof=0x68
     int eventTime;
 };
 
-struct __declspec(align(2)) usercmd_s // sizeof=0x20
-{                                       // ...
-    int serverTime;                     // ...
-    int buttons;                        // ...
-    int angles[3];                      // ...
-    unsigned __int8 weapon;             // ...
-    unsigned __int8 offHandIndex;
-    char forwardmove;                   // ...
-    char rightmove;                     // ...
-    float meleeChargeYaw;               // ...
-    unsigned __int8 meleeChargeDist;    // ...
-    char selectedLocation[2];
-    // padding byte
-};
-
 struct playerTeamState_t // sizeof=0x4
 {                                       // ...
     int location;
-};
-
-struct clientState_s // sizeof=0x64
-{                                       // ...
-    int clientIndex;
-    team_t team;                        // ...
-    int modelindex;
-    int attachModelIndex[6];            // ...
-    int attachTagIndex[6];              // ...
-    char name[16];                      // ...
-    float maxSprintTimeMultiplier;      // ...
-    int rank;
-    int prestige;
-    int perks;
-    int attachedVehEntNum;
-    int attachedVehSlotIndex;           // ...
 };
 
 struct clientSession_t // sizeof=0x110
@@ -362,129 +97,6 @@ struct clientSession_t // sizeof=0x110
     int teamInfo;
     clientState_s cs;
     int psOffsetTime;
-};
-
-struct playerState_s_hud // sizeof=0x26C0
-{                                       // ...
-    hudelem_s current[31];              // ...
-    hudelem_s archival[31];             // ...
-};
-
-struct playerState_s // sizeof=0x2F64
-{                                       // ...
-    int commandTime;
-    int pm_type;
-    int bobCycle;                       // ...
-    int pm_flags;
-    int weapFlags;
-    int otherFlags;                     // ...
-    int pm_time;
-    float origin[3];                    // ...
-    float velocity[3];
-    float oldVelocity[2];
-    int weaponTime;
-    int weaponDelay;
-    int grenadeTimeLeft;
-    int throwBackGrenadeOwner;
-    int throwBackGrenadeTimeLeft;
-    int weaponRestrictKickTime;
-    int foliageSoundTime;
-    int gravity;
-    float leanf;
-    int speed;
-    float delta_angles[3];
-    int groundEntityNum;
-    float vLadderVec[3];
-    int jumpTime;
-    float jumpOriginZ;                  // ...
-    int legsTimer;
-    int legsAnim;
-    int torsoTimer;
-    int torsoAnim;
-    int legsAnimDuration;
-    int torsoAnimDuration;
-    int damageTimer;
-    int damageDuration;
-    int flinchYawAnim;
-    int movementDir;
-    int eFlags;                         // ...
-    int eventSequence;                  // ...
-    int events[4];
-    unsigned int eventParms[4];
-    int oldEventSequence;
-    int clientNum;
-    int offHandIndex;
-    OffhandSecondaryClass offhandSecondary;
-    unsigned int weapon;
-    int weaponstate;
-    unsigned int weaponShotCount;
-    float fWeaponPosFrac;
-    int adsDelayTime;
-    int spreadOverride;
-    int spreadOverrideState;
-    int viewmodelIndex;
-    float viewangles[3];
-    int viewHeightTarget;
-    float viewHeightCurrent;
-    int viewHeightLerpTime;
-    int viewHeightLerpTarget;
-    int viewHeightLerpDown;
-    float viewAngleClampBase[2];
-    float viewAngleClampRange[2];
-    int damageEvent;
-    int damageYaw;
-    int damagePitch;
-    int damageCount;
-    int stats[5];                       // ...
-    int ammo[128];
-    int ammoclip[128];
-    unsigned int weapons[4];
-    unsigned int weaponold[4];
-    unsigned int weaponrechamber[4];
-    float proneDirection;
-    float proneDirectionPitch;
-    float proneTorsoPitch;
-    ViewLockTypes viewlocked;
-    int viewlocked_entNum;
-    int cursorHint;
-    int cursorHintString;
-    int cursorHintEntIndex;
-    int iCompassPlayerInfo;
-    int radarEnabled;
-    int locationSelectionInfo;
-    SprintState sprintState;
-    float fTorsoPitch;
-    float fWaistPitch;
-    float holdBreathScale;
-    int holdBreathTimer;
-    float moveSpeedScaleMultiplier;
-    MantleState mantleState;
-    float meleeChargeYaw;
-    int meleeChargeDist;
-    int meleeChargeTime;
-    int perks;
-    ActionSlotType actionSlotType[4];
-    ActionSlotParam actionSlotParam[4];
-    int entityEventSequence;
-    int weapAnim;
-    float aimSpreadScale;
-    int shellshockIndex;
-    int shellshockTime;
-    int shellshockDuration;
-    float dofNearStart;
-    float dofNearEnd;
-    float dofFarStart;
-    float dofFarEnd;
-    float dofNearBlur;
-    float dofFarBlur;
-    float dofViewmodelStart;
-    float dofViewmodelEnd;
-    int hudElemLastAssignedSoundID;
-    objective_t objective[16];          // ...
-    unsigned __int8 weaponmodels[128];
-    int deltaTime;
-    int killCamEntity;                  // ...
-    playerState_s_hud hud; // ...
 };
 
 struct gclient_s // sizeof=0x3184
@@ -804,8 +416,8 @@ struct scr_vehicle_s // sizeof=0x354
 
 struct tagInfo_s // sizeof=0x70
 {
-    struct gentity_s* parent;
-    struct gentity_s* next;
+    gentity_s* parent;
+    gentity_s* next;
     unsigned __int16 name;
     // padding byte
     // padding byte

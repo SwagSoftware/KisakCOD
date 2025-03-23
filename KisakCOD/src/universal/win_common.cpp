@@ -62,11 +62,11 @@ unsigned int Win_InitThreads()
     HANDLE CurrentProcess;
     unsigned long result; 
     unsigned long cpuCount; 
-    unsigned long systemAffinityMask; 
+    DWORD_PTR systemAffinityMask;
     unsigned long cpuOffset; 
     unsigned long threadAffinityMask; 
     unsigned long affinityMaskBits[33];
-    unsigned long processAffinityMask; 
+    DWORD_PTR processAffinityMask; 
 
     CurrentProcess = GetCurrentProcess();
     result = GetProcessAffinityMask(CurrentProcess, &processAffinityMask, &systemAffinityMask);
@@ -137,7 +137,7 @@ void Com_InitThreadData(int threadContext)
 
 void __cdecl Sys_Mkdir(const char *path)
 {
-    mkdir(path);
+    _mkdir(path);
 }
 
 char cwd[256];

@@ -786,26 +786,6 @@ void __cdecl Scr_AddArrayKeys(unsigned int parentId)
     }
 }
 
-double __cdecl Scr_GetObjectUsage(unsigned int parentId)
-{
-    float usage; // [esp+4h] [ebp-8h]
-    unsigned int id; // [esp+8h] [ebp-4h]
-
-    if ((scrVarGlob.variableList[parentId + 1].w.status & 0x60) == 0)
-        MyAssertHandler(
-            ".\\script\\scr_variable.cpp",
-            4966,
-            0,
-            "%s",
-            "(parentValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE");
-    if (!IsObject(&scrVarGlob.variableList[parentId + 1]))
-        MyAssertHandler(".\\script\\scr_variable.cpp", 4967, 0, "%s", "IsObject( parentValue )");
-    usage = 1.0;
-    for (id = FindFirstSibling(parentId); id; id = FindNextSibling(id))
-        usage = Scr_GetEntryUsage(&scrVarGlob.variableList[id + 32770]) + usage;
-    return usage;
-}
-
 void __cdecl TRACK_scr_vm()
 {
     track_static_alloc_internal(&scrVmGlob, 8232, "scrVmGlob", 7);

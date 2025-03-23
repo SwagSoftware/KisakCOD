@@ -681,7 +681,7 @@ char* __cdecl XAnimGetAnimDebugName(const XAnim_s* anims, unsigned int animIndex
     bool isDefault; // [esp+Fh] [ebp-15h]
     XAnimParts* parts; // [esp+10h] [ebp-14h]
     const char* debugName; // [esp+18h] [ebp-Ch]
-    XAnimEntry* anim; // [esp+1Ch] [ebp-8h]
+    const XAnimEntry* anim; // [esp+1Ch] [ebp-8h]
 
     if (!anims)
         MyAssertHandler(".\\xanim\\xanim.cpp", 2602, 0, "%s", "anims");

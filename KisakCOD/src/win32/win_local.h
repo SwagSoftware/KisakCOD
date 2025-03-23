@@ -1,4 +1,5 @@
 // win_local.h: Win32-specific Quake3 header file
+#pragma once // addition
 
 #if defined (_MSC_VER) && (_MSC_VER >= 1200)
 #pragma warning(disable : 4201)
@@ -38,7 +39,7 @@ void	IN_Init (void);
 void	IN_Shutdown (void);
 void	IN_JoystickCommands (void);
 
-void	IN_Move (usercmd_t *cmd);
+// KISAKTODO void	IN_Move (usercmd_s *cmd); // usercmd_t -> usercmd_s
 // add additional non keyboard / non mouse movement on top of the keyboard move cmd
 
 void	IN_DeactivateWin32Mouse( void);
@@ -48,7 +49,7 @@ void	IN_Frame (void);
 
 // window procedure
 #ifndef _XBOX
-LONG WINAPI MainWndProc (
+LRESULT WINAPI MainWndProc (
     HWND    hWnd,
     UINT    uMsg,
     WPARAM  wParam,

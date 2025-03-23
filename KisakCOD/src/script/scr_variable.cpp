@@ -3278,11 +3278,14 @@ int VariableInfoFileNameCompare(_DWORD* info1, _DWORD* info2)
 	return -1;
 }
 
-int  VariableInfoFunctionCompare(_DWORD* info1, _DWORD* info2)
+int  VariableInfoFunctionCompare(void* p_info1, void* p_info2)
 {
 	const char* functionName2; // [esp+0h] [ebp-Ch]
 	const char* functionName1; // [esp+4h] [ebp-8h]
 	int fileNameCompare; // [esp+8h] [ebp-4h]
+
+	_DWORD* info1 = (_DWORD *)p_info1;
+	_DWORD* info2 = (_DWORD *)p_info2;
 
 	fileNameCompare = VariableInfoFileNameCompare(info1, info2);
 	if (fileNameCompare)
@@ -3299,6 +3302,11 @@ int  VariableInfoFunctionCompare(_DWORD* info1, _DWORD* info2)
 int VariableInfoCountCompare(_DWORD* info1, _DWORD* info2)
 {
 	return info1[3] - info2[3];
+}
+
+int __cdecl CompareThreadIndices(_DWORD* arg1, _DWORD* arg2)
+{
+	return *arg1 - *arg2;
 }
 
 int __cdecl VariableInfoFileLineCompare(_DWORD* info1, _DWORD* info2)

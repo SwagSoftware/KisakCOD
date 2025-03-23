@@ -3,18 +3,6 @@
 #include <win32/win_local.h>
 #include <cstddef>
 
-struct XModelPiece // sizeof=0x10
-{
-    XModel *model;
-    float offset[3];
-};
-struct XModelPieces // sizeof=0xC
-{                                       // ...
-    const char *name;
-    int numpieces;
-    XModelPiece *pieces;
-};
-
 union XAssetHeader // sizeof=0x4
 {                                       // ...
     XAssetHeader() { data = NULL; }
@@ -150,64 +138,6 @@ struct __declspec(align(4)) XZone // sizeof=0xA8
     // padding byte
     // padding byte
     // padding byte
-};
-
-enum inflate_block_mode : __int32
-{                                       // ...
-    TYPE = 0x0,
-    LENS = 0x1,
-    STORED = 0x2,
-    TABLE = 0x3,
-    BTREE = 0x4,
-    DTREE = 0x5,
-    CODES = 0x6,
-    DRY = 0x7,
-    DONE = 0x8,
-    BAD = 0x9,
-};
-typedef inflate_block_mode inflate_mode; // ...
-
-
-struct inflate_blocks_state // sizeof=0x4
-{
-    int dummy;
-};
-struct internal_state // sizeof=0x18
-{
-    inflate_mode mode;
-    //$1F0878CB33AB691FEEFD309FEF732A16 sub;
-    union //$1F0878CB33AB691FEEFD309FEF732A16 // sizeof=0x8
-    {                                       // ...
-        unsigned int method;
-        //$A1AD60A7CB977A1DBF6E2660B1E40DE7 check;
-        struct //$A1AD60A7CB977A1DBF6E2660B1E40DE7
-        {
-            unsigned int was;
-            unsigned int need;
-        };
-        unsigned int marker;
-    };
-
-    int nowrap;
-    unsigned int wbits;
-    inflate_blocks_state *blocks;
-};
-
-struct z_stream_s // sizeof=0x34
-{                                       // ...
-    unsigned __int8 *next_in;           // ...
-    unsigned int avail_in;              // ...
-    unsigned int total_in;
-    unsigned __int8 *next_out;          // ...
-    unsigned int avail_out;             // ...
-    unsigned int total_out;
-    char *msg;
-    internal_state *state;
-    unsigned __int8 *(__cdecl *zalloc)(unsigned __int8 *, unsigned int, unsigned int);
-    void(__cdecl *zfree)(unsigned __int8 *, unsigned __int8 *);
-    unsigned __int8 *opaque;
-    int data_type;
-    unsigned int adler;
 };
 
 struct ScriptStringList // sizeof=0x8
