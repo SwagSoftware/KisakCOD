@@ -1,0 +1,1634 @@
+#include "dobj.h"
+#include "xmodel.h"
+
+unsigned int g_empty;
+
+void __cdecl DObjInit()
+{
+    int duplicatePartBits[5]; // [esp+0h] [ebp-14h] BYREF
+
+    memset(duplicatePartBits, 0, sizeof(duplicatePartBits));
+    g_empty = SL_GetStringOfSize((char *)duplicatePartBits, 0, 0x11u, 12).prev;
+}
+
+void __cdecl DObjShutdown()
+{
+    if (g_empty)
+    {
+        SL_RemoveRefToStringOfSize(g_empty, 0x11u);
+        g_empty = 0;
+    }
+}
+
+void __cdecl DObjDumpInfo(const DObj_s *obj)
+{
+    char *BoneName; // eax
+    char *v2; // eax
+    int v3; // [esp-8h] [ebp-28h]
+    char *v4; // [esp-4h] [ebp-24h]
+    int j; // [esp+0h] [ebp-20h]
+    int numBones; // [esp+4h] [ebp-1Ch]
+    const unsigned __int8 *pos; // [esp+8h] [ebp-18h]
+    int boneIndex; // [esp+Ch] [ebp-14h]
+    int numModels; // [esp+10h] [ebp-10h]
+    XModel *model; // [esp+14h] [ebp-Ch]
+    int i; // [esp+18h] [ebp-8h]
+    XModel **models; // [esp+1Ch] [ebp-4h]
+
+    if (obj)
+    {
+        Com_Printf(19, "\nModels:\n");
+        numModels = obj->numModels;
+        boneIndex = 0;
+        models = obj->models;
+        for (j = 0; j < numModels; ++j)
+        {
+            model = models[j];
+            Com_Printf(19, "%d: '%s'\n", boneIndex, model->name);
+            boneIndex += XModelNumBones(model);
+        }
+        Com_Printf(19, "\nBones:\n");
+        numBones = obj->numBones;
+        for (i = 0; i < numBones; ++i)
+        {
+            BoneName = DObjGetBoneName(obj, i);
+            Com_Printf(19, "Bone %d: '%s'\n", i, BoneName);
+        }
+        if (obj->duplicateParts)
+        {
+            Com_Printf(19, "\nPart duplicates:\n");
+            for (pos = (const unsigned __int8 *)(SL_ConvertToString(obj->duplicateParts) + 16); *pos; pos += 2)
+            {
+                v4 = DObjGetBoneName(obj, pos[1] - 1);
+                v3 = pos[1] - 1;
+                v2 = DObjGetBoneName(obj, *pos - 1);
+                Com_Printf(19, "%d ('%s') -> %d ('%s')\n", *pos - 1, v2, v3, v4);
+            }
+        }
+        else
+        {
+            Com_Printf(19, "\nNo part duplicates.\n");
+        }
+        Com_Printf(19, "\n");
+    }
+    else
+    {
+        Com_Printf(19, "No Dobj\n");
+    }
+}
+
+bool __cdecl DObjIgnoreCollision(const DObj_s *obj, char modelIndex)
+{
+    return (obj->ignoreCollision & (1 << modelIndex)) != 0;
+}
+
+void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBits)
+{
+    int j; // [esp+4Ch] [ebp-B8h]
+    const unsigned __int8 *pos; // [esp+50h] [ebp-B4h]
+    int newBoneIndex; // [esp+54h] [ebp-B0h]
+    int newBoneIndexa; // [esp+54h] [ebp-B0h]
+    const unsigned __int8 *modelParents; // [esp+58h] [ebp-ACh]
+    const unsigned __int8 *duplicateParts; // [esp+5Ch] [ebp-A8h]
+    unsigned int bit; // [esp+60h] [ebp-A4h]
+    int numModels; // [esp+64h] [ebp-A0h]
+    XModel *subModel; // [esp+68h] [ebp-9Ch]
+    int startIndex[33]; // [esp+6Ch] [ebp-98h]
+    int localBoneIndex; // [esp+F0h] [ebp-14h]
+    unsigned __int8 *parentList; // [esp+F4h] [ebp-10h]
+    const int *duplicatePartBits; // [esp+F8h] [ebp-Ch]
+    XModel **models; // [esp+FCh] [ebp-8h]
+    int highBoneIndex; // [esp+100h] [ebp-4h]
+
+    //Profile_Begin(329);
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 344, 0, "%s", "obj");
+    if (boneIndex >= (unsigned int)obj->numBones)
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            346,
+            0,
+            "boneIndex doesn't index obj->numBones\n\t%i not in [0, %i)",
+            boneIndex,
+            obj->numBones);
+    *partBits = 0;
+    partBits[1] = 0;
+    partBits[2] = 0;
+    partBits[3] = 0;
+    numModels = obj->numModels;
+    if (!obj->numModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 354, 0, "%s", "numModels > 0");
+    if (!obj->duplicateParts)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 356, 0, "%s", "obj->duplicateParts");
+    duplicatePartBits = (const int *)SL_ConvertToString(obj->duplicateParts);
+    duplicateParts = (const unsigned __int8 *)(duplicatePartBits + 4);
+    newBoneIndex = 0;
+    subModel = 0;
+    models = obj->models;
+    modelParents = (const unsigned __int8 *)&models[numModels];
+    for (j = 0; j < numModels; ++j)
+    {
+        startIndex[j] = newBoneIndex;
+        subModel = models[j];
+        newBoneIndex = startIndex[j] + subModel->numBones;
+        if (newBoneIndex > boneIndex)
+            break;
+    }
+    if (j != numModels)
+    {
+        *partBits = 0x80000000;
+        for (parentList = subModel->parentList; ; boneIndex -= parentList[newBoneIndexa])
+        {
+            localBoneIndex = boneIndex - startIndex[j];
+            while (1)
+            {
+                if (localBoneIndex < 0)
+                    MyAssertHandler(".\\xanim\\dobj.cpp", 394, 0, "%s", "localBoneIndex >= 0");
+                bit = 0x80000000 >> (boneIndex & 0x1F);
+                highBoneIndex = boneIndex >> 5;
+                partBits[boneIndex >> 5] |= bit;
+                if ((bit & duplicatePartBits[highBoneIndex]) != 0)
+                {
+                    for (pos = duplicateParts; ; pos += 2)
+                    {
+                        if (!*pos)
+                            MyAssertHandler(".\\xanim\\dobj.cpp", 422, 0, "%s", "*pos");
+                        if (boneIndex == *pos - 1)
+                            break;
+                    }
+                    boneIndex = pos[1] - 1;
+                    goto LABEL_30;
+                }
+                newBoneIndexa = localBoneIndex - subModel->numRootBones;
+                if (newBoneIndexa >= 0)
+                    break;
+                boneIndex = modelParents[j];
+                if (boneIndex == 255)
+                    goto LABEL_14;
+                do
+                {
+                LABEL_30:
+                    if (--j < 0)
+                        MyAssertHandler(".\\xanim\\dobj.cpp", 435, 0, "%s", "j >= 0");
+                    localBoneIndex = boneIndex - startIndex[j];
+                } while (localBoneIndex < 0);
+                subModel = models[j];
+                parentList = subModel->parentList;
+            }
+        }
+    }
+LABEL_14:
+    //Profile_EndInternal(0);
+}
+
+bool __cdecl DObjSkelIsBoneUpToDate(DObj_s *obj, int boneIndex)
+{
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 458, 0, "%s", "obj");
+    if (obj == (DObj_s *)-20)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 461, 0, "%s", "skel");
+    return (obj->skel.partBits.skel[boneIndex >> 5] & (0x80000000 >> (boneIndex & 0x1F))) != 0;
+}
+
+void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree)
+{
+    int savedregs; // [esp+0h] [ebp+0h] BYREF
+
+    obj->tree = tree;
+    if (tree)
+    {
+        if (tree->children)
+            XAnimResetAnimMap((XModelNameMap)&savedregs, obj, tree->children);
+    }
+}
+
+void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTree_s *tree, char *buf, __int16 entnum)
+{
+    //Profile_Begin(326);
+    if (!dobjModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 518, 0, "%s", "dobjModels");
+    if (!numModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 519, 0, "%s", "numModels > 0");
+    if (numModels > 0x20)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 520, 0, "%s", "(unsigned)numModels <= DOBJ_MAX_SUBMODELS");
+    if (!buf)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 523, 0, "%s", "obj");
+    memset((unsigned __int8 *)buf + 20, 0, 0x38u);
+    buf[8] = 0;
+    *((_WORD *)buf + 2) = 0;
+    *((unsigned int *)buf + 3) = 0;
+    *((unsigned int *)buf + 4) = 0;
+    *((_WORD *)buf + 3) = entnum;
+    *((unsigned int *)buf + 20) = 0;
+    *((unsigned int *)buf + 21) = 0;
+    *((unsigned int *)buf + 22) = 0;
+    *((unsigned int *)buf + 23) = 0;
+    DObjCreateDuplicateParts((DObj_s *)buf, dobjModels, numModels);
+    DObjComputeBounds((DObj_s *)buf);
+    DObjSetTree((DObj_s *)buf, tree);
+    //Profile_EndInternal(0);
+}
+
+void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsigned int numModels)
+{
+    int v3; // eax
+    char *v4; // eax
+    char *v5; // eax
+    const char *v6; // [esp-8h] [ebp-5E4h]
+    const char *v7; // [esp-4h] [ebp-5E0h]
+    const char *v8; // [esp-4h] [ebp-5E0h]
+    int numBones; // [esp+30h] [ebp-5ACh]
+    unsigned __int8 modelParents[32]; // [esp+34h] [ebp-5A8h] BYREF
+    int boneIndex; // [esp+58h] [ebp-584h]
+    DObjModel_s *dobjModel; // [esp+5Ch] [ebp-580h]
+    unsigned __int8 *duplicateParts; // [esp+60h] [ebp-57Ch]
+    bool bRootMeld; // [esp+67h] [ebp-575h]
+    int boneCount; // [esp+68h] [ebp-574h]
+    XModel *model; // [esp+6Ch] [ebp-570h]
+    unsigned int currNumModels; // [esp+70h] [ebp-56Ch]
+    unsigned int name; // [esp+74h] [ebp-568h]
+    int len; // [esp+78h] [ebp-564h]
+    unsigned int size; // [esp+7Ch] [ebp-560h]
+    unsigned __int8 parentIndex; // [esp+83h] [ebp-559h] BYREF
+    int localBoneIndex; // [esp+84h] [ebp-558h]
+    int index; // [esp+88h] [ebp-554h]
+    int duplicatePartBits[273]; // [esp+8Ch] [ebp-550h] BYREF
+    int matOffset[32]; // [esp+4D4h] [ebp-108h]
+    XModel *models[32]; // [esp+554h] [ebp-88h] BYREF
+    int modelIndex; // [esp+5D4h] [ebp-8h]
+    unsigned __int16 *boneNames; // [esp+5D8h] [ebp-4h]
+
+    //Profile_Begin(325);
+    duplicateParts = (unsigned __int8 *)&duplicatePartBits[4];
+    memset(duplicatePartBits, 0, 16);
+    len = 0;
+    boneCount = 0;
+    dobjModel = dobjModels;
+    currNumModels = 0;
+    while (currNumModels < numModels)
+    {
+        boneIndex = boneCount;
+        model = dobjModel->model;
+        if (!model)
+            MyAssertHandler(".\\xanim\\dobj.cpp", 193, 0, "%s", "model");
+        v3 = XModelNumBones(model);
+        boneCount += v3;
+        if (boneCount > 128)
+        {
+            if (!currNumModels)
+                MyAssertHandler(".\\xanim\\dobj.cpp", 198, 0, "%s", "currNumModels");
+            DObjDumpCreationInfo(dobjModels, numModels);
+            Com_Error(ERR_DROP, &byte_8CB220, models[0]->name, 128);
+        }
+        models[currNumModels] = model;
+        modelParents[currNumModels] = -1;
+        matOffset[currNumModels] = boneIndex;
+        if (dobjModel->ignoreCollision)
+            obj->ignoreCollision |= 1 << currNumModels;
+        if (currNumModels)
+        {
+            name = dobjModel->boneName;
+            if (name && *SL_ConvertToString(name))
+            {
+                for (modelIndex = currNumModels - 1; modelIndex >= 0; --modelIndex)
+                {
+                    if (XModelGetBoneIndex(models[modelIndex], name, matOffset[modelIndex], &modelParents[currNumModels]))
+                        goto LABEL_2;
+                }
+                if (!currNumModels)
+                    MyAssertHandler(".\\xanim\\dobj.cpp", 222, 0, "%s", "currNumModels");
+                v7 = models[0]->name;
+                v4 = SL_ConvertToString(name);
+                Com_PrintWarning(19, "WARNING: Part '%s' not found in model '%s' or any of its descendants\n", v4, v7);
+                if (modelParents[currNumModels] != 255)
+                    MyAssertHandler(".\\xanim\\dobj.cpp", 224, 0, "%s", "modelParents[currNumModels] == NO_BONEINDEX");
+            }
+            else
+            {
+                numBones = model->numBones;
+                boneNames = model->boneNames;
+                bRootMeld = 0;
+                for (localBoneIndex = 0; localBoneIndex < numBones; ++localBoneIndex)
+                {
+                    name = boneNames[localBoneIndex];
+                    for (modelIndex = currNumModels - 1; modelIndex >= 0; --modelIndex)
+                    {
+                        if (XModelGetBoneIndex(models[modelIndex], name, matOffset[modelIndex], &parentIndex))
+                        {
+                            if (parentIndex == 255)
+                                MyAssertHandler(
+                                    ".\\xanim\\dobj.cpp",
+                                    247,
+                                    0,
+                                    "%s\n\t(parentIndex) = %i",
+                                    "(parentIndex != 255)",
+                                    parentIndex);
+                            if (parentIndex == 254)
+                                MyAssertHandler(
+                                    ".\\xanim\\dobj.cpp",
+                                    248,
+                                    0,
+                                    "%s\n\t(parentIndex) = %i",
+                                    "(parentIndex != 254)",
+                                    parentIndex);
+                            if (parentIndex == localBoneIndex + boneIndex)
+                                MyAssertHandler(".\\xanim\\dobj.cpp", 249, 0, "%s", "parentIndex != boneIndex + localBoneIndex");
+                            if (!localBoneIndex)
+                                bRootMeld = 1;
+                            if (boneIndex + localBoneIndex + 1 >= 256)
+                                MyAssertHandler(".\\xanim\\dobj.cpp", 255, 0, "%s", "boneIndex + localBoneIndex + 1 < 256");
+                            if (parentIndex + 1 >= 256)
+                                MyAssertHandler(".\\xanim\\dobj.cpp", 256, 0, "%s", "parentIndex + 1 < 256");
+                            if (parentIndex >= localBoneIndex + boneIndex)
+                                MyAssertHandler(".\\xanim\\dobj.cpp", 257, 0, "%s", "parentIndex < boneIndex + localBoneIndex");
+                            index = localBoneIndex + boneIndex;
+                            duplicateParts[len] = localBoneIndex + boneIndex + 1;
+                            duplicatePartBits[index >> 5] |= 0x80000000 >> (index & 0x1F);
+                            if (!duplicateParts[len])
+                                MyAssertHandler(".\\xanim\\dobj.cpp", 262, 0, "%s", "duplicateParts[len]");
+                            duplicateParts[++len] = parentIndex + 1;
+                            if (!duplicateParts[len])
+                                MyAssertHandler(".\\xanim\\dobj.cpp", 265, 0, "%s", "duplicateParts[len]");
+                            ++len;
+                            break;
+                        }
+                    }
+                }
+                if (!bRootMeld)
+                {
+                    if (!currNumModels)
+                        MyAssertHandler(".\\xanim\\dobj.cpp", 271, 0, "%s", "currNumModels");
+                    v8 = models[0]->name;
+                    v6 = model->name;
+                    v5 = SL_ConvertToString(*boneNames);
+                    Com_PrintWarning(
+                        19,
+                        "WARNING: Attempting to meld model, but root part '%s' of model '%s' not found in model '%s' or any of its descendants\n",
+                        v5,
+                        v6,
+                        v8);
+                }
+            }
+        }
+    LABEL_2:
+        ++currNumModels;
+        ++dobjModel;
+    }
+    if (numModels != (unsigned __int8)numModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 278, 0, "%s", "numModels == (byte)numModels");
+    obj->numModels = numModels;
+    if (boneCount != (unsigned __int8)boneCount)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 281, 0, "%s", "boneCount == (byte)boneCount");
+    obj->numBones = boneCount;
+    if (!numModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 284, 0, "%s", "numModels > 0");
+    obj->models = (XModel **)MT_Alloc(5 * numModels, 13);
+    memcpy((unsigned __int8 *)obj->models, (unsigned __int8 *)models, 4 * numModels);
+    memcpy((unsigned __int8 *)&obj->models[numModels], modelParents, numModels);
+    if (!g_empty)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 295, 0, "%s", "g_empty");
+    if (obj->duplicateParts)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 296, 0, "%s", "!obj->duplicateParts");
+    if (len)
+    {
+        duplicateParts[len] = 0;
+        size = ++len + 16;
+        obj->duplicatePartsSize = len + 16;
+        if (obj->duplicatePartsSize != size)
+            MyAssertHandler(".\\xanim\\dobj.cpp", 305, 0, "%s", "obj->duplicatePartsSize == size");
+        obj->duplicateParts = SL_GetStringOfSize((char *)duplicatePartBits, 0, obj->duplicatePartsSize, 12).prev;
+    }
+    else
+    {
+        obj->duplicatePartsSize = 17;
+        obj->duplicateParts = g_empty;
+    }
+    //Profile_EndInternal(0);
+}
+
+void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, unsigned int numModels)
+{
+    const char *Name; // eax
+    char *v3; // eax
+    unsigned int j; // [esp+0h] [ebp-14h]
+    int numBones; // [esp+4h] [ebp-10h]
+    unsigned int boneIndex; // [esp+8h] [ebp-Ch]
+    XModel *model; // [esp+Ch] [ebp-8h]
+    int i; // [esp+10h] [ebp-4h]
+
+    boneIndex = 0;
+    for (j = 0; j < numModels; ++j)
+    {
+        model = dobjModels[j].model;
+        Name = XModelGetName(model);
+        Com_Printf(19, "Model '%s':\n", Name);
+        numBones = XModelNumBones(model);
+        for (i = 0; i < numBones; ++i)
+        {
+            v3 = SL_ConvertToString(model->boneNames[i]);
+            Com_Printf(19, "Bone %d: '%s'\n", boneIndex++, v3);
+        }
+    }
+}
+
+void __cdecl DObjComputeBounds(DObj_s *obj)
+{
+    int numModels; // [esp+0h] [ebp-10h]
+    float radius; // [esp+4h] [ebp-Ch]
+    XModel **models; // [esp+8h] [ebp-8h]
+    int modelIndex; // [esp+Ch] [ebp-4h]
+
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 487, 0, "%s", "obj");
+    numModels = obj->numModels;
+    radius = 0.0;
+    models = obj->models;
+    for (modelIndex = 0; modelIndex < numModels; ++modelIndex)
+    {
+        if (!models[modelIndex])
+            MyAssertHandler(".\\xanim\\dobj.cpp", 497, 0, "%s", "models[modelIndex]");
+        radius = XModelGetRadius(models[modelIndex]) + radius;
+    }
+    obj->radius = radius;
+}
+
+void __cdecl DObjFree(DObj_s *obj)
+{
+    XModel **models; // [esp+34h] [ebp-4h]
+
+    //Profile_Begin(327);
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 579, 0, "%s", "obj");
+    models = obj->models;
+    if (models)
+    {
+        MT_Free(models, 5 * obj->numModels);
+        obj->models = 0;
+    }
+    if (obj->tree)
+    {
+        if (!obj->tree->anims)
+            MyAssertHandler(".\\xanim\\dobj.cpp", 591, 0, "%s", "tree->anims");
+        obj->tree = 0;
+    }
+    if (!g_empty)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 595, 0, "%s", "g_empty");
+    if (obj->duplicateParts)
+    {
+        if (obj->duplicateParts != g_empty)
+            SL_RemoveRefToStringOfSize(obj->duplicateParts, obj->duplicatePartsSize);
+        obj->duplicatePartsSize = 0;
+        obj->duplicateParts = 0;
+    }
+    //Profile_EndInternal(0);
+}
+
+void __cdecl DObjGetCreateParms(
+    const DObj_s *obj,
+    DObjModel_s *dobjModels,
+    unsigned __int16 *numModels,
+    XAnimTree_s **tree,
+    unsigned __int16 *entnum)
+{
+    const unsigned __int8 *modelParents; // [esp+0h] [ebp-A8h]
+    DObjModel_s *dobjModel; // [esp+4h] [ebp-A4h]
+    int boneIndex; // [esp+8h] [ebp-A0h]
+    XModel *model; // [esp+Ch] [ebp-9Ch]
+    int startBoneIndex; // [esp+10h] [ebp-98h]
+    int parentModelIndex; // [esp+14h] [ebp-94h]
+    int matOffset[33]; // [esp+18h] [ebp-90h]
+    XModel **models; // [esp+9Ch] [ebp-Ch]
+    int modelIndex; // [esp+A0h] [ebp-8h]
+    unsigned __int16 *boneNames; // [esp+A4h] [ebp-4h]
+
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 621, 0, "%s", "obj");
+    if (!obj->numModels || obj->numModels > 0x20u)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 622, 0, "%s", "obj->numModels > 0 && obj->numModels <= DOBJ_MAX_SUBMODELS");
+    if (!dobjModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 623, 0, "%s", "dobjModels");
+    if (!numModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 624, 0, "%s", "numModels");
+    if (!tree)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 625, 0, "%s", "tree");
+    *numModels = obj->numModels;
+    *tree = obj->tree;
+    *entnum = obj->entnum;
+    startBoneIndex = 0;
+    models = obj->models;
+    modelParents = (const unsigned __int8 *)&models[obj->numModels];
+    modelIndex = 0;
+    dobjModel = dobjModels;
+    while (modelIndex < obj->numModels)
+    {
+        model = models[modelIndex];
+        matOffset[modelIndex] = startBoneIndex;
+        startBoneIndex += XModelNumBones(model);
+        dobjModel->model = models[modelIndex];
+        dobjModel->boneName = 0;
+        dobjModel->ignoreCollision = (obj->ignoreCollision & (1 << modelIndex)) != 0;
+        if (modelParents[modelIndex] != 255)
+        {
+            for (parentModelIndex = modelIndex - 1; parentModelIndex >= 0; --parentModelIndex)
+            {
+                if (modelParents[modelIndex] >= matOffset[parentModelIndex])
+                {
+                    boneIndex = modelParents[modelIndex] - matOffset[parentModelIndex];
+                    if (boneIndex >= XModelNumBones(models[parentModelIndex]))
+                        MyAssertHandler(
+                            ".\\xanim\\dobj.cpp",
+                            653,
+                            0,
+                            "%s",
+                            "boneIndex < XModelNumBones( models[parentModelIndex] )");
+                    boneNames = XModelBoneNames(models[parentModelIndex]);
+                    dobjModel->boneName = boneNames[boneIndex];
+                    break;
+                }
+            }
+        }
+        ++modelIndex;
+        ++dobjModel;
+    }
+}
+
+void __cdecl DObjArchive(DObj_s *obj)
+{
+    DObjModel_s *model; // [esp+8h] [ebp-170h]
+    SavedDObj savedObj; // [esp+10h] [ebp-168h] BYREF
+    unsigned int modelIndex; // [esp+74h] [ebp-104h]
+    DObjModel_s dobjModels[32]; // [esp+78h] [ebp-100h] BYREF
+
+    DObjGetCreateParms(obj, dobjModels, &savedObj.numModels, &savedObj.tree, &savedObj.entnum);
+    savedObj.ignoreCollision = 0;
+    savedObj.models = obj->models;
+    savedObj.hidePartBits[0] = obj->hidePartBits[0];
+    savedObj.hidePartBits[1] = obj->hidePartBits[1];
+    savedObj.hidePartBits[2] = obj->hidePartBits[2];
+    savedObj.hidePartBits[3] = obj->hidePartBits[3];
+    for (modelIndex = 0; modelIndex < savedObj.numModels; ++modelIndex)
+    {
+        model = &dobjModels[modelIndex];
+        savedObj.dobjModels[modelIndex].boneName = model->boneName;
+        if (model->ignoreCollision)
+            savedObj.ignoreCollision |= 1 << modelIndex;
+    }
+    if (!obj->models)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 706, 0, "%s", "obj->models");
+    obj->models = 0;
+    DObjFree(obj);
+    memcpy(obj, &savedObj, 0x60u);
+}
+
+void __cdecl DObjUnarchive(DObj_s *obj)
+{
+    DObjModel_s *model; // [esp+8h] [ebp-170h]
+    SavedDObj savedObj; // [esp+10h] [ebp-168h] BYREF
+    unsigned int modelIndex; // [esp+74h] [ebp-104h]
+    DObjModel_s dobjModels[32]; // [esp+78h] [ebp-100h] BYREF
+
+    memcpy(&savedObj, obj, sizeof(savedObj));
+    for (modelIndex = 0; modelIndex < savedObj.numModels; ++modelIndex)
+    {
+        model = &dobjModels[modelIndex];
+        model->boneName = savedObj.dobjModels[modelIndex].boneName;
+        model->model = savedObj.models[modelIndex];
+        model->ignoreCollision = (savedObj.ignoreCollision & (1 << modelIndex)) != 0;
+    }
+    MT_Free((_BYTE *)savedObj.models, 5 * savedObj.numModels);
+    DObjCreate(dobjModels, savedObj.numModels, savedObj.tree, (char *)obj, savedObj.entnum);
+    DObjSetHidePartBits(obj, savedObj.hidePartBits);
+}
+
+void __cdecl DObjSkelClear(const DObj_s *obj)
+{
+    memset((unsigned __int8 *)&obj->skel, 0, sizeof(obj->skel));
+}
+
+void __cdecl DObjGetBounds(const DObj_s *obj, float *mins, float *maxs)
+{
+    float radius; // [esp+4h] [ebp-14h]
+    float v4; // [esp+Ch] [ebp-Ch]
+
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 772, 0, "%s", "obj");
+    v4 = -obj->radius;
+    *mins = v4;
+    mins[1] = v4;
+    mins[2] = v4;
+    radius = obj->radius;
+    *maxs = radius;
+    maxs[1] = radius;
+    maxs[2] = radius;
+}
+
+void __cdecl DObjPhysicsGetBounds(const DObj_s *obj, float *mins, float *maxs)
+{
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 781, 0, "%s", "obj");
+    if (!*obj->models)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 782, 0, "%s", "obj->models[0]");
+    XModelGetBounds(*(const XModel **)obj->models, mins, maxs);
+}
+
+void __cdecl DObjPhysicsSetCollisionFromXModel(const DObj_s *obj, PhysWorld worldIndex, dxBody *physId)
+{
+    Phys_ObjSetCollisionFromXModel(*(const XModel **)obj->models, worldIndex, physId);
+}
+
+double __cdecl DObjGetRadius(const DObj_s *obj)
+{
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 803, 0, "%s", "obj");
+    return obj->radius;
+}
+
+PhysPreset *__cdecl DObjGetPhysPreset(const DObj_s *obj)
+{
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 811, 0, "%s", "obj");
+    if (!obj->numModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 812, 0, "%s", "obj->numModels > 0");
+    if (!*obj->models)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 813, 0, "%s", "obj->models[0]");
+    return (*obj->models)->physPreset;
+}
+
+const char *__cdecl DObjGetName(const DObj_s *obj)
+{
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 821, 0, "%s", "obj");
+    if (!obj->numModels)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 822, 0, "%s", "obj->numModels > 0");
+    if (!*obj->models)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 823, 0, "%s", "obj->models[0]");
+    return **(const char ***)obj->models;
+}
+
+char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
+{
+    int j; // [esp+0h] [ebp-20h]
+    int numBones; // [esp+4h] [ebp-1Ch]
+    int baseBoneIndex; // [esp+8h] [ebp-18h]
+    int numModels; // [esp+Ch] [ebp-14h]
+    XModel *model; // [esp+10h] [ebp-10h]
+    int index; // [esp+14h] [ebp-Ch]
+    XModel **models; // [esp+18h] [ebp-8h]
+    unsigned __int16 *boneNames; // [esp+1Ch] [ebp-4h]
+
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 952, 0, "%s", "obj");
+    numModels = obj->numModels;
+    baseBoneIndex = 0;
+    models = obj->models;
+    for (j = 0; j < numModels; ++j)
+    {
+        model = models[j];
+        boneNames = model->boneNames;
+        numBones = model->numBones;
+        index = boneIndex - baseBoneIndex;
+        if (boneIndex - baseBoneIndex < 0)
+            MyAssertHandler(".\\xanim\\dobj.cpp", 964, 0, "%s", "index >= 0");
+        if (index < numBones)
+            return SL_ConvertToString(boneNames[index]);
+        baseBoneIndex += numBones;
+    }
+    return 0;
+}
+
+char *__cdecl DObjGetModelParentBoneName(const DObj_s *obj, int modelIndex)
+{
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 984, 0, "%s", "obj");
+    if (modelIndex >= obj->numModels)
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            985,
+            0,
+            "%s\n\t(modelIndex) = %i",
+            "(modelIndex < obj->numModels)",
+            modelIndex);
+    return DObjGetBoneName(obj, *((unsigned __int8 *)&obj->models[obj->numModels] + modelIndex));
+}
+
+XAnimTree_s *__cdecl DObjGetTree(const DObj_s *obj)
+{
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1001, 0, "%s", "obj");
+    return obj->tree;
+}
+
+void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int8 *priorityMap, DObjTrace_s *trace)
+{
+    double v5; // st7
+    const char *v6; // eax
+    double scale; // [esp+18h] [ebp-398h]
+    float v8; // [esp+20h] [ebp-390h]
+    float v9; // [esp+24h] [ebp-38Ch]
+    float v10; // [esp+28h] [ebp-388h]
+    float v11; // [esp+2Ch] [ebp-384h]
+    float v12; // [esp+30h] [ebp-380h]
+    float v13; // [esp+34h] [ebp-37Ch]
+    unsigned __int16 v14; // [esp+3Ah] [ebp-376h]
+    float v15; // [esp+6Ch] [ebp-344h]
+    float v16; // [esp+70h] [ebp-340h]
+    float v17; // [esp+74h] [ebp-33Ch]
+    float v18; // [esp+78h] [ebp-338h]
+    float v19; // [esp+7Ch] [ebp-334h] BYREF
+    float v20; // [esp+80h] [ebp-330h]
+    float v21; // [esp+84h] [ebp-32Ch]
+    float v22; // [esp+88h] [ebp-328h]
+    float v23; // [esp+8Ch] [ebp-324h]
+    float v24; // [esp+90h] [ebp-320h]
+    float v25; // [esp+94h] [ebp-31Ch]
+    float v26; // [esp+98h] [ebp-318h]
+    float v27; // [esp+C0h] [ebp-2F0h]
+    float v28; // [esp+C4h] [ebp-2ECh]
+    float v29; // [esp+C8h] [ebp-2E8h]
+    float v30; // [esp+CCh] [ebp-2E4h]
+    float v31; // [esp+D0h] [ebp-2E0h]
+    float v32; // [esp+D4h] [ebp-2DCh]
+    float v33; // [esp+D8h] [ebp-2D8h]
+    float v34; // [esp+DCh] [ebp-2D4h]
+    float v35; // [esp+E0h] [ebp-2D0h]
+    float v36; // [esp+E4h] [ebp-2CCh]
+    float v37; // [esp+E8h] [ebp-2C8h]
+    float *v38; // [esp+ECh] [ebp-2C4h]
+    float transWeight; // [esp+F0h] [ebp-2C0h]
+    float v40; // [esp+F4h] [ebp-2BCh]
+    float v41; // [esp+F8h] [ebp-2B8h]
+    float v42; // [esp+FCh] [ebp-2B4h]
+    float v43; // [esp+100h] [ebp-2B0h]
+    float v44; // [esp+104h] [ebp-2ACh]
+    float v45; // [esp+108h] [ebp-2A8h]
+    float v46; // [esp+10Ch] [ebp-2A4h]
+    float v47; // [esp+110h] [ebp-2A0h]
+    float result; // [esp+114h] [ebp-29Ch] BYREF
+    float v49; // [esp+118h] [ebp-298h]
+    float v50; // [esp+11Ch] [ebp-294h]
+    float v51; // [esp+120h] [ebp-290h]
+    float v52; // [esp+124h] [ebp-28Ch]
+    float v53; // [esp+128h] [ebp-288h]
+    float v54; // [esp+12Ch] [ebp-284h]
+    float v55; // [esp+130h] [ebp-280h]
+    float v56; // [esp+134h] [ebp-27Ch]
+    float v57; // [esp+138h] [ebp-278h]
+    float v58; // [esp+13Ch] [ebp-274h]
+    float v59; // [esp+140h] [ebp-270h]
+    float v60; // [esp+144h] [ebp-26Ch]
+    float v61; // [esp+148h] [ebp-268h]
+    float v62; // [esp+14Ch] [ebp-264h]
+    float v63; // [esp+150h] [ebp-260h]
+    float v64; // [esp+154h] [ebp-25Ch]
+    float v65; // [esp+158h] [ebp-258h]
+    float v66; // [esp+15Ch] [ebp-254h]
+    float v67; // [esp+160h] [ebp-250h]
+    float v68; // [esp+164h] [ebp-24Ch]
+    float v69; // [esp+168h] [ebp-248h]
+    float v70; // [esp+16Ch] [ebp-244h]
+    float v71; // [esp+170h] [ebp-240h]
+    float v72; // [esp+174h] [ebp-23Ch]
+    float v73; // [esp+178h] [ebp-238h]
+    float v74; // [esp+17Ch] [ebp-234h]
+    float v75; // [esp+180h] [ebp-230h]
+    float v76; // [esp+184h] [ebp-22Ch]
+    float v77; // [esp+188h] [ebp-228h]
+    float *normal; // [esp+18Ch] [ebp-224h]
+    DObjAnimMat *boneMatrix; // [esp+1A4h] [ebp-20Ch]
+    unsigned int j; // [esp+1A8h] [ebp-208h]
+    const unsigned __int8 *pos; // [esp+1ACh] [ebp-204h]
+    const unsigned __int8 *modelParents; // [esp+1B0h] [ebp-200h]
+    float invL2; // [esp+1B4h] [ebp-1FCh]
+    int t; // [esp+1B8h] [ebp-1F8h]
+    bool bEndSolid; // [esp+1BFh] [ebp-1F1h]
+    float delta[3]; // [esp+1C0h] [ebp-1F0h] BYREF
+    DObjAnimMat *hitBoneMatrix; // [esp+1CCh] [ebp-1E4h]
+    float sphereFraction; // [esp+1D0h] [ebp-1E0h]
+    float localStart[3]; // [esp+1D4h] [ebp-1DCh] BYREF
+    float enterFrac; // [esp+1E0h] [ebp-1D0h]
+    float startOffset[3]; // [esp+1E4h] [ebp-1CCh] BYREF
+    float dist1; // [esp+1F0h] [ebp-1C0h]
+    int hitT; // [esp+1F4h] [ebp-1BCh]
+    unsigned __int16 classificationArray[128]; // [esp+1F8h] [ebp-1B8h]
+    XModel *model; // [esp+2FCh] [ebp-B4h]
+    float dist; // [esp+300h] [ebp-B0h]
+    unsigned int numModels; // [esp+304h] [ebp-ACh]
+    float diff2; // [esp+308h] [ebp-A8h]
+    float deltaLengthSq; // [esp+30Ch] [ebp-A4h]
+    float sign; // [esp+310h] [ebp-A0h]
+    unsigned int size; // [esp+314h] [ebp-9Ch]
+    float offset[3]; // [esp+318h] [ebp-98h] BYREF
+    unsigned int globalBoneIndex; // [esp+324h] [ebp-8Ch]
+    float d2; // [esp+328h] [ebp-88h]
+    float cappedSphereFraction; // [esp+32Ch] [ebp-84h]
+    float localEnd[3]; // [esp+330h] [ebp-80h] BYREF
+    float *bounds; // [esp+33Ch] [ebp-74h]
+    bool bStartSolid; // [esp+343h] [ebp-6Dh]
+    unsigned int localBoneIndex; // [esp+344h] [ebp-6Ch]
+    unsigned __int8 parentIndex; // [esp+34Bh] [ebp-65h]
+    float solidHitFrac; // [esp+34Ch] [ebp-64h]
+    float dist2; // [esp+350h] [ebp-60h]
+    DSkel *skel; // [esp+354h] [ebp-5Ch]
+    unsigned __int16 *names; // [esp+358h] [ebp-58h]
+    float leaveFrac; // [esp+35Ch] [ebp-54h]
+    int traceHitT; // [esp+360h] [ebp-50h]
+    unsigned int lowestPriority; // [esp+364h] [ebp-4Ch]
+    XBoneInfo *boneInfo; // [esp+368h] [ebp-48h]
+    int ignoreCollision; // [esp+36Ch] [ebp-44h]
+    float axis[3][3]; // [esp+370h] [ebp-40h] BYREF
+    XModel **models; // [esp+394h] [ebp-1Ch]
+    unsigned __int16 classification; // [esp+398h] [ebp-18h]
+    float center[3]; // [esp+39Ch] [ebp-14h] BYREF
+    float hitSign; // [esp+3A8h] [ebp-8h]
+    unsigned int currentPriority; // [esp+3ACh] [ebp-4h]
+
+    //Profile_Begin(311);
+    trace->surfaceflags = 0;
+    trace->modelIndex = 0;
+    trace->partName = 0;
+    trace->partGroup = 0;
+    normal = trace->normal;
+    trace->normal[0] = 0.0;
+    normal[1] = 0.0;
+    normal[2] = 0.0;
+    Vec3Sub(end, start, delta);
+    deltaLengthSq = Vec3LengthSq(delta);
+    if (deltaLengthSq == 0.0 || (boneMatrix = DObjGetRotTransArray(obj)) == 0)
+    {
+        //Profile_EndInternal(0);
+        return;
+    }
+    invL2 = 1.0 / deltaLengthSq;
+    lowestPriority = 2;
+    skel = &obj->skel;
+    if (obj == (DObj_s *)-20)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1132, 0, "%s", "skel");
+    if (!obj->duplicateParts)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1134, 0, "%s", "obj->duplicateParts");
+    pos = (const unsigned __int8 *)(SL_ConvertToString(obj->duplicateParts) + 16);
+    v77 = *start;
+    if ((LOunsigned int(v77) & 0x7F800000) == 0x7F800000
+        || (v76 = start[1], (LOunsigned int(v76) & 0x7F800000) == 0x7F800000)
+        || (v75 = start[2], (LOunsigned int(v75) & 0x7F800000) == 0x7F800000))
+    {
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            1138,
+            0,
+            "%s",
+            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
+    }
+    v74 = *end;
+    if ((LOunsigned int(v74) & 0x7F800000) == 0x7F800000
+        || (v73 = end[1], (LOunsigned int(v73) & 0x7F800000) == 0x7F800000)
+        || (v72 = end[2], (LOunsigned int(v72) & 0x7F800000) == 0x7F800000))
+    {
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1139, 0, "%s", "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
+    }
+    globalBoneIndex = 0;
+    hitT = -1;
+    traceHitT = -1;
+    hitSign = 0.0;
+    hitBoneMatrix = 0;
+    solidHitFrac = trace->fraction;
+    models = obj->models;
+    modelParents = (const unsigned __int8 *)&models[obj->numModels];
+    numModels = obj->numModels;
+    j = 0;
+LABEL_17:
+    if (j < numModels)
+    {
+        model = models[j];
+        names = model->boneNames;
+        size = model->numBones;
+        ignoreCollision = obj->ignoreCollision & (1 << j);
+        localBoneIndex = 0;
+        while (1)
+        {
+            if (localBoneIndex >= size)
+            {
+                ++j;
+                goto LABEL_17;
+            }
+            classification = model->partClassification[localBoneIndex];
+            currentPriority = priorityMap[classification];
+            if (globalBoneIndex == *pos - 1)
+            {
+                pos += 2;
+                if (currentPriority == 1)
+                {
+                    classification = classificationArray[*(pos - 1) - 1];
+                    currentPriority = priorityMap[classification];
+                }
+            }
+            else if (currentPriority == 1)
+            {
+                if (localBoneIndex >= model->numRootBones)
+                {
+                    classification = classificationArray[globalBoneIndex - model->parentList[localBoneIndex - model->numRootBones]];
+                }
+                else
+                {
+                    parentIndex = modelParents[j];
+                    if (parentIndex == 255)
+                        v14 = 0;
+                    else
+                        v14 = classificationArray[parentIndex];
+                    classification = v14;
+                }
+                currentPriority = priorityMap[classification];
+            }
+            classificationArray[globalBoneIndex] = classification;
+            if (!ignoreCollision)
+            {
+                boneInfo = &model->boneInfo[localBoneIndex];
+                if (LOunsigned int(boneInfo->radiusSquared))
+                {
+                    if ((obj->hidePartBits[globalBoneIndex >> 5] & (0x80000000 >> (globalBoneIndex & 0x1F))) == 0)
+                    {
+                        if ((skel->partBits.skel[globalBoneIndex >> 5] & (0x80000000 >> (globalBoneIndex & 0x1F))) == 0)
+                            MyAssertHandler(
+                                ".\\xanim\\dobj.cpp",
+                                1201,
+                                0,
+                                "%s",
+                                "skel->partBits.skel[globalBoneIndex >> 5] & (HIGH_BIT >> (globalBoneIndex & 31))");
+                        if (lowestPriority <= currentPriority)
+                        {
+                            v71 = boneMatrix->quat[0];
+                            if ((LOunsigned int(v71) & 0x7F800000) == 0x7F800000
+                                || (v70 = boneMatrix->quat[1], (LOunsigned int(v70) & 0x7F800000) == 0x7F800000)
+                                || (v69 = boneMatrix->quat[2], (LOunsigned int(v69) & 0x7F800000) == 0x7F800000)
+                                || (v68 = boneMatrix->quat[3], (LOunsigned int(v68) & 0x7F800000) == 0x7F800000))
+                            {
+                                MyAssertHandler(
+                                    ".\\xanim\\dobj.cpp",
+                                    1206,
+                                    0,
+                                    "%s",
+                                    "!IS_NAN((boneMatrix->quat)[0]) && !IS_NAN((boneMatrix->quat)[1]) && !IS_NAN((boneMatrix->quat)[2]) && "
+                                    "!IS_NAN((boneMatrix->quat)[3])");
+                            }
+                            v67 = boneMatrix->trans[0];
+                            if ((LOunsigned int(v67) & 0x7F800000) == 0x7F800000
+                                || (v66 = boneMatrix->trans[1], (LOunsigned int(v66) & 0x7F800000) == 0x7F800000)
+                                || (v65 = boneMatrix->trans[2], (LOunsigned int(v65) & 0x7F800000) == 0x7F800000))
+                            {
+                                MyAssertHandler(
+                                    ".\\xanim\\dobj.cpp",
+                                    1207,
+                                    0,
+                                    "%s",
+                                    "!IS_NAN((boneMatrix->trans)[0]) && !IS_NAN((boneMatrix->trans)[1]) && !IS_NAN((boneMatrix->trans)[2])");
+                            }
+                            v38 = boneInfo->offset;
+                            v43 = boneMatrix->quat[0];
+                            if ((LOunsigned int(v43) & 0x7F800000) == 0x7F800000
+                                || (v42 = boneMatrix->quat[1], (LOunsigned int(v42) & 0x7F800000) == 0x7F800000)
+                                || (v41 = boneMatrix->quat[2], (LOunsigned int(v41) & 0x7F800000) == 0x7F800000)
+                                || (v40 = boneMatrix->quat[3], (LOunsigned int(v40) & 0x7F800000) == 0x7F800000))
+                            {
+                                MyAssertHandler(
+                                    "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
+                                    432,
+                                    0,
+                                    "%s",
+                                    "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
+                            }
+                            transWeight = boneMatrix->transWeight;
+                            if ((LOunsigned int(transWeight) & 0x7F800000) == 0x7F800000)
+                                MyAssertHandler(
+                                    "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
+                                    433,
+                                    0,
+                                    "%s",
+                                    "!IS_NAN(mat->transWeight)");
+                            Vec3Scale(boneMatrix->quat, boneMatrix->transWeight, &result);
+                            v54 = result * boneMatrix->quat[0];
+                            v45 = result * boneMatrix->quat[1];
+                            v52 = result * boneMatrix->quat[2];
+                            v55 = result * boneMatrix->quat[3];
+                            v44 = v49 * boneMatrix->quat[1];
+                            v53 = v49 * boneMatrix->quat[2];
+                            v51 = v49 * boneMatrix->quat[3];
+                            v46 = v50 * boneMatrix->quat[2];
+                            v47 = v50 * boneMatrix->quat[3];
+                            v56 = 1.0 - (v44 + v46);
+                            v57 = v45 + v47;
+                            v58 = v52 - v51;
+                            v59 = v45 - v47;
+                            v60 = 1.0 - (v54 + v46);
+                            v61 = v53 + v55;
+                            v62 = v52 + v51;
+                            v63 = v53 - v55;
+                            v64 = 1.0 - (v54 + v44);
+                            center[0] = *v38 * v56 + v38[1] * v59 + v38[2] * v62 + boneMatrix->trans[0];
+                            center[1] = *v38 * v57 + v38[1] * v60 + v38[2] * v63 + boneMatrix->trans[1];
+                            center[2] = *v38 * v58 + v38[1] * v61 + v38[2] * v64 + boneMatrix->trans[2];
+                            Vec3Sub(start, center, startOffset);
+                            v5 = Vec3Dot(startOffset, delta);
+                            sphereFraction = -v5 * invL2;
+                            v13 = sphereFraction - 1.0;
+                            v37 = v13 < 0.0 ? sphereFraction : 1.0;
+                            v12 = 0.0 - sphereFraction;
+                            v11 = v12 < 0.0 ? v37 : 0.0;
+                            cappedSphereFraction = v11;
+                            Vec3Mad(startOffset, v11, delta, offset);
+                            d2 = Vec3LengthSq(offset);
+                            diff2 = boneInfo->radiusSquared - d2;
+                            if (diff2 > 0.0)
+                            {
+                                if (lowestPriority != currentPriority
+                                    || (v10 = invL2 * diff2, v9 = sqrt(v10), v36 = v9, trace->fraction > sphereFraction - v9))
+                                {
+                                    LocalInvMatrixTransformVectorQuatTrans(start, boneMatrix, localStart);
+                                    LocalInvMatrixTransformVectorQuatTrans(end, boneMatrix, localEnd);
+                                    v35 = localStart[0];
+                                    if ((LOunsigned int(localStart[0]) & 0x7F800000) == 0x7F800000
+                                        || (v34 = localStart[1], (LOunsigned int(localStart[1]) & 0x7F800000) == 0x7F800000)
+                                        || (v33 = localStart[2], (LOunsigned int(localStart[2]) & 0x7F800000) == 0x7F800000))
+                                    {
+                                        MyAssertHandler(
+                                            ".\\xanim\\dobj.cpp",
+                                            1231,
+                                            0,
+                                            "%s",
+                                            "!IS_NAN((localStart)[0]) && !IS_NAN((localStart)[1]) && !IS_NAN((localStart)[2])");
+                                    }
+                                    v32 = localEnd[0];
+                                    if ((LOunsigned int(localEnd[0]) & 0x7F800000) == 0x7F800000
+                                        || (v31 = localEnd[1], (LOunsigned int(localEnd[1]) & 0x7F800000) == 0x7F800000)
+                                        || (v30 = localEnd[2], (LOunsigned int(localEnd[2]) & 0x7F800000) == 0x7F800000))
+                                    {
+                                        MyAssertHandler(
+                                            ".\\xanim\\dobj.cpp",
+                                            1232,
+                                            0,
+                                            "%s",
+                                            "!IS_NAN((localEnd)[0]) && !IS_NAN((localEnd)[1]) && !IS_NAN((localEnd)[2])");
+                                    }
+                                    enterFrac = 0.0;
+                                    if (lowestPriority == currentPriority)
+                                        leaveFrac = trace->fraction;
+                                    else
+                                        leaveFrac = solidHitFrac;
+                                    bStartSolid = 1;
+                                    bEndSolid = 1;
+                                    sign = -1.0;
+                                    for (bounds = (float *)boneInfo; ; bounds += 3)
+                                    {
+                                        v29 = *bounds;
+                                        if ((LOunsigned int(v29) & 0x7F800000) == 0x7F800000
+                                            || (v28 = bounds[1], (LOunsigned int(v28) & 0x7F800000) == 0x7F800000)
+                                            || (v27 = bounds[2], (LOunsigned int(v27) & 0x7F800000) == 0x7F800000))
+                                        {
+                                            MyAssertHandler(
+                                                ".\\xanim\\dobj.cpp",
+                                                1247,
+                                                0,
+                                                "%s",
+                                                "!IS_NAN((bounds)[0]) && !IS_NAN((bounds)[1]) && !IS_NAN((bounds)[2])");
+                                        }
+                                        for (t = 0; t < 3; ++t)
+                                        {
+                                            dist1 = (localStart[t] - bounds[t]) * sign;
+                                            dist2 = (localEnd[t] - bounds[t]) * sign;
+                                            if (dist1 <= 0.0)
+                                            {
+                                                if (dist2 > 0.0)
+                                                {
+                                                    bEndSolid = 0;
+                                                    dist = dist1 - dist2;
+                                                    if (dist >= 0.0)
+                                                        MyAssertHandler(".\\xanim\\dobj.cpp", 1275, 0, "%s", "dist < 0");
+                                                    if (dist1 > leaveFrac * dist)
+                                                    {
+                                                        leaveFrac = dist1 / dist;
+                                                        if (leaveFrac <= (double)enterFrac)
+                                                            goto LABEL_19;
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (dist2 > 0.0)
+                                                    goto LABEL_19;
+                                                bStartSolid = 0;
+                                                dist = dist1 - dist2;
+                                                if (dist <= 0.0)
+                                                    MyAssertHandler(".\\xanim\\dobj.cpp", 1261, 0, "%s", "dist > 0");
+                                                if (dist1 > enterFrac * dist)
+                                                {
+                                                    enterFrac = dist1 / dist;
+                                                    if (leaveFrac <= (double)enterFrac)
+                                                        goto LABEL_19;
+                                                    hitSign = sign;
+                                                    hitT = t;
+                                                }
+                                            }
+                                        }
+                                        if (sign == 1.0)
+                                            break;
+                                        sign = 1.0;
+                                    }
+                                    if (bStartSolid)
+                                    {
+                                        if (bEndSolid)
+                                        {
+                                            v8 = start[1] * delta[1] + *start * delta[0];
+                                            if (v8 < 0.0)
+                                            {
+                                                trace->fraction = 0.0;
+                                                trace->modelIndex = j;
+                                                if (trace->modelIndex != j)
+                                                    MyAssertHandler(".\\xanim\\dobj.cpp", 1304, 1, "%s", "trace->modelIndex == j");
+                                                trace->partName = names[localBoneIndex];
+                                                trace->partGroup = classification;
+                                                Vec2NormalizeTo(start, trace->normal);
+                                                if (!Vec3IsNormalized(trace->normal))
+                                                {
+                                                    scale = Vec3Length(trace->normal);
+                                                    v6 = va("(%g %g %g) len %g", trace->normal[0], trace->normal[1], trace->normal[2], scale);
+                                                    MyAssertHandler(
+                                                        ".\\xanim\\dobj.cpp",
+                                                        1310,
+                                                        0,
+                                                        "%s\n\t%s",
+                                                        "Vec3IsNormalized( trace->normal )",
+                                                        v6);
+                                                }
+                                                //Profile_EndInternal(0);
+                                                return;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (lowestPriority == currentPriority)
+                                        {
+                                            if (trace->fraction <= (double)enterFrac)
+                                                goto LABEL_19;
+                                        }
+                                        else
+                                        {
+                                            lowestPriority = currentPriority;
+                                        }
+                                        trace->fraction = enterFrac;
+                                        if (trace->fraction < 0.0 || trace->fraction > 1.0)
+                                            MyAssertHandler(
+                                                ".\\xanim\\dobj.cpp",
+                                                1327,
+                                                1,
+                                                "%s\n\t(trace->fraction) = %g",
+                                                "(trace->fraction >= 0.0f && trace->fraction <= 1.0f)",
+                                                trace->fraction);
+                                        trace->modelIndex = j;
+                                        if (trace->modelIndex != j)
+                                            MyAssertHandler(".\\xanim\\dobj.cpp", 1329, 1, "%s", "trace->modelIndex == j");
+                                        trace->partName = names[localBoneIndex];
+                                        trace->partGroup = classification;
+                                        if (hitT < 0)
+                                            MyAssertHandler(".\\xanim\\dobj.cpp", 1332, 0, "%s", "hitT >= 0");
+                                        if (hitT >= 3)
+                                            MyAssertHandler(".\\xanim\\dobj.cpp", 1333, 0, "%s", "hitT < 3");
+                                        traceHitT = hitT;
+                                        hitBoneMatrix = boneMatrix;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        LABEL_19:
+            ++localBoneIndex;
+            ++boneMatrix;
+            ++globalBoneIndex;
+        }
+    }
+    if (hitBoneMatrix)
+    {
+        if (traceHitT < 0)
+            MyAssertHandler(".\\xanim\\dobj.cpp", 1343, 0, "%s", "traceHitT >= 0");
+        if (traceHitT >= 3)
+            MyAssertHandler(".\\xanim\\dobj.cpp", 1344, 0, "%s", "traceHitT < 3");
+        if ((COERCE_UNSIGNED_INT(hitBoneMatrix->quat[0]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(hitBoneMatrix->quat[1]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(hitBoneMatrix->quat[2]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(hitBoneMatrix->quat[3]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
+                432,
+                0,
+                "%s",
+                "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
+        }
+        if ((COERCE_UNSIGNED_INT(hitBoneMatrix->transWeight) & 0x7F800000) == 0x7F800000)
+            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
+        Vec3Scale(hitBoneMatrix->quat, hitBoneMatrix->transWeight, &v19);
+        v25 = v19 * hitBoneMatrix->quat[0];
+        v16 = v19 * hitBoneMatrix->quat[1];
+        v23 = v19 * hitBoneMatrix->quat[2];
+        v26 = v19 * hitBoneMatrix->quat[3];
+        v15 = v20 * hitBoneMatrix->quat[1];
+        v24 = v20 * hitBoneMatrix->quat[2];
+        v22 = v20 * hitBoneMatrix->quat[3];
+        v17 = v21 * hitBoneMatrix->quat[2];
+        v18 = v21 * hitBoneMatrix->quat[3];
+        axis[0][0] = 1.0 - (v15 + v17);
+        axis[0][1] = v16 + v18;
+        axis[0][2] = v23 - v22;
+        axis[1][0] = v16 - v18;
+        axis[1][1] = 1.0 - (v25 + v17);
+        axis[1][2] = v24 + v26;
+        axis[2][0] = v23 + v22;
+        axis[2][1] = v24 - v26;
+        axis[2][2] = 1.0 - (v25 + v15);
+        Vec3Scale(axis[traceHitT], hitSign, trace->normal);
+    }
+    //Profile_EndInternal(0);
+}
+
+void __cdecl LocalInvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
+{
+    float v3; // [esp+1Ch] [ebp-60h]
+    float v4; // [esp+20h] [ebp-5Ch]
+    float v5; // [esp+24h] [ebp-58h]
+    float v6; // [esp+28h] [ebp-54h]
+    float result; // [esp+2Ch] [ebp-50h] BYREF
+    float v8; // [esp+30h] [ebp-4Ch]
+    float v9; // [esp+34h] [ebp-48h]
+    float v10; // [esp+38h] [ebp-44h]
+    float v11; // [esp+3Ch] [ebp-40h]
+    float v12; // [esp+40h] [ebp-3Ch]
+    float v13; // [esp+44h] [ebp-38h]
+    float v14; // [esp+48h] [ebp-34h]
+    float temp[3]; // [esp+4Ch] [ebp-30h] BYREF
+    float axis[3][3]; // [esp+58h] [ebp-24h]
+
+    Vec3Sub(in, mat->trans, temp);
+    if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(mat->quat[2]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(mat->quat[3]) & 0x7F800000) == 0x7F800000)
+    {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
+            432,
+            0,
+            "%s",
+            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
+    }
+    if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
+        MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
+    Vec3Scale(mat->quat, mat->transWeight, &result);
+    v13 = result * mat->quat[0];
+    v4 = result * mat->quat[1];
+    v11 = result * mat->quat[2];
+    v14 = result * mat->quat[3];
+    v3 = v8 * mat->quat[1];
+    v12 = v8 * mat->quat[2];
+    v10 = v8 * mat->quat[3];
+    v5 = v9 * mat->quat[2];
+    v6 = v9 * mat->quat[3];
+    axis[0][0] = 1.0 - (v3 + v5);
+    axis[0][1] = v4 + v6;
+    axis[0][2] = v11 - v10;
+    axis[1][0] = v4 - v6;
+    axis[1][1] = 1.0 - (v13 + v5);
+    axis[1][2] = v12 + v14;
+    axis[2][0] = v11 + v10;
+    axis[2][1] = v12 - v14;
+    axis[2][2] = 1.0 - (v13 + v3);
+    *out = temp[0] * axis[0][0] + temp[1] * axis[0][1] + temp[2] * axis[0][2];
+    out[1] = temp[0] * axis[1][0] + temp[1] * axis[1][1] + temp[2] * axis[1][2];
+    out[2] = temp[0] * axis[2][0] + temp[1] * axis[2][1] + temp[2] * axis[2][2];
+}
+
+void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
+{
+    unsigned int j; // [esp+30h] [ebp-24h]
+    XModel *model; // [esp+34h] [ebp-20h]
+    unsigned int numModels; // [esp+38h] [ebp-1Ch]
+    unsigned int size; // [esp+3Ch] [ebp-18h]
+    unsigned int globalBoneIndex; // [esp+40h] [ebp-14h]
+    unsigned int localBoneIndex; // [esp+44h] [ebp-10h]
+    XModel **models; // [esp+50h] [ebp-4h]
+
+    //Profile_Begin(311);
+    *partBits = 0;
+    partBits[1] = 0;
+    partBits[2] = 0;
+    partBits[3] = 0;
+    globalBoneIndex = 0;
+    models = obj->models;
+    numModels = obj->numModels;
+    for (j = 0; j < numModels; ++j)
+    {
+        model = models[j];
+        size = model->numBones;
+        if ((obj->ignoreCollision & (1 << j)) != 0)
+        {
+            globalBoneIndex += size;
+        }
+        else
+        {
+            for (localBoneIndex = 0; localBoneIndex < size; ++localBoneIndex)
+            {
+                if (LOunsigned int(model->boneInfo[localBoneIndex].radiusSquared))
+                {
+                    if ((obj->hidePartBits[globalBoneIndex >> 5] & (0x80000000 >> (globalBoneIndex & 0x1F))) == 0)
+                        partBits[globalBoneIndex >> 5] |= 0x80000000 >> (globalBoneIndex & 0x1F);
+                }
+                ++globalBoneIndex;
+            }
+        }
+    }
+    DObjCompleteHierarchyBits(obj, partBits);
+    //Profile_EndInternal(0);
+}
+
+void __cdecl DObjGeomTraceline(DObj_s *obj, float *localStart, __int64 localEnd, DObjTrace_s *results)
+{
+    unsigned int boneIndex; // [esp+Ch] [ebp-48h]
+    XModel *model; // [esp+10h] [ebp-44h]
+    int partIndex; // [esp+14h] [ebp-40h]
+    unsigned int numModels; // [esp+18h] [ebp-3Ch]
+    trace_t trace; // [esp+1Ch] [ebp-38h] BYREF
+    DObjAnimMat *boneMtxList; // [esp+48h] [ebp-Ch]
+    unsigned int i; // [esp+4Ch] [ebp-8h]
+    XModel **models; // [esp+50h] [ebp-4h]
+
+    results->modelIndex = 0;
+    results->partName = 0;
+    results->partGroup = 0;
+    trace.fraction = results->fraction;
+    if (trace.fraction < 0.0 || trace.fraction > 1.0)
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            1431,
+            1,
+            "%s\n\t(trace.fraction) = %g",
+            "(trace.fraction >= 0.0f && trace.fraction <= 1.0f)",
+            trace.fraction);
+    trace.surfaceFlags = 0;
+    trace.normal[0] = 0.0;
+    trace.normal[1] = 0.0;
+    trace.normal[2] = 0.0;
+    boneMtxList = DObjGetRotTransArray(obj);
+    if (boneMtxList)
+    {
+        models = obj->models;
+        boneIndex = 0;
+        numModels = obj->numModels;
+        i = 0;
+        while (i < numModels)
+        {
+            model = models[i];
+            partIndex = XModelTraceLineAnimated(
+                obj,
+                i,
+                boneIndex,
+                &trace,
+                boneMtxList,
+                localStart,
+                (float *)localEnd,
+                SHIunsigned int(localEnd));
+            if (partIndex >= 0)
+            {
+                results->modelIndex = i;
+                if (results->modelIndex != i)
+                    MyAssertHandler(".\\xanim\\dobj.cpp", 1450, 1, "%s", "results->modelIndex == i");
+                results->partName = model->boneNames[partIndex];
+            }
+            ++i;
+            boneIndex += model->numBones;
+            boneMtxList += model->numBones;
+        }
+    }
+    results->fraction = trace.fraction;
+    if (results->fraction < 0.0 || results->fraction > 1.0)
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            1456,
+            1,
+            "%s\n\t(results->fraction) = %g",
+            "(results->fraction >= 0.0f && results->fraction <= 1.0f)",
+            results->fraction);
+    results->surfaceflags = trace.surfaceFlags;
+    results->normal[0] = trace.normal[0];
+    results->normal[1] = trace.normal[1];
+    results->normal[2] = trace.normal[2];
+}
+
+void __cdecl DObjGeomTracelinePartBits(DObj_s *obj, int contentmask, int *partBits)
+{
+    unsigned int boneIndex; // [esp+0h] [ebp-14h]
+    XModel *model; // [esp+4h] [ebp-10h]
+    unsigned int numModels; // [esp+8h] [ebp-Ch]
+    unsigned int i; // [esp+Ch] [ebp-8h]
+    XModel **models; // [esp+10h] [ebp-4h]
+
+    *partBits = 0;
+    partBits[1] = 0;
+    partBits[2] = 0;
+    partBits[3] = 0;
+    models = obj->models;
+    boneIndex = 0;
+    numModels = obj->numModels;
+    for (i = 0; i < numModels; ++i)
+    {
+        model = models[i];
+        XModelTraceLineAnimatedPartBits(obj, i, boneIndex, contentmask, partBits);
+        boneIndex += model->numBones;
+    }
+    DObjCompleteHierarchyBits(obj, partBits);
+}
+
+int __cdecl DObjHasContents(DObj_s *obj, int contentmask)
+{
+    int i; // [esp+0h] [ebp-8h]
+    XModel **models; // [esp+4h] [ebp-4h]
+
+    models = obj->models;
+    for (i = 0; i < obj->numModels; ++i)
+    {
+        if ((contentmask & XModelGetContents(models[i])) != 0)
+            return 1;
+    }
+    return 0;
+}
+
+int __cdecl DObjGetContents(const DObj_s *obj)
+{
+    int contents; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    contents = 0;
+    for (i = 0; i < obj->numModels; ++i)
+        contents |= XModelGetContents(obj->models[i]);
+    return contents;
+}
+
+int __cdecl DObjSetLocalBoneIndex(DObj_s *obj, int *partBits, int boneIndex, const float *trans, const float *angles)
+{
+    if (!DObjSetRotTransIndex(obj, partBits, boneIndex))
+        return 0;
+    DObjSetLocalTagInternal(obj, trans, angles, boneIndex);
+    return 1;
+}
+
+int __cdecl DObjGetBoneIndex(const DObj_s *obj, unsigned int name, unsigned __int8 *index)
+{
+    char *v3; // eax
+    int j; // [esp+0h] [ebp-18h]
+    int ja; // [esp+0h] [ebp-18h]
+    unsigned int boneIndex; // [esp+4h] [ebp-14h]
+    int numModels; // [esp+8h] [ebp-10h]
+    XModel *model; // [esp+Ch] [ebp-Ch]
+    XModel *modela; // [esp+Ch] [ebp-Ch]
+    unsigned int localBoneIndex; // [esp+10h] [ebp-8h]
+    XModel **models; // [esp+14h] [ebp-4h]
+
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1644, 0, "%s", "obj");
+    if (!name)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1645, 0, "%s", "name");
+    if (!SL_IsLowercaseString(name))
+    {
+        v3 = SL_ConvertToString(name);
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            1647,
+            0,
+            "%s\n\t(SL_ConvertToString( name )) = %s",
+            "(SL_IsLowercaseString( name ))",
+            v3);
+    }
+    localBoneIndex = *index;
+    if (localBoneIndex == 255)
+        return 0;
+    numModels = obj->numModels;
+    models = obj->models;
+    if (localBoneIndex < obj->numBones)
+    {
+        for (j = 0; j < numModels; ++j)
+        {
+            model = models[j];
+            if (localBoneIndex < model->numBones)
+            {
+                if (name != model->boneNames[localBoneIndex])
+                    break;
+                return 1;
+            }
+            localBoneIndex -= model->numBones;
+        }
+    }
+    boneIndex = 0;
+    for (ja = 0; ja < numModels; ++ja)
+    {
+        modela = models[ja];
+        if (XModelGetBoneIndex(modela, name, boneIndex, index))
+            return 1;
+        boneIndex += modela->numBones;
+    }
+    *index = -1;
+    return 0;
+}
+
+int __cdecl DObjGetModelBoneIndex(const DObj_s *obj, const char *modelName, unsigned int name, unsigned __int8 *index)
+{
+    char *v4; // eax
+    int j; // [esp+0h] [ebp-18h]
+    int ja; // [esp+0h] [ebp-18h]
+    unsigned int boneIndex; // [esp+4h] [ebp-14h]
+    int numModels; // [esp+8h] [ebp-10h]
+    XModel *model; // [esp+Ch] [ebp-Ch]
+    XModel *modela; // [esp+Ch] [ebp-Ch]
+    unsigned int localBoneIndex; // [esp+10h] [ebp-8h]
+    XModel **models; // [esp+14h] [ebp-4h]
+
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1698, 0, "%s", "obj");
+    if (!name)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1699, 0, "%s", "name");
+    if (!SL_IsLowercaseString(name))
+    {
+        v4 = SL_ConvertToString(name);
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            1701,
+            0,
+            "%s\n\t(SL_ConvertToString( name )) = %s",
+            "(SL_IsLowercaseString( name ))",
+            v4);
+    }
+    localBoneIndex = *index;
+    if (localBoneIndex == 255)
+        return 0;
+    numModels = obj->numModels;
+    models = obj->models;
+    if (localBoneIndex < obj->numBones)
+    {
+        for (j = 0; j < numModels; ++j)
+        {
+            model = models[j];
+            if (localBoneIndex < model->numBones)
+            {
+                if (name == model->boneNames[localBoneIndex] && !I_stricmp(modelName, model->name))
+                    return 1;
+                break;
+            }
+            localBoneIndex -= model->numBones;
+        }
+    }
+    boneIndex = 0;
+    for (ja = 0; ja < numModels; ++ja)
+    {
+        modela = models[ja];
+        if (!I_stricmp(modelName, modela->name) && XModelGetBoneIndex(modela, name, boneIndex, index))
+            return 1;
+        boneIndex += modela->numBones;
+    }
+    *index = -1;
+    return 0;
+}
+
+void __cdecl DObjGetBasePoseMatrix(const DObj_s *obj, unsigned __int8 boneIndex, DObjAnimMat *outMat)
+{
+    DObjAnimMat mat[128]; // [esp+8h] [ebp-1010h] BYREF
+    int partBits[4]; // [esp+1008h] [ebp-10h] BYREF
+
+    if (!obj)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1753, 0, "%s", "obj");
+    if (!outMat)
+        MyAssertHandler(".\\xanim\\dobj.cpp", 1754, 0, "%s", "outMat");
+    if (boneIndex >= (unsigned int)obj->numBones)
+        MyAssertHandler(
+            ".\\xanim\\dobj.cpp",
+            1755,
+            0,
+            "boneIndex doesn't index obj->numBones\n\t%i not in [0, %i)",
+            boneIndex,
+            obj->numBones);
+    if (boneIndex >= (int)(*obj->models)->numBones)
+    {
+        DObjGetHierarchyBits(obj, boneIndex, partBits);
+        DObjCalcBaseSkel(obj, mat, partBits);
+        memcpy(outMat, &mat[boneIndex], sizeof(DObjAnimMat));
+    }
+    else
+    {
+        memcpy(outMat, &XModelGetBasePose(*(const XModel **)obj->models)[boneIndex], sizeof(DObjAnimMat));
+    }
+}
+
+void __cdecl DObjSetHidePartBits(DObj_s *obj, const unsigned int *partBits)
+{
+    obj->hidePartBits[0] = *partBits;
+    obj->hidePartBits[1] = partBits[1];
+    obj->hidePartBits[2] = partBits[2];
+    obj->hidePartBits[3] = partBits[3];
+}
+

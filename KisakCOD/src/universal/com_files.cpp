@@ -542,7 +542,7 @@ unsigned int __cdecl FS_WriteLog(char *buffer, unsigned int len, int h)
     return FS_Write(buffer, len, h);
 }
 
-void FS_Printf(int h, char *fmt, ...)
+void FS_Printf(int h, const char *fmt, ...)
 {
     char string; // [esp+14h] [ebp-1008h] BYREF
     _BYTE v3[3]; // [esp+15h] [ebp-1007h] BYREF

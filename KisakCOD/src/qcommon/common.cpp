@@ -6,48 +6,59 @@
 
 #include <universal/com_memory.h>
 
-dvar_t *com_developer;
 int marker_common;
-dvar_t *com_maxFrameTime;
-dvar_t *com_statmon;
-dvar_t *com_filter_output;
+
 int com_skelTimeStamp;
-dvar_t *com_useConfig;
 unsigned int com_errorPrintsCount;
-dvar_t *com_fixedtime;
-dvar_t *fastfile_allowNoAuth;
-dvar_t *com_logfile;
-dvar_t *cl_paused;
-dvar_t *com_timescale;
-dvar_t *nextmap;
-dvar_t *version;
-dvar_t *com_sv_running;
 float com_timescaleValue;
 //00751450       struct _iobuf* debuglogfile 82f01450     common.obj
-dvar_t *ui_errorTitle;
-dvar_t *shortversion;
-dvar_t *com_attractmodeduration;
-dvar_t *com_attractmode;
-dvar_t *cl_paused_simple;
-dvar_t *sv_paused;
 int com_fixedConsolePosition;
-dvar_t *com_hiDef;
-dvar_t *com_animCheck;
-dvar_t *com_developer_script;
-dvar_t *dev_timescale;
-dvar_t *cl_useMapPreloading;
-dvar_t *com_maxfps;
-dvar_t *com_frameTime;
-dvar_t *com_recommendedSet;
-dvar_t *sv_useMapPreloading;
-dvar_t *ui_errorMessage;
-dvar_t *com_introPlayed;
-dvar_t *com_wideScreen;
 int com_errorEntered;
 int com_frameNumber;
 int com_consoleLogOpenFailed;
 int com_missingAssetOpenFailed;
-dvar_t *com_dedicated;
+
+const dvar_t *com_dedicated;
+const dvar_t *com_hiDef;
+const dvar_t *com_animCheck;
+const dvar_t *com_developer_script;
+const dvar_t *dev_timescale;
+const dvar_t *cl_useMapPreloading;
+const dvar_t *com_maxfps;
+const dvar_t *com_frameTime;
+const dvar_t *com_recommendedSet;
+const dvar_t *sv_useMapPreloading;
+const dvar_t *ui_errorMessage;
+const dvar_t *com_introPlayed;
+const dvar_t *com_wideScreen;
+const dvar_t *ui_errorTitle;
+const dvar_t *shortversion;
+const dvar_t *com_attractmodeduration;
+const dvar_t *com_attractmode;
+const dvar_t *cl_paused_simple;
+const dvar_t *sv_paused;
+const dvar_t *com_fixedtime;
+const dvar_t *fastfile_allowNoAuth;
+const dvar_t *com_logfile;
+const dvar_t *cl_paused;
+const dvar_t *com_timescale;
+const dvar_t *nextmap;
+const dvar_t *version;
+const dvar_t *com_sv_running;
+const dvar_t *com_useConfig;
+const dvar_t *com_maxFrameTime;
+const dvar_t *com_statmon;
+const dvar_t *com_filter_output;
+const dvar_t *com_developer;
+
+const dvar_t *sys_lockThreads;
+const dvar_t *sys_smp_allowed;
+const dvar_t *com_masterServerName;
+const dvar_t *com_authServerName;
+const dvar_t *com_masterPort;
+const dvar_t *com_authPort;
+
+const dvar_t *useFastFile;
 
 #define MAX_NUM_ARGVS	50
 
@@ -122,11 +133,10 @@ typedef enum
 	PRE_READ_WRITE								// prefetch assuming that buffer is used for both reading and writing
 } e_prefetch;
 
-void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type);
-
 #define EMMS_INSTRUCTION	__asm emms
 
-void _copyDWord(unsigned int* dest, const unsigned int constant, const unsigned int count) {
+void _copyDWord(unsigned int* dest, const unsigned int constant, const unsigned int count) 
+{
 	__asm
 	{
 		mov		edx, dest
@@ -467,7 +477,7 @@ void __cdecl Com_InitPlayerProfiles(int localClientNum)
         Com_ExecStartupConfigs(localClientNum, 0);
 }
 
-void __cdecl Com_PrintMessage(int channel, char* msg, int error)
+void __cdecl Com_PrintMessage(int channel, const char* msg, int error)
 {
     //PbCaptureConsoleOutput(msg, 4096);
     if (rd_buffer)

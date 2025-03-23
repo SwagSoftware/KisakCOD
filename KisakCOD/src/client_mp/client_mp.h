@@ -1162,3 +1162,12 @@ void __cdecl CL_UpdateSound();
 float (*__cdecl CL_GetMapCenter())[3];
 void __cdecl CL_ResetStats_f();
 int __cdecl CL_GetLocalClientActiveCount();
+
+#define MAX_CLIENTS 1 // LWSS Add
+
+extern clientConnection_t clientConnections[MAX_CLIENTS];
+extern clientUIActive_t clientUIActives[MAX_CLIENTS];
+extern clientActive_t clients[MAX_CLIENTS];
+extern dvar_t *name;
+
+extern clientStatic_t cls;

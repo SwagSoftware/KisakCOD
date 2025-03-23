@@ -558,7 +558,7 @@ int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...)
     return len;
 }
 
-bool __cdecl CanKeepStringPointer(char *string)
+bool __cdecl CanKeepStringPointer(const char *string)
 {
     va_info_t *info; // [esp+0h] [ebp-8h]
     char stackArray[4]; // [esp+4h] [ebp-4h] BYREF
@@ -786,7 +786,7 @@ bool __cdecl Info_Validate(char *s)
     return v3 == 0;
 }
 
-void __cdecl Info_SetValueForKey(char *s, char *key, const char *value)
+void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
 {
     int v3; // eax
     int v4; // eax

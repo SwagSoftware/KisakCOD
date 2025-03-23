@@ -69,14 +69,12 @@ int cl_maxLocalClients;
 int old_com_frameTime;
 unsigned int frame_msec;
 
-#define MAX_CLIENTS 1 // LWSS Add
-
 clientConnection_t clientConnections[MAX_CLIENTS];
 clientUIActive_t clientUIActives[MAX_CLIENTS];
 clientActive_t clients[MAX_CLIENTS];
 dvar_t *name;
 
-static clientStatic_t cls;
+clientStatic_t cls;
 
 
 void __cdecl TRACK_cl_main()

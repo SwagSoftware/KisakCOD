@@ -101,7 +101,7 @@ bool __cdecl FS_Delete(char *filename);
 unsigned int __cdecl FS_Read(unsigned __int8 *buffer, unsigned int len, int h);
 unsigned int __cdecl FS_Write(char *buffer, unsigned int len, int h);
 unsigned int __cdecl FS_WriteLog(char *buffer, unsigned int len, int h);
-void FS_Printf(int h, char *fmt, ...);
+void FS_Printf(int h, const char *fmt, ...);
 int __cdecl FS_Seek(int f, int offset, int origin);
 int __cdecl FS_ReadFile(const char *qpath, void **buffer);
 unsigned int *__cdecl FS_AllocMem(int bytes);

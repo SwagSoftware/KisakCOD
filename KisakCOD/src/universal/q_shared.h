@@ -156,14 +156,6 @@ typedef enum {
 	PRINT_ERROR
 } printParm_t;
 
-// parameters to the main Error routine
-typedef enum {
-	ERR_FATAL,					// exit the entire game with a popup window
-	ERR_DROP,					// print to console and disconnect from game
-	ERR_DISCONNECT,				// don't kill server
-	ERR_NEED_CD					// pop up the need-cd dialog
-} errorParm_t;
-
 // font rendering values used by ui and cgame
 #define PROP_GAP_WIDTH			2
 //#define PROP_GAP_WIDTH			3
@@ -422,6 +414,22 @@ struct DvarLimits_Vector
 };
 union DvarLimits
 {
+	// LWSS: KISAKTODO double check this...
+	DvarLimits()
+	{
+		integer.min = INT_MIN;
+		integer.max = INT_MAX;
+	}
+	DvarLimits(uint64 val)
+	{
+		integer.max = HIDWORD(val);
+		integer.min = LODWORD(val);
+	}
+	DvarLimits(int min, int max)
+	{
+		integer.min = min; 
+		integer.max = max;
+	}
 	DvarLimits_Enumeration enumeration;
 	DvarLimits_Integer integer;
 	DvarLimits_Value value;
@@ -490,14 +498,14 @@ void __cdecl Swap_Init();
 int Com_sprintf(char *dest, unsigned int size, const char *fmt, ...);
 int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...);
 
-bool __cdecl CanKeepStringPointer(char *string);
+bool __cdecl CanKeepStringPointer(const char *string);
 void __cdecl Com_InitThreadData(int threadContext);
 char *__cdecl Info_ValueForKey(char *s, char *key);
 void __cdecl Info_NextPair(const char **head, char *key, char *value);
 void __cdecl Info_RemoveKey(char *s, char *key);
 void __cdecl Info_RemoveKey_Big(char *s, char *key);
 bool __cdecl Info_Validate(char *s);
-void __cdecl Info_SetValueForKey(char *s, char *key, const char *value);
+void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value);
 void __cdecl Info_SetValueForKey_Big(char *s, char *key, const char *value);
 bool __cdecl ParseConfigStringToStruct(
 	unsigned __int8 *pStruct,
@@ -542,6 +550,78 @@ struct TraceThreadInfo
 	struct cmodel_t *box_model;
 };
 
+enum TraceHitType : __int32
+{                                       // ...
+	TRACE_HITTYPE_NONE = 0x0,
+	TRACE_HITTYPE_ENTITY = 0x1,
+	TRACE_HITTYPE_DYNENT_MODEL = 0x2,
+	TRACE_HITTYPE_DYNENT_BRUSH = 0x3,
+};
+
+struct __declspec(align(2)) trace_t // sizeof=0x2C
+{                                       // ...
+	float fraction;                     // ...
+	float normal[3];                    // ...
+	int surfaceFlags;                   // ...
+	int contents;                       // ...
+	const char *material;               // ...
+	TraceHitType hitType;               // ...
+	unsigned __int16 hitId;
+	unsigned __int16 modelIndex;        // ...
+	unsigned __int16 partName;          // ...
+	unsigned __int16 partGroup;         // ...
+	bool allsolid;                      // ...
+	bool startsolid;                    // ...
+	bool walkable;                      // ...
+	// padding byte
+};
+
+// win_shared
+unsigned int __cdecl Sys_Milliseconds();
+unsigned int __cdecl Sys_MillisecondsRaw();
+void __cdecl Sys_SnapVector(float *v);
+
+// com_shared
+struct qtime_s // sizeof=0x24
+{                                       // ...
+	int tm_sec;
+	int tm_min;                         // ...
+	int tm_hour;                        // ...
+	int tm_mday;                        // ...
+	int tm_mon;                         // ...
+	int tm_year;                        // ...
+	int tm_wday;
+	int tm_yday;
+	int tm_isdst;
+};
+char __cdecl Com_Filter(const char *filter, char *name, int casesensitive);
+char __cdecl Com_FilterPath(const char *filter, const char *name, int casesensitive);
+int __cdecl Com_HashKey(const char *string, int maxlen);
+int __cdecl Com_RealTime(qtime_s *qtime);
+void __cdecl Com_Memcpy(char *dest, char *src, int count);
+void __cdecl Com_Memset(unsigned int *dest, int val, int count);
+
+
+// com_stringtable
+struct StringTable // sizeof=0x10
+{                                       // ...
+	const char *name;
+	int columnCount;
+	int rowCount;
+	const char **values;
+};
+const char *__cdecl StringTable_GetColumnValueForRow(const StringTable *table, int row, int column);
+const char *__cdecl StringTable_Lookup(
+	const StringTable *table,
+	int comparisonColumn,
+	const char *value,
+	int valueColumn);
+int __cdecl StringTable_LookupRowNumForValue(const StringTable *table, int comparisonColumn, const char *value);
+void __cdecl StringTable_GetAsset(const char *filename, XAssetHeader *tablePtr);
+
+
 extern TraceThreadInfo g_traceThreadInfo[7];
 
 extern int g_com_error[7][16];
+
+extern const dvar_t *useFastFile;

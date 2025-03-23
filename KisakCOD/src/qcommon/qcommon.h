@@ -35,47 +35,71 @@ struct field_t // sizeof=0x118
 	char buffer[256];                   // ...
 };
 
-extern dvar_t *com_developer;
 extern int marker_common;
-extern dvar_t *com_maxFrameTime;
-extern dvar_t *com_statmon;
-extern dvar_t *com_filter_output;
+
 extern int com_skelTimeStamp;
-extern dvar_t *com_useConfig;
 extern unsigned int com_errorPrintsCount;
-extern dvar_t *com_fixedtime;
-extern dvar_t *fastfile_allowNoAuth;
-extern dvar_t *com_logfile;
-extern dvar_t *cl_paused;
-extern dvar_t *com_timescale;
-extern dvar_t *nextmap;
-extern dvar_t *version;
-extern dvar_t *com_sv_running;
+
 extern float com_timescaleValue;
-extern dvar_t *ui_errorTitle;
-extern dvar_t *shortversion;
-extern dvar_t *com_attractmodeduration;
-extern dvar_t *com_attractmode;
-extern dvar_t *cl_paused_simple;
-extern dvar_t *sv_paused;
+
 extern int com_fixedConsolePosition;
-extern dvar_t *com_hiDef;
-extern dvar_t *com_animCheck;
-extern dvar_t *com_developer_script;
-extern dvar_t *dev_timescale;
-extern dvar_t *cl_useMapPreloading;
-extern dvar_t *com_maxfps;
-extern dvar_t *com_frameTime;
-extern dvar_t *com_recommendedSet;
-extern dvar_t *sv_useMapPreloading;
-extern dvar_t *ui_errorMessage;
-extern dvar_t *com_introPlayed;
-extern dvar_t *com_wideScreen;
 extern int com_errorEntered;
 extern int com_frameNumber;
 extern int com_consoleLogOpenFailed;
 extern int com_missingAssetOpenFailed;
-extern dvar_t *com_dedicated;
+
+extern const dvar_t *com_dedicated;
+extern const dvar_t *com_hiDef;
+extern const dvar_t *com_animCheck;
+extern const dvar_t *com_developer_script;
+extern const dvar_t *dev_timescale;
+extern const dvar_t *cl_useMapPreloading;
+extern const dvar_t *com_maxfps;
+extern const dvar_t *com_frameTime;
+extern const dvar_t *com_recommendedSet;
+extern const dvar_t *sv_useMapPreloading;
+extern const dvar_t *ui_errorMessage;
+extern const dvar_t *com_introPlayed;
+extern const dvar_t *com_wideScreen;
+extern const dvar_t *ui_errorTitle;
+extern const dvar_t *shortversion;
+extern const dvar_t *com_attractmodeduration;
+extern const dvar_t *com_attractmode;
+extern const dvar_t *cl_paused_simple;
+extern const dvar_t *sv_paused;
+extern const dvar_t *com_fixedtime;
+extern const dvar_t *fastfile_allowNoAuth;
+extern const dvar_t *com_logfile;
+extern const dvar_t *cl_paused;
+extern const dvar_t *com_timescale;
+extern const dvar_t *nextmap;
+extern const dvar_t *version;
+extern const dvar_t *com_sv_running;
+extern const dvar_t *com_useConfig;
+extern const dvar_t *com_maxFrameTime;
+extern const dvar_t *com_statmon;
+extern const dvar_t *com_filter_output;
+extern const dvar_t *com_developer;
+
+extern const dvar_t *sys_lockThreads;
+extern const dvar_t *sys_smp_allowed;
+extern const dvar_t *com_masterServerName;
+extern const dvar_t *com_authServerName;
+extern const dvar_t *com_masterPort;
+extern const dvar_t *com_authPort;
+
+
+enum errorParm_t : __int32
+{                                       // ...
+    ERR_FATAL = 0x0,
+    ERR_DROP = 0x1,
+    ERR_SERVERDISCONNECT = 0x2,
+    ERR_DISCONNECT = 0x3,
+    ERR_SCRIPT = 0x4,
+    ERR_SCRIPT_DROP = 0x5,
+    ERR_LOCALIZATION = 0x6,
+    ERR_MAPLOADERRORSUMMARY = 0x7,
+};
 
 void QDECL Com_Printf(int channel, const char* fmt, ...);
 void QDECL Com_Error(errorParm_t code, const char* fmt, ...);
@@ -89,7 +113,7 @@ void Com_Shutdown(const char* finalmsg);
 
 void __cdecl Com_ShutdownWorld();
 void __cdecl Com_InitPlayerProfiles(int localClientNum);
-void __cdecl Com_PrintMessage(int channel, char* msg, int error);
+void __cdecl Com_PrintMessage(int channel, const char* msg, int error);
 void __cdecl Com_LogPrintMessage(int channel, char* msg);
 void Com_OpenLogFile();
 void Com_DPrintf(int channel, const char* fmt, ...);
@@ -192,19 +216,289 @@ DVAR
 ==============================================================
 */
 
-const dvar_s* Dvar_FindVar(const char* dvarName);
-const dvar_s* Dvar_RegisterBool(
-	const char* dvarName,
-	bool value,
-	word flags,
-	const char* description);
-const dvar_s* Dvar_RegisterVariant(
-	const char* dvarName,
-	byte type,
-	word flags,
-	DvarValue value,
-	DvarLimits domain,
-	const char* description);
+enum DvarSetSource : __int32
+{                                       // ...
+    DVAR_SOURCE_INTERNAL = 0x0,
+    DVAR_SOURCE_EXTERNAL = 0x1,
+    DVAR_SOURCE_SCRIPT = 0x2,
+    DVAR_SOURCE_DEVGUI = 0x3,
+};
+
+int __cdecl Dvar_Command();
+void __cdecl Dvar_GetCombinedString(char *combined, int first);
+void __cdecl Dvar_Toggle_f();
+bool __cdecl Dvar_ToggleInternal();
+bool __cdecl Dvar_ToggleSimple(dvar_s *dvar);
+void __cdecl Dvar_TogglePrint_f();
+void __cdecl Dvar_Set_f();
+void __cdecl Dvar_SetU_f();
+void __cdecl Dvar_SetS_f();
+void __cdecl Dvar_SetA_f();
+void __cdecl Dvar_SetFromDvar_f();
+void __cdecl Dvar_Reset_f();
+void __cdecl Dvar_WriteVariables(int f);
+void __cdecl Dvar_WriteSingleVariable(const dvar_s *dvar, int *userData);
+void __cdecl Dvar_WriteDefaults(int f);
+void __cdecl Dvar_WriteSingleDefault(const dvar_s *dvar, int *userData);
+void __cdecl Dvar_List_f();
+void __cdecl Dvar_ListSingle(const dvar_s *dvar, const char *userData);
+void __cdecl Dvar_Dump_f();
+void __cdecl PBdvar_set(const char *var_name, char *value);
+char *__cdecl Dvar_InfoString(int localClientNum, char bit);
+void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, unsigned int *userData);
+char *__cdecl Dvar_InfoString_Big(int bit);
+void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userData);
+void __cdecl Dvar_AddCommands();
+void __cdecl Dvar_RegisterBool_f();
+void __cdecl Dvar_RegisterInt_f();
+void __cdecl Dvar_RegisterFloat_f();
+void __cdecl Dvar_SetFromLocalizedStr_f();
+void __cdecl Dvar_SetToTime_f();
+void __cdecl CL_SelectStringTableEntryInDvar_f();
+void __cdecl Dvar_ForEach(void(__cdecl *callback)(const dvar_s *, void *), void *userData);
+void Dvar_Sort();
+void __cdecl Dvar_ForEachName(void(__cdecl *callback)(const char *));
+const dvar_s *__cdecl Dvar_GetAtIndex(unsigned int index);
+void __cdecl Dvar_SetInAutoExec(bool inAutoExec);
+bool __cdecl Dvar_IsSystemActive();
+char __cdecl Dvar_IsValidName(const char *dvarName);
+const char *__cdecl Dvar_EnumToString(const dvar_s *dvar);
+const char *__cdecl Dvar_IndexStringToEnumString(const dvar_s *dvar, const char *indexString);
+const char *__cdecl Dvar_DisplayableValue(const dvar_s *dvar);
+const char *__cdecl Dvar_ValueToString(const dvar_s *dvar, DvarValue value);
+const char *__cdecl Dvar_DisplayableResetValue(const dvar_s *dvar);
+const char *__cdecl Dvar_DisplayableLatchedValue(const dvar_s *dvar);
+char __cdecl Dvar_ValueInDomain(unsigned __int8 type, DvarValue value, DvarLimits domain);
+char __cdecl Dvar_VectorInDomain(const float *vector, int components, float min, float max);
+const char *__cdecl Dvar_DomainToString(unsigned __int8 type, DvarLimits domain, __int64 outBuffer);
+const char *__cdecl Dvar_DomainToString_Internal(
+    unsigned __int8 type,
+    DvarLimits domain,
+    __int64 outBuffer,
+    int *outLineCount);
+void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int64 outBuffer);
+const char *__cdecl Dvar_DomainToString_GetLines(
+    unsigned __int8 type,
+    DvarLimits domain,
+    __int64 outBuffer,
+    int *outLineCount);
+void __cdecl Dvar_PrintDomain(unsigned __int8 type, DvarLimits domain);
+bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar);
+int __cdecl Dvar_ValuesEqual(unsigned __int8 type, DvarValue val0, DvarValue val1);
+const dvar_s *__cdecl Dvar_FindVar(const char *dvarName);
+void __cdecl Dvar_ClearModified(dvar_s *dvar);
+void __cdecl Dvar_SetModified(dvar_s *dvar);
+void __cdecl Dvar_UpdateEnumDomain(dvar_s *dvar, const char **stringTable);
+DvarValue *__cdecl Dvar_ClampValueToDomain(
+    DvarValue *result,
+    unsigned __int8 type,
+    DvarValue value,
+    DvarValue resetValue,
+    DvarLimits domain);
+void __cdecl Dvar_ClampVectorToDomain(float *vector, int components, float min, float max);
+bool __cdecl Dvar_GetBool(const char *dvarName);
+bool __cdecl Dvar_StringToBool(const char *string);
+int __cdecl Dvar_GetInt(const char *dvarName);
+int __cdecl Dvar_StringToInt(const char *string);
+double __cdecl Dvar_GetFloat(const char *dvarName);
+double __cdecl Dvar_StringToFloat(const char *string);
+const char *__cdecl Dvar_GetString(const char *dvarName);
+const char *__cdecl Dvar_GetVariantString(const char *dvarName);
+void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor);
+void __cdecl Dvar_StringToColor(const char *string, unsigned __int8 *color);
+void __cdecl Dvar_GetUnpackedColorByName(const char *dvarName, float *expandedColor);
+void __cdecl Dvar_Shutdown();
+void __cdecl Dvar_FreeNameString(const char *name);
+bool __cdecl Dvar_ShouldFreeCurrentString(dvar_s *dvar);
+bool __cdecl Dvar_ShouldFreeLatchedString(dvar_s *dvar);
+bool __cdecl Dvar_ShouldFreeResetString(dvar_s *dvar);
+void __cdecl Dvar_FreeString(DvarValue *value);
+void __cdecl Dvar_ChangeResetValue(dvar_s *dvar, DvarValue value);
+void __cdecl Dvar_UpdateResetValue(dvar_s *dvar, DvarValue value);
+void __cdecl Dvar_AssignResetStringValue(dvar_s *dvar, DvarValue *dest, const char *string);
+void __cdecl Dvar_CopyString(const char *string, DvarValue *value);
+void __cdecl Dvar_WeakCopyString(const char *string, DvarValue *value);
+void __cdecl Dvar_MakeLatchedValueCurrent(dvar_s *dvar);
+void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source);
+void __cdecl Dvar_AssignCurrentStringValue(dvar_s *dvar, DvarValue *dest, char *string);
+void __cdecl Dvar_SetLatchedValue(dvar_s *dvar, DvarValue value);
+void __cdecl Dvar_AssignLatchedStringValue(dvar_s *dvar, DvarValue *dest, char *string);
+void __cdecl Dvar_ClearLatchedValue(dvar_s *dvar);
+void __cdecl Dvar_ReinterpretDvar(
+    dvar_s *dvar,
+    const char *dvarName,
+    unsigned __int8 type,
+    unsigned __int16 flags,
+    DvarValue value,
+    DvarLimits domain);
+const dvar_s *__cdecl Dvar_RegisterNew(
+    const char *dvarName,
+    unsigned __int8 type,
+    unsigned __int16 flags,
+    DvarValue value,
+    DvarLimits domain,
+    const char *description);
+void __cdecl Dvar_Reregister(
+    dvar_s *dvar,
+    const char *dvarName,
+    unsigned __int8 type,
+    unsigned __int16 flags,
+    DvarValue resetValue,
+    DvarLimits domain,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterBool(
+    const char *dvarName,
+    bool value,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterVariant(
+    const char *dvarName,
+    unsigned __int8 type,
+    unsigned __int16 flags,
+    DvarValue value,
+    DvarLimits domain,
+    const char *description);
+void __cdecl Dvar_MakeExplicitType(
+    dvar_s *dvar,
+    const char *dvarName,
+    unsigned __int8 type,
+    unsigned __int16 flags,
+    DvarValue resetValue,
+    DvarLimits domain);
+DvarValue *__cdecl Dvar_StringToValue(DvarValue *result, unsigned __int8 type, DvarLimits domain, const char *string);
+void __cdecl Dvar_StringToVec2(const char *string, float *vector);
+void __cdecl Dvar_StringToVec3(const char *string, float *vector);
+void __cdecl Dvar_StringToVec4(const char *string, float *vector);
+int __cdecl Dvar_StringToEnum(const DvarLimits *domain, const char *string);
+void __cdecl Dvar_UpdateValue(dvar_s *dvar, DvarValue value);
+char *__cdecl Dvar_AllocNameString(const char *name);
+const dvar_s *__cdecl Dvar_RegisterInt(
+    const char *dvarName,
+    int value,
+    DvarLimits min,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterFloat(
+    const char *dvarName,
+    float value,
+    DvarLimits min,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterVec2(
+    const char *dvarName,
+    float x,
+    float y,
+    DvarLimits min,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterVec3(
+    const char *dvarName,
+    float x,
+    float y,
+    float z,
+    DvarLimits min,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterVec4(
+    const char *dvarName,
+    float x,
+    float y,
+    float z,
+    float w,
+    DvarLimits min,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterString(
+    const char *dvarName,
+    const char *value,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterEnum(
+    const char *dvarName,
+    const char **valueList,
+    int defaultIndex,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterColor(
+    const char *dvarName,
+    float r,
+    float g,
+    float b,
+    float a,
+    unsigned __int16 flags,
+    const char *description);
+void __cdecl Dvar_SetBoolFromSource(dvar_s *dvar, bool value, DvarSetSource source);
+void __cdecl Dvar_SetIntFromSource(dvar_s *dvar, int value, DvarSetSource source);
+void __cdecl Dvar_SetFloatFromSource(dvar_s *dvar, float value, DvarSetSource source);
+void __cdecl Dvar_SetVec2FromSource(dvar_s *dvar, float x, float y, DvarSetSource source);
+void __cdecl Dvar_SetVec3FromSource(dvar_s *dvar, float x, float y, float z, DvarSetSource source);
+void __cdecl Dvar_SetVec4FromSource(dvar_s *dvar, float x, float y, float z, float w, DvarSetSource source);
+void __cdecl Dvar_SetColorFromSource(dvar_s *dvar, float r, float g, float b, float a, DvarSetSource source);
+void __cdecl Dvar_SetBool(dvar_s *dvar, bool value);
+void __cdecl Dvar_SetInt(dvar_s *dvar, int value);
+void __cdecl Dvar_SetFloat(dvar_s *dvar, float value);
+void __cdecl Dvar_SetVec3(dvar_s *dvar, float x, float y, float z);
+void __cdecl Dvar_SetString(dvar_s *dvar, char *value);
+void __cdecl Dvar_SetStringFromSource(dvar_s *dvar, char *string, DvarSetSource source);
+void __cdecl Dvar_SetColor(dvar_s *dvar, float r, float g, float b, float a);
+void __cdecl Dvar_SetFromString(dvar_s *dvar, char *string);
+void __cdecl Dvar_SetFromStringFromSource(dvar_s *dvar, char *string, DvarSetSource source);
+void __cdecl Dvar_SetBoolByName(const char *dvarName, bool value);
+void __cdecl Dvar_SetIntByName(const char *dvarName, int value);
+void __cdecl Dvar_SetFloatByName(const char *dvarName, float value);
+void __cdecl Dvar_SetVec3ByName(const char *dvarName, float x, float y, float z);
+void __cdecl Dvar_SetStringByName(const char *dvarName, char *value);
+const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, char *string, DvarSetSource source);
+void __cdecl Dvar_SetFromStringByName(const char *dvarName, char *string);
+void __cdecl Dvar_SetCommand(const char *dvarName, char *string);
+void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *, DvarValue));
+void __cdecl Dvar_AddFlags(const dvar_s *dvar, int flags);
+void __cdecl Dvar_Reset(dvar_s *dvar, DvarSetSource setSource);
+void __cdecl Dvar_SetCheatState();
+void __cdecl Dvar_Init();
+void __cdecl Dvar_ResetScriptInfo();
+char __cdecl Dvar_AnyLatchedValues();
+void __cdecl Dvar_ResetDvars(unsigned __int16 filter, DvarSetSource setSource);
+
+// dvar_cmds
+void __cdecl TRACK_dvar_cmds();
+int __cdecl Dvar_Command();
+void __cdecl Dvar_GetCombinedString(char *combined, int first);
+void __cdecl Dvar_Toggle_f();
+bool __cdecl Dvar_ToggleInternal();
+bool __cdecl Dvar_ToggleSimple(dvar_s *dvar);
+void __cdecl Dvar_TogglePrint_f();
+void __cdecl Dvar_Set_f();
+void __cdecl Dvar_SetU_f();
+void __cdecl Dvar_SetS_f();
+void __cdecl Dvar_SetA_f();
+void __cdecl Dvar_SetFromDvar_f();
+void __cdecl Dvar_Reset_f();
+void __cdecl Dvar_WriteVariables(int f);
+void __cdecl Dvar_WriteSingleVariable(const dvar_s *dvar, int *userData);
+void __cdecl Dvar_WriteDefaults(int f);
+void __cdecl Dvar_WriteSingleDefault(const dvar_s *dvar, int *userData);
+void __cdecl Dvar_List_f();
+void __cdecl Dvar_ListSingle(const dvar_s *dvar, const char *userData);
+void __cdecl Com_DvarDump(int channel, const char *match);
+void __cdecl Com_DvarDumpSingle(const dvar_s *dvar, void *userData);
+void __cdecl Dvar_Dump_f();
+void __cdecl SV_SetConfig(int start, int max, int bit);
+void __cdecl SV_SetConfigDvar(const dvar_s *dvar, int *userData);
+char *__cdecl Dvar_InfoString(int localClientNum, char bit);
+void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, unsigned int *userData);
+char *__cdecl Dvar_InfoString_Big(int bit);
+void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userData);
+void __cdecl Dvar_AddCommands();
+void __cdecl Dvar_RegisterBool_f();
+void __cdecl Dvar_RegisterInt_f();
+void __cdecl Dvar_RegisterFloat_f();
+void __cdecl Dvar_SetFromLocalizedStr_f();
+void __cdecl Dvar_SetToTime_f();
+
+extern char info1[1024];
+extern char info2[8192];
+
 /*
 ==============================================================
 
@@ -280,3 +574,44 @@ MISC
 
 #define RoundUp(N, M) ((N) + ((unsigned int)(M)) - (((unsigned int)(N)) % ((unsigned int)(M))))
 #define RoundDown(N, M) ((N) - (((unsigned int)(N)) % ((unsigned int)(M))))
+
+void _copyDWord(unsigned int *dest, const unsigned int constant, const unsigned int count);
+
+/*
+==============================================================
+
+DOBJ MANAGEMENT
+
+==============================================================
+*/
+
+struct __declspec(align(2)) DObjModel_s // sizeof=0x8
+{                                       // ...
+	XModel *model;                      // ...
+	unsigned __int16 boneName;          // ...
+	bool ignoreCollision;               // ...
+	// padding byte
+};
+
+void __cdecl TRACK_dobj_management();
+DObj_s *__cdecl Com_GetClientDObj(unsigned int handle, int localClientNum);
+DObj_s *__cdecl Com_GetServerDObj(unsigned int handle);
+DObj_s *__cdecl Com_ClientDObjCreate(
+	DObjModel_s *dobjModels,
+	unsigned __int16 numModels,
+	XAnimTree_s *tree,
+	unsigned int handle,
+	int localClientNum);
+int __cdecl Com_GetFreeDObjIndex();
+void __cdecl Com_ClientDObjClearAllSkel();
+DObj_s *__cdecl Com_ServerDObjCreate(
+	DObjModel_s *dobjModels,
+	unsigned __int16 numModels,
+	XAnimTree_s *tree,
+	unsigned int handle);
+void __cdecl Com_SafeClientDObjFree(unsigned int handle, int localClientNum);
+void __cdecl Com_SafeServerDObjFree(unsigned int handle);
+void __cdecl Com_InitDObj();
+void __cdecl Com_ShutdownDObj();
+void __cdecl DB_SaveDObjs();
+void __cdecl DB_LoadDObjs();
