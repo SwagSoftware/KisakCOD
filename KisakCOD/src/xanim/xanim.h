@@ -11,7 +11,7 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <cgame/cg_local.h>
 #include <database/database.h>
-#include <gfx_d3d/r_material.h>
+#include <gfx_d3d/r_font.h>
 #include <universal/com_math.h>
 
 enum MapType
@@ -774,146 +774,6 @@ struct GfxPlacement // sizeof=0x1C
     float quat[4];                      // ...
     float origin[3];                    // ...
 };
-struct FxFloatRange // sizeof=0x8
-{                                       // ...
-    float base;
-    float amplitude;
-};
-struct FxSpawnDefLooping // sizeof=0x8
-{                                       // ...
-    int intervalMsec;
-    int count;
-};
-struct FxIntRange // sizeof=0x8
-{                                       // ...
-    int base;
-    int amplitude;
-};
-struct FxSpawnDefOneShot // sizeof=0x8
-{                                       // ...
-    FxIntRange count;
-};
-union FxSpawnDef // sizeof=0x8
-{                                       // ...
-    FxSpawnDefLooping looping;
-    FxSpawnDefOneShot oneShot;
-};
-struct FxElemAtlas // sizeof=0x8
-{                                       // ...
-    unsigned __int8 behavior;
-    unsigned __int8 index;
-    unsigned __int8 fps;
-    unsigned __int8 loopCount;
-    unsigned __int8 colIndexBits;
-    unsigned __int8 rowIndexBits;
-    __int16 entryCount;
-};
-struct FxElemVec3Range // sizeof=0x18
-{                                       // ...
-    float base[3];
-    float amplitude[3];
-};
-struct FxElemVisualState // sizeof=0x18
-{                                       // ...
-    unsigned __int8 color[4];
-    float rotationDelta;
-    float rotationTotal;                // ...
-    float size[2];                      // ...
-    float scale;
-};
-const struct FxElemVisStateSample // sizeof=0x30
-{
-    FxElemVisualState base;
-    FxElemVisualState amplitude;
-};
-struct FxElemVelStateInFrame // sizeof=0x30
-{                                       // ...
-    FxElemVec3Range velocity;
-    FxElemVec3Range totalDelta;
-};
-const struct FxElemVelStateSample // sizeof=0x60
-{
-    FxElemVelStateInFrame local;
-    FxElemVelStateInFrame world;
-};
-union FxEffectDefRef // sizeof=0x4
-{                                       // ...
-    const FxEffectDef* handle;
-    const char* name;
-};
-union FxElemVisuals // sizeof=0x4
-{                                       // ...
-    const void* anonymous;
-    Material* material;
-    XModel* model;
-    FxEffectDefRef effectDef;
-    const char* soundName;
-};
-struct FxElemMarkVisuals // sizeof=0x8
-{                                       // ...
-    Material* materials[2];
-};
-union FxElemDefVisuals // sizeof=0x4
-{                                       // ...
-    FxElemMarkVisuals* markArray;
-    FxElemVisuals* array;
-    FxElemVisuals instance;
-};
-struct FxTrailVertex // sizeof=0x14
-{                                       // ...
-    float pos[2];
-    float normal[2];
-    float texCoord;
-};
-struct FxTrailDef // sizeof=0x1C
-{
-    int scrollTimeMsec;
-    int repeatDist;
-    int splitDist;
-    int vertCount;
-    FxTrailVertex* verts;
-    int indCount;
-    unsigned __int16* inds;
-};
-const struct FxElemDef // sizeof=0xFC
-{
-    int flags;
-    FxSpawnDef spawn;
-    FxFloatRange spawnRange;
-    FxFloatRange fadeInRange;
-    FxFloatRange fadeOutRange;
-    float spawnFrustumCullRadius;
-    FxIntRange spawnDelayMsec;
-    FxIntRange lifeSpanMsec;
-    FxFloatRange spawnOrigin[3];
-    FxFloatRange spawnOffsetRadius;
-    FxFloatRange spawnOffsetHeight;
-    FxFloatRange spawnAngles[3];
-    FxFloatRange angularVelocity[3];
-    FxFloatRange initialRotation;
-    FxFloatRange gravity;
-    FxFloatRange reflectionFactor;
-    FxElemAtlas atlas;
-    unsigned __int8 elemType;
-    unsigned __int8 visualCount;
-    unsigned __int8 velIntervalCount;
-    unsigned __int8 visStateIntervalCount;
-    const FxElemVelStateSample* velSamples;
-    const FxElemVisStateSample* visSamples;
-    FxElemDefVisuals visuals;
-    float collMins[3];
-    float collMaxs[3];
-    FxEffectDefRef effectOnImpact;
-    FxEffectDefRef effectOnDeath;
-    FxEffectDefRef effectEmitted;
-    FxFloatRange emitDist;
-    FxFloatRange emitDistVariance;
-    FxTrailDef* trailDef;
-    unsigned __int8 sortOrder;
-    unsigned __int8 lightingFrac;
-    unsigned __int8 useItemClip;
-    unsigned __int8 unused[1];
-};
 
 struct DynEntityDef // sizeof=0x60
 {
@@ -1540,31 +1400,6 @@ struct GfxWorld // sizeof=0x2DC
 
 
 
-struct Glyph // sizeof=0x18
-{
-    unsigned __int16 letter;
-    char x0;
-    char y0;
-    unsigned __int8 dx;
-    unsigned __int8 pixelWidth;
-    unsigned __int8 pixelHeight;
-    // padding byte
-    float s0;
-    float t0;
-    float s1;
-    float t1;
-};
-struct Font_s // sizeof=0x18
-{                                       // ...
-    const char* fontName;
-    int pixelHeight;
-    int glyphCount;
-    Material* material;
-    Material* glowMaterial;
-    Glyph* glyphs;
-};
-
-
 struct rectDef_s // sizeof=0x18
 {                                       // ...
     float x;                            // ...
@@ -2138,16 +1973,6 @@ struct SndDriverGlobals // sizeof=0x4
     const char* name;
 };
 
-struct FxImpactEntry // sizeof=0x84
-{
-    const FxEffectDef* nonflesh[29];
-    const FxEffectDef* flesh[4];
-};
-struct FxImpactTable // sizeof=0x8
-{                                       // ...
-    const char* name;
-    FxImpactEntry* table;
-};
 struct RawFile // sizeof=0xC
 {                                       // ...
     const char* name;

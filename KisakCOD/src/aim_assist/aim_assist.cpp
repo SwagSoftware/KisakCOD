@@ -1,6 +1,6 @@
 #include "aim_assist.h"
 #include <qcommon/mem_track.h>
-
+#include <universal/com_math.h>
 //float const *const vec2_origin        82000d78     aim_assist.obj
 //float const *const vec3_origin        82000d80     aim_assist.obj
 //float const *const vec4_origin        82000d8c     aim_assist.obj

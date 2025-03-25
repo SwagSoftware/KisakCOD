@@ -50,48 +50,7 @@ struct clientControllers_t // sizeof=0x60
      unsigned __int8 tag_barrel;
      // padding byte
  };
- struct FxBoltAndSortOrder // sizeof=0x4
- {                                       // ...
-    unsigned __int32 dobjHandle : 12;
-    unsigned __int32 temporalBits : 2;
-    unsigned __int32 boneIndex : 10;
-    unsigned __int32 sortOrder : 8;
- };
- struct FxSpatialFrame // sizeof=0x1C
- {                                       // ...
-     float quat[4];
-     float origin[3];                    // ...
- };
- struct FxEffectDef // sizeof=0x20
- {                                       // ...
-     const char *name;
-     int flags;
-     int totalSize;
-     int msecLoopingLife;
-     int elemDefCountLooping;
-     int elemDefCountOneShot;
-     int elemDefCountEmission;
-     const FxElemDef *elemDefs;
- };
- struct FxEffect // sizeof=0x80
- {                                       // ...
-     const FxEffectDef *def;
-     volatile int status;
-     unsigned __int16 firstElemHandle[3];
-     unsigned __int16 firstSortedElemHandle;
-     unsigned __int16 firstTrailHandle;
-     unsigned __int16 randomSeed;
-     unsigned __int16 owner;
-     unsigned __int16 packedLighting;
-     FxBoltAndSortOrder boltAndSortOrder;
-     volatile int frameCount;
-     int msecBegin;
-     int msecLastUpdate;
-     FxSpatialFrame frameAtSpawn;
-     FxSpatialFrame frameNow;
-     FxSpatialFrame framePrev;
-     float distanceTraveled;
- };
+ 
  struct CEntFx // sizeof=0x8
  {                                       // ...
      int triggerTime;
