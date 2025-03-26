@@ -451,6 +451,9 @@ typedef struct dvar_s {
 	dvar_s *hashNext;
 } dvar_t;
 
+// LWSS: intellisense sucks
+#define dvar_t dvar_s
+
 //=============================================
 
 struct cspField_t // sizeof=0xC

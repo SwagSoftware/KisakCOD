@@ -134,7 +134,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\aim_assist\aim_assist.cpp" />
+    <ClCompile Include="src\bgame\bg_animation_mp.cpp" />
+    <ClCompile Include="src\bgame\bg_jump.cpp" />
+    <ClCompile Include="src\bgame\bg_mantle.cpp" />
+    <ClCompile Include="src\bgame\bg_misc.cpp" />
+    <ClCompile Include="src\bgame\bg_perks_mp.cpp" />
     <ClCompile Include="src\cgame\cg_localents.cpp" />
+    <ClCompile Include="src\cgame_mp\cg_ents_mp.cpp" />
     <ClCompile Include="src\cgame_mp\cg_view_mp.cpp" />
     <ClCompile Include="src\client\cl_console.cpp" />
     <ClCompile Include="src\client_mp\cl_ui_mp.cpp" />
@@ -158,10 +164,16 @@
     <ClCompile Include="src\gfx_d3d\r_cinematic.cpp" />
     <ClCompile Include="src\gfx_d3d\r_debug.cpp" />
     <ClCompile Include="src\gfx_d3d\r_debug_alloc.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_dvars.cpp" />
     <ClCompile Include="src\gfx_d3d\r_font.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_image.cpp" />
     <ClCompile Include="src\gfx_d3d\r_init.cpp" />
     <ClCompile Include="src\gfx_d3d\r_material.cpp" />
     <ClCompile Include="src\gfx_d3d\r_rendercmds.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_scene.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_sky.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_state_utils.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_utils.cpp" />
     <ClCompile Include="src\gfx_d3d\r_warn.cpp" />
     <ClCompile Include="src\gfx_d3d\r_workercmds.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
@@ -182,6 +194,7 @@
     <ClCompile Include="src\script\scr_stringlist.cpp" />
     <ClCompile Include="src\script\scr_variable.cpp" />
     <ClCompile Include="src\script\scr_vm.cpp" />
+    <ClCompile Include="src\server\sv_main.cpp" />
     <ClCompile Include="src\server_mp\sv_init_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_main_mp.cpp" />
     <ClCompile Include="src\stringed\stringed_hooks.cpp" />
@@ -197,6 +210,7 @@
     <ClCompile Include="src\universal\physicalmemory.cpp" />
     <ClCompile Include="src\universal\q_parse.cpp" />
     <ClCompile Include="src\universal\q_shared.cpp" />
+    <ClCompile Include="src\universal\surfaceflags.cpp" />
     <ClCompile Include="src\universal\win_common.cpp" />
     <ClCompile Include="src\universal\win_shared.cpp" />
     <ClCompile Include="src\win32\win_input.cpp" />
@@ -234,24 +248,38 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\aim_assist\aim_assist.h" />
+    <ClInclude Include="src\bgame\bg_local.h" />
+    <ClInclude Include="src\bgame\bg_public.h" />
+    <ClInclude Include="src\binklib\bink.h" />
+    <ClInclude Include="src\binklib\binktextures.h" />
+    <ClInclude Include="src\binklib\rad3d.h" />
+    <ClInclude Include="src\binklib\radbase.h" />
     <ClInclude Include="src\cgame\cg_local.h" />
     <ClInclude Include="src\cgame_mp\cg_local_mp.h" />
+    <ClInclude Include="src\cgame_mp\cg_public_mp.h" />
     <ClInclude Include="src\client\client.h" />
     <ClInclude Include="src\client_mp\client_mp.h" />
     <ClInclude Include="src\database\database.h" />
+    <ClInclude Include="src\gfx_d3d\fxprimitives.h" />
     <ClInclude Include="src\gfx_d3d\rb_backend.h" />
     <ClInclude Include="src\gfx_d3d\rb_logfile.h" />
     <ClInclude Include="src\gfx_d3d\rb_stats.h" />
     <ClInclude Include="src\gfx_d3d\r_buffers.h" />
     <ClInclude Include="src\gfx_d3d\r_cinematic.h" />
     <ClInclude Include="src\gfx_d3d\r_debug.h" />
+    <ClInclude Include="src\gfx_d3d\r_dvars.h" />
     <ClInclude Include="src\gfx_d3d\r_font.h" />
+    <ClInclude Include="src\gfx_d3d\r_image.h" />
     <ClInclude Include="src\gfx_d3d\r_image_load_db.h" />
     <ClInclude Include="src\gfx_d3d\r_init.h" />
     <ClInclude Include="src\gfx_d3d\r_material.h" />
     <ClInclude Include="src\gfx_d3d\r_material_load_db.h" />
     <ClInclude Include="src\gfx_d3d\r_rendercmds.h" />
+    <ClInclude Include="src\gfx_d3d\r_scene.h" />
+    <ClInclude Include="src\gfx_d3d\r_sky.h" />
+    <ClInclude Include="src\gfx_d3d\r_utils.h" />
     <ClInclude Include="src\gfx_d3d\r_workercmds.h" />
+    <ClInclude Include="src\msslib\mss.h" />
     <ClInclude Include="src\qcommon\bitarray.h" />
     <ClInclude Include="src\qcommon\cmd.h" />
     <ClInclude Include="src\qcommon\files.h" />
@@ -276,6 +304,7 @@
     <ClInclude Include="src\universal\profile.h" />
     <ClInclude Include="src\universal\q_parse.h" />
     <ClInclude Include="src\universal\q_shared.h" />
+    <ClInclude Include="src\universal\surfaceflags.h" />
     <ClInclude Include="src\win32\win_input.h" />
     <ClInclude Include="src\win32\win_local.h" />
     <ClInclude Include="src\win32\win_localize.h" />
@@ -295,6 +324,10 @@
     <ClInclude Include="src\zlib\zconf.h" />
     <ClInclude Include="src\zlib\zlib.h" />
     <ClInclude Include="src\zlib\zutil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="src\msslib\mss32.lib" />
+    <Library Include="src\msslib\mss32_2.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

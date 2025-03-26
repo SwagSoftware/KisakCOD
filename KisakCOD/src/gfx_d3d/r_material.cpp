@@ -13,6 +13,8 @@ const stream_source_info_t s_streamSourceInfo[16][9];
 const stream_dest_info_t s_streamDestInfo[12];
 const BuiltInMaterialTable s_builtInMaterials[50];
 
+bool g_generateOverrideTechniques;
+
 void __cdecl TRACK_r_material()
 {
     track_static_alloc_internal(&materialGlobals, 4100, "materialGlobals", 18);
@@ -419,5 +421,10 @@ bool __cdecl IsValidMaterialHandle(Material *const handle)
     if (((unsigned __int8)handle & 3) != 0)
         MyAssertHandler(".\\r_material.cpp", 1798, 0, "%s", "( 0x0003 & reinterpret_cast<int>( handle ) ) == 0x0");
     return handle && handle->info.name && *handle->info.name;
+}
+
+void __cdecl Material_PreventOverrideTechniqueGeneration()
+{
+    g_generateOverrideTechniques = 0;
 }
 

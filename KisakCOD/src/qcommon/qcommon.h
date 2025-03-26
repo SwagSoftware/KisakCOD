@@ -463,6 +463,8 @@ void __cdecl Dvar_Init();
 void __cdecl Dvar_ResetScriptInfo();
 char __cdecl Dvar_AnyLatchedValues();
 void __cdecl Dvar_ResetDvars(unsigned __int16 filter, DvarSetSource setSource);
+int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, char *filename);
+int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, unsigned int bufsize);
 
 // dvar_cmds
 void __cdecl TRACK_dvar_cmds();

@@ -1,5 +1,7 @@
 #include "r_debug.h"
 #include <qcommon/mem_track.h>
+#include "r_scene.h"
+#include <aim_assist/aim_assist.h>
 
 DebugGlobals debugGlobals;
 

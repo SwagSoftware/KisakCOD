@@ -14,9 +14,46 @@ enum MapType
     MAPTYPE_COUNT = 0x6,
 };
 
+enum surfaceType_t : __int32
+{                                       // ...
+    SF_TRIANGLES = 0x0,
+    SF_TRIANGLES_PRETESS = 0x1,
+    SF_BEGIN_STATICMODEL = 0x2,
+    SF_STATICMODEL_RIGID = 0x2,
+    SF_STATICMODEL_PRETESS = 0x3,
+    SF_STATICMODEL_CACHED = 0x4,
+    SF_STATICMODEL_SKINNED = 0x5,
+    SF_END_STATICMODEL = 0x6,
+    SF_BMODEL = 0x6,
+    SF_BEGIN_XMODEL = 0x7,
+    SF_XMODEL_RIGID = 0x7,
+    SF_XMODEL_RIGID_SKINNED = 0x8,
+    SF_XMODEL_SKINNED = 0x9,
+    SF_END_XMODEL = 0xA,
+    SF_BEGIN_FX = 0xA,
+    SF_CODE_MESH = 0xA,
+    SF_MARK_MESH = 0xB,
+    SF_PARTICLE_CLOUD = 0xC,
+    SF_END_FX = 0xD,
+    SF_NUM_SURFACE_TYPES = 0xD,
+    SF_FORCE_32_BITS = -0x1,
+};
+
 union GfxColor // sizeof=0x4
 {                                       // ...
-    unsigned int packed;
+    operator unsigned int()
+    {
+        return packed;
+    }
+    GfxColor()
+    {
+        packed = 0;
+    }
+    GfxColor(int i)
+    {
+        packed = i;
+    }
+    unsigned unsigned int packed;
     unsigned __int8 array[4];
 };
 
@@ -437,3 +474,4 @@ void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl *callback)(Mater
 void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader *userData);
 bool __cdecl IsValidMaterialHandle(Material *const handle);
 
+void __cdecl Material_PreventOverrideTechniqueGeneration();

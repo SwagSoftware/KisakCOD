@@ -2,6 +2,8 @@
 #include <xanim/xanim.h>
 #include <win32/win_local.h>
 #include <cstddef>
+#include <gfx_d3d/fxprimitives.h>
+#include <zlib/zlib.h>
 
 union XAssetHeader // sizeof=0x4
 {                                       // ...

@@ -6,6 +6,7 @@
 #include "com_files.h"
 #include "com_memory.h"
 #include <stringed/stringed_hooks.h>
+#include "q_parse.h"
 
 static FastCriticalSection g_dvarCritSect;
 
@@ -3570,3 +3571,88 @@ void __cdecl Dvar_ResetDvars(unsigned __int16 filter, DvarSetSource setSource)
     InterlockedDecrement(&g_dvarCritSect.readCount);
 }
 
+int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, unsigned int bufsize)
+{
+    const char *string; // [esp+0h] [ebp-10h]
+    int written; // [esp+4h] [ebp-Ch]
+    unsigned int i; // [esp+8h] [ebp-8h]
+    const dvar_s *dvar; // [esp+Ch] [ebp-4h]
+
+    for (i = 0; i < numDvars; ++i)
+    {
+        dvar = Dvar_FindVar(dvarnames[i]);
+        if (!dvar)
+            MyAssertHandler(".\\universal\\dvar.cpp", 2454, 0, "%s", "dvar");
+        string = Dvar_DisplayableValue(dvar);
+        written = _snprintf(buffer, bufsize, "%s \"%s\"\n", dvar->name, string);
+        if (written < 0)
+            return 0;
+        buffer += written;
+        bufsize -= written;
+    }
+    return 1;
+}
+
+int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, char *filename)
+{
+    const char *v4; // eax
+    unsigned __int8 dst[16388]; // [esp+0h] [ebp-4018h] BYREF
+    unsigned int i; // [esp+4008h] [ebp-10h]
+    char *s0; // [esp+400Ch] [ebp-Ch]
+    dvar_s *dvar; // [esp+4010h] [ebp-8h]
+    int v10; // [esp+4014h] [ebp-4h]
+
+    if (numDvars >= 0x4000)
+        MyAssertHandler(".\\universal\\dvar.cpp", 2486, 0, "%s", "numDvars < ARRAY_COUNT( wasRead )");
+    memset(dst, 0, numDvars);
+    v10 = 0;
+    for (i = 0; i < numDvars; ++i)
+    {
+        dvar = (dvar_s *)Dvar_FindVar(dvarnames[i]);
+        if (!dvar)
+        {
+            v4 = va("Unable to find dvar '%s'", dvarnames[i]);
+            MyAssertHandler(".\\universal\\dvar.cpp", 2493, 0, "%s\n\t%s", "dvar", v4);
+        }
+        Dvar_Reset(dvar, DVAR_SOURCE_INTERNAL);
+    }
+    Com_BeginParseSession(filename);
+    while (1)
+    {
+        s0 = (char *)Com_Parse((const char **)&buffer);
+        if (!*s0)
+            break;
+        for (i = 0; ; ++i)
+        {
+            if (i >= numDvars)
+            {
+                Com_PrintWarning(16, "WARNING: unknown dvar '%s' in file '%s'\n", s0, filename);
+                goto next_dvar;
+            }
+            if (!I_stricmp(s0, dvarnames[i]))
+                break;
+        }
+        dvar = (dvar_s *)Dvar_FindVar(dvarnames[i]);
+        if (!dvar)
+            MyAssertHandler(".\\universal\\dvar.cpp", 2509, 0, "%s", "dvar");
+        s0 = (char *)Com_ParseOnLine((const char **)&buffer);
+        Dvar_SetFromString(dvar, s0);
+        if (!dst[i])
+        {
+            dst[i] = 1;
+            ++v10;
+        }
+    next_dvar:
+        Com_SkipRestOfLine((const char **)&buffer);
+    }
+    Com_EndParseSession();
+    if (v10 == numDvars)
+        return 1;
+    Com_PrintError(16, "ERROR: the following dvars were not specified in file '%s'\n", filename);
+    for (i = 0; i < numDvars; ++i)
+    {
+        if (!dst[i])
+            Com_PrintError(16, "  %s\n", dvarnames[i]);
+    }
+    return 0;
+}

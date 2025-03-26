@@ -359,6 +359,7 @@ void __cdecl RB_Stats_UpdateMaxs(const GfxFrameStats *frameStatsCur, GfxFrameSta
     }
 }
 
+int histogramHistoryIndex;
 void __cdecl RB_DrawPrimHistogramOverlay()
 {
     const char *v0; // eax

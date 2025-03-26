@@ -1,6 +1,7 @@
 #include "rb_backend.h"
 #include <qcommon/mem_track.h>
 
+#include "rb_logfile.h"
 // __Eg_fltMin@@YAXXZ       82790558 f   gfx_d3d : rb_backend.obj
 // __Eg_negativeZero@@YAXXZ 82790578 f   gfx_d3d : rb_backend.obj
 // __Eg_inc@@YAXXZ          82790598 f   gfx_d3d : rb_backend.obj
