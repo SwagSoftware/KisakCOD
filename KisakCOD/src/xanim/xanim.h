@@ -775,39 +775,6 @@ struct GfxPlacement // sizeof=0x1C
     float origin[3];                    // ...
 };
 
-struct DynEntityDef // sizeof=0x60
-{
-    DynEntityType type;
-    GfxPlacement pose;
-    XModel* xModel;
-    unsigned __int16 brushModel;
-    unsigned __int16 physicsBrushModel;
-    const FxEffectDef* destroyFx;
-    XModelPieces* destroyPieces;
-    PhysPreset* physPreset;
-    int health;
-    PhysMass mass;
-    int contents;
-};
-struct DynEntityPose // sizeof=0x20
-{
-    GfxPlacement pose;
-    float radius;
-};
-struct DynEntityClient // sizeof=0xC
-{
-    int physObjId;
-    unsigned __int16 flags;
-    unsigned __int16 lightingHandle;
-    int health;
-};
-struct DynEntityColl // sizeof=0x14
-{
-    unsigned __int16 sector;
-    unsigned __int16 nextEntInSector;
-    float linkMins[2];
-    float linkMaxs[2];
-};
 struct clipMap_t // sizeof=0x11C
 {                                       // ...
     const char* name;                   // ...

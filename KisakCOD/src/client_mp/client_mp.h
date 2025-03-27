@@ -1173,3 +1173,156 @@ extern clientActive_t clients[MAX_CLIENTS];
 extern dvar_t *name;
 
 extern clientStatic_t cls;
+
+
+inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int localClientNum)
+{
+    if (!clients)
+        MyAssertHandler("c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h", 1081, 0, "%s", "clients");
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
+            1087,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    return clients;
+}
+
+// cl_cgame_mp
+struct MemoryFile // sizeof=0x1C
+{                                       // ...
+    unsigned __int8 *buffer;            // ...
+    int bufferSize;
+    int bytesUsed;                      // ...
+    int segmentIndex;
+    int segmentStart;
+    bool errorOnOverflow;
+    bool memoryOverflow;
+    bool compress;
+    // padding byte
+    void(__cdecl *archiveProc)(MemoryFile *, int, void *);
+};
+void __cdecl TRACK_cl_cgame();
+void __cdecl CL_GetScreenDimensions(int *width, int *height, float *aspect);
+double __cdecl CL_GetScreenAspectRatioDisplayPixel();
+int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd);
+int __cdecl CL_GetCurrentCmdNumber(int localClientNum);
+void __cdecl CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNumber, int *serverTime);
+int __cdecl CL_GetSnapshot(int localClientNum, int snapshotNumber, snapshot_s *snapshot);
+void __cdecl CL_SetUserCmdWeapons(int localClientNum, int weapon, int offHandIndex);
+void __cdecl CL_SetUserCmdAimValues(int localClientNum, const float *kickAngles);
+void __cdecl CL_SetUserCmdOrigin(
+    int localClientNum,
+    const float *origin,
+    const float *velocity,
+    const float *viewangles,
+    int bobCycle,
+    int movementDir);
+void __cdecl CL_SetFOVSensitivityScale(int localClientNum, float scale);
+void __cdecl CL_SetExtraButtons(int localClientNum, int buttons);
+void __cdecl CL_DumpReliableCommands(int localClientNum);
+int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumber);
+void __cdecl CL_ConfigstringModified(int localClientNum);
+void __cdecl CL_CM_LoadMap(char *mapname);
+void __cdecl CL_ShutdownCGame(int localClientNum);
+bool __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex);
+void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration, int lineWidth);
+char *__cdecl CL_GetConfigString(int localClientNum, unsigned int configStringIndex);
+snd_alias_t *__cdecl CL_PickSoundAlias(const char *aliasname);
+void __cdecl CL_RenderScene(const refdef_s *fd);
+void __cdecl CL_DrawStretchPicPhysical(
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
+    const float *color,
+    Material *material);
+void __cdecl CL_DrawStretchPicPhysicalRotateXY(
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
+    float angle,
+    const float *color,
+    Material *material);
+void __cdecl CL_DrawStretchPicPhysicalFlipST(
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
+    const float *color,
+    Material *material);
+void __cdecl CL_DrawStretchPic(
+    const ScreenPlacement *scrPlace,
+    float x,
+    float y,
+    float w,
+    float h,
+    int horzAlign,
+    int vertAlign,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
+    const float *color,
+    Material *material);
+void __cdecl CL_DrawStretchPicFlipST(
+    const ScreenPlacement *scrPlace,
+    float x,
+    float y,
+    float w,
+    float h,
+    int horzAlign,
+    int vertAlign,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
+    const float *color,
+    Material *material);
+void __cdecl CL_DrawStretchPicRotatedST(
+    const ScreenPlacement *scrPlace,
+    float x,
+    float y,
+    float w,
+    float h,
+    int horzAlign,
+    int vertAlign,
+    float centerS,
+    float centerT,
+    float radiusST,
+    float scaleFinalS,
+    float scaleFinalT,
+    float angle,
+    const float *color,
+    Material *material);
+void __cdecl CL_CapTurnRate(int localClientNum, float maxPitchSpeed, float maxYawSpeed);
+void __cdecl CL_SyncTimes(int localClientNum);
+int __cdecl LoadWorld(char *mapname);
+void __cdecl CL_StartLoading();
+void __cdecl CL_InitCGame(int localClientNum);
+void __cdecl CL_FirstSnapshot(int localClientNum);
+void __cdecl CL_SetCGameTime(netsrc_t localClientNum);
+void __cdecl CL_AdjustTimeDelta(int localClientNum);
+void __cdecl CL_SetADS(int localClientNum, bool ads);
+void __cdecl CL_DrawString(int x, int y, char *pszString, int bShadow, int iCharHeight);
+void __cdecl CL_DrawRect(int x, int y, int width, int height, const float *color);
+void __cdecl CL_ArchiveClientState(int localClientNum, MemoryFile *memFile);
+void __cdecl CL_LookupColor(int localClientNum, unsigned __int8 c, float *color);
+void __cdecl CL_UpdateColor(int localClientNum);
+void __cdecl CL_UpdateColorInternal(const char *var_name, float *color);
+int __cdecl CL_IsCgameInitialized(int localClientNum);

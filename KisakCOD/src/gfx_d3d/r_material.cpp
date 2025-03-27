@@ -3,11 +3,7 @@
 #include <universal/com_memory.h>
 #include <qcommon/mem_track.h>
 
-struct //$1885470E9E0F585A5936AD9F9DCB543E // sizeof=0x1004
-{                                       // ...
-    int techniqueSetCount;
-    MaterialTechniqueSet *techniqueSetHashTable[1024]; // ...
-} materialGlobals;
+MaterialGlobals materialGlobals;
 
 const stream_source_info_t s_streamSourceInfo[16][9];
 const stream_dest_info_t s_streamDestInfo[12];
@@ -245,15 +241,15 @@ Material *__cdecl Material_Register_FastFile(const char *name)
     return DB_FindXAssetHeader(ASSET_TYPE_MATERIAL, name).material;
 }
 
-Material *__cdecl Material_Register(char *name, int imageTrack)
+Material *__cdecl Material_Register(const char *name, int imageTrack)
 {
     if (useFastFile->current.enabled)
-        return (Material *)((int(__cdecl *)(char *, int))Material_Register_FastFile)(name, imageTrack);
+        return Material_Register_FastFile(name);
     else
         return Material_Register_LoadObj(name, imageTrack);
 }
 
-Material *__cdecl Material_RegisterHandle(char *name, int imageTrack)
+Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack)
 {
     if (!name)
         MyAssertHandler(".\\r_material.cpp", 1324, 0, "%s", "name");

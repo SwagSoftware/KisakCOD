@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../universal/q_shared.h"
+#include <gfx_d3d/r_scene.h>
 
 typedef enum
 {
@@ -621,3 +622,290 @@ void __cdecl Com_InitDObj();
 void __cdecl Com_ShutdownDObj();
 void __cdecl DB_SaveDObjs();
 void __cdecl DB_LoadDObjs();
+
+
+/*
+==============================================================
+
+TRACES
+
+==============================================================
+*/
+// cm_trace
+struct TraceExtents // sizeof=0x24
+{                                       // ...
+    float start[3];                     // ...
+    float end[3];                       // ...
+    float invDelta[3];
+};
+struct locTraceWork_t // sizeof=0x28
+{                                       // ...
+    int contents;                       // ...
+    TraceExtents extents;               // ...
+};
+struct traceWork_t // sizeof=0xB0
+{                                       // ...
+    TraceExtents extents;               // ...
+    float delta[3];                     // ...
+    float deltaLen;                     // ...
+    float deltaLenSq;                   // ...
+    float midpoint[3];                  // ...
+    float halfDelta[3];                 // ...
+    float halfDeltaAbs[3];              // ...
+    float size[3];                      // ...
+    float bounds[2][3];                 // ...
+    int contents;                       // ...
+    bool isPoint;                       // ...
+    bool axialCullOnly;
+    // padding byte
+    // padding byte
+    float radius;                       // ...
+    float offsetZ;                      // ...
+    float radiusOffset[3];              // ...
+    float boundingRadius;               // ...
+    TraceThreadInfo threadInfo;         // ...
+};
+struct IgnoreEntParams // sizeof=0xC
+{                                       // ...
+    int baseEntity;                     // ...
+    int parentEntity;                   // ...
+    bool ignoreSelf;                    // ...
+    bool ignoreParent;                  // ...
+    bool ignoreSiblings;                // ...
+    bool ignoreChildren;                // ...
+};
+struct pointtrace_t // sizeof=0x34
+{                                       // ...
+    TraceExtents extents;               // ...
+    const IgnoreEntParams *ignoreEntParams; // ...
+    int contentmask;                    // ...
+    int bLocational;                    // ...
+    unsigned __int8 *priorityMap;       // ...
+};
+struct moveclip_t // sizeof=0x54
+{
+    float mins[3];
+    float maxs[3];
+    float outerSize[3];
+    TraceExtents extents;
+    int passEntityNum;
+    int passOwnerNum;
+    int contentmask;
+};
+unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace);
+unsigned __int16 __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *drawType);
+unsigned int __cdecl CM_TempBoxModel(const float *mins, const float *maxs, int contents);
+void __cdecl CM_GetBox(cbrush_t **box_brush, cmodel_t **box_model);
+bool __cdecl CM_ClipHandleIsValid(unsigned int handle);
+cmodel_t *__cdecl CM_ClipHandleToModel(unsigned int handle);
+int __cdecl CM_ContentsOfModel(unsigned int handle);
+void __cdecl CM_BoxTrace(
+    trace_t *results,
+    const float *start,
+    float *end,
+    const float *mins,
+    const float *maxs,
+    unsigned int model,
+    int brushmask);
+void __cdecl CM_Trace(
+    trace_t *results,
+    const float *start,
+    float *end,
+    const float *mins,
+    const float *maxs,
+    unsigned int model,
+    int brushmask);
+void __cdecl CM_GetTraceThreadInfo(TraceThreadInfo *threadInfo);
+void __cdecl CM_TestInLeaf(traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
+bool __cdecl CM_TestInLeafBrushNode(traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
+void __cdecl CM_TestInLeafBrushNode_r(const traceWork_t *tw, cLeafBrushNode_s *node, trace_t *trace);
+void __cdecl CM_TestBoxInBrush(const traceWork_t *tw, cbrush_t *brush, trace_t *trace);
+void __cdecl CM_TestCapsuleInCapsule(const traceWork_t *tw, trace_t *trace);
+void __cdecl CM_PositionTest(traceWork_t *tw, trace_t *trace);
+void __cdecl CM_TraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
+bool __cdecl CM_TraceThroughLeafBrushNode(const traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
+void __cdecl CM_TraceThroughLeafBrushNode_r(
+    const traceWork_t *tw,
+    cLeafBrushNode_s *node,
+    const float *p1_,
+    __int64 p2);
+void __cdecl CM_TraceThroughBrush(const traceWork_t *tw, cbrush_t *brush, trace_t *trace);
+void __cdecl CM_TraceCapsuleThroughCapsule(const traceWork_t *tw, trace_t *trace);
+int __cdecl CM_TraceSphereThroughSphere(
+    const traceWork_t *tw,
+    const float *vStart,
+    const float *vEnd,
+    const float *vStationary,
+    float radius,
+    trace_t *trace);
+int __cdecl CM_TraceCylinderThroughCylinder(
+    const traceWork_t *tw,
+    const float *vStationary,
+    float fStationaryHalfHeight,
+    float radius,
+    trace_t *trace);
+void __cdecl CM_TraceThroughTree(const traceWork_t *tw, int num, const float *p1_, const float *p2, trace_t *trace);
+void __cdecl CM_SetAxialCullOnly(traceWork_t *tw);
+void __cdecl CM_TransformedBoxTraceRotated(
+    trace_t *results,
+    const float *start,
+    const float *end,
+    const float *mins,
+    const float *maxs,
+    unsigned int model,
+    int brushmask,
+    const float *origin,
+    float (*matrix)[3]);
+void __cdecl CM_TransformedBoxTrace(
+    trace_t *results,
+    const float *start,
+    const float *end,
+    const float *mins,
+    const float *maxs,
+    __int64 model,
+    const float *origin,
+    const float *angles);
+void __cdecl CM_TransformedBoxTraceExternal(
+    trace_t *results,
+    const float *start,
+    const float *end,
+    const float *mins,
+    const float *maxs,
+    __int64 model,
+    const float *origin,
+    const float *angles);
+int __cdecl CM_BoxSightTrace(
+    int oldHitNum,
+    const float *start,
+    const float *end,
+    const float *mins,
+    const float *maxs,
+    unsigned int model,
+    int brushmask);
+int __cdecl CM_SightTraceThroughBrush(const traceWork_t *tw, cbrush_t *brush);
+int __cdecl CM_SightTraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
+int __cdecl CM_SightTraceThroughLeafBrushNode(const traceWork_t *tw, cLeaf_t *leaf);
+int __cdecl CM_SightTraceThroughLeafBrushNode_r(
+    const traceWork_t *tw,
+    cLeafBrushNode_s *node,
+    const float *p1_,
+    const float *p2);
+int __cdecl CM_SightTraceCapsuleThroughCapsule(const traceWork_t *tw, trace_t *trace);
+bool __cdecl CM_SightTraceSphereThroughSphere(
+    const traceWork_t *tw,
+    const float *vStart,
+    const float *vEnd,
+    const float *vStationary,
+    float radius,
+    trace_t *trace);
+bool __cdecl CM_SightTraceCylinderThroughCylinder(
+    const traceWork_t *tw,
+    const float *vStationary,
+    float fStationaryHalfHeight,
+    float radius,
+    trace_t *trace);
+int __cdecl CM_SightTraceThroughTree(const traceWork_t *tw, int num, const float *p1_, const float *p2, trace_t *trace);
+int __cdecl CM_TransformedBoxSightTrace(
+    int hitNum,
+    const float *start,
+    const float *end,
+    const float *mins,
+    const float *maxs,
+    unsigned int model,
+    int brushmask,
+    const float *origin,
+    const float *angles);
+
+// cm_load
+void __cdecl TRACK_cm_load();
+void __cdecl CM_LoadMap(const char *name, int *checksum);
+void CM_InitAllThreadData();
+void __cdecl CM_InitThreadData(unsigned int threadContext);
+void __cdecl CM_LoadMapData(const char *name);
+void __cdecl CM_LoadMapData_FastFile(const char *name);
+void __cdecl CM_LoadMapFromBsp(const char *name, bool usePvs);
+void __cdecl CM_Shutdown();
+void __cdecl CM_Unload();
+int __cdecl CM_LeafCluster(unsigned int leafnum);
+void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs);
+
+extern clipMap_t cm;
+
+// cm_load_obj
+void __cdecl CM_LoadMapData_LoadObj(const char *name);
+
+
+
+/*
+==============================================================
+
+Profiler
+
+==============================================================
+*/
+enum MapProfileTrackedValue : __int32
+{                                       // ...
+    MAP_PROFILE_FILE_OPEN = 0x0,
+    MAP_PROFILE_FILE_SEEK = 0x1,
+    MAP_PROFILE_FILE_READ = 0x2,
+    MAP_PROFILE_VALUE_MAX = 0x3,
+};
+struct MapProfileElement // sizeof=0x18
+{                                       // ...
+    unsigned __int64 ticksStart;
+    unsigned __int64 ticksTotal;
+    unsigned __int64 ticksSelf;
+};
+struct MapProfileEntry // sizeof=0x70
+{                                       // ...
+    const char *label;
+    int accessCount;
+    unsigned __int64 ticksStart;
+    unsigned __int64 ticksTotal;
+    unsigned __int64 ticksSelf;
+    int indent;
+    MapProfileEntry *parent;
+    MapProfileElement elements[3];
+};
+struct MapProfileHotSpot // sizeof=0x18
+{                                       // ...
+    const char *label;                  // ...
+    int accessCount;                    // ...
+    __int64 ticksSelf;                  // ...
+    __int64 ticksFile;                  // ...
+};
+
+void __cdecl TRACK_com_profilemapload();
+bool __cdecl ProfLoad_IsActive();
+void __cdecl ProfLoad_BeginTrackedValue(MapProfileTrackedValue type);
+void __cdecl ProfLoad_BeginTrackedValueTicks(MapProfileElement *value, unsigned __int64 ticks);
+void __cdecl ProfLoad_EndTrackedValue(MapProfileTrackedValue type);
+void __cdecl ProfLoad_EndTrackedValueTicks(MapProfileElement *value, unsigned __int64 ticks);
+void __cdecl ProfLoad_Init();
+void __cdecl ProfLoad_Activate();
+void __cdecl ProfLoad_Deactivate();
+void  ProfLoad_Print();
+void ProfLoad_CalculateSelfTicks();
+int ProfLoad_PrintTree();
+void __cdecl ProfLoad_GetEntryRowText(const MapProfileEntry *entry, char *rowText, int sizeofRowText);
+void ProfLoad_PrintHotSpots();
+bool __cdecl ProfLoad_CompareHotSpotNames(const MapProfileHotSpot *hotSpot0, const MapProfileHotSpot *hotSpot1);
+bool __cdecl ProfLoad_CompareHotSpotTicks(const MapProfileHotSpot *hotSpot0, const MapProfileHotSpot *hotSpot1);
+void __cdecl ProfLoad_Begin(const char *label);
+MapProfileEntry *__cdecl Com_GetEntryForNewLabel(const char *label);
+void __cdecl ProfLoad_End();
+void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect);
+int ProfLoad_DrawTree();
+
+extern const dvar_t *com_profileLoading;
+
+// statmonitor
+struct statmonitor_s // sizeof=0x8
+{                                       // ...
+    int endtime;                        // ...
+    Material *material;                 // ...
+};
+void __cdecl TRACK_statmonitor();
+void __cdecl StatMon_Warning(int type, int duration, const char *materialName);
+void __cdecl StatMon_GetStatsArray(const statmonitor_s **array, int *count);
+void __cdecl StatMon_Reset();

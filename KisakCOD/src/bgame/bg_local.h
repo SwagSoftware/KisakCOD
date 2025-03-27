@@ -357,3 +357,150 @@ shellshock_parms_t *__cdecl BG_GetShellshockParms(unsigned int index);
 void __cdecl BG_CreateXAnim(XAnim_s *anims, unsigned int animIndex, char *name);
 void __cdecl BG_CheckThread();
 int __cdecl BG_GetMaxSprintTime(const playerState_s *ps);
+
+
+// bg_perks_mp
+unsigned int __cdecl BG_GetPerkIndexForName(const char *perkName);
+void __cdecl Perks_RegisterDvars();
+
+// bg_pmove
+enum PmStanceFrontBack : __int32
+{                                       // ...
+    PM_STANCE_STAND = 0x0,
+    PM_STANCE_PRONE = 0x1,
+    PM_STANCE_CROUCH = 0x2,
+    PM_STANCE_BACKWARD_FIRST = 0x3,
+    PM_STANCE_BACKWARD_RUN = 0x3,
+    PM_STANCE_BACKWARD_PRONE = 0x4,
+    PM_STANCE_BACKWARD_CROUCH = 0x5,
+    NUM_PM_STANCE_FRONTBACK = 0x6,
+};
+struct viewLerpWaypoint_s // sizeof=0xC
+{                                       // ...
+    int iFrac;
+    float fViewHeight;
+    int iOffset;
+};
+void __cdecl PM_trace(
+    pmove_t *pm,
+    trace_t *results,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
+    int passEntityNum,
+    int contentMask);
+void __cdecl PM_playerTrace(
+    pmove_t *pm,
+    trace_t *results,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
+    int passEntityNum,
+    int contentMask);
+void __cdecl PM_AddEvent(playerState_s *ps, unsigned int newEvent);
+void __cdecl PM_AddTouchEnt(pmove_t *pm, int entityNum);
+void __cdecl PM_ClipVelocity(const float *in, const float *normal, float *out);
+void __cdecl PM_ProjectVelocity(const float *velIn, const float *normal, float *velOut);
+int __cdecl PM_GetEffectiveStance(const playerState_s *ps);
+int __cdecl PM_GetSprintLeft(const playerState_s *ps, int gametime);
+int __cdecl PM_GetSprintLeftLastTime(const playerState_s *ps);
+bool __cdecl PM_IsSprinting(const playerState_s *ps);
+double __cdecl PM_DamageScale_Walk(int damage_timer);
+unsigned int __cdecl PM_GroundSurfaceType(pml_t *pml);
+int __cdecl PM_GetViewHeightLerpTime(const playerState_s *ps, int iTarget, int bDown);
+bool __cdecl PlayerProneAllowed(pmove_t *pm);
+void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char iNewBobCycle, int bFootStep);
+int __cdecl PM_FootstepType(playerState_s *ps, pml_t *pml);
+bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm);
+void __cdecl PM_UpdateLean(
+    playerState_s *ps,
+    float msec,
+    usercmd_s *cmd,
+    void(__cdecl *capsuleTrace)(trace_t *, float *, float *, float *, float *, int));
+void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, unsigned __int8 handler);
+void __cdecl PM_UpdateViewAngles_Clamp(playerState_s *ps, usercmd_s *cmd);
+void __cdecl PM_UpdateViewAngles_RangeLimited(playerState_s *ps, float oldYaw);
+void __cdecl PM_UpdateViewAngles_LadderClamp(playerState_s *ps);
+void __cdecl PM_UpdateViewAngles_Prone(
+    playerState_s *ps,
+    float msec,
+    usercmd_s *cmd,
+    unsigned __int8 handler,
+    float oldViewYaw);
+int __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, unsigned __int8 handler);
+void __cdecl PM_UpdateViewAngles_ProneYawClamp(
+    playerState_s *ps,
+    float delta,
+    int proneBlocked,
+    float oldViewYaw,
+    float newViewYaw);
+void __cdecl PM_UpdateViewAngles_PronePitchClamp(playerState_s *ps);
+void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml);
+void __cdecl PM_SetProneMovementOverride(playerState_s *ps);
+void __cdecl PM_MeleeChargeStart(pmove_t *pm);
+void __cdecl PM_MeleeChargeClear(playerState_s *ps);
+void __cdecl Pmove(pmove_t *pm);
+void __cdecl PmoveSingle(pmove_t *pm);
+void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml);
+void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, int sprintLeft);
+void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm);
+bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int forwardSpeed, __int16 buttons);
+bool __cdecl PM_SprintEndingButtons(const playerState_s *ps, int forwardSpeed, __int16 buttons);
+bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm);
+void __cdecl PM_FlyMove(pmove_t *pm, pml_t *pml);
+void __cdecl Vec3Cross(const float *v0, const float *v1, float *cross);
+void __cdecl PM_Friction(playerState_s *ps, pml_t *pml);
+void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wishdir, float wishspeed, float accel);
+double __cdecl PM_PlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
+char __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
+double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float umove);
+double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd);
+void __cdecl PM_AirMove(pmove_t *pm, pml_t *pml);
+void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml);
+void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml);
+double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd);
+double __cdecl PM_CmdScaleForStance(const pmove_t *pm);
+void __cdecl PM_DeadMove(playerState_s *ps, pml_t *pml);
+void __cdecl PM_NoclipMove(pmove_t *pm, pml_t *pml);
+void __cdecl PM_UFOMove(pmove_t *pm, pml_t *pml);
+void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml);
+void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml);
+int __cdecl PM_LightLandingForSurface(pml_t *pml);
+int __cdecl PM_MediumLandingForSurface(pml_t *pml);
+unsigned int __cdecl PM_HardLandingForSurface(pml_t *pml);
+unsigned int __cdecl PM_DamageLandingForSurface(pml_t *pml);
+int __cdecl PM_CorrectAllSolid(pmove_t *pm, pml_t *pml, trace_t *trace);
+void __cdecl PM_GroundTraceMissed(pmove_t *pm, pml_t *pml);
+double __cdecl PM_GetViewHeightLerp(const pmove_t *pm, int iFromHeight, int iToHeight);
+bool __cdecl PM_IsPlayerFrozenByWeapon(const playerState_s *ps);
+void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml);
+void __cdecl PM_ViewHeightAdjust(pmove_t *pm, pml_t *pml);
+double __cdecl PM_ViewHeightTableLerp(int iFrac, viewLerpWaypoint_s *pTable, float *pfPosOfs);
+void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml);
+double __cdecl Vec2Length(const float *v);
+int __cdecl PM_GetStanceEx(int stance, int backward);
+void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml);
+void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int stance);
+unsigned int __cdecl PM_GetFlinchAnim(unsigned int flinchAnimDir);
+int __cdecl PM_Footsteps_TurnAnim(clientInfo_t *ci);
+scriptAnimMoveTypes_t __cdecl PM_GetNotMovingAnim(int stance, int turnAdjust);
+bool __cdecl PM_ShouldFlinch(playerState_s *ps);
+double __cdecl PM_GetMaxSpeed(pmove_t *pm, int walking, int sprinting);
+double __cdecl PM_GetBobMove(PmStanceFrontBack stance, float xyspeed, float fMaxSpeed, int walking, int sprinting);
+int __cdecl PM_GetStanceIdleAnim(char stanceFlag);
+int __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int walking, int sprinting);
+void __cdecl PM_SetStrafeCondition(pmove_t *pm);
+void __cdecl PM_Footstep_NotTryingToMove(pmove_t *pm);
+void __cdecl PM_FoliageSounds(pmove_t *pm);
+void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml);
+void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm);
+void __cdecl PM_ClearLadderFlag(playerState_s *ps);
+void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml);
+void __cdecl PM_SetLadderFlag(playerState_s *ps);
+void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml);
+void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml);
+void __cdecl TurretNVGTrigger(pmove_t *pm);
+double __cdecl BG_GetSpeed(const playerState_s *ps, int time);
+

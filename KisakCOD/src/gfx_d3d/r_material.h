@@ -443,6 +443,12 @@ struct BuiltInMaterialTable // sizeof=0x8
     Material **material;
 };
 
+struct MaterialGlobals
+{
+    int techniqueSetCount;
+    MaterialTechniqueSet *techniqueSetHashTable[1024]; // ...
+};
+
 void __cdecl TRACK_r_material();
 unsigned __int8 *__cdecl Material_Alloc(unsigned int size);
 void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, MaterialPixelShader *mtlShader);
@@ -461,7 +467,7 @@ void __cdecl Material_DirtySort();
 bool __cdecl Material_IsDefault(const Material *material);
 Material *__cdecl Material_Register_FastFile(const char *name);
 Material *__cdecl Material_Register(char *name, int imageTrack);
-Material *__cdecl Material_RegisterHandle(char *name, int imageTrack);
+Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack);
 void __cdecl R_MaterialList_f();
 void __cdecl R_GetMaterialList(XAssetHeader header, char *data);
 int __cdecl R_GetMaterialMemory(Material *material);
@@ -475,3 +481,10 @@ void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader *us
 bool __cdecl IsValidMaterialHandle(Material *const handle);
 
 void __cdecl Material_PreventOverrideTechniqueGeneration();
+
+extern MaterialGlobals materialGlobals;
+
+// r_material_load_obj
+MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
+    const char *name,
+    MtlTechSetNotFoundBehavior notFoundBehavior);

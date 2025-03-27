@@ -1,5 +1,6 @@
 #pragma once
 #include "r_material.h"
+#include "r_material.h"
 
 enum GfxRenderCommand : __int32
 {                                       // ...
