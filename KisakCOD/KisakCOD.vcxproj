@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\aim_assist\aim_assist.cpp" />
+    <ClCompile Include="src\aim_assist\aim_target_mp.cpp" />
     <ClCompile Include="src\bgame\bg_animation_mp.cpp" />
     <ClCompile Include="src\bgame\bg_jump.cpp" />
     <ClCompile Include="src\bgame\bg_mantle.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="src\cgame\cg_drawtools.cpp" />
     <ClCompile Include="src\cgame\cg_localents.cpp" />
     <ClCompile Include="src\cgame_mp\cg_ents_mp.cpp" />
+    <ClCompile Include="src\cgame_mp\cg_main_mp.cpp" />
     <ClCompile Include="src\cgame_mp\cg_view_mp.cpp" />
     <ClCompile Include="src\client\cl_console.cpp" />
     <ClCompile Include="src\client_mp\cl_cgame_mp.cpp" />
@@ -162,6 +164,21 @@
     <ClCompile Include="src\DynEntity\DynEntity_client.cpp" />
     <ClCompile Include="src\DynEntity\DynEntity_load_obj.cpp" />
     <ClCompile Include="src\DynEntity\DynEntity_pieces.cpp" />
+    <ClCompile Include="src\EffectsCore\fxcurve.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_archive.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_beam.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_draw.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_dvars.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_graph.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_marks.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_postlight.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_profile.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_random.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_sort.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_sprite.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_system.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_update.cpp" />
+    <ClCompile Include="src\EffectsCore\fx_update_util.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_backend.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_logfile.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_stats.cpp" />
@@ -222,6 +239,7 @@
     <ClCompile Include="src\physics\ode\timer.cpp" />
     <ClCompile Include="src\physics\ode\util.cpp" />
     <ClCompile Include="src\physics\phys_ode.cpp" />
+    <ClCompile Include="src\physics\phys_world_collision.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
     <ClCompile Include="src\qcommon\cm_load.cpp" />
     <ClCompile Include="src\qcommon\cm_load_obj.cpp" />
@@ -259,6 +277,7 @@
     <ClCompile Include="src\universal\dvar.cpp" />
     <ClCompile Include="src\universal\dvar_cmds.cpp" />
     <ClCompile Include="src\universal\physicalmemory.cpp" />
+    <ClCompile Include="src\universal\pool_allocator.cpp" />
     <ClCompile Include="src\universal\q_parse.cpp" />
     <ClCompile Include="src\universal\q_shared.cpp" />
     <ClCompile Include="src\universal\surfaceflags.cpp" />
@@ -313,6 +332,7 @@
     <ClInclude Include="src\client_mp\client_mp.h" />
     <ClInclude Include="src\database\database.h" />
     <ClInclude Include="src\DynEntity\DynEntity_client.h" />
+    <ClInclude Include="src\EffectsCore\fx_system.h" />
     <ClInclude Include="src\gfx_d3d\fxprimitives.h" />
     <ClInclude Include="src\gfx_d3d\rb_backend.h" />
     <ClInclude Include="src\gfx_d3d\rb_logfile.h" />
@@ -393,6 +413,7 @@
     <ClInclude Include="src\ui\keycodes.h" />
     <ClInclude Include="src\universal\assertive.h" />
     <ClInclude Include="src\universal\physicalmemory.h" />
+    <ClInclude Include="src\universal\pool_allocator.h" />
     <ClInclude Include="src\universal\profile.h" />
     <ClInclude Include="src\universal\q_parse.h" />
     <ClInclude Include="src\universal\q_shared.h" />

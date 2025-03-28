@@ -173,11 +173,69 @@ typedef struct dGeomClass {
   dGetColliderFnFn *collider;
   dGetAABBFn *aabb;
   dAABBTestFn *aabb_test;
+  bool isPlaceable; // LWSS ADD
   dGeomDtorFn *dtor;
 } dGeomClass;
 
+// LWSS ADD - COD4 User data
+#include <xanim/xanim.h>
+
+enum PhysicsGeomType : __int32
+{                                       // ...
+    PHYS_GEOM_NONE = 0x0,
+    PHYS_GEOM_BOX = 0x1,
+    PHYS_GEOM_BRUSHMODEL = 0x2,
+    PHYS_GEOM_BRUSH = 0x3,
+    PHYS_GEOM_CYLINDER = 0x4,
+    PHYS_GEOM_CAPSULE = 0x5,
+    PHYS_GEOM_COUNT = 0x6,
+};
+
+struct GeomStateCylinder // sizeof=0xC
+{                                       // ...
+    int direction;
+    float radius;
+    float halfHeight;
+};
+struct GeomStateBox // sizeof=0xC
+{                                       // ...
+    float extent[3];
+};
+union GeomStateBrush_u // sizeof=0x4
+{                                       // ...
+    unsigned __int16 brushModel;
+    const cbrush_t *brush;
+};
+struct GeomStateBrush // sizeof=0x1C
+{                                       // ...
+    GeomStateBrush_u u;
+    float momentsOfInertia[3];
+    float productsOfInertia[3];
+};
+union GeomState_u// sizeof=0x1C
+{                                       // ...
+    GeomStateCylinder cylinderState;
+    GeomStateBox boxState;
+    GeomStateBrush brushState;
+};
+struct GeomState // sizeof=0x48
+{                                       // ...
+    PhysicsGeomType type;               // ...
+    bool isOriented;                    // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    float orientation[3][3];            // ...
+    GeomState_u u;      // ...
+};
+// LWSS END
+
 int dCreateGeomClass (const dGeomClass *classptr);
 void * dGeomGetClassData (dGeomID);
+inline void *dGeomGetClassData(dxGeom* d) // LWSS Add - Intellisense cancer fixer
+{
+	return dGeomGetClassData((dGeomID)d);
+}
 dGeomID dCreateGeom (int classnum);
 
 /* ************************************************************************ */

@@ -5,4 +5,4 @@
 // KISAKTODO: probably needs more options. Couldn't build ODE 5.0 easily...
 
 #define dTRIMESH_ENABLED 1
-
+#define dSINGLE 1

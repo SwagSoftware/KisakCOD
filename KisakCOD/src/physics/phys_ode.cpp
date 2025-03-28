@@ -3,11 +3,15 @@
 #include <qcommon/mem_track.h>
 #include <aim_assist/aim_assist.h>
 #include <qcommon/cmd.h>
+#include <xanim/xmodel.h>
 
+#include <ode/objects.h>
 //int *g_phys_msecStep    827c0304     phys_ode.obj
 //struct PhysGlob physGlob   85513d50     phys_ode.obj
 
 PhysGlob physGlob;
+
+bool physInited;
 
 const dvar_t *phys_contact_erp;
 const dvar_t *phys_autoDisableAngular;
@@ -86,6 +90,15 @@ void __cdecl DynEntPieces_RegisterDvars()
         minb,
         0x80u,
         "Force applied when breakable is destroyed");
+}
+
+template <typename T>
+void __cdecl ODE_ForEachBody(dxWorld *world, T func)
+{
+    dxBody *bodyIter; // [esp+0h] [ebp-4h]
+
+    for (bodyIter = world->firstbody; bodyIter; bodyIter = (dxBody *)bodyIter->next)
+        func(bodyIter);
 }
 
 void __cdecl DynEntPieces_AddDrawSurfs()
@@ -2712,12 +2725,13 @@ dxJointAMotor *__cdecl Phys_CreateAngularMotor(
     const float *lowStops,
     const float *highStops)
 {
-    dxJointBall *joint; // [esp+Ch] [ebp-10h]
+    dxJointAMotor *joint; // [esp+Ch] [ebp-10h]
     dxJointAMotor *jointa; // [esp+Ch] [ebp-10h]
 
     if (numAxes >= 4)
         MyAssertHandler(".\\physics\\phys_ode.cpp", 2578, 0, "%s", "numAxes >= 0 && numAxes <= 3");
-    joint = (dxJointBall *)PhysStaticArray<dxJointAMotor, 160>::allocate(&physGlob.aMotorArray);
+    //joint = (dxJointBall *)PhysStaticArray<dxJointAMotor, 160>::allocate(&physGlob.aMotorArray);
+    joint = physGlob.aMotorArray.allocate();
     if (joint)
     {
         jointa = (dxJointAMotor *)dJointCreateAMotor(physGlob.world[worldIndex], joint);
@@ -2753,18 +2767,20 @@ void __cdecl Phys_JointDestroy(PhysWorld worldIndex, dxJointHinge *id)
 {
     if (!id)
         MyAssertHandler(".\\physics\\phys_ode.cpp", 2631, 0, "%s", "id");
+
     dJointDestroy(id);
-    if (PhysStaticArray<dxJointHinge, 192>::isMember(&physGlob.hingeArray, (unsigned int)id))
+
+    if (physGlob.hingeArray.isMember(id))
     {
-        PhysStaticArray<dxJointHinge, 192>::release(&physGlob.hingeArray, id);
+        physGlob.hingeArray.release(id);
     }
-    else if (PhysStaticArray<dxJointBall, 160>::isMember(&physGlob.ballArray, (unsigned int)id))
+    else if (physGlob.ballArray.isMember(id))
     {
-        PhysStaticArray<dxJointBall, 160>::release(&physGlob.ballArray, (dxJointBall *)id);
+        physGlob.ballArray.release((dxJointBall*)id);
     }
-    else if (PhysStaticArray<dxJointAMotor, 160>::isMember(&physGlob.aMotorArray, (unsigned int)id))
+    else if (physGlob.aMotorArray.isMember(id))
     {
-        PhysStaticArray<dxJointAMotor, 160>::release(&physGlob.aMotorArray, (dxJointAMotor *)id);
+        physGlob.aMotorArray.release((dxJointAMotor*)id);
     }
     else if (!alwaysfails)
     {

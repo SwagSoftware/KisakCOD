@@ -319,6 +319,16 @@ struct FxElemVec3Range // sizeof=0x18
     float base[3];
     float amplitude[3];
 };
+struct FxElemPreVisualState // sizeof=0x1C
+{                                       // ...
+    float sampleLerp;                   // ...
+    float sampleLerpInv;                // ...
+    const FxElemDef *elemDef;
+    const FxEffect *effect;
+    const FxElemVisStateSample *refState; // ...
+    int randomSeed;
+    unsigned int distanceFade;
+};
 struct FxElemVisualState // sizeof=0x18
 {                                       // ...
     unsigned __int8 color[4];
@@ -430,4 +440,14 @@ struct FxImpactTable // sizeof=0x8
 {                                       // ...
     const char *name;
     FxImpactEntry *table;
+};
+struct FxSystemBuffers // sizeof=0x47480
+{                                       // ...
+    FxEffect effects[1024];
+    FxPool<FxElem> elems[2048];
+    FxPool<FxTrail> trails[128];
+    FxPool<FxTrailElem> trailElems[2048];
+    FxVisState visState[2];
+    unsigned __int16 deferredElems[2048];
+    unsigned __int8 padBuffer[96];
 };

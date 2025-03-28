@@ -1405,6 +1405,18 @@ dReal dWorldGetContactSurfaceLayer (dWorldID w)
 	return w->contactp.min_depth;
 }
 
+// LWSS ADD
+#include <universal/pool_allocator.h>
+
+odeGlob_t odeGlob;
+
+void __cdecl ODE_Init()
+{
+    Pool_Init((char *)odeGlob.bodies, &odeGlob.bodyPool, 0x150u, 0x200u);
+    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, 0xD0u, 0x800u);
+}
+// LWSS END
+
 //****************************************************************************
 // testing
 

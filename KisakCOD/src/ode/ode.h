@@ -44,4 +44,54 @@
 #include <ode/odecpp_collision.h>
 #include <ode/export-dif.h>
 
+// LWSS ADD - Custom COD4
+#include <physics/ode/collision_kernel.h>
+#include <universal/pool_allocator.h>
+void __cdecl ODE_Init();
+
+
+struct dxSimpleSpace : public dxSpace {
+    dxSimpleSpace(dSpaceID _space);
+    void cleanGeoms();
+    void collide(void *data, dNearCallback *callback);
+    void collide2(void *data, dxGeom *geom, dNearCallback *callback);
+};
+struct dxJointGroup : public dBase {
+    int num;		// number of joints on the stack
+    dObStack stack;	// a stack of (possibly differently sized) dxJoint
+};			// objects.
+struct dxUserGeom : public dxGeom {
+    void *user_data;
+
+    dxUserGeom(int class_num);
+    ~dxUserGeom();
+    void computeAABB();
+    int AABBTest(dxGeom *o, dReal aabb[6]);
+};
+struct odeGlob_t // sizeof=0x2C64E0
+{                                       // ...
+    dxWorld world[3];
+    dxSimpleSpace space[3];             // ...
+    dxJointGroup contactsGroup[3];      // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    dxBody bodies[512];                 // ...
+    pooldata_t bodyPool;                // ...
+    unsigned __int8 geoms[425984];      // ...
+    pooldata_t geomPool;                // ...
+    dxUserGeom worldGeom;               // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+};
+extern odeGlob_t odeGlob;
+
+// LWSS END
 #endif

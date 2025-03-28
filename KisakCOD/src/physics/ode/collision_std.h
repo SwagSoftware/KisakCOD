@@ -64,5 +64,9 @@ int dCollideRayCCylinder (dxGeom *o1, dxGeom *o2,
 int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
 		      dContactGeom *contact, int skip);
 
+// LWSS ADD - Custom for COD4
+dxGeom *__cdecl ODE_AllocateGeom();
+
+// LWSS END
 
 #endif

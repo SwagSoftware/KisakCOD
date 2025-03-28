@@ -5,6 +5,9 @@
 #include "ode/joint.h"
 #include "ode/collision_trimesh_internal.h"
 #include <ode/collision_trimesh.h>
+#include <universal/pool_allocator.h>
+
+
 
 enum BodyState : __int32
 {                                       // ...
@@ -17,17 +20,6 @@ enum BodyState : __int32
     RAGDOLL_NUM_STATES = 0x6,
 };
 
-enum PhysicsGeomType : __int32
-{                                       // ...
-    PHYS_GEOM_NONE = 0x0,
-    PHYS_GEOM_BOX = 0x1,
-    PHYS_GEOM_BRUSHMODEL = 0x2,
-    PHYS_GEOM_BRUSH = 0x3,
-    PHYS_GEOM_CYLINDER = 0x4,
-    PHYS_GEOM_CAPSULE = 0x5,
-    PHYS_GEOM_COUNT = 0x6,
-};
-
 enum physStuckState_t : __int32
 {                                       // ...
     PHYS_OBJ_STATE_POSSIBLY_STUCK = 0x0,
@@ -35,43 +27,7 @@ enum physStuckState_t : __int32
     PHYS_OBJ_STATE_FREE = 0x2,
 };
 
-struct GeomStateCylinder // sizeof=0xC
-{                                       // ...
-    int direction;
-    float radius;
-    float halfHeight;
-};
-struct GeomStateBox // sizeof=0xC
-{                                       // ...
-    float extent[3];
-};
-union GeomStateBrush_u // sizeof=0x4
-{                                       // ...
-    unsigned __int16 brushModel;
-    const cbrush_t *brush;
-};
-struct GeomStateBrush // sizeof=0x1C
-{                                       // ...
-    GeomStateBrush_u u;
-    float momentsOfInertia[3];
-    float productsOfInertia[3];
-};
-union GeomState_u// sizeof=0x1C
-{                                       // ...
-    GeomStateCylinder cylinderState;
-    GeomStateBox boxState;
-    GeomStateBrush brushState;
-};
-struct GeomState // sizeof=0x48
-{                                       // ...
-    PhysicsGeomType type;               // ...
-    bool isOriented;                    // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    float orientation[3][3];            // ...
-    GeomState_u u;      // ...
-};
+
 
 struct dContactGeom // sizeof=0x2C
 {                                       // ...
@@ -216,12 +172,6 @@ struct dSurfaceParameters // sizeof=0x2C
     float slip2;
 };
 
- struct pooldata_t // sizeof=0x8
- {                                       // ...
-     void *firstFree;
-     int activeCount;
- };
-
  struct PhysTriMeshInfo // sizeof=0x14
  {                                       // ...
      float *verts;                       // ...
@@ -236,7 +186,54 @@ struct dSurfaceParameters // sizeof=0x2C
  struct PhysStaticArray
  {
      int freeEntry;
-     T entries[N]
+     T entries[N];
+
+     void init()
+     {
+         memset(this->entries, 0, sizeof(this->entries));
+         this->freeEntry = -1;
+         for (int i = N; i >= 0; --i)
+         {
+             release(&this->entries[i]);
+         }
+     }
+
+     T *allocate()
+     {
+         T *ptr;
+
+         if (this->freeEntry == -1)
+             return NULL;
+         if (this->freeEntry >= N)
+         {
+             MyAssertHandler(
+                 "c:\\trees\\cod3\\src\\physics\\phys_alloc.h",
+                 49,
+                 0,
+                 "freeEntry doesn't index numEntries\n\t%i not in [0, %i)",
+                 this->freeEntry,
+                 N);
+         }
+
+         ptr = &this->entries[this->freeEntry];
+         this->freeEntry++;
+         return ptr;
+     }
+
+     void release(T *ptr)
+     {
+         iassert(ptr >= &entries[0] && ptr < &entries[N]);
+         memset(ptr, 0, sizeof(T));
+         //*(int *)ptr = this->freeEntry;
+         this->freeEntry--;
+     }
+
+
+     bool isMember(void* ptr)
+     {
+         uintptr_t p = (uintptr_t)ptr;
+         return (p >= &entries[0] && p < &entries[N]);
+     }
  };
 
 
@@ -269,8 +266,16 @@ struct PhysGlob // sizeof=0x26508
 };
 
 
-
-
+union BrushInfo_u // sizeof=0x4
+{                                       // ...
+    unsigned __int16 brushModel;
+    const cbrush_t *brush;
+};
+struct BrushInfo // sizeof=0x10
+{
+    BrushInfo_u u;
+    float centerOfMass[3];
+};
 
 // phys_ode
 void __cdecl DynEntPieces_RegisterDvars();
@@ -472,3 +477,72 @@ void __cdecl Phys_AddJitterRegion(
     float minDisplacement,
     float maxDisplacement);
 void __cdecl Phys_ObjSetContactCentroid(dxBody *id, const float *worldPos);
+
+// phys_world_collision
+union objInfo_u // sizeof=0xC
+{                                       // ...
+    float sideExtents[3];
+    const cmodel_t *brushModel;
+    const cbrush_t *brush;
+};
+struct __declspec(align(4)) objInfo // sizeof=0xA8
+{                                       // ...
+    int clipMask;                       // ...
+    int cylDirection;                   // ...
+    TraceThreadInfo threadInfo;         // ...
+    float bounds[2][3];                 // ...
+    float radius;                       // ...
+    PhysicsGeomType type;               // ...
+    float pos[3];                       // ...
+    float R[3][3];                      // ...
+    float RTransposed[3][3];            // ...
+    objInfo_u u;        // ...
+    float bodyCenter[3];                // ...
+    bool isNarrow;                      // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+struct Results // sizeof=0x10
+{                                       // ...
+    dContactGeomExt *contacts;          // ...
+    int contactCount;                   // ...
+    int maxContacts;                    // ...
+    int stride;                         // ...
+};
+int __cdecl Phys_GetSurfaceFlagsFromBrush(const cbrush_t *brush, unsigned int brushSideIndex);
+void __cdecl CM_ForEachBrushInLeafBrushNode_r(
+    cLeafBrushNode_s *node,
+    const float *mins,
+    const float *maxs,
+    bool testMask,
+    int clipMask,
+    void(__cdecl *f)(const cbrush_t *, void *),
+    void *userData);
+void __cdecl CM_MeshTestGeomInLeaf(cLeaf_t *leaf, const objInfo *input, Results *results);
+void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const objInfo *input, Results *results);
+bool __cdecl CM_CullBox2(const objInfo *input, const float *origin, const float *halfSize);
+int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip);
+void __cdecl CM_TestGeomInLeaf(cLeaf_t *leaf, const objInfo *input, Results *results);
+void __cdecl CM_TestGeomInLeafBrushNode(cLeaf_t *leaf, const objInfo *input, Results *results);
+void __cdecl Phys_TestGeomInBrush(const cbrush_t *brush, unsigned int *userData);
+void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results);
+void __cdecl Phys_InitWorldCollision();
+int(__cdecl *__cdecl dGetColliderWorld(
+    int classnum))(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip);
+void __cdecl Phys_InitBrushmodelGeomClass();
+void __cdecl Phys_GetBrushmodelAABB(dxGeom *geom, float *aabb);
+void __cdecl Phys_InitBrushGeomClass();
+void __cdecl Phys_GetBrushAABB(dxGeom *geom, float *aabb);
+void __cdecl Phys_InitCylinderGeomClass();
+void __cdecl Phys_GetCylinderAABB(dxGeom *geom, float *aabb);
+void __cdecl Phys_InitCapsuleGeomClass();
+void __cdecl Phys_GetCapsuleAABB(dxGeom *geom, float *aabb);
+dxGeom *__cdecl Phys_CreateBrushmodelGeom(
+    dxSpace *space,
+    dxBody *body,
+    unsigned __int16 brushModel,
+    const float *centerOfMass);
+dxGeom *__cdecl Phys_CreateBrushGeom(dxSpace *space, dxBody *body, const cbrush_t *brush, const float *centerOfMass);
+dxGeom *__cdecl Phys_CreateCylinderGeom(dxSpace *space, dxBody *body, const GeomStateCylinder *cyl);
+dxGeom *__cdecl Phys_CreateCapsuleGeom(dxSpace *space, dxBody *body, const GeomStateCylinder *cyl);

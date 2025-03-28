@@ -38,6 +38,10 @@ dContactGeom::g1 and dContactGeom::g2.
 #include "collision_std.h"
 #include "collision_util.h"
 
+#include <win32/win_local.h> // lwss add
+#include <universal/pool_allocator.h> // lwss add
+#include "obstack.h" // lwss add
+
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
@@ -1818,3 +1822,17 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
   contact->g2 = plane;
   return 1;
 }
+
+
+// LWSS ADD - Custom for COD4
+#include <ode/ode.h>
+dxGeom *__cdecl ODE_AllocateGeom()
+{
+    dxGeom *geom; // [esp+0h] [ebp-4h]
+
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    geom = (dxGeom *)Pool_Alloc(&odeGlob.geomPool);
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+    return geom;
+}
+// LWSS END

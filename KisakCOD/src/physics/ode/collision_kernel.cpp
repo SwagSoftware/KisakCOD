@@ -40,6 +40,7 @@ for geometry objects
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
+#include <universal/assertive.h>
 
 //****************************************************************************
 // helper functions for dCollide()ing a space with another geom
@@ -623,3 +624,28 @@ void dCloseODE()
   colliders_initialized = 0;
   num_user_classes = 0;
 }
+
+
+// LWSS ADD - Custom for COD4
+dxGeom *__cdecl ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body)
+{
+    dxGeom *result; // eax
+    dxUserGeom *geom; // [esp+8h] [ebp-4h]
+
+    if (classnum < 11 || classnum > 15)
+        MyAssertHandler(
+            ".\\physics\\ode\\src\\collision_kernel.cpp",
+            737,
+            0,
+            "%s\n\t%s",
+            "( classnum >= dFirstUserClass ) && ( classnum <= dLastUserClass )",
+            "not a custom class");
+    geom = (dxUserGeom *)ODE_AllocateGeom();
+    if (!geom)
+        return 0;
+    return new (geom) dxUserGeom(classnum, space, body);
+    //dxUserGeom::dxUserGeom(geom, classnum, space, body);
+    return result;
+}
+
+// LWSS END

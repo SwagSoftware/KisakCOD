@@ -1,0 +1,2572 @@
+#include "fx_system.h"
+
+
+void __cdecl FX_SpawnAllFutureLooping(
+    FxSystem *system,
+    FxEffect *effect,
+    int elemDefFirst,
+    int elemDefCount,
+    __int64 frameBegin,
+    int msecWhenPlayed,
+    int msecUpdateBegin)
+{
+    int elemDefIndex; // [esp+64h] [ebp-4h]
+
+    if (!effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 465, 0, "%s", "effect");
+    if (!effect->def)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 468, 0, "%s", "effectDef");
+    for (elemDefIndex = elemDefFirst; elemDefIndex != elemDefCount + elemDefFirst; ++elemDefIndex)
+    {
+        if (effect->def->elemDefs[elemDefIndex].spawn.looping.count != 0x7FFFFFFF)
+            FX_SpawnLoopingElems(
+                system,
+                __SPAIR64__(elemDefIndex, (unsigned int)effect),
+                frameBegin,
+                msecWhenPlayed,
+                msecUpdateBegin,
+                0x7FFFFFFF);
+    }
+}
+
+void __cdecl FX_SpawnLoopingElems(
+    FxSystem *system,
+    __int64 effect,
+    __int64 frameBegin,
+    int msecWhenPlayed,
+    int msecUpdateBegin,
+    int msecUpdateEnd)
+{
+    const FxEffectDef *effectDef; // [esp+40h] [ebp-3Ch]
+    const FxElemDef *elemDef; // [esp+44h] [ebp-38h]
+    int msecNextSpawn; // [esp+48h] [ebp-34h]
+    float lerp; // [esp+4Ch] [ebp-30h]
+    int spawnedCount; // [esp+54h] [ebp-28h]
+    FxSpatialFrame frameWhenPlayed; // [esp+58h] [ebp-24h] BYREF
+    int maxUpdateMsec; // [esp+74h] [ebp-8h]
+    int updateMsec; // [esp+78h] [ebp-4h]
+
+    if (!(unsigned int)effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 350, 0, "%s", "effect");
+    effectDef = *(const FxEffectDef **)effect;
+    if (!*(unsigned int *)effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 353, 0, "%s", "effectDef");
+    if (HIDWORD(effect) >= effectDef->elemDefCountEmission
+        + effectDef->elemDefCountOneShot
+        + effectDef->elemDefCountLooping)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            355,
+            0,
+            "elemDefIndex doesn't index effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDefCou"
+            "ntEmission\n"
+            "\t%i not in [0, %i)",
+            HIDWORD(effect),
+            effectDef->elemDefCountEmission + effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping);
+    if (SHIDWORD(effect) >= effectDef->elemDefCountLooping
+        && SHIDWORD(effect) < effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping)
+    {
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            356,
+            0,
+            "%s",
+            "elemDefIndex < effectDef->elemDefCountLooping || elemDefIndex >= effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot");
+    }
+    if (msecWhenPlayed > msecUpdateBegin || msecUpdateBegin > msecUpdateEnd)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            357,
+            0,
+            "msecUpdateBegin not in [msecWhenPlayed, msecUpdateEnd]\n\t%g not in [%g, %g]",
+            (double)msecUpdateBegin,
+            (double)msecWhenPlayed,
+            (double)msecUpdateEnd);
+    elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)effect + 28) + 252 * HIDWORD(effect));
+    if (elemDef->elemType != 3)
+    {
+        if (msecUpdateEnd != 0x7FFFFFFF)
+        {
+            updateMsec = msecUpdateEnd - msecUpdateBegin;
+            if (msecUpdateEnd - msecUpdateBegin > 128)
+            {
+                maxUpdateMsec = FX_LimitStabilizeTimeForElemDef_Recurse(elemDef, 0, updateMsec) + 1;
+                elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)effect + 28) + 252 * HIDWORD(effect));
+                if (updateMsec > maxUpdateMsec)
+                    msecUpdateBegin += updateMsec - maxUpdateMsec;
+            }
+        }
+        spawnedCount = (msecUpdateBegin - msecWhenPlayed) / elemDef->spawn.looping.intervalMsec + 1;
+        msecNextSpawn = msecWhenPlayed + elemDef->spawn.looping.intervalMsec * spawnedCount;
+        memcpy(&frameWhenPlayed, (const void *)frameBegin, sizeof(frameWhenPlayed));
+        while (msecNextSpawn <= msecUpdateEnd && spawnedCount < elemDef->spawn.looping.count)
+        {
+            lerp = (double)(msecNextSpawn - msecUpdateBegin) / (double)(msecUpdateEnd - msecUpdateBegin);
+            Vec3Lerp(
+                (const float *)(frameBegin + 16),
+                (const float *)(HIDWORD(frameBegin) + 16),
+                lerp,
+                frameWhenPlayed.origin);
+            Vec4Lerp((const float *)frameBegin, (const float *)HIDWORD(frameBegin), lerp, frameWhenPlayed.quat);
+            Vec4Normalize(frameWhenPlayed.quat);
+            FX_SpawnElem(system, (FxEffect *)effect, SHIDWORD(effect), &frameWhenPlayed, msecNextSpawn, 0.0, spawnedCount);
+            elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)effect + 28) + 252 * HIDWORD(effect));
+            ++spawnedCount;
+            msecNextSpawn += elemDef->spawn.looping.intervalMsec;
+        }
+    }
+}
+
+int __cdecl FX_LimitStabilizeTimeForElemDef_Recurse(
+    const FxElemDef *elemDef,
+    bool needToSpawnSystem,
+    int originalUpdateTime)
+{
+    int v5; // [esp+4h] [ebp-40h]
+    int v6; // [esp+8h] [ebp-3Ch]
+    int v7; // [esp+Ch] [ebp-38h]
+    int v8; // [esp+10h] [ebp-34h]
+    int v9; // [esp+14h] [ebp-30h]
+    int v10; // [esp+18h] [ebp-2Ch]
+    int v11; // [esp+1Ch] [ebp-28h]
+    int v12; // [esp+20h] [ebp-24h]
+    int v13; // [esp+24h] [ebp-20h]
+    int selfStabilizeTime; // [esp+30h] [ebp-14h]
+    FxElemVisuals *visArray; // [esp+34h] [ebp-10h]
+    int maxStabilizeTime; // [esp+38h] [ebp-Ch]
+    int visIndex; // [esp+40h] [ebp-4h]
+
+    if (!elemDef)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 243, 0, "%s", "elemDef");
+    selfStabilizeTime = FX_LimitStabilizeTimeForElemDef_SelfOnly(elemDef, needToSpawnSystem);
+    maxStabilizeTime = selfStabilizeTime;
+    if (selfStabilizeTime >= originalUpdateTime)
+        return originalUpdateTime;
+    if (elemDef->elemType == 10)
+    {
+        if (elemDef->visualCount == 1)
+        {
+            v13 = FX_LimitStabilizeTimeForEffectDef_Recurse(elemDef->visuals.instance.effectDef.handle, originalUpdateTime);
+            if (selfStabilizeTime < v13)
+                v8 = v13;
+            else
+                v8 = selfStabilizeTime;
+            maxStabilizeTime = v8;
+            if (v8 >= originalUpdateTime)
+                return originalUpdateTime;
+        }
+        else
+        {
+            visArray = elemDef->visuals.array;
+            for (visIndex = 0; visIndex < elemDef->visualCount; ++visIndex)
+            {
+                v12 = FX_LimitStabilizeTimeForEffectDef_Recurse(visArray[visIndex].effectDef.handle, originalUpdateTime);
+                if (maxStabilizeTime < v12)
+                    v7 = v12;
+                else
+                    v7 = maxStabilizeTime;
+                maxStabilizeTime = v7;
+                if (v7 >= originalUpdateTime)
+                    return originalUpdateTime;
+            }
+        }
+    }
+    if (elemDef->effectOnDeath.handle)
+    {
+        v11 = selfStabilizeTime
+            + FX_LimitStabilizeTimeForEffectDef_Recurse(elemDef->effectOnDeath.handle, originalUpdateTime);
+        v6 = maxStabilizeTime < v11 ? v11 : maxStabilizeTime;
+        maxStabilizeTime = v6;
+        if (v6 >= originalUpdateTime)
+            return originalUpdateTime;
+    }
+    if (elemDef->effectOnImpact.handle)
+    {
+        v10 = selfStabilizeTime
+            + FX_LimitStabilizeTimeForEffectDef_Recurse(elemDef->effectOnImpact.handle, originalUpdateTime);
+        v5 = maxStabilizeTime < v10 ? v10 : maxStabilizeTime;
+        maxStabilizeTime = v5;
+        if (v5 >= originalUpdateTime)
+            return originalUpdateTime;
+    }
+    if (elemDef->effectEmitted.handle)
+    {
+        v9 = selfStabilizeTime
+            + FX_LimitStabilizeTimeForEffectDef_Recurse(elemDef->effectEmitted.handle, originalUpdateTime);
+        if (maxStabilizeTime < v9)
+            return v9;
+        else
+            return maxStabilizeTime;
+    }
+    return maxStabilizeTime;
+}
+
+int __cdecl FX_LimitStabilizeTimeForElemDef_SelfOnly(const FxElemDef *elemDef, bool needToSpawnSystem)
+{
+    int result; // [esp+4h] [ebp-4h]
+
+    if (elemDef->elemType == 3)
+        return 0x7FFFFFFF;
+    result = elemDef->spawnDelayMsec.amplitude
+        + elemDef->spawnDelayMsec.base
+        + elemDef->lifeSpanMsec.amplitude
+        + elemDef->lifeSpanMsec.base;
+    if (needToSpawnSystem && elemDef->spawn.looping.count > 0)
+    {
+        if (elemDef->spawn.looping.count == 0x7FFFFFFF)
+            return 0x7FFFFFFF;
+        result += elemDef->spawn.looping.intervalMsec * (elemDef->spawn.looping.count - 1);
+    }
+    return result;
+}
+
+int __cdecl FX_LimitStabilizeTimeForEffectDef_Recurse(const FxEffectDef *remoteEffectDef, int originalUpdateTime)
+{
+    int v3; // [esp+0h] [ebp-1Ch]
+    int v4; // [esp+4h] [ebp-18h]
+    int elemIter; // [esp+10h] [ebp-Ch]
+    int maxStabilizeTime; // [esp+14h] [ebp-8h]
+    int elemCount; // [esp+18h] [ebp-4h]
+
+    if (!remoteEffectDef)
+    {
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 182, 0, "%s", "remoteEffectDef");
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 197, 0, "%s", "effectDef");
+    }
+    elemCount = remoteEffectDef->elemDefCountEmission
+        + remoteEffectDef->elemDefCountOneShot
+        + remoteEffectDef->elemDefCountLooping;
+    maxStabilizeTime = 0;
+    for (elemIter = 0; elemIter != elemCount; ++elemIter)
+    {
+        v4 = FX_LimitStabilizeTimeForElemDef_Recurse(&remoteEffectDef->elemDefs[elemIter], 1, originalUpdateTime);
+        if (maxStabilizeTime < v4)
+            v3 = v4;
+        else
+            v3 = maxStabilizeTime;
+        maxStabilizeTime = v3;
+        if (v3 >= originalUpdateTime)
+            return originalUpdateTime;
+    }
+    return maxStabilizeTime;
+}
+
+void __cdecl FX_BeginLooping(
+    __int64 system,
+    int elemDefFirst,
+    int elemDefCount,
+    __int64 frameWhenPlayed,
+    int msecWhenPlayed,
+    int msecNow)
+{
+    const FxElemDef *elemDef; // [esp+5Ch] [ebp-18h]
+    unsigned __int16 trailHandle; // [esp+60h] [ebp-14h]
+    FxPool<FxTrail> *trail; // [esp+64h] [ebp-10h]
+    int elemDefStop; // [esp+6Ch] [ebp-8h]
+    int elemDefIndex; // [esp+70h] [ebp-4h]
+    int elemDefIndexa; // [esp+70h] [ebp-4h]
+
+    if (!HIDWORD(system))
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 492, 0, "%s", "effect");
+    if (!*(unsigned int *)HIDWORD(system))
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 495, 0, "%s", "effectDef");
+    elemDefStop = elemDefCount + elemDefFirst;
+    for (elemDefIndex = elemDefFirst; elemDefIndex != elemDefStop; ++elemDefIndex)
+    {
+        if (*(_BYTE *)(*(unsigned int *)(*(unsigned int *)HIDWORD(system) + 28) + 252 * elemDefIndex + 176) != 3)
+            FX_SpawnElem(
+                (FxSystem *)system,
+                (FxEffect *)HIDWORD(system),
+                elemDefIndex,
+                (const FxSpatialFrame *)frameWhenPlayed,
+                msecWhenPlayed,
+                0.0,
+                0);
+    }
+    for (trailHandle = *(_WORD *)(HIDWORD(system) + 16); trailHandle != 0xFFFF; trailHandle = trail->item.nextTrailHandle)
+    {
+        if (!(unsigned int)system)
+            MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 362, 0, "%s", "system");
+        trail = FX_PoolFromHandle_Generic<FxTrail, 128>(*(FxPool<FxTrail> **)(system + 376), trailHandle);
+        elemDefIndexa = trail->item.defIndex;
+        if (elemDefIndexa >= elemDefFirst && elemDefIndexa < elemDefStop)
+        {
+            elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)HIDWORD(system) + 28) + 252 * elemDefIndexa);
+            if (elemDef->elemType != 3)
+                MyAssertHandler(
+                    ".\\EffectsCore\\fx_update.cpp",
+                    517,
+                    0,
+                    "%s\n\t(elemDef->elemType) = %i",
+                    "(elemDef->elemType == FX_ELEM_TYPE_TRAIL)",
+                    elemDef->elemType);
+            FX_SpawnTrailElem_NoCull(
+                (FxSystem *)system,
+                (FxEffect *)HIDWORD(system),
+                (FxTrail *)trail,
+                (const FxSpatialFrame *)frameWhenPlayed,
+                msecWhenPlayed,
+                0.0);
+            if (msecNow <= msecWhenPlayed)
+            {
+                FX_SpawnTrailElem_NoCull(
+                    (FxSystem *)system,
+                    (FxEffect *)HIDWORD(system),
+                    (FxTrail *)trail,
+                    (const FxSpatialFrame *)frameWhenPlayed,
+                    msecWhenPlayed,
+                    0.0);
+            }
+            else
+            {
+                FX_SpawnTrailLoopingElems(
+                    system,
+                    (FxTrail *)trail,
+                    frameWhenPlayed,
+                    msecWhenPlayed,
+                    msecWhenPlayed,
+                    msecNow,
+                    0.0,
+                    *(float *)(HIDWORD(system) + 124));
+                FX_SpawnTrailElem_NoCull(
+                    (FxSystem *)system,
+                    (FxEffect *)HIDWORD(system),
+                    (FxTrail *)trail,
+                    (const FxSpatialFrame *)HIDWORD(frameWhenPlayed),
+                    msecNow,
+                    0.0);
+            }
+        }
+    }
+}
+
+void __cdecl FX_SpawnTrailLoopingElems(
+    __int64 system,
+    FxTrail *trail,
+    __int64 frameBegin,
+    int msecWhenPlayed,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
+    float distanceTravelledBegin,
+    float distanceTravelledEnd)
+{
+    float v8; // [esp+1Ch] [ebp-50h]
+    float v9; // [esp+20h] [ebp-4Ch]
+    float v10; // [esp+24h] [ebp-48h]
+    float lerp; // [esp+2Ch] [ebp-40h]
+    FxSpatialFrame frameWhenPlayed; // [esp+34h] [ebp-38h] BYREF
+    float distSpawn; // [esp+50h] [ebp-1Ch]
+    float normalizedTotalDistance; // [esp+54h] [ebp-18h]
+    const FxEffectDef *effectDef; // [esp+58h] [ebp-14h]
+    const FxElemDef *elemDef; // [esp+5Ch] [ebp-10h]
+    float normalizedDistanceTraversed; // [esp+60h] [ebp-Ch]
+    float normalizedDistanceRemaining; // [esp+64h] [ebp-8h]
+    float normalizedDistanceBeforeSpawn; // [esp+68h] [ebp-4h]
+
+    if (!HIDWORD(system))
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 101, 0, "%s", "effect");
+    effectDef = (const FxEffectDef *)*(unsigned int *)HIDWORD(system);
+    if (!effectDef)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 104, 0, "%s", "effectDef");
+    if (trail->defIndex >= (unsigned int)(effectDef->elemDefCountEmission
+        + effectDef->elemDefCountOneShot
+        + effectDef->elemDefCountLooping))
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            106,
+            0,
+            "trail->defIndex doesn't index effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDef"
+            "CountEmission\n"
+            "\t%i not in [0, %i)",
+            trail->defIndex,
+            effectDef->elemDefCountEmission + effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping);
+    if (trail->defIndex >= effectDef->elemDefCountLooping
+        && trail->defIndex < effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping)
+    {
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            107,
+            0,
+            "%s",
+            "trail->defIndex < effectDef->elemDefCountLooping || trail->defIndex >= effectDef->elemDefCountLooping + effectDef-"
+            ">elemDefCountOneShot");
+    }
+    if (msecWhenPlayed > msecUpdateBegin || msecUpdateBegin > msecUpdateEnd)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            108,
+            0,
+            "msecUpdateBegin not in [msecWhenPlayed, msecUpdateEnd]\n\t%g not in [%g, %g]",
+            (double)msecUpdateBegin,
+            (double)msecWhenPlayed,
+            (double)msecUpdateEnd);
+    elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)HIDWORD(system) + 28) + 252 * trail->defIndex);
+    if (elemDef->elemType != 3)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            112,
+            0,
+            "%s\n\t(elemDef->elemType) = %i",
+            "(elemDef->elemType == FX_ELEM_TYPE_TRAIL)",
+            elemDef->elemType);
+    if (!elemDef->trailDef)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 113, 0, "%s", "elemDef->trailDef");
+    normalizedTotalDistance = (distanceTravelledEnd - distanceTravelledBegin) / (double)elemDef->trailDef->splitDist;
+    v10 = distanceTravelledBegin / (double)elemDef->trailDef->splitDist;
+    v9 = floor(v10);
+    v8 = v10 - v9;
+    normalizedDistanceBeforeSpawn = 1.0 - v8;
+    normalizedDistanceTraversed = 0.0;
+    normalizedDistanceRemaining = normalizedTotalDistance;
+    while (normalizedDistanceBeforeSpawn < (double)normalizedDistanceRemaining)
+    {
+        normalizedDistanceTraversed = normalizedDistanceTraversed + normalizedDistanceBeforeSpawn;
+        lerp = normalizedDistanceTraversed / normalizedTotalDistance;
+        distSpawn = (distanceTravelledEnd - distanceTravelledBegin) * lerp + distanceTravelledBegin;
+        Vec3Lerp((const float *)(frameBegin + 16), (const float *)(HIDWORD(frameBegin) + 16), lerp, frameWhenPlayed.origin);
+        Vec4Lerp((const float *)frameBegin, (const float *)HIDWORD(frameBegin), lerp, frameWhenPlayed.quat);
+        Vec4Normalize(frameWhenPlayed.quat);
+        FX_SpawnTrailElem_Cull(
+            (FxSystem *)system,
+            (FxEffect *)HIDWORD(system),
+            trail,
+            &frameWhenPlayed,
+            msecUpdateBegin + (int)((double)(msecUpdateEnd - msecUpdateBegin) * lerp),
+            distSpawn);
+        normalizedDistanceRemaining = normalizedDistanceRemaining - normalizedDistanceBeforeSpawn;
+        normalizedDistanceBeforeSpawn = 1.0;
+    }
+}
+
+void __cdecl FX_TriggerOneShot(
+    FxSystem *system,
+    FxEffect *effect,
+    int elemDefFirst,
+    int elemDefCount,
+    const FxSpatialFrame *frameWhenPlayed,
+    int msecWhenPlayed)
+{
+    const FxEffectDef *effectDef; // [esp+14h] [ebp-Ch]
+    int elemDefIndex; // [esp+1Ch] [ebp-4h]
+
+    if (!effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 542, 0, "%s", "effect");
+    effectDef = effect->def;
+    if (!effect->def)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 545, 0, "%s", "effectDef");
+    if (elemDefCount
+        && (elemDefFirst < 0
+            || elemDefFirst >= effectDef->elemDefCountEmission
+            + effectDef->elemDefCountOneShot
+            + effectDef->elemDefCountLooping))
+    {
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            547,
+            0,
+            "%s",
+            "elemDefCount == 0 || (elemDefFirst >= 0 && elemDefFirst < effectDef->elemDefCountLooping + effectDef->elemDefCount"
+            "OneShot + effectDef->elemDefCountEmission)");
+    }
+    if (elemDefCount < 0
+        || elemDefCount + elemDefFirst > effectDef->elemDefCountEmission
+        + effectDef->elemDefCountOneShot
+        + effectDef->elemDefCountLooping)
+    {
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            548,
+            0,
+            "%s",
+            "elemDefCount >= 0 && elemDefFirst + elemDefCount <= effectDef->elemDefCountLooping + effectDef->elemDefCountOneSho"
+            "t + effectDef->elemDefCountEmission");
+    }
+    for (elemDefIndex = elemDefFirst; elemDefIndex != elemDefCount + elemDefFirst; ++elemDefIndex)
+        FX_SpawnOneShotElems(system, effect, elemDefIndex, frameWhenPlayed, msecWhenPlayed);
+}
+
+void __cdecl FX_SpawnOneShotElems(
+    FxSystem *system,
+    FxEffect *effect,
+    int elemDefIndex,
+    const FxSpatialFrame *frameWhenPlayed,
+    int msecWhenPlayed)
+{
+    const FxElemDef *elemDef; // [esp+10h] [ebp-Ch]
+    int spawnCount; // [esp+14h] [ebp-8h]
+    int spawnIndex; // [esp+18h] [ebp-4h]
+
+    if (!effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 405, 0, "%s", "effect");
+    if (!effect->def)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 408, 0, "%s", "effectDef");
+    elemDef = &effect->def->elemDefs[elemDefIndex];
+    if (elemDef->elemType != 3)
+    {
+        spawnCount = elemDef->spawn.looping.intervalMsec;
+        if (elemDef->spawn.looping.count)
+            spawnCount += ((elemDef->spawn.looping.count + 1) * LOWORD(fx_randomTable[effect->randomSeed + 19])) >> 16;
+        for (spawnIndex = 0; spawnIndex < spawnCount; ++spawnIndex)
+            FX_SpawnElem(system, effect, elemDefIndex, frameWhenPlayed, msecWhenPlayed, 0.0, spawnIndex);
+    }
+}
+
+void __cdecl FX_StartNewEffect(__int64 system)
+{
+    __int64 v1; // [esp-10h] [ebp-14h]
+    const FxEffectDef *def; // [esp+0h] [ebp-4h]
+
+    def = (const FxEffectDef *)*(unsigned int *)HIDWORD(system);
+    if (!*(unsigned int *)HIDWORD(system))
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 562, 0, "%s", "def");
+    HIDWORD(v1) = HIDWORD(system) + 68;
+    LODWORD(v1) = HIDWORD(system) + 40;
+    FX_BeginLooping(
+        system,
+        0,
+        def->elemDefCountLooping,
+        v1,
+        *(unsigned int *)(HIDWORD(system) + 32),
+        *(unsigned int *)(system + 2512));
+    FX_TriggerOneShot(
+        (FxSystem *)system,
+        (FxEffect *)HIDWORD(system),
+        def->elemDefCountLooping,
+        def->elemDefCountOneShot,
+        (const FxSpatialFrame *)(HIDWORD(system) + 40),
+        *(unsigned int *)(HIDWORD(system) + 32));
+    FX_SortNewElemsInEffect((FxSystem *)system, (FxEffect *)HIDWORD(system));
+}
+
+bool __cdecl FX_GetBoltTemporalBits(int localClientNum, int dobjHandle)
+{
+    return dobjHandle < 1022 && (CG_GetEntity(localClientNum, dobjHandle)->nextState.lerp.eFlags & 2) != 0;
+}
+
+char __cdecl FX_GetBoneOrientation(int localClientNum, unsigned int dobjHandle, int boneIndex, orientation_t *orient)
+{
+    DObj_s *obj; // [esp+60h] [ebp-8h]
+    centity_s *pose; // [esp+64h] [ebp-4h]
+
+    if (dobjHandle >= 0x480)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1351,
+            0,
+            "dobjHandle doesn't index CLIENT_DOBJ_HANDLE_MAX\n\t%i not in [0, %i)",
+            dobjHandle,
+            1152);
+    if (!orient)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1352, 0, "%s", "orient");
+    if (!FX_GetBoneOrientation_IsDObjEntityValid(localClientNum, dobjHandle))
+        return 0;
+    if (boneIndex >= 0)
+    {
+        obj = Com_GetClientDObj(dobjHandle, localClientNum);
+        if (obj)
+        {
+            if (boneIndex < DObjNumBones(obj))
+            {
+                pose = CG_GetPose(localClientNum, dobjHandle);
+                if (CG_DObjGetWorldBoneMatrix(&pose->pose, obj, boneIndex, orient->axis, orient->origin))
+                {
+                    if ((COERCE_UNSIGNED_INT(orient->origin[0]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->origin[1]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->origin[2]) & 0x7F800000) == 0x7F800000)
+                    {
+                        MyAssertHandler(
+                            ".\\EffectsCore\\fx_update.cpp",
+                            1381,
+                            0,
+                            "%s",
+                            "!IS_NAN((orient->origin)[0]) && !IS_NAN((orient->origin)[1]) && !IS_NAN((orient->origin)[2])");
+                    }
+                    if ((COERCE_UNSIGNED_INT(orient->axis[0][0]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->axis[0][1]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->axis[0][2]) & 0x7F800000) == 0x7F800000)
+                    {
+                        MyAssertHandler(
+                            ".\\EffectsCore\\fx_update.cpp",
+                            1382,
+                            0,
+                            "%s",
+                            "!IS_NAN((orient->axis[0])[0]) && !IS_NAN((orient->axis[0])[1]) && !IS_NAN((orient->axis[0])[2])");
+                    }
+                    if ((COERCE_UNSIGNED_INT(orient->axis[1][0]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->axis[1][1]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->axis[1][2]) & 0x7F800000) == 0x7F800000)
+                    {
+                        MyAssertHandler(
+                            ".\\EffectsCore\\fx_update.cpp",
+                            1383,
+                            0,
+                            "%s",
+                            "!IS_NAN((orient->axis[1])[0]) && !IS_NAN((orient->axis[1])[1]) && !IS_NAN((orient->axis[1])[2])");
+                    }
+                    if ((COERCE_UNSIGNED_INT(orient->axis[2][0]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->axis[2][1]) & 0x7F800000) == 0x7F800000
+                        || (COERCE_UNSIGNED_INT(orient->axis[2][2]) & 0x7F800000) == 0x7F800000)
+                    {
+                        MyAssertHandler(
+                            ".\\EffectsCore\\fx_update.cpp",
+                            1384,
+                            0,
+                            "%s",
+                            "!IS_NAN((orient->axis[2])[0]) && !IS_NAN((orient->axis[2])[1]) && !IS_NAN((orient->axis[2])[2])");
+                    }
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        CG_GetDObjOrientation(localClientNum, dobjHandle, orient->axis, orient->origin);
+        if ((COERCE_UNSIGNED_INT(orient->axis[0][0]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->axis[0][1]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->axis[0][2]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                1363,
+                0,
+                "%s",
+                "!IS_NAN((orient->axis[0])[0]) && !IS_NAN((orient->axis[0])[1]) && !IS_NAN((orient->axis[0])[2])");
+        }
+        if ((COERCE_UNSIGNED_INT(orient->axis[1][0]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->axis[1][1]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->axis[1][2]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                1364,
+                0,
+                "%s",
+                "!IS_NAN((orient->axis[1])[0]) && !IS_NAN((orient->axis[1])[1]) && !IS_NAN((orient->axis[1])[2])");
+        }
+        if ((COERCE_UNSIGNED_INT(orient->axis[2][0]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->axis[2][1]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->axis[2][2]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                1365,
+                0,
+                "%s",
+                "!IS_NAN((orient->axis[2])[0]) && !IS_NAN((orient->axis[2])[1]) && !IS_NAN((orient->axis[2])[2])");
+        }
+        if ((COERCE_UNSIGNED_INT(orient->origin[0]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->origin[1]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(orient->origin[2]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                1366,
+                0,
+                "%s",
+                "!IS_NAN((orient->origin)[0]) && !IS_NAN((orient->origin)[1]) && !IS_NAN((orient->origin)[2])");
+        }
+        return 1;
+    }
+}
+
+bool __cdecl FX_GetBoneOrientation_IsDObjEntityValid(int localClientNum, int dobjHandle)
+{
+    return dobjHandle >= 1022 || CG_GetEntity(localClientNum, dobjHandle)->nextValid;
+}
+
+void __cdecl FX_UpdateEffectPartial(
+    __int64 system,
+    long double msecUpdateBegin,
+    float distanceTravelledBegin,
+    float distanceTravelledEnd,
+    unsigned __int16 *elemHandleStart,
+    unsigned __int16 *elemHandleStop,
+    unsigned __int16 *trailElemStart,
+    unsigned __int16 *trailElemStop)
+{
+    int v8; // edx
+    __int64 v9; // [esp-8h] [ebp-48h]
+    unsigned __int16 v10; // [esp+14h] [ebp-2Ch]
+    unsigned __int16 v11; // [esp+18h] [ebp-28h]
+    const FxEffectDef *def; // [esp+1Ch] [ebp-24h]
+    unsigned __int16 trailHandle; // [esp+24h] [ebp-1Ch]
+    FxTrail trail; // [esp+28h] [ebp-18h] BYREF
+    unsigned int trailIter; // [esp+30h] [ebp-10h]
+    FxTrail *remoteTrail; // [esp+34h] [ebp-Ch]
+    unsigned __int16 startHandle; // [esp+38h] [ebp-8h]
+    unsigned int elemClass; // [esp+3Ch] [ebp-4h]
+
+    if (*(unsigned int *)(HIDWORD(system) + 36) > SHIDWORD(msecUpdateBegin))
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1573,
+            0,
+            "effect->msecLastUpdate <= msecUpdateEnd\n\t%g, %g",
+            (double)*(int *)(HIDWORD(system) + 36),
+            (double)SHIDWORD(msecUpdateBegin));
+    if ((*(unsigned int *)(HIDWORD(system) + 4) & 0x10000) != 0)
+    {
+        def = (const FxEffectDef *)*(unsigned int *)HIDWORD(system);
+        HIDWORD(v9) = HIDWORD(system) + 68;
+        LODWORD(v9) = HIDWORD(system) + 96;
+        FX_ProcessLooping(
+            system,
+            0,
+            *(unsigned int *)(*(unsigned int *)HIDWORD(system) + 16),
+            v9,
+            *(unsigned int *)(HIDWORD(system) + 32),
+            SLODWORD(msecUpdateBegin),
+            SHIDWORD(msecUpdateBegin),
+            distanceTravelledBegin,
+            distanceTravelledEnd);
+        if (HIDWORD(msecUpdateBegin) - *(unsigned int *)(HIDWORD(system) + 32) > def->msecLoopingLife)
+            FX_StopEffect((FxSystem *)system, (FxEffect *)HIDWORD(system));
+    }
+    for (elemClass = 0; elemClass < 3; ++elemClass)
+        FX_UpdateEffectPartialForClass(
+            (FxSystem *)system,
+            (FxEffect *)HIDWORD(system),
+            msecUpdateBegin,
+            elemHandleStart[elemClass],
+            elemHandleStop[elemClass],
+            elemClass);
+    trailIter = 0;
+    for (trailHandle = *(_WORD *)(HIDWORD(system) + 16); trailHandle != 0xFFFF; trailHandle = trail.nextTrailHandle)
+    {
+        if (!(unsigned int)system)
+            MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 362, 0, "%s", "system");
+        remoteTrail = (FxTrail *)FX_PoolFromHandle_Generic<FxTrail, 128>(*(FxPool<FxTrail> **)(system + 376), trailHandle);
+        v8 = *(unsigned int *)&remoteTrail->lastElemHandle;
+        *(unsigned int *)&trail.nextTrailHandle = *(unsigned int *)&remoteTrail->nextTrailHandle;
+        *(unsigned int *)&trail.lastElemHandle = v8;
+        if (trailElemStart)
+            v11 = trailElemStart[trailIter];
+        else
+            v11 = -1;
+        startHandle = v11;
+        if (trailElemStop)
+            v10 = trailElemStop[trailIter];
+        else
+            v10 = -1;
+        FX_UpdateEffectPartialTrail(
+            (FxSystem *)system,
+            (FxEffect *)HIDWORD(system),
+            &trail,
+            SLODWORD(msecUpdateBegin),
+            SHIDWORD(msecUpdateBegin),
+            distanceTravelledBegin,
+            distanceTravelledEnd,
+            startHandle,
+            v10,
+            (FxSpatialFrame *)(HIDWORD(system) + 68));
+        *remoteTrail = trail;
+        ++trailIter;
+    }
+    *(unsigned int *)(HIDWORD(system) + 36) = HIDWORD(msecUpdateBegin);
+}
+
+void __cdecl FX_ProcessLooping(
+    __int64 system,
+    int elemDefFirst,
+    int elemDefCount,
+    __int64 frameBegin,
+    int msecWhenPlayed,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
+    float distanceTravelledBegin,
+    float distanceTravelledEnd)
+{
+    unsigned __int16 trailHandle; // [esp+60h] [ebp-14h]
+    FxPool<FxTrail> *trail; // [esp+64h] [ebp-10h]
+    int elemDefEnd; // [esp+6Ch] [ebp-8h]
+    int elemDefIndex; // [esp+70h] [ebp-4h]
+    int elemDefIndexa; // [esp+70h] [ebp-4h]
+
+    if (!HIDWORD(system))
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 434, 0, "%s", "effect");
+    if (!*(unsigned int *)HIDWORD(system))
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 437, 0, "%s", "effectDef");
+    elemDefEnd = elemDefCount + elemDefFirst;
+    for (elemDefIndex = elemDefFirst; elemDefIndex != elemDefEnd; ++elemDefIndex)
+        FX_SpawnLoopingElems(
+            (FxSystem *)system,
+            __SPAIR64__(elemDefIndex, HIDWORD(system)),
+            frameBegin,
+            msecWhenPlayed,
+            msecUpdateBegin,
+            msecUpdateEnd);
+    for (trailHandle = *(_WORD *)(HIDWORD(system) + 16); trailHandle != 0xFFFF; trailHandle = trail->item.nextTrailHandle)
+    {
+        if (!(unsigned int)system)
+            MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 362, 0, "%s", "system");
+        trail = FX_PoolFromHandle_Generic<FxTrail, 128>(*(FxPool<FxTrail> **)(system + 376), trailHandle);
+        elemDefIndexa = trail->item.defIndex;
+        if (elemDefIndexa >= elemDefFirst && elemDefIndexa < elemDefEnd)
+            FX_SpawnTrailLoopingElems(
+                system,
+                (FxTrail *)trail,
+                frameBegin,
+                msecWhenPlayed,
+                msecUpdateBegin,
+                msecUpdateEnd,
+                distanceTravelledBegin,
+                distanceTravelledEnd);
+    }
+}
+
+void __cdecl FX_UpdateEffectPartialForClass(
+    FxSystem *system,
+    FxEffect *effect,
+    long double msecUpdateBegin,
+    unsigned __int16 elemHandleStart,
+    unsigned __int16 elemHandleStop,
+    unsigned int elemClass)
+{
+    long double v6; // [esp+Ch] [ebp-28h]
+    long double lifeSpan; // [esp+14h] [ebp-20h]
+    unsigned __int16 elemHandle; // [esp+1Ch] [ebp-18h]
+    FxUpdateResult updateResult; // [esp+20h] [ebp-14h]
+    unsigned __int16 elemHandleNext; // [esp+24h] [ebp-10h]
+    FxPool<FxElem> *elem; // [esp+28h] [ebp-Ch]
+    FxPool<FxElem> *elema; // [esp+28h] [ebp-Ch]
+    unsigned int passCount; // [esp+2Ch] [ebp-8h]
+    unsigned __int16 elemHandleFirstExisting; // [esp+30h] [ebp-4h]
+
+    if (effect->msecLastUpdate > SHIDWORD(msecUpdateBegin))
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1436,
+            0,
+            "effect->msecLastUpdate <= msecUpdateEnd\n\t%g, %g",
+            (double)effect->msecLastUpdate,
+            (double)SHIDWORD(msecUpdateBegin));
+    elemHandleFirstExisting = effect->firstElemHandle[elemClass];
+    passCount = 1;
+    do
+    {
+        for (elemHandle = elemHandleStart; elemHandle != elemHandleStop; elemHandle = elemHandleNext)
+        {
+            if (elemHandle == 0xFFFF)
+            {
+                Com_Printf(0, "---- EFFECT ABOUT TO ASSERT ----\n");
+                Com_Printf(0, "effect '%s' spawned at %i pass %i\n", effect->def->name, effect->msecBegin, passCount);
+                Com_Printf(
+                    0,
+                    "looping from %i to %i, first existing is %i\n",
+                    elemHandleStart,
+                    elemHandleStop,
+                    elemHandleFirstExisting);
+                LODWORD(v6) = HIDWORD(msecUpdateBegin) - LODWORD(msecUpdateBegin);
+                Com_Printf(0, "update period is from %lg to %lg (%lg ms)\n", msecUpdateBegin, v6, lifeSpan);
+                Com_Printf(0, "here's the active elem list:\n");
+                for (elemHandle = effect->firstElemHandle[elemClass];
+                    elemHandle != 0xFFFF;
+                    elemHandle = elem->item.nextElemHandleInEffect)
+                {
+                    if (!system)
+                        MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 334, 0, "%s", "system");
+                    elem = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
+                    HIDWORD(lifeSpan) = (elem->item.msecBegin + effect->randomSeed + 296 * (unsigned int)elem->item.sequence)
+                        % 0x1DF;
+                    HIDWORD(v6) = &effect->def->elemDefs[elem->item.defIndex].lifeSpanMsec;
+                    LODWORD(lifeSpan) = *(unsigned int *)HIDWORD(v6)
+                        + (((*(unsigned int *)(HIDWORD(v6) + 4) + 1) * LOWORD(fx_randomTable[HIDWORD(lifeSpan) + 17])) >> 16);
+                    Com_Printf(
+                        0,
+                        "  elem %i def %i seq %i spawn %i die %i\n",
+                        elemHandle,
+                        elem->item.defIndex,
+                        elem->item.sequence,
+                        elem->item.msecBegin,
+                        LODWORD(lifeSpan) + elem->item.msecBegin);
+                }
+                if (!alwaysfails)
+                    MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1467, 0, "Big bad effects assert.  Include assert log.");
+            }
+            if (!system)
+                MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 334, 0, "%s", "system");
+            elema = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
+            updateResult = FX_UpdateElement(
+                system,
+                effect,
+                (FxElem *)elema,
+                SLODWORD(msecUpdateBegin),
+                SHIDWORD(msecUpdateBegin));
+            elemHandleNext = elema->item.nextElemHandleInEffect;
+            if (updateResult == FX_UPDATE_REMOVE)
+            {
+                FX_FreeElem(system, elemHandle, effect, elemClass);
+                if (elemHandleFirstExisting == elemHandle)
+                    elemHandleFirstExisting = elemHandleNext;
+            }
+        }
+        elemHandleStop = elemHandleFirstExisting;
+        elemHandleFirstExisting = effect->firstElemHandle[elemClass];
+        elemHandleStart = elemHandleFirstExisting;
+        ++passCount;
+    } while (elemHandleFirstExisting != elemHandleStop);
+}
+
+FxUpdateResult __cdecl FX_UpdateElement(
+    FxSystem *system,
+    FxEffect *effect,
+    FxElem *elem,
+    int msecUpdateBegin,
+    int msecUpdateEnd)
+{
+    float msec; // [esp+0h] [ebp-140h]
+    bool v7; // [esp+10h] [ebp-130h]
+    int physObjId; // [esp+8Ch] [ebp-B4h]
+    FxUpdateElem update; // [esp+A8h] [ebp-98h] BYREF
+    const FxElemDef *elemDef; // [esp+128h] [ebp-18h]
+    FxUpdateResult updateResult; // [esp+12Ch] [ebp-14h] BYREF
+    float elemOriginPrev[3]; // [esp+130h] [ebp-10h] BYREF
+    bool goToRest; // [esp+13Fh] [ebp-1h]
+
+    if (!elem)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1266, 0, "%s", "elem");
+    updateResult = FX_UPDATE_KEEP;
+    if (FX_UpdateElement_SetupUpdate(
+        effect,
+        msecUpdateBegin,
+        msecUpdateEnd,
+        elem->defIndex,
+        elem->atRestFraction,
+        elem->msecBegin,
+        elem->sequence,
+        elem->origin,
+        &update))
+    {
+        FX_UpdateElement_TruncateToElemEnd(&update, &updateResult);
+        if (updateResult)
+        {
+            if (!FX_UpdateElement_TruncateToElemBegin(&update, &updateResult))
+                return updateResult;
+            elemOriginPrev[0] = elem->origin[0];
+            elemOriginPrev[1] = elem->origin[1];
+            elemOriginPrev[2] = elem->origin[2];
+            physObjId = elem->physObjId;
+            update.elemBaseVel = elem->baseVel;
+            update.physObjId = physObjId;
+            update.onGround = 0;
+            //Profile_Begin(194);
+            updateResult = FX_UpdateElementPosition(system, &update);
+            //Profile_EndInternal(0);
+            FX_UpdateElement_HandleEmitting(system, elem, &update, elemOriginPrev, &updateResult);
+        }
+        elemDef = FX_GetUpdateElemDef(&update);
+        if (updateResult)
+        {
+            v7 = 0;
+            if (update.atRestFraction == 255
+                && elemOriginPrev[0] == elem->origin[0]
+                && elemOriginPrev[1] == elem->origin[1]
+                && elemOriginPrev[2] == elem->origin[2])
+            {
+                v7 = 1;
+            }
+            goToRest = v7;
+            if (v7 && ((elemDef->flags & 0x100) == 0 || update.onGround))
+            {
+                msec = (float)update.msecUpdateEnd;
+                elem->atRestFraction = (int)FX_GetAtRestFraction(&update, msec);
+            }
+            else
+            {
+                elem->atRestFraction = update.atRestFraction;
+            }
+        }
+        else if (elemDef->effectOnDeath.handle)
+        {
+            FX_SpawnDeathEffect(system, &update);
+        }
+    }
+    return updateResult;
+}
+
+const FxElemDef *__cdecl FX_GetUpdateElemDef(const FxUpdateElem *update)
+{
+    if (!update->effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 79, 0, "%s", "update->effect");
+    return &update->effect->def->elemDefs[update->elemIndex];
+}
+
+double __cdecl FX_GetAtRestFraction(const FxUpdateElem *update, float msec)
+{
+    float v4; // [esp+Ch] [ebp-8h]
+    float v5; // [esp+10h] [ebp-4h]
+
+    v4 = msec - (double)update->msecElemBegin;
+    v5 = v4 * 255.0 / update->msecLifeSpan - 0.25;
+    return (float)ceil(v5);
+}
+
+int __cdecl FX_UpdateElementPosition(FxSystem *system, FxUpdateElem *update)
+{
+    const FxElemDef *elemDef; // [esp+4h] [ebp-4h]
+
+    elemDef = FX_GetUpdateElemDef(update);
+    if (elemDef->elemType == 5 && ((unsigned int)svs.snapshotClients[20582].attachModelIndex & elemDef->flags) != 0)
+        return 1;
+    if ((elemDef->flags & 0x100) != 0)
+        return FX_UpdateElementPosition_Colliding(system, update);
+    if (((unsigned int)&svs.snapshotEntities[42949].lerp.pos.trBase[2] & elemDef->flags) != 0)
+        return FX_UpdateElementPosition_NonColliding(update);
+    return FX_UpdateElementPosition_Local(update);
+}
+
+int __cdecl FX_UpdateElementPosition_Colliding(FxSystem *system, FxUpdateElem *update)
+{
+    double v3; // [esp-Ch] [ebp-20h]
+    int msecUpdateBegin; // [esp+0h] [ebp-14h]
+    float xyzWorldOld[3]; // [esp+4h] [ebp-10h] BYREF
+    int msecUpdatePartial; // [esp+10h] [ebp-4h]
+
+    if (update->atRestFraction == 255)
+    {
+        FX_OrientationPosToWorldPos(&update->orient, update->elemOrigin, xyzWorldOld);
+        msecUpdateBegin = update->msecUpdateBegin;
+        for (msecUpdatePartial = msecUpdateBegin + 50; msecUpdatePartial < update->msecUpdateEnd; msecUpdatePartial += 50)
+        {
+            if (!FX_UpdateElementPosition_CollidingStep(
+                system,
+                update,
+                COERCE_DOUBLE(__PAIR64__(msecUpdatePartial, msecUpdateBegin)),
+                xyzWorldOld))
+                return 0;
+            msecUpdateBegin = msecUpdatePartial;
+        }
+        HIDWORD(v3) = update->msecUpdateEnd;
+        LODWORD(v3) = msecUpdateBegin;
+        return FX_UpdateElementPosition_CollidingStep(system, update, v3, xyzWorldOld);
+    }
+    else
+    {
+        FX_OrientationPosToWorldPos(&update->orient, update->elemOrigin, update->posWorld);
+        return 1;
+    }
+}
+
+int __cdecl FX_UpdateElementPosition_CollidingStep(
+    FxSystem *system,
+    FxUpdateElem *update,
+    double msecUpdateBegin,
+    float *xyzWorldOld)
+{
+    const FxElemDef *elemDef; // [esp+34h] [ebp-34h]
+    int traceMask; // [esp+38h] [ebp-30h]
+    trace_t trace; // [esp+3Ch] [ebp-2Ch] BYREF
+
+    traceMask = 2065;
+    elemDef = FX_GetUpdateElemDef(update);
+    if (elemDef->useItemClip)
+        traceMask = 3089;
+    do
+    {
+        update->onGround = 0;
+        FX_NextElementPosition(update, msecUpdateBegin);
+        //Profile_Begin(203);
+        CM_BoxTrace(&trace, xyzWorldOld, update->posWorld, elemDef->collMins, elemDef->collMaxs, 0, traceMask);
+        //Profile_EndInternal(0);
+        if (!FX_TraceHitSomething(&trace))
+            break;
+        if (trace.normal[2] > DOUBLE_0_699999988079071)
+            update->onGround = 1;
+        LODWORD(msecUpdateBegin) = FX_CollisionResponse(
+            system,
+            update,
+            &trace,
+            SLODWORD(msecUpdateBegin),
+            SHIDWORD(msecUpdateBegin),
+            xyzWorldOld);
+        elemDef = FX_GetUpdateElemDef(update);
+        if ((elemDef->flags & 0x200) != 0)
+            return 0;
+    } while (LODWORD(msecUpdateBegin) != HIDWORD(msecUpdateBegin));
+    FX_OrientationPosFromWorldPos(&update->orient, update->posWorld, update->elemOrigin);
+    *xyzWorldOld = update->posWorld[0];
+    xyzWorldOld[1] = update->posWorld[1];
+    xyzWorldOld[2] = update->posWorld[2];
+    return 1;
+}
+
+void __cdecl FX_NextElementPosition(FxUpdateElem *update, double msecUpdateBegin)
+{
+    const char *v2; // eax
+    double v3; // [esp+Ch] [ebp-2Ch]
+    float *elemOrigin; // [esp+18h] [ebp-20h]
+    float gravityScale; // [esp+1Ch] [ebp-1Ch]
+    float secDuration; // [esp+20h] [ebp-18h]
+    const FxElemDef *elemDef; // [esp+24h] [ebp-14h]
+    float posLocal[3]; // [esp+28h] [ebp-10h] BYREF
+    float deltaVelFromGravity; // [esp+34h] [ebp-4h]
+
+    if (HIDWORD(msecUpdateBegin) - LODWORD(msecUpdateBegin) <= 0)
+    {
+        v2 = va("[%g, %g]", msecUpdateBegin, v3);
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 823, 0, "%s\n\t%s", "msecUpdateEnd - msecUpdateBegin > 0", v2);
+    }
+    elemOrigin = update->elemOrigin;
+    posLocal[0] = *elemOrigin;
+    posLocal[1] = elemOrigin[1];
+    posLocal[2] = elemOrigin[2];
+    FX_NextElementPosition_NoExternalForces(update, msecUpdateBegin, posLocal, update->posWorld);
+    secDuration = (double)(HIDWORD(msecUpdateBegin) - LODWORD(msecUpdateBegin)) * 0.001000000047497451;
+    Vec3Mad(update->posWorld, secDuration, update->elemBaseVel, update->posWorld);
+    elemDef = FX_GetUpdateElemDef(update);
+    gravityScale = elemDef->gravity.amplitude * flt_8801C4[update->randomSeed] + elemDef->gravity.base;
+    deltaVelFromGravity = gravityScale * 800.0 * secDuration;
+    update->elemBaseVel[2] = update->elemBaseVel[2] - deltaVelFromGravity;
+    update->posWorld[2] = update->posWorld[2] - deltaVelFromGravity * secDuration * 0.5;
+}
+
+void __cdecl FX_NextElementPosition_NoExternalForces(
+    FxUpdateElem *update,
+    double msecUpdateBegin,
+    float *posLocal,
+    float *posWorld)
+{
+    const char *v4; // eax
+    double v5; // [esp+10h] [ebp-10h]
+    float normUpdateEnd; // [esp+18h] [ebp-8h]
+    float normUpdateBegin; // [esp+1Ch] [ebp-4h]
+
+    if (HIDWORD(msecUpdateBegin) - LODWORD(msecUpdateBegin) <= 0)
+    {
+        v4 = va("[%g, %g]", msecUpdateBegin, v5);
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 804, 0, "%s\n\t%s", "msecUpdateEnd - msecUpdateBegin > 0", v4);
+    }
+    if (!posLocal)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 805, 0, "%s", "posLocal");
+    normUpdateBegin = (double)(LODWORD(msecUpdateBegin) - update->msecElemBegin) / update->msecLifeSpan;
+    normUpdateEnd = (double)(HIDWORD(msecUpdateBegin) - update->msecElemBegin) / update->msecLifeSpan;
+    FX_IntegrateVelocity(update, normUpdateBegin, normUpdateEnd, posLocal, posWorld);
+}
+
+void __cdecl FX_IntegrateVelocity(const FxUpdateElem *update, float t0, float t1, float *posLocal, float *posWorld)
+{
+    const char *v5; // eax
+    const char *v6; // eax
+    char *v7; // eax
+    char *v8; // eax
+    double v9; // [esp+18h] [ebp-80h]
+    int v10; // [esp+20h] [ebp-78h]
+    int v11; // [esp+24h] [ebp-74h]
+    float integralScale; // [esp+64h] [ebp-34h]
+    float startPoint; // [esp+68h] [ebp-30h]
+    float endPoint; // [esp+6Ch] [ebp-2Ch]
+    const FxElemDef *elemDef; // [esp+70h] [ebp-28h]
+    float startLerp; // [esp+74h] [ebp-24h]
+    int startIndex; // [esp+78h] [ebp-20h]
+    const FxElemVelStateSample *samples; // [esp+7Ch] [ebp-1Ch]
+    int intervalCount; // [esp+80h] [ebp-18h]
+    int endIndex; // [esp+84h] [ebp-14h]
+    float rangeLerp[3]; // [esp+88h] [ebp-10h] BYREF
+    float endLerp; // [esp+94h] [ebp-4h]
+
+    if (!update)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 759, 0, "%s", "update");
+    elemDef = FX_GetUpdateElemDef(update);
+    if (!elemDef)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 762, 0, "%s", "elemDef");
+    if (!elemDef->velSamples)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 763, 0, "%s", "elemDef->velSamples");
+    if (!elemDef->velIntervalCount)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            764,
+            0,
+            "%s\n\t(elemDef->velIntervalCount) = %i",
+            "(elemDef->velIntervalCount >= 1)",
+            elemDef->velIntervalCount);
+    if (t0 < 0.0 || t1 <= (double)t0 || t1 > 1.0)
+    {
+        v5 = va("%g, %g", t0, t1);
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 765, 0, "%s\n\t%s", "0.0f <= t0 && t0 < t1 && t1 <= 1.0f", v5);
+    }
+    rangeLerp[0] = fx_randomTable[update->randomSeed];
+    rangeLerp[1] = flt_88018C[update->randomSeed];
+    rangeLerp[2] = flt_880190[update->randomSeed];
+    integralScale = update->msecLifeSpan;
+    samples = elemDef->velSamples;
+    intervalCount = elemDef->velIntervalCount;
+    if (intervalCount == 1)
+    {
+        FX_IntegrateVelocityInSegment(
+            elemDef->flags,
+            &update->orient,
+            samples,
+            t0,
+            t1,
+            rangeLerp,
+            integralScale,
+            posLocal,
+            posWorld);
+    }
+    else
+    {
+        startPoint = (double)intervalCount * t0;
+        *((float *)&v9 + 1) = floor(startPoint);
+        startIndex = (int)*((float *)&v9 + 1);
+        startLerp = startPoint - (double)startIndex;
+        endPoint = (double)intervalCount * t1;
+        *(float *)&v9 = ceil(endPoint);
+        endIndex = (int)*(float *)&v9 - 1;
+        endLerp = endPoint - (double)endIndex;
+        if (startIndex > endIndex)
+        {
+            v6 = va("%i > %i for %g to %g on %i intervals", startIndex, endIndex, t0, t1, intervalCount);
+            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 788, 1, "%s\n\t%s", "startIndex <= endIndex", v6);
+        }
+        if (startIndex < 0 || startIndex >= intervalCount)
+        {
+            v7 = va("%i for %g on %i intervals", startIndex, t0, intervalCount);
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                789,
+                1,
+                "%s\n\t(va( \"%i for %g on %i intervals\", startIndex, t0, intervalCount )) = %i",
+                "(startIndex >= 0 && startIndex < intervalCount)",
+                v7,
+                v9,
+                v10,
+                v11);
+        }
+        if (endIndex < 0 || endIndex >= intervalCount)
+        {
+            v8 = va("%i for %g on %i intervals", endIndex, t1, intervalCount);
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                790,
+                1,
+                "%s\n\t(va( \"%i for %g on %i intervals\", endIndex, t1, intervalCount )) = %i",
+                "(endIndex >= 0 && endIndex < intervalCount)",
+                v8,
+                v9,
+                v10,
+                v11);
+        }
+        if (startIndex == endIndex)
+            FX_IntegrateVelocityInSegment(
+                elemDef->flags,
+                &update->orient,
+                &samples[startIndex],
+                startLerp,
+                endLerp,
+                rangeLerp,
+                integralScale,
+                posLocal,
+                posWorld);
+        else
+            FX_IntegrateVelocityAcrossSegments(
+                elemDef->flags,
+                &update->orient,
+                &samples[startIndex],
+                &samples[endIndex],
+                startLerp,
+                endLerp,
+                rangeLerp,
+                integralScale,
+                posLocal,
+                posWorld);
+    }
+}
+
+void __cdecl FX_IntegrateVelocityAcrossSegments(
+    int elemDefFlags,
+    const orientation_t *orient,
+    const FxElemVelStateSample *velState0,
+    const FxElemVelStateSample *velState1,
+    float t0,
+    float t1,
+    const float *amplitudeScale,
+    float integralScale,
+    float *posLocal,
+    float *posWorld)
+{
+    float v10; // [esp+10h] [ebp-28h]
+    float v11; // [esp+10h] [ebp-28h]
+    float t1ScaledByIntegral; // [esp+1Ch] [ebp-1Ch]
+    float w0[2]; // [esp+20h] [ebp-18h] BYREF
+    const FxElemVelStateSample *localVelState0; // [esp+28h] [ebp-10h]
+    float w1[2]; // [esp+2Ch] [ebp-Ch] BYREF
+    float t0ScaledByIntegral; // [esp+34h] [ebp-4h]
+
+    localVelState0 = velState0;
+    if (t0 < 0.0 || t0 > 1.0)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            672,
+            0,
+            "t0 not in [0.0f, 1.0f]\n\t%g not in [%g, %g]",
+            t0,
+            0.0,
+            1.0);
+    if (t1 < 0.0 || t1 > 1.0)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            673,
+            0,
+            "t1 not in [0.0f, 1.0f]\n\t%g not in [%g, %g]",
+            t1,
+            0.0,
+            1.0);
+    t0ScaledByIntegral = -integralScale * t0;
+    w0[1] = t0 * 0.5 * t0ScaledByIntegral;
+    w0[0] = t0ScaledByIntegral - w0[1];
+    t1ScaledByIntegral = t1 * integralScale;
+    w1[1] = t1 * 0.5 * t1ScaledByIntegral;
+    w1[0] = t1ScaledByIntegral - w1[1];
+    if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & elemDefFlags) != 0)
+    {
+        FX_IntegrateVelocityFromZeroInSegment(
+            &velState1->local,
+            &velState1[1].local,
+            w1,
+            amplitudeScale,
+            integralScale,
+            posLocal);
+        v10 = -integralScale;
+        FX_IntegrateVelocityFromZeroInSegment(
+            &localVelState0->local,
+            &localVelState0[1].local,
+            w0,
+            amplitudeScale,
+            v10,
+            posLocal);
+    }
+    FX_OrientationPosToWorldPos(orient, posLocal, posWorld);
+    if ((elemDefFlags & 0x2000000) != 0)
+    {
+        FX_IntegrateVelocityFromZeroInSegment(
+            &velState1->world,
+            &velState1[1].world,
+            w1,
+            amplitudeScale,
+            integralScale,
+            posWorld);
+        v11 = -integralScale;
+        FX_IntegrateVelocityFromZeroInSegment(
+            &localVelState0->world,
+            &localVelState0[1].world,
+            w0,
+            amplitudeScale,
+            v11,
+            posWorld);
+    }
+}
+
+void __cdecl FX_IntegrateVelocityFromZeroInSegment(
+    const FxElemVelStateInFrame *statePrev,
+    const FxElemVelStateInFrame *stateNext,
+    float *weight,
+    const float *amplitudeScale,
+    float integralScale,
+    float *pos)
+{
+    *pos = (*amplitudeScale * statePrev->totalDelta.amplitude[0] + statePrev->totalDelta.base[0]) * integralScale + *pos;
+    *pos = (*amplitudeScale * statePrev->velocity.amplitude[0] + statePrev->velocity.base[0]) * *weight + *pos;
+    *pos = (*amplitudeScale * stateNext->velocity.amplitude[0] + stateNext->velocity.base[0]) * weight[1] + *pos;
+    pos[1] = (amplitudeScale[1] * statePrev->totalDelta.amplitude[1] + statePrev->totalDelta.base[1]) * integralScale
+        + pos[1];
+    pos[1] = (amplitudeScale[1] * statePrev->velocity.amplitude[1] + statePrev->velocity.base[1]) * *weight + pos[1];
+    pos[1] = (amplitudeScale[1] * stateNext->velocity.amplitude[1] + stateNext->velocity.base[1]) * weight[1] + pos[1];
+    pos[2] = (amplitudeScale[2] * statePrev->totalDelta.amplitude[2] + statePrev->totalDelta.base[2]) * integralScale
+        + pos[2];
+    pos[2] = (amplitudeScale[2] * statePrev->velocity.amplitude[2] + statePrev->velocity.base[2]) * *weight + pos[2];
+    pos[2] = (amplitudeScale[2] * stateNext->velocity.amplitude[2] + stateNext->velocity.base[2]) * weight[1] + pos[2];
+}
+
+void __cdecl FX_IntegrateVelocityInSegment(
+    int elemDefFlags,
+    const orientation_t *orient,
+    const FxElemVelStateSample *velState,
+    float t0,
+    float t1,
+    const float *amplitudeScale,
+    float integralScale,
+    float *posLocal,
+    float *posWorld)
+{
+    float weight[2]; // [esp+Ch] [ebp-8h] BYREF
+
+    if (t0 < 0.0 || t0 > 1.0)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 726, 0, "%s\n\t(t0) = %g", "(t0 >= 0.0f && t0 <= 1.0f)", t0);
+    if (t1 < 0.0 || t1 > 1.0)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 727, 0, "%s\n\t(t1) = %g", "(t1 >= 0.0f && t1 <= 1.0f)", t1);
+    weight[1] = integralScale * 0.5 * (t1 * t1 - t0 * t0);
+    weight[0] = (t1 - t0) * integralScale - weight[1];
+    if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & elemDefFlags) != 0)
+        FX_IntegrateVelocityInSegmentInFrame(
+            &velState->local,
+            &velState[1].local,
+            weight,
+            amplitudeScale,
+            integralScale,
+            posLocal);
+    FX_OrientationPosToWorldPos(orient, posLocal, posWorld);
+    if ((elemDefFlags & 0x2000000) != 0)
+        FX_IntegrateVelocityInSegmentInFrame(
+            &velState->world,
+            &velState[1].world,
+            weight,
+            amplitudeScale,
+            integralScale,
+            posWorld);
+}
+
+void __cdecl FX_IntegrateVelocityInSegmentInFrame(
+    const FxElemVelStateInFrame *statePrev,
+    const FxElemVelStateInFrame *stateNext,
+    const float *weight,
+    const float *amplitudeScale,
+    float integralScale,
+    float *pos)
+{
+    *pos = (*amplitudeScale * statePrev->velocity.amplitude[0] + statePrev->velocity.base[0]) * *weight + *pos;
+    *pos = (*amplitudeScale * stateNext->velocity.amplitude[0] + stateNext->velocity.base[0]) * weight[1] + *pos;
+    pos[1] = (amplitudeScale[1] * statePrev->velocity.amplitude[1] + statePrev->velocity.base[1]) * *weight + pos[1];
+    pos[1] = (amplitudeScale[1] * stateNext->velocity.amplitude[1] + stateNext->velocity.base[1]) * weight[1] + pos[1];
+    pos[2] = (amplitudeScale[2] * statePrev->velocity.amplitude[2] + statePrev->velocity.base[2]) * *weight + pos[2];
+    pos[2] = (amplitudeScale[2] * stateNext->velocity.amplitude[2] + stateNext->velocity.base[2]) * weight[1] + pos[2];
+}
+
+bool __cdecl FX_TraceHitSomething(const trace_t *trace)
+{
+    if (!trace)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 843, 0, "%s", "trace");
+    return !trace->startsolid && !trace->allsolid && trace->fraction != 1.0;
+}
+
+int __cdecl FX_CollisionResponse(
+    FxSystem *system,
+    FxUpdateElem *update,
+    const trace_t *trace,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
+    float *xyzWorldOld)
+{
+    const char *v7; // eax
+    float fraction_4; // [esp+14h] [ebp-9Ch]
+    float scale; // [esp+18h] [ebp-98h]
+    float v10; // [esp+1Ch] [ebp-94h]
+    float v11; // [esp+28h] [ebp-88h]
+    float v12; // [esp+60h] [ebp-50h]
+    float postImpactVelocity[3]; // [esp+64h] [ebp-4Ch] BYREF
+    float gravityScale; // [esp+70h] [ebp-40h]
+    const FxElemDef *elemDef; // [esp+74h] [ebp-3Ch]
+    int msecOnImpact; // [esp+78h] [ebp-38h]
+    float velDelta[3]; // [esp+7Ch] [ebp-34h] BYREF
+    float msecElapsed; // [esp+88h] [ebp-28h]
+    float scaledPreImpactVelocity[3]; // [esp+8Ch] [ebp-24h] BYREF
+    float velocityAlongNormal; // [esp+98h] [ebp-18h]
+    float preImpactVelocity[3]; // [esp+9Ch] [ebp-14h] BYREF
+    float reflectionFactor; // [esp+A8h] [ebp-8h]
+    float overshotDeltaVelFromGravity; // [esp+ACh] [ebp-4h]
+
+    elemDef = FX_GetUpdateElemDef(update);
+    if (msecUpdateBegin >= msecUpdateEnd)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 888, 0, "%s", "msecUpdateBegin < msecUpdateEnd");
+    Vec3Lerp(xyzWorldOld, update->posWorld, trace->fraction, update->posWorld);
+    v12 = (double)(msecUpdateEnd - msecUpdateBegin) * trace->fraction;
+    v11 = floor(v12);
+    msecOnImpact = msecUpdateBegin + (int)v11;
+    if (msecOnImpact >= msecUpdateEnd)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 892, 0, "%s", "msecOnImpact < msecUpdateEnd");
+    if ((elemDef->flags & 0x200) != 0 || msecOnImpact == update->msecElemEnd)
+    {
+        if (elemDef->effectOnImpact.handle)
+            FX_SpawnImpactEffect(system, update, elemDef->effectOnImpact.handle, msecOnImpact, trace->normal);
+        return msecOnImpact;
+    }
+    else
+    {
+        gravityScale = elemDef->gravity.amplitude * flt_8801C4[update->randomSeed] + elemDef->gravity.base;
+        overshotDeltaVelFromGravity = gravityScale * 0.800000011920929 * (double)(msecUpdateEnd - msecOnImpact);
+        update->elemBaseVel[2] = update->elemBaseVel[2] + overshotDeltaVelFromGravity;
+        msecElapsed = (float)(msecOnImpact - update->msecElemBegin);
+        FX_GetVelocityAtTime(
+            elemDef,
+            update->randomSeed,
+            update->msecLifeSpan,
+            msecElapsed,
+            &update->orient,
+            update->elemBaseVel,
+            preImpactVelocity);
+        if ((LODWORD(preImpactVelocity[0]) & 0x7F800000) == 0x7F800000
+            || (LODWORD(preImpactVelocity[1]) & 0x7F800000) == 0x7F800000
+            || (LODWORD(preImpactVelocity[2]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                907,
+                0,
+                "%s",
+                "!IS_NAN((preImpactVelocity)[0]) && !IS_NAN((preImpactVelocity)[1]) && !IS_NAN((preImpactVelocity)[2])");
+        }
+        if (Vec3LengthSq(preImpactVelocity) >= 9.99999995904e11)
+        {
+            v7 = va("%g %g %g", preImpactVelocity[0], preImpactVelocity[1], preImpactVelocity[2]);
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                908,
+                0,
+                "%s\n\t%s",
+                "Vec3LengthSq( preImpactVelocity ) < 1.0e12f",
+                v7);
+        }
+        reflectionFactor = elemDef->reflectionFactor.amplitude * flt_8801C8[update->randomSeed]
+            + elemDef->reflectionFactor.base;
+        Vec3Scale(preImpactVelocity, reflectionFactor, scaledPreImpactVelocity);
+        if (elemDef->effectOnImpact.handle && Vec3LengthSq(preImpactVelocity) > 1.0)
+        {
+            FX_SpawnImpactEffect(system, update, elemDef->effectOnImpact.handle, msecOnImpact, trace->normal);
+            elemDef = FX_GetUpdateElemDef(update);
+        }
+        if (msecOnImpact == msecUpdateBegin
+            && (++msecOnImpact, Vec3LengthSq(scaledPreImpactVelocity) <= 1.0)
+            && trace->normal[2] > DOUBLE_0_699999988079071)
+        {
+            fraction_4 = (float)msecOnImpact;
+            update->atRestFraction = (int)FX_GetAtRestFraction(update, fraction_4);
+            return msecUpdateEnd;
+        }
+        else
+        {
+            velocityAlongNormal = Vec3Dot(scaledPreImpactVelocity, trace->normal);
+            if ((LODWORD(velocityAlongNormal) & 0x7F800000) == 0x7F800000)
+                MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 933, 0, "%s", "!IS_NAN(velocityAlongNormal)");
+            v10 = fabs(velocityAlongNormal);
+            if (v10 >= 1000000.0)
+                MyAssertHandler(
+                    ".\\EffectsCore\\fx_update.cpp",
+                    934,
+                    0,
+                    "%s\n\t(velocityAlongNormal) = %g",
+                    "(I_fabs( velocityAlongNormal ) < 1.0e6f)",
+                    velocityAlongNormal);
+            scale = velocityAlongNormal * -2.0;
+            Vec3Mad(scaledPreImpactVelocity, scale, trace->normal, postImpactVelocity);
+            Vec3Sub(postImpactVelocity, preImpactVelocity, velDelta);
+            Vec3Add(update->elemBaseVel, velDelta, update->elemBaseVel);
+            if ((COERCE_UNSIGNED_INT(*update->elemBaseVel) & 0x7F800000) == 0x7F800000
+                || (COERCE_UNSIGNED_INT(update->elemBaseVel[1]) & 0x7F800000) == 0x7F800000
+                || (COERCE_UNSIGNED_INT(update->elemBaseVel[2]) & 0x7F800000) == 0x7F800000)
+            {
+                MyAssertHandler(
+                    ".\\EffectsCore\\fx_update.cpp",
+                    939,
+                    0,
+                    "%s",
+                    "!IS_NAN((update->elemBaseVel)[0]) && !IS_NAN((update->elemBaseVel)[1]) && !IS_NAN((update->elemBaseVel)[2])");
+            }
+            FX_OrientationPosFromWorldPos(&update->orient, update->posWorld, update->elemOrigin);
+            *xyzWorldOld = update->posWorld[0];
+            xyzWorldOld[1] = update->posWorld[1];
+            xyzWorldOld[2] = update->posWorld[2];
+            return msecOnImpact;
+        }
+    }
+}
+
+void __cdecl FX_SpawnImpactEffect(
+    FxSystem *system,
+    const FxUpdateElem *update,
+    const FxEffectDef *impactEffect,
+    int msecOnImpact,
+    const float *impactNormal)
+{
+    FxEffect *effect; // [esp+8h] [ebp-28h]
+    float axis[3][3]; // [esp+Ch] [ebp-24h] BYREF
+
+    axis[0][0] = *impactNormal;
+    axis[0][1] = impactNormal[1];
+    axis[0][2] = impactNormal[2];
+    Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
+    effect = FX_SpawnEffect(
+        system,
+        impactEffect,
+        msecOnImpact,
+        update->posWorld,
+        axis,
+        4095,
+        2047,
+        255,
+        update->effect->owner,
+        0x3FFu);
+    if (effect)
+        FX_DelRefToEffect(system, effect);
+}
+
+int __cdecl FX_UpdateElementPosition_NonColliding(FxUpdateElem *update)
+{
+    FX_NextElementPosition(update, *(double *)&update->msecUpdateBegin);
+    FX_OrientationPosFromWorldPos(&update->orient, update->posWorld, update->elemOrigin);
+    return 1;
+}
+
+int __cdecl FX_UpdateElementPosition_Local(FxUpdateElem *update)
+{
+    const char *v1; // eax
+    float *elemBaseVel; // [esp+1Ch] [ebp-4h]
+
+    elemBaseVel = update->elemBaseVel;
+    if (0.0 != *elemBaseVel || 0.0 != elemBaseVel[1] || 0.0 != elemBaseVel[2])
+    {
+        v1 = va(
+            "effect %s def %i baseVel %g %g %g",
+            update->effect->def->name,
+            update->elemIndex,
+            *update->elemBaseVel,
+            update->elemBaseVel[1],
+            update->elemBaseVel[2]);
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1028,
+            0,
+            "%s\n\t%s",
+            "Vec3Compare( update->elemBaseVel, vec3_origin )",
+            v1);
+    }
+    FX_NextElementPosition_NoExternalForces(
+        update,
+        *(double *)&update->msecUpdateBegin,
+        update->elemOrigin,
+        update->posWorld);
+    return 1;
+}
+
+void __cdecl FX_SpawnDeathEffect(FxSystem *system, FxUpdateElem *update)
+{
+    __int64 v2; // [esp-8h] [ebp-6Ch]
+    FxEffect *effect; // [esp+10h] [ebp-54h]
+    FxSpatialFrame frame; // [esp+14h] [ebp-50h] BYREF
+    const FxElemDef *elemDef; // [esp+30h] [ebp-34h]
+    orientation_t orientPrev; // [esp+34h] [ebp-30h] BYREF
+
+    elemDef = FX_GetUpdateElemDef(update);
+    HIDWORD(v2) = &orientPrev;
+    LODWORD(v2) = update->randomSeed;
+    FX_GetOrientation(elemDef, &update->effect->frameAtSpawn, &update->effect->framePrev, v2);
+    FX_OrientationPosToWorldPos(&orientPrev, update->elemOrigin, frame.origin);
+    effect = FX_SpawnEffect(
+        system,
+        elemDef->effectOnDeath.handle,
+        update->msecUpdateBegin,
+        frame.origin,
+        orientPrev.axis,
+        4095,
+        2047,
+        255,
+        update->effect->owner,
+        0x3FFu);
+    if (effect)
+        FX_DelRefToEffect(system, effect);
+}
+
+char __cdecl FX_UpdateElement_SetupUpdate(
+    FxEffect *effect,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
+    unsigned int elemDefIndex,
+    int elemAtRestFraction,
+    int elemMsecBegin,
+    int elemSequence,
+    float *elemOrigin,
+    FxUpdateElem *update)
+{
+    const FxEffectDef *def; // [esp+4h] [ebp-Ch]
+    int msecLifeSpan; // [esp+8h] [ebp-8h]
+    const FxElemDef *elemDef; // [esp+Ch] [ebp-4h]
+
+    memset((unsigned __int8 *)update, 0xD0u, sizeof(FxUpdateElem));
+    update->effect = effect;
+    update->msecUpdateBegin = msecUpdateBegin;
+    update->msecUpdateEnd = msecUpdateEnd;
+    update->msecElemBegin = elemMsecBegin;
+    if (update->msecUpdateBegin > update->msecUpdateEnd)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1113,
+            0,
+            "update->msecUpdateBegin <= update->msecUpdateEnd\n\t%i, %i",
+            update->msecUpdateBegin,
+            update->msecUpdateEnd);
+    if (update->msecUpdateEnd < update->msecElemBegin)
+        return 0;
+    def = effect->def;
+    if (elemDefIndex >= def->elemDefCountEmission + def->elemDefCountOneShot + def->elemDefCountLooping)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1119,
+            0,
+            "elemDefIndex doesn't index def->elemDefCountLooping + def->elemDefCountOneShot + def->elemDefCountEmission\n"
+            "\t%i not in [0, %i)",
+            elemDefIndex,
+            def->elemDefCountEmission + def->elemDefCountOneShot + def->elemDefCountLooping);
+    update->elemIndex = elemDefIndex;
+    update->atRestFraction = elemAtRestFraction;
+    update->randomSeed = (296 * elemSequence + elemMsecBegin + (unsigned int)effect->randomSeed) % 0x1DF;
+    update->sequence = elemSequence;
+    elemDef = FX_GetUpdateElemDef(update);
+    msecLifeSpan = elemDef->lifeSpanMsec.base
+        + (((elemDef->lifeSpanMsec.amplitude + 1) * LOWORD(fx_randomTable[update->randomSeed + 17])) >> 16);
+    update->msecElemEnd = msecLifeSpan + update->msecElemBegin;
+    update->msecLifeSpan = (float)msecLifeSpan;
+    update->elemOrigin = elemOrigin;
+    return 1;
+}
+
+void __cdecl FX_UpdateElement_TruncateToElemEnd(FxUpdateElem *update, FxUpdateResult *outUpdateResult)
+{
+    if (update->msecUpdateEnd >= update->msecElemEnd)
+    {
+        if (FX_GetUpdateElemDef(update)->effectEmitted.handle)
+        {
+            update->msecUpdateEnd = update->msecElemEnd;
+            if (update->msecUpdateBegin > update->msecUpdateEnd)
+                MyAssertHandler(
+                    ".\\EffectsCore\\fx_update.cpp",
+                    1146,
+                    0,
+                    "update->msecUpdateBegin <= update->msecUpdateEnd\n\t%g, %g",
+                    (double)update->msecUpdateBegin,
+                    (double)update->msecUpdateEnd);
+        }
+        else
+        {
+            *outUpdateResult = FX_UPDATE_REMOVE;
+        }
+    }
+}
+
+void __cdecl FX_UpdateElement_HandleEmitting(
+    FxSystem *system,
+    FxElem *elem,
+    FxUpdateElem *update,
+    const float *elemOriginPrev,
+    FxUpdateResult *outUpdateResult)
+{
+    __int64 v5; // [esp-8h] [ebp-11Ch]
+    __int64 v6; // [esp-8h] [ebp-11Ch]
+    FxSpatialFrame frameBegin; // [esp+A4h] [ebp-70h] BYREF
+    const FxElemDef *elemDef; // [esp+C0h] [ebp-54h]
+    FxEffect *effect; // [esp+C4h] [ebp-50h]
+    orientation_t orientPrev; // [esp+C8h] [ebp-4Ch] BYREF
+    FxSpatialFrame frameEnd; // [esp+F8h] [ebp-1Ch] BYREF
+
+    elemDef = FX_GetUpdateElemDef(update);
+    if (elemDef->effectEmitted.handle)
+    {
+        effect = update->effect;
+        HIDWORD(v5) = &orientPrev;
+        LODWORD(v5) = update->randomSeed;
+        FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->framePrev, v5);
+        FX_OrientationPosToWorldPos(&orientPrev, elemOriginPrev, frameBegin.origin);
+        FX_GetQuatForOrientation(effect, elemDef, &effect->framePrev, &orientPrev, frameBegin.quat);
+        frameEnd.origin[0] = update->posWorld[0];
+        frameEnd.origin[1] = update->posWorld[1];
+        frameEnd.origin[2] = update->posWorld[2];
+        FX_GetQuatForOrientation(effect, elemDef, &effect->frameNow, &update->orient, frameEnd.quat);
+        HIDWORD(v6) = &frameEnd;
+        LODWORD(v6) = &frameBegin;
+        elem->emitResidual = FX_ProcessEmitting(system, update, elem->emitResidual, v6);
+        if (update->msecUpdateEnd == update->msecElemEnd)
+            *outUpdateResult = FX_UPDATE_REMOVE;
+    }
+}
+
+unsigned __int8 __cdecl FX_ProcessEmitting(
+    FxSystem *system,
+    FxUpdateElem *update,
+    unsigned __int8 emitResidual,
+    __int64 frameBegin)
+{
+    const char *v5; // eax
+    float v6; // [esp+10h] [ebp-C0h]
+    float v7; // [esp+18h] [ebp-B8h]
+    float v8; // [esp+1Ch] [ebp-B4h]
+    float v9; // [esp+28h] [ebp-A8h]
+    FxEffect *effect; // [esp+38h] [ebp-98h]
+    float v11; // [esp+40h] [ebp-90h]
+    float v12; // [esp+48h] [ebp-88h]
+    const FxElemDef *elemDef; // [esp+6Ch] [ebp-64h]
+    float maxDistPerEmit; // [esp+70h] [ebp-60h]
+    float lerp; // [esp+74h] [ebp-5Ch]
+    float baseDistPerEmit; // [esp+78h] [ebp-58h]
+    float distInUpdate; // [esp+7Ch] [ebp-54h]
+    float residuala; // [esp+80h] [ebp-50h]
+    float residual; // [esp+80h] [ebp-50h]
+    FxSpatialFrame frameElemNow; // [esp+84h] [ebp-4Ch] BYREF
+    float axisSpawn[3][3]; // [esp+A0h] [ebp-30h] BYREF
+    float distNextEmit; // [esp+C4h] [ebp-Ch]
+    int msecAtSpawn; // [esp+C8h] [ebp-8h]
+    float distLastEmit; // [esp+CCh] [ebp-4h]
+
+    Vec3Sub((const float *)(HIDWORD(frameBegin) + 16), (const float *)(frameBegin + 16), axisSpawn[0]);
+    distInUpdate = Vec3Normalize(axisSpawn[0]);
+    if (distInUpdate == 0.0)
+        return emitResidual;
+    elemDef = FX_GetUpdateElemDef(update);
+    v9 = elemDef->emitDist.amplitude * flt_8801D8[update->randomSeed] + elemDef->emitDist.base;
+    baseDistPerEmit = elemDef->emitDistVariance.base + v9;
+    maxDistPerEmit = baseDistPerEmit + elemDef->emitDistVariance.amplitude;
+    residuala = (double)emitResidual * maxDistPerEmit * 0.00390625;
+    distNextEmit = -residuala;
+    while (1)
+    {
+        distLastEmit = distNextEmit;
+        distNextEmit = (double)rand() * 0.000030517578125 * elemDef->emitDistVariance.amplitude
+            + baseDistPerEmit
+            + distNextEmit;
+        if (distInUpdate < (double)distNextEmit)
+            break;
+        v8 = distNextEmit - 0.0;
+        if (v8 < 0.0)
+            v7 = 0.0;
+        else
+            v7 = distNextEmit;
+        distNextEmit = v7;
+        lerp = v7 / distInUpdate;
+        v11 = (double)(update->msecUpdateEnd - update->msecUpdateBegin) * lerp;
+        v6 = floor(v11);
+        msecAtSpawn = update->msecUpdateBegin + (int)v6;
+        Vec3Lerp((const float *)(frameBegin + 16), (const float *)(HIDWORD(frameBegin) + 16), lerp, frameElemNow.origin);
+        Vec4Lerp((const float *)frameBegin, (const float *)HIDWORD(frameBegin), lerp, frameElemNow.quat);
+        Vec4Normalize(frameElemNow.quat);
+        PerpendicularVector(axisSpawn[0], axisSpawn[1]);
+        Vec3Cross(axisSpawn[0], axisSpawn[1], axisSpawn[2]);
+        effect = FX_SpawnEffect(
+            system,
+            elemDef->effectEmitted.handle,
+            msecAtSpawn,
+            frameElemNow.origin,
+            axisSpawn,
+            4095,
+            2047,
+            255,
+            update->effect->owner,
+            0x3FFu);
+        if (effect)
+            FX_DelRefToEffect(system, effect);
+        elemDef = FX_GetUpdateElemDef(update);
+    }
+    residual = distInUpdate - distLastEmit;
+    if (residual < -0.001000000047497451 || residual > maxDistPerEmit + 0.001000000047497451)
+    {
+        v5 = va("%g, %g", residual, maxDistPerEmit);
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            613,
+            0,
+            "%s\n\t%s",
+            "residual >= -0.001f && residual <= maxDistPerEmit + 0.001f",
+            v5);
+    }
+    v12 = residual * 256.0 / maxDistPerEmit;
+    return (int)(v12 + 9.313225746154785e-10);
+}
+
+void __cdecl FX_GetQuatForOrientation(
+    const FxEffect *effect,
+    const FxElemDef *elemDef,
+    const FxSpatialFrame *frameNow,
+    orientation_t *orient,
+    float *quat)
+{
+    int runFlags; // [esp+4h] [ebp-4h]
+
+    runFlags = elemDef->flags & 0xC0;
+    if (runFlags)
+    {
+        if (runFlags == 64)
+        {
+            *quat = effect->frameAtSpawn.quat[0];
+            quat[1] = effect->frameAtSpawn.quat[1];
+            quat[2] = effect->frameAtSpawn.quat[2];
+            quat[3] = effect->frameAtSpawn.quat[3];
+        }
+        else if (runFlags == 128)
+        {
+            *quat = frameNow->quat[0];
+            quat[1] = frameNow->quat[1];
+            quat[2] = frameNow->quat[2];
+            quat[3] = frameNow->quat[3];
+        }
+        else
+        {
+            if (runFlags != 192)
+                MyAssertHandler(
+                    ".\\EffectsCore\\fx_update.cpp",
+                    1081,
+                    0,
+                    "%s\n\t(runFlags) = %i",
+                    "(runFlags == FX_ELEM_RUN_RELATIVE_TO_OFFSET)",
+                    runFlags);
+            AxisToQuat(orient->axis, quat);
+        }
+    }
+    else
+    {
+        *quat = 0.0;
+        quat[1] = 0.0;
+        quat[2] = 0.0;
+        quat[3] = 1.0;
+    }
+}
+
+char __cdecl FX_UpdateElement_TruncateToElemBegin(FxUpdateElem *update, FxUpdateResult *outUpdateResult)
+{
+    const char *v3; // eax
+    const FxElemDef *UpdateElemDef; // eax
+    FxSpatialFrame *p_frameAtSpawn; // [esp-8h] [ebp-18h]
+    FxSpatialFrame *p_frameNow; // [esp-4h] [ebp-14h]
+    __int64 v7; // [esp+0h] [ebp-10h]
+    const FxElemDef *elemDef; // [esp+Ch] [ebp-4h]
+
+    if (update->msecUpdateBegin < update->msecElemBegin)
+        update->msecUpdateBegin = update->msecElemBegin;
+    if (update->msecUpdateBegin == update->msecUpdateEnd)
+    {
+        *outUpdateResult = update->msecUpdateBegin < update->msecElemEnd;
+        return 0;
+    }
+    else
+    {
+        elemDef = FX_GetUpdateElemDef(update);
+        if (update->msecLifeSpan <= 0.0)
+        {
+            v3 = va("%i + [0,%i) = %g", elemDef->lifeSpanMsec.base, elemDef->lifeSpanMsec.amplitude, update->msecLifeSpan);
+            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1197, 0, "%s\n\t%s", "update->msecLifeSpan > 0.0f", v3);
+        }
+        update->msecElapsed = (float)(update->msecUpdateEnd - update->msecElemBegin);
+        update->normTimeUpdateEnd = update->msecElapsed / update->msecLifeSpan;
+        if (update->normTimeUpdateEnd < 0.0 || update->normTimeUpdateEnd > 1.0)
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                1202,
+                0,
+                "%s\n\t(update->normTimeUpdateEnd) = %g",
+                "(update->normTimeUpdateEnd >= 0.0f && update->normTimeUpdateEnd <= 1.0f)",
+                update->normTimeUpdateEnd);
+        HIDWORD(v7) = &update->orient;
+        LODWORD(v7) = update->randomSeed;
+        p_frameNow = &update->effect->frameNow;
+        p_frameAtSpawn = &update->effect->frameAtSpawn;
+        UpdateElemDef = FX_GetUpdateElemDef(update);
+        FX_GetOrientation(UpdateElemDef, p_frameAtSpawn, p_frameNow, v7);
+        return 1;
+    }
+}
+
+void __cdecl FX_UpdateEffectPartialTrail(
+    FxSystem *system,
+    FxEffect *effect,
+    FxTrail *trail,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
+    float distanceTravelledBegin,
+    float distanceTravelledEnd,
+    unsigned __int16 trailElemHandleStart,
+    unsigned __int16 trailElemHandleStop,
+    FxSpatialFrame *frameNow)
+{
+    float basis[2][3]; // [esp+1Ch] [ebp-34h] BYREF
+    FxTrailElem *trailElem; // [esp+38h] [ebp-18h]
+    FxTrailElem *remoteTrailElem; // [esp+3Ch] [ebp-14h]
+    unsigned __int16 trailElemHandleNext; // [esp+40h] [ebp-10h]
+    unsigned __int16 trailElemHandleLast; // [esp+44h] [ebp-Ch]
+    unsigned __int16 trailElemHandle; // [esp+48h] [ebp-8h]
+    bool removable; // [esp+4Fh] [ebp-1h]
+
+    trailElemHandleLast = -1;
+    if (trailElemHandleStart == 0xFFFF)
+        trailElemHandle = trail->firstElemHandle;
+    else
+        trailElemHandle = trailElemHandleStart;
+    trailElem = 0;
+    removable = trailElemHandle == trail->firstElemHandle;
+    while (trailElemHandle != trailElemHandleStop)
+    {
+        if (trailElemHandle == 0xFFFF)
+            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1519, 0, "%s", "trailElemHandle != FX_HANDLE_NONE");
+        if (!system)
+            MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 348, 0, "%s", "system");
+        remoteTrailElem = (FxTrailElem *)FX_PoolFromHandle_Generic<FxTrailElem, 2048>(system->trailElems, trailElemHandle);
+        trailElem = remoteTrailElem;
+        trailElemHandleNext = remoteTrailElem->nextTrailElemHandle;
+        if (FX_UpdateTrailElement(system, effect, trail, remoteTrailElem, msecUpdateBegin, msecUpdateEnd))
+            removable = 0;
+        if (removable && trailElemHandleLast != 0xFFFF)
+            FX_FreeTrailElem(system, trailElemHandleLast, effect, trail);
+        trailElemHandleLast = trailElemHandle;
+        trailElemHandle = trailElemHandleNext;
+    }
+    if (trailElemHandleLast != 0xFFFF && trailElemHandleLast == trail->lastElemHandle)
+    {
+        if (removable)
+        {
+            FX_FreeTrailElem(system, trailElemHandleLast, effect, trail);
+        }
+        else if ((effect->status & 0x10000) != 0)
+        {
+            if (!trailElem)
+                MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1551, 0, "%s", "trailElem");
+            trailElem->spawnDist = effect->distanceTraveled;
+            FX_GetOriginForTrailElem(
+                effect,
+                &effect->def->elemDefs[trail->defIndex],
+                frameNow,
+                (296 * trailElem->sequence + trailElem->msecBegin + (unsigned int)effect->randomSeed) % 0x1DF,
+                trailElem->origin,
+                basis[0],
+                basis[1]);
+            FX_TrailElem_CompressBasis(basis, trailElem->basis);
+        }
+    }
+}
+
+void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBasis)[3])
+{
+    int v2; // [esp+0h] [ebp-10h]
+    int v3; // [esp+4h] [ebp-Ch]
+    int basisVecIter; // [esp+8h] [ebp-8h]
+    int dimIter; // [esp+Ch] [ebp-4h]
+
+    for (basisVecIter = 0; basisVecIter != 2; ++basisVecIter)
+    {
+        for (dimIter = 0; dimIter != 3; ++dimIter)
+        {
+            v3 = (int)((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
+            if (v3 >= -128)
+            {
+                if (v3 <= 127)
+                    v2 = (int)((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
+                else
+                    LOBYTE(v2) = 127;
+            }
+            else
+            {
+                LOBYTE(v2) = 0x80;
+            }
+            (*outBasis)[3 * basisVecIter + dimIter] = v2;
+        }
+    }
+}
+
+FxUpdateResult __cdecl FX_UpdateTrailElement(
+    FxSystem *system,
+    FxEffect *effect,
+    FxTrail *trail,
+    FxTrailElem *trailElem,
+    int msecUpdateBegin,
+    int msecUpdateEnd)
+{
+    int v7; // [esp+4h] [ebp-B4h]
+    int v8; // [esp+8h] [ebp-B0h]
+    float v9; // [esp+10h] [ebp-A8h]
+    FxUpdateElem update; // [esp+28h] [ebp-90h] BYREF
+    FxUpdateResult updateResult; // [esp+A8h] [ebp-10h] BYREF
+    float baseVel[3]; // [esp+ACh] [ebp-Ch] BYREF
+
+    updateResult = FX_UPDATE_KEEP;
+    if (FX_UpdateElement_SetupUpdate(
+        effect,
+        msecUpdateBegin,
+        msecUpdateEnd,
+        trail->defIndex,
+        0,
+        trailElem->msecBegin,
+        0,
+        trailElem->origin,
+        &update))
+    {
+        FX_UpdateElement_TruncateToElemEnd(&update, &updateResult);
+        if (updateResult)
+        {
+            if (!FX_UpdateElement_TruncateToElemBegin(&update, &updateResult))
+                return updateResult;
+            v9 = (double)trailElem->baseVelZ * 0.001000000047497451;
+            baseVel[0] = 0.0;
+            baseVel[1] = 0.0;
+            baseVel[2] = v9;
+            update.elemBaseVel = baseVel;
+            update.physObjId = 0;
+            update.onGround = 0;
+            //Profile_Begin(194);
+            updateResult = FX_UpdateElementPosition(system, &update);
+            //Profile_EndInternal(0);
+            v8 = (int)(baseVel[2] / 0.001000000047497451);
+            if (v8 >= -32768)
+            {
+                if (v8 <= 0x7FFF)
+                    v7 = (int)(baseVel[2] / 0.001000000047497451);
+                else
+                    LOWORD(v7) = 0x7FFF;
+            }
+            else
+            {
+                LOWORD(v7) = 0x8000;
+            }
+            trailElem->baseVelZ = v7;
+        }
+    }
+    return updateResult;
+}
+
+void __cdecl FX_UpdateSpotLight(FxCmd *cmd)
+{
+    FxEffect *effect; // [esp+8h] [ebp-8h]
+    FxSystem *system; // [esp+Ch] [ebp-4h]
+
+    if (fx_enable->current.enabled)
+    {
+        system = cmd->system;
+        if (!cmd->system)
+            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1831, 0, "%s", "system");
+        FX_BeginIteratingOverEffects_Cooperative(system);
+        if (system->activeSpotLightEffectCount > 0)
+        {
+            if (system->activeSpotLightEffectCount != 1)
+                MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1836, 0, "%s", "system->activeSpotLightEffectCount == 1");
+            for (effect = FX_EffectFromHandle(system, system->activeSpotLightEffectHandle);
+                InterlockedExchangeAdd(&effect->status, 0x20000000) >= 0x20000000;
+                InterlockedExchangeAdd(&effect->status, -536870912))
+            {
+                ;
+            }
+            FX_UpdateSpotLightEffect(__SPAIR64__((unsigned int)effect, (unsigned int)system));
+            InterlockedExchangeAdd(&effect->status, -536870912);
+        }
+        if (!InterlockedDecrement(&system->iteratorCount) && system->needsGarbageCollection)
+            FX_RunGarbageCollection(system);
+        if (fx_draw->current.enabled)
+            FX_DrawSpotLight(system);
+    }
+}
+
+void __cdecl FX_UpdateSpotLightEffect(__int64 system)
+{
+    long double v1; // [esp-8h] [ebp-50h]
+    __int64 v2; // [esp+10h] [ebp-38h]
+    float v3; // [esp+20h] [ebp-28h]
+    float diff[3]; // [esp+28h] [ebp-20h] BYREF
+    unsigned __int16 lastElemHandle[4]; // [esp+34h] [ebp-14h] BYREF
+    float newDistanceTraveled; // [esp+40h] [ebp-8h]
+    unsigned int elemClass; // [esp+44h] [ebp-4h]
+
+    if ((unsigned __int16)*(unsigned int *)(HIDWORD(system) + 4)
+        && *(unsigned int *)(HIDWORD(system) + 36) <= *(unsigned int *)(system + 2512))
+    {
+        FX_UpdateEffectBolt((FxSystem *)system, (FxEffect *)HIDWORD(system));
+        *(_WORD *)(system + 2504) = *(unsigned int *)(HIDWORD(system) + 24) & 0xFFF;
+        Vec3Sub((const float *)(HIDWORD(system) + 84), (const float *)(HIDWORD(system) + 112), diff);
+        v3 = Vec3Length(diff);
+        newDistanceTraveled = *(float *)(HIDWORD(system) + 124) + v3;
+        for (elemClass = 0; elemClass < 3; ++elemClass)
+            lastElemHandle[elemClass] = -1;
+        HIDWORD(v2) = *(unsigned int *)(system + 2512);
+        LODWORD(v2) = *(unsigned int *)(HIDWORD(system) + 36);
+        FX_UpdateSpotLightEffectPartial((FxSystem *)system, (FxEffect *)HIDWORD(system), v2);
+        HIDWORD(v1) = *(unsigned int *)(system + 2512);
+        LODWORD(v1) = *(unsigned int *)(HIDWORD(system) + 36);
+        FX_UpdateEffectPartial(
+            system,
+            v1,
+            *(float *)(HIDWORD(system) + 124),
+            newDistanceTraveled,
+            (unsigned __int16 *)(HIDWORD(system) + 8),
+            lastElemHandle,
+            0,
+            0);
+        FX_SortNewElemsInEffect((FxSystem *)system, (FxEffect *)HIDWORD(system));
+        memcpy((void *)(HIDWORD(system) + 96), (const void *)(HIDWORD(system) + 68), 0x1Cu);
+        *(float *)(HIDWORD(system) + 124) = newDistanceTraveled;
+    }
+}
+
+void __cdecl FX_UpdateSpotLightEffectPartial(FxSystem *system, FxEffect *effect, __int64 msecUpdateBegin)
+{
+    unsigned __int16 activeSpotLightElemHandle; // [esp+12h] [ebp-Ah]
+    FxPool<FxElem> *elem; // [esp+18h] [ebp-4h]
+
+    if (system->activeSpotLightEffectCount != 1)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1411, 0, "%s", "system->activeSpotLightEffectCount == 1");
+    if (effect != FX_EffectFromHandle(system, system->activeSpotLightEffectHandle))
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1412,
+            0,
+            "%s",
+            "effect == FX_EffectFromHandle( system, system->activeSpotLightEffectHandle )");
+    if (effect->msecLastUpdate > SHIDWORD(msecUpdateBegin))
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            1413,
+            0,
+            "effect->msecLastUpdate <= msecUpdateEnd\n\t%g, %g",
+            (double)effect->msecLastUpdate,
+            (double)SHIDWORD(msecUpdateBegin));
+    if (system->activeSpotLightElemCount)
+    {
+        activeSpotLightElemHandle = system->activeSpotLightElemHandle;
+        if (!system)
+            MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 334, 0, "%s", "system");
+        elem = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, activeSpotLightElemHandle);
+        if (FX_UpdateElement(system, effect, (FxElem *)elem, msecUpdateBegin, SHIDWORD(msecUpdateBegin)) == FX_UPDATE_REMOVE)
+            FX_FreeSpotLightElem(system, system->activeSpotLightElemHandle, effect);
+    }
+}
+
+void __cdecl FX_UpdateEffectBolt(FxSystem *system, FxEffect *effect)
+{
+    int localClientNum; // [esp+4h] [ebp-38h]
+    orientation_t orient; // [esp+8h] [ebp-34h] BYREF
+    bool temporalBitsValid; // [esp+3Bh] [ebp-1h]
+
+    if (((*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF) != 0x7FF)
+    {
+        localClientNum = system->localClientNum;
+        temporalBitsValid = FX_GetBoltTemporalBits(localClientNum, *(unsigned int *)&effect->boltAndSortOrder & 0xFFF) == ((*(unsigned int *)&effect->boltAndSortOrder >> 12) & 1);
+        if (temporalBitsValid
+            && FX_GetBoneOrientation(
+                localClientNum,
+                *(unsigned int *)&effect->boltAndSortOrder & 0xFFF,
+                (*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF,
+                &orient))
+        {
+            effect->frameNow.origin[0] = orient.origin[0];
+            effect->frameNow.origin[1] = orient.origin[1];
+            effect->frameNow.origin[2] = orient.origin[2];
+            AxisToQuat(orient.axis, effect->frameNow.quat);
+        }
+        else
+        {
+            FX_StopEffect(system, effect);
+            *(unsigned int *)&effect->boltAndSortOrder |= (unsigned int)&clients[0].parseClients[156].name[4];
+            *(unsigned int *)&effect->boltAndSortOrder |= 0xFFFu;
+        }
+    }
+}
+
+void __cdecl FX_UpdateNonDependent(FxCmd *cmd)
+{
+    if (fx_enable->current.enabled)
+        FX_Update(cmd->system, cmd->localClientNum, 1);
+}
+
+void __cdecl FX_Update(FxSystem *system, int localClientNum, bool nonBoltedEffectsOnly)
+{
+    FxEffect *localEffect; // [esp+48h] [ebp-Ch]
+    volatile int activeIndex; // [esp+4Ch] [ebp-8h]
+
+    //Profile_Begin(193);
+    if (!system)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1762, 0, "%s", "system");
+    FX_BeginIteratingOverEffects_Cooperative(system);
+    for (activeIndex = system->firstActiveEffect; activeIndex != system->firstNewEffect; ++activeIndex)
+    {
+        localEffect = FX_EffectFromHandle(system, system->allEffectHandles[activeIndex & 0x3FF]);
+        if (FX_ShouldProcessEffect(system, localEffect, nonBoltedEffectsOnly))
+        {
+            while (InterlockedExchangeAdd(&localEffect->status, 0x20000000) >= 0x20000000)
+                InterlockedExchangeAdd(&localEffect->status, -536870912);
+            FX_UpdateEffect(__SPAIR64__((unsigned int)localEffect, (unsigned int)system));
+            InterlockedExchangeAdd(&localEffect->status, -536870912);
+        }
+    }
+    if (!InterlockedDecrement(&system->iteratorCount) && system->needsGarbageCollection)
+        FX_RunGarbageCollection(system);
+    //Profile_EndInternal(0);
+}
+
+void __cdecl FX_UpdateEffect(__int64 system)
+{
+    long double v1; // [esp-8h] [ebp-50h]
+    float v2; // [esp+20h] [ebp-28h]
+    float diff[3]; // [esp+28h] [ebp-20h] BYREF
+    unsigned __int16 lastElemHandle[4]; // [esp+34h] [ebp-14h] BYREF
+    float newDistanceTraveled; // [esp+40h] [ebp-8h]
+    unsigned int elemClass; // [esp+44h] [ebp-4h]
+
+    if ((unsigned __int16)*(unsigned int *)(HIDWORD(system) + 4)
+        && *(unsigned int *)(HIDWORD(system) + 36) <= *(unsigned int *)(system + 2512))
+    {
+        FX_UpdateEffectBolt((FxSystem *)system, (FxEffect *)HIDWORD(system));
+        Vec3Sub((const float *)(HIDWORD(system) + 84), (const float *)(HIDWORD(system) + 112), diff);
+        v2 = Vec3Length(diff);
+        newDistanceTraveled = *(float *)(HIDWORD(system) + 124) + v2;
+        for (elemClass = 0; elemClass < 3; ++elemClass)
+            lastElemHandle[elemClass] = -1;
+        HIDWORD(v1) = *(unsigned int *)(system + 2512);
+        LODWORD(v1) = *(unsigned int *)(HIDWORD(system) + 36);
+        FX_UpdateEffectPartial(
+            system,
+            v1,
+            *(float *)(HIDWORD(system) + 124),
+            newDistanceTraveled,
+            (unsigned __int16 *)(HIDWORD(system) + 8),
+            lastElemHandle,
+            0,
+            0);
+        FX_SortNewElemsInEffect((FxSystem *)system, (FxEffect *)HIDWORD(system));
+        memcpy((void *)(HIDWORD(system) + 96), (const void *)(HIDWORD(system) + 68), 0x1Cu);
+        *(float *)(HIDWORD(system) + 124) = newDistanceTraveled;
+    }
+}
+
+bool __cdecl FX_ShouldProcessEffect(FxSystem *system, FxEffect *effect, bool nonBoltedEffectsOnly)
+{
+    return (!nonBoltedEffectsOnly || ((*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF) == 0x7FF)
+        && InterlockedExchange(&effect->frameCount, system->frameCount) != system->frameCount;
+}
+
+void __cdecl FX_RunPhysics(int localClientNum)
+{
+    FxSystem *system; // [esp+0h] [ebp-4h]
+
+    system = FX_GetSystem(localClientNum);
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    Phys_RunToTime(localClientNum, PHYS_WORLD_FX, (dxSpace *)system->msecNow);
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+}
+
+void __cdecl FX_UpdateRemaining(FxCmd *cmd)
+{
+    if (fx_enable->current.enabled)
+        FX_Update(cmd->system, cmd->localClientNum, 0);
+    CG_AddSceneTracerBeams(cmd->localClientNum);
+    CG_GenerateSceneVerts(cmd->localClientNum);
+}
+
+void __cdecl FX_BeginUpdate(int localClientNum)
+{
+    FX_BeginMarks(localClientNum);
+    FX_Beam_Begin();
+    FX_PostLight_Begin();
+    FX_SpriteBegin();
+}
+
+void __cdecl FX_EndUpdate(int localClientNum)
+{
+    FxSystem *system; // [esp+38h] [ebp-4h]
+
+    if (fx_enable->current.enabled)
+    {
+        //Profile_Begin(195);
+        system = FX_GetSystem(localClientNum);
+        if (!system)
+            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1936, 0, "%s", "system");
+        memcpy(&system->cameraPrev, system, sizeof(system->cameraPrev));
+        if (!system->cameraPrev.isValid)
+            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1939, 0, "%s", "system->cameraPrev.isValid");
+        //Profile_EndInternal(0);
+    }
+}
+
+void __cdecl FX_AddNonSpriteDrawSurfs(FxCmd *cmd)
+{
+    FxSystem *system; // [esp+30h] [ebp-4h]
+
+    //Profile_Begin(200);
+    system = cmd->system;
+    if (!cmd->system)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1952, 0, "%s", "system");
+    if (fx_enable->current.enabled && fx_draw->current.enabled)
+    {
+        FX_SortEffects(system);
+        FX_DrawNonSpriteElems(system);
+    }
+    //Profile_EndInternal(0);
+}
+
+void __cdecl FX_RewindTo(int localClientNum, int time)
+{
+    volatile int *Destination; // [esp+4h] [ebp-10ACh]
+    volatile int Comperand; // [esp+8h] [ebp-10A8h]
+    unsigned __int16 v4; // [esp+18h] [ebp-1098h]
+    FxEffect *effect; // [esp+1Ch] [ebp-1094h]
+    FxEffect *effecta; // [esp+1Ch] [ebp-1094h]
+    FxEffect *effectb; // [esp+1Ch] [ebp-1094h]
+    unsigned int dst[32]; // [esp+20h] [ebp-1090h] BYREF
+    int bitNum; // [esp+A0h] [ebp-1010h]
+    FxSystem *system; // [esp+A4h] [ebp-100Ch]
+    unsigned int v11[1024]; // [esp+A8h] [ebp-1008h]
+    int v12; // [esp+10A8h] [ebp-8h]
+    volatile int i; // [esp+10ACh] [ebp-4h]
+
+    system = FX_GetSystem(localClientNum);
+    if (!system)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 2052, 0, "%s", "system");
+    if (time < system->msecNow)
+    {
+        system->msecNow = time;
+        v12 = 0;
+        memset((unsigned __int8 *)dst, 0, sizeof(dst));
+        FX_BeginIteratingOverEffects_Cooperative(system);
+        for (i = system->firstActiveEffect; i != system->firstNewEffect; ++i)
+        {
+            v4 = system->allEffectHandles[i & 0x3FF];
+            effect = FX_EffectFromHandle(system, v4);
+            v11[v12++] = effect;
+            if ((unsigned __int16)effect->status && effect->msecBegin < time && effect->owner == v4)
+            {
+                FX_AddRefToEffect(system, effect);
+                Com_BitSetAssert(dst, v12 - 1, 128);
+            }
+        }
+        for (bitNum = 0; bitNum < v12; ++bitNum)
+        {
+            effecta = (FxEffect *)v11[bitNum];
+            if ((unsigned __int16)effecta->status)
+            {
+                while (InterlockedExchangeAdd(&effecta->status, 0x20000000) >= 0x20000000)
+                    InterlockedExchangeAdd(&effecta->status, -536870912);
+                FX_KillEffect(system, effecta);
+                InterlockedExchangeAdd(&effecta->status, -536870912);
+            }
+        }
+        if (!InterlockedDecrement(&system->iteratorCount) && system->needsGarbageCollection)
+            FX_RunGarbageCollection(system);
+        for (bitNum = 0; bitNum < v12; ++bitNum)
+        {
+            if (Com_BitCheckAssert(dst, bitNum, 128))
+            {
+                effectb = (FxEffect *)v11[bitNum];
+                effectb->msecLastUpdate = effectb->msecBegin;
+                if (effectb->def->msecLoopingLife)
+                {
+                    Destination = &effectb->status;
+                    do
+                        Comperand = *Destination;
+                    while (InterlockedCompareExchange(Destination, Comperand | 0x10000, Comperand) != Comperand);
+                    FX_StartNewEffect(__SPAIR64__((unsigned int)effectb, (unsigned int)system));
+                }
+                else
+                {
+                    FX_StartNewEffect(__SPAIR64__((unsigned int)effectb, (unsigned int)system));
+                    FX_DelRefToEffect(system, effectb);
+                }
+            }
+        }
+        if (system->needsGarbageCollection)
+            FX_RunGarbageCollection(system);
+    }
+}
+
+void __cdecl FX_SetNextUpdateCamera(int localClientNum, const refdef_s *refdef, float zfar)
+{
+    const char *v3; // eax
+    float scale1; // [esp+14h] [ebp-50h]
+    float scale1a; // [esp+14h] [ebp-50h]
+    double v6; // [esp+18h] [ebp-4Ch]
+    float v7; // [esp+20h] [ebp-44h]
+    float v8; // [esp+24h] [ebp-40h]
+    float v9; // [esp+38h] [ebp-2Ch]
+    float v10; // [esp+3Ch] [ebp-28h]
+    float sinHalfFov; // [esp+54h] [ebp-10h]
+    float sinHalfFova; // [esp+54h] [ebp-10h]
+    FxSystem *system; // [esp+58h] [ebp-Ch]
+    float cosHalfFov; // [esp+5Ch] [ebp-8h]
+    float cosHalfFova; // [esp+5Ch] [ebp-8h]
+    unsigned int planeIndex; // [esp+60h] [ebp-4h]
+
+    if (!refdef)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 2150, 0, "%s", "refdef");
+    system = FX_GetSystem(localClientNum);
+    system->camera.origin[0] = refdef->vieworg[0];
+    system->camera.origin[1] = refdef->vieworg[1];
+    system->camera.origin[2] = refdef->vieworg[2];
+    AxisCopy(refdef->viewaxis, system->camera.axis);
+    system->camera.frustum[0][0] = refdef->viewaxis[0][0];
+    system->camera.frustum[0][1] = refdef->viewaxis[0][1];
+    system->camera.frustum[0][2] = refdef->viewaxis[0][2];
+    system->camera.viewOffset[0] = refdef->viewOffset[0];
+    system->camera.viewOffset[1] = refdef->viewOffset[1];
+    system->camera.viewOffset[2] = refdef->viewOffset[2];
+    v10 = refdef->tanHalfFovX * refdef->tanHalfFovX + 1.0;
+    v8 = sqrt(v10);
+    cosHalfFov = 1.0 / v8;
+    sinHalfFov = refdef->tanHalfFovX * cosHalfFov;
+    Vec3ScaleMad(sinHalfFov, refdef->viewaxis[0], cosHalfFov, refdef->viewaxis[1], system->camera.frustum[1]);
+    scale1 = -cosHalfFov;
+    Vec3ScaleMad(sinHalfFov, refdef->viewaxis[0], scale1, refdef->viewaxis[1], system->camera.frustum[2]);
+    v9 = refdef->tanHalfFovY * refdef->tanHalfFovY + 1.0;
+    v7 = sqrt(v9);
+    cosHalfFova = 1.0 / v7;
+    sinHalfFova = refdef->tanHalfFovY * cosHalfFova;
+    Vec3ScaleMad(sinHalfFova, refdef->viewaxis[0], cosHalfFova, refdef->viewaxis[2], system->camera.frustum[3]);
+    scale1a = -cosHalfFova;
+    Vec3ScaleMad(sinHalfFova, refdef->viewaxis[0], scale1a, refdef->viewaxis[2], system->camera.frustum[4]);
+    system->camera.frustumPlaneCount = 5;
+    for (planeIndex = 0; planeIndex < system->camera.frustumPlaneCount; ++planeIndex)
+    {
+        if (!Vec3IsNormalized(system->camera.frustum[planeIndex]))
+        {
+            v6 = Vec3Length(system->camera.frustum[planeIndex]);
+            v3 = va(
+                "(%g %g %g) len %g",
+                system->camera.frustum[planeIndex][0],
+                system->camera.frustum[planeIndex][1],
+                system->camera.frustum[planeIndex][2],
+                v6);
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_update.cpp",
+                2172,
+                0,
+                "%s\n\t%s",
+                "Vec3IsNormalized( system->camera.frustum[planeIndex] )",
+                v3);
+        }
+        system->camera.frustum[planeIndex][3] = Vec3Dot(system->camera.origin, system->camera.frustum[planeIndex]);
+    }
+    if (zfar > 0.0)
+    {
+        system->camera.frustum[5][0] = -refdef->viewaxis[0][0];
+        system->camera.frustum[5][1] = -refdef->viewaxis[0][1];
+        system->camera.frustum[5][2] = -refdef->viewaxis[0][2];
+        system->camera.frustum[5][3] = -system->camera.frustum[0][3] - zfar;
+        system->camera.frustumPlaneCount = 6;
+    }
+    InterlockedExchange(&system->camera.isValid, 1);
+}
+
+void __cdecl FX_SetNextUpdateTime(int localClientNum, int time)
+{
+    FxSystem *system; // [esp+0h] [ebp-4h]
+
+    system = FX_GetSystem(localClientNum);
+    if (time < system->msecNow)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            2193,
+            0,
+            "time >= system->msecNow\n\t%i, %i",
+            time,
+            system->msecNow);
+    InterlockedExchange(&system->camera.isValid, 0);
+    InterlockedExchange(&system->msecDraw, time);
+    system->msecNow = time;
+    if (++system->frameCount <= 0)
+        system->frameCount = 1;
+}
+
+void __cdecl FX_FillUpdateCmd(int localClientNum, FxCmd *cmd)
+{
+    cmd->system = FX_GetSystem(localClientNum);
+    cmd->localClientNum = localClientNum;
+}
+

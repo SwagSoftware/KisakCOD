@@ -1149,3 +1149,109 @@ void __cdecl CG_GetPoseOrigin(const cpose_t *pose, float *origin);
 void __cdecl CG_GetPoseAngles(const cpose_t *pose, float *angles);
 float *__cdecl CG_GetEntityOrigin(int localClientNum, unsigned int entnum);
 void __cdecl CG_PredictiveSkinCEntity(GfxSceneEntity *sceneEnt);
+
+
+// cg_main_mp
+struct SndEntHandle_u // sizeof=0x4
+{                                       // ...
+    unsigned int entIndex;
+};
+union SndEntHandle // sizeof=0x4
+{                                       // ...
+    SndEntHandle_u field;
+    int handle;
+};
+struct cgs_t // sizeof=0x3A24
+{                                       // ...
+    int viewX;
+    int viewY;
+    int viewWidth;
+    int viewHeight;
+    float viewAspect;
+    int serverCommandSequence;
+    int processedSnapshotNum;
+    int localServer;
+    char gametype[32];
+    char szHostName[256];
+    int maxclients;
+    char mapname[64];
+    int gameEndTime;
+    int voteTime;
+    int voteYes;
+    int voteNo;
+    char voteString[256];
+    XModel *gameModels[512];
+    const FxEffectDef *fxs[100];
+    const FxEffectDef *smokeGrenadeFx;
+    shellshock_parms_t holdBreathParams;
+    char teamChatMsgs[8][160];
+    int teamChatMsgTimes[8];
+    int teamChatPos;
+    int teamLastChatPos;
+    float compassWidth;
+    float compassHeight;
+    float compassY;
+    clientInfo_t corpseinfo[8];
+};
+bool __cdecl CG_IsRagdollTrajectory(const trajectory_t *trajectory);
+void __cdecl CG_RegisterDvars();
+void __cdecl TRACK_cg_main();
+void __cdecl CG_GetDObjOrientation(int localClientNum, unsigned int dobjHandle, float (*axis)[3], float *origin);
+void __cdecl CG_GetSoundEntityOrientation(SndEntHandle sndEnt, float *origin_out, float (*axis_out)[3]);
+void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *origin_out, float (*axis_out)[3]);
+const playerState_s *__cdecl CG_GetPredictedPlayerState(int localClientNum);
+void __cdecl CG_GameMessage(int localClientNum, const char *msg);
+void __cdecl CG_BoldGameMessage(int localClientNum, const char *msg);
+void __cdecl CG_RegisterSounds();
+void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t **sound);
+int CG_RegisterPhysicsSounds();
+int CG_RegisterPhysicsSounds_FastFile();
+void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64], int *nclasses);
+void __cdecl CG_StartAmbient(int localClientNum);
+int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasList);
+int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasname);
+int __cdecl CG_PlayEntitySoundAlias(int localClientNum, int entitynum, snd_alias_list_t *aliasList);
+void __cdecl CG_StopSoundAlias(int localClientNum, int entitynum, snd_alias_list_t *aliasList);
+void __cdecl CG_StopSoundsOnEnt(int localClientNum, int entitynum);
+void __cdecl CG_StopSoundAliasByName(int localClientNum, int entityNum, const char *aliasName);
+void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *aliasName);
+void __cdecl CG_SubtitleSndLengthNotify(int msec, const snd_alias_t *lengthNotifyData);
+void __cdecl CG_SubtitlePrint(int msec, const snd_alias_t *alias);
+void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_alias_list_t *aliasList);
+int __cdecl CG_PlaySoundAlias(int localClientNum, int entitynum, const float *origin, snd_alias_list_t *aliasList);
+int __cdecl CG_PlaySoundAliasByName(int localClientNum, int entitynum, const float *origin, const char *aliasname);
+int __cdecl CG_PlaySoundAliasAsMasterByName(
+    int localClientNum,
+    int entitynum,
+    const float *origin,
+    const char *aliasname);
+void __cdecl CG_RestartSmokeGrenades(int localClientNum);
+void __cdecl CG_InitVote(int localClientNum);
+unsigned __int16 __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t weapType);
+int __cdecl CG_GetClientNum(int localClientNum);
+void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommandSequence, int clientNum);
+clientConnection_t *__cdecl CL_GetLocalClientConnection(int localClientNum);
+void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname);
+int __cdecl CG_PlayAnimScriptSoundAlias(int clientIndex, snd_alias_list_t *aliasList);
+void __cdecl CG_LoadHudMenu(int localClientNum);
+unsigned __int16 __cdecl CG_AttachWeapon(DObjModel_s *dobjModels, unsigned __int16 numModels, clientInfo_t *ci);
+void __cdecl CG_CreateDObj(
+    DObjModel_s *dobjModels,
+    unsigned __int16 numModels,
+    XAnimTree_s *tree,
+    unsigned int handle,
+    int localClientNum,
+    clientInfo_t *ci);
+DObj_s *__cdecl CG_GetDObj(unsigned int handle, int localClientNum);
+void __cdecl CG_LoadAnimTreeInstances(int localClientNum);
+void __cdecl CG_InitEntities(int localClientNum);
+void __cdecl CG_InitViewDimensions(int localClientNum);
+void __cdecl CG_InitDof(GfxDepthOfField *dof);
+void __cdecl CG_FreeWeapons(int localClientNum);
+void __cdecl CG_Shutdown(int localClientNum);
+void __cdecl CG_FreeAnimTreeInstances(int localClientNum);
+unsigned __int8 *__cdecl Hunk_AllocXAnimClient(unsigned int size);
+unsigned __int8 __cdecl CG_ShouldPlaySoundOnLocalClient();
+
+extern cg_s *cgArray;
+extern cgs_t *cgsArray;

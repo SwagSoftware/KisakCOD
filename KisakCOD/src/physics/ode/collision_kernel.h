@@ -199,4 +199,7 @@ struct dxSpace : public dxGeom {
 };
 
 
+// LWSS ADD- Custom for COD4
+dxGeom *__cdecl ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body);
+// LWSS END
 #endif

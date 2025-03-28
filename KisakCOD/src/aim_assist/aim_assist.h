@@ -139,6 +139,7 @@ int __cdecl AimAssist_CalcAimPos(
 void __cdecl Vec3Add(const float *a, const float *b, float *sum);
 void __cdecl Vec3Avg(const float *a, const float *b, float *sum);
 int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsigned int tagName, float *pos);
+void __cdecl AimTarget_GetTagPos(const centity_s *ent, unsigned int tagName, float *pos);
 int __cdecl AimAssist_GetScreenTargetCount(int localClientNum);
 int __cdecl AimAssist_GetScreenTargetEntity(int localClientNum, unsigned int targetIndex);
 void __cdecl AimAssist_ClearEntityReference(int localClientNum, int entIndex);
@@ -175,3 +176,26 @@ double __cdecl Vec3Length(const float *v);
 void __cdecl Vec3Copy(const float *from, float *to);
 double __cdecl tan(double X);
 double __cdecl floor(double X);
+
+
+
+// aim_target_mp
+int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsigned int tagName, float *pos);
+void __cdecl TRACK_aim_target();
+void __cdecl AimTarget_Init(int localClientNum);
+const dvar_s *AimTarget_RegisterDvars();
+void __cdecl AimTarget_ClearTargetList(int localClientNum);
+void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent);
+char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *targetEnt);
+double __cdecl AimTarget_GetTargetRadius(const centity_s *targetEnt);
+void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, float *maxs);
+char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targetEnt, unsigned int visBone);
+void __cdecl AimTarget_GetTargetCenter(const centity_s *targetEnt, float *center);
+void __cdecl Vec3Scale(const float *v, float scale, float *result);
+void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetEnt, AimTarget *target);
+double __cdecl Vec3LengthSq(const float *v);
+void __cdecl AimTarget_AddTargetToList(int localClientNum, const AimTarget *target);
+int __cdecl AimTarget_CompareTargets(const AimTarget *targetA, const AimTarget *targetB);
+bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps);
+void __cdecl AimTarget_UpdateClientTargets(int localClientNum);
+void __cdecl AimTarget_GetClientTargetList(int localClientNum, AimTarget **targetList, int *targetCount);
