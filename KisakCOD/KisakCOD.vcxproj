@@ -141,6 +141,9 @@
     <ClCompile Include="src\bgame\bg_misc.cpp" />
     <ClCompile Include="src\bgame\bg_perks_mp.cpp" />
     <ClCompile Include="src\bgame\bg_pmove.cpp" />
+    <ClCompile Include="src\bgame\bg_slidemove.cpp" />
+    <ClCompile Include="src\bgame\bg_vehicles_mp.cpp" />
+    <ClCompile Include="src\bgame\bg_weapons.cpp" />
     <ClCompile Include="src\cgame\cg_drawtools.cpp" />
     <ClCompile Include="src\cgame\cg_localents.cpp" />
     <ClCompile Include="src\cgame_mp\cg_ents_mp.cpp" />
@@ -179,6 +182,8 @@
     <ClCompile Include="src\EffectsCore\fx_system.cpp" />
     <ClCompile Include="src\EffectsCore\fx_update.cpp" />
     <ClCompile Include="src\EffectsCore\fx_update_util.cpp" />
+    <ClCompile Include="src\game_mp\g_main_mp.cpp" />
+    <ClCompile Include="src\game_mp\g_utils_mp.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_backend.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_logfile.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_stats.cpp" />
@@ -250,7 +255,9 @@
     <ClCompile Include="src\qcommon\files.cpp" />
     <ClCompile Include="src\qcommon\graph.cpp" />
     <ClCompile Include="src\qcommon\mem_track.cpp" />
+    <ClCompile Include="src\qcommon\msg_mp.cpp" />
     <ClCompile Include="src\qcommon\statmonitor.cpp" />
+    <ClCompile Include="src\qcommon\sv_msg_write_mp.cpp" />
     <ClCompile Include="src\qcommon\threads.cpp" />
     <ClCompile Include="src\script\scr_animtree.cpp" />
     <ClCompile Include="src\script\scr_compiler.cpp" />
@@ -263,10 +270,12 @@
     <ClCompile Include="src\script\scr_stringlist.cpp" />
     <ClCompile Include="src\script\scr_variable.cpp" />
     <ClCompile Include="src\script\scr_vm.cpp" />
+    <ClCompile Include="src\server\sv_game.cpp" />
     <ClCompile Include="src\server\sv_main.cpp" />
     <ClCompile Include="src\server_mp\sv_init_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_main_mp.cpp" />
     <ClCompile Include="src\stringed\stringed_hooks.cpp" />
+    <ClCompile Include="src\universal\com_constantconfigstrings.cpp" />
     <ClCompile Include="src\universal\com_files.cpp" />
     <ClCompile Include="src\universal\com_loadutils.cpp" />
     <ClCompile Include="src\universal\com_math.cpp" />
@@ -333,6 +342,8 @@
     <ClInclude Include="src\database\database.h" />
     <ClInclude Include="src\DynEntity\DynEntity_client.h" />
     <ClInclude Include="src\EffectsCore\fx_system.h" />
+    <ClInclude Include="src\game_mp\g_main_mp.h" />
+    <ClInclude Include="src\game_mp\g_utils_mp.h" />
     <ClInclude Include="src\gfx_d3d\fxprimitives.h" />
     <ClInclude Include="src\gfx_d3d\rb_backend.h" />
     <ClInclude Include="src\gfx_d3d\rb_logfile.h" />
@@ -397,8 +408,10 @@
     <ClInclude Include="src\qcommon\files.h" />
     <ClInclude Include="src\qcommon\graph.h" />
     <ClInclude Include="src\qcommon\mem_track.h" />
+    <ClInclude Include="src\server\sv_game.h" />
     <ClInclude Include="src\server_mp\server.h" />
     <ClInclude Include="src\stringed\stringed_hooks.h" />
+    <ClInclude Include="src\universal\com_constantconfigstrings.h" />
     <ClInclude Include="src\universal\com_files.h" />
     <ClInclude Include="src\universal\com_math.h" />
     <ClInclude Include="src\universal\com_memory.h" />

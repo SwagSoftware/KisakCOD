@@ -87,10 +87,10 @@ def main() -> None:
 
             pseudoCodeOBJ: ida_pro.strvec_t = decompileFunction(func)
             pseudoCodeString = pseudoCodeObjToString(pseudoCodeOBJ)
-            decompglob += pseudoCodeString.replace('_DONE', '').replace("BOOL", "bool").replace ('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD ', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";').replace('&String,', '"",').replace('qmemcpy(', 'memcpy(')
+            decompglob += pseudoCodeString.replace('_DONE', '').replace("BOOL", "bool").replace ('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD ', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";').replace('&String,', '"",').replace('qmemcpy(', 'memcpy(').replace('abs32(', 'abs(')
             decompglob += "\n"
             
-            first_line = pseudoCodeString.split("{")[0].replace('_DONE', '').replace("BOOL", "bool").replace('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD ', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";').replace('&String', '"",').replace('qmemcpy(', 'memcpy(')
+            first_line = pseudoCodeString.split("{")[0].replace('_DONE', '').replace("BOOL", "bool").replace('__usercall', '').replace('_DWORD', 'unsigned int').replace('DWORD ', 'unsigned int').replace('LONG', 'int').replace('_SL_', 'SL_').replace('_Sys_', 'Sys_').replace('Profile_', '//Profile_').replace('__noreturn', '').replace('PbCaptureConsoleOutput', '//PbCaptureConsoleOutput').replace('&String;', '"";').replace('&String', '"",').replace('qmemcpy(', 'memcpy(').replace('abs32(', 'abs(')
             decompheaderglob += remove_last_occurrence(first_line, "\n")
             decompheaderglob += ";\n"
 

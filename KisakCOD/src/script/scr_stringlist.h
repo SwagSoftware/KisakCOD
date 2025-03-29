@@ -114,3 +114,5 @@ void SL_RemoveRefToString(unsigned int stringValue);
 void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len);
 
 int SL_IsLowercaseString(unsigned int stringValue);
+
+void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from);

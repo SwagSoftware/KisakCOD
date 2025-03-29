@@ -713,3 +713,12 @@ void __cdecl SL_AddUser(unsigned int stringValue, unsigned int user)
 	RefString = GetRefString(stringValue);
 	SL_AddUserInternal(RefString, user);
 }
+
+void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from)
+{
+	if (from)
+		SL_AddRefToString(from);
+	if (*to)
+		SL_RemoveRefToString(*to);
+	*to = from;
+}
