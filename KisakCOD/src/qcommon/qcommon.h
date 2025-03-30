@@ -547,27 +547,92 @@ struct netadr_t  {
 	netadrtype_t	type;
 
 	byte	ip[4];
+    unsigned short	port;
 	byte	ipx[10];
-
-	unsigned short	port;
 };
 
-void		NET_Init(void);
-void		NET_Shutdown(void);
-void		NET_Restart(void);
-void		NET_Config(qboolean enableNetworking);
-
-void		NET_SendPacket(netsrc_t sock, int length, const void* data, netadr_t to);
-void		QDECL NET_OutOfBandPrint(netsrc_t net_socket, netadr_t adr, const char* format, ...);
-void		QDECL NET_OutOfBandData(netsrc_t sock, netadr_t adr, byte* format, int len);
-
-qboolean	NET_CompareAdr(netadr_t a, netadr_t b);
-qboolean	NET_CompareBaseAdr(netadr_t a, netadr_t b);
-qboolean	NET_IsLocalAddress(netadr_t adr);
+//void		NET_Init(void);
+//void		NET_Shutdown(void);
+//void		NET_Restart(void);
+//void		NET_Config(qboolean enableNetworking);
+//
+//void		NET_SendPacket(netsrc_t sock, int length, const void* data, netadr_t to);
+//void		QDECL NET_OutOfBandPrint(netsrc_t net_socket, netadr_t adr, const char* format, ...);
+//void		QDECL NET_OutOfBandData(netsrc_t sock, netadr_t adr, byte* format, int len);
+//
+//qboolean	NET_CompareAdr(netadr_t a, netadr_t b);
+//qboolean	NET_CompareBaseAdr(netadr_t a, netadr_t b);
+//qboolean	NET_IsLocalAddress(netadr_t adr);
 const char* NET_AdrToString(netadr_t a);
-qboolean	NET_StringToAdr(const char* s, netadr_t* a);
-qboolean	NET_GetLoopPacket(netsrc_t sock, netadr_t* net_from, msg_t* net_message);
-void		NET_Sleep(int msec);
+//qboolean	NET_StringToAdr(const char* s, netadr_t* a);
+//qboolean	NET_GetLoopPacket(netsrc_t sock, netadr_t* net_from, msg_t* net_message);
+//void		NET_Sleep(int msec);
+//
+
+void __cdecl NetProf_PrepProfiling(netProfileInfo_t *prof);
+void __cdecl NetProf_AddPacket(netProfileStream_t *pProfStream, int iSize, int bFragment);
+void __cdecl NetProf_NewSendPacket(netchan_t *pChan, int iSize, int bFragment);
+void __cdecl NetProf_NewRecievePacket(netchan_t *pChan, int iSize, int bFragment);
+void __cdecl NetProf_UpdateStatistics(netProfileStream_t *pStream);
+void __cdecl Net_DisplayProfile(int localClientNum);
+char __cdecl FakeLag_DestroyPacket(unsigned int packet);
+void __cdecl FakeLag_SendPacket_Real(unsigned int packet);
+void __cdecl FakeLag_Init();
+unsigned int __cdecl FakeLag_GetFreeSlot();
+bool __cdecl FakeLag_HostingGameOrParty();
+unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, netadr_t to);
+unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netadr_t *from, msg_t *msg);
+void __cdecl FakeLag_ReceivePackets();
+int __cdecl FakeLag_GetPacket(bool loopback, netsrc_t sock, netadr_t *net_from, msg_t *net_message);
+void __cdecl FakeLag_Frame();
+int __cdecl FakeLag_SendLaggedPackets();
+void __cdecl FakeLag_Shutdown();
+void __cdecl Netchan_Init(__int16 port);
+void __cdecl Net_DumpProfile_f();
+void __cdecl Netchan_Setup(
+    netsrc_t sock,
+    netchan_t *chan,
+    netadr_t adr,
+    int qport,
+    char *outgoingBuffer,
+    int outgoingBufferSize,
+    char *incomingBuffer,
+    int incomingBufferSize);
+bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan);
+bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data);
+int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg);
+int __cdecl NET_CompareBaseAdrSigned(netadr_t *a, netadr_t *b);
+bool __cdecl NET_CompareBaseAdr(netadr_t a, netadr_t b);
+int __cdecl NET_CompareAdrSigned(netadr_t *a, netadr_t *b);
+bool __cdecl NET_CompareAdr(netadr_t a, netadr_t b);
+bool __cdecl NET_IsLocalAddress(netadr_t adr);
+int __cdecl NET_GetClientPacket(netadr_t *net_from, msg_t *net_message);
+int __cdecl NET_GetServerPacket(netadr_t *net_from, msg_t *net_message);
+int __cdecl NET_GetLoopPacket_Real(netsrc_t sock, netadr_t *net_from, msg_t *net_message);
+int __cdecl NET_GetLoopPacket(netsrc_t sock, netadr_t *net_from, msg_t *net_message);
+void __cdecl NET_SendLoopPacket(netsrc_t sock, unsigned int length, unsigned __int8 *data, netadr_t to);
+char __cdecl NET_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, netadr_t to);
+bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *data);
+bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const unsigned __int8 *format, int len);
+bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, unsigned __int8 *format, unsigned int len);
+int __cdecl NET_StringToAdr(char *s, netadr_t *a);
+
+extern const dvar_t *showpackets;
+extern const dvar_t *fakelag_target;
+extern const dvar_t *fakelag_packetloss;
+extern const dvar_t *fakelag_currentjitter;
+extern const dvar_t *fakelag_jitter;
+extern const dvar_t *fakelag_current;
+extern const dvar_t *msg_dumpEnts;
+extern const dvar_t *net_profile;
+extern const dvar_t *net_lanauthorize;
+extern const dvar_t *packetDebug;
+extern const dvar_t *showdrop;
+extern const dvar_t *fakelag_jitterinterval;
+extern const dvar_t *net_showprofile;
+extern const dvar_t *msg_printEntityNums;
+extern const dvar_t *msg_hudelemspew;
+
 
 
 void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t *netmsg);
@@ -913,6 +978,13 @@ void __cdecl StatMon_Reset();
 
 
 
+/*
+==============================================================
+
+NET MSG 
+
+==============================================================
+*/
 // sv_msg_write_mp
 struct nodetype // sizeof=0x14
 {                                       // ...
@@ -1059,3 +1131,23 @@ void __cdecl MSG_WriteDeltaHudElems(
     const hudelem_s *from,
     const hudelem_s *to,
     unsigned int count);
+
+
+extern huffman_t msgHuff;
+
+
+// cl_scrn_mp
+void __cdecl SCR_DrawSmallStringExt(int x, int y, char *string, const float *setColor);
+void __cdecl SCR_Init();
+double __cdecl CL_GetMenuBlurRadius(int localClientNum);
+void __cdecl SCR_UpdateScreen();
+void SCR_UpdateFrame();
+int __cdecl CL_CGameRendering(int localClientNum);
+bool __cdecl CL_GetDemoType();
+void __cdecl CL_DrawScreen(int localClientNum);
+void __cdecl SCR_DrawScreenField(int localClientNum, int refreshedUI);
+void SCR_DrawDemoRecording();
+void SCR_ClearScreen();
+void __cdecl SCR_UpdateLoadScreen();
+void __cdecl CL_CubemapShot_f();
+void CL_CubemapShotUsage();

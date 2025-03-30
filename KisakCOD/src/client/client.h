@@ -475,3 +475,50 @@ void __cdecl Key_KeynumToStringBuf(int keynum, char *buf, int buflen);
 int __cdecl CL_GetClientName(int localClientNum, int index, char *buf, int size);
 int __cdecl CL_ShutdownUI();
 void __cdecl CL_InitUI();
+
+
+
+// screen_placement
+void __cdecl ScrPlace_SetupFloatViewport(
+    ScreenPlacement *scrPlace,
+    float viewportX,
+    float viewportY,
+    float viewportWidth,
+    float viewportHeight);
+void __cdecl ScrPlace_CalcSafeAreaOffsets(
+    float viewportX,
+    float viewportY,
+    float viewportWidth,
+    float viewportHeight,
+    float horzAspectScale,
+    float *realViewableMin,
+    float *realViewableMax,
+    float *virtualViewableMin,
+    float *virtualViewableMax);
+void __cdecl ScrPlace_SetupViewport(
+    ScreenPlacement *scrPlace,
+    int viewportX,
+    int viewportY,
+    int viewportWidth,
+    int viewportHeight);
+void __cdecl ScrPlace_SetupUnsafeViewport(
+    ScreenPlacement *scrPlace,
+    int viewportX,
+    int viewportY,
+    int viewportWidth,
+    int viewportHeight);
+double __cdecl ScrPlace_ApplyX(const ScreenPlacement *scrPlace, float x, int horzAlign);
+double __cdecl ScrPlace_ApplyY(const ScreenPlacement *scrPlace, float y, int vertAlign);
+void __cdecl ScrPlace_ApplyRect(
+    const ScreenPlacement *scrPlace,
+    float *x,
+    float *y,
+    float *w,
+    float *h,
+    int horzAlign,
+    int vertAlign);
+
+extern struct ScreenPlacement *scrPlaceView;
+extern struct ScreenPlacement scrPlaceFull;
+extern float cg_hudSplitscreenScale;
+extern ScreenPlacement scrPlaceFullUnsafe;

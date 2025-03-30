@@ -1,0 +1,1900 @@
+#include "cg_local.h"
+#include "cg_public.h"
+#include <stringed/stringed_hooks.h>
+
+#include <string.h>
+
+const dvar_t *waypointOffscreenScaleSmallest;
+const dvar_t *waypointPlayerOffsetStand;
+const dvar_t *waypointTweakY;
+const dvar_t *waypointOffscreenPointerHeight;
+const dvar_t *waypointOffscreenPadTop;
+const dvar_t *waypointIconHeight;
+const dvar_t *waypointDistScaleRangeMin;
+const dvar_t *waypointOffscreenRoundedCorners;
+const dvar_t *waypointOffscreenPadBottom;
+const dvar_t *waypointPlayerOffsetProne;
+const dvar_t *waypointOffscreenPointerWidth;
+const dvar_t *waypointIconWidth;
+const dvar_t *waypointSplitscreenScale;
+const dvar_t *waypointPlayerOffsetCrouch;
+const dvar_t *waypointOffscreenPadRight;
+const dvar_t *waypointOffscreenCornerRadius;
+const dvar_t *waypointDebugDraw;
+const dvar_t *waypointDistScaleRangeMax;
+const dvar_t *waypointOffscreenScaleLength;
+const dvar_t *waypointDistScaleSmallest;
+const dvar_t *waypointOffscreenPadLeft;
+const dvar_t *waypointOffscreenPointerDistance;
+const dvar_t *waypointOffscreenDistanceThresholdAlpha;
+
+const dvar_t *hudElemPausedBrightness;
+
+
+void __cdecl CG_HudElemRegisterDvars()
+{
+    DvarLimits min; // [esp+4h] [ebp-10h]
+    DvarLimits mina; // [esp+4h] [ebp-10h]
+    DvarLimits minb; // [esp+4h] [ebp-10h]
+    DvarLimits minc; // [esp+4h] [ebp-10h]
+    DvarLimits mind; // [esp+4h] [ebp-10h]
+    DvarLimits mine; // [esp+4h] [ebp-10h]
+    DvarLimits minf; // [esp+4h] [ebp-10h]
+    DvarLimits ming; // [esp+4h] [ebp-10h]
+    DvarLimits minh; // [esp+4h] [ebp-10h]
+    DvarLimits mini; // [esp+4h] [ebp-10h]
+    DvarLimits minj; // [esp+4h] [ebp-10h]
+    DvarLimits mink; // [esp+4h] [ebp-10h]
+    DvarLimits minl; // [esp+4h] [ebp-10h]
+    DvarLimits minm; // [esp+4h] [ebp-10h]
+    DvarLimits minn; // [esp+4h] [ebp-10h]
+    DvarLimits mino; // [esp+4h] [ebp-10h]
+    DvarLimits minp; // [esp+4h] [ebp-10h]
+    DvarLimits minq; // [esp+4h] [ebp-10h]
+    DvarLimits minr; // [esp+4h] [ebp-10h]
+    DvarLimits mins; // [esp+4h] [ebp-10h]
+    DvarLimits mint; // [esp+4h] [ebp-10h]
+    DvarLimits minu; // [esp+4h] [ebp-10h]
+
+    waypointDebugDraw = Dvar_RegisterBool("waypointDebugDraw", 0, 0, "");
+    min.value.max = 3.4028235e38;
+    min.value.min = 1.1754944e-38;
+    waypointIconWidth = Dvar_RegisterFloat("waypointIconWidth", 36.0, min, 0, "Width of the offscreen pointer.");
+    mina.value.max = 3.4028235e38;
+    mina.value.min = 1.1754944e-38;
+    waypointIconHeight = Dvar_RegisterFloat("waypointIconHeight", 36.0, mina, 0, "Height of the offscreen pointer.");
+    minb.value.max = 3.4028235e38;
+    minb.value.min = 1.1754944e-38;
+    waypointOffscreenPointerWidth = Dvar_RegisterFloat(
+        "waypointOffscreenPointerWidth",
+        25.0,
+        minb,
+        0,
+        "Width of the offscreen pointer.");
+    minc.value.max = 3.4028235e38;
+    minc.value.min = 1.1754944e-38;
+    waypointOffscreenPointerHeight = Dvar_RegisterFloat(
+        "waypointOffscreenPointerHeight",
+        12.0,
+        minc,
+        0,
+        "Height of the offscreen pointer.");
+    mind.value.max = 3.4028235e38;
+    mind.value.min = 1.1754944e-38;
+    waypointOffscreenPointerDistance = Dvar_RegisterFloat(
+        "waypointOffscreenPointerDistance",
+        30.0,
+        mind,
+        0,
+        "Distance from the center of the offscreen objective icon to the center its arrow.");
+    mine.value.max = 3.4028235e38;
+    mine.value.min = 0.0;
+    waypointOffscreenDistanceThresholdAlpha = Dvar_RegisterFloat(
+        "waypointOffscreenDistanceThresholdAlpha",
+        30.0,
+        mine,
+        0,
+        "Distance from the threshold over which offscreen objective icons lerp their alpha.");
+    minf.value.max = 3.4028235e38;
+    minf.value.min = 0.0;
+    waypointOffscreenPadLeft = Dvar_RegisterFloat("waypointOffscreenPadLeft", 103.0, minf, 0, "Offset from the edge.");
+    ming.value.max = 3.4028235e38;
+    ming.value.min = 0.0;
+    waypointOffscreenPadRight = Dvar_RegisterFloat("waypointOffscreenPadRight", 0.0, ming, 0, "Offset from the edge.");
+    minh.value.max = 3.4028235e38;
+    minh.value.min = 0.0;
+    waypointOffscreenPadTop = Dvar_RegisterFloat("waypointOffscreenPadTop", 0.0, minh, 0, "Offset from the edge.");
+    mini.value.max = 3.4028235e38;
+    mini.value.min = 0.0;
+    waypointOffscreenPadBottom = Dvar_RegisterFloat("waypointOffscreenPadBottom", 30.0, mini, 0, "Offset from the edge.");
+    waypointOffscreenRoundedCorners = Dvar_RegisterBool(
+        "waypointOffscreenRoundedCorners",
+        1,
+        0,
+        "Off-screen icons take rounded corners when true.  90-degree corners when false.");
+    minj.value.max = 3.4028235e38;
+    minj.value.min = 0.0;
+    waypointOffscreenCornerRadius = Dvar_RegisterFloat(
+        "waypointOffscreenCornerRadius",
+        105.0,
+        minj,
+        0,
+        "Size of the rounded corners.");
+    mink.value.max = 3.4028235e38;
+    mink.value.min = 1.1754944e-38;
+    waypointOffscreenScaleLength = Dvar_RegisterFloat(
+        "waypointOffscreenScaleLength",
+        500.0,
+        mink,
+        0,
+        "How far the offscreen icon scale travels from full to smallest scale.");
+    minl.value.max = 3.4028235e38;
+    minl.value.min = 0.0;
+    waypointOffscreenScaleSmallest = Dvar_RegisterFloat(
+        "waypointOffscreenScaleSmallest",
+        1.0,
+        minl,
+        0,
+        "Smallest scale that the offscreen effect uses.");
+    minm.value.max = 3.4028235e38;
+    minm.value.min = 0.0;
+    waypointDistScaleRangeMin = Dvar_RegisterFloat(
+        "waypointDistScaleRangeMin",
+        1000.0,
+        minm,
+        0,
+        "Distance from player that icon distance scaling starts.");
+    minn.value.max = 3.4028235e38;
+    minn.value.min = 0.0;
+    waypointDistScaleRangeMax = Dvar_RegisterFloat(
+        "waypointDistScaleRangeMax",
+        3000.0,
+        minn,
+        0,
+        "Distance from player that icon distance scaling ends.");
+    mino.value.max = 3.4028235e38;
+    mino.value.min = 0.0;
+    waypointDistScaleSmallest = Dvar_RegisterFloat(
+        "waypointDistScaleSmallest",
+        0.80000001,
+        mino,
+        0,
+        "Smallest scale that the distance effect uses.");
+    minp.value.max = 3.4028235e38;
+    minp.value.min = 0.1;
+    waypointSplitscreenScale = Dvar_RegisterFloat(
+        "waypointSplitscreenScale",
+        1.8,
+        minp,
+        0,
+        "Scale applied to waypoint icons in splitscreen views.");
+    minq.value.max = 3.4028235e38;
+    minq.value.min = -3.4028235e38;
+    waypointTweakY = Dvar_RegisterFloat("waypointTweakY", -17.0, minq, 0, "");
+    minr.value.max = 1.0;
+    minr.value.min = 0.0;
+    hudElemPausedBrightness = Dvar_RegisterFloat(
+        "hudElemPausedBrightness",
+        0.40000001,
+        minr,
+        0x80u,
+        "Brightness of the hudelems when the game is paused.");
+    mins.value.max = 3.4028235e38;
+    mins.value.min = 0.0;
+    waypointPlayerOffsetProne = Dvar_RegisterFloat(
+        "waypointPlayerOffsetProne",
+        30.0,
+        mins,
+        0x80u,
+        "For waypoints pointing to players, how high to offset off of their origin when they are prone.");
+    mint.value.max = 3.4028235e38;
+    mint.value.min = 0.0;
+    waypointPlayerOffsetCrouch = Dvar_RegisterFloat(
+        "waypointPlayerOffsetCrouch",
+        56.0,
+        mint,
+        0x80u,
+        "For waypoints pointing to players, how high to offset off of their origin when they are crouching.");
+    minu.value.max = 3.4028235e38;
+    minu.value.min = 0.0;
+    waypointPlayerOffsetStand = Dvar_RegisterFloat(
+        "waypointPlayerOffsetStand",
+        74.0,
+        minu,
+        0x80u,
+        "For waypoints pointing to players, how high to offset off of their origin when they are standing.");
+}
+
+void __cdecl CG_TranslateHudElemMessage(
+    int localClientNum,
+    const char *message,
+    const char *messageType,
+    char *hudElemString)
+{
+    const char *v4; // eax
+    char *translatedString; // [esp+10h] [ebp-Ch]
+    unsigned int stringLen; // [esp+14h] [ebp-8h] BYREF
+    unsigned int searchPos; // [esp+18h] [ebp-4h] BYREF
+
+    if (!message)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 274, 0, "%s", "message");
+    if (!hudElemString)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 275, 0, "%s", "hudElemString");
+    translatedString = SEH_LocalizeTextMessage(message, messageType, LOCMSG_SAFE);
+    stringLen = strlen(translatedString);
+    if (stringLen + 1 <= 0x100)
+    {
+        memcpy((unsigned __int8 *)hudElemString, (unsigned __int8 *)translatedString, stringLen);
+        hudElemString[stringLen] = 0;
+        searchPos = 0;
+        while (ReplaceDirective(localClientNum, &searchPos, &stringLen, hudElemString))
+            ;
+    }
+    else
+    {
+        v4 = va("Translated message too long to process: %s\n", message);
+        Com_Error(ERR_DROP, v4);
+    }
+}
+
+char __cdecl ReplaceDirective(int localClientNum, unsigned int *searchPos, unsigned int *dstLen, char *dstString)
+{
+    unsigned __int8 *v4; // eax
+    const char *v6; // eax
+    const char *v7; // eax
+    const char *v8; // eax
+    const char *v9; // eax
+    signed int directiveLen; // [esp+34h] [ebp-324h]
+    const char *startTokenPos; // [esp+38h] [ebp-320h]
+    int newStringLen; // [esp+3Ch] [ebp-31Ch]
+    unsigned int bindingLen; // [esp+40h] [ebp-318h]
+    unsigned int endLen; // [esp+44h] [ebp-314h]
+    char keyBinding[256]; // [esp+48h] [ebp-310h] BYREF
+    unsigned __int8 srcString[260]; // [esp+148h] [ebp-210h] BYREF
+    int beginLen; // [esp+24Ch] [ebp-10Ch]
+    char directive[256]; // [esp+250h] [ebp-108h] BYREF
+    const char *endTokenPos; // [esp+354h] [ebp-4h]
+    char *dstStringa; // [esp+36Ch] [ebp+14h]
+    unsigned __int8 *dstStringb; // [esp+36Ch] [ebp+14h]
+
+    if (!searchPos)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 199, 0, "%s", "searchPos");
+    if (!dstLen)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 201, 0, "%s", "dstLen");
+    if (*dstLen >= 0x100)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            202,
+            0,
+            "*dstLen doesn't index MAX_HUDELEM_TEXT_LEN\n\t%i not in [0, %i)",
+            *dstLen,
+            256);
+    if (*searchPos > *dstLen)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 203, 0, "*searchPos <= *dstLen\n\t%i, %i", *searchPos, *dstLen);
+    if (!dstString)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 204, 0, "%s", "dstString");
+    if (*dstLen != strlen(dstString))
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            205,
+            0,
+            "*dstLen == strlen( dstString )\n\t%i, %i",
+            *dstLen,
+            strlen(dstString));
+    memcpy(srcString, (unsigned __int8 *)dstString, *dstLen);
+    srcString[*dstLen] = 0;
+    strstr((const char*)&srcString[*searchPos], "[{");
+    startTokenPos = (const char *)v4;
+    if (!v4)
+        return 0;
+    strstr((const char*)v4, "}]");
+    endTokenPos = v6;
+    if (v6)
+    {
+        directiveLen = endTokenPos - startTokenPos - 2;
+        if (directiveLen < 0)
+            MyAssertHandler(
+                ".\\cgame\\cg_hudelem.cpp",
+                224,
+                1,
+                "%s\n\t(directiveLen) = %i",
+                "(directiveLen >= 0)",
+                directiveLen);
+        if (directiveLen)
+        {
+            memcpy((unsigned __int8 *)directive, (unsigned __int8 *)startTokenPos + 2, directiveLen);
+            directive[directiveLen] = 0;
+            GetHudelemDirective(localClientNum, directive, keyBinding);
+            bindingLen = &keyBinding[strlen(keyBinding) + 1] - &keyBinding[1];
+            newStringLen = *dstLen - directiveLen + bindingLen - 4;
+            if (newStringLen + 1 <= 256)
+            {
+                beginLen = startTokenPos - (const char *)srcString;
+                dstStringa = &dstString[startTokenPos - (const char *)srcString];
+                memcpy((unsigned __int8 *)dstStringa, (unsigned __int8 *)keyBinding, bindingLen);
+                dstStringb = (unsigned __int8 *)&dstStringa[bindingLen];
+                endLen = newStringLen - beginLen - bindingLen;
+                memcpy(dstStringb, (unsigned __int8 *)endTokenPos + 2, endLen);
+                dstStringb[endLen] = 0;
+                *searchPos = bindingLen + beginLen;
+                *dstLen = newStringLen;
+                if (*searchPos > *dstLen)
+                    MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 262, 1, "*searchPos <= *dstLen\n\t%i, %i", *searchPos, *dstLen);
+                return 1;
+            }
+            else
+            {
+                v9 = va("String too long to add key binding: %s\n", dstString);
+                Com_Error(ERR_DROP, v9);
+                return 0;
+            }
+        }
+        else
+        {
+            v8 = va("Directive empty in string '%s'", dstString);
+            Com_Error(ERR_DROP, v8);
+            return 0;
+        }
+    }
+    else
+    {
+        v7 = va("No end token to match begin token in string '%s'", dstString);
+        Com_Error(ERR_DROP, v7);
+        return 0;
+    }
+}
+
+void __cdecl GetHudelemDirective(int localClientNum, char *directive, char *result)
+{
+    char *v3; // eax
+    char arg0[256]; // [esp+0h] [ebp-208h] BYREF
+    char name[260]; // [esp+100h] [ebp-108h] BYREF
+
+    if (UI_GetKeyBindingLocalizedString(localClientNum, directive, result))
+    {
+        CL_ResetStats_f();
+    }
+    else
+    {
+        ParseDirective(directive, name, arg0);
+        if (I_stricmp(name, "FAKE_INTRO_SECONDS"))
+        {
+            v3 = UI_SafeTranslateString("KEY_UNBOUND");
+            Com_sprintf(result, 0x100u, "%s(%s)", v3, directive);
+        }
+        else
+        {
+            DirectiveFakeIntroSeconds(localClientNum, arg0, result);
+        }
+    }
+}
+
+void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, char *result)
+{
+    int fakeSeconds; // [esp+4h] [ebp-4h] BYREF
+
+    fakeSeconds = 0;
+    sscanf(arg0, "%d", &fakeSeconds);
+    if ((unsigned int)fakeSeconds > 0x28)
+    {
+        fakeSeconds = 0;
+        Com_PrintWarning(
+            1,
+            "Argument \"%s\" given for FAKE_INTRO_SECONDS is outside the acceptible range of (%d,%d).\n",
+            arg0,
+            0,
+            40);
+    }
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    Com_sprintf(result, 4u, "%02d", fakeSeconds + MEMORY[0x9D5560] / 1000);
+}
+
+void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0)
+{
+    const char *v3; // eax
+    const char *argpos; // [esp+4h] [ebp-4h]
+
+    if (!directive)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 139, 0, "%s", "directive");
+    strstr((unsigned __int8 *)directive, ":");
+    argpos = v3;
+    if (v3)
+    {
+        memcpy((unsigned __int8 *)resultName, (unsigned __int8 *)directive, v3 - directive);
+        resultName[argpos - directive] = 0;
+        I_strncpyz(resultArg0, (char *)argpos + 1, 256);
+    }
+    else
+    {
+        I_strncpyz(resultName, directive, 256);
+        *resultArg0 = 0;
+    }
+}
+
+void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground)
+{
+    bool v2; // [esp+7h] [ebp-100Dh]
+    int i; // [esp+8h] [ebp-100Ch]
+    hudelem_s *elems[1025]; // [esp+Ch] [ebp-1008h] BYREF
+    int SortedHudElems; // [esp+1010h] [ebp-4h]
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    SortedHudElems = GetSortedHudElems(localClientNum, elems);
+    if (SortedHudElems)
+    {
+        v2 = *(unsigned int *)(MEMORY[0x98F45C] + 16) < 7;
+        for (i = 0; i < SortedHudElems; ++i)
+        {
+            if ((v2 || (elems[i]->flags & 2) == 0)
+                && (!foreground || (elems[i]->flags & 1) != 0)
+                && (foreground || (elems[i]->flags & 1) == 0)
+                && ((elems[i]->flags & 4) == 0 || !UI_AnyMenuVisible(localClientNum)))
+            {
+                DrawSingleHudElem2d(localClientNum, elems[i]);
+            }
+        }
+    }
+}
+
+void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
+{
+    char hudElemString[256]; // [esp+8h] [ebp-340h] BYREF
+    cg_hudelem_t cghe; // [esp+108h] [ebp-240h] BYREF
+    hudelem_color_t toColor; // [esp+344h] [ebp-4h] BYREF
+
+    if (elem->type == HE_TYPE_WAYPOINT)
+    {
+        DrawOffscreenViewableWaypoint(localClientNum, elem);
+    }
+    else
+    {
+        if (localClientNum)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+                1071,
+                0,
+                "%s\n\t(localClientNum) = %i",
+                "(localClientNum == 0)",
+                localClientNum);
+        cghe.timeNow = MEMORY[0x9D5560];
+        if (localClientNum)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+                1071,
+                0,
+                "%s\n\t(localClientNum) = %i",
+                "(localClientNum == 0)",
+                localClientNum);
+        if (elem->fadeStartTime > *(unsigned int *)(MEMORY[0x98F45C] + 8))
+        {
+            if (localClientNum)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+                    1071,
+                    0,
+                    "%s\n\t(localClientNum) = %i",
+                    "(localClientNum == 0)",
+                    localClientNum);
+            MyAssertHandler(
+                ".\\cgame\\cg_hudelem.cpp",
+                1348,
+                0,
+                "elem->fadeStartTime <= CG_GetLocalClientGlobals( localClientNum )->nextSnap->serverTime\n\t%i, %i",
+                elem->fadeStartTime,
+                *(unsigned int *)(MEMORY[0x98F45C] + 8));
+        }
+        BG_LerpHudColors(elem, cghe.timeNow, &toColor);
+        if (toColor.a)
+        {
+            HudElemColorToVec4(&toColor, cghe.color);
+            GetHudElemInfo(localClientNum, elem, &cghe, hudElemString);
+            if (cghe.hudElemLabel[0])
+            {
+                DrawHudElemString(localClientNum, &scrPlaceView[localClientNum], cghe.hudElemLabel, elem, &cghe);
+                cghe.x = cghe.x + cghe.labelWidth;
+            }
+            switch (elem->type)
+            {
+            case HE_TYPE_TEXT:
+            case HE_TYPE_VALUE:
+            case HE_TYPE_PLAYERNAME:
+            case HE_TYPE_MAPNAME:
+            case HE_TYPE_GAMETYPE:
+            case HE_TYPE_TIMER_DOWN:
+            case HE_TYPE_TIMER_UP:
+            case HE_TYPE_TENTHS_TIMER_DOWN:
+            case HE_TYPE_TENTHS_TIMER_UP:
+                if (cghe.hudElemText[0])
+                    DrawHudElemString(localClientNum, &scrPlaceView[localClientNum], cghe.hudElemText, elem, &cghe);
+                break;
+            case HE_TYPE_MATERIAL:
+                DrawHudElemMaterial(localClientNum, elem, &cghe);
+                break;
+            case HE_TYPE_CLOCK_DOWN:
+            case HE_TYPE_CLOCK_UP:
+                DrawHudElemClock(localClientNum, elem, &cghe);
+                break;
+            default:
+                if (!alwaysfails)
+                    MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1387, 0, "invalid case");
+                break;
+            }
+        }
+    }
+}
+
+void __cdecl GetHudElemInfo(int localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe, char *hudElemString)
+{
+    char *ConfigString; // eax
+    char *v5; // eax
+    char *v6; // eax
+    char *v7; // eax
+    float v8; // [esp+10h] [ebp-30h]
+    int fontEnum; // [esp+28h] [ebp-18h]
+    const ScreenPlacement *scrPlace; // [esp+2Ch] [ebp-14h]
+    float baseFontScale; // [esp+30h] [ebp-10h]
+    unsigned int namedClientIndex; // [esp+38h] [ebp-8h]
+
+    scrPlace = &scrPlaceView[localClientNum];
+    switch (elem->font)
+    {
+    case 0:
+        goto $LN27_2;
+    case 1:
+        baseFontScale = 0.5;
+        fontEnum = 4;
+        break;
+    case 2:
+        baseFontScale = 0.33333334;
+        fontEnum = 5;
+        break;
+    case 3:
+        baseFontScale = 0.25;
+        fontEnum = 6;
+        break;
+    case 4:
+        baseFontScale = 0.25;
+        fontEnum = 2;
+        break;
+    case 5:
+        baseFontScale = 0.25;
+        fontEnum = 3;
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 752, 0, "invalid case");
+    $LN27_2:
+        baseFontScale = 0.25;
+        fontEnum = 0;
+        break;
+    }
+    v8 = baseFontScale * elem->fontScale;
+    cghe->fontScale = scrPlace->scaleVirtualToReal[1] * v8;
+    cghe->font = UI_GetFontHandle(scrPlace, fontEnum, cghe->fontScale);
+    cghe->fontHeight = (float)UI_TextHeight(cghe->font, cghe->fontScale);
+    cghe->hudElemLabel[0] = 0;
+    if (elem->label)
+        SafeTranslateHudElemString(localClientNum, elem->label, cghe->hudElemLabel);
+    cghe->hudElemText[0] = 0;
+    switch (elem->type)
+    {
+    case HE_TYPE_TEXT:
+        if (elem->text)
+            SafeTranslateHudElemString(localClientNum, elem->text, cghe->hudElemText);
+        break;
+    case HE_TYPE_VALUE:
+        Com_sprintf(cghe->hudElemText, 0x100u, "%g", elem->value);
+        break;
+    case HE_TYPE_PLAYERNAME:
+        namedClientIndex = (int)(elem->value + 9.313225746154785e-10);
+        if (namedClientIndex < 0x40)
+        {
+            if (localClientNum)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+                    1071,
+                    0,
+                    "%s\n\t(localClientNum) = %i",
+                    "(localClientNum == 0)",
+                    localClientNum);
+            I_strncpyz(cghe->hudElemText, cgArray[0].bgs.clientinfo[namedClientIndex].name, 256);
+        }
+        break;
+    case HE_TYPE_MAPNAME:
+        ConfigString = CL_GetConfigString(localClientNum, 0x11u);
+        I_strncpyz(cghe->hudElemText, ConfigString, 256);
+        break;
+    case HE_TYPE_GAMETYPE:
+        v5 = CL_GetConfigString(localClientNum, 0x12u);
+        I_strncpyz(cghe->hudElemText, v5, 256);
+        break;
+    case HE_TYPE_TIMER_DOWN:
+    case HE_TYPE_TIMER_UP:
+        v6 = HudElemTimerString(elem, cghe->timeNow);
+        CopyStringToHudElemString(v6, cghe->hudElemText);
+        break;
+    case HE_TYPE_TENTHS_TIMER_DOWN:
+    case HE_TYPE_TENTHS_TIMER_UP:
+        v7 = HudElemTenthsTimerString(elem, cghe->timeNow);
+        CopyStringToHudElemString(v7, cghe->hudElemText);
+        break;
+    default:
+        break;
+    }
+    if (cghe->hudElemLabel[0] && cghe->hudElemText[0])
+        ConsolidateHudElemText(cghe, hudElemString);
+    if (cghe->hudElemLabel[0])
+        cghe->labelWidth = HudElemStringWidth(cghe->hudElemLabel, cghe);
+    else
+        cghe->labelWidth = 0.0;
+    if (cghe->hudElemText[0])
+        cghe->textWidth = HudElemStringWidth(cghe->hudElemText, cghe);
+    else
+        cghe->textWidth = 0.0;
+    cghe->width = HudElemWidth(scrPlace, elem, cghe);
+    cghe->height = HudElemHeight(scrPlace, elem, cghe);
+    SetHudElemPos(&scrPlaceView[localClientNum], elem, cghe);
+}
+
+void __cdecl SafeTranslateHudElemString(int localClientNum, int index, char *hudElemString)
+{
+    char *ConfigString; // eax
+
+    if (!hudElemString)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 301, 0, "%s", "hudElemString");
+    if (index)
+    {
+        ConfigString = CL_GetConfigString(localClientNum, index + 309);
+        CG_TranslateHudElemMessage(localClientNum, ConfigString, "hudelem string", hudElemString);
+    }
+}
+
+double __cdecl HudElemStringWidth(const char *string, const cg_hudelem_t *cghe)
+{
+    double v4; // [esp+8h] [ebp-Ch]
+
+    v4 = (double)UI_TextWidth(string, 0, cghe->font, cghe->fontScale);
+    return (float)(v4 / CL_GetScreenAspectRatioDisplayPixel());
+}
+
+char *__cdecl HudElemTimerString(const hudelem_s *elem, int timeNow)
+{
+    int HudElemTime; // eax
+    int hours; // [esp+0h] [ebp-10h]
+    int seconds; // [esp+4h] [ebp-Ch]
+    int minutes; // [esp+8h] [ebp-8h]
+
+    HudElemTime = GetHudElemTime(elem, timeNow);
+    hours = HudElemTime / 1000 / 3600;
+    minutes = HudElemTime / 1000 % 3600 / 60;
+    seconds = HudElemTime / 1000 % 3600 % 60;
+    if (hours)
+        return va("%i:%02i:%02i", hours, minutes, seconds);
+    else
+        return va("%i:%02i", minutes, seconds);
+}
+
+int __cdecl GetHudElemTime(const hudelem_s *elem, int timeNow)
+{
+    int result; // eax
+    int time; // [esp+4h] [ebp-4h]
+
+    switch (elem->type)
+    {
+    case HE_TYPE_TIMER_DOWN:
+        time = elem->time - timeNow + 999;
+        goto LABEL_9;
+    case HE_TYPE_TIMER_UP:
+    case HE_TYPE_TENTHS_TIMER_UP:
+    case HE_TYPE_CLOCK_UP:
+        time = timeNow - elem->time;
+        goto LABEL_9;
+    case HE_TYPE_TENTHS_TIMER_DOWN:
+        time = elem->time - timeNow + 99;
+        goto LABEL_9;
+    case HE_TYPE_CLOCK_DOWN:
+        time = elem->time - timeNow;
+    LABEL_9:
+        if (time < 0)
+            time = 0;
+        result = time;
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 341, 0, "invalid case");
+        result = 0;
+        break;
+    }
+    return result;
+}
+
+char *__cdecl HudElemTenthsTimerString(const hudelem_s *elem, int timeNow)
+{
+    int HudElemTime; // eax
+    int hours; // [esp+0h] [ebp-14h]
+    int seconds; // [esp+4h] [ebp-10h]
+    int minutes; // [esp+8h] [ebp-Ch]
+    int tenths; // [esp+10h] [ebp-4h]
+
+    HudElemTime = GetHudElemTime(elem, timeNow);
+    hours = HudElemTime / 100 / 36000;
+    minutes = HudElemTime / 100 % 36000 / 600;
+    seconds = HudElemTime / 100 % 36000 % 600 / 10;
+    tenths = HudElemTime / 100 % 36000 % 600 % 10;
+    if (hours)
+        return va("%i:%02i:%02i.%i", hours, minutes, seconds, tenths);
+    else
+        return va("%i:%02i.%i", minutes, seconds, tenths);
+}
+
+double __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
+{
+    double result; // st7
+    float v4; // [esp+0h] [ebp-Ch]
+    float v5; // [esp+4h] [ebp-8h]
+
+    switch (elem->type)
+    {
+    case HE_TYPE_TEXT:
+    case HE_TYPE_VALUE:
+    case HE_TYPE_PLAYERNAME:
+    case HE_TYPE_MAPNAME:
+    case HE_TYPE_GAMETYPE:
+    case HE_TYPE_TIMER_DOWN:
+    case HE_TYPE_TIMER_UP:
+    case HE_TYPE_TENTHS_TIMER_DOWN:
+    case HE_TYPE_TENTHS_TIMER_UP:
+        v5 = cghe->labelWidth + cghe->textWidth;
+        result = v5;
+        break;
+    case HE_TYPE_MATERIAL:
+    case HE_TYPE_CLOCK_DOWN:
+    case HE_TYPE_CLOCK_UP:
+        v4 = HudElemMaterialWidth(scrPlace, elem, cghe) + cghe->labelWidth;
+        result = v4;
+        break;
+    case HE_TYPE_WAYPOINT:
+        result = (double)elem->width;
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 494, 0, "invalid case");
+        result = 0.0;
+        break;
+    }
+    return result;
+}
+
+double __cdecl HudElemMaterialWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
+{
+    float width; // [esp+1Ch] [ebp-10h]
+    float lerp; // [esp+20h] [ebp-Ch]
+    int deltaTime; // [esp+24h] [ebp-8h]
+    float fromWidth; // [esp+28h] [ebp-4h]
+
+    width = HudElemMaterialSpecifiedWidth(scrPlace, elem->alignScreen, elem->width, cghe);
+    if (elem->scaleTime <= 0)
+        return width;
+    deltaTime = cghe->timeNow - elem->scaleStartTime;
+    if (deltaTime >= elem->scaleTime)
+        return width;
+    fromWidth = HudElemMaterialSpecifiedWidth(scrPlace, elem->fromAlignScreen, elem->fromWidth, cghe);
+    if (deltaTime <= 0)
+        return fromWidth;
+    lerp = (double)deltaTime / (double)elem->scaleTime;
+    if (lerp < 0.0 || lerp > 1.0)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            439,
+            1,
+            "lerp not in [0.0f, 1.0f]\n\t%g not in [%g, %g]",
+            lerp,
+            0.0,
+            1.0);
+    return (float)((width - fromWidth) * lerp + fromWidth);
+}
+
+double __cdecl HudElemMaterialSpecifiedWidth(
+    const ScreenPlacement *scrPlace,
+    char alignScreen,
+    int sizeVirtual,
+    const cg_hudelem_t *cghe)
+{
+    if (!sizeVirtual)
+        return cghe->fontHeight;
+    if ((alignScreen & 0x38) == 0x20)
+        return (float)(scrPlace->scaleVirtualToFull[0] * (double)sizeVirtual);
+    else
+        return (float)(scrPlace->scaleVirtualToReal[0] * (double)sizeVirtual);
+}
+
+double __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
+{
+    double result; // st7
+    float height; // [esp+4h] [ebp-4h]
+
+    switch (elem->type)
+    {
+    case HE_TYPE_TEXT:
+    case HE_TYPE_VALUE:
+    case HE_TYPE_PLAYERNAME:
+    case HE_TYPE_MAPNAME:
+    case HE_TYPE_GAMETYPE:
+    case HE_TYPE_TIMER_DOWN:
+    case HE_TYPE_TIMER_UP:
+    case HE_TYPE_TENTHS_TIMER_DOWN:
+    case HE_TYPE_TENTHS_TIMER_UP:
+        height = cghe->fontHeight;
+        goto LABEL_8;
+    case HE_TYPE_MATERIAL:
+    case HE_TYPE_CLOCK_DOWN:
+    case HE_TYPE_CLOCK_UP:
+        height = HudElemMaterialHeight(scrPlace, elem, cghe);
+        goto LABEL_8;
+    case HE_TYPE_WAYPOINT:
+        height = (float)elem->height;
+    LABEL_8:
+        if (cghe != (const cg_hudelem_t *)-16 && cghe->fontHeight > (double)height)
+            height = cghe->fontHeight;
+        result = height;
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 530, 0, "invalid case");
+        result = 0.0;
+        break;
+    }
+    return result;
+}
+
+double __cdecl HudElemMaterialHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
+{
+    float height; // [esp+1Ch] [ebp-10h]
+    float lerp; // [esp+20h] [ebp-Ch]
+    int deltaTime; // [esp+24h] [ebp-8h]
+    float fromHeight; // [esp+28h] [ebp-4h]
+
+    height = HudElemMaterialSpecifiedHeight(scrPlace, elem->alignScreen, elem->height, cghe);
+    if (elem->scaleTime <= 0)
+        return height;
+    deltaTime = cghe->timeNow - elem->scaleStartTime;
+    if (deltaTime >= elem->scaleTime)
+        return height;
+    fromHeight = HudElemMaterialSpecifiedHeight(scrPlace, elem->fromAlignScreen, elem->fromHeight, cghe);
+    if (deltaTime <= 0)
+        return fromHeight;
+    lerp = (double)deltaTime / (double)elem->scaleTime;
+    if (lerp < 0.0 || lerp > 1.0)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            464,
+            1,
+            "lerp not in [0.0f, 1.0f]\n\t%g not in [%g, %g]",
+            lerp,
+            0.0,
+            1.0);
+    return (float)((height - fromHeight) * lerp + fromHeight);
+}
+
+double __cdecl HudElemMaterialSpecifiedHeight(
+    const ScreenPlacement *scrPlace,
+    char alignScreen,
+    int sizeVirtual,
+    const cg_hudelem_t *cghe)
+{
+    if (!sizeVirtual)
+        return cghe->fontHeight;
+    if ((alignScreen & 7) == 4)
+        return (float)(scrPlace->scaleVirtualToFull[1] * (double)sizeVirtual);
+    else
+        return (float)(scrPlace->scaleVirtualToReal[1] * (double)sizeVirtual);
+}
+
+void __cdecl SetHudElemPos(const ScreenPlacement *scrPlace, const hudelem_s *elem, cg_hudelem_t *cghe)
+{
+    float from[2]; // [esp+40h] [ebp-14h] BYREF
+    float lerp; // [esp+48h] [ebp-Ch]
+    float to[2]; // [esp+4Ch] [ebp-8h] BYREF
+
+    if (!elem)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 632, 0, "%s", "elem");
+    if (!cghe)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 633, 0, "%s", "cghe");
+    lerp = HudElemMovementFrac(elem, cghe->timeNow);
+    if (lerp == 1.0)
+    {
+        GetHudElemOrg(
+            scrPlace,
+            elem->alignOrg,
+            elem->alignScreen,
+            elem->x,
+            elem->y,
+            cghe->width,
+            cghe->height,
+            &cghe->x,
+            &cghe->y);
+        cghe->x = (float)(int)(cghe->x + 9.313225746154785e-10);
+        cghe->y = (float)(int)(cghe->y + 9.313225746154785e-10);
+    }
+    else
+    {
+        GetHudElemOrg(
+            scrPlace,
+            elem->fromAlignOrg,
+            elem->fromAlignScreen,
+            elem->fromX,
+            elem->fromY,
+            cghe->width,
+            cghe->height,
+            from,
+            &from[1]);
+        GetHudElemOrg(scrPlace, elem->alignOrg, elem->alignScreen, elem->x, elem->y, cghe->width, cghe->height, to, &to[1]);
+        cghe->x = (to[0] - from[0]) * lerp + from[0];
+        cghe->y = (to[1] - from[1]) * lerp + from[1];
+    }
+}
+
+void __cdecl GetHudElemOrg(
+    const ScreenPlacement *scrPlace,
+    int alignOrg,
+    int alignScreen,
+    float xVirtual,
+    float yVirtual,
+    float width,
+    float height,
+    float *orgX,
+    float *orgY)
+{
+    float x; // [esp+18h] [ebp-8h]
+    float y; // [esp+1Ch] [ebp-4h]
+
+    if (!orgX)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 582, 0, "%s", "orgX");
+    if (!orgY)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 583, 0, "%s", "orgY");
+    x = ScrPlace_ApplyX(scrPlace, xVirtual, (alignScreen >> 3) & 7);
+    *orgX = AlignHudElemX(alignOrg, x, width);
+    y = ScrPlace_ApplyY(scrPlace, yVirtual, alignScreen & 7);
+    *orgY = AlignHudElemY(alignOrg, y, height);
+}
+
+double __cdecl AlignHudElemX(int alignOrg, float x, float width)
+{
+    unsigned int alignX; // [esp+4h] [ebp-4h]
+
+    alignX = (alignOrg >> 2) & 3;
+    if (alignX > 2)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            558,
+            0,
+            "%s\n\t(alignOrg) = %i",
+            "(alignX == 0 || alignX == 1 || alignX == 2)",
+            alignOrg);
+    return (float)(x - width * s_alignScale[alignX]);
+}
+
+double __cdecl AlignHudElemY(int alignOrg, float y, float height)
+{
+    int alignY; // [esp+4h] [ebp-4h]
+
+    alignY = alignOrg & 3;
+    if ((alignOrg & 3) != 0 && alignY != 1 && alignY != 2)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            569,
+            0,
+            "%s\n\t(alignOrg) = %i",
+            "(alignY == 0 || alignY == 1 || alignY == 2)",
+            alignOrg);
+    return (float)(y - height * s_alignScale[alignY]);
+}
+
+double __cdecl HudElemMovementFrac(const hudelem_s *elem, int timeNow)
+{
+    int time; // [esp+4h] [ebp-4h]
+
+    if (elem->moveTime <= 0)
+        return 1.0;
+    time = timeNow - elem->moveStartTime;
+    if (time <= 0)
+        return 0.0;
+    if (time >= elem->moveTime)
+        return 1.0;
+    return (float)((double)time / (double)elem->moveTime);
+}
+
+void __cdecl ConsolidateHudElemText(cg_hudelem_t *cghe, char *hudElemString)
+{
+    int len; // [esp+8h] [ebp-Ch]
+    int textIndex; // [esp+Ch] [ebp-8h]
+    int labelIndex; // [esp+10h] [ebp-4h]
+
+    len = 0;
+    for (labelIndex = 0; len < 255 && cghe->hudElemLabel[labelIndex]; ++labelIndex)
+    {
+        if (cghe->hudElemLabel[labelIndex] == asc_861D24[0]
+            && cghe->hudElemLabel[labelIndex + 1] == 38
+            && cghe->hudElemLabel[labelIndex + 2] == 49)
+        {
+            labelIndex += 3;
+            break;
+        }
+        hudElemString[len++] = cghe->hudElemLabel[labelIndex];
+    }
+    for (textIndex = 0; len < 255 && cghe->hudElemText[textIndex]; ++textIndex)
+        hudElemString[len++] = cghe->hudElemText[textIndex];
+    while (len < 255 && cghe->hudElemLabel[labelIndex])
+        hudElemString[len++] = cghe->hudElemLabel[labelIndex++];
+    hudElemString[len] = 0;
+    memcpy(cghe->hudElemText, hudElemString, sizeof(cghe->hudElemText));
+    cghe->textWidth = HudElemStringWidth(cghe->hudElemText, cghe);
+    cghe->hudElemLabel[0] = 0;
+    cghe->labelWidth = 0.0;
+}
+
+void __cdecl CopyStringToHudElemString(char *string, char *hudElemString)
+{
+    signed int v2; // ecx
+    const char *v3; // eax
+    int stringLen; // [esp+10h] [ebp-4h]
+
+    if (!string)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 718, 0, "%s", "string");
+    if (!hudElemString)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 719, 0, "%s", "hudElemString");
+    v2 = strlen(string);
+    stringLen = v2;
+    if (v2 < 256)
+    {
+        memcpy((unsigned __int8 *)hudElemString, (unsigned __int8 *)string, v2);
+        hudElemString[stringLen] = 0;
+    }
+    else
+    {
+        v3 = va("Hud elem string too long, %s", string);
+        Com_Error(ERR_DROP, v3);
+    }
+}
+
+void __cdecl HudElemColorToVec4(const hudelem_color_t *hudElemColor, float *resultColor)
+{
+    if (!hudElemPausedBrightness)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 853, 0, "%s", "hudElemPausedBrightness");
+    if (!cl_paused)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 854, 0, "%s", "cl_paused");
+    *resultColor = (double)hudElemColor->r * 0.003921568859368563;
+    resultColor[1] = (double)hudElemColor->g * 0.003921568859368563;
+    resultColor[2] = (double)hudElemColor->b * 0.003921568859368563;
+    resultColor[3] = (double)hudElemColor->a * 0.003921568859368563;
+    if (cl_paused->current.integer)
+        Vec3Scale(resultColor, hudElemPausedBrightness->current.value, resultColor);
+    if (*resultColor < 0.0 || *resultColor > 1.000000953674316)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            864,
+            0,
+            "resultColor[0] not in [0.0f, 1.000001f]\n\t%g not in [%g, %g]",
+            *resultColor,
+            0.0,
+            1.000000953674316);
+    if (resultColor[1] < 0.0 || resultColor[1] > 1.000000953674316)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            865,
+            0,
+            "resultColor[1] not in [0.0f, 1.000001f]\n\t%g not in [%g, %g]",
+            resultColor[1],
+            0.0,
+            1.000000953674316);
+    if (resultColor[2] < 0.0 || resultColor[2] > 1.000000953674316)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            866,
+            0,
+            "resultColor[2] not in [0.0f, 1.000001f]\n\t%g not in [%g, %g]",
+            resultColor[2],
+            0.0,
+            1.000000953674316);
+    if (resultColor[3] < 0.0 || resultColor[3] > 1.000000953674316)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            867,
+            0,
+            "resultColor[3] not in [0.0f, 1.000001f]\n\t%g not in [%g, %g]",
+            resultColor[3],
+            0.0,
+            1.000000953674316);
+}
+
+void __cdecl DrawHudElemString(
+    unsigned int localClientNum,
+    const ScreenPlacement *scrPlace,
+    char *text,
+    const hudelem_s *elem,
+    cg_hudelem_t *cghe)
+{
+    float v5; // [esp+34h] [ebp-2Ch]
+    float offsetY; // [esp+38h] [ebp-28h]
+    float v7; // [esp+3Ch] [ebp-24h]
+    int strLength; // [esp+44h] [ebp-1Ch]
+    float textScale; // [esp+48h] [ebp-18h]
+    int fxBirthTime; // [esp+4Ch] [ebp-14h]
+    float y; // [esp+54h] [ebp-Ch]
+    float scaleX; // [esp+58h] [ebp-8h]
+    float dy; // [esp+5Ch] [ebp-4h]
+
+    if (!text)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 881, 0, "%s", "text");
+    if (!*text)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 882, 0, "%s", "text[0]");
+    if (!elem)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 883, 0, "%s", "elem");
+    if (!cghe)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 884, 0, "%s", "cghe");
+    if (cghe->color[3] == 0.0)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 886, 0, "%s", "cghe->color[3]");
+    offsetY = -(cghe->height - cghe->fontHeight);
+    y = OffsetHudElemY(elem, cghe, offsetY);
+    textScale = R_NormalizedTextScale(cghe->font, cghe->fontScale);
+    v7 = textScale * scrPlace->scaleRealToVirtual[1];
+    scaleX = scrPlace->scaleVirtualToReal[0] * v7;
+    dy = cghe->fontHeight;
+    fxBirthTime = elem->fxBirthTime;
+    if (fxBirthTime && fxBirthTime > cghe->timeNow)
+        fxBirthTime = cghe->timeNow;
+    HudElemColorToVec4(&elem->glowColor, glowColor);
+    if (fxBirthTime)
+    {
+        if (localClientNum)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+                1071,
+                0,
+                "%s\n\t(localClientNum) = %i",
+                "(localClientNum == 0)",
+                localClientNum);
+        strLength = SEH_PrintStrlen(text);
+        CL_PlayTextFXPulseSounds(
+            localClientNum,
+            cghe->timeNow,
+            strLength,
+            fxBirthTime,
+            elem->fxLetterTime,
+            elem->fxDecayStartTime,
+            &cgArray[0].hudElemSound[elem->soundID].lastPlayedTime);
+    }
+    v5 = y + dy;
+    CL_DrawTextPhysicalWithEffects(
+        text,
+        0x7FFFFFFF,
+        cghe->font,
+        cghe->x,
+        v5,
+        scaleX,
+        textScale,
+        cghe->color,
+        3,
+        glowColor,
+        cgMedia.textDecodeCharacters,
+        cgMedia.textDecodeCharactersGlow,
+        fxBirthTime,
+        elem->fxLetterTime,
+        elem->fxDecayStartTime,
+        elem->fxDecayDuration);
+}
+
+double __cdecl OffsetHudElemY(const hudelem_s *elem, const cg_hudelem_t *cghe, float offsetY)
+{
+    float from; // [esp+18h] [ebp-Ch]
+    float lerp; // [esp+1Ch] [ebp-8h]
+    float to; // [esp+20h] [ebp-4h]
+
+    lerp = HudElemMovementFrac(elem, cghe->timeNow);
+    if (lerp == 1.0)
+        return AlignHudElemY(elem->alignOrg, cghe->y, offsetY);
+    from = AlignHudElemY(elem->fromAlignOrg, cghe->y, offsetY);
+    to = AlignHudElemY(elem->alignOrg, cghe->y, offsetY);
+    return (float)((from - to) * lerp + from);
+}
+
+void __cdecl DrawHudElemClock(int localClientNum, const hudelem_s *elem, const cg_hudelem_t *cghe)
+{
+    float offsetY; // [esp+28h] [ebp-70h]
+    float v4; // [esp+2Ch] [ebp-6Ch]
+    float v5; // [esp+30h] [ebp-68h]
+    float width; // [esp+34h] [ebp-64h]
+    float height; // [esp+38h] [ebp-60h]
+    float angle; // [esp+3Ch] [ebp-5Ch]
+    char materialName[68]; // [esp+40h] [ebp-58h] BYREF
+    Material *handMaterial; // [esp+88h] [ebp-10h]
+    int time; // [esp+8Ch] [ebp-Ch]
+    Material *faceMaterial; // [esp+90h] [ebp-8h]
+    float y; // [esp+94h] [ebp-4h]
+
+    if (cghe->color[3] == 0.0)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 925, 0, "%s", "cghe->color[3]");
+    if (CG_ServerMaterialName(localClientNum, elem->materialIndex, materialName, 0x3Au))
+    {
+        faceMaterial = Material_RegisterHandle(materialName, 7);
+        I_strncat(materialName, 64, "needle");
+        handMaterial = Material_RegisterHandle(materialName, 7);
+        time = GetHudElemTime(elem, cghe->timeNow);
+        if (elem->duration)
+        {
+            v5 = (double)time * 360.0 / (double)elem->duration;
+            angle = AngleNormalize360(v5);
+        }
+        else
+        {
+            v4 = (double)time * 0.006000000052154064;
+            angle = AngleNormalize360(v4);
+        }
+        width = HudElemMaterialWidth(&scrPlaceView[localClientNum], elem, cghe);
+        height = HudElemMaterialHeight(&scrPlaceView[localClientNum], elem, cghe);
+        offsetY = -(cghe->height - height);
+        y = OffsetHudElemY(elem, cghe, offsetY);
+        CL_DrawStretchPicPhysical(cghe->x, y, width, height, 0.0, 0.0, 1.0, 1.0, cghe->color, faceMaterial);
+        CG_DrawRotatedPicPhysical(
+            &scrPlaceView[localClientNum],
+            cghe->x,
+            y,
+            width,
+            height,
+            angle,
+            cghe->color,
+            handMaterial);
+    }
+}
+
+void __cdecl DrawHudElemMaterial(int localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe)
+{
+    float offsetY; // [esp+28h] [ebp-58h]
+    Material *material; // [esp+2Ch] [ebp-54h]
+    float width; // [esp+30h] [ebp-50h]
+    float height; // [esp+34h] [ebp-4Ch]
+    char materialName[64]; // [esp+38h] [ebp-48h] BYREF
+    float y; // [esp+7Ch] [ebp-4h]
+
+    if (cghe->color[3] == 0.0)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 956, 0, "%s", "cghe->color[3]");
+    if (CG_ServerMaterialName(localClientNum, elem->materialIndex, materialName, 0x40u))
+    {
+        material = Material_RegisterHandle(materialName, 7);
+        width = HudElemMaterialWidth(&scrPlaceView[localClientNum], elem, cghe);
+        height = HudElemMaterialHeight(&scrPlaceView[localClientNum], elem, cghe);
+        offsetY = -(cghe->height - height);
+        y = OffsetHudElemY(elem, cghe, offsetY);
+        CL_DrawStretchPicPhysical(cghe->x, y, width, height, 0.0, 0.0, 1.0, 1.0, cghe->color, material);
+    }
+}
+
+void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *elem)
+{
+    double v2; // st7
+    float v3; // [esp+2Ch] [ebp-118h]
+    float v4; // [esp+30h] [ebp-114h]
+    float x; // [esp+34h] [ebp-110h]
+    float y; // [esp+38h] [ebp-10Ch]
+    float v7; // [esp+3Ch] [ebp-108h]
+    float v8; // [esp+44h] [ebp-100h]
+    float v9; // [esp+50h] [ebp-F4h]
+    float z; // [esp+54h] [ebp-F0h]
+    float colorArrow[4]; // [esp+5Ch] [ebp-E8h] BYREF
+    float shrinkDist; // [esp+6Ch] [ebp-D8h]
+    float screenPosArrow[3]; // [esp+70h] [ebp-D4h]
+    centity_s *cent; // [esp+7Ch] [ebp-C8h]
+    float scaleVirtualToRealAvg; // [esp+80h] [ebp-C4h]
+    float padTop; // [esp+84h] [ebp-C0h]
+    float padBottom; // [esp+88h] [ebp-BCh]
+    float iconWidth; // [esp+8Ch] [ebp-B8h]
+    float pointerWidth; // [esp+90h] [ebp-B4h]
+    float padding; // [esp+94h] [ebp-B0h]
+    ScreenPlacement *scrPlace; // [esp+98h] [ebp-ACh]
+    float clampedDist; // [esp+9Ch] [ebp-A8h] BYREF
+    Material *material; // [esp+A0h] [ebp-A4h]
+    float padRight; // [esp+A4h] [ebp-A0h]
+    float iconHeight; // [esp+A8h] [ebp-9Ch]
+    float angle; // [esp+ACh] [ebp-98h]
+    float pointerHeight; // [esp+B0h] [ebp-94h]
+    float clampedDir[2]; // [esp+B4h] [ebp-90h] BYREF
+    char materialName[68]; // [esp+BCh] [ebp-88h] BYREF
+    float distanceThresholdAlpha; // [esp+104h] [ebp-40h]
+    float worldPos[3]; // [esp+108h] [ebp-3Ch] BYREF
+    float tweak2dY; // [esp+114h] [ebp-30h]
+    float padLeft; // [esp+118h] [ebp-2Ch]
+    float screenPos[2]; // [esp+11Ch] [ebp-28h] BYREF
+    float scale; // [esp+124h] [ebp-20h]
+    hudelem_color_t toColor; // [esp+128h] [ebp-1Ch] BYREF
+    float color[4]; // [esp+12Ch] [ebp-18h] BYREF
+    bool didClamp; // [esp+13Fh] [ebp-5h]
+    float pointerDistance; // [esp+140h] [ebp-4h]
+
+    if (!elem)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1215, 0, "%s", "elem");
+    if (elem->type != HE_TYPE_WAYPOINT)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1216, 0, "%s", "elem->type == HE_TYPE_WAYPOINT");
+    if (CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, materialName, 0x40u)
+        && !CG_Flashbanged(localClientNum))
+    {
+        if (localClientNum)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+                1071,
+                0,
+                "%s\n\t(localClientNum) = %i",
+                "(localClientNum == 0)",
+                localClientNum);
+        BG_LerpHudColors(elem, MEMORY[0x9D5560], &toColor);
+        if (toColor.a)
+        {
+            material = Material_RegisterHandle(materialName, 7);
+            HudElemColorToVec4(&toColor, color);
+            scrPlace = &scrPlaceView[localClientNum];
+            scaleVirtualToRealAvg = (scrPlace->scaleVirtualToReal[0] + scrPlace->scaleVirtualToReal[1]) * 0.5;
+            iconWidth = waypointIconWidth->current.value * scrPlace->scaleVirtualToReal[0];
+            iconHeight = waypointIconHeight->current.value * scrPlace->scaleVirtualToReal[1];
+            pointerWidth = waypointOffscreenPointerWidth->current.value * scrPlace->scaleVirtualToReal[0];
+            pointerHeight = waypointOffscreenPointerHeight->current.value * scrPlace->scaleVirtualToReal[1];
+            pointerDistance = waypointOffscreenPointerDistance->current.value * scaleVirtualToRealAvg;
+            distanceThresholdAlpha = waypointOffscreenDistanceThresholdAlpha->current.value * scaleVirtualToRealAvg;
+            if (distanceThresholdAlpha < 0.1)
+                distanceThresholdAlpha = 0.1;
+            padding = pointerHeight * 0.5 + pointerDistance;
+            padLeft = waypointOffscreenPadLeft->current.value * scrPlace->scaleVirtualToReal[0] + padding;
+            padRight = waypointOffscreenPadRight->current.value * scrPlace->scaleVirtualToReal[0] + padding;
+            padTop = waypointOffscreenPadTop->current.value * scrPlace->scaleVirtualToReal[1] + padding;
+            padBottom = waypointOffscreenPadBottom->current.value * scrPlace->scaleVirtualToReal[1] + padding;
+            tweak2dY = waypointTweakY->current.value * scrPlace->scaleVirtualToReal[1];
+            if (elem->targetEntNum == 1023)
+            {
+                v9 = elem->y;
+                z = elem->z;
+                worldPos[0] = elem->x;
+                worldPos[1] = v9;
+                worldPos[2] = z;
+            LABEL_26:
+                WorldPosToScreenPos(localClientNum, worldPos, screenPos);
+                screenPos[1] = screenPos[1] + tweak2dY;
+                didClamp = ClampScreenPosToEdges(
+                    localClientNum,
+                    screenPos,
+                    padLeft,
+                    padRight,
+                    padTop,
+                    padBottom,
+                    clampedDir,
+                    &clampedDist);
+                if (didClamp && clampedDist > 0.0)
+                {
+                    colorArrow[0] = color[0];
+                    colorArrow[1] = color[1];
+                    colorArrow[2] = color[2];
+                    colorArrow[3] = color[3];
+                    if (distanceThresholdAlpha > (double)clampedDist)
+                        colorArrow[3] = clampedDist / distanceThresholdAlpha * colorArrow[3];
+                    shrinkDist = waypointOffscreenScaleLength->current.value * scaleVirtualToRealAvg;
+                    if (shrinkDist <= (double)clampedDist)
+                    {
+                        scale = waypointOffscreenScaleSmallest->current.value;
+                    }
+                    else
+                    {
+                        scale = clampedDist / shrinkDist;
+                        scale = scale * waypointOffscreenScaleSmallest->current.value + (1.0 - scale) * 1.0;
+                    }
+                    iconWidth = iconWidth * scale;
+                    iconHeight = iconHeight * scale;
+                    v8 = -clampedDir[1];
+                    v7 = atan2(clampedDir[0], v8);
+                    angle = v7 * 180.0 / 3.141592741012573;
+                    screenPosArrow[0] = pointerDistance * clampedDir[0] + screenPos[0];
+                    screenPosArrow[1] = pointerDistance * clampedDir[1] + screenPos[1];
+                    y = screenPosArrow[1] - pointerHeight * 0.5;
+                    x = screenPosArrow[0] - pointerWidth * 0.5;
+                    CL_DrawStretchPicPhysicalRotateXY(
+                        x,
+                        y,
+                        pointerWidth,
+                        pointerHeight,
+                        0.0,
+                        0.0,
+                        1.0,
+                        1.0,
+                        angle,
+                        colorArrow,
+                        cgMedia.offscreenObjectivePointer);
+                }
+                scale = GetScaleForDistance(localClientNum, worldPos);
+                iconWidth = iconWidth * scale;
+                iconHeight = iconHeight * scale;
+                v4 = screenPos[1] - iconHeight * 0.5;
+                v3 = screenPos[0] - iconWidth * 0.5;
+                CL_DrawStretchPicPhysical(v3, v4, iconWidth, iconHeight, 0.0, 0.0, 1.0, 1.0, color, material);
+                return;
+            }
+            if (localClientNum)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+                    1071,
+                    0,
+                    "%s\n\t(localClientNum) = %i",
+                    "(localClientNum == 0)",
+                    localClientNum);
+            LODWORD(screenPosArrow[2]) = cgArray;
+            if (elem->targetEntNum != MEMORY[0x9D85A4])
+            {
+                cent = CG_GetEntity(localClientNum, elem->targetEntNum);
+                if (!cent->nextValid)
+                {
+                    Com_PrintWarning(
+                        1,
+                        "DrawOffscreenViewableWaypoint(): targetEnt %i not in snapshot, may not be a network-broadcasting entity.",
+                        elem->targetEntNum);
+                    return;
+                }
+                worldPos[0] = cent->pose.origin[0];
+                worldPos[1] = cent->pose.origin[1];
+                worldPos[2] = cent->pose.origin[2];
+                if (cent->nextState.eType == 1)
+                {
+                    if ((cent->currentState.eFlags & 8) != 0)
+                    {
+                        worldPos[2] = worldPos[2] + waypointPlayerOffsetProne->current.value;
+                    }
+                    else
+                    {
+                        if ((cent->currentState.eFlags & 4) != 0)
+                            v2 = worldPos[2] + waypointPlayerOffsetCrouch->current.value;
+                        else
+                            v2 = worldPos[2] + waypointPlayerOffsetStand->current.value;
+                        worldPos[2] = v2;
+                    }
+                }
+                goto LABEL_26;
+            }
+        }
+    }
+}
+
+char __cdecl WorldPosToScreenPos(int localClientNum, const float *worldPos, float *outScreenPos)
+{
+    float v4; // [esp+0h] [ebp-64h]
+    float v5; // [esp+4h] [ebp-60h]
+    float v6; // [esp+8h] [ebp-5Ch]
+    float v7; // [esp+Ch] [ebp-58h]
+    float v8; // [esp+10h] [ebp-54h]
+    float v9; // [esp+14h] [ebp-50h]
+    float v10; // [esp+18h] [ebp-4Ch]
+    float v11; // [esp+24h] [ebp-40h]
+    ScreenPlacement *scrPlace; // [esp+40h] [ebp-24h]
+    float projections[3]; // [esp+48h] [ebp-1Ch] BYREF
+    const refdef_s *refdef; // [esp+54h] [ebp-10h]
+    float x; // [esp+58h] [ebp-Ch]
+    float y; // [esp+5Ch] [ebp-8h]
+    float w; // [esp+60h] [ebp-4h]
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    refdef = (const refdef_s *)&MEMORY[0x9D8700];
+    scrPlace = &scrPlaceView[localClientNum];
+    CG_GetViewAxisProjections((const refdef_s *)&MEMORY[0x9D8700], worldPos, projections);
+    w = projections[0];
+    if (projections[0] >= 0.0)
+    {
+        x = projections[1] / refdef->tanHalfFovX;
+        *outScreenPos = scrPlace->realViewportSize[0] * 0.5 * (1.0 - x / w);
+        y = projections[2] / refdef->tanHalfFovY;
+        outScreenPos[1] = scrPlace->realViewportSize[1] * 0.5 * (1.0 - y / w);
+        return 1;
+    }
+    else
+    {
+        *outScreenPos = -projections[1];
+        outScreenPos[1] = -projections[2];
+        v9 = fabs(*outScreenPos);
+        if (v9 >= 0.001000000047497451 || (v8 = fabs(outScreenPos[1]), v8 >= 0.001000000047497451))
+        {
+            v7 = fabs(*outScreenPos);
+            if (v7 < 0.001000000047497451)
+                *outScreenPos = 0.001;
+            v6 = fabs(outScreenPos[1]);
+            if (v6 < 0.001000000047497451)
+                outScreenPos[1] = 0.001;
+            while (1)
+            {
+                v5 = fabs(*outScreenPos);
+                if (scrPlace->realViewportSize[0] <= (double)v5)
+                    break;
+                v11 = scrPlace->realViewportSize[0];
+                *outScreenPos = v11 * *outScreenPos;
+                outScreenPos[1] = v11 * outScreenPos[1];
+            }
+            while (1)
+            {
+                v4 = fabs(outScreenPos[1]);
+                if (scrPlace->realViewportSize[1] <= (double)v4)
+                    break;
+                v10 = scrPlace->realViewportSize[1];
+                *outScreenPos = v10 * *outScreenPos;
+                outScreenPos[1] = v10 * outScreenPos[1];
+            }
+        }
+        else
+        {
+            outScreenPos[1] = scrPlace->realViewportSize[1] + scrPlace->realViewportSize[1];
+        }
+        return 0;
+    }
+}
+
+bool __cdecl ClampScreenPosToEdges(
+    int localClientNum,
+    float *point,
+    float padLeft,
+    float padRight,
+    float padTop,
+    float padBottom,
+    float *resultNormal,
+    float *resultDist)
+{
+    double v8; // st7
+    double v9; // st7
+    bool v11; // [esp+28h] [ebp-8Ch]
+    bool v12; // [esp+2Ch] [ebp-88h]
+    float v13; // [esp+30h] [ebp-84h]
+    float v14; // [esp+34h] [ebp-80h]
+    float x; // [esp+38h] [ebp-7Ch]
+    float y; // [esp+3Ch] [ebp-78h]
+    float v17; // [esp+58h] [ebp-5Ch]
+    float v18; // [esp+5Ch] [ebp-58h]
+    float v19; // [esp+60h] [ebp-54h]
+    float v20; // [esp+64h] [ebp-50h]
+    float dist; // [esp+68h] [ebp-4Ch]
+    float dir[2]; // [esp+6Ch] [ebp-48h] BYREF
+    bool top; // [esp+77h] [ebp-3Dh]
+    float radius; // [esp+78h] [ebp-3Ch]
+    bool left; // [esp+7Dh] [ebp-37h]
+    bool horzQualify; // [esp+7Eh] [ebp-36h]
+    bool vertQualify; // [esp+7Fh] [ebp-35h]
+    float focus[2]; // [esp+80h] [ebp-34h] BYREF
+    float borderTop; // [esp+88h] [ebp-2Ch]
+    float borderBottom; // [esp+8Ch] [ebp-28h]
+    ScreenPlacement *scrPlace; // [esp+90h] [ebp-24h]
+    bool clamped; // [esp+97h] [ebp-1Dh]
+    const cg_s *cgameGlob; // [esp+98h] [ebp-1Ch]
+    float halfWidth; // [esp+9Ch] [ebp-18h]
+    float borderRight; // [esp+A0h] [ebp-14h]
+    float pointOriginal[2]; // [esp+A4h] [ebp-10h] BYREF
+    float halfHeight; // [esp+ACh] [ebp-8h]
+    float borderLeft; // [esp+B0h] [ebp-4h]
+
+    if (!resultDist)
+        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1074, 0, "%s", "resultDist");
+    scrPlace = &scrPlaceView[localClientNum];
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    cgameGlob = cgArray;
+    halfWidth = scrPlace->realViewportSize[0] * 0.5;
+    halfHeight = scrPlace->realViewportSize[1] * 0.5;
+    pointOriginal[0] = *point;
+    pointOriginal[1] = point[1];
+    *point = *point - halfWidth;
+    point[1] = point[1] - halfHeight;
+    borderLeft = scrPlace->realViewableMin[0] + padLeft - halfWidth;
+    borderRight = halfWidth - (scrPlace->realViewportSize[0] - scrPlace->realViewableMax[0] + padRight);
+    borderTop = scrPlace->realViewableMin[1] + padTop - halfHeight;
+    borderBottom = halfHeight - (scrPlace->realViewportSize[1] - scrPlace->realViewableMax[1] + padBottom);
+    clamped = 0;
+    if (borderLeft <= (double)*point)
+    {
+        if (borderRight < (double)*point)
+        {
+            v19 = borderRight / *point;
+            *point = v19 * *point;
+            point[1] = v19 * point[1];
+            clamped = 1;
+        }
+    }
+    else
+    {
+        v20 = borderLeft / *point;
+        *point = v20 * *point;
+        point[1] = v20 * point[1];
+        clamped = 1;
+    }
+    if (borderTop <= (double)point[1])
+    {
+        if (borderBottom < (double)point[1])
+        {
+            v17 = borderBottom / point[1];
+            *point = v17 * *point;
+            point[1] = v17 * point[1];
+            clamped = 1;
+        }
+    }
+    else
+    {
+        v18 = borderTop / point[1];
+        *point = v18 * *point;
+        point[1] = v18 * point[1];
+        clamped = 1;
+    }
+    if (waypointOffscreenRoundedCorners->current.enabled)
+    {
+        radius = (scrPlace->scaleVirtualToReal[0] + scrPlace->scaleVirtualToReal[1])
+            * waypointOffscreenCornerRadius->current.value
+            * 0.5;
+        left = *point < 0.0;
+        top = point[1] < 0.0;
+        if (left)
+            v8 = borderLeft + radius;
+        else
+            v8 = borderRight - radius;
+        focus[0] = v8;
+        if (top)
+            v9 = borderTop + radius;
+        else
+            v9 = borderBottom - radius;
+        focus[1] = v9;
+        if (waypointDebugDraw->current.enabled)
+        {
+            y = focus[1] + halfHeight - 1.0;
+            x = focus[0] + halfWidth - 1.0;
+            CL_DrawStretchPicPhysical(x, y, 3.0, 3.0, 0.0, 0.0, 1.0, 1.0, colorYellow, cgMedia.whiteMaterial);
+            v14 = point[1] + halfHeight - 1.0;
+            v13 = *point + halfWidth - 1.0;
+            CL_DrawStretchPicPhysical(v13, v14, 3.0, 3.0, 0.0, 0.0, 1.0, 1.0, colorGreen, cgMedia.whiteMaterial);
+        }
+        dir[0] = *point - focus[0];
+        dir[1] = point[1] - focus[1];
+        Vec2Normalize(dir);
+        v12 = left && dir[0] < 0.0 || !left && dir[0] > 0.0;
+        horzQualify = v12;
+        v11 = top && dir[1] < 0.0 || !top && dir[1] > 0.0;
+        vertQualify = v11;
+        if (horzQualify && vertQualify)
+        {
+            dist = Vec2Distance(focus, point);
+            if (radius < (double)dist)
+            {
+                *point = radius * dir[0] + focus[0];
+                point[1] = radius * dir[1] + focus[1];
+                clamped = 1;
+            }
+        }
+    }
+    *point = *point + halfWidth;
+    point[1] = point[1] + halfHeight;
+    if (clamped)
+    {
+        *resultDist = Vec2Distance(point, pointOriginal);
+        *resultNormal = pointOriginal[0] - *point;
+        resultNormal[1] = pointOriginal[1] - point[1];
+        Vec2Normalize(resultNormal);
+    }
+    return clamped;
+}
+
+double __cdecl GetScaleForDistance(int localClientNum, const float *worldPos)
+{
+    float diff[4]; // [esp+8h] [ebp-18h] BYREF
+    float range; // [esp+18h] [ebp-8h]
+    float dist3D; // [esp+1Ch] [ebp-4h]
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    LODWORD(diff[3]) = cgArray;
+    Vec3Sub(worldPos, MEMORY[0x9D8718], diff);
+    dist3D = Vec3Length(diff);
+    if (waypointDistScaleRangeMin->current.value >= (double)dist3D)
+        return 1.0;
+    if (waypointDistScaleRangeMax->current.value <= (double)dist3D)
+        return waypointDistScaleSmallest->current.value;
+    range = waypointDistScaleRangeMax->current.value - waypointDistScaleRangeMin->current.value;
+    if (range <= 0.0)
+        range = 1.0;
+    range = (dist3D - waypointDistScaleRangeMin->current.value) / range;
+    return (float)(range * waypointDistScaleSmallest->current.value + (1.0 - range) * 1.0);
+}
+
+int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems)
+{
+    playerState_s *ps; // [esp+4h] [ebp-8h]
+    int elemCount; // [esp+8h] [ebp-4h] BYREF
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    ps = (playerState_s *)(MEMORY[0x98F45C] + 12);
+    elemCount = 0;
+    CopyInUseHudElems(elems, &elemCount, (hudelem_s *)(MEMORY[0x98F45C] + 2224), 31);
+    CopyInUseHudElems(elems, &elemCount, ps->hud.archival, 31);
+    qsort(elems, elemCount, 4u, compare_hudelems);
+    return elemCount;
+}
+
+void __cdecl CopyInUseHudElems(hudelem_s **elems, int *elemCount, hudelem_s *elemSrcArray, int elemSrcArrayCount)
+{
+    int i; // [esp+0h] [ebp-4h]
+
+    for (i = 0; i < elemSrcArrayCount && elemSrcArray[i].type; ++i)
+        elems[(*elemCount)++] = &elemSrcArray[i];
+}
+
+int __cdecl compare_hudelems(const void *pe0, const void *pe1)
+{
+    float delta; // [esp+0h] [ebp-Ch]
+
+    delta = *(float *)(*(unsigned int *)pe0 + 128) - *(float *)(*(unsigned int *)pe1 + 128);
+    if (delta >= 0.0)
+        return delta > 0.0;
+    else
+        return -1;
+}
+
+void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum)
+{
+    int i; // [esp+0h] [ebp-104h]
+    hudelem_s *elems[62]; // [esp+4h] [ebp-100h] BYREF
+    int elemCount; // [esp+100h] [ebp-4h]
+    int savedregs; // [esp+104h] [ebp+0h] BYREF
+
+    if (CG_ShouldDrawHud(localClientNum))
+    {
+        elemCount = GetSortedHudElems(localClientNum, elems);
+        if ((unsigned int)elemCount >= 0x3E)
+            MyAssertHandler(
+                ".\\cgame\\cg_hudelem.cpp",
+                1547,
+                0,
+                "elemCount doesn't index ARRAY_COUNT( elems )\n\t%i not in [0, %i)",
+                elemCount,
+                62);
+        for (i = 0; i < elemCount; ++i)
+        {
+            if (elems[i]->type == HE_TYPE_WAYPOINT)
+                AddDrawSurfForHudElemWaypoint((hudelem_color_t)&savedregs, localClientNum, elems[i]);
+        }
+    }
+}
+
+void  AddDrawSurfForHudElemWaypoint(hudelem_color_t a1@<ebp>, int localClientNum, const hudelem_s *elem)
+{
+    unsigned int v3[3]; // [esp-Ch] [ebp-9Ch] BYREF
+    FxSprite sprite; // [esp+0h] [ebp-90h]
+    float x; // [esp+20h] [ebp-70h]
+    float v6; // [esp+24h] [ebp-6Ch]
+    int v7; // [esp+28h] [ebp-68h]
+    float v8; // [esp+2Ch] [ebp-64h]
+    Material *radius; // [esp+30h] [ebp-60h]
+    int renderFxFlags; // [esp+34h] [ebp-5Ch] BYREF
+    char materialName[64]; // [esp+40h] [ebp-50h] BYREF
+    hudelem_color_t color; // [esp+84h] [ebp-Ch]
+    void *v13; // [esp+88h] [ebp-8h]
+    void *retaddr; // [esp+90h] [ebp+0h]
+
+    color = a1;
+    v13 = retaddr;
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    *(unsigned int *)&materialName[60] = MEMORY[0x9D5560];
+    BG_LerpHudColors(elem, MEMORY[0x9D5560], (hudelem_color_t *)&materialName[56]);
+    if (materialName[59])
+    {
+        if (!CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, (char *)&renderFxFlags, 0x40u))
+        {
+            if (CG_ServerMaterialName(localClientNum, elem->materialIndex, (char *)&renderFxFlags, 0x40u))
+            {
+                radius = Material_RegisterHandle((char *)&renderFxFlags, 7);
+                v8 = HudElemWaypointHeight(localClientNum, elem);
+                if (v8 != 0.0)
+                {
+                    if (elem->value <= 0.0)
+                    {
+                        v7 = 0;
+                        v6 = v8;
+                    }
+                    else
+                    {
+                        v7 = 3;
+                        v6 = v8 * 0.00430000014603138;
+                    }
+                    x = elem->x;
+                    *(float *)&sprite.flags = elem->y;
+                    sprite.minScreenRadius = elem->z;
+                    *(float *)&v3[1] = x;
+                    v3[2] = sprite.flags;
+                    *(float *)&sprite.material = sprite.minScreenRadius;
+                    sprite.pos[0] = *(float *)&materialName[56];
+                    *(unsigned int *)sprite.rgbaColor = v7;
+                    sprite.pos[1] = v6;
+                    sprite.pos[2] = 0.0;
+                    v3[0] = radius;
+                    FX_SpriteAdd((FxSprite *)v3);
+                }
+            }
+        }
+    }
+}
+
+double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem)
+{
+    float height; // [esp+20h] [ebp-10h]
+    float lerp; // [esp+24h] [ebp-Ch]
+    int deltaTime; // [esp+28h] [ebp-8h]
+    float fromHeight; // [esp+2Ch] [ebp-4h]
+
+    height = (float)elem->height;
+    if (elem->scaleTime <= 0)
+        return height;
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    deltaTime = MEMORY[0x9D5560] - elem->scaleStartTime;
+    if (deltaTime >= elem->scaleTime)
+        return height;
+    fromHeight = (float)elem->fromHeight;
+    if (deltaTime <= 0)
+        return fromHeight;
+    lerp = (double)deltaTime / (double)elem->scaleTime;
+    if (lerp < 0.0 || lerp > 1.0)
+        MyAssertHandler(
+            ".\\cgame\\cg_hudelem.cpp",
+            991,
+            1,
+            "lerp not in [0.0f, 1.0f]\n\t%g not in [%g, %g]",
+            lerp,
+            0.0,
+            1.0);
+    return (float)((height - fromHeight) * lerp + fromHeight);
+}
+

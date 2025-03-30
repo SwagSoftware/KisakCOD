@@ -222,3 +222,99 @@ void __cdecl CG_DebugCircle(
     int duration);
 void __cdecl CG_TeamColor(int team, const char *prefix, float *color);
 void __cdecl CG_RelativeTeamColor(int clientNum, const char *prefix, float *color, int localClientNum);
+
+
+
+// cg_hudelem
+struct cg_hudelem_t // sizeof=0x238
+{                                       // ...
+    float x;                            // ...
+    float y;
+    float width;
+    float height;
+    char hudElemLabel[256];             // ...
+    float labelWidth;                   // ...
+    char hudElemText[256];              // ...
+    float textWidth;
+    Font_s *font;
+    float fontScale;
+    float fontHeight;
+    float color[4];                     // ...
+    int timeNow;                        // ...
+};
+void __cdecl CG_HudElemRegisterDvars();
+void __cdecl CG_TranslateHudElemMessage(
+    int localClientNum,
+    const char *message,
+    const char *messageType,
+    char *hudElemString);
+char __cdecl ReplaceDirective(int localClientNum, unsigned int *searchPos, unsigned int *dstLen, char *dstString);
+void __cdecl GetHudelemDirective(int localClientNum, char *directive, char *result);
+void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, char *result);
+void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0);
+void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground);
+void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem);
+void __cdecl GetHudElemInfo(int localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe, char *hudElemString);
+void __cdecl SafeTranslateHudElemString(int localClientNum, int index, char *hudElemString);
+double __cdecl HudElemStringWidth(const char *string, const cg_hudelem_t *cghe);
+char *__cdecl HudElemTimerString(const hudelem_s *elem, int timeNow);
+int __cdecl GetHudElemTime(const hudelem_s *elem, int timeNow);
+char *__cdecl HudElemTenthsTimerString(const hudelem_s *elem, int timeNow);
+double __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
+double __cdecl HudElemMaterialWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
+double __cdecl HudElemMaterialSpecifiedWidth(
+    const ScreenPlacement *scrPlace,
+    char alignScreen,
+    int sizeVirtual,
+    const cg_hudelem_t *cghe);
+double __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
+double __cdecl HudElemMaterialHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
+double __cdecl HudElemMaterialSpecifiedHeight(
+    const ScreenPlacement *scrPlace,
+    char alignScreen,
+    int sizeVirtual,
+    const cg_hudelem_t *cghe);
+void __cdecl SetHudElemPos(const ScreenPlacement *scrPlace, const hudelem_s *elem, cg_hudelem_t *cghe);
+void __cdecl GetHudElemOrg(
+    const ScreenPlacement *scrPlace,
+    int alignOrg,
+    int alignScreen,
+    float xVirtual,
+    float yVirtual,
+    float width,
+    float height,
+    float *orgX,
+    float *orgY);
+double __cdecl AlignHudElemX(int alignOrg, float x, float width);
+double __cdecl AlignHudElemY(int alignOrg, float y, float height);
+double __cdecl HudElemMovementFrac(const hudelem_s *elem, int timeNow);
+void __cdecl ConsolidateHudElemText(cg_hudelem_t *cghe, char *hudElemString);
+void __cdecl CopyStringToHudElemString(char *string, char *hudElemString);
+void __cdecl HudElemColorToVec4(const hudelem_color_t *hudElemColor, float *resultColor);
+void __cdecl DrawHudElemString(
+    unsigned int localClientNum,
+    const ScreenPlacement *scrPlace,
+    char *text,
+    const hudelem_s *elem,
+    cg_hudelem_t *cghe);
+double __cdecl OffsetHudElemY(const hudelem_s *elem, const cg_hudelem_t *cghe, float offsetY);
+void __cdecl DrawHudElemClock(int localClientNum, const hudelem_s *elem, const cg_hudelem_t *cghe);
+void __cdecl DrawHudElemMaterial(int localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe);
+void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *elem);
+char __cdecl WorldPosToScreenPos(int localClientNum, const float *worldPos, float *outScreenPos);
+bool __cdecl ClampScreenPosToEdges(
+    int localClientNum,
+    float *point,
+    float padLeft,
+    float padRight,
+    float padTop,
+    float padBottom,
+    float *resultNormal,
+    float *resultDist);
+double __cdecl GetScaleForDistance(int localClientNum, const float *worldPos);
+int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems);
+void __cdecl CopyInUseHudElems(hudelem_s **elems, int *elemCount, hudelem_s *elemSrcArray, int elemSrcArrayCount);
+int __cdecl compare_hudelems(const void *pe0, const void *pe1);
+void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum);
+void  AddDrawSurfForHudElemWaypoint(hudelem_color_t a1@<ebp>, int localClientNum, const hudelem_s *elem);
+double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem);

@@ -998,6 +998,7 @@ struct ping_t // sizeof=0x41C
     char info[1024];                    // ...
 };
 
+// cl_main_mp
 //void __cdecl TRACK_cl_main();
 char __cdecl CL_IsLocalClientActive(int localClientNum);
 int __cdecl CL_LocalActiveIndexFromClientNum(int localClientNum);
@@ -1165,6 +1166,53 @@ float (*__cdecl CL_GetMapCenter())[3];
 void __cdecl CL_ResetStats_f();
 int __cdecl CL_GetLocalClientActiveCount();
 
+extern dvar_t *cl_conXOffset;
+extern dvar_t *cl_hudDrawsBehindsUI;
+extern dvar_t *cl_showSend;
+extern dvar_t *input_invertPitch;
+extern dvar_t *cl_avidemo;
+extern dvar_t *cl_nodelta;
+extern dvar_t *cl_showServerCommands;
+extern dvar_t *motd;
+extern dvar_t *cl_connectTimeout;
+extern dvar_t *cl_sensitivity;
+extern dvar_t *cl_forceavidemo;
+extern dvar_t *cl_timeout;
+extern dvar_t *m_yaw;
+extern dvar_t **customclass;
+extern dvar_t *m_pitch;
+extern dvar_t *cl_activeAction;
+extern dvar_t *playlist;
+extern dvar_t *cl_debugMessageKey;
+extern dvar_t *systemlink;
+extern dvar_t *nextdemo;
+extern dvar_t *cl_connectionAttempts;
+extern dvar_t *onlinegame;
+extern dvar_t *cl_showMouseRate;
+extern dvar_t *m_forward;
+extern dvar_t *cl_packetdup;
+extern dvar_t *cl_mouseAccel;
+extern dvar_t *cl_maxpackets;
+extern dvar_t *cl_motdString;
+extern dvar_t *onlinegameandhost;
+extern dvar_t *cl_freezeDemo;
+extern dvar_t *cl_showTimeDelta;
+extern dvar_t *input_viewSensitivity;
+extern dvar_t *input_autoAim;
+extern dvar_t *cl_ingame;
+extern dvar_t *cl_inGameVideo;
+extern dvar_t *cl_noprint;
+extern dvar_t *m_side;
+extern dvar_t *cl_profileTextY;
+extern dvar_t *cl_serverStatusResendTime;
+extern dvar_t *m_filter;
+extern dvar_t *cl_profileTextHeight;
+extern dvar_t *cl_shownuments;
+extern dvar_t *splitscreen;
+extern dvar_t *onlineunreankedgameandhost;
+extern dvar_t *cl_freelook;
+extern dvar_t *cl_shownet;
+
 #define MAX_CLIENTS 1 // LWSS Add
 
 extern clientConnection_t clientConnections[MAX_CLIENTS];
@@ -1326,3 +1374,13 @@ void __cdecl CL_LookupColor(int localClientNum, unsigned __int8 c, float *color)
 void __cdecl CL_UpdateColor(int localClientNum);
 void __cdecl CL_UpdateColorInternal(const char *var_name, float *color);
 int __cdecl CL_IsCgameInitialized(int localClientNum);
+
+
+
+// cl_net_chan_mp
+void __cdecl CL_Netchan_TransmitNextFragment(netchan_t *chan);
+void __cdecl CL_Netchan_Transmit(netchan_t *chan, unsigned __int8 *data, int length);
+void __cdecl CL_Netchan_AddOOBProfilePacket(int localClientNum, int iLength);
+void __cdecl CL_Netchan_PrintProfileStats(int localClientNum, int bPrintToConsole);
+void __cdecl CL_Netchan_UpdateProfileStats(int localClientNum);
+void __cdecl CL_ProfDraw(int y, char *pszString);

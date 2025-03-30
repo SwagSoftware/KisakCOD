@@ -1405,6 +1405,22 @@ struct ItemKeyHandler // sizeof=0xC
 
 union operandInternalDataUnion // sizeof=0x4
 {                                       // ...
+    operandInternalDataUnion()
+    {
+        intVal = 0;
+    }
+    operandInternalDataUnion(int i)
+    {
+        intVal = i;
+    }
+    operandInternalDataUnion(float f)
+    {
+        floatVal = f;
+    }
+    operandInternalDataUnion(const char *str)
+    {
+        string = str;
+    }
     int intVal;
     float floatVal;
     const char* string;

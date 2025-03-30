@@ -588,6 +588,45 @@
     <ClCompile Include="src\qcommon\msg_mp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\qcommon\huffman.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\qcommon\net_chan_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\client_mp\cl_net_chan_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\client_mp\cl_scrn_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui_mp\ui_main_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\client\screen_placement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cgame_mp\cg_newDraw_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cgame_mp\cg_draw_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cgame\cg_hudelem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\ui_shared.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\ui_localvars.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\ui_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\ui_expressions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\qcommon\qcommon.h">
@@ -960,6 +999,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\server\sv_game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qcommon\msg_mp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qcommon\huffman.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui_mp\ui_mp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

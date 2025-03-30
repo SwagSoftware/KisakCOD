@@ -7,6 +7,7 @@
 //struct weaponInfo_s **cg_weaponsArray 82839b94     cg_main_mp.obj
 //struct cgs_t *cgsArray    82839c6c     cg_main_mp.obj
 //struct cgMedia_t cgMedia   82839c88     cg_main_mp.obj
+cgMedia_t cgMedia;
 //struct centity_s **cg_entitiesArray 8283c430     cg_main_mp.obj
 
 cg_s *cgArray;
