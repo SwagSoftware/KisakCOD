@@ -522,3 +522,90 @@ extern struct ScreenPlacement *scrPlaceView;
 extern struct ScreenPlacement scrPlaceFull;
 extern float cg_hudSplitscreenScale;
 extern ScreenPlacement scrPlaceFullUnsafe;
+
+
+
+// con_channels
+char __cdecl Con_OpenChannel(char *name, bool allowScript);
+bool __cdecl Con_ScriptHasPermission(unsigned int channel);
+bool __cdecl Con_GetChannel(const char *name, int *channel_result);
+bool __cdecl Con_IsChannelOpen(unsigned int channel);
+bool __cdecl Con_IsChannelVisible(print_msg_dest_t dest, unsigned int channel, int errorflags);
+void __cdecl Con_WriteFilterConfigString(int f);
+void __cdecl Con_InitGameMsgChannels();
+void __cdecl Con_InitChannelsForDestFromList(print_msg_dest_t dest, const char *channelNames);
+void __cdecl Con_FilterShowChannel(print_msg_dest_t dest, const char *channelName, bool show);
+void __cdecl Con_InitChannels();
+void __cdecl Con_ChannelList_f();
+void __cdecl Con_FilterAdd_f();
+void __cdecl Con_FilterAdd(bool show);
+void __cdecl Con_FilterRemove_f();
+void __cdecl Con_FilterList_f();
+void __cdecl Con_ShutdownChannels();
+void __cdecl Con_CloseChannelInternal(unsigned int channel);
+
+
+
+// cl_devgui
+void __cdecl CL_DevGuiFrame(int localClientNum);
+void __cdecl CL_CreateDevGui();
+void __cdecl CL_DestroyDevGui();
+
+
+
+// cl_debugdata
+void __cdecl CL_AddDebugString(
+    const float *xyz,
+    const float *color,
+    float scale,
+    char *text,
+    int fromServer,
+    int duration);
+bool __cdecl CreateDebugStringsIfNeeded();
+void __cdecl AddDebugStringInternal(
+    const float *xyz,
+    const float *color,
+    float scale,
+    char *text,
+    int duration,
+    clientDebugStringInfo_t *info);
+void __cdecl CL_AddDebugLine(
+    const float *start,
+    const float *end,
+    const float *color,
+    int depthTest,
+    int duration,
+    int fromServer);
+bool __cdecl CreateDebugLinesIfNeeded();
+void __cdecl AddDebugLineInternal(
+    const float *start,
+    const float *end,
+    const float *color,
+    int depthTest,
+    int duration,
+    clientDebugLineInfo_t *info);
+void __cdecl CL_AddDebugStarWithText(
+    const float *point,
+    const float *starColor,
+    const float *textColor,
+    char *string,
+    float fontsize,
+    int duration,
+    int fromServer);
+void __cdecl CL_AddDebugStar(const float *point, const float *color, int duration, int fromServer);
+void __cdecl CL_FlushDebugClientData();
+void __cdecl FlushDebugStrings(clientDebugStringInfo_t *info, int fromServer);
+void __cdecl FlushDebugLines(clientDebugLineInfo_t *info, int fromServer);
+void __cdecl CL_UpdateDebugClientData();
+void __cdecl CL_FlushDebugServerData();
+void __cdecl CL_UpdateDebugServerData();
+void __cdecl CL_ShutdownDebugData();
+
+
+
+// cl_cin
+int __cdecl CIN_PlayCinematic(int localClientNum, char *arg);
+void __cdecl CL_PlayCinematic_f();
+void __cdecl CL_PlayUnskippableCinematic_f();
+void __cdecl SCR_DrawCinematic(int localClientNum);
+void __cdecl SCR_StopCinematic(int localClientNum);

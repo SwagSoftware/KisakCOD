@@ -1384,3 +1384,94 @@ void __cdecl CL_Netchan_AddOOBProfilePacket(int localClientNum, int iLength);
 void __cdecl CL_Netchan_PrintProfileStats(int localClientNum, int bPrintToConsole);
 void __cdecl CL_Netchan_UpdateProfileStats(int localClientNum);
 void __cdecl CL_ProfDraw(int y, char *pszString);
+
+
+
+
+// cl_parse_mp
+void __cdecl TRACK_cl_parse();
+void __cdecl SHOWNET(msg_t *msg, char *s);
+void __cdecl CL_SavePredictedOriginForServerTime(
+    clientActive_t *cl,
+    int serverTime,
+    float *predictedOrigin,
+    float *predictedVelocity,
+    float *viewangles,
+    int bobCycle,
+    int movementDir);
+char __cdecl CL_GetPredictedOriginForServerTime(
+    clientActive_t *cl,
+    int serverTime,
+    float *predictedOrigin,
+    float *predictedVelocity,
+    float *viewangles,
+    int *bobCycle,
+    int *movementDir);
+void __cdecl CL_DeltaClient(
+    clientActive_t *cl,
+    msg_t *msg,
+    int time,
+    clSnapshot_t *frame,
+    unsigned int newnum,
+    clientState_s *old,
+    int unchanged);
+void __cdecl CL_SystemInfoChanged(int localClientNum);
+void __cdecl CL_ParseMapCenter(int localClientNum);
+void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg);
+void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg);
+void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe, clSnapshot_t *newframe);
+void __cdecl CL_DeltaEntity(
+    clientActive_t *cl,
+    msg_t *msg,
+    int time,
+    clSnapshot_t *frame,
+    unsigned int newnum,
+    entityState_s *old);
+void __cdecl CL_CopyOldEntity(clientActive_t *cl, clSnapshot_t *frame, entityState_s *old);
+void __cdecl CL_ParsePacketClients(
+    clientActive_t *cl,
+    msg_t *msg,
+    int time,
+    clSnapshot_t *oldframe,
+    clSnapshot_t *newframe);
+void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg);
+void __cdecl CL_ParseCommandString(int localClientNum, msg_t *msg);
+
+
+
+// cl_pose_mp
+char *__cdecl CL_AllocSkelMemory(unsigned int size);
+int __cdecl CL_GetSkelTimeStamp();
+int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnimMat **pMatOut);
+
+
+
+// cl_rank
+enum rankTableColumns_t : __int32
+{                                       // ...
+    MP_RANKTABLE_RANKID = 0x0,
+    MP_RANKTABLE_RANK = 0x1,
+    MP_RANKTABLE_MINXP = 0x2,
+    MP_RANKTABLE_XPTONEXT = 0x3,
+    MP_RANKTABLE_SHORTRANK = 0x4,
+    MP_RANKTABLE_FULLRANK = 0x5,
+    MP_RANKTABLE_ICON = 0x6,
+    MP_RANKTABLE_MAXXP = 0x7,
+    MP_RANKTABLE_WEAPUNLOCK = 0x8,
+    MP_RANKTABLE_PERKUNLOCK = 0x9,
+    MP_RANKTABLE_CHALLENGE = 0xA,
+    MP_RANKTABLE_CAMO = 0xB,
+    MP_RANKTABLE_ATTACHMENT = 0xC,
+    MP_RANKTABLE_LEVEL = 0xD,
+    MP_RANKTABLE_DISPLAYLEVEL = 0xE,
+    MP_RANKTABLE_COUNT = 0xF,
+};
+int __cdecl CL_GetRankForXp(int xp);
+const char *__cdecl CL_GetRankData(int rank, rankTableColumns_t column);
+void __cdecl CL_GetRankIcon(int rank, int prestige, Material **handle);
+
+
+// cl_voice (different on PC)
+void __cdecl CL_WriteVoicePacket(int localClientNum);
+void __cdecl CL_VoicePacket(int localClientNum, msg_t *msg);
+bool __cdecl CL_IsPlayerTalking(int localClientNum, int talkingClientIndex);

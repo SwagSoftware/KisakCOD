@@ -47,3 +47,10 @@ int __cdecl Language_IsAsian();
 int __cdecl SEH_PrintStrlen(const char *string);
 const char *__cdecl SEH_GetLanguageName(unsigned int iLanguage);
 int __cdecl SEH_GetLanguageIndexForName(const char *pszLanguageName, int *piLanguageIndex);
+
+
+extern const dvar_t *loc_language;
+extern const dvar_t *loc_forceEnglish;
+extern const dvar_t *loc_translate;
+extern const dvar_t *loc_warnings;
+extern const dvar_t *loc_warningsAsErrors;

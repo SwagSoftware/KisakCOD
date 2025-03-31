@@ -1557,3 +1557,403 @@ void __cdecl CG_DrawActive(int localClientNum);
 void __cdecl CG_AddSceneTracerBeams(int localClientNum);
 void __cdecl CG_GenerateSceneVerts(int localClientNum);
 void __cdecl CG_GetViewAxisProjections(const refdef_s *refdef, const float *worldPoint, float *projections);
+
+
+// cg_players_mp
+void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int localClientNum);
+void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *cent);
+void  CG_AddPlayerSpriteDrawSurf(
+    int a1@<ebp>,
+    int localClientNum,
+    const centity_s *cent,
+    Material *material,
+    float additionalRadiusSize,
+    int height,
+    bool fixedScreenSize);
+void __cdecl CG_Player(int localClientNum, centity_s *cent);
+void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent);
+void __cdecl CG_Corpse(int localClientNum, centity_s *cent);
+void __cdecl CG_UpdatePlayerDObj(int localClientNum, centity_s *cent);
+void __cdecl CG_ResetPlayerEntity(int localClientNum, cg_s *cgameGlob, centity_s *cent, int resetAnimation);
+const char *__cdecl CG_GetTeamName(team_t team);
+const char *__cdecl CG_GetOpposingTeamName(team_t team);
+const char *__cdecl CG_GetPlayerTeamName(int localClientNum);
+const char *__cdecl CG_GetPlayerOpposingTeamName(int localClientNum);
+bool __cdecl CG_IsPlayerDead(int localClientNum);
+int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum);
+void __cdecl CG_UpdateWeaponVisibility(int localClientNum, centity_s *cent);
+bool __cdecl CG_IsWeaponVisible(int localClientNum, centity_s *cent, XModel *weapModel, float *origin, float *forward);
+void __cdecl CG_CalcWeaponVisTrace(
+    XModel *weapModel,
+    float *origin,
+    float *forward,
+    float *start,
+    float *end,
+    float *modelLen);
+
+
+
+// cg_scoreboard_mp
+enum listColumnTypes_t : __int32
+{                                       // ...
+    LCT_NAME = 0x0,             // ...
+    LCT_CLAN = 0x1,
+    LCT_SCORE = 0x2,             // ...
+    LCT_DEATHS = 0x3,             // ...
+    LCT_PING = 0x4,             // ...
+    LCT_STATUS_ICON = 0x5,             // ...
+    LCT_TALKING_ICON = 0x6,             // ...
+    LCT_KILLS = 0x7,             // ...
+    LCT_RANK_ICON = 0x8,             // ...
+    LCT_ASSISTS = 0x9,             // ...
+    LCT_NUM = 0xA,
+};
+struct listColumnInfo_t // sizeof=0x10
+{                                       // ...
+    listColumnTypes_t type;
+    float fWidth;
+    const char *pszName;
+    int iAlignment;
+};
+void __cdecl UpdateScores(int localClientNum);
+const score_t *__cdecl UI_GetOurClientScore(int localClientNum);
+const score_t *__cdecl GetClientScore(int localClientNum, int clientNum);
+const score_t *__cdecl UI_GetScoreAtRank(int localClientNum, int rank);
+char *__cdecl CG_GetGametypeDescription(int localClientNum);
+char __cdecl CG_DrawScoreboard_GetTeamColorIndex(int team, int localClientNum);
+int __cdecl CG_DrawScoreboard(int localClientNum);
+void __cdecl CG_DrawScoreboard_Backdrop(int localClientNum, float alpha);
+double __cdecl CG_BackdropLeft(int localClientNum);
+double __cdecl CG_BackdropTop();
+double __cdecl CG_BannerScoreboardScaleMultiplier();
+void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha);
+double __cdecl CG_DrawScoreboard_ListColumnHeaders(
+    int localClientNum,
+    const float *color,
+    float y,
+    float h,
+    float listWidth);
+void __cdecl CG_GetScoreboardInfo(const listColumnInfo_t **colInfo, int *numFields);
+int __cdecl CG_ScoreboardTotalLines(int localClientNum);
+double __cdecl CG_DrawTeamOfClientScore(
+    int localClientNum,
+    const float *color,
+    float y,
+    int team,
+    float listWidth,
+    int *drawLine);
+int __cdecl CG_CheckDrawScoreboardLine(int localClientNum, int *drawLine, float y, float lineHeight);
+double __cdecl CG_DrawScoreboard_ListBanner(
+    int localClientNum,
+    const float *color,
+    float y,
+    float w,
+    float h,
+    int team,
+    int *piDrawLine);
+double __cdecl CG_DrawClientScore(
+    int localClientNum,
+    const float *color,
+    float y,
+    const score_t *score,
+    float listWidth);
+double __cdecl CalcXAdj(int align, float maxw, float w);
+void __cdecl DrawListString(
+    int localClientNum,
+    char *string,
+    float x,
+    float y,
+    float width,
+    int alignment,
+    Font_s *font,
+    float scale,
+    int style,
+    const float *color);
+void __cdecl CG_DrawClientPing(int localClientNum, int ping, float x, float y, float maxWidth, float maxHeight);
+void __cdecl CG_DrawScrollbar(int localClientNum, const float *color, float top);
+void __cdecl CenterViewOnClient(int localClientNum);
+int __cdecl CG_IsScoreboardDisplayed(int localClientNum);
+void __cdecl CG_ScrollScoreboardUp(cg_s *cgameGlob);
+void __cdecl CG_ScrollScoreboardDown(cg_s *cgameGlob);
+void __cdecl CG_RegisterScoreboardDvars();
+void __cdecl CG_RegisterScoreboardGraphics();
+bool __cdecl Scoreboard_HandleInput(int localClientNum, int key);
+
+
+// cg_vehicles_mp
+struct __declspec(align(4)) vehicleEffects // sizeof=0x28
+{
+    bool active;
+    // padding byte
+    // padding byte
+    // padding byte
+    int lastAccessed;
+    int entityNum;
+    int nextDustFx;
+    int nextSmokeFx;
+    bool soundPlaying;
+    // padding byte
+    // padding byte
+    // padding byte
+    float barrelVelocity;
+    float barrelPos;
+    int lastBarrelUpdateTime;
+    unsigned __int8 tag_engine_left;
+    unsigned __int8 tag_engine_right;
+    // padding byte
+    // padding byte
+};
+struct vehfx_t // sizeof=0x48
+{                                       // ...
+    bool tireActive[4];
+    float tireGroundPoint[4][3];
+    unsigned __int8 tireGroundSurfType[4];
+    bool soundEnabled;
+    // padding byte
+    // padding byte
+    // padding byte
+    float soundEngineOrigin[3];
+};
+void __cdecl CG_VehRegisterDvars();
+DObj_s *__cdecl GetVehicleEntDObj(int localClientNum, centity_s *centVeh);
+void __cdecl CG_VehGunnerPOV(int localClientNum, float *resultOrigin, float *resultAngles);
+clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum);
+void __cdecl GetTagMatrix(
+    int localClientNum,
+    unsigned int vehEntNum,
+    unsigned __int16 tagName,
+    float (*resultTagMat)[3],
+    float *resultOrigin);
+bool __cdecl CG_VehLocalClientUsingVehicle(int localClientNum);
+bool __cdecl CG_VehLocalClientDriving(int localClientNum);
+bool __cdecl CG_VehEntityUsingVehicle(int localClientNum, unsigned int entNum);
+clientInfo_t *__cdecl ClientInfoForEntity(int localClientNum, unsigned int entNum);
+int __cdecl CG_VehLocalClientVehicleSlot(int localClientNum);
+int __cdecl CG_VehPlayerVehicleSlot(int localClientNum, unsigned int entNum);
+void __cdecl CG_VehSeatTransformForPlayer(
+    int localClientNum,
+    unsigned int entNum,
+    float *resultOrigin,
+    float *resultAngles);
+void __cdecl SeatTransformForClientInfo(int localClientNum, clientInfo_t *ci, float *resultOrigin, float *resultAngles);
+void __cdecl SeatTransformForSlot(
+    int localClientNum,
+    unsigned int vehEntNum,
+    unsigned int vehSlotIdx,
+    float *resultOrigin,
+    float *resultAngles);
+void __cdecl CG_VehSeatOriginForLocalClient(int localClientNum, float *result);
+double __cdecl Veh_GetTurretBarrelRoll(int localClientNum, centity_s *cent);
+int __cdecl CG_GetEntityIndex(int localClientNum, const centity_s *cent);
+vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum);
+void __cdecl Veh_IncTurretBarrelRoll(int localClientNum, int entityNum, float rotation);
+void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent);
+void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *cent, vehfx_t *fxInfo);
+unsigned __int16 __cdecl CompressUnit(float unit);
+void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cent, vehfx_t *fxInfo);
+double __cdecl GetSpeed(int localClientNum, centity_s *cent);
+void __cdecl CG_VehSphereCoordsToPos(float sphereDistance, float sphereYaw, float sphereAltitude, float *result);
+void __cdecl CG_Veh_Init();
+
+
+// cg_snapshot_mp
+void __cdecl CG_ShutdownEntity(int localClientNum, centity_s *cent);
+void __cdecl CG_SetInitialSnapshot(int localClientNum, snapshot_s *snap);
+void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap);
+void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity);
+void __cdecl CG_CopyCorpseInfo(clientInfo_t *corpseInfo, const clientInfo_t *ci);
+void __cdecl CG_TransitionKillcam(int localClientNum);
+void __cdecl CG_ProcessSnapshots(int localClientNum);
+void __cdecl CG_TransitionSnapshot(int localClientNum);
+snapshot_s *__cdecl CG_ReadNextSnapshot(int localClientNum);
+
+
+// cg_servercmds_mp
+void __cdecl CG_ParseServerInfo(int localClientNum);
+void __cdecl CG_ParseCodInfo(int localClientNum);
+void __cdecl CG_ParseFog(int localClientNum);
+void __cdecl CG_SetConfigValues(int localClientNum);
+void __cdecl CG_ParseGameEndTime(int localClientNum);
+void __cdecl CG_PrecacheScriptMenu(int localClientNum, int configStringIndex);
+void __cdecl CG_RegisterServerMaterial(int localClientNum, int configStringIndex);
+void __cdecl CG_MapRestart(int localClientNum, int savepersist);
+void __cdecl CG_ClearEntityFxHandles(int localClientNum);
+void __cdecl CG_CheckOpenWaitingScriptMenu(int localClientNum);
+void __cdecl CG_CloseScriptMenu(int localClientNum, bool allowResponse);
+void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow);
+void __cdecl CG_ServerCommand(int localClientNum);
+void __cdecl CG_DeployServerCommand(int localClientNum);
+void __cdecl CG_ParseScores(int localClientNum);
+void __cdecl CG_SetSingleClientScore(int localClientNum, int clientIndex, int newScore);
+void __cdecl CG_SortSingleClientScore(cg_s *cgameGlob, int scoreIndex);
+bool __cdecl CG_ClientScoreIsBetter(score_t *scoreA, score_t *scoreB);
+void __cdecl CG_ConfigStringModified(int localClientNum);
+void __cdecl CG_UpdateVoteString(int localClientNum, const char *rawVoteString);
+void __cdecl CG_AddToTeamChat(int localClientNum, const char *str);
+void __cdecl CG_OpenScriptMenu(int localClientNum);
+void __cdecl CG_RemoveChatEscapeChar(char *text);
+void __cdecl CG_SetTeamScore(int localClientNum, unsigned int team, int score);
+void CG_ReverbCmd();
+void CG_DeactivateReverbCmd();
+void __cdecl CG_SetChannelVolCmd(int localClientNum);
+void CG_DeactivateChannelVolCmd();
+char __cdecl LocalSound(int localClientNum);
+void __cdecl LocalSoundStop(int localClientNum);
+void __cdecl CG_SetClientDvarFromServer(cg_s *cgameGlob, const char *dvarname, char *value);
+void __cdecl CG_SetObjectiveText(cg_s *cgameGlob, char *text);
+void __cdecl CG_SetDrawHud(cg_s *cgameGlob, unsigned int value);
+void __cdecl CG_SetScriptMainMenu(cg_s *cgameGlob, char *text);
+void __cdecl CG_ExecuteNewServerCommands(int localClientNum, int latestSequence);
+
+
+
+// cg_predict_mp
+void __cdecl TRACK_cg_predict();
+int __cdecl CG_ItemListLocalClientNum();
+void __cdecl CG_ClearItemList();
+void __cdecl CG_BuildItemList(int localClientNum, const snapshot_s *nextSnap);
+void __cdecl CG_PredictPlayerState(int localClientNum);
+void __cdecl CG_PredictPlayerState_Internal(int localClientNum);
+void __cdecl CG_TouchItemPrediction(int localClientNum);
+void __cdecl CG_TouchItem(cg_s *cgameGlob, centity_s *cent);
+void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles);
+
+
+
+// cg_pose_mp
+void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int *partBits);
+void  CG_VehPoseControllers(float a1@<ebp>, const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl CG_Player_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits);
+double __cdecl Vec4LengthSq(const float *v);
+DObjAnimMat *__cdecl CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits);
+
+
+
+// cg_draw_net_mp
+void __cdecl CG_AddLagometerFrameInfo(const cg_s *cgameGlob);
+void __cdecl CG_AddLagometerSnapshotInfo(snapshot_s *snap);
+void __cdecl CG_DrawSnapshotAnalysis(int localClientNum);
+int __cdecl CG_ComparePacketAnalysisSamples(int *a, int *b);
+void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum);
+int __cdecl CG_CompareEntityAnalysisSamples(unsigned int *a, unsigned int *b);
+void __cdecl CG_DrawPingAnalysis(int localClientNum);
+void __cdecl CG_DrawLagometer(int localClientNum);
+void __cdecl CG_DrawDisconnect(int localClientNum);
+
+
+
+// cg_compassfriendlies_mp
+enum CompassType : __int32
+{                                       // ...
+    COMPASS_TYPE_PARTIAL = 0x0,
+    COMPASS_TYPE_FULL = 0x1,
+};
+struct CompassVehicle // sizeof=0x1C
+{                                       // ...
+    int entityNum;                      // ...
+    int lastUpdate;                     // ...
+    float lastPos[2];
+    float lastYaw;
+    team_t team;
+    int ownerIndex;
+};
+struct CompassActor // sizeof=0x30
+{                                       // ...
+    int lastUpdate;
+    float lastPos[2];
+    float lastEnemyPos[2];
+    float lastYaw;
+    int pingTime;
+    int beginFadeTime;
+    int beginRadarFadeTime;
+    int beginVoiceFadeTime;
+    bool enemy;
+    // padding byte
+    // padding byte
+    // padding byte
+    int perks;
+};
+void __cdecl TRACK_cg_compassfriendlies();
+void __cdecl CG_ClearCompassPingData();
+void __cdecl CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex);
+CompassVehicle *__cdecl GetVehicle(int localClientNum, int entityNum);
+void __cdecl CG_CompassRadarPingEnemyPlayers(int localClientNum, float oldRadarProgress, float newRadarProgress);
+void __cdecl GetRadarLine(cg_s *cgameGlob, float radarProgress, float *line);
+double __cdecl GetRadarLineMargin(cg_s *cgameGlob);
+bool __cdecl DoLinesSurroundPoint(cg_s *cgameGlob, float *radarLine1, float *radarLine2, float *pos);
+void __cdecl RadarPingEnemyPlayer(CompassActor *actor, int time);
+void __cdecl CG_CompassIncreaseRadarTime(int localClientNum);
+void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, const centity_s *cent, const float *origin, int msec);
+void __cdecl ActorUpdatePos(int localClientNum, CompassActor *actor, const float *newPos, int actorClientIndex);
+bool __cdecl DoesMovementCrossRadar(cg_s *cgameGlob, float radarProgress, const float *p1, const float *p2);
+bool __cdecl CanLocalPlayerHearActorFootsteps(int localClientNum, const float *actorPos, unsigned int actorClientIndex);
+void __cdecl CG_CompassUpdateActors(int localClientNum);
+void __cdecl CG_CompassDrawFriendlies(
+    int localClientNum,
+    CompassType compassType,
+    const rectDef_s *parentRect,
+    const rectDef_s *rect,
+    float *color);
+void __cdecl CG_CompassDrawEnemies(
+    int localClientNum,
+    CompassType compassType,
+    const rectDef_s *parentRect,
+    const rectDef_s *rect,
+    float *color);
+void __cdecl CG_CompassDrawRadarEffects(
+    int localClientNum,
+    CompassType compassType,
+    const rectDef_s *parentRect,
+    const rectDef_s *rect,
+    float *color);
+double __cdecl GetRadarLineEastWestPercentage(cg_s *cgameGlob, float radarProgress);
+void __cdecl CG_CompassDrawVehicles(
+    int localClientNum,
+    CompassType compassType,
+    int eType,
+    const rectDef_s *parentRect,
+    const rectDef_s *rect,
+    Material *enemyMaterial,
+    Material *friendlyMaterial,
+    const float *color);
+
+
+
+// cg_client_side_effects_mp
+struct ClientEntSound // sizeof=0x10
+{                                       // ...
+    float origin[3];
+    snd_alias_list_t *aliasList;        // ...
+};
+void __cdecl CG_StartClientSideEffects(int localClientNum);
+void __cdecl CG_LoadClientEffects(int localClientNum, const char *filename);
+void __cdecl CG_ParseClientEffects(int localClientNum, char *buffer);
+const char *__cdecl CG_SkipLine(char *line, const char *skipLine);
+const char *__cdecl CG_SkipWhiteSpace(const char *line);
+char *__cdecl CG_SkipText(char *line, const char *skipText);
+const char *__cdecl CG_SkipLineStartingWith(char *line, const char *skipLine);
+const char *__cdecl CG_SkipRestOfLine(const char *line);
+bool __cdecl CG_MatchLineStartingWith(const char *line, const char *startLine);
+const char *__cdecl CG_ParseSound(int localClientNum, char *line);
+void __cdecl CG_AddClientEntSound(const float *origin, const char *soundalias);
+const char *__cdecl CG_ParseVec3Finish(char *line, float *origin);
+const char *__cdecl CG_ParseStringFinish(char *line, char *text, unsigned int bufferSize);
+char *__cdecl CG_ParseString(char *line, char *text, unsigned int bufferSize);
+char *__cdecl CG_ParseEffect(int localClientNum, char *line);
+const char *__cdecl CG_ParseFloatFinish(char *line, float *value);
+char __cdecl CG_FindFileName(const char *name, char *filename, int size);
+void __cdecl CG_LoadClientEffects_FastFile(int localClientNum, const char *filename);
+void __cdecl CG_LoadClientEffectMapping(const char *filename);
+void __cdecl CG_ParseClientEffectMapping(const char *buffer);
+void __cdecl CG_AddPairToMap(char *name, char *filename);
+void __cdecl CG_LoadClientEffectMapping_FastFile(const char *filename);
+void __cdecl CG_ClientSideEffectsRegisterDvars();
+void __cdecl CG_AddClientSideSounds(int localClientNum);
+void __cdecl CG_AddClientSideSound(int localClientNum, int index, const ClientEntSound *sound);
+void __cdecl CG_CopyClientSideSoundEntityOrientation(
+    unsigned int clientSoundEntIndex,
+    float *origin_out,
+    float (*axis_out)[3]);

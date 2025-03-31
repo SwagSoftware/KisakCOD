@@ -30,11 +30,11 @@ languageInfo_t g_languages[15] =
     { "czech", 0 },
 };
 
-const dvar_s *loc_language;
-const dvar_s *loc_forceEnglish;
-const dvar_s *loc_translate;
-const dvar_s *loc_warnings;
-const dvar_s *loc_warningsAsErrors;
+const dvar_t *loc_language;
+const dvar_t *loc_forceEnglish;
+const dvar_t *loc_translate;
+const dvar_t *loc_warnings;
+const dvar_t *loc_warningsAsErrors;
 
 int g_currentAsian;
 
