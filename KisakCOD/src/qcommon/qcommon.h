@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../universal/q_shared.h"
+#include <xanim/xanim.h>
+#include <server_mp/server.h>
 
 typedef enum
 {
@@ -20,6 +22,37 @@ struct field_t // sizeof=0x118
 	int fixedSize;                      // ...
 	char buffer[256];                   // ...
 };
+
+const char *WeaponStateNames[27] =
+{
+  "WEAPON_READY",
+  "WEAPON_RAISING",
+  "WEAPON_RAISING_ALTSWITCH",
+  "WEAPON_DROPPING",
+  "WEAPON_DROPPING_QUICK",
+  "WEAPON_FIRING",
+  "WEAPON_RECHAMBERING",
+  "WEAPON_RELOADING",
+  "WEAPON_RELOADING_INTERUPT",
+  "WEAPON_RELOAD_START",
+  "WEAPON_RELOAD_START_INTERUPT",
+  "WEAPON_RELOAD_END",
+  "WEAPON_MELEE_INIT",
+  "WEAPON_MELEE_FIRE",
+  "WEAPON_MELEE_END",
+  "WEAPON_OFFHAND_INIT",
+  "WEAPON_OFFHAND_PREPARE",
+  "WEAPON_OFFHAND_HOLD",
+  "WEAPON_OFFHAND_START",
+  "WEAPON_OFFHAND",
+  "WEAPON_OFFHAND_END",
+  "WEAPON_DETONATING",
+  "WEAPON_SPRINT_RAISE",
+  "WEAPON_SPRINT_LOOP",
+  "WEAPON_SPRINT_DROP",
+  "WEAPON_NIGHTVISION_WEAR",
+  "WEAPON_NIGHTVISION_REMOVE"
+}; // idb
 
 extern int marker_common;
 
@@ -546,6 +579,7 @@ void __cdecl DB_LoadDObjs();
 ==============================================================
 
 TRACES
+(CM = Collision Model)
 
 ==============================================================
 */
@@ -745,6 +779,168 @@ int __cdecl CM_TransformedBoxSightTrace(
     int brushmask,
     const float *origin,
     const float *angles);
+
+// cm_mesh
+void __cdecl CM_TraceThroughAabbTree(const traceWork_t *tw, const CollisionAabbTree *aabbTree, trace_t *trace);
+void __cdecl CM_TraceThroughAabbTree_r(const traceWork_t *tw, const CollisionAabbTree *aabbTree, trace_t *trace);
+bool __cdecl CM_CullBox(const traceWork_t *tw, const float *origin, const float *halfSize);
+void __cdecl CM_TracePointThroughTriangle(const traceWork_t *tw, const unsigned __int16 *indices, trace_t *trace);
+void __cdecl CM_TraceCapsuleThroughTriangle(
+    const traceWork_t *tw,
+    int triIndex,
+    const unsigned __int16 *indices,
+    trace_t *trace);
+int __cdecl CM_TraceSphereThroughEdge(
+    const traceWork_t *tw,
+    const float *sphereStart,
+    const float *v0,
+    const float *v0_v1,
+    trace_t *trace);
+bool __cdecl Vec3IsNormalizedEpsilon(const float *v, float epsilon);
+void __cdecl CM_TraceSphereThroughVertex(
+    const traceWork_t *tw,
+    bool isWalkable,
+    const float *sphereStart,
+    const float *v,
+    trace_t *trace);
+void __cdecl CM_TraceCapsuleThroughBorder(const traceWork_t *tw, CollisionBorder *border, trace_t *trace);
+void __cdecl CM_TraceSphereThroughBorder(
+    const traceWork_t *tw,
+    const CollisionBorder *border,
+    float offsetZ,
+    trace_t *trace);
+void __cdecl CM_SightTraceThroughAabbTree(const traceWork_t *tw, const CollisionAabbTree *aabbTree, trace_t *trace);
+void __cdecl CM_MeshTestInLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
+void __cdecl CM_PositionTestInAabbTree_r(const traceWork_t *tw, CollisionAabbTree *aabbTree, trace_t *trace);
+void __cdecl CM_PositionTestCapsuleInTriangle(const traceWork_t *tw, const unsigned __int16 *indices, trace_t *trace);
+double __cdecl CM_DistanceSquaredFromPointToTriangle(const float *pt, const unsigned __int16 *indices);
+void __cdecl CM_ClosestPointOnTri(
+    const float *pt,
+    const float *v0,
+    const float *e0,
+    const float *e1,
+    float a00,
+    float a01,
+    float a11,
+    float *ptOnTri);
+bool __cdecl CM_DoesCapsuleIntersectTriangle(
+    const float *start,
+    const float *end,
+    float radiusSq,
+    const unsigned __int16 *indices);
+double __cdecl CM_DistanceSquaredBetweenSegments(
+    const float *start0,
+    const float *delta0,
+    const float *start1,
+    const float *delta1);
+
+// cm_test
+struct leafList_s // sizeof=0x2C
+{                                       // ...
+    int count;                          // ...
+    int maxcount;                       // ...
+    int overflowed;                     // ...
+    unsigned __int16 *list;             // ...
+    float bounds[2][3];                 // ...
+    int lastLeaf;                       // ...
+};
+int __cdecl CM_PointLeafnum_r(const float *p, int num);
+int __cdecl CM_PointLeafnum(const float *p);
+void __cdecl CM_BoxLeafnums_r(leafList_s *ll, int nodenum);
+void __cdecl CM_StoreLeafs(leafList_s *ll, int nodenum);
+int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, unsigned __int16 *list, int listsize, int *lastLeaf);
+int __cdecl CM_PointContents(const float *p, unsigned int model);
+int __cdecl CM_PointContentsLeafBrushNode_r(const float *p, cLeafBrushNode_s *node);
+int __cdecl CM_TransformedPointContents(const float *p, unsigned int model, const float *origin, const float *angles);
+unsigned __int8 *__cdecl CM_ClusterPVS(int cluster);
+
+// cm_world
+struct areaParms_t // sizeof=0x18
+{                                       // ...
+    const float *mins;                  // ...
+    const float *maxs;                  // ...
+    int *list;                          // ...
+    int count;                          // ...
+    int maxcount;                       // ...
+    int contentmask;                    // ...
+};
+struct staticmodeltrace_t // sizeof=0x28
+{                                       // ...
+    TraceExtents extents;               // ...
+    int contents;                       // ...
+};
+struct sightclip_t // sizeof=0x48
+{
+    float mins[3];
+    float maxs[3];
+    float outerSize[3];
+    float start[3];
+    float end[3];
+    int passEntityNum[2];
+    int contentmask;
+};
+struct sightpointtrace_t // sizeof=0x2C
+{                                       // ...
+    float start[3];                     // ...
+    float end[3];                       // ...
+    int passEntityNum[2];               // ...
+    int contentmask;                    // ...
+    int locational;                     // ...
+    unsigned __int8 *priorityMap;       // ...
+};
+void __cdecl TRACK_cm_world();
+void __cdecl CM_LinkWorld();
+void CM_ClearWorld();
+void __cdecl CM_UnlinkEntity(svEntity_s *ent);
+void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsigned int clipHandle);
+void __cdecl CM_AddEntityToNode(svEntity_s *ent, unsigned __int16 childNodeIndex);
+void __cdecl CM_SortNode(unsigned __int16 nodeIndex, float *mins, float *maxs);
+unsigned __int16 __cdecl CM_AllocWorldSector(float *mins, float *maxs);
+void __cdecl CM_AddStaticModelToNode(cStaticModel_s *staticModel, unsigned __int16 childNodeIndex);
+unsigned int CM_LinkAllStaticModels();
+void __cdecl CM_LinkStaticModel(cStaticModel_s *staticModel);
+int __cdecl CM_AreaEntities(const float *mins, const float *maxs, int *entityList, int maxcount, int contentmask);
+void __cdecl CM_AreaEntities_r(unsigned int nodeIndex, areaParms_t *ap);
+void __cdecl CM_PointTraceStaticModels(trace_t *results, const float *start, const float *end, int contentmask);
+void __cdecl CM_PointTraceStaticModels_r(
+    locTraceWork_t *tw,
+    unsigned __int16 nodeIndex,
+    const float *p1_,
+    const float *p2,
+    trace_t *trace);
+int __cdecl CM_PointTraceStaticModelsComplete(const float *start, const float *end, int contentmask);
+int __cdecl CM_PointTraceStaticModelsComplete_r(
+    const staticmodeltrace_t *clip,
+    unsigned __int16 nodeIndex,
+    const float *p1_,
+    const float *p2);
+void __cdecl CM_ClipMoveToEntities(moveclip_t *clip, trace_t *trace);
+void __cdecl CM_ClipMoveToEntities_r(
+    const moveclip_t *clip,
+    unsigned __int16 nodeIndex,
+    const float *p1,
+    const float *p2,
+    trace_t *trace);
+int __cdecl CM_ClipSightTraceToEntities(sightclip_t *clip);
+int __cdecl CM_ClipSightTraceToEntities_r(
+    const sightclip_t *clip,
+    unsigned __int16 nodeIndex,
+    const float *p1,
+    const float *p2);
+void __cdecl CM_PointTraceToEntities(pointtrace_t *clip, trace_t *trace);
+void __cdecl CM_PointTraceToEntities_r(
+    pointtrace_t *clip,
+    unsigned __int16 nodeIndex,
+    const float *p1,
+    const float *p2,
+    trace_t *trace);
+int __cdecl CM_PointSightTraceToEntities(sightpointtrace_t *clip);
+int __cdecl CM_PointSightTraceToEntities_r(
+    sightpointtrace_t *clip,
+    unsigned __int16 nodeIndex,
+    const float *p1,
+    const float *p2);
+
 
 // cm_load
 void __cdecl TRACK_cm_load();

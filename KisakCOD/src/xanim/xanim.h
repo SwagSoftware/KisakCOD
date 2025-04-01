@@ -12,8 +12,6 @@
 
 #include <universal/com_math.h>
 
-#include <msslib/mss.h>
-
 #include <bgame/bg_weapons.h>
 
 union XAnimIndices // sizeof=0x4
@@ -382,109 +380,7 @@ struct XAnimNotify_s // sizeof=0xC
     unsigned int type;
     float timeFrac;
 };
-struct MssSound // sizeof=0x28
-{                                       // ...
-    _AILSOUNDINFO info;
-    unsigned __int8* data;
-};
-struct LoadedSound // sizeof=0x2C
-{                                       // ...
-    const char* name;
-    MssSound sound;
-};
-struct StreamFileNameRaw // sizeof=0x8
-{                                       // ...
-    const char* dir;
-    const char* name;
-};
-union StreamFileInfo // sizeof=0x8
-{                                       // ...
-    StreamFileNameRaw raw;
-};
-struct StreamFileName // sizeof=0x8
-{                                       // ...
-    StreamFileInfo info;
-};
-struct StreamedSound // sizeof=0x8
-{                                       // ...
-    StreamFileName filename;
-};
-union SoundFileRef // sizeof=0x8
-{                                       // ...
-    LoadedSound* loadSnd;
-    StreamedSound streamSnd;
-};
-struct SoundFile // sizeof=0xC
-{
-    unsigned __int8 type;
-    unsigned __int8 exists;
-    // padding byte
-    // padding byte
-    SoundFileRef u;
-};
-struct SndCurve // sizeof=0x48
-{                                       // ...
-    const char* filename;               // ...
-    int knotCount;                      // ...
-    float knots[8][2];                  // ...
-};
-struct MSSSpeakerLevels // sizeof=0x10
-{                                       // ...
-    int speaker;
-    int numLevels;
-    float levels[2];
-};
-struct MSSChannelMap // sizeof=0x64
-{                                       // ...
-    int speakerCount;
-    MSSSpeakerLevels speakers[6];
-};
-struct SpeakerMap // sizeof=0x198
-{                                       // ...
-    bool isDefault;
-    // padding byte
-    // padding byte
-    // padding byte
-    const char* name;                   // ...
-    MSSChannelMap channelMaps[2][2];
-};
-struct SpeakerMapInfo // sizeof=0x1D8
-{                                       // ...
-    char name[64];
-    SpeakerMap speakerMap;              // ...
-};
-const struct snd_alias_t // sizeof=0x5C
-{
-    const char* aliasName;
-    const char* subtitle;
-    const char* secondaryAliasName;
-    const char* chainAliasName;
-    SoundFile* soundFile;
-    int sequence;
-    float volMin;
-    float volMax;
-    float pitchMin;
-    float pitchMax;
-    float distMin;
-    float distMax;
-    int flags;
-    float slavePercentage;
-    float probability;
-    float lfePercentage;
-    float centerPercentage;
-    int startDelay;
-    SndCurve* volumeFalloffCurve;
-    float envelopMin;
-    float envelopMax;
-    float envelopPercentage;
-    SpeakerMap* speakerMap;
-};
-struct snd_alias_list_t // sizeof=0xC
-{                                       // ...
-    const char* aliasName;              // ...
-    snd_alias_t* head;                  // ...
-    int count;                          // ...
-};
+
 struct cStaticModelWritable // sizeof=0x2
 {                                       // ...
     unsigned __int16 nextModelInWorldSector;

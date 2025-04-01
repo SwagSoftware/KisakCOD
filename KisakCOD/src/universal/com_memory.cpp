@@ -1150,3 +1150,23 @@ void* Z_Malloc(int size, const char* name, int type)
 
     return buf;
 }
+
+void __cdecl Z_Free(char *ptr, int type)
+{
+    if (ptr)
+    {
+       // track_z_free(type, ptr, 32);
+        free(ptr - 32);
+    }
+}
+
+
+char *__cdecl Z_MallocGarbage(int size, const char *name, int type)
+{
+    char *buf; // [esp+0h] [ebp-4h]
+
+    buf = Z_TryMallocGarbage(size, name, type);
+    if (!buf)
+        Z_MallocFailed(size + 32);
+    return buf;
+}

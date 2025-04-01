@@ -31,6 +31,8 @@ void __cdecl Z_VirtualCommit(void* ptr, int size);
 void* Z_Malloc(int size, const char* name, int type);
 void  Z_Free(void* ptr, int type);
 
+char *__cdecl Z_MallocGarbage(int size, const char *name, int type);
+
 const char* CopyString(const char* in);
 void __cdecl ReplaceString(const char** str, char* in);
 void __cdecl FreeString(const char* str);
