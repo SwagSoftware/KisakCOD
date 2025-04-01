@@ -5663,7 +5663,7 @@ void __cdecl Scr_SetErrorMessage(char* error)
 {
     if (!scrVarPub.error_message)
     {
-        _I_strncpyz(error_message, error, 1024);
+        I_strncpyz(error_message, error, 1024);
         scrVarPub.error_message = error_message;
     }
 }

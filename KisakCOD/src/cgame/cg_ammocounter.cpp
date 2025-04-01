@@ -458,13 +458,12 @@ void __cdecl CG_DrawPlayerActionSlotDpad(
         }
     }
 }
-
 void __cdecl CG_DrawPlayerActionSlot(
     int localClientNum,
-    const rectDef_s *rect,
+    const rectDef_s* rect,
     unsigned int slotIdx,
-    float *color,
-    Font_s *textFont,
+    float* color,
+    Font_s* textFont,
     float textScale,
     int textStyle)
 {
@@ -473,13 +472,13 @@ void __cdecl CG_DrawPlayerActionSlot(
     ActionSlotType v9; // [esp+30h] [ebp-7Ch]
     char str[64]; // [esp+34h] [ebp-78h] BYREF
     int ammo; // [esp+78h] [ebp-34h]
-    cg_s *cgameGlob; // [esp+7Ch] [ebp-30h]
+    cg_s* cgameGlob; // [esp+7Ch] [ebp-30h]
     unsigned int weapIdx; // [esp+80h] [ebp-2Ch]
-    const playerState_s *ps; // [esp+84h] [ebp-28h]
+    const playerState_s* ps; // [esp+84h] [ebp-28h]
     float colorMod[4]; // [esp+88h] [ebp-24h] BYREF
     float x; // [esp+98h] [ebp-14h] BYREF
     float y; // [esp+9Ch] [ebp-10h] BYREF
-    WeaponDef *weapDef; // [esp+A0h] [ebp-Ch]
+    WeaponDef* weapDef; // [esp+A0h] [ebp-Ch]
     float h; // [esp+A4h] [ebp-8h] BYREF
     float w; // [esp+A8h] [ebp-4h] BYREF
 
@@ -503,7 +502,7 @@ void __cdecl CG_DrawPlayerActionSlot(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    ps = (const playerState_s *)&MEMORY[0x9D5574];
+    ps = &cgArray[0].predictedPlayerState;
     colorMod[0] = *color;
     colorMod[1] = color[1];
     colorMod[2] = color[2];

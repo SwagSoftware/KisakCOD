@@ -1,109 +1,15 @@
 #pragma once
-#include <gfx_d3d/fxprimitives.h>
+
 #include <bgame/bg_local.h>
 
- struct CEntTurretAngles // sizeof=0x8
- {                                       // ...
-     float pitch;
-     float yaw;
- };
- union $06707BB8B07567CD0B9AB50B15101D6E // sizeof=0x8
- {                                       // ...
-     CEntTurretAngles angles;
-     const float *viewAngles;
- };
- struct CEntTurretInfo // sizeof=0x10
- {                                       // ...
-     $06707BB8B07567CD0B9AB50B15101D6E ___u0;
-     float barrelPitch;
-     bool playerUsing;
-     unsigned __int8 tag_aim;
-     unsigned __int8 tag_aim_animated;
-     unsigned __int8 tag_flash;
- };
- struct __declspec(align(2)) CEntVehicleInfo // sizeof=0x24
- {                                       // ...
-     __int16 pitch;
-     __int16 yaw;
-     __int16 roll;
-     __int16 barrelPitch;
-     float barrelRoll;
-     __int16 steerYaw;
-     // padding byte
-     // padding byte
-     float time;
-     unsigned __int16 wheelFraction[4];
-     unsigned __int8 wheelBoneIndex[4];
-     unsigned __int8 tag_body;
-     unsigned __int8 tag_turret;
-     unsigned __int8 tag_barrel;
-     // padding byte
- };
- 
- struct FxEffect;
- struct CEntFx // sizeof=0x8
- {                                       // ...
-     int triggerTime;
-     FxEffect *effect;
- };
+#include <gfx_d3d/fxprimitives.h>
+#include <gfx_d3d/r_gfx.h>
 
- struct GfxSkinCacheEntry // sizeof=0xC
- {                                       // ...
-     unsigned int frameCount;
-     int skinnedCachedOffset;
-     unsigned __int16 numSkinnedVerts;
-     unsigned __int16 ageCount;
- };
+struct cg_s;
 
-struct cpose_t // sizeof=0x64
-{                                       // ...
-    unsigned __int16 lightingHandle;
-    unsigned __int8 eType;
-    unsigned __int8 eTypeUnion;
-    unsigned __int8 localClientNum;
-    // padding byte
-    // padding byte
-    // padding byte
-    int cullIn;
-    unsigned __int8 isRagdoll;
-    // padding byte
-    // padding byte
-    // padding byte
-    int ragdollHandle;
-    int killcamRagdollHandle;
-    int physObjId;
-    float origin[3];
-    float angles[3];
-    GfxSkinCacheEntry skinCacheEntry;
-    //$9D88A49AD898204B3D6E378457DD8419 ___u12;
-    union //$9D88A49AD898204B3D6E378457DD8419 // sizeof=0x24
-    {                                       // ...
-        CEntPlayerInfo player;
-        CEntTurretInfo turret;
-        CEntVehicleInfo vehicle;
-        CEntFx fx;
-    };
-};
-
-struct XAnimTree_s;
-
-struct centity_s // sizeof=0x1DC
-{                                       // ...
-    cpose_t pose;
-    LerpEntityState currentState;
-    entityState_s nextState;
-    bool nextValid;
-    bool bMuzzleFlash;
-    bool bTrailMade;
-    // padding byte
-    int previousEventSequence;
-    int miscTime;
-    float lightingOrigin[3];
-    XAnimTree_s *tree;
-};
-
-struct ScreenPlacement;
+struct Font_s;
 struct Material;
+struct ScreenPlacement;
 
 void __cdecl CG_DrawRotatedPicPhysical(
     const ScreenPlacement *scrPlace,
@@ -310,13 +216,12 @@ int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems);
 void __cdecl CopyInUseHudElems(hudelem_s **elems, int *elemCount, hudelem_s *elemSrcArray, int elemSrcArrayCount);
 int __cdecl compare_hudelems(const void *pe0, const void *pe1);
 void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum);
-void  AddDrawSurfForHudElemWaypoint(hudelem_color_t a1@<ebp>, int localClientNum, const hudelem_s *elem);
+void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem);
 double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem);
 
 
-
-
 // cg_weapons
+struct refdef_s;
 struct weaponInfo_s // sizeof=0x44
 {                                       // ...
     DObj_s *viewModelDObj;
@@ -682,6 +587,49 @@ enum visionSetMode_t : __int32
     VISIONSETMODE_NIGHT = 0x1,
     VISIONSETMODECOUNT = 0x2,
 };
+enum visionSetLerpStyle_t : __int32
+{                                       // ...
+    VISIONSETLERP_UNDEFINED = 0x0,
+    VISIONSETLERP_NONE = 0x1,
+    VISIONSETLERP_TO_LINEAR = 0x2,
+    VISIONSETLERP_TO_SMOOTH = 0x3,
+    VISIONSETLERP_BACKFORTH_LINEAR = 0x4,
+    VISIONSETLERP_BACKFORTH_SMOOTH = 0x5,
+};
+struct visionSetLerpData_t // sizeof=0xC
+{                                       // ...
+    int timeStart;
+    int timeDuration;
+    visionSetLerpStyle_t style;
+};
+struct visionSetVars_t // sizeof=0x50
+{                                       // ...
+    bool glowEnable;                    // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    float glowBloomCutoff;              // ...
+    float glowBloomDesaturation;        // ...
+    float glowBloomIntensity0;          // ...
+    float glowBloomIntensity1;          // ...
+    float glowRadius0;                  // ...
+    float glowRadius1;                  // ...
+    float glowSkyBleedIntensity0;       // ...
+    float glowSkyBleedIntensity1;       // ...
+    bool filmEnable;                    // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    float filmBrightness;               // ...
+    float filmContrast;                 // ...
+    float filmDesaturation;             // ...
+    bool filmInvert;                    // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    float filmLightTint[3];             // ...
+    float filmDarkTint[3];              // ...
+};
 void __cdecl CG_RegisterVisionSetsDvars();
 void __cdecl CG_InitVisionSetsMenu();
 void __cdecl CG_AddVisionSetMenuItem(XAssetHeader header);
@@ -801,6 +749,21 @@ enum EquipmentSound_t : __int32
     EQS_QRUNNING = 0x4,
     EQS_QSPRINTING = 0x5,
 };
+
+enum InvalidCmdHintType : __int32
+{                                       // ...
+    INVALID_CMD_NONE = 0x0,
+    INVALID_CMD_NO_AMMO_BULLETS = 0x1,
+    INVALID_CMD_NO_AMMO_FRAG_GRENADE = 0x2,
+    INVALID_CMD_NO_AMMO_SPECIAL_GRENADE = 0x3,
+    INVALID_CMD_NO_AMMO_FLASH_GRENADE = 0x4,
+    INVALID_CMD_STAND_BLOCKED = 0x5,
+    INVALID_CMD_CROUCH_BLOCKED = 0x6,
+    INVALID_CMD_TARGET_TOO_CLOSE = 0x7,
+    INVALID_CMD_LOCKON_REQUIRED = 0x8,
+    INVALID_CMD_NOT_ENOUGH_CLEARANCE = 0x9,
+};
+
 int __cdecl CG_GetBoneIndex(
     int localClientNum,
     unsigned int dobjHandle,
@@ -913,13 +876,7 @@ void __cdecl CG_DrawGrenadeIcon(
 
 
 // cg_draw_debug
-struct meminfo_t // sizeof=0xA0
-{                                       // ...
-    int total;                          // ...
-    int nonSwapTotal;                   // ...
-    int nonSwapMinSpecTotal;            // ...
-    int typeTotal[37];                  // ...
-};
+struct meminfo_t;
 void __cdecl CG_CalculateFPS();
 double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *meminfo);
 bool __cdecl CG_Flash(int timeMs);
@@ -958,6 +915,12 @@ void __cdecl Vec4Set(float *v, float x, float y, float z, float w);
 
 
 // cg_compass
+enum CompassType : __int32
+{                                       // ...
+    COMPASS_TYPE_PARTIAL = 0x0,
+    COMPASS_TYPE_FULL = 0x1,
+};
+
 void __cdecl CG_CompassRegisterDvars();
 bool __cdecl CG_IsSelectingLocation(int localClientNum);
 bool __cdecl CG_WorldPosToCompass(
@@ -1148,11 +1111,11 @@ struct CameraShakeSet // sizeof=0x94
     CameraShake shakes[4];
     float phase;
 };
+
 void __cdecl TRACK_cg_camerashake();
 void __cdecl CG_StartShakeCamera(int localClientNum, float p, int duration, float *src, float radius);
 int __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake);
 void __cdecl CG_ShakeCamera(int localClientNum);
-void __cdecl MemFile_ArchiveData(MemoryFile *memFile, int bytes, void *data);
 void __cdecl CG_ClearCameraShakes(int localClientNum);
 
 

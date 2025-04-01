@@ -1,5 +1,7 @@
 #include "fx_system.h"
 
+static FxBeamInfo g_beamInfo;
+
 void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
 {
     float4 v1; // [esp-24h] [ebp-2DCh]
@@ -575,8 +577,7 @@ void __cdecl Float4x4InfinitePerspectiveMatrix(mat4x4 *mtx, float tanHalfFovX, f
     mtx->w.v[3] = 0.0;
 }
 
-char  FX_GenerateBeam_GetFlatDelta@<al>(
-    float a1@<ebp>,
+char  FX_GenerateBeam_GetFlatDelta(
     const mat4x4 *clipMtx,
     const mat4x4 *invClipMtx,
     float4 beamWorldBegin,

@@ -1,8 +1,9 @@
 #pragma once
+
+#include <qcommon/qcommon.h>
+
 #include <xanim/xanim.h>
 #include <xanim/dobj.h>
-
-#include <utility>
 
 enum DynEntityType : __int32
 {                                       // ...
@@ -80,6 +81,10 @@ struct __declspec(align(2)) BreakablePiece // sizeof=0xC
     bool active;                        // ...
     // padding byte
 };
+
+struct pointtrace_t;
+struct trace_t;
+struct moveclip_t;
 
 void __cdecl DynEntCl_RegisterDvars();
 void __cdecl DynEntCl_InitEntities(int localClientNum);

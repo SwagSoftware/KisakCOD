@@ -1139,6 +1139,18 @@
     <ClInclude Include="src\qcommon\ent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\cgame\cg_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cgame\cg_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bgame\bg_weapons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universal\memfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="src\msslib\mss32.lib" />

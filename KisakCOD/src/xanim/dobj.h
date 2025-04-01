@@ -1,6 +1,9 @@
 #pragma once
 
-#include "xanim.h"
+struct PhysPreset;
+
+struct XAnimTree_s;
+struct XModel;
 
 enum PhysWorld : __int32
 {                                       // ...
@@ -10,6 +13,7 @@ enum PhysWorld : __int32
     PHYS_WORLD_COUNT = 0x3,
 };
 
+// KISAKTODO replace with ode
 struct dxBody;
 struct dxJoint;
 struct dxSpace;
@@ -220,6 +224,52 @@ struct __declspec(align(4)) DObjTrace_s // sizeof=0x1C
     unsigned __int16 partName;          // ...
     unsigned __int16 partGroup;         // ...
     // padding byte
+    // padding byte
+};
+
+struct DObjAnimMat // sizeof=0x20
+{                                       // ...
+    float quat[4];                      // ...
+    float trans[3];                     // ...
+    float transWeight;                  // ...
+};
+
+struct DSkelPartBits // sizeof=0x30
+{                                       // ...
+    int anim[4];                        // ...
+    int control[4];                     // ...
+    int skel[4];                        // ...
+};
+
+struct DSkel // sizeof=0x38
+{                                       // ...
+    DSkelPartBits partBits;             // ...
+    int timeStamp;                      // ...
+    DObjAnimMat* mat;                   // ...
+};
+
+struct DObj_s // sizeof=0x64
+{
+    XAnimTree_s* tree;
+    unsigned __int16 duplicateParts;
+    unsigned __int16 entnum;
+    unsigned __int8 duplicatePartsSize;
+    unsigned __int8 numModels;
+    unsigned __int8 numBones;
+    // padding byte
+    unsigned int ignoreCollision;
+    volatile int locked;
+    DSkel skel;
+    float radius;
+    unsigned int hidePartBits[4];
+    XModel** models;
+};
+
+struct __declspec(align(2)) DObjModel_s // sizeof=0x8
+{                                       // ...
+    XModel* model;                      // ...
+    unsigned __int16 boneName;          // ...
+    bool ignoreCollision;               // ...
     // padding byte
 };
 

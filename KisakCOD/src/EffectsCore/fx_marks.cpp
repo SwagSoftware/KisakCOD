@@ -1648,7 +1648,6 @@ void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
 }
 
 void  FX_GenerateMarkVertsForMark_MatrixFromPlacement(
-    float a1@<ebp>,
     const GfxPlacement *placement,
     const float *viewOffset,
     float (*outTransform)[3])
@@ -1843,7 +1842,6 @@ char __cdecl FX_GenerateMarkVertsForList_EntDObj(
 }
 
 void  FX_GenerateMarkVertsForMark_MatrixFromAnim(
-    int a1@<ebp>,
     FxMark *mark,
     const DObj_s *dobj,
     const DObjAnimMat *boneMtxList,

@@ -2,114 +2,9 @@
 
 #include "cg_public_mp.h"
 
-#include <client_mp/client_mp.h>
+#include <cgame/cg_local.h>
 
-#include <bgame/bg_local.h>
 #include <gfx_d3d/r_gfx.h>
-
-struct CEntTurretAngles // sizeof=0x8
-{                                       // ...
-    float pitch;
-    float yaw;
-};
-struct CEntTurretInfo // sizeof=0x10
-{                                       // ...
-    union {
-        CEntTurretAngles angles;
-        const float* viewAngles;
-    };
-    float barrelPitch;
-    bool playerUsing;
-    unsigned __int8 tag_aim;
-    unsigned __int8 tag_aim_animated;
-    unsigned __int8 tag_flash;
-};
-struct __declspec(align(2)) CEntVehicleInfo // sizeof=0x24
-{                                       // ...
-    __int16 pitch;
-    __int16 yaw;
-    __int16 roll;
-    __int16 barrelPitch;
-    float barrelRoll;
-    __int16 steerYaw;
-    // padding byte
-    // padding byte
-    float time;
-    unsigned __int16 wheelFraction[4];
-    unsigned __int8 wheelBoneIndex[4];
-    unsigned __int8 tag_body;
-    unsigned __int8 tag_turret;
-    unsigned __int8 tag_barrel;
-    // padding byte
-};
-
-struct __declspec(align(4)) CEntPlayerInfo // sizeof=0xC
-{                                       // ...
-    clientControllers_t* control;       // ...
-    unsigned __int8 tag[6];             // ...
-    // padding byte
-    // padding byte
-};
-
-struct FxEffect;
-struct CEntFx // sizeof=0x8
-{                                       // ...
-    int triggerTime;
-    FxEffect *effect;
-};
-
-struct GfxSkinCacheEntry // sizeof=0xC
-{                                       // ...
-    unsigned int frameCount;
-    int skinnedCachedOffset;
-    unsigned __int16 numSkinnedVerts;
-    unsigned __int16 ageCount;
-};
-
-struct cpose_t // sizeof=0x64
-{                                       // ...
-    unsigned __int16 lightingHandle;
-    unsigned __int8 eType;
-    unsigned __int8 eTypeUnion;
-    unsigned __int8 localClientNum;
-    // padding byte
-    // padding byte
-    // padding byte
-    int cullIn;
-    unsigned __int8 isRagdoll;
-    // padding byte
-    // padding byte
-    // padding byte
-    int ragdollHandle;
-    int killcamRagdollHandle;
-    int physObjId;
-    float origin[3];
-    float angles[3];
-    GfxSkinCacheEntry skinCacheEntry;
-    //$9D88A49AD898204B3D6E378457DD8419 ___u12;
-    union //$9D88A49AD898204B3D6E378457DD8419 // sizeof=0x24
-    {                                       // ...
-        CEntPlayerInfo player;
-        CEntTurretInfo turret;
-        CEntVehicleInfo vehicle;
-        CEntFx fx;
-    };
-};
-
-struct centity_s // sizeof=0x1DC
-{                                       // ...
-    cpose_t pose;
-    LerpEntityState currentState;
-    entityState_s nextState;
-    bool nextValid;
-    bool bMuzzleFlash;
-    bool bTrailMade;
-    // padding byte
-    int previousEventSequence;
-    int miscTime;
-    float lightingOrigin[3];
-    XAnimTree_s *tree;
-};
 
 enum sessionState_t : __int32
 {                                       // ...
@@ -125,53 +20,55 @@ enum clientConnected_t : __int32
     CON_CONNECTING = 0x1,
     CON_CONNECTED = 0x2,
 };
-
-enum VehicleMoveState : __int32
-{                                       // ...
-    VEH_MOVESTATE_STOP = 0x0,
-    VEH_MOVESTATE_MOVE = 0x1,
-    VEH_MOVESTATE_HOVER = 0x2,
-};
-
-enum VehicleTurretState : __int32
-{                                       // ...
-    VEH_TURRET_STOPPED = 0x0,
-    VEH_TURRET_STOPPING = 0x1,
-    VEH_TURRET_MOVING = 0x2,
-};
-
-struct EntHandle // sizeof=0x4
-{                                       // ...
-    unsigned __int16 number;
-    unsigned __int16 infoIndex;
-};
-
-struct entityShared_t // sizeof=0x68
-{                                       // ...
-    unsigned __int8 linked;
-    unsigned __int8 bmodel;
-    unsigned __int8 svFlags;
-    // padding byte
-    int clientMask[2];
-    unsigned __int8 inuse;              // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    int broadcastTime;
-    float mins[3];                      // ...
-    float maxs[3];
-    int contents;                       // ...
-    float absmin[3];                    // ...
-    float absmax[3];
-    float currentOrigin[3];             // ...
-    float currentAngles[3];
-    EntHandle ownerNum;
-    int eventTime;
-};
-
 struct playerTeamState_t // sizeof=0x4
 {                                       // ...
     int location;
+};
+
+struct __declspec(align(2)) usercmd_s // sizeof=0x20
+{                                       // XREF: ?SV_BotUserMove@@YAXPAUclient_t@@@Z/r
+                                        // ?SV_UserMove@@YAXPAUclient_t@@PAUmsg_t@@H@Z/r ...
+    int serverTime;                     // XREF: CG_DrawDisconnect+85/r
+    // CG_DrawDisconnect+90/r ...
+    int buttons;                        // XREF: CG_CheckForPlayerInput+5D/r
+    // CG_CheckForPlayerInput+60/r ...
+    int angles[3];                      // XREF: CG_CheckPlayerMovement+B/o
+    // CG_CheckPlayerMovement+E/o ...
+    unsigned __int8 weapon;             // XREF: CL_CreateCmd+64/w
+    // SV_AddTestClient(void)+232/w ...
+    unsigned __int8 offHandIndex;
+    char forwardmove;                   // XREF: CG_CheckPlayerMovement:loc_4413AE/r
+    // SV_BotUserMove(client_t *)+138/w ...
+    char rightmove;                     // XREF: CG_CheckPlayerMovement+26/r
+    // SV_BotUserMove(client_t *)+166/w ...
+    float meleeChargeYaw;               // XREF: CL_CreateCmd+67/w
+    // SV_AddTestClient(void)+238/w ...
+    unsigned __int8 meleeChargeDist;    // XREF: CL_CreateCmd+6A/w
+    // SV_AddTestClient(void)+23E/w ...
+    char selectedLocation[2];
+    // padding byte
+};
+
+struct clientState_s // sizeof=0x64
+{                                       // XREF: ?MSG_WriteDeltaClient@@YAXPAUSnapshotInfo_s@@PAUmsg_t@@HPBUclientState_s@@2H@Z/r
+                                        // ?MSG_ReadDeltaClient@@YAHPAUmsg_t@@HPBUclientState_s@@PAU2@H@Z/r ...
+    int clientIndex;
+    team_t team;                        // XREF: SpectatorClientEndFrame(gentity_s *):loc_4F9933/r
+    // SpectatorClientEndFrame(gentity_s *):loc_4F9A78/r ...
+    int modelindex;
+    int attachModelIndex[6];            // XREF: FX_RestorePhysicsData+156/o
+    // FX_SavePhysicsData+156/o ...
+    int attachTagIndex[6];              // XREF: AimTarget_ProcessEntity(int,centity_s const *)+133/o
+    // AimTarget_IsTargetValid+228/o ...
+    char name[16];                      // XREF: FX_UpdateEffectBolt+E7/o
+    // _memmove:UnwindDown2/o ...
+    float maxSprintTimeMultiplier;      // XREF: RB_LogPrintState_0(int,int)+123/o
+    // R_ChangeState_0(GfxCmdBufState *,uint)+2E6/o
+    int rank;
+    int prestige;
+    int perks;
+    int attachedVehEntNum;
+    int attachedVehSlotIndex;           // XREF: .rdata:_hexc_10_32_table/o
 };
 
 struct clientSession_t // sizeof=0x110
@@ -207,6 +104,7 @@ struct clientSession_t // sizeof=0x110
     int psOffsetTime;
 };
 
+// KISAKTODO this + above should probably be in client_mp?
 struct gclient_s // sizeof=0x3184
 {                                       // ...
     playerState_s ps;
@@ -268,260 +166,6 @@ struct gclient_s // sizeof=0x3184
     int lastStandTime;
 };
 
-struct turretInfo_s // sizeof=0x48
-{                                       // ...
-    int inuse;                          // ...
-    int flags;
-    int fireTime;
-    float arcmin[2];
-    float arcmax[2];
-    float dropPitch;
-    int stance;
-    int prevStance;
-    int fireSndDelay;
-    float userOrigin[3];
-    float playerSpread;
-    float pitchCap;
-    int triggerDown;
-    unsigned __int8 fireSnd;
-    unsigned __int8 fireSndPlayer;
-    unsigned __int8 stopSnd;
-    unsigned __int8 stopSndPlayer;
-};
-
-struct VehicleRideSlot_t // sizeof=0xC
-{                                       // ...
-    unsigned int tagName;
-    int boneIdx;
-    int entNum;
-};
-
-struct vehicle_node_t // sizeof=0x44
-{                                       // ...
-    unsigned __int16 name;
-    unsigned __int16 target;
-    unsigned __int16 script_linkname;
-    unsigned __int16 script_noteworthy;
-    __int16 index;
-    // padding byte
-    // padding byte
-    int rotated;
-    float speed;
-    float lookAhead;
-    float origin[3];
-    float dir[3];
-    float angles[3];
-    float length;
-    __int16 nextIdx;
-    __int16 prevIdx;
-};
-
-struct vehicle_pathpos_t // sizeof=0xC0
-{                                       // ...
-    __int16 nodeIdx;
-    __int16 endOfPath;
-    float frac;
-    float speed;
-    float lookAhead;
-    float slide;
-    float origin[3];
-    float angles[3];
-    float lookPos[3];
-    vehicle_node_t switchNode[2];
-};
-struct vehicle_physic_t // sizeof=0xF8
-{                                       // ...
-    float origin[3];
-    float prevOrigin[3];
-    float angles[3];
-    float prevAngles[3];
-    float maxAngleVel[3];
-    float yawAccel;
-    float yawDecel;
-    char inputAccelerationOLD;
-    char inputTurning;
-    // padding byte
-    // padding byte
-    float driverPedal;
-    float driverSteer;
-    int onGround;
-    float colVelDelta[3];
-    float mins[3];
-    float maxs[3];
-    float vel[3];
-    float bodyVel[3];
-    float rotVel[3];
-    float accel[3];
-    float maxPitchAngle;
-    float maxRollAngle;
-    float wheelZVel[4];
-    float wheelZPos[4];
-    int wheelSurfType[4];
-    float worldTilt[3];
-    float worldTiltVel[3];
-};
-
-struct VehicleTags // sizeof=0x60
-{                                       // ...
-    VehicleRideSlot_t riderSlots[3];
-    int detach;
-    int popout;
-    int body;
-    int turret;
-    int turret_base;
-    int barrel;
-    int flash[5];
-    int wheel[4];
-};
-
-struct VehicleTurret // sizeof=0x14
-{                                       // ...
-    int fireTime;
-    int fireBarrel;
-    float barrelOffset;
-    int barrelBlocked;
-    VehicleTurretState turretState;
-};
-struct VehicleJitter // sizeof=0x3C
-{                                       // ...
-    int jitterPeriodMin;
-    int jitterPeriodMax;
-    int jitterEndTime;
-    float jitterOffsetRange[3];
-    float jitterDeltaAccel[3];
-    float jitterAccel[3];
-    float jitterPos[3];
-};
-struct VehicleHover // sizeof=0x1C
-{                                       // ...
-    float hoverRadius;
-    float hoverSpeed;
-    float hoverAccel;
-    float hoverGoalPos[3];
-    int useHoverAccelForAngles;
-};
-
-struct item_ent_t // sizeof=0xC
-{                                       // ...
-    int ammoCount;
-    int clipAmmoCount;
-    int index;
-};
-struct __declspec(align(4)) trigger_ent_t // sizeof=0x14
-{                                       // ...
-    int threshold;
-    int accumulate;
-    int timestamp;
-    int singleUserEntIndex;
-    bool requireLookAt;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct mover_ent_t // sizeof=0x60
-{                                       // ...
-    float decelTime;
-    float aDecelTime;
-    float speed;
-    float aSpeed;
-    float midTime;
-    float aMidTime;
-    float pos1[3];
-    float pos2[3];
-    float pos3[3];
-    float apos1[3];
-    float apos2[3];
-    float apos3[3];
-};
-struct corpse_ent_t // sizeof=0x4
-{                                       // ...
-    int deathAnimStartTime;
-};
-
-enum MissileStage : __int32
-{                                       // ...
-    MISSILESTAGE_SOFTLAUNCH = 0x0,
-    MISSILESTAGE_ASCENT = 0x1,
-    MISSILESTAGE_DESCENT = 0x2,
-};
-enum MissileFlightMode : __int32
-{                                       // ...
-    MISSILEFLIGHTMODE_TOP = 0x0,
-    MISSILEFLIGHTMODE_DIRECT = 0x1,
-};
-struct missile_ent_t // sizeof=0x3C
-{                                       // ...
-    float time;
-    int timeOfBirth;
-    float travelDist;
-    float surfaceNormal[3];
-    team_t team;
-    float curvature[3];
-    float targetOffset[3];
-    MissileStage stage;
-    MissileFlightMode flightMode;
-};
-
-struct scr_vehicle_s // sizeof=0x354
-{                                       // ...
-    vehicle_pathpos_t pathPos;
-    vehicle_physic_t phys;
-    int entNum;                         // ...
-    __int16 infoIdx;
-    // padding byte
-    // padding byte
-    int flags;
-    int team;
-    VehicleMoveState moveState;
-    __int16 waitNode;
-    // padding byte
-    // padding byte
-    float waitSpeed;
-    VehicleTurret turret;
-    VehicleJitter jitter;
-    VehicleHover hover;
-    int drawOnCompass;
-    unsigned __int16 lookAtText0;
-    unsigned __int16 lookAtText1;
-    int manualMode;
-    float manualSpeed;
-    float manualAccel;
-    float manualDecel;
-    float manualTime;
-    float speed;
-    float maxDragSpeed;
-    float turningAbility;
-    int hasTarget;
-    int hasTargetYaw;
-    int hasGoalYaw;
-    int stopAtGoal;
-    int stopping;
-    int targetEnt;
-    EntHandle lookAtEnt;
-    float targetOrigin[3];
-    float targetOffset[3];
-    float targetYaw;
-    float goalPosition[3];
-    float goalYaw;
-    float prevGoalYaw;
-    float yawOverShoot;
-    int yawSlowDown;
-    float nearGoalNotifyDist;
-    float joltDir[2];
-    float joltTime;
-    float joltWave;
-    float joltSpeed;
-    float joltDecel;
-    int playEngineSound;
-    EntHandle idleSndEnt;
-    EntHandle engineSndEnt;
-    float idleSndLerp;
-    float engineSndLerp;
-    VehicleTags boneIndex;
-    int turretHitNum;
-    float forcedMaterialSpeed;
-};
-
 struct tagInfo_s // sizeof=0x70
 {
     gentity_s* parent;
@@ -533,6 +177,7 @@ struct tagInfo_s // sizeof=0x70
     float axis[4][3];
     float parentInvAxis[4][3];
 };
+
 
 struct gentity_s // sizeof=0x274
 {                                       // ...
@@ -586,42 +231,6 @@ struct gentity_s // sizeof=0x274
     gentity_s* nextFree;
 };
 
-enum DemoType : __int32
-{                                       // ...
-    DEMO_TYPE_NONE = 0x0,
-    DEMO_TYPE_CLIENT = 0x1,
-    DEMO_TYPE_SERVER = 0x2,
-};
-enum CubemapShot : __int32
-{                                       // ...
-    CUBEMAPSHOT_NONE = 0x0,
-    CUBEMAPSHOT_RIGHT = 0x1,
-    CUBEMAPSHOT_LEFT = 0x2,
-    CUBEMAPSHOT_BACK = 0x3,
-    CUBEMAPSHOT_FRONT = 0x4,
-    CUBEMAPSHOT_UP = 0x5,
-    CUBEMAPSHOT_DOWN = 0x6,
-    CUBEMAPSHOT_COUNT = 0x7,
-};
-enum InvalidCmdHintType : __int32
-{                                       // ...
-    INVALID_CMD_NONE = 0x0,
-    INVALID_CMD_NO_AMMO_BULLETS = 0x1,
-    INVALID_CMD_NO_AMMO_FRAG_GRENADE = 0x2,
-    INVALID_CMD_NO_AMMO_SPECIAL_GRENADE = 0x3,
-    INVALID_CMD_NO_AMMO_FLASH_GRENADE = 0x4,
-    INVALID_CMD_STAND_BLOCKED = 0x5,
-    INVALID_CMD_CROUCH_BLOCKED = 0x6,
-    INVALID_CMD_TARGET_TOO_CLOSE = 0x7,
-    INVALID_CMD_LOCKON_REQUIRED = 0x8,
-    INVALID_CMD_NOT_ENOUGH_CLEARANCE = 0x9,
-};
-enum ShockViewTypes : __int32
-{                                       // ...
-    SHELLSHOCK_VIEWTYPE_BLURRED = 0x0,
-    SHELLSHOCK_VIEWTYPE_FLASHED = 0x1,
-    SHELLSHOCK_VIEWTYPE_NONE = 0x2,
-};
 struct snapshot_s // sizeof=0x2307C
 {                                       // ...
     int snapFlags;
@@ -634,6 +243,7 @@ struct snapshot_s // sizeof=0x2307C
     clientState_s clients[64];
     int serverCommandSequence;
 };
+
 struct playerEntity_t // sizeof=0x30
 {                                       // ...
     float fLastWeaponPosFrac;
@@ -643,31 +253,7 @@ struct playerEntity_t // sizeof=0x30
     float vLastMoveOrg[3];
     float vLastMoveAng[3];
 };
-struct refdef_s // sizeof=0x4098
-{                                       // ...
-    unsigned int x;
-    unsigned int y;
-    unsigned int width;
-    unsigned int height;
-    float tanHalfFovX;
-    float tanHalfFovY;
-    float vieworg[3];
-    float viewaxis[3][3];
-    float viewOffset[3];
-    int time;
-    float zNear;
-    float blurRadius;
-    GfxDepthOfField dof;
-    GfxFilm film;
-    GfxGlow glow;
-    GfxLight primaryLights[255];
-    GfxViewport scissorViewport;
-    bool useScissorViewport;
-    // padding byte
-    // padding byte
-    // padding byte
-    int localClientNum;
-};
+
 struct score_t // sizeof=0x28
 {                                       // ...
     int client;
@@ -678,56 +264,10 @@ struct score_t // sizeof=0x28
     int kills;
     int rank;
     int assists;
-    Material *hStatusIcon;
-    Material *hRankIcon;
+    Material* hStatusIcon;
+    Material* hRankIcon;
 };
-struct visionSetVars_t // sizeof=0x50
-{                                       // ...
-    bool glowEnable;                    // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    float glowBloomCutoff;              // ...
-    float glowBloomDesaturation;        // ...
-    float glowBloomIntensity0;          // ...
-    float glowBloomIntensity1;          // ...
-    float glowRadius0;                  // ...
-    float glowRadius1;                  // ...
-    float glowSkyBleedIntensity0;       // ...
-    float glowSkyBleedIntensity1;       // ...
-    bool filmEnable;                    // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    float filmBrightness;               // ...
-    float filmContrast;                 // ...
-    float filmDesaturation;             // ...
-    bool filmInvert;                    // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    float filmLightTint[3];             // ...
-    float filmDarkTint[3];              // ...
-};
-enum visionSetLerpStyle_t : __int32
-{                                       // ...
-    VISIONSETLERP_UNDEFINED = 0x0,
-    VISIONSETLERP_NONE = 0x1,
-    VISIONSETLERP_TO_LINEAR = 0x2,
-    VISIONSETLERP_TO_SMOOTH = 0x3,
-    VISIONSETLERP_BACKFORTH_LINEAR = 0x4,
-    VISIONSETLERP_BACKFORTH_SMOOTH = 0x5,
-};
-struct visionSetLerpData_t // sizeof=0xC
-{                                       // ...
-    int timeStart;
-    int timeDuration;
-    visionSetLerpStyle_t style;
-};
-struct hudElemSoundInfo_t // sizeof=0x4
-{                                       // ...
-    int lastPlayedTime;
-};
+
 struct cg_s // sizeof=0xFF580
 {
     int clientNum;
@@ -738,8 +278,8 @@ struct cg_s // sizeof=0xFF580
     int renderScreen;
     int latestSnapshotNum;
     int latestSnapshotTime;
-    snapshot_s *snap;
-    snapshot_s *nextSnap;
+    snapshot_s* snap;
+    snapshot_s* nextSnap;
     snapshot_s activeSnapshots[2];
     float frameInterpolation;
     int frametime;
@@ -763,7 +303,7 @@ struct cg_s // sizeof=0xFF580
     float swayAngles[3];
     float swayOffset[3];
     int iEntityLastType[1024];
-    XModel *pEntityLastXModel[1024];
+    XModel* pEntityLastXModel[1024];
     float zoomSensitivity;
     bool isLoading;
     char objectiveText[1024];
@@ -848,7 +388,7 @@ struct cg_s // sizeof=0xFF580
     float rumbleScale;
     float compassNorthYaw;
     float compassNorth[2];
-    Material *compassMapMaterial;
+    Material* compassMapMaterial;
     float compassMapUpperLeft[2];
     float compassMapWorldSize[2];
     int compassFadeTime;
@@ -913,9 +453,12 @@ struct cg_s // sizeof=0xFF580
 };
 
 // cg_ents_mp
+struct ComPrimaryLight;
+struct GfxSceneEntity;
+
 void __cdecl CG_Player_PreControllers(DObj_s *obj, centity_s *cent);
 void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent);
-void  CG_UpdateBModelWorldBounds(int a1@<ebp>, unsigned int localClientNum, centity_s *cent, int forceFilter);
+void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter);
 bool __cdecl CG_VecLessThan(float *a, float *b);
 void __cdecl CG_AdjustPositionForMover(
     int localClientNum,
@@ -1137,6 +680,16 @@ struct cgs_t // sizeof=0x3A24
     float compassY;
     clientInfo_t corpseinfo[8];
 };
+
+extern weaponInfo_s cg_weaponsArray[1][128];
+extern cg_s cgArray[1];
+extern cgs_t cgsArray[1];
+
+struct clientConnection_t;
+struct snd_alias_t;
+struct snd_alias_list_t;
+struct PhysPreset;
+
 bool __cdecl CG_IsRagdollTrajectory(const trajectory_t *trajectory);
 void __cdecl CG_RegisterDvars();
 void __cdecl TRACK_cg_main();
@@ -1202,6 +755,7 @@ extern cgs_t *cgsArray;
 extern cgMedia_t cgMedia;
 
 // cg_newDraw_mp
+struct MemoryFile;
 void __cdecl CG_AntiBurnInHUD_RegisterDvars();
 bool __cdecl CG_ShouldDrawHud(int localClientNum);
 double __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration);
@@ -1401,7 +955,6 @@ void __cdecl CG_GetViewAxisProjections(const refdef_s *refdef, const float *worl
 void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int localClientNum);
 void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *cent);
 void  CG_AddPlayerSpriteDrawSurf(
-    int a1@<ebp>,
     int localClientNum,
     const centity_s *cent,
     Material *material,
@@ -1683,12 +1236,6 @@ void __cdecl CG_DrawDisconnect(int localClientNum);
 
 
 
-// cg_compassfriendlies_mp
-enum CompassType : __int32
-{                                       // ...
-    COMPASS_TYPE_PARTIAL = 0x0,
-    COMPASS_TYPE_FULL = 0x1,
-};
 struct CompassVehicle // sizeof=0x1C
 {                                       // ...
     int entityNum;                      // ...

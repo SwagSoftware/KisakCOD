@@ -5,13 +5,15 @@
 //float (*)[3] * cg_entityOriginArray 8283cb54     cg_main_mp.obj
 //struct UiContext *cgDC    82834978     cg_main_mp.obj
 //struct weaponInfo_s **cg_weaponsArray 82839b94     cg_main_mp.obj
+weaponInfo_s cg_weaponsArray[1][128];
+
 //struct cgs_t *cgsArray    82839c6c     cg_main_mp.obj
 //struct cgMedia_t cgMedia   82839c88     cg_main_mp.obj
 cgMedia_t cgMedia;
 //struct centity_s **cg_entitiesArray 8283c430     cg_main_mp.obj
 
-cg_s *cgArray;
-cgs_t *cgsArray;
+cg_s cgArray[1];
+cgs_t cgsArray[1];
 
 const dvar_t * cg_hudGrenadeIconEnabledFlash;
 const dvar_t *cg_hudGrenadePointerPulseMax;

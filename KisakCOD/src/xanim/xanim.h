@@ -14,6 +14,8 @@
 
 #include <msslib/mss.h>
 
+#include <bgame/bg_weapons.h>
+
 union XAnimIndices // sizeof=0x4
 {                                       // ...
     unsigned __int8 *_1;
@@ -156,14 +158,6 @@ struct __declspec(align(4)) XAnimTree_s // sizeof=0x14
     // padding byte
     // padding byte
 };
-
-struct DObjAnimMat // sizeof=0x20
-{                                       // ...
-    float quat[4];                      // ...
-    float trans[3];                     // ...
-    float transWeight;                  // ...
-};
-
 struct mnode_t // sizeof=0x4
 {
     unsigned __int16 cellIndex;
@@ -365,36 +359,6 @@ struct XAnimInfo // sizeof=0x40
         XAnimParent animParent;
     };
     XAnimState state;                   // ...
-};
-
-struct DSkelPartBits // sizeof=0x30
-{                                       // ...
-    int anim[4];                        // ...
-    int control[4];                     // ...
-    int skel[4];                        // ...
-};
-struct DSkel // sizeof=0x38
-{                                       // ...
-    DSkelPartBits partBits;             // ...
-    int timeStamp;                      // ...
-    DObjAnimMat* mat;                   // ...
-};
-
-struct DObj_s // sizeof=0x64
-{
-    XAnimTree_s* tree;
-    unsigned __int16 duplicateParts;
-    unsigned __int16 entnum;
-    unsigned __int8 duplicatePartsSize;
-    unsigned __int8 numModels;
-    unsigned __int8 numBones;
-    // padding byte
-    unsigned int ignoreCollision;
-    volatile int locked;
-    DSkel skel;
-    float radius;
-    unsigned int hidePartBits[4];
-    XModel** models;
 };
 
 struct XAnimSimpleRotPos // sizeof=0x18
@@ -842,34 +806,6 @@ struct GameWorldMp // sizeof=0x4
     const char* name;
 };
 
-struct sunflare_t // sizeof=0x60
-{                                       // ...
-    bool hasValidData;
-    // padding byte
-    // padding byte
-    // padding byte
-    Material* spriteMaterial;
-    Material* flareMaterial;
-    float spriteSize;
-    float flareMinSize;
-    float flareMinDot;
-    float flareMaxSize;
-    float flareMaxDot;
-    float flareMaxAlpha;
-    int flareFadeInTime;
-    int flareFadeOutTime;
-    float blindMinDot;
-    float blindMaxDot;
-    float blindMaxDarken;
-    int blindFadeInTime;
-    int blindFadeOutTime;
-    float glareMinDot;
-    float glareMaxDot;
-    float glareMaxLighten;
-    int glareFadeInTime;
-    int glareFadeOutTime;
-    float sunFxPosition[3];
-};
 struct XModelDrawInfo // sizeof=0x4
 {                                       // ...
     unsigned __int16 lod;
@@ -913,6 +849,34 @@ struct GfxLightRegion // sizeof=0x8
 {
     unsigned int hullCount;
     GfxLightRegionHull* hulls;
+};
+struct sunflare_t // sizeof=0x60
+{                                       // ...
+    bool hasValidData;
+    // padding byte
+    // padding byte
+    // padding byte
+    Material* spriteMaterial;
+    Material* flareMaterial;
+    float spriteSize;
+    float flareMinSize;
+    float flareMinDot;
+    float flareMaxSize;
+    float flareMaxDot;
+    float flareMaxAlpha;
+    int flareFadeInTime;
+    int flareFadeOutTime;
+    float blindMinDot;
+    float blindMaxDot;
+    float blindMaxDarken;
+    int blindFadeInTime;
+    int blindFadeOutTime;
+    float glareMinDot;
+    float glareMaxDot;
+    float glareMaxLighten;
+    int glareFadeInTime;
+    int glareFadeOutTime;
+    float sunFxPosition[3];
 };
 struct GfxWorld // sizeof=0x2DC
 {                                       // ...
@@ -1574,100 +1538,7 @@ struct RawFile // sizeof=0xC
     int len;
     const char* buffer;
 };
-struct __declspec(align(8)) animation_s // sizeof=0x68
-{                                       // ...
-    char name[64];
-    int initialLerp;
-    float moveSpeed;
-    int duration;
-    int nameHash;
-    int flags;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    __int64 movetype;
-    int noteType;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct animScriptCondition_t // sizeof=0xC
-{                                       // ...
-    int index;
-    unsigned int value[2];
-};
-struct animScriptCommand_t // sizeof=0x10
-{                                       // ...
-    __int16 bodyPart[2];
-    __int16 animIndex[2];
-    __int16 animDuration[2];
-    snd_alias_list_t *soundAlias;
-};
-struct animScriptItem_t // sizeof=0x100
-{                                       // ...
-    int numConditions;
-    animScriptCondition_t conditions[10];
-    int numCommands;
-    animScriptCommand_t commands[8];
-};
-struct animScript_t // sizeof=0x204
-{                                       // ...
-    int numItems;
-    animScriptItem_t *items[128];
-};
-struct scr_animtree_t // sizeof=0x4
-{                                       // ...
-    XAnim_s *anims;                     // ...
-};
-struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
-{                                       // ...
-    animation_s animations[512];
-    unsigned int numAnimations;
-    animScript_t scriptAnims[1][43];
-    animScript_t scriptCannedAnims[1][43];
-    animScript_t scriptStateChange[1][1];
-    animScript_t scriptEvents[21];
-    animScriptItem_t scriptItems[2048];
-    int numScriptItems;
-    scr_animtree_t animTree;            // ...
-    unsigned __int16 torsoAnim;
-    unsigned __int16 legsAnim;
-    unsigned __int16 turningAnim;
-    // padding byte
-    // padding byte
-    snd_alias_list_t *(__cdecl *soundAlias)(const char *);
-    int(__cdecl *playSoundAlias)(int, snd_alias_list_t *);
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-};
-
-//struct $6CB7272563F4458FB40A4A5E123C4ABA // sizeof=0x4
-//{                                       // ...
-//    unsigned __int16 index;
-//    unsigned __int16 tree;
-//};
-//union $76411D3CC105A18E6E4A61D5A929E310 // sizeof=0x4
-//{                                       // ...
-//    $6CB7272563F4458FB40A4A5E123C4ABA __s0;
-//    const char *linkPointer;
-//};
-struct scr_anim_s // sizeof=0x4
-{                                       // ...
-    //$76411D3CC105A18E6E4A61D5A929E310 ___u0; // ...
-    union
-    {
-        struct
-        {
-            unsigned __int16 index;
-            unsigned __int16 tree;
-        };
-        const char *linkPointer;
-    };
-};
+struct DObj_s;
 
 struct gentity_s;
 

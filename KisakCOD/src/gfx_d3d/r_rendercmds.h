@@ -207,11 +207,6 @@ struct GfxBackEndPrimitiveData // sizeof=0x4
 {                                       // ...
     int hasSunDirChanged;
 };
-struct GfxEntity // sizeof=0x8
-{                                       // ...
-    unsigned int renderFxFlags;
-    float materialTime;
-};
 struct FxMarkMeshData // sizeof=0x10
 {                                       // ...
     unsigned int triCount;
@@ -222,19 +217,6 @@ struct FxMarkMeshData // sizeof=0x10
     unsigned int pad1;
 };
 
-struct GfxSceneDef // sizeof=0x14
-{                                       // ...
-    int time;                           // ...
-    float floatTime;                    // ...
-    float viewOffset[3];                // ...
-};
-struct GfxViewport // sizeof=0x10
-{                                       // ...
-    int x;                              // ...
-    int y;                              // ...
-    int width;                          // ...
-    int height;                         // ...
-};
 struct GfxDrawSurfListInfo // sizeof=0x28
 {                                       // ...
     const GfxDrawSurf *drawSurfs;
@@ -303,12 +285,6 @@ struct GfxSunShadowBoundingPoly // sizeof=0x78
     float points[9][2];
     int pointIsNear[9];
 };
-struct GfxSunShadow // sizeof=0x4A0
-{                                       // ...
-    GfxMatrix lookupMatrix;
-    GfxSunShadowProjection sunProj;
-    GfxSunShadowPartition partition[2];
-};
 struct __declspec(align(16)) GfxSunShadowPartition // sizeof=0x200
 {                                       // ...
     GfxViewParms shadowViewParms;
@@ -328,6 +304,12 @@ struct __declspec(align(16)) GfxSunShadowPartition // sizeof=0x200
     // padding byte
     // padding byte
     // padding byte
+};
+struct GfxSunShadow // sizeof=0x4A0
+{                                       // ...
+    GfxMatrix lookupMatrix;
+    GfxSunShadowProjection sunProj;
+    GfxSunShadowPartition partition[2];
 };
 struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
 {                                       // ...
@@ -357,6 +339,7 @@ struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
     // padding byte
     // padding byte
 };
+
 struct GfxBackEndData;
 
 struct __declspec(align(8)) GfxCmdBufInput // sizeof=0x430

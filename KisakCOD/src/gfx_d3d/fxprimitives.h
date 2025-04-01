@@ -1,5 +1,11 @@
 #pragma once
-#include "r_workercmds.h"
+
+struct Material;
+
+struct r_double_index_t // sizeof=0x4
+{                                       // ...
+    unsigned __int16 value[2];          // ...
+};
 
 struct orientation_t // sizeof=0x30
 {                                       // ...

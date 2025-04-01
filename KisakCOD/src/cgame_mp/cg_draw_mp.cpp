@@ -19,9 +19,9 @@ void __cdecl TRACK_cg_draw()
     track_static_alloc_internal(overheadFade, 768, "overheadFade", 10);
 }
 
-void __cdecl CG_PriorityCenterPrint(int localClientNum, const char *str, int priority)
+void __cdecl CG_PriorityCenterPrint(int localClientNum, const char* str, int priority)
 {
-    CenterPrint *centerPrint; // [esp+4h] [ebp-10Ch]
+    CenterPrint* centerPrint; // [esp+4h] [ebp-10Ch]
     char hudElemString[260]; // [esp+8h] [ebp-108h] BYREF
 
     centerPrint = &s_centerPrint[localClientNum];
@@ -38,7 +38,7 @@ void __cdecl CG_PriorityCenterPrint(int localClientNum, const char *str, int pri
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        centerPrint->time = MEMORY[0x9D5560];
+        centerPrint->time = cgArray[0].time;
     }
 }
 
@@ -46,18 +46,17 @@ void __cdecl CG_ClearCenterPrint(int localClientNum)
 {
     s_centerPrint[localClientNum].time = 0;
 }
-
 void __cdecl CG_DrawCenterString(
     int localClientNum,
-    const rectDef_s *rect,
-    Font_s *font,
+    const rectDef_s* rect,
+    Font_s* font,
     float fontscale,
-    float *color,
+    float* color,
     int textStyle)
 {
     float v6; // [esp+24h] [ebp-20h]
-    CenterPrint *centerPrint; // [esp+34h] [ebp-10h]
-    float *fadeColor; // [esp+38h] [ebp-Ch]
+    CenterPrint* centerPrint; // [esp+34h] [ebp-10h]
+    float* fadeColor; // [esp+38h] [ebp-Ch]
     int time; // [esp+3Ch] [ebp-8h]
     float x; // [esp+40h] [ebp-4h]
 
@@ -69,9 +68,9 @@ void __cdecl CG_DrawCenterString(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    time = MEMORY[0x9D5560];
+    time = cgArray[0].time;
     centerPrint = &s_centerPrint[localClientNum];
-    if (centerPrint->time > MEMORY[0x9D5560])
+    if (centerPrint->time > cgArray[0].time)
         centerPrint->time = 0;
     if (centerPrint->time)
     {
@@ -1442,27 +1441,26 @@ void __cdecl CG_DrawCrosshairNames(int localClientNum)
         }
     }
 }
-
 void __cdecl DrawViewmodelInfo(int localClientNum)
 {
-    const char *v1; // [esp+2Ch] [ebp-84Ch]
-    const char *v2; // [esp+30h] [ebp-848h]
-    const char *v3; // [esp+34h] [ebp-844h]
-    const char *v4; // [esp+38h] [ebp-840h]
-    const char *v5; // [esp+3Ch] [ebp-83Ch]
-    const char *name; // [esp+40h] [ebp-838h]
-    weaponInfo_s *weapInfo; // [esp+44h] [ebp-834h]
+    const char* v1; // [esp+2Ch] [ebp-84Ch]
+    const char* v2; // [esp+30h] [ebp-848h]
+    const char* v3; // [esp+34h] [ebp-844h]
+    const char* v4; // [esp+38h] [ebp-840h]
+    const char* v5; // [esp+3Ch] [ebp-83Ch]
+    const char* name; // [esp+40h] [ebp-838h]
+    weaponInfo_s* weapInfo; // [esp+44h] [ebp-834h]
     char buffer[2052]; // [esp+48h] [ebp-830h] BYREF
-    Font_s *font; // [esp+850h] [ebp-28h]
-    const ScreenPlacement *scrPlace; // [esp+854h] [ebp-24h]
-    XModel *weaponMdl; // [esp+858h] [ebp-20h]
-    const cg_s *cgameGlob; // [esp+85Ch] [ebp-1Ch]
-    const char *weaponMdlName; // [esp+860h] [ebp-18h]
+    Font_s* font; // [esp+850h] [ebp-28h]
+    const ScreenPlacement* scrPlace; // [esp+854h] [ebp-24h]
+    XModel* weaponMdl; // [esp+858h] [ebp-20h]
+    const cg_s* cgameGlob; // [esp+85Ch] [ebp-1Ch]
+    const char* weaponMdlName; // [esp+860h] [ebp-18h]
     int len; // [esp+864h] [ebp-14h]
     int weaponIndex; // [esp+868h] [ebp-10h]
     float fov; // [esp+86Ch] [ebp-Ch]
-    WeaponDef *weapDef; // [esp+870h] [ebp-8h]
-    const playerState_s *ps; // [esp+874h] [ebp-4h]
+    WeaponDef* weapDef; // [esp+870h] [ebp-8h]
+    const playerState_s* ps; // [esp+874h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -1473,8 +1471,8 @@ void __cdecl DrawViewmodelInfo(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    ps = (const playerState_s *)&MEMORY[0x9D5574];
-    weaponIndex = BG_GetViewmodelWeaponIndex((const playerState_s *)&MEMORY[0x9D5574]);
+    ps = &cgArray[0].predictedPlayerState;
+    weaponIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
     scrPlace = &scrPlaceView[localClientNum];
     font = UI_GetFontHandle(scrPlace, 6, 0.25);
     if (weaponIndex > 0)

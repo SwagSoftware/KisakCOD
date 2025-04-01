@@ -515,15 +515,8 @@ DOBJ MANAGEMENT
 
 struct XModel;
 struct DObj_s;
+struct DObjModel_s;
 struct XAnimTree_s;
-
-struct __declspec(align(2)) DObjModel_s // sizeof=0x8
-{                                       // ...
-	XModel *model;                      // ...
-	unsigned __int16 boneName;          // ...
-	bool ignoreCollision;               // ...
-	// padding byte
-};
 
 void __cdecl TRACK_dobj_management();
 DObj_s *__cdecl Com_GetClientDObj(unsigned int handle, int localClientNum);

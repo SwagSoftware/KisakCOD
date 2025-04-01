@@ -12,6 +12,12 @@ pmoveHandler_t *pmoveHandlers;
 //Line  1605:  0001 : 00008188       float const *const playerMins         82008788     bg_pmove.obj
 //Line  1606:  0001 : 00008194       float const *const playerMaxs         82008794     bg_pmove.obj
 
+const float playerMins[] = { -15.0, -15.0, 0.0 };
+const float playerMaxs[] = { 15.0, 15.0, 0.0 };
+
+#define abs8(x) abs(x)
+#define abs32(x) abs(x)
+
 void __cdecl PM_trace(
     pmove_t *pm,
     trace_t *results,
@@ -4041,7 +4047,7 @@ void __cdecl PM_SetLadderFlag(playerState_s *ps)
     ps->pm_flags |= 8u;
 }
 
-void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
+void __cdecl PM_LadderMove(pmove_t* pm, pml_t* pml)
 {
     __int64 a1; // [esp+4h] [ebp-CCh]
     float v3; // [esp+Ch] [ebp-C4h]
@@ -4050,19 +4056,19 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
     float v6; // [esp+18h] [ebp-B8h]
     float v7; // [esp+1Ch] [ebp-B4h]
     float v8; // [esp+20h] [ebp-B0h]
-    float *v9; // [esp+2Ch] [ebp-A4h]
-    float *v10; // [esp+30h] [ebp-A0h]
-    float *v11; // [esp+34h] [ebp-9Ch]
+    float* v9; // [esp+2Ch] [ebp-A4h]
+    float* v10; // [esp+30h] [ebp-A0h]
+    float* v11; // [esp+34h] [ebp-9Ch]
     float v12; // [esp+3Ch] [ebp-94h]
-    float *v13; // [esp+44h] [ebp-8Ch]
-    float *vLadderVec; // [esp+48h] [ebp-88h]
+    float* v13; // [esp+44h] [ebp-8Ch]
+    float* vLadderVec; // [esp+48h] [ebp-88h]
     float v15; // [esp+4Ch] [ebp-84h]
-    float *v16; // [esp+50h] [ebp-80h]
-    float *v17; // [esp+5Ch] [ebp-74h]
-    float *v18; // [esp+60h] [ebp-70h]
-    float *velocity; // [esp+68h] [ebp-68h]
+    float* v16; // [esp+50h] [ebp-80h]
+    float* v17; // [esp+5Ch] [ebp-74h]
+    float* v18; // [esp+60h] [ebp-70h]
+    float* velocity; // [esp+68h] [ebp-68h]
     float v20; // [esp+6Ch] [ebp-64h]
-    float *v21; // [esp+70h] [ebp-60h]
+    float* v21; // [esp+70h] [ebp-60h]
     float wishdir[3]; // [esp+88h] [ebp-48h] BYREF
     float fSideSpeed; // [esp+94h] [ebp-3Ch]
     float wishvel[3]; // [esp+98h] [ebp-38h] BYREF
@@ -4073,7 +4079,7 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
     float upscale; // [esp+C0h] [ebp-10h]
     int moveyaw; // [esp+C4h] [ebp-Ch]
     float scale; // [esp+C8h] [ebp-8h]
-    playerState_s *ps; // [esp+CCh] [ebp-4h]
+    playerState_s* ps; // [esp+CCh] [ebp-4h]
 
     if (!pm)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4582, 0, "%s", "pm");
@@ -4100,8 +4106,8 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
         Vec3Normalize(pml->forward);
         pml->right[2] = 0.0;
         Vec3NormalizeTo(pml->right, vTempRight);
-        HIunsigned int(a1) = pml->right;
-        LOunsigned int(a1) = ps->vLadderVec;
+        HIDWORD(a1) = pml->right;
+        LODWORD(a1) = ps->vLadderVec;
         ProjectPointOnPlane(vTempRight, a1);
         scale = PM_CmdScale(ps, &pm->cmd);
         wishvel[0] = 0.0;

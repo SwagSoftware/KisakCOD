@@ -1,6 +1,11 @@
 #pragma once
-#include <gfx_d3d/fxprimitives.h>
 
+#include <qcommon/qcommon.h>
+
+#include <universal/memfile.h>
+
+#include <gfx_d3d/fxprimitives.h>
+#include <gfx_d3d/r_gfx.h>
 
 void __cdecl TRACK_fx_system();
 FxSystem *__cdecl FX_GetSystem(int clientIndex);
@@ -172,6 +177,7 @@ extern const dvar_t *fx_profile;
 extern const dvar_t *fx_cull_elem_spawn;
 extern const dvar_t *fx_marks_ents;
 
+struct cpose_t;
 
 // fx_marks
 enum MarkFragmentsAgainstEnum : __int32
@@ -412,7 +418,6 @@ void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
     const GfxScaledPlacement *placement,
     __int64 viewOffset);
 void  FX_GenerateMarkVertsForMark_MatrixFromPlacement(
-    float a1@<ebp>,
     const GfxPlacement *placement,
     const float *viewOffset,
     float (*outTransform)[3]);
@@ -434,7 +439,6 @@ char __cdecl FX_GenerateMarkVertsForList_EntDObj(
     const DObj_s *dobj,
     const DObjAnimMat *boneMtxList);
 void  FX_GenerateMarkVertsForMark_MatrixFromAnim(
-    int a1@<ebp>,
     FxMark *mark,
     const DObj_s *dobj,
     const DObjAnimMat *boneMtxList,
@@ -541,14 +545,6 @@ struct FxTrailSegmentDrawState // sizeof=0x3C
     float size[2];
     float uCoord;                       // ...
     unsigned __int8 color[4];           // ...
-};
-struct FxElemVisualState // sizeof=0x18
-{                                       // ...
-    unsigned __int8 color[4];
-    float rotationDelta;
-    float rotationTotal;                // ...
-    float size[2];                      // ...
-    float scale;
 };
 struct FxBeam // sizeof=0x34
 {                                       // ...
@@ -719,10 +715,9 @@ void __cdecl FX_GetOrientation(
     const FxSpatialFrame *frameAtSpawn,
     const FxSpatialFrame *frameNow,
     __int64 randomSeed);
-char  FX_GenerateBeam_GetFlatDelta@<al>(
-    float a1@<ebp>,
-    const vector4* clipMtx,
-    const vector4* invClipMtx,
+char  FX_GenerateBeam_GetFlatDelta(
+    const mat4x4* clipMtx,
+    const mat4x4* invClipMtx,
     float4 beamWorldBegin,
     float4 beamWorldEnd,
     float4* outFlatDelta);

@@ -1,5 +1,10 @@
+#include <qcommon/qcommon.h>
+
 #include "cg_local.h"
 #include "cg_public.h"
+
+#include <cgame_mp/cg_local_mp.h>
+
 #include <xanim/dobj.h>
 #include <DynEntity/DynEntity_client.h>
 #include <stringed/stringed_hooks.h>
@@ -247,11 +252,11 @@ void __cdecl CG_UpdateWeaponViewmodels(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (cg_weaponsArray[0][weaponIndex].weapModelIdx != *(unsigned __int8 *)(MEMORY[0x98F45C] + weaponIndex + 2088))
+        if (cg_weaponsArray[0][weaponIndex].weapModelIdx != cgArray[0].nextSnap->ps.weaponmodels[weaponIndex])
             ChangeViewmodelDobj(
                 localClientNum,
                 weaponIndex,
-                *(_BYTE *)(MEMORY[0x98F45C] + weaponIndex + 2088),
+                cgArray[0].nextSnap->ps.weaponmodels[weaponIndex],
                 cg_weaponsArray[0][weaponIndex].handModel,
                 cg_weaponsArray[0][weaponIndex].gogglesModel,
                 cg_weaponsArray[0][weaponIndex].rocketModel,
@@ -457,7 +462,7 @@ void __cdecl CG_HoldBreathInit(cg_s *cgameGlob)
     cgameGlob->holdBreathFrac = 0.0;
 }
 
-void __cdecl CG_UpdateViewModelPose(const DObj_s *obj, int localClientNum)
+void __cdecl CG_UpdateViewModelPose(const DObj_s* obj, int localClientNum)
 {
     if (obj)
         DObjClearSkel(obj);
@@ -469,10 +474,10 @@ void __cdecl CG_UpdateViewModelPose(const DObj_s *obj, int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    AxisToAngles((const float (*)[3]) & MEMORY[0x9DF71C][95], MEMORY[0xA8E428]);
-    MEMORY[0xA8E41C] = *(float *)&MEMORY[0x9DF71C][104];
-    MEMORY[0xA8E420] = *(float *)&MEMORY[0x9DF71C][105];
-    MEMORY[0xA8E424] = *(float *)&MEMORY[0x9DF71C][106];
+    AxisToAngles(cgArray.viewModelAxis, cgArray.viewModelPose.angles);
+    cgArray.viewModelPose.origin[0] = cgArray.viewModelAxis[3][0];
+    cgArray.viewModelPose.origin[1] = cgArray.viewModelAxis[3][1];
+    cgArray.viewModelPose.origin[2] = cgArray.viewModelAxis[3][2];
 }
 
 bool __cdecl CG_IsPlayerCrouching(clientInfo_t *ci, const centity_s *cent)
@@ -564,23 +569,23 @@ void __cdecl CG_GetPlayerViewOrigin(int localClientNum, const playerState_s *ps,
         BG_GetPlayerViewOrigin(ps, origin, cgArray[0].time);
     }
 }
-
 void __cdecl CG_AddPlayerWeapon(
     int localClientNum,
-    const GfxScaledPlacement *placement,
-    const playerState_s *ps,
-    centity_s *cent,
+    const GfxScaledPlacement* placement,
+    const playerState_s* ps,
+    centity_s* cent,
     int bDrawGun)
 {
     unsigned int v5; // eax
     unsigned int fLeanDist; // [esp+Ch] [ebp-48h]
     bool v7; // [esp+10h] [ebp-44h]
-    bool v8; // [esp+14h] [ebp-40h]
+    BOOL v8; // [esp+14h] [ebp-40h]
     bool v9; // [esp+18h] [ebp-3Ch]
-    const weaponInfo_s *weapInfo; // [esp+30h] [ebp-24h]
+    snapshot_s* nextSnap; // [esp+28h] [ebp-2Ch]
+    const weaponInfo_s* weapInfo; // [esp+30h] [ebp-24h]
     int weaponNum; // [esp+34h] [ebp-20h]
     float lightingOrigin[3]; // [esp+44h] [ebp-10h] BYREF
-    const WeaponDef *weapDef; // [esp+50h] [ebp-4h]
+    const WeaponDef* weapDef; // [esp+50h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -590,8 +595,9 @@ void __cdecl CG_AddPlayerWeapon(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v9 = (*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && cent->nextState.number == *(unsigned int *)(MEMORY[0x98F45C] + 232);
-    v8 = v9 && !MEMORY[0x9D5570];
+    nextSnap = cgArray[0].nextSnap;
+    v9 = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
+    v8 = v9 && !cgArray[0].renderingThirdPerson;
     if (ps)
         weaponNum = BG_GetViewmodelWeaponIndex(ps);
     else
@@ -611,10 +617,10 @@ void __cdecl CG_AddPlayerWeapon(
             MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2907, 0, "%s", "weapInfo->viewModelDObj");
         if (ps)
         {
-            UnitQuatToAxis(placement->base.quat, (float (*)[3]) & MEMORY[0x9DF71C][95]);
-            MEMORY[0x9DF71C][104] = SLODWORD(placement->base.origin[0]);
-            MEMORY[0x9DF71C][105] = SLODWORD(placement->base.origin[1]);
-            MEMORY[0x9DF71C][106] = SLODWORD(placement->base.origin[2]);
+            UnitQuatToAxis(placement->base.quat, cgArray[0].viewModelAxis);
+            cgArray[0].viewModelAxis[3][0] = placement->base.origin[0];
+            cgArray[0].viewModelAxis[3][1] = placement->base.origin[1];
+            cgArray[0].viewModelAxis[3][2] = placement->base.origin[2];
             CG_UpdateViewModelPose(weapInfo->viewModelDObj, localClientNum);
             if (bDrawGun)
             {
@@ -623,7 +629,7 @@ void __cdecl CG_AddPlayerWeapon(
                 lightingOrigin[2] = ps->origin[2];
                 lightingOrigin[2] = lightingOrigin[2] + ps->viewHeightCurrent;
                 AddLeanToPosition(lightingOrigin, ps->viewangles[1], ps->leanf, 16.0, 20.0);
-                R_AddDObjToScene(weapInfo->viewModelDObj, (const cpose_t *)&MEMORY[0xA8E400], 0x3FFu, 3u, lightingOrigin, 0.0);
+                R_AddDObjToScene(weapInfo->viewModelDObj, &cgArray[0].viewModelPose, 0x3FFu, 3u, lightingOrigin, 0.0);
                 weapDef = BG_GetWeaponDef(weaponNum);
                 if (!weapDef)
                     MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2930, 0, "%s", "weapDef");
@@ -632,12 +638,13 @@ void __cdecl CG_AddPlayerWeapon(
                     CG_Laser_Add(
                         cent,
                         weapInfo->viewModelDObj,
-                        (cpose_t *)&MEMORY[0xA8E400],
-                        MEMORY[0x9D8748],
+                        &cgArray[0].viewModelPose,
+                        cgArray[0].refdef.viewOffset,
                         LASER_OWNER_PLAYER);
-                MEMORY[0x9D8748][6] = (weapDef->adsDofStart - ps->dofViewmodelStart) * ps->fWeaponPosFrac
+                cgArray[0].refdef.dof.viewModelStart = (weapDef->adsDofStart - ps->dofViewmodelStart) * ps->fWeaponPosFrac
                     + ps->dofViewmodelStart;
-                MEMORY[0x9D8748][7] = (weapDef->adsDofEnd - ps->dofViewmodelEnd) * ps->fWeaponPosFrac + ps->dofViewmodelEnd;
+                cgArray[0].refdef.dof.viewModelEnd = (weapDef->adsDofEnd - ps->dofViewmodelEnd) * ps->fWeaponPosFrac
+                    + ps->dofViewmodelEnd;
             }
             HoldBreathUpdate(localClientNum);
         }
@@ -693,27 +700,23 @@ void __cdecl HoldBreathUpdate(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DF930][2] > 0)
-        MEMORY[0x9DF930][2] -= MEMORY[0x9D555C];
-    if ((MEMORY[0x9D5584] & 4) != 0)
+    if (cgArray.holdBreathDelay > 0)
+        cgArray.holdBreathDelay -= cgArray.frametime;
+    if ((cgArray.predictedPlayerState.weapFlags & 4) != 0)
     {
-        deltaTime = (double)MEMORY[0x9D555C] * 0.001000000047497451;
-        *(float *)&MEMORY[0x9DF930][3] = DiffTrack(
-            1.0,
-            *(float *)&MEMORY[0x9DF930][3],
-            player_breath_snd_lerp->current.value,
-            deltaTime);
-        if (MEMORY[0x9DF930][0] >= 0)
+        deltaTime = (double)cgArray.frametime * 0.001000000047497451;
+        cgArray.holdBreathFrac = DiffTrack(1.0, cgArray.holdBreathFrac, player_breath_snd_lerp->current.value, deltaTime);
+        if (cgArray.holdBreathTime >= 0)
         {
             if (MEMORY[0x9DF930][0] > MEMORY[0x9DF930][1])
                 CG_PlayClientSoundAlias(localClientNum, cgMedia.playerHeartBeatSound);
         }
         else
         {
-            MEMORY[0x9DF930][0] = 0;
-            if (MEMORY[0x9DF930][2] > 0)
+            cgArray.holdBreathTime = 0;
+            if (cgArray.holdBreathDelay > 0)
             {
-                MEMORY[0x9DF930][1] = 0;
+                cgArray.holdBreathInTime = 0;
             }
             else
             {
@@ -722,16 +725,16 @@ void __cdecl HoldBreathUpdate(int localClientNum)
                 MEMORY[0x9DF930][2] = (int)(player_breath_snd_delay->current.value * 1000.0);
             }
         }
-        MEMORY[0x9DF930][0] += MEMORY[0x9D555C];
+        cgArray.holdBreathTime += cgArray.frametime;
     }
     else
     {
-        if (MEMORY[0x9DF930][0] >= 0)
+        if (cgArray.holdBreathTime >= 0)
         {
-            MEMORY[0x9DF930][0] += MEMORY[0x9D555C];
-            if (MEMORY[0x9DF930][0] <= (int)(player_breath_hold_time->current.value * 1000.0))
+            cgArray.holdBreathTime += cgArray.frametime;
+            if (cgArray.holdBreathTime <= (int)(player_breath_hold_time->current.value * 1000.0))
             {
-                if (MEMORY[0x9DF930][2] <= 0)
+                if (cgArray.holdBreathDelay <= 0)
                 {
                     CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathOutSound);
                     MEMORY[0x9DF930][2] = (int)(player_breath_snd_delay->current.value * 1000.0);
@@ -742,11 +745,11 @@ void __cdecl HoldBreathUpdate(int localClientNum)
                 CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathGaspSound);
             }
         }
-        MEMORY[0x9DF930][0] = -1;
-        MEMORY[0x9DF930][1] = 0;
-        *(float *)&MEMORY[0x9DF930][3] = 0.0;
+        cgArray.holdBreathTime = -1;
+        cgArray.holdBreathInTime = 0;
+        cgArray.holdBreathFrac = 0.0;
     }
-    HoldBreathSoundLerp(localClientNum, *(float *)&MEMORY[0x9DF930][3]);
+    HoldBreathSoundLerp(localClientNum, cgArray.holdBreathFrac);
 }
 
 void __cdecl HoldBreathSoundLerp(int localClientNum, float lerp)
@@ -777,8 +780,9 @@ void __cdecl HoldBreathSoundLerp(int localClientNum, float lerp)
 void __cdecl CG_UpdateViewWeaponAnim(int localClientNum)
 {
     float dtime; // [esp+8h] [ebp-14h]
-    weaponInfo_s *weapInfo; // [esp+Ch] [ebp-10h]
+    weaponInfo_s* weapInfo; // [esp+Ch] [ebp-10h]
     int weaponIndex; // [esp+14h] [ebp-8h]
+    playerState_s* ps; // [esp+18h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -788,9 +792,10 @@ void __cdecl CG_UpdateViewWeaponAnim(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9D5578] < 7)
+    ps = &cgArray.predictedPlayerState;
+    if (cgArray.predictedPlayerState.pm_type < 7)
     {
-        weaponIndex = BG_GetViewmodelWeaponIndex((const playerState_s *)MEMORY[0x9D5574]);
+        weaponIndex = BG_GetViewmodelWeaponIndex(ps);
         if (weaponIndex > 0)
         {
             CG_RegisterWeapon(localClientNum, weaponIndex);
@@ -805,30 +810,30 @@ void __cdecl CG_UpdateViewWeaponAnim(int localClientNum)
             weapInfo = &cg_weaponsArray[0][weaponIndex];
             if (!weapInfo->viewModelDObj)
                 MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3066, 0, "%s", "weapInfo->viewModelDObj");
-            UpdateViewmodelAttachments(localClientNum, weaponIndex, MEMORY[0x9D5574][weaponIndex + 2076], weapInfo);
-            WeaponRunXModelAnims(localClientNum, (const playerState_s *)MEMORY[0x9D5574], weapInfo);
-            dtime = (double)MEMORY[0x9D555C] * 0.001000000047497451;
+            UpdateViewmodelAttachments(localClientNum, weaponIndex, ps->weaponmodels[weaponIndex], weapInfo);
+            WeaponRunXModelAnims(localClientNum, ps, weapInfo);
+            dtime = (double)cgArray.frametime * 0.001000000047497451;
             DObjUpdateClientInfo(weapInfo->viewModelDObj, dtime, 1);
-            ProcessWeaponNoteTracks(localClientNum, (const playerState_s *)MEMORY[0x9D5574]);
+            ProcessWeaponNoteTracks(localClientNum, ps);
         }
     }
     else
     {
-        ResetWeaponAnimTrees(localClientNum, (const playerState_s *)MEMORY[0x9D5574]);
+        ResetWeaponAnimTrees(localClientNum, ps);
     }
 }
 
-void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s *ps, weaponInfo_s *weapInfo)
+void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s* ps, weaponInfo_s* weapInfo)
 {
-    bool v3; // [esp+14h] [ebp-34h]
-    bool v4; // [esp+18h] [ebp-30h]
-    bool v5; // [esp+1Ch] [ebp-2Ch]
-    DObj_s *obj; // [esp+24h] [ebp-24h]
+    BOOL v3; // [esp+14h] [ebp-34h]
+    BOOL v4; // [esp+18h] [ebp-30h]
+    BOOL v5; // [esp+1Ch] [ebp-2Ch]
+    DObj_s* obj; // [esp+24h] [ebp-24h]
     float transitionTime; // [esp+28h] [ebp-20h]
     int weaponIndex; // [esp+38h] [ebp-10h]
     signed int i; // [esp+3Ch] [ebp-Ch]
-    XAnimTree_s *pAnimTree; // [esp+40h] [ebp-8h]
-    const WeaponDef *weapDef; // [esp+44h] [ebp-4h]
+    XAnimTree_s* pAnimTree; // [esp+40h] [ebp-8h]
+    const WeaponDef* weapDef; // [esp+44h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -857,7 +862,7 @@ void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s *ps, w
     {
         PlayADSAnim(0.0, weaponIndex, obj, 32);
     }
-    if (ps->weapAnim != weapInfo->iPrevAnim || weaponIndex != MEMORY[0x9DF71C][37])
+    if (ps->weapAnim != weapInfo->iPrevAnim || weaponIndex != cgArray.prevViewmodelWeapon)
     {
         transitionTime = 0.0;
         switch (ps->weapAnim & 0xFFFFFDFF)
@@ -955,7 +960,7 @@ void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s *ps, w
             Com_Printf(19, "WeaponRunXModelAnims: Unknown weapon animation %i\n", ps->weapAnim & 0xFFFFFDFF);
         LABEL_64:
             weapInfo->iPrevAnim = ps->weapAnim;
-            MEMORY[0x9DF71C][37] = weaponIndex;
+            cgArray.prevViewmodelWeapon = weaponIndex;
             return;
         }
         while (1)
@@ -979,18 +984,17 @@ void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s *ps, w
         }
     }
 }
-
 void __cdecl StartWeaponAnim(
     int localClientNum,
     unsigned int weaponNum,
-    DObj_s *obj,
+    DObj_s* obj,
     int animIndex,
     float transitionTime)
 {
     float rate; // [esp+20h] [ebp-1Ch]
-    XAnim_s *anims; // [esp+2Ch] [ebp-10h]
+    XAnim_s* anims; // [esp+2Ch] [ebp-10h]
     signed int i; // [esp+30h] [ebp-Ch]
-    WeaponDef *weapDef; // [esp+34h] [ebp-8h]
+    WeaponDef* weapDef; // [esp+34h] [ebp-8h]
 
     if (animIndex <= 0 || animIndex >= 31)
         MyAssertHandler(
@@ -1020,19 +1024,19 @@ void __cdecl StartWeaponAnim(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((MEMORY[0x9D5660] == 7
-        || MEMORY[0x9D5660] == 9
-        || MEMORY[0x9D5660] == 11
-        || MEMORY[0x9D5660] == 10
-        || MEMORY[0x9D5660] == 8)
-        && (MEMORY[0x9D5B70] & 4) != 0)
+    if ((cgArray[0].predictedPlayerState.weaponstate == 7
+        || cgArray[0].predictedPlayerState.weaponstate == 9
+        || cgArray[0].predictedPlayerState.weaponstate == 11
+        || cgArray[0].predictedPlayerState.weaponstate == 10
+        || cgArray[0].predictedPlayerState.weaponstate == 8)
+        && (cgArray[0].predictedPlayerState.perks & 4) != 0)
     {
         if (perk_weapReloadMultiplier->current.value == 0.0)
             rate = 1000.0;
         else
             rate = rate / perk_weapReloadMultiplier->current.value;
     }
-    else if (MEMORY[0x9D5660] == 6 && (MEMORY[0x9D5B70] & 8) != 0)
+    else if (cgArray[0].predictedPlayerState.weaponstate == 6 && (cgArray[0].predictedPlayerState.perks & 8) != 0)
     {
         if (perk_weapRateMultiplier->current.value == 0.0)
             rate = 1000.0;
@@ -1173,7 +1177,7 @@ char __cdecl UpdateViewmodelAttachments(
     return 1;
 }
 
-bool __cdecl ViewmodelRocketShouldBeAttached(int localClientNum, WeaponDef *weapDef)
+bool __cdecl ViewmodelRocketShouldBeAttached(int localClientNum, WeaponDef* weapDef)
 {
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 850, 0, "%s", "weapDef");
@@ -1187,18 +1191,20 @@ bool __cdecl ViewmodelRocketShouldBeAttached(int localClientNum, WeaponDef *weap
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (*(unsigned int *)&MEMORY[0x9D5574][4 * BG_ClipForWeapon(MEMORY[0x9D565C]) + 860])
+    if (cgArray.predictedPlayerState.ammoclip[BG_ClipForWeapon(cgArray.predictedPlayerState.weapon)])
         return 1;
-    return (MEMORY[0x9D5660] == 7
-        || MEMORY[0x9D5660] == 9
-        || MEMORY[0x9D5660] == 11
-        || MEMORY[0x9D5660] == 10
-        || MEMORY[0x9D5660] == 8)
-        && weapDef->iReloadTime - MEMORY[0x9D55B0] > weapDef->reloadShowRocketTime;
+    return (cgArray.predictedPlayerState.weaponstate == 7
+        || cgArray.predictedPlayerState.weaponstate == 9
+        || cgArray.predictedPlayerState.weaponstate == 11
+        || cgArray.predictedPlayerState.weaponstate == 10
+        || cgArray.predictedPlayerState.weaponstate == 8)
+        && weapDef->iReloadTime - cgArray.predictedPlayerState.weaponTime > weapDef->reloadShowRocketTime;
 }
 
-bool __cdecl ViewmodelKnifeShouldBeAttached(int localClientNum, WeaponDef *weapDef)
+bool __cdecl ViewmodelKnifeShouldBeAttached(int localClientNum, WeaponDef* weapDef)
 {
+    unsigned int anim; // [esp+4h] [ebp-8h]
+
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 881, 0, "%s", "weapDef");
     if (!weapDef->knifeModel)
@@ -1211,7 +1217,8 @@ bool __cdecl ViewmodelKnifeShouldBeAttached(int localClientNum, WeaponDef *weapD
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (MEMORY[0x9D5B98] & 0xFFFFFDFF) == 8 || (MEMORY[0x9D5B98] & 0xFFFFFDFF) == 9;
+    anim = cgArray.predictedPlayerState.weapAnim & 0xFFFFFDFF;
+    return anim == 8 || anim == 9;
 }
 
 void __cdecl ProcessWeaponNoteTracks(int localClientNum, const playerState_s *predictedPlayerState)
@@ -1281,27 +1288,26 @@ void __cdecl PlayNoteMappedSoundAliases(int localClientNum, const char *noteName
         }
     }
 }
-
 void __cdecl CG_AddViewWeapon(int localClientNum)
 {
     double v1; // st7
     double v2; // st7
     int v3; // [esp+Ch] [ebp-12Ch]
-    float *vGunSpeed; // [esp+10h] [ebp-128h]
-    float *vGunOffset; // [esp+14h] [ebp-124h]
-    float *vLastMoveAng; // [esp+18h] [ebp-120h]
-    playerEntity_t *pe; // [esp+2Ch] [ebp-10Ch]
+    float* vGunSpeed; // [esp+10h] [ebp-128h]
+    float* vGunOffset; // [esp+14h] [ebp-124h]
+    float* vLastMoveAng; // [esp+18h] [ebp-120h]
+    playerEntity_t* pe; // [esp+2Ch] [ebp-10Ch]
     weaponState_t ws; // [esp+30h] [ebp-108h] BYREF
-    cg_s *cgameGlob; // [esp+88h] [ebp-B0h]
+    cg_s* cgameGlob; // [esp+88h] [ebp-B0h]
     int drawgun; // [esp+8Ch] [ebp-ACh]
     float vAxis2[3][3]; // [esp+90h] [ebp-A8h] BYREF
     float angles[3]; // [esp+B4h] [ebp-84h] BYREF
     GfxScaledPlacement placement; // [esp+C0h] [ebp-78h] BYREF
     int weaponIndex; // [esp+E0h] [ebp-58h]
     float fZoom; // [esp+E4h] [ebp-54h] BYREF
-    playerState_s *ps; // [esp+E8h] [ebp-50h]
+    playerState_s* ps; // [esp+E8h] [ebp-50h]
     float axis[3][3]; // [esp+ECh] [ebp-4Ch] BYREF
-    WeaponDef *weapDef; // [esp+110h] [ebp-28h]
+    WeaponDef* weapDef; // [esp+110h] [ebp-28h]
     float vAxis[3][3]; // [esp+114h] [ebp-24h] BYREF
 
     drawgun = 1;
@@ -1313,11 +1319,11 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    cgameGlob = cgArray;
-    ps = (playerState_s *)MEMORY[0x9D5574];
-    MEMORY[0x9D8748][6] = 0.0;
-    MEMORY[0x9D8748][7] = 0.0;
-    if (MEMORY[0x9D5578] != 4 && ps->pm_type != 5 && !cgameGlob->renderingThirdPerson)
+    cgameGlob = &cgArray;
+    ps = &cgArray.predictedPlayerState;
+    cgArray.refdef.dof.viewModelStart = 0.0;
+    cgameGlob->refdef.dof.viewModelEnd = 0.0;
+    if (ps->pm_type != 4 && ps->pm_type != 5 && !cgameGlob->renderingThirdPerson)
     {
         if (cgameGlob->cubemapShot || !cg_drawGun->current.enabled || CG_GetWeapReticleZoom(cgameGlob, &fZoom))
             drawgun = 0;

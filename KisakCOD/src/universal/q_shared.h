@@ -489,11 +489,11 @@ int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...)
 
 bool __cdecl CanKeepStringPointer(const char *string);
 void __cdecl Com_InitThreadData(int threadContext);
-char *__cdecl Info_ValueForKey(char *s, char *key);
+const char *__cdecl Info_ValueForKey(const char *s, const char *key);
 void __cdecl Info_NextPair(const char **head, char *key, char *value);
-void __cdecl Info_RemoveKey(char *s, char *key);
-void __cdecl Info_RemoveKey_Big(char *s, char *key);
-bool __cdecl Info_Validate(char *s);
+void __cdecl Info_RemoveKey(const char *s, const char *key);
+void __cdecl Info_RemoveKey_Big(const char *s, const char *key);
+bool __cdecl Info_Validate(const char *s);
 void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value);
 void __cdecl Info_SetValueForKey_Big(char *s, char *key, const char *value);
 bool __cdecl ParseConfigStringToStruct(

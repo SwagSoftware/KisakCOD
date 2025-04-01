@@ -1579,7 +1579,7 @@ void __cdecl CG_ExecuteNewServerCommands(int localClientNum, int latestSequence)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (!MEMORY[0x98F45C])
+        if (!cgArray[0].nextSnap)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_servercmds_mp.cpp",
                 1741,
@@ -1592,4 +1592,3 @@ void __cdecl CG_ExecuteNewServerCommands(int localClientNum, int latestSequence)
             MyAssertHandler(".\\cgame_mp\\cg_servercmds_mp.cpp", 1747, 0, "%s", "nesting == cmd_args.nesting");
     }
 }
-

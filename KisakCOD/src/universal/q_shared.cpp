@@ -579,16 +579,16 @@ void __cdecl Com_InitThreadData(int threadContext)
 }
 
 static int valueindex;
-char *__cdecl Info_ValueForKey(char *s, char *key)
+const char *__cdecl Info_ValueForKey(const char *s, const char *key)
 {
     char *v3; // [esp+0h] [ebp-2010h]
     char *v4; // [esp+0h] [ebp-2010h]
     char *v5; // [esp+4h] [ebp-200Ch]
-    char s1[8196]; // [esp+8h] [ebp-2008h] BYREF
+    char s1[8196]; // [esp+8h] [ebp-2008h] BYREF TODO: dear lord
     const char *v7; // [esp+2018h] [ebp+8h]
 
     if (!s || !key)
-        return (char *)"";
+        return "";
 
     valueindex ^= 1u;
 
@@ -601,7 +601,7 @@ char *__cdecl Info_ValueForKey(char *s, char *key)
         while (*s != 92)
         {
             if (!*s)
-                return (char *)"";
+                return "";
             *v3++ = *s++;
             if (v3 - s1 >= 0x2000)
                 Com_Error(ERR_DROP, "Info_ValueForKey: oversize key %d", v3 - s1);
@@ -616,7 +616,7 @@ char *__cdecl Info_ValueForKey(char *s, char *key)
         {
             if (!Sys_IsRenderThread())
                 MyAssertHandler(".\\universal\\q_shared.cpp", 1026, 0, "%s", "Sys_IsRenderThread()");
-            v5 = (char *)((valueindex << 13) + 231767416);
+            v5 = (char *)((valueindex << 13) + 231767416); // TODO: what
         }
         v4 = v5;
         while (*v7 != 92 && *v7)
@@ -630,9 +630,9 @@ char *__cdecl Info_ValueForKey(char *s, char *key)
             return v5;
         if (!*v7)
             break;
-        s = (char *)(v7 + 1);
+        s = v7 + 1;
     }
-    return (char *)"";
+    return "";
 }
 
 void __cdecl Info_NextPair(const char **head, char *key, char *value)
@@ -667,7 +667,7 @@ void __cdecl Info_NextPair(const char **head, char *key, char *value)
     *head = sa;
 }
 
-void __cdecl Info_RemoveKey(char *s, char *key)
+void __cdecl Info_RemoveKey(char *s, const char *key)
 {
     int v2; // eax
     char v3; // al
@@ -719,7 +719,7 @@ void __cdecl Info_RemoveKey(char *s, char *key)
     }
 }
 
-void __cdecl Info_RemoveKey_Big(char *s, char *key)
+void __cdecl Info_RemoveKey_Big(char *s, const char *key)
 {
     int v2; // eax
     char v3; // al
@@ -771,7 +771,7 @@ void __cdecl Info_RemoveKey_Big(char *s, char *key)
     }
 }
 
-bool __cdecl Info_Validate(char *s)
+bool __cdecl Info_Validate(const char *s)
 {
     int v1; // eax
     int v3; // eax

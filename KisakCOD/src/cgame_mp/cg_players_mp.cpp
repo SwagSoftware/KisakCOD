@@ -144,7 +144,6 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
 }
 
 void  CG_AddPlayerSpriteDrawSurf(
-    int a1@<ebp>,
     int localClientNum,
     const centity_s *cent,
     Material *material,

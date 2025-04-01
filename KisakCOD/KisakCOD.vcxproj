@@ -381,10 +381,13 @@
     <ClInclude Include="src\aim_assist\aim_assist.h" />
     <ClInclude Include="src\bgame\bg_local.h" />
     <ClInclude Include="src\bgame\bg_public.h" />
+    <ClInclude Include="src\bgame\bg_weapons.h" />
     <ClInclude Include="src\binklib\bink.h" />
     <ClInclude Include="src\binklib\binktextures.h" />
     <ClInclude Include="src\binklib\rad3d.h" />
     <ClInclude Include="src\binklib\radbase.h" />
+    <ClInclude Include="src\cgame\cg_local.h" />
+    <ClInclude Include="src\cgame\cg_public.h" />
     <ClInclude Include="src\cgame_mp\cg_local_mp.h" />
     <ClInclude Include="src\cgame_mp\cg_public_mp.h" />
     <ClInclude Include="src\client\client.h" />
@@ -484,6 +487,7 @@
     <ClInclude Include="src\script\scr_vm.h" />
     <ClInclude Include="src\ui\keycodes.h" />
     <ClInclude Include="src\universal\assertive.h" />
+    <ClInclude Include="src\universal\memfile.h" />
     <ClInclude Include="src\universal\physicalmemory.h" />
     <ClInclude Include="src\universal\pool_allocator.h" />
     <ClInclude Include="src\universal\profile.h" />

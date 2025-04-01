@@ -21,31 +21,6 @@ struct GfxSceneParms // sizeof=0xA0
     const GfxLight *primaryLights;
 };
 
-struct refdef_s // sizeof=0x4098
-{                                       // ...
-    unsigned int x;
-    unsigned int y;
-    unsigned int width;
-    unsigned int height;
-    float tanHalfFovX;
-    float tanHalfFovY;
-    float vieworg[3];
-    float viewaxis[3][3];
-    float viewOffset[3];
-    int time;
-    float zNear;
-    float blurRadius;
-    GfxDepthOfField dof;
-    GfxFilm film;
-    GfxGlow glow;
-    GfxLight primaryLights[255];
-    GfxViewport scissorViewport;
-    bool useScissorViewport;
-    // padding byte
-    // padding byte
-    // padding byte
-    int localClientNum;
-};
 struct GfxLodRamp // sizeof=0x8
 {                                       // ...
     float scale;                        // ...

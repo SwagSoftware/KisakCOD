@@ -128,7 +128,7 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
     XAnimSetGoalWeightKnobAll(obj, playAnim, 0, 1.0, 0.1, 1.0, 0, 0);
 }
 
-void  CG_UpdateBModelWorldBounds(int a1@<ebp>, unsigned int localClientNum, centity_s *cent, int forceFilter)
+void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter)
 {
     float *v4; // [esp-10h] [ebp-1F0h]
     __int64 v5; // [esp-Ch] [ebp-1ECh] BYREF
@@ -211,11 +211,9 @@ void  CG_UpdateBModelWorldBounds(int a1@<ebp>, unsigned int localClientNum, cent
     __int64 bounds_4; // [esp+1BCh] [ebp-24h] BYREF
     __int64 bounds_12; // [esp+1C4h] [ebp-1Ch]
     GfxBrushModel *bounds_20; // [esp+1CCh] [ebp-14h]
-    int bounds_28; // [esp+1D4h] [ebp-Ch]
     GfxBrushModel *bmodel; // [esp+1D8h] [ebp-8h]
     GfxBrushModel *retaddr; // [esp+1E0h] [ebp+0h]
 
-    bounds_28 = a1;
     bmodel = retaddr;
     bounds_20 = R_GetBrushModel(cent->nextState.index.brushmodel);
     axis_24 = *(_QWORD *)&bounds_20->bounds[0][0];

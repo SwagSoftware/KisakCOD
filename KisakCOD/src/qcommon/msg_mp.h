@@ -1,5 +1,7 @@
 #pragma once
+
 #include "qcommon.h"
+#include "ent.h"
 
 struct msg_t // sizeof=0x28
 {                                       // ...
@@ -32,6 +34,12 @@ struct NetFieldList // sizeof=0x8
     const NetField* array;
     unsigned int count;
 };
+
+struct hudelem_s;
+struct usercmd_s;
+
+struct clientState_s;
+struct playerState_s;
 
 int __cdecl GetMinBitCountForNum(unsigned int num);
 void __cdecl MSG_Init(msg_t *buf, unsigned __int8 *data, int length);

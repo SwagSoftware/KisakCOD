@@ -648,3 +648,50 @@ struct GfxQuadMeshData // sizeof=0x30
     float height;
     GfxMeshData meshData;               // ...
 };
+
+struct GfxEntity // sizeof=0x8
+{                                       // ...
+    unsigned int renderFxFlags;
+    float materialTime;
+};
+
+struct GfxSceneDef // sizeof=0x14
+{                                       // ...
+    int time;                           // ...
+    float floatTime;                    // ...
+    float viewOffset[3];                // ...
+};
+
+struct GfxViewport // sizeof=0x10
+{                                       // ...
+    int x;                              // ...
+    int y;                              // ...
+    int width;                          // ...
+    int height;                         // ...
+};
+
+struct refdef_s // sizeof=0x4098
+{                                       // ...
+    unsigned int x;
+    unsigned int y;
+    unsigned int width;
+    unsigned int height;
+    float tanHalfFovX;
+    float tanHalfFovY;
+    float vieworg[3];
+    float viewaxis[3][3];
+    float viewOffset[3];
+    int time;
+    float zNear;
+    float blurRadius;
+    GfxDepthOfField dof;
+    GfxFilm film;
+    GfxGlow glow;
+    GfxLight primaryLights[255];
+    GfxViewport scissorViewport;
+    bool useScissorViewport;
+    // padding byte
+    // padding byte
+    // padding byte
+    int localClientNum;
+};
