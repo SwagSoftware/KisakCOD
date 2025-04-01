@@ -1,5 +1,6 @@
 #pragma once
 #include <qcommon/qcommon.h>
+#include <qcommon/net_chan_mp.h>
 #include <xanim/xanim.h>
 
 union hudelem_color_t // sizeof=0x4
@@ -669,51 +670,6 @@ struct clientActive_t // sizeof=0x1B1BDC
 
 extern	clientActive_t*	clients;
 
-
-struct netProfilePacket_t // sizeof=0xC
-{                                       // ...
-    int iTime;
-    int iSize;
-    int bFragment;
-};
-struct netProfileStream_t // sizeof=0x2F0
-{                                       // ...
-    netProfilePacket_t packets[60];
-    int iCurrPacket;
-    int iBytesPerSecond;
-    int iLastBPSCalcTime;
-    int iCountedPackets;
-    int iCountedFragments;
-    int iFragmentPercentage;
-    int iLargestPacket;
-    int iSmallestPacket;
-};
-struct netProfileInfo_t // sizeof=0x5E0
-{                                       // ...
-    netProfileStream_t send;
-    netProfileStream_t recieve;         // ...
-};
-
-struct netchan_t // sizeof=0x62C
-{                                       // ...
-    int outgoingSequence;
-    netsrc_t sock;
-    int dropped;
-    int incomingSequence;
-    netadr_t remoteAddress;             // ...
-    int qport;
-    int fragmentSequence;
-    int fragmentLength;
-    unsigned __int8 *fragmentBuffer;
-    int fragmentBufferSize;
-    int unsentFragments;
-    int unsentFragmentStart;
-    int unsentLength;
-    unsigned __int8 *unsentBuffer;
-    int unsentBufferSize;
-    netProfileInfo_t prof;
-};
-
 struct clientConnection_t // sizeof=0x615E8
 {                                       // ...
     int qport;
@@ -845,46 +801,6 @@ struct __declspec(align(4)) vidConfig_t // sizeof=0x30
     // padding byte
     // padding byte
     // padding byte
-};
-
-struct trDebugString_t // sizeof=0x80
-{
-    float xyz[3];
-    float color[4];
-    float scale;
-    char text[96];
-};
-struct clientDebugStringInfo_t // sizeof=0x10
-{                                       // ...
-    int max;                            // ...
-    int num;                            // ...
-    trDebugString_t *strings;           // ...
-    int *durations;                     // ...
-};
-struct trDebugLine_t // sizeof=0x2C
-{
-    float start[3];
-    float end[3];
-    float color[4];
-    int depthTest;
-};
-struct clientDebugLineInfo_t // sizeof=0x10
-{                                       // ...
-    int max;                            // ...
-    int num;                            // ...
-    trDebugLine_t *lines;               // ...
-    int *durations;                     // ...
-};
-struct clientDebug_t // sizeof=0x68
-{                                       // ...
-    int prevFromServer;
-    int fromServer;                     // ...
-    clientDebugStringInfo_t clStrings;  // ...
-    clientDebugStringInfo_t svStringsBuffer; // ...
-    clientDebugStringInfo_t svStrings;  // ...
-    clientDebugLineInfo_t clLines;      // ...
-    clientDebugLineInfo_t svLinesBuffer; // ...
-    clientDebugLineInfo_t svLines;      // ...
 };
 
 struct Font_s;
@@ -1239,6 +1155,10 @@ inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int localClientNum)
 }
 
 // cl_cgame_mp
+struct snapshot_s;
+struct snd_alias_t;
+struct refdef_s;
+
 struct MemoryFile // sizeof=0x1C
 {                                       // ...
     unsigned __int8 *buffer;            // ...

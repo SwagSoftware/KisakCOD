@@ -33,55 +33,6 @@ struct svEntity_s // sizeof=0x178
     float linkmax[2];
 };
 
-struct clientHeader_t // sizeof=0x64C
-{                                       // ...
-    int state;                          // ...
-    int sendAsActive;
-    int deltaMessage;
-    int rateDelayed;
-    netchan_t netchan;                  // ...
-    float predictedOrigin[3];
-    int predictedOriginServerTime;      // ...
-};
-enum PacketEntityType : __int32
-{                                       // ...
-    ANALYZE_DATATYPE_ENTITYTYPE_GENERALENTITY = 0x0,
-    ANALYZE_DATATYPE_ENTITYTYPE_PLAYERENTITY = 0x1,
-    ANALYZE_DATATYPE_ENTITYTYPE_PLAYERCORPSEENTITY = 0x2,
-    ANALYZE_DATATYPE_ENTITYTYPE_ITEMENTITY = 0x3,
-    ANALYZE_DATATYPE_ENTITYTYPE_MISSILEENTITY = 0x4,
-    ANALYZE_DATATYPE_ENTITYTYPE_INVISIBLEENTITY = 0x5,
-    ANALYZE_DATATYPE_ENTITYTYPE_SCRIPTMOVERENTITY = 0x6,
-    ANALYZE_DATATYPE_ENTITYTYPE_SOUNDBLENDENTITY = 0x7,
-    ANALYZE_DATATYPE_ENTITYTYPE_FXENTITY = 0x8,
-    ANALYZE_DATATYPE_ENTITYTYPE_LOOPFXENTITY = 0x9,
-    ANALYZE_DATATYPE_ENTITYTYPE_PRIMARYLIGHTENTITY = 0xA,
-    ANALYZE_DATATYPE_ENTITYTYPE_MG42ENTITY = 0xB,
-    ANALYZE_DATATYPE_ENTITYTYPE_HELICOPTER = 0xC,
-    ANALYZE_DATATYPE_ENTITYTYPE_PLANE = 0xD,
-    ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE = 0xE,
-    ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE_COLLMAP = 0xF,
-    ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE_CORPSE = 0x10,
-    ANALYZE_DATATYPE_ENTITYTYPE_TEMPENTITY = 0x11,
-    ANALYZE_DATATYPE_ENTITYTYPE_ARCHIVEDENTITY = 0x12,
-    ANALYZE_DATATYPE_ENTITYTYPE_CLIENTSTATE = 0x13,
-    ANALYZE_DATATYPE_ENTITYTYPE_PLAYERSTATE = 0x14,
-    ANALYZE_DATATYPE_ENTITYTYPE_HUDELEM = 0x15,
-    ANALYZE_DATATYPE_ENTITYTYPE_BASELINE = 0x16,
-    ANALYZE_DATATYPE_ENTITYTYPE_COUNT = 0x17,
-};
-struct SnapshotInfo_s // sizeof=0x18
-{                                       // ...
-    int clientNum;                      // ...
-    const clientHeader_t *client;       // ...
-    int snapshotDeltaTime;              // ...
-    bool fromBaseline;                  // ...
-    bool archived;                      // ...
-    // padding byte
-    // padding byte
-    int *fieldChanges;                  // ...
-    PacketEntityType packetEntityType;  // ...
-};
 struct svscmd_info_t // sizeof=0x408
 {                                       // ...
     char cmd[1024];                     // ...
@@ -100,6 +51,7 @@ struct clientSnapshot_t // sizeof=0x2F84
     int messageSize;
     int serverTime;
 };
+
 struct __declspec(align(1)) VoicePacket_t // sizeof=0x105
 {                                       // ...
     unsigned __int8 talker;             // ...

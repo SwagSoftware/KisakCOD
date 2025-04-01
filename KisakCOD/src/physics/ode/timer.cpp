@@ -262,7 +262,7 @@ static struct {
   double total_t;		// total clocks used in this slot.
   double total_p;		// total percentage points used in this slot.
   int count;			// number of times this slot has been updated.
-  char *description;		// pointer to static string
+  const char *description;		// pointer to static string
 } event[MAXNUM];
 
 

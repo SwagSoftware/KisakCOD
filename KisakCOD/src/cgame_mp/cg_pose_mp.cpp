@@ -13,7 +13,7 @@ void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s 
     DObjSetLocalTag(obj, partBits, 0, control->tag_origin_offset, control->tag_origin_angles);
 }
 
-void  CG_VehPoseControllers(float a1@<ebp>, const cpose_t *pose, const DObj_s *obj, int *partBits)
+void  CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     float v4[7]; // [esp-Ch] [ebp-1DCh] BYREF
     float v5; // [esp+10h] [ebp-1C0h]
@@ -44,12 +44,12 @@ void  CG_VehPoseControllers(float a1@<ebp>, const cpose_t *pose, const DObj_s *o
     const DObjAnimMat *boneMtxList; // [esp+8Ch] [ebp-144h]
     unsigned int boneCount; // [esp+90h] [ebp-140h]
     XModel *model; // [esp+94h] [ebp-13Ch]
-    vector4 invAxis; // [esp+98h] [ebp-138h]
+    mat4x4 invAxis; // [esp+98h] [ebp-138h]
     float4 axisW; // [esp+D8h] [ebp-F8h]
     float v35; // [esp+E8h] [ebp-E8h]
     float4 axisZ; // [esp+ECh] [ebp-E4h]
     float v37; // [esp+FCh] [ebp-D4h]
-    vector4 axis; // [esp+100h] [ebp-D0h]
+    mat4x4 axis; // [esp+100h] [ebp-D0h]
     float *v39; // [esp+140h] [ebp-90h]
     float v40[3]; // [esp+144h] [ebp-8Ch] BYREF
     float tempAxis[4][3]; // [esp+150h] [ebp-80h] BYREF

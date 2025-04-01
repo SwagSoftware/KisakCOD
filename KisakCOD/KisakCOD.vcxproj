@@ -385,8 +385,6 @@
     <ClInclude Include="src\binklib\binktextures.h" />
     <ClInclude Include="src\binklib\rad3d.h" />
     <ClInclude Include="src\binklib\radbase.h" />
-    <ClInclude Include="src\cgame\cg_local.h" />
-    <ClInclude Include="src\cgame\cg_public.h" />
     <ClInclude Include="src\cgame_mp\cg_local_mp.h" />
     <ClInclude Include="src\cgame_mp\cg_public_mp.h" />
     <ClInclude Include="src\client\client.h" />
@@ -406,6 +404,7 @@
     <ClInclude Include="src\gfx_d3d\r_debug.h" />
     <ClInclude Include="src\gfx_d3d\r_dvars.h" />
     <ClInclude Include="src\gfx_d3d\r_font.h" />
+    <ClInclude Include="src\gfx_d3d\r_gfx.h" />
     <ClInclude Include="src\gfx_d3d\r_image.h" />
     <ClInclude Include="src\gfx_d3d\r_image_load_db.h" />
     <ClInclude Include="src\gfx_d3d\r_init.h" />
@@ -458,11 +457,14 @@
     <ClInclude Include="src\physics\phys_local.h" />
     <ClInclude Include="src\qcommon\bitarray.h" />
     <ClInclude Include="src\qcommon\cmd.h" />
+    <ClInclude Include="src\qcommon\ent.h" />
     <ClInclude Include="src\qcommon\files.h" />
     <ClInclude Include="src\qcommon\graph.h" />
     <ClInclude Include="src\qcommon\huffman.h" />
     <ClInclude Include="src\qcommon\mem_track.h" />
     <ClInclude Include="src\qcommon\msg_mp.h" />
+    <ClInclude Include="src\qcommon\net_chan_mp.h" />
+    <ClInclude Include="src\qcommon\sv_msg_write_mp.h" />
     <ClInclude Include="src\server\sv_game.h" />
     <ClInclude Include="src\server_mp\server.h" />
     <ClInclude Include="src\stringed\stringed_hooks.h" />

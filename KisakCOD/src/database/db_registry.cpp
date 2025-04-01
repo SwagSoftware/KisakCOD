@@ -551,32 +551,6 @@ LABEL_39:
     }
 }
 
-void __cdecl Sys_LockWrite(FastCriticalSection *critSect)
-{
-    while (1)
-    {
-        if (critSect->readCount)
-            goto LABEL_5;
-        if (InterlockedIncrement(&critSect->writeCount) == 1 && !critSect->readCount)
-            break;
-        InterlockedDecrement(&critSect->writeCount);
-    LABEL_5:
-        NET_Sleep(0);
-    }
-}
-
-void __cdecl Sys_UnlockWrite(FastCriticalSection *critSect)
-{
-    if (critSect->writeCount <= 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
-            107,
-            0,
-            "%s",
-            "critSect->writeCount > 0");
-    InterlockedDecrement(&critSect->writeCount);
-}
-
 void __cdecl DB_Sleep(unsigned int msec)
 {
     R_BeginRemoteScreenUpdate();

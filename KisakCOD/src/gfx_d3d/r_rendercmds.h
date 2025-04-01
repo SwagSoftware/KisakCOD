@@ -1,5 +1,8 @@
 #pragma once
-#include "r_material.h"
+
+#include "r_debug.h"
+#include "r_font.h"
+#include "r_gfx.h"
 #include "r_material.h"
 
 enum GfxRenderCommand : __int32
@@ -113,38 +116,12 @@ struct StateBitsTable // sizeof=0x8
     const char *name;                   // ...
 };
 
-struct GfxPackedVertexNormal // sizeof=0x8
-{                                       // ...
-    PackedUnitVec normal;
-    PackedUnitVec tangent;
-};
-struct GfxDynamicIndices // sizeof=0xC
-{                                       // ...
-    volatile int used;
-    int total;
-    unsigned __int16 *indices;          // ...
-};
-
-struct GfxVertexBufferState // sizeof=0x10
-{                                       // ...
-    volatile int used;
-    int total;
-    IDirect3DVertexBuffer9 *buffer;     // ...
-    unsigned __int8 *verts;
-};
-struct GfxMeshData // sizeof=0x20
-{                                       // ...
-    unsigned int indexCount;
-    unsigned int totalIndexCount;
-    unsigned __int16 *indices;
-    GfxVertexBufferState vb;
-    unsigned int vertSize;
-};
 struct GfxCmdHeader // sizeof=0x4
 {                                       // ...
     unsigned __int16 id;
     unsigned __int16 byteCount;
 };
+
 struct GfxCmdArray // sizeof=0x10
 {                                       // ...
     unsigned __int8 *cmds;              // ...
@@ -152,67 +129,11 @@ struct GfxCmdArray // sizeof=0x10
     int usedCritical;
     GfxCmdHeader *lastCmd;
 };
+
 struct GfxRenderCommandExecState // sizeof=0x4
 {                                       // ...
     const void *cmd;                    // ...
 };
-
-struct GfxDebugPoly // sizeof=0x18
-{
-    float color[4];
-    int firstVert;
-    int vertCount;
-};
-struct GfxDebugPlume // sizeof=0x28
-{
-    float origin[3];
-    float color[4];
-    int score;
-    int startTime;
-    int duration;
-};
-struct DebugGlobals // sizeof=0x54
-{                                       // ...
-    float (*verts)[3];
-    int vertCount;
-    int vertLimit;
-    GfxDebugPoly *polys;
-    int polyCount;
-    int polyLimit;
-    trDebugString_t *strings;
-    int stringCount;
-    int stringLimit;
-    trDebugString_t *externStrings;
-    int externStringCount;
-    int externMaxStringCount;
-    trDebugLine_t *lines;
-    int lineCount;
-    int lineLimit;
-    trDebugLine_t *externLines;
-    int externLineCount;
-    int externMaxLineCount;
-    GfxDebugPlume *plumes;              // ...
-    int plumeCount;                     // ...
-    int plumeLimit;                     // ...
-};
-
-struct GfxMatrix // sizeof=0x40
-{                                       // ...
-    float m[4][4];                      // ...
-};
-struct GfxViewParms // sizeof=0x140
-{                                       // ...
-    GfxMatrix viewMatrix;
-    GfxMatrix projectionMatrix;         // ...
-    GfxMatrix viewProjectionMatrix;     // ...
-    GfxMatrix inverseViewProjectionMatrix; // ...
-    float origin[4];                    // ...
-    float axis[3][3];                   // ...
-    float depthHackNearClip;
-    float zNear;
-    int pad;
-};
-
 struct __declspec(align(2)) GfxCmdDrawText2D // sizeof=0x54
 {
     GfxCmdHeader header;
@@ -300,14 +221,7 @@ struct FxMarkMeshData // sizeof=0x10
     unsigned __int8 pad0;
     unsigned int pad1;
 };
-struct GfxFog // sizeof=0x14
-{                                       // ...
-    int startTime;                      // ...
-    int finishTime;                     // ...
-    GfxColor color;                     // ...
-    float fogStart;                     // ...
-    float density;                      // ...
-};
+
 struct GfxSceneDef // sizeof=0x14
 {                                       // ...
     int time;                           // ...
@@ -326,10 +240,15 @@ struct GfxDrawSurfListInfo // sizeof=0x28
     const GfxDrawSurf *drawSurfs;
     unsigned int drawSurfCount;
     MaterialTechniqueType baseTechType; // ...
-    const GfxViewInfo *viewInfo;
+    const struct GfxViewInfo *viewInfo;
     float viewOrigin[4];
     const GfxLight *light;
     int cameraView;
+};
+struct PointLightPartition // sizeof=0x68
+{                                       // ...
+    GfxLight light;
+    GfxDrawSurfListInfo info;
 };
 struct __declspec(align(16)) ShadowCookie // sizeof=0xC0
 {                                       // ...
@@ -371,49 +290,6 @@ struct __declspec(align(16)) ShadowCookieList // sizeof=0x1210
     // padding byte
     // padding byte
 };
-struct PointLightPartition // sizeof=0x68
-{                                       // ...
-    GfxLight light;
-    GfxDrawSurfListInfo info;
-};
-struct GfxDepthOfField // sizeof=0x20
-{                                       // ...
-    float viewModelStart;
-    float viewModelEnd;
-    float nearStart;
-    float nearEnd;
-    float farStart;
-    float farEnd;
-    float nearBlur;
-    float farBlur;
-};
-struct GfxFilm // sizeof=0x2C
-{                                       // ...
-    bool enabled;
-    // padding byte
-    // padding byte
-    // padding byte
-    float brightness;
-    float contrast;
-    float desaturation;
-    bool invert;
-    // padding byte
-    // padding byte
-    // padding byte
-    float tintDark[3];
-    float tintLight[3];
-};
-struct GfxGlow // sizeof=0x14
-{                                       // ...
-    bool enabled;
-    // padding byte
-    // padding byte
-    // padding byte
-    float bloomCutoff;
-    float bloomDesaturation;
-    float bloomIntensity;
-    float radius;
-};
 struct GfxSunShadowProjection // sizeof=0x60
 {                                       // ...
     float viewMatrix[4][4];
@@ -426,6 +302,12 @@ struct GfxSunShadowBoundingPoly // sizeof=0x78
     int pointCount;
     float points[9][2];
     int pointIsNear[9];
+};
+struct GfxSunShadow // sizeof=0x4A0
+{                                       // ...
+    GfxMatrix lookupMatrix;
+    GfxSunShadowProjection sunProj;
+    GfxSunShadowPartition partition[2];
 };
 struct __declspec(align(16)) GfxSunShadowPartition // sizeof=0x200
 {                                       // ...
@@ -447,27 +329,21 @@ struct __declspec(align(16)) GfxSunShadowPartition // sizeof=0x200
     // padding byte
     // padding byte
 };
-struct GfxSunShadow // sizeof=0x4A0
-{                                       // ...
-    GfxMatrix lookupMatrix;
-    GfxSunShadowProjection sunProj;
-    GfxSunShadowPartition partition[2];
-};
 struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
 {                                       // ...
     GfxViewParms shadowViewParms;
     GfxMatrix lookupMatrix;
     unsigned __int8 shadowableLightIndex;
     unsigned __int8 pad[3];
-    const GfxLight *light;
+    const GfxLight* light;
     float fade;
     GfxDrawSurfListInfo info;
     GfxViewport viewport;
-    GfxImage *image;
+    GfxImage* image;
     GfxRenderTargetId renderTargetId;
     float pixelAdjust[4];
     int clearScreen;
-    GfxMeshData *clearMesh;
+    GfxMeshData* clearMesh;
     // padding byte
     // padding byte
     // padding byte
@@ -481,14 +357,21 @@ struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
     // padding byte
     // padding byte
 };
-struct GfxQuadMeshData // sizeof=0x30
+struct GfxBackEndData;
+
+struct __declspec(align(8)) GfxCmdBufInput // sizeof=0x430
 {                                       // ...
-    float x;
-    float y;
-    float width;
-    float height;
-    GfxMeshData meshData;               // ...
+    float consts[58][4];
+    const GfxImage* codeImages[27];     // ...
+    unsigned __int8 codeImageSamplerStates[27]; // ...
+    // padding byte
+    const GfxBackEndData* data;         // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
 };
+
 const struct GfxViewInfo // sizeof=0x67B0
 {                                       // ...
     GfxViewParms viewParms;
@@ -613,18 +496,6 @@ const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
     // padding byte
     // padding byte
     // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct __declspec(align(8)) GfxCmdBufInput // sizeof=0x430
-{                                       // ...
-    float consts[58][4];
-    const GfxImage *codeImages[27];     // ...
-    unsigned __int8 codeImageSamplerStates[27]; // ...
-    // padding byte
-    const GfxBackEndData *data;         // ...
     // padding byte
     // padding byte
     // padding byte

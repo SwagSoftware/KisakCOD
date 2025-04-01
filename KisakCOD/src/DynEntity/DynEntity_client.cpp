@@ -1,3 +1,5 @@
+#include <qcommon/qcommon.h>
+
 #include "dynentity_client.h"
 
 const dvar_t *dynEnt_active;
@@ -682,7 +684,7 @@ void __cdecl DynEntCl_PointTrace_r(
             mid[1] = (p2[1] - p[1]) * frac + p[1];
             mid[2] = (p2[2] - p[2]) * frac + p[2];
             mid[3] = (p2[3] - p[3]) * frac + p[3];
-            DynEntCl_PointTrace_r((DynEntityDrawType)drawType, clip, sector->tree.child[t2 >= 0.0], p, mid, results);
+            DynEntCl_PointTrace_r(drawType, clip, sector->tree.child[t2 >= 0.0], p, mid, results);
             if (results->fraction == 0.0)
                 return;
             sectorIndex = sector->tree.child[t2 < 0.0];

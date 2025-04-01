@@ -15,6 +15,7 @@ struct Glyph // sizeof=0x18
     float s1;
     float t1;
 };
+
 struct Font_s // sizeof=0x18
 {                                       // ...
     const char *fontName;

@@ -1,6 +1,8 @@
 #include "qcommon.h"
 #include "threads.h"
 
+#include <xanim/xanim.h>
+
 unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace)
 {
     if (!trace)

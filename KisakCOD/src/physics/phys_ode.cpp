@@ -2388,8 +2388,8 @@ void __cdecl Phys_ObjTraceNewPos(dxBody *body)
                     if (isTooNarrow)
                     {
                         Vec3Sub(newPos, userData->savedPos, delta);
-                        *(float *)&number = Vec3LengthSq(delta);
-                        invDist = I_rsqrt(number);
+                        number = Vec3LengthSq(delta);
+                        invDist = Q_rsqrt(number);
                         trace.fraction = trace.fraction - startMaxs[0] * 0.5 * invDist;
                         v4 = 0.0 - trace.fraction;
                         if (v4 < 0.0)

@@ -792,9 +792,9 @@ int __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *scriptItem
     return 1;
 }
 
-char *__cdecl GetMoveTypeName(int type)
+const char *__cdecl GetMoveTypeName(int type)
 {
-    char *result; // eax
+    const char *result; // eax
 
     switch (type)
     {
@@ -868,9 +868,9 @@ char *__cdecl GetMoveTypeName(int type)
     return result;
 }
 
-char *__cdecl GetWeaponTypeName(int type)
+const char *__cdecl GetWeaponTypeName(int type)
 {
-    char *result; // eax
+    const char *result; // eax
 
     switch (type)
     {
@@ -908,7 +908,7 @@ char *__cdecl GetWeaponTypeName(int type)
     return result;
 }
 
-char *__cdecl GetBodyPart(int bodypart)
+const char *__cdecl GetBodyPart(int bodypart)
 {
     switch (bodypart)
     {
@@ -1223,17 +1223,51 @@ void __cdecl BG_LerpOffset(float *offset_goal, float maxOffsetChange, float *off
     }
 }
 
-double __cdecl I_rsqrt(int number)
-{
-    float x2; // [esp+Ch] [ebp-8h]
+/*
+===========================================================================
+Copyright (C) 1999-2005 Id Software, Inc.
 
-    if ((number & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 84, 0, "%s", "!IS_NAN(number)");
-    if (*(float *)&number == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 85, 0, "%s", "number");
-    x2 = *(float *)&number * 0.5;
-    return (float)(((float)1.5 - x2 * COERCE_FLOAT(1597463007 - (number >> 1)) * COERCE_FLOAT(1597463007 - (number >> 1)))
-        * COERCE_FLOAT(1597463007 - (number >> 1)));
+This file is part of Quake III Arena source code.
+
+Quake III Arena source code is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of the License,
+or (at your option) any later version.
+
+Quake III Arena source code is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Foobar; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+===========================================================================
+*/
+double __cdecl Q_rsqrt(float number)
+{
+    iassert(number);
+    iassert(!isnan(number));
+
+    union standards_compliant_fp_bit_hack {
+        int i;
+        float f;
+    };
+
+    standards_compliant_fp_bit_hack v;
+    float x2, y;
+    const float threehalfs = 1.5F;
+
+    x2 = number * 0.5F;
+    y = number;
+    v.f = y;						// evil floating point bit level hacking
+    v.i = 0x5f3759df - (v.i >> 1);               // what the fuck?
+    y = v.f;
+    y = y * (threehalfs - (x2 * y * y));   // 1st iteration
+    //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+    // TODO: use rsqrtss instead since it's not 1990 anymore
+    return y;
 }
 
 void __cdecl Vec3Mad(const float *start, float scale, const float *dir, float *result)

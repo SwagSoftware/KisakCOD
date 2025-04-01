@@ -2688,10 +2688,10 @@ void __cdecl XAnimCalcRelDeltaParts(
     float rotWeightScale; // [esp+9Ch] [ebp-50h]
     const XAnimDeltaPart* part; // [esp+A0h] [ebp-4Ch]
     const XAnimPartTrans* trans; // [esp+A4h] [ebp-48h]
-    float4 vec1; // [esp+A8h] [ebp-44h] BYREF
+    float4x1 vec1; // [esp+A8h] [ebp-44h] BYREF
     float Q[2][2]; // [esp+B8h] [ebp-34h] BYREF
-    float4 vec2; // [esp+C8h] [ebp-24h] BYREF
-    float4 vec; // [esp+D8h] [ebp-14h]
+    float4x1 vec2; // [esp+C8h] [ebp-24h] BYREF
+    float4x1 vec; // [esp+D8h] [ebp-14h]
 
     XAnim_CalcDeltaForTime(parts, time1, Q[0], &vec1);
     XAnim_CalcDeltaForTime(parts, time2, Q[1], &vec2);

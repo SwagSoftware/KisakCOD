@@ -839,9 +839,6 @@
     <ClInclude Include="src\aim_assist\aim_assist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\cgame\cg_local.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\qcommon\graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -975,9 +972,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\cgame_mp\cg_public_mp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\cgame\cg_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\DynEntity\DynEntity_client.h">
@@ -1131,6 +1125,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\devgui\devgui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gfx_d3d\r_gfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qcommon\sv_msg_write_mp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qcommon\net_chan_mp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qcommon\ent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

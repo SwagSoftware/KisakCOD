@@ -1,35 +1,23 @@
 #pragma once
+
 #include "cg_public_mp.h"
+
 #include <client_mp/client_mp.h>
-#include <gfx_d3d/r_scene.h>
 
+#include <bgame/bg_local.h>
+#include <gfx_d3d/r_gfx.h>
 
-struct clientControllers_t // sizeof=0x60
-{                                       // ...
-    float angles[6][3];
-    float tag_origin_angles[3];
-    float tag_origin_offset[3];
-};
-struct __declspec(align(4)) CEntPlayerInfo // sizeof=0xC
-{                                       // ...
-    clientControllers_t *control;       // ...
-    unsigned __int8 tag[6];             // ...
-    // padding byte
-    // padding byte
-};
 struct CEntTurretAngles // sizeof=0x8
 {                                       // ...
     float pitch;
     float yaw;
 };
-union $06707BB8B07567CD0B9AB50B15101D6E // sizeof=0x8
-{                                       // ...
-    CEntTurretAngles angles;
-    const float *viewAngles;
-};
 struct CEntTurretInfo // sizeof=0x10
 {                                       // ...
-    $06707BB8B07567CD0B9AB50B15101D6E ___u0;
+    union {
+        CEntTurretAngles angles;
+        const float* viewAngles;
+    };
     float barrelPitch;
     bool playerUsing;
     unsigned __int8 tag_aim;
@@ -55,6 +43,15 @@ struct __declspec(align(2)) CEntVehicleInfo // sizeof=0x24
     // padding byte
 };
 
+struct __declspec(align(4)) CEntPlayerInfo // sizeof=0xC
+{                                       // ...
+    clientControllers_t* control;       // ...
+    unsigned __int8 tag[6];             // ...
+    // padding byte
+    // padding byte
+};
+
+struct FxEffect;
 struct CEntFx // sizeof=0x8
 {                                       // ...
     int triggerTime;
@@ -684,163 +681,6 @@ struct score_t // sizeof=0x28
     Material *hStatusIcon;
     Material *hRankIcon;
 };
-struct viewDamage_t // sizeof=0xC
-{                                       // ...
-    int time;
-    int duration;
-    float yaw;
-};
-struct shellshock_parms_t_screenblend // sizeof=0x14
-{                                       // ...
-    int blurredFadeTime;
-    int blurredEffectTime;
-    int flashWhiteFadeTime;
-    int flashShotFadeTime;
-    ShockViewTypes type;
-};
-struct shellshock_parms_t_view // sizeof=0xC
-{                                       // ...
-    int fadeTime;
-    float kickRate;
-    float kickRadius;
-};
-struct shellshock_parms_t_sound // sizeof=0x230
-{                                       // ...
-    bool affect;
-    char loop[64];
-    char loopSilent[64];
-    char end[64];
-    char endAbort[64];
-    // padding byte
-    // padding byte
-    // padding byte
-    int fadeInTime;
-    int fadeOutTime;
-    float drylevel;
-    float wetlevel;
-    char roomtype[16];
-    float channelvolume[64];
-    int modEndDelay;
-    int loopFadeTime;
-    int loopEndDelay;
-};
-struct shellshock_parms_t_lookcontrol // sizeof=0x14
-{                                       // ...
-    bool affect;
-    // padding byte
-    // padding byte
-    // padding byte
-    int fadeTime;
-    float mouseSensitivity;
-    float maxPitchSpeed;
-    float maxYawSpeed;
-};
-struct shellshock_parms_t_movement // sizeof=0x1
-{                                       // ...
-    bool affect;
-};
-const struct __declspec(align(4)) shellshock_parms_t // sizeof=0x268
-{                                       // ...
-    shellshock_parms_t_screenblend screenBlend;
-    shellshock_parms_t_view view;
-    shellshock_parms_t_sound sound;
-    shellshock_parms_t_lookcontrol lookControl;
-    shellshock_parms_t_movement movement;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct shellshock_t // sizeof=0x20
-{                                       // ...
-    const shellshock_parms_t *parms;
-    int startTime;
-    int duration;
-    int loopEndTime;
-    float sensitivity;
-    float viewDelta[2];
-    int hasSavedScreen;
-};
-struct lerpFrame_t // sizeof=0x30
-{                                       // ...
-    float yawAngle;
-    int yawing;
-    float pitchAngle;
-    int pitching;
-    int animationNumber;
-    animation_s *animation;
-    int animationTime;
-    float oldFramePos[3];
-    float animSpeedScale;
-    int oldFrameSnapshotTime;
-};
-struct __declspec(align(4)) clientInfo_t // sizeof=0x4CC
-{                                       // ...
-    int infoValid;                      // ...
-    int nextValid;
-    int clientNum;
-    char name[16];
-    team_t team;
-    team_t oldteam;
-    int rank;
-    int prestige;
-    int perks;
-    int score;
-    int location;
-    int health;
-    char model[64];
-    char attachModelNames[6][64];
-    char attachTagNames[6][64];
-    lerpFrame_t legs;
-    lerpFrame_t torso;
-    float lerpMoveDir;
-    float lerpLean;
-    float playerAngles[3];              // ...
-    int leftHandGun;
-    int dobjDirty;
-    clientControllers_t control;
-    unsigned int clientConditions[10][2];
-    XAnimTree_s *pXAnimTree;            // ...
-    int iDObjWeapon;
-    unsigned __int8 weaponModel;
-    // padding byte
-    // padding byte
-    // padding byte
-    int stanceTransitionTime;
-    int turnAnimEndTime;
-    char turnAnimType;
-    // padding byte
-    // padding byte
-    // padding byte
-    int attachedVehEntNum;
-    int attachedVehSlotIndex;
-    bool hideWeapon;
-    bool usingKnife;
-    // padding byte
-    // padding byte
-};
-struct bgs_t_human // sizeof=0x10
-{                                       // ...
-    scr_animtree_t tree;                // ...
-    scr_anim_s torso;
-    scr_anim_s legs;
-    scr_anim_s turning;
-};
-struct bgs_t // sizeof=0xADD08
-{                                       // ...
-    animScriptData_t animScriptData;    // ...
-    bgs_t_human generic_human; // ...
-    int time;                           // ...
-    int latestSnapshotTime;             // ...
-    int frametime;                      // ...
-    int anim_user;                      // ...
-    XModel *(__cdecl *GetXModel)(const char *); // ...
-    void(__cdecl *CreateDObj)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *); // ...
-    unsigned __int16(__cdecl *AttachWeapon)(DObjModel_s *, unsigned __int16, clientInfo_t *); // ...
-    DObj_s *(__cdecl *GetDObj)(int, int); // ...
-    void(__cdecl *SafeDObjFree)(int, int); // ...
-    void *(__cdecl *AllocXAnim)(int);   // ...
-    clientInfo_t clientinfo[64];        // ...
-};
 struct visionSetVars_t // sizeof=0x50
 {                                       // ...
     bool glowEnable;                    // ...
@@ -1143,8 +983,6 @@ void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent);
 const ComPrimaryLight *__cdecl Com_GetPrimaryLight(unsigned int primaryLightIndex);
 void __cdecl CG_ClampPrimaryLightOrigin(GfxLight *light, const ComPrimaryLight *refLight);
 void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *refLight);
-void __cdecl Vec3ScaleMad(float scale0, const float *dir0, float scale1, const float *dir1, float *result);
-bool __cdecl Vec3IsNormalized(const float *v);
 void __cdecl CG_GetPoseOrigin(const cpose_t *pose, float *origin);
 void __cdecl CG_GetPoseAngles(const cpose_t *pose, float *angles);
 float *__cdecl CG_GetEntityOrigin(int localClientNum, unsigned int entnum);
@@ -1822,7 +1660,7 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles);
 
 // cg_pose_mp
 void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int *partBits);
-void  CG_VehPoseControllers(float a1@<ebp>, const cpose_t *pose, const DObj_s *obj, int *partBits);
+void  CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
 void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
 void __cdecl CG_Player_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
 void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);

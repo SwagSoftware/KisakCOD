@@ -127,7 +127,6 @@ char __cdecl AimAssist_ConvertToClipBounds(
     const float (*mtx)[3],
     float (*clipBounds)[3]);
 char __cdecl AimAssist_XfmWorldPointToClipSpace(const AimAssistGlobals *aaGlob, const float *in, float *out);
-double __cdecl Vec4Dot(const float *a, const float *b);
 double __cdecl AimAssist_GetCrosshairDistSqr(const float *clipMins, const float *clipMaxs);
 void __cdecl AimAssist_AddToTargetList(AimAssistGlobals *aaGlob, const AimScreenTarget *screenTarget);
 int __cdecl AimAssist_CompareTargets(const AimScreenTarget *screenTargetA, const AimScreenTarget *screenTargetB);
@@ -136,8 +135,6 @@ int __cdecl AimAssist_CalcAimPos(
     const centity_s *targetEnt,
     const AimTarget *target,
     float *aimPos);
-void __cdecl Vec3Add(const float *a, const float *b, float *sum);
-void __cdecl Vec3Avg(const float *a, const float *b, float *sum);
 int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsigned int tagName, float *pos);
 void __cdecl AimTarget_GetTagPos(const centity_s *ent, unsigned int tagName, float *pos);
 int __cdecl AimAssist_GetScreenTargetCount(int localClientNum);
@@ -156,13 +153,11 @@ bool __cdecl AimAssist_DoBoundsIntersectCenterBox(
     const float *clipMaxs,
     float clipHalfWidth,
     float clipHalfHeight);
-void __cdecl Vec3Sub(const float *a, const float *b, float *diff);
 const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlobals *aaGlob, int entIndex);
 void __cdecl AimAssist_ApplyAutoMelee(const AimInput *input, AimOutput *output);
 void __cdecl AimAssist_ClearAutoMeleeTarget(AimAssistGlobals *aaGlob);
 char __cdecl AimAssist_UpdateAutoMeleeTarget(AimAssistGlobals *aaGlob);
 void __cdecl AimAssist_SetAutoMeleeTarget(AimAssistGlobals *aaGlob, const AimScreenTarget *screenTarget);
-double __cdecl Vec3Dot(const float *a, const float *b);
 void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output);
 void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output);
 void __cdecl AimAssist_DrawDebugOverlay(unsigned int localClientNum);
@@ -172,14 +167,10 @@ void __cdecl AimAssist_DrawCenterBox(
     float clipHalfHeight,
     const float *color);
 void __cdecl AimAssist_DrawTargets(__int64 localClientNum, const float *color);
-double __cdecl Vec3Length(const float *v);
-void __cdecl Vec3Copy(const float *from, float *to);
-double __cdecl tan(double X);
-double __cdecl floor(double X);
-
 
 
 // aim_target_mp
+struct cg_s;
 int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsigned int tagName, float *pos);
 void __cdecl TRACK_aim_target();
 void __cdecl AimTarget_Init(int localClientNum);
@@ -191,9 +182,7 @@ double __cdecl AimTarget_GetTargetRadius(const centity_s *targetEnt);
 void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, float *maxs);
 char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targetEnt, unsigned int visBone);
 void __cdecl AimTarget_GetTargetCenter(const centity_s *targetEnt, float *center);
-void __cdecl Vec3Scale(const float *v, float scale, float *result);
 void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetEnt, AimTarget *target);
-double __cdecl Vec3LengthSq(const float *v);
 void __cdecl AimTarget_AddTargetToList(int localClientNum, const AimTarget *target);
 int __cdecl AimTarget_CompareTargets(const AimTarget *targetA, const AimTarget *targetB);
 bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps);

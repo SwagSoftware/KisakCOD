@@ -1,7 +1,6 @@
 #include "bg_public.h"
 #include "bg_local.h"
 
-
 //char **eventnames       827b08a8     bg_misc.obj
 //char (*)[80] bgShockChannelNames 827ea9d8     bg_misc.obj
 //char const **bgShockDvarNames 827b0ae0     bg_misc.obj

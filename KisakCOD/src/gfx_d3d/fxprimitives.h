@@ -6,6 +6,7 @@ struct orientation_t // sizeof=0x30
     float origin[3];                    // ...
     float axis[3][3];                   // ...
 };
+
 struct GfxMarkContext // sizeof=0x6
 {                                       // ...
     unsigned __int8 lmapIndex;          // ...
@@ -14,6 +15,9 @@ struct GfxMarkContext // sizeof=0x6
     unsigned __int8 modelTypeAndSurf;   // ...
     unsigned __int16 modelIndex;        // ...
 };
+
+struct FxElemDef;
+
 /////////////////////////////////////////////////////////////////////////////////
 struct FxBoltAndSortOrder // sizeof=0x4
 {                                       // ...
@@ -198,11 +202,6 @@ union FxPointGroupPool // sizeof=0x44
     FxPointGroupPool *nextFreePointGroup;
     FxPointGroup pointGroup;
 };
-union FxTriGroupPool // sizeof=0x18
-{                                       // ...
-    FxTriGroupPool *nextFreeTriGroup;
-    FxTriGroup triGroup;
-};
 
 struct FxTriGroup // sizeof=0x18
 {                                       // ...
@@ -212,6 +211,13 @@ struct FxTriGroup // sizeof=0x18
     unsigned __int8 unused[1];
     int next;
 };
+
+union FxTriGroupPool // sizeof=0x18
+{                                       // ...
+    FxTriGroupPool* nextFreeTriGroup;
+    FxTriGroup triGroup;
+};
+
 struct FxMark // sizeof=0x44
 {                                       // ...
     unsigned __int16 prevMark;
@@ -319,16 +325,6 @@ struct FxElemVec3Range // sizeof=0x18
     float base[3];
     float amplitude[3];
 };
-struct FxElemPreVisualState // sizeof=0x1C
-{                                       // ...
-    float sampleLerp;                   // ...
-    float sampleLerpInv;                // ...
-    const FxElemDef *elemDef;
-    const FxEffect *effect;
-    const FxElemVisStateSample *refState; // ...
-    int randomSeed;
-    unsigned int distanceFade;
-};
 struct FxElemVisualState // sizeof=0x18
 {                                       // ...
     unsigned __int8 color[4];
@@ -341,6 +337,16 @@ const struct FxElemVisStateSample // sizeof=0x30
 {
     FxElemVisualState base;
     FxElemVisualState amplitude;
+};
+struct FxElemPreVisualState // sizeof=0x1C
+{                                       // ...
+    float sampleLerp;                   // ...
+    float sampleLerpInv;                // ...
+    const FxElemDef *elemDef;
+    const FxEffect *effect;
+    const FxElemVisStateSample *refState; // ...
+    int randomSeed;
+    unsigned int distanceFade;
 };
 struct FxElemVelStateInFrame // sizeof=0x30
 {                                       // ...

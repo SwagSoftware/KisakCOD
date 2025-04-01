@@ -4,26 +4,15 @@
 
 #include "xanim_public.h"
 
-#include <d3d9.h> // KISAKTODO: move to gfx I think
-
 #include <script/scr_stringlist.h>
 
-#include <cgame_mp/cg_local_mp.h>
-#include <cgame/cg_local.h>
 #include <database/database.h>
+
 #include <gfx_d3d/r_font.h>
+
 #include <universal/com_math.h>
 
-enum MapType
-{                                       // ...
-    MAPTYPE_NONE = 0x0,
-    MAPTYPE_INVALID1 = 0x1,
-    MAPTYPE_INVALID2 = 0x2,
-    MAPTYPE_2D = 0x3,
-    MAPTYPE_3D = 0x4,
-    MAPTYPE_CUBE = 0x5,
-    MAPTYPE_COUNT = 0x6,
-};
+#include <msslib/mss.h>
 
 union XAnimIndices // sizeof=0x4
 {                                       // ...
@@ -175,48 +164,12 @@ struct DObjAnimMat // sizeof=0x20
     float transWeight;                  // ...
 };
 
-struct XSurfaceVertexInfo // sizeof=0xC
-{                                       // ...
-    __int16 vertCount[4];
-    unsigned __int16 *vertsBlend;
-};
-
-struct XSurface // sizeof=0x38
-{
-    unsigned __int8 tileMode;
-    bool deformed;
-    unsigned __int16 vertCount;
-    unsigned __int16 triCount;
-    unsigned __int8 zoneHandle;
-    // padding byte
-    unsigned __int16 baseTriIndex;
-    unsigned __int16 baseVertIndex;
-    unsigned __int16 *triIndices;
-    XSurfaceVertexInfo vertInfo;
-    GfxPackedVertex *verts0;
-    unsigned int vertListCount;
-    XRigidVertList *vertList;
-    int partBits[4];
-};
-
 struct mnode_t // sizeof=0x4
 {
     unsigned __int16 cellIndex;
     unsigned __int16 rightChildOffset;
 };
 
-
-
-struct GfxPlacement // sizeof=0x1C
-{                                       // ...
-    float quat[4];                      // ...
-    float origin[3];                    // ...
-};
-struct GfxScaledPlacement // sizeof=0x20
-{                                       // ...
-    GfxPlacement base;                  // ...
-    float scale;                        // ...
-};
 struct DynEntityServer // sizeof=0x24
 {
     GfxPlacement pose;
@@ -225,7 +178,6 @@ struct DynEntityServer // sizeof=0x24
     // padding byte
     int health;
 };
-
 
 struct XModelLodInfo // sizeof=0x1C
 {                                       // ...
@@ -373,18 +325,6 @@ struct XModel // sizeof=0xDC
     PhysGeomList *physGeoms;
 };
 
-struct XModelPiece // sizeof=0x10
-{
-    XModel* model;
-    float offset[3];
-};
-struct XModelPieces // sizeof=0xC
-{                                       // ...
-    const char* name;
-    int numpieces;
-    XModelPiece* pieces;
-};
-
 struct __declspec(align(4)) XAnimState // sizeof=0x20
 {                                       // ...
     float currentAnimTime;              // ...
@@ -427,6 +367,19 @@ struct XAnimInfo // sizeof=0x40
     XAnimState state;                   // ...
 };
 
+struct DSkelPartBits // sizeof=0x30
+{                                       // ...
+    int anim[4];                        // ...
+    int control[4];                     // ...
+    int skel[4];                        // ...
+};
+struct DSkel // sizeof=0x38
+{                                       // ...
+    DSkelPartBits partBits;             // ...
+    int timeStamp;                      // ...
+    DObjAnimMat* mat;                   // ...
+};
+
 struct DObj_s // sizeof=0x64
 {
     XAnimTree_s* tree;
@@ -442,19 +395,6 @@ struct DObj_s // sizeof=0x64
     float radius;
     unsigned int hidePartBits[4];
     XModel** models;
-};
-
-struct DSkelPartBits // sizeof=0x30
-{                                       // ...
-    int anim[4];                        // ...
-    int control[4];                     // ...
-    int skel[4];                        // ...
-};
-struct DSkel // sizeof=0x38
-{                                       // ...
-    DSkelPartBits partBits;             // ...
-    int timeStamp;                      // ...
-    DObjAnimMat* mat;                   // ...
 };
 
 struct XAnimSimpleRotPos // sizeof=0x18
@@ -477,67 +417,6 @@ struct XAnimNotify_s // sizeof=0xC
     const char* name;
     unsigned int type;
     float timeFrac;
-};
-
-struct DObjAnimMat // sizeof=0x20
-{                                       // ...
-    float quat[4];                      // ...
-    float trans[3];                     // ...
-    float transWeight;                  // ...
-};
-
-
-
-struct XModel // sizeof=0xDC
-{                                       // ...
-    const char* name;
-    unsigned __int8 numBones;
-    unsigned __int8 numRootBones;
-    unsigned __int8 numsurfs;
-    unsigned __int8 lodRampType;
-    unsigned __int16* boneNames;
-    unsigned __int8* parentList;
-    __int16* quats;
-    float* trans;
-    unsigned __int8* partClassification;
-    DObjAnimMat* baseMat;
-    XSurface* surfs;
-    Material** materialHandles;
-    XModelLodInfo lodInfo[4];
-    XModelCollSurf_s* collSurfs;
-    int numCollSurfs;
-    int contents;
-    XBoneInfo* boneInfo;
-    float radius;
-    float mins[3];
-    float maxs[3];
-    __int16 numLods;
-    __int16 collLod;
-    XModelStreamInfo streamInfo;
-    // padding byte
-    // padding byte
-    // padding byte
-    int memUsage;
-    unsigned __int8 flags;
-    bool bad;
-    // padding byte
-    // padding byte
-    PhysPreset* physPreset;
-    PhysGeomList* physGeoms;
-};
-
-
-struct _AILSOUNDINFO // sizeof=0x24
-{                                       // ...
-    int format;
-    const void* data_ptr;               // ...
-    unsigned int data_len;              // ...
-    unsigned int rate;
-    int bits;
-    int channels;
-    unsigned int samples;
-    unsigned int block_size;
-    const void* initial_ptr;            // ...
 };
 struct MssSound // sizeof=0x28
 {                                       // ...
@@ -763,17 +642,18 @@ struct __declspec(align(16)) cbrush_t // sizeof=0x50
     // padding byte
     // padding byte
 };
+
 struct MapEnts // sizeof=0xC
 {                                       // ...
     const char* name;
     char* entityString;
     int numEntityChars;
 };
-struct GfxPlacement // sizeof=0x1C
-{                                       // ...
-    float quat[4];                      // ...
-    float origin[3];                    // ...
-};
+
+struct DynEntityDef;
+struct DynEntityPose;
+struct DynEntityClient;
+struct DynEntityColl;
 
 struct clipMap_t // sizeof=0x11C
 {                                       // ...
@@ -830,7 +710,6 @@ struct clipMap_t // sizeof=0x11C
     DynEntityColl* dynEntCollList[2];   // ...
     unsigned int checksum;              // ...
 };
-
 
 struct ComPrimaryLight // sizeof=0x44
 {
@@ -898,12 +777,7 @@ struct pathnode_dynamic_t // sizeof=0x20
     __int16 turretEntNumber;
     __int16 userCount;
 };
-struct pathnode_t // sizeof=0x80
-{
-    pathnode_constant_t constant;
-    pathnode_dynamic_t dynamic;
-    pathnode_transient_t transient;
-};
+struct pathnode_t;
 struct pathnode_transient_t // sizeof=0x1C
 {
     int iSearchFrame;
@@ -914,26 +788,36 @@ struct pathnode_transient_t // sizeof=0x1C
     float fHeuristic;
     float costFactor;
 };
+struct pathnode_t // sizeof=0x80
+{
+    pathnode_constant_t constant;
+    pathnode_dynamic_t dynamic;
+    pathnode_transient_t transient;
+};
 struct pathbasenode_t // sizeof=0x10
 {
     float vOrigin[3];
     unsigned int type;
 };
-struct pathnode_tree_t // sizeof=0x10
-{
-    int axis;
-    float dist;
-    pathnode_tree_info_t u;
-};
+
 struct pathnode_tree_nodes_t // sizeof=0x8
 {                                       // ...
     int nodeCount;
     unsigned __int16* nodes;
 };
+
+struct pathnode_tree_t;
 union pathnode_tree_info_t // sizeof=0x8
 {
     pathnode_tree_t* child[2];
     pathnode_tree_nodes_t s;
+};
+
+struct pathnode_tree_t // sizeof=0x10
+{
+    int axis;
+    float dist;
+    pathnode_tree_info_t u;
 };
 struct PathData // sizeof=0x28
 {                                       // ...
@@ -958,278 +842,6 @@ struct GameWorldMp // sizeof=0x4
     const char* name;
 };
 
-struct GfxStaticModelInst // sizeof=0x1C
-{                                       // ...
-    float mins[3];
-    float maxs[3];
-    GfxColor groundLighting;
-};
-struct srfTriangles_t // sizeof=0x10
-{                                       // ...
-    int vertexLayerData;
-    int firstVertex;
-    unsigned __int16 vertexCount;
-    unsigned __int16 triCount;
-    int baseIndex;
-};
-struct GfxSurface // sizeof=0x30
-{                                       // ...
-    srfTriangles_t tris;
-    Material* material;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
-    unsigned __int8 primaryLightIndex;
-    unsigned __int8 flags;
-    float bounds[2][3];
-};
-struct GfxCullGroup // sizeof=0x20
-{
-    float mins[3];
-    float maxs[3];
-    int surfaceCount;
-    int startSurfIndex;
-};
-struct GfxPackedPlacement // sizeof=0x34
-{                                       // ...
-    float origin[3];
-    float axis[3][3];
-    float scale;
-};
-struct __declspec(align(4)) GfxStaticModelDrawInst // sizeof=0x4C
-{                                       // ...
-    float cullDist;
-    GfxPackedPlacement placement;
-    XModel* model;
-    unsigned __int16 smodelCacheIndex[4];
-    unsigned __int8 reflectionProbeIndex;
-    unsigned __int8 primaryLightIndex;
-    unsigned __int16 lightingHandle;
-    unsigned __int8 flags;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct GfxWorldDpvsStatic // sizeof=0x68
-{                                       // ...
-    unsigned int smodelCount;           // ...
-    unsigned int staticSurfaceCount;    // ...
-    unsigned int staticSurfaceCountNoDecal; // ...
-    unsigned int litSurfsBegin;         // ...
-    unsigned int litSurfsEnd;           // ...
-    unsigned int decalSurfsBegin;       // ...
-    unsigned int decalSurfsEnd;         // ...
-    unsigned int emissiveSurfsBegin;    // ...
-    unsigned int emissiveSurfsEnd;      // ...
-    unsigned int smodelVisDataCount;    // ...
-    unsigned int surfaceVisDataCount;   // ...
-    unsigned __int8* smodelVisData[3];  // ...
-    unsigned __int8* surfaceVisData[3]; // ...
-    unsigned int* lodData;              // ...
-    unsigned __int16* sortedSurfIndex;  // ...
-    GfxStaticModelInst* smodelInsts;    // ...
-    GfxSurface* surfaces;               // ...
-    GfxCullGroup* cullGroups;           // ...
-    GfxStaticModelDrawInst* smodelDrawInsts; // ...
-    GfxDrawSurf* surfaceMaterials;      // ...
-    unsigned int* surfaceCastsSunShadow; // ...
-    volatile int usageCount;
-};
-struct GfxWorldDpvsDynamic // sizeof=0x30
-{                                       // ...
-    unsigned int dynEntClientWordCount[2]; // ...
-    unsigned int dynEntClientCount[2];  // ...
-    unsigned int* dynEntCellBits[2];    // ...
-    unsigned __int8* dynEntVisData[2][3]; // ...
-};
-struct GfxWorldStreamInfo // sizeof=0x0
-{                                       // ...
-};
-struct GfxWorldVertex // sizeof=0x2C
-{                                       // ...
-    float xyz[3];
-    float binormalSign;
-    GfxColor color;
-    float texCoord[2];
-    float lmapCoord[2];
-    PackedUnitVec normal;
-    PackedUnitVec tangent;
-};
-struct GfxWorldVertexData // sizeof=0x8
-{                                       // ...
-    GfxWorldVertex* vertices;           // ...
-    IDirect3DVertexBuffer9* worldVb;    // ...
-};
-struct GfxWorldVertexLayerData // sizeof=0x8
-{                                       // ...
-    unsigned __int8* data;              // ...
-    IDirect3DVertexBuffer9* layerVb;    // ...
-};
-struct SunLightParseParams // sizeof=0x80
-{                                       // ...
-    char name[64];
-    float ambientScale;
-    float ambientColor[3];
-    float diffuseFraction;
-    float sunLight;
-    float sunColor[3];
-    float diffuseColor[3];
-    bool diffuseColorHasBeenSet;
-    // padding byte
-    // padding byte
-    // padding byte
-    float angles[3];
-};
-struct __declspec(align(4)) GfxLightImage // sizeof=0x8
-{                                       // ...
-    GfxImage* image;
-    unsigned __int8 samplerState;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct GfxLightDef // sizeof=0x10
-{                                       // ...
-    const char* name;
-    GfxLightImage attenuation;
-    int lmapLookupStart;
-};
-struct GfxLight // sizeof=0x40
-{                                       // ...
-    unsigned __int8 type;
-    unsigned __int8 canUseShadowMap;
-    unsigned __int8 unused[2];
-    float color[3];
-    float dir[3];
-    float origin[3];
-    float radius;
-    float cosHalfFovOuter;
-    float cosHalfFovInner;
-    int exponent;
-    unsigned int spotShadowIndex;
-    GfxLightDef* def;
-};
-struct GfxReflectionProbe // sizeof=0x10
-{
-    float origin[3];
-    GfxImage* reflectionImage;
-};
-struct GfxWorldDpvsPlanes // sizeof=0x10
-{                                       // ...
-    int cellCount;                      // ...
-    cplane_s* planes;                   // ...
-    unsigned __int16* nodes;            // ...
-    unsigned int* sceneEntCellBits;     // ...
-};
-struct GfxAabbTree // sizeof=0x2C
-{
-    float mins[3];
-    float maxs[3];
-    unsigned __int16 childCount;
-    unsigned __int16 surfaceCount;
-    unsigned __int16 startSurfIndex;
-    unsigned __int16 surfaceCountNoDecal;
-    unsigned __int16 startSurfIndexNoDecal;
-    unsigned __int16 smodelIndexCount;
-    unsigned __int16* smodelIndexes;
-    int childrenOffset;
-};
-struct GfxPortalWritable // sizeof=0xC
-{
-    bool isQueued;
-    bool isAncestor;
-    unsigned __int8 recursionDepth;
-    unsigned __int8 hullPointCount;
-    float (*hullPoints)[2];
-    GfxPortal* queuedParent;
-};
-struct DpvsPlane // sizeof=0x14
-{                                       // ...
-    float coeffs[4];                    // ...
-    unsigned __int8 side[3];            // ...
-    unsigned __int8 pad;
-};
-struct GfxPortal // sizeof=0x44
-{
-    GfxPortalWritable writable;
-    DpvsPlane plane;
-    GfxCell* cell;
-    float (*vertices)[3];
-    unsigned __int8 vertexCount;
-    // padding byte
-    // padding byte
-    // padding byte
-    float hullAxis[2][3];
-};
-struct GfxCell // sizeof=0x38
-{
-    float mins[3];
-    float maxs[3];
-    int aabbTreeCount;
-    GfxAabbTree* aabbTree;
-    int portalCount;
-    GfxPortal* portals;
-    int cullGroupCount;
-    int* cullGroups;
-    unsigned __int8 reflectionProbeCount;
-    // padding byte
-    // padding byte
-    // padding byte
-    unsigned __int8* reflectionProbes;
-};
-struct GfxLightmapArray // sizeof=0x8
-{
-    GfxImage* primary;
-    GfxImage* secondary;
-};
-struct GfxLightGridEntry // sizeof=0x4
-{                                       // ...
-    unsigned __int16 colorsIndex;
-    unsigned __int8 primaryLightIndex;  // ...
-    unsigned __int8 needsTrace;
-};
-struct GfxLightGridColors // sizeof=0xA8
-{                                       // ...
-    unsigned __int8 rgb[56][3];
-};
-struct GfxLightGrid // sizeof=0x38
-{                                       // ...
-    bool hasLightRegions;               // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    unsigned int sunPrimaryLightIndex;  // ...
-    unsigned __int16 mins[3];           // ...
-    unsigned __int16 maxs[3];           // ...
-    unsigned int rowAxis;               // ...
-    unsigned int colAxis;               // ...
-    unsigned __int16* rowDataStart;     // ...
-    unsigned int rawRowDataSize;        // ...
-    unsigned __int8* rawRowData;        // ...
-    unsigned int entryCount;            // ...
-    GfxLightGridEntry* entries;         // ...
-    unsigned int colorCount;            // ...
-    GfxLightGridColors* colors;         // ...
-};
-struct GfxBrushModelWritable // sizeof=0x18
-{                                       // ...
-    float mins[3];
-    float maxs[3];
-};
-struct __declspec(align(4)) GfxBrushModel // sizeof=0x38
-{
-    GfxBrushModelWritable writable;
-    float bounds[2][3];
-    unsigned __int16 surfaceCount;
-    unsigned __int16 startSurfIndex;
-    unsigned __int16 surfaceCountNoDecal;
-    // padding byte
-    // padding byte
-};
-struct MaterialMemory // sizeof=0x8
-{                                       // ...
-    Material* material;
-    int memory;
-};
 struct sunflare_t // sizeof=0x60
 {                                       // ...
     bool hasValidData;
@@ -2056,6 +1668,8 @@ struct scr_anim_s // sizeof=0x4
         const char *linkPointer;
     };
 };
+
+struct gentity_s;
 
 void __cdecl SV_DObjInitServerTime(gentity_s* ent, float dtime);
 void __cdecl SV_DObjDisplayAnim(gentity_s* ent, const char* header);

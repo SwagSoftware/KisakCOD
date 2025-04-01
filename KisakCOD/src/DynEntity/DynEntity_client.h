@@ -1,15 +1,8 @@
 #pragma once
 #include <xanim/xanim.h>
 #include <xanim/dobj.h>
-#include <utility>
 
-enum DynEntityCollType : __int32
-{                                       // ...
-    DYNENT_COLL_CLIENT_FIRST = 0x0,
-    DYNENT_COLL_CLIENT_MODEL = 0x0,
-    DYNENT_COLL_CLIENT_BRUSH = 0x1,
-    DYNENT_COLL_COUNT = 0x2,
-};
+#include <utility>
 
 enum DynEntityType : __int32
 {                                       // ...
@@ -17,6 +10,14 @@ enum DynEntityType : __int32
     DYNENT_TYPE_CLUTTER = 0x1,
     DYNENT_TYPE_DESTRUCT = 0x2,
     DYNENT_TYPE_COUNT = 0x3,
+};
+
+enum DynEntityCollType : __int32
+{                                       // ...
+    DYNENT_COLL_CLIENT_FIRST = 0x0,
+    DYNENT_COLL_CLIENT_MODEL = 0x0,
+    DYNENT_COLL_CLIENT_BRUSH = 0x1,
+    DYNENT_COLL_COUNT = 0x2,
 };
 
 struct DynEntityDef // sizeof=0x60

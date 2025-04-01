@@ -719,7 +719,13 @@ void __cdecl FX_GetOrientation(
     const FxSpatialFrame *frameAtSpawn,
     const FxSpatialFrame *frameNow,
     __int64 randomSeed);
-bool __cdecl Vec4IsNormalized(const float *v);
+char  FX_GenerateBeam_GetFlatDelta@<al>(
+    float a1@<ebp>,
+    const vector4* clipMtx,
+    const vector4* invClipMtx,
+    float4 beamWorldBegin,
+    float4 beamWorldEnd,
+    float4* outFlatDelta);
 void __cdecl FX_GetVelocityAtTime(
     const FxElemDef *elemDef,
     int randomSeed,
@@ -813,36 +819,8 @@ void __cdecl FX_Archive(int clientIndex, MemoryFile *memFile);
 
 
 // fx_beam
-// KISAKTODO: move math generics out
-union float4 // sizeof=0x10
-{                                       // ...
-    float v[4];
-    unsigned int u[4];
-    PackedUnitVec unitVec[4];
-};
-struct vector3 // sizeof=0x30
-{                                       // ...
-    float4 x;                           // ...
-    float4 y;                           // ...
-    float4 z;                           // ...
-};
-struct vector4 : vector3 // sizeof=0x40
-{                                       // ...
-    float4 w;                           // ...
-};
 void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd);
-void __cdecl CreateClipMatrix(vector4 *clipMtx, const float *vieworg, const float (*viewaxis)[3]);
-void __cdecl Float4x4ForViewer(vector4 *mtx, const float *origin3, const float (*axis3)[3]);
-void __cdecl Float4x4InfinitePerspectiveMatrix(vector4 *mtx, float tanHalfFovX, float tanHalfFovY, float zNear);
-char  FX_GenerateBeam_GetFlatDelta@<al>(
-    float a1@<ebp>,
-    const vector4 *clipMtx,
-    const vector4 *invClipMtx,
-    float4 beamWorldBegin,
-    float4 beamWorldEnd,
-    float4 *outFlatDelta);
-bool __cdecl Vec4HomogenousClipBothZ(float4 *pt0, float4 *pt1);
-bool __cdecl Vec4HomogenousClipZW(float4 *pt0, float4 *pt1, float4 coeffZW);
+
 void __cdecl FX_Beam_Begin();
 void __cdecl FX_Beam_Add(FxBeam *beam);
 FxBeamInfo *__cdecl FX_Beam_GetInfo();

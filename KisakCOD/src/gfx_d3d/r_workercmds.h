@@ -1,5 +1,4 @@
 #pragma once
-#include <cgame/cg_local.h>
 #include "r_material.h"
 #include "rb_backend.h"
 #include "fxprimitives.h"

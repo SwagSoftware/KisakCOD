@@ -1,5 +1,29 @@
 #pragma once
-#include "qcommon.h"
+
+struct nodetype // sizeof=0x14
+{                                       // ...
+    nodetype* left;
+    nodetype* right;
+    nodetype* parent;
+    int weight;
+    int symbol;
+};
+
+struct huff_t // sizeof=0x4C14
+{                                       // ...
+    int blocNode;
+    int blocPtrs;
+    nodetype* tree;                     // ...
+    nodetype* loc[257];
+    nodetype** freelist;
+    nodetype nodeList[768];
+    nodetype* nodePtrs[768];
+};
+
+struct huffman_t // sizeof=0x4C14
+{                                       // ...
+    huff_t compressDecompress;          // ...
+};
 
 int __cdecl get_bit(const unsigned __int8 *fin);
 void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const unsigned __int8 *fin, int *offset);

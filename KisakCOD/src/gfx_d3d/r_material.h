@@ -1,18 +1,10 @@
 #pragma once
 
 #include <d3d9.h>
+
 #include <database/database.h>
 
-enum MapType
-{                                       // ...
-    MAPTYPE_NONE = 0x0,
-    MAPTYPE_INVALID1 = 0x1,
-    MAPTYPE_INVALID2 = 0x2,
-    MAPTYPE_2D = 0x3,
-    MAPTYPE_3D = 0x4,
-    MAPTYPE_CUBE = 0x5,
-    MAPTYPE_COUNT = 0x6,
-};
+#include "r_gfx.h"
 
 enum surfaceType_t : __int32
 {                                       // ...
@@ -39,50 +31,12 @@ enum surfaceType_t : __int32
     SF_FORCE_32_BITS = -0x1,
 };
 
-union GfxColor // sizeof=0x4
-{                                       // ...
-    operator unsigned int()
-    {
-        return packed;
-    }
-    GfxColor()
-    {
-        packed = 0;
-    }
-    GfxColor(int i)
-    {
-        packed = i;
-    }
-    unsigned unsigned int packed;
-    unsigned __int8 array[4];
-};
-
-struct PackedTexCoords // sizeof=0x4
-{                                       // ...
-    unsigned int packed;
-};
-
-union PackedUnitVec // sizeof=0x4
-{                                       // ...
-    unsigned int packed;
-    unsigned __int8 array[4];
-};
-
-struct GfxPackedVertex // sizeof=0x20
-{                                       // ...
-    float xyz[3];
-    float binormalSign;
-    GfxColor color;
-    PackedTexCoords texCoord;
-    PackedUnitVec normal;
-    PackedUnitVec tangent;
-};
-
 struct MaterialStreamRouting // sizeof=0x2
 {                                       // ...
     unsigned __int8 source;             // ...
     unsigned __int8 dest;               // ...
 };
+
 struct MaterialVertexStreamRouting // sizeof=0x60
 {                                       // ...
     MaterialStreamRouting data[16];
@@ -97,29 +51,6 @@ struct MaterialVertexDeclaration // sizeof=0x64
     // padding byte
     MaterialVertexStreamRouting routing;
 };
-struct MaterialPixelShaderProgram // sizeof=0xC
-{                                       // ...
-    IDirect3DPixelShader9 *ps;
-    GfxPixelShaderLoadDef loadDef;
-};
-struct MaterialPixelShader // sizeof=0x10
-{                                       // ...
-    const char *name;
-    MaterialPixelShaderProgram prog;
-};
-struct GfxVertex // sizeof=0x20
-{                                       // ...
-    float xyzw[4];
-    GfxColor color;                     // ...
-    float texCoord[2];                  // ...
-    PackedUnitVec normal;               // ...
-};
-struct GfxVertexShaderLoadDef // sizeof=0x8
-{                                       // ...
-    DWORD *program;
-    unsigned __int16 programSize;
-    unsigned __int16 loadForRenderer;
-};
 struct MaterialVertexShaderProgram // sizeof=0xC
 {                                       // ...
     IDirect3DVertexShader9 *vs;
@@ -130,12 +61,7 @@ struct MaterialVertexShader // sizeof=0x10
     const char *name;
     MaterialVertexShaderProgram prog;
 };
-struct GfxPixelShaderLoadDef // sizeof=0x8
-{                                       // ...
-    DWORD *program;
-    unsigned __int16 programSize;
-    unsigned __int16 loadForRenderer;
-};
+
 struct MaterialPixelShaderProgram // sizeof=0xC
 {                                       // ...
     IDirect3DPixelShader9 *ps;
@@ -183,58 +109,6 @@ struct MaterialTechnique // sizeof=0x1C
     unsigned __int16 flags;
     unsigned __int16 passCount;
     MaterialPass passArray[1];
-};
-
-__declspec(align(4)) struct GfxImageLoadDef // sizeof=0x14
-{
-    unsigned __int8 levelCount;
-    unsigned __int8 flags;
-    __int16 dimensions[3];
-    int format;
-    int resourceSize;
-    unsigned __int8 data[1];
-    // padding byte
-    // padding byte
-    // padding byte
-};
-
-union GfxTexture // sizeof=0x4
-{                                       // ...
-    IDirect3DBaseTexture9 *basemap;
-    IDirect3DTexture9 *map;
-    IDirect3DVolumeTexture9 *volmap;
-    IDirect3DCubeTexture9 *cubemap;
-    GfxImageLoadDef *loadDef;
-};
-
-struct Picmip // sizeof=0x2
-{                                       // ...
-    unsigned __int8 platform[2];        // ...
-};
-
-struct CardMemory // sizeof=0x8
-{                                       // ...
-    int platform[2];                    // ...
-};
-
-struct GfxImage // sizeof=0x24
-{                                       // ...
-    MapType mapType;                    // ...
-    GfxTexture texture;
-    Picmip picmip;
-    bool noPicmip;
-    unsigned __int8 semantic;
-    unsigned __int8 track;
-    // padding byte
-    // padding byte
-    // padding byte
-    CardMemory cardMemory;
-    unsigned __int16 width;
-    unsigned __int16 height;
-    unsigned __int16 depth;
-    unsigned __int8 category;
-    bool delayLoadPixels;
-    const char *name;
 };
 struct WaterWritable // sizeof=0x4
 {                                       // ...
@@ -286,28 +160,6 @@ struct MaterialConstantDef // sizeof=0x20
     float literal[4];
 };
 
-struct GfxStateBits // sizeof=0x8
-{
-    unsigned int loadBits[2];
-};
-
-struct GfxDrawSurfFields // sizeof=0x8
-{                                       // ...
-    unsigned __int64 objectId : 16;
-    unsigned __int64 reflectionProbeIndex : 8;
-    unsigned __int64 customIndex : 5;
-    unsigned __int64 materialSortedIndex : 11;
-    unsigned __int64 prepass : 2;
-    unsigned __int64 primaryLightIndex : 8;
-    unsigned __int64 surfType : 4;
-    unsigned __int64 primarySortKey : 6;
-    unsigned __int64 unused : 4;
-};
-union GfxDrawSurf // sizeof=0x8
-{                                       // ...
-    GfxDrawSurfFields fields;
-    unsigned __int64 packed;
-};
 struct __declspec(align(4)) MaterialInfo // sizeof=0x18
 {                                       // ...
     const char *name;                   // ...
@@ -349,14 +201,10 @@ struct Material // sizeof=0x50
     GfxStateBits *stateBitsTable;
 };
 
-struct GfxPackedVertex // sizeof=0x20
+struct MaterialMemory // sizeof=0x8
 {                                       // ...
-    float xyz[3];
-    float binormalSign;
-    GfxColor color;
-    PackedTexCoords texCoord;
-    PackedUnitVec normal;
-    PackedUnitVec tangent;
+    Material* material;
+    int memory;
 };
 
 struct XSurfaceCollisionAabb // sizeof=0xC
@@ -449,7 +297,18 @@ struct MaterialGlobals
     MaterialTechniqueSet *techniqueSetHashTable[1024]; // ...
 };
 
+
+const char* __cdecl Material_GetName(Material* handle);
+const Material* __cdecl Material_FromHandle(Material* handle);
+
+void __cdecl Material_Init();
+void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable* mtlTable, int mtlTableCount);
+void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl* callback)(MaterialTechniqueSet*));
+void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader* userData);
+bool __cdecl IsValidMaterialHandle(Material* const handle);
+
 void __cdecl TRACK_r_material();
+
 unsigned __int8 *__cdecl Material_Alloc(unsigned int size);
 void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, MaterialPixelShader *mtlShader);
 void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, MaterialVertexShader *mtlShader);
@@ -468,17 +327,11 @@ bool __cdecl Material_IsDefault(const Material *material);
 Material *__cdecl Material_Register_FastFile(const char *name);
 Material *__cdecl Material_Register(char *name, int imageTrack);
 Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack);
+
 void __cdecl R_MaterialList_f();
 void __cdecl R_GetMaterialList(XAssetHeader header, char *data);
 int __cdecl R_GetMaterialMemory(Material *material);
 bool __cdecl R_MaterialCompare(const MaterialMemory *material0, const MaterialMemory *material1);
-const char *__cdecl Material_GetName(Material *handle);
-const Material *__cdecl Material_FromHandle(Material *handle);
-void __cdecl Material_Init();
-void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable *mtlTable, int mtlTableCount);
-void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl *callback)(MaterialTechniqueSet *));
-void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader *userData);
-bool __cdecl IsValidMaterialHandle(Material *const handle);
 
 void __cdecl Material_PreventOverrideTechniqueGeneration();
 

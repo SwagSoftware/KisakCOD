@@ -1,13 +1,8 @@
 #pragma once
-#include <xanim/xanim.h>
-#include "r_rendercmds.h"
 
-enum DynEntityDrawType : __int32
-{                                       // ...
-    DYNENT_DRAW_MODEL = 0x0,
-    DYNENT_DRAW_BRUSH = 0x1,
-    DYNENT_DRAW_COUNT = 0x2,
-};
+#include <xanim/xanim.h>
+
+#include "r_rendercmds.h"
 
 struct GfxSceneParms // sizeof=0xA0
 {                                       // ...
@@ -77,6 +72,9 @@ struct GfxSceneEntityCull // sizeof=0x40
     char lods[32];
     GfxSkinnedXModelSurfs skinnedSurfs;
 };
+
+struct cpose_t;
+
 union GfxSceneEntityInfo // sizeof=0x4
 {                                       // ...
     const cpose_t *pose;

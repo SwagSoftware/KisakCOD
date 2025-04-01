@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../universal/q_shared.h"
-#include <gfx_d3d/r_scene.h>
-#include <server_mp/server.h>
 
 typedef enum
 {
@@ -12,19 +10,6 @@ typedef enum
     SE_CONSOLE = 0x3,
 } sysEventType_t;
 
-struct msg_t // sizeof=0x28
-{                                       // ...
-	int overflowed;                     // ...
-	int readOnly;                       // ...
-	unsigned __int8* data;              // ...
-	unsigned __int8* splitData;         // ...
-	int maxsize;                        // ...
-	int cursize;                        // ...
-	int splitSize;                      // ...
-	int readcount;                      // ...
-	int bit;                            // ...
-	int lastEntityRef;                  // ...
-};
 struct field_t // sizeof=0x118
 {                                       // ...
 	int cursor;                         // ...
@@ -510,136 +495,6 @@ extern char info2[8192];
 /*
 ==============================================================
 
-NET
-
-==============================================================
-*/
-
-#define	PACKET_BACKUP	32	// number of old messages that must be kept on client and
-// server for delta comrpession and ping estimation
-#define	PACKET_MASK		(PACKET_BACKUP-1)
-
-#define	MAX_PACKET_USERCMDS		32		// max number of usercmd_t in a packet
-
-#define	PORT_ANY			-1
-
-#define	MAX_RELIABLE_COMMANDS	128			// max string commands buffered for restransmit
-
-enum netadrtype_t {
-	NA_BOT,
-	NA_BAD,					// an address lookup failed
-	NA_LOOPBACK,
-	NA_BROADCAST,
-	NA_IP,
-	NA_IPX,
-	NA_BROADCAST_IPX
-};
-
-enum netsrc_t : __int32
-{                                       // ...
-	NS_CLIENT1 = 0x0,
-	NS_SERVER = 0x1,
-	NS_MAXCLIENTS = 0x1,
-	NS_PACKET = 0x2,
-};
-
-struct netadr_t  {
-	netadrtype_t	type;
-
-	byte	ip[4];
-    unsigned short	port;
-	byte	ipx[10];
-};
-
-//void		NET_Init(void);
-//void		NET_Shutdown(void);
-//void		NET_Restart(void);
-//void		NET_Config(qboolean enableNetworking);
-//
-//void		NET_SendPacket(netsrc_t sock, int length, const void* data, netadr_t to);
-//void		QDECL NET_OutOfBandPrint(netsrc_t net_socket, netadr_t adr, const char* format, ...);
-//void		QDECL NET_OutOfBandData(netsrc_t sock, netadr_t adr, byte* format, int len);
-//
-//qboolean	NET_CompareAdr(netadr_t a, netadr_t b);
-//qboolean	NET_CompareBaseAdr(netadr_t a, netadr_t b);
-//qboolean	NET_IsLocalAddress(netadr_t adr);
-const char* NET_AdrToString(netadr_t a);
-//qboolean	NET_StringToAdr(const char* s, netadr_t* a);
-//qboolean	NET_GetLoopPacket(netsrc_t sock, netadr_t* net_from, msg_t* net_message);
-//void		NET_Sleep(int msec);
-//
-
-void __cdecl NetProf_PrepProfiling(netProfileInfo_t *prof);
-void __cdecl NetProf_AddPacket(netProfileStream_t *pProfStream, int iSize, int bFragment);
-void __cdecl NetProf_NewSendPacket(netchan_t *pChan, int iSize, int bFragment);
-void __cdecl NetProf_NewRecievePacket(netchan_t *pChan, int iSize, int bFragment);
-void __cdecl NetProf_UpdateStatistics(netProfileStream_t *pStream);
-void __cdecl Net_DisplayProfile(int localClientNum);
-char __cdecl FakeLag_DestroyPacket(unsigned int packet);
-void __cdecl FakeLag_SendPacket_Real(unsigned int packet);
-void __cdecl FakeLag_Init();
-unsigned int __cdecl FakeLag_GetFreeSlot();
-bool __cdecl FakeLag_HostingGameOrParty();
-unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, netadr_t to);
-unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netadr_t *from, msg_t *msg);
-void __cdecl FakeLag_ReceivePackets();
-int __cdecl FakeLag_GetPacket(bool loopback, netsrc_t sock, netadr_t *net_from, msg_t *net_message);
-void __cdecl FakeLag_Frame();
-int __cdecl FakeLag_SendLaggedPackets();
-void __cdecl FakeLag_Shutdown();
-void __cdecl Netchan_Init(__int16 port);
-void __cdecl Net_DumpProfile_f();
-void __cdecl Netchan_Setup(
-    netsrc_t sock,
-    netchan_t *chan,
-    netadr_t adr,
-    int qport,
-    char *outgoingBuffer,
-    int outgoingBufferSize,
-    char *incomingBuffer,
-    int incomingBufferSize);
-bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan);
-bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data);
-int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg);
-int __cdecl NET_CompareBaseAdrSigned(netadr_t *a, netadr_t *b);
-bool __cdecl NET_CompareBaseAdr(netadr_t a, netadr_t b);
-int __cdecl NET_CompareAdrSigned(netadr_t *a, netadr_t *b);
-bool __cdecl NET_CompareAdr(netadr_t a, netadr_t b);
-bool __cdecl NET_IsLocalAddress(netadr_t adr);
-int __cdecl NET_GetClientPacket(netadr_t *net_from, msg_t *net_message);
-int __cdecl NET_GetServerPacket(netadr_t *net_from, msg_t *net_message);
-int __cdecl NET_GetLoopPacket_Real(netsrc_t sock, netadr_t *net_from, msg_t *net_message);
-int __cdecl NET_GetLoopPacket(netsrc_t sock, netadr_t *net_from, msg_t *net_message);
-void __cdecl NET_SendLoopPacket(netsrc_t sock, unsigned int length, unsigned __int8 *data, netadr_t to);
-char __cdecl NET_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, netadr_t to);
-bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *data);
-bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const unsigned __int8 *format, int len);
-bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, unsigned __int8 *format, unsigned int len);
-int __cdecl NET_StringToAdr(char *s, netadr_t *a);
-
-extern const dvar_t *showpackets;
-extern const dvar_t *fakelag_target;
-extern const dvar_t *fakelag_packetloss;
-extern const dvar_t *fakelag_currentjitter;
-extern const dvar_t *fakelag_jitter;
-extern const dvar_t *fakelag_current;
-extern const dvar_t *msg_dumpEnts;
-extern const dvar_t *net_profile;
-extern const dvar_t *net_lanauthorize;
-extern const dvar_t *packetDebug;
-extern const dvar_t *showdrop;
-extern const dvar_t *fakelag_jitterinterval;
-extern const dvar_t *net_showprofile;
-extern const dvar_t *msg_printEntityNums;
-extern const dvar_t *msg_hudelemspew;
-
-
-
-void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t *netmsg);
-void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t *netmsg);
-/*
-==============================================================
-
 MISC
 
 ==============================================================
@@ -657,6 +512,10 @@ DOBJ MANAGEMENT
 
 ==============================================================
 */
+
+struct XModel;
+struct DObj_s;
+struct XAnimTree_s;
 
 struct __declspec(align(2)) DObjModel_s // sizeof=0x8
 {                                       // ...
@@ -757,6 +616,18 @@ struct moveclip_t // sizeof=0x54
     int passEntityNum;
     int passOwnerNum;
     int contentmask;
+};
+
+struct cLeafBrushNode_s;
+struct cLeaf_t;
+struct cmodel_t;
+
+// KISAKTODO: move this the fuck outta here
+enum DynEntityDrawType : __int32
+{                                       // ...
+    DYNENT_DRAW_MODEL = 0x0,
+    DYNENT_DRAW_BRUSH = 0x1,
+    DYNENT_DRAW_COUNT = 0x2,
 };
 unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace);
 unsigned __int16 __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *drawType);
@@ -895,8 +766,6 @@ void __cdecl CM_Unload();
 int __cdecl CM_LeafCluster(unsigned int leafnum);
 void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs);
 
-extern clipMap_t cm;
-
 // cm_load_obj
 void __cdecl CM_LoadMapData_LoadObj(const char *name);
 
@@ -941,6 +810,9 @@ struct MapProfileHotSpot // sizeof=0x18
     __int64 ticksFile;                  // ...
 };
 
+struct rectDef_s;
+struct Material;
+
 void __cdecl TRACK_com_profilemapload();
 bool __cdecl ProfLoad_IsActive();
 void __cdecl ProfLoad_BeginTrackedValue(MapProfileTrackedValue type);
@@ -975,166 +847,6 @@ void __cdecl TRACK_statmonitor();
 void __cdecl StatMon_Warning(int type, int duration, const char *materialName);
 void __cdecl StatMon_GetStatsArray(const statmonitor_s **array, int *count);
 void __cdecl StatMon_Reset();
-
-
-
-/*
-==============================================================
-
-NET MSG 
-
-==============================================================
-*/
-// sv_msg_write_mp
-struct nodetype // sizeof=0x14
-{                                       // ...
-    nodetype *left;
-    nodetype *right;
-    nodetype *parent;
-    int weight;
-    int symbol;
-};
-struct huff_t // sizeof=0x4C14
-{                                       // ...
-    int blocNode;
-    int blocPtrs;
-    nodetype *tree;                     // ...
-    nodetype *loc[257];
-    nodetype **freelist;
-    nodetype nodeList[768];
-    nodetype *nodePtrs[768];
-};
-struct huffman_t // sizeof=0x4C14
-{                                       // ...
-    huff_t compressDecompress;          // ...
-};
-struct __declspec(align(4)) NetField // sizeof=0x10
-{                                       // ...
-    const char *name;
-    int offset;
-    int bits;
-    unsigned __int8 changeHints;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct NetFieldList // sizeof=0x8
-{                                       // ...
-    const NetField *array;
-    unsigned int count;
-};
-void __cdecl TRACK_msg();
-const NetFieldList *__cdecl MSG_GetStateFieldListForEntityType(int eType);
-void __cdecl MSG_WriteReliableCommandToBuffer(const char *pszCommand, char *pszBuffer, int iBufferSize);
-void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, float oldValue);
-void __cdecl MSG_WriteOriginZFloat(__int64 clientNum, float value, float oldValue);
-bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s *snapInfo, int bits, const int *fromF, const int *toF);
-void __cdecl MSG_WriteLastChangedField(msg_t *msg, int lastChangedFieldNum, unsigned int numFields);
-void __cdecl MSG_WriteEventNum(int clientNum, msg_t *msg, unsigned __int8 eventNum);
-void __cdecl MSG_WriteEventParam(int clientNum, msg_t *msg, unsigned __int8 eventParam);
-PacketEntityType __cdecl MSG_GetPacketEntityTypeForEType(int eType);
-unsigned int __cdecl MSG_GetBitCount(int bits, bool *estimate, int from, int to);
-void __cdecl MSG_WriteEntity(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    entityState_s *from,
-    const entityState_s *to,
-    int force);
-void __cdecl MSG_WriteEntityRemoval(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    unsigned __int8 *from,
-    int indexBits,
-    bool changeBit);
-void __cdecl MSG_WriteEntityDeltaForEType(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    int eType,
-    const entityState_s *from,
-    const entityState_s *to,
-    int force);
-int __cdecl MSG_WriteEntityDelta(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    const unsigned __int8 *from,
-    const unsigned __int8 *to,
-    int force,
-    int numFields,
-    int indexBits,
-    const NetField *stateFields);
-void __cdecl MSG_WriteDeltaField(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    const unsigned __int8 *from,
-    const unsigned __int8 *to,
-    const NetField *field,
-    int fieldNum,
-    bool forceSend);
-void __cdecl MSG_WriteDeltaTime(int clientNum, msg_t *msg, int timeBase, int time);
-void __cdecl MSG_Write24BitFlag(int clientNum, msg_t *msg, int oldFlags, int newFlags);
-void __cdecl MSG_WriteGroundEntityNum(int clientNum, msg_t *msg, int groundEntityNum);
-bool __cdecl MSG_CheckWritingEnoughBits(int value, unsigned int bits);
-void __cdecl MSG_WriteDeltaArchivedEntity(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    archivedEntity_s *from,
-    archivedEntity_s *to,
-    int force);
-int __cdecl MSG_WriteDeltaStruct(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    unsigned __int8 *from,
-    unsigned __int8 *to,
-    int force,
-    int numFields,
-    int indexBits,
-    const NetField *stateFields,
-    int bChangeBit);
-void __cdecl MSG_WriteDeltaClient(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    clientState_s *from,
-    clientState_s *to,
-    int force);
-void __cdecl MSG_WriteDeltaPlayerstate(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    const playerState_s *from,
-    const playerState_s *to);
-bool __cdecl MSG_ShouldSendPSField(
-    const SnapshotInfo_s *snapInfo,
-    bool sendOriginAndVel,
-    const playerState_s *ps,
-    const playerState_s *oldPs,
-    const NetField *field);
-void __cdecl MSG_WriteDeltaFields(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    unsigned __int8 *from,
-    unsigned __int8 *to,
-    int force,
-    int numFields,
-    const NetField *stateFields);
-void __cdecl MSG_WriteDeltaHudElems(
-    SnapshotInfo_s *snapInfo,
-    msg_t *msg,
-    int time,
-    const hudelem_s *from,
-    const hudelem_s *to,
-    unsigned int count);
-
-
-extern huffman_t msgHuff;
-
 
 // cl_scrn_mp
 void __cdecl SCR_DrawSmallStringExt(int x, int y, char *string, const float *setColor);

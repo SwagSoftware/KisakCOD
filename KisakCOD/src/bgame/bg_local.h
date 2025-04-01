@@ -1,7 +1,5 @@
 #pragma once
 
-#include <client_mp/client_mp.h>
-
 enum animBodyPart_t : __int32
 {                                       // ...
     ANIM_BP_UNUSED = 0x0,
@@ -140,32 +138,177 @@ struct animConditionTable_t // sizeof=0x8
     animStringItem_t *values;           // ...
 };
 
-struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
+
+struct viewDamage_t // sizeof=0xC
 {                                       // ...
-    animation_s animations[512];
-    unsigned int numAnimations;
-    animScript_t scriptAnims[1][43];
-    animScript_t scriptCannedAnims[1][43];
-    animScript_t scriptStateChange[1][1];
-    animScript_t scriptEvents[21];
-    animScriptItem_t scriptItems[2048];
-    int numScriptItems;
-    scr_animtree_t animTree;            // ...
-    unsigned __int16 torsoAnim;
-    unsigned __int16 legsAnim;
-    unsigned __int16 turningAnim;
+    int time;
+    int duration;
+    float yaw;
+};
+struct shellshock_parms_t_screenblend // sizeof=0x14
+{                                       // ...
+    int blurredFadeTime;
+    int blurredEffectTime;
+    int flashWhiteFadeTime;
+    int flashShotFadeTime;
+    ShockViewTypes type;
+};
+struct shellshock_parms_t_view // sizeof=0xC
+{                                       // ...
+    int fadeTime;
+    float kickRate;
+    float kickRadius;
+};
+struct shellshock_parms_t_sound // sizeof=0x230
+{                                       // ...
+    bool affect;
+    char loop[64];
+    char loopSilent[64];
+    char end[64];
+    char endAbort[64];
     // padding byte
     // padding byte
-    snd_alias_list_t *(__cdecl *soundAlias)(const char *);
-    int(__cdecl *playSoundAlias)(int, snd_alias_list_t *);
     // padding byte
+    int fadeInTime;
+    int fadeOutTime;
+    float drylevel;
+    float wetlevel;
+    char roomtype[16];
+    float channelvolume[64];
+    int modEndDelay;
+    int loopFadeTime;
+    int loopEndDelay;
+};
+struct shellshock_parms_t_lookcontrol // sizeof=0x14
+{                                       // ...
+    bool affect;
+    // padding byte
+    // padding byte
+    // padding byte
+    int fadeTime;
+    float mouseSensitivity;
+    float maxPitchSpeed;
+    float maxYawSpeed;
+};
+struct shellshock_parms_t_movement // sizeof=0x1
+{                                       // ...
+    bool affect;
+};
+const struct __declspec(align(4)) shellshock_parms_t // sizeof=0x268
+{                                       // ...
+    shellshock_parms_t_screenblend screenBlend;
+    shellshock_parms_t_view view;
+    shellshock_parms_t_sound sound;
+    shellshock_parms_t_lookcontrol lookControl;
+    shellshock_parms_t_movement movement;
     // padding byte
     // padding byte
     // padding byte
 };
+struct shellshock_t // sizeof=0x20
+{                                       // ...
+    const shellshock_parms_t* parms;
+    int startTime;
+    int duration;
+    int loopEndTime;
+    float sensitivity;
+    float viewDelta[2];
+    int hasSavedScreen;
+};
+struct lerpFrame_t // sizeof=0x30
+{                                       // ...
+    float yawAngle;
+    int yawing;
+    float pitchAngle;
+    int pitching;
+    int animationNumber;
+    animation_s* animation;
+    int animationTime;
+    float oldFramePos[3];
+    float animSpeedScale;
+    int oldFrameSnapshotTime;
+};
 
+struct clientControllers_t // sizeof=0x60
+{                                       // ...
+    float angles[6][3];
+    float tag_origin_angles[3];
+    float tag_origin_offset[3];
+};
+
+struct __declspec(align(4)) clientInfo_t // sizeof=0x4CC
+{                                       // ...
+    int infoValid;                      // ...
+    int nextValid;
+    int clientNum;
+    char name[16];
+    team_t team;
+    team_t oldteam;
+    int rank;
+    int prestige;
+    int perks;
+    int score;
+    int location;
+    int health;
+    char model[64];
+    char attachModelNames[6][64];
+    char attachTagNames[6][64];
+    lerpFrame_t legs;
+    lerpFrame_t torso;
+    float lerpMoveDir;
+    float lerpLean;
+    float playerAngles[3];              // ...
+    int leftHandGun;
+    int dobjDirty;
+    clientControllers_t control;
+    unsigned int clientConditions[10][2];
+    XAnimTree_s* pXAnimTree;            // ...
+    int iDObjWeapon;
+    unsigned __int8 weaponModel;
+    // padding byte
+    // padding byte
+    // padding byte
+    int stanceTransitionTime;
+    int turnAnimEndTime;
+    char turnAnimType;
+    // padding byte
+    // padding byte
+    // padding byte
+    int attachedVehEntNum;
+    int attachedVehSlotIndex;
+    bool hideWeapon;
+    bool usingKnife;
+    // padding byte
+    // padding byte
+};
+struct bgs_t_human // sizeof=0x10
+{                                       // ...
+    scr_animtree_t tree;                // ...
+    scr_anim_s torso;
+    scr_anim_s legs;
+    scr_anim_s turning;
+};
+struct bgs_t // sizeof=0xADD08
+{                                       // ...
+    animScriptData_t animScriptData;    // ...
+    bgs_t_human generic_human; // ...
+    int time;                           // ...
+    int latestSnapshotTime;             // ...
+    int frametime;                      // ...
+    int anim_user;                      // ...
+    XModel* (__cdecl* GetXModel)(const char*); // ...
+    void(__cdecl* CreateDObj)(DObjModel_s*, unsigned __int16, XAnimTree_s*, int, int, clientInfo_t*); // ...
+    unsigned __int16(__cdecl* AttachWeapon)(DObjModel_s*, unsigned __int16, clientInfo_t*); // ...
+    DObj_s* (__cdecl* GetDObj)(int, int); // ...
+    void(__cdecl* SafeDObjFree)(int, int); // ...
+    void* (__cdecl* AllocXAnim)(int);   // ...
+    clientInfo_t clientinfo[64];        // ...
+};
 
 // bg_jump
+struct clientInfo_t;
+struct lerpFrame_t;
+
 void __cdecl Jump_RegisterDvars();
 void __cdecl Jump_ClearState(playerState_s *ps);
 char __cdecl Jump_GetStepHeight(playerState_s *ps, const float *origin, float *stepSize);
@@ -209,9 +352,9 @@ int __cdecl BG_ExecuteCommand(
 int __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, scriptAnimMoveTypes_t movetype, int force);
 animScriptItem_t *__cdecl BG_FirstValidItem(unsigned int client, animScript_t *script);
 int __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *scriptItem);
-char *__cdecl GetMoveTypeName(int type);
-char *__cdecl GetWeaponTypeName(int type);
-char *__cdecl GetBodyPart(int bodypart);
+const char *__cdecl GetMoveTypeName(int type);
+const char *__cdecl GetWeaponTypeName(int type);
+const char *__cdecl GetBodyPart(int bodypart);
 int __cdecl BG_AnimScriptEvent(playerState_s *ps, scriptAnimEventTypes_t event, int isContinue, int force);
 void __cdecl BG_SetConditionValue(unsigned int client, unsigned int condition, unsigned __int64 value);
 const char *__cdecl BG_GetConditionString(int condition, unsigned int value);
@@ -225,8 +368,6 @@ bool __cdecl BG_IsAds(const clientInfo_t *ci, int animNum);
 bool __cdecl BG_IsProneAnim(const clientInfo_t *ci, int animNum);
 bool __cdecl BG_IsKnifeMeleeAnim(const clientInfo_t *ci, int animNum);
 void __cdecl BG_LerpOffset(float *offset_goal, float maxOffsetChange, float *offset);
-double __cdecl I_rsqrt(int number);
-void __cdecl Vec3Mad(const float *start, float scale, const float *dir, float *result);
 void __cdecl BG_Player_DoControllersSetup(const entityState_s *es, clientInfo_t *ci, int frametime);
 void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clientInfo_t *ci, controller_info_t *info);
 unsigned int __cdecl BG_GetConditionValue(const clientInfo_t *ci, unsigned int condition);
@@ -486,6 +627,9 @@ extern const dvar_t *perk_weapRateMultiplier;
 extern const dvar_t *perk_sprintMultiplier;
 
 // bg_pmove
+struct pmove_t;
+struct trace_t;
+
 enum PmStanceFrontBack : __int32
 {                                       // ...
     PM_STANCE_STAND = 0x0,
@@ -572,7 +716,6 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int forwa
 bool __cdecl PM_SprintEndingButtons(const playerState_s *ps, int forwardSpeed, __int16 buttons);
 bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm);
 void __cdecl PM_FlyMove(pmove_t *pm, pml_t *pml);
-void __cdecl Vec3Cross(const float *v0, const float *v1, float *cross);
 void __cdecl PM_Friction(playerState_s *ps, pml_t *pml);
 void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wishdir, float wishspeed, float accel);
 double __cdecl PM_PlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
@@ -601,7 +744,6 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml);
 void __cdecl PM_ViewHeightAdjust(pmove_t *pm, pml_t *pml);
 double __cdecl PM_ViewHeightTableLerp(int iFrac, viewLerpWaypoint_s *pTable, float *pfPosOfs);
 void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml);
-double __cdecl Vec2Length(const float *v);
 int __cdecl PM_GetStanceEx(int stance, int backward);
 void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml);
 void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int stance);
@@ -661,8 +803,6 @@ int __cdecl Mantle_GetAnim(MantleState *mstate);
 void __cdecl Mantle_CapView(playerState_s *ps);
 void __cdecl Mantle_ClearHint(playerState_s *ps);
 bool __cdecl Mantle_IsWeaponInactive(playerState_s *ps);
-void __cdecl Vec3Negate(const float *from, float *to);
-
 
 
 

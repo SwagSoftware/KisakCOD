@@ -64,9 +64,9 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4 tpos1; // [esp+200h] [ebp-B8h]
     FxBeamInfo *beamInfo; // [esp+210h] [ebp-A8h]
     float4 viewAxis; // [esp+218h] [ebp-A0h] BYREF
-    vector4 clipMtx; // [esp+228h] [ebp-90h] BYREF
+    mat4x4 clipMtx; // [esp+228h] [ebp-90h] BYREF
     int beamIter; // [esp+26Ch] [ebp-4Ch]
-    vector4 invClipMtx; // [esp+270h] [ebp-48h] BYREF
+    mat4x4 invClipMtx; // [esp+270h] [ebp-48h] BYREF
     int savedregs; // [esp+2B8h] [ebp+0h] BYREF
 
     if (!cmd)
@@ -300,12 +300,12 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     }
 }
 
-void __cdecl CreateClipMatrix(vector4 *clipMtx, const float *vieworg, const float (*viewaxis)[3])
+void __cdecl CreateClipMatrix(mat4x4 *clipMtx, const float *vieworg, const float (*viewaxis)[3])
 {
     unsigned int v3; // [esp+Ch] [ebp-90h]
     unsigned int LocalClientNum; // [esp+10h] [ebp-8Ch]
-    vector4 viewMtx; // [esp+14h] [ebp-88h] BYREF
-    vector4 projMtx; // [esp+54h] [ebp-48h] BYREF
+    mat4x4 viewMtx; // [esp+14h] [ebp-88h] BYREF
+    mat4x4 projMtx; // [esp+54h] [ebp-48h] BYREF
 
     Float4x4ForViewer(&viewMtx, vieworg, viewaxis);
     LocalClientNum = R_GetLocalClientNum();
@@ -393,7 +393,7 @@ void __cdecl CreateClipMatrix(vector4 *clipMtx, const float *vieworg, const floa
         + viewMtx.w.v[3] * projMtx.w.v[3];
 }
 
-void __cdecl Float4x4ForViewer(vector4 *mtx, const float *origin3, const float (*axis3)[3])
+void __cdecl Float4x4ForViewer(mat4x4 *mtx, const float *origin3, const float (*axis3)[3])
 {
     float v3; // [esp+8h] [ebp-1E4h]
     float v4; // [esp+Ch] [ebp-1E0h]
@@ -407,15 +407,15 @@ void __cdecl Float4x4ForViewer(vector4 *mtx, const float *origin3, const float (
     float4 *p_y; // [esp+88h] [ebp-164h]
     _QWORD v13[4]; // [esp+8Ch] [ebp-160h]
     float4 v14; // [esp+ACh] [ebp-140h]
-    vector4 *v15; // [esp+C0h] [ebp-12Ch]
+    mat4x4 *v15; // [esp+C0h] [ebp-12Ch]
     float v16[20]; // [esp+C4h] [ebp-128h] BYREF
     float4 v17; // [esp+114h] [ebp-D8h]
     float4 v18; // [esp+124h] [ebp-C8h]
     float4 v19; // [esp+134h] [ebp-B8h]
     float4 origin; // [esp+144h] [ebp-A8h]
-    vector4 tAxis; // [esp+154h] [ebp-98h] BYREF
+    mat4x4 tAxis; // [esp+154h] [ebp-98h] BYREF
     float4 transRow; // [esp+194h] [ebp-58h]
-    vector4 axis; // [esp+1A4h] [ebp-48h] BYREF
+    mat4x4 axis; // [esp+1A4h] [ebp-48h] BYREF
 
     origin.v[0] = *origin3;
     origin.v[1] = origin3[1];
@@ -542,7 +542,7 @@ void __cdecl Float4x4ForViewer(vector4 *mtx, const float *origin3, const float (
     mtx->w = transRow;
 }
 
-void __cdecl Float4x4InfinitePerspectiveMatrix(vector4 *mtx, float tanHalfFovX, float tanHalfFovY, float zNear)
+void __cdecl Float4x4InfinitePerspectiveMatrix(mat4x4 *mtx, float tanHalfFovX, float tanHalfFovY, float zNear)
 {
     float4 M1; // [esp+0h] [ebp-48h]
     float4 M2; // [esp+10h] [ebp-38h]
@@ -577,8 +577,8 @@ void __cdecl Float4x4InfinitePerspectiveMatrix(vector4 *mtx, float tanHalfFovX, 
 
 char  FX_GenerateBeam_GetFlatDelta@<al>(
     float a1@<ebp>,
-    const vector4 *clipMtx,
-    const vector4 *invClipMtx,
+    const mat4x4 *clipMtx,
+    const mat4x4 *invClipMtx,
     float4 beamWorldBegin,
     float4 beamWorldEnd,
     float4 *outFlatDelta)
@@ -686,14 +686,14 @@ char  FX_GenerateBeam_GetFlatDelta@<al>(
     if (!Vec4HomogenousClipBothZ((float4 *)&v34, (float4 *)&clipSpaceBeamBeginDivided.unitVec[2]))
         return 0;
     if (clipSpaceBeamBegin.v[0] == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 599, 0, "%s", "in.v[3]");
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_mat4x4_novec.h", 599, 0, "%s", "in.v[3]");
     clipSpaceBeamBeginDivided.v[1] = 1.0 / clipSpaceBeamBegin.v[0];
     clipSpaceBeamEndDivided.v[2] = v34 * clipSpaceBeamBeginDivided.v[1];
     clipSpaceBeamEndDivided.v[3] = v35 * clipSpaceBeamBeginDivided.v[1];
     v25 = v36 * clipSpaceBeamBeginDivided.v[1];
     clipSpaceBeamBeginDivided.v[0] = 1.0;
     if (clipSpaceBeamEnd.v[0] == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 599, 0, "%s", "in.v[3]");
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_mat4x4_novec.h", 599, 0, "%s", "in.v[3]");
     clipSpaceBeamEndDivided.v[1] = 1.0 / clipSpaceBeamEnd.v[0];
     clipSpaceFlatDelta_4 = clipSpaceBeamBeginDivided.v[2] * clipSpaceBeamEndDivided.v[1];
     clipSpaceFlatDelta_8 = clipSpaceBeamBeginDivided.v[3] * clipSpaceBeamEndDivided.v[1];
@@ -739,7 +739,7 @@ char  FX_GenerateBeam_GetFlatDelta@<al>(
         + outFlatDelta->v[2] * outFlatDelta->v[2]
         + outFlatDelta->v[3] * outFlatDelta->v[3];
     if (v8 == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 585, 0, "%s", "len");
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_mat4x4_novec.h", 585, 0, "%s", "len");
     v7 = sqrt(v8);
     v9 = 1.0 / v7;
     outFlatDelta->v[0] = outFlatDelta->v[0] * v9;

@@ -2,19 +2,6 @@
 #include <gfx_d3d/fxprimitives.h>
 #include <bgame/bg_local.h>
 
-struct clientControllers_t // sizeof=0x60
-{                                       // ...
-    float angles[6][3];
-    float tag_origin_angles[3];
-    float tag_origin_offset[3];
-};
- struct __declspec(align(4)) CEntPlayerInfo // sizeof=0xC
- {                                       // ...
-     clientControllers_t *control;       // ...
-     unsigned __int8 tag[6];             // ...
-     // padding byte
-     // padding byte
- };
  struct CEntTurretAngles // sizeof=0x8
  {                                       // ...
      float pitch;
@@ -53,6 +40,7 @@ struct clientControllers_t // sizeof=0x60
      // padding byte
  };
  
+ struct FxEffect;
  struct CEntFx // sizeof=0x8
  {                                       // ...
      int triggerTime;
@@ -97,6 +85,8 @@ struct cpose_t // sizeof=0x64
     };
 };
 
+struct XAnimTree_s;
+
 struct centity_s // sizeof=0x1DC
 {                                       // ...
     cpose_t pose;
@@ -111,6 +101,9 @@ struct centity_s // sizeof=0x1DC
     float lightingOrigin[3];
     XAnimTree_s *tree;
 };
+
+struct ScreenPlacement;
+struct Material;
 
 void __cdecl CG_DrawRotatedPicPhysical(
     const ScreenPlacement *scrPlace,

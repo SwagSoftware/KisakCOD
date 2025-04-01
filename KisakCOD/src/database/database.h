@@ -1,43 +1,95 @@
 #pragma once
-#include <xanim/xanim.h>
-#include <win32/win_local.h>
-#include <cstddef>
-#include <gfx_d3d/fxprimitives.h>
+
 #include <zlib/zlib.h>
+
+#include <cstddef>
+
+extern "C" {
+    // win32
+    struct _OVERLAPPED;
+}
+
+// todo: this sucks
+
+struct cbrush_t;
+struct clipMap_t;
+struct menuDef_t;
+struct snd_alias_list_t;
+struct windowDef_t;
+
+struct ComWorld;
+
+struct Font_s;
+struct FxEffectDef;
+struct FxImpactTable;
+
+struct GameWorldSp;
+struct GameWorldMp;
+
+struct PhysPreset;
+
+struct LoadedSound;
+struct LocalizeEntry;
+
+struct GfxImage;
+struct GfxLightDef;
+struct GfxWorld;
+
+struct MapEnts;
+
+struct Material;
+struct MaterialPixelShader;
+struct MaterialVertexShader;
+struct MaterialTechniqueSet;
+
+struct MenuList;
+
+struct RawFile;
+
+struct StringTable;
+struct SndCurve;
+struct SndDriverGlobals;
+
+struct WeaponDef;
+
+struct XAnimParts;
+struct XModel;
+struct XModelPiece;
+struct XModelPieces;
 
 union XAssetHeader // sizeof=0x4
 {                                       // ...
     XAssetHeader() { data = NULL; }
     // LWSS: This is used for lots of places in db_registry
-    XAssetHeader(XModelPieces *arg) { xmodelPieces = arg; }
-    XAssetHeader(PhysPreset *arg) { physPreset = arg; }
-    XAssetHeader(XAnimParts *arg) { parts = arg; }
-    XAssetHeader(XModel *arg) { model = arg; }
-    XAssetHeader(Material *arg) { material = arg; }
-    XAssetHeader(MaterialPixelShader *arg) { pixelShader = arg; }
-    XAssetHeader(MaterialVertexShader *arg) { vertexShader = arg; }
-    XAssetHeader(MaterialTechniqueSet *arg) { techniqueSet = arg; }
-    XAssetHeader(GfxImage *arg) { image = arg; }
-    XAssetHeader(snd_alias_list_t *arg) { sound = arg; }
-    XAssetHeader(SndCurve *arg) { sndCurve = arg; }
-    XAssetHeader(LoadedSound *arg) { loadSnd = arg; }
-    XAssetHeader(clipMap_t *arg) { clipMap = arg; }
-    XAssetHeader(ComWorld *arg) { comWorld = arg; }
-    XAssetHeader(GameWorldSp *arg) { gameWorldSp = arg; }
-    XAssetHeader(GameWorldMp *arg) { gameWorldMp = arg; }
-    XAssetHeader(MapEnts *arg) { mapEnts = arg; }
-    XAssetHeader(GfxWorld *arg) { gfxWorld = arg; }
-    XAssetHeader(GfxLightDef *arg) { lightDef = arg; }
-    XAssetHeader(Font_s *arg) { font = arg; }
-    XAssetHeader(MenuList *arg) { menuList = arg; }
-    XAssetHeader(menuDef_t *arg) { menu = arg; }
-    XAssetHeader(LocalizeEntry *arg) { localize = arg; }
-    XAssetHeader(WeaponDef *arg) { weapon = arg; }
-    XAssetHeader(SndDriverGlobals *arg) { sndDriverGlobals = arg; }
-    XAssetHeader(const FxEffectDef *arg) { fx = arg; }
-    XAssetHeader(FxImpactTable *arg) { impactFx = arg; }
-    XAssetHeader(RawFile *arg) { rawfile = arg; }
-    XAssetHeader(StringTable *arg) { stringTable = arg; }
+    // XAssetHeader(XModelPieces *arg) { xmodelPieces = arg; }
+    // XAssetHeader(PhysPreset *arg) { physPreset = arg; }
+    // XAssetHeader(XAnimParts *arg) { parts = arg; }
+    // XAssetHeader(XModel *arg) { model = arg; }
+    // XAssetHeader(Material *arg) { material = arg; }
+    // XAssetHeader(MaterialPixelShader *arg) { pixelShader = arg; }
+    // XAssetHeader(MaterialVertexShader *arg) { vertexShader = arg; }
+    // XAssetHeader(MaterialTechniqueSet *arg) { techniqueSet = arg; }
+    // XAssetHeader(GfxImage *arg) { image = arg; }
+    // XAssetHeader(snd_alias_list_t *arg) { sound = arg; }
+    // XAssetHeader(SndCurve *arg) { sndCurve = arg; }
+    // XAssetHeader(LoadedSound *arg) { loadSnd = arg; }
+    // XAssetHeader(clipMap_t *arg) { clipMap = arg; }
+    // XAssetHeader(ComWorld *arg) { comWorld = arg; }
+    // XAssetHeader(GameWorldSp *arg) { gameWorldSp = arg; }
+    // XAssetHeader(GameWorldMp *arg) { gameWorldMp = arg; }
+    // XAssetHeader(MapEnts *arg) { mapEnts = arg; }
+    // XAssetHeader(GfxWorld *arg) { gfxWorld = arg; }
+    // XAssetHeader(GfxLightDef *arg) { lightDef = arg; }
+    // XAssetHeader(Font_s *arg) { font = arg; }
+    // XAssetHeader(MenuList *arg) { menuList = arg; }
+    // XAssetHeader(menuDef_t *arg) { menu = arg; }
+    // XAssetHeader(LocalizeEntry *arg) { localize = arg; }
+    // XAssetHeader(WeaponDef *arg) { weapon = arg; }
+    // XAssetHeader(SndDriverGlobals *arg) { sndDriverGlobals = arg; }
+    // XAssetHeader(const FxEffectDef *arg) { fx = arg; }
+    // XAssetHeader(FxImpactTable *arg) { impactFx = arg; }
+    // XAssetHeader(RawFile *arg) { rawfile = arg; }
+    // XAssetHeader(StringTable *arg) { stringTable = arg; }
     XAssetHeader(void *arg) { data = arg; }
 
     XModelPieces *xmodelPieces;
@@ -70,6 +122,46 @@ union XAssetHeader // sizeof=0x4
     RawFile *rawfile;
     StringTable *stringTable;
     void *data;
+};
+
+enum XAssetType : __int32
+{
+    ASSET_TYPE_XMODELPIECES = 0x0,
+    ASSET_TYPE_PHYSPRESET = 0x1,
+    ASSET_TYPE_XANIMPARTS = 0x2,
+    ASSET_TYPE_XMODEL = 0x3,
+    ASSET_TYPE_MATERIAL = 0x4,
+    ASSET_TYPE_TECHNIQUE_SET = 0x5,
+    ASSET_TYPE_IMAGE = 0x6,
+    ASSET_TYPE_SOUND = 0x7,
+    ASSET_TYPE_SOUND_CURVE = 0x8,
+    ASSET_TYPE_LOADED_SOUND = 0x9,
+    ASSET_TYPE_CLIPMAP = 0xA,
+    ASSET_TYPE_CLIPMAP_PVS = 0xB,
+    ASSET_TYPE_COMWORLD = 0xC,
+    ASSET_TYPE_GAMEWORLD_SP = 0xD,
+    ASSET_TYPE_GAMEWORLD_MP = 0xE,
+    ASSET_TYPE_MAP_ENTS = 0xF,
+    ASSET_TYPE_GFXWORLD = 0x10,
+    ASSET_TYPE_LIGHT_DEF = 0x11,
+    ASSET_TYPE_UI_MAP = 0x12,
+    ASSET_TYPE_FONT = 0x13,
+    ASSET_TYPE_MENULIST = 0x14,
+    ASSET_TYPE_MENU = 0x15,
+    ASSET_TYPE_LOCALIZE_ENTRY = 0x16,
+    ASSET_TYPE_WEAPON = 0x17,
+    ASSET_TYPE_SNDDRIVER_GLOBALS = 0x18,
+    ASSET_TYPE_FX = 0x19,
+    ASSET_TYPE_IMPACT_FX = 0x1A,
+    ASSET_TYPE_AITYPE = 0x1B,
+    ASSET_TYPE_MPTYPE = 0x1C,
+    ASSET_TYPE_CHARACTER = 0x1D,
+    ASSET_TYPE_XMODELALIAS = 0x1E,
+    ASSET_TYPE_RAWFILE = 0x1F,
+    ASSET_TYPE_STRINGTABLE = 0x20,
+    ASSET_TYPE_COUNT = 0x21,
+    ASSET_TYPE_STRING = 0x21,
+    ASSET_TYPE_ASSETLIST = 0x22,
 };
 
 struct XAsset // sizeof=0x8
@@ -120,6 +212,7 @@ struct XBlock // sizeof=0x8
     unsigned __int8 *data;
     unsigned int size;
 };
+
 struct XZoneMemory // sizeof=0x58
 {                                       // ...
     XBlock blocks[9];
@@ -145,14 +238,23 @@ struct __declspec(align(4)) XZone // sizeof=0xA8
 struct ScriptStringList // sizeof=0x8
 {                                       // ...
     int count;
-    const char **strings;
+    const char** strings;
 };
+
 struct XAssetList // sizeof=0x10
 {                                       // ...
     ScriptStringList stringList;
     int assetCount;
     XAsset *assets;
 };
+
+struct XFile // sizeof=0x2C
+{                                       // ...
+    unsigned int size;
+    unsigned int externalSize;          // ...
+    unsigned int blockSize[9];          // ...
+};
+
 
 // db_registry
 void __cdecl TRACK_db_registry();
@@ -221,8 +323,6 @@ void __cdecl DB_EnumXAssets_FastFile(
     void *inData,
     bool includeOverride);
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name);
-void __cdecl Sys_LockWrite(FastCriticalSection *critSect);
-void __cdecl Sys_UnlockWrite(FastCriticalSection *critSect);
 void __cdecl DB_Sleep(unsigned int msec);
 void __cdecl DB_LogMissingAsset(XAssetType type, const char *name);
 XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name);
@@ -301,27 +401,6 @@ int __cdecl DB_AuthLoad_InflateInit(z_stream_s *stream, bool isSecure);
 void __cdecl DB_AuthLoad_InflateEnd(z_stream_s *stream);
 unsigned int __cdecl DB_AuthLoad_Inflate(z_stream_s *stream, int flush);
 
-
-
-struct DB_LoadData // sizeof=0x68
-{                                       // ...
-    void *f;                            // ...
-    const char *filename;               // ...
-    XZoneMemory *zoneMem;               // ...
-    int outstandingReads;               // ...
-    _OVERLAPPED overlapped;             // ...
-    z_stream_s stream;                  // ...
-    unsigned __int8 *compressBufferStart; // ...
-    unsigned __int8 *compressBufferEnd; // ...
-    void(__cdecl *interrupt)();        // ...
-    int allocType;                      // ...
-};
-struct XFile // sizeof=0x2C
-{                                       // ...
-    unsigned int size;
-    unsigned int externalSize;          // ...
-    unsigned int blockSize[9];          // ...
-};
 
 // db_file_load
 void __cdecl DB_CancelLoadXFile();
@@ -781,7 +860,5 @@ void __cdecl Mark_XAssetHeader();
 void __cdecl Mark_XAsset();
 void __cdecl Mark_SndAliasCustom(snd_alias_list_t **var);
 void __cdecl DB_LoadDObjs();
-
-
 
 extern XAssetList *varXAssetList;

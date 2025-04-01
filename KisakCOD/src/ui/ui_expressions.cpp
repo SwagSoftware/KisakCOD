@@ -1,5 +1,6 @@
-#include "ui.h"
+#include <qcommon/qcommon.h>
 
+#include "ui.h"
 
 char *__cdecl GetSourceString(Operand operand)
 {

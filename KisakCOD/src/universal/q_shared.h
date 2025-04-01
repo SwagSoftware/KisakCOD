@@ -229,20 +229,6 @@ int __cdecl I_DrawStrlen(const char *str);
 char *__cdecl I_CleanStr(char *string);
 unsigned __int8 __cdecl I_CleanChar(unsigned __int8 character);
 
-//=============================================
-// LWSS: IDA Macros.
-#define BYTEn(x, n)   (*((BYTE*)&(x)+n))
-#define WORDn(x, n)   (*((WORD*)&(x)+n))
-#define DWORDn(x, n)  (*((DWORD*)&(x)+n))
-
-#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN
-#  define LOW_IND(x,part_type)   LAST_IND(x,part_type)
-#  define HIGH_IND(x,part_type)  0
-#else
-#  define HIGH_IND(x,part_type)  LAST_IND(x,part_type)
-#  define LOW_IND(x,part_type)   0
-#endif
-
 // lwss: fcking winblows!
 #undef MAKEWORD
 #undef MAKELONG
@@ -620,6 +606,8 @@ const char *__cdecl StringTable_Lookup(
 	const char *value,
 	int valueColumn);
 int __cdecl StringTable_LookupRowNumForValue(const StringTable *table, int comparisonColumn, const char *value);
+
+union XAssetHeader;
 void __cdecl StringTable_GetAsset(const char *filename, XAssetHeader *tablePtr);
 
 
