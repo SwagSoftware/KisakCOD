@@ -1263,14 +1263,6 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
     }
 }
 
-void __cdecl Vec4Lerp(const float *from, const float *to, float frac, float *result)
-{
-    *result = (*to - *from) * frac + *from;
-    result[1] = (to[1] - from[1]) * frac + from[1];
-    result[2] = (to[2] - from[2]) * frac + from[2];
-    result[3] = (to[3] - from[3]) * frac + from[3];
-}
-
 void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to)
 {
     *to = (double)*from * 0.003921568859368563;

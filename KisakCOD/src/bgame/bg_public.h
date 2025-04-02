@@ -30,8 +30,6 @@ struct __declspec(align(4)) pmove_t // sizeof=0x110
 };
 
 // bg_jump
-double __cdecl Vec3Normalize(float *v);
-
 extern const dvar_t *jump_height;
 extern const dvar_t *jump_stepSize;
 extern const dvar_t *jump_slowdownEnable;

@@ -38,6 +38,9 @@
 #include <ode/memory.h>
 #include <ode/error.h>
 
+// ADD: for memcpy
+#include <string.h>
+
 // misc defines
 #define ALLOCA dALLOCA16
 
@@ -1406,7 +1409,7 @@ dReal dWorldGetContactSurfaceLayer (dWorldID w)
 }
 
 // LWSS ADD
-#include <universal/pool_allocator.h>
+#include "odeext.h"
 
 odeGlob_t odeGlob;
 

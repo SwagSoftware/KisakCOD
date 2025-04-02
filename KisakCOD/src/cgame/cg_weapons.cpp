@@ -708,8 +708,8 @@ void __cdecl HoldBreathUpdate(int localClientNum)
         cgArray.holdBreathFrac = DiffTrack(1.0, cgArray.holdBreathFrac, player_breath_snd_lerp->current.value, deltaTime);
         if (cgArray.holdBreathTime >= 0)
         {
-            if (MEMORY[0x9DF930][0] > MEMORY[0x9DF930][1])
-                CG_PlayClientSoundAlias(localClientNum, cgMedia.playerHeartBeatSound);
+            if (cgArray.holdBreathTime > cgArray.holdBreathInTime)
+                CG_PlayClientSoundAlias(localClientNum, unk_A8FA14);
         }
         else
         {
@@ -720,9 +720,9 @@ void __cdecl HoldBreathUpdate(int localClientNum)
             }
             else
             {
-                playbackId = CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathInSound);
-                SND_GetKnownLength(playbackId, &MEMORY[0x9DF930][1]);
-                MEMORY[0x9DF930][2] = (int)(player_breath_snd_delay->current.value * 1000.0);
+                playbackId = CG_PlayClientSoundAlias(localClientNum, unk_A8FA18);
+                SND_GetKnownLength(playbackId, &cgArray.holdBreathInTime);
+                cgArray.holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
             }
         }
         cgArray.holdBreathTime += cgArray.frametime;
@@ -736,13 +736,13 @@ void __cdecl HoldBreathUpdate(int localClientNum)
             {
                 if (cgArray.holdBreathDelay <= 0)
                 {
-                    CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathOutSound);
-                    MEMORY[0x9DF930][2] = (int)(player_breath_snd_delay->current.value * 1000.0);
+                    CG_PlayClientSoundAlias(localClientNum, unk_A8FA1C);
+                    cgArray.holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
                 }
             }
             else
             {
-                CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathGaspSound);
+                CG_PlayClientSoundAlias(localClientNum, unk_A8FA20);
             }
         }
         cgArray.holdBreathTime = -1;
@@ -2609,7 +2609,7 @@ void __cdecl FireBulletPenetrate(
                 if (!BG_AdvanceTrace(bp, &br, 0.13500001))
                     break;
                 traceHit = BulletTrace(localClientNum, bp, weapDef, attacker, &br, br.depthSurfaceType);
-                Com_Memcpy((char *)&revBp, (char *)bp, 64);
+                revBp = *bp; // Com_Memcpy((char *)&revBp, (char *)bp, 64);
                 LODWORD(diff[4]) = bp->dir;
                 revBp.dir[0] = -bp->dir[0];
                 revBp.dir[1] = -bp->dir[1];
@@ -2619,7 +2619,7 @@ void __cdecl FireBulletPenetrate(
                 revBp.start[1] = bp->end[1];
                 revBp.start[2] = bp->end[2];
                 Vec3Mad(lastHitPos, 0.0099999998, revBp.dir, revBp.end);
-                Com_Memcpy((char *)&revBr, (char *)&br, 68);
+                revBr = br; // Com_Memcpy((char *)&revBr, (char *)&br, 68);
                 revBr.trace.normal[0] = -revBr.trace.normal[0];
                 revBr.trace.normal[1] = -revBr.trace.normal[1];
                 revBr.trace.normal[2] = -revBr.trace.normal[2];

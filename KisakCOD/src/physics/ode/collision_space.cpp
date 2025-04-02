@@ -232,14 +232,6 @@ void dxSpace::dirty (dxGeom *geom)
 //****************************************************************************
 // simple space - reports all n^2 object intersections
 
-struct dxSimpleSpace : public dxSpace {
-  dxSimpleSpace (dSpaceID _space);
-  void cleanGeoms();
-  void collide (void *data, dNearCallback *callback);
-  void collide2 (void *data, dxGeom *geom, dNearCallback *callback);
-};
-
-
 dxSimpleSpace::dxSimpleSpace (dSpaceID _space) : dxSpace (_space)
 {
   type = dSimpleSpaceClass;

@@ -121,5 +121,4 @@ struct dxWorld : public dBase {
   dxContactParameters contactp;
 };
 
-
 #endif

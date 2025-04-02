@@ -27,6 +27,8 @@
 
 #include <ode/config.h>
 
+#include <vadefs.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -28,92 +28,103 @@ void __cdecl FX_SpawnAllFutureLooping(
                 0x7FFFFFFF);
     }
 }
-
-void __cdecl FX_SpawnLoopingElems(
-    FxSystem *system,
-    __int64 effect,
-    __int64 frameBegin,
+void __cdecl FX_SpawnTrailLoopingElems(
+    FxSystem* system,
+    FxEffect* effect,
+    FxTrail* trail,
+    FxSpatialFrame* frameBegin,
+    FxSpatialFrame* frameEnd,
     int msecWhenPlayed,
     int msecUpdateBegin,
-    int msecUpdateEnd)
+    int msecUpdateEnd,
+    float distanceTravelledBegin,
+    float distanceTravelledEnd)
 {
-    const FxEffectDef *effectDef; // [esp+40h] [ebp-3Ch]
-    const FxElemDef *elemDef; // [esp+44h] [ebp-38h]
-    int msecNextSpawn; // [esp+48h] [ebp-34h]
-    float lerp; // [esp+4Ch] [ebp-30h]
-    int spawnedCount; // [esp+54h] [ebp-28h]
-    FxSpatialFrame frameWhenPlayed; // [esp+58h] [ebp-24h] BYREF
-    int maxUpdateMsec; // [esp+74h] [ebp-8h]
-    int updateMsec; // [esp+78h] [ebp-4h]
+    float v10; // [esp+1Ch] [ebp-50h]
+    float v11; // [esp+20h] [ebp-4Ch]
+    float v12; // [esp+24h] [ebp-48h]
+    float lerp; // [esp+2Ch] [ebp-40h]
+    FxSpatialFrame frameWhenPlayed; // [esp+34h] [ebp-38h] BYREF
+    float distSpawn; // [esp+50h] [ebp-1Ch]
+    float normalizedTotalDistance; // [esp+54h] [ebp-18h]
+    const FxEffectDef* effectDef; // [esp+58h] [ebp-14h]
+    const FxElemDef* elemDef; // [esp+5Ch] [ebp-10h]
+    float normalizedDistanceTraversed; // [esp+60h] [ebp-Ch]
+    float normalizedDistanceRemaining; // [esp+64h] [ebp-8h]
+    float normalizedDistanceBeforeSpawn; // [esp+68h] [ebp-4h]
 
-    if (!(unsigned int)effect)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 350, 0, "%s", "effect");
-    effectDef = *(const FxEffectDef **)effect;
-    if (!*(unsigned int *)effect)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 353, 0, "%s", "effectDef");
-    if (HIDWORD(effect) >= effectDef->elemDefCountEmission
+    if (!effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 101, 0, "%s", "effect");
+    effectDef = effect->def;
+    if (!effectDef)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 104, 0, "%s", "effectDef");
+    if (trail->defIndex >= (effectDef->elemDefCountEmission
         + effectDef->elemDefCountOneShot
-        + effectDef->elemDefCountLooping)
+        + effectDef->elemDefCountLooping))
         MyAssertHandler(
             ".\\EffectsCore\\fx_update.cpp",
-            355,
+            106,
             0,
-            "elemDefIndex doesn't index effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDefCou"
-            "ntEmission\n"
+            "trail->defIndex doesn't index effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDef"
+            "CountEmission\n"
             "\t%i not in [0, %i)",
-            HIDWORD(effect),
+            trail->defIndex,
             effectDef->elemDefCountEmission + effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping);
-    if (SHIDWORD(effect) >= effectDef->elemDefCountLooping
-        && SHIDWORD(effect) < effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping)
+    if (trail->defIndex >= effectDef->elemDefCountLooping
+        && trail->defIndex < effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping)
     {
         MyAssertHandler(
             ".\\EffectsCore\\fx_update.cpp",
-            356,
+            107,
             0,
             "%s",
-            "elemDefIndex < effectDef->elemDefCountLooping || elemDefIndex >= effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot");
+            "trail->defIndex < effectDef->elemDefCountLooping || trail->defIndex >= effectDef->elemDefCountLooping + effectDef-"
+            ">elemDefCountOneShot");
     }
     if (msecWhenPlayed > msecUpdateBegin || msecUpdateBegin > msecUpdateEnd)
         MyAssertHandler(
             ".\\EffectsCore\\fx_update.cpp",
-            357,
+            108,
             0,
             "msecUpdateBegin not in [msecWhenPlayed, msecUpdateEnd]\n\t%g not in [%g, %g]",
-            (double)msecUpdateBegin,
-            (double)msecWhenPlayed,
-            (double)msecUpdateEnd);
-    elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)effect + 28) + 252 * HIDWORD(effect));
+            msecUpdateBegin,
+            msecWhenPlayed,
+            msecUpdateEnd);
+    elemDef = &effect->def->elemDefs[trail->defIndex];
     if (elemDef->elemType != 3)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            112,
+            0,
+            "%s\n\t(elemDef->elemType) = %i",
+            "(elemDef->elemType == FX_ELEM_TYPE_TRAIL)",
+            elemDef->elemType);
+    if (!elemDef->trailDef)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 113, 0, "%s", "elemDef->trailDef");
+    normalizedTotalDistance = (distanceTravelledEnd - distanceTravelledBegin) / elemDef->trailDef->splitDist;
+    v12 = distanceTravelledBegin / elemDef->trailDef->splitDist;
+    v11 = floor(v12);
+    v10 = v12 - v11;
+    normalizedDistanceBeforeSpawn = 1.0 - v10;
+    normalizedDistanceTraversed = 0.0;
+    normalizedDistanceRemaining = normalizedTotalDistance;
+    while (normalizedDistanceBeforeSpawn < normalizedDistanceRemaining)
     {
-        if (msecUpdateEnd != 0x7FFFFFFF)
-        {
-            updateMsec = msecUpdateEnd - msecUpdateBegin;
-            if (msecUpdateEnd - msecUpdateBegin > 128)
-            {
-                maxUpdateMsec = FX_LimitStabilizeTimeForElemDef_Recurse(elemDef, 0, updateMsec) + 1;
-                elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)effect + 28) + 252 * HIDWORD(effect));
-                if (updateMsec > maxUpdateMsec)
-                    msecUpdateBegin += updateMsec - maxUpdateMsec;
-            }
-        }
-        spawnedCount = (msecUpdateBegin - msecWhenPlayed) / elemDef->spawn.looping.intervalMsec + 1;
-        msecNextSpawn = msecWhenPlayed + elemDef->spawn.looping.intervalMsec * spawnedCount;
-        memcpy(&frameWhenPlayed, (const void *)frameBegin, sizeof(frameWhenPlayed));
-        while (msecNextSpawn <= msecUpdateEnd && spawnedCount < elemDef->spawn.looping.count)
-        {
-            lerp = (double)(msecNextSpawn - msecUpdateBegin) / (double)(msecUpdateEnd - msecUpdateBegin);
-            Vec3Lerp(
-                (const float *)(frameBegin + 16),
-                (const float *)(HIDWORD(frameBegin) + 16),
-                lerp,
-                frameWhenPlayed.origin);
-            Vec4Lerp((const float *)frameBegin, (const float *)HIDWORD(frameBegin), lerp, frameWhenPlayed.quat);
-            Vec4Normalize(frameWhenPlayed.quat);
-            FX_SpawnElem(system, (FxEffect *)effect, SHIDWORD(effect), &frameWhenPlayed, msecNextSpawn, 0.0, spawnedCount);
-            elemDef = (const FxElemDef *)(*(unsigned int *)(*(unsigned int *)effect + 28) + 252 * HIDWORD(effect));
-            ++spawnedCount;
-            msecNextSpawn += elemDef->spawn.looping.intervalMsec;
-        }
+        normalizedDistanceTraversed = normalizedDistanceTraversed + normalizedDistanceBeforeSpawn;
+        lerp = normalizedDistanceTraversed / normalizedTotalDistance;
+        distSpawn = (distanceTravelledEnd - distanceTravelledBegin) * lerp + distanceTravelledBegin;
+        Vec3Lerp(frameBegin->origin, frameEnd->origin, lerp, frameWhenPlayed.origin);
+        Vec4Lerp(frameBegin->quat, frameEnd->quat, lerp, frameWhenPlayed.quat);
+        Vec4Normalize(frameWhenPlayed.quat);
+        FX_SpawnTrailElem_Cull(
+            system,
+            effect,
+            trail,
+            &frameWhenPlayed,
+            msecUpdateBegin + ((msecUpdateEnd - msecUpdateBegin) * lerp),
+            distSpawn);
+        normalizedDistanceRemaining = normalizedDistanceRemaining - normalizedDistanceBeforeSpawn;
+        normalizedDistanceBeforeSpawn = 1.0;
     }
 }
 
@@ -2158,43 +2169,42 @@ void __cdecl FX_UpdateSpotLight(FxCmd *cmd)
     }
 }
 
-void __cdecl FX_UpdateSpotLightEffect(__int64 system)
+void __cdecl FX_UpdateSpotLightEffect(FxSystem* system, FxEffect* effect)
 {
-    long double v1; // [esp-8h] [ebp-50h]
-    __int64 v2; // [esp+10h] [ebp-38h]
-    float v3; // [esp+20h] [ebp-28h]
+    long double v2; // [esp-8h] [ebp-50h]
+    __int64 v3; // [esp+10h] [ebp-38h]
+    float v4; // [esp+20h] [ebp-28h]
     float diff[3]; // [esp+28h] [ebp-20h] BYREF
     unsigned __int16 lastElemHandle[4]; // [esp+34h] [ebp-14h] BYREF
     float newDistanceTraveled; // [esp+40h] [ebp-8h]
     unsigned int elemClass; // [esp+44h] [ebp-4h]
 
-    if ((unsigned __int16)*(unsigned int *)(HIDWORD(system) + 4)
-        && *(unsigned int *)(HIDWORD(system) + 36) <= *(unsigned int *)(system + 2512))
+    if (effect->status && effect->msecLastUpdate <= system->msecNow)
     {
-        FX_UpdateEffectBolt((FxSystem *)system, (FxEffect *)HIDWORD(system));
-        *(_WORD *)(system + 2504) = *(unsigned int *)(HIDWORD(system) + 24) & 0xFFF;
-        Vec3Sub((const float *)(HIDWORD(system) + 84), (const float *)(HIDWORD(system) + 112), diff);
-        v3 = Vec3Length(diff);
-        newDistanceTraveled = *(float *)(HIDWORD(system) + 124) + v3;
+        FX_UpdateEffectBolt(system, effect);
+        system->activeSpotLightBoltDobj = *&effect->boltAndSortOrder & 0xFFF;
+        Vec3Sub(effect->frameNow.origin, effect->framePrev.origin, diff);
+        v4 = Vec3Length(diff);
+        newDistanceTraveled = effect->distanceTraveled + v4;
         for (elemClass = 0; elemClass < 3; ++elemClass)
             lastElemHandle[elemClass] = -1;
-        HIDWORD(v2) = *(unsigned int *)(system + 2512);
-        LODWORD(v2) = *(unsigned int *)(HIDWORD(system) + 36);
-        FX_UpdateSpotLightEffectPartial((FxSystem *)system, (FxEffect *)HIDWORD(system), v2);
-        HIDWORD(v1) = *(unsigned int *)(system + 2512);
-        LODWORD(v1) = *(unsigned int *)(HIDWORD(system) + 36);
+        HIDWORD(v3) = system->msecNow;
+        LODWORD(v3) = effect->msecLastUpdate;
+        FX_UpdateSpotLightEffectPartial(system, effect, v3);
+        HIDWORD(v2) = system->msecNow;
+        LODWORD(v2) = effect->msecLastUpdate;
         FX_UpdateEffectPartial(
-            system,
-            v1,
-            *(float *)(HIDWORD(system) + 124),
+            __SPAIR64__(effect, system),
+            v2,
+            effect->distanceTraveled,
             newDistanceTraveled,
-            (unsigned __int16 *)(HIDWORD(system) + 8),
+            effect->firstElemHandle,
             lastElemHandle,
             0,
             0);
-        FX_SortNewElemsInEffect((FxSystem *)system, (FxEffect *)HIDWORD(system));
-        memcpy((void *)(HIDWORD(system) + 96), (const void *)(HIDWORD(system) + 68), 0x1Cu);
-        *(float *)(HIDWORD(system) + 124) = newDistanceTraveled;
+        FX_SortNewElemsInEffect(system, effect);
+        qmemcpy(&effect->framePrev, &effect->frameNow, sizeof(effect->framePrev));
+        effect->distanceTraveled = newDistanceTraveled;
     }
 }
 

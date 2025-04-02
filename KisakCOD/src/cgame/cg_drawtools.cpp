@@ -447,15 +447,6 @@ void __cdecl CG_DebugBoxOriented(
         CG_DebugLine(v[iEdgePairs[i][0]], v[dword_865EAC[2 * i]], color, depthTest, duration);
 }
 
-void __cdecl MatrixTransformVector(const float *in1, const float (*in2)[3], float *out)
-{
-    if (in1 == out)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 716, 0, "%s", "in1 != out");
-    *out = *in1 * (*in2)[0] + in1[1] * (float)(*in2)[3] + in1[2] * (float)(*in2)[6];
-    out[1] = *in1 * (float)(*in2)[1] + in1[1] * (float)(*in2)[4] + in1[2] * (float)(*in2)[7];
-    out[2] = *in1 * (float)(*in2)[2] + in1[1] * (float)(*in2)[5] + in1[2] * (float)(*in2)[8];
-}
-
 void __cdecl CG_DebugCircle(
     const float *center,
     float radius,

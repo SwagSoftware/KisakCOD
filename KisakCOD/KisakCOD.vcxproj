@@ -497,6 +497,7 @@
     <ClInclude Include="src\physics\ode\mat.h" />
     <ClInclude Include="src\physics\ode\objects.h" />
     <ClInclude Include="src\physics\ode\obstack.h" />
+    <ClInclude Include="src\physics\ode\odeext.h" />
     <ClInclude Include="src\physics\ode\quickstep.h" />
     <ClInclude Include="src\physics\ode\stack.h" />
     <ClInclude Include="src\physics\ode\step.h" />

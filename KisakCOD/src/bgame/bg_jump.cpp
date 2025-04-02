@@ -303,26 +303,6 @@ void __cdecl Jump_PushOffLadder(playerState_s *ps, pml_t *pml)
     ps->pm_flags &= ~8u;
 }
 
-double __cdecl Vec3Normalize(float *v)
-{
-    float v2; // [esp+0h] [ebp-14h]
-    float v3; // [esp+4h] [ebp-10h]
-    float ilength; // [esp+Ch] [ebp-8h]
-    float length; // [esp+10h] [ebp-4h]
-
-    length = *v * *v + v[1] * v[1] + v[2] * v[2];
-    v3 = sqrt(length);
-    if (-v3 < 0.0)
-        v2 = v3;
-    else
-        v2 = 1.0;
-    ilength = 1.0 / v2;
-    *v = *v * ilength;
-    v[1] = v[1] * ilength;
-    v[2] = v[2] * ilength;
-    return v3;
-}
-
 void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml)
 {
     int surfType; // [esp+0h] [ebp-4h]

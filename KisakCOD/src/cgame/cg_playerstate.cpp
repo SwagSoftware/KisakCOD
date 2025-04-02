@@ -1,7 +1,6 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-
 void __cdecl CG_Respawn(int localClientNum)
 {
     if (localClientNum)
@@ -12,52 +11,55 @@ void __cdecl CG_Respawn(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (!MEMORY[0x98F458])
+    if (!cgArray[0].snap)
         MyAssertHandler(".\\cgame\\cg_playerstate.cpp", 108, 0, "%s", "cgameGlob->snap");
-    memcpy(MEMORY[0x9D5574], (unsigned __int8 *)(MEMORY[0x98F458] + 12), 0x2F64u);
-    MEMORY[0x9DF71C][34] = MEMORY[0x9D565C];
-    MEMORY[0x9DF71C][35] = MEMORY[0x9D5560];
-    MEMORY[0x9DF71C][38] = MEMORY[0x9D5654];
-    MEMORY[0x9DF71C][9] = 0;
-    MEMORY[0x9DF71C][10] = 0;
-    MEMORY[0x9DF71C][29] = 0;
-    MEMORY[0x9D8748][4122] = 0.0;
-    MEMORY[0x9D8748][4123] = 0.0;
-    MEMORY[0x9D8748][4124] = 0.0;
-    MEMORY[0x9D8748][4125] = 0.0;
-    MEMORY[0x9D8748][4126] = 0.0;
-    MEMORY[0x9D8748][4127] = 0.0;
-    MEMORY[0x9D8748][4128] = 0.0;
-    MEMORY[0x9D8748][4129] = 0.0;
-    MEMORY[0x9D8748][4130] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][78] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][79] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][80] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][75] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][76] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][77] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][74] = 0.0;
-    memset(MEMORY[0x9D86B4], 0, 0x30u);
-    MEMORY[0x9DF71C][63] = 0;
-    *(float *)&MEMORY[0x9DF71C][71] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][72] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][89] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][90] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][91] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][92] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][93] = 0.0;
-    *(float *)&MEMORY[0x9DF71C][94] = 0.0;
-    memset((unsigned __int8 *)&MEMORY[0x9DF71C][39], 0, 0x60u);
+    memcpy(
+        (unsigned __int8*)&cgArray[0].predictedPlayerState,
+        (unsigned __int8*)&cgArray[0].snap->ps,
+        sizeof(cgArray[0].predictedPlayerState));
+    cgArray[0].weaponSelect = cgArray[0].predictedPlayerState.weapon;
+    cgArray[0].weaponSelectTime = cgArray[0].time;
+    cgArray[0].equippedOffHand = cgArray[0].predictedPlayerState.offHandIndex;
+    cgArray[0].cursorHintIcon = 0;
+    cgArray[0].cursorHintTime = 0;
+    cgArray[0].proneBlockedEndTime = 0;
+    cgArray[0].swayViewAngles[0] = 0.0;
+    cgArray[0].swayViewAngles[1] = 0.0;
+    cgArray[0].swayViewAngles[2] = 0.0;
+    cgArray[0].swayAngles[0] = 0.0;
+    cgArray[0].swayAngles[1] = 0.0;
+    cgArray[0].swayAngles[2] = 0.0;
+    cgArray[0].swayOffset[0] = 0.0;
+    cgArray[0].swayOffset[1] = 0.0;
+    cgArray[0].swayOffset[2] = 0.0;
+    cgArray[0].kickAngles[0] = 0.0;
+    cgArray[0].kickAngles[1] = 0.0;
+    cgArray[0].kickAngles[2] = 0.0;
+    cgArray[0].kickAVel[0] = 0.0;
+    cgArray[0].kickAVel[1] = 0.0;
+    cgArray[0].kickAVel[2] = 0.0;
+    cgArray[0].xyspeed = 0.0;
+    memset((unsigned __int8*)&cgArray[0].playerEntity, 0, sizeof(cgArray[0].playerEntity));
+    cgArray[0].damageTime = 0;
+    cgArray[0].v_dmg_pitch = 0.0;
+    cgArray[0].v_dmg_roll = 0.0;
+    cgArray[0].vGunOffset[0] = 0.0;
+    cgArray[0].vGunOffset[1] = 0.0;
+    cgArray[0].vGunOffset[2] = 0.0;
+    cgArray[0].vGunSpeed[0] = 0.0;
+    cgArray[0].vGunSpeed[1] = 0.0;
+    cgArray[0].vGunSpeed[2] = 0.0;
+    memset((unsigned __int8*)cgArray[0].viewDamage, 0, sizeof(cgArray[0].viewDamage));
     CG_ClearCameraShakes(localClientNum);
-    MEMORY[0x9D86E8] = 0.0;
-    MEMORY[0x9D86EC] = 0.0;
-    MEMORY[0x9D86F0] = 0.0;
-    MEMORY[0x9E06EC] = 0;
+    cgArray[0].predictedError[0] = 0.0;
+    cgArray[0].predictedError[1] = 0.0;
+    cgArray[0].predictedError[2] = 0.0;
+    cgArray[0].adsViewErrorDone = 0;
     CL_SetStance(localClientNum, CL_STANCE_STAND);
     CL_SetADS(localClientNum, 0);
-    CG_SetEquippedOffHand(localClientNum, MEMORY[0x9D5654]);
+    CG_SetEquippedOffHand(localClientNum, cgArray[0].predictedPlayerState.offHandIndex);
     CG_ResetLowHealthOverlay(cgArray);
-    MEMORY[0x9D86FC] = 3.4028235e38;
+    cgArray[0].heightToCeiling = 3.4028235e38;
     CG_HoldBreathInit(cgArray);
 }
 

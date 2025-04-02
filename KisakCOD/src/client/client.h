@@ -308,7 +308,6 @@ void __cdecl ConDrawInput_TextAndOver(char *str, const float *color);
 int __cdecl ConDrawInput_TextWidth(const char *text);
 void __cdecl ConDrawInput_Box(int lines, const float *color);
 void __cdecl ConDraw_Box(float x, float y, float w, float h, const float *color);
-void __cdecl Vec4Scale(const float *v, float scale, float *result);
 void __cdecl ConDrawInput_IncrMatchCounter(char *str);
 void __cdecl ConDrawInput_DvarMatch(char *str);
 void __cdecl ConDrawInput_TextLimitChars(char *str, int maxChars, const float *color);

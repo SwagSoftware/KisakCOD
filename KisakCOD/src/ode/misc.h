@@ -26,7 +26,7 @@
 #define _ODE_MISC_H_
 
 #include <ode/common.h>
-
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,10 +55,10 @@ dReal dRandReal();
 
 /* print out a matrix */
 #ifdef __cplusplus
-void dPrintMatrix (const dReal *A, int n, int m, char *fmt = "%10.4f ",
+void dPrintMatrix (const dReal *A, int n, int m, const char *fmt = "%10.4f ",
 		   FILE *f=stdout);
 #else
-void dPrintMatrix (const dReal *A, int n, int m, char *fmt, FILE *f);
+void dPrintMatrix (const dReal *A, int n, int m, const char *fmt, FILE *f);
 #endif
 
 /* make a random vector with entries between +/- range. A has n elements. */

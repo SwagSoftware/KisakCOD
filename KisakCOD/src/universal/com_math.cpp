@@ -9,9 +9,11 @@
 //Line 51773:  0006 : 0000bc58       float (*)[3] bytedirs        827bbc58     com_math.obj
 //Line 53450 : 0006 : 0291d360       int marker_com_math      850cd360     com_math.obj
 
+static unsigned int holdrand;
+
 float bytedirs[162][3];
 
-double __cdecl AngleDelta(float a1, float a2)
+float __cdecl AngleDelta(float a1, float a2)
 {
     float v4; // [esp+Ch] [ebp-10h]
     float v5; // [esp+10h] [ebp-Ch]
@@ -22,7 +24,7 @@ double __cdecl AngleDelta(float a1, float a2)
     v7 = v6 * 0.002777777845039964;
     v5 = v7 + 0.5;
     v4 = floor(v5);
-    return (float)((v7 - v4) * 360.0);
+    return ((v7 - v4) * 360.0);
 }
 
 void __cdecl TRACK_com_math()
@@ -30,14 +32,14 @@ void __cdecl TRACK_com_math()
     track_static_alloc_internal(bytedirs, 1944, "bytedirs", 10);
 }
 
-double __cdecl random()
+float __cdecl random()
 {
-    return (float)((double)rand() / 32768.0);
+    return (rand() / 32768.0);
 }
 
-double __cdecl crandom()
+float __cdecl crandom()
 {
-    return (float)(random() * 2.0 - 1.0);
+    return (random() * 2.0 - 1.0);
 }
 
 void __cdecl GaussianRandom(float *f0, float *f1)
@@ -87,9 +89,9 @@ void __cdecl PointInCircleFromUniformDeviates(float radiusDeviate, float yawDevi
     point[1] = v3 * sinYaw;
 }
 
-double __cdecl LinearTrack(float tgt, float cur, float rate, float deltaTime)
+float __cdecl LinearTrack(float tgt, float cur, float rate, float deltaTime)
 {
-    double v4; // st7
+    float v4; // st7
     float v7; // [esp+4h] [ebp-18h]
     float v8; // [esp+8h] [ebp-14h]
     float v9; // [esp+Ch] [ebp-10h]
@@ -107,12 +109,12 @@ double __cdecl LinearTrack(float tgt, float cur, float rate, float deltaTime)
         return tgt;
     v8 = fabs(err);
     v7 = fabs(step);
-    if (v7 > (double)v8)
+    if (v7 > v8)
         return tgt;
-    return (float)(cur + step);
+    return (cur + step);
 }
 
-double __cdecl LinearTrackAngle(float tgt, float cur, float rate, float deltaTime)
+float __cdecl LinearTrackAngle(float tgt, float cur, float rate, float deltaTime)
 {
     float v6; // [esp+14h] [ebp-10h]
     float v7; // [esp+18h] [ebp-Ch]
@@ -127,10 +129,10 @@ double __cdecl LinearTrackAngle(float tgt, float cur, float rate, float deltaTim
     v8 = angle * 0.002777777845039964;
     v7 = v8 + 0.5;
     v6 = floor(v7);
-    return (float)((v8 - v6) * 360.0);
+    return ((v8 - v6) * 360.0);
 }
 
-double __cdecl DiffTrack(float tgt, float cur, float rate, float deltaTime)
+float __cdecl DiffTrack(float tgt, float cur, float rate, float deltaTime)
 {
     float v6; // [esp+4h] [ebp-18h]
     float v7; // [esp+8h] [ebp-14h]
@@ -145,12 +147,12 @@ double __cdecl DiffTrack(float tgt, float cur, float rate, float deltaTime)
         return tgt;
     v7 = fabs(err);
     v6 = fabs(step);
-    if (v6 > (double)v7)
+    if (v6 > v7)
         return tgt;
-    return (float)(cur + step);
+    return (cur + step);
 }
 
-double __cdecl DiffTrackAngle(float tgt, float cur, float rate, float deltaTime)
+float __cdecl DiffTrackAngle(float tgt, float cur, float rate, float deltaTime)
 {
     float v6; // [esp+14h] [ebp-10h]
     float v7; // [esp+18h] [ebp-Ch]
@@ -165,10 +167,10 @@ double __cdecl DiffTrackAngle(float tgt, float cur, float rate, float deltaTime)
     v8 = angle * 0.002777777845039964;
     v7 = v8 + 0.5;
     v6 = floor(v7);
-    return (float)((v8 - v6) * 360.0);
+    return ((v8 - v6) * 360.0);
 }
 
-double __cdecl GraphGetValueFromFraction(int knotCount, const float (*knots)[2], float fraction)
+float __cdecl GraphGetValueFromFraction(int knotCount, const float *knots, float fraction)
 {
     float result; // [esp+8h] [ebp-Ch]
     float adjustedFrac; // [esp+Ch] [ebp-8h]
@@ -187,20 +189,19 @@ double __cdecl GraphGetValueFromFraction(int knotCount, const float (*knots)[2],
             "%s\n\t(fraction) = %g",
             "(fraction >= 0.0f && fraction <= 1.0f)",
             fraction);
-    if ((*knots)[2 * knotCount - 2] != 1.0)
+    if (knots[2 * knotCount - 2] != 1.0)
         MyAssertHandler(
             ".\\universal\\com_math.cpp",
             463,
             0,
             "%s\n\t(knots[knotCount - 1][0]) = %g",
             "(knots[knotCount - 1][0] == 1.0f)",
-            (*knots)[2 * knotCount - 2]);
+            knots[2 * knotCount - 2]);
     for (knotIndex = 1; knotIndex < knotCount; ++knotIndex)
     {
-        if ((*knots)[2 * knotIndex] >= (double)fraction)
+        if (knots[2 * knotIndex] >= fraction)
         {
-            adjustedFrac = (fraction - (float)(*knots)[2 * knotIndex - 2])
-                / ((float)(*knots)[2 * knotIndex] - (float)(*knots)[2 * knotIndex - 2]);
+            adjustedFrac = (fraction - knots[2 * knotIndex - 2]) / (knots[2 * knotIndex] - knots[2 * knotIndex - 2]);
             if (adjustedFrac < 0.0 || adjustedFrac > 1.0)
                 MyAssertHandler(
                     ".\\universal\\com_math.cpp",
@@ -209,24 +210,23 @@ double __cdecl GraphGetValueFromFraction(int knotCount, const float (*knots)[2],
                     "%s\n\t(adjustedFrac) = %g",
                     "(adjustedFrac >= 0.0f && adjustedFrac <= 1.0f)",
                     adjustedFrac);
-            if ((*knots)[2 * knotIndex - 1] < 0.0 || (*knots)[2 * knotIndex - 1] > 1.0)
+            if (knots[2 * knotIndex - 1] < 0.0 || knots[2 * knotIndex - 1] > 1.0)
                 MyAssertHandler(
                     ".\\universal\\com_math.cpp",
                     472,
                     0,
                     "%s\n\t(knots[knotIndex - 1][1]) = %g",
                     "(knots[knotIndex - 1][1] >= 0.0f && knots[knotIndex - 1][1] <= 1.0f)",
-                    (*knots)[2 * knotIndex - 1]);
-            if ((*knots)[2 * knotIndex + 1] < 0.0 || (*knots)[2 * knotIndex + 1] > 1.0)
+                    knots[2 * knotIndex - 1]);
+            if (knots[2 * knotIndex + 1] < 0.0 || knots[2 * knotIndex + 1] > 1.0)
                 MyAssertHandler(
                     ".\\universal\\com_math.cpp",
                     473,
                     0,
                     "%s\n\t(knots[knotIndex][1]) = %g",
                     "(knots[knotIndex][1] >= 0.0f && knots[knotIndex][1] <= 1.0f)",
-                    (*knots)[2 * knotIndex + 1]);
-            result = ((float)(*knots)[2 * knotIndex + 1] - (float)(*knots)[2 * knotIndex - 1]) * adjustedFrac
-                + (float)(*knots)[2 * knotIndex - 1];
+                    knots[2 * knotIndex + 1]);
+            result = (knots[2 * knotIndex + 1] - knots[2 * knotIndex - 1]) * adjustedFrac + knots[2 * knotIndex - 1];
             break;
         }
     }
@@ -241,22 +241,22 @@ double __cdecl GraphGetValueFromFraction(int knotCount, const float (*knots)[2],
     return result;
 }
 
-double __cdecl Q_acos(float c)
+float __cdecl Q_acos(float c)
 {
     float v2; // [esp+0h] [ebp-8h]
 
     v2 = acos(c);
     if (v2 > 3.141592741012573)
-        return 3.1415927;
+        return 3.1415927f;
     if (v2 >= -3.141592741012573)
         return v2;
-    return 3.1415927;
+    return 3.1415927f;
 }
 
 char __cdecl ClampChar(int i)
 {
     if (i < -128)
-        return 0x80;
+        return CHAR_MIN;
     if (i <= 127)
         return i;
     return 127;
@@ -276,7 +276,7 @@ unsigned __int8 __cdecl DirToByte(const float *dir)
     for (i = 0; i < 0xA2u; ++i)
     {
         d = Vec3Dot(dir, bytedirs[i]);
-        if (bestd < (double)d)
+        if (bestd < d)
         {
             bestd = d;
             best = i;
@@ -318,23 +318,30 @@ int __cdecl VecNCompareCustomEpsilon(const float *v0, const float *v1, float eps
     return 1;
 }
 
-double __cdecl Vec2Distance(const float *v1, const float *v2)
+float __cdecl Vec2Length(const vec2r v)
 {
-    float dir[2]; // [esp+4h] [ebp-8h] BYREF
+    float v3; // [esp+4h] [ebp-4h]
 
-    dir[0] = *v2 - *v1;
+    v3 = v[1] * v[1] + *v * *v;
+    return sqrtf(v3);
+}
+
+float __cdecl Vec2Distance(const vec2r v1, const vec2r v2)
+{
+    vec2 dir; // [esp+4h] [ebp-8h] BYREF
+    dir[0] = v2[0] - v1[0];
     dir[1] = v2[1] - v1[1];
     return Vec2Length(dir);
 }
 
-double __cdecl Vec2DistanceSq(const float *p1, const float *p2)
+float __cdecl Vec2DistanceSq(const vec2r p1, const vec2r p2)
 {
     float v; // [esp+4h] [ebp-8h]
     float v_4; // [esp+8h] [ebp-4h]
 
-    v = *p2 - *p1;
+    v = p2[0] - p1[0];
     v_4 = p2[1] - p1[1];
-    return (float)(v * v + v_4 * v_4);
+    return (v * v + v_4 * v_4);
 }
 
 void __cdecl Vec3ProjectionCoords(const float *dir, int *xCoord, int *yCoord)
@@ -342,9 +349,9 @@ void __cdecl Vec3ProjectionCoords(const float *dir, int *xCoord, int *yCoord)
     float dirSq[3]; // [esp+0h] [ebp-Ch] BYREF
 
     Vec3Mul(dir, dir, dirSq);
-    if (dirSq[0] > (double)dirSq[2] || dirSq[1] > (double)dirSq[2])
+    if (dirSq[0] > dirSq[2] || dirSq[1] > dirSq[2])
     {
-        if (dirSq[0] > (double)dirSq[1] || dirSq[2] > (double)dirSq[1])
+        if (dirSq[0] > dirSq[1] || dirSq[2] > dirSq[1])
         {
             if (*dir <= 0.0)
             {
@@ -380,46 +387,49 @@ void __cdecl Vec3ProjectionCoords(const float *dir, int *xCoord, int *yCoord)
     }
 }
 
-double __cdecl Vec2Normalize(float *v)
+float __cdecl Vec2Normalize(vec2r v)
 {
     float v2; // [esp+0h] [ebp-14h]
     float v3; // [esp+4h] [ebp-10h]
     float ilength; // [esp+Ch] [ebp-8h]
     float length; // [esp+10h] [ebp-4h]
 
-    length = *v * *v + v[1] * v[1];
+    length = v[0] * v[0] + v[1] * v[1];
+    
     v3 = sqrt(length);
     if (-v3 < 0.0)
         v2 = v3;
     else
         v2 = 1.0;
+    
     ilength = 1.0 / v2;
-    *v = *v * ilength;
+    v[0] = v[0] * ilength;
     v[1] = v[1] * ilength;
     return v3;
 }
 
-double __cdecl Vec3NormalizeTo(const float *v, float *out)
+float __cdecl Vec3NormalizeTo(const vec3r v, vec3r out)
 {
     float v3; // [esp+0h] [ebp-14h]
     float v4; // [esp+4h] [ebp-10h]
     float ilength; // [esp+Ch] [ebp-8h]
     float length; // [esp+10h] [ebp-4h]
 
-    length = *v * *v + v[1] * v[1] + v[2] * v[2];
+    length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
     v4 = sqrt(length);
     if (-v4 < 0.0)
         v3 = v4;
     else
         v3 = 1.0;
     ilength = 1.0 / v3;
-    *out = *v * ilength;
+
+    out[0] = v[0] * ilength;
     out[1] = v[1] * ilength;
     out[2] = v[2] * ilength;
     return v4;
 }
 
-double __cdecl Vec2NormalizeTo(const float *v, float *out)
+float __cdecl Vec2NormalizeTo(const float *v, float *out)
 {
     float v3; // [esp+0h] [ebp-14h]
     float v4; // [esp+4h] [ebp-10h]
@@ -438,84 +448,88 @@ double __cdecl Vec2NormalizeTo(const float *v, float *out)
     return v4;
 }
 
-void __cdecl Vec3Rotate(const float *in, const float (*matrix)[3], float *out)
+void __cdecl Vec3Rotate(const vec3r in, const mat3x3& matrix, vec3r out)
 {
-    if (in == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 828, 0, "%s", "in != out");
-    *out = *in * (*matrix)[0] + in[1] * (float)(*matrix)[1] + in[2] * (float)(*matrix)[2];
-    out[1] = *in * (float)(*matrix)[3] + in[1] * (float)(*matrix)[4] + in[2] * (float)(*matrix)[5];
-    out[2] = *in * (float)(*matrix)[6] + in[1] * (float)(*matrix)[7] + in[2] * (float)(*matrix)[8];
+    iassert(in != out);
+
+    out[0] = in[0] * (matrix)[0][0] + in[1] * (matrix)[0][1] + in[2] * (matrix)[0][2];
+    out[1] = in[0] * (matrix)[1][0] + in[1] * (matrix)[1][1] + in[2] * (matrix)[1][2];
+    out[2] = in[0] * (matrix)[2][0] + in[1] * (matrix)[2][1] + in[2] * (matrix)[2][2];
 }
 
-void __cdecl Vec3RotateTranspose(const float *in, const float (*matrix)[3], float *out)
+void __cdecl Vec3RotateTranspose(const vec3r in, const mat3x3& matrix, vec3r out)
 {
-    if (in == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 837, 0, "%s", "in != out");
-    *out = *in * (*matrix)[0] + in[1] * (float)(*matrix)[3] + in[2] * (float)(*matrix)[6];
-    out[1] = *in * (float)(*matrix)[1] + in[1] * (float)(*matrix)[4] + in[2] * (float)(*matrix)[7];
-    out[2] = *in * (float)(*matrix)[2] + in[1] * (float)(*matrix)[5] + in[2] * (float)(*matrix)[8];
+    iassert(in != out);
+
+    out[0] = in[0] * (matrix)[0][0] + in[1] * (matrix)[1][0] + in[2] * (matrix)[2][0];
+    out[1] = in[0] * (matrix)[0][1] + in[1] * (matrix)[1][1] + in[2] * (matrix)[2][1];
+    out[2] = in[0] * (matrix)[0][2] + in[1] * (matrix)[1][2] + in[2] * (matrix)[2][2];
 }
 
-void __cdecl RotatePointAroundVector(float *dst, const float *dir, const float *point, float degrees)
+void __cdecl RotatePointAroundVector(float* dst, const float* dir, const float* point, float degrees)
 {
-    float m[3][3]; // [esp+1Ch] [ebp-E0h] BYREF
+    mat3x3 m; // [esp+1Ch] [ebp-E0h] BYREF
+    mat3x3 rot; // [esp+74h] [ebp-88h] BYREF
+
+    mat3x3 tmpmat; // [esp+B4h] [ebp-48h] BYREF
+    mat3x3 im; // [esp+D8h] [ebp-24h] BYREF
+
     float rad; // [esp+40h] [ebp-BCh]
-    _QWORD vr[3]; // [esp+44h] [ebp-B8h] BYREF
-    float zrot_12; // [esp+5Ch] [ebp-A0h]
-    float zrot_16; // [esp+60h] [ebp-9Ch]
-    int zrot_20; // [esp+64h] [ebp-98h]
-    __int64 zrot_24; // [esp+68h] [ebp-94h]
-    float zrot_32; // [esp+70h] [ebp-8Ch]
-    float rot[3][3]; // [esp+74h] [ebp-88h] BYREF
+    float vr[3]; // [esp+44h] [ebp-B8h] BYREF
+    
+    
     float vf[3]; // [esp+98h] [ebp-64h] BYREF
     float vup[3]; // [esp+A4h] [ebp-58h] BYREF
     int i; // [esp+B0h] [ebp-4Ch]
-    float tmpmat[3][3]; // [esp+B4h] [ebp-48h] BYREF
-    float im[3][3]; // [esp+D8h] [ebp-24h] BYREF
 
     if (*dir == 0.0 && dir[1] == 0.0 && dir[2] == 0.0)
         MyAssertHandler(".\\universal\\com_math.cpp", 862, 0, "%s", "dir[0] || dir[1] || dir[2]");
+    
     vf[0] = *dir;
     vf[1] = dir[1];
     vf[2] = dir[2];
-    PerpendicularVector(dir, (float *)vr);
-    Vec3Cross((const float *)vr, vf, vup);
-    m[0][0] = *(float *)vr;
-    m[1][0] = *((float *)vr + 1);
-    m[2][0] = *(float *)&vr[1];
+    
+    PerpendicularVector(dir, vr);
+    Vec3Cross(vr, vf, vup);
+    
+    m[0][0] = vr[0];
+    m[1][0] = vr[1];
+    m[2][0] = vr[2];
     m[0][1] = vup[0];
     m[1][1] = vup[1];
     m[2][1] = vup[2];
     m[0][2] = vf[0];
     m[1][2] = vf[1];
     m[2][2] = vf[2];
+
     memcpy(im, m, sizeof(im));
-    im[0][1] = *((float *)vr + 1);
-    im[0][2] = *(float *)&vr[1];
+    im[0][1] = vr[1];
+    im[0][2] = vr[2];
     im[1][0] = vup[0];
     im[1][2] = vup[2];
     im[2][0] = vf[0];
     im[2][1] = vf[1];
-    vr[2] = 0;
-    zrot_12 = 0.0;
-    zrot_20 = 0;
-    zrot_24 = 0;
-    zrot_32 = 1.0;
-    zrot_16 = 1.0;
-    *((float *)&vr[1] + 1) = 1.0;
+
+    mat3x3 zrot{};
+
+    zrot[2][2] = 1.0;
+    zrot[1][1] = 1.0;
+    zrot[0][0] = 1.0;
     rad = degrees * 0.01745329238474369;
-    if ((LOunsigned int(rad) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\universal\\com_math.cpp", 897, 0, "%s", "!IS_NAN(rad)");
-    *((float *)&vr[1] + 1) = cos(rad);
-    *(float *)&vr[2] = sin(rad);
-    if ((vr[2] & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\universal\\com_math.cpp", 901, 0, "%s", "!IS_NAN(zrot[0][1])");
-    if ((HIunsigned int(vr[1]) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\universal\\com_math.cpp", 902, 0, "%s", "!IS_NAN(zrot[0][0])");
-    zrot_12 = -*(float *)&vr[2];
-    zrot_16 = *((float *)&vr[1] + 1);
-    MatrixMultiply(m, (const float (*)[3])((char *)&vr[1] + 4), tmpmat);
+    iassert(!isnan(rad));
+
+    zrot[0][0] = cos(rad);
+    zrot[0][1] = sin(rad);
+
+    iassert(!isnan(zrot[0][1]));
+    iassert(!isnan(zrot[0][0]));
+
+    zrot[1][0] = -zrot[0][1];
+    zrot[1][1] = zrot[0][0];
+    
+    MatrixMultiply(m, zrot, tmpmat);
     MatrixMultiply(tmpmat, im, rot);
+
     for (i = 0; i < 3; ++i)
         dst[i] = rot[i][0] * *point + rot[i][1] * point[1] + rot[i][2] * point[2];
 }
@@ -526,7 +540,7 @@ void __cdecl Vec3Basis_RightHanded(const float *forward, float *left, float *up)
     Vec3Cross(up, forward, left);
 }
 
-double __cdecl vectoyaw(const float *vec)
+float __cdecl vectoyaw(const float *vec)
 {
     float v2; // [esp+0h] [ebp-14h]
     float v3; // [esp+4h] [ebp-10h]
@@ -534,7 +548,7 @@ double __cdecl vectoyaw(const float *vec)
 
     if (vec[1] == 0.0 && *vec == 0.0)
     {
-        return (float)0.0;
+        return 0.0;
     }
     else
     {
@@ -544,18 +558,18 @@ double __cdecl vectoyaw(const float *vec)
             v2 = 360.0;
         else
             v2 = 0.0;
-        return (float)(yawa + v2);
+        return (yawa + v2);
     }
 }
 
-double __cdecl vectosignedyaw(const float *vec)
+float __cdecl vectosignedyaw(const float *vec)
 {
     float v2; // [esp+0h] [ebp-10h]
     float yaw; // [esp+Ch] [ebp-4h]
 
     if (vec[1] == 0.0 && *vec == 0.0)
     {
-        return (float)0.0;
+        return 0.0;
     }
     else
     {
@@ -569,7 +583,7 @@ double __cdecl vectosignedyaw(const float *vec)
     return yaw;
 }
 
-double __cdecl vectopitch(const float *vec)
+float __cdecl vectopitch(const float *vec)
 {
     float v2; // [esp+0h] [ebp-20h]
     float v3; // [esp+4h] [ebp-1Ch]
@@ -580,9 +594,9 @@ double __cdecl vectopitch(const float *vec)
     if (vec[1] == 0.0 && *vec == 0.0)
     {
         if (-vec[2] < 0.0)
-            return (float)270.0;
+            return 270.0;
         else
-            return (float)90.0;
+            return 90.0;
     }
     else
     {
@@ -594,11 +608,11 @@ double __cdecl vectopitch(const float *vec)
             v2 = 360.0;
         else
             v2 = 0.0;
-        return (float)(pitcha + v2);
+        return (pitcha + v2);
     }
 }
 
-double __cdecl vectosignedpitch(const float *vec)
+float __cdecl vectosignedpitch(const float *vec)
 {
     float v2; // [esp+0h] [ebp-1Ch]
     float v3; // [esp+4h] [ebp-18h]
@@ -607,16 +621,16 @@ double __cdecl vectosignedpitch(const float *vec)
     if (vec[1] == 0.0 && *vec == 0.0)
     {
         if (-vec[2] < 0.0)
-            return (float)-90.0;
+            return -90.0;
         else
-            return (float)90.0;
+            return 90.0;
     }
     else
     {
         v5 = vec[1] * vec[1] + *vec * *vec;
         v3 = sqrt(v5);
         v2 = atan2(vec[2], v3);
-        return (float)(v2 * -180.0 / 3.141592741012573);
+        return (v2 * -180.0 / 3.141592741012573);
     }
 }
 
@@ -719,10 +733,10 @@ void __cdecl YawVectors2D(float yaw, float *forward, float *right)
     }
 }
 
-void __cdecl PerpendicularVector(const float *src, float *dst)
+void __cdecl PerpendicularVector(const float* src, float* dst)
 {
-    const char *v2; // eax
-    double scale; // [esp+18h] [ebp-34h]
+    const char* v2; // eax
+    float scale; // [esp+18h] [ebp-34h]
     int pos; // [esp+38h] [ebp-14h]
     float d; // [esp+3Ch] [ebp-10h]
     float srcSq[3]; // [esp+40h] [ebp-Ch]
@@ -736,8 +750,8 @@ void __cdecl PerpendicularVector(const float *src, float *dst)
     srcSq[0] = *src * *src;
     srcSq[1] = src[1] * src[1];
     srcSq[2] = src[2] * src[2];
-    pos = srcSq[0] > (double)srcSq[1];
-    if (srcSq[pos] > (double)srcSq[2])
+    pos = srcSq[0] > srcSq[1];
+    if (srcSq[pos] > srcSq[2])
         pos = 2;
     d = -src[pos];
     Vec3Scale(src, d, dst);
@@ -745,7 +759,7 @@ void __cdecl PerpendicularVector(const float *src, float *dst)
     Vec3Normalize(dst);
 }
 
-double __cdecl PointToBoxDistSq(const float *pt, const float *mins, const float *maxs)
+float __cdecl PointToBoxDistSq(const float *pt, const float *mins, const float *maxs)
 {
     float delta; // [esp+0h] [ebp-Ch]
     float deltaa; // [esp+0h] [ebp-Ch]
@@ -799,10 +813,10 @@ void __cdecl ClosestApproachOfTwoLines(
     dir1Diff = Vec3Dot(dir1, diff);
     diffDiff = Vec3Dot(diff, diff);
     det = dir1LenSq * dir2LenSq - dir1dir2 * dir1dir2;
-    EPSILON = 0.000099999997;
+    EPSILON = 0.000099999997f;
     v8 = dir1dir2 * dir1LenSq;
     v7 = fabs(v8);
-    v6 = (float)0.000099999997 * v7;
+    v6 = 0.000099999997 * v7;
     if (v6 >= det * det)
     {
         if (dir1LenSq <= 0.000009999999747378752)
@@ -819,242 +833,279 @@ void __cdecl ClosestApproachOfTwoLines(
     }
 }
 
-void __cdecl MatrixIdentity33(float (*out)[3])
+mat3x3 identityMatrix33 = {
+    {1, 0, 0},
+    {0, 1, 0},
+    {0, 0, 1}
+};
+
+mat4x4 identityMatrix44 = {
+    {1, 0, 0, 0},
+    {0, 1, 0, 0},
+    {0, 0, 1, 0},
+    {0, 0, 0, 1}
+};
+
+void __cdecl MatrixIdentity33(mat3x3& out)
 {
-    if (!out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1419, 0, "%s", "out");
-    (*out)[0] = 0.0;
-    (*out)[1] = 0.0;
-    (*out)[2] = 0.0;
-    (*out)[3] = 0.0;
-    (*out)[4] = 0.0;
-    (*out)[5] = 0.0;
-    (*out)[6] = 0.0;
-    (*out)[7] = 0.0;
-    (*out)[8] = 0.0;
-    (*out)[0] = 1.0;
-    (*out)[4] = 1.0;
-    (*out)[8] = 1.0;
+    iassert(out);
+
+    // out = identityMatrix33;
+    memcpy(&out, &identityMatrix33, sizeof(out));
 }
 
-void __cdecl MatrixIdentity44(float (*out)[4])
+void __cdecl MatrixIdentity44(mat4x4& out)
 {
-    if (!out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1429, 0, "%s", "out");
-    memcpy(out, identityMatrix44, 0x40u);
+    iassert(out);
+    memcpy(&out, &identityMatrix44, sizeof(out));
 }
 
-void __cdecl MatrixSet44(float (*out)[4], const float *origin, const float (*axis)[3], float scale)
+void __cdecl MatrixSet44(mat4x4 &out, const vec3 &origin, const mat3x3 &axis, float scale)
 {
-    (*out)[0] = (*axis)[0] * scale;
-    (*out)[1] = (float)(*axis)[1] * scale;
-    (*out)[2] = (float)(*axis)[2] * scale;
-    (*out)[3] = 0.0;
-    (*out)[4] = (float)(*axis)[3] * scale;
-    (*out)[5] = (float)(*axis)[4] * scale;
-    (*out)[6] = (float)(*axis)[5] * scale;
-    (*out)[7] = 0.0;
-    (*out)[8] = (float)(*axis)[6] * scale;
-    (*out)[9] = (float)(*axis)[7] * scale;
-    (*out)[10] = (float)(*axis)[8] * scale;
-    (*out)[11] = 0.0;
-    (*out)[12] = *origin;
-    (*out)[13] = origin[1];
-    (*out)[14] = origin[2];
-    (*out)[15] = 1.0;
+    (out)[0][0] = (axis)[0][0] * scale;
+    (out)[0][1] = (axis)[0][1] * scale;
+    (out)[0][2] = (axis)[0][2] * scale;
+    (out)[0][3] = 0.0;
+
+    (out)[1][0] = (axis)[1][0] * scale;
+    (out)[1][1] = (axis)[1][1] * scale;
+    (out)[1][2] = (axis)[1][2] * scale;
+    (out)[1][3] = 0.0;
+
+    (out)[2][0] = (axis)[2][0] * scale;
+    (out)[2][1] = (axis)[2][1] * scale;
+    (out)[2][2] = (axis)[2][2] * scale;
+    out[2][3] = 0.0;
+
+    out[3][0] = origin[0];
+    out[3][1] = origin[1];
+    out[3][2] = origin[2];
+    out[3][3] = 1.0;
 }
 
-void __cdecl MatrixMultiply(const float (*in1)[3], const float (*in2)[3], float (*out)[3])
+void __cdecl MatrixMultiply(const mat3x3 &in1, const mat3x3 &in2, mat3x3 &out)
 {
-    (*out)[0] = (*in1)[0] * (*in2)[0] + (float)(*in1)[1] * (float)(*in2)[3] + (float)(*in1)[2] * (float)(*in2)[6];
-    (*out)[1] = (*in1)[0] * (float)(*in2)[1] + (float)(*in1)[1] * (float)(*in2)[4] + (float)(*in1)[2] * (float)(*in2)[7];
-    (*out)[2] = (*in1)[0] * (float)(*in2)[2] + (float)(*in1)[1] * (float)(*in2)[5] + (float)(*in1)[2] * (float)(*in2)[8];
-    (*out)[3] = (float)(*in1)[3] * (*in2)[0] + (float)(*in1)[4] * (float)(*in2)[3] + (float)(*in1)[5] * (float)(*in2)[6];
-    (*out)[4] = (float)(*in1)[3] * (float)(*in2)[1]
-        + (float)(*in1)[4] * (float)(*in2)[4]
-        + (float)(*in1)[5] * (float)(*in2)[7];
-    (*out)[5] = (float)(*in1)[3] * (float)(*in2)[2]
-        + (float)(*in1)[4] * (float)(*in2)[5]
-        + (float)(*in1)[5] * (float)(*in2)[8];
-    (*out)[6] = (float)(*in1)[6] * (*in2)[0] + (float)(*in1)[7] * (float)(*in2)[3] + (float)(*in1)[8] * (float)(*in2)[6];
-    (*out)[7] = (float)(*in1)[6] * (float)(*in2)[1]
-        + (float)(*in1)[7] * (float)(*in2)[4]
-        + (float)(*in1)[8] * (float)(*in2)[7];
-    (*out)[8] = (float)(*in1)[6] * (float)(*in2)[2]
-        + (float)(*in1)[7] * (float)(*in2)[5]
-        + (float)(*in1)[8] * (float)(*in2)[8];
+    iassert(in1 != out);
+    iassert(in2 != out);
+
+    out[0][0] = (in1)[0][0] * (in2)[0][0]
+        + (in1)[0][1] * (in2)[1][0]
+        + (in1)[0][2] * (in2)[2][0];
+    (out)[0][1] = (in1)[0][0] * (in2)[0][1]
+        + (in1)[0][1] * (in2)[1][1]
+        + (in1)[0][2] * (in2)[2][1];
+    (out)[0][2] = (in1)[0][0] * (in2)[0][2]
+        + (in1)[0][1] * (in2)[1][2]
+        + (in1)[0][2] * (in2)[2][2];
+    (out)[1][0] = (in1)[1][0] * (in2)[0][0]
+        + (in1)[1][1] * (in2)[1][0]
+        + (in1)[1][2] * (in2)[2][0];
+    (out)[1][1] = (in1)[1][0] * (in2)[0][1]
+        + (in1)[1][1] * (in2)[1][1]
+        + (in1)[1][2] * (in2)[2][1];
+    (out)[1][2] = (in1)[1][0] * (in2)[0][2]
+        + (in1)[1][1] * (in2)[1][2]
+        + (in1)[1][2] * (in2)[2][2];
+    (out)[2][0] = (in1)[2][0] * (in2)[0][0]
+        + (in1)[2][1] * (in2)[1][0]
+        + (in1)[2][2] * (in2)[2][0];
+    (out)[2][1] = (in1)[2][0] * (in2)[0][1]
+        + (in1)[2][1] * (in2)[1][1]
+        + (in1)[2][2] * (in2)[2][1];
+    (out)[2][2] = (in1)[2][0] * (in2)[0][2]
+        + (in1)[2][1] * (in2)[1][2]
+        + (in1)[2][2] * (in2)[2][2];
 }
 
-void __cdecl MatrixMultiply43(const float (*in1)[3], const float (*in2)[3], float (*out)[3])
+// NOTE: this is not literally a 4x3 matrix multiplication since that does not work
+void __cdecl MatrixMultiply43(const mat4x3 &in1, const mat4x3 &in2, mat4x3 &out)
 {
-    if (in1 == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1545, 0, "%s", "in1 != out");
-    if (in2 == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1546, 0, "%s", "in2 != out");
-    (*out)[0] = (*in1)[0] * (*in2)[0] + (float)(*in1)[1] * (float)(*in2)[3] + (float)(*in1)[2] * (float)(*in2)[6];
-    (*out)[3] = (float)(*in1)[3] * (*in2)[0] + (float)(*in1)[4] * (float)(*in2)[3] + (float)(*in1)[5] * (float)(*in2)[6];
-    (*out)[6] = (float)(*in1)[6] * (*in2)[0] + (float)(*in1)[7] * (float)(*in2)[3] + (float)(*in1)[8] * (float)(*in2)[6];
-    (*out)[1] = (*in1)[0] * (float)(*in2)[1] + (float)(*in1)[1] * (float)(*in2)[4] + (float)(*in1)[2] * (float)(*in2)[7];
-    (*out)[4] = (float)(*in1)[3] * (float)(*in2)[1]
-        + (float)(*in1)[4] * (float)(*in2)[4]
-        + (float)(*in1)[5] * (float)(*in2)[7];
-    (*out)[7] = (float)(*in1)[6] * (float)(*in2)[1]
-        + (float)(*in1)[7] * (float)(*in2)[4]
-        + (float)(*in1)[8] * (float)(*in2)[7];
-    (*out)[2] = (*in1)[0] * (float)(*in2)[2] + (float)(*in1)[1] * (float)(*in2)[5] + (float)(*in1)[2] * (float)(*in2)[8];
-    (*out)[5] = (float)(*in1)[3] * (float)(*in2)[2]
-        + (float)(*in1)[4] * (float)(*in2)[5]
-        + (float)(*in1)[5] * (float)(*in2)[8];
-    (*out)[8] = (float)(*in1)[6] * (float)(*in2)[2]
-        + (float)(*in1)[7] * (float)(*in2)[5]
-        + (float)(*in1)[8] * (float)(*in2)[8];
-    (*out)[9] = (float)(*in1)[9] * (*in2)[0]
-        + (float)(*in1)[10] * (float)(*in2)[3]
-        + (float)(*in1)[11] * (float)(*in2)[6]
-        + (float)(*in2)[9];
-    (*out)[10] = (float)(*in1)[9] * (float)(*in2)[1]
-        + (float)(*in1)[10] * (float)(*in2)[4]
-        + (float)(*in1)[11] * (float)(*in2)[7]
-        + (float)(*in2)[10];
-    (*out)[11] = (float)(*in1)[9] * (float)(*in2)[2]
-        + (float)(*in1)[10] * (float)(*in2)[5]
-        + (float)(*in1)[11] * (float)(*in2)[8]
-        + (float)(*in2)[11];
+    iassert(in1 != out);
+    iassert(in2 != out);
+
+    (out)[0][0] = (in1)[0][0] * (in2)[0][0]
+        + (float)(in1)[0][1] * (float)(in2)[1][0]
+        + (float)(in1)[0][2] * (float)(in2)[2][0];
+    (out)[1][0] = (float)(in1)[1][0] * (in2)[0][0]
+        + (float)(in1)[1][1] * (float)(in2)[1][0]
+        + (float)(in1)[1][2] * (float)(in2)[2][0];
+    (out)[2][0] = (float)(in1)[2][0] * (in2)[0][0]
+        + (float)(in1)[2][1] * (float)(in2)[1][0]
+        + (float)(in1)[2][2] * (float)(in2)[2][0];
+    (out)[0][1] = (in1)[0][0] * (float)(in2)[0][1]
+        + (float)(in1)[0][1] * (float)(in2)[1][1]
+        + (float)(in1)[0][2] * (float)(in2)[2][1];
+    (out)[1][1] = (float)(in1)[1][0] * (float)(in2)[0][1]
+        + (float)(in1)[1][1] * (float)(in2)[1][1]
+        + (float)(in1)[1][2] * (float)(in2)[2][1];
+    (out)[2][1] = (float)(in1)[2][0] * (float)(in2)[0][1]
+        + (float)(in1)[2][1] * (float)(in2)[1][1]
+        + (float)(in1)[2][2] * (float)(in2)[2][1];
+    (out)[0][2] = (in1)[0][0] * (float)(in2)[0][2]
+        + (float)(in1)[0][1] * (float)(in2)[1][2]
+        + (float)(in1)[0][2] * (float)(in2)[2][2];
+    (out)[1][2] = (float)(in1)[1][0] * (float)(in2)[0][2]
+        + (float)(in1)[1][1] * (float)(in2)[1][2]
+        + (float)(in1)[1][2] * (float)(in2)[2][2];
+    (out)[2][2] = (float)(in1)[2][0] * (float)(in2)[0][2]
+        + (float)(in1)[2][1] * (float)(in2)[1][2]
+        + (float)(in1)[2][2] * (float)(in2)[2][2];
+    (out)[3][0] = (float)(in1)[3][0] * (in2)[0][0]
+        + (float)(in1)[3][1] * (float)(in2)[1][0]
+        + (float)(in1)[3][2] * (float)(in2)[2][0]
+        + (float)(in2)[3][0];
+    (out)[3][1] = (float)(in1)[3][0] * (float)(in2)[0][1]
+        + (float)(in1)[3][1] * (float)(in2)[1][1]
+        + (float)(in1)[3][2] * (float)(in2)[2][1]
+        + (float)(in2)[3][1];
+    (out)[3][2] = (float)(in1)[3][0] * (float)(in2)[0][2]
+        + (float)(in1)[3][1] * (float)(in2)[1][2]
+        + (float)(in1)[3][2] * (float)(in2)[2][2]
+        + (float)(in2)[3][2];
 }
 
-void __cdecl MatrixMultiply44(const float (*in1)[4], const float (*in2)[4], float (*out)[4])
+void __cdecl MatrixMultiply44(const mat4x4 &in1, const mat4x4 &in2, mat4x4 &out)
 {
-    if (in1 == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1573, 0, "%s", "in1 != out");
-    if (in2 == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1574, 0, "%s", "in2 != out");
-    (*out)[0] = (*in1)[0] * (*in2)[0]
-        + (float)(*in1)[1] * (float)(*in2)[4]
-        + (float)(*in1)[2] * (float)(*in2)[8]
-        + (float)(*in1)[3] * (float)(*in2)[12];
-    (*out)[1] = (*in1)[0] * (float)(*in2)[1]
-        + (float)(*in1)[1] * (float)(*in2)[5]
-        + (float)(*in1)[2] * (float)(*in2)[9]
-        + (float)(*in1)[3] * (float)(*in2)[13];
-    (*out)[2] = (*in1)[0] * (float)(*in2)[2]
-        + (float)(*in1)[1] * (float)(*in2)[6]
-        + (float)(*in1)[2] * (float)(*in2)[10]
-        + (float)(*in1)[3] * (float)(*in2)[14];
-    (*out)[3] = (*in1)[0] * (float)(*in2)[3]
-        + (float)(*in1)[1] * (float)(*in2)[7]
-        + (float)(*in1)[2] * (float)(*in2)[11]
-        + (float)(*in1)[3] * (float)(*in2)[15];
-    (*out)[4] = (float)(*in1)[4] * (*in2)[0]
-        + (float)(*in1)[5] * (float)(*in2)[4]
-        + (float)(*in1)[6] * (float)(*in2)[8]
-        + (float)(*in1)[7] * (float)(*in2)[12];
-    (*out)[5] = (float)(*in1)[4] * (float)(*in2)[1]
-        + (float)(*in1)[5] * (float)(*in2)[5]
-        + (float)(*in1)[6] * (float)(*in2)[9]
-        + (float)(*in1)[7] * (float)(*in2)[13];
-    (*out)[6] = (float)(*in1)[4] * (float)(*in2)[2]
-        + (float)(*in1)[5] * (float)(*in2)[6]
-        + (float)(*in1)[6] * (float)(*in2)[10]
-        + (float)(*in1)[7] * (float)(*in2)[14];
-    (*out)[7] = (float)(*in1)[4] * (float)(*in2)[3]
-        + (float)(*in1)[5] * (float)(*in2)[7]
-        + (float)(*in1)[6] * (float)(*in2)[11]
-        + (float)(*in1)[7] * (float)(*in2)[15];
-    (*out)[8] = (float)(*in1)[8] * (*in2)[0]
-        + (float)(*in1)[9] * (float)(*in2)[4]
-        + (float)(*in1)[10] * (float)(*in2)[8]
-        + (float)(*in1)[11] * (float)(*in2)[12];
-    (*out)[9] = (float)(*in1)[8] * (float)(*in2)[1]
-        + (float)(*in1)[9] * (float)(*in2)[5]
-        + (float)(*in1)[10] * (float)(*in2)[9]
-        + (float)(*in1)[11] * (float)(*in2)[13];
-    (*out)[10] = (float)(*in1)[8] * (float)(*in2)[2]
-        + (float)(*in1)[9] * (float)(*in2)[6]
-        + (float)(*in1)[10] * (float)(*in2)[10]
-        + (float)(*in1)[11] * (float)(*in2)[14];
-    (*out)[11] = (float)(*in1)[8] * (float)(*in2)[3]
-        + (float)(*in1)[9] * (float)(*in2)[7]
-        + (float)(*in1)[10] * (float)(*in2)[11]
-        + (float)(*in1)[11] * (float)(*in2)[15];
-    (*out)[12] = (float)(*in1)[12] * (*in2)[0]
-        + (float)(*in1)[13] * (float)(*in2)[4]
-        + (float)(*in1)[14] * (float)(*in2)[8]
-        + (float)(*in1)[15] * (float)(*in2)[12];
-    (*out)[13] = (float)(*in1)[12] * (float)(*in2)[1]
-        + (float)(*in1)[13] * (float)(*in2)[5]
-        + (float)(*in1)[14] * (float)(*in2)[9]
-        + (float)(*in1)[15] * (float)(*in2)[13];
-    (*out)[14] = (float)(*in1)[12] * (float)(*in2)[2]
-        + (float)(*in1)[13] * (float)(*in2)[6]
-        + (float)(*in1)[14] * (float)(*in2)[10]
-        + (float)(*in1)[15] * (float)(*in2)[14];
-    (*out)[15] = (float)(*in1)[12] * (float)(*in2)[3]
-        + (float)(*in1)[13] * (float)(*in2)[7]
-        + (float)(*in1)[14] * (float)(*in2)[11]
-        + (float)(*in1)[15] * (float)(*in2)[15];
+    iassert(in1 != out);
+    iassert(in2 != out);
+
+    (out)[0][0] = (in1)[0][0] * (in2)[0][0]
+        + (in1)[0][1] * (in2)[1][0]
+        + (in1)[0][2] * (in2)[2][0]
+        + (in1)[0][3] * (in2)[3][0];
+    (out)[0][1] = (in1)[0][0] * (in2)[0][1]
+        + (in1)[0][1] * (in2)[1][1]
+        + (in1)[0][2] * (in2)[2][1]
+        + (in1)[0][3] * (in2)[3][1];
+    (out)[0][2] = (in1)[0][0] * (in2)[0][2]
+        + (in1)[0][1] * (in2)[1][2]
+        + (in1)[0][2] * (in2)[2][2]
+        + (in1)[0][3] * (in2)[3][2];
+    (out)[0][3] = (in1)[0][0] * (in2)[0][3]
+        + (in1)[0][1] * (in2)[1][3]
+        + (in1)[0][2] * (in2)[2][3]
+        + (in1)[0][3] * (in2)[3][3];
+    (out)[1][0] = (in1)[1][0] * (in2)[0][0]
+        + (in1)[1][1] * (in2)[1][0]
+        + (in1)[1][2] * (in2)[2][0]
+        + (in1)[1][3] * (in2)[3][0];
+    (out)[1][1] = (in1)[1][0] * (in2)[0][1]
+        + (in1)[1][1] * (in2)[1][1]
+        + (in1)[1][2] * (in2)[2][1]
+        + (in1)[1][3] * (in2)[3][1];
+    (out)[1][2] = (in1)[1][0] * (in2)[0][2]
+        + (in1)[1][1] * (in2)[1][2]
+        + (in1)[1][2] * (in2)[2][2]
+        + (in1)[1][3] * (in2)[3][2];
+    (out)[1][3] = (in1)[1][0] * (in2)[0][3]
+        + (in1)[1][1] * (in2)[1][3]
+        + (in1)[1][2] * (in2)[2][3]
+        + (in1)[1][3] * (in2)[3][3];
+    (out)[2][0] = (in1)[2][0] * (in2)[0][0]
+        + (in1)[2][1] * (in2)[1][0]
+        + (in1)[2][2] * (in2)[2][0]
+        + (in1)[2][3] * (in2)[3][0];
+    (out)[2][1] = (in1)[2][0] * (in2)[0][1]
+        + (in1)[2][1] * (in2)[1][1]
+        + (in1)[2][2] * (in2)[2][1]
+        + (in1)[2][3] * (in2)[3][1];
+    (out)[2][2] = (in1)[2][0] * (in2)[0][2]
+        + (in1)[2][1] * (in2)[1][2]
+        + (in1)[2][2] * (in2)[2][2]
+        + (in1)[2][3] * (in2)[3][2];
+    (out)[2][3] = (in1)[2][0] * (in2)[0][3]
+        + (in1)[2][1] * (in2)[1][3]
+        + (in1)[2][2] * (in2)[2][3]
+        + (in1)[2][3] * (in2)[3][3];
+    (out)[3][0] = (in1)[3][0] * (in2)[0][0]
+        + (in1)[3][1] * (in2)[1][0]
+        + (in1)[3][2] * (in2)[2][0]
+        + (in1)[3][3] * (in2)[3][0];
+    (out)[3][1] = (in1)[3][0] * (in2)[0][1]
+        + (in1)[3][1] * (in2)[1][1]
+        + (in1)[3][2] * (in2)[2][1]
+        + (in1)[3][3] * (in2)[3][1];
+    (out)[3][2] = (in1)[3][0] * (in2)[0][2]
+        + (in1)[3][1] * (in2)[1][2]
+        + (in1)[3][2] * (in2)[2][2]
+        + (in1)[3][3] * (in2)[3][2];
+    (out)[3][3] = (in1)[3][0] * (in2)[0][3]
+        + (in1)[3][1] * (in2)[1][3]
+        + (in1)[3][2] * (in2)[2][3]
+        + (in1)[3][3] * (in2)[3][3];
 }
 
-void __cdecl MatrixTranspose(const float (*in)[3], float (*out)[3])
+void __cdecl MatrixTranspose(const mat3x3& in, mat3x3& out)
 {
-    if (in == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1605, 0, "%s", "in != out");
-    (*out)[0] = (*in)[0];
-    (*out)[1] = (*in)[3];
-    (*out)[2] = (*in)[6];
-    (*out)[3] = (*in)[1];
-    (*out)[4] = (*in)[4];
-    (*out)[5] = (*in)[7];
-    (*out)[6] = (*in)[2];
-    (*out)[7] = (*in)[5];
-    (*out)[8] = (*in)[8];
+    iassert(in != out);
+
+    (out)[0][0] = (in)[0][0];
+    (out)[0][1] = (in)[1][0];
+    (out)[0][2] = (in)[2][0];
+    (out)[1][0] = (in)[0][1];
+    (out)[1][1] = (in)[1][1];
+    (out)[1][2] = (in)[2][1];
+    (out)[2][0] = (in)[0][2];
+    (out)[2][1] = (in)[1][2];
+    (out)[2][2] = (in)[2][2];
 }
 
-void __cdecl MatrixTranspose44(const float *in, float *out)
+void __cdecl MatrixTranspose44(const mat4x4 in, mat4x4 out)
 {
-    if (in == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1621, 0, "%s", "in != out");
-    *out = *in;
-    out[1] = in[4];
-    out[2] = in[8];
-    out[3] = in[12];
-    out[4] = in[1];
-    out[5] = in[5];
-    out[6] = in[9];
-    out[7] = in[13];
-    out[8] = in[2];
-    out[9] = in[6];
-    out[10] = in[10];
-    out[11] = in[14];
-    out[12] = in[3];
-    out[13] = in[7];
-    out[14] = in[11];
-    out[15] = in[15];
+    iassert(in != out);
+
+    (out)[0][0] = (in)[0][0];
+    (out)[0][1] = (in)[1][0];
+    (out)[0][2] = (in)[2][0];
+    (out)[0][3] = (in)[3][0];
+    (out)[1][0] = (in)[0][1];
+    (out)[1][1] = (in)[1][1];
+    (out)[1][2] = (in)[2][1];
+    (out)[1][3] = (in)[3][1];
+    (out)[2][0] = (in)[0][2];
+    (out)[2][1] = (in)[1][2];
+    (out)[2][2] = (in)[2][2];
+    (out)[2][3] = (in)[3][2];
+    (out)[3][0] = (in)[0][3];
+    (out)[3][1] = (in)[1][3];
+    (out)[3][2] = (in)[2][3];
+    (out)[3][3] = (in)[3][3];
 }
 
-void __cdecl MatrixInverseOrthogonal43(const float (*in)[3], float (*out)[3])
+void __cdecl MatrixTransformVector(const vec3r in1, const mat3x3& in2, vec3r out)
 {
-    float origin[3]; // [esp+0h] [ebp-Ch] BYREF
+    iassert(in1 != out);
 
-    MatrixTranspose(in, out);
-    Vec3Sub(vec3_origin, &(*in)[9], origin);
-    MatrixTransformVector(origin, out, &(*out)[9]);
+    (out)[0] = (in1)[0] * (in2)[0][0] + (in1)[1] * (in2)[1][0] + (in1)[2] * (in2)[2][0];
+    (out)[1] = (in1)[0] * (in2)[0][1] + (in1)[1] * (in2)[1][1] + (in1)[2] * (in2)[2][1];
+    (out)[2] = (in1)[0] * (in2)[0][2] + (in1)[1] * (in2)[1][2] + (in1)[2] * (in2)[2][2];
 }
 
-void __cdecl MatrixInverse44(const float *mat, float *dst)
+void __cdecl MatrixInverseOrthogonal43(const mat4x3& in, mat4x3& out)
+{
+    vec3 negated; // [esp+0h] [ebp-Ch] BYREF
+
+    MatrixTranspose((const mat3x3 &)in, (mat3x3 &)out);
+    Vec3Sub(vec3_origin, (in)[3], negated);
+    MatrixTransformVector(negated, (const mat3x3 &) out, out[3]);
+}
+
+void __cdecl MatrixInverse44(const mat4x4 &mat, mat4x4& dst)
 {
     float src[16]; // [esp+0h] [ebp-78h]
-    float det; // [esp+40h] [ebp-38h]
     float tmp[12]; // [esp+44h] [ebp-34h]
+
+    float det; // [esp+40h] [ebp-38h]
     int i; // [esp+74h] [ebp-4h]
 
-    if (mat == dst)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1702, 0, "%s", "mat != dst");
+    iassert(mat != dst);
+
     for (i = 0; i < 4; ++i)
     {
-        src[i] = mat[4 * i];
-        src[i + 4] = mat[4 * i + 1];
-        src[i + 8] = mat[4 * i + 2];
-        src[i + 12] = mat[4 * i + 3];
+        src[i] = (mat)[i][0];
+        src[i + 4] = (mat)[i][1];
+        src[i + 8] = (mat)[i][2];
+        src[i + 12] = (mat)[i][3];
     }
     tmp[0] = src[10] * src[15];
     tmp[1] = src[11] * src[14];
@@ -1068,22 +1119,22 @@ void __cdecl MatrixInverse44(const float *mat, float *dst)
     tmp[9] = src[10] * src[12];
     tmp[10] = src[8] * src[13];
     tmp[11] = src[9] * src[12];
-    *dst = tmp[0] * src[5] + tmp[3] * src[6] + tmp[4] * src[7];
-    *dst = *dst - (tmp[1] * src[5] + tmp[2] * src[6] + tmp[5] * src[7]);
-    dst[1] = tmp[1] * src[4] + tmp[6] * src[6] + tmp[9] * src[7];
-    dst[1] = dst[1] - (tmp[0] * src[4] + tmp[7] * src[6] + tmp[8] * src[7]);
-    dst[2] = tmp[2] * src[4] + tmp[7] * src[5] + tmp[10] * src[7];
-    dst[2] = dst[2] - (tmp[3] * src[4] + tmp[6] * src[5] + tmp[11] * src[7]);
-    dst[3] = tmp[5] * src[4] + tmp[8] * src[5] + tmp[11] * src[6];
-    dst[3] = dst[3] - (tmp[4] * src[4] + tmp[9] * src[5] + tmp[10] * src[6]);
-    dst[4] = tmp[1] * src[1] + tmp[2] * src[2] + tmp[5] * src[3];
-    dst[4] = dst[4] - (tmp[0] * src[1] + tmp[3] * src[2] + tmp[4] * src[3]);
-    dst[5] = tmp[0] * src[0] + tmp[7] * src[2] + tmp[8] * src[3];
-    dst[5] = dst[5] - (tmp[1] * src[0] + tmp[6] * src[2] + tmp[9] * src[3]);
-    dst[6] = tmp[3] * src[0] + tmp[6] * src[1] + tmp[11] * src[3];
-    dst[6] = dst[6] - (tmp[2] * src[0] + tmp[7] * src[1] + tmp[10] * src[3]);
-    dst[7] = tmp[4] * src[0] + tmp[9] * src[1] + tmp[10] * src[2];
-    dst[7] = dst[7] - (tmp[5] * src[0] + tmp[8] * src[1] + tmp[11] * src[2]);
+    (dst)[0][0] = tmp[0] * src[5] + tmp[3] * src[6] + tmp[4] * src[7];
+    (dst)[0][0] = (dst)[0][0] - (tmp[1] * src[5] + tmp[2] * src[6] + tmp[5] * src[7]);
+    (dst)[0][1] = tmp[1] * src[4] + tmp[6] * src[6] + tmp[9] * src[7];
+    (dst)[0][1] = (dst)[0][1] - (tmp[0] * src[4] + tmp[7] * src[6] + tmp[8] * src[7]);
+    (dst)[0][2] = tmp[2] * src[4] + tmp[7] * src[5] + tmp[10] * src[7];
+    (dst)[0][2] = (dst)[0][2] - (tmp[3] * src[4] + tmp[6] * src[5] + tmp[11] * src[7]);
+    (dst)[0][3] = tmp[5] * src[4] + tmp[8] * src[5] + tmp[11] * src[6];
+    (dst)[0][3] = (dst)[0][3] - (tmp[4] * src[4] + tmp[9] * src[5] + tmp[10] * src[6]);
+    (dst)[1][0] = tmp[1] * src[1] + tmp[2] * src[2] + tmp[5] * src[3];
+    (dst)[1][0] = (dst)[1][0] - (tmp[0] * src[1] + tmp[3] * src[2] + tmp[4] * src[3]);
+    (dst)[1][1] = tmp[0] * src[0] + tmp[7] * src[2] + tmp[8] * src[3];
+    (dst)[1][1] = (dst)[1][1] - (tmp[1] * src[0] + tmp[6] * src[2] + tmp[9] * src[3]);
+    (dst)[1][2] = tmp[3] * src[0] + tmp[6] * src[1] + tmp[11] * src[3];
+    (dst)[1][2] = (dst)[1][2] - (tmp[2] * src[0] + tmp[7] * src[1] + tmp[10] * src[3]);
+    (dst)[1][3] = tmp[4] * src[0] + tmp[9] * src[1] + tmp[10] * src[2];
+    (dst)[1][3] = (dst)[1][3] - (tmp[5] * src[0] + tmp[8] * src[1] + tmp[11] * src[2]);
     tmp[0] = src[2] * src[7];
     tmp[1] = src[3] * src[6];
     tmp[2] = src[1] * src[7];
@@ -1096,68 +1147,69 @@ void __cdecl MatrixInverse44(const float *mat, float *dst)
     tmp[9] = src[2] * src[4];
     tmp[10] = src[0] * src[5];
     tmp[11] = src[1] * src[4];
-    dst[8] = tmp[0] * src[13] + tmp[3] * src[14] + tmp[4] * src[15];
-    dst[8] = dst[8] - (tmp[1] * src[13] + tmp[2] * src[14] + tmp[5] * src[15]);
-    dst[9] = tmp[1] * src[12] + tmp[6] * src[14] + tmp[9] * src[15];
-    dst[9] = dst[9] - (tmp[0] * src[12] + tmp[7] * src[14] + tmp[8] * src[15]);
-    dst[10] = tmp[2] * src[12] + tmp[7] * src[13] + tmp[10] * src[15];
-    dst[10] = dst[10] - (tmp[3] * src[12] + tmp[6] * src[13] + tmp[11] * src[15]);
-    dst[11] = tmp[5] * src[12] + tmp[8] * src[13] + tmp[11] * src[14];
-    dst[11] = dst[11] - (tmp[4] * src[12] + tmp[9] * src[13] + tmp[10] * src[14]);
-    dst[12] = tmp[2] * src[10] + tmp[5] * src[11] + tmp[1] * src[9];
-    dst[12] = dst[12] - (tmp[4] * src[11] + tmp[0] * src[9] + tmp[3] * src[10]);
-    dst[13] = tmp[8] * src[11] + tmp[0] * src[8] + tmp[7] * src[10];
-    dst[13] = dst[13] - (tmp[6] * src[10] + tmp[9] * src[11] + tmp[1] * src[8]);
-    dst[14] = tmp[6] * src[9] + tmp[11] * src[11] + tmp[3] * src[8];
-    dst[14] = dst[14] - (tmp[10] * src[11] + tmp[2] * src[8] + tmp[7] * src[9]);
-    dst[15] = tmp[10] * src[10] + tmp[4] * src[8] + tmp[9] * src[9];
-    dst[15] = dst[15] - (tmp[8] * src[9] + tmp[11] * src[10] + tmp[5] * src[8]);
-    det = src[0] * *dst + src[1] * dst[1] + src[2] * dst[2] + src[3] * dst[3];
-    if (det == 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1775, 0, "%s", "det");
+    (dst)[2][0] = tmp[0] * src[13] + tmp[3] * src[14] + tmp[4] * src[15];
+    (dst)[2][0] = (dst)[2][0] - (tmp[1] * src[13] + tmp[2] * src[14] + tmp[5] * src[15]);
+    (dst)[2][1] = tmp[1] * src[12] + tmp[6] * src[14] + tmp[9] * src[15];
+    (dst)[2][1] = (dst)[2][1] - (tmp[0] * src[12] + tmp[7] * src[14] + tmp[8] * src[15]);
+    (dst)[2][2] = tmp[2] * src[12] + tmp[7] * src[13] + tmp[10] * src[15];
+    (dst)[2][2] = (dst)[2][2] - (tmp[3] * src[12] + tmp[6] * src[13] + tmp[11] * src[15]);
+    (dst)[2][3] = tmp[5] * src[12] + tmp[8] * src[13] + tmp[11] * src[14];
+    (dst)[2][3] = (dst)[2][3] - (tmp[4] * src[12] + tmp[9] * src[13] + tmp[10] * src[14]);
+    (dst)[3][0] = tmp[2] * src[10] + tmp[5] * src[11] + tmp[1] * src[9];
+    (dst)[3][0] = (dst)[3][0] - (tmp[4] * src[11] + tmp[0] * src[9] + tmp[3] * src[10]);
+    (dst)[3][1] = tmp[8] * src[11] + tmp[0] * src[8] + tmp[7] * src[10];
+    (dst)[3][1] = (dst)[3][1] - (tmp[6] * src[10] + tmp[9] * src[11] + tmp[1] * src[8]);
+    (dst)[3][2] = tmp[6] * src[9] + tmp[11] * src[11] + tmp[3] * src[8];
+    (dst)[3][2] = (dst)[3][2] - (tmp[10] * src[11] + tmp[2] * src[8] + tmp[7] * src[9]);
+    (dst)[3][3] = tmp[10] * src[10] + tmp[4] * src[8] + tmp[9] * src[9];
+    (dst)[3][3] = (dst)[3][3] - (tmp[8] * src[9] + tmp[11] * src[10] + tmp[5] * src[8]);
+    det = src[0] * (dst)[0][0] + src[1] * (dst)[0][1] + src[2] * (dst)[0][2] + src[3] * (dst)[0][3];
+    
+    iassert(det != 0.0);
+
     det = 1.0 / det;
     for (i = 0; i < 16; ++i)
-        dst[i] = dst[i] * det;
+        (dst)[0][i] = (dst)[0][i] * det;
 }
 
-void __cdecl MatrixTransformVector44(const float *vec, const float (*mat)[4], float *out)
+void __cdecl MatrixTransformVector44(const float *vec, const mat4x4 &mat, float *out)
 {
     if (vec == out)
         MyAssertHandler(".\\universal\\com_math.cpp", 1789, 0, "%s", "vec != out");
-    *out = *vec * (*mat)[0] + vec[1] * (float)(*mat)[4] + vec[2] * (float)(*mat)[8] + vec[3] * (float)(*mat)[12];
-    out[1] = *vec * (float)(*mat)[1] + vec[1] * (float)(*mat)[5] + vec[2] * (float)(*mat)[9] + vec[3] * (float)(*mat)[13];
-    out[2] = *vec * (float)(*mat)[2] + vec[1] * (float)(*mat)[6] + vec[2] * (float)(*mat)[10] + vec[3] * (float)(*mat)[14];
-    out[3] = *vec * (float)(*mat)[3] + vec[1] * (float)(*mat)[7] + vec[2] * (float)(*mat)[11] + vec[3] * (float)(*mat)[15];
+    out[0] = vec[0] * (mat)[0][0] + vec[1] * (mat)[1][0] + vec[2] * (mat)[2][0] + vec[3] * (mat)[3][0];
+    out[1] = vec[0] * (mat)[0][1] + vec[1] * (mat)[1][1] + vec[2] * (mat)[2][1] + vec[3] * (mat)[3][1];
+    out[2] = vec[0] * (mat)[0][2] + vec[1] * (mat)[1][2] + vec[2] * (mat)[2][2] + vec[3] * (mat)[3][2];
+    out[3] = vec[0] * (mat)[0][3] + vec[1] * (mat)[1][3] + vec[2] * (mat)[2][3] + vec[3] * (mat)[3][3];
 }
 
-void __cdecl MatrixTransposeTransformVector(const float *in1, const float (*in2)[3], float *out)
+void __cdecl MatrixTransposeTransformVector(const vec3r in1, const mat3x3& in2, vec3r out)
 {
-    if (in1 == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1804, 0, "%s", "in1 != out");
-    *out = *in1 * (*in2)[0] + in1[1] * (float)(*in2)[1] + in1[2] * (float)(*in2)[2];
-    out[1] = *in1 * (float)(*in2)[3] + in1[1] * (float)(*in2)[4] + in1[2] * (float)(*in2)[5];
-    out[2] = *in1 * (float)(*in2)[6] + in1[1] * (float)(*in2)[7] + in1[2] * (float)(*in2)[8];
+    iassert(in1 != out);
+
+    out[0] = in1[0] * in2[0][0] + in1[1] * in2[0][1] + in1[2] * in2[0][2];
+    out[1] = in1[0] * in2[1][0] + in1[1] * in2[1][1] + in1[2] * in2[1][2];
+    out[2] = in1[0] * in2[2][0] + in1[1] * in2[2][1] + in1[2] * in2[2][2];
 }
 
-void __cdecl MatrixTransformVector43(const float *in1, const float (*in2)[3], float *out)
+void __cdecl MatrixTransformVector43(const vec3r in1, const mat4x3 &in2, vec3r out)
 {
-    if (in1 == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1818, 0, "%s", "in1 != out");
-    *out = *in1 * (*in2)[0] + in1[1] * (float)(*in2)[3] + in1[2] * (float)(*in2)[6] + (float)(*in2)[9];
-    out[1] = *in1 * (float)(*in2)[1] + in1[1] * (float)(*in2)[4] + in1[2] * (float)(*in2)[7] + (float)(*in2)[10];
-    out[2] = *in1 * (float)(*in2)[2] + in1[1] * (float)(*in2)[5] + in1[2] * (float)(*in2)[8] + (float)(*in2)[11];
+    iassert(in1 != out);
+
+    out[0] = in1[0] * (in2)[0][0] + in1[1] * (in2)[1][0] + in1[2] * (in2)[2][0] + (in2)[3][0];
+    out[1] = in1[0] * (in2)[0][1] + in1[1] * (in2)[1][1] + in1[2] * (in2)[2][1] + (in2)[3][1];
+    out[2] = in1[0] * (in2)[0][2] + in1[1] * (in2)[1][2] + in1[2] * (in2)[2][2] + (in2)[3][2];
 }
 
-void __cdecl MatrixTransposeTransformVector43(float *in1, const float (*in2)[3], float *out)
+void __cdecl MatrixTransposeTransformVector43(vec3r in1, const mat4x3 &in2, vec3r out)
 {
+    iassert(in1 != out);
     float temp[3]; // [esp+0h] [ebp-Ch] BYREF
 
-    if (in1 == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1834, 0, "%s", "in1 != out");
-    Vec3Sub(in1, &(*in2)[9], temp);
-    *out = (*in2)[0] * temp[0] + (float)(*in2)[1] * temp[1] + (float)(*in2)[2] * temp[2];
-    out[1] = (float)(*in2)[3] * temp[0] + (float)(*in2)[4] * temp[1] + (float)(*in2)[5] * temp[2];
-    out[2] = (float)(*in2)[6] * temp[0] + (float)(*in2)[7] * temp[1] + (float)(*in2)[8] * temp[2];
+    Vec3Sub(in1, (in2)[3], temp);
+
+    out[0] = (in2)[0][0] * temp[0] + (in2)[0][1] * temp[1] + (in2)[0][2] * temp[2];
+    out[1] = (in2)[1][0] * temp[0] + (in2)[1][1] * temp[1] + (in2)[1][2] * temp[2];
+    out[2] = (in2)[2][0] * temp[0] + (in2)[2][1] * temp[1] + (in2)[2][2] * temp[2];
 }
 
 void __cdecl VectorAngleMultiply(float *vec, float angle)
@@ -1175,7 +1227,7 @@ void __cdecl VectorAngleMultiply(float *vec, float angle)
     *vec = temp;
 }
 
-void __cdecl QuatToAxis(const float *quat, float (*axis)[3])
+void __cdecl QuatToAxis(const float *quat, mat3x3 &axis)
 {
     float yy; // [esp+0h] [ebp-38h]
     float yya; // [esp+0h] [ebp-38h]
@@ -1214,15 +1266,16 @@ void __cdecl QuatToAxis(const float *quat, float (*axis)[3])
     yz = scaledY * quat[2];
     yw = scaledY * quat[3];
     zw = scale * quat[2] * quat[3];
-    (*axis)[0] = 1.0 - (yya + zza);
-    (*axis)[1] = xy + zw;
-    (*axis)[2] = xz - yw;
-    (*axis)[3] = xy - zw;
-    (*axis)[4] = 1.0 - (xxa + zza);
-    (*axis)[5] = yz + xw;
-    (*axis)[6] = xz + yw;
-    (*axis)[7] = yz - xw;
-    (*axis)[8] = 1.0 - (xxa + yya);
+
+    (axis)[0][0] = 1.0 - (yya + zza);
+    (axis)[0][1] = xy + zw;
+    (axis)[0][2] = xz - yw;
+    (axis)[1][0] = xy - zw;
+    (axis)[1][1] = 1.0 - (xxa + zza);
+    (axis)[1][2] = yz + xw;
+    (axis)[2][0] = xz + yw;
+    (axis)[2][1] = yz - xw;
+    (axis)[2][2] = 1.0 - (xxa + yya);
 }
 
 void __cdecl UnitQuatToAxis(const float *quat, float (*axis)[3])
@@ -1258,15 +1311,16 @@ void __cdecl UnitQuatToAxis(const float *quat, float (*axis)[3])
     scaledZ = quat[2] + quat[2];
     zw = scaledZ * quat[3];
     zz = scaledZ * quat[2];
-    (*axis)[0] = 1.0 - (yy + zz);
-    (*axis)[1] = xy + zw;
-    (*axis)[2] = xz - yw;
-    (*axis)[3] = xy - zw;
-    (*axis)[4] = 1.0 - (xx + zz);
-    (*axis)[5] = yz + xw;
-    (*axis)[6] = xz + yw;
-    (*axis)[7] = yz - xw;
-    (*axis)[8] = 1.0 - (xx + yy);
+
+    (axis)[0][0] = 1.0 - (yy + zz);
+    (axis)[0][1] = xy + zw;
+    (axis)[0][2] = xz - yw;
+    (axis)[1][0] = xy - zw;
+    (axis)[1][1] = 1.0 - (xx + zz);
+    (axis)[1][2] = yz + xw;
+    (axis)[2][0] = xz + yw;
+    (axis)[2][1] = yz - xw;
+    (axis)[2][2] = 1.0 - (xx + yy);
 }
 
 void __cdecl UnitQuatToForward(const float *quat, float *forward)
@@ -1285,7 +1339,7 @@ void __cdecl UnitQuatToForward(const float *quat, float *forward)
 
 void __cdecl QuatSlerp(const float *from, const float *to, float frac, float *result)
 {
-    double v4; // st6
+    float v4; // st6
     float v5; // [esp+0h] [ebp-30h]
     float v6; // [esp+4h] [ebp-2Ch]
     float v7; // [esp+8h] [ebp-28h]
@@ -1340,19 +1394,18 @@ void __cdecl QuatSlerp(const float *from, const float *to, float frac, float *re
     result[3] = scaleFrom * from[3] + v4;
 }
 
-void __cdecl QuatMultiply(const float *in1, const float *in2, float *out)
+void __cdecl QuatMultiply(const float* in1, const float* in2, float* out)
 {
-    if (in1 == out)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 732, 0, "%s", "in1 != out");
-    if (in2 == out)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 733, 0, "%s", "in2 != out");
-    *out = *in1 * in2[3] + in1[3] * *in2 + in1[2] * in2[1] - in1[1] * in2[2];
+    iassert(in1 != out);
+    iassert(in2 != out);
+
+    out[0] = in1[0] * in2[3] + in1[3] * *in2 + in1[2] * in2[1] - in1[1] * in2[2];
     out[1] = in1[1] * in2[3] - in1[2] * *in2 + in1[3] * in2[1] + *in1 * in2[2];
     out[2] = in1[2] * in2[3] + in1[1] * *in2 - *in1 * in2[1] + in1[3] * in2[2];
     out[3] = in1[3] * in2[3] - *in1 * *in2 - in1[1] * in2[1] - in1[2] * in2[2];
 }
 
-double __cdecl RotationToYaw(const float *rot)
+float __cdecl RotationToYaw(const float *rot)
 {
     float v2; // [esp+0h] [ebp-18h]
     float v3; // [esp+4h] [ebp-14h]
@@ -1369,7 +1422,7 @@ double __cdecl RotationToYaw(const float *rot)
     v4 = ra * (rot[1] * *rot);
     v3 = 1.0 - ra * zz;
     v2 = atan2(v4, v3);
-    return (float)(v2 * 57.2957763671875);
+    return (v2 * 57.2957763671875);
 }
 
 void __cdecl AnglesSubtract(float *v1, float *v2, float *v3)
@@ -1379,7 +1432,7 @@ void __cdecl AnglesSubtract(float *v1, float *v2, float *v3)
     v3[2] = AngleDelta(v1[2], v2[2]);
 }
 
-double __cdecl AngleNormalize360(float angle)
+float __cdecl AngleNormalize360(float angle)
 {
     float v3; // [esp+Ch] [ebp-18h]
     float scaledAngle; // [esp+18h] [ebp-Ch]
@@ -1391,28 +1444,28 @@ double __cdecl AngleNormalize360(float angle)
     result = (scaledAngle - v3) * 360.0;
     result2 = result - 360.0;
     if (result2 < 0.0)
-        return (float)((scaledAngle - v3) * 360.0);
+        return ((scaledAngle - v3) * 360.0);
     else
-        return (float)(result - 360.0);
+        return (result - 360.0);
 }
 
-double __cdecl RadiusFromBounds(const float *mins, const float *maxs)
+float __cdecl RadiusFromBounds(const float *mins, const float *maxs)
 {
     float v4; // [esp+4h] [ebp-4h]
 
     v4 = RadiusFromBoundsSq(mins, maxs);
-    return (float)sqrt(v4);
+    return sqrt(v4);
 }
 
-double __cdecl RadiusFromBounds2D(const float *mins, const float *maxs)
+float __cdecl RadiusFromBounds2D(const float *mins, const float *maxs)
 {
     float v4; // [esp+4h] [ebp-4h]
 
     v4 = RadiusFromBounds2DSq(mins, maxs);
-    return (float)sqrt(v4);
+    return sqrt(v4);
 }
 
-double __cdecl RadiusFromBoundsSq(const float *mins, const float *maxs)
+float __cdecl RadiusFromBoundsSq(const float *mins, const float *maxs)
 {
     float v3; // [esp+0h] [ebp-2Ch]
     float v4; // [esp+4h] [ebp-28h]
@@ -1426,7 +1479,7 @@ double __cdecl RadiusFromBoundsSq(const float *mins, const float *maxs)
         v5 = fabs(mins[i]);
         a = v5;
         v4 = fabs(maxs[i]);
-        if (v4 >= (double)v5)
+        if (v4 >= v5)
             v3 = v4;
         else
             v3 = a;
@@ -1435,7 +1488,7 @@ double __cdecl RadiusFromBoundsSq(const float *mins, const float *maxs)
     return Vec3LengthSq(corner);
 }
 
-double __cdecl RadiusFromBounds2DSq(const float *mins, const float *maxs)
+float __cdecl RadiusFromBounds2DSq(const float *mins, const float *maxs)
 {
     float v4; // [esp+4h] [ebp-28h]
     float v5; // [esp+8h] [ebp-24h]
@@ -1449,13 +1502,13 @@ double __cdecl RadiusFromBounds2DSq(const float *mins, const float *maxs)
         v6 = fabs(mins[i]);
         a = v6;
         v5 = fabs(maxs[i]);
-        if (v5 >= (double)v6)
+        if (v5 >= v6)
             v4 = v5;
         else
             v4 = a;
         corner[i] = v4;
     }
-    return (float)(corner[1] * corner[1] + corner[0] * corner[0]);
+    return (corner[1] * corner[1] + corner[0] * corner[0]);
 }
 
 void __cdecl ExtendBounds(float *mins, float *maxs, const float *offset)
@@ -1481,11 +1534,11 @@ void __cdecl ExpandBoundsToWidth(float *mins, float *maxs)
     float diff; // [esp+8h] [ebp-14h]
     float size[3]; // [esp+10h] [ebp-Ch] BYREF
 
-    if (*mins > (double)*maxs)
+    if (*mins > *maxs)
         MyAssertHandler(".\\universal\\com_math.cpp", 2455, 0, "%s", "maxs[0] >= mins[0]");
-    if (mins[1] > (double)maxs[1])
+    if (mins[1] > maxs[1])
         MyAssertHandler(".\\universal\\com_math.cpp", 2456, 0, "%s", "maxs[1] >= mins[1]");
-    if (mins[2] > (double)maxs[2])
+    if (mins[2] > maxs[2])
         MyAssertHandler(".\\universal\\com_math.cpp", 2457, 0, "%s", "maxs[2] >= mins[2]");
     Vec3Sub(maxs, mins, size);
     v3 = size[0] - size[1];
@@ -1493,7 +1546,7 @@ void __cdecl ExpandBoundsToWidth(float *mins, float *maxs)
         v2 = size[1];
     else
         v2 = size[0];
-    if (size[2] < (double)v2)
+    if (size[2] < v2)
     {
         diff = (v2 - size[2]) * 0.5;
         mins[2] = mins[2] - diff;
@@ -1507,20 +1560,20 @@ void __cdecl ShrinkBoundsToHeight(float *mins, float *maxs)
     float diffa; // [esp+10h] [ebp-10h]
     float size[3]; // [esp+14h] [ebp-Ch] BYREF
 
-    if (*mins > (double)*maxs)
+    if (*mins > *maxs)
         MyAssertHandler(".\\universal\\com_math.cpp", 2477, 0, "maxs[0] >= mins[0]\n\t%g, %g", *maxs, *mins);
-    if (mins[1] > (double)maxs[1])
+    if (mins[1] > maxs[1])
         MyAssertHandler(".\\universal\\com_math.cpp", 2478, 0, "maxs[1] >= mins[1]\n\t%g, %g", maxs[1], mins[1]);
-    if (mins[2] > (double)maxs[2])
+    if (mins[2] > maxs[2])
         MyAssertHandler(".\\universal\\com_math.cpp", 2479, 0, "maxs[2] >= mins[2]\n\t%g, %g", maxs[2], mins[2]);
     Vec3Sub(maxs, mins, size);
-    if (size[2] < (double)size[0])
+    if (size[2] < size[0])
     {
         diff = (size[0] - size[2]) * 0.5;
         *mins = *mins + diff;
         *maxs = *maxs - diff;
     }
-    if (size[2] < (double)size[1])
+    if (size[2] < size[1])
     {
         diffa = (size[1] - size[2]) * 0.5;
         mins[1] = mins[1] + diffa;
@@ -1538,29 +1591,29 @@ void __cdecl ClearBounds2D(float *mins, float *maxs)
 
 void __cdecl AddPointToBounds(const float *v, float *mins, float *maxs)
 {
-    if (*mins > (double)*v)
+    if (*mins > *v)
         *mins = *v;
-    if (*maxs < (double)*v)
+    if (*maxs < *v)
         *maxs = *v;
-    if (mins[1] > (double)v[1])
+    if (mins[1] > v[1])
         mins[1] = v[1];
-    if (maxs[1] < (double)v[1])
+    if (maxs[1] < v[1])
         maxs[1] = v[1];
-    if (mins[2] > (double)v[2])
+    if (mins[2] > v[2])
         mins[2] = v[2];
-    if (maxs[2] < (double)v[2])
+    if (maxs[2] < v[2])
         maxs[2] = v[2];
 }
 
 void __cdecl AddPointToBounds2D(const float *v, float *mins, float *maxs)
 {
-    if (*mins > (double)*v)
+    if (*mins > *v)
         *mins = *v;
-    if (*maxs < (double)*v)
+    if (*maxs < *v)
         *maxs = *v;
-    if (mins[1] > (double)v[1])
+    if (mins[1] > v[1])
         mins[1] = v[1];
-    if (maxs[1] < (double)v[1])
+    if (maxs[1] < v[1])
         maxs[1] = v[1];
 }
 
@@ -1572,85 +1625,89 @@ bool __cdecl PointInBounds(const float *v, const float *mins, const float *maxs)
         MyAssertHandler(".\\universal\\com_math.cpp", 2561, 0, "%s", "mins");
     if (!maxs)
         MyAssertHandler(".\\universal\\com_math.cpp", 2562, 0, "%s", "maxs");
-    if (*mins > (double)*v || *maxs < (double)*v)
+    if (*mins > *v || *maxs < *v)
         return 0;
-    if (mins[1] > (double)v[1] || maxs[1] < (double)v[1])
+    if (mins[1] > v[1] || maxs[1] < v[1])
         return 0;
-    return mins[2] <= (double)v[2] && maxs[2] >= (double)v[2];
+    return mins[2] <= v[2] && maxs[2] >= v[2];
 }
 
 bool __cdecl BoundsOverlap(const float *mins0, const float *maxs0, const float *mins1, const float *maxs1)
 {
-    if (*maxs1 < (double)*mins0 || *maxs0 < (double)*mins1)
+    if (*maxs1 < *mins0 || *maxs0 < *mins1)
         return 0;
-    if (maxs1[1] < (double)mins0[1] || maxs0[1] < (double)mins1[1])
+    if (maxs1[1] < mins0[1] || maxs0[1] < mins1[1])
         return 0;
-    return maxs1[2] >= (double)mins0[2] && maxs0[2] >= (double)mins1[2];
+    return maxs1[2] >= mins0[2] && maxs0[2] >= mins1[2];
 }
 
 void __cdecl ExpandBounds(const float *addedmins, const float *addedmaxs, float *mins, float *maxs)
 {
-    if (*addedmins < (double)*mins)
+    if (*addedmins < *mins)
         *mins = *addedmins;
-    if (*addedmaxs > (double)*maxs)
+    if (*addedmaxs > *maxs)
         *maxs = *addedmaxs;
-    if (addedmins[1] < (double)mins[1])
+    if (addedmins[1] < mins[1])
         mins[1] = addedmins[1];
-    if (addedmaxs[1] > (double)maxs[1])
+    if (addedmaxs[1] > maxs[1])
         maxs[1] = addedmaxs[1];
-    if (addedmins[2] < (double)mins[2])
+    if (addedmins[2] < mins[2])
         mins[2] = addedmins[2];
-    if (addedmaxs[2] > (double)maxs[2])
+    if (addedmaxs[2] > maxs[2])
         maxs[2] = addedmaxs[2];
 }
 
-void __cdecl AxisClear(float (*axis)[3])
+void __cdecl AxisClear(mat3x3 &axis)
 {
-    (*axis)[0] = 1.0;
-    (*axis)[1] = 0.0;
-    (*axis)[2] = 0.0;
-    (*axis)[3] = 0.0;
-    (*axis)[4] = 1.0;
-    (*axis)[5] = 0.0;
-    (*axis)[6] = 0.0;
-    (*axis)[7] = 0.0;
-    (*axis)[8] = 1.0;
+    (axis)[0][0] = 1.0;
+    (axis)[0][1] = 0.0;
+    (axis)[0][2] = 0.0;
+    
+    (axis)[1][0] = 0.0;
+    (axis)[1][1] = 1.0;
+    (axis)[1][2] = 0.0;
+
+    (axis)[2][0] = 0.0;
+    (axis)[2][1] = 0.0;
+    (axis)[2][2] = 1.0;
 }
 
-void __cdecl AxisTranspose(const float (*in)[3], float (*out)[3])
+void __cdecl AxisTranspose(const mat3x3& in, mat3x3& out)
 {
-    if (in == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2732, 0, "%s", "in != out");
-    (*out)[0] = (*in)[0];
-    (*out)[1] = (*in)[3];
-    (*out)[2] = (*in)[6];
-    (*out)[3] = (*in)[1];
-    (*out)[4] = (*in)[4];
-    (*out)[5] = (*in)[7];
-    (*out)[6] = (*in)[2];
-    (*out)[7] = (*in)[5];
-    (*out)[8] = (*in)[8];
+    iassert(in != out);
+
+    (out)[0][0] = (in)[0][0];
+    (out)[0][1] = (in)[1][0];
+    (out)[0][2] = (in)[2][0];
+    
+    (out)[1][0] = (in)[0][1];
+    (out)[1][1] = (in)[1][1];
+    (out)[1][2] = (in)[2][1];
+
+    (out)[2][0] = (in)[0][2];
+    (out)[2][1] = (in)[1][2];
+    (out)[2][2] = (in)[2][2];
 }
 
 void __cdecl AxisTransformVec3(const float (*axes)[3], const float *vec, float *out)
 {
-    *out = *vec * (*axes)[0] + vec[1] * (float)(*axes)[3] + vec[2] * (float)(*axes)[6];
-    out[1] = *vec * (float)(*axes)[1] + vec[1] * (float)(*axes)[4] + vec[2] * (float)(*axes)[7];
-    out[2] = *vec * (float)(*axes)[2] + vec[1] * (float)(*axes)[5] + vec[2] * (float)(*axes)[8];
+    out[0] = *vec * (axes)[0][0] + vec[1] * (axes)[1][0] + vec[2] * (axes)[2][0];
+    out[1] = *vec * (axes)[0][1] + vec[1] * (axes)[1][1] + vec[2] * (axes)[2][1];
+    out[2] = *vec * (axes)[0][2] + vec[1] * (axes)[1][2] + vec[2] * (axes)[2][2];
 }
 
 void __cdecl YawToAxis(float yaw, float (*axis)[3])
 {
     float right[3]; // [esp+Ch] [ebp-Ch] BYREF
 
-    YawVectors(yaw, (float *)axis, right);
-    (*axis)[6] = 0.0;
-    (*axis)[7] = 0.0;
-    (*axis)[8] = 1.0;
-    Vec3Sub(vec3_origin, right, &(*axis)[3]);
+    YawVectors(yaw, axis[0], right);
+    (axis)[2][0] = 0.0;
+    (axis)[2][1] = 0.0;
+    (axis)[2][2] = 1.0;
+    Vec3Sub(vec3_origin, right, axis[1]);
 }
 
-void __cdecl AxisToAngles(const float (*axis)[3], float *angles)
+void __cdecl AxisToAngles(const mat3x3 &axis, vec3r angles)
 {
     float v2; // [esp+0h] [ebp-38h]
     float rad; // [esp+18h] [ebp-20h]
@@ -1661,10 +1718,10 @@ void __cdecl AxisToAngles(const float (*axis)[3], float *angles)
     float fCos; // [esp+30h] [ebp-8h]
     float fSin; // [esp+34h] [ebp-4h]
 
-    vectoangles((const float *)axis, angles);
-    right[0] = (*axis)[3];
-    right[1] = (*axis)[4];
-    right[2] = (*axis)[5];
+    vectoangles(axis[0], angles);
+    right[0] = axis[1][0];
+    right[1] = axis[1][1];
+    right[2] = axis[1][2];
     rad = -angles[1] * 0.01745329238474369;
     fCos = cos(rad);
     fSin = sin(rad);
@@ -1692,8 +1749,8 @@ void __cdecl AxisToAngles(const float (*axis)[3], float *angles)
 
 int __cdecl IntersectPlanes(const float **plane, float *xyz)
 {
-    double invDeterminant; // [esp+0h] [ebp-28h]
-    double determinant; // [esp+8h] [ebp-20h]
+    float invDeterminant; // [esp+0h] [ebp-28h]
+    float determinant; // [esp+8h] [ebp-20h]
 
     determinant = (plane[1][1] * plane[2][2] - plane[2][1] * plane[1][2]) * **plane
         + (plane[2][1] * (*plane)[2] - (*plane)[1] * plane[2][2]) * *plane[1]
@@ -1719,9 +1776,9 @@ int __cdecl IntersectPlanes(const float **plane, float *xyz)
 void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, float snapGrid, float snapEpsilon)
 {
     float v4; // [esp+0h] [ebp-68h]
-    double v5; // [esp+4h] [ebp-64h]
+    float v5; // [esp+4h] [ebp-64h]
     float v6; // [esp+Ch] [ebp-5Ch]
-    double v7; // [esp+10h] [ebp-58h]
+    float v7; // [esp+10h] [ebp-58h]
     float v9; // [esp+1Ch] [ebp-4Ch]
     float v10; // [esp+20h] [ebp-48h]
     float v11; // [esp+24h] [ebp-44h]
@@ -1739,10 +1796,10 @@ void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, flo
     for (axis = 0; axis < 3; ++axis)
     {
         v13 = xyz[axis] / snapGrid;
-        rounded = (double)(int)(v13 + 9.313225746154785e-10) * snapGrid;
+        rounded = (int)(v13 + 9.313225746154785e-10) * snapGrid;
         v12 = rounded - xyz[axis];
         v9 = fabs(v12);
-        if (snapEpsilon <= (double)v9)
+        if (snapEpsilon <= v9)
             snapped[axis] = xyz[axis];
         else
             snapped[axis] = rounded;
@@ -1757,16 +1814,16 @@ void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, flo
             v11 = Vec3Dot(planes[planeIndex], snapped) - v7;
             v6 = fabs(v11);
             snapError = v6;
-            if (v6 > (double)maxSnapError)
+            if (v6 > maxSnapError)
                 maxSnapError = snapError;
             v5 = planes[planeIndex][3];
             v10 = Vec3Dot(planes[planeIndex], xyz) - v5;
             v4 = fabs(v10);
             baseError = v4;
-            if (v4 > (double)maxBaseError)
+            if (v4 > maxBaseError)
                 maxBaseError = baseError;
         }
-        if (maxBaseError > (double)maxSnapError)
+        if (maxBaseError > maxSnapError)
         {
             *xyz = snapped[0];
             xyz[1] = snapped[1];
@@ -1793,10 +1850,10 @@ int __cdecl ProjectedWindingContainsCoplanarPoint(
     vertIndexPrev = vertCount - 1;
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
     {
-        edgeNormal = (float)(*verts)[3 * vertIndex + y] - (float)(*verts)[3 * vertIndexPrev + y];
-        edgeNormal_4 = (float)(*verts)[3 * vertIndexPrev + x] - (float)(*verts)[3 * vertIndex + x];
-        pointDelta = point[x] - (float)(*verts)[3 * vertIndexPrev + x];
-        pointDelta_4 = point[y] - (float)(*verts)[3 * vertIndexPrev + y];
+        edgeNormal = (*verts)[3 * vertIndex + y] - (*verts)[3 * vertIndexPrev + y];
+        edgeNormal_4 = (*verts)[3 * vertIndexPrev + x] - (*verts)[3 * vertIndex + x];
+        pointDelta = point[x] - (*verts)[3 * vertIndexPrev + x];
+        pointDelta_4 = point[y] - (*verts)[3 * vertIndexPrev + y];
         projectionDist = edgeNormal_4 * pointDelta_4 + edgeNormal * pointDelta;
         if (projectionDist < 0.0)
             return 0;
@@ -1807,11 +1864,11 @@ int __cdecl ProjectedWindingContainsCoplanarPoint(
 
 int __cdecl PlaneFromPoints(float *plane, const float *v0, const float *v1, const float *v2)
 {
-    double v5; // st7
-    double v6; // st7
+    float v5; // st7
+    float v6; // st7
     float v7; // [esp+0h] [ebp-34h]
-    double v8; // [esp+4h] [ebp-30h]
-    double v9; // [esp+Ch] [ebp-28h]
+    float v8; // [esp+4h] [ebp-30h]
+    float v9; // [esp+Ch] [ebp-28h]
     float v2_v0[3]; // [esp+14h] [ebp-20h] BYREF
     float v1_v0[3]; // [esp+20h] [ebp-14h] BYREF
     float length; // [esp+2Ch] [ebp-8h]
@@ -1847,20 +1904,20 @@ LABEL_7:
     return 1;
 }
 
-void __cdecl ProjectPointOnPlane(const float *p, __int64 normal)
+void __cdecl ProjectPointOnPlane(const float* p, float* normal, float* result)
 {
-    const char *v2; // eax
-    double v3; // [esp+18h] [ebp-14h]
+    const char* v3; // eax
+    float v4; // [esp+18h] [ebp-14h]
     float d; // [esp+28h] [ebp-4h]
 
-    if (!Vec3IsNormalized((const float *)normal))
+    if (!Vec3IsNormalized(normal))
     {
-        v3 = Vec3Length((const float *)normal);
-        v2 = va("(%g %g %g) len %g", *(float *)normal, *(float *)(normal + 4), *(float *)(normal + 8), v3);
-        MyAssertHandler(".\\universal\\com_math.cpp", 3139, 0, "%s\n\t%s", "Vec3IsNormalized( normal )", v2);
+        v4 = Vec3Length(normal);
+        v3 = va("(%g %g %g) len %g", *normal, normal[1], normal[2], v4);
+        MyAssertHandler(".\\universal\\com_math.cpp", 3139, 0, "%s\n\t%s", "Vec3IsNormalized( normal )", v3);
     }
-    d = -Vec3Dot((const float *)normal, p);
-    Vec3Mad(p, d, (const float *)normal, (float *)HIunsigned int(normal));
+    d = -Vec3Dot(normal, p);
+    Vec3Mad(p, d, normal, result);
 }
 
 void __cdecl SetPlaneSignbits(cplane_s *out)
@@ -1896,33 +1953,33 @@ bool __cdecl BoxDistSqrdExceeds(const float *absmin, const float *absmax, const 
         {
             minsSqrd = mins[i] * mins[i];
             maxsSqrd = maxs[i] * maxs[i];
-            if (minsSqrd <= (double)maxsSqrd)
+            if (minsSqrd <= maxsSqrd)
                 v5 = minsSqrd;
             else
                 v5 = maxsSqrd;
             total = total + v5;
         }
     }
-    return fogOpaqueDistSqrd < (double)total;
+    return fogOpaqueDistSqrd < total;
 }
 
-double __cdecl Q_rint(float in)
+float __cdecl Q_rint(float in)
 {
     float v3; // [esp+Ch] [ebp-4h]
 
     v3 = in + 0.5;
-    return (float)floor(v3);
+    return floor(v3);
 }
 
-double __cdecl ColorNormalize(float *in, float *out)
+float __cdecl ColorNormalize(const float* in, float *out)
 {
     float max; // [esp+8h] [ebp-8h]
     float scale; // [esp+Ch] [ebp-4h]
 
-    max = *in;
-    if (max < (double)in[1])
+    max = in[0];
+    if (max < in[1])
         max = in[1];
-    if (max < (double)in[2])
+    if (max < in[2])
         max = in[2];
     if (max == 0.0)
     {
@@ -1939,30 +1996,30 @@ double __cdecl ColorNormalize(float *in, float *out)
     }
 }
 
-double __cdecl PitchForYawOnNormal(float fYaw, const float *normal)
+float __cdecl PitchForYawOnNormal(float fYaw, const float *normal)
 {
     float v4; // [esp+10h] [ebp-14h]
     float forward[3]; // [esp+18h] [ebp-Ch] BYREF
 
-    if (*normal == 0.0 && normal[1] == 0.0 && normal[2] == 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 3693, 0, "%s", "normal[0] || normal[1] || normal[2]");
+    iassert(normal[0] != 0.0 || normal[1] != 0.0 || normal[2] != 0.0);
+
     YawVectors(fYaw, forward, 0);
     if (normal[2] == 0.0)
         return 270.0;
     forward[2] = (*normal * forward[0] + normal[1] * forward[1]) / normal[2];
     v4 = atan(forward[2]);
-    return (float)(v4 * 180.0 / 3.141592741012573);
+    return (v4 * 180.0 / 3.141592741012573);
 }
 
-void __cdecl NearestPitchAndYawOnPlane(const float *angles, const float *normal, float *result)
+void __cdecl NearestPitchAndYawOnPlane(const float* angles, float* normal, float* result)
 {
     float projected[3]; // [esp+0h] [ebp-18h] BYREF
     float forward[3]; // [esp+Ch] [ebp-Ch] BYREF
 
-    if (*normal == 0.0 && normal[1] == 0.0 && normal[2] == 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 3724, 0, "%s", "normal[0] || normal[1] || normal[2]");
+    iassert(normal[0] != 0.0 || normal[1] != 0.0 || normal[2] != 0.0);
+
     AngleVectors(angles, forward, 0, 0);
-    ProjectPointOnPlane(forward, __SPAIR64__(projected, (unsigned int)normal));
+    ProjectPointOnPlane(forward, normal, projected);
     vectoangles(projected, result);
 }
 
@@ -1971,13 +2028,13 @@ void __cdecl Rand_Init(int seed)
     holdrand = seed;
 }
 
-double __cdecl flrand(float min, float max)
+float __cdecl flrand(float min, float max)
 {
     float result; // [esp+8h] [ebp-4h]
 
     holdrand = 214013 * holdrand + 2531011;
-    result = (float)(holdrand >> 17);
-    return (float)((max - min) * result / 32768.0 + min);
+    result = (holdrand >> 17);
+    return ((max - min) * result / 32768.0 + min);
 }
 
 int __cdecl irand(int min, int max)
@@ -1986,15 +2043,17 @@ int __cdecl irand(int min, int max)
     return (((holdrand >> 17) * (__int64)(max - min)) >> 15) + min;
 }
 
-void __cdecl MatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
+#include <xanim/dobj.h>
+
+void __cdecl MatrixTransformVectorQuatTrans(const vec3r in, const DObjAnimMat *mat, vec3r out)
 {
     float v3; // [esp+1Ch] [ebp-54h]
     float v4; // [esp+20h] [ebp-50h]
     float v5; // [esp+24h] [ebp-4Ch]
     float v6; // [esp+28h] [ebp-48h]
-    float result; // [esp+2Ch] [ebp-44h] BYREF
-    float v8; // [esp+30h] [ebp-40h]
-    float v9; // [esp+34h] [ebp-3Ch]
+    vec3 result;
+    float v8; // [esp+28h] [ebp-48h]
+    float v9; // [esp+28h] [ebp-48h]
     float v10; // [esp+38h] [ebp-38h]
     float v11; // [esp+3Ch] [ebp-34h]
     float v12; // [esp+40h] [ebp-30h]
@@ -2007,50 +2066,37 @@ void __cdecl MatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *
     float v19; // [esp+5Ch] [ebp-14h]
     float v20; // [esp+60h] [ebp-10h]
     float v21; // [esp+64h] [ebp-Ch]
-    float v22; // [esp+68h] [ebp-8h]
-    float v23; // [esp+6Ch] [ebp-4h]
 
-    if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[2]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[3]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\universal\\../xanim/xanim_public.h",
-            432,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\universal\\../xanim/xanim_public.h",
-            433,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(mat->quat, mat->transWeight, &result);
-    v13 = result * mat->quat[0];
-    v4 = result * mat->quat[1];
-    v11 = result * mat->quat[2];
-    v14 = result * mat->quat[3];
-    v3 = v8 * mat->quat[1];
-    v12 = v8 * mat->quat[2];
-    v10 = v8 * mat->quat[3];
-    v5 = v9 * mat->quat[2];
-    v6 = v9 * mat->quat[3];
-    v15 = 1.0 - (v3 + v5);
-    v16 = v4 + v6;
-    v17 = v11 - v10;
-    v18 = v4 - v6;
-    v19 = 1.0 - (v13 + v5);
-    v20 = v12 + v14;
-    v21 = v11 + v10;
-    v22 = v12 - v14;
-    v23 = 1.0 - (v13 + v3);
-    *out = *in * v15 + in[1] * v18 + in[2] * v21 + mat->trans[0];
-    out[1] = *in * v16 + in[1] * v19 + in[2] * v22 + mat->trans[1];
-    out[2] = *in * v17 + in[1] * v20 + in[2] * v23 + mat->trans[2];
+    iassert(!isnan((mat->quat[0])));
+    iassert(!isnan((mat->quat[1])));
+    iassert(!isnan((mat->quat[2])));
+    iassert(!isnan((mat->quat[3])));
+    iassert(!isnan((mat->transWeight)));
+
+    Vec3Scale(mat->quat, mat->transWeight, result);
+   
+    v11 = result[0] * mat->quat[0];
+    v4 = result[0] * mat->quat[1];
+    v9 = result[0] * mat->quat[2];
+    v12 = result[0] * mat->quat[3];
+    v3 = result[1] * mat->quat[1];
+    v10 = result[1] * mat->quat[2];
+    v8 = result[1] * mat->quat[3];
+    v5 = result[2] * mat->quat[2];
+    v6 = result[2] * mat->quat[3];
+    v13 = 1.0 - (v3 + v5);
+    v14 = v4 + v6;
+    v15 = v9 - v8;
+    v16 = v4 - v6;
+    v17 = 1.0 - (v11 + v5);
+    v18 = v10 + v12;
+    v19 = v9 + v8;
+    v20 = v10 - v12;
+    v21 = 1.0 - (v11 + v3);
+    
+    out[0] = in[0] * v13 + in[1] * v16 + in[2] * v19 + mat->trans[0];
+    out[1] = in[0] * v14 + in[1] * v17 + in[2] * v20 + mat->trans[1];
+    out[2] = in[0] * v15 + in[1] * v18 + in[2] * v21 + mat->trans[2];
 }
 
 void __cdecl AxisToQuat(const float (*mat)[3], float *out)
@@ -2061,29 +2107,29 @@ void __cdecl AxisToQuat(const float (*mat)[3], float *out)
     int best; // [esp+50h] [ebp-8h]
     float testSizeSq; // [esp+54h] [ebp-4h]
 
-    test[0][0] = (float)(*mat)[5] - (float)(*mat)[7];
-    test[0][1] = (float)(*mat)[6] - (float)(*mat)[2];
-    test[0][2] = (float)(*mat)[1] - (float)(*mat)[3];
-    test[0][3] = (*mat)[0] + (float)(*mat)[4] + (float)(*mat)[8] + 1.0;
+    test[0][0] = (mat)[1][2] - (mat)[2][1];
+    test[0][1] = (mat)[2][0] - (mat)[0][2];
+    test[0][2] = (mat)[0][1] - (mat)[1][0];
+    test[0][3] = (mat)[0][0] + (mat)[1][1] + (mat)[2][2] + 1.0;
     testSizeSq = Vec4LengthSq(test[0]);
     if (testSizeSq < 1.0)
     {
-        test[1][0] = (float)(*mat)[6] + (float)(*mat)[2];
-        test[1][1] = (float)(*mat)[7] + (float)(*mat)[5];
-        test[1][2] = (float)(*mat)[8] - (float)(*mat)[4] - (*mat)[0] + 1.0;
+        test[1][0] = (mat)[2][0] + (mat)[0][2];
+        test[1][1] = (mat)[2][1] + (mat)[1][2];
+        test[1][2] = (mat)[2][2] - (mat)[1][1] - (mat)[0][0] + 1.0;
         test[1][3] = test[0][2];
         testSizeSq = Vec4LengthSq(test[1]);
         if (testSizeSq < 1.0)
         {
-            test[2][0] = (*mat)[0] - (float)(*mat)[4] - (float)(*mat)[8] + 1.0;
-            test[2][1] = (float)(*mat)[3] + (float)(*mat)[1];
+            test[2][0] = (mat)[0][0] - (mat)[1][1] - (mat)[2][2] + 1.0;
+            test[2][1] = (mat)[1][0] + (mat)[0][1];
             test[2][2] = test[1][0];
             test[2][3] = test[0][0];
             testSizeSq = Vec4LengthSq(test[2]);
             if (testSizeSq < 1.0)
             {
                 test[3][0] = test[2][1];
-                test[3][1] = (float)(*mat)[4] - (*mat)[0] - (float)(*mat)[8] + 1.0;
+                test[3][1] = (mat)[1][1] - (mat)[0][0] - (mat)[2][2] + 1.0;
                 test[3][2] = test[1][1];
                 test[3][3] = test[0][1];
                 testSizeSq = Vec4LengthSq(test[3]);
@@ -2111,8 +2157,9 @@ void __cdecl AxisToQuat(const float (*mat)[3], float *out)
     {
         best = 0;
     }
-    if (testSizeSq == 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 3837, 0, "%s", "testSizeSq");
+    
+    iassert(testSizeSq != 0.0);
+
     v2 = sqrt(testSizeSq);
     invLength = 1.0 / v2;
     Vec4Scale(test[best], invLength, out);
@@ -2397,7 +2444,7 @@ bool __cdecl CullSphereFromCone(
         MyAssertHandler(".\\universal\\com_math.cpp", 4098, 0, "%s", "cosHalfFov >= 0.0f");
     Vec3Sub(sphereCenter, coneOrg, delta);
     dist = Vec3Dot(delta, coneDir);
-    if (radius <= (double)dist)
+    if (radius <= dist)
         return 1;
     scale = -dist;
     Vec3Mad(delta, scale, coneDir, perpendicular);
@@ -2409,34 +2456,68 @@ bool __cdecl CullSphereFromCone(
     return discriminant * discriminant <= perpLenSq * cosHalfFovSq;
 }
 
-void __cdecl AxisCopy(const float (*in)[3], float (*out)[3])
+void __cdecl AxisCopy(const mat3x3 &in, mat3x3 &out)
 {
-    (*out)[0] = (*in)[0];
-    (*out)[1] = (*in)[1];
-    (*out)[2] = (*in)[2];
-    (*out)[3] = (*in)[3];
-    (*out)[4] = (*in)[4];
-    (*out)[5] = (*in)[5];
-    (*out)[6] = (*in)[6];
-    (*out)[7] = (*in)[7];
-    (*out)[8] = (*in)[8];
+    memcpy(out, in, sizeof(mat3x3));
 }
 
-double __cdecl log(double X)
+float __cdecl Vec3Normalize(float* v)
 {
-    int v1; // eax
-    bool v2; // zf
-    char v4; // [esp+0h] [ebp-8h]
+    float v2; // [esp+0h] [ebp-14h]
+    float v3; // [esp+4h] [ebp-10h]
+    float ilength; // [esp+Ch] [ebp-8h]
+    float length; // [esp+10h] [ebp-4h]
 
-    if (__use_sse2_mathfcns)
-    {
-        v1 = _mm_getcsr() & 0x1F80;
-        v2 = v1 == 8064;
-        if (v1 == 8064)
-            v2 = (v4 & 0x7F) == 127;
-        if (v2)
-            JUMPOUT(0x8453A8);
-    }
-    JUMPOUT(0x8353CF);
+    length = *v * *v + v[1] * v[1] + v[2] * v[2];
+    v3 = sqrt(length);
+    if (-v3 < 0.0)
+        v2 = v3;
+    else
+        v2 = 1.0;
+    ilength = 1.0 / v2;
+    *v = *v * ilength;
+    v[1] = v[1] * ilength;
+    v[2] = v[2] * ilength;
+    return v3;
 }
 
+void __cdecl Vec3Mul(const float* a, const float* b, float* product)
+{
+    *product = *a * *b;
+    product[1] = a[1] * b[1];
+    product[2] = a[2] * b[2];
+}
+
+void __cdecl Vec3Lerp(const float* start, const float* end, float fraction, float* endpos)
+{
+    *endpos = (*end - *start) * fraction + *start;
+    endpos[1] = (end[1] - start[1]) * fraction + start[1];
+    endpos[2] = (end[2] - start[2]) * fraction + start[2];
+}
+
+void __cdecl Vec4Lerp(const float* from, const float* to, float frac, float* result)
+{
+    *result = (*to - *from) * frac + *from;
+    result[1] = (to[1] - from[1]) * frac + from[1];
+    result[2] = (to[2] - from[2]) * frac + from[2];
+    result[3] = (to[3] - from[3]) * frac + from[3];
+}
+
+void __cdecl Vec4Scale(const float* v, float scale, float* result)
+{
+    *result = scale * *v;
+    result[1] = scale * v[1];
+    result[2] = scale * v[2];
+    result[3] = scale * v[3];
+}
+
+void __cdecl Vec3Cross(const float* v0, const float* v1, float* cross)
+{
+    if (v0 == cross)
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector.h", 401, 0, "%s", "v0 != cross");
+    if (v1 == cross)
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector.h", 402, 0, "%s", "v1 != cross");
+    *cross = v0[1] * v1[2] - v0[2] * v1[1];
+    cross[1] = v0[2] * *v1 - *v0 * v1[2];
+    cross[2] = *v0 * v1[1] - v0[1] * *v1;
+}

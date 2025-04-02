@@ -15,46 +15,38 @@ union PackedUnitVec // sizeof=0x4
     unsigned __int8 array[4];
 };
 
-union float4 // sizeof=0x10
-{                                       // ...
-    float v[4];
-    unsigned int u[4];
-    PackedUnitVec unitVec[4];
-};
+using vec2 = float[2];
+using vec3 = float[3];
+using vec4 = float[4];
 
-struct mat3x4 // sizeof=0x30
-{                                       // ...
-    float4 x;                           // ...
-    float4 y;                           // ...
-    float4 z;                           // ...
-};
+// TODO change if we ever actually use classes
+#define vec2r float*
+#define vec3r float*
+#define vec4r float*
 
-struct mat4x4 : mat3x4 // sizeof=0x40
-{                                       // ...
-    float4 w;                           // ...
-};
+// note - row major order
+using mat3x3 = float[3][3];
+using mat4x3 = float[4][3];
+using mat4x4 = float[4][4];
 
 // TODO fun fact: if we initialize these to -0.0 instead the compiler can remove the float addition without -ffast-math or some equivalent
-const float vec2_origin[] = { 0.0, 0.0 };
-const float vec3_origin[] = { 0.0, 0.0, 0.0 };
-const float vec4_origin[] = { 0.0, 0.0, 0.0, 0.0 };
+const vec2 vec2_origin = { 0.0, 0.0 };
+const vec3 vec3_origin = { 0.0, 0.0, 0.0 };
+const vec4 vec4_origin = { 0.0, 0.0, 0.0, 0.0 };
 
-void __cdecl CreateClipMatrix(mat4x4* clipMtx, const float* vieworg, const float (*viewaxis)[3]);
-void __cdecl Float4x4ForViewer(mat4x4* mtx, const float* origin3, const float (*axis3)[3]);
-void __cdecl Float4x4InfinitePerspectiveMatrix(mat4x4* mtx, float tanHalfFovX, float tanHalfFovY, float zNear);
-bool __cdecl Vec4HomogenousClipBothZ(float4* pt0, float4* pt1);
-bool __cdecl Vec4HomogenousClipZW(float4* pt0, float4* pt1, float4 coeffZW);
-bool __cdecl Vec4IsNormalized(const float* v);
+bool __cdecl Vec4HomogenousClipBothZ(vec4r pt0, vec4r pt1);
+bool __cdecl Vec4HomogenousClipZW(vec4r pt0, vec4r pt1, vec4r coeffZW);
+bool __cdecl Vec4IsNormalized(const vec4r v);
 
 void __cdecl TRACK_com_math();
 
 // == RANDOM == 
 void __cdecl Rand_Init(int seed);
 
-double __cdecl random();
-double __cdecl crandom();
+float __cdecl random();
+float __cdecl crandom();
 
-double __cdecl flrand(float min, float max);
+float __cdecl flrand(float min, float max);
 int __cdecl irand(int min, int max);
 
 unsigned int __cdecl RandWithSeed(int* seed);
@@ -62,63 +54,69 @@ void __cdecl GaussianRandom(float* f0, float* f1);
 void __cdecl PointInCircleFromUniformDeviates(float radiusDeviate, float yawDeviate, float* point);
 
 // == SCALAR FUNCTIONS ==
-double __cdecl Q_rint(float in);
-double __cdecl Q_acos(float c);
-double __cdecl Q_rsqrt(float number);
+float __cdecl Q_rint(float in);
+float __cdecl Q_acos(float c);
+float __cdecl Q_rsqrt(float number);
 
-double __cdecl DiffTrack(float tgt, float cur, float rate, float deltaTime);
-double __cdecl DiffTrackAngle(float tgt, float cur, float rate, float deltaTime);
+float __cdecl DiffTrack(float tgt, float cur, float rate, float deltaTime);
+float __cdecl DiffTrackAngle(float tgt, float cur, float rate, float deltaTime);
 
-double __cdecl LinearTrack(float tgt, float cur, float rate, float deltaTime);
-double __cdecl LinearTrackAngle(float tgt, float cur, float rate, float deltaTime);
+float __cdecl LinearTrack(float tgt, float cur, float rate, float deltaTime);
+float __cdecl LinearTrackAngle(float tgt, float cur, float rate, float deltaTime);
 
-double __cdecl GraphGetValueFromFraction(int knotCount, const float (*knots)[2], float fraction);
+float __cdecl GraphGetValueFromFraction(int knotCount, const float (*knots)[2], float fraction);
 
-double __cdecl AngleDelta(float a1, float a2);
+float __cdecl AngleDelta(float a1, float a2);
 void __cdecl AnglesSubtract(float* v1, float* v2, float* v3);
 
-double __cdecl RotationToYaw(const float* rot);
-double __cdecl AngleNormalize360(float angle);
+float __cdecl RotationToYaw(const float* rot);
+float __cdecl AngleNormalize360(float angle);
 
-double __cdecl ColorNormalize(float* in, float* out);
+float __cdecl ColorNormalize(float* in, float* out);
 
-double __cdecl PitchForYawOnNormal(float fYaw, const float* normal);
+float __cdecl PitchForYawOnNormal(float fYaw, const float* normal);
 
 // == PACKING ==
 unsigned __int8 __cdecl DirToByte(const float *dir);
 void __cdecl ByteToDir(unsigned int b, float *dir);
 
 // == VECTOR FUNCTIONS ==
-double __cdecl Vec2Distance(const float *v1, const float *v2);
-double __cdecl Vec2DistanceSq(const float *p1, const float *p2);
-double __cdecl Vec2Normalize(float* v);
-double __cdecl Vec2NormalizeTo(const float* v, float* out);
-void __cdecl YawVectors2D(float yaw, float* forward, float* right);
+float __cdecl Vec2Distance(const vec2r v1, const vec2r v2);
+float __cdecl Vec2DistanceSq(const vec2r p1, const vec2r p2);
+float __cdecl Vec2Normalize(vec2r v);
+float __cdecl Vec2NormalizeTo(const vec2r v, vec2r out);
+float __cdecl Vec2Length(const vec2r v);
+void __cdecl YawVectors2D(float yaw, vec2r forward, vec2r right);
 
-void __cdecl Vec3Add(const float* a, const float* b, float* sum);
-void __cdecl Vec3Sub(const float* a, const float* b, float* diff);
+void __cdecl Vec3Add(const vec3r a, const vec3r b, vec3r sum);
+void __cdecl Vec3Sub(const vec3r a, const vec3r b, vec3r diff);
+void __cdecl Vec3Mul(const vec3r a, const vec3r b, vec3r product);
 
-void __cdecl Vec3Negate(const float* from, float* to);
+void __cdecl Vec3Negate(const vec3r from, vec3r to);
 
-void __cdecl Vec3Avg(const float* a, const float* b, float* sum);
+void __cdecl Vec3Avg(const vec3r a, const vec3r b, vec3r sum);
 
-double __cdecl Vec3Dot(const float* a, const float* b);
-double __cdecl Vec3LengthSq(const float* v);
-void __cdecl Vec3Scale(const float* v, float scale, float* result);
+float __cdecl Vec3Dot(const vec3r a, const vec3r b);
+void __cdecl Vec3Cross(const vec3r v0, const vec3r v1, vec3r cross);
+float __cdecl Vec3LengthSq(const vec3r v);
+void __cdecl Vec3Scale(const vec3r v, float scale, vec3r result);
 
-void __cdecl Vec3ScaleMad(float scale0, const float* dir0, float scale1, const float* dir1, float* result);
-bool __cdecl Vec3IsNormalized(const float* v);
+void __cdecl Vec3ScaleMad(float scale0, const vec3r dir0, float scale1, const vec3r dir1, vec3r result);
+float __cdecl Vec3Normalize(float* v);
+bool __cdecl Vec3IsNormalized(const vec3r v);
 
-double __cdecl Vec3Length(const float* v);
-void __cdecl Vec3Copy(const float* from, float* to);
+float __cdecl Vec3Length(const vec3r v);
+void __cdecl Vec3Copy(const vec3r from, vec3r to);
 
 void __cdecl Vec3ProjectionCoords(const float *dir, int *xCoord, int *yCoord);
-double __cdecl Vec3NormalizeTo(const float *v, float *out);
-void __cdecl Vec3Mad(const float* start, float scale, const float* dir, float* result);
-void __cdecl Vec3Rotate(const float *in, const float (*matrix)[3], float *out);
-void __cdecl Vec3RotateTranspose(const float *in, const float (*matrix)[3], float *out);
+float __cdecl Vec3NormalizeTo(const vec3r v, vec3r out);
+void __cdecl Vec3Mad(const vec3r start, float scale, const vec3r dir, vec3r result);
+void __cdecl Vec3Rotate(const vec3r in, const mat3x3& matrix, vec3r out);
+void __cdecl Vec3RotateTranspose(const vec3r in, const mat3x3& matrix, vec3r out);
 
 void __cdecl Vec3Basis_RightHanded(const float *forward, float *left, float *up);
+
+void __cdecl Vec3Lerp(const float* start, const float* end, float fraction, float* endpos);
 
 int __cdecl VecNCompareCustomEpsilon(const float* v0, const float* v1, float epsilon, int coordCount);
 void __cdecl RotatePointAroundVector(float* dst, const float* dir, const float* point, float degrees);
@@ -129,52 +127,63 @@ void __cdecl AngleVectors(const float* angles, float* forward, float* right, flo
 void __cdecl AnglesToAxis(const float* angles, float (*axis)[3]);
 void __cdecl AxisToQuat(const float (*mat)[3], float* out);
 
-double __cdecl PointToBoxDistSq(const float* pt, const float* mins, const float* maxs);
+float __cdecl PointToBoxDistSq(const float* pt, const float* mins, const float* maxs);
 
-double __cdecl Vec4Dot(const float* a, const float* b);
-double __cdecl Vec4Normalize(float* v);
+float __cdecl Vec4Dot(const float* a, const float* b);
+float __cdecl Vec4Normalize(float* v);
+void __cdecl Vec4Mul(const float* a, const float* b, float* product);
+float __cdecl Vec4LengthSq(const float* v);
+void __cdecl Vec4Scale(const float* v, float scale, float* result);
 
-double __cdecl Vec2Length(const float* v);
-void __cdecl Vec3Cross(const float* v0, const float* v1, float* cross);
+void __cdecl Vec4Lerp(const float* from, const float* to, float frac, float* result);
 
-double __cdecl vectoyaw(const float *vec);
-double __cdecl vectosignedyaw(const float *vec);
-double __cdecl vectopitch(const float *vec);
-double __cdecl vectosignedpitch(const float *vec);
+float __cdecl vectoyaw(const float *vec);
+float __cdecl vectosignedyaw(const float *vec);
+float __cdecl vectopitch(const float *vec);
+float __cdecl vectosignedpitch(const float *vec);
 void __cdecl vectoangles(const float *vec, float *angles);
 
 void __cdecl PerpendicularVector(const float *src, float *dst);
 
 void __cdecl VectorAngleMultiply(float* vec, float angle);
 
-void __cdecl AxisClear(float (*axis)[3]);
-void __cdecl AxisTranspose(const float (*in)[3], float (*out)[3]);
-void __cdecl AxisTransformVec3(const float (*axes)[3], const float* vec, float* out);
+void __cdecl AxisClear(mat3x3& axis);
+void __cdecl AxisTranspose(const mat3x3& in, mat3x3& out);
+void __cdecl AxisTransformVec3(const mat3x3& axis, const float* vec, float* out);
 
-void __cdecl YawToAxis(float yaw, float (*axis)[3]);
-void __cdecl AxisToAngles(const float (*axis)[3], float* angles);
+void __cdecl YawToAxis(float yaw, mat3x3& axis);
+void __cdecl AxisToAngles(const mat3x3& axis, vec3r angles);
 
 // == MATRICES ==
-void __cdecl MatrixIdentity33(float (*out)[3]);
-void __cdecl MatrixIdentity44(float (*out)[4]);
-void __cdecl MatrixSet44(float (*out)[4], const float *origin, const float (*axis)[3], float scale);
-void __cdecl MatrixMultiply(const float (*in1)[3], const float (*in2)[3], float (*out)[3]);
-void __cdecl MatrixMultiply43(const float (*in1)[3], const float (*in2)[3], float (*out)[3]);
-void __cdecl MatrixMultiply44(const float (*in1)[4], const float (*in2)[4], float (*out)[4]);
-void __cdecl MatrixTranspose(const float (*in)[3], float (*out)[3]);
-void __cdecl MatrixTranspose44(const float *in, float *out);
-void __cdecl MatrixInverseOrthogonal43(const float (*in)[3], float (*out)[3]);
-void __cdecl MatrixInverse44(const float *mat, float *dst);
-void __cdecl MatrixTransformVector44(const float *vec, const float (*mat)[4], float *out);
-void __cdecl MatrixTransposeTransformVector(const float *in1, const float (*in2)[3], float *out);
-void __cdecl MatrixTransformVector43(const float *in1, const float (*in2)[3], float *out);
-void __cdecl MatrixTransposeTransformVector43(float *in1, const float (*in2)[3], float *out);
-void __cdecl MatrixTransformVectorQuatTrans(const float* in, const struct DObjAnimMat* mat, float* out);
+void __cdecl MatrixIdentity33(mat3x3& out);
+void __cdecl MatrixIdentity44(mat4x4& out);
 
-double __cdecl RadiusFromBounds(const float *mins, const float *maxs);
-double __cdecl RadiusFromBounds2D(const float *mins, const float *maxs);
-double __cdecl RadiusFromBoundsSq(const float *mins, const float *maxs);
-double __cdecl RadiusFromBounds2DSq(const float *mins, const float *maxs);
+void __cdecl MatrixSet44(mat4x4& out, const vec3r origin, const mat3x3& axis, float scale);
+
+void __cdecl MatrixMultiply(const mat3x3& in1, const mat3x3& in2, mat3x3& out);
+void __cdecl MatrixMultiply43(const mat4x3& in1, const mat4x3& int2, mat4x3& out);
+void __cdecl MatrixMultiply44(const mat4x4& in1, const mat4x4& int2, mat4x4& out);
+
+void __cdecl MatrixTranspose(const mat3x3& in, mat3x3& out);
+void __cdecl MatrixTranspose44(const mat4x4& in, mat4x4& out);
+
+void __cdecl MatrixInverseOrthogonal43(const mat4x3& in, mat4x3& out);
+void __cdecl MatrixInverse44(const mat4x4& mat, mat4x4& dst);
+
+void __cdecl MatrixTransformVector(const vec3r in1, const mat3x3& in2, vec3r out);
+void __cdecl MatrixTransformVector43(const vec3r in1, const mat4x3& in2, vec3r out);
+void __cdecl MatrixTransformVector44(const vec4r vec, const mat4x4& mat, vec4r out);
+
+void __cdecl MatrixTransposeTransformVector(const vec3r in1, const mat3x3& in2, vec3r out);
+void __cdecl MatrixTransposeTransformVector43(const vec3r in1, const mat4x3&, vec3r out);
+
+void __cdecl MatrixTransformVectorQuatTrans(const vec3r in, const struct DObjAnimMat* mat, vec3r out);
+
+float __cdecl RadiusFromBounds(const float *mins, const float *maxs);
+float __cdecl RadiusFromBounds2D(const float *mins, const float *maxs);
+
+float __cdecl RadiusFromBoundsSq(const float *mins, const float *maxs);
+float __cdecl RadiusFromBounds2DSq(const float *mins, const float *maxs);
 
 void __cdecl ExtendBounds(float *mins, float *maxs, const float *offset);
 void __cdecl ExpandBoundsToWidth(float *mins, float *maxs);
@@ -225,14 +234,14 @@ bool __cdecl CullSphereFromCone(
     float cosHalfFov,
     const float *sphereCenter,
     float radius);
-void __cdecl AxisCopy(const float (*in)[3], float (*out)[3]);
+void __cdecl AxisCopy(const mat3x3 &in, mat3x3& out);
 
 // == QUATERNIONS ==
 void __cdecl AnglesToQuat(const float* angles, float* quat);
 void __cdecl UnitQuatToAngles(const float* quat, float* angles);
 
-void __cdecl QuatToAxis(const float* quat, float (*axis)[3]);
-void __cdecl UnitQuatToAxis(const float* quat, float (*axis)[3]);
+void __cdecl QuatToAxis(const float* quat, mat3x3& axis);
+void __cdecl UnitQuatToAxis(const float* quat, mat3x3& axis);
 void __cdecl UnitQuatToForward(const float* quat, float* forward);
 void __cdecl QuatSlerp(const float* from, const float* to, float frac, float* result);
 void __cdecl QuatMultiply(const float* in1, const float* in2, float* out);

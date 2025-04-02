@@ -42,6 +42,9 @@ for geometry objects
 #endif
 #include <universal/assertive.h>
 
+// ADD: please stop implicitly using crap!!
+#include <string.h>
+
 //****************************************************************************
 // helper functions for dCollide()ing a space with another geom
 
@@ -503,16 +506,6 @@ int dGeomIsEnabled (dxGeom *g)
 
 static int num_user_classes = 0;
 static dGeomClass user_classes [dMaxUserClasses];
-
-
-struct dxUserGeom : public dxGeom {
-  void *user_data;
-
-  dxUserGeom (int class_num);
-  ~dxUserGeom();
-  void computeAABB();
-  int AABBTest (dxGeom *o, dReal aabb[6]);
-};
 
 
 dxUserGeom::dxUserGeom (int class_num) : dxGeom (0,1)

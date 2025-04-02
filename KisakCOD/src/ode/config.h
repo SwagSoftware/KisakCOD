@@ -6,3 +6,5 @@
 
 #define dTRIMESH_ENABLED 1
 #define dSINGLE 1
+
+#define dInfinity FLT_MAX

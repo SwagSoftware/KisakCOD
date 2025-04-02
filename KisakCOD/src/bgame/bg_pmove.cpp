@@ -1696,17 +1696,6 @@ void __cdecl PM_FlyMove(pmove_t *pm, pml_t *pml)
     PM_StepSlideMove(pm, pml, 0);
 }
 
-void __cdecl Vec3Cross(const float *v0, const float *v1, float *cross)
-{
-    if (v0 == cross)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector.h", 401, 0, "%s", "v0 != cross");
-    if (v1 == cross)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector.h", 402, 0, "%s", "v1 != cross");
-    *cross = v0[1] * v1[2] - v0[2] * v1[1];
-    cross[1] = v0[2] * *v1 - *v0 * v1[2];
-    cross[2] = *v0 * v1[1] - v0[1] * *v1;
-}
-
 void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
 {
     float scale; // [esp+8h] [ebp-2Ch]
@@ -3488,14 +3477,6 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
             }
         }
     }
-}
-
-double __cdecl Vec2Length(const float *v)
-{
-    float v3; // [esp+4h] [ebp-4h]
-
-    v3 = v[1] * v[1] + *v * *v;
-    return (float)sqrt(v3);
 }
 
 int __cdecl PM_GetStanceEx(int stance, int backward)

@@ -369,7 +369,7 @@ void __cdecl GetHudelemDirective(int localClientNum, char *directive, char *resu
     }
 }
 
-void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, char *result)
+void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char* arg0, char* result)
 {
     int fakeSeconds; // [esp+4h] [ebp-4h] BYREF
 
@@ -393,7 +393,7 @@ void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, cha
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    Com_sprintf(result, 4u, "%02d", fakeSeconds + MEMORY[0x9D5560] / 1000);
+    Com_sprintf(result, 4u, "%02d", fakeSeconds + cgArray.time / 1000);
 }
 
 void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0)
@@ -470,7 +470,7 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        cghe.timeNow = MEMORY[0x9D5560];
+        cghe.timeNow = cgArray.time;
         if (localClientNum)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
@@ -479,7 +479,7 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (elem->fadeStartTime > *(unsigned int *)(MEMORY[0x98F45C] + 8))
+        if (elem->fadeStartTime > cgArray.nextSnap->serverTime)
         {
             if (localClientNum)
                 MyAssertHandler(
@@ -495,7 +495,7 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
                 0,
                 "elem->fadeStartTime <= CG_GetLocalClientGlobals( localClientNum )->nextSnap->serverTime\n\t%i, %i",
                 elem->fadeStartTime,
-                *(unsigned int *)(MEMORY[0x98F45C] + 8));
+                cgArray.nextSnap->serverTime);
         }
         BG_LerpHudColors(elem, cghe.timeNow, &toColor);
         if (toColor.a)
@@ -1796,23 +1796,25 @@ void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum)
     }
 }
 
-void  AddDrawSurfForHudElemWaypoint(hudelem_color_t a1@<ebp>, int localClientNum, const hudelem_s *elem)
+void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
 {
-    unsigned int v3[3]; // [esp-Ch] [ebp-9Ch] BYREF
+    hudelem_color_t v2; // ebp
+    _DWORD v3[3]; // [esp-Ch] [ebp-9Ch] BYREF
     FxSprite sprite; // [esp+0h] [ebp-90h]
     float x; // [esp+20h] [ebp-70h]
     float v6; // [esp+24h] [ebp-6Ch]
     int v7; // [esp+28h] [ebp-68h]
     float v8; // [esp+2Ch] [ebp-64h]
-    Material *radius; // [esp+30h] [ebp-60h]
+    Material* radius; // [esp+30h] [ebp-60h]
     int renderFxFlags; // [esp+34h] [ebp-5Ch] BYREF
-    char materialName[64]; // [esp+40h] [ebp-50h] BYREF
+    hudelem_color_t v11; // [esp+78h] [ebp-18h] BYREF
+    int time; // [esp+7Ch] [ebp-14h]
     hudelem_color_t color; // [esp+84h] [ebp-Ch]
-    void *v13; // [esp+88h] [ebp-8h]
-    void *retaddr; // [esp+90h] [ebp+0h]
+    void* v14; // [esp+88h] [ebp-8h]
+    void* retaddr; // [esp+90h] [ebp+0h]
 
-    color = a1;
-    v13 = retaddr;
+    color = v2;
+    v14 = retaddr;
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
@@ -1821,15 +1823,15 @@ void  AddDrawSurfForHudElemWaypoint(hudelem_color_t a1@<ebp>, int localClientNum
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    *(unsigned int *)&materialName[60] = MEMORY[0x9D5560];
-    BG_LerpHudColors(elem, MEMORY[0x9D5560], (hudelem_color_t *)&materialName[56]);
-    if (materialName[59])
+    time = cgArray.time;
+    BG_LerpHudColors(elem, cgArray.time, &v11);
+    if (v11.a)
     {
-        if (!CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, (char *)&renderFxFlags, 0x40u))
+        if (!CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, (char*)&renderFxFlags, 0x40u))
         {
-            if (CG_ServerMaterialName(localClientNum, elem->materialIndex, (char *)&renderFxFlags, 0x40u))
+            if (CG_ServerMaterialName(localClientNum, elem->materialIndex, (char*)&renderFxFlags, 0x40u))
             {
-                radius = Material_RegisterHandle((char *)&renderFxFlags, 7);
+                radius = Material_RegisterHandle((char*)&renderFxFlags, 7);
                 v8 = HudElemWaypointHeight(localClientNum, elem);
                 if (v8 != 0.0)
                 {
@@ -1844,17 +1846,17 @@ void  AddDrawSurfForHudElemWaypoint(hudelem_color_t a1@<ebp>, int localClientNum
                         v6 = v8 * 0.00430000014603138;
                     }
                     x = elem->x;
-                    *(float *)&sprite.flags = elem->y;
+                    *(float*)&sprite.flags = elem->y;
                     sprite.minScreenRadius = elem->z;
-                    *(float *)&v3[1] = x;
+                    *(float*)&v3[1] = x;
                     v3[2] = sprite.flags;
-                    *(float *)&sprite.material = sprite.minScreenRadius;
-                    sprite.pos[0] = *(float *)&materialName[56];
-                    *(unsigned int *)sprite.rgbaColor = v7;
+                    *(float*)&sprite.material = sprite.minScreenRadius;
+                    LODWORD(sprite.pos[0]) = (hudelem_color_t)v11.rgba;
+                    *(_DWORD*)sprite.rgbaColor = v7;
                     sprite.pos[1] = v6;
                     sprite.pos[2] = 0.0;
                     v3[0] = radius;
-                    FX_SpriteAdd((FxSprite *)v3);
+                    FX_SpriteAdd((FxSprite*)v3);
                 }
             }
         }
@@ -1879,7 +1881,7 @@ double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    deltaTime = MEMORY[0x9D5560] - elem->scaleStartTime;
+    deltaTime = cgArray.time - elem->scaleStartTime;
     if (deltaTime >= elem->scaleTime)
         return height;
     fromHeight = (float)elem->fromHeight;

@@ -24,7 +24,10 @@
 #define _ODE_COMMON_H_
 
 // make alloca happy
-#include <memory.h>
+#include <malloc.h>
+#ifndef alloca
+#define alloca _alloca
+#endif
 
 #include <ode/config.h>
 #include <ode/error.h>

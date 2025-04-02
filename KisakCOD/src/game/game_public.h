@@ -56,7 +56,6 @@ void __cdecl Scr_GetClientField(gclient_s *client, int offset);
 
 
 // g_helicopter
-void __cdecl Vec3Mul(const float *a, const float *b, float *product);
 void __cdecl VEH_CheckForPredictedCrash(gentity_s *ent);
 void __cdecl VEH_UpdateClientChopper(gentity_s *ent);
 void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float *rotAccel);

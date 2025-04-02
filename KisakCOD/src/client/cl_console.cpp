@@ -2899,14 +2899,6 @@ void __cdecl ConDraw_Box(float x, float y, float w, float h, const float *color)
     R_AddCmdDrawStretchPic(x, v5, w, 2.0, 0.0, 0.0, 0.0, 0.0, darkColor, cls.whiteMaterial);
 }
 
-void __cdecl Vec4Scale(const float *v, float scale, float *result)
-{
-    *result = scale * *v;
-    result[1] = scale * v[1];
-    result[2] = scale * v[2];
-    result[3] = scale * v[3];
-}
-
 void __cdecl ConDrawInput_IncrMatchCounter(char *str)
 {
     if (Con_IsAutoCompleteMatch(str, conDrawInputGlob.inputText, conDrawInputGlob.inputTextLen))

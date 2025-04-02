@@ -1175,13 +1175,6 @@ void __cdecl CG_InterpolateEntityPosition(cg_s *cgameGlob, centity_s *cent)
     }
 }
 
-void __cdecl Vec3Lerp(const float *start, const float *end, float fraction, float *endpos)
-{
-    *endpos = (*end - *start) * fraction + *start;
-    endpos[1] = (end[1] - start[1]) * fraction + start[1];
-    endpos[2] = (end[2] - start[2]) * fraction + start[2];
-}
-
 void __cdecl CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent)
 {
     if (!cent)

@@ -1,13 +1,6 @@
 #include "game_public.h"
 
 
-void __cdecl Vec3Mul(const float *a, const float *b, float *product)
-{
-    *product = *a * *b;
-    product[1] = a[1] * b[1];
-    product[2] = a[2] * b[2];
-}
-
 void __cdecl VEH_CheckForPredictedCrash(gentity_s *ent)
 {
     vehicle_physic_t *phys; // [esp+Ch] [ebp-40h]

@@ -2,6 +2,30 @@
 
 static FxBeamInfo g_beamInfo;
 
+// NOTE: yes, these really seem to be different matrix types for some reason..
+union float4 {
+    vec4 v;
+    unsigned int u[4];
+    PackedUnitVec unit[4];
+};
+
+struct float4x3 {
+    float4 x;
+    float4 y;
+    float4 z;
+};
+
+struct float4x4 {
+    float4 x;
+    float4 y;
+    float4 z;
+    float4 w;
+};
+void __cdecl CreateClipMatrix(mat4x4* clipMtx, const float* vieworg, const vec3* viewaxis);
+
+void __cdecl Float4x4ForViewer(float4x4* mtx, const float* origin3, const vec3* axis);
+void __cdecl Float4x4InfinitePerspectiveMatrix(float4x4* mtx, float tanHalfFovX, float tanHalfFovY, float zNear);
+
 void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
 {
     float4 v1; // [esp-24h] [ebp-2DCh]
@@ -103,7 +127,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
         *(_QWORD *)v1.v = *(_QWORD *)beamWorldBegin.v;
         v1.u[2] = beamWorldBegin.u[2];
         v1.v[3] = 0.0;
-        if (FX_GenerateBeam_GetFlatDelta(COERCE_FLOAT(&savedregs), &clipMtx, &invClipMtx, v1, beamWorldEnd, &flatDelta))
+        if (FX_GenerateBeam_GetFlatDelta(&clipMtx, &invClipMtx, v1, beamWorldEnd, &flatDelta))
         {
             indexCount = 3 * (2 * segCount + 2);
             vertexCount = 2 * segCount + 4;
@@ -302,7 +326,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     }
 }
 
-void __cdecl CreateClipMatrix(mat4x4 *clipMtx, const float *vieworg, const float (*viewaxis)[3])
+void __cdecl CreateClipMatrix(mat4x4* clipMtx, const float* vieworg, const vec3* viewaxis)
 {
     unsigned int v3; // [esp+Ch] [ebp-90h]
     unsigned int LocalClientNum; // [esp+10h] [ebp-8Ch]
@@ -395,7 +419,7 @@ void __cdecl CreateClipMatrix(mat4x4 *clipMtx, const float *vieworg, const float
         + viewMtx.w.v[3] * projMtx.w.v[3];
 }
 
-void __cdecl Float4x4ForViewer(mat4x4 *mtx, const float *origin3, const float (*axis3)[3])
+void __cdecl Float4x4ForViewer(mat4x4 *mtx, const vec3 *origin3, const vec3 *axis3)
 {
     float v3; // [esp+8h] [ebp-1E4h]
     float v4; // [esp+Ch] [ebp-1E0h]
@@ -544,194 +568,169 @@ void __cdecl Float4x4ForViewer(mat4x4 *mtx, const float *origin3, const float (*
     mtx->w = transRow;
 }
 
-void __cdecl Float4x4InfinitePerspectiveMatrix(mat4x4 *mtx, float tanHalfFovX, float tanHalfFovY, float zNear)
+void __cdecl Float4x4InfinitePerspectiveMatrix(float4x4* mtx, float tanHalfFovX, float tanHalfFovY, float zNear)
 {
-    float4 M1; // [esp+0h] [ebp-48h]
-    float4 M2; // [esp+10h] [ebp-38h]
-    __int64 M3; // [esp+24h] [ebp-24h]
+    float M1_4; // [esp+4h] [ebp-44h]
     float M3_8; // [esp+2Ch] [ebp-1Ch]
-    __int64 M0; // [esp+34h] [ebp-14h]
-    __int64 M0_8; // [esp+3Ch] [ebp-Ch]
+    float M0; // [esp+34h] [ebp-14h]
 
-    M2.v[0] = 0.0;
-    M2.v[1] = 0.0;
-    M2.v[2] = 0.99951172;
-    M2.v[3] = 1.0;
-    *(float *)&M3 = 0.0;
-    *((float *)&M3 + 1) = 0.0;
     M3_8 = -zNear * (float)0.99951172;
-    *(float *)&M0 = (float)0.99951172 / tanHalfFovX;
-    *((float *)&M0 + 1) = 0.0;
-    *(float *)&M0_8 = 0.0;
-    *((float *)&M0_8 + 1) = 0.0;
-    M1.v[0] = 0.0;
-    M1.v[1] = (float)0.99951172 / tanHalfFovY;
-    M1.v[2] = 0.0;
-    M1.v[3] = 0.0;
-    *(_QWORD *)mtx->x.v = M0;
-    *(_QWORD *)&mtx->x.unitVec[2].packed = M0_8;
-    mtx->y = M1;
-    mtx->z = M2;
-    *(_QWORD *)mtx->w.v = M3;
+    M0 = (float)0.99951172 / tanHalfFovX;
+    M1_4 = (float)0.99951172 / tanHalfFovY;
+    
+    mtx->x.v[0] = M0;
+    mtx->x.v[1] = 0.0;
+    mtx->x.v[2] = 0.0;
+    mtx->x.v[3] = 0.0;
+
+    mtx->y.v[0] = 0.0;
+    mtx->y.v[1] = M1_4;
+    mtx->y.v[2] = 0.0;
+    mtx->y.v[3] = 0.0;
+
+    mtx->z.v[0] = 0.0;
+    mtx->z.v[1] = 0.0;
+    mtx->z.v[2] = 0.99951172;
+    mtx->z.v[3] = 1.0;
+
+    mtx->w.v[0] = 0.0;
+    mtx->w.v[1] = 0.0;
     mtx->w.v[2] = M3_8;
     mtx->w.v[3] = 0.0;
 }
 
 char  FX_GenerateBeam_GetFlatDelta(
-    const mat4x4 *clipMtx,
-    const mat4x4 *invClipMtx,
+    const float4x4 *clipMtx,
+    const float4x4 *invClipMtx,
     float4 beamWorldBegin,
     float4 beamWorldEnd,
     float4 *outFlatDelta)
 {
-    float v7; // [esp-14h] [ebp-154h]
-    float v8; // [esp-10h] [ebp-150h]
-    float v9; // [esp-10h] [ebp-150h]
-    float4 v10; // [esp-Ch] [ebp-14Ch] BYREF
-    float4 temp_8; // [esp+8h] [ebp-138h]
-    float v12; // [esp+18h] [ebp-128h]
-    __int64 v13; // [esp+1Ch] [ebp-124h]
-    float4 worldSpaceFlatDelta; // [esp+24h] [ebp-11Ch]
-    float v15; // [esp+34h] [ebp-10Ch]
-    __int64 v16; // [esp+38h] [ebp-108h]
-    __int64 v17; // [esp+40h] [ebp-100h]
-    float4 v18; // [esp+48h] [ebp-F8h]
-    __int64 v19; // [esp+58h] [ebp-E8h]
-    __int64 v20; // [esp+60h] [ebp-E0h]
-    float clipSpaceFlatDelta_4; // [esp+68h] [ebp-D8h]
-    float clipSpaceFlatDelta_8; // [esp+6Ch] [ebp-D4h]
-    float clipSpaceFlatDelta_12; // [esp+70h] [ebp-D0h]
-    float4 clipSpaceBeamEndDivided; // [esp+74h] [ebp-CCh]
-    float v25; // [esp+84h] [ebp-BCh]
-    float4 clipSpaceBeamBeginDivided; // [esp+88h] [ebp-B8h] BYREF
-    float v27; // [esp+98h] [ebp-A8h]
-    float4 clipSpaceBeamEnd; // [esp+9Ch] [ebp-A4h]
-    float v29; // [esp+ACh] [ebp-94h]
-    float v30; // [esp+B0h] [ebp-90h]
-    float v31; // [esp+B4h] [ebp-8Ch]
-    float v32; // [esp+B8h] [ebp-88h]
-    float v33; // [esp+BCh] [ebp-84h]
-    float v34; // [esp+C0h] [ebp-80h] BYREF
-    float v35; // [esp+C4h] [ebp-7Ch]
-    float v36; // [esp+C8h] [ebp-78h]
-    float4 clipSpaceBeamBegin; // [esp+CCh] [ebp-74h]
-    float v38; // [esp+DCh] [ebp-64h]
-    float v39; // [esp+E0h] [ebp-60h]
-    float v40; // [esp+E4h] [ebp-5Ch]
-    float v41; // [esp+E8h] [ebp-58h]
-    float v42; // [esp+ECh] [ebp-54h]
-    float v43; // [esp+F0h] [ebp-50h]
-    float v44; // [esp+F4h] [ebp-4Ch]
-    float v45; // [esp+F8h] [ebp-48h]
-    float worldSpaceBeamEnd[5]; // [esp+FCh] [ebp-44h]
-    float v47; // [esp+110h] [ebp-30h]
-    float v48; // [esp+114h] [ebp-2Ch]
-    float v49; // [esp+118h] [ebp-28h]
-    float worldSpaceBeamBegin[9]; // [esp+11Ch] [ebp-24h]
-    float retaddr; // [esp+140h] [ebp+0h]
+    float v7; // [esp-148h] [ebp-154h]
+    float v8; // [esp-144h] [ebp-150h]
+    float v9; // [esp-144h] [ebp-150h]
+    float4 v10; // [esp-140h] [ebp-14Ch] BYREF
+    float4 v11; // [esp-12Ch] [ebp-138h]
+    float v12; // [esp-11Ch] [ebp-128h]
+    __int64 v13; // [esp-118h] [ebp-124h]
+    float v14; // [esp-110h] [ebp-11Ch]
+    float v15; // [esp-10Ch] [ebp-118h]
+    __int64 v16; // [esp-108h] [ebp-114h]
+    float v17; // [esp-100h] [ebp-10Ch]
+    float4 v18; // [esp-FCh] [ebp-108h]
+    float4 v19; // [esp-ECh] [ebp-F8h]
+    float4 v20; // [esp-DCh] [ebp-E8h]
+    float v21; // [esp-CCh] [ebp-D8h]
+    float v22; // [esp-C8h] [ebp-D4h]
+    float v23; // [esp-C4h] [ebp-D0h]
+    float v24; // [esp-C0h] [ebp-CCh]
+    float v25; // [esp-BCh] [ebp-C8h]
+    float v26; // [esp-B8h] [ebp-C4h]
+    float v27; // [esp-B4h] [ebp-C0h]
+    float v28; // [esp-B0h] [ebp-BCh]
+    float v29; // [esp-ACh] [ebp-B8h]
+    float v30; // [esp-A8h] [ebp-B4h]
+    float4 v31; // [esp-A4h] [ebp-B0h] BYREF
+    float4 v32; // [esp-94h] [ebp-A0h]
+    float v33; // [esp-84h] [ebp-90h]
+    float v34; // [esp-80h] [ebp-8Ch]
+    float v35; // [esp-7Ch] [ebp-88h]
+    float v36; // [esp-78h] [ebp-84h]
+    float4 v37; // [esp-74h] [ebp-80h] BYREF
+    float4 v38; // [esp-64h] [ebp-70h]
+    float v39; // [esp-54h] [ebp-60h]
+    float v40; // [esp-50h] [ebp-5Ch]
+    float v41; // [esp-4Ch] [ebp-58h]
+    float v42; // [esp-48h] [ebp-54h]
+    float v43; // [esp-44h] [ebp-50h]
+    float v44; // [esp-40h] [ebp-4Ch]
+    float v45; // [esp-3Ch] [ebp-48h]
+    float v46; // [esp-38h] [ebp-44h]
+    float4 v47; // [esp-34h] [ebp-40h]
+    float v48; // [esp-24h] [ebp-30h]
+    float v49; // [esp-20h] [ebp-2Ch]
+    float v50; // [esp-1Ch] [ebp-28h]
+    float v51; // [esp-18h] [ebp-24h]
+    float4 v52; // [esp-14h] [ebp-20h]
+    int v53; // [esp+0h] [ebp-Ch]
+    void* v54; // [esp+4h] [ebp-8h]
+    void* retaddr; // [esp+Ch] [ebp+0h]
 
-    worldSpaceBeamBegin[6] = a1;
-    worldSpaceBeamBegin[7] = retaddr;
-    *(float4 *)&worldSpaceBeamBegin[1] = g_unit;
-    v47 = beamWorldBegin.v[0] + 0.0;
-    v48 = beamWorldBegin.v[1] + 0.0;
-    v49 = beamWorldBegin.v[2] + 0.0;
-    worldSpaceBeamBegin[0] = beamWorldBegin.v[3] + 1.0;
-    *(float4 *)&worldSpaceBeamEnd[1] = g_unit;
+    v53 = v5;
+    v48 = beamWorldBegin.v[0] + 0.0;
+    v49 = beamWorldBegin.v[1] + 0.0;
+    v50 = beamWorldBegin.v[2] + 0.0;
+    v51 = beamWorldBegin.v[3] + 1.0;
+    v47 = g_unit;
     v43 = beamWorldEnd.v[0] + 0.0;
     v44 = beamWorldEnd.v[1] + 0.0;
     v45 = beamWorldEnd.v[2] + 0.0;
-    worldSpaceBeamEnd[0] = beamWorldEnd.v[3] + 1.0;
-    v39 = v47;
-    v40 = v48;
-    v41 = v49;
-    v42 = worldSpaceBeamBegin[0];
-    clipSpaceBeamBegin.v[1] = v47 * clipMtx->x.v[0]
-        + v48 * clipMtx->y.v[0]
-        + v49 * clipMtx->z.v[0]
-        + worldSpaceBeamBegin[0] * clipMtx->w.v[0];
-    clipSpaceBeamBegin.v[2] = v47 * clipMtx->x.v[1]
-        + v48 * clipMtx->y.v[1]
-        + v49 * clipMtx->z.v[1]
-        + worldSpaceBeamBegin[0] * clipMtx->w.v[1];
-    clipSpaceBeamBegin.v[3] = v47 * clipMtx->x.v[2]
-        + v48 * clipMtx->y.v[2]
-        + v49 * clipMtx->z.v[2]
-        + worldSpaceBeamBegin[0] * clipMtx->w.v[2];
-    v38 = v47 * clipMtx->x.v[3] + v48 * clipMtx->y.v[3] + v49 * clipMtx->z.v[3] + worldSpaceBeamBegin[0] * clipMtx->w.v[3];
-    v34 = clipSpaceBeamBegin.v[1];
-    v35 = clipSpaceBeamBegin.v[2];
-    v36 = clipSpaceBeamBegin.v[3];
-    clipSpaceBeamBegin.v[0] = v38;
-    v30 = v43;
-    v31 = v44;
-    v32 = v45;
-    v33 = worldSpaceBeamEnd[0];
-    clipSpaceBeamEnd.v[1] = v43 * clipMtx->x.v[0]
-        + v44 * clipMtx->y.v[0]
-        + v45 * clipMtx->z.v[0]
-        + worldSpaceBeamEnd[0] * clipMtx->w.v[0];
-    clipSpaceBeamEnd.v[2] = v43 * clipMtx->x.v[1]
-        + v44 * clipMtx->y.v[1]
-        + v45 * clipMtx->z.v[1]
-        + worldSpaceBeamEnd[0] * clipMtx->w.v[1];
-    clipSpaceBeamEnd.v[3] = v43 * clipMtx->x.v[2]
-        + v44 * clipMtx->y.v[2]
-        + v45 * clipMtx->z.v[2]
-        + worldSpaceBeamEnd[0] * clipMtx->w.v[2];
-    v29 = v43 * clipMtx->x.v[3] + v44 * clipMtx->y.v[3] + v45 * clipMtx->z.v[3] + worldSpaceBeamEnd[0] * clipMtx->w.v[3];
-    clipSpaceBeamBeginDivided.v[2] = clipSpaceBeamEnd.v[1];
-    clipSpaceBeamBeginDivided.v[3] = clipSpaceBeamEnd.v[2];
-    v27 = clipSpaceBeamEnd.v[3];
-    clipSpaceBeamEnd.v[0] = v29;
-    if (!Vec4HomogenousClipBothZ((float4 *)&v34, (float4 *)&clipSpaceBeamBeginDivided.unitVec[2]))
+    v46 = beamWorldEnd.v[3] + 1.0;
+    v39 = v48;
+    v40 = v49;
+    v41 = v50;
+    v42 = v51;
+    v38.v[0] = v48 * clipMtx->x.v[0] + v49 * clipMtx->y.v[0] + v50 * clipMtx->z.v[0] + v51 * clipMtx->w.v[0];
+    v38.v[1] = v48 * clipMtx->x.v[1] + v49 * clipMtx->y.v[1] + v50 * clipMtx->z.v[1] + v51 * clipMtx->w.v[1];
+    v38.v[2] = v48 * clipMtx->x.v[2] + v49 * clipMtx->y.v[2] + v50 * clipMtx->z.v[2] + v51 * clipMtx->w.v[2];
+    v38.v[3] = v48 * clipMtx->x.v[3] + v49 * clipMtx->y.v[3] + v50 * clipMtx->z.v[3] + v51 * clipMtx->w.v[3];
+    v37 = v38;
+    v33 = v43;
+    v34 = v44;
+    v35 = v45;
+    v36 = v46;
+    v32.v[0] = v43 * clipMtx->x.v[0] + v44 * clipMtx->y.v[0] + v45 * clipMtx->z.v[0] + v46 * clipMtx->w.v[0];
+    v32.v[1] = v43 * clipMtx->x.v[1] + v44 * clipMtx->y.v[1] + v45 * clipMtx->z.v[1] + v46 * clipMtx->w.v[1];
+    v32.v[2] = v43 * clipMtx->x.v[2] + v44 * clipMtx->y.v[2] + v45 * clipMtx->z.v[2] + v46 * clipMtx->w.v[2];
+    v32.v[3] = v43 * clipMtx->x.v[3] + v44 * clipMtx->y.v[3] + v45 * clipMtx->z.v[3] + v46 * clipMtx->w.v[3];
+    v31 = v32;
+    if (!Vec4HomogenousClipBothZ(&v37, &v31))
         return 0;
-    if (clipSpaceBeamBegin.v[0] == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_mat4x4_novec.h", 599, 0, "%s", "in.v[3]");
-    clipSpaceBeamBeginDivided.v[1] = 1.0 / clipSpaceBeamBegin.v[0];
-    clipSpaceBeamEndDivided.v[2] = v34 * clipSpaceBeamBeginDivided.v[1];
-    clipSpaceBeamEndDivided.v[3] = v35 * clipSpaceBeamBeginDivided.v[1];
-    v25 = v36 * clipSpaceBeamBeginDivided.v[1];
-    clipSpaceBeamBeginDivided.v[0] = 1.0;
-    if (clipSpaceBeamEnd.v[0] == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_mat4x4_novec.h", 599, 0, "%s", "in.v[3]");
-    clipSpaceBeamEndDivided.v[1] = 1.0 / clipSpaceBeamEnd.v[0];
-    clipSpaceFlatDelta_4 = clipSpaceBeamBeginDivided.v[2] * clipSpaceBeamEndDivided.v[1];
-    clipSpaceFlatDelta_8 = clipSpaceBeamBeginDivided.v[3] * clipSpaceBeamEndDivided.v[1];
-    clipSpaceFlatDelta_12 = v27 * clipSpaceBeamEndDivided.v[1];
-    clipSpaceBeamEndDivided.v[0] = 1.0;
-    *(float *)&v19 = clipSpaceFlatDelta_4 - clipSpaceBeamEndDivided.v[2];
-    *((float *)&v19 + 1) = clipSpaceFlatDelta_8 - clipSpaceBeamEndDivided.v[3];
-    *(float *)&v20 = clipSpaceFlatDelta_12 - v25;
-    *((float *)&v20 + 1) = (float)1.0 - clipSpaceBeamBeginDivided.v[0];
-    v18 = g_keepXYW;
-    v19 &= *(_QWORD *)g_keepXYW.v;
-    v20 &= *(_QWORD *)&g_keepXYW.unitVec[2].packed;
-    v16 = v19;
-    v17 = v20;
-    worldSpaceFlatDelta.v[1] = *(float *)&v19 * invClipMtx->x.v[0]
-        + *((float *)&v19 + 1) * invClipMtx->y.v[0]
-        + *(float *)&v20 * invClipMtx->z.v[0]
-        + *((float *)&v20 + 1) * invClipMtx->w.v[0];
-    worldSpaceFlatDelta.v[2] = *(float *)&v19 * invClipMtx->x.v[1]
-        + *((float *)&v19 + 1) * invClipMtx->y.v[1]
-        + *(float *)&v20 * invClipMtx->z.v[1]
-        + *((float *)&v20 + 1) * invClipMtx->w.v[1];
-    worldSpaceFlatDelta.v[3] = *(float *)&v19 * invClipMtx->x.v[2]
-        + *((float *)&v19 + 1) * invClipMtx->y.v[2]
-        + *(float *)&v20 * invClipMtx->z.v[2]
-        + *((float *)&v20 + 1) * invClipMtx->w.v[2];
-    v15 = *(float *)&v19 * invClipMtx->x.v[3]
-        + *((float *)&v19 + 1) * invClipMtx->y.v[3]
-        + *(float *)&v20 * invClipMtx->z.v[3]
-        + *((float *)&v20 + 1) * invClipMtx->w.v[3];
-    v12 = worldSpaceFlatDelta.v[1];
-    v13 = *(_QWORD *)&worldSpaceFlatDelta.unitVec[2].packed;
-    worldSpaceFlatDelta.v[0] = v15;
-    temp_8 = g_keepXYZ;
-    outFlatDelta->u[0] = g_keepXYZ.u[0] & worldSpaceFlatDelta.u[1];
-    *(_QWORD *)&outFlatDelta->unitVec[1].packed = *(_QWORD *)&temp_8.unitVec[1].packed & v13;
-    outFlatDelta->u[3] = temp_8.u[3] & worldSpaceFlatDelta.u[0];
+    if (v37.v[3] == 0.0)
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 599, 0, "%s", "in.v[3]");
+    v30 = 1.0 / v37.v[3];
+    v26 = v37.v[0] * v30;
+    v27 = v37.v[1] * v30;
+    v28 = v37.v[2] * v30;
+    v29 = 1.0;
+    if (v31.v[3] == 0.0)
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 599, 0, "%s", "in.v[3]");
+    v25 = 1.0 / v31.v[3];
+    v21 = v31.v[0] * v25;
+    v22 = v31.v[1] * v25;
+    v23 = v31.v[2] * v25;
+    v24 = 1.0;
+    v20.v[0] = v21 - v26;
+    v20.v[1] = v22 - v27;
+    v20.v[2] = v23 - v28;
+    v20.v[3] = (float)1.0 - v29;
+    v19 = g_keepXYW;
+    *(_QWORD*)v20.v &= *(_QWORD*)g_keepXYW.v;
+    *(_QWORD*)&v20.unit[2].packed &= *(_QWORD*)&g_keepXYW.unit[2].packed;
+    v18 = v20;
+    v15 = v20.v[0] * invClipMtx->x.v[0]
+        + v20.v[1] * invClipMtx->y.v[0]
+        + v20.v[2] * invClipMtx->z.v[0]
+        + v20.v[3] * invClipMtx->w.v[0];
+    *(float*)&v16 = v20.v[0] * invClipMtx->x.v[1]
+        + v20.v[1] * invClipMtx->y.v[1]
+        + v20.v[2] * invClipMtx->z.v[1]
+        + v20.v[3] * invClipMtx->w.v[1];
+    *((float*)&v16 + 1) = v20.v[0] * invClipMtx->x.v[2]
+        + v20.v[1] * invClipMtx->y.v[2]
+        + v20.v[2] * invClipMtx->z.v[2]
+        + v20.v[3] * invClipMtx->w.v[2];
+    v17 = v20.v[0] * invClipMtx->x.v[3]
+        + v20.v[1] * invClipMtx->y.v[3]
+        + v20.v[2] * invClipMtx->z.v[3]
+        + v20.v[3] * invClipMtx->w.v[3];
+    v12 = v15;
+    v13 = v16;
+    v14 = v17;
+    v11 = g_keepXYZ;
+    outFlatDelta->u[0] = g_keepXYZ.u[0] & LODWORD(v15);
+    *(_QWORD*)&outFlatDelta->unit[1].packed = *(_QWORD*)&v11.unit[1].packed & v13;
+    outFlatDelta->u[3] = v11.u[3] & LODWORD(v14);
     v10 = *outFlatDelta;
     if (Vec4LengthSq(v10.v) < 0.000002)
         return 0;
@@ -740,7 +739,7 @@ char  FX_GenerateBeam_GetFlatDelta(
         + outFlatDelta->v[2] * outFlatDelta->v[2]
         + outFlatDelta->v[3] * outFlatDelta->v[3];
     if (v8 == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_mat4x4_novec.h", 585, 0, "%s", "len");
+        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 585, 0, "%s", "len");
     v7 = sqrt(v8);
     v9 = 1.0 / v7;
     outFlatDelta->v[0] = outFlatDelta->v[0] * v9;

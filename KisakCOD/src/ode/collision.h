@@ -27,6 +27,9 @@
 #include <ode/collision_space.h>
 #include <ode/contact.h>
 
+ // LWSS ADD - COD4 User data
+struct cbrush_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -176,9 +179,6 @@ typedef struct dGeomClass {
   bool isPlaceable; // LWSS ADD
   dGeomDtorFn *dtor;
 } dGeomClass;
-
-// LWSS ADD - COD4 User data
-#include <xanim/xanim.h>
 
 enum PhysicsGeomType : __int32
 {                                       // ...

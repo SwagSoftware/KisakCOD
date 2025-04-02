@@ -112,7 +112,6 @@ void __cdecl CG_DebugBoxOriented(
     const float *color,
     int depthTest,
     int duration);
-void __cdecl MatrixTransformVector(const float *in1, const float (*in2)[3], float *out);
 void __cdecl CG_DebugCircle(
     const float *center,
     float radius,
@@ -1216,7 +1215,6 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
     float text_y,
     char textAlignMode,
     Material *material);
-void __cdecl Vec4Lerp(const float *from, const float *to, float frac, float *result);
 void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to);
 unsigned int __cdecl GetWeaponIndex(const cg_s *cgameGlob);
 void __cdecl Vec4Copy(const float *from, float *to);

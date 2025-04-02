@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ode/ode.h>
+
 struct PhysPreset;
 
 struct XAnimTree_s;
@@ -11,47 +13,6 @@ enum PhysWorld : __int32
     PHYS_WORLD_FX = 0x1,
     PHYS_WORLD_RAGDOLL = 0x2,
     PHYS_WORLD_COUNT = 0x3,
-};
-
-// KISAKTODO replace with ode
-struct dxBody;
-struct dxJoint;
-struct dxSpace;
-
-struct dxWorld;
-
-struct dBase // sizeof=0x0
-{                                       // ...
-};
-
-struct dxQuickStepParameters // sizeof=0x8
-{                                       // ...
-    int num_iterations;
-    float w;
-};
-
-struct dxContactParameters // sizeof=0x8
-{                                       // ...
-    float max_vel;
-    float min_depth;
-};
-
-struct dxWorldStepInfo // sizeof=0x2C
-{                                       // ...
-    float gravity[4];
-    float global_erp;
-    float global_cfm;
-    dxQuickStepParameters qs;
-    unsigned int holdrand;
-    dxContactParameters contactp;
-};
-
-struct dxAutoDisable // sizeof=0x10
-{                                       // ...
-    float linear_threshold;
-    float angular_threshold;
-    float idle_time;
-    int idle_steps;
 };
 
 struct SorLcpData // sizeof=0x6F0
@@ -86,133 +47,6 @@ struct ConstraintRowData // sizeof=0x90
 struct QuickstepData // sizeof=0xF9C0
 {                                       // ...
     ConstraintRowData rowData[444];
-};
-
-struct dObject : dBase // sizeof=0x14
-{                                       // ...
-    dxWorld *world;
-    dObject *next;
-    dObject **tome;
-    void *userdata;
-    int tag;
-};
-
-struct dxJointNode // sizeof=0x10
-{                                       // ...
-    dxJoint *joint;
-    dxBody *body;
-    int bodyTag;
-    dxJointNode *next;
-};
-
-struct __declspec(align(4)) dxJoint : dObject // sizeof=0x40
-{                                       // ...
-    int typenum;
-    int flags;
-    dxJointNode node[2];
-    bool debug;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-
-struct dxGeom : dBase // sizeof=0x4C
-{                                       // ...
-    //dxGeom_vtbl *__vftable;
-    virtual ~dxGeom()
-    {
-    }
-    virtual void computeAABB()
-    {
-        return;
-    }
-    virtual int AABBTest(dxGeom* o, float* aabb)
-    {
-        return 1;
-    }
-
-    int type;
-    int gflags;
-    void* data;
-    dxBody* body;
-    dxGeom* body_next;
-    float* pos;
-    float* R;
-    dxGeom* next;
-    dxGeom** tome;
-    dxSpace* parent_space;
-    float aabb[6];
-    unsigned int category_bits;
-    unsigned int collide_bits;
-};
-
-struct __declspec(align(4)) dxSpace : dxGeom // sizeof=0x64
-{                                       // ...
-    int count;
-    dxGeom *first;
-    int cleanup;
-    int current_index;
-    dxGeom *current_geom;
-    int lock_count;
-};
-
-struct dMass // sizeof=0x44
-{                                       // ...
-    float mass;                         // ...
-    float c[4];
-    float I[12];                        // ...
-};
-
-struct dxBodyInfo // sizeof=0x70
-{                                       // ...
-    float pos[4];
-    float q[4];
-    float R[12];
-    float lvel[4];
-    float avel[4];
-};
-
-struct dxBody : dObject // sizeof=0x150
-{                                       // ...
-    dxJointNode *firstjoint;
-    int flags;
-    dxGeom *geom;
-    dMass mass;
-    float invI[12];
-    float invMass;
-    float facc[4];
-    float tacc[4];
-    float finite_rot_axis[4];
-    dxAutoDisable adis;
-    float adis_timeleft;
-    int adis_stepsleft;
-    dxBodyInfo info;
-};
-
-struct dxWorld : dBase // sizeof=0x10110
-{                                       // ...
-    dxBody* firstbody;
-    dxJoint* firstjoint;
-    int nb;
-    int nj;
-    dxWorldStepInfo stepInfo;
-    dxAutoDisable adis;
-    int adis_flag;
-    float seconds;
-    SorLcpData sd;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    QuickstepData qd;
 };
 
 struct __declspec(align(4)) DObjTrace_s // sizeof=0x1C

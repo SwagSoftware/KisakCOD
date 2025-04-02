@@ -198,6 +198,23 @@ struct dxSpace : public dxGeom {
   virtual void collide2 (void *data, dxGeom *geom, dNearCallback *callback)=0;
 };
 
+// ADD - move these out of collision_space.cpp and collision_kernel.cpp
+struct dxSimpleSpace : public dxSpace {
+    dxSimpleSpace(dSpaceID _space);
+    void cleanGeoms();
+    void collide(void* data, dNearCallback* callback);
+    void collide2(void* data, dxGeom* geom, dNearCallback* callback);
+};
+
+struct dxUserGeom : public dxGeom {
+    void* user_data;
+
+    dxUserGeom(int class_num);
+    ~dxUserGeom();
+    void computeAABB();
+    int AABBTest(dxGeom* o, dReal aabb[6]);
+};
+// END
 
 // LWSS ADD- Custom for COD4
 dxGeom *__cdecl ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body);

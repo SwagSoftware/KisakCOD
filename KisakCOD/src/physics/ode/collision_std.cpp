@@ -38,8 +38,6 @@ dContactGeom::g1 and dContactGeom::g2.
 #include "collision_std.h"
 #include "collision_util.h"
 
-#include <win32/win_local.h> // lwss add
-#include <universal/pool_allocator.h> // lwss add
 #include "obstack.h" // lwss add
 
 #ifdef _MSC_VER
@@ -1825,7 +1823,11 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
 
 
 // LWSS ADD - Custom for COD4
-#include <ode/ode.h>
+#include <win32/win_local.h> // lwss add
+#include <universal/pool_allocator.h> // lwss add
+
+#include "odeext.h"
+
 dxGeom *__cdecl ODE_AllocateGeom()
 {
     dxGeom *geom; // [esp+0h] [ebp-4h]

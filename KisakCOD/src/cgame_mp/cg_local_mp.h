@@ -492,7 +492,6 @@ int __cdecl CG_DObjGetWorldTagPos(const cpose_t *pose, DObj_s *obj, unsigned int
 centity_s *__cdecl CG_GetPose(int localClientNum, unsigned int handle);
 void __cdecl CG_CalcEntityLerpPositions(int localClientNum, centity_s *cent);
 void __cdecl CG_InterpolateEntityPosition(cg_s *cgameGlob, centity_s *cent);
-void __cdecl Vec3Lerp(const float *start, const float *end, float fraction, float *endpos);
 void __cdecl CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent);
 void __cdecl CG_CreatePhysicsObject(int localClientNum, centity_s *cent);
 void __cdecl CG_UpdatePhysicsPose(centity_s *cent);
@@ -909,7 +908,6 @@ void __cdecl CG_DrawCenterString(
     float fontscale,
     float *color,
     int textStyle);
-void __cdecl Vec4Mul(const float *a, const float *b, float *product);
 void __cdecl CG_ClearOverheadFade();
 void __cdecl CG_Draw2D(int localClientNum);
 void __cdecl CG_DrawChatMessages(int localClientNum);
@@ -1218,7 +1216,6 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
 void __cdecl CG_Player_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
 void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
 void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits);
-double __cdecl Vec4LengthSq(const float *v);
 DObjAnimMat *__cdecl CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits);
 
 
