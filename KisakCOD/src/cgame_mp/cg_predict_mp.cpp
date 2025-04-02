@@ -1,6 +1,12 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 
+#include <bgame/bg_public.h>
+
+static pmove_t cg_pmove[1];
+static centity_s* cg_itemEntities[512];
+static int cg_itemEntityCount;
+static int cg_itemLocalClientNum;
 
 void __cdecl TRACK_cg_predict()
 {
@@ -39,16 +45,17 @@ void __cdecl CG_BuildItemList(int localClientNum, const snapshot_s *nextSnap)
 
 void __cdecl CG_PredictPlayerState(int localClientNum)
 {
-    centity_s *Entity; // eax
+    centity_s* Entity; // eax
     double v2; // st7
     float v3; // [esp+10h] [ebp-3Ch]
     float v4; // [esp+14h] [ebp-38h]
+    float* origin; // [esp+24h] [ebp-28h]
     float angle; // [esp+2Ch] [ebp-20h]
     float size; // [esp+34h] [ebp-18h]
     float fZoom; // [esp+38h] [ebp-14h] BYREF
-    WeaponDef *weapDef; // [esp+3Ch] [ebp-10h]
+    WeaponDef* weapDef; // [esp+3Ch] [ebp-10h]
     float fCos; // [esp+40h] [ebp-Ch]
-    playerState_s *ps; // [esp+44h] [ebp-8h]
+    playerState_s* ps; // [esp+44h] [ebp-8h]
     float fSin; // [esp+48h] [ebp-4h]
 
     if (localClientNum)
@@ -59,38 +66,42 @@ void __cdecl CG_PredictPlayerState(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = (playerState_s *)&MEMORY[0x9D5574];
-    *(float *)&MEMORY[0xA8E91C][5] = MEMORY[0x9D5B9C];
+    ps = &cgArray[0].predictedPlayerState;
+    cgArray[0].lastFrame.aimSpreadScale = cgArray[0].predictedPlayerState.aimSpreadScale;
     CG_PredictPlayerState_Internal(localClientNum);
-    Entity = CG_GetEntity(localClientNum, MEMORY[0x9D5650]);
-    Entity->pose.origin[0] = MEMORY[0x9D5590];
-    Entity->pose.origin[1] = MEMORY[0x9D5594];
-    Entity->pose.origin[2] = MEMORY[0x9D5598];
-    BG_EvaluateTrajectory(&Entity->currentState.apos, MEMORY[0x9D5560], Entity->pose.angles);
+    Entity = CG_GetEntity(localClientNum, ps->clientNum);
+    origin = ps->origin;
+    Entity->pose.origin[0] = ps->origin[0];
+    Entity->pose.origin[1] = origin[1];
+    Entity->pose.origin[2] = origin[2];
+    BG_EvaluateTrajectory(&Entity->currentState.apos, cgArray[0].time, Entity->pose.angles);
     weapDef = BG_GetWeaponDef(ps->weapon);
-    if ((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 4) != 0 && CG_GetWeapReticleZoom(cgArray, &fZoom))
+    if ((cgArray[0].nextSnap->ps.otherFlags & 4) != 0 && CG_GetWeapReticleZoom(cgArray, &fZoom))
     {
-        if (weapDef->adsViewErrorMax != 0.0 && !MEMORY[0x9E06EC])
+        if (weapDef->adsViewErrorMax != 0.0 && !cgArray[0].adsViewErrorDone)
         {
-            MEMORY[0x9E06EC] = 1;
+            cgArray[0].adsViewErrorDone = 1;
             size = flrand(weapDef->adsViewErrorMin, weapDef->adsViewErrorMax);
             v2 = random();
             angle = (v2 + v2) * 3.141592741012573;
             fCos = cos(angle);
             fSin = sin(angle);
-            v4 = fSin * size + *(float *)&MEMORY[0x9DF71C][81];
-            *(float *)&MEMORY[0x9DF71C][81] = AngleNormalize360(v4);
-            v3 = fCos * size + *(float *)&MEMORY[0x9DF71C][82];
-            *(float *)&MEMORY[0x9DF71C][82] = AngleNormalize360(v3);
+            v4 = fSin * size + cgArray[0].offsetAngles[0];
+            cgArray[0].offsetAngles[0] = AngleNormalize360(v4);
+            v3 = fCos * size + cgArray[0].offsetAngles[1];
+            cgArray[0].offsetAngles[1] = AngleNormalize360(v3);
         }
     }
     else
     {
-        MEMORY[0x9E06EC] = 0;
+        cgArray[0].adsViewErrorDone = 0;
     }
-    MEMORY[0x9D85A4] = LOWORD(ps->clientNum);
-    BG_PlayerStateToEntityState(ps, (entityState_s *)&MEMORY[0x9D85A4], 0, 0);
-    memcpy(&MEMORY[0x9D853C], &MEMORY[0x9D85AC], 0x68u);
+    cgArray[0].predictedPlayerEntity.nextState.number = LOWORD(ps->clientNum);
+    BG_PlayerStateToEntityState(ps, &cgArray[0].predictedPlayerEntity.nextState, 0, 0);
+    memcpy(
+        &cgArray[0].predictedPlayerEntity.currentState,
+        &cgArray[0].predictedPlayerEntity.nextState.lerp,
+        sizeof(cgArray[0].predictedPlayerEntity.currentState));
     CL_SetUserCmdOrigin(localClientNum, ps->origin, ps->velocity, ps->viewangles, ps->bobCycle, ps->movementDir);
     CL_SendCmd(localClientNum);
 }
@@ -106,8 +117,8 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     float v8; // [esp+4Ch] [ebp-14Ch]
     float value; // [esp+50h] [ebp-148h]
     float v10; // [esp+54h] [ebp-144h]
-    float *viewangles; // [esp+58h] [ebp-140h]
-    float *predictedError; // [esp+8Ch] [ebp-10Ch]
+    float* viewangles; // [esp+58h] [ebp-140h]
+    float* predictedError; // [esp+8Ch] [ebp-10Ch]
     int timeSinceStart; // [esp+B8h] [ebp-E0h]
     int smoothingDuration; // [esp+BCh] [ebp-DCh]
     float lerp; // [esp+C0h] [ebp-D8h]
@@ -118,18 +129,18 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     float delta[3]; // [esp+E4h] [ebp-B4h] BYREF
     float len; // [esp+F0h] [ebp-A8h]
     transPlayerState_t oldTransPlayerState; // [esp+F4h] [ebp-A4h] BYREF
-    cg_s *cgameGlob; // [esp+10Ch] [ebp-8Ch]
+    cg_s* cgameGlob; // [esp+10Ch] [ebp-8Ch]
     int bPredictionRun; // [esp+110h] [ebp-88h]
     usercmd_s latestCmd; // [esp+114h] [ebp-84h] BYREF
     float oldViewangles[3]; // [esp+134h] [ebp-64h]
     float deltaAngles[3]; // [esp+140h] [ebp-58h] BYREF
     int cmdNum; // [esp+14Ch] [ebp-4Ch]
-    const playerState_s *oldPlayerState; // [esp+150h] [ebp-48h]
+    const playerState_s* oldPlayerState; // [esp+150h] [ebp-48h]
     float oldOrigin[3]; // [esp+154h] [ebp-44h] BYREF
     usercmd_s oldestCmd; // [esp+160h] [ebp-38h] BYREF
     int oldCommandTime; // [esp+184h] [ebp-14h]
-    const playerState_s *ps; // [esp+188h] [ebp-10h]
-    __int64 oldVelocity; // [esp+18Ch] [ebp-Ch]
+    const playerState_s* ps; // [esp+188h] [ebp-10h]
+    float oldVelocity[2]; // [esp+18Ch] [ebp-Ch]
     int current; // [esp+194h] [ebp-4h]
 
     //Profile_Begin(322);
@@ -142,7 +153,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 280, 0, "%s", "cgameGlob->nextSnap");
     ps = &cgameGlob->nextSnap->ps;
     if (cgameGlob->demoType || (ps->otherFlags & 2) != 0)
@@ -160,9 +171,9 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
         cg_pmove[localClientNum].ps = &cgameGlob->predictedPlayerState;
         cg_pmove[localClientNum].handler = 0;
         if (cg_pmove[localClientNum].ps->pm_type < 7)
-            cg_pmove[localClientNum].tracemask = (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1;
+            cg_pmove[localClientNum].tracemask = 0x2810011;
         else
-            cg_pmove[localClientNum].tracemask = (int)&off_810011;
+            cg_pmove[localClientNum].tracemask = 0x810011;
         if (ps->pm_type == 4)
             cg_pmove[localClientNum].tracemask &= 0xFDFEFFFF;
         cg_pmove[localClientNum].viewChange = 0.0;
@@ -176,19 +187,19 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
             oldOrigin[0] = cgameGlob->predictedPlayerState.origin[0];
             oldOrigin[1] = cgameGlob->predictedPlayerState.origin[1];
             oldOrigin[2] = cgameGlob->predictedPlayerState.origin[2];
-            *(float *)&oldVelocity = cgameGlob->predictedPlayerState.oldVelocity[0];
-            *((float *)&oldVelocity + 1) = cgameGlob->predictedPlayerState.oldVelocity[1];
+            oldVelocity[0] = cgameGlob->predictedPlayerState.oldVelocity[0];
+            oldVelocity[1] = cgameGlob->predictedPlayerState.oldVelocity[1];
             oldViewangles[0] = cgameGlob->predictedPlayerState.viewangles[0];
             oldViewangles[1] = cgameGlob->predictedPlayerState.viewangles[1];
             oldViewangles[2] = cgameGlob->predictedPlayerState.viewangles[2];
             CG_ExtractTransPlayerState(&cgameGlob->predictedPlayerState, &oldTransPlayerState);
             CL_GetUserCmd(localClientNum, current, &latestCmd);
             memcpy(
-                (unsigned __int8 *)&cgameGlob->predictedPlayerState,
-                (unsigned __int8 *)ps,
+                (unsigned __int8*)&cgameGlob->predictedPlayerState,
+                (unsigned __int8*)ps,
                 sizeof(cgameGlob->predictedPlayerState));
             cgameGlob->physicsTime = cgameGlob->nextSnap->serverTime;
-            *(_QWORD *)cgameGlob->predictedPlayerState.oldVelocity = oldVelocity;
+            *(_QWORD*)cgameGlob->predictedPlayerState.oldVelocity = oldVelocity;
             if (cgameGlob->predictedPlayerState.pm_type == 1 || cgameGlob->predictedPlayerState.pm_type == 8)
                 CG_InterpolatePlayerState(localClientNum, 0);
             CG_AdjustPositionForMover(
@@ -359,7 +370,7 @@ void __cdecl CG_TouchItemPrediction(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9D5578] <= 1u)
+    if (cgArray[0].predictedPlayerState.pm_type <= 1u)
     {
         for (entIndex = 0; entIndex < cg_itemEntityCount; ++entIndex)
         {
@@ -418,10 +429,10 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles)
     float v13; // [esp+44h] [ebp-44h]
     int cmdNum; // [esp+48h] [ebp-40h]
     usercmd_s cmd; // [esp+4Ch] [ebp-3Ch] BYREF
-    playerState_s *out; // [esp+70h] [ebp-18h]
-    cg_s *cgameGlob; // [esp+74h] [ebp-14h]
-    const snapshot_s *prevSnap; // [esp+78h] [ebp-10h]
-    const snapshot_s *nextSnap; // [esp+7Ch] [ebp-Ch]
+    playerState_s* out; // [esp+70h] [ebp-18h]
+    cg_s* cgameGlob; // [esp+74h] [ebp-14h]
+    const snapshot_s* prevSnap; // [esp+78h] [ebp-10h]
+    const snapshot_s* nextSnap; // [esp+7Ch] [ebp-Ch]
     float f; // [esp+80h] [ebp-8h]
     int i; // [esp+84h] [ebp-4h]
 
@@ -434,14 +445,14 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    out = (playerState_s *)&MEMORY[0x9D5574];
-    prevSnap = (const snapshot_s *)MEMORY[0x98F458];
-    nextSnap = (const snapshot_s *)MEMORY[0x98F45C];
-    if (!MEMORY[0x98F458])
+    out = &cgArray[0].predictedPlayerState;
+    prevSnap = cgArray[0].snap;
+    nextSnap = cgArray[0].nextSnap;
+    if (!prevSnap)
         MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 173, 0, "%s", "prevSnap");
     if (!nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 174, 0, "%s", "nextSnap");
-    memcpy((unsigned __int8 *)out, (unsigned __int8 *)&nextSnap->ps, sizeof(playerState_s));
+    memcpy((unsigned __int8*)out, (unsigned __int8*)&nextSnap->ps, sizeof(playerState_s));
     if (grabAngles)
     {
         cmdNum = CL_GetCurrentCmdNumber(localClientNum);
@@ -489,4 +500,3 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles)
         }
     }
 }
-
