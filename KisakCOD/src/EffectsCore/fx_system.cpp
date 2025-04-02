@@ -380,12 +380,11 @@ unsigned __int16 __cdecl FX_CalculatePackedLighting(const float *origin)
     R_GetAverageLightingAtPoint(origin, color);
     return ((color[2] & 0xF8) << 8) | (8 * (color[1] & 0xF8)) | ((color[0] & 0xF8) >> 3);
 }
-
-FxEffect *__cdecl FX_SpawnEffect(
-    FxSystem *system,
-    const FxEffectDef *remoteDef,
+FxEffect* __cdecl FX_SpawnEffect(
+    FxSystem* system,
+    const FxEffectDef* remoteDef,
     int msecBegin,
-    const float *origin,
+    const float* origin,
     const float (*axis)[3],
     int dobjHandle,
     int boneIndex,
@@ -393,12 +392,12 @@ FxEffect *__cdecl FX_SpawnEffect(
     unsigned __int16 owner,
     unsigned int markEntnum)
 {
-    volatile int *Destination; // [esp+Ch] [ebp-34h]
+    volatile long* Destination; // [esp+Ch] [ebp-34h]
     unsigned __int16 effectHandle; // [esp+1Ch] [ebp-24h]
     int allocIndex; // [esp+20h] [ebp-20h]
-    FxEffect *ownerEffect; // [esp+28h] [ebp-18h]
-    FxEffect *remoteEffect; // [esp+2Ch] [ebp-14h]
-    int oldStatusValue; // [esp+30h] [ebp-10h]
+    FxEffect* ownerEffect; // [esp+28h] [ebp-18h]
+    FxEffect* remoteEffect; // [esp+2Ch] [ebp-14h]
+    LONG oldStatusValue; // [esp+30h] [ebp-10h]
     char isSpotLightEffect; // [esp+3Bh] [ebp-5h]
     unsigned int elemClass; // [esp+3Ch] [ebp-4h]
 
@@ -481,17 +480,19 @@ FxEffect *__cdecl FX_SpawnEffect(
         }
         if (dobjHandle < 0)
             MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1253, 0, "%s", "dobjHandle >= 0");
+
+        // KISAKTODO cleanup bitfield mess
         remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((boneIndex & 0x7FF) << 13)
-            | *(unsigned int *)&remoteEffect->boltAndSortOrder & 0xFF001FFF);
-        if (((*(unsigned int *)&remoteEffect->boltAndSortOrder >> 13) & 0x7FF) != boneIndex)
+            | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFF001FFF);
+        if (((*(_DWORD*)&remoteEffect->boltAndSortOrder >> 13) & 0x7FF) != boneIndex)
             MyAssertHandler(
                 ".\\EffectsCore\\fx_system.cpp",
                 1256,
                 0,
                 "effect->boltAndSortOrder.boneIndex == static_cast<uint>( boneIndex )\n\t%i, %i",
-                (*(unsigned int *)&remoteEffect->boltAndSortOrder >> 13) & 0x7FF,
+                (*(_DWORD*)&remoteEffect->boltAndSortOrder >> 13) & 0x7FF,
                 boneIndex);
-        *(unsigned int *)&remoteEffect->boltAndSortOrder &= ~0x1000u;
+        *(_DWORD*)&remoteEffect->boltAndSortOrder &= ~0x1000u;
         if (markEntnum == 1023)
         {
             if (boneIndex == 2047 && dobjHandle != 4095)
@@ -505,17 +506,17 @@ FxEffect *__cdecl FX_SpawnEffect(
             if (boneIndex < 0)
                 MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1270, 0, "%s", "boneIndex >= 0");
             remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(dobjHandle & 0xFFF
-                | *(unsigned int *)&remoteEffect->boltAndSortOrder & 0xFFFFF000);
-            if ((*(unsigned int *)&remoteEffect->boltAndSortOrder & 0xFFF) != dobjHandle)
+                | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFF000);
+            if ((*(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFF) != dobjHandle)
                 MyAssertHandler(
                     ".\\EffectsCore\\fx_system.cpp",
                     1272,
                     0,
                     "effect->boltAndSortOrder.dobjHandle == static_cast<uint>( dobjHandle )\n\t%i, %i",
-                    *(unsigned int *)&remoteEffect->boltAndSortOrder & 0xFFF,
+                    *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFF,
                     dobjHandle);
             remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)((FX_GetBoltTemporalBits(system->localClientNum, dobjHandle) << 12)
-                | *(unsigned int *)&remoteEffect->boltAndSortOrder & 0xFFFFEFFF);
+                | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFEFFF);
         }
         else
         {
@@ -532,8 +533,8 @@ FxEffect *__cdecl FX_SpawnEffect(
                     markEntnum,
                     4095);
             remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(markEntnum & 0xFFF
-                | *(unsigned int *)&remoteEffect->boltAndSortOrder & 0xFFFFF000);
-            if ((*(unsigned int *)&remoteEffect->boltAndSortOrder & 0xFFF) != markEntnum)
+                | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFF000);
+            if ((*(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFF) != markEntnum)
                 MyAssertHandler(
                     ".\\EffectsCore\\fx_system.cpp",
                     1265,
@@ -545,19 +546,19 @@ FxEffect *__cdecl FX_SpawnEffect(
         remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((unsigned __int8)runnerSortOrder << 24)
             | ((unsigned int)&clients[0].parseClients[238].attachTagIndex[4]
                 + 3)
-            & *(unsigned int *)&remoteEffect->boltAndSortOrder);
-        if ((unsigned __int8)HIBYTE(*(unsigned int *)&remoteEffect->boltAndSortOrder) != runnerSortOrder)
+            & *(_DWORD*)&remoteEffect->boltAndSortOrder);
+        if ((unsigned __int8)HIBYTE(*(_DWORD*)&remoteEffect->boltAndSortOrder) != runnerSortOrder)
             MyAssertHandler(
                 ".\\EffectsCore\\fx_system.cpp",
                 1279,
                 0,
                 "effect->boltAndSortOrder.sortOrder == static_cast<uint>( runnerSortOrder )\n\t%i, %i",
-                HIBYTE(*(unsigned int *)&remoteEffect->boltAndSortOrder),
+                HIBYTE(*(_DWORD*)&remoteEffect->boltAndSortOrder),
                 runnerSortOrder);
         remoteEffect->frameAtSpawn.origin[0] = *origin;
         remoteEffect->frameAtSpawn.origin[1] = origin[1];
         remoteEffect->frameAtSpawn.origin[2] = origin[2];
-        AxisToQuat(axis, remoteEffect->frameAtSpawn.quat);
+        AxisToQuat((const float (*)[3][3])axis, remoteEffect->frameAtSpawn.quat);
         memcpy(&remoteEffect->framePrev, &remoteEffect->frameAtSpawn, sizeof(remoteEffect->framePrev));
         memcpy(&remoteEffect->frameNow, &remoteEffect->frameAtSpawn, sizeof(remoteEffect->frameNow));
         Destination = &system->firstNewEffect;
@@ -566,7 +567,7 @@ FxEffect *__cdecl FX_SpawnEffect(
             while (*Destination != allocIndex)
                 ;
         } while (InterlockedCompareExchange(Destination, allocIndex + 1, allocIndex) != allocIndex);
-        FX_StartNewEffect(__SPAIR64__((unsigned int)remoteEffect, (unsigned int)system));
+        FX_StartNewEffect(system, remoteEffect);
         InterlockedExchangeAdd(&remoteEffect->status, -536870912);
         return remoteEffect;
     }
@@ -867,20 +868,16 @@ void __cdecl FX_PlayBoltedEffect(
     if (effect)
         FX_DelRefToEffect(system, effect);
 }
-
-void __cdecl FX_RetriggerEffect(int localClientNum, FxEffect *effect, int msecBegin)
+void __cdecl FX_RetriggerEffect(int localClientNum, FxEffect* effect, int msecBegin)
 {
-    long double v3; // [esp-8h] [ebp-78h]
-    __int64 v4; // [esp+8h] [ebp-68h]
-    __int64 v5; // [esp+8h] [ebp-68h]
-    volatile int *Destination; // [esp+1Ch] [ebp-54h]
-    volatile int Comperand; // [esp+20h] [ebp-50h]
+    volatile long* Destination; // [esp+1Ch] [ebp-54h]
+    volatile LONG Comperand; // [esp+20h] [ebp-50h]
     unsigned __int16 lastOldTrailElemHandle[8]; // [esp+34h] [ebp-3Ch] BYREF
     int trailCount; // [esp+44h] [ebp-2Ch] BYREF
     unsigned __int16 lastElemHandle[5]; // [esp+48h] [ebp-28h] BYREF
     bool catchUpNewElems; // [esp+53h] [ebp-1Dh]
     unsigned __int16 firstOldElemHandle[4]; // [esp+54h] [ebp-1Ch] BYREF
-    FxSystem *system; // [esp+64h] [ebp-Ch]
+    FxSystem* system; // [esp+64h] [ebp-Ch]
     bool hasPendingLoopElems; // [esp+6Bh] [ebp-5h]
     unsigned int elemClass; // [esp+6Ch] [ebp-4h]
 
@@ -892,14 +889,13 @@ void __cdecl FX_RetriggerEffect(int localClientNum, FxEffect *effect, int msecBe
     FX_AddRefToEffect(system, effect);
     if ((effect->status & 0x10000) != 0)
     {
-        HIDWORD(v4) = &effect->frameNow;
-        LODWORD(v4) = &effect->framePrev;
         FX_SpawnAllFutureLooping(
             system,
             effect,
             0,
             effect->def->elemDefCountLooping,
-            v4,
+            &effect->framePrev,
+            &effect->frameNow,
             effect->msecBegin,
             effect->msecLastUpdate);
         FX_StopEffect(system, effect);
@@ -912,11 +908,11 @@ void __cdecl FX_RetriggerEffect(int localClientNum, FxEffect *effect, int msecBe
     {
         for (elemClass = 0; elemClass < 3; ++elemClass)
             lastElemHandle[elemClass] = -1;
-        HIDWORD(v3) = msecBegin;
-        LODWORD(v3) = effect->msecLastUpdate;
         FX_UpdateEffectPartial(
-            __SPAIR64__((unsigned int)effect, (unsigned int)system),
-            v3,
+            system,
+            effect,
+            effect->msecLastUpdate,
+            msecBegin,
             0.0,
             0.0,
             firstOldElemHandle,
@@ -926,13 +922,13 @@ void __cdecl FX_RetriggerEffect(int localClientNum, FxEffect *effect, int msecBe
     }
     effect->msecBegin = msecBegin;
     effect->distanceTraveled = 0.0;
-    HIDWORD(v5) = &effect->frameNow;
-    LODWORD(v5) = &effect->frameNow;
     FX_BeginLooping(
-        __SPAIR64__((unsigned int)effect, (unsigned int)system),
+        system,
+        effect,
         0,
         effect->def->elemDefCountLooping,
-        v5,
+        &effect->frameNow,
+        &effect->frameNow,
         msecBegin,
         msecBegin);
     FX_TriggerOneShot(
@@ -952,8 +948,10 @@ void __cdecl FX_RetriggerEffect(int localClientNum, FxEffect *effect, int msecBe
     }
     if (catchUpNewElems)
         FX_UpdateEffectPartial(
-            __SPAIR64__((unsigned int)effect, (unsigned int)system),
-            *(long double *)&effect->msecBegin,
+            system,
+            effect,
+            effect->msecBegin,
+            effect->msecLastUpdate,
             0.0,
             0.0,
             effect->firstElemHandle,
@@ -1034,7 +1032,7 @@ void __cdecl FX_StopEffect(FxSystem *system, FxEffect *effect)
         //Profile_Begin(213);
         FX_AddRefToEffect(system, effect);
         FX_StopEffectNonRecursive(system, effect);
-        if (((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & effect->status) != 0)
+        if((effect->status & 0x7FE0000) != 0)
         {
             stoppedEffectHandle = FX_EffectToHandle(system, effect);
             FX_BeginIteratingOverEffects_Cooperative(system);
@@ -1414,7 +1412,7 @@ void __cdecl FX_SpawnElem(
     FxSystem *system,
     FxEffect *effect,
     int elemDefIndex,
-    FxSpatialFrame *effectFrameWhenPlayed,
+    const FxSpatialFrame *effectFrameWhenPlayed,
     int msecWhenPlayed,
     float distanceWhenPlayed,
     int sequence)
@@ -1743,7 +1741,7 @@ bool __cdecl FX_SpawnModelPhysics(
 void __cdecl FX_GetOriginForElem(
     FxEffect *effect,
     const FxElemDef *elemDef,
-    FxSpatialFrame *effectFrameWhenPlayed,
+    const FxSpatialFrame *effectFrameWhenPlayed,
     int randomSeed,
     float *outOrigin)
 {
@@ -2023,11 +2021,11 @@ void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBas
                 if (v3 <= 127)
                     v2 = (int)((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
                 else
-                    LOBYTE(v2) = 127;
+                    v2 = 127;
             }
             else
             {
-                LOBYTE(v2) = 0x80;
+                v2 = 0x80;
             }
             (*outBasis)[3 * basisVecIter + dimIter] = v2;
         }

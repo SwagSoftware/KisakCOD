@@ -51,7 +51,7 @@ struct FxEffectDef // sizeof=0x20
 struct FxEffect // sizeof=0x80
 {                                       // ...
     const FxEffectDef *def;
-    volatile int status;
+    volatile long status;
     unsigned __int16 firstElemHandle[3];
     unsigned __int16 firstSortedElemHandle;
     unsigned __int16 firstTrailHandle;
@@ -59,7 +59,7 @@ struct FxEffect // sizeof=0x80
     unsigned __int16 owner;
     unsigned __int16 packedLighting;
     FxBoltAndSortOrder boltAndSortOrder;
-    volatile int frameCount;
+    volatile long frameCount;
     int msecBegin;
     int msecLastUpdate;
     FxSpatialFrame frameAtSpawn;
@@ -80,7 +80,7 @@ struct FxPool
 struct FxCamera // sizeof=0xB0
 {                                       // ...
     float origin[3];
-    volatile int isValid;
+    volatile long isValid;
     float frustum[6][4];
     float axis[3][3];
     unsigned int frustumPlaneCount;
@@ -160,31 +160,31 @@ struct FxSystem // sizeof=0xA60
     FxPool<FxTrail> *trails;
     FxPool<FxTrailElem> *trailElems;
     unsigned __int16 *deferredElems;
-    volatile int firstFreeElem;
-    volatile int firstFreeTrailElem;
-    volatile int firstFreeTrail;
-    volatile int deferredElemCount;
-    volatile int activeElemCount;
-    volatile int activeTrailElemCount;
-    volatile int activeTrailCount;
-    volatile int gfxCloudCount;
+    volatile long firstFreeElem;
+    volatile long firstFreeTrailElem;
+    volatile long firstFreeTrail;
+    volatile long deferredElemCount;
+    volatile long activeElemCount;
+    volatile long activeTrailElemCount;
+    volatile long activeTrailCount;
+    volatile long gfxCloudCount;
     FxVisState *visState;
     const FxVisState *visStateBufferRead;
     FxVisState *visStateBufferWrite;
-    volatile int firstActiveEffect;
-    volatile int firstNewEffect;
-    volatile int firstFreeEffect;
+    volatile long firstActiveEffect;
+    volatile long firstNewEffect;
+    volatile long firstFreeEffect;
     unsigned __int16 allEffectHandles[1024];
-    volatile int activeSpotLightEffectCount;
-    volatile int activeSpotLightElemCount;
+    volatile long activeSpotLightEffectCount;
+    volatile long activeSpotLightElemCount;
     unsigned __int16 activeSpotLightEffectHandle;
     unsigned __int16 activeSpotLightElemHandle;
     __int16 activeSpotLightBoltDobj;
     // padding byte
     // padding byte
-    volatile int iteratorCount;
+    volatile long iteratorCount;
     int msecNow;
-    volatile int msecDraw;
+    volatile long msecDraw;
     int frameCount;
     bool isInitialized;
     bool needsGarbageCollection;

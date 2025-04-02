@@ -116,7 +116,7 @@ void __cdecl FX_SpawnElem(
     FxSystem *system,
     FxEffect *effect,
     int elemDefIndex,
-    FxSpatialFrame *effectFrameWhenPlayed,
+    const FxSpatialFrame *effectFrameWhenPlayed,
     int msecWhenPlayed,
     float distanceWhenPlayed,
     int sequence);
@@ -711,10 +711,11 @@ void __cdecl FX_TransformPosFromLocalToWorld(const FxSpatialFrame *frame, float 
 void __cdecl FX_SpatialFrameToOrientation(const FxSpatialFrame *frame, orientation_t *orient);
 void __cdecl FX_OrientationDirToWorldDir(const orientation_t *orient, const float *dir, float *out);
 void __cdecl FX_GetOrientation(
-    const FxElemDef *elemDef,
-    const FxSpatialFrame *frameAtSpawn,
-    const FxSpatialFrame *frameNow,
-    __int64 randomSeed);
+    const FxElemDef* elemDef,
+    const FxSpatialFrame* frameAtSpawn,
+    const FxSpatialFrame* frameNow,
+    int randomSeed,
+    orientation_t* orient);
 char  FX_GenerateBeam_GetFlatDelta(
     const mat4x4* clipMtx,
     const mat4x4* invClipMtx,
@@ -923,17 +924,20 @@ enum FxUpdateResult : __int32
     FX_UPDATE_KEEP = 0x1,
 };
 void __cdecl FX_SpawnAllFutureLooping(
-    FxSystem *system,
-    FxEffect *effect,
+    FxSystem* system,
+    FxEffect* effect,
     int elemDefFirst,
     int elemDefCount,
-    __int64 frameBegin,
+    FxSpatialFrame* frameBegin,
+    FxSpatialFrame* frameEnd,
     int msecWhenPlayed,
     int msecUpdateBegin);
 void __cdecl FX_SpawnLoopingElems(
-    FxSystem *system,
-    __int64 effect,
-    __int64 frameBegin,
+    FxSystem* system,
+    FxEffect* effect,
+    int elemDefIndex,
+    FxSpatialFrame* frameBegin,
+    FxSpatialFrame* frameEnd,
     int msecWhenPlayed,
     int msecUpdateBegin,
     int msecUpdateEnd);
@@ -944,16 +948,20 @@ int __cdecl FX_LimitStabilizeTimeForElemDef_Recurse(
 int __cdecl FX_LimitStabilizeTimeForElemDef_SelfOnly(const FxElemDef *elemDef, bool needToSpawnSystem);
 int __cdecl FX_LimitStabilizeTimeForEffectDef_Recurse(const FxEffectDef *remoteEffectDef, int originalUpdateTime);
 void __cdecl FX_BeginLooping(
-    __int64 system,
+    FxSystem* system,
+    FxEffect* effect,
     int elemDefFirst,
     int elemDefCount,
-    __int64 frameWhenPlayed,
+    FxSpatialFrame* frameWhenPlayed,
+    FxSpatialFrame* a2,
     int msecWhenPlayed,
     int msecNow);
 void __cdecl FX_SpawnTrailLoopingElems(
-    __int64 system,
-    FxTrail *trail,
-    __int64 frameBegin,
+    FxSystem* system,
+    FxEffect* effect,
+    FxTrail* trail,
+    FxSpatialFrame* frameBegin,
+    FxSpatialFrame* frameEnd,
     int msecWhenPlayed,
     int msecUpdateBegin,
     int msecUpdateEnd,
@@ -972,24 +980,28 @@ void __cdecl FX_SpawnOneShotElems(
     int elemDefIndex,
     const FxSpatialFrame *frameWhenPlayed,
     int msecWhenPlayed);
-void __cdecl FX_StartNewEffect(__int64 system);
+void __cdecl FX_StartNewEffect(FxSystem* system, FxEffect* effect);
 bool __cdecl FX_GetBoltTemporalBits(int localClientNum, int dobjHandle);
 char __cdecl FX_GetBoneOrientation(int localClientNum, unsigned int dobjHandle, int boneIndex, orientation_t *orient);
 bool __cdecl FX_GetBoneOrientation_IsDObjEntityValid(int localClientNum, int dobjHandle);
 void __cdecl FX_UpdateEffectPartial(
-    __int64 system,
-    long double msecUpdateBegin,
+    FxSystem* system,
+    FxEffect* effect,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
     float distanceTravelledBegin,
     float distanceTravelledEnd,
-    unsigned __int16 *elemHandleStart,
-    unsigned __int16 *elemHandleStop,
-    unsigned __int16 *trailElemStart,
-    unsigned __int16 *trailElemStop);
+    unsigned __int16* elemHandleStart,
+    unsigned __int16* elemHandleStop,
+    unsigned __int16* trailElemStart,
+    unsigned __int16* trailElemStop);
 void __cdecl FX_ProcessLooping(
-    __int64 system,
+    FxSystem* system,
+    FxEffect* effect,
     int elemDefFirst,
     int elemDefCount,
-    __int64 frameBegin,
+    FxSpatialFrame* frameBegin,
+    FxSpatialFrame* frameEnd,
     int msecWhenPlayed,
     int msecUpdateBegin,
     int msecUpdateEnd,
@@ -1097,7 +1109,8 @@ unsigned __int8 __cdecl FX_ProcessEmitting(
     FxSystem *system,
     FxUpdateElem *update,
     unsigned __int8 emitResidual,
-    __int64 frameBegin);
+    FxSpatialFrame* frameBegin,
+    FxSpatialFrame* frameEnd);
 void __cdecl FX_GetQuatForOrientation(
     const FxEffect *effect,
     const FxElemDef *elemDef,
@@ -1125,12 +1138,16 @@ FxUpdateResult __cdecl FX_UpdateTrailElement(
     int msecUpdateBegin,
     int msecUpdateEnd);
 void __cdecl FX_UpdateSpotLight(FxCmd *cmd);
-void __cdecl FX_UpdateSpotLightEffect(__int64 system);
-void __cdecl FX_UpdateSpotLightEffectPartial(FxSystem *system, FxEffect *effect, __int64 msecUpdateBegin);
+void __cdecl FX_UpdateSpotLightEffect(FxSystem* system, FxEffect* effect);
+void __cdecl FX_UpdateSpotLightEffectPartial(
+    FxSystem* system,
+    FxEffect* effect,
+    int msecUpdateBegin,
+    int msecUpdateEnd);
 void __cdecl FX_UpdateEffectBolt(FxSystem *system, FxEffect *effect);
 void __cdecl FX_UpdateNonDependent(FxCmd *cmd);
 void __cdecl FX_Update(FxSystem *system, int localClientNum, bool nonBoltedEffectsOnly);
-void __cdecl FX_UpdateEffect(__int64 system);
+void __cdecl FX_UpdateEffect(FxSystem* system, FxEffect* effect);
 bool __cdecl FX_ShouldProcessEffect(FxSystem *system, FxEffect *effect, bool nonBoltedEffectsOnly);
 void __cdecl FX_RunPhysics(int localClientNum);
 void __cdecl FX_UpdateRemaining(FxCmd *cmd);

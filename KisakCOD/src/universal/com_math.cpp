@@ -2461,6 +2461,17 @@ void __cdecl AxisCopy(const mat3x3 &in, mat3x3 &out)
     memcpy(out, in, sizeof(mat3x3));
 }
 
+
+bool __cdecl Vec4IsNormalized(const float* v)
+{
+    float v2; // [esp+4h] [ebp-8h]
+    float v3; // [esp+8h] [ebp-4h]
+
+    v3 = Vec4LengthSq(v) - 1.0;
+    v2 = fabs(v3);
+    return v2 < 0.002000000094994903;
+}
+
 float __cdecl Vec3Normalize(float* v)
 {
     float v2; // [esp+0h] [ebp-14h]

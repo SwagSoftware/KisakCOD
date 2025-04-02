@@ -128,43 +128,44 @@ void __cdecl FX_OrientationDirToWorldDir(const orientation_t *orient, const floa
 }
 
 void __cdecl FX_GetOrientation(
-    const FxElemDef *elemDef,
-    const FxSpatialFrame *frameAtSpawn,
-    const FxSpatialFrame *frameNow,
-    __int64 randomSeed)
+    const FxElemDef* elemDef,
+    const FxSpatialFrame* frameAtSpawn,
+    const FxSpatialFrame* frameNow,
+    int randomSeed,
+    orientation_t* orient)
 {
-    const char *v4; // eax
-    const char *v5; // eax
-    float v6; // [esp+20h] [ebp-4Ch]
+    const char* v5; // eax
+    const char* v6; // eax
+    float v7; // [esp+20h] [ebp-4Ch]
     float up[3]; // [esp+5Ch] [ebp-10h] BYREF
     int runFlags; // [esp+68h] [ebp-4h]
 
     if (!Vec4IsNormalized(frameAtSpawn->quat))
     {
-        v4 = va("%g %g %g %g", frameAtSpawn->quat[0], frameAtSpawn->quat[1], frameAtSpawn->quat[2], frameAtSpawn->quat[3]);
+        v5 = va("%g %g %g %g", frameAtSpawn->quat[0], frameAtSpawn->quat[1], frameAtSpawn->quat[2], frameAtSpawn->quat[3]);
         MyAssertHandler(
             ".\\EffectsCore\\fx_update_util.cpp",
             196,
             0,
             "%s\n\t%s",
             "Vec4IsNormalized( frameAtSpawn->quat )",
-            v4);
+            v5);
     }
     if (!Vec4IsNormalized(frameNow->quat))
     {
-        v5 = va("%g %g %g %g", frameNow->quat[0], frameNow->quat[1], frameNow->quat[2], frameNow->quat[3]);
-        MyAssertHandler(".\\EffectsCore\\fx_update_util.cpp", 197, 0, "%s\n\t%s", "Vec4IsNormalized( frameNow->quat )", v5);
+        v6 = va("%g %g %g %g", frameNow->quat[0], frameNow->quat[1], frameNow->quat[2], frameNow->quat[3]);
+        MyAssertHandler(".\\EffectsCore\\fx_update_util.cpp", 197, 0, "%s\n\t%s", "Vec4IsNormalized( frameNow->quat )", v6);
     }
     runFlags = elemDef->flags & 0xC0;
     if (runFlags)
     {
         if (runFlags == 64)
         {
-            FX_SpatialFrameToOrientation(frameAtSpawn, (orientation_t *)HIDWORD(randomSeed));
+            FX_SpatialFrameToOrientation(frameAtSpawn, orient);
         }
         else if (runFlags == 128)
         {
-            FX_SpatialFrameToOrientation(frameNow, (orientation_t *)HIDWORD(randomSeed));
+            FX_SpatialFrameToOrientation(frameNow, orient);
         }
         else
         {
@@ -184,27 +185,21 @@ void __cdecl FX_GetOrientation(
                     "%s\n\t(elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) = %i",
                     "((elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) != FX_ELEM_SPAWN_OFFSET_NONE)",
                     elemDef->flags & 0x30);
-            FX_GetSpawnOrigin(frameAtSpawn, elemDef, randomSeed, (float *)HIDWORD(randomSeed));
-            *(float *)(HIDWORD(randomSeed) + 12) = 0.0;
-            *(float *)(HIDWORD(randomSeed) + 16) = 0.0;
-            *(float *)(HIDWORD(randomSeed) + 20) = 0.0;
-            FX_OffsetSpawnOrigin(frameAtSpawn, elemDef, randomSeed, (float *)(HIDWORD(randomSeed) + 12));
-            Vec3Add(
-                (const float *)(HIDWORD(randomSeed) + 12),
-                (const float *)HIDWORD(randomSeed),
-                (float *)HIDWORD(randomSeed));
-            if (Vec3Normalize((float *)(HIDWORD(randomSeed) + 12)) == 0.0)
+            FX_GetSpawnOrigin(frameAtSpawn, elemDef, randomSeed, orient->origin);
+            orient->axis[0][0] = 0.0;
+            orient->axis[0][1] = 0.0;
+            orient->axis[0][2] = 0.0;
+            FX_OffsetSpawnOrigin(frameAtSpawn, elemDef, randomSeed, orient->axis[0]);
+            Vec3Add(orient->axis[0], orient->origin, orient->origin);
+            if (Vec3Normalize(orient->axis[0]) == 0.0)
             {
-                *(float *)(HIDWORD(randomSeed) + 12) = 1.0;
-                *(float *)(HIDWORD(randomSeed) + 16) = 0.0;
-                *(float *)(HIDWORD(randomSeed) + 20) = 0.0;
+                orient->axis[0][0] = 1.0;
+                orient->axis[0][1] = 0.0;
+                orient->axis[0][2] = 0.0;
             }
             if ((elemDef->flags & 0x30) == 0x10)
             {
-                Vec3Basis_RightHanded(
-                    (const float *)(HIDWORD(randomSeed) + 12),
-                    (float *)(HIDWORD(randomSeed) + 24),
-                    (float *)(HIDWORD(randomSeed) + 36));
+                Vec3Basis_RightHanded(orient->axis[0], orient->axis[1], orient->axis[2]);
             }
             else
             {
@@ -216,9 +211,9 @@ void __cdecl FX_GetOrientation(
                         "%s\n\t(elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) = %i",
                         "((elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) == FX_ELEM_SPAWN_OFFSET_CYLINDER)",
                         elemDef->flags & 0x30);
-                v6 = fabs(*(float *)(HIDWORD(randomSeed) + 20));
+                v7 = fabs(orient->axis[0][2]);
                 up[0] = 0.0;
-                if (v6 < 0.9990000128746033)
+                if (v7 < 0.9990000128746033)
                 {
                     up[1] = 0.0;
                     up[2] = 1.0;
@@ -228,41 +223,28 @@ void __cdecl FX_GetOrientation(
                     up[1] = 1.0;
                     up[2] = 0.0;
                 }
-                Vec3Cross(up, (const float *)(HIDWORD(randomSeed) + 12), (float *)(HIDWORD(randomSeed) + 24));
-                Vec3Normalize((float *)(HIDWORD(randomSeed) + 24));
-                Vec3Cross(
-                    (const float *)(HIDWORD(randomSeed) + 12),
-                    (const float *)(HIDWORD(randomSeed) + 24),
-                    (float *)(HIDWORD(randomSeed) + 36));
+                Vec3Cross(up, orient->axis[0], orient->axis[1]);
+                Vec3Normalize(orient->axis[1]);
+                Vec3Cross(orient->axis[0], orient->axis[1], orient->axis[2]);
             }
         }
     }
     else
     {
-        *(float *)HIDWORD(randomSeed) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 4) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 8) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 12) = 1.0;
-        *(float *)(HIDWORD(randomSeed) + 16) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 20) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 24) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 28) = 1.0;
-        *(float *)(HIDWORD(randomSeed) + 32) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 36) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 40) = 0.0;
-        *(float *)(HIDWORD(randomSeed) + 44) = 1.0;
+        orient->origin[0] = 0.0;
+        orient->origin[1] = 0.0;
+        orient->origin[2] = 0.0;
+        orient->axis[0][0] = 1.0;
+        orient->axis[0][1] = 0.0;
+        orient->axis[0][2] = 0.0;
+        orient->axis[1][0] = 0.0;
+        orient->axis[1][1] = 1.0;
+        orient->axis[1][2] = 0.0;
+        orient->axis[2][0] = 0.0;
+        orient->axis[2][1] = 0.0;
+        orient->axis[2][2] = 1.0;
     }
-}
-
-bool __cdecl Vec4IsNormalized(const float *v)
-{
-    float v2; // [esp+4h] [ebp-8h]
-    float v3; // [esp+8h] [ebp-4h]
-
-    v3 = Vec4LengthSq(v) - 1.0;
-    v2 = fabs(v3);
-    return v2 < 0.002000000094994903;
-}
+};
 
 void __cdecl FX_GetVelocityAtTime(
     const FxElemDef *elemDef,
