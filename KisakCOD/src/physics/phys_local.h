@@ -8,7 +8,6 @@
 #include <universal/pool_allocator.h>
 
 
-
 enum BodyState : __int32
 {                                       // ...
     BS_DEAD = 0x0,

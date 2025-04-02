@@ -361,6 +361,8 @@
     <ClCompile Include="src\server_mp\sv_init_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_main_mp.cpp" />
     <ClCompile Include="src\sound\snd.cpp" />
+    <ClCompile Include="src\sound\snd_driver.cpp" />
+    <ClCompile Include="src\sound\snd_mss.cpp" />
     <ClCompile Include="src\stringed\stringed_hooks.cpp" />
     <ClCompile Include="src\ui\ui_expressions.cpp" />
     <ClCompile Include="src\ui\ui_localvars.cpp" />
@@ -389,6 +391,7 @@
     <ClCompile Include="src\win32\win_main.cpp" />
     <ClCompile Include="src\win32\win_net.cpp" />
     <ClCompile Include="src\win32\win_syscon.cpp" />
+    <ClCompile Include="src\win32\win_voice.cpp" />
     <ClCompile Include="src\win32\win_wndproc.cpp" />
     <ClCompile Include="src\xanim\dobj.cpp" />
     <ClCompile Include="src\xanim\dobj_skel.cpp" />
@@ -497,7 +500,6 @@
     <ClInclude Include="src\physics\ode\mat.h" />
     <ClInclude Include="src\physics\ode\objects.h" />
     <ClInclude Include="src\physics\ode\obstack.h" />
-    <ClInclude Include="src\physics\ode\odeext.h" />
     <ClInclude Include="src\physics\ode\quickstep.h" />
     <ClInclude Include="src\physics\ode\stack.h" />
     <ClInclude Include="src\physics\ode\step.h" />
@@ -549,6 +551,7 @@
     <ClInclude Include="src\win32\win_local.h" />
     <ClInclude Include="src\win32\win_localize.h" />
     <ClInclude Include="src\xanim\dobj.h" />
+    <ClInclude Include="src\xanim\dobj_utils.h" />
     <ClInclude Include="src\xanim\xanim.h" />
     <ClInclude Include="src\xanim\xanim_load_db.h" />
     <ClInclude Include="src\xanim\xanim_public.h" />
@@ -566,11 +569,10 @@
     <ClInclude Include="src\zlib\zutil.h" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="src\msslib\mss32.lib" />
-    <Library Include="src\msslib\mss32_2.lib" />
+    <Text Include="src\physics\ode\placeholder.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="src\physics\ode\placeholder.txt" />
+    <Library Include="src\msslib\mss32.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

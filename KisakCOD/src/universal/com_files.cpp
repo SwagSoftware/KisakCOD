@@ -813,3 +813,12 @@ void __cdecl FS_FreeFileList(const char **list)
         Hunk_UserDestroy((HunkUser *)*(list - 1));
 }
 
+unsigned int __cdecl FS_FTell(int f)
+{
+    iobuf *v1; // eax
+
+    if (fsh[f].zipFile)
+        return unztell(fsh[f].handleFiles.file.z);
+    v1 = FS_FileForHandle(f);
+    return ftell(v1);
+}

@@ -5,6 +5,18 @@
 #include <universal/memfile.h>
 
 // snd
+enum SND_EQTYPE : __int32
+{                                       // ...
+    SND_EQTYPE_FIRST = 0x0,
+    SND_EQTYPE_LOWPASS = 0x0,
+    SND_EQTYPE_HIGHPASS = 0x1,
+    SND_EQTYPE_LOWSHELF = 0x2,
+    SND_EQTYPE_HIGHSHELF = 0x3,
+    SND_EQTYPE_BELL = 0x4,
+    SND_EQTYPE_LAST = 0x4,
+    SND_EQTYPE_COUNT = 0x5,
+    SND_EQTYPE_INVALID = 0x5,
+};
 enum snd_overlay_type_t : __int32
 {                                       // ...
     SND_OVERLAY_NONE = 0x0,
@@ -356,7 +368,7 @@ void __cdecl SND_SetEnvironmentEffects_f();
 int __cdecl SND_RoomtypeFromString(const char *string);
 void __cdecl SND_DeactivateEnvironmentEffects_f();
 void __cdecl SND_SetEq_f();
-int __cdecl SND_EqTypeFromString(const char *typeString);
+SND_EQTYPE __cdecl SND_EqTypeFromString(const char *typeString);
 char __cdecl SND_ParseChannelAndBand_f(int *entchannel, int *eqIndex, int *band);
 void __cdecl SND_SetEqFreq_f();
 void __cdecl SND_SetEqType_f();

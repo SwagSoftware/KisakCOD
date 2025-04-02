@@ -185,7 +185,6 @@ const dvar_t *cg_laserLightBeginOffset;
 const dvar_t *cg_overheadIconSize;
 const dvar_t *cg_tracerScrewDist;
 const dvar_t *cg_tracerLength;
-
 const dvar_t *cg_hudChatIntermissionPosition;
 const dvar_t *cg_hudVotePosition;
 const dvar_t *cg_fs_debug;

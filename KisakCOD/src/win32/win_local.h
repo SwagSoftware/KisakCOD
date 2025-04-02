@@ -162,3 +162,17 @@ void __cdecl Sys_Mkdir(const char *path);
 char *__cdecl Sys_Cwd();
 const char *__cdecl Sys_DefaultCDPath();
 char *__cdecl Sys_DefaultInstallPath();
+
+
+
+// win_voice
+bool __cdecl Voice_SendVoiceData();
+bool __cdecl Voice_Init();
+void __cdecl Voice_Shutdown();
+double __cdecl Voice_GetVoiceLevel();
+void __cdecl Voice_Playback();
+int __cdecl Voice_GetLocalVoiceData();
+void __cdecl Voice_IncomingVoiceData(unsigned __int8 talker, unsigned __int8 *data, int packetDataSize);
+bool __cdecl Voice_IsClientTalking(unsigned int clientNum);
+char __cdecl Voice_StartRecording();
+char __cdecl Voice_StopRecording();

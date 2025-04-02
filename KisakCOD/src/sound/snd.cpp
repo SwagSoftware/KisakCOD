@@ -4,6 +4,7 @@
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
+#include <cgame_mp/cg_local_mp.h>
 
 const dvar_t *snd_cinematicVolumeScale;
 const dvar_t *snd_enable3D;
@@ -22,8 +23,41 @@ const dvar_t *snd_slaveFadeTime;
 const dvar_t *snd_enableStream;
 const dvar_t *snd_drawEqChannels;
 const dvar_t *snd_levelFadeTime;
+const dvar_t *snd_touchStreamFilesOnLoad;
 
 snd_local_t g_snd;
+
+const char *snd_eqTypeStrings[6] = { "lowpass", "highpass", "lowshelf", "highshelf", "bell", NULL }; // idb
+const char *snd_roomStrings[27] =
+{
+  "generic",
+  "paddedcell",
+  "room",
+  "bathroom",
+  "livingroom",
+  "stoneroom",
+  "auditorium",
+  "concerthall",
+  "cave",
+  "arena",
+  "hangar",
+  "carpetedhallway",
+  "hallway",
+  "stonecorridor",
+  "alley",
+  "forest",
+  "city",
+  "mountains",
+  "quarry",
+  "plain",
+  "parkinglot",
+  "sewerpipe",
+  "underwater",
+  "drugged",
+  "dizzy",
+  "psychotic",
+  NULL
+}; // idb
 
 void __cdecl TRACK_snd()
 {
@@ -366,7 +400,7 @@ void __cdecl SND_SetEq_f()
         if (SND_ParseChannelAndBand_f(&entchannel, &eqIndex, &band))
         {
             v0 = Cmd_Argv(4);
-            type = SND_EqTypeFromString(v0);
+            type = (SND_EQTYPE)SND_EqTypeFromString(v0);
             if (type != SND_EQTYPE_COUNT)
             {
                 v1 = Cmd_Argv(5);
@@ -398,7 +432,7 @@ void __cdecl SND_SetEq_f()
     }
 }
 
-int __cdecl SND_EqTypeFromString(const char *typeString)
+SND_EQTYPE __cdecl SND_EqTypeFromString(const char *typeString)
 {
     int stringIndex; // [esp+0h] [ebp-4h]
     int stringIndexa; // [esp+0h] [ebp-4h]
@@ -408,7 +442,7 @@ int __cdecl SND_EqTypeFromString(const char *typeString)
     for (stringIndex = 0; snd_eqTypeStrings[stringIndex]; ++stringIndex)
     {
         if (!I_stricmp(typeString, snd_eqTypeStrings[stringIndex]))
-            return stringIndex;
+            return (SND_EQTYPE)stringIndex;
     }
     Com_Printf(9, "invalid eq type string '%s', it must be one of the following strings:\n", typeString);
     for (stringIndexa = 0; snd_eqTypeStrings[stringIndexa]; ++stringIndexa)
@@ -416,7 +450,7 @@ int __cdecl SND_EqTypeFromString(const char *typeString)
         if (*snd_eqTypeStrings[stringIndexa])
             Com_Printf(9, "  %s\n", snd_eqTypeStrings[stringIndexa]);
     }
-    return 5;
+    return (SND_EQTYPE)5;
 }
 
 char __cdecl SND_ParseChannelAndBand_f(int *entchannel, int *eqIndex, int *band)

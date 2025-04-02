@@ -1,9 +1,30 @@
 #include "ragdoll.h"
 #include <xanim/dobj.h>
 #include <physics/phys_local.h>
+#include <qcommon/threads.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <xanim/dobj_utils.h>
 
 
 //Line 53622:  0006 : 03066908       int ragdollTime          85816908     ragdoll_update.obj
+
+float quatZRot[4] =
+{
+    0.0f, 0.0f, 1.0f, 0.0f
+};
+
+StateEnt stateEntries[6] =
+{
+    // EnterFunc, ExitFunc, UpdateFunc
+    {Ragdoll_EnterDead, Ragdoll_ExitDead, NULL},
+    {NULL, Ragdoll_ExitDObjWait, Ragdoll_UpdateDObjWait},
+    {NULL, NULL, Ragdoll_UpdateVelocityCapture},
+    {Ragdoll_EnterTunnelTest, NULL, NULL},
+    {Ragdoll_EnterRunning, NULL, Ragdoll_UpdateRunning},
+    {Ragdoll_EnterIdle, Ragdoll_ExitIdle, NULL}
+};
+
+int ragdollTime;
 
 char __cdecl Ragdoll_ValidateBodyObj(RagdollBody *body)
 {
@@ -179,10 +200,10 @@ void __cdecl Ragdoll_AnimMatToMat43(const DObjAnimMat *mat, float (*out)[3])
     float v12; // [esp+4Ch] [ebp-8h]
     float v13; // [esp+50h] [ebp-4h]
 
-    if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[2]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[3]) & 0x7F800000) == 0x7F800000)
+    if ((unsigned int(mat->quat[0]) & 0x7F800000) == 0x7F800000
+        || (unsigned int(mat->quat[1]) & 0x7F800000) == 0x7F800000
+        || (unsigned int(mat->quat[2]) & 0x7F800000) == 0x7F800000
+        || (unsigned int(mat->quat[3]) & 0x7F800000) == 0x7F800000)
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h",
@@ -191,7 +212,7 @@ void __cdecl Ragdoll_AnimMatToMat43(const DObjAnimMat *mat, float (*out)[3])
             "%s",
             "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
     }
-    if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
+    if ((unsigned int(mat->transWeight) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
     Vec3Scale(mat->quat, mat->transWeight, &result);
     v12 = result * mat->quat[0];
@@ -862,7 +883,7 @@ void __cdecl Ragdoll_GetTorsoPosition(RagdollBody *body, float *center)
     center[2] = boneOrientation->origin[2];
 }
 
-char __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body)
+bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState curState, BodyState newState)
 {
     BoneOrientation *v2; // eax
     BoneOrientation *v3; // eax
@@ -886,18 +907,18 @@ char __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body)
         Ragdoll_UpdateBodyContactCentroids(body);
         if (tunnelPassed)
         {
-            Ragdoll_BodyNewState(body, BS_RUNNING);
+            Ragdoll_BodyNewState(body, BodyState::BS_RUNNING);
         }
         else
         {
             Ragdoll_PrintTunnelFail(body);
-            Ragdoll_BodyNewState(body, BS_DEAD);
+            Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
         }
         return 1;
     }
     else
     {
-        Ragdoll_BodyNewState(body, BS_DEAD);
+        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
         return 0;
     }
 }
@@ -1006,10 +1027,10 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                 parentAnimMat = Ragdoll_GetDObjLocalBoneMatrix(pose, obj, parentBoneIdx);
                 if (!boneAnimMat || !parentAnimMat || boneAnimMat == parentAnimMat)
                     break;
-                if ((COERCE_UNSIGNED_INT(parentAnimMat->quat[0]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(parentAnimMat->quat[1]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(parentAnimMat->quat[2]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(parentAnimMat->quat[3]) & 0x7F800000) == 0x7F800000)
+                if ((unsigned int(parentAnimMat->quat[0]) & 0x7F800000) == 0x7F800000
+                    || (unsigned int(parentAnimMat->quat[1]) & 0x7F800000) == 0x7F800000
+                    || (unsigned int(parentAnimMat->quat[2]) & 0x7F800000) == 0x7F800000
+                    || (unsigned int(parentAnimMat->quat[3]) & 0x7F800000) == 0x7F800000)
                 {
                     MyAssertHandler(
                         "c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h",
@@ -1018,7 +1039,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                         "%s",
                         "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
                 }
-                if ((COERCE_UNSIGNED_INT(parentAnimMat->transWeight) & 0x7F800000) == 0x7F800000)
+                if ((unsigned int(parentAnimMat->transWeight) & 0x7F800000) == 0x7F800000)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h",
                         537,
@@ -1367,16 +1388,16 @@ int __cdecl Ragdoll_FindBoneChildren(RagdollBody *body, int boneIdx, int *childI
 
 char __cdecl Ragdoll_BoneTrace(trace_t *trace, trace_t *revTrace, float *start, float *end)
 {
-    CM_BoxTrace(trace, start, end, vec3_origin, vec3_origin, 0, (int)sv.svEntities[345].clusternums + 1);
+    CM_BoxTrace(trace, start, end, vec3_origin, vec3_origin, 0, 0x2806C91);
     if (trace->startsolid)
     {
-        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, (int)sv.svEntities[345].clusternums + 1);
+        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, 0x2806C91);
         if (revTrace->startsolid)
             return 0;
     }
     else if (trace->fraction != 1.0)
     {
-        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, (int)sv.svEntities[345].clusternums + 1);
+        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, 0x2806C91);
         if (revTrace->fraction != 1.0)
             return 0;
     }
@@ -1419,7 +1440,7 @@ void __cdecl Ragdoll_UpdateVelocityCapture(RagdollBody *body)
         body->curOrientationBuffer ^= 1u;
         snapshota = Ragdoll_BodyBoneOrientations(body);
         Ragdoll_SnapshotAnimOrientations(body, snapshota);
-        Ragdoll_BodyNewState(body, BS_TUNNEL_TEST);
+        Ragdoll_BodyNewState(body, BodyState::BS_TUNNEL_TEST);
     }
     else
     {
@@ -1465,7 +1486,7 @@ void __cdecl Ragdoll_SnapshotAnimOrientations(RagdollBody *body, BoneOrientation
     }
     else
     {
-        Ragdoll_BodyNewState(body, BS_DEAD);
+        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
     }
 }
 
@@ -1498,11 +1519,11 @@ char __cdecl Ragdoll_GetDObjWorldBoneOriginQuat(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    Vec3Add(mat->trans, MEMORY[0x9D8748], origin);
+    Vec3Add(mat->trans, cgArray[0].refdef.viewOffset, origin);
     return 1;
 }
 
-char __cdecl Ragdoll_EnterDead(RagdollBody *body)
+bool __cdecl Ragdoll_EnterDead(RagdollBody *body, BodyState curState, BodyState newState)
 {
     int references; // [esp+0h] [ebp-4h]
 
@@ -1515,7 +1536,7 @@ char __cdecl Ragdoll_EnterDead(RagdollBody *body)
     return 1;
 }
 
-char __cdecl Ragdoll_ExitDead(RagdollBody *body)
+bool __cdecl Ragdoll_ExitDead(RagdollBody *body, BodyState curState, BodyState newState)
 {
     RagdollDef *def; // [esp+0h] [ebp-4h]
 
@@ -1530,7 +1551,7 @@ char __cdecl Ragdoll_ExitDead(RagdollBody *body)
     return 1;
 }
 
-char __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState prevState, BodyState curState)
+bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState prevState, BodyState curState)
 {
     RagdollDef *def; // [esp+0h] [ebp-18h]
     DObj_s *obj; // [esp+4h] [ebp-14h]
@@ -1586,7 +1607,7 @@ char __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState prevState, BodySt
     return 1;
 }
 
-char __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState curState, BodyState newState)
+bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState curState, BodyState newState)
 {
     BoneOrientation *v4; // eax
 
@@ -1609,7 +1630,7 @@ char __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState curState, BodyState n
     return 1;
 }
 
-char __cdecl Ragdoll_EnterIdle(RagdollBody *body)
+bool __cdecl Ragdoll_EnterIdle(RagdollBody *body, BodyState curState, BodyState newState)
 {
     BoneOrientation *v1; // eax
 
@@ -1671,16 +1692,16 @@ void __cdecl Ragdoll_SnapshotBonePositions(RagdollBody *body, BoneOrientation *b
     }
 }
 
-char __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState curState)
+bool __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState curState, BodyState newState)
 {
     if (!body)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1677, 0, "%s", "body");
     if (Ragdoll_CountPhysicsBodies() < ragdoll_max_simulating->current.integer)
         return 1;
     if (curState == BS_IDLE)
-        Ragdoll_BodyNewState(body, BS_IDLE);
+        Ragdoll_BodyNewState(body, BodyState::BS_IDLE);
     else
-        Ragdoll_BodyNewState(body, BS_DEAD);
+        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
     return 0;
 }
 
@@ -1691,7 +1712,7 @@ void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body)
     if (body->stateFrames <= 3)
     {
         if (Ragdoll_ValidateBodyObj(body))
-            Ragdoll_BodyNewState(body, BS_VELOCITY_CAPTURE);
+            Ragdoll_BodyNewState(body, BodyState::BS_VELOCITY_CAPTURE);
     }
     else
     {
@@ -1699,7 +1720,7 @@ void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body)
             Com_PrintWarning(20, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->dobj);
         else
             Com_PrintWarning(20, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->obj);
-        Ragdoll_BodyNewState(body, BS_DEAD);
+        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
     }
 }
 
@@ -1709,7 +1730,7 @@ void __cdecl Ragdoll_UpdateRunning(RagdollBody *body)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1770, 0, "%s", "body");
     if (Ragdoll_CheckIdle(body))
     {
-        Ragdoll_BodyNewState(body, BS_IDLE);
+        Ragdoll_BodyNewState(body, BodyState::BS_IDLE);
     }
     else
     {

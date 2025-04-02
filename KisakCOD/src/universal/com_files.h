@@ -115,3 +115,5 @@ unsigned int __cdecl FS_FOpenFileByMode(char *qpath, int *f, fsMode_t mode);
 void __cdecl FS_Flush(int f);
 void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname);
 void __cdecl FS_FreeFileList(const char **list);
+
+unsigned int __cdecl FS_FTell(int f);

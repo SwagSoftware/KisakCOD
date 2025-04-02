@@ -92,7 +92,7 @@ struct DObj_s // sizeof=0x64
     unsigned __int8 numBones;
     // padding byte
     unsigned int ignoreCollision;
-    volatile int locked;
+    volatile unsigned int locked;
     DSkel skel;
     float radius;
     unsigned int hidePartBits[4];

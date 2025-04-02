@@ -6,6 +6,8 @@
 #include <universal/com_memory.h>
 #include "r_init.h"
 #include <msslib/mss.h>
+#include <sound/snd_local.h>
+#include <win32/win_local.h>
 
 CinematicGlob cinematicGlob;
 bool g_cinematicThreadInitialized;
