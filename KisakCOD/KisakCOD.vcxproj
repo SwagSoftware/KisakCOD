@@ -316,11 +316,8 @@
     <ClCompile Include="src\gfx_d3d\r_warn.cpp" />
     <ClCompile Include="src\gfx_d3d\r_water.cpp" />
     <ClCompile Include="src\gfx_d3d\r_workercmds.cpp" />
-<<<<<<< Updated upstream
-=======
     <ClCompile Include="src\gfx_d3d\r_workercmds_common.cpp" />
     <ClCompile Include="src\physics\ode\array.cpp" />
->>>>>>> Stashed changes
     <ClCompile Include="src\physics\ode\collision_kernel.cpp" />
     <ClCompile Include="src\physics\ode\collision_quadtreespace.cpp" />
     <ClCompile Include="src\physics\ode\collision_space.cpp" />
