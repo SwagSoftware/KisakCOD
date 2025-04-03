@@ -2,7 +2,6 @@
 
 #include "../universal/q_shared.h"
 #include <xanim/xanim.h>
-#include <server_mp/server.h>
 
 typedef enum
 {
@@ -891,6 +890,8 @@ struct sightpointtrace_t // sizeof=0x2C
 void __cdecl TRACK_cm_world();
 void __cdecl CM_LinkWorld();
 void CM_ClearWorld();
+
+struct svEntity_s;
 void __cdecl CM_UnlinkEntity(svEntity_s *ent);
 void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsigned int clipHandle);
 void __cdecl CM_AddEntityToNode(svEntity_s *ent, unsigned __int16 childNodeIndex);

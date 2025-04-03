@@ -112,8 +112,8 @@ submatrix of A. there are two ways we could arrange the rows/columns in AC.
 #include "lcp.h"
 #include <ode/matrix.h>
 #include <ode/misc.h>
-#include "mat.h"		// for testing
-#include <ode/timer.h>		// for testing
+// #include "mat.h"		// for testing
+// #include <ode/timer.h>		// for testing
 
 //***************************************************************************
 // code generation parameters

@@ -25,6 +25,8 @@
 
 #include "objects.h" 
 
+#if 0 // REM
+
 // each obstack Arena pointer points to a block of this many bytes
 #define dOBSTACK_ARENA_SIZE 16384
 
@@ -64,5 +66,6 @@ struct dObStack : public dBase {
   // traversal of the list must exactly match the parameters passed to alloc().
 };
 
+#endif
 
 #endif

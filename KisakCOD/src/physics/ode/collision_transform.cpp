@@ -40,24 +40,8 @@ geom transform
 //****************************************************************************
 // dxGeomTransform class
 
-struct dxGeomTransform : public dxGeom {
-  dxGeom *obj;		// object that is being transformed
-  int cleanup;		// 1 to destroy obj when destroyed
-  int infomode;		// 1 to put Tx geom in dContactGeom g1
 
-  // cached final object transform (body tx + relative tx). this is set by
-  // computeAABB(), and it is valid while the AABB is valid.
-  dVector3 final_pos;
-  dMatrix3 final_R;
-
-  dxGeomTransform (dSpaceID space);
-  ~dxGeomTransform();
-  void computeAABB();
-  void computeFinalTx();
-};
-
-
-dxGeomTransform::dxGeomTransform (dSpaceID space) : dxGeom (space,1)
+dxGeomTransform::dxGeomTransform (dSpaceID space, dxBody *body) : dxGeom (space,1,body)
 {
   type = dGeomTransformClass;
   obj = 0;
@@ -67,10 +51,16 @@ dxGeomTransform::dxGeomTransform (dSpaceID space) : dxGeom (space,1)
   dRSetIdentity (final_R);
 }
 
-
 dxGeomTransform::~dxGeomTransform()
 {
-  if (obj && cleanup) delete obj;
+ //  if (obj && cleanup) delete obj;
+	Destruct(); // MOD
+}
+
+// ADD
+void dxGeomTransform::Destruct() {
+	if (this->obj && this->cleanup)
+		ODE_GeomDestruct(this->obj);
 }
 
 
@@ -170,9 +160,9 @@ int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
 //****************************************************************************
 // public API
 
-dGeomID dCreateGeomTransform (dSpaceID space)
+dGeomID dCreateGeomTransform (dSpaceID space, dxBody *body)
 {
-  return new dxGeomTransform (space);
+  return new dxGeomTransform (space, body);
 }
 
 

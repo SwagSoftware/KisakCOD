@@ -15,40 +15,6 @@ enum PhysWorld : __int32
     PHYS_WORLD_COUNT = 0x3,
 };
 
-struct SorLcpData // sizeof=0x6F0
-{                                       // ...
-    int order[444];
-};
-
-struct ConstraintRowData // sizeof=0x90
-{                                       // ...
-    float J_body1Linear[3];
-    float lambda;
-    float J_body1Angular[3];
-    int body1;
-    float J_body2Linear[3];
-    int body2;
-    float J_body2Angular[3];
-    float padding1;
-    float iMJ_body1Linear[3];
-    float padding2;
-    float iMJ_body1Angular[3];
-    float padding3;
-    float iMJ_body2Linear[3];
-    float padding4;
-    float iMJ_body2Angular[3];
-    float padding5;
-    float lo;
-    float hi;
-    float rhs;
-    float Ad;
-};
-
-struct QuickstepData // sizeof=0xF9C0
-{                                       // ...
-    ConstraintRowData rowData[444];
-};
-
 struct __declspec(align(4)) DObjTrace_s // sizeof=0x1C
 {                                       // ...
     float fraction;                     // ...

@@ -101,7 +101,7 @@ struct dxGeom : public dBase {
   dReal aabb[6];	// cached AABB for this space
   unsigned long category_bits,collide_bits;
 
-  dxGeom (dSpaceID _space, int is_placeable);
+  dxGeom (dSpaceID _space, int is_placeable, dxBody *new_body); // MOD
   virtual ~dxGeom();
 
   virtual void computeAABB()=0;
@@ -177,6 +177,9 @@ struct dxSpace : public dxGeom {
   dxSpace (dSpaceID _space);
   ~dxSpace();
 
+  // ADD
+  void clear();
+
   void computeAABB();
 
   void setCleanup (int mode);
@@ -201,15 +204,22 @@ struct dxSpace : public dxGeom {
 // ADD - move these out of collision_space.cpp and collision_kernel.cpp
 struct dxSimpleSpace : public dxSpace {
     dxSimpleSpace(dSpaceID _space);
+
+    // ADDITION
+    dxSimpleSpace() : dxSimpleSpace(nullptr) { }
+
     void cleanGeoms();
     void collide(void* data, dNearCallback* callback);
     void collide2(void* data, dxGeom* geom, dNearCallback* callback);
 };
 
 struct dxUserGeom : public dxGeom {
-    void* user_data;
+    char user_data[16]; // MOD
 
-    dxUserGeom(int class_num);
+    dxUserGeom(int class_num, dxSpace *space, dxBody *body); // MOD
+
+    dxUserGeom() : dxUserGeom(0, nullptr, nullptr) { } // ADD
+
     ~dxUserGeom();
     void computeAABB();
     int AABBTest(dxGeom* o, dReal aabb[6]);
@@ -217,6 +227,27 @@ struct dxUserGeom : public dxGeom {
 // END
 
 // LWSS ADD- Custom for COD4
-dxGeom *__cdecl ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body);
+
+// expose this
+struct dxGeomTransform : public dxGeom {
+    dxGeom* obj;		// object that is being transformed
+    int cleanup;		// 1 to destroy obj when destroyed
+    int infomode;		// 1 to put Tx geom in dContactGeom g1
+
+    // cached final object transform (body tx + relative tx). this is set by
+    // computeAABB(), and it is valid while the AABB is valid.
+    dVector3 final_pos;
+    dMatrix3 final_R;
+
+    dxGeomTransform(dSpaceID space, dxBody* body); // MOD
+    ~dxGeomTransform();
+    void computeAABB();
+    void computeFinalTx();
+    void Destruct();
+};
+
+dxGeom *ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body);
+dxGeom *ODE_AllocateGeom();
+void ODE_GeomDestruct(dxGeom* g);
 // LWSS END
 #endif

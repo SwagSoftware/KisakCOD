@@ -31,6 +31,8 @@ struct mem_track_node_s // sizeof=0x20
 void track_init();
 void track_static_alloc_internal(void* ptr, int size, const char* name, int type);
 
+#define TRACK_STATIC(glob, type) track_static_alloc_internal(glob, sizeof(glob), #glob, type)
+
 void __cdecl CG_track_init();
 void __cdecl TRACK_g_memtrack();
 void __cdecl G_track_init();

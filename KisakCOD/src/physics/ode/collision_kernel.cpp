@@ -42,8 +42,7 @@ for geometry objects
 #endif
 #include <universal/assertive.h>
 
-// ADD: please stop implicitly using crap!!
-#include <string.h>
+#include <new>
 
 //****************************************************************************
 // helper functions for dCollide()ing a space with another geom
@@ -193,7 +192,7 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 //****************************************************************************
 // dxGeom
 
-dxGeom::dxGeom (dSpaceID _space, int is_placeable)
+dxGeom::dxGeom (dSpaceID _space, int is_placeable, dxBody *new_body)
 {
   initColliders();
 
@@ -204,17 +203,8 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable)
   data = 0;
   body = 0;
   body_next = 0;
-  if (is_placeable) {
-    dxPosR *pr = (dxPosR*) dAlloc (sizeof(dxPosR));
-    pos = pr->pos;
-    R = pr->R;
-    dSetZero (pos,4);
-    dRSetIdentity (R);
-  }
-  else {
-    pos = 0;
-    R = 0;
-  }
+
+  // MOD
 
   // setup space vars
   next = 0;
@@ -226,14 +216,26 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable)
 
   // put this geom in a space if required
   if (_space) dSpaceAdd (_space,this);
+
+  // ADD
+  if (is_placeable) {
+      dUASSERT(new_body);
+      dGeomSetBody(this, new_body);
+  }
+  else {
+      dUASSERT(!new_body);
+      pos = 0;
+      R = 0;
+  }
 }
 
 
 dxGeom::~dxGeom()
 {
-  if (parent_space) dSpaceRemove (parent_space,this);
-  if ((gflags & GEOM_PLACEABLE) && !body) dFree (pos,sizeof(dxPosR));
-  bodyRemove();
+    dUASSERT(false, "unsupported operation");
+  // if (parent_space) dSpaceRemove (parent_space,this);
+  // if ((gflags & GEOM_PLACEABLE) && !body) dFree (pos,sizeof(dxPosR));
+  // bodyRemove();
 }
 
 
@@ -298,34 +300,20 @@ void *dGeomGetData (dxGeom *g)
 }
 
 
+// MOD
 void dGeomSetBody (dxGeom *g, dxBody *b)
 {
   dAASSERT (g);
+  dAASSERT (b);
   dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   CHECK_NOT_LOCKED (g->parent_space);
 
-  if (b) {
-    if (!g->body) dFree (g->pos,sizeof(dxPosR));
-    g->pos = b->pos;
-    g->R = b->R;
-    dGeomMoved (g);
-    if (g->body != b) {
+  g->pos = b->info.pos;
+  g->R = b->info.R;
+  dGeomMoved(g);
+  if (g->body != b) {
       g->bodyRemove();
-      g->bodyAdd (b);
-    }
-  }
-  else {
-    if (g->body) {
-      dxPosR *pr = (dxPosR*) dAlloc (sizeof(dxPosR));
-      g->pos = pr->pos;
-      g->R = pr->R;
-      memcpy (g->pos,g->body->pos,sizeof(dVector3));
-      memcpy (g->R,g->body->R,sizeof(dMatrix3));
-      g->bodyRemove();
-    }
-    // dGeomMoved() should not be called if the body is being set to 0, as the
-    // new position of the geom is set to the old position of the body, so the
-    // effective position of the geom remains unchanged.
+      g->bodyAdd(b);
   }
 }
 
@@ -508,20 +496,20 @@ static int num_user_classes = 0;
 static dGeomClass user_classes [dMaxUserClasses];
 
 
-dxUserGeom::dxUserGeom (int class_num) : dxGeom (0,1)
+dxUserGeom::dxUserGeom(int class_num, dxSpace* space, dxBody* body) : dxGeom (space, user_classes[class_num - dFirstUserClass].isPlaceable, body)
 {
   type = class_num;
   int size = user_classes[type-dFirstUserClass].bytes;
-  user_data = dAlloc (size);
+  dAASSERT(size < sizeof(user_data));
   memset (user_data,0,size);
 }
 
 
 dxUserGeom::~dxUserGeom()
 {
-  dGeomClass *c = &user_classes[type-dFirstUserClass];
-  if (c->dtor) c->dtor (this);
-  dFree (user_data,c->bytes);
+    dAASSERT(false);
+  // dGeomClass *c = &user_classes[type-dFirstUserClass];
+  // if (c->dtor) c->dtor (this);
 }
 
 
@@ -600,13 +588,13 @@ void * dGeomGetClassData (dxGeom *g)
   return user->user_data;
 }
 
-
-dGeomID dCreateGeom (int classnum)
-{
-  dUASSERT (classnum >= dFirstUserClass &&
-	    classnum <= dLastUserClass,"not a custom class");
-  return new dxUserGeom (classnum);
-}
+// REM
+// dGeomID dCreateGeom (int classnum)
+// {
+//   dUASSERT (classnum >= dFirstUserClass &&
+// 	    classnum <= dLastUserClass,"not a custom class");
+//   return new dxUserGeom (classnum);
+// }
 
 //****************************************************************************
 // here is where we deallocate any memory that has been globally
@@ -620,12 +608,16 @@ void dCloseODE()
 
 
 // LWSS ADD - Custom for COD4
-dxGeom *__cdecl ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body)
-{
-    dxGeom *result; // eax
-    dxUserGeom *geom; // [esp+8h] [ebp-4h]
+#include <win32/win_local.h> // lwss add
+#include <universal/pool_allocator.h> // lwss add
 
-    if (classnum < 11 || classnum > 15)
+#include "odeext.h"
+
+dxGeom *ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body)
+{
+    dxUserGeom *geom;
+
+    if (classnum < dFirstUserClass || classnum > dLastUserClass)
         MyAssertHandler(
             ".\\physics\\ode\\src\\collision_kernel.cpp",
             737,
@@ -633,12 +625,67 @@ dxGeom *__cdecl ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body)
             "%s\n\t%s",
             "( classnum >= dFirstUserClass ) && ( classnum <= dLastUserClass )",
             "not a custom class");
+    
     geom = (dxUserGeom *)ODE_AllocateGeom();
     if (!geom)
-        return 0;
+        return nullptr;
+
     return new (geom) dxUserGeom(classnum, space, body);
-    //dxUserGeom::dxUserGeom(geom, classnum, space, body);
-    return result;
+}
+
+void dGeomFree(dxGeom* g)
+{
+    iassert(g);
+
+    switch (g->type)
+    {
+    case dBoxClass:
+    case 0xB: // user classes
+    case 0xC:
+    case 0xD:
+    case 0xE:
+        if (g->type < dFirstUserClass || user_classes[g->type - dFirstUserClass].isPlaceable)
+        {
+            Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+            Pool_Free((freenode*)g, &odeGlob.geomPool);
+            Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+        }
+        break;
+    case dGeomTransformClass: {
+        static_cast<dxGeomTransform*>(g)->Destruct();
+        Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+        Pool_Free((freenode*)g, &odeGlob.geomPool);
+        Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+        break;
+    }
+    case dTriMeshClass:
+        break;
+    case dSimpleSpaceClass: {
+        static_cast<dxSpace*>(g)->clear();
+        break;
+    }
+    default:
+        iassert(false);
+        break;
+    }
+}
+
+dxGeom* ODE_AllocateGeom()
+{
+    dxGeom* geom;
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    geom = (dxGeom*)Pool_Alloc(&odeGlob.geomPool);
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+    return geom;
+}
+
+void ODE_GeomDestruct(dxGeom* g)
+{
+    dAASSERT(g);
+    if (g->parent_space)
+        dSpaceRemove(g->parent_space, g);
+    g->bodyRemove();
+    dGeomFree(g);
 }
 
 // LWSS END

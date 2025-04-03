@@ -2,7 +2,11 @@
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>
 #include "com_files.h"
+
 #include <server_mp/server.h>
+#include <client_mp/client_mp.h>
+
+#include <stringed/stringed_hooks.h>
 
 struct DvarDumpInfo // sizeof=0xC
 {                                       // ...
@@ -24,8 +28,8 @@ char info2[8192];
 
 void __cdecl TRACK_dvar_cmds()
 {
-    track_static_alloc_internal(info1, 1024, "info1", 10);
-    track_static_alloc_internal(info2, 0x2000, "info2", 10);
+    track_static_alloc_internal(info1, sizeof(info1), "info1", 10);
+    track_static_alloc_internal(info2, sizeof(info2), "info2", 10);
 }
 
 int __cdecl Dvar_Command()

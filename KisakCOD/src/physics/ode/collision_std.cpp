@@ -46,24 +46,25 @@ dContactGeom::g1 and dContactGeom::g2.
 
 //****************************************************************************
 // the basic geometry objects
+// MOD constructors to add dxBody* param
 
 struct dxSphere : public dxGeom {
   dReal radius;		// sphere radius
-  dxSphere (dSpaceID space, dReal _radius);
+  dxSphere (dSpaceID space, dxBody* body, dReal _radius);
   void computeAABB();
 };
 
 
 struct dxBox : public dxGeom {
   dVector3 side;	// side lengths (x,y,z)
-  dxBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
+  dxBox (dSpaceID space, dxBody *body, dReal lx, dReal ly, dReal lz);
   void computeAABB();
 };
 
 
 struct dxCCylinder : public dxGeom {
   dReal radius,lz;	// radius, length along z axis
-  dxCCylinder (dSpaceID space, dReal _radius, dReal _length);
+  dxCCylinder (dSpaceID space, dxBody* body, dReal _radius, dReal _length);
   void computeAABB();
 };
 
@@ -77,14 +78,14 @@ struct dxPlane : public dxGeom {
 
 struct dxRay : public dxGeom {
   dReal length;
-  dxRay (dSpaceID space, dReal _length);
+  dxRay (dSpaceID space, dxBody* body, dReal _length);
   void computeAABB();
 };
 
 //****************************************************************************
 // sphere public API
 
-dxSphere::dxSphere (dSpaceID space, dReal _radius) : dxGeom (space,1)
+dxSphere::dxSphere (dSpaceID space, dxBody* body, dReal _radius) : dxGeom (space, 1, body)
 {
   dAASSERT (_radius > 0);
   type = dSphereClass;
@@ -103,9 +104,9 @@ void dxSphere::computeAABB()
 }
 
 
-dGeomID dCreateSphere (dSpaceID space, dReal radius)
+dGeomID dCreateSphere (dSpaceID space, dxBody* body, dReal radius)
 {
-  return new dxSphere (space,radius);
+  return new dxSphere (space,body, radius);
 }
 
 
@@ -139,7 +140,7 @@ dReal dGeomSpherePointDepth (dGeomID g, dReal x, dReal y, dReal z)
 //****************************************************************************
 // box public API
 
-dxBox::dxBox (dSpaceID space, dReal lx, dReal ly, dReal lz) : dxGeom (space,1)
+dxBox::dxBox (dSpaceID space, dxBody *body, dReal lx, dReal ly, dReal lz) : dxGeom (space, 1, body)
 {
   dAASSERT (lx >= 0 && ly >= 0 && lz >= 0);
   type = dBoxClass;
@@ -166,9 +167,9 @@ void dxBox::computeAABB()
 }
 
 
-dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
+dGeomID dCreateBox (dSpaceID space, dxBody* body, dReal lx, dReal ly, dReal lz)
 {
-  return new dxBox (space,lx,ly,lz);
+  return new dxBox (space,body,lx,ly,lz);
 }
 
 
@@ -217,8 +218,8 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
 //****************************************************************************
 // capped cylinder public API
 
-dxCCylinder::dxCCylinder (dSpaceID space, dReal _radius, dReal _length) :
-  dxGeom (space,1)
+dxCCylinder::dxCCylinder (dSpaceID space, dxBody* body, dReal _radius, dReal _length) :
+  dxGeom (space,1,body)
 {
   dAASSERT (_radius > 0 && _length > 0);
   type = dCCylinderClass;
@@ -241,9 +242,9 @@ void dxCCylinder::computeAABB()
 }
 
 
-dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length)
+dGeomID dCreateCCylinder (dSpaceID space, dxBody* body, dReal radius, dReal length)
 {
-  return new dxCCylinder (space,radius,length);
+  return new dxCCylinder (space,body,radius,length);
 }
 
 
@@ -309,7 +310,7 @@ static void make_sure_plane_normal_has_unit_length (dxPlane *g)
 
 
 dxPlane::dxPlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d) :
-  dxGeom (space,0)
+  dxGeom (space,0,nullptr)
 {
   type = dPlaneClass;
   p[0] = a;
@@ -374,7 +375,7 @@ dReal dGeomPlanePointDepth (dGeomID g, dReal x, dReal y, dReal z)
 //****************************************************************************
 // ray public API
 
-dxRay::dxRay (dSpaceID space, dReal _length) : dxGeom (space,1)
+dxRay::dxRay (dSpaceID space, dxBody* body, dReal _length) : dxGeom (space,1,body)
 {
   type = dRayClass;
   length = _length;
@@ -417,9 +418,9 @@ void dxRay::computeAABB()
 }
 
 
-dGeomID dCreateRay (dSpaceID space, dReal length)
+dGeomID dCreateRay (dSpaceID space, dxBody* body, dReal length)
 {
-  return new dxRay (space,length);
+  return new dxRay (space,body,length);
 }
 
 
@@ -1820,21 +1821,3 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
   contact->g2 = plane;
   return 1;
 }
-
-
-// LWSS ADD - Custom for COD4
-#include <win32/win_local.h> // lwss add
-#include <universal/pool_allocator.h> // lwss add
-
-#include "odeext.h"
-
-dxGeom *__cdecl ODE_AllocateGeom()
-{
-    dxGeom *geom; // [esp+0h] [ebp-4h]
-
-    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
-    geom = (dxGeom *)Pool_Alloc(&odeGlob.geomPool);
-    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
-    return geom;
-}
-// LWSS END

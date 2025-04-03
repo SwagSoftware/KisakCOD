@@ -25,8 +25,6 @@
 
 #include <ode/common.h>
 
-#include <math.h>
-
 #ifdef __GNUC__
 #define PURE_INLINE extern inline
 #else

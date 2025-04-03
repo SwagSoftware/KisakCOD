@@ -39,6 +39,8 @@
 #ifndef _ODE_ARRAY_H_
 #define _ODE_ARRAY_H_
 
+#if 0 // MOD: nope.
+
 #include <ode/config.h>
 
 
@@ -131,5 +133,6 @@ public:
   }
 };
 
+#endif
 
 #endif

@@ -27,6 +27,9 @@
 
 #include "ode/config.h"
 
+// MOD: goodbye!
+#if 0
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,6 +57,8 @@ void dFree (void *ptr, size_t size);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

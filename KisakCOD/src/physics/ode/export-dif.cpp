@@ -177,13 +177,13 @@ static void printLimot (PrintingContext &c, dxJointLimitMotor &limot, int num)
 
 static const char *getJointName (dxJoint *j)
 {
-	switch (j->vtable->typenum) {
+	switch (j->typenum) {
 		case dJointTypeBall: return "ball";
 		case dJointTypeHinge: return "hinge";
 		case dJointTypeSlider: return "slider";
 		case dJointTypeContact: return "contact";
 		case dJointTypeUniversal: return "universal";
-		case dJointTypeHinge2: return "ODE_hinge2";
+		// REM case dJointTypeHinge2: return "ODE_hinge2";
 		case dJointTypeFixed: return "fixed";
 		case dJointTypeNull: return "null";
 		case dJointTypeAMotor: return "ODE_angular_motor";
@@ -263,7 +263,7 @@ static void printUniversal (PrintingContext &c, dxJoint *j)
 	printLimot (c,u->limot2,2);
 }
 
-
+#if 0 // REM
 static void printHinge2 (PrintingContext &c, dxJoint *j)
 {
 	dxJointHinge2 *h = (dxJointHinge2*) j;
@@ -278,7 +278,7 @@ static void printHinge2 (PrintingContext &c, dxJoint *j)
 	printLimot (c,h->limot1,1);
 	printLimot (c,h->limot2,2);
 }
-
+#endif
 
 static void printFixed (PrintingContext &c, dxJoint *j)
 {
@@ -425,11 +425,11 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 	c.indent = 1;
 
 	fprintf (file,"-- Dynamics Interchange Format v0.1\n\n%sworld = dynamics.world {\n",prefix);
-	c.print ("gravity",w->gravity);
+	c.print ("gravity",w->stepInfo.gravity);
 	c.print ("ODE = {");
 	c.indent++;
-	c.print ("ERP",w->global_erp);
-	c.print ("CFM",w->global_cfm);
+	c.print ("ERP",w->stepInfo.global_erp);
+	c.print ("CFM",w->stepInfo.global_cfm);
 	c.print ("auto_disable = {");
 	c.indent++;
 	c.print ("linear_threshold",w->adis.linear_threshold);
@@ -446,10 +446,10 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 		b->tag = num;
 		fprintf (file,"%sbody[%d] = dynamics.body {\n\tworld = %sworld,\n",prefix,num,prefix);
 		c.indent++;
-		c.print ("pos",b->pos);
-		c.print ("q",b->q,4);
-		c.print ("lvel",b->lvel);
-		c.print ("avel",b->avel);
+		c.print ("pos",b->info.pos);
+		c.print ("q",b->info.q,4);
+		c.print ("lvel",b->info.lvel);
+		c.print ("avel",b->info.avel);
 		c.print ("mass",b->mass.mass);
 		fprintf (file,"\tI = {{");
 		for (int i=0; i<3; i++) {
@@ -516,13 +516,13 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			,prefix,num,name,prefix,prefix,j->node[0].body->tag);
 		if (j->node[1].body) fprintf (file,",%sbody[%d]",prefix,j->node[1].body->tag);
 		fprintf (file,"},\n");
-		switch (j->vtable->typenum) {
+		switch (j->typenum) {
 			case dJointTypeBall: printBall (c,j); break;
 			case dJointTypeHinge: printHinge (c,j); break;
 			case dJointTypeSlider: printSlider (c,j); break;
 			case dJointTypeContact: printContact (c,j); break;
 			case dJointTypeUniversal: printUniversal (c,j); break;
-			case dJointTypeHinge2: printHinge2 (c,j); break;
+			// REM case dJointTypeHinge2: printHinge2 (c,j); break;
 			case dJointTypeFixed: printFixed (c,j); break;
 			case dJointTypeAMotor: printAMotor (c,j); break;
 		}		

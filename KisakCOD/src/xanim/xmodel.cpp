@@ -18,7 +18,7 @@ bool __cdecl XModelBad(const XModel *model)
 
 void __cdecl TRACK_xmodel()
 {
-    track_static_alloc_internal(&g_default, 76, "g_default", 11);
+    track_static_alloc_internal(&g_default, sizeof(g_default), "g_default", 11);
 }
 
 XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))

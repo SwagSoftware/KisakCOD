@@ -32,10 +32,10 @@
 #include "joint.h"
 #include <ode/odemath.h>
 #include <ode/matrix.h>
-#include "step.h"
+// #include "step.h" REM
 #include "quickstep.h"
 #include "util.h"
-#include <ode/memory.h>
+// #include <ode/memory.h> REM
 #include <ode/error.h>
 
 // ADD: for memcpy
@@ -239,12 +239,12 @@ dxBody *dBodyCreate (dxWorld *w)
   b->invI[5] = 1;
   b->invI[10] = 1;
   b->invMass = 1;
-  dSetZero (b->pos,4);
-  dSetZero (b->q,4);
-  b->q[0] = 1;
-  dRSetIdentity (b->R);
-  dSetZero (b->lvel,4);
-  dSetZero (b->avel,4);
+  dSetZero (b->info.pos,4);
+  dSetZero (b->info.q,4);
+  b->info.q[0] = 1;
+  dRSetIdentity (b->info.R);
+  dSetZero (b->info.lvel,4);
+  dSetZero (b->info.avel,4);
   dSetZero (b->facc,4);
   dSetZero (b->tacc,4);
   dSetZero (b->finite_rot_axis,4);
@@ -257,37 +257,6 @@ dxBody *dBodyCreate (dxWorld *w)
   b->adis_timeleft = b->adis.idle_time;
 
   return b;
-}
-
-
-void dBodyDestroy (dxBody *b)
-{
-  dAASSERT (b);
-
-  // all geoms that link to this body must be notified that the body is about
-  // to disappear. note that the call to dGeomSetBody(geom,0) will result in
-  // dGeomGetBodyNext() returning 0 for the body, so we must get the next body
-  // before setting the body to 0.
-  dxGeom *next_geom = 0;
-  for (dxGeom *geom = b->geom; geom; geom = next_geom) {
-    next_geom = dGeomGetBodyNext (geom);
-    dGeomSetBody (geom,0);
-  }
-
-  // detach all neighbouring joints, then delete this body.
-  dxJointNode *n = b->firstjoint;
-  while (n) {
-    // sneaky trick to speed up removal of joint references (black magic)
-    n->joint->node[(n == n->joint->node)].body = 0;
-
-    dxJointNode *next = n->next;
-    n->next = 0;
-    removeJointReferencesFromAttachedBodies (n->joint);
-    n = next;
-  }
-  removeObjectFromList (b);
-  b->world->nb--;
-  delete b;
 }
 
 
@@ -308,9 +277,9 @@ void *dBodyGetData (dBodyID b)
 void dBodySetPosition (dBodyID b, dReal x, dReal y, dReal z)
 {
   dAASSERT (b);
-  b->pos[0] = x;
-  b->pos[1] = y;
-  b->pos[2] = z;
+  b->info.pos[0] = x;
+  b->info.pos[1] = y;
+  b->info.pos[2] = z;
 
   // notify all attached geoms that this body has moved
   for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
@@ -324,11 +293,11 @@ void dBodySetRotation (dBodyID b, const dMatrix3 R)
   dQuaternion q;
   dRtoQ (R,q);
   dNormalize4 (q);
-  b->q[0] = q[0];
-  b->q[1] = q[1];
-  b->q[2] = q[2];
-  b->q[3] = q[3];
-  dQtoR (b->q,b->R);
+  b->info.q[0] = q[0];
+  b->info.q[1] = q[1];
+  b->info.q[2] = q[2];
+  b->info.q[3] = q[3];
+  dQtoR (b->info.q,b->info.R);
 
   // notify all attached geoms that this body has moved
   for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
@@ -339,12 +308,12 @@ void dBodySetRotation (dBodyID b, const dMatrix3 R)
 void dBodySetQuaternion (dBodyID b, const dQuaternion q)
 {
   dAASSERT (b && q);
-  b->q[0] = q[0];
-  b->q[1] = q[1];
-  b->q[2] = q[2];
-  b->q[3] = q[3];
-  dNormalize4 (b->q);
-  dQtoR (b->q,b->R);
+  b->info.q[0] = q[0];
+  b->info.q[1] = q[1];
+  b->info.q[2] = q[2];
+  b->info.q[3] = q[3];
+  dNormalize4 (b->info.q);
+  dQtoR (b->info.q,b->info.R);
 
   // notify all attached geoms that this body has moved
   for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
@@ -355,53 +324,53 @@ void dBodySetQuaternion (dBodyID b, const dQuaternion q)
 void dBodySetLinearVel  (dBodyID b, dReal x, dReal y, dReal z)
 {
   dAASSERT (b);
-  b->lvel[0] = x;
-  b->lvel[1] = y;
-  b->lvel[2] = z;
+  b->info.lvel[0] = x;
+  b->info.lvel[1] = y;
+  b->info.lvel[2] = z;
 }
 
 
 void dBodySetAngularVel (dBodyID b, dReal x, dReal y, dReal z)
 {
   dAASSERT (b);
-  b->avel[0] = x;
-  b->avel[1] = y;
-  b->avel[2] = z;
+  b->info.avel[0] = x;
+  b->info.avel[1] = y;
+  b->info.avel[2] = z;
 }
 
 
 const dReal * dBodyGetPosition (dBodyID b)
 {
   dAASSERT (b);
-  return b->pos;
+  return b->info.pos;
 }
 
 
 const dReal * dBodyGetRotation (dBodyID b)
 {
   dAASSERT (b);
-  return b->R;
+  return b->info.R;
 }
 
 
 const dReal * dBodyGetQuaternion (dBodyID b)
 {
   dAASSERT (b);
-  return b->q;
+  return b->info.q;
 }
 
 
 const dReal * dBodyGetLinearVel (dBodyID b)
 {
   dAASSERT (b);
-  return b->lvel;
+  return b->info.lvel;
 }
 
 
 const dReal * dBodyGetAngularVel (dBodyID b)
 {
   dAASSERT (b);
-  return b->avel;
+  return b->info.avel;
 }
 
 
@@ -450,7 +419,7 @@ void dBodyAddRelForce (dBodyID b, dReal fx, dReal fy, dReal fz)
   t1[1] = fy;
   t1[2] = fz;
   t1[3] = 0;
-  dMULTIPLY0_331 (t2,b->R,t1);
+  dMULTIPLY0_331 (t2,b->info.R,t1);
   b->facc[0] += t2[0];
   b->facc[1] += t2[1];
   b->facc[2] += t2[2];
@@ -465,7 +434,7 @@ void dBodyAddRelTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
   t1[1] = fy;
   t1[2] = fz;
   t1[3] = 0;
-  dMULTIPLY0_331 (t2,b->R,t1);
+  dMULTIPLY0_331 (t2,b->info.R,t1);
   b->tacc[0] += t2[0];
   b->tacc[1] += t2[1];
   b->tacc[2] += t2[2];
@@ -483,9 +452,9 @@ void dBodyAddForceAtPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   f[0] = fx;
   f[1] = fy;
   f[2] = fz;
-  q[0] = px - b->pos[0];
-  q[1] = py - b->pos[1];
-  q[2] = pz - b->pos[2];
+  q[0] = px - b->info.pos[0];
+  q[1] = py - b->info.pos[1];
+  q[2] = pz - b->info.pos[2];
   dCROSS (b->tacc,+=,q,f);
 }
 
@@ -503,7 +472,7 @@ void dBodyAddForceAtRelPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (p,b->R,prel);
+  dMULTIPLY0_331 (p,b->info.R,prel);
   b->facc[0] += f[0];
   b->facc[1] += f[1];
   b->facc[2] += f[2];
@@ -520,14 +489,14 @@ void dBodyAddRelForceAtPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   frel[1] = fy;
   frel[2] = fz;
   frel[3] = 0;
-  dMULTIPLY0_331 (f,b->R,frel);
+  dMULTIPLY0_331 (f,b->info.R,frel);
   b->facc[0] += f[0];
   b->facc[1] += f[1];
   b->facc[2] += f[2];
   dVector3 q;
-  q[0] = px - b->pos[0];
-  q[1] = py - b->pos[1];
-  q[2] = pz - b->pos[2];
+  q[0] = px - b->info.pos[0];
+  q[1] = py - b->info.pos[1];
+  q[2] = pz - b->info.pos[2];
   dCROSS (b->tacc,+=,q,f);
 }
 
@@ -545,8 +514,8 @@ void dBodyAddRelForceAtRelPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (f,b->R,frel);
-  dMULTIPLY0_331 (p,b->R,prel);
+  dMULTIPLY0_331 (f,b->info.R,frel);
+  dMULTIPLY0_331 (p,b->info.R,prel);
   b->facc[0] += f[0];
   b->facc[1] += f[1];
   b->facc[2] += f[2];
@@ -595,10 +564,10 @@ void dBodyGetRelPointPos (dBodyID b, dReal px, dReal py, dReal pz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (p,b->R,prel);
-  result[0] = p[0] + b->pos[0];
-  result[1] = p[1] + b->pos[1];
-  result[2] = p[2] + b->pos[2];
+  dMULTIPLY0_331 (p,b->info.R,prel);
+  result[0] = p[0] + b->info.pos[0];
+  result[1] = p[1] + b->info.pos[1];
+  result[2] = p[2] + b->info.pos[2];
 }
 
 
@@ -611,11 +580,11 @@ void dBodyGetRelPointVel (dBodyID b, dReal px, dReal py, dReal pz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (p,b->R,prel);
-  result[0] = b->lvel[0];
-  result[1] = b->lvel[1];
-  result[2] = b->lvel[2];
-  dCROSS (result,+=,b->avel,p);
+  dMULTIPLY0_331 (p,b->info.R,prel);
+  result[0] = b->info.lvel[0];
+  result[1] = b->info.lvel[1];
+  result[2] = b->info.lvel[2];
+  dCROSS (result,+=,b->info.avel,p);
 }
 
 
@@ -624,14 +593,14 @@ void dBodyGetPointVel (dBodyID b, dReal px, dReal py, dReal pz,
 {
   dAASSERT (b);
   dVector3 p;
-  p[0] = px - b->pos[0];
-  p[1] = py - b->pos[1];
-  p[2] = pz - b->pos[2];
+  p[0] = px - b->info.pos[0];
+  p[1] = py - b->info.pos[1];
+  p[2] = pz - b->info.pos[2];
   p[3] = 0;
-  result[0] = b->lvel[0];
-  result[1] = b->lvel[1];
-  result[2] = b->lvel[2];
-  dCROSS (result,+=,b->avel,p);
+  result[0] = b->info.lvel[0];
+  result[1] = b->info.lvel[1];
+  result[2] = b->info.lvel[2];
+  dCROSS (result,+=,b->info.avel,p);
 }
 
 
@@ -640,11 +609,11 @@ void dBodyGetPosRelPoint (dBodyID b, dReal px, dReal py, dReal pz,
 {
   dAASSERT (b);
   dVector3 prel;
-  prel[0] = px - b->pos[0];
-  prel[1] = py - b->pos[1];
-  prel[2] = pz - b->pos[2];
+  prel[0] = px - b->info.pos[0];
+  prel[1] = py - b->info.pos[1];
+  prel[2] = pz - b->info.pos[2];
   prel[3] = 0;
-  dMULTIPLY1_331 (result,b->R,prel);
+  dMULTIPLY1_331 (result,b->info.R,prel);
 }
 
 
@@ -657,7 +626,7 @@ void dBodyVectorToWorld (dBodyID b, dReal px, dReal py, dReal pz,
   p[1] = py;
   p[2] = pz;
   p[3] = 0;
-  dMULTIPLY0_331 (result,b->R,p);
+  dMULTIPLY0_331 (result,b->info.R,p);
 }
 
 
@@ -670,7 +639,7 @@ void dBodyVectorFromWorld (dBodyID b, dReal px, dReal py, dReal pz,
   p[1] = py;
   p[2] = pz;
   p[3] = 0;
-  dMULTIPLY1_331 (result,b->R,p);
+  dMULTIPLY1_331 (result,b->info.R,p);
 }
 
 
@@ -863,6 +832,7 @@ void dBodySetAutoDisableDefaults (dBodyID b)
 //****************************************************************************
 // joints
 
+#if 0
 static void dJointInit (dxWorld *w, dxJoint *j)
 {
   dIASSERT (w && j);
@@ -879,8 +849,52 @@ static void dJointInit (dxWorld *w, dxJoint *j)
   addObjectToList (j,(dObject **) &w->firstjoint);
   w->nj++;
 }
+#endif
 
+// MOD
+void jointInit(dxJoint* joint);
+void ODE_InitJoint(dxWorld* world, dxJoint* joint, dxJointTypeNum typenum)
+{
+    dAASSERT(world);
+    dAASSERT(joint);
 
+    joint->world = world;
+    joint->next = 0;
+    joint->tome = 0;
+    joint->userdata = 0;
+    joint->tag = 0;
+    joint->typenum = dJointTypeNone;
+    joint->flags = 0;
+
+    joint->node[0].joint = joint;
+    joint->node[0].body = 0;
+    joint->node[0].next = 0;
+
+    joint->node[1].joint = joint;
+    joint->node[1].body = 0;
+    joint->node[1].next = 0;
+
+    addObjectToList(joint, (dObject **) &world->firstjoint);
+    ++world->nj;
+    joint->typenum = typenum;
+
+    jointInit(joint);
+}
+
+dxJoint* __cdecl createJointInPlace(dxWorld* world, dxJoint* joint, dxJointTypeNum typenum)
+{
+    dAASSERT(world);
+    dAASSERT(joint);
+
+    if (world->nj >= 4096)
+        return 0;
+    
+    ODE_InitJoint(world, joint, typenum);
+    return joint;
+}
+
+// REM
+#if 0
 static dxJoint *createJoint (dWorldID w, dJointGroupID group,
 			     dxJoint::Vtable *vtable)
 {
@@ -898,83 +912,98 @@ static dxJoint *createJoint (dWorldID w, dJointGroupID group,
   j->feedback = 0;
   return j;
 }
+#endif
 
-
-dxJoint * dJointCreateBall (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateBall (dWorldID w, dxJointBall* joint)
 {
   dAASSERT (w);
-  return createJoint (w,group,&__dball_vtable);
+  return createJointInPlace(w, joint, dJointTypeBall);
 }
 
 
-dxJoint * dJointCreateHinge (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateHinge (dWorldID w, dxJointHinge* joint)
 {
   dAASSERT (w);
-  return createJoint (w,group,&__dhinge_vtable);
+  return createJointInPlace(w, joint, dJointTypeHinge);
 }
 
 
-dxJoint * dJointCreateSlider (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateSlider (dWorldID w, dxJointSlider* joint)
 {
   dAASSERT (w);
-  return createJoint (w,group,&__dslider_vtable);
+  return createJointInPlace(w, joint, dJointTypeSlider);
 }
 
 
 dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
-			       const dContact *c)
+    const dSurfaceParameters *surfParms,
+    const dContact *c)
 {
-  dAASSERT (w && c);
-  dxJointContact *j = (dxJointContact *)
-    createJoint (w,group,&__dcontact_vtable);
-  j->contact = *c;
-  return j;
+    dAASSERT(w);
+  dAASSERT(c);
+  dAASSERT(surfParms);
+  dAASSERT(group);
+
+  dxJointContact* joint; // [esp+8h] [ebp-4h]
+
+  if (w->nj >= ODE_WORLD_MAX_JOINT_COUNT || group->num >= ODE_WORLD_MAX_JOINT_COUNT)
+      return 0;
+  joint = &group->joints[group->num++];
+  ODE_InitJoint(w, joint, dJointTypeContact);
+  joint->flags |= dJOINT_INGROUP;
+  memcpy(&joint->contact.surface, surfParms, sizeof(joint->contact.surface));
+  memcpy(&joint->contact.geom, c, sizeof(joint->contact.geom));
+  return joint;
 }
 
-
-dxJoint * dJointCreateHinge2 (dWorldID w, dJointGroupID group)
-{
-  dAASSERT (w);
-  return createJoint (w,group,&__dhinge2_vtable);
-}
-
-
-dxJoint * dJointCreateUniversal (dWorldID w, dJointGroupID group)
-{
-  dAASSERT (w);
-  return createJoint (w,group,&__duniversal_vtable);
-}
-
-
-dxJoint * dJointCreateFixed (dWorldID w, dJointGroupID group)
+// REM
+#if 0
+dxJoint * dJointCreateHinge2 (dWorldID w, dxJointHinge2* joint)
 {
   dAASSERT (w);
-  return createJoint (w,group,&__dfixed_vtable);
+  return createJointInPlace(w, joint, dJointTypeHinge2);
+}
+#endif
+
+dxJoint * dJointCreateUniversal (dWorldID w, dxJointUniversal* joint)
+{
+  dAASSERT (w);
+  return createJointInPlace(w, joint, dJointTypeUniversal);
 }
 
 
-dxJoint * dJointCreateNull (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateFixed (dWorldID w, dxJointFixed* joint)
+{
+  dAASSERT (w);
+  return createJointInPlace(w, joint, dJointTypeFixed);
+}
+
+// DEL
+#if 0
+dxJoint * dJointCreateNull (dWorldID w, dxJointBall* joint)
 {
   dAASSERT (w);
   return createJoint (w,group,&__dnull_vtable);
 }
+#endif
 
-
-dxJoint * dJointCreateAMotor (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateAMotor (dWorldID w, dxJointAMotor* joint)
 {
   dAASSERT (w);
-  return createJoint (w,group,&__damotor_vtable);
+  return createJointInPlace(w, joint, dJointTypeAMotor);
 }
 
 
 void dJointDestroy (dxJoint *j)
 {
   dAASSERT (j);
-  if (j->flags & dJOINT_INGROUP) return;
-  removeJointReferencesFromAttachedBodies (j);
-  removeObjectFromList (j);
-  j->world->nj--;
-  dFree (j,j->vtable->size);
+
+  if (!(j->flags & dJOINT_INGROUP))
+  {
+      removeJointReferencesFromAttachedBodies(j);
+      removeObjectFromList(j);
+      --j->world->nj;
+  }
 }
 
 
@@ -992,35 +1021,6 @@ void dJointGroupDestroy (dJointGroupID group)
   dAASSERT (group);
   dJointGroupEmpty (group);
   delete group;
-}
-
-
-void dJointGroupEmpty (dJointGroupID group)
-{
-  // the joints in this group are detached starting from the most recently
-  // added (at the top of the stack). this helps ensure that the various
-  // linked lists are not traversed too much, as the joints will hopefully
-  // be at the start of those lists.
-  // if any group joints have their world pointer set to 0, their world was
-  // previously destroyed. no special handling is required for these joints.
-
-  dAASSERT (group);
-  int i;
-  dxJoint **jlist = (dxJoint**) ALLOCA (group->num * sizeof(dxJoint*));
-  dxJoint *j = (dxJoint*) group->stack.rewind();
-  for (i=0; i < group->num; i++) {
-    jlist[i] = j;
-    j = (dxJoint*) (group->stack.next (j->vtable->size));
-  }
-  for (i=group->num-1; i >= 0; i--) {
-    if (jlist[i]->world) {
-      removeJointReferencesFromAttachedBodies (jlist[i]);
-      removeObjectFromList (jlist[i]);
-      jlist[i]->world->nj--;
-    }
-  }
-  group->num = 0;
-  group->stack.freeAll();
 }
 
 
@@ -1089,7 +1089,7 @@ void *dJointGetData (dxJoint *joint)
 int dJointGetType (dxJoint *joint)
 {
   dAASSERT (joint);
-  return joint->vtable->typenum;
+  return joint->typenum;
 }
 
 
@@ -1103,20 +1103,20 @@ dBodyID dJointGetBody (dxJoint *joint, int index)
   else return 0;
 }
 
-
+// DEL
+#if 0
 void dJointSetFeedback (dxJoint *joint, dJointFeedback *f)
 {
   dAASSERT (joint);
   joint->feedback = f;
 }
 
-
 dJointFeedback *dJointGetFeedback (dxJoint *joint)
 {
   dAASSERT (joint);
   return joint->feedback;
 }
-
+#endif
 
 int dAreConnected (dBodyID b1, dBodyID b2)
 {
@@ -1142,123 +1142,62 @@ int dAreConnectedExcluding (dBodyID b1, dBodyID b2, int joint_type)
 //****************************************************************************
 // world
 
-dxWorld * dWorldCreate()
-{
-  dxWorld *w = new dxWorld;
-  w->firstbody = 0;
-  w->firstjoint = 0;
-  w->nb = 0;
-  w->nj = 0;
-  dSetZero (w->gravity,4);
-  w->global_erp = REAL(0.2);
-#if defined(dSINGLE)
-  w->global_cfm = 1e-5f;
-#elif defined(dDOUBLE)
-  w->global_cfm = 1e-10;
-#else
-  #error dSINGLE or dDOUBLE must be defined
-#endif
-
-  w->adis.linear_threshold = REAL(0.001)*REAL(0.001);	// (magnitude squared)
-  w->adis.angular_threshold = REAL(0.001)*REAL(0.001);	// (magnitude squared)
-  w->adis.idle_steps = 10;
-  w->adis.idle_time = 0;
-  w->adis_flag = 0;
-
-  w->qs.num_iterations = 20;
-  w->qs.w = REAL(1.3);
-
-  w->contactp.max_vel = dInfinity;
-  w->contactp.min_depth = 0;
-
-  return w;
-}
-
-
-void dWorldDestroy (dxWorld *w)
-{
-  // delete all bodies and joints
-  dAASSERT (w);
-  dxBody *nextb, *b = w->firstbody;
-  while (b) {
-    nextb = (dxBody*) b->next;
-    delete b;
-    b = nextb;
-  }
-  dxJoint *nextj, *j = w->firstjoint;
-  while (j) {
-    nextj = (dxJoint*)j->next;
-    if (j->flags & dJOINT_INGROUP) {
-      // the joint is part of a group, so "deactivate" it instead
-      j->world = 0;
-      j->node[0].body = 0;
-      j->node[0].next = 0;
-      j->node[1].body = 0;
-      j->node[1].next = 0;
-      dMessage (0,"warning: destroying world containing grouped joints");
-    }
-    else {
-      dFree (j,j->vtable->size);
-    }
-    j = nextj;
-  }
-  delete w;
-}
 
 
 void dWorldSetGravity (dWorldID w, dReal x, dReal y, dReal z)
 {
   dAASSERT (w);
-  w->gravity[0] = x;
-  w->gravity[1] = y;
-  w->gravity[2] = z;
+  w->stepInfo.gravity[0] = x;
+  w->stepInfo.gravity[1] = y;
+  w->stepInfo.gravity[2] = z;
 }
 
 
 void dWorldGetGravity (dWorldID w, dVector3 g)
 {
   dAASSERT (w);
-  g[0] = w->gravity[0];
-  g[1] = w->gravity[1];
-  g[2] = w->gravity[2];
+  g[0] = w->stepInfo.gravity[0];
+  g[1] = w->stepInfo.gravity[1];
+  g[2] = w->stepInfo.gravity[2];
 }
 
 
 void dWorldSetERP (dWorldID w, dReal erp)
 {
   dAASSERT (w);
-  w->global_erp = erp;
+  w->stepInfo.global_erp = erp;
 }
 
 
 dReal dWorldGetERP (dWorldID w)
 {
   dAASSERT (w);
-  return w->global_erp;
+  return w->stepInfo.global_erp;
 }
 
 
 void dWorldSetCFM (dWorldID w, dReal cfm)
 {
   dAASSERT (w);
-  w->global_cfm = cfm;
+  w->stepInfo.global_cfm = cfm;
 }
 
 
 dReal dWorldGetCFM (dWorldID w)
 {
   dAASSERT (w);
-  return w->global_cfm;
+  return w->stepInfo.global_cfm;
 }
 
-
+// REM
+#if 0
 void dWorldStep (dWorldID w, dReal stepsize)
 {
   dUASSERT (w,"bad world argument");
   dUASSERT (stepsize > 0,"stepsize must be > 0");
   dxProcessIslands (w,stepsize,&dInternalStepIsland);
 }
-
+#endif
 
 void dWorldQuickStep (dWorldID w, dReal stepsize)
 {
@@ -1356,72 +1295,61 @@ void dWorldSetAutoDisableFlag (dWorldID w, int do_auto_disable)
 void dWorldSetQuickStepNumIterations (dWorldID w, int num)
 {
 	dAASSERT(w);
-	w->qs.num_iterations = num;
+	w->stepInfo.qs.num_iterations = num;
 }
 
 
 int dWorldGetQuickStepNumIterations (dWorldID w)
 {
 	dAASSERT(w);
-	return w->qs.num_iterations;
+	return w->stepInfo.qs.num_iterations;
 }
 
 
 void dWorldSetQuickStepW (dWorldID w, dReal param)
 {
 	dAASSERT(w);
-	w->qs.w = param;
+	w->stepInfo.qs.w = param;
 }
 
 
 dReal dWorldGetQuickStepW (dWorldID w)
 {
 	dAASSERT(w);
-	return w->qs.w;
+	return w->stepInfo.qs.w;
 }
 
 
 void dWorldSetContactMaxCorrectingVel (dWorldID w, dReal vel)
 {
 	dAASSERT(w);
-	w->contactp.max_vel = vel;
+	w->stepInfo.contactp.max_vel = vel;
 }
 
 
 dReal dWorldGetContactMaxCorrectingVel (dWorldID w)
 {
 	dAASSERT(w);
-	return w->contactp.max_vel;
+	return w->stepInfo.contactp.max_vel;
 }
 
 
 void dWorldSetContactSurfaceLayer (dWorldID w, dReal depth)
 {
 	dAASSERT(w);
-	w->contactp.min_depth = depth;
+	w->stepInfo.contactp.min_depth = depth;
 }
 
 
 dReal dWorldGetContactSurfaceLayer (dWorldID w)
 {
 	dAASSERT(w);
-	return w->contactp.min_depth;
+	return w->stepInfo.contactp.min_depth;
 }
-
-// LWSS ADD
-#include "odeext.h"
-
-odeGlob_t odeGlob;
-
-void __cdecl ODE_Init()
-{
-    Pool_Init((char *)odeGlob.bodies, &odeGlob.bodyPool, 0x150u, 0x200u);
-    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, 0xD0u, 0x800u);
-}
-// LWSS END
 
 //****************************************************************************
 // testing
+#if 0
 
 #define NUM 100
 
@@ -1430,101 +1358,251 @@ void __cdecl ODE_Init()
 
 extern "C" void dTestDataStructures()
 {
-  int i;
-  DO(printf ("testDynamicsStuff()\n"));
+    int i;
+    DO(printf("testDynamicsStuff()\n"));
 
-  dBodyID body [NUM];
-  int nb = 0;
-  dJointID joint [NUM];
-  int nj = 0;
+    dBodyID body[NUM];
+    int nb = 0;
+    dJointID joint[NUM];
+    int nj = 0;
 
-  for (i=0; i<NUM; i++) body[i] = 0;
-  for (i=0; i<NUM; i++) joint[i] = 0;
+    for (i = 0; i < NUM; i++) body[i] = 0;
+    for (i = 0; i < NUM; i++) joint[i] = 0;
 
-  DO(printf ("creating world\n"));
-  dWorldID w = dWorldCreate();
-  checkWorld (w);
+    DO(printf("creating world\n"));
+    dWorldID w = dWorldCreate();
+    checkWorld(w);
 
-  for (;;) {
-    if (nb < NUM && dRandReal() > 0.5) {
-      DO(printf ("creating body\n"));
-      body[nb] = dBodyCreate (w);
-      DO(printf ("\t--> %p\n",body[nb]));
-      nb++;
-      checkWorld (w);
-      DO(printf ("%d BODIES, %d JOINTS\n",nb,nj));
+    for (;;) {
+        if (nb < NUM && dRandReal() > 0.5) {
+            DO(printf("creating body\n"));
+            body[nb] = dBodyCreate(w);
+            DO(printf("\t--> %p\n", body[nb]));
+            nb++;
+            checkWorld(w);
+            DO(printf("%d BODIES, %d JOINTS\n", nb, nj));
+        }
+        if (nj < NUM && nb > 2 && dRandReal() > 0.5) {
+            dBodyID b1 = body[dRand() % nb];
+            dBodyID b2 = body[dRand() % nb];
+            if (b1 != b2) {
+                DO(printf("creating joint, attaching to %p,%p\n", b1, b2));
+                joint[nj] = dJointCreateBall(w, 0);
+                DO(printf("\t-->%p\n", joint[nj]));
+                checkWorld(w);
+                dJointAttach(joint[nj], b1, b2);
+                nj++;
+                checkWorld(w);
+                DO(printf("%d BODIES, %d JOINTS\n", nb, nj));
+            }
+        }
+        if (nj > 0 && nb > 2 && dRandReal() > 0.5) {
+            dBodyID b1 = body[dRand() % nb];
+            dBodyID b2 = body[dRand() % nb];
+            if (b1 != b2) {
+                int k = dRand() % nj;
+                DO(printf("reattaching joint %p\n", joint[k]));
+                dJointAttach(joint[k], b1, b2);
+                checkWorld(w);
+                DO(printf("%d BODIES, %d JOINTS\n", nb, nj));
+            }
+        }
+        if (nb > 0 && dRandReal() > 0.5) {
+            int k = dRand() % nb;
+            DO(printf("destroying body %p\n", body[k]));
+            dBodyDestroy(body[k]);
+            checkWorld(w);
+            for (; k < (NUM - 1); k++) body[k] = body[k + 1];
+            nb--;
+            DO(printf("%d BODIES, %d JOINTS\n", nb, nj));
+        }
+        if (nj > 0 && dRandReal() > 0.5) {
+            int k = dRand() % nj;
+            DO(printf("destroying joint %p\n", joint[k]));
+            dJointDestroy(joint[k]);
+            checkWorld(w);
+            for (; k < (NUM - 1); k++) joint[k] = joint[k + 1];
+            nj--;
+            DO(printf("%d BODIES, %d JOINTS\n", nb, nj));
+        }
     }
-    if (nj < NUM && nb > 2 && dRandReal() > 0.5) {
-      dBodyID b1 = body [dRand() % nb];
-      dBodyID b2 = body [dRand() % nb];
-      if (b1 != b2) {
-	DO(printf ("creating joint, attaching to %p,%p\n",b1,b2));
-	joint[nj] = dJointCreateBall (w,0);
-	DO(printf ("\t-->%p\n",joint[nj]));
-	checkWorld (w);
-	dJointAttach (joint[nj],b1,b2);
-	nj++;
-	checkWorld (w);
-	DO(printf ("%d BODIES, %d JOINTS\n",nb,nj));
-      }
-    }
-    if (nj > 0 && nb > 2 && dRandReal() > 0.5) {
-      dBodyID b1 = body [dRand() % nb];
-      dBodyID b2 = body [dRand() % nb];
-      if (b1 != b2) {
-	int k = dRand() % nj;
-	DO(printf ("reattaching joint %p\n",joint[k]));
-	dJointAttach (joint[k],b1,b2);
-	checkWorld (w);
-	DO(printf ("%d BODIES, %d JOINTS\n",nb,nj));
-      }
-    }
-    if (nb > 0 && dRandReal() > 0.5) {
-      int k = dRand() % nb;
-      DO(printf ("destroying body %p\n",body[k]));
-      dBodyDestroy (body[k]);
-      checkWorld (w);
-      for (; k < (NUM-1); k++) body[k] = body[k+1];
-      nb--;
-      DO(printf ("%d BODIES, %d JOINTS\n",nb,nj));
-    }
-    if (nj > 0 && dRandReal() > 0.5) {
-      int k = dRand() % nj;
-      DO(printf ("destroying joint %p\n",joint[k]));
-      dJointDestroy (joint[k]);
-      checkWorld (w);
-      for (; k < (NUM-1); k++) joint[k] = joint[k+1];
-      nj--;
-      DO(printf ("%d BODIES, %d JOINTS\n",nb,nj));
-    }
-  }
 
-  /*
-  printf ("creating world\n");
-  dWorldID w = dWorldCreate();
-  checkWorld (w);
-  printf ("creating body\n");
-  dBodyID b1 = dBodyCreate (w);
-  checkWorld (w);
-  printf ("creating body\n");
-  dBodyID b2 = dBodyCreate (w);
-  checkWorld (w);
-  printf ("creating joint\n");
-  dJointID j = dJointCreateBall (w);
-  checkWorld (w);
-  printf ("attaching joint\n");
-  dJointAttach (j,b1,b2);
-  checkWorld (w);
-  printf ("destroying joint\n");
-  dJointDestroy (j);
-  checkWorld (w);
-  printf ("destroying body\n");
-  dBodyDestroy (b1);
-  checkWorld (w);
-  printf ("destroying body\n");
-  dBodyDestroy (b2);
-  checkWorld (w);
-  printf ("destroying world\n");
-  dWorldDestroy (w);
-  */
+    /*
+    printf ("creating world\n");
+    dWorldID w = dWorldCreate();
+    checkWorld (w);
+    printf ("creating body\n");
+    dBodyID b1 = dBodyCreate (w);
+    checkWorld (w);
+    printf ("creating body\n");
+    dBodyID b2 = dBodyCreate (w);
+    checkWorld (w);
+    printf ("creating joint\n");
+    dJointID j = dJointCreateBall (w);
+    checkWorld (w);
+    printf ("attaching joint\n");
+    dJointAttach (j,b1,b2);
+    checkWorld (w);
+    printf ("destroying joint\n");
+    dJointDestroy (j);
+    checkWorld (w);
+    printf ("destroying body\n");
+    dBodyDestroy (b1);
+    checkWorld (w);
+    printf ("destroying body\n");
+    dBodyDestroy (b2);
+    checkWorld (w);
+    printf ("destroying world\n");
+    dWorldDestroy (w);
+    */
+}
+#endif
+
+// LWSS ADD
+#include "odeext.h"
+
+
+#include <universal/pool_allocator.h>
+#include <win32/win_local.h>
+
+
+odeGlob_t odeGlob;
+
+void __cdecl ODE_Init()
+{
+    INIT_STATIC_POOL(odeGlob.bodies, &odeGlob.bodyPool);
+    INIT_STATIC_POOL(odeGlob.geoms, &odeGlob.geomPool);
+}
+
+// MOD
+#include <xanim/dobj.h>
+
+dxWorld* dWorldCreate(PhysWorld worldIndex)
+{
+    dxWorld *w = &odeGlob.world[worldIndex];
+    w->firstbody = 0;
+    w->firstjoint = 0;
+    w->nb = 0;
+    w->nj = 0;
+    dSetZero(w->stepInfo.gravity, 4);
+    w->stepInfo.global_erp = REAL(0.2);
+#if defined(dSINGLE)
+    w->stepInfo.global_cfm = 1e-5f;
+#elif defined(dDOUBLE)
+    w->global_cfm = 1e-10;
+#else
+#error dSINGLE or dDOUBLE must be defined
+#endif
+
+    w->adis.linear_threshold = REAL(0.001) * REAL(0.001);	// (magnitude squared)
+    w->adis.angular_threshold = REAL(0.001) * REAL(0.001);	// (magnitude squared)
+    w->adis.idle_steps = 10;
+    w->adis.idle_time = 0;
+    w->adis_flag = 0;
+
+    w->stepInfo.qs.num_iterations = 20;
+    w->stepInfo.qs.w = REAL(1.3);
+
+    w->stepInfo.holdrand = 0x89ABCDEF;
+
+    w->stepInfo.contactp.max_vel = dInfinity;
+    w->stepInfo.contactp.min_depth = 0;
+
+    return w;
+}
+
+// LWSS END
+
+// MOD
+
+void dJointGroupEmpty(dJointGroupID group)
+{
+    int i;
+
+    dAASSERT(group);
+    dAASSERT(group->num < ODE_WORLD_MAX_JOINT_COUNT);
+
+    for (i = group->num - 1; i >= 0; --i)
+    {
+        if (group->joints[i].world)
+        {
+            removeJointReferencesFromAttachedBodies(&group->joints[i]);
+            removeObjectFromList(&group->joints[i]);
+            --group->joints[i].world->nj;
+        }
+    }
+
+    group->num = 0;
+}
+
+void dWorldDestroy(dxWorld* w)
+{
+    // delete all bodies and joints
+    dAASSERT(w);
+    
+    dxJoint* joint; // [esp+0h] [ebp-10h]
+    dxBody* b; // [esp+4h] [ebp-Ch]
+    dxJoint* nextj; // [esp+8h] [ebp-8h]
+    dxBody* nextb; // [esp+Ch] [ebp-4h]
+
+    b = w->firstbody;
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    while (b)
+    {
+        nextb = (dxBody*)b->next;
+        Pool_Free((freenode*)b, &odeGlob.bodyPool);
+        b = nextb;
+    }
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+    for (joint = w->firstjoint; joint; joint = nextj)
+    {
+        nextj = (dxJoint*)joint->next;
+        if (joint->flags & dJOINT_INGROUP)
+        {
+            joint->world = 0;
+            joint->node[0].body = 0;
+            joint->node[0].next = 0;
+            joint->node[1].body = 0;
+            joint->node[1].next = 0;
+            dMessage(0, "warning: destroying world containing grouped joints");
+        }
+    }
+}
+
+
+void dBodyDestroy(dxBody* b)
+{
+    dAASSERT(b);
+
+    // all geoms that link to this body must be notified that the body is about
+    // to disappear. note that the call to dGeomSetBody(geom,0) will result in
+    // dGeomGetBodyNext() returning 0 for the body, so we must get the next body
+    // before setting the body to 0.
+    dxGeom* next_geom = nullptr;
+    for (dxGeom* geom = b->geom; geom; geom = next_geom) {
+        next_geom = dGeomGetBodyNext(geom);
+        ODE_GeomDestruct(geom);
+    }
+
+    // detach all neighbouring joints, then delete this body.
+    dxJointNode* n = b->firstjoint;
+    while (n) {
+        // sneaky trick to speed up removal of joint references (black magic)
+        n->joint->node[(n == n->joint->node)].body = 0;
+
+        dxJointNode* next = n->next;
+        n->next = 0;
+        removeJointReferencesFromAttachedBodies(n->joint);
+        n = next;
+    }
+    removeObjectFromList(b);
+
+    dAASSERT(b->world);
+    dAASSERT(b->world->nb);
+
+    b->world->nb--;
+
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    Pool_Free((freenode*)b, &odeGlob.bodyPool);
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
 }

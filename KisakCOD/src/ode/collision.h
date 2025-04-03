@@ -177,7 +177,7 @@ typedef struct dGeomClass {
   dGetAABBFn *aabb;
   dAABBTestFn *aabb_test;
   bool isPlaceable; // LWSS ADD
-  dGeomDtorFn *dtor;
+  // dGeomDtorFn *dtor; REM
 } dGeomClass;
 
 enum PhysicsGeomType : __int32
@@ -235,11 +235,9 @@ struct GeomState // sizeof=0x48
 
 int dCreateGeomClass (const dGeomClass *classptr);
 void * dGeomGetClassData (dGeomID);
-inline void *dGeomGetClassData(dxGeom* d) // LWSS Add - Intellisense cancer fixer
-{
-	return dGeomGetClassData((dGeomID)d);
-}
-dGeomID dCreateGeom (int classnum);
+
+// REM
+// dGeomID dCreateGeom (int classnum);
 
 /* ************************************************************************ */
 

@@ -30,6 +30,9 @@ void	Sys_DestroyConsole( void );
 
 char	*Sys_ConsoleInput (void);
 
+struct netadr_t;
+struct msg_t;
+
 qboolean	Sys_GetPacket ( netadr_t *net_from, msg_t *net_message );
 qboolean	Sys_GetBroadcastPacket( msg_t *net_message );
 

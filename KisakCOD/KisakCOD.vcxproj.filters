@@ -387,9 +387,6 @@
     <ClCompile Include="src\physics\phys_ode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\ode\obstack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\physics\ode\ode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -402,28 +399,10 @@
     <ClCompile Include="src\physics\ode\rotation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\ode\scrapbook.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\stack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\step.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\stepfast.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\testing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\physics\ode\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\ode\util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\array.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\ode\collision_kernel.cpp">
@@ -439,27 +418,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\ode\collision_transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\collision_trimesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\collision_trimesh_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\collision_trimesh_ccylinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\collision_trimesh_distance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\collision_trimesh_ray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\collision_trimesh_sphere.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\collision_trimesh_trimesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\ode\collision_util.cpp">
@@ -486,19 +444,10 @@
     <ClCompile Include="src\physics\ode\joint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\ode\lcp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\physics\ode\mass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\ode\mat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\physics\ode\matrix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\ode\misc.cpp">
@@ -1121,16 +1070,7 @@
     <ClInclude Include="src\physics\ode\stack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\ode\step.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physics\ode\testing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\physics\ode\util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physics\ode\array.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\physics\ode\collision_kernel.h">
@@ -1145,19 +1085,10 @@
     <ClInclude Include="src\physics\ode\collision_transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\ode\collision_trimesh_internal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\physics\ode\collision_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\physics\ode\joint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physics\ode\lcp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physics\ode\mat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ode\collision.h">
@@ -1293,6 +1224,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\game_mp\g_public_mp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\ode\odeext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\qcommon\com_bsp.h">

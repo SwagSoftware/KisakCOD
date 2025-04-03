@@ -2610,10 +2610,9 @@ void __cdecl Phys_SetHingeParams(
     float lowStop,
     float highStop)
 {
-    if (!id)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 2471, 0, "%s", "id");
-    if (id->typenum != 2)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 2475, 0, "%s", "joint->typenum == dJointTypeHinge");
+    iassert(id);
+    iassert(id->typenum == dJointTypeHinge);
+
     dJointSetHingeParam(id, 2, motorSpeed);
     dJointSetHingeParam(id, 3, motorMaxForce);
     dJointSetHingeParam(id, 4, 0.89999998);

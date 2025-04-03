@@ -26,94 +26,6 @@ enum physStuckState_t : __int32
     PHYS_OBJ_STATE_FREE = 0x2,
 };
 
-
-
-struct dContactGeom // sizeof=0x2C
-{                                       // ...
-    float pos[4];
-    float normal[4];
-    float depth;
-    dxGeom *g1;
-    dxGeom *g2;
-};
-
-struct dContactGeomExt // sizeof=0x30
-{                                       // ...
-    dContactGeom contact;
-    int surfFlags;
-};
-
-struct ContactList // sizeof=0x1804
-{                                       // ...
-    dContactGeomExt contacts[128];
-    int contactCount;                   // ...
-};
-
-struct dxJointLimitMotor // sizeof=0x2C
-{                                       // ...
-    float vel;
-    float fmax;
-    float lostop;
-    float histop;
-    float fudge_factor;
-    float normal_cfm;
-    float stop_erp;
-    float stop_cfm;
-    float bounce;
-    int limit;
-    float limit_err;
-};
-struct dxJointHinge : dxJoint // sizeof=0xBC
-{                                       // ...
-    float anchor1[4];
-    float anchor2[4];
-    float axis1[4];
-    float axis2[4];
-    float qrel[4];
-    dxJointLimitMotor limot;
-};
-struct dxJointAMotor : dxJoint // sizeof=0x128
-{                                       // ...
-    int num;
-    int mode;
-    int rel[3];
-    float axis[3][4];
-    dxJointLimitMotor limot[3];
-    float reference1[4];
-    float reference2[4];
-};
-struct dxJointSlider : dxJoint // sizeof=0x9C
-{
-    float axis1[4];
-    float qrel[4];
-    float offset[4];
-    dxJointLimitMotor limot;
-};
-struct dxJointFixed : dxJoint // sizeof=0x60
-{
-    float qrel[4];
-    float offset[4];
-};
-struct dxJointNull : dxJoint // sizeof=0x40
-{
-};
-struct dxJointUniversal : dxJoint // sizeof=0xF8
-{
-    float anchor1[4];
-    float anchor2[4];
-    float axis1[4];
-    float axis2[4];
-    float qrel1[4];
-    float qrel2[4];
-    dxJointLimitMotor limot1;
-    dxJointLimitMotor limot2;
-};
-struct dxJointBall : dxJoint // sizeof=0x60
-{                                       // ...
-    float anchor1[4];
-    float anchor2[4];
-};
-
 struct Jitter // sizeof=0x24
 {                                       // ...
     float origin[3];
@@ -155,22 +67,6 @@ struct __declspec(align(4)) PhysObjUserData // sizeof=0x70
     // padding byte
     // padding byte
 };
-
-struct dSurfaceParameters // sizeof=0x2C
-{                                       // ...
-    int mode;                           // ...
-    float mu;                           // ...
-    float mu2;                          // ...
-    float bounce;                       // ...
-    float bounce_vel;                   // ...
-    float soft_erp;                     // ...
-    float soft_cfm;                     // ...
-    float motion1;
-    float motion2;
-    float slip1;
-    float slip2;
-};
-
  struct PhysTriMeshInfo // sizeof=0x14
  {                                       // ...
      float *verts;                       // ...

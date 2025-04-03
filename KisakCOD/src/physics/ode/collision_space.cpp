@@ -73,7 +73,7 @@ void dGeomMoved (dxGeom *geom)
 //****************************************************************************
 // dxSpace
 
-dxSpace::dxSpace (dSpaceID _space) : dxGeom (_space,0)
+dxSpace::dxSpace (dSpaceID _space) : dxGeom (_space, false, nullptr)
 {
   count = 0;
   first = 0;
@@ -774,4 +774,32 @@ void dSpaceCollide2 (dxGeom *g1, dxGeom *g2, void *data,
       callback (data,g1,g2);
     }
   }
+}
+
+// ADD
+void dxSpace::clear()
+{
+    dxGeom* i; // [esp+4h] [ebp-10h]
+    dxGeom* next; // [esp+8h] [ebp-Ch]
+    dxGeom* g; // [esp+Ch] [ebp-8h]
+    dxGeom* n; // [esp+10h] [ebp-4h]
+    
+    CHECK_NOT_LOCKED(this);
+
+    if (this->cleanup)
+    {
+        for (g = this->first; g; g = n)
+        {
+            n = g->next;
+            ODE_GeomDestruct(g);
+        }
+    }
+    else
+    {
+        for (i = this->first; i; i = next)
+        {
+            next = i->next;
+            this->remove(i);
+        }
+    }
 }

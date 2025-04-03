@@ -243,14 +243,14 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   for (i=0; i<nb; i++) {
     dReal tmp[12];
     // compute inertia tensor in global frame
-    dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->R);
-    dMULTIPLY0_333 (I+i*12,body[i]->R,tmp);
+    dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->info.R);
+    dMULTIPLY0_333 (I+i*12,body[i]->info.R,tmp);
     // compute inverse inertia tensor in global frame
-    dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->R);
-    dMULTIPLY0_333 (invI+i*12,body[i]->R,tmp);
+    dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->info.R);
+    dMULTIPLY0_333 (invI+i*12,body[i]->info.R,tmp);
     // compute rotational force
-    dMULTIPLY0_331 (tmp,I+i*12,body[i]->avel);
-    dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
+    dMULTIPLY0_331 (tmp,I+i*12,body[i]->info.avel);
+    dCROSS (body[i]->tacc,-=,body[i]->info.avel,tmp);
   }
 
   // add the gravity force to all bodies
@@ -328,8 +328,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   for (i=0; i<nb; i++) {
     for (j=0; j<3; j++) fe[i*6+j] = body[i]->facc[j];
     for (j=0; j<3; j++) fe[i*6+3+j] = body[i]->tacc[j];
-    for (j=0; j<3; j++) v[i*6+j] = body[i]->lvel[j];
-    for (j=0; j<3; j++) v[i*6+3+j] = body[i]->avel[j];
+    for (j=0; j<3; j++) v[i*6+j] = body[i]->info.lvel[j];
+    for (j=0; j<3; j++) v[i*6+3+j] = body[i]->info.avel[j];
   }
 
   // this will be set to the velocity update
@@ -488,8 +488,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   dTimerNow ("update velocity");
 # endif
   for (i=0; i<nb; i++) {
-    for (j=0; j<3; j++) body[i]->lvel[j] = vnew[i*6+j];
-    for (j=0; j<3; j++) body[i]->avel[j] = vnew[i*6+3+j];
+    for (j=0; j<3; j++) body[i]->info.lvel[j] = vnew[i*6+j];
+    for (j=0; j<3; j++) body[i]->info.avel[j] = vnew[i*6+3+j];
   }
 
   // update the position and orientation from the new linear/angular velocity
@@ -555,14 +555,14 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   for (i=0; i<nb; i++) {
     dReal tmp[12];
     // compute inertia tensor in global frame
-    dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->R);
-    dMULTIPLY0_333 (I+i*12,body[i]->R,tmp);
+    dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->info.R);
+    dMULTIPLY0_333 (I+i*12,body[i]->info.R,tmp);
     // compute inverse inertia tensor in global frame
-    dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->R);
-    dMULTIPLY0_333 (invI+i*12,body[i]->R,tmp);
+    dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->info.R);
+    dMULTIPLY0_333 (invI+i*12,body[i]->info.R,tmp);
     // compute rotational force
-    dMULTIPLY0_331 (tmp,I+i*12,body[i]->avel);
-    dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
+    dMULTIPLY0_331 (tmp,I+i*12,body[i]->info.avel);
+    dCROSS (body[i]->tacc,-=,body[i]->info.avel,tmp);
   }
 
   // add the gravity force to all bodies
@@ -801,9 +801,9 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       dReal body_invMass = body[i]->invMass;
       dReal *body_invI = invI + i*12;
       for (j=0; j<3; j++) tmp1[i*8+j] = body[i]->facc[j] * body_invMass +
-			    body[i]->lvel[j] * stepsize1;
+			    body[i]->info.lvel[j] * stepsize1;
       dMULTIPLY0_331 (tmp1 + i*8 + 4,body_invI,body[i]->tacc);
-      for (j=0; j<3; j++) tmp1[i*8+4+j] += body[i]->avel[j] * stepsize1;
+      for (j=0; j<3; j++) tmp1[i*8+4+j] += body[i]->info.avel[j] * stepsize1;
     }
     // put J*tmp1 into rhs
     dReal *rhs = (dReal*) ALLOCA (m * sizeof(dReal));
@@ -923,8 +923,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   for (i=0; i<nb; i++) {
     dReal body_invMass = body[i]->invMass;
     dReal *body_invI = invI + i*12;
-    for (j=0; j<3; j++) body[i]->lvel[j] += body_invMass * cforce[i*8+j];
-    dMULTIPLYADD0_331 (body[i]->avel,body_invI,cforce+i*8+4);
+    for (j=0; j<3; j++) body[i]->info.lvel[j] += body_invMass * cforce[i*8+j];
+    dMULTIPLYADD0_331 (body[i]->info.avel,body_invI,cforce+i*8+4);
   }
 
   // update the position and orientation from the new linear/angular velocity
@@ -937,8 +937,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 # ifdef COMPARE_METHODS
   dReal *tmp_vnew = (dReal*) ALLOCA (nb*6*sizeof(dReal));
   for (i=0; i<nb; i++) {
-    for (j=0; j<3; j++) tmp_vnew[i*6+j] = body[i]->lvel[j];
-    for (j=0; j<3; j++) tmp_vnew[i*6+3+j] = body[i]->avel[j];
+    for (j=0; j<3; j++) tmp_vnew[i*6+j] = body[i]->info.lvel[j];
+    for (j=0; j<3; j++) tmp_vnew[i*6+3+j] = body[i]->info.avel[j];
   }
   comparator.nextMatrix (tmp_vnew,nb*6,1,0,"vnew");
 # endif

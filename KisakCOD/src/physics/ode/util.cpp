@@ -40,12 +40,12 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 		
 		// see if the body is idle
 		int idle = 1;			// initial assumption
-		dReal lspeed2 = dDOT(bb->lvel,bb->lvel);
+		dReal lspeed2 = dDOT(bb->info.lvel,bb->info.lvel);
 		if (lspeed2 > bb->adis.linear_threshold) {
 			idle = 0;		// moving fast - not idle
 		}
 		else {
-			dReal aspeed = dDOT(bb->avel,bb->avel);
+			dReal aspeed = dDOT(bb->info.avel,bb->info.avel);
 			if (aspeed > bb->adis.angular_threshold) {
 				idle = 0;	// turning fast - not idle
 			}
@@ -94,7 +94,7 @@ void dxStepBody (dxBody *b, dReal h)
   int j;
 
   // handle linear velocity
-  for (j=0; j<3; j++) b->pos[j] += h * b->lvel[j];
+  for (j=0; j<3; j++) b->info.pos[j] += h * b->info.lvel[j];
 
   if (b->flags & dxBodyFlagFiniteRotation) {
     dVector3 irv;	// infitesimal rotation vector
@@ -104,13 +104,13 @@ void dxStepBody (dxBody *b, dReal h)
       // split the angular velocity vector into a component along the finite
       // rotation axis, and a component orthogonal to it.
       dVector3 frv;		// finite rotation vector
-      dReal k = dDOT (b->finite_rot_axis,b->avel);
+      dReal k = dDOT (b->finite_rot_axis,b->info.avel);
       frv[0] = b->finite_rot_axis[0] * k;
       frv[1] = b->finite_rot_axis[1] * k;
       frv[2] = b->finite_rot_axis[2] * k;
-      irv[0] = b->avel[0] - frv[0];
-      irv[1] = b->avel[1] - frv[1];
-      irv[2] = b->avel[2] - frv[2];
+      irv[0] = b->info.avel[0] - frv[0];
+      irv[1] = b->info.avel[1] - frv[1];
+      irv[2] = b->info.avel[2] - frv[2];
 
       // make a rotation quaternion q that corresponds to frv * h.
       // compare this with the full-finite-rotation case below.
@@ -124,39 +124,39 @@ void dxStepBody (dxBody *b, dReal h)
     }
     else {
       // make a rotation quaternion q that corresponds to w * h
-      dReal wlen = dSqrt (b->avel[0]*b->avel[0] + b->avel[1]*b->avel[1] +
-			  b->avel[2]*b->avel[2]);
+      dReal wlen = dSqrt (b->info.avel[0]*b->info.avel[0] + b->info.avel[1]*b->info.avel[1] +
+			  b->info.avel[2]*b->info.avel[2]);
       h *= REAL(0.5);
       dReal theta = wlen * h;
       q[0] = dCos(theta);
       dReal s = sinc(theta) * h;
-      q[1] = b->avel[0] * s;
-      q[2] = b->avel[1] * s;
-      q[3] = b->avel[2] * s;
+      q[1] = b->info.avel[0] * s;
+      q[2] = b->info.avel[1] * s;
+      q[3] = b->info.avel[2] * s;
     }
 
     // do the finite rotation
     dQuaternion q2;
-    dQMultiply0 (q2,q,b->q);
-    for (j=0; j<4; j++) b->q[j] = q2[j];
+    dQMultiply0 (q2,q,b->info.q);
+    for (j=0; j<4; j++) b->info.q[j] = q2[j];
 
     // do the infitesimal rotation if required
     if (b->flags & dxBodyFlagFiniteRotationAxis) {
       dReal dq[4];
-      dWtoDQ (irv,b->q,dq);
-      for (j=0; j<4; j++) b->q[j] += h * dq[j];
+      dWtoDQ (irv,b->info.q,dq);
+      for (j=0; j<4; j++) b->info.q[j] += h * dq[j];
     }
   }
   else {
     // the normal way - do an infitesimal rotation
     dReal dq[4];
-    dWtoDQ (b->avel,b->q,dq);
-    for (j=0; j<4; j++) b->q[j] += h * dq[j];
+    dWtoDQ (b->info.avel,b->info.q,dq);
+    for (j=0; j<4; j++) b->info.q[j] += h * dq[j];
   }
 
   // normalize the quaternion and convert it to a rotation matrix
-  dNormalize4 (b->q);
-  dQtoR (b->q,b->R);
+  dNormalize4 (b->info.q);
+  dQtoR (b->info.q,b->info.R);
 
   // notify all attached geoms that this body has moved
   for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))

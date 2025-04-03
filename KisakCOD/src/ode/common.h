@@ -25,9 +25,16 @@
 
 // make alloca happy
 #include <malloc.h>
+
 #ifndef alloca
 #define alloca _alloca
 #endif
+
+// used everywhere
+#include <math.h>
+#include <float.h>
+#include <string.h>
+#include <memory.h>
 
 #include <ode/config.h>
 #include <ode/error.h>
@@ -107,6 +114,8 @@ typedef double dReal;
 #else
 #error You must #define dSINGLE or dDOUBLE
 #endif
+
+#define dTriIndex unsigned int
 
 
 /* round an integer up to a multiple of 4, except that 0 and 1 are unmodified
@@ -202,14 +211,14 @@ enum {
 
 /* joint type numbers */
 
-enum {
+enum dxJointTypeNum {
   dJointTypeNone = 0,		/* or "unknown" */
   dJointTypeBall,
   dJointTypeHinge,
   dJointTypeSlider,
   dJointTypeContact,
   dJointTypeUniversal,
-  dJointTypeHinge2,
+  // dJointTypeHinge2, REM - hinge2 does not exist
   dJointTypeFixed,
   dJointTypeNull,
   dJointTypeAMotor

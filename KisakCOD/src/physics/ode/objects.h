@@ -46,10 +46,11 @@ enum {
 // base class that does correct object allocation / deallocation
 
 struct dBase {
-  void *operator new (size_t size) { return dAlloc (size); }
-  void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
-  void *operator new[] (size_t size) { return dAlloc (size); }
-  void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }
+  // MOD
+  // void *operator new (size_t size) { return dAlloc (size); }
+  // void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
+  // void *operator new[] (size_t size) { return dAlloc (size); }
+  // void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }
 };
 
 
@@ -86,6 +87,13 @@ struct dxContactParameters {
   dReal min_depth;		// thickness of 'surface layer'
 };
 
+// MOD
+struct dxBodyInfo {
+	dVector3 pos;			// position of POR (point of reference)
+	dQuaternion q;		// orientation quaternion
+	dMatrix3 R;			// rotation matrix, always corresponds to q
+	dVector3 lvel, avel;		// linear and angular velocity of POR
+};
 
 struct dxBody : public dObject {
   dxJointNode *firstjoint;	// list of attached joints
@@ -94,10 +102,6 @@ struct dxBody : public dObject {
   dMass mass;			// mass parameters about POR
   dMatrix3 invI;		// inverse of mass.I
   dReal invMass;		// 1 / mass.mass
-  dVector3 pos;			// position of POR (point of reference)
-  dQuaternion q;		// orientation quaternion
-  dMatrix3 R;			// rotation matrix, always corresponds to q
-  dVector3 lvel,avel;		// linear and angular velocity of POR
   dVector3 facc,tacc;		// force and torque accumulators
   dVector3 finite_rot_axis;	// finite rotation axis, unit length or 0=none
 
@@ -105,20 +109,70 @@ struct dxBody : public dObject {
   dxAutoDisable adis;		// auto-disable parameters
   dReal adis_timeleft;		// time left to be idle
   int adis_stepsleft;		// steps left to be idle
+  dxBodyInfo info;
 };
 
+// ADD
+struct dxWorldStepInfo // sizeof=0x2C
+{                                       // ...
+    float gravity[4];
+    float global_erp;
+    float global_cfm;
+    dxQuickStepParameters qs;
+    unsigned int holdrand;
+    dxContactParameters contactp;
+};
+
+struct SorLcpData // sizeof=0x6F0
+{                                       // ...
+    int order[444];
+};
+
+struct ConstraintRowData // sizeof=0x90
+{                                       // ...
+    float J_body1Linear[3];
+    float lambda;
+    float J_body1Angular[3];
+    int body1;
+    float J_body2Linear[3];
+    int body2;
+    float J_body2Angular[3];
+    float padding1;
+    float iMJ_body1Linear[3];
+    float padding2;
+    float iMJ_body1Angular[3];
+    float padding3;
+    float iMJ_body2Linear[3];
+    float padding4;
+    float iMJ_body2Angular[3];
+    float padding5;
+    float lo;
+    float hi;
+    float rhs;
+    float Ad;
+};
+
+struct QuickstepData // sizeof=0xF9C0
+{                                       // ...
+    ConstraintRowData rowData[444];
+};
 
 struct dxWorld : public dBase {
   dxBody *firstbody;		// body linked list
   dxJoint *firstjoint;		// joint linked list
   int nb,nj;			// number of bodies and joints in lists
-  dVector3 gravity;		// gravity vector (m/s/s)
-  dReal global_erp;		// global error reduction parameter
-  dReal global_cfm;		// global costraint force mixing parameter
+  // REM dVector3 gravity;		// gravity vector (m/s/s)
+  // REM dReal global_erp;		// global error reduction parameter
+  // REM dReal global_cfm;		// global costraint force mixing parameter
+  dxWorldStepInfo stepInfo; // ADD
   dxAutoDisable adis;		// auto-disable parameters
   int adis_flag;		// auto-disable flag for new bodies
-  dxQuickStepParameters qs;
-  dxContactParameters contactp;
+  // dxQuickStepParameters qs;
+  // dxContactParameters contactp;
+  float seconds; // ADD
+
+  SorLcpData sd;
+  QuickstepData qd;
 };
 
 #endif

@@ -30,6 +30,8 @@
 
 #include "collision_space_internal.h"
 
+#include <math.h>
+#include <float.h>
 
 #define AXIS0 0
 #define AXIS1 1
@@ -318,6 +320,7 @@ Block* Block::GetBlockChild(const dReal* AABB){
 //****************************************************************************
 // quadtree space
 
+#if 0 // MOD
 struct dxQuadTreeSpace : public dxSpace{
 	Block* Blocks;	// Blocks[0] is the root
 
@@ -577,7 +580,10 @@ void dxQuadTreeSpace::collide2(void* UserData, dxGeom* g1, dNearCallback* Callba
 
   lock_count--;
 }
+#endif
 
 dSpaceID dQuadTreeSpaceCreate(dxSpace* space, dVector3 Center, dVector3 Extents, int Depth){
-	return new dxQuadTreeSpace(space, Center, Extents, Depth);
+	dAASSERT(false);
+	return nullptr;
+	// return new dxQuadTreeSpace(space, Center, Extents, Depth);
 }

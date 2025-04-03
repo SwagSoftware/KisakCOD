@@ -39,7 +39,7 @@ TODO
 //****************************************************************************
 // implementation for windows based on the multimedia performance counter.
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "windows.h"
 
@@ -148,7 +148,7 @@ double dTimerTicksPerSecond()
 //****************************************************************************
 // otherwise, do the implementation based on gettimeofday().
 
-#if !defined(PENTIUM) && !defined(WIN32)
+#if !defined(PENTIUM) && !defined(_WIN32)
 
 #ifndef macintosh
 
@@ -316,7 +316,7 @@ void dTimerEnd()
 //****************************************************************************
 // print report
 
-static void fprintDoubleWithPrefix (FILE *f, double a, char *fmt)
+static void fprintDoubleWithPrefix (FILE *f, double a, const char *fmt)
 {
   if (a >= 0.999999) {
     fprintf (f,fmt,a);

@@ -23,6 +23,9 @@
 #include <ode/config.h>
 #include <ode/error.h>
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <varargs.h>
 
 static dMessageFunction *error_function = 0;
 static dMessageFunction *debug_function = 0;
@@ -80,7 +83,7 @@ static void printMessage (int num, const char *msg1, const char *msg2,
 //****************************************************************************
 // unix
 
-#ifndef WIN32
+#ifndef _WIN32
 
 extern "C" void dError (int num, const char *msg, ...)
 {
@@ -116,7 +119,7 @@ extern "C" void dMessage (int num, const char *msg, ...)
 //****************************************************************************
 // windows
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "windows.h"
 
@@ -131,7 +134,7 @@ extern "C" void dError (int num, const char *msg, ...)
     snprintf (title,sizeof(title),"ODE Error %d",num);
     vsnprintf (s,sizeof(s),msg,ap);
     s[sizeof(s)-1] = 0;
-    MessageBox(0,s,title,MB_OK | MB_ICONWARNING);
+    MessageBoxA(0,s,title,MB_OK | MB_ICONWARNING);
   }
   exit (1);
 }
@@ -147,7 +150,7 @@ extern "C" void dDebug (int num, const char *msg, ...)
     snprintf (title,sizeof(title),"ODE INTERNAL ERROR %d",num);
     vsnprintf (s,sizeof(s),msg,ap);
     s[sizeof(s)-1] = 0;
-    MessageBox(0,s,title,MB_OK | MB_ICONSTOP);
+    MessageBoxA(0,s,title,MB_OK | MB_ICONSTOP);
   }
   abort();
 }

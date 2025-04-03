@@ -29,7 +29,7 @@
 #include <ode/error.h>
 #include <ode/matrix.h>
 #include <ode/misc.h>
-#include "lcp.h"
+// #include "lcp.h"
 #include "util.h"
 
 #define ALLOCA dALLOCA16
@@ -47,7 +47,7 @@ typedef dReal *dRealMutablePtr;
 // help for motor-driven joints. unfortunately it appears to hurt
 // with high-friction contacts using the SOR method. use with care
 
-#define WARM_STARTING 1
+// #define WARM_STARTING 1
 
 
 // for the SOR method:
@@ -307,7 +307,7 @@ static int compare_index_error (const void *a, const void *b)
 
 #endif
 
-
+// KISAKTODO they fuck with this somehow
 static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *body,
 	dRealPtr invI, dRealMutablePtr lambda, dRealMutablePtr fc, dRealMutablePtr b,
 	dRealMutablePtr lo, dRealMutablePtr hi, dRealPtr cfm, int *findex,
@@ -540,27 +540,27 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 	// for all bodies, compute the inertia tensor and its inverse in the global
 	// frame, and compute the rotational force and add it to the torque
 	// accumulator. I and invI are a vertical stack of 3x4 matrices, one per body.
-	dRealAllocaArray (I,3*4*nb);	// need to remember all I's for feedback purposes only
+	// REM dRealAllocaArray (I,3*4*nb);	// need to remember all I's for feedback purposes only
 	dRealAllocaArray (invI,3*4*nb);
 	for (i=0; i<nb; i++) {
 		dMatrix3 tmp;
 		// compute inertia tensor in global frame
-		dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->R);
-		dMULTIPLY0_333 (I+i*12,body[i]->R,tmp);
+		dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->info.R);
+		// REM dMULTIPLY0_333 (I+i*12,body[i]->info.R,tmp);
 		// compute inverse inertia tensor in global frame
-		dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->R);
-		dMULTIPLY0_333 (invI+i*12,body[i]->R,tmp);
+		dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->info.R);
+		dMULTIPLY0_333 (invI+i*12,body[i]->info.R,tmp);
 		// compute rotational force
-		dMULTIPLY0_331 (tmp,I+i*12,body[i]->avel);
-		dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
+		// REM dMULTIPLY0_331 (tmp,I+i*12,body[i]->info.avel);
+		dCROSS (body[i]->tacc,-=,body[i]->info.avel,tmp);
 	}
 
 	// add the gravity force to all bodies
 	for (i=0; i<nb; i++) {
 		if ((body[i]->flags & dxBodyNoGravity)==0) {
-			body[i]->facc[0] += body[i]->mass.mass * world->gravity[0];
-			body[i]->facc[1] += body[i]->mass.mass * world->gravity[1];
-			body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
+			body[i]->facc[0] += body[i]->mass.mass * world->stepInfo.gravity[0];
+			body[i]->facc[1] += body[i]->mass.mass * world->stepInfo.gravity[1];
+			body[i]->facc[2] += body[i]->mass.mass * world->stepInfo.gravity[2];
 		}
 	}
 
@@ -570,7 +570,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 	//@@@ do we really need to save all the info1's
 	dxJoint::Info1 *info = (dxJoint::Info1*) alloca (nj*sizeof(dxJoint::Info1));
 	for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
-		joint[j]->vtable->getInfo1 (joint[j],info+i);
+		jointGetInfo1(joint[j], info + i);
 		dIASSERT (info[i].m >= 0 && info[i].m <= 6 && info[i].nub >= 0 && info[i].nub <= info[i].m);
 		if (info[i].m > 0) {
 			joint[i] = joint[j];
@@ -600,7 +600,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		dRealAllocaArray (hi,m);
 		int *findex = (int*) alloca (m*sizeof(int));
 		dSetZero (c,m);
-		dSetValue (cfm,m,world->global_cfm);
+		dSetValue (cfm,m,world->stepInfo.global_cfm);
 		dSetValue (lo,m,-dInfinity);
 		dSetValue (hi,m, dInfinity);
 		for (i=0; i<m; i++) findex[i] = -1;
@@ -623,7 +623,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		dxJoint::Info2 Jinfo;
 		Jinfo.rowskip = 12;
 		Jinfo.fps = stepsize1;
-		Jinfo.erp = world->global_erp;
+		Jinfo.erp = world->stepInfo.global_erp;
 		for (i=0; i<nj; i++) {
 			Jinfo.J1l = J + ofs[i]*12;
 			Jinfo.J1a = Jinfo.J1l + 3;
@@ -634,7 +634,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 			Jinfo.lo = lo + ofs[i];
 			Jinfo.hi = hi + ofs[i];
 			Jinfo.findex = findex + ofs[i];
-			joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
+			jointGetInfo2(joint[i], &world->stepInfo, &Jinfo);
 			// adjust returned findex values for global index numbering
 			for (j=0; j<info[i].m; j++) {
 				if (findex[ofs[i] + j] >= 0) findex[ofs[i] + j] += ofs[i];
@@ -660,9 +660,9 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		// put v/h + invM*fe into tmp1
 		for (i=0; i<nb; i++) {
 			dReal body_invMass = body[i]->invMass;
-			for (j=0; j<3; j++) tmp1[i*6+j] = body[i]->facc[j] * body_invMass + body[i]->lvel[j] * stepsize1;
+			for (j=0; j<3; j++) tmp1[i*6+j] = body[i]->facc[j] * body_invMass + body[i]->info.lvel[j] * stepsize1;
 			dMULTIPLY0_331 (tmp1 + i*6 + 3,invI + i*12,body[i]->tacc);
-			for (j=0; j<3; j++) tmp1[i*6+3+j] += body[i]->avel[j] * stepsize1;
+			for (j=0; j<3; j++) tmp1[i*6+3+j] += body[i]->info.avel[j] * stepsize1;
 		}
 
 		// put J*tmp1 into rhs
@@ -687,7 +687,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		// solve the LCP problem and get lambda and invM*constraint_force
 		IFTIMING (dTimerNow ("solving LCP problem");)
 		dRealAllocaArray (cforce,nb*6);
-		SOR_LCP (m,nb,J,jb,body,invI,lambda,cforce,rhs,lo,hi,cfm,findex,&world->qs);
+		SOR_LCP (m,nb,J,jb,body,invI,lambda,cforce,rhs,lo,hi,cfm,findex,&world->stepInfo.qs);
 
 #ifdef WARM_STARTING
 		// save lambda for the next iteration
@@ -703,8 +703,8 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		
 		// add stepsize * cforce to the body velocity
 		for (i=0; i<nb; i++) {
-			for (j=0; j<3; j++) body[i]->lvel[j] += stepsize * cforce[i*6+j];
-			for (j=0; j<3; j++) body[i]->avel[j] += stepsize * cforce[i*6+3+j];
+			for (j=0; j<3; j++) body[i]->info.lvel[j] += stepsize * cforce[i*6+j];
+			for (j=0; j<3; j++) body[i]->info.avel[j] += stepsize * cforce[i*6+3+j];
 		}
 
 		// if joint feedback is requested, compute the constraint force.
@@ -712,6 +712,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		// so we must compute M*cforce.
 		// @@@ if any joint has a feedback request we compute the entire
 		//     adjusted cforce, which is not the most efficient way to do it.
+#if 0 // REM? KISAKTODO
 		for (j=0; j<nj; j++) {
 			if (joint[j]->feedback) {
 				// compute adjusted cforce
@@ -742,6 +743,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 				}
 			}
 		}
+#endif
 	}
 
 	// compute the velocity update:
@@ -750,17 +752,17 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 	IFTIMING (dTimerNow ("compute velocity update");)
 	for (i=0; i<nb; i++) {
 		dReal body_invMass = body[i]->invMass;
-		for (j=0; j<3; j++) body[i]->lvel[j] += stepsize * body_invMass * body[i]->facc[j];
+		for (j=0; j<3; j++) body[i]->info.lvel[j] += stepsize * body_invMass * body[i]->facc[j];
 		for (j=0; j<3; j++) body[i]->tacc[j] *= stepsize;	
-		dMULTIPLYADD0_331 (body[i]->avel,invI + i*12,body[i]->tacc);
+		dMULTIPLYADD0_331 (body[i]->info.avel,invI + i*12,body[i]->tacc);
 	}
 
 #if 0
 	// check that the updated velocity obeys the constraint (this check needs unmodified J)
 	dRealAllocaArray (vel,nb*6);
 	for (i=0; i<nb; i++) {
-		for (j=0; j<3; j++) vel[i*6+j] = body[i]->lvel[j];
-		for (j=0; j<3; j++) vel[i*6+3+j] = body[i]->avel[j];
+		for (j=0; j<3; j++) vel[i*6+j] = body[i]->info.lvel[j];
+		for (j=0; j<3; j++) vel[i*6+3+j] = body[i]->info.avel[j];
 	}
 	dRealAllocaArray (tmp,m);
 	multiply_J (m,J,jb,vel,tmp);

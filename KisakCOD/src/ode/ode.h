@@ -30,7 +30,7 @@
 #include <ode/common.h>
 #include <ode/contact.h>
 #include <ode/error.h>
-#include <ode/memory.h>
+// #include <ode/memory.h> nope
 #include <ode/odemath.h>
 #include <ode/matrix.h>
 #include <ode/timer.h>

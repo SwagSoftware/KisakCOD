@@ -1,5 +1,6 @@
 #include "cg_local.h"
 #include "cg_public.h"
+
 #include <stringed/stringed_hooks.h>
 
 #include <string.h>
@@ -422,7 +423,7 @@ void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground)
 {
     bool v2; // [esp+7h] [ebp-100Dh]
     int i; // [esp+8h] [ebp-100Ch]
-    hudelem_s *elems[1025]; // [esp+Ch] [ebp-1008h] BYREF
+    hudelem_s* elems[1025]; // [esp+Ch] [ebp-1008h] BYREF
     int SortedHudElems; // [esp+1010h] [ebp-4h]
 
     if (localClientNum)
@@ -436,7 +437,7 @@ void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground)
     SortedHudElems = GetSortedHudElems(localClientNum, elems);
     if (SortedHudElems)
     {
-        v2 = *(unsigned int *)(MEMORY[0x98F45C] + 16) < 7;
+        v2 = *(_DWORD*)(dword_98F45C + 16) < 7;
         for (i = 0; i < SortedHudElems; ++i)
         {
             if ((v2 || (elems[i]->flags & 2) == 0)

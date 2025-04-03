@@ -983,7 +983,7 @@ bool __cdecl ParseConfigStringToStructCustomSize(
     const char *v14; // eax
     float v15; // [esp+0h] [ebp-2024h]
     float v16; // [esp+4h] [ebp-2020h]
-    char *src; // [esp+Ch] [ebp-2018h]
+    const char *src; // [esp+Ch] [ebp-2018h]
     char v18; // [esp+13h] [ebp-2011h]
     char dest[8192]; // [esp+14h] [ebp-2010h] BYREF
     const cspField_t *v20; // [esp+2018h] [ebp-Ch]

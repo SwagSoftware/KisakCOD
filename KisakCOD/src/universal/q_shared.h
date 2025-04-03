@@ -518,6 +518,8 @@ void __cdecl AddLeanToPosition(float *position, float fViewYaw, float fLeanFrac,
 bool __cdecl Com_IsLegacyXModelName(const char *name);
 unsigned int __cdecl LongNoSwap(unsigned int color);
 
+#define arr_esize(a) (sizeof((a)[0]))
+#define arr_cnt(a) (sizeof(a)/arr_esize(a))
 
 struct va_info_t
 {
