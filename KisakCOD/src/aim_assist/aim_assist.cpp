@@ -1,6 +1,10 @@
 #include "aim_assist.h"
 #include <qcommon/mem_track.h>
 #include <universal/com_math.h>
+#include <qcommon/cmd.h>
+#include <client/client.h>
+#include <client_mp/client_mp.h>
+#include <script/scr_const.h>
 //float const *const vec2_origin        82000d78     aim_assist.obj
 //float const *const vec3_origin        82000d80     aim_assist.obj
 //float const *const vec4_origin        82000d8c     aim_assist.obj
@@ -32,6 +36,43 @@
 AimAssistGlobals aaGlobArray[1];
 GraphFloat aaInputGraph[4];
 
+const dvar_t *aim_input_graph_enabled;
+const dvar_t *aim_input_graph_debug;
+const dvar_t *aim_input_graph_index;
+const dvar_t *aim_turnrate_pitch;
+const dvar_t *aim_turnrate_pitch_ads;
+const dvar_t *aim_turnrate_yaw;
+const dvar_t *aim_turnrate_yaw_ads;
+const dvar_t *aim_accel_turnrate_enabled;
+const dvar_t *aim_accel_turnrate_debug;
+const dvar_t *aim_accel_turnrate_lerp;
+const dvar_t *aim_slowdown_enabled;
+const dvar_t *aim_slowdown_debug;
+const dvar_t *aim_slowdown_region_width;
+const dvar_t *aim_slowdown_region_height;
+const dvar_t *aim_slowdown_pitch_scale;
+const dvar_t *aim_slowdown_pitch_scale_ads;
+const dvar_t *aim_slowdown_yaw_scale;
+const dvar_t *aim_slowdown_yaw_scale_ads;
+const dvar_t *aim_autoaim_enabled;
+const dvar_t *aim_autoaim_debug;
+const dvar_t *aim_autoaim_lerp;
+const dvar_t *aim_autoaim_region_width;
+const dvar_t *aim_autoaim_region_height;
+const dvar_t *aim_automelee_enabled;
+const dvar_t *aim_automelee_debug;
+const dvar_t *aim_automelee_lerp;
+const dvar_t *aim_automelee_region_width;
+const dvar_t *aim_automelee_region_height;
+const dvar_t *aim_automelee_range;
+const dvar_t *aim_lockon_enabled;
+const dvar_t *aim_lockon_debug;
+const dvar_t *aim_lockon_deflection;
+const dvar_t *aim_lockon_strength;
+const dvar_t *aim_lockon_region_width;
+const dvar_t *aim_lockon_region_height;
+const dvar_t *aim_scale_view_axis;
+
 void __cdecl TRACK_aim_assist()
 {
     track_static_alloc_internal(aaGlobArray, 3636, "aaGlobArray", 10);
@@ -58,9 +99,8 @@ void __cdecl AimAssist_Init(int localClientNum)
     }
 }
 
-const dvar_s *AimAssist_RegisterDvars()
+void AimAssist_RegisterDvars()
 {
-    const dvar_s *result; // eax
     DvarLimits min; // [esp+4h] [ebp-14h]
     DvarLimits mina; // [esp+4h] [ebp-14h]
     DvarLimits minb; // [esp+4h] [ebp-14h]
@@ -289,13 +329,11 @@ const dvar_s *AimAssist_RegisterDvars()
         minu,
         0x80u,
         "The height of the auto aim region in virtual screen coordinates(0-480)");
-    result = Dvar_RegisterBool(
+    aim_scale_view_axis = Dvar_RegisterBool(
         "aim_scale_view_axis",
         1,
         0x80u,
         "Scale the influence of each input axis so that the major axis has more influence on the control");
-    aim_scale_view_axis = result;
-    return result;
 }
 
 void __cdecl AimAssist_Setup(int localClientNum)
@@ -392,27 +430,6 @@ void __cdecl AimAssist_UpdateScreenTargets(
     {
         //Profile_EndInternal(0);
     }
-}
-
-centity_s *__cdecl CG_GetEntity(int localClientNum, unsigned int entityIndex)
-{
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (entityIndex >= 0x400)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
-            1113,
-            0,
-            "entityIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entityIndex,
-            1024);
-    return &cg_entitiesArray[0][entityIndex];
 }
 
 void __cdecl AimAssist_FovScale(AimAssistGlobals *aaGlob, float tanHalfFovY)
@@ -623,11 +640,6 @@ char __cdecl AimAssist_XfmWorldPointToClipSpace(const AimAssistGlobals *aaGlob, 
     out[1] = clip_4 / clip_12 * -1.0;
     out[2] = clip_8 / clip_12;
     return 1;
-}
-
-double __cdecl Vec4Dot(const float *a, const float *b)
-{
-    return (float)(*a * *b + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]);
 }
 
 double __cdecl AimAssist_GetCrosshairDistSqr(const float *clipMins, const float *clipMaxs)
@@ -1068,11 +1080,6 @@ void __cdecl AimAssist_SetAutoMeleeTarget(AimAssistGlobals *aaGlob, const AimScr
     AimAssist_UpdateAutoMeleeTarget(aaGlob);
 }
 
-double __cdecl Vec3Dot(const float *a, const float *b)
-{
-    return (float)(*a * *b + a[1] * b[1] + a[2] * b[2]);
-}
-
 void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output)
 {
     float v2; // [esp+18h] [ebp-30h]
@@ -1165,25 +1172,25 @@ void __cdecl AimAssist_DrawDebugOverlay(unsigned int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        ps = (const playerState_s *)&byte_9D5574;
+        ps = &cgArray[0].predictedPlayerState;
         if (aim_slowdown_debug->current.enabled)
         {
-            AimAssist_DrawTargets(__SPAIR64__((unsigned int)ps, localClientNum), red);
+            AimAssist_DrawTargets(localClientNum, red);
             AimAssist_DrawCenterBox(aaGlob, tweaks->slowdownRegionWidth, tweaks->slowdownRegionHeight, green);
         }
         if (aim_autoaim_debug->current.enabled)
         {
-            AimAssist_DrawTargets(__SPAIR64__((unsigned int)ps, localClientNum), red);
+            AimAssist_DrawTargets(localClientNum, red);
             AimAssist_DrawCenterBox(aaGlob, tweaks->autoAimRegionWidth, tweaks->autoAimRegionHeight, green);
         }
         if (aim_automelee_debug->current.enabled)
         {
-            AimAssist_DrawTargets(__SPAIR64__((unsigned int)ps, localClientNum), red);
+            AimAssist_DrawTargets(localClientNum, red);
             AimAssist_DrawCenterBox(aaGlob, tweaks->autoMeleeRegionWidth, tweaks->autoMeleeRegionHeight, green);
         }
         if (aim_lockon_debug->current.enabled)
         {
-            AimAssist_DrawTargets(__SPAIR64__((unsigned int)ps, localClientNum), red);
+            AimAssist_DrawTargets(localClientNum, red);
             AimAssist_DrawCenterBox(aaGlob, tweaks->lockOnRegionWidth, tweaks->lockOnRegionHeight, green);
         }
     }
@@ -1241,11 +1248,11 @@ void __cdecl AimAssist_DrawTargets(__int64 localClientNum, const float *color)
     float yd; // [esp+8Ch] [ebp-8h]
     float y_4; // [esp+90h] [ebp-4h]
 
-    if (!HIunsigned int(localClientNum))
+    if (!HIDWORD(localClientNum))
         MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1627, 0, "%s", "ps");
     if (!color)
         MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1628, 0, "%s", "color");
-    weapIndex = AimAssist_GetWeaponIndex(localClientNum, (const playerState_s *)HIunsigned int(localClientNum));
+    weapIndex = AimAssist_GetWeaponIndex(localClientNum, (const playerState_s *)HIDWORD(localClientNum));
     if (weapIndex)
     {
         weapDef = BG_GetWeaponDef(weapIndex);
@@ -1364,55 +1371,3 @@ void __cdecl AimAssist_DrawTargets(__int64 localClientNum, const float *color)
         }
     }
 }
-
-double __cdecl Vec3Length(const float *v)
-{
-    float v3; // [esp+4h] [ebp-4h]
-
-    v3 = v[2] * v[2] + v[1] * v[1] + *v * *v;
-    return (float)sqrt(v3);
-}
-
-void __cdecl Vec3Copy(const float *from, float *to)
-{
-    *to = *from;
-    to[1] = from[1];
-    to[2] = from[2];
-}
-
-double __cdecl tan(double X)
-{
-    int v1; // eax
-    bool v2; // zf
-    char v4; // [esp+0h] [ebp-8h]
-
-    if (__use_sse2_mathfcns)
-    {
-        v1 = _mm_getcsr() & 0x1F80;
-        v2 = v1 == 8064;
-        if (v1 == 8064)
-            v2 = (v4 & 0x7F) == 127;
-        if (v2)
-            JUMPOUT(0x83ABA8);
-    }
-    JUMPOUT(0x8303BF);
-}
-
-double __cdecl floor(double X)
-{
-    int v1; // eax
-    bool v2; // zf
-    char v4; // [esp+0h] [ebp-8h]
-
-    if (!__use_sse2_mathfcns)
-        return _floor_default(X);
-    v1 = _mm_getcsr() & 0x1F80;
-    v2 = v1 == 8064;
-    if (v1 == 8064)
-        v2 = (v4 & 0x7F) == 127;
-    if (v2)
-        return _floor_pentium4(X);
-    else
-        return _floor_default(X);
-}
-

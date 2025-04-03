@@ -10,6 +10,8 @@
 
 #include <xanim/xanim.h>
 
+#include <ui_mp/ui_mp.h>
+
 struct clSnapshot_t // sizeof=0x2F94
 {                                       // XREF: .data:newSnap/r
                                         // clientActive_t/r ...
@@ -200,19 +202,6 @@ struct GfxConfiguration // sizeof=0x30
     const char *localizedCodeFastFileName; // ...
     const char *localizedCommonFastFileName; // ...
     const char *modFastFileName;        // ...
-};
-
-struct ScreenPlacement // sizeof=0x44
-{                                       // ...
-    float scaleVirtualToReal[2];        // ...
-    float scaleVirtualToFull[2];        // ...
-    float scaleRealToVirtual[2];
-    float virtualViewableMin[2];
-    float virtualViewableMax[2];
-    float realViewportSize[2];
-    float realViewableMin[2];
-    float realViewableMax[2];
-    float subScreenLeft;
 };
 
 struct __declspec(align(4)) serverInfo_t // sizeof=0x94
@@ -551,52 +540,52 @@ float (*__cdecl CL_GetMapCenter())[3];
 void __cdecl CL_ResetStats_f();
 int __cdecl CL_GetLocalClientActiveCount();
 
-extern dvar_t *cl_conXOffset;
-extern dvar_t *cl_hudDrawsBehindsUI;
-extern dvar_t *cl_showSend;
-extern dvar_t *input_invertPitch;
-extern dvar_t *cl_avidemo;
-extern dvar_t *cl_nodelta;
-extern dvar_t *cl_showServerCommands;
-extern dvar_t *motd;
-extern dvar_t *cl_connectTimeout;
-extern dvar_t *cl_sensitivity;
-extern dvar_t *cl_forceavidemo;
-extern dvar_t *cl_timeout;
-extern dvar_t *m_yaw;
-extern dvar_t **customclass;
-extern dvar_t *m_pitch;
-extern dvar_t *cl_activeAction;
-extern dvar_t *playlist;
-extern dvar_t *cl_debugMessageKey;
-extern dvar_t *systemlink;
-extern dvar_t *nextdemo;
-extern dvar_t *cl_connectionAttempts;
-extern dvar_t *onlinegame;
-extern dvar_t *cl_showMouseRate;
-extern dvar_t *m_forward;
-extern dvar_t *cl_packetdup;
-extern dvar_t *cl_mouseAccel;
-extern dvar_t *cl_maxpackets;
-extern dvar_t *cl_motdString;
-extern dvar_t *onlinegameandhost;
-extern dvar_t *cl_freezeDemo;
-extern dvar_t *cl_showTimeDelta;
-extern dvar_t *input_viewSensitivity;
-extern dvar_t *input_autoAim;
-extern dvar_t *cl_ingame;
-extern dvar_t *cl_inGameVideo;
-extern dvar_t *cl_noprint;
-extern dvar_t *m_side;
-extern dvar_t *cl_profileTextY;
-extern dvar_t *cl_serverStatusResendTime;
-extern dvar_t *m_filter;
-extern dvar_t *cl_profileTextHeight;
-extern dvar_t *cl_shownuments;
-extern dvar_t *splitscreen;
-extern dvar_t *onlineunreankedgameandhost;
-extern dvar_t *cl_freelook;
-extern dvar_t *cl_shownet;
+extern const dvar_t *cl_conXOffset;
+extern const dvar_t *cl_hudDrawsBehindsUI;
+extern const dvar_t *cl_showSend;
+extern const dvar_t *input_invertPitch;
+extern const dvar_t *cl_avidemo;
+extern const dvar_t *cl_nodelta;
+extern const dvar_t *cl_showServerCommands;
+extern const dvar_t *motd;
+extern const dvar_t *cl_connectTimeout;
+extern const dvar_t *cl_sensitivity;
+extern const dvar_t *cl_forceavidemo;
+extern const dvar_t *cl_timeout;
+extern const dvar_t *m_yaw;
+extern const dvar_t **customclass;
+extern const dvar_t *m_pitch;
+extern const dvar_t *cl_activeAction;
+extern const dvar_t *playlist;
+extern const dvar_t *cl_debugMessageKey;
+extern const dvar_t *systemlink;
+extern const dvar_t *nextdemo;
+extern const dvar_t *cl_connectionAttempts;
+extern const dvar_t *onlinegame;
+extern const dvar_t *cl_showMouseRate;
+extern const dvar_t *m_forward;
+extern const dvar_t *cl_packetdup;
+extern const dvar_t *cl_mouseAccel;
+extern const dvar_t *cl_maxpackets;
+extern const dvar_t *cl_motdString;
+extern const dvar_t *onlinegameandhost;
+extern const dvar_t *cl_freezeDemo;
+extern const dvar_t *cl_showTimeDelta;
+extern const dvar_t *input_viewSensitivity;
+extern const dvar_t *input_autoAim;
+extern const dvar_t *cl_ingame;
+extern const dvar_t *cl_inGameVideo;
+extern const dvar_t *cl_noprint;
+extern const dvar_t *m_side;
+extern const dvar_t *cl_profileTextY;
+extern const dvar_t *cl_serverStatusResendTime;
+extern const dvar_t *m_filter;
+extern const dvar_t *cl_profileTextHeight;
+extern const dvar_t *cl_shownuments;
+extern const dvar_t *splitscreen;
+extern const dvar_t *onlineunreankedgameandhost;
+extern const dvar_t *cl_freelook;
+extern const dvar_t *cl_shownet;
 
 #define MAX_CLIENTS 1 // LWSS Add
 
@@ -606,6 +595,8 @@ extern clientActive_t clients[MAX_CLIENTS];
 extern dvar_t *name;
 
 extern clientStatic_t cls;
+
+extern unsigned int frame_msec;
 
 
 inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int localClientNum)
@@ -852,3 +843,115 @@ void __cdecl CL_GetRankIcon(int rank, int prestige, Material **handle);
 void __cdecl CL_WriteVoicePacket(int localClientNum);
 void __cdecl CL_VoicePacket(int localClientNum, msg_t *msg);
 bool __cdecl CL_IsPlayerTalking(int localClientNum, int talkingClientIndex);
+
+
+// cl_input
+struct __declspec(align(4)) kbutton_t // sizeof=0x14
+{                                       // ...
+    int down[2];                        // ...
+    unsigned int downtime;
+    unsigned int msec;
+    bool active;                        // ...
+    bool wasPressed;
+    // padding byte
+    // padding byte
+};
+void __cdecl TRACK_cl_input();
+void __cdecl CL_SetStance(int localClientNum, StanceState stance);
+void __cdecl IN_CenterView();
+void __cdecl CL_UpdateCmdButton(int localClientNum, int *cmdButtons, int kbButton, int buttonFlag);
+void __cdecl CL_WritePacket(int localClientNum);
+void __cdecl CL_SendCmd(int localClientNum);
+bool __cdecl CL_ReadyToSendPacket(int localClientNum);
+void __cdecl CL_CreateCmdsDuringConnection(int localClientNum);
+void __cdecl CL_CreateNewCommands(int localClientNum);
+usercmd_s *__cdecl CL_CreateCmd(usercmd_s *result, int localClientNum);
+void __cdecl CL_AdjustAngles(int localClientNum);
+double __cdecl CL_KeyState(kbutton_t *key);
+void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd);
+void __cdecl CL_StanceButtonUpdate(int localClientNum);
+void __cdecl CL_AddCurrentStanceToCmd(int localClientNum, usercmd_s *cmd);
+void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd);
+void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my);
+void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd);
+void __cdecl CL_FinishMove(int localClientNum, usercmd_s *cmd);
+char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd);
+void __cdecl CL_Input(int localClientNum);
+void __cdecl CL_InitInput();
+void __cdecl IN_MLookDown();
+void __cdecl IN_MLookUp();
+void __cdecl IN_UpDown();
+void __cdecl IN_KeyDown(kbutton_t *b);
+void __cdecl IN_UpUp();
+void __cdecl IN_KeyUp(kbutton_t *b);
+void __cdecl IN_DownDown();
+void __cdecl IN_DownUp();
+void __cdecl IN_LeftDown();
+void __cdecl IN_LeftUp();
+void __cdecl IN_RightDown();
+void __cdecl IN_RightUp();
+void __cdecl IN_ForwardDown();
+void __cdecl IN_ForwardUp();
+void __cdecl IN_BackDown();
+void __cdecl IN_BackUp();
+void __cdecl IN_LookupDown();
+void __cdecl IN_LookupUp();
+void __cdecl IN_LookdownDown();
+void __cdecl IN_LookdownUp();
+void __cdecl IN_MoveleftDown();
+void __cdecl IN_MoveleftUp();
+void __cdecl IN_MoverightDown();
+void __cdecl IN_MoverightUp();
+void __cdecl IN_SpeedDown();
+void __cdecl IN_SpeedUp();
+void __cdecl IN_StrafeDown();
+void __cdecl IN_StrafeUp();
+void __cdecl IN_Attack_Down();
+void __cdecl IN_Attack_Up();
+void __cdecl IN_Breath_Down();
+void __cdecl IN_Breath_Up();
+void __cdecl IN_MeleeBreath_Down();
+void __cdecl IN_MeleeBreath_Up();
+void __cdecl IN_Frag_Down();
+void __cdecl IN_Frag_Up();
+void __cdecl IN_Smoke_Down();
+void __cdecl IN_Smoke_Up();
+void __cdecl IN_BreathSprint_Down();
+void __cdecl IN_BreathSprint_Up();
+void __cdecl IN_Melee_Down();
+void __cdecl IN_Melee_Up();
+void __cdecl IN_Activate_Down();
+void __cdecl IN_Activate_Up();
+void __cdecl IN_Reload_Down();
+void __cdecl IN_Reload_Up();
+void __cdecl IN_UseReload_Down();
+void __cdecl IN_UseReload_Up();
+void __cdecl IN_LeanLeft_Down();
+void __cdecl IN_LeanLeft_Up();
+void __cdecl IN_LeanRight_Down();
+void __cdecl IN_LeanRight_Up();
+void __cdecl IN_Prone_Down();
+void __cdecl IN_Prone_Up();
+void __cdecl IN_Stance_Down();
+void __cdecl IN_Stance_Up();
+void __cdecl IN_ToggleADS();
+void __cdecl IN_LeaveADS();
+void __cdecl IN_Throw_Down();
+void __cdecl IN_Throw_Up();
+void __cdecl IN_ToggleADS_Throw_Down();
+void __cdecl IN_ToggleADS_Throw_Up();
+void __cdecl IN_Speed_Throw_Down();
+void __cdecl IN_Speed_Throw_Up();
+void __cdecl IN_LowerStance();
+void __cdecl IN_RaiseStance();
+void __cdecl IN_ToggleCrouch();
+void __cdecl CL_ToggleStance(int localClientNum, StanceState preferredStance);
+void __cdecl IN_ToggleProne();
+void __cdecl IN_GoProne();
+void __cdecl IN_GoCrouch();
+void __cdecl IN_GoStandDown();
+void __cdecl IN_GoStandUp();
+void __cdecl IN_SprintDown();
+void __cdecl IN_SprintUp();
+void __cdecl CL_ShutdownInput();
+void __cdecl CL_ClearKeys(int localClientNum);

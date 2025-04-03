@@ -58,4 +58,20 @@ bool __cdecl Image_IsCodeImage(int track);
 bool __cdecl imagecompare(GfxImage *image1, GfxImage *image2);
 _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image);
 
+void __cdecl Image_UploadData(
+    const GfxImage *image,
+    _D3DFORMAT format,
+    _D3DCUBEMAP_FACES face,
+    unsigned int mipLevel,
+    unsigned __int8 *src);
+
+
+// r_image_utils
+void __cdecl R_DownsampleMipMapBilinear(
+    const unsigned __int8 *src,
+    int srcWidth,
+    int srcHeight,
+    int texelPitch,
+    unsigned __int8 *dst);
+
 extern ImgGlobals imageGlobals;

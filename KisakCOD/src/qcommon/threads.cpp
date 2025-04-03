@@ -584,3 +584,42 @@ void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent()
     Sys_ResetEvent(&g_cinematicsHostOutstandingRequestEvent);
 }
 
+void __cdecl Win_SetThreadLock(WinThreadLock threadLock)
+{
+    if (s_cpuCount != 1 && threadLock != s_threadLock)
+    {
+        s_threadLock = threadLock;
+        if (s_cpuCount < 2)
+            MyAssertHandler(".\\qcommon\\threads.cpp", 2419, 1, "s_cpuCount >= 2\n\t%i, %i", s_cpuCount, 2);
+        if (threadLock)
+            SetThreadAffinityMask(threadHandle[0], s_affinityMaskForCpu[0]);
+        else
+            SetThreadAffinityMask(threadHandle[0], s_affinityMaskForProcess);
+        if (threadLock)
+            SetThreadAffinityMask(threadHandle[1], s_affinityMaskForCpu[1]);
+        else
+            SetThreadAffinityMask(threadHandle[1], s_affinityMaskForProcess);
+        if (threadLock == THREAD_LOCK_ALL)
+            SetThreadAffinityMask(threadHandle[6], s_affinityMaskForCpu[2 - (s_cpuCount < 3)]);
+        else
+            SetThreadAffinityMask(threadHandle[6], s_affinityMaskForProcess);
+        if (threadLock == THREAD_LOCK_ALL)
+            SetThreadAffinityMask(threadHandle[4], s_affinityMaskForCpu[s_cpuCount - 1]);
+        else
+            SetThreadAffinityMask(threadHandle[4], s_affinityMaskForProcess);
+        if (s_cpuCount >= 3)
+        {
+            if (threadLock == THREAD_LOCK_ALL)
+                SetThreadAffinityMask(threadHandle[2], s_affinityMaskForCpu[2]);
+            else
+                SetThreadAffinityMask(threadHandle[2], s_affinityMaskForProcess);
+        }
+        if (s_cpuCount >= 4)
+        {
+            if (threadLock == THREAD_LOCK_ALL)
+                SetThreadAffinityMask(threadHandle[3], s_affinityMaskForCpu[3]);
+            else
+                SetThreadAffinityMask(threadHandle[3], s_affinityMaskForProcess);
+        }
+    }
+}

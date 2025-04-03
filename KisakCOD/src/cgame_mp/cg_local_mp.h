@@ -5,6 +5,8 @@
 #include <cgame/cg_local.h>
 
 #include <gfx_d3d/r_gfx.h>
+#include <ui_mp/ui_mp.h>
+#include <client_mp/client_mp.h>
 
 enum sessionState_t : __int32
 {                                       // ...
@@ -749,10 +751,6 @@ void __cdecl CG_FreeAnimTreeInstances(int localClientNum);
 unsigned __int8 *__cdecl Hunk_AllocXAnimClient(unsigned int size);
 unsigned __int8 __cdecl CG_ShouldPlaySoundOnLocalClient();
 
-extern cg_s *cgArray;
-extern cgs_t *cgsArray;
-extern cgMedia_t cgMedia;
-
 // cg_newDraw_mp
 struct MemoryFile;
 void __cdecl CG_AntiBurnInHUD_RegisterDvars();
@@ -1341,6 +1339,100 @@ void __cdecl CG_CopyClientSideSoundEntityOrientation(
     float (*axis_out)[3]);
 
 
+// cg_animtree_mp
+void __cdecl CGScr_LoadAnimTrees();
+void __cdecl CG_FreeClientDObjInfo(int localClientNum);
+void __cdecl CG_SetDObjInfo(int localClientNum, int iEntNum, int iEntType, XModel *pXModel);
+bool __cdecl CG_CheckDObjInfoMatches(int localClientNum, int iEntNum, int iEntType, XModel *pXModel);
+void __cdecl CG_SafeDObjFree(int localClientNum, int entIndex);
+void __cdecl CG_FreeEntityDObjInfo(int localClientNum);
+
+
+// cg_view_mp
+struct ClientViewParams // sizeof=0x10
+{                                       // ...
+    float x;
+    float y;
+    float width;
+    float height;
+};
+struct TestEffect // sizeof=0x54
+{                                       // ...
+    char name[64];
+    float pos[3];
+    int time;
+    int respawnTime;
+};
+void __cdecl TRACK_cg_view();
+void __cdecl CG_FxSetTestPosition();
+void __cdecl CG_FxTest();
+void __cdecl CG_PlayTestFx(int localClientNum);
+double __cdecl CG_GetViewFov(int localClientNum);
+void __cdecl CG_ViewRegisterDvars();
+void __cdecl CG_UpdateHelicopterKillCam(int localClientNum);
+void __cdecl CG_UpdateFov(int localClientNum, float fov_x);
+void __cdecl CG_UpdateHelicopterKillCamDof(float distance, GfxDepthOfField *dof);
+void __cdecl CG_UpdateAirstrikeKillCam(int localClientNum);
+void __cdecl CG_UpdateAirstrikeKillCamDof(float distance, GfxDepthOfField *dof);
+void __cdecl CG_InitView(int localClientNum);
+void __cdecl CG_CalcViewValues(int localClientNum);
+void __cdecl CG_OffsetThirdPersonView(cg_s *cgameGlob);
+void __cdecl ThirdPersonViewTrace(cg_s *cgameGlob, float *start, float *end, int contentMask, float *result);
+void __cdecl CG_CalcVrect(int localClientNum);
+void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob);
+void __cdecl CG_OffsetFirstPersonView(cg_s *cgameGlob);
+void __cdecl CG_CalcFov(int localClientNum);
+void __cdecl CG_CalcCubemapViewValues(cg_s *cgameGlob);
+void __cdecl CG_CalcTurretViewValues(int localClientNum);
+void __cdecl CG_ApplyViewAnimation(int localClientNum);
+void __cdecl CalcViewValuesVehicle(int localClientNum);
+void __cdecl CalcViewValuesVehicleDriver(int localClientNum);
+void __cdecl CalcViewValuesVehiclePassenger(int localClientNum);
+void __cdecl CalcViewValuesVehicleGunner(int localClientNum);
+bool __cdecl CG_HelicopterKillCamEnabled(int localClientNum);
+bool __cdecl CG_AirstrikeKillCamEnabled(int localClientNum);
+void __cdecl CG_UpdateThirdPerson(int localClientNum);
+bool __cdecl CG_KillCamEntityEnabled(int localClientNum);
+const ClientViewParams *__cdecl CG_GetLocalClientViewParams(int localClientNum);
+void __cdecl CG_UpdateViewOffset(int localClientNum);
+void __cdecl CG_UpdateKillCamEntityViewOffset(int localClientNum);
+int __cdecl CG_DrawActiveFrame(
+    int localClientNum,
+    int serverTime,
+    DemoType demoType,
+    CubemapShot cubemapShot,
+    int cubemapSize,
+    int renderScreen);
+void __cdecl CG_UpdateTestFX(int localClientNum);
+void __cdecl CG_KickAngles(cg_s *cgameGlob);
+void __cdecl CG_UpdateEntInfo(int localClientNum);
+void __cdecl GetCeilingHeight(cg_s *cgameGlob);
+void __cdecl DumpAnims(int localClientNum);
+void __cdecl DrawShellshockBlend(int localClientNum);
+void __cdecl CG_UpdateSceneDepthOfField(int localClientNum);
+void __cdecl CG_UpdateAdsDof(int localClientNum, GfxDepthOfField *dof);
+double __cdecl CG_UpdateAdsDofValue(float currentValue, float targetValue, float maxChange, float dt);
+
+
+// cg_consolecmds_mp
+void __cdecl CG_ScoresUp(int localClientNum);
+void __cdecl CG_InitConsoleCommands();
+void __cdecl CG_Viewpos_f();
+void __cdecl CG_ScoresUp_f();
+void __cdecl CG_ScoresDown_f();
+void __cdecl CG_ScoresDown(int localClientNum);
+void __cdecl CG_ShellShock_f();
+void __cdecl CG_ShellShock_Load_f();
+void __cdecl CG_ShellShock_Save_f();
+void __cdecl CG_QuickMessage_f();
+void __cdecl CG_VoiceChat_f();
+void __cdecl CG_TeamVoiceChat_f();
+void __cdecl CG_RestartSmokeGrenades_f();
+void __cdecl UpdateGlowTweaks_f();
+void __cdecl UpdateFilmTweaks_f();
+void __cdecl CG_ShutdownConsoleCommands();
+
+
 extern const dvar_t *cg_hudGrenadeIconEnabledFlash;
 extern const dvar_t *cg_hudGrenadePointerPulseMax;
 extern const dvar_t *cg_laserLight;
@@ -1514,3 +1606,32 @@ extern const dvar_t *cg_tracerLength;
 extern const dvar_t *cg_hudChatIntermissionPosition;
 extern const dvar_t *cg_hudVotePosition;
 extern const dvar_t *cg_fs_debug;
+
+extern float cg_entityOriginArray[1][1024][3];
+extern weaponInfo_s cg_weaponsArray[1][128];
+extern cgMedia_t cgMedia;
+extern centity_s cg_entitiesArray[1][1024];
+extern cg_s cgArray[1];
+extern cgs_t cgsArray[1];
+extern UiContext cgDC[1];
+
+inline centity_s *__cdecl CG_GetEntity(int localClientNum, unsigned int entityIndex)
+{
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
+            1112,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    if (entityIndex >= 0x400)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
+            1113,
+            0,
+            "entityIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
+            entityIndex,
+            1024);
+    return &cg_entitiesArray[0][entityIndex];
+}

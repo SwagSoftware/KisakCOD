@@ -11,6 +11,17 @@ enum XModelLodRampType : __int32
     XMODEL_LOD_RAMP_COUNT = 0x2,
 };
 
+struct XModelPiece // sizeof=0x10
+{
+    XModel *model;
+    float offset[3];
+};
+struct XModelPieces // sizeof=0xC
+{                                       // ...
+    const char *name;
+    int numpieces;
+    XModelPiece *pieces;
+};
 struct QueueElement // sizeof=0x8
 {                                       // ...
     unsigned int beginIndex;            // ...

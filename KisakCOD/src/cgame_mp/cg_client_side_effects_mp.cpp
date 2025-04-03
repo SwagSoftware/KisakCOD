@@ -1,6 +1,10 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
+#include <universal/com_files.h>
 
+const dvar_t *cg_clientSideEffects;
+int g_clientEntSoundCount;
+ClientEntSound g_clientEntSounds[128];
 
 void __cdecl CG_StartClientSideEffects(int localClientNum)
 {
@@ -20,6 +24,23 @@ void __cdecl CG_StartClientSideEffects(int localClientNum)
         CG_LoadClientEffectMapping(fxfilename);
         Com_sprintf(fxfilename, 0x100u, "maps/createfx/%s_fx.gsc", mapname);
         CG_LoadClientEffects(localClientNum, fxfilename);
+    }
+}
+
+void __cdecl CG_LoadClientEffects_LoadObj(int localClientNum, const char *filename)
+{
+    char *buffer; // [esp+0h] [ebp-8h] BYREF
+    int size; // [esp+4h] [ebp-4h]
+
+    size = FS_ReadFile(filename, (void **)&buffer);
+    if (size >= 0)
+    {
+        CG_ParseClientEffects(localClientNum, buffer);
+        FS_FreeFile(buffer);
+    }
+    else
+    {
+        Com_PrintError(1, "file not found: %s\n", filename);
     }
 }
 

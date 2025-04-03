@@ -324,3 +324,4 @@ extern DxGlobals dx;
 extern r_global_permanent_t rgp;
 extern int g_disableRendering;
 extern r_globals_t rg;
+extern vidConfig_t vidConfig;

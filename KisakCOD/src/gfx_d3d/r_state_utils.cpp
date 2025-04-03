@@ -1,6 +1,8 @@
 #include "r_utils.h"
 #include <universal/com_memory.h>
 #include <aim_assist/aim_assist.h>
+#include "r_state.h"
+#include "r_dvars.h"
 
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
 {
@@ -292,3 +294,86 @@ void __cdecl Byte4UnpackBgra(const unsigned __int8 *from, float *to)
     to[3] = (double)from[3] * 0.003921568859368563;
 }
 
+
+void __cdecl R_SetShadowLookupMatrix(GfxCmdBufSourceState *source, const GfxMatrix *matrix)
+{
+    ++source->matrixVersions[6];
+    memcpy(&source->shadowLookupMatrix, matrix, sizeof(source->shadowLookupMatrix));
+}
+
+void __cdecl R_Set2D(GfxCmdBufSourceState *source)
+{
+    GfxViewport viewport; // [esp+4h] [ebp-10h] BYREF
+    int savedregs; // [esp+14h] [ebp+0h] BYREF
+
+    if (source->viewMode != VIEW_MODE_2D)
+    {
+        source->viewMode = VIEW_MODE_2D;
+        source->viewportIsDirty = 1;
+        source->eyeOffset[0] = 0.0;
+        source->eyeOffset[1] = 0.0;
+        source->eyeOffset[2] = 0.0;
+        source->eyeOffset[3] = 1.0;
+        R_GetViewport(source, &viewport);
+        R_CmdBufSet2D((GfxViewParms *)&savedregs, source, &viewport);
+    }
+}
+
+void __usercall R_CmdBufSet2D(GfxViewParms *a1@<ebp>, GfxCmdBufSourceState *source, GfxViewport *viewport)
+{
+    float v3[16]; // [esp-8h] [ebp-9Ch] BYREF
+    GfxMatrix identity_52; // [esp+38h] [ebp-5Ch] BYREF
+    GfxViewParms *transform_56; // [esp+7Ch] [ebp-18h]
+    float transform_60; // [esp+80h] [ebp-14h]
+    float v7; // [esp+84h] [ebp-10h]
+    GfxViewParms *viewParms; // [esp+88h] [ebp-Ch]
+    float invHeight; // [esp+8Ch] [ebp-8h]
+    float retaddr; // [esp+94h] [ebp+0h]
+
+    viewParms = a1;
+    invHeight = retaddr;
+    if (viewport->width <= 0)
+        MyAssertHandler(
+            ".\\r_state_utils.cpp",
+            168,
+            0,
+            "%s\n\t(viewport->width) = %i",
+            "(viewport->width > 0)",
+            viewport->width);
+    if (viewport->height <= 0)
+        MyAssertHandler(
+            ".\\r_state_utils.cpp",
+            169,
+            0,
+            "%s\n\t(viewport->height) = %i",
+            "(viewport->height > 0)",
+            viewport->height);
+    v7 = 1.0 / (double)viewport->width;
+    transform_60 = 1.0 / (double)viewport->height;
+    transform_56 = &source->viewParms;
+    memset((unsigned __int8 *)&identity_52, 0, sizeof(identity_52));
+    identity_52.m[0][0] = v7 * 2.0;
+    identity_52.m[1][1] = transform_60 * -2.0;
+    identity_52.m[3][0] = -1.0 - v7;
+    identity_52.m[3][1] = transform_60 + 1.0;
+    identity_52.m[3][2] = 1.0;
+    identity_52.m[3][3] = 1.0;
+    R_MatrixIdentity44((float (*)[4])v3);
+    R_MatrixIdentity44(transform_56->viewMatrix.m);
+    qmemcpy(&transform_56->projectionMatrix, &identity_52, sizeof(transform_56->projectionMatrix));
+    qmemcpy(&transform_56->viewProjectionMatrix, &identity_52, sizeof(transform_56->viewProjectionMatrix));
+    memset(
+        (unsigned __int8 *)&transform_56->inverseViewProjectionMatrix,
+        0,
+        sizeof(transform_56->inverseViewProjectionMatrix));
+    ++source->matrixVersions[1];
+    ++source->matrixVersions[2];
+    ++source->matrixVersions[4];
+    qmemcpy(R_GetActiveWorldMatrix(source), v3, 0x40u);
+}
+
+GfxCmdBufSourceState *__cdecl R_GetActiveWorldMatrix(GfxCmdBufSourceState *source)
+{
+    R_WorldMatrixChanged(source);
+    return source;
+}

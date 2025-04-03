@@ -1,5 +1,6 @@
 #pragma once
 #include <xanim/xanim.h>
+#include "rb_backend.h"
 
 
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to);
@@ -39,3 +40,8 @@ int __cdecl R_PickMaterial(
 double __cdecl FresnelTerm(float n0, float n1, float cosIncidentAngle);
 char __cdecl R_GetClearColor(float *unpackedRgba);
 void __cdecl Byte4UnpackBgra(const unsigned __int8 *from, float *to);
+
+void __cdecl R_SetShadowLookupMatrix(GfxCmdBufSourceState *source, const GfxMatrix *matrix);
+void __cdecl R_Set2D(GfxCmdBufSourceState *source);
+void __usercall R_CmdBufSet2D(GfxViewParms *a1@<ebp>, GfxCmdBufSourceState *source, GfxViewport *viewport);
+GfxCmdBufSourceState *__cdecl R_GetActiveWorldMatrix(GfxCmdBufSourceState *source);

@@ -822,3 +822,389 @@ unsigned int __cdecl FS_FTell(int f)
     v1 = FS_FileForHandle(f);
     return ftell(v1);
 }
+
+int __cdecl FS_GetModList(char *listbuf, int bufsize)
+{
+    char v3; // [esp+3h] [ebp-18Dh]
+    char *v4; // [esp+8h] [ebp-188h]
+    char *v5; // [esp+Ch] [ebp-184h]
+    char v6; // [esp+13h] [ebp-17Dh]
+    char *v7; // [esp+18h] [ebp-178h]
+    char *v8; // [esp+1Ch] [ebp-174h]
+    char v9; // [esp+33h] [ebp-15Dh]
+    char *v10; // [esp+38h] [ebp-158h]
+    char *v11; // [esp+3Ch] [ebp-154h]
+    char v12; // [esp+43h] [ebp-14Dh]
+    char *v13; // [esp+48h] [ebp-148h]
+    char *v14; // [esp+4Ch] [ebp-144h]
+    iobuf *file; // [esp+60h] [ebp-130h]
+    int nMods; // [esp+64h] [ebp-12Ch]
+    int nDescLen; // [esp+68h] [ebp-128h]
+    int nDescLena; // [esp+68h] [ebp-128h]
+    int descHandle; // [esp+6Ch] [ebp-124h] BYREF
+    int dummy; // [esp+70h] [ebp-120h] BYREF
+    char *name; // [esp+74h] [ebp-11Ch]
+    char descPath[256]; // [esp+78h] [ebp-118h] BYREF
+    int nPotential; // [esp+17Ch] [ebp-14h]
+    int nLen; // [esp+180h] [ebp-10h]
+    int nTotal; // [esp+184h] [ebp-Ch]
+    int i; // [esp+188h] [ebp-8h]
+    char **pFiles; // [esp+18Ch] [ebp-4h]
+    char *listbufa; // [esp+198h] [ebp+8h]
+
+    pFiles = 0;
+    *listbuf = 0;
+    nTotal = 0;
+    nPotential = 0;
+    nMods = 0;
+    sprintf(descPath, "%s/%s", fs_homepath->current.string, "mods");
+    pFiles = Sys_ListFiles(descPath, 0, 0, &dummy, 1);
+    nPotential = Sys_CountFileList(pFiles);
+    for (i = 0; i < nPotential; ++i)
+    {
+        name = pFiles[i];
+        nLen = strlen(name) + 1;
+        v14 = name;
+        v13 = descPath;
+        do
+        {
+            v12 = *v14;
+            *v13++ = *v14++;
+        } while (v12);
+        I_strncat(descPath, 256, "/description.txt");
+        if (FS_SV_FOpenFileRead(descPath, &descHandle) > 0 && descHandle)
+        {
+            file = FS_FileForHandle(descHandle);
+            Com_Memset((unsigned int *)descPath, 0, 256);
+            nDescLen = FS_FileRead(descPath, 0x30u, file);
+            if (nDescLen >= 0)
+                descPath[nDescLen] = 0;
+            FS_FCloseFile(descHandle);
+        }
+        else
+        {
+            v11 = name;
+            v10 = descPath;
+            do
+            {
+                v9 = *v11;
+                *v10++ = *v11++;
+            } while (v9);
+        }
+        nDescLena = &descPath[strlen(descPath) + 1] - &descPath[1] + 1;
+        if (nLen + nTotal + nDescLena + 2 >= bufsize)
+            break;
+        v8 = name;
+        v7 = listbuf;
+        do
+        {
+            v6 = *v8;
+            *v7++ = *v8++;
+        } while (v6);
+        listbufa = &listbuf[nLen];
+        v5 = descPath;
+        v4 = listbufa;
+        do
+        {
+            v3 = *v5;
+            *v4++ = *v5++;
+        } while (v3);
+        listbuf = &listbufa[nDescLena];
+        nTotal += nDescLena + nLen;
+        ++nMods;
+    }
+    FS_FreeFileList((const char **)pFiles);
+    return nMods;
+}
+
+int __cdecl FS_GetFileList(
+    const char *path,
+    const char *extension,
+    FsListBehavior_e behavior,
+    char *listbuf,
+    int bufsize)
+{
+    char v6; // [esp+3h] [ebp-35h]
+    char *v7; // [esp+8h] [ebp-30h]
+    const char *v8; // [esp+Ch] [ebp-2Ch]
+    const char **fileNames; // [esp+24h] [ebp-14h]
+    int nLen; // [esp+28h] [ebp-10h]
+    int nTotal; // [esp+2Ch] [ebp-Ch]
+    int i; // [esp+30h] [ebp-8h]
+    int fileCount; // [esp+34h] [ebp-4h] BYREF
+
+    *listbuf = 0;
+    fileCount = 0;
+    nTotal = 0;
+    if (!I_stricmp(path, "$modlist"))
+        return FS_GetModList(listbuf, bufsize);
+    fileNames = FS_ListFiles(path, extension, behavior, &fileCount);
+    for (i = 0; i < fileCount; ++i)
+    {
+        nLen = strlen(fileNames[i]) + 1;
+        if (nTotal + nLen + 1 >= bufsize)
+        {
+            fileCount = i;
+            break;
+        }
+        v8 = fileNames[i];
+        v7 = listbuf;
+        do
+        {
+            v6 = *v8;
+            *v7++ = *v8++;
+        } while (v6);
+        listbuf += nLen;
+        nTotal += nLen;
+    }
+    FS_FreeFileList(fileNames);
+    return fileCount;
+}
+
+const char **__cdecl FS_ListFilteredFiles(
+    searchpath_s *searchPath,
+    const char *path,
+    const char *extension,
+    const char *filter,
+    FsListBehavior_e behavior,
+    int *numfiles)
+{
+    char v7; // [esp+13h] [ebp-3E1h]
+    char *v8; // [esp+18h] [ebp-3DCh]
+    char *v9; // [esp+1Ch] [ebp-3D8h]
+    char *v10; // [esp+5Ch] [ebp-398h]
+    char netpath[256]; // [esp+64h] [ebp-390h] BYREF
+    int numSysFiles; // [esp+164h] [ebp-290h] BYREF
+    char **sysFiles; // [esp+168h] [ebp-28Ch]
+    char szTrimmedName[68]; // [esp+16Ch] [ebp-288h] BYREF
+    int depth; // [esp+1B0h] [ebp-244h] BYREF
+    char *name; // [esp+1B4h] [ebp-240h]
+    int zpathLen; // [esp+1B8h] [ebp-23Ch]
+    int pathDepth; // [esp+1BCh] [ebp-238h] BYREF
+    iwd_t *iwd; // [esp+1C0h] [ebp-234h]
+    char zpath[259]; // [esp+1C4h] [ebp-230h] BYREF
+    bool isDirSearch; // [esp+2C7h] [ebp-12Dh]
+    const char **list; // [esp+2C8h] [ebp-12Ch]
+    int extensionLength; // [esp+2CCh] [ebp-128h]
+    int nfiles; // [esp+2D0h] [ebp-124h]
+    int pathLength; // [esp+2D4h] [ebp-120h]
+    fileInIwd_s *buildBuffer; // [esp+2D8h] [ebp-11Ch]
+    HunkUser *user; // [esp+2DCh] [ebp-118h]
+    int temp; // [esp+2E0h] [ebp-114h]
+    char sanitizedPath[256]; // [esp+2E4h] [ebp-110h] BYREF
+    searchpath_s *search; // [esp+3E8h] [ebp-Ch]
+    int i; // [esp+3ECh] [ebp-8h]
+    int length; // [esp+3F0h] [ebp-4h]
+
+    FS_CheckFileSystemStarted();
+    if (!path)
+    {
+        *numfiles = 0;
+        return 0;
+    }
+    if (!extension)
+        extension = &String;
+    if (!FS_SanitizeFilename(path, sanitizedPath, 256))
+    {
+        *numfiles = 0;
+        return 0;
+    }
+    isDirSearch = I_stricmp(extension, "/") == 0;
+    v10 = &sanitizedPath[strlen(sanitizedPath) + 1];
+    pathLength = v10 - &sanitizedPath[1];
+    if (v10 != &sanitizedPath[1] && (sanitizedPath[pathLength - 1] == 92 || sanitizedPath[pathLength - 1] == 47))
+        --pathLength;
+    extensionLength = strlen(extension);
+    nfiles = 0;
+    FS_ReturnPath(sanitizedPath, zpath, &pathDepth);
+    if (sanitizedPath[0])
+        ++pathDepth;
+    user = Hunk_UserCreate(0x20000, "FS_ListFilteredFiles", 0, 0, 3);
+    list = (const char **)Hunk_UserAlloc(user, 0x8004u, 4);
+    *list++ = (const char *)user;
+    for (search = searchPath; search; search = search->next)
+    {
+        if (FS_UseSearchPath(search))
+        {
+            if (search->iwd)
+            {
+                if (search->bLocalized || FS_IwdIsPure(search->iwd))
+                {
+                    iwd = search->iwd;
+                    buildBuffer = iwd->buildBuffer;
+                    for (i = 0; i < iwd->numfiles; ++i)
+                    {
+                        name = buildBuffer[i].name;
+                        if (filter)
+                        {
+                            if (Com_FilterPath(filter, name, 0))
+                                nfiles = FS_AddFileToList(user, name, list, nfiles);
+                            continue;
+                        }
+                        zpathLen = FS_ReturnPath(name, zpath, &depth);
+                        if (depth == pathDepth
+                            && pathLength <= zpathLen
+                            && (pathLength <= 0 || name[pathLength] == 47)
+                            && !I_strnicmp(name, sanitizedPath, pathLength))
+                        {
+                            if (!isDirSearch)
+                            {
+                                if (extensionLength)
+                                {
+                                    length = strlen(name);
+                                    if (length <= extensionLength
+                                        || name[length - extensionLength - 1] != 46
+                                        || I_stricmp(&name[length - extensionLength], extension))
+                                    {
+                                        continue;
+                                    }
+                                }
+                            LABEL_44:
+                                temp = pathLength;
+                                if (pathLength)
+                                    ++temp;
+                                if (isDirSearch)
+                                {
+                                    v9 = &name[temp];
+                                    v8 = szTrimmedName;
+                                    do
+                                    {
+                                        v7 = *v9;
+                                        *v8++ = *v9++;
+                                    } while (v7);
+                                    szTrimmedName[&szTrimmedName[strlen(szTrimmedName) + 1] - &szTrimmedName[1] - 1] = 0;
+                                    nfiles = FS_AddFileToList(user, szTrimmedName, list, nfiles);
+                                }
+                                else
+                                {
+                                    nfiles = FS_AddFileToList(user, &name[temp], list, nfiles);
+                                }
+                                continue;
+                            }
+                            if (extensionLength != 1)
+                                MyAssertHandler(".\\universal\\com_files.cpp", 3314, 1, "%s", "extensionLength == 1");
+                            if (*extension != 47 || extension[1])
+                                MyAssertHandler(
+                                    ".\\universal\\com_files.cpp",
+                                    3315,
+                                    1,
+                                    "%s",
+                                    "extension[0] == '/' && extension[1] == '\\0'");
+                            if (name[strlen(name) - 1] == 47)
+                                goto LABEL_44;
+                        }
+                    }
+                }
+            }
+            else if (search->dir && (!fs_restrict->current.enabled && !fs_numServerIwds || behavior))
+            {
+                FS_BuildOSPath(search->dir->path, search->dir->gamedir, sanitizedPath, netpath);
+                sysFiles = Sys_ListFiles(netpath, extension, filter, &numSysFiles, isDirSearch);
+                for (i = 0; i < numSysFiles; ++i)
+                    nfiles = FS_AddFileToList(user, sysFiles[i], list, nfiles);
+                FS_FreeFileList((const char **)sysFiles);
+            }
+        }
+    }
+    *numfiles = nfiles;
+    if (nfiles)
+    {
+        list[nfiles] = 0;
+        return list;
+    }
+    else
+    {
+        Hunk_UserDestroy(user);
+        return 0;
+    }
+}
+
+const char **__cdecl FS_ListFiles(const char *path, const char *extension, FsListBehavior_e behavior, int *numfiles)
+{
+    return FS_ListFilteredFiles(fs_searchpaths, path, extension, 0, behavior, numfiles);
+}
+
+bool __cdecl FS_CheckLocation(const char *path, int lookInFlags)
+{
+    if (lookInFlags == 63)
+        return 1;
+    if ((lookInFlags & 1) != 0 && !I_strncmp(path, "main", 4))
+        return 1;
+    if ((lookInFlags & 2) != 0 && !I_strncmp(path, "dev", 3))
+        return 1;
+    if ((lookInFlags & 4) != 0 && !I_strncmp(path, "temp", 4))
+        return 1;
+    if ((lookInFlags & 8) != 0 && !I_strncmp(path, "raw", 3))
+        return 1;
+    if ((lookInFlags & 0x10) != 0 && !I_strncmp(path, "raw_shared", 10))
+        return 1;
+    return (lookInFlags & 0x20) != 0 && !I_strncmp(path, "devraw", 6);
+}
+
+const char **__cdecl FS_ListFilteredFilesInLocation(
+    const char *path,
+    const char *extension,
+    const char *filter,
+    FsListBehavior_e behavior,
+    int *numfiles,
+    int lookInFlags)
+{
+    const char **result; // [esp+0h] [ebp-18h]
+    searchpath_s *locationSearchPath; // [esp+4h] [ebp-14h]
+    HunkUser *user; // [esp+8h] [ebp-10h]
+    char *pathDir; // [esp+Ch] [ebp-Ch]
+    searchpath_s *search; // [esp+10h] [ebp-8h]
+    searchpath_s *locationSearch; // [esp+14h] [ebp-4h]
+
+    user = Hunk_UserCreate(0x20000, "FS_ListFilteredFilesInLocation", 0, 0, 3);
+    locationSearchPath = 0;
+    locationSearch = 0;
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->dir)
+        {
+            pathDir = search->dir->gamedir;
+        }
+        else if (search->iwd)
+        {
+            pathDir = search->iwd->iwdGamename;
+        }
+        else
+        {
+            pathDir = 0;
+        }
+        if (!pathDir)
+            MyAssertHandler(".\\universal\\com_files.cpp", 3483, 0, "%s", "pathDir");
+        if (FS_CheckLocation(pathDir, lookInFlags))
+        {
+            if (locationSearchPath)
+            {
+                locationSearch->next = (searchpath_s *)Hunk_UserAlloc(user, 0x1Cu, 4);
+                locationSearch = locationSearch->next;
+            }
+            else
+            {
+                locationSearchPath = (searchpath_s *)Hunk_UserAlloc(user, 0x1Cu, 4);
+                locationSearch = locationSearchPath;
+            }
+            locationSearch->next = 0;
+            locationSearch->dir = search->dir;
+            locationSearch->language = search->language;
+            locationSearch->bLocalized = search->bLocalized;
+            locationSearch->iwd = search->iwd;
+        }
+    }
+    result = FS_ListFilteredFiles(locationSearchPath, path, extension, filter, behavior, numfiles);
+    Hunk_UserDestroy(user);
+    return result;
+}
+
+const char **__cdecl FS_ListFilesInLocation(
+    const char *path,
+    const char *extension,
+    FsListBehavior_e behavior,
+    int *numfiles,
+    int lookInFlags)
+{
+    return FS_ListFilteredFilesInLocation(path, extension, 0, behavior, numfiles, lookInFlags);
+}

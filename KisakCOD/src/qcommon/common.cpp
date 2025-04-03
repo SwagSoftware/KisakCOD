@@ -17,6 +17,7 @@ int com_errorEntered;
 int com_frameNumber;
 int com_consoleLogOpenFailed;
 int com_missingAssetOpenFailed;
+int com_frameTime;
 
 const dvar_t *com_dedicated;
 const dvar_t *com_hiDef;
@@ -25,7 +26,6 @@ const dvar_t *com_developer_script;
 const dvar_t *dev_timescale;
 const dvar_t *cl_useMapPreloading;
 const dvar_t *com_maxfps;
-const dvar_t *com_frameTime;
 const dvar_t *com_recommendedSet;
 const dvar_t *sv_useMapPreloading;
 const dvar_t *ui_errorMessage;
@@ -189,105 +189,105 @@ void _copyDWord(unsigned int* dest, const unsigned int constant, const unsigned 
 
 // optimized memory copy routine that handles all alignment
 // cases and block sizes efficiently
-void Com_Memcpy(void* dest, const void* src, const size_t count) {
-	Com_Prefetch(src, count, PRE_READ);
-	__asm
-	{
-		push	edi
-		push	esi
-		mov		ecx, count
-		cmp		ecx, 0						// count = 0 check (just to be on the safe side)
-		je		outta
-		mov		edx, dest
-		mov		ebx, src
-		cmp		ecx, 32						// padding only?
-		jl		padding
-
-		mov		edi, ecx
-		and edi, ~31					// edi = count&~31
-		sub		edi, 32
-
-		align 16
-		loopMisAligned:
-		mov		eax, [ebx + edi + 0 + 0 * 8]
-		mov		esi, [ebx + edi + 4 + 0 * 8]
-		mov[edx + edi + 0 + 0 * 8], eax
-		mov[edx + edi + 4 + 0 * 8], esi
-		mov		eax, [ebx + edi + 0 + 1 * 8]
-		mov		esi, [ebx + edi + 4 + 1 * 8]
-		mov[edx + edi + 0 + 1 * 8], eax
-		mov[edx + edi + 4 + 1 * 8], esi
-		mov		eax, [ebx + edi + 0 + 2 * 8]
-		mov		esi, [ebx + edi + 4 + 2 * 8]
-		mov[edx + edi + 0 + 2 * 8], eax
-		mov[edx + edi + 4 + 2 * 8], esi
-		mov		eax, [ebx + edi + 0 + 3 * 8]
-		mov		esi, [ebx + edi + 4 + 3 * 8]
-		mov[edx + edi + 0 + 3 * 8], eax
-		mov[edx + edi + 4 + 3 * 8], esi
-		sub		edi, 32
-		jge		loopMisAligned
-
-		mov		edi, ecx
-		and edi, ~31
-		add		ebx, edi					// increase src pointer
-		add		edx, edi					// increase dst pointer
-		and ecx, 31					// new count
-		jz		outta					// if count = 0, get outta here
-
-		padding :
-		cmp		ecx, 16
-		jl		skip16
-		mov		eax, dword ptr[ebx]
-		mov		dword ptr[edx], eax
-		mov		eax, dword ptr[ebx + 4]
-		mov		dword ptr[edx + 4], eax
-		mov		eax, dword ptr[ebx + 8]
-		mov		dword ptr[edx + 8], eax
-		mov		eax, dword ptr[ebx + 12]
-		mov		dword ptr[edx + 12], eax
-		sub		ecx, 16
-		add		ebx, 16
-		add		edx, 16
-
-		skip16:
-		cmp		ecx, 8
-		jl		skip8
-		mov		eax, dword ptr[ebx]
-		mov		dword ptr[edx], eax
-		mov		eax, dword ptr[ebx + 4]
-		sub		ecx, 8
-		mov		dword ptr[edx + 4], eax
-		add		ebx, 8
-		add		edx, 8
-		skip8:
-		cmp		ecx, 4
-		jl		skip4
-		mov		eax, dword ptr[ebx]	// here 4-7 bytes
-		add		ebx, 4
-		sub		ecx, 4
-		mov		dword ptr[edx], eax
-		add		edx, 4
-		skip4:							// 0-3 remaining bytes
-		cmp		ecx, 2
-		jl		skip2
-		mov		ax, word ptr[ebx]	// two bytes
-		cmp		ecx, 3				// less than 3?
-		mov		word ptr[edx], ax
-		jl		outta
-		mov		al, byte ptr[ebx + 2]	// last byte
-		mov		byte ptr[edx + 2], al
-		jmp		outta
-		skip2 :
-		cmp		ecx, 1
-		jl		outta
-		mov		al, byte ptr[ebx]
-		mov		byte ptr[edx], al
-		outta :
-		pop		esi
-		pop		edi
-	}
-}
+//void Com_Memcpy(void* dest, const void* src, const size_t count) {
+//	Com_Prefetch(src, count, PRE_READ);
+//	__asm
+//	{
+//		push	edi
+//		push	esi
+//		mov		ecx, count
+//		cmp		ecx, 0						// count = 0 check (just to be on the safe side)
+//		je		outta
+//		mov		edx, dest
+//		mov		ebx, src
+//		cmp		ecx, 32						// padding only?
+//		jl		padding
+//
+//		mov		edi, ecx
+//		and edi, ~31					// edi = count&~31
+//		sub		edi, 32
+//
+//		align 16
+//		loopMisAligned:
+//		mov		eax, [ebx + edi + 0 + 0 * 8]
+//		mov		esi, [ebx + edi + 4 + 0 * 8]
+//		mov[edx + edi + 0 + 0 * 8], eax
+//		mov[edx + edi + 4 + 0 * 8], esi
+//		mov		eax, [ebx + edi + 0 + 1 * 8]
+//		mov		esi, [ebx + edi + 4 + 1 * 8]
+//		mov[edx + edi + 0 + 1 * 8], eax
+//		mov[edx + edi + 4 + 1 * 8], esi
+//		mov		eax, [ebx + edi + 0 + 2 * 8]
+//		mov		esi, [ebx + edi + 4 + 2 * 8]
+//		mov[edx + edi + 0 + 2 * 8], eax
+//		mov[edx + edi + 4 + 2 * 8], esi
+//		mov		eax, [ebx + edi + 0 + 3 * 8]
+//		mov		esi, [ebx + edi + 4 + 3 * 8]
+//		mov[edx + edi + 0 + 3 * 8], eax
+//		mov[edx + edi + 4 + 3 * 8], esi
+//		sub		edi, 32
+//		jge		loopMisAligned
+//
+//		mov		edi, ecx
+//		and edi, ~31
+//		add		ebx, edi					// increase src pointer
+//		add		edx, edi					// increase dst pointer
+//		and ecx, 31					// new count
+//		jz		outta					// if count = 0, get outta here
+//
+//		padding :
+//		cmp		ecx, 16
+//		jl		skip16
+//		mov		eax, dword ptr[ebx]
+//		mov		dword ptr[edx], eax
+//		mov		eax, dword ptr[ebx + 4]
+//		mov		dword ptr[edx + 4], eax
+//		mov		eax, dword ptr[ebx + 8]
+//		mov		dword ptr[edx + 8], eax
+//		mov		eax, dword ptr[ebx + 12]
+//		mov		dword ptr[edx + 12], eax
+//		sub		ecx, 16
+//		add		ebx, 16
+//		add		edx, 16
+//
+//		skip16:
+//		cmp		ecx, 8
+//		jl		skip8
+//		mov		eax, dword ptr[ebx]
+//		mov		dword ptr[edx], eax
+//		mov		eax, dword ptr[ebx + 4]
+//		sub		ecx, 8
+//		mov		dword ptr[edx + 4], eax
+//		add		ebx, 8
+//		add		edx, 8
+//		skip8:
+//		cmp		ecx, 4
+//		jl		skip4
+//		mov		eax, dword ptr[ebx]	// here 4-7 bytes
+//		add		ebx, 4
+//		sub		ecx, 4
+//		mov		dword ptr[edx], eax
+//		add		edx, 4
+//		skip4:							// 0-3 remaining bytes
+//		cmp		ecx, 2
+//		jl		skip2
+//		mov		ax, word ptr[ebx]	// two bytes
+//		cmp		ecx, 3				// less than 3?
+//		mov		word ptr[edx], ax
+//		jl		outta
+//		mov		al, byte ptr[ebx + 2]	// last byte
+//		mov		byte ptr[edx + 2], al
+//		jmp		outta
+//		skip2 :
+//		cmp		ecx, 1
+//		jl		outta
+//		mov		al, byte ptr[ebx]
+//		mov		byte ptr[edx], al
+//		outta :
+//		pop		esi
+//		pop		edi
+//	}
+//}
 
 void Com_Memset(void* dest, const int val, const size_t count)
 {

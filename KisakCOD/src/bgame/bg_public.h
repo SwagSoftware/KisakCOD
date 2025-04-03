@@ -35,3 +35,6 @@ extern const dvar_t *jump_stepSize;
 extern const dvar_t *jump_slowdownEnable;
 extern const dvar_t *jump_ladderPushVel;
 extern const dvar_t *jump_spreadAdd;
+
+// bg_weapons
+extern unsigned int bg_lastParsedWeaponIndex;

@@ -111,6 +111,7 @@ void __cdecl Hunk_AddData(int type, void* data, void* (__cdecl* alloc)(int));
 
 class LargeLocal
 {
+public:
     LargeLocal(int sizeParam);
     ~LargeLocal();
 

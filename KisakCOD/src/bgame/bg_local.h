@@ -1885,3 +1885,7 @@ double __cdecl PM_PermuteRestrictiveClipPlanes(
     int planeCount,
     const float (*planes)[3],
     int *permutation);
+
+
+// bg_misctables
+extern _DWORD bg_itemlist[2048];

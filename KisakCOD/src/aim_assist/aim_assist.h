@@ -110,7 +110,7 @@ struct __declspec(align(4)) AimOutput // sizeof=0x10
 
 void __cdecl TRACK_aim_assist();
 void __cdecl AimAssist_Init(int localClientNum);
-const dvar_s *AimAssist_RegisterDvars();
+void AimAssist_RegisterDvars();
 void __cdecl AimAssist_Setup(int localClientNum);
 void __cdecl AimAssist_UpdateScreenTargets(
     int localClientNum,

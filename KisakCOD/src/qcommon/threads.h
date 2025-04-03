@@ -71,3 +71,12 @@ void __cdecl Sys_ResetCinematicsThreadOutstandingRequestEvent();
 bool __cdecl Sys_WaitForCinematicsHostOutstandingRequestEventTimeout(unsigned int timeoutMsec);
 void __cdecl Sys_SetCinematicsHostOutstandingRequestEvent();
 void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent();
+
+
+enum WinThreadLock : __int32
+{                                       // ...
+    THREAD_LOCK_NONE = 0x0,
+    THREAD_LOCK_MINIMAL = 0x1,
+    THREAD_LOCK_ALL = 0x2,
+};
+void __cdecl Win_SetThreadLock(WinThreadLock threadLock);

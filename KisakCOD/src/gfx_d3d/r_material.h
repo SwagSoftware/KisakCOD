@@ -31,6 +31,12 @@ enum surfaceType_t : __int32
     SF_FORCE_32_BITS = -0x1,
 };
 
+struct DObjSkelMat // sizeof=0x40
+{                                       // ...
+    float axis[3][4];
+    float origin[4];
+};
+
 struct MaterialStreamRouting // sizeof=0x2
 {                                       // ...
     unsigned __int8 source;             // ...

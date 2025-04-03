@@ -117,3 +117,22 @@ void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *m
 void __cdecl FS_FreeFileList(const char **list);
 
 unsigned int __cdecl FS_FTell(int f);
+enum FsListBehavior_e : __int32
+{                                       // ...
+    FS_LIST_PURE_ONLY = 0x0,
+    FS_LIST_ALL = 0x1,
+};
+int __cdecl FS_GetFileList(
+    const char *path,
+    const char *extension,
+    FsListBehavior_e behavior,
+    char *listbuf,
+    int bufsize);
+
+const char **__cdecl FS_ListFiles(const char *path, const char *extension, FsListBehavior_e behavior, int *numfiles);
+const char **__cdecl FS_ListFilesInLocation(
+    const char *path,
+    const char *extension,
+    FsListBehavior_e behavior,
+    int *numfiles,
+    int lookInFlags);

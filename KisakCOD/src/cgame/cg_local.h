@@ -1233,3 +1233,13 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
 void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to);
 unsigned int __cdecl GetWeaponIndex(const cg_s *cgameGlob);
 void __cdecl Vec4Copy(const float *from, float *to);
+
+
+// cg_effects_load_obj
+struct EffectFile // sizeof=0x630
+{                                       // ...
+    const char *nonflesh[12][29];       // ...
+    const char *flesh[12][4];           // ...
+};
+FxImpactTable *__cdecl CG_RegisterImpactEffects(const char *mapname);
+FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname);

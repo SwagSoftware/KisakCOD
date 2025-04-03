@@ -183,6 +183,14 @@ struct SndEntHandle_s // sizeof=0x4
 };
 union SndEntHandle // sizeof=0x4
 {                                       // ...
+    SndEntHandle()
+    {
+        handle = -1;
+    }
+    SndEntHandle(int entIndex)
+    {
+        field.entIndex = entIndex;
+    }
     SndEntHandle_s field;
     int handle;
 };

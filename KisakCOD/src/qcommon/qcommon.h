@@ -65,6 +65,7 @@ extern int com_errorEntered;
 extern int com_frameNumber;
 extern int com_consoleLogOpenFailed;
 extern int com_missingAssetOpenFailed;
+extern int com_frameTime;
 
 extern const dvar_t *com_dedicated;
 extern const dvar_t *com_hiDef;

@@ -110,6 +110,27 @@ enum MaterialTechniqueType : __int32
     TECHNIQUE_NONE = 0x24,
 };
 
+enum FullscreenType : __int32
+{                                       // ...
+    FULLSCREEN_DISPLAY = 0x0,
+    FULLSCREEN_MIXED = 0x1,
+    FULLSCREEN_SCENE = 0x2,
+};
+
+struct GfxRenderTargetSurface // sizeof=0x8
+{                                       // ...
+    IDirect3DSurface9 *color;           // ...
+    IDirect3DSurface9 *depthStencil;    // ...
+};
+
+struct GfxRenderTarget // sizeof=0x14
+{                                       // ...
+    GfxImage *image;                    // ...
+    GfxRenderTargetSurface surface;     // ...
+    unsigned int width;                 // ...
+    unsigned int height;                // ...
+};
+
 struct StateBitsTable // sizeof=0x8
 {                                       // ...
     int stateBits;                      // ...
@@ -271,6 +292,13 @@ struct __declspec(align(16)) ShadowCookieList // sizeof=0x1210
     // padding byte
     // padding byte
     // padding byte
+};
+struct ShadowCookieCmd // sizeof=0x10
+{                                       // ...
+    const GfxViewParms *viewParmsDpvs;
+    const GfxViewParms *viewParmsDraw;
+    ShadowCookieList *shadowCookieList;
+    int localClientNum;
 };
 struct GfxSunShadowProjection // sizeof=0x60
 {                                       // ...
@@ -467,7 +495,7 @@ const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
     const void *cmds;
     GfxLight sunLight;
     int hasApproxSunDirChanged;
-    volatile int primDrawSurfPos;
+    volatile unsigned int primDrawSurfPos;
     unsigned int *staticModelLit;
     DebugGlobals debugGlobals;
     unsigned int drawType;

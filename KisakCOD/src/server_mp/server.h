@@ -287,3 +287,19 @@ int __cdecl SV_Frame(int msec);
 void __cdecl SV_FrameInternal(int msec);
 int SV_PostFrame();
 char __cdecl SV_CheckOverflow();
+
+
+// sv_net_chan_mp
+bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan);
+void __cdecl SV_Netchan_OutgoingSequenceIncremented(client_t *client, netchan_t *chan);
+bool __cdecl SV_Netchan_Transmit(client_t *client, unsigned __int8 *data, int length);
+void __cdecl SV_Netchan_AddOOBProfilePacket(int iLength);
+void __cdecl SV_Netchan_UpdateProfileStats();
+
+
+
+// sv_archive_mp
+void __cdecl SV_ArchiveSnapshot(msg_t *msg);
+gentity_s *__cdecl SV_GentityNumLocal(int num);
+const clientState_s *__cdecl G_GetClientStateLocal(int clientNum);
+int __cdecl GetFollowPlayerStateLocal(int clientNum, playerState_s *ps);

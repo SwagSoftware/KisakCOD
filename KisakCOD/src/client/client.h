@@ -1,5 +1,6 @@
 #pragma once
 #include <qcommon/qcommon.h>
+#include <ui_mp/ui_mp.h>
 
 enum msgwnd_mode_t : __int32
 {                                       // ...
@@ -521,6 +522,9 @@ extern struct ScreenPlacement *scrPlaceView;
 extern struct ScreenPlacement scrPlaceFull;
 extern float cg_hudSplitscreenScale;
 extern ScreenPlacement scrPlaceFullUnsafe;
+
+extern PlayerKeyState playerKeys[1];
+
 
 
 

@@ -5,7 +5,7 @@
 
 
 //struct GfxBuffers gfxBuf   85b3aa20     gfx_d3d : r_buffers.obj
-struct GfxBuffers gfxBuf;
+GfxBuffers gfxBuf;
 
 void __cdecl TRACK_r_buffers()
 {

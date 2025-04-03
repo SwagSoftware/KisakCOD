@@ -15,6 +15,8 @@ WeaponDef *bg_weapClips[128];
 bool penetrationDepthTableLoaded;
 float penetrationDepthTable[4][29];
 
+unsigned int bg_lastParsedWeaponIndex;
+
 void __cdecl TRACK_bg_weapons()
 {
     track_static_alloc_internal(bg_weapAmmoTypes, 512, "bg_weapAmmoTypes", 9);

@@ -2532,3 +2532,73 @@ void __cdecl Vec3Cross(const float* v0, const float* v1, float* cross)
     cross[1] = v0[2] * *v1 - *v0 * v1[2];
     cross[2] = *v0 * v1[1] - v0[1] * *v1;
 }
+
+void __cdecl Vec3Copy(const float *from, float *to)
+{
+    *to = *from;
+    to[1] = from[1];
+    to[2] = from[2];
+}
+
+float __cdecl Vec3Length(const vec3r v)
+{
+    float v3; // [esp+4h] [ebp-4h]
+
+    v3 = v[2] * v[2] + v[1] * v[1] + *v * *v;
+    return (float)sqrt(v3);
+}
+
+float __cdecl Vec4Dot(const float *a, const float *b)
+{
+    return (float)(*a * *b + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]);
+}
+
+void __cdecl MatrixForViewer(float (*mtx)[4], const float *origin, const float (*axis)[3])
+{
+    if (!mtx)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2302, 0, "%s", "mtx");
+    if (!origin)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2303, 0, "%s", "origin");
+    if (!axis)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2304, 0, "%s", "axis");
+    (*mtx)[0] = -(*axis)[3];
+    (*mtx)[4] = -(*axis)[4];
+    (*mtx)[8] = -(*axis)[5];
+    (*mtx)[12] = -(*origin * (*mtx)[0] + origin[1] * (*mtx)[4] + origin[2] * (*mtx)[8]);
+    (*mtx)[1] = (*axis)[6];
+    (*mtx)[5] = (*axis)[7];
+    (*mtx)[9] = (*axis)[8];
+    (*mtx)[13] = -(*origin * (*mtx)[1] + origin[1] * (*mtx)[5] + origin[2] * (*mtx)[9]);
+    (*mtx)[2] = (*axis)[0];
+    (*mtx)[6] = (*axis)[1];
+    (*mtx)[10] = (*axis)[2];
+    (*mtx)[14] = -(*origin * (*mtx)[2] + origin[1] * (*mtx)[6] + origin[2] * (*mtx)[10]);
+    (*mtx)[3] = 0.0;
+    (*mtx)[7] = 0.0;
+    (*mtx)[11] = 0.0;
+    (*mtx)[15] = 1.0;
+}
+
+void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear)
+{
+    if (!mtx)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2251, 0, "%s", "mtx");
+    if (zNear <= 0.0)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2252, 0, "%s", "zNear > 0");
+    memset((unsigned __int8 *)mtx, 0, 0x40u);
+    (*mtx)[0] = (float)0.99951172 / tanHalfFovX;
+    (*mtx)[5] = (float)0.99951172 / tanHalfFovY;
+    (*mtx)[10] = 0.99951172;
+    (*mtx)[11] = 1.0;
+    (*mtx)[14] = -zNear * (float)0.99951172;
+}
+
+void __cdecl ClearBounds(float *mins, float *maxs)
+{
+    *mins = 131072.0;
+    mins[1] = 131072.0;
+    mins[2] = 131072.0;
+    *maxs = -131072.0;
+    maxs[1] = -131072.0;
+    maxs[2] = -131072.0;
+}

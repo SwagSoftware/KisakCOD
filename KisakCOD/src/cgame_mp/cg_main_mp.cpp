@@ -1,19 +1,28 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <universal/surfaceflags.h>
+#include <ui_mp/ui_mp.h>
+#include <qcommon/mem_track.h>
+#include <DynEntity/DynEntity_client.h>
+#include <ragdoll/ragdoll.h>
+#include <client/client.h>
+#include <universal/com_sndalias.h>
+#include <universal/com_memory.h>
+#include <EffectsCore/fx_system.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include <aim_assist/aim_assist.h>
+#include <script/scr_const.h>
+#include <universal/com_files.h>
+#include <qcommon/threads.h>
+#include <stringed/stringed_hooks.h>
 
-//float (*)[3] * cg_entityOriginArray 8283cb54     cg_main_mp.obj
-//struct UiContext *cgDC    82834978     cg_main_mp.obj
-//struct weaponInfo_s **cg_weaponsArray 82839b94     cg_main_mp.obj
+float cg_entityOriginArray[1][1024][3];
 weaponInfo_s cg_weaponsArray[1][128];
-
-//struct cgs_t *cgsArray    82839c6c     cg_main_mp.obj
-//struct cgMedia_t cgMedia   82839c88     cg_main_mp.obj
 cgMedia_t cgMedia;
-//struct centity_s **cg_entitiesArray 8283c430     cg_main_mp.obj
-
+centity_s cg_entitiesArray[1][1024];
 cg_s cgArray[1];
 cgs_t cgsArray[1];
+UiContext cgDC[1];
 
 const dvar_t * cg_hudGrenadeIconEnabledFlash;
 const dvar_t *cg_hudGrenadePointerPulseMax;
@@ -188,6 +197,9 @@ const dvar_t *cg_tracerLength;
 const dvar_t *cg_hudChatIntermissionPosition;
 const dvar_t *cg_hudVotePosition;
 const dvar_t *cg_fs_debug;
+const dvar_t *g_compassShowEnemies;
+
+const char *debugOverlayNames[4] = { "Off", "ViewmodelInfo", "FontTest", NULL }; // idb
 
 const char *cg_drawFpsNames[5] =
 {
@@ -1144,11 +1156,11 @@ void __cdecl TRACK_cg_main()
     track_static_alloc_internal(cg_entityOriginArray, 12288, "cg_entityOriginArray", 9);
 }
 
-void __cdecl CG_GetDObjOrientation(int localClientNum, unsigned int dobjHandle, float (*axis)[3], float *origin)
+void __cdecl CG_GetDObjOrientation(int localClientNum, signed int dobjHandle, float (*axis)[3], float *origin)
 {
     centity_s *cent; // [esp+Ch] [ebp-4h]
 
-    if (dobjHandle >= 0x480)
+    if ((unsigned int)dobjHandle >= 0x480)
         MyAssertHandler(
             ".\\cgame_mp\\cg_main_mp.cpp",
             744,
@@ -1160,9 +1172,9 @@ void __cdecl CG_GetDObjOrientation(int localClientNum, unsigned int dobjHandle, 
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 745, 0, "%s", "axis");
     if (!origin)
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 746, 0, "%s", "origin");
-    if ((int)dobjHandle >= 1024)
+    if (dobjHandle >= 1024)
     {
-        if ((int)(dobjHandle - 1024) >= 128)
+        if (dobjHandle - 1024 >= 128)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_main_mp.cpp",
                 755,
@@ -1178,10 +1190,10 @@ void __cdecl CG_GetDObjOrientation(int localClientNum, unsigned int dobjHandle, 
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        AxisCopy((const float (*)[3]) & MEMORY[0x9DF71C][95], axis);
-        *origin = *(float *)&MEMORY[0x9DF71C][104];
-        origin[1] = *(float *)&MEMORY[0x9DF71C][105];
-        origin[2] = *(float *)&MEMORY[0x9DF71C][106];
+        AxisCopy(cgArray[0].viewModelAxis, axis);
+        *origin = cgArray[0].viewModelAxis[3][0];
+        origin[1] = cgArray[0].viewModelAxis[3][1];
+        origin[2] = cgArray[0].viewModelAxis[3][2];
     }
     else
     {
@@ -1226,7 +1238,7 @@ const playerState_s *__cdecl CG_GetPredictedPlayerState(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (const playerState_s *)&MEMORY[0x9D5574];
+    return &cgArray[0].predictedPlayerState;
 }
 
 void __cdecl CG_GameMessage(int localClientNum, const char *msg)
@@ -1303,7 +1315,7 @@ void __cdecl CG_RegisterSounds()
 
 void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t **sound)
 {
-    char *v2; // eax
+    const char *v2; // eax
     snd_alias_list_t *defaultAliasList; // [esp+0h] [ebp-110h]
     snd_alias_list_t *defaultAliasLista; // [esp+0h] [ebp-110h]
     int i; // [esp+4h] [ebp-10Ch]
@@ -1331,6 +1343,35 @@ void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t 
         defaultAliasList = Com_FindSoundAliasNoErrors("collision_default");
         for (i = 0; i < 29; ++i)
             sound[i] = defaultAliasList;
+    }
+}
+
+void CG_RegisterPhysicsSounds_LoadObj()
+{
+    char classes[50][64]; // [esp+0h] [ebp-C98h] BYREF
+    PhysPreset *physPreset; // [esp+C84h] [ebp-14h]
+    int nclasses; // [esp+C88h] [ebp-10h] BYREF
+    const char **physicsFiles; // [esp+C8Ch] [ebp-Ch]
+    int i; // [esp+C90h] [ebp-8h]
+    int physPresetCount; // [esp+C94h] [ebp-4h] BYREF
+
+    nclasses = 0;
+    physicsFiles = FS_ListFilesInLocation("physic", "", FS_LIST_PURE_ONLY, &physPresetCount, 59);
+    if (physPresetCount <= 50)
+    {
+        for (i = 0; i < physPresetCount; ++i)
+        {
+            if (physicsFiles[i])
+            {
+                physPreset = PhysPresetPrecache(physicsFiles[i], (void *(__cdecl *)(int))Hunk_AllocPhysPresetPrecache);
+                CG_AddAudioPhysicsClass(physPreset, classes, &nclasses);
+            }
+        }
+        FS_FreeFileList(physicsFiles);
+    }
+    else
+    {
+        Com_PrintError(20, "ERROR: exceeded 'audio class' max %d > %d\n", physPresetCount, 50);
     }
 }
 
@@ -1409,7 +1450,7 @@ void __cdecl CG_StartAmbient(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    time = MEMORY[0x9D5560];
+    time = cgArray[0].time;
     fadetime = atoi(pszFadeTime) - time;
     if (fadetime < 0 || !time)
         fadetime = 0;
@@ -1434,11 +1475,7 @@ int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasL
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return CG_PlaySoundAlias(
-        localClientNum,
-        *(unsigned int *)(MEMORY[0x98F45C] + 232),
-        (const float *)(MEMORY[0x98F45C] + 40),
-        aliasList);
+    return CG_PlaySoundAlias(localClientNum, cgArray[0].nextSnap->ps.clientNum, cgArray[0].nextSnap->ps.origin, aliasList);
 }
 
 int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasname)
@@ -1453,8 +1490,8 @@ int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasn
             localClientNum);
     return CG_PlaySoundAliasByName(
         localClientNum,
-        *(unsigned int *)(MEMORY[0x98F45C] + 232),
-        (const float *)(MEMORY[0x98F45C] + 40),
+        cgArray[0].nextSnap->ps.clientNum,
+        cgArray[0].nextSnap->ps.origin,
         aliasname);
 }
 
@@ -1495,7 +1532,7 @@ void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *alias
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    CG_StopSoundAliasByName(localClientNum, *(unsigned int *)(MEMORY[0x98F45C] + 232), aliasName);
+    CG_StopSoundAliasByName(localClientNum, cgArray[0].nextSnap->ps.clientNum, aliasName);
 }
 
 void __cdecl CG_SubtitleSndLengthNotify(int msec, const snd_alias_t *lengthNotifyData)
@@ -1596,7 +1633,7 @@ int __cdecl CG_PlaySoundAliasAsMasterByName(
 void __cdecl CG_RestartSmokeGrenades(int localClientNum)
 {
     int eventIndex; // [esp+18h] [ebp-3Ch]
-    const snapshot_s *nextSnap; // [esp+20h] [ebp-34h]
+    snapshot_s *nextSnap; // [esp+20h] [ebp-34h]
     int v3; // [esp+24h] [ebp-30h]
     int i; // [esp+2Ch] [ebp-28h]
     float axis[3][3]; // [esp+30h] [ebp-24h] BYREF
@@ -1619,16 +1656,16 @@ void __cdecl CG_RestartSmokeGrenades(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        Com_Printf(14, "Playing smoke grenades at time %i\n", MEMORY[0x9D5560]);
+        Com_Printf(14, "Playing smoke grenades at time %i\n", cgArray[0].time);
         FX_KillEffectDef(localClientNum, cgsArray[0].smokeGrenadeFx);
-        FX_RewindTo(localClientNum, MEMORY[0x9D5560]);
-        nextSnap = (const snapshot_s *)MEMORY[0x98F45C];
+        FX_RewindTo(localClientNum, cgArray[0].time);
+        nextSnap = cgArray[0].nextSnap;
         for (i = 0; i < nextSnap->numEntities; ++i)
         {
             v3 = (int)&nextSnap->entities[i];
             if ((nextSnap->entities[i].lerp.eFlags & 0x10000) != 0
-                && nextSnap->entities[i].time2 >= MEMORY[0x9D5560]
-                && nextSnap->entities[i].lerp.u.missile.launchTime <= MEMORY[0x9D5560])
+                && nextSnap->entities[i].time2 >= cgArray[0].time
+                && nextSnap->entities[i].lerp.u.missile.launchTime <= cgArray[0].time)
             {
                 if (nextSnap->entities[i].eType)
                     MyAssertHandler(
@@ -1645,10 +1682,10 @@ void __cdecl CG_RestartSmokeGrenades(int localClientNum)
                         1586,
                         0,
                         "es->events[eventIndex] not in [EV_GRENADE_EXPLODE, EV_CUSTOM_EXPLODE_NOMARKS]\n\t%i not in [%i, %i]",
-                        *(unsigned int *)(v3 + 4 * eventIndex + 164),
+                        *(_DWORD *)(v3 + 4 * eventIndex + 164),
                         45,
                         50);
-                ByteToDir(*(unsigned int *)(v3 + 4 * eventIndex + 180), axis[0]);
+                ByteToDir(*(_DWORD *)(v3 + 4 * eventIndex + 180), axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
                 Com_Printf(
                     14,
@@ -1749,7 +1786,7 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     }
     CL_GetLocalClientConnection(localClientNum);
     memset((unsigned __int8 *)cgsArray, 0, sizeof(cgsArray));
-    memset((unsigned __int8 *)cgArray, 0, sizeof(cgArray));
+    memset((unsigned __int8 *)cgArray, 0, 0xFF580u);
     memset((unsigned __int8 *)&cgDC[localClientNum], 0, sizeof(UiContext));
     memset((unsigned __int8 *)cg_entitiesArray[localClientNum], 0, sizeof(centity_s[1024]));
     memset((unsigned __int8 *)cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
@@ -1757,13 +1794,13 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     CG_ClearCompassPingData();
     CG_Veh_Init();
     CG_ClearOverheadFade();
-    CG_InitDof((GfxDepthOfField *)&MEMORY[0x9D8748][6]);
+    CG_InitDof(&cgArray[0].refdef.dof);
     Ragdoll_Init();
     Phys_Init();
-    MEMORY[0x98F43C] = localClientNum;
-    MEMORY[0xA8E402] = 17;
-    MEMORY[0xA8E404] = localClientNum;
-    if ((unsigned __int8)localClientNum != localClientNum)
+    cgArray[0].localClientNum = localClientNum;
+    cgArray[0].viewModelPose.eType = 17;
+    cgArray[0].viewModelPose.localClientNum = localClientNum;
+    if (cgArray[0].viewModelPose.localClientNum != localClientNum)
         MyAssertHandler(
             ".\\cgame_mp\\cg_main_mp.cpp",
             1912,
@@ -1772,19 +1809,19 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
             "cgameGlob->viewModelPose.localClientNum == localClientNum");
     CL_SetStance(localClientNum, CL_STANCE_STAND);
     CL_SetADS(localClientNum, 0);
-    MEMORY[0x9DE7D9][0] = 0;
-    MEMORY[0xA7B0BC] = Com_FindSoundAlias;
-    MEMORY[0xA7B0C0] = CG_PlayAnimScriptSoundAlias;
-    MEMORY[0xA7B0E8] = FX_RegisterModel;
-    MEMORY[0xA7B0EC] = CG_CreateDObj;
-    MEMORY[0xA7B0F0] = CG_AttachWeapon;
-    MEMORY[0xA7B0F4] = CG_GetDObj;
-    MEMORY[0xA7B0F8] = Com_SafeClientDObjFree;
-    MEMORY[0xA7B0FC] = Hunk_AllocXAnimClient;
-    MEMORY[0xA7B0E4] = 0;
+    cgArray[0].objectiveText[0] = 0;
+    cgArray[0].bgs.animScriptData.soundAlias = Com_FindSoundAlias;
+    cgArray[0].bgs.animScriptData.playSoundAlias = CG_PlayAnimScriptSoundAlias;
+    cgArray[0].bgs.GetXModel = FX_RegisterModel;
+    cgArray[0].bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *))CG_CreateDObj;
+    cgArray[0].bgs.AttachWeapon = CG_AttachWeapon;
+    cgArray[0].bgs.GetDObj = (DObj_s * (__cdecl *)(int, int))CG_GetDObj;
+    cgArray[0].bgs.SafeDObjFree = (void(__cdecl *)(int, int))Com_SafeClientDObjFree;
+    cgArray[0].bgs.AllocXAnim = (void *(__cdecl *)(int))Hunk_AllocXAnimClient;
+    cgArray[0].bgs.anim_user = 0;
     cgArray[0].clientNum = clientNum;
-    MEMORY[0x9DF71C][4] = 1;
-    MEMORY[0x9DF71C][17] = 1;
+    cgArray[0].drawHud = 1;
+    cgArray[0].lastHealthLerpDelay = 1;
     cgsArray[0].processedSnapshotNum = serverMessageNum;
     cgsArray[0].serverCommandSequence = serverCommandSequence;
     CG_ParseServerInfo(localClientNum);
@@ -1819,14 +1856,16 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     Material_RegisterHandle("killiconsuicide", 7);
     Material_RegisterHandle("killiconheadshot", 7);
     Material_RegisterHandle("killiconmelee", 7);
+
     if (cg_fs_debug->current.integer == 2)
-        Dvar_SetInt((dvar_s *)cg_fs_debug, 0);
+        Dvar_SetInt(cg_fs_debug, 0);
+
     CG_AntiBurnInHUD_RegisterDvars();
     CG_InitConsoleCommands();
     CG_InitViewDimensions(localClientNum);
     s = CL_GetConfigString(localClientNum, 2u);
     if (strcmp(s, "cod"))
-        Com_Error(ERR_DROP, &byte_86B5A0, "cod", s);
+        Com_Error(ERR_DROP, "Client/Server game mismatch: %s/%s", "cod", s);
     SCR_UpdateLoadScreen();
     if (!com_sv_running)
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2011, 0, "%s", "com_sv_running");
@@ -1847,7 +1886,7 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     CGScr_LoadAnimTrees();
     if (bgs)
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2041, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
-    bgs = (bgs_t *)&MEMORY[0x9E06F8];
+    bgs = &cgArray[0].bgs;
     BG_LoadAnim();
     CG_LoadAnimTreeInstances(localClientNum);
     if (!cgsArray[0].localServer)
@@ -1880,14 +1919,14 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     CG_InitEntities(localClientNum);
     CG_InitLocalEntities(localClientNum);
     DynEntCl_InitEntities(localClientNum);
-    MEMORY[0x9DE7D8] = 0;
+    cgArray[0].isLoading = 0;
     CG_SetConfigValues(localClientNum);
-    CG_LoadingString(localClientNum, &String);
+    CG_LoadingString(localClientNum, "");
     CG_NorthDirectionChanged(localClientNum);
     if (!g_mapLoaded)
         SND_StopSounds(SND_STOP_ALL);
-    CG_ParseFog(MEMORY[0x9D5560]);
-    R_InitPrimaryLights((GfxLight *)&MEMORY[0x9D8748][30]);
+    CG_ParseFog(cgArray[0].time);
+    R_InitPrimaryLights(cgArray[0].refdef.primaryLights);
     R_ClearShadowedPrimaryLightHistory(localClientNum);
     if (!g_ambientStarted)
     {
@@ -1899,7 +1938,7 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     AimAssist_Init(localClientNum);
     CG_InitVote(localClientNum);
     CG_StartClientSideEffects(localClientNum);
-    if (bgs != (bgs_t *)&MEMORY[0x9E06F8])
+    if (bgs != &cgArray[0].bgs)
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2184, 0, "%s\n\t(bgs) = %p", "(bgs == &cgameGlob->bgs)", bgs);
     bgs = 0;
     R_EndRemoteScreenUpdate();

@@ -186,6 +186,12 @@ void __cdecl MatrixTransposeTransformVector43(const vec3r in1, const mat4x3&, ve
 
 void __cdecl MatrixTransformVectorQuatTrans(const vec3r in, const struct DObjAnimMat* mat, vec3r out);
 
+void __cdecl MatrixForViewer(float (*mtx)[4], const float *origin, const float (*axis)[3]);
+void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear);
+
+
+void __cdecl ClearBounds(float *mins, float *maxs);
+
 float __cdecl RadiusFromBounds(const float *mins, const float *maxs);
 float __cdecl RadiusFromBounds2D(const float *mins, const float *maxs);
 

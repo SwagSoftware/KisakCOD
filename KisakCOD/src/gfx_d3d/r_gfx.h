@@ -318,8 +318,33 @@ struct GfxDrawSurfFields // sizeof=0x8
 
 union GfxDrawSurf // sizeof=0x8
 {                                       // ...
+    operator GfxDrawSurfFields()
+    {
+        return fields;
+    }
+    operator const GfxDrawSurfFields()
+    {
+        return fields;
+    }
     GfxDrawSurfFields fields;
     unsigned __int64 packed;
+};
+
+struct GfxDrawSurfList // sizeof=0x8
+{                                       // ...
+    GfxDrawSurf *current;               // ...
+    GfxDrawSurf *end;                   // ...
+};
+struct GfxDelayedCmdBuf // sizeof=0x10
+{                                       // ...
+    int primDrawSurfPos;
+    unsigned int primDrawSurfSize;
+    GfxDrawSurf drawSurfKey;
+};
+struct GfxBspDrawSurfData // sizeof=0x18
+{                                       // ...
+    GfxDelayedCmdBuf delayedCmdBuf;
+    GfxDrawSurfList drawSurfList;       // ...
 };
 
 struct GfxWorldDpvsStatic // sizeof=0x68

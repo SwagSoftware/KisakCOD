@@ -589,7 +589,7 @@ char __cdecl Com_Filter(const char *filter, char *name, int casesensitive);
 char __cdecl Com_FilterPath(const char *filter, const char *name, int casesensitive);
 int __cdecl Com_HashKey(const char *string, int maxlen);
 int __cdecl Com_RealTime(qtime_s *qtime);
-void __cdecl Com_Memcpy(char *dest, char *src, int count);
+//void __cdecl Com_Memcpy(char *dest, char *src, int count);
 void __cdecl Com_Memset(unsigned int *dest, int val, int count);
 
 

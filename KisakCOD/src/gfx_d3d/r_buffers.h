@@ -17,3 +17,6 @@ void __cdecl R_CreateDynamicBuffers();
 void __cdecl R_CreateParticleCloudBuffer();
 
 void __cdecl R_FinishStaticVertexBuffer(IDirect3DVertexBuffer9 *vb);
+
+
+extern GfxBuffers gfxBuf;
