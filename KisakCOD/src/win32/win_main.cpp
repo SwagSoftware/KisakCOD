@@ -419,8 +419,14 @@ char *__cdecl Sys_GetClipboardData()
 				I_strncpyz(data, cliptext, v1);
 				GlobalUnlock(hClipboardData);
 
-				char* next_token;
-				strtok_s(data, "\n\r\b", &next_token);
+				while (*data) {
+					if (*data == '\r' || *data == '\n' || *data == '\b') {
+						*data = '\0';
+						break;
+					}
+
+					data++;
+				}
 			}
 		}
 		CloseClipboard();
