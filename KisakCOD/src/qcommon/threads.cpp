@@ -28,6 +28,8 @@ static volatile unsigned int smpData;
 
 static volatile unsigned int renderPausedCount;
 
+static WinThreadLock s_threadLock;
+
 static const char* s_threadNames[7] =
 {
     "Main",
@@ -624,5 +626,24 @@ void __cdecl Win_SetThreadLock(WinThreadLock threadLock)
             else
                 SetThreadAffinityMask(threadHandle[3], s_affinityMaskForProcess);
         }
+    }
+}
+
+void Win_UpdateThreadLock()
+{
+    if (s_cpuCount == 1)
+    {
+        s_threadLock = THREAD_LOCK_ALL;
+    }
+    else if (RB_IsUsingAnyProfile())
+    {
+        Win_SetThreadLock(THREAD_LOCK_ALL);
+    }
+    else
+    {
+        WinThreadLock threadLock = (WinThreadLock)sys_lockThreads->current.integer;
+        if (threadLock == THREAD_LOCK_NONE && R_IsUsingAdaptiveGpuSync())
+            threadLock = THREAD_LOCK_MINIMAL;
+        Win_SetThreadLock(threadLock);
     }
 }

@@ -124,7 +124,7 @@ void __cdecl AimAssist_CreateScreenMatrix(AimAssistGlobals *aaGlob, float tanHal
 char __cdecl AimAssist_ConvertToClipBounds(
     const AimAssistGlobals *aaGlob,
     const float (*bounds)[3],
-    const float (*mtx)[3],
+    const mat4x3& mtx,
     float (*clipBounds)[3]);
 char __cdecl AimAssist_XfmWorldPointToClipSpace(const AimAssistGlobals *aaGlob, const float *in, float *out);
 double __cdecl AimAssist_GetCrosshairDistSqr(const float *clipMins, const float *clipMaxs);

@@ -1,5 +1,7 @@
 #include "bullet.h"
 
+#include <cgame_mp/cg_local_mp.h>
+
 char __cdecl BulletTrace(
     int localClientNum,
     const BulletFireParams *bp,

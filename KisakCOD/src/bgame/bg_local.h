@@ -790,7 +790,7 @@ struct cpose_t // sizeof=0x64
     // padding byte
     // padding byte
     // padding byte
-    int cullIn;
+    volatile unsigned long cullIn;
     unsigned __int8 isRagdoll;
     // padding byte
     // padding byte

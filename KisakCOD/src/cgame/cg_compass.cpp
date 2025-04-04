@@ -1,6 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <cgame_mp/cg_local_mp.h>
+
 const dvar_t *compassObjectiveArrowWidth;
 const dvar_t *compassObjectiveTextScale;
 const dvar_t *compassMinRange;

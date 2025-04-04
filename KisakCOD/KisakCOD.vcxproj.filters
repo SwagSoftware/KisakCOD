@@ -957,6 +957,15 @@
     <ClCompile Include="src\gfx_d3d\rb_showcollision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\win32\win_configure.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\win_net_debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universal\memfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\qcommon\qcommon.h">
@@ -1361,9 +1370,6 @@
     <ClInclude Include="src\game_mp\g_public_mp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\ode\odeext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\qcommon\com_bsp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1476,6 +1482,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gfx_d3d\rb_showcollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win32\win_configure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win32\win_net.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win32\win_net_debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

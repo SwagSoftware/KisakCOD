@@ -317,7 +317,6 @@
     <ClCompile Include="src\gfx_d3d\r_water.cpp" />
     <ClCompile Include="src\gfx_d3d\r_workercmds.cpp" />
     <ClCompile Include="src\gfx_d3d\r_workercmds_common.cpp" />
-    <ClCompile Include="src\physics\ode\array.cpp" />
     <ClCompile Include="src\physics\ode\collision_kernel.cpp" />
     <ClCompile Include="src\physics\ode\collision_quadtreespace.cpp" />
     <ClCompile Include="src\physics\ode\collision_space.cpp" />
@@ -407,6 +406,7 @@
     <ClCompile Include="src\universal\dvar.cpp" />
     <ClCompile Include="src\universal\dvar_cmds.cpp" />
     <ClCompile Include="src\universal\fft.cpp" />
+    <ClCompile Include="src\universal\memfile.cpp" />
     <ClCompile Include="src\universal\physicalmemory.cpp" />
     <ClCompile Include="src\universal\pool_allocator.cpp" />
     <ClCompile Include="src\universal\q_parse.cpp" />
@@ -421,7 +421,6 @@
     <ClCompile Include="src\win32\win_main.cpp" />
     <ClCompile Include="src\win32\win_net.cpp" />
     <ClCompile Include="src\win32\win_net_debug.cpp" />
-    <ClCompile Include="src\win32\win_remote.cpp" />
     <ClCompile Include="src\win32\win_syscon.cpp" />
     <ClCompile Include="src\win32\win_voice.cpp" />
     <ClCompile Include="src\win32\win_wndproc.cpp" />
@@ -611,7 +610,6 @@
     <ClInclude Include="src\win32\win_local.h" />
     <ClInclude Include="src\win32\win_localize.h" />
     <ClInclude Include="src\win32\win_net_debug.h" />
-    <ClInclude Include="src\win32\win_remote.h" />
     <ClInclude Include="src\xanim\dobj.h" />
     <ClInclude Include="src\xanim\dobj_utils.h" />
     <ClInclude Include="src\xanim\xanim.h" />

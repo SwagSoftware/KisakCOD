@@ -1,6 +1,6 @@
 #include "xmodel.h"
 
-int __cdecl XModelGetStaticBounds(const XModel *model, float (*axis)[3], float *mins, float *maxs)
+int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3& axis, float *mins, float *maxs)
 {
     float v5; // [esp+0h] [ebp-34h]
     float v6; // [esp+4h] [ebp-30h]

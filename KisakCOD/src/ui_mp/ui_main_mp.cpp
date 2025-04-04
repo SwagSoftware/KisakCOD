@@ -1,7 +1,10 @@
 #include "ui_mp.h"
+#include <ui/ui.h>
+#include <qcommon/cmd.h>
 #include <qcommon/mem_track.h>
-#include <client/client.h>
+#include <client_mp/client_mp.h>
 #include <gfx_d3d/r_rendercmds.h>
+#include <universal/q_parse.h>
 
 const dvar_t *ui_showList;
 const dvar_t *ui_customClassName;
@@ -4105,11 +4108,11 @@ void __cdecl UI_UpdatePendingPings(uiInfo_s *uiInfo)
     *(unsigned int *)&sharedUiInfo.serverStatus.string[1104] = uiInfo->uiDC.realTime + 1000;
 }
 
-char *__cdecl UI_SafeTranslateString(char *reference)
+char *__cdecl UI_SafeTranslateString(const char *reference)
 {
     char v2; // [esp+3h] [ebp-11h]
     char *v3; // [esp+8h] [ebp-Ch]
-    char *v4; // [esp+Ch] [ebp-8h]
+    const char *v4; // [esp+Ch] [ebp-8h]
     const char *translation; // [esp+10h] [ebp-4h]
 
     if (*reference == 21)

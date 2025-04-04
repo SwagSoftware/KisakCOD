@@ -1185,9 +1185,7 @@ void __cdecl BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, float *re
 
     if (!tr)
         MyAssertHandler(".\\bgame\\bg_misc.cpp", 921, 0, "%s", "tr");
-    if ((COERCE_UNSIGNED_INT(tr->trBase[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(tr->trBase[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(tr->trBase[2]) & 0x7F800000) == 0x7F800000)
+    if (!(!IS_NAN((tr->trBase)[0]) && !IS_NAN((tr->trBase)[1]) && !IS_NAN((tr->trBase)[2])))
     {
         MyAssertHandler(
             ".\\bgame\\bg_misc.cpp",
@@ -1196,9 +1194,7 @@ void __cdecl BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, float *re
             "%s",
             "!IS_NAN((tr->trBase)[0]) && !IS_NAN((tr->trBase)[1]) && !IS_NAN((tr->trBase)[2])");
     }
-    if ((COERCE_UNSIGNED_INT(tr->trDelta[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(tr->trDelta[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(tr->trDelta[2]) & 0x7F800000) == 0x7F800000)
+    if (!(!IS_NAN((tr->trDelta)[0]) && !IS_NAN((tr->trDelta)[1]) && !IS_NAN((tr->trDelta)[2])))
     {
         MyAssertHandler(
             ".\\bgame\\bg_misc.cpp",

@@ -713,8 +713,8 @@ bool __cdecl CG_Flashbanged(int localClientNum);
 
 
 // cg_pose_utils
-void __cdecl CG_UsedDObjCalcPose(const cpose_t *pose);
-void __cdecl CG_CullIn(const cpose_t *pose);
+void __cdecl CG_UsedDObjCalcPose(cpose_t *pose);
+void __cdecl CG_CullIn(cpose_t *pose);
 
 
 

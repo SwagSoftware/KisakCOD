@@ -52,7 +52,7 @@ struct cpose_t;
 
 union GfxSceneEntityInfo // sizeof=0x4
 {                                       // ...
-    const cpose_t *pose;
+    cpose_t *pose;
     unsigned __int16 *cachedLightingHandle;
 };
 struct __declspec(align(4)) GfxSceneEntity // sizeof=0x7C

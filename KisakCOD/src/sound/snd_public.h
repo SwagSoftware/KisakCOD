@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qcommon/qcommon.h>
 #include <msslib/mss.h>
 #include <gfx_d3d/fxprimitives.h>
 #include <universal/memfile.h>

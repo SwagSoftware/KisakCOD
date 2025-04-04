@@ -1,17 +1,17 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-void __cdecl CG_UsedDObjCalcPose(const cpose_t *pose)
+#include <bgame/bg_local.h>
+
+void __cdecl CG_UsedDObjCalcPose(cpose_t *pose)
 {
-    if (!pose)
-        MyAssertHandler(".\\cgame\\cg_pose_utils.cpp", 13, 0, "%s", "pose");
-    InterlockedCompareExchange(&pose->cullIn, 1, 0);
+    iassert(pose);
+    _InterlockedCompareExchange(&pose->cullIn, 1, 0);
 }
 
-void __cdecl CG_CullIn(const cpose_t *pose)
+void __cdecl CG_CullIn(cpose_t *pose)
 {
-    if (!pose)
-        MyAssertHandler(".\\cgame\\cg_pose_utils.cpp", 21, 0, "%s", "pose");
+    iassert(pose);
     pose->cullIn = 2;
 }
 

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <universal/assertive.h>
+
+#include <math.h>
+
 struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...
@@ -103,8 +107,7 @@ void __cdecl Vec3Scale(const vec3r v, float scale, vec3r result);
 // :)
 inline float __cdecl I_fres(float val)
 {
-    if (val == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 107, 0, "%s", "val");
+    iassert(val != 0.0);
     return (float)(1.0 / val);
 }
 
@@ -273,14 +276,22 @@ void __cdecl ClosestApproachOfTwoLines(
 
 // KISAK ADDITION: pray that the optimizer doesn't shit the bed
 __forceinline static float COERCE_FLOAT(unsigned val) {
-    union ida_pro_costs_10k_btw {
+    union {
         unsigned v;
         float f;
-    };
-
-    ida_pro_costs_10k_btw lol = { val };
+    } lol = { val };
     return lol.f;
 }
+
+__forceinline static unsigned int COERCE_UNSIGNED_INT(float val) {
+    union {
+        float f;
+        unsigned v;
+    } lol = { val };
+    return lol.v;
+}
+
+#define IS_NAN(x) (isnan(x))
 
 // LWSS: There appear to be a lot more functions on XBox.
 //__Eg_fltMin@@YAXXZ       8278c5f0 f   com_math_anglevectors.obj

@@ -1,10 +1,12 @@
-#include "../win32/win_local.h"
+#include <win32/win_local.h>
+#include <win32/win_net.h>
 
-#include "../universal/assertive.h"
+#include <universal/assertive.h>
+
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
-#include <direct.h>
 
+#include <direct.h>
 
 
 _RTL_CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
@@ -64,15 +66,15 @@ unsigned int Win_InitThreads()
     unsigned long cpuCount; 
     DWORD_PTR systemAffinityMask;
     unsigned long cpuOffset; 
-    unsigned long threadAffinityMask; 
-    unsigned long affinityMaskBits[33];
+    DWORD_PTR threadAffinityMask;
+    DWORD_PTR affinityMaskBits[33];
     DWORD_PTR processAffinityMask; 
 
     CurrentProcess = GetCurrentProcess();
     result = GetProcessAffinityMask(CurrentProcess, &processAffinityMask, &systemAffinityMask);
     s_affinityMaskForProcess = processAffinityMask;
     cpuCount = 0;
-    for (threadAffinityMask = 1; (processAffinityMask & -threadAffinityMask) != 0; threadAffinityMask *= 2)
+    for (threadAffinityMask = 1; (processAffinityMask & ((DWORD_PTR)0 - threadAffinityMask)) != 0; threadAffinityMask *= 2)
     {
         if ((processAffinityMask & threadAffinityMask) != 0)
         {

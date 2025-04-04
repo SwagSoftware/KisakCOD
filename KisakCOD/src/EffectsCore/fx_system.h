@@ -717,8 +717,8 @@ void __cdecl FX_GetOrientation(
     int randomSeed,
     orientation_t* orient);
 char  FX_GenerateBeam_GetFlatDelta(
-    const mat4x4* clipMtx,
-    const mat4x4* invClipMtx,
+    const float4x4* clipMtx,
+    const float4x4* invClipMtx,
     float4 beamWorldBegin,
     float4 beamWorldEnd,
     float4* outFlatDelta);

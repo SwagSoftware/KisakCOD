@@ -1,6 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <cgame_mp/cg_local_mp.h>
+
 void __cdecl CG_OffhandRegisterDvars()
 {
     DvarLimits min; // [esp+4h] [ebp-10h]

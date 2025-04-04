@@ -1,8 +1,9 @@
 #pragma once
 #include <cgame_mp/cg_local_mp.h>
 #include <game_mp/g_main_mp.h>
-#include <script/scr_stringlist.h>
 
+#include <script/scr_stringlist.h>
+#include <script/scr_variable.h>
 
 
 // g_client_fields
@@ -83,31 +84,6 @@ struct game_hudelem_field_t // sizeof=0x1C
     int shift;
     void(__cdecl *setter)(game_hudelem_s *, int);
     void(__cdecl *getter)(game_hudelem_s *, int);
-};
-struct scr_entref_t // sizeof=0x4
-{                                       // ...
-    unsigned __int16 entnum;            // ...
-    unsigned __int16 classnum;          // ...
-};
-struct VariableStackBuffer // sizeof=0xC
-{
-    const char *pos;
-    unsigned __int16 size;
-    unsigned __int16 bufLen;
-    unsigned __int16 localId;
-    unsigned __int8 time;
-    char buf[1];
-};
-union VariableUnion // sizeof=0x4
-{                                       // ...
-    int intValue;
-    float floatValue;
-    unsigned int stringValue;
-    const float *vectorValue;
-    const char *codePosValue;
-    unsigned int pointerValue;
-    VariableStackBuffer *stackValue;
-    unsigned int entityOffset;
 };
 enum hudelem_update_t : __int32
 {                                       // ...

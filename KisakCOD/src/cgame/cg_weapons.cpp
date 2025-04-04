@@ -474,10 +474,10 @@ void __cdecl CG_UpdateViewModelPose(const DObj_s* obj, int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    AxisToAngles(cgArray.viewModelAxis, cgArray.viewModelPose.angles);
-    cgArray.viewModelPose.origin[0] = cgArray.viewModelAxis[3][0];
-    cgArray.viewModelPose.origin[1] = cgArray.viewModelAxis[3][1];
-    cgArray.viewModelPose.origin[2] = cgArray.viewModelAxis[3][2];
+    AxisToAngles((mat3x3 &)cgArray[0].viewModelAxis, cgArray[0].viewModelPose.angles);
+    cgArray[0].viewModelPose.origin[0] = cgArray[0].viewModelAxis[3][0];
+    cgArray[0].viewModelPose.origin[1] = cgArray[0].viewModelAxis[3][1];
+    cgArray[0].viewModelPose.origin[2] = cgArray[0].viewModelAxis[3][2];
 }
 
 bool __cdecl CG_IsPlayerCrouching(clientInfo_t *ci, const centity_s *cent)
@@ -552,9 +552,9 @@ void __cdecl CG_GetPlayerViewOrigin(int localClientNum, const playerState_s *ps,
         turretEnt = CG_GetEntity(localClientNum, ps->viewlocked_entNum);
         obj = Com_GetClientDObj(turretEnt->nextState.number, 0);
         if (!obj)
-            Com_Error(ERR_DROP, &byte_8705C8, turretEnt->nextState.number);
+            Com_Error(ERR_DROP, "CG_GetPlayerViewOrigin: Unable to get DObj for turret entity %i", turretEnt->nextState.number);
         if (!CG_DObjGetWorldTagPos(&turretEnt->pose, obj, scr_const.tag_player, origin))
-            Com_Error(ERR_DROP, &byte_870588);
+            Com_Error(ERR_DROP, "CG_GetPlayerViewOrigin: Couldn't find [tag_player] on turret");
     }
     else
     {
@@ -700,44 +700,44 @@ void __cdecl HoldBreathUpdate(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (cgArray.holdBreathDelay > 0)
-        cgArray.holdBreathDelay -= cgArray.frametime;
-    if ((cgArray.predictedPlayerState.weapFlags & 4) != 0)
+    if (cgArray[0].holdBreathDelay > 0)
+        cgArray[0].holdBreathDelay -= cgArray[0].frametime;
+    if ((cgArray[0].predictedPlayerState.weapFlags & 4) != 0)
     {
-        deltaTime = (double)cgArray.frametime * 0.001000000047497451;
-        cgArray.holdBreathFrac = DiffTrack(1.0, cgArray.holdBreathFrac, player_breath_snd_lerp->current.value, deltaTime);
-        if (cgArray.holdBreathTime >= 0)
+        deltaTime = (double)cgArray[0].frametime * 0.001000000047497451;
+        cgArray[0].holdBreathFrac = DiffTrack(1.0, cgArray[0].holdBreathFrac, player_breath_snd_lerp->current.value, deltaTime);
+        if (cgArray[0].holdBreathTime >= 0)
         {
-            if (cgArray.holdBreathTime > cgArray.holdBreathInTime)
+            if (cgArray[0].holdBreathTime > cgArray[0].holdBreathInTime)
                 CG_PlayClientSoundAlias(localClientNum, unk_A8FA14);
         }
         else
         {
-            cgArray.holdBreathTime = 0;
-            if (cgArray.holdBreathDelay > 0)
+            cgArray[0].holdBreathTime = 0;
+            if (cgArray[0].holdBreathDelay > 0)
             {
-                cgArray.holdBreathInTime = 0;
+                cgArray[0].holdBreathInTime = 0;
             }
             else
             {
                 playbackId = CG_PlayClientSoundAlias(localClientNum, unk_A8FA18);
-                SND_GetKnownLength(playbackId, &cgArray.holdBreathInTime);
-                cgArray.holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
+                SND_GetKnownLength(playbackId, &cgArray[0].holdBreathInTime);
+                cgArray[0].holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
             }
         }
-        cgArray.holdBreathTime += cgArray.frametime;
+        cgArray[0].holdBreathTime += cgArray[0].frametime;
     }
     else
     {
-        if (cgArray.holdBreathTime >= 0)
+        if (cgArray[0].holdBreathTime >= 0)
         {
-            cgArray.holdBreathTime += cgArray.frametime;
-            if (cgArray.holdBreathTime <= (int)(player_breath_hold_time->current.value * 1000.0))
+            cgArray[0].holdBreathTime += cgArray[0].frametime;
+            if (cgArray[0].holdBreathTime <= (int)(player_breath_hold_time->current.value * 1000.0))
             {
-                if (cgArray.holdBreathDelay <= 0)
+                if (cgArray[0].holdBreathDelay <= 0)
                 {
                     CG_PlayClientSoundAlias(localClientNum, unk_A8FA1C);
-                    cgArray.holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
+                    cgArray[0].holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
                 }
             }
             else
@@ -745,11 +745,11 @@ void __cdecl HoldBreathUpdate(int localClientNum)
                 CG_PlayClientSoundAlias(localClientNum, unk_A8FA20);
             }
         }
-        cgArray.holdBreathTime = -1;
-        cgArray.holdBreathInTime = 0;
-        cgArray.holdBreathFrac = 0.0;
+        cgArray[0].holdBreathTime = -1;
+        cgArray[0].holdBreathInTime = 0;
+        cgArray[0].holdBreathFrac = 0.0;
     }
-    HoldBreathSoundLerp(localClientNum, cgArray.holdBreathFrac);
+    HoldBreathSoundLerp(localClientNum, cgArray[0].holdBreathFrac);
 }
 
 void __cdecl HoldBreathSoundLerp(int localClientNum, float lerp)
@@ -792,8 +792,8 @@ void __cdecl CG_UpdateViewWeaponAnim(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = &cgArray.predictedPlayerState;
-    if (cgArray.predictedPlayerState.pm_type < 7)
+    ps = &cgArray->predictedPlayerState;
+    if (cgArray->predictedPlayerState.pm_type < 7)
     {
         weaponIndex = BG_GetViewmodelWeaponIndex(ps);
         if (weaponIndex > 0)
@@ -812,7 +812,7 @@ void __cdecl CG_UpdateViewWeaponAnim(int localClientNum)
                 MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3066, 0, "%s", "weapInfo->viewModelDObj");
             UpdateViewmodelAttachments(localClientNum, weaponIndex, ps->weaponmodels[weaponIndex], weapInfo);
             WeaponRunXModelAnims(localClientNum, ps, weapInfo);
-            dtime = (double)cgArray.frametime * 0.001000000047497451;
+            dtime = (double)cgArray->frametime * 0.001000000047497451;
             DObjUpdateClientInfo(weapInfo->viewModelDObj, dtime, 1);
             ProcessWeaponNoteTracks(localClientNum, ps);
         }
@@ -862,7 +862,7 @@ void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s* ps, w
     {
         PlayADSAnim(0.0, weaponIndex, obj, 32);
     }
-    if (ps->weapAnim != weapInfo->iPrevAnim || weaponIndex != cgArray.prevViewmodelWeapon)
+    if (ps->weapAnim != weapInfo->iPrevAnim || weaponIndex != cgArray->prevViewmodelWeapon)
     {
         transitionTime = 0.0;
         switch (ps->weapAnim & 0xFFFFFDFF)
@@ -960,7 +960,7 @@ void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s* ps, w
             Com_Printf(19, "WeaponRunXModelAnims: Unknown weapon animation %i\n", ps->weapAnim & 0xFFFFFDFF);
         LABEL_64:
             weapInfo->iPrevAnim = ps->weapAnim;
-            cgArray.prevViewmodelWeapon = weaponIndex;
+            cgArray[0].prevViewmodelWeapon = weaponIndex;
             return;
         }
         while (1)
@@ -1191,14 +1191,14 @@ bool __cdecl ViewmodelRocketShouldBeAttached(int localClientNum, WeaponDef* weap
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (cgArray.predictedPlayerState.ammoclip[BG_ClipForWeapon(cgArray.predictedPlayerState.weapon)])
+    if (cgArray[0].predictedPlayerState.ammoclip[BG_ClipForWeapon(cgArray[0].predictedPlayerState.weapon)])
         return 1;
-    return (cgArray.predictedPlayerState.weaponstate == 7
-        || cgArray.predictedPlayerState.weaponstate == 9
-        || cgArray.predictedPlayerState.weaponstate == 11
-        || cgArray.predictedPlayerState.weaponstate == 10
-        || cgArray.predictedPlayerState.weaponstate == 8)
-        && weapDef->iReloadTime - cgArray.predictedPlayerState.weaponTime > weapDef->reloadShowRocketTime;
+    return (cgArray[0].predictedPlayerState.weaponstate == 7
+        || cgArray[0].predictedPlayerState.weaponstate == 9
+        || cgArray[0].predictedPlayerState.weaponstate == 11
+        || cgArray[0].predictedPlayerState.weaponstate == 10
+        || cgArray[0].predictedPlayerState.weaponstate == 8)
+        && weapDef->iReloadTime - cgArray[0].predictedPlayerState.weaponTime > weapDef->reloadShowRocketTime;
 }
 
 bool __cdecl ViewmodelKnifeShouldBeAttached(int localClientNum, WeaponDef* weapDef)
@@ -1217,7 +1217,7 @@ bool __cdecl ViewmodelKnifeShouldBeAttached(int localClientNum, WeaponDef* weapD
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    anim = cgArray.predictedPlayerState.weapAnim & 0xFFFFFDFF;
+    anim = cgArray[0].predictedPlayerState.weapAnim & 0xFFFFFDFF;
     return anim == 8 || anim == 9;
 }
 
@@ -1320,8 +1320,8 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = &cgArray;
-    ps = &cgArray.predictedPlayerState;
-    cgArray.refdef.dof.viewModelStart = 0.0;
+    ps = &cgArray[0].predictedPlayerState;
+    cgArray[0].refdef.dof.viewModelStart = 0.0;
     cgameGlob->refdef.dof.viewModelEnd = 0.0;
     if (ps->pm_type != 4 && ps->pm_type != 5 && !cgameGlob->renderingThirdPerson)
     {
@@ -3870,7 +3870,7 @@ char __cdecl CG_ScopeIsOverlayed(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] < 9)
+    if (client_state[0] < 9)
         return 0;
     if (CG_PlayerUsingScopedTurret(localClientNum))
         return 1;
@@ -3895,13 +3895,13 @@ int __cdecl CG_PlayerTurretWeaponIdx(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((MEMORY[0x9D5624] & 0x300) == 0)
+    if ((cgArray[0].predictedPlayerState.eFlags & 0x300) == 0)
         return 0;
-    if (!MEMORY[0x9D56BC][276])
+    if (cgArray[0].predictedPlayerState.viewlocked == PLAYERVIEWLOCK_NONE)
         return 0;
-    if (MEMORY[0x9D56BC][277] == 1023)
+    if (cgArray[0].predictedPlayerState.viewlocked_entNum == 1023)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4788, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
-    return CG_GetEntity(localClientNum, MEMORY[0x9D56BC][277])->nextState.weapon;
+    return CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum)->nextState.weapon;
 }
 
 bool __cdecl CG_PlayerUsingScopedTurret(int localClientNum)

@@ -1,6 +1,7 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <cgame_mp/cg_local_mp.h>
 
 void __cdecl CG_DrawFlashDamage(const cg_s *cgameGlob)
 {

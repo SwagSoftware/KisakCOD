@@ -1,6 +1,7 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <cgame_mp/cg_local_mp.h>
 
 const dvar_t *lowAmmoWarningPulseMin;
 const dvar_t *actionSlotsHide;

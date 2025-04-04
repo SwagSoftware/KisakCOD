@@ -1,6 +1,7 @@
 #include "g_utils_mp.h"
 #include <qcommon/mem_track.h>
 #include <universal/com_constantconfigstrings.h>
+#include <client_mp/client_mp.h>
 #include <server_mp/server.h>
 #include <xanim/xmodel.h>
 #include <script/scr_memorytree.h>

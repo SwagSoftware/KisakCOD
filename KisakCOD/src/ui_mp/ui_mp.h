@@ -1,5 +1,10 @@
 #pragma once
+
+#include <qcommon/qcommon.h>
+#include <qcommon/net_chan_mp.h>
+
 #include <gfx_d3d/r_font.h>
+
 #include <xanim/xanim.h>
 
 enum UILocalVarType : __int32
@@ -518,7 +523,7 @@ void UI_StopServerRefresh();
 void __cdecl UI_DoServerRefresh(uiInfo_s *uiInfo);
 void __cdecl UI_StartServerRefresh(int localClientNum, int full);
 void __cdecl UI_UpdatePendingPings(uiInfo_s *uiInfo);
-char *__cdecl UI_SafeTranslateString(char *reference);
+char *__cdecl UI_SafeTranslateString(const char *reference);
 bool __cdecl UI_AnyMenuVisible(int localClientNum);
 char *__cdecl UI_ReplaceConversionString(char *sourceString, const char *replaceString);
 char *__cdecl UI_ReplaceConversionInt(char *sourceString, int replaceInt);

@@ -720,3 +720,9 @@ struct refdef_s // sizeof=0x4098
     // padding byte
     int localClientNum;
 };
+
+struct GfxPosTexVertex // sizeof=0x14
+{                                       // ...
+    float xyz[3];
+    float texCoord[2];
+};

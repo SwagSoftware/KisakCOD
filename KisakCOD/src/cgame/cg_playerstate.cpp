@@ -1,6 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <cgame_mp/cg_local_mp.h>
+
 void __cdecl CG_Respawn(int localClientNum)
 {
     if (localClientNum)
@@ -138,7 +140,7 @@ void __cdecl CG_DamageFeedback(int localClientNum, int yawByte, int pitchByte, i
     CG_MenuShowNotify(localClientNum, 0);
 }
 
-int __cdecl CG_CheckPlayerstateEvents(int localClientNum, playerState_s *ps, const transPlayerState_t *ops)
+int __cdecl CG_CheckPlayerstateEvents(int localClientNum, playerState_s* ps, const transPlayerState_t* ops)
 {
     int v4; // [esp+4h] [ebp-18h]
     int event; // [esp+8h] [ebp-14h]
@@ -163,10 +165,9 @@ int __cdecl CG_CheckPlayerstateEvents(int localClientNum, playerState_s *ps, con
         if (i >= eventSequence || i > eventSequence - 4 && ps->events[i & 3] != ops->events[i & 3])
         {
             event = ps->events[i & 3];
-            MEMORY[0x9D8640] = LOBYTE(ps->eventParms[i & 3]);
-            CG_EntityEvent(localClientNum, (centity_s *)&MEMORY[0x9D84D8], event);
+            cgArray[0].predictedPlayerEntity.nextState.eventParm = LOBYTE(ps->eventParms[i & 3]);
+            CG_EntityEvent(localClientNum, &cgArray[0].predictedPlayerEntity, event);
         }
     }
     return eventSequence;
 }
-

@@ -1,6 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <cgame_mp/cg_local_mp.h>
+
 
 void __cdecl TRACK_cg_camerashake()
 {
@@ -146,8 +148,8 @@ void __cdecl CG_ShakeCamera(int localClientNum)
     float v4; // [esp+Ch] [ebp-2Ch]
     float v5; // [esp+10h] [ebp-28h]
     float v6; // [esp+14h] [ebp-24h]
-    CameraShakeSet *camShakeSet; // [esp+18h] [ebp-20h]
-    CameraShake *cameraShake; // [esp+1Ch] [ebp-1Ch]
+    CameraShakeSet* camShakeSet; // [esp+18h] [ebp-20h]
+    CameraShake* cameraShake; // [esp+1Ch] [ebp-1Ch]
     float val; // [esp+24h] [ebp-14h]
     float vala; // [esp+24h] [ebp-14h]
     float valb; // [esp+24h] [ebp-14h]
@@ -167,7 +169,7 @@ void __cdecl CG_ShakeCamera(int localClientNum)
     camShakeSet = &s_cameraShakeSet[localClientNum];
     scale = 0.0;
     rumbleScale = 0.0;
-    sx = (double)MEMORY[0x9D5560] / 600.0;
+    sx = (double)cgArray[0].time / 600.0;
     for (i = 0; i < 4; ++i)
     {
         cameraShake = &camShakeSet->shakes[i];
@@ -180,10 +182,10 @@ void __cdecl CG_ShakeCamera(int localClientNum)
             }
         }
     }
-    if (scale < (double)*(float *)&MEMORY[0x9DF71C][107])
+    if (scale < (double)cgArray[0].rumbleScale)
     {
-        scale = *(float *)&MEMORY[0x9DF71C][107];
-        rumbleScale = *(float *)&MEMORY[0x9DF71C][107];
+        scale = cgArray[0].rumbleScale;
+        rumbleScale = scale;
     }
     if (scale > 0.0)
     {
@@ -192,29 +194,20 @@ void __cdecl CG_ShakeCamera(int localClientNum)
         v6 = camShakeSet->phase + sx * 25.13274192810059;
         v3 = sin(v6);
         val = v3 * rumbleScale * 18.0 * scale;
-        MEMORY[0x9D8748][4116] = MEMORY[0x9D8748][4116] + val;
+        cgArray[0].refdefViewAngles[0] = cgArray[0].refdefViewAngles[0] + val;
         v5 = camShakeSet->phase + sx * 47.1238899230957;
         v2 = sin(v5);
         vala = v2 * rumbleScale * 16.0 * scale;
-        MEMORY[0x9D8748][4117] = MEMORY[0x9D8748][4117] + vala;
+        cgArray[0].refdefViewAngles[1] = cgArray[0].refdefViewAngles[1] + vala;
         v4 = camShakeSet->phase + sx * 37.69911193847656;
         v1 = sin(v4);
         valb = v1 * rumbleScale * 10.0 * scale;
-        MEMORY[0x9D8748][4118] = MEMORY[0x9D8748][4118] + valb;
+        cgArray[0].refdefViewAngles[2] = cgArray[0].refdefViewAngles[2] + valb;
     }
     else
     {
         camShakeSet->phase = crandom() * 3.141592741012573;
     }
-}
-
-void __cdecl MemFile_ArchiveData(MemoryFile *memFile, int bytes, void *data)
-{
-    if (!memFile)
-        MyAssertHandler("c:\\trees\\cod3\\src\\cgame\\../universal/memfile.h", 188, 0, "%s", "memFile");
-    if (!memFile->archiveProc)
-        MyAssertHandler("c:\\trees\\cod3\\src\\cgame\\../universal/memfile.h", 189, 0, "%s", "memFile->archiveProc");
-    memFile->archiveProc(memFile, bytes, data);
 }
 
 void __cdecl CG_ClearCameraShakes(int localClientNum)

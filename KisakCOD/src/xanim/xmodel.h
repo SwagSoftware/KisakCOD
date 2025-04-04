@@ -156,4 +156,4 @@ int __cdecl XModelGetContents(const XModel *model);
 
 
 // xmodel_load_obj
-int __cdecl XModelGetStaticBounds(const XModel *model, float (*axis)[3], float *mins, float *maxs);
+int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3 &axis, float *mins, float *maxs);

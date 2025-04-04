@@ -3,6 +3,8 @@
 #include <qcommon/mem_track.h>
 #include <aim_assist/aim_assist.h>
 
+#include <cgame_mp/cg_local_mp.h>
+
 //struct localEntity_s **cg_freeLocalEntities 82834808     cg_localents.obj
 //struct localEntity_s *cg_activeLocalEntities 82834818     cg_localents.obj
 
@@ -122,9 +124,7 @@ void __cdecl CG_AddMovingTracer(const cg_s *cgameGlob, localEntity_s *le, const 
     float lengthFromBase; // [esp+5Ch] [ebp-4h]
 
     BG_EvaluateTrajectory(&le->pos, cgameGlob->time, start);
-    if ((COERCE_UNSIGNED_INT(le->pos.trDelta[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(le->pos.trDelta[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(le->pos.trDelta[2]) & 0x7F800000) == 0x7F800000)
+    if (!(!isnan((le->pos.trDelta)[0]) && !isnan((le->pos.trDelta)[1]) && !isnan((le->pos.trDelta)[2])))
     {
         MyAssertHandler(
             ".\\cgame\\cg_localents.cpp",

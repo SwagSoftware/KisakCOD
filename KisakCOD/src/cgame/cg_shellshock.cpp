@@ -1,6 +1,7 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <client_mp/client_mp.h>
 
 void __cdecl CG_PerturbCamera(cg_s *cgameGlob)
 {
@@ -26,13 +27,13 @@ void __cdecl CG_PerturbCamera(cg_s *cgameGlob)
 
 int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
     int localClientNum,
-    const shellshock_parms_t *parms,
+    const shellshock_parms_t* parms,
     int start,
     int duration)
 {
     float v5; // [esp+14h] [ebp-20h]
     int dt; // [esp+24h] [ebp-10h]
-    const ClientViewParams *view; // [esp+2Ch] [ebp-8h]
+    const ClientViewParams* view; // [esp+2Ch] [ebp-8h]
     int screenBlendTime; // [esp+30h] [ebp-4h]
 
     if (localClientNum)
@@ -45,7 +46,7 @@ int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
             localClientNum);
     if (start && duration > 0)
     {
-        dt = duration + start - MEMORY[0x9D5560];
+        dt = duration + start - cgArray[0].time;
         if (dt > 0)
         {
             screenBlendTime = parms->screenBlend.blurredEffectTime;
@@ -54,7 +55,7 @@ int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
                 v5 = (double)dt / (double)parms->screenBlend.blurredFadeTime * (double)screenBlendTime;
                 screenBlendTime = (int)(v5 + 9.313225746154785e-10);
             }
-            if (MEMORY[0x9DF924])
+            if (cgArray[0].shellshock.hasSavedScreen)
             {
                 view = CG_GetLocalClientViewParams(localClientNum);
                 R_AddCmdBlendSavedScreenShockBlurred(
@@ -66,18 +67,18 @@ int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
                     localClientNum);
             }
             SaveScreenToBuffer(localClientNum);
-            MEMORY[0x9DF924] = 1;
+            cgArray[0].shellshock.hasSavedScreen = 1;
             return 1;
         }
         else
         {
-            MEMORY[0x9DF924] = 0;
+            cgArray[0].shellshock.hasSavedScreen = 0;
             return 0;
         }
     }
     else
     {
-        MEMORY[0x9DF924] = 0;
+        cgArray[0].shellshock.hasSavedScreen = 0;
         return 0;
     }
 }
@@ -96,10 +97,9 @@ void __cdecl SaveScreenToBuffer(int localClientNum)
         R_AddCmdSaveScreen(localClientNum);
     }
 }
-
 int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
     int localClientNum,
-    const shellshock_parms_t *parms,
+    const shellshock_parms_t* parms,
     int start,
     int duration)
 {
@@ -107,7 +107,7 @@ int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
     float whiteFactor; // [esp+20h] [ebp-Ch]
     float whiteFactora; // [esp+20h] [ebp-Ch]
     float whiteFactorb; // [esp+20h] [ebp-Ch]
-    const ClientViewParams *view; // [esp+24h] [ebp-8h]
+    const ClientViewParams* view; // [esp+24h] [ebp-8h]
     float grabFactor; // [esp+28h] [ebp-4h]
     float grabFactora; // [esp+28h] [ebp-4h]
     float grabFactorb; // [esp+28h] [ebp-4h]
@@ -122,7 +122,7 @@ int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
             localClientNum);
     if (start && duration > 0)
     {
-        dt = duration + start - MEMORY[0x9D5560];
+        dt = duration + start - cgArray[0].time;
         if (dt > 0)
         {
             whiteFactor = (float)parms->screenBlend.flashWhiteFadeTime;
@@ -137,7 +137,7 @@ int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
                 grabFactora = (double)dt / grabFactor;
             whiteFactorb = BlendSmooth(whiteFactora);
             grabFactorb = BlendSmooth(grabFactora);
-            if (MEMORY[0x9DF924])
+            if (cgArray[0].shellshock.hasSavedScreen)
             {
                 view = CG_GetLocalClientViewParams(localClientNum);
                 R_AddCmdBlendSavedScreenShockFlashed(whiteFactorb, grabFactorb, view->x, view->y, view->width, view->height);
@@ -146,18 +146,18 @@ int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
             {
                 SaveScreenToBuffer(localClientNum);
             }
-            MEMORY[0x9DF924] = 1;
+            cgArray[0].shellshock.hasSavedScreen = 1;
             return 1;
         }
         else
         {
-            MEMORY[0x9DF924] = 0;
+            cgArray[0].shellshock.hasSavedScreen = 0;
             return 0;
         }
     }
     else
     {
-        MEMORY[0x9DF924] = 0;
+        cgArray[0].shellshock.hasSavedScreen = 0;
         return 0;
     }
 }
@@ -184,7 +184,7 @@ void __cdecl CG_UpdateShellShock(int localClientNum, const shellshock_parms_t *p
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    time = MEMORY[0x9D5560] - start;
+    time = cgArray[0].time - start;
     if (start && time >= 0)
     {
         UpdateShellShockSound(localClientNum, parms, time, duration);
@@ -219,9 +219,9 @@ void __cdecl EndShellShockSound(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DF914])
+    if (cgArray[0].shellshock.loopEndTime)
     {
-        MEMORY[0x9DF914] = 0;
+        cgArray[0].shellshock.loopEndTime = 0;
         alias = CL_PickSoundAlias("shellshock_end_abort");
         SND_PlaySoundAlias(alias, (SndEntHandle)1023, vec3_origin, 0, SASYS_CGAME);
     }
@@ -237,7 +237,7 @@ void __cdecl EndShellShockLookControl(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    MEMORY[0x9DF918] = 1.0;
+    cgArray[0].shellshock.sensitivity = 1.0;
     CL_CapTurnRate(localClientNum, 0.0, 0.0);
 }
 
@@ -251,8 +251,9 @@ void __cdecl EndShellShockCamera(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    MEMORY[0x9DF91C] = 0.0;
-    MEMORY[0x9DF920] = 0.0;
+
+    cgArray[0].shellshock.viewDelta[0] = 0.0;
+    cgArray[0].shellshock.viewDelta[1] = 0.0;
 }
 
 void __cdecl EndShellShockScreen(int localClientNum)
@@ -265,16 +266,16 @@ void __cdecl EndShellShockScreen(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    MEMORY[0x9DF924] = 0;
+    cgArray[0].shellshock.hasSavedScreen = 0;
 }
 
-void __cdecl UpdateShellShockSound(int localClientNum, const shellshock_parms_t *parms, int time, int duration)
+void __cdecl UpdateShellShockSound(int localClientNum, const shellshock_parms_t* parms, int time, int duration)
 {
-    const snd_alias_t *v4; // eax
-    const snd_alias_t *v5; // eax
+    const snd_alias_t* v4; // eax
+    const snd_alias_t* v5; // eax
     int wetlevel; // [esp+10h] [ebp-3Ch]
-    snd_alias_t *alias1; // [esp+30h] [ebp-1Ch]
-    snd_alias_t *alias0; // [esp+34h] [ebp-18h]
+    snd_alias_t* alias1; // [esp+30h] [ebp-1Ch]
+    snd_alias_t* alias0; // [esp+34h] [ebp-18h]
     int dt; // [esp+38h] [ebp-14h]
     int dta; // [esp+38h] [ebp-14h]
     float fade; // [esp+3Ch] [ebp-10h]
@@ -334,20 +335,20 @@ void __cdecl UpdateShellShockSound(int localClientNum, const shellshock_parms_t 
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        end = parms->sound.loopEndDelay + duration + MEMORY[0x9D5560] - time;
-        if (MEMORY[0x9D5560] >= end)
+        end = parms->sound.loopEndDelay + duration + cgArray[0].time - time;
+        if (cgArray[0].time >= end)
         {
-            if (end != MEMORY[0x9DF914])
+            if (end != cgArray[0].shellshock.loopEndTime)
             {
-                MEMORY[0x9DF914] = parms->sound.loopEndDelay + duration + MEMORY[0x9D5560] - time;
-                wetlevel = MEMORY[0x9D5560] - end;
+                cgArray[0].shellshock.loopEndTime = end;
+                wetlevel = cgArray[0].time - end;
                 v5 = CL_PickSoundAlias(parms->sound.end);
                 SND_PlaySoundAlias(v5, (SndEntHandle)1023, vec3_origin, wetlevel, SASYS_CGAME);
             }
         }
-        else if (MEMORY[0x9DF914])
+        else if (cgArray[0].shellshock.loopEndTime)
         {
-            MEMORY[0x9DF914] = 0;
+            cgArray[0].shellshock.loopEndTime = 0;
             v4 = CL_PickSoundAlias(parms->sound.endAbort);
             SND_PlaySoundAlias(v4, (SndEntHandle)1023, vec3_origin, 0, SASYS_CGAME);
         }
@@ -396,12 +397,12 @@ void __cdecl UpdateShellShockLookControl(int localClientNum, const shellshock_pa
             localClientNum);
     if (fade == 1.0)
     {
-        MEMORY[0x9DF918] = parms->lookControl.mouseSensitivity;
+        cgArray[0].shellshock.sensitivity = parms->lookControl.mouseSensitivity;
         CL_CapTurnRate(localClientNum, parms->lookControl.maxPitchSpeed, parms->lookControl.maxYawSpeed);
     }
     else
     {
-        MEMORY[0x9DF918] = (parms->lookControl.mouseSensitivity - 1.0) * fade + 1.0;
+        cgArray[0].shellshock.sensitivity = (parms->lookControl.mouseSensitivity - 1.0) * fade + 1.0;
         maxYawSpeed = parms->lookControl.maxYawSpeed / fade;
         maxPitchSpeed = parms->lookControl.maxPitchSpeed / fade;
         CL_CapTurnRate(localClientNum, maxPitchSpeed, maxYawSpeed);
@@ -441,8 +442,9 @@ void __cdecl UpdateShellShockCamera(int localClientNum, const shellshock_parms_t
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        MEMORY[0x9DF91C] = CubicInterpolate(t, *perturb, perturb[2], perturb[4], perturb[6]) * radius;
-        MEMORY[0x9DF920] = CubicInterpolate(t, perturb[1], perturb[3], perturb[5], perturb[7]) * radius;
+
+        cgArray[0].shellshock.viewDelta[0] = CubicInterpolate(t, *perturb, perturb[2], perturb[4], perturb[6]) * radius;
+        cgArray[0].shellshock.viewDelta[1] = CubicInterpolate(t, perturb[1], perturb[3], perturb[5], perturb[7]) * radius;
     }
     else
     {
@@ -479,6 +481,7 @@ bool __cdecl CG_Flashbanged(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return MEMORY[0x9DF910] + MEMORY[0x9DF90C] - MEMORY[0x9D5560] > 0 && *(unsigned int *)(MEMORY[0x9DF908] + 16) != 0;
+    return cgArray[0].shellshock.duration + cgArray[0].shellshock.startTime - cgArray[0].time > 0
+        && cgArray[0].shellshock.parms->screenBlend.type != SHELLSHOCK_VIEWTYPE_BLURRED;
 }
 

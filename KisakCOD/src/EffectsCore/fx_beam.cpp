@@ -1,29 +1,39 @@
 #include "fx_system.h"
 
+#include <client_mp/client_mp.h>
+
 static FxBeamInfo g_beamInfo;
 
 // NOTE: yes, these really seem to be different matrix types for some reason..
 union float4 {
     vec4 v;
     unsigned int u[4];
-    PackedUnitVec unit[4];
+    PackedUnitVec unitVec[4];
 };
 
-struct float4x3 {
-    float4 x;
-    float4 y;
-    float4 z;
+union float4x3 {
+    union {
+        float4 x;
+        float4 y;
+        float4 z;
+    };
+
+    mat4x3 mat;
 };
 
-struct float4x4 {
-    float4 x;
-    float4 y;
-    float4 z;
-    float4 w;
-};
-void __cdecl CreateClipMatrix(mat4x4* clipMtx, const float* vieworg, const vec3* viewaxis);
+union float4x4 {
+    struct {
+        float4 x;
+        float4 y;
+        float4 z;
+        float4 w;
+    };
 
-void __cdecl Float4x4ForViewer(float4x4* mtx, const float* origin3, const vec3* axis);
+    mat4x4 mat;
+};
+
+void __cdecl CreateClipMatrix(float4x4* clipMtx, const float* vieworg, const mat3x3& viewaxis);
+void __cdecl Float4x4ForViewer(float4x4* mtx, const vec3r origin3, const mat3x3& axis);
 void __cdecl Float4x4InfinitePerspectiveMatrix(float4x4* mtx, float tanHalfFovX, float tanHalfFovY, float zNear);
 
 void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
@@ -90,9 +100,9 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4 tpos1; // [esp+200h] [ebp-B8h]
     FxBeamInfo *beamInfo; // [esp+210h] [ebp-A8h]
     float4 viewAxis; // [esp+218h] [ebp-A0h] BYREF
-    mat4x4 clipMtx; // [esp+228h] [ebp-90h] BYREF
+    float4x4 clipMtx; // [esp+228h] [ebp-90h] BYREF
     int beamIter; // [esp+26Ch] [ebp-4Ch]
-    mat4x4 invClipMtx; // [esp+270h] [ebp-48h] BYREF
+    float4x4 invClipMtx; // [esp+270h] [ebp-48h] BYREF
     int savedregs; // [esp+2B8h] [ebp+0h] BYREF
 
     if (!cmd)
@@ -101,7 +111,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
         MyAssertHandler(".\\EffectsCore\\fx_beam.cpp", 288, 0, "%s", "cmd->beamInfo");
     beamInfo = cmd->beamInfo;
     CreateClipMatrix(&clipMtx, cmd->vieworg, cmd->viewaxis);
-    MatrixInverse44(clipMtx.x.v, invClipMtx.x.v);
+    MatrixInverse44(clipMtx.mat, invClipMtx.mat);
     v18 = cmd->viewaxis[0];
     viewAxis.v[0] = cmd->viewaxis[0][0];
     viewAxis.v[1] = cmd->viewaxis[0][1];
@@ -214,8 +224,8 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
             v10->v[1] = v11->v[1] + beamWorldBegin.v[1];
             v10->v[2] = v11->v[2] + beamWorldBegin.v[2];
             v10->v[3] = v11->v[3] + beamWorldBegin.v[3];
-            beginColor.packed = (unsigned int)beam->beginColor;
-            endColor.packed = (unsigned int)beam->endColor;
+            beginColor = beam->beginColor;
+            endColor = beam->endColor;
             verts = baseVerts;
             v9 = -beginRadius;
             vertPos.v[0] = v9 * flatDelta.v[0] + beamWorldBegin.v[0];
@@ -326,12 +336,12 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     }
 }
 
-void __cdecl CreateClipMatrix(mat4x4* clipMtx, const float* vieworg, const vec3* viewaxis)
+void __cdecl CreateClipMatrix(float4x4* clipMtx, const float* vieworg, const mat3x3& viewaxis)
 {
     unsigned int v3; // [esp+Ch] [ebp-90h]
     unsigned int LocalClientNum; // [esp+10h] [ebp-8Ch]
-    mat4x4 viewMtx; // [esp+14h] [ebp-88h] BYREF
-    mat4x4 projMtx; // [esp+54h] [ebp-48h] BYREF
+    float4x4 viewMtx; // [esp+14h] [ebp-88h] BYREF
+    float4x4 projMtx; // [esp+54h] [ebp-48h] BYREF
 
     Float4x4ForViewer(&viewMtx, vieworg, viewaxis);
     LocalClientNum = R_GetLocalClientNum();
@@ -352,7 +362,7 @@ void __cdecl CreateClipMatrix(mat4x4* clipMtx, const float* vieworg, const vec3*
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             v3);
-    Float4x4InfinitePerspectiveMatrix(&projMtx, MEMORY[0x9D8710], MEMORY[0x9D8714], 1.0);
+    Float4x4InfinitePerspectiveMatrix(&projMtx, cgArray[0].refdef.tanHalfFovX, cgArray[0].refdef.tanHalfFovY, 1.0);
     clipMtx->x.v[0] = viewMtx.x.v[0] * projMtx.x.v[0]
         + viewMtx.x.v[1] * projMtx.y.v[0]
         + viewMtx.x.v[2] * projMtx.z.v[0]
@@ -419,7 +429,7 @@ void __cdecl CreateClipMatrix(mat4x4* clipMtx, const float* vieworg, const vec3*
         + viewMtx.w.v[3] * projMtx.w.v[3];
 }
 
-void __cdecl Float4x4ForViewer(mat4x4 *mtx, const vec3 *origin3, const vec3 *axis3)
+void __cdecl Float4x4ForViewer(float4x4 *mtx, const vec3r origin3, const mat3x3& axis3)
 {
     float v3; // [esp+8h] [ebp-1E4h]
     float v4; // [esp+Ch] [ebp-1E0h]
@@ -433,39 +443,36 @@ void __cdecl Float4x4ForViewer(mat4x4 *mtx, const vec3 *origin3, const vec3 *axi
     float4 *p_y; // [esp+88h] [ebp-164h]
     _QWORD v13[4]; // [esp+8Ch] [ebp-160h]
     float4 v14; // [esp+ACh] [ebp-140h]
-    mat4x4 *v15; // [esp+C0h] [ebp-12Ch]
-    float v16[20]; // [esp+C4h] [ebp-128h] BYREF
+    float4x4 *v15; // [esp+C0h] [ebp-12Ch]
+    float v16[16]; // [esp+C4h] [ebp-128h] BYREF
     float4 v17; // [esp+114h] [ebp-D8h]
     float4 v18; // [esp+124h] [ebp-C8h]
     float4 v19; // [esp+134h] [ebp-B8h]
     float4 origin; // [esp+144h] [ebp-A8h]
-    mat4x4 tAxis; // [esp+154h] [ebp-98h] BYREF
+    float4x4 tAxis; // [esp+154h] [ebp-98h] BYREF
     float4 transRow; // [esp+194h] [ebp-58h]
-    mat4x4 axis; // [esp+1A4h] [ebp-48h] BYREF
+    float4x4 axis; // [esp+1A4h] [ebp-48h] BYREF
 
-    origin.v[0] = *origin3;
+    origin.v[0] = origin3[0];
     origin.v[1] = origin3[1];
     origin.v[2] = origin3[2];
     origin.v[3] = 0.0;
-    LODWORD(v16[19]) = axis3;
-    tAxis.x.v[0] = (*axis3)[0];
-    tAxis.x.v[1] = (*axis3)[1];
-    tAxis.x.v[2] = (*axis3)[2];
+    tAxis.x.v[0] = (axis3)[0][0];
+    tAxis.x.v[1] = (axis3)[0][1];
+    tAxis.x.v[2] = (axis3)[0][2];
     tAxis.x.v[3] = 0.0;
-    tAxis.y.v[0] = (*axis3)[3];
-    tAxis.y.v[1] = (*axis3)[4];
-    tAxis.y.v[2] = (*axis3)[5];
+    tAxis.y.v[0] = (axis3)[1][0];
+    tAxis.y.v[1] = (axis3)[1][1];
+    tAxis.y.v[2] = (axis3)[1][2];
     tAxis.y.v[3] = 0.0;
-    tAxis.z.v[0] = (*axis3)[6];
-    tAxis.z.v[1] = (*axis3)[7];
-    tAxis.z.v[2] = (*axis3)[8];
+    tAxis.z.v[0] = (axis3)[2][0];
+    tAxis.z.v[1] = (axis3)[2][1];
+    tAxis.z.v[2] = (axis3)[2][2];
     tAxis.z.v[3] = 0.0;
     tAxis.w.v[0] = 0.0;
     tAxis.w.v[1] = 0.0;
     tAxis.w.v[2] = 0.0;
     tAxis.w.v[3] = 1.0;
-    LODWORD(v16[17]) = tAxis.y.v;
-    LODWORD(v16[18]) = tAxis.y.v;
     tAxis.y.v[0] = -tAxis.y.v[0];
     tAxis.y.v[1] = -tAxis.y.v[1];
     tAxis.y.v[2] = -tAxis.y.v[2];
@@ -486,6 +493,7 @@ void __cdecl Float4x4ForViewer(mat4x4 *mtx, const vec3 *origin3, const vec3 *axi
     v16[13] = tAxis.y.v[3];
     v16[14] = 0.0;
     v16[15] = 1.0;
+    static_assert(sizeof(v16) == sizeof(axis), "");
     memcpy(&axis, v16, sizeof(axis));
     v19 = g_swizzleYZXW;
     v13[0] = *(_QWORD *)axis.x.v;
@@ -706,7 +714,7 @@ char  FX_GenerateBeam_GetFlatDelta(
     v20.v[3] = (float)1.0 - v29;
     v19 = g_keepXYW;
     *(_QWORD*)v20.v &= *(_QWORD*)g_keepXYW.v;
-    *(_QWORD*)&v20.unit[2].packed &= *(_QWORD*)&g_keepXYW.unit[2].packed;
+    *(_QWORD*)&v20.unitVec[2].packed &= *(_QWORD*)&g_keepXYW.unitVec[2].packed;
     v18 = v20;
     v15 = v20.v[0] * invClipMtx->x.v[0]
         + v20.v[1] * invClipMtx->y.v[0]
@@ -729,7 +737,7 @@ char  FX_GenerateBeam_GetFlatDelta(
     v14 = v17;
     v11 = g_keepXYZ;
     outFlatDelta->u[0] = g_keepXYZ.u[0] & LODWORD(v15);
-    *(_QWORD*)&outFlatDelta->unit[1].packed = *(_QWORD*)&v11.unit[1].packed & v13;
+    *(_QWORD*)&outFlatDelta->unitVec[1].packed = *(_QWORD*)&v11.unitVec[1].packed & v13;
     outFlatDelta->u[3] = v11.u[3] & LODWORD(v14);
     v10 = *outFlatDelta;
     if (Vec4LengthSq(v10.v) < 0.000002)

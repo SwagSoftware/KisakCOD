@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qcommon/qcommon.h>
+
 #include "r_debug.h"
 #include "r_font.h"
 #include "r_gfx.h"

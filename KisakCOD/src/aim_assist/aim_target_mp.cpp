@@ -2,6 +2,7 @@
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>
 #include <bgame/bg_local.h>
+#include <cgame_mp/cg_local_mp.h>
 
 AimTargetGlob atGlobArray[1];
 
@@ -388,11 +389,6 @@ void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetE
     }
     AimTarget_AddTargetToList(localClientNum, target);
     //Profile_EndInternal(0);
-}
-
-double __cdecl Vec3LengthSq(const float *v)
-{
-    return (float)(*v * *v + v[1] * v[1] + v[2] * v[2]);
 }
 
 void __cdecl AimTarget_AddTargetToList(int localClientNum, const AimTarget *target)

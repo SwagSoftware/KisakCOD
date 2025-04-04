@@ -1,5 +1,12 @@
 #include "database.h"
 
+#include <xanim/xanim.h>
+
+#include <sound/snd_local.h>
+
+#include <gfx_d3d/fxprimitives.h>>
+#include <gfx_d3d/r_material.h>
+#include <gfx_d3d/r_gfx.h>
 
 void *varint;
 void *varuint;

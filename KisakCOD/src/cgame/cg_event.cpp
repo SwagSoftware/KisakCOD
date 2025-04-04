@@ -2,6 +2,8 @@
 #include "cg_public.h"
 
 
+#include <cgame_mp/cg_local_mp.h>
+
 
 int __cdecl CG_GetBoneIndex(
     int localClientNum,

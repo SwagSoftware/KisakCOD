@@ -2602,3 +2602,8 @@ void __cdecl ClearBounds(float *mins, float *maxs)
     maxs[1] = -131072.0;
     maxs[2] = -131072.0;
 }
+
+float __cdecl Vec3LengthSq(const float* v)
+{
+    return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}

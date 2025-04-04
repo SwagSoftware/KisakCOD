@@ -466,14 +466,14 @@ void __cdecl AimAssist_CreateScreenMatrix(AimAssistGlobals *aaGlob, float tanHal
     MatrixForViewer(viewMtx, aaGlob->viewOrigin, aaGlob->viewAxis);
     InfinitePerspectiveMatrix(projMtx, tanHalfFovX, tanHalfFovY, 1.0);
     MatrixMultiply44(viewMtx, projMtx, screenMtx);
-    MatrixTranspose44(screenMtx[0], aaGlob->screenMtx[0]);
-    MatrixInverse44(aaGlob->screenMtx[0], aaGlob->invScreenMtx[0]);
+    MatrixTranspose44(screenMtx, aaGlob->screenMtx);
+    MatrixInverse44(aaGlob->screenMtx, aaGlob->invScreenMtx);
 }
 
 char __cdecl AimAssist_ConvertToClipBounds(
     const AimAssistGlobals *aaGlob,
     const float (*bounds)[3],
-    const float (*mtx)[3],
+    const mat4x3 &mtx,
     float (*clipBounds)[3])
 {
     float v5; // [esp+0h] [ebp-A0h]
