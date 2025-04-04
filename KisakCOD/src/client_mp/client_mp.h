@@ -991,3 +991,18 @@ void __cdecl Key_KeynumToStringBuf(int keynum, char* buf, int buflen);
 int __cdecl CL_GetClientName(int localClientNum, int index, char* buf, int size);
 int __cdecl CL_ShutdownUI();
 void __cdecl CL_InitUI();
+
+
+
+// cl_main_win32_mp
+void __cdecl CL_SetServerInfoByAddress(netadr_t from, char *info, __int16 ping);
+void __cdecl CL_SetServerInfo(serverInfo_t *server, char *info, __int16 ping);
+void __cdecl CL_ServerInfoPacket(netadr_t from, msg_t *msg, int time);
+void __cdecl CL_Connect_f();
+bool __cdecl CL_CDKeyValidate(const char *key, const char *checksum);
+void __cdecl CL_GlobalServers_f();
+void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg);
+void __cdecl CL_ResetPlayerMuting(unsigned int muteClientIndex);
+void __cdecl CL_MutePlayer(int localClientNum, unsigned int muteClientIndex);
+bool __cdecl CL_IsPlayerMuted(int localClientNum, unsigned int muteClientIndex);
+void __cdecl CL_ClearMutedList();

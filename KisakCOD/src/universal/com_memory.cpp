@@ -166,13 +166,6 @@ int __cdecl DB_GetAllXAssetOfType_FastFile(XAssetType type, XAssetHeader* assets
     return assetCount;
 }
 
-unsigned __int8* __cdecl Hunk_AllocPhysPresetPrecache(int size)
-{
-    if (size <= 0)
-        MyAssertHandler(".\\EffectsCore\\fx_load_obj.cpp", 237, 0, "%s", "size > 0");
-    return Hunk_Alloc(size, "Hunk_AllocPhysPresetPrecache", 21);
-}
-
 unsigned __int8* __cdecl Hunk_AllocXAnimServer(unsigned int size)
 {
     return Hunk_AllocLow(size, "Hunk_AllocXAnimServer", 11);

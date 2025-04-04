@@ -6,7 +6,6 @@
 unsigned __int8* __cdecl Hunk_AllocXAnimPrecache(unsigned int size);
 unsigned __int8* __cdecl Hunk_AllocPhysPresetPrecache(unsigned int size);
 unsigned __int8* __cdecl Hunk_AllocXAnimClient(unsigned int size);
-unsigned __int8* __cdecl Hunk_AllocPhysPresetPrecache(int size);
 unsigned __int8* __cdecl Hunk_AllocXAnimServer(unsigned int size);
 
 //void __cdecl TRACK_com_memory();

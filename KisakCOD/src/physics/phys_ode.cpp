@@ -51,7 +51,6 @@ const dvar_t *phys_drawDebugInfo;
 const dvar_t *phys_qsi  ;
 const dvar_t *phys_jitterMaxMass;
 const dvar_t *phys_mcv;
-
 const dvar_t *dynEntPieces_velocity;
 const dvar_t *dynEntPieces_angularVelocity;
 const dvar_t *dynEntPieces_impactForce;

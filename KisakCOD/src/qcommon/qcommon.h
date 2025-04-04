@@ -959,7 +959,88 @@ void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs);
 // cm_load_obj
 void __cdecl CM_LoadMapData_LoadObj(const char *name);
 
+// cm_showcollision
+struct __declspec(align(4)) ShowCollisionBrushPt // sizeof=0x14
+{                                       // ...
+    float xyz[3];
+    __int16 sideIndex[3];
+    // padding byte
+    // padding byte
+};
+struct winding_t // sizeof=0x34
+{
+    int numpoints;
+    float p[4][3];
+};
+void __cdecl TRACK_cm_showcollision();
+void __cdecl CM_GetPlaneVec4Form(
+    const cbrushside_t *sides,
+    const float (*axialPlanes)[4],
+    int index,
+    float *expandedPlane);
+void __cdecl CM_ShowSingleBrushCollision(
+    const cbrush_t *brush,
+    const float *color,
+    void(__cdecl *drawCollisionPoly)(int, float (*)[3], const float *));
+void __cdecl CM_BuildAxialPlanes(const cbrush_t *brush, float (*axialPlanes)[4]);
+int __cdecl CM_ForEachBrushPlaneIntersection(
+    const cbrush_t *brush,
+    const float (*axialPlanes)[4],
+    ShowCollisionBrushPt *brushPts);
+int __cdecl CM_AddSimpleBrushPoint(
+    const cbrush_t *brush,
+    const float (*axialPlanes)[4],
+    const __int16 *sideIndices,
+    const float *xyz,
+    int ptCount,
+    ShowCollisionBrushPt *brushPts);
+char __cdecl CM_BuildBrushWindingForSide(
+    winding_t *winding,
+    float *planeNormal,
+    int sideIndex,
+    const ShowCollisionBrushPt *pts,
+    int ptCount);
+int __cdecl CM_GetXyzList(int sideIndex, const ShowCollisionBrushPt *pts, int ptCount, float (*xyz)[3], int xyzLimit);
+int __cdecl CM_PointInList(const float *point, const float (*xyzList)[3], int xyzCount);
+void __cdecl CM_PickProjectionAxes(const float *normal, int *i, int *j);
+void __cdecl CM_AddExteriorPointToWindingProjected(winding_t *w, float *pt, int i, int j);
+double __cdecl CM_SignedAreaForPointsProjected(const float *pt0, const float *pt1, const float *pt2, int i, int j);
+void __cdecl CM_AddColinearExteriorPointToWindingProjected(
+    winding_t *w,
+    float *pt,
+    int i,
+    int j,
+    int index0,
+    int index1);
+double __cdecl CM_RepresentativeTriangleFromWinding(const winding_t *w, const float *normal, int *i0, int *i1, int *i2);
+void __cdecl CM_ReverseWinding(winding_t *w);
+void __cdecl CM_ShowBrushCollision(
+    int contentMask,
+    cplane_s *frustumPlanes,
+    int frustumPlaneCount,
+    void(__cdecl *drawCollisionPoly)(int, float (*)[3], const float *));
+void __cdecl CM_GetShowCollisionColor(float *colorFloat, char colorCounter);
+char __cdecl CM_BrushInView(const cbrush_t *brush, cplane_s *frustumPlanes, int frustumPlaneCount);
+int __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_s *p, const cplane_s *pa);
 
+
+// cm_staticmodel
+void __cdecl CM_TraceStaticModel(
+    cStaticModel_s *sm,
+    trace_t *results,
+    const float *start,
+    const float *end,
+    int contentmask);
+bool __cdecl CM_TraceStaticModelComplete(cStaticModel_s *sm, const float *start, const float *end, int contentmask);
+
+
+// cm_tracebox
+void __cdecl CM_CalcTraceExtents(TraceExtents *extents);
+int __cdecl CM_TraceBox(const TraceExtents *extents, float *mins, float *maxs, float fraction);
+bool __cdecl CM_TraceSphere(const TraceExtents *extents, const float *origin, float radius, float fraction);
+
+
+extern clipMap_t cm;
 
 /*
 ==============================================================

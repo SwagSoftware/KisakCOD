@@ -5,21 +5,7 @@
 #include <qcommon/cmd.h>
 
 ImgGlobals imageGlobals;
-//char const **g_platform_name  827dbe58     gfx_d3d : r_image.obj
 GfxImage g_imageProgs[14];
-const char *imageTypeName[10] =
-{
-    "misc",
-    "debug",
-    "$tex+?",
-    "ui",
-    "lmap",
-    "light",
-    "f/x",
-    "hud",
-    "model",
-    "world"
-};
 
 void __cdecl TRACK_r_image()
 {
@@ -1406,12 +1392,6 @@ void R_InitCodeImages()
         MyAssertHandler(".\\r_image.cpp", 1207, 1, "%s", "rgp.pixelCostColorCodeImage");
 }
 
-const char *g_platform_name[2] =
-{
-    "current",
-    "min_pc"
-};
-
 void __cdecl R_ImageList_f()
 {
     const char *v0; // eax
@@ -1612,4 +1592,147 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
     }
     return (_D3DFORMAT)0;
 }
+
+
+void __cdecl Image_CreateCubeTexture_PC(
+    GfxImage *image,
+    unsigned __int16 edgeLen,
+    unsigned int mipmapCount,
+    _D3DFORMAT imageFormat)
+{
+    const char *v4; // eax
+    const char *v5; // eax
+    const char *v6; // eax
+    int hr; // [esp+0h] [ebp-4h]
+
+    if (!image)
+        MyAssertHandler(".\\r_image.cpp", 605, 0, "%s", "image");
+    if (image->texture.basemap)
+        MyAssertHandler(".\\r_image.cpp", 606, 0, "%s", "!image->texture.basemap");
+    image->width = edgeLen;
+    image->height = edgeLen;
+    image->depth = 1;
+    image->mapType = MAPTYPE_CUBE;
+    if (!gfxMetrics.canMipCubemaps)
+        mipmapCount = 1;
+    hr = dx.device->CreateCubeTexture(
+        dx.device,
+        edgeLen,
+        mipmapCount,
+        0,
+        imageFormat,
+        D3DPOOL_MANAGED,
+        (IDirect3DCubeTexture9 **)&image->texture,
+        0);
+    if (hr < 0)
+    {
+        v4 = R_ErrorDescription(hr);
+        Com_Error(
+            ERR_DROP,
+            "CreateCubeTexture ( %s, %i, %i, %i ) failed: %08x = %s",
+            image->name,
+            image->width,
+            mipmapCount,
+            imageFormat,
+            hr,
+            v4);
+    }
+    if (hr != -2005530520 && !image->texture.basemap)
+    {
+        v5 = R_ErrorDescription(hr);
+        v6 = va(
+            "DirectX succeeded without creating cube texture for %s: size %ix%i, type %08x, hr %08x = %s",
+            image->name,
+            image->width,
+            image->height,
+            imageFormat,
+            hr,
+            v5);
+        MyAssertHandler(".\\r_image.cpp", 621, 0, "%s\n\t%s", "hr == D3DERR_DEVICELOST || image->texture.map", v6);
+    }
+}
+
+
+void __cdecl Image_Create3DTexture_PC(
+    GfxImage *image,
+    unsigned __int16 width,
+    unsigned __int16 height,
+    unsigned __int16 depth,
+    unsigned int mipmapCount,
+    int imageFlags,
+    _D3DFORMAT imageFormat)
+{
+    HRESULT v7; // eax
+    const char *v8; // eax
+    const char *v9; // eax
+    const char *v10; // eax
+    HRESULT hr; // [esp+0h] [ebp-Ch]
+    unsigned int usage; // [esp+4h] [ebp-8h]
+
+    if (!image)
+        MyAssertHandler(".\\r_image.cpp", 575, 0, "%s", "image");
+    if (image->texture.basemap)
+        MyAssertHandler(".\\r_image.cpp", 576, 0, "%s", "!image->texture.basemap");
+    image->width = width;
+    image->height = height;
+    image->depth = depth;
+    image->mapType = MAPTYPE_3D;
+    usage = Image_GetUsage(imageFlags, imageFormat);
+    if ((imageFlags & 0x40000) != 0)
+        v7 = dx.device->CreateVolumeTexture(
+            dx.device,
+            width,
+            height,
+            depth,
+            mipmapCount,
+            0,
+            imageFormat,
+            D3DPOOL_SYSTEMMEM,
+            (IDirect3DVolumeTexture9 **)&image->texture,
+            0);
+    else
+        v7 = dx.device->CreateVolumeTexture(
+            dx.device,
+            width,
+            height,
+            depth,
+            mipmapCount,
+            0,
+            imageFormat,
+            (_D3DPOOL)(usage == 0),
+            (IDirect3DVolumeTexture9 **)&image->texture,
+            0);
+    hr = v7;
+    if (v7 < 0)
+    {
+        v8 = R_ErrorDescription(v7);
+        Com_Error(
+            ERR_DROP,
+            "Create3DTexture( %s, %i, %i, %i, %i, %i ) failed: %08x = %s",
+            image->name,
+            image->width,
+            image->height,
+            image->depth,
+            0,
+            imageFormat,
+            hr,
+            v8);
+    }
+    if (hr != -2005530520 && !image->texture.basemap)
+    {
+        v9 = R_ErrorDescription(hr);
+        v10 = va(
+            "DirectX succeeded without creating 3D texture for %s: size %ix%ix%i, type %08x, hr %08x = %s",
+            image->name,
+            image->width,
+            image->height,
+            image->depth,
+            imageFormat,
+            hr,
+            v9);
+        MyAssertHandler(".\\r_image.cpp", 594, 0, "%s\n\t%s", "hr == D3DERR_DEVICELOST || image->texture.map", v10);
+    }
+}
+
+
 

@@ -2,6 +2,7 @@
 #include "r_init.h"
 #include <universal/com_memory.h>
 #include <qcommon/mem_track.h>
+#include <qcommon/cmd.h>
 
 MaterialGlobals materialGlobals;
 
@@ -424,3 +425,38 @@ void __cdecl Material_PreventOverrideTechniqueGeneration()
     g_generateOverrideTechniques = 0;
 }
 
+void __cdecl Material_UpdatePicmipAll()
+{
+    R_SyncRenderThread();
+    R_SetPicmip();
+    DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void *))Material_UpdatePicmipSingle, 0, 1);
+}
+
+void __cdecl R_Cmd_ReloadMaterialTextures()
+{
+    char *v0; // eax
+    Material *material; // [esp+0h] [ebp-8h]
+    const char *name; // [esp+4h] [ebp-4h]
+
+    if (Cmd_Argc() == 2)
+    {
+        name = Cmd_Argv(1);
+        if (!name)
+            MyAssertHandler(".\\r_material.cpp", 1702, 0, "%s", "name");
+        material = Material_Find(name);
+        if (material)
+        {
+            RB_BindDefaultImages();
+            Material_ReloadTextures(material);
+        }
+        else
+        {
+            v0 = va("ReloadMaterialTextures: Material '%s' is not currently loaded.\n", name);
+            Com_Printf(8, v0);
+        }
+    }
+    else
+    {
+        Com_Printf(8, "Usage: reloadmaterialtextures <materialname>\n");
+    }
+}

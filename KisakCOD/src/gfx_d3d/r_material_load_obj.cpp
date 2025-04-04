@@ -60,3 +60,12 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
         MyAssertHandler(".\\r_material.cpp", 847, 0, "%s", "defaultTechSet");
     return defaultTechSet;
 }
+
+void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo)
+{
+    if (!handle)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 6907, 0, "%s", "handle");
+    if (!matInfo)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 6908, 0, "%s", "matInfo");
+    *matInfo = Material_FromHandle(handle)->info;
+}

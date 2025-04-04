@@ -1,6 +1,26 @@
 #pragma once
 #include "r_material.h"
 
+const char *imageTypeName[10] =
+{
+    "misc",
+    "debug",
+    "$tex+?",
+    "ui",
+    "lmap",
+    "light",
+    "f/x",
+    "hud",
+    "model",
+    "world"
+};
+
+const char *g_platform_name[2] =
+{
+    "current",
+    "min_pc"
+};
+
 struct ImageList // sizeof=0x2004
 {                                       // ...
     unsigned int count;                 // ...
@@ -65,6 +85,29 @@ void __cdecl Image_UploadData(
     unsigned int mipLevel,
     unsigned __int8 *src);
 
+void __cdecl Image_CreateCubeTexture_PC(
+    GfxImage *image,
+    unsigned __int16 edgeLen,
+    unsigned int mipmapCount,
+    _D3DFORMAT imageFormat);
+
+void __cdecl Image_Create3DTexture_PC(
+    GfxImage *image,
+    unsigned __int16 width,
+    unsigned __int16 height,
+    unsigned __int16 depth,
+    unsigned int mipmapCount,
+    int imageFlags,
+    _D3DFORMAT imageFormat);
+
+void __cdecl Image_Create2DTexture_PC(
+    GfxImage *image,
+    unsigned __int16 width,
+    unsigned __int16 height,
+    unsigned int mipmapCount,
+    int imageFlags,
+    _D3DFORMAT imageFormat);
+
 
 // r_image_utils
 void __cdecl R_DownsampleMipMapBilinear(
@@ -74,4 +117,118 @@ void __cdecl R_DownsampleMipMapBilinear(
     int texelPitch,
     unsigned __int8 *dst);
 
+inline unsigned int __cdecl Image_GetUsage(int imageFlags, _D3DFORMAT imageFormat)
+{
+    if ((imageFlags & 0x20000) != 0)
+    {
+        if (imageFormat == D3DFMT_D24S8 || imageFormat == D3DFMT_D24X8 || imageFormat == D3DFMT_D16)
+            return 2;
+        else
+            return 1;
+    }
+    else if ((imageFlags & 0x10000) != 0)
+    {
+        return 512;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+// r_image_load_obj
+void __cdecl Image_SetupFromFile(GfxImage *image, const GfxImageFileHeader *fileHeader, _D3DFORMAT imageFormat);
+void __cdecl Image_Setup(GfxImage *image, int width, int height, int depth, int imageFlags, _D3DFORMAT imageFormat);
+void __cdecl Image_TrackTexture(GfxImage *image, char imageFlags, _D3DFORMAT format, int width, int height, int depth);
+unsigned int __cdecl Image_GetCardMemoryAmount(
+    char imageFlags,
+    _D3DFORMAT format,
+    unsigned int width,
+    unsigned int height,
+    unsigned int depth);
+unsigned int __cdecl Image_GetCardMemoryAmountForMipLevel(
+    _D3DFORMAT format,
+    unsigned int mipWidth,
+    unsigned int mipHeight,
+    unsigned int mipDepth);
+void __cdecl Image_TrackTotalMemory(GfxImage *image, int platform, int memory);
+
+// r_image_decode
+unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader);
+int __cdecl Image_CountMipmapsForFile(GfxImageFileHeader *imageFile);
+
+
+// r_image_wavelet
+struct __declspec(align(4)) WaveletDecode // sizeof=0x20
+{                                       // ...
+    unsigned __int16 value;             // ...
+    unsigned __int16 bit;               // ...
+    char *data;                         // ...
+    int width;                          // ...
+    int height;                         // ...
+    int channels;                       // ...
+    int bpp;                            // ...
+    int mipLevel;                       // ...
+    bool dataInitialized;               // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+enum GfxRefBlendMode : __int32
+{                                       // ...
+    BLENDMODE_OPAQUE = 0x0,
+    BLENDMODE_BLEND = 0x1,
+    BLENDMODE_GT0 = 0x2,
+    BLENDMODE_GE128 = 0x3,
+    BLENDMODE_LT128 = 0x4,
+    BLENDMODE_ADD = 0x5,
+};
+struct GfxRawPixel // sizeof=0x4
+{                                       // ...
+    unsigned __int8 r;                  // ...
+    unsigned __int8 g;                  // ...
+    unsigned __int8 b;                  // ...
+    unsigned __int8 a;                  // ...
+};
+struct GfxRawImage // sizeof=0x54
+{                                       // ...
+    char name[64];
+    GfxRefBlendMode blendMode;
+    bool hasAlpha;
+    // padding byte
+    // padding byte
+    // padding byte
+    int width;                          // ...
+    int height;
+    GfxRawPixel *pixels;                // ...
+};
+void __cdecl Image_LoadWavelet(
+    GfxImage *image,
+    const GfxImageFileHeader *fileHeader,
+    char *data,
+    _D3DFORMAT format,
+    int bytesPerPixel);
+void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst, WaveletDecode *decode);
+void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decode);
+int __cdecl Wavelet_DecodeValue(
+    const WaveletHuffmanDecode *decodeTable,
+    unsigned __int16 bitCount,
+    int bias,
+    WaveletDecode *decode);
+void __cdecl Wavelet_AddDeltaToMipmap(
+    unsigned __int8 *inout,
+    int size,
+    WaveletDecode *decode,
+    const int *dstChanOffset);
+
+void __cdecl Image_DecodeWavelet(
+    GfxRawImage *image,
+    GfxImageFileHeader *imageFile,
+    unsigned __int8 *imageData,
+    int bytesPerPixel);
+
+
+
 extern ImgGlobals imageGlobals;
+extern GfxImage g_imageProgs[14];

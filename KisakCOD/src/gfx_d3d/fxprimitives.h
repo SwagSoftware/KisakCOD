@@ -426,8 +426,8 @@ const struct FxElemDef // sizeof=0xFC
     unsigned __int8 visualCount;
     unsigned __int8 velIntervalCount;
     unsigned __int8 visStateIntervalCount;
-    const FxElemVelStateSample *velSamples;
-    const FxElemVisStateSample *visSamples;
+    FxElemVelStateSample *velSamples;
+    FxElemVisStateSample *visSamples;
     FxElemDefVisuals visuals;
     float collMins[3];
     float collMaxs[3];

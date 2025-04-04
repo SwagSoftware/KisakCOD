@@ -3,6 +3,8 @@
 #include "ode/common.h"
 #include "ode/collision_kernel.h"
 #include <ode/objects.h>
+#include <universal/assertive.h>
+#include <qcommon/qcommon.h>
 
 // LWSS HACK - unfk some types
 #define float dReal

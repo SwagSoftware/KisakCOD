@@ -10,14 +10,16 @@
 //struct GfxPrimStats *g_primStats 85b95b54     gfx_d3d : rb_stats.obj
 
 int histogramHistory[64][2][16];
+
 GfxPrimStats *backupPrimStats;
 GfxViewStats *g_viewStats;
 GfxPrimStats *g_primStats;
+GfxFrameStats g_frameStatsCur;
+
 const int drawPrimHistogramLimit[15] =
 {
     0xA, 0x19, 0x32, 0x64, 0xC8, 0x12C, 0x190, 0x258, 0x320, 0x3E8, 0x4B0, 0x578, 0x640, 0x708, 0x7D0
 };
-GfxFrameStats g_frameStatsCur;
 const char *primStatsLabel[10] =
 {
     "world",

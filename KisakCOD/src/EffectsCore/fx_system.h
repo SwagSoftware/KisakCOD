@@ -1182,3 +1182,121 @@ const FxCurve *__cdecl FxCurve_AllocAndCreateWithKeys(float *keyArray, int dimen
 void __cdecl FxCurveIterator_SampleTimeVec3(FxCurveIterator *source, float *replyVector, float time);
 double __cdecl FxCurveIterator_SampleTime(FxCurveIterator *source, float time);
 void __cdecl FxCurveIterator_MoveToTime(FxCurveIterator *source, float time);
+
+
+
+// fx_load_obj
+struct FxEditorElemAtlas // sizeof=0x1C
+{                                       // ...
+    int behavior;
+    int index;
+    int fps;
+    int loopCount;
+    int colIndexBits;
+    int rowIndexBits;
+    int entryCount;
+};
+struct FxEditorTrailDef // sizeof=0x608
+{                                       // ...
+    FxTrailVertex verts[64];
+    int vertCount;
+    unsigned __int16 inds[128];
+    int indCount;
+};
+struct FxEditorElemDef // sizeof=0x858
+{                                       // ...
+    char name[48];
+    int editorFlags;
+    int flags;
+    FxFloatRange spawnRange;
+    FxFloatRange fadeInRange;
+    FxFloatRange fadeOutRange;
+    float spawnFrustumCullRadius;
+    FxSpawnDefLooping spawnLooping;
+    FxSpawnDefOneShot spawnOneShot;
+    FxIntRange spawnDelayMsec;
+    FxIntRange lifeSpanMsec;
+    FxFloatRange spawnOrigin[3];
+    FxFloatRange spawnOffsetRadius;
+    FxFloatRange spawnOffsetHeight;
+    FxFloatRange spawnAngles[3];
+    FxFloatRange angularVelocity[3];
+    FxFloatRange initialRotation;
+    FxFloatRange gravity;
+    FxFloatRange elasticity;
+    FxEditorElemAtlas atlas;
+    float velScale[2][3];
+    const FxCurve *velShape[2][3][2];
+    float rotationScale;
+    const FxCurve *rotationShape[2];
+    float sizeScale[2];
+    const FxCurve *sizeShape[2][2];
+    float scaleScale;
+    const FxCurve *scaleShape[2];
+    const FxCurve *color[2];
+    const FxCurve *alpha[2];
+    float lightingFrac;
+    float collOffset[3];
+    float collRadius;
+    const FxEffectDef *effectOnImpact;
+    const FxEffectDef *effectOnDeath;
+    int sortOrder;
+    const FxEffectDef *emission;
+    FxFloatRange emitDist;
+    FxFloatRange emitDistVariance;
+    unsigned __int8 elemType;
+    // padding byte
+    // padding byte
+    // padding byte
+    int visualCount;
+    //$6DCA2FC3F9FD742A3C1907AE7E70399A ___u41;
+    union
+    {
+        FxElemVisuals visuals[32];
+        FxElemMarkVisuals markVisuals[16];
+    }visualunion;
+    int trailSplitDist;
+    int trailRepeatDist;
+    float trailScrollTime;
+    FxEditorTrailDef trailDef;
+};
+struct FxEditorEffectDef // sizeof=0x10B44
+{                                       // ...
+    char name[64];
+    int elemCount;
+    FxEditorElemDef elems[32];
+};
+struct FxElemField // sizeof=0x8
+{                                       // ...
+    const char *keyName;                // ...
+    bool(__cdecl *handler)(const char **, FxEditorElemDef *); // ...
+};
+struct FxFlagOutputSet // sizeof=0xC
+{                                       // ...
+    int *flags[3];                      // ...
+};
+struct FxFlagDef // sizeof=0x10
+{
+    const char *name;
+    int flagType;
+    int mask;
+    int value;
+};
+enum FxSampleChannel : __int32
+{                                       // ...
+    FX_CHAN_RGBA = 0x0,
+    FX_CHAN_SIZE_0 = 0x1,
+    FX_CHAN_SIZE_1 = 0x2,
+    FX_CHAN_SCALE = 0x3,
+    FX_CHAN_ROTATION = 0x4,
+    FX_CHAN_COUNT = 0x5,
+    FX_CHAN_NONE = 0x6,
+};
+const FxEffectDef *__cdecl FX_Register(char *name);
+const FxEffectDef *__cdecl FX_Register_FastFile(const char *name);
+void __cdecl FX_RegisterDefaultEffect();
+PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name);
+
+
+// fx_convert
+const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(__cdecl *Alloc)(int));

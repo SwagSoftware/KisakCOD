@@ -341,9 +341,14 @@ bool __cdecl R_MaterialCompare(const MaterialMemory *material0, const MaterialMe
 
 void __cdecl Material_PreventOverrideTechniqueGeneration();
 
+void __cdecl Material_UpdatePicmipAll();
+void __cdecl R_Cmd_ReloadMaterialTextures();
+
 extern MaterialGlobals materialGlobals;
 
 // r_material_load_obj
 MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
     const char *name,
     MtlTechSetNotFoundBehavior notFoundBehavior);
+
+void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo);
