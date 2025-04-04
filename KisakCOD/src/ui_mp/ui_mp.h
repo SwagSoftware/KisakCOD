@@ -35,11 +35,27 @@ struct ScreenPlacement // sizeof=0x44
     float realViewableMax[2];
     float subScreenLeft;
 };
-union UILocalVar_u// sizeof=0x4
+union UILocalVar_u // sizeof=0x4
 {                                       // ...
+    UILocalVar_u()
+    {
+        integer = 0;
+    }
+    UILocalVar_u(int i)
+    {
+        integer = i;
+    }
+    UILocalVar_u(float f)
+    {
+        value = f;
+    }
+    UILocalVar_u(const char* str)
+    {
+        string = str;
+    }
     int integer;
     float value;
-    const char *string;
+    const char* string;
 };
 struct UILocalVar // sizeof=0xC
 {                                       // ...
@@ -56,38 +72,6 @@ struct UiContext_cursor // sizeof=0x8
 {                                       // ...
     float x;
     float y;
-};
-union UILocalVar_u // sizeof=0x4
-{                                       // ...
-    UILocalVar_u()
-    {
-        integer = 0;
-    }
-    UILocalVar_u(int i)
-    {
-        integer = i;
-    }
-    UILocalVar_u(float f)
-    {
-        value = f;
-    }
-    UILocalVar_u(const char *str)
-    {
-        string = str;
-    }
-    int integer;
-    float value;
-    const char *string;
-};
-struct UILocalVar // sizeof=0xC
-{                                       // ...
-    UILocalVarType type;
-    const char *name;
-    UILocalVar_u u;
-};
-struct UILocalVarContext // sizeof=0xC00
-{                                       // ...
-    UILocalVar table[256];
 };
 struct PlayerProfileStatus // sizeof=0x104
 {                                       // ...

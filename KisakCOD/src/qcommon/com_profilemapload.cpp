@@ -30,8 +30,6 @@ mapLoadProfile_t mapLoadProfile;
 
 const dvar_t *com_profileLoading;
 
-long double msecPerRawTimerTick;
-
 void __cdecl TRACK_com_profilemapload()
 {
     track_static_alloc_internal(&mapLoadProfile, 43136, "mapLoadProfile", 0);

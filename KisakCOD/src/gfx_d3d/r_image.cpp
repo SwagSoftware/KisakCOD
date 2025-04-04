@@ -27,6 +27,7 @@ void __cdecl TRACK_r_image()
     track_static_alloc_internal(imageTypeName, 40, "imageTypeName", 18);
 }
 
+
 void __cdecl R_GetImageList(ImageList *imageList)
 {
     if (!imageList)
@@ -35,11 +36,11 @@ void __cdecl R_GetImageList(ImageList *imageList)
     DB_EnumXAssets(ASSET_TYPE_IMAGE, (void(__cdecl *)(XAssetHeader, void *))R_AddImageToList, imageList, 1);
 }
 
-void __cdecl R_AddImageToList(XAssetHeader header, XAssetHeader *data)
+void __cdecl R_AddImageToList(XAssetHeader header, ImageList* data)
 {
-    if (data->xmodelPieces >= (XModelPieces *)0x800)
+    if (data->count >= 0x800)
         MyAssertHandler(".\\r_image.cpp", 165, 0, "%s", "imageList->count < ARRAY_COUNT( imageList->image )");
-    data[(int)data->xmodelPieces++ + 1] = header;
+    data->image[data->count++] = header.image;
 }
 
 void __cdecl R_SumOfUsedImages(Image_MemUsage *usage)
@@ -1446,7 +1447,7 @@ void __cdecl R_ImageList_f()
                 imageList.image[imageList.count++] = &g_imageProgs[i];
         }
     }
-    std::_Sort<GfxImage **, int, int(__cdecl *)(GfxImage *, GfxImage *)>(
+    std::sort(
         imageList.image,
         &imageList.image[imageList.count],
         (signed int)(4 * imageList.count) >> 2,

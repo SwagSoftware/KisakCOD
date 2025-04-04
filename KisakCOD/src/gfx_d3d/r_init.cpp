@@ -968,3 +968,58 @@ void __cdecl R_ComErrorCleanup()
     }
 }
 
+char __cdecl R_RecoverLostDevice()
+{
+    int remoteScreenUpdateNesting; // [esp+0h] [ebp-4h]
+
+    if (!dx.device)
+        MyAssertHandler(".\\r_init.cpp", 2722, 0, "%s", "dx.device");
+    if (!dx.deviceLost)
+        MyAssertHandler(".\\r_init.cpp", 2723, 0, "%s", "dx.deviceLost");
+    if (!gfxBuf.dynamicVertexBuffer->buffer)
+        MyAssertHandler(".\\r_init.cpp", 2725, 0, "%s", "gfxBuf.dynamicVertexBuffer->buffer");
+    if (!gfxBuf.dynamicIndexBuffer->buffer)
+        MyAssertHandler(".\\r_init.cpp", 2727, 0, "%s", "gfxBuf.dynamicIndexBuffer->buffer");
+    if (!R_CanRecoverLostDevice())
+        return 0;
+    Com_Printf(8, "Recovering lost device...\n");
+    remoteScreenUpdateNesting = R_PopRemoteScreenUpdate();
+    R_SyncRenderThread();
+    R_Cinematic_BeginLostDevice();
+    DB_BeginRecoverLostDevice();
+    R_ResetModelLighting();
+    R_ReleaseLostImages();
+    Material_ReleaseAll();
+    R_ReleaseWorld();
+    R_ResetDevice();
+    R_ReloadWorld();
+    Material_ReloadAll();
+    R_ReloadLostImages();
+    dx.sunSpriteSamples = RB_CalcSunSpriteSamples();
+    DB_EndRecoverLostDevice();
+    R_Cinematic_EndLostDevice();
+    R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
+    Com_Printf(8, "Finished recovering lost device.\n");
+    return 1;
+}
+
+bool R_CheckLostDevice()
+{
+    if (!dx.device)
+        return false;
+    
+    if (!dx.deviceLost)
+    {
+        HRESULT hr = dx.device->TestCooperativeLevel();
+        if (hr != D3DERR_DEVICELOST && hr != D3DERR_DEVICENOTRESET)
+            return true;
+
+        R_SyncRenderThread();
+        dx.deviceLost = 1;
+    }
+
+    if (Sys_IsMainThread())
+        R_RecoverLostDevice();
+    
+    return false;
+}

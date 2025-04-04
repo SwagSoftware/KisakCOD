@@ -1,6 +1,7 @@
 #include "r_debug.h"
-#include <universal/com_memory.h>
 
+#include <qcommon/qcommon.h>
+#include <universal/com_memory.h>
 
 void __cdecl R_DebugAlloc(void **memPtr, int size, const char *name)
 {

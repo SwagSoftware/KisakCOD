@@ -14,7 +14,7 @@ struct ScreenPlacement;
 const float colorBlack[4] = { 0.0, 0.0, 0.0, 1.0 }; // idb
 const float colorRed[4] = { 1.0, 0.0, 0.0, 1.0 }; // idb
 const float colorGreen[4] = { 0.0, 1.0, 0.0, 1.0 }; // idb
-const float colorLtGreen[4] = { 0.0, 0.69999999, 0.0, 1.0 }; // idb
+const float colorLtGreen[4] = { 0.0, 0.69999999f, 0.0, 1.0 }; // idb
 const float colorBlue[4] = { 0.0, 0.0, 1.0, 1.0 }; // idb
 const float colorLtBlue[4] = { 0.5, 0.5, 1.0, 1.0 }; // idb
 const float colorYellow[4] = { 1.0, 1.0, 0.0, 1.0 }; // idb
@@ -23,8 +23,8 @@ const float colorMagenta[4] = { 1.0, 0.0, 1.0, 1.0 }; // idb
 const float colorLtCyan[4] = { 0.0, 0.75, 0.75, 1.0 }; // idb
 const float colorWhite[4] = { 1.0, 1.0, 1.0, 1.0 }; // idb
 const float colorLtGrey[4] = { 0.75, 0.75, 0.75, 1.0 }; // idb
-const float colorOrange[4] = { 1.0, 0.69999999, 0.0, 1.0 }; // idb
-const float colorLtOrange[4] = { 0.75, 0.52499998, 0.0, 1.0 }; // idb
+const float colorOrange[4] = { 1.0, 0.69999999f, 0.0, 1.0 }; // idb
+const float colorLtOrange[4] = { 0.75, 0.52499998f, 0.0, 1.0 }; // idb
 
 void __cdecl CG_DrawRotatedPicPhysical(
     const ScreenPlacement *scrPlace,

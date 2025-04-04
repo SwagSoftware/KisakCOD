@@ -27,6 +27,7 @@ void Sys_QueEvent( int time, sysEventType_t type, int value, int value2, int ptr
 
 void	Sys_CreateConsole( void );
 void	Sys_DestroyConsole( void );
+void	Sys_ShowConsole(int visLevel, qboolean quitOnClose);
 
 char	*Sys_ConsoleInput (void);
 
@@ -60,6 +61,7 @@ LRESULT WINAPI MainWndProc (
 #endif
 
 void Conbuf_AppendText( const char *msg );
+void Conbuf_AppendTextInMainThread(const char* msg);
 
 #ifndef _XBOX
 // LWSS: Accurate to cod4
@@ -83,6 +85,24 @@ typedef struct
 
 extern WinVars_t	g_wv;
 #endif
+
+struct __declspec(align(8)) SysInfo // sizeof=0x260
+{                                       // ...
+	long double cpuGHz;                 // ...
+	long double configureGHz;           // ...
+	int logicalCpuCount;                // ...
+	int physicalCpuCount;               // ...
+	int sysMB;                          // ...
+	char gpuDescription[512];           // ...
+	bool SSE;                           // ...
+	char cpuVendor[13];                 // ...
+	char cpuName[49];                   // ...
+	// padding byte
+	// padding byte
+	// padding byte
+	// padding byte
+	// padding byte
+};
 
 #define	MAX_QUED_EVENTS		256
 #define	MASK_QUED_EVENTS	( MAX_QUED_EVENTS - 1 )
@@ -130,7 +150,6 @@ struct sysEvent_t // sizeof=0x18
 	void *evPtr;                        // ...
 };
 
-
 struct FastCriticalSection
 {
 	volatile unsigned int readCount;
@@ -143,6 +162,7 @@ void Sys_LeaveCriticalSection(int critSect);
 void Sys_LockWrite(FastCriticalSection* critSect);
 void Sys_UnlockWrite(FastCriticalSection* critSect);
 
+void Sys_SetErrorText(const char* buf);
 void Sys_Error(const char *error, ...);
 void __cdecl Sys_OutOfMemErrorInternal(const char* filename, int line);
 
@@ -158,8 +178,10 @@ void Sys_ShutdownEvents();
 void __cdecl Sys_LoadingKeepAlive();
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result);
 void __cdecl Sys_Init();
-void __cdecl Sys_In_Restart_f();
-void __cdecl Sys_Net_Restart_f();
+
+void Sys_In_Restart_f();
+void Sys_Net_Restart_f();
+void __cdecl Sys_Listen_f();
 
 void __cdecl Sys_Mkdir(const char *path);
 char *__cdecl Sys_Cwd();

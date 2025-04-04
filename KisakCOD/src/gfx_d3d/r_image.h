@@ -35,7 +35,7 @@ struct GfxImageFileHeader // sizeof=0x1C
 
 void __cdecl TRACK_r_image();
 void __cdecl R_GetImageList(ImageList *imageList);
-void __cdecl R_AddImageToList(XAssetHeader header, XAssetHeader *data);
+void __cdecl R_AddImageToList(XAssetHeader header, ImageList *data);
 void __cdecl R_SumOfUsedImages(Image_MemUsage *usage);
 void __cdecl Image_Release(GfxImage *image);
 GfxImage *__cdecl Image_AllocProg(int imageProgType, unsigned __int8 category, unsigned __int8 semantic);

@@ -447,36 +447,6 @@ void __cdecl Key_SetCatcher(int localClientNum, int catcher);
 
 
 
-// cl_ui_mp
-struct uiClientState_s // sizeof=0xC08
-{                                       // ...
-    connstate_t connState;              // ...
-    int connectPacketCount;             // ...
-    char servername[1024];              // ...
-    char updateInfoString[1024];
-    char messageString[1024];           // ...
-};
-void __cdecl CL_GetClientState(int localClientNum, uiClientState_s *state);
-void __cdecl CL_SetDisplayHUDWithKeycatchUI(int localClientNum, bool display);
-bool __cdecl CL_AllowPopup(int localClientNum);
-void __cdecl LAN_ResetPings(int source);
-int __cdecl LAN_GetServerCount(int source);
-int __cdecl LAN_WaitServerResponse(int source);
-void __cdecl LAN_GetServerInfo(int source, unsigned int n, char *buf, int buflen);
-int __cdecl LAN_GetServerPing(int source, unsigned int n);
-serverInfo_t *__cdecl LAN_GetServerPtr(int source, unsigned int n);
-void __cdecl LAN_CleanHostname(const char *hostName, char *cleanHostName);
-int __cdecl LAN_CompareHostname(const char *hostName1, const char *hostName2);
-int __cdecl LAN_CompareServers(int source, int sortKey, int sortDir, unsigned int s1, unsigned int s2);
-void __cdecl LAN_MarkServerDirty(int source, unsigned int n, unsigned __int8 dirty);
-int __cdecl LAN_ServerIsDirty(int source, unsigned int n);
-int __cdecl LAN_UpdateDirtyPings(netsrc_t localClientNum, unsigned int source);
-void __cdecl Key_KeynumToStringBuf(int keynum, char *buf, int buflen);
-int __cdecl CL_GetClientName(int localClientNum, int index, char *buf, int size);
-int __cdecl CL_ShutdownUI();
-void __cdecl CL_InitUI();
-
-
 
 // screen_placement
 void __cdecl ScrPlace_SetupFloatViewport(
@@ -557,6 +527,9 @@ void __cdecl CL_DestroyDevGui();
 
 
 // cl_debugdata
+struct clientDebugStringInfo_t;
+struct clientDebugLineInfo_t;
+
 void __cdecl CL_AddDebugString(
     const float *xyz,
     const float *color,

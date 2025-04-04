@@ -1,7 +1,9 @@
 #include "win_localize.h"
 #include <universal/q_shared.h>
+#include <universal/q_parse.h>
+#include <stringed/stringed_hooks.h>
 
-static $8CB265A9D3778DFC1F2AA7A5F0192391 localization;
+static LocalizationData localization;
 
 #define LANGUAGE_BUF_SIZE 0x1000
 static char language_buffer[LANGUAGE_BUF_SIZE];

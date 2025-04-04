@@ -74,7 +74,6 @@ extern const dvar_t *com_developer_script;
 extern const dvar_t *dev_timescale;
 extern const dvar_t *cl_useMapPreloading;
 extern const dvar_t *com_maxfps;
-extern const dvar_t *com_frameTime;
 extern const dvar_t *com_recommendedSet;
 extern const dvar_t *sv_useMapPreloading;
 extern const dvar_t *ui_errorMessage;

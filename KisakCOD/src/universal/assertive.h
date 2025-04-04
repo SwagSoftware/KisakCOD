@@ -7,6 +7,9 @@ void MyAssertHandler(const char* filename, int line, int type, const char* fmt, 
             (MyAssertHandler(__FILE__, (unsigned)(__LINE__), 0, "%s", #expression), 0) \
         )
 
-
+#define vassert(expression, fmt, ...)  (void)(                                                       \
+            (!!(expression)) ||                                                          \
+            (MyAssertHandler(__FILE__, (unsigned)(__LINE__), 0, "%s\n\t" fmt, #expression, __VA_ARGS__), 0) \
+        )
 
 #define alwaysfails 0

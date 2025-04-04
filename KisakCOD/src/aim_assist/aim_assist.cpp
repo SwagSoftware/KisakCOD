@@ -75,8 +75,8 @@ const dvar_t *aim_scale_view_axis;
 
 void __cdecl TRACK_aim_assist()
 {
-    track_static_alloc_internal(aaGlobArray, 3636, "aaGlobArray", 10);
-    track_static_alloc_internal(aaInputGraph, 1440, "aaInputGraph", 10);
+    TRACK_STATIC_ARR(aaGlobArray, 10);
+    TRACK_STATIC_ARR(aaInputGraph, 10);
 }
 
 void __cdecl AimAssist_Init(int localClientNum)

@@ -1,7 +1,9 @@
 #include "r_debug.h"
-#include <qcommon/mem_track.h>
 #include "r_scene.h"
-#include <aim_assist/aim_assist.h>
+
+#include <qcommon/mem_track.h>
+
+#include <win32/win_local.h>
 
 DebugGlobals debugGlobals;
 
@@ -135,7 +137,7 @@ void __cdecl R_AddDebugString(
             pDebugString->color[2] = color[2];
             pDebugString->color[3] = color[3];
             pDebugString->scale = scale;
-            strncpy((unsigned __int8 *)pDebugString->text, (unsigned __int8 *)string, 0x5Fu);
+            strncpy(pDebugString->text, string, sizeof(pDebugString->text) - 1);
             pDebugString->text[95] = 0;
             ++debugGlobalsEntry->stringCount;
             Sys_LeaveCriticalSection(CRITSECT_DEBUG_LINE);

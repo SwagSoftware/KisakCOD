@@ -2401,8 +2401,8 @@ void __cdecl FX_AddNonSpriteDrawSurfs(FxCmd *cmd)
 
 void __cdecl FX_RewindTo(int localClientNum, int time)
 {
-    volatile int *Destination; // [esp+4h] [ebp-10ACh]
-    volatile int Comperand; // [esp+8h] [ebp-10A8h]
+    volatile long *Destination; // [esp+4h] [ebp-10ACh]
+    volatile long Comperand; // [esp+8h] [ebp-10A8h]
     unsigned __int16 v4; // [esp+18h] [ebp-1098h]
     FxEffect *effect; // [esp+1Ch] [ebp-1094h]
     FxEffect *effecta; // [esp+1Ch] [ebp-1094h]
@@ -2459,11 +2459,11 @@ void __cdecl FX_RewindTo(int localClientNum, int time)
                     do
                         Comperand = *Destination;
                     while (InterlockedCompareExchange(Destination, Comperand | 0x10000, Comperand) != Comperand);
-                    FX_StartNewEffect(__SPAIR64__((unsigned int)effectb, (unsigned int)system));
+                    FX_StartNewEffect(system, effectb);
                 }
                 else
                 {
-                    FX_StartNewEffect(__SPAIR64__((unsigned int)effectb, (unsigned int)system));
+                    FX_StartNewEffect(system, effectb);
                     FX_DelRefToEffect(system, effectb);
                 }
             }

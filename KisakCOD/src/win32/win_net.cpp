@@ -40,7 +40,7 @@ static	byte	localIP[MAX_IPS][4];
 NET_ErrorString
 ====================
 */
-char *NET_ErrorString( void ) {
+const char *NET_ErrorString( void ) {
 	int		code;
 
 	code = WSAGetLastError();
@@ -1235,4 +1235,119 @@ NET_Restart_f
 */
 void NET_Restart( void ) {
 	NET_Config( networkingEnabled );
+}
+
+
+void __cdecl TRACK_win_net()
+{
+	track_static_alloc_internal(&winsockdata, 400, "winsockdata", 9);
+}
+
+int __cdecl NET_Select(unsigned int socket)
+{
+	const char* v2; // eax
+	fd_set readfds; // [esp+0h] [ebp-220h] BYREF
+	int err; // [esp+10Ch] [ebp-114h]
+	fd_set writefds; // [esp+110h] [ebp-110h] BYREF
+	timeval time; // [esp+218h] [ebp-8h] BYREF
+
+	readfds.fd_count = 1;
+	readfds.fd_array[0] = socket;
+	writefds.fd_count = 1;
+	writefds.fd_array[0] = socket;
+	time.tv_sec = 5;
+	time.tv_usec = 0;
+	err = select(0, &readfds, &writefds, 0, &time);
+	if (err)
+	{
+		if (err == -1)
+		{
+			v2 = NET_ErrorString();
+			Com_PrintWarning(16, "WARNING: NET_Select: connect: %s\n", v2);
+			return 0;
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	else
+	{
+		Com_Printf(16, "NET_Select: NET_Select: timeout\n");
+		return 0;
+	}
+}
+
+unsigned int __cdecl NET_TCPIPSocket(const char* net_interface, int port, int type)
+{
+	const char* v3; // eax
+	const char* v5; // eax
+	const char* v6; // eax
+	const char* v7; // eax
+	sockaddr_in address; // [esp+4h] [ebp-20h] BYREF
+	int err; // [esp+18h] [ebp-Ch]
+	int _true; // [esp+1Ch] [ebp-8h] BYREF
+	unsigned int newsocket; // [esp+20h] [ebp-4h]
+
+	_true = 1;
+	if (net_interface)
+		Com_Printf(16, "Opening IP socket: %s:%i\n", net_interface, port);
+	else
+		Com_Printf(16, "Opening IP socket: localhost:%i\n", port);
+	newsocket = socket(2, 1, 6);
+	if (newsocket == -1)
+	{
+		if (WSAGetLastError() != 10047)
+		{
+			v3 = NET_ErrorString();
+			Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: socket: %s\n", v3);
+		}
+		return 0;
+	}
+	else
+	{
+		if (ioctlsocket(newsocket, 0x8004667E, (u_long*)&_true) == -1)
+		{
+			v5 = NET_ErrorString();
+			Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: ioctl FIONBIO: %s\n", v5);
+			return 0;
+		}
+		if (net_interface && *net_interface && I_stricmp(net_interface, "localhost"))
+			Sys_StringToSockaddr(net_interface, (sockaddr*)&address);
+		else
+			address.sin_addr.S_un.S_addr = 0;
+		if (port == -1)
+			address.sin_port = 0;
+		else
+			address.sin_port = htons(port);
+		address.sin_family = 2;
+		if (type)
+		{
+			if (type == 1 && connect(newsocket, (const struct sockaddr*)&address, 16) == -1)
+			{
+				err = WSAGetLastError();
+				if (err != 10035)
+				{
+					v7 = NET_ErrorString();
+					Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: connect: %s\n", v7);
+					closesocket(newsocket);
+					return 0;
+				}
+				if (!NET_Select(newsocket))
+				{
+					Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: connect failed\n");
+					closesocket(newsocket);
+					return 0;
+				}
+			}
+		}
+		else if (bind(newsocket, (const struct sockaddr*)&address, 16) == -1)
+		{
+			v6 = NET_ErrorString();
+			Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: bind: %s\n", v6);
+			closesocket(newsocket);
+			return 0;
+		}
+		return newsocket;
+	}
 }

@@ -318,7 +318,7 @@ void __cdecl R_TrackStatistics(trStatistics_t *stats);
 void __cdecl R_UpdateTeamColors(int team, const float *color_allies, const float *color_axis);
 void __cdecl R_ConfigureRenderer(const GfxConfiguration *config);
 void __cdecl R_ComErrorCleanup();
-
+bool R_CheckLostDevice();
 
 extern DxGlobals dx;
 extern r_global_permanent_t rgp;

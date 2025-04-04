@@ -26,22 +26,22 @@ bgs_t *bgs;
 
 void __cdecl TRACK_bg_animation_mp()
 {
-    track_static_alloc_internal(numDefines, 40, "numDefines", 9);
-    track_static_alloc_internal(defineStrings, 10000, "defineStrings", 9);
-    track_static_alloc_internal(defineStr, 1280, "defineStr", 9);
-    track_static_alloc_internal(defineBits, 1280, "defineBits", 9);
-    track_static_alloc_internal(weaponStrings, 1024, "weaponStrings", 9);
-    track_static_alloc_internal(animStateStr, 16, "animStateStr", 9);
-    track_static_alloc_internal(animMoveTypesStr, 352, "animMoveTypesStr", 9);
-    track_static_alloc_internal(animEventTypesStr, 176, "animEventTypesStr", 9);
-    track_static_alloc_internal(animBodyPartsStr, 40, "animBodyPartsStr", 9);
-    track_static_alloc_internal(animConditionMountedStr, 24, "animConditionMountedStr", 9);
-    track_static_alloc_internal(animWeaponClassStr, 88, "animWeaponClassStr", 9);
-    track_static_alloc_internal(animWeaponPositionStr, 24, "animWeaponPositionStr", 9);
-    track_static_alloc_internal(animStrafeStateStr, 32, "animStrafeStateStr", 9);
-    track_static_alloc_internal(animPerkStateStr, 32, "animPerkStateStr", 9);
-    track_static_alloc_internal(animConditionsStr, 88, "animConditionsStr", 9);
-    track_static_alloc_internal(animConditionsTable, 80, "animConditionsTable", 9);
+    TRACK_STATIC_ARR(numDefines, 9);
+    TRACK_STATIC_ARR(defineStrings, 9);
+    TRACK_STATIC_ARR(defineStr, 9);
+    TRACK_STATIC_ARR(defineBits, 9);
+    TRACK_STATIC_ARR(weaponStrings, 9);
+    TRACK_STATIC_ARR(animStateStr, 9);
+    TRACK_STATIC_ARR(animMoveTypesStr, 9);
+    TRACK_STATIC_ARR(animEventTypesStr, 9);
+    TRACK_STATIC_ARR(animBodyPartsStr, 9);
+    TRACK_STATIC_ARR(animConditionMountedStr, 9);
+    TRACK_STATIC_ARR(animWeaponClassStr, 9);
+    TRACK_STATIC_ARR(animWeaponPositionStr, 9);
+    TRACK_STATIC_ARR(animStrafeStateStr, 9);
+    TRACK_STATIC_ARR(animPerkStateStr, 9);
+    TRACK_STATIC_ARR(animConditionsStr, 9);
+    TRACK_STATIC_ARR(animConditionsTable, 9);
 }
 
 void BG_AnimParseError(const char *msg, ...)

@@ -30,27 +30,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -415,10 +415,13 @@
     <ClCompile Include="src\universal\timing.cpp" />
     <ClCompile Include="src\universal\win_common.cpp" />
     <ClCompile Include="src\universal\win_shared.cpp" />
+    <ClCompile Include="src\win32\win_configure.cpp" />
     <ClCompile Include="src\win32\win_input.cpp" />
     <ClCompile Include="src\win32\win_localize.cpp" />
     <ClCompile Include="src\win32\win_main.cpp" />
     <ClCompile Include="src\win32\win_net.cpp" />
+    <ClCompile Include="src\win32\win_net_debug.cpp" />
+    <ClCompile Include="src\win32\win_remote.cpp" />
     <ClCompile Include="src\win32\win_syscon.cpp" />
     <ClCompile Include="src\win32\win_voice.cpp" />
     <ClCompile Include="src\win32\win_wndproc.cpp" />
@@ -602,9 +605,13 @@
     <ClInclude Include="src\universal\q_shared.h" />
     <ClInclude Include="src\universal\surfaceflags.h" />
     <ClInclude Include="src\universal\timing.h" />
+    <ClInclude Include="src\win32\win_configure.h" />
+    <ClInclude Include="src\win32\win_net.h" />
     <ClInclude Include="src\win32\win_input.h" />
     <ClInclude Include="src\win32\win_local.h" />
     <ClInclude Include="src\win32\win_localize.h" />
+    <ClInclude Include="src\win32\win_net_debug.h" />
+    <ClInclude Include="src\win32\win_remote.h" />
     <ClInclude Include="src\xanim\dobj.h" />
     <ClInclude Include="src\xanim\dobj_utils.h" />
     <ClInclude Include="src\xanim\xanim.h" />

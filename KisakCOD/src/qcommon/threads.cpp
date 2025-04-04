@@ -1,7 +1,10 @@
 #include "threads.h"
 
 #include <Windows.h>
+
 #include <universal/assertive.h>
+
+#include <client_mp/client_mp.h>
 
 void Com_InitThreadData(int threadContext);
 unsigned int Win_InitThreads();
