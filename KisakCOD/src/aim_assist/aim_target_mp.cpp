@@ -3,6 +3,8 @@
 #include <qcommon/cmd.h>
 #include <bgame/bg_local.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <script/scr_const.h>
+#include <EffectsCore/fx_system.h>
 
 AimTargetGlob atGlobArray[1];
 
@@ -280,18 +282,18 @@ char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targ
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    LODWORD(endPos[3]) = cgArray;
-    playerEyePos[0] = flt_9D8718[0];
-    playerEyePos[1] = flt_9D8718[1];
-    playerEyePos[2] = flt_9D8718[2];
+    endPos[3] = 1.4046605e-38;
+    playerEyePos[0] = cgArray[0].refdef.vieworg[0];
+    playerEyePos[1] = cgArray[0].refdef.vieworg[1];
+    playerEyePos[2] = cgArray[0].refdef.vieworg[2];
     CG_TraceCapsule(
         &trace,
         playerEyePos,
         (float *)vec3_origin,
         (float *)vec3_origin,
         targetEyePos,
-        unk_9D5650,
-        (int)&loc_803003);
+        cgArray[0].predictedPlayerState.clientNum,
+        0x803003);
     if (trace.fraction != 1.0 && Trace_GetEntityHitId(&trace) != targetEnt->nextState.number)
     {
         if ((clientActive_t *)targetEnt->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]

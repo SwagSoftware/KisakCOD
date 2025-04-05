@@ -1,1518 +1,431 @@
 ﻿  aim_assist.cpp
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(314,9): warning C4005: 'BYTEn': macro redefinition
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(234,9):
-      see previous definition of 'BYTEn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(315,9): warning C4005: 'WORDn': macro redefinition
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(235,9):
-      see previous definition of 'WORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(316,9): warning C4005: 'DWORDn': macro redefinition
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(236,9):
-      see previous definition of 'DWORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(564,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(623,57): error C2061: syntax error: identifier 'XAssetHeader'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(552,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_assist.cpp')
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(204,9): warning C4005: 'LOWORD': macro redefinition
   (compiling source file 'src/aim_assist/aim_assist.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(319,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(305,9):
       see previous definition of 'LOWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(205,9): warning C4005: 'HIWORD': macro redefinition
   (compiling source file 'src/aim_assist/aim_assist.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(322,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(308,9):
       see previous definition of 'HIWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(206,9): warning C4005: 'LOBYTE': macro redefinition
   (compiling source file 'src/aim_assist/aim_assist.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(318,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(304,9):
       see previous definition of 'LOBYTE'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(207,9): warning C4005: 'HIBYTE': macro redefinition
   (compiling source file 'src/aim_assist/aim_assist.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(321,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(307,9):
       see previous definition of 'HIBYTE'
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(118,19): error C3646: 'normal': unknown override specifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_material.h(169,29): warning C4359: 'MaterialInfo': Alignment specifier is less than actual alignment (8), and will be ignored.
   (compiling source file 'src/aim_assist/aim_assist.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(118,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\xanim\xanim.h(233,29): warning C4359: 'cbrushside_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_assist.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(119,19): error C3646: 'tangent': unknown override specifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(750,29): warning C4359: 'CEntVehicleInfo': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_assist.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(119,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(30,29): warning C4359: 'usercmd_s': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_assist.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(182,21): error C2143: syntax error: missing ';' before '*'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\client_mp\client_mp.h(367,29): warning C4359: 'VoicePacket_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_assist.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(182,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(182,29): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(185,21): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(185,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(185,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(188,19): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(188,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(188,25): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(191,19): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(191,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(191,31): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(222,12): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(222,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(222,17): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(225,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(225,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(233,14): error C3646: 'glowForceColor': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(233,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(238,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(238,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(238,31): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,11): error C2086: 'const int GfxCmdDrawText2D::Material': redefinition
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(216,29): warning C4359: 'GfxCmdDrawText2D': Alignment specifier is less than actual alignment (4), and will be ignored.
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(256,24): error C3646: 'placement': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(256,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(258,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(258,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(270,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(270,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(271,21): error C3646: 'texCoord': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(271,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(272,19): error C3646: 'normal': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(272,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(273,19): error C3646: 'tangent': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(273,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(307,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(307,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(326,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(326,23): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(326,33): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(329,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(329,23): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(329,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(331,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(331,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(331,26): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(376,14): error C3646: 'light': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(376,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(462,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(462,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(462,26): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(466,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(466,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(466,20): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(515,14): error C3646: 'shadowableLights': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(515,30): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(515,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(521,14): error C3646: 'emissiveSpotLight': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(521,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(523,17): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(523,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(523,39): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(558,20): error C3646: 'input': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(558,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(569,17): error C3646: 'drawSurfs': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(569,26): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(569,33): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(602,14): error C3646: 'sunLight': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(602,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(624,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(624,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(624,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(669,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(670,46): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(670,61): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,25): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,56): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,71): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,34): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,22): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,56): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,71): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,31): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(683,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(695,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(708,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(712,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(725,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(738,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(749,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(763,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(780,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(791,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(803,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(816,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(829,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,14): warning C4229: anachronism used: modifiers on data are ignored
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,14): error C2182: 'R_AddCmdDrawQuadPic': this use of 'void' is not valid
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,48): error C2065: 'verts': undeclared identifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,59): error C2059: syntax error: 'const'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(847,90): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(847,105): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(26,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(26,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(26,34): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(46,14): error C3646: 'primaryLights': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(46,27): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(46,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(82,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(82,19): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(82,24): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(88,24): error C3646: 'placement': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(88,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(92,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(92,18): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(92,22): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(107,17): error C3646: 'drawSurfs': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(107,26): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(107,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(112,15): error C3646: 'planes': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(112,21): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(112,24): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(114,17): error C3646: 'drawSurfs': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(114,26): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(114,31): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(119,20): error C3646: 'info': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(119,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(120,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(120,18): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(120,24): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(121,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(121,18): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(121,22): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(122,24): error C3646: 'placement': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(122,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(135,20): error C3646: 'info': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(135,20): error C1003: error count exceeds 100; stopping compilation
-  (compiling source file 'src/aim_assist/aim_assist.cpp')
-  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_assist.cpp(211,9): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_assist.cpp(227,9): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_assist.cpp(304,9): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_assist.cpp(312,9): warning C4305: 'argument': truncation from 'double' to 'float'
   aim_target_mp.cpp
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(314,9): warning C4005: 'BYTEn': macro redefinition
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(234,9):
-      see previous definition of 'BYTEn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(315,9): warning C4005: 'WORDn': macro redefinition
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(235,9):
-      see previous definition of 'WORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(316,9): warning C4005: 'DWORDn': macro redefinition
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(236,9):
-      see previous definition of 'DWORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(564,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(623,57): error C2061: syntax error: identifier 'XAssetHeader'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(552,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(204,9): warning C4005: 'LOWORD': macro redefinition
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(319,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(305,9):
       see previous definition of 'LOWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(205,9): warning C4005: 'HIWORD': macro redefinition
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(322,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(308,9):
       see previous definition of 'HIWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(206,9): warning C4005: 'LOBYTE': macro redefinition
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(318,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(304,9):
       see previous definition of 'LOBYTE'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(207,9): warning C4005: 'HIBYTE': macro redefinition
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(321,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(307,9):
       see previous definition of 'HIBYTE'
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(118,19): error C3646: 'normal': unknown override specifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_material.h(169,29): warning C4359: 'MaterialInfo': Alignment specifier is less than actual alignment (8), and will be ignored.
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(118,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\xanim\xanim.h(233,29): warning C4359: 'cbrushside_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(119,19): error C3646: 'tangent': unknown override specifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(750,29): warning C4359: 'CEntVehicleInfo': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(119,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\client_mp\client_mp.h(126,15): error C2079: 'clientActive_t::cmds' uses undefined struct 'usercmd_s'
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(182,21): error C2143: syntax error: missing ';' before '*'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\client_mp\client_mp.h(136,19): error C2079: 'clientActive_t::parseClients' uses undefined struct 'clientState_s'
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(182,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\client_mp\client_mp.h(367,29): warning C4359: 'VoicePacket_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(182,29): error C2238: unexpected token(s) preceding ';'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(30,29): warning C4359: 'usercmd_s': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(185,21): error C2143: syntax error: missing ';' before '*'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\EffectsCore\fx_system.h(720,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(185,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\EffectsCore\fx_system.h(720,19): error C2143: syntax error: missing ',' before '*'
   (compiling source file 'src/aim_assist/aim_target_mp.cpp')
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(185,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(188,19): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(188,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(188,25): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(191,19): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(191,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(191,31): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(222,12): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(222,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(222,17): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(225,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(225,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(233,14): error C3646: 'glowForceColor': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(233,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(238,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(238,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(238,31): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,11): error C2086: 'const int GfxCmdDrawText2D::Material': redefinition
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(239,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(216,29): warning C4359: 'GfxCmdDrawText2D': Alignment specifier is less than actual alignment (4), and will be ignored.
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(256,24): error C3646: 'placement': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(256,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(258,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(258,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(270,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(270,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(271,21): error C3646: 'texCoord': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(271,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(272,19): error C3646: 'normal': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(272,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(273,19): error C3646: 'tangent': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(273,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(307,14): error C3646: 'color': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(307,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(326,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(326,23): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(326,33): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(329,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(329,23): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(329,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(331,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(331,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(331,26): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(376,14): error C3646: 'light': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(376,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(462,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(462,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(462,26): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(466,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(466,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(466,20): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(515,14): error C3646: 'shadowableLights': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(515,30): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(515,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(521,14): error C3646: 'emissiveSpotLight': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(521,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(523,17): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(523,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(523,39): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(558,20): error C3646: 'input': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(558,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(569,17): error C3646: 'drawSurfs': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(569,26): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(569,33): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(602,14): error C3646: 'sunLight': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(602,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(624,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(624,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(624,35): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(669,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(670,46): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(670,61): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,25): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,56): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,71): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(671,34): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,22): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,56): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,71): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(672,31): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(683,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(695,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(708,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(712,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(725,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(738,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(749,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(763,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(780,5): error C2061: syntax error: identifier 'Material'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(791,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(803,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(816,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(829,5): error C2061: syntax error: identifier 'Font_s'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,14): warning C4229: anachronism used: modifiers on data are ignored
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,14): error C2182: 'R_AddCmdDrawQuadPic': this use of 'void' is not valid
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,48): error C2065: 'verts': undeclared identifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(843,59): error C2059: syntax error: 'const'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(847,90): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_rendercmds.h(847,105): error C2143: syntax error: missing ',' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(26,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(26,20): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(26,34): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(46,14): error C3646: 'primaryLights': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(46,27): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(46,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(82,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(82,19): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(82,24): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(88,24): error C3646: 'placement': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(88,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(92,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(92,18): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(92,22): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(107,17): error C3646: 'drawSurfs': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(107,26): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(107,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(112,15): error C3646: 'planes': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(112,21): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(112,24): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(114,17): error C3646: 'drawSurfs': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(114,26): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(114,31): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(119,20): error C3646: 'info': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(119,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(120,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(120,18): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(120,24): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(121,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(121,18): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(121,22): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(122,24): error C3646: 'placement': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(122,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(135,20): error C3646: 'info': unknown override specifier
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_scene.h(135,20): error C1003: error count exceeds 100; stopping compilation
-  (compiling source file 'src/aim_assist/aim_target_mp.cpp')
-  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_target_mp.cpp(102,110): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_target_mp.cpp(116,5): error C2059: syntax error: '}'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_target_mp.cpp(180,115): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_target_mp.cpp(240,116): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_target_mp.cpp(285,17): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\aim_assist\aim_target_mp.cpp(299,116): error C2109: subscript requires array or pointer type
   bg_animation_mp.cpp
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(314,9): warning C4005: 'BYTEn': macro redefinition
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(234,9):
-      see previous definition of 'BYTEn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(315,9): warning C4005: 'WORDn': macro redefinition
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(235,9):
-      see previous definition of 'WORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(316,9): warning C4005: 'DWORDn': macro redefinition
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(236,9):
-      see previous definition of 'DWORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(564,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(623,57): error C2061: syntax error: identifier 'XAssetHeader'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(552,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/bgame/bg_animation_mp.cpp')
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(204,9): warning C4005: 'LOWORD': macro redefinition
   (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(319,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(305,9):
       see previous definition of 'LOWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(205,9): warning C4005: 'HIWORD': macro redefinition
   (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(322,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(308,9):
       see previous definition of 'HIWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(206,9): warning C4005: 'LOBYTE': macro redefinition
   (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(318,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(304,9):
       see previous definition of 'LOBYTE'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(207,9): warning C4005: 'HIBYTE': macro redefinition
   (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(321,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(307,9):
       see previous definition of 'HIBYTE'
   
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(39,29): warning C4359: 'CEntVehicleInfo': Alignment specifier is less than actual alignment (4), and will be ignored.
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(61,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(61,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(61,21): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(105,21): error C3646: 'currentState': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(105,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(106,19): error C3646: 'nextState': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(106,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(114,17): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(114,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(114,22): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(195,15): error C3646: 'cmd': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(195,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(196,15): error C3646: 'oldcmd': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(196,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(209,19): error C3646: 'cs': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(209,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(215,19): error C3646: 'ps': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(215,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(240,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(240,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(240,33): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(461,12): error C3646: 'team': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(461,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(530,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(530,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(530,22): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(531,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(531,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(531,20): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(542,19): error C3646: 's': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(542,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(633,19): error C3646: 'ps': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(633,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(636,19): error C3646: 'entities': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(636,27): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(636,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(637,19): error C3646: 'clients': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(637,26): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(637,30): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(663,21): error C3646: 'dof': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(663,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(664,13): error C3646: 'film': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(664,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(665,13): error C3646: 'glow': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(665,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(666,14): error C3646: 'primaryLights': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(666,27): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(666,32): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(667,17): error C3646: 'scissorViewport': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(667,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(684,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(684,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(684,26): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(685,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(685,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(685,24): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(770,17): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(770,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(770,27): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(782,12): error C3646: 'team': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(782,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(783,12): error C3646: 'oldteam': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(783,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(802,17): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(802,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(802,28): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(823,20): error C3646: 'tree': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(823,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(824,16): error C3646: 'torso': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(824,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(825,16): error C3646: 'legs': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(825,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(826,16): error C3646: 'turning': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(826,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(830,22): error C3646: 'animScriptData': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(830,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(836,12): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(836,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(836,47): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(837,31): error C2061: syntax error: identifier 'DObjModel_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(838,45): error C2061: syntax error: identifier 'DObjModel_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(839,12): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(839,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(839,41): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(911,19): error C3646: 'predictedPlayerState': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(911,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(926,12): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(926,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(926,36): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1011,14): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1011,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1011,33): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1034,17): error C3646: 'sprintStates': unknown override specifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1034,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1076,14): warning C4229: anachronism used: modifiers on data are ignored
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1076,14): error C2182: 'CG_Player_PreControllers': this use of 'void' is not valid
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1076,39): error C2065: 'DObj_s': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1076,47): error C2065: 'obj': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1076,63): error C2065: 'cent': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1076,52): error C2275: 'centity_s': expected an expression instead of a type
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1077,14): warning C4229: anachronism used: modifiers on data are ignored
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1077,14): error C2182: 'CG_mg42_PreControllers': this use of 'void' is not valid
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1077,37): error C2065: 'DObj_s': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1077,45): error C2065: 'obj': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1077,61): error C2065: 'cent': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1077,50): error C2275: 'centity_s': expected an expression instead of a type
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1078,40): error C2018: unknown character '0x40'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1078,41): error C2143: syntax error: missing ',' before '<'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1093,55): error C2061: syntax error: identifier 'DObj_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1096,5): error C2061: syntax error: identifier 'DObj_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1100,13): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1100,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1100,69): error C2061: syntax error: identifier 'DObj_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1100,22): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1103,5): error C2061: syntax error: identifier 'DObj_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1107,13): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1107,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1107,1): error C2086: 'int DObjAnimMat': redefinition
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1100,1):
-      see declaration of 'DObjAnimMat'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1107,68): error C2061: syntax error: identifier 'DObj_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1107,22): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1108,56): error C2061: syntax error: identifier 'DObj_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1120,8): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1120,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1120,86): error C2061: syntax error: identifier 'XModel'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1120,17): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1121,9): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1121,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1121,18): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1122,9): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1122,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1122,1): error C2086: 'int XAnim_s': redefinition
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1121,1):
-      see declaration of 'XAnim_s'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1122,18): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1123,9): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1123,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1123,1): error C2086: 'int XAnim_s': redefinition
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1121,1):
-      see declaration of 'XAnim_s'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1123,18): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1125,51): error C2061: syntax error: identifier 'DObj_s'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1140,10): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1140,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1140,19): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1143,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1143,23): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1143,32): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1144,14): warning C4229: anachronism used: modifiers on data are ignored
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1144,14): error C2182: 'CG_ClampPrimaryLightOrigin': this use of 'void' is not valid
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1144,41): error C2065: 'GfxLight': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1144,51): error C2065: 'light': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1144,58): error C2059: syntax error: 'const'
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1145,14): warning C4229: anachronism used: modifiers on data are ignored
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1145,14): error C2182: 'CG_ClampPrimaryLightDir': this use of 'void' is not valid
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1145,38): error C2065: 'GfxLight': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1145,48): error C2065: 'light': undeclared identifier
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(1145,48): error C1003: error count exceeds 100; stopping compilation
-  (compiling source file 'src/bgame/bg_animation_mp.cpp')
-  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_material.h(169,29): warning C4359: 'MaterialInfo': Alignment specifier is less than actual alignment (8), and will be ignored.
+  (compiling source file 'src/bgame/bg_animation_mp.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\xanim\xanim.h(233,29): warning C4359: 'cbrushside_t': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_animation_mp.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(750,29): warning C4359: 'CEntVehicleInfo': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_animation_mp.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(30,29): warning C4359: 'usercmd_s': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_animation_mp.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\client_mp\client_mp.h(367,29): warning C4359: 'VoicePacket_t': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_animation_mp.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\game_mp\g_main_mp.h(63,8): error C2011: 'com_parse_mark_t': 'struct' type redefinition
+  (compiling source file 'src/bgame/bg_animation_mp.cpp')
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_parse.h(30,8):
+      see declaration of 'com_parse_mark_t'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\game_mp\g_main_mp.h(133,22): error C2079: 'level_locals_t::currentScriptIOLineMark' uses undefined struct 'com_parse_mark_t'
+  (compiling source file 'src/bgame/bg_animation_mp.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(64,5): error C4996: '_vsnprintf': This function or variable may be unsafe. Consider using _vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1613,42): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1768,21): error C2664: 'void XAnimSetTime(__int64,float)': cannot convert argument 1 from 'XAnimTree_s *' to '__int64'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1768,34):
+      There is no context in which this conversion is possible
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\xanim\xanim.h(1644,14):
+      see declaration of 'XAnimSetTime'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1768,21):
+      while trying to match the argument list '(XAnimTree_s *, double)'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1777,21): error C2664: 'void XAnimSetTime(__int64,float)': cannot convert argument 1 from 'XAnimTree_s *' to '__int64'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1777,34):
+      There is no context in which this conversion is possible
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\xanim\xanim.h(1644,14):
+      see declaration of 'XAnimSetTime'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1777,21):
+      while trying to match the argument list '(XAnimTree_s *, float)'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1784,79): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1969,40): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(1978,41): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2154,17): error C2079: 'dobjModels' uses undefined struct 'DObjModel_s'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2177,17): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2178,22): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2180,17): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2181,17): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2186,40): error C2664: 'unsigned short (DObjModel_s *,unsigned short,clientInfo_t *)': cannot convert argument 1 from 'int' to 'DObjModel_s *'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2186,40):
+      Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2191,30): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2192,35): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2194,30): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2195,32): error C2109: subscript requires array or pointer type
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2197,21): error C2664: 'void (DObjModel_s *,unsigned short,XAnimTree_s *,int,int,clientInfo_t *)': cannot convert argument 1 from 'int' to 'DObjModel_s *'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2197,21):
+      Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2203,5): error C2065: 'LargeLocal': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2203,16): error C2146: syntax error: missing ';' before identifier 'playerAnims_large_local'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2203,16): error C2065: 'playerAnims_large_local': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2207,5): error C2653: 'LargeLocal': is not a class or namespace name
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2207,29): error C2065: 'playerAnims_large_local': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2207,17): error C3861: 'LargeLocal': identifier not found
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2208,39): error C2653: 'LargeLocal': is not a class or namespace name
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2208,59): error C2065: 'playerAnims_large_local': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2208,51): error C3861: 'GetBuf': identifier not found
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2215,5): error C3861: 'Scr_PrecacheAnimTrees': identifier not found
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2217,5): error C3861: 'Scr_EndLoadAnimTrees': identifier not found
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2219,5): error C2653: 'LargeLocal': is not a class or namespace name
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2219,30): error C2065: 'playerAnims_large_local': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2219,18): error C3861: '{dtor}': identifier not found
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,29): error C2665: 'strstr': no overloaded function could convert all the argument types
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(1292,14):
+      could be 'void strstr(unsigned char *,unsigned char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,29):
+          'void strstr(unsigned char *,unsigned char *)': cannot convert argument 2 from 'const char [7]' to 'unsigned char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,66):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt\string.h(518,28):
+      or       'char *strstr(char *const ,const char *const )'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,29):
+          'char *strstr(char *const ,const char *const )': cannot convert argument 1 from 'unsigned char *' to 'char *const '
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,55):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include\vcruntime_string.h(82,38):
+      or       'const char *strstr(const char *,const char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,29):
+          'const char *strstr(const char *,const char *)': cannot convert argument 1 from 'unsigned char *' to 'const char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,55):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2298,29):
+      while trying to match the argument list '(unsigned char *, const char [7])'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2302,44): error C2440: '=': cannot convert from 'const char [7]' to 'char *'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2302,44):
+      Conversion from string literal loses const qualifier (see /Zc:strictStrings)
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,33): error C2665: 'strstr': no overloaded function could convert all the argument types
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(1292,14):
+      could be 'void strstr(unsigned char *,unsigned char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,33):
+          'void strstr(unsigned char *,unsigned char *)': cannot convert argument 2 from 'const char [6]' to 'unsigned char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,70):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt\string.h(518,28):
+      or       'char *strstr(char *const ,const char *const )'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,33):
+          'char *strstr(char *const ,const char *const )': cannot convert argument 1 from 'unsigned char *' to 'char *const '
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,59):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include\vcruntime_string.h(82,38):
+      or       'const char *strstr(const char *,const char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,33):
+          'const char *strstr(const char *,const char *)': cannot convert argument 1 from 'unsigned char *' to 'const char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,59):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2306,33):
+      while trying to match the argument list '(unsigned char *, const char [6])'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2310,48): error C2440: '=': cannot convert from 'const char [6]' to 'char *'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2310,48):
+      Conversion from string literal loses const qualifier (see /Zc:strictStrings)
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,37): error C2665: 'strstr': no overloaded function could convert all the argument types
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(1292,14):
+      could be 'void strstr(unsigned char *,unsigned char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,37):
+          'void strstr(unsigned char *,unsigned char *)': cannot convert argument 2 from 'const char [5]' to 'unsigned char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,74):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt\string.h(518,28):
+      or       'char *strstr(char *const ,const char *const )'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,37):
+          'char *strstr(char *const ,const char *const )': cannot convert argument 1 from 'unsigned char *' to 'char *const '
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,63):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include\vcruntime_string.h(82,38):
+      or       'const char *strstr(const char *,const char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,37):
+          'const char *strstr(const char *,const char *)': cannot convert argument 1 from 'unsigned char *' to 'const char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,63):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2314,37):
+      while trying to match the argument list '(unsigned char *, const char [5])'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2318,52): error C2440: '=': cannot convert from 'const char [5]' to 'char *'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2318,52):
+      Conversion from string literal loses const qualifier (see /Zc:strictStrings)
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,41): error C2665: 'strstr': no overloaded function could convert all the argument types
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(1292,14):
+      could be 'void strstr(unsigned char *,unsigned char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,41):
+          'void strstr(unsigned char *,unsigned char *)': cannot convert argument 2 from 'const char [5]' to 'unsigned char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,78):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt\string.h(518,28):
+      or       'char *strstr(char *const ,const char *const )'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,41):
+          'char *strstr(char *const ,const char *const )': cannot convert argument 1 from 'unsigned char *' to 'char *const '
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,67):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include\vcruntime_string.h(82,38):
+      or       'const char *strstr(const char *,const char *)'
+          C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,41):
+          'const char *strstr(const char *,const char *)': cannot convert argument 1 from 'unsigned char *' to 'const char *'
+              C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,67):
+              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2322,41):
+      while trying to match the argument list '(unsigned char *, const char [5])'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2326,56): error C2440: '=': cannot convert from 'const char [7]' to 'char *'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2326,56):
+      Conversion from string literal loses const qualifier (see /Zc:strictStrings)
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2331,56): error C2440: '=': cannot convert from 'const char [4]' to 'char *'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2331,56):
+      Conversion from string literal loses const qualifier (see /Zc:strictStrings)
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2397,30): error C2065: 'byte_8581E4': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2451,5): error C2065: 'animScriptParseMode_t': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2451,27): error C2146: syntax error: missing ';' before identifier 'newParseMode'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2451,27): error C2065: 'newParseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2460,5): error C2065: 'animScriptParseMode_t': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2460,27): error C2146: syntax error: missing ';' before identifier 'parseMode'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2460,27): error C2065: 'parseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2468,30): error C2065: 'byte_858554': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2472,5): error C2065: 'parseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2472,17): error C2065: 'PARSEMODE_DEFINES': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2486,5): error C2065: 'defineStringsOffset': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2498,9): error C2065: 'newParseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2498,49): error C2065: 'animParseModesStr': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2499,13): error C2065: 'newParseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2499,28): error C2065: 'PARSEMODE_DEFINES': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2501,21): error C2065: 'parseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2501,21): error C2050: switch expression not integral
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2503,18): error C2065: 'PARSEMODE_DEFINES': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2503,18): error C2131: expression did not evaluate to a constant
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2503,18):
+      a non-constant (sub-)expression was encountered
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2515,82): error C2065: 'defineStringsOffset': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2532,18): error C2065: 'PARSEMODE_ANIMATION': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2532,18): error C2131: expression did not evaluate to a constant
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2532,18):
+      a non-constant (sub-)expression was encountered
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2533,18): error C2065: 'PARSEMODE_CANNED_ANIMATIONS': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2533,18): error C2131: expression did not evaluate to a constant
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2533,18):
+      a non-constant (sub-)expression was encountered
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2544,37): error C2065: 'parseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2544,50): error C2065: 'PARSEMODE_ANIMATION': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2547,62): error C2440: '=': cannot convert from 'int' to 'scriptAnimMoveTypes_t'
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2547,62):
+      Conversion to enumeration type requires an explicit cast (static_cast, C-style cast or parenthesized function-style cast)
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2549,42): error C2065: 'parseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2549,55): error C2065: 'PARSEMODE_CANNED_ANIMATIONS': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2606,18): error C2065: 'PARSEMODE_STATECHANGES': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2606,18): error C2131: expression did not evaluate to a constant
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2606,18):
+      a non-constant (sub-)expression was encountered
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2607,18): error C2065: 'PARSEMODE_EVENTS': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2607,18): error C2131: expression did not evaluate to a constant
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2607,18):
+      a non-constant (sub-)expression was encountered
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2647,33): error C2065: 'parseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2647,46): error C2065: 'PARSEMODE_STATECHANGES': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2703,13): error C2065: 'parseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2703,25): error C2065: 'newParseMode': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2777,48): error C3892: 'token': you cannot assign to a variable that is const
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2882,48): error C3892: 'token': you cannot assign to a variable that is const
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2935,30): error C2065: 'byte_8586B0': undeclared identifier
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_animation_mp.cpp(2955,13): error C3861: 'JUMPOUT': identifier not found
   bg_jump.cpp
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(314,9): warning C4005: 'BYTEn': macro redefinition
-  (compiling source file 'src/bgame/bg_jump.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(234,9):
-      see previous definition of 'BYTEn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(315,9): warning C4005: 'WORDn': macro redefinition
-  (compiling source file 'src/bgame/bg_jump.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(235,9):
-      see previous definition of 'WORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(316,9): warning C4005: 'DWORDn': macro redefinition
-  (compiling source file 'src/bgame/bg_jump.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(236,9):
-      see previous definition of 'DWORDn'
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(564,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
-  (compiling source file 'src/bgame/bg_jump.cpp')
-  
-C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(623,57): error C2061: syntax error: identifier 'XAssetHeader'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(552,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
   (compiling source file 'src/bgame/bg_jump.cpp')
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(204,9): warning C4005: 'LOWORD': macro redefinition
   (compiling source file 'src/bgame/bg_jump.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(319,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(305,9):
       see previous definition of 'LOWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(205,9): warning C4005: 'HIWORD': macro redefinition
   (compiling source file 'src/bgame/bg_jump.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(322,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(308,9):
       see previous definition of 'HIWORD'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(206,9): warning C4005: 'LOBYTE': macro redefinition
   (compiling source file 'src/bgame/bg_jump.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(318,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(304,9):
       see previous definition of 'LOBYTE'
   
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(207,9): warning C4005: 'HIBYTE': macro redefinition
   (compiling source file 'src/bgame/bg_jump.cpp')
-      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(321,9):
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(307,9):
+      see previous definition of 'HIBYTE'
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\gfx_d3d\r_material.h(169,29): warning C4359: 'MaterialInfo': Alignment specifier is less than actual alignment (8), and will be ignored.
+  (compiling source file 'src/bgame/bg_jump.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\xanim\xanim.h(233,29): warning C4359: 'cbrushside_t': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_jump.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_local.h(750,29): warning C4359: 'CEntVehicleInfo': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_jump.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\cgame_mp\cg_local_mp.h(30,29): warning C4359: 'usercmd_s': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_jump.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\client_mp\client_mp.h(367,29): warning C4359: 'VoicePacket_t': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_jump.cpp')
+  
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_jump.cpp(111,25): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\bgame\bg_jump.cpp(118,17): warning C4305: '=': truncation from 'double' to 'float'
+  bg_mantle.cpp
+C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(552,29): warning C4359: 'trace_t': Alignment specifier is less than actual alignment (4), and will be ignored.
+  (compiling source file 'src/bgame/bg_mantle.cpp')
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(204,9): warning C4005: 'LOWORD': macro redefinition
+  (compiling source file 'src/bgame/bg_mantle.cpp')
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(305,9):
+      see previous definition of 'LOWORD'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(205,9): warning C4005: 'HIWORD': macro redefinition
+  (compiling source file 'src/bgame/bg_mantle.cpp')
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(308,9):
+      see previous definition of 'HIWORD'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(206,9): warning C4005: 'LOBYTE': macro redefinition
+  (compiling source file 'src/bgame/bg_mantle.cpp')
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(304,9):
+      see previous definition of 'LOBYTE'
+  
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h(207,9): warning C4005: 'HIBYTE': macro redefinition
+  (compiling source file 'src/bgame/bg_mantle.cpp')
+      C:\Users\M1911\source\repos\KisakCOD\KisakCOD\src\universal\q_shared.h(307,9):
       see previous definition of 'HIBYTE'
   

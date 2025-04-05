@@ -3732,7 +3732,7 @@ BOOL __cdecl XAnimIsPrimitive(XAnim_s* anims, unsigned int animIndex)
     return anims->entries[animIndex].numAnims == 0;
 }
 
-void __cdecl XAnimSetTime(__int64 tree, float time)
+void __cdecl XAnimSetTime(XAnimTree_s* tree, float time)
 {
     char* AnimDebugName; // eax
     const char* v3; // eax

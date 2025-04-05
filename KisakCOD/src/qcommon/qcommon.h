@@ -1134,3 +1134,14 @@ void SCR_ClearScreen();
 void __cdecl SCR_UpdateLoadScreen();
 void __cdecl CL_CubemapShot_f();
 void CL_CubemapShotUsage();
+
+
+
+// RANDOM INLINE SHIT
+
+// LWSS: Note that this strstr() does not return anything. It's a common paradigm in this codebase to use this one.
+void __cdecl strstr(unsigned __int8 *str1, unsigned const __int8 * const str2)
+{
+    char *found = strstr((char *)str1, (char *)str2);
+    str1 = (unsigned __int8*)found;
+}

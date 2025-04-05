@@ -307,6 +307,15 @@ struct animScriptCommand_t // sizeof=0x10
     __int16 animDuration[2];
     snd_alias_list_t* soundAlias;
 };
+enum animScriptParseMode_t : __int32
+{                                       // ...
+    PARSEMODE_DEFINES = 0x0,
+    PARSEMODE_ANIMATION = 0x1,
+    PARSEMODE_CANNED_ANIMATIONS = 0x2,
+    PARSEMODE_STATECHANGES = 0x3,
+    PARSEMODE_EVENTS = 0x4,
+    NUM_PARSEMODES = 0x5,
+};
 struct animScriptItem_t // sizeof=0x100
 {                                       // ...
     int numConditions;
@@ -1202,7 +1211,7 @@ void __cdecl TRACK_bg_animation_mp();
 void BG_AnimParseError(const char *msg, ...);
 unsigned int __cdecl BG_AnimationIndexForString(const char *string);
 int __cdecl BG_StringHashValue(const char *fname);
-int __cdecl BG_IndexForString(const char *token, animStringItem_t *strings, int allowFail);
+animScriptParseMode_t __cdecl BG_IndexForString(const char *token, animStringItem_t *strings, int allowFail);
 void __cdecl BG_InitWeaponString(int index, const char *name);
 void __cdecl BG_InitWeaponStrings();
 void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, animScriptData_t *scriptData);

@@ -2,6 +2,23 @@
 #include "bg_local.h"
 #include <qcommon/mem_track.h>
 #include <universal/q_parse.h>
+#include <script/scr_animtree.h>
+
+#include <string.h>
+#include <game_mp/g_main_mp.h>
+#include <xanim/dobj.h>
+#include <universal/com_memory.h>
+#include <script/scr_main.h>
+
+animStringItem_t animParseModesStr[6] =
+{
+  { "defines", -1 },
+  { "animations", -1 },
+  { "canned_animations", -1 },
+  { "statechanges", -1 },
+  { "events", -1 },
+  { NULL, -1 }
+}; // idb
 
 int numDefines[10];
 char defineStrings[10000];
@@ -23,6 +40,14 @@ animConditionTable_t animConditionsTable[10];
 char *globalFilename;
 
 bgs_t *bgs;
+
+loadAnim_t *g_pLoadAnims;
+unsigned int *g_piNumLoadAnims;
+animScriptData_t *globalScriptData;
+scriptAnimMoveTypes_t parseMovetype;
+int parseEvent;
+
+unsigned int defineStringsOffset;
 
 void __cdecl TRACK_bg_animation_mp()
 {
@@ -134,7 +159,7 @@ int __cdecl BG_StringHashValue(const char *fname)
     return hash;
 }
 
-int __cdecl BG_IndexForString(const char *token, animStringItem_t *strings, int allowFail)
+animScriptParseMode_t __cdecl BG_IndexForString(const char *token, animStringItem_t *strings, int allowFail)
 {
     int hash; // [esp+4h] [ebp-8h]
     int i; // [esp+8h] [ebp-4h]
@@ -146,13 +171,13 @@ int __cdecl BG_IndexForString(const char *token, animStringItem_t *strings, int 
         if (strings->hash == -1)
             strings->hash = BG_StringHashValue(strings->string);
         if (hash == strings->hash && !I_stricmp(token, strings->string))
-            return i;
+            return (animScriptParseMode_t)i;
         ++strings;
         ++i;
     }
     if (!allowFail)
         BG_AnimParseError("BG_IndexForString: unknown token '%s'", token);
-    return -1;
+    return (animScriptParseMode_t)-1;
 }
 
 void __cdecl BG_InitWeaponString(int index, const char *name)
@@ -327,10 +352,10 @@ void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, 
                 tokene = Com_ParseOnLine(input);
                 if (!tokene || !tokene->token[0])
                     BG_AnimParseError("BG_ParseCommands: expected sound");
-                strstr((unsigned __int8 *)tokene, ".wav");
+                strstr((unsigned __int8*)tokene->token, (unsigned __int8*)".wav");
                 if (v4)
                     BG_AnimParseError("BG_ParseCommands: wav files not supported, only sound scripts");
-                command->soundAlias = globalScriptData->soundAlias(tokene);
+                command->soundAlias = globalScriptData->soundAlias(tokene->token);
             }
         }
         partIndex = 0;
@@ -599,11 +624,11 @@ int __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, scrip
         {
             scriptItem = BG_FirstValidItem(ps->clientNum, &globalScriptData->scriptAnims[state][movetype]);
             if (!scriptItem)
-                --state;
+                state = (aistateEnum_t)((int)state - 1); // KISAKTODO: fkin ugly (should be state--;)
         }
         else
         {
-            --state;
+            state = (aistateEnum_t)((int)state - 1);
         }
     }
     if (scriptItem)
@@ -969,7 +994,7 @@ void __cdecl BG_SetConditionValue(unsigned int client, unsigned int condition, u
             64);
     conditions = bgs->clientinfo[client].clientConditions[condition];
     *(_QWORD *)conditions = value;
-    if ((*conditions != (unsigned int)value || conditions[1] != HIunsigned int(value)) && G_IsServerGameSystem(client))
+    if ((*conditions != (unsigned int)value || conditions[1] != HIDWORD(value)) && G_IsServerGameSystem(client))
     {
         if (client >= 0x40)
             MyAssertHandler(
@@ -1138,7 +1163,7 @@ unsigned int __cdecl BG_GetConditionBit(const clientInfo_t *ci, unsigned int con
 animScriptData_t *__cdecl BG_GetAnimationForIndex(int client, unsigned int index)
 {
     if (index >= globalScriptData->numAnimations)
-        Com_Error(ERR_DROP, &byte_857E68);
+        Com_Error(ERR_DROP, "BG_GetAnimationForIndex: index out of bounds");
     return (animScriptData_t *)((char *)globalScriptData + 104 * index);
 }
 
@@ -1180,8 +1205,8 @@ bool __cdecl BG_IsCrouchingAnim(const clientInfo_t *ci, int animNum)
     animScriptData_t *anim; // [esp+8h] [ebp-4h]
 
     anim = BG_GetAnimationForIndex(ci->clientNum, animNum & 0xFFFFFDFF);
-    HIunsigned int(v2) = anim->animations[0].movetype & 0xC4;
-    LOunsigned int(v2) = HIunsigned int(anim->animations[0].movetype) & 0x300;
+    HIDWORD(v2) = anim->animations[0].movetype & 0xC4;
+    LODWORD(v2) = HIDWORD(anim->animations[0].movetype) & 0x300;
     return v2 != 0;
 }
 
@@ -1221,53 +1246,6 @@ void __cdecl BG_LerpOffset(float *offset_goal, float maxOffsetChange, float *off
             Vec3Mad(offset, *(float *)&error, diff, offset);
         }
     }
-}
-
-/*
-===========================================================================
-Copyright (C) 1999-2005 Id Software, Inc.
-
-This file is part of Quake III Arena source code.
-
-Quake III Arena source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
-
-Quake III Arena source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-===========================================================================
-*/
-double __cdecl Q_rsqrt(float number)
-{
-    iassert(number);
-    iassert(!isnan(number));
-
-    union standards_compliant_fp_bit_hack {
-        int i;
-        float f;
-    };
-
-    standards_compliant_fp_bit_hack v;
-    float x2, y;
-    const float threehalfs = 1.5F;
-
-    x2 = number * 0.5F;
-    y = number;
-    v.f = y;						// evil floating point bit level hacking
-    v.i = 0x5f3759df - (v.i >> 1);               // what the fuck?
-    y = v.f;
-    y = y * (threehalfs - (x2 * y * y));   // 1st iteration
-    //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
-
-    // TODO: use rsqrtss instead since it's not 1990 anymore
-    return y;
 }
 
 void __cdecl Vec3Mad(const float *start, float scale, const float *dir, float *result)
@@ -1475,8 +1453,8 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
         angles[3][0] = vHeadAngles[0] * 0.300000011920929;
         angles[3][1] = vHeadAngles[1] * 0.300000011920929;
         angles[3][2] = 0.0;
-        angles[4][0] = vHeadAngles[0] * DOUBLE_0_699999988079071;
-        angles[4][1] = vHeadAngles[1] * DOUBLE_0_699999988079071;
+        angles[4][0] = vHeadAngles[0] * 0.699999988079071;
+        angles[4][1] = vHeadAngles[1] * 0.699999988079071;
         angles[4][2] = vHeadAngles[2] * -0.300000011920929;
         angles[5][0] = 0.0;
         angles[5][1] = 0.0;
@@ -1715,7 +1693,7 @@ void __cdecl BG_SetNewAnimation(
         lf->animationNumber = newAnimation;
         newAnimationa = newAnimation & 0xFFFFFDFF;
         if (newAnimationa >= bgs->animScriptData.numAnimations)
-            Com_Error(ERR_DROP, &byte_857FE0, bgs->animScriptData.numAnimations, newAnimationa);
+            Com_Error(ERR_DROP, "Player animation index out of range (%i): %i", bgs->animScriptData.numAnimations, newAnimationa);
         pAnimTree = ci->pXAnimTree;
         pXAnims = bgs->animScriptData.animTree.anims;
         if (newAnimationa)
@@ -1802,7 +1780,7 @@ void __cdecl BG_SetNewAnimation(
                 else
                 {
                     XAnimSetGoalWeightKnobAll(obj, newAnimationa, 0, 1.0, 0.0, 1.0, 0, 0);
-                    XAnimSetTime(__SPAIR64__(newAnimationa, (unsigned int)pAnimTree), 1.0);
+                    XAnimSetTime(pAnimTree, 1.0);
                 }
             }
             else
@@ -1811,7 +1789,7 @@ void __cdecl BG_SetNewAnimation(
                 v11 = (double)lf->animationTime * 0.001000000047497451;
                 XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0, v11, 1.0, 0, anim->noteType, lf != &ci->legs);
                 if (v12)
-                    XAnimSetTime(__SPAIR64__(newAnimationa, (unsigned int)pAnimTree), fStartTime);
+                    XAnimSetTime(pAnimTree, fStartTime);
             }
             if (lf != &ci->legs)
             {
@@ -2228,7 +2206,7 @@ void __cdecl BG_UpdatePlayerDObj(
         dobjModels[iNumModels].model = bgs->GetXModel(ci->attachModelNames[i]);
         if (!dobjModels[iNumModels].model)
             MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3590, 0, "%s", "dobjModels[iNumModels].model");
-        dobjModels[iNumModels].boneName = SL_FindString(ci->attachTagNames[i]).prev;
+        dobjModels[iNumModels].boneName = SL_FindString(ci->attachTagNames[i]);
         dobjModels[iNumModels++].ignoreCollision = (attachIgnoreCollision & (1 << i)) != 0;
     }
     bgs->CreateDObj(dobjModels, iNumModels, pAnimTree, es->number, localClientNum, ci);
@@ -2237,12 +2215,14 @@ void __cdecl BG_UpdatePlayerDObj(
 
 void __cdecl BG_LoadAnim()
 {
-    LargeLocal playerAnims_large_local; // [esp+0h] [ebp-10h] BYREF
+    LargeLocal playerAnims_large_local(36864); // [esp+0h] [ebp-10h] BYREF
     unsigned int iNumPlayerAnims; // [esp+8h] [ebp-8h] BYREF
     loadAnim_t(*playerAnims)[512]; // [esp+Ch] [ebp-4h]
 
-    LargeLocal::LargeLocal(&playerAnims_large_local, 36864);
-    playerAnims = (loadAnim_t(*)[512])LargeLocal::GetBuf(&playerAnims_large_local);
+    //LargeLocal::LargeLocal(&playerAnims_large_local, 36864);
+    //playerAnims = (loadAnim_t(*)[512])LargeLocal::GetBuf(&playerAnims_large_local);
+    playerAnims = (loadAnim_t(*)[512])playerAnims_large_local.GetBuf();
+
     BG_CheckThread();
     if (!bgs)
         MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3675, 0, "%s", "bgs");
@@ -2253,7 +2233,7 @@ void __cdecl BG_LoadAnim()
     BG_FindAnimTrees();
     Scr_EndLoadAnimTrees();
     BG_FinalizePlayerAnims();
-    LargeLocal::~LargeLocal(&playerAnims_large_local);
+    //LargeLocal::~LargeLocal(&playerAnims_large_local);
 }
 
 void BG_FinalizePlayerAnims()
@@ -2316,6 +2296,7 @@ void BG_FinalizePlayerAnims()
                 }
                 else
                 {
+                    
                     pCurrAnim->duration = (int)(duration * 1000.0);
                     XAnimGetRelDelta(pXAnims, i, vRot, vDelta, 0.0, 1.0);
                     pCurrAnim->moveSpeed = Vec3Length(vDelta) / duration;
@@ -2332,40 +2313,40 @@ void BG_FinalizePlayerAnims()
                                 fullspeed = (float)g_speed->current.integer;
                             else
                                 fullspeed = 190.0;
-                            strstr((unsigned __int8 *)pCurrAnim, "crouch");
+                            strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"crouch");
                             if (v2)
                             {
                                 fullspeeda = fullspeed * 0.6499999761581421;
-                                moveType = "crouch";
+                                moveType = (char*)"crouch";
                             }
                             else
                             {
-                                strstr((unsigned __int8 *)pCurrAnim, "prone");
+                                strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"prone");
                                 if (v3)
                                 {
                                     fullspeeda = fullspeed * 0.1500000059604645;
-                                    moveType = "prone";
+                                    moveType = (char*)"prone";
                                 }
                                 else
                                 {
-                                    strstr((unsigned __int8 *)pCurrAnim, "walk");
+                                    strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"walk");
                                     if (v4)
                                     {
                                         fullspeeda = fullspeed * 0.4000000059604645;
-                                        moveType = "walk";
+                                        moveType = (char*)"walk";
                                     }
                                     else
                                     {
-                                        strstr((unsigned __int8 *)pCurrAnim, "fast");
+                                        strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"fast");
                                         if (v5)
                                         {
                                             fullspeeda = fullspeed * player_sprintSpeedScale->current.value;
-                                            moveType = "sprint";
+                                            moveType = (char*)"sprint";
                                         }
                                         else
                                         {
                                             fullspeeda = fullspeed * 1.0;
-                                            moveType = "run";
+                                            moveType = (char*)"run";
                                         }
                                     }
                                 }
@@ -2431,7 +2412,7 @@ loadAnim_t *__cdecl BG_LoadAnimForAnimIndex(unsigned int iAnimIndex)
     loadAnim_t *pAnim; // [esp+4h] [ebp-4h]
 
     if (iAnimIndex >= globalScriptData->numAnimations)
-        Com_Error(ERR_DROP, &byte_8581E4, iAnimIndex, globalScriptData->numAnimations);
+        Com_Error(ERR_DROP, "Player animation index %i out of 0 to %i range", iAnimIndex, globalScriptData->numAnimations);
     i = 0;
     pAnim = g_pLoadAnims;
     while (i < *g_piNumLoadAnims)
@@ -2502,7 +2483,7 @@ void __cdecl BG_AnimParseAnimScript(animScriptData_t *scriptData, loadAnim_t *pL
     currentScriptItem = 0;
     input = Com_LoadRawTextFile(globalFilename);
     if (!input)
-        Com_Error(ERR_DROP, &byte_858554, globalFilename);
+        Com_Error(ERR_DROP, "Couldn',27h,'t load player animation script %s", globalFilename);
     globalScriptData = scriptData;
     g_pLoadAnims = pLoadAnims;
     g_piNumLoadAnims = piNumAnims;
@@ -2581,7 +2562,7 @@ void __cdecl BG_AnimParseAnimScript(animScriptData_t *scriptData, loadAnim_t *pL
                                 if (parseMode == PARSEMODE_ANIMATION)
                                 {
                                     currentScript = &scriptData->scriptAnims[indexes[0]][indexes[1]];
-                                    parseMovetype = indexes[1];
+                                    parseMovetype = (scriptAnimMoveTypes_t)indexes[1];
                                 }
                                 else if (parseMode == PARSEMODE_CANNED_ANIMATIONS)
                                 {
@@ -2778,7 +2759,7 @@ void __cdecl BG_ParseConditionBits(
     unsigned int tempBits[2]; // [esp+50h] [ebp-60h] BYREF
     char currentString[68]; // [esp+58h] [ebp-58h] BYREF
     int minus; // [esp+A0h] [ebp-10h]
-    const char *token; // [esp+A4h] [ebp-Ch]
+    char *token; // [esp+A4h] [ebp-Ch]
     int endFlag; // [esp+A8h] [ebp-8h]
     int indexFound; // [esp+ACh] [ebp-4h]
 
@@ -2790,7 +2771,7 @@ void __cdecl BG_ParseConditionBits(
     tempBits[1] = 0;
     while (!endFlag)
     {
-        token = (const char *)Com_ParseOnLine(text_pp);
+        token = (char *)Com_ParseOnLine(text_pp);
         if (!token || !*token)
         {
             Com_UngetToken();
@@ -2805,7 +2786,7 @@ void __cdecl BG_ParseConditionBits(
             if (I_stricmp(token, "none,"))
             {
                 if (!I_stricmp(token, "NOT"))
-                    token = "MINUS";
+                    token = (char*)"MINUS";
                 if (!endFlag && I_stricmp(token, "AND") && I_stricmp(token, "MINUS"))
                 {
                     if (token[strlen(token) - 1] == 44)
@@ -2894,12 +2875,12 @@ int __cdecl BG_ParseConditions(const char **text_pp, animScriptItem_t *scriptIte
     animScriptConditionTypes_t type; // [esp+20h] [ebp-14h]
     int conditionIndex; // [esp+24h] [ebp-10h]
     unsigned int conditionValue[2]; // [esp+28h] [ebp-Ch] BYREF
-    const char *token; // [esp+30h] [ebp-4h]
+    char *token; // [esp+30h] [ebp-4h]
 
     conditionValue[0] = 0;
     for (conditionValue[1] = 0; ; scriptItem->conditions[scriptItem->numConditions++].value[1] = conditionValue[1])
     {
-        token = (const char *)Com_ParseOnLine(text_pp);
+        token = (char *)Com_ParseOnLine(text_pp);
         if (!token || !*token)
             break;
         if (!I_stricmp(token, "default"))
@@ -2912,7 +2893,7 @@ int __cdecl BG_ParseConditions(const char **text_pp, animScriptItem_t *scriptIte
             {
                 if (animConditionsTable[conditionIndex].values)
                 {
-                    token = (const char *)Com_ParseOnLine(text_pp);
+                    token = (char *)Com_ParseOnLine(text_pp);
                     if (!token || !*token)
                         BG_AnimParseError("BG_ParseConditions: expected condition value, found end of line");
                     if (token[strlen(token) - 1] == 44)
@@ -2969,68 +2950,7 @@ scr_animtree_t __cdecl BG_FindAnimTree(const char *filename, int bEnforceExists)
 
     tree.anims = Scr_FindAnimTree(filename).anims;
     if (!tree.anims && bEnforceExists)
-        Com_Error(ERR_DROP, &byte_8586B0, filename);
+        Com_Error(ERR_DROP, "Could not find animation tree %s", filename);
     return tree;
-}
-
-void __cdecl strstr(unsigned __int8 *str1, unsigned __int8 *str2)
-{
-    unsigned __int8 v2; // dl
-    unsigned __int8 v4; // dh
-    unsigned __int8 *v5; // ecx
-    unsigned __int8 *v6; // esi
-    char v7; // al
-    unsigned __int8 v8; // ah
-    unsigned __int8 v9; // al
-    unsigned __int8 v10; // al
-
-    v2 = *str2;
-    if (*str2)
-    {
-        v4 = str2[1];
-        if (!v4)
-            JUMPOUT(0x832526);
-    findnext:
-        v5 = str2;
-        v6 = str1 + 1;
-        if (*str1 == v2)
-            goto first_char_found;
-        if (*str1)
-        {
-            while (2)
-            {
-                v7 = *v6++;
-                while (v7 == v2)
-                {
-                first_char_found:
-                    v7 = *v6++;
-                    if (v7 == v4)
-                    {
-                        str1 = v6 - 1;
-                        while (1)
-                        {
-                            v8 = v5[2];
-                            if (!v8)
-                                break;
-                            v9 = *v6;
-                            v6 += 2;
-                            if (v9 != v8)
-                                goto findnext;
-                            v10 = v5[3];
-                            if (!v10)
-                                break;
-                            v5 += 2;
-                            if (v10 != *(v6 - 1))
-                                goto findnext;
-                        }
-                        return;
-                    }
-                }
-                if (v7)
-                    continue;
-                break;
-            }
-        }
-    }
 }
 
