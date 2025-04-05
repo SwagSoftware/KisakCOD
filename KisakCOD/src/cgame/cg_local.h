@@ -1243,3 +1243,10 @@ struct EffectFile // sizeof=0x630
 };
 FxImpactTable *__cdecl CG_RegisterImpactEffects(const char *mapname);
 FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname);
+
+
+
+// cg_info
+void __cdecl CG_LoadingString(int localClientNum, const char *s);
+void __cdecl CG_DrawInformation(int localClientNum);
+bool __cdecl CG_IsShowingProgress_FastFile();

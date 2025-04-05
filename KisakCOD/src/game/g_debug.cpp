@@ -1,4 +1,5 @@
 #include "game_public.h"
+#include <client/client.h>
 
 
 void __cdecl G_DebugLine(const float *start, const float *end, const float *color, int depthTest)

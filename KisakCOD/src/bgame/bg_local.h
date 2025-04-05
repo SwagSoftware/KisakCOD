@@ -1887,5 +1887,18 @@ double __cdecl PM_PermuteRestrictiveClipPlanes(
     int *permutation);
 
 
+// bg_weapons_load_obj
+char *__cdecl BG_GetPlayerAnimTypeName(int index);
+void __cdecl TRACK_bg_weapons_load_obj();
+const char *__cdecl BG_GetWeaponTypeName(weapType_t type);
+const char *__cdecl BG_GetWeaponClassName(weapClass_t type);
+const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type);
+void __cdecl BG_LoadWeaponStrings();
+void __cdecl BG_LoadPlayerAnimTypes();
+WeaponDef *__cdecl BG_LoadDefaultWeaponDef();
+WeaponDef *__cdecl BG_LoadDefaultWeaponDef_FastFile();
+
+
+
 // bg_misctables
 extern _DWORD bg_itemlist[2048];

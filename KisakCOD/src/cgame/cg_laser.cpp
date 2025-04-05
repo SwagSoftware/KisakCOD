@@ -1,5 +1,7 @@
 #include "cg_local.h"
 #include "cg_public.h"
+#include <xanim/dobj.h>
+#include <cgame_mp/cg_local_mp.h>
 
 
 

@@ -158,6 +158,7 @@
     <ClCompile Include="src\cgame\cg_effects_load_obj.cpp" />
     <ClCompile Include="src\cgame\cg_event.cpp" />
     <ClCompile Include="src\cgame\cg_hudelem.cpp" />
+    <ClCompile Include="src\cgame\cg_info.cpp" />
     <ClCompile Include="src\cgame\cg_laser.cpp" />
     <ClCompile Include="src\cgame\cg_localents.cpp" />
     <ClCompile Include="src\cgame\cg_playerstate.cpp" />
@@ -236,6 +237,7 @@
     <ClCompile Include="src\EffectsCore\fx_update_util.cpp" />
     <ClCompile Include="src\game\bullet.cpp" />
     <ClCompile Include="src\game\enthandle.cpp" />
+    <ClCompile Include="src\game\g_bsp.cpp" />
     <ClCompile Include="src\game\g_client_fields.cpp" />
     <ClCompile Include="src\game\g_debug.cpp" />
     <ClCompile Include="src\game\g_helicopter.cpp" />
@@ -267,6 +269,7 @@
     <ClCompile Include="src\gfx_d3d\rb_backend.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_depthprepass.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_draw3d.cpp" />
+    <ClCompile Include="src\gfx_d3d\rb_drawprofile.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_fog.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_imagefilter.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_light.cpp" />
@@ -294,6 +297,7 @@
     <ClCompile Include="src\gfx_d3d\r_dpvs_dynmodel.cpp" />
     <ClCompile Include="src\gfx_d3d\r_dpvs_entity.cpp" />
     <ClCompile Include="src\gfx_d3d\r_dpvs_sceneent.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_draw_bsp.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_material.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_method.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_pixelshader.cpp" />
@@ -377,6 +381,7 @@
     <ClCompile Include="src\qcommon\common.cpp" />
     <ClCompile Include="src\qcommon\com_bsp.cpp" />
     <ClCompile Include="src\qcommon\com_bsp_load_obj.cpp" />
+    <ClCompile Include="src\qcommon\com_fileaccess.cpp" />
     <ClCompile Include="src\qcommon\com_playerprofile.cpp" />
     <ClCompile Include="src\qcommon\com_profilemapload.cpp" />
     <ClCompile Include="src\qcommon\dobj_management.cpp" />
@@ -407,6 +412,7 @@
     <ClCompile Include="src\script\scr_vm.cpp" />
     <ClCompile Include="src\server\sv_game.cpp" />
     <ClCompile Include="src\server\sv_main.cpp" />
+    <ClCompile Include="src\server\sv_world.cpp" />
     <ClCompile Include="src\server_mp\sv_archive_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_init_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_main_mp.cpp" />
@@ -434,6 +440,7 @@
     <ClCompile Include="src\universal\fft.cpp" />
     <ClCompile Include="src\universal\physicalmemory.cpp" />
     <ClCompile Include="src\universal\pool_allocator.cpp" />
+    <ClCompile Include="src\universal\profile.cpp" />
     <ClCompile Include="src\universal\q_parse.cpp" />
     <ClCompile Include="src\universal\q_shared.cpp" />
     <ClCompile Include="src\universal\surfaceflags.cpp" />
@@ -507,6 +514,7 @@
     <ClInclude Include="src\gfx_d3d\rb_backend.h" />
     <ClInclude Include="src\gfx_d3d\rb_depthprepass.h" />
     <ClInclude Include="src\gfx_d3d\rb_draw3d.h" />
+    <ClInclude Include="src\gfx_d3d\rb_drawprofile.h" />
     <ClInclude Include="src\gfx_d3d\rb_fog.h" />
     <ClInclude Include="src\gfx_d3d\rb_imagefilter.h" />
     <ClInclude Include="src\gfx_d3d\rb_light.h" />
@@ -527,6 +535,7 @@
     <ClInclude Include="src\gfx_d3d\r_debug.h" />
     <ClInclude Include="src\gfx_d3d\r_devgui.h" />
     <ClInclude Include="src\gfx_d3d\r_dpvs.h" />
+    <ClInclude Include="src\gfx_d3d\r_draw_bsp.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_material.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_method.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_shadowable_light.h" />
@@ -602,6 +611,7 @@
     <ClInclude Include="src\qcommon\bitarray.h" />
     <ClInclude Include="src\qcommon\cmd.h" />
     <ClInclude Include="src\qcommon\com_bsp.h" />
+    <ClInclude Include="src\qcommon\com_fileaccess.h" />
     <ClInclude Include="src\qcommon\com_playerprofile.h" />
     <ClInclude Include="src\qcommon\ent.h" />
     <ClInclude Include="src\qcommon\files.h" />
@@ -612,8 +622,14 @@
     <ClInclude Include="src\qcommon\net_chan_mp.h" />
     <ClInclude Include="src\qcommon\sv_msg_write_mp.h" />
     <ClInclude Include="src\ragdoll\ragdoll.h" />
+    <ClInclude Include="src\script\scr_animtree.h" />
     <ClInclude Include="src\script\scr_const.h" />
+    <ClInclude Include="src\script\scr_debugger.h" />
+    <ClInclude Include="src\script\scr_evaluate.h" />
+    <ClInclude Include="src\script\scr_parser.h" />
+    <ClInclude Include="src\script\scr_parsetree.h" />
     <ClInclude Include="src\server\sv_game.h" />
+    <ClInclude Include="src\server\sv_world.h" />
     <ClInclude Include="src\server_mp\server.h" />
     <ClInclude Include="src\sound\snd_local.h" />
     <ClInclude Include="src\sound\snd_public.h" />
@@ -654,6 +670,7 @@
     <ClInclude Include="src\xanim\dobj.h" />
     <ClInclude Include="src\xanim\dobj_utils.h" />
     <ClInclude Include="src\xanim\xanim.h" />
+    <ClInclude Include="src\xanim\xanim_calc.h" />
     <ClInclude Include="src\xanim\xanim_load_db.h" />
     <ClInclude Include="src\xanim\xanim_public.h" />
     <ClInclude Include="src\xanim\xmodel.h" />

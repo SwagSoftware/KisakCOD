@@ -1,38 +1,45 @@
 #pragma once
 #include "r_gfx.h"
+#include "r_font.h"
+#include <universal/profile.h>
 
-struct ProfileAtom // sizeof=0x4
-{                                       // ...
-    unsigned int value[1];              // ...
-};
-struct ProfileWritable // sizeof=0x1C
-{                                       // ...
-    int nesting;
-    unsigned int hits;
-    ProfileAtom start[3];
-    ProfileAtom total;
-    ProfileAtom child;
-};
-volatile struct ProfileReadable // sizeof=0xC
-{                                       // ...
-    unsigned int hits;
-    ProfileAtom total;                  // ...
-    ProfileAtom self;                   // ...
-};
 
-struct ProfileDrawInfo // sizeof=0x8
+struct __declspec(align(8)) DrawProfileGlobals // sizeof=0x81A8
 {                                       // ...
-    int probeIndex;
-    int indentation;
+    Font_s *font;                       // ...
+    float fontWidth;                    // ...
+    float fontHeight;                   // ...
+    GfxColor textColor;                 // ...
+    GfxColor labelColor;                // ...
+    ProfileProbe log[5];                // ...
+    int sortedProbeIndices[432];        // ...
+    int lastSortTime;                   // ...
+    ProfileReadableGlobal global[432];  // ...
+    int devguiSelection;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
 };
 
-struct ProfileSettings // sizeof=0x20
+struct SourceBufferInfo // sizeof=0x2C
 {
-    const char *name;
-    const ProfileDrawInfo *profDrawInfo;
-    int infoCount;
-    int defaultProbeIndex[5];
+    const char *codePos;
+    char *buf;
+    const char *sourceBuf;
+    int len;
+    int sortedIndex;
+    bool archive;
+    // padding byte
+    // padding byte
+    // padding byte
+    int time;
+    int avgTime;
+    int maxTime;
+    float totalTime;
+    float totalBuiltIn;
 };
+
 
 void __cdecl TRACK_rb_drawprofile();
 void __cdecl RB_AddProfileThread(int threadContext);

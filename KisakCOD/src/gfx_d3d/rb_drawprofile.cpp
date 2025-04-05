@@ -1,5 +1,13 @@
 #include "rb_drawprofile.h"
 #include <qcommon/mem_track.h>
+#include "r_dvars.h"
+#include <qcommon/qcommon.h>
+#include "rb_shade.h"
+#include <qcommon/threads.h>
+#include <script/scr_parser.h>
+
+DrawProfileGlobals drawProfGlob;
+float g_tally;
 
 
 void __cdecl TRACK_rb_drawprofile()
@@ -15,21 +23,21 @@ void __cdecl RB_AddProfileThread(int threadContext)
     int atomType; // [esp+1Ch] [ebp-8h]
     profile_t *prof; // [esp+20h] [ebp-4h]
 
-    prof_stack = //Profile_GetStackForContext(threadContext);
-        for (profEnum = 0; profEnum < 432; ++profEnum)
+    prof_stack = Profile_GetStackForContext(threadContext);
+    for (profEnum = 0; profEnum < 432; ++profEnum)
+    {
+        prof = &prof_stack->prof_array[profEnum];
+        global = &drawProfGlob.global[profEnum];
+        global->hits += prof_stack->prof_array[profEnum].read.hits;
+        for (atomType = 0; atomType < 1; ++atomType)
         {
-            prof = &prof_stack->prof_array[profEnum];
-            global = &drawProfGlob.global[profEnum];
-            global->hits += prof_stack->prof_array[profEnum].read.hits;
-            for (atomType = 0; atomType < 1; ++atomType)
-            {
-                global->read.self.value[atomType] += prof->read.self.value[atomType];
-                global->read.total.value[atomType] += prof->read.total.value[atomType];
-            }
-            global->selfClks = (double)prof_stack->prof_array[profEnum].read.self.value[0] + global->selfClks;
-            global->totalClks = (double)prof_stack->prof_array[profEnum].read.total.value[0] + global->totalClks;
-            global->read.hits += prof_stack->prof_array[profEnum].read.hits;
+            global->read.self.value[atomType] += prof->read.self.value[atomType];
+            global->read.total.value[atomType] += prof->read.total.value[atomType];
         }
+        global->selfClks = (double)prof_stack->prof_array[profEnum].read.self.value[0] + global->selfClks;
+        global->totalClks = (double)prof_stack->prof_array[profEnum].read.total.value[0] + global->totalClks;
+        global->read.hits += prof_stack->prof_array[profEnum].read.hits;
+    }
 }
 
 char __cdecl RB_IsUsingAnyProfile()
@@ -44,6 +52,30 @@ char __cdecl RB_IsUsingAnyProfile()
             return 1;
     }
     return 0;
+}
+
+void __cdecl RB_DrawSlowProfileOverlay(int(__cdecl *compare)(const void *, const void *))
+{
+    int row; // [esp+8h] [ebp-10h]
+    int probeIndex; // [esp+Ch] [ebp-Ch]
+    DWORD currTime; // [esp+10h] [ebp-8h]
+    float y; // [esp+14h] [ebp-4h]
+
+    currTime = Sys_Milliseconds();
+    if (prof_sortTime->current.value * 1000.0 <= (double)(int)(currTime - drawProfGlob.lastSortTime)
+        || (int)(currTime - drawProfGlob.lastSortTime) < 0)
+    {
+        drawProfGlob.lastSortTime = currTime;
+        for (probeIndex = 0; probeIndex < 432; ++probeIndex)
+            drawProfGlob.sortedProbeIndices[probeIndex] = probeIndex;
+        qsort(drawProfGlob.sortedProbeIndices, 0x1B0u, 4u, compare);
+    }
+    RB_DrawAllProfileBackgrounds(0, profile_rowcount->current.integer);
+    RB_DrawProfileHistory(0);
+    y = RB_DrawProfileLabels();
+    g_tally = 0.0;
+    for (row = 0; row < profile_rowcount->current.integer; ++row)
+        y = RB_DrawProfileRow(drawProfGlob.sortedProbeIndices[row], 0, y);
 }
 
 void __cdecl RB_DrawProfile()
@@ -68,8 +100,8 @@ void __cdecl RB_DrawProfile()
             memset((unsigned __int8 *)drawProfGlob.global, 0, sizeof(drawProfGlob.global));
             for (profEnum = 0; profEnum < 432; ++profEnum)
                 drawProfGlob.global[profEnum].min.value[0] = -1;
-            Dvar_ClearModified(profile);
-            Dvar_ClearModified(profile_thread);
+            Dvar_ClearModified((dvar_s*)profile);
+            Dvar_ClearModified((dvar_s*)profile_thread);
         }
         else
         {
@@ -81,16 +113,16 @@ void __cdecl RB_DrawProfile()
                 p_read->self.value[0] = 0;
             }
         }
-        threadContext = //Profile_GetDisplayThread();
-            if (threadContext >= gfxCfg.threadContextCount)
-            {
-                for (threadContexta = 0; threadContexta < gfxCfg.threadContextCount; ++threadContexta)
-                    RB_AddProfileThread(threadContexta);
-            }
-            else
-            {
-                RB_AddProfileThread(threadContext);
-            }
+        threadContext = Profile_GetDisplayThread();
+        if (threadContext >= gfxCfg.threadContextCount)
+        {
+            for (threadContexta = 0; threadContexta < gfxCfg.threadContextCount; ++threadContexta)
+                RB_AddProfileThread(threadContexta);
+        }
+        else
+        {
+            RB_AddProfileThread(threadContext);
+        }
         for (profEnumb = 0; profEnumb < 432; ++profEnumb)
         {
             global = &drawProfGlob.global[profEnumb];
@@ -163,8 +195,8 @@ void __cdecl RB_DrawProfileHistory(const ProfileSettings *profSettings)
         profEnum = historyProfEnum[probeIndex];
         if (profEnum)
         {
-            parity = //Profile_GetEnumParity(profEnum);
-                RB_DrawProfileHistoryGraph(&drawProfGlob.global[profEnum].read, parity, probeIndex, x, y);
+            parity = Profile_GetEnumParity(profEnum);
+            RB_DrawProfileHistoryGraph(&drawProfGlob.global[profEnum].read, parity, probeIndex, x, y);
             x = x + 124.0;
         }
     }
@@ -463,15 +495,15 @@ double __cdecl RB_DrawProfileRow(int probeIndex, int indentation, float y)
         v11 = va("%5u", drawProfGlob.global[probeIndex].read.hits);
         RB_DrawProfileString(79, y, v11, v23);
         if (avgHits == 0.0 || avgHits >= 10.0)
-            format = "%5.0f";
+            format = (char*)"%5.0f";
         else
-            format = "%5.1f";
+            format = (char*)"%5.1f";
         v24.packed = (unsigned int)drawProfGlob.textColor;
         v12 = va(format, avgHits);
         RB_DrawProfileString(84, y, v12, v24);
         if (avgHits == 0.0)
         {
-            s = "      ";
+            s = (char*)"      ";
         }
         else
         {
@@ -610,7 +642,7 @@ void __cdecl RB_DrawProfileScript()
 
     if (profile_script->current.enabled)
     {
-        profile = //Profile_GetScript();
+        profile = Profile_GetScript();
             RB_DrawProfileBackground(30.0);
         RB_DrawProfileString(5, 30.0, "Probe Name", drawProfGlob.labelColor);
         RB_DrawProfileString(28, 30.0, " Current", drawProfGlob.labelColor);
@@ -648,7 +680,7 @@ void __cdecl RB_DrawProfileScript()
     }
     else if (profile_script_by_file->current.enabled)
     {
-        profilea = //Profile_GetScript();
+        profilea = Profile_GetScript();
             RB_DrawProfileBackground(30.0);
         RB_DrawProfileString(1, 30.0, " File", drawProfGlob.labelColor);
         RB_DrawProfileString(33, 30.0, "Current", drawProfGlob.labelColor);
