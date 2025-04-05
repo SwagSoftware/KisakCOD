@@ -1,5 +1,10 @@
 #pragma once
 
+constexpr size_t MAX_EFFECTS = 1024;
+constexpr size_t MAX_ELEMS = 2048;
+constexpr size_t MAX_TRAILS = 128;
+constexpr size_t MAX_TRAIL_ELEMS = 2048;
+           
 struct Material;
 
 struct r_double_index_t // sizeof=0x4
@@ -118,6 +123,8 @@ struct FxElem // sizeof=0x28
     };
     //FxElem::<unnamed_type_u> u;
     FxElem_u u;
+
+    static constexpr size_t HANDLE_SCALE = 4;
 };
 struct FxTrail // sizeof=0x8
 {                                       // ...
@@ -126,6 +133,8 @@ struct FxTrail // sizeof=0x8
     unsigned __int16 lastElemHandle;    // ...
     char defIndex;                      // ...
     char sequence;                      // ...
+
+    static constexpr size_t HANDLE_SCALE = 4;
 };
 struct FxTrailElem // sizeof=0x20
 {                                       // ...
@@ -137,6 +146,8 @@ struct FxTrailElem // sizeof=0x20
     char basis[2][3];
     unsigned __int8 sequence;
     unsigned __int8 unused;
+
+    static constexpr size_t HANDLE_SCALE = 4;
 };
 struct FxVisBlocker // sizeof=0x10
 {                                       // ...
@@ -455,11 +466,30 @@ struct FxImpactTable // sizeof=0x8
 };
 struct FxSystemBuffers // sizeof=0x47480
 {                                       // ...
-    FxEffect effects[1024];
-    FxPool<FxElem> elems[2048];
-    FxPool<FxTrail> trails[128];
-    FxPool<FxTrailElem> trailElems[2048];
+    FxEffect effects[MAX_EFFECTS];
+    FxPool<FxElem> elems[MAX_ELEMS];
+    FxPool<FxTrail> trails[MAX_TRAILS];
+    FxPool<FxTrailElem> trailElems[MAX_TRAIL_ELEMS];
     FxVisState visState[2];
     unsigned __int16 deferredElems[2048];
     unsigned __int8 padBuffer[96];
 };
+
+template<typename ITEM_TYPE, size_t LIMIT>
+uint16 FX_PoolToHandle_Generic(FxPool<ITEM_TYPE>* poolArray, ITEM_TYPE* item)
+{
+    static_assert((LIMIT * ITEM_TYPE::HANDLE_SCALE) <= 0xFFFF, "do not support huge pools at the moment");
+
+    if (!item || item < poolArray || item >= &poolArray[LIMIT])
+    {
+        vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", ppolArray, item);
+    }
+    return ((char*)item - (char*)poolArray) / ITEM_TYPE::HANDLE_SCALE;
+}
+
+template<typename ITEM_TYPE, size_t LIMIT>
+FxPool<ITEM_TYPE>* FX_PoolFromHandle_Generic(FxPool<ITEM_TYPE>* poolArray, uint handle)
+{
+    vassert(handle < (LIMIT * sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) && handle % (sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) == 0, "%p %u", poolArray, handle);
+    return (FxPool<FxElem> *)((char*)poolArray + (handle * ITEM_TYPE::HANDLE_SCALE));
+}

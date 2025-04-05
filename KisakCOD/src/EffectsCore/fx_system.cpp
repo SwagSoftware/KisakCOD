@@ -150,7 +150,7 @@ FxSystemBuffers *__cdecl FX_GetSystemBuffers(int clientIndex)
 void __cdecl FX_LinkSystemBuffers(FxSystem *system, FxSystemBuffers *systemBuffers)
 {
     system->elems = systemBuffers->elems;
-    system->effects = (FxEffect *)systemBuffers;
+    system->effects = systemBuffers->effects;
     system->trails = systemBuffers->trails;
     system->trailElems = systemBuffers->trailElems;
     system->visState = systemBuffers->visState;

@@ -4800,3 +4800,8 @@ double __cdecl SND_GetVolumeNormalized()
     return (float)(g_snd.volume * 1.333333373069763);
 }
 
+void __cdecl SND_SetHWND(HWND* hwnd)
+{
+    if (g_snd.Initialized2d)
+        AIL_set_DirectSound_HWND(milesGlob.driver, hwnd);
+}

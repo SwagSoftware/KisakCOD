@@ -439,6 +439,7 @@
     <ClCompile Include="src\universal\dvar.cpp" />
     <ClCompile Include="src\universal\dvar_cmds.cpp" />
     <ClCompile Include="src\universal\fft.cpp" />
+    <ClCompile Include="src\universal\memfile.cpp" />
     <ClCompile Include="src\universal\physicalmemory.cpp" />
     <ClCompile Include="src\universal\pool_allocator.cpp" />
     <ClCompile Include="src\universal\profile.cpp" />

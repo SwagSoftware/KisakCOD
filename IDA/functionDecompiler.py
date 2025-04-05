@@ -14,7 +14,8 @@ import os
 import shutil
 
 # Windows users must escape reverse slash in path: \\
-outputPath: str = "C:\\Users\\M1911\\Documents\\kisak-COD"
+currentDir: str = os.path.dirname(__file__)
+outputPath: str = os.path.join(currentDir, "..")
 functionsPath: str = os.path.join(outputPath, "functions")
 
 def remove_last_occurrence(text, char_to_remove):
@@ -43,7 +44,7 @@ def main() -> None:
     decompglob: str = ""
     decompheaderglob: str = ""
     inputlines: str = ""
-    with open('C:\\Users\\M1911\\Documents\\kisak-COD\\targetfuncs.txt') as file:
+    with open(os.path.join(currentDir, "targetfuncs.txt")) as file:
         inputlines = file.readlines()
         
     for line in inputlines:
@@ -102,10 +103,10 @@ def main() -> None:
             functionCounter -= 1            
 
     IDAConsolePrint(f"[!] Successfully decompiled %s functions! [!]" % str(functionCounter - 1))
-    with open('C:\\Users\\M1911\\Documents\\kisak-COD\\decompout.txt', "w") as outfile:
+    with open(os.path.join(currentDir, "decompout.txt"), "w") as outfile:
         outfile.write("%s" % decompglob)
         
-    with open('C:\\Users\\M1911\\Documents\\kisak-COD\\decompheaderglob.txt', "w") as outfile:
+    with open(os.path.join(currentDir, "decompheaderglob.txt"), "w") as outfile:
         outfile.write("%s" % decompheaderglob)
 
 def initHexraysPlugin() -> None:

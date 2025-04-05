@@ -834,6 +834,8 @@ void __cdecl FX_ProcessLooping(
                 distanceTravelledEnd);
     }
 }
+
+
 void __cdecl FX_UpdateEffectPartialForClass(
     FxSystem* system,
     FxEffect* effect,
@@ -852,6 +854,9 @@ void __cdecl FX_UpdateEffectPartialForClass(
     FxPool<FxElem>* elema; // [esp+28h] [ebp-Ch]
     unsigned int passCount; // [esp+2Ch] [ebp-8h]
     unsigned __int16 elemHandleFirstExisting; // [esp+30h] [ebp-4h]
+
+    int unk1;
+    int unk2;
 
     if (effect->msecLastUpdate > msecUpdateEnd)
         MyAssertHandler(
@@ -881,8 +886,8 @@ void __cdecl FX_UpdateEffectPartialForClass(
                 Com_Printf(
                     0,
                     "update period is from %d to %d (%d ms)\n", // change from lg to d
-                    COERCE_LONG_DOUBLE(__PAIR64__(msecUpdateEnd, msecUpdateBegin)),
-                    *&v7,
+                    msecUpdateEnd, msecUpdateBegin,
+                    v7,
                     lifeSpan);
                 Com_Printf(0, "here's the active elem list:\n");
                 for (elemHandle = effect->firstElemHandle[elemClass];
@@ -891,13 +896,13 @@ void __cdecl FX_UpdateEffectPartialForClass(
                 {
                     if (!system)
                         MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 334, 0, "%s", "system");
+                    // KISAKTODO this is extremely dubious at best
                     elem = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
-                    HIDWORD(lifeSpan) = (elem->item.msecBegin + effect->randomSeed + 296 * elem->item.sequence) % 0x1DF;
-                    *(&v7 + 1) = &effect->def->elemDefs[elem->item.defIndex].lifeSpanMsec;
-
-                    // TODO this is garbage
-                    LODWORD(lifeSpan) = **(&v7 + 1)
-                        + (((*(*(&v7 + 1) + 4) + 1) * LOWORD(fx_randomTable[HIDWORD(lifeSpan) + 17])) >> 16);
+                    unk1 = (elem->item.msecBegin + effect->randomSeed + 296 * (unsigned int)elem->item.sequence)
+                        % 0x1DF;
+                    unk2 = (int)&effect->def->elemDefs[elem->item.defIndex].lifeSpanMsec;
+                    lifeSpan = *(_DWORD*)unk2
+                        + (((*(_DWORD*)(unk2 + 4) + 1) * LOWORD(fx_randomTable[unk1 + 17])) >> 16);
                     Com_Printf(
                         0,
                         "  elem %i def %i seq %i spawn %i die %i\n",

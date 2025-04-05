@@ -1125,3 +1125,12 @@ static void IN_ShutdownMIDI( void )
 	Com_Memset( &s_midiInfo, 0, sizeof( s_midiInfo ) );
 }
 
+void __cdecl IN_RecenterMouse()
+{
+	tagRECT window_rect; // [esp+0h] [ebp-10h] BYREF
+
+	GetWindowRect(g_wv.hWnd, &window_rect);
+	window_center_x = (window_rect.left + window_rect.right) / 2;
+	window_center_y = (window_rect.bottom + window_rect.top) / 2;
+	SetCursorPos((window_rect.left + window_rect.right) / 2, (window_rect.bottom + window_rect.top) / 2);
+}

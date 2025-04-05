@@ -160,6 +160,11 @@ struct PhysGlob // sizeof=0x26508
     unsigned int performanceMaxtime;    // ...
 };
 
+struct dContactGeomExt // sizeof=0x30
+{                                       // ...
+    dContactGeom contact;
+    int surfFlags;
+};
 
 union BrushInfo_u // sizeof=0x4
 {                                       // ...
@@ -173,6 +178,9 @@ struct BrushInfo // sizeof=0x10
 };
 
 // phys_ode
+struct ScreenPlacement;
+struct ContactList;
+
 void __cdecl DynEntPieces_RegisterDvars();
 void __cdecl DynEntPieces_AddDrawSurfs();
 void __cdecl DynEntPieces_SpawnPieces(
@@ -455,11 +463,6 @@ struct Poly // sizeof=0x8
 {                                       // ...
     float (*pts)[3];                    // ...
     unsigned int ptCount;               // ...
-};
-struct dContactGeomExt // sizeof=0x30
-{                                       // ...
-    dContactGeom contact;
-    int surfFlags;
 };
 struct BrushTrimeshData // sizeof=0x18
 {                                       // ...

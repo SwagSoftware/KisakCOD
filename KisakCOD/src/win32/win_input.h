@@ -1,7 +1,7 @@
 #ifndef _WIN_INPUT_H_
 #define _WIN_INPUT_H_
 
-#include "../client/keycodes.h"
+#include "../ui/keycodes.h"
 
 bool IN_ControllersChanged(int inserted[], int removed[]);
 
@@ -27,6 +27,7 @@ void	IN_KillRumbleScripts( void );
 
 // LWSS add
 void IN_ActivateMouse(qboolean force);
+void __cdecl IN_RecenterMouse();
 
 // LWSS end
 
@@ -78,8 +79,8 @@ void	IN_SetMainController(int id);
 void	IN_PadUnplugged(int controller);
 void	IN_PadPlugged(int controller);
 
-void	IN_CommonJoyPress(int controller, fakeAscii_t button, bool pressed);
-void	IN_CommonUpdate(void);
+// void	IN_CommonJoyPress(int controller, fakeAscii_t button, bool pressed);
+// void	IN_CommonUpdate(void);
 
 #define IN_MAX_JOYSTICKS 2
 // Stores gamepad joystick info

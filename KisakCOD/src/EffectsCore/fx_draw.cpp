@@ -937,7 +937,7 @@ void __cdecl FX_DrawNonSpriteEffect(FxSystem *system, FxEffect *effect, unsigned
         {
             if (!system)
                 MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 334, 0, "%s", "system");
-            elem = (FxElem *)FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
+            elem = &FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle)->item;
             elemDef = &elemDefs[elem->defIndex];
             if (elemDef->elemType <= 3u)
                 MyAssertHandler(

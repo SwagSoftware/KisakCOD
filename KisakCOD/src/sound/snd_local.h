@@ -141,7 +141,6 @@ void __cdecl SND_DriverPostUpdate();
 void __cdecl SND_Update2DChannel(int i, int frametime);
 void __cdecl SND_Update3DChannel(int i, int frametime);
 void __cdecl SND_UpdateStreamChannel(int i, int frametime);
-double __cdecl MemFile_ReadFloat(MemoryFile *memFile);
 
 
 

@@ -4,6 +4,8 @@
 #include <qcommon/mem_track.h>
 #include <qcommon/threads.h>
 
+#include <EffectsCore/fx_system.h>
+
 #include <string.h>
 
 //Line 53466:  0006 : 02bc009c       int marker_q_shared      8537009c     q_shared.obj
@@ -865,7 +867,7 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
     }
 }
 
-void __cdecl Info_SetValueForKey_Big(char *s, char *key, const char *value)
+void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value)
 {
     int v3; // eax
     int v4; // eax
@@ -902,21 +904,21 @@ void __cdecl Info_SetValueForKey_Big(char *s, char *key, const char *value)
         strchr(key, 0x5Cu);
         if (v3)
         {
-            Com_Printf(16, (char *)"Can't use keys with a \\ key: %s value: %s", key, value);
+            Com_Printf(16, "Can't use keys with a \\ key: %s value: %s", key, value);
         }
         else
         {
             strchr(key, 0x3Bu);
             if (v4)
             {
-                Com_Printf(16, (char *)"Can't use keys with a semicolon. key: %s value: %s", key, value);
+                Com_Printf(16, "Can't use keys with a semicolon. key: %s value: %s", key, value);
             }
             else
             {
                 strchr(key, 0x22u);
                 if (v5)
                 {
-                    Com_Printf(16, (char *)"Can't use keys with a \". key: %s value: %s", key, value);
+                    Com_Printf(16, "Can't use keys with a \". key: %s value: %s", key, value);
                 }
                 else
                 {
@@ -929,11 +931,11 @@ void __cdecl Info_SetValueForKey_Big(char *s, char *key, const char *value)
                             if (strlen(s) + &v11[strlen(&dest)] - v11 <= 0x400)
                                 memcpy(&s[strlen(s)], &dest, (char*)&v11[strlen(&dest)] - &dest);
                             else
-                                Com_Printf(16, (char *)"Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);
+                                Com_Printf(16, "Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);
                         }
                         else
                         {
-                            Com_Printf(16, (char *)"Info buffer length exceeded, not including key/value pair in response.");
+                            Com_Printf(16, "Info buffer length exceeded, not including key/value pair in response.");
                         }
                     }
                 }
@@ -942,7 +944,7 @@ void __cdecl Info_SetValueForKey_Big(char *s, char *key, const char *value)
     }
     else
     {
-        Com_Printf(16, (char *)"Info_SetValueForKey_Big: oversize infostring");
+        Com_Printf(16, "Info_SetValueForKey_Big: oversize infostring");
     }
 }
 

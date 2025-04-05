@@ -1074,7 +1074,7 @@ bool __cdecl FX_LoadEditorEffect(const char *name, FxEditorEffectDef *edEffectDe
     }
 }
 
-unsigned __int8 *__cdecl FX_AllocMem(unsigned int size)
+void* FX_AllocMem(unsigned int size)
 {
     return Hunk_AllocAlign(size, 4, "FX_Alloc", 8);
 }
@@ -1382,7 +1382,7 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
     _DWORD *v6; // [esp+30h] [ebp-28h]
     _DWORD *v7; // [esp+34h] [ebp-24h]
     unsigned int baseBytesNeeded; // [esp+40h] [ebp-18h]
-    unsigned __int8 *effectDef; // [esp+48h] [ebp-10h]
+    byte *effectDef; // [esp+48h] [ebp-10h]
     int relocationDistance; // [esp+4Ch] [ebp-Ch]
     int elemIndex; // [esp+54h] [ebp-4h]
 
@@ -1405,7 +1405,7 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
     }
     v5 = &fx_load.defaultEffect->name[strlen(fx_load.defaultEffect->name) + 1];
     baseBytesNeeded = fx_load.defaultEffect->totalSize - (v5 - fx_load.defaultEffect->name);
-    effectDef = FX_AllocMem(fx_load.defaultEffect->totalSize - (v5 - (fx_load.defaultEffect->name + 1)) + strlen(name));
+    effectDef = (byte *)FX_AllocMem(fx_load.defaultEffect->totalSize - (v5 - (fx_load.defaultEffect->name + 1)) + strlen(name));
     memcpy(effectDef, (unsigned __int8 *)fx_load.defaultEffect, baseBytesNeeded);
     *(_DWORD *)effectDef = (_DWORD)&effectDef[baseBytesNeeded];
     v4 = name;
@@ -1427,24 +1427,18 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
     return (const FxEffectDef *)effectDef;
 }
 
-const FxEffectDef *__cdecl FX_Load(char *name)
+const FxEffectDef *__cdecl FX_Load(const char *name)
 {
     char v2; // [esp+3h] [ebp-10B61h]
     FxEditorEffectDef *p_edEffectDef; // [esp+8h] [ebp-10B5Ch]
-    char *v4; // [esp+Ch] [ebp-10B58h]
+    const char *v4; // [esp+Ch] [ebp-10B58h]
     const FxEffectDef *v5; // [esp+10h] [ebp-10B54h]
     FxEditorEffectDef edEffectDef; // [esp+14h] [ebp-10B50h] BYREF
 
     v4 = name;
-    p_edEffectDef = &edEffectDef;
-    do
-    {
-        v2 = *v4;
-        p_edEffectDef->name[0] = *v4++;
-        p_edEffectDef = (FxEditorEffectDef *)((char *)p_edEffectDef + 1);
-    } while (v2);
+    strcpy_s(p_edEffectDef->name, name);
     if (FX_LoadEditorEffect(name, &edEffectDef)
-        && (v5 = FX_Convert(&edEffectDef, (void *(__cdecl *)(int))FX_AllocMem)) != 0)
+        && (v5 = FX_Convert(&edEffectDef, &FX_AllocMem)) != 0)
     {
         return v5;
     }
@@ -1454,14 +1448,7 @@ const FxEffectDef *__cdecl FX_Load(char *name)
     }
 }
 
-PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name)
-{
-    if (!name)
-        MyAssertHandler(".\\EffectsCore\\fx_load_obj.cpp", 246, 0, "%s", "name");
-    return PhysPresetPrecache(name, (void *(__cdecl *)(int))Hunk_AllocPhysPresetPrecache);
-}
-
-int __cdecl FX_HashName(char *name)
+int __cdecl FX_HashName(const char *name)
 {
     __int16 hash; // [esp+4h] [ebp-Ch]
     char letter; // [esp+Bh] [ebp-5h]
@@ -1487,7 +1474,7 @@ int __cdecl FX_HashName(char *name)
     return hash & 0x1FF;
 }
 
-int __cdecl FX_GetHashIndex(char *name, bool *exists)
+int __cdecl FX_GetHashIndex(const char *name, bool *exists)
 {
     int hashIndex; // [esp+0h] [ebp-4h]
 
@@ -1507,7 +1494,7 @@ int __cdecl FX_GetHashIndex(char *name, bool *exists)
     return hashIndex;
 }
 
-const FxEffectDef *__cdecl FX_Register_LoadObj(char *name)
+const FxEffectDef *__cdecl FX_Register_LoadObj(const char *name)
 {
     int hashIndex; // [esp+0h] [ebp-8h]
     bool exists; // [esp+7h] [ebp-1h] BYREF
@@ -1520,7 +1507,7 @@ const FxEffectDef *__cdecl FX_Register_LoadObj(char *name)
     return fx_load.effectDefs[hashIndex];
 }
 
-const FxEffectDef *__cdecl FX_Register(char *name)
+const FxEffectDef *__cdecl FX_Register(const char *name)
 {
     if (useFastFile->current.enabled)
         return FX_Register_FastFile(name);

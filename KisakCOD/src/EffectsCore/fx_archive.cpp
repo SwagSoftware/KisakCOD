@@ -246,7 +246,7 @@ void __cdecl FX_SavePhysicsData(FxSystem *system, MemoryFile *memFile)
             elem = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
             elemDef = &effect->def->elemDefs[elem->item.defIndex];
             elemHandleNext = elem->item.nextElemHandleInEffect;
-            if (elemDef->elemType == 5 && ((unsigned int)svs.snapshotClients[20582].attachModelIndex & elemDef->flags) != 0)
+            if (elemDef->elemType == 5 && (elemDef->flags & 0x8000000) != 0)
                 Phys_ObjSave((dxBody *)elem->item.physObjId, memFile);
         }
     }

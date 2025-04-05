@@ -1703,14 +1703,3 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
         }
     }
 }
-
-double __cdecl MemFile_ReadFloat(MemoryFile *memFile)
-{
-    float value; // [esp+4h] [ebp-4h] BYREF
-
-    MemFile_ReadData(memFile, 4, (unsigned __int8 *)&value);
-    if ((LODWORD(value) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal/memfile.h", 173, 0, "%s", "!IS_NAN(value)");
-    return value;
-}
-

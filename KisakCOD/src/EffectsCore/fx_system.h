@@ -1302,4 +1302,4 @@ PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name);
 
 
 // fx_convert
-const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(__cdecl *Alloc)(int));
+const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(* Alloc)(unsigned int));

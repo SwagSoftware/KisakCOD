@@ -1,7 +1,16 @@
 #include "win_local.h"
+#include "win_input.h"
 
-#include "../ui/keycodes.h"
-#include "../qcommon/qcommon.h"
+#include <qcommon/qcommon.h>
+
+#include <client/client.h>
+#include <client_mp/client_mp.h>
+
+#include <ui/keycodes.h>
+
+#include <sound/snd_public.h>
+
+#include <gfx_d3d/r_dvars.h>
 
 static UINT MSH_MOUSEWHEEL;
 
@@ -184,6 +193,20 @@ static byte extendedVirtualKeyConvert[21][2] =
 	{ 0xFC,				K_ASCII_252		},
 	{ 0,				0				},
 };
+
+static bool IsNumLockAffectedVK(unsigned int wParam)
+{
+	return wParam >= 0x60 && wParam <= 0x69 || wParam == 110;
+}
+
+static unsigned int AdustKeyForNumericKeypad(unsigned int key, unsigned int wParam, unsigned int extended)
+{
+	if ((clientUIActives[0].keyCatchers & 0x11) == 0)
+		return key;
+	if (extended)
+		return key;
+	return !IsNumLockAffectedVK(wParam) ? key : 0;
+}
 
 static unsigned char MapKey(int key, unsigned int wParam)
 {

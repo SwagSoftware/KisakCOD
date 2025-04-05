@@ -24,28 +24,18 @@ struct directory_t // sizeof=0x200
     char path[256];
     char gamedir[256];
 };
-struct searchpath_s // sizeof=0x1C
-{
-    searchpath_s *next;
-    iwd_t *iwd;
-    directory_t *dir;
-    int bLocalized;
-    int ignore;
-    int ignorePureCheck;
-    int language;
-};
 struct fileInIwd_s // sizeof=0xC
 {
     unsigned int pos;
-    char *name;
-    fileInIwd_s *next;
+    char* name;
+    fileInIwd_s* next;
 };
 struct iwd_t // sizeof=0x324
 {
     char iwdFilename[256];
     char iwdBasename[256];
     char iwdGamename[256];
-    unsigned __int8 *handle;
+    unsigned __int8* handle;
     int checksum;
     int pure_checksum;
     volatile int hasOpenFile;
@@ -55,8 +45,18 @@ struct iwd_t // sizeof=0x324
     // padding byte
     // padding byte
     unsigned int hashSize;
-    fileInIwd_s **hashTable;
-    fileInIwd_s *buildBuffer;
+    fileInIwd_s** hashTable;
+    fileInIwd_s* buildBuffer;
+};
+struct searchpath_s // sizeof=0x1C
+{
+    searchpath_s *next;
+    iwd_t *iwd;
+    directory_t *dir;
+    int bLocalized;
+    int ignore;
+    int ignorePureCheck;
+    int language;
 };
 
 union qfile_gus // sizeof=0x4

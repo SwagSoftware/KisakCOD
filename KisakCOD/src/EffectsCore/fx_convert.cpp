@@ -1624,7 +1624,7 @@ int __cdecl FX_GetLoopingLife(const FxEffectDef *effectDef)
     return msecLoopingLifeMax;
 }
 
-const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(__cdecl *Alloc)(int))
+const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(*Alloc)(unsigned int))
 {
     PhysPreset *v2; // eax
     int v4; // eax
