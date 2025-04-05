@@ -1,8 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-
 #include <cgame_mp/cg_local_mp.h>
+#include <script/scr_const.h>
 
 
 int __cdecl CG_GetBoneIndex(

@@ -689,6 +689,8 @@ double __cdecl FX_ClampRangeLerp(float dist, const FxFloatRange *range);
 
 
 // fx_update_util
+struct float4;
+struct float4x4;
 void __cdecl FX_OffsetSpawnOrigin(
     const FxSpatialFrame *effectFrame,
     const FxElemDef *elemDef,
@@ -901,12 +903,13 @@ char __cdecl FX_HeightScreenToWorld(
     FxGenerateVertsCmd *cmd);
 double __cdecl FX_GetClipSpaceW(const float *worldPoint, float *vieworg, float (*viewaxis)[3]);
 void __cdecl FX_GenerateSpriteCodeMeshVertsFixedWorldSize(
-    Material *material,
-    const float *pos,
+    Material* material,
+    const float* pos,
     float radius,
     float minScreenRadius,
-    __int64 rgbaColor,
-    FxGenerateVertsCmd *cmd);
+    const unsigned __int8* rgbaColor,
+    char spriteFlags,
+    FxGenerateVertsCmd* cmd);
 char __cdecl FX_HeightWorldToScreen(
     const float *worldOrigin,
     float worldHeight,

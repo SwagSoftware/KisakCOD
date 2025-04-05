@@ -13,12 +13,11 @@ unsigned __int8 *__cdecl Hunk_AllocXModelPrecacheColl(unsigned int size);
 void __cdecl R_XModelDebug(const DObj_s *obj, int *partBits);
 void __cdecl R_XModelDebugBoxes(const DObj_s *obj, int *partBits);
 void __cdecl R_XModelDebugAxes(const DObj_s *obj, int *partBits);
-int  R_SkinXModel@<eax>(
-    float a1@<ebp>,
-    XModelDrawInfo *modelInfo,
-    const XModel *model,
-    const DObj_s *obj,
-    const GfxPlacement *placement,
+int __cdecl R_SkinXModel(
+    XModelDrawInfo* modelInfo,
+    const XModel* model,
+    const DObj_s* obj,
+    const GfxPlacement* placement,
     float scale,
     __int16 gfxEntIndex);
 void __cdecl R_SkinSceneEnt(GfxSceneEntity *sceneEnt);

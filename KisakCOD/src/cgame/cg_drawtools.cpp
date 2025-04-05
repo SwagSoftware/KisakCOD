@@ -1,6 +1,10 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <client_mp/client_mp.h>
+
+#include <ui_mp/ui_mp.h>
+
 #include <gfx_d3d/r_rendercmds.h>
 #include <universal/q_parse.h>
 
@@ -281,14 +285,14 @@ float *__cdecl CG_FadeColor(int timeNow, int startMsec, int totalMsec, int fadeM
 
 void __cdecl CG_MiniMapChanged(int localClientNum)
 {
-    parseInfo_t *v1; // eax
-    parseInfo_t *v2; // eax
-    parseInfo_t *v3; // eax
-    parseInfo_t *v4; // eax
-    const char *string; // [esp+8h] [ebp-28h] BYREF
-    const char *material; // [esp+Ch] [ebp-24h]
-    float toLR[3]; // [esp+10h] [ebp-20h]
-    float south_4; // [esp+1Ch] [ebp-14h]
+    parseInfo_t* v1; // eax
+    parseInfo_t* v2; // eax
+    parseInfo_t* v3; // eax
+    parseInfo_t* v4; // eax
+    const char* string; // [esp+8h] [ebp-28h] BYREF
+    const char* material; // [esp+Ch] [ebp-24h]
+    float toLR[2]; // [esp+10h] [ebp-20h]
+    float south[2]; // [esp+18h] [ebp-18h]
     float east[2]; // [esp+20h] [ebp-10h]
     float lowerRight[2]; // [esp+28h] [ebp-8h]
 
@@ -301,28 +305,28 @@ void __cdecl CG_MiniMapChanged(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    material = (const char *)Com_Parse(&string);
-    dword_9DF71C[111] = (int)Material_RegisterHandle((char *)material, 7);
+    material = (const char*)Com_Parse(&string);
+    cgArray[0].compassMapMaterial = Material_RegisterHandle((char*)material, 7);
     v1 = Com_Parse(&string);
-    *(float *)&dword_9DF71C[112] = atof(v1->token);
+    cgArray[0].compassMapUpperLeft[0] = atof(v1->token);
     v2 = Com_Parse(&string);
-    *(float *)&dword_9DF71C[113] = atof(v2->token);
+    cgArray[0].compassMapUpperLeft[1] = atof(v2->token);
     v3 = Com_Parse(&string);
     lowerRight[0] = atof(v3->token);
     v4 = Com_Parse(&string);
     lowerRight[1] = atof(v4->token);
-    east[0] = *(float *)&dword_9DF71C[110];
-    east[1] = -*(float *)&dword_9DF71C[109];
-    toLR[2] = east[1];
-    south_4 = -*(float *)&dword_9DF71C[110];
-    toLR[0] = lowerRight[0] - *(float *)&dword_9DF71C[112];
-    toLR[1] = lowerRight[1] - *(float *)&dword_9DF71C[113];
-    *(float *)&dword_9DF71C[114] = east[1] * toLR[1] + *(float *)&dword_9DF71C[110] * toLR[0];
-    *(float *)&dword_9DF71C[115] = south_4 * toLR[1] + east[1] * toLR[0];
-    if (*(float *)&dword_9DF71C[114] == 0.0)
-        *(float *)&dword_9DF71C[114] = 1000.0;
-    if (*(float *)&dword_9DF71C[115] == 0.0)
-        *(float *)&dword_9DF71C[115] = 1000.0;
+    east[0] = cgArray[0].compassNorth[1];
+    east[1] = -cgArray[0].compassNorth[0];
+    south[0] = -cgArray[0].compassNorth[0];
+    south[1] = -cgArray[0].compassNorth[1];
+    toLR[0] = lowerRight[0] - cgArray[0].compassMapUpperLeft[0];
+    toLR[1] = lowerRight[1] - cgArray[0].compassMapUpperLeft[1];
+    cgArray[0].compassMapWorldSize[0] = east[1] * toLR[1] + east[0] * toLR[0];
+    cgArray[0].compassMapWorldSize[1] = south[1] * toLR[1] + south[0] * toLR[0];
+    if (cgArray[0].compassMapWorldSize[0] == 0.0)
+        cgArray[0].compassMapWorldSize[0] = 1000.0;
+    if (cgArray[0].compassMapWorldSize[1] == 0.0)
+        cgArray[0].compassMapWorldSize[1] = 1000.0;
 }
 
 void __cdecl CG_NorthDirectionChanged(int localClientNum)
@@ -339,10 +343,10 @@ void __cdecl CG_NorthDirectionChanged(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    *(float *)&dword_9DF71C[108] = atof(pszString);
-    v1 = *(float *)&dword_9DF71C[108] * 0.01745329238474369;
-    *(float *)&dword_9DF71C[109] = cos(v1);
-    *(float *)&dword_9DF71C[110] = sin(v1);
+    cgArray[0].compassNorthYaw = atof(pszString);
+    v1 = cgArray[0].compassNorthYaw * 0.01745329238474369;
+    cgArray[0].compassNorth[0] = cos(v1);
+    cgArray[0].compassNorth[1] = sin(v1);
     CG_MiniMapChanged(localClientNum);
 }
 

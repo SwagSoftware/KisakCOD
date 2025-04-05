@@ -15,12 +15,9 @@ void __cdecl FX_SpriteGenerateVerts(FxGenerateVertsCmd *cmd)
         FX_GenerateSpriteCodeMeshVerts((FxSprite *)&spriteInfo[2 * i + 1], cmd);
 }
 
-void __cdecl FX_GenerateSpriteCodeMeshVerts(FxSprite *sprite, FxGenerateVertsCmd *cmd)
+void __cdecl FX_GenerateSpriteCodeMeshVerts(FxSprite* sprite, FxGenerateVertsCmd* cmd)
 {
-    __int64 v2; // [esp+8h] [ebp-Ch]
-
     if ((sprite->flags & 2) != 0)
-    {
         FX_GenerateSpriteCodeMeshVertsFixedScreenSize(
             sprite->material,
             sprite->pos,
@@ -28,19 +25,15 @@ void __cdecl FX_GenerateSpriteCodeMeshVerts(FxSprite *sprite, FxGenerateVertsCmd
             sprite->rgbaColor,
             sprite->flags,
             cmd);
-    }
     else
-    {
-        HIDWORD(v2) = sprite->flags;
-        LODWORD(v2) = sprite->rgbaColor;
         FX_GenerateSpriteCodeMeshVertsFixedWorldSize(
             sprite->material,
             sprite->pos,
             sprite->radius,
             sprite->minScreenRadius,
-            v2,
+            sprite->rgbaColor,
+            sprite->flags,
             cmd);
-    }
 }
 
 void __cdecl FX_GenerateSpriteCodeMeshVertsFixedScreenSize(
@@ -58,10 +51,10 @@ void __cdecl FX_GenerateSpriteCodeMeshVertsFixedScreenSize(
 }
 
 void __cdecl FX_BuildSpriteCodeMeshVerts(
-    Material *material,
-    const float *pos,
+    Material* material,
+    const float* pos,
     float worldRadius,
-    const unsigned __int8 *rgbaColor,
+    const unsigned __int8* rgbaColor,
     char spriteFlags)
 {
     unsigned int v5; // [esp+10h] [ebp-30h]
@@ -85,7 +78,7 @@ void __cdecl FX_BuildSpriteCodeMeshVerts(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             LocalClientNum);
-    Vec3Scale(&MEMORY[0x9D8730], worldRadius, left);
+    Vec3Scale(cgArray[0].refdef.viewaxis[1], worldRadius, left);
     v6 = R_GetLocalClientNum();
     if (v6)
         MyAssertHandler(
@@ -95,7 +88,7 @@ void __cdecl FX_BuildSpriteCodeMeshVerts(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             v6);
-    Vec3Scale(&MEMORY[0x9D873C], worldRadius, up);
+    Vec3Scale(cgArray[0].refdef.viewaxis[2], worldRadius, up);
     v5 = R_GetLocalClientNum();
     if (v5)
         MyAssertHandler(
@@ -107,7 +100,7 @@ void __cdecl FX_BuildSpriteCodeMeshVerts(
             v5);
     FX_BuildQuadStampCodeMeshVerts(
         material,
-        MEMORY[0x9D8724],
+        cgArray[0].refdef.viewaxis[0],
         worldOrigin,
         left,
         up,
@@ -182,7 +175,7 @@ void __cdecl FX_BuildQuadStampCodeMeshVerts(
         index.value[0] = baseVertex + 1;
         index.value[1] = baseVertex + 2;
         indices[2] = index;
-        R_AddCodeMeshDrawSurf(material, indices, 6u, 0, 0, &String);
+        R_AddCodeMeshDrawSurf(material, indices, 6u, 0, 0, "");
         Vec3Add(left, up, leftUp);
         Vec3Sub(left, up, leftDown);
         Byte4CopyRgbaToVertexColor(rgbaColor, (unsigned __int8 *)&nativeColor);
@@ -331,7 +324,7 @@ char __cdecl FX_HeightScreenToWorld(
             "(localClientNum == 0)",
             LocalClientNum);
     clipSpaceHeight = screenHeight * clipSpaceW + screenHeight * clipSpaceW;
-    *worldHeight = clipSpaceHeight * MEMORY[0x9D8714];
+    *worldHeight = clipSpaceHeight * cgArray[0].refdef.tanHalfFovY;
     if (*worldHeight <= 0.0)
         MyAssertHandler(
             ".\\EffectsCore\\fx_sprite.cpp",
@@ -352,12 +345,13 @@ double __cdecl FX_GetClipSpaceW(const float *worldPoint, float *vieworg, float (
 }
 
 void __cdecl FX_GenerateSpriteCodeMeshVertsFixedWorldSize(
-    Material *material,
-    const float *pos,
+    Material* material,
+    const float* pos,
     float radius,
     float minScreenRadius,
-    __int64 rgbaColor,
-    FxGenerateVertsCmd *cmd)
+    const unsigned __int8* rgbaColor,
+    char spriteFlags,
+    FxGenerateVertsCmd* cmd)
 {
     float worldRadius; // [esp+Ch] [ebp-10h]
     float screenRadius; // [esp+14h] [ebp-8h] BYREF
@@ -382,7 +376,7 @@ void __cdecl FX_GenerateSpriteCodeMeshVertsFixedWorldSize(
             worldRadius = radius * screenScale;
         }
     }
-    FX_BuildSpriteCodeMeshVerts(material, pos, worldRadius, (const unsigned __int8 *)rgbaColor, SBYTE4(rgbaColor));
+    FX_BuildSpriteCodeMeshVerts(material, pos, worldRadius, rgbaColor, spriteFlags);
 }
 
 char __cdecl FX_HeightWorldToScreen(
@@ -417,7 +411,7 @@ char __cdecl FX_HeightWorldToScreen(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             LocalClientNum);
-    clipSpaceHeight = worldHeight / MEMORY[0x9D8714];
+    clipSpaceHeight = worldHeight / cgArray[0].refdef.tanHalfFovY;
     *screenHeight = clipSpaceHeight / (clipSpaceW + clipSpaceW);
     if (*screenHeight <= 0.0)
         MyAssertHandler(

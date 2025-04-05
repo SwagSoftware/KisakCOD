@@ -227,33 +227,32 @@ void __cdecl R_XModelDebugAxes(const DObj_s *obj, int *partBits)
         }
     }
 }
-
-int  R_SkinXModel@<eax>(
-    float a1@<ebp>,
-    XModelDrawInfo *modelInfo,
-    const XModel *model,
-    const DObj_s *obj,
-    const GfxPlacement *placement,
+int __cdecl R_SkinXModel(
+    XModelDrawInfo* modelInfo,
+    const XModel* model,
+    const DObj_s* obj,
+    const GfxPlacement* placement,
     float scale,
     __int16 gfxEntIndex)
 {
+    float v6; // ebp
     unsigned int v8; // [esp+20h] [ebp-E64h]
     unsigned int startSurfPos; // [esp+2Ch] [ebp-E58h]
     unsigned int v11; // [esp+38h] [ebp-E4Ch]
     int i; // [esp+40h] [ebp-E44h]
-    GfxModelRigidSurface **xsurf; // [esp+44h] [ebp-E40h]
-    GfxModelRigidSurface *rigidSurf; // [esp+48h] [ebp-E3Ch] BYREF
+    GfxModelRigidSurface** xsurf; // [esp+44h] [ebp-E40h]
+    GfxModelRigidSurface* rigidSurf; // [esp+48h] [ebp-E3Ch] BYREF
     unsigned __int8 surfBuf[3584]; // [esp+54h] [ebp-E30h] BYREF
     int v16; // [esp+E54h] [ebp-30h]
     unsigned int hidePartBits[4]; // [esp+E58h] [ebp-2Ch] BYREF
     int surfaceCount; // [esp+E68h] [ebp-1Ch]
-    XSurface *surfaces; // [esp+E6Ch] [ebp-18h]
+    XSurface* surfaces; // [esp+E6Ch] [ebp-18h]
     int lod; // [esp+E70h] [ebp-14h]
     float dist; // [esp+E78h] [ebp-Ch]
-    void *v22; // [esp+E7Ch] [ebp-8h]
-    void *retaddr; // [esp+E84h] [ebp+0h]
+    void* v22; // [esp+E7Ch] [ebp-8h]
+    void* retaddr; // [esp+E84h] [ebp+0h]
 
-    dist = a1;
+    dist = v6;
     v22 = retaddr;
     if (!model)
         MyAssertHandler(".\\r_model.cpp", 410, 0, "%s", "model");
@@ -261,53 +260,53 @@ int  R_SkinXModel@<eax>(
         return 0;
     if (scale == 0.0)
         MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 107, 0, "%s", "val");
-    *(float *)&lod = 1.0 / scale;
-    *(float *)&surfaces = R_GetBaseLodDist(placement->origin) * *(float *)&lod;
+    *(float*)&lod = 1.0 / scale;
+    *(float*)&surfaces = R_GetBaseLodDist(placement->origin) * *(float*)&lod;
     surfaceCount = XModelGetLodRampType(model);
-    *(float *)&surfaces = R_GetAdjustedLodDist(*(float *)&surfaces, (XModelLodRampType)surfaceCount);
-    hidePartBits[3] = XModelGetLodForDist(model, *(float *)&surfaces);
+    *(float*)&surfaces = R_GetAdjustedLodDist(*(float*)&surfaces, (XModelLodRampType)surfaceCount);
+    hidePartBits[3] = XModelGetLodForDist(model, *(float*)&surfaces);
     if ((hidePartBits[3] & 0x80000000) != 0)
         return 0;
-    //Profile_Begin(89);
-    hidePartBits[1] = XModelGetSurfaces(model, (XSurface **)&hidePartBits[2], hidePartBits[3]);
+   // Profile_Begin(89);
+    hidePartBits[1] = XModelGetSurfaces(model, (XSurface**)&hidePartBits[2], hidePartBits[3]);
     if (!hidePartBits[1])
         MyAssertHandler(".\\r_model.cpp", 430, 0, "%s", "surfaceCount");
     if (obj)
-        DObjGetHidePartBits(obj, (unsigned int *)&surfBuf[3576]);
+        DObjGetHidePartBits(obj, (unsigned int*)&surfBuf[3576]);
     xsurf = &rigidSurf;
     for (i = 0; i < (int)hidePartBits[1]; ++i)
     {
         v11 = hidePartBits[2] + 56 * i;
         if (obj
-            && *(unsigned int *)(v11 + 52) & hidePartBits[0]
-            | *(unsigned int *)(v11 + 48) & v16
-            | *(unsigned int *)(v11 + 44) & *(unsigned int *)&surfBuf[3580]
-            | *(unsigned int *)(v11 + 40) & *(unsigned int *)&surfBuf[3576])
+            && *(_DWORD*)(v11 + 52) & hidePartBits[0]
+            | *(_DWORD*)(v11 + 48) & v16
+            | *(_DWORD*)(v11 + 44) & *(_DWORD*)&surfBuf[3580]
+            | *(_DWORD*)(v11 + 40) & *(_DWORD*)&surfBuf[3576])
         {
-            *xsurf++ = (GfxModelRigidSurface *)-3;
+            *xsurf++ = (GfxModelRigidSurface*)-3;
         }
         else
         {
-            if (!*(_BYTE *)(v11 + 1) && useFastFile->current.enabled)
+            if (!*(_BYTE*)(v11 + 1) && useFastFile->current.enabled)
                 startSurfPos = -2;
             else
                 startSurfPos = -1;
-            *xsurf = (GfxModelRigidSurface *)startSurfPos;
-            xsurf[1] = (GfxModelRigidSurface *)v11;
-            *((_WORD *)xsurf + 7) = gfxEntIndex;
-            *((_WORD *)xsurf + 8) = 0;
+            *xsurf = (GfxModelRigidSurface*)startSurfPos;
+            xsurf[1] = (GfxModelRigidSurface*)v11;
+            *((_WORD*)xsurf + 7) = gfxEntIndex;
+            *((_WORD*)xsurf + 8) = 0;
             memcpy(xsurf + 6, placement, 0x1Cu);
-            *((float *)xsurf + 13) = scale;
+            *((float*)xsurf + 13) = scale;
             xsurf += 14;
         }
     }
-    v8 = InterlockedExchangeAdd(&frontEndDataOut->surfPos, (char *)xsurf - (char *)&rigidSurf);
-    if ((char *)xsurf - (char *)&rigidSurf + v8 <= 0x20000)
+    v8 = InterlockedExchangeAdd(&frontEndDataOut->surfPos, (char*)xsurf - (char*)&rigidSurf);
+    if ((char*)xsurf - (char*)&rigidSurf + v8 <= 0x20000)
     {
         if ((v8 & 3) != 0)
             MyAssertHandler(".\\r_model.cpp", 480, 0, "%s", "!(startSurfPos & 3)");
         modelInfo->surfId = v8 >> 2;
-        memcpy(&frontEndDataOut->surfsBuffer[v8], (unsigned __int8 *)&rigidSurf, (char *)xsurf - (char *)&rigidSurf);
+        memcpy(&frontEndDataOut->surfsBuffer[v8], (unsigned __int8*)&rigidSurf, (char*)xsurf - (char*)&rigidSurf);
         modelInfo->lod = hidePartBits[3];
         //Profile_EndInternal(0);
         return 1;
@@ -315,7 +314,7 @@ int  R_SkinXModel@<eax>(
     else
     {
         R_WarnOncePerFrame(R_WARN_MAX_SCENE_SURFS_SIZE);
-        //Profile_EndInternal(0);
+       // Profile_EndInternal(0);
         return 0;
     }
 }

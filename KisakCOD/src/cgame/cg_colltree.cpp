@@ -1,6 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
+
 #include <qcommon/mem_track.h>
+#include <qcommon/threads.h>
 
 
 void __cdecl TRACK_CG_CollWorld()

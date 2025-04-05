@@ -1,6 +1,8 @@
 #include "database.h"
 #include <qcommon/mem_track.h>
 
+#include <xanim/xmodel.h>
+
 //int marker_db_registry   828e570c     db_registry.obj
 //unsigned int volatile g_mainThreadBlocked  829f278c     db_registry.obj
 

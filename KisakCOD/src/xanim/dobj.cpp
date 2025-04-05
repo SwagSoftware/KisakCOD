@@ -1349,16 +1349,16 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
     //Profile_EndInternal(0);
 }
 
-void __cdecl DObjGeomTraceline(DObj_s *obj, float *localStart, __int64 localEnd, DObjTrace_s *results)
+void __cdecl DObjGeomTraceline(DObj_s* obj, float* localStart, float* localEnd, int contentmask, DObjTrace_s* results)
 {
     unsigned int boneIndex; // [esp+Ch] [ebp-48h]
-    XModel *model; // [esp+10h] [ebp-44h]
+    XModel* model; // [esp+10h] [ebp-44h]
     int partIndex; // [esp+14h] [ebp-40h]
     unsigned int numModels; // [esp+18h] [ebp-3Ch]
     trace_t trace; // [esp+1Ch] [ebp-38h] BYREF
-    DObjAnimMat *boneMtxList; // [esp+48h] [ebp-Ch]
+    DObjAnimMat* boneMtxList; // [esp+48h] [ebp-Ch]
     unsigned int i; // [esp+4Ch] [ebp-8h]
-    XModel **models; // [esp+50h] [ebp-4h]
+    XModel** models; // [esp+50h] [ebp-4h]
 
     results->modelIndex = 0;
     results->partName = 0;
@@ -1386,15 +1386,7 @@ void __cdecl DObjGeomTraceline(DObj_s *obj, float *localStart, __int64 localEnd,
         while (i < numModels)
         {
             model = models[i];
-            partIndex = XModelTraceLineAnimated(
-                obj,
-                i,
-                boneIndex,
-                &trace,
-                boneMtxList,
-                localStart,
-                (float *)localEnd,
-                SHIunsigned int(localEnd));
+            partIndex = XModelTraceLineAnimated(obj, i, boneIndex, &trace, boneMtxList, localStart, localEnd, contentmask);
             if (partIndex >= 0)
             {
                 results->modelIndex = i;

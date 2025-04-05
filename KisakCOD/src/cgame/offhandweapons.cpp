@@ -381,7 +381,7 @@ void __cdecl CG_DrawOffHandName(
 void __cdecl CG_SwitchOffHandCmd(int localClientNum)
 {
     unsigned int newOffhand; // [esp+4h] [ebp-8h]
-    WeaponDef *weapDef; // [esp+8h] [ebp-4h]
+    WeaponDef* weapDef; // [esp+8h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -391,12 +391,12 @@ void __cdecl CG_SwitchOffHandCmd(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DF71C][38])
+    if (cgArray[0].equippedOffHand)
     {
-        weapDef = BG_GetWeaponDef(MEMORY[0x9DF71C][38]);
+        weapDef = BG_GetWeaponDef(cgArray[0].equippedOffHand);
         if (weapDef->offhandClass == OFFHAND_CLASS_NONE)
             MyAssertHandler(".\\cgame\\offhandweapons.cpp", 323, 0, "%s", "weapDef->offhandClass != OFFHAND_CLASS_NONE");
-        newOffhand = BG_GetFirstAvailableOffhand((const playerState_s *)&MEMORY[0x9D5574], weapDef->offhandClass);
+        newOffhand = BG_GetFirstAvailableOffhand(&cgArray[0].predictedPlayerState, weapDef->offhandClass);
         if (newOffhand)
             CG_SetEquippedOffHand(localClientNum, newOffhand);
     }
@@ -460,8 +460,8 @@ void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned i
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        cgameGlob = cgArray;
-        if (cent->nextState.number == *(unsigned int *)(MEMORY[0x98F45C] + 232))
+        cgameGlob = cgArray;    
+        if (cent->nextState.number == cgArray[0].nextSnap->ps.clientNum)
         {
             obj = weapInfo->viewModelDObj;
             CG_UpdateViewModelPose(weapInfo->viewModelDObj, localClientNum);

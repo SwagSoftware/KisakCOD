@@ -22,18 +22,6 @@
 //    struct dvar_s const *const vehTextureScrollScale 82e97278     g_vehicles_mp.obj
 //    short s_numVehicleInfos    82e9727c     g_vehicles_mp.obj
 
-
-unsigned __int16 __cdecl BG_VehiclesGetSlotTagName(int slotIndex)
-{
-    if (!slotIndex)
-        return scr_const.tag_driver;
-    if (slotIndex == 1)
-        return scr_const.tag_passenger;
-    if (slotIndex != 2)
-        MyAssertHandler(".\\bgame\\bg_vehicles_mp.cpp", 24, 0, "%s", "slotIndex == VEHICLE_RIDESLOT_GUNNER");
-    return scr_const.tag_gunner;
-}
-
 void __cdecl CG_VehRegisterDvars()
 {
     DvarLimits min; // [esp+4h] [ebp-10h]

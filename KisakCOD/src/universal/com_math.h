@@ -291,6 +291,14 @@ __forceinline static unsigned int COERCE_UNSIGNED_INT(float val) {
     return lol.v;
 }
 
+__forceinline static int COERCE_INT(float val) {
+    union {
+        float f;
+        int v;
+    } lol = { val };
+    return lol.v;
+}
+
 #define IS_NAN(x) (isnan(x))
 
 // LWSS: There appear to be a lot more functions on XBox.

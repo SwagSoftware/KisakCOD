@@ -1,6 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <client_mp/client_mp.h>
+#include <qcommon/threads.h>
 
 bool __cdecl CG_IsEntityLinked(int localClientNum, unsigned int entIndex)
 {
@@ -86,7 +88,7 @@ void __cdecl CG_LinkEntity(int localClientNum, unsigned int entIndex)
     float maxs[3]; // [esp+58h] [ebp-30h] BYREF
     DObj_s *dobj; // [esp+64h] [ebp-24h]
     float absMaxs[3]; // [esp+68h] [ebp-20h] BYREF
-    const centity_s *cent; // [esp+74h] [ebp-14h]
+    centity_s *cent; // [esp+74h] [ebp-14h]
     entityState_s *p_nextState; // [esp+78h] [ebp-10h]
     float absMins[3]; // [esp+7Ch] [ebp-Ch] BYREF
 
@@ -148,8 +150,7 @@ void __cdecl CG_GetEntityBModelBounds(const centity_s *cent, float *mins, float 
         MyAssertHandler(".\\cgame\\cg_world.cpp", 67, 0, "%s", "absMaxs");
     if (!cent->nextState.solid)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 70, 0, "%s", "es->solid");
-    if ((clientActive_t *)cent->nextState.solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-        + 3))
+    if (cent->nextState.solid == 0xFFFFFF)
     {
         CM_ModelBounds(cent->nextState.index.brushmodel, mins, maxs);
     }
@@ -868,7 +869,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
                                 "(localClientNum == 0)",
                                 localClientNum);
                         cgameGlob = cgArray;
-                        Vec3Sub(clip->extents.start, MEMORY[0x9D8748], localStart);
+                        Vec3Sub(clip->extents.start, cgArray[0].refdef.viewOffset, localStart);
                         Vec3Sub(clip->extents.end, cgameGlob->refdef.viewOffset, localEnd);
                         objTrace.fraction = results->fraction;
                         DObjGeomTracelinePartBits(dobj, clip->contentmask, partBits);
@@ -886,7 +887,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
                             results->normal[0] = objTrace.normal[0];
                             results->normal[1] = objTrace.normal[1];
                             results->normal[2] = objTrace.normal[2];
-                            results->walkable = results->normal[2] >= DOUBLE_0_699999988079071;
+                            results->walkable = results->normal[2] >= 0.699999988079071;
                         LABEL_33:
                             number = p_nextState->number;
                             if (!results)

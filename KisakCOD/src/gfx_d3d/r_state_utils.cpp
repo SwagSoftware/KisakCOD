@@ -303,9 +303,6 @@ void __cdecl R_SetShadowLookupMatrix(GfxCmdBufSourceState *source, const GfxMatr
 
 void __cdecl R_Set2D(GfxCmdBufSourceState *source)
 {
-    GfxViewport viewport; // [esp+4h] [ebp-10h] BYREF
-    int savedregs; // [esp+14h] [ebp+0h] BYREF
-
     if (source->viewMode != VIEW_MODE_2D)
     {
         source->viewMode = VIEW_MODE_2D;
@@ -314,23 +311,26 @@ void __cdecl R_Set2D(GfxCmdBufSourceState *source)
         source->eyeOffset[1] = 0.0;
         source->eyeOffset[2] = 0.0;
         source->eyeOffset[3] = 1.0;
+
+        GfxViewport viewport;
         R_GetViewport(source, &viewport);
-        R_CmdBufSet2D((GfxViewParms *)&savedregs, source, &viewport);
+        R_CmdBufSet2D(source, &viewport);
     }
 }
 
-void __usercall R_CmdBufSet2D(GfxViewParms *a1@<ebp>, GfxCmdBufSourceState *source, GfxViewport *viewport)
+void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport)
 {
+    GfxViewParms* v2; // ebp
     float v3[16]; // [esp-8h] [ebp-9Ch] BYREF
     GfxMatrix identity_52; // [esp+38h] [ebp-5Ch] BYREF
-    GfxViewParms *transform_56; // [esp+7Ch] [ebp-18h]
+    GfxViewParms* transform_56; // [esp+7Ch] [ebp-18h]
     float transform_60; // [esp+80h] [ebp-14h]
     float v7; // [esp+84h] [ebp-10h]
-    GfxViewParms *viewParms; // [esp+88h] [ebp-Ch]
+    GfxViewParms* viewParms; // [esp+88h] [ebp-Ch]
     float invHeight; // [esp+8Ch] [ebp-8h]
     float retaddr; // [esp+94h] [ebp+0h]
 
-    viewParms = a1;
+    viewParms = v2;
     invHeight = retaddr;
     if (viewport->width <= 0)
         MyAssertHandler(
@@ -351,7 +351,7 @@ void __usercall R_CmdBufSet2D(GfxViewParms *a1@<ebp>, GfxCmdBufSourceState *sour
     v7 = 1.0 / (double)viewport->width;
     transform_60 = 1.0 / (double)viewport->height;
     transform_56 = &source->viewParms;
-    memset((unsigned __int8 *)&identity_52, 0, sizeof(identity_52));
+    memset((unsigned __int8*)&identity_52, 0, sizeof(identity_52));
     identity_52.m[0][0] = v7 * 2.0;
     identity_52.m[1][1] = transform_60 * -2.0;
     identity_52.m[3][0] = -1.0 - v7;
@@ -360,20 +360,28 @@ void __usercall R_CmdBufSet2D(GfxViewParms *a1@<ebp>, GfxCmdBufSourceState *sour
     identity_52.m[3][3] = 1.0;
     R_MatrixIdentity44((float (*)[4])v3);
     R_MatrixIdentity44(transform_56->viewMatrix.m);
-    qmemcpy(&transform_56->projectionMatrix, &identity_52, sizeof(transform_56->projectionMatrix));
-    qmemcpy(&transform_56->viewProjectionMatrix, &identity_52, sizeof(transform_56->viewProjectionMatrix));
+    memcpy(&transform_56->projectionMatrix, &identity_52, sizeof(transform_56->projectionMatrix));
+    memcpy(&transform_56->viewProjectionMatrix, &identity_52, sizeof(transform_56->viewProjectionMatrix));
     memset(
-        (unsigned __int8 *)&transform_56->inverseViewProjectionMatrix,
+        (unsigned __int8*)&transform_56->inverseViewProjectionMatrix,
         0,
         sizeof(transform_56->inverseViewProjectionMatrix));
     ++source->matrixVersions[1];
     ++source->matrixVersions[2];
     ++source->matrixVersions[4];
-    qmemcpy(R_GetActiveWorldMatrix(source), v3, 0x40u);
+    memcpy(R_GetActiveWorldMatrix(source), v3, 0x40u);
 }
 
 GfxCmdBufSourceState *__cdecl R_GetActiveWorldMatrix(GfxCmdBufSourceState *source)
 {
     R_WorldMatrixChanged(source);
     return source;
+}
+
+double __cdecl R_GetBaseLodDist(const float* origin)
+{
+    float diff[3]; // [esp+4h] [ebp-Ch] BYREF
+
+    Vec3Sub(rg.lodParms.origin, origin, diff);
+    return Vec3Length(diff);
 }

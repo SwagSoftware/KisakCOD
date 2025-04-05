@@ -1873,7 +1873,15 @@ void __cdecl BG_StringCopy(unsigned __int8 *member, const char *keyValue);
 
 
 // bg_vehicles_mp
-unsigned __int16 __cdecl BG_VehiclesGetSlotTagName(int slotIndex);
+enum vehicleRideSlots_t : __int32
+{
+    VEHICLE_RIDESLOT_DRIVER = 0x0,
+    VEHICLE_RIDESLOT_PASSENGER = 0x1,
+    VEHICLE_RIDESLOT_GUNNER = 0x2,
+    VEHICLE_RIDESLOTS_COUNT = 0x3,
+};
+
+uint16 BG_VehiclesGetSlotTagName(int slotIndex);
 
 
 // bg_slidemove
