@@ -612,7 +612,7 @@ void __cdecl CG_TransitionKillcam(int localClientNum)
                 anim = cgsArray[0].corpseinfo[corpseIndex].legs.animationNumber & 0xFFFFFDFF;
                 anims = XAnimGetAnims(pXAnimTree);
                 if (anim && !XAnimIsLooped(anims, anim) && !XAnimGetNumChildren(anims, anim))
-                    XAnimSetTime(__SPAIR64__(anim, (unsigned int)pXAnimTree), 1.0);
+                    XAnimSetTime((XAnimTree_s*)pXAnimTree, anim, 1.0);
             }
         }
     }

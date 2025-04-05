@@ -1780,7 +1780,7 @@ void __cdecl BG_SetNewAnimation(
                 else
                 {
                     XAnimSetGoalWeightKnobAll(obj, newAnimationa, 0, 1.0, 0.0, 1.0, 0, 0);
-                    XAnimSetTime(pAnimTree, 1.0);
+                    XAnimSetTime(pAnimTree, newAnimationa, 1.0);
                 }
             }
             else
@@ -1789,7 +1789,7 @@ void __cdecl BG_SetNewAnimation(
                 v11 = (double)lf->animationTime * 0.001000000047497451;
                 XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0, v11, 1.0, 0, anim->noteType, lf != &ci->legs);
                 if (v12)
-                    XAnimSetTime(pAnimTree, fStartTime);
+                    XAnimSetTime(pAnimTree, newAnimationa, fStartTime);
             }
             if (lf != &ci->legs)
             {

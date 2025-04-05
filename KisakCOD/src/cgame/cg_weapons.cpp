@@ -108,9 +108,7 @@ void __cdecl CG_RegisterWeapon(int localClientNum, unsigned int weaponNum)
                 if (*weapDef->szXAnims[32])
                 {
                     XAnimSetGoalWeight(obj, 0x20u, 1.0, 0.0, 0.0, 0, 1u, 0);
-                    HIDWORD(_C) = 32;
-                    LODWORD(_C) = weapInfo->tree;
-                    XAnimSetTime(_C, 1.0);
+                    XAnimSetTime(weapInfo->tree, 32, 1.0);
                 }
                 for (tagIndex = 0; tagIndex < 8 && weapDef->hideTags[tagIndex]; ++tagIndex)
                 {
@@ -1082,8 +1080,8 @@ double __cdecl GetWeaponAnimRate(WeaponDef *weapDef, XAnim_s *anims, unsigned in
 
 void __cdecl PlayADSAnim(float weaponPosFrac, int weaponNum, DObj_s *obj, int animIndex)
 {
-    __int64 v4; // [esp+Ch] [ebp-10h]
-    __int64 v5; // [esp+Ch] [ebp-10h]
+    XAnimTree_s *Tree; // eax
+    XAnimTree_s *v5; // eax
     float time; // [esp+18h] [ebp-4h]
 
     if (animIndex != 31 && animIndex != 32)
@@ -1103,11 +1101,11 @@ void __cdecl PlayADSAnim(float weaponPosFrac, int weaponNum, DObj_s *obj, int an
         XAnimSetGoalWeight(obj, 0x1Fu, 0.0, 0.1, 0.0, 0, 0, 0);
         XAnimSetGoalWeight(obj, 0x20u, 1.0, 0.1, 0.0, 0, 1u, 0);
     }
-    v4 = (unsigned int)DObjGetTree(obj) | 0x1F00000000LL;
-    XAnimSetTime(v4, weaponPosFrac);
+    Tree = DObjGetTree(obj);
+    XAnimSetTime(Tree, 0x1Fu, weaponPosFrac);
     time = 1.0 - weaponPosFrac;
-    v5 = (unsigned int)DObjGetTree(obj) | 0x2000000000LL;
-    XAnimSetTime(v5, time);
+    v5 = DObjGetTree(obj);
+    XAnimSetTime(v5, 0x20u, time);
 }
 
 void __cdecl ResetWeaponAnimTrees(int localClientNum, const playerState_s *ps)

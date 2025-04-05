@@ -3732,52 +3732,52 @@ BOOL __cdecl XAnimIsPrimitive(XAnim_s* anims, unsigned int animIndex)
     return anims->entries[animIndex].numAnims == 0;
 }
 
-void __cdecl XAnimSetTime(XAnimTree_s* tree, float time)
+void __cdecl XAnimSetTime(XAnimTree_s *tree, unsigned int animIndex, float time)
 {
-    char* AnimDebugName; // eax
-    const char* v3; // eax
-    char* v4; // eax
-    const char* v5; // eax
+    char *AnimDebugName; // eax
+    const char *v4; // eax
+    char *v5; // eax
+    const char *v6; // eax
     BOOL bLoop; // [esp+8h] [ebp-20h]
-    BOOL v7; // [esp+10h] [ebp-18h]
-    XAnimState* state; // [esp+18h] [ebp-10h]
+    BOOL v8; // [esp+10h] [ebp-18h]
+    XAnimState *state; // [esp+18h] [ebp-10h]
     unsigned int infoIndex; // [esp+20h] [ebp-8h]
-    const XAnimEntry* anim; // [esp+24h] [ebp-4h]
+    const XAnimEntry *anim; // [esp+24h] [ebp-4h]
 
-    if (!(_DWORD)tree)
+    if (!tree)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3864, 0, "%s", "tree");
-    if (!*(_DWORD*)tree)
+    if (!tree->anims)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3865, 0, "%s", "tree->anims");
-    if (HIDWORD(tree) >= *(_DWORD*)(*(_DWORD*)tree + 4))
+    if (animIndex >= tree->anims->size)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3866, 0, "%s", "animIndex < tree->anims->size");
-    infoIndex = XAnimGetInfoIndex((const XAnimTree_s*)tree, HIDWORD(tree));
+    infoIndex = XAnimGetInfoIndex(tree, animIndex);
     if (infoIndex)
     {
-        anim = (const XAnimEntry*)(*(_DWORD*)tree + 8 * HIDWORD(tree) + 12);
+        anim = &tree->anims->entries[animIndex];
         if (!IsLeafNode(anim))
         {
-            AnimDebugName = XAnimGetAnimDebugName(*(const XAnim_s**)tree, HIDWORD(tree));
-            v3 = va("Anim name: '%s', time: %f", AnimDebugName, time);
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3873, 0, "%s\n\t%s", "IsLeafNode( anim )", v3);
+            AnimDebugName = XAnimGetAnimDebugName(tree->anims, animIndex);
+            v4 = va("Anim name: '%s', time: %f", AnimDebugName, time);
+            MyAssertHandler(".\\xanim\\xanim.cpp", 3873, 0, "%s\n\t%s", "IsLeafNode( anim )", v4);
         }
         if (time < 0.0 || time > 1.0)
             MyAssertHandler(".\\xanim\\xanim.cpp", 3875, 0, "%s\n\t(time) = %g", "(time >= 0.0f && time <= 1.0f)", time);
         if (anim->parts->bLoop)
-            v7 = time < 1.0;
+            v8 = time < 1.0;
         else
-            v7 = time <= 1.0;
-        if (!v7)
+            v8 = time <= 1.0;
+        if (!v8)
         {
             bLoop = anim->parts->bLoop;
-            v4 = XAnimGetAnimDebugName(*(const XAnim_s**)tree, HIDWORD(tree));
-            v5 = va("name: '%s', time: %f, parts->bLoop: %d", v4, time, bLoop);
+            v5 = XAnimGetAnimDebugName(tree->anims, animIndex);
+            v6 = va("name: '%s', time: %f, parts->bLoop: %d", v5, time, bLoop);
             MyAssertHandler(
                 ".\\xanim\\xanim.cpp",
                 3876,
                 0,
                 "%s\n\t%s",
                 "anim->parts->bLoop ? (time < 1.0f) : (time <= 1.0f)",
-                v5);
+                v6);
         }
         if (infoIndex >= 0x1000)
             MyAssertHandler(
