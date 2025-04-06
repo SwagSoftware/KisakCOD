@@ -82,6 +82,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -96,6 +97,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -110,6 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,6 +127,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -297,6 +301,7 @@
     <ClCompile Include="src\gfx_d3d\r_dpvs_dynmodel.cpp" />
     <ClCompile Include="src\gfx_d3d\r_dpvs_entity.cpp" />
     <ClCompile Include="src\gfx_d3d\r_dpvs_sceneent.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_drawsurf.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_bsp.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_material.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_method.cpp" />
@@ -537,6 +542,7 @@
     <ClInclude Include="src\gfx_d3d\r_debug.h" />
     <ClInclude Include="src\gfx_d3d\r_devgui.h" />
     <ClInclude Include="src\gfx_d3d\r_dpvs.h" />
+    <ClInclude Include="src\gfx_d3d\r_drawsurf.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_bsp.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_material.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_method.h" />

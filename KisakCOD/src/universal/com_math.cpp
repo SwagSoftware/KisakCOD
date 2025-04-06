@@ -540,6 +540,13 @@ void __cdecl Vec3Basis_RightHanded(const float *forward, float *left, float *up)
     Vec3Cross(up, forward, left);
 }
 
+void __cdecl Vec3AddScalar(const float* a, float s, float* sum)
+{
+    *sum = *a + s;
+    sum[1] = a[1] + s;
+    sum[2] = a[2] + s;
+}
+
 float __cdecl vectoyaw(const float *vec)
 {
     float v2; // [esp+0h] [ebp-14h]

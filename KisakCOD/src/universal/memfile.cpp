@@ -1,15 +1,93 @@
+#include "memfile.h"
+
 #include <qcommon/qcommon.h>
 
-#include "memfile.h"
+#include <qcommon/threads.h>
 
 static int g_cacheSize;
 static int g_nonZeroCount;
 static int g_zeroCount;
 static int g_cacheBufferLen;
 
+static bool g_compress;
+
 #define CODE_LEN_MASK 63
 
 static byte g_cacheBuffer[CODE_LEN_MASK + 2];
+static byte g_saveBuffer[0x2000];
+
+static int streamModeThread;
+static MemFileMode streamMode;
+
+static z_stream_s stream;
+
+static const char* MemFileModeNames[] = // idb
+{
+    "default",
+    "inflating",
+    "deflating"
+};
+
+static const char* MemFileThreadNames[] = // idb
+{
+    "unknown",
+    "main",
+    "debugService",
+    "server",
+    "backend",
+    "database",
+    "stream",
+    "sndStreamPacketCallback"
+};
+
+/*
+
+===== MEMFILE DATA FORMAT =====
+
+Memfiles come in two flavors: Compressed and uncompressed.
+
+In either case, there is a simple run-length encoding scheme that has two possible cases, indicated by a "header" and continuation bytes:
+
+The header byte is encoded as follows:
+
+MAYBE_NZ_COUNT: 2
+AUX: 6
+
+if MAYBE_NZ_COUNT is zero, then the data is a run of zero bytes with length (AUX + 1). otherwise, the data is a 'raw' set of of nonzero bytes with length (AUX + 1).
+
+This continues until there is no data left in the file.
+
+*/
+
+static void AssertStreamMode(MemFileMode mode)
+{
+    if (streamMode != mode)
+    {
+        const char *fmt = va(
+            "Memfile routine expected streamMode \"%s\", but is \"%s\" instead.  Possible race with thread \"%s\".",
+            MemFileModeNames[mode],
+            MemFileModeNames[streamMode],
+            MemFileThreadNames[streamModeThread]);
+        MyAssertHandler(".\\universal\\memfile.cpp", 177, 0, fmt);
+    }
+}
+
+static int GetThreadID()
+{
+    if (Sys_IsMainThread())
+        return 1;
+    if (Sys_IsRenderThread())
+        return 4;
+    if (Sys_IsDatabaseThread())
+        return 5;
+    return 0;
+}
+
+void SetStreamMode(MemFileMode mode)
+{
+    streamMode = mode;
+    streamModeThread = GetThreadID();
+}
 
 void MemFile_ArchiveData(MemoryFile* memFile, int bytes, void* data)
 {
@@ -88,7 +166,8 @@ void MemFile_StartSegment(MemoryFile* memFile, int index)
         return;
 
     // if we already have a segment, end it and check for overflow again
-    if (memFile->segmentIndex >= 0) {
+    if (memFile->segmentIndex >= 0)
+    {
         MemFile_EndSegment(memFile);
 
         if (memFile->memoryOverflow)
@@ -440,16 +519,18 @@ int __cdecl MemFile_GetUsedSize(MemoryFile* memFile)
     return memFile->bytesUsed;
 }
 
-void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, byte* p)
+void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, const void* dat)
 {
     unsigned int moveByte; // [esp+0h] [ebp-20h]
     unsigned int nextByte; // [esp+8h] [ebp-18h]
     int nonZeroCount; // [esp+Ch] [ebp-14h]
     int cacheBufferLen; // [esp+10h] [ebp-10h]
-    int i; // [esp+14h] [ebp-Ch]
     int zeroCount; // [esp+18h] [ebp-8h]
     int cacheSize; // [esp+1Ch] [ebp-4h]
     int cacheSizea; // [esp+1Ch] [ebp-4h]
+    int i;
+
+    const byte* p = (const byte *)dat;
 
     if (!memFile)
         MyAssertHandler(".\\universal\\memfile.cpp", 643, 0, "%s", "memFile");
@@ -472,10 +553,99 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, byte* p)
         return;
     if (!p)
         MyAssertHandler(".\\universal\\memfile.cpp", 652, 0, "%s", "p");
+
     cacheSize = g_cacheSize;
     zeroCount = g_zeroCount;
     nonZeroCount = g_nonZeroCount;
     cacheBufferLen = g_cacheBufferLen;
+
+#if 0
+#define TRY_WRITE(bytes, nonZeroCount, cacheBufferLen, nextByte) \
+    if (!MemFile_WriteDataInternal(memFile, bytes, nonZeroCount, cacheBufferLen, nextByte)) { MemFile_WriteError(memFile); return; }
+
+#define NEXT_BYTE() \
+    if (++i >= byteCount) goto DONE;
+
+#define BOUNDS_CHECK() \
+    vassert(i < byteCount, "(i = %d, byteCount = %d)", i, byteCount);
+
+    // MAIN LOOP
+    for (int i = 0; i < byteCount; )
+    {
+        // if we were previously writing nonzero bytes
+        if (nonZeroCount)
+        {
+            vassert(i < byteCount, "(i = %d, byteCount = %d)", i, byteCount);
+            vassert(nonZeroCount < 4, "(nonZeroCount = %d)", nonZeroCount);
+
+            // hit some zero bytes. increment either until we're done or we overflowed
+            bool overflow = false;
+            while (!p[i])
+            {
+                // whoops, we'd overflow if we tried to write this zero byte.
+                if (cacheBufferLen == CODE_LEN_MASK)
+                {
+                    overflow = true;
+                    break;
+                }
+
+                ++cacheBufferLen;
+                
+                // continue on to the next byte
+                NEXT_BYTE();
+            }
+
+            zeroCount = overflow ? 1 : 0;
+            TRY_WRITE(cacheSize, nonZeroCount, cacheBufferLen, p[i]);
+
+            cacheBufferLen = 0;
+            nonZeroCount = 0;
+            cacheSize = 2;
+        }
+
+        BOUNDS_CHECK();
+
+        // flush cache if we'd overflow by writing the next byte, zero or not.
+        if (cacheBufferLen == CODE_LEN_MASK)
+        {
+            // setting nonZeroCount to 0 implies we're writing a "stream" of N bytes, where N is CODE_LEN_MASK + 1.
+            TRY_WRITE(cacheSize, 0, CODE_LEN_MASK, nextByte);
+
+            cacheBufferLen = 0;
+            nonZeroCount = 0;
+            cacheSize = 2;
+            zeroCount = (nextByte == 0) ? 1 : 0;
+
+            NEXT_BYTE();
+            nextByte = p[i];
+        }
+
+        if (p[i])
+        {
+            // nonzero byte, reset zero count. 
+            zeroCount = 0;
+
+        }
+        else
+        {
+            // if we hit a zero byte, increment zero count and ??????
+
+        }
+    }
+
+    DONE:
+
+    // write-back data back to globals
+    g_cacheSize = cacheSize;
+    g_zeroCount = zeroCount;
+    g_nonZeroCount = nonZeroCount;
+    g_cacheBufferLen = cacheBufferLen;
+
+    // append to cache, flush if needed
+#endif
+
+    // ORIGINAL BELOW
+
     for (i = 0; ; ++i)
     {
     LABEL_16:
@@ -489,8 +659,9 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, byte* p)
         }
         if (!nonZeroCount)
             break;
-        if (i >= byteCount)
-            MyAssertHandler(".\\universal\\memfile.cpp", 666, 0, "%s", "i < byteCount");
+
+        vassert(i < byteCount, "(i = %d, byteCount = %d)", i, byteCount);
+
         while (!p[i])
         {
             ++zeroCount;
@@ -511,8 +682,8 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, byte* p)
         nonZeroCount = 0;
         cacheSize = 2;
     }
-    if (i >= byteCount)
-        MyAssertHandler(".\\universal\\memfile.cpp", 701, 0, "%s", "i < byteCount");
+    vassert(i < byteCount, "(i = %d, byteCount = %d)", i, byteCount);
+
     while (1)
     {
         nextByte = (unsigned __int8)p[i];
@@ -532,20 +703,15 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, byte* p)
         zeroCount = 0;
     LABEL_71:
         ++cacheBufferLen;
-        if (cacheSize >= 65)
-            MyAssertHandler(
-                ".\\universal\\memfile.cpp",
-                786,
-                0,
-                "%s\n\t(cacheSize) = %i",
-                "(cacheSize < CODE_LEN_MASK + 2)",
-                cacheSize);
-        if (cacheSize <= 0)
-            MyAssertHandler(".\\universal\\memfile.cpp", 787, 0, "%s\n\t(cacheSize) = %i", "(cacheSize > 0)", cacheSize);
+        
+        vassert(cacheSize > 0, "(cacheSize = %d)", cacheSize);
+        vassert(cacheSize < CODE_LEN_MASK + 2, "(cacheSize = %d)", cacheSize);
+        
         if (memFile->compress)
             g_cacheBuffer[cacheSize] = nextByte;
         else
             memFile->buffer[cacheSize + memFile->bytesUsed] = nextByte;
+        
         ++cacheSize;
         ++i;
     LABEL_79:
@@ -597,24 +763,15 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, byte* p)
     cacheSizea = cacheSize - 3;
     if (memFile->compress)
     {
-        if (*(_BYTE*)(cacheSizea + 231103377) || *(_BYTE*)(cacheSizea + 231103378))
-            MyAssertHandler(
-                ".\\universal\\memfile.cpp",
-                739,
-                0,
-                "%s",
-                "g_cacheBuffer[cacheSize + 1] == 0 && g_cacheBuffer[cacheSize + 2] == 0");
+        vassert(g_cacheBuffer[cacheSize + 1] == 0 && g_cacheBuffer[cacheSize + 2] == 0, "g_cacheBuffer[cacheSize + 1] == %d, g_cacheBuffer[cacheSize + 2] == %d", g_cacheBuffer[cacheSize + 1], g_cacheBuffer[cacheSize + 2]);
         moveByte = g_cacheBuffer[cacheSizea];
     }
     else
     {
-        if (memFile->buffer[cacheSizea + 1 + memFile->bytesUsed] || memFile->buffer[cacheSizea + 2 + memFile->bytesUsed])
-            MyAssertHandler(
-                ".\\universal\\memfile.cpp",
-                745,
-                0,
-                "%s",
-                "memFile->buffer[memFile->bytesUsed + cacheSize + 1] == 0 && memFile->buffer[memFile->bytesUsed + cacheSize + 2] == 0");
+        vassert(memFile->buffer[memFile->bytesUsed + cacheSize + 1] == 0 && memFile->buffer[memFile->bytesUsed + cacheSize + 2] == 0,
+            "memFile->buffer[memFile->bytesUsed + cacheSize + 1] == %d, memFile->buffer[memFile->bytesUsed + cacheSize + 2] == %d",
+            memFile->buffer[memFile->bytesUsed + cacheSize + 1], memFile->buffer[memFile->bytesUsed + cacheSize + 2]);
+
         moveByte = memFile->buffer[cacheSizea + memFile->bytesUsed];
     }
     if (!moveByte)
@@ -628,11 +785,12 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, byte* p)
         ++i;
         goto LABEL_16;
     }
+
 LABEL_56:
     MemFile_WriteError(memFile);
 }
 
-void __cdecl MemFile_WriteCString(MemoryFile* memFile, char* string)
+void __cdecl MemFile_WriteCString(MemoryFile* memFile, const char* string)
 {
     if (!string)
         MyAssertHandler(".\\universal\\memfile.cpp", 813, 0, "%s", "string");

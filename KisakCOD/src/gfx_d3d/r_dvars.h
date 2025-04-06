@@ -4,7 +4,7 @@
 
 void __cdecl R_ReflectionProbeRegisterDvars();
 void __cdecl R_RegisterDvars();
-const struct dvar_t *R_RegisterWorkerThreadDvar(const char *name, unsigned int workerIndex);
+const dvar_t *R_RegisterWorkerThreadDvar(const char *name, unsigned int workerIndex);
 char __cdecl R_CheckDvarModified(const dvar_s *dvar);
 
 extern const dvar_t **prof_probe;

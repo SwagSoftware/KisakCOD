@@ -126,25 +126,3 @@ unsigned __int8* __cdecl LargeLocalGetBuf(int startPos);
 void __cdecl LargeLocalReset();
 unsigned int __cdecl LargeLocalRoundSize(int size);
 
-
-void __cdecl DB_EnumXAssets_FastFile(
-    XAssetType type,
-    void(__cdecl* func)(XAssetHeader, void*),
-    void* inData,
-    bool includeOverride);
-
-int __cdecl DB_GetAllXAssetOfType_FastFile(XAssetType type, XAssetHeader* assets, int maxCount);
-int __cdecl DB_GetAllXAssetOfType(XAssetType type, XAssetHeader* assets, int maxCount);
-int __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHeader* assets, int maxCount);
-
-void __cdecl DB_EnumXAssets(
-    XAssetType type,
-    void(__cdecl* func)(XAssetHeader, void*),
-    void* inData,
-    bool includeOverride);
-void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(__cdecl* func)(void*, void*), void* inData);
-void __cdecl DB_EnumXAssetsFor(
-    fileData_s* fileData,
-    int fileDataType,
-    void(__cdecl* func)(void*, void*),
-    void* inData);

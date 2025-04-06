@@ -128,7 +128,6 @@ void __cdecl FX_SpawnRunner(
     const FxSpatialFrame *effectFrameWhenPlayed,
     int randomSeed,
     int msecWhenPlayed);
-void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int randomSeed, float (*axisOut)[3]);
 bool __cdecl FX_SpawnModelPhysics(
     FxSystem *system,
     FxEffect *effect,
@@ -270,7 +269,7 @@ void __cdecl FX_ImpactMark(
     int localClientNum,
     Material *worldMaterial,
     Material *modelMaterial,
-    float *origin,
+    const float *origin,
     const float *quat,
     float orientation,
     const unsigned __int8 *nativeColor,
@@ -519,12 +518,12 @@ enum FxRandKey : __int32
 };
 struct FxDrawState // sizeof=0xA8
 {                                       // ...
-    const FxSystem *system;             // ...
+    FxSystem *system;             // ...
     const FxEffect *effect;             // ...
     const FxElem *elem;
     const FxElemDef *elemDef;
     orientation_t orient;
-    const FxCamera *camera;
+    FxCamera *camera;
     int randomSeed;
     float msecLifeSpan;
     float msecElapsed;
@@ -686,11 +685,15 @@ void __cdecl FX_GenerateVerts(FxGenerateVertsCmd *cmd);
 void __cdecl FX_FillGenerateVertsCmd(int localClientNum, FxGenerateVertsCmd *cmd);
 void __cdecl FX_EvaluateDistanceFade(FxDrawState *draw);
 double __cdecl FX_ClampRangeLerp(float dist, const FxFloatRange *range);
-
+void __cdecl FX_DrawElement_Setup_1_(
+    FxSystem* system,
+    FxDrawState* draw,
+    int elemMsecBegin,
+    int elemSequence,
+    const float* elemOrigin,
+    float* outRealNormTime);
 
 // fx_update_util
-struct float4;
-struct float4x4;
 void __cdecl FX_OffsetSpawnOrigin(
     const FxSpatialFrame *effectFrame,
     const FxElemDef *elemDef,
@@ -748,14 +751,14 @@ void __cdecl FX_GetElemAxis(
     int randomSeed,
     const orientation_t *orient,
     float msecElapsed,
-    float (*axis)[3]);
-void __cdecl FX_AnglesToOrientedAxis(const float *anglesInRad, const orientation_t *orient, float (*axisOut)[3]);
+    mat3x3& axis);
+void __cdecl FX_AnglesToOrientedAxis(const float *anglesInRad, const orientation_t *orient, mat3x3 &axisOut);
 
 
 // fx_random
 void __cdecl TRACK_fx_random();
 void __cdecl FX_RandomDir(int seed, float *dir);
-void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int randomSeed, float (*axisOut)[3]);
+void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int randomSeed, mat3x3& axisOut);
 
 
 
@@ -811,10 +814,9 @@ FxElemVisuals __cdecl FX_GetElemVisuals(const FxElemDef *elemDef, int randomSeed
 void __cdecl FX_Save(int clientIndex, MemoryFile *memFile);
 void __cdecl FX_SaveEffectDefTable(FxSystem *system, MemoryFile *memFile);
 void __cdecl FX_SaveEffectDefTable_FastFile(MemoryFile *memFile);
+void __cdecl FX_SaveEffectDefTable_LoadObj(MemoryFile* memFile);
 void __cdecl FX_SavePhysicsData(FxSystem *system, MemoryFile *memFile);
 void __cdecl FX_Archive(int clientIndex, MemoryFile *memFile);
-
-
 
 // fx_beam
 void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd);
@@ -849,13 +851,12 @@ int __cdecl FX_CompareProfileEntries(const FxProfileEntry *e0, const FxProfileEn
 double __cdecl FX_GetProfileEntryCost(const FxProfileEntry *entry);
 void __cdecl FX_DrawMarkProfile(int clientIndex, void(__cdecl *drawFunc)(char *), float *profilePos);
 void __cdecl FX_DrawMarkProfile_MarkPrint(
-FxMarksSystem *marksSystem,
-unsigned __int16 head,
-const char *name,
-int index,
-void(__cdecl *drawFunc)(const char *, float *),
-float *profilePos);
-const char *__cdecl typeAsString(unsigned __int8 type);
+    FxMarksSystem* marksSystem,
+    unsigned __int16 head,
+    const char* name,
+    int index,
+    void(__cdecl* drawFunc)(const char*, float*),
+    float* profilePos);
 
 
 
@@ -1034,10 +1035,11 @@ int __cdecl FX_UpdateElementPosition_CollidingStep(
     float *xyzWorldOld);
 void __cdecl FX_NextElementPosition(FxUpdateElem *update, double msecUpdateBegin);
 void __cdecl FX_NextElementPosition_NoExternalForces(
-    FxUpdateElem *update,
-    double msecUpdateBegin,
-    float *posLocal,
-    float *posWorld);
+    FxUpdateElem* update,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
+    float* posLocal,
+    float* posWorld);
 void __cdecl FX_IntegrateVelocity(const FxUpdateElem *update, float t0, float t1, float *posLocal, float *posWorld);
 void __cdecl FX_IntegrateVelocityAcrossSegments(
     int elemDefFlags,
@@ -1299,7 +1301,10 @@ const FxEffectDef *__cdecl FX_Register(char *name);
 const FxEffectDef *__cdecl FX_Register_FastFile(const char *name);
 void __cdecl FX_RegisterDefaultEffect();
 PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name);
-
+void __cdecl FX_ForEachEffectDef(void(__cdecl* callback)(const FxEffectDef*, void*), void* data);
+void FX_UnregisterAll();
 
 // fx_convert
 const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(* Alloc)(unsigned int));
+
+extern const float fx_randomTable[];

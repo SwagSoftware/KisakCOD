@@ -423,7 +423,7 @@ union DvarLimits
 };
 
 // nothing outside the Dvar_*() functions should modify these fields!
-typedef struct dvar_s {
+struct dvar_s {
 	const char *name;
 	const char *description;
 	word flags;
@@ -433,9 +433,12 @@ typedef struct dvar_s {
 	DvarValue latched;
 	DvarValue reset;
 	DvarLimits domain;
-	bool (__cdecl *domainFunc)(dvar_s *, DvarValue);
-	dvar_s *hashNext;
-} dvar_t;
+	bool (__cdecl *domainFunc)(dvar_s*, DvarValue);
+	dvar_s* hashNext;
+};
+
+// lol
+using dvar_t = dvar_s;
 
 //=============================================
 

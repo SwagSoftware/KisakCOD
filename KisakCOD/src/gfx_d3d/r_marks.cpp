@@ -1,8 +1,8 @@
 #include "r_marks.h"
 
+#include "r_gfx.h"
 
 void  R_BoxSurfaces(
-    int a1@<ebp>,
     const float *mins,
     const float *maxs,
     int(__cdecl **allowSurf)(int, void *),
@@ -429,8 +429,7 @@ void __cdecl R_AABBTreeSurfacesTwoLists_r(
     }
 }
 
-int  R_BoxStaticModels@<eax>(
-    int a1@<ebp>,
+int  R_BoxStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
@@ -616,8 +615,7 @@ void __cdecl R_AddStaticModelToList(int smodelIndex, unsigned __int16 *smodelLis
     smodelList[(*smodelCount)++] = smodelIndex;
 }
 
-unsigned int  R_CylinderSurfaces@<eax>(
-    int a1@<ebp>,
+unsigned int  R_CylinderSurfaces(
     const float *start,
     const float *end,
     float radius,
@@ -1774,22 +1772,22 @@ char __cdecl R_MarkFragments_SceneDObjs(MarkInfo *markInfo)
 }
 
 char __cdecl R_MarkFragments_AnimatedXModel(
-    MarkInfo *markInfo,
-    const XModel *model,
-    const unsigned int *hidePartBits,
+    MarkInfo* markInfo,
+    const XModel* model,
+    const unsigned int* hidePartBits,
     int boneIndex,
-    const DObjAnimMat *boneMtxList,
+    const DObjAnimMat* boneMtxList,
     int boneCount,
-    GfxMarkContext *markContext)
+    GfxMarkContext* markContext)
 {
     int boneOffset; // [esp+528h] [ebp-30h]
-    const DObjAnimMat *baseMatList; // [esp+53Ch] [ebp-1Ch]
+    const DObjAnimMat* baseMatList; // [esp+53Ch] [ebp-1Ch]
     int surfIndex; // [esp+540h] [ebp-18h]
     unsigned int vertListIndex; // [esp+544h] [ebp-14h]
     int surfCount; // [esp+548h] [ebp-10h]
-    Material **materials; // [esp+54Ch] [ebp-Ch]
-    XSurface *surfaces; // [esp+550h] [ebp-8h] BYREF
-    XSurface *surface; // [esp+554h] [ebp-4h]
+    Material** materials; // [esp+54Ch] [ebp-Ch]
+    XSurface* surfaces; // [esp+550h] [ebp-8h] BYREF
+    XSurface* surface; // [esp+554h] [ebp-4h]
     int savedregs; // [esp+558h] [ebp+0h] BYREF
 
     surfCount = XModelGetSurfaces(model, &surfaces, 0);
@@ -1863,8 +1861,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     return 1;
 }
 
-char  R_MarkFragments_AnimatedXModel_VertList@<al>(
-    float a1@<ebp>,
+char  R_MarkFragments_AnimatedXModel_VertList(
     MarkInfo *markInfo,
     unsigned int vertListIndex,
     const DObjAnimMat *poseBone,

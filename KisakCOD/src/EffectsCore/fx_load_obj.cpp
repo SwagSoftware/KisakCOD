@@ -67,6 +67,11 @@ const FxFlagDef s_allFlagDefs[42] =
 //    return Hunk_Alloc(size, "Hunk_AllocPhysPresetPrecache", 21);
 //}
 
+void FX_UnregisterAll()
+{
+    memset(&fx_load, 0, sizeof(fx_load));
+}
+
 char __cdecl FX_ParseSingleFlag(const char *token, FxFlagOutputSet *flagOutputSet)
 {
     int *outputFlag; // [esp+0h] [ebp-8h]
@@ -1533,3 +1538,13 @@ void __cdecl FX_RegisterDefaultEffect()
     fx_load.defaultEffect = FX_Register((char*)"misc/missing_fx");
 }
 
+void __cdecl FX_ForEachEffectDef(void(__cdecl* callback)(const FxEffectDef*, void*), void* data)
+{
+    int hashIndex; // [esp+0h] [ebp-4h]
+
+    for (hashIndex = 0; hashIndex < 512; ++hashIndex)
+    {
+        if (fx_load.effectDefs[hashIndex])
+            callback(fx_load.effectDefs[hashIndex], data);
+    }
+}

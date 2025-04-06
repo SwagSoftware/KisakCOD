@@ -38,8 +38,6 @@ const vec2 vec2_origin = { 0.0, 0.0 };
 const vec3 vec3_origin = { 0.0, 0.0, 0.0 };
 const vec4 vec4_origin = { 0.0, 0.0, 0.0, 0.0 };
 
-bool __cdecl Vec4HomogenousClipBothZ(vec4r pt0, vec4r pt1);
-bool __cdecl Vec4HomogenousClipZW(vec4r pt0, vec4r pt1, vec4r coeffZW);
 bool __cdecl Vec4IsNormalized(const vec4r v);
 
 void __cdecl TRACK_com_math();
@@ -123,6 +121,8 @@ float __cdecl Vec3NormalizeTo(const vec3r v, vec3r out);
 void __cdecl Vec3Mad(const vec3r start, float scale, const vec3r dir, vec3r result);
 void __cdecl Vec3Rotate(const vec3r in, const mat3x3& matrix, vec3r out);
 void __cdecl Vec3RotateTranspose(const vec3r in, const mat3x3& matrix, vec3r out);
+
+void __cdecl Vec3AddScalar(const float* a, float s, float* sum);
 
 void __cdecl Vec3Basis_RightHanded(const float *forward, float *left, float *up);
 

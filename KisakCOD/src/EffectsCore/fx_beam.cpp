@@ -2,39 +2,29 @@
 
 #include <client_mp/client_mp.h>
 
+#include <gfx_d3d/r_drawsurf.h>
+
+#include <gfx_d3d/r_scene.h>
+
 static FxBeamInfo g_beamInfo;
-
-// NOTE: yes, these really seem to be different matrix types for some reason..
-union float4 {
-    vec4 v;
-    unsigned int u[4];
-    PackedUnitVec unitVec[4];
-};
-
-union float4x3 {
-    union {
-        float4 x;
-        float4 y;
-        float4 z;
-    };
-
-    mat4x3 mat;
-};
-
-union float4x4 {
-    struct {
-        float4 x;
-        float4 y;
-        float4 z;
-        float4 w;
-    };
-
-    mat4x4 mat;
-};
 
 void __cdecl CreateClipMatrix(float4x4* clipMtx, const float* vieworg, const mat3x3& viewaxis);
 void __cdecl Float4x4ForViewer(float4x4* mtx, const vec3r origin3, const mat3x3& axis);
 void __cdecl Float4x4InfinitePerspectiveMatrix(float4x4* mtx, float tanHalfFovX, float tanHalfFovY, float zNear);
+
+bool __cdecl Vec4HomogenousClipBothZ(float4* pt0, float4* pt1);
+bool __cdecl Vec4HomogenousClipZW(float4* pt0, float4* pt1, float4* coeffZW);
+
+static const float4 wiggle[] = {
+    {.v = { 0.0, 1.0, 0.0, 0.0, }},
+    {.v = { 0.70999998, 0.70999998, 0.0, 0.0, }},
+    {.v = { 1.0, 0.0, 0.0, 0.0, }},
+    {.v = { 0.70999998, -0.70999998, 0.0, 0.0, }},
+    {.v = { 0.0, -1.0, 0.0, 0.0, }},
+    {.v = { -0.70999998, -0.70999998, 0.0, 0.0, }},
+    {.v = { -1.0, 0.0, 0.0, 0.0, }},
+    {.v = { -0.70999998, 0.70999998, 0.0, 0.0, }}
+};
 
 void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
 {
@@ -75,7 +65,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4 flatDelta; // [esp+13Ch] [ebp-17Ch] BYREF
     int segIter; // [esp+14Ch] [ebp-16Ch]
     float4 *baseArgs; // [esp+150h] [ebp-168h]
-    const FxBeam *beam; // [esp+154h] [ebp-164h]
+    FxBeam *beam; // [esp+154h] [ebp-164h]
     float4 beamWorldEnd; // [esp+158h] [ebp-160h]
     float4 vertPos; // [esp+168h] [ebp-150h]
     GfxColor endColor; // [esp+178h] [ebp-140h]
@@ -134,8 +124,9 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
         beamWorldEnd.v[1] = beam->end[1];
         beamWorldEnd.v[2] = beam->end[2];
         beamWorldEnd.v[3] = 0.0;
-        *(_QWORD *)v1.v = *(_QWORD *)beamWorldBegin.v;
-        v1.u[2] = beamWorldBegin.u[2];
+        v1.v[0] = beamWorldBegin.v[0];
+        v1.v[1] = beamWorldBegin.v[1];
+        v1.v[2] = beamWorldBegin.v[2];
         v1.v[3] = 0.0;
         if (FX_GenerateBeam_GetFlatDelta(&clipMtx, &invClipMtx, v1, beamWorldEnd, &flatDelta))
         {
@@ -660,11 +651,9 @@ char  FX_GenerateBeam_GetFlatDelta(
     float v50; // [esp-1Ch] [ebp-28h]
     float v51; // [esp-18h] [ebp-24h]
     float4 v52; // [esp-14h] [ebp-20h]
-    int v53; // [esp+0h] [ebp-Ch]
     void* v54; // [esp+4h] [ebp-8h]
     void* retaddr; // [esp+Ch] [ebp+0h]
 
-    v53 = v5;
     v48 = beamWorldBegin.v[0] + 0.0;
     v49 = beamWorldBegin.v[1] + 0.0;
     v50 = beamWorldBegin.v[2] + 0.0;

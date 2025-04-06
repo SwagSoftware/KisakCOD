@@ -380,6 +380,29 @@ void DB_ExternalInitAssets();
 void DB_UnarchiveAssets();
 void __cdecl DB_Cleanup();
 
+void __cdecl DB_EnumXAssets_FastFile(
+    XAssetType type,
+    void(__cdecl* func)(XAssetHeader, void*),
+    void* inData,
+    bool includeOverride);
+
+int __cdecl DB_GetAllXAssetOfType_FastFile(XAssetType type, XAssetHeader* assets, int maxCount);
+int __cdecl DB_GetAllXAssetOfType(XAssetType type, XAssetHeader* assets, int maxCount);
+int __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHeader* assets, int maxCount);
+
+struct fileData_s;
+void __cdecl DB_EnumXAssets(
+    XAssetType type,
+    void(__cdecl* func)(XAssetHeader, void*),
+    void* inData,
+    bool includeOverride);
+void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(* func)(void*, void*), void* inData);
+
+void __cdecl DB_EnumXAssetsFor(
+    fileData_s* fileData,
+    int fileDataType,
+    void(* func)(void*, void*),
+    void* inData);
 
 
 // db_assetnames

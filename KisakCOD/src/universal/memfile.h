@@ -16,6 +16,14 @@ struct MemoryFile
     void(* archiveProc)(MemoryFile*, int, byte *);
 };
 
+enum MemFileMode : __int32
+{                                       // ...
+    MEM_FILE_MODE_DEFAULT = 0x0,
+    MEM_FILE_MODE_INFLATE = 0x1,
+    MEM_FILE_MODE_DEFLATE = 0x2,
+    MEM_FILE_MODENUM      = 0x3,
+};
+
 void MemFile_ArchiveData(MemoryFile* memFile, int bytes, void* data);
 
 void MemFile_CommonInit(MemoryFile* memFile, int size, byte* buffer, bool errorOnOverflow, bool compress);
@@ -44,8 +52,8 @@ int __cdecl MemFile_WriteDataInternal(
     char cacheBufferLen,
     unsigned __int8 nextByte);
 int __cdecl MemFile_GetUsedSize(MemoryFile* memFile);
-void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, _BYTE* p);
-void __cdecl MemFile_WriteCString(MemoryFile* memFile, char* string);
+void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, const void* p);
+void __cdecl MemFile_WriteCString(MemoryFile* memFile, const char* string);
 const char* __cdecl MemFile_ReadCString(MemoryFile* memFile);
 void __cdecl MemFile_ReadData(MemoryFile* memFile, int byteCount, unsigned __int8* p);
 unsigned __int8 __cdecl MemFile_ReadByteInternal(MemoryFile* memFile);

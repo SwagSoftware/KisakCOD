@@ -1,5 +1,8 @@
 #include "fx_system.h"
 
+#include <database/database.h>
+
+#include <physics/phys_local.h>
 
 void __cdecl FX_Restore(int clientIndex, MemoryFile *memFile)
 {
@@ -146,7 +149,7 @@ void __cdecl FX_RestorePhysicsData(FxSystem *system, MemoryFile *memFile)
             elem = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
             elemDef = &effect->def->elemDefs[elem->item.defIndex];
             elemHandleNext = elem->item.nextElemHandleInEffect;
-            if (elemDef->elemType == 5 && ((unsigned int)svs.snapshotClients[20582].attachModelIndex & elemDef->flags) != 0)
+            if (elemDef->elemType == 5 && (elemDef->flags & 0x8000000) != 0)
             {
                 elem->item.physObjId = (int)Phys_ObjLoad(PHYS_WORLD_FX, memFile);
                 visuals = FX_GetElemVisuals(
@@ -195,10 +198,10 @@ void __cdecl FX_Save(int clientIndex, MemoryFile *memFile)
     FX_SaveEffectDefTable(system, memFile);
     MemFile_WriteData(memFile, 2656, system);
     UsedSize = MemFile_GetUsedSize(memFile);
-    ProfMem_Begin("systemBuffers", UsedSize);
+    // ProfMem_Begin("systemBuffers", UsedSize);
     MemFile_WriteData(memFile, 291968, systemBuffers);
     v3 = MemFile_GetUsedSize(memFile);
-    ProfMem_End(v3);
+    // ProfMem_End(v3);
     p = system;
     MemFile_WriteData(memFile, 4, &p);
     FX_SavePhysicsData(system, memFile);
@@ -211,7 +214,21 @@ void __cdecl FX_SaveEffectDefTable(FxSystem *system, MemoryFile *memFile)
         FX_SaveEffectDefTable_FastFile(memFile);
     else
         FX_SaveEffectDefTable_LoadObj(memFile);
-    MemFile_WriteCString(memFile, (char *)&String);
+    MemFile_WriteCString(memFile, "");
+}
+
+void __cdecl FX_SaveEffectDefTableEntry_FileLoadObj(const FxEffectDef* effectDef, MemoryFile* data)
+{
+    const FxEffectDef* p; // [esp+0h] [ebp-4h] BYREF
+
+    MemFile_WriteCString(data, (char*)effectDef->name);
+    p = effectDef;
+    MemFile_WriteData(data, 4, &p);
+}
+
+void __cdecl FX_SaveEffectDefTable_LoadObj(MemoryFile* memFile)
+{
+    FX_ForEachEffectDef((void(__cdecl*)(const FxEffectDef*, void*))FX_SaveEffectDefTableEntry_FileLoadObj, memFile);
 }
 
 void __cdecl FX_SaveEffectDefTable_FastFile(MemoryFile *memFile)

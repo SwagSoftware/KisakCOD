@@ -1,8 +1,18 @@
 #pragma once
 
+struct FxWorldMarkPoint // sizeof=0x18
+{                                       // ...
+    float xyz[3];
+    float vertWeights[3];
+};
+
+struct FxModelMarkPoint // sizeof=0x18
+{                                       // ...
+    float xyz[3];                       // ...
+    float vertWeights[3];               // ...
+};
 
 void  R_BoxSurfaces(
-    int a1@<ebp>,
     const float *mins,
     const float *maxs,
     int(__cdecl **allowSurf)(int, void *),
@@ -61,8 +71,7 @@ void __cdecl R_AABBTreeSurfacesTwoLists_r(
     GfxSurface ***surfLists,
     unsigned int surfListSize,
     unsigned int *surfCounts);
-int  R_BoxStaticModels@<eax>(
-    int a1@<ebp>,
+int  R_BoxStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
@@ -95,8 +104,7 @@ void __cdecl R_AABBTreeStaticModels_r(
     int smodelListSize,
     int *smodelCount);
 void __cdecl R_AddStaticModelToList(int smodelIndex, unsigned __int16 *smodelList, int *smodelCount);
-unsigned int  R_CylinderSurfaces@<eax>(
-    int a1@<ebp>,
+unsigned int  R_CylinderSurfaces(
     const float *start,
     const float *end,
     float radius,
@@ -209,8 +217,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     const DObjAnimMat *boneMtxList,
     int boneCount,
     GfxMarkContext *markContext);
-char  R_MarkFragments_AnimatedXModel_VertList@<al>(
-    float a1@<ebp>,
+char  R_MarkFragments_AnimatedXModel_VertList(
     MarkInfo *markInfo,
     unsigned int vertListIndex,
     const DObjAnimMat *poseBone,

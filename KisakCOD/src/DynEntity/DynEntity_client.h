@@ -167,7 +167,6 @@ void __cdecl DynEntCl_ExplosionEvent(
     float inScale,
     int innerDamage,
     int outerDamage);
-void __cdecl Vec3AddScalar(const float *a, float s, float *sum);
 unsigned int __cdecl DynEntCl_GetClosestEntities(
     DynEntityDrawType drawType,
     float *radiusMins,

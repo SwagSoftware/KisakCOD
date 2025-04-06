@@ -95,7 +95,7 @@ struct FxCamera // sizeof=0xB0
 
 struct FxSpriteInfo // sizeof=0x10
 {                                       // ...
-    r_double_index_t *indices;          // ...
+    int indices;          // ...
     unsigned int indexCount;
     Material *material;
     const char *name;
@@ -158,7 +158,7 @@ struct FxVisBlocker // sizeof=0x10
 struct FxVisState // sizeof=0x1010
 {                                       // ...
     FxVisBlocker blocker[256];
-    volatile int blockerCount;
+    volatile long blockerCount;
     unsigned int pad[3];
 };
 struct FxSystem // sizeof=0xA60
@@ -387,6 +387,9 @@ union FxElemVisuals // sizeof=0x4
     struct XModel *model;
     FxEffectDefRef effectDef;
     const char *soundName;
+
+    FxElemVisuals() : anonymous(nullptr) { }
+    FxElemVisuals(Material *mat) : material(mat) { }
 };
 struct FxElemMarkVisuals // sizeof=0x8
 {                                       // ...
@@ -482,7 +485,7 @@ uint16 FX_PoolToHandle_Generic(FxPool<ITEM_TYPE>* poolArray, ITEM_TYPE* item)
 
     if (!item || item < poolArray || item >= &poolArray[LIMIT])
     {
-        vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", ppolArray, item);
+        vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", poolArray, item);
     }
     return ((char*)item - (char*)poolArray) / ITEM_TYPE::HANDLE_SCALE;
 }
@@ -493,3 +496,87 @@ FxPool<ITEM_TYPE>* FX_PoolFromHandle_Generic(FxPool<ITEM_TYPE>* poolArray, uint 
     vassert(handle < (LIMIT * sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) && handle % (sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) == 0, "%p %u", poolArray, handle);
     return (FxPool<FxElem> *)((char*)poolArray + (handle * ITEM_TYPE::HANDLE_SCALE));
 }
+
+using uint4 = unsigned int[4];
+
+// NOTE: yes, these really seem to be different matrix types specific to the FX system for some reason..
+union float4 {
+    vec4 v;
+    uint4 u;
+    PackedUnitVec unitVec[4];
+};
+
+union float4x3 {
+    union {
+        float4 x;
+        float4 y;
+        float4 z;
+    };
+
+    mat4x3 mat;
+};
+
+union float4x4 {
+    struct {
+        float4 x;
+        float4 y;
+        float4 z;
+        float4 w;
+    };
+
+    mat4x4 mat;
+};
+
+constexpr float4 g_zero = {
+    .v = {
+        0.0, 0.0, 0.0, 0.0
+    }
+};
+
+constexpr float4 g_unit = {
+    .v = {
+        0.0, 0.0, 0.0, 1.0
+    }
+};
+
+constexpr float4 g_2xunit = {
+    .v = {
+        0.0, 0.0, 0.0, 1.0
+    }
+};
+
+constexpr float4 g_swizzleXYZA = {
+    .u = {
+        0x00010203,
+        0x04050607,
+        0x08090A0B,
+        0x10111213
+    }
+};
+
+constexpr float4 g_swizzleYZXW = {
+    .u = {
+        0x04050607,
+        0x08090A0B,
+        0x00010203,
+        0x0C0D0E0F
+    }
+};
+
+constexpr float4 g_keepXYW = {
+    .u = {
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0,
+        0xFFFFFFFF
+    }
+};
+
+constexpr float4 g_keepXYZ = {
+    .u = {
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0
+    }
+};

@@ -1557,13 +1557,6 @@ void __cdecl DynEntCl_ExplosionEvent(
     }
 }
 
-void __cdecl Vec3AddScalar(const float *a, float s, float *sum)
-{
-    *sum = *a + s;
-    sum[1] = a[1] + s;
-    sum[2] = a[2] + s;
-}
-
 unsigned int __cdecl DynEntCl_GetClosestEntities(
     DynEntityDrawType drawType,
     float *radiusMins,

@@ -725,11 +725,11 @@ void __cdecl FX_ReserveElemDefMemory(FxElemDef *elemDef, unsigned __int8 **memPo
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 705, 0, "%s", "*memPool");
     if (!elemDef->velIntervalCount)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 707, 0, "%s", "elemDef->velIntervalCount");
-    elemDef->velSamples = (const FxElemVelStateSample *)*memPool;
+    elemDef->velSamples = (FxElemVelStateSample *)*memPool;
     *memPool += 96 * elemDef->velIntervalCount + 96;
     if (elemDef->visStateIntervalCount)
     {
-        elemDef->visSamples = (const FxElemVisStateSample *)*memPool;
+        elemDef->visSamples = (FxElemVisStateSample *)*memPool;
         *memPool += 48 * elemDef->visStateIntervalCount + 48;
     }
     else

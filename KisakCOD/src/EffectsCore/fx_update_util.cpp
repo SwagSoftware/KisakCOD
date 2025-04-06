@@ -1,11 +1,13 @@
 #include "fx_system.h"
 
+int warnCount_1;
+int fx_serverVisClient;
 
 void __cdecl FX_OffsetSpawnOrigin(
-    const FxSpatialFrame *effectFrame,
-    const FxElemDef *elemDef,
+    const FxSpatialFrame* effectFrame,
+    const FxElemDef* elemDef,
     int randomSeed,
-    float *spawnOrigin)
+    float* spawnOrigin)
 {
     float scale0; // [esp+14h] [ebp-74h]
     float v5; // [esp+18h] [ebp-70h]
@@ -24,7 +26,7 @@ void __cdecl FX_OffsetSpawnOrigin(
         if (v6 == 16)
         {
             FX_RandomDir(randomSeed, dir);
-            radius = elemDef->spawnOffsetRadius.amplitude * flt_8801B4[randomSeed] + elemDef->spawnOffsetRadius.base;
+            radius = elemDef->spawnOffsetRadius.amplitude * fx_randomTable[randomSeed + 11] + elemDef->spawnOffsetRadius.base;
             Vec3Mad(spawnOrigin, radius, dir, spawnOrigin);
         }
         else
@@ -37,15 +39,15 @@ void __cdecl FX_OffsetSpawnOrigin(
                     "%s\n\t(elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) = %i",
                     "((elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) == FX_ELEM_SPAWN_OFFSET_CYLINDER)",
                     elemDef->flags & 0x30);
-            radius = elemDef->spawnOffsetRadius.amplitude * flt_8801B4[randomSeed] + elemDef->spawnOffsetRadius.base;
-            yaw = flt_8801AC[randomSeed] * 6.283185482025146;
+            radius = elemDef->spawnOffsetRadius.amplitude * fx_randomTable[randomSeed + 11] + elemDef->spawnOffsetRadius.base;
+            yaw = fx_randomTable[randomSeed + 9] * 6.283185482025146;
             UnitQuatToAxis(effectFrame->quat, axis);
             cosYaw = cos(yaw);
             sinYaw = sin(yaw);
             v5 = radius * sinYaw;
             scale0 = radius * cosYaw;
             Vec3MadMad(spawnOrigin, scale0, axis[1], v5, axis[2], spawnOrigin);
-            height = elemDef->spawnOffsetHeight.amplitude * flt_8801B0[randomSeed] + elemDef->spawnOffsetHeight.base;
+            height = elemDef->spawnOffsetHeight.amplitude * fx_randomTable[randomSeed + 10] + elemDef->spawnOffsetHeight.base;
             Vec3Mad(spawnOrigin, height, axis[0], spawnOrigin);
         }
     }
@@ -91,9 +93,9 @@ void __cdecl FX_GetSpawnOrigin(
 {
     float offset[3]; // [esp+18h] [ebp-Ch] BYREF
 
-    offset[0] = elemDef->spawnOrigin[0].amplitude * flt_8801A0[randomSeed] + elemDef->spawnOrigin[0].base;
-    offset[1] = elemDef->spawnOrigin[1].amplitude * flt_8801A4[randomSeed] + elemDef->spawnOrigin[1].base;
-    offset[2] = elemDef->spawnOrigin[2].amplitude * flt_8801A8[randomSeed] + elemDef->spawnOrigin[2].base;
+    offset[0] = elemDef->spawnOrigin[0].amplitude * fx_randomTable[randomSeed + 6] + elemDef->spawnOrigin[0].base;
+    offset[1] = elemDef->spawnOrigin[1].amplitude * fx_randomTable[randomSeed + 7] + elemDef->spawnOrigin[1].base;
+    offset[2] = elemDef->spawnOrigin[2].amplitude * fx_randomTable[randomSeed + 8] + elemDef->spawnOrigin[2].base;
     if ((elemDef->flags & 2) != 0)
         FX_TransformPosFromLocalToWorld(effectFrame, offset, spawnOrigin);
     else
@@ -247,17 +249,17 @@ void __cdecl FX_GetOrientation(
 };
 
 void __cdecl FX_GetVelocityAtTime(
-    const FxElemDef *elemDef,
+    const FxElemDef* elemDef,
     int randomSeed,
     float msecLifeSpan,
     float msecElapsed,
-    const orientation_t *orient,
-    const float *baseVel,
-    float *velocity)
+    const orientation_t* orient,
+    const float* baseVel,
+    float* velocity)
 {
-    const char *v7; // eax
+    const char* v7; // eax
     int v8; // eax
-    char *v9; // eax
+    char* v9; // eax
     double v10; // [esp+18h] [ebp-58h]
     float v11; // [esp+20h] [ebp-50h]
     float v12; // [esp+24h] [ebp-4Ch]
@@ -266,7 +268,7 @@ void __cdecl FX_GetVelocityAtTime(
     float samplePoint; // [esp+38h] [ebp-38h]
     float velocityScale; // [esp+3Ch] [ebp-34h]
     int sampleIndex; // [esp+40h] [ebp-30h]
-    const FxElemVelStateSample *samples; // [esp+44h] [ebp-2Ch]
+    const FxElemVelStateSample* samples; // [esp+44h] [ebp-2Ch]
     int intervalCount; // [esp+48h] [ebp-28h]
     float velocityLocal[3]; // [esp+4Ch] [ebp-24h] BYREF
     float weight[2]; // [esp+58h] [ebp-18h] BYREF
@@ -299,14 +301,14 @@ void __cdecl FX_GetVelocityAtTime(
     }
     v12 = fx_randomTable[randomSeed];
     rangeLerp[0] = v12;
-    v11 = flt_88018C[randomSeed];
+    v11 = fx_randomTable[randomSeed + 1];
     rangeLerp[1] = v11;
-    *((float *)&v10 + 1) = flt_880190[randomSeed];
-    rangeLerp[2] = *((float *)&v10 + 1);
+    *((float*)&v10 + 1) = fx_randomTable[randomSeed + 2];
+    rangeLerp[2] = *((float*)&v10 + 1);
     intervalCount = elemDef->velIntervalCount;
     samplePoint = (double)intervalCount * sampleTime;
-    *(float *)&v10 = floor(samplePoint);
-    v8 = (int)*(float *)&v10;
+    *(float*)&v10 = floor(samplePoint);
+    v8 = (int)*(float*)&v10;
     sampleIndex = v8;
     sampleLerp = samplePoint - (double)v8;
     if (v8 < 0 || sampleIndex >= intervalCount)
@@ -335,7 +337,7 @@ void __cdecl FX_GetVelocityAtTime(
         FX_GetVelocityAtTimeInFrame(&samples->world, &samples[1].world, rangeLerp, weight, velocityWorld);
         Vec3Mad(velocity, velocityScale, velocityWorld, velocity);
     }
-    if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & elemDef->flags) != 0)
+    if ((elemDef->flags & 0x1000000) != 0)
     {
         FX_GetVelocityAtTimeInFrame(&samples->local, &samples[1].local, rangeLerp, weight, velocityLocal);
         FX_OrientationDirToWorldDir(orient, velocityLocal, velocityWorld);
@@ -485,30 +487,30 @@ char __cdecl FX_CullSphere(const FxCamera *camera, unsigned int frustumPlaneCoun
 }
 
 void __cdecl FX_GetElemAxis(
-    const FxElemDef *elemDef,
+    const FxElemDef* elemDef,
     int randomSeed,
-    const orientation_t *orient,
+    const orientation_t* orient,
     float msecElapsed,
-    float (*axis)[3])
+    mat3x3 &axis)
 {
     float v5; // [esp+0h] [ebp-90h]
     float v6; // [esp+4h] [ebp-8Ch]
     float v7; // [esp+8h] [ebp-88h]
     float angles[3]; // [esp+84h] [ebp-Ch] BYREF
 
-    angles[0] = elemDef->spawnAngles[0].amplitude * flt_8801B8[randomSeed] + elemDef->spawnAngles[0].base;
-    angles[1] = elemDef->spawnAngles[1].amplitude * flt_8801BC[randomSeed] + elemDef->spawnAngles[1].base;
-    angles[2] = elemDef->spawnAngles[2].amplitude * flt_8801C0[randomSeed] + elemDef->spawnAngles[2].base;
-    v7 = elemDef->angularVelocity[0].amplitude * flt_880194[randomSeed] + elemDef->angularVelocity[0].base;
+    angles[0] = elemDef->spawnAngles[0].amplitude * fx_randomTable[randomSeed + 12] + elemDef->spawnAngles[0].base;
+    angles[1] = elemDef->spawnAngles[1].amplitude * fx_randomTable[randomSeed + 13] + elemDef->spawnAngles[1].base;
+    angles[2] = elemDef->spawnAngles[2].amplitude * fx_randomTable[randomSeed + 14] + elemDef->spawnAngles[2].base;
+    v7 = elemDef->angularVelocity[0].amplitude * fx_randomTable[randomSeed + 3] + elemDef->angularVelocity[0].base;
     angles[0] = msecElapsed * v7 + angles[0];
-    v6 = elemDef->angularVelocity[1].amplitude * flt_880198[randomSeed] + elemDef->angularVelocity[1].base;
+    v6 = elemDef->angularVelocity[1].amplitude * fx_randomTable[randomSeed + 4] + elemDef->angularVelocity[1].base;
     angles[1] = msecElapsed * v6 + angles[1];
-    v5 = elemDef->angularVelocity[2].amplitude * flt_88019C[randomSeed] + elemDef->angularVelocity[2].base;
+    v5 = elemDef->angularVelocity[2].amplitude * fx_randomTable[randomSeed + 5] + elemDef->angularVelocity[2].base;
     angles[2] = msecElapsed * v5 + angles[2];
     FX_AnglesToOrientedAxis(angles, orient, axis);
 }
 
-void __cdecl FX_AnglesToOrientedAxis(const float *anglesInRad, const orientation_t *orient, float (*axisOut)[3])
+void __cdecl FX_AnglesToOrientedAxis(const float* anglesInRad, const orientation_t* orient, float (*axisOut)[3][3])
 {
     float v3; // [esp+8h] [ebp-40h]
     float v4; // [esp+14h] [ebp-34h]
@@ -533,14 +535,13 @@ void __cdecl FX_AnglesToOrientedAxis(const float *anglesInRad, const orientation
     localDir[0] = cp * cy;
     localDir[1] = cp * sy;
     localDir[2] = -v9;
-    FX_OrientationDirToWorldDir(orient, localDir, (float *)axisOut);
+    FX_OrientationDirToWorldDir(orient, localDir, (float*)axisOut);
     localDir[0] = sr * v9 * cy - cr * sy;
     localDir[1] = sr * v9 * sy + cr * cy;
     localDir[2] = sr * cp;
-    FX_OrientationDirToWorldDir(orient, localDir, &(*axisOut)[3]);
+    FX_OrientationDirToWorldDir(orient, localDir, (*axisOut)[1]);
     localDir[0] = cr * v9 * cy + sr * sy;
     localDir[1] = cr * v9 * sy - sr * cy;
     localDir[2] = cr * cp;
-    FX_OrientationDirToWorldDir(orient, localDir, &(*axisOut)[6]);
+    FX_OrientationDirToWorldDir(orient, localDir, (*axisOut)[2]);
 }
-

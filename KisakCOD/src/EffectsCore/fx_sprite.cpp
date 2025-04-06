@@ -1,5 +1,13 @@
 #include "fx_system.h"
 
+#include <gfx_d3d/r_drawsurf.h>
+#include <gfx_d3d/r_scene.h>
+
+#include <client_mp/client_mp.h>
+
+FxSpriteInfo g_spriteInfo;
+
+static FxSprite g_sprites[96]; // ADDED
 
 void __cdecl FX_SpriteGenerateVerts(FxGenerateVertsCmd *cmd)
 {
@@ -431,8 +439,8 @@ void __cdecl FX_SpriteBegin()
 
 void __cdecl FX_SpriteAdd(FxSprite *sprite)
 {
-    if (g_spriteInfo.indices != (r_double_index_t *)96)
-        memcpy((char *)&unk_13DA210 + 32 * (int)g_spriteInfo.indices++, sprite, 0x20u);
+    if (g_spriteInfo.indices < arr_cnt(g_sprites))
+        memcpy(&g_sprites[g_spriteInfo.indices++], sprite, sizeof(*sprite));
 }
 
 FxSpriteInfo *__cdecl FX_SpriteGetInfo()

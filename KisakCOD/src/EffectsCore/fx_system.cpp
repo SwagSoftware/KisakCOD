@@ -1,111 +1,17 @@
 #include "fx_system.h"
-#include <qcommon/mem_track.h>
 
-const float fx_randomTable[] = { // idb
-  0.4300513, 0.58586591, 0.14015682, 0.3638894, 0.87767053
-, 0.67589945, 0.18348631, 0.28799689, 0.68363762, 0.071270868
-, 0.94988143, 0.45510319, 0.87240946, 0.84151697, 0.37590459
-, 0.64859152, 0.85434818, 0.0097696204, 0.49672353, 0.43216714
-, 0.43313825, 0.23515075, 0.5371843, 0.61560357, 0.03023384
-, 0.057191439, 0.65731519, 0.29047075, 0.90327185, 0.23431137
-, 0.05183224, 0.91735321, 0.91935956, 0.4768306, 0.21653092
-, 0.4561961, 0.69488961, 0.044218689, 0.63184845, 0.90852547
-, 0.092098549, 0.94213349, 0.43789461, 0.3860575, 0.50210679
-, 0.44924319, 0.077410743, 0.02781762, 0.71404278, 0.46823773
-, 0.16539073, 0.84952122, 0.58761573, 0.75461656, 0.12618695
-, 0.84028637, 0.19792362, 0.62809461, 0.65041906, 0.68348265
-, 0.95578396, 0.53067636, 0.70822668, 0.27705476, 0.89751518
-, 0.19948892, 0.46663198, 0.45911321, 0.97627419, 0.97676295
-, 0.88385767, 0.94792533, 0.29644635, 0.86131966, 0.55083162
-, 0.14450631, 0.4517478, 0.24042863, 0.81023574, 0.82853132
-, 0.52504712, 0.37389964, 0.69264203, 0.13117498, 0.3472065
-, 0.31517592, 0.0083110398, 0.44988856, 0.49951336, 0.9003765
-, 0.78329813, 0.81486571, 0.4483971, 0.4672305, 0.93911082
-, 0.89200824, 0.17852297, 0.31579405, 0.83032441, 0.99541497
-, 0.99564368, 0.83419341, 0.93674266, 0.59296888, 0.82696533
-, 0.25299728, 0.65787756, 0.60125524, 0.71742213, 0.16162384
-, 0.49152723, 0.74315333, 0.82406402, 0.27905896, 0.14410391
-, 0.41164124, 0.17885713, 0.24133457, 0.32128367, 0.098229118
-, 0.88920987, 0.7849403, 0.43577054, 0.11585052, 0.56665128
-, 0.3038781, 0.98217356, 0.28906128, 0.4941771, 0.11015297
-, 0.77107245, 0.80635756, 0.23325177, 0.80025041, 0.73169285
-, 0.34092966, 0.80862534, 0.36114588, 0.45414591, 0.63507688
-, 0.29330644, 0.74397641, 0.77859789, 0.71629274, 0.42346886
-, 0.26225805, 0.22746687, 0.56216818, 0.23426829, 0.204547
-, 0.78050673, 0.73767084, 0.26677799, 0.92962486, 0.12538251
-, 0.035765801, 0.67172313, 0.95439821, 0.73759651, 0.61376756
-, 0.57056129, 0.41414258, 0.26482594, 0.59178662, 0.59692085
-, 0.42688146, 0.4482491, 0.2322731, 0.08040332, 0.72192836
-, 0.6125083, 0.59067816, 0.78994411, 0.53614408, 0.82144821
-, 0.0048924498, 0.26253748, 0.72266257, 0.3699922, 0.97312027
-, 0.63466078, 0.81400824, 0.63080442, 0.89367366, 0.70864719
-, 0.033989701, 0.48497409, 0.01206893, 0.92950028, 0.1581609
-, 0.099648967, 0.8424297, 0.97269017, 0.68393487, 0.95944852
-, 0.4509795, 0.82100147, 0.18113543, 0.0096133696, 0.920946
-, 0.33979946, 0.89501613, 0.065963529, 0.90690607, 0.35550943
-, 0.25761193, 0.1111341, 0.57185584, 0.18842904, 0.33852205
-, 0.046839122, 0.95978206, 0.80558294, 0.92706299, 0.59524548
-, 0.45904613, 0.43219119, 0.52756715, 0.20981228, 0.80596066
-, 0.57433665, 0.57474899, 0.080443613, 0.97415334, 0.34311083
-, 0.78087932, 0.5398711, 0.1471191, 0.21029839, 0.69047922
-, 0.64907241, 0.0037523599, 0.25652143, 0.066917039, 0.42544365
-, 0.60155916, 0.98711497, 0.43153438, 0.4893913, 0.056757361
-, 0.23902097, 0.57154202, 0.015792551, 0.54616123, 0.28140566
-, 0.03631027, 0.21171141, 0.87545216, 0.22514275, 0.23361419
-, 0.29637456, 0.11000722, 0.67475307, 0.66369998, 0.22543389
-, 0.16714393, 0.23289442, 0.44037509, 0.441459, 0.6035313
-, 0.19945596, 0.46643037, 0.55098015, 0.46017194, 0.01365657
-, 0.7092557, 0.72405142, 0.83080012, 0.83758152, 0.20579153
-, 0.65234804, 0.13164432, 0.58492744, 0.35376385, 0.29083517
-, 0.1880834, 0.73528826, 0.82383567, 0.73836708, 0.32443753
-, 0.79825288, 0.88416022, 0.29525176, 0.58739269, 0.52058733
-, 0.4052889, 0.04222694, 0.89132303, 0.74553084, 0.15682253
-, 0.3840099, 0.92480797, 0.8763603, 0.78868055, 0.86117363
-, 0.39133897, 0.71420085, 0.12660342, 0.51410252, 0.72796601
-, 0.35408342, 0.51130998, 0.39910421, 0.18174252, 0.080187671
-, 0.69640565, 0.54660672, 0.52597398, 0.5497635, 0.28814542
-, 0.13676344, 0.81884927, 0.8216908, 0.1969064, 0.30875972
-, 0.86829132, 0.44542047, 0.044237342, 0.24750334, 0.054299012
-, 0.12496416, 0.11764297, 0.30022261, 0.87562662, 0.58950698
-, 0.58307421, 0.16994901, 0.6894263, 0.19844636, 0.16028295
-, 0.7327404, 0.74463415, 0.52504176, 0.86025077, 0.65626323
-, 0.86740291, 0.036132291, 0.20404001, 0.42704168, 0.78181702
-, 0.84354407, 0.40591183, 0.87515259, 0.61463499, 0.32317799
-, 0.71624094, 0.16840763, 0.28943446, 0.35340124, 0.066314623
-, 0.18790971, 0.92870241, 0.57402211, 0.33305961, 0.21671356
-, 0.075696267, 0.01095232, 0.49700284, 0.9989416, 0.25630879
-, 0.33151048, 0.29058096, 0.1273568, 0.37259457, 0.48575065
-, 0.01453627, 0.31546465, 0.93492645, 0.22717103, 0.27263665
-, 0.15749003, 0.24550053, 0.18373783, 0.98265928, 0.31101075
-, 0.30897412, 0.26391375, 0.081691124, 0.83008957, 0.52232796
-, 0.65347987, 0.99033225, 0.87762624, 0.02487598, 0.11673046
-, 0.84127766, 0.83317691, 0.66335428, 0.27539879, 0.25289989
-, 0.89033073, 0.35153669, 0.79241872, 0.06226705, 0.078950956
-, 0.48853651, 0.18124095, 0.35651085, 0.8659876, 0.62736237
-, 0.76226276, 0.23658484, 0.55449253, 0.2344183, 0.060345381
-, 0.27069253, 0.7884531, 0.65331531, 0.89417225, 0.53179425
-, 0.22478817, 0.01499144, 0.27721068, 0.5308041, 0.20394848
-, 0.79406381, 0.22481775, 0.92929673, 0.83930409, 0.99520814
-, 0.35052964, 0.15813006, 0.51348597, 0.03899226, 0.96105975
-, 0.22541645, 0.51048911, 0.93245894, 0.78994197, 0.52231276
-, 0.35033268, 0.32351711, 0.88878679, 0.45213586, 0.81627446
-, 0.55437946, 0.047238011, 0.837286, 0.10283028, 0.080125153
-, 0.52949619, 0.87636662, 0.30254862, 0.59845614, 0.090570398
-, 0.70794213, 0.30488759, 0.8177613, 0.051665921, 0.72196418
-, 0.37726265, 0.76605135, 0.35348725, 0.093858831, 0.34912285
-, 0.30874071, 0.93809372, 0.26611614, 0.42589629, 0.70167565
-, 0.30498829, 0.9933089, 0.45530573, 0.93443823, 0.04146773
-, 0.73757112, 0.35768315, 0.86916125, 0.69214576, 0.99868959
-, 0.51038635, 0.38308778, 0.58059692, 0.063681237, 0.038692512
-, 0.71719843, 0.98433518, 0.72153294, 0.95375413, 0.4300513
-, 0.58586591, 0.14015682, 0.3638894, 0.87767053, 0.67589945
-, 0.18348631, 0.28799689, 0.68363762, 0.071270868, 0.94988143
-, 0.45510319, 0.87240946, 0.84151697, 0.37590459, 0.64859152
-, 0.85434818, 0.0097696204, 0.49672353, 0.43216714, 0.43313825
-, 0.23515075, 0.5371843, 0.61560357, 0.03023384, 0.057191439
-, 0.65731519, 0.29047075
-};
-static_assert(sizeof(fx_randomTable) == 0x7EC, "");
+#include <qcommon/mem_track.h>
+#include <qcommon/threads.h>
+
+#include <physics/phys_local.h>
+
+#include <gfx_d3d/rb_light.h>
+
+#include <universal/com_sndalias.h>
+
+#include <client_mp/client_mp.h>
+
+#include <win32/win_local.h>
 
 int fx_maxLocalClients;
 int fx_serverVisClient;
@@ -263,6 +169,7 @@ int __cdecl FX_EffectToHandle(FxSystem *system, FxEffect *effect)
     return ((char *)effect - (char *)system->effects) / 4;
 }
 
+
 void __cdecl FX_ShutdownSystem(int localClientNum)
 {
     FxSystem *system; // [esp+0h] [ebp-8h]
@@ -300,7 +207,7 @@ void __cdecl FX_EffectNoLongerReferenced(FxSystem *system, FxEffect *remoteEffec
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 677, 0, "%s", "remoteEffect");
     if ((unsigned __int16)remoteEffect->status != 1)
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 690, 0, "%s", "(effect->status & FX_STATUS_REF_COUNT_MASK) == 1");
-    if (((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & remoteEffect->status) != 0)
+    if ((remoteEffect->status & 0x7FE0000) != 0)
     {
         v2 = va("%s, %i", remoteEffect->def->name, remoteEffect->status);
         MyAssertHandler(
@@ -314,7 +221,7 @@ void __cdecl FX_EffectNoLongerReferenced(FxSystem *system, FxEffect *remoteEffec
     remoteOwner = FX_EffectFromHandle(system, remoteEffect->owner);
     if ((remoteEffect->status & 0x10000000) == 0)
     {
-        if ((int)((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & remoteOwner->status) <= 0)
+        if ((remoteOwner->status & 0x7FE0000) == 0)
             MyAssertHandler(
                 ".\\EffectsCore\\fx_system.cpp",
                 708,
@@ -438,7 +345,6 @@ void __cdecl FX_SpawnEffect_AllocTrails(FxSystem *system, FxEffect *effect)
     int elemDefCount; // [esp+10h] [ebp-10h]
     int elemDefIter; // [esp+14h] [ebp-Ch]
     int localTrail; // [esp+18h] [ebp-8h]
-    int localTrail_4; // [esp+1Ch] [ebp-4h]
 
     def = effect->def;
     if (!effect->def)
@@ -451,8 +357,7 @@ void __cdecl FX_SpawnEffect_AllocTrails(FxSystem *system, FxEffect *effect)
             remoteTrail = FX_AllocTrail(system);
             if (!remoteTrail)
                 return;
-            LOWORD(localTrail) = effect->firstTrailHandle;
-            BYTE2(localTrail_4) = elemDefIter;
+
             if ((char)elemDefIter != elemDefIter)
                 MyAssertHandler(
                     ".\\EffectsCore\\fx_system.cpp",
@@ -461,17 +366,218 @@ void __cdecl FX_SpawnEffect_AllocTrails(FxSystem *system, FxEffect *effect)
                     "%s\n\t(elemDefIter) = %i",
                     "(localTrail.defIndex == elemDefIter)",
                     elemDefIter);
-            HIWORD(localTrail) = -1;
-            LOWORD(localTrail_4) = -1;
-            HIBYTE(localTrail_4) = 0;
+
             if (!system)
                 MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 355, 0, "%s", "system");
             effect->firstTrailHandle = FX_PoolToHandle_Generic<FxTrail, 128>(system->trails, (FxTrail *)remoteTrail);
-            remoteTrail->nextFree = localTrail;
-            *(unsigned int *)&remoteTrail->item.lastElemHandle = localTrail_4;
+            
+            // KISAKTODO verify this
+            
+            remoteTrail->nextFree = effect->firstTrailHandle | 0xFFFF0000;
+            remoteTrail->item.lastElemHandle = -1;
+            remoteTrail->item.defIndex = elemDefIter;
+            remoteTrail->item.sequence = 0;
         }
     }
 }
+
+FxPool<FxTrail>* __cdecl FX_AllocPool_Generic_FxTrail_(
+    volatile long* firstFreeIndex,
+    FxPool<FxTrail>* pool,
+    volatile long* activeCount)
+{
+    FxPool<FxTrail>* item; // [esp+0h] [ebp-8h]
+    unsigned int itemIndex; // [esp+4h] [ebp-4h]
+
+    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
+    itemIndex = *firstFreeIndex;
+    if (*firstFreeIndex != -1 && itemIndex >= 0x80)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            188,
+            0,
+            "%s",
+            "itemIndex == -1 || (itemIndex >= 0 && itemIndex < ITEM_TYPE::POOL_SIZE)");
+    if (itemIndex == -1)
+    {
+        Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+        return 0;
+    }
+    else
+    {
+        item = &pool[itemIndex];
+        if (item->nextFree != -1 && item->nextFree >= 0x80u)
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_system.cpp",
+                200,
+                0,
+                "%s",
+                "item->nextFree == -1 || (item->nextFree >= 0 && item->nextFree < ITEM_TYPE::POOL_SIZE)");
+        *firstFreeIndex = item->nextFree;
+        ++*activeCount;
+        
+        Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+        return &pool[itemIndex];
+    }
+}
+
+FxPool<FxTrailElem>* __cdecl FX_AllocPool_Generic_FxTrailElem_(
+    volatile int* firstFreeIndex,
+    FxPool<FxTrailElem>* pool,
+    volatile int* activeCount)
+{
+    FxPool<FxTrailElem>* item; // [esp+0h] [ebp-8h]
+    unsigned int itemIndex; // [esp+4h] [ebp-4h]
+
+    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
+    itemIndex = *firstFreeIndex;
+    if (*firstFreeIndex != -1 && itemIndex >= 0x800)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            188,
+            0,
+            "%s",
+            "itemIndex == -1 || (itemIndex >= 0 && itemIndex < ITEM_TYPE::POOL_SIZE)");
+    if (itemIndex == -1)
+    {
+        Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+        return 0;
+    }
+    else
+    {
+        item = &pool[itemIndex];
+        if (item->nextFree != -1 && item->nextFree >= 0x800u)
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_system.cpp",
+                200,
+                0,
+                "%s",
+                "item->nextFree == -1 || (item->nextFree >= 0 && item->nextFree < ITEM_TYPE::POOL_SIZE)");
+        *firstFreeIndex = item->nextFree;
+        ++*activeCount;
+        
+        Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+        return &pool[itemIndex];
+    }
+}
+
+FxPool<FxElem>* __cdecl FX_AllocPool_Generic_FxElem_(
+    volatile int* firstFreeIndex,
+    FxPool<FxElem>* pool,
+    volatile int* activeCount)
+{
+    FxPool<FxElem>* item; // [esp+0h] [ebp-8h]
+    unsigned int itemIndex; // [esp+4h] [ebp-4h]
+
+    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
+    itemIndex = *firstFreeIndex;
+    if (*firstFreeIndex != -1 && itemIndex >= 0x800)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            188,
+            0,
+            "%s",
+            "itemIndex == -1 || (itemIndex >= 0 && itemIndex < ITEM_TYPE::POOL_SIZE)");
+    if (itemIndex == -1)
+    {
+        Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+        return 0;
+    }
+    else
+    {
+        item = &pool[itemIndex];
+        if (item->nextFree != -1 && item->nextFree >= 0x800u)
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_system.cpp",
+                200,
+                0,
+                "%s",
+                "item->nextFree == -1 || (item->nextFree >= 0 && item->nextFree < ITEM_TYPE::POOL_SIZE)");
+        *firstFreeIndex = item->nextFree;
+        ++*activeCount;
+        Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+        return &pool[itemIndex];
+    }
+}
+
+void __cdecl FX_FreePool_Generic_FxElem_(FxElem* item, volatile long* firstFreeIndex, FxPool<FxElem>* pool)
+{
+    volatile unsigned int freedIndex; // [esp+4h] [ebp-4h]
+
+    freedIndex = ((char*)item - (char*)pool) / 40;
+    if (freedIndex >= 0x800)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            228,
+            0,
+            "%s",
+            "freedIndex >= 0 && freedIndex < ITEM_TYPE::POOL_SIZE");
+    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
+    if (*firstFreeIndex != -1 && *firstFreeIndex >= 0x800u)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            243,
+            0,
+            "%s",
+            "*firstFreeIndex == -1 || (*firstFreeIndex >= 0 && *firstFreeIndex < ITEM_TYPE::POOL_SIZE)");
+    *(_DWORD*)&item->defIndex = *firstFreeIndex;
+    *firstFreeIndex = freedIndex;
+    Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+}
+
+void __cdecl FX_FreePool_Generic_FxTrailElem_(
+    FxTrailElem* item,
+    volatile long* firstFreeIndex,
+    FxPool<FxTrailElem>* pool)
+{
+    volatile unsigned int freedIndex; // [esp+4h] [ebp-4h]
+
+    freedIndex = ((char*)item - (char*)pool) >> 5;
+    if (freedIndex >= 0x800)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            228,
+            0,
+            "%s",
+            "freedIndex >= 0 && freedIndex < ITEM_TYPE::POOL_SIZE");
+    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
+    if (*firstFreeIndex != -1 && *firstFreeIndex >= 0x800u)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            243,
+            0,
+            "%s",
+            "*firstFreeIndex == -1 || (*firstFreeIndex >= 0 && *firstFreeIndex < ITEM_TYPE::POOL_SIZE)");
+    LODWORD(item->origin[0]) = *firstFreeIndex;
+    *firstFreeIndex = freedIndex;
+    Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+}
+
+void __cdecl FX_FreePool_Generic_FxTrail_(FxTrail* item, volatile long* firstFreeIndex, FxPool<FxTrail>* pool)
+{
+    volatile unsigned int freedIndex; // [esp+4h] [ebp-4h]
+
+    freedIndex = ((char*)item - (char*)pool) >> 3;
+    if (freedIndex >= 0x80)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            228,
+            0,
+            "%s",
+            "freedIndex >= 0 && freedIndex < ITEM_TYPE::POOL_SIZE");
+    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
+    if (*firstFreeIndex != -1 && *firstFreeIndex >= 0x80u)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            243,
+            0,
+            "%s",
+            "*firstFreeIndex == -1 || (*firstFreeIndex >= 0 && *firstFreeIndex < ITEM_TYPE::POOL_SIZE)");
+    *(_DWORD*)&item->nextTrailHandle = *firstFreeIndex;
+    *firstFreeIndex = freedIndex;
+    Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+}
+
 
 FxPool<FxTrail> *__cdecl FX_AllocTrail(FxSystem *system)
 {
@@ -546,7 +652,7 @@ FxEffect* __cdecl FX_SpawnEffect(
         FX_SpawnEffect_AllocTrails(system, remoteEffect);
         if (isSpotLightEffect)
             FX_SpawnEffect_AllocSpotLightEffect(system, remoteEffect);
-        if (((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & remoteEffect->status) != 0)
+        if ((remoteEffect->status & 0x7FE0000) != 0)
             MyAssertHandler(
                 ".\\EffectsCore\\fx_system.cpp",
                 1216,
@@ -574,7 +680,7 @@ FxEffect* __cdecl FX_SpawnEffect(
                     "((oldStatusValue & ~FX_STATUS_OWNED_EFFECTS_MASK) == ((oldStatusValue + (1 << FX_STATUS_OWNED_EFFECTS_SHIFT)) "
                     "& ~FX_STATUS_OWNED_EFFECTS_MASK))",
                     oldStatusValue);
-            if ((int)((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & ownerEffect->status) <= 0)
+            if ((ownerEffect->status & 0x7FE0000) == 0)
                 MyAssertHandler(
                     ".\\EffectsCore\\fx_system.cpp",
                     1250,
@@ -649,9 +755,7 @@ FxEffect* __cdecl FX_SpawnEffect(
                     markEntnum);
         }
         remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((unsigned __int8)runnerSortOrder << 24)
-            | ((unsigned int)&clients[0].parseClients[238].attachTagIndex[4]
-                + 3)
-            & *(_DWORD*)&remoteEffect->boltAndSortOrder);
+            | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFFF);
         if ((unsigned __int8)HIBYTE(*(_DWORD*)&remoteEffect->boltAndSortOrder) != runnerSortOrder)
             MyAssertHandler(
                 ".\\EffectsCore\\fx_system.cpp",
@@ -663,7 +767,7 @@ FxEffect* __cdecl FX_SpawnEffect(
         remoteEffect->frameAtSpawn.origin[0] = *origin;
         remoteEffect->frameAtSpawn.origin[1] = origin[1];
         remoteEffect->frameAtSpawn.origin[2] = origin[2];
-        AxisToQuat((const float (*)[3][3])axis, remoteEffect->frameAtSpawn.quat);
+        AxisToQuat(axis, remoteEffect->frameAtSpawn.quat);
         memcpy(&remoteEffect->framePrev, &remoteEffect->frameAtSpawn, sizeof(remoteEffect->framePrev));
         memcpy(&remoteEffect->frameNow, &remoteEffect->frameAtSpawn, sizeof(remoteEffect->frameNow));
         Destination = &system->firstNewEffect;
@@ -1187,11 +1291,11 @@ void __cdecl FX_StopEffectNonRecursive(FxSystem *system, FxEffect *effect)
     }
 }
 
-void __cdecl FX_KillEffect(FxSystem *system, FxEffect *effect)
+void __cdecl FX_KillEffect(FxSystem* system, FxEffect* effect)
 {
     unsigned __int16 effectHandle; // [esp+Ch] [ebp-14h]
     unsigned __int16 killedEffectHandle; // [esp+10h] [ebp-10h]
-    FxEffect *otherEffect; // [esp+18h] [ebp-8h]
+    FxEffect* otherEffect; // [esp+18h] [ebp-8h]
     volatile int activeIndex; // [esp+1Ch] [ebp-4h]
 
     if (!effect)
@@ -1202,12 +1306,12 @@ void __cdecl FX_KillEffect(FxSystem *system, FxEffect *effect)
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1656, 0, "%s", "(effect->status & FX_STATUS_IS_LOCKED_MASK) != 0");
     FX_AddRefToEffect(system, effect);
     FX_RemoveAllEffectElems(system, effect);
-    if (((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & effect->status) != 0)
+    if ((effect->status & 0x7FE0000) != 0)
     {
         killedEffectHandle = FX_EffectToHandle(system, effect);
         FX_BeginIteratingOverEffects_Cooperative(system);
         activeIndex = system->firstActiveEffect;
-        while (((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & effect->status) != 0)
+        while ((effect->status & 0x7FE0000) != 0)
         {
             if (activeIndex == system->firstNewEffect)
                 MyAssertHandler(
@@ -1225,7 +1329,7 @@ void __cdecl FX_KillEffect(FxSystem *system, FxEffect *effect)
                 {
                     while (InterlockedExchangeAdd(&otherEffect->status, 0x20000000) >= 0x20000000)
                         InterlockedExchangeAdd(&otherEffect->status, -536870912);
-                    if (((unsigned int)&svs.snapshotClients[19271].attachTagIndex[1] & otherEffect->status) != 0)
+                    if ((otherEffect->status & 0x7FE0000) != 0)
                         MyAssertHandler(
                             ".\\EffectsCore\\fx_system.cpp",
                             1685,
@@ -1647,12 +1751,12 @@ void __cdecl FX_SpawnElem(
                         if (elemDef->elemType == 5)
                         {
                             elem->item.u.lightingHandle = 0;
-                            if (((unsigned int)svs.snapshotClients[20582].attachModelIndex & elemDef->flags) != 0
-                                && !FX_SpawnModelPhysics(system, effect, elemDef, randomSeed, (FxElem *)elem))
+                            if ((elemDef->flags & 0x8000000) != 0
+                                && !FX_SpawnModelPhysics(system, effect, elemDef, randomSeed, (FxElem*)elem))
                             {
                                 if (!system)
                                     MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 327, 0, "%s", "system");
-                                v7 = FX_PoolToHandle_Generic<FxElem, 2048>(system->elems, (FxElem *)elem);
+                                v7 = FX_PoolToHandle_Generic<FxElem, 2048>(system->elems, (FxElem*)elem);
                                 FX_FreeElem(system, v7, effect, elemClass);
                             }
                         }
@@ -1756,42 +1860,6 @@ void __cdecl FX_SpawnRunner(
         FX_DelRefToEffect(system, spawnedEffect);
 }
 
-void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int randomSeed, float (*axisOut)[3])
-{
-    const char *v3; // eax
-    const char *v4; // eax
-    const char *v5; // eax
-    double v6; // [esp+18h] [ebp-28h]
-    double v7; // [esp+18h] [ebp-28h]
-    double v8; // [esp+18h] [ebp-28h]
-    float rotation; // [esp+3Ch] [ebp-4h]
-
-    rotation = flt_8801E8[randomSeed] * 360.0;
-    (*axisOut)[0] = (*axisIn)[0];
-    (*axisOut)[1] = (*axisIn)[1];
-    (*axisOut)[2] = (*axisIn)[2];
-    RotatePointAroundVector(&(*axisOut)[3], (const float *)axisOut, &(*axisIn)[3], rotation);
-    Vec3Cross((const float *)axisOut, &(*axisOut)[3], &(*axisOut)[6]);
-    if (!Vec3IsNormalized((const float *)axisOut))
-    {
-        v6 = Vec3Length((const float *)axisOut);
-        v3 = va("(%g %g %g) len %g", (*axisOut)[0], (*axisOut)[1], (*axisOut)[2], v6);
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1772, 0, "%s\n\t%s", "Vec3IsNormalized( axisOut[0] )", v3);
-    }
-    if (!Vec3IsNormalized(&(*axisOut)[3]))
-    {
-        v7 = Vec3Length(&(*axisOut)[3]);
-        v4 = va("(%g %g %g) len %g", (*axisOut)[3], (*axisOut)[4], (*axisOut)[5], v7);
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1773, 0, "%s\n\t%s", "Vec3IsNormalized( axisOut[1] )", v4);
-    }
-    if (!Vec3IsNormalized(&(*axisOut)[6]))
-    {
-        v8 = Vec3Length(&(*axisOut)[6]);
-        v5 = va("(%g %g %g) len %g", (*axisOut)[6], (*axisOut)[7], (*axisOut)[8], v8);
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1774, 0, "%s\n\t%s", "Vec3IsNormalized( axisOut[2] )", v5);
-    }
-}
-
 bool __cdecl FX_SpawnModelPhysics(
     FxSystem* system,
     FxEffect* effect,
@@ -1814,17 +1882,17 @@ bool __cdecl FX_SpawnModelPhysics(
     FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, randomSeed, &orient);
     FX_OrientationPosToWorldPos(&orient, elem->origin, worldOrigin);
     FX_GetElemAxis(elemDef, randomSeed, &orient, 0.0, axis);
-    AxisToQuat(axis, quat);
+    AxisToQuat((const float (*)[3][3])axis, quat);
     msecLifeSpan = (float)((((elemDef->lifeSpanMsec.amplitude + 1) * LOWORD(fx_randomTable[randomSeed + 17])) >> 16)
         + elemDef->lifeSpanMsec.base);
     FX_GetVelocityAtTime(elemDef, randomSeed, msecLifeSpan, 0.0, &orient, elem->baseVel, velocity);
-    v8 = elemDef->angularVelocity[0].amplitude * flt_880194[randomSeed] + elemDef->angularVelocity[0].base;
+    v8 = elemDef->angularVelocity[0].amplitude * fx_randomTable[randomSeed + 3] + elemDef->angularVelocity[0].base;
     angularVelocity[0] = v8 * 1000.0;
-    v7 = elemDef->angularVelocity[1].amplitude * flt_880198[randomSeed] + elemDef->angularVelocity[1].base;
+    v7 = elemDef->angularVelocity[1].amplitude * fx_randomTable[randomSeed + 4] + elemDef->angularVelocity[1].base;
     angularVelocity[1] = v7 * 1000.0;
-    v6 = elemDef->angularVelocity[2].amplitude * flt_88019C[randomSeed] + elemDef->angularVelocity[2].base;
+    v6 = elemDef->angularVelocity[2].amplitude * fx_randomTable[randomSeed + 5] + elemDef->angularVelocity[2].base;
     angularVelocity[2] = v6 * 1000.0;
-    _Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
     visuals.anonymous = FX_GetElemVisuals(elemDef, randomSeed).anonymous;
     if (!*((_DWORD*)visuals.anonymous + 53))
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1853, 0, "%s", "visuals.model->physPreset");
@@ -1839,7 +1907,7 @@ bool __cdecl FX_SpawnModelPhysics(
         Phys_ObjSetCollisionFromXModel(visuals.model, PHYS_WORLD_FX, (dxBody*)elem->physObjId);
         Phys_ObjSetAngularVelocity((dxBody*)elem->physObjId, angularVelocity);
     }
-    _Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
     return elem->physObjId != 0;
 }
 
@@ -1922,12 +1990,12 @@ void __cdecl FX_SpawnSound(
     }
 }
 
-void __cdecl FX_FreeElem(FxSystem *system, unsigned __int16 elemHandle, FxEffect *effect, unsigned int elemClass)
+void __cdecl FX_FreeElem(FxSystem* system, unsigned __int16 elemHandle, FxEffect* effect, unsigned int elemClass)
 {
     unsigned __int16 prevElemHandleInEffect; // [esp+10h] [ebp-14h]
     unsigned __int16 nextElemHandleInEffect; // [esp+12h] [ebp-12h]
-    const FxElemDef *elemDef; // [esp+14h] [ebp-10h]
-    FxPool<FxElem> *elem; // [esp+20h] [ebp-4h]
+    const FxElemDef* elemDef; // [esp+14h] [ebp-10h]
+    FxPool<FxElem>* elem; // [esp+20h] [ebp-4h]
 
     if (!system)
         MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 334, 0, "%s", "system");
@@ -1960,16 +2028,14 @@ void __cdecl FX_FreeElem(FxSystem *system, unsigned __int16 elemHandle, FxEffect
         FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, prevElemHandleInEffect)->item.nextElemHandleInEffect = elem->item.nextElemHandleInEffect;
     }
     elemDef = &effect->def->elemDefs[elem->item.defIndex];
-    if (elemDef->elemType == 5
-        && ((unsigned int)svs.snapshotClients[20582].attachModelIndex & elemDef->flags) != 0
-        && elem->item.physObjId)
+    if (elemDef->elemType == 5 && (elemDef->flags & 0x8000000) != 0 && elem->item.physObjId)
     {
         Sys_EnterCriticalSection(CRITSECT_PHYSICS);
-        Phys_ObjDestroy(PHYS_WORLD_FX, (dxBody *)elem->item.physObjId);
+        Phys_ObjDestroy(PHYS_WORLD_FX, (dxBody*)elem->item.physObjId);
         Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
     }
     elem->nextFree = 0;
-    *(unsigned int *)&elem->item.nextElemHandleInEffect = 0;
+    *(_DWORD*)&elem->item.nextElemHandleInEffect = 0;
     elem->item.msecBegin = 0;
     elem->item.baseVel[0] = 0.0;
     elem->item.baseVel[1] = 0.0;
@@ -1978,7 +2044,7 @@ void __cdecl FX_FreeElem(FxSystem *system, unsigned __int16 elemHandle, FxEffect
     elem->item.origin[1] = 0.0;
     elem->item.origin[2] = 0.0;
     elem->item.u.trailTexCoord = 0.0;
-    FX_FreePool_Generic_FxElem_((FxElem *)elem, &system->firstFreeElem, system->elems);
+    FX_FreePool_Generic_FxElem_((FxElem*)elem, &system->firstFreeElem, system->elems);
     FX_DelRefToEffect(system, effect);
     InterlockedDecrement(&system->activeElemCount);
 }
@@ -2136,4 +2202,3 @@ void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBas
         }
     }
 }
-

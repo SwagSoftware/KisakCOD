@@ -302,3 +302,10 @@ void __cdecl R_FinishStaticVertexBuffer(IDirect3DVertexBuffer9 *vb)
         }
     } while (alwaysfails);
 }
+
+void __cdecl R_UnlockVertexBuffer(IDirect3DVertexBuffer9* handle)
+{
+    if (!handle)
+        MyAssertHandler(".\\r_buffers.cpp", 131, 0, "%s", "handle");
+    handle->Unlock();
+}

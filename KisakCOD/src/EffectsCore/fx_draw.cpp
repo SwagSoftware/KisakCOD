@@ -1,13 +1,23 @@
 #include "fx_system.h"
+
+#include <gfx_d3d/r_drawsurf.h>
+#include <gfx_d3d/r_scene.h>
+#include <gfx_d3d/r_dpvs.h>
+
 #include <aim_assist/aim_assist.h>
 
+#include <cgame_mp/cg_local_mp.h>
+
+#include <physics/phys_local.h>
+
+#include <win32/win_local.h>
 
 void __cdecl FX_EvaluateVisAlpha(FxElemPreVisualState *preVisState, FxElemVisualState *visState)
 {
     float valueLerpInv; // [esp+30h] [ebp-8h]
     float valueLerp; // [esp+34h] [ebp-4h]
 
-    valueLerp = flt_8801E4[preVisState->randomSeed];
+    valueLerp = fx_randomTable[preVisState->randomSeed + 23];
     valueLerpInv = 1.0 - valueLerp;
     visState->color[3] = FX_InterpolateColor(
         preVisState->refState,
@@ -54,7 +64,7 @@ void __cdecl FX_SetupVisualState(
     preVisState->sampleLerpInv = 1.0 - preVisState->sampleLerp;
     preVisState->elemDef = elemDef;
     preVisState->effect = effect;
-    preVisState->refState = &elemDef->visSamples[v5];
+    preVisState->refState = &elemDef->visSamples[(int)v5];
     preVisState->randomSeed = randomSeed;
     preVisState->distanceFade = 255;
 }
@@ -113,7 +123,7 @@ void __cdecl FX_EvaluateVisualState(FxElemPreVisualState *preVisState, float mse
         MyAssertHandler(".\\EffectsCore\\fx_draw.cpp", 182, 0, "%s", "elemDef");
     refState = preVisState->refState;
     randomSeed = preVisState->randomSeed;
-    valueLerp = flt_8801E4[randomSeed];
+    valueLerp = fx_randomTable[randomSeed + 23];
     valueLerpInv = 1.0 - valueLerp;
     sampleLerp = preVisState->sampleLerp;
     sampleLerpInv = preVisState->sampleLerpInv;
@@ -123,7 +133,7 @@ void __cdecl FX_EvaluateVisualState(FxElemPreVisualState *preVisState, float mse
     visState->color[3] = FX_InterpolateColor(refState, valueLerp, valueLerpInv, sampleLerp, sampleLerpInv, 3);
     if (elemDef->lightingFrac)
         FX_EvaluateVisualState_DoLighting(preVisState, visState, elemDef);
-    visState->rotationTotal = elemDef->initialRotation.amplitude * flt_8801E8[randomSeed] + elemDef->initialRotation.base;
+    visState->rotationTotal = elemDef->initialRotation.amplitude * fx_randomTable[randomSeed + 23] + elemDef->initialRotation.base;
     visState->rotationTotal = FX_IntegrateRotationFromZero(
         refState,
         randomSeed,
@@ -158,6 +168,8 @@ double __cdecl FX_IntegrateRotationFromZero(
         + rotationTotala;
     return (float)(rotationTotalb * msecLifeSpan);
 }
+
+static int mapping[] = { 2, 1, 0 }; // idb
 
 void __cdecl FX_EvaluateVisualState_DoLighting(
     FxElemPreVisualState *preVisState,
@@ -224,17 +236,17 @@ void __cdecl FX_DrawElem_BillboardSprite(FxDrawState *draw)
     if (!FX_CullElementForDraw_Sprite(draw))
     {
         v3 = draw->camera->axis[0];
-        normal[0] = -*v3;
+        normal[0] = -v3[0];
         normal[1] = -v3[1];
         normal[2] = -v3[2];
         v2 = draw->camera->axis[1];
-        tangent[0] = -*v2;
+        tangent[0] = -v2[0];
         tangent[1] = -v2[1];
         tangent[2] = -v2[2];
-        origin = draw->camera->origin;
-        binormal[0] = origin[34];
-        binormal[1] = origin[35];
-        binormal[2] = origin[36];
+        origin = draw->camera->axis[2];
+        binormal[0] = origin[0];
+        binormal[1] = origin[1];
+        binormal[2] = origin[2];
         FX_GenSpriteVerts(draw, tangent, binormal, normal);
     }
 }
@@ -284,7 +296,7 @@ void __cdecl FX_GenSpriteVerts(FxDrawState *draw, const float *tangent, const fl
     r_double_index_t index; // [esp+244h] [ebp-38h]
     float rotatedTangent[3]; // [esp+248h] [ebp-34h] BYREF
     float up[3]; // [esp+254h] [ebp-28h] BYREF
-    const FxSystem *system; // [esp+260h] [ebp-1Ch]
+    FxSystem *system; // [esp+260h] [ebp-1Ch]
     int s0; // [esp+264h] [ebp-18h] BYREF
     unsigned __int16 baseVertex; // [esp+268h] [ebp-14h] BYREF
     float rotatedBinormal[3]; // [esp+26Ch] [ebp-10h] BYREF
@@ -376,7 +388,7 @@ void __cdecl FX_GenSpriteVerts(FxDrawState *draw, const float *tangent, const fl
             v11 = v23;
         else
             v11 = -16384;
-        verts->texCoord.packed = (v11 & 0x3FFF | (SLODWORD(v22) >> 16) & 0xC000)
+        verts->texCoord.packed = (v11 & 0x3FFF | ((int)LODWORD(v22) >> 16) & 0xC000)
             + ((v12 & 0x3FFF | (s0 >> 16) & 0xC000) << 16);
         verts->tangent = packedTangent;
         ++verts;
@@ -425,7 +437,7 @@ void __cdecl FX_GenSpriteVerts(FxDrawState *draw, const float *tangent, const fl
         else
             v7 = -16384;
         verts->texCoord.packed = (v7 & 0x3FFF | (t0 >> 16) & 0xC000)
-            + ((v8 & 0x3FFF | (SLODWORD(v18) >> 16) & 0xC000) << 16);
+            + ((v8 & 0x3FFF | ((int)LODWORD(v18) >> 16) & 0xC000) << 16);
         verts->tangent = packedTangent;
         ++verts;
         Vec3Add(rightSide, up, verts->xyz);
@@ -450,8 +462,8 @@ void __cdecl FX_GenSpriteVerts(FxDrawState *draw, const float *tangent, const fl
             v5 = v14;
         else
             v5 = -16384;
-        verts->texCoord.packed = (v5 & 0x3FFF | (SLODWORD(v13) >> 16) & 0xC000)
-            + ((v6 & 0x3FFF | (SLODWORD(v15) >> 16) & 0xC000) << 16);
+        verts->texCoord.packed = (v5 & 0x3FFF | ((int)LODWORD(v13) >> 16) & 0xC000)
+            + ((v6 & 0x3FFF | ((int)LODWORD(v15) >> 16) & 0xC000) << 16);
         verts->tangent = packedTangent;
     }
 }
@@ -815,7 +827,7 @@ void __cdecl FX_DrawElem_Model(FxDrawState *draw)
                 "%s\n\t(draw->elemDef->elemType) = %i",
                 "(draw->elemDef->elemType == FX_ELEM_TYPE_MODEL)",
                 draw->elemDef->elemType);
-        if (((unsigned int)svs.snapshotClients[20582].attachModelIndex & draw->elemDef->flags) != 0)
+        if ((draw->elemDef->flags & 0x8000000) != 0)
             FX_SetPlacementFromPhysics(draw, &placement.base);
         visuals.anonymous = FX_GetElemVisuals(draw->elemDef, draw->randomSeed).anonymous;
         if (!visuals.anonymous)
@@ -952,6 +964,75 @@ void __cdecl FX_DrawNonSpriteEffect(FxSystem *system, FxEffect *effect, unsigned
         }
     }
 }
+
+void __cdecl FX_DrawElement_Setup_1_(
+    FxSystem* system,
+    FxDrawState* draw,
+    int elemMsecBegin,
+    int elemSequence,
+    const float* elemOrigin,
+    float* outRealNormTime)
+{
+    float opacity; // [esp+8h] [ebp-84h]
+    int msecElapsed; // [esp+7Ch] [ebp-10h]
+    float normTime; // [esp+80h] [ebp-Ch]
+    float msecElapsedFloat; // [esp+84h] [ebp-8h]
+
+    draw->randomSeed = (elemMsecBegin + (unsigned int)draw->effect->randomSeed + 296 * elemSequence) % 0x1DF;
+    draw->msecLifeSpan = (float)((((draw->elemDef->lifeSpanMsec.amplitude + 1)
+        * LOWORD(fx_randomTable[draw->randomSeed + 17])) >> 16)
+        + draw->elemDef->lifeSpanMsec.base);
+    msecElapsed = draw->msecDraw - elemMsecBegin;
+    msecElapsedFloat = (float)msecElapsed;
+    normTime = msecElapsedFloat / draw->msecLifeSpan;
+    if (outRealNormTime)
+        *outRealNormTime = normTime;
+    if (msecElapsed < (int)draw->msecLifeSpan)
+    {
+        if (msecElapsed > (int)draw->msecLifeSpan)
+            MyAssertHandler(
+                ".\\EffectsCore\\fx_draw.cpp",
+                972,
+                0,
+                "msecElapsed <= static_cast< int >( draw->msecLifeSpan )\n\t%i, %i",
+                msecElapsed,
+                (int)draw->msecLifeSpan);
+        draw->msecElapsed = msecElapsedFloat;
+        draw->normTimeUpdateEnd = normTime;
+    }
+    else
+    {
+        draw->msecElapsed = draw->msecLifeSpan;
+        draw->normTimeUpdateEnd = 1.0;
+    }
+    FX_GetOrientation(
+        draw->elemDef,
+        &draw->effect->frameAtSpawn,
+        &draw->effect->frameNow,
+        draw->randomSeed,
+        &draw->orient);
+    FX_OrientationPosToWorldPos(&draw->orient, elemOrigin, draw->posWorld);
+    // Profile_Begin(198);
+    FX_SetupVisualState(draw->elemDef, draw->effect, draw->randomSeed, draw->normTimeUpdateEnd, &draw->preVisState);
+    FX_EvaluateSize(&draw->preVisState, &draw->visState);
+    //  Profile_EndInternal(0);
+    if ((draw->elemDef->flags & 0x1000) != 0)
+        FX_EvaluateVisAlpha(&draw->preVisState, &draw->visState);
+    draw->camera = &draw->system->camera;
+    FX_EvaluateDistanceFade(draw);
+    if ((draw->elemDef->flags & 0x1000) != 0)
+    {
+        opacity = (double)((draw->preVisState.distanceFade * draw->visState.color[3]) >> 8) * 0.003921568859368563;
+        FX_AddVisBlocker(system, draw->posWorld, draw->visState.size[0], opacity);
+    }
+}
+
+using ElementHandlerFn = void(*)(FxDrawState*);
+
+static ElementHandlerFn s_drawElemHandler[] =
+{
+
+};
 
 void __cdecl FX_DrawElement(FxSystem *system, const FxElemDef *elemDef, const FxElem *elem, FxDrawState *draw)
 {
@@ -1415,7 +1496,7 @@ void __cdecl FX_GenTrail_VertsForSegment(const FxTrailSegmentDrawState *segmentD
     upFloat4.v[1] = up[1];
     upFloat4.v[2] = up[2];
     upFloat4.v[3] = 0.0;
-    uCoord = SLODWORD(segmentDrawState->uCoord);
+    uCoord = LODWORD(segmentDrawState->uCoord);
     vertCount = trailDef->vertCount;
     for (vertIter = 0; vertIter != vertCount; ++vertIter)
     {
@@ -1440,7 +1521,7 @@ void __cdecl FX_GenTrail_VertsForSegment(const FxTrailSegmentDrawState *segmentD
             v3 = v10;
         else
             v3 = -16384;
-        remoteVerts->texCoord.packed = (v3 & 0x3FFF | (SLODWORD(texCoord) >> 16) & 0xC000)
+        remoteVerts->texCoord.packed = (v3 & 0x3FFF | ((int)LODWORD(texCoord) >> 16) & 0xC000)
             + ((v4 & 0x3FFF | (uCoord >> 16) & 0xC000) << 16);
         v9 = trailDef->verts[vertIter].normal[0];
         temp = v9 * leftFloat4;
@@ -1536,7 +1617,7 @@ void __cdecl FX_GenerateVerts(FxGenerateVertsCmd *cmd)
     }
 }
 
-void __cdecl FX_FillGenerateVertsCmd(int localClientNum, FxGenerateVertsCmd *cmd)
+void __cdecl FX_FillGenerateVertsCmd(int localClientNum, FxGenerateVertsCmd* cmd)
 {
     unsigned int v2; // [esp+0h] [ebp-10h]
     unsigned int v3; // [esp+Ch] [ebp-4h]
@@ -1557,9 +1638,9 @@ void __cdecl FX_FillGenerateVertsCmd(int localClientNum, FxGenerateVertsCmd *cmd
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             v3);
-    cmd->vieworg[0] = MEMORY[0x9D8718][0];
-    cmd->vieworg[1] = MEMORY[0x9D8718][1];
-    cmd->vieworg[2] = MEMORY[0x9D8718][2];
+    cmd->vieworg[0] = cgArray[0].refdef.vieworg[0];
+    cmd->vieworg[1] = cgArray[0].refdef.vieworg[1];
+    cmd->vieworg[2] = cgArray[0].refdef.vieworg[2];
     v2 = R_GetLocalClientNum();
     if (v2)
         MyAssertHandler(
@@ -1569,7 +1650,7 @@ void __cdecl FX_FillGenerateVertsCmd(int localClientNum, FxGenerateVertsCmd *cmd
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             v2);
-    AxisCopy((const float (*)[3])MEMORY[0x9D8724], cmd->viewaxis);
+    AxisCopy(cgArray[0].refdef.viewaxis, cmd->viewaxis);
 }
 
 void __cdecl FX_EvaluateDistanceFade(FxDrawState *draw)

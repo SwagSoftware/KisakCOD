@@ -263,4 +263,4 @@ void __cdecl R_CullDynModelInCell(
 
 
 // r_dpvs_sceneent
-void __usercall R_AddCellSceneEntSurfacesInFrustumCmd(unsigned int a1@<ebp>, GfxWorldDpvsPlanes *data);
+void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data);

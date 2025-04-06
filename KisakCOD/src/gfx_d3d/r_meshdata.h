@@ -30,3 +30,4 @@ void __cdecl R_SetQuadMesh(
     float t1,
     unsigned int color);
 void __cdecl R_DrawQuadMesh(GfxCmdBufContext context, const Material *material, GfxMeshData *quadMesh);
+void __cdecl R_BeginMeshVerts(GfxMeshData* mesh);

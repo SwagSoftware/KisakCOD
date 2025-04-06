@@ -1,7 +1,7 @@
 #include "r_dpvs.h"
 
 
-void __usercall R_AddCellSceneEntSurfacesInFrustumCmd(unsigned int a1@<ebp>, GfxWorldDpvsPlanes *data)
+void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
 {
     bool v2; // zf
     int v3; // eax
