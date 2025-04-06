@@ -722,3 +722,30 @@ void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from)
 		SL_RemoveRefToString(*to);
 	*to = from;
 }
+
+HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type)
+{
+	char *v4; // [esp+4Ch] [ebp-2014h]
+	char str[8192]; // [esp+50h] [ebp-2010h] BYREF
+	HashEntry_unnamed_type_u v6; // [esp+2054h] [ebp-Ch]
+	unsigned int len; // [esp+2058h] [ebp-8h]
+	unsigned int i; // [esp+205Ch] [ebp-4h]
+
+	//Profile_Begin(334);
+	len = SL_GetStringLen(stringValue) + 1;
+	if (len <= 0x2000)
+	{
+		v4 = SL_ConvertToString(stringValue);
+		for (i = 0; i < len; ++i)
+			str[i] = tolower(v4[i]);
+		v6.prev = SL_GetStringOfSize(str, user, len, type).prev;
+		SL_RemoveRefToString(stringValue);
+		//Profile_EndInternal(0);
+		return v6;
+	}
+	else
+	{
+		//Profile_EndInternal(0);
+		return (HashEntry_unnamed_type_u)stringValue;
+	}
+}

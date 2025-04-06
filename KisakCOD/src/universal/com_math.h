@@ -223,7 +223,7 @@ int __cdecl ProjectedWindingContainsCoplanarPoint(
 int __cdecl IntersectPlanes(const float** plane, float* xyz);
 void __cdecl SnapPointToIntersectingPlanes(const float** planes, float* xyz, float snapGrid, float snapEpsilon);
 int __cdecl PlaneFromPoints(float *plane, const float *v0, const float *v1, const float *v2);
-void __cdecl ProjectPointOnPlane(const float *p, __int64 normal);
+void __cdecl ProjectPointOnPlane(const float * const f1, const float * const normal, float * const result);
 void __cdecl SetPlaneSignbits(cplane_s *out);
 void __cdecl NearestPitchAndYawOnPlane(const float *angles, const float *normal, float *result);
 

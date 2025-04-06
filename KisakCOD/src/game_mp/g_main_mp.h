@@ -192,10 +192,10 @@ void __cdecl ShowEntityInfo_Items(gentity_s *ent);
 void __cdecl G_RunFrameForEntity(gentity_s *ent);
 void __cdecl G_TraceCapsule(
     trace_t *results,
-    float *start,
-    float *mins,
-    float *maxs,
-    float *end,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
     int passEntityNum,
     int contentmask);
 int __cdecl G_TraceCapsuleComplete(

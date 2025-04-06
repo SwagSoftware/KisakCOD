@@ -1911,10 +1911,10 @@ LABEL_7:
     return 1;
 }
 
-void __cdecl ProjectPointOnPlane(const float* p, float* normal, float* result)
+void __cdecl ProjectPointOnPlane(const float *const f1, const float *const normal, float *const result)
 {
-    const char* v3; // eax
-    float v4; // [esp+18h] [ebp-14h]
+    const char *v3; // eax
+    double v4; // [esp+18h] [ebp-14h]
     float d; // [esp+28h] [ebp-4h]
 
     if (!Vec3IsNormalized(normal))
@@ -1923,8 +1923,8 @@ void __cdecl ProjectPointOnPlane(const float* p, float* normal, float* result)
         v3 = va("(%g %g %g) len %g", *normal, normal[1], normal[2], v4);
         MyAssertHandler(".\\universal\\com_math.cpp", 3139, 0, "%s\n\t%s", "Vec3IsNormalized( normal )", v3);
     }
-    d = -Vec3Dot(normal, p);
-    Vec3Mad(p, d, normal, result);
+    d = -Vec3Dot(normal, f1);
+    Vec3Mad(f1, d, normal, result);
 }
 
 void __cdecl SetPlaneSignbits(cplane_s *out)

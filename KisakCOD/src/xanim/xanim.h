@@ -1441,6 +1441,8 @@ struct gentity_s;
 void __cdecl SV_DObjInitServerTime(gentity_s* ent, float dtime);
 void __cdecl SV_DObjDisplayAnim(gentity_s* ent, const char* header);
 
+unsigned __int8 *__cdecl Hunk_AllocXAnimPrecache(unsigned int size);
+
 int __cdecl XAnimGetTreeHighMemUsage();
 int __cdecl XAnimGetTreeMemUsage();
 void __cdecl TRACK_xanim();
@@ -1450,6 +1452,7 @@ void __cdecl XAnimShutdown();
 XAnimParts* __cdecl XAnimFindData_LoadObj(const char* name);
 XAnimParts* __cdecl XAnimFindData_FastFile(const char* name);
 void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* name);
+XAnimParts *__cdecl XAnimPrecache(char *name, void *(__cdecl *Alloc)(int));
 void __cdecl XAnimBlend(
     XAnim_s* anims,
     unsigned int animIndex,

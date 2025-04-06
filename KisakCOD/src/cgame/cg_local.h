@@ -585,10 +585,10 @@ void __cdecl CG_LocationalTraceEntitiesOnly(
     int contentMask);
 void __cdecl CG_TraceCapsule(
     trace_t *results,
-    float *start,
-    float *mins,
-    float *maxs,
-    float *end,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
     int passEntityNum,
     int contentMask);
 

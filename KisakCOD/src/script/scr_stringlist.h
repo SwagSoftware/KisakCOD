@@ -116,3 +116,5 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len);
 int SL_IsLowercaseString(unsigned int stringValue);
 
 void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from);
+
+HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type);

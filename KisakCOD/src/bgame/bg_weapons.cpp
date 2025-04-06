@@ -3,14 +3,23 @@
 #include <qcommon/mem_track.h>
 #include <universal/surfaceflags.h>
 #include <aim_assist/aim_assist.h>
+#include <game_mp/g_main_mp.h>
 
 //struct WeaponDef **bg_weaponDefs 82800908     bg_weapons.obj
 //float (*)[29] penetrationDepthTable 82800f10     bg_weapons.obj
 //unsigned int bg_lastParsedWeaponIndex 828010e4     bg_weapons.obj
 
+int surfaceTypeSoundListCount;
+WeaponDef *bg_weaponDefs[128];
+
+const float MY_RELOADSTART_INTERUPT_IGNORE_FRAC = 0.4;
+
 WeaponDef *bg_weapAmmoTypes[128];
 WeaponDef *bg_sharedAmmoCaps[128];
 WeaponDef *bg_weapClips[128];
+unsigned int bg_numAmmoTypes;
+unsigned int bg_numSharedAmmoCaps;
+unsigned int bg_numWeapClips;
 
 bool penetrationDepthTableLoaded;
 float penetrationDepthTable[4][29];
@@ -136,6 +145,38 @@ double __cdecl BG_GetSurfacePenetrationDepth(const WeaponDef *weapDef, unsigned 
         return 0.0;
 }
 
+void __cdecl BG_ClearSurfaceTypeSounds()
+{
+    surfaceTypeSoundListCount = 0;
+}
+
+void __cdecl BG_FreeWeaponDefStrings()
+{
+    unsigned int j; // [esp+0h] [ebp-Ch]
+    unsigned int ja; // [esp+0h] [ebp-Ch]
+    unsigned int i; // [esp+4h] [ebp-8h]
+    WeaponDef *weapDef; // [esp+8h] [ebp-4h]
+
+    for (i = 1; i <= bg_lastParsedWeaponIndex; ++i)
+    {
+        weapDef = bg_weaponDefs[i];
+        if (!weapDef)
+            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 188, 0, "%s", "weapDef");
+        for (j = 0; j < 8; ++j)
+        {
+            if (weapDef->hideTags[j])
+                SL_RemoveRefToString(weapDef->hideTags[j]);
+        }
+        for (ja = 0; ja < 0x10; ++ja)
+        {
+            if (weapDef->notetrackSoundMapKeys[ja])
+                SL_RemoveRefToString(weapDef->notetrackSoundMapKeys[ja]);
+            if (weapDef->notetrackSoundMapValues[ja])
+                SL_RemoveRefToString(weapDef->notetrackSoundMapValues[ja]);
+        }
+    }
+}
+
 void __cdecl BG_ShutdownWeaponDefFiles()
 {
     if (*(_BYTE *)fs_gameDirVar->current.integer)
@@ -245,7 +286,7 @@ void __cdecl BG_SetupSharedAmmoIndexes(unsigned int weapIndex)
                 {
                     Com_Error(
                         ERR_DROP,
-                        &byte_85DC20,
+                        "Shared ammo cap mismatch for %s shared ammo cap: %s set it to %i, but '%s' already set it to %i.",
                         weapDef->szSharedAmmoCapName,
                         weapDef->szInternalName,
                         weapDef->iSharedAmmoCap,
@@ -406,7 +447,7 @@ void __cdecl BG_SetupWeaponAlts(unsigned int weapIndex, void(__cdecl *regWeap)(u
     {
         altWeaponIndex = BG_GetWeaponIndexForName(weapDef->szAltWeaponName, regWeap);
         if (!altWeaponIndex)
-            Com_Error(ERR_DROP, &byte_85DD90, weapDef->szAltWeaponName, weapDef->szInternalName);
+            Com_Error(ERR_DROP, "could not find altWeapon %s for weapon %s", weapDef->szAltWeaponName, weapDef->szInternalName);
         weapDef->altWeaponIndex = altWeaponIndex;
     }
 }
@@ -4246,7 +4287,7 @@ void __cdecl BG_CalculateWeaponPosition_Sway(
         swayYawScale = swayYawScale * ssSwayScale;
         swayHorizScalea = swayHorizScale * ssSwayScale;
         swayVertScalea = swayVertScale * ssSwayScale;
-        AnglesSubtract(ps->viewangles, swayViewAngles, deltaAngles);
+        AnglesSubtract((float*)ps->viewangles, swayViewAngles, deltaAngles);
         if (dt == 0.0)
             MyAssertHandler(".\\bgame\\bg_weapons.cpp", 4978, 0, "%s", "dt");
         scale = 1.0 / (dt * 60.0);

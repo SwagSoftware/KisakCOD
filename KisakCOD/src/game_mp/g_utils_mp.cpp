@@ -6,27 +6,6 @@
 #include <xanim/xmodel.h>
 #include <script/scr_memorytree.h>
 
-const char *entityTypeNames[17] =
-{
-    "ET_GENERAL",
-    "ET_PLAYER",
-    "ET_PLAYER_CORPSE",
-    "ET_ITEM",
-    "ET_MISSILE",
-    "ET_INVISIBLE",
-    "ET_SCRIPTMOVER",
-    "ET_SOUND_BLEND",
-    "ET_FX",
-    "ET_LOOP_FX",
-    "ET_PRIMARY_LIGHT",
-    "ET_MG42",
-    "ET_HELICOPTER",
-    "ET_PLANE",
-    "ET_VEHICLE",
-    "ET_VEHICLE_COLLMAP",
-    "ET_VEHICLE_CORPSE"
-};
-
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
 {
     if (unusedLocalClientNum != -1)
@@ -42,7 +21,7 @@ void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
 
 void __cdecl TRACK_g_utils()
 {
-    track_static_alloc_internal(entityTypeNames, 68, "entityTypeNames", 9);
+    //track_static_alloc_internal(entityTypeNames, 68, "entityTypeNames", 9);
 }
 
 int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, const char *errormsg)

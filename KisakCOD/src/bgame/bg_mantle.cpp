@@ -105,7 +105,7 @@ void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int))
             MyAssertHandler(".\\bgame\\bg_mantle.cpp", 530, 0, "%s", "s_mantleAnims");
         XAnimBlend(s_mantleAnims, 0, s_mantleAnimNames[0], 1u, 0xAu, 0);
         for (animIndex = 1; animIndex < 11; ++animIndex)
-            BG_CreateXAnim(s_mantleAnims, animIndex, s_mantleAnimNames[animIndex]);
+            BG_CreateXAnim(s_mantleAnims, animIndex, (char*)s_mantleAnimNames[animIndex]);
         for (transIndex = 0; transIndex < 7; ++transIndex)
         {
             animIndex = s_mantleTrans[transIndex].upAnimIndex;

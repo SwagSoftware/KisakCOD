@@ -20,6 +20,14 @@ enum aistateEnum_t : __int32
     MAX_AISTATES = 0x1,
 };
 
+enum scriptAnimStrafeStates_t : __int32
+{                                       // ...
+    ANIM_STRAFE_NOT = 0x0,
+    ANIM_STRAFE_LEFT = 0x1,
+    ANIM_STRAFE_RIGHT = 0x2,
+    NUM_ANIM_STRAFESTATES = 0x3,
+};
+
 enum scriptAnimMoveTypes_t : __int32
 {                                       // ...
     ANIM_MT_UNUSED = 0x0,
@@ -1392,7 +1400,7 @@ extern const dvar_t *player_adsExitDelay;
 extern const dvar_t *bg_shock_soundDryLevel;
 extern const dvar_t *bg_swingSpeed;
 extern const dvar_t *bg_shock_movement;
-extern const dvar_t *bg_shock_volume;
+extern const dvar_s *bg_shock_volume[64];
 extern const dvar_t *bg_aimSpreadMoveSpeedThreshold;
 extern const dvar_t *bg_shock_lookControl;
 extern const dvar_t *player_breath_snd_lerp;
@@ -1478,6 +1486,9 @@ extern const dvar_t *player_lean_rotate_left;
 extern const dvar_t *player_lean_rotate_right;
 extern const dvar_t *player_lean_rotate_crouch_left;
 extern const dvar_t *player_lean_rotate_crouch_right;
+
+extern int surfaceTypeSoundListCount;
+
 
 
 // bg_perks_mp
@@ -1919,3 +1930,6 @@ WeaponDef *__cdecl BG_LoadDefaultWeaponDef_FastFile();
 
 // bg_misctables
 extern _DWORD bg_itemlist[2048];
+
+const float playerMins[] = { -15.0, -15.0, 0.0 };
+const float playerMaxs[] = { 15.0, 15.0, 0.0 };

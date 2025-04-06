@@ -94,6 +94,11 @@ XAnimParts* __cdecl XAnimFindData_FastFile(const char* name)
     return DB_FindXAssetHeader(ASSET_TYPE_XANIMPARTS, name).parts;
 }
 
+unsigned __int8 *__cdecl Hunk_AllocXAnimPrecache(unsigned int size)
+{
+    return Hunk_AllocAlign(size, 4, "XAnimPrecache", 11);
+}
+
 void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* name)
 {
     XAnimParts* Data_FastFile; // eax
@@ -133,6 +138,47 @@ void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* nam
     {
         Com_Error(ERR_DROP, &byte_8CC024, name);
     }
+}
+
+XAnimParts *__cdecl XAnimPrecache(char *name, void *(__cdecl *Alloc)(int))
+{
+    XAnimParts *result; // eax
+    XAnimParts *Data_FastFile; // eax
+    XAnimParts *defaultParts; // [esp+Ch] [ebp-8h]
+    XAnimParts *parts; // [esp+10h] [ebp-4h]
+
+    if (useFastFile->current.enabled)
+        result = XAnimFindData_FastFile(name);
+    else
+        result = XAnimFindData_LoadObj(name);
+    if (!result)
+    {
+        parts = XAnimLoadFile(name, Alloc);
+        if (!parts)
+        {
+            Com_PrintWarning(19, "WARNING: Couldn't find xanim '%s', using default xanim '%s' instead\n", name, "void");
+            if (useFastFile->current.enabled)
+                Data_FastFile = XAnimFindData_FastFile("void");
+            else
+                Data_FastFile = XAnimFindData_LoadObj("void");
+            defaultParts = Data_FastFile;
+            if (!Data_FastFile)
+            {
+                defaultParts = XAnimLoadFile("void", Alloc);
+                if (!defaultParts)
+                {
+                    Com_Error(ERR_DROP, &byte_8CBF70, "void");
+                    return 0;
+                }
+                Hunk_SetDataForFile(6, "void", defaultParts, Alloc);
+            }
+            parts = XAnimClone(defaultParts, Alloc);
+            parts->isDefault = 1;
+        }
+        parts->name = Hunk_SetDataForFile(6, name, parts, Alloc);
+        return parts;
+    }
+    return result;
 }
 
 void __cdecl XAnimBlend(

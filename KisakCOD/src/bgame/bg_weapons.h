@@ -1,4 +1,5 @@
 #pragma once
+#include <universal/com_memory.h>
 
 
 enum weapType_t : __int32
@@ -184,3 +185,41 @@ enum OffhandClass : __int32
     OFFHAND_CLASS_FLASH_GRENADE = 0x3,
     OFFHAND_CLASS_COUNT = 0x4,
 };
+
+// bg_weapons_load_obj
+struct SurfaceTypeSoundList // sizeof=0x8
+{
+    char *surfaceSoundBase;
+    snd_alias_list_t **soundAliasList;
+};
+WeaponDef *__cdecl BG_LoadWeaponDef_LoadObj(const char *name);
+
+inline void __cdecl SetConfigString(char **ppszConfigString, const char *pszKeyValue)
+{
+    char v2; // [esp+3h] [ebp-21h]
+    char *v3; // [esp+8h] [ebp-1Ch]
+    const char *v4; // [esp+Ch] [ebp-18h]
+    char *buf; // [esp+20h] [ebp-4h]
+
+    if (*pszKeyValue)
+    {
+        buf = (char *)Hunk_AllocLowAlign(strlen(pszKeyValue) + 1, 1, "SetConfigString", 9);
+        v4 = pszKeyValue;
+        v3 = buf;
+        do
+        {
+            v2 = *v4;
+            *v3++ = *v4++;
+        } while (v2);
+        *ppszConfigString = buf;
+    }
+    else
+    {
+        *ppszConfigString = (char *)"";
+    }
+}
+
+inline void __cdecl SetConfigString2(unsigned __int8 *pMember, const char *pszKeyValue)
+{
+    SetConfigString((char **)pMember, pszKeyValue);
+}

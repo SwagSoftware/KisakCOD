@@ -2,11 +2,53 @@
 #include "bg_local.h"
 
 #include <qcommon/threads.h>
+#include <sound/snd_public.h>
+#include <game/game_public.h>
+#include <universal/com_files.h>
+
+const char *bgShockDvarNames[27] =
+{
+  "bg_shock_screenType",
+  "bg_shock_screenBlurBlendTime",
+  "bg_shock_screenBlurBlendFadeTime",
+  "bg_shock_screenFlashWhiteFadeTime",
+  "bg_shock_screenFlashShotFadeTime",
+  "bg_shock_viewKickPeriod",
+  "bg_shock_viewKickRadius",
+  "bg_shock_viewKickFadeTime",
+  "bg_shock_soundLoop",
+  "bg_shock_soundLoopSilent",
+  "bg_shock_soundEnd",
+  "bg_shock_soundEndAbort",
+  "bg_shock_sound",
+  "bg_shock_soundFadeInTime",
+  "bg_shock_soundFadeOutTime",
+  "bg_shock_soundLoopFadeTime",
+  "bg_shock_soundLoopEndDelay",
+  "bg_shock_soundRoomType",
+  "bg_shock_soundDryLevel",
+  "bg_shock_soundWetLevel",
+  "bg_shock_soundModEndDelay",
+  "bg_shock_lookControl",
+  "bg_shock_lookControl_maxpitchspeed",
+  "bg_shock_lookControl_maxyawspeed",
+  "bg_shock_lookControl_mousesensitivityscale",
+  "bg_shock_lookControl_fadeTime",
+  "bg_shock_movement"
+}; // idb
+
+char filebuf[65536];
+
+const int serverOnlyEvents[4] = { 31, 20, 19, -1 }; // idb
+const int singleClientEvents[13] = { 6, 7, 8, 34, 13, 14, 32, 33, 34, 37, 42, 43, -1 }; // idb
+
 
 //char **eventnames       827b08a8     bg_misc.obj
 //char (*)[80] bgShockChannelNames 827ea9d8     bg_misc.obj
 //char const **bgShockDvarNames 827b0ae0     bg_misc.obj
 //struct shellshock_parms_t *bg_shellshockParms 827ebf30     bg_misc.obj
+shellshock_parms_t bg_shellshockParms[16];
+
 const dvar_t *player_footstepsThreshhold;
 const dvar_t *player_debugHealth;
 const dvar_t *bg_shock_lookControl_mousesensitivityscale;
@@ -31,7 +73,7 @@ const dvar_t *player_adsExitDelay;
 const dvar_t *bg_shock_soundDryLevel;
 const dvar_t *bg_swingSpeed;
 const dvar_t *bg_shock_movement;
-const dvar_t *bg_shock_volume;
+const dvar_s *bg_shock_volume[64];
 const dvar_t *bg_aimSpreadMoveSpeedThreshold;
 const dvar_t *bg_shock_lookControl;
 const dvar_t *player_breath_snd_lerp;
@@ -156,6 +198,8 @@ const char *bg_soundRoomTypes[27] =
     NULL
 };
 
+char bgShockChannelNames[64][80];
+
 void __cdecl BG_RegisterShockVolumeDvars()
 {
     DvarLimits min; // [esp+4h] [ebp-28h]
@@ -172,7 +216,7 @@ void __cdecl BG_RegisterShockVolumeDvars()
         sprintf(bgShockChannelNames[i], "bg_shock_volume_%s", channelName->name);
         min.value.max = 1.0;
         min.value.min = 0.0;
-        bg_shock_volume[i] = Dvar_RegisterFloat(bgShockChannelNames[i], 0.5, min, 0x80u, &String);
+        bg_shock_volume[i] = Dvar_RegisterFloat(bgShockChannelNames[i], 0.5, min, 0x80u, "");
     }
 }
 
@@ -981,7 +1025,7 @@ void __cdecl BG_RegisterDvars()
 char *__cdecl BG_GetEntityTypeName(int eType)
 {
     if (eType < 17)
-        return entityTypeNames[eType];
+        return (char*)entityTypeNames[eType];
     if ((unsigned int)(eType - 17) > 0x86)
         MyAssertHandler(
             ".\\bgame\\bg_misc.cpp",
@@ -1060,7 +1104,7 @@ bool __cdecl BG_CanItemBeGrabbed(const entityState_s *ent, const playerState_s *
         return 0;
     if (ent->index.brushmodel < 1 || ent->index.brushmodel >= 2048)
     {
-        v4 = va(&byte_85C270, ent->index.brushmodel, ent->eType);
+        v4 = va("BG_CanItemBeGrabbed: index out of range (index is %i, eType is %i)", ent->index.brushmodel, ent->eType);
         Com_Error(ERR_DROP, v4);
     }
     if (ent->clientNum == ps->clientNum)
@@ -1149,7 +1193,7 @@ bool __cdecl BG_PlayerHasRoomForEntAllAmmoTypes(const entityState_s *ent, const 
         MyAssertHandler(".\\bgame\\bg_misc.cpp", 894, 0, "%s", "ps");
     if (ent->index.brushmodel < 1 || ent->index.brushmodel >= 2048)
     {
-        v2 = va(&byte_85C2E8, ent->index.brushmodel, ent->eType);
+        v2 = va("BG_PlayerHasRoomForAllAmmoTypesOfEnt: index out of range (index is %i, eType is %i)", ent->index.brushmodel, ent->eType);
         Com_Error(ERR_DROP, v2);
     }
     v3 = ent->index.brushmodel % 128;
@@ -1260,7 +1304,7 @@ void __cdecl BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, float *re
         Vec3Mad(v, v3, result, result);
         break;
     default:
-        Com_Error(ERR_DROP, &byte_85C340, tr->trType);
+        Com_Error(ERR_DROP, "BG_EvaluateTrajectory: unknown trType: %i", tr->trType);
         break;
     }
     if ((COERCE_UNSIGNED_INT(tr->trBase[0]) & 0x7F800000) == 0x7F800000
@@ -1404,7 +1448,7 @@ void __cdecl BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, floa
         }
         return;
     default:
-        Com_Error(ERR_DROP, &byte_85C428, tr->trType);
+        Com_Error(ERR_DROP, "BG_EvaluateTrajectoryDelta: unknown trType: %i", tr->trType);
         goto LABEL_22;
     }
 }
@@ -1503,7 +1547,7 @@ void __cdecl BG_PlayerToEntityProcessEvents(playerState_s *ps, entityState_s *s,
     for (i = ps->oldEventSequence; i != ps->eventSequence; ++i)
     {
         event = ps->events[i & 3];
-        playerEvent = (void(__cdecl *)(int, int))dword_940D74[2 * handler];
+        playerEvent = pmoveHandlers[handler].playerEvent;
         if (playerEvent)
             playerEvent(s->number, event);
         for (j = 0; serverOnlyEvents[j] > 0 && serverOnlyEvents[j] != event; ++j)
@@ -1704,9 +1748,9 @@ char __cdecl BG_CheckProneValid(
     if (!traceFunc)
         MyAssertHandler(".\\bgame\\bg_misc.cpp", 1435, 0, "%s", "traceFunc");
     if (proneCheckType)
-        iTraceMask = (int)&loc_82000F + 2;
+        iTraceMask = 0x820011;
     else
-        iTraceMask = (int)&off_810011;
+        iTraceMask = 0x810011;
     if (!isAlreadyProne)
     {
         vMins[0] = -fSize;
@@ -1760,7 +1804,7 @@ char __cdecl BG_CheckProneValid(
         v19 = fSize + 2.0;
         if (fFirstTraceDist < (double)v19)
             return 0;
-        if (fFirstTraceDist < fTraceHeight * DOUBLE_0_699999988079071 + 18.0)
+        if (fFirstTraceDist < fTraceHeight * 0.699999988079071 + 18.0)
         {
             bFirstTraceHit = 0;
             vEnd[2] = vEnd[2] + 22.0;
@@ -1775,7 +1819,7 @@ char __cdecl BG_CheckProneValid(
             {
                 bFirstTraceHit = 1;
                 fFirstTraceDist = trace.fraction * fPitchDiff + 6.0;
-                if (fFirstTraceDist < fTraceHeight * DOUBLE_0_699999988079071 + 18.0)
+                if (fFirstTraceDist < fTraceHeight * 0.699999988079071 + 18.0)
                     return 0;
             }
         }
@@ -2058,7 +2102,7 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
             "%s\n\t(parms->screenBlend.blurredEffectTime) = %i",
             "(parms->screenBlend.blurredEffectTime > 0)",
             parms->screenBlend.blurredEffectTime);
-    parms->screenBlend.type = bg_shock_screenType->current.integer;
+    parms->screenBlend.type = (ShockViewTypes)bg_shock_screenType->current.integer;
     parms->view.fadeTime = 3000;
     value = bg_shock_viewKickPeriod->current.value;
     v6 = 0.001 - value;

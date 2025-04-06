@@ -1,22 +1,134 @@
 #include "bg_public.h"
 #include "bg_local.h"
-
-struct pmoveHandler_t // sizeof=0x8
-{
-    void(__cdecl *trace)(trace_t *, const float *, const float *, const float *, const float *, int, int);
-    void(__cdecl *playerEvent)(int, int);
-};
-
-//Line 51741:  0006 : 00000ec8       struct pmoveHandler_t *pmoveHandlers 827b0ec8     bg_pmove.obj
-pmoveHandler_t *pmoveHandlers;
-//Line  1605:  0001 : 00008188       float const *const playerMins         82008788     bg_pmove.obj
-//Line  1606:  0001 : 00008194       float const *const playerMaxs         82008794     bg_pmove.obj
-
-const float playerMins[] = { -15.0, -15.0, 0.0 };
-const float playerMaxs[] = { 15.0, 15.0, 0.0 };
+#include <game_mp/g_main_mp.h>
 
 #define abs8(x) abs(x)
 #define abs32(x) abs(x)
+
+const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
+{
+  {
+    { ANIM_MT_RUN, ANIM_MT_STUMBLE_FORWARD },
+    { ANIM_MT_WALK, ANIM_MT_STUMBLE_WALK_FORWARD }
+  },
+  {
+    { ANIM_MT_WALKPRONE, ANIM_MT_WALKPRONE },
+    { ANIM_MT_WALKPRONE, ANIM_MT_WALKPRONE }
+  },
+  {
+    { ANIM_MT_RUNCR, ANIM_MT_STUMBLE_CROUCH_FORWARD },
+    { ANIM_MT_WALKCR, ANIM_MT_STUMBLE_CROUCH_FORWARD }
+  },
+  {
+    { ANIM_MT_RUNBK, ANIM_MT_STUMBLE_BACKWARD },
+    { ANIM_MT_WALKBK, ANIM_MT_STUMBLE_WALK_BACKWARD }
+  },
+  {
+    { ANIM_MT_WALKPRONEBK, ANIM_MT_WALKPRONEBK },
+    { ANIM_MT_WALKPRONEBK, ANIM_MT_WALKPRONEBK }
+  },
+  {
+    { ANIM_MT_RUNCRBK, ANIM_MT_STUMBLE_CROUCH_BACKWARD },
+    { ANIM_MT_WALKCRBK, ANIM_MT_STUMBLE_CROUCH_BACKWARD }
+  }
+}; // idb
+
+const float bobFactorTable[6][2] =
+{
+  { 0.33500001, 0.30500001 },
+  { 0.25, 0.23999999 },
+  { 0.34, 0.315 },
+  { 0.36000001, 0.32499999 },
+  { 0.25, 0.23999999 },
+  { 0.34, 0.315 }
+}; // idb
+
+const scriptAnimMoveTypes_t notMovingAnims[3][3] =
+{
+  { ANIM_MT_IDLE, ANIM_MT_TURNRIGHT, ANIM_MT_TURNLEFT },
+  { ANIM_MT_IDLEPRONE, ANIM_MT_IDLEPRONE, ANIM_MT_IDLEPRONE },
+  { ANIM_MT_IDLECR, ANIM_MT_TURNRIGHTCR, ANIM_MT_TURNLEFTCR }
+}; // idb
+
+const float CorrectSolidDeltas[26][3] =
+{
+  { 0.0, 0.0, 1.0 },
+  { -1.0, 0.0, 1.0 },
+  { 0.0, -1.0, 1.0 },
+  { 1.0, 0.0, 1.0 },
+  { 0.0, 1.0, 1.0 },
+  { -1.0, 0.0, 0.0 },
+  { 0.0, -1.0, 0.0 },
+  { 1.0, 0.0, 0.0 },
+  { 0.0, 1.0, 0.0 },
+  { 0.0, 0.0, -1.0 },
+  { -1.0, 0.0, -1.0 },
+  { 0.0, -1.0, -1.0 },
+  { 1.0, 0.0, -1.0 },
+  { 0.0, 1.0, -1.0 },
+  { -1.0, -1.0, 1.0 },
+  { 1.0, -1.0, 1.0 },
+  { 1.0, 1.0, 1.0 },
+  { -1.0, 1.0, 1.0 },
+  { -1.0, -1.0, 0.0 },
+  { 1.0, -1.0, 0.0 },
+  { 1.0, 1.0, 0.0 },
+  { -1.0, 1.0, 0.0 },
+  { -1.0, -1.0, -1.0 },
+  { 1.0, -1.0, -1.0 },
+  { 1.0, 1.0, -1.0 },
+  { -1.0, 1.0, -1.0 }
+}; // idb
+
+viewLerpWaypoint_s viewLerp_StandCrouch[9] =
+{
+  { 0, 60.0, 0 },
+  { 1, 59.5, 0 },
+  { 4, 58.5, 0 },
+  { 30, 56.0, 0 },
+  { 80, 44.0, 0 },
+  { 90, 41.5, 0 },
+  { 95, 40.5, 0 },
+  { 100, 40.0, 0 },
+  { -1, 0.0, 0 }
+}; // idb
+viewLerpWaypoint_s viewLerp_CrouchStand[9] =
+{
+  { 0, 40.0, 0 },
+  { 5, 40.5, 0 },
+  { 10, 41.5, 0 },
+  { 20, 44.0, 0 },
+  { 70, 56.0, 0 },
+  { 96, 58.5, 0 },
+  { 99, 59.5, 0 },
+  { 100, 60.0, 0 },
+  { -1, 0.0, 0 }
+}; // idb
+viewLerpWaypoint_s viewLerp_CrouchProne[11] =
+{
+  { 0, 40.0, 0 },
+  { 11, 38.0, 0 },
+  { 22, 33.0, 0 },
+  { 34, 25.0, 0 },
+  { 45, 16.0, 0 },
+  { 50, 15.0, 0 },
+  { 55, 16.0, 0 },
+  { 70, 18.0, 0 },
+  { 90, 17.0, 0 },
+  { 100, 11.0, 0 },
+  { -1, 0.0, 0 }
+}; // idb
+viewLerpWaypoint_s viewLerp_ProneCrouch[8] =
+{
+  { 0, 11.0, 0 },
+  { 5, 10.0, 0 },
+  { 30, 21.0, 0 },
+  { 50, 25.0, 0 },
+  { 67, 31.0, 0 },
+  { 83, 34.0, 0 },
+  { 100, 40.0, 0 },
+  { -1, 0.0, 0 }
+}; // idb
 
 void __cdecl PM_trace(
     pmove_t *pm,
@@ -3427,7 +3539,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
         pm->xyspeed = Vec2Length(ps->velocity);
         if ((ps->eFlags & 0x300) != 0)
         {
-            StanceIdleAnim = PM_GetStanceIdleAnim(ps->pm_flags);
+            StanceIdleAnim = (scriptAnimMoveTypes_t)PM_GetStanceIdleAnim(ps->pm_flags);
             BG_AnimScriptAnimation(ps, AISTATE_COMBAT, StanceIdleAnim, 0);
         }
         else
@@ -3447,9 +3559,9 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
                 }
                 else if (pm->cmd.forwardmove || pm->cmd.rightmove)
                 {
-                    stanceFrontBack = PM_GetStanceEx(iStance, ps->pm_flags & 0x20);
+                    stanceFrontBack = (PmStanceFrontBack)PM_GetStanceEx(iStance, ps->pm_flags & 0x20);
                     PM_SetStrafeCondition(pm);
-                    moveAnim = PM_GetMoveAnim(ps, stanceFrontBack, walking, sprinting);
+                    moveAnim = (scriptAnimMoveTypes_t)PM_GetMoveAnim(ps, stanceFrontBack, walking, sprinting);
                     if (BG_AnimScriptAnimation(ps, AISTATE_COMBAT, moveAnim, 0) < 0)
                         BG_AnimScriptAnimation(ps, AISTATE_COMBAT, ANIM_MT_IDLE, 0);
                     fMaxSpeed = PM_GetMaxSpeed(pm, walking, sprinting);
@@ -3554,7 +3666,7 @@ void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int stance)
     {
         if (PM_ShouldFlinch(ps) && ps->viewHeightTarget == 60)
         {
-            flinch_anim = PM_GetFlinchAnim(ps->flinchYawAnim);
+            flinch_anim = (scriptAnimMoveTypes_t)PM_GetFlinchAnim(ps->flinchYawAnim);
             BG_AnimScriptAnimation(ps, AISTATE_COMBAT, flinch_anim, 0);
             return;
         }
@@ -4028,28 +4140,27 @@ void __cdecl PM_SetLadderFlag(playerState_s *ps)
     ps->pm_flags |= 8u;
 }
 
-void __cdecl PM_LadderMove(pmove_t* pm, pml_t* pml)
+void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
 {
-    __int64 a1; // [esp+4h] [ebp-CCh]
-    float v3; // [esp+Ch] [ebp-C4h]
-    float v4; // [esp+10h] [ebp-C0h]
-    float v5; // [esp+14h] [ebp-BCh]
-    float v6; // [esp+18h] [ebp-B8h]
-    float v7; // [esp+1Ch] [ebp-B4h]
-    float v8; // [esp+20h] [ebp-B0h]
-    float* v9; // [esp+2Ch] [ebp-A4h]
-    float* v10; // [esp+30h] [ebp-A0h]
-    float* v11; // [esp+34h] [ebp-9Ch]
-    float v12; // [esp+3Ch] [ebp-94h]
-    float* v13; // [esp+44h] [ebp-8Ch]
-    float* vLadderVec; // [esp+48h] [ebp-88h]
-    float v15; // [esp+4Ch] [ebp-84h]
-    float* v16; // [esp+50h] [ebp-80h]
-    float* v17; // [esp+5Ch] [ebp-74h]
-    float* v18; // [esp+60h] [ebp-70h]
-    float* velocity; // [esp+68h] [ebp-68h]
-    float v20; // [esp+6Ch] [ebp-64h]
-    float* v21; // [esp+70h] [ebp-60h]
+    float v2; // [esp+Ch] [ebp-C4h]
+    float v3; // [esp+10h] [ebp-C0h]
+    float v4; // [esp+14h] [ebp-BCh]
+    float v5; // [esp+18h] [ebp-B8h]
+    float v6; // [esp+1Ch] [ebp-B4h]
+    float v7; // [esp+20h] [ebp-B0h]
+    float *v8; // [esp+2Ch] [ebp-A4h]
+    float *v9; // [esp+30h] [ebp-A0h]
+    float *v10; // [esp+34h] [ebp-9Ch]
+    float v11; // [esp+3Ch] [ebp-94h]
+    float *v12; // [esp+44h] [ebp-8Ch]
+    float *vLadderVec; // [esp+48h] [ebp-88h]
+    float v14; // [esp+4Ch] [ebp-84h]
+    float *v15; // [esp+50h] [ebp-80h]
+    float *v16; // [esp+5Ch] [ebp-74h]
+    float *v17; // [esp+60h] [ebp-70h]
+    float *velocity; // [esp+68h] [ebp-68h]
+    float v19; // [esp+6Ch] [ebp-64h]
+    float *v20; // [esp+70h] [ebp-60h]
     float wishdir[3]; // [esp+88h] [ebp-48h] BYREF
     float fSideSpeed; // [esp+94h] [ebp-3Ch]
     float wishvel[3]; // [esp+98h] [ebp-38h] BYREF
@@ -4060,7 +4171,7 @@ void __cdecl PM_LadderMove(pmove_t* pm, pml_t* pml)
     float upscale; // [esp+C0h] [ebp-10h]
     int moveyaw; // [esp+C4h] [ebp-Ch]
     float scale; // [esp+C8h] [ebp-8h]
-    playerState_s* ps; // [esp+CCh] [ebp-4h]
+    playerState_s *ps; // [esp+CCh] [ebp-4h]
 
     if (!pm)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4582, 0, "%s", "pm");
@@ -4087,9 +4198,7 @@ void __cdecl PM_LadderMove(pmove_t* pm, pml_t* pml)
         Vec3Normalize(pml->forward);
         pml->right[2] = 0.0;
         Vec3NormalizeTo(pml->right, vTempRight);
-        HIDWORD(a1) = pml->right;
-        LODWORD(a1) = ps->vLadderVec;
-        ProjectPointOnPlane(vTempRight, a1);
+        ProjectPointOnPlane(vTempRight, ps->vLadderVec, pml->right);
         scale = PM_CmdScale(ps, &pm->cmd);
         wishvel[0] = 0.0;
         wishvel[1] = 0.0;
@@ -4098,8 +4207,8 @@ void __cdecl PM_LadderMove(pmove_t* pm, pml_t* pml)
             wishvel[2] = 0.5 * upscale * scale * (double)pm->cmd.forwardmove;
         if (pm->cmd.rightmove)
         {
-            v8 = scale * 0.2000000029802322 * (double)pm->cmd.rightmove;
-            Vec3Mad(wishvel, v8, pml->right, wishvel);
+            v7 = scale * 0.2000000029802322 * (double)pm->cmd.rightmove;
+            Vec3Mad(wishvel, v7, pml->right, wishvel);
         }
         wishspeed = Vec3NormalizeTo(wishvel, wishdir);
         PM_Accelerate(ps, pml, wishdir, wishspeed, 9.0);
@@ -4127,53 +4236,53 @@ void __cdecl PM_LadderMove(pmove_t* pm, pml_t* pml)
             if (fSideSpeed != 0.0)
             {
                 velocity = ps->velocity;
-                v20 = -fSideSpeed;
-                v21 = ps->velocity;
-                ps->velocity[0] = v20 * vSideDir[0] + ps->velocity[0];
-                velocity[1] = v20 * vSideDir[1] + v21[1];
+                v19 = -fSideSpeed;
+                v20 = ps->velocity;
+                ps->velocity[0] = v19 * vSideDir[0] + ps->velocity[0];
+                velocity[1] = v19 * vSideDir[1] + v20[1];
                 fSpeedDrop = fSideSpeed * pml->frametime * 16.0;
-                v7 = fabs(fSideSpeed);
-                v6 = fabs(fSpeedDrop);
-                if (v6 < (double)v7)
+                v6 = fabs(fSideSpeed);
+                v5 = fabs(fSpeedDrop);
+                if (v5 < (double)v6)
                 {
-                    v5 = fabs(fSpeedDrop);
-                    if (v5 < 1.0)
+                    v4 = fabs(fSpeedDrop);
+                    if (v4 < 1.0)
                     {
                         if (fSpeedDrop < 0.0)
-                            v4 = -1.0;
+                            v3 = -1.0;
                         else
-                            v4 = 1.0;
-                        fSpeedDrop = v4;
+                            v3 = 1.0;
+                        fSpeedDrop = v3;
                     }
                     fSideSpeed = fSideSpeed - fSpeedDrop;
+                    v16 = ps->velocity;
                     v17 = ps->velocity;
-                    v18 = ps->velocity;
                     ps->velocity[0] = fSideSpeed * vSideDir[0] + ps->velocity[0];
-                    v17[1] = fSideSpeed * vSideDir[1] + v18[1];
+                    v16[1] = fSideSpeed * vSideDir[1] + v17[1];
                 }
             }
         }
         if (!pml->walking)
         {
             fSideSpeed = ps->velocity[1] * ps->vLadderVec[1] + ps->velocity[0] * ps->vLadderVec[0];
-            v13 = ps->velocity;
+            v12 = ps->velocity;
             vLadderVec = ps->vLadderVec;
-            v15 = -fSideSpeed;
-            v16 = ps->velocity;
-            ps->velocity[0] = v15 * ps->vLadderVec[0] + ps->velocity[0];
-            v13[1] = v15 * vLadderVec[1] + v16[1];
+            v14 = -fSideSpeed;
+            v15 = ps->velocity;
+            ps->velocity[0] = v14 * ps->vLadderVec[0] + ps->velocity[0];
+            v12[1] = v14 * vLadderVec[1] + v15[1];
             if (ps->velocity[0] != 0.0 || ps->velocity[1] != 0.0 || ps->velocity[2] != 0.0)
             {
-                v12 = ps->velocity[0] * ps->velocity[0] + ps->velocity[1] * ps->velocity[1];
-                v3 = ps->velocity[2] * ps->velocity[2];
-                if (v3 >= (double)v12)
+                v11 = ps->velocity[0] * ps->velocity[0] + ps->velocity[1] * ps->velocity[1];
+                v2 = ps->velocity[2] * ps->velocity[2];
+                if (v2 >= (double)v11)
                 {
                     fSideSpeed = -50.0;
-                    v9 = ps->velocity;
-                    v10 = ps->vLadderVec;
-                    v11 = ps->velocity;
+                    v8 = ps->velocity;
+                    v9 = ps->vLadderVec;
+                    v10 = ps->velocity;
                     ps->velocity[0] = (float)-50.0 * ps->vLadderVec[0] + ps->velocity[0];
-                    v9[1] = fSideSpeed * v10[1] + v11[1];
+                    v8[1] = fSideSpeed * v9[1] + v10[1];
                 }
             }
         }

@@ -1,8 +1,6 @@
 #pragma once
 #include <qcommon/qcommon.h>
 
-extern const char *entityTypeNames[17];
-
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
 void __cdecl TRACK_g_utils();
 int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, const char *errormsg);
