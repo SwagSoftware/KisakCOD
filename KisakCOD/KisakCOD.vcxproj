@@ -426,6 +426,7 @@
     <ClCompile Include="src\sound\snd_mss.cpp" />
     <ClCompile Include="src\sound\snd_utils.cpp" />
     <ClCompile Include="src\stringed\stringed_hooks.cpp" />
+    <ClCompile Include="src\ui\ui_atoms.cpp" />
     <ClCompile Include="src\ui\ui_expressions.cpp" />
     <ClCompile Include="src\ui\ui_localvars.cpp" />
     <ClCompile Include="src\ui\ui_shared.cpp" />

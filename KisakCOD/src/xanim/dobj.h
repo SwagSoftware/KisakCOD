@@ -106,7 +106,12 @@ XAnimTree_s *__cdecl DObjGetTree(const DObj_s *obj);
 void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int8 *priorityMap, DObjTrace_s *trace);
 void __cdecl LocalInvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
 void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits);
-void __cdecl DObjGeomTraceline(DObj_s *obj, float *localStart, __int64 localEnd, DObjTrace_s *results);
+void __cdecl DObjGeomTraceline(
+    DObj_s *obj,
+    float *localStart,
+    float *const localEnd,
+    int contentmask,
+    DObjTrace_s *results);
 void __cdecl DObjGeomTracelinePartBits(DObj_s *obj, int contentmask, int *partBits);
 int __cdecl DObjHasContents(DObj_s *obj, int contentmask);
 int __cdecl DObjGetContents(const DObj_s *obj);

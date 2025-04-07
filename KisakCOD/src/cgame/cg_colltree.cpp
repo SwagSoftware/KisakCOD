@@ -4,6 +4,9 @@
 #include <qcommon/mem_track.h>
 #include <qcommon/threads.h>
 
+CgEntCollWorld cgEntCollWorld[1];
+CgEntCollNode cgEntCollNodes[1][1024];
+int cgCollWorldLocalClientNum;
 
 void __cdecl TRACK_CG_CollWorld()
 {

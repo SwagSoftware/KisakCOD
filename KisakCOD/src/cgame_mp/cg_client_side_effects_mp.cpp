@@ -1,10 +1,23 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <universal/com_files.h>
+#include <universal/com_sndalias.h>
+#include <EffectsCore/fx_system.h>
+
+struct EffectDefMap // sizeof=0x80
+{                                       // ...
+    char name[64];
+    char filename[64];                  // ...
+};
 
 const dvar_t *cg_clientSideEffects;
 int g_clientEntSoundCount;
 ClientEntSound g_clientEntSounds[128];
+
+int g_effectDefMapEntries;
+EffectDefMap g_effectDefMap[32];
+
+float zeroVec3[3];
 
 void __cdecl CG_StartClientSideEffects(int localClientNum)
 {
@@ -369,6 +382,23 @@ void __cdecl CG_LoadClientEffects_FastFile(int localClientNum, const char *filen
         CG_ParseClientEffects(localClientNum, (char *)rawfile->buffer);
     else
         Com_PrintError(1, "file not found: %s\n", filename);
+}
+
+void __cdecl CG_LoadClientEffectMapping_LoadObj(const char *filename)
+{
+    char *buffer; // [esp+0h] [ebp-8h] BYREF
+    int size; // [esp+4h] [ebp-4h]
+
+    size = FS_ReadFile(filename, (void **)&buffer);
+    if (size >= 0)
+    {
+        CG_ParseClientEffectMapping(buffer);
+        FS_FreeFile(buffer);
+    }
+    else
+    {
+        Com_PrintError(1, "file not found: %s\n", filename);
+    }
 }
 
 void __cdecl CG_LoadClientEffectMapping(const char *filename)

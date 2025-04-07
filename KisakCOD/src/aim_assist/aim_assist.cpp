@@ -5,33 +5,10 @@
 #include <client/client.h>
 #include <client_mp/client_mp.h>
 #include <script/scr_const.h>
+
 //float const *const vec2_origin        82000d78     aim_assist.obj
 //float const *const vec3_origin        82000d80     aim_assist.obj
 //float const *const vec4_origin        82000d8c     aim_assist.obj
-//D3DPRIMITIVEVERTEXCOUNT    82000da0     aim_assist.obj
-//D3DTESSPRIMITIVEVERTEXCOUNT 82000e10     aim_assist.obj
-//struct __vector4 const g_XMSinCoefficients0 82000eb0     aim_assist.obj
-//struct __vector4 const g_XMSinCoefficients1 82000ec0     aim_assist.obj
-//struct __vector4 const g_XMSinCoefficients2 82000ed0     aim_assist.obj
-//struct __vector4 const g_XMCosCoefficients0 82000ee0     aim_assist.obj
-//struct __vector4 const g_XMCosCoefficients1 82000ef0     aim_assist.obj
-//struct __vector4 const g_XMCosCoefficients2 82000f00     aim_assist.obj
-//struct __vector4 const g_XMTanCoefficients0 82000f10     aim_assist.obj
-//struct __vector4 const g_XMTanCoefficients1 82000f20     aim_assist.obj
-//struct __vector4 const g_XMTanCoefficients2 82000f30     aim_assist.obj
-//struct __vector4 const g_XMASinCoefficients0 82000f40     aim_assist.obj
-//struct __vector4 const g_XMASinCoefficients1 82000f50     aim_assist.obj
-//struct __vector4 const g_XMASinCoefficients2 82000f60     aim_assist.obj
-//struct __vector4 const g_XMATanCoefficients0 82000f70     aim_assist.obj
-//struct __vector4 const g_XMATanCoefficients1 82000f80     aim_assist.obj
-//struct __vector4 const g_XMATanCoefficients2 82000f90     aim_assist.obj
-//struct __vector4 const g_XMSinEstCoefficients 82000fa0     aim_assist.obj
-//struct __vector4 const g_XMCosEstCoefficients 82000fb0     aim_assist.obj
-//struct __vector4 const g_XMTanEstCoefficients 82000fc0     aim_assist.obj
-//struct __vector4 const g_XMATanEstCoefficients 82000fd0     aim_assist.obj
-//struct __vector4 const g_XMASinEstCoefficients 82000fe0     aim_assist.obj
-//struct __vector4 const g_XMASinEstConstants 82000ff0     aim_assist.obj
-//struct __vector4 const g_XMPiConstants0 82001000     aim_assist.obj
 
 AimAssistGlobals aaGlobArray[1];
 GraphFloat aaInputGraph[4];

@@ -4,6 +4,13 @@
 #include <stringed/stringed_hooks.h>
 
 #include <string.h>
+#include <ui/ui.h>
+#include <client_mp/client_mp.h>
+#include <client/client.h>
+#include <EffectsCore/fx_system.h>
+
+const float s_alignScale[4] = { 0.0, 0.5, 1.0, 0.0 }; // idb
+float glowColor[4]; // KISAKTODO: check for duplicates more
 
 const dvar_t *waypointOffscreenScaleSmallest;
 const dvar_t *waypointPlayerOffsetStand;
@@ -370,7 +377,7 @@ void __cdecl GetHudelemDirective(int localClientNum, char *directive, char *resu
     }
 }
 
-void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char* arg0, char* result)
+void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, char *result)
 {
     int fakeSeconds; // [esp+4h] [ebp-4h] BYREF
 
@@ -394,7 +401,7 @@ void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char* arg0, cha
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    Com_sprintf(result, 4u, "%02d", fakeSeconds + cgArray.time / 1000);
+    Com_sprintf(result, 4u, "%02d", fakeSeconds + cgArray[0].time / 1000);
 }
 
 void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0)
@@ -404,7 +411,7 @@ void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0)
 
     if (!directive)
         MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 139, 0, "%s", "directive");
-    strstr((unsigned __int8 *)directive, ":");
+    strstr((unsigned __int8 *)directive, (unsigned __int8 *)":");
     argpos = v3;
     if (v3)
     {
@@ -423,7 +430,7 @@ void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground)
 {
     bool v2; // [esp+7h] [ebp-100Dh]
     int i; // [esp+8h] [ebp-100Ch]
-    hudelem_s* elems[1025]; // [esp+Ch] [ebp-1008h] BYREF
+    hudelem_s *elems[1025]; // [esp+Ch] [ebp-1008h] BYREF
     int SortedHudElems; // [esp+1010h] [ebp-4h]
 
     if (localClientNum)
@@ -437,7 +444,7 @@ void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground)
     SortedHudElems = GetSortedHudElems(localClientNum, elems);
     if (SortedHudElems)
     {
-        v2 = *(_DWORD*)(dword_98F45C + 16) < 7;
+        v2 = cgArray[0].nextSnap->ps.pm_type < 7;
         for (i = 0; i < SortedHudElems; ++i)
         {
             if ((v2 || (elems[i]->flags & 2) == 0)
@@ -471,7 +478,7 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        cghe.timeNow = cgArray.time;
+        cghe.timeNow = cgArray[0].time;
         if (localClientNum)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
@@ -480,7 +487,7 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (elem->fadeStartTime > cgArray.nextSnap->serverTime)
+        if (elem->fadeStartTime > cgArray[0].nextSnap->serverTime)
         {
             if (localClientNum)
                 MyAssertHandler(
@@ -496,7 +503,7 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
                 0,
                 "elem->fadeStartTime <= CG_GetLocalClientGlobals( localClientNum )->nextSnap->serverTime\n\t%i, %i",
                 elem->fadeStartTime,
-                cgArray.nextSnap->serverTime);
+                cgArray[0].nextSnap->serverTime);
         }
         BG_LerpHudColors(elem, cghe.timeNow, &toColor);
         if (toColor.a)
@@ -1028,9 +1035,9 @@ void __cdecl ConsolidateHudElemText(cg_hudelem_t *cghe, char *hudElemString)
     len = 0;
     for (labelIndex = 0; len < 255 && cghe->hudElemLabel[labelIndex]; ++labelIndex)
     {
-        if (cghe->hudElemLabel[labelIndex] == asc_861D24[0]
-            && cghe->hudElemLabel[labelIndex + 1] == 38
-            && cghe->hudElemLabel[labelIndex + 2] == 49)
+        if (cghe->hudElemLabel[labelIndex] == '&'
+            && cghe->hudElemLabel[labelIndex + 1] == '&'
+            && cghe->hudElemLabel[labelIndex + 2] == '1')
         {
             labelIndex += 3;
             break;
@@ -1340,7 +1347,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        BG_LerpHudColors(elem, MEMORY[0x9D5560], &toColor);
+        BG_LerpHudColors(elem, cgArray[0].time, &toColor);
         if (toColor.a)
         {
             material = Material_RegisterHandle(materialName, 7);
@@ -1436,8 +1443,8 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            LODWORD(screenPosArrow[2]) = cgArray;
-            if (elem->targetEntNum != MEMORY[0x9D85A4])
+            screenPosArrow[2] = 1.4046605e-38;
+            if (elem->targetEntNum != cgArray[0].predictedPlayerEntity.nextState.number)
             {
                 cent = CG_GetEntity(localClientNum, elem->targetEntNum);
                 if (!cent->nextValid)
@@ -1497,9 +1504,9 @@ char __cdecl WorldPosToScreenPos(int localClientNum, const float *worldPos, floa
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    refdef = (const refdef_s *)&MEMORY[0x9D8700];
+    refdef = &cgArray[0].refdef;
     scrPlace = &scrPlaceView[localClientNum];
-    CG_GetViewAxisProjections((const refdef_s *)&MEMORY[0x9D8700], worldPos, projections);
+    CG_GetViewAxisProjections(&cgArray[0].refdef, worldPos, projections);
     w = projections[0];
     if (projections[0] >= 0.0)
     {
@@ -1717,8 +1724,8 @@ double __cdecl GetScaleForDistance(int localClientNum, const float *worldPos)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    LODWORD(diff[3]) = cgArray;
-    Vec3Sub(worldPos, MEMORY[0x9D8718], diff);
+    diff[3] = 1.4046605e-38;
+    Vec3Sub(worldPos, cgArray[0].refdef.vieworg, diff);
     dist3D = Vec3Length(diff);
     if (waypointDistScaleRangeMin->current.value >= (double)dist3D)
         return 1.0;
@@ -1744,9 +1751,9 @@ int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = (playerState_s *)(MEMORY[0x98F45C] + 12);
+    ps = &cgArray[0].nextSnap->ps;
     elemCount = 0;
-    CopyInUseHudElems(elems, &elemCount, (hudelem_s *)(MEMORY[0x98F45C] + 2224), 31);
+    CopyInUseHudElems(elems, &elemCount, ps->hud.current, 31);
     CopyInUseHudElems(elems, &elemCount, ps->hud.archival, 31);
     qsort(elems, elemCount, 4u, compare_hudelems);
     return elemCount;
@@ -1776,7 +1783,6 @@ void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum)
     int i; // [esp+0h] [ebp-104h]
     hudelem_s *elems[62]; // [esp+4h] [ebp-100h] BYREF
     int elemCount; // [esp+100h] [ebp-4h]
-    int savedregs; // [esp+104h] [ebp+0h] BYREF
 
     if (CG_ShouldDrawHud(localClientNum))
     {
@@ -1792,7 +1798,7 @@ void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum)
         for (i = 0; i < elemCount; ++i)
         {
             if (elems[i]->type == HE_TYPE_WAYPOINT)
-                AddDrawSurfForHudElemWaypoint((hudelem_color_t)&savedregs, localClientNum, elems[i]);
+                AddDrawSurfForHudElemWaypoint(localClientNum, elems[i]);
         }
     }
 }

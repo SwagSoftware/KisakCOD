@@ -4,12 +4,35 @@
 
 #include <gfx_d3d/fxprimitives.h>
 #include <gfx_d3d/r_gfx.h>
+#include <gfx_d3d/r_material.h>
 
 struct cg_s;
 
 struct Font_s;
 struct Material;
 struct ScreenPlacement;
+
+ enum entityType_t : __int32
+ {                                       // ...
+     ET_GENERAL         = 0x0,
+     ET_PLAYER          = 0x1,
+     ET_PLAYER_CORPSE   = 0x2,
+     ET_ITEM            = 0x3,
+     ET_MISSILE         = 0x4,
+     ET_INVISIBLE       = 0x5,
+     ET_SCRIPTMOVER     = 0x6,
+     ET_SOUND_BLEND     = 0x7,
+     ET_FX              = 0x8,
+     ET_LOOP_FX         = 0x9,
+     ET_PRIMARY_LIGHT   = 0xA,
+     ET_MG42            = 0xB,
+     ET_HELICOPTER      = 0xC,
+     ET_PLANE           = 0xD,
+     ET_VEHICLE         = 0xE,
+     ET_VEHICLE_COLLMAP = 0xF,
+     ET_VEHICLE_CORPSE  = 0x10,
+     ET_EVENTS          = 0x11,
+ };
 
 const float colorBlack[4] = { 0.0, 0.0, 0.0, 1.0 }; // idb
 const float colorRed[4] = { 1.0, 0.0, 0.0, 1.0 }; // idb
@@ -25,6 +48,11 @@ const float colorWhite[4] = { 1.0, 1.0, 1.0, 1.0 }; // idb
 const float colorLtGrey[4] = { 0.75, 0.75, 0.75, 1.0 }; // idb
 const float colorOrange[4] = { 1.0, 0.69999999f, 0.0, 1.0 }; // idb
 const float colorLtOrange[4] = { 0.75, 0.52499998f, 0.0, 1.0 }; // idb
+
+const float colorWhiteFaded[4] = { 1.0, 1.0, 1.0, 0.75 }; // idb
+const float colorGreenFaded[4] = { 0.0, 1.0, 0.0, 0.75 }; // idb
+const float colorRedFaded[4] = { 0.75, 0.25, 0.0, 0.75 }; // idb
+
 
 void __cdecl CG_DrawRotatedPicPhysical(
     const ScreenPlacement *scrPlace,
@@ -867,6 +895,11 @@ void __cdecl CG_CalcReticleImageOffset(const float *drawSize, float *imageTexelO
 
 
 // cg_draw_indicators
+struct HudGrenade // sizeof=0x10
+{                                       // ...
+    float origin[3];
+    Material *material;                 // ...
+};
 void __cdecl CG_DrawFlashDamage(const cg_s *cgameGlob);
 void __cdecl CG_DrawDamageDirectionIndicators(int localClientNum);
 void __cdecl CG_ClearHudGrenades();
@@ -970,7 +1003,8 @@ void __cdecl CG_CompassDrawPlayerNorthCoord(
     const rectDef_s *rect,
     Font_s *font,
     Material *material,
-    __int64 color);
+    float *const color,
+    int style);
 void __cdecl CG_CompassDrawPlayerEastCoord(
     int localClientNum,
     CompassType compassType,
@@ -1090,6 +1124,15 @@ struct __declspec(align(4)) CgEntCollSector // sizeof=0x10
     // padding byte
     // padding byte
 };
+struct CgEntCollWorld // sizeof=0x401C
+{                                       // ...
+    float mins[3];
+    float maxs[3];
+    unsigned __int16 freeHead;
+    // padding byte
+    // padding byte
+    CgEntCollSector sectors[1024];
+};
 void __cdecl TRACK_CG_CollWorld();
 void __cdecl CG_SetCollWorldLocalClientNum(int localClientNum);
 int __cdecl CG_GetCollWorldLocalClientNum();
@@ -1149,9 +1192,9 @@ unsigned int __cdecl GetWeaponAltIndex(const cg_s *cgameGlob, const WeaponDef *w
 double __cdecl AmmoCounterFadeAlpha(int localClientNum, cg_s *cgameGlob);
 double __cdecl CG_GetHudAlphaDPad(int localClientNum);
 double __cdecl DpadFadeAlpha(int localClientNum, cg_s *cgameGlob);
-char __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx);
+bool __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx);
 double __cdecl CG_GetHudAlphaAmmoCounter(int localClientNum);
-char __cdecl CG_ActionSlotIsUsable(int localClientNum, unsigned int slotIdx);
+bool __cdecl CG_ActionSlotIsUsable(int localClientNum, unsigned int slotIdx);
 void __cdecl CG_DrawPlayerActionSlotDpad(
     int localClientNum,
     const rectDef_s *rect,
@@ -1250,3 +1293,9 @@ FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname);
 void __cdecl CG_LoadingString(int localClientNum, const char *s);
 void __cdecl CG_DrawInformation(int localClientNum);
 bool __cdecl CG_IsShowingProgress_FastFile();
+
+
+
+extern const dvar_t *nightVisionFadeInOutTime;
+extern const dvar_t *nightVisionPowerOnTime;
+extern const dvar_t *nightVisionDisableEffects;

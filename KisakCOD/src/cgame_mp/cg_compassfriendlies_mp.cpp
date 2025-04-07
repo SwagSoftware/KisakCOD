@@ -1,5 +1,12 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
+#include <qcommon/mem_track.h>
+#include <cgame/cg_public.h>
+#include <ui/ui.h>
+#include <client/client.h>
+
+CompassActor s_compassActors[1][64];
+CompassVehicle s_compassVehicles[1][8];
 
 void __cdecl TRACK_cg_compassfriendlies()
 {
@@ -26,7 +33,7 @@ void __cdecl CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 296, 0, "%s", "cgameGlob->nextSnap");
     cent = CG_GetEntity(localClientNum, entityIndex);
     if (cent->nextState.eType != 14 && cent->nextState.eType != 12 && cent->nextState.eType != 13)
@@ -37,10 +44,10 @@ void __cdecl CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex)
             "%s",
             "cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER || cent->nextState.eType == ET_PLANE");
     Vehicle = GetVehicle(localClientNum, entityIndex);
-    Vehicle->lastUpdate = MEMORY[0x9D5560];
+    Vehicle->lastUpdate = cgArray[0].time;
     *(double *)Vehicle->lastPos = *(double *)cent->pose.origin;
     Vehicle->lastYaw = cent->pose.angles[1];
-    Vehicle->team = cent->nextState.lerp.u.vehicle.teamAndOwnerIndex & 3;
+    Vehicle->team = (team_t)(cent->nextState.lerp.u.vehicle.teamAndOwnerIndex & 3);
     Vehicle->ownerIndex = cent->nextState.lerp.u.vehicle.teamAndOwnerIndex >> 2;
 }
 
@@ -101,15 +108,15 @@ void __cdecl CG_CompassRadarPingEnemyPlayers(int localClientNum, float oldRadarP
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (*(unsigned int *)(MEMORY[0x98F45C] + 232) >= 0x40u)
+        if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
                 325,
                 0,
                 "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                *(unsigned int *)(MEMORY[0x98F45C] + 232),
+                cgArray[0].nextSnap->ps.clientNum,
                 64);
-        localClientInfo = &cgArray[0].bgs.clientinfo[*(unsigned int *)(MEMORY[0x98F45C] + 232)];
+        localClientInfo = &cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum];
         GetRadarLine(cgArray, oldRadarProgress, radarLine1);
         GetRadarLine(cgArray, newRadarProgress, radarLine2);
         if (localClientNum)
@@ -150,7 +157,7 @@ void __cdecl CG_CompassRadarPingEnemyPlayers(int localClientNum, float oldRadarP
                     if (!cent->nextValid || cent->nextState.eType == 1 && (cent->nextState.lerp.eFlags & 0x20000) == 0)
                     {
                         if (DoLinesSurroundPoint(cgArray, radarLine1, radarLine2, actor->lastPos))
-                            RadarPingEnemyPlayer(actor, MEMORY[0x9D5560]);
+                            RadarPingEnemyPlayer(actor, cgArray[0].time);
                     }
                 }
             }
@@ -175,6 +182,8 @@ void __cdecl GetRadarLine(cg_s *cgameGlob, float radarProgress, float *line)
 
 double __cdecl GetRadarLineMargin(cg_s *cgameGlob)
 {
+    static float SQRT2 = sqrt(2.0);
+
     float v2; // [esp+0h] [ebp-10h]
     float marginForRadara; // [esp+4h] [ebp-Ch]
     float marginForRadar; // [esp+4h] [ebp-Ch]
@@ -238,17 +247,18 @@ void __cdecl CG_CompassIncreaseRadarTime(int localClientNum)
             localClientNum);
     if (!cgArray)
         MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 376, 0, "%s", "cgameGlob");
-    if (MEMORY[0x9D5B24])
+    if (cgArray[0].predictedPlayerState.radarEnabled)
     {
-        oldRadarProgress = MEMORY[0x9DF940];
-        MEMORY[0x9DF940] = (double)MEMORY[0x9D555C] / (compassRadarUpdateTime->current.value * 1000.0) + MEMORY[0x9DF940];
-        v1 = floor(MEMORY[0x9DF940]);
-        MEMORY[0x9DF940] = MEMORY[0x9DF940] - v1;
-        CG_CompassRadarPingEnemyPlayers(localClientNum, oldRadarProgress, MEMORY[0x9DF940]);
+        oldRadarProgress = cgArray[0].radarProgress;
+        cgArray[0].radarProgress = (double)cgArray[0].frametime / (compassRadarUpdateTime->current.value * 1000.0)
+            + oldRadarProgress;
+        v1 = floor(cgArray[0].radarProgress);
+        cgArray[0].radarProgress = cgArray[0].radarProgress - v1;
+        CG_CompassRadarPingEnemyPlayers(localClientNum, oldRadarProgress, cgArray[0].radarProgress);
     }
     else
     {
-        MEMORY[0x9DF940] = 0.0;
+        cgArray[0].radarProgress = 0.0;
     }
 }
 
@@ -282,16 +292,16 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, const centity_s *ce
                 "cent->nextState.number doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
                 cent->nextState.number,
                 64);
-        if (*(unsigned int *)(MEMORY[0x98F45C] + 232) >= 0x40u)
+        if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
                 409,
                 0,
                 "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                *(unsigned int *)(MEMORY[0x98F45C] + 232),
+                cgArray[0].nextSnap->ps.clientNum,
                 64);
-        localClientInfo = &cgArray[0].bgs.clientinfo[*(unsigned int *)(MEMORY[0x98F45C] + 232)];
-        if (*(unsigned int *)(MEMORY[0x98F45C] + 232) != cent->nextState.clientNum)
+        localClientInfo = &cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum];
+        if (cgArray[0].nextSnap->ps.clientNum != cent->nextState.clientNum)
         {
             playerIndex = cent->nextState.number;
             playerTeam = cgArray[0].bgs.clientinfo[cent->nextState.clientNum].team;
@@ -305,7 +315,7 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, const centity_s *ce
                         "%s",
                         "playerTeam == TEAM_ALLIES || playerTeam == TEAM_AXIS || playerTeam == TEAM_FREE");
                 actor = &s_compassActors[localClientNum][playerIndex];
-                actor->beginFadeTime = msec + MEMORY[0x9D5560];
+                actor->beginFadeTime = msec + cgArray[0].time;
                 v4 = localClientInfo->team == TEAM_FREE || playerTeam != localClientInfo->team;
                 actor->enemy = v4;
                 actor->perks = cgArray[0].bgs.clientinfo[playerIndex].perks;
@@ -336,14 +346,14 @@ void __cdecl ActorUpdatePos(int localClientNum, CompassActor *actor, const float
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (MEMORY[0x9D5B24]
-            && actor->lastUpdate > MEMORY[0x9D5560] - 1500
-            && DoesMovementCrossRadar(cgArray, MEMORY[0x9DF940], actor->lastPos, newPos))
+        if (cgArray[0].predictedPlayerState.radarEnabled
+            && actor->lastUpdate > cgArray[0].time - 1500
+            && DoesMovementCrossRadar(cgArray, cgArray[0].radarProgress, actor->lastPos, newPos))
         {
-            RadarPingEnemyPlayer(actor, MEMORY[0x9D5560]);
+            RadarPingEnemyPlayer(actor, cgArray[0].time);
         }
         if (CanLocalPlayerHearActorFootsteps(localClientNum, newPos, actorClientIndex))
-            RadarPingEnemyPlayer(actor, MEMORY[0x9D5560]);
+            RadarPingEnemyPlayer(actor, cgArray[0].time);
     }
     *(double *)actor->lastPos = *(double *)newPos;
 }
@@ -396,8 +406,8 @@ bool __cdecl CanLocalPlayerHearActorFootsteps(int localClientNum, const float *a
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    ps = (const playerState_s *)&MEMORY[0x9D5574];
-    if (MEMORY[0x9D5578])
+    ps = &cgArray[0].predictedPlayerState;
+    if (cgArray[0].predictedPlayerState.pm_type)
         return 0;
     if ((cgameGlob->bgs.clientinfo[actorClientIndex].perks & 0x100) != 0)
         return 0;
@@ -453,7 +463,7 @@ void __cdecl CG_CompassUpdateActors(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 472, 0, "%s", "cgameGlob->nextSnap");
     if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
         MyAssertHandler(
@@ -581,11 +591,8 @@ void __cdecl CG_CompassUpdateActors(int localClientNum)
                 ActorUpdatePos(localClientNum, actor, newPos, index);
                 actor->lastYaw = (double)((int)(cgameGlob->nextSnap->ps.iCompassPlayerInfo & 0xFF000000) >> 24) * 1.40625;
                 actor->lastUpdate = cgameGlob->time;
-                if ((((unsigned int)&loc_7FFFFF + 1) & cgameGlob->nextSnap->ps.eFlags) != 0
-                    && actor->pingTime <= cgameGlob->time)
-                {
+                if ((cgameGlob->nextSnap->ps.eFlags & 0x800000) != 0 && actor->pingTime <= cgameGlob->time)
                     actor->pingTime = cgameGlob->time + 3000;
-                }
             }
         }
     }
@@ -608,7 +615,7 @@ void __cdecl CG_CompassDrawFriendlies(
     float angle; // [esp+48h] [ebp-C4h]
     float v13; // [esp+4Ch] [ebp-C0h]
     float v14; // [esp+50h] [ebp-BCh]
-    bool icon; // [esp+68h] [ebp-A4h]
+    BOOL icon; // [esp+68h] [ebp-A4h]
     float yawVector[2]; // [esp+6Ch] [ebp-A0h] BYREF
     bool clipped; // [esp+77h] [ebp-95h]
     clientInfo_t *localClientInfo; // [esp+78h] [ebp-94h]
@@ -645,7 +652,7 @@ void __cdecl CG_CompassDrawFriendlies(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 604, 0, "%s", "cgameGlob->nextSnap");
     if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
         MyAssertHandler(
@@ -926,7 +933,7 @@ void __cdecl CG_CompassDrawEnemies(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 780, 0, "%s", "cgameGlob->nextSnap");
     if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
         MyAssertHandler(
@@ -1244,7 +1251,7 @@ void __cdecl CG_CompassDrawVehicles(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 977, 0, "%s", "cgameGlob->nextSnap");
     compassFadeOutAlpha = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (compassFadeOutAlpha != 0.0)
@@ -1349,5 +1356,3 @@ void __cdecl CG_CompassDrawVehicles(
         }
     }
 }
-
-s

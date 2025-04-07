@@ -281,6 +281,49 @@ void __cdecl SV_FrameInternal(int msec);
 int SV_PostFrame();
 char __cdecl SV_CheckOverflow();
 
+extern server_t sv;
+
+extern const dvar_t *sv_allowedClan2;
+extern const dvar_t *sv_maxPing;
+extern const dvar_t *sv_debugPacketContentsForClientThisFrame;
+extern const dvar_t *sv_privateClients;
+extern const dvar_t *sv_maxclients;
+extern const dvar_t *sv_hostname;
+extern const dvar_t *sv_allowedClan1;
+extern const dvar_t *sv_smp;
+extern const dvar_t *sv_debugReliableCmds;
+extern const dvar_t *sv_clientSideBullets;
+extern const dvar_t *sv_privateClientsForClients;
+extern const dvar_t *sv_reconnectlimit;
+extern const dvar_t *sv_kickBanTime;
+extern const dvar_t *sv_floodProtect;
+extern const dvar_t *sv_gametype;
+extern const dvar_t *sv_mapname;
+extern const dvar_t *sv_cheats;
+extern const dvar_t *sv_maxRate;
+extern const dvar_t *sv_showCommands;
+extern const dvar_t *sv_packet_info;
+extern const dvar_t *sv_mapRotationCurrent;
+extern const dvar_t *sv_connectTimeout;
+extern const dvar_t *sv_disableClientConsole;
+extern const dvar_t *sv_network_fps;
+extern const dvar_t *sv_minPing;
+extern const dvar_t *sv_mapcrc;
+extern const dvar_t *sv_debugPacketContents;
+extern const dvar_t *sv_zombietime;
+extern const dvar_t *sv_debugRate;
+extern const dvar_t *sv_showAverageBPS;
+extern const dvar_t *sv_timeout;
+extern const dvar_t *sv_padPackets;
+extern const dvar_t *sv_debugPlayerstate;
+extern const dvar_t *sv_maxHappyPingTime;
+extern const dvar_t *sv_endGameIfISuck;
+extern const dvar_t *sv_debugMessageKey;
+extern const dvar_t *sv_fps;
+extern const dvar_t *sv_botsPressAttackBtn;
+extern const dvar_t *sv_serverid;
+extern const dvar_t *sv_mapRotation;
+
 
 // sv_net_chan_mp
 bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan);

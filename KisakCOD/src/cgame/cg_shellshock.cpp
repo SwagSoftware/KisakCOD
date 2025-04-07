@@ -2,6 +2,8 @@
 #include "cg_public.h"
 
 #include <client_mp/client_mp.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include <sound/snd_public.h>
 
 void __cdecl CG_PerturbCamera(cg_s *cgameGlob)
 {
@@ -168,7 +170,7 @@ double __cdecl BlendSmooth(float percent)
     float sin; // [esp+14h] [ebp-4h]
 
     v3 = (percent - 0.5) * 3.141592741012573;
-    sin = sin(v3);
+    sin = sinf(v3);
     return (float)((sin + 1.0) * 0.5);
 }
 

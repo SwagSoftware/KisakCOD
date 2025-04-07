@@ -2,6 +2,12 @@
 #include "cg_public.h"
 
 #include <cgame_mp/cg_local_mp.h>
+#include <ui/ui.h>
+#include <client/client.h>
+#include <gfx_d3d/r_rendercmds.h>
+
+unsigned int g_hudGrenadeCount;
+HudGrenade g_hudGrenades[32];
 
 void __cdecl CG_DrawFlashDamage(const cg_s *cgameGlob)
 {
@@ -27,7 +33,7 @@ void __cdecl CG_DrawFlashDamage(const cg_s *cgameGlob)
         col[0] = 0.2;
         col[1] = 0.0;
         col[2] = 0.0;
-        col[3] = redFlash / 5.0 * DOUBLE_0_699999988079071;
+        col[3] = redFlash / 5.0 * 0.699999988079071;
         sidebuffer = 10.0;
         CL_GetScreenDimensions(&displayWidth, &displayHeight, &displayAspect);
         height = (double)displayHeight + sidebuffer;
@@ -67,7 +73,7 @@ void __cdecl CG_DrawDamageDirectionIndicators(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (MEMORY[0x98F45C] && !CG_Flashbanged(localClientNum))
+    if (cgArray[0].nextSnap && !CG_Flashbanged(localClientNum))
     {
         scrPlace = &scrPlaceView[localClientNum];
         if (CG_GetWeapReticleZoom(cgameGlob, &angle))
@@ -295,7 +301,7 @@ void __cdecl CG_DrawGrenadeIndicators(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (MEMORY[0x98F45C]
+    if (cgArray[0].nextSnap
         && cgameGlob->predictedPlayerState.pm_type != 4
         && (cgameGlob->predictedPlayerState.otherFlags & 2) == 0
         && g_hudGrenadeCount)
@@ -385,7 +391,7 @@ void __cdecl CG_DrawGrenadePointer(
     radiusScale = cg_hudGrenadeIconOffset->current.value;
     pivot = cg_hudGrenadePointerPivot->current.value;
     pivot_4 = cg_hudGrenadePointerPivot->current.vector[1];
-    angle = vectoyaw(grenadeOffset) - MEMORY[0x9D5680];
+    angle = vectoyaw(grenadeOffset) - cgArray[0].predictedPlayerState.viewangles[1];
     yaw = AngleNormalize360(angle);
     v13 = yaw * 0.01745329238474369;
     cosYaw = cos(v13);
@@ -449,7 +455,7 @@ void __cdecl CG_DrawGrenadeIcon(
     width = cg_hudGrenadeIconWidth->current.value;
     height = cg_hudGrenadeIconHeight->current.value;
     radiusScale = cg_hudGrenadeIconOffset->current.value;
-    angle = vectoyaw(grenadeOffset) - MEMORY[0x9D5680];
+    angle = vectoyaw(grenadeOffset) - cgArray[0].predictedPlayerState.viewangles[1];
     yaw = AngleNormalize360(angle);
     v15 = yaw * 0.01745329238474369;
     cosYaw = cos(v15);

@@ -3,6 +3,13 @@
 
 #include <cgame_mp/cg_local_mp.h>
 #include <script/scr_const.h>
+#include <xanim/dobj.h>
+#include <EffectsCore/fx_system.h>
+#include <bgame/bg_public.h>
+#include <DynEntity/DynEntity_client.h>
+#include <ragdoll/ragdoll.h>
+#include <client/client.h>
+#include <server_mp/server.h>
 
 
 int __cdecl CG_GetBoneIndex(
@@ -48,8 +55,8 @@ void __cdecl CG_PlayBoltedEffect(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        time = MEMORY[0x9D5560];
-        FX_PlayBoltedEffect(localClientNum, fxDef, MEMORY[0x9D5560], dobjHandle, boneIndex);
+        time = cgArray[0].time;
+        FX_PlayBoltedEffect(localClientNum, fxDef, cgArray[0].time, dobjHandle, boneIndex);
     }
 }
 
@@ -75,8 +82,9 @@ void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event)
     snapshot_s *v25; // [esp+B4h] [ebp-A0h]
     snapshot_s *v26; // [esp+B8h] [ebp-9Ch]
     snapshot_s *v27; // [esp+BCh] [ebp-98h]
-    snapshot_s *nextSnap; // [esp+C0h] [ebp-94h]
-    snd_alias_list_t *v29; // [esp+CCh] [ebp-88h] BYREF
+    snapshot_s *v28; // [esp+C0h] [ebp-94h]
+    snapshot_s *nextSnap; // [esp+C8h] [ebp-8Ch]
+    snd_alias_list_t *v30; // [esp+CCh] [ebp-88h] BYREF
     FxEffectDef *def; // [esp+D0h] [ebp-84h] BYREF
     snd_alias_list_t *outSnd; // [esp+D4h] [ebp-80h] BYREF
     FxEffectDef *outFx; // [esp+D8h] [ebp-7Ch] BYREF
@@ -113,10 +121,11 @@ void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event)
                 localClientNum);
         cgameGlob = cgArray;
         position = cent->pose.origin;
-        ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
+        ps = &cgArray[0].nextSnap->ps;
         ent = &cent->nextState;
         eventParm = cent->nextState.eventParm;
-        v23 = (*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && ent->number == *(unsigned int *)(MEMORY[0x98F45C] + 232);
+        nextSnap = cgArray[0].nextSnap;
+        v23 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
         isPlayerView = v23;
         if (cg_debugEvents->current.enabled)
             Com_Printf(21, "ent:%3i  event:%3i ", ent->number, event);
@@ -542,11 +551,11 @@ void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event)
                         weaponDef->iExplosionOuterDamage);
                     ByteToDir(ent->eventParm, axis[0]);
                     Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
-                    CG_ImpactEffectForWeapon(weaponIdx, ent->surfType, 0, (const FxEffectDef **)&def, &v29);
+                    CG_ImpactEffectForWeapon(weaponIdx, ent->surfType, 0, (const FxEffectDef **)&def, &v30);
                     if (def)
                         FX_PlayOrientedEffect(localClientNum, def, cgameGlob->time, position, axis);
-                    if (v29)
-                        CG_PlaySoundAlias(localClientNum, 1022, position, v29);
+                    if (v30)
+                        CG_PlaySoundAlias(localClientNum, 1022, position, v30);
                     if (weaponDef->projExplosionEffect)
                     {
                         Com_Printf(
@@ -746,8 +755,8 @@ void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event)
                     CG_Obituary(localClientNum, ent);
                     return;
                 case 67:
-                    nextSnap = cgameGlob->nextSnap;
-                    if ((nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum)
+                    v28 = cgameGlob->nextSnap;
+                    if ((v28->ps.otherFlags & 6) != 0 && ent->number == v28->ps.clientNum)
                         CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_NO_AMMO_FRAG_GRENADE);
                     return;
                 case 68:
@@ -834,7 +843,7 @@ void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event)
                         (EquipmentSound_t)(offset != 0 ? EQS_QRUNNING : EQS_RUNNING));
                     break;
                 default:
-                    Com_Error(ERR_DROP, &byte_866DF4, eventnames[event]);
+                    Com_Error(ERR_DROP, "Unknown event: %s", eventnames[event]);
                     break;
                 }
             }
@@ -1000,7 +1009,7 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
     }
     if (target >= 0x40)
     {
-        Com_Error(ERR_DROP, &byte_86701C);
+        Com_Error(ERR_DROP, "CG_Obituary: target out of range");
         MyAssertHandler(
             ".\\cgame\\cg_event.cpp",
             139,
@@ -1040,31 +1049,32 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
                 attackerName[0] = 0;
                 attackerColor = 55;
             }
-            ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
+            ps = &cgArray[0].nextSnap->ps;
             if (attacker == target)
             {
                 attackerName[0] = 0;
             }
             else if (attacker == ps->clientNum)
             {
-                if (!MEMORY[0x9E06F0])
+                if (!cgArray[0].inKillCam)
                 {
                     if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
-                        s = va(aCgameYoukilled_0, targetName, "CGAME_TEAMMATE");
+                        s = va("CGAME_YOUKILLED", targetName, "CGAME_TEAMMATE");
                     else
-                        s = va(aCgameYoukilled, targetName);
+                        s = va("CGAME_YOUKILLED", targetName);
                     CG_PriorityCenterPrint(localClientNum, s, 0);
                 }
             }
-            else if (target == ps->clientNum && attackerCI && !MEMORY[0x9E06F0])
+            else if (target == ps->clientNum && attackerCI && !cgArray[0].inKillCam)
             {
+                // KISAKTODO: double check the string literals here in va() `CGAME_...`
                 if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
-                    s = va(aCgameYouwereki_0, attackerName, "CGAME_TEAMMATE");
+                    s = va("CGAME_YOUWEREKILLED", attackerName, "CGAME_TEAMMATE");
                 else
-                    s = va(aCgameYouwereki, attackerName);
+                    s = va("CGAME_YOUWEREKILLED", attackerName);
                 CG_PriorityCenterPrint(localClientNum, s, 0);
             }
-            if (!MEMORY[0x9E06F0])
+            if (!cgArray[0].inKillCam)
                 CL_DeathMessagePrint(
                     localClientNum,
                     attackerName,
@@ -1096,10 +1106,10 @@ void __cdecl CG_ItemPickup(int localClientNum, int weapIndex)
                 localClientNum);
         if (weapDef->offhandClass)
         {
-            if (!MEMORY[0x9DF71C][38])
+            if (!cgArray[0].equippedOffHand)
                 CG_SetEquippedOffHand(localClientNum, weapIndex);
         }
-        else if (!MEMORY[0x9DF71C][34])
+        else if (!cgArray[0].weaponSelect)
         {
             CG_SelectWeaponIndex(localClientNum, weapIndex);
         }
@@ -1191,7 +1201,7 @@ void __cdecl CG_PlayFx(int localClientNum, centity_s *cent, const float *angles)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        FX_PlayOrientedEffect(localClientNum, fxDef, MEMORY[0x9D5560], cent->pose.origin, axis);
+        FX_PlayOrientedEffect(localClientNum, fxDef, cgArray[0].time, cent->pose.origin, axis);
     }
     else
     {
@@ -1247,7 +1257,7 @@ void __cdecl CG_PlayFxOnTag(int localClientNum, centity_s *cent, int eventParm)
     if (!fxDef)
         MyAssertHandler(".\\cgame\\cg_event.cpp", 393, 0, "%s", "fxDef");
     dobjHandle = cent->nextState.number;
-    tagName = SL_GetString((char *)tagAndEffect + 2, 0).prev;
+    tagName = SL_GetString((char *)tagAndEffect + 2, 0);
     CG_PlayBoltedEffect(localClientNum, fxDef, dobjHandle, tagName);
     Scr_SetString(&tagName, 0);
 }

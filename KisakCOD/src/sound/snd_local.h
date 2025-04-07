@@ -53,6 +53,12 @@ struct __declspec(align(4)) SndEqParams // sizeof=0x14
     // padding byte
 };
 
+struct snd_eqoverlay_info_t // sizeof=0x1C
+{                                       // ...
+    SndEqParams *params[2][3];
+    float lerp;                         // ...
+};
+
 struct MssEqInfo // sizeof=0xF00
 {                                       // ...
     SndEqParams params[3][64];

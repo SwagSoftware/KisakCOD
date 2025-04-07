@@ -14,7 +14,6 @@ const dvar_t *hud_fade_stance;
 const dvar_t *hud_fade_compass;
 const dvar_t *hud_health_pulserate_critical;
 const dvar_t *hud_fade_healthbar;
-
 const dvar_t *hud_fadeout_speed;
 const dvar_t *hud_enable;
 const dvar_t *hud_healthOverlay_regenPauseTime;

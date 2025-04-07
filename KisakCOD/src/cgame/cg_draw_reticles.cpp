@@ -2,6 +2,7 @@
 #include "cg_public.h"
 
 #include <cgame_mp/cg_local_mp.h>
+#include <client/client.h>
 
 
 void __cdecl CG_CalcCrosshairPosition(const cg_s *cgameGlob, float *x, float *y)
@@ -125,12 +126,12 @@ void __cdecl CG_DrawCrosshair(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = (const playerState_s *)&MEMORY[0x9D5574];
+    ps = &cgArray[0].predictedPlayerState;
     if (!cg_drawGun)
         MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 764, 0, "%s", "cg_drawGun");
     if (!cg_crosshairDynamic)
         MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 765, 0, "%s", "cg_crosshairDynamic");
-    if (!MEMORY[0x9D5570])
+    if (!cgArray[0].renderingThirdPerson)
     {
         drawHud = CG_ShouldDrawHud(localClientNum);
         posLerp = ps->fWeaponPosFrac;
@@ -150,7 +151,7 @@ void __cdecl CG_DrawCrosshair(int localClientNum)
         }
         else
         {
-            weapIndex = BG_GetViewmodelWeaponIndex((const playerState_s *)&MEMORY[0x9D5574]);
+            weapIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
             if (weapIndex)
             {
                 weapDef = BG_GetWeaponDef(weapIndex);
@@ -168,7 +169,7 @@ void __cdecl CG_DrawCrosshair(int localClientNum)
                     CG_CalcCrosshairColor(localClientNum, reticleAlpha, color);
                     if (color[3] >= 0.009999999776482582
                         && (posLerp != 1.0 || !cg_drawGun->current.enabled)
-                        && AllowedToDrawCrosshair(localClientNum, (const playerState_s *)&MEMORY[0x9D5574]))
+                        && AllowedToDrawCrosshair(localClientNum, &cgArray[0].predictedPlayerState))
                     {
                         CG_CalcCrosshairPosition(cgArray, &centerX, &centerY);
                         if (posLerp != 0.0)
@@ -465,7 +466,7 @@ double __cdecl CG_DrawWeapReticle(int localClientNum)
             localClientNum);
     if (CG_GetWeapReticleZoom(cgArray, &zoomFrac))
     {
-        weapIndex = BG_GetViewmodelWeaponIndex((const playerState_s *)&MEMORY[0x9D5574]);
+        weapIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
         weapDef = BG_GetWeaponDef(weapIndex);
         color[0] = 1.0;
         color[1] = 1.0;
@@ -523,16 +524,16 @@ void __cdecl CG_CalcCrosshairColor(int localClientNum, float alpha, float *color
             "(localClientNum == 0)",
             localClientNum);
     }
-    weapDef = BG_GetWeaponDef(MEMORY[0x9D565C]);
+    weapDef = BG_GetWeaponDef(cgArray[0].predictedPlayerState.weapon);
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 310, 0, "%s", "weapDef");
     if (!weapDef->crosshairColorChange)
         goto LABEL_21;
-    if ((MEMORY[0x9D5584] & 8) == 0)
+    if ((cgArray[0].predictedPlayerState.weapFlags & 8) == 0)
     {
-        if ((MEMORY[0x9D5584] & 0x10) != 0
+        if ((cgArray[0].predictedPlayerState.weapFlags & 0x10) != 0
             && cg_crosshairEnemyColor->current.enabled
-            && MEMORY[0x9DF71C][6] - MEMORY[0x9DF71C][7] >= cg_enemyNameFadeIn->current.integer)
+            && cgArray[0].crosshairClientLastTime - cgArray[0].crosshairClientStartTime >= cg_enemyNameFadeIn->current.integer)
         {
             Dvar_GetUnpackedColorByName("g_TeamColor_EnemyTeam", color);
             goto LABEL_22;
@@ -543,7 +544,7 @@ void __cdecl CG_CalcCrosshairColor(int localClientNum, float alpha, float *color
         color[2] = 1.0;
         goto LABEL_22;
     }
-    if (MEMORY[0x9DF71C][6] - MEMORY[0x9DF71C][7] < cg_friendlyNameFadeIn->current.integer)
+    if (cgArray[0].crosshairClientLastTime - cgArray[0].crosshairClientStartTime < cg_friendlyNameFadeIn->current.integer)
         goto LABEL_21;
     Dvar_GetUnpackedColorByName("g_TeamColor_MyTeam", color);
 LABEL_22:
@@ -577,14 +578,14 @@ void __cdecl CG_DrawTurretCrossHair(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (MEMORY[0x9D56BC][277] == 1023)
+        if (cgArray[0].predictedPlayerState.viewlocked_entNum == 1023)
             MyAssertHandler(
                 ".\\cgame\\cg_draw_reticles.cpp",
                 388,
                 0,
                 "%s",
                 "predictedPlayerState->viewlocked_entNum != ENTITYNUM_NONE");
-        cent = CG_GetEntity(localClientNum, MEMORY[0x9D56BC][277]);
+        cent = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
         if (cent->nextState.eType != 11)
             MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 390, 0, "%s", "cent->nextState.eType == ET_MG42");
         weapIndex = cent->nextState.weapon;
@@ -779,8 +780,8 @@ void __cdecl CG_DrawReticleCenter(
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            if (MEMORY[0x9D55B8])
-                drawSize = (double)(MEMORY[0x9D55B8] % 1000) / 100.0 + drawSize;
+            if (cgArray[0].predictedPlayerState.grenadeTimeLeft)
+                drawSize = (double)(cgArray[0].predictedPlayerState.grenadeTimeLeft % 1000) / 100.0 + drawSize;
         }
         drawSizea = drawSize * transScale;
         x = centerX - drawSizea * 0.5;
@@ -839,7 +840,7 @@ void __cdecl CG_DrawReticleSides(
                 localClientNum);
         cgameGlob = cgArray;
         reticleAlpha = CG_DrawWeapReticle(localClientNum);
-        CG_CalcReticleColor(baseColor, reticleAlpha, MEMORY[0x9D5B9C], reticleColor);
+        CG_CalcReticleColor(baseColor, reticleAlpha, cgArray[0].predictedPlayerState.aimSpreadScale, reticleColor);
         if (reticleColor[3] >= 0.009999999776482582)
         {
             drawSize[0] = (double)weapDef->iReticleSideSize * transScale;

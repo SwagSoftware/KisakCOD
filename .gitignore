@@ -6,3 +6,4 @@ KisakCOD/Release
 *.idb
 *.tlog
 *.log
+IDA/*

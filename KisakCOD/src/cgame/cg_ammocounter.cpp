@@ -2,6 +2,9 @@
 #include "cg_public.h"
 
 #include <cgame_mp/cg_local_mp.h>
+#include <client/client.h>
+#include <stringed/stringed_hooks.h>
+#include <ui/ui.h>
 
 const dvar_t *lowAmmoWarningPulseMin;
 const dvar_t *actionSlotsHide;
@@ -15,6 +18,33 @@ const dvar_t *ammoCounterHide;
 const dvar_t *lowAmmoWarningColor2;
 const dvar_t *lowAmmoWarningColor1;
 
+const float MYFLASHTERM = 40.0f;
+const float TEST_bullet_step_1[2] = { 20.0f, 12.0f };
+const float TEST_bullet_wh_1[2] = { 16.0f, 8.0f };
+const float TEST_bullet_step_2[2] = { 72.0f, 12.0f };
+const float TEST_bullet_wh_2[2] = {64.0f, 16.0f};
+const int TEST_bullet_rowCnt = 1;
+const float TEST_bullet_wh_3[2] = { 8.0f, 4.0f };
+const float TEST_bullet_step_3[2] = { 8.0f, -2.0f };
+
+const float colorLowAmmo[4] = { 1.0f, 0.3f, 0.3f, 1.0f };
+const float colorDpadArrow[4] = { 1.0f, 0.97f, 0.55f, 1.0f };
+const float MY_ACTIVECOLOR[3] = { 1.2f, 1.2f, 1.2f };
+const float MY_OFFSETS[4][2] =
+{
+    { 0.25f, 0.12f },
+    { 0.25, 0.63f },
+    { 0.12f, 0.25f },
+    { 0.63f, 0.25f }
+};
+const float MY_ST[4][4] =
+{
+  { 0.0, 0.0, 1.0, 1.0 },
+  { 0.0, 1.0, 1.0, 0.0 },
+  { 0.0, 0.0, 1.0, 1.0 },
+  { 0.0, 1.0, 1.0, 0.0 }
+}; // idb
+const float MY_DIMS[4][2] = { { 0.5, 0.25 }, { 0.5, 0.25 }, { 0.25, 0.5 }, { 0.25, 0.5 } }; // idb
 
 void __cdecl CG_AmmoCounterRegisterDvars()
 {
@@ -124,7 +154,7 @@ void __cdecl CG_DrawPlayerWeaponAmmoStock(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    ps = (const playerState_s *)&MEMORY[0x9D5574];
+    ps = &cgArray[0].predictedPlayerState;
     colorMod[0] = *color;
     colorMod[1] = color[1];
     colorMod[2] = color[2];
@@ -255,9 +285,10 @@ double __cdecl DpadFadeAlpha(int localClientNum, cg_s *cgameGlob)
     return AmmoCounterFadeAlpha(localClientNum, cgameGlob);
 }
 
-char __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx)
+bool __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx)
 {
-    int v3; // [esp+0h] [ebp-10h]
+    ActionSlotType v3; // [esp+0h] [ebp-10h]
+    playerState_s *ps; // [esp+8h] [ebp-8h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -267,23 +298,24 @@ char __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v3 = *((unsigned int *)&MEMORY[0x9D5574] + slotIdx + 384);
+    ps = &cgArray[0].predictedPlayerState;
+    v3 = cgArray[0].predictedPlayerState.actionSlotType[slotIdx];
     switch (v3)
     {
-    case 1:
-        if (MEMORY[0x9DF71C][34] == *((unsigned int *)&MEMORY[0x9D5574] + slotIdx + 388))
+    case ACTIONSLOTTYPE_SPECIFYWEAPON:
+        if (cgArray[0].weaponSelect == ps->actionSlotParam[slotIdx].specifyWeapon.index)
             return 1;
         break;
-    case 2:
-        if (BG_GetWeaponDef(MEMORY[0x9DF71C][34])->inventoryType == WEAPINVENTORY_ALTMODE)
+    case ACTIONSLOTTYPE_ALTWEAPONTOGGLE:
+        if (BG_GetWeaponDef(cgArray[0].weaponSelect)->inventoryType == WEAPINVENTORY_ALTMODE)
             return 1;
         break;
-    case 3:
+    case ACTIONSLOTTYPE_NIGHTVISION:
         if (CG_LookingThroughNightVision(localClientNum))
             return 1;
         break;
     default:
-        if (*((unsigned int *)&MEMORY[0x9D5574] + slotIdx + 384))
+        if (ps->actionSlotType[slotIdx])
             MyAssertHandler(
                 ".\\cgame\\cg_ammocounter.cpp",
                 567,
@@ -308,10 +340,11 @@ double __cdecl CG_GetHudAlphaAmmoCounter(int localClientNum)
     return AmmoCounterFadeAlpha(localClientNum, cgArray);
 }
 
-char __cdecl CG_ActionSlotIsUsable(int localClientNum, unsigned int slotIdx)
+bool __cdecl CG_ActionSlotIsUsable(int localClientNum, unsigned int slotIdx)
 {
-    int v3; // [esp+0h] [ebp-10h]
+    ActionSlotType v3; // [esp+0h] [ebp-10h]
     unsigned int weapIdx; // [esp+8h] [ebp-8h]
+    playerState_s *ps; // [esp+Ch] [ebp-4h]
 
     if (slotIdx > 3)
         MyAssertHandler(
@@ -330,27 +363,28 @@ char __cdecl CG_ActionSlotIsUsable(int localClientNum, unsigned int slotIdx)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v3 = *((unsigned int *)&MEMORY[0x9D5574] + slotIdx + 384);
+    ps = &cgArray[0].predictedPlayerState;
+    v3 = cgArray[0].predictedPlayerState.actionSlotType[slotIdx];
     switch (v3)
     {
-    case 1:
-        weapIdx = *((unsigned int *)&MEMORY[0x9D5574] + slotIdx + 388);
+    case ACTIONSLOTTYPE_SPECIFYWEAPON:
+        weapIdx = ps->actionSlotParam[slotIdx].specifyWeapon.index;
         if (weapIdx)
         {
-            if (!&MEMORY[0x9D5574])
+            if (cgArray == (cg_s *)-287036)
                 MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-            if (Com_BitCheckAssert((const unsigned int *)&MEMORY[0x9D56BC][261], weapIdx, 16))
+            if (Com_BitCheckAssert(cgArray[0].predictedPlayerState.weapons, weapIdx, 16))
                 return 1;
         }
         break;
-    case 2:
+    case ACTIONSLOTTYPE_ALTWEAPONTOGGLE:
         if (CG_AltWeaponToggleIndex(localClientNum, cgArray))
             return 1;
         break;
-    case 3:
+    case ACTIONSLOTTYPE_NIGHTVISION:
         return 1;
     default:
-        if (*((unsigned int *)&MEMORY[0x9D5574] + slotIdx + 384))
+        if (ps->actionSlotType[slotIdx])
             MyAssertHandler(
                 ".\\cgame\\cg_ammocounter.cpp",
                 631,
@@ -420,10 +454,10 @@ void __cdecl CG_DrawPlayerActionSlotDpad(
             {
                 if (ActionSlotIsActive(localClientNum, idx))
                 {
-                    x = rect->w * (float)MY_OFFSETS[idx][0] + rect->x;
-                    y = rect->h * flt_862484[2 * idx] + rect->y;
+                    x = rect->w * (float)MY_DIMS[idx + 4][0] + rect->x;
+                    y = rect->h * (float)MY_DIMS[idx + 4][1] + rect->y;
                     w = rect->w * (float)MY_DIMS[idx][0];
-                    h = rect->h * flt_862464[2 * idx];
+                    h = rect->h * (float)MY_DIMS[idx][1];
                     if ((unsigned int)idx > 1)
                         CL_DrawStretchPicFlipST(
                             scrPlace,
@@ -940,7 +974,7 @@ void __cdecl DrawClipAmmoShotgunShells(
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 231, 0, "%s", "weapDef");
     bulletX = *base - TEST_bullet_wh_1[0];
-    bulletY = base[1] - flt_942B24 * 0.5;
+    bulletY = base[1] - TEST_bullet_wh_1[1] * 0.5;
     magCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
     AmmoColor(cgameGlob, color, weapIdx);
     for (magIdx = 0; magIdx < weapDef->iClipSize; ++magIdx)
@@ -955,7 +989,7 @@ void __cdecl DrawClipAmmoShotgunShells(
             bulletX,
             bulletY,
             TEST_bullet_wh_1[0],
-            flt_942B24,
+            TEST_bullet_wh_1[1],
             0.0,
             0.0,
             1.0,
@@ -983,7 +1017,7 @@ void __cdecl DrawClipAmmoRockets(
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 261, 0, "%s", "weapDef");
     bulletX = *base - TEST_bullet_wh_2[0];
-    bulletY = base[1] - flt_942B34 * 0.5;
+    bulletY = base[1] - TEST_bullet_wh_2[1] * 0.5;
     magCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
     AmmoColor(cgameGlob, color, weapIdx);
     for (magIdx = 0; magIdx < weapDef->iClipSize; ++magIdx)
@@ -998,7 +1032,7 @@ void __cdecl DrawClipAmmoRockets(
             bulletX,
             bulletY,
             TEST_bullet_wh_2[0],
-            flt_942B34,
+            TEST_bullet_wh_2[1],
             0.0,
             0.0,
             1.0,
@@ -1028,7 +1062,7 @@ void __cdecl DrawClipAmmoBeltfed(
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 293, 0, "%s", "weapDef");
     stepX = TEST_bullet_step_3[0];
     bulletX = *base;
-    bulletY = flt_942B40 * 0.25 * (double)(weapDef->iClipSize / TEST_bullet_rowCnt) + base[1];
+    bulletY = TEST_bullet_wh_3[1] * 0.25 * (double)(weapDef->iClipSize / TEST_bullet_rowCnt) + base[1];
     clipCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
     AmmoColor(cgameGlob, color, weapIdx);
     for (clipIdx = 0; clipIdx < weapDef->iClipSize; ++clipIdx)
@@ -1042,14 +1076,14 @@ void __cdecl DrawClipAmmoBeltfed(
         if (!(clipIdx % TEST_bullet_rowCnt))
         {
             stepX = stepX * -1.0;
-            bulletY = bulletY + flt_942B48;
+            bulletY = bulletY + TEST_bullet_step_3[1];
             bulletX = bulletX + stepX;
         }
         CL_DrawStretchPicPhysical(
             bulletX,
             bulletY,
             TEST_bullet_wh_3[0],
-            flt_942B40,
+            TEST_bullet_wh_3[1],
             0.0,
             0.0,
             1.0,
@@ -1178,16 +1212,16 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9D5578] < 7
-        && MEMORY[0x9D5578] != 4
-        && (MEMORY[0x9D5624] & 0x300) == 0
-        && MEMORY[0x9D5660] != 7
-        && MEMORY[0x9D5660] != 9
-        && MEMORY[0x9D5660] != 11
-        && MEMORY[0x9D5660] != 10
-        && MEMORY[0x9D5660] != 8)
+    if (cgArray[0].predictedPlayerState.pm_type < 7
+        && cgArray[0].predictedPlayerState.pm_type != 4
+        && (cgArray[0].predictedPlayerState.eFlags & 0x300) == 0
+        && cgArray[0].predictedPlayerState.weaponstate != 7
+        && cgArray[0].predictedPlayerState.weaponstate != 9
+        && cgArray[0].predictedPlayerState.weaponstate != 11
+        && cgArray[0].predictedPlayerState.weaponstate != 10
+        && cgArray[0].predictedPlayerState.weaponstate != 8)
     {
-        if (MEMORY[0x9D565C])
+        if (cgArray[0].predictedPlayerState.weapon)
         {
             fade = AmmoCounterFadeAlpha(localClientNum, cgArray);
             if (fade != 0.0)
@@ -1222,7 +1256,7 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
                         }
                         amplitude = (lowAmmoWarningPulseMax->current.value - lowAmmoWarningPulseMin->current.value) * 0.5;
                         bias = lowAmmoWarningPulseMin->current.value + amplitude;
-                        v12 = lowAmmoWarningPulseFreq->current.value * ((double)MEMORY[0x9D5560] * 0.006283185444772243);
+                        v12 = lowAmmoWarningPulseFreq->current.value * ((double)cgArray[0].time * 0.006283185444772243);
                         v11 = sin(v12);
                         frac = v11 * amplitude + bias;
                         Vec4Lerp(color1, color2, frac, colorMod);

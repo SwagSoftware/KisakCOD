@@ -27,7 +27,6 @@ const dvar_t *snd_touchStreamFilesOnLoad;
 
 snd_local_t g_snd;
 
-const char *snd_eqTypeStrings[6] = { "lowpass", "highpass", "lowshelf", "highshelf", "bell", NULL }; // idb
 const char *snd_roomStrings[27] =
 {
   "generic",

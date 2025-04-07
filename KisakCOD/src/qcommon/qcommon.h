@@ -1150,3 +1150,11 @@ inline void __cdecl strncpy(unsigned __int8 *dest, unsigned __int8 *src, unsigne
 {
     strncpy((char *)dest, (char *)src, count);
 }
+
+
+// LWSS: Random return 0 Stub function that IDA thinks is jpeg-related.
+int __cdecl RETURN_ZERO32()
+{
+    return 0;
+}
+#define jpeg_mem_init RETURN_ZERO32

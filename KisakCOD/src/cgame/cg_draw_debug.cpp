@@ -1,10 +1,80 @@
 #include "cg_local.h"
 #include "cg_public.h"
+#include <cgame_mp/cg_local_mp.h>
+#include <universal/physicalmemory.h>
+#include <physics/phys_local.h>
+#include <gfx_d3d/r_init.h>
+#include <server_mp/server.h>
 
+#include <qcommon/mem_track.h>
+#include <client/client.h>
+#include <aim_assist/aim_assist.h>
+#include <ui/ui.h>
+#include <gfx_d3d/r_utils.h>
+#include <sound/snd_public.h>
+#include <EffectsCore/fx_system.h>
+#include <ragdoll/ragdoll.h>
+#include <script/scr_variable.h>
+#include <script/scr_vm.h>
+#include <sound/snd_local.h>
+#include <sound/snd_public.h>
+
+int previous;
+int fps_previousTimes[32];
+int fps_index;
+
+const struct MemInfoData//$26A77A1ABB1A9087FD9203E2FD79C24D // sizeof=0x8
+{                                       // ...
+    const char *name;                   // ...
+    int budgetKB;                       // ...
+};
+
+const /*$26A77A1ABB1A9087FD9203E2FD79C24D*/ MemInfoData meminfoData[37] =
+{
+  { "debug", 0 },
+  { "free hunk", 0 },
+  { "binaries", 0 },
+  { "misc swap", 0 },
+  { "", 0},
+  { "AI", 2048 },
+  { "AI nodes", 5120 },
+  { "script", 4096 },
+  { "FX", 5120 },
+  { "ent/net", 97280 },
+  { "misc", 0 },
+  { "anim", 10240 },
+  { "world gbl", 0 },
+  { "sound gbl", 0 },
+  { "min pc sound gbl", 0 },
+  { "sound", 0 },
+  { "min pc sound", 10240 },
+  { "", 0 },
+  { "gfx gbl", 0 },
+  { "gfx images", 0 },
+  { "gfx world", 0 },
+  { "gfx model", 0 },
+  { "gfx misc", 0 },
+  { "gfx total", 0 },
+  { "", 0 },
+  { "coll misc", 0 },
+  { "coll brush", 0 },
+  { "coll model tri", 0 },
+  { "coll terrain", 0 },
+  { "coll total", 0 },
+  { "map ents", 0 },
+  { "temp", 0 },
+  { "", 0 },
+  { "localize", 3072 },
+  { "ui", 3072 },
+  { "min pc tex", 49152 },
+  { "", 0 }
+}; // idb
+
+trStatistics_t rendererStats;
 
 void __cdecl CG_CalculateFPS()
 {
-    unsigned intv0; // eax
+    DWORD v0; // eax
     int frameTime; // [esp+0h] [ebp-8h]
 
     v0 = Sys_Milliseconds();
@@ -101,16 +171,16 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
     Vec4Lerp(colorRed, colorWhite, frac, varColor);
     color = varColor;
     s = va("(%i-%i, %i) %i", fpsMin, (int)(v12 + 9.313225746154785e-10), (int)(variance + 9.313225746154785e-10), fps);
-    yf = CG_CornerDebugPrint(scrPlace, farRight, y, v10, s, " FPS", color) + y;
+    yf = CG_CornerDebugPrint(scrPlace, farRight, y, v10, s, (char *)" FPS", color) + y;
     mspf = (double)total / 32.0;
     s = va("(%i-%i) %1.2f", minTime, maxTime, mspf);
-    ya = CG_CornerDebugPrint(scrPlace, farRight, yf, v10, s, " cg ms/frame", colorWhite) + yf;
+    ya = CG_CornerDebugPrint(scrPlace, farRight, yf, v10, s, (char *)" cg ms/frame", colorWhite) + yf;
     if (sv.profile.frameTime > 0.0)
     {
         s = va("(%.0f-%.0f) %.2f", sv.serverFrameTimeMin, sv.serverFrameTimeMax, sv.profile.frameTime);
-        yg = CG_CornerDebugPrint(scrPlace, farRight, ya, v10, s, " sv ms/frame", colorWhite) + ya;
+        yg = CG_CornerDebugPrint(scrPlace, farRight, ya, v10, s, (char *)" sv ms/frame", colorWhite) + ya;
         s = va("(%.2f) %.2f", 50.0 / sv.profile.wallClockTime, sv.profile.wallClockTime);
-        ya = CG_CornerDebugPrint(scrPlace, farRight, yg, v10, s, " wall clock", colorWhite) + yg;
+        ya = CG_CornerDebugPrint(scrPlace, farRight, yg, v10, s, (char *)" wall clock", colorWhite) + yg;
     }
     freeMem = (double)PMem_GetFreeAmount() / 1024.0 / 1024.0;
     if (freeMem >= 5.0)
@@ -129,28 +199,28 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
         color = colorWhiteFaded;
     }
     s = va("%3.1f", freeMem);
-    yb = CG_CornerDebugPrint(scrPlace, farRight, ya, v10, s, " free mem", colorWhite) + ya;
+    yb = CG_CornerDebugPrint(scrPlace, farRight, ya, v10, s, (char *)" free mem", colorWhite) + ya;
     if (cg_drawFPS->current.integer >= 2)
     {
         R_TrackStatistics(&rendererStats);
-        yh = CG_CornerDebugPrintCaption(scrPlace, farRight, yb, v10, "-Scene-", colorGreenFaded) + yb;
+        yh = CG_CornerDebugPrintCaption(scrPlace, farRight, yb, v10, (char *)"-Scene-", colorGreenFaded) + yb;
         s = va("%i", rendererStats.c_viewIndexes / 3);
-        yc = CG_CornerDebugPrint(scrPlace, farRight, yh, v10, s, " view tris", colorWhite) + yh;
+        yc = CG_CornerDebugPrint(scrPlace, farRight, yh, v10, s, (char *)" view tris", colorWhite) + yh;
         if (rendererStats.c_shadowIndexes)
         {
             s = va("%i", rendererStats.c_shadowIndexes / 3);
-            yc = CG_CornerDebugPrint(scrPlace, farRight, yc, v10, s, " shadow tris", colorWhite) + yc;
+            yc = CG_CornerDebugPrint(scrPlace, farRight, yc, v10, s, (char *)" shadow tris", colorWhite) + yc;
         }
         s = va("%i", rendererStats.c_indexes / 3);
-        yi = CG_CornerDebugPrint(scrPlace, farRight, yc, v10, s, " raw geo tris", colorWhite) + yc;
+        yi = CG_CornerDebugPrint(scrPlace, farRight, yc, v10, s, (char *)" raw geo tris", colorWhite) + yc;
         s = va("%i", rendererStats.c_fxIndexes / 3);
-        yj = CG_CornerDebugPrint(scrPlace, farRight, yi, v10, s, " raw fx tris", colorWhite) + yi;
+        yj = CG_CornerDebugPrint(scrPlace, farRight, yi, v10, s, (char *)" raw fx tris", colorWhite) + yi;
         s = va("%i", rendererStats.c_batches);
-        yk = CG_CornerDebugPrint(scrPlace, farRight, yj, v10, s, " prim", colorWhite) + yj;
-        yl = CG_CornerDebugPrintCaption(scrPlace, farRight, yk, v10, "-Level-", colorGreenFaded) + yk;
+        yk = CG_CornerDebugPrint(scrPlace, farRight, yj, v10, s, (char *)" prim", colorWhite) + yj;
+        yl = CG_CornerDebugPrintCaption(scrPlace, farRight, yk, v10, (char *)"-Level-", colorGreenFaded) + yk;
         s = va("%d", rendererStats.c_imageUsage.total / 0x100000);
-        yd = CG_CornerDebugPrint(scrPlace, farRight, yl, v10, s, " tex", colorWhite) + yl;
-        if (rendererStats.c_imageUsage.minspec > (int)&svs.clients[5].reliableCommandInfo[110].cmd[284])
+        yd = CG_CornerDebugPrint(scrPlace, farRight, yl, v10, s, (char *)" tex", colorWhite) + yl;
+        if (rendererStats.c_imageUsage.minspec > 0x3000000)
         {
             color = colorRed;
             s = va("(!budget is %g!) %d", 48.0, rendererStats.c_imageUsage.minspec / 0x100000);
@@ -160,8 +230,8 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
             color = colorWhite;
             s = va("%d", rendererStats.c_imageUsage.minspec / 0x100000);
         }
-        ye = CG_CornerDebugPrint(scrPlace, farRight, yd, v10, s, " min pc tex", color) + yd;
-        if ((char *)(meminfoData[35].budgetKB << 10) != &svs.clients[5].reliableCommandInfo[110].cmd[284])
+        ye = CG_CornerDebugPrint(scrPlace, farRight, yd, v10, s, (char *)" min pc tex", color) + yd;
+        if (meminfoData[35].budgetKB << 10 != 0x3000000)
             MyAssertHandler(
                 ".\\cgame\\cg_draw_debug.cpp",
                 415,
@@ -170,12 +240,12 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
                 "MAX_MINSPEC_TEXTURE_USAGE == meminfoData[TRACK_MINSPEC_IMAGES].budgetKB * 1024");
         meminfo->typeTotal[35] = 0;
         s = va("%i", meminfo->nonSwapMinSpecTotal / 0x100000);
-        yb = CG_CornerDebugPrint(scrPlace, farRight, ye, v10, s, " min pc mem", colorWhite) + ye;
+        yb = CG_CornerDebugPrint(scrPlace, farRight, ye, v10, s, (char *)" min pc mem", colorWhite) + ye;
     }
     Phys_PerformanceEndFrame();
     Phys_GetPerformance(&average, &minTime, &maxTime);
     s = va("(%i-%i) %3.1f", minTime, maxTime, average);
-    return (float)(CG_CornerDebugPrint(scrPlace, farRight, yb, v10, s, " phys ms/fr", colorWhite) + yb);
+    return (float)(CG_CornerDebugPrint(scrPlace, farRight, yb, v10, s, (char*)" phys ms/fr", colorWhite) + yb);    
 }
 
 bool __cdecl CG_Flash(int timeMs)
@@ -287,13 +357,13 @@ double __cdecl CG_DrawSnapshot(int localClientNum, float posY)
     scrPlace = &scrPlaceView[localClientNum];
     posX = cg_debugInfoCornerOffset->current.value + scrPlace->virtualViewableMax[0] - scrPlace->virtualViewableMin[0];
     v5 = (double)R_TextWidth(" server time", 0, cgMedia.smallDevFont) * 1.0;
-    posYa = CG_CornerDebugPrintCaption(scrPlace, posX, posY, v5, "-Snapshot-", colorGreenFaded) + posY;
-    v2 = va("%i", *(unsigned int *)(MEMORY[0x98F45C] + 8));
-    posYb = CG_CornerDebugPrint(scrPlace, posX, posYa, v5, v2, " server time", colorWhite) + posYa;
-    v3 = va("%i", MEMORY[0x98F450]);
-    posYc = CG_CornerDebugPrint(scrPlace, posX, posYb, v5, v3, " snap num", colorWhite) + posYb;
+    posYa = CG_CornerDebugPrintCaption(scrPlace, posX, posY, v5, (char*)"-Snapshot-", colorGreenFaded) + posY;
+    v2 = va("%i", cgArray[0].nextSnap->serverTime);
+    posYb = CG_CornerDebugPrint(scrPlace, posX, posYa, v5, v2, (char *)" server time", colorWhite) + posYa;
+    v3 = va("%i", cgArray[0].latestSnapshotNum);
+    posYc = CG_CornerDebugPrint(scrPlace, posX, posYb, v5, v3, (char *)" snap num", colorWhite) + posYb;
     str = va("%i", cgsArray[0].serverCommandSequence);
-    return (float)(CG_CornerDebugPrint(scrPlace, posX, posYc, v5, str, " cmd", colorWhite) + posYc);
+    return (float)(CG_CornerDebugPrint(scrPlace, posX, posYc, v5, str, (char *)" cmd", colorWhite) + posYc);
 }
 
 double __cdecl CG_DrawStatmon(const ScreenPlacement *scrPlace, float y, meminfo_t *meminfo)
@@ -395,8 +465,8 @@ void __cdecl CG_DrawMaterial(int localClientNum, unsigned int drawMaterialType)
             localClientNum);
     if (R_PickMaterial(
         traceMask[drawMaterialType],
-        MEMORY[0x9D8718],
-        MEMORY[0x9D8724],
+        cgArray[0].refdef.vieworg,
+        cgArray[0].refdef.viewaxis[0],
         name,
         surfaceFlags,
         contents,
@@ -433,12 +503,12 @@ void __cdecl CG_DrawDebugPlayerHealth(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9D56BC][0] && MEMORY[0x9D56BC][2])
+    if (cgArray[0].predictedPlayerState.stats[0] && cgArray[0].predictedPlayerState.stats[2])
     {
-        health = (double)MEMORY[0x9D56BC][0] / (double)MEMORY[0x9D56BC][2];
+        health = (double)cgArray[0].predictedPlayerState.stats[0] / (double)cgArray[0].predictedPlayerState.stats[2];
         v4 = health - 1.0;
         if (v4 < 0.0)
-            v5 = (double)MEMORY[0x9D56BC][0] / (double)MEMORY[0x9D56BC][2];
+            v5 = (double)cgArray[0].predictedPlayerState.stats[0] / (double)cgArray[0].predictedPlayerState.stats[2];
         else
             v5 = 1.0;
         v3 = 0.0 - health;
@@ -615,12 +685,12 @@ void __cdecl CG_DrawSoundEqOverlay(int localClientNum)
     int count; // [esp+754h] [ebp-4h]
 
     scrPlace = &scrPlaceView[localClientNum];
-    count = jpeg_mem_init();
+    count = RETURN_ZERO32();
     if (count > 0)
     {
         charHeight = 10.0;
         x = 0.0;
-        CG_DrawStringExt(scrPlace, 0.0, 82.0, "Current EQ Settings", colorWhite, 0, 1, 10.0);
+        CG_DrawStringExt(scrPlace, 0.0, 82.0, (char*)"Current EQ Settings", colorWhite, 0, 1, 10.0);
         y = (float)82.0 + (float)10.0;
         for (entchannel = 0; entchannel < count; ++entchannel)
         {
@@ -678,7 +748,7 @@ void __cdecl CG_DrawSoundOverlay(const ScreenPlacement *scrPlace)
     int SoundOverlay; // [esp+4448h] [ebp-8h]
     int cpu; // [esp+444Ch] [ebp-4h] BYREF
 
-    type = snd_drawInfo->current.integer;
+    type = (snd_overlay_type_t)snd_drawInfo->current.integer;
     SoundOverlay = SND_GetSoundOverlay(type, info, 64, &cpu);
     if (SoundOverlay > 0)
     {
@@ -759,4 +829,3 @@ void __cdecl Vec4Set(float *v, float x, float y, float z, float w)
     v[2] = z;
     v[3] = w;
 }
-

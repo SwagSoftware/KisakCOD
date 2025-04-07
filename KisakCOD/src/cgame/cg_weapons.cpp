@@ -9,6 +9,57 @@
 #include <DynEntity/DynEntity_client.h>
 #include <stringed/stringed_hooks.h>
 #include <aim_assist/aim_assist.h>
+#include <script/scr_const.h>
+#include <xanim/dobj_utils.h>
+#include <gfx_d3d/r_scene.h>
+#include <sound/snd_public.h>
+#include <qcommon/cmd.h>
+#include <server_mp/server.h>
+#include <EffectsCore/fx_system.h>
+#include <game/bullet.h>
+#include <game_mp/g_main_mp.h>
+
+const float MYLERP_START = 0.3f;
+const float MYLERP_END = 0.1f;
+
+int removeMeWhenMPStopsCrashingInHere;
+
+int g_animRateOffsets[33] =
+{
+  -1,
+  -1,
+  -1,
+  -1,
+  888,
+  -1,
+  -1,
+  896,
+  900,
+  904,
+  912,
+  920,
+  928,
+  936,
+  956,
+  932,
+  944,
+  940,
+  952,
+  948,
+  960,
+  964,
+  968,
+  972,
+  976,
+  -1,
+  980,
+  992,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1
+}; // idb
 
 bool __cdecl CG_JavelinADS(int localClientNum)
 {
@@ -220,11 +271,11 @@ XAnimTree_s *__cdecl CG_CreateWeaponViewModelXAnim(WeaponDef *weapDef)
     if (!pAnimTree)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 573, 0, "%s", "pAnimTree");
     if (!weapDef->szXAnims[1] || !*weapDef->szXAnims[1])
-        Com_Error(ERR_DROP, &byte_8704C0, weapDef->szDisplayName);
+        Com_Error(ERR_DROP, "CG_RegisterWeapon: No idle anim specified for [%s]", weapDef->szDisplayName);
     if (*weapDef->szXAnims[31] && XAnimIsLooped(pAnims, 0x1Fu))
-        Com_Error(ERR_DROP, &byte_87048C, weapDef->szXAnims[31]);
+        Com_Error(ERR_DROP, "CG_RegisterWeapon: ADS anim [%s] cannot be looping", weapDef->szXAnims[31]);
     if (*weapDef->szXAnims[32] && XAnimIsLooped(pAnims, 0x20u))
-        Com_Error(ERR_DROP, &byte_87048C, weapDef->szXAnims[32]);
+        Com_Error(ERR_DROP, "CG_RegisterWeapon: ADS anim [%s] cannot be looping", weapDef->szXAnims[32]);
     return pAnimTree;
 }
 
@@ -703,11 +754,15 @@ void __cdecl HoldBreathUpdate(int localClientNum)
     if ((cgArray[0].predictedPlayerState.weapFlags & 4) != 0)
     {
         deltaTime = (double)cgArray[0].frametime * 0.001000000047497451;
-        cgArray[0].holdBreathFrac = DiffTrack(1.0, cgArray[0].holdBreathFrac, player_breath_snd_lerp->current.value, deltaTime);
+        cgArray[0].holdBreathFrac = DiffTrack(
+            1.0,
+            cgArray[0].holdBreathFrac,
+            player_breath_snd_lerp->current.value,
+            deltaTime);
         if (cgArray[0].holdBreathTime >= 0)
         {
             if (cgArray[0].holdBreathTime > cgArray[0].holdBreathInTime)
-                CG_PlayClientSoundAlias(localClientNum, unk_A8FA14);
+                CG_PlayClientSoundAlias(localClientNum, cgMedia.playerHeartBeatSound);
         }
         else
         {
@@ -718,7 +773,7 @@ void __cdecl HoldBreathUpdate(int localClientNum)
             }
             else
             {
-                playbackId = CG_PlayClientSoundAlias(localClientNum, unk_A8FA18);
+                playbackId = CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathInSound);
                 SND_GetKnownLength(playbackId, &cgArray[0].holdBreathInTime);
                 cgArray[0].holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
             }
@@ -734,13 +789,13 @@ void __cdecl HoldBreathUpdate(int localClientNum)
             {
                 if (cgArray[0].holdBreathDelay <= 0)
                 {
-                    CG_PlayClientSoundAlias(localClientNum, unk_A8FA1C);
+                    CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathOutSound);
                     cgArray[0].holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
                 }
             }
             else
             {
-                CG_PlayClientSoundAlias(localClientNum, unk_A8FA20);
+                CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathGaspSound);
             }
         }
         cgArray[0].holdBreathTime = -1;
@@ -1271,7 +1326,7 @@ void __cdecl PlayNoteMappedSoundAliases(int localClientNum, const char *noteName
 
     if (weapDef->notetrackSoundMapKeys[0])
     {
-        noteNameSL = SL_FindLowercaseString(noteName).prev;
+        noteNameSL = SL_FindLowercaseString(noteName);
         if (noteNameSL)
         {
             for (mapIdx = 0; mapIdx < 16 && weapDef->notetrackSoundMapKeys[mapIdx]; ++mapIdx)
@@ -1317,7 +1372,7 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    cgameGlob = &cgArray;
+    cgameGlob = &cgArray[0];
     ps = &cgArray[0].predictedPlayerState;
     cgArray[0].refdef.dof.viewModelStart = 0.0;
     cgameGlob->refdef.dof.viewModelEnd = 0.0;
@@ -1709,11 +1764,11 @@ void __cdecl CalculateWeaponPostion_PositionToADS(cg_s *cgameGlob, playerState_s
 
 void __cdecl CG_NextWeapon_f()
 {
-    if (MEMORY[0x98F45C])
+    if (cgArray[0].nextSnap)
     {
         if (WeaponCycleAllowed(cgArray))
         {
-            MEMORY[0x9DF71C][35] = MEMORY[0x9D5560];
+            cgArray[0].weaponSelectTime = cgArray[0].time;
             CG_MenuShowNotify(0, 1);
             CycleWeapPrimary(0, 1, 0);
         }
@@ -1735,11 +1790,11 @@ bool __cdecl WeaponCycleAllowed(cg_s *cgameGlob)
 
 void __cdecl CG_PrevWeapon_f()
 {
-    if (MEMORY[0x98F45C])
+    if (cgArray[0].nextSnap)
     {
         if (WeaponCycleAllowed(cgArray))
         {
-            MEMORY[0x9DF71C][35] = MEMORY[0x9D5560];
+            cgArray[0].weaponSelectTime = cgArray[0].time;
             CycleWeapPrimary(0, 0, 0);
         }
     }
@@ -1747,7 +1802,7 @@ void __cdecl CG_PrevWeapon_f()
 
 void __cdecl CG_OutOfAmmoChange(int localClientNum)
 {
-    int bitNum; // [esp+0h] [ebp-14h]
+    unsigned int bitNum; // [esp+0h] [ebp-14h]
     const WeaponDef *weapDef; // [esp+10h] [ebp-4h]
 
     if (localClientNum)
@@ -1758,27 +1813,27 @@ void __cdecl CG_OutOfAmmoChange(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x98F45C] && MEMORY[0x9D5578] < 7)
+    if (cgArray[0].nextSnap && cgArray[0].predictedPlayerState.pm_type < 7)
     {
-        if (!MEMORY[0x9D565C] && MEMORY[0x9DF71C][36])
+        if (!cgArray[0].predictedPlayerState.weapon && cgArray[0].weaponLatestPrimaryIdx)
         {
-            bitNum = MEMORY[0x9DF71C][36];
-            if (!&MEMORY[0x9D5574])
+            bitNum = cgArray[0].weaponLatestPrimaryIdx;
+            if (cgArray == (cg_s *)-287036)
                 MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-            if (Com_BitCheckAssert((const unsigned int *)&MEMORY[0x9D56BC][261], bitNum, 16))
+            if (Com_BitCheckAssert(cgArray[0].predictedPlayerState.weapons, bitNum, 16))
             {
-                CG_SelectWeaponIndex(localClientNum, MEMORY[0x9DF71C][36]);
+                CG_SelectWeaponIndex(localClientNum, cgArray[0].weaponLatestPrimaryIdx);
                 return;
             }
         }
-        weapDef = BG_GetWeaponDef(MEMORY[0x9D565C]);
+        weapDef = BG_GetWeaponDef(cgArray[0].predictedPlayerState.weapon);
         if (!weapDef->cancelAutoHolsterWhenEmpty)
         {
             if (weapDef->inventoryType == WEAPINVENTORY_ALTMODE)
             {
                 if (!VerifyPlayerAltModeWeapon(localClientNum, weapDef))
                     return;
-                if (BG_WeaponAmmo((const playerState_s *)&MEMORY[0x9D5574], weapDef->altWeaponIndex))
+                if (BG_WeaponAmmo(&cgArray[0].predictedPlayerState, weapDef->altWeaponIndex))
                     goto LABEL_17;
             }
             if (!CycleWeapPrimary(localClientNum, 1, 1) && weapDef->inventoryType == WEAPINVENTORY_ALTMODE)
@@ -1790,8 +1845,6 @@ void __cdecl CG_OutOfAmmoChange(int localClientNum)
 
 char __cdecl VerifyPlayerAltModeWeapon(int localClientNum, const WeaponDef *weapDef)
 {
-    unsigned int bitNum; // [esp+0h] [ebp-Ch]
-
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3305, 0, "%s", "weapDef");
     if (weapDef->inventoryType != WEAPINVENTORY_ALTMODE)
@@ -1804,10 +1857,7 @@ char __cdecl VerifyPlayerAltModeWeapon(int localClientNum, const WeaponDef *weap
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    bitNum = weapDef->altWeaponIndex;
-    if (!&MEMORY[0x9D5574])
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-    if (Com_BitCheckAssert((const unsigned int *)&MEMORY[0x9D56BC][261], bitNum, 16))
+    if (Com_BitCheckAssert(cgArray[0].predictedPlayerState.weapons, weapDef->altWeaponIndex, 16))
         return 1;
     Com_PrintError(
         14,
@@ -1820,8 +1870,8 @@ char __cdecl VerifyPlayerAltModeWeapon(int localClientNum, const WeaponDef *weap
 
 char __cdecl CycleWeapPrimary(int localClientNum, int cycleForward, int bIgnoreEmpty)
 {
-    int v4; // [esp+0h] [ebp-24h]
-    int bitNum; // [esp+4h] [ebp-20h]
+    unsigned int weaponSelect; // [esp+0h] [ebp-24h]
+    unsigned int bitNum; // [esp+4h] [ebp-20h]
     unsigned int highestWeapIndex; // [esp+8h] [ebp-1Ch]
     int startIndex; // [esp+10h] [ebp-14h]
     int weaponIndex; // [esp+18h] [ebp-Ch]
@@ -1836,14 +1886,14 @@ char __cdecl CycleWeapPrimary(int localClientNum, int cycleForward, int bIgnoreE
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         return 0;
-    if ((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 4) == 0)
+    if ((cgArray[0].nextSnap->ps.otherFlags & 4) == 0)
         return 0;
-    if (MEMORY[0x9D5578] >= 7)
+    if (cgArray[0].predictedPlayerState.pm_type >= 7)
         return 0;
-    weaponIndex = MEMORY[0x9DF71C][34];
-    weapDef = BG_GetWeaponDef(MEMORY[0x9DF71C][34]);
+    weaponIndex = cgArray[0].weaponSelect;
+    weapDef = BG_GetWeaponDef(weaponIndex);
     if (BG_GetNumWeapons() < 2)
         return 0;
     if (weapDef->inventoryType == WEAPINVENTORY_ALTMODE)
@@ -1860,14 +1910,14 @@ char __cdecl CycleWeapPrimary(int localClientNum, int cycleForward, int bIgnoreE
     }
     else
     {
-        if (weapDef->inventoryType == WEAPINVENTORY_PRIMARY || !MEMORY[0x9DF71C][36])
+        if (weapDef->inventoryType == WEAPINVENTORY_PRIMARY || !cgArray[0].weaponLatestPrimaryIdx)
             goto LABEL_21;
-        bitNum = MEMORY[0x9DF71C][36];
-        if (!&MEMORY[0x9D5574])
+        bitNum = cgArray[0].weaponLatestPrimaryIdx;
+        if (cgArray == (cg_s *)-287036)
             MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-        if (Com_BitCheckAssert((const unsigned int *)&MEMORY[0x9D56BC][261], bitNum, 16))
+        if (Com_BitCheckAssert(cgArray[0].predictedPlayerState.weapons, bitNum, 16))
         {
-            CG_SelectWeaponIndex(localClientNum, MEMORY[0x9DF71C][36]);
+            CG_SelectWeaponIndex(localClientNum, cgArray[0].weaponLatestPrimaryIdx);
             return 1;
         }
         else
@@ -1882,10 +1932,10 @@ char __cdecl CycleWeapPrimary(int localClientNum, int cycleForward, int bIgnoreE
                 weaponIndex = (highestWeapIndex + weaponIndex + 2 * (cycleForward != 0) - 1 - 1) % highestWeapIndex + 1;
                 if (weaponIndex == startIndex)
                     break;
-                if (!&MEMORY[0x9D5574])
+                if (cgArray == (cg_s *)-287036)
                     MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-                if (Com_BitCheckAssert((const unsigned int *)&MEMORY[0x9D56BC][261], weaponIndex, 16)
-                    && (!bIgnoreEmpty || BG_WeaponAmmo((const playerState_s *)&MEMORY[0x9D5574], weaponIndex)))
+                if (Com_BitCheckAssert(cgArray[0].predictedPlayerState.weapons, weaponIndex, 16)
+                    && (!bIgnoreEmpty || BG_WeaponAmmo(&cgArray[0].predictedPlayerState, weaponIndex)))
                 {
                     weapDefa = BG_GetWeaponDef(weaponIndex);
                     if (weapDefa->inventoryType != WEAPINVENTORY_ALTMODE
@@ -1897,10 +1947,10 @@ char __cdecl CycleWeapPrimary(int localClientNum, int cycleForward, int bIgnoreE
                     }
                 }
             }
-            v4 = MEMORY[0x9DF71C][34];
-            if (!&MEMORY[0x9D5574])
+            weaponSelect = cgArray[0].weaponSelect;
+            if (cgArray == (cg_s *)-287036)
                 MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-            if (!Com_BitCheckAssert((const unsigned int *)&MEMORY[0x9D56BC][261], v4, 16))
+            if (!Com_BitCheckAssert(cgArray[0].predictedPlayerState.weapons, weaponSelect, 16))
                 CG_SelectWeaponIndex(localClientNum, 0);
             return 0;
         }
@@ -1909,7 +1959,7 @@ char __cdecl CycleWeapPrimary(int localClientNum, int cycleForward, int bIgnoreE
 
 unsigned int __cdecl CG_AltWeaponToggleIndex(int localClientNum, const cg_s *cgameGlob)
 {
-    playerState_s *ps; // [esp+0h] [ebp-Ch]
+    const playerState_s *ps; // [esp+0h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+4h] [ebp-8h]
     int newPrimaryIdx; // [esp+8h] [ebp-4h]
 
@@ -1973,7 +2023,8 @@ int __cdecl NextWeapInCycle(
 
 void __cdecl CG_ActionSlotDown_f()
 {
-    int v0; // [esp+0h] [ebp-24h]
+    ActionSlotType v0; // [esp+0h] [ebp-24h]
+    unsigned int bitNum; // [esp+4h] [ebp-20h]
     int slot; // [esp+10h] [ebp-14h] BYREF
     unsigned int weapon; // [esp+14h] [ebp-10h]
     int localClientNum; // [esp+18h] [ebp-Ch]
@@ -1981,18 +2032,32 @@ void __cdecl CG_ActionSlotDown_f()
     playerState_s *ps; // [esp+20h] [ebp-4h]
 
     localClientNum = 0;
-    if (ActionSlotUsageAllowed(cgArray) && MEMORY[0x9D5560] - MEMORY[0xA8E91C][1] >= 250 && ActionParms(&slot))
+    if (ActionSlotUsageAllowed(cgArray) && cgArray[0].time - cgArray[0].lastActionSlotTime >= 250 && ActionParms(&slot))
     {
-        ps = (playerState_s *)MEMORY[0x9D5574];
+        ps = &cgArray[0].predictedPlayerState;
         didSomething = 0;
-        v0 = *(unsigned int *)&MEMORY[0x9D5574][4 * slot + 1536];
+        v0 = cgArray[0].predictedPlayerState.actionSlotType[slot];
         switch (v0)
         {
-        case 1:
+        case ACTIONSLOTTYPE_SPECIFYWEAPON:
             weapon = ps->actionSlotParam[slot].specifyWeapon.index;
-            if (weapon == MEMORY[0x9DF71C][34])
+            if (weapon == cgArray[0].weaponSelect)
             {
-                didSomething = CycleWeapPrimary(localClientNum, 1, 0);
+                if (weapon == cgArray[0].weaponLatestPrimaryIdx)
+                    goto LABEL_15;
+                bitNum = cgArray[0].weaponLatestPrimaryIdx;
+                if (!ps)
+                    MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+                if (!Com_BitCheckAssert(ps->weapons, bitNum, 16))
+                {
+                LABEL_15:
+                    didSomething = CycleWeapPrimary(localClientNum, 1, 0);
+                }
+                else
+                {
+                    CG_SelectWeaponIndex(localClientNum, cgArray[0].weaponLatestPrimaryIdx);
+                    didSomething = 1;
+                }
             }
             else
             {
@@ -2005,20 +2070,20 @@ void __cdecl CG_ActionSlotDown_f()
                 }
             }
             break;
-        case 2:
+        case ACTIONSLOTTYPE_ALTWEAPONTOGGLE:
             didSomething = ToggleWeaponAltMode(localClientNum);
             break;
-        case 3:
-            MEMORY[0xA8E91C][0] |= 0x40000u;
+        case ACTIONSLOTTYPE_NIGHTVISION:
+            cgArray[0].extraButtons |= 0x40000u;
             didSomething = 1;
             break;
         }
-        MEMORY[0x9DF8F0][1] = MEMORY[0x9D5560];
+        cgArray[0].ammoFadeTime = cgArray[0].time;
         if (didSomething)
         {
-            MEMORY[0xA8E91C][1] = MEMORY[0x9D5560];
+            cgArray[0].lastActionSlotTime = cgArray[0].time;
             if ((ps->eFlags & 0x300) != 0 && ps->actionSlotType[slot] == ACTIONSLOTTYPE_SPECIFYWEAPON)
-                MEMORY[0xA8E91C][0] |= 0x20u;
+                cgArray[0].extraButtons |= 0x20u;
         }
     }
 }
@@ -2035,8 +2100,11 @@ char __cdecl ToggleWeaponAltMode(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((MEMORY[0x9D5660] == 1 || MEMORY[0x9D5660] == 2 || MEMORY[0x9D5660] == 3 || MEMORY[0x9D5660] == 4)
-        && MEMORY[0x9D5660] != 1)
+    if ((cgArray[0].predictedPlayerState.weaponstate == 1
+        || cgArray[0].predictedPlayerState.weaponstate == 2
+        || cgArray[0].predictedPlayerState.weaponstate == 3
+        || cgArray[0].predictedPlayerState.weaponstate == 4)
+        && cgArray[0].predictedPlayerState.weaponstate != 1)
     {
         return 0;
     }
@@ -2104,6 +2172,7 @@ void __cdecl CG_EjectWeaponBrass(int localClientNum, const entityState_s *ent, i
     const FxEffectDef *viewShellEjectEffect; // [esp+4h] [ebp-24h]
     const FxEffectDef *viewLastShotEjectEffect; // [esp+8h] [ebp-20h]
     bool v6; // [esp+Ch] [ebp-1Ch]
+    snapshot_s *nextSnap; // [esp+10h] [ebp-18h]
     const FxEffectDef *fxDef; // [esp+20h] [ebp-8h]
     const WeaponDef *weaponDef; // [esp+24h] [ebp-4h]
 
@@ -2119,7 +2188,8 @@ void __cdecl CG_EjectWeaponBrass(int localClientNum, const entityState_s *ent, i
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            v6 = (*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && ent->number == *(unsigned int *)(MEMORY[0x98F45C] + 232);
+            nextSnap = cgArray[0].nextSnap;
+            v6 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
             weaponDef = BG_GetWeaponDef(ent->weapon);
             if (weaponDef->viewLastShotEjectEffect && weaponDef->worldLastShotEjectEffect && event == 27)
             {
@@ -2148,7 +2218,7 @@ void __cdecl CG_EjectWeaponBrass(int localClientNum, const entityState_s *ent, i
         }
         else
         {
-            Com_Error(ERR_DROP, &byte_870904);
+            Com_Error(ERR_DROP, "CG_EjectWeaponBrass: ent->weapon >= BG_GetNumWeapons()");
         }
     }
 }
@@ -2162,6 +2232,7 @@ void __cdecl CG_FireWeapon(
     const playerState_s *ps)
 {
     bool v7; // [esp+8h] [ebp-40h]
+    snapshot_s *nextSnap; // [esp+Ch] [ebp-3Ch]
     const weaponInfo_s *weapInfo; // [esp+14h] [ebp-34h]
     snd_alias_list_t *firesound; // [esp+18h] [ebp-30h]
     DObj_s *obj; // [esp+1Ch] [ebp-2Ch]
@@ -2203,7 +2274,8 @@ void __cdecl CG_FireWeapon(
                     "(localClientNum == 0)",
                     localClientNum);
             cgameGlob = cgArray;
-            v7 = (*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && ent->number == *(unsigned int *)(MEMORY[0x98F45C] + 232);
+            nextSnap = cgArray[0].nextSnap;
+            v7 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
             isPlayer = v7;
             if (sv_clientSideBullets->current.enabled)
                 DrawBulletImpacts(localClientNum, cent, weaponDef, tagName, ps);
@@ -2270,7 +2342,7 @@ void __cdecl CG_FireWeapon(
         }
         else
         {
-            Com_Error(ERR_DROP, &byte_87093C);
+            Com_Error(ERR_DROP, "CG_FireWeapon: weapon >= BG_GetNumWeapons()");
         }
     }
 }
@@ -2287,6 +2359,7 @@ void __cdecl DrawBulletImpacts(
     float v7; // [esp+24h] [ebp-134h]
     float v8; // [esp+28h] [ebp-130h]
     float v10; // [esp+40h] [ebp-118h]
+    snapshot_s *nextSnap; // [esp+48h] [ebp-110h]
     float velocity[3]; // [esp+4Ch] [ebp-10Ch] BYREF
     unsigned __int8 boneIndex; // [esp+5Bh] [ebp-FDh] BYREF
     int weaponNum; // [esp+5Ch] [ebp-FCh]
@@ -2319,7 +2392,8 @@ void __cdecl DrawBulletImpacts(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if ((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && ent->nextState.number == *(unsigned int *)(MEMORY[0x98F45C] + 232))
+    nextSnap = cgArray[0].nextSnap;
+    if ((nextSnap->ps.otherFlags & 6) != 0 && ent->nextState.number == nextSnap->ps.clientNum)
     {
         weaponNum = BG_GetViewmodelWeaponIndex(ps);
         dobjNumber = CG_WeaponDObjHandle(weaponNum);
@@ -2806,7 +2880,7 @@ char __cdecl BulletTrace(
             lastSurfaceType,
             29);
     Com_Memset((unsigned int *)br, 0, 68);
-    CG_LocationalTrace(&br->trace, bp->start, bp->end, bp->ignoreEntIndex, (int)&sv.svEntities[342].clusternums[2] + 1);
+    CG_LocationalTrace(&br->trace, (float*)bp->start, (float *)bp->end, bp->ignoreEntIndex, (int)&sv.svEntities[342].clusternums[2] + 1);
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
     hitEntId = Trace_GetEntityHitId(&br->trace);
@@ -2818,7 +2892,7 @@ char __cdecl BulletTrace(
     if (Entity)
     {
         if ((Entity->nextState.eType == 1 || Entity->nextState.eType == 2) && !br->trace.surfaceFlags)
-            br->trace.surfaceFlags = (int)&loc_6FFFFC + 4;
+            br->trace.surfaceFlags = 0x700000;
         br->ignoreHitEnt = ShouldIgnoreHitEntity(attacker->nextState.number, hitEntId);
     }
     br->depthSurfaceType = (br->trace.surfaceFlags & 0x1F00000) >> 20;
@@ -3136,6 +3210,7 @@ double __cdecl CalcTracerFinalScale(float tracerScaleDistRange, float dist, floa
 
 cg_s *__cdecl CG_GetLocalClientGlobalsForEnt(int localClientNum, int entityNum)
 {
+    snapshot_s *nextSnap; // [esp+4h] [ebp-Ch]
     int clientIndex; // [esp+Ch] [ebp-4h]
 
     for (clientIndex = 0; clientIndex < 1; ++clientIndex)
@@ -3150,7 +3225,8 @@ cg_s *__cdecl CG_GetLocalClientGlobalsForEnt(int localClientNum, int entityNum)
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     clientIndex);
-            if ((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && entityNum == *(unsigned int *)(MEMORY[0x98F45C] + 232))
+            nextSnap = cgArray[0].nextSnap;
+            if ((nextSnap->ps.otherFlags & 6) != 0 && entityNum == nextSnap->ps.clientNum)
                 return cgArray;
         }
     }
@@ -3557,7 +3633,7 @@ void __cdecl CG_BulletHitEvent_Internal(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    time = MEMORY[0x9D5560];
+    time = cgArray[0].time;
     if (fx && (*normal != 0.0 || normal[1] != 0.0 || normal[2] != 0.0))
     {
         axis[0][0] = *normal;
@@ -3634,7 +3710,7 @@ void __cdecl WhizbySound(int localClientNum, const float *start, const float *en
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    viewOrg = MEMORY[0x9D8718];
+    viewOrg = cgArray[0].refdef.vieworg;
     Vec3Sub(end, start, delta);
     Vec3NormalizeTo(delta, dir);
     dist = Vec3Dot(delta, dir);
@@ -3655,6 +3731,8 @@ void __cdecl WhizbySound(int localClientNum, const float *start, const float *en
 
 bool __cdecl ShouldSpawnTracer(int localClientNum, int sourceEntityNum)
 {
+    snapshot_s *nextSnap; // [esp+8h] [ebp-8h]
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
@@ -3665,10 +3743,14 @@ bool __cdecl ShouldSpawnTracer(int localClientNum, int sourceEntityNum)
             localClientNum);
     if (cg_tracerChance->current.value <= 0.0)
         return 0;
-    if ((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && sourceEntityNum == *(unsigned int *)(MEMORY[0x98F45C] + 232))
+    nextSnap = cgArray[0].nextSnap;
+    if ((nextSnap->ps.otherFlags & 6) != 0 && sourceEntityNum == nextSnap->ps.clientNum)
         return 0;
-    if (CG_PlayerUsingScopedTurret(localClientNum) && MEMORY[0x9D56BC][277] == sourceEntityNum)
+    if (CG_PlayerUsingScopedTurret(localClientNum)
+        && cgArray[0].predictedPlayerState.viewlocked_entNum == sourceEntityNum)
+    {
         return 0;
+    }
     return cg_tracerChance->current.value * 32768.0 > (double)rand();
 }
 
@@ -3723,6 +3805,7 @@ void __cdecl CG_BulletHitClientEvent(
 void __cdecl CG_MeleeBloodEvent(int localClientNum, const centity_s *cent)
 {
     int weapon; // [esp+4h] [ebp-18h]
+    snapshot_s *nextSnap; // [esp+8h] [ebp-14h]
     unsigned int dobjHandle; // [esp+10h] [ebp-Ch]
 
     if (!cent)
@@ -3735,7 +3818,8 @@ void __cdecl CG_MeleeBloodEvent(int localClientNum, const centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) == 0 || cent->nextState.number != *(unsigned int *)(MEMORY[0x98F45C] + 232))
+    nextSnap = cgArray[0].nextSnap;
+    if ((nextSnap->ps.otherFlags & 6) == 0 || cent->nextState.number != nextSnap->ps.clientNum)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4594, 0, "%s", "isPlayer");
     dobjHandle = CG_WeaponDObjHandle(cent->nextState.weapon);
     weapon = cent->nextState.weapon;
@@ -3761,7 +3845,7 @@ void __cdecl CG_SetupWeaponDef(int localClientNum)
     char v1; // [esp+3h] [ebp-2225h]
     _BYTE *v2; // [esp+8h] [ebp-2220h]
     char *v3; // [esp+Ch] [ebp-221Ch]
-    unsigned int dst[129]; // [esp+10h] [ebp-2218h] BYREF
+    _DWORD dst[129]; // [esp+10h] [ebp-2218h] BYREF
     char *ConfigString; // [esp+214h] [ebp-2014h]
     int iNumFiles; // [esp+218h] [ebp-2010h]
     _BYTE *v7; // [esp+21Ch] [ebp-200Ch]
@@ -3778,7 +3862,7 @@ void __cdecl CG_SetupWeaponDef(int localClientNum)
         *v2++ = *v3++;
     } while (v1);
     v7 = v8;
-    dst[iNumFiles++] = v8;
+    dst[iNumFiles++] = (_DWORD)v8;
     while (*v7)
     {
         if (*v7 == 32)
@@ -3788,7 +3872,7 @@ void __cdecl CG_SetupWeaponDef(int localClientNum)
             {
                 if (iNumFiles >= 127)
                     break;
-                dst[iNumFiles++] = v7;
+                dst[iNumFiles++] = (_DWORD)v7;
             }
         }
         else
@@ -3829,9 +3913,9 @@ unsigned int __cdecl ValidLatestPrimaryWeapIdx(unsigned int weaponIndex)
         return weaponIndexa;
 }
 
-void __cdecl CG_SelectWeaponIndex(int localClientNum, int weaponIndex)
+void __cdecl CG_SelectWeaponIndex(int localClientNum, unsigned int weaponIndex)
 {
-    bool v2; // [esp+0h] [ebp-10h]
+    BOOL v2; // [esp+0h] [ebp-10h]
     unsigned int validLatest; // [esp+Ch] [ebp-4h]
 
     if (localClientNum)
@@ -3842,14 +3926,14 @@ void __cdecl CG_SelectWeaponIndex(int localClientNum, int weaponIndex)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    MEMORY[0x9DF71C][35] = MEMORY[0x9D5560];
-    if (MEMORY[0x9DF71C][34] != weaponIndex)
+    cgArray[0].weaponSelectTime = cgArray[0].time;
+    if (cgArray[0].weaponSelect != weaponIndex)
     {
-        v2 = weaponIndex && weaponIndex == BG_GetWeaponDef(MEMORY[0x9DF71C][34])->altWeaponIndex;
+        v2 = weaponIndex && weaponIndex == BG_GetWeaponDef(cgArray[0].weaponSelect)->altWeaponIndex;
         validLatest = ValidLatestPrimaryWeapIdx(weaponIndex);
         if (validLatest)
-            MEMORY[0x9DF71C][36] = validLatest;
-        MEMORY[0x9DF71C][34] = weaponIndex;
+            cgArray[0].weaponLatestPrimaryIdx = validLatest;
+        cgArray[0].weaponSelect = weaponIndex;
         CG_MenuShowNotify(localClientNum, 1);
         if (!v2)
             CL_SetADS(localClientNum, 0);
@@ -3868,7 +3952,7 @@ char __cdecl CG_ScopeIsOverlayed(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (client_state[0] < 9)
+    if (clientUIActives[0].connectionState < CA_ACTIVE)
         return 0;
     if (CG_PlayerUsingScopedTurret(localClientNum))
         return 1;
@@ -3910,63 +3994,48 @@ bool __cdecl CG_PlayerUsingScopedTurret(int localClientNum)
     return weapIdxTurret && BG_GetWeaponDef(weapIdxTurret)->overlayMaterial != 0;
 }
 
-char __cdecl Bullet_Trace(
+char __cdecl BulletTrace(
+    int localClientNum,
     const BulletFireParams *bp,
     const WeaponDef *weapDef,
-    gentity_s *attacker,
+    const centity_s *attacker,
     BulletTraceResults *br,
     unsigned int lastSurfaceType)
 {
-    gentity_s *v7; // [esp+Ch] [ebp-10h]
+    centity_s *Entity; // [esp+Ch] [ebp-10h]
     unsigned __int16 hitEntId; // [esp+18h] [ebp-4h]
 
     if (!bp)
-        MyAssertHandler(".\\game\\bullet.cpp", 427, 0, "%s", "bp");
+        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2301, 0, "%s", "bp");
     if (!weapDef)
-        MyAssertHandler(".\\game\\bullet.cpp", 428, 0, "%s", "weapDef");
+        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2302, 0, "%s", "weapDef");
     if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 429, 0, "%s", "attacker");
+        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2303, 0, "%s", "attacker");
     if (!br)
-        MyAssertHandler(".\\game\\bullet.cpp", 430, 0, "%s", "br");
+        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2304, 0, "%s", "br");
     if (lastSurfaceType >= 0x1D)
         MyAssertHandler(
-            ".\\game\\bullet.cpp",
-            431,
+            ".\\cgame\\cg_weapons.cpp",
+            2305,
             0,
             "lastSurfaceType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
             lastSurfaceType,
             29);
     Com_Memset((unsigned int *)br, 0, 68);
-    if (weapDef->bRifleBullet)
-        G_LocationalTraceAllowChildren(
-            &br->trace,
-            bp->start,
-            bp->end,
-            bp->ignoreEntIndex,
-            (int)&sv.svEntities[342].clusternums[2] + 1,
-            riflePriorityMap);
-    else
-        G_LocationalTraceAllowChildren(
-            &br->trace,
-            bp->start,
-            bp->end,
-            bp->ignoreEntIndex,
-            (int)&sv.svEntities[342].clusternums[2] + 1,
-            bulletPriorityMap);
+    CG_LocationalTrace(&br->trace, (float*)bp->start, (float*)bp->end, bp->ignoreEntIndex, (int)&sv.svEntities[342].clusternums[2] + 1);
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
     hitEntId = Trace_GetEntityHitId(&br->trace);
     if (hitEntId == 1022)
-        v7 = 0;
+        Entity = 0;
     else
-        v7 = &g_entities[hitEntId];
-    br->hitEnt = v7;
+        Entity = CG_GetEntity(localClientNum, hitEntId);
     Vec3Lerp(bp->start, bp->end, br->trace.fraction, br->hitPos);
-    if (br->hitEnt)
+    if (Entity)
     {
-        if ((br->hitEnt->s.eType == 1 || br->hitEnt->s.eType == 2) && !br->trace.surfaceFlags)
-            br->trace.surfaceFlags = (int)&loc_6FFFFC + 4;
-        br->ignoreHitEnt = Bullet_IgnoreHitEntity(bp, br, attacker);
+        if ((Entity->nextState.eType == 1 || Entity->nextState.eType == 2) && !br->trace.surfaceFlags)
+            br->trace.surfaceFlags = 0x700000;
+        br->ignoreHitEnt = ShouldIgnoreHitEntity(attacker->nextState.number, hitEntId);
     }
     br->depthSurfaceType = (br->trace.surfaceFlags & 0x1F00000) >> 20;
     if ((br->trace.surfaceFlags & 0x100) != 0)
@@ -3980,4 +4049,3 @@ char __cdecl Bullet_Trace(
     }
     return 1;
 }
-

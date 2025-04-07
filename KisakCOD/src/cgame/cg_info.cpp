@@ -1,6 +1,8 @@
 #include "cg_local.h"
 #include <sound/snd_public.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <ui/ui.h>
+#include <client/client.h>
 
 void __cdecl CG_LoadingString(int localClientNum, const char *s)
 {
@@ -21,6 +23,11 @@ void __cdecl CG_LoadingString(int localClientNum, const char *s)
         Com_Printf(14, v2);
     }
     SCR_UpdateLoadScreen();
+}
+
+BOOL __cdecl CG_IsShowingProgress_LoadObj()
+{
+    return com_expectedHunkUsage > 0;
 }
 
 void __cdecl CG_DrawInformation(int localClientNum)

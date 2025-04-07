@@ -1,6 +1,8 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <qcommon/mem_track.h>
+#include <client/client.h>
+#include <ui/ui.h>
 
 struct CenterPrint // sizeof=0x408
 {                                       // ...
@@ -119,7 +121,7 @@ void __cdecl CG_Draw2D(int localClientNum)
     bool drawHud; // [esp+37h] [ebp-Dh]
     int isScoreboardVisible; // [esp+38h] [ebp-Ch]
     int chatOverScoreboard; // [esp+3Ch] [ebp-8h]
-    const playerState_s *ps; // [esp+40h] [ebp-4h]
+    playerState_s *ps; // [esp+40h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -129,7 +131,7 @@ void __cdecl CG_Draw2D(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (!MEMORY[0x98F444] && cg_draw2D->current.enabled)
+    if (cgArray[0].cubemapShot == CUBEMAPSHOT_NONE && cg_draw2D->current.enabled)
     {
         if (debugOverlay->current.integer == 1)
         {
@@ -144,15 +146,15 @@ void __cdecl CG_Draw2D(int localClientNum)
         else
         {
             drawHud = CG_ShouldDrawHud(localClientNum);
-            ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
-            if (*(unsigned int *)(MEMORY[0x98F45C] + 16) == 5)
+            ps = &cgArray[0].nextSnap->ps;
+            if (cgArray[0].nextSnap->ps.pm_type == 5)
             {
                 DrawIntermission(localClientNum);
                 CG_DrawSay(localClientNum);
             }
             else
             {
-                Dvar_SetBool((dvar_s *)ui_showEndOfGame, 0);
+                Dvar_SetBool(ui_showEndOfGame, 0);
                 CG_CompassUpdateActors(localClientNum);
                 chatOverScoreboard = CG_IsScoreboardDisplayed(localClientNum);
                 if (ps->pm_type == 4)

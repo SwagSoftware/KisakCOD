@@ -594,6 +594,8 @@ extern const dvar_t *onlineunreankedgameandhost;
 extern const dvar_t *cl_freelook;
 extern const dvar_t *cl_shownet;
 
+extern BOOL g_waitingForServer;
+
 #define MAX_CLIENTS 1 // LWSS Add
 
 extern clientConnection_t clientConnections[MAX_CLIENTS];

@@ -431,3 +431,40 @@ char *__cdecl GetExpressionResultString(int localClientNum, const statement_s *s
 Operand *__cdecl EvaluateExpression(int localClientNum, const statement_s *statement, Operand *result);
 bool __cdecl IsExpressionTrue(int localClientNum, const statement_s *statement);
 double __cdecl GetExpressionFloat(int localClientNum, const statement_s *statement);
+
+
+
+// ui_atoms
+void __cdecl UI_DrawHandlePic(
+    const ScreenPlacement *scrPlace,
+    float x,
+    float y,
+    float w,
+    float h,
+    int horzAlign,
+    int vertAlign,
+    const float *color,
+    Material *material);
+void __cdecl UI_DrawLoadBar(
+    const ScreenPlacement *scrPlace,
+    float x,
+    float y,
+    float w,
+    float h,
+    int horzAlign,
+    int vertAlign,
+    const float *color,
+    Material *material);
+double __cdecl UI_LoadBarProgress_FastFile();
+void __cdecl UI_FillRectPhysical(float x, float y, float width, float height, const float *color);
+void __cdecl UI_FillRect(
+    const ScreenPlacement *scrPlace,
+    float x,
+    float y,
+    float width,
+    float height,
+    int horzAlign,
+    int vertAlign,
+    const float *color);
+
+extern int com_expectedHunkUsage;

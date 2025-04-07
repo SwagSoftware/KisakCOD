@@ -574,3 +574,5 @@ extern const dvar_t *ui_uav_client;
 extern const dvar_t *ui_borderLowLightScale;
 extern const dvar_t *ui_partyFull;
 extern const dvar_t *ui_customModeName;
+
+extern sharedUiInfo_t sharedUiInfo;

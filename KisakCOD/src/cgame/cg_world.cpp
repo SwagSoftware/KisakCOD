@@ -3,6 +3,9 @@
 
 #include <client_mp/client_mp.h>
 #include <qcommon/threads.h>
+#include <xanim/dobj.h>
+#include <DynEntity/DynEntity_client.h>
+#include <xanim/dobj_utils.h>
 
 bool __cdecl CG_IsEntityLinked(int localClientNum, unsigned int entIndex)
 {
@@ -577,7 +580,7 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, unsigned int entIndex, 
     float absMaxs[3]; // [esp+1Ch] [ebp-44h] BYREF
     const centity_s *cent; // [esp+28h] [ebp-38h]
     int localClientNum; // [esp+2Ch] [ebp-34h]
-    entityState_s *p_nextState; // [esp+30h] [ebp-30h]
+    const entityState_s *p_nextState; // [esp+30h] [ebp-30h]
     float angles[3]; // [esp+34h] [ebp-2Ch] BYREF
     float maxs[3]; // [esp+40h] [ebp-20h] BYREF
     unsigned int cmodel; // [esp+4Ch] [ebp-14h]
@@ -805,8 +808,7 @@ void __cdecl CG_PointTraceToEntities_r(
 void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entIndex, trace_t *results)
 {
     __int64 v3; // [esp-Ch] [ebp-C4h]
-    __int64 v4; // [esp-8h] [ebp-C0h]
-    DObj_s *v5; // [esp+8h] [ebp-B0h]
+    DObj_s *v4; // [esp+8h] [ebp-B0h]
     unsigned __int16 number; // [esp+Eh] [ebp-AAh]
     float mins[3]; // [esp+18h] [ebp-A0h] BYREF
     float angles[3]; // [esp+24h] [ebp-94h] BYREF
@@ -822,7 +824,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
     float absMaxs[3]; // [esp+84h] [ebp-34h] BYREF
     const centity_s *cent; // [esp+90h] [ebp-28h]
     int localClientNum; // [esp+94h] [ebp-24h]
-    entityState_s *p_nextState; // [esp+98h] [ebp-20h]
+    const entityState_s *p_nextState; // [esp+98h] [ebp-20h]
     int partBits[4]; // [esp+9Ch] [ebp-1Ch] BYREF
     float absMins[3]; // [esp+ACh] [ebp-Ch] BYREF
 
@@ -844,10 +846,10 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
     if (entIndex == clip->ignoreEntParams->baseEntity)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 516, 0, "%s", "entIndex != clip->ignoreEntParams->baseEntity");
     if (clip->bLocational)
-        v5 = CG_LocationalTraceDObj(localClientNum, entIndex);
+        v4 = CG_LocationalTraceDObj(localClientNum, entIndex);
     else
-        v5 = 0;
-    dobj = v5;
+        v4 = 0;
+    dobj = v4;
     if (p_nextState->solid || dobj)
     {
         if (dobj)
@@ -874,9 +876,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
                         objTrace.fraction = results->fraction;
                         DObjGeomTracelinePartBits(dobj, clip->contentmask, partBits);
                         CG_LocationTraceDobjCalcPose(dobj, &cent->pose, partBits);
-                        HIDWORD(v4) = clip->contentmask;
-                        LODWORD(v4) = localEnd;
-                        DObjGeomTraceline(dobj, localStart, v4, &objTrace);
+                        DObjGeomTraceline(dobj, localStart, localEnd, clip->contentmask, &objTrace);
                         if (results->fraction > (double)objTrace.fraction)
                         {
                             results->fraction = objTrace.fraction;
@@ -962,9 +962,9 @@ void __cdecl CG_LocationTraceDobjCalcPose(const DObj_s *dobj, const cpose_t *pos
         MyAssertHandler(".\\cgame\\cg_world.cpp", 159, 0, "%s", "dobj");
     if (!pose)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 160, 0, "%s", "pose");
-    DObjLock(dobj);
+    DObjLock((DObj_s * )dobj);
     CG_DObjCalcPose(pose, dobj, partBits);
-    DObjUnlock(dobj);
+    DObjUnlock((DObj_s * )dobj);
     if (!DObjSkelAreBonesUpToDate(dobj, partBits))
         MyAssertHandler(".\\cgame\\cg_world.cpp", 172, 0, "%s", "DObjSkelAreBonesUpToDate( dobj, partBits )");
 }
@@ -1054,7 +1054,7 @@ void __cdecl CG_TraceCapsule(
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\cgame\\cg_world.cpp", 909, 0, "%s", "Sys_IsMainThread()");
     //Profile_Begin(52);
-    CG_Trace(results, start, mins, maxs, end, passEntityNum, contentMask, 0, 0);
+    CG_Trace(results, (float*)start, (float*)mins, (float*)maxs, (float*)end, passEntityNum, contentMask, 0, 0);
     //Profile_EndInternal(0);
 }
 

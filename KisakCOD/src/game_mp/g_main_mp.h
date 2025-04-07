@@ -306,3 +306,15 @@ extern const dvar_t *g_motd;
 extern const dvar_t *g_TeamColor_EnemyTeam;
 extern const dvar_t *g_debugDamage;
 extern const dvar_t *g_clonePlayerMaxVelocity;
+
+extern gentity_s g_entities[1024];
+extern level_locals_t level;
+
+inline BOOL __cdecl OnSameTeam(gentity_s *ent1, gentity_s *ent2)
+{
+    if (!ent1->client || !ent2->client)
+        return 0;
+    if (ent1->client->sess.cs.team)
+        return ent1->client->sess.cs.team == ent2->client->sess.cs.team;
+    return 0;
+}

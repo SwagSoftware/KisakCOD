@@ -1,49 +1,61 @@
 #include "bullet.h"
 
 #include <cgame_mp/cg_local_mp.h>
+#include <game_mp/g_main_mp.h>
+#include "game_public.h"
+#include <game_mp/g_public_mp.h>
+#include <client/client.h>
+#include <server_mp/server.h>
+#include <game_mp/g_utils_mp.h>
 
-char __cdecl BulletTrace(
-    int localClientNum,
+unsigned __int8 bulletPriorityMap[] = { 1u, 3u, 3u, 3u }; // idb
+unsigned __int8 riflePriorityMap[19] = { 1u, 9u, 9u, 9u, 8u, 7u, 6u, 6u, 6u, 6u, 5u, 5u, 4u, 4u, 4u, 4u, 3u, 3u, 0u }; // idb
+
+char __cdecl Bullet_Trace(
     const BulletFireParams *bp,
     const WeaponDef *weapDef,
-    const centity_s *attacker,
+    gentity_s *attacker,
     BulletTraceResults *br,
     unsigned int lastSurfaceType)
 {
-    centity_s *Entity; // [esp+Ch] [ebp-10h]
+    gentity_s *v7; // [esp+Ch] [ebp-10h]
     unsigned __int16 hitEntId; // [esp+18h] [ebp-4h]
 
     if (!bp)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2301, 0, "%s", "bp");
+        MyAssertHandler(".\\game\\bullet.cpp", 427, 0, "%s", "bp");
     if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2302, 0, "%s", "weapDef");
+        MyAssertHandler(".\\game\\bullet.cpp", 428, 0, "%s", "weapDef");
     if (!attacker)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2303, 0, "%s", "attacker");
+        MyAssertHandler(".\\game\\bullet.cpp", 429, 0, "%s", "attacker");
     if (!br)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2304, 0, "%s", "br");
+        MyAssertHandler(".\\game\\bullet.cpp", 430, 0, "%s", "br");
     if (lastSurfaceType >= 0x1D)
         MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            2305,
+            ".\\game\\bullet.cpp",
+            431,
             0,
             "lastSurfaceType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
             lastSurfaceType,
             29);
     Com_Memset((unsigned int *)br, 0, 68);
-    CG_LocationalTrace(&br->trace, bp->start, bp->end, bp->ignoreEntIndex, (int)&sv.svEntities[342].clusternums[2] + 1);
+    if (weapDef->bRifleBullet)
+        G_LocationalTraceAllowChildren(&br->trace, (float*)bp->start, (float *)bp->end, bp->ignoreEntIndex, 0x2806831, riflePriorityMap);
+    else
+        G_LocationalTraceAllowChildren(&br->trace, (float *)bp->start, (float *)bp->end, bp->ignoreEntIndex, 0x2806831, bulletPriorityMap);
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
     hitEntId = Trace_GetEntityHitId(&br->trace);
     if (hitEntId == 1022)
-        Entity = 0;
+        v7 = 0;
     else
-        Entity = CG_GetEntity(localClientNum, hitEntId);
+        v7 = &g_entities[hitEntId];
+    br->hitEnt = v7;
     Vec3Lerp(bp->start, bp->end, br->trace.fraction, br->hitPos);
-    if (Entity)
+    if (br->hitEnt)
     {
-        if ((Entity->nextState.eType == 1 || Entity->nextState.eType == 2) && !br->trace.surfaceFlags)
-            br->trace.surfaceFlags = (int)&loc_6FFFFC + 4;
-        br->ignoreHitEnt = ShouldIgnoreHitEntity(attacker->nextState.number, hitEntId);
+        if ((br->hitEnt->s.eType == 1 || br->hitEnt->s.eType == 2) && !br->trace.surfaceFlags)
+            br->trace.surfaceFlags = 0x700000;
+        br->ignoreHitEnt = Bullet_IgnoreHitEntity(bp, br, attacker);
     }
     br->depthSurfaceType = (br->trace.surfaceFlags & 0x1F00000) >> 20;
     if ((br->trace.surfaceFlags & 0x100) != 0)
@@ -58,7 +70,7 @@ char __cdecl BulletTrace(
     return 1;
 }
 
-double __cdecl G_GoodRandomFloat(int *idum)
+float __cdecl G_GoodRandomFloat(int *idum)
 {
     double v4; // [esp+Ch] [ebp-90h]
     int j; // [esp+14h] [ebp-88h]
@@ -76,12 +88,11 @@ double __cdecl G_GoodRandomFloat(int *idum)
     *idum = 16807 * (*idum % 127773) - 2836 * (*idum / 127773);
     if (*idum < 0)
         *idum += 0x7FFFFFFF;
-    v4 = (double)iv[(int)(((unsigned int)&svs.clients[29].netchanOutgoingBuffer[109727] & (iv[0] >> 31)) + iv[0]) >> 26]
-        * 4.656612875245797e-10;
+    v4 = (double)iv[iv[0] / 0x4000000] * 4.656612875245797e-10;
     if (0.99999988 - v4 < 0.0)
-        return (float)0.99999988;
+        return 0.99999988;
     else
-        return (float)v4;
+        return v4;
 }
 
 void __cdecl Bullet_Endpos(int randSeed, float spread, float *end, float *dir, const weaponParms *wp, float maxRange)
@@ -309,77 +320,6 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
     }
 }
 
-char __cdecl Bullet_Trace(
-    const BulletFireParams *bp,
-    const WeaponDef *weapDef,
-    gentity_s *attacker,
-    BulletTraceResults *br,
-    unsigned int lastSurfaceType)
-{
-    gentity_s *v7; // [esp+Ch] [ebp-10h]
-    unsigned __int16 hitEntId; // [esp+18h] [ebp-4h]
-
-    if (!bp)
-        MyAssertHandler(".\\game\\bullet.cpp", 427, 0, "%s", "bp");
-    if (!weapDef)
-        MyAssertHandler(".\\game\\bullet.cpp", 428, 0, "%s", "weapDef");
-    if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 429, 0, "%s", "attacker");
-    if (!br)
-        MyAssertHandler(".\\game\\bullet.cpp", 430, 0, "%s", "br");
-    if (lastSurfaceType >= 0x1D)
-        MyAssertHandler(
-            ".\\game\\bullet.cpp",
-            431,
-            0,
-            "lastSurfaceType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-            lastSurfaceType,
-            29);
-    Com_Memset((unsigned int *)br, 0, 68);
-    if (weapDef->bRifleBullet)
-        G_LocationalTraceAllowChildren(
-            &br->trace,
-            bp->start,
-            bp->end,
-            bp->ignoreEntIndex,
-            (int)&sv.svEntities[342].clusternums[2] + 1,
-            riflePriorityMap);
-    else
-        G_LocationalTraceAllowChildren(
-            &br->trace,
-            bp->start,
-            bp->end,
-            bp->ignoreEntIndex,
-            (int)&sv.svEntities[342].clusternums[2] + 1,
-            bulletPriorityMap);
-    if (br->trace.hitType == TRACE_HITTYPE_NONE)
-        return 0;
-    hitEntId = Trace_GetEntityHitId(&br->trace);
-    if (hitEntId == 1022)
-        v7 = 0;
-    else
-        v7 = &g_entities[hitEntId];
-    br->hitEnt = v7;
-    Vec3Lerp(bp->start, bp->end, br->trace.fraction, br->hitPos);
-    if (br->hitEnt)
-    {
-        if ((br->hitEnt->s.eType == 1 || br->hitEnt->s.eType == 2) && !br->trace.surfaceFlags)
-            br->trace.surfaceFlags = (int)&loc_6FFFFC + 4;
-        br->ignoreHitEnt = Bullet_IgnoreHitEntity(bp, br, attacker);
-    }
-    br->depthSurfaceType = (br->trace.surfaceFlags & 0x1F00000) >> 20;
-    if ((br->trace.surfaceFlags & 0x100) != 0)
-    {
-        br->depthSurfaceType = 0;
-    }
-    else if (!br->depthSurfaceType)
-    {
-        if (lastSurfaceType)
-            br->depthSurfaceType = lastSurfaceType;
-    }
-    return 1;
-}
-
 bool __cdecl Bullet_IgnoreHitEntity(const BulletFireParams *bp, const BulletTraceResults *br, gentity_s *attacker)
 {
     if (!bp)
@@ -423,7 +363,7 @@ void __cdecl Bullet_Process(
         MyAssertHandler(".\\game\\bullet.cpp", 494, 0, "%s", "attacker");
     *outImpactFlags = 0;
     damage = Bullet_GetDamage(bp, br, weapDef, attacker);
-    G_CheckHitTriggerDamage(attacker, bp->start, br->hitPos, damage, bp->methodOfDeath);
+    G_CheckHitTriggerDamage(attacker, (float*)bp->start, br->hitPos, damage, bp->methodOfDeath);
     bulletEffectTempEnt = 0;
     if (processFx)
         Bullet_ImpactEffect(bp, br, br->trace.normal, weapDef, attacker, 0, &bulletEffectTempEnt);
@@ -435,7 +375,7 @@ void __cdecl Bullet_Process(
         if (!br->hitEnt->r.inuse)
             MyAssertHandler(".\\game\\bullet.cpp", 528, 0, "%s", "br->hitEnt->r.inuse");
         targetWasAlive = br->hitEnt->health > 0;
-        hitLoc = br->trace.partGroup;
+        hitLoc = (hitLocation_t)br->trace.partGroup;
         if (hitLoc == HITLOC_HEAD || hitLoc == HITLOC_HELMET)
             *outImpactFlags |= 1u;
         if (g_debugLocDamage->current.enabled)
@@ -444,7 +384,7 @@ void __cdecl Bullet_Process(
             br->hitEnt,
             attacker,
             attacker,
-            bp->dir,
+            (float*)bp->dir,
             br->hitPos,
             damage,
             dFlags,

@@ -6,6 +6,9 @@
 #include <universal/memfile.h>
 
 // snd
+
+const char *snd_eqTypeStrings[6] = { "lowpass", "highpass", "lowshelf", "highshelf", "bell", NULL }; // idb
+
 enum SND_EQTYPE : __int32
 {                                       // ...
     SND_EQTYPE_FIRST = 0x0,

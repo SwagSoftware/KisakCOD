@@ -2,6 +2,14 @@
 #include "cg_public.h"
 
 #include <cgame_mp/cg_local_mp.h>
+#include <ui/ui.h>
+#include <client/client.h>
+#include <script/scr_const.h>
+
+const dvar_t *hud_flash_time_offhand;
+const dvar_t *hud_flash_period_offhand;
+
+const char *offhandStrings[4] = { "", "WEAPON_FRAGGRENADE", "WEAPON_SMOKEGRENADE", "WEAPON_FLASHGRENADE"}; // idb
 
 void __cdecl CG_OffhandRegisterDvars()
 {
@@ -58,13 +66,13 @@ void __cdecl CG_DrawOffHandIcon(
             localClientNum);
     if (IsOffHandDisplayVisible(cgArray))
     {
-        if (GetBestOffhand((const playerState_s *)&MEMORY[0x9D5574], weaponType))
+        if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
         {
             v6 = hud_fade_offhand->current.value * 1000.0;
             drawColor[3] = CG_FadeHudMenu(
                 localClientNum,
                 hud_fade_offhand,
-                MEMORY[0x9DF8F0][4],
+                cgArray[0].offhandFadeTime,
                 (int)(v6 + 9.313225746154785e-10))
                 * color[3];
             if (drawColor[3] != 0.0)
@@ -73,14 +81,14 @@ void __cdecl CG_DrawOffHandIcon(
                 drawColor[1] = color[1];
                 drawColor[2] = color[2];
                 weapIndex = 0;
-                if (MEMORY[0x9DF71C][38])
+                if (cgArray[0].equippedOffHand)
                 {
-                    weapDef = BG_GetWeaponDef(MEMORY[0x9DF71C][38]);
+                    weapDef = BG_GetWeaponDef(cgArray[0].equippedOffHand);
                     if (weapDef->offhandClass == weaponType)
-                        weapIndex = MEMORY[0x9DF71C][38];
+                        weapIndex = cgArray[0].equippedOffHand;
                 }
                 if (!weapIndex)
-                    weapIndex = GetBestOffhand((const playerState_s *)&MEMORY[0x9D5574], weaponType);
+                    weapIndex = GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType);
                 if (weapIndex)
                 {
                     equippedWeapDef = BG_GetWeaponDef(weapIndex);
@@ -146,23 +154,23 @@ void __cdecl CG_DrawOffHandHighlight(
             localClientNum);
     if (IsOffHandDisplayVisible(cgArray))
     {
-        if (GetBestOffhand((const playerState_s *)&MEMORY[0x9D5574], weaponType))
+        if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
         {
-            if (MEMORY[0x9DF71C][38])
+            if (cgArray[0].equippedOffHand)
             {
                 v6 = hud_fade_offhand->current.value * 1000.0;
                 drawColor[3] = CG_FadeHudMenu(
                     localClientNum,
                     hud_fade_offhand,
-                    MEMORY[0x9DF8F0][4],
+                    cgArray[0].offhandFadeTime,
                     (int)(v6 + 9.313225746154785e-10))
                     * color[3];
                 if (drawColor[3] != 0.0)
                 {
-                    weapDef = BG_GetWeaponDef(MEMORY[0x9DF71C][38]);
+                    weapDef = BG_GetWeaponDef(cgArray[0].equippedOffHand);
                     if (weaponType == weapDef->offhandClass)
                     {
-                        if (CalcOffHandAmmo((const playerState_s *)&MEMORY[0x9D5574], weaponType))
+                        if (CalcOffHandAmmo(&cgArray[0].predictedPlayerState, weaponType))
                         {
                             drawColor[0] = *color;
                             drawColor[1] = color[1];
@@ -280,18 +288,18 @@ void __cdecl CG_DrawOffHandAmmo(
             localClientNum);
     if (IsOffHandDisplayVisible(cgArray))
     {
-        if (GetBestOffhand((const playerState_s *)&MEMORY[0x9D5574], weaponType))
+        if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
         {
             v7 = hud_fade_offhand->current.value * 1000.0;
             drawColor[3] = CG_FadeHudMenu(
                 localClientNum,
                 hud_fade_offhand,
-                MEMORY[0x9DF8F0][4],
+                cgArray[0].offhandFadeTime,
                 (int)(v7 + 9.313225746154785e-10))
                 * color[3];
             if (drawColor[3] != 0.0)
             {
-                ammoCount = CalcOffHandAmmo((const playerState_s *)&MEMORY[0x9D5574], weaponType);
+                ammoCount = CalcOffHandAmmo(&cgArray[0].predictedPlayerState, weaponType);
                 ammoCountString = va("%i", ammoCount);
                 if (ammoCount)
                 {
@@ -347,13 +355,13 @@ void __cdecl CG_DrawOffHandName(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (IsOffHandDisplayVisible(cgArray) && GetBestOffhand((const playerState_s *)&MEMORY[0x9D5574], weaponType))
+    if (IsOffHandDisplayVisible(cgArray) && GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
     {
         v7 = hud_fade_offhand->current.value * 1000.0;
         drawColor[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_offhand,
-            MEMORY[0x9DF8F0][4],
+            cgArray[0].offhandFadeTime,
             (int)(v7 + 9.313225746154785e-10))
             * color[3];
         if (drawColor[3] != 0.0)
@@ -478,7 +486,7 @@ void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned i
     }
 }
 
-void __cdecl CG_SetEquippedOffHand(int localClientNum, unsigned int offHandIndex)
+void __cdecl CG_SetEquippedOffHand(int localClientNum, int offHandIndex)
 {
     WeaponDef *WeaponDef; // eax
     const char *v3; // eax
@@ -503,7 +511,7 @@ void __cdecl CG_SetEquippedOffHand(int localClientNum, unsigned int offHandIndex
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    MEMORY[0x9DF71C][38] = offHandIndex;
+    cgArray[0].equippedOffHand = offHandIndex;
     CG_MenuShowNotify(localClientNum, 4);
 }
 

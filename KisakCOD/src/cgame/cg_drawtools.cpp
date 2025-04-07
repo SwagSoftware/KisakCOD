@@ -7,6 +7,33 @@
 
 #include <gfx_d3d/r_rendercmds.h>
 #include <universal/q_parse.h>
+#include <client/client.h>
+
+const float sign[4][2] =
+{
+    { -1.0f, -1.0f },
+    { 1.0f, -1.0f },
+    { 1.0f, 1.0f },
+    {-1.0f, 1.0f }
+};
+
+const int iEdgePairs[12][2] =
+{
+  { 0, 1 },
+  { 0, 2 },
+  { 0, 4 },
+  { 1, 3 },
+  { 1, 5 },
+  { 2, 3 },
+  { 2, 6 },
+  { 3, 7 },
+  { 4, 5 },
+  { 4, 6 },
+  { 5, 7 },
+  { 6, 7 }
+}; // idb
+
+float color_0[4];
 
 void __cdecl CG_DrawRotatedPicPhysical(
     const ScreenPlacement *scrPlace,
@@ -35,10 +62,9 @@ void __cdecl CG_DrawRotatedPicPhysical(
     float sin; // [esp+6Ch] [ebp-4h]
 
     v14 = angle * 0.01745329238474369;
-    //cos = cos(v14);
     cos = cosf(v14);
-    //sin = sin(v14);
     sin = sinf(v14);
+    
     v13 = width * 0.5;
     halfWidth = scrPlace->scaleRealToVirtual[0] * v13;
     v12 = height * 0.5;
@@ -53,9 +79,9 @@ void __cdecl CG_DrawRotatedPicPhysical(
     scale[1][1] = cos * halfHeight;
     for (i = 0; i < 4; ++i)
     {
-        v9 = scale[0][0] * (float)sign[i][0] + center[0] - scale[1][0] * flt_865D4C[2 * i];
+        v9 = scale[0][0] * (float)sign[i][0] + center[0] - scale[1][0] * (float)sign[i][1];
         verts[i][0] = scrPlace->scaleVirtualToReal[0] * v9;
-        v8 = scale[1][1] * flt_865D4C[2 * i] + scale[0][1] * (float)sign[i][0] + center[1];
+        v8 = scale[1][1] * (float)sign[i][1] + scale[0][1] * (float)sign[i][0] + center[1];
         verts[i][1] = scrPlace->scaleVirtualToReal[1] * v8;
     }
     R_AddCmdDrawQuadPic(verts, color, material);
@@ -143,8 +169,8 @@ void __cdecl CG_DrawVLine(
     center[1] = top + halfHeight;
     for (i = 0; i < 4; ++i)
     {
-        verts[i][0] = (float)sign_0[i][0] * halfWidth + center[0];
-        verts[i][1] = flt_865D6C[2 * i] * halfHeight + center[1];
+        verts[i][0] = (float)sign[i + 4][0] * halfWidth + center[0];
+        verts[i][1] = (float)sign[i + 4][1] * halfHeight + center[1];
     }
     R_AddCmdDrawQuadPic(verts, color, material);
 }
@@ -276,9 +302,9 @@ float *__cdecl CG_FadeColor(int timeNow, int startMsec, int totalMsec, int fadeM
         return 0;
     if (timeNow - startMsec >= totalMsec)
         return 0;
-    flt_985750 = CG_FadeAlpha(timeNow, startMsec, totalMsec, fadeMsec);
-    flt_98574C = 1.0;
-    flt_985748 = 1.0;
+    color_0[3] = CG_FadeAlpha(timeNow, startMsec, totalMsec, fadeMsec);
+    color_0[2] = 1.0;
+    color_0[1] = 1.0;
     color_0[0] = 1.0;
     return color_0;
 }
@@ -411,7 +437,7 @@ void __cdecl CG_DebugBox(
         Vec3Add(&v[3 * i], origin, &v[3 * i]);
     }
     for (ia = 0; ia < 0xC; ++ia)
-        CG_DebugLine(&v[3 * iEdgePairs[ia][0]], &v[3 * dword_865EAC[2 * ia]], color, depthTest, duration);
+        CG_DebugLine(&v[3 * iEdgePairs[ia][0]], &v[3 * iEdgePairs[ia][1]], color, depthTest, duration);
 }
 
 void __cdecl CG_DebugBoxOriented(
@@ -448,7 +474,7 @@ void __cdecl CG_DebugBoxOriented(
         Vec3Add(v[i], origin, v[i]);
     }
     for (i = 0; i < 0xC; ++i)
-        CG_DebugLine(v[iEdgePairs[i][0]], v[dword_865EAC[2 * i]], color, depthTest, duration);
+        CG_DebugLine(v[iEdgePairs[i][0]], v[iEdgePairs[i][1]], color, depthTest, duration);
 }
 
 void __cdecl CG_DebugCircle(

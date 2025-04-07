@@ -2,6 +2,8 @@
 #include "cg_public.h"
 #include <xanim/dobj.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <script/scr_const.h>
+#include <EffectsCore/fx_system.h>
 
 
 
@@ -78,14 +80,7 @@ void __cdecl CG_Laser_Add_Core(
     laserBegin[1] = orient->origin[1];
     laserBegin[2] = orient->origin[2];
     Vec3Mad(orient->origin, laserRange, orient->axis[0], laserEnd);
-    CG_TraceCapsule(
-        &traceResults,
-        laserBegin,
-        mins,
-        maxs,
-        laserEnd,
-        cent->nextState.number,
-        (int)&sv.svEntities[342].clusternums[2] + 1);
+    CG_TraceCapsule(&traceResults, laserBegin, mins, maxs, laserEnd, cent->nextState.number, 0x2806831);
     laserLength = traceResults.fraction * laserRange;
     scale = laserLength - cg_laserEndOffset->current.value;
     Vec3Mad(orient->origin, scale, orient->axis[0], laserEnd);

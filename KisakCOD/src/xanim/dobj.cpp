@@ -1349,7 +1349,12 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
     //Profile_EndInternal(0);
 }
 
-void __cdecl DObjGeomTraceline(DObj_s* obj, float* localStart, float* localEnd, int contentmask, DObjTrace_s* results)
+void __cdecl DObjGeomTraceline(
+    DObj_s *obj,
+    float *localStart,
+    float *const localEnd,
+    int contentmask,
+    DObjTrace_s *results)
 {
     unsigned int boneIndex; // [esp+Ch] [ebp-48h]
     XModel* model; // [esp+10h] [ebp-44h]

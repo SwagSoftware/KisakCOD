@@ -1,5 +1,40 @@
 #include "cg_local.h"
 #include "cg_public.h"
+#include <devgui/devgui.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <universal/q_parse.h>
+
+const dvar_t *nightVisionFadeInOutTime;
+const dvar_t *nightVisionPowerOnTime;
+const dvar_t *nightVisionDisableEffects;
+
+const char *MYDEFAULTVISIONNAME = "default";
+
+struct visField_t // sizeof=0xC
+{                                       // ...
+    const char *name;                   // ...
+    int offset;
+    int fieldType;
+};
+visField_t visionDefFields[16] =
+{
+  { "r_glow", 0, 0 },
+  { "r_glowBloomCutoff", 4, 1 },
+  { "r_glowBloomDesaturation", 8, 1 },
+  { "r_glowBloomIntensity0", 12, 1 },
+  { "r_glowBloomIntensity1", 16, 1 },
+  { "r_glowRadius0", 20, 1 },
+  { "r_glowRadius1", 24, 1 },
+  { "r_glowSkyBleedIntensity0", 28, 1 },
+  { "r_glowSkyBleedIntensity1", 32, 1 },
+  { "r_filmEnable", 36, 0 },
+  { "r_filmBrightness", 40, 1 },
+  { "r_filmContrast", 44, 1 },
+  { "r_filmDesaturation", 48, 1 },
+  { "r_filmInvert", 52, 0 },
+  { "r_filmLightTint", 56, 2 },
+  { "r_filmDarkTint", 68, 2 }
+}; // idb
 
 void __cdecl CG_RegisterVisionSetsDvars()
 {
@@ -22,7 +57,7 @@ void __cdecl CG_RegisterVisionSetsDvars()
         mina,
         0x1000u,
         "How long the black-to-nightvision fade lasts when turning on the goggles.");
-    nightVisionDisableEffects = Dvar_RegisterBool("nightVisionDisableEffects", 0, 0x1000u, &String);
+    nightVisionDisableEffects = Dvar_RegisterBool("nightVisionDisableEffects", 0, 0x1000u, "");
 }
 
 void __cdecl CG_InitVisionSetsMenu()
@@ -79,11 +114,11 @@ void __cdecl CG_VisionSetsUpdate(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (!LOBYTE(MEMORY[0xA8E428][285]))
+    if (!cgArray[0].visionNameNaked[0])
         SetDefaultVision(localClientNum);
     for (idx = 0; idx < 2; ++idx)
         UpdateVarsLerp(
-            MEMORY[0x9D5560],
+            cgArray[0].time,
             &cgArray[0].visionSetFrom[idx],
             &cgArray[0].visionSetTo[idx],
             &cgArray[0].visionSetLerpData[idx],
@@ -271,7 +306,7 @@ char __cdecl CG_VisionSetStartLerp_To(
     memcpy(&cgArray[0].visionSetFrom[mode], &cgArray[0].visionSetCurrent[mode], sizeof(cgArray[0].visionSetFrom[mode]));
     cgArray[0].visionSetLerpData[mode].style = style;
     cgArray[0].visionSetLerpData[mode].timeDuration = duration;
-    cgArray[0].visionSetLerpData[mode].timeStart = MEMORY[0x9D5560];
+    cgArray[0].visionSetLerpData[mode].timeStart = cgArray[0].time;
     return 1;
 }
 
@@ -477,13 +512,8 @@ void __cdecl SetDefaultVision(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    I_strncpyz((char *)&MEMORY[0xA8E428][285], (char *)MYDEFAULTVISIONNAME, 64);
-    CG_VisionSetStartLerp_To(
-        localClientNum,
-        VISIONSETMODE_NAKED,
-        VISIONSETLERP_TO_SMOOTH,
-        (char *)&MEMORY[0xA8E428][285],
-        0);
+    I_strncpyz(cgArray[0].visionNameNaked, (char *)MYDEFAULTVISIONNAME, 64);
+    CG_VisionSetStartLerp_To(localClientNum, VISIONSETMODE_NAKED, VISIONSETLERP_TO_SMOOTH, cgArray[0].visionNameNaked, 0);
 }
 
 void __cdecl CG_VisionSetConfigString_Naked(int localClientNum)
@@ -503,14 +533,14 @@ void __cdecl CG_VisionSetConfigString_Naked(int localClientNum)
             localClientNum);
     configString = CL_GetConfigString(localClientNum, 0x338u);
     token = (const char *)Com_Parse(&configString);
-    I_strncpyz((char *)&MEMORY[0xA8E428][285], (char *)token, 64);
+    I_strncpyz(cgArray[0].visionNameNaked, (char *)token, 64);
     v1 = Com_Parse(&configString);
     duration = atoi(v1->token);
     CG_VisionSetStartLerp_To(
         localClientNum,
         VISIONSETMODE_NAKED,
         VISIONSETLERP_TO_SMOOTH,
-        (char *)&MEMORY[0xA8E428][285],
+        cgArray[0].visionNameNaked,
         duration);
 }
 
@@ -531,14 +561,14 @@ void __cdecl CG_VisionSetConfigString_Night(int localClientNum)
             localClientNum);
     configString = CL_GetConfigString(localClientNum, 0x339u);
     token = (const char *)Com_Parse(&configString);
-    I_strncpyz((char *)&MEMORY[0xA8E428][301], (char *)token, 64);
+    I_strncpyz(cgArray[0].visionNameNight, (char *)token, 64);
     v1 = Com_Parse(&configString);
     duration = atoi(v1->token);
     CG_VisionSetStartLerp_To(
         localClientNum,
         VISIONSETMODE_NIGHT,
         VISIONSETLERP_TO_SMOOTH,
-        (char *)&MEMORY[0xA8E428][301],
+        cgArray[0].visionNameNight,
         duration);
 }
 
@@ -557,7 +587,7 @@ void __cdecl CG_VisionSetMyChanges()
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (MEMORY[0xE7A7C2])
+        if (clientUIActives[0].cgameInitialized)
         {
             if (localClientNum)
                 MyAssertHandler(
@@ -569,19 +599,19 @@ void __cdecl CG_VisionSetMyChanges()
                     localClientNum);
             for (visSetIdx = 0; visSetIdx < 4; ++visSetIdx)
                 cgArray[0].visionSetPreLoadedName[visSetIdx][0] = 0;
-            if (LOBYTE(MEMORY[0xA8E428][285]))
+            if (cgArray[0].visionNameNaked[0])
                 CG_VisionSetStartLerp_To(
                     localClientNum,
                     VISIONSETMODE_NAKED,
                     VISIONSETLERP_TO_LINEAR,
-                    (char *)&MEMORY[0xA8E428][285],
+                    cgArray[0].visionNameNaked,
                     0);
-            if (LOBYTE(MEMORY[0xA8E428][301]))
+            if (cgArray[0].visionNameNight[0])
                 CG_VisionSetStartLerp_To(
                     localClientNum,
                     VISIONSETMODE_NIGHT,
                     VISIONSETLERP_TO_LINEAR,
-                    (char *)&MEMORY[0xA8E428][301],
+                    cgArray[0].visionNameNight,
                     0);
         }
     }
@@ -614,9 +644,9 @@ bool __cdecl LoadVisionFileForTweaks(visionSetVars_t *setVars)
     char *setName; // [esp+Ch] [ebp-4h]
 
     if (CG_LookingThroughNightVision(0))
-        setName = (char *)&MEMORY[0xA8E428][301];
+        setName = cgArray[0].visionNameNight;
     else
-        setName = (char *)&MEMORY[0xA8E428][285];
+        setName = cgArray[0].visionNameNaked;
     return *setName && GetVisionSet(0, setName, setVars) != 0;
 }
 
@@ -657,7 +687,7 @@ char __cdecl CG_LookingThroughNightVision(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] < 9)
+    if (clientUIActives[0].connectionState < CA_ACTIVE)
         return 0;
     if (nightVisionDisableEffects->current.enabled)
         return 0;
@@ -669,19 +699,19 @@ char __cdecl CG_LookingThroughNightVision(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    weapIndex = BG_GetViewmodelWeaponIndex((const playerState_s *)&MEMORY[0x9D5574]);
+    weapIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
     weapDef = BG_GetWeaponDef(weapIndex);
-    if (MEMORY[0x9D5660] == 25)
+    if (cgArray[0].predictedPlayerState.weaponstate == 25)
     {
-        if (weapDef->nightVisionWearTime - MEMORY[0x9D55B0] >= weapDef->nightVisionWearTimePowerUp)
+        if (weapDef->nightVisionWearTime - cgArray[0].predictedPlayerState.weaponTime >= weapDef->nightVisionWearTimePowerUp)
             return 1;
     }
-    else if (MEMORY[0x9D5660] == 26)
+    else if (cgArray[0].predictedPlayerState.weaponstate == 26)
     {
-        if (weapDef->nightVisionRemoveTime - MEMORY[0x9D55B0] <= weapDef->nightVisionRemoveTimePowerDown)
+        if (weapDef->nightVisionRemoveTime - cgArray[0].predictedPlayerState.weaponTime <= weapDef->nightVisionRemoveTimePowerDown)
             return 1;
     }
-    else if ((MEMORY[0x9D5584] & 0x40) != 0)
+    else if ((cgArray[0].predictedPlayerState.weapFlags & 0x40) != 0)
     {
         return 1;
     }
@@ -691,6 +721,8 @@ char __cdecl CG_LookingThroughNightVision(int localClientNum)
 void __cdecl CG_VisionSetApplyToRefdef(int localClientNum)
 {
     float fade; // [esp+14h] [ebp-1Ch]
+    GfxFilm *film; // [esp+1Ch] [ebp-14h]
+    GfxGlow *glow; // [esp+20h] [ebp-10h]
     visionSetMode_t visionChannel; // [esp+2Ch] [ebp-4h]
 
     if (localClientNum)
@@ -701,33 +733,35 @@ void __cdecl CG_VisionSetApplyToRefdef(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    visionChannel = CG_LookingThroughNightVision(localClientNum) != 0;
+    film = &cgArray[0].refdef.film;
+    glow = &cgArray[0].refdef.glow;
+    visionChannel = (visionSetMode_t)(CG_LookingThroughNightVision(localClientNum) != 0);
     if (cgArray[0].visionSetLerpData[visionChannel].style)
     {
-        LOBYTE(MEMORY[0x9D8748][14]) = cgArray[0].visionSetCurrent[visionChannel].filmEnable;
-        MEMORY[0x9D8748][15] = cgArray[0].visionSetCurrent[visionChannel].filmBrightness;
-        MEMORY[0x9D8748][16] = cgArray[0].visionSetCurrent[visionChannel].filmContrast;
-        MEMORY[0x9D8748][17] = cgArray[0].visionSetCurrent[visionChannel].filmDesaturation;
-        LOBYTE(MEMORY[0x9D8748][18]) = cgArray[0].visionSetCurrent[visionChannel].filmInvert;
-        MEMORY[0x9D8748][19] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[0];
-        MEMORY[0x9D8748][20] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[1];
-        MEMORY[0x9D8748][21] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[2];
-        MEMORY[0x9D8748][22] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[0];
-        MEMORY[0x9D8748][23] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[1];
-        MEMORY[0x9D8748][24] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[2];
-        LOBYTE(MEMORY[0x9D8748][25]) = cgArray[0].visionSetCurrent[visionChannel].glowEnable;
-        MEMORY[0x9D8748][26] = cgArray[0].visionSetCurrent[visionChannel].glowBloomCutoff;
-        MEMORY[0x9D8748][27] = cgArray[0].visionSetCurrent[visionChannel].glowBloomDesaturation;
-        MEMORY[0x9D8748][28] = cgArray[0].visionSetCurrent[visionChannel].glowBloomIntensity0;
-        MEMORY[0x9D8748][29] = cgArray[0].visionSetCurrent[visionChannel].glowRadius0;
+        film->enabled = cgArray[0].visionSetCurrent[visionChannel].filmEnable;
+        cgArray[0].refdef.film.brightness = cgArray[0].visionSetCurrent[visionChannel].filmBrightness;
+        cgArray[0].refdef.film.contrast = cgArray[0].visionSetCurrent[visionChannel].filmContrast;
+        cgArray[0].refdef.film.desaturation = cgArray[0].visionSetCurrent[visionChannel].filmDesaturation;
+        cgArray[0].refdef.film.invert = cgArray[0].visionSetCurrent[visionChannel].filmInvert;
+        cgArray[0].refdef.film.tintDark[0] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[0];
+        cgArray[0].refdef.film.tintDark[1] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[1];
+        cgArray[0].refdef.film.tintDark[2] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[2];
+        cgArray[0].refdef.film.tintLight[0] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[0];
+        cgArray[0].refdef.film.tintLight[1] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[1];
+        cgArray[0].refdef.film.tintLight[2] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[2];
+        glow->enabled = cgArray[0].visionSetCurrent[visionChannel].glowEnable;
+        cgArray[0].refdef.glow.bloomCutoff = cgArray[0].visionSetCurrent[visionChannel].glowBloomCutoff;
+        cgArray[0].refdef.glow.bloomDesaturation = cgArray[0].visionSetCurrent[visionChannel].glowBloomDesaturation;
+        cgArray[0].refdef.glow.bloomIntensity = cgArray[0].visionSetCurrent[visionChannel].glowBloomIntensity0;
+        cgArray[0].refdef.glow.radius = cgArray[0].visionSetCurrent[visionChannel].glowRadius0;
         fade = VisionFadeValue(localClientNum);
         if (fade != 1.0)
-            FadeRefDef((refdef_s *)&MEMORY[0x9D8700], fade);
+            FadeRefDef(&cgArray[0].refdef, fade);
     }
     else
     {
-        LOBYTE(MEMORY[0x9D8748][14]) = 0;
-        LOBYTE(MEMORY[0x9D8748][25]) = 0;
+        film->enabled = 0;
+        glow->enabled = 0;
     }
 }
 
@@ -761,13 +795,13 @@ double __cdecl VisionFadeValue(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    weapIndex = BG_GetViewmodelWeaponIndex((const playerState_s *)MEMORY[0x9D5574]);
+    weapIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
     weapDef = BG_GetWeaponDef(weapIndex);
     if (!weapIndex)
         return 1.0;
-    if (MEMORY[0x9D5660] == 25)
+    if (cgArray[0].predictedPlayerState.weaponstate == 25)
     {
-        timePassed = weapDef->nightVisionWearTime - MEMORY[0x9D55B0];
+        timePassed = weapDef->nightVisionWearTime - cgArray[0].predictedPlayerState.weaponTime;
         if (timePassed > weapDef->nightVisionWearTimeFadeOutEnd)
         {
             if (timePassed < weapDef->nightVisionWearTimePowerUp)
@@ -806,9 +840,9 @@ double __cdecl VisionFadeValue(int localClientNum)
                 return (float)0.0;
         }
     }
-    else if (MEMORY[0x9D5660] == 26)
+    else if (cgArray[0].predictedPlayerState.weaponstate == 26)
     {
-        timePasseda = weapDef->nightVisionRemoveTime - MEMORY[0x9D55B0];
+        timePasseda = weapDef->nightVisionRemoveTime - cgArray[0].predictedPlayerState.weaponTime;
         if (timePasseda >= weapDef->nightVisionRemoveTimePowerDown)
         {
             if (timePasseda < weapDef->nightVisionRemoveTimeFadeInStart)

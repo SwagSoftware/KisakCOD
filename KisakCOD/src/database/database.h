@@ -3,6 +3,7 @@
 #include <zlib/zlib.h>
 
 #include <cstddef>
+#include <xanim/xmodel.h>
 
 extern "C" {
     // win32

@@ -2,7 +2,10 @@
 #include "cg_public.h"
 
 #include <cgame_mp/cg_local_mp.h>
+#include <qcommon/mem_track.h>
 
+
+CameraShakeSet s_cameraShakeSet[1];
 
 void __cdecl TRACK_cg_camerashake()
 {
@@ -35,7 +38,7 @@ void __cdecl CG_StartShakeCamera(int localClientNum, float p, int duration, floa
     buildShake.rumbleScale = 0.0;
     buildShake.scale = p;
     buildShake.length = (float)duration;
-    buildShake.time = MEMORY[0x9D5560];
+    buildShake.time = cgArray[0].time;
     buildShake.src[0] = *src;
     buildShake.src[1] = src[1];
     buildShake.src[2] = src[2];
@@ -44,8 +47,8 @@ void __cdecl CG_StartShakeCamera(int localClientNum, float p, int duration, floa
     cameraShakeArray = &s_cameraShakeSet[localClientNum];
     for (i = 0; i < 4; ++i)
     {
-        if (cameraShakeArray->shakes[i].time > MEMORY[0x9D5560]
-            || (double)MEMORY[0x9D5560] >= (double)cameraShakeArray->shakes[i].time + cameraShakeArray->shakes[i].length)
+        if (cameraShakeArray->shakes[i].time > cgArray[0].time
+            || (double)cgArray[0].time >= (double)cameraShakeArray->shakes[i].time + cameraShakeArray->shakes[i].length)
         {
             goto LABEL_23;
         }
