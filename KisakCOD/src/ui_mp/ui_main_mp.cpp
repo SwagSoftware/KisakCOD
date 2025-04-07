@@ -306,7 +306,7 @@ int __cdecl UI_TextHeight(Font_s *font, float scale)
 
 void __cdecl UI_DrawText(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,

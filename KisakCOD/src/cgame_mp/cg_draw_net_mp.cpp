@@ -47,7 +47,7 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
     unsigned int fieldb; // [esp+78h] [ebp-6Ch]
     int fieldc; // [esp+78h] [ebp-6Ch]
     int sortedSamples[13]; // [esp+7Ch] [ebp-68h] BYREF
-    char *string; // [esp+B0h] [ebp-34h]
+    const char *string; // [esp+B0h] [ebp-34h]
     cg_s *cgameGlob; // [esp+B4h] [ebp-30h]
     float height; // [esp+B8h] [ebp-2Ch]
     float width; // [esp+BCh] [ebp-28h]
@@ -396,7 +396,7 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
     int entsSentWhenMax; // [esp+A4h] [ebp-98h]
     int maxEntsSent; // [esp+A8h] [ebp-94h]
     int totalBitsUsed; // [esp+ACh] [ebp-90h]
-    char *string; // [esp+B0h] [ebp-8Ch]
+    const char *string; // [esp+B0h] [ebp-8Ch]
     int sortedSamples[18]; // [esp+B4h] [ebp-88h] BYREF
     cg_s *cgameGlob; // [esp+FCh] [ebp-40h]
     float graphy; // [esp+100h] [ebp-3Ch]
@@ -736,7 +736,10 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
     int frame; // [esp+60h] [ebp-30h]
     int ping; // [esp+64h] [ebp-2Ch]
     float height; // [esp+6Ch] [ebp-24h]
-    float lineColor[6]; // [esp+70h] [ebp-20h] BYREF
+    float lineColor[3]; // [esp+70h] [ebp-20h] BYREF
+    float v13; // [esp+7Ch] [ebp-14h]
+    const float (*textColor)[4]; // [esp+80h] [ebp-10h]
+    cgs_t* cgs; // [esp+84h] [ebp-Ch]
     float x; // [esp+88h] [ebp-8h]
     float y; // [esp+8Ch] [ebp-4h]
 
@@ -748,7 +751,7 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    LODWORD(lineColor[5]) = cgsArray;
+    cgs = cgsArray;
     if (cgsArray[0].localServer)
     {
         if (net_showprofile->current.integer)
@@ -759,21 +762,10 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
                 x = -150.0;
                 y = 100.0;
                 height = 10.0;
-                LODWORD(lineColor[4]) = colorWhite;
+                textColor = (const float (*)[4])colorWhite;
                 v5 = (float)100.0 + 15.0;
                 v4 = (float)-150.0 + 5.0;
-                UI_DrawText(
-                    &scrPlaceView[localClientNum],
-                    "Ping",
-                    32,
-                    cgMedia.smallDevFont,
-                    v4,
-                    v5,
-                    3,
-                    1,
-                    0.40000001,
-                    colorWhite,
-                    3);
+                UI_DrawText(&scrPlaceView[localClientNum], "Ping", 32, dword_A8EC1C, v4, v5, 3, 1, 0.40000001, colorWhite, 3);
                 for (frame = 31; frame >= 0; --frame)
                 {
                     ping = SV_GetClientSnapshotPing(client, frame);
@@ -792,14 +784,14 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
                                 lineColor[0] = v6;
                                 lineColor[1] = 0.0;
                                 lineColor[2] = 0.0;
-                                lineColor[3] = 1.0;
+                                v13 = 1.0;
                             }
                             else
                             {
                                 lineColor[0] = 1.0 - (double)(ping - 100) * 1.0 / 100.0 * 0.800000011920929;
                                 lineColor[1] = lineColor[0];
                                 lineColor[2] = 0.0;
-                                lineColor[3] = 1.0;
+                                v13 = 1.0;
                             }
                         }
                         else
@@ -807,7 +799,7 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
                             lineColor[0] = 0.0;
                             lineColor[1] = 1.0 - (double)ping * 1.0 / 100.0 * 0.800000011920929;
                             lineColor[2] = 0.0;
-                            lineColor[3] = 1.0;
+                            v13 = 1.0;
                         }
                     }
                     else
@@ -815,7 +807,7 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
                         lineColor[0] = 0.0;
                         lineColor[1] = 0.0;
                         lineColor[2] = 0.0;
-                        lineColor[3] = 1.0;
+                        v13 = 1.0;
                     }
                     v2 = y - height;
                     v1 = (double)(3 * frame) + x;

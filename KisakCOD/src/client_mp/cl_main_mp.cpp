@@ -2170,10 +2170,22 @@ void __cdecl CL_ToggleMenu_f()
         UI_SetActiveMenu(0, 2);
     }
 }
-
 void __cdecl CL_InitOnceForAllClients()
 {
-    unsigned int v0; // eax
+    DWORD v0; // eax
+    DvarLimits min; // [esp+4h] [ebp-18h]
+    DvarLimits mina; // [esp+4h] [ebp-18h]
+    DvarLimits minb; // [esp+4h] [ebp-18h]
+    DvarLimits minc; // [esp+4h] [ebp-18h]
+    DvarLimits mind; // [esp+4h] [ebp-18h]
+    DvarLimits mine; // [esp+4h] [ebp-18h]
+    DvarLimits minf; // [esp+4h] [ebp-18h]
+    DvarLimits ming; // [esp+4h] [ebp-18h]
+    DvarLimits minh; // [esp+4h] [ebp-18h]
+    DvarLimits mini; // [esp+4h] [ebp-18h]
+    DvarLimits minj; // [esp+4h] [ebp-18h]
+    DvarLimits mink; // [esp+4h] [ebp-18h]
+    DvarLimits minl; // [esp+4h] [ebp-18h]
     int i; // [esp+18h] [ebp-4h]
 
     v0 = Sys_MillisecondsRaw();
@@ -2191,28 +2203,24 @@ void __cdecl CL_InitOnceForAllClients()
     Dvar_SetBool(onlinegame, 1);
     cl_hudDrawsBehindUI = Dvar_RegisterBool("cl_hudDrawsBehindUI", 1, 0, "Should the HUD draw when the UI is up?");
     cl_voice = Dvar_RegisterBool("cl_voice", 1, 3u, "Use voice communications");
-    cl_timeout = Dvar_RegisterFloat(
-        "cl_timeout",
-        40.0,
-        0.0,
-        3600.0,
-        0,
-        "Seconds with no received packets until a timeout occurs");
+    min.value.max = 3600.0;
+    min.value.min = 0.0;
+    cl_timeout = Dvar_RegisterFloat("cl_timeout", 40.0, min, 0, "Seconds with no received packets until a timeout occurs");
+    mina.value.max = 3600.0;
+    mina.value.min = 0.0;
     cl_connectTimeout = Dvar_RegisterFloat(
         "cl_connectTimeout",
         200.0,
-        0.0,
-        3600.0,
+        mina,
         0,
         "Timeout time in seconds while connecting to a server");
     cl_connectionAttempts = Dvar_RegisterInt(
         "cl_connectionAttempts",
         10,
-        0,
-        0x7FFFFFFF,
+        (DvarLimits)0x7FFFFFFF00000000LL,
         0,
         "Maximum number of connection attempts before aborting");
-    cl_shownet = Dvar_RegisterInt("cl_shownet", 0, -2, 4, 0, "Display network debugging information");
+    cl_shownet = Dvar_RegisterInt("cl_shownet", 0, (DvarLimits)0x4FFFFFFFELL, 0, "Display network debugging information");
     cl_shownuments = Dvar_RegisterBool("cl_shownuments", 0, 0, "Show the number of entities");
     cl_showServerCommands = Dvar_RegisterBool(
         "cl_showServerCommands",
@@ -2227,33 +2235,35 @@ void __cdecl CL_InitOnceForAllClients()
         0,
         "cl_freezeDemo is used to lock a demo in place for single frame advances");
     cl_activeAction = Dvar_RegisterString("activeAction", "", 0, "Action to execute in first frame");
-    cl_avidemo = Dvar_RegisterInt("cl_avidemo", 0, 0, 0x7FFFFFFF, 0, "AVI demo frames per second");
+    cl_avidemo = Dvar_RegisterInt("cl_avidemo", 0, (DvarLimits)0x7FFFFFFF00000000LL, 0, "AVI demo frames per second");
     cl_forceavidemo = Dvar_RegisterBool("cl_forceavidemo", 0, 0, "Record AVI demo even if client is not active");
-    cl_yawspeed = Dvar_RegisterFloat(
-        "cl_yawspeed",
-        140.0,
-        -3.4028235e38,
-        3.4028235e38,
-        1u,
-        "Max yaw speed in degrees for game pad and keyboard");
-    cl_pitchspeed = Dvar_RegisterFloat(
-        "cl_pitchspeed",
-        140.0,
-        -3.4028235e38,
-        3.4028235e38,
-        1u,
-        "Max pitch speed in degrees for game pad");
+    minb.value.max = 3.4028235e38;
+    minb.value.min = -3.4028235e38;
+    cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, minb, 1u, "Max yaw speed in degrees for game pad and keyboard");
+    minc.value.max = 3.4028235e38;
+    minc.value.min = -3.4028235e38;
+    cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, minc, 1u, "Max pitch speed in degrees for game pad");
+    mind.value.max = 3.4028235e38;
+    mind.value.min = 0.0;
     cl_anglespeedkey = Dvar_RegisterFloat(
         "cl_anglespeedkey",
         1.5,
-        0.0,
-        3.4028235e38,
+        mind,
         0,
         "Multiplier for max angle speed for game pad and keyboard");
-    cl_maxpackets = Dvar_RegisterInt("cl_maxpackets", 30, 15, 100, 1u, "Maximum number of packets sent per frame");
-    cl_packetdup = Dvar_RegisterInt("cl_packetdup", 1, 0, 5, 1u, "Enable packet duplication");
-    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0, 0.0099999998, 100.0, 1u, "Mouse sensitivity");
-    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0, 0.0, 100.0, 1u, "Mouse acceleration");
+    cl_maxpackets = Dvar_RegisterInt(
+        "cl_maxpackets",
+        30,
+        (DvarLimits)0x640000000FLL,
+        1u,
+        "Maximum number of packets sent per frame");
+    cl_packetdup = Dvar_RegisterInt("cl_packetdup", 1, (DvarLimits)0x500000000LL, 1u, "Enable packet duplication");
+    mine.value.max = 100.0;
+    mine.value.min = 0.0099999998;
+    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0, mine, 1u, "Mouse sensitivity");
+    minf.value.max = 100.0;
+    minf.value.min = 0.0;
+    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0, minf, 1u, "Mouse acceleration");
     cl_freelook = Dvar_RegisterBool("cl_freelook", 1, 1u, "Enable looking with mouse");
     cl_showMouseRate = Dvar_RegisterBool(
         "cl_showmouserate",
@@ -2267,8 +2277,7 @@ void __cdecl CL_InitOnceForAllClients()
     cl_serverStatusResendTime = Dvar_RegisterInt(
         "cl_serverStatusResendTime",
         750,
-        0,
-        3600,
+        (DvarLimits)0xE1000000000LL,
         0,
         "Time in milliseconds to resend a server status message");
     cl_bypassMouseInput = Dvar_RegisterBool(
@@ -2276,25 +2285,37 @@ void __cdecl CL_InitOnceForAllClients()
         0,
         0,
         "Bypass UI mouse input and send directly to the game");
-    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022, -1.0, 1.0, 1u, "Default pitch");
-    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022, -1.0, 1.0, 1u, "Default yaw");
-    m_forward = Dvar_RegisterFloat("m_forward", 0.25, -1.0, 1.0, 1u, "Forward speed in units per second");
-    m_side = Dvar_RegisterFloat("m_side", 0.25, -1.0, 1.0, 1u, "Sideways motion in units per second");
+    ming.value.max = 1.0;
+    ming.value.min = -1.0;
+    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022, ming, 1u, "Default pitch");
+    minh.value.max = 1.0;
+    minh.value.min = -1.0;
+    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022, minh, 1u, "Default yaw");
+    mini.value.max = 1.0;
+    mini.value.min = -1.0;
+    m_forward = Dvar_RegisterFloat("m_forward", 0.25, mini, 1u, "Forward speed in units per second");
+    minj.value.max = 1.0;
+    minj.value.min = -1.0;
+    m_side = Dvar_RegisterFloat("m_side", 0.25, minj, 1u, "Sideways motion in units per second");
     m_filter = Dvar_RegisterBool("m_filter", 0, 1u, "Allow mouse movement smoothing");
     cl_motdString = Dvar_RegisterString("cl_motdString", "", 0x40u, "Message of the day");
     cl_ingame = Dvar_RegisterBool("cl_ingame", 0, 0x40u, "True if the game is active");
-    Dvar_RegisterInt("cl_maxPing", 800, 20, 2000, 1u, "Maximum ping for the client");
+    Dvar_RegisterInt("cl_maxPing", 800, (DvarLimits)0x7D000000014LL, 1u, "Maximum ping for the client");
     cl_profileTextHeight = Dvar_RegisterInt(
         "cl_profileTextHeight",
         19,
-        1,
-        100,
+        (DvarLimits)0x6400000001LL,
         0,
         "Text size to draw the network profile data");
-    cl_profileTextY = Dvar_RegisterInt("cl_profileTextY", 110, 0, 800, 0, "Y position to draw the profile data");
+    cl_profileTextY = Dvar_RegisterInt(
+        "cl_profileTextY",
+        110,
+        (DvarLimits)0x32000000000LL,
+        0,
+        "Y position to draw the profile data");
     name = Dvar_RegisterString("name", "", 3u, "Player name");
-    Dvar_RegisterInt("rate", 25000, 1000, 25000, 3u, "Player's preferred baud rate");
-    Dvar_RegisterInt("snaps", 20, 1, 30, 3u, "Snapshot rate");
+    Dvar_RegisterInt("rate", 25000, (DvarLimits)0x61A8000003E8LL, 3u, "Player's preferred baud rate");
+    Dvar_RegisterInt("snaps", 20, (DvarLimits)0x1E00000001LL, 3u, "Snapshot rate");
     Dvar_RegisterBool("cl_punkbuster", 1, 0x13u, "Determines whether PunkBuster is enabled");
     Dvar_RegisterString("password", "", 2u, "password");
     nextdemo = Dvar_RegisterString("nextdemo", "", 0, "The next demo to play");
@@ -2311,18 +2332,20 @@ void __cdecl CL_InitOnceForAllClients()
     I_strncpyz(cls.autoupdateServerNames[3], "cod2update4.activision.com", 64);
     I_strncpyz(cls.autoupdateServerNames[4], "cod2update5.activision.com", 64);
     motd = Dvar_RegisterString("motd", "", 0, "Message of the day");
+    mink.value.max = 80.0;
+    mink.value.min = -80.0;
     vehDriverViewHeightMin = Dvar_RegisterFloat(
         "vehDriverViewHeightMin",
         -15.0,
-        -80.0,
-        80.0,
+        mink,
         1u,
         "Min orbit altitude for driver's view");
+    minl.value.max = 80.0;
+    minl.value.min = -80.0;
     vehDriverViewHeightMax = Dvar_RegisterFloat(
         "vehDriverViewHeightMax",
         50.0,
-        -80.0,
-        80.0,
+        minl,
         1u,
         "Max orbit altitude for driver's view");
     Cmd_AddCommandInternal("cmd", CL_ForwardToServer_f, &CL_ForwardToServer_f_VAR);
@@ -2746,7 +2769,7 @@ void __cdecl CL_SetWaitingOnServerToLoadMap(int localClientNum, bool waiting)
 }
 
 void __cdecl CL_DrawTextPhysical(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -2760,7 +2783,7 @@ void __cdecl CL_DrawTextPhysical(
 }
 
 void __cdecl CL_DrawTextPhysicalWithEffects(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -2799,7 +2822,7 @@ void __cdecl CL_DrawTextPhysicalWithEffects(
 
 void __cdecl CL_DrawText(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -2817,7 +2840,7 @@ void __cdecl CL_DrawText(
 
 void __cdecl CL_DrawTextRotate(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -2852,7 +2875,7 @@ void __cdecl CL_DrawTextPhysicalWithCursor(
 
 void __cdecl CL_DrawTextWithCursor(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,

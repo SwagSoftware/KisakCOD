@@ -52,7 +52,7 @@ void __cdecl Cbuf_AddServerText_f();
 void __cdecl Cmd_ExecuteServerString(char *text);
 void __cdecl Cbuf_SV_Execute();
 void __cdecl Cmd_AddServerCommandInternal(const char *cmdName, void(__cdecl *function)(), cmd_function_s *allocedCmd);
-void __cdecl Cbuf_ExecuteBuffer(int localClientNum, int controllerIndex, char *buffer);
+void __cdecl Cbuf_ExecuteBuffer(int localClientNum, int controllerIndex, const char *buffer);
 void __cdecl Cbuf_Execute(int localClientNum, int controllerIndex);
 void __cdecl Cbuf_ExecuteInternal(int localClientNum, int controllerIndex);
 void __cdecl Cmd_Vstr_f();

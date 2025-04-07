@@ -459,7 +459,7 @@ bool __cdecl CL_IsServerLoadingMap();
 bool __cdecl CL_IsWaitingOnServerToLoadMap(int localClientNum);
 void __cdecl CL_SetWaitingOnServerToLoadMap(int localClientNum, bool waiting);
 void __cdecl CL_DrawTextPhysical(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -469,7 +469,7 @@ void __cdecl CL_DrawTextPhysical(
     const float *color,
     int style);
 void __cdecl CL_DrawTextPhysicalWithEffects(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -487,7 +487,7 @@ void __cdecl CL_DrawTextPhysicalWithEffects(
     int fxDecayDuration);
 void __cdecl CL_DrawText(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -500,7 +500,7 @@ void __cdecl CL_DrawText(
     int style);
 void __cdecl CL_DrawTextRotate(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -513,7 +513,7 @@ void __cdecl CL_DrawTextRotate(
     const float *color,
     int style);
 void __cdecl CL_DrawTextPhysicalWithCursor(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -526,7 +526,7 @@ void __cdecl CL_DrawTextPhysicalWithCursor(
     char cursor);
 void __cdecl CL_DrawTextWithCursor(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,

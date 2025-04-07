@@ -346,7 +346,6 @@
     <ClCompile Include="src\gfx_d3d\r_workercmds.cpp" />
     <ClCompile Include="src\gfx_d3d\r_workercmds_common.cpp" />
     <ClCompile Include="src\gfx_d3d\r_xsurface.cpp" />
-    <ClCompile Include="src\physics\ode\array.cpp" />
     <ClCompile Include="src\physics\ode\collision_kernel.cpp" />
     <ClCompile Include="src\physics\ode\collision_quadtreespace.cpp" />
     <ClCompile Include="src\physics\ode\collision_space.cpp" />
