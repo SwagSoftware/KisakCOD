@@ -8,6 +8,8 @@
 #include <ui_mp/ui_mp.h>
 #include <client_mp/client_mp.h>
 
+#include <sound/snd_public.h>
+
 enum sessionState_t : __int32
 {                                       // ...
     SESS_STATE_PLAYING = 0x0,

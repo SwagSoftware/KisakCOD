@@ -3,6 +3,7 @@
 #include <qcommon/mem_track.h>
 #include <client/client.h>
 #include <ui/ui.h>
+#include <xanim/xmodel.h>
 
 struct CenterPrint // sizeof=0x408
 {                                       // ...
@@ -279,8 +280,8 @@ void __cdecl CG_DrawChatMessages(int localClientNum)
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            cgameTimeNow = MEMORY[0x9D5560];
-            if (MEMORY[0x9D5560] - cgsArray[0].teamChatMsgTimes[cgsArray[0].teamLastChatPos % chatHeight] > cg_chatTime->current.integer)
+            cgameTimeNow = cgArray[0].time;
+            if (cgArray[0].time - cgsArray[0].teamChatMsgTimes[cgsArray[0].teamLastChatPos % chatHeight] > cg_chatTime->current.integer)
                 ++cgsArray[0].teamLastChatPos;
             scrPlace = &scrPlaceView[localClientNum];
             font = UI_GetFontHandle(scrPlace, 0, fontScale);
@@ -361,7 +362,7 @@ void __cdecl CG_ScanForCrosshairEntity(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (!MEMORY[0x98F45C])
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 473, 0, "%s", "cgameGlob->nextSnap");
     cgameGlob->predictedPlayerState.weapFlags &= 0xFFFFFFE7;
     if (!CG_Flashbanged(localClientNum))
@@ -443,10 +444,10 @@ void __cdecl CG_CheckTimedMenus(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DF71C][33] && MEMORY[0x9D5560] - MEMORY[0x9DF71C][33] > 2500)
+    if (cgArray[0].voiceTime && cgArray[0].time - cgArray[0].voiceTime > 2500)
     {
         Menus_CloseByName(&cgDC[localClientNum], "voiceMenu");
-        MEMORY[0x9DF71C][33] = 0;
+        cgArray[0].voiceTime = 0;
     }
     CG_CheckForPlayerInput(localClientNum);
     CG_CheckHudHealthDisplay(localClientNum);
@@ -534,7 +535,7 @@ bool __cdecl CG_CheckPlayerTryReload(int localClientNum, char buttons)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (MEMORY[0x9D5580] & 4) == 0 && (MEMORY[0x9D5624] & 0x300) == 0;
+    return (cgArray[0].predictedPlayerState.pm_flags & 4) == 0 && (cgArray[0].predictedPlayerState.eFlags & 0x300) == 0;
 }
 
 bool __cdecl CG_CheckPlayerFireNonTurret(int localClientNum, char buttons)
@@ -549,7 +550,7 @@ bool __cdecl CG_CheckPlayerFireNonTurret(int localClientNum, char buttons)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (MEMORY[0x9D5624] & 0x300) == 0;
+    return (cgArray[0].predictedPlayerState.eFlags & 0x300) == 0;
 }
 
 int __cdecl CG_CheckPlayerOffHandUsage(int localClientNum, __int16 buttons)
@@ -575,17 +576,17 @@ void __cdecl CG_CheckHudHealthDisplay(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (hud_health_startpulse_injured->current.value <= CG_CalcPlayerHealth((const playerState_s *)(MEMORY[0x98F45C] + 12)))
+    if (hud_health_startpulse_injured->current.value <= CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps))
     {
         if (hud_fade_healthbar->current.value != 0.0
-            && MEMORY[0x9DF8F0][0]
-            && hud_fade_healthbar->current.value * 1000.0 < (double)(MEMORY[0x9D5560] - MEMORY[0x9DF8F0][0]))
+            && cgArray[0].healthFadeTime
+            && hud_fade_healthbar->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].healthFadeTime))
         {
             if (CL_GetLocalClientActiveCount() == 1)
                 Menus_HideByName(&cgDC[localClientNum], "Health");
             else
                 Menus_HideByName(&cgDC[localClientNum], "Health_mp");
-            MEMORY[0x9DF8F0][0] = 0;
+            cgArray[0].healthFadeTime = 0;
         }
     }
     else
@@ -607,8 +608,8 @@ void __cdecl CG_CheckHudAmmoDisplay(int localClientNum)
     if (CG_CheckPlayerForLowAmmo(cgArray) || CG_CheckPlayerForLowClip(cgArray))
         CG_MenuShowNotify(localClientNum, 1);
     if (hud_fade_ammodisplay->current.value != 0.0
-        && MEMORY[0x9DF8F0][1]
-        && hud_fade_ammodisplay->current.value * 1000.0 < (double)(MEMORY[0x9D5560] - MEMORY[0x9DF8F0][1]))
+        && cgArray[0].ammoFadeTime
+        && hud_fade_ammodisplay->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].ammoFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
         {
@@ -619,7 +620,7 @@ void __cdecl CG_CheckHudAmmoDisplay(int localClientNum)
         {
             Menus_HideByName(&cgDC[localClientNum], "weaponinfo_mp");
         }
-        MEMORY[0x9DF8F0][1] = 0;
+        cgArray[0].ammoFadeTime = 0;
     }
 }
 
@@ -634,14 +635,14 @@ void __cdecl CG_CheckHudCompassDisplay(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     if (hud_fade_compass->current.value != 0.0
-        && MEMORY[0x9DF8EC]
-        && hud_fade_compass->current.value * 1000.0 < (double)(MEMORY[0x9D5560] - MEMORY[0x9DF8EC]))
+        && cgArray[0].compassFadeTime
+        && hud_fade_compass->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].compassFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "Compass");
         else
             Menus_HideByName(&cgDC[localClientNum], "Compass_mp");
-        MEMORY[0x9DF8EC] = 0;
+        cgArray[0].compassFadeTime = 0;
     }
 }
 
@@ -655,27 +656,27 @@ void __cdecl CG_CheckHudStanceDisplay(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((*(unsigned int *)(MEMORY[0x98F45C] + 188) & 8) != 0 && (*(unsigned int *)(MEMORY[0x98F45C] + 188) & 0x100) != 0
-        || (*(unsigned int *)(MEMORY[0x98F45C] + 188) & 4) != 0 && (*(unsigned int *)(MEMORY[0x98F45C] + 188) & 0x200) != 0)
+    if ((cgArray[0].nextSnap->ps.eFlags & 8) != 0 && (cgArray[0].nextSnap->ps.eFlags & 0x100) != 0
+        || (cgArray[0].nextSnap->ps.eFlags & 4) != 0 && (cgArray[0].nextSnap->ps.eFlags & 0x200) != 0)
     {
         CG_MenuShowNotify(localClientNum, 3);
     }
     if (hud_fade_stance->current.value != 0.0
-        && MEMORY[0x9DF8F0][2]
-        && hud_fade_stance->current.value * 1000.0 < (double)(MEMORY[0x9D5560] - MEMORY[0x9DF8F0][2]))
+        && cgArray[0].stanceFadeTime
+        && hud_fade_stance->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].stanceFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "stance");
         else
             Menus_HideByName(&cgDC[localClientNum], "stance_mp");
-        MEMORY[0x9DF8F0][2] = 0;
+        cgArray[0].stanceFadeTime = 0;
     }
 }
 
 void __cdecl CG_CheckHudSprintDisplay(int localClientNum)
 {
     int maxSprintTime; // [esp+Ch] [ebp-Ch]
-    const playerState_s *ps; // [esp+10h] [ebp-8h]
+    playerState_s* ps; // [esp+10h] [ebp-8h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -685,24 +686,27 @@ void __cdecl CG_CheckHudSprintDisplay(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
-    if (*(unsigned int *)(MEMORY[0x98F45C] + 16) != 7)
+    ps = &cgArray[0].nextSnap->ps;
+    if (cgArray[0].nextSnap->ps.pm_type != 7)
     {
         maxSprintTime = BG_GetMaxSprintTime(ps);
-        if (PM_GetSprintLeft(ps, MEMORY[0x9D5560]) < maxSprintTime)
+        if (PM_GetSprintLeft(ps, cgArray[0].time) < maxSprintTime)
             CG_MenuShowNotify(localClientNum, 6);
     }
-    if (ps->pm_type != 7 && MEMORY[0x9D5B34] > MEMORY[0x9D5B38])
+    if (ps->pm_type != 7
+        && cgArray[0].predictedPlayerState.sprintState.lastSprintStart > cgArray[0].predictedPlayerState.sprintState.lastSprintEnd)
+    {
         CG_MenuShowNotify(localClientNum, 6);
+    }
     if (hud_fade_sprint->current.value != 0.0
-        && MEMORY[0x9DF8F0][3]
-        && hud_fade_stance->current.value * 1000.0 < (double)(MEMORY[0x9D5560] - MEMORY[0x9DF8F0][3]))
+        && cgArray[0].sprintFadeTime
+        && hud_fade_stance->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].sprintFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "sprintMeter");
         else
             Menus_HideByName(&cgDC[localClientNum], "sprintMeter_mp");
-        MEMORY[0x9DF8F0][3] = 0;
+        cgArray[0].sprintFadeTime = 0;
     }
 }
 
@@ -717,14 +721,14 @@ void __cdecl CG_CheckHudOffHandDisplay(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     if (hud_fade_offhand->current.value != 0.0
-        && MEMORY[0x9DF8F0][4]
-        && hud_fade_offhand->current.value * 1000.0 < (double)(MEMORY[0x9D5560] - MEMORY[0x9DF8F0][4]))
+        && cgArray[0].offhandFadeTime
+        && hud_fade_offhand->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].offhandFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "offhandinfo");
         else
             Menus_HideByName(&cgDC[localClientNum], "offhandinfo_mp");
-        MEMORY[0x9DF8F0][4] = 0;
+        cgArray[0].offhandFadeTime = 0;
     }
 }
 
@@ -740,7 +744,7 @@ void __cdecl CG_CheckHudObjectiveDisplay(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (MEMORY[0x9D5560] - MEMORY[0x9DF71C][0] > 100)
+        if (cgArray[0].time - cgArray[0].scoreFadeTime > 100)
             Menus_HideByName(&cgDC[localClientNum], "objectiveinfo");
     }
 }
@@ -890,8 +894,8 @@ void __cdecl DrawIntermission(int localClientNum)
         }
         else
         {
-            MEMORY[0x9DF718] = 1;
-            MEMORY[0x9DF71C][0] = MEMORY[0x9D5560];
+            cgArray[0].showScores = 1;
+            cgArray[0].scoreFadeTime = cgArray[0].time;
             if (UI_GetActiveMenu(localClientNum) != 10 && !ui_showEndOfGame->current.enabled)
                 UI_SetActiveMenu(localClientNum, 10);
             if (UI_GetActiveMenu(localClientNum) == 10)
@@ -942,7 +946,7 @@ void __cdecl CG_DrawSpectatorMessage(int localClientNum)
                 "(localClientNum == 0)",
                 localClientNum);
         cgameGlob = cgArray;
-        if (!MEMORY[0x98F45C])
+        if (!cgArray[0].nextSnap)
             MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1275, 0, "%s", "cgameGlob->nextSnap");
         ps = &cgameGlob->nextSnap->ps;
         if ((ps->otherFlags & 0x18) != 0)
@@ -1000,14 +1004,14 @@ void __cdecl CG_DrawSpectatorMessage(int localClientNum)
 
 int __cdecl CG_DrawFollow(int localClientNum)
 {
-    Font_s *font; // [esp+24h] [ebp-4Ch]
-    ScreenPlacement *scrPlace; // [esp+28h] [ebp-48h]
-    char *followingString; // [esp+30h] [ebp-40h]
+    Font_s* font; // [esp+24h] [ebp-4Ch]
+    ScreenPlacement* scrPlace; // [esp+28h] [ebp-48h]
+    char* followingString; // [esp+30h] [ebp-40h]
     char clientName[40]; // [esp+34h] [ebp-3Ch] BYREF
     float scale; // [esp+60h] [ebp-10h]
     float x; // [esp+64h] [ebp-Ch]
     float y; // [esp+68h] [ebp-8h]
-    const playerState_s *ps; // [esp+6Ch] [ebp-4h]
+    const playerState_s* ps; // [esp+6Ch] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -1017,10 +1021,10 @@ int __cdecl CG_DrawFollow(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
-    if ((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 2) == 0)
+    ps = &cgArray[0].nextSnap->ps;
+    if ((ps->otherFlags & 2) == 0)
         return 0;
-    if (MEMORY[0x9E06F0])
+    if (cgArray[0].inKillCam)
         return 0;
     if (ps->clientNum >= 0x40u)
         MyAssertHandler(
@@ -1056,10 +1060,11 @@ void __cdecl CG_UpdatePlayerNames(int localClientNum)
 void __cdecl CG_DrawFriendlyNames(int localClientNum)
 {
     bool v1; // [esp+4h] [ebp-2Ch]
+    snapshot_s *v2; // [esp+8h] [ebp-28h]
     int entityIndex; // [esp+Ch] [ebp-24h]
     team_t team; // [esp+10h] [ebp-20h]
     bool flashed; // [esp+17h] [ebp-19h]
-    const snapshot_s *nextSnap; // [esp+1Ch] [ebp-14h]
+    snapshot_s *nextSnap; // [esp+1Ch] [ebp-14h]
     centity_s *cent; // [esp+20h] [ebp-10h]
     float alpha; // [esp+2Ch] [ebp-4h]
 
@@ -1073,17 +1078,17 @@ void __cdecl CG_DrawFriendlyNames(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        team = cgArray[0].bgs.clientinfo[*(unsigned int *)(MEMORY[0x98F45C] + 232)].team;
-        nextSnap = (const snapshot_s *)MEMORY[0x98F45C];
+        team = cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum].team;
+        nextSnap = cgArray[0].nextSnap;
         flashed = CG_Flashbanged(localClientNum);
         for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
         {
             cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
             if (cent->nextState.eType == 1)
             {
-                v1 = (*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0
-                    && cent->nextState.number == *(unsigned int *)(MEMORY[0x98F45C] + 232);
-                if ((!v1 || MEMORY[0x9D5570])
+                v2 = cgArray[0].nextSnap;
+                v1 = (v2->ps.otherFlags & 6) != 0 && cent->nextState.number == v2->ps.clientNum;
+                if ((!v1 || cgArray[0].renderingThirdPerson)
                     && team
                     && (team == TEAM_SPECTATOR || team == cgArray[0].bgs.clientinfo[cent->nextState.clientNum].team))
                 {
@@ -1092,7 +1097,7 @@ void __cdecl CG_DrawFriendlyNames(int localClientNum)
                         if (!overheadFade[cent->nextState.clientNum].visible)
                         {
                             overheadFade[cent->nextState.clientNum].visible = 1;
-                            overheadFade[cent->nextState.clientNum].startTime = MEMORY[0x9D5560];
+                            overheadFade[cent->nextState.clientNum].startTime = cgArray[0].time;
                         }
                     }
                     else
@@ -1100,9 +1105,9 @@ void __cdecl CG_DrawFriendlyNames(int localClientNum)
                         overheadFade[cent->nextState.clientNum].visible = 0;
                     }
                     if (overheadFade[cent->nextState.clientNum].visible)
-                        overheadFade[cent->nextState.clientNum].lastTime = MEMORY[0x9D5560];
+                        overheadFade[cent->nextState.clientNum].lastTime = cgArray[0].time;
                     alpha = CG_FadeCrosshairNameAlpha(
-                        MEMORY[0x9D5560],
+                        cgArray[0].time,
                         overheadFade[cent->nextState.clientNum].startTime,
                         overheadFade[cent->nextState.clientNum].lastTime,
                         cg_friendlyNameFadeIn->current.integer,
@@ -1168,7 +1173,7 @@ void __cdecl CG_DrawOverheadNames(int localClientNum, const centity_s *cent, flo
                 "(localClientNum == 0)",
                 localClientNum);
         cgameGlob = cgArray;
-        ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
+        ps = &cgArray[0].nextSnap->ps;
         font = UI_GetFontHandle(0, cg_overheadNamesFont->current.integer, 1.0);
         obj = Com_GetClientDObj(cent->nextState.number, localClientNum);
         if (obj && CG_DObjGetWorldTagPos(&cent->pose, obj, scr_const.j_head, origin))
@@ -1282,9 +1287,9 @@ char __cdecl CG_CalcNamePosition(int localClientNum, float *origin, float *xOut,
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    refdef = (const refdef_s *)&MEMORY[0x9D8700];
+    refdef = &cgArray[0].refdef;
     scrPlace = &scrPlaceView[localClientNum];
-    CG_GetViewAxisProjections((const refdef_s *)&MEMORY[0x9D8700], origin, projections);
+    CG_GetViewAxisProjections(&cgArray[0].refdef, origin, projections);
     w = projections[0];
     if (projections[0] < 0.0)
         return 0;
@@ -1377,8 +1382,8 @@ void __cdecl CG_DrawCrosshairNames(int localClientNum)
 {
     int entityIndex; // [esp+4h] [ebp-1Ch]
     team_t myTeam; // [esp+Ch] [ebp-14h]
-    const snapshot_s *nextSnap; // [esp+10h] [ebp-10h]
-    centity_s *cent; // [esp+14h] [ebp-Ch]
+    snapshot_s* nextSnap; // [esp+10h] [ebp-10h]
+    centity_s* cent; // [esp+14h] [ebp-Ch]
     float alpha; // [esp+1Ch] [ebp-4h]
 
     if (cg_drawCrosshairNames->current.enabled)
@@ -1391,49 +1396,54 @@ void __cdecl CG_DrawCrosshairNames(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (!MEMORY[0x9D5570] && MEMORY[0x9DF71C][5] <= 64)
+        if (!cgArray[0].renderingThirdPerson && cgArray[0].crosshairClientNum <= 64)
         {
-            if (*(unsigned int *)(MEMORY[0x98F45C] + 232) >= 0x40u)
+            if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
                 MyAssertHandler(
                     ".\\cgame_mp\\cg_draw_mp.cpp",
                     685,
                     0,
                     "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    *(unsigned int *)(MEMORY[0x98F45C] + 232),
+                    cgArray[0].nextSnap->ps.clientNum,
                     64);
-            if (cgArray[0].bgs.clientinfo[*(unsigned int *)(MEMORY[0x98F45C] + 232)].infoValid)
+            if (cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum].infoValid)
             {
-                if (MEMORY[0x9DF71C][5] >= 0x40u)
+                if (cgArray[0].crosshairClientNum >= 0x40u)
                     MyAssertHandler(
                         ".\\cgame_mp\\cg_draw_mp.cpp",
                         689,
                         0,
                         "cgameGlob->crosshairClientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                        MEMORY[0x9DF71C][5],
+                        cgArray[0].crosshairClientNum,
                         64);
-                if (cgArray[0].bgs.clientinfo[MEMORY[0x9DF71C][5]].infoValid)
+                if (cgArray[0].bgs.clientinfo[cgArray[0].crosshairClientNum].infoValid)
                 {
-                    nextSnap = (const snapshot_s *)MEMORY[0x98F45C];
+                    nextSnap = cgArray[0].nextSnap;
                     for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
                     {
                         cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
-                        if (cent->nextState.eType == 1 && cent->nextState.clientNum == MEMORY[0x9DF71C][5])
+                        if (cent->nextState.eType == 1 && cent->nextState.clientNum == cgArray[0].crosshairClientNum)
                         {
-                            myTeam = cgArray[0].bgs.clientinfo[*(unsigned int *)(MEMORY[0x98F45C] + 232)].team;
-                            if (myTeam == TEAM_SPECTATOR || myTeam && myTeam == cgArray[0].bgs.clientinfo[MEMORY[0x9DF71C][5]].team)
+                            myTeam = cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum].team;
+                            if (myTeam == TEAM_SPECTATOR
+                                || myTeam && myTeam == cgArray[0].bgs.clientinfo[cgArray[0].crosshairClientNum].team)
+                            {
                                 alpha = CG_FadeCrosshairNameAlpha(
-                                    MEMORY[0x9D5560],
-                                    MEMORY[0x9DF71C][7],
-                                    MEMORY[0x9DF71C][6],
+                                    cgArray[0].time,
+                                    cgArray[0].crosshairClientStartTime,
+                                    cgArray[0].crosshairClientLastTime,
                                     cg_friendlyNameFadeIn->current.integer,
                                     cg_friendlyNameFadeOut->current.integer);
+                            }
                             else
+                            {
                                 alpha = CG_FadeCrosshairNameAlpha(
-                                    MEMORY[0x9D5560],
-                                    MEMORY[0x9DF71C][7],
-                                    MEMORY[0x9DF71C][6],
+                                    cgArray[0].time,
+                                    cgArray[0].crosshairClientStartTime,
+                                    cgArray[0].crosshairClientLastTime,
                                     cg_enemyNameFadeIn->current.integer,
                                     cg_enemyNameFadeOut->current.integer);
+                            }
                             CG_DrawOverheadNames(localClientNum, cent, alpha);
                             return;
                         }
@@ -1443,26 +1453,27 @@ void __cdecl CG_DrawCrosshairNames(int localClientNum)
         }
     }
 }
+
 void __cdecl DrawViewmodelInfo(int localClientNum)
 {
-    const char* v1; // [esp+2Ch] [ebp-84Ch]
-    const char* v2; // [esp+30h] [ebp-848h]
-    const char* v3; // [esp+34h] [ebp-844h]
-    const char* v4; // [esp+38h] [ebp-840h]
-    const char* v5; // [esp+3Ch] [ebp-83Ch]
-    const char* name; // [esp+40h] [ebp-838h]
-    weaponInfo_s* weapInfo; // [esp+44h] [ebp-834h]
+    const char *v1; // [esp+2Ch] [ebp-84Ch]
+    const char *v2; // [esp+30h] [ebp-848h]
+    const char *v3; // [esp+34h] [ebp-844h]
+    const char *v4; // [esp+38h] [ebp-840h]
+    const char *v5; // [esp+3Ch] [ebp-83Ch]
+    const char *name; // [esp+40h] [ebp-838h]
+    weaponInfo_s *weapInfo; // [esp+44h] [ebp-834h]
     char buffer[2052]; // [esp+48h] [ebp-830h] BYREF
-    Font_s* font; // [esp+850h] [ebp-28h]
-    const ScreenPlacement* scrPlace; // [esp+854h] [ebp-24h]
-    XModel* weaponMdl; // [esp+858h] [ebp-20h]
-    const cg_s* cgameGlob; // [esp+85Ch] [ebp-1Ch]
-    const char* weaponMdlName; // [esp+860h] [ebp-18h]
+    Font_s *font; // [esp+850h] [ebp-28h]
+    const ScreenPlacement *scrPlace; // [esp+854h] [ebp-24h]
+    XModel *weaponMdl; // [esp+858h] [ebp-20h]
+    const cg_s *cgameGlob; // [esp+85Ch] [ebp-1Ch]
+    const char *weaponMdlName; // [esp+860h] [ebp-18h]
     int len; // [esp+864h] [ebp-14h]
     int weaponIndex; // [esp+868h] [ebp-10h]
     float fov; // [esp+86Ch] [ebp-Ch]
-    WeaponDef* weapDef; // [esp+870h] [ebp-8h]
-    const playerState_s* ps; // [esp+874h] [ebp-4h]
+    WeaponDef *weapDef; // [esp+870h] [ebp-8h]
+    const playerState_s *ps; // [esp+874h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -1556,17 +1567,17 @@ void __cdecl CG_DrawActive(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    fovSensitivityScale = MEMORY[0x9D8748][6179];
-    if (MEMORY[0x9DF918] != 0.0)
-        fovSensitivityScale = fovSensitivityScale * MEMORY[0x9DF918];
+    fovSensitivityScale = cgArray[0].zoomSensitivity;
+    if (cgArray[0].shellshock.sensitivity != 0.0)
+        fovSensitivityScale = fovSensitivityScale * cgArray[0].shellshock.sensitivity;
     CL_SetFOVSensitivityScale(localClientNum, fovSensitivityScale);
-    Vec3Add((const float *)&MEMORY[0x9DF71C][78], (const float *)&MEMORY[0x9DF71C][81], angles);
+    Vec3Add(cgArray[0].kickAngles, cgArray[0].offsetAngles, angles);
     CL_SetUserCmdAimValues(localClientNum, angles);
-    BG_AssertOffhandIndexOrNone(MEMORY[0x9DF71C][38]);
-    CL_SetUserCmdWeapons(localClientNum, MEMORY[0x9DF71C][34], MEMORY[0x9DF71C][38]);
-    CL_SetExtraButtons(localClientNum, MEMORY[0xA8E91C][0]);
-    MEMORY[0xA8E91C][0] = 0;
-    CL_RenderScene((const refdef_s *)&MEMORY[0x9D8700]);
+    BG_AssertOffhandIndexOrNone(cgArray[0].equippedOffHand);
+    CL_SetUserCmdWeapons(localClientNum, cgArray[0].weaponSelect, cgArray[0].equippedOffHand);
+    CL_SetExtraButtons(localClientNum, cgArray[0].extraButtons);
+    cgArray[0].extraButtons = 0;
+    CL_RenderScene(&cgArray[0].refdef);
 }
 
 void __cdecl CG_AddSceneTracerBeams(int localClientNum)

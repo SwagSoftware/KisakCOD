@@ -3,7 +3,12 @@
 #include <universal/com_constantconfigstrings.h>
 #include <client_mp/client_mp.h>
 #include <server_mp/server.h>
+
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
 #include <xanim/xmodel.h>
+
+#include <script/scr_const.h>
 #include <script/scr_memorytree.h>
 
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)

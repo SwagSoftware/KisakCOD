@@ -273,7 +273,7 @@ double __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int di
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    fadeColor = CG_FadeColor(time, displayStartTime, duration, 700);
+    fadeColor = CG_FadeColor(cgArray[0].time, displayStartTime, duration, 700);
     if (fadeColor)
         return fadeColor[3];
     else

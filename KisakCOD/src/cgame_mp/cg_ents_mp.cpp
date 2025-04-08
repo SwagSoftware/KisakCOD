@@ -1,5 +1,7 @@
 #include "cg_local_mp.h"
 
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
 
 void __cdecl CG_Player_PreControllers(DObj_s *obj, centity_s *cent)
 {
@@ -28,7 +30,7 @@ void __cdecl CG_Player_PreControllers(DObj_s *obj, centity_s *cent)
     ci = &cgArray[0].bgs.clientinfo[cent->nextState.clientNum];
     if (ci->infoValid)
     {
-        BG_Player_DoControllersSetup(&cent->nextState, ci, dword_9D555C);
+        BG_Player_DoControllersSetup(&cent->nextState, ci, cgArray[0].frametime);
         for (i = 0; i < 6; ++i)
             DObjGetBoneIndex(obj, *controller_names[i], &cent->pose.player.tag[i]);
         cent->pose.fx.triggerTime = (int)&ci->control;
@@ -61,7 +63,7 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
     float v19; // [esp+60h] [ebp-34h]
     float v20; // [esp+64h] [ebp-30h]
     float v21; // [esp+68h] [ebp-2Ch]
-    float v22; // [esp+70h] [ebp-24h]
+    float frameInterpolation; // [esp+70h] [ebp-24h]
     float v23; // [esp+74h] [ebp-20h]
     unsigned int playAnim; // [esp+7Ch] [ebp-18h]
 
@@ -75,25 +77,26 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             cent->pose.localClientNum);
-    v14 = (word_9D5624 & 0x300) != 0 && dword_9D56BC[277] == cent->nextState.number;
+    v14 = (cgArray[0].predictedPlayerState.eFlags & 0x300) != 0
+        && cgArray[0].predictedPlayerState.viewlocked_entNum == cent->nextState.number;
     cent->pose.turret.playerUsing = v14;
     if (cent->pose.turret.playerUsing)
     {
-        cent->pose.fx.triggerTime = (int)&flt_9D8748[4116];
+        cent->pose.fx.triggerTime = (int)cgArray[0].refdefViewAngles;
         cent->pose.cullIn = 0;
     }
     else
     {
         v21 = cent->currentState.u.turret.gunAngles[0];
-        v22 = unk_9D5558;
+        frameInterpolation = cgArray[0].frameInterpolation;
         v13 = cent->nextState.lerp.u.turret.gunAngles[0] - v21;
         v23 = v13 * 0.002777777845039964;
         v12 = v23 + 0.5;
         v11 = floor(v12);
         v10 = (v23 - v11) * 360.0;
-        cent->pose.turret.angles.pitch = v10 * v22 + v21;
+        cent->pose.turret.angles.pitch = v10 * frameInterpolation + v21;
         v18 = cent->currentState.u.turret.gunAngles[1];
-        v19 = unk_9D5558;
+        v19 = cgArray[0].frameInterpolation;
         v9 = cent->nextState.lerp.u.turret.gunAngles[1] - v18;
         v20 = v9 * 0.002777777845039964;
         v8 = v20 + 0.5;
@@ -102,7 +105,7 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
         cent->pose.turret.angles.yaw = v6 * v19 + v18;
     }
     v15 = cent->currentState.u.turret.gunAngles[2];
-    v16 = unk_9D5558;
+    v16 = cgArray[0].frameInterpolation;
     v5 = cent->nextState.lerp.u.turret.gunAngles[2] - v15;
     v17 = v5 * 0.002777777845039964;
     v4 = v17 + 0.5;
@@ -113,7 +116,8 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
     DObjGetBoneIndex(obj, scr_const.tag_aim_animated, &cent->pose.turret.tag_aim_animated);
     DObjGetBoneIndex(obj, scr_const.tag_flash, &cent->pose.turret.tag_flash);
     DObjGetTree(obj);
-    if ((word_9D5624 & 0x300) != 0 && dword_9D56BC[277] == cent->nextState.number)
+    if ((cgArray[0].predictedPlayerState.eFlags & 0x300) != 0
+        && cgArray[0].predictedPlayerState.viewlocked_entNum == cent->nextState.number)
     {
         playAnim = 1;
     }
@@ -253,7 +257,7 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v50 = 0;
     else
         v50 = -1;
-    LOunsigned int(v47) = v50;
+    LODWORD(v47) = v50;
     if (v73 >= 0.0)
         v46 = 0;
     else
@@ -270,11 +274,11 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v44 = -1;
     v49 = v44;
     v41 = v51 & v47 | v55 & ~v47;
-    v42 = LOunsigned int(v52) & v48 | LOunsigned int(v56) & ~v48;
-    v43 = LOunsigned int(v53) & v49 | LOunsigned int(v57) & ~v49;
+    v42 = LODWORD(v52) & v48 | LODWORD(v56) & ~v48;
+    v43 = LODWORD(v53) & v49 | LODWORD(v57) & ~v49;
     v38 = v55 & v47 | v51 & ~v47;
-    v39 = LOunsigned int(v56) & v48 | LOunsigned int(v52) & ~v48;
-    v40 = LOunsigned int(v57) & v49 | LOunsigned int(v53) & ~v49;
+    v39 = LODWORD(v56) & v48 | LODWORD(v52) & ~v48;
+    v40 = LODWORD(v57) & v49 | LODWORD(v53) & ~v49;
     *(float *)&v55 = *((float *)&axis_24 + 1);
     *((float *)&v55 + 1) = *((float *)&axis_24 + 1);
     v56 = *((float *)&axis_24 + 1);
@@ -288,7 +292,7 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v36 = 0;
     else
         v36 = -1;
-    LOunsigned int(v33) = v36;
+    LODWORD(v33) = v36;
     if (v68 >= 0.0)
         v32 = 0;
     else
@@ -305,11 +309,11 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v30 = -1;
     v35 = v30;
     v27 = v51 & v33 | v55 & ~v33;
-    v28 = LOunsigned int(v52) & v34 | LOunsigned int(v56) & ~v34;
-    v29 = LOunsigned int(v53) & v35 | LOunsigned int(v57) & ~v35;
+    v28 = LODWORD(v52) & v34 | LODWORD(v56) & ~v34;
+    v29 = LODWORD(v53) & v35 | LODWORD(v57) & ~v35;
     v24 = v55 & v33 | v51 & ~v33;
-    v25 = LOunsigned int(v56) & v34 | LOunsigned int(v52) & ~v34;
-    v26 = LOunsigned int(v57) & v35 | LOunsigned int(v53) & ~v35;
+    v25 = LODWORD(v56) & v34 | LODWORD(v52) & ~v34;
+    v26 = LODWORD(v57) & v35 | LODWORD(v53) & ~v35;
     *(float *)&v55 = *(float *)&axis_32;
     *((float *)&v55 + 1) = *(float *)&axis_32;
     v56 = *(float *)&axis_32;
@@ -323,7 +327,7 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v22 = 0;
     else
         v22 = -1;
-    LOunsigned int(v19) = v22;
+    LODWORD(v19) = v22;
     if (v63 >= 0.0)
         v18 = 0;
     else
@@ -340,11 +344,11 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v16 = -1;
     v21 = v16;
     v13 = v51 & v19 | v55 & ~v19;
-    v14 = LOunsigned int(v52) & v20 | LOunsigned int(v56) & ~v20;
-    v15 = LOunsigned int(v53) & v21 | LOunsigned int(v57) & ~v21;
+    v14 = LODWORD(v52) & v20 | LODWORD(v56) & ~v20;
+    v15 = LODWORD(v53) & v21 | LODWORD(v57) & ~v21;
     *(_QWORD *)&rotatedBounds[1].unitVec[1].packed = v55 & v19 | v51 & ~v19;
-    rotatedBounds[1].u[3] = LOunsigned int(v56) & v20 | LOunsigned int(v52) & ~v20;
-    v12 = LOunsigned int(v57) & v21 | LOunsigned int(v53) & ~v21;
+    rotatedBounds[1].u[3] = LODWORD(v56) & v20 | LODWORD(v52) & ~v20;
+    v12 = LODWORD(v57) & v21 | LODWORD(v53) & ~v21;
     v8 = *(float *)&v41 * v72 + v58;
     v9 = *((float *)&v41 + 1) * v73 + v59;
     v10 = *(float *)&v42 * v74 + v60;
@@ -357,19 +361,19 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
     v9 = *((float *)&v13 + 1) * v63 + v9;
     v10 = *(float *)&v14 * v64 + v10;
     rotatedBounds[0].v[0] = *(float *)&v15 * v65 + rotatedBounds[0].v[0];
-    LOunsigned int(maxs[11]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[11]) = &rotatedBounds[0].v[1];
     rotatedBounds[0].v[1] = *(float *)&v38 * v72 + v58;
     rotatedBounds[0].v[2] = *((float *)&v38 + 1) * v73 + v59;
     rotatedBounds[0].v[3] = *(float *)&v39 * v74 + v60;
     rotatedBounds[1].v[0] = *(float *)&v40 * v75 + v61;
-    LOunsigned int(maxs[10]) = &rotatedBounds[0].v[1];
-    LOunsigned int(maxs[9]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[10]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[9]) = &rotatedBounds[0].v[1];
     rotatedBounds[0].v[1] = *(float *)&v24 * v67 + rotatedBounds[0].v[1];
     rotatedBounds[0].v[2] = *((float *)&v24 + 1) * v68 + rotatedBounds[0].v[2];
     rotatedBounds[0].v[3] = *(float *)&v25 * v69 + rotatedBounds[0].v[3];
     rotatedBounds[1].v[0] = *(float *)&v26 * v70 + rotatedBounds[1].v[0];
-    LOunsigned int(maxs[8]) = &rotatedBounds[0].v[1];
-    LOunsigned int(maxs[7]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[8]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[7]) = &rotatedBounds[0].v[1];
     rotatedBounds[0].v[1] = rotatedBounds[1].v[1] * v62 + rotatedBounds[0].v[1];
     rotatedBounds[0].v[2] = rotatedBounds[1].v[2] * v63 + rotatedBounds[0].v[2];
     rotatedBounds[0].v[3] = rotatedBounds[1].v[3] * v64 + rotatedBounds[0].v[3];

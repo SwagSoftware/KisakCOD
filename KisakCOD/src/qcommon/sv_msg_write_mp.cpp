@@ -1,5 +1,10 @@
+#include "sv_msg_write_mp.h"
+
 #include "qcommon.h"
 #include "mem_track.h"
+#include "huffman.h"
+
+#include "net_chan_mp.h"
 
 unsigned int kbitmask[33] =
 {

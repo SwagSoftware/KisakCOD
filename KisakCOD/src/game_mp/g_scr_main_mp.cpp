@@ -1,5 +1,27 @@
 #include "g_public_mp.h"
 
+#include "g_utils_mp.h"
+
+#include <client/client.h>
+#include <client_mp/client_mp.h>
+
+#include <database/database.h>
+
+#include <server/sv_game.h>
+#include <server_mp/server.h>
+
+#include <script/scr_animtree.h>
+#include <script/scr_const.h>
+#include <script/scr_main.h>
+#include <script/scr_stringlist.h>
+#include <script/scr_variable.h>
+#include <script/scr_vm.h>
+
+#include <universal/com_sndalias.h>
+
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
+#include <xanim/xanim.h>
 
 //   struct BuiltinFunctionDef *functions 827b5700     g_scr_main_mp.obj
 //   struct scr_data_t g_scr_data 82e8a4b8     g_scr_main_mp.obj
@@ -645,7 +667,7 @@ void GScr_SetDvar()
         Dvar_SetFromStringByName(dvarName, (char *)dvarValue);
         if (v3)
         {
-            dvar = _Dvar_FindVar(dvarName);
+            dvar = Dvar_FindVar(dvarName);
             if (!dvar)
                 MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 778, 0, "%s", "dvar");
             Dvar_AddFlags(dvar, 1024);
@@ -5343,7 +5365,7 @@ void GScr_MakeDvarServerInfo()
     char *pCh; // [esp+834h] [ebp-4h]
 
     dvarName = Scr_GetString(0);
-    dvar = _Dvar_FindVar(dvarName);
+    dvar = Dvar_FindVar(dvarName);
     if (dvar)
     {
         Dvar_AddFlags(dvar, 256);

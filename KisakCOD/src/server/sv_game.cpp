@@ -1,6 +1,9 @@
 #include "sv_game.h"
 #include <qcommon/mem_track.h>
 
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
+
 
 //int gameInitialized      834a4d50     sv_game.obj
 char g_sv_skel_memory[262144];

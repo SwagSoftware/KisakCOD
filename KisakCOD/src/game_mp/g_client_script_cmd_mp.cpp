@@ -1,6 +1,6 @@
 #include "g_public_mp.h"
 
-
+#include <script/scr_vm.h>
 
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
 {

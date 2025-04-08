@@ -137,7 +137,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime);
 bool __cdecl Scr_CompareProfileTimes(const OpcodeLookup *opcodeLookup1, const OpcodeLookup *opcodeLookup2);
 void CompileError(unsigned int sourcePos, const char *msg, ...);
 scrStringDebugGlob_t *Scr_IgnoreLeaks();
-void CompileError2(char *codePos, char *msg, ...);
+void CompileError2(char *codePos, const char *msg, ...);
 void __cdecl Scr_GetTextSourcePos(const char *buf, char *codePos, char *line);
 void __cdecl RuntimeError(char *codePos, unsigned int index, const char *msg, const char *dialogMessage);
 void __cdecl RuntimeErrorInternal(int channel, char *codePos, unsigned int index, const char *msg);

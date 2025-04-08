@@ -1,5 +1,7 @@
 #pragma once
 
+#include "r_gfx.h"
+
 struct FxWorldMarkPoint // sizeof=0x18
 {                                       // ...
     float xyz[3];

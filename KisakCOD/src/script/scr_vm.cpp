@@ -1,5 +1,26 @@
 #include "scr_vm.h"
 
+#include "scr_animtree.h"
+#include "scr_debugger.h"
+#include "scr_parser.h"
+#include "scr_main.h"
+#include "scr_stringlist.h"
+
+#include <database/database.h>
+
+#include <bgame/bg_local.h>
+
+#include <game_mp/g_public_mp.h>
+
+#include <universal/com_memory.h>
+
+scrVmPub_t scrVmPub;
+scrVmGlob_t scrVmGlob;
+
+function_stack_t pos;
+
+int scr_initialized;
+
 void __cdecl SCR_Init()
 {
     scr_initialized = 1;
@@ -496,7 +517,7 @@ int __cdecl Scr_GetFunctionHandle(const char* filename, const char* name)
         MyAssertHandler(".\\script\\scr_main.cpp", 70, 0, "%s", "strlen( filename ) < MAX_QPATH");
     name2 = Scr_CreateCanonicalFilename(filename);
     fileId = FindVariable(scrCompilePub.scripts, name2);
-    _SL_RemoveRefToString(name2);
+    SL_RemoveRefToString(name2);
     if (!fileId)
         return 0;
     id = FindObject(fileId);
@@ -5576,7 +5597,7 @@ void __cdecl Scr_AddStruct()
     RemoveRefToObject(id);
 }
 
-void __cdecl Scr_AddString(char* value)
+void __cdecl Scr_AddString(const char* value)
 {
     if (!value)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4946, 0, "%s", "value");
@@ -5585,7 +5606,7 @@ void __cdecl Scr_AddString(char* value)
     scrVmPub.top->u.intValue = SL_GetString(value, 0).prev;
 }
 
-void __cdecl Scr_AddIString(char* value)
+void __cdecl Scr_AddIString(const char* value)
 {
     if (!value)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4956, 0, "%s", "value");
@@ -5604,7 +5625,7 @@ void __cdecl Scr_AddConstString(unsigned int value)
     SL_AddRefToString(value);
 }
 
-void __cdecl Scr_AddVector(float* value)
+void __cdecl Scr_AddVector(const float* value)
 {
     IncInParam();
     scrVmPub.top->type = 4;
@@ -5659,7 +5680,7 @@ void __cdecl Scr_Error(const char* error)
     Scr_ErrorInternal();
 }
 
-void __cdecl Scr_SetErrorMessage(char* error)
+void __cdecl Scr_SetErrorMessage(const char* error)
 {
     if (!scrVarPub.error_message)
     {
@@ -5676,7 +5697,7 @@ void __cdecl Scr_TerminalError(const char* error)
     Scr_Error(error);
 }
 
-void __cdecl Scr_NeverTerminalError(char* error)
+void __cdecl Scr_NeverTerminalError(const char* error)
 {
     if (scrVmGlob.loading)
     {

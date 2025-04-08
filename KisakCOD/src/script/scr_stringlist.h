@@ -104,7 +104,7 @@ unsigned int SL_GetLowercaseString(const char* str, unsigned int user);
 int SL_GetRefStringLen(RefString* refString);
 int SL_GetStringLen(unsigned int stringValue);
 
-unsigned int SL_FindLowercaseString(const char* str);
+HashEntry_unnamed_type_u SL_FindLowercaseString(const char* str);
 
 const char* SL_DebugConvertToString(unsigned int stringValue);
 unsigned int SL_ConvertFromString(const char* str);
@@ -118,3 +118,5 @@ int SL_IsLowercaseString(unsigned int stringValue);
 void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from);
 
 HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type);
+
+HashEntry_unnamed_type_u __cdecl Scr_CreateCanonicalFilename(const char *filename);

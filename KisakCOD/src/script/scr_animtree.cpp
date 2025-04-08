@@ -1,7 +1,14 @@
 #include "scr_animtree.h"
-#include <qcommon/mem_track.h>
-#include "scr_main.h"
 
+#include <qcommon/mem_track.h>
+#include <universal/q_parse.h>
+
+#include "scr_main.h"
+#include "scr_parser.h"
+#include "scr_variable.h"
+
+scrAnimPub_t scrAnimPub;
+scrAnimGlob_t scrAnimGlob;
 
 //    int marker_scr_animtree  83020a00     scr_animtree.obj
 //    struct scrAnimPub_t scrAnimPub 83020c18     scr_animtree.obj
@@ -450,7 +457,7 @@ void __cdecl Scr_AnimTreeParse(const char *pos, unsigned int parentNode, unsigne
     Com_EndParseSession();
 }
 
-void __cdecl AnimTreeCompileError(char *msg)
+void __cdecl AnimTreeCompileError(const char *msg)
 {
     const char *pos; // [esp+0h] [ebp-4h]
 

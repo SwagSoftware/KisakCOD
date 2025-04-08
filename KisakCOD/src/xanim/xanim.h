@@ -6,13 +6,13 @@
 
 #include <script/scr_stringlist.h>
 
-#include <database/database.h>
-
 #include <gfx_d3d/r_font.h>
 
 #include <universal/com_math.h>
 
 #include <bgame/bg_weapons.h>
+
+#include <xanim/xasset.h>
 
 union XAnimIndices // sizeof=0x4
 {                                       // ...
@@ -169,152 +169,6 @@ struct DynEntityServer // sizeof=0x24
     // padding byte
     // padding byte
     int health;
-};
-
-struct XModelLodInfo // sizeof=0x1C
-{                                       // ...
-    float dist;
-    unsigned __int16 numsurfs;
-    unsigned __int16 surfIndex;
-    int partBits[4];
-    unsigned __int8 lod;
-    unsigned __int8 smcIndexPlusOne;
-    unsigned __int8 smcAllocBits;
-    unsigned __int8 unused;
-};
-
-struct XModelCollTri_s // sizeof=0x30
-{
-    float plane[4];
-    float svec[4];
-    float tvec[4];
-};
-
-struct XBoneInfo // sizeof=0x28
-{                                       // ...
-    float bounds[2][3];
-    float offset[3];
-    float radiusSquared;
-};
-
-struct XModelCollSurf_s // sizeof=0x2C
-{
-    XModelCollTri_s* collTris;
-    int numCollTris;
-    float mins[3];
-    float maxs[3];
-    int boneIdx;
-    int contents;
-    int surfFlags;
-};
-
-struct XModelStreamInfo // sizeof=0x0
-{                                       // ...
-};
-
-struct __declspec(align(4)) PhysPreset // sizeof=0x2C
-{                                       // ...
-    const char* name;                   // ...
-    int type;                           // ...
-    float mass;                         // ...
-    float bounce;                       // ...
-    float friction;                     // ...
-    float bulletForceScale;             // ...
-    float explosiveForceScale;          // ...
-    const char* sndAliasPrefix;         // ...
-    float piecesSpreadFraction;
-    float piecesUpwardVelocity;
-    bool tempDefaultToCylinder;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-
-struct __declspec(align(2)) cbrushside_t // sizeof=0xC
-{                                       // ...
-    cplane_s* plane;                    // ...
-    unsigned int materialNum;           // ...
-    __int16 firstAdjacentSideOffset;
-    unsigned __int8 edgeCount;
-    // padding byte
-};
-
-struct BrushWrapper // sizeof=0x50
-{
-    float mins[3];
-    int contents;
-    float maxs[3];
-    unsigned int numsides;
-    cbrushside_t* sides;
-    __int16 axialMaterialNum[2][3];
-    unsigned __int8* baseAdjacentSide;
-    __int16 firstAdjacentSideOffsets[2][3];
-    unsigned __int8 edgeCount[2][3];
-    // padding byte
-    // padding byte
-    int totalEdgeCount;
-    cplane_s* planes;
-};
-
-struct PhysMass // sizeof=0x24
-{                                       // ...
-    float centerOfMass[3];
-    float momentsOfInertia[3];
-    float productsOfInertia[3];
-};
-
-struct PhysGeomInfo // sizeof=0x44
-{
-    BrushWrapper* brush;
-    int type;
-    float orientation[3][3];
-    float offset[3];
-    float halfLengths[3];
-};
-
-struct PhysGeomList // sizeof=0x2C
-{
-    unsigned int count;
-    PhysGeomInfo* geoms;
-    PhysMass mass;
-};
-
-struct XModel // sizeof=0xDC
-{                                       // ...
-    const char *name;
-    unsigned __int8 numBones;
-    unsigned __int8 numRootBones;
-    unsigned __int8 numsurfs;
-    unsigned __int8 lodRampType;
-    unsigned __int16 *boneNames;
-    unsigned __int8 *parentList;
-    __int16 *quats;
-    float *trans;
-    unsigned __int8 *partClassification;
-    DObjAnimMat *baseMat;
-    XSurface *surfs;
-    Material **materialHandles;
-    XModelLodInfo lodInfo[4];
-    XModelCollSurf_s *collSurfs;
-    int numCollSurfs;
-    int contents;
-    XBoneInfo *boneInfo;
-    float radius;
-    float mins[3];
-    float maxs[3];
-    __int16 numLods;
-    __int16 collLod;
-    XModelStreamInfo streamInfo;
-    // padding byte
-    // padding byte
-    // padding byte
-    int memUsage;
-    unsigned __int8 flags;
-    bool bad;
-    // padding byte
-    // padding byte
-    PhysPreset *physPreset;
-    PhysGeomList *physGeoms;
 };
 
 struct __declspec(align(4)) XAnimState // sizeof=0x20
@@ -480,6 +334,16 @@ struct cmodel_t // sizeof=0x48
     float radius;
     cLeaf_t leaf;                       // ...
 };
+
+struct __declspec(align(2)) cbrushside_t // sizeof=0xC
+{                                       // ...
+    cplane_s* plane;                    // ...
+    unsigned int materialNum;           // ...
+    __int16 firstAdjacentSideOffset;
+    unsigned __int8 edgeCount;
+    // padding byte
+};
+
 struct __declspec(align(16)) cbrush_t // sizeof=0x50
 {                                       // ...
     float mins[3];

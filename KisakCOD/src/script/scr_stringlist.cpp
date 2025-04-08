@@ -652,7 +652,7 @@ unsigned int SL_ConvertFromString(const char* str)
 	return SL_ConvertFromRefString(refStr);
 }
 
-unsigned int SL_FindLowercaseString(const char* str)
+HashEntry_unnamed_type_u SL_FindLowercaseString(const char* str)
 {
 	char stra[8196]; // [esp+5Ch] [ebp-2010h] BYREF
 	unsigned int len; // [esp+2064h] [ebp-8h]
@@ -748,4 +748,41 @@ HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue,
 		//Profile_EndInternal(0);
 		return (HashEntry_unnamed_type_u)stringValue;
 	}
+}
+
+void __cdecl CreateCanonicalFilename(char *newFilename, const char *filename, int count)
+{
+	unsigned int c; // [esp+0h] [ebp-4h]
+	const int oldCount = count; // addition because the old assert was broken, lol
+	if (!count)
+		MyAssertHandler(".\\script\\scr_stringlist.cpp", 1146, 0, "%s", "count");
+	do
+	{
+		do
+		{
+			do
+				c = *filename++;
+			while (c == 92);
+		} while (c == 47);
+		while (c >= 0x20)
+		{
+			*newFilename++ = tolower(c);
+			if (!--count)
+				Com_Error(ERR_DROP, "Filename %s exceeds maximum length of %d", filename, oldCount);
+			if (c == 47)
+				break;
+			c = *filename++;
+			if (c == 92)
+				c = 47;
+		}
+	} while (c);
+	*newFilename = 0;
+}
+
+HashEntry_unnamed_type_u __cdecl Scr_CreateCanonicalFilename(const char *filename)
+{
+	char newFilename[1028]; // [esp+0h] [ebp-408h] BYREF
+
+	CreateCanonicalFilename(newFilename, filename, 1024);
+	return SL_GetString_(newFilename, 0, 7);
 }

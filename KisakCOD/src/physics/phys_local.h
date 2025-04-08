@@ -1,10 +1,13 @@
 #pragma once
 #include <xanim/xanim.h>
+#include <xanim/xmodel.h>
 #include <xanim/dobj.h>
 
 #include "ode/joint.h"
 #include "ode/collision_trimesh_internal.h"
 #include <ode/collision_trimesh.h>
+
+#include <universal/memfile.h>
 #include <universal/pool_allocator.h>
 
 

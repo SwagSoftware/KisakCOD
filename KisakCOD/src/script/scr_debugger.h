@@ -1,23 +1,6 @@
 #pragma once
 #include "scr_variable.h"
 
-union VariableUnion // sizeof=0x4
-{                                       // ...
-    int intValue;
-    float floatValue;
-    unsigned int stringValue;
-    const float *vectorValue;
-    const char *codePosValue;
-    unsigned int pointerValue;
-    VariableStackBuffer *stackValue;
-    unsigned int entityOffset;
-};
-struct VariableValue // sizeof=0x8
-{                                       // ...
-    VariableUnion u;                    // ...
-    int type;                           // ...
-};
-
 struct debugger_sval_s // sizeof=0x4
 {
     debugger_sval_s *next;

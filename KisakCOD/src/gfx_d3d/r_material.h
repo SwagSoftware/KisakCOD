@@ -2,7 +2,7 @@
 
 #include <d3d9.h>
 
-#include <database/database.h>
+#include <xanim/xasset.h>
 
 #include "r_gfx.h"
 
@@ -211,66 +211,6 @@ struct MaterialMemory // sizeof=0x8
 {                                       // ...
     Material* material;
     int memory;
-};
-
-struct XSurfaceCollisionAabb // sizeof=0xC
-{                                       // ...
-    unsigned __int16 mins[3];
-    unsigned __int16 maxs[3];
-};
-
-struct XSurfaceCollisionNode // sizeof=0x10
-{
-    XSurfaceCollisionAabb aabb;
-    unsigned __int16 childBeginIndex;
-    unsigned __int16 childCount;
-};
-
-struct XSurfaceCollisionLeaf // sizeof=0x2
-{
-    unsigned __int16 triangleBeginIndex;
-};
-
-struct XSurfaceCollisionTree // sizeof=0x28
-{
-    float trans[3];
-    float scale[3];
-    unsigned int nodeCount;
-    XSurfaceCollisionNode *nodes;
-    unsigned int leafCount;
-    XSurfaceCollisionLeaf *leafs;
-};
-struct XRigidVertList // sizeof=0xC
-{                                       // ...
-    unsigned __int16 boneOffset;        // ...
-    unsigned __int16 vertCount;         // ...
-    unsigned __int16 triOffset;         // ...
-    unsigned __int16 triCount;          // ...
-    XSurfaceCollisionTree *collisionTree;
-};
-
-struct XSurfaceVertexInfo // sizeof=0xC
-{                                       // ...
-    __int16 vertCount[4];
-    unsigned __int16 *vertsBlend;
-};
-
-struct XSurface // sizeof=0x38
-{
-    unsigned __int8 tileMode;
-    bool deformed;
-    unsigned __int16 vertCount;
-    unsigned __int16 triCount;
-    unsigned __int8 zoneHandle;
-    // padding byte
-    unsigned __int16 baseTriIndex;
-    unsigned __int16 baseVertIndex;
-    unsigned __int16 *triIndices;
-    XSurfaceVertexInfo vertInfo;
-    GfxPackedVertex *verts0;
-    unsigned int vertListCount;
-    XRigidVertList *vertList;
-    int partBits[4];
 };
 
 struct stream_source_info_t // sizeof=0x3
