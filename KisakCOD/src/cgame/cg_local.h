@@ -151,7 +151,7 @@ void __cdecl CG_DebugBoxOriented(
     const float *origin,
     const float *mins,
     const float *maxs,
-    float (*rotation)[3],
+    const mat3x3 &rotation,
     const float *color,
     int depthTest,
     int duration);
@@ -1251,8 +1251,8 @@ void __cdecl DrawClipAmmoRockets(
     const WeaponDef *weapDef,
     float *color);
 void __cdecl DrawClipAmmoBeltfed(
-    float *base,
     cg_s *cgameGlob,
+    float *base,
     unsigned int weapIdx,
     const WeaponDef *weapDef,
     float *color);

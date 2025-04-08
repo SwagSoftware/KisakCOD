@@ -11,18 +11,6 @@ enum JointType : __int32
 };
 const char *jointNames[3] = { "none", "hinge", "swivel" }; // idb
 
-enum BodyState : __int32
-{                                       // ...
-    BS_DEAD = 0x0,
-    BS_DOBJ_WAIT = 0x1,
-    BS_VELOCITY_CAPTURE = 0x2,
-    BS_TUNNEL_TEST = 0x3,
-    BS_RUNNING = 0x4,
-    BS_IDLE = 0x5,
-    RAGDOLL_NUM_STATES = 0x6,
-};
-
-
 struct BoneDef // sizeof=0x4C
 {                                       // ...
     char animBoneTextNames[2][20];

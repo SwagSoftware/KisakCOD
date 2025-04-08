@@ -1,6 +1,7 @@
 #pragma once
 #include "dobj.h"
 #include "xanim.h"
+#include "xmodel.h"
 
 DObjAnimMat *__cdecl DObjGetRotTransArray(const DObj_s *obj);
 int __cdecl DObjGetNumModels(const DObj_s *obj);

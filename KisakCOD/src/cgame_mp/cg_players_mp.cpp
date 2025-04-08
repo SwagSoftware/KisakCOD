@@ -4,6 +4,9 @@
 #include <aim_assist/aim_assist.h>
 #include <bgame/bg_local.h>
 
+#include <client_mp/client_mp.h>
+
+#include <EffectsCore/fx_system.h>
 
 void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int localClientNum)
 {

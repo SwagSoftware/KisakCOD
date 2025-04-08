@@ -1,9 +1,12 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#include <database/database.h>
+
 #include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
 
+#include <client_mp/client_mp.h>
 
 void __cdecl CG_CalcCrosshairPosition(const cg_s *cgameGlob, float *x, float *y)
 {

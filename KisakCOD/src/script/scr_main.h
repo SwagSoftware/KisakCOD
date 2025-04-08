@@ -1,6 +1,8 @@
 #pragma once
+
 #include <universal/q_shared.h>
 
+#include <universal/com_memory.h>
 
 struct scrCompilePub_t
 {
@@ -21,19 +23,7 @@ struct scrCompilePub_t
     int func_table_size;
     int func_table[1024];
 };
-struct __declspec(align(4)) HunkUser
-{
-    HunkUser* current;
-    HunkUser* next;
-    int maxSize;
-    int end;
-    int pos;
-    const char* name;
-    bool fixed;
-    bool tempMem;
-    int type;
-    unsigned __int8 buf[1];
-};
+
 struct scrVarPub_t // sizeof=0x2007C
 {
     char* fieldBuffer;

@@ -56,25 +56,25 @@ void __cdecl CL_SetServerInfoByAddress(netadr_t from, char *info, __int16 ping)
 
 void __cdecl CL_SetServerInfo(serverInfo_t *server, char *info, __int16 ping)
 {
-    char *v3; // eax
-    char *v4; // eax
-    char *v5; // eax
-    char *v6; // eax
-    char *v7; // eax
-    char *v8; // eax
-    char *v9; // eax
-    char *v10; // eax
-    char *v11; // eax
-    char *v12; // eax
-    char *v13; // eax
-    char *v14; // eax
-    char *v15; // eax
-    char *v16; // eax
-    char *v17; // eax
-    char *v18; // eax
-    char *v19; // eax
-    char *v20; // eax
-    char *v21; // eax
+    const char *v3; // eax
+    const char *v4; // eax
+    const char *v5; // eax
+    const char *v6; // eax
+    const char *v7; // eax
+    const char *v8; // eax
+    const char *v9; // eax
+    const char *v10; // eax
+    const char *v11; // eax
+    const char *v12; // eax
+    const char *v13; // eax
+    const char *v14; // eax
+    const char *v15; // eax
+    const char *v16; // eax
+    const char *v17; // eax
+    const char *v18; // eax
+    const char *v19; // eax
+    const char *v20; // eax
+    const char *v21; // eax
 
     if (server)
     {

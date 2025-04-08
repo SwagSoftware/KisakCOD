@@ -3,6 +3,8 @@
 
 #include <cgame_mp/cg_local_mp.h>
 
+#include <client_mp/client_mp.h>
+
 void __cdecl CG_Respawn(int localClientNum)
 {
     if (localClientNum)

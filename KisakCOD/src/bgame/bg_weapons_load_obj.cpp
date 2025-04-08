@@ -1,6 +1,7 @@
 #include "bg_local.h"
 #include "bg_public.h"
 #include <qcommon/mem_track.h>
+#include <database/database.h>
 #include <universal/q_parse.h>
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
@@ -571,7 +572,7 @@ cspField_t weaponDefFields[502] =
   { "adsDofEnd", 2164, 6 }
 }; // idb
 
-const char *szWeapTypeNames[4] = { "bullet", "grenade", "projectile", "binoculars" }; // idb
+// const char *szWeapTypeNames[4] = { "bullet", "grenade", "projectile", "binoculars" }; // idb
 const char *szWeapClassNames[10] =
 {
   "rifle",

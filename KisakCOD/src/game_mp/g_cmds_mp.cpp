@@ -485,7 +485,7 @@ void __cdecl Cmd_Notarget_f(gentity_s *ent)
 void __cdecl Cmd_Noclip_f(gentity_s *ent)
 {
     const char *v1; // eax
-    char *msg; // [esp+0h] [ebp-4h]
+    const char *msg; // [esp+0h] [ebp-4h]
 
     if (CheatsOk(ent))
     {
@@ -502,7 +502,7 @@ void __cdecl Cmd_Noclip_f(gentity_s *ent)
 void __cdecl Cmd_UFO_f(gentity_s *ent)
 {
     const char *v1; // eax
-    char *msg; // [esp+0h] [ebp-4h]
+    const char *msg; // [esp+0h] [ebp-4h]
 
     if (CheatsOk(ent))
     {

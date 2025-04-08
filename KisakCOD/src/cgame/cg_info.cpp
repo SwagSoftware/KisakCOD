@@ -3,6 +3,8 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <ui/ui.h>
 #include <client/client.h>
+#include <database/database.h>
+#include <client_mp/client_mp.h>
 
 void __cdecl CG_LoadingString(int localClientNum, const char *s)
 {

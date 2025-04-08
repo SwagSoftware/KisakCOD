@@ -1,9 +1,11 @@
 #include "bg_public.h"
 #include "bg_local.h"
+#include <database/database.h>
 #include <qcommon/mem_track.h>
 #include <universal/surfaceflags.h>
 #include <aim_assist/aim_assist.h>
 #include <game_mp/g_main_mp.h>
+#include <xanim/xanim.h>
 
 //struct WeaponDef **bg_weaponDefs 82800908     bg_weapons.obj
 //float (*)[29] penetrationDepthTable 82800f10     bg_weapons.obj

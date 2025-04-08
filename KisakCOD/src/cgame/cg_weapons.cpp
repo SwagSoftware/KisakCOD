@@ -666,7 +666,7 @@ void __cdecl CG_AddPlayerWeapon(
             MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2907, 0, "%s", "weapInfo->viewModelDObj");
         if (ps)
         {
-            UnitQuatToAxis(placement->base.quat, cgArray[0].viewModelAxis);
+            UnitQuatToAxis(placement->base.quat, (mat3x3&)cgArray[0].viewModelAxis);
             cgArray[0].viewModelAxis[3][0] = placement->base.origin[0];
             cgArray[0].viewModelAxis[3][1] = placement->base.origin[1];
             cgArray[0].viewModelAxis[3][2] = placement->base.origin[2];
@@ -2591,7 +2591,7 @@ void __cdecl FireBulletPenetrate(
     float v36; // [esp+A8h] [ebp-154h]
     int v37; // [esp+ACh] [ebp-150h]
     float v[4]; // [esp+B4h] [ebp-148h] BYREF
-    float diff[5]; // [esp+C4h] [ebp-138h] BYREF
+    float diff[3]; // [esp+C4h] [ebp-138h] BYREF
     int perks; // [esp+D8h] [ebp-124h]
     int hitContents; // [esp+DCh] [ebp-120h]
     int damage; // [esp+E0h] [ebp-11Ch]
@@ -2682,11 +2682,11 @@ void __cdecl FireBulletPenetrate(
                     break;
                 traceHit = BulletTrace(localClientNum, bp, weapDef, attacker, &br, br.depthSurfaceType);
                 revBp = *bp; // Com_Memcpy((char *)&revBp, (char *)bp, 64);
-                LODWORD(diff[4]) = bp->dir;
+                // LODWORD(diff[4]) = bp->dir;
                 revBp.dir[0] = -bp->dir[0];
                 revBp.dir[1] = -bp->dir[1];
                 revBp.dir[2] = -bp->dir[2];
-                LODWORD(diff[3]) = bp->end;
+                // LODWORD(diff[3]) = bp->end;
                 revBp.start[0] = bp->end[0];
                 revBp.start[1] = bp->end[1];
                 revBp.start[2] = bp->end[2];

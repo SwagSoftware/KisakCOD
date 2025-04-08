@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qcommon/qcommon.h>
+#include <universal/q_parse.h>
 
 enum hitLocation_t : __int32
 {                                       // ...
@@ -58,15 +59,6 @@ struct trigger_info_t // sizeof=0xC
     unsigned __int16 otherEntnum;
     int useCount;
     int otherUseCount;
-};
-
-struct com_parse_mark_t // sizeof=0x14
-{                                       // ...
-    int lines;                          // ...
-    const char *text;
-    int ungetToken;
-    int backup_lines;
-    const char *backup_text;
 };
 
 struct cached_tag_mat_t // sizeof=0x3C

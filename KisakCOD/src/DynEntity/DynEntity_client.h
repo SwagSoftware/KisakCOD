@@ -2,6 +2,8 @@
 
 #include <qcommon/qcommon.h>
 
+#include <physics/phys_local.h>
+
 #include <xanim/xanim.h>
 #include <xanim/dobj.h>
 

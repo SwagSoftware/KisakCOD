@@ -1,5 +1,7 @@
 #include "cg_local.h"
 #include "cg_public.h"
+#include <database/database.h>
+#include <client_mp/client_mp.h>
 #include <devgui/devgui.h>
 #include <cgame_mp/cg_local_mp.h>
 #include <universal/q_parse.h>

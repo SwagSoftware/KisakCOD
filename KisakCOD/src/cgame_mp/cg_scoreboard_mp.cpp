@@ -1,5 +1,7 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
+#include <client_mp/client_mp.h>
+#include <database/database.h>
 #include <ui_mp/ui_mp.h>
 #include <stringed/stringed_hooks.h>
 

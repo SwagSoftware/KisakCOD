@@ -99,8 +99,7 @@ void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent)
     {
         if ((ent->nextState.lerp.eFlags & 0x800) == 0)
             MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 478, 0, "%s", "ent->nextState.lerp.eFlags & EF_AIM_ASSIST");
-        if ((clientActive_t *)ent->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+        if (ent->nextState.solid != 0xFFFFFF)
             MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 479, 0, "%s", "ent->nextState.solid == SOLID_BMODEL");
         visBone = 0;
     }
@@ -176,9 +175,7 @@ char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *tar
         //Profile_EndInternal(0);
         return 0;
     }
-    if ((targetEnt->nextState.lerp.eFlags & 0x800) == 0
-        || (clientActive_t *)targetEnt->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+    if ((targetEnt->nextState.lerp.eFlags & 0x800) == 0 || targetEnt->nextState.solid != 0xFFFFFF)
     {
         goto LABEL_25;
     }
@@ -237,8 +234,7 @@ void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, 
     }
     else
     {
-        if ((clientActive_t *)targetEnt->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+        if (targetEnt->nextState.solid != 0xFFFFFF)
             MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 201, 0, "%s", "targetEnt->nextState.solid == SOLID_BMODEL");
         CM_ModelBounds(targetEnt->nextState.index.brushmodel, mins, maxs);
     }
@@ -296,8 +292,7 @@ char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targ
         0x803003);
     if (trace.fraction != 1.0 && Trace_GetEntityHitId(&trace) != targetEnt->nextState.number)
     {
-        if ((clientActive_t *)targetEnt->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+        if (targetEnt->nextState.solid != 0xFFFFFF)
         {
             //Profile_EndInternal(0);
             return 0;

@@ -1194,6 +1194,31 @@ struct viewLerpWaypoint_s // sizeof=0xC
     int iOffset;
 };
 
+
+struct __declspec(align(2)) usercmd_s // sizeof=0x20
+{                                       // XREF: ?SV_BotUserMove@@YAXPAUclient_t@@@Z/r
+                                        // ?SV_UserMove@@YAXPAUclient_t@@PAUmsg_t@@H@Z/r ...
+    int serverTime;                     // XREF: CG_DrawDisconnect+85/r
+    // CG_DrawDisconnect+90/r ...
+    int buttons;                        // XREF: CG_CheckForPlayerInput+5D/r
+    // CG_CheckForPlayerInput+60/r ...
+    int angles[3];                      // XREF: CG_CheckPlayerMovement+B/o
+    // CG_CheckPlayerMovement+E/o ...
+    unsigned __int8 weapon;             // XREF: CL_CreateCmd+64/w
+    // SV_AddTestClient(void)+232/w ...
+    unsigned __int8 offHandIndex;
+    char forwardmove;                   // XREF: CG_CheckPlayerMovement:loc_4413AE/r
+    // SV_BotUserMove(client_t *)+138/w ...
+    char rightmove;                     // XREF: CG_CheckPlayerMovement+26/r
+    // SV_BotUserMove(client_t *)+166/w ...
+    float meleeChargeYaw;               // XREF: CL_CreateCmd+67/w
+    // SV_AddTestClient(void)+238/w ...
+    unsigned __int8 meleeChargeDist;    // XREF: CL_CreateCmd+6A/w
+    // SV_AddTestClient(void)+23E/w ...
+    char selectedLocation[2];
+    // padding byte
+};
+
 // bg_jump
 
 struct pmove_t;
@@ -1509,7 +1534,6 @@ extern const dvar_t *perk_sprintMultiplier;
 // bg_pmove
 struct pmove_t;
 struct trace_t;
-struct usercmd_s;
 
 void __cdecl PM_trace(
     pmove_t *pm,

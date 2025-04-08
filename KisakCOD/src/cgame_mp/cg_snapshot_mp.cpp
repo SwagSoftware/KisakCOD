@@ -1,6 +1,9 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 
+#include <client_mp/client_mp.h>
+
+#include <physics/phys_local.h>
 
 void __cdecl CG_ShutdownEntity(int localClientNum, centity_s *cent)
 {

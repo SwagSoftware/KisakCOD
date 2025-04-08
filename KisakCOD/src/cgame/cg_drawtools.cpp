@@ -444,7 +444,7 @@ void __cdecl CG_DebugBoxOriented(
     const float *origin,
     const float *mins,
     const float *maxs,
-    float (*rotation)[3],
+    const mat3x3 &rotation,
     const float *color,
     int depthTest,
     int duration)

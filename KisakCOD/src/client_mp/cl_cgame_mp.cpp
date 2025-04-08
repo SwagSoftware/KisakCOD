@@ -1,5 +1,15 @@
 #include "client_mp.h"
+
+#include <client/client.h>
+
+#include <qcommon/cmd.h>
 #include <qcommon/mem_track.h>
+
+#include <gfx_d3d/r_rendercmds.h>
+
+#include <xanim/xanim.h>
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
 
 char bigConfigString[8192];
 const float g_color_table[8][4]

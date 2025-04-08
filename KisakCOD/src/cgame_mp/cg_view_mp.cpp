@@ -1,6 +1,10 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 
+#include <client_mp/client_mp.h>
+
+#include <EffectsCore/fx_system.h>
+
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>
 

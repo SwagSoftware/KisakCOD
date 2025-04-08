@@ -1830,8 +1830,8 @@ void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    time = cgArray.time;
-    BG_LerpHudColors(elem, cgArray.time, &v11);
+    time = cgArray[0].time;
+    BG_LerpHudColors(elem, cgArray[0].time, &v11);
     if (v11.a)
     {
         if (!CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, (char*)&renderFxFlags, 0x40u))
@@ -1888,7 +1888,7 @@ double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    deltaTime = cgArray.time - elem->scaleStartTime;
+    deltaTime = cgArray[0].time - elem->scaleStartTime;
     if (deltaTime >= elem->scaleTime)
         return height;
     fromHeight = (float)elem->fromHeight;

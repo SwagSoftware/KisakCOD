@@ -1,5 +1,6 @@
 #include "cg_local.h"
 #include "cg_public.h"
+#include <database/database.h>
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
 #include <universal/q_parse.h>
