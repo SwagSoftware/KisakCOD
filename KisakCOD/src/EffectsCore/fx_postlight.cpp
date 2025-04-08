@@ -1,5 +1,6 @@
 #include "fx_system.h"
 
+#include <gfx_d3d/r_drawsurf.h>
 
 void __cdecl FX_PostLight_GenerateVerts(FxPostLightInfo *postLightInfoAddr, FxSystem *system)
 {

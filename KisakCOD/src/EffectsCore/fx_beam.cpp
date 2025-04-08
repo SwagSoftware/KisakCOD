@@ -13,7 +13,7 @@ void __cdecl Float4x4ForViewer(float4x4* mtx, const vec3r origin3, const mat3x3&
 void __cdecl Float4x4InfinitePerspectiveMatrix(float4x4* mtx, float tanHalfFovX, float tanHalfFovY, float zNear);
 
 bool __cdecl Vec4HomogenousClipBothZ(float4* pt0, float4* pt1);
-bool __cdecl Vec4HomogenousClipZW(float4* pt0, float4* pt1, float4* coeffZW);
+bool __cdecl Vec4HomogenousClipZW(float4* pt0, float4* pt1, float4 coeffZW);
 
 static const float4 wiggle[] = {
     {.v = { 0.0, 1.0, 0.0, 0.0, }},

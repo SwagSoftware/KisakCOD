@@ -422,9 +422,9 @@ FxPool<FxTrail>* __cdecl FX_AllocPool_Generic_FxTrail_(
 }
 
 FxPool<FxTrailElem>* __cdecl FX_AllocPool_Generic_FxTrailElem_(
-    volatile int* firstFreeIndex,
+    volatile long * firstFreeIndex,
     FxPool<FxTrailElem>* pool,
-    volatile int* activeCount)
+    volatile long * activeCount)
 {
     FxPool<FxTrailElem>* item; // [esp+0h] [ebp-8h]
     unsigned int itemIndex; // [esp+4h] [ebp-4h]
@@ -462,9 +462,9 @@ FxPool<FxTrailElem>* __cdecl FX_AllocPool_Generic_FxTrailElem_(
 }
 
 FxPool<FxElem>* __cdecl FX_AllocPool_Generic_FxElem_(
-    volatile int* firstFreeIndex,
+    volatile long* firstFreeIndex,
     FxPool<FxElem>* pool,
-    volatile int* activeCount)
+    volatile long * activeCount)
 {
     FxPool<FxElem>* item; // [esp+0h] [ebp-8h]
     unsigned int itemIndex; // [esp+4h] [ebp-4h]
@@ -1882,7 +1882,7 @@ bool __cdecl FX_SpawnModelPhysics(
     FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, randomSeed, &orient);
     FX_OrientationPosToWorldPos(&orient, elem->origin, worldOrigin);
     FX_GetElemAxis(elemDef, randomSeed, &orient, 0.0, axis);
-    AxisToQuat((const float (*)[3][3])axis, quat);
+    AxisToQuat(axis, quat);
     msecLifeSpan = (float)((((elemDef->lifeSpanMsec.amplitude + 1) * LOWORD(fx_randomTable[randomSeed + 17])) >> 16)
         + elemDef->lifeSpanMsec.base);
     FX_GetVelocityAtTime(elemDef, randomSeed, msecLifeSpan, 0.0, &orient, elem->baseVel, velocity);
@@ -1918,7 +1918,7 @@ void __cdecl FX_GetOriginForElem(
     int randomSeed,
     float *outOrigin)
 {
-    FxSpatialFrame *p_frameAtSpawn; // [esp+0h] [ebp-3Ch]
+    const FxSpatialFrame *p_frameAtSpawn; // [esp+0h] [ebp-3Ch]
     float effectFrameAxis[3][3]; // [esp+4h] [ebp-38h] BYREF
     const FxSpatialFrame *effectFrame; // [esp+28h] [ebp-14h]
     float delta[3]; // [esp+2Ch] [ebp-10h] BYREF

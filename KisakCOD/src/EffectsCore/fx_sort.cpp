@@ -236,7 +236,7 @@ void __cdecl FX_GetInsertSortElem(
             elemDef->elemType);
     sortElem->defSortOrder = elemDef->sortOrder;
     randomSeed = (296 * elem->sequence + elem->msecBegin + (unsigned int)effect->randomSeed) % 0x1DF;
-    FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, __SPAIR64__(&orient, randomSeed));
+    FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, randomSeed, &orient);
     FX_OrientationPosToWorldPos(&orient, elem->origin, posWorld);
     Vec3Sub(system->cameraPrev.origin, posWorld, diff);
     sortElem->distToCamSq = Vec3LengthSq(diff);
@@ -269,7 +269,7 @@ bool __cdecl FX_ExistingElemSortsBeforeNewElem(
     if (elemDef->sortOrder > sortElemNew->defSortOrder)
         return 0;
     randomSeed = (elem->msecBegin + effect->randomSeed + 296 * (unsigned int)elem->sequence) % 0x1DF;
-    FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, __SPAIR64__(&orient, randomSeed));
+    FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, randomSeed, &orient);
     FX_OrientationPosToWorldPos(&orient, elem->origin, posWorld);
     Vec3Sub(system->cameraPrev.origin, posWorld, diff);
     distToCamSq = Vec3LengthSq(diff);

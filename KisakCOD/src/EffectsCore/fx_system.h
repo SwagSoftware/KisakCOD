@@ -137,7 +137,7 @@ bool __cdecl FX_SpawnModelPhysics(
 void __cdecl FX_GetOriginForElem(
     FxEffect *effect,
     const FxElemDef *elemDef,
-    FxSpatialFrame *effectFrameWhenPlayed,
+    const FxSpatialFrame *effectFrameWhenPlayed,
     int randomSeed,
     float *outOrigin);
 void __cdecl FX_SpawnSound(
@@ -412,14 +412,15 @@ void __cdecl FX_GenerateMarkVertsForMark_FinishAnimated(
     FxMark *mark,
     unsigned __int16 baseVertex,
     FxActiveMarkSurf *drawSurf,
-    const float (*transform)[3]);
+    const float (*transform)[3][3]);
 void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
     const GfxScaledPlacement *placement,
-    __int64 viewOffset);
+    const float *viewOffset,
+    float (*outTransform)[3][3]);
 void  FX_GenerateMarkVertsForMark_MatrixFromPlacement(
     const GfxPlacement *placement,
     const float *viewOffset,
-    float (*outTransform)[3]);
+    float (*outTransform)[3][3]);
 void __cdecl FX_GenerateMarkVertsForEntDObj(
     int localClientNum,
     int entId,
@@ -1014,7 +1015,8 @@ void __cdecl FX_ProcessLooping(
 void __cdecl FX_UpdateEffectPartialForClass(
     FxSystem *system,
     FxEffect *effect,
-    long double msecUpdateBegin,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
     unsigned __int16 elemHandleStart,
     unsigned __int16 elemHandleStop,
     unsigned int elemClass);
@@ -1031,9 +1033,10 @@ int __cdecl FX_UpdateElementPosition_Colliding(FxSystem *system, FxUpdateElem *u
 int __cdecl FX_UpdateElementPosition_CollidingStep(
     FxSystem *system,
     FxUpdateElem *update,
-    double msecUpdateBegin,
+    int msecUpdateBegin,
+    int msecUpdateEnd,
     float *xyzWorldOld);
-void __cdecl FX_NextElementPosition(FxUpdateElem *update, double msecUpdateBegin);
+void __cdecl FX_NextElementPosition(FxUpdateElem *update, int msecUpdateBegin, int msecUpdateEnd);
 void __cdecl FX_NextElementPosition_NoExternalForces(
     FxUpdateElem* update,
     int msecUpdateBegin,

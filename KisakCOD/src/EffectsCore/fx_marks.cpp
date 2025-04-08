@@ -4,7 +4,7 @@
 
 #include <gfx_d3d/r_drawsurf.h>
 #include <gfx_d3d/r_scene.h>
-#include <gfx_d3d/r_scene.h>
+#include <gfx_d3d/r_marks.h>
 
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
@@ -12,6 +12,8 @@
 #include <client_mp/client_mp.h>
 
 #include <win32/win_local.h>
+
+#include <algorithm>
 
 FxMarkPoint g_fxMarkPoints[765];
 
@@ -211,8 +213,6 @@ void __cdecl FX_ImpactMark_Generate(
         .radius = radius,
         .nativeColor = nativeColor
     };
-
-    unsigned int callbackContext[4]; // [esp+1278h] [ebp-10h] BYREF
 
     System = FX_GetSystem(localClientNum);
 
