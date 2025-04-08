@@ -4,6 +4,7 @@
 #include <gfx_d3d/r_model.h>
 #include <universal/com_memory.h>
 #include <physics/phys_local.h>
+#include <database/database.h>
 
 struct $5E78DEAD8FFD2AA25C77996D083B001E // sizeof=0x808
 {                                       // ...
@@ -1435,13 +1436,11 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
 const FxEffectDef *__cdecl FX_Load(const char *name)
 {
     char v2; // [esp+3h] [ebp-10B61h]
-    FxEditorEffectDef *p_edEffectDef; // [esp+8h] [ebp-10B5Ch]
     const char *v4; // [esp+Ch] [ebp-10B58h]
     const FxEffectDef *v5; // [esp+10h] [ebp-10B54h]
     FxEditorEffectDef edEffectDef; // [esp+14h] [ebp-10B50h] BYREF
 
-    v4 = name;
-    strcpy_s(p_edEffectDef->name, name);
+    strcpy_s(edEffectDef.name, name);
     if (FX_LoadEditorEffect(name, &edEffectDef)
         && (v5 = FX_Convert(&edEffectDef, &FX_AllocMem)) != 0)
     {

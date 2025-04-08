@@ -388,7 +388,8 @@ union FxElemVisuals // sizeof=0x4
     FxEffectDefRef effectDef;
     const char *soundName;
 
-    FxElemVisuals() : anonymous(nullptr) { }
+    FxElemVisuals() = default;
+
     FxElemVisuals(Material *mat) : material(mat) { }
 };
 struct FxElemMarkVisuals // sizeof=0x8
@@ -494,7 +495,7 @@ template<typename ITEM_TYPE, size_t LIMIT>
 FxPool<ITEM_TYPE>* FX_PoolFromHandle_Generic(FxPool<ITEM_TYPE>* poolArray, uint handle)
 {
     vassert(handle < (LIMIT * sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) && handle % (sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) == 0, "%p %u", poolArray, handle);
-    return (FxPool<FxElem> *)((char*)poolArray + (handle * ITEM_TYPE::HANDLE_SCALE));
+    return (FxPool<ITEM_TYPE> *)((char*)poolArray + (handle * ITEM_TYPE::HANDLE_SCALE));
 }
 
 using uint4 = unsigned int[4];

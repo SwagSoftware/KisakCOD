@@ -753,7 +753,7 @@ void __cdecl FX_UpdateEffectPartialForClass(
     unsigned int elemClass)
 {
     int v7; // [esp+Ch] [ebp-28h]
-    long double lifeSpan; // [esp+14h] [ebp-20h]
+    int lifeSpan; // [esp+14h] [ebp-20h]
     unsigned __int16 elemHandle; // [esp+1Ch] [ebp-18h]
     FxUpdateResult updateResult; // [esp+20h] [ebp-14h]
     unsigned __int16 elemHandleNext; // [esp+24h] [ebp-10h]
@@ -794,8 +794,7 @@ void __cdecl FX_UpdateEffectPartialForClass(
                     0,
                     "update period is from %d to %d (%d ms)\n", // change from lg to d
                     msecUpdateEnd, msecUpdateBegin,
-                    v7,
-                    lifeSpan);
+                    v7);
                 Com_Printf(0, "here's the active elem list:\n");
                 for (elemHandle = effect->firstElemHandle[elemClass];
                     elemHandle != 0xFFFF;
@@ -817,7 +816,7 @@ void __cdecl FX_UpdateEffectPartialForClass(
                         elem->item.defIndex,
                         elem->item.sequence,
                         elem->item.msecBegin,
-                        LODWORD(lifeSpan) + elem->item.msecBegin);
+                        lifeSpan + elem->item.msecBegin);
                 }
                 if (!alwaysfails)
                     MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1467, 0, "Big bad effects assert.  Include assert log.");
@@ -1056,7 +1055,7 @@ void __cdecl FX_NextElementPosition_NoExternalForces(
 
     if (msecUpdateEnd - msecUpdateBegin <= 0)
     {
-        v5 = va("[%d, %d]", msecUpdateEnd, msecUpdateBegin, v6);
+        v5 = va("[%d, %d]", msecUpdateEnd, msecUpdateBegin, msecUpdateBegin, msecUpdateEnd);
         MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 804, 0, "%s\n\t%s", "msecUpdateEnd - msecUpdateBegin > 0", v5);
     }
     if (!posLocal)
@@ -1523,7 +1522,7 @@ void __cdecl FX_SpawnImpactEffect(
 
 int __cdecl FX_UpdateElementPosition_NonColliding(FxUpdateElem *update)
 {
-    FX_NextElementPosition(update, *(double *)&update->msecUpdateBegin);
+    FX_NextElementPosition(update, update->msecUpdateBegin, update->msecUpdateEnd);
     FX_OrientationPosFromWorldPos(&update->orient, update->posWorld, update->elemOrigin);
     return 1;
 }
