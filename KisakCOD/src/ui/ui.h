@@ -1,6 +1,8 @@
 #pragma once
 #include <xanim/xanim.h>
 #include <ui_mp/ui_mp.h>
+#include <physics/ode/objects.h>
+#include <bgame/bg_local.h>
 
 
 
@@ -335,10 +337,10 @@ struct OperatorStack // sizeof=0xF4
 char *__cdecl GetSourceString(Operand operand);
 double __cdecl GetSourceFloat(Operand *source);
 operandInternalDataUnion __cdecl GetSourceInt(Operand *source);
-int(__cdecl *__cdecl GetOperationFunction(
+void(__cdecl *__cdecl GetOperationFunction(
     operationEnum op,
     Operand *data1,
-    Operand *data2))(Operand *leftSide, Operand *rightSide, Operand *result);
+    Operand *data2))(Operand *, Operand *, Operand *);
 bool __cdecl OpPairsWithRightParen(operationEnum op);
 void __cdecl RunLogicOp(
     int localClientNum,
@@ -367,7 +369,7 @@ void __cdecl GetLocalVarStringValue(
 UILocalVarContext *__cdecl GetLocalVar(int localClientNum, Operand *source);
 void __cdecl GetLocalVarBoolValue(int localClientNum, Operand *source, Operand *result);
 void __cdecl GetLocalVarIntValue(int localClientNum, Operand *source, Operand *result);
-void __cdecl GetLocalVarFloatValue(__int64 localClientNum, Operand *result);
+void __cdecl GetLocalVarFloatValue(int localClientNum, Operand *source, Operand *result);
 void __cdecl GetSinValue(Operand *source, Operand *result);
 void __cdecl GetCosValue(Operand *source, Operand *result);
 void __cdecl GetMilliseconds(Operand *result);
@@ -468,3 +470,120 @@ void __cdecl UI_FillRect(
     const float *color);
 
 extern int com_expectedHunkUsage;
+
+
+
+// ui_expressions_logicfunctions
+int __cdecl compare_impact_files(const char **pe0, const char **pe1);
+int __cdecl compare_hudelems(const void *pe0, const void *pe1);
+int __cdecl compare_use(float *pe1, float *pe2);
+void __cdecl compare_doesStringEqualString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesStringNotEqualString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesIntEqualInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesIntNotEqualInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesIntEqualFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesFloatEqualInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesFloatEqualFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesIntNotEqualFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesFloatNotEqualInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_doesFloatNotEqualFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntLessThanInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntLessThanFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatLessThanInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatLessThanFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntLessThanEqualToInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatGreaterThanEqualToInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntLessThanEqualToFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatLessThanEqualToInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatLessThanEqualToFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntGreaterThanInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntGreaterThanFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatGreaterThanInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatGreaterThanFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntGreaterThanEqualToInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isIntGreaterThanEqualToFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl compare_isFloatGreaterThanEqualToFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+int __cdecl compare_floats(float *e0, float *e1);
+
+void __cdecl add_bit(char bit, unsigned __int8 *fout);
+void __cdecl add_IntWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_IntWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_FloatWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_FloatWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_StringWithString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_StringWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_IntWithString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_FloatWithString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl add_StringWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+
+void __cdecl subtract_IntFromInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl subtract_FloatFromInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl subtract_IntFromFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl subtract_FloatFromFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+
+void __cdecl BitwiseNot(int localClientNum, Operand *source, Operand *result);
+void __cdecl multiply_IntByInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl multiply_IntByFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl multiply_FloatByInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl multiply_FloatByFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl divide_IntByInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl divide_IntByFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl divide_FloatByInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl divide_FloatByFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl mod_IntByInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl mod_FloatByInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl mod_IntByFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl mod_FloatByFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_IntWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_FloatWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_IntWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_StringWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_IntWithString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_StringWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_FloatWithString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl and_FloatWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_IntWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_FloatWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_IntWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_StringWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_IntWithString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_StringWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_FloatWithString(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl or_FloatWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl bitwiseAnd(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl bitwiseOr(Operand *leftSide, Operand *rightSide, Operand *result);
+void __cdecl multiply_J(int constraintRowCount, ConstraintRowData *rows, float *in);
+
+
+// ui_shared_obj
+// KISAKTODO: Rewrite the functions to actually use these templated versions. (There aren't a ton so they were just pasted in)
+template<typename T, int useless, int HASH_SEED>
+struct KeywordHashEntry
+{
+    bool KeywordHash_IsValidSeed(int count, int seed)
+    {
+
+    }
+    int KeywordHash_PickSeed(int count)
+    {
+        for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+        {
+            iassert(seed != 65536);
+        }
+    }
+    void KeywordHash_Validate()
+    {
+        if (!KeywordHash_IsValidSeed())
+        {
+            MyAssertHandler(
+                ".\\ui\\ui_shared_obj.cpp",
+                685,
+                0,
+                "%s\n\t(KeywordHash_PickSeed( array, count )) = %i",
+                "(KeywordHash_IsValidSeed( array, count, HASH_SEED ))",
+                v2);
+        }
+    }
+    const char *keyword;
+    int(__cdecl *func)(T *, int);
+};

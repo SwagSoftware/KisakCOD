@@ -1,4 +1,9 @@
 #include "ui.h"
+#include <universal/q_parse.h>
+#include <client_mp/client_mp.h>
+#include <client/client.h>
+#include <qcommon/cmd.h>
+#include <stringed/stringed_hooks.h>
 
 
 int g_waitingForKey;
@@ -19,29 +24,6 @@ bool __cdecl Window_IsVisible(int localClientNum, const windowDef_t *w)
             localClientNum,
             1);
     return (w->dynamicFlags[localClientNum] & 4) != 0;
-}
-
-void __cdecl Item_SetupKeywordHash()
-{
-    unsigned int i; // [esp+0h] [ebp-4h]
-
-    KeywordHash_Validate_itemDef_s_256_3855_(itemParseKeywords, 71);
-    memset((unsigned __int8 *)itemParseKeywordHash, 0, sizeof(itemParseKeywordHash));
-    for (i = 0; i < 0x47; ++i)
-        KeywordHash_Add_itemDef_s_256_3855_(
-            itemParseKeywordHash,
-            (const KeywordHashEntry<itemDef_s, 256, 3855> *)(8 * i + 9147016));
-}
-void __cdecl Menu_SetupKeywordHash()
-{
-    unsigned int i; // [esp+0h] [ebp-4h]
-
-    KeywordHash_Validate_menuDef_t_128_128_(menuParseKeywords, 36);
-    memset((unsigned __int8 *)menuParseKeywordHash, 0, sizeof(menuParseKeywordHash));
-    for (i = 0; i < 0x24; ++i)
-        KeywordHash_Add_menuDef_t_128_128_(
-            menuParseKeywordHash,
-            (const KeywordHashEntry<menuDef_t, 128, 128> *)(8 * i + 9146728));
 }
 
 void __cdecl Menu_Setup(UiContext *dc)
@@ -222,7 +204,7 @@ int __cdecl Menu_ItemsMatchingGroup(menuDef_t *menu, char *name)
 
     count = 0;
     wildcard = -1;
-    strstr((unsigned __int8 *)name, "*");
+    strstr((unsigned __int8 *)name, (unsigned __int8 *)"*");
     if (v2)
         wildcard = v2 - (unsigned int)name;
     for (i = 0; i < menu->itemCount; ++i)
@@ -253,7 +235,7 @@ itemDef_s *__cdecl Menu_GetMatchingItemByNumber(menuDef_t *menu, int index, char
 
     count = 0;
     wildcard = -1;
-    strstr((unsigned __int8 *)name, "*");
+    strstr((unsigned __int8 *)name, (unsigned __int8 *)"*");
     if (v3)
         wildcard = v3 - (unsigned int)name;
     for (i = 0; i < menu->itemCount; ++i)
@@ -493,7 +475,7 @@ void __cdecl Menu_RunCloseScript(UiContext *dc, menuDef_t *menu)
         if (menu->onClose)
         {
             item.parent = menu;
-            Item_RunScript(dc, &item, menu->onClose);
+            Item_RunScript(dc, &item, (char*)menu->onClose);
         }
     }
 }
@@ -647,6 +629,16 @@ void __cdecl Script_CloseForGameType(UiContext *dc, itemDef_s *item, const char 
         String = Dvar_GetString(item->dvar);
         v4 = va(name, String);
         Menus_CloseByName(dc, v4);
+    }
+}
+
+void __cdecl Script_ValidateStat(int controllerIndex, int index, int value)
+{
+    if (index < 2400 || index > 2402)
+    {
+        if (index < 200 || index >= 250)
+            Com_Error(ERR_DROP, "statsetusingtable should only be used for create-a-class.  You can't set stat %d\n", index);
+        LiveStorage_ValidateCaCStat(controllerIndex, index, value);
     }
 }
 
@@ -2626,7 +2618,7 @@ int __cdecl Item_DvarEnum_CountSettings(itemDef_s *item)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 3053, 0, "%s\n\t(item->type) = %i", "(item->type == 13)", item->type);
     if (!item->typeData.listBox)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 3054, 0, "%s", "item->typeData.enumDvarName");
-    enumDvar = _Dvar_FindVar(item->typeData.enumDvarName);
+    enumDvar = Dvar_FindVar(item->typeData.enumDvarName);
     if (enumDvar->type == 6)
         return enumDvar->domain.enumeration.stringCount;
     else
@@ -2640,7 +2632,7 @@ int __cdecl Item_DvarEnum_EnumIndex(itemDef_s *item)
     const dvar_s *enumDvar; // [esp+4h] [ebp-8h]
     const char *enumString; // [esp+8h] [ebp-4h]
 
-    enumDvar = _Dvar_FindVar(item->typeData.enumDvarName);
+    enumDvar = Dvar_FindVar(item->typeData.enumDvarName);
     if (enumDvar->type != 6)
         return 0;
     enumString = Dvar_GetVariantString(item->dvar);
@@ -3367,8 +3359,8 @@ int __cdecl Item_Bind_HandleKey(UiContext *dc, itemDef_s *item, int key, int dow
                 bindCount = Key_GetCommandAssignment(dc->localClientNum, item->dvar, boundKeys);
                 if (key == 127 || bindCount == 2)
                 {
-                    Key_SetBinding(dc->localClientNum, boundKeys[0], (char *)&String);
-                    Key_SetBinding(dc->localClientNum, boundKeys[1], (char *)&String);
+                    Key_SetBinding(dc->localClientNum, boundKeys[0], (char *)"");
+                    Key_SetBinding(dc->localClientNum, boundKeys[1], (char *)"");
                 }
                 if (key != 127)
                     Key_SetBinding(dc->localClientNum, key, (char *)item->dvar);
@@ -4311,7 +4303,7 @@ void __cdecl Item_TextField_Paint(UiContext *dc, itemDef_s *item)
         {
             if (item->type == 17)
             {
-                dvar = _Dvar_FindVar(item->dvar);
+                dvar = Dvar_FindVar(item->dvar);
                 if (dvar && dvar->type == 1)
                     Com_LocalizedFloatToString(dvar->current.value, buff, 0x400u, 2u);
             }
@@ -4475,7 +4467,7 @@ const char *__cdecl Item_DvarEnum_Setting(itemDef_s *item)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 3160, 0, "%s\n\t(item->type) = %i", "(item->type == 13)", item->type);
     if (!item->typeData.listBox)
         return "<dvarEnumList not set>";
-    enumDvar = _Dvar_FindVar(item->typeData.enumDvarName);
+    enumDvar = Dvar_FindVar(item->typeData.enumDvarName);
     if (enumDvar->type != 6)
         return "<not an enum dvar>";
     if (!enumDvar->domain.enumeration.stringCount)

@@ -428,8 +428,10 @@
     <ClCompile Include="src\stringed\stringed_hooks.cpp" />
     <ClCompile Include="src\ui\ui_atoms.cpp" />
     <ClCompile Include="src\ui\ui_expressions.cpp" />
+    <ClCompile Include="src\ui\ui_expressions_logicfunctions.cpp" />
     <ClCompile Include="src\ui\ui_localvars.cpp" />
     <ClCompile Include="src\ui\ui_shared.cpp" />
+    <ClCompile Include="src\ui\ui_shared_obj.cpp" />
     <ClCompile Include="src\ui\ui_utils.cpp" />
     <ClCompile Include="src\ui_mp\ui_main_mp.cpp" />
     <ClCompile Include="src\universal\com_constantconfigstrings.cpp" />
@@ -461,6 +463,7 @@
     <ClCompile Include="src\win32\win_net.cpp" />
     <ClCompile Include="src\win32\win_net_debug.cpp" />
     <ClCompile Include="src\win32\win_remote.cpp" />
+    <ClCompile Include="src\win32\win_storage.cpp" />
     <ClCompile Include="src\win32\win_syscon.cpp" />
     <ClCompile Include="src\win32\win_voice.cpp" />
     <ClCompile Include="src\win32\win_wndproc.cpp" />

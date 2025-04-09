@@ -1,6 +1,304 @@
 #include <qcommon/qcommon.h>
 
 #include "ui.h"
+#include <cgame_mp/cg_local_mp.h>
+#include <client/client.h>
+#include <stringed/stringed_hooks.h>
+#include <game_mp/g_main_mp.h>
+
+int s_operatorPrecedence[81] =
+{
+  2147483647,
+  0,
+  11,
+  11,
+  11,
+  13,
+  13,
+  9,
+  15,
+  15,
+  15,
+  15,
+  16,
+  16,
+  25,
+  25,
+  99,
+  80,
+  17,
+  18,
+  9,
+  14,
+  14,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5,
+  5
+}; // idb
+
+const char *g_expOperatorNames[81] =
+{
+  "NOOP",
+  ")",
+  "*",
+  "/",
+  "%",
+  "+",
+  "-",
+  "!",
+  "<",
+  "<=",
+  ">",
+  ">=",
+  "==",
+  "!=",
+  "&",
+  "||",
+  "(",
+  ",",
+  "&",
+  "|",
+  "~",
+  "<<",
+  ">>",
+  "sin",
+  "cos",
+  "min",
+  "max",
+  "milliseconds",
+  "dvarint",
+  "dvarbool",
+  "dvarfloat",
+  "dvarstring",
+  "stat",
+  "ui_active",
+  "flashbanged",
+  "scoped",
+  "scoreboard_visible",
+  "inkillcam",
+  "player",
+  "selecting_location",
+  "team",
+  "otherteam",
+  "marinesfield",
+  "opforfield",
+  "menuisopen",
+  "writingdata",
+  "inlobby",
+  "inprivateparty",
+  "privatepartyhost",
+  "privatepartyhostinlobby",
+  "aloneinparty",
+  "adsjavelin",
+  "weaplockblink",
+  "weapattacktop",
+  "weapattackdirect",
+  "secondsastime",
+  "tablelookup",
+  "locstring",
+  "localvarint",
+  "localvarbool",
+  "localvarfloat",
+  "localvarstring",
+  "timeleft",
+  "secondsascountdown",
+  "gamemsgwndactive",
+  "int",
+  "string",
+  "float",
+  "gametypename",
+  "gametype",
+  "gametypedescription",
+  "scoreatrank",
+  "friendsonline",
+  "spectatingclient",
+  "statrangeanybitsset",
+  "keybinding",
+  "actionslotusable",
+  "hudfade",
+  "maxrecommendedplayers",
+  "acceptinginvite",
+  "isintermission"
+}; // idb
+
+int currentTempOperand;
+char s_tempOperandValueAsString[16][256];
+
+struct ValidOperation // sizeof=0x10
+{
+    operationEnum op;
+    expDataType leftSide;
+    expDataType rightSide;
+    void(__cdecl *function)(Operand *, Operand *, Operand *);
+};
+
+ValidOperation validOperations[84] =
+{
+  { OP_EQUALS, VAL_STRING, VAL_STRING, &compare_doesStringEqualString },
+  { OP_NOTEQUAL, VAL_STRING, VAL_STRING, &compare_doesStringNotEqualString },
+  { OP_EQUALS, VAL_INT, VAL_INT, &compare_doesIntEqualInt },
+  { OP_EQUALS, VAL_INT, VAL_FLOAT, &compare_doesIntEqualFloat },
+  { OP_EQUALS, VAL_FLOAT, VAL_INT, &compare_doesFloatEqualInt },
+  { OP_EQUALS, VAL_FLOAT, VAL_FLOAT, &compare_doesFloatEqualFloat },
+  { OP_NOTEQUAL, VAL_INT, VAL_INT, &compare_doesIntNotEqualInt },
+  { OP_NOTEQUAL, VAL_INT, VAL_FLOAT, &compare_doesIntNotEqualFloat },
+  { OP_NOTEQUAL, VAL_FLOAT, VAL_INT, &compare_doesFloatNotEqualInt },
+  { OP_NOTEQUAL, VAL_FLOAT, VAL_FLOAT, &compare_doesFloatNotEqualFloat },
+  { OP_LESSTHAN, VAL_INT, VAL_INT, &compare_isIntLessThanInt },
+  { OP_LESSTHAN, VAL_INT, VAL_FLOAT, &compare_isIntLessThanFloat },
+  { OP_LESSTHAN, VAL_FLOAT, VAL_INT, &compare_isFloatLessThanInt },
+  { OP_LESSTHAN, VAL_FLOAT, VAL_FLOAT, &compare_isFloatLessThanFloat },
+  { OP_LESSTHANEQUALTO, VAL_INT, VAL_INT, &compare_isIntLessThanEqualToInt },
+  { OP_LESSTHANEQUALTO, VAL_INT, VAL_FLOAT, &compare_isIntLessThanEqualToFloat },
+  { OP_LESSTHANEQUALTO, VAL_FLOAT, VAL_INT, &compare_isFloatLessThanEqualToInt },
+  {
+    OP_LESSTHANEQUALTO,
+    VAL_FLOAT,
+    VAL_FLOAT,
+    &compare_isFloatLessThanEqualToFloat
+  },
+  { OP_GREATERTHAN, VAL_INT, VAL_INT, &compare_isIntGreaterThanInt },
+  { OP_GREATERTHAN, VAL_INT, VAL_FLOAT, &compare_isIntGreaterThanFloat },
+  { OP_GREATERTHAN, VAL_FLOAT, VAL_INT, &compare_isFloatGreaterThanInt },
+  { OP_GREATERTHAN, VAL_FLOAT, VAL_FLOAT, &compare_isFloatGreaterThanFloat },
+  {
+    OP_GREATERTHANEQUALTO,
+    VAL_INT,
+    VAL_INT,
+    &compare_isIntGreaterThanEqualToInt
+  },
+  {
+    OP_GREATERTHANEQUALTO,
+    VAL_INT,
+    VAL_FLOAT,
+    &compare_isIntGreaterThanEqualToFloat
+  },
+  {
+    OP_GREATERTHANEQUALTO,
+    VAL_FLOAT,
+    VAL_INT,
+    &compare_isFloatGreaterThanEqualToInt
+  },
+  {
+    OP_GREATERTHANEQUALTO,
+    VAL_FLOAT,
+    VAL_FLOAT,
+    &compare_isFloatGreaterThanEqualToFloat
+  },
+  { OP_ADD, VAL_INT, VAL_INT, &add_IntWithInt },
+  { OP_ADD, VAL_INT, VAL_FLOAT, &add_IntWithFloat },
+  { OP_ADD, VAL_FLOAT, VAL_INT, &add_FloatWithInt },
+  { OP_ADD, VAL_STRING, VAL_STRING, &add_StringWithString },
+  { OP_ADD, VAL_STRING, VAL_INT, &add_StringWithInt },
+  { OP_ADD, VAL_INT, VAL_STRING, &add_IntWithString },
+  { OP_ADD, VAL_STRING, VAL_FLOAT, &add_StringWithFloat },
+  { OP_ADD, VAL_FLOAT, VAL_STRING, &add_FloatWithString },
+  { OP_ADD, VAL_FLOAT, VAL_FLOAT, &add_FloatWithFloat },
+  { OP_MULTIPLY, VAL_INT, VAL_INT, &multiply_IntByInt },
+  { OP_MULTIPLY, VAL_INT, VAL_FLOAT, &multiply_IntByFloat },
+  { OP_MULTIPLY, VAL_FLOAT, VAL_INT, &multiply_FloatByInt },
+  { OP_MULTIPLY, VAL_FLOAT, VAL_FLOAT, &multiply_FloatByFloat },
+  { OP_SUBTRACT, VAL_INT, VAL_INT, &subtract_IntFromInt },
+  { OP_SUBTRACT, VAL_INT, VAL_FLOAT, &subtract_FloatFromInt },
+  { OP_SUBTRACT, VAL_FLOAT, VAL_INT, &subtract_IntFromFloat },
+  { OP_SUBTRACT, VAL_FLOAT, VAL_FLOAT, &subtract_FloatFromFloat },
+  { OP_DIVIDE, VAL_INT, VAL_INT, &divide_IntByInt },
+  { OP_DIVIDE, VAL_INT, VAL_FLOAT, &divide_IntByFloat },
+  { OP_DIVIDE, VAL_FLOAT, VAL_INT, &divide_FloatByInt },
+  { OP_DIVIDE, VAL_FLOAT, VAL_FLOAT, &divide_FloatByFloat },
+  { OP_MODULUS, VAL_INT, VAL_INT, &mod_IntByInt },
+  { OP_MODULUS, VAL_INT, VAL_FLOAT, &mod_IntByFloat },
+  { OP_MODULUS, VAL_FLOAT, VAL_INT, &mod_FloatByInt },
+  { OP_MODULUS, VAL_FLOAT, VAL_FLOAT, &mod_FloatByFloat },
+  { OP_AND, VAL_INT, VAL_INT, &and_IntWithInt },
+  { OP_AND, VAL_FLOAT, VAL_INT, &and_FloatWithInt },
+  { OP_AND, VAL_INT, VAL_FLOAT, &and_IntWithFloat },
+  { OP_AND, VAL_STRING, VAL_INT, &and_StringWithInt },
+  { OP_AND, VAL_INT, VAL_STRING, &and_IntWithString },
+  { OP_AND, VAL_STRING, VAL_FLOAT, &and_StringWithFloat },
+  { OP_AND, VAL_FLOAT, VAL_STRING, &and_FloatWithString },
+  { OP_AND, VAL_FLOAT, VAL_FLOAT, &and_FloatWithFloat },
+  { OP_OR, VAL_INT, VAL_INT, &or_IntWithInt },
+  { OP_OR, VAL_FLOAT, VAL_INT, &or_FloatWithInt },
+  { OP_OR, VAL_INT, VAL_FLOAT, &or_IntWithFloat },
+  { OP_OR, VAL_STRING, VAL_INT, &or_StringWithInt },
+  { OP_OR, VAL_INT, VAL_STRING, &or_IntWithString },
+  { OP_OR, VAL_STRING, VAL_FLOAT, &or_StringWithFloat },
+  { OP_OR, VAL_FLOAT, VAL_STRING, &or_FloatWithString },
+  { OP_OR, VAL_FLOAT, VAL_FLOAT, &or_FloatWithFloat },
+  { OP_BITWISEAND, VAL_INT, VAL_INT, &bitwiseAnd },
+  { OP_BITWISEAND, VAL_FLOAT, VAL_INT, &bitwiseAnd },
+  { OP_BITWISEAND, VAL_INT, VAL_FLOAT, &bitwiseAnd },
+  { OP_BITWISEAND, VAL_STRING, VAL_INT, &bitwiseAnd },
+  { OP_BITWISEAND, VAL_INT, VAL_STRING, &bitwiseAnd },
+  { OP_BITWISEAND, VAL_STRING, VAL_FLOAT, &bitwiseAnd },
+  { OP_BITWISEAND, VAL_FLOAT, VAL_STRING, &bitwiseAnd },
+  { OP_BITWISEAND, VAL_FLOAT, VAL_FLOAT, &bitwiseAnd },
+  { OP_BITWISEOR, VAL_INT, VAL_INT, &bitwiseOr },
+  { OP_BITWISEOR, VAL_FLOAT, VAL_INT, &bitwiseOr },
+  { OP_BITWISEOR, VAL_INT, VAL_FLOAT, &bitwiseOr },
+  { OP_BITWISEOR, VAL_STRING, VAL_INT, &bitwiseOr },
+  { OP_BITWISEOR, VAL_INT, VAL_STRING, &bitwiseOr },
+  { OP_BITWISEOR, VAL_STRING, VAL_FLOAT, &bitwiseOr },
+  { OP_BITWISEOR, VAL_FLOAT, VAL_STRING, &bitwiseOr },
+  { OP_BITWISEOR, VAL_FLOAT, VAL_FLOAT, &bitwiseOr },
+  { OP_NOOP, VAL_INT, VAL_INT, NULL }
+}; // idb
 
 char *__cdecl GetSourceString(Operand operand)
 {
@@ -59,10 +357,10 @@ operandInternalDataUnion __cdecl GetSourceInt(Operand *source)
     }
 }
 
-int(__cdecl *__cdecl GetOperationFunction(
+void(__cdecl *__cdecl GetOperationFunction(
     operationEnum op,
     Operand *data1,
-    Operand *data2))(Operand *leftSide, Operand *rightSide, Operand *result)
+    Operand *data2))(Operand *, Operand *, Operand *)
 {
     double v4; // [esp+0h] [ebp-2Ch]
     double v5; // [esp+Ch] [ebp-20h]
@@ -74,10 +372,10 @@ int(__cdecl *__cdecl GetOperationFunction(
     for (opNum = 0; validOperations[opNum].op; ++opNum)
     {
         if (validOperations[opNum].op == op
-            && dword_949B54[4 * opNum] == data1->dataType
-            && dword_949B58[4 * opNum] == data2->dataType)
+            && validOperations[opNum].leftSide == data1->dataType
+            && validOperations[opNum].rightSide == data2->dataType)
         {
-            return off_949B5C[4 * opNum];
+            return validOperations[opNum].function;
         }
     }
     if (data1->dataType == VAL_STRING)
@@ -113,10 +411,10 @@ int(__cdecl *__cdecl GetOperationFunction(
     for (opNuma = 0; validOperations[opNuma].op; ++opNuma)
     {
         if (validOperations[opNuma].op == op
-            && dword_949B54[4 * opNuma] == data1->dataType
-            && dword_949B58[4 * opNuma] == data2->dataType)
+            && validOperations[opNuma].leftSide == data1->dataType
+            && validOperations[opNuma].rightSide == data2->dataType)
         {
-            return off_949B5C[4 * opNuma];
+            return validOperations[opNuma].function;
         }
     }
     return 0;
@@ -163,7 +461,7 @@ void __cdecl RunLogicOp(
             NameForValueType,
             SourceString);
     }
-    function = (void(__cdecl *)(Operand *, Operand *, Operand *))GetOperationFunction(op, &data1, &data2);
+    function = GetOperationFunction(op, &data1, &data2);
     if (function)
     {
         function(&data1, &data2, &operandResult);
@@ -300,6 +598,27 @@ char __cdecl GetOperandList(OperandStack *dataStack, OperandList *list)
         list->operands[0].internals.intVal = 0;
         return 0;
     }
+}
+
+BOOL __cdecl CG_IsIntermission(int localClientNum)
+{
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
+            1071,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    return cgArray[0].nextSnap->ps.pm_type == 5;
+}
+
+void __cdecl GetIsIntermission(int localClientNum, Operand *result)
+{
+    result->dataType = VAL_INT;
+    result->internals.intVal = CG_IsIntermission(localClientNum);
+    if (uiscript_debug->current.integer)
+        Com_Printf(13, "isIntermission() = %i\n", result->internals.intVal);
 }
 
 void __cdecl RunOp(int localClientNum, OperatorStack *opStack, OperandStack *dataStack)
@@ -448,7 +767,7 @@ void __cdecl RunOp(int localClientNum, OperatorStack *opStack, OperandStack *dat
         GetDvarIntValue(&data1, &operandResult);
         AddOperandToStack(dataStack, &operandResult);
         return;
-    case OP_DVARbool:
+    case OP_DVARBOOL:
         GetOperand(dataStack, &data1);
         GetDvarBoolValue(&data1, &operandResult);
         AddOperandToStack(dataStack, &operandResult);
@@ -583,14 +902,14 @@ void __cdecl RunOp(int localClientNum, OperatorStack *opStack, OperandStack *dat
         GetLocalVarIntValue(localClientNum, &data1, &operandResult);
         AddOperandToStack(dataStack, &operandResult);
         return;
-    case OP_LOCALVARbool:
+    case OP_LOCALVARBOOL:
         GetOperand(dataStack, &data1);
         GetLocalVarBoolValue(localClientNum, &data1, &operandResult);
         AddOperandToStack(dataStack, &operandResult);
         return;
     case OP_LOCALVARFLOAT:
         GetOperand(dataStack, &data1);
-        GetLocalVarFloatValue(__SPAIR64__(&data1, localClientNum), &operandResult);
+        GetLocalVarFloatValue(localClientNum , &data1, &operandResult);
         AddOperandToStack(dataStack, &operandResult);
         return;
     case OP_LOCALVARSTRING:
@@ -702,7 +1021,7 @@ void __cdecl GetDvarStringValue(Operand *source, Operand *result)
     if (source->dataType == VAL_STRING)
     {
         result->dataType = VAL_STRING;
-        dvar = _Dvar_FindVar(source->internals.string);
+        dvar = Dvar_FindVar(source->internals.string);
         if (dvar)
         {
             if (dvar->type == 7)
@@ -893,21 +1212,17 @@ void __cdecl GetLocalVarIntValue(int localClientNum, Operand *source, Operand *r
     }
 }
 
-void __cdecl GetLocalVarFloatValue(__int64 localClientNum, Operand *result)
+void __cdecl GetLocalVarFloatValue(int localClientNum, Operand *source, Operand *result)
 {
     UILocalVarContext *var; // [esp+8h] [ebp-4h]
 
-    var = GetLocalVar(localClientNum, (Operand *)HIDWORD(localClientNum));
+    var = GetLocalVar(localClientNum, source);
     if (var)
     {
         result->dataType = VAL_FLOAT;
         result->internals.floatVal = UILocalVar_GetFloat(var->table);
         if (uiscript_debug->current.integer)
-            Com_Printf(
-                13,
-                "localVarFloat( %s ) = %f\n",
-                *(const char **)(HIDWORD(localClientNum) + 4),
-                result->internals.floatVal);
+            Com_Printf(13, "localVarFloat( %s ) = %f\n", source->internals.string, result->internals.floatVal);
     }
     else
     {
@@ -1218,7 +1533,7 @@ void __cdecl InKillcam(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    result->internals.intVal = MEMORY[0x9E06F0];
+    result->internals.intVal = cgArray[0].inKillCam;
     if (uiscript_debug->current.integer)
         Com_Printf(13, "InKillcam() = %i\n", result->internals.intVal);
 }
@@ -1287,7 +1602,7 @@ void __cdecl GetPlayerStat(int localClientNum, Operand *source, Operand *result)
     index = getOperandValueInt(source).intVal;
     result->dataType = VAL_INT;
     v3 = CL_ControllerIndexFromClientNum(localClientNum);
-    result->internals.intVal = LiveStorage_GetStat(v3, index);
+    result->internals.intVal = LiveStorage_GetStat(v3, index); // KISAKTODO: win_storage.cpp
     if (uiscript_debug->current.integer)
         Com_Printf(13, "stat( %i ) = %i\n", index, result->internals.intVal);
 }
@@ -1332,7 +1647,7 @@ void __cdecl GetPlayerStatRangeBitsSet(int localClientNum, OperandList *list, Op
             controllerIndex = CL_ControllerIndexFromClientNum(localClientNum);
             for (statIndex.intVal = minStat; statIndex.intVal <= maxStat; ++statIndex.intVal)
             {
-                if ((bitMask & LiveStorage_GetStat(controllerIndex, statIndex.intVal)) != 0)
+                if ((bitMask & LiveStorage_GetStat(controllerIndex, statIndex.intVal)) != 0) // KISAKTODO: win_storage.cpp
                 {
                     result->internals.intVal = 1;
                     break;
@@ -1363,8 +1678,64 @@ void __cdecl GetPlayerStatRangeBitsSet(int localClientNum, OperandList *list, Op
     }
 }
 
+int __cdecl GetKeyBindingLocalizedString(int localClientNum, const char *command, char *keys, bool single)
+{
+    char *v4; // eax
+    const char *v6; // [esp+4h] [ebp-120h]
+    char *translation; // [esp+10h] [ebp-114h]
+    const char *translationa; // [esp+10h] [ebp-114h]
+    const char *translation_4; // [esp+14h] [ebp-110h]
+    int bindCount; // [esp+18h] [ebp-10Ch]
+    char bindings[2][128]; // [esp+1Ch] [ebp-108h] BYREF
+    const char *conjunction; // [esp+120h] [ebp-4h]
+
+    bindCount = CL_GetKeyBinding(localClientNum, command, bindings);
+    if (single && bindCount > 1)
+        bindCount = 1;
+    if (bindCount)
+    {
+        if (bindCount == 1)
+        {
+            translation = (char *)SEH_StringEd_GetString(bindings[0]);
+            if (translation)
+                I_strncpyz(keys, translation, 256);
+            else
+                I_strncpyz(keys, bindings[0], 256);
+        }
+        else
+        {
+            if (bindCount != 2)
+                MyAssertHandler(".\\ui\\ui_shared.cpp", 5084, 0, "%s\n\t(bindCount) = %i", "(bindCount == 2)", bindCount);
+            translationa = SEH_StringEd_GetString(bindings[0]);
+            translation_4 = SEH_StringEd_GetString(bindings[1]);
+            conjunction = UI_SafeTranslateString("KEY_OR");
+            if (translation_4)
+                v6 = translation_4;
+            else
+                v6 = bindings[1];
+            if (translationa)
+                Com_sprintf(keys, 0x100u, "%s %s %s", translationa, conjunction, v6);
+            else
+                Com_sprintf(keys, 0x100u, "%s %s %s", bindings[0], conjunction, v6);
+        }
+    }
+    else
+    {
+        v4 = UI_SafeTranslateString("KEY_UNBOUND");
+        I_strncpyz(keys, v4, 256);
+    }
+    return bindCount;
+}
+
+int __cdecl UI_GetKeyBindingLocalizedStringSingle(int localClientNum, const char *command, char *keys)
+{
+    return GetKeyBindingLocalizedString(localClientNum, command, keys, 1);
+}
+
 void __cdecl GetKeyBinding(int localClientNum, Operand *fieldName, Operand *result)
 {
+    static char resultString[256];
+
     const char *NameForValueType; // eax
 
     if (fieldName->dataType == VAL_STRING)
@@ -1597,7 +1968,7 @@ void __cdecl GetAdsJavelin(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    result->internals.intVal = MEMORY[0xE7A7CC][0] >= 7 && CG_JavelinADS(localClientNum);
+    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && CG_JavelinADS(localClientNum);
     if (uiscript_debug->current.integer)
         Com_Printf(13, "adsjavelin() = %i\n", result->internals.intVal);
 }
@@ -1616,7 +1987,7 @@ void __cdecl GetWeapLockBlink(int localClientNum, Operand *source, Operand *resu
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    result->internals.intVal = MEMORY[0xE7A7CC][0] >= 7 && G_ExitAfterConnectPaths();
+    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
     if (uiscript_debug->current.integer)
         Com_Printf(13, "weaplockblink( %.2f ) = %i\n", bps, result->internals.intVal);
 }
@@ -1632,7 +2003,7 @@ void __cdecl GetWeapAttackTop(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    result->internals.intVal = MEMORY[0xE7A7CC][0] >= 7 && G_ExitAfterConnectPaths();
+    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
     if (uiscript_debug->current.integer)
         Com_Printf(13, "weapattacktop() = %i\n", result->internals.intVal);
 }
@@ -1648,13 +2019,14 @@ void __cdecl GetWeapAttackDirect(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    result->internals.intVal = MEMORY[0xE7A7CC][0] >= 7 && G_ExitAfterConnectPaths();
+    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
     if (uiscript_debug->current.integer)
         Com_Printf(13, "weapattackdirect() = %i\n", result->internals.intVal);
 }
 
 void __cdecl SecondsToTimeDisplay(int localClientNum, Operand *source, Operand *result)
 {
+    static char resultString_0[128];
     float v3; // [esp+4h] [ebp-14h]
 
     v3 = (double)GetSourceInt(source).intVal / 60.0;
@@ -1673,6 +2045,8 @@ void __cdecl SecondsToTimeDisplay(int localClientNum, Operand *source, Operand *
 
 void __cdecl SecondsToCountdownDisplay(int localClientNum, int seconds, Operand *result)
 {
+    static char resultString_1[128];
+
     result->dataType = VAL_STRING;
     result->internals.intVal = (int)resultString_1;
     if (seconds >= 0)
@@ -1699,7 +2073,7 @@ void __cdecl GetTimeLeft(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] < 7)
+    if (clientUIActives[0].connectionState < CA_LOADING)
     {
         result->dataType = VAL_INT;
         result->internals.intVal = 0;
@@ -1721,8 +2095,8 @@ void __cdecl GetTimeLeft(int localClientNum, Operand *result)
             "(localClientNum == 0)",
             localClientNum);
     }
-    if (MEMORY[0x98F45C])
-        timeLeft.intVal = (cgsArray[0].gameEndTime - *(unsigned int *)(MEMORY[0x98F45C] + 8)) / 1000;
+    if (cgArray[0].nextSnap)
+        timeLeft.intVal = (cgsArray[0].gameEndTime - cgArray[0].nextSnap->serverTime) / 1000;
     else
         timeLeft.intVal = 0;
     result->dataType = VAL_INT;
@@ -1740,7 +2114,7 @@ void __cdecl GetGametypeObjective(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] >= 7)
+    if (clientUIActives[0].connectionState >= CA_LOADING)
     {
         if (localClientNum)
             MyAssertHandler(
@@ -1771,7 +2145,7 @@ void __cdecl GetGametypeName(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] >= 7)
+    if (clientUIActives[0].connectionState >= CA_LOADING)
     {
         if (localClientNum)
             MyAssertHandler(
@@ -1823,7 +2197,7 @@ void __cdecl GetGametypeInternal(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] >= 7)
+    if (clientUIActives[0].connectionState >= CA_LOADING)
         result->internals.intVal = (int)cgsArray[0].gametype;
     else
         result->internals.intVal = g_gametype->current.integer;
@@ -1880,7 +2254,7 @@ void __cdecl GetFollowing(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((MEMORY[0x9D5588] & 2) != 0)
+    if ((cgArray[0].predictedPlayerState.otherFlags & 2) != 0)
         result->internals.intVal = 1;
 }
 
@@ -2179,8 +2553,11 @@ bool __cdecl IsOpAssociative(operationEnum op)
     return op < OP_DIVIDE || op > OP_MODULUS && op != OP_SUBTRACT;
 }
 
+int lastWarnTime;
 char *__cdecl GetExpressionResultString(int localClientNum, const statement_s *statement)
 {
+    static char resultString_2[256];
+
     const char *v3; // eax
     Operand result; // [esp+Ch] [ebp-Ch] BYREF
     int len; // [esp+14h] [ebp-4h]
@@ -2224,6 +2601,7 @@ char *__cdecl GetExpressionResultString(int localClientNum, const statement_s *s
     return resultString_2;
 }
 
+const statement_s *g_releaseBuildStatement;
 Operand *__cdecl EvaluateExpression(int localClientNum, const statement_s *statement, Operand *result)
 {
     expressionEntry *v4; // [esp+0h] [ebp-14BCh]

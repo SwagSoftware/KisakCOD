@@ -1,5 +1,7 @@
 #include "ui.h"
 #include <qcommon/mem_track.h>
+#include <qcommon/threads.h>
+#include <universal/q_parse.h>
 
 stringDef_s *g_strHandle[2048];
 
@@ -357,6 +359,7 @@ void __cdecl String_Init()
     memset((unsigned __int8 *)g_strHandle, 0, sizeof(g_strHandle));
 }
 
+const char *staticNULL = "";
 const char *__cdecl String_Alloc(const char *p)
 {
     char v2; // [esp+3h] [ebp-45h]

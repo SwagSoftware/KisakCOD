@@ -757,6 +757,15 @@ union operandInternalDataUnion // sizeof=0x4
     {
         string = str;
     }
+
+    operator int()
+    {
+        return intVal;
+    }
+    operator float()
+    {
+        return floatVal;
+    }
     int intVal;
     float floatVal;
     const char* string;
