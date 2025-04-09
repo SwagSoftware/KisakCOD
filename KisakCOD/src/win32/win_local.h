@@ -51,6 +51,8 @@ void	IN_DeactivateWin32Mouse( void);
 void	IN_Activate (qboolean active);
 void	IN_Frame (void);
 
+bool IN_IsTalkKeyHeld();
+
 // window procedure
 #ifndef _XBOX
 LRESULT WINAPI MainWndProc (

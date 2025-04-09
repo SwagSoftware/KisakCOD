@@ -5,6 +5,155 @@
 #include <client_mp/client_mp.h>
 #include <gfx_d3d/r_rendercmds.h>
 #include <universal/q_parse.h>
+#include <client/client.h>
+#include <buildnumber_mp.h>
+#include <stringed/stringed_hooks.h>
+#include <database/database.h>
+#include <universal/com_files.h>
+#include <universal/com_sndalias.h>
+
+#include <gfx_d3d/r_dvars.h>
+#include <win32/win_local.h>
+#include <qcommon/com_playerprofile.h>
+
+enum sscType_t : __int32
+{                                       // ...
+    SSC_STRING = 0x0,
+    SSC_YESNO = 0x1,
+    SSC_GAMETYPE = 0x2,
+    SSC_MAPNAME = 0x3,
+};
+
+struct serverFilter_s // sizeof=0x8
+{                                       // ...
+    const char *description;            // ...
+    const char *basedir;                // ...
+};
+
+struct serverStatusDvar_t // sizeof=0xC
+{
+    const char *name;
+    const char *altName;
+    sscType_t type;
+};
+
+
+int tleEstimates[80] =
+{
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60,
+  60
+}; // idb
+
+serverStatusDvar_t serverStatusDvars[26] =
+{
+  { "sv_hostname", "@EXE_SV_INFO_SERVERNAME", SSC_STRING },
+  { "address", "@EXE_SV_INFO_ADDRESS", SSC_STRING },
+  { "pswrd", "@EXE_SV_INFO_PASSWORD", SSC_YESNO },
+  { "gamename", "@EXE_SV_INFO_GAMENAME", SSC_STRING },
+  { "g_gametype", "@EXE_SV_INFO_GAMETYPE", SSC_GAMETYPE },
+  { "sv_pure", "@EXE_SV_INFO_PURE", SSC_YESNO },
+  { "mapname", "@EXE_SV_INFO_MAP", SSC_MAPNAME },
+  { "shortversion", "@EXE_SV_INFO_VERSION", SSC_STRING },
+  { "protocol", "@EXE_SV_INFO_PROTOCOL", SSC_STRING },
+  { "sv_maxping", "@EXE_SV_INFO_MAXPING", SSC_STRING },
+  { "sv_minping", "@EXE_SV_INFO_MINPING", SSC_STRING },
+  { "sv_maxrate", "@EXE_SV_INFO_MAXRATE", SSC_STRING },
+  { "sv_floodprotect", "@EXE_SV_INFO_FLOODPROTECT", SSC_YESNO },
+  { "sv_allowanonymous", "@EXE_SV_INFO_ALLOWANON", SSC_STRING },
+  { "sv_maxclients", "@EXE_SV_INFO_MAXCLIENTS", SSC_STRING },
+  { "sv_privateclients", "@EXE_SV_INFO_PRIVATECLIENTS", SSC_STRING },
+  { "scr_friendlyFire", "@EXE_SV_INFO_FRIENDLY_FIRE", SSC_STRING },
+  { "fs_game", "@EXE_SV_INFO_MOD", SSC_STRING },
+  { "mod", "@MENU_MODS", SSC_YESNO },
+  { "scr_killcam", "@EXE_SV_INFO_KILLCAM", SSC_YESNO },
+  { "g_antilag", "@EXE_SV_INFO_ANTILAG", SSC_YESNO },
+  { "g_compassShowEnemies", "@EXE_SV_INFO_COMPASS_ENEMIES", SSC_YESNO },
+  { "sv_voice", "@EXE_SV_INFO_VOICE", SSC_YESNO },
+  { "sv_punkbuster", "@MPUI_PUNKBUSTER", SSC_YESNO },
+  { "sv_disableClientConsole", "@EXE_SV_INFO_CLIENT_CONSOLE", SSC_YESNO },
+  { NULL, NULL, SSC_STRING }
+}; // idb
+
+const char *netSources[3] = { "EXE_LOCAL", "EXE_INTERNET", "EXE_FAVORITES" }; // idb
+const serverFilter_s serverFilters[1] = { { "EXE_ALL", "" }}; // idb
 
 const dvar_t *ui_showList;
 const dvar_t *ui_customClassName;
@@ -38,9 +187,38 @@ const dvar_t *ui_borderLowLightScale;
 const dvar_t *ui_partyFull;
 const dvar_t *ui_customModeName;
 
-int ui_serverFilterType;
+const dvar_t *ui_joinGameType;
+const dvar_t *ui_netGameTypeName;
+const dvar_t *ui_dedicated;
+const dvar_t *ui_currentNetMap;
+const dvar_t *ui_browserShowFull;
+const dvar_t *ui_browserShowEmpty;
+const dvar_t *ui_browserShowPassword;
+const dvar_t *ui_browserShowPure;
+const dvar_t *ui_browserMod;
+const dvar_t *ui_browserShowDedicated;
+const dvar_t *ui_browserFriendlyfire;
 
-UiContext uiInfoArray;
+const dvar_t *ui_browserKillcam;
+const dvar_t *ui_browserShowPunkBuster;
+const dvar_t *ui_playerProfileCount;
+const dvar_t *ui_playerProfileSelected;
+const dvar_t *ui_playerProfileNameNew;
+const dvar_t *ui_showEndOfGame;
+const dvar_t *ui_playerProfileNameNew;
+const dvar_t *ui_playerProfileNameNew;
+const dvar_t *ui_playerProfileNameNew;
+
+const dvar_t *ui_netGameType;
+
+LegacyHacks legacyHacks;
+
+char g_mapname[64];
+char g_gametype[64];
+int ui_serverFilterType;
+bool g_ingameMenusLoaded[1];
+
+uiInfo_s uiInfoArray; // On PC this array is just [1].
 sharedUiInfo_t sharedUiInfo;
 
 const char *MonthAbbrev[12] =
@@ -71,7 +249,7 @@ UILocalVarContext *__cdecl UI_GetLocalVarsContext(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return &uiInfoArray.localVars;
+    return &uiInfoArray.uiDC.localVars;
 }
 
 void __cdecl TRACK_ui_main()
@@ -509,17 +687,17 @@ void __cdecl UI_UpdateTime(int localClientNum, int realtime)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    uiInfoArray.frameTime = realtime - uiInfoArray.realTime;
-    uiInfoArray.realTime = realtime;
-    *((unsigned int *)&uiInfoArray + dword_DB561AC[0]++ % 4 + 1572) = uiInfoArray.frameTime;
-    if (dword_DB561AC[0] > 4)
+    uiInfoArray.uiDC.frameTime = realtime - uiInfoArray.uiDC.realTime;
+    uiInfoArray.uiDC.realTime = realtime;
+    uiInfoArray.previousTimes[uiInfoArray.timeIndex++ % 4] = uiInfoArray.uiDC.frameTime;
+    if (uiInfoArray.timeIndex > 4)
     {
         frameTimeTotal = 0;
         for (frameTimeIndex = 0; frameTimeIndex < 4; ++frameTimeIndex)
-            frameTimeTotal += *((unsigned int *)&uiInfoArray + frameTimeIndex + 1572);
+            frameTimeTotal += uiInfoArray.previousTimes[frameTimeIndex];
         if (!frameTimeTotal)
             frameTimeTotal = 1;
-        uiInfoArray.FPS = (float)(4000 / frameTimeTotal);
+        uiInfoArray.uiDC.FPS = (float)(4000 / frameTimeTotal);
     }
 }
 
@@ -541,6 +719,317 @@ void __cdecl UI_DrawBuildNumber(int localClientNum)
     UI_DrawText(&scrPlaceView[localClientNum], v2, 64, scale, x, y, 3, 0, value, colorMdGrey, 0);
 }
 
+int __cdecl LAN_GetServerStatus(char *serverAddress, char *serverStatus, int maxLen)
+{
+    return CL_ServerStatus(serverAddress, serverStatus, maxLen);
+}
+
+void __cdecl UI_SortServerStatusInfo(serverStatusInfo_t *info)
+{
+    const char *v1; // eax
+    int j; // [esp+18h] [ebp-14h]
+    const char *tmp1; // [esp+1Ch] [ebp-10h]
+    const char *tmp2; // [esp+20h] [ebp-Ch]
+    int index; // [esp+24h] [ebp-8h]
+    int i; // [esp+28h] [ebp-4h]
+
+    index = 0;
+    for (i = 0; serverStatusDvars[i].name; ++i)
+    {
+        for (j = 0; j < info->numLines; ++j)
+        {
+            if (info->lines[j][1] && !*info->lines[j][1] && !I_stricmp(serverStatusDvars[i].name, info->lines[j][0]))
+            {
+                tmp1 = info->lines[index][0];
+                tmp2 = info->lines[index][3];
+                info->lines[index][0] = info->lines[j][0];
+                info->lines[index][3] = info->lines[j][3];
+                info->lines[j][0] = tmp1;
+                info->lines[j][3] = tmp2;
+                if (strlen(serverStatusDvars[i].altName))
+                    info->lines[index][0] = serverStatusDvars[i].altName;
+                switch (serverStatusDvars[i].type)
+                {
+                case SSC_STRING:
+                    break;
+                case SSC_YESNO:
+                    if (atoi(info->lines[index][3]))
+                        info->lines[index][3] = "@EXE_YES";
+                    else
+                        info->lines[index][3] = "@EXE_NO";
+                    break;
+                case SSC_GAMETYPE:
+                    info->lines[index][3] = UI_GetGameTypeDisplayName(info->lines[index][3]);
+                    break;
+                case SSC_MAPNAME:
+                    info->lines[index][3] = UI_GetMapDisplayName(info->lines[index][3]);
+                    break;
+                default:
+                    if (!alwaysfails)
+                    {
+                        v1 = va("unknown server status dvar type: %i", serverStatusDvars[i].type);
+                        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 3684, 0, v1);
+                    }
+                    break;
+                }
+                ++index;
+            }
+        }
+    }
+}
+
+int __cdecl UI_GetServerStatusInfo(char *serverAddress, serverStatusInfo_t *info)
+{
+    char *v3; // eax
+    char *v4; // eax
+    _BYTE *v5; // eax
+    _BYTE *v6; // eax
+    _BYTE *v7; // eax
+    char *ping; // [esp+10h] [ebp-18h]
+    int len; // [esp+18h] [ebp-10h]
+    int i; // [esp+1Ch] [ebp-Ch]
+    char *p; // [esp+20h] [ebp-8h]
+    char *pa; // [esp+20h] [ebp-8h]
+    char *score; // [esp+24h] [ebp-4h]
+
+    if (info)
+    {
+        memset((unsigned __int8 *)info, 0, sizeof(serverStatusInfo_t));
+        if (LAN_GetServerStatus(serverAddress, info->text, 1024))
+        {
+            I_strncpyz(info->address, serverAddress, 64);
+            p = info->text;
+            info->numLines = 0;
+            info->lines[info->numLines][0] = "address";
+            info->lines[info->numLines][1] = "";
+            info->lines[info->numLines][2] = "";
+            info->lines[info->numLines++][3] = (const char *)info;
+            do
+            {
+                if (!p)
+                    break;
+                if (!*p)
+                    break;
+                strchr(p, 0x5Cu);
+                p = v3;
+                if (!v3)
+                    break;
+                *v3 = 0;
+                p = v3 + 1;
+                if (v3[1] == 92)
+                    break;
+                info->lines[info->numLines][0] = p;
+                info->lines[info->numLines][1] = "";
+                info->lines[info->numLines][2] = "";
+                strchr(p, 0x5Cu);
+                p = v4;
+                if (!v4)
+                    break;
+                *v4 = 0;
+                p = v4 + 1;
+                info->lines[info->numLines++][3] = v4 + 1;
+            } while (info->numLines < 128);
+            if (info->numLines < 125)
+            {
+                info->lines[info->numLines][0] = "";
+                info->lines[info->numLines][1] = "";
+                info->lines[info->numLines][2] = "";
+                info->lines[info->numLines++][3] = "";
+                info->lines[info->numLines][0] = "@EXE_SV_INFO_NUM";
+                info->lines[info->numLines][1] = "@EXE_SV_INFO_SCORE";
+                info->lines[info->numLines][2] = "@EXE_SV_INFO_PING";
+                info->lines[info->numLines++][3] = "@EXE_SV_INFO_NAME";
+                i = 0;
+                len = 0;
+                while (p && *p)
+                {
+                    if (*p == 92)
+                        *p++ = 0;
+                    if (!p)
+                        break;
+                    score = p;
+                    strchr(p, 0x20u);
+                    if (!v5)
+                        break;
+                    *v5 = 0;
+                    ping = (char*)(v5 + 1);
+                    strchr((char*)(v5 + 1), 0x20u);
+                    if (!v6)
+                        break;
+                    *v6 = 0;
+                    pa = (char*)(v6 + 1);
+                    Com_sprintf(&info->pings[len], 192 - len, "%d", i);
+                    info->lines[info->numLines][0] = &info->pings[len];
+                    len += strlen(&info->pings[len]) + 1;
+                    info->lines[info->numLines][1] = score;
+                    info->lines[info->numLines][2] = ping;
+                    info->lines[info->numLines][3] = pa;
+                    if (++info->numLines >= 128)
+                        break;
+                    strchr(pa, 0x5Cu);
+                    if (!v7)
+                        break;
+                    *v7 = 0;
+                    p = (char*)(v7 + 1);
+                    ++i;
+                }
+            }
+            UI_SortServerStatusInfo(info);
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        LAN_GetServerStatus(serverAddress, 0, 0);
+        return 0;
+    }
+}
+
+int numFound;
+int numTimeOuts;
+uiInfo_s *UI_BuildFindPlayerList()
+{
+    uiInfo_s *result; // eax
+    const char *v1; // eax
+    int j; // [esp+4h] [ebp-1144h]
+    serverStatusInfo_t info; // [esp+8h] [ebp-1140h] BYREF
+    uiInfo_s *uiInfo; // [esp+D14h] [ebp-434h]
+    char dest[36]; // [esp+D18h] [ebp-430h] BYREF
+    int i; // [esp+D3Ch] [ebp-40Ch]
+    char buf[1028]; // [esp+D40h] [ebp-408h] BYREF
+
+    uiInfo = &uiInfoArray;
+    result = &uiInfoArray;
+    if (uiInfoArray.nextFindPlayerRefresh)
+    {
+        result = (uiInfo_s *)uiInfo->nextFindPlayerRefresh;
+        if ((int)result <= uiInfo->uiDC.realTime)
+        {
+            UI_UpdateDisplayServers(uiInfo);
+            for (i = 0; i < 16; ++i)
+            {
+                if (sharedUiInfo.pendingServerStatus.server[i].valid
+                    && UI_GetServerStatusInfo(sharedUiInfo.pendingServerStatus.server[i].adrstr, &info))
+                {
+                    ++numFound;
+                    for (j = 0; j < info.numLines; ++j)
+                    {
+                        if (*(_DWORD *)&info.text[16 * j - 2040])
+                        {
+                            if (**(_BYTE **)&info.text[16 * j - 2040])
+                            {
+                                I_strncpyz(dest, *(char **)&info.text[16 * j - 2036], 34);
+                                I_CleanStr(dest);
+                                if (stristr(dest, uiInfo->findPlayerName))
+                                {
+                                    if (uiInfo->numFoundPlayerServers >= 15)
+                                    {
+                                        sharedUiInfo.pendingServerStatus.num = *(_DWORD *)&sharedUiInfo.gap8EB4[72900];
+                                    }
+                                    else
+                                    {
+                                        I_strncpyz(
+                                            &uiInfo->findPlayerName[64 * uiInfo->numFoundPlayerServers + 960],
+                                            sharedUiInfo.pendingServerStatus.server[i].adrstr,
+                                            64);
+                                        I_strncpyz(
+                                            uiInfo->foundPlayerServerAddresses[uiInfo->numFoundPlayerServers + 15],
+                                            sharedUiInfo.pendingServerStatus.server[i].name,
+                                            64);
+                                        ++uiInfo->numFoundPlayerServers;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Com_sprintf(
+                        uiInfo->foundPlayerServerAddresses[uiInfo->numFoundPlayerServers + 15],
+                        0x40u,
+                        "searching %d/%d...",
+                        sharedUiInfo.pendingServerStatus.num,
+                        numFound);
+                    sharedUiInfo.pendingServerStatus.server[i].valid = 0;
+                }
+                if (!sharedUiInfo.pendingServerStatus.server[i].valid
+                    || sharedUiInfo.pendingServerStatus.server[i].startTime < uiInfo->uiDC.realTime
+                    - ui_serverStatusTimeOut->current.integer)
+                {
+                    if (sharedUiInfo.pendingServerStatus.server[i].valid)
+                        ++numTimeOuts;
+                    UI_GetServerStatusInfo(sharedUiInfo.pendingServerStatus.server[i].adrstr, 0);
+                    sharedUiInfo.pendingServerStatus.server[i].valid = 0;
+                    UI_UpdateDisplayServers(uiInfo);
+                    if (sharedUiInfo.pendingServerStatus.num < *(int *)&sharedUiInfo.gap8EB4[72900])
+                    {
+                        sharedUiInfo.pendingServerStatus.server[i].startTime = uiInfo->uiDC.realTime;
+                        LAN_GetServerAddressString(
+                            ui_netSource->current.integer,
+                            *(_DWORD *)&sharedUiInfo.gap8EB4[4 * sharedUiInfo.pendingServerStatus.num - 7100],
+                            sharedUiInfo.pendingServerStatus.server[i].adrstr,
+                            64);
+                        LAN_GetServerInfo(
+                            ui_netSource->current.integer,
+                            *(_DWORD *)&sharedUiInfo.gap8EB4[4 * sharedUiInfo.pendingServerStatus.num - 7100],
+                            buf,
+                            1024);
+                        v1 = Info_ValueForKey(buf, "hostname");
+                        I_strncpyz(sharedUiInfo.pendingServerStatus.server[i].name, v1, 64);
+                        sharedUiInfo.pendingServerStatus.server[i].valid = 1;
+                        Com_sprintf(
+                            uiInfo->foundPlayerServerAddresses[uiInfo->numFoundPlayerServers + 15],
+                            0x40u,
+                            "searching %d/%d...",
+                            ++sharedUiInfo.pendingServerStatus.num,
+                            numFound);
+                    }
+                }
+            }
+            for (i = 0; i < 16 && !sharedUiInfo.pendingServerStatus.server[i].valid; ++i)
+                ;
+            if (i >= 16)
+            {
+                if (uiInfo->numFoundPlayerServers)
+                {
+                    if (uiInfo->numFoundPlayerServers == 2)
+                        result = (uiInfo_s *)Com_sprintf(
+                            uiInfo->foundPlayerServerAddresses[uiInfo->numFoundPlayerServers + 15],
+                            0x40u,
+                            "%d server%s found with player %s",
+                            uiInfo->numFoundPlayerServers - 1,
+                            "",
+                            uiInfo->findPlayerName);
+                    else
+                        result = (uiInfo_s *)Com_sprintf(
+                            uiInfo->foundPlayerServerAddresses[uiInfo->numFoundPlayerServers + 15],
+                            0x40u,
+                            "%d server%s found with player %s",
+                            uiInfo->numFoundPlayerServers - 1,
+                            "s",
+                            uiInfo->findPlayerName);
+                }
+                else
+                {
+                    result = (uiInfo_s *)Com_sprintf(
+                        uiInfo->foundPlayerServerAddresses[uiInfo->numFoundPlayerServers + 15],
+                        0x40u,
+                        "no servers found");
+                }
+                uiInfo->nextFindPlayerRefresh = 0;
+            }
+            else
+            {
+                result = uiInfo;
+                uiInfo->nextFindPlayerRefresh = uiInfo->uiDC.realTime + 25;
+            }
+        }
+    }
+    return result;
+}
+
 void __cdecl UI_Refresh(int localClientNum)
 {
     float x; // [esp+20h] [ebp-18h]
@@ -556,11 +1045,11 @@ void __cdecl UI_Refresh(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (Menu_Count(&uiInfoArray) > 0)
+    if (Menu_Count(&uiInfoArray.uiDC) > 0)
     {
-        Menu_PaintAll(&uiInfoArray);
-        UI_DoServerRefresh((uiInfo_s *)&uiInfoArray);
-        UI_BuildServerStatus((uiInfo_s *)&uiInfoArray, 0);
+        Menu_PaintAll(&uiInfoArray.uiDC);
+        UI_DoServerRefresh(&uiInfoArray);
+        UI_BuildServerStatus(&uiInfoArray, 0);
         UI_BuildFindPlayerList();
         if (CL_AllLocalClientsDisconnected())
         {
@@ -572,25 +1061,58 @@ void __cdecl UI_Refresh(int localClientNum)
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            if (!MEMORY[0xE7A7CC][0])
+            if (clientUIActives[0].connectionState == CA_DISCONNECTED)
                 UI_DrawBuildNumber(localClientNum);
         }
-        if (uiInfoArray.isCursorVisible)
+        if (uiInfoArray.uiDC.isCursorVisible)
         {
-            if (!Dvar_GetBool("cl_bypassMouseInput") && UI_GetActiveMenu(localClientNum) != 10)
+            if (!Dvar_GetBool("cl_bypassMouseInput") && UI_GetActiveMenu(localClientNum) != UIMENU_SCOREBOARD)
             {
                 w = scrPlaceFull.scaleVirtualToReal[0] * 32.0 / scrPlaceFull.scaleVirtualToFull[0];
                 h = scrPlaceFull.scaleVirtualToReal[1] * 32.0 / scrPlaceFull.scaleVirtualToFull[1];
-                y = uiInfoArray.cursor.y - h * 0.5;
-                x = uiInfoArray.cursor.x - w * 0.5;
+                y = uiInfoArray.uiDC.cursor.y - h * 0.5;
+                x = uiInfoArray.uiDC.cursor.x - w * 0.5;
                 UI_DrawHandlePic(&scrPlaceView[localClientNum], x, y, w, h, 4, 4, 0, sharedUiInfo.assets.cursor);
             }
         }
     }
-    if (!Menu_GetFocused(&uiInfoArray))
+    if (!Menu_GetFocused(&uiInfoArray.uiDC))
     {
         if (Key_IsCatcherActive(localClientNum, 16))
             Key_RemoveCatcher(localClientNum, -17);
+    }
+}
+
+void __cdecl LAN_SaveServersToCache()
+{
+    int version; // [esp+8h] [ebp-10h] BYREF
+    int size; // [esp+Ch] [ebp-Ch] BYREF
+    int fileOut; // [esp+10h] [ebp-8h]
+    int i; // [esp+14h] [ebp-4h]
+
+    fileOut = FS_SV_FOpenFileWrite("servercache.dat");
+    if (fileOut)
+    {
+        version = 1;
+        FS_Write((char *)&version, 4u, fileOut);
+        for (i = cls.numglobalservers - 1; i >= 0; --i)
+        {
+            if (cls.globalServers[i].requestCount >= 3u)
+                goto LABEL_8;
+            if (!i)
+                break;
+            if (!NET_CompareAdrSigned(&cls.globalServers[i].adr, (netadr_t *)&cls.localServers[i + 127].adr.port))
+                LABEL_8:
+            memcpy(&cls.globalServers[i], &cls.globalServers[--cls.numglobalservers], sizeof(cls.globalServers[i]));
+        }
+        CL_SortGlobalServers();
+        FS_Write((char *)&cls.numglobalservers, 4u, fileOut);
+        FS_Write((char *)&cls.numfavoriteservers, 4u, fileOut);
+        size = 2978944;
+        FS_Write((char *)&size, 4u, fileOut);
+        FS_Write((char *)cls.globalServers, 0x2D2A80u, fileOut);
+        FS_Write((char *)cls.favoriteServers, 0x4A00u, fileOut);
+        FS_FCloseFile(fileOut);
     }
 }
 
@@ -604,12 +1126,41 @@ void __cdecl UI_Shutdown(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    Menus_CloseAll(&uiInfoArray);
+    Menus_CloseAll(&uiInfoArray.uiDC);
     sharedUiInfo.assets.whiteMaterial = 0;
-    UILocalVar_Shutdown(&uiInfoArray.localVars);
+    UILocalVar_Shutdown(&uiInfoArray.uiDC.localVars);
     if (!useFastFile->current.enabled)
-        Menus_FreeAllMemory(&uiInfoArray);
+        Menus_FreeAllMemory(&uiInfoArray.uiDC);
     LAN_SaveServersToCache();
+}
+
+char *__cdecl GetMenuBuffer_LoadObj(char *filename)
+{
+    int len; // [esp+0h] [ebp-8h]
+    int f; // [esp+4h] [ebp-4h] BYREF
+
+    len = FS_FOpenFileByMode(filename, &f, FS_READ);
+    if (f)
+    {
+        if (len < 0x8000)
+        {
+            FS_Read((unsigned __int8 *)menuBuf2, len, f);
+            menuBuf2[len] = 0;
+            FS_FCloseFile(f);
+            return menuBuf2;
+        }
+        else
+        {
+            Com_PrintError(13, "menu file too large: %s is %i, max allowed is %i", filename, len, 0x8000);
+            FS_FCloseFile(f);
+            return 0;
+        }
+    }
+    else
+    {
+        Com_PrintError(13, "menu file not found: %s, using default\n", filename);
+        return 0;
+    }
 }
 
 char *__cdecl GetMenuBuffer(char *filename)
@@ -646,7 +1197,7 @@ int __cdecl Load_ScriptMenu(int localClientNum, char *pszMenu, int imageTrack)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    UI_AddMenuList(&uiInfoArray, menuList);
+    UI_AddMenuList(&uiInfoArray.uiDC, menuList);
     return 1;
 }
 
@@ -714,14 +1265,14 @@ int __cdecl UI_OwnerDrawWidth(int ownerDraw, Font_s *font, float scale)
         break;
     case 220:
         if (ui_netSource->current.integer > sharedUiInfo.numJoinGameTypes)
-            Dvar_SetInt((dvar_s *)ui_netSource, 0);
-        v3 = va(aExeNetsource, netSources[ui_netSource->current.integer]);
+            Dvar_SetInt((dvar_s*)ui_netSource, 0);
+        v3 = va("EXE_NETSOURCE_%s", netSources[ui_netSource->current.integer]);
         s = SEH_LocalizeTextMessage(v3, "net source", LOCMSG_SAFE);
         break;
     case 222:
         if ((unsigned int)ui_serverFilterType >= 2)
             ui_serverFilterType = 0;
-        v4 = va(aExeServerfilte, serverFilters[ui_serverFilterType].description);
+        v4 = va("EXE_SERVERFILTER_%s", serverFilters[ui_serverFilterType].description);
         s = SEH_LocalizeTextMessage(v4, "server filter", LOCMSG_SAFE);
         break;
     case 247:
@@ -756,15 +1307,15 @@ void __cdecl UI_DrawMapLevelshot(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    menu = Menus_FindByName(&uiInfoArray, "pregame_loaderror_mp");
-    if (!menu || !Menus_MenuIsInStack(&uiInfoArray, menu))
+    menu = Menus_FindByName(&uiInfoArray.uiDC, "pregame_loaderror_mp");
+    if (!menu || !Menus_MenuIsInStack(&uiInfoArray.uiDC, menu))
     {
         if (g_mapname[0])
         {
             if (useFastFile->current.enabled)
                 menua = DB_FindXAssetHeader(ASSET_TYPE_MENU, "connect").menu;
             else
-                menua = Menus_FindByName(&uiInfoArray, "connect");
+                menua = Menus_FindByName(&uiInfoArray.uiDC, "connect");
         }
         else
         {
@@ -772,11 +1323,11 @@ void __cdecl UI_DrawMapLevelshot(int localClientNum)
         }
         if (menua)
         {
-            if (!Menus_MenuIsInStack(&uiInfoArray, menua))
-                Menus_Open(&uiInfoArray, menua);
-            uiInfoArray.blurRadiusOut = 0.0;
+            if (!Menus_MenuIsInStack(&uiInfoArray.uiDC, menua))
+                Menus_Open(&uiInfoArray.uiDC, menua);
+            uiInfoArray.uiDC.blurRadiusOut = 0.0;
             Window_SetDynamicFlags(localClientNum, &menua->window, 16388);
-            Menu_Paint(&uiInfoArray, menua);
+            Menu_Paint(&uiInfoArray.uiDC, menua);
         }
         else
         {
@@ -792,7 +1343,7 @@ void __cdecl UI_LoadIngameMenus(int localClientNum)
     if (!g_ingameMenusLoaded[localClientNum])
     {
         g_ingameMenusLoaded[localClientNum] = 1;
-        menuList = UI_LoadMenus("ui_mp/ingame.txt", 3);
+        menuList = UI_LoadMenus((char*)"ui_mp/ingame.txt", 3);
         if (localClientNum)
             MyAssertHandler(
                 ".\\ui_mp\\ui_main_mp.cpp",
@@ -801,7 +1352,65 @@ void __cdecl UI_LoadIngameMenus(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        UI_AddMenuList(&uiInfoArray, menuList);
+        UI_AddMenuList(&uiInfoArray.uiDC, menuList);
+    }
+}
+
+void __cdecl UI_ParseMenuMaterial(const char *key, char *value)
+{
+    Material *material; // [esp+0h] [ebp-4Ch]
+    char name[68]; // [esp+4h] [ebp-48h] BYREF
+
+    material = Material_RegisterHandle(value, 3);
+    Com_sprintf(name, 0x40u, "$%s", key);
+    I_strlwr(name);
+    Material_Duplicate(material, name);
+}
+
+void __cdecl UI_MapLoadInfo(const char *filename)
+{
+    const char *parse; // [esp+14h] [ebp-118h] BYREF
+    int tokenLen; // [esp+18h] [ebp-114h]
+    char key[256]; // [esp+1Ch] [ebp-110h] BYREF
+    const char *token; // [esp+120h] [ebp-Ch]
+    char *loadfile; // [esp+124h] [ebp-8h] BYREF
+    const char *value; // [esp+128h] [ebp-4h]
+
+    if (*filename)
+    {
+        if (FS_ReadFile(filename, (void **)&loadfile) >= 0)
+        {
+            parse = loadfile;
+            Com_BeginParseSession(filename);
+            Com_SetCSV(1);
+            while (1)
+            {
+                token = (const char *)Com_Parse(&parse);
+                if (!*token)
+                    break;
+                tokenLen = strlen(token) + 1;
+                if ((unsigned int)tokenLen >= 0x100)
+                {
+                    Com_EndParseSession();
+                    Com_Error(ERR_DROP, "key '%s' is %i > %i characters long", key, tokenLen - 1, 255);
+                }
+                memcpy((unsigned __int8 *)key, (unsigned __int8 *)token, tokenLen);
+                value = (const char *)Com_ParseOnLine(&parse);
+                if (!*value)
+                {
+                    Com_EndParseSession();
+                    Com_Error(ERR_DROP, "key '%s' missing value in '%s'\n", key, filename);
+                    break;
+                }
+                UI_ParseMenuMaterial(key, (char *)value);
+            }
+            Com_EndParseSession();
+            FS_FreeFile(loadfile);
+        }
+        else
+        {
+            Com_PrintWarning(13, "WARNING: Could not find '%s'.\n", filename);
+        }
     }
 }
 
@@ -838,9 +1447,14 @@ int __cdecl UI_GetTalkerClientNum(int localClientNum, int num)
     }
     return -1;
 }
+
+const float PROFLOAD_FONT_SCALE = 0.36f;
+const float PROFLOAD_TEXT_COLOR[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+const float PROFLOAD_BACKGROUND_COLOR[4] = { 0.0f, 0.0f, 0.0f, 0.8f };
+long double msecPerRawTimerTick;
+
 void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
 {
-    MapProfileEntry *v1; // eax
     int fileReadCount; // [esp+7Ch] [ebp-128h]
     Font_s *profileFont; // [esp+88h] [ebp-11Ch]
     int fileOpenCount; // [esp+8Ch] [ebp-118h]
@@ -862,7 +1476,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             rect->horzAlign,
             rect->vertAlign,
             PROFLOAD_BACKGROUND_COLOR);
-        ProfLoad_DrawTree(v1);
+        ProfLoad_DrawTree();
         fileOpenElement = mapLoadProfile.elements;
         fileOpenCount = mapLoadProfile.elementAccessCount[0];
         fileSeekCount = mapLoadProfile.elementAccessCount[1];
@@ -1120,7 +1734,7 @@ void __cdecl UI_DrawNetFilter(
 
     if ((unsigned int)ui_serverFilterType >= 2)
         ui_serverFilterType = 0;
-    v6 = va(aExeServerfilte, serverFilters[ui_serverFilterType].description);
+    v6 = va("EXE_SERVERFILTER_%s", serverFilters[ui_serverFilterType].description);
     pszTeanslation = SEH_LocalizeTextMessage(v6, "server filter", LOCMSG_SAFE);
     UI_DrawText(
         &scrPlaceView[localClientNum],
@@ -1147,7 +1761,7 @@ void __cdecl UI_DrawNetSource(
     const char *v6; // eax
     char *translation; // [esp+1Ch] [ebp-4h]
 
-    v6 = va(aExeNetsource, netSources[ui_netSource->current.integer]);
+    v6 = va("EXE_NETSOURCE_%s", netSources[ui_netSource->current.integer]);
     translation = SEH_LocalizeTextMessage(v6, "net source", LOCMSG_SAFE);
     UI_DrawText(
         &scrPlaceView[localClientNum],
@@ -1298,7 +1912,7 @@ void __cdecl UI_DrawServerRefreshDate(
     const char *string; // [esp+94h] [ebp-8h]
     int serverCount; // [esp+98h] [ebp-4h]
 
-    if (*(unsigned int *)&sharedUiInfo.serverStatus.string[1124])
+    if (*(_DWORD *)&sharedUiInfo.serverStatus.string[1124])
     {
         lowLight[0] = *color * 0.800000011920929;
         lowLight[1] = color[1] * 0.800000011920929;
@@ -1312,8 +1926,8 @@ void __cdecl UI_DrawServerRefreshDate(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        LODWORD(newColor[4]) = &uiInfoArray;
-        v10 = (float)(uiInfoArray.realTime / 75);
+        newColor[4] = 1.117259e-30;
+        v10 = (float)(uiInfoArray.uiDC.realTime / 75);
         v9 = sin(v10);
         t = v9 * 0.5 + 0.5;
         LerpColor(color, lowLight, newColor, t);
@@ -1375,7 +1989,7 @@ void __cdecl UI_DrawKeyBindStatus(
     float y; // [esp+4h] [ebp-20h]
     int horzAlign; // [esp+8h] [ebp-1Ch]
     int vertAlign; // [esp+Ch] [ebp-18h]
-    char *v11; // [esp+1Ch] [ebp-8h]
+    const char *v11; // [esp+1Ch] [ebp-8h]
 
     if (Display_KeyBindPending())
         v11 = "EXE_KEYWAIT";
@@ -1464,6 +2078,76 @@ void __cdecl UI_DrawTalkerNum(
     }
 }
 
+void UI_CreatePlayerProfile()
+{
+    char name[32]; // [esp+14h] [ebp-2Ch] BYREF
+    int curSelected; // [esp+38h] [ebp-8h]
+    int profileIndex; // [esp+3Ch] [ebp-4h]
+
+    if (strlen(ui_playerProfileNameNew->current.string))
+    {
+        I_strncpyz(name, (char *)ui_playerProfileNameNew->current.integer, 32);
+        Dvar_SetString((dvar_s *)ui_playerProfileNameNew, (char *)"");
+        if (uiInfoArray.playerProfileCount == 64)
+        {
+            Menus_OpenByName(&uiInfoArray.uiDC, "profile_create_too_many_popmenu");
+        }
+        else
+        {
+            for (profileIndex = 0; profileIndex < uiInfoArray.playerProfileCount; ++profileIndex)
+            {
+                if (!I_stricmp(name, uiInfoArray.playerProfileName[profileIndex]))
+                {
+                    Menus_OpenByName(&uiInfoArray.uiDC, "profile_exists_popmenu");
+                    return;
+                }
+            }
+            if (Com_NewPlayerProfile(name))
+            {
+                uiInfoArray.playerProfileName[uiInfoArray.playerProfileCount++] = String_Alloc(name);
+                UI_SortPlayerProfiles(0);
+                Dvar_SetInt(ui_playerProfileCount, uiInfoArray.playerProfileCount);
+                curSelected = UI_GetPlayerProfileListIndexFromName(name);
+                if ((unsigned int)curSelected >= uiInfoArray.playerProfileCount)
+                    MyAssertHandler(
+                        ".\\ui_mp\\ui_main_mp.cpp",
+                        2241,
+                        0,
+                        "curSelected doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
+                        curSelected,
+                        uiInfoArray.playerProfileCount);
+                UI_SelectPlayerProfileIndex(curSelected);
+            }
+            else
+            {
+                Menus_OpenByName(&uiInfoArray.uiDC, "profile_create_fail_popmenu");
+            }
+        }
+    }
+}
+
+void UI_AddPlayerProfiles()
+{
+    const char *v0; // eax
+    const char **profileList; // [esp+0h] [ebp-10h]
+    int profileCount; // [esp+4h] [ebp-Ch] BYREF
+    uiInfo_s *uiInfo; // [esp+8h] [ebp-8h]
+    int profileIndex; // [esp+Ch] [ebp-4h]
+
+    uiInfo = &uiInfoArray;
+    uiInfoArray.playerProfileCount = 0;
+    uiInfo->playerProfileStatus.sortDir = 1;
+    profileList = FS_ListFiles("profiles", "/", FS_LIST_ALL, &profileCount);
+    for (profileIndex = 0; profileIndex < profileCount; ++profileIndex)
+    {
+        v0 = String_Alloc(profileList[profileIndex]);
+        uiInfo->playerProfileName[uiInfo->playerProfileCount++] = v0;
+    }
+    FS_FreeFileList(profileList);
+    UI_SortPlayerProfiles(0);
+    Dvar_SetInt(ui_playerProfileCount, uiInfo->playerProfileCount);
+}
+
 bool __cdecl UI_OwnerDrawVisible(__int16 flags)
 {
     bool vis; // [esp+0h] [ebp-4h]
@@ -1474,6 +2158,222 @@ bool __cdecl UI_OwnerDrawVisible(__int16 flags)
     if ((flags & 0x1000) != 0 && ui_netSource->current.integer == 2)
         return 0;
     return vis;
+}
+
+int __cdecl UI_GameType_HandleKey(int flags, float *special, int key, int resetMap)
+{
+    int oldCount; // [esp+0h] [ebp-8h]
+    int nextGameType; // [esp+4h] [ebp-4h]
+
+    if (key != 200 && key != 201 && key != 13 && key != 191)
+        return 0;
+    oldCount = UI_MapCountByGameType();
+    if (key != 201)
+    {
+        nextGameType = ui_gametype->current.integer + 1;
+        if (nextGameType >= sharedUiInfo.numGameTypes)
+            goto LABEL_7;
+        if (ui_gametype->current.integer == 1)
+            nextGameType = 3;
+    LABEL_14:
+        Dvar_SetInt((dvar_s*)ui_gametype, nextGameType);
+        goto LABEL_15;
+    }
+    nextGameType = ui_gametype->current.integer - 1;
+    if (ui_gametype->current.integer != 3)
+    {
+        if (nextGameType < 2)
+            nextGameType = sharedUiInfo.numGameTypes - 1;
+        goto LABEL_14;
+    }
+LABEL_7:
+    Dvar_SetInt((dvar_s *)ui_gametype, 1);
+LABEL_15:
+    if (resetMap)
+    {
+        if (oldCount != UI_MapCountByGameType())
+            Dvar_SetInt((dvar_s *)ui_currentMap, 0);
+    }
+    return 1;
+}
+
+int __cdecl UI_NetSource_HandleKey(int flags, float *special, int key)
+{
+    int integer; // [esp+0h] [ebp-Ch]
+    int nextNetSource; // [esp+8h] [ebp-4h]
+
+    if (key != 200 && key != 201 && key != 13 && key != 191)
+        return 0;
+    if (key == 201)
+    {
+        if (ui_netSource->current.integer)
+            integer = ui_netSource->current.integer;
+        else
+            integer = 3;
+        Dvar_SetInt(ui_netSource, integer - 1);
+    }
+    else
+    {
+        nextNetSource = ui_netSource->current.integer + 1;
+        if (ui_netSource->current.integer == 2)
+            nextNetSource = 0;
+        Dvar_SetInt(ui_netSource, nextNetSource);
+    }
+    if (ui_netSource->current.integer != 1)
+        UI_StartServerRefresh(0, 1);
+    UI_BuildServerDisplayList(&uiInfoArray, 1);
+    return 1;
+}
+
+int __cdecl UI_NetFilter_HandleKey(int flags, float *special, int key)
+{
+    if (key != 200 && key != 201 && key != 13 && key != 191)
+        return 0;
+    if (key == 201)
+        --ui_serverFilterType;
+    else
+        ++ui_serverFilterType;
+    if (ui_serverFilterType < 1)
+    {
+        if (ui_serverFilterType < 0)
+            ui_serverFilterType = 0;
+    }
+    else
+    {
+        ui_serverFilterType = 0;
+    }
+    UI_BuildServerDisplayList(&uiInfoArray, 1);
+    return 1;
+}
+
+BOOL __cdecl UI_IsMapActive(int mapIndex)
+{
+    if (mapIndex < 0 || mapIndex >= sharedUiInfo.mapCount)
+        MyAssertHandler(
+            ".\\ui_mp\\ui_main_mp.cpp",
+            3117,
+            0,
+            "%s\n\t(mapIndex) = %i",
+            "(mapIndex >= 0 && mapIndex < sharedUiInfo.mapCount)",
+            mapIndex);
+    return sharedUiInfo.serverHardwareIconList[40 * mapIndex - 5081] != 0;
+}
+
+void __cdecl UI_SelectListIndexForMapIndex(int mapIndex)
+{
+    int listIndex; // [esp+0h] [ebp-4h]
+
+    listIndex = UI_GetListIndexFromMapIndex(mapIndex);
+    Menu_SetFeederSelection(&uiInfoArray.uiDC, 0, 4, listIndex, "createserver_maps");
+}
+
+void UI_SelectFirstActiveMap()
+{
+    int mapIndex; // [esp+4h] [ebp-4h]
+
+    for (mapIndex = 0; mapIndex < sharedUiInfo.mapCount; ++mapIndex)
+    {
+        if (sharedUiInfo.serverHardwareIconList[40 * mapIndex - 5081])
+        {
+            Menu_SetFeederSelection(&uiInfoArray.uiDC, 0, 4, 0, "createserver_maps");
+            Dvar_SetInt(ui_currentNetMap, mapIndex);
+            return;
+        }
+    }
+    Com_Error(ERR_FATAL, "No active maps found for gametype '%s'.", ui_netGameTypeName->current.string);
+}
+
+void __cdecl UI_SelectCurrentMap(int localClientNum)
+{
+    const char *v1; // eax
+    int iCount; // [esp+0h] [ebp-C60h]
+    char *info; // [esp+4h] [ebp-C5Ch]
+    char szMap[68]; // [esp+8h] [ebp-C58h] BYREF
+    int i; // [esp+4Ch] [ebp-C14h]
+    uiClientState_s cstate; // [esp+50h] [ebp-C10h] BYREF
+
+    CL_GetClientState(localClientNum, &cstate);
+    if (cstate.connState == CA_ACTIVE)
+    {
+        info = CL_GetConfigString(localClientNum, 0);
+        if (*info)
+        {
+            v1 = Info_ValueForKey(info, "mapname");
+            I_strncpyz(szMap, v1, 64);
+            iCount = 0;
+            for (i = 0; i < sharedUiInfo.mapCount; ++i)
+            {
+                if (sharedUiInfo.serverHardwareIconList[40 * i - 5081])
+                {
+                    if (!I_stricmp(szMap, sharedUiInfo.mapList[i].mapName))
+                    {
+                        Menu_SetFeederSelection(&uiInfoArray.uiDC, 0, 4, iCount, "createserver_maps");
+                        return;
+                    }
+                    ++iCount;
+                }
+            }
+        }
+    }
+}
+
+int __cdecl UI_NetGameType_HandleKey(int flags, float *special, int key)
+{
+    int integer; // [esp+0h] [ebp-8h]
+    int nextNetGameType; // [esp+4h] [ebp-4h]
+
+    if (key != 200 && key != 201 && key != 13 && key != 191)
+        return 0;
+    if (key == 201)
+    {
+        if (ui_netGameType->current.integer)
+            integer = ui_netGameType->current.integer;
+        else
+            integer = sharedUiInfo.numGameTypes;
+        Dvar_SetInt(ui_netGameType, integer - 1);
+    }
+    else
+    {
+        nextNetGameType = ui_netGameType->current.integer + 1;
+        if (nextNetGameType == sharedUiInfo.numGameTypes)
+            nextNetGameType = 0;
+        Dvar_SetInt(ui_netGameType, nextNetGameType);
+    }
+    Dvar_SetString((dvar_s *)ui_netGameTypeName, (char *)sharedUiInfo.gameTypes[ui_netGameType->current.integer].gameType);
+    Dvar_SetStringByName("g_gametype", (char *)sharedUiInfo.gameTypes[ui_netGameType->current.integer].gameType);
+    UI_MapCountByGameType();
+    if (UI_IsMapActive(ui_currentNetMap->current.integer))
+        UI_SelectListIndexForMapIndex(ui_currentNetMap->current.integer);
+    else
+        UI_SelectFirstActiveMap();
+    UI_SelectCurrentMap(0);
+    return 1;
+}
+
+int __cdecl UI_JoinGameType_HandleKey(int flags, float *special, int key)
+{
+    int integer; // [esp+0h] [ebp-8h]
+    int nextJoinGameType; // [esp+4h] [ebp-4h]
+
+    if (key != 200 && key != 201 && key != 13 && key != 191)
+        return 0;
+    if (key == 201)
+    {
+        if (ui_joinGameType->current.integer)
+            integer = ui_joinGameType->current.integer;
+        else
+            integer = sharedUiInfo.numJoinGameTypes;
+        Dvar_SetInt(ui_joinGameType, integer - 1);
+    }
+    else
+    {
+        nextJoinGameType = ui_joinGameType->current.integer + 1;
+        if (nextJoinGameType == sharedUiInfo.numJoinGameTypes)
+            nextJoinGameType = 0;
+        Dvar_SetInt(ui_joinGameType, nextJoinGameType);
+    }
+    UI_BuildServerDisplayList(&uiInfoArray, 1);
+    return 1;
 }
 
 int __cdecl UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, int key)
@@ -1497,6 +2397,7 @@ int __cdecl UI_OwnerDrawHandleKey(int ownerDraw, int flags, float *special, int 
     }
 }
 
+int g_editingField;
 int __cdecl UI_CheckExecKey(int localClientNum, int key)
 {
     menuDef_t *menu; // [esp+4h] [ebp-8h]
@@ -1510,7 +2411,7 @@ int __cdecl UI_CheckExecKey(int localClientNum, int key)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    menu = Menu_GetFocused(&uiInfoArray);
+    menu = Menu_GetFocused(&uiInfoArray.uiDC);
     if (g_editingField)
         return 1;
     if (key > 256)
@@ -1523,6 +2424,418 @@ int __cdecl UI_CheckExecKey(int localClientNum, int key)
             return 1;
     }
     return 0;
+}
+
+void __cdecl UI_LoadPlayerProfile(int localClientNum)
+{
+    if (!ui_playerProfileSelected)
+        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2289, 0, "%s", "ui_playerProfileSelected");
+    if (*(_BYTE *)ui_playerProfileSelected->current.integer)
+        Com_ChangePlayerProfile(localClientNum, (char *)ui_playerProfileSelected->current.integer);
+}
+
+void __cdecl UI_Update(const char *name)
+{
+    char *value; // eax
+    char *VariantString; // eax
+    int rate; // [esp+4h] [ebp-4h]
+
+    if (I_stricmp(name, "ui_SetName"))
+    {
+        if (I_stricmp(name, "ui_GetName"))
+        {
+            if (I_stricmp(name, "ui_setRate"))
+            {
+                if (!I_stricmp(name, "ui_mousePitch"))
+                {
+                    if (Dvar_GetBool(name))
+                        Dvar_SetFloatByName("m_pitch", -0.022);
+                    else
+                        Dvar_SetFloatByName("m_pitch", 0.022);
+                }
+            }
+            else
+            {
+                rate = Dvar_GetInt("rate");
+                if (rate < 5000)
+                {
+                    Dvar_SetIntByName("cl_maxpackets", 15);
+                    if (rate < 4000)
+                        Dvar_SetIntByName("cl_packetdup", 1);
+                    else
+                        Dvar_SetIntByName("cl_packetdup", 2);
+                }
+                else
+                {
+                    Dvar_SetIntByName("cl_maxpackets", 30);
+                    Dvar_SetIntByName("cl_packetdup", 1);
+                }
+            }
+        }
+        else
+        {
+            VariantString = (char *)Dvar_GetVariantString("name");
+            Dvar_SetStringByName("ui_Name", VariantString);
+        }
+    }
+    else
+    {
+        value = (char *)Dvar_GetVariantString("ui_Name");
+        Dvar_SetStringByName("name", value);
+    }
+}
+
+void UI_SelectActivePlayerProfile()
+{
+    int selIndex; // [esp+0h] [ebp-4h]
+
+    selIndex = UI_GetPlayerProfileListIndexFromName(com_playerProfile->current.string);
+    if (selIndex >= 0 && selIndex < uiInfoArray.playerProfileCount)
+        UI_SelectPlayerProfileIndex(selIndex);
+}
+
+int __cdecl LAN_AddServer(int source, char *name, char *address)
+{
+    const char *v3; // eax
+    int i; // [esp+8h] [ebp-24h]
+    int *count; // [esp+Ch] [ebp-20h]
+    serverInfo_t *servers; // [esp+10h] [ebp-1Ch]
+    netadr_t adr; // [esp+14h] [ebp-18h] BYREF
+
+    servers = 0;
+    count = 0;
+    if (source == 2)
+    {
+        count = &cls.numfavoriteservers;
+        servers = cls.favoriteServers;
+    }
+    else if (!alwaysfails)
+    {
+        v3 = va("Unhandled source %i in LAN_AddServer\n", source);
+        MyAssertHandler(".\\client_mp\\cl_ui_pc_mp.cpp", 41, 1, v3);
+    }
+    if (!servers || *count >= 128)
+        return -1;
+    if (!NET_StringToAdr(address, &adr))
+        return -2;
+    for (i = 0; i < *count && !NET_CompareAdr(servers[i].adr, adr); ++i)
+        ;
+    if (i < *count)
+        return 0;
+    servers[*count].adr = adr;
+    I_strncpyz(servers[*count].hostName, name, 32);
+    servers[(*count)++].dirty = 1;
+    if (source == 1)
+        CL_SortGlobalServers();
+    return 1;
+}
+
+void __cdecl UI_AddServerToFavoritesList(char *pszName, char *pszAddress)
+{
+    char *v2; // eax
+    char *v3; // eax
+    char *v4; // eax
+    char *v5; // eax
+    char *v6; // eax
+    char *v7; // eax
+    char *v8; // eax
+    int res; // [esp+20h] [ebp-4h]
+
+    if (strlen(pszName))
+    {
+        if (strlen(pszAddress))
+        {
+            res = LAN_AddServer(2, pszName, pszAddress);
+            if (res)
+            {
+                if (res == -1)
+                {
+                    v5 = UI_SafeTranslateString("EXE_FAVORITELISTFULL");
+                    Com_Printf(13, "%s\n", v5);
+                    Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITELISTFULL");
+                }
+                else if (res == -2)
+                {
+                    v6 = UI_SafeTranslateString("EXE_BADSERVERADDRESS");
+                    Com_Printf(13, "%s\n", v6);
+                    Dvar_SetStringByName("ui_favorite_message", "@EXE_BADSERVERADDRESS");
+                }
+                else
+                {
+                    v7 = UI_SafeTranslateString("EXE_FAVORITEADDED");
+                    v8 = va("%s\n", v7);
+                    Com_Printf(13, v8, pszAddress);
+                    Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITEADDED");
+                }
+            }
+            else
+            {
+                v4 = UI_SafeTranslateString("EXE_FAVORITEINLIST");
+                Com_Printf(13, "%s\n", v4);
+                Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITEINLIST");
+            }
+        }
+        else
+        {
+            v3 = UI_SafeTranslateString("EXE_FAVORITEADDRESSEMPTY");
+            Com_Printf(13, "%s\n", v3);
+            Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITEADDRESSEMPTY");
+        }
+    }
+    else
+    {
+        v2 = UI_SafeTranslateString("EXE_FAVORITENAMEEMPTY");
+        Com_Printf(13, "%s\n", v2);
+        Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITENAMEEMPTY");
+    }
+}
+
+void __cdecl LAN_RemoveServer(int source, char *addr)
+{
+    const char *v2; // eax
+    int j; // [esp+4h] [ebp-28h]
+    netadr_t comp; // [esp+8h] [ebp-24h] BYREF
+    int i; // [esp+20h] [ebp-Ch]
+    int *count; // [esp+24h] [ebp-8h]
+    serverInfo_t *servers; // [esp+28h] [ebp-4h]
+
+    servers = 0;
+    count = 0;
+    if (source == 2)
+    {
+        count = &cls.numfavoriteservers;
+        servers = cls.favoriteServers;
+    }
+    else if (!alwaysfails)
+    {
+        v2 = va("Unhandled source %i in LAN_RemoveServer\n", source);
+        MyAssertHandler(".\\client_mp\\cl_ui_pc_mp.cpp", 89, 1, v2);
+    }
+    if (servers)
+    {
+        NET_StringToAdr(addr, &comp);
+        for (i = 0; i < *count; ++i)
+        {
+            if (NET_CompareAdr(comp, servers[i].adr))
+            {
+                for (j = i; j < *count - 1; ++j)
+                    Com_Memcpy((char *)&servers[j], (char *)&servers[j + 1], 148);
+                --*count;
+                return;
+            }
+        }
+    }
+}
+
+int __cdecl UI_GetPlayerProfileListIndexFromName(const char *name)
+{
+    unsigned int nameIndex; // [esp+4h] [ebp-8h]
+    int profileIndex; // [esp+8h] [ebp-4h]
+
+    if (!name)
+        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2090, 0, "%s", "name");
+    for (profileIndex = 0; profileIndex < uiInfoArray.playerProfileCount; ++profileIndex)
+    {
+        nameIndex = uiInfoArray.playerProfileStatus.displayProfile[profileIndex];
+        if (nameIndex >= uiInfoArray.playerProfileCount)
+            MyAssertHandler(
+                ".\\ui_mp\\ui_main_mp.cpp",
+                2096,
+                0,
+                "nameIndex doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
+                nameIndex,
+                uiInfoArray.playerProfileCount);
+        if (!I_stricmp(name, uiInfoArray.playerProfileName[nameIndex]))
+            return profileIndex;
+    }
+    return -1;
+}
+
+const char *UI_LoadMods()
+{
+    const char *result; // eax
+    int numdirs; // [esp+20h] [ebp-818h]
+    const char *dirptr; // [esp+24h] [ebp-814h]
+    char dirlist[2048]; // [esp+28h] [ebp-810h] BYREF
+    char *descptr; // [esp+82Ch] [ebp-Ch]
+    int i; // [esp+830h] [ebp-8h]
+    int dirlen; // [esp+834h] [ebp-4h]
+
+    sharedUiInfo.modCount = 0;
+    sharedUiInfo.modIndex = 0;
+    numdirs = FS_GetFileList("$modlist", "", FS_LIST_ALL, dirlist, 2048);
+    dirptr = dirlist;
+    for (i = 0; ; ++i)
+    {
+        result = (const char *)i;
+        if (i >= numdirs)
+            break;
+        dirlen = strlen(dirptr) + 1;
+        descptr = (char *)&dirptr[dirlen];
+        sharedUiInfo.modList[sharedUiInfo.modCount].modName = String_Alloc(dirptr);
+        sharedUiInfo.modList[sharedUiInfo.modCount].modDescr = String_Alloc(descptr);
+        result = &dirptr[strlen(descptr) + 1 + dirlen];
+        dirptr = result;
+        if (++sharedUiInfo.modCount >= 64)
+            break;
+    }
+    return result;
+}
+
+int __cdecl UI_PlayerProfilesQsortCompare(_DWORD *arg1, _DWORD *arg2)
+{
+    int result; // [esp+0h] [ebp-10h]
+
+    if (!arg1)
+        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2111, 0, "%s", "arg1");
+    if (!arg2)
+        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2112, 0, "%s", "arg2");
+    if (*arg1 == *arg2)
+        return 0;
+    result = I_stricmp(uiInfoArray.playerProfileName[*arg1], uiInfoArray.playerProfileName[*arg2]);
+    if (uiInfoArray.playerProfileStatus.sortDir)
+        return result;
+    else
+        return -result;
+}
+
+void __cdecl UI_SelectPlayerProfileIndex(int index)
+{
+    int menuIndex; // [esp+8h] [ebp-4h]
+
+    for (menuIndex = uiInfoArray.uiDC.openMenuCount - 1; menuIndex >= 0; --menuIndex)
+    {
+        if (Window_IsVisible(0, &uiInfoArray.uiDC.menuStack[menuIndex]->window))
+            Menu_SetFeederSelection(&uiInfoArray.uiDC, uiInfoArray.uiDC.menuStack[menuIndex], 24, index, 0);
+    }
+}
+
+void __cdecl UI_SortPlayerProfiles(int selectIndex)
+{
+    int profileIndex; // [esp+4h] [ebp-4h]
+
+    if (uiInfoArray.playerProfileCount)
+    {
+        for (profileIndex = 0; profileIndex < uiInfoArray.playerProfileCount; ++profileIndex)
+            uiInfoArray.playerProfileStatus.displayProfile[profileIndex] = profileIndex;
+        qsort(
+            uiInfoArray.playerProfileStatus.displayProfile,
+            uiInfoArray.playerProfileCount,
+            4u,
+            (int(__cdecl *)(const void *, const void *))UI_PlayerProfilesQsortCompare);
+        UI_SelectPlayerProfileIndex(selectIndex);
+    }
+}
+
+void UI_DeletePlayerProfile()
+{
+    const char *v0; // eax
+    unsigned int curSelected; // [esp+8h] [ebp-8h]
+    unsigned int nameIndex; // [esp+Ch] [ebp-4h]
+
+    if (uiInfoArray.playerProfileCount)
+    {
+        if (!ui_playerProfileSelected)
+            MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2257, 0, "%s", "ui_playerProfileSelected");
+        if (Com_DeletePlayerProfile(ui_playerProfileSelected->current.string))
+        {
+            curSelected = UI_GetPlayerProfileListIndexFromName(ui_playerProfileSelected->current.string);
+            if (curSelected >= uiInfoArray.playerProfileCount)
+                MyAssertHandler(
+                    ".\\ui_mp\\ui_main_mp.cpp",
+                    2265,
+                    0,
+                    "curSelected doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
+                    curSelected,
+                    uiInfoArray.playerProfileCount);
+            nameIndex = uiInfoArray.playerProfileStatus.displayProfile[curSelected];
+            if (nameIndex >= uiInfoArray.playerProfileCount)
+                MyAssertHandler(
+                    ".\\ui_mp\\ui_main_mp.cpp",
+                    2268,
+                    0,
+                    "nameIndex doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
+                    nameIndex,
+                    uiInfoArray.playerProfileCount);
+            if (I_stricmp(uiInfoArray.playerProfileName[nameIndex], ui_playerProfileSelected->current.string))
+            {
+                v0 = va("%s != %s", uiInfoArray.playerProfileName[nameIndex], ui_playerProfileSelected->current.string);
+                MyAssertHandler(
+                    ".\\ui_mp\\ui_main_mp.cpp",
+                    2269,
+                    0,
+                    "%s\n\t%s",
+                    "!I_stricmp( uiInfo->playerProfileName[nameIndex], ui_playerProfileSelected->current.string )",
+                    v0);
+            }
+            if (--uiInfoArray.playerProfileCount)
+            {
+                uiInfoArray.playerProfileName[nameIndex] = uiInfoArray.playerProfileName[uiInfoArray.playerProfileCount];
+                if (curSelected == uiInfoArray.playerProfileCount)
+                    --curSelected;
+                UI_SortPlayerProfiles(curSelected);
+            }
+            else
+            {
+                Dvar_SetString((dvar_s *)ui_playerProfileSelected, (char *)"");
+            }
+            Dvar_SetInt(ui_playerProfileCount, uiInfoArray.playerProfileCount);
+        }
+        else
+        {
+            Menus_OpenByName(&uiInfoArray.uiDC, "profile_delete_fail_popmenu");
+        }
+    }
+}
+
+void __cdecl LAN_GetServerAddressString(int source, unsigned int n, char *buf, int buflen)
+{
+    const char *v4; // eax
+    const char *v5; // eax
+    const char *v6; // eax
+
+    if (source)
+    {
+        if (source == 1)
+        {
+            if ((n & 0x80000000) == 0 && (int)n < cls.numglobalservers)
+            {
+                v5 = NET_AdrToString(cls.globalServers[n].adr);
+                I_strncpyz(buf, v5, buflen);
+                return;
+            }
+        }
+        else if (source == 2 && n < 0x80)
+        {
+            v6 = NET_AdrToString(cls.favoriteServers[n].adr);
+            I_strncpyz(buf, v6, buflen);
+            return;
+        }
+    }
+    else if (n < 0x80)
+    {
+        v4 = NET_AdrToString(cls.localServers[n].adr);
+        I_strncpyz(buf, v4, buflen);
+        return;
+    }
+    *buf = 0;
+}
+
+void UI_SelectCurrentGameType()
+{
+    const char *currType; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    currType = Dvar_GetString("g_gametype");
+    for (i = 0; i < sharedUiInfo.numGameTypes; ++i)
+    {
+        if (!I_stricmp(currType, sharedUiInfo.gameTypes[i].gameType))
+        {
+            Dvar_SetInt(ui_netGameType, i);
+            Dvar_SetString((dvar_s *)ui_netGameTypeName, (char *)sharedUiInfo.gameTypes[i].gameType);
+            return;
+        }
+    }
 }
 
 void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actualScript)
@@ -1539,14 +2852,14 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
     const char *v12; // eax
     const char *v13; // eax
     const char *v14; // eax
-    dvar_s *Var; // eax
+    const dvar_s *Var; // eax
     const char *v16; // eax
     int v17; // eax
     const char *v18; // eax
     const char *v19; // eax
-    char *v20; // eax
-    char *v21; // eax
-    char *v22; // eax
+    const char *v20; // eax
+    const char *v21; // eax
+    const char *v22; // eax
     char *VariantString; // eax
     int v24; // eax
     int Int; // eax
@@ -1595,7 +2908,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        dc = &uiInfoArray;
+        dc = (UiContext *)&uiInfoArray;
         if (I_stricmp(out, "StartServer"))
         {
             if (I_stricmp(out, "getCDKey"))
@@ -1823,7 +3136,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                                                                                 UI_UpdateDisplayServers((uiInfo_s *)dc);
                                                                                                                                                 LAN_GetServerInfo(
                                                                                                                                                     ui_netSource->current.integer,
-                                                                                                                                                    *(unsigned int *)&sharedUiInfo.gap8EB4[4 * *(unsigned int *)&sharedUiInfo.serverStatus.string[1128] - 7100],
+                                                                                                                                                    *(_DWORD *)&sharedUiInfo.gap8EB4[4 * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128] - 7100],
                                                                                                                                                     v39,
                                                                                                                                                     1024);
                                                                                                                                                 addr = 0;
@@ -1843,7 +3156,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                                                                             {
                                                                                                                                                 LAN_GetServerInfo(
                                                                                                                                                     ui_netSource->current.integer,
-                                                                                                                                                    *(unsigned int *)&sharedUiInfo.gap8EB4[4 * *(unsigned int *)&sharedUiInfo.serverStatus.string[1128] - 7100],
+                                                                                                                                                    *(_DWORD *)&sharedUiInfo.gap8EB4[4 * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128] - 7100],
                                                                                                                                                     s,
                                                                                                                                                     1024);
                                                                                                                                                 v20 = Info_ValueForKey(s, "hostname");
@@ -1882,8 +3195,8 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                                                         }
                                                                                                                         else if (Int_Parse((const char **)args, &i))
                                                                                                                         {
-                                                                                                                            if (i == *(unsigned int *)&sharedUiInfo.serverStatus.string[1112])
-                                                                                                                                *(unsigned int *)&sharedUiInfo.serverStatus.string[1116] = *(unsigned int *)&sharedUiInfo.serverStatus.string[1116] == 0;
+                                                                                                                            if (i == *(_DWORD *)&sharedUiInfo.serverStatus.string[1112])
+                                                                                                                                *(_DWORD *)&sharedUiInfo.serverStatus.string[1116] = *(_DWORD *)&sharedUiInfo.serverStatus.string[1116] == 0;
                                                                                                                             UI_ServersSort(i, 1);
                                                                                                                         }
                                                                                                                     }
@@ -1906,36 +3219,37 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                                             else
                                                                                                             {
                                                                                                                 v17 = CL_ControllerIndexFromClientNum(localClientNum);
-                                                                                                                Cmd_ExecuteSingleCommand(localClientNum, v17, aQuit_1);
+                                                                                                                Cmd_ExecuteSingleCommand(localClientNum, v17, (char*)"quit");
                                                                                                             }
                                                                                                         }
                                                                                                         else
                                                                                                         {
                                                                                                             Dvar_SetBoolByName("cg_thirdPerson", 0);
                                                                                                             UI_UpdateDisplayServers((uiInfo_s *)dc);
-                                                                                                            ServerPunkBuster = LAN_GetServerPunkBuster(
-                                                                                                                ui_netSource->current.integer,
-                                                                                                                *(unsigned int *)&sharedUiInfo.gap8EB4[4 * *(unsigned int *)&sharedUiInfo.serverStatus.string[1128] - 7100]);
-                                                                                                            if (ServerPunkBuster != 1 || Dvar_GetBool("cl_punkbuster"))
-                                                                                                            {
-                                                                                                                if (*(int *)&sharedUiInfo.serverStatus.string[1128] >= 0
-                                                                                                                    && *(int *)&sharedUiInfo.serverStatus.string[1128] < *(int *)&sharedUiInfo.gap8EB4[72900])
-                                                                                                                {
-                                                                                                                    LAN_GetServerAddressString(
-                                                                                                                        ui_netSource->current.integer,
-                                                                                                                        *(unsigned int *)&sharedUiInfo.gap8EB4[4
-                                                                                                                        * *(unsigned int *)&sharedUiInfo.serverStatus.string[1128]
-                                                                                                                        - 7100],
-                                                                                                                        v44,
-                                                                                                                        1024);
-                                                                                                                    v16 = va("connect %s\n", v44);
-                                                                                                                    Cbuf_AddText(localClientNum, v16);
-                                                                                                                }
-                                                                                                            }
-                                                                                                            else
-                                                                                                            {
+                                                                                                            // LWSS: Remove punkbuster crap
+                                                                                                            //ServerPunkBuster = LAN_GetServerPunkBuster(
+                                                                                                            //    ui_netSource->current.integer,
+                                                                                                            //    *(_DWORD *)&sharedUiInfo.gap8EB4[4 * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128] - 7100]);
+                                                                                                            //if (ServerPunkBuster != 1 || Dvar_GetBool("cl_punkbuster"))
+                                                                                                            //{
+                                                                                                            //    if (*(int *)&sharedUiInfo.serverStatus.string[1128] >= 0
+                                                                                                            //        && *(int *)&sharedUiInfo.serverStatus.string[1128] < *(int *)&sharedUiInfo.gap8EB4[72900])
+                                                                                                            //    {
+                                                                                                            //        LAN_GetServerAddressString(
+                                                                                                            //            ui_netSource->current.integer,
+                                                                                                            //            *(_DWORD *)&sharedUiInfo.gap8EB4[4
+                                                                                                            //            * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128]
+                                                                                                            //            - 7100],
+                                                                                                            //            v44,
+                                                                                                            //            1024);
+                                                                                                            //        v16 = va("connect %s\n", v44);
+                                                                                                            //        Cbuf_AddText(localClientNum, v16);
+                                                                                                            //    }
+                                                                                                            //}
+                                                                                                            //else
+                                                                                                            //{
                                                                                                                 Menus_OpenByName(dc, "joinpb_popmenu");
-                                                                                                            }
+                                                                                                            //}
                                                                                                         }
                                                                                                     }
                                                                                                     else
@@ -1948,33 +3262,33 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                                 }
                                                                                                 else
                                                                                                 {
-                                                                                                    UI_UpdateDisplayServers((uiInfo_s *)&uiInfoArray);
+                                                                                                    UI_UpdateDisplayServers(&uiInfoArray);
                                                                                                     if (*(int *)&sharedUiInfo.serverStatus.string[1128] >= 0
                                                                                                         && *(int *)&sharedUiInfo.serverStatus.string[1128] < *(int *)&sharedUiInfo.gap8EB4[72900])
                                                                                                     {
                                                                                                         LAN_GetServerAddressString(
                                                                                                             ui_netSource->current.integer,
-                                                                                                            *(unsigned int *)&sharedUiInfo.gap8EB4[4
-                                                                                                            * *(unsigned int *)&sharedUiInfo.serverStatus.string[1128]
+                                                                                                            *(_DWORD *)&sharedUiInfo.gap8EB4[4
+                                                                                                            * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128]
                                                                                                             - 7100],
                                                                                                             sharedUiInfo.serverStatusAddress,
                                                                                                             64);
-                                                                                                        UI_BuildServerStatus((uiInfo_s *)&uiInfoArray, 1);
+                                                                                                        UI_BuildServerStatus(&uiInfoArray, 1);
                                                                                                     }
                                                                                                 }
                                                                                             }
                                                                                             else
                                                                                             {
                                                                                                 UI_StopServerRefresh();
-                                                                                                *(unsigned int *)&sharedUiInfo.gap8EB4[72912] = 0;
+                                                                                                *(_DWORD *)&sharedUiInfo.gap8EB4[72912] = 0;
                                                                                                 sharedUiInfo.nextServerStatusRefresh = 0;
                                                                                                 dc[1].localVars.table[79].u.integer = 0;
                                                                                             }
                                                                                         }
-                                                                                        else if (*(unsigned int *)&sharedUiInfo.serverStatus.string[1124])
+                                                                                        else if (*(_DWORD *)&sharedUiInfo.serverStatus.string[1124])
                                                                                         {
                                                                                             UI_StopServerRefresh();
-                                                                                            *(unsigned int *)&sharedUiInfo.gap8EB4[72912] = 0;
+                                                                                            *(_DWORD *)&sharedUiInfo.gap8EB4[72912] = 0;
                                                                                             sharedUiInfo.nextServerStatusRefresh = 0;
                                                                                             dc[1].localVars.table[79].u.integer = 0;
                                                                                             UI_BuildServerDisplayList((uiInfo_s *)dc, 1);
@@ -1989,7 +3303,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                     {
                                                                                         if (useFastFile->current.enabled)
                                                                                             DB_SyncXAssets();
-                                                                                        Var = (dvar_s *)_Dvar_FindVar("fs_game");
+                                                                                        Var = Dvar_FindVar("fs_game");
                                                                                         Dvar_Reset(Var, DVAR_SOURCE_INTERNAL);
                                                                                         Cbuf_AddText(localClientNum, "vid_restart\n");
                                                                                     }
@@ -2064,7 +3378,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                             }
                                             else
                                             {
-                                                Dvar_SetStringByName("com_errorMessage", (char *)&String);
+                                                Dvar_SetStringByName("com_errorMessage", (char *)"");
                                                 Dvar_SetBoolByName("com_isNotice", 0);
                                                 if (localClientNum)
                                                     MyAssertHandler(
@@ -2074,7 +3388,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                         "%s\n\t(localClientNum) = %i",
                                                         "(localClientNum == 0)",
                                                         localClientNum);
-                                                if (MEMORY[0xE7A7CC][0] > 0)
+                                                if (clientUIActives[0].connectionState > CA_DISCONNECTED)
                                                     Key_RemoveCatcher(localClientNum, -17);
                                             }
                                         }
@@ -2155,11 +3469,11 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
             else
             {
                 CLUI_GetCDKey(&buf, 17, buf2, 5);
-                Dvar_SetStringByName("cdkey1", (char *)&String);
-                Dvar_SetStringByName("cdkey2", (char *)&String);
-                Dvar_SetStringByName("cdkey3", (char *)&String);
-                Dvar_SetStringByName("cdkey4", (char *)&String);
-                Dvar_SetStringByName("cdkey5", (char *)&String);
+                Dvar_SetStringByName("cdkey1", (char *)"");
+                Dvar_SetStringByName("cdkey2", (char *)"");
+                Dvar_SetStringByName("cdkey3", (char *)"");
+                Dvar_SetStringByName("cdkey4", (char *)"");
+                Dvar_SetStringByName("cdkey5", (char *)"");
                 if (&v51[strlen(&buf)] - v51 == 16)
                 {
                     I_strncpyz(dest, &buf, 5);
@@ -2327,7 +3641,7 @@ bool __cdecl UI_DvarValueTest(const char *cmd, const char *dvarName, const char 
         MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2550, 0, "%s", "dvarName");
     if (!testValue)
         MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2551, 0, "%s", "testValue");
-    if (_Dvar_FindVar(dvarName))
+    if (Dvar_FindVar(dvarName))
     {
         dvarValue = Dvar_GetVariantString(dvarName);
         return (I_stricmp(testValue, dvarValue) == 0) == wantMatch;
@@ -2365,22 +3679,40 @@ void __cdecl UI_CloseMenuOnDvar(
         Menus_CloseByName(&uiInfo->uiDC, menuName);
 }
 
+void __cdecl UI_RemoveServerFromDisplayList(int num)
+{
+    int j; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    for (i = 0; i < *(int *)&sharedUiInfo.gap8EB4[72900]; ++i)
+    {
+        if (*(_DWORD *)&sharedUiInfo.gap8EB4[4 * i - 7100] == num)
+        {
+            --*(_DWORD *)&sharedUiInfo.gap8EB4[72900];
+            for (j = i; j < *(int *)&sharedUiInfo.gap8EB4[72900]; ++j)
+                *(_DWORD *)&sharedUiInfo.gap8EB4[4 * j - 7100] = *(_DWORD *)&sharedUiInfo.gap8EB4[4 * j - 7096];
+            return;
+        }
+    }
+}
+
+int numclean;
 void __cdecl UI_BuildServerDisplayList(uiInfo_s *uiInfo, int force)
 {
     char *String; // eax
-    char *v3; // eax
-    char *v4; // eax
-    char *v5; // eax
-    char *v6; // eax
-    char *v7; // eax
-    char *v8; // eax
-    char *v9; // eax
-    char *v10; // eax
-    char *v11; // eax
-    char *v12; // eax
-    char *v13; // eax
-    char *v14; // eax
-    char *v15; // eax
+    const char *v3; // eax
+    const char *v4; // eax
+    const char *v5; // eax
+    const char *v6; // eax
+    const char *v7; // eax
+    const char *v8; // eax
+    const char *v9; // eax
+    const char *v10; // eax
+    const char *v11; // eax
+    const char *v12; // eax
+    const char *v13; // eax
+    const char *v14; // eax
+    const char *v15; // eax
     const char *gameType; // [esp-4h] [ebp-458h]
     const char *basedir; // [esp-4h] [ebp-458h]
     char v18; // [esp+13h] [ebp-441h]
@@ -2401,8 +3733,8 @@ void __cdecl UI_BuildServerDisplayList(uiInfo_s *uiInfo, int force)
         if (force == 2)
             force = 0;
         String = (char *)Dvar_GetString("cl_motdString");
-        I_strncpyz(&sharedUiInfo.gap8EB4[72944], String, 1024);
-        len = strlen(&sharedUiInfo.gap8EB4[72944]);
+        I_strncpyz((char*)&sharedUiInfo.gap8EB4[72944], String, 1024);
+        len = strlen((char*)&sharedUiInfo.gap8EB4[72944]);
         if (!len)
         {
             v3 = UI_SafeTranslateString("EXE_COD_MULTIPLAYER");
@@ -2413,7 +3745,7 @@ void __cdecl UI_BuildServerDisplayList(uiInfo_s *uiInfo, int force)
                 v18 = *v20;
                 *v19++ = *v20++;
             } while (v18);
-            len = strlen(&sharedUiInfo.gap8EB4[72944]);
+            len = strlen((char *)&sharedUiInfo.gap8EB4[72944]);
         }
         if (len != *(unsigned int *)&sharedUiInfo.gap8EB4[72920])
         {
@@ -2678,6 +4010,26 @@ void __cdecl UI_BuildServerStatus(uiInfo_s *uiInfo, int force)
     }
 }
 
+int __cdecl UI_MapCountByGameType()
+{
+    int c; // [esp+0h] [ebp-Ch]
+    int game; // [esp+4h] [ebp-8h]
+    int i; // [esp+8h] [ebp-4h]
+
+    game = ui_netGameType->current.integer;
+    c = 0;
+    for (i = 0; i < sharedUiInfo.mapCount; ++i)
+    {
+        sharedUiInfo.serverHardwareIconList[40 * i - 5081] = 0;
+        if (((int)sharedUiInfo.serverHardwareIconList[40 * i - 5115] & (1 << game)) != 0)
+        {
+            ++c;
+            sharedUiInfo.serverHardwareIconList[40 * i - 5081] = (Material *)1;
+        }
+    }
+    return c;
+}
+
 int __cdecl UI_FeederCount(int localClientNum, float feederID)
 {
     if (feederID == 4.0)
@@ -2694,8 +4046,8 @@ int __cdecl UI_FeederCount(int localClientNum, float feederID)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        UI_UpdateDisplayServers((uiInfo_s *)&uiInfoArray);
-        return *(unsigned int *)&sharedUiInfo.gap8EB4[72900];
+        UI_UpdateDisplayServers(&uiInfoArray);
+        return *(_DWORD *)&sharedUiInfo.gap8EB4[72900];
     }
     else if (feederID == 13.0)
     {
@@ -2711,9 +4063,9 @@ int __cdecl UI_FeederCount(int localClientNum, float feederID)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (uiInfoArray.realTime > unk_DB55F9C)
+        if (uiInfoArray.uiDC.realTime > uiInfoArray.playerRefresh)
         {
-            unk_DB55F9C = uiInfoArray.realTime + 3000;
+            uiInfoArray.playerRefresh = uiInfoArray.uiDC.realTime + 3000;
             UI_BuildPlayerList(localClientNum);
         }
         return sharedUiInfo.playerCount;
@@ -2732,9 +4084,9 @@ int __cdecl UI_FeederCount(int localClientNum, float feederID)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (uiInfoArray.realTime > unk_DB55F9C)
+        if (uiInfoArray.uiDC.realTime > uiInfoArray.playerRefresh)
         {
-            unk_DB55F9C = uiInfoArray.realTime + 3000;
+            uiInfoArray.playerRefresh = uiInfoArray.uiDC.realTime + 3000;
             UI_BuildPlayerList(localClientNum);
         }
         return sharedUiInfo.playerCount;
@@ -2749,7 +4101,7 @@ int __cdecl UI_FeederCount(int localClientNum, float feederID)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        return dword_DB55FA4;
+        return uiInfoArray.playerProfileCount;
     }
     else if (feederID == 29.0)
     {
@@ -2763,7 +4115,7 @@ int __cdecl UI_FeederCount(int localClientNum, float feederID)
 
 void __cdecl UI_BuildPlayerList(int localClientNum)
 {
-    char *v1; // eax
+    const char *v1; // eax
     char *info; // [esp+0h] [ebp-C44h]
     uiClientState_s state; // [esp+4h] [ebp-C40h] BYREF
     char szName[40]; // [esp+C10h] [ebp-34h] BYREF
@@ -2788,7 +4140,25 @@ void __cdecl UI_BuildPlayerList(int localClientNum)
     }
 }
 
-char *__cdecl UI_FeederItemText(
+int __cdecl UI_GetClientNumForPlayerListNum(int playerListIndex)
+{
+    if (sharedUiInfo.playerClientNums[playerListIndex] >= 0x40u)
+        MyAssertHandler(
+            ".\\ui_mp\\ui_main_mp.cpp",
+            1437,
+            0,
+            "%s\n\t(sharedUiInfo.playerClientNums[playerListIndex]) = %i",
+            "(sharedUiInfo.playerClientNums[playerListIndex] >= 0 && sharedUiInfo.playerClientNums[playerListIndex] < 64)",
+            sharedUiInfo.playerClientNums[playerListIndex]);
+    return sharedUiInfo.playerClientNums[playerListIndex];
+}
+
+char info[1024];
+int lastColumn;
+int lastTime;
+char clientBuff[38];
+
+const char *__cdecl UI_FeederItemText(
     int localClientNum,
     itemDef_s *item,
     const float feederID,
@@ -2796,20 +4166,20 @@ char *__cdecl UI_FeederItemText(
     unsigned int column,
     Material **handle)
 {
-    char *result; // eax
-    char *v7; // eax
-    char *v8; // eax
-    char *v9; // eax
-    char *v10; // eax
-    char *v11; // eax
-    char *v12; // eax
-    char *v13; // eax
-    char *v14; // eax
-    char *v15; // eax
-    char *v16; // eax
-    char *v17; // eax
+    const char *result; // eax
+    const char *v7; // eax
+    const char *v8; // eax
+    const char *v9; // eax
+    const char *v10; // eax
+    const char *v11; // eax
+    const char *v12; // eax
+    const char *v13; // eax
+    const char *v14; // eax
+    const char *v15; // eax
+    const char *v16; // eax
+    const char *v17; // eax
     unsigned int ClientNumForPlayerListNum; // eax
-    char *v19; // [esp-4h] [ebp-18h]
+    const char *v19; // [esp-4h] [ebp-18h]
     unsigned int hardware; // [esp+4h] [ebp-10h]
     int ping; // [esp+8h] [ebp-Ch]
     int actual; // [esp+Ch] [ebp-8h] BYREF
@@ -2986,6 +4356,17 @@ char *__cdecl UI_FeederItemText(
     return result;
 }
 
+Material *__cdecl UI_GetLevelShot(int index)
+{
+    if (index < 0 || index >= sharedUiInfo.mapCount)
+        index = 0;
+    if (!sharedUiInfo.serverHardwareIconList[40 * index - 5082])
+        sharedUiInfo.serverHardwareIconList[40 * index - 5082] = Material_RegisterHandle(
+            (char *)sharedUiInfo.serverHardwareIconList[40 * index - 5118],
+            3);
+    return sharedUiInfo.serverHardwareIconList[40 * index - 5082];
+}
+
 Material *__cdecl UI_FeederItemImage(float feederID, int index)
 {
     int actual; // [esp+0h] [ebp-4h] BYREF
@@ -3023,6 +4404,32 @@ void __cdecl UI_FeederItemColor(
         color[2] = listPtr->disableColor[2];
         color[3] = listPtr->disableColor[3];
     }
+}
+
+int __cdecl UI_GetListIndexFromMapIndex(int testMapIndex)
+{
+    int listIndex; // [esp+0h] [ebp-8h]
+    int mapIndex; // [esp+4h] [ebp-4h]
+
+    if (testMapIndex < 0 || testMapIndex >= sharedUiInfo.mapCount)
+        MyAssertHandler(
+            ".\\ui_mp\\ui_main_mp.cpp",
+            4153,
+            0,
+            "%s\n\t(testMapIndex) = %i",
+            "(testMapIndex >= 0 && testMapIndex < sharedUiInfo.mapCount)",
+            testMapIndex);
+    listIndex = 0;
+    for (mapIndex = 0; mapIndex < sharedUiInfo.mapCount; ++mapIndex)
+    {
+        if (sharedUiInfo.serverHardwareIconList[40 * mapIndex - 5081])
+        {
+            if (mapIndex == testMapIndex)
+                return listIndex;
+            ++listIndex;
+        }
+    }
+    return 0;
 }
 
 void __cdecl UI_OverrideCursorPos(int localClientNum, itemDef_s *item)
@@ -3068,6 +4475,29 @@ void __cdecl UI_OverrideCursorPos(int localClientNum, itemDef_s *item)
     }
 }
 
+char *__cdecl UI_SelectedMap(int index, int *actual)
+{
+    int c; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    c = 0;
+    *actual = 0;
+    for (i = 0; i < sharedUiInfo.mapCount; ++i)
+    {
+        if (sharedUiInfo.serverHardwareIconList[40 * i - 5081])
+        {
+            if (c == index)
+            {
+                *actual = i;
+                return UI_SafeTranslateString((char *)sharedUiInfo.mapList[i].mapName);
+            }
+            ++c;
+        }
+    }
+    return (char *)"";
+}
+
+char info_0[1024];
 void __cdecl UI_FeederSelection(int localClientNum, float feederID, int index)
 {
     int actual; // [esp+8h] [ebp-8h] BYREF
@@ -3119,6 +4549,56 @@ void __cdecl UI_FeederSelection(int localClientNum, float feederID, int index)
     }
 }
 
+void UI_GetGameTypesList_LoadObj()
+{
+    char *v0; // eax
+    unsigned int v1; // [esp+0h] [ebp-1030h]
+    char *p; // [esp+10h] [ebp-1020h]
+    char *data_p; // [esp+18h] [ebp-1018h] BYREF
+    char *v4; // [esp+1Ch] [ebp-1014h]
+    char listbuf[4096]; // [esp+20h] [ebp-1010h] BYREF
+    int i; // [esp+1024h] [ebp-Ch]
+    char *MenuBuffer; // [esp+1028h] [ebp-8h]
+    int FileList; // [esp+102Ch] [ebp-4h]
+
+    FileList = FS_GetFileList("maps/mp/gametypes", "gsc", FS_LIST_PURE_ONLY, listbuf, 4096);
+    p = listbuf;
+    for (i = 0; i < FileList; ++i)
+    {
+        v1 = strlen(p);
+        if (*p == 95)
+        {
+            p += v1 + 1;
+        }
+        else
+        {
+            if (!I_stricmp(&p[v1 - 4], ".gsc"))
+                p[v1 - 4] = 0;
+            if (sharedUiInfo.numGameTypes == 32 || sharedUiInfo.numJoinGameTypes == 32)
+            {
+                Com_Printf(13, "Too many game type scripts found! Only loading the first %i\n", 31);
+                return;
+            }
+            sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes].gameType = String_Alloc(p);
+            sharedUiInfo.joinGameTypes[sharedUiInfo.numJoinGameTypes].gameType = sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes].gameType;
+            v0 = va("maps/mp/gametypes/%s.txt", p);
+            MenuBuffer = GetMenuBuffer(v0);
+            data_p = MenuBuffer;
+            if (MenuBuffer)
+            {
+                v4 = (char *)Com_Parse((const char **)&data_p);
+                sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes].gameTypeName = String_Alloc(v4);
+            }
+            else
+            {
+                sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes].gameTypeName = sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes].gameType;
+            }
+            sharedUiInfo.joinGameTypes[sharedUiInfo.numJoinGameTypes++].gameTypeName = sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes++].gameTypeName;
+            p += v1 + 1;
+        }
+    }
+}
+
 void UI_GetGameTypesList()
 {
     sharedUiInfo.numGameTypes = 0;
@@ -3131,7 +4611,7 @@ void UI_GetGameTypesList()
     else
         ((void(__cdecl *)(void (*)()))UI_GetGameTypesList_LoadObj)(UI_GetGameTypesList_LoadObj);
     if (!sharedUiInfo.numGameTypes)
-        Com_Error(ERR_FATAL, &byte_8B6CD0);
+        Com_Error(ERR_FATAL, "No game type scripts found in maps/mp/gametypes folder");
 }
 
 void UI_GetGameTypesList_FastFile()
@@ -3197,18 +4677,18 @@ void __cdecl UI_OpenMenu_f()
     char name[68]; // [esp+4h] [ebp-48h] BYREF
 
     Cmd_ArgsBuffer(1, name, 64);
-    Menus_OpenByName(&uiInfoArray, name);
+    Menus_OpenByName(&uiInfoArray.uiDC, name);
 }
 
 void __cdecl UI_ListMenus_f()
 {
-    Menus_PrintAllLoadedMenus(&uiInfoArray);
+    Menus_PrintAllLoadedMenus(&uiInfoArray.uiDC);
 }
 
 void __cdecl CL_SelectStringTableEntryInDvar_f()
 {
     const char *v0; // eax
-    unsigned intv1; // eax
+    unsigned int v1; // eax
     const char *v2; // eax
     int v3; // eax
     const char *v4; // eax
@@ -3245,7 +4725,55 @@ void __cdecl UI_CloseMenu_f()
     char name[68]; // [esp+4h] [ebp-48h] BYREF
 
     Cmd_ArgsBuffer(1, name, 64);
-    Menus_CloseByName(&uiInfoArray, name);
+    Menus_CloseByName(&uiInfoArray.uiDC, name);
+}
+
+void __cdecl UI_LoadSoundAliases()
+{
+    Com_LoadSoundAliases("menu", "all_mp", SASYS_UI);
+}
+
+BOOL __cdecl LAN_LoadCachedServersInternal(int fileIn)
+{
+    int version; // [esp+0h] [ebp-8h] BYREF
+    int size; // [esp+4h] [ebp-4h] BYREF
+
+    if (FS_Read((unsigned __int8 *)&version, 4u, fileIn) != 4)
+        return 0;
+    if (version != 1)
+        return 0;
+    if (FS_Read((unsigned __int8 *)&cls.numglobalservers, 4u, fileIn) != 4)
+        return 0;
+    if (cls.numglobalservers >= 0x4E20u)
+        return 0;
+    if (FS_Read((unsigned __int8 *)&cls.numfavoriteservers, 4u, fileIn) != 4)
+        return 0;
+    if (cls.numfavoriteservers >= 0x80u)
+        return 0;
+    if (FS_Read((unsigned __int8 *)&size, 4u, fileIn) != 4)
+        return 0;
+    if (size != 2978944)
+        return 0;
+    if (FS_Read((unsigned __int8 *)cls.globalServers, 0x2D2A80u, fileIn) == 2960000)
+        return FS_Read((unsigned __int8 *)cls.favoriteServers, 0x4A00u, fileIn) == 18944;
+    return 0;
+}
+
+void __cdecl LAN_LoadCachedServers()
+{
+    int fileIn; // [esp+0h] [ebp-8h] BYREF
+    int success; // [esp+4h] [ebp-4h]
+
+    if (FS_SV_FOpenFileRead("servercache.dat", &fileIn)
+        && (success = LAN_LoadCachedServersInternal(fileIn), FS_FCloseFile(fileIn), success))
+    {
+        CL_SortGlobalServers();
+    }
+    else
+    {
+        cls.numglobalservers = 0;
+        cls.numfavoriteservers = 0;
+    }
 }
 
 void __cdecl UI_Init(int localClientNum)
@@ -3264,21 +4792,23 @@ void __cdecl UI_Init(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    uiInfoArray.localClientNum = localClientNum;
+    uiInfoArray.uiDC.localClientNum = localClientNum;
     g_ingameMenusLoaded[localClientNum] = 0;
     if (useFastFile->current.enabled)
         DB_ResetZoneSize(0);
     if (!useFastFile->current.enabled)
         UI_LoadSoundAliases();
     UI_RegisterDvars();
-    byte_DB561C4 = 1;
+    uiInfoArray.allowScriptMenuResponse = 1;
     String_Init();
-    Menu_Setup(&uiInfoArray);
-    CL_GetScreenDimensions(&uiInfoArray.screenWidth, &uiInfoArray.screenHeight, &uiInfoArray.screenAspect);
-    if (480 * uiInfoArray.screenWidth <= 640 * uiInfoArray.screenHeight)
-        uiInfoArray.bias = 0.0;
+    Menu_Setup(&uiInfoArray.uiDC);
+    CL_GetScreenDimensions(&uiInfoArray.uiDC.screenWidth, &uiInfoArray.uiDC.screenHeight, &uiInfoArray.uiDC.screenAspect);
+    if (480 * uiInfoArray.uiDC.screenWidth <= 640 * uiInfoArray.uiDC.screenHeight)
+        uiInfoArray.uiDC.bias = 0.0;
     else
-        uiInfoArray.bias = ((double)uiInfoArray.screenWidth - (double)uiInfoArray.screenHeight * 1.333333373069763) * 0.5;
+        uiInfoArray.uiDC.bias = ((double)uiInfoArray.uiDC.screenWidth
+            - (double)uiInfoArray.uiDC.screenHeight * 1.333333373069763)
+        * 0.5;
     Sys_Milliseconds();
     UI_GetGameTypesList();
     if (sharedUiInfo.numGameTypes > 0x20u)
@@ -3294,13 +4824,13 @@ void __cdecl UI_Init(int localClientNum)
     UI_LoadArenas();
     if (useFastFile->current.enabled)
     {
-        menuList = UI_LoadMenus("ui_mp/code.txt", 3);
-        UI_AddMenuList(&uiInfoArray, menuList);
+        menuList = UI_LoadMenus((char*)"ui_mp/code.txt", 3);
+        UI_AddMenuList(&uiInfoArray.uiDC, menuList);
     }
     if (!g_mapname[0] || !useFastFile->current.enabled)
     {
-        menuLista = UI_LoadMenus("ui_mp/menus.txt", 3);
-        UI_AddMenuList(&uiInfoArray, menuLista);
+        menuLista = UI_LoadMenus((char *)"ui_mp/menus.txt", 3);
+        UI_AddMenuList(&uiInfoArray.uiDC, menuLista);
     }
     if (g_mapname[0] && !useFastFile->current.enabled)
     {
@@ -3308,14 +4838,14 @@ void __cdecl UI_Init(int localClientNum)
         UI_MapLoadInfo(v1);
     }
     UI_AssetCache();
-    Menus_CloseAll(&uiInfoArray);
+    Menus_CloseAll(&uiInfoArray.uiDC);
     sharedUiInfo.serverHardwareIconList[0] = Material_RegisterHandle("server_hardware_unknown", 3);
     sharedUiInfo.serverHardwareIconList[1] = Material_RegisterHandle("server_hardware_linux_dedicated", 3);
     sharedUiInfo.serverHardwareIconList[2] = Material_RegisterHandle("server_hardware_win_dedicated", 3);
     sharedUiInfo.serverHardwareIconList[3] = Material_RegisterHandle("server_hardware_mac_dedicated", 3);
     sharedUiInfo.serverHardwareIconList[6] = Material_RegisterHandle("server_hardware_win_listen", 3);
     sharedUiInfo.serverHardwareIconList[7] = Material_RegisterHandle("server_hardware_mac_listen", 3);
-    LAN_LoadCachedServers();
+    LAN_LoadCachedServers(); // cl_ui_xenon_mp.obj
     UI_ServersSort(10, 0);
     v3 = Dvar_GetFloat("m_pitch") < 0.0;
     Dvar_SetBoolByName("ui_mousePitch", v3);
@@ -3538,6 +5068,7 @@ Font_s *UI_AssetCache()
     return result;
 }
 
+int bypassKeyClear;
 void __cdecl UI_KeyEvent(int localClientNum, int key, int down)
 {
     menuDef_t *menu; // [esp+8h] [ebp-4h]
@@ -3550,21 +5081,21 @@ void __cdecl UI_KeyEvent(int localClientNum, int key, int down)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (Menu_Count(&uiInfoArray))
+    if (Menu_Count(&uiInfoArray.uiDC))
     {
-        menu = Menu_GetFocused(&uiInfoArray);
+        menu = Menu_GetFocused(&uiInfoArray.uiDC);
         if (!menu)
             goto LABEL_25;
-        if (Dvar_GetBool("cl_bypassMouseInput") || UI_GetActiveMenu(localClientNum) == 10)
+        if (Dvar_GetBool("cl_bypassMouseInput") || UI_GetActiveMenu(localClientNum) == UIMENU_SCOREBOARD)
             bypassKeyClear = 1;
-        if (key == 27 && down && !Menus_AnyFullScreenVisible(&uiInfoArray) && !menu->onESC)
-            Menus_CloseAll(&uiInfoArray);
-        if (Key_IsCatcherActive(uiInfoArray.localClientNum, 16))
-            Menu_HandleKey(&uiInfoArray, menu, key, down);
-        if (!Menu_GetFocused(&uiInfoArray))
+        if (key == 27 && down && !Menus_AnyFullScreenVisible(&uiInfoArray.uiDC) && !menu->onESC)
+            Menus_CloseAll(&uiInfoArray.uiDC);
+        if (Key_IsCatcherActive(uiInfoArray.uiDC.localClientNum, 16))
+            Menu_HandleKey(&uiInfoArray.uiDC, menu, key, down);
+        if (!Menu_GetFocused(&uiInfoArray.uiDC))
         {
         LABEL_25:
-            if (Key_IsCatcherActive(uiInfoArray.localClientNum, 16))
+            if (Key_IsCatcherActive(uiInfoArray.uiDC.localClientNum, 16))
             {
                 Key_RemoveCatcher(localClientNum, -17);
                 if (!bypassKeyClear)
@@ -3576,19 +5107,18 @@ void __cdecl UI_KeyEvent(int localClientNum, int key, int down)
     }
 }
 
-int __cdecl UI_GetActiveMenu(int localClientNum)
+uiMenuCommand_t __cdecl UI_GetActiveMenu(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\ui_mp\\ui_main_mp.cpp",
-            332,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return dword_DB561C0;
+  if ( localClientNum )
+    MyAssertHandler(
+      ".\\ui_mp\\ui_main_mp.cpp",
+      332,
+      0,
+      "%s\n\t(localClientNum) = %i",
+      "(localClientNum == 0)",
+      localClientNum);
+  return uiInfoArray.currentMenuType;
 }
-
 const char *__cdecl UI_GetTopActiveMenuName(int localClientNum)
 {
     int topMenuStackIndex; // [esp+4h] [ebp-4h]
@@ -3601,15 +5131,15 @@ const char *__cdecl UI_GetTopActiveMenuName(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    topMenuStackIndex = uiInfoArray.openMenuCount - 1;
-    if (topMenuStackIndex < 0 || topMenuStackIndex >= uiInfoArray.menuCount)
+    topMenuStackIndex = uiInfoArray.uiDC.openMenuCount - 1;
+    if (topMenuStackIndex < 0 || topMenuStackIndex >= uiInfoArray.uiDC.menuCount)
         return 0;
-    if (!uiInfoArray.menuStack[topMenuStackIndex])
+    if (!uiInfoArray.uiDC.menuStack[topMenuStackIndex])
         MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 6325, 0, "%s", "uiInfo->uiDC.menuStack[topMenuStackIndex]");
-    return uiInfoArray.menuStack[topMenuStackIndex]->window.name;
+    return uiInfoArray.uiDC.menuStack[topMenuStackIndex]->window.name;
 }
 
-int __cdecl UI_SetActiveMenu(int localClientNum, int menu)
+int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
 {
     int result; // eax
     const char *v3; // eax
@@ -3625,20 +5155,20 @@ int __cdecl UI_SetActiveMenu(int localClientNum, int menu)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (Menu_Count(&uiInfoArray) <= 0)
+    if (Menu_Count(&uiInfoArray.uiDC) <= 0)
         return 0;
-    if (menu == 9)
+    if (menu == UIMENU_SCRIPT_POPUP)
         MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 6348, 0, "%s", "menu != UIMENU_SCRIPT_POPUP");
-    dword_DB561C0 = menu;
+    uiInfoArray.currentMenuType = menu;
     switch (menu)
     {
-    case 0:
+    case UIMENU_NONE:
         Key_RemoveCatcher(localClientNum, -17);
         Dvar_SetIntByName("cl_paused", 0);
-        Menus_CloseAll(&uiInfoArray);
+        Menus_CloseAll(&uiInfoArray.uiDC);
         result = 1;
         break;
-    case 1:
+    case UIMENU_MAIN:
         if (localClientNum)
             MyAssertHandler(
                 ".\\ui_mp\\ui_main_mp.cpp",
@@ -3648,72 +5178,72 @@ int __cdecl UI_SetActiveMenu(int localClientNum, int menu)
                 "(localClientNum == 0)",
                 localClientNum);
         Key_SetCatcher(localClientNum, 16);
-        Menus_OpenByName(&uiInfoArray, "main");
+        Menus_OpenByName(&uiInfoArray.uiDC, "main");
         buf = Dvar_GetString("com_errorMessage");
         if (strlen(buf))
         {
             if (I_stricmp(buf, ";"))
-                Menus_OpenByName(&uiInfoArray, "error_popmenu");
+                Menus_OpenByName(&uiInfoArray.uiDC, "error_popmenu");
         }
         SND_FadeAllSounds(1.0, 1000);
         result = 1;
         break;
-    case 2:
+    case UIMENU_INGAME:
         Key_SetCatcher(localClientNum, 16);
-        Menus_CloseAll(&uiInfoArray);
-        v3 = CG_ScriptMainMenu(uiInfoArray.localClientNum);
-        if (!Menus_OpenByName(&uiInfoArray, v3))
-            Menus_OpenByName(&uiInfoArray, "main");
+        Menus_CloseAll(&uiInfoArray.uiDC);
+        v3 = CG_ScriptMainMenu(uiInfoArray.uiDC.localClientNum);
+        if (!Menus_OpenByName(&uiInfoArray.uiDC, v3))
+            Menus_OpenByName(&uiInfoArray.uiDC, "main");
         result = 1;
         break;
-    case 3:
+    case UIMENU_NEED_CD:
         Key_SetCatcher(localClientNum, 16);
-        Menus_OpenByName(&uiInfoArray, "needcd");
+        Menus_OpenByName(&uiInfoArray.uiDC, "needcd");
         result = 1;
         break;
-    case 4:
+    case UIMENU_BAD_CD_KEY:
         Key_SetCatcher(localClientNum, 16);
-        Menus_OpenByName(&uiInfoArray, "badcd");
+        Menus_OpenByName(&uiInfoArray.uiDC, "badcd");
         result = 1;
         break;
-    case 5:
+    case UIMENU_PREGAME:
         if (!*Dvar_GetString("com_errorMessage"))
             MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 6577, 0, "%s", "buf[0]");
         Key_SetCatcher(localClientNum, 16);
-        Menus_CloseAll(&uiInfoArray);
-        Menus_OpenByName(&uiInfoArray, "pregame_loaderror_mp");
+        Menus_CloseAll(&uiInfoArray.uiDC);
+        Menus_OpenByName(&uiInfoArray.uiDC, "pregame_loaderror_mp");
         result = 1;
         break;
-    case 7:
-        uiInfoArray.cursor.x = 639.0;
-        uiInfoArray.cursor.y = 479.0;
-        UI_SetSystemCursorPos(&uiInfoArray, 639.0, 479.0);
+    case UIMENU_WM_QUICKMESSAGE:
+        uiInfoArray.uiDC.cursor.x = 639.0;
+        uiInfoArray.uiDC.cursor.y = 479.0;
+        UI_SetSystemCursorPos(&uiInfoArray.uiDC, 639.0, 479.0);
         Key_SetCatcher(localClientNum, 16);
-        CL_SetDisplayHUDWithKeycatchUI(uiInfoArray.localClientNum, 1);
-        Menus_CloseAll(&uiInfoArray);
-        Menus_OpenByName(&uiInfoArray, "quickmessage");
+        CL_SetDisplayHUDWithKeycatchUI(uiInfoArray.uiDC.localClientNum, 1);
+        Menus_CloseAll(&uiInfoArray.uiDC);
+        Menus_OpenByName(&uiInfoArray.uiDC, "quickmessage");
         result = 1;
         break;
-    case 8:
-        Menus_OpenByName(&uiInfoArray, "autoupdate");
+    case UIMENU_WM_AUTOUPDATE:
+        Menus_OpenByName(&uiInfoArray.uiDC, "autoupdate");
         result = 1;
         break;
-    case 10:
+    case UIMENU_SCOREBOARD:
         Key_SetCatcher(localClientNum, 16);
-        Menus_CloseAll(&uiInfoArray);
-        Menus_OpenByName(&uiInfoArray, "scoreboard");
+        Menus_CloseAll(&uiInfoArray.uiDC);
+        Menus_OpenByName(&uiInfoArray.uiDC, "scoreboard");
         bufa = Dvar_GetString("com_errorMessage");
         if (strlen(bufa) && I_stricmp(bufa, ";"))
-            Menus_OpenByName(&uiInfoArray, "error_popmenu");
+            Menus_OpenByName(&uiInfoArray.uiDC, "error_popmenu");
         result = 1;
         break;
-    case 11:
+    case UIMENU_ENDOFGAME:
         Key_SetCatcher(localClientNum, 16);
-        Menus_CloseAll(&uiInfoArray);
-        Menus_OpenByName(&uiInfoArray, "endofgame");
+        Menus_CloseAll(&uiInfoArray.uiDC);
+        Menus_OpenByName(&uiInfoArray.uiDC, "endofgame");
         bufb = Dvar_GetString("com_errorMessage");
         if (strlen(bufb) && I_stricmp(bufb, ";"))
-            Menus_OpenByName(&uiInfoArray, "error_popmenu");
+            Menus_OpenByName(&uiInfoArray.uiDC, "error_popmenu");
         result = 1;
         break;
     default:
@@ -3733,7 +5263,278 @@ int __cdecl UI_IsFullscreen(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return Menus_AnyFullScreenVisible(&uiInfoArray);
+    return Menus_AnyFullScreenVisible(&uiInfoArray.uiDC);
+}
+
+void __cdecl UI_ReadableSize(char *buf, unsigned int bufsize, int value)
+{
+    char *v3; // eax
+    char *v4; // eax
+    char *v5; // [esp-4h] [ebp-50h]
+    char *v6; // [esp-4h] [ebp-50h]
+
+    if (value <= 0x40000000)
+    {
+        if (value <= 0x100000)
+        {
+            if (value <= 1024)
+            {
+                v4 = UI_SafeTranslateString("EXE_BYTES");
+                Com_sprintf(buf, bufsize, "%d %s", value, v4);
+            }
+            else
+            {
+                v3 = UI_SafeTranslateString("EXE_KILOBYTE");
+                Com_sprintf(buf, bufsize, "%d %s", value / 1024, v3);
+            }
+        }
+        else
+        {
+            Com_sprintf(buf, bufsize, "%d", value / 0x100000);
+            v6 = UI_SafeTranslateString("EXE_MEGABYTE");
+            Com_sprintf(
+                &buf[strlen(buf)],
+                bufsize - strlen(buf),
+                ".%02d %s",
+                (int)(100 * (value & 0x800FFFFF)) / 0x100000,
+                v6);
+        }
+    }
+    else
+    {
+        Com_sprintf(buf, bufsize, "%d", value / 0x40000000);
+        v5 = UI_SafeTranslateString("EXE_GIGABYTE");
+        Com_sprintf(
+            &buf[strlen(buf)],
+            bufsize - strlen(buf),
+            ".%02d %s",
+            (int)(100 * (value & 0xBFFFFFFF)) / 0x40000000,
+            v5);
+    }
+}
+
+void __cdecl UI_PrintTime(char *buf, unsigned int bufsize, int time)
+{
+    char *v3; // eax
+    char *v4; // eax
+    char *v5; // eax
+    char *v6; // [esp-4h] [ebp-4h]
+    char *v7; // [esp-4h] [ebp-4h]
+
+    if (time <= 3600)
+    {
+        if (time <= 60)
+        {
+            v5 = UI_SafeTranslateString("EXE_SECONDS");
+            Com_sprintf(buf, bufsize, "%d %s", time, v5);
+        }
+        else
+        {
+            v7 = UI_SafeTranslateString("EXE_SECONDS");
+            v4 = UI_SafeTranslateString("EXE_MINUTES");
+            Com_sprintf(buf, bufsize, "%d %s %d %s", time / 60, v4, time % 60, v7);
+        }
+    }
+    else
+    {
+        v6 = UI_SafeTranslateString("EXE_MINUTES");
+        v3 = UI_SafeTranslateString("EXE_HOURS");
+        Com_sprintf(buf, bufsize, "%d %s %d %s", time / 3600, v3, time % 3600 / 60, v6);
+    }
+}
+
+int tleIndex;
+void __cdecl UI_DisplayDownloadInfo(char *downloadName, float centerPoint, float yStart, Font_s *font, float scale)
+{
+    char *v5; // eax
+    char *v6; // eax
+    char *v7; // eax
+    char *v8; // eax
+    char *v9; // eax
+    char *v10; // eax
+    char *v11; // eax
+    char *v12; // eax
+    char *v13; // eax
+    char *v14; // eax
+    char *v15; // eax
+    float x; // [esp+0h] [ebp-1CCh]
+    float v17; // [esp+8h] [ebp-1C4h]
+    float v18; // [esp+8h] [ebp-1C4h]
+    float v19; // [esp+8h] [ebp-1C4h]
+    char *v20; // [esp+14h] [ebp-1B8h]
+    char *v21; // [esp+14h] [ebp-1B8h]
+    char *v22; // [esp+14h] [ebp-1B8h]
+    int v23; // [esp+18h] [ebp-1B4h]
+    int v24; // [esp+18h] [ebp-1B4h]
+    float v25; // [esp+20h] [ebp-1ACh]
+    float v26; // [esp+24h] [ebp-1A8h]
+    float v27; // [esp+28h] [ebp-1A4h]
+    float v28; // [esp+2Ch] [ebp-1A0h]
+    float v29; // [esp+30h] [ebp-19Ch]
+    float v30; // [esp+34h] [ebp-198h]
+    float v31; // [esp+38h] [ebp-194h]
+    float v32; // [esp+3Ch] [ebp-190h]
+    float v33; // [esp+40h] [ebp-18Ch]
+    float v34; // [esp+44h] [ebp-188h]
+    float v35; // [esp+48h] [ebp-184h]
+    float v36; // [esp+4Ch] [ebp-180h]
+    float v37; // [esp+50h] [ebp-17Ch]
+    float v38; // [esp+54h] [ebp-178h]
+    float v39; // [esp+5Ch] [ebp-170h]
+    float v40; // [esp+64h] [ebp-168h]
+    float v41; // [esp+68h] [ebp-164h]
+    float y; // [esp+6Ch] [ebp-160h]
+    int i; // [esp+74h] [ebp-158h]
+    int timeleft; // [esp+78h] [ebp-154h]
+    char dlTimeBuf[68]; // [esp+7Ch] [ebp-150h] BYREF
+    int downloadTime; // [esp+C0h] [ebp-10Ch]
+    char xferRateBuf[64]; // [esp+C4h] [ebp-108h] BYREF
+    int firstColumn; // [esp+104h] [ebp-C8h]
+    uiInfo_s *uiInfo; // [esp+108h] [ebp-C4h]
+    int percent; // [esp+10Ch] [ebp-C0h]
+    int width; // [esp+110h] [ebp-BCh]
+    float secondColumn; // [esp+114h] [ebp-B8h]
+    int downloadCount; // [esp+118h] [ebp-B4h]
+    char totalSizeBuf[68]; // [esp+11Ch] [ebp-B0h] BYREF
+    float maxSecondColumnWidth; // [esp+160h] [ebp-6Ch]
+    float fileNameScale; // [esp+164h] [ebp-68h]
+    const char *s; // [esp+168h] [ebp-64h]
+    char dlSizeBuf[68]; // [esp+16Ch] [ebp-60h] BYREF
+    float color[4]; // [esp+1B4h] [ebp-18h] BYREF
+    int downloadSize; // [esp+1C4h] [ebp-8h]
+    int xferRate; // [esp+1C8h] [ebp-4h]
+
+    firstColumn = 24;
+    secondColumn = 200.0;
+    maxSecondColumnWidth = 630.0 - (float)200.0;
+    downloadSize = legacyHacks.cl_downloadSize;
+    downloadCount = legacyHacks.cl_downloadCount;
+    downloadTime = legacyHacks.cl_downloadTime;
+    color[0] = 0.0;
+    color[1] = 0.0;
+    color[2] = 0.0;
+    color[3] = 0.2;
+    y = yStart + 184.0;
+    UI_FillRect(&scrPlaceFull, 0.0, y, 640.0, 85.0, 0, 0, color);
+    v41 = yStart + 185.0;
+    UI_FillRect(&scrPlaceFull, 0.0, v41, 640.0, 83.0, 0, 0, color);
+    v40 = yStart + 186.0;
+    UI_FillRect(&scrPlaceFull, 0.0, v40, 640.0, 81.0, 0, 0, color);
+    if (downloadSize > 0)
+    {
+        color[0] = 0.0;
+        color[1] = 1.0;
+        color[2] = 0.0;
+        color[3] = 0.15000001;
+        width = (int)((double)downloadCount / (double)downloadSize * 640.0);
+        v17 = (float)(width + 2);
+        v39 = yStart + 164.0;
+        UI_FillRect(&scrPlaceFull, 0.0, v39, v17, 5.0, 0, 0, color);
+        v18 = (float)(width + 1);
+        v38 = yStart + 165.0;
+        UI_FillRect(&scrPlaceFull, 0.0, v38, v18, 3.0, 0, 0, color);
+        v19 = (float)width;
+        v37 = yStart + 166.0;
+        UI_FillRect(&scrPlaceFull, 0.0, v37, v19, 1.0, 0, 0, color);
+    }
+    v36 = yStart + 210.0;
+    v5 = UI_SafeTranslateString("EXE_DOWNLOADING");
+    UI_DrawText(&scrPlaceFull, v5, 64, font, 24.0, v36, 0, 0, scale, colorLtGrey, 0);
+    v35 = yStart + 235.0;
+    v6 = UI_SafeTranslateString("EXE_EST_TIME_LEFT");
+    UI_DrawText(&scrPlaceFull, v6, 64, font, 24.0, v35, 0, 0, scale, colorLtGrey, 0);
+    v34 = yStart + 260.0;
+    v7 = UI_SafeTranslateString("EXE_TRANS_RATE");
+    UI_DrawText(&scrPlaceFull, v7, 64, font, 24.0, v34, 0, 0, scale, colorLtGrey, 0);
+    width = UI_TextWidth(downloadName, 0, font, scale);
+    if (maxSecondColumnWidth >= (double)width)
+    {
+        fileNameScale = scale;
+    }
+    else
+    {
+        fileNameScale = scale * maxSecondColumnWidth / (double)width;
+        if (fileNameScale <= 0.2000000029802322)
+            v33 = 0.2;
+        else
+            v33 = fileNameScale;
+        fileNameScale = v33;
+    }
+    v32 = yStart + 210.0;
+    UI_DrawText(&scrPlaceFull, downloadName, 0x7FFFFFFF, font, secondColumn, v32, 0, 0, fileNameScale, colorLtGrey, 0);
+    UI_ReadableSize(dlSizeBuf, 0x40u, downloadCount);
+    UI_ReadableSize(totalSizeBuf, 0x40u, downloadSize);
+    if (downloadSize <= 0)
+        percent = 0;
+    else
+        percent = (int)((double)downloadCount * 100.0 / (double)downloadSize);
+    if (downloadCount >= 4096 && downloadTime)
+    {
+        uiInfo = &uiInfoArray;
+        if ((uiInfoArray.uiDC.realTime - downloadTime) / 1000)
+            xferRate = downloadCount / ((uiInfo->uiDC.realTime - downloadTime) / 1000);
+        else
+            xferRate = 0;
+        UI_ReadableSize(xferRateBuf, 0x40u, xferRate);
+        if (downloadSize && xferRate)
+        {
+            timeleft = 0;
+            tleEstimates[tleIndex++] = downloadSize / xferRate
+                - downloadSize / xferRate * (downloadCount / 1024) / (downloadSize / 1024);
+            if (tleIndex >= 80)
+                tleIndex = 0;
+            for (i = 0; i < 80; ++i)
+                timeleft += tleEstimates[i];
+            UI_PrintTime(dlTimeBuf, 0x40u, timeleft / 80);
+            v29 = yStart + 235.0;
+            UI_DrawText(&scrPlaceFull, dlTimeBuf, 0x7FFFFFFF, font, secondColumn, v29, 0, 0, scale, colorLtGrey, 3);
+            v23 = percent;
+            v21 = UI_SafeTranslateString("EXE_COPIED");
+            v10 = UI_SafeTranslateString("EXE_OF");
+            s = va("%s %s %s %s (%d%%)", dlSizeBuf, v10, totalSizeBuf, v21, v23);
+            v28 = yStart + 320.0;
+            Text_PaintCenter(&scrPlaceFull, centerPoint, v28, font, scale, colorLtGrey, (char *)s, 0);
+        }
+        else
+        {
+            v11 = UI_SafeTranslateString("EXE_ESTIMATING");
+            v27 = yStart + 235.0;
+            Text_PaintCenter(&scrPlaceFull, centerPoint, v27, font, scale, colorLtGrey, v11, 0);
+            if (downloadSize)
+            {
+                v24 = percent;
+                v22 = UI_SafeTranslateString("EXE_COPIED");
+                v12 = UI_SafeTranslateString("EXE_OF");
+                s = va("%s %s %s %s (%d%%)", dlSizeBuf, v12, totalSizeBuf, v22, v24);
+            }
+            else
+            {
+                v13 = UI_SafeTranslateString("EXE_COPIED");
+                s = va("(%s %s)", dlSizeBuf, v13);
+            }
+            v26 = yStart + 320.0;
+            Text_PaintCenter(&scrPlaceFull, centerPoint, v26, font, scale, colorLtGrey, (char *)s, 0);
+        }
+        if (xferRate)
+        {
+            v25 = yStart + 260.0;
+            x = secondColumn;
+            v14 = UI_SafeTranslateString("EXE_SECONDS");
+            v15 = va("%s/%s", xferRateBuf, v14);
+            UI_DrawText(&scrPlaceFull, v15, 0x7FFFFFFF, font, x, v25, 0, 0, scale, colorLtGrey, 3);
+        }
+    }
+    else
+    {
+        v8 = UI_SafeTranslateString("EXE_ESTIMATING");
+        v31 = yStart + 235.0;
+        Text_PaintCenter(&scrPlaceFull, centerPoint, v31, font, scale, colorLtGrey, v8, 0);
+        v20 = UI_SafeTranslateString("EXE_COPIED");
+        v9 = UI_SafeTranslateString("EXE_OF");
+        s = va("%s %s %s %s (%d%%)", dlSizeBuf, v9, totalSizeBuf, v20, percent);
+        v30 = yStart + 340.0;
+        Text_PaintCenter(&scrPlaceFull, centerPoint, v30, font, scale, colorLtGrey, (char *)s, 0);
+    }
 }
 
 void __cdecl UI_DrawConnectScreen(int localClientNum)
@@ -3744,7 +5545,7 @@ void __cdecl UI_DrawConnectScreen(int localClientNum)
     char *v4; // eax
     char *v5; // eax
     const char *String; // [esp+18h] [ebp-DC8h]
-    DvarValue *p_current; // [esp+18h] [ebp-DC8h]
+    const DvarValue *p_current; // [esp+18h] [ebp-DC8h]
     signed int v8; // [esp+20h] [ebp-DC0h]
     float y; // [esp+30h] [ebp-DB0h]
     char v10; // [esp+37h] [ebp-DA9h]
@@ -3978,7 +5779,7 @@ double __cdecl UI_GetBlurRadius(int localClientNum)
             localClientNum);
     if (!&uiInfoArray)
         MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 7029, 0, "%s", "uiInfo");
-    return uiInfoArray.blurRadiusOut;
+    return uiInfoArray.uiDC.blurRadiusOut;
 }
 
 void UI_StopServerRefresh()
@@ -4068,14 +5869,14 @@ void __cdecl UI_StartServerRefresh(int localClientNum, int full)
     Dvar_SetStringByName(dvarName, v3);
     if (full)
     {
-        *(unsigned int *)&sharedUiInfo.serverStatus.string[1124] = 1;
-        *(unsigned int *)&sharedUiInfo.gap8EB4[72912] = uiInfoArray.realTime + 1000;
+        *(_DWORD *)&sharedUiInfo.serverStatus.string[1124] = 1;
+        *(_DWORD *)&sharedUiInfo.gap8EB4[72912] = uiInfoArray.uiDC.realTime + 1000;
         UI_ClearDisplayedServers();
         LAN_MarkServerDirty(ui_netSource->current.integer, 0xFFFFFFFF, 1u);
         LAN_ResetPings(ui_netSource->current.integer);
         if (ui_netSource->current.integer)
         {
-            *(unsigned int *)&sharedUiInfo.serverStatus.string[1104] = uiInfoArray.realTime + 5000;
+            *(_DWORD *)&sharedUiInfo.serverStatus.string[1104] = uiInfoArray.uiDC.realTime + 5000;
             if (ui_netSource->current.integer == 1)
             {
                 i = 0;
@@ -4091,13 +5892,13 @@ void __cdecl UI_StartServerRefresh(int localClientNum, int full)
         else
         {
             v4 = CL_ControllerIndexFromClientNum(localClientNum);
-            Cmd_ExecuteSingleCommand(localClientNum, v4, "localservers\n");
-            *(unsigned int *)&sharedUiInfo.serverStatus.string[1104] = uiInfoArray.realTime + 1000;
+            Cmd_ExecuteSingleCommand(localClientNum, v4, (char*)"localservers\n");
+            *(_DWORD *)&sharedUiInfo.serverStatus.string[1104] = uiInfoArray.uiDC.realTime + 1000;
         }
     }
     else
     {
-        UI_UpdatePendingPings((uiInfo_s *)&uiInfoArray);
+        UI_UpdatePendingPings(&uiInfoArray);
     }
 }
 
@@ -4108,6 +5909,7 @@ void __cdecl UI_UpdatePendingPings(uiInfo_s *uiInfo)
     *(unsigned int *)&sharedUiInfo.serverStatus.string[1104] = uiInfo->uiDC.realTime + 1000;
 }
 
+char errorString[1024];
 char *__cdecl UI_SafeTranslateString(const char *reference)
 {
     char v2; // [esp+3h] [ebp-11h]
@@ -4151,7 +5953,7 @@ char *__cdecl UI_SafeTranslateString(const char *reference)
     return (char *)translation;
 }
 
-bool __cdecl UI_AnyMenuVisible(int localClientNum)
+BOOL __cdecl UI_AnyMenuVisible(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -4161,7 +5963,7 @@ bool __cdecl UI_AnyMenuVisible(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return uiInfoArray.openMenuCount != 0;
+    return uiInfoArray.uiDC.openMenuCount != 0;
 }
 
 char *__cdecl UI_ReplaceConversionString(char *sourceString, const char *replaceString)
@@ -4207,7 +6009,7 @@ void __cdecl UI_ReplaceConversions(
 
     if (!sourceString)
         MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 7349, 0, "%s", "sourceString");
-    strstr((unsigned __int8 *)sourceString, asc_861D24);
+    strstr((unsigned __int8 *)sourceString, (unsigned __int8 *)"&&");
     if (v4)
     {
         if (!arguments)
@@ -4235,7 +6037,7 @@ void __cdecl UI_ReplaceConversions(
         index = 0;
         while (index < sourceStringLength)
         {
-            if (!strncmp(&sourceString[index], asc_861D24, 2u) && isdigit(sourceString[index + 2]))
+            if (!strncmp(&sourceString[index], "&&", 2u) && isdigit(sourceString[index + 2]))
             {
                 argIndex = sourceString[index + 2] - 49;
                 if (argIndex < 0 || argIndex >= arguments->argCount)
@@ -4278,7 +6080,7 @@ void __cdecl UI_CloseAll(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    Menus_CloseAll(&uiInfoArray);
+    Menus_CloseAll(&uiInfoArray.uiDC);
     UI_SetActiveMenu(localClientNum, 0);
 }
 
@@ -4292,12 +6094,12 @@ void __cdecl UI_CloseFocusedMenu(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (Menu_Count(&uiInfoArray) > 0)
+    if (Menu_Count(&uiInfoArray.uiDC) > 0)
     {
-        if (Menu_GetFocused(&uiInfoArray))
+        if (Menu_GetFocused(&uiInfoArray.uiDC))
         {
-            if (!Menus_AnyFullScreenVisible(&uiInfoArray))
-                Menus_CloseAll(&uiInfoArray);
+            if (!Menus_AnyFullScreenVisible(&uiInfoArray.uiDC))
+                Menus_CloseAll(&uiInfoArray.uiDC);
         }
         else if (Key_IsCatcherActive(localClientNum, 16))
         {
@@ -4322,6 +6124,27 @@ int __cdecl UI_Popup(int localClientNum, const char *menu)
     return 1;
 }
 
+void __cdecl UI_SetSystemCursorPos(UiContext *dc, float x, float y)
+{
+    tagPOINT X; // [esp+0h] [ebp-28h]
+    float v4; // [esp+8h] [ebp-20h]
+    float v5; // [esp+Ch] [ebp-1Ch]
+    float v6; // [esp+10h] [ebp-18h]
+    float v7; // [esp+14h] [ebp-14h]
+    float v8; // [esp+18h] [ebp-10h]
+    float v9; // [esp+1Ch] [ebp-Ch]
+
+    v9 = x * scrPlaceFull.scaleVirtualToFull[0];
+    v7 = v9 + 0.5;
+    v6 = floor(v7);
+    v8 = y * scrPlaceFull.scaleVirtualToFull[1];
+    v5 = v8 + 0.5;
+    v4 = floor(v5);
+    X.y = (int)v4;
+    X.x = (int)v6;
+    CL_SetCursorPos(X);
+}
+
 int __cdecl UI_PopupScriptMenu(int localClientNum, const char *menuName, bool useMouse)
 {
     menuDef_t *pFocus; // [esp+Ch] [ebp-4h]
@@ -4334,21 +6157,21 @@ int __cdecl UI_PopupScriptMenu(int localClientNum, const char *menuName, bool us
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    pFocus = Menu_GetFocused(&uiInfoArray);
-    if (pFocus && dword_DB561C0 != 9 && dword_DB561C0 != 10)
+    pFocus = Menu_GetFocused(&uiInfoArray.uiDC);
+    if (pFocus && uiInfoArray.currentMenuType != UIMENU_SCRIPT_POPUP && uiInfoArray.currentMenuType != UIMENU_SCOREBOARD)
         return 0;
     if (!pFocus || I_stricmp(pFocus->window.name, menuName))
     {
-        dword_DB561C0 = 9;
+        uiInfoArray.currentMenuType = UIMENU_SCRIPT_POPUP;
         if (!useMouse)
         {
-            uiInfoArray.cursor.x = 639.0;
-            uiInfoArray.cursor.y = 479.0;
-            UI_SetSystemCursorPos(&uiInfoArray, 639.0, 479.0);
+            uiInfoArray.uiDC.cursor.x = 639.0;
+            uiInfoArray.uiDC.cursor.y = 479.0;
+            UI_SetSystemCursorPos(&uiInfoArray.uiDC, 639.0, 479.0);
         }
         Key_SetCatcher(localClientNum, 16);
-        Menus_CloseAll(&uiInfoArray);
-        Menus_OpenByName(&uiInfoArray, menuName);
+        Menus_CloseAll(&uiInfoArray.uiDC);
+        Menus_OpenByName(&uiInfoArray.uiDC, menuName);
     }
     return 1;
 }
@@ -4363,15 +6186,15 @@ void __cdecl UI_ClosePopupScriptMenu(int localClientNum, bool allowResponse)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (dword_DB561C0 == 9)
+    if (uiInfoArray.currentMenuType == UIMENU_SCRIPT_POPUP)
     {
-        byte_DB561C4 = allowResponse;
+        uiInfoArray.allowScriptMenuResponse = allowResponse;
         UI_CloseFocusedMenu(localClientNum);
-        byte_DB561C4 = 1;
+        uiInfoArray.allowScriptMenuResponse = 1;
     }
 }
 
-char __cdecl UI_AllowScriptMenuResponse(int localClientNum)
+bool __cdecl UI_AllowScriptMenuResponse(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -4381,7 +6204,7 @@ char __cdecl UI_AllowScriptMenuResponse(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return byte_DB561C4;
+    return uiInfoArray.allowScriptMenuResponse;
 }
 
 void __cdecl UI_CloseInGameMenu(int localClientNum)
@@ -4407,11 +6230,11 @@ bool __cdecl Menu_IsMenuOpenAndVisible(int localClientNum, const char *menuName)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    menu = Menus_FindByName(&uiInfoArray, menuName);
+    menu = Menus_FindByName(&uiInfoArray.uiDC, menuName);
     if (!menu)
         return 0;
-    if (Menus_MenuIsInStack(&uiInfoArray, menu))
-        return Menu_IsVisible(&uiInfoArray, menu) != 0;
+    if (Menus_MenuIsInStack(&uiInfoArray.uiDC, menu))
+        return Menu_IsVisible(&uiInfoArray.uiDC, menu) != 0;
     return 0;
 }
 

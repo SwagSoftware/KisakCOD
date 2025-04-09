@@ -6576,3 +6576,294 @@ void __cdecl Menu_SetupKeywordHash()
             menuParseKeywordHash,
             (const KeywordHashEntry<menuDef_t, 128, 128> *)(8 * i + 9146728));
 }
+
+void __cdecl Menu_FreeItemMemory(itemDef_s *item)
+{
+    if (!item)
+        MyAssertHandler(".\\ui\\ui_shared_obj.cpp", 106, 0, "%s", "item");
+    free_expression(&item->visibleExp);
+    free_expression(&item->materialExp);
+    free_expression(&item->textExp);
+    free_expression(&item->rectXExp);
+    free_expression(&item->rectYExp);
+    free_expression(&item->rectWExp);
+    free_expression(&item->rectHExp);
+    free_expression(&item->forecolorAExp);
+}
+
+void __cdecl Menu_Init(menuDef_t *menu, int imageTrack)
+{
+    memset((unsigned __int8 *)menu, 0, sizeof(menuDef_t));
+    Menu_SetCursorItem(0, menu, -1);
+    menu->fadeAmount = g_load_0.loadAssets.fadeAmount;
+    menu->fadeInAmount = g_load_0.loadAssets.fadeInAmount;
+    menu->fadeClamp = g_load_0.loadAssets.fadeClamp;
+    menu->fadeCycle = g_load_0.loadAssets.fadeCycle;
+    menu->imageTrack = imageTrack;
+    menu->items = g_load_0.items;
+    Window_Init(&menu->window);
+}
+
+const KeywordHashEntry<menuDef_t, 128, 128> *__cdecl KeywordHash_Find_menuDef_t_128_128_(
+    const KeywordHashEntry<menuDef_t, 128, 128> **table,
+    const char *keyword)
+{
+    const KeywordHashEntry<menuDef_t, 128, 128> *key; // [esp+Ch] [ebp-4h]
+
+    key = table[KeywordHash_Key_128_128_(keyword)];
+    if (!key || I_stricmp(key->keyword, keyword))
+        return 0;
+    else
+        return key;
+}
+
+int __cdecl Menu_Parse(int handle, menuDef_t *menu)
+{
+    const KeywordHashEntry<menuDef_t, 128, 128> *key; // [esp+0h] [ebp-41Ch]
+    pc_token_s token; // [esp+4h] [ebp-418h] BYREF
+
+    if (!PC_ReadTokenHandle(handle, &token))
+        return 0;
+    if (token.string[0] != 123)
+        return 0;
+    do
+    {
+        while (1)
+        {
+            do
+            {
+                memset((unsigned __int8 *)&token, 0, sizeof(token));
+                if (!PC_ReadTokenHandle(handle, &token))
+                {
+                    PC_SourceError(handle, (char*)"end of file inside menu\n");
+                    return 0;
+                }
+                if (token.string[0] == 125)
+                    return 1;
+            } while (token.string[0] == 59);
+            key = KeywordHash_Find_menuDef_t_128_128_(menuParseKeywordHash, token.string);
+            if (key)
+                break;
+            PC_SourceError(handle, (char*)"unknown menu keyword %s", token.string);
+        }
+    } while (key->func(menu, handle));
+    PC_SourceError(handle, (char*)"couldn't parse menu keyword %s", token.string);
+    return 0;
+}
+
+void __cdecl Menu_PostParse(menuDef_t *menu)
+{
+    unsigned int size; // [esp+0h] [ebp-4h]
+
+    if (!menu)
+        MyAssertHandler(".\\ui\\ui_shared_obj.cpp", 2653, 0, "%s", "menu");
+    size = 4 * menu->itemCount;
+    menu->items = (itemDef_s **)UI_Alloc(size, 4);
+    memcpy((unsigned __int8 *)menu->items, (unsigned __int8 *)g_load_0.items, size);
+    if (menu->fullScreen)
+    {
+        menu->window.rect.x = 0.0;
+        menu->window.rect.y = 0.0;
+        menu->window.rect.w = 640.0;
+        menu->window.rect.h = 480.0;
+    }
+    Menu_UpdatePosition(0, menu);
+}
+
+char __cdecl Menu_New(int handle, int imageTrack)
+{
+    menuDef_t *menu; // [esp+0h] [ebp-4h]
+
+    menu = (menuDef_t *)UI_Alloc(0x11Cu, 4);
+    Menu_Init(menu, imageTrack);
+    if (Menu_Parse(handle, menu))
+    {
+        if (menu->window.name)
+        {
+            Menu_PostParse(menu);
+            if (g_load_0.menuList.menuCount >= 512)
+                Com_Error(ERR_DROP, "Menu_New: (Kisak) Out of memory"); // KISAKTODO: proper err msg... IDA shows it as hex and cba
+            g_load_0.menuList.menus[g_load_0.menuList.menuCount++] = menu;
+            return 1;
+        }
+        else
+        {
+            PC_SourceError(handle, (char*)"menu has no name");
+            Menu_FreeMemory(menu);
+            return 0;
+        }
+    }
+    else
+    {
+        Menu_FreeMemory(menu);
+        return 0;
+    }
+}
+
+int __cdecl Asset_Parse(int handle)
+{
+    pc_token_s token; // [esp+0h] [ebp-418h] BYREF
+
+    if (!PC_ReadTokenHandle(handle, &token))
+        return 0;
+    if (I_stricmp(token.string, "{"))
+        return 0;
+    do
+    {
+        while (1)
+        {
+            while (1)
+            {
+                while (1)
+                {
+                    while (1)
+                    {
+                        do
+                        {
+                            if (!PC_ReadTokenHandle(handle, &token))
+                                return 0;
+                        } while (!I_stricmp(token.string, ";"));
+                        if (!I_stricmp(token.string, "}"))
+                            return 1;
+                        if (I_stricmp(token.string, "fadeClamp"))
+                            break;
+                        if (!PC_Float_Parse(handle, &g_load_0.loadAssets.fadeClamp))
+                            return 0;
+                    }
+                    if (I_stricmp(token.string, "fadeCycle"))
+                        break;
+                    if (!PC_Int_Parse(handle, &g_load_0.loadAssets.fadeCycle))
+                        return 0;
+                }
+                if (I_stricmp(token.string, "fadeAmount"))
+                    break;
+                if (!PC_Float_Parse(handle, &g_load_0.loadAssets.fadeAmount))
+                    return 0;
+            }
+            if (!I_stricmp(token.string, "fadeInAmount"))
+                break;
+            PC_SourceError(
+                handle,
+                (char*)"Unknown token %s in assetGlobalDef.  Valid commands are 'fadeClamp', 'fadeCycle', 'fadeAmount', and 'fadeInAmount'\n",
+                token.string);
+        }
+    } while (PC_Float_Parse(handle, &g_load_0.loadAssets.fadeInAmount));
+    return 0;
+}
+
+char __cdecl UI_ParseMenuInternal(char *menuFile, int imageTrack)
+{
+    int handle; // [esp+0h] [ebp-424h]
+    const char *builtinDefines[2]; // [esp+4h] [ebp-420h] BYREF
+    pc_token_s token; // [esp+Ch] [ebp-418h] BYREF
+
+    builtinDefines[0] = "PC";
+    builtinDefines[1] = 0;
+    Com_Printf(13, "\tLoading '%s'...\n", menuFile);
+    handle = PC_LoadSourceHandle(menuFile, builtinDefines);
+    if (handle)
+    {
+        while (PC_ReadTokenHandle(handle, &token))
+        {
+            if (I_stricmp(token.string, "}") && I_stricmp(token.string, "{"))
+            {
+                if (I_stricmp(token.string, "assetGlobalDef"))
+                {
+                    if (I_stricmp(token.string, "menudef"))
+                    {
+                        PC_SourceError(
+                            handle,
+                            (char*)"Unknown token %s in menu file.  Expected \"menudef\" or \"assetglobaldef\".\n",
+                            token.string);
+                    }
+                    else if (!Menu_New(handle, imageTrack))
+                    {
+                        break;
+                    }
+                }
+                else if (!Asset_Parse(handle))
+                {
+                    break;
+                }
+            }
+        }
+        PC_FreeSourceHandle(handle);
+        return 1;
+    }
+    else
+    {
+        Com_PrintError(13, "Couldn't find menu file '%s'\n", menuFile);
+        return 0;
+    }
+}
+
+MenuList *__cdecl UI_LoadMenu_LoadObj(char *menuFile, int imageTrack)
+{
+    memset((unsigned __int8 *)&g_load_0, 0, sizeof(g_load_0));
+    g_load_0.menuList.menus = g_load_0.menus;
+    if (!UI_ParseMenuInternal(menuFile, imageTrack))
+    {
+        Com_PrintWarning(13, "WARNING: menu file not found: %s\n", menuFile);
+        if (!UI_ParseMenuInternal((char*)"ui/default.menu", imageTrack))
+            Com_Error(ERR_DROP, "default.menu file not found. This is a default menu that you should have.");
+    }
+    return &g_load_0.menuList;
+}
+
+int __cdecl Load_Menu(const char **p, int imageTrack)
+{
+    parseInfo_t *token; // [esp+0h] [ebp-4h]
+
+    if (Com_Parse(p)->token[0] != 123)
+        return 0;
+    while (1)
+    {
+        token = Com_Parse(p);
+        if (!I_stricmp(token->token, "}"))
+            return 1;
+        if (!token || !token->token[0])
+            break;
+        UI_ParseMenuInternal(token->token, imageTrack);
+    }
+    return 0;
+}
+
+char menuBuf[32768];
+MenuList *__cdecl UI_LoadMenus_LoadObj(char *menuFile, int imageTrack)
+{
+    int len; // [esp+0h] [ebp-10h]
+    int f; // [esp+4h] [ebp-Ch] BYREF
+    const char *token; // [esp+8h] [ebp-8h]
+    const char *p; // [esp+Ch] [ebp-4h] BYREF
+
+    memset((unsigned __int8 *)&g_load_0, 0, sizeof(g_load_0));
+    g_load_0.menuList.menus = g_load_0.menus;
+    len = FS_FOpenFileByMode(menuFile, &f, FS_READ);
+    if (!f)
+    {
+        Com_Printf(13, "^3WARNING: menu file not found: %s\n", menuFile);
+        len = FS_FOpenFileByMode((char*)"ui/default.menu", &f, FS_READ);
+        if (!f)
+            Com_Error(ERR_DROP, "default.menu file not found. This is a default menu that you should have.");
+    }
+    if (len >= 0x8000)
+    {
+        FS_FCloseFile(f);
+        Com_Error(ERR_DROP, "^1menu file too large: %s is %i, max allowed is %i", menuFile, len, 0x8000);
+    }
+    FS_Read((unsigned __int8 *)menuBuf, len, f);
+    menuBuf[len] = 0;
+    FS_FCloseFile(f);
+    Com_Compress(menuBuf);
+    p = menuBuf;
+    Com_BeginParseSession(menuFile);
+    do
+        token = (const char *)Com_Parse(&p);
+    while (token
+        && *token
+        && *token != 125
+        && I_stricmp(token, "}")
+        && (I_stricmp(token, "loadmenu") || Load_Menu(&p, imageTrack)));
+    Com_EndParseSession();
+    return &g_load_0.menuList;
+}

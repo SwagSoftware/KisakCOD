@@ -1208,3 +1208,84 @@ const char **__cdecl FS_ListFilesInLocation(
 {
     return FS_ListFilteredFilesInLocation(path, extension, 0, behavior, numfiles, lookInFlags);
 }
+
+int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
+{
+    iobuf *Binary; // eax
+    iobuf *v3; // eax
+    iobuf *v4; // eax
+    char *v6; // [esp+2Ch] [ebp-10Ch]
+    char ospath[256]; // [esp+30h] [ebp-108h] BYREF
+    int f; // [esp+134h] [ebp-4h]
+
+    FS_CheckFileSystemStarted();
+    f = FS_HandleForFile(FS_THREAD_MAIN);
+    fsh[f].zipFile = 0;
+    I_strncpyz(fsh[f].name, filename, 256);
+    FS_BuildOSPath((char *)fs_homepath->current.integer, filename, (char *)&String, ospath);
+    v6 = ospath;
+    v6 += strlen(v6) + 1;
+    ospath[v6 - &ospath[1] - 1] = 0;
+    if (fs_debug->current.integer)
+        Com_Printf(10, "FS_SV_FOpenFileRead (fs_homepath): %s\n", ospath);
+    Binary = FS_FileOpenReadBinary(ospath);
+    fsh[f].handleFiles.file.o = Binary;
+    fsh[f].handleSync = 0;
+    if (!fsh[f].handleFiles.file.o && I_stricmp(fs_homepath->current.string, fs_basepath->current.string))
+    {
+        FS_BuildOSPath((char *)fs_basepath->current.integer, filename, (char *)&String, ospath);
+        ospath[&ospath[strlen(ospath) + 1] - &ospath[1] - 1] = 0;
+        if (fs_debug->current.integer)
+            Com_Printf(10, "FS_SV_FOpenFileRead (fs_basepath): %s\n", ospath);
+        v3 = FS_FileOpenReadBinary(ospath);
+        fsh[f].handleFiles.file.o = v3;
+        fsh[f].handleSync = 0;
+        if (!fsh[f].handleFiles.file.o)
+            f = 0;
+    }
+    if (!fsh[f].handleFiles.file.o)
+    {
+        FS_BuildOSPath((char *)fs_cdpath->current.integer, filename, (char *)&String, ospath);
+        ospath[&ospath[strlen(ospath) + 1] - &ospath[1] - 1] = 0;
+        if (fs_debug->current.integer)
+            Com_Printf(10, "FS_SV_FOpenFileRead (fs_cdpath) : %s\n", ospath);
+        v4 = FS_FileOpenReadBinary(ospath);
+        fsh[f].handleFiles.file.o = v4;
+        fsh[f].handleSync = 0;
+        if (!fsh[f].handleFiles.file.o)
+            f = 0;
+    }
+    *fp = f;
+    if (f)
+        return FS_filelength(f);
+    else
+        return 0;
+}
+
+int __cdecl FS_SV_FOpenFileWrite(const char *filename)
+{
+    iobuf *v2; // eax
+    char *v3; // [esp+Ch] [ebp-10Ch]
+    char ospath[256]; // [esp+10h] [ebp-108h] BYREF
+    int f; // [esp+114h] [ebp-4h]
+
+    FS_CheckFileSystemStarted();
+    FS_BuildOSPath((char *)fs_homepath->current.integer, (char *)filename, (char *)&String, ospath);
+    v3 = ospath;
+    v3 += strlen(v3) + 1;
+    ospath[v3 - &ospath[1] - 1] = 0;
+    f = FS_HandleForFile(FS_THREAD_MAIN);
+    fsh[f].zipFile = 0;
+    if (fs_debug->current.integer)
+        Com_Printf(10, "FS_SV_FOpenFileWrite: %s\n", ospath);
+    if (FS_CreatePath(ospath))
+        return 0;
+    Com_DPrintf(10, "writing to: %s\n", ospath);
+    v2 = FS_FileOpenWriteBinary(ospath);
+    fsh[f].handleFiles.file.o = v2;
+    I_strncpyz(fsh[f].name, (char *)filename, 256);
+    fsh[f].handleSync = 0;
+    if (!fsh[f].handleFiles.file.o)
+        return 0;
+    return f;
+}

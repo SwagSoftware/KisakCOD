@@ -292,3 +292,5 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
     MtlTechSetNotFoundBehavior notFoundBehavior);
 
 void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo);
+
+Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name);

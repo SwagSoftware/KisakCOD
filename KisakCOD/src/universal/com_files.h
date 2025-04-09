@@ -116,6 +116,9 @@ void __cdecl FS_Flush(int f);
 void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname);
 void __cdecl FS_FreeFileList(const char **list);
 
+int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp);
+int __cdecl FS_SV_FOpenFileWrite(const char *filename);
+
 unsigned int __cdecl FS_FTell(int f);
 enum FsListBehavior_e : __int32
 {                                       // ...

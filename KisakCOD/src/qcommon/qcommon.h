@@ -459,9 +459,25 @@ void __cdecl Dvar_SetVec4FromSource(dvar_s *dvar, float x, float y, float z, flo
 void __cdecl Dvar_SetColorFromSource(dvar_s *dvar, float r, float g, float b, float a, DvarSetSource source);
 void __cdecl Dvar_SetBool(dvar_s *dvar, bool value);
 void __cdecl Dvar_SetInt(dvar_s *dvar, int value);
+inline void __cdecl Dvar_SetInt(const dvar_s *dvar, int value) // KISAKTODO: remove this mischief
+{
+    Dvar_SetInt((dvar_s *)dvar, value);
+}
 void __cdecl Dvar_SetFloat(dvar_s *dvar, float value);
+inline void Dvar_SetFloat(const dvar_s *dvar, float value)
+{
+    Dvar_SetFloat((dvar_s *)dvar, value);
+}
 void __cdecl Dvar_SetVec3(dvar_s *dvar, float x, float y, float z);
 void __cdecl Dvar_SetString(dvar_s *dvar, char *value);
+inline void Dvar_SetString(const dvar_s *dvar, char* value)
+{
+    Dvar_SetString((dvar_s *)dvar, value);
+}
+inline void Dvar_SetSTring(const dvar_s *dvar, const char *value)
+{
+    Dvar_SetString((dvar_s *)dvar, (char *)value);
+}
 void __cdecl Dvar_SetStringFromSource(dvar_s *dvar, char *string, DvarSetSource source);
 void __cdecl Dvar_SetColor(dvar_s *dvar, float r, float g, float b, float a);
 void __cdecl Dvar_SetFromString(dvar_s *dvar, char *string);
@@ -471,12 +487,20 @@ void __cdecl Dvar_SetIntByName(const char *dvarName, int value);
 void __cdecl Dvar_SetFloatByName(const char *dvarName, float value);
 void __cdecl Dvar_SetVec3ByName(const char *dvarName, float x, float y, float z);
 void __cdecl Dvar_SetStringByName(const char *dvarName, char *value);
+inline void __cdecl Dvar_SetStringByName(const char *dvarName, const char *value)
+{
+    Dvar_SetStringByName(dvarName, (char *)value);
+}
 const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, char *string, DvarSetSource source);
 void __cdecl Dvar_SetFromStringByName(const char *dvarName, char *string);
 void __cdecl Dvar_SetCommand(const char *dvarName, char *string);
 void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *, DvarValue));
 void __cdecl Dvar_AddFlags(const dvar_s *dvar, int flags);
 void __cdecl Dvar_Reset(dvar_s *dvar, DvarSetSource setSource);
+inline void Dvar_Reset(const dvar_s *dvar, DvarSetSource src)
+{
+    Dvar_Reset((dvar_s *)dvar, src);
+}
 void __cdecl Dvar_SetCheatState();
 void __cdecl Dvar_Init();
 void __cdecl Dvar_ResetScriptInfo();
@@ -1080,6 +1104,29 @@ struct MapProfileHotSpot // sizeof=0x18
     __int64 ticksSelf;                  // ...
     __int64 ticksFile;                  // ...
 };
+struct mapLoadProfile_t // sizeof=0xA880
+{                                       // ...
+    bool isLoading;                     // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    int profileEntryCount;              // ...
+    MapProfileEntry profileEntries[384]; // ...
+    MapProfileEntry *currentEntry;      // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    unsigned __int64 ticksStart;        // ...
+    unsigned __int64 ticksFinish;       // ...
+    unsigned __int64 ticksProfiled;     // ...
+    int elementAccessCount[3];          // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    MapProfileElement elements[3];      // ...
+};
 
 struct rectDef_s;
 struct Material;
@@ -1107,6 +1154,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect);
 int ProfLoad_DrawTree();
 
 extern const dvar_t *com_profileLoading;
+extern mapLoadProfile_t mapLoadProfile;
 
 // statmonitor
 struct statmonitor_s // sizeof=0x8
@@ -1158,6 +1206,64 @@ void __cdecl strncpy(unsigned __int8 *dest, unsigned __int8 *source, unsigned in
     dest = (unsigned __int8 *)result;
 }
 
+/**
+ * stristr - Case insensitive strstr()
+ * @haystack: Where we will search for our @needle
+ * @needle:   Search pattern.
+ *
+ * Description:
+ * This function is an ANSI version of strstr() with case insensitivity.
+ *
+ * It is a commodity funciton found on the web, cut'd, 'n', pasted..
+ * URL: http://www.brokersys.com/snippets/STRISTR.C
+ *
+ * Hereby donated to public domain.
+ *
+ * Returns:  char *pointer if needle is found in haystack, otherwise NULL.
+ *
+ * Rev History:  01/20/05  Joachim Nilsson   Cleanups
+ *               07/04/95  Bob Stout         ANSI-fy
+ *               02/03/94  Fred Cole         Original
+ */
+inline char * stristr(const char *haystack, const char *needle)
+{
+    char *pptr = (char *)needle;   /* Pattern to search for    */
+    char *start = (char *)haystack; /* Start with a bowl of hay */
+    char *sptr;                      /* Substring pointer        */
+    int   slen = strlen(haystack); /* Total size of haystack   */
+    int   plen = strlen(needle);   /* Length of our needle     */
+
+    /* while string length not shorter than pattern length */
+    for (; slen >= plen; start++, slen--)
+    {
+        /* find start of pattern in string */
+        while (toupper(*start) != toupper(*needle))
+        {
+            start++;
+            slen--;
+            /* if pattern longer than string */
+            if (slen < plen)
+            {
+                return NULL;
+            }
+        }
+
+        sptr = start;
+        pptr = (char *)needle;
+        while (toupper(*sptr) == toupper(*pptr))
+        {
+            sptr++;
+            pptr++;
+            /* if end of pattern then pattern was found */
+            if ('\0' == *pptr)
+            {
+                return start;
+            }
+        }
+    }
+
+    return NULL;
+}
 
 // LWSS: Random return 0 Stub function that IDA thinks is jpeg-related.
 int __cdecl RETURN_ZERO32()

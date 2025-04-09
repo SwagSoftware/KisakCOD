@@ -41,6 +41,11 @@ void __cdecl IN_CenterView()
     }
 }
 
+bool __cdecl IN_IsTalkKeyHeld()
+{
+    return playersKb[0][29].active;
+}
+
 void __cdecl CL_UpdateCmdButton(int localClientNum, int *cmdButtons, int kbButton, int buttonFlag)
 {
     kbutton_t *kb; // [esp+0h] [ebp-4h]

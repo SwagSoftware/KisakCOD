@@ -12,9 +12,9 @@ void __cdecl Menu_Setup(UiContext *dc);
 void __cdecl LerpColor(float *a, float *b, float *c, float t);
 int __cdecl Color_Parse(const char **p, float (*c)[4]);
 int __cdecl String_Parse(const char **p, char *out, int len);
-void __cdecl Script_SetColor(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_SetBackground(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_SetItemColor(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_SetColor(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_SetBackground(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_SetItemColor(UiContext *dc, itemDef_s *item, const char **args=NULL);
 int __cdecl Menu_ItemsMatchingGroup(menuDef_t *menu, char *name);
 itemDef_s *__cdecl Menu_GetMatchingItemByNumber(menuDef_t *menu, int index, char *name);
 int __cdecl Menus_MenuIsInStack(UiContext *dc, menuDef_t *menu);
@@ -23,6 +23,8 @@ void __cdecl Menus_HideByName(const UiContext *dc, const char *menuName);
 void __cdecl Menus_ShowByName(const UiContext *dc, const char *windowName);
 void __cdecl Menus_CloseByName(UiContext *dc, const char *p);
 void __cdecl Menus_Close(UiContext *dc, menuDef_t *menu);
+void __cdecl Menus_FreeAllMemory(UiContext *dc);
+void __cdecl Menu_FreeMemory(menuDef_t *menu);
 bool __cdecl Window_HasFocus(int localClientNum, const windowDef_t *w);
 int __cdecl Menus_RemoveFromStack(UiContext *dc, menuDef_t *pMenu);
 void __cdecl Menu_GainFocusDueToClose(UiContext *dc, menuDef_t *menu);
@@ -30,69 +32,71 @@ void __cdecl Menu_CallOnFocusDueToOpen(UiContext *dc, menuDef_t *menu);
 void __cdecl Menu_RunCloseScript(UiContext *dc, menuDef_t *menu);
 itemDef_s *__cdecl Menu_FindItemByName(menuDef_t *menu, const char *p);
 void __cdecl Menus_CloseAll(UiContext *dc);
-void __cdecl Script_Show(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_Show(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Menu_ShowItemByName(int localClientNum, menuDef_t *menu, char *p, int bShow);
-void __cdecl Script_Hide(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_FadeIn(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_Hide(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_FadeIn(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Menu_FadeItemByName(int localClientNum, menuDef_t *menu, char *p, int fadeOut);
-void __cdecl Script_FadeOut(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_ShowMenu(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_HideMenu(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_Open(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_OpenForGameType(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_CloseForGameType(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_StatClearBitMask(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_StatBitMaskGetArgs(UiContext *dc, itemDef_s *item, const char **args, int *statNum, int *bitMask);
-void __cdecl Script_Close(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_InGameOpen(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_InGameClose(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_FocusFirstInMenu(UiContext *dc, itemDef_s *item);
+void __cdecl Script_FadeOut(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_ShowMenu(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_HideMenu(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_Open(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_OpenForGameType(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_CloseForGameType(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_StatClearBitMask(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_StatBitMaskGetArgs(UiContext *dc, itemDef_s *item, const char **args=NULL, int *statNum, int *bitMask);
+void __cdecl Script_Close(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_InGameOpen(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_InGameClose(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_FocusFirstInMenu(UiContext *dc, itemDef_s *item, const char **args=NULL);
 itemDef_s *__cdecl Menu_FocusFirstSelectableItem(UiContext *dc, menuDef_t *menu);
-void __cdecl Script_SetFocus(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_SetFocusByDvar(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_SetDvar(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_Exec(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_SetFocus(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_SetFocusByDvar(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_SetDvar(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_Exec(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_ExecHandler(
     int localClientNum,
     int controllerIndex,
     itemDef_s *item,
-    const char **args,
+    const char **args=NULL,
     void(__cdecl *textCallback)(int, int, const char *));
 void __cdecl Script_AddTextWrapper(int clientNum, int controllerIndex, const char *text);
-void __cdecl Script_ExecNow(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_ExecOnDvarStringValue(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_ExecNow(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_ExecOnDvarStringValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_ConditionalExecHandler(
     int localClientNum,
     itemDef_s *item,
-    const char **args,
+    const char **args=NULL,
     bool(__cdecl *shouldExec)(const char *, const char *),
     void(__cdecl *textCallback)(int, int, const char *));
 bool __cdecl Script_ExecIfStringsEqual(const char *dvarValue, const char *testValue);
-void __cdecl Script_ExecOnDvarIntValue(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_ExecOnDvarIntValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
 bool __cdecl Script_ExecIfIntsEqual(const char *dvarValue, const char *testValue);
-void __cdecl Script_ExecOnDvarFloatValue(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_ExecOnDvarFloatValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
 bool __cdecl Script_ExecIfFloatsEqual(const char *dvarValue, const char *testValue);
-void __cdecl Script_ExecNowOnDvarStringValue(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_ExecNowOnDvarIntValue(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_ExecNowOnDvarFloatValue(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_RespondOnDvarStringValue(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_ExecNowOnDvarStringValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_ExecNowOnDvarIntValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_ExecNowOnDvarFloatValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_RespondOnDvarStringValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_ConditionalResponseHandler(
     int localClientNum,
     itemDef_s *item,
-    const char **args,
+    const char **args=NULL,
     bool(__cdecl *shouldRespond)(const char *, const char *));
-void __cdecl Script_RespondOnDvarIntValue(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_RespondOnDvarFloatValue(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_SetLocalVarBool(UiContext *dc, itemDef_s *item, const char **args);
-UILocalVarContext *__cdecl Script_ParseLocalVar(UiContext *dc, const char **args);
-void __cdecl Script_SetLocalVarInt(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_SetLocalVarFloat(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_SetLocalVarString(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_FeederTop(UiContext *dc, itemDef_s *item);
-void __cdecl Script_FeederBottom(UiContext *dc, itemDef_s *item);
-void __cdecl Script_Play(UiContext *dc, itemDef_s *item, const char **args);
-void __cdecl Script_ScriptMenuResponse(UiContext *dc, itemDef_s *item, const char **args);
+void __cdecl Script_RespondOnDvarIntValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_RespondOnDvarFloatValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_SetLocalVarBool(UiContext *dc, itemDef_s *item, const char **args=NULL);
+UILocalVarContext *__cdecl Script_ParseLocalVar(UiContext *dc, const char **args=NULL);
+void __cdecl Script_SetLocalVarInt(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_SetLocalVarFloat(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_SetLocalVarString(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_FeederTop(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_FeederBottom(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_Play(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_ScriptMenuResponse(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_StatClearPerkNew(UiContext *dc, itemDef_s *item, const char **args=NULL);
+void __cdecl Script_GetAutoUpdate(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Item_RunScript(UiContext *dc, itemDef_s *item, char *s);
 int __cdecl Item_SetFocus(UiContext *dc, itemDef_s *item, float x, float y);
 const rectDef_s *__cdecl Item_GetTextRect(int localClientNum, const itemDef_s *item);
@@ -111,14 +115,14 @@ void __cdecl Menus_PrintAllLoadedMenus(UiContext *dc);
 void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down);
 bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key);
 void __cdecl Item_TextField_EnsureCursorVisible(int localClientNum, itemDef_s *item, const char *text);
-int __cdecl Item_HandleKey(UiContext *dc, __int64 item, int down);
+int __cdecl Item_HandleKey(UiContext *dc, itemDef_s *item, int down);
 int __cdecl Item_OwnerDraw_HandleKey(itemDef_s *item, int key);
 int __cdecl Item_ListBox_HandleKey(UiContext *dc, itemDef_s *item, int key, int down, int force);
 void __cdecl Item_ListBox_Page(int localClientNum, itemDef_s *item, int max, int scrollmax, int viewmax, int delta);
 void __cdecl Item_ListBox_Scroll(int localClientNum, itemDef_s *item, int max, int scrollmax, int viewmax, int delta);
 int __cdecl Item_YesNo_HandleKey(UiContext *dc, itemDef_s *item, int key);
 bool __cdecl Item_ShouldHandleKey(UiContext *dc, itemDef_s *item, int key);
-int __cdecl Item_Multi_HandleKey(UiContext *dc, __int64 item);
+int __cdecl Item_Multi_HandleKey(UiContext *dc, itemDef_s *item);
 int __cdecl Item_Multi_CountSettings(itemDef_s *item);
 int __cdecl Item_Multi_FindDvarByValue(itemDef_s *item);
 int __cdecl Item_List_NextEntryForKey(int key, int current, int count);
@@ -128,7 +132,7 @@ int __cdecl Item_DvarEnum_EnumIndex(itemDef_s *item);
 double __cdecl Item_Slider_ThumbPosition(int localClientNum, itemDef_s *item);
 double __cdecl Item_GetRectPlacementX(int alignX, float x0, float containerWidth, float selfWidth);
 double __cdecl Item_ListBox_ThumbPosition(int localClientNum, itemDef_s *item);
-int __cdecl Item_Slider_HandleKey(UiContext *dc, __int64 item);
+int __cdecl Item_Slider_HandleKey(UiContext *dc, itemDef_s *item);
 void __cdecl Item_Action(UiContext *dc, itemDef_s *item);
 itemDef_s *__cdecl Menu_SetPrevCursorItem(UiContext *dc, menuDef_t *menu);
 itemDef_s *__cdecl Menu_SetNextCursorItem(UiContext *dc, menuDef_t *menu);
@@ -334,6 +338,7 @@ struct OperatorStack // sizeof=0xF4
     operationEnum stack[60];            // ...
     int numOperators;                   // ...
 };
+int __cdecl GetKeyBindingLocalizedString(int localClientNum, const char *command, char *keys, bool single);
 char *__cdecl GetSourceString(Operand operand);
 double __cdecl GetSourceFloat(Operand *source);
 operandInternalDataUnion __cdecl GetSourceInt(Operand *source);
@@ -587,3 +592,9 @@ struct KeywordHashEntry
     const char *keyword;
     int(__cdecl *func)(T *, int);
 };
+void __cdecl free_expression(statement_s *statement);
+void __cdecl Menu_FreeItemMemory(itemDef_s *item);
+void __cdecl Item_SetupKeywordHash();
+void __cdecl Menu_SetupKeywordHash();
+MenuList *__cdecl UI_LoadMenu_LoadObj(char *menuFile, int imageTrack);
+MenuList *__cdecl UI_LoadMenus_LoadObj(char *menuFile, int imageTrack);

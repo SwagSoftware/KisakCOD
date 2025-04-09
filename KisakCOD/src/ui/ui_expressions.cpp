@@ -5,6 +5,7 @@
 #include <client/client.h>
 #include <stringed/stringed_hooks.h>
 #include <game_mp/g_main_mp.h>
+#include <win32/win_storage.h>
 
 int s_operatorPrecedence[81] =
 {

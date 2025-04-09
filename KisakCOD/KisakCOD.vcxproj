@@ -392,6 +392,7 @@
     <ClCompile Include="src\qcommon\files.cpp" />
     <ClCompile Include="src\qcommon\graph.cpp" />
     <ClCompile Include="src\qcommon\huffman.cpp" />
+    <ClCompile Include="src\qcommon\md4.cpp" />
     <ClCompile Include="src\qcommon\mem_track.cpp" />
     <ClCompile Include="src\qcommon\msg_mp.cpp" />
     <ClCompile Include="src\qcommon\net_chan_mp.cpp" />
@@ -433,6 +434,7 @@
     <ClCompile Include="src\ui\ui_shared.cpp" />
     <ClCompile Include="src\ui\ui_shared_obj.cpp" />
     <ClCompile Include="src\ui\ui_utils.cpp" />
+    <ClCompile Include="src\ui_mp\ui_gameinfo_mp.cpp" />
     <ClCompile Include="src\ui_mp\ui_main_mp.cpp" />
     <ClCompile Include="src\universal\com_constantconfigstrings.cpp" />
     <ClCompile Include="src\universal\com_files.cpp" />
@@ -628,6 +630,7 @@
     <ClInclude Include="src\qcommon\files.h" />
     <ClInclude Include="src\qcommon\graph.h" />
     <ClInclude Include="src\qcommon\huffman.h" />
+    <ClInclude Include="src\qcommon\md4.h" />
     <ClInclude Include="src\qcommon\mem_track.h" />
     <ClInclude Include="src\qcommon\msg_mp.h" />
     <ClInclude Include="src\qcommon\net_chan_mp.h" />
@@ -678,6 +681,7 @@
     <ClInclude Include="src\win32\win_localize.h" />
     <ClInclude Include="src\win32\win_net_debug.h" />
     <ClInclude Include="src\win32\win_remote.h" />
+    <ClInclude Include="src\win32\win_storage.h" />
     <ClInclude Include="src\xanim\dobj.h" />
     <ClInclude Include="src\xanim\dobj_utils.h" />
     <ClInclude Include="src\xanim\xanim.h" />

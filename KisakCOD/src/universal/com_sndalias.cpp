@@ -2,6 +2,8 @@
 #include "com_memory.h"
 #include <devgui/devgui.h>
 #include <sound/snd_local.h>
+#include "com_files.h"
+#include <qcommon/cmd.h>
 
 SoundAliasGlobals g_sa;
 const char ***varXStringPtr;
@@ -392,3 +394,133 @@ bool __cdecl Com_AliasNameRefersToSingleAlias(const char *aliasname)
     return aliasList && aliasList->count == 1;
 }
 
+void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurGame, snd_alias_system_t system)
+{
+    char *v3; // ecx
+    const char *v4; // eax
+    char v5; // [esp+3h] [ebp-69h]
+    char *v6; // [esp+8h] [ebp-64h]
+    const char *v7; // [esp+Ch] [ebp-60h]
+    int mark; // [esp+10h] [ebp-5Ch]
+    char trimspec[68]; // [esp+14h] [ebp-58h] BYREF
+    int numMissing; // [esp+5Ch] [ebp-10h]
+    const char **fileNames; // [esp+60h] [ebp-Ch]
+    int i; // [esp+64h] [ebp-8h]
+    int fileCount; // [esp+68h] [ebp-4h] BYREF
+
+    if (!loadspec)
+        MyAssertHandler(".\\universal\\com_sndalias.cpp", 907, 0, "%s", "loadspec");
+    if (!*loadspec)
+        MyAssertHandler(".\\universal\\com_sndalias.cpp", 908, 0, "%s", "loadspec[0]");
+    if ((unsigned int)system > SASYS_GAME)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            913,
+            0,
+            "%s\n\t(system) = %i",
+            "(system >= 0 && system < SASYS_COUNT)",
+            system);
+    if (system == SASYS_GAME && g_sa.initialized[1])
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            914,
+            0,
+            "%s",
+            "system != SASYS_GAME || !g_sa.initialized[SASYS_CGAME]");
+    if (g_sa.initialized[system])
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            916,
+            0,
+            "%s\n\t(system) = %i",
+            "(!g_sa.initialized[system])",
+            system);
+    if (g_sa.aliasInfo[system].count)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            917,
+            0,
+            "%s\n\t(g_sa.aliasInfo[system].count) = %i",
+            "(g_sa.aliasInfo[system].count == 0)",
+            g_sa.aliasInfo[system].count);
+    if (*(&g_sa.soundFileInfo[-4].count + 3 * system))
+        MyAssertHandler(".\\universal\\com_sndalias.cpp", 918, 0, "%s", "g_sa.aliasInfo[system].head == NULL");
+    if (!g_sa.curvesInitialized)
+        Com_InitCurves();
+    if (!g_sa.speakerMapsInitialized)
+        Com_InitSpeakerMaps();
+    if ((unsigned int)system > SASYS_GAME)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            930,
+            0,
+            "%s\n\t(system) = %i",
+            "(system >= 0 && system < SASYS_COUNT)",
+            system);
+    if (I_strnicmp(loadspec, "maps/mp/", 8))
+    {
+        if (I_strnicmp(loadspec, "maps/", 5))
+        {
+            v7 = loadspec;
+            v6 = trimspec;
+            do
+            {
+                v5 = *v7;
+                *v6++ = *v7++;
+            } while (v5);
+        }
+        else
+        {
+            Com_StripExtension((char *)loadspec + 5, trimspec);
+        }
+    }
+    else
+    {
+        Com_StripExtension((char *)loadspec + 8, trimspec);
+    }
+    I_strlwr(trimspec);
+    if (system == SASYS_CGAME && com_sv_running->current.enabled)
+    {
+        g_sa.aliasInfo[1] = g_sa.aliasInfo[2];
+        g_sa.soundFileInfo[1] = g_sa.soundFileInfo[2];
+    }
+    else
+    {
+        ProfLoad_Begin("Find sound alias files");
+        fileNames = FS_ListFiles("soundaliases", "csv", FS_LIST_PURE_ONLY, &fileCount);
+        ProfLoad_End();
+        if (!fileCount)
+        {
+            Com_PrintWarning(9, "WARNING: can't find any sound alias files (soundaliases/*.csv)\n");
+            return;
+        }
+        ProfLoad_Begin("Load sound alias files");
+        mark = Hunk_HideTempMemory();
+        Com_InitSoundAlias();
+        Com_InitEntChannels(v3);
+        for (i = 0; i < fileCount; ++i)
+            Com_LoadSoundAliasFile(trimspec, loadspecCurGame, fileNames[i]);
+        ProfLoad_End();
+        ProfLoad_Begin("Finish sound aliases");
+        Com_MakeSoundAliasesPermanent(&g_sa.aliasInfo[system], (SoundFileInfo *)(8 * system + 230749208));
+        ProfLoad_End();
+        Hunk_ClearTempMemory();
+        Hunk_ShowTempMemory(mark);
+        FS_FreeFileList(fileNames);
+    }
+    if ((unsigned int)system <= SASYS_CGAME && !g_sa.initialized[1] && !g_sa.initialized[0])
+        Cmd_AddCommandInternal("snd_list", Com_SoundList_f, &Com_SoundList_f_VAR);
+    g_sa.initialized[system] = 1;
+    if ((unsigned int)system <= SASYS_CGAME)
+    {
+        numMissing = Com_LoadSoundAliasSounds((SoundFileInfo *)(8 * system + 230749208));
+        if (numMissing)
+        {
+            if (snd_errorOnMissing->current.enabled)
+            {
+                v4 = va(&byte_8C0EE8, numMissing);
+                Com_Error((errorParm_t)(system != SASYS_UI), v4);
+            }
+        }
+    }
+}

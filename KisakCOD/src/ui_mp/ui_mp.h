@@ -28,6 +28,13 @@ enum uiMenuCommand_t : __int32
     UIMENU_SCOREBOARD = 0xA,
     UIMENU_ENDOFGAME = 0xB,
 };
+struct LegacyHacks // sizeof=0x4C
+{                                       // ...
+    int cl_downloadSize;                // ...
+    int cl_downloadCount;               // ...
+    int cl_downloadTime;                // ...
+    char cl_downloadName[64];           // ...
+};
 struct ScreenPlacement // sizeof=0x44
 {                                       // ...
     float scaleVirtualToReal[2];        // ...
@@ -467,7 +474,7 @@ int UI_ClearDisplayedServers();
 void __cdecl UI_BuildServerStatus(uiInfo_s *uiInfo, int force);
 int __cdecl UI_FeederCount(int localClientNum, float feederID);
 void __cdecl UI_BuildPlayerList(int localClientNum);
-char *__cdecl UI_FeederItemText(
+const char *__cdecl UI_FeederItemText(
     int localClientNum,
     itemDef_s *item,
     const float feederID,
@@ -495,7 +502,7 @@ void __cdecl UI_Init(int localClientNum);
 const dvar_s *UI_RegisterDvars();
 Font_s *UI_AssetCache();
 void __cdecl UI_KeyEvent(int localClientNum, int key, int down);
-int __cdecl UI_GetActiveMenu(int localClientNum);
+uiMenuCommand_t __cdecl UI_GetActiveMenu(int localClientNum);
 const char *__cdecl UI_GetTopActiveMenuName(int localClientNum);
 int __cdecl UI_SetActiveMenu(int localClientNum, int menu);
 int __cdecl UI_IsFullscreen(int localClientNum);
@@ -524,7 +531,7 @@ void __cdecl UI_DoServerRefresh(uiInfo_s *uiInfo);
 void __cdecl UI_StartServerRefresh(int localClientNum, int full);
 void __cdecl UI_UpdatePendingPings(uiInfo_s *uiInfo);
 char *__cdecl UI_SafeTranslateString(const char *reference);
-bool __cdecl UI_AnyMenuVisible(int localClientNum);
+BOOL __cdecl UI_AnyMenuVisible(int localClientNum);
 char *__cdecl UI_ReplaceConversionString(char *sourceString, const char *replaceString);
 char *__cdecl UI_ReplaceConversionInt(char *sourceString, int replaceInt);
 void __cdecl UI_ReplaceConversions(
@@ -537,7 +544,7 @@ void __cdecl UI_CloseFocusedMenu(int localClientNum);
 int __cdecl UI_Popup(int localClientNum, const char *menu);
 int __cdecl UI_PopupScriptMenu(int localClientNum, const char *menuName, bool useMouse);
 void __cdecl UI_ClosePopupScriptMenu(int localClientNum, bool allowResponse);
-char __cdecl UI_AllowScriptMenuResponse(int localClientNum);
+bool __cdecl UI_AllowScriptMenuResponse(int localClientNum);
 void __cdecl UI_CloseInGameMenu(int localClientNum);
 void __cdecl UI_CloseAllMenus(int localClientNum);
 bool __cdecl Menu_IsMenuOpenAndVisible(int localClientNum, const char *menuName);
@@ -576,3 +583,11 @@ extern const dvar_t *ui_partyFull;
 extern const dvar_t *ui_customModeName;
 
 extern sharedUiInfo_t sharedUiInfo;
+extern LegacyHacks legacyHacks;
+
+
+// ui_gameinfo_mp
+int __cdecl UI_ParseInfos(const char *buf, int max, char **infos);
+void __cdecl UI_LoadArenas();
+int UI_LoadArenasFromFile();
+void UI_LoadArenasFromFile_FastFile();
