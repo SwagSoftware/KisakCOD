@@ -2,6 +2,8 @@
 #include "cg_public_mp.h"
 
 #include <bgame/bg_public.h>
+#include <qcommon/mem_track.h>
+#include <qcommon/threads.h>
 
 static pmove_t cg_pmove[1];
 static centity_s* cg_itemEntities[512];
@@ -199,7 +201,9 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                 (unsigned __int8*)ps,
                 sizeof(cgameGlob->predictedPlayerState));
             cgameGlob->physicsTime = cgameGlob->nextSnap->serverTime;
-            *(_QWORD*)cgameGlob->predictedPlayerState.oldVelocity = oldVelocity;
+            //*(_QWORD*)cgameGlob->predictedPlayerState.oldVelocity = oldVelocity;
+            cgameGlob->predictedPlayerState.oldVelocity[0] = oldVelocity[0];
+            cgameGlob->predictedPlayerState.oldVelocity[1] = oldVelocity[1];
             if (cgameGlob->predictedPlayerState.pm_type == 1 || cgameGlob->predictedPlayerState.pm_type == 8)
                 CG_InterpolatePlayerState(localClientNum, 0);
             CG_AdjustPositionForMover(

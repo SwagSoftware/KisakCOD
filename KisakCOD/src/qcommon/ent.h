@@ -147,6 +147,10 @@ union entityState_s_type_index // sizeof=0x4
 union entityState_s_un1 // sizeof=0x4
 {                                       // XREF: IsValidArrayIndex(uint)+B/o
                                         // entityState_s/r
+    operator int()
+    {
+        return scale;
+    }
     int scale;
     int eventParm2;
     int helicopterStage;

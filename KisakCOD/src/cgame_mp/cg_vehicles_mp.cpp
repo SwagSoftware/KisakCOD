@@ -1,14 +1,26 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
+#include <script/scr_const.h>
+#include <gfx_d3d/r_scene.h>
+#include <xanim/dobj_utils.h>
+#include <EffectsCore/fx_system.h>
 
-//struct dvar_s const *const vehDebugClient 8284e648     cg_vehicles_mp.obj
-//struct dvar_s const *const heli_barrelSlowdown 8284e64c     cg_vehicles_mp.obj
 //struct vehicleEffects(*)[8] vehEffects 8284e650     cg_vehicles_mp.obj
-//struct dvar_s const *const vehDriverViewFocusRange 8284eb50     cg_vehicles_mp.obj
-//struct dvar_s const *const heli_barrelMaxVelocity 8284eb54     cg_vehicles_mp.obj
-//struct dvar_s const *const vehDriverViewDist 8284eb58     cg_vehicles_mp.obj
-//struct dvar_s const *const heli_barrelRotation 8284eb5c     cg_vehicles_mp.obj
 
+const unsigned __int16 *wheelTags[4] =
+{
+  (const unsigned __int16 *)&scr_const.tag_wheel_front_left,
+  (const unsigned __int16 *)&scr_const.tag_wheel_front_right,
+  (const unsigned __int16 *)&scr_const.tag_wheel_back_left,
+  (const unsigned __int16 *)&scr_const.tag_wheel_back_right
+}; // idb
+
+const dvar_t *vehDebugClient;
+const dvar_t *heli_barrelSlowdown;
+const dvar_t *vehDriverViewFocusRange;
+const dvar_t *heli_barrelMaxVelocity;
+const dvar_t *vehDriverViewDist;
+const dvar_t *heli_barrelRotation;
 
 void __cdecl CG_VehRegisterDvars()
 {
@@ -45,10 +57,10 @@ void __cdecl CG_VehRegisterDvars()
         "How much to rotate the turret barrel when a helicopter fires");
     minc.value.max = 3.4028235e38;
     minc.value.min = -360.0;
-    heli_barrelMaxVelocity = Dvar_RegisterFloat("heli_barrelMaxVelocity", 1250.0, minc, 0, &String);
+    heli_barrelMaxVelocity = Dvar_RegisterFloat("heli_barrelMaxVelocity", 1250.0, minc, 0, "");
     mind.value.max = 3.4028235e38;
     mind.value.min = -360.0;
-    heli_barrelSlowdown = Dvar_RegisterFloat("heli_barrelSlowdown", 360.0, mind, 0, &String);
+    heli_barrelSlowdown = Dvar_RegisterFloat("heli_barrelSlowdown", 360.0, mind, 0, "");
 }
 
 DObj_s *__cdecl GetVehicleEntDObj(int localClientNum, centity_s *centVeh)
@@ -94,22 +106,23 @@ clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9D5650] >= 0x40u)
+    if (cgArray[0].predictedPlayerState.clientNum >= 0x40u)
         MyAssertHandler(
             ".\\cgame_mp\\cg_vehicles_mp.cpp",
             71,
             0,
             "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            MEMORY[0x9D5650],
+            cgArray[0].predictedPlayerState.clientNum,
             64);
-    return (clientInfo_t *)((char *)&MEMORY[0x9E06F8] + 1228 * MEMORY[0x9D5650] + 633352);
+    return &cgArray[0].bgs.clientinfo[cgArray[0].predictedPlayerState.clientNum];
 }
 
 void __cdecl GetTagMatrix(
     int localClientNum,
     unsigned int vehEntNum,
     unsigned __int16 tagName,
-    float (*resultTagMat)[3],
+    //float (*resultTagMat)[3],
+    mat3x3& resultTagMat,
     float *resultOrigin)
 {
     centity_s *centVeh; // [esp+0h] [ebp-8h]
@@ -250,7 +263,8 @@ void __cdecl SeatTransformForSlot(
 {
     unsigned __int16 tagName; // [esp+0h] [ebp-34h]
     float tagOrigin[3]; // [esp+4h] [ebp-30h] BYREF
-    float tagMtx[3][3]; // [esp+10h] [ebp-24h] BYREF
+    //float tagMtx[3][3]; // [esp+10h] [ebp-24h] BYREF
+    mat3x3 tagMtx;
 
     tagName = BG_VehiclesGetSlotTagName(vehSlotIdx);
     GetTagMatrix(localClientNum, vehEntNum, tagName, tagMtx, tagOrigin);
@@ -292,8 +306,8 @@ double __cdecl Veh_GetTurretBarrelRoll(int localClientNum, centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    msecs = MEMORY[0x9D5560] - vehFx->lastBarrelUpdateTime;
-    vehFx->lastBarrelUpdateTime = MEMORY[0x9D5560];
+    msecs = cgArray[0].time - vehFx->lastBarrelUpdateTime;
+    vehFx->lastBarrelUpdateTime = cgArray[0].time;
     vehFx->barrelPos = (double)msecs / 1000.0 * vehFx->barrelVelocity + vehFx->barrelPos;
     if (vehFx->barrelPos > 360.0)
         vehFx->barrelPos = vehFx->barrelPos - 360.0;
@@ -316,6 +330,7 @@ int __cdecl CG_GetEntityIndex(int localClientNum, const centity_s *cent)
     return cent->nextState.number;
 }
 
+vehicleEffects vehEffects[1][8];
 vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
 {
     vehicleEffects *v3; // edx
@@ -326,9 +341,9 @@ vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
 
     for (veh = 0; veh < 8 && vehEffects[localClientNum][veh].active; ++veh)
     {
-        if (dword_B0BD08[80 * localClientNum + 10 * veh] == entityNum)
+        if (vehEffects[localClientNum][veh].entityNum == entityNum)
         {
-            dword_B0BD04[80 * localClientNum + 10 * veh] = Sys_Milliseconds();
+            vehEffects[localClientNum][veh].lastAccessed = Sys_Milliseconds();
             return &vehEffects[localClientNum][veh];
         }
     }
@@ -339,25 +354,25 @@ vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
         oldest = 0;
         for (vehb = 1; vehb < 8; ++vehb)
         {
-            if (dword_B0BD04[80 * localClientNum + 10 * vehb] < dword_B0BD04[80 * localClientNum + 10 * oldest])
+            if (vehEffects[localClientNum][vehb].lastAccessed < vehEffects[localClientNum][oldest].lastAccessed)
                 oldest = vehb;
         }
         veha = oldest;
     }
     v3 = &vehEffects[localClientNum][veha];
-    *(unsigned int *)&v3->active = 0;
+    *(_DWORD *)&v3->active = 0;
     v3->lastAccessed = 0;
     v3->entityNum = 0;
     v3->nextDustFx = 0;
     v3->nextSmokeFx = 0;
-    *(unsigned int *)&v3->soundPlaying = 0;
+    *(_DWORD *)&v3->soundPlaying = 0;
     v3->barrelVelocity = 0.0;
     v3->barrelPos = 0.0;
     v3->lastBarrelUpdateTime = 0;
-    *(unsigned int *)&v3->tag_engine_left = 0;
+    *(_DWORD *)&v3->tag_engine_left = 0;
     v3->active = 1;
-    dword_B0BD04[80 * localClientNum + 10 * veha] = Sys_Milliseconds();
-    dword_B0BD08[80 * localClientNum + 10 * veha] = entityNum;
+    vehEffects[localClientNum][veha].lastAccessed = Sys_Milliseconds();
+    vehEffects[localClientNum][veha].entityNum = entityNum;
     return &vehEffects[localClientNum][veha];
 }
 
@@ -429,8 +444,8 @@ void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent)
             {
                 time = p_currentState->u.vehicle.materialTime
                     + (int)((double)(ns->lerp.u.vehicle.materialTime - p_currentState->u.vehicle.materialTime)
-                        * MEMORY[0x9D5558]);
-                materialTime = (double)(MEMORY[0x9D5560] - time) * 0.001000000047497451;
+                        * cgArray[0].frameInterpolation);
+                materialTime = (double)(cgArray[0].time - time) * 0.001000000047497451;
             }
             R_AddDObjToScene(obj, &cent->pose, ns->number, 4u, lightingOrigin, materialTime);
         }
@@ -474,7 +489,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     float v36; // [esp+90h] [ebp-158h]
     float v37; // [esp+94h] [ebp-154h]
     float v38; // [esp+98h] [ebp-150h]
-    double v39; // [esp+9Ch] [ebp-14Ch]
+    double frameInterpolation; // [esp+9Ch] [ebp-14Ch]
     float v40; // [esp+A4h] [ebp-144h]
     float v41; // [esp+A8h] [ebp-140h]
     float v42; // [esp+B4h] [ebp-134h]
@@ -529,10 +544,10 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v41 = ns->lerp.u.turret.gunAngles[0] - v55;
     v56 = v41 * 0.002777777845039964;
     v40 = v56 + 0.5;
-    v39 = MEMORY[0x9D5558];
+    frameInterpolation = cgArray[0].frameInterpolation;
     v38 = floor(v40);
     v37 = (v56 - v38) * 360.0;
-    v54 = v37 * v39 + v55;
+    v54 = v37 * frameInterpolation + v55;
     v36 = v54 * 182.0444488525391 + 0.5;
     v35 = floor(v36);
     cent->pose.vehicle.pitch = (int)v35;
@@ -540,7 +555,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v34 = ns->lerp.u.turret.gunAngles[1] - v52;
     v53 = v34 * 0.002777777845039964;
     v33 = v53 + 0.5;
-    v32 = MEMORY[0x9D5558];
+    v32 = cgArray[0].frameInterpolation;
     v31 = floor(v33);
     v30 = (v53 - v31) * 360.0;
     v51 = v30 * v32 + v52;
@@ -551,7 +566,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v27 = ns->lerp.u.primaryLight.cosHalfFovInner - cosHalfFovInner;
     v50 = v27 * 0.002777777845039964;
     v26 = v50 + 0.5;
-    v25 = MEMORY[0x9D5558];
+    v25 = cgArray[0].frameInterpolation;
     v24 = floor(v26);
     v23 = (v50 - v24) * 360.0;
     v48 = v23 * v25 + cosHalfFovInner;
@@ -562,7 +577,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v20 = ns->lerp.u.vehicle.gunYaw - gunYaw;
     v47 = v20 * 0.002777777845039964;
     v19 = v47 + 0.5;
-    v18 = MEMORY[0x9D5558];
+    v18 = cgArray[0].frameInterpolation;
     v17 = floor(v19);
     v16 = (v47 - v17) * 360.0;
     v45 = v16 * v18 + gunYaw;
@@ -574,7 +589,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v13 = ns->lerp.u.turret.gunAngles[2] - v43;
     v44 = v13 * 0.002777777845039964;
     v12 = v44 + 0.5;
-    v11 = MEMORY[0x9D5558];
+    v11 = cgArray[0].frameInterpolation;
     v10 = floor(v12);
     v9 = (v44 - v10) * 360.0;
     v42 = v9 * v11 + v43;
@@ -621,7 +636,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
                 CG_TraceCapsule(&trace, traceStart, (float *)vec3_origin, (float *)vec3_origin, traceEnd, ns->number, 529);
                 v5 = CompressUnit(trace.fraction);
                 cent->pose.vehicle.wheelFraction[tireIdx] = v5;
-                if (tireIdx == MEMORY[0xA8E91C][38] % 4)
+                if (tireIdx == cgArray[0].vehicleFrame % 4)
                 {
                     fxInfo->tireActive[tireIdx] = 1;
                     Vec3Lerp(traceStart, traceEnd, trace.fraction, fxInfo->tireGroundPoint[tireIdx]);
@@ -724,8 +739,8 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                             "%s\n\t(localClientNum) = %i",
                             "(localClientNum == 0)",
                             localClientNum);
-                    startMsec = MEMORY[0x9D5560];
-                    FX_PlayOrientedEffect(localClientNum, fx, MEMORY[0x9D5560], fxInfo->tireGroundPoint[tireIdx], axis);
+                    startMsec = cgArray[0].time;
+                    FX_PlayOrientedEffect(localClientNum, fx, cgArray[0].time, fxInfo->tireGroundPoint[tireIdx], axis);
                     if (vehDebugClient->current.enabled)
                     {
                         v4 = va("#%i", fxInfo->tireGroundSurfType[tireIdx]);
@@ -831,7 +846,7 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                             "%s\n\t(localClientNum) = %i",
                             "(localClientNum == 0)",
                             localClientNum);
-                    FX_PlayOrientedEffect(localClientNum, fx, MEMORY[0x9D5560], groundpos, axis);
+                    FX_PlayOrientedEffect(localClientNum, fx, cgArray[0].time, groundpos, axis);
                 }
             }
             vehFx->nextDustFx = nextDustInc + Sys_Milliseconds();
@@ -867,7 +882,7 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                         "%s\n\t(localClientNum) = %i",
                         "(localClientNum == 0)",
                         localClientNum);
-                FX_PlayBoltedEffect(localClientNum, fx, MEMORY[0x9D5560], cent->nextState.number, boneIndex);
+                FX_PlayBoltedEffect(localClientNum, fx, cgArray[0].time, cent->nextState.number, boneIndex);
                 vehFx->nextSmokeFx = Sys_Milliseconds() + 50;
                 return;
             }
@@ -898,7 +913,7 @@ double __cdecl GetSpeed(int localClientNum, centity_s *cent)
             localClientNum);
     p_currentState = &cent->currentState;
     ns = &cent->nextState;
-    serverTimeDelta = *(unsigned int *)(MEMORY[0x98F45C] + 8) - *(unsigned int *)(MEMORY[0x98F458] + 8);
+    serverTimeDelta = cgArray[0].nextSnap->serverTime - cgArray[0].snap->serverTime;
     Vec3Sub(cent->nextState.lerp.pos.trBase, cent->currentState.pos.trBase, posDelta);
     len = Vec3Length(posDelta);
     if ((double)serverTimeDelta <= 0.0)

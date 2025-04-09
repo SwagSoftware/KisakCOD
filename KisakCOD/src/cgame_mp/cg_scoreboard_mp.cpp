@@ -4,6 +4,8 @@
 #include <database/database.h>
 #include <ui_mp/ui_mp.h>
 #include <stringed/stringed_hooks.h>
+#include <client/client.h>
+#include <ui/ui.h>
 
 
 const dvar_t *cg_scoreboardMyColor;
@@ -26,6 +28,30 @@ const dvar_t *cg_scoreboardPingText;
 const dvar_t *cg_scoreboardRankFontScale;
 const dvar_t *cg_scoreboardWidth;
 const dvar_t *cg_scoreboardBannerHeight;
+
+const listColumnInfo_t columnInfo[8] =
+{
+  { LCT_RANK_ICON, 0.07, "", 0 },
+  { LCT_STATUS_ICON, 0.050000001, "", 2 },
+  { LCT_NAME, 0.43000001, "", 0 },
+  { LCT_TALKING_ICON, 0.050000001, "", 0 },
+  { LCT_SCORE, 0.1, "CGAME_SB_SCORE", 2 },
+  { LCT_KILLS, 0.1, "CGAME_SB_KILLS", 2 },
+  { LCT_ASSISTS, 0.1, "CGAME_SB_ASSISTS", 2 },
+  { LCT_DEATHS, 0.1, "CGAME_SB_DEATHS", 2 }
+}; // idb
+const listColumnInfo_t columnInfoWithPing[9] =
+{
+  { LCT_RANK_ICON, 0.050000001, "", 0 },
+  { LCT_STATUS_ICON, 0.050000001, "", 2 },
+  { LCT_NAME, 0.34999999, "", 0 },
+  { LCT_TALKING_ICON, 0.050000001, "", 0 },
+  { LCT_SCORE, 0.1, "CGAME_SB_SCORE", 2 },
+  { LCT_KILLS, 0.1, "CGAME_SB_KILLS", 2 },
+  { LCT_ASSISTS, 0.1, "CGAME_SB_ASSISTS", 2 },
+  { LCT_DEATHS, 0.1, "CGAME_SB_DEATHS", 2 },
+  { LCT_PING, 0.1, "CGAME_SB_PING", 2 }
+}; // idb
 
 void __cdecl UpdateScores(int localClientNum)
 {
@@ -161,15 +187,15 @@ int __cdecl CG_DrawScoreboard(int localClientNum)
     }
     else
     {
-        fadeColor = CG_FadeColor(MEMORY[0x9D5560], MEMORY[0x9DF71C][0], 100, 100);
+        fadeColor = CG_FadeColor(cgArray[0].time, cgArray[0].scoreFadeTime, 100, 100);
         if (!fadeColor)
             return 0;
         fade = fadeColor[3];
     }
     UpdateScores(localClientNum);
-    if (MEMORY[0x9DF71C][1] <= 0)
+    if (cgArray[0].scoresTop <= 0)
         CenterViewOnClient(localClientNum);
-    if (MEMORY[0x9DF71C][1] <= 0)
+    if (cgArray[0].scoresTop <= 0)
         MyAssertHandler(".\\cgame_mp\\cg_scoreboard_mp.cpp", 1316, 0, "%s", "cgameGlob->scoresTop > 0");
     CG_DrawScoreboard_Backdrop(localClientNum, fade);
     CG_DrawScoreboard_ScoresList(localClientNum, fade);
@@ -181,6 +207,62 @@ void __cdecl CG_DrawScoreboard_Backdrop(int localClientNum, float alpha)
     CG_BackdropLeft(localClientNum);
     CG_BackdropTop();
     CG_DrawBackdropServerInfo(localClientNum, alpha);
+}
+
+void __cdecl CG_DrawBackdropServerInfo(int localClientNum, float alpha)
+{
+    int v2; // esi
+    double v3; // [esp+28h] [ebp-50h]
+    float v4; // [esp+34h] [ebp-44h]
+    float v5; // [esp+38h] [ebp-40h]
+    float value; // [esp+3Ch] [ebp-3Ch]
+    Font_s *footerFont; // [esp+40h] [ebp-38h]
+    ScreenPlacement *scrPlace; // [esp+44h] [ebp-34h]
+    char *serverName; // [esp+50h] [ebp-28h]
+    char *serverIP; // [esp+54h] [ebp-24h]
+    float x; // [esp+5Ch] [ebp-1Ch]
+    float xa; // [esp+5Ch] [ebp-1Ch]
+    float xb; // [esp+5Ch] [ebp-1Ch]
+    float y; // [esp+60h] [ebp-18h]
+    float color[4]; // [esp+64h] [ebp-14h] BYREF
+    float fontScale; // [esp+74h] [ebp-4h]
+
+    color[0] = 1.0;
+    color[1] = 1.0;
+    color[2] = 1.0;
+    color[3] = alpha;
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
+            1083,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    serverName = cgsArray[0].szHostName;
+    serverIP = CL_GetServerIPAddress();
+    if (!I_stricmp(serverIP, "0.0.0.0:0"))
+        serverIP = UI_SafeTranslateString("CGAME_LISTENSERVER");
+    fontScale = CG_BannerScoreboardScaleMultiplier() * 0.3499999940395355;
+    scrPlace = &scrPlaceView[localClientNum];
+    do
+    {
+        footerFont = UI_GetFontHandle(scrPlace, cg_scoreboardFont->current.integer, fontScale);
+        value = cg_scoreboardWidth->current.value;
+        v2 = UI_TextWidth(serverName, 0, footerFont, fontScale);
+        if (value - 6.0 - 8.0 >= (double)(v2 + UI_TextWidth(serverIP, 0, footerFont, fontScale) + 4))
+            break;
+        fontScale = fontScale - 0.009999999776482582;
+    } while (fontScale > 0.07500000298023224);
+    v5 = cg_scoreboardHeight->current.value;
+    v3 = CG_BackdropTop() + v5 - 3.0 - 2.0 - 14.0 + 14.0;
+    y = v3 - (double)(14 - UI_TextHeight(footerFont, fontScale)) * 0.5;
+    x = CG_BackdropLeft(localClientNum) + 3.0 + 2.0 + 4.0;
+    UI_DrawText(scrPlace, serverName, 0x7FFFFFFF, footerFont, x, y, 1, 0, fontScale, color, 3);
+    v4 = cg_scoreboardWidth->current.value;
+    xa = CG_BackdropLeft(localClientNum) + v4 - 3.0 - 2.0 - 4.0;
+    xb = xa - (double)(UI_TextWidth(serverIP, 0, footerFont, fontScale) + 4);
+    UI_DrawText(scrPlace, serverIP, 0x7FFFFFFF, footerFont, xb, y, 1, 0, fontScale, color, 3);
 }
 
 double __cdecl CG_BackdropLeft(int localClientNum)
@@ -246,17 +328,17 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DECE0])
+    if (cgArray[0].numScores)
     {
-        if (MEMORY[0x9DF71C][1] > CG_ScoreboardTotalLines(localClientNum))
+        if (cgArray[0].scoresTop > CG_ScoreboardTotalLines(localClientNum))
             MyAssertHandler(
                 ".\\cgame_mp\\cg_scoreboard_mp.cpp",
                 1172,
                 0,
                 "%s\n\t(cgameGlob->scoresTop) = %i",
                 "(cgameGlob->scoresTop <= CG_ScoreboardTotalLines( localClientNum ))",
-                MEMORY[0x9DF71C][1]);
-        MEMORY[0x9DF71C][2] = 0;
+                cgArray[0].scoresTop);
+        cgArray[0].scoresOffBottom = 0;
         yb = CG_BackdropTop() + 3.0 + 2.0 + 24.0 + 1.0;
         color[0] = 1.0;
         color[1] = 1.0;
@@ -268,7 +350,7 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
         y = yc + 15.0;
         v6 = (double)cg_scoreboardBannerHeight->current.integer;
         scrollbarTop = CG_BannerScoreboardScaleMultiplier() * v6 + y;
-        if (MEMORY[0x9DF71C][1] <= 1)
+        if (cgArray[0].scoresTop <= 1)
         {
             v3 = (double)cg_scoreboardBannerHeight->current.integer;
             v2 = CG_BannerScoreboardScaleMultiplier() * v3;
@@ -282,7 +364,7 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
         }
         color[4] = y;
         drawLine = 1;
-        if (MEMORY[0x9DED08] || MEMORY[0x9DED0C])
+        if (cgArray[0].teamPlayers[1] || cgArray[0].teamPlayers[2])
         {
             team = cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team;
             if (team != TEAM_AXIS && team != TEAM_ALLIES)
@@ -296,14 +378,14 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
             ye = CG_DrawTeamOfClientScore(localClientNum, color, yd, teama, listWidth, &drawLine);
             y = ye + 4.0;
         }
-        if (MEMORY[0x9DED04])
+        if (cgArray[0].teamPlayers[0])
         {
             yf = CG_DrawTeamOfClientScore(localClientNum, color, y, 0, listWidth, &drawLine);
             y = yf + 4.0;
         }
-        if (MEMORY[0x9DED10])
+        if (cgArray[0].teamPlayers[3])
             CG_DrawTeamOfClientScore(localClientNum, color, y, 3, listWidth, &drawLine);
-        MEMORY[0x9DF71C][3] = drawLine - 1;
+        cgArray[0].scoresBottom = drawLine - 1;
         CG_DrawScrollbar(localClientNum, color, scrollbarTop);
     }
 }
@@ -379,14 +461,14 @@ int __cdecl CG_ScoreboardTotalLines(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    total = MEMORY[0x9DECE0];
-    if (MEMORY[0x9DED04])
-        total = MEMORY[0x9DECE0] + 1;
-    if (MEMORY[0x9DED08])
+    total = cgArray[0].numScores;
+    if (cgArray[0].teamPlayers[0])
         ++total;
-    if (MEMORY[0x9DED0C])
+    if (cgArray[0].teamPlayers[1])
         ++total;
-    if (MEMORY[0x9DED10])
+    if (cgArray[0].teamPlayers[2])
+        ++total;
+    if (cgArray[0].teamPlayers[3])
         ++total;
     return total;
 }
@@ -417,12 +499,12 @@ double __cdecl CG_DrawTeamOfClientScore(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    score = (const score_t *)&MEMORY[0x9DED14];
+    score = cgArray[0].scores;
     integer = (double)cg_scoreboardBannerHeight->current.integer;
     h = CG_BannerScoreboardScaleMultiplier() * integer;
     ya = CG_DrawScoreboard_ListBanner(localClientNum, color, y, listWidth, h, team, drawLine);
     i = 0;
-    while (i < MEMORY[0x9DECE0])
+    while (i < cgArray[0].numScores)
     {
         if (score->client >= 0x40u)
             MyAssertHandler(
@@ -462,9 +544,9 @@ int __cdecl CG_CheckDrawScoreboardLine(int localClientNum, int *drawLine, float 
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DF71C][2])
+    if (cgArray[0].scoresOffBottom)
         return 0;
-    if (*drawLine >= MEMORY[0x9DF71C][1])
+    if (*drawLine >= cgArray[0].scoresTop)
     {
         value = cg_scoreboardHeight->current.value;
         if (CG_BackdropTop() + value - 3.0 - 2.0 - 14.0 - 1.0 >= y + lineHeight)
@@ -474,7 +556,7 @@ int __cdecl CG_CheckDrawScoreboardLine(int localClientNum, int *drawLine, float 
         }
         else
         {
-            MEMORY[0x9DF71C][2] = 1;
+            cgArray[0].scoresOffBottom = 1;
             return 0;
         }
     }
@@ -878,7 +960,8 @@ void __cdecl DrawListString(
                 0,
                 "%s\n\t(scale) = %i",
                 "(scale > 0)",
-                (unsigned int)COERCE_UNSIGNED_INT64(scale));
+                //(unsigned int)COERCE_UNSIGNED_INT64(scale));
+                (unsigned int)(unsigned __int64)(scale));
         if (scale < 0.2000000029802322)
             style = 0;
         maxw_4 = (float)UI_TextWidth(string, 0x7FFFFFFF, font, scale);
@@ -984,7 +1067,7 @@ void __cdecl CG_DrawScrollbar(int localClientNum, const float *color, float top)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DF71C][1] > 1 || MEMORY[0x9DF71C][2])
+    if (cgArray[0].scoresTop > 1 || cgArray[0].scoresOffBottom)
     {
         totalLines = CG_ScoreboardTotalLines(localClientNum);
         scrPlace = &scrPlaceView[localClientNum];
@@ -1012,14 +1095,14 @@ void __cdecl CG_DrawScrollbar(int localClientNum, const float *color, float top)
         h = h - 2.0;
         if (totalLines)
         {
-            y = (double)(MEMORY[0x9DF71C][1] - 1) / (double)totalLines * h + y;
-            h = (double)(MEMORY[0x9DF71C][3] - MEMORY[0x9DF71C][1] + 1) / (double)totalLines * h;
+            y = (double)(cgArray[0].scoresTop - 1) / (double)totalLines * h + y;
+            h = (double)(cgArray[0].scoresBottom - cgArray[0].scoresTop + 1) / (double)totalLines * h;
         }
         materiala = Material_RegisterHandle("white", 7);
         barColor[3] = color[3] * 0.25;
         UI_DrawHandlePic(scrPlace, x, y, w, h, 1, 0, barColor, materiala);
         barColor[3] = color[3];
-        if (MEMORY[0x9DF71C][1] > 1)
+        if (cgArray[0].scoresTop > 1)
         {
             materialb = Material_RegisterHandle("hudscoreboardscroll_uparrow", 7);
             v5 = cg_scoreboardWidth->current.value;
@@ -1044,7 +1127,7 @@ void __cdecl CG_DrawScrollbar(int localClientNum, const float *color, float top)
             h = 16.0;
             UI_DrawHandlePic(scrPlace, x, y, 16.0, 16.0, 1, 0, barColor, materialc);
         }
-        if (MEMORY[0x9DF71C][2])
+        if (cgArray[0].scoresOffBottom)
         {
             materiald = Material_RegisterHandle("hudscoreboardscroll_downarrow", 7);
             v4 = cg_scoreboardWidth->current.value;
@@ -1109,11 +1192,11 @@ void __cdecl CenterViewOnClient(int localClientNum)
     clientLine = 1;
     if (team == TEAM_SPECTATOR)
     {
-        MEMORY[0x9DF71C][1] = 1;
+        cgArray[0].scoresTop = 1;
     }
     else
     {
-        for (i = 0; i < MEMORY[0x9DECE0]; ++i)
+        for (i = 0; i < cgArray[0].numScores; ++i)
         {
             if (cgArray[0].scores[i].team == team)
             {
@@ -1123,9 +1206,9 @@ void __cdecl CenterViewOnClient(int localClientNum)
             }
         }
         if (clientLine > viewmax)
-            MEMORY[0x9DF71C][1] = clientLine - viewmax / 2 + 1;
+            cgArray[0].scoresTop = clientLine - viewmax / 2 + 1;
         else
-            MEMORY[0x9DF71C][1] = 1;
+            cgArray[0].scoresTop = 1;
     }
 }
 
@@ -1139,7 +1222,7 @@ int __cdecl CG_IsScoreboardDisplayed(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return MEMORY[0x9DF718];
+    return cgArray[0].showScores;
 }
 
 void __cdecl CG_ScrollScoreboardUp(cg_s *cgameGlob)

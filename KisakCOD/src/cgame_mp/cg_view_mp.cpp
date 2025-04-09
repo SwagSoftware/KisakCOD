@@ -9,6 +9,13 @@
 #include <qcommon/cmd.h>
 
 #include <script/scr_const.h>
+#include <gfx_d3d/r_dpvs.h>
+#include <qcommon/threads.h>
+#include <client/client.h>
+#include <aim_assist/aim_assist.h>
+#include <gfx_d3d/r_workercmds_common.h>
+#include <universal/profile.h>
+#include <game_mp/g_main_mp.h>
 
 TestEffect s_testEffect[1];
 ClientViewParams clientViewParamsArray[1][1];
@@ -395,7 +402,7 @@ void __cdecl CG_UpdateHelicopterKillCam(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (MEMORY[0x9D5E14][0] == 1023)
+    if (cgArray[0].predictedPlayerState.killCamEntity == 1023)
         MyAssertHandler(
             ".\\cgame_mp\\cg_view_mp.cpp",
             941,
@@ -580,9 +587,9 @@ void __cdecl CG_InitView(int localClientNum)
     CG_PredictPlayerState(localClientNum);
     CG_UpdateViewWeaponAnim(localClientNum);
     CG_CalcViewValues(localClientNum);
-    FX_SetNextUpdateTime(localClientNum, MEMORY[0x9D5560]);
+    FX_SetNextUpdateTime(localClientNum, cgArray[0].time);
     zfar = R_GetFarPlaneDist();
-    FX_SetNextUpdateCamera(localClientNum, (const refdef_s *)&MEMORY[0x9D8700], zfar);
+    FX_SetNextUpdateCamera(localClientNum, &cgArray[0].refdef, zfar);
 }
 
 void __cdecl CG_CalcViewValues(int localClientNum)
@@ -604,8 +611,7 @@ void __cdecl CG_CalcViewValues(int localClientNum)
     cgArray[0].refdef.time = cgArray[0].time;
     cgArray[0].refdef.localClientNum = localClientNum;
     uiBlurRadius = CL_GetMenuBlurRadius(localClientNum);
-    v2 = uiBlurRadius * uiBlurRadius
-        + *((float*)&unk_9880C4 + 1438 * localClientNum) * *((float*)&unk_9880C4 + 1438 * localClientNum);
+    v2 = uiBlurRadius * uiBlurRadius + cgDC[localClientNum].blurRadiusOut * cgDC[localClientNum].blurRadiusOut;
     v1 = sqrt(v2);
     cgArray[0].refdef.blurRadius = v1;
     CG_VisionSetApplyToRefdef(localClientNum);
@@ -734,6 +740,8 @@ void __cdecl CG_OffsetThirdPersonView(cg_s *cgameGlob)
     AnglesToAxis(viewAngles, cgameGlob->refdef.viewaxis);
 }
 
+const float MYMINS[3] = { -4.0f, -4.0f, -4.0f };
+const float MYMAXS[3] = { 4.0f, 4.0f, 4.0f };
 void __cdecl ThirdPersonViewTrace(cg_s *cgameGlob, float *start, float *end, int contentMask, float *result)
 {
     float testEnd[3]; // [esp+8h] [ebp-38h] BYREF
@@ -1001,24 +1009,26 @@ void __cdecl CG_CalcTurretViewValues(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((MEMORY[0x9D5624] & 0x300) != 0)
+    if ((cgArray[0].predictedPlayerState.eFlags & 0x300) != 0)
     {
-        if (!MEMORY[0x9D56BC][276])
+        if (cgArray[0].predictedPlayerState.viewlocked == PLAYERVIEWLOCK_NONE)
             MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 701, 0, "%s", "ps->viewlocked");
-        if (MEMORY[0x9D56BC][277] == 1023)
+        if (cgArray[0].predictedPlayerState.viewlocked_entNum == 1023)
             MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 702, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
-        cent = CG_GetEntity(localClientNum, MEMORY[0x9D56BC][277]);
+        cent = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
         obj = Com_GetClientDObj(cent->nextState.number, localClientNum);
         if (obj)
         {
-            if (!CG_DObjGetWorldTagPos(&cent->pose, obj, scr_const.tag_player, MEMORY[0x9D8718]))
-                Com_Error(ERR_DROP, &byte_86F634);
-            if (MEMORY[0x9D56BC][276] == 2 && !MEMORY[0x9D5570])
+            if (!CG_DObjGetWorldTagPos(&cent->pose, obj, scr_const.tag_player, cgArray[0].refdef.vieworg))
+                Com_Error(ERR_DROP, "Turret has no bone: tag_player");
+            if (cgArray[0].predictedPlayerState.viewlocked == PLAYERVIEWLOCK_WEAPONJITTER && !cgArray[0].renderingThirdPerson)
             {
                 v2 = crandom();
-                MEMORY[0x9D8748][4116] = BG_GetWeaponDef(cent->nextState.weapon)->vertViewJitter * v2 + MEMORY[0x9D8748][4116];
+                cgArray[0].refdefViewAngles[0] = BG_GetWeaponDef(cent->nextState.weapon)->vertViewJitter * v2
+                    + cgArray[0].refdefViewAngles[0];
                 v1 = crandom();
-                MEMORY[0x9D8748][4117] = BG_GetWeaponDef(cent->nextState.weapon)->horizViewJitter * v1 + MEMORY[0x9D8748][4117];
+                cgArray[0].refdefViewAngles[1] = BG_GetWeaponDef(cent->nextState.weapon)->horizViewJitter * v1
+                    + cgArray[0].refdefViewAngles[1];
             }
         }
     }
@@ -1094,16 +1104,17 @@ void __cdecl CalcViewValuesVehicle(int localClientNum)
     }
 }
 
+const float TEMP_OFFSET[3] = { 0.0f, 0.0f, 55.0f };
 void __cdecl CalcViewValuesVehicleDriver(int localClientNum)
 {
     float v1; // [esp+10h] [ebp-4Ch]
     float v2; // [esp+14h] [ebp-48h]
     float v3; // [esp+18h] [ebp-44h]
     float v4; // [esp+2Ch] [ebp-30h]
-    clientActive_t* LocalClientGlobals; // [esp+34h] [ebp-28h]
+    clientActive_t *LocalClientGlobals; // [esp+34h] [ebp-28h]
     float tmpVect[3]; // [esp+3Ch] [ebp-20h] BYREF
     float pitch; // [esp+48h] [ebp-14h]
-    playerState_s* ps; // [esp+4Ch] [ebp-10h]
+    playerState_s *ps; // [esp+4Ch] [ebp-10h]
     float focusPoint[3]; // [esp+50h] [ebp-Ch] BYREF
 
     if (localClientNum)
@@ -1336,6 +1347,11 @@ void __cdecl CG_UpdateKillCamEntityViewOffset(int localClientNum)
     cgArray[0].refdef.viewOffset[0] = cent->pose.origin[0];
     cgArray[0].refdef.viewOffset[1] = cent->pose.origin[1];
     cgArray[0].refdef.viewOffset[2] = cent->pose.origin[2];
+}
+
+void __cdecl CL_SyncGpu(int(__cdecl *WorkCallback)(unsigned __int64))
+{
+    R_SyncGpu(WorkCallback);
 }
 
 int __cdecl CG_DrawActiveFrame(
@@ -1939,7 +1955,7 @@ void __cdecl CG_UpdateAdsDof(int localClientNum, GfxDepthOfField *dof)
             (float *)vec3_origin,
             traceEnd,
             ps->clientNum,
-            (int)&loc_806C31);
+            0x806C31);
         Vec3Lerp(cgameGlob->refdef.vieworg, traceEnd, trace.fraction, traceEnd);
         Vec3Sub(traceEnd, cgameGlob->refdef.vieworg, v);
         traceDist = Vec3Length(v);

@@ -10,6 +10,8 @@
 
 #include <sound/snd_public.h>
 
+const float up[3] = { 0.0f, 0.0f, 1.0f };
+
 enum sessionState_t : __int32
 {                                       // ...
     SESS_STATE_PLAYING = 0x0,
@@ -1078,7 +1080,8 @@ void __cdecl GetTagMatrix(
     int localClientNum,
     unsigned int vehEntNum,
     unsigned __int16 tagName,
-    float (*resultTagMat)[3],
+    //float (*resultTagMat)[3],
+    mat3x3 &resultTagMat,
     float *resultOrigin);
 bool __cdecl CG_VehLocalClientUsingVehicle(int localClientNum);
 bool __cdecl CG_VehLocalClientDriving(int localClientNum);
@@ -1122,6 +1125,7 @@ void __cdecl CG_TransitionKillcam(int localClientNum);
 void __cdecl CG_ProcessSnapshots(int localClientNum);
 void __cdecl CG_TransitionSnapshot(int localClientNum);
 snapshot_s *__cdecl CG_ReadNextSnapshot(int localClientNum);
+void __cdecl CG_ExtractTransPlayerState(const playerState_s *ps, transPlayerState_t *transPs);
 
 
 // cg_servercmds_mp

@@ -3,14 +3,36 @@
 
 #include <client_mp/client_mp.h>
 #include <database/database.h>
+#include <universal/com_files.h>
+#include <universal/q_parse.h>
+#include <gfx_d3d/r_fog.h>
+#include <EffectsCore/fx_system.h>
+#include <DynEntity/DynEntity_client.h>
+#include <gfx_d3d/r_bsp.h>
+#include <ui/ui.h>
+#include <stringed/stringed_hooks.h>
+#include <win32/win_storage.h>
+#include <qcommon/cmd.h>
+#include <gfx_d3d/r_model.h>
+
+struct __declspec(align(4)) $59835072FC2CD3936CE4A4C9F556010B // sizeof=0x48
+{                                       // ...
+    char name[64];                      // ...
+    int index;                          // ...
+    bool useMouse;                      // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+$59835072FC2CD3936CE4A4C9F556010B cg_waitingScriptMenu[1];
 
 void __cdecl CG_ParseServerInfo(int localClientNum)
 {
     unsigned __int8 *v1; // eax
     unsigned __int8 *v2; // eax
-    char *v3; // eax
+    const char *v3; // eax
     char *info; // [esp+0h] [ebp-Ch]
-    char *mapname; // [esp+8h] [ebp-4h]
+    const char *mapname; // [esp+8h] [ebp-4h]
 
     info = CL_GetConfigString(localClientNum, 0);
     if (localClientNum)
@@ -98,7 +120,7 @@ void __cdecl CG_ParseFog(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    time = MEMORY[0x9D5560];
+    time = cgArray[0].time;
     info = CL_GetConfigString(localClientNum, 9u);
     token = (const char *)Com_Parse(&info);
     start = atof(token);
@@ -150,9 +172,9 @@ void __cdecl CG_SetConfigValues(int localClientNum)
             localClientNum);
     CL_ParseMapCenter(localClientNum);
     ConfigString = CL_GetConfigString(localClientNum, 4u);
-    MEMORY[0x9DECE8] = atoi(ConfigString);
+    cgArray[0].teamScores[1] = atoi(ConfigString);
     v2 = CL_GetConfigString(localClientNum, 5u);
-    MEMORY[0x9DECEC] = atoi(v2);
+    cgArray[0].teamScores[2] = atoi(v2);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -161,7 +183,7 @@ void __cdecl CG_SetConfigValues(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    R_SwitchFog(0, MEMORY[0x9D5560], 0);
+    R_SwitchFog(0, cgArray[0].time, 0);
     for (i = 1970; i < 2002; ++i)
         CG_PrecacheScriptMenu(localClientNum, i);
     for (ia = 2259; ia < 2267; ++ia)
@@ -212,7 +234,7 @@ void __cdecl CG_PrecacheScriptMenu(int localClientNum, int configStringIndex)
     if (*configString)
     {
         if (!Load_ScriptMenu(localClientNum, configString, 7))
-            Com_Error(ERR_DROP, &byte_86DC20, configString);
+            Com_Error(ERR_DROP, "Could not load script menu file %s", configString);
     }
 }
 
@@ -255,8 +277,8 @@ void __cdecl CG_MapRestart(int localClientNum, int savepersist)
     if (cg_showmiss->current.integer)
         Com_Printf(14, "CG_MapRestart\n");
     CG_ClearCenterPrint(localClientNum);
-    MEMORY[0x9DF71C][11] = 0;
-    MEMORY[0x9DF71C][17] = 1;
+    cgArray[0].cursorHintFade = 0;
+    cgArray[0].lastHealthLerpDelay = 1;
     CG_InitLocalEntities(localClientNum);
     FX_KillAllEffects(localClientNum);
     FX_ShutdownSystem(localClientNum);
@@ -267,7 +289,7 @@ void __cdecl CG_MapRestart(int localClientNum, int savepersist)
         Phys_Init();
     }
     DynEntCl_InitEntities(localClientNum);
-    R_InitPrimaryLights((GfxLight *)&MEMORY[0x9D8748][30]);
+    R_InitPrimaryLights(cgArray[0].refdef.primaryLights);
     R_ClearShadowedPrimaryLightHistory(localClientNum);
     FX_InitSystem(localClientNum);
     CG_ClearEntityFxHandles(localClientNum);
@@ -275,26 +297,26 @@ void __cdecl CG_MapRestart(int localClientNum, int savepersist)
     CG_VisionSetConfigString_Night(localClientNum);
     DynEntCl_Shutdown(localClientNum);
     cgsArray[0].voteTime = 0;
-    *(unsigned int *)&MEMORY[0x9D5564][8] = 1;
+    cgArray[0].mapRestart = 1;
     SND_StopSounds(SND_STOP_ALL);
     CG_StartAmbient(localClientNum);
-    MEMORY[0x9DF71C][70] = 0;
-    memset((unsigned __int8 *)&MEMORY[0x9DF71C][39], 0, 0x60u);
-    Dvar_SetBool((dvar_s *)cg_thirdPerson, 0);
+    cgArray[0].v_dmg_time = 0;
+    memset((unsigned __int8 *)cgArray[0].viewDamage, 0, sizeof(cgArray[0].viewDamage));
+    Dvar_SetBool(cg_thirdPerson, 0);
     CL_SetStance(localClientNum, CL_STANCE_STAND);
     CL_SetADS(localClientNum, 0);
     if (!savepersist)
     {
         CG_CloseScriptMenu(localClientNum, 0);
         UI_CloseAllMenus(localClientNum);
-        memset(MEMORY[0x9DED14], 0, 0xA00u);
-        MEMORY[0x9DECE4] = 0;
-        MEMORY[0x9DECE8] = 0;
-        MEMORY[0x9DECEC] = 0;
-        MEMORY[0x9DECF0] = 0;
+        memset((unsigned __int8 *)cgArray[0].scores, 0, sizeof(cgArray[0].scores));
+        cgArray[0].teamScores[0] = 0;
+        cgArray[0].teamScores[1] = 0;
+        cgArray[0].teamScores[2] = 0;
+        cgArray[0].teamScores[3] = 0;
     }
     CG_ScoresUp(localClientNum);
-    MEMORY[0x9DE7D9][0] = 0;
+    cgArray[0].objectiveText[0] = 0;
     CL_SyncTimes(localClientNum);
     CG_StartClientSideEffects(localClientNum);
 }
@@ -312,9 +334,9 @@ void __cdecl CG_ClearEntityFxHandles(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    for (num = 0; num < *(unsigned int *)(MEMORY[0x98F458] + 12144); ++num)
+    for (num = 0; num < cgArray[0].snap->numEntities; ++num)
     {
-        cent = CG_GetEntity(localClientNum, *(unsigned int *)(MEMORY[0x98F458] + 244 * num + 12152));
+        cent = CG_GetEntity(localClientNum, cgArray[0].snap->entities[num].number);
         if (cent->nextState.eType == 8 || cent->nextState.eType == 9)
         {
             cent->pose.fx.effect = 0;
@@ -356,9 +378,9 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
     switch (menuToShow)
     {
     case 0:
-        if (MEMORY[0x9DF8F0][0] < MEMORY[0x9D5560])
+        if (cgArray[0].healthFadeTime < cgArray[0].time)
         {
-            MEMORY[0x9DF8F0][0] = MEMORY[0x9D5560];
+            cgArray[0].healthFadeTime = cgArray[0].time;
             if (CL_GetLocalClientActiveCount() == 1)
                 Menus_ShowByName(&cgDC[localClientNum], "Health");
             else
@@ -367,9 +389,9 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
         break;
     case 1:
     case 4:
-        if (MEMORY[0x9DF8F0][1] < MEMORY[0x9D5560])
+        if (cgArray[0].ammoFadeTime < cgArray[0].time)
         {
-            MEMORY[0x9DF8F0][1] = MEMORY[0x9D5560];
+            cgArray[0].ammoFadeTime = cgArray[0].time;
             if (CL_GetLocalClientActiveCount() == 1)
             {
                 Menus_ShowByName(&cgDC[localClientNum], "weaponinfo");
@@ -380,9 +402,9 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
                 Menus_ShowByName(&cgDC[localClientNum], "weaponinfo_mp");
             }
         }
-        if (MEMORY[0x9DF8F0][4] < MEMORY[0x9D5560])
+        if (cgArray[0].offhandFadeTime < cgArray[0].time)
         {
-            MEMORY[0x9DF8F0][4] = MEMORY[0x9D5560];
+            cgArray[0].offhandFadeTime = cgArray[0].time;
             if (CL_GetLocalClientActiveCount() == 1)
                 Menus_ShowByName(&cgDC[localClientNum], "offhandinfo");
             else
@@ -390,9 +412,9 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
         }
         break;
     case 2:
-        if (MEMORY[0x9DF8EC] < MEMORY[0x9D5560])
+        if (cgArray[0].compassFadeTime < cgArray[0].time)
         {
-            MEMORY[0x9DF8EC] = MEMORY[0x9D5560];
+            cgArray[0].compassFadeTime = cgArray[0].time;
             if (CL_GetLocalClientActiveCount() == 1)
                 Menus_ShowByName(&cgDC[localClientNum], "Compass");
             else
@@ -400,9 +422,9 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
         }
         break;
     case 3:
-        if (MEMORY[0x9DF8F0][2] < MEMORY[0x9D5560])
+        if (cgArray[0].stanceFadeTime < cgArray[0].time)
         {
-            MEMORY[0x9DF8F0][2] = MEMORY[0x9D5560];
+            cgArray[0].stanceFadeTime = cgArray[0].time;
             if (CL_GetLocalClientActiveCount() == 1)
                 Menus_ShowByName(&cgDC[localClientNum], "stance");
             else
@@ -410,16 +432,16 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
         }
         break;
     case 5:
-        if (MEMORY[0x9DF71C][0] < MEMORY[0x9D5560])
+        if (cgArray[0].scoreFadeTime < cgArray[0].time)
         {
-            MEMORY[0x9DF71C][0] = MEMORY[0x9D5560];
+            cgArray[0].scoreFadeTime = cgArray[0].time;
             Menus_ShowByName(&cgDC[localClientNum], "objectiveinfo");
         }
         break;
     case 6:
-        if (MEMORY[0x9DF8F0][3] < MEMORY[0x9D5560])
+        if (cgArray[0].sprintFadeTime < cgArray[0].time)
         {
-            MEMORY[0x9DF8F0][3] = MEMORY[0x9D5560];
+            cgArray[0].sprintFadeTime = cgArray[0].time;
             if (CL_GetLocalClientActiveCount() == 1)
                 Menus_ShowByName(&cgDC[localClientNum], "sprintMeter");
             else
@@ -766,32 +788,32 @@ void __cdecl CG_ParseScores(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9DECE0] <= 0)
-        MEMORY[0x9DF71C][1] = -1;
+    if (cgArray[0].numScores <= 0)
+        cgArray[0].scoresTop = -1;
     v1 = Cmd_Argv(1);
-    MEMORY[0x9DECE0] = atoi(v1);
-    if (MEMORY[0x9DECE0] > 64)
-        MEMORY[0x9DECE0] = 64;
-    MEMORY[0x9DECE4] = 0;
-    MEMORY[0x9DECE8] = 0;
-    MEMORY[0x9DECEC] = 0;
-    MEMORY[0x9DECF0] = 0;
+    cgArray[0].numScores = atoi(v1);
+    if (cgArray[0].numScores > 64)
+        cgArray[0].numScores = 64;
+    cgArray[0].teamScores[0] = 0;
+    cgArray[0].teamScores[1] = 0;
+    cgArray[0].teamScores[2] = 0;
+    cgArray[0].teamScores[3] = 0;
     v2 = Cmd_Argv(2);
-    MEMORY[0x9DECE8] = atoi(v2);
+    cgArray[0].teamScores[1] = atoi(v2);
     v3 = Cmd_Argv(3);
-    MEMORY[0x9DECEC] = atoi(v3);
+    cgArray[0].teamScores[2] = atoi(v3);
     v4 = Cmd_Argv(4);
-    *(unsigned int *)&MEMORY[0x9DED14][2560] = atoi(v4);
-    memset(MEMORY[0x9DED14], 0, 0xA00u);
-    MEMORY[0x9DECF4] = 0;
-    MEMORY[0x9DECF8] = 0;
-    MEMORY[0x9DECFC] = 0;
-    MEMORY[0x9DED00] = 0;
-    MEMORY[0x9DED04] = 0;
-    MEMORY[0x9DED08] = 0;
-    MEMORY[0x9DED0C] = 0;
-    MEMORY[0x9DED10] = 0;
-    for (i = 0; i < MEMORY[0x9DECE0]; ++i)
+    cgArray[0].scoreLimit = atoi(v4);
+    memset((unsigned __int8 *)cgArray[0].scores, 0, sizeof(cgArray[0].scores));
+    cgArray[0].teamPings[0] = 0;
+    cgArray[0].teamPings[1] = 0;
+    cgArray[0].teamPings[2] = 0;
+    cgArray[0].teamPings[3] = 0;
+    cgArray[0].teamPlayers[0] = 0;
+    cgArray[0].teamPlayers[1] = 0;
+    cgArray[0].teamPlayers[2] = 0;
+    cgArray[0].teamPlayers[3] = 0;
+    for (i = 0; i < cgArray[0].numScores; ++i)
     {
         v5 = Cmd_Argv(7 * i + 5);
         cgArray[0].scores[i].client = atoi(v5);
@@ -870,7 +892,7 @@ void __cdecl CG_SetSingleClientScore(int localClientNum, int clientIndex, int ne
             "(localClientNum == 0)",
             localClientNum);
     foundScoreIndex = 0;
-    for (scoreIndex = 0; scoreIndex < MEMORY[0x9DECE0]; ++scoreIndex)
+    for (scoreIndex = 0; scoreIndex < cgArray[0].numScores; ++scoreIndex)
     {
         if (cgArray[0].scores[scoreIndex].client == clientIndex)
         {
@@ -883,7 +905,7 @@ void __cdecl CG_SetSingleClientScore(int localClientNum, int clientIndex, int ne
     {
         CG_SortSingleClientScore(cgArray, scoreIndex);
     }
-    else if (!MEMORY[0x9DECDC] || MEMORY[0x9DECDC] + 10000 < MEMORY[0x9D5560])
+    else if (!cgArray[0].scoresRequestTime || cgArray[0].scoresRequestTime + 10000 < cgArray[0].time)
     {
         UpdateScores(localClientNum);
     }
@@ -1048,7 +1070,7 @@ void __cdecl CG_ConfigStringModified(int localClientNum)
                         }
                         else
                         {
-                            *((unsigned int *)cgs + num - 921) = FX_Register((char *)str);
+                            *((unsigned int *)cgs + num - 921) = (unsigned int)FX_Register((char *)str); // KISAKTODO: unhack typing
                             if (!*((unsigned int *)cgs + num - 921))
                                 MyAssertHandler(
                                     ".\\cgame_mp\\cg_servercmds_mp.cpp",
@@ -1060,7 +1082,7 @@ void __cdecl CG_ConfigStringModified(int localClientNum)
                     }
                     else
                     {
-                        *((unsigned int *)cgs + num - 665) = R_RegisterModel(str);
+                        *((unsigned int *)cgs + num - 665) = (unsigned int)R_RegisterModel(str); // KISAKTODO: unhack typing
                     }
                     break;
                 }
@@ -1162,7 +1184,7 @@ void __cdecl CG_AddToTeamChat(int localClientNum, const char *str)
                         "%s\n\t(localClientNum) = %i",
                         "(localClientNum == 0)",
                         localClientNum);
-                cgsArray[0].teamChatMsgTimes[cgsArray[0].teamChatPos++ % chatHeight] = MEMORY[0x9D5560];
+                cgsArray[0].teamChatMsgTimes[cgsArray[0].teamChatPos++ % chatHeight] = cgArray[0].time;
                 pa = cgsArray[0].teamChatMsgs[cgsArray[0].teamChatPos % chatHeight];
                 *pa = 0;
                 *pa++ = 94;
@@ -1198,7 +1220,7 @@ void __cdecl CG_AddToTeamChat(int localClientNum, const char *str)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        cgsArray[0].teamChatMsgTimes[cgsArray[0].teamChatPos++ % chatHeight] = MEMORY[0x9D5560];
+        cgsArray[0].teamChatMsgTimes[cgsArray[0].teamChatPos++ % chatHeight] = cgArray[0].time;
         if (cgsArray[0].teamChatPos - cgsArray[0].teamLastChatPos > chatHeight)
             cgsArray[0].teamLastChatPos = cgsArray[0].teamChatPos - chatHeight;
     }

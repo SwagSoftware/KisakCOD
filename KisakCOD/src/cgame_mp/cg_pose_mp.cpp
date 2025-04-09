@@ -1,5 +1,6 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
+#include <xanim/dobj_utils.h>
 
 
 void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int *partBits)
@@ -9,8 +10,8 @@ void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s 
 
     control = player->control;
     for (i = 0; i < 6; ++i)
-        DObjSetControlTagAngles(obj, partBits, player->tag[i], control->angles[i]);
-    DObjSetLocalTag(obj, partBits, 0, control->tag_origin_offset, control->tag_origin_angles);
+        DObjSetControlTagAngles((DObj_s*)obj, partBits, player->tag[i], control->angles[i]);
+    DObjSetLocalTag((DObj_s *)obj, partBits, 0, control->tag_origin_offset, control->tag_origin_angles);
 }
 
 void  CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)

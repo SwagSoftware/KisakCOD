@@ -117,43 +117,6 @@ clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
     return (clientInfo_t *)((char *)&MEMORY[0x9E06F8] + 1228 * MEMORY[0x9D5650] + 633352);
 }
 
-void __cdecl GetTagMatrix(
-    int localClientNum,
-    unsigned int vehEntNum,
-    unsigned __int16 tagName,
-    float (*resultTagMat)[3],
-    float *resultOrigin)
-{
-    centity_s *centVeh; // [esp+0h] [ebp-8h]
-    DObj_s *objVeh; // [esp+4h] [ebp-4h]
-
-    centVeh = CG_GetEntity(localClientNum, vehEntNum);
-    if (centVeh->nextValid)
-    {
-        objVeh = GetVehicleEntDObj(localClientNum, centVeh);
-        if (objVeh)
-        {
-            CG_DObjGetWorldTagMatrix(&centVeh->pose, objVeh, tagName, resultTagMat, resultOrigin);
-        }
-        else
-        {
-            Com_PrintWarning(14, "GetTagMatrix() unable to get vehicle DObj.\n");
-            MatrixIdentity33(resultTagMat);
-            *resultOrigin = 0.0;
-            resultOrigin[1] = 0.0;
-            resultOrigin[2] = 0.0;
-        }
-    }
-    else
-    {
-        Com_PrintWarning(14, "Vehicle being used by a player was not included in latest snapshot.\n");
-        MatrixIdentity33(resultTagMat);
-        *resultOrigin = 0.0;
-        resultOrigin[1] = 0.0;
-        resultOrigin[2] = 0.0;
-    }
-}
-
 bool __cdecl CG_VehLocalClientUsingVehicle(int localClientNum)
 {
     clientInfo_t *ci; // [esp+0h] [ebp-4h]

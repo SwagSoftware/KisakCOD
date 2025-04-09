@@ -28,3 +28,11 @@ extern const dvar_t *cg_sprintMeterFullColor;
 extern const dvar_t *cg_sprintMeterEmptyColor;
 extern const dvar_t *cg_sprintMeterDisabledColor;
 extern const dvar_t *cg_drawTalk;
+
+// cg_vehicles_mp
+extern const dvar_t *vehDebugClient;
+extern const dvar_t *heli_barrelSlowdown;
+extern const dvar_t *vehDriverViewFocusRange;
+extern const dvar_t *heli_barrelMaxVelocity;
+extern const dvar_t *vehDriverViewDist;
+extern const dvar_t *heli_barrelRotation;

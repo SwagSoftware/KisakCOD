@@ -864,12 +864,6 @@ void __cdecl CG_VehRegisterDvars();
 DObj_s *__cdecl GetVehicleEntDObj(int localClientNum, centity_s *centVeh);
 void __cdecl CG_VehGunnerPOV(int localClientNum, float *resultOrigin, float *resultAngles);
 clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum);
-void __cdecl GetTagMatrix(
-    int localClientNum,
-    unsigned int vehEntNum,
-    unsigned __int16 tagName,
-    float (*resultTagMat)[3],
-    float *resultOrigin);
 bool __cdecl CG_VehLocalClientUsingVehicle(int localClientNum);
 bool __cdecl CG_VehLocalClientDriving(int localClientNum);
 bool __cdecl CG_VehEntityUsingVehicle(int localClientNum, unsigned int entNum);

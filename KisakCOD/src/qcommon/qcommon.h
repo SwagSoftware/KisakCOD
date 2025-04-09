@@ -458,6 +458,10 @@ void __cdecl Dvar_SetVec3FromSource(dvar_s *dvar, float x, float y, float z, Dva
 void __cdecl Dvar_SetVec4FromSource(dvar_s *dvar, float x, float y, float z, float w, DvarSetSource source);
 void __cdecl Dvar_SetColorFromSource(dvar_s *dvar, float r, float g, float b, float a, DvarSetSource source);
 void __cdecl Dvar_SetBool(dvar_s *dvar, bool value);
+inline void Dvar_SetBool(const dvar_s *dvar, bool value)
+{
+    Dvar_SetBool((dvar_s *)dvar, value);
+}
 void __cdecl Dvar_SetInt(dvar_s *dvar, int value);
 inline void __cdecl Dvar_SetInt(const dvar_s *dvar, int value) // KISAKTODO: remove this mischief
 {
@@ -1271,3 +1275,4 @@ int __cdecl RETURN_ZERO32()
     return 0;
 }
 #define jpeg_mem_init RETURN_ZERO32
+#define qmemcpy memcpy
