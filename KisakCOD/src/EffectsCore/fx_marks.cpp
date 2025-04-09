@@ -17,6 +17,8 @@
 
 FxMarkPoint g_fxMarkPoints[765];
 
+static long g_markThread[1];
+
 void __cdecl TRACK_fx_marks()
 {
     track_static_alloc_internal(g_fxMarkPoints, 24480, "g_fxMarkPoints", 8);
@@ -1327,7 +1329,7 @@ void __cdecl FX_BeginGeneratingMarkVertsForEntModels(int localClientNum, unsigne
             "fx_marks->current.enabled && fx_marks_ents->current.enabled");
     //Profile_Begin(210);
     R_BeginMarkMeshVerts();
-    if (InterlockedIncrement((volatile int *)(4 * localClientNum + 20812776)) != 1)
+    if (InterlockedIncrement(&g_markThread[localClientNum]) != 1)
         MyAssertHandler(
             ".\\EffectsCore\\fx_marks.cpp",
             1638,
@@ -1399,9 +1401,7 @@ char __cdecl FX_GenerateMarkVertsForList_EntXModel(
     unsigned __int16 baseVertex; // [esp+110h] [ebp-34h] BYREF
     float transformMatrix[4][3]; // [esp+114h] [ebp-30h] BYREF
 
-    HIDWORD(v8) = transformMatrix;
-    LODWORD(v8) = vec3_origin;
-    FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(placement, v8);
+    FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(placement, vec3_origin, (float (*)[3][3])transformMatrix);
     for (markHandle = head; markHandle != 0xFFFF; markHandle = mark->nextMark)
     {
         mark = FX_MarkFromHandle(marksSystem, markHandle);
@@ -1904,7 +1904,7 @@ void FX_GenerateMarkVertsForMark_MatrixFromAnim(
     float v39; // [esp+128h] [ebp-FCh]
     float v40; // [esp+12Ch] [ebp-F8h]
     float* v41; // [esp+130h] [ebp-F4h]
-    float v42[3][3]; // [esp+134h] [ebp-F0h] BYREF
+    mat4x3 v42{}; // [esp+134h] [ebp-F0h] BYREF
     float bonePoseMatrix_24[8]; // [esp+158h] [ebp-CCh] BYREF
     float v44; // [esp+178h] [ebp-ACh]
     float v45; // [esp+17Ch] [ebp-A8h]
@@ -2159,7 +2159,7 @@ char __cdecl FX_GenerateMarkVertsForList_EntBrush(
     float transformMatrix[4][3]; // [esp+114h] [ebp-30h] BYREF
     int savedregs; // [esp+144h] [ebp+0h] BYREF
 
-    FX_GenerateMarkVertsForMark_MatrixFromPlacement(placement, vec3_origin, transformMatrix);
+    FX_GenerateMarkVertsForMark_MatrixFromPlacement(placement, vec3_origin, (float(*)[3][3])transformMatrix);
     for (markHandle = head; markHandle != 0xFFFF; markHandle = mark->nextMark)
     {
         mark = FX_MarkFromHandle(marksSystem, markHandle);
@@ -2205,7 +2205,7 @@ void __cdecl FX_FinishGeneratingMarkVerts(FxMarksSystem *marksSystem)
     {
         if (!R_ReserveMarkMeshIndices(0, &doubleIndices))
             MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1616, 0, "%s", "allocSuccessed");
-        *--doubleIndices = (r_double_index_t)marksSystem->carryIndex;
+        (*--doubleIndices).value[0] = marksSystem->carryIndex;
     }
 }
 

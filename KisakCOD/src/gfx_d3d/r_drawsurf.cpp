@@ -163,8 +163,9 @@ void __cdecl R_AddCodeMeshDrawSurf(
                 LODWORD(drawSurf->packed) = drawSurf->packed;
                 HIDWORD(drawSurf->packed) = v7;
                 
-                LODWORD(drawSurf->packed) = drawSurf->packed;
-                HIDWORD(drawSurf->packed) = HIDWORD(drawSurf->packed);
+                // LODWORD(drawSurf->packed) = drawSurf->packed;
+                // HIDWORD(drawSurf->packed) = HIDWORD(drawSurf->packed);
+
                 if (((drawSurf->packed >> 40) & 3) != 3)
                     MyAssertHandler(".\\r_drawsurf.cpp", 491, 1, "%s", "localDrawSurf->fields.prepass == MTL_PREPASS_NONE");
                 if ((MaterialSortKey == 48) + (MaterialSortKey != 24 ? 0 : 2)
@@ -247,4 +248,135 @@ char __cdecl R_ReserveMarkMeshIndices(int indexCount, r_double_index_t** indices
         return 1;
     R_WarnOncePerFrame(R_WARN_MAX_MARK_INDS);
     return 0;
+}
+
+char __cdecl R_ReserveMarkMeshVerts(int vertCount, unsigned __int16 *baseVertex)
+{
+    if (!g_processMarkMesh)
+        MyAssertHandler(".\\r_drawsurf.cpp", 784, 0, "%s", "g_processMarkMesh");
+    if (R_ReserveMeshVerts(&frontEndDataOut->markMesh, vertCount, baseVertex))
+        return 1;
+    R_WarnOncePerFrame(R_WARN_MAX_MARK_VERTS);
+    return 0;
+}
+
+void __cdecl R_BeginMarkMeshVerts()
+{
+    if (g_processMarkMesh)
+        MyAssertHandler(".\\r_drawsurf.cpp", 649, 0, "%s", "!g_processMarkMesh");
+    g_processMarkMesh = 1;
+    R_BeginMeshVerts(&frontEndDataOut->markMesh);
+}
+
+void __cdecl R_AddMarkMeshDrawSurf(
+    Material *material,
+    const GfxMarkContext *context,
+    unsigned __int16 *indices,
+    unsigned int indexCount)
+{
+    int packed_high; // edx
+    unsigned __int64 v5; // rax
+    int v6; // ecx
+    unsigned __int64 v7; // rax
+    int v8; // ecx
+    unsigned int v9; // ecx
+    GfxDrawSurf *drawSurf; // [esp+40h] [ebp-14h]
+    int region; // [esp+48h] [ebp-Ch]
+    unsigned int markMeshIndex; // [esp+4Ch] [ebp-8h]
+    FxMarkMeshData *markMesh; // [esp+50h] [ebp-4h]
+
+    if (!g_processMarkMesh)
+        MyAssertHandler(".\\r_drawsurf.cpp", 507, 0, "%s", "g_processMarkMesh");
+    if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
+        MyAssertHandler(
+            ".\\r_drawsurf.cpp",
+            508,
+            0,
+            "%s",
+            "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+    if (Material_GetTechnique(material, (MaterialTechniqueType)gfxDrawMethod.litTechType[11][0]))
+    {
+        markMeshIndex = InterlockedExchangeAdd(&frontEndDataOut->markMeshCount, 1);
+        if (markMeshIndex < 0x600)
+        {
+            markMesh = &frontEndDataOut->markMeshes[markMeshIndex];
+            markMesh->triCount = indexCount / 3;
+            markMesh->indices = indices;
+            markMesh->modelIndex = context->modelIndex;
+            markMesh->modelTypeAndSurf = context->modelTypeAndSurf;
+            if (material->info.sortKey < 0x18u)
+                MyAssertHandler(
+                    ".\\r_drawsurf.cpp",
+                    530,
+                    0,
+                    "%s\n\t(material->info.sortKey) = %i",
+                    "(material->info.sortKey >= 24)",
+                    material->info.sortKey);
+            region = (material->info.sortKey == 48) + (material->info.sortKey != 24 ? 0 : 2) + 6;
+            drawSurf = R_AllocFxDrawSurf(region);
+            if (drawSurf)
+            {
+                drawSurf->fields = (GfxDrawSurfFields)material->info.drawSurf;
+
+                // packed_high = HIDWORD(drawSurf->packed);
+                // *(_DWORD *)&drawSurf->fields = (unsigned __int16)markMeshIndex | *(_DWORD *)&drawSurf->fields & 0xFFFF0000;
+                // HIDWORD(drawSurf->packed) = packed_high;
+
+                drawSurf->fields.objectId = markMeshIndex;
+
+                v5 = (unsigned __int64)(context->lmapIndex & 0x1F) << 24;
+                v6 = HIDWORD(v5) | HIDWORD(drawSurf->packed);
+                *(_DWORD *)&drawSurf->fields = v5 | *(_DWORD *)&drawSurf->fields & 0xE0FFFFFF;
+                
+                HIDWORD(drawSurf->packed) = v6;
+                HIDWORD(v5) = HIDWORD(drawSurf->packed) & 0xFFC3FFFF | 0x2C0000;
+                
+                // drawSurf->fields = drawSurf->fields;
+                HIDWORD(drawSurf->packed) = HIDWORD(v5);
+
+                drawSurf->fields.reflectionProbeIndex = context->reflectionProbeIndex;
+                drawSurf->fields.primaryLightIndex = context->primaryLightIndex;
+
+                // v7 = (unsigned __int64)context->reflectionProbeIndex << 16;
+                // v8 = HIDWORD(v7) | HIDWORD(drawSurf->packed);
+                // *(_DWORD *)&drawSurf->fields = v7 | *(_DWORD *)&drawSurf->fields & 0xFF00FFFF;
+                // HIDWORD(drawSurf->packed) = v8;
+                // v9 = (context->primaryLightIndex << 10) | HIDWORD(drawSurf->packed) & 0xFFFC03FF;
+                // *(_DWORD *)&drawSurf->fields = drawSurf->fields;
+                // HIDWORD(drawSurf->packed) = v9;
+
+                if (((drawSurf->packed >> 40) & 3) != 3)
+                    MyAssertHandler(".\\r_drawsurf.cpp", 546, 1, "%s", "drawSurf->fields.prepass == MTL_PREPASS_NONE");
+                if ((unsigned __int8)BYTE2(*(_DWORD *)&drawSurf->fields) != (unsigned __int64)context->reflectionProbeIndex)
+                    MyAssertHandler(
+                        ".\\r_drawsurf.cpp",
+                        547,
+                        1,
+                        "drawSurf->fields.reflectionProbeIndex == context->reflectionProbeIndex\n\t%i, %i",
+                        (unsigned __int8)BYTE2(*(_DWORD *)&drawSurf->fields),
+                        context->reflectionProbeIndex);
+                if (region != 6
+                    && drawSurf != scene.drawSurfs[region]
+                    && ((drawSurf->packed >> 54) & 0x3F) < ((drawSurf[-1].packed >> 54) & 0x3F))
+                {
+                    MyAssertHandler(
+                        ".\\r_drawsurf.cpp",
+                        548,
+                        1,
+                        "%s\n\t(region) = %i",
+                        "((region == DRAW_SURF_FX_CAMERA_LIT) || (drawSurf == scene.drawSurfs[region]) || (drawSurf->fields.primarySo"
+                        "rtKey >= (drawSurf - 1)->fields.primarySortKey))",
+                        region);
+                }
+            }
+        }
+        else
+        {
+            R_WarnOncePerFrame(R_WARN_GFX_MARK_MESH_LIMIT);
+        }
+    }
+    else
+    {
+        R_WarnOncePerFrame(R_WARN_NONLIGHTMAP_MARK_MATERIAL);
+    }
 }

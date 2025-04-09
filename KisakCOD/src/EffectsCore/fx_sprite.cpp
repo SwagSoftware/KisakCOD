@@ -439,8 +439,9 @@ void __cdecl FX_SpriteBegin()
 
 void __cdecl FX_SpriteAdd(FxSprite *sprite)
 {
-    if (g_spriteInfo.indices < arr_cnt(g_sprites))
-        memcpy(&g_sprites[g_spriteInfo.indices++], sprite, sizeof(*sprite));
+    // KISAKTODO ?????????
+    if ((int)g_spriteInfo.indices < arr_cnt(g_sprites))
+        memcpy(&g_sprites[(*(int *)&g_spriteInfo.indices)++], sprite, sizeof(*sprite));
 }
 
 FxSpriteInfo *__cdecl FX_SpriteGetInfo()

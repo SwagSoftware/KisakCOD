@@ -70,16 +70,12 @@ bool __cdecl FX_FirstEffectIsFurther(FxEffect *firstEffect, FxEffect *secondEffe
     {
         return 0;
     }
-    if ((unsigned __int8)HIBYTE(*(unsigned int *)&firstEffect->boltAndSortOrder) == 255)
+    if ((unsigned __int8)HIBYTE(*(_DWORD *)&firstEffect->boltAndSortOrder) == 255)
         firstEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((unsigned __int8)FX_CalcRunnerParentSortOrder(firstEffect) << 24)
-            | ((unsigned int)&clients[0].parseClients[238].attachTagIndex[4]
-                + 3)
-            & *(unsigned int *)&firstEffect->boltAndSortOrder);
-    if ((unsigned __int8)HIBYTE(*(unsigned int *)&secondEffect->boltAndSortOrder) == 255)
+            | *(_DWORD *)&firstEffect->boltAndSortOrder & 0xFFFFFF);
+    if ((unsigned __int8)HIBYTE(*(_DWORD *)&secondEffect->boltAndSortOrder) == 255)
         secondEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((unsigned __int8)FX_CalcRunnerParentSortOrder(secondEffect) << 24)
-            | ((unsigned int)&clients[0].parseClients[238].attachTagIndex[4]
-                + 3)
-            & *(unsigned int *)&secondEffect->boltAndSortOrder);
+            | *(_DWORD *)&secondEffect->boltAndSortOrder & 0xFFFFFF);
     return (unsigned __int8)HIBYTE(*(unsigned int *)&firstEffect->boltAndSortOrder) < (unsigned int)(unsigned __int8)HIBYTE(*(unsigned int *)&secondEffect->boltAndSortOrder);
 }
 

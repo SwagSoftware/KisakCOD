@@ -27,4 +27,12 @@ void __cdecl R_AddCodeMeshDrawSurf(
 float (*__cdecl R_GetCodeMeshArgs(unsigned int argOffset))[4];
 GfxPackedVertex* __cdecl R_GetCodeMeshVerts(unsigned __int16 baseVertex);
 
+char __cdecl R_ReserveMarkMeshVerts(int vertCount, unsigned __int16 *baseVertex);
 char __cdecl R_ReserveMarkMeshIndices(int indexCount, r_double_index_t** indicesOut);
+
+void __cdecl R_BeginMarkMeshVerts();
+void __cdecl R_AddMarkMeshDrawSurf(
+    Material *material,
+    const GfxMarkContext *context,
+    unsigned __int16 *indices,
+    unsigned int indexCount);

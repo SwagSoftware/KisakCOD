@@ -351,6 +351,33 @@ void __cdecl FX_DrawMarkProfile(int clientIndex, void(__cdecl* drawFunc)(const c
     }
 }
 
+const char *__cdecl typeAsString(unsigned __int8 type)
+{
+    const char *result; // eax
+
+    switch (type)
+    {
+    case 0u:
+        result = "wbrush";
+        break;
+    case 0x40u:
+        result = "wmodel";
+        break;
+    case 0x80u:
+        result = "ebrush";
+        break;
+    case 0xC0u:
+        result = "emodel";
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\EffectsCore\\fx_profile.cpp", 228, 0, "unpossible");
+        result = "unknown";
+        break;
+    }
+    return result;
+}
+
 void __cdecl FX_DrawMarkProfile_MarkPrint(
     FxMarksSystem *marksSystem,
     unsigned __int16 head,
@@ -409,31 +436,3 @@ void __cdecl FX_DrawMarkProfile_MarkPrint(
         drawFunc(v9, profilePos);
     }
 }
-
-const char *__cdecl typeAsString(unsigned __int8 type)
-{
-    const char *result; // eax
-
-    switch (type)
-    {
-    case 0u:
-        result = "wbrush";
-        break;
-    case 0x40u:
-        result = "wmodel";
-        break;
-    case 0x80u:
-        result = "ebrush";
-        break;
-    case 0xC0u:
-        result = "emodel";
-        break;
-    default:
-        if (!alwaysfails)
-            MyAssertHandler(".\\EffectsCore\\fx_profile.cpp", 228, 0, "unpossible");
-        result = "unknown";
-        break;
-    }
-    return result;
-}
-

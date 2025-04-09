@@ -2,6 +2,8 @@
 
 #include <gfx_d3d/r_drawsurf.h>
 
+static FxPostLightInfo g_postLightInfo;
+
 void __cdecl FX_PostLight_GenerateVerts(FxPostLightInfo *postLightInfoAddr, FxSystem *system)
 {
     int v2; // ecx
