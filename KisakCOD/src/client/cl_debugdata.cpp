@@ -1,11 +1,14 @@
 #include "client.h"
 
+#include <client_mp/client_mp.h>
+
+#include <gfx_d3d/r_debug.h>
 
 void __cdecl CL_AddDebugString(
     const float *xyz,
     const float *color,
     float scale,
-    char *text,
+    const  char *text,
     int fromServer,
     int duration)
 {
@@ -63,7 +66,7 @@ void __cdecl AddDebugStringInternal(
     const float *xyz,
     const float *color,
     float scale,
-    char *text,
+    const char *text,
     int duration,
     clientDebugStringInfo_t *info)
 {
@@ -171,7 +174,7 @@ void __cdecl CL_AddDebugStarWithText(
     const float *point,
     const float *starColor,
     const float *textColor,
-    char *string,
+    const char *string,
     float fontsize,
     int duration,
     int fromServer)
@@ -209,10 +212,11 @@ void __cdecl CL_AddDebugStarWithText(
 
 void __cdecl CL_AddDebugStar(const float *point, const float *color, int duration, int fromServer)
 {
+    const float black[] = { 0, 0, 0, 0 };
     CL_AddDebugStarWithText(
         point,
         color,
-        `D3DXShader::SetTyped<2, 3, 4, 4, 0>::Set'[::M]::pDefFloat4,
+        black,
         0,
         1.0,
         duration,
@@ -275,6 +279,15 @@ void __cdecl FlushDebugLines(clientDebugLineInfo_t *info, int fromServer)
         }
     }
 }
+
+clientDebugLineInfo_t *clLine = &cls.debug.clLines;
+clientDebugStringInfo_t *clStr = &cls.debug.clStrings;
+
+clientDebugLineInfo_t *svLine = &cls.debug.svLines;
+clientDebugStringInfo_t *svStr = &cls.debug.svStrings;
+
+clientDebugLineInfo_t *svLineBuff = &cls.debug.svLinesBuffer;
+clientDebugStringInfo_t *svStrBuff = &cls.debug.svStringsBuffer;
 
 void __cdecl CL_UpdateDebugClientData()
 {

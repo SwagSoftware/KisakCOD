@@ -1,5 +1,16 @@
 #include "g_public_mp.h"
 
+#include <game_mp/g_utils_mp.h>
+
+#include <script/scr_const.h>
+#include <script/scr_vm.h>
+
+#include <server/sv_game.h>
+#include <server/sv_world.h>
+
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
+#include <xanim/xanim.h>
 
 void __cdecl P_DamageFeedback(gentity_s *player)
 {

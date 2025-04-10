@@ -33,7 +33,7 @@ void  Z_Free(void* ptr, int type);
 char *__cdecl Z_MallocGarbage(int size, const char *name, int type);
 
 const char* CopyString(const char* in);
-void __cdecl ReplaceString(const char** str, char* in);
+void __cdecl ReplaceString(const char** str, const char* in);
 void __cdecl FreeString(const char* str);
 
 void Com_InitHunkMemory();

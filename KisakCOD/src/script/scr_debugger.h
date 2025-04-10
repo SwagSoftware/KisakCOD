@@ -94,6 +94,18 @@ struct Scr_OpcodeList_s // sizeof=0x8
     Scr_OpcodeList_s *next;
 };
 
+struct Scr_WatchElementNode_s // sizeof=0x8
+{
+    Scr_WatchElement_s *element;
+    Scr_WatchElementNode_s *next;
+};
+
+struct Scr_WatchElementDoubleNode_t // sizeof=0x8
+{
+    Scr_WatchElementNode_s *list;
+    Scr_WatchElementNode_s *removedList;
+};
+
 void __cdecl TRACK_scr_debugger();
 void __cdecl Scr_AddManualBreakpoint(unsigned __int8 *codePos);
 void __cdecl Scr_AddBreakpoint(const unsigned __int8 *codePos);

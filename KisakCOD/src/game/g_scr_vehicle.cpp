@@ -1,8 +1,110 @@
 #include "game_public.h"
 
+#include <game_mp/g_public_mp.h>
+#include <game_mp/g_utils_mp.h>
+
+#include <script/scr_const.h>
+#include <script/scr_vm.h>
+
+#include <server/sv_game.h>
+#include <server/sv_world.h>
+
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
+#include <xanim/xanim.h>
 
 //Line 51763:  0006 : 00006554       unsigned short **s_flashTags      827b6554     g_scr_vehicle.obj
 
+struct VehicleLocalPhysics // sizeof=0x34
+{                                       // ...
+    trace_t groundTrace;                // ...
+    int hasGround;                      // ...
+    int onGround;                       // ...
+};
+
+vehicle_info_t s_vehicleInfos[32];
+VehicleLocalPhysics s_phys;
+
+const float  s_correctSolidDeltas[] = {
+    0.0,
+    0.0,
+    1.0,
+    -1.0,
+    0.0,
+    1.0,
+    0.0,
+    -1.0,
+    1.0,
+    1.0,
+    0.0,
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    -1.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    -1.0,
+    0.0,
+    -1.0,
+    0.0,
+    -1.0,
+    -1.0,
+    1.0,
+    0.0,
+    -1.0,
+    0.0,
+    1.0,
+    -1.0,
+    -1.0,
+    -1.0,
+    1.0,
+    1.0,
+    -1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    -1.0,
+    1.0,
+    1.0,
+    -1.0,
+    -1.0,
+    0.0,
+    1.0,
+    -1.0,
+    0.0,
+    1.0,
+    1.0,
+    0.0,
+    -1.0,
+    1.0,
+    0.0,
+    -1.0,
+    -1.0,
+    -1.0,
+    1.0,
+    -1.0,
+    -1.0,
+    1.0,
+    1.0,
+    -1.0,
+    -1.0,
+    1.0,
+    -1.0,
+};
 
 gentity_s *__cdecl GScr_GetVehicle(scr_entref_t entref)
 {

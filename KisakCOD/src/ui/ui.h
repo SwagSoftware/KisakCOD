@@ -45,7 +45,7 @@ void __cdecl Script_OpenForGameType(UiContext *dc, itemDef_s *item, const char *
 void __cdecl Script_CloseForGameType(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_StatClearBitMask(UiContext *dc, itemDef_s *item, const char **args=NULL);
-void __cdecl Script_StatBitMaskGetArgs(UiContext *dc, itemDef_s *item, const char **args=NULL, int *statNum, int *bitMask);
+void __cdecl Script_StatBitMaskGetArgs(UiContext *dc, itemDef_s *item, const char **args, int *statNum, int *bitMask);
 void __cdecl Script_Close(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_InGameOpen(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_InGameClose(UiContext *dc, itemDef_s *item, const char **args=NULL);
@@ -59,7 +59,7 @@ void __cdecl Script_ExecHandler(
     int localClientNum,
     int controllerIndex,
     itemDef_s *item,
-    const char **args=NULL,
+    const char **args,
     void(__cdecl *textCallback)(int, int, const char *));
 void __cdecl Script_AddTextWrapper(int clientNum, int controllerIndex, const char *text);
 void __cdecl Script_ExecNow(UiContext *dc, itemDef_s *item, const char **args=NULL);
@@ -67,7 +67,7 @@ void __cdecl Script_ExecOnDvarStringValue(UiContext *dc, itemDef_s *item, const 
 void __cdecl Script_ConditionalExecHandler(
     int localClientNum,
     itemDef_s *item,
-    const char **args=NULL,
+    const char **args,
     bool(__cdecl *shouldExec)(const char *, const char *),
     void(__cdecl *textCallback)(int, int, const char *));
 bool __cdecl Script_ExecIfStringsEqual(const char *dvarValue, const char *testValue);
@@ -82,7 +82,7 @@ void __cdecl Script_RespondOnDvarStringValue(UiContext *dc, itemDef_s *item, con
 void __cdecl Script_ConditionalResponseHandler(
     int localClientNum,
     itemDef_s *item,
-    const char **args=NULL,
+    const char **args,
     bool(__cdecl *shouldRespond)(const char *, const char *));
 void __cdecl Script_RespondOnDvarIntValue(UiContext *dc, itemDef_s *item, const char **args=NULL);
 void __cdecl Script_RespondOnDvarFloatValue(UiContext *dc, itemDef_s *item, const char **args=NULL);

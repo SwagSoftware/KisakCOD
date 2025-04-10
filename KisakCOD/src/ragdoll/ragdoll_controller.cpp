@@ -1,5 +1,11 @@
 #include "ragdoll.h"
 
+#include <client_mp/client_mp.h>
+
+#include <gfx_d3d/r_scene.h>
+
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
 
 RagdollBody *__cdecl Ragdoll_HandleBody(int ragdollHandle)
 {
@@ -44,7 +50,7 @@ BoneOrientation *__cdecl Ragdoll_BodyPrevBoneOrientations(RagdollBody *body)
     return body->boneOrientations[body->curOrientationBuffer ^ 1];
 }
 
-void __cdecl Ragdoll_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
+void __cdecl Ragdoll_DoControllers(const cpose_t *pose, DObj_s *obj, int *partBits)
 {
     RagdollBody *v3; // eax
     float v4; // [esp+0h] [ebp-48h]
@@ -87,9 +93,9 @@ void __cdecl Ragdoll_DoControllers(const cpose_t *pose, const DObj_s *obj, int *
                         "%s\n\t(localClientNum) = %i",
                         "(localClientNum == 0)",
                         LocalClientNum);
-                viewOffset[0] = MEMORY[0x9D8748][0];
-                viewOffset[1] = MEMORY[0x9D8748][1];
-                viewOffset[2] = MEMORY[0x9D8748][2];
+                viewOffset[0] = cgArray[0].refdef.viewOffset[0];
+                viewOffset[1] = cgArray[0].refdef.viewOffset[1];
+                viewOffset[2] = cgArray[0].refdef.viewOffset[2];
                 bone = body->bones;
                 boneOrientation = Ragdoll_BodyBoneOrientations(body);
                 i = 0;

@@ -15,6 +15,11 @@ static int g_debugReadBytes;
 // KISAKTODO
 // track_static_alloc_internal(g_debugPacket, 0x2000, "g_debugPacket", 9);
 
+int __cdecl Sys_IsRemoteDebugClient()
+{
+	return g_debugClient;
+}
+
 void __cdecl NET_ShutdownDebug()
 {
 	int i; // [esp+0h] [ebp-4h]

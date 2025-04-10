@@ -175,7 +175,7 @@ void __cdecl Cmd_Score_f(gentity_s *ent);
 int __cdecl CheatsOk(gentity_s *ent);
 char *__cdecl ConcatArgs(int start);
 int __cdecl SV_Cmd_Argc();
-void __cdecl G_setfog(char *fogstring);
+void __cdecl G_setfog(const char *fogstring);
 void __cdecl Cmd_Give_f(gentity_s *ent);
 void __cdecl Cmd_Take_f(gentity_s *ent);
 void __cdecl Cmd_God_f(gentity_s *ent);

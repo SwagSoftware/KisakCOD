@@ -270,9 +270,9 @@ char* __cdecl CopyString(char* in)
     return SL_ConvertToString(out.prev);
 }
 
-void __cdecl ReplaceString(const char** str, char* in)
+void __cdecl ReplaceString(const char** str, const char* in)
 {
-    char* newStr; // [esp+0h] [ebp-4h]
+    const char* newStr; // [esp+0h] [ebp-4h]
 
     if (!str)
         MyAssertHandler(".\\universal\\com_memory.cpp", 845, 0, "%s", "str");

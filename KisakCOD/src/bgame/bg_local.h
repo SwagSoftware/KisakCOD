@@ -3,6 +3,8 @@
 #include <qcommon/qcommon.h>
 #include <qcommon/ent.h>
 
+#include <game/enthandle.h>
+
 #include "bg_weapons.h"
 
 enum animBodyPart_t : __int32
@@ -1071,12 +1073,6 @@ struct missile_ent_t // sizeof=0x3C
     float targetOffset[3];
     MissileStage stage;
     MissileFlightMode flightMode;
-};
-
-struct EntHandle // sizeof=0x4
-{                                       // ...
-    unsigned __int16 number;
-    unsigned __int16 infoIndex;
 };
 
 struct scr_vehicle_s // sizeof=0x354

@@ -2,6 +2,8 @@
 
 extern int g_debugClient;
 
+int __cdecl Sys_IsRemoteDebugClient();
+
 void __cdecl NET_ShutdownDebug();
 void NET_InitDebug();
 void NET_RestartDebug();

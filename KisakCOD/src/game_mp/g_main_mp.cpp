@@ -1,11 +1,35 @@
 #include "g_main_mp.h"
+
+#include "g_public_mp.h"
+#include "g_utils_mp.h"
+
+#include <bgame/bg_local.h>
+
+#include <client/client.h>
+
+#include <database/database.h>
+
+#include <game/game_public.h>
+
+#include <server/sv_game.h>
+#include <server/sv_world.h>
+
+#include <script/scr_const.h>
+#include <script/scr_main.h>
+#include <script/scr_vm.h>
+
+#include <qcommon/cmd.h>
 #include <qcommon/mem_track.h>
+#include <qcommon/threads.h>
+
+#include <universal/com_files.h>
 
 //struct bgs_t level_bgs     82d8f0f8     g_main_mp.obj
 //struct entityHandler_t *entityHandlers 827b5088     g_main_mp.obj
 //struct gentity_s *g_entities 82cf2090     g_main_mp.obj
 //struct level_locals_t level 82e7b988     g_main_mp.obj
 // 
+
 const dvar_t *pickupPrints;
 const dvar_t *g_password;
 const dvar_t *g_smoothClients;
@@ -82,10 +106,11 @@ const dvar_t *g_TeamColor_EnemyTeam;
 const dvar_t *g_debugDamage;
 const dvar_t *g_clonePlayerMaxVelocity;
 
+bgs_t level_bgs;
 level_locals_t level;
 gentity_s g_entities[1024];
 gclient_s g_clients[64];
-entityHandler_t entityHandlers[];
+entityHandler_t entityHandlers[24]; // TODO this needs ida paste
 const char *g_entinfoNames[3] =
 {
     "off",

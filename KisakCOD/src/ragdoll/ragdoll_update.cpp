@@ -337,10 +337,10 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
     type = jointDef->type;
     if (type == RAGDOLL_JOINT_HINGE)
     {
-        joint->joint = (int)Phys_CreateHinge(
+        joint->joint = Phys_CreateHinge(
             PHYS_WORLD_RAGDOLL,
-            (dxBody *)bone->rigidBody,
-            (dxBody *)parentBone->rigidBody,
+            bone->rigidBody,
+            parentBone->rigidBody,
             anchor,
             limitAxes[0],
             0.0,
@@ -351,12 +351,12 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
     }
     else if (type == RAGDOLL_JOINT_SWIVEL)
     {
-        joint->joint = (int)Phys_CreateBallAndSocket(
+        joint->joint = Phys_CreateBallAndSocket(
             PHYS_WORLD_RAGDOLL,
-            (dxBody *)bone->rigidBody,
-            (dxBody *)parentBone->rigidBody,
+            bone->rigidBody,
+            parentBone->rigidBody,
             anchor);
-        joint->joint2 = (int)Phys_CreateAngularMotor(
+        joint->joint2 = Phys_CreateAngularMotor(
             PHYS_WORLD_RAGDOLL,
             (dxBody *)bone->rigidBody,
             (dxBody *)parentBone->rigidBody,
@@ -481,7 +481,7 @@ char __cdecl Ragdoll_CreatePhysObj(RagdollBody *body, BoneDef *boneDef, Bone *bo
     preset.type = 0;
     preset.sndAliasPrefix = 0;
     bone->parentBone = boneDef->parentBone;
-    bone->rigidBody = (int)Phys_ObjCreate(PHYS_WORLD_RAGDOLL, b0Origin, b0Quat, (float *)vec3_origin, &preset);
+    bone->rigidBody = Phys_ObjCreate(PHYS_WORLD_RAGDOLL, b0Origin, b0Quat, (float *)vec3_origin, &preset);
     if (bone->rigidBody)
     {
         Vec3Sub(b1Origin, b0Origin, diff);
@@ -535,7 +535,7 @@ char __cdecl Ragdoll_GetDObjBaseBoneOrigin(
     int localClientNum,
     DObj_s *obj,
     const float *offset,
-    const float (*axis)[3],
+    const mat3x3 &axis,
     unsigned __int8 boneIndex,
     float *origin)
 {
@@ -553,7 +553,7 @@ char __cdecl Ragdoll_GetDObjBaseBoneOriginQuat(
     int localClientNum,
     DObj_s *obj,
     const float *offset,
-    const float (*axis)[3],
+    const mat3x3 &axis,
     unsigned __int8 boneIndex,
     float *origin,
     float *quat)
@@ -571,7 +571,7 @@ char __cdecl Ragdoll_GetDObjBaseBoneOriginQuat(
     return 1;
 }
 
-void __cdecl Ragdoll_PoseInvAxis(const cpose_t *pose, float (*invAxis)[3])
+void __cdecl Ragdoll_PoseInvAxis(const cpose_t *pose, mat3x3 &invAxis)
 {
     float axis[3][3]; // [esp+0h] [ebp-24h] BYREF
 
@@ -1772,7 +1772,7 @@ void __cdecl Ragdoll_UpdateFriction(RagdollBody *body)
                 frictionForce = jointDef->axisFriction[0] * lerpScale;
                 Phys_SetHingeParams(
                     PHYS_WORLD_RAGDOLL,
-                    joint->joint,
+                    (dxJointHinge *)joint->joint,
                     0.0,
                     frictionForce,
                     jointDef->minAngles[0],

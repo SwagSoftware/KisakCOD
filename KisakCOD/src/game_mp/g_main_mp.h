@@ -301,6 +301,7 @@ extern const dvar_t *g_clonePlayerMaxVelocity;
 
 extern gentity_s g_entities[1024];
 extern level_locals_t level;
+extern bgs_t level_bgs;
 
 inline BOOL __cdecl OnSameTeam(gentity_s *ent1, gentity_s *ent2)
 {

@@ -1,7 +1,13 @@
 #include "xmodel.h"
+
+#include "dobj.h"
+#include "dobj_utils.h"
+
+#include <qcommon/qcommon.h>
 #include <qcommon/mem_track.h>
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
+#include <database/database.h>
 
 XModelDefault g_default;
 Material *g_materials[1];
@@ -787,7 +793,7 @@ int __cdecl XModelTraceLineAnimated(
         if ((contentmask & csurf->contents) != 0)
         {
             boneIdx = csurf->boneIdx;
-            LOunsigned int(localEnd2[3]) = boneIdx + baseBoneIndex;
+            LODWORD(localEnd2[3]) = boneIdx + baseBoneIndex;
             if ((hidePartBits[(boneIdx + baseBoneIndex) >> 5] & (0x80000000 >> ((boneIdx + baseBoneIndex) & 0x1F))) == 0)
             {
                 boneMtx = &boneMtxList[boneIdx];
@@ -810,10 +816,10 @@ int __cdecl XModelTraceLineAnimated(
                 else
                 {
                     v32 = baseMat->quat[0];
-                    if ((LOunsigned int(v32) & 0x7F800000) == 0x7F800000
-                        || (v31 = baseMat->quat[1], (LOunsigned int(v31) & 0x7F800000) == 0x7F800000)
-                        || (v30 = baseMat->quat[2], (LOunsigned int(v30) & 0x7F800000) == 0x7F800000)
-                        || (v29 = baseMat->quat[3], (LOunsigned int(v29) & 0x7F800000) == 0x7F800000))
+                    if ((LODWORD(v32) & 0x7F800000) == 0x7F800000
+                        || (v31 = baseMat->quat[1], (LODWORD(v31) & 0x7F800000) == 0x7F800000)
+                        || (v30 = baseMat->quat[2], (LODWORD(v30) & 0x7F800000) == 0x7F800000)
+                        || (v29 = baseMat->quat[3], (LODWORD(v29) & 0x7F800000) == 0x7F800000))
                     {
                         MyAssertHandler(
                             "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
@@ -823,7 +829,7 @@ int __cdecl XModelTraceLineAnimated(
                             "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
                     }
                     transWeight = baseMat->transWeight;
-                    if ((LOunsigned int(transWeight) & 0x7F800000) == 0x7F800000)
+                    if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
                         MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 537, 0, "%s", "!IS_NAN(mat->transWeight)");
                     Vec3Scale(baseMat->quat, baseMat->transWeight, &result);
                     v43 = result * baseMat->quat[0];

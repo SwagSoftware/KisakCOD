@@ -162,7 +162,7 @@ int __cdecl SV_Cmd_Argc()
     return sv_cmd_args.argc[sv_cmd_args.nesting];
 }
 
-void __cdecl G_setfog(char *fogstring)
+void __cdecl G_setfog(const char *fogstring)
 {
     float fDensity; // [esp+0h] [ebp-1Ch] BYREF
     float clr[3]; // [esp+4h] [ebp-18h] BYREF

@@ -37,8 +37,8 @@ struct BaseLerpBoneDef // sizeof=0x20
 
 struct Joint // sizeof=0x8
 {                                       // ...
-    int joint;
-    int joint2;
+    void *joint;
+    void *joint2;
 };
 
 struct JointDef // sizeof=0x54
@@ -84,7 +84,7 @@ struct Bone // sizeof=0x1C
     unsigned __int8 animBones[2];
     // padding byte
     // padding byte
-    int rigidBody;
+    dxBody *rigidBody; // TODO change to void* or uintptr_t if this ends up being wrong
     float length;
     float center[3];
 };
@@ -164,7 +164,7 @@ void __cdecl Ragdoll_Shutdown();
 RagdollBody *__cdecl Ragdoll_HandleBody(int ragdollHandle);
 BoneOrientation *__cdecl Ragdoll_BodyBoneOrientations(RagdollBody *body);
 BoneOrientation *__cdecl Ragdoll_BodyPrevBoneOrientations(RagdollBody *body);
-void __cdecl Ragdoll_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl Ragdoll_DoControllers(const cpose_t *pose, DObj_s *obj, int *partBits);
 
 
 // ragdoll_quat
@@ -193,18 +193,18 @@ char __cdecl Ragdoll_GetDObjBaseBoneOrigin(
     int localClientNum,
     DObj_s *obj,
     const float *offset,
-    const float (*axis)[3],
+    const mat3x3 &axis,
     unsigned __int8 boneIndex,
     float *origin);
 char __cdecl Ragdoll_GetDObjBaseBoneOriginQuat(
     int localClientNum,
     DObj_s *obj,
     const float *offset,
-    const float (*axis)[3],
+    const mat3x3 &axis,
     unsigned __int8 boneIndex,
     float *origin,
     float *quat);
-void __cdecl Ragdoll_PoseInvAxis(const cpose_t *pose, float (*invAxis)[3]);
+void __cdecl Ragdoll_PoseInvAxis(const cpose_t *pose, mat3x3 &invAxis);
 void __cdecl Ragdoll_DestroyPhysJoints(RagdollBody *body);
 void __cdecl Ragdoll_DestroyPhysObjs(RagdollBody *body);
 void __cdecl Ragdoll_RemoveBodyPhysics(RagdollBody *body);

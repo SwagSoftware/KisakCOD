@@ -6,7 +6,7 @@
 //Line 53332:  0006 : 00cf4d5c       int sv_serverId_value    834a4d5c     sv_init_mp.obj
 
 
-void __cdecl SV_SetConfigstring(int index, char *val)
+void __cdecl SV_SetConfigstring(int index, const char *val)
 {
     unsigned __int16 v2; // [esp+20h] [ebp-444h]
     client_t *client; // [esp+38h] [ebp-42Ch]

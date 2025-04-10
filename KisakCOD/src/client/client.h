@@ -534,7 +534,7 @@ void __cdecl CL_AddDebugString(
     const float *xyz,
     const float *color,
     float scale,
-    char *text,
+    const char *text,
     int fromServer,
     int duration);
 bool __cdecl CreateDebugStringsIfNeeded();
@@ -542,7 +542,7 @@ void __cdecl AddDebugStringInternal(
     const float *xyz,
     const float *color,
     float scale,
-    char *text,
+    const char *text,
     int duration,
     clientDebugStringInfo_t *info);
 void __cdecl CL_AddDebugLine(
@@ -564,7 +564,7 @@ void __cdecl CL_AddDebugStarWithText(
     const float *point,
     const float *starColor,
     const float *textColor,
-    char *string,
+    const char *string,
     float fontsize,
     int duration,
     int fromServer);
