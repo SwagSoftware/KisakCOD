@@ -2,6 +2,8 @@
 #include <qcommon/mem_track.h>
 #include "r_init.h"
 #include <universal/com_memory.h>
+#include "r_dvars.h"
+#include "rb_logfile.h"
 
 
 //struct GfxBuffers gfxBuf   85b3aa20     gfx_d3d : r_buffers.obj
@@ -24,15 +26,16 @@ void *__cdecl R_AllocDynamicVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeIn
         MyAssertHandler(".\\r_buffers.cpp", 163, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, unsigned int, unsigned int, IDirect3DVertexBuffer9 **, unsigned int))dx.device->CreateVertexBuffer)(
-        dx.device,
-        dx.device,
-        sizeInBytes,
-        520,
-        0,
-        0,
-        vb,
-        0);
+    //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, unsigned int, unsigned int, IDirect3DVertexBuffer9 **, unsigned int))dx.device->CreateVertexBuffer)(
+    //    dx.device,
+    //    dx.device,
+    //    sizeInBytes,
+    //    520,
+    //    0,
+    //    0,
+    //    vb,
+    //    0);
+    hr = dx.device->CreateVertexBuffer(sizeInBytes, 520, 0, D3DPOOL_DEFAULT, vb, 0);
     if (hr < 0)
     {
         v3 = R_ErrorDescription(hr);
@@ -58,22 +61,24 @@ void *__cdecl R_AllocStaticVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInB
         MyAssertHandler(".\\r_buffers.cpp", 185, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, unsigned int, unsigned int, IDirect3DVertexBuffer9 **, unsigned int))dx.device->CreateVertexBuffer)(
-        dx.device,
-        dx.device,
-        sizeInBytes,
-        8,
-        0,
-        0,
-        vb,
-        0);
+    //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, unsigned int, unsigned int, IDirect3DVertexBuffer9 **, unsigned int))dx.device->CreateVertexBuffer)(
+    //    dx.device,
+    //    dx.device,
+    //    sizeInBytes,
+    //    8,
+    //    0,
+    //    0,
+    //    vb,
+    //    0);
+    hr = dx.device->CreateVertexBuffer(sizeInBytes, 8, 0, D3DPOOL_DEFAULT, vb, 0);
     if (hr < 0)
     {
         v3 = R_ErrorDescription(hr);
         v4 = va("DirectX didn't create a %i-byte vertex buffer: %s\n", sizeInBytes, v3);
         R_FatalInitError(v4);
     }
-    hra = (*vb)->Lock(*vb, 0, 0, &vertexBufferData, 0);
+    //hra = (*vb)->Lock(*vb, 0, 0, &vertexBufferData, 0);
+    hra = (*vb)->Lock(0, 0, &vertexBufferData, 0);
     if (hra < 0)
     {
         v5 = R_ErrorDescription(hra);
@@ -91,7 +96,8 @@ void *__cdecl R_AllocDynamicIndexBuffer(IDirect3DIndexBuffer9 **ib, unsigned int
 
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    hr = dx.device->CreateIndexBuffer(dx.device, sizeInBytes, 520u, D3DFMT_INDEX16, D3DPOOL_DEFAULT, ib, 0);
+    //hr = dx.device->CreateIndexBuffer(dx.device, sizeInBytes, 520u, D3DFMT_INDEX16, D3DPOOL_DEFAULT, ib, 0);
+    hr = dx.device->CreateIndexBuffer(sizeInBytes, 520, D3DFMT_INDEX16, D3DPOOL_DEFAULT, ib, 0);
     if (hr < 0)
     {
         v3 = R_ErrorDescription(hr);
@@ -111,19 +117,28 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
         MyAssertHandler(".\\r_buffers.cpp", 241, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, unsigned int, IDirect3DIndexBuffer9 **, unsigned int))dx.device->CreateIndexBuffer)(
-        dx.device,
-        dx.device,
-        sizeInBytes,
-        8,
-        101,
-        0,
-        ib,
-        0) < 0)
+    //if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, unsigned int, IDirect3DIndexBuffer9 **, unsigned int))dx.device->CreateIndexBuffer)(
+    //    dx.device,
+    //    dx.device,
+    //    sizeInBytes,
+    //    8,
+    //    101,
+    //    0,
+    //    ib,
+    //    0) < 0)
+    //    return 0;
+    if (dx.device->CreateIndexBuffer(sizeInBytes, 8, (D3DFORMAT)101, D3DPOOL_DEFAULT, ib, 0) < 0)
+    {
         return 0;
-    if ((*ib)->Lock(*ib, 0, 0, &indexBufferData, 0) >= 0)
+    }
+    //if ((*ib)->Lock(*ib, 0, 0, &indexBufferData, 0) >= 0)
+    //    return indexBufferData;
+    //(*ib)->Release(*ib);
+    if ((*ib)->Lock(0, 0, &indexBufferData, 0) >= 0)
+    {
         return indexBufferData;
-    (*ib)->Release(*ib);
+    }
+    (*ib)->Release();
     return 0;
 }
 
@@ -201,6 +216,29 @@ void __cdecl R_CreateDynamicBuffers()
         R_InitDynamicIndexBufferState(&gfxBuf.preTessIndexBufferPool[bufferIterc], 0x100000);
     gfxBuf.preTessIndexBuffer = gfxBuf.preTessIndexBufferPool;
     gfxBuf.preTessBufferFrame = 0;
+}
+
+void __cdecl R_FinishStaticIndexBuffer(IDirect3DIndexBuffer9 *ib)
+{
+    const char *v1; // eax
+    int hr; // [esp+0h] [ebp-4h]
+
+    do
+    {
+        if (r_logFile && r_logFile->current.integer)
+            RB_LogPrint("ib->Unlock()\n");
+        //hr = ib->Unlock(ib);
+        hr = ib->Unlock();
+        if (hr < 0)
+        {
+            do
+            {
+                ++g_disableRendering;
+                v1 = R_ErrorDescription(hr);
+                Com_Error(ERR_FATAL, ".\\r_buffers.cpp (%i) ib->Unlock() failed: %s\n", 266, v1);
+            } while (alwaysfails);
+        }
+    } while (alwaysfails);
 }
 
 void __cdecl R_CreateParticleCloudBuffer()
@@ -281,6 +319,7 @@ void __cdecl R_CreateParticleCloudBuffer()
 }
 
 
+
 void __cdecl R_FinishStaticVertexBuffer(IDirect3DVertexBuffer9 *vb)
 {
     const char *v1; // eax
@@ -290,7 +329,8 @@ void __cdecl R_FinishStaticVertexBuffer(IDirect3DVertexBuffer9 *vb)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("vb->Unlock()\n");
-        hr = vb->Unlock(vb);
+        //hr = vb->Unlock(vb);
+        hr = vb->Unlock();
         if (hr < 0)
         {
             do

@@ -1658,3 +1658,18 @@ bool __cdecl R_IsInRemoteScreenUpdate()
     return r_glob.isRenderingRemoteUpdate;
 }
 
+void __cdecl R_InitTempSkinBuf()
+{
+    GfxBackEndData *data; // [esp+0h] [ebp-8h]
+    unsigned int i; // [esp+4h] [ebp-4h]
+
+    for (i = 0; i < 2; ++i)
+    {
+        data = &s_backEndData[i];
+        if (data->tempSkinPos)
+            MyAssertHandler(".\\r_rendercmds.cpp", 552, 0, "%s", "!data->tempSkinPos");
+        if (data->tempSkinBuf)
+            MyAssertHandler(".\\r_rendercmds.cpp", 553, 0, "%s", "!data->tempSkinBuf");
+        data->tempSkinBuf = (unsigned __int8 *)Z_VirtualReserve(0x480000);
+    }
+}

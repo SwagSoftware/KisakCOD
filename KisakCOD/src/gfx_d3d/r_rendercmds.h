@@ -767,4 +767,6 @@ void __cdecl R_PushRemoteScreenUpdate(int remoteScreenUpdateNesting);
 int __cdecl R_PopRemoteScreenUpdate();
 bool __cdecl R_IsInRemoteScreenUpdate();
 
+void __cdecl R_InitTempSkinBuf();
+
 extern GfxBackEndData *frontEndDataOut;

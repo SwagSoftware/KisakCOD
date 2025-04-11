@@ -48,6 +48,12 @@ struct DSkel // sizeof=0x38
     DObjAnimMat* mat;                   // ...
 };
 
+struct DObjSkelMat // sizeof=0x40
+{                                       // ...
+    float axis[3][4];
+    float origin[4];
+};
+
 struct DObj_s // sizeof=0x64
 {
     XAnimTree_s* tree;

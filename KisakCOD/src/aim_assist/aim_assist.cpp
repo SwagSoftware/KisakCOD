@@ -704,7 +704,7 @@ int __cdecl AimAssist_CalcAimPos(
 
 void __cdecl Vec3Add(const float *a, const float *b, float *sum)
 {
-    *sum = *a + *b;
+    sum[0] = a[0] + b[0];
     sum[1] = a[1] + b[1];
     sum[2] = a[2] + b[2];
 }

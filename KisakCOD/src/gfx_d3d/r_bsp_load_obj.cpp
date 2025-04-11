@@ -1,6 +1,7 @@
 #include "r_bsp.h"
 #include <cgame_mp/cg_local_mp.h>
 #include "r_init.h"
+#include "r_light.h"
 
 void __cdecl R_InterpretSunLightParseParamsIntoLights(SunLightParseParams *sunParse, GfxLight *sunLight)
 {

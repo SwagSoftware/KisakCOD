@@ -14,6 +14,7 @@
 #include "r_xsurface.h"
 #include "rb_stats.h"
 #include <DynEntity/DynEntity_client.h>
+#include <database/database.h>
 
 void __cdecl R_Cmd_ScreenshotJpeg()
 {
@@ -34,7 +35,7 @@ void __cdecl R_ImageList_f()
     const char *v0; // eax
     _D3DFORMAT v1; // eax
     const char *v2; // eax
-    char *fmt; // [esp+Ch] [ebp-2110h]
+    const char *fmt; // [esp+Ch] [ebp-2110h]
     GfxImage *image; // [esp+A0h] [ebp-207Ch]
     int v5; // [esp+A4h] [ebp-2078h]
     bool v6; // [esp+ABh] [ebp-2071h]
@@ -212,8 +213,8 @@ void __cdecl R_Cmd_LoadSun()
 void __cdecl R_ModelList_f()
 {
     const char *Name; // eax
-    char *v1; // [esp+Ch] [ebp-212Ch]
-    char *fmt; // [esp+10h] [ebp-2128h]
+    const char *v1; // [esp+Ch] [ebp-212Ch]
+    const char *fmt; // [esp+10h] [ebp-2128h]
     int inData; // [esp+108h] [ebp-2030h] BYREF
     XModel *v4[2050]; // [esp+10Ch] [ebp-202Ch] BYREF
     XModel *model; // [esp+2114h] [ebp-24h]

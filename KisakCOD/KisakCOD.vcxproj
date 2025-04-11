@@ -297,6 +297,7 @@
     <ClCompile Include="src\gfx_d3d\r_debug.cpp" />
     <ClCompile Include="src\gfx_d3d\r_debug_alloc.cpp" />
     <ClCompile Include="src\gfx_d3d\r_devgui.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_dobj_skin.cpp" />
     <ClCompile Include="src\gfx_d3d\r_dpvs.cpp" />
     <ClCompile Include="src\gfx_d3d\r_dpvs_dynmodel.cpp" />
     <ClCompile Include="src\gfx_d3d\r_dpvs_entity.cpp" />
@@ -546,6 +547,7 @@
     <ClInclude Include="src\gfx_d3d\r_cmds.h" />
     <ClInclude Include="src\gfx_d3d\r_debug.h" />
     <ClInclude Include="src\gfx_d3d\r_devgui.h" />
+    <ClInclude Include="src\gfx_d3d\r_dobj_skin.h" />
     <ClInclude Include="src\gfx_d3d\r_dpvs.h" />
     <ClInclude Include="src\gfx_d3d\r_drawsurf.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_bsp.h" />

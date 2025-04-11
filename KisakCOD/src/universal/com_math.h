@@ -4,6 +4,9 @@
 
 #include <math.h>
 
+#include <xanim/dobj.h>
+#include <gfx_d3d/fxprimitives.h>
+
 struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...
@@ -352,6 +355,14 @@ __forceinline static int COERCE_INT(float val) {
 //__Eg_unpackShiftQuat@@YAXXZ 8278cbd0 f   com_math_anglevectors.obj
 //__Eg_unpackSignShiftQuat@@YAXXZ 8278cbf0 f   com_math_anglevectors.obj
 //__Eg_unpackShiftSimpleQuat@@YAXXZ 8278cc10 f   com_math_anglevectors.obj
+
+//__int128 _mask__NegFloat_ = 0x80000000800000008000000080000000;
+
+void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat);
+void __fastcall LocalConvertQuatToSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat);
+void __fastcall LocalQuatMultiplyInverse(const float *in1, const float *in2, float *out);
+void __cdecl LocalTransformVector(const float *in1, const float4 *in2, float *out);
+void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out);
 
 /*
 ===========================================================================

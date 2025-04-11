@@ -1,9 +1,11 @@
 #include "r_bsp.h"
 #include "r_init.h"
+#include "r_dvars.h"
 
 
 //struct GfxWorld s_world    85b28080     gfx_d3d : r_bsp.obj
 
+GfxWorld s_world;
 
 
 void __cdecl R_InterpretSunLightParseParams(SunLightParseParams *sunParse)

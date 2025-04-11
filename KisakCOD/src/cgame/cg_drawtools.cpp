@@ -17,22 +17,6 @@ const float sign[4][2] =
     {-1.0f, 1.0f }
 };
 
-const int iEdgePairs[12][2] =
-{
-  { 0, 1 },
-  { 0, 2 },
-  { 0, 4 },
-  { 1, 3 },
-  { 1, 5 },
-  { 2, 3 },
-  { 2, 6 },
-  { 3, 7 },
-  { 4, 5 },
-  { 4, 6 },
-  { 5, 7 },
-  { 6, 7 }
-}; // idb
-
 float color_0[4];
 
 void __cdecl CG_DrawRotatedPicPhysical(

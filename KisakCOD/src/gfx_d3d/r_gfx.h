@@ -64,7 +64,7 @@ struct GfxDynamicIndices // sizeof=0xC
 
 struct GfxVertexBufferState // sizeof=0x10
 {                                       // ...
-    volatile int used;
+    volatile unsigned int used;
     int total;
     IDirect3DVertexBuffer9* buffer;     // ...
     unsigned __int8* verts;

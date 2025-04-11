@@ -14,7 +14,7 @@ void __cdecl R_CopyParseParamsToDvars(const SunLightParseParams *sunParse, int s
 void R_InitDynamicData();
 void __cdecl R_SetWorldPtr_FastFile(const char *name);
 
-
+extern GfxWorld s_world;
 
 // r_bsp_load_obj
 void __cdecl R_InterpretSunLightParseParamsIntoLights(SunLightParseParams *sunParse, GfxLight *sunLight);

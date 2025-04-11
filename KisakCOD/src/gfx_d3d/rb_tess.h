@@ -2,11 +2,11 @@
 #include "rb_backend.h"
 
 
-union $B667868682928995E3CB40CE466D3989 // sizeof=0x4
-{                                       // ...
-    GfxPackedVertex *skinnedVert;
-    int oldSkinnedCachedOffset;
-};
+//union $B667868682928995E3CB40CE466D3989 // sizeof=0x4
+//{                                       // ...
+//    GfxPackedVertex *skinnedVert;
+//    int oldSkinnedCachedOffset;
+//};
 
 struct __declspec(align(4)) GfxModelSurfaceInfo // sizeof=0xC
 {                                       // ...
@@ -24,7 +24,12 @@ struct GfxModelSkinnedSurface // sizeof=0x18
     int skinnedCachedOffset;
     XSurface *xsurf;
     GfxModelSurfaceInfo info;
-    $B667868682928995E3CB40CE466D3989 ___u3;
+    //$B667868682928995E3CB40CE466D3989 ___u3;
+    union
+    {
+        GfxPackedVertex *skinnedVert;
+        int oldSkinnedCachedOffset;
+    };
 };
 
 

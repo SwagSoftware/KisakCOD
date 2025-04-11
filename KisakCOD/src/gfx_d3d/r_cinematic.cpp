@@ -8,6 +8,10 @@
 #include <msslib/mss.h>
 #include <sound/snd_local.h>
 #include <win32/win_local.h>
+#include "rb_state.h"
+#include "r_image.h"
+#include <database/database.h>
+#include <qcommon/com_fileaccess.h>
 
 CinematicGlob cinematicGlob;
 bool g_cinematicThreadInitialized;
@@ -734,6 +738,62 @@ static void __cdecl R_Cinematic_ReleaseImages(CinematicTextureSet *textureSet)
     Image_Release(&textureSet->drawImageA);
 }
 
+IDirect3DTexture9 *__cdecl R_Cinematic_MakeBinkTexture_PC(
+    GfxImage *image,
+    unsigned int width,
+    unsigned int height,
+    int baseImageFlags)
+{
+    Image_Setup(image, width, height, 1, baseImageFlags | 3, D3DFMT_L8);
+    return image->texture.map;
+}
+
+IDirect3DTexture9 *R_Cinematic_MakeBinkDrawTextures()
+{
+    IDirect3DTexture9 *result; // eax
+    bool useAlpha; // [esp+Bh] [ebp-9h]
+    int frameIter; // [esp+Ch] [ebp-8h]
+    CinematicTextureSet *textureSet; // [esp+10h] [ebp-4h]
+
+    useAlpha = 0;
+    for (frameIter = 0; frameIter != 2; ++frameIter)
+    {
+        if (cinematicGlob.binkTextureSet.bink_buffers.Frames[frameIter].APlane.Allocate)
+            useAlpha = 1;
+    }
+    textureSet = &cinematicGlob.textureSets[cinematicGlob.activeTextureSet];
+    cinematicGlob.binkTextureSet.tex_draw.Ytexture = R_Cinematic_MakeBinkTexture_PC(
+        &textureSet->drawImageY,
+        cinematicGlob.binkTextureSet.bink_buffers.YABufferWidth,
+        cinematicGlob.binkTextureSet.bink_buffers.YABufferHeight,
+        0x10000);
+    cinematicGlob.binkTextureSet.tex_draw.cRtexture = R_Cinematic_MakeBinkTexture_PC(
+        &textureSet->drawImageCr,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferWidth,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferHeight,
+        0x10000);
+    cinematicGlob.binkTextureSet.tex_draw.cBtexture = R_Cinematic_MakeBinkTexture_PC(
+        &textureSet->drawImageCb,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferWidth,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferHeight,
+        0x10000);
+    result = (IDirect3DTexture9 *)useAlpha;
+    if (useAlpha)
+    {
+        result = R_Cinematic_MakeBinkTexture_PC(
+            &textureSet->drawImageA,
+            cinematicGlob.binkTextureSet.bink_buffers.YABufferWidth,
+            cinematicGlob.binkTextureSet.bink_buffers.YABufferHeight,
+            0x10000);
+        cinematicGlob.binkTextureSet.tex_draw.Atexture = result;
+    }
+    else
+    {
+        cinematicGlob.binkTextureSet.tex_draw.Atexture = 0;
+    }
+    return result;
+}
+
 IDirect3DTexture9 *R_Cinematic_InitBinkTextures()
 {
     BINKFRAMETEXTURES *textures; // [esp+40h] [ebp-10h]
@@ -863,8 +923,8 @@ char __cdecl R_Cinematic_BinkOpenPath(
         {
             return 0;
         }
-        flags = (unsigned int)&svs.clients[31].frames[17].ps.hud.current[6].flags;
-        cinematicGlob.bink = (BINK *)BinkOpen(filledBuffer, &svs.clients[31].frames[17].ps.hud.current[6].flags);
+        flags = 0x4104400;
+        cinematicGlob.bink = (BINK *)BinkOpen((const char*)filledBuffer, 0x4104400);
         if (!cinematicGlob.bink)
             CinematicHunk_Reset(&cinematicGlob.residentHunk);
         if ((cinematicGlob.playbackFlags & 1) == 0)
@@ -1179,6 +1239,44 @@ void __cdecl R_Cinematic_SyncNow()
 {
     cinematicGlob.fullSyncNextUpdate = 1;
     R_Cinematic_UpdateFrame();
+}
+
+void __cdecl R_Cinematic_DrawLetterbox_OptionalCinematic(bool drawCinematic, float letterboxAlpha)
+{
+    float rectY; // [esp+3Ch] [ebp-2Ch]
+    float width; // [esp+44h] [ebp-24h]
+    float height; // [esp+48h] [ebp-20h]
+    float letterboxHalfHeight; // [esp+4Ch] [ebp-1Ch]
+    float color[4]; // [esp+50h] [ebp-18h] BYREF
+    float movieHeight; // [esp+60h] [ebp-8h]
+    float aspectRatio; // [esp+64h] [ebp-4h]
+
+    width = (float)vidConfig.displayWidth;
+    height = (float)vidConfig.displayHeight;
+    aspectRatio = vidConfig.aspectRatioDisplayPixel;
+    movieHeight = width * vidConfig.aspectRatioDisplayPixel / (float)1.7777778;
+    if (height < (double)movieHeight)
+        movieHeight = (float)vidConfig.displayHeight;
+    letterboxHalfHeight = (height - movieHeight) * 0.5;
+    color[0] = 0.0;
+    color[1] = 0.0;
+    color[2] = 0.0;
+    color[3] = letterboxAlpha;
+    R_AddCmdDrawStretchPic(0.0, 0.0, width, letterboxHalfHeight, 0.0, 0.0, 1.0, 1.0, color, rgp.whiteMaterial);
+    rectY = height - letterboxHalfHeight;
+    R_AddCmdDrawStretchPic(0.0, rectY, width, letterboxHalfHeight, 0.0, 0.0, 1.0, 1.0, color, rgp.whiteMaterial);
+    if (drawCinematic)
+        R_AddCmdDrawStretchPic(
+            0.0,
+            letterboxHalfHeight,
+            width,
+            movieHeight,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            colorWhite,
+            rgp.cinematicMaterial);
 }
 
 void __cdecl R_Cinematic_DrawStretchPic_Letterboxed()

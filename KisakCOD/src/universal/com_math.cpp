@@ -3,6 +3,7 @@
 #include <universal/assertive.h>
 #include <qcommon/mem_track.h>
 #include <math.h>
+#include <xanim/dobj.h>
 #include <stdlib.h>
 #include "q_shared.h"
 
@@ -2050,7 +2051,6 @@ int __cdecl irand(int min, int max)
     return (((holdrand >> 17) * (__int64)(max - min)) >> 15) + min;
 }
 
-#include <xanim/dobj.h>
 
 void __cdecl MatrixTransformVectorQuatTrans(const vec3r in, const DObjAnimMat *mat, vec3r out)
 {
@@ -2613,4 +2613,213 @@ void __cdecl ClearBounds(float *mins, float *maxs)
 float __cdecl Vec3LengthSq(const float* v)
 {
     return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+void __cdecl LocalTransformVector(const float *in1, const float4 *in2, float *out)
+{
+    *out = *in1 * in2->v[0] + in1[1] * in2[1].v[0] + in1[2] * in2[2].v[0] + in2[3].v[0];
+    out[1] = *in1 * in2->v[1] + in1[1] * in2[1].v[1] + in1[2] * in2[2].v[1] + in2[3].v[1];
+    out[2] = *in1 * in2->v[2] + in1[1] * in2[1].v[2] + in1[2] * in2[2].v[2] + in2[3].v[2];
+}
+
+void __fastcall LocalConvertQuatToSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat)
+{
+    double v2; // fp0
+    double transWeight; // fp12
+    double v4; // fp11
+    double v5; // fp7
+    double v6; // fp9
+    double v7; // fp8
+    double v8; // fp10
+    double v9; // fp12
+    double v10; // fp6
+    double v11; // fp5
+    double v12; // fp8
+    double v13; // fp4
+    double v14; // fp11
+    double v15; // fp0
+    double v16; // fp12
+    double v17; // fp10
+    double v18; // fp9
+
+    v2 = mat->quat[2];
+    transWeight = mat->transWeight;
+    v4 = mat->quat[1];
+    v5 = (float)(mat->quat[2] * mat->transWeight);
+    v6 = mat->quat[3];
+    v7 = mat->quat[0];
+    skelMat->axis[0][3] = 0.0;
+    skelMat->axis[1][3] = 0.0;
+    skelMat->axis[2][3] = 0.0;
+    v8 = (float)((float)v4 * (float)transWeight);
+    v10 = (float)((float)v2 * (float)v5);
+    v11 = (float)((float)v4 * (float)((float)v4 * (float)transWeight));
+    v9 = (float)((float)v7 * (float)transWeight);
+    v12 = (float)((float)v7 * (float)v9);
+    v13 = (float)((float)v2 * (float)v9);
+    v14 = (float)((float)v4 * (float)v9);
+    v15 = (float)((float)v2 * (float)v8);
+    v16 = (float)((float)v6 * (float)v9);
+    v17 = (float)((float)v6 * (float)v8);
+    v18 = (float)((float)v6 * (float)v5);
+    skelMat->axis[1][2] = (float)v15 + (float)v16;
+    skelMat->axis[0][2] = (float)v13 - (float)v17;
+    skelMat->axis[0][1] = (float)v18 + (float)v14;
+    skelMat->axis[1][0] = (float)v14 - (float)v18;
+    skelMat->axis[2][0] = (float)v17 + (float)v13;
+    skelMat->axis[2][1] = (float)v15 - (float)v16;
+    skelMat->axis[0][0] = (float)1.0 - (float)((float)v10 + (float)v11);
+    skelMat->axis[2][2] = (float)1.0 - (float)((float)v11 + (float)v12);
+    skelMat->axis[1][1] = (float)1.0 - (float)((float)v10 + (float)v12);
+    skelMat->origin[0] = mat->trans[0];
+    skelMat->origin[1] = mat->trans[1];
+    skelMat->origin[2] = mat->trans[2];
+    skelMat->origin[3] = 1.0;
+}
+
+void __fastcall LocalQuatMultiplyInverse(const float *in1, const float *in2, float *out)
+{
+    *out = (float)(in2[2] * in1[1])
+        - (float)((float)(in2[1] * in1[2]) - (float)((float)(*in2 * in1[3]) - (float)(in2[3] * *in1)));
+    out[1] = -(float)((float)(in2[2] * *in1)
+        - (float)((float)(in1[2] * *in2) + (float)((float)(in2[1] * in1[3]) - (float)(in2[3] * in1[1]))));
+    out[2] = (float)(in2[1] * *in1)
+        + (float)((float)(in2[2] * in1[3]) - (float)((float)(in1[1] * *in2) + (float)(in2[3] * in1[2])));
+    out[3] = (float)(in2[1] * in1[1])
+        + (float)((float)(in2[2] * in1[2]) + (float)((float)(*in1 * *in2) + (float)(in2[3] * in1[3])));
+}
+
+void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out)
+{
+    *out = (float)((float)(*origin * mat->axis[0][0])
+        + (float)((float)(mat->axis[2][0] * origin[2]) + (float)(mat->axis[1][0] * origin[1])))
+        + mat->origin[0];
+    out[1] = (float)((float)(mat->axis[1][1] * origin[1])
+        + (float)((float)(mat->axis[0][1] * *origin) + (float)(mat->axis[2][1] * origin[2])))
+        + mat->origin[1];
+    out[2] = (float)((float)(mat->axis[1][2] * origin[1])
+        + (float)((float)(mat->axis[0][2] * *origin) + (float)(mat->axis[2][2] * origin[2])))
+        + mat->origin[2];
+}
+
+void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat)
+{
+    float transWeight; // xmm4_4
+    float v3; // xmm2_4
+    float v4; // xmm1_4
+    float v5; // xmm6_4
+    float v6; // xmm0_4
+    float v7; // xmm7_4
+    float v8; // xmm5_4
+    float v9; // xmm3_4
+    float v10; // xmm0_4
+    float v11; // xmm4_4
+    float v12; // xmm1_4
+    float v13; // xmm2_4
+    float v14; // xmm5_4
+    float v15; // xmm0_4
+    float v16; // xmm6_4
+    float v17; // xmm1_4
+    float v18; // xmm6_4
+    float v19; // xmm2_4
+    float v20; // xmm6_4
+    float v21; // xmm4_4
+    float v22; // xmm6_4
+    float v23; // xmm7_4
+    float v24; // xmm3_4
+    float v25; // [esp+4h] [ebp-1Ch]
+    float yy; // [esp+8h] [ebp-18h]
+    float xw; // [esp+Ch] [ebp-14h]
+    float yw; // [esp+10h] [ebp-10h]
+    float xy; // [esp+14h] [ebp-Ch]
+    float xx; // [esp+18h] [ebp-8h]
+
+    iassert((!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])));
+    //if (((LODWORD(mat->quat.v[0]) & 0x7F800000) == 0x7F800000
+    //    || (LODWORD(mat->quat.v[1]) & 0x7F800000) == 0x7F800000
+    //    || (LODWORD(mat->quat.v[2]) & 0x7F800000) == 0x7F800000
+    //    || (LODWORD(mat->quat.v[3]) & 0x7F800000) == 0x7F800000)
+    //    && !Assert_MyHandler(
+    //        "c:\\t6\\code\\src_noserver\\universal\\com_math.h",
+    //        1934,
+    //        0,
+    //        "(!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3]))",
+    //        (const char *)&pBlock))
+    //{
+    //    __debugbreak();
+    //}
+    iassert((!IS_NAN(mat->transWeight)));
+    //if ((LODWORD(mat->transWeight) & 0x7F800000) == 0x7F800000
+    //    && !Assert_MyHandler(
+    //        "c:\\t6\\code\\src_noserver\\universal\\com_math.h",
+    //        1935,
+    //        0,
+    //        "(!IS_NAN(mat->transWeight))",
+    //        (const char *)&pBlock))
+    //{
+    //    __debugbreak();
+    //}
+    transWeight = mat->transWeight;
+    v3 = mat->quat[1];
+    v4 = mat->quat[2];
+    v5 = mat->quat[3];
+    v6 = mat->quat[0] * transWeight;
+    xx = mat->quat[0] * v6;
+    v7 = v4 * transWeight;
+    xy = v3 * v6;
+    v8 = v3 * transWeight;
+    v9 = v4 * v6;
+    xw = v5 * v6;
+    v10 = v3 * (v3 * transWeight);
+    v11 = v4 * (v3 * transWeight);
+    v12 = v4 * v7;
+    v13 = v5 * v8;
+    yy = v10;
+    v14 = v12 + xx;
+    v15 = 1.0f - (v12 + v10);
+    v16 = v5 * v7;
+    v17 = xy - v16;
+    v18 = v16 + xy;
+    yw = v13;
+    v19 = v13 + v9;
+    v25 = v18;
+    v20 = v11;
+    v21 = v11 + xw;
+    v22 = v20 - xw;
+    v23 = v9 - yw;
+    v24 = 1.0f - (yy + xx);
+
+    skelMat->axis[0][0] = v15;
+    skelMat->axis[0][1] = v17;
+    skelMat->axis[0][2] = v19;
+    skelMat->axis[0][3] = 0.0f;
+
+    skelMat->axis[1][0] = v18;
+    skelMat->axis[1][1] = 1.0 - v14;
+    skelMat->axis[1][2] = v22;
+    skelMat->axis[1][3] = 0.0f;
+
+    skelMat->axis[2][0] = v23;
+    skelMat->axis[2][1] = v21;
+    skelMat->axis[2][2] = v24;
+    skelMat->axis[2][3] = 0.0f;
+
+    skelMat->origin[0] = ((v15 * mat->trans[0]) + (v25 * mat->trans[1])) + (mat->trans[2] * v23) * -1.0f; // ^_mask__NegFloat_;
+    skelMat->origin[1] = ((v17 * mat->trans[0]) + ((1.0f - v14) * mat->trans[1])) + (mat->trans[2] * v21) * 1.0f; //  ^_mask__NegFloat_;
+    skelMat->origin[2] = ((v19 * mat->trans[0]) + (v22 * mat->trans[1])) + (mat->trans[2] * v24) * 1.0f; // ^_mask__NegFloat_;
+    skelMat->origin[3] = 1.0f;
+
+    //LODWORD(skelMat->origin.v[0]) = COERCE_UNSIGNED_INT(
+    //    (float)((float)(v15 * mat->trans[0]) + (float)(v25 * mat->trans[1]))
+    //    + (float)(mat->trans[2] * v23))
+    //    ^ _mask__NegFloat_;
+    //LODWORD(skelMat->origin.v[1]) = COERCE_UNSIGNED_INT(
+    //    (float)((float)(v17 * mat->trans[0]) + (float)((float)(1.0 - v14) * mat->trans[1]))
+    //    + (float)(mat->trans[2] * v21))
+    //    ^ _mask__NegFloat_;
+    //LODWORD(skelMat->origin.v[2]) = COERCE_UNSIGNED_INT(
+    //    (float)((float)(v19 * mat->trans[0]) + (float)(v22 * mat->trans[1]))
+    //    + (float)(mat->trans[2] * v24))
+    //    ^ _mask__NegFloat_;
+    //LODWORD(skelMat->origin.v[3]) = FLOAT_1_0;
 }

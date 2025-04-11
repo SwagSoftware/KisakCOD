@@ -4,6 +4,7 @@
 #include <qcommon/mem_track.h>
 
 #include <win32/win_local.h>
+#include <cgame/cg_public.h>
 
 DebugGlobals debugGlobals;
 
@@ -109,7 +110,7 @@ void __cdecl R_AddDebugBox(DebugGlobals *debugGlobalsEntry, const float *mins, c
         }
     }
     for (ia = 0; ia < 0xC; ++ia)
-        R_AddDebugLine(debugGlobalsEntry, v[iEdgePairs[ia][0]], v[dword_865EAC[2 * ia]], color);
+        R_AddDebugLine(debugGlobalsEntry, v[iEdgePairs[ia][0]], v[iEdgePairs[ia][1]], color);
 }
 
 void __cdecl R_AddDebugString(
