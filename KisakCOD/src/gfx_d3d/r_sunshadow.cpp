@@ -4,6 +4,11 @@
 #include "r_dpvs.h"
 #include "r_pretess.h"
 
+struct ShadowGlobals // sizeof=0x4
+{                                       // ...
+    const MaterialTechnique *defaultShadowCasterTechnique; // ...
+};
+
 const float g_shadowFrustumBound[5][2] =
 {
     { -1.0f, -1.0f },
@@ -20,6 +25,9 @@ const float g_clipSpacePoints[4][3] =
     { 1.0f, 1.0f, 0.0f },
     {-1.0f, 1.0f, 0.0f }
 };
+
+
+ShadowGlobals shadowGlob;
 
 void __cdecl R_GetSunAxes(float (*sunAxis)[3])
 {

@@ -3,6 +3,17 @@
 #include <qcommon/qcommon.h>
 #include <universal/com_memory.h>
 #include <qcommon/cmd.h>
+#include <database/database.h>
+#include "r_init.h"
+#include "r_dvars.h"
+#include <universal/com_files.h>
+#include "rb_logfile.h"
+#include <universal/profile.h>
+#include "r_pixelcost_load_obj.h"
+#include "r_utils.h"
+#include "r_texturemem.h"
+#include "rb_state.h"
+#include "r_state.h"
 
 ImgGlobals imageGlobals;
 GfxImage g_imageProgs[14];
@@ -95,7 +106,8 @@ void __cdecl Image_Release(GfxImage *image)
     }
     if (image->texture.basemap)
     {
-        image->texture.basemap->Release(image->texture.basemap);
+        //image->texture.basemap->Release(image->texture.basemap);
+        image->texture.basemap->Release();
         image->texture.basemap = 0;
         image->cardMemory.platform[0] = 0;
         image->cardMemory.platform[1] = 0;
@@ -124,6 +136,17 @@ GfxImage *__cdecl Image_AllocProg(int imageProgType, unsigned __int8 category, u
     image->track = 0;
     imageGlobals.imageHashTable[Image_GetAvailableHashLocation(name)] = image;
     return &g_imageProgs[imageProgType];
+}
+
+void __cdecl Image_SetupAndLoad(
+    GfxImage *image,
+    int width,
+    int height,
+    int depth,
+    int imageFlags,
+    _D3DFORMAT imageFormat)
+{
+    Image_Setup(image, width, height, depth, imageFlags, imageFormat);
 }
 
 void __cdecl Image_SetupRenderTarget(
@@ -162,7 +185,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
     image->texture.basemap = 0;
     if (r_loadForRenderer->current.enabled)
     {
-        imageFormat = loadDef->format;
+        imageFormat = (D3DFORMAT)loadDef->format;
         if (loadDef->resourceSize)
         {
             image->delayLoadPixels = 0;
@@ -209,7 +232,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                 if (faceCount == 1)
                     v5 = D3DCUBEMAP_FACE_POSITIVE_X;
                 else
-                    v5 = Image_CubemapFace(faceIndex);
+                    v5 = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
                 for (mipLevel = 0; mipLevel < mipCount; ++mipLevel)
                 {
                     Image_UploadData(image, imageFormat, v5, mipLevel, data);
@@ -308,7 +331,7 @@ GfxImage *__cdecl Image_Register(const char *imageName, unsigned __int8 semantic
     if (useFastFile->current.enabled)
         return (GfxImage *)Image_Register_FastFile(imageName);
     else
-        return Image_Register_LoadObj(imageName, semantic, imageTrack);
+        return Image_Register_LoadObj((char*)imageName, semantic, imageTrack);
 }
 
 GfxImage *__cdecl Image_Register_FastFile(const char *imageName)
@@ -319,6 +342,32 @@ GfxImage *__cdecl Image_Register_FastFile(const char *imageName)
 char __cdecl Image_LoadFromFile(GfxImage *image)
 {
     return Image_LoadFromFileWithReader(image, (int(__cdecl *)(const char *, int *))FS_FOpenFileReadDatabase);
+}
+
+char __cdecl Image_ValidateHeader(GfxImageFileHeader *imageFile, const char *filepath)
+{
+    if (imageFile->tag[0] == 73 && imageFile->tag[1] == 87 && imageFile->tag[2] == 105)
+    {
+        if (imageFile->version == 6)
+        {
+            return 1;
+        }
+        else
+        {
+            Com_PrintError(8, "ERROR: image '%s' is version %i but should be version %i\n", filepath, imageFile->version, 6);
+            return 0;
+        }
+    }
+    else
+    {
+        Com_PrintError(8, "ERROR: image '%s' is not an IW image\n", filepath);
+        return 0;
+    }
+}
+
+void __cdecl Image_PrintTruncatedFileError(const char *filepath)
+{
+    Com_PrintError(8, "ERROR: image '%s' is truncated.  Delete the file and run converter to fix.\n", filepath);
 }
 
 char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFileRead)(const char *, int *))
@@ -352,7 +401,7 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
                     "%s\n\t(filepath) = %s",
                     "(fileSize >= sizeof( fileHeader ))",
                     filepath);
-            if (FS_Read(&fileHeader, 28, fileHandle) == 28)
+            if (FS_Read((unsigned __int8 *)&fileHeader, sizeof(GfxImageFileHeader), fileHandle) == 28)
             {
                 if (Image_ValidateHeader(&fileHeader, filepath))
                 {
@@ -545,7 +594,7 @@ void __cdecl Image_LoadWavelet(
             from[faceIndex] = to[faceIndex];
             to[faceIndex] = &pixels[faceIndex][totalSize - sizeForLevel];
             Wavelet_DecompressLevel(from[faceIndex], to[faceIndex], &decode);
-            face = Image_CubemapFace(faceIndex);
+            face = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
             Image_UploadData(image, format, face, decode.mipLevel - picmip, to[faceIndex]);
         }
         --decode.mipLevel;
@@ -603,7 +652,7 @@ void __cdecl Image_LoadBitmap(
             v5 = 1;
         for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
         {
-            face = Image_CubemapFace(faceIndex);
+            face = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
             if (format == D3DFMT_X8R8G8B8)
             {
                 Image_ExpandBgr(data, v5 * v6, expandedData);
@@ -753,110 +802,11 @@ void __cdecl Image_LoadDxtc(
             v5 = 1;
         for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
         {
-            face = Image_CubemapFace(faceIndex);
-            Image_UploadData(image, format, face, mipLevel - picmip, data);
+            face = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
+            Image_UploadData(image, format, face, mipLevel - picmip, (unsigned char*)data);
             data += bytesPerBlock * ((int)(v5 + 3) >> 2) * ((int)(v6 + 3) >> 2);
         }
     }
-}
-
-void __cdecl Image_Upload3D_CopyData_PC(
-    const GfxImage *image,
-    _D3DFORMAT format,
-    unsigned int mipLevel,
-    unsigned __int8 *src)
-{
-    const char *v4; // eax
-    const char *v5; // eax
-    int v6; // [esp+0h] [ebp-44h]
-    int v7; // [esp+4h] [ebp-40h]
-    int v8; // [esp+8h] [ebp-3Ch]
-    int v9; // [esp+18h] [ebp-2Ch]
-    int hr; // [esp+1Ch] [ebp-28h]
-    int srcRowPitch; // [esp+24h] [ebp-20h]
-    int sliceIndex; // [esp+28h] [ebp-1Ch]
-    _D3DLOCKED_BOX lockedBox; // [esp+2Ch] [ebp-18h] BYREF
-    int width; // [esp+38h] [ebp-Ch]
-    int height; // [esp+3Ch] [ebp-8h]
-    unsigned __int8 *dst; // [esp+40h] [ebp-4h]
-
-    if (!image)
-        MyAssertHandler(".\\r_image_load_common.cpp", 700, 0, "%s", "image");
-    if (image->mapType != MAPTYPE_3D)
-        MyAssertHandler(
-            ".\\r_image_load_common.cpp",
-            701,
-            0,
-            "%s\n\t(image->mapType) = %i",
-            "(image->mapType == MAPTYPE_3D)",
-            image->mapType);
-    if (image->width >> mipLevel > 1)
-        v8 = image->width >> mipLevel;
-    else
-        v8 = 1;
-    width = v8;
-    if (image->height >> mipLevel > 1)
-        v7 = image->height >> mipLevel;
-    else
-        v7 = 1;
-    height = v7;
-    if (image->depth >> mipLevel > 1)
-        v6 = image->depth >> mipLevel;
-    else
-        v6 = 1;
-    srcRowPitch = Image_SourceBytesPerSlice_PC(format, width, height);
-    if (!image->texture.basemap)
-        MyAssertHandler(".\\r_image_load_common.cpp", 708, 0, "%s", "image->texture.volmap");
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("image->texture.volmap->LockBox( mipLevel, &lockedBox, 0, 0 )\n");
-        hr = ((int(__stdcall *)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD))image->texture.basemap->__vftable[1].Release)(
-            (GfxTexture)image->texture.basemap,
-            mipLevel,
-            &lockedBox,
-            0,
-            0);
-        if (hr < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                v4 = R_ErrorDescription(hr);
-                Com_Error(
-                    ERR_FATAL,
-                    ".\\r_image_load_common.cpp (%i) image->texture.volmap->LockBox( mipLevel, &lockedBox, 0, 0 ) failed: %s\n",
-                    709,
-                    v4);
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
-    dst = (unsigned __int8 *)lockedBox.pBits;
-    for (sliceIndex = 0; sliceIndex < v6; ++sliceIndex)
-    {
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedBox.RowPitch, dst);
-        src += srcRowPitch;
-        dst += lockedBox.SlicePitch;
-    }
-    do
-    {
-        if (r_logFile && r_logFile->current.integer)
-            RB_LogPrint("image->texture.volmap->UnlockBox( mipLevel )\n");
-        v9 = image->texture.basemap->__vftable[1].GetDevice(image->texture.basemap, (IDirect3DDevice9 **)mipLevel);
-        if (v9 < 0)
-        {
-            do
-            {
-                ++g_disableRendering;
-                v5 = R_ErrorDescription(v9);
-                Com_Error(
-                    ERR_FATAL,
-                    ".\\r_image_load_common.cpp (%i) image->texture.volmap->UnlockBox( mipLevel ) failed: %s\n",
-                    719,
-                    v5);
-            } while (alwaysfails);
-        }
-    } while (alwaysfails);
 }
 
 void __cdecl Image_UploadData(
@@ -878,32 +828,6 @@ void __cdecl Image_UploadData(
 void __cdecl Image_LoadWhite(GfxImage *image)
 {
     Image_LoadSolid(image, 0xFFu, 0xFFu, 0xFFu, 0xFFu);
-}
-
-void __cdecl Image_Generate2D(GfxImage *image, unsigned __int8 *pixels, int width, int height, _D3DFORMAT imageFormat)
-{
-    if (!pixels)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 860, 0, "%s", "pixels");
-    if (width <= 0 || (width & (width - 1)) != 0)
-        MyAssertHandler(
-            ".\\r_image_load_obj.cpp",
-            861,
-            0,
-            "%s\n\t(width) = %i",
-            "(width > 0 && (((width) & ((width) - 1)) == 0))",
-            width);
-    if (height <= 0 || (height & (height - 1)) != 0)
-        MyAssertHandler(
-            ".\\r_image_load_obj.cpp",
-            862,
-            0,
-            "%s\n\t(height) = %i",
-            "(height > 0 && (((height) & ((height) - 1)) == 0))",
-            height);
-    Image_Setup(image, width, height, 1, 3, imageFormat);
-    if (image->cardMemory.platform[0] <= 0)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 867, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
-    Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
 }
 
 void __cdecl Image_LoadSolid(
@@ -1325,10 +1249,11 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("image->texture.map->GetSurfaceLevel( 0, &surface )\n");
-        hr = ((int(__stdcall *)(unsigned int, unsigned int, unsigned int))image->texture.basemap->__vftable[1].AddRef)(
-            (GfxTexture)image->texture.basemap,
-            0,
-            &surface);
+        //hr = ((int(__stdcall *)(unsigned int, unsigned int, unsigned int))image->texture.basemap->__vftable[1].AddRef)(
+        //    (GfxTexture)image->texture.basemap,
+        //    0,
+        //    &surface);
+        hr = image->texture.map->GetSurfaceLevel(0, &surface);
         if (hr < 0)
         {
             do
@@ -1344,6 +1269,108 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
         }
     } while (alwaysfails);
     return surface;
+}
+
+void __cdecl R_SetPicmip()
+{
+    unsigned int texMemInMegs; // [esp+0h] [ebp-10h]
+    unsigned int sysMemInMegs; // [esp+4h] [ebp-Ch]
+    bool cappedPicmip; // [esp+Bh] [ebp-5h]
+    int minPicmip; // [esp+Ch] [ebp-4h]
+
+    if (!dx.device)
+        MyAssertHandler(".\\r_image.cpp", 1233, 0, "%s", "dx.device");
+    texMemInMegs = R_AvailableTextureMemory();
+    sysMemInMegs = Dvar_GetInt("sys_sysMB");
+    if (!r_reflectionProbeGenerate)
+        MyAssertHandler(".\\r_image.cpp", 1243, 0, "%s", "r_reflectionProbeGenerate");
+    if (r_reflectionProbeGenerate->current.enabled)
+    {
+        Com_Printf(8, "Picmip is set to lowest quality for generating reflections.\n");
+        imageGlobals.picmip = 2;
+        imageGlobals.picmipBump = 2;
+        imageGlobals.picmipSpec = 2;
+    }
+    else
+    {
+        if (r_picmip_manual->current.enabled)
+        {
+            Com_Printf(8, "Picmip is set manually.\n");
+            imageGlobals.picmip = r_picmip->current.integer;
+            imageGlobals.picmipBump = r_picmip_bump->current.integer;
+            imageGlobals.picmipSpec = r_picmip_spec->current.integer;
+        }
+        else
+        {
+            Com_Printf(8, "Texture detail is set automatically.\n");
+            if (texMemInMegs < 0x1C2)
+            {
+                if (texMemInMegs < 0x12C)
+                {
+                    imageGlobals.picmip = texMemInMegs < 0xC8;
+                    imageGlobals.picmipBump = 1;
+                }
+                else
+                {
+                    imageGlobals.picmip = 0;
+                    imageGlobals.picmipBump = 0;
+                }
+                imageGlobals.picmipSpec = 1;
+            }
+            else
+            {
+                imageGlobals.picmip = 0;
+                imageGlobals.picmipBump = 0;
+                imageGlobals.picmipSpec = 0;
+            }
+            if (sysMemInMegs > 0x180)
+                minPicmip = sysMemInMegs <= 0x280;
+            else
+                minPicmip = 2;
+            if (minPicmip)
+            {
+                cappedPicmip = 0;
+                if (imageGlobals.picmip < minPicmip)
+                {
+                    imageGlobals.picmip = minPicmip;
+                    cappedPicmip = 1;
+                }
+                if (imageGlobals.picmipBump < minPicmip)
+                {
+                    imageGlobals.picmipBump = minPicmip;
+                    cappedPicmip = 1;
+                }
+                if (imageGlobals.picmipSpec < minPicmip)
+                {
+                    imageGlobals.picmipSpec = minPicmip;
+                    cappedPicmip = 1;
+                }
+                if (cappedPicmip)
+                    Com_Printf(
+                        8,
+                        "Reducing texture detail based on total system memory of %i MB to improve load times.\n",
+                        sysMemInMegs);
+            }
+            Dvar_SetInt(r_picmip, imageGlobals.picmip);
+            Dvar_SetInt(r_picmip_bump, imageGlobals.picmipBump);
+            Dvar_SetInt(r_picmip_spec, imageGlobals.picmipSpec);
+        }
+        if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
+            imageGlobals.picmipSpec = 3;
+        Com_Printf(
+            8,
+            "Using picmip %i on most textures, %i on normal maps, and %i on specular maps\n",
+            imageGlobals.picmip,
+            imageGlobals.picmipBump,
+            imageGlobals.picmipSpec);
+    }
+}
+
+void R_InitRawImage()
+{
+    rgp.rawImage = Image_AllocProg(11, 4u, 0);
+    if (!rgp.rawImage)
+        MyAssertHandler(".\\r_image.cpp", 1142, 1, "%s", "rgp.rawImage");
 }
 
 void __cdecl R_InitImages()
@@ -1615,15 +1642,16 @@ void __cdecl Image_CreateCubeTexture_PC(
     image->mapType = MAPTYPE_CUBE;
     if (!gfxMetrics.canMipCubemaps)
         mipmapCount = 1;
-    hr = dx.device->CreateCubeTexture(
-        dx.device,
-        edgeLen,
-        mipmapCount,
-        0,
-        imageFormat,
-        D3DPOOL_MANAGED,
-        (IDirect3DCubeTexture9 **)&image->texture,
-        0);
+    //hr = dx.device->CreateCubeTexture(
+    //    dx.device,
+    //    edgeLen,
+    //    mipmapCount,
+    //    0,
+    //    imageFormat,
+    //    D3DPOOL_MANAGED,
+    //    (IDirect3DCubeTexture9 **)&image->texture,
+    //    0);
+    hr = dx.device->CreateCubeTexture(edgeLen, mipmapCount, 0, imageFormat, D3DPOOL_MANAGED, (IDirect3DCubeTexture9 **)&image->texture, 0);
     if (hr < 0)
     {
         v4 = R_ErrorDescription(hr);
@@ -1679,29 +1707,35 @@ void __cdecl Image_Create3DTexture_PC(
     image->mapType = MAPTYPE_3D;
     usage = Image_GetUsage(imageFlags, imageFormat);
     if ((imageFlags & 0x40000) != 0)
-        v7 = dx.device->CreateVolumeTexture(
-            dx.device,
-            width,
-            height,
-            depth,
-            mipmapCount,
-            0,
-            imageFormat,
-            D3DPOOL_SYSTEMMEM,
-            (IDirect3DVolumeTexture9 **)&image->texture,
-            0);
+    {
+        //v7 = dx.device->CreateVolumeTexture(
+        //    dx.device,
+        //    width,
+        //    height,
+        //    depth,
+        //    mipmapCount,
+        //    0,
+        //    imageFormat,
+        //    D3DPOOL_SYSTEMMEM,
+        //    (IDirect3DVolumeTexture9 **)&image->texture,
+        //    0);
+        v7 = dx.device->CreateVolumeTexture(width, height, depth, mipmapCount, 0, imageFormat, D3DPOOL_SYSTEMMEM, (IDirect3DVolumeTexture9 **)&image->texture, 0);
+    }
     else
-        v7 = dx.device->CreateVolumeTexture(
-            dx.device,
-            width,
-            height,
-            depth,
-            mipmapCount,
-            0,
-            imageFormat,
-            (_D3DPOOL)(usage == 0),
-            (IDirect3DVolumeTexture9 **)&image->texture,
-            0);
+    {
+        //v7 = dx.device->CreateVolumeTexture(
+        //    dx.device,
+        //    width,
+        //    height,
+        //    depth,
+        //    mipmapCount,
+        //    0,
+        //    imageFormat,
+        //    (_D3DPOOL)(usage == 0),
+        //    (IDirect3DVolumeTexture9 **)&image->texture,
+        //    0);
+        v7 = dx.device->CreateVolumeTexture(width, height, depth, mipmapCount, 0, imageFormat, (_D3DPOOL)(usage == 0), (IDirect3DVolumeTexture9 **)&image->texture, 0);
+    }
     hr = v7;
     if (v7 < 0)
     {
@@ -1734,5 +1768,13 @@ void __cdecl Image_Create3DTexture_PC(
     }
 }
 
+void __cdecl RB_UnbindAllImages()
+{
+    unsigned int samplerIndex; // [esp+0h] [ebp-4h]
 
-
+    if (dx.device && !dx.deviceLost)
+    {
+        for (samplerIndex = 0; samplerIndex < vidConfig.maxTextureMaps; ++samplerIndex)
+            R_DisableSampler(&gfxCmdBufState, samplerIndex);
+    }
+}

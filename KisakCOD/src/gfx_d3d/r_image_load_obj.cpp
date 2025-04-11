@@ -1,7 +1,88 @@
 #include "r_image.h"
 #include "r_dvars.h"
 #include "r_init.h"
+#include "r_utils.h"
 
+unsigned __int8 *s_imageLoadBuf;
+unsigned int s_imageLoadBytesUsed;
+
+unsigned __int8 *__cdecl Image_AllocTempMemory(int bytes)
+{
+    unsigned __int8 *mem; // [esp+10h] [ebp-4h]
+    unsigned int bytesa; // [esp+1Ch] [ebp+8h]
+
+    bytesa = (bytes + 3) & 0xFFFFFFFC;
+    if (bytesa + s_imageLoadBytesUsed > 0x600000)
+        Com_Error(
+            ERR_DROP,
+            "Needed to allocate at least %.1f MB to load images",
+            (double)(bytesa + s_imageLoadBytesUsed) * 0.00000095367431640625);
+    if (!s_imageLoadBuf)
+    {
+        s_imageLoadBuf = (unsigned __int8 *)Z_VirtualAlloc(6291456, "Image_AllocTempMemory", 18);
+        if (!s_imageLoadBuf)
+            MyAssertHandler(".\\r_image_load_obj.cpp", 207, 0, "%s", "s_imageLoadBuf");
+    }
+    mem = &s_imageLoadBuf[s_imageLoadBytesUsed];
+    s_imageLoadBytesUsed += bytesa;
+    return mem;
+}
+
+void __cdecl Image_FreeTempMemory(unsigned __int8 *mem, int bytes)
+{
+    unsigned int bytesa; // [esp+Ch] [ebp+Ch]
+
+    bytesa = (bytes + 3) & 0xFFFFFFFC;
+    if (&mem[bytesa] != &s_imageLoadBuf[s_imageLoadBytesUsed])
+        MyAssertHandler(".\\r_image_load_obj.cpp", 224, 0, "%s", "mem + bytes == s_imageLoadBuf + s_imageLoadBytesUsed");
+    s_imageLoadBytesUsed -= bytesa;
+}
+
+void __cdecl Image_Generate2D(GfxImage *image, unsigned __int8 *pixels, int width, int height, _D3DFORMAT imageFormat)
+{
+    if (!pixels)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 860, 0, "%s", "pixels");
+    if (width <= 0 || (width & (width - 1)) != 0)
+        MyAssertHandler(
+            ".\\r_image_load_obj.cpp",
+            861,
+            0,
+            "%s\n\t(width) = %i",
+            "(width > 0 && (((width) & ((width) - 1)) == 0))",
+            width);
+    if (height <= 0 || (height & (height - 1)) != 0)
+        MyAssertHandler(
+            ".\\r_image_load_obj.cpp",
+            862,
+            0,
+            "%s\n\t(height) = %i",
+            "(height > 0 && (((height) & ((height) - 1)) == 0))",
+            height);
+    Image_Setup(image, width, height, 1, 3, imageFormat);
+    if (image->cardMemory.platform[0] <= 0)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 867, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
+    Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
+}
+
+void __cdecl Image_ExpandBgr(const unsigned __int8 *src, unsigned int count, unsigned __int8 *dst)
+{
+    if (!src)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 160, 0, "%s", "src");
+    if (!dst)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 161, 0, "%s", "dst");
+    if (!count)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 162, 0, "%s\n\t(count) = %i", "(count > 0)", 0);
+    do
+    {
+        *dst = *src;
+        dst[1] = src[1];
+        dst[2] = src[2];
+        dst[3] = -1;
+        dst += 4;
+        src += 3;
+        --count;
+    } while (count);
+}
 
 unsigned int __cdecl Image_GetCardMemoryAmountForMipLevel(
     _D3DFORMAT format,
@@ -360,4 +441,98 @@ void __cdecl Image_Create2DTexture_PC(
            v8);
     MyAssertHandler(".\\r_image.cpp", 562, 0, "%s\n\t%s", "hr == D3DERR_DEVICELOST || image->texture.map", v9);
   }
+}
+
+GfxImage *__cdecl Image_FindExisting_LoadObj(const char *name)
+{
+    GfxImage *image; // [esp+14h] [ebp-8h]
+    int hashIndex; // [esp+18h] [ebp-4h]
+
+    hashIndex = R_HashAssetName(name) & 0x7FF;
+    for (image = imageGlobals.imageHashTable[hashIndex];
+        image && strcmp(name, image->name);
+        image = imageGlobals.imageHashTable[hashIndex])
+    {
+        hashIndex = ((_WORD)hashIndex + 1) & 0x7FF;
+    }
+    return !Image_IsProg(image) ? image : 0;
+}
+
+bool __cdecl Image_IsProg(GfxImage *image)
+{
+    return image >= g_imageProgs && image < (GfxImage *)&imageGlobals;
+}
+
+void __cdecl Image_Generate3D(
+    GfxImage *image,
+    unsigned __int8 *pixels,
+    int width,
+    int height,
+    int depth,
+    _D3DFORMAT imageFormat)
+{
+    if (!pixels)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 895, 0, "%s", "pixels");
+    if (width <= 0 || (width & (width - 1)) != 0)
+        MyAssertHandler(
+            ".\\r_image_load_obj.cpp",
+            896,
+            0,
+            "%s\n\t(width) = %i",
+            "(width > 0 && (((width) & ((width) - 1)) == 0))",
+            width);
+    if (height <= 0 || (height & (height - 1)) != 0)
+        MyAssertHandler(
+            ".\\r_image_load_obj.cpp",
+            897,
+            0,
+            "%s\n\t(height) = %i",
+            "(height > 0 && (((height) & ((height) - 1)) == 0))",
+            height);
+    if (depth <= 0 || (depth & (depth - 1)) != 0)
+        MyAssertHandler(
+            ".\\r_image_load_obj.cpp",
+            898,
+            0,
+            "%s\n\t(depth) = %i",
+            "(depth > 0 && (((depth) & ((depth) - 1)) == 0))",
+            depth);
+    Image_Setup(image, width, height, depth, 11, imageFormat);
+    if (image->cardMemory.platform[0] <= 0)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 903, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
+    Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
+}
+
+void __cdecl Image_GenerateCube(
+    GfxImage *image,
+    const unsigned __int8 *(*pixels)[15],
+    int edgeLen,
+    _D3DFORMAT imageFormat,
+    unsigned int mipCount)
+{
+    _D3DCUBEMAP_FACES face; // [esp+0h] [ebp-10h]
+    unsigned int mipIndex; // [esp+4h] [ebp-Ch]
+    unsigned int faceIndex; // [esp+8h] [ebp-8h]
+    unsigned __int8 imageFlags; // [esp+Fh] [ebp-1h]
+
+    if (!pixels)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 936, 0, "%s", "pixels");
+    if (edgeLen <= 0)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 937, 0, "%s", "edgeLen > 0");
+    if ((edgeLen & (edgeLen - 1)) != 0)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 938, 0, "%s", "IsPowerOf2( edgeLen )");
+    if (mipCount > 0xF)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 939, 0, "%s", "mipCount <= 15");
+    imageFlags = 5;
+    if (mipCount == 1)
+        imageFlags = 7;
+    Image_Setup(image, edgeLen, edgeLen, 1, imageFlags, imageFormat);
+    if (image->cardMemory.platform[0] <= 0)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 948, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
+    for (faceIndex = 0; faceIndex < 6; ++faceIndex)
+    {
+        face = Image_CubemapFace(faceIndex);
+        for (mipIndex = 0; mipIndex < mipCount; ++mipIndex)
+            Image_UploadData(image, imageFormat, face, mipIndex, (unsigned __int8 *)(&(*pixels)[15 * faceIndex])[mipIndex]);
+    }
 }

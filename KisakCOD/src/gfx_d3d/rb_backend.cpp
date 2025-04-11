@@ -2,61 +2,36 @@
 #include <qcommon/mem_track.h>
 
 #include "rb_logfile.h"
-// __Eg_fltMin@@YAXXZ       82790558 f   gfx_d3d : rb_backend.obj
-// __Eg_negativeZero@@YAXXZ 82790578 f   gfx_d3d : rb_backend.obj
-// __Eg_inc@@YAXXZ          82790598 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleXYZW@@YAXXZ  827905b8 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleYXZW@@YAXXZ  827905d8 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleXZYW@@YAXXZ  827905f8 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleYXWZ@@YAXXZ  82790618 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleXAZC@@YAXXZ  82790638 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleYBWD@@YAXXZ  82790658 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleXYAB@@YAXXZ  82790678 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleZWCD@@YAXXZ  82790698 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleXYZA@@YAXXZ  827906b8 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleYZXW@@YAXXZ  827906d8 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleZXYW@@YAXXZ  827906f8 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleWABW@@YAXXZ  82790718 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleZWAW@@YAXXZ  82790738 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleYZWA@@YAXXZ  82790758 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleXXXX@@YAXXZ  82790778 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleYYYY@@YAXXZ  82790798 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleZZZZ@@YAXXZ  827907b8 f   gfx_d3d : rb_backend.obj
-// __Eg_swizzleWWWW@@YAXXZ  827907d8 f   gfx_d3d : rb_backend.obj
-// __Eg_selectX@@YAXXZ      827907f8 f   gfx_d3d : rb_backend.obj
-// __Eg_selectY@@YAXXZ      82790818 f   gfx_d3d : rb_backend.obj
-// __Eg_selectZ@@YAXXZ      82790838 f   gfx_d3d : rb_backend.obj
-// __Eg_selectW@@YAXXZ      82790858 f   gfx_d3d : rb_backend.obj
-// __Eg_keepYZW@@YAXXZ      82790878 f   gfx_d3d : rb_backend.obj
-// __Eg_keepXZW@@YAXXZ      82790898 f   gfx_d3d : rb_backend.obj
-// __Eg_keepXYW@@YAXXZ      827908b8 f   gfx_d3d : rb_backend.obj
-// __Eg_keepXYZ@@YAXXZ      827908d8 f   gfx_d3d : rb_backend.obj
-// __Eg_keepXY@@YAXXZ       827908f8 f   gfx_d3d : rb_backend.obj
-// __Eg_keepZW@@YAXXZ       82790918 f   gfx_d3d : rb_backend.obj
-// __Eg_keepX@@YAXXZ        82790938 f   gfx_d3d : rb_backend.obj
-// __Eg_keepZ@@YAXXZ        82790958 f   gfx_d3d : rb_backend.obj
-// __Eg_packedMaskQuat@@YAXXZ 82790978 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackSignBitQuat@@YAXXZ 82790998 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackAndQuat@@YAXXZ 827909b8 f   gfx_d3d : rb_backend.obj
-// __Eg_packMantissa@@YAXXZ 827909d8 f   gfx_d3d : rb_backend.obj
-// __Eg_packedMaskSimpleQuat@@YAXXZ 827909f8 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackSignBitSimpleQuat@@YAXXZ 82790a18 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackAndSimpleQuat@@YAXXZ 82790a38 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackQuatRotateMask@@YAXXZ 82790a58 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackQuatSignBit@@YAXXZ 82790a78 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackSimpleQuatRotateMask@@YAXXZ 82790a98 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackQuatRotatePerm@@YAXXZ 82790ab8 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackQuatRotateAdd@@YAXXZ 82790ad8 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackSimpleQuatRotatePerm@@YAXXZ 82790af8 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackSimpleQuatRotateAdd@@YAXXZ 82790b18 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackShiftQuat@@YAXXZ 82790b38 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackSignShiftQuat@@YAXXZ 82790b58 f   gfx_d3d : rb_backend.obj
-// __Eg_unpackShiftSimpleQuat@@YAXXZ 82790b78 f   gfx_d3d : rb_backend.obj
+#include "rb_stats.h"
+#include "r_image.h"
+#include "rb_state.h"
+#include "rb_shade.h"
+#include "r_cmdbuf.h"
+#include "r_utils.h"
+#include <EffectsCore/fx_system.h>
+#include "r_draw_shadowable_light.h"
+#include "r_state.h"
+#include "r_draw_material.h"
+#include "r_shade.h"
+#include "r_setstate_d3d.h"
+#include <win32/win_local.h>
+#include "rb_pixelcost.h"
+#include "rb_drawprofile.h"
+#include <stringed/stringed_hooks.h>
+#include "rb_draw3d.h"
+#include "r_dvars.h"
+#include "r_pixelcost_load_obj.h"
+#include <win32/win_net.h>
+#include <qcommon/threads.h>
+#include "r_workercmds.h"
 //
 // struct GfxBackEndData const *const backEndData 85b28f60     gfx_d3d : rb_backend.obj
 // int marker_rb_backend    85b28f64     gfx_d3d : rb_backend.obj
 // struct materialCommands_t tess 85b28f70     gfx_d3d : rb_backend.obj
 // struct r_backEndGlobals_t backEnd 85b3a790     gfx_d3d : rb_backend.obj
+
+const GfxBackEndData *backEndData;
+GfxRenderTarget gfxRenderTargets[15];
 
 r_backEndGlobals_t backEnd;
 materialCommands_t tess;
@@ -67,6 +42,72 @@ void __cdecl TRACK_rb_backend()
     track_static_alloc_internal(&backEnd, 640, "backEnd", 18);
     track_static_alloc_internal(&tess, 2271584, "tess", 18);
     track_static_alloc_internal(&gfxCmdBufInput, 1072, "gfxCmdBufInput", 18);
+}
+
+bool __cdecl R_GpuFenceTimeout()
+{
+    if (RB_IsGpuFenceFinished())
+        return 1;
+    dx.gpuSyncEnd = __rdtsc();
+    return dx.gpuSyncEnd - dx.gpuSyncStart >= dx.gpuSyncDelay;
+}
+
+void __cdecl R_FinishGpuFence()
+{
+    //Profile_Begin(121);
+    while (!RB_IsGpuFenceFinished())
+        ;
+    //Profile_EndInternal(0);
+}
+
+void __cdecl R_AcquireGpuFenceLock()
+{
+    Sys_EnterCriticalSection(CRITSECT_GPU_FENCE);
+}
+
+void __cdecl R_ReleaseGpuFenceLock()
+{
+    Sys_LeaveCriticalSection(CRITSECT_GPU_FENCE);
+}
+
+void __cdecl R_InsertGpuFence()
+{
+    const char *v0; // eax
+    int hr; // [esp+0h] [ebp-4h]
+
+    if (dx.flushGpuQueryCount)
+        MyAssertHandler(".\\rb_backend.cpp", 2602, 0, "%s", "!dx.flushGpuQueryCount");
+    if (!dx.flushGpuQuery)
+        MyAssertHandler(".\\rb_backend.cpp", 2604, 0, "%s", "dx.flushGpuQuery");
+    do
+    {
+        if (r_logFile && r_logFile->current.integer)
+            RB_LogPrint("dx.flushGpuQuery->Issue( (1 << 0) )\n");
+        hr = dx.flushGpuQuery->Issue(1);
+        if (hr < 0)
+        {
+            do
+            {
+                ++g_disableRendering;
+                v0 = R_ErrorDescription(hr);
+                Com_Error(ERR_FATAL, ".\\rb_backend.cpp (%i) dx.flushGpuQuery->Issue( (1 << 0) ) failed: %s\n", 2605, v0);
+            } while (alwaysfails);
+        }
+    } while (alwaysfails);
+    dx.flushGpuQueryIssued = 1;
+    ++dx.flushGpuQueryCount;
+}
+
+void RB_AbandonGpuFence()
+{
+    if (!dx.flushGpuQuery)
+        MyAssertHandler(".\\rb_backend.cpp", 2615, 0, "%s", "dx.flushGpuQuery");
+    if (!dx.flushGpuQueryIssued)
+        MyAssertHandler(".\\rb_backend.cpp", 2616, 0, "%s", "dx.flushGpuQueryIssued");
+    if (dx.flushGpuQueryCount != 1)
+        MyAssertHandler(".\\rb_backend.cpp", 2617, 0, "%s", "dx.flushGpuQueryCount == 1");
+    dx.flushGpuQueryIssued = 0;
+    --dx.flushGpuQueryCount;
 }
 
 void __cdecl RB_CopyBackendStats()
@@ -332,7 +373,7 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
 
     if (!image)
         MyAssertHandler(".\\rb_backend.cpp", 660, 0, "%s", "image");
-    if (image->width != dword_EA74EFC[5 * context.state->renderTargetId])
+    if (image->width != gfxRenderTargets[context.state->renderTargetId].width)
     {
         v2 = va("%s,%i", image->name, context.state->renderTargetId);
         MyAssertHandler(
@@ -343,7 +384,7 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
             "image->width == gfxRenderTargets[context.state->renderTargetId].width",
             v2);
     }
-    if (image->height != dword_EA74F00[5 * context.state->renderTargetId])
+    if (image->height != gfxRenderTargets[context.state->renderTargetId].height)
     {
         v3 = va("%s,%i", image->name, context.state->renderTargetId);
         MyAssertHandler(
@@ -365,13 +406,14 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
             RB_LogPrint(
                 "context.state->prim.device->StretchRect( gfxRenderTargets[context.state->renderTargetId].surface.color, 0, image"
                 "Surface, 0, D3DTEXF_LINEAR )\n");
-        hr = context.state->prim.device->StretchRect(
-            context.state->prim.device,
-            (IDirect3DSurface9 *)dword_EA74EF4[5 * context.state->renderTargetId],
-            0,
-            imageSurface,
-            0,
-            D3DTEXF_LINEAR);
+        //hr = context.state->prim.device->StretchRect(
+        //    context.state->prim.device,
+        //    gfxRenderTargets[context.state->renderTargetId].surface.color,
+        //    0,
+        //    imageSurface,
+        //    0,
+        //    D3DTEXF_LINEAR);
+        hr = context.state->prim.device->StretchRect(gfxRenderTargets[context.state->renderTargetId].surface.color, 0, imageSurface, 0, D3DTEXF_LINEAR);
         if (hr < 0)
         {
             do
@@ -391,7 +433,8 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("imageSurface->Release()\n");
-        v6 = imageSurface->Release(imageSurface);
+        //v6 = imageSurface->Release(imageSurface);
+        v6 = imageSurface->Release();
         if (v6 < 0)
         {
             do
@@ -638,13 +681,13 @@ void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const
     int newline; // [esp+34h] [ebp-8h]
     int rowIndex; // [esp+38h] [ebp-4h]
 
-    if (dx.device->CreateOffscreenPlainSurface(dx.device, cols, rows, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &rawSurf, 0) >= 0)
+    if (dx.device->CreateOffscreenPlainSurface(cols, rows, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &rawSurf, 0) >= 0)
     {
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("rawSurf->LockRect( &lockedRect, 0, 0x00002000L )\n");
-            v8 = rawSurf->LockRect(rawSurf, &lockedRect, 0, 0x2000u);
+            v8 = rawSurf->LockRect(&lockedRect, 0, 0x2000u);
             if (v8 < 0)
             {
                 do
@@ -671,20 +714,22 @@ void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const
             }
             dest += newline;
         }
-        rawSurf->UnlockRect(rawSurf);
+        rawSurf->UnlockRect();
         dstRect.left = x;
         dstRect.top = y;
         dstRect.right = w + x;
         dstRect.bottom = h + y;
-        ((void(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, IDirect3DSurface9 *, unsigned int, IDirect3DSurface9 *, tagRECT *, int))dx.device->StretchRect)(
-            dx.device,
-            dx.device,
-            rawSurf,
-            0,
-            stru_EA74F04.surface.color,
-            &dstRect,
-            2);
-        rawSurf->Release(rawSurf);
+        //((void(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, IDirect3DSurface9 *, _DWORD, IDirect3DSurface9 *, tagRECT *, int))dx.device->StretchRect)(
+        //    dx.device,
+        //    dx.device,
+        //    rawSurf,
+        //    0,
+        //    gfxRenderTargets[1].surface.color,
+        //    &dstRect,
+        //    2);
+        dx.device->StretchRect(rawSurf, 0, gfxRenderTargets[1].surface.color, &dstRect, D3DTEXF_LINEAR);
+
+        rawSurf->Release();
     }
 }
 
@@ -1053,7 +1098,7 @@ void __cdecl RB_DrawPoints2D(const GfxCmdDrawPoints *cmd)
     float y; // [esp+38h] [ebp-14h]
     float size; // [esp+40h] [ebp-Ch]
     int pointIndex; // [esp+44h] [ebp-8h]
-    GfxPointVertex *v; // [esp+48h] [ebp-4h]
+    const GfxPointVertex *v; // [esp+48h] [ebp-4h]
 
     if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
         MyAssertHandler(".\\rb_backend.cpp", 1338, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
@@ -1127,7 +1172,7 @@ void __cdecl RB_DrawPoints3D(const GfxCmdDrawPoints *cmd)
     float offset; // [esp+60h] [ebp-10h]
     float offset_4; // [esp+64h] [ebp-Ch]
     int pointIndex; // [esp+68h] [ebp-8h]
-    GfxPointVertex *v; // [esp+6Ch] [ebp-4h]
+    const GfxPointVertex *v; // [esp+6Ch] [ebp-4h]
 
     RB_SetTessTechnique(rgp.pointMaterial, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_DEBUG);
@@ -1410,7 +1455,7 @@ void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState)
     cmd = (const GfxCmdSetMaterialColor *)execState->cmd;
     if (tess.indexCount)
         RB_EndTessSurface();
-    R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0x28u, cmd->color);
+    R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0x28u, (float*)cmd->color);
     execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
 }
 
@@ -1455,6 +1500,17 @@ void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState)
     execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
 }
 
+GfxColor color_table[8] =
+{
+  { 4278190080u },
+  { 4284243199u },
+  { 4278255360u },
+  { 4278255615u },
+  { 4294901760u },
+  { 4294967040u },
+  { 4294925567u },
+  { 4294967295u }
+}; // weak
 void __cdecl RB_LookupColor(unsigned __int8 c, GfxColor *color)
 {
     GfxColor *p_color_axis; // [esp+8h] [ebp-Ch]
@@ -1496,6 +1552,14 @@ void __cdecl RB_DrawText(const char *text, Font_s *font, float x, float y, GfxCo
     DrawText2D(text, x, y, font, 1.0, 1.0, 0.0, 1.0, color, 0x7FFFFFFF, 0, 0, 0, 0.0, color, 0, 0, 0, 0, 0, 0);
 }
 
+const unsigned __int8 MY_ALTCOLOR_TWO[4] = { 0xE6, 0xFF, 0xE6, 0xDC };
+const float MY_OFFSETS_0[4][2] =
+{
+    { -1.0f, 1.0f },
+    { -1.0f, 1.0f },
+    { 1.0f, -1.0f },
+    { 1.0f, 1.0f }
+};
 void __cdecl DrawText2D(
     const char *text,
     float x,
@@ -1785,7 +1849,7 @@ void __cdecl DrawText2D(
                                     for (offIdx = 0; offIdx < 4; ++offIdx)
                                     {
                                         xRot = xa + xAdj + resizeOffsX + (float)MY_OFFSETS_0[offIdx][0] * 2.0 * xScale;
-                                        yRot = ya + yAdj + resizeOffsY + flt_8F6728[2 * offIdx] * 2.0 * yScale;
+                                        yRot = ya + yAdj + resizeOffsY + (float)MY_OFFSETS_0[offIdx][1] * 2.0 * yScale;
                                         RotateXY(cosAngle, sinAngle, startX, startY, xRot, yRot, &xRot, &yRot);
                                         if (!glowMaterial)
                                             MyAssertHandler(".\\rb_backend.cpp", 2385, 0, "%s", "glowMaterial");
@@ -2613,7 +2677,8 @@ GfxIndexBufferState *RB_SwapBuffers()
             "(dx.targetWindowIndex >= 0 && dx.targetWindowIndex < dx.windowCount)",
             dx.targetWindowIndex);
     //Profile_Begin(128);
-    hr = dx.windows[dx.targetWindowIndex].swapChain->Present(dx.windows[dx.targetWindowIndex].swapChain, 0, 0, 0, 0, 0);
+    //hr = dx.windows[dx.targetWindowIndex].swapChain->Present(dx.windows[dx.targetWindowIndex].swapChain, 0, 0, 0, 0, 0);
+    hr = dx.windows[dx.targetWindowIndex].swapChain->Present(0, 0, 0, 0, 0);
     //Profile_EndInternal(0);
     if (hr < 0 && hr != -2005530520)
     {
@@ -2817,7 +2882,16 @@ void __cdecl RB_CallExecuteRenderCommands()
     //Profile_EndInternal(0);
 }
 
+void RB_RenderThreadIdle()
+{
+    if (sys_smp_allowed->current.enabled && r_smp_backend->current.enabled)
+        R_ProcessWorkerCmdsWithTimeout(Sys_IsMainThreadReady, 1);
+    else
+        Sys_WaitForMainThread();
+}
+
 // positive sp value has been detected, the output may be wrong!
+const void *data;
 void __cdecl  RB_RenderThread(unsigned int threadContext)
 {
     void *Value; // eax
@@ -2859,9 +2933,9 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
             //Profile_EndInternal(0);
             if (Sys_FinishRenderer())
             {
-                data = Sys_RendererSleep();
+                data = (void*)Sys_RendererSleep();
                 if (data)
-                    RB_RenderCommandFrame(data);
+                    RB_RenderCommandFrame((GfxBackEndData*)data);
                 Sys_StopRenderer();
                 CL_ResetStats_f();
                 RB_RenderThreadIdle();
@@ -2871,9 +2945,9 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
             {
                 if (!data)
                 {
-                    data = Sys_RendererSleep();
+                    data = (void*)Sys_RendererSleep();
                     if (data)
-                        RB_RenderCommandFrame(data);
+                        RB_RenderCommandFrame((GfxBackEndData *)data);
                 }
                 if (r_glob.screenUpdateNotify)
                     MyAssertHandler(".\\rb_backend.cpp", 3439, 0, "%s", "!r_glob.screenUpdateNotify");
@@ -2901,15 +2975,30 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
         LABEL_39:
             data = 0;
         }
-        data = Sys_RendererSleep();
+        data = (void*)Sys_RendererSleep();
         if (data)
         {
-            RB_RenderCommandFrame(data);
+            RB_RenderCommandFrame((GfxBackEndData *)data);
             goto LABEL_39;
         }
         CL_ResetStats_f();
         R_ProcessWorkerCmdsWithTimeout(Sys_RendererReady, 0);
     }
+}
+
+BOOL __cdecl RB_BackendTimeout()
+{
+    BOOL v1; // [esp+0h] [ebp-Ch]
+    _BYTE v2[4]; // [esp+8h] [ebp-4h] BYREF
+
+    if (dx.swapFence)
+    {
+        //v1 = dx.swapFence->GetData(dx.swapFence, v2, 4u, 1u) == 1;
+        v1 = dx.swapFence->GetData(v2, 4, 1) == 1;
+    }
+    else
+        v1 = 0;
+    return !v1;
 }
 
 void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)

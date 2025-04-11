@@ -129,3 +129,4 @@ void  R_DrawCall(
     GfxCmdBuf *cmdBuf,
     GfxCmdBuf *prepassCmdBuf);
 void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int constant, float x, float y, float z, float w);
+void __cdecl R_SetAlphaAntiAliasingState(IDirect3DDevice9 *device, __int16 stateBits0);

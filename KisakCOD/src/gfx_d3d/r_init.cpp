@@ -4,6 +4,7 @@
 
 //int g_disableRendering   85825680     gfx_d3d:r_init.obj
 //struct GfxAssets gfxAssets 85825684     gfx_d3d :r_init.obj
+GfxAssets gfxAssets;
 //struct DxGlobals dx        85825688     gfx_d3d :r_init.obj
 DxGlobals dx;
 //struct r_global_permanent_t rgp 85825700     gfx_d3d :r_init.obj
@@ -22,6 +23,11 @@ GfxConfiguration gfxCfg;
 GfxGlobals r_glob;
 
 int g_disableRendering;
+
+bool __cdecl R_IsUsingAdaptiveGpuSync()
+{
+    return dx.gpuSync == 1;
+}
 
 void __cdecl TRACK_r_init()
 {

@@ -26,6 +26,84 @@ enum MaterialVertexDeclType : __int32
     VERTDECL_COUNT = 0x10,
 };
 
+struct GfxCmdSetMaterialColor // sizeof=0x14
+{
+    GfxCmdHeader header;
+    float color[4];
+};
+
+struct GfxCmdDrawLines // sizeof=0x28
+{
+    GfxCmdHeader header;
+    __int16 lineCount;
+    unsigned __int8 width;
+    unsigned __int8 dimensions;
+    GfxPointVertex verts[2];
+};
+
+struct GfxCmdBlendSavedScreenFlashed // sizeof=0x1C
+{
+    GfxCmdHeader header;
+    float intensityWhiteout;
+    float intensityScreengrab;
+    float s0;
+    float t0;
+    float ds;
+    float dt;
+};
+
+struct GfxCmdBlendSavedScreenBlurred // sizeof=0x1C
+{
+    GfxCmdHeader header;
+    int fadeMsec;
+    float s0;
+    float t0;
+    float ds;
+    float dt;
+    int screenTimerId;
+};
+
+struct GfxCmdDrawQuadPic // sizeof=0x2C
+{
+    GfxCmdHeader header;
+    const Material *material;
+    float verts[4][2];
+    GfxColor color;
+};
+
+struct GfxCmdStretchPicRotateST // sizeof=0x34
+{
+    GfxCmdHeader header;
+    const Material *material;
+    float x;
+    float y;
+    float w;
+    float h;
+    float centerS;
+    float centerT;
+    float radiusST;
+    float scaleFinalS;
+    float scaleFinalT;
+    GfxColor color;
+    float rotation;
+};
+
+struct GfxCmdStretchPicRotateXY // sizeof=0x30
+{
+    GfxCmdHeader header;
+    const Material *material;
+    float x;
+    float y;
+    float w;
+    float h;
+    float s0;
+    float t0;
+    float s1;
+    float t1;
+    GfxColor color;
+    float rotation;
+};
+
 struct __declspec(align(16)) GfxCmdBufSourceState // sizeof=0xF00
 {                                       // ...
     GfxCodeMatrices matrices;
@@ -437,6 +515,12 @@ void __cdecl RB_SetBspImages();
 void __cdecl RB_InitCodeImages();
 void __cdecl RB_RegisterBackendAssets();
 
+void RB_AbandonGpuFence();
+void __cdecl R_InsertGpuFence();
+bool __cdecl R_GpuFenceTimeout();
+void __cdecl R_FinishGpuFence();
+void __cdecl R_AcquireGpuFenceLock();
+void __cdecl R_ReleaseGpuFenceLock();
 
 
 extern r_backEndGlobals_t backEnd;

@@ -7,6 +7,11 @@
 #include <Windows.h>
 #include <d3d9.h>
 
+struct GfxAssets // sizeof=0x4
+{                                       // ...
+    IDirect3DQuery9 *pixelCountQuery;   // ...
+};
+
 struct GfxWindowParms // sizeof=0x28
 {                                       // ...
     HWND__ *hwnd;                       // ...
@@ -278,6 +283,7 @@ struct GfxGlobals // sizeof=0x10
 };
 
 void __cdecl TRACK_r_init();
+bool __cdecl R_IsUsingAdaptiveGpuSync();
 void __cdecl  R_FatalInitError(const char *msg);
 void __cdecl  R_FatalLockError(HRESULT hr);
 const char *__cdecl R_ErrorDescription(HRESULT hr);
@@ -326,3 +332,5 @@ extern int g_disableRendering;
 extern r_globals_t rg;
 extern vidConfig_t vidConfig;
 extern GfxConfiguration gfxCfg;
+extern GfxAssets gfxAssets;
+extern GfxGlobals r_glob;

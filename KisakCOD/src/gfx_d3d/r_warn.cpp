@@ -26,6 +26,9 @@ void R_WarnOncePerFrame(GfxWarningType warnType, ...)
     }
 }
 
+unsigned int frameCount;
+int previous_0;
+float frameRate;
 double __cdecl R_UpdateFrameRate()
 {
     int frameTime; // [esp+0h] [ebp-8h]

@@ -11,6 +11,7 @@
 #include "r_dvars.h"
 
 #include "r_scene.h"
+#include <universal/profile.h>
 
 static bool g_processCodeMesh;
 static bool g_processMarkMesh;
@@ -379,4 +380,167 @@ void __cdecl R_AddMarkMeshDrawSurf(
     {
         R_WarnOncePerFrame(R_WARN_NONLIGHTMAP_MARK_MATERIAL);
     }
+}
+
+struct GfxSortDrawSurfsInterface // sizeof=0x0
+{
+};
+
+void __cdecl ShortSort /*ShortSortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>*/(GfxDrawSurf *lo, GfxDrawSurf *hi)
+{
+    int packed_high; // edx
+    unsigned __int64 v3; // [esp+4h] [ebp-34h]
+    unsigned __int64 packed; // [esp+Ch] [ebp-2Ch]
+    GfxDrawSurf *max; // [esp+1Ch] [ebp-1Ch]
+    unsigned __int64 maxKey; // [esp+20h] [ebp-18h]
+    GfxDrawSurf *walk; // [esp+34h] [ebp-4h]
+
+    while (hi > lo)
+    {
+        max = lo;
+        LODWORD(maxKey) = lo->packed;
+        HIDWORD(maxKey) = ((~((lo->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(lo->packed) & 0xF03FFFFF;
+        for (walk = lo + 1; walk <= hi; ++walk)
+        {
+            packed = walk->packed;
+            HIDWORD(packed) = ((~((walk->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(walk->packed) & 0xF03FFFFF;
+            if (maxKey < packed)
+            {
+                LODWORD(maxKey) = walk->packed;
+                HIDWORD(maxKey) = ((~((walk->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(walk->packed) & 0xF03FFFFF;
+                max = walk;
+            }
+        }
+        v3 = max->packed;
+        packed_high = HIDWORD(hi->packed);
+        *(_DWORD *)&max->fields = hi->packed;
+        HIDWORD(max->packed) = packed_high;
+        hi->packed = v3;
+        --hi;
+    }
+}
+
+void __cdecl SortMyShit /*qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>*/(GfxDrawSurf *elems, int count)
+{
+    int packed_high; // edx
+    GfxDrawSurf *v3; // eax
+    int v4; // eax
+    int v5; // ecx
+    GfxDrawSurf *v6; // edx
+    GfxDrawSurf v7; // [esp+4h] [ebp-180h]
+    int fields; // [esp+Ch] [ebp-178h]
+    int v9; // [esp+10h] [ebp-174h]
+    GfxDrawSurf v10; // [esp+14h] [ebp-170h]
+    GfxDrawSurf v11; // [esp+1Ch] [ebp-168h]
+    GfxDrawSurf v12; // [esp+2Ch] [ebp-158h]
+    unsigned __int64 pivotKey; // [esp+64h] [ebp-120h]
+    GfxDrawSurf *loWalk; // [esp+74h] [ebp-110h]
+    int sortCount; // [esp+78h] [ebp-10Ch]
+    GfxDrawSurf *hiEnd; // [esp+7Ch] [ebp-108h]
+    GfxDrawSurf *hiWalk; // [esp+80h] [ebp-104h]
+    GfxDrawSurf *loStack[30]; // [esp+84h] [ebp-100h]
+    GfxDrawSurf *hiStack[30]; // [esp+FCh] [ebp-88h]
+    int stackPos; // [esp+178h] [ebp-Ch]
+    GfxDrawSurf *loEnd; // [esp+17Ch] [ebp-8h]
+    GfxDrawSurf *mid; // [esp+180h] [ebp-4h]
+
+    if (count >= 2)
+    {
+        stackPos = 0;
+        loEnd = elems;
+        hiEnd = &elems[count - 1];
+        while (1)
+        {
+            while (1)
+            {
+                sortCount = hiEnd - loEnd + 1;
+                if (sortCount <= 8)
+                {
+                    //ShortSortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>(loEnd, hiEnd);
+                    ShortSort(loEnd, hiEnd);
+                    goto LABEL_22;
+                }
+                mid = &loEnd[sortCount / 2];
+                v12.fields = mid->fields;
+                packed_high = HIDWORD(loEnd->packed);
+                v3 = mid;
+                *(_DWORD *)&mid->fields = loEnd->packed;
+                HIDWORD(v3->packed) = packed_high;
+                loEnd->fields = v12.fields;
+                loWalk = loEnd;
+                hiWalk = hiEnd + 1;
+                LODWORD(pivotKey) = loEnd->packed;
+                HIDWORD(pivotKey) = ((~((loEnd->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(loEnd->packed) & 0xF03FFFFF;
+                while (1)
+                {
+                    do
+                    {
+                        if (++loWalk > hiEnd)
+                            break;
+                        v11.fields = loWalk->fields;
+                        HIDWORD(v11.packed) = ((~((loWalk->packed >> 54) & 0x3F) & 0x3F) << 22)
+                            | HIDWORD(loWalk->packed) & 0xF03FFFFF;
+                    } while (v11.packed <= pivotKey);
+                    do
+                    {
+                        if (loEnd >= --hiWalk)
+                            break;
+                        v10.fields = hiWalk->fields;
+                        HIDWORD(v10.packed) = ((~((hiWalk->packed >> 54) & 0x3F) & 0x3F) << 22)
+                            | HIDWORD(hiWalk->packed) & 0xF03FFFFF;
+                    } while (pivotKey <= v10.packed);
+                    if (hiWalk < loWalk)
+                        break;
+                    fields = (int)loWalk->packed;
+                    v9 = HIDWORD(loWalk->packed);
+                    v4 = HIDWORD(hiWalk->packed);
+                    *(_DWORD *)&loWalk->fields = hiWalk->packed;
+                    HIDWORD(loWalk->packed) = v4;
+                    *(_DWORD *)&hiWalk->fields = fields;
+                    HIDWORD(hiWalk->packed) = v9;
+                }
+                v7.fields = loEnd->fields;
+                v5 = HIDWORD(hiWalk->packed);
+                v6 = loEnd;
+                *(_DWORD *)&loEnd->fields = hiWalk->packed;
+                HIDWORD(v6->packed) = v5;
+                hiWalk->fields = v7.fields;
+                if (&hiWalk[-1] - loEnd >= hiEnd - loWalk)
+                    break;
+                if (loWalk < hiEnd)
+                {
+                    loStack[stackPos] = loWalk;
+                    hiStack[stackPos++] = hiEnd;
+                }
+                if (loEnd >= &hiWalk[-1])
+                {
+                LABEL_22:
+                    if (--stackPos < 0)
+                        return;
+                    loEnd = loStack[stackPos];
+                    hiEnd = hiStack[stackPos];
+                }
+                else
+                {
+                    hiEnd = hiWalk - 1;
+                }
+            }
+            if (loEnd <= hiWalk)
+            {
+                loStack[stackPos] = loEnd;
+                hiStack[stackPos++] = hiWalk - 1;
+            }
+            if (loWalk >= hiEnd)
+                goto LABEL_22;
+            loEnd = loWalk;
+        }
+    }
+}
+
+void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount)
+{
+    Profile_Begin(88);
+    //qsortArray<GfxSortDrawSurfsInterface, GfxDrawSurf>(drawSurfList, surfCount);
+    SortMyShit(drawSurfList, surfCount);
+    Profile_EndInternal(0);
 }

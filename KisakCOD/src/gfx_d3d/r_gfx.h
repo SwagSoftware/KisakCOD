@@ -167,6 +167,14 @@ enum MapType : __int32
 
 struct Picmip // sizeof=0x2
 {                                       // ...
+    Picmip()
+    {
+    }
+    Picmip(int i)
+    {
+        platform[0] = i;
+        platform[1] = i;
+    }
     unsigned __int8 platform[2];        // ...
 };
 
@@ -325,6 +333,10 @@ union GfxDrawSurf // sizeof=0x8
     operator const GfxDrawSurfFields()
     {
         return fields;
+    }
+    operator int()
+    {
+        return packed;
     }
     GfxDrawSurfFields fields;
     unsigned __int64 packed;

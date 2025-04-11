@@ -36,3 +36,5 @@ void __cdecl R_AddMarkMeshDrawSurf(
     const GfxMarkContext *context,
     unsigned __int16 *indices,
     unsigned int indexCount);
+
+void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount);

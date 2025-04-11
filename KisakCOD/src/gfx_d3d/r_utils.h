@@ -43,5 +43,8 @@ void __cdecl Byte4UnpackBgra(const unsigned __int8 *from, float *to);
 
 void __cdecl R_SetShadowLookupMatrix(GfxCmdBufSourceState *source, const GfxMatrix *matrix);
 void __cdecl R_Set2D(GfxCmdBufSourceState *source);
+void __cdecl R_Set3D(GfxCmdBufSourceState *source);
 void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport);
 GfxCmdBufSourceState *__cdecl R_GetActiveWorldMatrix(GfxCmdBufSourceState *source);
+
+void __cdecl R_MatrixIdentity44(float (*out)[4]);

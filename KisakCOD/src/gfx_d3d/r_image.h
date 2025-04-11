@@ -1,6 +1,24 @@
 #pragma once
 #include "r_material.h"
 
+const char *g_imageProgNames[14] =
+{
+  "$shadow_cookie",
+  "$shadow_cookie_blur",
+  "$shadowmap_sun",
+  "$shadowmap_spot",
+  "$floatz",
+  "$post_effect_0",
+  "$post_effect_1",
+  "$pingpong_0",
+  "$pingpong_1",
+  "$resolved_scene",
+  "$savedscreen",
+  "$raw",
+  "$model_lighting",
+  "$model_lighting1"
+}; // idb
+
 const char *imageTypeName[10] =
 {
     "misc",
@@ -108,6 +126,8 @@ void __cdecl Image_Create2DTexture_PC(
     int imageFlags,
     _D3DFORMAT imageFormat);
 
+void __cdecl RB_UnbindAllImages();
+
 
 // r_image_utils
 void __cdecl R_DownsampleMipMapBilinear(
@@ -153,6 +173,25 @@ unsigned int __cdecl Image_GetCardMemoryAmountForMipLevel(
     unsigned int mipHeight,
     unsigned int mipDepth);
 void __cdecl Image_TrackTotalMemory(GfxImage *image, int platform, int memory);
+unsigned __int8 *__cdecl Image_AllocTempMemory(int bytes);
+void __cdecl Image_FreeTempMemory(unsigned __int8 *mem, int bytes);
+GfxImage *__cdecl Image_FindExisting_LoadObj(const char *name);
+bool __cdecl Image_IsProg(GfxImage *image);
+void __cdecl Image_ExpandBgr(const unsigned __int8 *src, unsigned int count, unsigned __int8 *dst);
+void __cdecl Image_Generate2D(GfxImage *image, unsigned __int8 *pixels, int width, int height, _D3DFORMAT imageFormat);
+void __cdecl Image_Generate3D(
+    GfxImage *image,
+    unsigned __int8 *pixels,
+    int width,
+    int height,
+    int depth,
+    _D3DFORMAT imageFormat);
+void __cdecl Image_GenerateCube(
+    GfxImage *image,
+    const unsigned __int8 *(*pixels)[15],
+    int edgeLen,
+    _D3DFORMAT imageFormat,
+    unsigned int mipCount);
 
 // r_image_decode
 unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader);
@@ -212,7 +251,7 @@ void __cdecl Image_LoadWavelet(
 void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst, WaveletDecode *decode);
 void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decode);
 int __cdecl Wavelet_DecodeValue(
-    const WaveletHuffmanDecode *decodeTable,
+    const struct WaveletHuffmanDecode *decodeTable,
     unsigned __int16 bitCount,
     int bias,
     WaveletDecode *decode);
@@ -232,3 +271,29 @@ void __cdecl Image_DecodeWavelet(
 
 extern ImgGlobals imageGlobals;
 extern GfxImage g_imageProgs[14];
+
+
+
+// r_image_load_common
+unsigned int __cdecl Image_CubemapFace(unsigned int faceIndex);
+void __cdecl Image_GetPicmip(const GfxImage *image, Picmip *picmip);
+void __cdecl Image_PicmipForSemantic(unsigned __int8 semantic, Picmip *picmip);
+int __cdecl Image_SourceBytesPerSlice_PC(_D3DFORMAT format, int width, int height);
+void __cdecl Image_Upload3D_CopyData_PC(
+    const GfxImage *image,
+    _D3DFORMAT format,
+    unsigned int mipLevel,
+    unsigned __int8 *src);
+void __cdecl Image_Upload2D_CopyDataBlock_PC(
+    int width,
+    int height,
+    unsigned __int8 *src,
+    _D3DFORMAT format,
+    int dstPitch,
+    unsigned __int8 *dst);
+void __cdecl Image_Upload2D_CopyData_PC(
+    const GfxImage *image,
+    _D3DFORMAT format,
+    _D3DCUBEMAP_FACES face,
+    unsigned int mipLevel,
+    unsigned __int8 *src);

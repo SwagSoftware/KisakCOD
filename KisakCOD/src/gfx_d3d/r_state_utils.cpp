@@ -3,6 +3,7 @@
 #include <aim_assist/aim_assist.h>
 #include "r_state.h"
 #include "r_dvars.h"
+#include "r_cmdbuf.h"
 
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
 {
@@ -384,4 +385,43 @@ double __cdecl R_GetBaseLodDist(const float* origin)
 
     Vec3Sub(rg.lodParms.origin, origin, diff);
     return Vec3Length(diff);
+}
+
+const float g_identityMatrix44[4][4] =
+{
+  { 1.0, 0.0, 0.0, 0.0 },
+  { 0.0, 1.0, 0.0, 0.0 },
+  { 0.0, 0.0, 1.0, 0.0 },
+  { 0.0, 0.0, 0.0, 1.0 }
+}; // idb
+void __cdecl R_MatrixIdentity44(float (*out)[4])
+{
+    if (!out)
+        MyAssertHandler(".\\r_state_utils.cpp", 18, 0, "%s", "out");
+    qmemcpy(out, g_identityMatrix44, 0x40u);
+}
+
+void __cdecl R_Set3D(GfxCmdBufSourceState *source)
+{
+    if (!source->viewParms3D)
+        MyAssertHandler(".\\r_state_utils.cpp", 240, 0, "%s", "source->viewParms3D");
+    if (source->viewMode != VIEW_MODE_3D)
+    {
+        source->viewMode = VIEW_MODE_3D;
+        qmemcpy(&source->viewParms, source->viewParms3D, sizeof(source->viewParms));
+        if (source->viewParms.origin[3] == 0.0)
+        {
+            source->eyeOffset[0] = 0.0;
+            source->eyeOffset[1] = 0.0;
+            source->eyeOffset[2] = 0.0;
+        }
+        else
+        {
+            source->eyeOffset[0] = source->viewParms.origin[0];
+            source->eyeOffset[1] = source->viewParms.origin[1];
+            source->eyeOffset[2] = source->viewParms.origin[2];
+        }
+        source->eyeOffset[3] = 1.0;
+        R_CmdBufSet3D(source);
+    }
 }

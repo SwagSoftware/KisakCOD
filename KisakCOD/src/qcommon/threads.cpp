@@ -5,6 +5,7 @@
 #include <universal/assertive.h>
 
 #include <client_mp/client_mp.h>
+#include <gfx_d3d/rb_drawprofile.h>
 
 void Com_InitThreadData(int threadContext);
 unsigned int Win_InitThreads();
@@ -296,7 +297,7 @@ int __cdecl Sys_RendererSleep()
     return InterlockedExchange(&smpData, 0);
 }
 
-bool __cdecl Sys_RendererReady()
+int __cdecl Sys_RendererReady()
 {
     return smpData != 0;
 }
@@ -413,7 +414,7 @@ bool __cdecl Sys_FinishRenderer()
     return !Sys_WaitForSingleObjectTimeout(&noThreadOwnershipEvent, 0);
 }
 
-bool __cdecl Sys_IsMainThreadReady()
+int __cdecl Sys_IsMainThreadReady()
 {
     return Sys_WaitForSingleObjectTimeout(&noThreadOwnershipEvent, 0);
 }
@@ -488,7 +489,7 @@ void __cdecl Sys_ResetWorkerCmdEvent()
     Sys_ResetEvent(backendEvent);
 }
 
-bool __cdecl Sys_WaitBackendEvent()
+int __cdecl Sys_WaitBackendEvent()
 {
     return Sys_WaitForSingleObjectTimeout(&backendEvent[1], 0);
 }

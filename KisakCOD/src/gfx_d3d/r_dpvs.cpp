@@ -1,5 +1,9 @@
 #include "r_dpvs.h"
 #include <qcommon/mem_track.h>
+#include "r_model_lighting.h"
+#include "r_dvars.h"
+#include <DynEntity/DynEntity_client.h>
+#include "r_drawsurf.h"
 
 
 DpvsGlobals dpvsGlob;

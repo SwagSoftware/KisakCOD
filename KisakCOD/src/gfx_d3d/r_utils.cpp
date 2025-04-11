@@ -2,6 +2,7 @@
 #include <universal/com_memory.h>
 #include <aim_assist/aim_assist.h>
 #include "r_dvars.h"
+#include <universal/surfaceflags.h>
 
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
 {
@@ -154,20 +155,20 @@ int __cdecl R_PickMaterial(
     if ((_BYTE)v8 && index < 29)
         strncpy((unsigned __int8 *)surfaceFlags, (unsigned __int8 *)infoParms[index - 1].name, charLimit);
     else
-        strncpy((unsigned __int8 *)surfaceFlags, "^1default^7", charLimit);
+        strncpy((unsigned __int8 *)surfaceFlags, (unsigned __int8 *)"^1default^7", charLimit);
     if (surfaceFlags[charLimit - 1])
         return 0;
     surfaceFlagsLen = strlen(surfaceFlags);
     if ((trace.contents & 1) != 0)
-        strncpy((unsigned __int8 *)contents, "solid", charLimit);
+        strncpy((unsigned __int8 *)contents, (unsigned __int8 *)"solid", charLimit);
     else
-        strncpy((unsigned __int8 *)contents, "^3nonsolid^7", charLimit);
+        strncpy((unsigned __int8 *)contents, (unsigned __int8 *)"^3nonsolid^7", charLimit);
     if (contents[charLimit - 1])
         return 0;
     contentsLen = strlen(contents);
     for (i = 28; infoParms[i].name; ++i)
     {
-        if ((trace.surfaceFlags & dword_94F4B0[5 * i]) != 0)
+        if ((trace.surfaceFlags & infoParms[i].surfaceFlags) != 0)
         {
             surfaceFlags[surfaceFlagsLen++] = 32;
             strncpy(
@@ -178,7 +179,7 @@ int __cdecl R_PickMaterial(
                 return 0;
             surfaceFlagsLen += strlen(&surfaceFlags[surfaceFlagsLen]);
         }
-        if ((trace.contents & dword_94F4B4[5 * i]) != 0)
+        if ((trace.contents & infoParms[i].contents) != 0)
         {
             contents[contentsLen++] = 32;
             strncpy((unsigned __int8 *)&contents[contentsLen], (unsigned __int8 *)infoParms[i].name, charLimit - contentsLen);

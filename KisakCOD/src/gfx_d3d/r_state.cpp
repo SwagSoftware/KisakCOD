@@ -2858,3 +2858,46 @@ void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int consta
     R_DirtyCodeConstant(source, constant);
 }
 
+
+void __cdecl R_SetAlphaAntiAliasingState(IDirect3DDevice9 *device, __int16 stateBits0)
+{
+    const char *v2; // eax
+    int hr; // [esp+0h] [ebp-Ch]
+    _D3DFORMAT aaAlphaFormat; // [esp+4h] [ebp-8h]
+
+    if ((stateBits0 & 0xF00) != 0)
+    {
+        aaAlphaFormat = D3DFMT_UNKNOWN;
+    }
+    else if (r_aaAlpha->current.integer == 2)
+    {
+        aaAlphaFormat = 1094800211;
+    }
+    else
+    {
+        aaAlphaFormat = 1129272385;
+    }
+    do
+    {
+        if (r_logFile && r_logFile->current.integer)
+            RB_LogPrint("device->SetRenderState( D3DRS_ADAPTIVETESS_Y, aaAlphaFormat )\n");
+        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, _D3DFORMAT))device->SetRenderState)(
+            device,
+            device,
+            181,
+            aaAlphaFormat);
+        if (hr < 0)
+        {
+            do
+            {
+                ++g_disableRendering;
+                v2 = R_ErrorDescription(hr);
+                Com_Error(
+                    ERR_FATAL,
+                    ".\\r_state.cpp (%i) device->SetRenderState( D3DRS_ADAPTIVETESS_Y, aaAlphaFormat ) failed: %s\n",
+                    826,
+                    v2);
+            } while (alwaysfails);
+        }
+    } while (alwaysfails);
+}
