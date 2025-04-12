@@ -1,6 +1,11 @@
 #include "r_rendercmds.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/threads.h>
+#include "rb_logfile.h"
+#include "r_utils.h"
+#include "r_model_lighting.h"
+#include "r_scene.h"
+#include "r_dpvs.h"
 
 //  struct GfxBackEndData *frontEndDataOut 85827c80     gfx_d3d : r_rendercmds.obj
 GfxBackEndData *frontEndDataOut;
@@ -31,6 +36,90 @@ void __cdecl TRACK_r_rendercmds()
     track_static_alloc_internal(g_frontEndCmds, 32, "g_frontEndCmds", 18);
     track_static_alloc_internal(&s_debugFrameGlob, 1173632, "s_debugFrameGlob", 0);
     track_static_alloc_internal(&g_debugFrontEndCmds, 16, "g_debugFrontEndCmds", 0);
+}
+
+void __cdecl R_FreeGlobalVariable(void *var)
+{
+    Z_VirtualFree(var);
+}
+
+void __cdecl R_ShutdownSceneBuffers()
+{
+    unsigned int localClientNum; // [esp+0h] [ebp-8h]
+    unsigned int viewIndex; // [esp+4h] [ebp-4h]
+
+    for (viewIndex = 0; viewIndex < 7; ++viewIndex)
+        R_FreeGlobalVariable(scene.dpvs.entVisData[viewIndex]);
+    R_FreeGlobalVariable(scene.dpvs.sceneXModelIndex);
+    R_FreeGlobalVariable(scene.dpvs.sceneDObjIndex);
+    for (localClientNum = 0; localClientNum < gfxCfg.maxClientViews; ++localClientNum)
+    {
+        R_FreeGlobalVariable(dpvsGlob.entVisBits[localClientNum]);
+        R_FreeGlobalVariable(scene.dpvs.entInfo[localClientNum]);
+    }
+}
+
+void __cdecl R_ShutdownRenderCommands()
+{
+    unsigned int dataIndex; // [esp+4h] [ebp-4h]
+
+    R_ShutdownModelLightingGlobals();
+    for (dataIndex = 0; dataIndex < 2; ++dataIndex)
+    {
+        R_FreeGlobalVariable(s_backEndData[dataIndex].commands->cmds);
+        R_ShutdownDebugEntry(&s_backEndData[dataIndex].debugGlobals);
+    }
+    R_FreeGlobalVariable(g_debugFrontEndCmds.cmds);
+    R_ShutdownSceneBuffers();
+}
+
+void __cdecl R_ShutdownRenderBuffers()
+{
+    GfxBackEndData *data; // [esp+0h] [ebp-10h]
+    unsigned int partitionIndex; // [esp+4h] [ebp-Ch]
+    int dataIndex; // [esp+8h] [ebp-8h]
+    unsigned int viewIndex; // [esp+Ch] [ebp-4h]
+    unsigned int viewIndexa; // [esp+Ch] [ebp-4h]
+
+    for (dataIndex = 0; dataIndex < 2; ++dataIndex)
+    {
+        data = &s_backEndData[dataIndex];
+        data->endFence = 0;
+        data->preTessIb = 0;
+        R_ShutdownDynamicMesh(&data->codeMesh);
+        R_ShutdownDynamicMesh(&data->markMesh);
+        for (viewIndex = 0; viewIndex < 4; ++viewIndex)
+        {
+            for (partitionIndex = 0; partitionIndex < 4; ++partitionIndex)
+                R_ShutdownDynamicMesh(&g_viewInfo[dataIndex][viewIndex].pointLightMeshData[partitionIndex]);
+        }
+    }
+    dx.swapFence = 0;
+    for (viewIndexa = 0; viewIndexa < 4; ++viewIndexa)
+        R_ShutdownDynamicMesh(&gfxMeshGlob.fullSceneViewMesh[viewIndexa].meshData);
+    R_ShutdownSpotShadowMeshes();
+    R_ShutdownDynamicIndices(&gfxBuf.smodelCache);
+}
+
+void __cdecl R_ShutdownDynamicMesh(GfxMeshData *mesh)
+{
+    IDirect3DVertexBuffer9 *varCopy; // [esp+0h] [ebp-4h]
+
+    R_FreeGlobalVariable(mesh->indices);
+    if (mesh->vb.buffer)
+    {
+        do
+        {
+            if (r_logFile)
+            {
+                if (r_logFile->current.integer)
+                    RB_LogPrint("mesh->vb.buffer->Release()\n");
+            }
+            varCopy = mesh->vb.buffer;
+            mesh->vb.buffer = 0;
+            R_ReleaseAndSetNULL<IDirect3DDevice9>((IDirect3DSurface9 *)varCopy, "mesh->vb.buffer", ".\\r_rendercmds.cpp", 246);
+        } while (alwaysfails);
+    }
 }
 
 void __cdecl R_InitRenderCommands()

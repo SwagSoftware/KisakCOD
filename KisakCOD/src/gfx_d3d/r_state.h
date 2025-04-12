@@ -1,5 +1,6 @@
 #pragma once
 #include "rb_backend.h"
+#include "rb_backend.h"
 
 
 void __cdecl R_ChangeIndices(GfxCmdBufPrimState *state, IDirect3DIndexBuffer9 *ib);
@@ -19,13 +20,12 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
     unsigned int firstRow);
 void __cdecl R_DeriveCodeMatrix(GfxCmdBufSourceState *source, GfxCodeMatrices *activeMatrices, unsigned int baseIndex);
 void __cdecl R_DeriveViewMatrix(GfxCmdBufSourceState *source);
-void  R_DeriveWorldViewMatrix(int a1@<ebp>, GfxCmdBufSourceState *source);
+void  R_DeriveWorldViewMatrix(GfxCmdBufSourceState *source);
 void __cdecl R_DeriveProjectionMatrix(GfxCmdBufSourceState *source);
 void __cdecl R_DeriveViewProjectionMatrix(GfxCmdBufSourceState *source);
-void  R_DeriveWorldViewProjectionMatrix(int a1@<ebp>, GfxCmdBufSourceState *source);
+void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source);
 void __cdecl R_DeriveShadowLookupMatrix(GfxCmdBufSourceState *source);
 void  R_GenerateWorldOutdoorLookupMatrix(
-    GfxCodeMatrices *a1@<ebp>,
     GfxCmdBufSourceState *source,
     float (*outMatrix)[4]);
 void __cdecl Vec4Add(const float *a, const float *b, float *sum);
@@ -119,7 +119,6 @@ void __cdecl R_SetMeshStream(GfxCmdBufState *state, GfxMeshData *mesh);
 void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBits);
 // bad sp value at call has been detected, the output may be wrong!
 void  R_DrawCall(
-    int a1@<ebp>,
     void(__cdecl *callback)(const void *, GfxCmdBufContext, GfxCmdBufContext),
     const void *userData,
     GfxCmdBufSourceState *source,

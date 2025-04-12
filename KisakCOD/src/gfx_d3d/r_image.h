@@ -72,6 +72,20 @@ struct GfxImageFileHeader // sizeof=0x1C
 };
 
 void __cdecl TRACK_r_image();
+void __cdecl R_ShutdownImages();
+void __cdecl Image_SetupAndLoad(
+    GfxImage *image,
+    int width,
+    int height,
+    int depth,
+    int imageFlags,
+    _D3DFORMAT imageFormat);
+GfxImage *__cdecl Image_Alloc(
+    char *name,
+    unsigned __int8 category,
+    unsigned __int8 semantic,
+    unsigned __int8 imageTrack);
+void __cdecl Image_Free(GfxImage *image);
 void __cdecl R_GetImageList(ImageList *imageList);
 void __cdecl R_AddImageToList(XAssetHeader header, ImageList *data);
 void __cdecl R_SumOfUsedImages(Image_MemUsage *usage);
@@ -95,6 +109,9 @@ void __cdecl R_ImageList_f();
 bool __cdecl Image_IsCodeImage(int track);
 bool __cdecl imagecompare(GfxImage *image1, GfxImage *image2);
 _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image);
+
+void __cdecl R_ReleaseLostImages();
+void __cdecl R_ReloadLostImages();
 
 void __cdecl Image_UploadData(
     const GfxImage *image,
@@ -158,7 +175,9 @@ inline unsigned int __cdecl Image_GetUsage(int imageFlags, _D3DFORMAT imageForma
 
 
 // r_image_load_obj
+void __cdecl Image_BuildWaterMap(GfxImage *image);
 void __cdecl Image_SetupFromFile(GfxImage *image, const GfxImageFileHeader *fileHeader, _D3DFORMAT imageFormat);
+unsigned int __cdecl Image_CountMipmaps(char imageFlags, unsigned int width, unsigned int height, unsigned int depth);
 void __cdecl Image_Setup(GfxImage *image, int width, int height, int depth, int imageFlags, _D3DFORMAT imageFormat);
 void __cdecl Image_TrackTexture(GfxImage *image, char imageFlags, _D3DFORMAT format, int width, int height, int depth);
 unsigned int __cdecl Image_GetCardMemoryAmount(
@@ -195,8 +214,14 @@ void __cdecl Image_GenerateCube(
 
 // r_image_decode
 unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader);
+int __cdecl Image_CountMipmapsForFile_0(GfxImageFileHeader *imageFile);
 int __cdecl Image_CountMipmapsForFile(GfxImageFileHeader *imageFile);
-
+void __cdecl Image_CopyBitmapData(GfxRawImage *image, GfxImageFileHeader *imageFile, unsigned __int8 *imageData);
+void __cdecl Image_DecodeWavelet(
+    GfxRawImage *image,
+    GfxImageFileHeader *imageFile,
+    unsigned __int8 *imageData,
+    int bytesPerPixel);
 
 // r_image_wavelet
 struct __declspec(align(4)) WaveletDecode // sizeof=0x20
@@ -260,7 +285,7 @@ void __cdecl Wavelet_AddDeltaToMipmap(
     int size,
     WaveletDecode *decode,
     const int *dstChanOffset);
-
+void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst, WaveletDecode *decode);
 void __cdecl Image_DecodeWavelet(
     GfxRawImage *image,
     GfxImageFileHeader *imageFile,

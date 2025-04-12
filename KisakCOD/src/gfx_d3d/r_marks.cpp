@@ -1,6 +1,8 @@
 #include "r_marks.h"
 
 #include "r_gfx.h"
+#include "r_init.h"
+#include <xanim/dobj_utils.h>
 
 void  R_BoxSurfaces(
     const float *mins,
@@ -19,7 +21,7 @@ void  R_BoxSurfaces(
     void *v13; // [esp+90h] [ebp-8h]
     void *retaddr; // [esp+98h] [ebp+0h]
 
-    v12 = a1;
+    //v12 = a1;
     v13 = retaddr;
     if (!rgp.world)
         MyAssertHandler(".\\r_marks.cpp", 944, 0, "%s", "rgp.world");
@@ -442,7 +444,7 @@ int  R_BoxStaticModels(
     void *v10; // [esp+8Ch] [ebp-8h]
     void *retaddr; // [esp+94h] [ebp+0h]
 
-    v9 = a1;
+    //v9 = a1;
     v10 = retaddr;
     if (!rgp.world)
         MyAssertHandler(".\\r_marks.cpp", 966, 0, "%s", "rgp.world");
@@ -632,7 +634,7 @@ unsigned int  R_CylinderSurfaces(
     void *v14; // [esp+C8h] [ebp-8h]
     void *retaddr; // [esp+D0h] [ebp+0h]
 
-    v13 = a1;
+    //v13 = a1;
     v14 = retaddr;
     if (!rgp.world)
         MyAssertHandler(".\\r_marks.cpp", 986, 0, "%s", "rgp.world");
@@ -992,9 +994,9 @@ void __cdecl R_MarkUtil_GetDObjAnimMatAndHideParts(
     memset(zeroLods, 0, sizeof(zeroLods));
     if (!DObjGetSurfaces(dobj, partBits, zeroLods))
         MyAssertHandler(".\\r_marks.cpp", 1715, 0, "%s", "surfaceCount");
-    DObjLock(dobj);
+    DObjLock((DObj_s*)dobj);
     *outBoneMtxList = CG_DObjCalcPose(pose, dobj, partBits);
-    DObjUnlock(dobj);
+    DObjUnlock((DObj_s*)dobj);
     if (!DObjSkelAreBonesUpToDate(dobj, partBits))
         MyAssertHandler(".\\r_marks.cpp", 1726, 0, "%s", "DObjSkelAreBonesUpToDate( dobj, partBits )");
     if (!*outBoneMtxList)

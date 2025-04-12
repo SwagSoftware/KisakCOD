@@ -590,7 +590,7 @@ char __cdecl Com_FilterPath(const char *filter, const char *name, int casesensit
 int __cdecl Com_HashKey(const char *string, int maxlen);
 int __cdecl Com_RealTime(qtime_s *qtime);
 //void __cdecl Com_Memcpy(char *dest, char *src, int count);
-void __cdecl Com_Memset(unsigned int *dest, int val, int count);
+//void __cdecl Com_Memset(unsigned int *dest, int val, int count);
 
 
 // com_stringtable

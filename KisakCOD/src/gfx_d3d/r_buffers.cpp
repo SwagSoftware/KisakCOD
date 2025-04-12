@@ -4,6 +4,7 @@
 #include <universal/com_memory.h>
 #include "r_dvars.h"
 #include "rb_logfile.h"
+#include "r_utils.h"
 
 
 //struct GfxBuffers gfxBuf   85b3aa20     gfx_d3d : r_buffers.obj
@@ -347,5 +348,209 @@ void __cdecl R_UnlockVertexBuffer(IDirect3DVertexBuffer9* handle)
 {
     if (!handle)
         MyAssertHandler(".\\r_buffers.cpp", 131, 0, "%s", "handle");
+    handle->Unlock();
+}
+
+void *__cdecl R_LockVertexBuffer(IDirect3DVertexBuffer9 *handle, int offset, int bytes, int lockFlags)
+{
+    int hr; // [esp+0h] [ebp-8h]
+    void *bufferData; // [esp+4h] [ebp-4h] BYREF
+
+    if (!handle)
+        MyAssertHandler(".\\r_buffers.cpp", 119, 0, "%s", "handle");
+    if (dx.deviceLost)
+        MyAssertHandler(".\\r_buffers.cpp", 120, 0, "%s", "!dx.deviceLost");
+    //hr = ((int(__thiscall *)(IDirect3DVertexBuffer9 *, IDirect3DVertexBuffer9 *, int, int, void **, int))handle->Lock)(
+    //    handle,
+    //    handle,
+    //    offset,
+    //    bytes,
+    //    &bufferData,
+    //    lockFlags);
+    hr = handle->Lock(offset, bytes, &bufferData, lockFlags);
+    if (hr < 0)
+        R_FatalLockError(hr);
+    return bufferData;
+}
+
+void __cdecl R_ShutdownTempSkinBuf()
+{
+    GfxBackEndData *data; // [esp+0h] [ebp-8h]
+    unsigned int i; // [esp+4h] [ebp-4h]
+
+    for (i = 0; i < 2; ++i)
+    {
+        data = &s_backEndData[i];
+        if (data->tempSkinBuf)
+        {
+            Z_VirtualFree(data->tempSkinBuf);
+            data->tempSkinBuf = 0;
+            data->tempSkinPos = 0;
+        }
+    }
+}
+
+void __cdecl R_FreeStaticVertexBuffer(IDirect3DVertexBuffer9 *vb)
+{
+    IDirect3DVertexBuffer9 *varCopy; // [esp+0h] [ebp-4h]
+
+    do
+    {
+        if (r_logFile)
+        {
+            if (r_logFile->current.integer)
+                RB_LogPrint("vb->Release()\n");
+        }
+        varCopy = vb;
+        vb = 0;
+        R_ReleaseAndSetNULL<IDirect3DSurface9>((IDirect3DSurface9 *)varCopy, "vb", ".\\r_buffers.cpp", 213);
+    } while (alwaysfails);
+}
+
+void __cdecl R_FreeStaticIndexBuffer(IDirect3DIndexBuffer9 *ib)
+{
+    IDirect3DIndexBuffer9 *varCopy; // [esp+0h] [ebp-4h]
+
+    do
+    {
+        if (r_logFile)
+        {
+            if (r_logFile->current.integer)
+                RB_LogPrint("ib->Release()\n");
+        }
+        varCopy = ib;
+        ib = 0;
+        R_ReleaseAndSetNULL<IDirect3DDevice9>((IDirect3DSurface9 *)varCopy, "ib", ".\\r_buffers.cpp", 272);
+    } while (alwaysfails);
+}
+
+void __cdecl R_DestroyParticleCloudBuffer()
+{
+    if (gfxBuf.particleCloudVertexBuffer)
+    {
+        R_FreeStaticVertexBuffer(gfxBuf.particleCloudVertexBuffer);
+        gfxBuf.particleCloudVertexBuffer = 0;
+    }
+    if (gfxBuf.particleCloudIndexBuffer)
+    {
+        R_FreeStaticIndexBuffer(gfxBuf.particleCloudIndexBuffer);
+        gfxBuf.particleCloudIndexBuffer = 0;
+    }
+}
+
+void __cdecl R_DestroyDynamicBuffers()
+{
+    IDirect3DSurface9 *v0; // [esp+0h] [ebp-14h]
+    IDirect3DSurface9 *buffer; // [esp+4h] [ebp-10h]
+    IDirect3DSurface9 *var; // [esp+8h] [ebp-Ch]
+    IDirect3DIndexBuffer9 *varCopy; // [esp+Ch] [ebp-8h]
+    int bufferIter; // [esp+10h] [ebp-4h]
+    int bufferItera; // [esp+10h] [ebp-4h]
+    int bufferIterb; // [esp+10h] [ebp-4h]
+    int bufferIterc; // [esp+10h] [ebp-4h]
+
+    for (bufferIter = 0; bufferIter != 2; ++bufferIter)
+    {
+        if (gfxBuf.preTessIndexBufferPool[bufferIter].buffer)
+        {
+            do
+            {
+                if (r_logFile)
+                {
+                    if (r_logFile->current.integer)
+                        RB_LogPrint("gfxBuf.preTessIndexBufferPool[bufferIter].buffer->Release()\n");
+                }
+                varCopy = gfxBuf.preTessIndexBufferPool[bufferIter].buffer;
+                gfxBuf.preTessIndexBufferPool[bufferIter].buffer = 0;
+                R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                    (IDirect3DSurface9 *)varCopy,
+                    "gfxBuf.preTessIndexBufferPool[bufferIter].buffer",
+                    ".\\r_buffers.cpp",
+                    522);
+            } while (alwaysfails);
+        }
+    }
+    for (bufferItera = 0; bufferItera != 1; ++bufferItera)
+    {
+        if (gfxBuf.dynamicIndexBufferPool[bufferItera].buffer)
+        {
+            do
+            {
+                if (r_logFile && r_logFile->current.integer)
+                    RB_LogPrint("gfxBuf.dynamicIndexBufferPool[bufferIter].buffer->Release()\n");
+                var = (IDirect3DSurface9 *)gfxBuf.dynamicIndexBufferPool[bufferItera].buffer;
+                gfxBuf.dynamicIndexBufferPool[bufferItera].buffer = 0;
+                R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                    var,
+                    "gfxBuf.dynamicIndexBufferPool[bufferIter].buffer",
+                    ".\\r_buffers.cpp",
+                    530);
+            } while (alwaysfails);
+        }
+    }
+    for (bufferIterb = 0; bufferIterb != 2; ++bufferIterb)
+    {
+        if (gfxBuf.skinnedCacheVbPool[bufferIterb].buffer)
+        {
+            do
+            {
+                if (r_logFile && r_logFile->current.integer)
+                    RB_LogPrint("gfxBuf.skinnedCacheVbPool[bufferIter].buffer->Release()\n");
+                buffer = (IDirect3DSurface9 *)gfxBuf.skinnedCacheVbPool[bufferIterb].buffer;
+                gfxBuf.skinnedCacheVbPool[bufferIterb].buffer = 0;
+                R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                    buffer,
+                    "gfxBuf.skinnedCacheVbPool[bufferIter].buffer",
+                    ".\\r_buffers.cpp",
+                    537);
+            } while (alwaysfails);
+        }
+    }
+    for (bufferIterc = 0; bufferIterc != 1; ++bufferIterc)
+    {
+        if (gfxBuf.dynamicVertexBufferPool[bufferIterc].buffer)
+        {
+            do
+            {
+                if (r_logFile && r_logFile->current.integer)
+                    RB_LogPrint("gfxBuf.dynamicVertexBufferPool[bufferIter].buffer->Release()\n");
+                v0 = (IDirect3DSurface9 *)gfxBuf.dynamicVertexBufferPool[bufferIterc].buffer;
+                gfxBuf.dynamicVertexBufferPool[bufferIterc].buffer = 0;
+                R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                    v0,
+                    "gfxBuf.dynamicVertexBufferPool[bufferIter].buffer",
+                    ".\\r_buffers.cpp",
+                    544);
+            } while (alwaysfails);
+        }
+    }
+    R_ShutdownTempSkinBuf();
+}
+
+void *__cdecl R_LockIndexBuffer(IDirect3DIndexBuffer9 *handle, int offset, int bytes, int lockFlags)
+{
+    int hr; // [esp+0h] [ebp-8h]
+    void *bufferData; // [esp+4h] [ebp-4h] BYREF
+
+    if (!handle)
+        MyAssertHandler(".\\r_buffers.cpp", 141, 0, "%s", "handle");
+    if (dx.deviceLost)
+        MyAssertHandler(".\\r_buffers.cpp", 142, 0, "%s", "!dx.deviceLost");
+    hr = ((int(__thiscall *)(IDirect3DIndexBuffer9 *, IDirect3DIndexBuffer9 *, int, int, void **, int))handle->Lock)(
+        handle,
+        handle,
+        offset,
+        bytes,
+        &bufferData,
+        lockFlags);
+    if (hr < 0)
+        R_FatalLockError(hr);
+    return bufferData;
+}
+
+void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle)
+{
+    if (!handle)
+        MyAssertHandler(".\\r_buffers.cpp", 153, 0, "%s", "handle");
     handle->Unlock();
 }

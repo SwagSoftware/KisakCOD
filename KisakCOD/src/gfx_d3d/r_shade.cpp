@@ -3,7 +3,70 @@
 #include "rb_logfile.h"
 #include "r_dvars.h"
 #include "rb_shade.h"
+#include <universal/profile.h>
+#include "r_buffers.h"
 
+
+int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
+{
+    unsigned int v2; // edx
+    int indexCount; // [esp+8h] [ebp-4h]
+
+    indexCount = 3 * triCount;
+    if (3 * triCount > gfxBuf.dynamicIndexBuffer->total)
+        MyAssertHandler(
+            ".\\r_shade.cpp",
+            590,
+            0,
+            "%s\n\t(indexCount) = %i",
+            "(indexCount <= gfxBuf.dynamicIndexBuffer->total)",
+            indexCount);
+    if (indexCount + gfxBuf.dynamicIndexBuffer->used > gfxBuf.dynamicIndexBuffer->total)
+        gfxBuf.dynamicIndexBuffer->used = 0;
+    if (!gfxBuf.dynamicIndexBuffer->used)
+    {
+        v2 = (gfxBuf.dynamicIndexBuffer - gfxBuf.dynamicIndexBufferPool + 1) & 0x80000000;
+        if (gfxBuf.dynamicIndexBuffer - gfxBuf.dynamicIndexBufferPool + 1 < 0)
+            v2 = 0;
+        gfxBuf.dynamicIndexBuffer = &gfxBuf.dynamicIndexBufferPool[v2];
+    }
+    return gfxBuf.dynamicIndexBuffer->used;
+}
+
+int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, int triCount)
+{
+    int baseIndex; // [esp+60h] [ebp-18h]
+    int indexDataSize; // [esp+64h] [ebp-14h]
+    unsigned int lockFlags; // [esp+68h] [ebp-10h]
+    IDirect3DIndexBuffer9 *ib; // [esp+70h] [ebp-8h]
+    unsigned __int8 *bufferData; // [esp+74h] [ebp-4h]
+
+    Profile_Begin(156);
+    baseIndex = R_ReserveIndexData(state, triCount);
+    indexDataSize = 6 * triCount;
+    ib = gfxBuf.dynamicIndexBuffer->buffer;
+    if (!ib)
+        MyAssertHandler(".\\r_shade.cpp", 633, 0, "%s", "ib");
+    if (gfxBuf.dynamicIndexBuffer->used)
+    {
+        lockFlags = 4096;
+        Profile_Begin(158);
+    }
+    else
+    {
+        lockFlags = 0x2000;
+        Profile_Begin(157);
+    }
+    bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
+    Profile_EndInternal(0);
+    memcpy(bufferData, indices, indexDataSize);
+    R_UnlockIndexBuffer(ib);
+    if (state->indexBuffer != ib)
+        R_ChangeIndices(state, ib);
+    gfxBuf.dynamicIndexBuffer->used += 3 * triCount;
+    Profile_EndInternal(0);
+    return baseIndex;
+}
 
 void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context)
 {

@@ -2,6 +2,8 @@
 #include <qcommon/mem_track.h>
 #include "r_init.h"
 #include "rb_backend.h"
+#include "r_utils.h"
+#include "rb_logfile.h"
 
 
 SunFlareDynamic sunFlareArray[4];
@@ -436,6 +438,38 @@ void __cdecl RB_AddSunEffects(SunFlareDynamic *sunFlare)
     sunFlare->lastDot = Vec3Dot(rgp.world->sun.sunFxPosition, gfxCmdBufSourceState.viewParms3D->axis[0]);
     if (sunFlare->lastDot > 0.0)
         RB_DrawSunSprite();
+}
+
+void __cdecl RB_FreeSunSpriteQueries()
+{
+    IDirect3DQuery9 *varCopy; // [esp+0h] [ebp-Ch]
+    unsigned int viewIndex; // [esp+4h] [ebp-8h]
+    unsigned int queryIndex; // [esp+8h] [ebp-4h]
+
+    for (viewIndex = 0; viewIndex < 4; ++viewIndex)
+    {
+        for (queryIndex = 0; queryIndex < 2; ++queryIndex)
+        {
+            if (sunFlareArray[viewIndex].sunQuery[queryIndex])
+            {
+                do
+                {
+                    if (r_logFile)
+                    {
+                        if (r_logFile->current.integer)
+                            RB_LogPrint("sunFlareArray[viewIndex].sunQuery[queryIndex]->Release()\n");
+                    }
+                    varCopy = sunFlareArray[viewIndex].sunQuery[queryIndex];
+                    sunFlareArray[viewIndex].sunQuery[queryIndex] = 0;
+                    R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                        (IDirect3DSurface9 *)varCopy,
+                        "sunFlareArray[viewIndex].sunQuery[queryIndex]",
+                        ".\\rb_sky.cpp",
+                        674);
+                } while (alwaysfails);
+            }
+        }
+    }
 }
 
 void RB_DrawSunSprite()

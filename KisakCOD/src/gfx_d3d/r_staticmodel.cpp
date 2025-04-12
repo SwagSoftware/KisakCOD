@@ -2,12 +2,10 @@
 #include <qcommon/mem_track.h>
 #include "r_init.h"
 #include "r_rendercmds.h"
+#include <universal/com_files.h>
+#include <xanim/xmodel.h>
+#include "r_xsurface.h"
 
-
-void __cdecl TRACK_r_staticmodelcache()
-{
-	track_static_alloc_internal(&s_cache, 266464, "s_cache", 18);
-}
 
 void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
 {

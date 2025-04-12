@@ -1,9 +1,8 @@
 #pragma once
+#include "r_rendercmds.h"
 
 
-void __cdecl R_DrawSunShadowMapCallback(const GfxSunShadowPartition *userData, GfxCmdBufContext context);
-void __usercall R_DrawSunShadowMap(
-    int a1@<ebp>,
+void R_DrawSunShadowMap(
     const GfxViewInfo *viewInfo,
     unsigned int partitionIndex,
     GfxCmdBuf *cmdBuf);

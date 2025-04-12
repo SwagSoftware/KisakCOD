@@ -1,8 +1,12 @@
 #include "rb_draw3d.h"
 #include "rb_logfile.h"
 #include "r_dvars.h"
-
-
+#include "r_state.h"
+#include "r_draw_method.h"
+#include "rb_state.h"
+#include "r_cmdbuf.h"
+#include "r_utils.h"
+#include "rb_sky.h"
 
 void __cdecl R_HW_InsertFence(IDirect3DQuery9 **fence)
 {
@@ -15,7 +19,7 @@ void __cdecl R_HW_InsertFence(IDirect3DQuery9 **fence)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("(*fence)->Issue( (1 << 0) )\n");
-        hr = (*fence)->Issue(*fence, 1u);
+        hr = (*fence)->Issue(1);
         if (hr < 0)
         {
             do

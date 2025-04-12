@@ -18,6 +18,7 @@ struct __declspec(align(4)) SkinXModelCmd // sizeof=0x1C
     // padding byte
 };
 
+int __cdecl DObjBad(const DObj_s *obj);
 void __cdecl R_FlagXModelAsSkinned(GfxSceneEntity *sceneEnt, unsigned int surfaceCount);
 void __cdecl R_SkinSceneDObj(
     GfxSceneEntity *sceneEnt,

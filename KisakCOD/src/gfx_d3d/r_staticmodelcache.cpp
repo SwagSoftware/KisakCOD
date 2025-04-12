@@ -10,6 +10,8 @@
 #include "r_workercmds.h"
 #include "r_buffers.h"
 #include <universal/profile.h>
+#include "rb_logfile.h"
+#include "r_utils.h"
 
 
 static_model_cache_t s_cache;
@@ -18,6 +20,44 @@ static_model_cache_t s_cache;
 void __cdecl TRACK_r_staticmodelcache()
 {
     track_static_alloc_internal(&s_cache, 266464, "s_cache", 18);
+}
+
+void *R_AllocStaticModelCache()
+{
+    if (gfxBuf.smodelCacheVb)
+        MyAssertHandler(".\\r_staticmodelcache.cpp", 638, 0, "%s", "!gfxBuf.smodelCacheVb");
+    return R_AllocDynamicVertexBuffer(&gfxBuf.smodelCacheVb, 0x800000);
+}
+
+void __cdecl R_InitStaticModelCache()
+{
+    R_AllocStaticModelCache();
+    SMC_ClearCache();
+}
+
+void __cdecl R_ShutdownStaticModelCache()
+{
+    IDirect3DVertexBuffer9 *varCopy; // [esp+0h] [ebp-4h]
+
+    R_FlushStaticModelCache();
+    if (gfxBuf.smodelCacheVb)
+    {
+        do
+        {
+            if (r_logFile)
+            {
+                if (r_logFile->current.integer)
+                    RB_LogPrint("gfxBuf.smodelCacheVb->Release()\n");
+            }
+            varCopy = gfxBuf.smodelCacheVb;
+            gfxBuf.smodelCacheVb = 0;
+            R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                (IDirect3DSurface9 *)varCopy,
+                "gfxBuf.smodelCacheVb",
+                ".\\r_staticmodelcache.cpp",
+                753);
+        } while (alwaysfails);
+    }
 }
 
 void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lod, unsigned int cacheBaseVertIndex)
@@ -493,6 +533,24 @@ void __cdecl R_FlushStaticModelCache()
         }
         SMC_ClearCache();
     }
+}
+
+GfxCachedSModelSurf *__cdecl R_GetCachedSModelSurf(unsigned int cacheIndex)
+{
+    if (!cacheIndex)
+    {
+        MyAssertHandler(".\\r_staticmodelcache.cpp", 547, 0, "%s", "cacheIndex");
+        MyAssertHandler(".\\r_staticmodelcache.cpp", 278, 0, "%s", "cacheIndex");
+    }
+    if (*(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse >= rgp.world->dpvs.smodelCount)
+        MyAssertHandler(
+            ".\\r_staticmodelcache.cpp",
+            550,
+            0,
+            "leaf->cachedSurf.smodelIndex doesn't index rgp.world->dpvs.smodelCount\n\t%i not in [0, %i)",
+            *(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse,
+            rgp.world->dpvs.smodelCount);
+    return (GfxCachedSModelSurf *)(8 * cacheIndex + (char*)&s_cache);
 }
 
 const GfxBackEndData *RB_PatchStaticModelCache()

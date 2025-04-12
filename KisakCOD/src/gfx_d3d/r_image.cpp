@@ -149,6 +149,36 @@ void __cdecl Image_SetupAndLoad(
     Image_Setup(image, width, height, depth, imageFlags, imageFormat);
 }
 
+void __cdecl R_ShutdownImages()
+{
+    GfxImage *image; // [esp+0h] [ebp-2014h]
+    GfxImage *imagea; // [esp+0h] [ebp-2014h]
+    int v2; // [esp+4h] [ebp-2010h]
+    unsigned int i; // [esp+8h] [ebp-200Ch]
+    _DWORD v4[2049]; // [esp+Ch] [ebp-2008h]
+    int j; // [esp+2010h] [ebp-4h]
+
+    RB_UnbindAllImages();
+    v2 = 0;
+    for (i = 0; i < 0x800; ++i)
+    {
+        image = imageGlobals.imageHashTable[i];
+        if (image)
+        {
+            if (Image_IsProg(image))
+                v4[v2++] = (_DWORD)image;
+            else
+                Image_Free(imageGlobals.imageHashTable[i]);
+        }
+    }
+    memset((unsigned __int8 *)&imageGlobals, 0, 0x2000u);
+    for (j = 0; j < v2; ++j)
+    {
+        imagea = (GfxImage *)v4[j];
+        imageGlobals.imageHashTable[Image_GetAvailableHashLocation(imagea->name)] = imagea;
+    }
+}
+
 void __cdecl Image_SetupRenderTarget(
     GfxImage *image,
     unsigned __int16 width,
@@ -1180,6 +1210,10 @@ GfxImage *__cdecl Image_Alloc(
     imageGlobals.imageHashTable[Image_GetAvailableHashLocation(name)] = image;
     return image;
 }
+void __cdecl Image_Free(GfxImage *image)
+{
+    Image_Release(image);
+}
 static GfxImage *__cdecl Image_LoadBuiltin(char *name, unsigned __int8 semantic, unsigned __int8 imageTrack)
 {
     GfxImage *image; // [esp+14h] [ebp-8h]
@@ -1575,6 +1609,120 @@ bool __cdecl imagecompare(GfxImage *image1, GfxImage *image2)
     if (image1->track >= (int)image2->track)
         return image1->cardMemory.platform[0] < image2->cardMemory.platform[0];
     return 1;
+}
+
+void __cdecl R_FreeLostImage(XAssetHeader header)
+{
+    if (!header.xmodelPieces)
+        MyAssertHandler(".\\r_image.cpp", 989, 0, "%s", "image");
+    if (!BYTE2(header.xmodelPieces[2].numpieces))
+        MyAssertHandler(".\\r_image.cpp", 990, 0, "%s", "image->category != IMG_CATEGORY_UNKNOWN");
+    if (BYTE2(header.xmodelPieces[2].numpieces) >= 5u)
+        Image_Release(header.image);
+}
+
+char __cdecl Image_ReloadFromFile(GfxImage *image)
+{
+    return Image_LoadFromFileWithReader(image, (int(__cdecl *)(const char *, int *))FS_FOpenFileRead);
+}
+
+char __cdecl R_DuplicateTexture(GfxImage *dstImage, const GfxImage *srcImage)
+{
+    if (!srcImage || !srcImage->texture.basemap)
+        return 0;
+    dstImage->texture.basemap = srcImage->texture.basemap;
+    //dstImage->texture.basemap->AddRef(dstImage->texture.basemap);
+    dstImage->texture.basemap->AddRef();
+    return 1;
+}
+
+char __cdecl Image_AssignDefaultTexture(GfxImage *image)
+{
+    if (image->mapType != MAPTYPE_2D)
+        return 0;
+    if (image->semantic == 5)
+        return R_DuplicateTexture(image, rgp.identityNormalMapImage);
+    if (image->semantic == 8)
+        return R_DuplicateTexture(image, rgp.blackImage);
+    return R_DuplicateTexture(image, rgp.whiteImage);
+}
+
+void __cdecl Image_Rebuild(GfxImage *image)
+{
+    const char *v1; // eax
+    unsigned __int8 category; // [esp+0h] [ebp-4h]
+
+    if (!image)
+        MyAssertHandler(".\\r_image.cpp", 890, 0, "%s", "image");
+    if (!image->category)
+        MyAssertHandler(".\\r_image.cpp", 891, 0, "%s", "image->category != IMG_CATEGORY_UNKNOWN");
+    if (image->category < 5u)
+        MyAssertHandler(".\\r_image.cpp", 894, 0, "%s", "image->category >= IMG_CATEGORY_FIRST_UNMANAGED");
+    if (image->texture.basemap)
+        MyAssertHandler(".\\r_image.cpp", 896, 0, "%s", "!image->texture.basemap");
+    category = image->category;
+    if (category == 5)
+    {
+        Image_BuildWaterMap(image);
+    }
+    else if (category == 6)
+    {
+        if (!alwaysfails)
+            MyAssertHandler(".\\r_image.cpp", 905, 1, "non-prog image cannot be a render target");
+    }
+    else if (!alwaysfails)
+    {
+        v1 = va("unhandled case %i", image->category);
+        MyAssertHandler(".\\r_image.cpp", 909, 1, v1);
+    }
+}
+
+void __cdecl R_RebuildLostImage(XAssetHeader header)
+{
+    if (!header.xmodelPieces)
+        MyAssertHandler(".\\r_image.cpp", 1004, 0, "%s", "image");
+    if (!BYTE2(header.xmodelPieces[2].numpieces))
+        MyAssertHandler(".\\r_image.cpp", 1005, 0, "%s", "image->category != IMG_CATEGORY_UNKNOWN");
+    if (!header.xmodelPieces->numpieces)
+    {
+        if (BYTE2(header.xmodelPieces[2].numpieces) < 5u)
+        {
+            if (BYTE2(header.xmodelPieces[2].numpieces) == 3)
+            {
+                if (!HIBYTE(header.xmodelPieces[2].numpieces)
+                    && !Image_ReloadFromFile(header.image)
+                    && !Image_AssignDefaultTexture(header.image))
+                {
+                    Com_Error(
+                        ERR_DROP,
+                        "Couldn't load image '%s' to recover from a lost device",
+                        (const char *)header.xmodelPieces[2].pieces);
+                }
+            }
+            else
+            {
+                Com_Error(
+                    ERR_DROP,
+                    "No way to recover image '%s' from a lost device",
+                    (const char *)header.xmodelPieces[2].pieces);
+            }
+        }
+        else if (!Image_IsProg(header.image))
+        {
+            Image_Rebuild(header.image);
+        }
+    }
+}
+
+void __cdecl R_ReloadLostImages()
+{
+    DB_EnumXAssets(ASSET_TYPE_IMAGE, (void(__cdecl *)(XAssetHeader, void *))R_RebuildLostImage, 0, 1);
+}
+
+void __cdecl R_ReleaseLostImages()
+{
+    rg.waterFloatTime = rg.waterFloatTime + 1.0;
+    DB_EnumXAssets(ASSET_TYPE_IMAGE, (void(__cdecl *)(XAssetHeader, void *))R_FreeLostImage, 0, 1);
 }
 
 _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)

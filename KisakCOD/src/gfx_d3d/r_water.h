@@ -25,3 +25,8 @@ void __cdecl GenerateMipMaps(_D3DFORMAT format, unsigned __int8 *pixels, water_t
 void __cdecl R_UploadWaterTexture(water_t *water, float floatTime);
 void __cdecl R_InitWater();
 void __cdecl Load_PicmipWater(water_t **waterRef);
+
+// r_water_load_obj
+void __cdecl R_InitLoadWater();
+water_t *__cdecl R_LoadWaterSetup(const water_t *water);
+void __cdecl R_ShutdownLoadWater();

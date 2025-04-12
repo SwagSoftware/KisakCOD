@@ -14,6 +14,7 @@ void __cdecl RB_UpdateSunVisibilityWithoutQuery(SunFlareDynamic *sunFlare);
 double __cdecl RB_GetSunSampleRectRelativeArea(int widthInPixels, int heightInPixels);
 void __cdecl RB_AddSunEffects(SunFlareDynamic *sunFlare);
 void RB_DrawSunSprite();
+void __cdecl RB_FreeSunSpriteQueries();
 void __cdecl RB_DrawSunPostEffects(unsigned int localClientNum);
 void __cdecl RB_DrawSunFlare(SunFlareDynamic *sunFlare, int frameTime);
 double __cdecl R_UpdateOverTime(float fCurrent, float fGoal, int iFadeInTime, int iFadeOutTime, int frametime);

@@ -289,71 +289,71 @@ void _copyDWord(unsigned int* dest, const unsigned int constant, const unsigned 
 //	}
 //}
 
-void Com_Memset(void* dest, const int val, const size_t count)
-{
-	unsigned int fillval;
-
-	if (count < 8)
-	{
-		__asm
-		{
-			mov		edx, dest
-			mov		eax, val
-			mov		ah, al
-			mov		ebx, eax
-			and ebx, 0xffff
-			shl		eax, 16
-			add		eax, ebx				// eax now contains pattern
-			mov		ecx, count
-			cmp		ecx, 4
-			jl		skip4
-			mov[edx], eax			// copy first dword
-			add		edx, 4
-			sub		ecx, 4
-			skip4:	cmp		ecx, 2
-			jl		skip2
-			mov		word ptr[edx], ax	// copy 2 bytes
-			add		edx, 2
-			sub		ecx, 2
-			skip2 : cmp		ecx, 0
-			je		skip1
-			mov		byte ptr[edx], al	// copy single byte
-			skip1 :
-		}
-		return;
-	}
-
-	fillval = val;
-
-	fillval = fillval | (fillval << 8);
-	fillval = fillval | (fillval << 16);		// fill dword with 8-bit pattern
-
-	_copyDWord((unsigned int*)(dest), fillval, count / 4);
-
-	__asm									// padding of 0-3 bytes
-	{
-		mov		ecx, count
-		mov		eax, ecx
-		and ecx, 3
-		jz		skipA
-		and eax, ~3
-		mov		ebx, dest
-		add		ebx, eax
-		mov		eax, fillval
-		cmp		ecx, 2
-		jl		skipB
-		mov		word ptr[ebx], ax
-		cmp		ecx, 2
-		je		skipA
-		mov		byte ptr[ebx + 2], al
-		jmp		skipA
-		skipB :
-		cmp		ecx, 0
-		je		skipA
-		mov		byte ptr[ebx], al
-		skipA :
-	}
-}
+//void Com_Memset(void* dest, const int val, const size_t count)
+//{
+//	unsigned int fillval;
+//
+//	if (count < 8)
+//	{
+//		__asm
+//		{
+//			mov		edx, dest
+//			mov		eax, val
+//			mov		ah, al
+//			mov		ebx, eax
+//			and ebx, 0xffff
+//			shl		eax, 16
+//			add		eax, ebx				// eax now contains pattern
+//			mov		ecx, count
+//			cmp		ecx, 4
+//			jl		skip4
+//			mov[edx], eax			// copy first dword
+//			add		edx, 4
+//			sub		ecx, 4
+//			skip4:	cmp		ecx, 2
+//			jl		skip2
+//			mov		word ptr[edx], ax	// copy 2 bytes
+//			add		edx, 2
+//			sub		ecx, 2
+//			skip2 : cmp		ecx, 0
+//			je		skip1
+//			mov		byte ptr[edx], al	// copy single byte
+//			skip1 :
+//		}
+//		return;
+//	}
+//
+//	fillval = val;
+//
+//	fillval = fillval | (fillval << 8);
+//	fillval = fillval | (fillval << 16);		// fill dword with 8-bit pattern
+//
+//	_copyDWord((unsigned int*)(dest), fillval, count / 4);
+//
+//	__asm									// padding of 0-3 bytes
+//	{
+//		mov		ecx, count
+//		mov		eax, ecx
+//		and ecx, 3
+//		jz		skipA
+//		and eax, ~3
+//		mov		ebx, dest
+//		add		ebx, eax
+//		mov		eax, fillval
+//		cmp		ecx, 2
+//		jl		skipB
+//		mov		word ptr[ebx], ax
+//		cmp		ecx, 2
+//		je		skipA
+//		mov		byte ptr[ebx + 2], al
+//		jmp		skipA
+//		skipB :
+//		cmp		ecx, 0
+//		je		skipA
+//		mov		byte ptr[ebx], al
+//		skipA :
+//	}
+//}
 
 qboolean Com_Memcmp(const void* src0, const void* src1, const unsigned int count)
 {

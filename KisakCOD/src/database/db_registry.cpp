@@ -67,6 +67,71 @@ void __cdecl TRACK_db_registry()
     track_static_alloc_internal(g_fileBuf, 0x80000, "g_fileBuf", 10);
 }
 
+void __cdecl DB_GetIndexBufferAndBase(unsigned __int8 zoneHandle, void *indices, void **ib, int *baseIndex)
+{
+    *ib = g_zones[zoneHandle].mem.indexBuffer;
+    *baseIndex = ((unsigned int)indices - (unsigned int)g_zones[zoneHandle].mem.blocks[8].data) >> 1;
+}
+
+void __cdecl DB_GetVertexBufferAndOffset(unsigned __int8 zoneHandle, _BYTE *verts, void **vb, int *vertexOffset)
+{
+    *vertexOffset = verts - g_zones[zoneHandle].mem.blocks[7].data;
+    *vb = g_zones[zoneHandle].mem.vertexBuffer;
+}
+
+void __cdecl DB_EndRecoverLostDevice()
+{
+    int zoneIter; // [esp+4h] [ebp-4h]
+
+    InterlockedIncrement(&db_hashCritSect.readCount);
+    while (db_hashCritSect.writeCount)
+        NET_Sleep_DONE(0);
+    for (zoneIter = 0; zoneIter < g_zoneCount; ++zoneIter)
+        DB_RecoverGeometryBuffers(&g_zones[g_zoneHandles[zoneIter]].mem);
+    if (db_hashCritSect.readCount <= 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
+            76,
+            0,
+            "%s",
+            "critSect->readCount > 0");
+    InterlockedDecrement(&db_hashCritSect.readCount);
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\database\\db_registry.cpp", 2929, 0, "%s", "Sys_IsMainThread()");
+    if (!g_isRecoveringLostDevice)
+        MyAssertHandler(".\\database\\db_registry.cpp", 2930, 0, "%s", "g_isRecoveringLostDevice");
+    if (!g_mayRecoverLostAssets)
+        MyAssertHandler(".\\database\\db_registry.cpp", 2931, 0, "%s", "g_mayRecoverLostAssets");
+    g_mayRecoverLostAssets = !g_loadingZone;
+    g_isRecoveringLostDevice = 0;
+}
+
+void __cdecl DB_BeginRecoverLostDevice()
+{
+    int zoneIter; // [esp+4h] [ebp-4h]
+
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\database\\db_registry.cpp", 2896, 0, "%s", "Sys_IsMainThread()");
+    if (g_isRecoveringLostDevice)
+        MyAssertHandler(".\\database\\db_registry.cpp", 2897, 0, "%s", "!g_isRecoveringLostDevice");
+    g_isRecoveringLostDevice = 1;
+    while (!g_mayRecoverLostAssets)
+        NET_Sleep_DONE(0);
+    InterlockedIncrement(&db_hashCritSect.readCount);
+    while (db_hashCritSect.writeCount)
+        NET_Sleep_DONE(0);
+    for (zoneIter = 0; zoneIter < g_zoneCount; ++zoneIter)
+        DB_ReleaseGeometryBuffers(&g_zones[g_zoneHandles[zoneIter]].mem);
+    if (db_hashCritSect.readCount <= 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
+            76,
+            0,
+            "%s",
+            "critSect->readCount > 0");
+    InterlockedDecrement(&db_hashCritSect.readCount);
+}
+
 void __cdecl DB_InitSingleton(void *pool, int size)
 {
     if (size != 1)

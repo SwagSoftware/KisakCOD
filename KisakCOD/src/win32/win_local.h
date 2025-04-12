@@ -113,6 +113,8 @@ struct __declspec(align(8)) SysInfo // sizeof=0x260
 
 extern _RTL_CRITICAL_SECTION s_criticalSections[];
 extern int client_state; // LWSS ADD. This looks similar to signonstate
+extern HWND g_splashWnd;
+
 
 enum CriticalSection : int
 {

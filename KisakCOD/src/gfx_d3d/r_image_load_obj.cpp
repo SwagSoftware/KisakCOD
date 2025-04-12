@@ -531,8 +531,15 @@ void __cdecl Image_GenerateCube(
         MyAssertHandler(".\\r_image_load_obj.cpp", 948, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
     for (faceIndex = 0; faceIndex < 6; ++faceIndex)
     {
-        face = Image_CubemapFace(faceIndex);
+        face = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
         for (mipIndex = 0; mipIndex < mipCount; ++mipIndex)
             Image_UploadData(image, imageFormat, face, mipIndex, (unsigned __int8 *)(&(*pixels)[15 * faceIndex])[mipIndex]);
     }
+}
+
+void __cdecl Image_BuildWaterMap(GfxImage *image)
+{
+    if (!image)
+        MyAssertHandler(".\\r_image_load_obj.cpp", 1149, 0, "%s", "image");
+    Image_SetupAndLoad(image, image->width, image->height, 1, 65537, D3DFMT_L8);
 }

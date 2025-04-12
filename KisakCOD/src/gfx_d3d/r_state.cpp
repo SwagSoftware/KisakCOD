@@ -1,12 +1,31 @@
 #include "r_state.h"
 #include "rb_logfile.h"
 #include "r_dvars.h"
+#include "rb_stats.h"
+#include "r_draw_bsp.h"
+#include "rb_state.h"
 
 //float const *const shadowmapClearColor 820ebb50     gfx_d3d : r_state.obj
 //BOOL g_renderTargetIsOverridden 85b5dd38     gfx_d3d : r_state.obj
 //unsigned int *s_decodeSamplerFilterState 85b5dcb8     gfx_d3d : r_state.obj
 //struct GfxScaledPlacement s_manualObjectPlacement 85b5dd18     gfx_d3d : r_state.obj
 
+unsigned int s_decodeSamplerFilterState[24];
+
+const _D3DTEXTUREFILTERTYPE s_mipFilterTable[4][3] =
+{
+  { D3DTEXF_NONE, D3DTEXF_POINT, D3DTEXF_LINEAR },
+  { D3DTEXF_NONE, D3DTEXF_LINEAR, D3DTEXF_LINEAR },
+  { D3DTEXF_NONE, D3DTEXF_POINT, D3DTEXF_POINT },
+  { D3DTEXF_NONE, D3DTEXF_NONE, D3DTEXF_NONE }
+}; // idb
+
+const unsigned int s_cullTable_30[4] = { 0u, 1u, 3u, 2u }; // idb
+const unsigned int s_blendTable_30[11] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+const unsigned int s_blendOpTable_30[6] = { 0, 1, 2, 3, 4, 5 };
+const unsigned int s_depthTestTable_30[4] = { 8, 2, 3, 4 };
+const unsigned int s_stencilOpTable_30[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+const unsigned int s_stencilFuncTable_30[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
 
 void __cdecl R_ChangeIndices(GfxCmdBufPrimState *state, IDirect3DIndexBuffer9 *ib)
 {
@@ -24,10 +43,11 @@ void __cdecl R_ChangeIndices(GfxCmdBufPrimState *state, IDirect3DIndexBuffer9 *i
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetIndices( ib )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, IDirect3DIndexBuffer9 *))device->SetIndices)(
-            device,
-            device,
-            ib);
+        //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, IDirect3DIndexBuffer9 *))device->SetIndices)(
+        //    device,
+        //    device,
+        //    ib);
+        hr = device->SetIndices(ib);
         if (hr < 0)
         {
             do
@@ -77,7 +97,7 @@ void __cdecl R_ChangeStreamSource(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetStreamSource( streamIndex, vb, vertexOffset, vertexStride )\n");
-        hr = device->SetStreamSource(device, streamIndex, vb, vertexOffset, vertexStride);
+        hr = device->SetStreamSource(streamIndex, vb, vertexOffset, vertexStride);
         if (hr < 0)
         {
             do
@@ -212,7 +232,7 @@ void __cdecl R_SetTexFilter()
     for (entryIndex = 0; entryIndex < 0x18; ++entryIndex)
     {
         texFilter = entryIndex & 7;
-        decoded = s_mipFilterTable[mipFilterMode][(int)(entryIndex & 0x18) >> 3] << 16;
+        decoded = (_D3DTEXTUREFILTERTYPE)(s_mipFilterTable[mipFilterMode][(int)(entryIndex & 0x18) >> 3] << 16);
         switch (texFilter)
         {
         case 2:
@@ -249,7 +269,7 @@ void __cdecl R_SetInitialContextState(IDirect3DDevice9 *device)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_SEPARATEALPHABLENDENABLE, 1 )\n");
-        hr = device->SetRenderState(device, D3DRS_SEPARATEALPHABLENDENABLE, 1u);
+        hr = device->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, 1);
         if (hr < 0)
         {
             do
@@ -268,10 +288,8 @@ void __cdecl R_SetInitialContextState(IDirect3DDevice9 *device)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_TWOSIDEDSTENCILMODE, 1 )\n");
-        v5 = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int))device->SetRenderState)(
-            device,
-            device,
-            185,
+        v5 = device->SetRenderState(
+            D3DRS_TWOSIDEDSTENCILMODE,
             1);
         if (v5 < 0)
         {
@@ -291,7 +309,7 @@ void __cdecl R_SetInitialContextState(IDirect3DDevice9 *device)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE )\n");
-        v4 = device->SetRenderState(device, D3DRS_ZENABLE, 0);
+        v4 = device->SetRenderState(D3DRS_ZENABLE, 0);
         if (v4 < 0)
         {
             do
@@ -505,7 +523,7 @@ void __cdecl R_DeriveViewProjectionMatrix(GfxCmdBufSourceState *source)
     source->constVersions[74] = source->matrixVersions[4];
 }
 
-void  R_DeriveWorldViewProjectionMatrix(int a1@<ebp>, GfxCmdBufSourceState *source)
+void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source)
 {
     float *v2; // [esp-8h] [ebp-60h]
     float v3[18]; // [esp-4h] [ebp-5Ch] BYREF
@@ -545,7 +563,6 @@ void __cdecl R_DeriveShadowLookupMatrix(GfxCmdBufSourceState *source)
 }
 
 void  R_GenerateWorldOutdoorLookupMatrix(
-    GfxCodeMatrices *a1@<ebp>,
     GfxCmdBufSourceState *source,
     float (*outMatrix)[4])
 {
@@ -774,7 +791,7 @@ void __cdecl R_HW_SetViewport(IDirect3DDevice9 *device, const GfxViewport *viewp
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetViewport( &d3dViewport )\n");
-        hr = device->SetViewport(device, &d3dViewport);
+        hr = device->SetViewport(&d3dViewport);
         if (hr < 0)
         {
             do
@@ -843,7 +860,7 @@ void __cdecl R_DrawIndexedPrimitive(GfxCmdBufPrimState *state, const GfxDrawPrim
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, args->vertexCount, args->baseIndex, triCount )\n");
-            hr = device->DrawIndexedPrimitive(device, D3DPT_TRIANGLELIST, 0, 0, args->vertexCount, args->baseIndex, triCount);
+            hr = device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, args->vertexCount, args->baseIndex, triCount);
             if (hr < 0)
             {
                 do
@@ -869,7 +886,7 @@ void __cdecl R_ChangeState_0(GfxCmdBufState *state, unsigned int stateBits0)
     IDirect3DDevice9 *device; // [esp+38h] [ebp-4h]
 
     changedBits = state->activeStateBits[0] ^ stateBits0;
-    if (changedBits || ((unsigned int)&svs.snapshotEntities[111715].index & (state->refStateBits[0] ^ stateBits0)) != 0)
+    if (changedBits || ((state->refStateBits[0] ^ stateBits0) & 0x7000700) != 0)
     {
         if (r_logFile->current.integer)
             RB_LogPrintState_0(stateBits0, changedBits);
@@ -900,13 +917,10 @@ void __cdecl R_ChangeState_0(GfxCmdBufState *state, unsigned int stateBits0)
         blendOpRgbWasEnabled = (state->refStateBits[0] & 0x700) != 0;
         if ((stateBits0 & 0x700) != 0)
         {
-            if (((unsigned int)&svs.snapshotEntities[111708].lerp.apos.trTime & stateBits0) == 0)
+            if ((stateBits0 & 0x7000000) == 0)
             {
                 stateBits0 = stateBits0 & 0xF800FFFF | ((stateBits0 & 0x7FF) << 16);
-                changedBits = changedBits & 0xF800FFFF
-                    | (unsigned int)&svs.snapshotClients[19926].maxSprintTimeMultiplier
-                    & (state->activeStateBits[0]
-                        ^ stateBits0);
+                changedBits = changedBits & 0xF800FFFF | (state->activeStateBits[0] ^ stateBits0) & 0x7FF0000;
                 if ((state->activeStateBits[0] ^ stateBits0) != changedBits)
                     MyAssertHandler(".\\r_state.cpp", 906, 0, "%s", "(stateBits0 ^ state->activeStateBits[0]) == changedBits");
             }
@@ -914,15 +928,14 @@ void __cdecl R_ChangeState_0(GfxCmdBufState *state, unsigned int stateBits0)
         }
         else
         {
-            if (((unsigned int)&svs.snapshotEntities[111708].lerp.apos.trTime & stateBits0) != 0)
+            if ((stateBits0 & 0x7000000) != 0)
                 MyAssertHandler(
                     ".\\r_state.cpp",
                     883,
                     0,
                     "%s",
                     "(stateBits0 & GFXS0_BLENDOP_ALPHA_MASK) == (GFXS_BLENDOP_DISABLED << GFXS0_BLENDOP_ALPHA_SHIFT)");
-            stateBits0 = stateBits0 & 0xF800F800
-                | ((unsigned int)&svs.snapshotClients[19947].attachModelIndex[2] + 3) & state->activeStateBits[0];
+            stateBits0 = stateBits0 & 0xF800F800 | state->activeStateBits[0] & 0x7FF07FF;
             changedBits &= 0xF800F800;
             if ((state->activeStateBits[0] ^ stateBits0) != changedBits)
                 MyAssertHandler(".\\r_state.cpp", 887, 0, "%s", "(stateBits0 ^ state->activeStateBits[0]) == changedBits");
@@ -944,10 +957,8 @@ void __cdecl R_HW_SetAlphaTestEnable(IDirect3DDevice9 *device, __int16 stateBits
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ALPHATESTENABLE, (stateBits0 & GFXS0_ATEST_DISABLE) ? 0 : 1 )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, bool))device->SetRenderState)(
-            device,
-            device,
-            15,
+        hr = device->SetRenderState(
+            D3DRS_ALPHATESTENABLE,
             (stateBits0 & 0x800) == 0);
         if (hr < 0)
         {
@@ -976,10 +987,8 @@ void __cdecl R_HW_SetColorMask(IDirect3DDevice9 *device, unsigned int stateBits0
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_COLORWRITEENABLE, mask )\n");
         hr = device->SetRenderState(
-            device,
             D3DRS_COLORWRITEENABLE,
-            (((unsigned int)svs.snapshotClients[20582].attachModelIndex & stateBits0) != 0 ? 7 : 0)
-            | ((stateBits0 & 0x10000000) != 0 ? 8 : 0));
+            ((stateBits0 & 0x8000000) != 0 ? 7 : 0) | ((stateBits0 & 0x10000000) != 0 ? 8 : 0));
         if (hr < 0)
         {
             do
@@ -1013,7 +1022,7 @@ void __cdecl R_HW_SetCullFace(IDirect3DDevice9 *device, __int16 stateBits0)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_CULLMODE, s_cullTable[(stateBits0 & GFXS0_CULL_MASK) >> GFXS0_CULL_SHIFT] )\n");
-        hr = device->SetRenderState(device, D3DRS_CULLMODE, s_cullTable_30[(unsigned __int16)(stateBits0 & 0xC000) >> 14]);
+        hr = device->SetRenderState(D3DRS_CULLMODE, s_cullTable_30[(unsigned __int16)(stateBits0 & 0xC000) >> 14]);
         if (hr < 0)
         {
             do
@@ -1041,10 +1050,8 @@ void __cdecl R_HW_SetPolygonMode(IDirect3DDevice9 *device, signed int stateBits0
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint(
                 "device->SetRenderState( D3DRS_FILLMODE, (stateBits0 & GFXS0_POLYMODE_LINE) ? D3DFILL_WIREFRAME : D3DFILL_SOLID )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int))device->SetRenderState)(
-            device,
-            device,
-            8,
+        hr = device->SetRenderState(
+            D3DRS_FILLMODE,
             3 - (stateBits0 < 0));
         if (hr < 0)
         {
@@ -1072,7 +1079,7 @@ void __cdecl R_HW_DisableBlend(IDirect3DDevice9 *device)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ALPHABLENDENABLE, 0 )\n");
-        hr = device->SetRenderState(device, D3DRS_ALPHABLENDENABLE, 0);
+        hr = device->SetRenderState(D3DRS_ALPHABLENDENABLE, 0);
         if (hr < 0)
         {
             do
@@ -1116,10 +1123,8 @@ void __cdecl R_HW_SetBlend(
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetRenderState( D3DRS_ALPHABLENDENABLE, 1 )\n");
-            hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int))device->SetRenderState)(
-                device,
-                device,
-                27,
+            hr = device->SetRenderState(
+                D3DRS_ALPHABLENDENABLE,
                 1);
             if (hr < 0)
             {
@@ -1143,7 +1148,7 @@ void __cdecl R_HW_SetBlend(
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint(
                     "device->SetRenderState( D3DRS_BLENDOP, s_blendOpTable[(stateBits0 >> GFXS0_BLENDOP_RGB_SHIFT) & GFXS_BLENDOP_MASK] )\n");
-            v16 = device->SetRenderState(device, D3DRS_BLENDOP, s_blendOpTable_30[(stateBits0 >> 8) & 7]);
+            v16 = device->SetRenderState(D3DRS_BLENDOP, s_blendOpTable_30[(stateBits0 >> 8) & 7]);
             if (v16 < 0)
             {
                 do
@@ -1167,7 +1172,7 @@ void __cdecl R_HW_SetBlend(
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint(
                     "device->SetRenderState( D3DRS_SRCBLEND, s_blendTable[(stateBits0 >> GFXS0_SRCBLEND_RGB_SHIFT) & GFXS_BLEND_MASK] )\n");
-            v15 = device->SetRenderState(device, D3DRS_SRCBLEND, s_blendTable_30[stateBits0 & 0xF]);
+            v15 = device->SetRenderState(D3DRS_SRCBLEND, s_blendTable_30[stateBits0 & 0xF]);
             if (v15 < 0)
             {
                 do
@@ -1191,10 +1196,8 @@ void __cdecl R_HW_SetBlend(
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint(
                     "device->SetRenderState( D3DRS_DESTBLEND, s_blendTable[(stateBits0 >> GFXS0_DSTBLEND_RGB_SHIFT) & GFXS_BLEND_MASK] )\n");
-            v14 = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, const unsigned int))device->SetRenderState)(
-                device,
-                device,
-                20,
+            v14 = device->SetRenderState(
+                D3DRS_DESTBLEND,
                 s_blendTable_30[(unsigned __int8)stateBits0 >> 4]);
             if (v14 < 0)
             {
@@ -1212,14 +1215,14 @@ void __cdecl R_HW_SetBlend(
             }
         } while (alwaysfails);
     }
-    if (((unsigned int)&svs.snapshotEntities[111708].lerp.apos.trTime & changedBits) != 0)
+    if ((changedBits & 0x7000000) != 0)
     {
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint(
                     "device->SetRenderState( D3DRS_BLENDOPALPHA, s_blendOpTable[(stateBits0 >> GFXS0_BLENDOP_ALPHA_SHIFT) & GFXS_BLENDOP_MASK] )\n");
-            v13 = device->SetRenderState(device, D3DRS_BLENDOPALPHA, s_blendOpTable_30[HIBYTE(stateBits0) & 7]);
+            v13 = device->SetRenderState(D3DRS_BLENDOPALPHA, s_blendOpTable_30[HIBYTE(stateBits0) & 7]);
             if (v13 < 0)
             {
                 do
@@ -1243,7 +1246,7 @@ void __cdecl R_HW_SetBlend(
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint(
                     "device->SetRenderState( D3DRS_SRCBLENDALPHA, s_blendTable[(stateBits0 >> GFXS0_SRCBLEND_ALPHA_SHIFT) & GFXS_BLEND_MASK] )\n");
-            v12 = device->SetRenderState(device, D3DRS_SRCBLENDALPHA, s_blendTable_30[HIWORD(stateBits0) & 0xF]);
+            v12 = device->SetRenderState(D3DRS_SRCBLENDALPHA, s_blendTable_30[HIWORD(stateBits0) & 0xF]);
             if (v12 < 0)
             {
                 do
@@ -1260,17 +1263,15 @@ void __cdecl R_HW_SetBlend(
             }
         } while (alwaysfails);
     }
-    if (((unsigned int)&clients[0].snapshots[9].ps.hud.current[17].alignOrg & changedBits) != 0)
+    if ((changedBits & 0xF00000) != 0)
     {
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint(
                     "device->SetRenderState( D3DRS_DESTBLENDALPHA, s_blendTable[(stateBits0 >> GFXS0_DSTBLEND_ALPHA_SHIFT) & GFXS_BLEND_MASK] )\n");
-            v11 = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, const unsigned int))device->SetRenderState)(
-                device,
-                device,
-                208,
+            v11 = device->SetRenderState(
+                D3DRS_DESTBLENDALPHA,
                 s_blendTable_30[(stateBits0 >> 20) & 0xF]);
             if (v11 < 0)
             {
@@ -1329,7 +1330,7 @@ void __cdecl R_SetAlphaTestFunction(GfxCmdBufState *state, __int16 stateBits0)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ALPHAFUNC, function )\n");
-        hr = device->SetRenderState(device, D3DRS_ALPHAFUNC, function);
+        hr = device->SetRenderState(D3DRS_ALPHAFUNC, function);
         if (hr < 0)
         {
             do
@@ -1350,7 +1351,7 @@ void __cdecl R_SetAlphaTestFunction(GfxCmdBufState *state, __int16 stateBits0)
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetRenderState( D3DRS_ALPHAREF, ref )\n");
-            v4 = device->SetRenderState(device, D3DRS_ALPHAREF, ref);
+            v4 = device->SetRenderState(D3DRS_ALPHAREF, ref);
             if (v4 < 0)
             {
                 do
@@ -1427,8 +1428,7 @@ void __cdecl R_ChangeState_1(GfxCmdBufState *state, unsigned int stateBits1)
         }
         if ((changedBits & 0x1FF00) != 0)
             R_HW_SetFrontStencilOp(device, (stateBits1 >> 8) & 7, (stateBits1 >> 11) & 7, (stateBits1 >> 14) & 7);
-        if ((((unsigned int)&svs.clients[17].frames[19].ps.hud.archival[8].x | ((unsigned int)&loc_6FFFFC + 4) | 0x1C000000)
-            & changedBits) != 0)
+        if ((changedBits & 0x1FF00000) != 0)
             R_HW_SetBackStencilOp(device, (stateBits1 >> 20) & 7, (stateBits1 >> 23) & 7, (stateBits1 >> 26) & 7);
         if ((changedBits & 0xE0000) != 0)
             R_HW_SetFrontStencilFunc(device, (stateBits1 >> 17) & 7);
@@ -1447,10 +1447,8 @@ void __cdecl R_HW_SetDepthWriteEnable(IDirect3DDevice9 *device, char stateBits1)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ZWRITEENABLE, (stateBits1 & GFXS1_DEPTHWRITE) ? 1 : 0 )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, bool))device->SetRenderState)(
-            device,
-            device,
-            14,
+        hr = device->SetRenderState(
+            D3DRS_ZWRITEENABLE,
             (stateBits1 & 1) != 0);
         if (hr < 0)
         {
@@ -1478,10 +1476,8 @@ void __cdecl R_HW_SetDepthTestEnable(IDirect3DDevice9 *device, char stateBits1)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ZENABLE, (stateBits1 & GFXS1_DEPTHTEST_DISABLE) ? D3DZB_FALSE : D3DZB_TRUE )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, bool))device->SetRenderState)(
-            device,
-            device,
-            7,
+        hr = device->SetRenderState(
+            D3DRS_ZENABLE,
             (stateBits1 & 2) == 0);
         if (hr < 0)
         {
@@ -1510,7 +1506,7 @@ void __cdecl R_HW_SetDepthTestFunction(IDirect3DDevice9 *device, char stateBits1
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint(
                 "device->SetRenderState( D3DRS_ZFUNC, s_depthTestTable[(stateBits1 & GFXS1_DEPTHTEST_MASK) >> GFXS1_DEPTHTEST_SHIFT] )\n");
-        hr = device->SetRenderState(device, D3DRS_ZFUNC, s_depthTestTable_30[(unsigned __int8)(stateBits1 & 0xC) >> 2]);
+        hr = device->SetRenderState(D3DRS_ZFUNC, s_depthTestTable_30[(unsigned __int8)(stateBits1 & 0xC) >> 2]);
         if (hr < 0)
         {
             do
@@ -1537,7 +1533,7 @@ void __cdecl R_HW_EnableStencil(IDirect3DDevice9 *device)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_STENCILENABLE, 1 )\n");
-        hr = device->SetRenderState(device, D3DRS_STENCILENABLE, 1u);
+        hr = device->SetRenderState(D3DRS_STENCILENABLE, 1u);
         if (hr < 0)
         {
             do
@@ -1563,7 +1559,7 @@ void __cdecl R_HW_DisableStencil(IDirect3DDevice9 *device)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_STENCILENABLE, 0 )\n");
-        hr = device->SetRenderState(device, D3DRS_STENCILENABLE, 0);
+        hr = device->SetRenderState(D3DRS_STENCILENABLE, 0);
         if (hr < 0)
         {
             do
@@ -1597,7 +1593,7 @@ void __cdecl R_HW_SetFrontStencilOp(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_STENCILPASS, s_stencilOpTable[stencilOpPass] )\n");
-        hr = device->SetRenderState(device, D3DRS_STENCILPASS, s_stencilOpTable_30[stencilOpPass]);
+        hr = device->SetRenderState(D3DRS_STENCILPASS, s_stencilOpTable_30[stencilOpPass]);
         if (hr < 0)
         {
             do
@@ -1617,7 +1613,7 @@ void __cdecl R_HW_SetFrontStencilOp(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_STENCILFAIL, s_stencilOpTable[stencilOpFail] )\n");
-        v8 = device->SetRenderState(device, D3DRS_STENCILFAIL, s_stencilOpTable_30[stencilOpFail]);
+        v8 = device->SetRenderState(D3DRS_STENCILFAIL, s_stencilOpTable_30[stencilOpFail]);
         if (v8 < 0)
         {
             do
@@ -1637,7 +1633,7 @@ void __cdecl R_HW_SetFrontStencilOp(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_STENCILZFAIL, s_stencilOpTable[stencilOpZFail] )\n");
-        v7 = device->SetRenderState(device, D3DRS_STENCILZFAIL, s_stencilOpTable_30[stencilOpZFail]);
+        v7 = device->SetRenderState(D3DRS_STENCILZFAIL, s_stencilOpTable_30[stencilOpZFail]);
         if (v7 < 0)
         {
             do
@@ -1672,7 +1668,7 @@ void __cdecl R_HW_SetBackStencilOp(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_CCW_STENCILPASS, s_stencilOpTable[stencilOpPass] )\n");
-        hr = device->SetRenderState(device, D3DRS_CCW_STENCILPASS, s_stencilOpTable_30[stencilOpPass]);
+        hr = device->SetRenderState(D3DRS_CCW_STENCILPASS, s_stencilOpTable_30[stencilOpPass]);
         if (hr < 0)
         {
             do
@@ -1692,7 +1688,7 @@ void __cdecl R_HW_SetBackStencilOp(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_CCW_STENCILFAIL, s_stencilOpTable[stencilOpFail] )\n");
-        v8 = device->SetRenderState(device, D3DRS_CCW_STENCILFAIL, s_stencilOpTable_30[stencilOpFail]);
+        v8 = device->SetRenderState(D3DRS_CCW_STENCILFAIL, s_stencilOpTable_30[stencilOpFail]);
         if (v8 < 0)
         {
             do
@@ -1712,7 +1708,7 @@ void __cdecl R_HW_SetBackStencilOp(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_CCW_STENCILZFAIL, s_stencilOpTable[stencilOpZFail] )\n");
-        v7 = device->SetRenderState(device, D3DRS_CCW_STENCILZFAIL, s_stencilOpTable_30[stencilOpZFail]);
+        v7 = device->SetRenderState(D3DRS_CCW_STENCILZFAIL, s_stencilOpTable_30[stencilOpZFail]);
         if (v7 < 0)
         {
             do
@@ -1739,7 +1735,7 @@ void __cdecl R_HW_SetFrontStencilFunc(IDirect3DDevice9 *device, unsigned int ste
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_STENCILFUNC, s_stencilFuncTable[stencilFunc] )\n");
-        hr = device->SetRenderState(device, D3DRS_STENCILFUNC, s_stencilFuncTable_30[stencilFunc]);
+        hr = device->SetRenderState(D3DRS_STENCILFUNC, s_stencilFuncTable_30[stencilFunc]);
         if (hr < 0)
         {
             do
@@ -1766,7 +1762,7 @@ void __cdecl R_HW_SetBackStencilFunc(IDirect3DDevice9 *device, unsigned int sten
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_CCW_STENCILFUNC, s_stencilFuncTable[stencilFunc] )\n");
-        hr = device->SetRenderState(device, D3DRS_CCW_STENCILFUNC, s_stencilFuncTable_30[stencilFunc]);
+        hr = device->SetRenderState(D3DRS_CCW_STENCILFUNC, s_stencilFuncTable_30[stencilFunc]);
         if (hr < 0)
         {
             do
@@ -1887,7 +1883,6 @@ unsigned int __cdecl R_HW_SetSamplerState(
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MAGFILTER, magFilter )\n");
             v17 = device->SetSamplerState(
-                device,
                 samplerIndex,
                 D3DSAMP_MAGFILTER,
                 (unsigned __int16)(samplerState & 0xF000) >> 12);
@@ -1919,11 +1914,9 @@ unsigned int __cdecl R_HW_SetSamplerState(
             {
                 if (r_logFile && r_logFile->current.integer)
                     RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MAXANISOTROPY, anisotropy )\n");
-                v16 = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, int, unsigned int))device->SetSamplerState)(
-                    device,
-                    device,
+                v16 = device->SetSamplerState(
                     samplerIndex,
-                    10,
+                    D3DSAMP_MAXANISOTROPY,
                     (unsigned __int8)samplerState);
                 if (v16 < 0)
                 {
@@ -1948,7 +1941,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MIPFILTER, mipFilter )\n");
-            v15 = device->SetSamplerState(device, samplerIndex, D3DSAMP_MIPFILTER, (samplerState & 0xF0000) >> 16);
+            v15 = device->SetSamplerState(samplerIndex, D3DSAMP_MIPFILTER, (samplerState & 0xF0000) >> 16);
             if (v15 < 0)
             {
                 do
@@ -2787,7 +2780,6 @@ void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBit
 
 // bad sp value at call has been detected, the output may be wrong!
 void  R_DrawCall(
-    int a1@<ebp>,
     void(__cdecl *callback)(const void *, GfxCmdBufContext, GfxCmdBufContext),
     const void *userData,
     GfxCmdBufSourceState *source,
@@ -2806,7 +2798,7 @@ void  R_DrawCall(
     void *v15; // [esp+4h] [ebp-8h]
     void *retaddr; // [esp+Ch] [ebp+0h]
 
-    v14 = a1;
+    //v14 = a1;
     v15 = retaddr;
     v9 = alloca(5192);
     p_input = &viewInfo->input;
@@ -2871,20 +2863,18 @@ void __cdecl R_SetAlphaAntiAliasingState(IDirect3DDevice9 *device, __int16 state
     }
     else if (r_aaAlpha->current.integer == 2)
     {
-        aaAlphaFormat = 1094800211;
+        aaAlphaFormat = (_D3DFORMAT)1094800211;
     }
     else
     {
-        aaAlphaFormat = 1129272385;
+        aaAlphaFormat = (_D3DFORMAT)1129272385;
     }
     do
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ADAPTIVETESS_Y, aaAlphaFormat )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, _D3DFORMAT))device->SetRenderState)(
-            device,
-            device,
-            181,
+        hr = device->SetRenderState(
+            D3DRS_ADAPTIVETESS_Y,
             aaAlphaFormat);
         if (hr < 0)
         {

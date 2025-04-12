@@ -147,3 +147,6 @@ bool __cdecl R_Cinematic_IsFinished();
 bool __cdecl R_Cinematic_IsStarted();
 bool __cdecl R_Cinematic_IsNextReady();
 bool __cdecl R_Cinematic_IsUnderrun();
+
+void __cdecl R_Cinematic_BeginLostDevice();
+void __cdecl R_Cinematic_EndLostDevice();

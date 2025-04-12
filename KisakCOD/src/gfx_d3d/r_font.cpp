@@ -4,6 +4,7 @@
 #include <universal/com_files.h>
 #include <universal/com_memory.h>
 #include "r_init.h"
+#include <database/database.h>
 
 Font_s *registeredFont[16];
 int registeredFontCount;
@@ -319,3 +320,13 @@ int __cdecl R_ConsoleTextWidth(const char *textPool, int poolSize, int firstChar
     return width;
 }
 
+void __cdecl R_InitFonts()
+{
+    if (registeredFontCount)
+        MyAssertHandler(".\\r_font.cpp", 144, 0, "%s", "registeredFontCount == 0");
+}
+
+void __cdecl R_ShutdownFonts()
+{
+    registeredFontCount = 0;
+}

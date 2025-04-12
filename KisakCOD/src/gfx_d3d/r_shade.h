@@ -12,6 +12,7 @@ union GfxShaderConstantState // sizeof=0x8
     unsigned __int64 packed;
 };
 
+int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, int triCount);
 void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context);
 void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData);
 void __cdecl R_HW_SetVertexShaderConstant(__int64 device, __int64 data);

@@ -1,6 +1,10 @@
 #include "rb_sunshadow.h"
 #include <qcommon/mem_track.h>
 #include "r_dvars.h"
+#include "rb_backend.h"
+#include "r_draw_sunshadow.h"
+#include "r_cmdbuf.h"
+#include "rb_pixelcost.h"
 
 GfxPointVertex g_overlayPoints[36];
 

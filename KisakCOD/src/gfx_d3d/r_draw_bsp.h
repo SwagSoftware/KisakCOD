@@ -1,7 +1,6 @@
 #pragma once
 #include "rb_backend.h"
 
-
 struct GfxTrianglesDrawStream // sizeof=0x30
 {                                       // ...
     unsigned int reflectionProbeCount;  // ...
@@ -15,7 +14,7 @@ struct GfxTrianglesDrawStream // sizeof=0x30
     const GfxTexture *lightmapPrimaryTexture; // ...
     const GfxTexture *lightmapSecondaryTexture; // ...
     unsigned int customSamplerFlags;    // ...
-
+};
 
 void __cdecl R_SetStreamSource(
     GfxCmdBufPrimState *primState,

@@ -1,6 +1,6 @@
 #pragma once
 #include <xanim/xmodel.h>
-
+#include "r_rendercmds.h"
 
 struct SkinCachedStaticModelCmd // sizeof=0x4
 {                                       // ...
@@ -49,6 +49,9 @@ struct static_model_cache_t // sizeof=0x410E0
     static_model_node_list_t freelist[4][6]; // ...
     static_model_tree_list_t usedlist[4]; // ...
 };
+
+void __cdecl R_InitStaticModelCache();
+void __cdecl R_ShutdownStaticModelCache();
 
 void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lod, unsigned int cacheBaseVertIndex);
 char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex);

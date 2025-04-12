@@ -1,4 +1,9 @@
 #include "r_draw_shadowable_light.h"
+#include "r_dvars.h"
+#include "r_utils.h"
+#include "rb_postfx.h"
+#include <devgui/devgui.h>
+#include <qcommon/com_bsp.h>
 
 
 
@@ -141,7 +146,7 @@ void __cdecl R_SetShadowableLight(
     GfxLightDef *def; // [esp+34h] [ebp-1Ch]
     float falloffShift; // [esp+3Ch] [ebp-14h]
     const GfxSpotShadow *spotShadow; // [esp+44h] [ebp-Ch]
-    GfxMatrix *lookupMatrix; // [esp+48h] [ebp-8h]
+    const GfxMatrix *lookupMatrix; // [esp+48h] [ebp-8h]
     LightHasShadowMap hasShadowMap; // [esp+4Ch] [ebp-4h]
 
     if (shadowableLightIndex >= 0xFF)
@@ -202,7 +207,7 @@ void __cdecl R_SetShadowableLight(
                     spotShadowFade = spotShadow->fade;
                     R_SetCodeImageTexture(source, 8u, spotShadow->image);
                     if (!Vec4Compare(source->input.consts[50], spotShadow->pixelAdjust))
-                        R_SetCodeConstantFromVec4(source, 0x32u, spotShadow->pixelAdjust);
+                        R_SetCodeConstantFromVec4(source, 0x32u, (float*)spotShadow->pixelAdjust);
                 }
                 R_SetLightProperties(
                     source,

@@ -473,6 +473,16 @@ void __cdecl R_SetupDynamicModelLighting(GfxCmdBufInput *input)
     R_SetModelLightingLookupScale(input);
 }
 
+void __cdecl R_ShutdownModelLightingGlobals()
+{
+    unsigned int i; // [esp+0h] [ebp-4h]
+
+    for (i = 0; i < 4; ++i)
+        R_FreeGlobalVariable(modelLightGlob.pixelFreeBits[i]);
+    R_FreeGlobalVariable(modelLightGlob.lightingOrigins);
+    R_FreeGlobalVariable(modelLightGlob.lightingInfo);
+}
+
 void __cdecl R_InitModelLightingGlobals()
 {
     int v1; // eax

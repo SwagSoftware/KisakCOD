@@ -1,6 +1,9 @@
 #include "r_meshdata.h"
 #include "r_shade.h"
 #include "r_state.h"
+#include "r_drawsurf.h"
+#include "r_utils.h"
+#include "rb_stats.h"
 
 
 //struct GfxMeshGlobals gfxMeshGlob 85b93690     gfx_d3d : r_meshdata.obj

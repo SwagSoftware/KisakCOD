@@ -3,6 +3,10 @@
 #include <universal/com_memory.h>
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>
+#include <database/database.h>
+#include "rb_logfile.h"
+#include "r_utils.h"
+#include "r_dvars.h"
 
 MaterialGlobals materialGlobals;
 
@@ -178,7 +182,7 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("dx.device->CreateVertexDeclaration( elemTable, &decl )\n");
-        hr = dx.device->CreateVertexDeclaration(dx.device, elemTable, &decl);
+        hr = dx.device->CreateVertexDeclaration(dx. elemTable, &decl);
         if (hr < 0)
         {
             do
@@ -349,6 +353,146 @@ const char *__cdecl Material_GetName(Material *handle)
     return Material_FromHandle(handle)->info.name;
 }
 
+void __cdecl Material_ReleasePassResources(MaterialPass *pass)
+{
+    IDirect3DSurface9 *v1; // [esp+0h] [ebp-10h]
+    IDirect3DSurface9 *var; // [esp+4h] [ebp-Ch]
+    IDirect3DPixelShader9 *varCopy; // [esp+8h] [ebp-8h]
+    int declIndex; // [esp+Ch] [ebp-4h]
+
+    if (!pass->pixelShader)
+        MyAssertHandler(".\\r_material.cpp", 933, 0, "%s", "pass->pixelShader");
+    if (pass->pixelShader->prog.ps)
+    {
+        do
+        {
+            if (r_logFile && r_logFile->current.integer)
+                RB_LogPrint("pass->pixelShader->prog.ps->Release()\n");
+            varCopy = pass->pixelShader->prog.ps;
+            pass->pixelShader->prog.ps = 0;
+            R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                (IDirect3DSurface9 *)varCopy,
+                "pass->pixelShader->prog.ps",
+                ".\\r_material.cpp",
+                935);
+        } while (alwaysfails);
+    }
+    if (!pass->vertexShader)
+        MyAssertHandler(".\\r_material.cpp", 937, 0, "%s", "pass->vertexShader");
+    if (pass->vertexShader->prog.vs)
+    {
+        do
+        {
+            if (r_logFile && r_logFile->current.integer)
+                RB_LogPrint("pass->vertexShader->prog.vs->Release()\n");
+            var = (IDirect3DSurface9 *)pass->vertexShader->prog.vs;
+            pass->vertexShader->prog.vs = 0;
+            R_ReleaseAndSetNULL<IDirect3DDevice9>(var, "pass->vertexShader->prog.vs", ".\\r_material.cpp", 939);
+        } while (alwaysfails);
+    }
+    if (!pass->vertexDecl)
+        MyAssertHandler(".\\r_material.cpp", 941, 0, "%s", "pass->vertexDecl");
+    if (pass->vertexDecl->isLoaded)
+    {
+        pass->vertexDecl->isLoaded = 0;
+        for (declIndex = 0; declIndex < 16; ++declIndex)
+        {
+            if (pass->vertexDecl->routing.decl[declIndex])
+            {
+                do
+                {
+                    if (r_logFile)
+                    {
+                        if (r_logFile->current.integer)
+                            RB_LogPrint("pass->vertexDecl->routing.decl[declIndex]->Release()\n");
+                    }
+                    v1 = (IDirect3DSurface9 *)pass->vertexDecl->routing.decl[declIndex];
+                    pass->vertexDecl->routing.decl[declIndex] = 0;
+                    R_ReleaseAndSetNULL<IDirect3DDevice9>(
+                        v1,
+                        "pass->vertexDecl->routing.decl[declIndex]",
+                        ".\\r_material.cpp",
+                        948);
+                } while (alwaysfails);
+            }
+        }
+    }
+}
+
+void __cdecl Material_ReleaseTechniqueSetResources(MaterialTechniqueSet *techniqueSet)
+{
+    MaterialTechnique *technique; // [esp+10h] [ebp-Ch]
+    int techType; // [esp+14h] [ebp-8h]
+    int passIndex; // [esp+18h] [ebp-4h]
+
+    for (techType = 0; techType < 34; ++techType)
+    {
+        technique = techniqueSet->techniques[techType];
+        if (technique)
+        {
+            for (passIndex = 0; passIndex < technique->passCount; ++passIndex)
+                Material_ReleasePassResources(&technique->passArray[passIndex]);
+        }
+    }
+}
+
+void __cdecl Material_ReloadPassResources(MaterialPass *pass)
+{
+    if (!pass->pixelShader)
+        MyAssertHandler(".\\r_material.cpp", 958, 0, "%s", "pass->pixelShader");
+    if (!pass->pixelShader->prog.ps)
+        Load_CreateMaterialPixelShader(&pass->pixelShader->prog.loadDef, pass->pixelShader);
+    if (!pass->vertexShader)
+        MyAssertHandler(".\\r_material.cpp", 962, 0, "%s", "pass->vertexShader");
+    if (!pass->vertexShader->prog.vs)
+        Load_CreateMaterialVertexShader(&pass->vertexShader->prog.loadDef, pass->vertexShader);
+    if (!pass->vertexDecl)
+        MyAssertHandler(".\\r_material.cpp", 966, 0, "%s", "pass->vertexDecl");
+    if (!pass->vertexDecl->isLoaded)
+    {
+        Load_BuildVertexDecl(&pass->vertexDecl);
+        if (!pass->vertexDecl->isLoaded)
+            MyAssertHandler(".\\r_material.cpp", 970, 0, "%s", "pass->vertexDecl->isLoaded");
+    }
+}
+
+void __cdecl Material_ReloadTechniqueSetResources(MaterialTechniqueSet *techniqueSet)
+{
+    MaterialTechnique *technique; // [esp+0h] [ebp-Ch]
+    int techType; // [esp+4h] [ebp-8h]
+    int passIndex; // [esp+8h] [ebp-4h]
+
+    for (techType = 0; techType < 34; ++techType)
+    {
+        technique = techniqueSet->techniques[techType];
+        if (technique)
+        {
+            for (passIndex = 0; passIndex < technique->passCount; ++passIndex)
+                Material_ReloadPassResources(&technique->passArray[passIndex]);
+        }
+    }
+}
+
+void __cdecl Material_ReloadTechniqueSet(XAssetHeader header)
+{
+    Material_ReloadTechniqueSetResources(header.techniqueSet);
+}
+
+void __cdecl Material_ReleaseTechniqueSet(XAssetHeader header)
+{
+    Material_ReleaseTechniqueSetResources(header.techniqueSet);
+}
+
+void __cdecl Material_ReloadAll()
+{
+    DB_EnumXAssets(ASSET_TYPE_TECHNIQUE_SET, (void(__cdecl *)(XAssetHeader, void *))Material_ReloadTechniqueSet, 0, 1);
+}
+
+void __cdecl Material_ReleaseAll()
+{
+    DB_EnumXAssets(ASSET_TYPE_TECHNIQUE_SET, (void(__cdecl *)(XAssetHeader, void *))Material_ReleaseTechniqueSet, 0, 1);
+}
+
 const Material *__cdecl Material_FromHandle(Material *handle)
 {
     if (!handle)
@@ -369,6 +513,14 @@ void __cdecl Material_Init()
     }
     Material_LoadBuiltIn(s_builtInMaterials, 50);
     Material_Register("statmon_warning_tris", 1);
+}
+
+void __cdecl Material_Shutdown()
+{
+    Material_FreeAll();
+    memset((unsigned __int8 *)&materialGlobals, 0, sizeof(materialGlobals));
+    memset((unsigned __int8 *)rg.materialHashTable, 0, sizeof(rg.materialHashTable));
+    rgp.materialCount = 0;
 }
 
 void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable *mtlTable, int mtlTableCount)

@@ -1304,3 +1304,89 @@ bool __cdecl R_Cinematic_IsUnderrun()
     return cinematicGlob.underrun;
 }
 
+void __cdecl R_Cinematic_BeginLostDevice()
+{
+    unsigned int setIter; // [esp+4h] [ebp-8h]
+    CinematicTextureSet *textureSet; // [esp+8h] [ebp-4h]
+
+    Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
+    if (cinematicGlob.hasFileIO)
+        R_Cinematic_RelinquishIO();
+    if (R_Cinematic_IsStarted() && cinematicGlob.currentPaused == CINEMATIC_NOT_PAUSED)
+    {
+        cinematicGlob.currentPaused = CINEMATIC_PAUSED;
+        BinkPause(cinematicGlob.bink, 1);
+    }
+    for (setIter = 0; setIter != 2; ++setIter)
+    {
+        textureSet = &cinematicGlob.textureSets[setIter];
+        Image_Release(&textureSet->drawImageY);
+        Image_Release(&textureSet->drawImageCr);
+        Image_Release(&textureSet->drawImageCb);
+        Image_Release(&textureSet->drawImageA);
+    }
+    Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
+}
+
+void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int height, unsigned __int8 clearValue)
+{
+    const char *v4; // eax
+    HRESULT hr; // [esp+0h] [ebp-Ch]
+    _D3DLOCKED_RECT lockedRect; // [esp+4h] [ebp-8h] BYREF
+
+    hr = texture->LockRect(0, &lockedRect, 0, 0x2000u);
+    if (hr >= 0)
+    {
+        if (lockedRect.Pitch < width)
+            MyAssertHandler(".\\r_cinematic.cpp", 1239, 0, "lockedRect.Pitch >= width\n\t%i, %i", lockedRect.Pitch, width);
+        memset((unsigned __int8 *)lockedRect.pBits, clearValue, lockedRect.Pitch * height);
+        texture->UnlockRect(0);
+    }
+    else
+    {
+        v4 = DXGetErrorDescription9A(hr);
+        Com_PrintError(8, "LockRect failed with error 0x%08x - %s", hr, v4);
+    }
+}
+
+void R_Cinematic_ClearBinkDrawTextures()
+{
+    if (!cinematicGlob.binkTextureSet.tex_draw.Ytexture)
+        MyAssertHandler(".\\r_cinematic.cpp", 1254, 0, "%s", "textures->Ytexture");
+    if (!cinematicGlob.binkTextureSet.tex_draw.cRtexture)
+        MyAssertHandler(".\\r_cinematic.cpp", 1255, 0, "%s", "textures->cRtexture");
+    if (!cinematicGlob.binkTextureSet.tex_draw.cBtexture)
+        MyAssertHandler(".\\r_cinematic.cpp", 1256, 0, "%s", "textures->cBtexture");
+    R_Cinematic_ClearTexture(
+        cinematicGlob.binkTextureSet.tex_draw.Ytexture,
+        cinematicGlob.binkTextureSet.bink_buffers.YABufferWidth,
+        cinematicGlob.binkTextureSet.bink_buffers.YABufferHeight,
+        0);
+    R_Cinematic_ClearTexture(
+        cinematicGlob.binkTextureSet.tex_draw.cRtexture,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferWidth,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferHeight,
+        0x80u);
+    R_Cinematic_ClearTexture(
+        cinematicGlob.binkTextureSet.tex_draw.cBtexture,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferWidth,
+        cinematicGlob.binkTextureSet.bink_buffers.cRcBBufferHeight,
+        0x80u);
+    if (cinematicGlob.binkTextureSet.tex_draw.Atexture)
+        R_Cinematic_ClearTexture(
+            cinematicGlob.binkTextureSet.tex_draw.Atexture,
+            cinematicGlob.binkTextureSet.bink_buffers.YABufferWidth,
+            cinematicGlob.binkTextureSet.bink_buffers.YABufferHeight,
+            0);
+}
+
+void __cdecl R_Cinematic_EndLostDevice()
+{
+    Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
+    if (cinematicGlob.bink)
+    {
+        R_Cinematic_MakeBinkDrawTextures();
+        R_Cinematic_ClearBinkDrawTextures();
+    }
+    Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
+}

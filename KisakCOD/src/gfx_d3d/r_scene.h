@@ -22,6 +22,12 @@ struct GfxSceneParms // sizeof=0xA0
     const GfxLight *primaryLights;
 };
 
+struct BModelSurface // sizeof=0x8
+{
+    const GfxScaledPlacement *placement;
+    const GfxSurface *surf;
+};
+
 struct GfxSkinnedXModelSurfs // sizeof=0x4
 {                                       // ...
     void *firstSurf;

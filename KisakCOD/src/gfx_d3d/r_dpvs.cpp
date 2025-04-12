@@ -4,6 +4,13 @@
 #include "r_dvars.h"
 #include <DynEntity/DynEntity_client.h>
 #include "r_drawsurf.h"
+#include "r_primarylights.h"
+#include "r_model.h"
+#include <qcommon/threads.h>
+#include <universal/com_convexhull.h>
+#include "r_workercmds.h"
+#include "r_utils.h"
+#include <devgui/devgui.h>
 
 
 DpvsGlobals dpvsGlob;
@@ -877,7 +884,6 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
         {
             sceneModel = &scene.sceneModel[sceneEntIndexa];
             if (!R_SkinXModel(
-                COERCE_FLOAT(&savedregs),
                 &sceneModel->info,
                 sceneModel->model,
                 sceneModel->obj,
@@ -1030,7 +1036,7 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
             if (!dynEntDef->xModel)
                 MyAssertHandler(".\\r_dpvs.cpp", 1696, 0, "%s", "dynEntDef->xModel");
             sceneDynModel = &rgp.world->sceneDynModel[scene.sceneDynModelCount];
-            if (R_SkinXModel(COERCE_FLOAT(&savedregs), &sceneDynModel->info, dynEntDef->xModel, 0, &dynEntPose->pose, 1.0, 0))
+            if (R_SkinXModel(&sceneDynModel->info, dynEntDef->xModel, 0, &dynEntPose->pose, 1.0, 0))
             {
                 sceneDynModel->dynEntId = dynEntIndex;
                 ++scene.sceneDynModelCount;
@@ -1778,7 +1784,6 @@ void __cdecl R_GenerateShadowMapCasterCells()
 void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
 {
     float scale; // [esp+4h] [ebp-D80h]
-    LargeLocal hullPointsPoolArray_large_local; // [esp+54h] [ebp-D30h] BYREF
     GfxHullPointsPool(*hullPointsPoolArray)[256]; // [esp+5Ch] [ebp-D28h]
     int childPlaneCount; // [esp+60h] [ebp-D24h]
     GfxPortal *portal; // [esp+64h] [ebp-D20h]
@@ -1790,8 +1795,10 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
     float hull[64][2]; // [esp+B7Ch] [ebp-208h] BYREF
     unsigned int hullPointCount; // [esp+D80h] [ebp-4h]
 
-    LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
-    hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
+    LargeLocal hullPointsPoolArray_large_local(0x20000);
+    //LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
+    //hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
+    hullPointsPoolArray = (GfxHullPointsPool(*)[256])hullPointsPoolArray_large_local.GetBuf();
     //Profile_Begin(188);
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_dpvs.cpp", 2879, 0, "%s", "Sys_IsMainThread()");
@@ -1835,7 +1842,7 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
         }
     }
     //Profile_EndInternal(0);
-    LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
+    //LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
 }
 
 unsigned int __cdecl R_PortalClipPlanesNoFrustum(
@@ -2721,6 +2728,14 @@ void __cdecl R_CullDynamicPointLightsInCameraView()
     }
 }
 
+const float standardFrustumSidePlanes[4][4] =
+{
+  { -1.0, 0.0, 0.0, 1.0 },
+  { 1.0, 0.0, 0.0, 1.0 },
+  { 0.0, -1.0, 0.0, 1.0 },
+  { 0.0, 1.0, 0.0, 1.0 }
+}; // idb
+
 void __cdecl R_SetupWorldSurfacesDpvs(const GfxViewParms *viewParms)
 {
     DpvsView *dpvsView; // [esp+0h] [ebp-4h]
@@ -2906,13 +2921,14 @@ void __cdecl R_AddWorldSurfacesPortalWalk(int cameraCellIndex)
     }
 }
 
+const float color[4] = { 0.0f, 1.0f, 1.0f, 0.25f };
+
 void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, const DpvsPlane *planes, int planeCount)
 {
     float scale; // [esp+4h] [ebp-D98h]
     float v5; // [esp+28h] [ebp-D74h]
     float v6; // [esp+2Ch] [ebp-D70h]
     DpvsPlane *childPlanes; // [esp+58h] [ebp-D44h]
-    LargeLocal hullPointsPoolArray_large_local; // [esp+5Ch] [ebp-D40h] BYREF
     GfxHullPointsPool(*hullPointsPoolArray)[256]; // [esp+64h] [ebp-D38h]
     unsigned int childPlanesCount; // [esp+68h] [ebp-D34h]
     int childPlaneCount; // [esp+6Ch] [ebp-D30h]
@@ -2927,8 +2943,10 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
     float hull[64][2]; // [esp+B94h] [ebp-208h] BYREF
     unsigned int hullPointCount; // [esp+D98h] [ebp-4h]
 
-    LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
-    hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
+    LargeLocal hullPointsPoolArray_large_local(0x20000);
+    //LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
+    //hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
+    hullPointsPoolArray = (GfxHullPointsPool(*)[256])hullPointsPoolArray_large_local.GetBuf();
     //Profile_Begin(188);
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_dpvs.cpp", 2778, 0, "%s", "Sys_IsMainThread()");
@@ -3013,7 +3031,7 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
         }
     }
     //Profile_EndInternal(0);
-    LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
+    //LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
 }
 
 unsigned int __cdecl R_PortalClipPlanes(
@@ -3043,7 +3061,7 @@ unsigned int __cdecl R_PortalClipPlanes(
     if (vertexCount < 3)
         MyAssertHandler(".\\r_dpvs.cpp", 474, 0, "%s\n\t(vertexCount) = %i", "(vertexCount >= 3)", vertexCount);
     useNormalPlanes = vertexCount <= 0xA;
-    v7 = vertexCount > 0xA || r_portalBevelsOnly->current.enabled;
+    v7 = (DpvsForceBevels)(vertexCount > 0xA || r_portalBevelsOnly->current.enabled);
     forceBevels = v7;
     v6 = v7 == DPVS_FORCE_BEVELS || r_portalBevels->current.value > 0.0;
     useBevelPlanes = v6;
@@ -3218,7 +3236,7 @@ void __cdecl R_ProjectPortal(
             v8 = va("area %g bounds [%g,%g]-[%g,%g]\n%s", areab, *mins, mins[1], *maxs, maxs[1], v7);
             MyAssertHandler(".\\r_dpvs.cpp", 379, 0, "%s\n\t%s", "area >= 0", v8);
         }
-        *clipChildren = r_portalMinClipArea->current.value <= (double)areab;
+        *clipChildren = (DpvsClipChildren)(r_portalMinClipArea->current.value <= (double)areab);
     }
     else
     {
@@ -3751,5 +3769,11 @@ int __cdecl R_CellForPoint(const GfxWorld *world, const float *origin)
         node = (mnode_t *)((char *)node + 2 * (d <= 0.0) * (node->rightChildOffset - 2) + 4);
     }
     return cellIndex - 1;
+}
+
+void __cdecl R_FreeHullPoints(GfxHullPointsPool *hullPoints)
+{
+    hullPoints->nextFree = dpvsGlob.nextFreeHullPoints;
+    dpvsGlob.nextFreeHullPoints = hullPoints;
 }
 

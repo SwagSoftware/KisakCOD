@@ -45,3 +45,5 @@ const char *__cdecl R_TextLineWrapPosition(
     Font_s *font,
     float scale);
 int __cdecl R_ConsoleTextWidth(const char *textPool, int poolSize, int firstChar, int charCount, Font_s *font);
+void __cdecl R_InitFonts();
+void __cdecl R_ShutdownFonts();

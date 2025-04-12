@@ -513,6 +513,7 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data);
 void __cdecl RB_InitBackendGlobalStructs();
 void __cdecl RB_SetBspImages();
 void __cdecl RB_InitCodeImages();
+void __cdecl RB_BindDefaultImages();
 void __cdecl RB_RegisterBackendAssets();
 
 void RB_AbandonGpuFence();
@@ -523,6 +524,11 @@ void __cdecl R_AcquireGpuFenceLock();
 void __cdecl R_ReleaseGpuFenceLock();
 
 
+// rb_imagetouch
+void __cdecl RB_TouchAllImages();
+
 extern r_backEndGlobals_t backEnd;
 extern materialCommands_t tess;
 extern GfxCmdBufInput gfxCmdBufInput;
+extern const GfxBackEndData *backEndData;
+extern GfxRenderTarget gfxRenderTargets[15];

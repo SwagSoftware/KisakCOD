@@ -3056,6 +3056,17 @@ void __cdecl RB_SetBspImages()
     gfxCmdBufInput.codeImageSamplerStates[14] = rgp.world->skySamplerState;
 }
 
+void __cdecl RB_BindDefaultImages()
+{
+    GfxCmdBufContext context; // [esp+0h] [ebp-10h]
+    unsigned int samplerIndex; // [esp+8h] [ebp-8h]
+
+    context.source = &gfxCmdBufSourceState;
+    context.state = &gfxCmdBufState;
+    for (samplerIndex = 0; samplerIndex < 0x10; ++samplerIndex)
+        R_SetSampler(context, samplerIndex, 1u, rgp.whiteImage);
+}
+
 void __cdecl RB_InitCodeImages()
 {
     unsigned __int8 v0; // [esp+Eh] [ebp-16h]

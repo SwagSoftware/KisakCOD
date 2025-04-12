@@ -1,4 +1,12 @@
 #include "r_draw_xmodel.h"
+#include "rb_stats.h"
+#include <database/database.h>
+#include "r_state.h"
+#include "r_draw_bsp.h"
+#include "r_shade.h"
+#include "r_dvars.h"
+#include "r_utils.h"
+#include "rb_tess.h"
 
 
 void __cdecl R_DrawXModelRigidModelSurf(GfxCmdBufContext context, XSurface *xsurf)
@@ -19,7 +27,7 @@ void __cdecl R_DrawXModelRigidModelSurf(GfxCmdBufContext context, XSurface *xsur
         MyAssertHandler(".\\r_draw_xmodel.cpp", 172, 0, "%s", "ib");
     if (context.state->prim.indexBuffer != ib)
         R_ChangeIndices(&context.state->prim, ib);
-    DB_GetVertexBufferAndOffset(xsurf->zoneHandle, xsurf->verts0, (void **)&vb0, &vertexOffset0);
+    DB_GetVertexBufferAndOffset(xsurf->zoneHandle, (uint8*)xsurf->verts0, (void **)&vb0, &vertexOffset0);
     R_SetStreamSource(&context.state->prim, vb0, vertexOffset0, 0x20u);
     R_SetupPassPerPrimArgs(context);
     R_DrawIndexedPrimitive(&context.state->prim, &args);

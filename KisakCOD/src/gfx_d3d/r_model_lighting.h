@@ -15,6 +15,7 @@ struct GfxLightingInfo // sizeof=0x2
     unsigned __int8 reflectionProbeIndex; // ...
 };
 
+
 void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out);
 unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle);
 char __cdecl R_AllocStaticModelLighting(const GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex);
@@ -62,6 +63,7 @@ unsigned int R_SetModelLightingSampleDeltas();
 void __cdecl R_SetModelLightingLookupScale(GfxCmdBufInput *input);
 void __cdecl R_SetupDynamicModelLighting(GfxCmdBufInput *input);
 void __cdecl R_InitModelLightingGlobals();
+void __cdecl R_ShutdownModelLightingGlobals();
 char *__cdecl R_AllocModelLightingGlobal(unsigned int bytes);
 void __cdecl R_ResetModelLighting();
 void __cdecl R_InitModelLightingImage();

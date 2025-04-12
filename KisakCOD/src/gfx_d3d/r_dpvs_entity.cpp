@@ -1,4 +1,6 @@
 #include "r_dpvs.h"
+#include "r_model_pose.h"
+#include "r_dobj_skin.h"
 
 
 
@@ -12,10 +14,9 @@ void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data)
     GfxSceneEntity *localSceneEnt; // [esp+20h] [ebp-Ch] BYREF
     const DpvsPlane *planes; // [esp+24h] [ebp-8h]
     GfxSceneEntity *sceneEnt; // [esp+28h] [ebp-4h]
-    int savedregs; // [esp+2Ch] [ebp+0h] BYREF
 
     sceneEnt = *(GfxSceneEntity **)data;
-    boneMatrix = R_UpdateSceneEntBounds((GfxSceneEntity *)&savedregs, sceneEnt, &localSceneEnt, &obj, 1);
+    boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1);
     if (boneMatrix)
     {
         if (!localSceneEnt)

@@ -20,3 +20,6 @@ void __cdecl R_SetStaticModelVertexBuffer(GfxCmdBufPrimState *primState, XSurfac
 void __cdecl R_DrawStaticModelDrawSurfPlacement(
     const GfxStaticModelDrawInst *smodelDrawInst,
     GfxCmdBufSourceState *source);
+void __cdecl R_DrawStaticModelDrawSurfLightingNonOptimized(
+    GfxStaticModelDrawStream *drawStream,
+    GfxCmdBufContext context);

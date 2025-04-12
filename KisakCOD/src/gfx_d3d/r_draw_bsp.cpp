@@ -1,7 +1,9 @@
 #include "r_draw_bsp.h"
 #include "r_state.h"
 #include "rb_logfile.h"
-
+#include "r_dvars.h"
+#include "r_state.h"
+#include "r_dvars.cpp"
 
 //int *g_layerDataStride  827dc14c     gfx_d3d : r_draw_bsp.obj
 

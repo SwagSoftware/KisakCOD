@@ -77,6 +77,11 @@ int __cdecl DObjBad(const DObj_s *obj)
     return 0;
 }
 
+const GfxSkinCacheEntry *__cdecl CG_GetSkinCacheEntry(const cpose_t *pose)
+{
+    return &pose->skinCacheEntry;
+}
+
 int  R_SkinSceneDObjModels(
     GfxSceneEntity *sceneEnt,
     const DObj_s *obj,

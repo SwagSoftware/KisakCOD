@@ -22,3 +22,4 @@ int __cdecl R_SkinXModel(
     __int16 gfxEntIndex);
 void __cdecl R_SkinSceneEnt(GfxSceneEntity *sceneEnt);
 int __cdecl R_SkinAndBoundSceneEnt(GfxSceneEntity *sceneEnt);
+void __cdecl R_UnlockSkinnedCache();

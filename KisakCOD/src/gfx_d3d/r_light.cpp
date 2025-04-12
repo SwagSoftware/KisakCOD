@@ -6,6 +6,9 @@
 #include "r_init.h"
 #include "r_scene.h"
 #include "r_dvars.h"
+#include <database/database.h>
+#include "r_bsp.h"
+#include "r_marks.h"
 
 LightGlobals lightGlob;
 int s_lmapPixelsUsedForFalloff;
@@ -332,7 +335,7 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     GfxDrawSurf *drawSurfs; // [esp+130h] [ebp-Ch]
     GfxDrawSurf *surfaceMaterials; // [esp+134h] [ebp-8h]
     unsigned int listSurfIndex; // [esp+138h] [ebp-4h]
-    int savedregs; // [esp+13Ch] [ebp+0h] BYREF
+    //int savedregs; // [esp+13Ch] [ebp+0h] BYREF
 
     surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
@@ -350,7 +353,6 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     bspLightCallback.position[2] = light->origin[2];
     bspLightCallback.radiusSq = light->radius * light->radius;
     R_BoxSurfaces(
-        (int)&savedregs,
         mins,
         maxs,
         allowSurf_0,
@@ -414,7 +416,7 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     GfxDrawSurf *surfaceMaterials; // [esp+250h] [ebp-10h]
     unsigned int listSurfIndex; // [esp+254h] [ebp-Ch]
     unsigned int surfCounts[2]; // [esp+258h] [ebp-8h] BYREF
-    int savedregs; // [esp+260h] [ebp+0h] BYREF
+    //int savedregs; // [esp+260h] [ebp+0h] BYREF
 
     if (lightIndex >= 1)
         MyAssertHandler(".\\r_light.cpp", 520, 0, "%s", "lightIndex < MAX_VISIBLE_SHADOWABLE_DLIGHTS");
@@ -432,7 +434,7 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     surfaces[1] = (GfxSurface **)&drawSurfs[1][512];
     bspLightCallback.surfaceVisData = surfaceVisData;
     R_CalcSpotLightPlanes(light, bspLightCallback.planes);
-    R_BoxSurfaces((int)&savedregs, mins, maxs, allowSurf_1, &bspLightCallback, surfaces, 0x400u, surfCounts, 2u);
+    R_BoxSurfaces(mins, maxs, allowSurf_1, &bspLightCallback, surfaces, 0x400u, surfCounts, 2u);
     if (surfCounts[0])
     {
         scene.visLightShadow[lightIndex - 4].drawSurfCount = surfCounts[0];
@@ -710,7 +712,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
     GfxDelayedCmdBuf surfData; // [esp+894h] [ebp-20h] BYREF
     GfxDrawSurfList surfData_16; // [esp+8A4h] [ebp-10h] BYREF
     int smodelIndex; // [esp+8B0h] [ebp-4h]
-    int savedregs; // [esp+8B4h] [ebp+0h] BYREF
+    //int savedregs; // [esp+8B4h] [ebp+0h] BYREF
 
     if (!visibleCount)
         MyAssertHandler(".\\r_light.cpp", 708, 0, "%s", "visibleCount");
@@ -749,7 +751,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
             g_staticModelLightCallback.position[2] = *((float *)&shadowSurfData.drawSurf[2].current[4].packed + 1);
             g_staticModelLightCallback.radiusSq = *(float *)&shadowSurfData.drawSurf[2].current[5].fields
                 * *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
-            smodelCount = R_BoxStaticModels((int)&savedregs, mins, maxs, R_AllowStaticModelOmniLight, smodels, 1024);
+            smodelCount = R_BoxStaticModels(mins, maxs, R_AllowStaticModelOmniLight, smodels, 1024);
         }
         else
         {
@@ -817,7 +819,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
     }
 }
 
-bool __cdecl R_AllowStaticModelOmniLight(int smodelIndex)
+int __cdecl R_AllowStaticModelOmniLight(int smodelIndex)
 {
     return g_staticModelLightCallback.smodelVisData[smodelIndex]
         && g_staticModelLightCallback.radiusSq >= PointToBoxDistSq(

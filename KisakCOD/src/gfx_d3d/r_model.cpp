@@ -1,12 +1,29 @@
 #include "r_model.h"
 #include <qcommon/mem_track.h>
 #include <universal/com_memory.h>
+#include "r_buffers.h"
 
 
 void __cdecl TRACK_r_model()
 {
     track_static_alloc_internal((void *)boxVerts, 288, "boxVerts", 18);
     track_static_alloc_internal(&gfxBuf, 2359456, "gfxBuf", 18);
+}
+
+void __cdecl R_UnlockSkinnedCache()
+{
+    IDirect3DVertexBuffer9 *vb; // [esp+30h] [ebp-4h]
+
+    if (gfxBuf.skinnedCacheLockAddr)
+    {
+        gfxBuf.skinnedCacheLockAddr = 0;
+        Profile_Begin(160);
+        vb = frontEndDataOut->skinnedCacheVb->buffer;
+        if (!vb)
+            MyAssertHandler(".\\r_model.cpp", 372, 0, "%s", "vb");
+        R_UnlockVertexBuffer(vb);
+        Profile_EndInternal(0);
+    }
 }
 
 void __cdecl R_ModelList_f()

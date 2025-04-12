@@ -769,4 +769,10 @@ bool __cdecl R_IsInRemoteScreenUpdate();
 
 void __cdecl R_InitTempSkinBuf();
 
+void __cdecl R_ShutdownDynamicMesh(GfxMeshData *mesh);
+void __cdecl R_ShutdownRenderBuffers();
+
+void __cdecl R_ShutdownRenderCommands();
+
 extern GfxBackEndData *frontEndDataOut;
+extern GfxBackEndData s_backEndData[2];

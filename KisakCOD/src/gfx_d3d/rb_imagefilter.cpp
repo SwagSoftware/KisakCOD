@@ -1,4 +1,9 @@
 #include "rb_imagefilter.h"
+#include "rb_backend.h"
+#include "r_state.h"
+#include "rb_state.h"
+#include "r_utils.h"
+#include "rb_shade.h"
 
 
 void __cdecl RB_GaussianFilterImage(
@@ -15,10 +20,10 @@ void __cdecl RB_GaussianFilterImage(
     GfxImageFilter filter; // [esp+38h] [ebp-1310h] BYREF
 
     RB_VirtualToSceneRadius(radius, &radiusX, &radiusY);
-    srcWidth = dword_EA74EFC[5 * srcRenderTargetId];
-    srcHeight = dword_EA74F00[5 * srcRenderTargetId];
-    dstWidth = dword_EA74EFC[5 * dstRenderTargetId];
-    dstHeight = dword_EA74F00[5 * dstRenderTargetId];
+    srcWidth = gfxRenderTargets[srcRenderTargetId].width;
+    srcHeight = gfxRenderTargets[srcRenderTargetId].height;
+    dstWidth = gfxRenderTargets[dstRenderTargetId].width;
+    dstHeight = gfxRenderTargets[dstRenderTargetId].height;
     filter.sourceImage = gfxRenderTargets[srcRenderTargetId].image;
     filter.finalTarget = dstRenderTargetId;
     filter.passCount = RB_GenerateGaussianFilterChain(
@@ -394,7 +399,7 @@ void __cdecl RB_FilterPingPong(const GfxImageFilter *filter, int passIndex)
     if (passIndex == filter->passCount - 1)
         finalTarget = filter->finalTarget;
     else
-        finalTarget = pingpong + 7;
+        finalTarget = (GfxRenderTargetId)(pingpong + 7);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, finalTarget);
     R_SetRenderTarget(gfxCmdBufContext, finalTarget);
 }
@@ -414,7 +419,7 @@ void __cdecl RB_GlowFilterImage(float radius)
             backEnd.glowCount);
     if (radius != 0.0)
     {
-        radiusScale = (double)stru_EA74FCC.width / (double)image.width;
+        radiusScale = (double)gfxRenderTargets[11].width / (double)gfxRenderTargets[4].width;
         radiusa = radius * radiusScale;
         backEnd.glowImage = gfxRenderTargets[RB_ApplyGlowFilter(
             radiusa,
@@ -459,26 +464,26 @@ GfxRenderTargetId __cdecl RB_ApplyGlowFilter(
         MyAssertHandler(".\\rb_imagefilter.cpp", 429, 0, "%s\n\t(radius) = %g", "(radius >= 0)", radius);
     if (radius == 0.0)
         return srcRenderTarget;
-    if (dword_EA74EFC[5 * dstRenderTarget] != (unsigned int)dword_EA74EFC[5 * srcRenderTarget] >> 2)
+    if (gfxRenderTargets[dstRenderTarget].width != gfxRenderTargets[srcRenderTarget].width >> 2)
         MyAssertHandler(
             ".\\rb_imagefilter.cpp",
             433,
             0,
             "gfxRenderTargets[dstRenderTarget].width == gfxRenderTargets[srcRenderTarget].width / 4\n\t%i, %i",
-            dword_EA74EFC[5 * dstRenderTarget],
-            (unsigned int)dword_EA74EFC[5 * srcRenderTarget] >> 2);
-    if (dword_EA74F00[5 * dstRenderTarget] != (unsigned int)dword_EA74F00[5 * srcRenderTarget] >> 2)
+            gfxRenderTargets[dstRenderTarget].width,
+            gfxRenderTargets[srcRenderTarget].width >> 2);
+    if (gfxRenderTargets[dstRenderTarget].height != gfxRenderTargets[srcRenderTarget].height >> 2)
         MyAssertHandler(
             ".\\rb_imagefilter.cpp",
             434,
             0,
             "gfxRenderTargets[dstRenderTarget].height == gfxRenderTargets[srcRenderTarget].height / 4\n\t%i, %i",
-            dword_EA74F00[5 * dstRenderTarget],
-            (unsigned int)dword_EA74F00[5 * srcRenderTarget] >> 2);
+            gfxRenderTargets[dstRenderTarget].height,
+            gfxRenderTargets[srcRenderTarget].height >> 2);
     v5 = radius * 0.25;
     RB_VirtualToSceneRadius(v5, &radiusX, &radiusY);
-    srcWidth = dword_EA74EFC[5 * dstRenderTarget];
-    srcHeight = dword_EA74F00[5 * dstRenderTarget];
+    srcWidth = gfxRenderTargets[dstRenderTarget].width;
+    srcHeight = gfxRenderTargets[dstRenderTarget].height;
     filter.sourceImage = gfxRenderTargets[srcRenderTarget].image;
     filter.finalTarget = dstRenderTarget;
     filter.passes[0].srcWidth = 1.0;

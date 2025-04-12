@@ -16,6 +16,33 @@ enum DpvsForceBevels : __int32
     DPVS_FORCE_BEVELS = 0x1,
 };
 
+struct DpvsDynamicCellCmd // sizeof=0xC
+{                                       // ...
+    const DpvsPlane *planes;            // ...
+    unsigned int cellIndex;             // ...
+    unsigned __int8 planeCount;         // ...
+    unsigned __int8 frustumPlaneCount;  // ...
+    unsigned __int16 viewIndex;         // ...
+};
+
+struct DpvsStaticCellCmd // sizeof=0xC
+{                                       // ...
+    const DpvsPlane *planes;            // ...
+    const GfxCell *cell;                // ...
+    unsigned __int8 planeCount;         // ...
+    unsigned __int8 frustumPlaneCount;  // ...
+    unsigned __int16 viewIndex;         // ...
+};
+
+struct DpvsEntityCmd // sizeof=0x10
+{                                       // ...
+    GfxSceneEntity *sceneEnt;
+    const DpvsPlane *planes;
+    unsigned __int16 planeCount;
+    unsigned __int16 cellIndex;
+    unsigned __int8 *entVisData;
+};
+
 struct FilterEntInfo // sizeof=0x10
 {                                       // ...
     unsigned int localClientNum;        // ...
@@ -243,6 +270,8 @@ unsigned int __cdecl R_FindNearestReflectionProbeInCell(
 unsigned int __cdecl R_FindNearestReflectionProbe(const GfxWorld *world, const float *origin);
 int __cdecl R_CellForPoint(const GfxWorld *world, const float *origin);
 
+void __cdecl R_FreeHullPoints(GfxHullPointsPool *hullPoints);
+
 
 
 // r_dpvs_entity
@@ -264,3 +293,7 @@ void __cdecl R_CullDynModelInCell(
 
 // r_dpvs_sceneent
 void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data);
+
+
+
+extern DpvsGlobals dpvsGlob;

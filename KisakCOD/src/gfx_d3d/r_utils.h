@@ -46,5 +46,27 @@ void __cdecl R_Set2D(GfxCmdBufSourceState *source);
 void __cdecl R_Set3D(GfxCmdBufSourceState *source);
 void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport);
 GfxCmdBufSourceState *__cdecl R_GetActiveWorldMatrix(GfxCmdBufSourceState *source);
+void __cdecl R_InitCmdBufState(GfxCmdBufState *state);
+void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdBufInput *input, int cameraView);
 
 void __cdecl R_MatrixIdentity44(float (*out)[4]);
+
+template <typename T>
+inline void __cdecl R_ReleaseAndSetNULL(
+    IDirect3DSurface9 *var,
+    const char *fn,
+    const char *filename,
+    int line)
+{
+    const char *v4; // eax
+    unsigned int useCount; // [esp+0h] [ebp-4h]
+
+    if (!var)
+        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_types_d3d.h", 198, 0, "%s", "var");
+    useCount = var->Release();
+    if (useCount)
+    {
+        v4 = va("%s (%i) %s->Release() failed: %i leak(s)!", filename, line, fn, useCount);
+        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_types_d3d.h", 209, 0, "%s\n\t%s", "!useCount", v4);
+    }
+}

@@ -5,6 +5,9 @@
 
 
 // r_bsp
+void __cdecl R_ReloadWorld();
+void __cdecl R_ReleaseWorld();
+void __cdecl R_ShutdownWorld();
 void __cdecl R_InterpretSunLightParseParams(SunLightParseParams *sunParse);
 void __cdecl R_UpdateLightsFromDvars();
 void __cdecl R_CopyParseParamsFromDvars(SunLightParseParams *sunParse);

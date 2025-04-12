@@ -9,6 +9,18 @@ struct LightGlobals // sizeof=0x104
     GfxLightDef *defs[64];              // ...
 };
 
+struct BspOmniLightCallback // sizeof=0x14
+{                                       // ...
+    const unsigned __int8 *surfaceVisData; // ...
+    float position[3];                  // ...
+    float radiusSq;                     // ...
+};
+struct BspSpotLightCallback // sizeof=0x64
+{                                       // ...
+    const unsigned __int8 *surfaceVisData; // ...
+    float planes[6][4];                 // ...
+};
+
 GfxLightDef *__cdecl R_RegisterLightDef(const char *name);
 GfxLightDef *__cdecl R_RegisterLightDef_FastFile(const char *name);
 void __cdecl R_InitLightDefs();
@@ -34,7 +46,7 @@ void __cdecl R_CalcPlaneFromCosSinPointDirs(
     const float *forward,
     const float *lateral);
 void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visibleCount);
-bool __cdecl R_AllowStaticModelOmniLight(int smodelIndex);
+int __cdecl R_AllowStaticModelOmniLight(int smodelIndex);
 int __cdecl R_AllowStaticModelSpotLight(int smodelIndex);
 void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visibleCount);
 int __cdecl R_SphereInPlanes(const float (*planes)[4], const float *center, float radius);

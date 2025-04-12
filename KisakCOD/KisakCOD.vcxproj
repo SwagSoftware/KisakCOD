@@ -276,6 +276,7 @@
     <ClCompile Include="src\gfx_d3d\rb_drawprofile.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_fog.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_imagefilter.cpp" />
+    <ClCompile Include="src\gfx_d3d\rb_imagetouch.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_light.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_logfile.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_pixelcost.cpp" />
@@ -330,6 +331,7 @@
     <ClCompile Include="src\gfx_d3d\r_meshdata.cpp" />
     <ClCompile Include="src\gfx_d3d\r_model.cpp" />
     <ClCompile Include="src\gfx_d3d\r_model_lighting.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_model_pose.cpp" />
     <ClCompile Include="src\gfx_d3d\r_model_skin.cpp" />
     <ClCompile Include="src\gfx_d3d\r_pixelcost_load_obj.cpp" />
     <ClCompile Include="src\gfx_d3d\r_pretess.cpp" />
@@ -352,6 +354,7 @@
     <ClCompile Include="src\gfx_d3d\r_utils.cpp" />
     <ClCompile Include="src\gfx_d3d\r_warn.cpp" />
     <ClCompile Include="src\gfx_d3d\r_water.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_water_load_obj.cpp" />
     <ClCompile Include="src\gfx_d3d\r_workercmds.cpp" />
     <ClCompile Include="src\gfx_d3d\r_workercmds_common.cpp" />
     <ClCompile Include="src\gfx_d3d\r_xsurface.cpp" />
@@ -446,6 +449,7 @@
     <ClCompile Include="src\ui_mp\ui_gameinfo_mp.cpp" />
     <ClCompile Include="src\ui_mp\ui_main_mp.cpp" />
     <ClCompile Include="src\universal\com_constantconfigstrings.cpp" />
+    <ClCompile Include="src\universal\com_convexhull.cpp" />
     <ClCompile Include="src\universal\com_files.cpp" />
     <ClCompile Include="src\universal\com_loadutils.cpp" />
     <ClCompile Include="src\universal\com_math.cpp" />
@@ -581,6 +585,7 @@
     <ClInclude Include="src\gfx_d3d\r_meshdata.h" />
     <ClInclude Include="src\gfx_d3d\r_model.h" />
     <ClInclude Include="src\gfx_d3d\r_model_lighting.h" />
+    <ClInclude Include="src\gfx_d3d\r_model_pose.h" />
     <ClInclude Include="src\gfx_d3d\r_model_skin.h" />
     <ClInclude Include="src\gfx_d3d\r_pixelcost_load_obj.h" />
     <ClInclude Include="src\gfx_d3d\r_pretess.h" />
@@ -668,6 +673,7 @@
     <ClInclude Include="src\ui\ui.h" />
     <ClInclude Include="src\ui_mp\ui_mp.h" />
     <ClInclude Include="src\universal\com_constantconfigstrings.h" />
+    <ClInclude Include="src\universal\com_convexhull.h" />
     <ClInclude Include="src\universal\com_files.h" />
     <ClInclude Include="src\universal\com_math.h" />
     <ClInclude Include="src\universal\com_memory.h" />

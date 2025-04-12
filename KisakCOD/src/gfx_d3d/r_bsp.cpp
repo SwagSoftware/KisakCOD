@@ -1,12 +1,65 @@
 #include "r_bsp.h"
 #include "r_init.h"
 #include "r_dvars.h"
+#include "r_model_lighting.h"
+#include "r_staticmodelcache.h"
+#include "rb_logfile.h"
 
 
 //struct GfxWorld s_world    85b28080     gfx_d3d : r_bsp.obj
 
 GfxWorld s_world;
 
+void __cdecl R_ReloadWorld()
+{
+    if (s_world.vd.worldVb)
+        MyAssertHandler(".\\r_bsp.cpp", 439, 0, "%s", "s_world.vd.worldVb == NULL_VERTEX_BUFFER");
+    if (s_world.vertexCount)
+        R_CreateWorldVertexBuffer(&s_world.vd.worldVb, (int *)s_world.vd.vertices, 44 * s_world.vertexCount);
+    if (s_world.vld.layerVb)
+        MyAssertHandler(".\\r_bsp.cpp", 443, 0, "%s", "s_world.vld.layerVb == NULL_VERTEX_BUFFER");
+    if (s_world.vertexLayerDataSize)
+        R_CreateWorldVertexBuffer(&s_world.vld.layerVb, (int *)s_world.vld.data, s_world.vertexLayerDataSize);
+}
+
+void __cdecl R_ShutdownWorld()
+{
+    R_ReleaseWorld();
+    rgp.world = 0;
+    if (s_world.vd.worldVb)
+        MyAssertHandler(".\\r_bsp.cpp", 391, 0, "%s", "s_world.vd.worldVb == NULL_VERTEX_BUFFER");
+    if (s_world.vld.layerVb)
+        MyAssertHandler(".\\r_bsp.cpp", 392, 0, "%s", "s_world.vld.layerVb == NULL_VERTEX_BUFFER");
+    s_world.vertexCount = 0;
+    s_world.vertexLayerDataSize = 0;
+}
+
+void __cdecl R_ReleaseWorld()
+{
+    if (rgp.world)
+    {
+        R_ResetModelLighting();
+        R_FlushStaticModelCache();
+    }
+    if (s_world.vertexCount)
+    {
+        if (!s_world.vd.worldVb)
+            MyAssertHandler(".\\r_bsp.cpp", 414, 0, "%s", "s_world.vd.worldVb != NULL_VERTEX_BUFFER");
+        R_FreeStaticVertexBuffer(s_world.vd.worldVb);
+        s_world.vd.worldVb = 0;
+    }
+    if (s_world.vd.worldVb)
+        MyAssertHandler(".\\r_bsp.cpp", 420, 0, "%s", "s_world.vd.worldVb == NULL_VERTEX_BUFFER");
+    if (s_world.vertexLayerDataSize)
+    {
+        if (!s_world.vld.layerVb)
+            MyAssertHandler(".\\r_bsp.cpp", 424, 0, "%s", "s_world.vld.layerVb != NULL_VERTEX_BUFFER");
+        R_FreeStaticVertexBuffer(s_world.vld.layerVb);
+        s_world.vld.layerVb = 0;
+    }
+    if (s_world.vld.layerVb)
+        MyAssertHandler(".\\r_bsp.cpp", 430, 0, "%s", "s_world.vld.layerVb == NULL_VERTEX_BUFFER");
+}
 
 void __cdecl R_InterpretSunLightParseParams(SunLightParseParams *sunParse)
 {

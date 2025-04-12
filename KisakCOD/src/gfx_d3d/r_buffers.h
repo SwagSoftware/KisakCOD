@@ -16,8 +16,17 @@ void __cdecl R_InitDynamicIndices(GfxDynamicIndices *ib, int indexCount);
 void __cdecl R_CreateDynamicBuffers();
 void __cdecl R_CreateParticleCloudBuffer();
 void __cdecl R_UnlockVertexBuffer(IDirect3DVertexBuffer9* handle);
+void *__cdecl R_LockVertexBuffer(IDirect3DVertexBuffer9 *handle, int offset, int bytes, int lockFlags);
 
 void __cdecl R_FinishStaticVertexBuffer(IDirect3DVertexBuffer9 *vb);
+
+void __cdecl R_DestroyDynamicBuffers();
+void __cdecl R_DestroyParticleCloudBuffer();
+void __cdecl R_FreeStaticVertexBuffer(IDirect3DVertexBuffer9 *vb);
+void __cdecl R_FreeStaticIndexBuffer(IDirect3DIndexBuffer9 *ib);
+
+void *__cdecl R_LockIndexBuffer(IDirect3DIndexBuffer9 *handle, int offset, int bytes, int lockFlags);
+void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle);
 
 
 extern GfxBuffers gfxBuf;

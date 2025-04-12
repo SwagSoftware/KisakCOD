@@ -241,7 +241,11 @@ struct MaterialGlobals
 const char* __cdecl Material_GetName(Material* handle);
 const Material* __cdecl Material_FromHandle(Material* handle);
 
+void __cdecl Material_ReloadAll();
+void __cdecl Material_ReleaseAll();
+
 void __cdecl Material_Init();
+void __cdecl Material_Shutdown();
 void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable* mtlTable, int mtlTableCount);
 void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl* callback)(MaterialTechniqueSet*));
 void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader* userData);

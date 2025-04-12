@@ -1,6 +1,37 @@
 #include "r_draw_staticmodel.h"
+#include "rb_stats.h"
 
 
+void __cdecl R_DrawStaticModelDrawSurfLightingNonOptimized(
+    GfxStaticModelDrawStream *drawStream,
+    GfxCmdBufContext context)
+{
+    const GfxStaticModelDrawInst *smodelDrawInst; // [esp+0h] [ebp-28h]
+    GfxStaticModelDrawInst *smodelDrawInsts; // [esp+4h] [ebp-24h]
+    const unsigned __int16 *list; // [esp+8h] [ebp-20h]
+    unsigned int smodelCount; // [esp+Ch] [ebp-1Ch]
+    unsigned int index; // [esp+10h] [ebp-18h]
+    XSurface *xsurf; // [esp+14h] [ebp-14h]
+    GfxDrawPrimArgs args; // [esp+18h] [ebp-10h] BYREF
+    unsigned __int16 lightingHandle; // [esp+24h] [ebp-4h]
+
+    xsurf = drawStream->localSurf;
+    R_SetupStaticModelPrim(xsurf, &args, &context.state->prim);
+    R_SetStaticModelVertexBuffer(&context.state->prim, xsurf);
+    smodelCount = drawStream->smodelCount;
+    smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
+    list = drawStream->smodelList;
+    for (index = 0; index < smodelCount; ++index)
+    {
+        smodelDrawInst = &smodelDrawInsts[list[index]];
+        R_SetReflectionProbe(context, smodelDrawInst->reflectionProbeIndex);
+        R_DrawStaticModelDrawSurfPlacement(smodelDrawInst, context.source);
+        lightingHandle = smodelDrawInst->lightingHandle;
+        R_SetModelLightingCoordsForSource(lightingHandle, context.source);
+        R_SetupPassPerPrimArgs(context);
+        R_DrawIndexedPrimitive(&context.state->prim, &args);
+    }
+}
 
 void __cdecl R_DrawStaticModelSurfLit(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
 {

@@ -3,6 +3,7 @@
 #include "r_image.h"
 #include <universal/fft.h>
 #include "r_dvars.h"
+#include <qcommon/qcommon.h>
 
 WaterGlob waterGlob;
 WaterGlobStatic waterGlobStatic;

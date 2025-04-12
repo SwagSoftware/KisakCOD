@@ -1,5 +1,7 @@
 #include "rb_state.h"
 #include <qcommon/mem_track.h>
+#include "r_utils.h"
+#include "r_state.h"
 
 GfxCmdBufContext gfxCmdBufContext;
 GfxCmdBufSourceState gfxCmdBufSourceState;
@@ -28,18 +30,18 @@ void __cdecl RB_SetInitialState()
     R_SetTexFilter();
     R_InitCmdBufState(&gfxCmdBufState);
     RB_InitSceneViewport();
-    if (!stru_EA74F04.surface.color)
+    if (!gfxRenderTargets[1].surface.color)
         MyAssertHandler(".\\rb_state.cpp", 62, 0, "%s", "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color");
-    if (!g_allocateMinimalResources && !stru_EA74F04.surface.depthStencil)
+    if (!g_allocateMinimalResources && !gfxRenderTargets[1].surface.depthStencil)
         MyAssertHandler(
             ".\\rb_state.cpp",
             64,
             0,
             "%s",
             "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.depthStencil");
-    if (!stru_EA74F04.width)
+    if (!gfxRenderTargets[1].width)
         MyAssertHandler(".\\rb_state.cpp", 66, 0, "%s", "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].width");
-    if (!stru_EA74F04.height)
+    if (!gfxRenderTargets[1].height)
         MyAssertHandler(".\\rb_state.cpp", 67, 0, "%s", "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].height");
     if (gfxCmdBufSourceState.renderTargetWidth)
         MyAssertHandler(".\\rb_state.cpp", 68, 1, "%s", "gfxCmdBufSourceState.renderTargetWidth == 0");

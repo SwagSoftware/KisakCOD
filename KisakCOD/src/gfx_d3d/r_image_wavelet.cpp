@@ -1,6 +1,7 @@
 #include "r_image.h"
 #include <qcommon/mem_track.h>
 #include <universal/assertive.h>
+#include <universal/com_memory.h>
 
 struct WaveletHuffmanDecode // sizeof=0x4
 {                                       // ...
@@ -14699,77 +14700,4 @@ void __cdecl Wavelet_AddDeltaToMipmap(
         inout += decode->bpp;
         --size;
     } while (size);
-}
-
-
-
-void __cdecl Image_DecodeWavelet(
-    GfxRawImage *image,
-    GfxImageFileHeader *imageFile,
-    unsigned __int8 *imageData,
-    int bytesPerPixel)
-{
-    unsigned __int8 *TempMemory; // eax
-    int v5; // [esp+0h] [ebp-90h]
-    int v6; // [esp+4h] [ebp-8Ch]
-    unsigned __int8 *from[6]; // [esp+10h] [ebp-80h]
-    unsigned __int8 *pixels[6]; // [esp+28h] [ebp-68h]
-    int sizeForLevel; // [esp+40h] [ebp-50h]
-    int width; // [esp+44h] [ebp-4Ch]
-    int height; // [esp+48h] [ebp-48h]
-    int face; // [esp+4Ch] [ebp-44h]
-    int faceCount; // [esp+50h] [ebp-40h]
-    WaveletDecode decode; // [esp+54h] [ebp-3Ch] BYREF
-    unsigned __int8 *to[6]; // [esp+74h] [ebp-1Ch]
-    int totalSize; // [esp+8Ch] [ebp-4h]
-
-    if (!image)
-        MyAssertHandler(".\\r_imagedecode.cpp", 181, 0, "%s", "image");
-    if (!imageFile)
-        MyAssertHandler(".\\r_imagedecode.cpp", 182, 0, "%s", "imageFile");
-    decode.value = 0;
-    decode.bit = 0;
-    decode.width = imageFile->dimensions[0];
-    decode.height = imageFile->dimensions[1];
-    decode.mipLevel = Image_CountMipmapsForFile_0(imageFile) - 1;
-    decode.channels = bytesPerPixel;
-    decode.bpp = bytesPerPixel;
-    decode.dataInitialized = 0;
-    if ((imageFile->flags & 4) != 0)
-        faceCount = 6;
-    else
-        faceCount = 1;
-    totalSize = bytesPerPixel * imageFile->dimensions[1] * imageFile->dimensions[0];
-    for (face = 0; face < faceCount; ++face)
-    {
-        TempMemory = (unsigned __int8 *)Hunk_AllocateTempMemory(totalSize, "Image_LoadWavelet");
-        pixels[face] = TempMemory;
-        to[face] = 0;
-    }
-    decode.data = (char *)imageData;
-    while (decode.mipLevel >= 0)
-    {
-        if (decode.width >> SLOBYTE(decode.mipLevel) > 1)
-            v6 = decode.width >> SLOBYTE(decode.mipLevel);
-        else
-            v6 = 1;
-        width = v6;
-        if (decode.height >> SLOBYTE(decode.mipLevel) > 1)
-            v5 = decode.height >> SLOBYTE(decode.mipLevel);
-        else
-            v5 = 1;
-        height = v5;
-        sizeForLevel = bytesPerPixel * v5 * width;
-        for (face = 0; face < faceCount; ++face)
-        {
-            from[face] = to[face];
-            to[face] = &pixels[face][totalSize - sizeForLevel];
-            Wavelet_DecompressLevel(from[face], to[face], &decode);
-            if (!face && !decode.mipLevel)
-                Image_CopyBitmapData(image, imageFile, to[face]);
-        }
-        --decode.mipLevel;
-    }
-    for (face = faceCount - 1; face >= 0; --face)
-        Hunk_FreeTempMemory((char *)pixels[face]);
 }

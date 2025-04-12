@@ -1,4 +1,5 @@
 #include "r_dpvs.h"
+#include "r_workercmds.h"
 
 
 void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
@@ -59,7 +60,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
     GfxSceneDpvs *sceneDpvs; // [esp+C0h] [ebp-8h]
     GfxSceneDpvs *retaddr; // [esp+C8h] [ebp+0h]
 
-    localClientNum = a1;
+    //localClientNum = a1;
     sceneDpvs = retaddr;
     worldDpvs = data;
     wordCount = (unsigned int)&scene.dpvs;
@@ -114,7 +115,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
         bit = *(_DWORD *)(wordIndex + 4 * entnum);
         while (1)
         {
-            v2 = !_BitScanReverse((unsigned int *)&v3, bit);
+            v2 = !_BitScanReverse((DWORD*)&v3, (DWORD)bit);
             if (v2)
                 v3 = `CountLeadingZeros'::`2': : notFound;
             sceneEntIndex = v3 ^ 0x1F;
@@ -209,7 +210,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
         bita = *(_DWORD *)(wordIndexa + 4 * entnuma);
         while (1)
         {
-            v2 = !_BitScanReverse((unsigned int *)&v4, bita);
+            v2 = !_BitScanReverse((DWORD *)&v4, (DWORD)bita);
             if (v2)
                 v4 = `CountLeadingZeros'::`2': : notFound;
             sceneEntIndexa = v4 ^ 0x1F;

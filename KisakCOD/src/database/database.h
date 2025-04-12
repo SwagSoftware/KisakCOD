@@ -10,6 +10,10 @@
 
 // db_registry
 void __cdecl TRACK_db_registry();
+void __cdecl DB_GetIndexBufferAndBase(unsigned __int8 zoneHandle, void *indices, void **ib, int *baseIndex);
+void __cdecl DB_GetVertexBufferAndOffset(unsigned __int8 zoneHandle, _BYTE *verts, void **vb, int *vertexOffset);
+void __cdecl DB_EndRecoverLostDevice();
+void __cdecl DB_BeginRecoverLostDevice();
 void __cdecl DB_InitSingleton(void *pool, int size);
 void __cdecl Load_PhysPresetAsset(XAssetHeader *physPreset);
 void __cdecl Mark_PhysPresetAsset(PhysPreset *physPreset);
