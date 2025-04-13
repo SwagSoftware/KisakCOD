@@ -1070,14 +1070,8 @@ void __cdecl CG_ConfigStringModified(int localClientNum)
                         }
                         else
                         {
-                            *((unsigned int *)cgs + num - 921) = (unsigned int)FX_Register((char *)str); // KISAKTODO: unhack typing
-                            if (!*((unsigned int *)cgs + num - 921))
-                                MyAssertHandler(
-                                    ".\\cgame_mp\\cg_servercmds_mp.cpp",
-                                    806,
-                                    0,
-                                    "%s",
-                                    "cgs->fxs[num - CS_EFFECT_NAMES]");
+                            cgs->fxs[num - CS_EFFECT_NAMES] = FX_Register(str);
+                            iassert(cgs->fxs[num - CS_EFFECT_NAMES]);
                         }
                     }
                     else

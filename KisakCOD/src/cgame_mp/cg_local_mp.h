@@ -336,7 +336,7 @@ int __cdecl CG_DObjGetWorldTagMatrix(
     float *origin);
 DObjAnimMat *__cdecl CG_DObjGetLocalTagMatrix(const cpose_t *pose, DObj_s *obj, unsigned int tagName);
 int __cdecl CG_DObjGetWorldTagPos(const cpose_t *pose, DObj_s *obj, unsigned int tagName, float *pos);
-centity_s *__cdecl CG_GetPose(int localClientNum, unsigned int handle);
+cpose_t *__cdecl CG_GetPose(int localClientNum, unsigned int handle);
 void __cdecl CG_CalcEntityLerpPositions(int localClientNum, centity_s *cent);
 void __cdecl CG_InterpolateEntityPosition(cg_s *cgameGlob, centity_s *cent);
 void __cdecl CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent);
@@ -517,6 +517,8 @@ struct cgs_t // sizeof=0x3A24
     float compassY;
     clientInfo_t corpseinfo[8];
 };
+
+#define CS_EFFECT_NAMES 244
 
 extern weaponInfo_s cg_weaponsArray[1][128];
 extern cg_s cgArray[1];

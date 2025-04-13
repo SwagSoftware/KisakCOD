@@ -287,7 +287,7 @@ int __cdecl UI_TextWidth(const char *text, int maxChars, Font_s *font, float sca
 int __cdecl UI_TextHeight(Font_s *font, float scale);
 void __cdecl UI_DrawText(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -299,7 +299,7 @@ void __cdecl UI_DrawText(
     int style);
 void __cdecl UI_DrawTextWithGlow(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -314,7 +314,7 @@ void __cdecl UI_DrawTextWithGlow(
     bool cinematic);
 void __cdecl UI_DrawTextNoSnap(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -326,7 +326,7 @@ void __cdecl UI_DrawTextNoSnap(
     int style);
 void __cdecl UI_DrawTextWithCursor(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,

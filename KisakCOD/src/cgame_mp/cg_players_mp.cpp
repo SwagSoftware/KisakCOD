@@ -37,7 +37,7 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
     int secondaryHeight; // [esp+14h] [ebp-14h]
     Material *hMaterial; // [esp+18h] [ebp-10h]
     team_t iTeam; // [esp+1Ch] [ebp-Ch]
-    const playerState_s *ps; // [esp+20h] [ebp-8h]
+    playerState_s *ps; // [esp+20h] [ebp-8h]
     char *pszIcon; // [esp+24h] [ebp-4h]
     int savedregs; // [esp+28h] [ebp+0h] BYREF
 
@@ -68,14 +68,14 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
                 cent->nextState.clientNum,
                 64);
         iTeam = cgArray[0].bgs.clientinfo[cent->nextState.clientNum].team;
-        ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
-        if (*(_DWORD *)(MEMORY[0x98F45C] + 232) >= 0x40u)
+        ps = &cgArray[0].nextSnap->ps;
+        if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_players_mp.cpp",
                 141,
                 0,
                 "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                *(_DWORD *)(MEMORY[0x98F45C] + 232),
+                cgArray[0].nextSnap->ps.clientNum,
                 64);
         if (cgArray[0].bgs.clientinfo[ps->clientNum].infoValid)
         {
@@ -99,7 +99,6 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
                 if (hMaterial)
                 {
                     CG_AddPlayerSpriteDrawSurf(
-                        (int)&savedregs,
                         localClientNum,
                         cent,
                         hMaterial,
@@ -109,10 +108,9 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
                     secondaryHeight = (int)cg_scriptIconSize->current.value + 16;
                 }
             }
-            if (cent->nextState.number == cgArray[0].clientNum && MEMORY[0x9E06F0])
+            if (cent->nextState.number == cgArray[0].clientNum && cgArray[0].inKillCam)
             {
                 CG_AddPlayerSpriteDrawSurf(
-                    (int)&savedregs,
                     localClientNum,
                     cent,
                     cgMedia.youInKillCamMaterial,
@@ -123,7 +121,6 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
             else if ((cent->nextState.lerp.eFlags & 0x80) != 0)
             {
                 CG_AddPlayerSpriteDrawSurf(
-                    (int)&savedregs,
                     localClientNum,
                     cent,
                     cgMedia.connectionMaterial,
@@ -134,7 +131,6 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
             else if ((iTeam == iClientTeam || iClientTeam == TEAM_SPECTATOR) && (cent->nextState.lerp.eFlags & 0x200000) != 0)
             {
                 CG_AddPlayerSpriteDrawSurf(
-                    (int)&savedregs,
                     localClientNum,
                     cent,
                     cgMedia.balloonMaterial,
@@ -840,7 +836,7 @@ bool __cdecl CG_IsPlayerDead(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] < 8)
+    if (client_state[0] < 8)
         return 0;
     if (localClientNum)
         MyAssertHandler(
@@ -860,14 +856,14 @@ bool __cdecl CG_IsPlayerDead(int localClientNum)
             64);
     if (!cgArray[0].bgs.clientinfo[cgArray[0].clientNum].infoValid)
         MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 774, 0, "%s", "localPlayer->infoValid");
-    return !*(unsigned int *)(MEMORY[0x98F45C] + 340)
-        || (*(unsigned int *)(MEMORY[0x98F45C] + 32) & 4) == 0
-        || (*(unsigned int *)(MEMORY[0x98F45C] + 32) & 2) != 0;
+    return !cgArray[0].nextSnap->ps.stats[0]
+        || (cgArray[0].nextSnap->ps.otherFlags & 4) == 0
+        || (cgArray[0].nextSnap->ps.otherFlags & 2) != 0;
 }
 
 int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum)
 {
-    const playerState_s *ps; // [esp+8h] [ebp-4h]
+    playerState_s *ps; // [esp+8h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -877,8 +873,8 @@ int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
-    return ps->ammoclip[BG_ClipForWeapon(*(unsigned int *)(MEMORY[0x98F45C] + 244))];
+    ps = &cgArray[0].nextSnap->ps;
+    return ps->ammoclip[BG_ClipForWeapon(cgArray[0].nextSnap->ps.weapon)];
 }
 
 void __cdecl CG_UpdateWeaponVisibility(int localClientNum, centity_s *cent)
@@ -971,7 +967,7 @@ void __cdecl CG_UpdateWeaponVisibility(int localClientNum, centity_s *cent)
 
 bool __cdecl CG_IsWeaponVisible(int localClientNum, centity_s *cent, XModel *weapModel, float *origin, float *forward)
 {
-    float stock[4]; // [esp+Ch] [ebp-58h] BYREF
+    float stock[3]; // [esp+Ch] [ebp-58h] BYREF
     float end[3]; // [esp+1Ch] [ebp-48h] BYREF
     trace_t trace; // [esp+28h] [ebp-3Ch] BYREF
     float weapLen; // [esp+54h] [ebp-10h] BYREF
@@ -982,7 +978,7 @@ bool __cdecl CG_IsWeaponVisible(int localClientNum, centity_s *cent, XModel *wea
     if (!cent)
         MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 1031, 0, "%s", "cent");
     CG_CalcWeaponVisTrace(weapModel, origin, forward, stock, end, &weapLen);
-    CG_TraceCapsule(&trace, stock, (float *)vec3_origin, (float *)vec3_origin, end, cent->nextState.number, 4097);
+    CG_TraceCapsule(&trace, stock, vec3_origin, vec3_origin, end, cent->nextState.number, 4097);
     if (!cg_drawWVisDebug)
         MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 1039, 0, "%s", "cg_drawWVisDebug");
     if (cg_drawWVisDebug->current.enabled)
@@ -1002,11 +998,10 @@ bool __cdecl CG_IsWeaponVisible(int localClientNum, centity_s *cent, XModel *wea
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    LODWORD(stock[3]) = cgArray;
-    eye[0] = MEMORY[0x9D8718][0];
-    eye[1] = MEMORY[0x9D8718][1];
-    eye[2] = MEMORY[0x9D8718][2];
-    CG_TraceCapsule(&trace, eye, (float *)vec3_origin, (float *)vec3_origin, stock, cent->nextState.number, 4097);
+    eye[0] = cgArray[0].refdef.vieworg[0];
+    eye[1] = cgArray[0].refdef.vieworg[1];
+    eye[2] = cgArray[0].refdef.vieworg[2];
+    CG_TraceCapsule(&trace, eye, vec3_origin, vec3_origin, stock, cent->nextState.number, 4097);
     if (cg_drawWVisDebug->current.enabled)
     {
         if (trace.fraction == 1.0)

@@ -5,6 +5,17 @@
 #include <ui/ui.h>
 #include <xanim/xmodel.h>
 
+#include <EffectsCore/fx_system.h>
+
+#include <game_mp/g_main_mp.h>
+
+#include <script/scr_const.h>
+#include <script/scr_vm.h>
+
+#include <stringed/stringed_hooks.h>
+
+extern const dvar_t *ui_showEndOfGame;
+
 struct CenterPrint // sizeof=0x408
 {                                       // ...
     int time;                           // ...
@@ -378,7 +389,7 @@ void __cdecl CG_ScanForCrosshairEntity(int localClientNum)
             (float *)vec3_origin,
             end,
             cgameGlob->nextSnap->ps.clientNum,
-            (int)&sv.svEntities[304].baseline.s.weapon + 1);
+            0x2803001);
         hitEntId = Trace_GetEntityHitId(&trace);
         if (hitEntId < 0x40u)
         {
@@ -778,7 +789,7 @@ void __cdecl CG_DrawVote(int localClientNum)
     char *v7; // [esp+10h] [ebp-340h]
     int v8; // [esp+14h] [ebp-33Ch]
     char *v9; // [esp+14h] [ebp-33Ch]
-    char *scale; // [esp+18h] [ebp-338h]
+    const char *scale; // [esp+18h] [ebp-338h]
     int scalea; // [esp+18h] [ebp-338h]
     int scaleb; // [esp+18h] [ebp-338h]
     Font_s *font; // [esp+1Ch] [ebp-334h]
@@ -846,7 +857,7 @@ void __cdecl CG_DrawVote(int localClientNum)
         {
             v1 = UI_SafeTranslateString("CGAME_VOTE");
             s = va("%s(%i):%s", v1, v8, scale);
-            UI_DrawText(scrPlace, (char *)s, 0x7FFFFFFF, font, x, y, 1, 1, fontScale, colorYellow, 3);
+            UI_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, y, 1, 1, fontScale, colorYellow, 3);
             y = y + fontHeight;
             scalea = cgs->voteNo;
             v9 = UI_SafeTranslateString("CGAME_NO");
@@ -858,7 +869,7 @@ void __cdecl CG_DrawVote(int localClientNum)
         {
             v3 = UI_SafeTranslateString("CGAME_VOTE");
             s = va("%s(%i):%s", v3, v8, scale);
-            UI_DrawText(scrPlace, (char *)s, 0x7FFFFFFF, font, x, y, 1, 1, fontScale, colorYellow, 3);
+            UI_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, y, 1, 1, fontScale, colorYellow, 3);
             y = y + fontHeight;
             scaleb = cgs->voteNo;
             v7 = UI_SafeTranslateString("CGAME_NO");
@@ -866,7 +877,7 @@ void __cdecl CG_DrawVote(int localClientNum)
             v4 = UI_SafeTranslateString("CGAME_YES");
             s = va("%s(%s):%i, %s(%s):%i", v4, szVoteYes, v5, v7, szVoteNo, scaleb);
         }
-        UI_DrawText(scrPlace, (char *)s, 0x7FFFFFFF, font, x, y, 1, 1, fontScale, colorYellow, 3);
+        UI_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, y, 1, 1, fontScale, colorYellow, 3);
     }
 }
 
@@ -903,6 +914,23 @@ void __cdecl DrawIntermission(int localClientNum)
         }
         CG_DrawChatMessages(localClientNum);
     }
+}
+
+const char *__cdecl CG_GetBoundSpectatorCommand(int localClientNum, const char **choices, int choiceCount)
+{
+    int i; // [esp+0h] [ebp-10Ch]
+    char binding[260]; // [esp+4h] [ebp-108h] BYREF
+
+    for (i = 0; i < choiceCount; ++i)
+    {
+        if (!choices[i])
+            MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1228, 0, "%s", "choices[i]");
+        if (UI_GetKeyBindingLocalizedString(localClientNum, choices[i], binding))
+            return choices[i];
+    }
+    if (choiceCount <= 0)
+        MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1233, 0, "%s", "choiceCount > 0");
+    return *choices;
 }
 
 void __cdecl CG_DrawSpectatorMessage(int localClientNum)
@@ -1036,7 +1064,7 @@ int __cdecl CG_DrawFollow(int localClientNum)
             64);
     if (!CL_GetClientName(localClientNum, ps->clientNum, clientName, 38))
         Com_sprintf(clientName, 0x26u, "?");
-    followingString = SEH_LocalizeTextMessage(pszInputBuffer, "spectator follow string", LOCMSG_SAFE);
+    followingString = SEH_LocalizeTextMessage("CGAME_FOLLOWING", "spectator follow string", LOCMSG_SAFE);
     scale = 0.33333334;
     if (G_ExitAfterConnectPaths())
         scale = scale * 1.5;
@@ -1182,7 +1210,6 @@ void __cdecl CG_DrawOverheadNames(int localClientNum, const centity_s *cent, flo
         }
         else
         {
-            LODWORD(diff[4]) = cent->pose.origin;
             origin[0] = cent->pose.origin[0];
             origin[1] = cent->pose.origin[1];
             origin[2] = cent->pose.origin[2];
@@ -1195,7 +1222,6 @@ void __cdecl CG_DrawOverheadNames(int localClientNum, const centity_s *cent, flo
             color[3] = alpha;
             if (CG_CalcNamePosition(localClientNum, origin, &x, &y))
             {
-                LODWORD(diff[3]) = cgameGlob->refdef.vieworg;
                 viewPos[0] = cgameGlob->refdef.vieworg[0];
                 viewPos[1] = cgameGlob->refdef.vieworg[1];
                 viewPos[2] = cgameGlob->refdef.vieworg[2];
@@ -1318,7 +1344,7 @@ bool __cdecl CG_CanSeeFriendlyHead(int localClientNum, const centity_s *cent)
 {
     float v3; // [esp+8h] [ebp-8Ch]
     float v4; // [esp+Ch] [ebp-88h]
-    float diff[5]; // [esp+10h] [ebp-84h] BYREF
+    float diff[3]; // [esp+10h] [ebp-84h] BYREF
     DObj_s *obj; // [esp+24h] [ebp-70h]
     const cg_s *cgameGlob; // [esp+28h] [ebp-6Ch]
     float contactEnd[3]; // [esp+2Ch] [ebp-68h] BYREF
@@ -1341,15 +1367,13 @@ bool __cdecl CG_CanSeeFriendlyHead(int localClientNum, const centity_s *cent)
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    ps = (const playerState_s *)(MEMORY[0x98F45C] + 12);
-    LODWORD(diff[4]) = MEMORY[0x9D8718];
-    start[0] = MEMORY[0x9D8718][0];
-    start[1] = MEMORY[0x9D8718][1];
-    start[2] = MEMORY[0x9D8718][2];
+    ps = &cgArray[0].nextSnap->ps;
+    start[0] = cgArray[0].refdef.vieworg[0];
+    start[1] = cgArray[0].refdef.vieworg[1];
+    start[2] = cgArray[0].refdef.vieworg[2];
     obj = Com_GetClientDObj(cent->nextState.number, localClientNum);
     if (!obj || !CG_DObjGetWorldTagPos(&cent->pose, obj, scr_const.j_head, end))
     {
-        LODWORD(diff[3]) = cent->pose.origin;
         end[0] = cent->pose.origin[0];
         end[1] = cent->pose.origin[1];
         end[2] = cent->pose.origin[2];
@@ -1362,14 +1386,7 @@ bool __cdecl CG_CanSeeFriendlyHead(int localClientNum, const centity_s *cent)
     v3 = cg_overheadNamesMaxDist->current.value * cg_overheadNamesMaxDist->current.value;
     if (v4 > (double)v3)
         return 0;
-    CG_TraceCapsule(
-        &trace,
-        start,
-        (float *)vec3_origin,
-        (float *)vec3_origin,
-        end,
-        ps->clientNum,
-        (int)&sv.svEntities[304].baseline.s.weapon + 1);
+    CG_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ps->clientNum, 41955329);
     hitEntId = Trace_GetEntityHitId(&trace);
     if (hitEntId != 1023 && hitEntId != cent->nextState.clientNum)
         return 0;
@@ -1539,7 +1556,7 @@ void __cdecl DrawViewmodelInfo(int localClientNum)
             "^7ADS: ^5%.2f ^7-^5 %.0f^7fov\n"
             "^7---Anims---\n"
             "^3",
-            WeaponStateNames_20[ps->weaponstate],
+            WeaponStateNames[ps->weaponstate],
             weapDef->szInternalName,
             v1,
             v2,

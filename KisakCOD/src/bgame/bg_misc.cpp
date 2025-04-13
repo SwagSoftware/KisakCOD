@@ -2245,7 +2245,7 @@ shellshock_parms_t *__cdecl BG_GetShellshockParms(unsigned int index)
     return &bg_shellshockParms[index];
 }
 
-void __cdecl BG_CreateXAnim(XAnim_s *anims, unsigned int animIndex, char *name)
+void __cdecl BG_CreateXAnim(XAnim_s *anims, unsigned int animIndex, const char *name)
 {
     if (!useFastFile->current.enabled)
         XAnimPrecache(name, (void *(__cdecl *)(int))Hunk_AllocXAnimPrecache);

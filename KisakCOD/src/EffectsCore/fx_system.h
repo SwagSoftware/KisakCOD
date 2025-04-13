@@ -442,8 +442,8 @@ void  FX_GenerateMarkVertsForMark_MatrixFromAnim(
     FxMark *mark,
     const DObj_s *dobj,
     const DObjAnimMat *boneMtxList,
-    const float *viewOffset,
-    float (*outTransform)[3]);
+    const vec3r viewOffset,
+    mat4x3 &outTransform);
 void __cdecl FX_GenerateMarkVertsForEntBrush(
     int localClientNum,
     int entId,
@@ -1300,7 +1300,7 @@ enum FxSampleChannel : __int32
     FX_CHAN_COUNT = 0x5,
     FX_CHAN_NONE = 0x6,
 };
-const FxEffectDef *__cdecl FX_Register(char *name);
+const FxEffectDef *__cdecl FX_Register(const char *name);
 const FxEffectDef *__cdecl FX_Register_FastFile(const char *name);
 void __cdecl FX_RegisterDefaultEffect();
 PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name);

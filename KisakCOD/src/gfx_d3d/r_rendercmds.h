@@ -591,7 +591,7 @@ void __cdecl R_AddCmdDrawStretchPicRotateST(
     const float *color,
     Material *material);
 void __cdecl R_AddCmdDrawTextWithCursor(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -604,7 +604,7 @@ void __cdecl R_AddCmdDrawTextWithCursor(
     int cursorPos,
     char cursor);
 GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -617,7 +617,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
     int cursorPos,
     char cursor);
 void __cdecl R_AddCmdDrawText(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -628,7 +628,7 @@ void __cdecl R_AddCmdDrawText(
     const float *color,
     int style);
 void __cdecl R_AddCmdDrawTextSubtitle(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -642,7 +642,7 @@ void __cdecl R_AddCmdDrawTextSubtitle(
     bool cinematic);
 char __cdecl SetDrawText2DGlowParms(GfxCmdDrawText2D *cmd, const float *color, const float *glowColor);
 void __cdecl R_AddCmdDrawTextWithEffects(
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,

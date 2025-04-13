@@ -1,5 +1,22 @@
 #include "cg_local_mp.h"
 
+#include <aim_assist/aim_assist.h>
+
+#include <EffectsCore/fx_system.h>
+
+#include <gfx_d3d/r_scene.h>
+#include <gfx_d3d/r_workercmds_common.h>
+
+#include <script/scr_const.h>
+
+#include <physics/phys_local.h>
+
+#include <ragdoll/ragdoll.h>
+
+#include <qcommon/com_bsp.h>
+
+#include <win32/win_local.h>
+
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
 
@@ -497,20 +514,20 @@ void __cdecl CG_SetFrameInterpolation(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (!unk_98F458)
+    if (!cgArray[0].snap)
         MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 565, 0, "%s", "cgameGlob->snap");
-    if (!dword_98F45C)
+    if (!cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 566, 0, "%s", "cgameGlob->nextSnap");
-    delta = *(unsigned int *)(dword_98F45C + 8) - *(unsigned int *)(unk_98F458 + 8);
+    delta = cgArray[0].nextSnap->serverTime - cgArray[0].snap->serverTime;
     if (delta)
     {
-        unk_9D5558 = (double)(time - *(unsigned int *)(unk_98F458 + 8)) / (double)delta;
-        if (unk_9D5558 < 0.0)
-            unk_9D5558 = 0.0;
+        cgArray[0].frameInterpolation = (double)(cgArray[0].time - cgArray[0].snap->serverTime) / (double)delta;
+        if (cgArray[0].frameInterpolation < 0.0)
+            cgArray[0].frameInterpolation = 0.0;
     }
     else
     {
-        unk_9D5558 = 0.0;
+        cgArray[0].frameInterpolation = 0.0;
     }
 }
 
@@ -595,7 +612,7 @@ void __cdecl CG_AddPacketEntity(int localClientNum, int entnum)
         }
         entMoved = v2;
         if (v2)
-            CG_UpdateBModelWorldBounds((int)&savedregs, localClientNum, cent, 0);
+            CG_UpdateBModelWorldBounds(localClientNum, cent, 0);
     }
     else
     {
@@ -680,7 +697,7 @@ void __cdecl CG_UpdateClientDobjPartBits(centity_s *cent, int entnum, int localC
 
 int __cdecl CG_AddPacketEntities(int localClientNum)
 {
-    int v2; // [esp+0h] [ebp-154h]
+    int viewlocked_entNum; // [esp+0h] [ebp-154h]
     unsigned int linkedPlayerCount; // [esp+34h] [ebp-120h]
     int lockedView; // [esp+38h] [ebp-11Ch]
     centity_s *cent; // [esp+40h] [ebp-114h]
@@ -700,18 +717,18 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    *(float *)&dword_9DF71C[107] = 0.0;
-    if ((word_9D5624 & 0x300) != 0)
-        v2 = dword_9D56BC[277];
+    cgArray[0].rumbleScale = 0.0;
+    if ((cgArray[0].predictedPlayerState.eFlags & 0x300) != 0)
+        viewlocked_entNum = cgArray[0].predictedPlayerState.viewlocked_entNum;
     else
-        v2 = 1023;
-    lockedViewEntNum = v2;
+        viewlocked_entNum = 1023;
+    lockedViewEntNum = viewlocked_entNum;
     lockedView = 0;
     linkedPlayerCount = 0;
     CG_AddClientSideSounds(localClientNum);
-    for (num = 0; num < *(unsigned int *)(dword_98F45C + 12144); ++num)
+    for (num = 0; num < cgArray[0].nextSnap->numEntities; ++num)
     {
-        entnum = *(unsigned int *)(dword_98F45C + 244 * num + 12152);
+        entnum = cgArray[0].nextSnap->entities[num].number;
         cent = CG_GetEntity(localClientNum, entnum);
         eType = cent->nextState.eType;
         if (eType < 0x11)
@@ -828,7 +845,7 @@ int __cdecl CG_DObjGetWorldBoneMatrix(
             "(localClientNum == 0)",
             pose->localClientNum);
     cgameGlob = cgArray;
-    Vec3Add(mat->trans, flt_9D8748, origin);
+    Vec3Add(mat->trans, cgArray[0].refdef.viewOffset, origin);
     return 1;
 }
 
@@ -919,7 +936,7 @@ int __cdecl CG_DObjGetWorldTagMatrix(
             "(localClientNum == 0)",
             pose->localClientNum);
     cgameGlob = cgArray;
-    Vec3Add(mat->trans, flt_9D8748, origin);
+    Vec3Add(mat->trans, cgArray[0].refdef.viewOffset, origin);
     return 1;
 }
 
@@ -955,11 +972,11 @@ int __cdecl CG_DObjGetWorldTagPos(const cpose_t *pose, DObj_s *obj, unsigned int
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             pose->localClientNum);
-    Vec3Add(mat->trans, flt_9D8748, pos);
+    Vec3Add(mat->trans, cgArray[0].refdef.viewOffset, pos);
     return 1;
 }
 
-centity_s *__cdecl CG_GetPose(int localClientNum, unsigned int handle)
+cpose_t*__cdecl CG_GetPose(int localClientNum, unsigned int handle)
 {
     if (handle >= 0x480)
         MyAssertHandler(
@@ -970,7 +987,7 @@ centity_s *__cdecl CG_GetPose(int localClientNum, unsigned int handle)
             "(handle >= 0 && handle < (((1<<10)) + 128))",
             handle);
     if ((int)handle < 1024)
-        return CG_GetEntity(localClientNum, handle);
+        return &CG_GetEntity(localClientNum, handle)->pose;
     if ((int)(handle - 1024) >= 128)
         MyAssertHandler(
             ".\\cgame_mp\\cg_ents_mp.cpp",
@@ -987,7 +1004,7 @@ centity_s *__cdecl CG_GetPose(int localClientNum, unsigned int handle)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (centity_s *)&unk_A8E400;
+    return &cgArray[0].viewModelPose;
 }
 
 void __cdecl CG_CalcEntityLerpPositions(int localClientNum, centity_s *cent)
@@ -1015,8 +1032,8 @@ void __cdecl CG_CalcEntityLerpPositions(int localClientNum, centity_s *cent)
     }
     else
     {
-        BG_EvaluateTrajectory(&cent->currentState.pos, time, cent->pose.origin);
-        BG_EvaluateTrajectory(&cent->currentState.apos, time, cent->pose.angles);
+        BG_EvaluateTrajectory(&cent->currentState.pos, cgArray[0].time, cent->pose.origin);
+        BG_EvaluateTrajectory(&cent->currentState.apos, cgArray[0].time, cent->pose.angles);
         if (cent->nextState.eType == 1)
         {
             if (cent->nextState.clientNum >= 0x40u)
@@ -1058,13 +1075,13 @@ void __cdecl CG_CalcEntityLerpPositions(int localClientNum, centity_s *cent)
             cent->pose.angles[2] = 0.0;
             cia->lerpLean = cent->nextState.lerp.u.turret.gunAngles[0];
         }
-        if (cent != (centity_s *)&unk_9D84D8)
+        if (cent != &cgArray[0].predictedPlayerEntity)
             CG_AdjustPositionForMover(
                 localClientNum,
                 cent->pose.origin,
                 cent->nextState.groundEntityNum,
-                *(unsigned int *)(unk_98F458 + 8),
-                time,
+                cgArray[0].snap->serverTime,
+                cgArray[0].time,
                 cent->pose.origin,
                 0);
         if (CG_IsRagdollTrajectory(&cent->currentState.pos))
@@ -1319,7 +1336,7 @@ char __cdecl CG_ExpiredLaunch(int localClientNum, centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (cent->pose.physObjId || time <= cent->nextState.lerp.pos.trTime + 1000)
+    if (cent->pose.physObjId || cgArray[0].time <= cent->nextState.lerp.pos.trTime + 1000)
         return 0;
     cent->pose.physObjId = -1;
     return 1;
@@ -1356,11 +1373,11 @@ void __cdecl CG_CreateRagdollObject(int localClientNum, centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (dword_9E06F0)
+    if (cgArray[0].inKillCam)
         reset = 0;
     else
         reset = (cent->nextState.lerp.eFlags & 0x80000) != 0;
-    if (cent->nextState.eType == 2 && cent->nextState.clientNum == cgArray[0].clientNum && dword_9E06F0)
+    if (cent->nextState.eType == 2 && cent->nextState.clientNum == cgArray[0].clientNum && cgArray[0].inKillCam)
     {
         shareRagdoll = 0;
         RagdollForDObj = Ragdoll_CreateRagdollForDObj(localClientNum, 0, cent->nextState.number, reset, 0);
@@ -1786,7 +1803,7 @@ void __cdecl CG_mg42(int localClientNum, centity_s *cent)
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            if (dword_9D5570)
+            if (cgArray[0].renderingThirdPerson)
                 goto LABEL_12;
             if (localClientNum)
                 MyAssertHandler(
@@ -1796,7 +1813,7 @@ void __cdecl CG_mg42(int localClientNum, centity_s *cent)
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            if (dword_9D56BC[277] != ns->number)
+            if (cgArray[0].predictedPlayerState.viewlocked_entNum != ns->number)
             {
             LABEL_12:
                 lightingOrigin[0] = cent->pose.origin[0];
@@ -1826,7 +1843,7 @@ void __cdecl CG_Missile(int localClientNum, centity_s *cent)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (cent->nextState.lerp.u.missile.launchTime <= time)
+        if (cent->nextState.lerp.u.missile.launchTime <= cgArray[0].time)
         {
             if (cent->nextState.weapon >= BG_GetNumWeapons())
                 cent->nextState.weapon = 0;
@@ -1947,7 +1964,7 @@ void __cdecl CG_SoundBlend(int localClientNum, centity_s *cent)
                                 "%s\n\t(localClientNum) = %i",
                                 "(localClientNum == 0)",
                                 localClientNum);
-                        lerp = (cent->nextState.lerp.u.turret.gunAngles[0] - cent->currentState.u.turret.gunAngles[0]) * unk_9D5558
+                        lerp = (cent->nextState.lerp.u.turret.gunAngles[0] - cent->currentState.u.turret.gunAngles[0]) * cgArray[0].frameInterpolation
                             + cent->currentState.u.turret.gunAngles[0];
                         if (lerp < 0.0 || lerp > 1.0)
                             MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 1007, 0, "%s", "(lerp >= 0.0f) && (lerp <= 1.0f)");
@@ -2101,10 +2118,10 @@ void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent)
     Byte4UnpackRgba((const unsigned __int8 *)&cent->nextState.lerp.u, newColor);
     Vec3Scale(oldColor, cent->currentState.u.turret.gunAngles[1], oldColor);
     Vec3Scale(newColor, cent->nextState.lerp.u.turret.gunAngles[1], newColor);
-    Vec3Lerp(oldColor, newColor, unk_9D5558, light->color);
+    Vec3Lerp(oldColor, newColor, cgArray[0].frameInterpolation, light->color);
     if (refLight->rotationLimit < 1.0)
     {
-        BG_EvaluateTrajectory(&cent->nextState.lerp.apos, time, lightAngles);
+        BG_EvaluateTrajectory(&cent->nextState.lerp.apos, cgArray[0].time, lightAngles);
         AngleVectors(lightAngles, light->dir, 0, 0);
         light->dir[0] = -light->dir[0];
         light->dir[1] = -light->dir[1];
@@ -2114,22 +2131,23 @@ void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent)
     }
     if (refLight->translationLimit > 0.0)
     {
-        BG_EvaluateTrajectory(&cent->nextState.lerp.pos, time, light->origin);
+        BG_EvaluateTrajectory(&cent->nextState.lerp.pos, cgArray[0].time, light->origin);
         CG_ClampPrimaryLightOrigin(light, refLight);
     }
-    light->radius = (cent->nextState.lerp.u.turret.gunAngles[2] - cent->currentState.u.turret.gunAngles[2]) * unk_9D5558
+    light->radius = (cent->nextState.lerp.u.turret.gunAngles[2] - cent->currentState.u.turret.gunAngles[2])
+        * cgArray[0].frameInterpolation
         + cent->currentState.u.turret.gunAngles[2];
     light->cosHalfFovOuter = (cent->nextState.lerp.u.primaryLight.cosHalfFovOuter
         - cent->currentState.u.primaryLight.cosHalfFovOuter)
-        * unk_9D5558
+        * cgArray[0].frameInterpolation
         + cent->currentState.u.primaryLight.cosHalfFovOuter;
     light->cosHalfFovInner = (cent->nextState.lerp.u.primaryLight.cosHalfFovInner
         - cent->currentState.u.primaryLight.cosHalfFovInner)
-        * unk_9D5558
+        * cgArray[0].frameInterpolation
         + cent->currentState.u.primaryLight.cosHalfFovInner;
     light->exponent = (int)((double)(cent->nextState.lerp.u.primaryLight.colorAndExp[3]
         - cent->currentState.u.primaryLight.colorAndExp[3])
-        * unk_9D5558)
+        * cgArray[0].frameInterpolation)
         + cent->currentState.u.primaryLight.colorAndExp[3];
     if (light->cosHalfFovOuter <= 0.0
         || light->cosHalfFovInner <= (double)light->cosHalfFovOuter
@@ -2263,7 +2281,7 @@ float *__cdecl CG_GetEntityOrigin(int localClientNum, unsigned int entnum)
 
 void __cdecl CG_PredictiveSkinCEntity(GfxSceneEntity *sceneEnt)
 {
-    const cpose_t *pose; // [esp+0h] [ebp-4h]
+    cpose_t *pose; // [esp+0h] [ebp-4h]
 
     if (!sceneEnt)
         MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 1810, 0, "%s", "sceneEnt");

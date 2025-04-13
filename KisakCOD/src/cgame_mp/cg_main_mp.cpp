@@ -1,6 +1,7 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <universal/surfaceflags.h>
+#include <ui/ui.h>
 #include <ui_mp/ui_mp.h>
 #include <qcommon/mem_track.h>
 #include <DynEntity/DynEntity_client.h>
@@ -15,6 +16,7 @@
 #include <universal/com_files.h>
 #include <qcommon/threads.h>
 #include <stringed/stringed_hooks.h>
+#include <database/database.h>
 
 float cg_entityOriginArray[1][1024][3];
 weaponInfo_s cg_weaponsArray[1][128];
@@ -1156,7 +1158,7 @@ void __cdecl TRACK_cg_main()
     track_static_alloc_internal(cg_entityOriginArray, 12288, "cg_entityOriginArray", 9);
 }
 
-void __cdecl CG_GetDObjOrientation(int localClientNum, signed int dobjHandle, float (*axis)[3], float *origin)
+void __cdecl CG_GetDObjOrientation(int localClientNum, signed int dobjHandle, mat3x3 &axis, float *origin)
 {
     centity_s *cent; // [esp+Ch] [ebp-4h]
 
@@ -1190,7 +1192,7 @@ void __cdecl CG_GetDObjOrientation(int localClientNum, signed int dobjHandle, fl
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        AxisCopy(cgArray[0].viewModelAxis, axis);
+        AxisCopy((mat3x3&)cgArray[0].viewModelAxis, axis);
         *origin = cgArray[0].viewModelAxis[3][0];
         origin[1] = cgArray[0].viewModelAxis[3][1];
         origin[2] = cgArray[0].viewModelAxis[3][2];

@@ -1,7 +1,11 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
+
 #include <bgame/bg_local.h>
 
+#include <client/client.h>
+
+#include <ui/ui.h>
 
 const dvar_t *hud_fade_sprint;
 const dvar_t *hud_health_pulserate_injured;

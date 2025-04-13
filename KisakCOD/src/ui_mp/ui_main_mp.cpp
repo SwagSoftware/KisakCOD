@@ -516,7 +516,7 @@ void __cdecl UI_DrawText(
 
 void __cdecl UI_DrawTextWithGlow(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -570,7 +570,7 @@ void __cdecl UI_DrawTextWithGlow(
 
 void __cdecl UI_DrawTextNoSnap(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,
@@ -592,7 +592,7 @@ void __cdecl UI_DrawTextNoSnap(
 
 void __cdecl UI_DrawTextWithCursor(
     const ScreenPlacement *scrPlace,
-    char *text,
+    const char *text,
     int maxChars,
     Font_s *font,
     float x,

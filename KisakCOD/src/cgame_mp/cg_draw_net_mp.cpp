@@ -1,8 +1,22 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 
+#include <client/client.h>
+
+#include <ui/ui.h>
 
 // struct lagometer_t lagometer 82829b60     cg_draw_net_mp.obj
+
+struct lagometer_t // sizeof=0x608
+{                                       // ...
+    int frameSamples[128];              // ...
+    int frameCount;                     // ...
+    int snapshotFlags[128];             // ...
+    int snapshotSamples[128];           // ...
+    int snapshotCount;                  // ...
+};
+
+lagometer_t lagometer;
 
 void __cdecl CG_AddLagometerFrameInfo(const cg_s *cgameGlob)
 {
@@ -965,7 +979,7 @@ void __cdecl CG_DrawDisconnect(int localClientNum)
                 localClientNum);
         cmdNum = CL_GetCurrentCmdNumber(localClientNum) - 127;
         CL_GetUserCmd(localClientNum, cmdNum, &cmd);
-        if (cmd.serverTime > *(unsigned int *)(MEMORY[0x98F45C] + 12) && cmd.serverTime <= MEMORY[0x9D5560])
+        if (cmd.serverTime > cgArray[0].nextSnap->ps.commandTime && cmd.serverTime <= cgArray[0].time)
         {
             scrPlace = &scrPlaceView[localClientNum];
             s = UI_SafeTranslateString("CGAME_CONNECTIONINTERUPTED");
@@ -973,7 +987,7 @@ void __cdecl CG_DrawDisconnect(int localClientNum)
             w = UI_TextWidth(s, 0, font, 0.5);
             x = (float)((640 - w) / 2);
             UI_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, 100.0, 0, 0, 0.5, colorWhite, 3);
-            if (((MEMORY[0x9D5560] >> 9) & 1) == 0)
+            if (((cgArray[0].time >> 9) & 1) == 0)
             {
                 disconnectMaterial = Material_RegisterHandle("net_disconnect", 7);
                 UI_DrawHandlePic(scrPlace, 296.0, 320.0, 48.0, 48.0, 0, 0, 0, disconnectMaterial);
@@ -981,4 +995,3 @@ void __cdecl CG_DrawDisconnect(int localClientNum)
         }
     }
 }
-

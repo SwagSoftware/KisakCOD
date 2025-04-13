@@ -752,14 +752,14 @@ struct CEntTurretAngles // sizeof=0x8
     float pitch;
     float yaw;
 };
-union $06707BB8B07567CD0B9AB50B15101D6E // sizeof=0x8
-{                                       // ...
-    CEntTurretAngles angles;
-    const float* viewAngles;
-};
+
 struct CEntTurretInfo // sizeof=0x10
 {                                       // ...
-    $06707BB8B07567CD0B9AB50B15101D6E ___u0;
+    union
+    {
+        CEntTurretAngles angles;
+        const float *viewAngles;
+    };
     float barrelPitch;
     bool playerUsing;
     unsigned __int8 tag_aim;
@@ -1393,7 +1393,7 @@ int __cdecl BG_LoadShellShockDvars(const char *name);
 void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms);
 int __cdecl BG_SaveShellShockDvars(const char *name);
 shellshock_parms_t *__cdecl BG_GetShellshockParms(unsigned int index);
-void __cdecl BG_CreateXAnim(XAnim_s *anims, unsigned int animIndex, char *name);
+void __cdecl BG_CreateXAnim(XAnim_s *anims, unsigned int animIndex, const char *name);
 void __cdecl BG_CheckThread();
 int __cdecl BG_GetMaxSprintTime(const playerState_s *ps);
 

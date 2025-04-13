@@ -1534,7 +1534,7 @@ const FxEffectDef *__cdecl FX_Register_FastFile(const char *name)
 
 void __cdecl FX_RegisterDefaultEffect()
 {
-    fx_load.defaultEffect = FX_Register((char*)"misc/missing_fx");
+    fx_load.defaultEffect = FX_Register("misc/missing_fx");
 }
 
 void __cdecl FX_ForEachEffectDef(void(__cdecl* callback)(const FxEffectDef*, void*), void* data)

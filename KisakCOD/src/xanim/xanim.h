@@ -1325,7 +1325,7 @@ void __cdecl XAnimShutdown();
 XAnimParts* __cdecl XAnimFindData_LoadObj(const char* name);
 XAnimParts* __cdecl XAnimFindData_FastFile(const char* name);
 void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* name);
-XAnimParts *__cdecl XAnimPrecache(char *name, void *(__cdecl *Alloc)(int));
+XAnimParts *__cdecl XAnimPrecache(const char *name, void *(__cdecl *Alloc)(int));
 void __cdecl XAnimBlend(
     XAnim_s* anims,
     unsigned int animIndex,

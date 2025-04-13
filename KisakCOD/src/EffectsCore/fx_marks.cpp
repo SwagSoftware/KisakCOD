@@ -1861,107 +1861,138 @@ char __cdecl FX_GenerateMarkVertsForList_EntDObj(
     return 1;
 }
 
-void FX_GenerateMarkVertsForMark_MatrixFromAnim(
-    FxMark* mark,
-    const DObj_s* dobj,
-    const DObjAnimMat* boneMtxList,
-    const float* viewOffset,
-    mat4x3& outTransform)
+void __cdecl FX_GenerateMarkVertsForMark_MatrixFromAnim(
+    FxMark *mark,
+    const DObj_s *dobj,
+    const DObjAnimMat *boneMtxList,
+    const vec3r viewOffset,
+    mat4x3 &outTransform)
 {
+    int v5; // ebp
     float v6[4][3]; // [esp+3Ch] [ebp-1E8h] BYREF
-    float invBasePoseMatrix_36; // [esp+6Ch] [ebp-1B8h]
-    float invBasePoseMatrix_40; // [esp+70h] [ebp-1B4h]
-    float invBasePoseMatrix_44; // [esp+74h] [ebp-1B0h]
+    float v7; // [esp+6Ch] [ebp-1B8h]
+    float v8; // [esp+70h] [ebp-1B4h]
+    float v9; // [esp+74h] [ebp-1B0h]
     float v10; // [esp+78h] [ebp-1ACh]
     float v11; // [esp+7Ch] [ebp-1A8h]
     float v12; // [esp+80h] [ebp-1A4h]
-    DObjSkelMat invBasePoseMat; // [esp+84h] [ebp-1A0h]
-    float v14; // [esp+C4h] [ebp-160h]
-    float v15; // [esp+C8h] [ebp-15Ch]
-    float v16; // [esp+CCh] [ebp-158h]
-    float v17; // [esp+D0h] [ebp-154h]
-    float v18; // [esp+D4h] [ebp-150h]
-    float v19; // [esp+D8h] [ebp-14Ch]
-    float v20; // [esp+DCh] [ebp-148h] BYREF
-    float v21; // [esp+E0h] [ebp-144h]
-    float v22; // [esp+E4h] [ebp-140h]
-    float v23; // [esp+E8h] [ebp-13Ch]
-    float v24; // [esp+ECh] [ebp-138h]
-    float v25; // [esp+F0h] [ebp-134h]
-    float v26; // [esp+F4h] [ebp-130h]
-    float v27; // [esp+F8h] [ebp-12Ch]
-    const DObjAnimMat* v28; // [esp+FCh] [ebp-128h]
-    const DObjAnimMat* BasePose; // [esp+100h] [ebp-124h]
-    float v30; // [esp+104h] [ebp-120h]
-    float v31; // [esp+108h] [ebp-11Ch]
-    const DObjAnimMat* modelBaseMatrices; // [esp+10Ch] [ebp-118h]
-    float* v33; // [esp+110h] [ebp-114h]
-    float v34; // [esp+114h] [ebp-110h]
-    float v35; // [esp+118h] [ebp-10Ch]
-    float v36; // [esp+11Ch] [ebp-108h]
-    float* v37; // [esp+120h] [ebp-104h]
-    float v38; // [esp+124h] [ebp-100h]
-    float v39; // [esp+128h] [ebp-FCh]
-    float v40; // [esp+12Ch] [ebp-F8h]
-    float* v41; // [esp+130h] [ebp-F4h]
-    mat4x3 v42{}; // [esp+134h] [ebp-F0h] BYREF
-    float bonePoseMatrix_24[8]; // [esp+158h] [ebp-CCh] BYREF
-    float v44; // [esp+178h] [ebp-ACh]
-    float v45; // [esp+17Ch] [ebp-A8h]
-    float v46; // [esp+180h] [ebp-A4h]
-    DObjSkelMat skelMat; // [esp+184h] [ebp-A0h] BYREF
-    float v48; // [esp+1C4h] [ebp-60h]
-    float v49; // [esp+1C8h] [ebp-5Ch]
-    float v50; // [esp+1CCh] [ebp-58h]
-    float v51; // [esp+1D0h] [ebp-54h]
-    float v52; // [esp+1D4h] [ebp-50h]
-    float v53; // [esp+1D8h] [ebp-4Ch]
-    float v54; // [esp+1DCh] [ebp-48h]
-    float v55; // [esp+1E0h] [ebp-44h] BYREF
-    float v56; // [esp+1E4h] [ebp-40h]
-    float v57; // [esp+1E8h] [ebp-3Ch]
+    float v13; // [esp+84h] [ebp-1A0h]
+    float v14; // [esp+88h] [ebp-19Ch]
+    float v15; // [esp+8Ch] [ebp-198h]
+    float v16; // [esp+90h] [ebp-194h]
+    float v17; // [esp+94h] [ebp-190h]
+    float v18; // [esp+98h] [ebp-18Ch]
+    float v19; // [esp+9Ch] [ebp-188h]
+    float v20; // [esp+A0h] [ebp-184h]
+    float v21; // [esp+A4h] [ebp-180h]
+    float v22; // [esp+A8h] [ebp-17Ch]
+    float v23; // [esp+ACh] [ebp-178h]
+    float v24; // [esp+B0h] [ebp-174h]
+    float v25; // [esp+B4h] [ebp-170h]
+    float v26; // [esp+B8h] [ebp-16Ch]
+    float v27; // [esp+BCh] [ebp-168h]
+    float v28; // [esp+C0h] [ebp-164h]
+    float v29; // [esp+C4h] [ebp-160h]
+    float v30; // [esp+C8h] [ebp-15Ch]
+    float v31; // [esp+CCh] [ebp-158h]
+    float v32; // [esp+D0h] [ebp-154h]
+    float v33; // [esp+D4h] [ebp-150h]
+    float v34; // [esp+D8h] [ebp-14Ch]
+    float v35; // [esp+DCh] [ebp-148h] BYREF
+    float v36; // [esp+E0h] [ebp-144h]
+    float v37; // [esp+E4h] [ebp-140h]
+    float v38; // [esp+E8h] [ebp-13Ch]
+    float v39; // [esp+ECh] [ebp-138h]
+    float v40; // [esp+F0h] [ebp-134h]
+    float v41; // [esp+F4h] [ebp-130h]
+    float v42; // [esp+F8h] [ebp-12Ch]
+    const DObjAnimMat *v43; // [esp+FCh] [ebp-128h]
+    const DObjAnimMat *BasePose; // [esp+100h] [ebp-124h]
+    float v45; // [esp+104h] [ebp-120h]
+    float v46; // [esp+108h] [ebp-11Ch]
+    float v47; // [esp+10Ch] [ebp-118h]
+    float *v48; // [esp+110h] [ebp-114h]
+    float v49; // [esp+114h] [ebp-110h]
+    float v50; // [esp+118h] [ebp-10Ch]
+    float v51; // [esp+11Ch] [ebp-108h]
+    float *v52; // [esp+120h] [ebp-104h]
+    float v53; // [esp+124h] [ebp-100h]
+    float v54; // [esp+128h] [ebp-FCh]
+    float v55; // [esp+12Ch] [ebp-F8h]
+    float *v56; // [esp+130h] [ebp-F4h]
+    float v57[4][3]; // [esp+134h] [ebp-F0h] BYREF
+    float v58; // [esp+164h] [ebp-C0h]
+    float v59; // [esp+168h] [ebp-BCh]
+    float v60; // [esp+16Ch] [ebp-B8h]
+    const float *trans; // [esp+170h] [ebp-B4h]
+    float *v62; // [esp+174h] [ebp-B0h]
+    float v63; // [esp+178h] [ebp-ACh]
+    float v64; // [esp+17Ch] [ebp-A8h]
+    float v65; // [esp+180h] [ebp-A4h]
+    float v66; // [esp+184h] [ebp-A0h]
+    float v67; // [esp+188h] [ebp-9Ch]
+    float v68; // [esp+18Ch] [ebp-98h]
+    float v69; // [esp+190h] [ebp-94h]
+    float v70; // [esp+194h] [ebp-90h]
+    float v71; // [esp+198h] [ebp-8Ch]
+    float v72; // [esp+19Ch] [ebp-88h]
+    float v73; // [esp+1A0h] [ebp-84h]
+    float v74; // [esp+1A4h] [ebp-80h]
+    float v75; // [esp+1A8h] [ebp-7Ch] BYREF
+    float v76; // [esp+1ACh] [ebp-78h]
+    float v77; // [esp+1B0h] [ebp-74h]
+    float v78; // [esp+1B4h] [ebp-70h]
+    float v79; // [esp+1BCh] [ebp-68h]
+    float v80; // [esp+1C0h] [ebp-64h]
+    float v81; // [esp+1C4h] [ebp-60h]
+    float v82; // [esp+1C8h] [ebp-5Ch]
+    float v83; // [esp+1CCh] [ebp-58h]
+    float v84; // [esp+1D0h] [ebp-54h]
+    float v85; // [esp+1D4h] [ebp-50h]
+    float v86; // [esp+1D8h] [ebp-4Ch]
+    float v87; // [esp+1DCh] [ebp-48h]
+    float v88; // [esp+1E0h] [ebp-44h] BYREF
+    float v89; // [esp+1E4h] [ebp-40h]
+    float v90; // [esp+1E8h] [ebp-3Ch]
     float transWeight; // [esp+1ECh] [ebp-38h]
-    float v59; // [esp+1F0h] [ebp-34h]
-    float v60; // [esp+1F4h] [ebp-30h]
-    float v61; // [esp+1F8h] [ebp-2Ch]
-    float v62; // [esp+1FCh] [ebp-28h]
-    const DObjAnimMat* v63; // [esp+200h] [ebp-24h]
-    const XModel* v64; // [esp+204h] [ebp-20h]
-    XModel* i; // [esp+208h] [ebp-1Ch]
-    int v66; // [esp+20Ch] [ebp-18h]
-    XModel* model; // [esp+210h] [ebp-14h]
-    int dObjModelIndexIter; // [esp+214h] [ebp-10h]
-    int baseBoneIndex; // [esp+218h] [ebp-Ch]
-    int dObjModelIndexForMark; // [esp+21Ch] [ebp-8h]
-    int retaddr; // [esp+224h] [ebp+0h]
+    float v92; // [esp+1F0h] [ebp-34h]
+    float v93; // [esp+1F4h] [ebp-30h]
+    float v94; // [esp+1F8h] [ebp-2Ch]
+    float v95; // [esp+1FCh] [ebp-28h]
+    const DObjAnimMat *v96; // [esp+200h] [ebp-24h]
+    const XModel *Model; // [esp+204h] [ebp-20h]
+    int i; // [esp+208h] [ebp-1Ch]
+    int v99; // [esp+20Ch] [ebp-18h]
+    int v100; // [esp+210h] [ebp-14h]
+    int lmapIndex; // [esp+214h] [ebp-10h]
+    void *v103; // [esp+21Ch] [ebp-8h]
 
-    dObjModelIndexForMark = retaddr;
     if (!dobj)
         MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1452, 0, "%s", "dobj");
     if (!boneMtxList)
         MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1453, 0, "%s", "boneMtxList");
-    dObjModelIndexIter = mark->context.lmapIndex;
-    model = (XModel*)(mark->context.modelTypeAndSurf & 0x3F);
-    if ((int)model >= DObjGetNumModels(dobj))
+    lmapIndex = mark->context.lmapIndex;
+    v100 = mark->context.modelTypeAndSurf & 0x3F;
+    if (v100 >= DObjGetNumModels(dobj))
         MyAssertHandler(
             ".\\EffectsCore\\fx_marks.cpp",
             1458,
             0,
             "%s\n\t(dObjModelIndexForMark) = %i",
             "(dObjModelIndexForMark < DObjGetNumModels( dobj ))",
-            model);
-    v66 = 0;
-    for (i = 0; i != model; i = (XModel*)((char*)i + 1))
+            v100);
+    v99 = 0;
+    for (i = 0; i != v100; ++i)
     {
-        v64 = DObjGetModel(dobj, (int)i);
-        v66 += XModelNumBones(v64);
+        Model = DObjGetModel(dobj, i);
+        v99 += XModelNumBones(Model);
     }
-    v63 = &boneMtxList[dObjModelIndexIter + v66];
-    v62 = v63->quat[0];
-    if ((LODWORD(v62) & 0x7F800000) == 0x7F800000
-        || (v61 = v63->quat[1], (LODWORD(v61) & 0x7F800000) == 0x7F800000)
-        || (v60 = v63->quat[2], (LODWORD(v60) & 0x7F800000) == 0x7F800000)
-        || (v59 = v63->quat[3], (LODWORD(v59) & 0x7F800000) == 0x7F800000))
+    v96 = &boneMtxList[lmapIndex + v99];
+    v95 = v96->quat[0];
+    if ((LODWORD(v95) & 0x7F800000) == 0x7F800000
+        || (v94 = v96->quat[1], (LODWORD(v94) & 0x7F800000) == 0x7F800000)
+        || (v93 = v96->quat[2], (LODWORD(v93) & 0x7F800000) == 0x7F800000)
+        || (v92 = v96->quat[3], (LODWORD(v92) & 0x7F800000) == 0x7F800000))
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
@@ -1970,7 +2001,7 @@ void FX_GenerateMarkVertsForMark_MatrixFromAnim(
             "%s",
             "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
     }
-    transWeight = v63->transWeight;
+    transWeight = v96->transWeight;
     if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
@@ -1978,70 +2009,70 @@ void FX_GenerateMarkVertsForMark_MatrixFromAnim(
             0,
             "%s",
             "!IS_NAN(mat->transWeight)");
-    Vec3Scale(v63->quat, v63->transWeight, &v55);
-    v54 = v55 * v63->quat[0];
-    v53 = v55 * v63->quat[1];
-    v52 = v55 * v63->quat[2];
-    v51 = v55 * v63->quat[3];
-    v50 = v56 * v63->quat[1];
-    v49 = v56 * v63->quat[2];
-    v48 = v56 * v63->quat[3];
-    skelMat.origin[3] = v57 * v63->quat[2];
-    skelMat.origin[2] = v57 * v63->quat[3];
-    v44 = 1.0 - (v50 + skelMat.origin[3]);
-    v45 = v53 + skelMat.origin[2];
-    v46 = v52 - v48;
-    skelMat.axis[0][0] = 0.0;
-    skelMat.axis[0][1] = v53 - skelMat.origin[2];
-    skelMat.axis[0][2] = 1.0 - (v54 + skelMat.origin[3]);
-    skelMat.axis[0][3] = v49 + v51;
-    skelMat.axis[1][0] = 0.0;
-    skelMat.axis[1][1] = v52 + v48;
-    skelMat.axis[1][2] = v49 - v51;
-    skelMat.axis[1][3] = 1.0 - (v54 + v50);
-    skelMat.axis[2][0] = 0.0;
-    LODWORD(bonePoseMatrix_24[7]) = &skelMat.axis[2][1];
-    LODWORD(bonePoseMatrix_24[6]) = v63->trans;
-    skelMat.axis[2][1] = v63->trans[0];
-    skelMat.axis[2][2] = v63->trans[1];
-    skelMat.axis[2][3] = v63->trans[2];
-    skelMat.origin[0] = 1.0;
-    bonePoseMatrix_24[5] = v44;
-    bonePoseMatrix_24[4] = v45;
-    bonePoseMatrix_24[3] = v46;
-    v42[0][0] = v44;
-    v42[0][1] = v45;
-    v42[0][2] = v46;
-    v41 = v42[1];
-    v40 = skelMat.axis[0][1];
-    v39 = skelMat.axis[0][2];
-    v38 = skelMat.axis[0][3];
-    v42[1][0] = skelMat.axis[0][1];
-    v42[1][1] = skelMat.axis[0][2];
-    v42[1][2] = skelMat.axis[0][3];
-    v37 = v42[2];
-    v36 = skelMat.axis[1][1];
-    v35 = skelMat.axis[1][2];
-    v34 = skelMat.axis[1][3];
-    v42[2][0] = skelMat.axis[1][1];
-    v42[2][1] = skelMat.axis[1][2];
-    v42[2][2] = skelMat.axis[1][3];
-    v33 = bonePoseMatrix_24;
-    modelBaseMatrices = (const DObjAnimMat*)LODWORD(skelMat.axis[2][1]);
-    v31 = skelMat.axis[2][2];
-    v30 = skelMat.axis[2][3];
-    bonePoseMatrix_24[0] = skelMat.axis[2][1];
-    bonePoseMatrix_24[1] = skelMat.axis[2][2];
-    bonePoseMatrix_24[2] = skelMat.axis[2][3];
-    Vec3Add(bonePoseMatrix_24, viewOffset, bonePoseMatrix_24);
-    v64 = DObjGetModel(dobj, (int)model);
-    BasePose = XModelGetBasePose(v64);
-    v28 = &BasePose[dObjModelIndexIter];
-    v27 = v28->quat[0];
-    if ((LODWORD(v27) & 0x7F800000) == 0x7F800000
-        || (v26 = v28->quat[1], (LODWORD(v26) & 0x7F800000) == 0x7F800000)
-        || (v25 = v28->quat[2], (LODWORD(v25) & 0x7F800000) == 0x7F800000)
-        || (v24 = v28->quat[3], (LODWORD(v24) & 0x7F800000) == 0x7F800000))
+    Vec3Scale(v96->quat, v96->transWeight, &v88);
+    v87 = v88 * v96->quat[0];
+    v86 = v88 * v96->quat[1];
+    v85 = v88 * v96->quat[2];
+    v84 = v88 * v96->quat[3];
+    v83 = v89 * v96->quat[1];
+    v82 = v89 * v96->quat[2];
+    v81 = v89 * v96->quat[3];
+    v80 = v90 * v96->quat[2];
+    v79 = v90 * v96->quat[3];
+    v63 = 1.0 - (v83 + v80);
+    v64 = v86 + v79;
+    v65 = v85 - v81;
+    v66 = 0.0;
+    v67 = v86 - v79;
+    v68 = 1.0 - (v87 + v80);
+    v69 = v82 + v84;
+    v70 = 0.0;
+    v71 = v85 + v81;
+    v72 = v82 - v84;
+    v73 = 1.0 - (v87 + v83);
+    v74 = 0.0;
+    v62 = &v75;
+    trans = v96->trans;
+    v75 = v96->trans[0];
+    v76 = v96->trans[1];
+    v77 = v96->trans[2];
+    v78 = 1.0;
+    v60 = v63;
+    v59 = v64;
+    v58 = v65;
+    v57[0][0] = v63;
+    v57[0][1] = v64;
+    v57[0][2] = v65;
+    v56 = v57[1];
+    v55 = v67;
+    v54 = v68;
+    v53 = v69;
+    v57[1][0] = v67;
+    v57[1][1] = v68;
+    v57[1][2] = v69;
+    v52 = v57[2];
+    v51 = v71;
+    v50 = v72;
+    v49 = v73;
+    v57[2][0] = v71;
+    v57[2][1] = v72;
+    v57[2][2] = v73;
+    v48 = v57[3];
+    v47 = v75;
+    v46 = v76;
+    v45 = v77;
+    v57[3][0] = v75;
+    v57[3][1] = v76;
+    v57[3][2] = v77;
+    Vec3Add(v57[3], (const float *)viewOffset, v57[3]);
+    Model = DObjGetModel(dobj, v100);
+    BasePose = XModelGetBasePose(Model);
+    v43 = &BasePose[lmapIndex];
+    v42 = v43->quat[0];
+    if ((LODWORD(v42) & 0x7F800000) == 0x7F800000
+        || (v41 = v43->quat[1], (LODWORD(v41) & 0x7F800000) == 0x7F800000)
+        || (v40 = v43->quat[2], (LODWORD(v40) & 0x7F800000) == 0x7F800000)
+        || (v39 = v43->quat[3], (LODWORD(v39) & 0x7F800000) == 0x7F800000))
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
@@ -2050,62 +2081,56 @@ void FX_GenerateMarkVertsForMark_MatrixFromAnim(
             "%s",
             "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
     }
-    v23 = v28->transWeight;
-    if ((LODWORD(v23) & 0x7F800000) == 0x7F800000)
+    v38 = v43->transWeight;
+    if ((LODWORD(v38) & 0x7F800000) == 0x7F800000)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
             582,
             0,
             "%s",
             "!IS_NAN(mat->transWeight)");
-    Vec3Scale(v28->quat, v28->transWeight, &v20);
-    v19 = v20 * v28->quat[0];
-    v18 = v20 * v28->quat[1];
-    v17 = v20 * v28->quat[2];
-    v16 = v20 * v28->quat[3];
-    v15 = v21 * v28->quat[1];
-    v14 = v21 * v28->quat[2];
-    invBasePoseMat.origin[3] = v21 * v28->quat[3];
-    invBasePoseMat.origin[2] = v22 * v28->quat[2];
-    invBasePoseMat.origin[1] = v22 * v28->quat[3];
-    v10 = 1.0 - (v15 + invBasePoseMat.origin[2]);
-    v11 = v18 - invBasePoseMat.origin[1];
-    v12 = v17 + invBasePoseMat.origin[3];
-    invBasePoseMat.axis[0][0] = 0.0;
-    invBasePoseMat.axis[0][1] = v18 + invBasePoseMat.origin[1];
-    invBasePoseMat.axis[0][2] = 1.0 - (v19 + invBasePoseMat.origin[2]);
-    invBasePoseMat.axis[0][3] = v14 - v16;
-    invBasePoseMat.axis[1][0] = 0.0;
-    invBasePoseMat.axis[1][1] = v17 - invBasePoseMat.origin[3];
-    invBasePoseMat.axis[1][2] = v14 + v16;
-    invBasePoseMat.axis[1][3] = 1.0 - (v19 + v15);
-    invBasePoseMat.axis[2][0] = 0.0;
-    invBasePoseMat.axis[2][1] = -(v28->trans[0] * v10
-        + v28->trans[1] * invBasePoseMat.axis[0][1]
-        + v28->trans[2] * invBasePoseMat.axis[1][1]);
-    invBasePoseMat.axis[2][2] = -(v28->trans[0] * v11
-        + v28->trans[1] * invBasePoseMat.axis[0][2]
-        + v28->trans[2] * invBasePoseMat.axis[1][2]);
-    invBasePoseMat.axis[2][3] = -(v28->trans[0] * v12
-        + v28->trans[1] * invBasePoseMat.axis[0][3]
-        + v28->trans[2] * invBasePoseMat.axis[1][3]);
-    invBasePoseMat.origin[0] = 1.0;
-    invBasePoseMatrix_44 = v10;
-    invBasePoseMatrix_40 = v11;
-    invBasePoseMatrix_36 = v12;
+    Vec3Scale(v43->quat, v43->transWeight, &v35);
+    v34 = v35 * v43->quat[0];
+    v33 = v35 * v43->quat[1];
+    v32 = v35 * v43->quat[2];
+    v31 = v35 * v43->quat[3];
+    v30 = v36 * v43->quat[1];
+    v29 = v36 * v43->quat[2];
+    v28 = v36 * v43->quat[3];
+    v27 = v37 * v43->quat[2];
+    v26 = v37 * v43->quat[3];
+    v10 = 1.0 - (v30 + v27);
+    v11 = v33 - v26;
+    v12 = v32 + v28;
+    v13 = 0.0;
+    v14 = v33 + v26;
+    v15 = 1.0 - (v34 + v27);
+    v16 = v29 - v31;
+    v17 = 0.0;
+    v18 = v32 - v28;
+    v19 = v29 + v31;
+    v20 = 1.0 - (v34 + v30);
+    v21 = 0.0;
+    v22 = -(v43->trans[0] * v10 + v43->trans[1] * v14 + v43->trans[2] * v18);
+    v23 = -(v43->trans[0] * v11 + v43->trans[1] * v15 + v43->trans[2] * v19);
+    v24 = -(v43->trans[0] * v12 + v43->trans[1] * v16 + v43->trans[2] * v20);
+    v25 = 1.0;
+    v9 = v10;
+    v8 = v11;
+    v7 = v12;
     v6[0][0] = v10;
     v6[0][1] = v11;
     v6[0][2] = v12;
-    v6[1][0] = invBasePoseMat.axis[0][1];
-    v6[1][1] = invBasePoseMat.axis[0][2];
-    v6[1][2] = invBasePoseMat.axis[0][3];
-    v6[2][0] = invBasePoseMat.axis[1][1];
-    v6[2][1] = invBasePoseMat.axis[1][2];
-    v6[2][2] = invBasePoseMat.axis[1][3];
-    v6[3][0] = invBasePoseMat.axis[2][1];
-    v6[3][1] = invBasePoseMat.axis[2][2];
-    v6[3][2] = invBasePoseMat.axis[2][3];
-    MatrixMultiply43(v6, v42, outTransform);
+    v6[1][0] = v14;
+    v6[1][1] = v15;
+    v6[1][2] = v16;
+    v6[2][0] = v18;
+    v6[2][1] = v19;
+    v6[2][2] = v20;
+    v6[3][0] = v22;
+    v6[3][1] = v23;
+    v6[3][2] = v24;
+    MatrixMultiply43(v6, v57, outTransform);
 }
 
 void __cdecl FX_GenerateMarkVertsForEntBrush(
@@ -2273,6 +2298,99 @@ void __cdecl FX_GenerateMarkVertsForStaticModels(
     //Profile_EndInternal(0);
 }
 
+void __cdecl FX_ExpandMarkVerts_NoTransform_GfxPackedVertex_(
+    FxMarksSystem *marksSystem,
+    const FxMark *mark,
+    unsigned __int16 baseVertex)
+{
+    double v3; // st7
+    double v4; // st7
+    int v5; // [esp+50h] [ebp-D4h]
+    PackedUnitVec v6; // [esp+58h] [ebp-CCh]
+    PackedUnitVec v7; // [esp+7Ch] [ebp-A8h]
+    GfxPackedVertex *castOutVert; // [esp+E0h] [ebp-44h]
+    unsigned int groupHandle; // [esp+E4h] [ebp-40h]
+    float delta[3]; // [esp+E8h] [ebp-3Ch] BYREF
+    float texCoordScale; // [esp+F4h] [ebp-30h]
+    float binormal[3]; // [esp+F8h] [ebp-2Ch] BYREF
+    const FxMarkPoint *markPoint; // [esp+104h] [ebp-20h]
+    GfxWorldVertex *verts; // [esp+108h] [ebp-1Ch]
+    float texCoord[2]; // [esp+10Ch] [ebp-18h] BYREF
+    int pointCount; // [esp+114h] [ebp-10h]
+    int loopCount; // [esp+118h] [ebp-Ch]
+    const FxPointGroup *group; // [esp+11Ch] [ebp-8h]
+    GfxWorldVertex *outVert; // [esp+120h] [ebp-4h]
+
+    if (!mark)
+        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1082, 0, "%s", "mark");
+    verts = R_GetMarkMeshVerts(baseVertex);
+    pointCount = mark->pointCount;
+    if (mark->radius < 0.1000000014901161)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1097,
+            0,
+            "%s\n\t(mark->radius) = %g",
+            "(mark->radius >= 0.1f)",
+            mark->radius);
+    texCoordScale = 0.5 / mark->radius;
+    groupHandle = mark->points;
+    outVert = verts;
+    do
+    {
+        if (groupHandle == 0xFFFF)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1103, 0, "%s", "groupHandle != FX_HANDLE_NONE");
+        group = (const FxPointGroup *)FX_PointGroupFromHandle(marksSystem, groupHandle);
+        groupHandle = group->next;
+        if (pointCount > 2)
+            v5 = 2;
+        else
+            v5 = pointCount;
+        loopCount = v5;
+        if (v5 <= 0)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1108, 0, "%s\n\t(loopCount) = %i", "(loopCount > 0)", loopCount);
+        pointCount -= loopCount;
+        markPoint = (const FxMarkPoint *)group;
+        do
+        {
+            castOutVert = (GfxPackedVertex *)outVert;
+            Vec3Sub(markPoint->xyz, mark->origin, delta);
+            Vec3Cross(mark->texCoordAxis, markPoint->normal, binormal);
+            castOutVert->xyz[0] = markPoint->xyz[0];
+            castOutVert->xyz[1] = markPoint->xyz[1];
+            castOutVert->xyz[2] = markPoint->xyz[2];
+            castOutVert->binormalSign = -1.0;
+            castOutVert->color.packed = *(_DWORD *)mark->nativeColor;
+            v3 = Vec3Dot(delta, mark->texCoordAxis);
+            texCoord[0] = v3 * texCoordScale + 0.5;
+            v4 = Vec3Dot(delta, binormal);
+            texCoord[1] = v4 * texCoordScale + 0.5;
+            setTexCoordAndLMap_GfxPackedVertex_(castOutVert, texCoord);
+            v7.array[0] = (int)(markPoint->normal[0] * 127.0 + 127.5);
+            v7.array[1] = (int)(markPoint->normal[1] * 127.0 + 127.5);
+            v7.array[2] = (int)(markPoint->normal[2] * 127.0 + 127.5);
+            v7.array[3] = 63;
+            castOutVert->normal = v7;
+            v6.array[0] = (int)(mark->texCoordAxis[0] * 127.0 + 127.5);
+            v6.array[1] = (int)(mark->texCoordAxis[1] * 127.0 + 127.5);
+            v6.array[2] = (int)(mark->texCoordAxis[2] * 127.0 + 127.5);
+            v6.array[3] = 63;
+            castOutVert->tangent = v6;
+            ++markPoint;
+            ++outVert;
+            --loopCount;
+        } while (loopCount);
+    } while (pointCount);
+    if (groupHandle != 0xFFFF)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1135,
+            0,
+            "%s\n\t(groupHandle) = %i",
+            "(groupHandle == 0xffff)",
+            groupHandle);
+}
+
 char __cdecl FX_GenerateMarkVertsForList_WorldXModel(
     FxMarksSystem *marksSystem,
     unsigned __int16 head,
@@ -2292,6 +2410,102 @@ char __cdecl FX_GenerateMarkVertsForList_WorldXModel(
         FX_GenerateMarkVertsForMark_FinishNonAnimated(marksSystem, mark, baseVertex, &drawSurf);
     }
     return 1;
+}
+
+void __cdecl FX_ExpandMarkVerts_NoTransform_GfxWorldVertex_(
+    FxMarksSystem *marksSystem,
+    const FxMark *mark,
+    unsigned __int16 baseVertex)
+{
+    double v3; // st7
+    double v4; // st7
+    int v5; // [esp+50h] [ebp-A4h]
+    PackedUnitVec v6; // [esp+58h] [ebp-9Ch]
+    PackedUnitVec v7; // [esp+7Ch] [ebp-78h]
+    float *lmapCoord; // [esp+9Ch] [ebp-58h]
+    GfxWorldVertex *castOutVert; // [esp+B0h] [ebp-44h]
+    unsigned int groupHandle; // [esp+B4h] [ebp-40h]
+    float delta[3]; // [esp+B8h] [ebp-3Ch] BYREF
+    float texCoordScale; // [esp+C4h] [ebp-30h]
+    float binormal[3]; // [esp+C8h] [ebp-2Ch] BYREF
+    const FxMarkPoint *markPoint; // [esp+D4h] [ebp-20h]
+    GfxWorldVertex *verts; // [esp+D8h] [ebp-1Ch]
+    __int64 texCoord; // [esp+DCh] [ebp-18h]
+    int pointCount; // [esp+E4h] [ebp-10h]
+    int loopCount; // [esp+E8h] [ebp-Ch]
+    const FxPointGroup *group; // [esp+ECh] [ebp-8h]
+    GfxWorldVertex *outVert; // [esp+F0h] [ebp-4h]
+
+    if (!mark)
+        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1082, 0, "%s", "mark");
+    verts = R_GetMarkMeshVerts(baseVertex);
+    pointCount = mark->pointCount;
+    if (mark->radius < 0.1000000014901161)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1097,
+            0,
+            "%s\n\t(mark->radius) = %g",
+            "(mark->radius >= 0.1f)",
+            mark->radius);
+    texCoordScale = 0.5 / mark->radius;
+    groupHandle = mark->points;
+    outVert = verts;
+    do
+    {
+        if (groupHandle == 0xFFFF)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1103, 0, "%s", "groupHandle != FX_HANDLE_NONE");
+        group = (const FxPointGroup *)FX_PointGroupFromHandle(marksSystem, groupHandle);
+        groupHandle = group->next;
+        if (pointCount > 2)
+            v5 = 2;
+        else
+            v5 = pointCount;
+        loopCount = v5;
+        if (v5 <= 0)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1108, 0, "%s\n\t(loopCount) = %i", "(loopCount > 0)", loopCount);
+        pointCount -= loopCount;
+        markPoint = (const FxMarkPoint *)group;
+        do
+        {
+            castOutVert = outVert;
+            Vec3Sub(markPoint->xyz, mark->origin, delta);
+            Vec3Cross(mark->texCoordAxis, markPoint->normal, binormal);
+            castOutVert->xyz[0] = markPoint->xyz[0];
+            castOutVert->xyz[1] = markPoint->xyz[1];
+            castOutVert->xyz[2] = markPoint->xyz[2];
+            castOutVert->binormalSign = -1.0;
+            castOutVert->color.packed = *(_DWORD *)mark->nativeColor;
+            v3 = Vec3Dot(delta, mark->texCoordAxis);
+            *(float *)&texCoord = v3 * texCoordScale + 0.5;
+            v4 = Vec3Dot(delta, binormal);
+            *((float *)&texCoord + 1) = v4 * texCoordScale + 0.5;
+            lmapCoord = markPoint->lmapCoord;
+            *(_QWORD *)castOutVert->texCoord = texCoord;
+            *(double *)castOutVert->lmapCoord = *(double *)lmapCoord;
+            v7.array[0] = (int)(markPoint->normal[0] * 127.0 + 127.5);
+            v7.array[1] = (int)(markPoint->normal[1] * 127.0 + 127.5);
+            v7.array[2] = (int)(markPoint->normal[2] * 127.0 + 127.5);
+            v7.array[3] = 63;
+            castOutVert->normal = v7;
+            v6.array[0] = (int)(mark->texCoordAxis[0] * 127.0 + 127.5);
+            v6.array[1] = (int)(mark->texCoordAxis[1] * 127.0 + 127.5);
+            v6.array[2] = (int)(mark->texCoordAxis[2] * 127.0 + 127.5);
+            v6.array[3] = 63;
+            castOutVert->tangent = v6;
+            ++markPoint;
+            ++outVert;
+            --loopCount;
+        } while (loopCount);
+    } while (pointCount);
+    if (groupHandle != 0xFFFF)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1135,
+            0,
+            "%s\n\t(groupHandle) = %i",
+            "(groupHandle == 0xffff)",
+            groupHandle);
 }
 
 void __cdecl FX_GenerateMarkVertsForMark_FinishNonAnimated(
