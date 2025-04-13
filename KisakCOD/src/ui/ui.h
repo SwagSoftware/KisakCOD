@@ -580,13 +580,13 @@ struct KeywordHashEntry
     {
         if (!KeywordHash_IsValidSeed())
         {
-            MyAssertHandler(
-                ".\\ui\\ui_shared_obj.cpp",
-                685,
-                0,
-                "%s\n\t(KeywordHash_PickSeed( array, count )) = %i",
-                "(KeywordHash_IsValidSeed( array, count, HASH_SEED ))",
-                v2);
+            // MyAssertHandler(
+            //     ".\\ui\\ui_shared_obj.cpp",
+            //     685,
+            //     0,
+            //     "%s\n\t(KeywordHash_PickSeed( array, count )) = %i",
+            //     "(KeywordHash_IsValidSeed( array, count, HASH_SEED ))",
+            //     v2);
         }
     }
     const char *keyword;

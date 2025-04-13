@@ -2,6 +2,8 @@
 #include "cg_public.h"
 
 #include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+
 #include <qcommon/threads.h>
 #include <xanim/dobj.h>
 #include <DynEntity/DynEntity_client.h>

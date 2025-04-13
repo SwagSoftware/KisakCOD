@@ -38,7 +38,8 @@ unsigned __int8 __cdecl R_LightGridLookup(
     const GfxLightGrid *lightGrid,
     const float *samplePos,
     float *cornerWeight,
-    __int64 cornerEntry);
+    const GfxLightGridEntry **cornerEntry,
+    unsigned int *defaultGridEntry);
 void __cdecl R_ShowLightGrid(
     const GfxLightGrid *lightGrid,
     const unsigned int *pos,
@@ -114,3 +115,5 @@ void __cdecl R_AverageLightGridColors(const GfxLightGridColors *colors, float su
 void __cdecl R_InitLightVisHistory(char *bspName);
 void __cdecl R_LightVisHistoryFilename(char *bspName, char *filename);
 void __cdecl R_SaveLightVisHistory();
+
+GfxModelLightingPatch *__cdecl R_BackEndDataAllocAndClearModelLightingPatch(GfxBackEndData *frontEndDataOut);

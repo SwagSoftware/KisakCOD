@@ -3,6 +3,7 @@
 #include "client_mp/client_mp.h"
 
 #include "r_gfx.h"
+#include "r_rendercmds.h"
 
 #include <Windows.h>
 #include <d3d9.h>

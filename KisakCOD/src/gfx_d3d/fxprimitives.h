@@ -1,5 +1,8 @@
 #pragma once
 
+#include <universal/q_shared.h>
+#include <universal/com_math.h>
+
 constexpr size_t MAX_EFFECTS = 1024;
 constexpr size_t MAX_ELEMS = 2048;
 constexpr size_t MAX_TRAILS = 128;
@@ -484,10 +487,7 @@ uint16 FX_PoolToHandle_Generic(FxPool<ITEM_TYPE>* poolArray, ITEM_TYPE* item)
 {
     static_assert((LIMIT * ITEM_TYPE::HANDLE_SCALE) <= 0xFFFF, "do not support huge pools at the moment");
 
-    if (!item || item < poolArray || item >= &poolArray[LIMIT])
-    {
-        vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", poolArray, item);
-    }
+    vassert(item && item >= &poolArray[0].item && item < &poolArray[LIMIT].item, "%p %p", poolArray, item);
     return ((char*)item - (char*)poolArray) / ITEM_TYPE::HANDLE_SCALE;
 }
 
@@ -497,87 +497,3 @@ FxPool<ITEM_TYPE>* FX_PoolFromHandle_Generic(FxPool<ITEM_TYPE>* poolArray, uint 
     vassert(handle < (LIMIT * sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) && handle % (sizeof(ITEM_TYPE) / ITEM_TYPE::HANDLE_SCALE) == 0, "%p %u", poolArray, handle);
     return (FxPool<ITEM_TYPE> *)((char*)poolArray + (handle * ITEM_TYPE::HANDLE_SCALE));
 }
-
-using uint4 = unsigned int[4];
-
-// NOTE: yes, these really seem to be different matrix types specific to the FX system for some reason..
-union float4 {
-    vec4 v;
-    uint4 u;
-    PackedUnitVec unitVec[4];
-};
-
-union float4x3 {
-    union {
-        float4 x;
-        float4 y;
-        float4 z;
-    };
-
-    mat4x3 mat;
-};
-
-union float4x4 {
-    struct {
-        float4 x;
-        float4 y;
-        float4 z;
-        float4 w;
-    };
-
-    mat4x4 mat;
-};
-
-constexpr float4 g_zero = {
-    .v = {
-        0.0, 0.0, 0.0, 0.0
-    }
-};
-
-constexpr float4 g_unit = {
-    .v = {
-        0.0, 0.0, 0.0, 1.0
-    }
-};
-
-constexpr float4 g_2xunit = {
-    .v = {
-        0.0, 0.0, 0.0, 1.0
-    }
-};
-
-constexpr float4 g_swizzleXYZA = {
-    .u = {
-        0x00010203,
-        0x04050607,
-        0x08090A0B,
-        0x10111213
-    }
-};
-
-constexpr float4 g_swizzleYZXW = {
-    .u = {
-        0x04050607,
-        0x08090A0B,
-        0x00010203,
-        0x0C0D0E0F
-    }
-};
-
-constexpr float4 g_keepXYW = {
-    .u = {
-        0xFFFFFFFF,
-        0xFFFFFFFF,
-        0,
-        0xFFFFFFFF
-    }
-};
-
-constexpr float4 g_keepXYZ = {
-    .u = {
-        0xFFFFFFFF,
-        0xFFFFFFFF,
-        0xFFFFFFFF,
-        0
-    }
-};

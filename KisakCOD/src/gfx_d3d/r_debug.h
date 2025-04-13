@@ -187,13 +187,13 @@ void __cdecl R_AddDebugString(
     const float *origin,
     const float *color,
     float scale,
-    char *string);
+    const char *string);
 void __cdecl R_AddScaledDebugString(
     DebugGlobals *debugGlobalsEntry,
     const GfxViewParms *viewParms,
     const float *origin,
     const float *color,
-    char *string);
+    const char *string);
 void __cdecl R_InitDebugEntry(DebugGlobals *debugGlobalsEntry);
 void __cdecl R_InitDebug();
 void __cdecl R_ShutdownDebugEntry(DebugGlobals *debugGlobalsEntry);

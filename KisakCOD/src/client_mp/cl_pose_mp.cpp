@@ -1,5 +1,6 @@
 #include "client_mp.h"
 
+#include <gfx_d3d/r_scene.h>
 
 char *__cdecl CL_AllocSkelMemory(unsigned int size)
 {

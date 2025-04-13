@@ -7,6 +7,7 @@
 #include <ui/ui.h>
 #include <client_mp/client_mp.h>
 #include <client/client.h>
+#include <cgame_mp/cg_local_mp.h>
 #include <EffectsCore/fx_system.h>
 
 const float s_alignScale[4] = { 0.0, 0.5, 1.0, 0.0 }; // idb
@@ -1803,25 +1804,21 @@ void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum)
     }
 }
 
-void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
+void AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
 {
-    hudelem_color_t v2; // ebp
-    _DWORD v3[3]; // [esp-Ch] [ebp-9Ch] BYREF
-    FxSprite sprite; // [esp+0h] [ebp-90h]
-    float x; // [esp+20h] [ebp-70h]
-    float v6; // [esp+24h] [ebp-6Ch]
-    int v7; // [esp+28h] [ebp-68h]
-    float v8; // [esp+2Ch] [ebp-64h]
-    Material* radius; // [esp+30h] [ebp-60h]
-    int renderFxFlags; // [esp+34h] [ebp-5Ch] BYREF
-    hudelem_color_t v11; // [esp+78h] [ebp-18h] BYREF
-    int time; // [esp+7Ch] [ebp-14h]
-    hudelem_color_t color; // [esp+84h] [ebp-Ch]
-    void* v14; // [esp+88h] [ebp-8h]
-    void* retaddr; // [esp+90h] [ebp+0h]
+    FxSprite sprite; // [esp-94h] [ebp-A0h] BYREF
+    float z; // [esp-70h] [ebp-7Ch]
+    float y; // [esp-6Ch] [ebp-78h]
+    float x; // [esp-68h] [ebp-74h]
+    float v6; // [esp-64h] [ebp-70h]
+    int v7; // [esp-60h] [ebp-6Ch]
+    float v8; // [esp-5Ch] [ebp-68h]
+    Material *v9; // [esp-58h] [ebp-64h]
+    char v10[68]; // [esp-54h] [ebp-60h] BYREF
+    hudelem_color_t v11; // [esp-10h] [ebp-1Ch] BYREF
+    int time; // [esp-Ch] [ebp-18h]
+    void *v13; // [esp+0h] [ebp-Ch]
 
-    color = v2;
-    v14 = retaddr;
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
@@ -1834,11 +1831,11 @@ void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
     BG_LerpHudColors(elem, cgArray[0].time, &v11);
     if (v11.a)
     {
-        if (!CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, (char*)&renderFxFlags, 0x40u))
+        if (!CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, v10, 0x40u))
         {
-            if (CG_ServerMaterialName(localClientNum, elem->materialIndex, (char*)&renderFxFlags, 0x40u))
+            if (CG_ServerMaterialName(localClientNum, elem->materialIndex, v10, 0x40u))
             {
-                radius = Material_RegisterHandle((char*)&renderFxFlags, 7);
+                v9 = Material_RegisterHandle(v10, 7);
                 v8 = HudElemWaypointHeight(localClientNum, elem);
                 if (v8 != 0.0)
                 {
@@ -1853,17 +1850,17 @@ void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
                         v6 = v8 * 0.00430000014603138;
                     }
                     x = elem->x;
-                    *(float*)&sprite.flags = elem->y;
-                    sprite.minScreenRadius = elem->z;
-                    *(float*)&v3[1] = x;
-                    v3[2] = sprite.flags;
-                    *(float*)&sprite.material = sprite.minScreenRadius;
-                    LODWORD(sprite.pos[0]) = (hudelem_color_t)v11.rgba;
-                    *(_DWORD*)sprite.rgbaColor = v7;
-                    sprite.pos[1] = v6;
-                    sprite.pos[2] = 0.0;
-                    v3[0] = radius;
-                    FX_SpriteAdd((FxSprite*)v3);
+                    y = elem->y;
+                    z = elem->z;
+                    sprite.pos[0] = x;
+                    sprite.pos[1] = y;
+                    sprite.pos[2] = z;
+                    *(hudelem_color_t *)sprite.rgbaColor = v11;
+                    sprite.flags = v7;
+                    sprite.radius = v6;
+                    sprite.minScreenRadius = 0.0;
+                    sprite.material = v9;
+                    FX_SpriteAdd(&sprite);
                 }
             }
         }

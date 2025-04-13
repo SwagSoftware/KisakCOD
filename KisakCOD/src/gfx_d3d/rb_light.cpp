@@ -1,6 +1,20 @@
 #include "rb_light.h"
-#include <qcommon/threads.h>
 
+#include "r_dvars.h"
+#include "r_utils.h"
+
+#include <qcommon/com_bsp.h>
+#include <qcommon/threads.h>
+#include <universal/com_files.h>
+
+struct // sizeof=0x8
+{                                       // ...
+    unsigned __int16 (*history)[3];     // ...
+    int count;                          // ...
+} s_vc_log;
+
+static int s_lightGridRowDelta;
+static int s_lightGridSliceDelta;
 
 void __cdecl R_ShowLightVisCachePoints(const float *viewOrigin, const DpvsPlane *clipPlanes, int clipPlaneCount)
 {
@@ -512,7 +526,6 @@ unsigned __int8 __cdecl R_GetPrimaryLightFromGrid(
     const float *samplePos,
     unsigned __int8 sunPrimaryLightIndex)
 {
-    __int64 v4; // [esp-8h] [ebp-58h]
     float cornerWeight[8]; // [esp+0h] [ebp-50h] BYREF
     const GfxLightGridEntry *entry; // [esp+20h] [ebp-30h]
     unsigned int cornerIndex; // [esp+24h] [ebp-2Ch]
@@ -522,9 +535,7 @@ unsigned __int8 __cdecl R_GetPrimaryLightFromGrid(
 
     if (!lightGrid)
         MyAssertHandler(".\\rb_light.cpp", 1190, 0, "%s", "lightGrid");
-    HIDWORD(v4) = &defaultGridEntry;
-    LODWORD(v4) = cornerEntry;
-    primaryLightIndex = R_LightGridLookup(lightGrid, samplePos, cornerWeight, v4);
+    primaryLightIndex = R_LightGridLookup(lightGrid, samplePos, cornerWeight, cornerEntry, &defaultGridEntry);
     if (primaryLightIndex == 255)
         primaryLightIndex = sunPrimaryLightIndex;
     for (cornerIndex = 0; cornerIndex < 8; ++cornerIndex)
@@ -544,14 +555,15 @@ unsigned __int8 __cdecl R_LightGridLookup(
     const GfxLightGrid *lightGrid,
     const float *samplePos,
     float *cornerWeight,
-    __int64 cornerEntry)
+    const GfxLightGridEntry **cornerEntry,
+    unsigned int *defaultGridEntry)
 {
-    bool v5; // [esp+8h] [ebp-7Ch]
-    float v6; // [esp+24h] [ebp-60h]
-    float v7; // [esp+28h] [ebp-5Ch]
-    float v8; // [esp+2Ch] [ebp-58h]
-    bool v9; // [esp+32h] [ebp-52h]
-    unsigned __int8 v10; // [esp+33h] [ebp-51h]
+    bool v6; // [esp+8h] [ebp-7Ch]
+    float v7; // [esp+24h] [ebp-60h]
+    float v8; // [esp+28h] [ebp-5Ch]
+    float v9; // [esp+2Ch] [ebp-58h]
+    bool v10; // [esp+32h] [ebp-52h]
+    unsigned __int8 v11; // [esp+33h] [ebp-51h]
     unsigned int pos[3]; // [esp+40h] [ebp-44h] BYREF
     bool honorSuppression; // [esp+4Fh] [ebp-35h]
     const GfxLightGridEntry *entry; // [esp+50h] [ebp-34h]
@@ -566,12 +578,12 @@ unsigned __int8 __cdecl R_LightGridLookup(
 
     if (!lightGrid)
         MyAssertHandler(".\\rb_light.cpp", 1083, 0, "%s", "lightGrid");
-    v8 = floor(*samplePos);
-    pos[0] = ((int)v8 + 0x20000) >> 5;
-    v7 = floor(samplePos[1]);
-    pos[1] = ((int)v7 + 0x20000) >> 5;
-    v6 = floor(samplePos[2]);
-    pos[2] = ((int)v6 + 0x20000) >> 6;
+    v9 = floor(*samplePos);
+    pos[0] = ((int)v9 + 0x20000) >> 5;
+    v8 = floor(samplePos[1]);
+    pos[1] = ((int)v8 + 0x20000) >> 5;
+    v7 = floor(samplePos[2]);
+    pos[2] = ((int)v7 + 0x20000) >> 6;
     if ((lightGrid->rowAxis || lightGrid->colAxis != 1) && (lightGrid->rowAxis != 1 || lightGrid->colAxis))
         MyAssertHandler(
             ".\\rb_light.cpp",
@@ -594,18 +606,10 @@ unsigned __int8 __cdecl R_LightGridLookup(
     quadWeight = axisLerp[1] * axisLerp[2];
     cornerWeight[3] = (1.0 - axisLerp[0]) * quadWeight;
     cornerWeight[7] = quadWeight * axisLerp[0];
-    *(unsigned int *)HIDWORD(cornerEntry) = 1;
-    R_GetLightGridSampleEntryQuad(
-        lightGrid,
-        pos,
-        (const GfxLightGridEntry **)cornerEntry,
-        (unsigned int *)HIDWORD(cornerEntry));
+    *defaultGridEntry = 1;
+    R_GetLightGridSampleEntryQuad(lightGrid, pos, cornerEntry, defaultGridEntry);
     ++pos[lightGrid->rowAxis];
-    R_GetLightGridSampleEntryQuad(
-        lightGrid,
-        pos,
-        (const GfxLightGridEntry **)(cornerEntry + 16),
-        (unsigned int *)HIDWORD(cornerEntry));
+    R_GetLightGridSampleEntryQuad(lightGrid, pos, cornerEntry + 4, defaultGridEntry);
     --pos[lightGrid->rowAxis];
     if (r_vc_makelog->current.integer)
         R_UpdateVisHistory(lightGrid, pos);
@@ -616,23 +620,23 @@ unsigned __int8 __cdecl R_LightGridLookup(
     cornerTraceBit = 1;
     while (cornerIndex < 8)
     {
-        entry = *(const GfxLightGridEntry **)(cornerEntry + 4 * cornerIndex);
+        entry = cornerEntry[cornerIndex];
         if (!entry)
             goto LABEL_12;
         if (cornerWeight[cornerIndex] < 0.001000000047497451)
         {
-            *(unsigned int *)(cornerEntry + 4 * cornerIndex) = 0;
+            cornerEntry[cornerIndex] = 0;
             goto LABEL_12;
         }
-        v5 = ((unsigned __int8)cornerTraceBit & entry->needsTrace) != 0
+        v6 = ((unsigned __int8)cornerTraceBit & entry->needsTrace) != 0
             && !R_IsValidLightGridSample(lightGrid, entry, cornerIndex, pos, samplePos);
-        suppressEntry = v5;
-        suppressEntryLog[cornerIndex] = v5;
+        suppressEntry = v6;
+        suppressEntryLog[cornerIndex] = v6;
         if (suppressEntry)
         {
             if (honorSuppression)
             {
-                *(unsigned int *)(cornerEntry + 4 * cornerIndex) = 0;
+                cornerEntry[cornerIndex] = 0;
                 goto LABEL_12;
             }
         }
@@ -644,19 +648,19 @@ unsigned __int8 __cdecl R_LightGridLookup(
             memset((unsigned __int8 *)cornerEntry, 0, 4 * cornerIndex);
             goto LABEL_12;
         }
-        v10 = entry->primaryLightIndex;
+        v11 = entry->primaryLightIndex;
         if (primaryLightIndex)
         {
-            if (v10)
-                v9 = primaryLightIndex == 255 || v10 != 255 && cornerWeight[cornerIndex] > (double)bestPrimaryLightWeight;
+            if (v11)
+                v10 = primaryLightIndex == 255 || v11 != 255 && cornerWeight[cornerIndex] > (double)bestPrimaryLightWeight;
             else
-                v9 = 0;
+                v10 = 0;
         }
         else
         {
-            v9 = 1;
+            v10 = 1;
         }
-        if (v9)
+        if (v10)
         {
             bestPrimaryLightWeight = cornerWeight[cornerIndex];
             primaryLightIndex = entry->primaryLightIndex;
@@ -666,13 +670,7 @@ unsigned __int8 __cdecl R_LightGridLookup(
         cornerTraceBit *= 2;
     }
     if (r_showLightGrid->current.enabled)
-        R_ShowLightGrid(
-            lightGrid,
-            pos,
-            samplePos,
-            (const GfxLightGridEntry **)cornerEntry,
-            suppressEntryLog,
-            honorSuppression);
+        R_ShowLightGrid(lightGrid, pos, samplePos, cornerEntry, suppressEntryLog, honorSuppression);
     return primaryLightIndex;
 }
 
@@ -1063,8 +1061,7 @@ unsigned int __cdecl R_GetLightingAtPoint(
     unsigned __int16 dest,
     GfxModelLightExtrapolation extrapolateBehavior)
 {
-    __int64 sampleWeightAdd; // [esp+4h] [ebp-FCh]
-    float v7; // [esp+Ch] [ebp-F4h]
+    float v6; // [esp+Ch] [ebp-F4h]
     float cornerWeight[8]; // [esp+68h] [ebp-98h] BYREF
     const GfxLightGridEntry *entry; // [esp+88h] [ebp-78h]
     unsigned int cornerIndex; // [esp+8Ch] [ebp-74h]
@@ -1082,9 +1079,7 @@ unsigned int __cdecl R_GetLightingAtPoint(
     if (!lightGrid)
         MyAssertHandler(".\\rb_light.cpp", 1428, 0, "%s", "lightGrid");
     //Profile_Begin(85);
-    HIDWORD(sampleWeightAdd) = &defaultGridEntry;
-    LODWORD(sampleWeightAdd) = cornerEntry;
-    primaryLightIndex = R_LightGridLookup(lightGrid, samplePos, cornerWeight, sampleWeightAdd);
+    primaryLightIndex = R_LightGridLookup(lightGrid, samplePos, cornerWeight, cornerEntry, &defaultGridEntry);
     if (primaryLightIndex == 255)
     {
         primaryLightIndex = LOBYTE(lightGrid->sunPrimaryLightIndex);
@@ -1157,14 +1152,14 @@ unsigned int __cdecl R_GetLightingAtPoint(
         }
         else
         {
-            v7 = 1.0 / maxWeight;
+            v6 = 1.0 / maxWeight;
             R_BlendAndSetLightGridColors(
                 lightGrid,
                 (unsigned __int8 *)sampleColors,
                 sampleWeight,
                 sampleCount,
                 primaryVisibleWeight,
-                v7,
+                v6,
                 dest);
         }
     }
@@ -1174,6 +1169,19 @@ unsigned int __cdecl R_GetLightingAtPoint(
     }
     //Profile_EndInternal(0);
     return primaryLightIndex;
+}
+
+GfxModelLightingPatch *__cdecl R_BackEndDataAllocAndClearModelLightingPatch(GfxBackEndData *frontEndDataOut)
+{
+    GfxModelLightingPatch *v1; // edx
+    unsigned int patchIndex; // [esp+4h] [ebp-4h]
+
+    patchIndex = InterlockedExchangeAdd(&frontEndDataOut->modelLightingPatchCount, 1);
+    if (patchIndex >= 0x1000)
+        Com_Error(ERR_FATAL, "modelLightingPatchList ran out of elements.");
+    v1 = &frontEndDataOut->modelLightingPatchList[patchIndex];
+    memset(v1, 0, sizeof(v1));
+    return v1;
 }
 
 void __cdecl R_SetLightGridColorsFromIndex(
@@ -1326,12 +1334,11 @@ char __cdecl R_CanLightInfluenceLightGridCorner(
 
 void __cdecl R_GetAverageLightingAtPoint(const float *samplePos, unsigned __int8 *outColor)
 {
-    __int64 sampleWeightAdd; // [esp+4h] [ebp-D4h]
-    float v3; // [esp+18h] [ebp-C0h]
-    float v4; // [esp+1Ch] [ebp-BCh]
-    float v5; // [esp+20h] [ebp-B8h]
-    float v6; // [esp+2Ch] [ebp-ACh]
-    float v7; // [esp+30h] [ebp-A8h]
+    float v2; // [esp+18h] [ebp-C0h]
+    float v3; // [esp+1Ch] [ebp-BCh]
+    float v4; // [esp+20h] [ebp-B8h]
+    float v5; // [esp+2Ch] [ebp-ACh]
+    float v6; // [esp+30h] [ebp-A8h]
     float cornerWeight[8]; // [esp+38h] [ebp-A0h] BYREF
     const GfxLightGridEntry *entry; // [esp+58h] [ebp-80h]
     unsigned int cornerIndex; // [esp+5Ch] [ebp-7Ch]
@@ -1351,9 +1358,7 @@ void __cdecl R_GetAverageLightingAtPoint(const float *samplePos, unsigned __int8
     sampleCount = 0;
     maxWeight = 0.0;
     primaryWeight = 0.0;
-    HIDWORD(sampleWeightAdd) = &defaultGridEntry;
-    LODWORD(sampleWeightAdd) = cornerEntry;
-    primaryLightIndex = R_LightGridLookup(&rgp.world->lightGrid, samplePos, cornerWeight, sampleWeightAdd);
+    primaryLightIndex = R_LightGridLookup(&rgp.world->lightGrid, samplePos, cornerWeight, cornerEntry, &defaultGridEntry);
     if (primaryLightIndex != 1)
     {
         colorWithSunAlpha[0] = 0;
@@ -1417,18 +1422,18 @@ LABEL_21:
     primaryLightColor = rgp.world->sunLight->color;
     for (colorIndex = 0; colorIndex != 3; ++colorIndex)
     {
-        v6 = primaryLightColor[colorIndex] * ((double)colorWithSunAlpha[3] * 0.5) + (double)colorWithSunAlpha[colorIndex];
-        v5 = v6 - 255.0;
-        if (v5 < 0.0)
-            v7 = primaryLightColor[colorIndex] * ((double)colorWithSunAlpha[3] * 0.5) + (double)colorWithSunAlpha[colorIndex];
-        else
-            v7 = 255.0;
-        v4 = 0.0 - v6;
+        v5 = primaryLightColor[colorIndex] * ((double)colorWithSunAlpha[3] * 0.5) + (double)colorWithSunAlpha[colorIndex];
+        v4 = v5 - 255.0;
         if (v4 < 0.0)
-            v3 = v7;
+            v6 = primaryLightColor[colorIndex] * ((double)colorWithSunAlpha[3] * 0.5) + (double)colorWithSunAlpha[colorIndex];
         else
-            v3 = 0.0;
-        outColor[colorIndex] = (int)v3;
+            v6 = 255.0;
+        v3 = 0.0 - v5;
+        if (v3 < 0.0)
+            v2 = v6;
+        else
+            v2 = 0.0;
+        outColor[colorIndex] = (int)v2;
     }
     outColor[3] = -1;
 }
@@ -1506,7 +1511,7 @@ void __cdecl R_LightVisHistoryFilename(char *bspName, char *filename)
         MyAssertHandler(".\\rb_light.cpp", 1583, 0, "%s", "bspName");
     Com_StripExtension(bspName, filename);
     if (strlen(filename) + 5 >= 0x40)
-        Com_Error(ERR_DROP, &byte_8FFD14, filename);
+        Com_Error(ERR_DROP, "light grid log filename %s.grid is too long", filename);
     strcat(filename, ".grid");
 }
 

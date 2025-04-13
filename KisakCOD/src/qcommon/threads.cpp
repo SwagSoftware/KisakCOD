@@ -14,7 +14,8 @@ static DWORD threadId[7];
 static HANDLE threadHandle[7];
 
 static void* g_threadValues[7][4];
-static void *g_threadLocals[4];
+
+static thread_local void *g_threadLocals[4];
 
 typedef void (*ThreadFuncFn)(unsigned int);
 static ThreadFuncFn threadFunc[7];

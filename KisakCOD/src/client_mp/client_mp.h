@@ -4,7 +4,7 @@
 #include <qcommon/ent.h>
 #include <qcommon/net_chan_mp.h>
 
-#include <cgame_mp/cg_local_mp.h>
+#include <bgame/bg_local.h>
 
 #include <gfx_d3d/r_debug.h>
 
@@ -64,6 +64,141 @@ struct outPacket_t // sizeof=0xC
     int p_cmdNumber;
     int p_serverTime;
     int p_realtime;
+};
+enum sessionState_t : __int32
+{                                       // ...
+    SESS_STATE_PLAYING = 0x0,
+    SESS_STATE_DEAD = 0x1,
+    SESS_STATE_SPECTATOR = 0x2,
+    SESS_STATE_INTERMISSION = 0x3,
+};
+
+enum clientConnected_t : __int32
+{                                       // ...
+    CON_DISCONNECTED = 0x0,
+    CON_CONNECTING = 0x1,
+    CON_CONNECTED = 0x2,
+};
+struct playerTeamState_t // sizeof=0x4
+{                                       // ...
+    int location;
+};
+
+struct clientState_s // sizeof=0x64
+{                                       // XREF: ?MSG_WriteDeltaClient@@YAXPAUSnapshotInfo_s@@PAUmsg_t@@HPBUclientState_s@@2H@Z/r
+                                        // ?MSG_ReadDeltaClient@@YAHPAUmsg_t@@HPBUclientState_s@@PAU2@H@Z/r ...
+    int clientIndex;
+    team_t team;                        // XREF: SpectatorClientEndFrame(gentity_s *):loc_4F9933/r
+    // SpectatorClientEndFrame(gentity_s *):loc_4F9A78/r ...
+    int modelindex;
+    int attachModelIndex[6];            // XREF: FX_RestorePhysicsData+156/o
+    // FX_SavePhysicsData+156/o ...
+    int attachTagIndex[6];              // XREF: AimTarget_ProcessEntity(int,centity_s const *)+133/o
+    // AimTarget_IsTargetValid+228/o ...
+    char name[16];                      // XREF: FX_UpdateEffectBolt+E7/o
+    // _memmove:UnwindDown2/o ...
+    float maxSprintTimeMultiplier;      // XREF: RB_LogPrintState_0(int,int)+123/o
+    // R_ChangeState_0(GfxCmdBufState *,uint)+2E6/o
+    int rank;
+    int prestige;
+    int perks;
+    int attachedVehEntNum;
+    int attachedVehSlotIndex;           // XREF: .rdata:_hexc_10_32_table/o
+};
+
+struct clientSession_t // sizeof=0x110
+{                                       // ...
+    sessionState_t sessionState;
+    int forceSpectatorClient;
+    int killCamEntity;
+    int status_icon;
+    int archiveTime;
+    int score;
+    int deaths;
+    int kills;
+    int assists;
+    unsigned __int16 scriptPersId;
+    // padding byte
+    // padding byte
+    clientConnected_t connected;
+    usercmd_s cmd;
+    usercmd_s oldcmd;
+    int localClient;
+    int predictItemPickup;
+    char newnetname[16];
+    int maxHealth;
+    int enterTime;
+    playerTeamState_t teamState;
+    int voteCount;
+    int teamVoteCount;
+    float moveSpeedScaleMultiplier;
+    int viewmodelIndex;
+    int noSpectate;
+    int teamInfo;
+    clientState_s cs;
+    int psOffsetTime;
+};
+
+// KISAKTODO this + above should probably be in client_mp?
+struct gclient_s // sizeof=0x3184
+{                                       // ...
+    playerState_s ps;
+    clientSession_t sess;
+    int spectatorClient;
+    int noclip;
+    int ufo;
+    int bFrozen;
+    int lastCmdTime;
+    int buttons;
+    int oldbuttons;
+    int latched_buttons;
+    int buttonsSinceLastFrame;
+    float oldOrigin[3];
+    float fGunPitch;
+    float fGunYaw;
+    int damage_blood;
+    float damage_from[3];
+    int damage_fromWorld;
+    int accurateCount;
+    int accuracy_shots;
+    int accuracy_hits;
+    int inactivityTime;
+    int inactivityWarning;
+    int lastVoiceTime;
+    int switchTeamTime;
+    float currentAimSpreadScale;
+    gentity_s *persistantPowerup;
+    int portalID;
+    int dropWeaponTime;
+    int sniperRifleFiredTime;
+    float sniperRifleMuzzleYaw;
+    int PCSpecialPickedUpCount;
+    EntHandle useHoldEntity;
+    int useHoldTime;
+    int useButtonDone;
+    int iLastCompassPlayerInfoEnt;
+    int compassPingTime;
+    int damageTime;
+    float v_dmg_roll;
+    float v_dmg_pitch;
+    float swayViewAngles[3];
+    float swayOffset[3];
+    float swayAngles[3];
+    float vLastMoveAng[3];
+    float fLastIdleFactor;
+    float vGunOffset[3];
+    float vGunSpeed[3];
+    int weapIdleTime;
+    int lastServerTime;
+    int lastSpawnTime;
+    unsigned int lastWeapon;
+    bool previouslyFiring;
+    bool previouslyUsingNightVision;
+    bool previouslySprinting;
+    // padding byte
+    int hasRadar;
+    int lastStand;
+    int lastStandTime;
 };
 
 struct clientActive_t // sizeof=0x1B1BDC

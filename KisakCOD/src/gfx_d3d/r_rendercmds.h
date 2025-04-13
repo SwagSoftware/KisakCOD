@@ -469,7 +469,7 @@ const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
     unsigned int smcPatchCount;
     unsigned int smcPatchVertsUsed;
     GfxModelLightingPatch modelLightingPatchList[4096];
-    volatile int modelLightingPatchCount;
+    volatile long modelLightingPatchCount;
     GfxBackEndPrimitiveData prim;
     unsigned int shadowableLightHasShadowMap[8];
     unsigned int frameCount;

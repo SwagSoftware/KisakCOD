@@ -10,10 +10,17 @@
 #include <universal/com_convexhull.h>
 #include "r_workercmds.h"
 #include "r_utils.h"
+#include "r_light.h"
 #include <devgui/devgui.h>
 
 
 DpvsGlobals dpvsGlob;
+
+static thread_local DpvsView *g_dpvsView;
+static thread_local int g_viewIndex;
+static thread_local EntVisData g_dynEntVisData;
+static thread_local byte *g_smodelVisData;
+static thread_local byte *g_surfaceVisData;
 
 void __cdecl TRACK_r_dpvs()
 {
@@ -1658,11 +1665,11 @@ unsigned int __cdecl R_SetVisData(unsigned int viewIndex)
     unsigned int oldViewIndex; // [esp+4h] [ebp-8h]
     unsigned int drawType; // [esp+8h] [ebp-4h]
 
-    oldViewIndex = *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
-    *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12) = viewIndex;
+    oldViewIndex = g_viewIndex; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
+    g_viewIndex = oldViewIndex; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12) = viewIndex;
     for (drawType = 0; drawType < 2; ++drawType)
-        *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4 * drawType + 16) = rgp.world->dpvsDyn.dynEntVisData[drawType][viewIndex];
-    *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) = &dpvsGlob.views[scene.dpvs.localClientNum][viewIndex];
+        g_dynEntVisData[drawType] = rgp.world->dpvsDyn.dynEntVisData[drawType][viewIndex]; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4 * drawType + 16) =
+    g_dpvsView = &dpvsGlob.views[scene.dpvs.localClientNum][viewIndex]; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8)
     return oldViewIndex;
 }
 
@@ -1678,7 +1685,7 @@ void __cdecl R_AddCellDynBrushSurfacesInFrustumCmd(const DpvsPlane **data)
 
 void __cdecl R_CullDynBrushInCell(unsigned int cellIndex, const DpvsPlane *planes, int planeCount)
 {
-    int v4; // eax
+    unsigned long v4; // eax
     int v5; // [esp+4h] [ebp-34h]
     const DpvsPlane *v6; // [esp+8h] [ebp-30h]
     int v7; // [esp+Ch] [ebp-2Ch]
@@ -1700,7 +1707,7 @@ void __cdecl R_CullDynBrushInCell(unsigned int cellIndex, const DpvsPlane *plane
             "cellIndex doesn't index rgp.world->dpvsPlanes.cellCount\n\t%i not in [0, %i)",
             cellIndex,
             rgp.world->dpvsPlanes.cellCount);
-    dynEntVisData = *(unsigned __int8 **)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 20);
+    dynEntVisData = g_dynEntVisData[1];
     dynEntClientWordCount = rgp.world->dpvsDyn.dynEntClientWordCount[1];
     dynEntCellBits = &rgp.world->dpvsDyn.dynEntCellBits[1][dynEntClientWordCount * cellIndex];
     for (wordIndex = 0; wordIndex < dynEntClientWordCount; ++wordIndex)
@@ -1708,8 +1715,8 @@ void __cdecl R_CullDynBrushInCell(unsigned int cellIndex, const DpvsPlane *plane
         bits = dynEntCellBits[wordIndex];
         while (1)
         {
-            if (!_BitScanReverse((unsigned int *)&v4, bits))
-                v4 = `CountLeadingZeros'::`2': : notFound;
+            if (!_BitScanReverse(&v4, bits))
+                v4 = 0x3F;
             indexLow = v4 ^ 0x1F;
             if ((v4 ^ 0x1Fu) >= 0x20)
                 break;
@@ -2383,14 +2390,13 @@ void __cdecl R_SetAncestorListStatus(GfxPortal *portal, bool isAncestor)
         portal = portal->writable.queuedParent;
     }
 }
-
 void __cdecl R_AddWorldSurfacesFrustumOnly()
 {
     int v0; // [esp+8h] [ebp-B4h]
-    int v1; // [esp+Ch] [ebp-B0h]
+    DpvsPlane *v1; // [esp+Ch] [ebp-B0h]
     int v2; // [esp+10h] [ebp-ACh]
     int v3; // [esp+14h] [ebp-A8h]
-    int v4; // [esp+18h] [ebp-A4h]
+    DpvsPlane *v4; // [esp+18h] [ebp-A4h]
     int v5; // [esp+1Ch] [ebp-A0h]
     GfxCell *cell; // [esp+20h] [ebp-9Ch]
     GfxCell *cella; // [esp+20h] [ebp-9Ch]
@@ -2425,29 +2431,27 @@ void __cdecl R_AddWorldSurfacesFrustumOnly()
             {
                 cell = &rgp.world->cells[cellIndex];
                 v5 = 0;
-                v4 = *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 4;
-                while (v5 < *(unsigned int *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8)
-                    + 284))
+                v4 = g_dpvsView->frustumPlanes;
+                while (v5 < g_dpvsView->frustumPlaneCount)
                 {
-                    if (*(float *)((char *)cell->mins + *(unsigned __int8 *)(v4 + 16)) * *(float *)v4
-                        + *(float *)(v4 + 12)
-                        + *(float *)((char *)cell->mins + *(unsigned __int8 *)(v4 + 17)) * *(float *)(v4 + 4)
-                        + *(float *)((char *)cell->mins + *(unsigned __int8 *)(v4 + 18)) * *(float *)(v4 + 8) <= 0.0)
+                    if (*(float *)((char *)cell->mins + v4->side[0]) * v4->coeffs[0]
+                        + v4->coeffs[3]
+                        + *(float *)((char *)cell->mins + v4->side[1]) * v4->coeffs[1]
+                        + *(float *)((char *)cell->mins + v4->side[2]) * v4->coeffs[2] <= 0.0)
                     {
                         v3 = 1;
                         goto LABEL_22;
                     }
                     ++v5;
-                    v4 += 20;
+                    ++v4;
                 }
                 v3 = 0;
             LABEL_22:
                 if (!v3)
                     R_AddCellSurfacesAndCullGroupsInFrustumDelayed(
                         cell,
-                        (const DpvsPlane *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 4),
-                        *(unsigned int *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 284),
-                        *(unsigned int *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 284));
+                        g_dpvsView->frustumPlanes,
+                        g_dpvsView->frustumPlaneCount, g_dpvsView->frustumPlaneCount);
             }
         }
     }
@@ -2457,28 +2461,28 @@ void __cdecl R_AddWorldSurfacesFrustumOnly()
         {
             cella = &rgp.world->cells[cellIndexa];
             v2 = 0;
-            v1 = *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 4;
-            while (v2 < *(unsigned int *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 284))
+            v1 = g_dpvsView->frustumPlanes;
+            while (v2 < g_dpvsView->frustumPlaneCount)
             {
-                if (*(float *)((char *)cella->mins + *(unsigned __int8 *)(v1 + 16)) * *(float *)v1
-                    + *(float *)(v1 + 12)
-                    + *(float *)((char *)cella->mins + *(unsigned __int8 *)(v1 + 17)) * *(float *)(v1 + 4)
-                    + *(float *)((char *)cella->mins + *(unsigned __int8 *)(v1 + 18)) * *(float *)(v1 + 8) <= 0.0)
+                if (*(float *)((char *)cella->mins + v1->side[0]) * v1->coeffs[0]
+                    + v1->coeffs[3]
+                    + *(float *)((char *)cella->mins + v1->side[1]) * v1->coeffs[1]
+                    + *(float *)((char *)cella->mins + v1->side[2]) * v1->coeffs[2] <= 0.0)
                 {
                     v0 = 1;
                     goto LABEL_34;
                 }
                 ++v2;
-                v1 += 20;
+                ++v1;
             }
             v0 = 0;
         LABEL_34:
             if (!v0)
                 R_AddCellSurfacesAndCullGroupsInFrustumDelayed(
                     cella,
-                    (const DpvsPlane *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 4),
-                    *(unsigned int *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 284),
-                    *(unsigned int *)(*(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8) + 284));
+                    g_dpvsView->frustumPlanes,
+                    g_dpvsView->frustumPlaneCount,
+                    g_dpvsView->frustumPlaneCount);
         }
     }
 }
@@ -2496,13 +2500,13 @@ void __cdecl R_AddCellSurfacesAndCullGroupsInFrustumDelayed(
     dpvsStaticCell.planes = planes;
     dpvsStaticCell.planeCount = planeCount;
     dpvsStaticCell.frustumPlaneCount = frustumPlaneCount;
-    dpvsStaticCell.viewIndex = *(_WORD *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
+    dpvsStaticCell.viewIndex = g_viewIndex; // *(_WORD *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
     R_AddWorkerCmd(3, (unsigned __int8 *)&dpvsStaticCell);
     dpvsDynamicCell.cellIndex = cell - rgp.world->cells;
     dpvsDynamicCell.planes = planes;
     dpvsDynamicCell.planeCount = planeCount;
     dpvsDynamicCell.frustumPlaneCount = frustumPlaneCount;
-    dpvsDynamicCell.viewIndex = *(_WORD *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
+    dpvsDynamicCell.viewIndex = g_viewIndex; //*(_WORD *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
     R_AddWorkerCmd(5, (unsigned __int8 *)&dpvsDynamicCell);
     R_AddWorkerCmd(4, (unsigned __int8 *)&dpvsDynamicCell);
     R_AddWorkerCmd(6, (unsigned __int8 *)&dpvsDynamicCell);
@@ -2788,9 +2792,9 @@ void __cdecl R_SetupDpvsForPoint(const GfxViewParms *viewParms)
     dpvsGlob.viewPlane.coeffs[1] = viewParms->axis[0][1];
     dpvsGlob.viewPlane.coeffs[2] = viewParms->axis[0][2];
     dpvsGlob.viewPlane.coeffs[3] = 0.1 - Vec3Dot(dpvsGlob.viewPlane.coeffs, dpvsGlob.viewOrg);
-    dpvsGlob.viewPlane.side[0] = SLODWORD(dpvsGlob.viewPlane.coeffs[0]) <= 0 ? 0 : 0xC;
-    dpvsGlob.viewPlane.side[1] = SLODWORD(dpvsGlob.viewPlane.coeffs[1]) <= 0 ? 4 : 16;
-    dpvsGlob.viewPlane.side[2] = SLODWORD(dpvsGlob.viewPlane.coeffs[2]) <= 0 ? 8 : 20;
+    dpvsGlob.viewPlane.side[0] = dpvsGlob.viewPlane.coeffs[0] <= 0 ? 0 : 0xC;
+    dpvsGlob.viewPlane.side[1] = dpvsGlob.viewPlane.coeffs[1] <= 0 ? 4 : 16;
+    dpvsGlob.viewPlane.side[2] = dpvsGlob.viewPlane.coeffs[2] <= 0 ? 8 : 20;
     dpvsGlob.nearPlane = (DpvsPlane *)&dpvsGlob;
     zfar = R_GetFarPlaneDist();
     if (zfar > 0.0)
@@ -2799,9 +2803,9 @@ void __cdecl R_SetupDpvsForPoint(const GfxViewParms *viewParms)
         dpvsGlob.fogPlane.coeffs[1] = -viewParms->axis[0][1];
         dpvsGlob.fogPlane.coeffs[2] = -viewParms->axis[0][2];
         dpvsGlob.fogPlane.coeffs[3] = zfar - Vec3Dot(dpvsGlob.fogPlane.coeffs, dpvsGlob.viewOrg);
-        dpvsGlob.fogPlane.side[0] = SLODWORD(dpvsGlob.fogPlane.coeffs[0]) <= 0 ? 0 : 0xC;
-        dpvsGlob.fogPlane.side[1] = SLODWORD(dpvsGlob.fogPlane.coeffs[1]) <= 0 ? 4 : 16;
-        dpvsGlob.fogPlane.side[2] = SLODWORD(dpvsGlob.fogPlane.coeffs[2]) <= 0 ? 8 : 20;
+        dpvsGlob.fogPlane.side[0] = dpvsGlob.fogPlane.coeffs[0] <= 0 ? 0 : 0xC;
+        dpvsGlob.fogPlane.side[1] = dpvsGlob.fogPlane.coeffs[1] <= 0 ? 4 : 16;
+        dpvsGlob.fogPlane.side[2] = dpvsGlob.fogPlane.coeffs[2] <= 0 ? 8 : 20;
         dpvsGlob.farPlane = &dpvsGlob.fogPlane;
     }
     else
@@ -2832,6 +2836,64 @@ void __cdecl R_SetViewFrustumPlanes(GfxViewInfo *viewInfo)
         v1[1] = v2->coeffs[1];
         v1[2] = v2->coeffs[2];
         v1[3] = v2->coeffs[3];
+    }
+}
+
+// lol.
+void __cdecl R_CopyClipPlane(const DpvsPlane *in, DpvsPlane *out)
+{
+    *out = *in;
+}
+
+void __cdecl R_AddSkySurfacesDpvs(const DpvsPlane *planes, int planeCount)
+{
+    int v2; // [esp+4h] [ebp-1B0h]
+    int v3; // [esp+8h] [ebp-1ACh]
+    const DpvsPlane *v4; // [esp+Ch] [ebp-1A8h]
+    unsigned int i; // [esp+10h] [ebp-1A4h]
+    GfxSurface *v6; // [esp+18h] [ebp-19Ch]
+    DpvsPlane clipPlanePool[16]; // [esp+1Ch] [ebp-198h] BYREF
+    int surfIndex; // [esp+160h] [ebp-54h]
+    DpvsClipPlaneSet clipSet; // [esp+164h] [ebp-50h]
+    int planeIndex; // [esp+1B0h] [ebp-4h]
+
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\r_dpvs_static.cpp", 970, 0, "%s", "Sys_IsMainThread()");
+    g_smodelVisData = rgp.world->dpvs.smodelVisData[0]; // (_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24)
+    g_surfaceVisData = rgp.world->dpvs.surfaceVisData[0]; // *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28)
+    for (planeIndex = 0; planeIndex < planeCount; ++planeIndex)
+    {
+        R_CopyClipPlane(&planes[planeIndex], &clipPlanePool[planeIndex]);
+        clipSet.planes[planeIndex] = &clipPlanePool[planeIndex];
+    }
+    clipSet.count = planeCount;
+    for (surfIndex = 0; surfIndex < rgp.world->skySurfCount; ++surfIndex)
+    {
+        v2 = rgp.world->skyStartSurfs[surfIndex];
+        if (!*(_BYTE *)(g_surfaceVisData + v2))
+        {
+            v6 = &rgp.world->dpvs.surfaces[v2];
+            for (i = 0; i < clipSet.count; ++i)
+            {
+                v4 = clipSet.planes[i];
+                if (*(float *)((char *)v6->bounds[0] + v4->side[0]) * v4->coeffs[0]
+                    + v4->coeffs[3]
+                    + *(float *)((char *)v6->bounds[0] + v4->side[1]) * v4->coeffs[1]
+                    + *(float *)((char *)v6->bounds[0] + v4->side[2]) * v4->coeffs[2] <= 0.0)
+                {
+                    v3 = 1;
+                    goto LABEL_15;
+                }
+            }
+            v3 = 0;
+        LABEL_15:
+            if (!v3)
+            {
+                if ((r_showAabbTrees->current.integer & 2) != 0)
+                    R_AddDebugBox(&frontEndDataOut->debugGlobals, v6->bounds[0], v6->bounds[1], colorGreen);
+                *(_BYTE *)(g_surfaceVisData + v2) = 1;
+            }
+        }
     }
 }
 
@@ -2886,8 +2948,9 @@ void __cdecl R_AddWorldSurfacesPortalWalk(int cameraCellIndex)
     if (!r_skipPvs->current.enabled)
     {
         dpvsView = dpvsGlob.views[scene.dpvs.localClientNum];
-        if (dpvsView != *(DpvsView **)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8))
-            MyAssertHandler(".\\r_dpvs.cpp", 3055, 0, "%s", "dpvsView == g_dpvsView");
+
+        // *(DpvsView **)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8)
+        vassert(dpvsView == g_dpvsView, "dpsView == %p, g_dpsView == %p", dpvsView, g_dpvsView);
         if (cameraCellIndex < 0)
         {
             for (cellIndex = 0; cellIndex < rgp.world->dpvsPlanes.cellCount; ++cellIndex)

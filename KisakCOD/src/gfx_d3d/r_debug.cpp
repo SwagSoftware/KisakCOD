@@ -118,7 +118,7 @@ void __cdecl R_AddDebugString(
     const float *origin,
     const float *color,
     float scale,
-    char *string)
+    const char *string)
 {
     trDebugString_t *pDebugString; // [esp+4h] [ebp-4h]
 
@@ -155,7 +155,7 @@ void __cdecl R_AddScaledDebugString(
     const GfxViewParms *viewParms,
     const float *origin,
     const float *color,
-    char *string)
+    const char *string)
 {
     float delta[3]; // [esp+14h] [ebp-14h] BYREF
     float scale; // [esp+20h] [ebp-8h]

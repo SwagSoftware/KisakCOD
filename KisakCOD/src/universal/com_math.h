@@ -4,9 +4,6 @@
 
 #include <math.h>
 
-#include <xanim/dobj.h>
-#include <gfx_d3d/fxprimitives.h>
-
 struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...
@@ -37,9 +34,94 @@ using mat4x3 = float[4][3];
 using mat4x4 = float[4][4];
 
 // TODO fun fact: if we initialize these to -0.0 instead the compiler can remove the float addition without -ffast-math or some equivalent
-const vec2 vec2_origin = { 0.0, 0.0 };
-const vec3 vec3_origin = { 0.0, 0.0, 0.0 };
-const vec4 vec4_origin = { 0.0, 0.0, 0.0, 0.0 };
+constexpr vec2 vec2_origin = { 0.0, 0.0 };
+constexpr vec3 vec3_origin = { 0.0, 0.0, 0.0 };
+constexpr vec4 vec4_origin = { 0.0, 0.0, 0.0, 0.0 };
+
+using uint4 = unsigned int[4];
+
+// NOTE: yes, these really seem to be different matrix types specific to the FX system for some reason..
+union float4 {
+    vec4 v;
+    uint4 u;
+    PackedUnitVec unitVec[4];
+};
+
+union float4x3 {
+    union {
+        float4 x;
+        float4 y;
+        float4 z;
+    };
+
+    mat4x3 mat;
+};
+
+union float4x4 {
+    struct {
+        float4 x;
+        float4 y;
+        float4 z;
+        float4 w;
+    };
+
+    mat4x4 mat;
+};
+
+constexpr float4 g_zero = {
+    .v = {
+        0.0, 0.0, 0.0, 0.0
+    }
+};
+
+constexpr float4 g_unit = {
+    .v = {
+        0.0, 0.0, 0.0, 1.0
+    }
+};
+
+constexpr float4 g_2xunit = {
+    .v = {
+        0.0, 0.0, 0.0, 1.0
+    }
+};
+
+constexpr float4 g_swizzleXYZA = {
+    .u = {
+        0x00010203,
+        0x04050607,
+        0x08090A0B,
+        0x10111213
+    }
+};
+
+constexpr float4 g_swizzleYZXW = {
+    .u = {
+        0x04050607,
+        0x08090A0B,
+        0x00010203,
+        0x0C0D0E0F
+    }
+};
+
+constexpr float4 g_keepXYW = {
+    .u = {
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0,
+        0xFFFFFFFF
+    }
+};
+
+constexpr float4 g_keepXYZ = {
+    .u = {
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0
+    }
+};
+
 
 bool __cdecl Vec4IsNormalized(const vec4r v);
 
@@ -357,6 +439,9 @@ __forceinline static int COERCE_INT(float val) {
 //__Eg_unpackShiftSimpleQuat@@YAXXZ 8278cc10 f   com_math_anglevectors.obj
 
 //__int128 _mask__NegFloat_ = 0x80000000800000008000000080000000;
+
+struct DObjAnimMat;
+struct DObjSkelMat;
 
 void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat);
 void __fastcall LocalConvertQuatToSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat);
