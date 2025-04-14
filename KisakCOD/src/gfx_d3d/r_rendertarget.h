@@ -43,6 +43,7 @@ void __cdecl R_InitAndTrackRenderTargetImage(
     _D3DFORMAT format,
     RenderTargetUsage usage,
     GfxRenderTarget *renderTarget);
+void __cdecl R_InitShadowCookieBlurRenderTarget(GfxRenderTarget *renderTarget);
 void __cdecl R_InitShadowCookieRenderTarget(GfxRenderTarget *renderTarget);
 void __cdecl R_AssignShadowCookieDepthStencilSurface(GfxRenderTargetSurface *surface);
 _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget();

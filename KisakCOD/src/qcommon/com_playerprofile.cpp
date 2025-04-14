@@ -5,6 +5,8 @@
 #include "qcommon.h"
 #include <universal/q_parse.h>
 #include <universal/com_files.h>
+#include "cmd.h"
+#include <win32/win_storage.h>
 
 const dvar_t *ui_playerProfileAlreadyChosen;
 const dvar_t *com_playerProfile;
@@ -201,7 +203,7 @@ char __cdecl Com_NewPlayerProfile(const char *profileName)
     }
     else
     {
-        Com_BuildPlayerProfilePathForPlayer(profilePath, 64, profileName, &String);
+        Com_BuildPlayerProfilePathForPlayer(profilePath, 64, profileName, "");
         FS_BuildOSPath((char *)fs_basepath->current.integer, "players", profilePath, osPath);
         if (FS_CreatePath(osPath))
         {

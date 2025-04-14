@@ -1,6 +1,44 @@
 #include "r_draw_staticmodel.h"
 #include "rb_stats.h"
+#include <database/database.h>
+#include "r_state.h"
+#include "r_model_lighting.h"
+#include "r_shade.h"
+#include "r_draw_bsp.h"
+#include "r_utils.h"
 
+
+void __cdecl R_SetupStaticModelPrim(XSurface *xsurf, GfxDrawPrimArgs *args, GfxCmdBufPrimState *primState)
+{
+    IDirect3DIndexBuffer9 *ib; // [esp+10h] [ebp-4h] BYREF
+
+    if (!xsurf)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 260, 0, "%s", "xsurf");
+    args->vertexCount = xsurf->vertCount;
+    args->triCount = xsurf->triCount;
+    if (!useFastFile->current.enabled)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 266, 0, "%s", "XSurfaceHasOptimizedIndices()");
+    DB_GetIndexBufferAndBase(xsurf->zoneHandle, xsurf->triIndices, (void **)&ib, &args->baseIndex);
+    if (!ib)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 269, 0, "%s", "ib");
+    if (primState->indexBuffer != ib)
+        R_ChangeIndices(primState, ib);
+}
+
+void __cdecl R_SetModelLightingCoordsForSource(unsigned __int16 handle, GfxCmdBufSourceState *source)
+{
+    R_SetModelLightingCoords(handle, source->input.consts[57]);
+    R_DirtyCodeConstant(source, 0x39u);
+}
+
+void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context)
+{
+    const MaterialPass *pass; // [esp+0h] [ebp-4h]
+
+    pass = context.state->pass;
+    if (pass->perPrimArgCount)
+        R_SetPassShaderPrimArguments(context, pass->perPrimArgCount, pass->args);
+}
 
 void __cdecl R_DrawStaticModelDrawSurfLightingNonOptimized(
     GfxStaticModelDrawStream *drawStream,
@@ -111,7 +149,7 @@ void __cdecl R_SetStaticModelVertexBuffer(GfxCmdBufPrimState *primState, XSurfac
         MyAssertHandler(".\\r_draw_staticmodel.cpp", 245, 0, "%s", "xsurf");
     if (xsurf->deformed || !useFastFile->current.enabled)
         MyAssertHandler(".\\r_draw_staticmodel.cpp", 246, 0, "%s", "XSurfaceHasOptimizedVertices( xsurf )");
-    DB_GetVertexBufferAndOffset(xsurf->zoneHandle, xsurf->verts0, (void **)&vb, &vertexOffset);
+    DB_GetVertexBufferAndOffset(xsurf->zoneHandle, (uint8*)xsurf->verts0, (void **)&vb, &vertexOffset);
     if (!vb)
         MyAssertHandler(".\\r_draw_staticmodel.cpp", 248, 0, "%s", "vb");
     R_SetStreamSource(primState, vb, vertexOffset, 0x20u);

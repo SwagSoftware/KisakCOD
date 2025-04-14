@@ -17,3 +17,6 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
 
 
 unsigned __int16 *__cdecl R_AllocPreTessIndices(int count);
+
+void __cdecl R_EndPreTess();
+void __cdecl R_BeginPreTess();

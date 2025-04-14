@@ -197,6 +197,14 @@ void __cdecl R_InitDynamicIndices(GfxDynamicIndices *ib, int indexCount)
     ib->indices = indices;
 }
 
+void __cdecl R_ShutdownDynamicIndices(GfxDynamicIndices *ib)
+{
+    if (!ib->indices)
+        MyAssertHandler(".\\r_buffers.cpp", 557, 0, "%s", "ib->indices");
+    Z_VirtualFree(ib->indices);
+    ib->indices = 0;
+}
+
 void __cdecl R_CreateDynamicBuffers()
 {
     int bufferIter; // [esp+0h] [ebp-4h]
@@ -536,13 +544,14 @@ void *__cdecl R_LockIndexBuffer(IDirect3DIndexBuffer9 *handle, int offset, int b
         MyAssertHandler(".\\r_buffers.cpp", 141, 0, "%s", "handle");
     if (dx.deviceLost)
         MyAssertHandler(".\\r_buffers.cpp", 142, 0, "%s", "!dx.deviceLost");
-    hr = ((int(__thiscall *)(IDirect3DIndexBuffer9 *, IDirect3DIndexBuffer9 *, int, int, void **, int))handle->Lock)(
-        handle,
-        handle,
-        offset,
-        bytes,
-        &bufferData,
-        lockFlags);
+    //hr = ((int(__thiscall *)(IDirect3DIndexBuffer9 *, IDirect3DIndexBuffer9 *, int, int, void **, int))handle->Lock)(
+    //    handle,
+    //    handle,
+    //    offset,
+    //    bytes,
+    //    &bufferData,
+    //    lockFlags);
+    hr = handle->Lock(offset, bytes, &bufferData, lockFlags);
     if (hr < 0)
         R_FatalLockError(hr);
     return bufferData;

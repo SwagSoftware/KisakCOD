@@ -16,6 +16,7 @@
 #include <win32/win_local.h>
 #include "rb_logfile.h"
 #include "r_setstate_d3d.h"
+#include "r_model_pose.h"
 
 void(__cdecl *g_cmdExecFailed[17])();
 
@@ -375,8 +376,6 @@ int __cdecl R_ProcessWorkerCmd(int type)
 
 void __cdecl R_ProcessWorkerCmdInternal(int type, FxCmd *data)
 {
-    int savedregs; // [esp+8h] [ebp+0h] BYREF
-
     R_NotifyWorkerCmdType(type);
     switch (type)
     {
@@ -393,7 +392,7 @@ void __cdecl R_ProcessWorkerCmdInternal(int type, FxCmd *data)
         R_AddCellStaticSurfacesInFrustumCmd((DpvsStaticCellCmd *)data);
         break;
     case 4:
-        R_AddCellSceneEntSurfacesInFrustumCmd((unsigned int)&savedregs, (GfxWorldDpvsPlanes *)data);
+        R_AddCellSceneEntSurfacesInFrustumCmd((GfxWorldDpvsPlanes *)data);
         break;
     case 5:
         R_AddCellDynModelSurfacesInFrustumCmd((const DpvsPlane **)data);
@@ -431,7 +430,7 @@ void __cdecl R_ProcessWorkerCmdInternal(int type, FxCmd *data)
         R_SkinCachedStaticModelCmd((SkinCachedStaticModelCmd *)data);
         break;
     case 16:
-        R_SkinXModelCmd((int)&savedregs, data);
+        R_SkinXModelCmd((WORD*)data);
         break;
     default:
         if (!alwaysfails)

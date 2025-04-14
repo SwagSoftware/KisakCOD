@@ -16,6 +16,49 @@ void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out)
     out[3] = 1.0;
 }
 
+void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, PackedLightingCoords *packedCoords)
+{
+    unsigned int v2; // [esp+0h] [ebp-18h]
+    unsigned int v3; // [esp+4h] [ebp-14h]
+    unsigned int entryIndex; // [esp+8h] [ebp-10h]
+    unsigned int xPixel; // [esp+10h] [ebp-8h]
+
+    entryIndex = R_ModelLightingIndexFromHandle(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle);
+    xPixel = 4 * (entryIndex & 0x3F);
+    if ((modelLightGlob.imageHeight & (modelLightGlob.imageHeight - 1)) != 0)
+        MyAssertHandler(".\\r_model_lighting.cpp", 833, 0, "%s", "IsPowerOf2( modelLightGlob.imageHeight )");
+    if (modelLightGlob.imageHeight > 0x100)
+        MyAssertHandler(
+            ".\\r_model_lighting.cpp",
+            834,
+            0,
+            "modelLightGlob.imageHeight <= GFX_ML_IMAGE_WIDTH\n\t%i, %i",
+            modelLightGlob.imageHeight,
+            256);
+    v3 = xPixel + 2;
+    if (xPixel + 2 != (unsigned __int8)(xPixel + 2))
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            v3,
+            (unsigned __int8)v3);
+    packedCoords->array[0] = v3;
+    v2 = ((entryIndex >> 4) & 0xFFFFFFFC) + 2 * (0x100 / modelLightGlob.imageHeight);
+    if (v2 != (unsigned __int8)v2)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            v2,
+            (unsigned __int8)v2);
+    packedCoords->array[1] = v2;
+    packedCoords->array[2] = 0x80;
+    packedCoords->array[3] = 0;
+}
+
 unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle)
 {
     if (!handle || handle > modelLightGlob.totalEntryLimit)

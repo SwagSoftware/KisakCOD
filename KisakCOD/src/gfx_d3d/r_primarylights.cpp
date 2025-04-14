@@ -4,8 +4,9 @@
 #include "r_init.h"
 #include "r_scene.h"
 #include "r_dvars.h"
+#include "r_spotshadow.h"
 
-
+GfxShadowedLightHistory s_shadowHistory[4];
 void __cdecl R_ClearShadowedPrimaryLightHistory(int localClientNum)
 {
     GfxShadowedLightHistory *history; // [esp+0h] [ebp-4h]
@@ -172,6 +173,7 @@ unsigned int __cdecl R_AddPotentiallyShadowedLight(
     }
 }
 
+const float vec3_colorintensity[3] = { 0.2989f, 0.587f, 0.114f };
 double __cdecl R_ShadowedSpotLightScore(const GfxViewParms *viewParms, const GfxLight *light)
 {
     float scale; // [esp+10h] [ebp-34h]

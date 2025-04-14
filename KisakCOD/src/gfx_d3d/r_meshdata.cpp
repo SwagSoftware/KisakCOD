@@ -8,6 +8,7 @@
 
 //struct GfxMeshGlobals gfxMeshGlob 85b93690     gfx_d3d : r_meshdata.obj
 
+GfxMeshGlobals gfxMeshGlob;
 
 char __cdecl R_ReserveMeshIndices(GfxMeshData *mesh, int indexCount, r_double_index_t **indicesOut)
 {

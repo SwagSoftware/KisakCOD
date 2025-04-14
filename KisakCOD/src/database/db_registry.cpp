@@ -6,6 +6,8 @@
 //int marker_db_registry   828e570c     db_registry.obj
 //unsigned int volatile g_mainThreadBlocked  829f278c     db_registry.obj
 
+unsigned int volatile g_mainThreadBlocked;
+
 unsigned __int16 db_hashTable[32768];
 XAssetEntry *g_copyInfo[2048];
 XZone g_zones[33];

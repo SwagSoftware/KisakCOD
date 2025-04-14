@@ -1,5 +1,34 @@
 #include "server.h"
 
+#include <cstring>
+#include <qcommon/net_chan_mp.h>
+
+void __cdecl SV_Netchan_Encode(client_t *client, unsigned __int8 *data, int size)
+{
+    unsigned __int8 *string; // [esp+0h] [ebp-10h]
+    _BYTE key[5]; // [esp+7h] [ebp-9h]
+    int i; // [esp+Ch] [ebp-4h]
+
+    string = (unsigned __int8 *)client->lastClientCommandString;
+    key[4] = 0;
+    *(_DWORD *)key = (unsigned __int8)(LOBYTE(client->header.netchan.outgoingSequence) ^ LOBYTE(client->challenge));
+    for (i = 0; i < size; ++i)
+    {
+        if (!string[*(_DWORD *)&key[1]])
+            *(_DWORD *)&key[1] = 0;
+        if (string[*(_DWORD *)&key[1]] == 37)
+            MyAssertHandler(
+                ".\\server_mp\\sv_net_chan_mp.cpp",
+                34,
+                0,
+                "%s\n\t(client->lastClientCommandString) = %s",
+                "(string[index] != '%')",
+                client->lastClientCommandString);
+        key[0] ^= string[(*(_DWORD *)&key[1])++] << (i & 1);
+        *data++ ^= key[0];
+    }
+}
+
 bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan)
 {
     bool res; // [esp+3h] [ebp-1h]
@@ -8,16 +37,6 @@ bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan)
     if (!chan->unsentFragments)
         SV_Netchan_OutgoingSequenceIncremented(client, chan);
     return res;
-}
-
-void __cdecl SV_Netchan_OutgoingSequenceIncremented(client_t *client, netchan_t *chan)
-{
-    clientSnapshot_t *frame; // [esp+0h] [ebp-4h]
-
-    frame = &client->frames[chan->outgoingSequence & 0x1F];
-    memset((unsigned __int8 *)frame, 0, sizeof(clientSnapshot_t));
-    frame->first_entity = svs.nextSnapshotEntities;
-    frame->first_client = svs.nextSnapshotClients;
 }
 
 bool __cdecl SV_Netchan_Transmit(client_t *client, unsigned __int8 *data, int length)

@@ -30,3 +30,7 @@ void __cdecl R_GenerateSortedPrimarySpotShadowDrawSurfs(
     unsigned int spotShadowIndex,
     unsigned int shadowableLightIndex);
 void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo);
+
+
+unsigned int R_InitSpotShadowMeshes();
+void __cdecl R_ShutdownSpotShadowMeshes();

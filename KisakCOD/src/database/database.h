@@ -641,3 +641,5 @@ void __cdecl Mark_SndAliasCustom(snd_alias_list_t **var);
 void __cdecl DB_LoadDObjs();
 
 extern XAssetList *varXAssetList;
+
+extern unsigned int volatile g_mainThreadBlocked;

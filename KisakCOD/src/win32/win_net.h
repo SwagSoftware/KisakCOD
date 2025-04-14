@@ -11,3 +11,6 @@ const char* NET_ErrorString(void);
 void		NET_Sleep(int msec);
 
 unsigned int __cdecl NET_TCPIPSocket(char* net_interface, int port, int type);
+
+qboolean Sys_StringToAdr(const char *s, netadr_t *a);
+char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to);

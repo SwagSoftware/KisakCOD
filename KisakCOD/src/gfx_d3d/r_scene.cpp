@@ -2,10 +2,36 @@
 #include <qcommon/mem_track.h>
 #include "r_init.h"
 #include "r_debug.h"
+#include "r_dvars.h"
+#include <qcommon/threads.h>
+#include <xanim/dobj_utils.h>
+#include "r_draw_method.h"
+#include "r_dobj_skin.h"
+#include "r_xsurface.h"
+#include "r_dpvs.h"
+#include "rb_logfile.h"
+#include "r_model_lighting.h"
+#include "rb_fog.h"
+#include "r_workercmds.h"
+#include "r_bsp.h"
+#include "r_primarylights.h"
+#include "r_sunshadow.h"
+#include "r_add_staticmodel.h"
+#include <DynEntity/DynEntity_client.h>
+#include "r_spotshadow.h"
+#include "r_shadowcookie.h"
+#include "r_pretess.h"
+#include "r_light.h"
+#include <EffectsCore/fx_system.h>
+#include "r_drawsurf.h"
+#include "rb_postfx.h"
+#include "r_meshdata.h"
+#include <qcommon/com_bsp.h>
+#include "r_cinematic.h"
 
 
 //struct GfxScene scene      859c8280     gfx_d3d : r_scene.obj
-
+GfxViewParms lockPvsViewParms;
 GfxScene scene;
 
 void __cdecl TRACK_r_scene()
@@ -175,7 +201,7 @@ void __cdecl R_AddDObjToScene(
                 sceneEnt->obj = obj;
                 sceneEnt->entnum = entnum;
                 scene.dpvs.sceneDObjIndex[entnum] = sceneEntIndex;
-                sceneEnt->info.pose = pose;
+                sceneEnt->info.pose = (cpose_t*)pose;
                 if (sceneEnt->cull.state)
                     MyAssertHandler(
                         ".\\r_scene.cpp",
@@ -437,12 +463,12 @@ void __cdecl R_AddBModelSurfacesCamera(
                     "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
                     surfId,
                     0x10000);
-            LOunsigned int(drawSurf) = ((unsigned __int8)reflectionProbeIndex << 16)
+            LODWORD(drawSurf) = ((unsigned __int8)reflectionProbeIndex << 16)
                 | ((bspSurf->lightmapIndex & 0x1F) << 24)
                 | (unsigned __int16)surfId
                 | *(unsigned int *)&material->info.drawSurf.fields & 0xE0000000;
-            HIunsigned int(drawSurf) = (bspSurf->primaryLightIndex << 10)
-                | HIunsigned int(material->info.drawSurf.packed) & 0xFFC003FF
+            HIDWORD(drawSurf) = (bspSurf->primaryLightIndex << 10)
+                | HIDWORD(material->info.drawSurf.packed) & 0xFFC003FF
                 | 0x180000;
             drawSurfs[region]->packed = drawSurf;
             ++drawSurfs[region];
@@ -499,9 +525,9 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
                     "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
                     surfId,
                     0x10000);
-            newDrawSurf_4 = HIunsigned int(material->info.drawSurf.packed) & 0xFFC3FFFF | 0x180000;
+            newDrawSurf_4 = HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF | 0x180000;
             *(unsigned int *)&drawSurf->fields = (unsigned __int16)surfId | *(unsigned int *)&material->info.drawSurf.fields & 0xFFFF0000;
-            HIunsigned int(drawSurf->packed) = newDrawSurf_4;
+            HIDWORD(drawSurf->packed) = newDrawSurf_4;
             ++drawSurf;
         }
         ++modelSurf;
@@ -638,24 +664,24 @@ void __cdecl R_AddXModelSurfacesCamera(
                         surfId,
                         0x10000);
                 drawSurf = (*material)->info.drawSurf.packed;
-                HIunsigned int(drawSurf) = ((surfType & 0xF) << 18)
+                HIDWORD(drawSurf) = ((surfType & 0xF) << 18)
                     | (((((drawSurf >> 54) & 0x3F) - depthHack) & 0x3F) << 22)
-                    | HIunsigned int(drawSurf) & 0xF003FFFF;
-                LOunsigned int(drawSurf) = ((isShadowReceiver & 0x1F) << 24)
+                    | HIDWORD(drawSurf) & 0xF003FFFF;
+                LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24)
                     | ((unsigned __int8)reflectionProbeIndex << 16) & 0xE0FFFFFF
                     | (unsigned __int16)surfId
                     | drawSurf & 0xE0000000;
-                HIunsigned int(drawSurf) = (primaryLightIndex << 10) | HIunsigned int(drawSurf) & 0xFFFC03FF;
+                HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF;
                 drawSurfs[region]->packed = drawSurf;
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {
-                    XSurface = R_GetXSurface(modelSurf, surfType);
+                    XSurface = R_GetXSurface((unsigned int*)modelSurf, surfType);
                     totalTriCount += XSurfaceGetNumTris(XSurface);
                 }
                 else if (r_showVertCounts->current.enabled)
                 {
-                    v12 = R_GetXSurface(modelSurf, surfType);
+                    v12 = R_GetXSurface((unsigned int*)modelSurf, surfType);
                     totalVertCount += XSurfaceGetNumVerts(v12);
                 }
                 surfId += 14;
@@ -762,8 +788,8 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
                         "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
                         surfId,
                         0x10000);
-                HIunsigned int(newDrawSurf) = ((surfType & 0xF) << 18) | HIunsigned int((*material)->info.drawSurf.packed) & 0xFFC3FFFF;
-                LOunsigned int(newDrawSurf) = (unsigned __int16)surfId | *(unsigned int *)&(*material)->info.drawSurf.fields & 0xFFFF0000;
+                HIDWORD(newDrawSurf) = ((surfType & 0xF) << 18) | HIDWORD((*material)->info.drawSurf.packed) & 0xFFC3FFFF;
+                LODWORD(newDrawSurf) = (unsigned __int16)surfId | *(unsigned int *)&(*material)->info.drawSurf.fields & 0xFFFF0000;
                 drawSurf->packed = newDrawSurf;
                 ++drawSurf;
                 surfId += 14;
@@ -916,24 +942,24 @@ LABEL_15:
                         surfIda,
                         0x10000);
                 drawSurf = (*material)->info.drawSurf.packed;
-                HIunsigned int(drawSurf) = ((surfType & 0xF) << 18)
+                HIDWORD(drawSurf) = ((surfType & 0xF) << 18)
                     | (((((drawSurf >> 54) & 0x3F) - depthHack) & 0x3F) << 22)
-                    | HIunsigned int(drawSurf) & 0xF003FFFF;
-                LOunsigned int(drawSurf) = ((isShadowReceiver & 0x1F) << 24)
+                    | HIDWORD(drawSurf) & 0xF003FFFF;
+                LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24)
                     | (sceneEnt->reflectionProbeIndex << 16) & 0xE0FFFFFF
                     | (unsigned __int16)surfIda
                     | drawSurf & 0xE0000000;
-                HIunsigned int(drawSurf) = (primaryLightIndex << 10) | HIunsigned int(drawSurf) & 0xFFFC03FF;
+                HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF;
                 drawSurfs[region]->packed = drawSurf;
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {
-                    XSurface = R_GetXSurface(modelSurf, surfType);
+                    XSurface = R_GetXSurface((unsigned int *)modelSurf, surfType);
                     totalTriCount += XSurfaceGetNumTris(XSurface);
                 }
                 else if (r_showVertCounts->current.enabled)
                 {
-                    v6 = R_GetXSurface(modelSurf, surfType);
+                    v6 = R_GetXSurface((unsigned int*)modelSurf, surfType);
                     totalVertCount += XSurfaceGetNumVerts(v6);
                 }
             }
@@ -1057,9 +1083,9 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
                         0x10000);
                 newDrawSurf.fields = (GfxDrawSurfFields)(*material)->info.drawSurf;
                 *(unsigned int *)&drawSurf->fields = (unsigned __int16)surfIda | *(unsigned int *)&newDrawSurf.fields & 0xFFFF0000;
-                HIunsigned int(drawSurf->packed) = ((surfType & 0xF) << 18)
+                HIDWORD(drawSurf->packed) = ((surfType & 0xF) << 18)
                     | (((((newDrawSurf.packed >> 54) & 0x3F) - depthHack) & 0x3F) << 22)
-                    | HIunsigned int(newDrawSurf.packed) & 0xF003FFFF;
+                    | HIDWORD(newDrawSurf.packed) & 0xF003FFFF;
                 ++drawSurf;
             }
             goto LABEL_17;
@@ -1193,7 +1219,7 @@ void __cdecl R_SetLodOrigin(const refdef_s *refdef)
 {
     if (r_lockPvs->modified)
     {
-        Dvar_ClearModified(r_lockPvs);
+        Dvar_ClearModified((dvar_t*)r_lockPvs);
         R_SetViewParmsForScene(refdef, &lockPvsViewParms);
     }
     R_UpdateLodParms(refdef, &rg.lodParms);
@@ -1467,7 +1493,7 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
         if (r_logFile->current.integer)
             RB_LogPrint("====== R_RenderScene ======\n");
         if (!rgp.world)
-            Com_Error(ERR_DROP, &byte_8EF99C);
+            Com_Error(ERR_DROP, "R_RenderScene: NULL worldmodel");
         rg.viewOrg[0] = refdef->vieworg[0];
         rg.viewOrg[1] = refdef->vieworg[1];
         rg.viewOrg[2] = refdef->vieworg[2];
@@ -1543,7 +1569,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
             4);
     frontEndDataOut->viewInfoIndex = viewInfoIndex;
     viewInfo = &frontEndDataOut->viewInfo[viewInfoIndex];
-    dynamicShadowType = R_DynamicShadowType();
+    dynamicShadowType = (ShadowType)R_DynamicShadowType();
     rg.sunShadowFull = r_rendererInUse->current.integer == 1;
     if (rg.sunShadowFull)
     {
@@ -1811,6 +1837,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     R_ShowCull();
 }
 
+bool g_allowShadowMaps; // KISAKTODO: value here?
 bool __cdecl R_GetAllowShadowMaps()
 {
     return sm_enable->current.enabled && g_allowShadowMaps;
@@ -1849,7 +1876,7 @@ void __cdecl R_SetDepthOfField(GfxViewInfo *viewInfo, const GfxSceneParms *scene
     }
     else if (r_dof_enable->current.enabled)
     {
-        memcpy(&viewInfo->dof, &sceneParms->dof, sizeof(viewInfo->dof));
+        qmemcpy(&viewInfo->dof, &sceneParms->dof, sizeof(viewInfo->dof));
     }
     else
     {
@@ -1864,7 +1891,7 @@ void __cdecl R_SetDepthOfField(GfxViewInfo *viewInfo, const GfxSceneParms *scene
     }
     if (R_UsingDepthOfField(viewInfo))
     {
-        if (!renderTarget.surface.color)
+        if (!gfxRenderTargets[5].surface.color)
             Com_Error(
                 ERR_FATAL,
                 "Depth of field used (enabled via r_dof_enable or r_dof_tweak) with no float-z buffer (r_floatz wasn't enabled wh"
@@ -1873,14 +1900,14 @@ void __cdecl R_SetDepthOfField(GfxViewInfo *viewInfo, const GfxSceneParms *scene
         if (com_statmon->current.enabled)
         {
             font = R_RegisterFont("fonts/consoleFont", 1);
-            R_AddCmdDrawText("DOF", 0x7FFFFFFF, font, 0.0, 320.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
+            R_AddCmdDrawText((char*)"DOF", 0x7FFFFFFF, font, 0.0, 320.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
         }
     }
 }
 
 void __cdecl R_SetFilmInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParms)
 {
-    DvarValue *p_current; // [esp+Ch] [ebp-10h]
+    const DvarValue *p_current; // [esp+Ch] [ebp-10h]
     int v3; // [esp+14h] [ebp-8h]
     float desaturationScale; // [esp+18h] [ebp-4h]
 
@@ -1895,8 +1922,8 @@ void __cdecl R_SetFilmInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
         viewInfo->film.brightness = r_filmTweakBrightness->current.value;
         viewInfo->film.desaturation = r_filmTweakDesaturation->current.value;
         viewInfo->film.invert = r_filmTweakInvert->current.enabled;
-        v3 = LOunsigned int(r_lightTweakSunDirection.vector[1]) + 12;
-        viewInfo->film.tintLight[0] = *(float *)(LOunsigned int(r_lightTweakSunDirection.vector[1]) + 12);
+        v3 = LODWORD(r_lightTweakSunDirection.vector[1]) + 12;
+        viewInfo->film.tintLight[0] = *(float *)(LODWORD(r_lightTweakSunDirection.vector[1]) + 12);
         viewInfo->film.tintLight[1] = *(float *)(v3 + 4);
         viewInfo->film.tintLight[2] = *(float *)(v3 + 8);
         p_current = &r_filmTweakDarkTint->current;
@@ -2001,7 +2028,7 @@ void __cdecl R_SetGlowInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
     if (R_UsingGlow(viewInfo) && com_statmon->current.enabled)
     {
         font = R_RegisterFont("fonts/consoleFont", 1);
-        R_AddCmdDrawText("GLOW", 0x7FFFFFFF, font, 0.0, 340.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
+        R_AddCmdDrawText((char*)"GLOW", 0x7FFFFFFF, font, 0.0, 340.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
     }
 }
 
@@ -2185,11 +2212,11 @@ MaterialTechniqueType __cdecl R_GetEmissiveTechnique(const GfxViewInfo *viewInfo
     if (baseTech != TECHNIQUE_EMISSIVE)
         return baseTech;
     if (!viewInfo->emissiveSpotLightCount || !r_spotLightShadows->current.enabled)
-        return 5;
+        return (MaterialTechniqueType)5;
     if (!comWorld.isInUse)
         MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
     if (!Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, comWorld.primaryLightCount, 32))
-        return 5;
+        return (MaterialTechniqueType)5;
     if (!comWorld.isInUse)
         MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
     if (comWorld.primaryLightCount + 1 != viewInfo->shadowableLightCount)
@@ -2199,25 +2226,25 @@ MaterialTechniqueType __cdecl R_GetEmissiveTechnique(const GfxViewInfo *viewInfo
             0,
             "%s",
             "Com_GetPrimaryLightCount() + GFX_MAX_EMISSIVE_SPOT_LIGHTS == viewInfo->shadowableLightCount");
-    return 6;
+    return (MaterialTechniqueType)6;
 }
 
 void __cdecl R_SetSunShadowConstants(GfxCmdBufInput *input, const GfxSunShadowProjection *sunProj)
 {
-    R_SetInputCodeConstantFromVec4(input, 0x20u, sunProj->switchPartition);
-    R_SetInputCodeConstantFromVec4(input, 0x21u, sunProj->shadowmapScale);
+    R_SetInputCodeConstantFromVec4(input, 0x20u, (float*)sunProj->switchPartition);
+    R_SetInputCodeConstantFromVec4(input, 0x21u, (float*)sunProj->shadowmapScale);
 }
 
 void __cdecl R_SetSunConstants(GfxCmdBufInput *input)
 {
-    GfxLight *sun; // [esp+1Ch] [ebp-10h]
+    const GfxLight *sun; // [esp+1Ch] [ebp-10h]
     float specularColor[3]; // [esp+20h] [ebp-Ch] BYREF
 
     if (input->data->sunLight.type != 1)
         MyAssertHandler(".\\r_scene.cpp", 1691, 0, "%s", "input->data->sunLight.type == GFX_LIGHT_TYPE_DIR");
     sun = &input->data->sunLight;
     Vec3Scale(input->data->sunLight.color, r_specularColorScale->current.value, specularColor);
-    R_SetInputCodeConstantFromVec4(input, 0x23u, sun->dir);
+    R_SetInputCodeConstantFromVec4(input, 0x23u, (float*)sun->dir);
     R_SetInputCodeConstant(input, 0x24u, sun->color[0], sun->color[1], sun->color[2], 1.0);
     R_SetInputCodeConstant(input, 0x25u, specularColor[0], specularColor[1], specularColor[2], 1.0);
 }
@@ -2225,7 +2252,7 @@ void __cdecl R_SetSunConstants(GfxCmdBufInput *input)
 void R_DrawCineWarning()
 {
     Font_s *font; // [esp+1Ch] [ebp-8h]
-    char *msg; // [esp+20h] [ebp-4h]
+    const char *msg; // [esp+20h] [ebp-4h]
 
     if (com_statmon->current.enabled && R_Cinematic_IsStarted())
     {
@@ -2233,7 +2260,7 @@ void R_DrawCineWarning()
         font = R_RegisterFont("fonts/consoleFont", 1);
         if (R_Cinematic_IsUnderrun())
             msg = "CINE UNDERRUN!";
-        R_AddCmdDrawText(msg, 0x7FFFFFFF, font, 0.0, 360.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
+        R_AddCmdDrawText((char*)msg, 0x7FFFFFFF, font, 0.0, 360.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
     }
 }
 

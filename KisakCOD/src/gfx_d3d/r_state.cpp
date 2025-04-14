@@ -4,6 +4,9 @@
 #include "rb_stats.h"
 #include "r_draw_bsp.h"
 #include "rb_state.h"
+#include "rb_pixelcost.h"
+#include "r_rendertarget.h"
+#include "r_utils.h"
 
 //float const *const shadowmapClearColor 820ebb50     gfx_d3d : r_state.obj
 //BOOL g_renderTargetIsOverridden 85b5dd38     gfx_d3d : r_state.obj
@@ -433,7 +436,6 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
 void __cdecl R_DeriveCodeMatrix(GfxCmdBufSourceState *source, GfxCodeMatrices *activeMatrices, unsigned int baseIndex)
 {
     const char *v3; // eax
-    int savedregs; // [esp+F0h] [ebp+0h] BYREF
 
     switch (baseIndex)
     {
@@ -444,19 +446,19 @@ void __cdecl R_DeriveCodeMatrix(GfxCmdBufSourceState *source, GfxCodeMatrices *a
         R_DeriveProjectionMatrix(source);
         break;
     case 0xCu:
-        R_DeriveWorldViewMatrix((int)&savedregs, source);
+        R_DeriveWorldViewMatrix(source);
         break;
     case 0x10u:
         R_DeriveViewProjectionMatrix(source);
         break;
     case 0x14u:
-        R_DeriveWorldViewProjectionMatrix((int)&savedregs, source);
+        R_DeriveWorldViewProjectionMatrix(source);
         break;
     case 0x18u:
         R_DeriveShadowLookupMatrix(source);
         break;
     case 0x1Cu:
-        R_GenerateWorldOutdoorLookupMatrix((GfxCodeMatrices *)&savedregs, source, activeMatrices->matrix[baseIndex].m);
+        R_GenerateWorldOutdoorLookupMatrix(source, activeMatrices->matrix[baseIndex].m);
         break;
     default:
         if (!alwaysfails)
@@ -475,16 +477,14 @@ void __cdecl R_DeriveViewMatrix(GfxCmdBufSourceState *source)
     source->constVersions[62] = source->matrixVersions[1];
 }
 
-void  R_DeriveWorldViewMatrix(int a1@<ebp>, GfxCmdBufSourceState *source)
+void  R_DeriveWorldViewMatrix(GfxCmdBufSourceState *source)
 {
     float v2[18]; // [esp-8h] [ebp-5Ch] BYREF
     float *world_60; // [esp+40h] [ebp-14h]
     GfxViewParms *p_viewParms; // [esp+44h] [ebp-10h]
-    int v5; // [esp+48h] [ebp-Ch]
     GfxCodeMatrices *activeMatrices; // [esp+4Ch] [ebp-8h]
     GfxCodeMatrices *retaddr; // [esp+54h] [ebp+0h]
 
-    v5 = a1;
     activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
     world_60 = (float *)source;
@@ -533,7 +533,6 @@ void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source)
     GfxCodeMatrices *activeMatrices; // [esp+50h] [ebp-8h]
     GfxCodeMatrices *retaddr; // [esp+58h] [ebp+0h]
 
-    v6 = a1;
     activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
     world_60 = (const float *)source;
@@ -574,11 +573,11 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     const void *zIn_8; // [esp+68h] [ebp-18h]
     float zIn_12; // [esp+6Ch] [ebp-14h]
     const float *invViewProjMatrix; // [esp+70h] [ebp-10h]
-    GfxCodeMatrices *activeMatrices; // [esp+74h] [ebp-Ch]
+    //GfxCodeMatrices *activeMatrices; // [esp+74h] [ebp-Ch]
     float downBias; // [esp+78h] [ebp-8h]
     float retaddr; // [esp+80h] [ebp+0h]
 
-    activeMatrices = a1;
+    //activeMatrices = a1;
     downBias = retaddr;
     invViewProjMatrix = (const float *)r_outdoorAwayBias->current.integer;
     zIn_12 = r_outdoorDownBias->current.value;
@@ -1856,7 +1855,6 @@ unsigned int __cdecl R_HW_SetSamplerState(
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MINFILTER, minFilter )\n");
             hr = device->SetSamplerState(
-                device,
                 samplerIndex,
                 D3DSAMP_MINFILTER,
                 (unsigned __int16)(samplerState & 0xF00) >> 8);
@@ -1958,7 +1956,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
             }
         } while (alwaysfails);
     }
-    if (((unsigned int)&svs.clients[28].frames[10].ps.hud.current[25] & diffSamplerState) != 0)
+    if ((diffSamplerState & 0x3F00000) != 0)
     {
         if ((diffSamplerState & 0x300000) != 0)
         {
@@ -1966,7 +1964,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
             {
                 if (r_logFile && r_logFile->current.integer)
                     RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_ADDRESSU, address )\n");
-                v14 = device->SetSamplerState(device, samplerIndex, D3DSAMP_ADDRESSU, (samplerState & 0x300000) >> 20);
+                v14 = device->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSU, (samplerState & 0x300000) >> 20);
                 if (v14 < 0)
                 {
                     do
@@ -1983,18 +1981,16 @@ unsigned int __cdecl R_HW_SetSamplerState(
                 }
             } while (alwaysfails);
         }
-        if (((unsigned int)&cls.globalServers[2711].adr.ipx[6] & diffSamplerState) != 0)
+        if ((diffSamplerState & 0xC00000) != 0)
         {
             do
             {
                 if (r_logFile && r_logFile->current.integer)
                     RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_ADDRESSV, address )\n");
-                v13 = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, int, unsigned int))device->SetSamplerState)(
-                    device,
-                    device,
+                v13 = device->SetSamplerState(
                     samplerIndex,
-                    2,
-                    ((unsigned int)&cls.globalServers[2711].adr.ipx[6] & samplerState) >> 22);
+                    D3DSAMP_ADDRESSV,
+                    (samplerState & 0xC00000) >> 22);
                 if (v13 < 0)
                 {
                     do
@@ -2011,17 +2007,13 @@ unsigned int __cdecl R_HW_SetSamplerState(
                 }
             } while (alwaysfails);
         }
-        if (((unsigned int)&svs.clients[5].reliableCommandInfo[110].cmd[284] & diffSamplerState) != 0)
+        if ((diffSamplerState & 0x3000000) != 0)
         {
             do
             {
                 if (r_logFile && r_logFile->current.integer)
                     RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_ADDRESSW, address )\n");
-                v12 = device->SetSamplerState(
-                    device,
-                    samplerIndex,
-                    D3DSAMP_ADDRESSW,
-                    ((unsigned int)&svs.clients[5].reliableCommandInfo[110].cmd[284] & samplerState) >> 24);
+                v12 = device->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSW, (samplerState & 0x3000000) >> 24);
                 if (v12 < 0)
                 {
                     do
@@ -2055,9 +2047,9 @@ unsigned int __cdecl R_DecodeSamplerState(unsigned __int8 samplerState)
             "tableIndex doesn't index s_decodeSamplerFilterState\n\t%i not in [0, %i)",
             tableIndex,
             s_decodeSamplerFilterState);
-    return (unsigned int)&g_entities[620].attachModelNames[16]
-        | s_decodeSamplerFilterState[tableIndex]
-        | ((samplerState & 0x20) << 16)
+    return s_decodeSamplerFilterState[tableIndex]
+        | 0x1500000
+            | ((samplerState & 0x20) << 16)
             | ((samplerState & 0x40) << 17)
             | ((samplerState & 0x80) << 18);
 }
@@ -2352,9 +2344,7 @@ void __cdecl R_HW_DisableSampler(IDirect3DDevice9 *device, unsigned int samplerI
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetTexture( samplerIndex, 0 )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, unsigned int))device->SetTexture)(
-            device,
-            device,
+        hr = device->SetTexture(
             samplerIndex,
             0);
         if (hr < 0)
@@ -2384,6 +2374,7 @@ void __cdecl R_UnbindImage(GfxCmdBufState *state, const GfxImage *image)
     }
 }
 
+bool g_renderTargetIsOverridden;
 void __cdecl R_SetRenderTargetSize(GfxCmdBufSourceState *source, GfxRenderTargetId newTargetId)
 {
     GfxRenderTargetId actualTargetId; // [esp+0h] [ebp-4h]
@@ -2409,8 +2400,8 @@ void __cdecl R_SetRenderTargetSize(GfxCmdBufSourceState *source, GfxRenderTarget
             0,
             14);
     source->viewportBehavior = R_ViewportBehaviorForRenderTarget(newTargetId);
-    source->renderTargetWidth = dword_EA74EFC[5 * newTargetId];
-    source->renderTargetHeight = dword_EA74F00[5 * newTargetId];
+    source->renderTargetWidth = gfxRenderTargets[newTargetId].width;
+    source->renderTargetHeight = gfxRenderTargets[newTargetId].height;
     if (source->renderTargetWidth <= 0)
         MyAssertHandler(
             ".\\r_state.cpp",
@@ -2428,6 +2419,25 @@ void __cdecl R_SetRenderTargetSize(GfxCmdBufSourceState *source, GfxRenderTarget
             "(source->renderTargetHeight > 0)",
             source->renderTargetHeight);
 }
+
+const GfxViewportBehavior s_viewportBehaviorForRenderTarget[15] =
+{
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FOR_VIEW,
+  GFX_USE_VIEWPORT_FOR_VIEW,
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FOR_VIEW,
+  GFX_USE_VIEWPORT_FOR_VIEW,
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FOR_VIEW,
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FULL,
+  GFX_USE_VIEWPORT_FOR_VIEW,
+  GFX_USE_VIEWPORT_FOR_VIEW
+}; // idb
 
 GfxViewportBehavior __cdecl R_ViewportBehaviorForRenderTarget(GfxRenderTargetId renderTargetId)
 {
@@ -2470,7 +2480,7 @@ void __cdecl R_SetRenderTarget(GfxCmdBufContext context, GfxRenderTargetId newTa
                 0,
                 "%s",
                 "context.source->viewportBehavior == R_ViewportBehaviorForRenderTarget( newTargetId )");
-        if (context.source->renderTargetHeight != dword_EA74F00[5 * newTargetId])
+        if (context.source->renderTargetHeight != gfxRenderTargets[newTargetId].height)
             MyAssertHandler(
                 ".\\r_state.cpp",
                 1381,
@@ -2497,7 +2507,7 @@ void __cdecl R_SetRenderTarget(GfxCmdBufContext context, GfxRenderTargetId newTa
         context.state->renderTargetId = newTargetId;
         context.source->viewMode = VIEW_MODE_NONE;
         context.source->viewportIsDirty = 1;
-        if (context.source->renderTargetWidth != dword_EA74EFC[5 * newTargetId])
+        if (context.source->renderTargetWidth != gfxRenderTargets[newTargetId].width)
             MyAssertHandler(
                 ".\\r_state.cpp",
                 1404,
@@ -2518,13 +2528,13 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
     device = state->prim.device;
     if (!device)
         MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 888, 0, "%s", "device");
-    if (dword_EA74EF4[5 * state->renderTargetId] != dword_EA74EF4[5 * newTargetId])
+    if (gfxRenderTargets[state->renderTargetId].surface.color != gfxRenderTargets[newTargetId].surface.color)
     {
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetRenderTarget( 0, gfxRenderTargets[newTargetId].surface.color )\n");
-            hr = device->SetRenderTarget(device, 0, (IDirect3DSurface9 *)dword_EA74EF4[5 * newTargetId]);
+            hr = device->SetRenderTarget(0, gfxRenderTargets[newTargetId].surface.color);
             if (hr < 0)
             {
                 do
@@ -2542,19 +2552,19 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
         } while (alwaysfails);
         state->viewport.x = 0;
         state->viewport.y = 0;
-        state->viewport.width = dword_EA74EFC[5 * newTargetId];
-        state->viewport.height = dword_EA74F00[5 * newTargetId];
+        state->viewport.width = gfxRenderTargets[newTargetId].width;
+        state->viewport.height = gfxRenderTargets[newTargetId].height;
         state->depthRangeType = GFX_DEPTH_RANGE_FULL;
         state->depthRangeNear = 0.0;
         state->depthRangeFar = 1.0;
     }
-    if (dword_EA74EF8[5 * state->renderTargetId] != dword_EA74EF8[5 * newTargetId])
+    if (gfxRenderTargets[state->renderTargetId].surface.depthStencil != gfxRenderTargets[newTargetId].surface.depthStencil)
     {
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetDepthStencilSurface( gfxRenderTargets[newTargetId].surface.depthStencil )\n");
-            v4 = device->SetDepthStencilSurface(device, (IDirect3DSurface9 *)dword_EA74EF8[5 * newTargetId]);
+            v4 = device->SetDepthStencilSurface(gfxRenderTargets[newTargetId].surface.depthStencil);
             if (v4 < 0)
             {
                 do
@@ -2627,14 +2637,15 @@ void __cdecl R_ClearScreenInternal(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->Clear( 0, 0, whichToClear, nativeColor.packed, depth, stencil )\n");
-        hr = ((int(__stdcall *)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int))device->Clear)(
-            device,
-            0,
-            0,
-            whichToClear,
-            (GfxColor)nativeColor.packed,
-            LODWORD(depth),
-            stencil);
+        //hr = ((int(__stdcall *)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int))device->Clear)(
+        //    device,
+        //    0,
+        //    0,
+        //    whichToClear,
+        //    (GfxColor)nativeColor.packed,
+        //    LODWORD(depth),
+        //    stencil);
+        hr = device->Clear(0, 0, whichToClear, (GfxColor)nativeColor.packed, LODWORD(depth), stencil);
         if (hr < 0)
         {
             do
@@ -2712,7 +2723,7 @@ void __cdecl R_HW_SetPolygonOffset(IDirect3DDevice9 *device, float scale, float 
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetRenderState( D3DRS_SLOPESCALEDEPTHBIAS, FloatAsInt( &scale ) )\n");
-            hr = device->SetRenderState(device, D3DRS_SLOPESCALEDEPTHBIAS, LODWORD(scale));
+            hr = device->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, LODWORD(scale));
             if (hr < 0)
             {
                 do
@@ -2737,7 +2748,7 @@ void __cdecl R_HW_SetPolygonOffset(IDirect3DDevice9 *device, float scale, float 
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_DEPTHBIAS, FloatAsInt( &bias ) )\n");
-        v5 = device->SetRenderState(device, D3DRS_DEPTHBIAS, LODWORD(bias));
+        v5 = device->SetRenderState(D3DRS_DEPTHBIAS, LODWORD(bias));
         if (v5 < 0)
         {
             do
@@ -2792,8 +2803,8 @@ void  R_DrawCall(
     void *v9; // esp
     _BYTE v10[2576]; // [esp-1430h] [ebp-143Ch] BYREF
     _BYTE v11[2580]; // [esp-A20h] [ebp-A2Ch] BYREF
-    GfxSceneDef *p_sceneDef; // [esp-Ch] [ebp-18h]
-    GfxCmdBufInput *p_input; // [esp-8h] [ebp-14h]
+    const GfxSceneDef *p_sceneDef; // [esp-Ch] [ebp-18h]
+    const GfxCmdBufInput *p_input; // [esp-8h] [ebp-14h]
     int v14; // [esp+0h] [ebp-Ch]
     void *v15; // [esp+4h] [ebp-8h]
     void *retaddr; // [esp+Ch] [ebp+0h]

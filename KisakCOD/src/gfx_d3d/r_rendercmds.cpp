@@ -6,6 +6,20 @@
 #include "r_model_lighting.h"
 #include "r_scene.h"
 #include "r_dpvs.h"
+#include "r_meshdata.h"
+#include "r_spotshadow.h"
+#include "r_buffers.h"
+#include "r_model.h"
+#include "r_workercmds.h"
+#include "r_cinematic.h"
+#include "r_dvars.h"
+#include <client/client.h>
+#include "r_bsp.h"
+#include "r_sky.h"
+#include "r_draw_method.h"
+#include <xanim/xmodel.h>
+#include <win32/win_net.h>
+#include <database/database.h>
 
 //  struct GfxBackEndData *frontEndDataOut 85827c80     gfx_d3d : r_rendercmds.obj
 GfxBackEndData *frontEndDataOut;
@@ -368,6 +382,8 @@ void __cdecl R_AbortRenderCommands()
     }
 }
 
+GfxCmdArray *s_cmdList;
+
 void __cdecl R_BeginClientCmdList2D()
 {
     frontEndDataOut->viewInfo[frontEndDataOut->viewInfoCount].cmds = &s_cmdList->cmds[s_cmdList->usedTotal];
@@ -449,6 +465,17 @@ GfxCmdHeader *__cdecl R_GetCommandBuffer(GfxRenderCommand renderCmd, int bytes)
     }
 }
 
+void R_FreeTempSkinBuffer()
+{
+    if (frontEndDataOut->tempSkinPos)
+    {
+        Z_VirtualDecommit(frontEndDataOut->tempSkinBuf, frontEndDataOut->tempSkinPos);
+        frontEndDataOut->tempSkinPos = 0;
+    }
+}
+
+unsigned int s_smpFrame;
+unsigned int g_frameIndex;
 DebugGlobals *R_ToggleSmpFrame()
 {
     DebugGlobals *result; // eax
@@ -1233,6 +1260,14 @@ void __cdecl R_BeginFrame()
     }
 }
 
+const float s_debugShaderConsts[5][4] =
+{
+  { 0.0, 0.0, 0.0, 0.0 },
+  { 0.0, 0.0, 0.0, 1.0 },
+  { 1.0, 0.0, 0.0, 0.0 },
+  { 0.0, 1.0, 0.0, 0.0 },
+  { 0.0, 0.0, 1.0, 0.0 }
+}; // idb
 const dvar_s *R_UpdateFrontEndDvarOptions()
 {
     const dvar_s *result; // eax
@@ -1242,7 +1277,7 @@ const dvar_s *R_UpdateFrontEndDvarOptions()
         R_UpdateLightsFromDvars();
     if (r_sun_from_dvars->current.enabled && rgp.world)
         R_SetSunFromDvars(&rgp.world->sun);
-    if ((unsigned __int8)R_GpuSyncModified())
+    if (R_GpuSyncModified())
         R_UpdateGpuSyncType();
     R_SetTestLods();
     rg.hasAnyImageOverrides = R_AreAnyImageOverridesActive();
@@ -1253,8 +1288,8 @@ const dvar_s *R_UpdateFrontEndDvarOptions()
     }
     if (r_fullbright->modified || r_debugShader->modified)
     {
-        Dvar_ClearModified(r_fullbright);
-        Dvar_ClearModified(r_debugShader);
+        Dvar_ClearModified((dvar_t*)r_fullbright);
+        Dvar_ClearModified((dvar_t*)r_debugShader);
         R_SyncRenderThread();
         R_InitDrawMethod();
     }
@@ -1273,7 +1308,7 @@ const dvar_s *R_UpdateFrontEndDvarOptions()
     if (rg.distortion != v1)
         R_SyncRenderThread();
     rg.distortion = v1;
-    R_SetInputCodeImageTexture(&gfxCmdBufInput, 0xAu, v1 ? dword_EA74F2C : 0);
+    R_SetInputCodeImageTexture(&gfxCmdBufInput, 0xAu, v1 ? gfxRenderTargets[3].image : 0);
     rg.drawWorld = r_drawWorld->current.enabled;
     result = r_drawBModels;
     rg.drawBModels = r_drawBModels->current.enabled;
@@ -1356,7 +1391,7 @@ bool __cdecl R_LightTweaksModified()
         MyAssertHandler(".\\r_rendercmds.cpp", 1702, 0, "%s", "r_lightTweakSunColor");
     if (!r_lightTweakSunDiffuseColor)
         MyAssertHandler(".\\r_rendercmds.cpp", 1703, 0, "%s", "r_lightTweakSunDiffuseColor");
-    if (!r_lightTweakSunDirection.integer)
+    if (!r_lightTweakSunDirection)
         MyAssertHandler(".\\r_rendercmds.cpp", 1704, 0, "%s", "r_lightTweakSunDirection");
     v1 = R_CheckDvarModified(r_lightTweakAmbient);
     v2 = R_CheckDvarModified(r_lightTweakDiffuseFraction) | v1;
@@ -1364,7 +1399,7 @@ bool __cdecl R_LightTweaksModified()
     v4 = R_CheckDvarModified(r_lightTweakAmbientColor) | v3;
     v5 = R_CheckDvarModified(r_lightTweakSunColor) | v4;
     v6 = R_CheckDvarModified(r_lightTweakSunDiffuseColor) | v5;
-    return R_CheckDvarModified((const dvar_s *)r_lightTweakSunDirection.integer) | v6;
+    return R_CheckDvarModified((const dvar_s *)r_lightTweakSunDirection) | v6;
 }
 
 void R_SetTestLods()

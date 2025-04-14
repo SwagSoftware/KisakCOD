@@ -3,6 +3,7 @@
 #include "../qcommon/exe_headers.h"
 
 #include "win_local.h"
+#include <qcommon/net_chan_mp.h>
 
 static WSADATA	winsockdata;
 static qboolean	winsockInitialized = qfalse;
@@ -391,79 +392,61 @@ static char socksBuf[4096];
 Sys_SendPacket
 ==================
 */
-void Sys_SendPacket( int length, const void *data, netadr_t to ) {
-	int				ret;
-	struct sockaddr	addr;
-	SOCKET			net_socket;
+char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
+{
+	const char *v4; // eax
+	int err; // [esp+0h] [ebp-20h]
+	sockaddr addr; // [esp+4h] [ebp-1Ch] BYREF
+	int ret; // [esp+14h] [ebp-Ch]
+	unsigned int net_socket; // [esp+18h] [ebp-8h]
 
-#ifdef _XBOX
-	// VVFIXME - SOF2 calls into XBL code
-    // XBL_SentDataPacket( length );
-#endif
-
-	if( to.type == NA_BROADCAST ) {
+	net_socket = 0;
+	switch (to.type)
+	{
+	case NA_BROADCAST:
 		net_socket = ip_socket;
-	}
-	else if( to.type == NA_IP ) {
+		break;
+	case NA_IP:
 		net_socket = ip_socket;
-	}
-	else if( to.type == NA_IPX ) {
-#ifdef _XBOX
-		return;
-#else
+		break;
+	case NA_IPX:
 		net_socket = ipx_socket;
-#endif
-	}
-	else if( to.type == NA_BROADCAST_IPX ) {
-#ifdef _XBOX
-		return;
-#else
+		break;
+	case NA_BROADCAST_IPX:
 		net_socket = ipx_socket;
-#endif
+		break;
+	default:
+		Com_Error(ERR_FATAL, "Sys_SendPacket: bad address type");
+		break;
 	}
-	else {
-		Com_Error( ERR_FATAL, "Sys_SendPacket: bad address type" );
-		return;
-	}
-
-	if( net_socket == INVALID_SOCKET) {
-		return;
-	}
-
-	NetadrToSockadr( &to, &addr );
-
-#ifndef _XBOX
-	if( usingSocks && to.type == NA_IP ) {
-		socksBuf[0] = 0;	// reserved
+	if (!net_socket)
+		return 1;
+	NetadrToSockadr(&to, &addr);
+	if (usingSocks && to.type == NA_IP)
+	{
+		socksBuf[0] = 0;
 		socksBuf[1] = 0;
-		socksBuf[2] = 0;	// fragment (not fragmented)
-		socksBuf[3] = 1;	// address type: IPV4
-		*(int *)&socksBuf[4] = ((struct sockaddr_in *)&addr)->sin_addr.s_addr;
-		*(short *)&socksBuf[8] = ((struct sockaddr_in *)&addr)->sin_port;
-		memcpy( &socksBuf[10], data, length );
-		ret = sendto( net_socket, socksBuf, length+10, 0, &socksRelayAddr, sizeof(socksRelayAddr) );
+		socksBuf[2] = 0;
+		socksBuf[3] = 1;
+		*(_DWORD *)&socksBuf[4] = *(_DWORD *)&addr.sa_data[2];
+		*(_WORD *)&socksBuf[8] = *(_WORD *)addr.sa_data;
+		memcpy((unsigned __int8 *)&socksBuf[10], data, length);
+		ret = sendto(net_socket, socksBuf, length + 10, 0, &socksRelayAddr, 16);
 	}
-	else {
-#endif
-		ret = sendto( net_socket, (const char *)data, length, 0, &addr, sizeof(addr) );
-#ifndef _XBOX
+	else
+	{
+		ret = sendto(net_socket, (const char *)data, length, 0, &addr, 16);
 	}
-#endif
-	if( ret == SOCKET_ERROR ) {
-		int err = WSAGetLastError();
-
-		// wouldblock is silent
-		if( err == WSAEWOULDBLOCK ) {
-			return;
-		}
-
-		// some PPP links do not allow broadcasts and return an error
-		if( ( err == WSAEADDRNOTAVAIL ) && ( ( to.type == NA_BROADCAST ) || ( to.type == NA_BROADCAST_IPX ) ) ) {
-			return;
-		}
-
-		Com_Printf( "NET_SendPacket: %s\n", NET_ErrorString() );
-	}
+	if (ret != -1)
+		return 1;
+	err = WSAGetLastError();
+	if (err == 10035)
+		return 1;
+	if (err == 10049 && (to.type == NA_BROADCAST || to.type == NA_BROADCAST_IPX))
+		return 1;
+	v4 = NET_ErrorString();
+	Com_PrintError(16, "Sys_SendPacket: %s\n", v4);
+	return 0;
 }
 
 

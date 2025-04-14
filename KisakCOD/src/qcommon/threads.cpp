@@ -47,6 +47,11 @@ unsigned int __cdecl Sys_GetCpuCount()
     return s_cpuCount;
 }
 
+BOOL __cdecl Sys_IsRendererReady()
+{
+    return Sys_WaitForSingleObjectTimeout(&renderCompletedEvent, 0);
+}
+
 void __cdecl Sys_InitMainThread()
 {
     HANDLE process; // [esp+0h] [ebp-8h]

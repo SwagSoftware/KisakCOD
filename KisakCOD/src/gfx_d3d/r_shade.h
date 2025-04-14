@@ -12,6 +12,8 @@ union GfxShaderConstantState // sizeof=0x8
     unsigned __int64 packed;
 };
 
+int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexCount, int stride);
+void __cdecl R_ChangeObjectPlacement(GfxCmdBufSourceState *source, const GfxScaledPlacement *placement);
 int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, int triCount);
 void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context);
 void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData);
@@ -69,6 +71,22 @@ void __cdecl R_SetPassShaderStableArguments(
     GfxCmdBufContext context,
     unsigned int argCount,
     const MaterialShaderArgument *arg);
+
+inline void __cdecl R_CheckVertexDataOverflow(int dataSize)
+{
+    if (!gfxBuf.dynamicVertexBuffer)
+        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_shade.h", 38, 0, "%s", "gfxBuf.dynamicVertexBuffer");
+    if (dataSize <= 0 || dataSize > gfxBuf.dynamicVertexBuffer->total)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\gfx_d3d\\r_shade.h",
+            39,
+            0,
+            "%s\n\t(dataSize) = %i",
+            "(dataSize > 0 && dataSize <= gfxBuf.dynamicVertexBuffer->total)",
+            dataSize);
+    if (dataSize + gfxBuf.dynamicVertexBuffer->used > gfxBuf.dynamicVertexBuffer->total)
+        gfxBuf.dynamicVertexBuffer->used = 0;
+}
 
 
 // r_draw_pixelshader

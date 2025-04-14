@@ -324,6 +324,8 @@ extern const dvar_t *sv_botsPressAttackBtn;
 extern const dvar_t *sv_serverid;
 extern const dvar_t *sv_mapRotation;
 
+extern serverStatic_t svs;
+
 
 // sv_net_chan_mp
 bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan);
@@ -331,6 +333,7 @@ void __cdecl SV_Netchan_OutgoingSequenceIncremented(client_t *client, netchan_t 
 bool __cdecl SV_Netchan_Transmit(client_t *client, unsigned __int8 *data, int length);
 void __cdecl SV_Netchan_AddOOBProfilePacket(int iLength);
 void __cdecl SV_Netchan_UpdateProfileStats();
+void __cdecl SV_Netchan_PrintProfileStats(int bPrintToConsole);
 
 
 

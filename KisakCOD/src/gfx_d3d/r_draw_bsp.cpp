@@ -4,6 +4,8 @@
 #include "r_dvars.h"
 #include "r_state.h"
 #include "r_dvars.cpp"
+#include "r_shade.h"
+#include "rb_stats.h"
 
 //int *g_layerDataStride  827dc14c     gfx_d3d : r_draw_bsp.obj
 
@@ -37,11 +39,12 @@ void __cdecl R_HW_SetSamplerTexture(IDirect3DDevice9 *device, unsigned int sampl
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetTexture( samplerIndex, texture->basemap )\n");
-        hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, IDirect3DBaseTexture9 *))device->SetTexture)(
-            device,
-            device,
-            samplerIndex,
-            texture->basemap);
+        //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, IDirect3DBaseTexture9 *))device->SetTexture)(
+        //    device,
+        //    device,
+        //    samplerIndex,
+        //    texture->basemap);
+        hr = device->SetTexture(samplerIndex, texture->basemap);
         if (hr < 0)
         {
             do
@@ -58,6 +61,7 @@ void __cdecl R_HW_SetSamplerTexture(IDirect3DDevice9 *device, unsigned int sampl
     } while (alwaysfails);
 }
 
+const int g_layerDataStride[16] = { 0, 0, 0, 8, 12, 16, 20, 24, 24, 28, 32, 32, 36, 40, 0, 0 }; // idb
 void __cdecl R_SetStreamsForBspSurface(GfxCmdBufPrimState *state, const srfTriangles_t *tris)
 {
     int vertexLayerData; // [esp+0h] [ebp-2Ch]

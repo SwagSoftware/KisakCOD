@@ -455,3 +455,96 @@ void __cdecl Image_Upload2D_CopyData_PC(
         } while (alwaysfails);
     }
 }
+
+
+int __cdecl Image_GetPlatformScreenWidth(int platform, int screenWidth)
+{
+    if (platform == 1)
+        return 640;
+    if (platform)
+        MyAssertHandler(
+            ".\\r_image_load_common.cpp",
+            58,
+            0,
+            "%s\n\t(platform) = %i",
+            "(platform == PICMIP_PLATFORM_USED)",
+            platform);
+    return screenWidth;
+}
+
+int __cdecl Image_GetPlatformScreenHeight(int platform, int screenHeight)
+{
+    if (platform == 1)
+        return 480;
+    if (platform)
+        MyAssertHandler(
+            ".\\r_image_load_common.cpp",
+            70,
+            0,
+            "%s\n\t(platform) = %i",
+            "(platform == PICMIP_PLATFORM_USED)",
+            platform);
+    return screenHeight;
+}
+
+void __cdecl Image_GetMipmapResolution(
+    int baseWidth,
+    int baseHeight,
+    int mipmap,
+    unsigned __int16 *mipWidth,
+    unsigned __int16 *mipHeight)
+{
+    unsigned int v5; // [esp+0h] [ebp-10h]
+    unsigned int v6; // [esp+4h] [ebp-Ch]
+
+    if (baseWidth <= 0)
+        MyAssertHandler(".\\r_image_load_common.cpp", 38, 0, "%s\n\t(baseWidth) = %i", "(baseWidth > 0)", baseWidth);
+    if (baseHeight <= 0)
+        MyAssertHandler(".\\r_image_load_common.cpp", 39, 0, "%s\n\t(baseHeight) = %i", "(baseHeight > 0)", baseHeight);
+    if (mipmap < 0)
+        MyAssertHandler(".\\r_image_load_common.cpp", 40, 0, "%s\n\t(mipmap) = %i", "(mipmap >= 0)", mipmap);
+    if (!mipWidth)
+        MyAssertHandler(".\\r_image_load_common.cpp", 41, 0, "%s", "mipWidth");
+    if (!mipHeight)
+        MyAssertHandler(".\\r_image_load_common.cpp", 42, 0, "%s", "mipHeight");
+    if ((int)((unsigned int)baseWidth >> mipmap) > 1)
+        v6 = (unsigned int)baseWidth >> mipmap;
+    else
+        LOWORD(v6) = 1;
+    *mipWidth = v6;
+    if ((int)((unsigned int)baseHeight >> mipmap) > 1)
+        v5 = (unsigned int)baseHeight >> mipmap;
+    else
+        LOWORD(v5) = 1;
+    *mipHeight = v5;
+    if (!*mipWidth)
+        MyAssertHandler(".\\r_image_load_common.cpp", 46, 1, "%s\n\t(*mipWidth) = %i", "(*mipWidth > 0)", *mipWidth);
+    if (!*mipHeight)
+        MyAssertHandler(".\\r_image_load_common.cpp", 47, 1, "%s\n\t(*mipHeight) = %i", "(*mipHeight > 0)", *mipHeight);
+}
+
+void __cdecl Image_TrackFullscreenTexture(
+    GfxImage *image,
+    int fullscreenWidth,
+    int fullscreenHeight,
+    int picmip,
+    _D3DFORMAT format)
+{
+    unsigned int memory; // [esp+0h] [ebp-18h]
+    unsigned int platformHeight; // [esp+4h] [ebp-14h]
+    unsigned __int16 width; // [esp+8h] [ebp-10h] BYREF
+    unsigned __int16 height; // [esp+Ch] [ebp-Ch] BYREF
+    int platformWidth; // [esp+10h] [ebp-8h]
+    int platform; // [esp+14h] [ebp-4h]
+
+    for (platform = 0; platform < 2; ++platform)
+    {
+        platformWidth = Image_GetPlatformScreenWidth(platform, fullscreenWidth);
+        platformHeight = Image_GetPlatformScreenHeight(platform, fullscreenHeight);
+        Image_GetMipmapResolution(platformWidth, platformHeight, picmip, &width, &height);
+        memory = Image_GetCardMemoryAmount(3, format, width, height, 1u);
+        if (!useFastFile->current.enabled)
+            Image_TrackTotalMemory(image, platform, memory);
+        image->cardMemory.platform[platform] = memory;
+    }
+}

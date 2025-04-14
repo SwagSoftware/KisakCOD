@@ -277,6 +277,8 @@ void __cdecl MatrixTransformVectorQuatTrans(const vec3r in, const struct DObjAni
 void __cdecl MatrixForViewer(float (*mtx)[4], const float *origin, const float (*axis)[3]);
 void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear);
 
+void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear, float zFar);
+
 
 void __cdecl ClearBounds(float *mins, float *maxs);
 

@@ -144,6 +144,7 @@ void __cdecl Image_Create2DTexture_PC(
     _D3DFORMAT imageFormat);
 
 void __cdecl RB_UnbindAllImages();
+void __cdecl R_SetPicmip();
 
 
 // r_image_utils
@@ -322,3 +323,10 @@ void __cdecl Image_Upload2D_CopyData_PC(
     _D3DCUBEMAP_FACES face,
     unsigned int mipLevel,
     unsigned __int8 *src);
+
+void __cdecl Image_TrackFullscreenTexture(
+    GfxImage *image,
+    int fullscreenWidth,
+    int fullscreenHeight,
+    int picmip,
+    _D3DFORMAT format);

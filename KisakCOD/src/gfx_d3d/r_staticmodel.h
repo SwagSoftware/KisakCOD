@@ -15,8 +15,3 @@ int __cdecl R_StaticModelGetMemoryUsage(XModel *model, int *modelCount);
 BOOL __cdecl R_StaticModelCompare(
     const GfxStaticModelCombinedInst *smodelInst0,
     const GfxStaticModelCombinedInst *smodelInst1);
-
-
-void __cdecl R_StaticModelCacheStats_f();
-void __cdecl R_StaticModelCacheFlush_f();
-void __cdecl R_ClearAllStaticModelCacheRefs();

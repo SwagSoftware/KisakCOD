@@ -16,6 +16,17 @@ enum DpvsForceBevels : __int32
     DPVS_FORCE_BEVELS = 0x1,
 };
 
+struct DpvsPlanes // sizeof=0x8
+{                                       // ...
+    const DpvsPlane *planes;            // ...
+    int count;                          // ...
+};
+struct DpvsClipPlaneSet // sizeof=0x44
+{                                       // ...
+    const DpvsPlane *planes[16];        // ...
+    unsigned int count;                 // ...
+};
+
 struct DpvsDynamicCellCmd // sizeof=0xC
 {                                       // ...
     const DpvsPlane *planes;            // ...
@@ -300,6 +311,7 @@ void __cdecl R_CullDynModelInCell(
 // r_dpvs_sceneent
 void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data);
 
-
+// r_dpvs_static
+void __cdecl R_AddCellStaticSurfacesInFrustumCmd(DpvsStaticCellCmd *data);
 
 extern DpvsGlobals dpvsGlob;

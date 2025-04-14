@@ -119,6 +119,54 @@ enum FullscreenType : __int32
     FULLSCREEN_SCENE = 0x2,
 };
 
+struct GfxCmdStretchPic // sizeof=0x2C
+{
+    GfxCmdHeader header;
+    const Material *material;
+    float x;
+    float y;
+    float w;
+    float h;
+    float s0;
+    float t0;
+    float s1;
+    float t1;
+    GfxColor color;
+};
+
+struct GfxCmdClearScreen // sizeof=0x1C
+{
+    GfxCmdHeader header;
+    unsigned __int8 whichToClear;
+    unsigned __int8 stencil;
+    // padding byte
+    // padding byte
+    float depth;
+    float color[4];
+};
+
+struct GfxCmdProjectionSet // sizeof=0x8
+{
+    GfxCmdHeader header;
+    GfxProjectionTypes projection;
+};
+
+struct GfxCmdSaveScreenSection // sizeof=0x18
+{
+    GfxCmdHeader header;
+    float s0;
+    float t0;
+    float ds;
+    float dt;
+    int screenTimerId;
+};
+
+struct GfxCmdSaveScreen // sizeof=0x8
+{
+    GfxCmdHeader header;
+    int screenTimerId;
+};
+
 struct GfxRenderTargetSurface // sizeof=0x8
 {                                       // ...
     IDirect3DSurface9 *color;           // ...

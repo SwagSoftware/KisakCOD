@@ -22,6 +22,11 @@ struct GfxSceneParms // sizeof=0xA0
     const GfxLight *primaryLights;
 };
 
+struct SceneEntCmd // sizeof=0x4
+{                                       // ...
+    const GfxViewInfo *viewInfo;        // ...
+};
+
 struct BModelSurface // sizeof=0x8
 {
     const GfxScaledPlacement *placement;

@@ -169,3 +169,23 @@ unsigned __int16 *__cdecl R_AllocPreTessIndices(int count)
     gfxBuf.preTessIndexBuffer->used += count;
     return indices;
 }
+
+void __cdecl R_EndPreTess()
+{
+    if (!gfxBuf.preTessIndexBuffer->indices)
+        MyAssertHandler(".\\r_pretess.cpp", 292, 0, "%s", "gfxBuf.preTessIndexBuffer->indices != NULL");
+    R_UnlockIndexBuffer(gfxBuf.preTessIndexBuffer->buffer);
+    gfxBuf.preTessIndexBuffer->indices = 0;
+}
+
+void __cdecl R_BeginPreTess()
+{
+    if (gfxBuf.preTessIndexBuffer->indices)
+        MyAssertHandler(".\\r_pretess.cpp", 280, 0, "%s", "gfxBuf.preTessIndexBuffer->indices == NULL");
+    gfxBuf.preTessIndexBuffer->indices = (unsigned __int16 *)R_LockIndexBuffer(
+        gfxBuf.preTessIndexBuffer->buffer,
+        0,
+        2 * gfxBuf.preTessIndexBuffer->total,
+        0x2000);
+    gfxBuf.preTessIndexBuffer->used = 0;
+}

@@ -188,6 +188,13 @@ void Sys_Net_Restart_f();
 void __cdecl Sys_Listen_f();
 
 void __cdecl Sys_Mkdir(const char *path);
+int __cdecl Sys_CountFileList(char **list);
+char **__cdecl Sys_ListFiles(
+	const char *directory,
+	const char *extension,
+	const char *filter,
+	int *numfiles,
+	int wantsubs);
 char *__cdecl Sys_Cwd();
 const char *__cdecl Sys_DefaultCDPath();
 char *__cdecl Sys_DefaultInstallPath();

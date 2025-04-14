@@ -39,6 +39,13 @@ struct netadr_t {
     unsigned char  ipx[10];
 };
 
+struct ClientSnapshotData // sizeof=0x44
+{
+    int snapshotSize[8];
+    int compressedSize[8];
+    int index;
+};
+
 struct netProfilePacket_t // sizeof=0xC
 {                                       // ...
     int iTime;
@@ -83,6 +90,34 @@ struct netchan_t // sizeof=0x62C
     unsigned __int8* unsentBuffer;
     int unsentBufferSize;
     netProfileInfo_t prof;
+};
+
+struct fakedLatencyPackets_t // sizeof=0x50
+{
+    bool outbound;
+    bool loopback;
+    // padding byte
+    // padding byte
+    netsrc_t sock;
+    netadr_t addr;
+    unsigned int length;
+    unsigned __int8 *data;
+    int startTime;
+    msg_t msg;
+};
+
+struct loopmsg_t // sizeof=0x580
+{                                       // ...
+    unsigned __int8 data[1400];
+    int datalen;
+    int port;
+};
+
+struct loopback_t // sizeof=0x5808
+{                                       // ...
+    loopmsg_t msgs[16];
+    volatile unsigned int get;
+    volatile unsigned int send;
 };
 
 struct clientHeader_t // sizeof=0x64C

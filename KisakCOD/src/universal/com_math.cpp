@@ -2823,3 +2823,19 @@ void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelM
     //    ^ _mask__NegFloat_;
     //LODWORD(skelMat->origin.v[3]) = FLOAT_1_0;
 }
+
+void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear, float zFar)
+{
+    if (!mtx)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2217, 0, "%s", "mtx");
+    if (zNear <= 0.0)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2218, 0, "zNear > 0.0f\n\t%g, %g", zNear, 0.0);
+    if (zNear >= (double)zFar)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2219, 0, "zFar > zNear\n\t%g, %g", zFar, zNear);
+    memset((unsigned __int8 *)mtx, 0, 0x40u);
+    (*mtx)[0] = 1.0 / tanHalfFovX;
+    (*mtx)[5] = 1.0 / tanHalfFovY;
+    (*mtx)[10] = -zFar / (zNear - zFar);
+    (*mtx)[11] = 1.0;
+    (*mtx)[14] = zNear * zFar / (zNear - zFar);
+}

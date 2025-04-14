@@ -72,6 +72,8 @@ bool __cdecl Sys_WaitForCinematicsHostOutstandingRequestEventTimeout(unsigned in
 void __cdecl Sys_SetCinematicsHostOutstandingRequestEvent();
 void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent();
 
+BOOL __cdecl Sys_IsRendererReady();
+
 
 enum WinThreadLock : __int32
 {                                       // ...

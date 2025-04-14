@@ -73,3 +73,8 @@ void __cdecl SMC_FreeCachedSurface_r(
 
 unsigned int SMC_ClearCache();
 void __cdecl R_FlushStaticModelCache();
+
+
+void __cdecl R_StaticModelCacheStats_f();
+void __cdecl R_StaticModelCacheFlush_f();
+void __cdecl R_ClearAllStaticModelCacheRefs();

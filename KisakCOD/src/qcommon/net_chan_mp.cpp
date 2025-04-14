@@ -1,4 +1,11 @@
+#include "net_chan_mp.h"
 #include "qcommon.h"
+#include <client_mp/client_mp.h>
+#include <win32/win_local.h>
+#include "cmd.h"
+#include <universal/com_files.h>
+#include <server_mp/server.h>
+#include <win32/win_net.h>
 
 
 const dvar_t *showpackets;
@@ -20,6 +27,12 @@ const dvar_t *msg_hudelemspew;
 // struct fakedLatencyPackets_t *laggedPackets 82ff2720     net_chan_mp.obj
 // int g_qport              83020760     net_chan_mp.obj
 // BOOL fakelagInitialized  83020768     net_chan_mp.obj
+unsigned __int8 tempNetchanPacketBuf[131072];
+loopback_t loopbacks[2];
+fakedLatencyPackets_t laggedPackets[512];
+bool fakelagInitialized;
+
+ClientSnapshotData s_clientSnapshotData[64];
 
 int net_iProfilingOn;
 
@@ -28,6 +41,7 @@ const char *netsrcString[2] =
     "client1",
     "server"
 };
+
 const char *NET_AdrToString(netadr_t a)
 {
     static	char	s[64];
@@ -226,11 +240,11 @@ void __cdecl Net_DisplayProfile(int localClientNum)
 
 char __cdecl FakeLag_DestroyPacket(unsigned int packet)
 {
-    Z_VirtualFree((void *)dword_2321360[20 * packet]);
-    dword_2321360[20 * packet] = 0;
-    dword_2321370[20 * packet] = 0;
-    dword_232135C[20 * packet] = 0;
-    dword_232137C[20 * packet] = 0;
+    Z_VirtualFree(laggedPackets[packet].data);
+    laggedPackets[packet].data = 0;
+    laggedPackets[packet].msg.data = 0;
+    laggedPackets[packet].length = 0;
+    laggedPackets[packet].msg.cursize = 0;
     return 1;
 }
 
@@ -240,13 +254,13 @@ void __cdecl FakeLag_SendPacket_Real(unsigned int packet)
         MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 541, 0, "%s", "packet < FAKELATENCY_MAX_PACKETS_HELD");
     if (!laggedPackets[packet].outbound)
         MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 542, 0, "%s", "laggedPackets[ packet ].outbound");
-    if (!dword_2321360[20 * packet])
+    if (!laggedPackets[packet].data)
         MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 543, 0, "%s", "laggedPackets[ packet ].data");
     NET_SendPacket(
-        (netsrc_t)dword_2321344[20 * packet],
-        dword_232135C[20 * packet],
-        (unsigned __int8 *)dword_2321360[20 * packet],
-        *((netadr_t *)&unk_2321348 + 4 * packet));
+        laggedPackets[packet].sock,
+        laggedPackets[packet].length,
+        laggedPackets[packet].data,
+        laggedPackets[packet].addr);
     FakeLag_DestroyPacket(packet);
 }
 
@@ -264,21 +278,21 @@ unsigned int __cdecl FakeLag_GetFreeSlot()
     int packet; // [esp+0h] [ebp-Ch]
     int packeta; // [esp+0h] [ebp-Ch]
     unsigned int oldest; // [esp+4h] [ebp-8h]
-    signed int oldestTime; // [esp+8h] [ebp-4h]
+    int oldestTime; // [esp+8h] [ebp-4h]
 
     for (packet = 0; packet < 512; ++packet)
     {
-        if (!dword_232135C[20 * packet])
+        if (!laggedPackets[packet].length)
             return packet;
     }
     oldest = 0;
     oldestTime = Sys_Milliseconds();
     for (packeta = 0; packeta < 512; ++packeta)
     {
-        if (laggedPackets[packeta].outbound && dword_2321364[20 * packeta] < oldestTime)
+        if (laggedPackets[packeta].outbound && laggedPackets[packeta].startTime < oldestTime)
         {
             oldest = packeta;
-            oldestTime = dword_2321364[20 * packeta];
+            oldestTime = laggedPackets[packeta].startTime;
         }
     }
     Com_Printf(16, "fake lag buffer is full, you should increase FAKELATENCY_MAX_PACKETS_HELD or reduce your latency\n");
@@ -296,13 +310,15 @@ bool __cdecl FakeLag_HostingGameOrParty()
 
 unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, netadr_t to)
 {
+    static int lastCall;
+
     __int64 v4; // rax
     const char *v6; // [esp+Ch] [ebp-28h]
     const char *v7; // [esp+10h] [ebp-24h]
     int v8; // [esp+14h] [ebp-20h]
     int jitter; // [esp+1Ch] [ebp-18h]
     unsigned int slot; // [esp+20h] [ebp-14h]
-    unsigned intnow; // [esp+24h] [ebp-10h]
+    DWORD now; // [esp+24h] [ebp-10h]
     int change; // [esp+28h] [ebp-Ch]
 
     if (length <= 0)
@@ -320,7 +336,7 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
         change = v8;
         if (fakelag_currentjitter->current.integer + fakelag_target->current.integer < fakelag_current->current.integer)
             change = -v8;
-        Dvar_SetInt((dvar_s *)fakelag_current, change + fakelag_current->current.integer);
+        Dvar_SetInt(fakelag_current, change + fakelag_current->current.integer);
     }
     if (fakelag_packetloss->current.value > 0.0 && fakelag_packetloss->current.value >= flrand(0.0, 1.0))
         return -1;
@@ -330,19 +346,19 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
     {
         slot = FakeLag_GetFreeSlot();
         laggedPackets[slot].outbound = 1;
-        dword_2321344[20 * slot] = sock;
-        byte_2321341[80 * slot] = to.type == NA_LOOPBACK;
-        *((netadr_t *)&unk_2321348 + 4 * slot) = to;
-        dword_232135C[20 * slot] = length;
-        dword_2321360[20 * slot] = (int)Z_VirtualAlloc(length, "FakeLag_SendPacket", 0);
-        dword_2321370[20 * slot] = dword_2321360[20 * slot];
-        memcpy((unsigned __int8 *)dword_2321360[20 * slot], data, length);
+        laggedPackets[slot].sock = sock;
+        laggedPackets[slot].loopback = to.type == NA_LOOPBACK;
+        laggedPackets[slot].addr = to;
+        laggedPackets[slot].length = length;
+        laggedPackets[slot].data = (unsigned __int8 *)Z_VirtualAlloc(length, "FakeLag_SendPacket", 0);
+        laggedPackets[slot].msg.data = laggedPackets[slot].data;
+        memcpy(laggedPackets[slot].data, data, length);
         if (fakelag_jitter->current.integer)
             jitter = irand(0, lastCall - now);
         else
             jitter = 0;
-        dword_2321364[20 * slot] = jitter + Sys_Milliseconds();
-        if (showpackets->current.integer && (showpackets->current.integer > 1 || !byte_2321341[80 * slot]))
+        laggedPackets[slot].startTime = jitter + Sys_Milliseconds();
+        if (showpackets->current.integer && (showpackets->current.integer > 1 || !laggedPackets[slot].loopback))
         {
             if (sock == NS_SERVER)
             {
@@ -356,7 +372,7 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
                     v6 = "client";
                 v7 = v6;
             }
-            if (byte_2321341[80 * slot])
+            if (laggedPackets[slot].loopback)
                 Com_Printf(16, "[%i] adding outbound %s packet for %s\n", now, "loopback", v7);
             else
                 Com_Printf(16, "[%i] adding outbound %s packet for %s\n", now, "network", v7);
@@ -376,13 +392,15 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
 
 unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netadr_t *from, msg_t *msg)
 {
+    static int lastCall_0;
+
     __int64 v4; // rax
     const char *v6; // [esp+14h] [ebp-24h]
     const char *v7; // [esp+18h] [ebp-20h]
     int v8; // [esp+1Ch] [ebp-1Ch]
     int jitter; // [esp+24h] [ebp-14h]
     unsigned int slot; // [esp+28h] [ebp-10h]
-    unsigned intnow; // [esp+2Ch] [ebp-Ch]
+    DWORD now; // [esp+2Ch] [ebp-Ch]
     int change; // [esp+30h] [ebp-8h]
 
     if (msg->cursize <= 0)
@@ -400,28 +418,28 @@ unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, n
         change = v8;
         if (fakelag_currentjitter->current.integer + fakelag_target->current.integer < fakelag_current->current.integer)
             change = -v8;
-        Dvar_SetInt((dvar_s *)fakelag_current, change + fakelag_current->current.integer);
+        Dvar_SetInt(fakelag_current, change + fakelag_current->current.integer);
     }
     if (fakelag_packetloss->current.value > 0.0 && fakelag_packetloss->current.value >= flrand(0.0, 1.0))
         return -1;
     slot = FakeLag_GetFreeSlot();
     laggedPackets[slot].outbound = 0;
-    byte_2321341[80 * slot] = loopback;
-    dword_2321344[20 * slot] = sock;
-    *((netadr_t *)&unk_2321348 + 4 * slot) = *from;
-    dword_232135C[20 * slot] = msg->cursize;
-    dword_2321360[20 * slot] = (int)Z_VirtualAlloc(msg->cursize, "FakeLag_SendPacket", 0);
-    if (!dword_2321360[20 * slot])
+    laggedPackets[slot].loopback = loopback;
+    laggedPackets[slot].sock = sock;
+    laggedPackets[slot].addr = *from;
+    laggedPackets[slot].length = msg->cursize;
+    laggedPackets[slot].data = (unsigned __int8 *)Z_VirtualAlloc(msg->cursize, "FakeLag_SendPacket", 0);
+    if (!laggedPackets[slot].data)
         return -1;
-    memcpy((unsigned __int8 *)dword_2321360[20 * slot], msg->data, msg->cursize);
-    memcpy(&dword_2321368[20 * slot], msg, 0x28u);
-    dword_2321370[20 * slot] = dword_2321360[20 * slot];
+    memcpy(laggedPackets[slot].data, msg->data, msg->cursize);
+    qmemcpy(&laggedPackets[slot].msg, msg, sizeof(laggedPackets[slot].msg));
+    laggedPackets[slot].msg.data = laggedPackets[slot].data;
     if (fakelag_jitter->current.integer)
         jitter = irand(0, lastCall_0 - now);
     else
         jitter = 0;
-    dword_2321364[20 * slot] = jitter + Sys_Milliseconds();
-    if (showpackets->current.integer && (showpackets->current.integer > 1 || !byte_2321341[80 * slot]))
+    laggedPackets[slot].startTime = jitter + Sys_Milliseconds();
+    if (showpackets->current.integer && (showpackets->current.integer > 1 || !laggedPackets[slot].loopback))
     {
         if (sock == NS_SERVER)
         {
@@ -477,35 +495,36 @@ int __cdecl FakeLag_GetPacket(bool loopback, netsrc_t sock, netadr_t *net_from, 
     {
         if (packet >= 512)
             return 0;
-        if (dword_232135C[20 * packet]
+        if (laggedPackets[packet].length
             && !laggedPackets[packet].outbound
-            && dword_2321344[20 * packet] == sock
-            && byte_2321341[80 * packet] == loopback
-            && (FakeLag_HostingGameOrParty() && !byte_2321341[80 * packet]
-                || dword_2321364[20 * packet] + fakelag_current->current.integer / 2 < now))
+            && laggedPackets[packet].sock == sock
+            && laggedPackets[packet].loopback == loopback
+            && (FakeLag_HostingGameOrParty() && !laggedPackets[packet].loopback
+                || laggedPackets[packet].startTime + fakelag_current->current.integer / 2 < now))
         {
             break;
         }
     }
-    if (showpackets->current.integer && (showpackets->current.integer > 1 || !byte_2321341[80 * packet]))
+    if (showpackets->current.integer && (showpackets->current.integer > 1 || !laggedPackets[packet].loopback))
         Com_Printf(
             16,
             "[%i] delivering incoming packet from %i (time: %i) (%ims latency)\n",
             now,
-            dword_2321364[20 * packet],
-            dword_2321364[20 * packet],
-            now - dword_2321364[20 * packet]);
-    *net_from = *(netadr_t *)((_BYTE *)&unk_2321348 + 4 * packet);
-    net_message->bit = dword_2321388[20 * packet];
-    net_message->cursize = dword_232137C[20 * packet];
-    net_message->maxsize = dword_2321378[20 * packet];
-    net_message->overflowed = dword_2321368[20 * packet];
-    net_message->readcount = dword_2321384[20 * packet];
-    memcpy(net_message->data, (unsigned __int8 *)dword_2321360[20 * packet], dword_232135C[20 * packet]);
+            laggedPackets[packet].startTime,
+            laggedPackets[packet].startTime,
+            now - laggedPackets[packet].startTime);
+    *net_from = laggedPackets[packet].addr;
+    net_message->bit = laggedPackets[packet].msg.bit;
+    net_message->cursize = laggedPackets[packet].msg.cursize;
+    net_message->maxsize = laggedPackets[packet].msg.maxsize;
+    net_message->overflowed = laggedPackets[packet].msg.overflowed;
+    net_message->readcount = laggedPackets[packet].msg.readcount;
+    memcpy(net_message->data, laggedPackets[packet].data, laggedPackets[packet].length);
     FakeLag_DestroyPacket(packet);
     return 1;
 }
 
+int nextChangeTime;
 void __cdecl FakeLag_Frame()
 {
     double v0; // st7
@@ -530,14 +549,14 @@ void __cdecl FakeLag_Frame()
 
 int __cdecl FakeLag_SendLaggedPackets()
 {
-    unsigned intv1; // eax
-    int v2; // [esp-8h] [ebp-24h]
-    unsigned intv3; // [esp-4h] [ebp-20h]
+    DWORD v1; // eax
+    int startTime; // [esp-8h] [ebp-24h]
+    DWORD v3; // [esp-4h] [ebp-20h]
     const char *v4; // [esp+0h] [ebp-1Ch]
     const char *v5; // [esp+4h] [ebp-18h]
     const char *v6; // [esp+8h] [ebp-14h]
     signed int packet; // [esp+Ch] [ebp-10h]
-    int loopbackPacketTime; // [esp+10h] [ebp-Ch]
+    signed int loopbackPacketTime; // [esp+10h] [ebp-Ch]
     signed int networkPacketTime; // [esp+14h] [ebp-8h]
     int numSent; // [esp+18h] [ebp-4h]
 
@@ -551,33 +570,33 @@ int __cdecl FakeLag_SendLaggedPackets()
     numSent = 0;
     for (packet = 0; packet < 512; ++packet)
     {
-        if (dword_232135C[20 * packet]
+        if (laggedPackets[packet].length
             && laggedPackets[packet].outbound
-            && (byte_2321341[80 * packet] && dword_2321364[20 * packet] <= loopbackPacketTime
-                || !byte_2321341[80 * packet] && dword_2321364[20 * packet] <= networkPacketTime))
+            && (laggedPackets[packet].loopback && laggedPackets[packet].startTime <= loopbackPacketTime
+                || !laggedPackets[packet].loopback && laggedPackets[packet].startTime <= networkPacketTime))
         {
-            if (showpackets->current.integer && (showpackets->current.integer > 1 || !byte_2321341[80 * packet]))
+            if (showpackets->current.integer && (showpackets->current.integer > 1 || !laggedPackets[packet].loopback))
             {
-                if (dword_2321344[20 * packet] == 1)
+                if (laggedPackets[packet].sock == NS_SERVER)
                 {
                     v6 = "server";
                 }
                 else
                 {
-                    if (dword_2321344[20 * packet] >= 1)
+                    if (laggedPackets[packet].sock >= NS_SERVER)
                         v5 = "";
                     else
                         v5 = "client";
                     v6 = v5;
                 }
-                if (byte_2321341[80 * packet])
+                if (laggedPackets[packet].loopback)
                     v4 = "loopback";
                 else
                     v4 = "network";
-                v3 = Sys_Milliseconds() - dword_2321364[20 * packet];
-                v2 = dword_2321364[20 * packet];
+                v3 = Sys_Milliseconds() - laggedPackets[packet].startTime;
+                startTime = laggedPackets[packet].startTime;
                 v1 = Sys_Milliseconds();
-                Com_Printf(16, "[%i] delivering outbound %s packet for %s (from %i) (%ims delay)\n", v1, v4, v6, v2, v3);
+                Com_Printf(16, "[%i] delivering outbound %s packet for %s (from %i) (%ims delay)\n", v1, v4, v6, startTime, v3);
             }
             FakeLag_SendPacket_Real(packet);
             ++numSent;
@@ -594,7 +613,7 @@ void __cdecl FakeLag_Shutdown()
     {
         for (packet = 0; packet < 512; ++packet)
         {
-            if (dword_232135C[20 * packet])
+            if (laggedPackets[packet].length)
             {
                 if (laggedPackets[packet].outbound)
                     FakeLag_SendPacket_Real(packet);
@@ -605,6 +624,30 @@ void __cdecl FakeLag_Shutdown()
         fakelagInitialized = 0;
     }
 }
+
+
+
+int g_qport;
+
+void __cdecl Net_SetQPort_f()
+{
+    const char *v0; // eax
+
+    if (Cmd_Argc() < 1)
+        Com_PrintError(16, "setqport usage: setqport <qport>\n");
+    v0 = Cmd_Argv(1);
+    g_qport = (__int16)atoi(v0);
+}
+
+void __cdecl Net_GetQPort_f()
+{
+    Com_Printf(16, "qport = %i\n", g_qport);
+}
+
+cmd_function_s Net_DumpProfile_f_VAR;
+cmd_function_s MSG_DumpNetFieldChanges_f_VAR;
+cmd_function_s Net_GetQPort_f_VAR;
+cmd_function_s Net_SetQPort_f_VAR;
 
 void __cdecl Netchan_Init(__int16 port)
 {
@@ -654,13 +697,13 @@ void __cdecl Netchan_Init(__int16 port)
     min.value.min = 0.0;
     fakelag_packetloss = Dvar_RegisterFloat("fakelag_packetloss", 0.0, min, 0, "Packet loss for lag debugging");
     FakeLag_Init();
-    Cmd_AddCommandInternal("net_dumpprofile", Net_Dump//Profile_f, &Net_Dump//Profile_f_VAR);
+    Cmd_AddCommandInternal("net_dumpprofile", Net_DumpProfile_f, &Net_DumpProfile_f_VAR);
         Cmd_AddCommandInternal("net_dumpnetfieldchanges", MSG_DumpNetFieldChanges_f, &MSG_DumpNetFieldChanges_f_VAR);
     Cmd_AddCommandInternal("getqport", Net_GetQPort_f, &Net_GetQPort_f_VAR);
     Cmd_AddCommandInternal("setqport", Net_SetQPort_f, &Net_SetQPort_f_VAR);
 }
 
-void __cdecl Net_Dump//Profile_f()
+void __cdecl Net_DumpProfile_f()
 {
   if (net_iProfilingOn)
   {
@@ -673,6 +716,326 @@ void __cdecl Net_Dump//Profile_f()
   {
     Com_Printf(0, "Network profiling is not on. Set net_profile to turn on network profiling\n");
   }
+}
+
+void __cdecl SV_ProfDraw(int y, char *string, bool showHighlight)
+{
+    float color[4]; // [esp+Ch] [ebp-10h] BYREF
+
+    if (showHighlight)
+    {
+        color[0] = 1.0;
+        color[1] = 1.0;
+        color[2] = 1.0;
+        color[3] = 0.2;
+        CL_DrawRect(12, y, 1024, cl_profileTextHeight->current.integer - 6, color);
+    }
+    CL_DrawString(12, y, string, 0, cl_profileTextHeight->current.integer);
+}
+
+int __cdecl SV_GetPacketCompressionForClient(int clientNum)
+{
+    int slot; // [esp+0h] [ebp-Ch]
+    int avgCompressedSize; // [esp+4h] [ebp-8h]
+    int avgSize; // [esp+8h] [ebp-4h]
+
+    avgSize = 0;
+    avgCompressedSize = 0;
+    for (slot = 0; slot < 8; ++slot)
+    {
+        avgSize += s_clientSnapshotData[clientNum].snapshotSize[slot];
+        avgCompressedSize += s_clientSnapshotData[clientNum].compressedSize[slot];
+    }
+    if (avgSize)
+        return 100 - 100 * avgCompressedSize / avgSize;
+    else
+        return 0;
+}
+
+void __cdecl SV_Netchan_PrintProfileStats(int bPrintToConsole)
+{
+    int iTotalMinRecieved; // [esp+4h] [ebp-49Ch]
+    int packet; // [esp+8h] [ebp-498h]
+    int packeta; // [esp+8h] [ebp-498h]
+    int compress; // [esp+Ch] [ebp-494h]
+    char szLine[1028]; // [esp+10h] [ebp-490h] BYREF
+    int iYPos; // [esp+414h] [ebp-8Ch]
+    int totalPacketsSent; // [esp+418h] [ebp-88h]
+    int iFragmentTotal; // [esp+41Ch] [ebp-84h]
+    int totalAcked; // [esp+420h] [ebp-80h]
+    char szClientName[32]; // [esp+424h] [ebp-7Ch] BYREF
+    int iTotalBPSRecieved; // [esp+448h] [ebp-58h]
+    int iTotalPacketsRecieved; // [esp+44Ch] [ebp-54h]
+    int totalUnacked; // [esp+450h] [ebp-50h]
+    int iTotalBPSSent; // [esp+454h] [ebp-4Ch]
+    int iTotalMaxRecieved; // [esp+458h] [ebp-48h]
+    int now; // [esp+45Ch] [ebp-44h]
+    int iTotalMinSent; // [esp+460h] [ebp-40h]
+    client_t *pClient; // [esp+464h] [ebp-3Ch]
+    int iTotalFragmentsSent; // [esp+468h] [ebp-38h]
+    int packetsSent; // [esp+46Ch] [ebp-34h]
+    int iTotalPacketsSent; // [esp+470h] [ebp-30h]
+    int iYStep; // [esp+474h] [ebp-2Ch]
+    int iTotalMaxSent; // [esp+478h] [ebp-28h]
+    clientSnapshot_t *snap; // [esp+47Ch] [ebp-24h]
+    int i; // [esp+480h] [ebp-20h]
+    int unacked; // [esp+484h] [ebp-1Ch]
+    int packetStart; // [esp+488h] [ebp-18h]
+    int totalOOBPackets; // [esp+48Ch] [ebp-14h]
+    int iTotalFragmentsRecieved; // [esp+490h] [ebp-10h]
+    int lastTime; // [esp+494h] [ebp-Ch]
+    netProfileInfo_t *pStream; // [esp+498h] [ebp-8h]
+    int dropPercent; // [esp+49Ch] [ebp-4h]
+
+    iTotalBPSSent = 0;
+    iTotalBPSRecieved = 0;
+    iTotalPacketsSent = 0;
+    iTotalFragmentsSent = 0;
+    iTotalPacketsRecieved = 0;
+    iTotalFragmentsRecieved = 0;
+    iTotalMaxSent = 0;
+    iTotalMinSent = 9999;
+    iTotalMaxRecieved = 0;
+    iTotalMinRecieved = 9999;
+    iYPos = cl_profileTextY->current.integer;
+    iYStep = 10;
+    if (!net_profile->current.integer)
+        MyAssertHandler(".\\server_mp\\sv_snapshot_profile_mp.cpp", 1185, 0, "%s", "net_profile->current.integer");
+    SV_Netchan_UpdateProfileStats();
+    if (bPrintToConsole)
+        Com_Printf(15, "\n\n");
+    Com_sprintf(szLine, 0x400u, "====================");
+    if (bPrintToConsole)
+        Com_Printf(15, "%s\n", szLine);
+    Com_sprintf(szLine, 0x400u, "Server Network Profile:");
+    if (bPrintToConsole)
+        Com_Printf(15, "%s\n\n", szLine);
+    Com_sprintf(szLine, 0x400u, "                    | Sent To                                   | From |");
+    if (bPrintToConsole)
+    {
+        Com_Printf(15, "%s\n", szLine);
+    }
+    else
+    {
+        iYPos += 10;
+        SV_ProfDraw(iYPos, szLine, 0);
+    }
+    Com_sprintf(szLine, 0x400u, "              Source|   bps|  max|  min|frag%%|drop%%|ak|huff%%|p/s|   bps|");
+    if (bPrintToConsole)
+    {
+        Com_Printf(15, "%s\n", szLine);
+    }
+    else
+    {
+        iYPos += 10;
+        SV_ProfDraw(iYPos, szLine, 0);
+    }
+    now = Sys_Milliseconds();
+    pStream = &svs.OOBProf;
+    iTotalBPSSent += svs.OOBProf.send.iBytesPerSecond;
+    iTotalPacketsSent += svs.OOBProf.send.iCountedPackets;
+    iTotalFragmentsSent += svs.OOBProf.send.iCountedFragments;
+    iTotalBPSRecieved += svs.OOBProf.recieve.iBytesPerSecond;
+    iTotalPacketsRecieved += svs.OOBProf.recieve.iCountedPackets;
+    iTotalFragmentsRecieved += svs.OOBProf.recieve.iCountedFragments;
+    if (svs.OOBProf.send.iLargestPacket > iTotalMaxSent)
+        iTotalMaxSent = pStream->send.iLargestPacket;
+    if (pStream->send.iSmallestPacket < iTotalMinSent)
+        iTotalMinSent = pStream->send.iSmallestPacket;
+    if (pStream->recieve.iLargestPacket > iTotalMaxRecieved)
+        iTotalMaxRecieved = pStream->recieve.iLargestPacket;
+    if (pStream->recieve.iSmallestPacket < 9999)
+        iTotalMinRecieved = pStream->recieve.iSmallestPacket;
+    i = 0;
+    pClient = svs.clients;
+    while (i < sv_maxclients->current.integer)
+    {
+        if (pClient->header.state)
+        {
+            pStream = &pClient->header.netchan.prof;
+            if (pClient->header.netchan.remoteAddress.type != NA_LOOPBACK)
+            {
+                iTotalBPSSent += pStream->send.iBytesPerSecond;
+                iTotalPacketsSent += pStream->send.iCountedPackets;
+                iTotalFragmentsSent += pStream->send.iCountedFragments;
+                iTotalBPSRecieved += pStream->recieve.iBytesPerSecond;
+                iTotalPacketsRecieved += pStream->recieve.iCountedPackets;
+                iTotalFragmentsRecieved += pStream->recieve.iCountedFragments;
+                if (pStream->send.iLargestPacket > iTotalMaxSent)
+                    iTotalMaxSent = pStream->send.iLargestPacket;
+                if (pStream->send.iSmallestPacket < iTotalMinSent)
+                    iTotalMinSent = pStream->send.iSmallestPacket;
+                if (pStream->recieve.iLargestPacket > iTotalMaxRecieved)
+                    iTotalMaxRecieved = pStream->recieve.iLargestPacket;
+                if (pStream->recieve.iSmallestPacket < iTotalMinRecieved)
+                    iTotalMinRecieved = pStream->recieve.iSmallestPacket;
+            }
+        }
+        ++i;
+        ++pClient;
+    }
+    if (iTotalPacketsRecieved + iTotalPacketsSent <= 0 || iTotalFragmentsRecieved + iTotalFragmentsSent <= 0)
+        iFragmentTotal = 0;
+    else
+        iFragmentTotal = 100 * (iTotalFragmentsRecieved + iTotalFragmentsSent) / (iTotalPacketsRecieved + iTotalPacketsSent);
+    dropPercent = 0;
+    unacked = 0;
+    totalPacketsSent = 0;
+    if (iTotalPacketsSent)
+        Com_sprintf(
+            szLine,
+            0x400u,
+            "              Totals:%6i|%5i|%5i| %3i%%| %3i%%|%2i|%4i%%|%3i|%6i|",
+            iTotalBPSSent,
+            iTotalMaxSent,
+            iTotalMinSent,
+            100 * iTotalFragmentsSent / iTotalPacketsSent,
+            dropPercent,
+            unacked,
+            0,
+            totalPacketsSent,
+            iTotalBPSRecieved);
+    else
+        Com_sprintf(
+            szLine,
+            0x400u,
+            "              Totals:%6i|%5i|%5i| %3i%%| %3i%%|%2i|%4i%%|%3i|%6i|",
+            iTotalBPSSent,
+            iTotalMaxSent,
+            iTotalMinSent,
+            0,
+            dropPercent,
+            unacked,
+            0,
+            totalPacketsSent,
+            iTotalBPSRecieved);
+    if (bPrintToConsole)
+    {
+        Com_Printf(15, "%s\n", szLine);
+    }
+    else
+    {
+        iYPos += 10;
+        SV_ProfDraw(iYPos, szLine, 0);
+    }
+    pStream = &svs.OOBProf;
+    if (svs.OOBProf.recieve.iCountedPackets + svs.OOBProf.send.iCountedPackets <= 0
+        || pStream->recieve.iCountedFragments + pStream->send.iCountedFragments <= 0)
+    {
+        iFragmentTotal = 0;
+    }
+    else
+    {
+        iFragmentTotal = 100
+            * (pStream->recieve.iCountedFragments + pStream->send.iCountedFragments)
+            / (pStream->recieve.iCountedPackets + pStream->send.iCountedPackets);
+    }
+    dropPercent = 0;
+    unacked = 0;
+    totalOOBPackets = 0;
+    for (packet = 0; packet < 60; ++packet)
+    {
+        if (now - pStream->send.packets[packet].iTime < 1000)
+            ++totalOOBPackets;
+    }
+    Com_sprintf(
+        szLine,
+        0x400u,
+        "  OutOfBand Messages: %5i|%5i|%5i| %3i%%| %3i%%|%2i|%4i%%|%3i| %5i|",
+        pStream->send.iBytesPerSecond,
+        pStream->send.iLargestPacket,
+        pStream->send.iSmallestPacket,
+        pStream->send.iFragmentPercentage,
+        dropPercent,
+        unacked,
+        0,
+        totalOOBPackets,
+        pStream->recieve.iBytesPerSecond);
+    if (bPrintToConsole)
+    {
+        Com_Printf(15, "%s\n", szLine);
+    }
+    else
+    {
+        iYPos += 10;
+        SV_ProfDraw(iYPos, szLine, 0);
+    }
+    i = 0;
+    pClient = svs.clients;
+    while (i < sv_maxclients->current.integer)
+    {
+        if (pClient->header.state)
+        {
+            strncpy((unsigned __int8 *)szClientName, (unsigned __int8 *)pClient->name, 0x11u);
+            szClientName[16] = 0;
+            pStream = &pClient->header.netchan.prof;
+            if (pClient->header.netchan.prof.recieve.iCountedPackets + pClient->header.netchan.prof.send.iCountedPackets <= 0
+                || pStream->recieve.iCountedFragments + pStream->send.iCountedFragments <= 0)
+            {
+                iFragmentTotal = 0;
+            }
+            else
+            {
+                iFragmentTotal = 100
+                    * (pStream->recieve.iCountedFragments + pStream->send.iCountedFragments)
+                    / (pStream->recieve.iCountedPackets + pStream->send.iCountedPackets);
+            }
+            lastTime = 0;
+            for (packetStart = 0; packetStart < 32 && pClient->frames[packetStart].messageSent > lastTime; ++packetStart)
+                lastTime = pClient->frames[packetStart].messageSent;
+            totalAcked = 0;
+            totalUnacked = 0;
+            unacked = 0;
+            packetsSent = 0;
+            for (packeta = 0; packeta < 32; ++packeta)
+            {
+                snap = &pClient->frames[((_BYTE)packetStart + (_BYTE)packeta) & 0x1F];
+                if (pClient->frames[((_BYTE)packetStart + (_BYTE)packeta) & 0x1F].messageSent > now - 1000)
+                    ++packetsSent;
+                if (snap->messageAcked > 0)
+                {
+                    totalUnacked += unacked;
+                    unacked = 0;
+                    ++totalAcked;
+                }
+                else
+                {
+                    ++unacked;
+                }
+            }
+            if (totalAcked)
+                dropPercent = 100 * totalUnacked / (totalAcked + totalUnacked);
+            else
+                dropPercent = 100;
+            compress = SV_GetPacketCompressionForClient(i);
+            Com_sprintf(
+                szLine,
+                0x400u,
+                "#%2i-%16s: %5i|%5i|%5i| %3i%%| %3i%%|%2i|%4i%%|%3i| %5i|",
+                i,
+                szClientName,
+                pStream->send.iBytesPerSecond,
+                pStream->send.iLargestPacket,
+                pStream->send.iSmallestPacket,
+                pStream->send.iFragmentPercentage,
+                dropPercent,
+                unacked,
+                compress,
+                packetsSent,
+                pStream->recieve.iBytesPerSecond);
+            if (bPrintToConsole)
+            {
+                Com_Printf(15, "%s\n", szLine);
+            }
+            else
+            {
+                iYPos += 10;
+                SV_ProfDraw(iYPos, szLine, i == cg_packetAnalysisClient->current.integer);
+            }
+        }
+        ++i;
+        ++pClient;
+    }
 }
 
 void __cdecl Netchan_Setup(
@@ -750,13 +1113,13 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
     //Profile_Begin(299);
     if (length > 0x20000)
     {
-        file = FS_FOpenFileWrite("badpacket.dat");
+        file = FS_FOpenFileWrite((char*)"badpacket.dat");
         if (file)
         {
             FS_Write(data, length, file);
             FS_FCloseFile(file);
         }
-        Com_Error(ERR_DROP, &byte_89AA90, length);
+        Com_Error(ERR_DROP, "Netchan_Transmit: length = %i", length);
     }
     chan->unsentFragmentStart = 0;
     if (length < 1300)
@@ -810,11 +1173,11 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
 
 int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
 {
-    char *v2; // eax
-    char *v4; // eax
-    char *v5; // eax
-    char *v6; // eax
-    char *v7; // eax
+    const char *v2; // eax
+    const char *v4; // eax
+    const char *v5; // eax
+    const char *v6; // eax
+    const char *v7; // eax
     int dropped; // [esp-8h] [ebp-1Ch]
     int incomingSequence; // [esp-4h] [ebp-18h]
     int v10; // [esp-4h] [ebp-18h]
@@ -1044,6 +1407,7 @@ int __cdecl NET_GetLoopPacket(netsrc_t sock, netadr_t *net_from, msg_t *net_mess
         return NET_GetLoopPacket_Real(sock, net_from, net_message);
 }
 
+
 void __cdecl NET_SendLoopPacket(netsrc_t sock, unsigned int length, unsigned __int8 *data, netadr_t to)
 {
     loopback_t *loop; // [esp+0h] [ebp-10h]
@@ -1054,7 +1418,7 @@ void __cdecl NET_SendLoopPacket(netsrc_t sock, unsigned int length, unsigned __i
     if (sock >= NS_SERVER)
     {
         if (sock == NS_SERVER)
-            sock = to.port;
+            sock = (netsrc_t)to.port;
     }
     else
     {
@@ -1077,9 +1441,13 @@ char __cdecl NET_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, ne
         Com_Printf(16, "[%s] send packet %4i\n", netsrcString[sock], length);
     if (to.type == NA_LOOPBACK)
     {
-        *(_QWORD *)&v5.type = __PAIR64__(*(unsigned int *)to.ip, 2);
-        *(unsigned int *)&v5.port = *(unsigned int *)&to.port;
-        *(_QWORD *)&v5.ipx[2] = *(_QWORD *)&to.ipx[2];
+        //*(_QWORD *)&v5.type = __PAIR64__(*(unsigned int *)to.ip, 2);
+        v5.type = NA_LOOPBACK;
+        //*(unsigned int *)&v5.port = *(unsigned int *)&to.port;
+        v5.port = to.port;
+        //*(_QWORD *)&v5.ipx[2] = *(_QWORD *)&to.ipx[2];
+        v5.ipx[0] = to.ipx[0];
+        v5.ipx[1] = to.ipx[1];
         NET_SendLoopPacket(sock, length, data, v5);
         return 1;
     }
@@ -1099,7 +1467,7 @@ char __cdecl NET_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, ne
 
 bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *data)
 {
-    char *v3; // eax
+    const char *v3; // eax
     const char *v4; // eax
     int v6; // [esp+0h] [ebp-5Ch]
     int res; // [esp+54h] [ebp-8h]
@@ -1206,7 +1574,7 @@ int __cdecl NET_StringToAdr(char *s, netadr_t *a)
     else
     {
         I_strncpyz(base, s, 1024);
-        strstr((unsigned __int8 *)base, ":");
+        strstr((unsigned __int8 *)base, (unsigned __int8 *)":");
         port = v3;
         if (v3)
             *port++ = 0;

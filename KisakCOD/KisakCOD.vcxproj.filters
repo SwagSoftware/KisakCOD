@@ -1128,6 +1128,15 @@
     <ClCompile Include="src\universal\com_convexhull.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\gfx_d3d\r_dpvs_static.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stringed\stringed_ingame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx_d3d\r_material_override.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\qcommon\qcommon.h">
@@ -1770,6 +1779,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universal\com_convexhull.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stringed\stringed_ingame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

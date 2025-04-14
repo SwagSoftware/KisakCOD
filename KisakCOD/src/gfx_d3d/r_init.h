@@ -361,6 +361,8 @@ void __cdecl R_ConfigureRenderer(const GfxConfiguration *config);
 void __cdecl R_ComErrorCleanup();
 bool R_CheckLostDevice();
 
+void __cdecl R_UpdateGpuSyncType();
+
 extern DxGlobals dx;
 extern r_global_permanent_t rgp;
 extern int g_disableRendering;

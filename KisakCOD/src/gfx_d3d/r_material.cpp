@@ -7,6 +7,7 @@
 #include "rb_logfile.h"
 #include "r_utils.h"
 #include "r_dvars.h"
+#include "r_image.h"
 
 MaterialGlobals materialGlobals;
 
@@ -535,21 +536,6 @@ void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable *mtlTable, int mtlT
         if (!*mtlTable[builtInMtlIndex].material)
             Com_Error(ERR_FATAL, "Could not find material '%s'", mtlTable[builtInMtlIndex].name);
     }
-}
-
-void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl *callback)(MaterialTechniqueSet *))
-{
-    unsigned int inData[1024]; // [esp+0h] [ebp-1008h] BYREF
-    int v2; // [esp+1000h] [ebp-8h]
-
-    v2 = 0;
-    DB_EnumXAssets(
-        ASSET_TYPE_TECHNIQUE_SET,
-        (void(__cdecl *)(XAssetHeader, void *))Material_CollateTechniqueSets,
-        inData,
-        0);
-    while (v2)
-        callback((MaterialTechniqueSet *)inData[--v2]);
 }
 
 void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader *userData)

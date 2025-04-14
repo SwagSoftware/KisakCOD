@@ -13,6 +13,7 @@ void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, unsigned __int8 *buf
 void __cdecl R_InitDynamicVertexBufferState(GfxVertexBufferState *vb, int bytes);
 void __cdecl R_InitDynamicIndexBufferState(GfxIndexBufferState *ib, int indexCount);
 void __cdecl R_InitDynamicIndices(GfxDynamicIndices *ib, int indexCount);
+void __cdecl R_ShutdownDynamicIndices(GfxDynamicIndices *ib);
 void __cdecl R_CreateDynamicBuffers();
 void __cdecl R_CreateParticleCloudBuffer();
 void __cdecl R_UnlockVertexBuffer(IDirect3DVertexBuffer9* handle);

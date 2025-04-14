@@ -6,6 +6,11 @@
 #include "r_workercmds.h"
 #include <qcommon/com_bsp.h>
 #include "r_bsp.h"
+#include "r_model_pose.h"
+#include "r_meshdata.h"
+#include "r_light.h"
+#include "r_pretess.h"
+#include "r_add_staticmodel.h"
 
 
 void __cdecl R_AddSpotShadowEntCmd(const GfxSpotShadowEntCmd *data)
@@ -18,11 +23,10 @@ void __cdecl R_AddSpotShadowEntCmd(const GfxSpotShadowEntCmd *data)
     GfxSceneEntity *sceneEnt; // [esp+28h] [ebp-14h]
     float boxCenter[3]; // [esp+2Ch] [ebp-10h] BYREF
     const GfxSpotShadowEntCmd *cmd; // [esp+38h] [ebp-4h]
-    int savedregs; // [esp+3Ch] [ebp+0h] BYREF
 
     cmd = data;
     sceneEnt = data->sceneEnt;
-    boneMatrix = R_UpdateSceneEntBounds((GfxSceneEntity *)&savedregs, sceneEnt, &localSceneEnt, &obj, 1);
+    boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1);
     if (boneMatrix)
     {
         if (!localSceneEnt)
@@ -54,7 +58,7 @@ char __cdecl R_AddSpotShadowsForLight(
     float spotShadowFade)
 {
     float nearPlaneBias; // [esp+4h] [ebp-20h]
-    bool v6; // [esp+8h] [ebp-1Ch]
+    BOOL v6; // [esp+8h] [ebp-1Ch]
     unsigned int tileCount; // [esp+18h] [ebp-Ch]
     unsigned int spotShadowIndex; // [esp+20h] [ebp-4h]
 
@@ -98,7 +102,7 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].viewport.y = spotShadowIndex << 10;
         viewInfo->spotShadows[spotShadowIndex].viewport.width = 1024;
         viewInfo->spotShadows[spotShadowIndex].viewport.height = 1024;
-        viewInfo->spotShadows[spotShadowIndex].image = stru_EA74FF4.image;
+        viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[13].image;
         viewInfo->spotShadows[spotShadowIndex].renderTargetId = R_RENDERTARGET_SHADOWMAP_SUN;
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00024414062;
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062;
@@ -114,7 +118,7 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].viewport.y = spotShadowIndex << 9;
         viewInfo->spotShadows[spotShadowIndex].viewport.width = 512;
         viewInfo->spotShadows[spotShadowIndex].viewport.height = 512;
-        viewInfo->spotShadows[spotShadowIndex].image = stru_EA75008.image;
+        viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[14].image;
         viewInfo->spotShadows[spotShadowIndex].renderTargetId = R_RENDERTARGET_SHADOWMAP_SPOT;
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00048828125;
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062;
@@ -308,7 +312,7 @@ void __cdecl R_GenerateSortedPrimarySpotShadowDrawSurfs(
 
 void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
 {
-    float *origin; // [esp+20h] [ebp-28h]
+    const float *origin; // [esp+20h] [ebp-28h]
     int firstDrawSurf; // [esp+38h] [ebp-10h]
     GfxDrawSurfListInfo *info; // [esp+3Ch] [ebp-Ch]
     unsigned int spotShadowIndex; // [esp+44h] [ebp-4h]
@@ -356,3 +360,62 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
     }
 }
 
+unsigned int R_InitSpotShadowMeshes()
+{
+    unsigned int result; // eax
+    unsigned int sunShadowIndex; // [esp+24h] [ebp-10h]
+    float x; // [esp+28h] [ebp-Ch]
+    float y; // [esp+2Ch] [ebp-8h]
+    float ya; // [esp+2Ch] [ebp-8h]
+    unsigned int spotShadowIndex; // [esp+30h] [ebp-4h]
+
+    x = 0.0;
+    y = 0.0;
+    for (spotShadowIndex = 0; spotShadowIndex < 4; ++spotShadowIndex)
+    {
+        R_InitDynamicMesh(&gfxMeshGlob.spotShadowClearMeshData[spotShadowIndex], 6u, 4u, 0x20u);
+        R_SetQuadMeshData(
+            &gfxMeshGlob.spotShadowClearMeshData[spotShadowIndex],
+            x,
+            y,
+            512.0,
+            512.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0xFFFFFFFF);
+        y = y + 512.0;
+        result = spotShadowIndex + 1;
+    }
+    ya = 0.0;
+    for (sunShadowIndex = 0; sunShadowIndex < 2; ++sunShadowIndex)
+    {
+        R_InitDynamicMesh(&gfxMeshGlob.sunShadowClearMeshData[sunShadowIndex], 6u, 4u, 0x20u);
+        R_SetQuadMeshData(
+            &gfxMeshGlob.sunShadowClearMeshData[sunShadowIndex],
+            x,
+            ya,
+            1024.0,
+            1024.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0xFFFFFFFF);
+        ya = ya + 1024.0;
+        result = sunShadowIndex + 1;
+    }
+    return result;
+}
+
+void __cdecl R_ShutdownSpotShadowMeshes()
+{
+    unsigned int sunShadowIndex; // [esp+0h] [ebp-8h]
+    unsigned int spotShadowIndex; // [esp+4h] [ebp-4h]
+
+    for (spotShadowIndex = 0; spotShadowIndex < 4; ++spotShadowIndex)
+        R_ShutdownDynamicMesh(&gfxMeshGlob.spotShadowClearMeshData[spotShadowIndex]);
+    for (sunShadowIndex = 0; sunShadowIndex < 2; ++sunShadowIndex)
+        R_ShutdownDynamicMesh(&gfxMeshGlob.sunShadowClearMeshData[sunShadowIndex]);
+}

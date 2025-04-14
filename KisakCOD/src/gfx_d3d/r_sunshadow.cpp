@@ -3,6 +3,7 @@
 #include "r_init.h"
 #include "r_dpvs.h"
 #include "r_pretess.h"
+#include <universal/com_convexhull.h>
 
 struct ShadowGlobals // sizeof=0x4
 {                                       // ...

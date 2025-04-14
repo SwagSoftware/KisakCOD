@@ -108,6 +108,7 @@ unsigned int *__cdecl FS_AllocMem(int bytes);
 void __cdecl FS_ResetFiles();
 void __cdecl FS_FreeFile(char *buffer);
 void __cdecl FS_FreeMem(char *buffer);
+int __cdecl FS_FileExists(char *file);
 int __cdecl FS_WriteFile(char *filename, char *buffer, unsigned int size);
 void __cdecl FS_ConvertPath(char *s);
 void __cdecl FS_InitFilesystem();
@@ -139,3 +140,10 @@ const char **__cdecl FS_ListFilesInLocation(
     FsListBehavior_e behavior,
     int *numfiles,
     int lookInFlags);
+
+void __cdecl FS_FileClose(struct iobuf *stream);
+int __cdecl FS_FOpenFileWriteToDirForThread(char *filename, char *dir, FsThread thread);
+int __cdecl FS_FOpenFileWriteToDir(char *filename, char *dir);
+int __cdecl FS_WriteFileToDir(char *filename, char *path, char *buffer, unsigned int size);
+
+void FS_RegisterDvars();

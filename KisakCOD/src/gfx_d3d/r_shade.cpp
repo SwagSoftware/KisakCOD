@@ -5,6 +5,7 @@
 #include "rb_shade.h"
 #include <universal/profile.h>
 #include "r_buffers.h"
+#include "r_utils.h"
 
 
 int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
@@ -836,4 +837,93 @@ void __cdecl R_SetPassShaderStableArguments(
         ++arg;
         --argCount;
     } while (argCount);
+}
+
+void __cdecl R_ChangeObjectPlacement(GfxCmdBufSourceState *source, const GfxScaledPlacement *placement)
+{
+    const char *v2; // eax
+    const char *v3; // eax
+    const char *v4; // eax
+    double scale; // [esp+18h] [ebp-54h]
+    double scalea; // [esp+18h] [ebp-54h]
+    double scaleb; // [esp+18h] [ebp-54h]
+    GfxCmdBufSourceState *matrix; // [esp+38h] [ebp-34h]
+    float origin[3]; // [esp+3Ch] [ebp-30h] BYREF
+    float axis[3][3]; // [esp+48h] [ebp-24h] BYREF
+
+    if (placement == source->objectPlacement)
+        MyAssertHandler(".\\r_state.cpp", 276, 0, "%s", "placement != source->objectPlacement");
+    if (!placement)
+        MyAssertHandler(".\\r_state.cpp", 277, 0, "%s", "placement");
+    UnitQuatToAxis(placement->base.quat, axis);
+    if (!Vec3IsNormalized(axis[0]))
+    {
+        scale = Vec3Length(axis[0]);
+        v2 = va("(%g %g %g) len %g", axis[0][0], axis[0][1], axis[0][2], scale);
+        MyAssertHandler(".\\r_state.cpp", 280, 0, "%s\n\t%s", "Vec3IsNormalized( axis[0] )", v2);
+    }
+    if (!Vec3IsNormalized(axis[1]))
+    {
+        scalea = Vec3Length(axis[1]);
+        v3 = va("(%g %g %g) len %g", axis[1][0], axis[1][1], axis[1][2], scalea);
+        MyAssertHandler(".\\r_state.cpp", 281, 0, "%s\n\t%s", "Vec3IsNormalized( axis[1] )", v3);
+    }
+    if (!Vec3IsNormalized(axis[2]))
+    {
+        scaleb = Vec3Length(axis[2]);
+        v4 = va("(%g %g %g) len %g", axis[2][0], axis[2][1], axis[2][2], scaleb);
+        MyAssertHandler(".\\r_state.cpp", 282, 0, "%s\n\t%s", "Vec3IsNormalized( axis[2] )", v4);
+    }
+    matrix = R_GetActiveWorldMatrix(source);
+    Vec3Sub(placement->base.origin, source->eyeOffset, origin);
+    MatrixSet44((float (*)[4])matrix, origin, axis, placement->scale);
+    source->objectPlacement = placement;
+}
+
+int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexCount, int stride)
+{
+    IDirect3DVertexBuffer9 *vb; // [esp+6Ch] [ebp-14h]
+    volatile int vertexOffset; // [esp+70h] [ebp-10h]
+    unsigned int lockFlags; // [esp+74h] [ebp-Ch]
+    void *bufferData; // [esp+78h] [ebp-8h]
+    int totalSize; // [esp+7Ch] [ebp-4h]
+
+    if (vertexCount <= 0)
+        MyAssertHandler(".\\r_shade.cpp", 875, 0, "%s", "vertexCount > 0");
+    Profile_Begin(161);
+    totalSize = stride * vertexCount;
+    if (stride * vertexCount > gfxBuf.dynamicVertexBuffer->total)
+        MyAssertHandler(
+            ".\\r_shade.cpp",
+            881,
+            0,
+            "%s\n\t(totalSize) = %i",
+            "(totalSize <= gfxBuf.dynamicVertexBuffer->total)",
+            totalSize);
+    if (totalSize + gfxBuf.dynamicVertexBuffer->used > gfxBuf.dynamicVertexBuffer->total)
+        MyAssertHandler(
+            ".\\r_shade.cpp",
+            886,
+            0,
+            "%s",
+            "gfxBuf.dynamicVertexBuffer->used + totalSize <= gfxBuf.dynamicVertexBuffer->total");
+    vb = gfxBuf.dynamicVertexBuffer->buffer;
+    if (!vb)
+        MyAssertHandler(".\\r_shade.cpp", 899, 0, "%s", "vb");
+    lockFlags = gfxBuf.dynamicVertexBuffer->used != 0 ? 4096 : 0x2000;
+    Profile_Begin(163);
+    bufferData = R_LockVertexBuffer(vb, gfxBuf.dynamicVertexBuffer->used, totalSize, lockFlags);
+    Profile_EndInternal(0);
+    if (!bufferData)
+        MyAssertHandler(".\\r_shade.cpp", 910, 0, "%s", "bufferData");
+    Profile_Begin(167);
+    Profile_Begin(171);
+    Com_Memcpy(bufferData, data, totalSize);
+    Profile_EndInternal(0);
+    Profile_EndInternal(0);
+    R_UnlockVertexBuffer(vb);
+    vertexOffset = gfxBuf.dynamicVertexBuffer->used;
+    gfxBuf.dynamicVertexBuffer->used += totalSize;
+    Profile_EndInternal(0);
+    return vertexOffset;
 }

@@ -12,6 +12,8 @@
 #include <universal/profile.h>
 #include "rb_logfile.h"
 #include "r_utils.h"
+#include "r_xsurface.h"
+#include "r_model_lighting.h"
 
 
 static_model_cache_t s_cache;
@@ -592,4 +594,238 @@ const GfxBackEndData *RB_PatchStaticModelCache()
         }
     }
     return result;
+}
+
+void __cdecl R_StaticModelCacheStats_f()
+{
+    unsigned int usedCount; // [esp+24h] [ebp-24h]
+    unsigned int lodIter; // [esp+28h] [ebp-20h]
+    unsigned int allocCount; // [esp+2Ch] [ebp-1Ch]
+    unsigned int surfCount; // [esp+30h] [ebp-18h]
+    unsigned int smodelIter; // [esp+34h] [ebp-14h]
+    unsigned int lodCount; // [esp+38h] [ebp-10h]
+    const GfxStaticModelDrawInst *drawInst; // [esp+3Ch] [ebp-Ch]
+    unsigned int surfIter; // [esp+40h] [ebp-8h]
+    XSurface *surfs; // [esp+44h] [ebp-4h] BYREF
+
+    if (rgp.world)
+    {
+        allocCount = 0;
+        usedCount = 0;
+        for (smodelIter = 0; smodelIter < rgp.world->dpvs.smodelCount; ++smodelIter)
+        {
+            drawInst = &rgp.world->dpvs.smodelDrawInsts[smodelIter];
+            lodCount = XModelGetNumLods(drawInst->model);
+            for (lodIter = 0; lodIter < lodCount; ++lodIter)
+            {
+                if (drawInst->smodelCacheIndex[lodIter])
+                {
+                    allocCount += 1 << XModelGetLodInfo(drawInst->model, lodIter)->smcAllocBits;
+                    surfCount = XModelGetSurfCount(drawInst->model, lodIter);
+                    XModelGetSurfaces(drawInst->model, &surfs, lodIter);
+                    for (surfIter = 0; surfIter < surfCount; ++surfIter)
+                        usedCount += XSurfaceGetNumVerts(&surfs[surfIter]);
+                }
+            }
+        }
+        Com_Printf(8, "%.2f%% of cache is currently allocated.\n", (double)allocCount * 100.0 / 262144.0);
+        if (allocCount)
+            Com_Printf(8, "%.2f%% allocated cache vertices are used.\n", (double)usedCount * 100.0 / (double)allocCount);
+    }
+}
+
+void __cdecl R_StaticModelCacheFlush_f()
+{
+    R_SyncRenderThread();
+    R_ClearAllStaticModelCacheRefs();
+}
+
+void __cdecl R_UncacheStaticModel(unsigned int smodelIndex)
+{
+    GfxStaticModelDrawInst *smodelDrawInst; // [esp+0h] [ebp-14h]
+    unsigned int lod; // [esp+Ch] [ebp-8h]
+    unsigned int cacheIndex; // [esp+10h] [ebp-4h]
+
+    smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[smodelIndex];
+    for (lod = 0; lod < 4; ++lod)
+    {
+        cacheIndex = smodelDrawInst->smodelCacheIndex[lod];
+        if (smodelDrawInst->smodelCacheIndex[lod])
+        {
+            if (*(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse != smodelIndex)
+                MyAssertHandler(
+                    ".\\r_staticmodelcache.cpp",
+                    741,
+                    0,
+                    "cachedSurf->smodelIndex == smodelIndex\n\t%i, %i",
+                    *(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse,
+                    smodelIndex);
+            *(_WORD *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse = -1;
+            smodelDrawInst->smodelCacheIndex[lod] = 0;
+        }
+    }
+}
+
+void __cdecl R_ClearAllStaticModelCacheRefs()
+{
+    unsigned int smodelCount; // [esp+0h] [ebp-8h]
+    unsigned int smodelIndex; // [esp+4h] [ebp-4h]
+
+    if (rgp.world)
+    {
+        smodelCount = rgp.world->dpvs.smodelCount;
+        for (smodelIndex = 0; smodelIndex < smodelCount; ++smodelIndex)
+            R_UncacheStaticModel(smodelIndex);
+    }
+}
+
+void __cdecl SetupTransformUnitVec(const float4 *mtx, int (*fixedMtx)[3])
+{
+    (*fixedMtx)[0] = (int)(mtx->v[0] * (float)32768.0);
+    (*fixedMtx)[1] = (int)(mtx->v[1] * (float)32768.0);
+    (*fixedMtx)[2] = (int)(mtx->v[2] * (float)32768.0);
+    (*fixedMtx)[3] = (int)(mtx[1].v[0] * (float)32768.0);
+    (*fixedMtx)[4] = (int)(mtx[1].v[1] * (float)32768.0);
+    (*fixedMtx)[5] = (int)(mtx[1].v[2] * (float)32768.0);
+    (*fixedMtx)[6] = (int)(mtx[2].v[0] * (float)32768.0);
+    (*fixedMtx)[7] = (int)(mtx[2].v[1] * (float)32768.0);
+    (*fixedMtx)[8] = (int)(mtx[2].v[2] * (float)32768.0);
+}
+
+PackedUnitVec __cdecl LocalTransformUnitVec(PackedUnitVec in, const int (*fixedMtx)[3])
+{
+    PackedUnitVec out; // [esp+0h] [ebp-10h]
+
+    out.array[0] = ((*fixedMtx)[3] * (in.array[3] + 192) * (in.array[1] - 127)
+        + (*fixedMtx)[0] * (in.array[3] + 192) * (in.array[0] - 127)
+        + (*fixedMtx)[6] * (in.array[3] + 192) * (in.array[2] - 127)
+        + 1069547520) >> 23;
+    out.array[1] = ((*fixedMtx)[4] * (in.array[3] + 192) * (in.array[1] - 127)
+        + (*fixedMtx)[1] * (in.array[3] + 192) * (in.array[0] - 127)
+        + (*fixedMtx)[7] * (in.array[3] + 192) * (in.array[2] - 127)
+        + 1069547520) >> 23;
+    out.array[2] = ((*fixedMtx)[5] * (in.array[3] + 192) * (in.array[1] - 127)
+        + (*fixedMtx)[2] * (in.array[3] + 192) * (in.array[0] - 127)
+        + (*fixedMtx)[8] * (in.array[3] + 192) * (in.array[2] - 127)
+        + 1069547520) >> 23;
+    out.array[3] = 64;
+    return out;
+}
+
+void __cdecl R_SkinXSurfaceStaticVerts(
+    const float4 *useAxis,
+    const int (*normAxis)[3],
+    unsigned int baseVertIndex,
+    unsigned int vertCount,
+    const GfxPackedVertex *srcVertArray,
+    unsigned int smodelIndex,
+    GfxSModelCachedVertex *verts)
+{
+    PackedUnitVec v7; // [esp+24h] [ebp-14h]
+    PackedUnitVec v8; // [esp+28h] [ebp-10h]
+    const GfxPackedVertex *srcVert; // [esp+2Ch] [ebp-Ch]
+    PackedLightingCoords packedBaseLighting; // [esp+30h] [ebp-8h] BYREF
+    unsigned int vertIndex; // [esp+34h] [ebp-4h]
+
+    R_GetPackedStaticModelLightingCoords(smodelIndex, &packedBaseLighting);
+    for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
+    {
+        srcVert = &srcVertArray[vertIndex];
+        LocalTransformVector(srcVert->xyz, useAxis, verts[vertIndex].xyz);
+        v8.packed = LocalTransformUnitVec(srcVert->normal, normAxis).packed;
+        verts[vertIndex].normal = v8;
+        verts[vertIndex].color.packed = srcVert->color.packed;
+        verts[vertIndex].texCoord.packed = srcVert->texCoord.packed;
+        v7.packed = LocalTransformUnitVec(srcVert->tangent, normAxis).packed;
+        verts[vertIndex].tangent = v7;
+        packedBaseLighting.array[3] = ((SLODWORD(srcVert->binormalSign) >> 30) & 0xFE) + 2;
+        verts[vertIndex].baseLighting = packedBaseLighting;
+    }
+}
+
+void __cdecl R_SkinCachedStaticModelCmd(SkinCachedStaticModelCmd *skinCmd)
+{
+    float v1; // [esp+94h] [ebp-100h]
+    float v2; // [esp+A0h] [ebp-F4h]
+    float scale; // [esp+A8h] [ebp-ECh]
+    int cacheIndex; // [esp+C0h] [ebp-D4h]
+    float4 useAxis[4]; // [esp+C4h] [ebp-D0h] BYREF
+    GfxStaticModelDrawInst *smodelDrawInst; // [esp+108h] [ebp-8Ch]
+    unsigned int surfIndex; // [esp+10Ch] [ebp-88h]
+    int baseVertIndex; // [esp+110h] [ebp-84h]
+    float4 normAxis[4]; // [esp+114h] [ebp-80h] BYREF
+    const GfxCachedSModelSurf *cachedSurf; // [esp+158h] [ebp-3Ch]
+    unsigned int surfCount; // [esp+15Ch] [ebp-38h]
+    const static_model_leaf_t *leaf; // [esp+160h] [ebp-34h]
+    GfxSModelCachedVertex *verts; // [esp+164h] [ebp-30h]
+    const XSurface *xsurf; // [esp+168h] [ebp-2Ch]
+    int fixedNormAxis[3][3]; // [esp+16Ch] [ebp-28h] BYREF
+    XSurface *surfs; // [esp+190h] [ebp-4h] BYREF
+
+    if (!skinCmd)
+        MyAssertHandler(".\\r_staticmodelcache.cpp", 511, 0, "%s", "skinCmd");
+    if (!rgp.world)
+        MyAssertHandler(".\\r_staticmodelcache.cpp", 512, 0, "%s", "rgp.world");
+    verts = &frontEndDataOut->smcPatchVerts[skinCmd->firstPatchVert];
+    cacheIndex = skinCmd->cacheIndex;
+    if (!skinCmd->cacheIndex)
+        MyAssertHandler(".\\r_staticmodelcache.cpp", 278, 0, "%s", "cacheIndex");
+    leaf = (const static_model_leaf_t *)(8 * cacheIndex + 245472024);
+    cachedSurf = &leaf->cachedSurf;
+    if (*(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse >= rgp.world->dpvs.smodelCount)
+        MyAssertHandler(
+            ".\\r_staticmodelcache.cpp",
+            518,
+            0,
+            "cachedSurf->smodelIndex doesn't index rgp.world->dpvs.smodelCount\n\t%i not in [0, %i)",
+            cachedSurf->smodelIndex,
+            rgp.world->dpvs.smodelCount);
+    smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[cachedSurf->smodelIndex];
+    normAxis[0].v[0] = smodelDrawInst->placement.axis[0][0];
+    normAxis[0].v[1] = smodelDrawInst->placement.axis[0][1];
+    normAxis[0].v[2] = smodelDrawInst->placement.axis[0][2];
+    normAxis[0].v[3] = 0.0;
+    normAxis[1].v[0] = smodelDrawInst->placement.axis[1][0];
+    normAxis[1].v[1] = smodelDrawInst->placement.axis[1][1];
+    normAxis[1].v[2] = smodelDrawInst->placement.axis[1][2];
+    normAxis[1].v[3] = 0.0;
+    normAxis[2].v[0] = smodelDrawInst->placement.axis[2][0];
+    normAxis[2].v[1] = smodelDrawInst->placement.axis[2][1];
+    normAxis[2].v[2] = smodelDrawInst->placement.axis[2][2];
+    normAxis[2].v[3] = 0.0;
+    scale = smodelDrawInst->placement.scale;
+    useAxis[0].v[0] = scale * normAxis[0].v[0];
+    useAxis[0].v[1] = scale * normAxis[0].v[1];
+    useAxis[0].v[2] = scale * normAxis[0].v[2];
+    useAxis[0].v[3] = scale * (float)0.0;
+    v2 = smodelDrawInst->placement.scale;
+    useAxis[1].v[0] = v2 * normAxis[1].v[0];
+    useAxis[1].v[1] = v2 * normAxis[1].v[1];
+    useAxis[1].v[2] = v2 * normAxis[1].v[2];
+    useAxis[1].v[3] = v2 * (float)0.0;
+    v1 = smodelDrawInst->placement.scale;
+    useAxis[2].v[0] = v1 * normAxis[2].v[0];
+    useAxis[2].v[1] = v1 * normAxis[2].v[1];
+    useAxis[2].v[2] = v1 * normAxis[2].v[2];
+    useAxis[2].v[3] = v1 * (float)0.0;
+    useAxis[3].v[0] = smodelDrawInst->placement.origin[0];
+    useAxis[3].v[1] = smodelDrawInst->placement.origin[1];
+    useAxis[3].v[2] = smodelDrawInst->placement.origin[2];
+    useAxis[3].v[3] = 0.0;
+    SetupTransformUnitVec(normAxis, fixedNormAxis);
+    surfCount = XModelGetSurfCount(smodelDrawInst->model, cachedSurf->lodIndex);
+    XModelGetSurfaces(smodelDrawInst->model, &surfs, cachedSurf->lodIndex);
+    for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
+    {
+        xsurf = &surfs[surfIndex];
+        baseVertIndex = cachedSurf->baseVertIndex + xsurf->baseVertIndex;
+        R_SkinXSurfaceStaticVerts(
+            useAxis,
+            fixedNormAxis,
+            baseVertIndex,
+            xsurf->vertCount,
+            xsurf->verts0,
+            cachedSurf->smodelIndex,
+            &verts[xsurf->baseVertIndex]);
+    }
 }

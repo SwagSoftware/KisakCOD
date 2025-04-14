@@ -1,12 +1,13 @@
 #include "r_model_skin.h"
 #include "r_init.h"
+#include "r_dvars.h"
 
 
 //unsigned int const *const g_shortBoneWeightPerm__uint4 820f4950     gfx_d3d : r_model_skin.obj
 //struct __vector4 const g_shortBoneWeightPerm 85b981d0     gfx_d3d : r_model_skin.obj
 
 
-void  R_SkinXModelCmd(int a1@<ebp>, _WORD *data)
+void  R_SkinXModelCmd(_WORD *data)
 {
     void *v2; // esp
     int v3; // [esp+Ch] [ebp-2188h]
@@ -369,6 +370,91 @@ void __cdecl R_SkinXSurfaceWeight0(
         ++vertexBlend;
         ++vertsOut;
     }
+}
+
+void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)
+{
+    float decodeScale; // [esp+10h] [ebp-4h]
+
+    decodeScale = ((double)in.array[3] - -192.0) / 32385.0;
+    *out = ((double)in.array[0] - 127.0) * decodeScale;
+    out[1] = ((double)in.array[1] - 127.0) * decodeScale;
+    out[2] = ((double)in.array[2] - 127.0) * decodeScale;
+}
+
+void __cdecl MatrixTransformVertexAndBasis(
+    const float *offset,
+    float binormalSign,
+    PackedUnitVec normal,
+    PackedUnitVec tangent,
+    const DObjSkelMat *mat,
+    GfxPackedVertex *vert)
+{
+    PackedUnitVec v6; // [esp+48h] [ebp-88h]
+    PackedUnitVec v7; // [esp+68h] [ebp-68h] BYREF
+    float v8; // [esp+6Ch] [ebp-64h]
+    float v9; // [esp+70h] [ebp-60h]
+    PackedUnitVec v10; // [esp+74h] [ebp-5Ch]
+    PackedUnitVec v11; // [esp+7Ch] [ebp-54h]
+    PackedUnitVec v12; // [esp+80h] [ebp-50h]
+    PackedUnitVec v13; // [esp+84h] [ebp-4Ch]
+    PackedUnitVec v14; // [esp+88h] [ebp-48h]
+    float v15; // [esp+8Ch] [ebp-44h]
+    float v16; // [esp+90h] [ebp-40h]
+    float v17; // [esp+94h] [ebp-3Ch]
+    PackedUnitVec out; // [esp+9Ch] [ebp-34h] BYREF
+    float v19; // [esp+A0h] [ebp-30h]
+    float v20; // [esp+A4h] [ebp-2Ch]
+    PackedUnitVec in; // [esp+A8h] [ebp-28h]
+    PackedUnitVec v22; // [esp+B4h] [ebp-1Ch]
+    float rotated[3]; // [esp+B8h] [ebp-18h]
+    float unpacked[3]; // [esp+C4h] [ebp-Ch]
+
+    vert->xyz[0] = *offset * mat->axis[0][0] + offset[1] * mat->axis[1][0] + offset[2] * mat->axis[2][0] + mat->origin[0];
+    vert->xyz[1] = *offset * mat->axis[0][1] + offset[1] * mat->axis[1][1] + offset[2] * mat->axis[2][1] + mat->origin[1];
+    vert->xyz[2] = *offset * mat->axis[0][2] + offset[1] * mat->axis[1][2] + offset[2] * mat->axis[2][2] + mat->origin[2];
+    vert->binormalSign = binormalSign;
+    out.packed = normal.packed;
+    v19 = *(float *)&normal.packed;
+    v20 = *(float *)&normal.packed;
+    in.packed = normal.packed;
+    Vec3UnpackUnitVec(normal, (float *)&out.packed);
+    *(float *)&in.packed = 0.0;
+    unpacked[0] = *(float *)&out.packed;
+    unpacked[1] = v19;
+    unpacked[2] = v20;
+    rotated[0] = *(float *)&out.packed * mat->axis[0][0] + v19 * mat->axis[1][0] + v20 * mat->axis[2][0];
+    rotated[1] = *(float *)&out.packed * mat->axis[0][1] + v19 * mat->axis[1][1] + v20 * mat->axis[2][1];
+    rotated[2] = *(float *)&out.packed * mat->axis[0][2] + v19 * mat->axis[1][2] + v20 * mat->axis[2][2];
+    v15 = rotated[1];
+    v16 = rotated[2];
+    v17 = 0.0;
+    v11.array[0] = (int)(rotated[0] * 127.0 + 127.5);
+    v11.array[1] = (int)(rotated[1] * 127.0 + 127.5);
+    v11.array[2] = (int)(rotated[2] * 127.0 + 127.5);
+    v11.array[3] = 63;
+    v12.packed = v11.packed;
+    v14.packed = v11.packed;
+    v13.packed = v11.packed;
+    v22.packed = v11.packed;
+    vert->normal = v11;
+    v7.packed = tangent.packed;
+    v8 = *(float *)&tangent.packed;
+    v9 = *(float *)&tangent.packed;
+    v10.packed = tangent.packed;
+    Vec3UnpackUnitVec(tangent, (float *)&v7.packed);
+    *(float *)&v10.packed = 0.0;
+    unpacked[0] = *(float *)&v7.packed;
+    unpacked[1] = v8;
+    unpacked[2] = v9;
+    rotated[0] = *(float *)&v7.packed * mat->axis[0][0] + v8 * mat->axis[1][0] + v9 * mat->axis[2][0];
+    rotated[1] = *(float *)&v7.packed * mat->axis[0][1] + v8 * mat->axis[1][1] + v9 * mat->axis[2][1];
+    rotated[2] = *(float *)&v7.packed * mat->axis[0][2] + v8 * mat->axis[1][2] + v9 * mat->axis[2][2];
+    v6.array[0] = (int)(rotated[0] * 127.0 + 127.5);
+    v6.array[1] = (int)(rotated[1] * 127.0 + 127.5);
+    v6.array[2] = (int)(rotated[2] * 127.0 + 127.5);
+    v6.array[3] = 63;
+    vert->tangent = v6;
 }
 
 void __cdecl R_SkinXSurfaceWeight1(
