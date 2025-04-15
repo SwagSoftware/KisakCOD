@@ -1,6 +1,12 @@
 #include <qcommon/qcommon.h>
 
 #include "dynentity_client.h"
+#include <gfx_d3d/r_scene.h>
+#include <cgame/cg_local.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <EffectsCore/fx_system.h>
+#include <server_mp/server.h>
+#include <gfx_d3d/r_shadowcookie.h>
 
 const dvar_t *dynEnt_active;
 const dvar_t *dynEnt_bulletForce;
@@ -66,7 +72,6 @@ void __cdecl DynEntCl_RegisterDvars()
 void __cdecl DynEntCl_InitEntities(int localClientNum)
 {
     DynEntityPose *dynEntPose; // [esp+8h] [ebp-24h]
-    DynEntityDrawType drawType; // [esp+Ch] [ebp-20h]
     DynEntityClient *dynEntClient; // [esp+18h] [ebp-14h]
     const DynEntityDef *dynEntDef; // [esp+1Ch] [ebp-10h]
     unsigned __int16 dynEntCount; // [esp+20h] [ebp-Ch]
@@ -75,8 +80,9 @@ void __cdecl DynEntCl_InitEntities(int localClientNum)
 
     if (localClientNum == jpeg_mem_init())
     {
-        for (drawType = DYNENT_DRAW_MODEL; (unsigned int)drawType < DYNENT_DRAW_COUNT; ++drawType)
+        for (int d = DYNENT_DRAW_MODEL; d < (int)DYNENT_DRAW_COUNT; ++d)
         {
+            DynEntityDrawType drawType = (DynEntityDrawType)d; // [esp+Ch] [ebp-20h]
             DynEnt_ClearCollWorld((DynEntityCollType)drawType);
             dynEntCount = DynEnt_GetEntityCount((DynEntityCollType)drawType);
             for (dynEntId = 0; dynEntId < (int)dynEntCount; ++dynEntId)
@@ -975,7 +981,7 @@ void __cdecl DynEntCl_AreaEntities_r(
         else
         {
             nextSectorIndex = sector->tree.child[1];
-            DynEntCl_AreaEntities_r((DynEntityDrawType)drawType, sector->tree.child[0], areaParms);
+            DynEntCl_AreaEntities_r((DynEntityCollType)drawType, sector->tree.child[0], areaParms);
             sectorIndex = nextSectorIndex;
         }
     }
@@ -1109,7 +1115,7 @@ void __cdecl DynEntCl_PlayEventFx(const FxEffectDef *def, const float *origin, c
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     clientIndex);
-            FX_PlayOrientedEffect(clientIndex, def, time, origin, axis);
+            FX_PlayOrientedEffect(clientIndex, def, cgArray[0].time, origin, axis);
         }
     }
 }
@@ -1128,10 +1134,10 @@ char __cdecl DynEntCl_EventNeedsProcessed(int localClientNum, int sourceEntityNu
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if ((*(unsigned int *)(dword_98F45C + 32) & 6) == 0 || sourceEntityNum != *(unsigned int *)(dword_98F45C + 232))
+        if ((cgArray[0].nextSnap->ps.otherFlags & 6) == 0 || sourceEntityNum != cgArray[0].nextSnap->ps.clientNum)
             return 0;
     }
-    else if (localClientNum != jpeg_mem_init())
+    else if (localClientNum != RETURN_ZERO32())
     {
         return 0;
     }
@@ -1177,7 +1183,7 @@ char __cdecl DynEntCl_DynEntImpactEvent(
     clip.extents.end[2] = end[2];
     CM_CalcTraceExtents(&clip.extents);
     clip.ignoreEntParams = 0;
-    clip.contentmask = (int)&loc_802012 + 1;
+    clip.contentmask = 0x802013;
     clip.bLocational = 1;
     clip.priorityMap = 0;
     DynEntCl_PointTrace(&clip, &trace);
@@ -1244,7 +1250,7 @@ dxBody *__cdecl DynEntCl_CreatePhysObj(const DynEntityDef *dynEntDef, const GfxP
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 796, 0, "%s", "dynEntDef->physPreset");
     if (!dynEnt_active->current.enabled)
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 799, 0, "%s", "dynEnt_active->current.enabled");
-    physId = Phys_ObjCreate(PHYS_WORLD_DYNENT, pose->origin, pose->quat, (float *)vec3_origin, dynEntDef->physPreset);
+    physId = Phys_ObjCreate(PHYS_WORLD_DYNENT, (float*)pose->origin, (float*)pose->quat, (float *)vec3_origin, dynEntDef->physPreset);
     if (physId)
     {
         DynEnt_SetPhysObjCollision(dynEntDef, physId);
@@ -1352,6 +1358,8 @@ void __cdecl DynEntCl_TestPhysicsEntities(
     }
 }
 
+const float traceOffsets[5][2] = { { 0.0, 0.0 }, { 1.0, 1.0 }, { -1.0, 1.0 }, { 1.0, -1.0 }, { -1.0, -1.0 } }; // idb
+
 void __cdecl DynEntCl_MeleeEvent(int localClientNum, int sourceEntityNum)
 {
     float v2; // [esp+Ch] [ebp-58h]
@@ -1386,7 +1394,7 @@ void __cdecl DynEntCl_MeleeEvent(int localClientNum, int sourceEntityNum)
                 Vec3Mad(eyePos, player_meleeRange->current.value, forward, end);
                 scale = player_meleeWidth->current.value * (float)traceOffsets[traceIndex][0];
                 Vec3Mad(end, scale, right, end);
-                v2 = player_meleeHeight->current.value * flt_89265C[2 * traceIndex];
+                v2 = player_meleeHeight->current.value * (float)traceOffsets[traceIndex][1];
                 Vec3Mad(end, v2, up, end);
                 if (DynEntCl_DynEntImpactEvent(localClientNum, attacker->nextState.number, eyePos, end, damage, 1))
                     break;
@@ -1572,7 +1580,7 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
     DynEntityClient *ClientEntity; // [esp+8134h] [ebp-8h]
     unsigned int i; // [esp+8138h] [ebp-4h]
 
-    unsignedInt_low = DynEntCl_AreaEntities(drawType, radiusMins, radiusMaxs, (int)&loc_802012 + 1, 0x1000u, hitEnts);
+    unsignedInt_low = DynEntCl_AreaEntities(drawType, radiusMins, radiusMaxs, 0x802013, 0x1000u, hitEnts);
     if (unsignedInt_low > dynEnt_explodeMaxEnts->current.integer)
     {
         for (i = 0; i < unsignedInt_low; ++i)
@@ -1652,7 +1660,7 @@ void __cdecl DynEntCl_JitterEvent(
         maxs[2] = 3.4028235e38;
         for (drawType = DYNENT_DRAW_MODEL; (unsigned int)drawType < DYNENT_DRAW_COUNT; ++drawType)
         {
-            unsignedInt = DynEntCl_AreaEntities(drawType, sum, maxs, (int)&loc_802012 + 1, 0x1000u, dynEntList);
+            unsignedInt = DynEntCl_AreaEntities(drawType, sum, maxs, 0x802013, 0x1000u, dynEntList);
             if (unsignedInt > dynEnt_explodeMaxEnts->current.integer)
             {
                 for (i = 0; i < (int)unsignedInt; ++i)

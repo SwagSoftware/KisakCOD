@@ -1,5 +1,10 @@
 #include "devgui.h"
 #include <qcommon/mem_track.h>
+#include <qcommon/qcommon.h>
+#include <qcommon/cmd.h>
+#include <client_mp/client_mp.h>
+#include <client/client.h>
+#include <cgame/cg_local.h>
 
 
 const dvar_t *devgui_colorTextGray;
@@ -79,7 +84,7 @@ unsigned __int16 __cdecl DevGui_ConstructPath_r(unsigned __int16 parent, const c
 
     do
     {
-        tokResult = DevGui_PathToken(&path, label, &sortKey);
+        tokResult = (DevGuiTokenResult)DevGui_PathToken(&path, label, &sortKey);
         if (tokResult == DEVGUI_TOKEN_ERROR)
             MyAssertHandler(".\\devgui\\devgui.cpp", 393, 0, "%s", "tokResult != DEVGUI_TOKEN_ERROR");
         parent = DevGui_RegisterMenu(parent, label, sortKey);
@@ -205,7 +210,7 @@ unsigned __int16 __cdecl DevGui_FindMenu(unsigned __int16 parentHandle, const ch
     return 0;
 }
 
-int __cdecl DevGui_PathToken(const char **pathInOut, char *label, __int16 *sortKeyOut)
+DevGuiTokenResult __cdecl DevGui_PathToken(const char **pathInOut, char *label, __int16 *sortKeyOut)
 {
     const char *path; // [esp+0h] [ebp-10h]
     __int16 sign; // [esp+4h] [ebp-Ch]
@@ -241,13 +246,13 @@ int __cdecl DevGui_PathToken(const char **pathInOut, char *label, __int16 *sortK
                 ++path;
             }
             if (*path < 48 || *path > 57)
-                return 0;
+                return (DevGuiTokenResult)0;
             do
                 sortKey = 10 * sortKey + *path++ - 48;
             while (*path >= 48 && *path <= 57);
             *sortKeyOut = sign * sortKey;
             if (*path && (*path != 47 || path[1] == 47))
-                return 0;
+                return (DevGuiTokenResult)0;
         }
         else
         {
@@ -255,18 +260,18 @@ int __cdecl DevGui_PathToken(const char **pathInOut, char *label, __int16 *sortK
             {
                 label[labelLen] = 0;
                 *pathInOut = path;
-                return 1;
+                return (DevGuiTokenResult)1;
             }
             label[labelLen] = *path++;
             if (++labelLen == 26)
-                return 0;
+                return (DevGuiTokenResult)0;
         }
     }
     if (!labelLen)
-        return 0;
+        return (DevGuiTokenResult)0;
     *pathInOut = path;
     label[labelLen] = 0;
-    return 2;
+    return (DevGuiTokenResult)2;
 }
 
 char __cdecl DevGui_IsValidPath(const char *path)
@@ -622,7 +627,7 @@ void __cdecl DevGui_DrawMenuVertically(const DevMenuItem *menu, unsigned __int16
         *(unsigned int *)textColor = devgui_colorText->current.integer;
         shade = devgui_bevelShade->current.value;
         DevGui_DrawBevelBox(x, w, h, shade, bgndColor);
-        DevGui_DrawFont(x + 4, HIDWORD(x) + 4, textColor, "...");
+        DevGui_DrawFont(x + 4, HIDWORD(x) + 4, textColor, (char*)"...");
         HIDWORD(x) += h;
     }
     childCount = 0;
@@ -667,7 +672,7 @@ void __cdecl DevGui_DrawMenuVertically(const DevMenuItem *menu, unsigned __int16
             DevGui_DrawBevelBox(x, w, h, shade, bgndColor);
             DevGui_DrawFont(x + 4, HIDWORD(x) + 4, textColor, (char *)childMenua);
             if (!childMenua->menus[0].childType && childMenua->menus[0].child.menu)
-                DevGui_DrawFont(subMenuStringPos, HIDWORD(x) + 4, textColor, " >");
+                DevGui_DrawFont(subMenuStringPos, HIDWORD(x) + 4, textColor, (char*)" >");
             HIDWORD(x) += h;
             ++childCount;
         }
@@ -980,7 +985,7 @@ void __cdecl DevGui_DrawSingleSlider(
 void __cdecl DevGui_DrawDvarValue(int x, int y, const dvar_s *dvar)
 {
     const char *v3; // eax
-    char *v4; // [esp+0h] [ebp-8h]
+    const char *v4; // [esp+0h] [ebp-8h]
     char *text; // [esp+4h] [ebp-4h]
 
     if (dvar->type)
@@ -1002,7 +1007,7 @@ void __cdecl DevGui_DrawDvarValue(int x, int y, const dvar_s *dvar)
             v4 = "On";
         else
             v4 = "Off";
-        DevGui_DrawFont(x, y, (const unsigned __int8 *)&devgui_colorText->current, v4);
+        DevGui_DrawFont(x, y, (const unsigned __int8 *)&devgui_colorText->current, (char*)v4);
     }
 }
 
@@ -1054,6 +1059,8 @@ void DevGui_DrawBindNextKey()
     *(unsigned int *)textColor = -1;
     DevGui_DrawFont(x, y, textColor, (char *)text);
 }
+
+const char *MYINSTRUCTIONS = "<Y> Edits node,  <LB> Adds new node,  <RB> Removes node,  <START> Saves to disk"; // idb
 
 void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int localClientNum)
 {

@@ -57,6 +57,10 @@ union VariableUnion // sizeof=0x4
     {
         return intValue;
     }
+    VariableUnion(float f)
+    {
+        floatValue = f;
+    }
     VariableUnion(int i)
     {
         intValue = i;

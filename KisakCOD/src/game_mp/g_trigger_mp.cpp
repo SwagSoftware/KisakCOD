@@ -79,7 +79,7 @@ void __cdecl multi_trigger(gentity_s *ent)
         G_FreeEntityDelay(ent);
 }
 
-void __cdecl Touch_Multi(gentity_s *self, gentity_s *other)
+void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int extra)
 {
     G_Trigger(self, other);
     multi_trigger(self);
@@ -180,7 +180,7 @@ void __cdecl SP_trigger_disk(gentity_s *ent)
     SV_LinkEntity(ent);
 }
 
-void __cdecl hurt_touch(gentity_s *self, gentity_s *other)
+void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int extra)
 {
     if (other->takedamage && self->item[0].index <= level.time)
     {
@@ -196,7 +196,7 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other)
     }
 }
 
-void __cdecl hurt_use(gentity_s *self)
+void __cdecl hurt_use(gentity_s *self, gentity_s *other, gentity_s *third)
 {
     if (self->handler == 3)
     {
@@ -269,19 +269,28 @@ void __cdecl Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int iDa
     }
 }
 
-void __cdecl Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther)
+void __cdecl Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s *third)
 {
     Activate_trigger_damage(pEnt, pOther, pEnt->item[0].clipAmmoCount + 1, -1);
 }
 
-void __cdecl Pain_trigger_damage(gentity_s *pSelf, gentity_s *pAttacker, int iDamage, const float *vPoint, int iMod)
+void __cdecl Pain_trigger_damage(gentity_s *pSelf, gentity_s *pAttacker, int iDamage, const float *vPoint, int iMod, const float* idk, hitLocation_t hit, int swag)
 {
     Activate_trigger_damage(pSelf, pAttacker, iDamage, iMod);
     if (!pSelf->item[0].clipAmmoCount)
         pSelf->health = 32000;
 }
 
-void __cdecl Die_trigger_damage(gentity_s *pSelf, gentity_s *pInflictor, gentity_s *pAttacker, int iDamage, int iMod)
+void Die_trigger_damage(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    int iDamage,
+    int iMod,
+    int iWeapon,
+    const float *vDir,
+    const hitLocation_t hitLoc,
+    int timeOffset)
 {
     Activate_trigger_damage(pSelf, pAttacker, iDamage, iMod);
     if (!pSelf->item[0].clipAmmoCount)
@@ -291,7 +300,8 @@ void __cdecl Die_trigger_damage(gentity_s *pSelf, gentity_s *pInflictor, gentity
 void __cdecl SP_trigger_damage(gentity_s *pSelf)
 {
     G_SpawnInt("accumulate", "0", &pSelf->item[0].clipAmmoCount);
-    G_SpawnInt("threshold", "0", (int *)&pSelf->436);
+    //G_SpawnInt("threshold", "0", (int *)&pSelf->436);
+    G_SpawnInt("threshold", "0", &pSelf->item[0].ammoCount);
     pSelf->health = 32000;
     pSelf->takedamage = 1;
     pSelf->handler = 4;

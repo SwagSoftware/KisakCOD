@@ -2,9 +2,6 @@
 #include "bg_local.h"
 #include <game_mp/g_main_mp.h>
 
-#define abs8(x) abs(x)
-#define abs32(x) abs(x)
-
 const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
 {
   {

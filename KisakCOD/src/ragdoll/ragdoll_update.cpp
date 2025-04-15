@@ -631,6 +631,132 @@ bool __cdecl Ragdoll_ValidatePrecalcBoneDef(RagdollDef *def, BoneDef *bone)
     return v3 >= 0.000001;
 }
 
+void __cdecl Ragdoll_ClosestPointsTwoSegs(float (*s0)[3], float (*s1)[3], float *t0, float *t1, float *direction)
+{
+    double v5; // [esp+0h] [ebp-70h]
+    float v6; // [esp+8h] [ebp-68h]
+    double v7; // [esp+Ch] [ebp-64h]
+    float v8; // [esp+14h] [ebp-5Ch]
+    float sc; // [esp+18h] [ebp-58h]
+    float tc; // [esp+1Ch] [ebp-54h]
+    float D; // [esp+20h] [ebp-50h]
+    int c; // [esp+24h] [ebp-4Ch]
+    float tN; // [esp+28h] [ebp-48h]
+    float sD; // [esp+2Ch] [ebp-44h]
+    float uwDot; // [esp+30h] [ebp-40h]
+    float sN; // [esp+34h] [ebp-3Ch]
+    float uvDot; // [esp+38h] [ebp-38h]
+    float vwDot; // [esp+3Ch] [ebp-34h]
+    float tD; // [esp+40h] [ebp-30h]
+    float u[3]; // [esp+44h] [ebp-2Ch] BYREF
+    float uuDot; // [esp+50h] [ebp-20h]
+    float vvDot; // [esp+54h] [ebp-1Ch]
+    float v[3]; // [esp+58h] [ebp-18h] BYREF
+    float w[3]; // [esp+64h] [ebp-Ch] BYREF
+
+    if (!t0)
+        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 847, 0, "%s", "t0");
+    if (!t1)
+        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 848, 0, "%s", "t1");
+    Vec3Sub(&(*s0)[3], (const float *)s0, u);
+    Vec3Sub(&(*s1)[3], (const float *)s1, v);
+    Vec3Sub((const float *)s0, (const float *)s1, w);
+    uuDot = Vec3Dot(u, u);
+    uvDot = Vec3Dot(u, v);
+    vvDot = Vec3Dot(v, v);
+    uwDot = Vec3Dot(u, w);
+    vwDot = Vec3Dot(v, w);
+    D = uuDot * vvDot - uvDot * uvDot;
+    tD = D;
+    sD = D;
+    if (D >= 0.000001)
+    {
+        sN = uvDot * vwDot - vvDot * uwDot;
+        tN = uuDot * vwDot - uvDot * uwDot;
+        if (sN >= 0.0)
+        {
+            if (D < (double)sN)
+            {
+                sN = uuDot * vvDot - uvDot * uvDot;
+                tN = vwDot + uvDot;
+                tD = vvDot;
+            }
+        }
+        else
+        {
+            sN = 0.0;
+            tN = vwDot;
+            tD = vvDot;
+        }
+    }
+    else
+    {
+        sN = 0.0;
+        sD = 1.0;
+        tN = vwDot;
+        tD = vvDot;
+    }
+    if (tN >= 0.0)
+    {
+        if (tD < (double)tN)
+        {
+            tN = tD;
+            if (uvDot - uwDot >= 0.0)
+            {
+                if (uuDot >= uvDot - uwDot)
+                {
+                    sN = uvDot - uwDot;
+                    sD = uuDot;
+                }
+                else
+                {
+                    sN = sD;
+                }
+            }
+            else
+            {
+                sN = 0.0;
+            }
+        }
+    }
+    else
+    {
+        tN = 0.0;
+        if (-uwDot >= 0.0)
+        {
+            if (uuDot >= -uwDot)
+            {
+                sN = -uwDot;
+                sD = uuDot;
+            }
+            else
+            {
+                sN = sD;
+            }
+        }
+        else
+        {
+            sN = 0.0;
+        }
+    }
+    v8 = fabs(sN);
+    if (v8 >= 0.00009999999747378752)
+        v7 = sN / sD;
+    else
+        v7 = 0.0;
+    sc = v7;
+    v6 = fabs(tN);
+    if (v6 >= 0.00009999999747378752)
+        v5 = tN / tD;
+    else
+        v5 = 0.0;
+    tc = v5;
+    *t0 = sc;
+    *t1 = tc;
+    for (c = 0; c < 3; ++c)
+        direction[c] = sc * u[c] + w[c] - tc * v[c];
+}
+
 void __cdecl Ragdoll_GenerateAllSelfCollisionContacts()
 {
     float diff[3]; // [esp+14h] [ebp-88h] BYREF

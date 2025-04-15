@@ -107,5 +107,6 @@ char *__cdecl Com_ValidateBspLumpData(
     unsigned int *count);
 
 int __cdecl Com_BlockChecksumKey32(const unsigned __int8 *data, unsigned int length, unsigned int initialCrc);
+char *__cdecl Com_EntityString(int *numEntityChars);
 
 extern ComWorld comWorld;

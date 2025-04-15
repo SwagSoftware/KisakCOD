@@ -13,6 +13,8 @@
 #include <xanim/dobj_utils.h>
 #include <xanim/xanim.h>
 
+#include "bullet.h"
+
 //Line 51763:  0006 : 00006554       unsigned short **s_flashTags      827b6554     g_scr_vehicle.obj
 
 struct VehicleLocalPhysics // sizeof=0x34
@@ -22,8 +24,17 @@ struct VehicleLocalPhysics // sizeof=0x34
     int onGround;                       // ...
 };
 
+struct VehiclePhysicsBackup // sizeof=0x1B8
+{                                       // ...
+    vehicle_pathpos_t pathPos;
+    vehicle_physic_t phys;              // ...
+};
+
+VehicleLocalPhysics s_phys_0;
 vehicle_info_t s_vehicleInfos[32];
 VehicleLocalPhysics s_phys;
+
+VehiclePhysicsBackup s_backup;
 
 const float  s_correctSolidDeltas[] = {
     0.0,
@@ -156,7 +167,7 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int infoIdx)
     ent->nextthink = level.time + 50;
     ent->takedamage = 1;
     ent->active = 1;
-    ent->clipmask = (int)&loc_81020F + 2;
+    ent->clipmask = 0x810211;
     SV_DObjGetBounds(ent, ent->r.mins, ent->r.maxs);
     SV_LinkEntity(ent);
 }
@@ -313,6 +324,35 @@ void __cdecl VEH_InitPhysics(gentity_s *ent)
     phys->worldTiltVel[2] = 0.0;
 }
 
+const float s_correctSolidDeltas[26][3] =
+{
+  { 0.0, 0.0, 1.0 },
+  { -1.0, 0.0, 1.0 },
+  { 0.0, -1.0, 1.0 },
+  { 1.0, 0.0, 1.0 },
+  { 0.0, 1.0, 1.0 },
+  { -1.0, 0.0, 0.0 },
+  { 0.0, -1.0, 0.0 },
+  { 1.0, 0.0, 0.0 },
+  { 0.0, 1.0, 0.0 },
+  { 0.0, 0.0, -1.0 },
+  { -1.0, 0.0, -1.0 },
+  { 0.0, -1.0, -1.0 },
+  { 1.0, 0.0, -1.0 },
+  { 0.0, 1.0, -1.0 },
+  { -1.0, -1.0, 1.0 },
+  { 1.0, -1.0, 1.0 },
+  { 1.0, 1.0, 1.0 },
+  { -1.0, 1.0, 1.0 },
+  { -1.0, -1.0, 0.0 },
+  { 1.0, -1.0, 0.0 },
+  { 1.0, 1.0, 0.0 },
+  { -1.0, 1.0, 0.0 },
+  { -1.0, -1.0, -1.0 },
+  { 1.0, -1.0, -1.0 },
+  { 1.0, 1.0, -1.0 },
+  { -1.0, 1.0, -1.0 }
+}; // idb
 int __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace)
 {
     vehicle_physic_t *phys; // [esp+10h] [ebp-18h]
@@ -322,7 +362,7 @@ int __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace)
     phys = &ent->scr_vehicle->phys;
     for (i = 0; i < 0x1A; ++i)
     {
-        Vec3Add(phys->origin, s_correctSolidDeltas[i], point);
+        Vec3Add(phys->origin, &s_correctSolidDeltas[i], point);
         G_TraceCapsule(trace, point, phys->mins, phys->maxs, point, ent->s.number, ent->clipmask);
         if (!trace->startsolid)
         {
@@ -488,7 +528,7 @@ void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out)
     float backoff; // [esp+8h] [ebp-4h]
     float backoffa; // [esp+8h] [ebp-4h]
 
-    if (normal[2] < DOUBLE_0_699999988079071 || in[2] * in[2] > *in * *in + in[1] * in[1])
+    if (normal[2] < 0.699999988079071 || in[2] * in[2] > *in * *in + in[1] * in[1])
     {
         backoff = Vec3Dot(in, normal);
         if (backoff >= 0.0)
@@ -606,7 +646,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     DObj_s *obj; // [esp+24h] [ebp-1068h]
     scr_vehicle_s *scr_vehicle; // [esp+28h] [ebp-1064h]
     float b[3]; // [esp+2Ch] [ebp-1060h] BYREF
-    void(__cdecl * v6)(gentity_s *, gentity_s *, int); // [esp+38h] [ebp-1054h]
+    void(__cdecl * touch)(gentity_s *, gentity_s *, int); // [esp+38h] [ebp-1054h]
     float v7; // [esp+3Ch] [ebp-1050h]
     gentity_s *target; // [esp+40h] [ebp-104Ch]
     float out[3]; // [esp+44h] [ebp-1048h] BYREF
@@ -623,7 +663,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 1917, 0, "%s", "ent->scr_vehicle");
     scr_vehicle = ent->scr_vehicle;
-    v6 = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * ent->handler];
+    touch = entityHandlers[ent->handler].touch;
     Vec3Sub(scr_vehicle->phys.origin, scr_vehicle->phys.prevOrigin, diff);
     AnglesSubtract(scr_vehicle->phys.angles, scr_vehicle->phys.prevAngles, v3);
     Vec3NormalizeTo(scr_vehicle->phys.vel, out);
@@ -641,7 +681,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     for (i = 0; i < v1; ++i)
     {
         target = &g_entities[entityList[i]];
-        v12 = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * target->handler];
+        v12 = entityHandlers[target->handler].touch;
         if (target->s.number != ent->s.number
             && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 4 || target->s.eType == 14)
             && target->s.eType == 4)
@@ -683,8 +723,8 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
                     }
                     if (v12)
                         v12(target, ent, 1);
-                    if (v6)
-                        v6(ent, target, 1);
+                    if (touch)
+                        touch(ent, target, 1);
                     if (target->s.eType == 1)
                         VEH_PushEntity(ent, target, out, diff, v3);
                 }
@@ -1906,7 +1946,7 @@ void __cdecl CMD_VEH_GetSpeed(scr_entref_t entref)
     scr_vehicle_s *veh; // [esp+4h] [ebp-8h]
 
     veh = GScr_GetVehicle(entref)->scr_vehicle;
-    Scr_AddFloat(COERCE_VARIABLEUNION(veh->speed));
+    Scr_AddFloat(veh->speed);
 }
 
 void __cdecl CMD_VEH_GetSpeedMPH(scr_entref_t entref)
@@ -2426,6 +2466,15 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     veh->turret.fireBarrel = veh->turret.fireBarrel == 0;
 }
 
+unsigned __int16 *s_flashTags[] =
+{
+    &scr_const.tag_flash,
+    &scr_const.tag_flash_11,
+    &scr_const.tag_flash_2,
+    &scr_const.tag_flash_22,
+    &scr_const.tag_flash_3
+};
+
 int __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int barrel)
 {
     VariableUnion v2; // eax
@@ -2573,7 +2622,7 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int gravity, float frameTime)
         down[1] = startOrigin[1];
         down[2] = startOrigin[2] - 18.0;
         G_TraceCapsule(&trace, startOrigin, veh->phys.mins, veh->phys.maxs, down, ent->s.number, ent->clipmask);
-        if (veh->phys.vel[2] <= 0.0 || trace.fraction != 1.0 && trace.normal[2] >= DOUBLE_0_699999988079071)
+        if (veh->phys.vel[2] <= 0.0 || trace.fraction != 1.0 && trace.normal[2] >= 0.699999988079071)
         {
             up[0] = startOrigin[0];
             up[1] = startOrigin[1];

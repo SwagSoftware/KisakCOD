@@ -225,7 +225,7 @@ void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, 
             if (scriptItem->numCommands >= 8)
                 BG_AnimParseError("BG_ParseCommands: exceeded maximum number of animations (%i)", 8);
             command = &scriptItem->commands[scriptItem->numCommands++];
-            *(unsigned int *)command->bodyPart = 0;
+            *(_DWORD *)command->bodyPart = 0;
         }
         command->bodyPart[partIndex] = BG_IndexForString(v5->token, animBodyPartsStr, 1);
         if (command->bodyPart[partIndex] <= 0)
@@ -352,10 +352,9 @@ void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, 
                 tokene = Com_ParseOnLine(input);
                 if (!tokene || !tokene->token[0])
                     BG_AnimParseError("BG_ParseCommands: expected sound");
-                strstr((unsigned __int8*)tokene->token, (unsigned __int8*)".wav");
-                if (v4)
+                if (strstr((const char*)tokene, ".wav"))
                     BG_AnimParseError("BG_ParseCommands: wav files not supported, only sound scripts");
-                command->soundAlias = globalScriptData->soundAlias(tokene->token);
+                command->soundAlias = globalScriptData->soundAlias((const char*)tokene);
             }
         }
         partIndex = 0;
@@ -2313,32 +2312,28 @@ void BG_FinalizePlayerAnims()
                                 fullspeed = (float)g_speed->current.integer;
                             else
                                 fullspeed = 190.0;
-                            strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"crouch");
-                            if (v2)
+                            if (strstr(pCurrAnim->name, "crouch"))
                             {
                                 fullspeeda = fullspeed * 0.6499999761581421;
                                 moveType = (char*)"crouch";
                             }
                             else
                             {
-                                strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"prone");
-                                if (v3)
+                                if (strstr(pCurrAnim->name, "prone"))
                                 {
                                     fullspeeda = fullspeed * 0.1500000059604645;
                                     moveType = (char*)"prone";
                                 }
                                 else
                                 {
-                                    strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"walk");
-                                    if (v4)
+                                    if (strstr(pCurrAnim->name, "walk"))
                                     {
                                         fullspeeda = fullspeed * 0.4000000059604645;
                                         moveType = (char*)"walk";
                                     }
                                     else
                                     {
-                                        strstr((unsigned __int8 *)pCurrAnim, (unsigned __int8 *)"fast");
-                                        if (v5)
+                                        if (strstr(pCurrAnim->name, "fast"))
                                         {
                                             fullspeeda = fullspeed * player_sprintSpeedScale->current.value;
                                             moveType = (char*)"sprint";
@@ -2724,7 +2719,7 @@ void __cdecl BG_AnimParseAnimScript(animScriptData_t *scriptData, loadAnim_t *pL
         }
     }
     if (indentLevel)
-        BG_AnimParseError("BG_AnimParseAnimScript: unexpected end of file: %s", v11);
+        BG_AnimParseError("BG_AnimParseAnimScript: unexpected end of file: %s", token);
     Com_EndParseSession();
     Com_UnloadRawTextFile(input);
 }

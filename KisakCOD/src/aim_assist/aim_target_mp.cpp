@@ -90,7 +90,10 @@ void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent)
             "%s",
             "ent->nextState.number != cgameGlob->predictedPlayerState.clientNum");
     if (!AimTarget_PlayerInValidState(&cgArray[0].predictedPlayerState))
-        goto LABEL_20;
+    {
+        return;
+    }
+        //goto LABEL_20;
     if (ent->nextState.eType == 1)
     {
         visBone = scr_const.aim_vis_bone;
@@ -110,7 +113,7 @@ void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent)
     }
     else
     {
-    LABEL_20:
+    //LABEL_20:
         //Profile_EndInternal(0);
     }
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include <client_mp/client_mp.h>
 
+#define abs8(x) abs(x)
+#define abs32(x) abs(x)
+
 const char *entityTypeNames[17] =
 {
     "ET_GENERAL",
@@ -204,6 +207,14 @@ void __cdecl G_TraceCapsule(
     int contentmask);
 
 void __cdecl G_PlayerEvent(int clientNum, int event);
+void __cdecl CG_TraceCapsule(
+    trace_t *results,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
+    int passEntityNum,
+    int contentMask);
 
 pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent}}; // idb
 

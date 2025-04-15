@@ -29,6 +29,15 @@ enum physStuckState_t : __int32
     PHYS_OBJ_STATE_FREE = 0x2,
 };
 
+struct PhysContact // sizeof=0x24
+{                                       // ...
+    float pos[3];
+    float normal[3];                    // ...
+    float depth;                        // ...
+    float friction;                     // ...
+    float bounce;                       // ...
+};
+
 struct Jitter // sizeof=0x24
 {                                       // ...
     float origin[3];
@@ -182,7 +191,11 @@ struct BrushInfo // sizeof=0x10
 
 // phys_ode
 struct ScreenPlacement;
-struct ContactList;
+struct ContactList // sizeof=0x1804
+{                                       // ...
+    dContactGeomExt contacts[128];
+    int contactCount;                   // ...
+};
 
 void __cdecl DynEntPieces_RegisterDvars();
 void __cdecl DynEntPieces_AddDrawSurfs();
@@ -476,10 +489,16 @@ struct BrushTrimeshData // sizeof=0x18
     int surfaceFlags;                   // ...
     Results *results;                   // ...
 };
+struct BrushBrushData // sizeof=0xC
+{                                       // ...
+    const cbrush_t *fixedBrush;         // ...
+    const objInfo *input;               // ...
+    Results *results;                   // ...
+};
 void __cdecl Phys_DrawPoly(const Poly *poly, const float *color);
 dContactGeomExt *__cdecl AddContact(Results *results);
 bool __cdecl Phys_AddContactData(Results *results, float depth, float *normal, float *pos, int surfaceFlags);
-int __cdecl GetPolyOrientation(const float *polyNormal, const float (*poly)[3], unsigned int ptCount);
+PolyOrientation __cdecl GetPolyOrientation(const float *polyNormal, const float (*poly)[3], unsigned int ptCount);
 char __cdecl Phys_GetChoppingPlaneForPolyEdge(
     const float *polyNormal,
     const float *pt1,
@@ -661,6 +680,34 @@ int __cdecl Phys_ClipPolyAgainstPlane(
 // physpreset_load_obj
 PhysPreset *__cdecl PhysPresetPrecache(const char *name, void *(__cdecl *Alloc)(int));
 
+// phys_contacts
+void __cdecl Phys_CheckOpposingNormals(dxBody *body0, dxBody *body1, ContactList *contacts);
+void __cdecl Phys_ReduceContacts(dxBody *body, const ContactList *in, ContactList *out);
+void __cdecl Phys_AssignInitialGroups(const ContactList *contacts, int *group);
+void __cdecl Phys_KMeans(const ContactList *contacts, float (*centroid)[3], int *group);
+void __cdecl Phys_DumpGroups(const float (*centroid)[3]);
+void __cdecl Phys_DumpContacts(const ContactList *contacts, const int *group);
+void __cdecl Phys_MergeGroups(const ContactList *contacts, float (*centroid)[3], int *group);
+void __cdecl Phys_GenerateGroupContacts(
+    dxBody *body,
+    const ContactList *inContacts,
+    float (*centroid)[3],
+    int *group,
+    ContactList *outContacts);
+void __cdecl Phys_CreateBasisFromNormal(const float *normal, float *binormal, float *tangent);
+void __cdecl Phys_DebugDrawContactPoint(const float *pos, const float *normal, float depth, const float *color);
+void __cdecl Phys_DumpContact(int contactNum, const dContactGeom *contact);
+void __cdecl Phys_CreateJointForEachContact(
+    ContactList *contactList,
+    dxBody *body1,
+    dxBody *body2,
+    const dSurfaceParameters *surfParms,
+    PhysWorld worldIndex);
+void __cdecl Phys_ApplyContactJitter(PhysWorld worldIndex, dContactGeom *contact, dxBody *body1, dxBody *body2);
+void __cdecl Phys_RemoveOpposingNormalContacts(const float *com, ContactList *contacts);
+void __cdecl Phys_AddCollisionContact(PhysWorld worldId, const PhysContact *physContact, dxBody *obj0, dxBody *obj1);
+
+
 
 extern const dvar_t *phys_contact_erp;
 extern const dvar_t *phys_autoDisableAngular;
@@ -703,3 +750,5 @@ extern const dvar_t *phys_mcv;
 extern const dvar_t *dynEntPieces_velocity;
 extern const dvar_t *dynEntPieces_angularVelocity;
 extern const dvar_t *dynEntPieces_impactForce;
+
+extern PhysGlob physGlob;

@@ -106,7 +106,7 @@ centity_s *__cdecl Ragdoll_BodyPose(RagdollBody *body)
         return (centity_s *)body->pose;
     if (body->dobj == -1)
         MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 215, 0, "%s", "body->dobj != DOBJ_HANDLE_NONE");
-    return CG_GetPose(body->localClientNum, body->dobj);
+    return (centity_s*)CG_GetPose(body->localClientNum, body->dobj);
 }
 
 void __cdecl Ragdoll_BodyRootOrigin(RagdollBody *body, float *origin)

@@ -1,6 +1,24 @@
 #include "game_public.h"
+#include <qcommon/mem_track.h>
+#include <server/sv_world.h>
+#include <game_mp/g_utils_mp.h>
+#include <server/sv_game.h>
+
+struct pushed_t // sizeof=0x2C
+{                                       // ...
+    gentity_s *ent;
+    float origin[3];
+    float angles[3];
+    float surfaceNormal[3];
+    float deltayaw;
+};
 
 //Line 51761:  0006 : 0000559c       char const **hintStrings      827b559c     g_mover.obj
+
+const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH"}; // idb
+
+pushed_t pushed[1024];
+pushed_t *pushed_p;
 
 void __cdecl TRACK_g_mover()
 {
@@ -17,7 +35,7 @@ gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin)
 
     if (ent->clipmask)
     {
-        if (((unsigned int)&svs.clients[29].netchanOutgoingBuffer[109728] & ent->r.contents) != 0)
+        if ((ent->r.contents & 0x4000000) != 0)
             return 0;
         mask = ent->clipmask;
     }
@@ -54,6 +72,18 @@ void __cdecl G_CreateRotationMatrix(const float *angles, float (*matrix)[3])
     (*matrix)[3] = -(*matrix)[3];
     (*matrix)[4] = -(*matrix)[4];
     (*matrix)[5] = -(*matrix)[5];
+}
+
+void __cdecl G_TransposeMatrix(float (*matrix)[3], float (*transpose)[3])
+{
+    int j; // [esp+4h] [ebp-8h]
+    int i; // [esp+8h] [ebp-4h]
+
+    for (i = 0; i < 3; ++i)
+    {
+        for (j = 0; j < 3; ++j)
+            (*transpose)[3 * i + j] = (*matrix)[3 * j + i];
+    }
 }
 
 int __cdecl G_TryPushingEntity(gentity_s *check, gentity_s *pusher, float *move, float *amove)
@@ -237,7 +267,7 @@ void __cdecl G_MoverTeam(gentity_s *ent)
                 {
                     if (level.time >= ent->s.lerp.pos.trDuration + ent->s.lerp.pos.trTime)
                     {
-                        reached = (void(__cdecl *)(gentity_s *))dword_94671C[10 * ent->handler];
+                        reached = entityHandlers[ent->handler].reached;
                         if (reached)
                             reached(ent);
                     }
@@ -246,7 +276,7 @@ void __cdecl G_MoverTeam(gentity_s *ent)
                 {
                     if (level.time >= ent->s.lerp.apos.trDuration + ent->s.lerp.apos.trTime)
                     {
-                        reached = (void(__cdecl *)(gentity_s *))dword_94671C[10 * ent->handler];
+                        reached = entityHandlers[ent->handler].reached;
                         if (reached)
                             reached(ent);
                     }
@@ -285,7 +315,7 @@ void __cdecl G_MoverTeam(gentity_s *ent)
                 BG_EvaluateTrajectory(&ent->s.lerp.pos, level.time, ent->r.currentOrigin);
                 BG_EvaluateTrajectory(&ent->s.lerp.apos, level.time, ent->r.currentAngles);
                 SV_LinkEntity(ent);
-                blocked = (void(__cdecl *)(gentity_s *, gentity_s *))dword_946720[10 * ent->handler];
+                blocked = entityHandlers[ent->handler].blocked;
                 if (blocked)
                     blocked(ent, obstacle);
             }
@@ -365,7 +395,7 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
             v13[i] = v13[i] + move[i];
     }
     SV_UnlinkEntity(pusher);
-    v9 = CM_AreaEntities(v14, v13, entityList, 1024, (int)&svs.snapshotEntities[42950].events[2]);
+    v9 = CM_AreaEntities(v14, v13, entityList, 1024, 0x6000180);
     Vec3Add(pusher->r.currentOrigin, move, pusher->r.currentOrigin);
     Vec3Add(pusher->r.currentAngles, amove, pusher->r.currentAngles);
     SV_LinkEntity(pusher);
@@ -506,7 +536,7 @@ void __cdecl trigger_use_shared(gentity_s *self)
                 }
             }
             if (i == 32)
-                Com_Error(ERR_DROP, &byte_88AA90, 32);
+                Com_Error(ERR_DROP, "Too many different hintstring key values on trigger_use entities. Max allowed is %i different strings", 32);
         }
     }
     else

@@ -8,6 +8,14 @@
 
 
 
+struct BuiltinMethodDef // sizeof=0xC
+{                                       // ...
+    const char *actionString;           // ...
+    void(__cdecl *actionFunc)(scr_entref_t); // ...
+    int type;                           // ...
+};
+
+
 // g_active_mp
 void __cdecl P_DamageFeedback(gentity_s *player);
 void __cdecl G_SetClientSound(gentity_s *ent);
@@ -222,7 +230,7 @@ void __cdecl player_die(
     gentity_s *attacker,
     int damage,
     int meansOfDeath,
-    unsigned int iWeapon,
+    int iWeapon,
     const float *vDir,
     hitLocation_t hitLoc,
     int psTimeOffset);
@@ -333,7 +341,7 @@ void __cdecl turret_controller(const gentity_s *self, int *partBits);
 void __cdecl G_FreeTurret(gentity_s *self);
 bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner);
 bool __cdecl turret_behind(gentity_s *self, gentity_s *other);
-void __cdecl turret_use(gentity_s *self, gentity_s *owner);
+void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s *activator);
 void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname);
 void __cdecl SP_turret(gentity_s *self);
 
@@ -375,16 +383,20 @@ void __cdecl Helicopter_Pain(
     gentity_s *pAttacker,
     int damage,
     const float *point,
-    int mod,
-    const float *dir);
+    const int mod,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    const int weaponIdx);
 void __cdecl Helicopter_Die(
     gentity_s *pSelf,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    int damage,
-    int mod,
-    int weapon,
-    const float *dir);
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    int psTimeOffset);
 void __cdecl Helicopter_Controller(const gentity_s *pSelf, int *partBits);
 void __cdecl Helicopter_Think(gentity_s *ent);
 
@@ -800,20 +812,29 @@ void __cdecl G_Trigger(gentity_s *self, gentity_s *other);
 char __cdecl InitTrigger(gentity_s *self);
 void __cdecl InitSentientTrigger(gentity_s *self);
 void __cdecl multi_trigger(gentity_s *ent);
-void __cdecl Touch_Multi(gentity_s *self, gentity_s *other);
+void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int extra);
 void __cdecl SP_trigger_multiple(gentity_s *ent);
 void __cdecl InitTriggerWait(gentity_s *ent, int spawnflag);
 void __cdecl SP_trigger_radius(gentity_s *ent);
 void __cdecl SP_trigger_disk(gentity_s *ent);
-void __cdecl hurt_touch(gentity_s *self, gentity_s *other);
-void __cdecl hurt_use(gentity_s *self);
+void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int extra);
+void __cdecl hurt_use(gentity_s *self, gentity_s *other, gentity_s *third);
 void __cdecl SP_trigger_hurt(gentity_s *self);
 void __cdecl SP_trigger_once(gentity_s *ent);
 bool __cdecl Respond_trigger_damage(gentity_s *pEnt, int iMOD);
 void __cdecl Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int iDamage, int iMOD);
-void __cdecl Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther);
-void __cdecl Pain_trigger_damage(gentity_s *pSelf, gentity_s *pAttacker, int iDamage, const float *vPoint, int iMod);
-void __cdecl Die_trigger_damage(gentity_s *pSelf, gentity_s *pInflictor, gentity_s *pAttacker, int iDamage, int iMod);
+void __cdecl Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s *third);
+void __cdecl Pain_trigger_damage(gentity_s *pSelf, gentity_s *pAttacker, int iDamage, const float *vPoint, int iMod, const float *idk, hitLocation_t hit, int swag);
+void Die_trigger_damage(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    int iDamage,
+    int iMod,
+    int iWeapon,
+    const float *vDir,
+    const hitLocation_t hitLoc,
+    int timeOffset);
 void __cdecl SP_trigger_damage(gentity_s *pSelf);
 void __cdecl G_CheckHitTriggerDamage(gentity_s *pActivator, float *vStart, float *vEnd, int iDamage, unsigned int iMOD);
 void __cdecl G_GrenadeTouchTriggerDamage(gentity_s *pActivator, float *vStart, float *vEnd, int iDamage, int iMOD);
@@ -969,17 +990,19 @@ void __cdecl VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin);
 void __cdecl AdvanceVehicleRotation(gentity_s *ent, float frameTime);
 void __cdecl CapMaxMPH(vehicle_physic_t *phys);
 void __cdecl InitFirstThink(gentity_s *pSelf);
-void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther);
-void __cdecl G_VehEntHandler_Use(gentity_s *pEnt, gentity_s *pOther);
+void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched);
+void __cdecl G_VehEntHandler_Use(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator);
 void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player);
 void __cdecl G_VehEntHandler_Die(
     gentity_s *pSelf,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    int damage,
-    int mod,
-    int weapon,
-    const float *dir);
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    int psTimeOffset);
 void __cdecl G_VehEntHandler_Controller(const gentity_s *pSelf, int *partBits);
 void __cdecl G_VehSpawner(gentity_s *pSelf);
 void __cdecl G_VehCollmapSpawner(gentity_s *pSelf);
@@ -1003,3 +1026,35 @@ int __cdecl compare_use(float *pe1, float *pe2);
 int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *traceEnt);
 void __cdecl Player_SetTurretDropHint(gentity_s *ent);
 void __cdecl Player_SetVehicleDropHint(gentity_s *ent);
+
+
+
+extern const dvar_t *vehHelicopterTiltFromControllerAxes;
+extern const dvar_t *vehHelicopterTiltFromFwdAndYaw;
+extern const dvar_t *vehHelicopterJitterJerkyness;
+extern const dvar_t *vehHelicopterTiltSpeed;
+extern const dvar_t *vehHelicopterInvertUpDown;
+extern const dvar_t *vehHelicopterMaxYawAccel;
+extern const dvar_t *vehHelicopterLookaheadTime;
+extern const dvar_t *vehHelicopterMaxSpeedVertical;
+extern const dvar_t *vehHelicopterTiltFromDeceleration;
+extern const dvar_t *vehHelicopterRightStickDeadzone;
+extern const dvar_t *vehHelicopterSoftCollisions;
+extern const dvar_t *vehHelicopterYawOnLeftStick;
+extern const dvar_t *vehHelicopterDecelerationFwd;
+extern const dvar_t *vehHelicopterMaxAccelVertical;
+extern const dvar_t *vehHelicopterMaxPitch;
+extern const dvar_t *vehHelicopterTiltFromAcceleration;
+extern const dvar_t *vehHelicopterStrafeDeadzone;
+extern const dvar_t *vehHelicopterHoverSpeedThreshold;
+extern const dvar_t *vehHelicopterMaxYawRate;
+extern const dvar_t *vehHelicopterMaxAccel;
+extern const dvar_t *vehHelicopterYawAltitudeControls;
+extern const dvar_t *vehHelicopterMaxRoll;
+extern const dvar_t *vehHelicopterScaleMovement;
+extern const dvar_t *vehHelicopterMaxSpeed;
+extern const dvar_t *vehHelicopterTiltFromVelocity;
+extern const dvar_t *vehHelicopterTiltMomentum;
+extern const dvar_t *vehHelicopterHeadSwayDontSwayTheTurret;
+extern const dvar_t *vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt;
+extern const dvar_t *vehHelicopterDecelerationSide;

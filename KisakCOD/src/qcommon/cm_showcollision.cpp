@@ -1,6 +1,8 @@
 #include "qcommon.h"
+#include "mem_track.h"
 
 
+unsigned __int8 windingPool[12292];
 
 void __cdecl TRACK_cm_showcollision()
 {
@@ -46,7 +48,7 @@ void __cdecl CM_ShowSingleBrushCollision(
     int ptCount; // [esp+30h] [ebp-506Ch]
     ShowCollisionBrushPt brushPts; // [esp+34h] [ebp-5068h] BYREF
     int sideIndex; // [esp+5038h] [ebp-64h]
-    _OWORD axialPlanes[6]; // [esp+503Ch] [ebp-60h] BYREF
+    float axialPlanes[6][4]; // [esp+503Ch] [ebp-60h] BYREF
 
     if (!brush)
         MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 403, 0, "%s", "brush");
@@ -600,33 +602,36 @@ char __cdecl CM_BrushInView(const cbrush_t *brush, cplane_s *frustumPlanes, int 
     return 1;
 }
 
-int __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_s *p, const cplane_s *pa)
+int bops_initialized;
+int Ljmptab[8];
+BOOL __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_s *p, const cplane_s *pa)
 {
-    int signbits; // eax
-
-    if (bops_initialized != 1)
-    {
-        bops_initialized = 1;
-        Ljmptab[0] = (int)&Lcase0;
-        dword_DB8E15C = (int)&Lcase1;
-        dword_DB8E160 = (int)&Lcase2;
-        dword_DB8E164 = (int)&Lcase3;
-        dword_DB8E168 = (int)&Lcase4;
-        dword_DB8E16C = (int)&Lcase5;
-        dword_DB8E170 = (int)&Lcase6;
-        dword_DB8E174 = (int)&Lcase7;
-    }
-    signbits = p->signbits;
-    if ((unsigned __int8)signbits < 8u)
-        __asm { jmp     Ljmptab[eax * 4] }
-    __debugbreak();
-    if (!alwaysfails)
-        MyAssertHandler(".\\universal\\com_math.cpp", 3473, 1, "BoxOnPlaneSide: invalid signbits for plane");
-    __debugbreak();
-    __debugbreak();
-    __debugbreak();
-    __debugbreak();
-    __debugbreak();
-    return BoxDistSqrdExceeds(emins, emaxs, p->normal, *(const float *)&pa);
+    // KISAKTODO: Needs ASM jump table and assembly bits (Probably critical function lmao)
+    // 
+    //int signbits; // eax
+    //
+    //if (bops_initialized != 1)
+    //{
+    //    bops_initialized = 1;
+    //    Ljmptab[0] = (int)&Lcase0;
+    //    Ljmptab[1] = (int)&Lcase1;
+    //    Ljmptab[2] = (int)&Lcase2;
+    //    Ljmptab[3] = (int)&Lcase3;
+    //    Ljmptab[4] = (int)&Lcase4;
+    //    Ljmptab[5] = (int)&Lcase5;
+    //    Ljmptab[6] = (int)&Lcase6;
+    //    Ljmptab[7] = (int)&Lcase7;
+    //}
+    //signbits = p->signbits;
+    //if ((unsigned __int8)signbits < 8u)
+    //    __asm { jmp     Ljmptab[eax * 4] }
+    //__debugbreak();
+    //if (!alwaysfails)
+    //    MyAssertHandler(".\\universal\\com_math.cpp", 3473, 1, "BoxOnPlaneSide: invalid signbits for plane");
+    //__debugbreak();
+    //__debugbreak();
+    //__debugbreak();
+    //__debugbreak();
+    //__debugbreak();
+    return BoxDistSqrdExceeds(emins, emaxs, p->normal, *(float *)&pa);
 }
-

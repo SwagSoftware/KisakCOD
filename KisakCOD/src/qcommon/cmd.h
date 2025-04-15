@@ -83,3 +83,4 @@ void __cdecl Cmd_Exec_f();
 char __cdecl Cmd_ExecFromDisk(int localClientNum, int controllerIndex, const char *filename);
 char __cdecl Cmd_ExecFromFastFile(int localClientNum, int controllerIndex, const char *filename);
 
+void __cdecl SV_Cmd_ArgvBuffer(int arg, char *buffer, int bufferLength);

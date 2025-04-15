@@ -994,7 +994,7 @@ bool __cdecl turret_behind(gentity_s *self, gentity_s *other)
     return yawSpan >= (double)angle;
 }
 
-void __cdecl turret_use(gentity_s *self, gentity_s *owner)
+void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s* activator)
 {
     unsigned int v2; // ecx
     float v3; // [esp+8h] [ebp-60h]

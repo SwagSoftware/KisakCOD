@@ -6,6 +6,8 @@
 #include <aim_assist/aim_assist.h>
 #include <game_mp/g_main_mp.h>
 #include <xanim/xanim.h>
+#include <universal/com_files.h>
+#include <cgame_mp/cg_local_mp.h>
 
 //struct WeaponDef **bg_weaponDefs 82800908     bg_weapons.obj
 //float (*)[29] penetrationDepthTable 82800f10     bg_weapons.obj
@@ -2953,14 +2955,14 @@ void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps)
 
 void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
 {
-    WeaponDef *WeaponDef; // eax
+    WeaponDef *pWeapDef; // eax
     const char *v2; // eax
     unsigned int FirstAvailableOffhand; // eax
-    WeaponDef *v4; // eax
+    WeaponDef *pWeapDef2; // eax
     const char *v5; // eax
-    WeaponDef *v6; // eax
+    WeaponDef *pWeapDef3; // eax
     int bitNum; // [esp+0h] [ebp-14h]
-    WeaponDef *weapDef; // [esp+4h] [ebp-10h]
+    WeaponDef *pWeapDef4; // [esp+4h] [ebp-10h]
     playerState_s *ps; // [esp+8h] [ebp-Ch]
     unsigned int offHandIndex; // [esp+Ch] [ebp-8h]
     OffhandClass offhandClass; // [esp+10h] [ebp-4h]
@@ -2988,8 +2990,8 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
             {
                 if (BG_GetWeaponDef(ps->offHandIndex)->offhandClass == OFFHAND_CLASS_NONE)
                 {
-                    WeaponDef = BG_GetWeaponDef(ps->offHandIndex);
-                    v2 = va("ps->offHandIndex = %d (%s)\n", ps->offHandIndex, WeaponDef->szInternalName);
+                    pWeapDef = BG_GetWeaponDef(ps->offHandIndex);
+                    v2 = va("ps->offHandIndex = %d (%s)\n", ps->offHandIndex, pWeapDef->szInternalName);
                     MyAssertHandler(
                         ".\\bgame\\bg_weapons.cpp",
                         3486,
@@ -3030,8 +3032,8 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
         offHandIndex = FirstAvailableOffhand;
         if (FirstAvailableOffhand && BG_GetWeaponDef(FirstAvailableOffhand)->offhandClass == OFFHAND_CLASS_NONE)
         {
-            v4 = BG_GetWeaponDef(offHandIndex);
-            v5 = va("offHandIndex = %d (%s)\n", offHandIndex, v4->szInternalName);
+            pWeapDef2 = BG_GetWeaponDef(offHandIndex);
+            v5 = va("offHandIndex = %d (%s)\n", offHandIndex, pWeapDef2->szInternalName);
             MyAssertHandler(
                 ".\\bgame\\bg_weapons.cpp",
                 3512,
@@ -3044,12 +3046,12 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
         {
             BG_AddPredictableEventToPlayerstate(0x22u, offHandIndex, ps);
             ps->offHandIndex = offHandIndex;
-            v6 = BG_GetWeaponDef(ps->offHandIndex);
-            weapDef = v6;
-            if (v6->weapType != WEAPTYPE_GRENADE)
-                Com_Error(ERR_DROP, "[%s] Only grenades are currently supported for off hand use\n", v6->szInternalName);
-            if (weapDef->offhandClass == OFFHAND_CLASS_NONE)
-                Com_Error(ERR_DROP, "[%s] No offhand class set\n", weapDef->szInternalName);
+            pWeapDef3 = BG_GetWeaponDef(ps->offHandIndex);
+            pWeapDef4 = pWeapDef3;
+            if (pWeapDef3->weapType != WEAPTYPE_GRENADE)
+                Com_Error(ERR_DROP, "[%s] Only grenades are currently supported for off hand use\n", pWeapDef3->szInternalName);
+            if (pWeapDef4->offhandClass == OFFHAND_CLASS_NONE)
+                Com_Error(ERR_DROP, "[%s] No offhand class set\n", pWeapDef4->szInternalName);
             if (ps->cursorHintEntIndex == 1023 && (!ps->weapon || ps->weaponstate == 20))
                 PM_Weapon_OffHandPrepare(ps);
             else

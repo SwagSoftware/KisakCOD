@@ -8,6 +8,12 @@ enum DevGuiInputState : __int32
     SCROLL_STALLED = 0x2,
     SCROLL_HELD = 0x3,
 };
+enum DevGuiTokenResult : __int32
+{                                       // ...
+    DEVGUI_TOKEN_ERROR = 0x0,
+    DEVGUI_TOKEN_MORE = 0x1,
+    DEVGUI_TOKEN_LAST = 0x2,
+};
 enum DevEventType : __int32
 {                                       // ...
     EVENT_ACTIVATE = 0x0,
@@ -105,7 +111,7 @@ unsigned __int16 __cdecl DevGui_CreateMenu(unsigned __int16 parentHandle, const 
 unsigned __int16 __cdecl DevGui_GetMenuHandle(DevMenuItem *menu);
 int __cdecl DevGui_CompareMenus(const DevMenuItem *menu0, const DevMenuItem *menu1);
 unsigned __int16 __cdecl DevGui_FindMenu(unsigned __int16 parentHandle, const char *label);
-int __cdecl DevGui_PathToken(const char **pathInOut, char *label, __int16 *sortKeyOut);
+DevGuiTokenResult __cdecl DevGui_PathToken(const char **pathInOut, char *label, __int16 *sortKeyOut);
 char __cdecl DevGui_IsValidPath(const char *path);
 void __cdecl DevGui_AddCommand(const char *path, char *command);
 void __cdecl DevGui_AddGraph(const char *path, DevGraph *graph);

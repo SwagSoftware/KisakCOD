@@ -7,6 +7,8 @@
 #include <xanim/xanim.h>
 #include <xanim/dobj.h>
 
+const float traceOffsets[5][2] = { { 0.0, 0.0 }, { 1.0, 1.0 }, { -1.0, 1.0 }, { 1.0, -1.0 }, { -1.0, -1.0 } }; // idb
+
 enum DynEntityType : __int32
 {                                       // ...
     DYNENT_TYPE_INVALID = 0x0,
@@ -260,6 +262,83 @@ DynEntityColl *__cdecl DynEnt_GetEntityColl(DynEntityCollType collType, unsigned
 int __cdecl DynEnt_GetXModelUsageCount(const XModel *xModel);
 
 
+
+// DynEntity_coll
+union DynEntityCollTree_u // sizeof=0x2
+{                                       // ...
+    unsigned __int16 parent;
+    unsigned __int16 nextFree;
+};
+struct DynEntityCollTree // sizeof=0xC
+{                                       // ...
+    float dist;
+    unsigned __int16 axis;
+    DynEntityCollTree_u u;
+    unsigned __int16 child[2];
+};
+struct __declspec(align(4)) DynEntityCollSector // sizeof=0x14
+{                                       // ...
+    DynEntityCollTree tree;
+    int contents;
+    unsigned __int16 entListHead;
+    // padding byte
+    // padding byte
+};
+struct DynEntityCollWorld // sizeof=0x501C
+{                                       // ...
+    float mins[3];
+    float maxs[3];
+    unsigned __int16 freeHead;
+    // padding byte
+    // padding byte
+    DynEntityCollSector sectors[1024];
+};
+void __cdecl TRACK_DynEntityCollWorld();
+DynEntityCollSector *__cdecl DynEnt_GetCollSector(DynEntityCollType collType, unsigned int sectorIndex);
+void __cdecl DynEnt_ClearCollWorld(DynEntityCollType collType);
+void __cdecl DynEnt_UnlinkEntity(DynEntityCollType collType, unsigned __int16 dynEntId);
+void __cdecl DynEnt_LinkEntity(
+    DynEntityCollType collType,
+    unsigned __int16 dynEntId,
+    const float *absMins,
+    const float *absMaxs);
+void __cdecl DynEnt_AddToCollSector(
+    DynEntityCollType collType,
+    unsigned __int16 dynEntId,
+    unsigned __int16 sectorIndex);
+void __cdecl DynEnt_SortCollSector(
+    DynEntityCollType collType,
+    unsigned __int16 sectorIndex,
+    const float *mins,
+    const float *maxs);
+unsigned __int16 __cdecl DynEnt_AllocCollSector(DynEntityCollType collType, const float *mins, const float *maxs);
+int __cdecl DynEnt_GetContents(const DynEntityDef *dynEntDef);
+void __cdecl DynEnt_GetLocalBounds(const DynEntityDef *dynEntDef, float *mins, float *maxs);
+void __cdecl DynEnt_GetWorldBounds(const DynEntityPose *dynEntPose, float *mins, float *maxs);
+double __cdecl DynEnt_GetRadiusDistSqr(const DynEntityPose *dynEntPose, const float *origin);
+double __cdecl DynEnt_GetCylindricalRadiusDistSqr(const DynEntityPose *dynEntPose, const float *origin);
+bool __cdecl DynEnt_EntityInArea(
+    const DynEntityDef *dynEntDef,
+    const DynEntityPose *dynEntPose,
+    const float *mins,
+    const float *maxs,
+    int contentMask);
+void __cdecl DynEnt_PointTraceToModel(
+    const DynEntityDef *dynEntDef,
+    const DynEntityPose *dynEntPose,
+    const pointtrace_t *clip,
+    trace_t *results);
+void __cdecl DynEnt_PointTraceToBrush(
+    const DynEntityDef *dynEntDef,
+    const DynEntityPose *dynEntPose,
+    const pointtrace_t *clip,
+    trace_t *results);
+void __cdecl DynEnt_ClipMoveTraceToBrush(
+    const DynEntityDef *dynEntDef,
+    const DynEntityPose *dynEntPose,
+    const moveclip_t *clip,
+    trace_t *results);
+void __cdecl DynEnt_SetPhysObjCollision(const DynEntityDef *dynEntDef, dxBody *physId);
 
 
 extern int numPieces;

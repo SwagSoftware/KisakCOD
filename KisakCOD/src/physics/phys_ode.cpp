@@ -6,6 +6,7 @@
 #include <xanim/xmodel.h>
 
 #include <ode/objects.h>
+#include <physics/ode/collision_kernel.h>
 //int *g_phys_msecStep    827c0304     phys_ode.obj
 //struct PhysGlob physGlob   85513d50     phys_ode.obj
 

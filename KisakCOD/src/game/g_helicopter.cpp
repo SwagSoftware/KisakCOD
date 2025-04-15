@@ -1,4 +1,8 @@
 #include "game_public.h"
+#include <script/scr_vm.h>
+#include <game_mp/g_public_mp.h>
+#include <script/scr_const.h>
+#include <game_mp/g_utils_mp.h>
 
 
 void __cdecl VEH_CheckForPredictedCrash(gentity_s *ent)

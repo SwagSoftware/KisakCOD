@@ -91,7 +91,7 @@ void __cdecl player_die(
     gentity_s *attacker,
     int damage,
     int meansOfDeath,
-    unsigned int iWeapon,
+    int iWeapon,
     const float *vDir,
     hitLocation_t hitLoc,
     int psTimeOffset)

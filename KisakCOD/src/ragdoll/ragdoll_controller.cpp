@@ -6,6 +6,7 @@
 
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
+#include <cgame_mp/cg_local_mp.h>
 
 RagdollBody *__cdecl Ragdoll_HandleBody(int ragdollHandle)
 {

@@ -2,6 +2,7 @@
 #include "threads.h"
 
 #include <xanim/xanim.h>
+#include <game/game_public.h>
 
 unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace)
 {
@@ -329,7 +330,7 @@ void __cdecl CM_Trace(
         }
     }
     if (!results->walkable && !results->startsolid)
-        results->walkable = results->normal[2] >= DOUBLE_0_699999988079071;
+        results->walkable = results->normal[2] >= 0.699999988079071;
     if (oldFrac > (double)results->fraction)
     {
         if (results->surfaceFlags == -1)
@@ -512,10 +513,10 @@ void __cdecl CM_TestBoxInBrush(const traceWork_t *tw, cbrush_t *brush, trace_t *
             v4 = tw->offsetZ * plane->normal[2];
             v3 = fabs(v4);
             dist = plane->dist + tw->radius + v3;
-            if ((LOunsigned int(dist) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(dist) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 259, 0, "%s", "!IS_NAN(dist)");
             d1 = Vec3Dot(tw->extents.start, plane->normal) - dist;
-            if ((LOunsigned int(d1) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(d1) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 263, 0, "%s", "!IS_NAN(d1)");
             if (d1 > 0.0)
                 return;
@@ -699,8 +700,8 @@ bool __cdecl CM_TraceThroughLeafBrushNode(const traceWork_t *tw, cLeaf_t *leaf, 
     end[2] = tw->extents.end[2];
     start[3] = 0.0;
     end[3] = trace->fraction;
-    HIunsigned int(_FFFFFFFC) = trace;
-    LOunsigned int(_FFFFFFFC) = end;
+    HIDWORD(_FFFFFFFC) = trace;
+    LODWORD(_FFFFFFFC) = end;
     CM_TraceThroughLeafBrushNode_r(tw, &cm.leafbrushNodes[leaf->leafBrushNode], start, _FFFFFFFC);
     return trace->fraction == 0.0;
 }
@@ -755,11 +756,11 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
                 {
                     brushnum = brushes[k];
                     if ((tw->contents & cm.brushes[brushnum].contents) != 0)
-                        CM_TraceThroughBrush(tw, &cm.brushes[brushnum], (trace_t *)HIunsigned int(p2));
+                        CM_TraceThroughBrush(tw, &cm.brushes[brushnum], (trace_t *)HIDWORD(p2));
                 }
                 return;
             }
-            CM_TraceThroughLeafBrushNode_r(tw, node + 1, p1, (const float *)p2, (trace_t *)HIunsigned int(p2));
+            CM_TraceThroughLeafBrushNode_r(tw, node + 1, p1, (const float *)p2, (trace_t *)HIDWORD(p2));
         }
         t1 = p1[node->axis] - node->data.children.dist;
         t2 = *(float *)(p2 + 4 * node->axis) - node->data.children.dist;
@@ -780,7 +781,7 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
         {
             if (tmax > -offset)
             {
-                if (p1[3] >= (double)*(float *)HIunsigned int(p2))
+                if (p1[3] >= (double)*(float *)HIDWORD(p2))
                     return;
                 diff = t2 - t1;
                 v9 = fabs(diff);
@@ -818,7 +819,7 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
                     &node[node->data.children.childOffset[side]],
                     p1,
                     mid,
-                    (trace_t *)HIunsigned int(p2));
+                    (trace_t *)HIDWORD(p2));
                 if (frac2 > 1.000000476837158)
                     MyAssertHandler(
                         ".\\qcommon\\cm_trace.cpp",
@@ -956,9 +957,9 @@ void __cdecl CM_TraceThroughBrush(const traceWork_t *tw, cbrush_t *brush, trace_
         {
             d1 = (tw->extents.start[j] - bounds[j]) * sign - tw->radiusOffset[j];
             d2 = (tw->extents.end[j] - bounds[j]) * sign - tw->radiusOffset[j];
-            if ((LOunsigned int(d1) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(d1) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 593, 0, "%s", "!IS_NAN(d1)");
-            if ((LOunsigned int(d2) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(d2) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 594, 0, "%s", "!IS_NAN(d2)");
             if (d1 <= 0.0)
             {
@@ -1047,13 +1048,13 @@ void __cdecl CM_TraceThroughBrush(const traceWork_t *tw, cbrush_t *brush, trace_
             v5 = fabs(v11);
             offsetDotNormal = v5;
             dist = plane->dist + tw->radius + v5;
-            if ((LOunsigned int(dist) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(dist) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 651, 0, "%s", "!IS_NAN(dist)");
             d1a = Vec3Dot(tw->extents.start, plane->normal) - dist;
             d2 = Vec3Dot(tw->extents.end, plane->normal) - dist;
-            if ((LOunsigned int(d1a) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(d1a) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 656, 0, "%s", "!IS_NAN(d1)");
-            if ((LOunsigned int(d2) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(d2) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 657, 0, "%s", "!IS_NAN(d2)");
             if (d1a <= 0.0)
             {
@@ -1083,7 +1084,7 @@ void __cdecl CM_TraceThroughBrush(const traceWork_t *tw, cbrush_t *brush, trace_
                 if (d2 > 0.0)
                     allsolid = 0;
                 delta = d1a - d2;
-                if ((LOunsigned int(delta) & 0x7F800000) == 0x7F800000)
+                if ((LODWORD(delta) & 0x7F800000) == 0x7F800000)
                     MyAssertHandler(".\\qcommon\\cm_trace.cpp", 668, 0, "%s", "!IS_NAN(delta)");
                 if (delta <= 0.0)
                     MyAssertHandler(".\\qcommon\\cm_trace.cpp", 670, 0, "%s", "delta > 0");
@@ -1706,12 +1707,12 @@ void __cdecl CM_TransformedBoxTrace(
                 v8);
         }
         oldFraction = results->fraction;
-        CM_Trace(results, start_l, end_l, symetricSize[0], symetricSize[1], model, SHIunsigned int(model));
+        CM_Trace(results, start_l, end_l, symetricSize[0], symetricSize[1], model, SHIDWORD(model));
     }
     else
     {
         AnglesToAxis(angles, matrix);
-        CM_TransformedBoxTraceRotated(results, start, end, mins, maxs, model, SHIunsigned int(model), origin, matrix);
+        CM_TransformedBoxTraceRotated(results, start, end, mins, maxs, model, SHIDWORD(model), origin, matrix);
     }
 }
 
@@ -1965,9 +1966,9 @@ int __cdecl CM_SightTraceThroughBrush(const traceWork_t *tw, cbrush_t *brush)
         {
             d1 = (tw->extents.start[j] - bounds->mins[j]) * sign - tw->radiusOffset[j];
             d2 = (tw->extents.end[j] - bounds->mins[j]) * sign - tw->radiusOffset[j];
-            if ((LOunsigned int(d1) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(d1) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1690, 0, "%s", "!IS_NAN(d1)");
-            if ((LOunsigned int(d2) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(d2) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1691, 0, "%s", "!IS_NAN(d2)");
             if (d1 <= 0.0)
             {
@@ -2031,13 +2032,13 @@ int __cdecl CM_SightTraceThroughBrush(const traceWork_t *tw, cbrush_t *brush)
         v8 = tw->offsetZ * plane->normal[2];
         v3 = fabs(v8);
         dist = plane->dist + tw->radius + v3;
-        if ((LOunsigned int(dist) & 0x7F800000) == 0x7F800000)
+        if ((LODWORD(dist) & 0x7F800000) == 0x7F800000)
             MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1734, 0, "%s", "!IS_NAN(dist)");
         d1a = Vec3Dot(tw->extents.start, plane->normal) - dist;
         d2a = Vec3Dot(tw->extents.end, plane->normal) - dist;
-        if ((LOunsigned int(d1a) & 0x7F800000) == 0x7F800000)
+        if ((LODWORD(d1a) & 0x7F800000) == 0x7F800000)
             MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1739, 0, "%s", "!IS_NAN(d1)");
-        if ((LOunsigned int(d2a) & 0x7F800000) == 0x7F800000)
+        if ((LODWORD(d2a) & 0x7F800000) == 0x7F800000)
             MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1740, 0, "%s", "!IS_NAN(d2)");
         if (d1a <= 0.0)
         {
@@ -2057,7 +2058,7 @@ int __cdecl CM_SightTraceThroughBrush(const traceWork_t *tw, cbrush_t *brush)
         else
         {
             delta = d1a - d2a;
-            if ((LOunsigned int(delta) & 0x7F800000) == 0x7F800000)
+            if ((LODWORD(delta) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1745, 0, "%s", "!IS_NAN(delta)");
             if (d2a > 0.0)
                 return 0;
@@ -2639,7 +2640,7 @@ int __cdecl CM_TransformedBoxSightTrace(
     Vec3Sub(start_l, origin, start_l);
     Vec3Sub(end_l, origin, end_l);
     v10 = *angles != 0.0 || angles[1] != 0.0 || angles[2] != 0.0;
-    LOunsigned int(start_l[3]) = v10;
+    LODWORD(start_l[3]) = v10;
     halfwidth = symetricSize[1][0];
     halfheight = symetricSize[1][2];
     if (v10)

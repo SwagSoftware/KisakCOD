@@ -157,7 +157,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.touch, 1u);
         useEnt->active = 1;
-        touch = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * useEnt->handler];
+        touch = entityHandlers[useEnt->handler].touch;
         if (touch)
             touch(useEnt, playerEnt, 0);
     }
@@ -165,7 +165,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
     {
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.trigger, 1u);
-        use = (void(__cdecl *)(gentity_s *, gentity_s *, gentity_s *))dword_946728[10 * useEnt->handler];
+        use = entityHandlers[useEnt->handler].use;
         if (use)
             use(useEnt, playerEnt, playerEnt);
     }
@@ -262,7 +262,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 if (!G_VehUsable(self, ent))
                                     goto LABEL_21;
                                 hintString = 1;
-                                G_GetHintStringIndex(&piIndex, "MP_USEVEHICLE");
+                                G_GetHintStringIndex(&piIndex, (char*)"MP_USEVEHICLE");
                                 if (*BG_GetWeaponDef(self->s.weapon)->szUseHintString)
                                     scale = BG_GetWeaponDef(self->s.weapon)->iUseHintStringIndex;
                                 else

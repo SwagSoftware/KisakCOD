@@ -3323,7 +3323,7 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
     veh->flags |= 8u;
 }
 
-void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther)
+void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
 {
     int damage; // [esp+8h] [ebp-30h]
     float moveLen; // [esp+Ch] [ebp-2Ch]
@@ -3385,7 +3385,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther)
     }
 }
 
-void __cdecl G_VehEntHandler_Use(gentity_s *pEnt, gentity_s *pOther)
+void __cdecl G_VehEntHandler_Use(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator)
 {
     if (pOther->client)
     {
@@ -3472,10 +3472,12 @@ void __cdecl G_VehEntHandler_Die(
     gentity_s *pSelf,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    int damage,
-    int mod,
-    int weapon,
-    const float *dir)
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    int psTimeOffset)
 {
     WeaponDef *weapDef; // [esp+Ch] [ebp-8h]
     VehicleTags *rideTag; // [esp+10h] [ebp-4h]

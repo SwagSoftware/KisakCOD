@@ -1,26 +1,30 @@
 #include "game_public.h"
+#include <script/scr_const.h>
+#include <game_mp/g_utils_mp.h>
+#include <server/sv_world.h>
+#include <script/scr_vm.h>
 
 
-//  struct dvar_s const *const missileJavSpeedLimitDescend 82e7f060     g_missile.obj
-//  struct dvar_s const *const missileJavClimbHeightTop 82e7f064     g_missile.obj
-//  struct dvar_s const *const missileJavTurnRateDirect 82e7f068     g_missile.obj
-//  struct dvar_s const *const missileJavClimbCeilingTop 82e7f06c     g_missile.obj
-//  struct dvar_s const *const missileJavTurnDecel 82e7f070     g_missile.obj
-//  struct dvar_s const *const missileJavAccelDescend 82e7f074     g_missile.obj
-//  struct dvar_s const *const missileHellfireMaxSlope 82e7f3f8     g_missile.obj
-//  struct dvar_s const *const missileJavTurnRateTop 82e7f400     g_missile.obj
-//  struct dvar_s const *const missileJavAccelClimb 82e7f404     g_missile.obj
-//  struct dvar_s const *const missileDebugAttractors 82e7f408     g_missile.obj
-//  struct dvar_s const *const missileDebugText 82e7f40c     g_missile.obj
-//  struct dvar_s const *const missileJavClimbToOwner 82e7f410     g_missile.obj
-//  struct dvar_s const *const missileWaterMaxDepth 82e7f414     g_missile.obj
-//  struct dvar_s const *const missileJavClimbAngleDirect 82e7f418     g_missile.obj
-//  struct dvar_s const *const missileJavClimbHeightDirect 82e7f41c     g_missile.obj
-//  struct dvar_s const *const missileJavClimbCeilingDirect 82e7f420     g_missile.obj
-//  struct dvar_s const *const missileJavClimbAngleTop 82e7f424     g_missile.obj
-//  struct dvar_s const *const missileJavSpeedLimitClimb 82e7f428     g_missile.obj
-//  struct dvar_s const *const missileHellfireUpAccel 82e7f42c     g_missile.obj
-//  struct dvar_s const *const missileDebugDraw 82e7f430     g_missile.obj
+const dvar_t *missileJavSpeedLimitDescend;
+const dvar_t *missileJavClimbHeightTop;
+const dvar_t *missileJavTurnRateDirect;
+const dvar_t *missileJavClimbCeilingTop;
+const dvar_t *missileJavTurnDecel;
+const dvar_t *missileJavAccelDescend;
+const dvar_t *missileHellfireMaxSlope;
+const dvar_t *missileJavTurnRateTop;
+const dvar_t *missileJavAccelClimb;
+const dvar_t *missileDebugAttractors;
+const dvar_t *missileDebugText;
+const dvar_t *missileJavClimbToOwner;
+const dvar_t *missileWaterMaxDepth;
+const dvar_t *missileJavClimbAngleDirect;
+const dvar_t *missileJavClimbHeightDirect;
+const dvar_t *missileJavClimbCeilingDirect;
+const dvar_t *missileJavClimbAngleTop;
+const dvar_t *missileJavSpeedLimitClimb;
+const dvar_t *missileHellfireUpAccel;
+const dvar_t *missileDebugDraw;
 
 
 void __cdecl G_RegisterMissileDvars()
@@ -159,10 +163,10 @@ void __cdecl G_RegisterMissileDvars()
         "Rocket's speed limit when descending towards target.");
     minn.value.max = 1.0;
     minn.value.min = 0.0;
-    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001, minn, 0x80u, &String);
+    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001, minn, 0x80u, "");
     mino.value.max = 3.4028235e38;
     mino.value.min = 0.0;
-    missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0, mino, 0x80u, &String);
+    missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0, mino, 0x80u, "");
     minp.value.max = 3.4028235e38;
     minp.value.min = 0.0;
     missileWaterMaxDepth = Dvar_RegisterFloat(
@@ -427,10 +431,10 @@ int __cdecl GetSplashMethodOfDeath(gentity_s *ent)
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 456, 0, "%s", "weapDef");
-    if (dword_94673C[10 * ent->handler] == 4 && weapDef->projExplosion == WEAPPROJEXP_HEAVY)
+    if (entityHandlers[ent->handler].splashMethodOfDeath == 4 && weapDef->projExplosion == WEAPPROJEXP_HEAVY)
         return 14;
     else
-        return dword_94673C[10 * ent->handler];
+        return entityHandlers[ent->handler].splashMethodOfDeath;
 }
 
 void __cdecl G_MissileTrace(trace_t *results, float *start, float *end, int passEntityNum, int contentmask)

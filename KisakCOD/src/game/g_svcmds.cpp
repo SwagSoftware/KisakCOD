@@ -1,5 +1,10 @@
 #include "game_public.h"
+#include <qcommon/cmd.h>
+#include <server/sv_game.h>
+#include <game_mp/g_utils_mp.h>
 
+ipFilter_s ipFilters[1024];
+int numIPFilters;
 
 void __cdecl G_ProcessIPBans()
 {
@@ -13,7 +18,7 @@ void __cdecl G_ProcessIPBans()
     s = str;
     for (t = str; *t; t = s)
     {
-        strchr((unsigned __int8 *)s, 0x20u);
+        v0 = strchr(s, 0x20u);
         s = v0;
         if (!v0)
             break;
@@ -39,7 +44,7 @@ void __cdecl AddIP(char *str)
         }
         ++numIPFilters;
     }
-    if (!StringToFilter(str, (ipFilter_s *)(8 * i + 23871832)))
+    if (!StringToFilter(str, &ipFilters[i]))
         ipFilters[i].compare = -1;
     UpdateIPBans();
 }
@@ -200,7 +205,7 @@ int __cdecl ConsoleCommand()
                     else
                     {
                         v1 = ConcatArgs(1);
-                        v2 = va(aCGameServer, 101, v1);
+                        v2 = va("%c \"GAME_SERVER: %s\"", 101, v1);
                         SV_GameSendServerCommand(-1, SV_CMD_CAN_IGNORE, v2);
                         return 1;
                     }

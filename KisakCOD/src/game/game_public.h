@@ -4,6 +4,8 @@
 
 #include <script/scr_stringlist.h>
 #include <script/scr_variable.h>
+#include <game_mp/g_public_mp.h>
+#include <game_mp/g_public_mp.h>
 
 
 // g_client_fields
@@ -31,25 +33,26 @@ struct client_fields_s // sizeof=0x14
 };
 
 void __cdecl ClientScr_ReadOnly(gclient_s *pSelf, const client_fields_s *pField);
-void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf);
-void __cdecl ClientScr_GetName(gclient_s *pSelf);
-void __cdecl ClientScr_GetSessionTeam(gclient_s *pSelf);
-void __cdecl ClientScr_SetSessionState(gclient_s *pSelf);
-void __cdecl ClientScr_GetSessionState(gclient_s *pSelf);
-void __cdecl ClientScr_SetMaxHealth(gclient_s *pSelf);
-void __cdecl ClientScr_SetScore(gclient_s *pSelf);
-void __cdecl ClientScr_SetSpectatorClient(gclient_s *pSelf);
-void __cdecl ClientScr_SetKillCamEntity(gclient_s *pSelf);
-void __cdecl ClientScr_SetStatusIcon(gclient_s *pSelf);
-void __cdecl ClientScr_GetStatusIcon(gclient_s *pSelf);
-void __cdecl ClientScr_SetHeadIcon(gclient_s *pSelf);
-void __cdecl ClientScr_GetHeadIcon(gclient_s *pSelf);
-void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf);
-void __cdecl ClientScr_GetHeadIconTeam(gclient_s *pSelf);
-void __cdecl ClientScr_SetArchiveTime(gclient_s *pSelf);
-void __cdecl ClientScr_GetArchiveTime(gclient_s *pSelf);
-void __cdecl ClientScr_SetPSOffsetTime(gclient_s *pSelf);
-void __cdecl ClientScr_GetPSOffsetTime(gclient_s *pSelf);
+void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetName(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetSessionTeam(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetSessionState(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetSessionState(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetMaxHealth(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetScore(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetSpectatorClient(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetKillCamEntity(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetStatusIcon(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetStatusIcon(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetHeadIcon(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetHeadIcon(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetHeadIconTeam(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetArchiveTime(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetArchiveTime(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_SetPSOffsetTime(gclient_s *pSelf, const client_fields_s *pField);
+void __cdecl ClientScr_GetPSOffsetTime(gclient_s *pSelf, const client_fields_s *pField);
+
 void __cdecl GScr_AddFieldsForClient();
 void __cdecl Scr_SetClientField(gclient_s *client, int offset);
 void __cdecl Scr_GetClientField(gclient_s *client, int offset);
@@ -341,6 +344,7 @@ void __cdecl InitRocketTimer(gentity_s *bolt, WeaponDef *weapDef);
 void __cdecl TRACK_g_mover();
 gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin);
 void __cdecl G_CreateRotationMatrix(const float *angles, float (*matrix)[3]);
+void __cdecl G_TransposeMatrix(float (*matrix)[3], float (*transpose)[3]);
 int __cdecl G_TryPushingEntity(gentity_s *check, gentity_s *pusher, float *move, float *amove);
 void __cdecl G_MoverTeam(gentity_s *ent);
 char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s **obstacle);
@@ -639,3 +643,124 @@ void __cdecl Svcmd_AddIP_f();
 void __cdecl Svcmd_RemoveIP_f();
 void __cdecl Svcmd_EntityList_f();
 int __cdecl ConsoleCommand();
+
+
+const entityHandler_t entityHandlers[] =
+{
+  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, &Touch_Multi, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, &hurt_use, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, &hurt_touch, &hurt_use, NULL, NULL, NULL, 0, 0 },
+  {
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    &Use_trigger_damage,
+    &Pain_trigger_damage,
+    &Die_trigger_damage,
+    NULL,
+    0,
+    0
+  },
+  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  {
+    &G_ExplodeMissile,
+    NULL,
+    NULL,
+    &Touch_Item_Auto,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    3,
+    4
+  },
+  { &G_TimedObjectThink, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { &G_ExplodeMissile, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5, 6 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, &player_die, &G_PlayerController, 0, 0 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, &player_die, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, &G_PlayerController, 0, 0 },
+  { &BodyEnd, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  {
+    &turret_think_init,
+    NULL,
+    NULL,
+    NULL,
+    &turret_use,
+    NULL,
+    NULL,
+    &turret_controller,
+    0,
+    0
+  },
+  {
+    &turret_think,
+    NULL,
+    NULL,
+    NULL,
+    &turret_use,
+    NULL,
+    NULL,
+    &turret_controller,
+    0,
+    0
+  },
+  {
+    &DroppedItemClearOwner,
+    NULL,
+    NULL,
+    &Touch_Item_Auto,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    0,
+    0
+  },
+  {
+    &FinishSpawningItem,
+    NULL,
+    NULL,
+    &Touch_Item_Auto,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    0,
+    0
+  },
+  { NULL, NULL, NULL, &Touch_Item_Auto, NULL, NULL, NULL, NULL, 0, 0 },
+  //{ NULL, NULL, NULL, NULL, &CL_ResetStats_f, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { &G_FreeEntity, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  {
+    &G_VehEntHandler_Think,
+    NULL,
+    NULL,
+    &G_VehEntHandler_Touch,
+    &G_VehEntHandler_Use,
+    &Helicopter_Pain,
+    &G_VehEntHandler_Die,
+    &G_VehEntHandler_Controller,
+    0,
+    0
+  },
+  {
+    &Helicopter_Think,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    &Helicopter_Pain,
+    &Helicopter_Die,
+    &Helicopter_Controller,
+    0,
+    0
+  }
+}; // idb
+
+
+extern vehicle_info_t s_vehicleInfos[32];

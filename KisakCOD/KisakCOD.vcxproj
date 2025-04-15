@@ -220,6 +220,7 @@
     <ClCompile Include="src\devgui\devgui_input.cpp" />
     <ClCompile Include="src\devgui\devgui_util.cpp" />
     <ClCompile Include="src\DynEntity\DynEntity_client.cpp" />
+    <ClCompile Include="src\DynEntity\DynEntity_coll.cpp" />
     <ClCompile Include="src\DynEntity\DynEntity_load_obj.cpp" />
     <ClCompile Include="src\DynEntity\DynEntity_pieces.cpp" />
     <ClCompile Include="src\EffectsCore\fxcurve.cpp" />
@@ -384,6 +385,7 @@
     <ClCompile Include="src\physics\ode\util.cpp" />
     <ClCompile Include="src\physics\physpreset_load_obj.cpp" />
     <ClCompile Include="src\physics\phys_coll_boxbrush.cpp" />
+    <ClCompile Include="src\physics\phys_contacts.cpp" />
     <ClCompile Include="src\physics\phys_ode.cpp" />
     <ClCompile Include="src\physics\phys_world_collision.cpp" />
     <ClCompile Include="src\qcommon\cmd.cpp" />
@@ -436,6 +438,7 @@
     <ClCompile Include="src\server_mp\sv_init_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_main_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_net_chan_mp.cpp" />
+    <ClCompile Include="src\server_mp\sv_snapshot_mp.cpp" />
     <ClCompile Include="src\sound\snd.cpp" />
     <ClCompile Include="src\sound\snd_driver.cpp" />
     <ClCompile Include="src\sound\snd_mss.cpp" />

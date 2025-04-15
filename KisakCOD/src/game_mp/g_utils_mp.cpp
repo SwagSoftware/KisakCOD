@@ -10,6 +10,7 @@
 
 #include <script/scr_const.h>
 #include <script/scr_memorytree.h>
+#include <script/scr_vm.h>
 
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
 {

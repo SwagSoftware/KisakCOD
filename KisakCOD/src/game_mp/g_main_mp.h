@@ -221,7 +221,7 @@ int __cdecl G_LocationalTracePassed(
 void __cdecl G_SightTrace(int *hitNum, float *start, float *end, int passEntityNum, int contentmask);
 void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int duration);
 void __cdecl G_SafeDObjFree(gentity_s *ent);
-
+BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2);
 
 extern const dvar_t *pickupPrints;
 extern const dvar_t *g_password;
@@ -303,11 +303,4 @@ extern gentity_s g_entities[1024];
 extern level_locals_t level;
 extern bgs_t level_bgs;
 
-inline BOOL __cdecl OnSameTeam(gentity_s *ent1, gentity_s *ent2)
-{
-    if (!ent1->client || !ent2->client)
-        return 0;
-    if (ent1->client->sess.cs.team)
-        return ent1->client->sess.cs.team == ent2->client->sess.cs.team;
-    return 0;
-}
+

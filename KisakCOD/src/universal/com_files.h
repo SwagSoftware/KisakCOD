@@ -147,3 +147,16 @@ int __cdecl FS_FOpenFileWriteToDir(char *filename, char *dir);
 int __cdecl FS_WriteFileToDir(char *filename, char *path, char *buffer, unsigned int size);
 
 void FS_RegisterDvars();
+
+
+extern const dvar_t *fs_remotePCDirectory;
+extern const dvar_t *fs_remotePCName;
+extern const dvar_t *fs_homepath;
+extern const dvar_s *fs_debug;
+extern const dvar_s *fs_restrict;
+extern const dvar_s *fs_ignoreLocalized;
+extern const dvar_s *fs_basepath;
+extern const dvar_s *fs_copyfiles;
+extern const dvar_s *fs_cdpath;
+extern const dvar_s *fs_gameDirVar;
+extern const dvar_s *fs_basegame;

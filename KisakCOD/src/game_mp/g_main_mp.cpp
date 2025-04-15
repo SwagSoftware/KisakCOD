@@ -110,7 +110,6 @@ bgs_t level_bgs;
 level_locals_t level;
 gentity_s g_entities[1024];
 gclient_s g_clients[64];
-entityHandler_t entityHandlers[24]; // TODO this needs ida paste
 const char *g_entinfoNames[3] =
 {
     "off",
@@ -1700,3 +1699,11 @@ void __cdecl G_SafeDObjFree(gentity_s *ent)
     Com_SafeServerDObjFree(ent->s.number);
 }
 
+BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2)
+{
+    if (!ent1->client || !ent2->client)
+        return 0;
+    if (ent1->client->sess.cs.team)
+        return ent1->client->sess.cs.team == ent2->client->sess.cs.team;
+    return 0;
+}

@@ -1110,3 +1110,10 @@ char __cdecl Cmd_ExecFromFastFile(int localClientNum, int controllerIndex, const
     return 1;
 }
 
+void __cdecl SV_Cmd_ArgvBuffer(int arg, char *buffer, int bufferLength)
+{
+    char *v3; // eax
+
+    v3 = (char *)SV_Cmd_Argv(arg);
+    I_strncpyz(buffer, v3, bufferLength);
+}

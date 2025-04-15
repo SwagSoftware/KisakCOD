@@ -1,6 +1,9 @@
 #include "DynEntity_client.h"
 #include <xanim/xmodel.h>
 #include <universal/com_memory.h>
+#include <EffectsCore/fx_system.h>
+#include <universal/q_parse.h>
+#include <qcommon/com_bsp.h>
 
 const char *dynEntClassNames[2] =
 {
@@ -65,6 +68,34 @@ int __cdecl DynEnt_GetType(const char *typeName)
             return type;
     }
     return 0;
+}
+
+unsigned __int8 *__cdecl DynEnt_AllocXModelPieces(int size)
+{
+    if (size <= 0)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 200, 0, "%s", "size > 0");
+    return Hunk_Alloc(size, "DynEnt_AllocXModelPieces", 21);
+}
+
+XModelPieces *__cdecl DynEnt_XModelPiecesPrecache(const char *name)
+{
+    if (!name)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 220, 0, "%s", "name");
+    return XModelPiecesPrecache(name, (void *(__cdecl *)(int))DynEnt_AllocXModelPieces);
+}
+
+unsigned __int8 *__cdecl DynEnt_AllocPhysPreset(int size)
+{
+    if (size <= 0)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 190, 0, "%s", "size > 0");
+    return Hunk_Alloc(size, "DynEnt_AllocPhysPreset", 21);
+}
+
+PhysPreset *__cdecl DynEnt_PhysPresetPrecache(const char *name)
+{
+    if (!name)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 210, 0, "%s", "name");
+    return PhysPresetPrecache(name, (void *(__cdecl *)(int))DynEnt_AllocPhysPreset);
 }
 
 char __cdecl DynEnt_Create(DynEntityDef *dynEntDef, const DynEntityCreateParams *params)
@@ -206,6 +237,104 @@ char __cdecl DynEnt_Create(DynEntityDef *dynEntDef, const DynEntityCreateParams 
         Com_Error(ERR_DROP, "Couldn't find fx [%s] for Dyn Entity.\n", params->destroyFxFile);
         return 0;
     }
+}
+
+int __cdecl DynEnt_GetEntityCountFromString(const char *entityString)
+{
+    char key[68]; // [esp+0h] [ebp-98h] BYREF
+    const char *ptr; // [esp+44h] [ebp-54h] BYREF
+    const char *token; // [esp+48h] [ebp-50h]
+    int count; // [esp+4Ch] [ebp-4Ch]
+    char value[68]; // [esp+50h] [ebp-48h] BYREF
+
+    if (!entityString)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 116, 0, "%s", "entityString");
+    ptr = entityString;
+    count = 0;
+    while (1)
+    {
+        token = (const char *)Com_Parse(&ptr);
+        if (!ptr || *token != 123)
+            break;
+        while (1)
+        {
+            token = (const char *)Com_Parse(&ptr);
+            if (!ptr)
+                break;
+            if (*token == 125)
+                break;
+            I_strncpyz(key, (char *)token, 64);
+            token = (const char *)Com_Parse(&ptr);
+            if (!ptr)
+                break;
+            I_strncpyz(value, (char *)token, 64);
+            if (!I_stricmp(key, "classname") && DynEnt_IsValidClassName(value))
+                ++count;
+        }
+    }
+    return count;
+}
+
+int __cdecl DynEnt_CompareEntities(_DWORD *arg0, _DWORD *arg1)
+{
+    int hasModel0; // [esp+8h] [ebp-14h]
+    int value1; // [esp+10h] [ebp-Ch]
+    int hasModel1; // [esp+14h] [ebp-8h]
+    int value0; // [esp+18h] [ebp-4h]
+
+    if (!arg0)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 361, 0, "%s", "arg0");
+    if (!arg1)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 362, 0, "%s", "arg1");
+    if (*arg0 >= 3u)
+        MyAssertHandler(
+            ".\\DynEntity\\DynEntity_load_obj.cpp",
+            367,
+            0,
+            "dynEntDef0->type doesn't index DYNENT_TYPE_COUNT\n\t%i not in [0, %i)",
+            *arg0,
+            3);
+    if (*arg1 >= 3u)
+        MyAssertHandler(
+            ".\\DynEntity\\DynEntity_load_obj.cpp",
+            368,
+            0,
+            "dynEntDef1->type doesn't index DYNENT_TYPE_COUNT\n\t%i not in [0, %i)",
+            *arg1,
+            3);
+    hasModel0 = arg0[8] != 0;
+    hasModel1 = arg1[8] != 0;
+    if (hasModel0 != hasModel1)
+        return hasModel0 - hasModel1;
+    value0 = dynEntProps[*arg0].clientOnly;
+    value1 = dynEntProps[*arg1].clientOnly;
+    if (value0 != value1)
+        return value0 - value1;
+    if (arg0[8])
+    {
+        if (!arg1[8])
+            MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 387, 0, "%s", "dynEntDef1->xModel");
+        return arg0[8] < arg1[8] ? -1 : 1;
+    }
+    else
+    {
+        if (arg1[8])
+            MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 392, 0, "%s", "!dynEntDef1->xModel");
+        return *((unsigned __int16 *)arg0 + 18) - *((unsigned __int16 *)arg1 + 18);
+    }
+}
+
+unsigned __int8 *__cdecl DynEnt_Alloc(int count, int size)
+{
+    unsigned __int8 *buf; // [esp+0h] [ebp-4h]
+
+    if (count <= 0)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 404, 0, "%s", "count > 0");
+    if (size <= 0)
+        MyAssertHandler(".\\DynEntity\\DynEntity_load_obj.cpp", 405, 0, "%s", "size > 0");
+    buf = Hunk_Alloc(size * count, "DynEnt_LoadEntities", 9);
+    Com_Memset((unsigned int *)buf, 0, size * count);
+    return buf;
 }
 
 void __cdecl DynEnt_LoadEntities()

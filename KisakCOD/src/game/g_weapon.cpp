@@ -1,4 +1,11 @@
 #include "game_public.h"
+#include <server_mp/server.h>
+#include <server/sv_world.h>
+#include <game_mp/g_utils_mp.h>
+#include <DynEntity/DynEntity_client.h>
+#include "bullet.h"
+#include <script/scr_const.h>
+#include <server/sv_game.h>
 
 
 void __cdecl G_AntiLagRewindClientPos(int gameTime, AntilagClientStore *antilagStore)
@@ -179,7 +186,7 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
         return 0;
     partName = tr.partName;
     modelIndex = tr.modelIndex;
-    partGroup = tr.partGroup;
+    partGroup = (hitLocation_t)tr.partGroup;
     v6 = G_rand();
     G_Damage(
         traceEnt,
@@ -228,7 +235,7 @@ char __cdecl Melee_Trace(
         Vec3Mad(wp->muzzleTrace, range, wp->forward, end);
         scale = width * (float)traceOffsets[traceIndex][0];
         Vec3Mad(end, scale, wp->right, end);
-        v13 = height * flt_89265C[2 * traceIndex];
+        v13 = height * (float)traceOffsets[traceIndex][1];
         Vec3Mad(end, v13, wp->up, end);
         if (melee_debug->current.enabled)
             G_DebugLineWithDuration(wp->muzzleTrace, end, colorRed, 1, 200);
@@ -254,11 +261,11 @@ char __cdecl Melee_Trace(
         Vec3Mad(wp->muzzleTrace, range, wp->forward, end);
         v12 = width * (float)traceOffsets[traceIndex][0];
         Vec3Mad(end, v12, wp->right, start);
-        v11 = height * flt_89265C[2 * traceIndex];
+        v11 = height * (float)traceOffsets[traceIndex][1];
         Vec3Mad(start, v11, wp->up, start);
-        v10 = width * flt_892660[2 * traceIndex];
+        v10 = width * (float)traceOffsets[traceIndex + 1][0];
         Vec3Mad(end, v10, wp->right, end);
-        v9 = height * flt_892664[2 * traceIndex];
+        v9 = height * (float)traceOffsets[traceIndex + 1][1];
         Vec3Mad(end, v9, wp->up, end);
         if (melee_debug->current.enabled)
             G_DebugLineWithDuration(start, end, colorRed, 1, 200);
@@ -498,7 +505,7 @@ void __cdecl FireWeapon(gentity_s *ent, int gametime)
             }
             else
             {
-                Com_Error(ERR_DROP, &byte_8926F4, wp.weapDef->weapType, wp.weapDef->szInternalName);
+                Com_Error(ERR_DROP, "Unknown weapon type %i for %s", wp.weapDef->weapType, wp.weapDef->szInternalName);
             }
         }
         else

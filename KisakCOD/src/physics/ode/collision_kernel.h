@@ -33,6 +33,7 @@ internal data structures and functions for collision detection.
 #include <ode/contact.h>
 #include <ode/collision.h>
 #include "objects.h"
+#include <universal/assertive.h>
 
 //****************************************************************************
 // constants and macros
@@ -227,6 +228,13 @@ struct dxUserGeom : public dxGeom {
 // END
 
 // LWSS ADD- Custom for COD4
+
+inline dxGeom *__cdecl ODE_BodyGetFirstGeom(dxBody *body)
+{
+    if (!body)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_kernel.cpp", 310, 0, "%s", "body");
+    return body->geom;
+}
 
 // expose this
 struct dxGeomTransform : public dxGeom {

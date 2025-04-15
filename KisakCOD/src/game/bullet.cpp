@@ -8,9 +8,6 @@
 #include <server_mp/server.h>
 #include <game_mp/g_utils_mp.h>
 
-unsigned __int8 bulletPriorityMap[] = { 1u, 3u, 3u, 3u }; // idb
-unsigned __int8 riflePriorityMap[19] = { 1u, 9u, 9u, 9u, 8u, 7u, 6u, 6u, 6u, 6u, 5u, 5u, 4u, 4u, 4u, 4u, 3u, 3u, 0u }; // idb
-
 char __cdecl Bullet_Trace(
     const BulletFireParams *bp,
     const WeaponDef *weapDef,

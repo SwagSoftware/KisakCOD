@@ -1,4 +1,9 @@
 #include "game_public.h"
+#include <server/sv_world.h>
+#include <script/scr_const.h>
+#include <server/sv_game.h>
+#include <game_mp/g_utils_mp.h>
+#include <script/scr_vm.h>
 
 
 void __cdecl Reached_ScriptMover(gentity_s *pEnt)
@@ -286,7 +291,8 @@ void __cdecl ScriptMover_Move(gentity_s *pEnt, const float *vPos, float fTotalTi
         origin,
         &pEnt->mover.speed,
         &pEnt->mover.midTime,
-        (float *)&pEnt->436,
+        &pEnt->mover.aDecelTime,
+        //(float *)&pEnt->u30,
         pEnt->mover.pos1,
         pEnt->mover.pos2,
         pEnt->mover.pos3);
@@ -1233,6 +1239,28 @@ void __cdecl ScriptEntCmd_NotSolid(scr_entref_t entref)
         SV_LinkEntity(pSelf);
     }
 }
+
+const BuiltinMethodDef methods_1[18] =
+{
+  { "moveto", &ScriptEntCmd_MoveTo, 0 },
+  { "movex", &ScriptEntCmd_MoveX, 0 },
+  { "movey", &ScriptEntCmd_MoveY, 0 },
+  { "movez", &ScriptEntCmd_MoveZ, 0 },
+  { "movegravity", &ScriptEntCmd_GravityMove, 0 },
+  { "rotateto", &ScriptEntCmd_RotateTo, 0 },
+  { "rotatepitch", &ScriptEntCmd_RotatePitch, 0 },
+  { "rotateyaw", &ScriptEntCmd_RotateYaw, 0 },
+  { "rotateroll", &ScriptEntCmd_RotateRoll, 0 },
+  { "devaddpitch", &ScriptEntCmd_DevAddPitch, 1 },
+  { "devaddyaw", &ScriptEntCmd_DevAddYaw, 1 },
+  { "devaddroll", &ScriptEntCmd_DevAddRoll, 1 },
+  { "vibrate", &ScriptEntCmd_Vibrate, 0 },
+  { "rotatevelocity", &ScriptEntCmd_RotateVelocity, 0 },
+  { "solid", &ScriptEntCmd_Solid, 0 },
+  { "notsolid", &ScriptEntCmd_NotSolid, 0 },
+  { "setcandamage", &ScriptEntCmd_SetCanDamage, 0 },
+  { "physicslaunch", &ScriptEntCmd_PhysicsLaunch, 0 }
+}; // idb
 
 void(__cdecl *__cdecl ScriptEnt_GetMethod(const char **pName))(scr_entref_t)
 {

@@ -1,35 +1,66 @@
 #include "g_public_mp.h"
+#include <script/scr_vm.h>
+#include <xanim/dobj.h>
+#include "g_utils_mp.h"
 
+const dvar_t *vehHelicopterTiltFromControllerAxes;
+const dvar_t *vehHelicopterTiltFromFwdAndYaw;
+const dvar_t *vehHelicopterJitterJerkyness;
+const dvar_t *vehHelicopterTiltSpeed;
+const dvar_t *vehHelicopterInvertUpDown;
+const dvar_t *vehHelicopterMaxYawAccel;
+const dvar_t *vehHelicopterLookaheadTime;
+const dvar_t *vehHelicopterMaxSpeedVertical;
+const dvar_t *vehHelicopterTiltFromDeceleration;
+const dvar_t *vehHelicopterRightStickDeadzone;
+const dvar_t *vehHelicopterSoftCollisions;
+const dvar_t *vehHelicopterYawOnLeftStick;
+const dvar_t *vehHelicopterDecelerationFwd;
+const dvar_t *vehHelicopterMaxAccelVertical;
+const dvar_t *vehHelicopterMaxPitch;
+const dvar_t *vehHelicopterTiltFromAcceleration;
+const dvar_t *vehHelicopterStrafeDeadzone;
+const dvar_t *vehHelicopterHoverSpeedThreshold;
+const dvar_t *vehHelicopterMaxYawRate;
+const dvar_t *vehHelicopterMaxAccel;
+const dvar_t *vehHelicopterYawAltitudeControls;
+const dvar_t *vehHelicopterMaxRoll;
+const dvar_t *vehHelicopterScaleMovement;
+const dvar_t *vehHelicopterMaxSpeed;
+const dvar_t *vehHelicopterTiltFromVelocity;
+const dvar_t *vehHelicopterTiltMomentum;
+const dvar_t *vehHelicopterHeadSwayDontSwayTheTurret;
+const dvar_t *vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt;
+const dvar_t *vehHelicopterDecelerationSide;
 
-//  struct dvar_s const *const vehHelicopterTiltFromControllerAxes 82e8a440     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterTiltFromFwdAndYaw 82e8a444     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterJitterJerkyness 82e8a448     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterTiltSpeed 82e8a44c     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterInvertUpDown 82e8a450     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxYawAccel 82e8a454     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterLookaheadTime 82e8a458     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxSpeedVertical 82e8a45c     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterTiltFromDeceleration 82e8a460     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterRightStickDeadzone 82e8a464     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterSoftCollisions 82e8a468     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterYawOnLeftStick 82e8a46c     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterDecelerationFwd 82e8a470     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxAccelVertical 82e8a474     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxPitch 82e8a478     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterTiltFromAcceleration 82e8a47c     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterStrafeDeadzone 82e8a480     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterHoverSpeedThreshold 82e8a484     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxYawRate 82e8a488     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxAccel 82e8a48c     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterYawAltitudeControls 82e8a490     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxRoll 82e8a494     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterScaleMovement 82e8a498     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterMaxSpeed 82e8a49c     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterTiltFromVelocity 82e8a4a0     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterTiltMomentum 82e8a4a4     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterHeadSwayDontSwayTheTurret 82e8a4a8     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt 82e8a4ac     g_scr_helicopter.obj
-//  struct dvar_s const *const vehHelicopterDecelerationSide 82e8a4b0     g_scr_helicopter.obj
+const BuiltinMethodDef s_methods[25] =
+{
+  { "freehelicopter", &CMD_Heli_FreeHelicopter, 0 },
+  { "setspeed", &CMD_VEH_SetSpeed, 0 },
+  { "getspeed", &CMD_VEH_GetSpeed, 0 },
+  { "getspeedmph", &CMD_VEH_GetSpeedMPH, 0 },
+  { "resumespeed", &CMD_VEH_ResumeSpeed, 0 },
+  { "setyawspeed", &CMD_VEH_SetYawSpeed, 0 },
+  { "setmaxpitchroll", &CMD_VEH_SetMaxPitchRoll, 0 },
+  { "setturningability", &CMD_VEH_SetTurningAbility, 0 },
+  { "setairresistance", &CMD_VEH_SetAirResitance, 0 },
+  { "sethoverparams", &CMD_VEH_SetHoverParams, 0 },
+  { "setneargoalnotifydist", &CMD_VEH_NearGoalNotifyDist, 0 },
+  { "setvehgoalpos", &CMD_VEH_SetGoalPos, 0 },
+  { "setgoalyaw", &CMD_VEH_SetGoalYaw, 0 },
+  { "cleargoalyaw", &CMD_VEH_ClearGoalYaw, 0 },
+  { "settargetyaw", &CMD_VEH_SetTargetYaw, 0 },
+  { "cleartargetyaw", &CMD_VEH_ClearTargetYaw, 0 },
+  { "setlookatent", &CMD_VEH_SetLookAtEnt, 0 },
+  { "clearlookatent", &CMD_VEH_ClearLookAtEnt, 0 },
+  { "setvehweapon", &CMD_VEH_SetWeapon, 0 },
+  { "fireweapon", &CMD_VEH_FireWeapon, 0 },
+  { "setturrettargetvec", &CMD_VEH_SetTurretTargetVec, 0 },
+  { "setturrettargetent", &CMD_VEH_SetTurretTargetEnt, 0 },
+  { "clearturrettarget", &CMD_VEH_ClearTurretTargetEnt, 0 },
+  { "setvehicleteam", &CMD_VEH_SetVehicleTeam, 0 },
+  { "setdamagestage", &CMD_Heli_SetDamageStage, 0 }
+}; // idb
 
 void __cdecl CMD_Heli_FreeHelicopter(scr_entref_t entref)
 {
@@ -399,8 +430,10 @@ void __cdecl Helicopter_Pain(
     gentity_s *pAttacker,
     int damage,
     const float *point,
-    int mod,
-    const float *dir)
+    const int mod,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    const int weaponIdx)
 {
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
@@ -419,10 +452,12 @@ void __cdecl Helicopter_Die(
     gentity_s *pSelf,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    int damage,
-    int mod,
-    int weapon,
-    const float *dir)
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    int psTimeOffset)
 {
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 

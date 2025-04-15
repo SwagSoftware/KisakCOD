@@ -1,4 +1,8 @@
 #pragma once
+#include <qcommon/ent.h>
+#include <qcommon/net_chan_mp.h>
+#include <qcommon/sv_msg_write_mp.h>
+#include <client_mp/client_mp.h>
 
 enum svscmd_type : __int32
 {                                       // ...
@@ -342,3 +346,50 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg);
 gentity_s *__cdecl SV_GentityNumLocal(int num);
 const clientState_s *__cdecl G_GetClientStateLocal(int clientNum);
 int __cdecl GetFollowPlayerStateLocal(int clientNum, playerState_s *ps);
+
+
+// sv_snapshot_mp
+struct snapshotEntityNumbers_t // sizeof=0x1004
+{                                       // ...
+    int numSnapshotEntities;            // ...
+    int snapshotEntities[1024];         // ...
+};
+void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg);
+void __cdecl SV_EmitPacketEntities(
+    SnapshotInfo_s *snapInfo,
+    int from_num_entities,
+    int from_first_entity,
+    int to_num_entities,
+    int to_first_entity,
+    msg_t *msg);
+void __cdecl SV_EmitPacketClients(
+    SnapshotInfo_s *snapInfo,
+    int from_num_clients,
+    int from_first_client,
+    int to_num_clients,
+    int to_first_client,
+    msg_t *msg);
+void __cdecl SV_UpdateServerCommandsToClient(client_t *client, msg_t *msg);
+void __cdecl SV_UpdateServerCommandsToClient_PreventOverflow(client_t *client, msg_t *msg, int iMsgSize);
+char __cdecl SV_GetClientPositionAtTime(int client, int gametime, float *pos);
+int __cdecl SV_GetArchivedClientInfo(int clientNum, int *pArchiveTime, playerState_s *ps, clientState_s *cs);
+cachedSnapshot_t *__cdecl SV_GetCachedSnapshot(int *pArchiveTime);
+cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame);
+int __cdecl SV_GetCurrentClientInfo(int clientNum, playerState_s *ps, clientState_s *cs);
+void __cdecl SV_BuildClientSnapshot(client_t *client);
+void __cdecl SV_AddEntitiesVisibleFromPoint(float *org, int clientNum, snapshotEntityNumbers_t *eNums);
+void __cdecl SV_AddCachedEntitiesVisibleFromPoint(
+    int from_num_entities,
+    int from_first_entity,
+    float *org,
+    int clientNum,
+    snapshotEntityNumbers_t *eNums);
+void __cdecl SV_AddArchivedEntToSnapshot(int e, snapshotEntityNumbers_t *eNums);
+void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client);
+int __cdecl SV_RateMsec(client_t *client, int messageSize);
+void __cdecl SV_BeginClientSnapshot(client_t *client, msg_t *msg);
+void __cdecl SV_EndClientSnapshot(client_t *client, msg_t *msg);
+void __cdecl SV_PrintServerCommandsForClient(client_t *client);
+void __cdecl SV_SetServerStaticHeader();
+void __cdecl SV_GetServerStaticHeader();
+void __cdecl SV_SendClientMessages();

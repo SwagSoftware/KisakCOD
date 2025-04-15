@@ -5,6 +5,7 @@
 #include <client/client.h>
 #include <client_mp/client_mp.h>
 #include <script/scr_const.h>
+#include <cgame_mp/cg_local_mp.h>
 
 //float const *const vec2_origin        82000d78     aim_assist.obj
 //float const *const vec3_origin        82000d80     aim_assist.obj

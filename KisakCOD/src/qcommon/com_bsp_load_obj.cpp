@@ -182,3 +182,16 @@ int __cdecl Com_BlockChecksumKey32(const unsigned __int8 *data, unsigned int len
     }
     return ~crc;
 }
+
+char *__cdecl Com_EntityString(int *numEntityChars)
+{
+    char *entityString; // [esp+0h] [ebp-8h]
+    unsigned int count; // [esp+4h] [ebp-4h] BYREF
+
+    if (!Com_IsBspLoaded())
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 377, 0, "%s", "Com_IsBspLoaded()");
+    entityString = Com_GetBspLump(LUMP_ENTITIES, 1u, &count);
+    if (numEntityChars)
+        *numEntityChars = count;
+    return entityString;
+}

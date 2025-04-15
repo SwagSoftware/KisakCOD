@@ -1,5 +1,6 @@
 #include "game_public.h"
 #include <client/client.h>
+#include <cgame/cg_public.h>
 
 
 void __cdecl G_DebugLine(const float *start, const float *end, const float *color, int depthTest)
@@ -72,7 +73,7 @@ void __cdecl G_DebugBox(
         Vec3Add(&v[3 * i], origin, &v[3 * i]);
     }
     for (ia = 0; ia < 0xC; ++ia)
-        G_DebugLineWithDuration(&v[3 * iEdgePairs[ia][0]], &v[3 * dword_865EAC[2 * ia]], color, depthTest, duration);
+        G_DebugLineWithDuration(&v[3 * iEdgePairs[ia][0]], &v[3 * iEdgePairs[ia][1]], color, depthTest, duration);
 }
 
 void __cdecl G_DebugCircle(
