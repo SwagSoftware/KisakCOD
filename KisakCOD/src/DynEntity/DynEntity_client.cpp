@@ -1358,8 +1358,6 @@ void __cdecl DynEntCl_TestPhysicsEntities(
     }
 }
 
-const float traceOffsets[5][2] = { { 0.0, 0.0 }, { 1.0, 1.0 }, { -1.0, 1.0 }, { 1.0, -1.0 }, { -1.0, -1.0 } }; // idb
-
 void __cdecl DynEntCl_MeleeEvent(int localClientNum, int sourceEntityNum)
 {
     float v2; // [esp+Ch] [ebp-58h]

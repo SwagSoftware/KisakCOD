@@ -160,11 +160,53 @@ enum XAssetType : __int32
     ASSET_TYPE_STRING = 0x21,
     ASSET_TYPE_ASSETLIST = 0x22,
 };
+XAssetType &operator++(XAssetType &e) {
+    static_cast<XAssetType>(static_cast<int>(e) + 1);
+    return e;
+}
+XAssetType &operator++(XAssetType &e, int i)
+{
+    XAssetType temp = e;
+    ++e;
+    return temp;
+}
 
 struct XAsset // sizeof=0x8
 {                                       // ...
     XAssetType type;                    // ...
     XAssetHeader header;                // ...
+};
+
+union XAssetSize // sizeof=0x878
+{                                       // ...
+    XAssetSize()
+    {
+        fx = NULL;
+    }
+    XAnimParts parts;
+    XModel model;
+    Material material;
+    MaterialPixelShader pixelShader;
+    MaterialVertexShader vertexShader;
+    MaterialTechniqueSet techniqueSet;
+    GfxImage image;
+    snd_alias_list_t sound;
+    SndCurve sndCurve;
+    clipMap_t clipMap;
+    ComWorld comWorld;
+    MapEnts mapEnts;
+    GfxWorld gfxWorld;
+    GfxLightDef lightDef;
+    Font_s font;
+    MenuList menuList;
+    menuDef_t menu;
+    LocalizeEntry localize;
+    WeaponDef weapon;
+    SndDriverGlobals sndDriverGlobals;
+    const FxEffectDef *fx;
+    FxImpactTable impactFx;
+    RawFile rawfile;
+    StringTable stringTable;
 };
 
 template <typename T>

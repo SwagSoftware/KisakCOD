@@ -289,6 +289,7 @@
     <ClCompile Include="src\gfx_d3d\rb_stats.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_sunshadow.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_tess.cpp" />
+    <ClCompile Include="src\gfx_d3d\rb_uploadshaders.cpp" />
     <ClCompile Include="src\gfx_d3d\r_add_bsp.cpp" />
     <ClCompile Include="src\gfx_d3d\r_add_cmdbuf.cpp" />
     <ClCompile Include="src\gfx_d3d\r_add_staticmodel.cpp" />
@@ -435,8 +436,11 @@
     <ClCompile Include="src\server\sv_main.cpp" />
     <ClCompile Include="src\server\sv_world.cpp" />
     <ClCompile Include="src\server_mp\sv_archive_mp.cpp" />
+    <ClCompile Include="src\server_mp\sv_ccmds_mp.cpp" />
+    <ClCompile Include="src\server_mp\sv_client_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_init_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_main_mp.cpp" />
+    <ClCompile Include="src\server_mp\sv_main_pc_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_net_chan_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_snapshot_mp.cpp" />
     <ClCompile Include="src\sound\snd.cpp" />
@@ -559,6 +563,7 @@
     <ClInclude Include="src\gfx_d3d\rb_stats.h" />
     <ClInclude Include="src\gfx_d3d\rb_sunshadow.h" />
     <ClInclude Include="src\gfx_d3d\rb_tess.h" />
+    <ClInclude Include="src\gfx_d3d\rb_uploadshaders.h" />
     <ClInclude Include="src\gfx_d3d\r_add_staticmodel.h" />
     <ClInclude Include="src\gfx_d3d\r_bsp.h" />
     <ClInclude Include="src\gfx_d3d\r_buffers.h" />

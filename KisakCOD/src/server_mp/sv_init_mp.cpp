@@ -1,10 +1,41 @@
 #include "server.h"
 #include <qcommon/qcommon.h>
+#include <server/sv_game.h>
+#include <database/database.h>
+#include <game_mp/g_public_mp.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include <universal/com_files.h>
+#include <win32/win_net.h>
+#include <universal/com_constantconfigstrings.h>
+#include <qcommon/threads.h>
+#include <qcommon/com_bsp.h>
+#include <universal/com_sndalias.h>
 
 
 
 //Line 53332:  0006 : 00cf4d5c       int sv_serverId_value    834a4d5c     sv_init_mp.obj
 
+const dvar_t *sv_punkbuster;
+const dvar_t *sv_allowAnonymous;
+const dvar_t *sv_privatePassword;
+const dvar_t *sv_allowDownload;
+const dvar_t *sv_iwds;
+const dvar_t *sv_iwdNames;
+const dvar_t *sv_referencedIwds;
+const dvar_t *sv_referencedIwdNames;
+const dvar_t *sv_FFCheckSums;
+const dvar_t *sv_FFNames;
+const dvar_t *sv_referencedFFCheckSums;
+const dvar_t *sv_referencedFFNames;
+const dvar_t *sv_voice;
+const dvar_t *sv_voiceQuality;
+const dvar_t *sv_pure;
+const dvar_t *rcon_password;
+const dvar_t *sv_wwwDownload;
+const dvar_t *sv_wwwBaseURL;
+const dvar_t *sv_wwwDlDisconnected;
+const dvar_t *sv_loadMyChanges;
+const dvar_t *sv_clientArchive;
 
 void __cdecl SV_SetConfigstring(int index, const char *val)
 {
@@ -21,7 +52,7 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
     char cmd; // [esp+463h] [ebp-1h]
 
     if ((unsigned int)index >= 0x98A)
-        Com_Error(ERR_DROP, &byte_8B0048, index);
+        Com_Error(ERR_DROP, "SV_SetConfigstring: bad index %i", index);
 
     if (sv.configstrings[index])
     {
@@ -31,7 +62,7 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
         {
             SL_RemoveRefToString(sv.configstrings[index]);
             caseSensitive = index < 821;
-            v2 = index < 821 ? SL_GetString_(val, 0, 19).prev : SL_GetLowercaseString_(val, 0, 19);
+            v2 = index < 821 ? SL_GetString_(val, 0, 19) : SL_GetLowercaseString_(val, 0, 19);
             sv.configstrings[index] = v2;
             if (SV_Loaded() || sv.restarting)
             {
@@ -88,9 +119,9 @@ void __cdecl SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize
     char *v3; // eax
 
     if (bufferSize < 1)
-        Com_Error(ERR_DROP, &byte_8B00A8, bufferSize);
+        Com_Error(ERR_DROP, "SV_GetConfigstring: bufferSize == %i", bufferSize);
     if (index >= 0x98A)
-        Com_Error(ERR_DROP, &byte_8B0084, index);
+        Com_Error(ERR_DROP, "SV_GetConfigstring: bad index %i", index);
     if (!sv.configstrings[index])
         MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 195, 0, "%s", "sv.configstrings[index]");
     v3 = SL_ConvertToString(sv.configstrings[index]);
@@ -115,7 +146,7 @@ void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
     int ia; // [esp+10h] [ebp-4h]
 
     if (start < 821)
-        v5.prev = SL_FindString(key).prev;
+        v5.prev = SL_FindString(key);
     else
         v5.prev = SL_FindLowercaseString(key).prev;
     i = CCS_GetConstConfigStringIndex(value);
@@ -147,17 +178,17 @@ void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
             v4 = SL_ConvertToString(sv.configstrings[ia + start]);
             Com_Printf(15, "%i: %i ( %s )\n", ia + start, sv.configstrings[ia + start], v4);
         }
-        Com_Error(ERR_DROP, &byte_8B00F4);
+        Com_Error(ERR_DROP, "SV_SetConfigValueForKey: overflow'");
     }
     SV_SetConfigstring(ia + max + start, value);
 }
 
 void __cdecl SV_SetUserinfo(int index, char *val)
 {
-    char *v2; // eax
+    const char *v2; // eax
 
     if (index < 0 || index >= sv_maxclients->current.integer)
-        Com_Error(ERR_DROP, &byte_8B0170, index);
+        Com_Error(ERR_DROP, "SV_SetUserinfo: bad index %i", index);
     if (!val)
         val = (char *)"";
     I_strncpyz(svs.clients[index].userinfo, val, 1024);
@@ -168,9 +199,9 @@ void __cdecl SV_SetUserinfo(int index, char *val)
 void __cdecl SV_GetUserinfo(int index, char *buffer, int bufferSize)
 {
     if (bufferSize < 1)
-        Com_Error(ERR_DROP, &byte_8B01B0, bufferSize);
+        Com_Error(ERR_DROP, "SV_GetUserinfo: bufferSize == %i", bufferSize);
     if (index < 0 || index >= sv_maxclients->current.integer)
-        Com_Error(ERR_DROP, &byte_8B0190, index);
+        Com_Error(ERR_DROP, "SV_GetUserinfo: bad index %i", index);
     I_strncpyz(buffer, svs.clients[index].userinfo, bufferSize);
 }
 
@@ -222,7 +253,7 @@ void __cdecl SV_BoundMaxClients(int minimum)
         v1,
         0x25u,
         "The maximum number of clients that can connect to a server");
-    Dvar_ClearModified(sv_maxclients);
+    Dvar_ClearModified((dvar_s*)sv_maxclients);
     if (sv_maxclients->current.integer < minimum)
         Dvar_SetInt((dvar_s *)sv_maxclients, minimum);
 }
@@ -342,7 +373,7 @@ void __cdecl SV_SpawnServer(char *server)
     {
         savepersist = 0;
     }
-    strstr((unsigned __int8 *)server, "\\");
+    strstr((unsigned __int8 *)server, (unsigned __int8 *)"\\");
     if (v1)
         MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 871, 0, "%s", "!strstr( server, \"\\\\\" )");
     Dvar_SetStringByName("mapname", server);
@@ -402,7 +433,7 @@ void __cdecl SV_SpawnServer(char *server)
         }
     }
     R_BeginRemoteScreenUpdate();
-    sv.emptyConfigString = SL_GetString_((char *)"", 0, 19).prev;
+    sv.emptyConfigString = SL_GetString_((char *)"", 0, 19);
     for (i = 0; i < 2442; ++i)
     {
         prev = SL_GetString_((char *)"", 0, 19).prev;
@@ -481,8 +512,8 @@ void __cdecl SV_SpawnServer(char *server)
     }
     else
     {
-        Dvar_SetString((dvar_s *)sv_iwds, (char *)&String);
-        Dvar_SetString((dvar_s *)sv_iwdNames, (char *)&String);
+        Dvar_SetString((dvar_s *)sv_iwds, (char *)"");
+        Dvar_SetString((dvar_s *)sv_iwdNames, (char *)"");
     }
     p = FS_ReferencedIwdChecksums();
     Dvar_SetString((dvar_s *)sv_referencedIwds, (char *)p);

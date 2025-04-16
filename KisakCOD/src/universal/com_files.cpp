@@ -2138,3 +2138,19 @@ int __cdecl FS_WriteFileToDir(char *filename, char *path, char *buffer, unsigned
         return 0;
     }
 }
+
+void __cdecl FS_Shutdown()
+{
+    int i; // [esp+0h] [ebp-4h]
+
+    SND_StopSounds(SND_STOP_STREAMED);
+    SEH_Shutdown_StringEd();
+    for (i = 1; i < 65; ++i)
+    {
+        if (fsh[i].fileSize)
+            FS_FCloseFile(i);
+    }
+    FS_ShutdownSearchPaths(fs_searchpaths);
+    fs_searchpaths = 0;
+    FS_RemoveCommands();
+}

@@ -29,5 +29,6 @@ void __cdecl R_FreeStaticIndexBuffer(IDirect3DIndexBuffer9 *ib);
 void *__cdecl R_LockIndexBuffer(IDirect3DIndexBuffer9 *handle, int offset, int bytes, int lockFlags);
 void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle);
 
+void __cdecl R_FinishStaticIndexBuffer(IDirect3DIndexBuffer9 *ib);
 
 extern GfxBuffers gfxBuf;

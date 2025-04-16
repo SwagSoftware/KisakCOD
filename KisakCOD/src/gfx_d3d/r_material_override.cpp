@@ -331,3 +331,35 @@ void __cdecl Material_OverrideTechniqueSets()
         }
     }
 }
+
+void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet)
+{
+    char remapName[68]; // [esp+0h] [ebp-48h] BYREF
+
+    if (!techSet)
+        MyAssertHandler(".\\r_material_override.cpp", 341, 0, "%s", "techSet");
+    if (r_rendererInUse->current.integer || !strncmp(techSet->name, "sm2/", 4u))
+    {
+        techSet->remappedTechniqueSet = techSet;
+    }
+    else
+    {
+        *(_DWORD *)remapName = *(_DWORD *)"sm2/";
+        strncpy((unsigned __int8 *)&remapName[4], (unsigned __int8 *)techSet->name, 0x3Cu);
+        remapName[63] = 0;
+        techSet->remappedTechniqueSet = Material_FindTechniqueSet(remapName, MTL_TECHSET_NOT_FOUND_RETURN_DEFAULT);
+        AssertValidRemappedTechniqueSet(techSet);
+    }
+}
+
+void __cdecl Material_DirtyTechniqueSetOverrides()
+{
+    mtlOverrideGlob.isDirty = 1;
+}
+
+void __cdecl Material_ClearShaderUploadList()
+{
+    mtlUploadGlob.get = 0;
+    mtlUploadGlob.put = 0;
+    mtlUploadGlob.techTypeIter = 0;
+}

@@ -146,6 +146,7 @@ void __cdecl Image_Create2DTexture_PC(
 void __cdecl RB_UnbindAllImages();
 void __cdecl R_SetPicmip();
 
+void __cdecl R_DelayLoadImage(XAssetHeader header);
 
 // r_image_utils
 void __cdecl R_DownsampleMipMapBilinear(

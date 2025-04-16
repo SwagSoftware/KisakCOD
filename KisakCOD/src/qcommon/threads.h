@@ -73,6 +73,7 @@ void __cdecl Sys_SetCinematicsHostOutstandingRequestEvent();
 void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent();
 
 BOOL __cdecl Sys_IsRendererReady();
+void __cdecl Sys_BeginLoadThreadPriorities();
 
 
 enum WinThreadLock : __int32

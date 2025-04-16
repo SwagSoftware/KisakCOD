@@ -34,6 +34,15 @@ static hunkUsed_t hunk_low;
 static unsigned char* s_hunkData;
 static int s_hunkTotal;
 
+void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data)
+{
+    if (!data)
+        MyAssertHandler(".\\universal\\com_memory.cpp", 1731, 0, "%s", "data");
+    if (*data >= data[1])
+        MyAssertHandler(".\\universal\\com_memory.cpp", 1735, 0, "%s", "assetList->assetCount < assetList->maxCount");
+    *(XAssetHeader *)(data[2] + 4 * (*data)++) = header;
+}
+
 /*
 ========================
 CopyString

@@ -1,12 +1,14 @@
 #include "database.h"
 
-
-//int marker_db_stream     82b7b184     db_stream.obj
-//unsigned int g_streamDelayIndex   82b7b188     db_stream.obj
-//struct XBlock *g_streamBlocks 82b7b18c     db_stream.obj
-//unsigned char **g_streamPosArray 82b7b194     db_stream.obj
-//struct StreamDelayInfo *g_streamDelayArray 82b7b1b0     db_stream.obj
-//unsigned int g_streamPosIndex     82b831b0     db_stream.obj
+unsigned int g_streamDelayIndex;
+XBlock * g_streamBlocks;
+unsigned __int8 *g_streamPosArray[9];
+StreamDelayInfo g_streamDelayArray[4096];
+unsigned int g_streamPosIndex;
+StreamPosInfo g_streamPosStack[64];
+XZoneMemory *g_streamZoneMem;
+unsigned __int8 *g_streamPos;
+unsigned int g_streamPosStackIndex;
 
 void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
 {
@@ -37,6 +39,15 @@ void __cdecl DB_PushStreamPos(unsigned int index)
     g_streamPosStack[g_streamPosStackIndex++].index = g_streamPosIndex;
     DB_SetStreamIndex(index);
     *(&g_streamPosIndex + 2 * g_streamPosStackIndex) = (unsigned int)g_streamPos;
+}
+
+void __cdecl DB_CloneStreamData(unsigned __int8 *destStart)
+{
+    if (destStart)
+        memcpy(
+            &destStart[g_streamPosArray[g_streamPosIndex] - g_streamZoneMem->blocks[g_streamPosIndex].data],
+            g_streamPosArray[g_streamPosIndex],
+            g_streamPos - g_streamPosArray[g_streamPosIndex]);
 }
 
 void __cdecl DB_SetStreamIndex(unsigned int index)

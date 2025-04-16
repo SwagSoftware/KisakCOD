@@ -1,9 +1,71 @@
 #include "database.h"
 
 #include <universal/physicalmemory.h>
+#include <qcommon/qcommon.h>
+#include <gfx_d3d/r_buffers.h>
 
 int g_block_mem_type[9];
 char *g_block_mem_name[9];
+
+void __cdecl DB_RecoverGeometryBuffers(XZoneMemory *zoneMem)
+{
+    unsigned __int8 *lockedData; // [esp+4h] [ebp-4h]
+    unsigned __int8 *lockedDataa; // [esp+4h] [ebp-4h]
+
+    if (zoneMem->blocks[7].size)
+    {
+        if (!zoneMem->blocks[7].data)
+            MyAssertHandler(".\\database\\db_memory.cpp", 197, 0, "%s", "block->data");
+        if (zoneMem->vertexBuffer)
+            MyAssertHandler(".\\database\\db_memory.cpp", 198, 0, "%s", "zoneMem->vertexBuffer == NULL");
+        lockedData = (unsigned __int8 *)R_AllocStaticVertexBuffer(
+            (IDirect3DVertexBuffer9 **)&zoneMem->vertexBuffer,
+            zoneMem->blocks[7].size);
+        memcpy(lockedData, zoneMem->blocks[7].data, zoneMem->blocks[7].size);
+        if (zoneMem->lockedVertexData)
+            zoneMem->lockedVertexData = lockedData;
+        else
+            R_FinishStaticVertexBuffer((IDirect3DVertexBuffer9 *)zoneMem->vertexBuffer);
+    }
+    if (zoneMem->blocks[8].size)
+    {
+        if (!zoneMem->blocks[8].data)
+            MyAssertHandler(".\\database\\db_memory.cpp", 210, 0, "%s", "block->data");
+        if (zoneMem->indexBuffer)
+            MyAssertHandler(".\\database\\db_memory.cpp", 211, 0, "%s", "zoneMem->indexBuffer == NULL");
+        lockedDataa = (unsigned __int8 *)R_AllocStaticIndexBuffer(
+            (IDirect3DIndexBuffer9 **)&zoneMem->indexBuffer,
+            zoneMem->blocks[8].size);
+        memcpy(lockedDataa, zoneMem->blocks[8].data, zoneMem->blocks[8].size);
+        if (zoneMem->lockedIndexData)
+            zoneMem->lockedIndexData = lockedDataa;
+        else
+            R_FinishStaticIndexBuffer((IDirect3DIndexBuffer9 *)zoneMem->indexBuffer);
+    }
+}
+
+void __cdecl DB_ReleaseGeometryBuffers(XZoneMemory *zoneMem)
+{
+    IDirect3DVertexBuffer9 *vb; // [esp+0h] [ebp-8h]
+    IDirect3DIndexBuffer9 *ib; // [esp+4h] [ebp-4h]
+
+    if (zoneMem->vertexBuffer)
+    {
+        vb = (IDirect3DVertexBuffer9 *)zoneMem->vertexBuffer;
+        if (zoneMem->lockedVertexData)
+            R_UnlockVertexBuffer(vb);
+        R_FreeStaticVertexBuffer(vb);
+        zoneMem->vertexBuffer = 0;
+    }
+    if (zoneMem->indexBuffer)
+    {
+        ib = (IDirect3DIndexBuffer9 *)zoneMem->indexBuffer;
+        if (zoneMem->lockedIndexData)
+            R_UnlockIndexBuffer(ib);
+        R_FreeStaticIndexBuffer(ib);
+        zoneMem->indexBuffer = 0;
+    }
+}
 
 void __cdecl DB_AllocXZoneMemory(
     unsigned int *blockSize,

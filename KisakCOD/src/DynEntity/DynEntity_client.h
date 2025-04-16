@@ -39,6 +39,7 @@ struct DynEntityDef // sizeof=0x60
     PhysMass mass;
     int contents;
 };
+
 struct DynEntityPose // sizeof=0x20
 {
     GfxPlacement pose;

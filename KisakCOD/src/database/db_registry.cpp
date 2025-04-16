@@ -2,11 +2,249 @@
 #include <qcommon/mem_track.h>
 
 #include <xanim/xmodel.h>
+#include <win32/win_net.h>
+#include <qcommon/threads.h>
+#include <qcommon/com_bsp.h>
+#include <gfx_d3d/r_init.h>
+#include <win32/win_local.h>
+#include <gfx_d3d/rb_uploadshaders.h>
+#include <gfx_d3d/r_image.h>
+#include <universal/com_files.h>
+#include <game/game_public.h>
+#include <gfx_d3d/r_bsp.h>
+#include <stringed/stringed_hooks.h>
+#include <qcommon/cmd.h>
+#include <universal/physicalmemory.h>
+#include <gfx_d3d/rb_shade.h>
+#include <gfx_d3d/r_staticmodelcache.h>
+#include <win32/win_localize.h>
 
+struct DBReorderAssetEntry // sizeof=0x10
+{                                       // ...
+    unsigned int sequence;
+    int type;
+    const char *typeString;
+    const char *assetName;
+};
+
+int g_poolSize[33] =
+{
+  64,
+  64,
+  4096,
+  1000,
+  2048,
+  1024,
+  2400,
+  16000,
+  64,
+  1200,
+  1,
+  1,
+  1,
+  1,
+  1,
+  2,
+  1,
+  32,
+  0,
+  16,
+  128,
+  640,
+  6144,
+  128,
+  1,
+  400,
+  4,
+  0,
+  0,
+  0,
+  0,
+  1024,
+  50
+}; // idb
+
+XAssetHeader __cdecl node1_(void *pool)
+{
+    return (XAssetHeader)pool;
+}
+
+XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[33])(void *) =
+{
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocMaterial,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  &node1_,
+  &node1_,
+  &node1_,
+  &node1_,
+  &node1_,
+  (XAssetHeader(*)(void *)) &DB_AllocXAsset_StringTable_,
+  &node1_,
+  (XAssetHeader(*)(void *)) &DB_AllocXAsset_StringTable_,
+  NULL,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  NULL,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_
+}; // idb
+
+void(__cdecl *DB_FreeXAssetHeaderHandler[33])(void *, XAssetHeader) =
+{
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeMaterial,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
+  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
+  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
+  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
+  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  NULL,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  NULL,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_
+}; // idb
+
+const char *g_defaultAssetName[33] =
+{
+  "",
+  "default",
+  "void",
+  "void",
+  "$default",
+  "default",
+  "$white",
+  "null",
+  "default",
+  "null.wav",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "light_dynamic",
+  "",
+  "fonts/consolefont",
+  "ui/default.menu",
+  "default_menu",
+  "CGAME_UNKNOWN",
+  "defaultweapon_mp",
+  "",
+  "misc/missing_fx",
+  "default",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "mp/defaultStringTable.csv"
+}; // idb
+
+const char *g_assetNames[33] =
+{
+  "xmodelpieces",
+  "physpreset",
+  "xanim",
+  "xmodel",
+  "material",
+  "techset",
+  "image",
+  "sound",
+  "sndcurve",
+  "loaded_sound",
+  "col_map_sp",
+  "col_map_mp",
+  "com_map",
+  "game_map_sp",
+  "game_map_mp",
+  "map_ents",
+  "gfx_map",
+  "lightdef",
+  "ui_map",
+  "font",
+  "menufile",
+  "menu",
+  "localize",
+  "weapon",
+  "snddriverglobals",
+  "fx",
+  "impactfx",
+  "aitype",
+  "mptype",
+  "character",
+  "xmodelalias",
+  "rawfile",
+  "stringtable"
+};
+
+struct XZoneInfoInternal // sizeof=0x44
+{                                       // ...
+    char name[64];
+    int flags;                          // ...
+};
+
+struct $CDDDFFEA12416D380697EB22F7449911 // sizeof=0x8011C
+{                                       // ...
+    FastCriticalSection critSect;
+    char zoneName[256];                 // ...
+    bool alreadyFinished;               // ...
+    bool loadedSound;                   // ...
+    bool loadedLocalization;            // ...
+    // padding byte
+    DBReorderAssetEntry *lastEntry;     // ...
+    unsigned int sequence;              // ...
+    unsigned int sequenceForIncludes;   // ...
+    unsigned int entryCount;            // ...
+    DBReorderAssetEntry entries[32768]; // ...
+};
+
+$CDDDFFEA12416D380697EB22F7449911 s_dbReorder;
+int g_missingAssetFile;
 //int marker_db_registry   828e570c     db_registry.obj
 //unsigned int volatile g_mainThreadBlocked  829f278c     db_registry.obj
 
 unsigned int volatile g_mainThreadBlocked;
+XAssetEntryPoolEntry *g_freeAssetEntryHead;
 
 unsigned __int16 db_hashTable[32768];
 XAssetEntry *g_copyInfo[2048];
@@ -36,6 +274,244 @@ XAssetPool<RawFile, 1024> g_RawFilePool;
 XAssetPool<StringTable, 50> g_StringTablePool;
 XAssetEntryPoolEntry g_assetEntryPool[32768];
 unsigned __int8 g_fileBuf[524288];
+
+fileData_s *com_fileDataHashTable[1024];
+
+FastCriticalSection db_hashCritSect;
+
+bool g_zoneInited;
+int g_zoneCount;
+
+bool g_minimumFastFileLoaded;
+
+bool g_isRecoveringLostDevice;
+bool g_mayRecoverLostAssets;
+volatile bool g_loadingZone;
+volatile unsigned int g_zoneInfoCount;
+bool g_initializing;
+
+char g_debugZoneName[64];
+unsigned int g_copyInfoCount;
+unsigned int g_zoneAllocType;
+unsigned int g_zoneIndex;
+unsigned int _S1;
+const dvar_t *zone_reorder;
+volatile unsigned int g_loadingAssets;
+XZoneInfoInternal g_zoneInfo[8];
+
+void __cdecl DB_InitPool_RawFile_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 3 * i + 1) = (_DWORD)((char *)pool + 12 * i + 16);
+    *((_DWORD *)pool + 3 * size - 2) = 0;
+}
+
+void __cdecl DB_InitPool_LoadedSound_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 11 * i + 1) = (_DWORD)((char *)pool + 44 * i + 48);
+    *((_DWORD *)pool + 11 * size - 10) = 0;
+}
+
+void __cdecl DB_InitPool_XAnimParts_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 22 * i + 1) = (_DWORD)((char *)pool + 88 * i + 92);
+    *((_DWORD *)pool + 22 * size - 21) = 0;
+}
+
+void __cdecl DB_InitPool_XModel_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 55 * i + 1) = (_DWORD)((char *)pool + 220 * i + 224);
+    *((_DWORD *)pool + 55 * size - 54) = 0;
+}
+
+void __cdecl DB_InitPool_Material_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 8);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 20 * i + 2) = (_DWORD)((char *)pool + 80 * i + 88);
+    *((_DWORD *)pool + 20 * size - 18) = 0;
+}
+
+void __cdecl DB_InitPool_MaterialTechniqueSet_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 37 * i + 1) = (_DWORD)((char *)pool + 148 * i + 152);
+    *((_DWORD *)pool + 37 * size - 36) = 0;
+}
+
+void __cdecl DB_InitPool_GfxImage_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 9 * i + 1) = (_DWORD)((char *)pool + 36 * i + 40);
+    *((_DWORD *)pool + 9 * size - 8) = 0;
+}
+
+void __cdecl DB_InitPool_SndCurve_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 18 * i + 1) = (_DWORD)((char *)pool + 72 * i + 76);
+    *((_DWORD *)pool + 18 * size - 17) = 0;
+}
+
+void __cdecl DB_InitPool_StringTable_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 4 * i + 1) = (_DWORD)((char *)pool + 16 * i + 20);
+    *((_DWORD *)pool + 4 * size - 3) = 0;
+}
+
+void __cdecl DB_InitPool_Font_s_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 6 * i + 1) = (_DWORD)((char *)pool + 24 * i + 28);
+    *((_DWORD *)pool + 6 * size - 5) = 0;
+}
+
+void __cdecl DB_InitPool_menuDef_t_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 71 * i + 1) = (_DWORD)((char *)pool + 284 * i + 288);
+    *((_DWORD *)pool + 71 * size - 70) = 0;
+}
+
+void __cdecl DB_InitPool_FxImpactTable_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 2 * i + 1) = (_DWORD)((char *)pool + 8 * i + 12);
+    *((_DWORD *)pool + 2 * size - 1) = 0;
+}
+
+void __cdecl DB_InitPool_WeaponDef_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 542 * i + 1) = (_DWORD)((char *)pool + 2168 * i + 2172);
+    *((_DWORD *)pool + 542 * size - 541) = 0;
+}
+
+void __cdecl DB_InitPool_FxEffectDef_(void *pool, int size)
+{
+    int i; // [esp+4h] [ebp-4h]
+
+    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
+    for (i = 0; i < size - 1; ++i)
+        *((_DWORD *)pool + 8 * i + 1) = (_DWORD)((char *)pool + 32 * i + 36);
+    *((_DWORD *)pool + 8 * size - 7) = 0;
+}
+
+void(__cdecl *DB_InitPoolHeaderHandler[33])(void *, int) =
+{
+  &DB_InitPool_RawFile_,
+  &DB_InitPool_LoadedSound_,
+  &DB_InitPool_XAnimParts_,
+  &DB_InitPool_XModel_,
+  &DB_InitPool_Material_,
+  &DB_InitPool_MaterialTechniqueSet_,
+  &DB_InitPool_GfxImage_,
+  &DB_InitPool_RawFile_,
+  &DB_InitPool_SndCurve_,
+  &DB_InitPool_LoadedSound_,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  &DB_InitSingleton,
+  &DB_InitPool_RawFile_,
+  &DB_InitSingleton,
+  &DB_InitPool_StringTable_,
+  NULL,
+  &DB_InitPool_Font_s_,
+  &DB_InitPool_RawFile_,
+  &DB_InitPool_menuDef_t_,
+  &DB_InitPool_FxImpactTable_,
+  &DB_InitPool_WeaponDef_,
+  NULL,
+  &DB_InitPool_FxEffectDef_,
+  &DB_InitPool_FxImpactTable_,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  &DB_InitPool_RawFile_,
+  &DB_InitPool_StringTable_
+}; // idb
+
+void *DB_XAssetPool[33] =
+{
+  &g_XModelPiecesPool,
+  &g_PhysPresetPool,
+  &g_XAnimPartsPool,
+  &g_XModelPool,
+  &g_MaterialPool,
+  &g_MaterialTechniqueSetPool,
+  &g_GfxImagePool,
+  &g_SoundPool,
+  &g_SndCurvePool,
+  &g_LoadedSoundPool,
+  &cm,
+  &cm,
+  &comWorld,
+  NULL,
+  &gameWorldMp,
+  &g_MapEntsPool,
+  &s_world,
+  &g_GfxLightDefPool,
+  NULL,
+  &g_FontPool,
+  &g_MenuListPool,
+  &g_MenuPool,
+  &g_LocalizeEntryPool,
+  &g_WeaponDefPool,
+  NULL,
+  &g_FxEffectDefPool,
+  &g_FxImpactTablePool,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  &g_RawFilePool,
+  &g_StringTablePool
+}; // idb
 
 void __cdecl TRACK_db_registry()
 {
@@ -87,7 +563,7 @@ void __cdecl DB_EndRecoverLostDevice()
 
     InterlockedIncrement(&db_hashCritSect.readCount);
     while (db_hashCritSect.writeCount)
-        NET_Sleep_DONE(0);
+        NET_Sleep(0);
     for (zoneIter = 0; zoneIter < g_zoneCount; ++zoneIter)
         DB_RecoverGeometryBuffers(&g_zones[g_zoneHandles[zoneIter]].mem);
     if (db_hashCritSect.readCount <= 0)
@@ -118,10 +594,10 @@ void __cdecl DB_BeginRecoverLostDevice()
         MyAssertHandler(".\\database\\db_registry.cpp", 2897, 0, "%s", "!g_isRecoveringLostDevice");
     g_isRecoveringLostDevice = 1;
     while (!g_mayRecoverLostAssets)
-        NET_Sleep_DONE(0);
+        NET_Sleep(0);
     InterlockedIncrement(&db_hashCritSect.readCount);
     while (db_hashCritSect.writeCount)
-        NET_Sleep_DONE(0);
+        NET_Sleep(0);
     for (zoneIter = 0; zoneIter < g_zoneCount; ++zoneIter)
         DB_ReleaseGeometryBuffers(&g_zones[g_zoneHandles[zoneIter]].mem);
     if (db_hashCritSect.readCount <= 0)
@@ -242,7 +718,12 @@ void __cdecl Mark_ClipMapAsset(clipMap_t *clipMap)
     DB_GetXAsset(ASSET_TYPE_CLIPMAP_PVS, (XAssetHeader)clipMap);
 }
 
-void __cdecl DB_RemoveClipMap()
+void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
+{
+    Z_Free((char *)header.xmodelPieces[3].numpieces, 15);
+}
+
+void __cdecl DB_RemoveClipMap(XAssetHeader ass)
 {
     CM_Unload();
 }
@@ -257,7 +738,7 @@ void __cdecl Mark_ComWorldAsset(ComWorld *comWorld)
     DB_GetXAsset(ASSET_TYPE_COMWORLD, (XAssetHeader)comWorld);
 }
 
-void __cdecl DB_RemoveComWorld()
+void __cdecl DB_RemoveComWorld(XAssetHeader ass)
 {
     Com_UnloadWorld();
 }
@@ -302,7 +783,7 @@ void __cdecl Mark_GfxWorldAsset(GfxWorld *gfxWorld)
     DB_GetXAsset(ASSET_TYPE_GFXWORLD, (XAssetHeader)gfxWorld);
 }
 
-void __cdecl DB_RemoveGfxWorld()
+void __cdecl DB_RemoveGfxWorld(XAssetHeader ass)
 {
     R_UnloadWorld();
 }
@@ -353,7 +834,7 @@ void __cdecl Mark_MenuAsset(menuDef_t *menu)
     DB_GetXAsset(ASSET_TYPE_MENU, (XAssetHeader)menu);
 }
 
-void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to)
+void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int swag)
 {
     windowDef_t *toWindow; // [esp+14h] [ebp-18h]
     int toIndex; // [esp+18h] [ebp-14h]
@@ -454,10 +935,35 @@ void __cdecl Mark_StringTableAsset(StringTable *stringTable)
     DB_GetXAsset(ASSET_TYPE_STRINGTABLE, (XAssetHeader)stringTable);
 }
 
+XAssetHeader __cdecl DB_AllocXAsset_StringTable_(XAssetHeader *pool)
+{
+    XAssetHeader header; // [esp+4h] [ebp-8h]
+
+    if (pool->xmodelPieces)
+    {
+        header.xmodelPieces = pool->xmodelPieces;
+        pool->xmodelPieces = (XModelPieces *)pool->xmodelPieces->name;
+    }
+    else
+    {
+        header.xmodelPieces = 0;
+    }
+    return header;
+}
+
 XAssetHeader __cdecl DB_AllocMaterial(XAssetHeader *pool)
 {
     Material_DirtySort();
     return DB_AllocXAsset_StringTable_(pool);
+}
+
+void __cdecl DB_FreeXAssetHeader_StringTable_(XAssetPoolEntry<StringTable> **pool, XAssetHeader header)
+{
+    XAssetPoolEntry<StringTable> *oldFreeHead; // [esp+8h] [ebp-4h]
+
+    oldFreeHead = *pool;
+    *pool = (XAssetPoolEntry<StringTable> *)header.xmodelPieces;
+    header.xmodelPieces->name = (const char *)oldFreeHead;
 }
 
 void __cdecl DB_FreeMaterial(XAssetPoolEntry<StringTable> **pool, XAssetHeader header)
@@ -539,7 +1045,49 @@ void __cdecl DB_EnumXAssets(
     if (useFastFile->current.enabled)
         DB_EnumXAssets_FastFile(type, func, inData, includeOverride);
     else
-        DB_EnumXAssets_LoadObj(type, func, inData);
+        DB_EnumXAssets_LoadObj(type, (void(*)(void *, void *))func, inData);
+}
+
+void __cdecl R_EnumMaterials(void(__cdecl *func)(Material *, void *), void *data)
+{
+    Material *header; // [esp+0h] [ebp-8h]
+    unsigned int hashIndex; // [esp+4h] [ebp-4h]
+
+    for (hashIndex = 0; hashIndex < 0x800; ++hashIndex)
+    {
+        header = rg.materialHashTable[hashIndex];
+        if (header)
+            func(header, data);
+    }
+}
+
+void __cdecl R_EnumTechniqueSets(void(__cdecl *func)(MaterialTechniqueSet *, void *), void *data)
+{
+    MaterialTechniqueSet *header; // [esp+0h] [ebp-8h]
+    unsigned int hashIndex; // [esp+4h] [ebp-4h]
+
+    for (hashIndex = 0; hashIndex < 0x400; ++hashIndex)
+    {
+        header = materialGlobals.techniqueSetHashTable[hashIndex];
+        if (header)
+            func(header, data);
+    }
+}
+
+void __cdecl R_EnumImages(void(__cdecl *func)(GfxImage *, void *), void *data)
+{
+    GfxImage *header; // [esp+0h] [ebp-8h]
+    unsigned int imageIndex; // [esp+4h] [ebp-4h]
+
+    for (imageIndex = 0; imageIndex < 0x800; ++imageIndex)
+    {
+        header = imageGlobals.imageHashTable[imageIndex];
+        if (header)
+        {
+            if (!Image_IsProg(header))
+                func(header, data);
+        }
+    }
 }
 
 void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(* func)(void*, void*), void* inData)
@@ -580,6 +1128,11 @@ void __cdecl DB_EnumXAssetsFor(
     }
 }
 
+bool __cdecl DB_IsMinimumFastFileLoaded()
+{
+    return g_minimumFastFileLoaded;
+}
+
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 {
     unsigned int v2; // eax
@@ -600,7 +1153,7 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
             InterlockedIncrement(&db_hashCritSect.readCount);
             while (db_hashCritSect.writeCount)
                 NET_Sleep(0);
-            assetEntry = DB_FindXAssetEntry(type, name);
+            assetEntry = &DB_FindXAssetEntry(type, name)->entry;
             if (db_hashCritSect.readCount <= 0)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
@@ -662,7 +1215,7 @@ LABEL_39:
         return assetEntry->asset.header;
     }
     Sys_LockWrite(&db_hashCritSect);
-    assetEntry = DB_FindXAssetEntry(type, name);
+    assetEntry = &DB_FindXAssetEntry(type, name)->entry;
     if (assetEntry)
     {
         if (!assetEntry->asset.header.xmodelPieces)
@@ -683,7 +1236,7 @@ LABEL_39:
     }
     else
     {
-        newEntry = DB_CreateDefaultEntry(type, name);
+        newEntry = DB_CreateDefaultEntry(type, (char*)name);
         Sys_UnlockWrite(&db_hashCritSect);
         return newEntry->asset.header;
     }
@@ -715,7 +1268,7 @@ void __cdecl DB_LogMissingAsset(XAssetType type, const char *name)
     LABEL_4:
         Sys_EnterCriticalSection(CRITSECT_MISSING_ASSET);
         if (g_missingAssetFile)
-            g_missingAssetFile = FS_FOpenFileAppend("missingasset.csv");
+            g_missingAssetFile = FS_FOpenFileAppend((char*)"missingasset.csv");
         else
             g_missingAssetFile = FS_FOpenTextFileWrite("missingasset.csv");
         if (g_missingAssetFile)
@@ -753,6 +1306,168 @@ XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *na
     return 0;
 }
 
+void DB_SetReorderIncludeSequence()
+{
+    DBReorderAssetEntry *entry; // [esp+0h] [ebp-8h]
+    unsigned int entryIter; // [esp+4h] [ebp-4h]
+
+    for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
+    {
+        entry = &s_dbReorder.entries[entryIter];
+        if (entry->type == 33 && !I_strnicmp(entry->typeString, "include", 7))
+            entry->sequence = s_dbReorder.sequenceForIncludes;
+    }
+}
+
+void DB_EndReorderZone()
+{
+    DBReorderAssetEntry *entry; // [esp+180h] [ebp-41Ch]
+    bool wroteBlank; // [esp+187h] [ebp-415h]
+    DWORD bytesa; // [esp+188h] [ebp-414h]
+    DWORD bytes; // [esp+188h] [ebp-414h]
+    HANDLE file; // [esp+18Ch] [ebp-410h]
+    DWORD written; // [esp+190h] [ebp-40Ch] BYREF
+    char csvName[256]; // [esp+194h] [ebp-408h] BYREF
+    char line[512]; // [esp+294h] [ebp-308h] BYREF
+    char bakName[256]; // [esp+494h] [ebp-108h] BYREF
+    DWORD entryIter; // [esp+598h] [ebp-4h]
+
+    if (s_dbReorder.entryCount)
+    {
+        s_dbReorder.alreadyFinished = 1;
+        Com_sprintf(csvName, 0x100u, "..\\share\\zone_source\\%s.csv", s_dbReorder.zoneName);
+        Com_sprintf(bakName, 0x100u, "%s.bak", csvName);
+        DeleteFileA(bakName);
+        rename(csvName, bakName);
+        file = CreateFileA(csvName, 0x40000000u, 0, 0, 2u, 0, 0);
+        if (file != (HANDLE)-1)
+        {
+            wroteBlank = 0;
+            DB_SetReorderIncludeSequence();
+            std::_Sort<DBReorderAssetEntry *, int, bool(__cdecl *)(DBReorderAssetEntry const &, DBReorderAssetEntry const &)>(
+                (GfxSModelSurfStats *)s_dbReorder.entries,
+                (GfxSModelSurfStats *)&s_dbReorder.entries[s_dbReorder.entryCount],
+                (signed int)(16 * s_dbReorder.entryCount) >> 4,
+                (bool(__cdecl *)(GfxSModelSurfStats *, GfxSModelSurfStats *))DB_CompareReorderEntries);
+            for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
+            {
+                entry = &s_dbReorder.entries[entryIter];
+                if (!wroteBlank && entry->sequence == -1)
+                {
+                    switch (entry->type)
+                    {
+                    case 7:
+                    case 0xA:
+                    case 0xB:
+                    case 0x16:
+                    case 0x21:
+                        break;
+                    default:
+                        wroteBlank = 1;
+                        WriteFile(file, "\r\n", 2u, &written, 0);
+                        break;
+                    }
+                }
+                if (entry->type == 23)
+                {
+                    bytesa = Com_sprintf(line, 0x200u, "%s,%s%s\r\n", entry->typeString, "mp/", entry->assetName);
+                    WriteFile(file, line, bytesa, &written, 0);
+                }
+                else
+                {
+                    if (entry->type == 7)
+                        bytes = Com_sprintf(
+                            line,
+                            0x200u,
+                            "%s,%s,%s,%s\r\n",
+                            entry->typeString,
+                            entry->assetName,
+                            s_dbReorder.zoneName,
+                            "all_mp");
+                    else
+                        bytes = Com_sprintf(line, 0x200u, "%s,%s\r\n", entry->typeString, entry->assetName);
+                    WriteFile(file, line, bytes, &written, 0);
+                }
+            }
+            CloseHandle(file);
+        }
+    }
+}
+
+char __cdecl DB_RegisterAllReorderAssetsOfType(int type, XAssetEntry *assetEntry)
+{
+    DBReorderAssetEntry *entry; // [esp+0h] [ebp-8h]
+    unsigned int entryIter; // [esp+4h] [ebp-4h]
+
+    if (assetEntry && _stricmp(g_zones[assetEntry->zoneIndex].name, s_dbReorder.zoneName))
+        return 0;
+    if (Sys_IsDatabaseThread())
+        return 0;
+    Sys_LockWrite(&s_dbReorder.critSect);
+    for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
+    {
+        entry = &s_dbReorder.entries[entryIter];
+        if (entry->type == type && entry->sequence == -1)
+            entry->sequence = s_dbReorder.sequence;
+    }
+    s_dbReorder.sequence += 2;
+    if (s_dbReorder.alreadyFinished)
+        DB_EndReorderZone();
+    Sys_UnlockWrite(&s_dbReorder.critSect);
+    return 1;
+}
+
+void __cdecl DB_RegisteredReorderAsset(int type, const char *assetName, XAssetEntry *assetEntry)
+{
+    DBReorderAssetEntry *entry; // [esp+0h] [ebp-Ch]
+    const char *extension; // [esp+4h] [ebp-8h]
+    unsigned int entryIter; // [esp+8h] [ebp-4h]
+
+    if (s_dbReorder.entryCount)
+    {
+        if (type == 22)
+        {
+            if (!s_dbReorder.loadedLocalization)
+                s_dbReorder.loadedLocalization = DB_RegisterAllReorderAssetsOfType(22, assetEntry) != 0;
+        }
+        else if (type == 7)
+        {
+            if (!s_dbReorder.loadedSound)
+                s_dbReorder.loadedSound = DB_RegisterAllReorderAssetsOfType(7, assetEntry) != 0;
+        }
+        else if (!s_dbReorder.lastEntry
+            || s_dbReorder.lastEntry->type != type
+            || _stricmp(s_dbReorder.lastEntry->assetName, assetName))
+        {
+            Sys_LockWrite(&s_dbReorder.critSect);
+            s_dbReorder.lastEntry = 0;
+            for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
+            {
+                entry = &s_dbReorder.entries[entryIter];
+                if (entry->type == type && !_stricmp(entry->assetName, assetName))
+                {
+                    s_dbReorder.lastEntry = &s_dbReorder.entries[entryIter];
+                    if (entry->sequence == -1)
+                    {
+                        entry->sequence = s_dbReorder.sequence;
+                        if (entry->type == 31)
+                        {
+                            extension = Com_GetExtensionSubString(assetName);
+                            if (!I_stricmp(extension, ".gsc"))
+                                s_dbReorder.sequenceForIncludes = s_dbReorder.sequence + 1;
+                        }
+                        s_dbReorder.sequence += 2;
+                        if (s_dbReorder.alreadyFinished)
+                            DB_EndReorderZone();
+                    }
+                    break;
+                }
+            }
+            Sys_UnlockWrite(&s_dbReorder.critSect);
+        }
+    }
+}
+
 unsigned __int32 __cdecl DB_HashForName(const char *name, XAssetType type)
 {
     int c; // [esp+8h] [ebp-4h]
@@ -771,6 +1486,7 @@ unsigned __int32 __cdecl DB_HashForName(const char *name, XAssetType type)
     return out_val % 0x8000u;
 }
 
+int g_defaultAssetCount;
 XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
 {
     unsigned __int32 v2; // eax
@@ -808,7 +1524,7 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     v2 = DB_HashForName(name, type);
     newEntry->nextHash = db_hashTable[v2];
     db_hashTable[v2] = ((char *)newEntry - (char *)g_assetEntryPool) >> 4;
-    v3.prev = SL_GetString(name, 4u).prev;
+    v3.prev = SL_GetString(name, 4u);
     v4 = SL_ConvertToString(v3.prev);
     DB_SetXAssetName(&newEntry->asset, v4);
     newEntry->inuse = 1;
@@ -893,6 +1609,15 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
     while (assetEntry->entry.nextOverride)
         assetEntry = &g_assetEntryPool[assetEntry->entry.nextOverride];
     return assetEntry->entry.asset.header;
+}
+
+BOOL __cdecl IsConfigFile(const char *name)
+{
+    int v1; // eax
+
+    if (!name)
+        MyAssertHandler(".\\database\\db_registry.cpp", 2634, 0, "%s", "name");
+    return strstr(name, ".cfg") != 0;
 }
 
 void __cdecl PrintWaitedError(XAssetType type, const char *name, int waitedMsec)
@@ -1022,6 +1747,21 @@ int __cdecl DB_GetAllXAssetOfType_FastFile(XAssetType type, XAssetHeader *assets
     return assetCount;
 }
 
+void DB_SyncLostDevice()
+{
+    if (g_isRecoveringLostDevice)
+    {
+        if (g_mayRecoverLostAssets)
+            MyAssertHandler(".\\database\\db_registry.cpp", 2945, 0, "%s", "!g_mayRecoverLostAssets");
+        g_mayRecoverLostAssets = 1;
+        do
+            NET_Sleep(0x19u);
+        while (g_isRecoveringLostDevice);
+        if (g_mayRecoverLostAssets)
+            MyAssertHandler(".\\database\\db_registry.cpp", 2951, 0, "%s", "!g_mayRecoverLostAssets");
+    }
+}
+
 XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 {
     XAssetEntryPoolEntry *existingEntry; // [esp+0h] [ebp-14h]
@@ -1086,7 +1826,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
                 MyAssertHandler(".\\database\\db_registry.cpp", 3006, 0, "%s", "existingEntry");
             return existingEntry;
         }
-        v5.xmodelPieces = (XModelPieces *)newEntry->entry.asset.header;
+        v5.xmodelPieces = newEntry->entry.asset.header.xmodelPieces;
         asset.type = newEntry->entry.asset.type;
         asset.header = v5;
         newEntry = DB_AllocXAssetEntry(asset.type, g_zoneIndex);
@@ -1182,7 +1922,8 @@ void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry)
     DB_FreeXAssetHeader(assetEntry->entry.asset.type, assetEntry->entry.asset.header);
     oldFreeHead = g_freeAssetEntryHead;
     g_freeAssetEntryHead = assetEntry;
-    assetEntry->entry.asset.type = (XAssetType)oldFreeHead;
+    //assetEntry->entry.asset.type = (XAssetType)oldFreeHead;
+    assetEntry->entry.asset.type = oldFreeHead->entry.asset.type;
 }
 
 void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header)
@@ -1199,15 +1940,55 @@ void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to)
     to->zoneIndex = from->zoneIndex;
 }
 
+void(__cdecl *DB_DynamicCloneXAssetHandler[33])(XAssetHeader, XAssetHeader, int) =
+{
+    NULL, // 0
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL, // 9
+
+    NULL, // 10
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+
+    NULL, // 20
+    DB_DynamicCloneMenu,
+    NULL,
+    (void(*)(XAssetHeader, XAssetHeader, int))CL_ResetStats_f,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+
+    NULL,
+    NULL,
+    NULL,
+};
 void __cdecl DB_DynamicCloneXAsset(XAssetHeader from, XAssetHeader to, XAssetType type, int fromDefault)
 {
     if (DB_DynamicCloneXAssetHandler[type])
-        ((void(__cdecl *)(unsigned int, unsigned int, unsigned int))DB_DynamicCloneXAssetHandler[type])(
-            (const XAssetHeader)from.xmodelPieces,
-            (XAssetHeader)to.xmodelPieces,
+        DB_DynamicCloneXAssetHandler[type](
+            from,
+            to,
             fromDefault);
 }
 
+int g_sync;
 void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry)
 {
     const char *XAssetTypeName; // eax
@@ -1341,6 +2122,7 @@ void __cdecl DB_SyncXAssets()
     DB_PostLoadXZone();
 }
 
+cmd_function_s DB_LoadZone_f_VAR;
 void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, unsigned int zoneCount, int sync)
 {
     unsigned int j; // [esp+4h] [ebp-14h]
@@ -1427,7 +2209,8 @@ int DB_Init()
     for (i = 1; i < 0x7FFF; ++i)
     {
         result = 16 * i;
-        g_assetEntryPool[i].entry.asset.type = (XAssetType)&g_assetEntryPool[i + 1];
+        //g_assetEntryPool[i].entry.asset.type = (XAssetType)&g_assetEntryPool[i + 1];
+        g_assetEntryPool[i].entry.asset.type = g_assetEntryPool[i + 1].entry.asset.type;
     }
     g_assetEntryPool[0x7FFF].entry.asset.type = ASSET_TYPE_XMODELPIECES;
     return result;
@@ -1478,7 +2261,7 @@ void __cdecl DB_LoadZone_f()
 {
     char *v0; // eax
 
-    v0 = (char *)_Cmd_Argv(1);
+    v0 = (char *)Cmd_Argv(1);
     I_strncpyz(g_debugZoneName, v0, 64);
     DB_UpdateDebugZone();
 }
@@ -1502,11 +2285,12 @@ void __cdecl  DB_Thread(unsigned int threadContext)
             threadContext,
             6);
     Value = Sys_GetValue(2);
-    if (_setjmp3(Value, 0))
-    {
-        //Profile_Recover(1);
-        Com_ErrorAbort();
-    }
+    // KISAKTODO: try-catch
+    //if (_setjmp3(Value, 0))
+    //{
+    //    //Profile_Recover(1);
+    //    Com_ErrorAbort();
+    //}
     //Profile_Guard(1);
     while (1)
     {
@@ -1544,6 +2328,217 @@ void DB_TryLoadXFile()
     {
         MyAssertHandler(".\\database\\db_registry.cpp", 3759, 0, "%s", "!g_loadingAssets");
     }
+}
+
+char __cdecl DB_NextZoneCsvToken(const char **parse, char *token, unsigned int tokenSize, bool allowNewLine)
+{
+    unsigned int used; // [esp+0h] [ebp-Ch]
+    bool isSkippingLeadingSpaces; // [esp+7h] [ebp-5h]
+    const char *scan; // [esp+8h] [ebp-4h]
+
+    scan = *parse;
+    if (**parse == 10)
+    {
+        if (!allowNewLine)
+            return 0;
+        while (*scan == 10)
+            ++scan;
+    }
+    if (*scan)
+    {
+        if (*scan == 44)
+            ++scan;
+        used = 0;
+        isSkippingLeadingSpaces = 1;
+        while (*scan && *scan != 10 && *scan != 44)
+        {
+            if (!isSkippingLeadingSpaces || !isspace(*scan))
+            {
+                isSkippingLeadingSpaces = 0;
+                if (used < tokenSize - 1)
+                    token[used++] = *scan;
+            }
+            ++scan;
+        }
+        while (used && isspace(token[used - 1]))
+            --used;
+        token[used] = 0;
+        *parse = scan;
+        return 1;
+    }
+    else
+    {
+        *parse = scan;
+        return 0;
+    }
+}
+
+void __cdecl DB_AddReorderAsset(const char *typeString, const char *assetName)
+{
+    char *v2; // [esp+0h] [ebp-10h]
+    DBReorderAssetEntry *entry; // [esp+4h] [ebp-Ch]
+    DBReorderAssetEntry *entrya; // [esp+4h] [ebp-Ch]
+    int type; // [esp+8h] [ebp-8h]
+    unsigned int entryIter; // [esp+Ch] [ebp-4h]
+
+    for (type = 0; type < 33 && _stricmp(typeString, g_assetNames[type]); ++type)
+        ;
+    if (type == 23)
+    {
+        if (strnicmp(assetName, "mp/", 3u))
+            MyAssertHandler(
+                ".\\database\\db_registry.cpp",
+                1911,
+                0,
+                "%s",
+                "!strnicmp( assetName, REORDER_WEAPON_PREFIX, REORDER_WEAPON_PREFIX_LEN )");
+        assetName += 3;
+    }
+    for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
+    {
+        entry = &s_dbReorder.entries[entryIter];
+        if (entry->type == type && !_stricmp(entry->assetName, assetName) && !_stricmp(entry->typeString, typeString))
+            return;
+    }
+    entrya = &s_dbReorder.entries[s_dbReorder.entryCount++];
+    entrya->type = type;
+    if (type >= 33)
+        v2 = _strdup(typeString);
+    else
+        v2 = (char *)g_assetNames[type];
+    entrya->typeString = v2;
+    entrya->assetName = _strdup(assetName);
+    if (entrya->type != 33 || I_stricmp(typeString, "ignore"))
+    {
+        if (entrya->type == 10 || entrya->type == 11)
+            entrya->sequence = 1;
+        else
+            entrya->sequence = -1;
+    }
+    else
+    {
+        entrya->sequence = 0;
+    }
+}
+
+void __cdecl DB_BeginReorderZone(const char *zoneName)
+{
+    char v1; // [esp+3h] [ebp-259h]
+    char *v2; // [esp+8h] [ebp-254h]
+    const char *v3; // [esp+Ch] [ebp-250h]
+    char *from; // [esp+10h] [ebp-24Ch]
+    DBReorderAssetEntry *entry; // [esp+14h] [ebp-248h]
+    char assetType[32]; // [esp+18h] [ebp-244h] BYREF
+    unsigned int size; // [esp+38h] [ebp-224h]
+    void *file; // [esp+3Ch] [ebp-220h]
+    int success; // [esp+40h] [ebp-21Ch]
+    char assetName[256]; // [esp+44h] [ebp-218h] BYREF
+    char csvName[256]; // [esp+144h] [ebp-118h] BYREF
+    const char *parse; // [esp+248h] [ebp-14h] BYREF
+    char *csv; // [esp+24Ch] [ebp-10h]
+    char *to; // [esp+250h] [ebp-Ch]
+    DWORD read; // [esp+254h] [ebp-8h] BYREF
+    DWORD entryIter; // [esp+258h] [ebp-4h]
+
+    for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
+    {
+        entry = &s_dbReorder.entries[entryIter];
+        free((void *)entry->assetName);
+        if (entry->type == 33)
+            free((void *)entry->typeString);
+    }
+    s_dbReorder.entryCount = 0;
+    s_dbReorder.sequence = 2;
+    s_dbReorder.sequenceForIncludes = 3;
+    s_dbReorder.alreadyFinished = 0;
+    s_dbReorder.loadedSound = 0;
+    s_dbReorder.loadedLocalization = 0;
+    s_dbReorder.lastEntry = 0;
+    v3 = zoneName;
+    v2 = s_dbReorder.zoneName;
+    do
+    {
+        v1 = *v3;
+        *v2++ = *v3++;
+    } while (v1);
+    Sys_LockWrite(&s_dbReorder.critSect);
+    Com_sprintf(csvName, 0x100u, "..\\share\\zone_source\\%s.csv", zoneName);
+    file = CreateFileA(csvName, 0x80000000, 0, 0, 3u, 0, 0);
+    if (file == (void *)-1)
+    {
+        Sys_UnlockWrite(&s_dbReorder.critSect);
+    }
+    else
+    {
+        size = GetFileSize(file, 0);
+        csv = (char *)malloc(size + 1);
+        success = ReadFile(file, csv, size, &read, 0);
+        CloseHandle(file);
+        if (success && read == size)
+        {
+            csv[size] = 0;
+            to = csv;
+            for (from = csv; *from; ++from)
+            {
+                if (*from != 13)
+                    *to++ = *from;
+            }
+            *to = 0;
+            for (parse = csv; DB_NextZoneCsvToken(&parse, assetType, 0x20u, 1); ++parse)
+            {
+                if (DB_NextZoneCsvToken(&parse, assetName, 0x100u, 0) && assetType[0] && assetName[0])
+                    DB_AddReorderAsset(assetType, assetName);
+                while (*parse && *parse != 10)
+                    ++parse;
+                if (!*parse)
+                    break;
+            }
+            free(csv);
+            Sys_UnlockWrite(&s_dbReorder.critSect);
+        }
+        else
+        {
+            free(csv);
+            Sys_UnlockWrite(&s_dbReorder.critSect);
+        }
+    }
+}
+
+int fs_numServerReferencedFFs;
+const char *fs_serverReferencedFFNames[32];
+char __cdecl DB_ShouldLoadFromModDir(const char *zoneName)
+{
+    const char *strPos; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    if (!zoneName)
+        MyAssertHandler(".\\database\\db_registry.cpp", 3523, 0, "%s", "zoneName");
+    if (com_sv_running->current.enabled)
+        return 1;
+    if (!fs_numServerReferencedFFs)
+        return 1;
+    if (!I_stricmp(zoneName, "mod"))
+        return 1;
+    for (i = 0; ; ++i)
+    {
+        if (i >= fs_numServerReferencedFFs)
+            return 0;
+        if (!fs_serverReferencedFFNames[i])
+            MyAssertHandler(".\\database\\db_registry.cpp", 3536, 0, "%s", "fs_serverReferencedFFNames[i]");
+        strPos = I_stristr(fs_serverReferencedFFNames[i], zoneName);
+        if (strPos)
+            break;
+    }
+    if (strPos <= fs_serverReferencedFFNames[i])
+        return 0;
+    if (!I_strncmp(fs_serverReferencedFFNames[i], "mods", 4))
+        MyAssertHandler(
+            ".\\database\\db_registry.cpp",
+            3543,
+            0,
+            "%s",
+            "I_strncmp( fs_serverReferencedFFNames[i], MODS_BASE_PATH, MODS_BASE_PATH_LENGTH )");
+    return 1;
 }
 
 int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
@@ -1815,10 +2810,47 @@ LABEL_4:
     }
 }
 
+void(__cdecl *DB_RemoveXAssetHandler[33])(XAssetHeader) =
+{
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  &Material_ReleaseTechniqueSet,
+  (void(*)(XAssetHeader))&Image_Free,
+  NULL,
+  NULL,
+  &DB_RemoveLoadedSound,
+  &DB_RemoveClipMap,
+  &DB_RemoveClipMap,
+  &DB_RemoveComWorld,
+  NULL,
+  NULL,
+  NULL,
+  &DB_RemoveGfxWorld,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+}; // idb
+
 void __cdecl DB_RemoveXAsset(XAsset *asset)
 {
     if (DB_RemoveXAssetHandler[asset->type])
-        ((void(__cdecl *)(unsigned int))DB_RemoveXAssetHandler[asset->type])((XAssetHeader)asset->header.xmodelPieces);
+        DB_RemoveXAssetHandler[asset->type](asset->header);
 }
 
 void __cdecl DB_ReleaseXAssets()
@@ -1858,6 +2890,18 @@ void __cdecl DB_ShutdownXAssets()
         DB_UnloadXZoneMemory(&g_zones[g_zoneHandles[ia]]);
     g_zoneCount = 0;
     Sys_UnlockWrite(&db_hashCritSect);
+}
+
+void __cdecl DB_FreeXZoneMemory(XZoneMemory *zoneMem)
+{
+    unsigned int blockIndex; // [esp+0h] [ebp-4h]
+
+    DB_ReleaseGeometryBuffers(zoneMem);
+    for (blockIndex = 0; blockIndex < 9; ++blockIndex)
+    {
+        zoneMem->blocks[blockIndex].data = 0;
+        zoneMem->blocks[blockIndex].size = 0;
+    }
 }
 
 void __cdecl DB_UnloadXZoneMemory(XZone *zone)
@@ -1961,6 +3005,7 @@ void DB_SyncExternalAssets()
     RB_ClearVertexDecl();
 }
 
+bool g_archiveBuf;
 void DB_ArchiveAssets()
 {
     if (!g_archiveBuf)
@@ -2011,7 +3056,7 @@ void DB_FreeUnusedResources()
             else if (assetEntry->entry.inuse)
             {
                 name = (char *)DB_GetXAssetName(&assetEntry->entry.asset);
-                v0.prev = SL_GetString(name, 4u).prev;
+                v0.prev = SL_GetString(name, 4u);
                 newName = SL_ConvertToString(v0.prev);
                 DB_SetXAssetName(&assetEntry->entry.asset, newName);
                 pAssetEntryIndex = &assetEntry->entry.nextHash;
@@ -2058,3 +3103,32 @@ void __cdecl DB_Cleanup()
         MyAssertHandler(".\\database\\db_registry.cpp", 4256, 0, "%s", "!g_archiveBuf");
 }
 
+void __cdecl DB_BuildOSPath_Mod(const char *zoneName, unsigned int size, char *filename)
+{
+    char *v3; // eax
+    const char *string; // [esp-8h] [ebp-8h]
+
+    if (!*(_BYTE *)fs_gameDirVar->current.integer)
+        MyAssertHandler(".\\database\\db_registry.cpp", 3204, 0, "%s", "IsUsingMods()");
+    string = fs_gameDirVar->current.string;
+    v3 = Sys_DefaultInstallPath();
+    Com_sprintf(filename, size, "%s\\%s\\%s.ff", v3, string, zoneName);
+}
+
+int __cdecl DB_FileSize(const char *zoneName, int isMod)
+{
+    char filename[260]; // [esp+0h] [ebp-110h] BYREF
+    int size; // [esp+108h] [ebp-8h]
+    void *zoneFile; // [esp+10Ch] [ebp-4h]
+
+    if (isMod)
+        DB_BuildOSPath_Mod(zoneName, 0x100u, filename);
+    else
+        DB_BuildOSPath(zoneName, 0x100u, filename);
+    zoneFile = CreateFileA(filename, 0x80000000, 1u, 0, 3u, 0x60000000u, 0);
+    if (zoneFile == (void *)-1)
+        return 0;
+    size = GetFileSize(zoneFile, 0);
+    CloseHandle(zoneFile);
+    return size;
+}

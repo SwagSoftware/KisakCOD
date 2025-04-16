@@ -7,6 +7,24 @@
 #include <xanim/xasset.h>
 #include <xanim/xmodel.h>
 
+struct StreamDelayInfo // sizeof=0x8
+{
+    const void *ptr;
+    int size;
+};
+
+struct StreamPosInfo // sizeof=0x8
+{                                       // ...
+    unsigned __int8 *pos;               // ...
+    unsigned int index;                 // ...
+};
+
+struct AssetList // sizeof=0xC
+{                                       // ...
+    int assetCount;                     // ...
+    int maxCount;                       // ...
+    XAssetHeader *assets;               // ...
+};
 
 // db_registry
 void __cdecl TRACK_db_registry();
@@ -35,10 +53,10 @@ void __cdecl Load_LoadedSoundAsset(XAssetHeader *loadSnd);
 void __cdecl Mark_LoadedSoundAsset(LoadedSound *loadSnd);
 void __cdecl Load_ClipMapAsset(XAssetHeader *clipMap);
 void __cdecl Mark_ClipMapAsset(clipMap_t *clipMap);
-void __cdecl DB_RemoveClipMap();
+void __cdecl DB_RemoveClipMap(XAssetHeader ass);
 void __cdecl Load_ComWorldAsset(XAssetHeader *comWorld);
 void __cdecl Mark_ComWorldAsset(ComWorld *comWorld);
-void __cdecl DB_RemoveComWorld();
+void __cdecl DB_RemoveComWorld(XAssetHeader ass);
 void __cdecl Load_GameWorldSpAsset(XAssetHeader *gameWorldSp);
 void __cdecl Mark_GameWorldSpAsset(GameWorldSp *gameWorldSp);
 void __cdecl Load_GameWorldMpAsset(XAssetHeader *gameWorldMp);
@@ -47,7 +65,7 @@ void __cdecl Load_MapEntsAsset(XAssetHeader *mapEnts);
 void __cdecl Mark_MapEntsAsset(MapEnts *mapEnts);
 void __cdecl Load_GfxWorldAsset(XAssetHeader *gfxWorld);
 void __cdecl Mark_GfxWorldAsset(GfxWorld *gfxWorld);
-void __cdecl DB_RemoveGfxWorld();
+void __cdecl DB_RemoveGfxWorld(XAssetHeader ass);
 void __cdecl Load_LightDefAsset(XAssetHeader *lightDef);
 void __cdecl Mark_LightDefAsset(GfxLightDef *lightDef);
 void __cdecl Load_FontAsset(XAssetHeader *font);
@@ -56,7 +74,7 @@ void __cdecl Load_MenuListAsset(XAssetHeader *menuList);
 void __cdecl Mark_MenuListAsset(MenuList *menuList);
 void __cdecl Load_MenuAsset(XAssetHeader *menu);
 void __cdecl Mark_MenuAsset(menuDef_t *menu);
-void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to);
+void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int swag = 0);
 void __cdecl DB_RemoveWindowFocus(windowDef_t *window);
 void __cdecl Load_LocalizeEntryAsset(XAssetHeader *localize);
 void __cdecl Mark_LocalizeEntryAsset(LocalizeEntry *localize);
@@ -81,6 +99,7 @@ void __cdecl DB_EnumXAssets_FastFile(
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name);
 void __cdecl DB_Sleep(unsigned int msec);
 void __cdecl DB_LogMissingAsset(XAssetType type, const char *name);
+void __cdecl DB_RegisteredReorderAsset(int type, const char *assetName, XAssetEntry *assetEntry);
 XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name);
 unsigned __int32 __cdecl DB_HashForName(const char *name, XAssetType type);
 XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name);
@@ -160,6 +179,8 @@ void __cdecl DB_EnumXAssetsFor(
     void(* func)(void*, void*),
     void* inData);
 
+int __cdecl DB_FileSize(const char *zoneName, int isMod);
+
 
 // db_assetnames
 void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
@@ -207,6 +228,8 @@ void __cdecl DB_LoadXFile(
     int allocType);
 
 // db_memory
+void __cdecl DB_RecoverGeometryBuffers(XZoneMemory *zoneMem);
+void __cdecl DB_ReleaseGeometryBuffers(XZoneMemory *zoneMem);
 void __cdecl DB_AllocXZoneMemory(
     unsigned int *blockSize,
     const char *filename,
@@ -643,3 +666,15 @@ void __cdecl DB_LoadDObjs();
 extern XAssetList *varXAssetList;
 
 extern unsigned int volatile g_mainThreadBlocked;
+
+extern unsigned int g_streamDelayIndex;
+extern XBlock *g_streamBlocks;
+extern unsigned __int8 *g_streamPosArray[9];
+extern StreamDelayInfo g_streamDelayArray[4096];
+extern unsigned int g_streamPosIndex;
+extern StreamPosInfo g_streamPosStack[64];
+extern XZoneMemory *g_streamZoneMem;
+extern unsigned __int8 *g_streamPos;
+extern unsigned int g_streamPosStackIndex;
+
+extern XAsset *varXAsset;

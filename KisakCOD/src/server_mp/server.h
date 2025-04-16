@@ -329,6 +329,7 @@ extern const dvar_t *sv_serverid;
 extern const dvar_t *sv_mapRotation;
 
 extern serverStatic_t svs;
+extern int com_inServerFrame;
 
 
 // sv_net_chan_mp
@@ -393,3 +394,86 @@ void __cdecl SV_PrintServerCommandsForClient(client_t *client);
 void __cdecl SV_SetServerStaticHeader();
 void __cdecl SV_GetServerStaticHeader();
 void __cdecl SV_SendClientMessages();
+
+
+// sv_client_mp
+void __cdecl SV_GetChallenge(netadr_t from);
+int __cdecl SV_IsBannedGuid(const char *cdkeyHash);
+void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg);
+void __cdecl SV_SetClientStat(int clientNum, int index, unsigned int value);
+int __cdecl SV_GetClientStat(int clientNum, int index);
+void __cdecl SV_BanGuidBriefly(const char *cdkeyHash);
+unsigned int __cdecl SV_FindFreeTempBanSlot();
+void __cdecl SV_BanClient(client_t *cl);
+void __cdecl SV_UnbanClient(char *name);
+void __cdecl SV_FreeClient(client_t *cl);
+void __cdecl SV_FreeClients();
+void __cdecl SV_DirectConnect(netadr_t from);
+void __cdecl SV_FreeClientScriptPers();
+void __cdecl SV_SendDisconnect(
+    client_t *client,
+    int state,
+    const char *reason,
+    bool translationForReason,
+    const char *clientName);
+void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem);
+void __cdecl SV_DelayDropClient(client_t *drop, const char *reason);
+void __cdecl SV_SendClientGameState(client_t *client);
+void __cdecl SV_ClientEnterWorld(client_t *client, usercmd_s *cmd);
+void __cdecl SV_Disconnect_f(client_t *cl);
+void __cdecl SV_UserinfoChanged(client_t *cl);
+void __cdecl SV_UpdateUserinfo_f(client_t *cl);
+void __cdecl SV_ClientThink(client_t *cl, usercmd_s *cmd);
+void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta);
+void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg);
+int __cdecl SV_ClientCommand(client_t *cl, msg_t *msg, int fromOldServer);
+void __cdecl SV_ExecuteClientCommand(client_t *cl, char *s, int clientOK, int fromOldServer);
+gentity_s *__cdecl SV_AddTestClient();
+
+
+// sv_ccmds_mp
+char *__cdecl SV_GetMapBaseName(char *mapname);
+void __cdecl SV_Heartbeat_f();
+void __cdecl SV_GameCompleteStatus_f();
+void __cdecl SV_AddOperatorCommands();
+void __cdecl SV_Map_f();
+void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count);
+void __cdecl SV_MapRestart_f();
+void __cdecl SV_MapRestart(int fast_restart);
+void __cdecl SV_FastRestart_f();
+void __cdecl SV_MapRotate_f();
+void __cdecl SV_TempBan_f();
+int __cdecl SV_KickUser_f(char *playerName, int maxPlayerNameLen, char *cdkeyHash);
+client_t *__cdecl SV_GetPlayerByName();
+int __cdecl SV_KickClient(client_t *cl, char *playerName, int maxPlayerNameLen, char *cdkeyHash);
+void __cdecl SV_Ban_f();
+void __cdecl SV_BanNum_f();
+client_t *__cdecl SV_GetPlayerByNum();
+void __cdecl SV_Unban_f();
+void __cdecl SV_Drop_f();
+void __cdecl SV_DropNum_f();
+int __cdecl SV_KickClient_f(char *playerName, int maxPlayerNameLen, char *cdkeyHash);
+void __cdecl SV_TempBanNum_f();
+void __cdecl SV_Status_f();
+void __cdecl SV_Serverinfo_f();
+void __cdecl SV_Systeminfo_f();
+void __cdecl SV_DumpUser_f();
+void __cdecl SV_KillServer_f();
+void __cdecl SV_ScriptUsage_f();
+void __cdecl SV_ScriptVarUsage_f();
+void __cdecl SV_ScriptProfile_f();
+void __cdecl SV_ScriptBuiltin_f();
+void __cdecl SV_StringUsage_f();
+void __cdecl SV_SetPerk_f();
+void __cdecl SV_AddDedicatedCommands();
+void __cdecl SV_ConSay_f();
+void __cdecl SV_AssembleConSayMessage(int firstArg, char *text, int sizeofText);
+void __cdecl SV_ConTell_f();
+void __cdecl SV_RemoveDedicatedCommands();
+
+
+
+// sv_main_pc_mp
+void __cdecl SV_MasterGameCompleteStatus();
+void __cdecl SV_MasterHeartbeat(const char *hbname);
+void __cdecl SV_MasterShutdown();

@@ -5,14 +5,162 @@
 #include <script/scr_variable.h>
 #include "g_main_mp.h"
 #include <game/game_public.h>
+#include <script/scr_const.h>
 
+BuiltinMethodDef methods_2[82] =
+{
+  { "attach", &ScrCmd_attach, 0 },
+  { "detach", &ScrCmd_detach, 0 },
+  { "detachall", &ScrCmd_detachAll, 0 },
+  { "getattachsize", &ScrCmd_GetAttachSize, 0 },
+  { "getattachmodelname", &ScrCmd_GetAttachModelName, 0 },
+  { "getattachtagname", &ScrCmd_GetAttachTagName, 0 },
+  { "getattachignorecollision", &ScrCmd_GetAttachIgnoreCollision, 0 },
+  { "getammocount", &GScr_GetAmmoCount, 0 },
+  { "getclanid", &ScrCmd_GetClanId, 0 },
+  { "getclanname", &ScrCmd_GetClanName, 0 },
+  { "hidepart", &ScrCmd_hidepart, 0 },
+  { "showpart", &ScrCmd_showpart, 0 },
+  { "showallparts", &ScrCmd_showallparts, 0 },
+  { "linkto", &ScrCmd_LinkTo, 0 },
+  { "unlink", &ScrCmd_Unlink, 0 },
+  { "enablelinkto", &ScrCmd_EnableLinkTo, 0 },
+  { "getorigin", &ScrCmd_GetOrigin, 0 },
+  { "geteye", &ScrCmd_GetEye, 0 },
+  { "useby", &ScrCmd_UseBy, 0 },
+  { "setstablemissile", &Scr_SetStableMissile, 0 },
+  { "istouching", &ScrCmd_IsTouching, 0 },
+  { "playsound", &ScrCmd_PlaySound, 0 },
+  { "playsoundasmaster", &ScrCmd_PlaySoundAsMaster, 0 },
+  { "playsoundtoteam", &ScrCmd_PlaySoundToTeam, 0 },
+  { "playsoundtoplayer", &ScrCmd_PlaySoundToPlayer, 0 },
+  { "playloopsound", &ScrCmd_PlayLoopSound, 0 },
+  { "stoploopsound", &ScrCmd_StopLoopSound, 0 },
+  { "playrumbleonentity", (void(__cdecl *)(scr_entref_t))&CL_ResetStats_f, 0},
+  { "playrumblelooponentity", (void(__cdecl *)(scr_entref_t)) &CL_ResetStats_f, 0 },
+  { "stoprumble", (void(__cdecl *)(scr_entref_t)) &CL_ResetStats_f, 0 },
+  { "delete", &ScrCmd_Delete, 0 },
+  { "setmodel", &ScrCmd_SetModel, 0 },
+  { "getnormalhealth", &ScrCmd_GetNormalHealth, 0 },
+  { "setnormalhealth", &ScrCmd_SetNormalHealth, 0 },
+  { "show", &ScrCmd_Show, 0 },
+  { "hide", &ScrCmd_Hide, 0 },
+  { "laseron", &ScrCmd_LaserOn, 0 },
+  { "laseroff", &ScrCmd_LaserOff, 0 },
+  { "showtoplayer", &ScrCmd_ShowToPlayer, 0 },
+  { "setcontents", &ScrCmd_SetContents, 0 },
+  { "getstance", &ScrCmd_GetStance, 0 },
+  { "setcursorhint", &GScr_SetCursorHint, 0 },
+  { "sethintstring", &GScr_SetHintString, 0 },
+  { "usetriggerrequirelookat", &GScr_UseTriggerRequireLookAt, 0 },
+  { "shellshock", &GScr_ShellShock, 0 },
+  { "gettagorigin", &GScr_GetTagOrigin, 0 },
+  { "gettagangles", &GScr_GetTagAngles, 0 },
+  { "stopshellshock", &GScr_StopShellShock, 0 },
+  { "setdepthoffield", &GScr_SetDepthOfField, 0 },
+  { "setviewmodeldepthoffield", &GScr_SetViewModelDepthOfField, 0 },
+  { "viewkick", &GScr_ViewKick, 0 },
+  { "localtoworldcoords", &GScr_LocalToWorldCoords, 0 },
+  { "setrightarc", &GScr_SetRightArc, 0 },
+  { "setleftarc", &GScr_SetLeftArc, 0 },
+  { "settoparc", &GScr_SetTopArc, 0 },
+  { "setbottomarc", &GScr_SetBottomArc, 0 },
+  { "radiusdamage", &GScr_EntityRadiusDamage, 0 },
+  { "detonate", &GScr_Detonate, 0 },
+  { "damageconetrace", &GScr_DamageConeTrace, 0 },
+  { "sightconetrace", &GScr_SightConeTrace, 0 },
+  { "getentitynumber", &GScr_GetEntityNumber, 0 },
+  { "enablegrenadetouchdamage", &GScr_EnableGrenadeTouchDamage, 0 },
+  { "disablegrenadetouchdamage", &GScr_DisableGrenadeTouchDamage, 0 },
+  { "enableaimassist", &GScr_EnableAimAssist, 0 },
+  { "disableaimassist", &GScr_DisableAimAssist, 0 },
+  { "placespawnpoint", &GScr_PlaceSpawnPoint, 0 },
+  { "setteamfortrigger", &GScr_SetTeamForTrigger, 0 },
+  { "clientclaimtrigger", &GScr_ClientClaimTrigger, 0 },
+  { "clientreleasetrigger", &GScr_ClientReleaseTrigger, 0 },
+  { "releaseclaimedtrigger", &GScr_ReleaseClaimedTrigger, 0 },
+  { "getstat", &GScr_GetStat, 0 },
+  { "setstat", &GScr_SetStat, 0 },
+  { "sendleaderboards", (void(__cdecl *)(scr_entref_t)) &CL_ResetStats_f, 0 },
+  { "setmovespeedscale", &ScrCmd_SetMoveSpeedScale, 0 },
+  { "logstring", (void(__cdecl *)(scr_entref_t)) &CL_ResetStats_f, 0 },
+  { "missile_settarget", &GScr_MissileSetTarget, 0 },
+  { "isonladder", &GScr_IsOnLadder, 0 },
+  { "ismantling", &GScr_IsMantling, 0 },
+  { "startragdoll", &GScr_StartRagdoll, 0 },
+  { "isragdoll", &GScr_IsRagdoll, 0 },
+  { "getcorpseanim", &GScr_GetCorpseAnim, 0 },
+  { "itemweaponsetammo", &ScrCmd_ItemWeaponSetAmmo, 0 }
+}; // idb
 
+static unsigned __int16 *modNames[16] =
+{
+    &scr_const.mod_unknown,
+    &scr_const.mod_pistol_bullet,
+    &scr_const.mod_rifle_bullet,
+    &scr_const.mod_grenade,
+    &scr_const.mod_grenade_splash,
+    &scr_const.mod_projectile,
+    &scr_const.mod_projectile_splash,
+    &scr_const.mod_melee,
+    &scr_const.mod_head_shot,
+    &scr_const.mod_crush,
+    &scr_const.mod_telefrag,
+    &scr_const.mod_falling,
+    &scr_const.mod_suicide,
+    &scr_const.mod_trigger_hurt,
+    &scr_const.mod_explosive,
+    &scr_const.mod_impact
+};
 
 struct BuiltinMethodDef // sizeof=0xC
 {                                       // ...
     const char *actionString;           // ...
     void(__cdecl *actionFunc)(scr_entref_t); // ...
     int type;                           // ...
+};
+
+struct gameTypeScript_t // sizeof=0x84
+{                                       // ...
+    char pszScript[64];
+    char pszName[64];                   // ...
+    int bTeamBased;
+};
+
+struct scr_data_t_s // sizeof=0x10A8
+{                                       // ...
+    int main;                           // ...
+    int startupgametype;                // ...
+    int playerconnect;                  // ...
+    int playerdisconnect;               // ...
+    int playerdamage;                   // ...
+    int playerkilled;                   // ...
+    int votecalled;
+    int playervote;
+    int playerlaststand;                // ...
+    int iNumGameTypes;                  // ...
+    gameTypeScript_t list[32];          // ...
+};
+struct __declspec(align(4)) corpseInfo_t // sizeof=0x4DC
+{                                       // ...
+    XAnimTree_s *tree;                  // ...
+    int entnum;                         // ...
+    int time;
+    clientInfo_t ci;
+    bool falling;
+    // padding byte
+    // padding byte
+    // padding byte
+};
+struct scr_data_t // sizeof=0x379C
+{                                       // ...
+    int levelscript;                    // ...
+    int gametypescript;
+    scr_data_t_s gametype; // ...
+    int delete_;                        // ...
+    int initstructs;                    // ...
+    int createstruct;                   // ...
+    corpseInfo_t playerCorpseInfo[8];   // ...
 };
 
 
@@ -408,13 +556,13 @@ HashEntry_unnamed_type_u __cdecl GScr_AllocString(const char *s);
 void __cdecl TRACK_g_scr_main();
 void __cdecl Scr_LoadLevel();
 void __cdecl GScr_LoadGameTypeScript();
-int __cdecl GScr_LoadScriptAndLabel(char *filename, const char *label, int bEnforceExists);
+int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, int bEnforceExists);
 void __cdecl GScr_LoadScripts();
 int GScr_LoadLevelScript();
 void GScr_PostLoadScripts();
 void __cdecl GScr_FreeScripts();
-void __cdecl ScrCmd_GetClanId();
-void __cdecl ScrCmd_GetClanName();
+void __cdecl ScrCmd_GetClanId(scr_entref_t entref);
+void __cdecl ScrCmd_GetClanName(scr_entref_t entref);
 void GScr_CreatePrintChannel();
 void GScr_printChannelSet();
 const dvar_s *print();

@@ -3,6 +3,8 @@
 #include <xanim/xanim.h>
 #include <script/scr_stringlist.h>
 
+void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data);
+
 unsigned __int8* __cdecl Hunk_AllocXAnimPrecache(unsigned int size);
 unsigned __int8* __cdecl Hunk_AllocPhysPresetPrecache(unsigned int size);
 unsigned __int8* __cdecl Hunk_AllocXAnimClient(unsigned int size);

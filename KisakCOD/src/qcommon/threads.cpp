@@ -654,3 +654,10 @@ void Win_UpdateThreadLock()
         Win_SetThreadLock(threadLock);
     }
 }
+
+void __cdecl Sys_BeginLoadThreadPriorities()
+{
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\qcommon\\threads.cpp", 715, 0, "%s", "Sys_IsMainThread()");
+    SetThreadPriority(threadHandle[0], -1);
+}

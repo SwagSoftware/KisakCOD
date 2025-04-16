@@ -24,7 +24,7 @@ void __cdecl Load_Stream(bool atStreamStart, unsigned __int8 *ptr, int size)
                         g_streamDelayIndex,
                         4096);
                 g_streamDelayArray[g_streamDelayIndex].ptr = ptr;
-                dword_13B927C[2 * g_streamDelayIndex++] = size;
+                g_streamDelayArray[g_streamDelayIndex++].size = size;
             }
         }
         else

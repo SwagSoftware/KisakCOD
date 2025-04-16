@@ -22,15 +22,21 @@
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
 #include <xanim/xanim.h>
+#include <qcommon/mem_track.h>
+#include <stringed/stringed_hooks.h>
+#include <server/sv_world.h>
+#include <universal/surfaceflags.h>
+#include <qcommon/cmd.h>
+#include <universal/com_files.h>
 
 //   struct BuiltinFunctionDef *functions 827b5700     g_scr_main_mp.obj
 //   struct scr_data_t g_scr_data 82e8a4b8     g_scr_main_mp.obj
-
+scr_data_t g_scr_data;
 
 
 HashEntry_unnamed_type_u __cdecl GScr_AllocString(const char *s)
 {
-    return Scr_AllocString(s, 1);
+    return Scr_AllocString((char*)s, 1);
 }
 
 void __cdecl TRACK_g_scr_main()
@@ -82,19 +88,19 @@ void __cdecl GScr_LoadGameTypeScript()
         1);
 }
 
-int __cdecl GScr_LoadScriptAndLabel(char *filename, const char *label, int bEnforceExists)
+int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, int bEnforceExists)
 {
     int func; // [esp+0h] [ebp-4h]
 
     if (G_ExitAfterConnectPaths())
         return 0;
     if (!Scr_LoadScript(filename) && bEnforceExists)
-        Com_Error(ERR_DROP, &byte_88CE4C, filename);
+        Com_Error(ERR_DROP, "Could not find script %s", filename);
     func = Scr_GetFunctionHandle(filename, label);
     if (!func)
     {
         if (bEnforceExists)
-            Com_Error(ERR_DROP, &byte_88CE20, label, filename);
+            Com_Error(ERR_DROP, "Could not find label %s in script %s", label, filename);
     }
     return func;
 }
@@ -144,14 +150,14 @@ void __cdecl GScr_FreeScripts()
         Scr_RemoveClassMap(classnum);
 }
 
-void __cdecl ScrCmd_GetClanId()
+void __cdecl ScrCmd_GetClanId(scr_entref_t entref)
 {
     Scr_AddString("0");
 }
 
-void __cdecl ScrCmd_GetClanName()
+void __cdecl ScrCmd_GetClanName(scr_entref_t entref)
 {
-    Scr_AddString((char *)&String);
+    Scr_AddString((char *)"");
 }
 
 void GScr_CreatePrintChannel()
@@ -738,7 +744,7 @@ void Scr_GetWeaponModel()
                 Com_Printf(17, v0);
             }
         }
-        Scr_AddString((char *)&String);
+        Scr_AddString((char *)"");
     }
 }
 
@@ -771,7 +777,7 @@ gentity_s *__cdecl GetPlayerEntity(scr_entref_t entref)
 {
     char *v1; // eax
     const char *v2; // eax
-    char *v4; // [esp+20h] [ebp-8h]
+    const char *v4; // [esp+20h] [ebp-8h]
     gentity_s *ent; // [esp+24h] [ebp-4h]
 
     ent = GetEntity(entref);
@@ -1425,7 +1431,7 @@ void __cdecl ScrCmd_UseBy(scr_entref_t entref)
     pOther = Scr_GetEntity(0);
     Scr_AddEntity(pOther);
     Scr_Notify(pEnt, scr_const.trigger, 1u);
-    use = (void(__cdecl *)(gentity_s *, gentity_s *, gentity_s *))dword_946728[10 * pEnt->handler];
+    use = entityHandlers[pEnt->handler].use;
     if (use)
         use(pEnt, pOther, pOther);
 }
@@ -1701,7 +1707,7 @@ void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
         }
         else
         {
-            Scr_AddFloat(COERCE_VARIABLEUNION(0.0));
+            Scr_AddFloat(0.0f);
         }
     }
     else
@@ -1928,7 +1934,7 @@ void __cdecl GScr_SetHintString(scr_entref_t entref)
     if (pEnt->classname != scr_const.trigger_use && pEnt->classname != scr_const.trigger_use_touch)
         Scr_Error("The setHintString command only works on trigger_use or trigger_use_touch entities.\n");
     type = Scr_GetType(0);
-    if (type != 2 || (String = Scr_GetString(0), I_stricmp(String, &::String)))
+    if (type != 2 || (String = Scr_GetString(0), I_stricmp(String, "")))//I_stricmp(String, &::String)))
     {
         NumParam = Scr_GetNumParam();
         Scr_ConstructMessageString(0, NumParam - 1, "Hint String", szHint, 0x400u);
@@ -2627,7 +2633,7 @@ void GScr_WeaponIsBoltAction()
 
 void GScr_WeaponType()
 {
-    char *WeaponTypeName; // eax
+    const char *WeaponTypeName; // eax
     char *weaponName; // [esp+0h] [ebp-Ch]
     int weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
@@ -2642,7 +2648,7 @@ void GScr_WeaponType()
 
 void GScr_WeaponClass()
 {
-    char *WeaponClassName; // eax
+    const char *WeaponClassName; // eax
     char *weaponName; // [esp+0h] [ebp-Ch]
     int weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
@@ -2663,7 +2669,7 @@ void GScr_WeaponClass()
 
 void GScr_WeaponInventoryType()
 {
-    char *WeaponInventoryTypeName; // eax
+    const char *WeaponInventoryTypeName; // eax
     char *weaponName; // [esp+0h] [ebp-Ch]
     int weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
@@ -2741,7 +2747,7 @@ void GScr_WeaponFireTime()
     }
     else
     {
-        Scr_AddFloat(COERCE_VARIABLEUNION(0.0));
+        Scr_AddFloat(0.0f);
     }
 }
 
@@ -2838,7 +2844,7 @@ int __cdecl GScr_GetLocSelIndex(const char *mtlName)
 
 void Scr_BulletTrace()
 {
-    char *value; // eax
+    const char *value; // eax
     float vNorm[3]; // [esp+14h] [ebp-74h] BYREF
     float vEnd[3]; // [esp+20h] [ebp-68h] BYREF
     gentity_s *pIgnoreEnt; // [esp+2Ch] [ebp-5Ch]
@@ -2864,7 +2870,7 @@ void Scr_BulletTrace()
     }
     G_LocationalTrace(&trace, vStart, vEnd, iIgnoreEntNum, iClipMask, 0);
     Scr_MakeArray();
-    Scr_AddFloat(LODWORD(trace.fraction));
+    Scr_AddFloat(trace.fraction);
     Scr_AddArrayStringIndexed(scr_const.fraction);
     Vec3Lerp(vStart, vEnd, trace.fraction, endpos);
     Scr_AddVector(endpos);
@@ -2954,7 +2960,7 @@ void Scr_PhysicsTrace()
 
     Scr_GetVector(0, start);
     Scr_GetVector(1u, end);
-    G_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, 1023, (int)&loc_82000F + 2);
+    G_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, 1023, 0x820011);
     Vec3Lerp(start, end, trace.fraction, endpos);
     Scr_AddVector(endpos);
 }
@@ -2968,7 +2974,7 @@ void Scr_PlayerPhysicsTrace()
 
     Scr_GetVector(0, start);
     Scr_GetVector(1u, end);
-    G_TraceCapsule(&trace, start, (float *)playerMins, (float *)playerMaxs, end, 1023, (int)&loc_82000F + 2);
+    G_TraceCapsule(&trace, start, (float *)playerMins, (float *)playerMaxs, end, 1023, 0x820011);
     Vec3Lerp(start, end, trace.fraction, endpos);
     Scr_AddVector(endpos);
 }
@@ -3031,8 +3037,10 @@ void Scr_RandomFloatRange()
         Com_Printf(
             23,
             "Scr_RandomFloatRange parms: %d %d ",
-            (unsigned int)COERCE_UNSIGNED_INT64(fMin),
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(fMin)));
+            fMin, fMax
+            //(unsigned int)COERCE_UNSIGNED_INT64(fMin),
+            //(unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(fMin))
+        );
         Scr_Error("Scr_RandomFloatRange range must be positive float.\n");
     }
     min_4.floatValue = flrand(fMin, fMax);
@@ -3711,7 +3719,7 @@ void Scr_PrecacheShellShock()
     shellshockName = Scr_GetString(0);
     index = G_ShellShockIndex(shellshockName);
     if (!BG_LoadShellShockDvars(shellshockName))
-        Com_Error(ERR_DROP, &byte_88E294, shellshockName);
+        Com_Error(ERR_DROP, "Couldn't find shell shock %s -- see console", shellshockName);
     ShellshockParms = BG_GetShellshockParms(index);
     BG_SetShellShockParmsFromDvars(ShellshockParms);
 }
@@ -3883,7 +3891,7 @@ void __cdecl GScr_RadiusDamageInternal(gentity_s *inflictor)
         attacker = Scr_GetEntity(4u);
     mod = MOD_EXPLOSIVE;
     if (Scr_GetNumParam() > 5 && Scr_GetType(5u))
-        mod = G_MeansOfDeathFromScriptParam(5u);
+        mod = (meansOfDeath_t)G_MeansOfDeathFromScriptParam(5u);
     weapon = -1;
     if (Scr_GetNumParam() > 6 && Scr_GetType(6u))
     {
@@ -3941,7 +3949,7 @@ VariableUnion GScr_SetPlayerIgnoreRadiusDamage()
 
 void __cdecl GScr_DamageConeTrace(scr_entref_t entref)
 {
-    GScr_DamageConeTraceInternal(entref, (int)&loc_80200B + 6);
+    GScr_DamageConeTraceInternal(entref, 0x802011);
 }
 
 void __cdecl GScr_DamageConeTraceInternal(scr_entref_t entref, int contentMask)
@@ -4182,7 +4190,7 @@ void __cdecl Scr_FxParamError(unsigned int paramIndex, const char *errorString, 
 void Scr_PlayFXOnTag()
 {
     const char *v0; // eax
-    unsigned __int8 *v1; // eax
+    char *v1; // eax
     int v2; // eax
     unsigned int v3; // eax
     char *v4; // eax
@@ -4207,8 +4215,8 @@ void Scr_PlayFXOnTag()
     if (!ent->model)
         Scr_ParamError(1u, "cannot play fx on entity with no model");
     tag = Scr_GetConstLowercaseString(2u).stringValue;
-    v1 = (unsigned __int8 *)SL_ConvertToString(tag);
-    strchr(v1, 0x22u);
+    v1 = SL_ConvertToString(tag);
+    strchr(v1, '"');
     if (v2)
         Scr_ParamError(2u, "cannot use \" characters in tag names\n");
     if (SV_DObjGetBoneIndex(ent, tag) < 0)
@@ -4595,7 +4603,7 @@ void Scr_TableLookup()
     else
     {
         Com_Printf(16, "You cannot do table lookups without fastfiles.\n");
-        Scr_AddString((char *)&String);
+        Scr_AddString((char *)"");
     }
 }
 
@@ -4623,7 +4631,7 @@ void Scr_TableLookupIString()
     else
     {
         Com_Printf(16, "You cannot do table lookups without fastfiles.\n");
-        Scr_AddIString((char *)&String);
+        Scr_AddIString((char *)"");
     }
 }
 
@@ -4645,7 +4653,7 @@ void GScr_IsPlayerNumber()
 
 void GScr_SetWinningPlayer()
 {
-    char *v0; // eax
+    const char *v0; // eax
     char *pszWinner; // [esp+0h] [ebp-410h]
     int iWinner; // [esp+4h] [ebp-40Ch]
     char buffer[1024]; // [esp+8h] [ebp-408h] BYREF
@@ -4667,7 +4675,7 @@ void GScr_SetWinningTeam()
 {
     char *v0; // eax
     const char *v1; // eax
-    char *v2; // eax
+    const char *v2; // eax
     char *pszWinner; // [esp+0h] [ebp-414h]
     unsigned __int16 team; // [esp+4h] [ebp-410h]
     int iWinner; // [esp+8h] [ebp-40Ch]
@@ -5324,7 +5332,7 @@ void GScr_LoadMap()
     }
 }
 
-void __thiscall GScr_ExitLevel(jpeg_common_struct *cinfo)
+void GScr_ExitLevel()
 {
     if (level.finished)
     {
@@ -5825,7 +5833,7 @@ void GScr_FGetArg()
                                 "freadline failed, there aren't %i arguments on this line, there are only %i arguments\n",
                                 arg + 1,
                                 i);
-                            Scr_AddString((char *)&String);
+                            Scr_AddString((char *)"");
                             return;
                         }
                     }
@@ -5834,25 +5842,25 @@ void GScr_FGetArg()
                 else
                 {
                     Com_Printf(23, "freadline failed, file number %i was not open for reading\n", filenum);
-                    Scr_AddString((char *)&String);
+                    Scr_AddString((char *)"");
                 }
             }
             else
             {
                 Com_Printf(23, "freadline failed, invalid argument number %i\n", arg);
-                Scr_AddString((char *)&String);
+                Scr_AddString((char *)"");
             }
         }
         else
         {
             Com_Printf(23, "freadline failed, invalid file number %i\n", filenum);
-            Scr_AddString((char *)&String);
+            Scr_AddString((char *)"");
         }
     }
     else
     {
         Com_Printf(23, "freadline requires at least 2 parameters (file, string)\n");
-        Scr_AddString((char *)&String);
+        Scr_AddString((char *)"");
     }
 }
 
@@ -6412,6 +6420,85 @@ void __cdecl GScr_AddEntity(gentity_s *pEnt)
         Scr_AddEntity(pEnt);
     else
         Scr_AddUndefined();
+}
+
+int Scr_ParseGameTypeList_LoadObj()
+{
+    const char *v0; // eax
+    const char *v1; // eax
+    int result; // eax
+    char *qpath; // [esp+10h] [ebp-1430h]
+    char *src; // [esp+14h] [ebp-142Ch]
+    unsigned __int8 buffer[1024]; // [esp+18h] [ebp-1428h] BYREF
+    char *data_p; // [esp+418h] [ebp-1028h] BYREF
+    char *s0; // [esp+41Ch] [ebp-1024h]
+    char listbuf[4096]; // [esp+420h] [ebp-1020h] BYREF
+    int f; // [esp+1424h] [ebp-1Ch] BYREF
+    unsigned int v10; // [esp+1428h] [ebp-18h]
+    int v11; // [esp+142Ch] [ebp-14h]
+    int len; // [esp+1430h] [ebp-10h]
+    int i; // [esp+1434h] [ebp-Ch]
+    char *dest; // [esp+1438h] [ebp-8h]
+    int FileList; // [esp+143Ch] [ebp-4h]
+
+    memset((unsigned __int8 *)g_scr_data.gametype.list, 0, sizeof(g_scr_data.gametype.list));
+    v11 = 0;
+    FileList = FS_GetFileList("maps/mp/gametypes", "gsc", FS_LIST_PURE_ONLY, listbuf, 4096);
+    src = listbuf;
+    for (i = 0; i < FileList; ++i)
+    {
+        v10 = strlen(src);
+        if (*src == 95)
+        {
+            src += v10 + 1;
+        }
+        else
+        {
+            if (!I_stricmp(&src[v10 - 4], ".gsc"))
+                src[v10 - 4] = 0;
+            if (v11 == 32)
+            {
+                Com_Printf(23, "Too many game type scripts found! Only loading the first %i\n", 31);
+                break;
+            }
+            dest = g_scr_data.gametype.list[v11].pszScript;
+            I_strncpyz(dest, src, 64);
+            strlwr(dest);
+            qpath = va("maps/mp/gametypes/%s.txt", src);
+            len = FS_FOpenFileByMode(qpath, &f, FS_READ);
+            if (len > 0 && len < 1024)
+            {
+                FS_Read(buffer, len, f);
+                data_p = (char *)buffer;
+                s0 = (char *)Com_Parse((const char **)&data_p);
+                I_strncpyz(dest + 64, s0, 64);
+                s0 = (char *)Com_Parse((const char **)&data_p);
+                *((_DWORD *)dest + 32) = s0 && !I_stricmp(s0, "team");
+            }
+            else
+            {
+                if (len > 0)
+                {
+                    v1 = va("maps/mp/gametypes/%s.txt", src);
+                    Com_PrintWarning(23, "WARNING: GameType description file %s is too big to load.\n", v1);
+                }
+                else
+                {
+                    v0 = va("maps/mp/gametypes/%s.txt", src);
+                    Com_PrintWarning(23, "WARNING: Could not load GameType description file %s for gametype %s\n", v0, src);
+                }
+                I_strncpyz(dest + 64, dest, 64);
+                *((_DWORD *)dest + 32) = 0;
+            }
+            ++v11;
+            if (len > 0)
+                FS_FCloseFile(f);
+            src += v10 + 1;
+        }
+    }
+    result = v11;
+    g_scr_data.gametype.iNumGameTypes = v11;
+    return result;
 }
 
 void __cdecl Scr_ParseGameTypeList()

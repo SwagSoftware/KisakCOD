@@ -120,3 +120,5 @@ void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from);
 HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type);
 
 HashEntry_unnamed_type_u __cdecl Scr_CreateCanonicalFilename(const char *filename);
+
+HashEntry_unnamed_type_u __cdecl Scr_AllocString(char *s, int sys);

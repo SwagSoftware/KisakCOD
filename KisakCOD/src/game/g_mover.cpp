@@ -15,8 +15,6 @@ struct pushed_t // sizeof=0x2C
 
 //Line 51761:  0006 : 0000559c       char const **hintStrings      827b559c     g_mover.obj
 
-const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH"}; // idb
-
 pushed_t pushed[1024];
 pushed_t *pushed_p;
 

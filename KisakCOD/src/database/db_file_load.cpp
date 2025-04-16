@@ -2,6 +2,7 @@
 
 #include <qcommon/threads.h>
 #include <win32/win_local.h>
+#include <client_mp/client_mp.h>
 
 //unsigned int volatile g_loadingAssets      828e3f3c     db_file_load.obj
 //int marker_db_file_load  828e3f40     db_file_load.obj
@@ -168,6 +169,18 @@ void __stdcall DB_FileReadCompletion(
     _OVERLAPPED *lpOverlapped)
 {
     ;
+}
+
+void __cdecl DB_LoadDelayedImages()
+{
+    unsigned int copyIter; // [esp+0h] [ebp-4h]
+
+    DB_EnumXAssets(ASSET_TYPE_IMAGE, (void(__cdecl *)(XAssetHeader, void *))R_DelayLoadImage, 0, 0);
+    for (copyIter = 0; copyIter < g_copyInfoCount; ++copyIter)
+    {
+        if (g_copyInfo[copyIter]->asset.type == ASSET_TYPE_IMAGE)
+            R_DelayLoadImage(g_copyInfo[copyIter]->asset.header);
+    }
 }
 
 void __cdecl DB_LoadXFileInternal()

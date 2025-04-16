@@ -147,7 +147,7 @@ int __cdecl FS_FOpenFileWriteToDir(char *filename, char *dir);
 int __cdecl FS_WriteFileToDir(char *filename, char *path, char *buffer, unsigned int size);
 
 void FS_RegisterDvars();
-
+void __cdecl FS_Shutdown();
 
 extern const dvar_t *fs_remotePCDirectory;
 extern const dvar_t *fs_remotePCName;

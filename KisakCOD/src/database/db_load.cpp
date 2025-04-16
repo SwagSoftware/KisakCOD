@@ -8,6 +8,11 @@
 #include <gfx_d3d/fxprimitives.h>>
 #include <gfx_d3d/r_material.h>
 #include <gfx_d3d/r_gfx.h>
+#include <xanim/dobj.h>
+#include <gfx_d3d/r_buffers.h>
+
+#include <DynEntity/DynEntity_client.h>
+#include <gfx_d3d/r_water.h>
 
 void *varint;
 void *varuint;
@@ -27,7 +32,7 @@ XAnimDeltaPartQuat *varXAnimDeltaPartQuat     ;
 clipMap_t *varclipMap_t     ;
 MaterialPixelShaderProgram *varMaterialPixelShaderProgram     ;
 GfxWorldStreamInfo *varGfxWorldStreamInfo     ;
-char const *const varConstChar           ;
+char const * varConstChar           ;
 unsigned short *varr_index16_t         ;
 MenuList *varMenuList     ;
 listBoxDef_s *varlistBoxDef_t     ;
@@ -5588,7 +5593,7 @@ void __cdecl Load_RawFile(bool atStreamStart)
     if (varRawFile->buffer)
     {
         varRawFile->buffer = (const char *)AllocLoad_raw_byte();
-        varConstChar = varRawFile->buffer;
+        varConstChar = (const char*)varRawFile->buffer;
         Load_ConstCharArray(1, varRawFile->len + 1);
     }
     DB_PopStreamPos();
@@ -5882,7 +5887,7 @@ void __cdecl Load_GfxPortal(bool atStreamStart)
     if (varGfxPortal->vertices)
     {
         varGfxPortal->vertices = (float (*)[3])AllocLoad_FxElemVisStateSample();
-        varvec3_t = varGfxPortal->vertices;
+        varvec3_t = (unsigned char*)varGfxPortal->vertices;
         Load_vec3_tArray(1, varGfxPortal->vertexCount);
     }
 }

@@ -251,6 +251,8 @@ void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl* callback)(Mater
 void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader* userData);
 bool __cdecl IsValidMaterialHandle(Material* const handle);
 
+void __cdecl Material_ReleaseTechniqueSet(XAssetHeader header);
+
 void __cdecl TRACK_r_material();
 
 unsigned __int8 *__cdecl Material_Alloc(unsigned int size);
@@ -292,3 +294,9 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
 void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo);
 
 Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name);
+
+// r_material_override
+void __cdecl Material_OverrideTechniqueSets();
+void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet);
+void __cdecl Material_DirtyTechniqueSetOverrides();
+void __cdecl Material_ClearShaderUploadList();

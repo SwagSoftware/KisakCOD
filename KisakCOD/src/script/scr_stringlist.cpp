@@ -15,6 +15,13 @@ static scrStringDebugGlob_t scrStringDebugGlobBuf;
 static scrMemTreePub_t scrMemTreePub;
 static scrStringGlob_t scrStringGlob; // 0x244E300
 
+HashEntry_unnamed_type_u __cdecl Scr_AllocString(char *s, int sys)
+{
+	if (sys != 1)
+		MyAssertHandler(".\\script\\scr_stringlist.cpp", 1030, 0, "%s", "sys == SCR_SYS_GAME");
+	return SL_GetString(s, 1u);
+}
+
 unsigned int GetHashCode(const char* str, unsigned int len)
 {
 	unsigned int hash;

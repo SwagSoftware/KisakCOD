@@ -1305,6 +1305,32 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
     return surface;
 }
 
+void __cdecl R_DelayLoadImage(XAssetHeader header)
+{
+    LONG externalDataSize; // [esp+4h] [ebp-8h]
+    HRESULT hr; // [esp+8h] [ebp-4h]
+
+    if (HIBYTE(header.xmodelPieces[2].numpieces))
+    {
+        HIBYTE(header.xmodelPieces[2].numpieces) = 0;
+        externalDataSize = header.xmodelPieces[1].numpieces;
+        header.xmodelPieces[1].numpieces = 0;
+        header.xmodelPieces[1].pieces = 0;
+        if (r_loadForRenderer->current.enabled && !dx.deviceLost)
+        {
+            if (!Image_LoadFromFile(header.image))
+                Image_AssignDefaultTexture(header.image);
+            if (!header.xmodelPieces->numpieces)
+            {
+                hr = dx.device->TestCooperativeLevel();
+                if (hr != -2005530520 && hr != -2005530519)
+                    Com_Error(ERR_DROP, "Couldn't load image '%s'\n", (const char *)header.xmodelPieces[2].pieces);
+            }
+        }
+        DB_LoadedExternalData(externalDataSize);
+    }
+}
+
 void __cdecl R_SetPicmip()
 {
     unsigned int texMemInMegs; // [esp+0h] [ebp-10h]
