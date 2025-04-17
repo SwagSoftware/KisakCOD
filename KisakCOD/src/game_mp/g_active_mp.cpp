@@ -11,6 +11,9 @@
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
 #include <xanim/xanim.h>
+#include <universal/profile.h>
+#include <qcommon/threads.h>
+#include <client/client.h>
 
 void __cdecl P_DamageFeedback(gentity_s *player)
 {
@@ -87,7 +90,7 @@ void __cdecl ClientImpacts(gentity_s *ent, pmove_t *pm)
     void(__cdecl * otherTouch)(gentity_s *, gentity_s *, int); // [esp+10h] [ebp-8h]
     int i; // [esp+14h] [ebp-4h]
 
-    entTouch = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * ent->handler];
+    entTouch = entityHandlers[ent->handler].touch;
     for (i = 0; i < pm->numtouch; ++i)
     {
         for (j = 0; j < i && pm->touchents[j] != pm->touchents[i]; ++j)
@@ -102,7 +105,7 @@ void __cdecl ClientImpacts(gentity_s *ent, pmove_t *pm)
                 Scr_AddEntity(ent);
                 Scr_Notify(other, scr_const.touch, 1u);
             }
-            otherTouch = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * other->handler];
+            otherTouch = entityHandlers[other->handler].touch;
             if (otherTouch)
                 otherTouch(other, ent, 1);
             if (entTouch)
@@ -111,23 +114,24 @@ void __cdecl ClientImpacts(gentity_s *ent, pmove_t *pm)
     }
 }
 
+const float range[3] = { 20.0f, 20.0f, 20.0f };
 void __cdecl G_TouchTriggers(gentity_s *ent)
 {
     int entityList[1025]; // [esp+30h] [ebp-1030h] BYREF
     float diff[3]; // [esp+1034h] [ebp-2Ch] BYREF
-    int v3; // [esp+1040h] [ebp-20h]
+    void(__cdecl * touch)(gentity_s *, gentity_s *, int); // [esp+1040h] [ebp-20h]
     entityState_s *item; // [esp+1044h] [ebp-1Ch]
     float sum[3]; // [esp+1048h] [ebp-18h] BYREF
-    void(__cdecl * v6)(entityState_s *, gentity_s *, int); // [esp+1054h] [ebp-Ch]
+    void(__cdecl * v6)(gentity_s *, gentity_s *, int); // [esp+1054h] [ebp-Ch]
     int v7; // [esp+1058h] [ebp-8h]
     int i; // [esp+105Ch] [ebp-4h]
 
-    //Profile_Begin(350);
+    Profile_Begin(350);
     if (!ent->client)
         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 191, 0, "%s", "ent->client");
     if (ent->client->ps.pm_type > 1)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return;
     }
     Vec3Sub(ent->r.absmin, range, diff);
@@ -136,7 +140,7 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
     Vec3Add(ent->client->ps.origin, ent->r.mins, diff);
     Vec3Add(ent->client->ps.origin, ent->r.maxs, sum);
     ExpandBoundsToWidth(diff, sum);
-    v3 = dword_946724[10 * ent->handler];
+    touch = entityHandlers[ent->handler].touch;
     for (i = 0; i < v7; ++i)
     {
         item = &g_entities[entityList[i]].s;
@@ -144,8 +148,8 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
             MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 215, 0, "%s", "hit->r.contents & MASK_TRIGGER");
         if (item->eType == 4)
             MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 216, 0, "%s", "hit->s.eType != ET_MISSILE");
-        v6 = (void(__cdecl *)(entityState_s *, gentity_s *, int))dword_946724[10 * BYTE2(item[1].attackerEntityNum)];
-        if (v6 || v3)
+        v6 = entityHandlers[BYTE2(item[1].attackerEntityNum)].touch;
+        if (v6 || touch)
         {
             if (item->eType == 3)
             {
@@ -164,10 +168,10 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
                 Scr_Notify(ent, scr_const.touch, 1u);
             }
             if (v6)
-                v6(item, ent, 1);
+                v6((gentity_s *)item, ent, 1);
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl SpectatorThink(gentity_s *ent, usercmd_s *ucmd)
@@ -205,7 +209,7 @@ void __cdecl SpectatorThink(gentity_s *ent, usercmd_s *ucmd)
         memset((unsigned __int8 *)&pm, 0, sizeof(pm));
         pm.ps = &client->ps;
         memcpy(&pm.cmd, ucmd, sizeof(pm.cmd));
-        pm.tracemask = (int)&loc_800811;
+        pm.tracemask = 0x800811;
         pm.handler = 1;
         Pmove(&pm);
         ent->r.currentOrigin[0] = client->ps.origin[0];
@@ -377,7 +381,7 @@ void __cdecl AttemptLiveGrenadePickup(gentity_s *clientEnt)
     {
         if (clientEnt->client->ps.throwBackGrenadeTimeLeft)
         {
-            touch = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * grenadeEnt->handler];
+            touch = entityHandlers[grenadeEnt->handler].touch;
             if (touch)
             {
                 if (EntHandle::isDefined(&grenadeEnt->parent))
@@ -545,9 +549,9 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 memcpy(&pm.cmd, ucmd, sizeof(pm.cmd));
                 memcpy(&pm.oldcmd, &client->sess.oldcmd, sizeof(pm.oldcmd));
                 if (client->ps.pm_type < 7)
-                    pm.tracemask = (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1;
+                    pm.tracemask = 0x2810011;
                 else
-                    pm.tracemask = (int)&off_810011;
+                    pm.tracemask = 0x810011;
                 pm.handler = 1;
                 oldOrigin = client->oldOrigin;
                 origin = client->ps.origin;
@@ -946,6 +950,7 @@ bool __cdecl G_ClientCanSpectateTeam(gclient_s *client, team_t team)
     return (client->sess.noSpectate & (1 << team)) == 0;
 }
 
+hudelem_s g_dummyHudCurrent;
 int __cdecl GetFollowPlayerState(int clientNum, playerState_s *ps)
 {
     gclient_s *client; // [esp+8h] [ebp-8h]
@@ -1068,6 +1073,15 @@ int __cdecl StuckInClient(gentity_s *self)
     self->client->ps.pm_flags |= 0x80u;
     return 1;
 }
+
+unsigned __int16 *controller_names[] =
+{
+    &scr_const.back_mid,
+    &scr_const.back_up,
+    &scr_const.neck,
+    &scr_const.head,
+    &scr_const.pelvis
+};
 
 void __cdecl G_PlayerController(const gentity_s *self, int *partBits)
 {
@@ -1226,7 +1240,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             {
                 client->iLastCompassPlayerInfoEnt = client->ps.iCompassPlayerInfo & 0x3F;
                 if ((g_entities[client->iLastCompassPlayerInfoEnt].s.lerp.eFlags & 0x400000) != 0)
-                    v3 = ((unsigned int)&loc_7FFFFF + 1) | client->ps.eFlags;
+                    v3 = client->ps.eFlags | 0x800000;
                 else
                     v3 = client->ps.eFlags & 0xFF7FFFFF;
                 client->ps.eFlags = v3;

@@ -2,6 +2,7 @@
 
 #include <qcommon/qcommon.h>
 #include <universal/q_parse.h>
+#include <client_mp/client_mp.h>
 
 enum hitLocation_t : __int32
 {                                       // ...
@@ -155,6 +156,7 @@ void __cdecl G_CreateDObj(
     int unusedLocalClientNum);
 DObj_s *__cdecl G_GetDObj(unsigned int handle, int unusedLocalClientNum);
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
+void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
 XAnimTree_s *G_LoadAnimTreeInstances();
 void G_PrintAllFastFileErrors();
 void __cdecl G_PrintFastFileErrors(const char *fastfile);
@@ -298,6 +300,10 @@ extern const dvar_t *g_motd;
 extern const dvar_t *g_TeamColor_EnemyTeam;
 extern const dvar_t *g_debugDamage;
 extern const dvar_t *g_clonePlayerMaxVelocity;
+
+extern const dvar_t *voice_global;
+extern const dvar_t *voice_localEcho;
+extern const dvar_t *voice_deadChat;
 
 extern gentity_s g_entities[1024];
 extern level_locals_t level;

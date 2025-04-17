@@ -11,6 +11,12 @@
 #include <script/scr_const.h>
 #include <script/scr_memorytree.h>
 #include <script/scr_vm.h>
+#include <stringed/stringed_hooks.h>
+#include <server/sv_game.h>
+#include "g_main_mp.h"
+#include <database/database.h>
+#include "g_public_mp.h"
+#include <server/sv_world.h>
 
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
 {
@@ -99,7 +105,7 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
                     v8 = SL_ConvertToString(ConfigstringConst);
                     Com_Printf(15, "%i: %s\n", ic, v8);
                 }
-                v9 = va(&byte_891424, start, name);
+                v9 = va("G_FindConfigstringIndex: overflow (%d): %s", start, name);
                 Com_Error(ERR_DROP, v9);
             }
             SV_SetConfigstring(ic + start, name);
@@ -117,6 +123,7 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
     }
 }
 
+const char *origErrorMsg;
 int __cdecl G_LocalizedStringIndex(char *string)
 {
     int v2; // eax
@@ -242,7 +249,7 @@ int __cdecl G_ModelIndex(char *name)
         if ((unsigned int)i >= 0x200)
             MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 298, 0, "i doesn't index MAX_MODELS\n\t%i not in [0, %i)", i, 512);
         if (i == 512)
-            Com_Error(ERR_DROP, &byte_891570);
+            Com_Error(ERR_DROP, "G_ModelIndex: overflow");
         cached_models[i] = SV_XModelGet(name);
         SV_SetConfigstring(i + 830, name);
         //Profile_EndInternal(0);
@@ -274,6 +281,7 @@ bool __cdecl G_GetModelBounds(int index, float *outMins, float *outMaxs)
     return XModelGetStaticBounds(xmodel, identityBasis, outMins, outMaxs) != 0;
 }
 
+XModel *cached_models[512];
 XModel *__cdecl G_GetModel(int index)
 {
     if (index <= 0)
@@ -556,8 +564,8 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
         if (!checkEnt->tagInfo)
             break;
     }
-    tagInfo = MT_Alloc(112, 17);
-    *(unsigned int *)tagInfo = parent;
+    tagInfo = (char*)MT_Alloc(112, 17);
+    *(unsigned int *)tagInfo = (unsigned int)parent;
     *((_WORD *)tagInfo + 4) = 0;
     if (tagName && !SL_IsLowercaseString(tagName))
     {
@@ -670,7 +678,7 @@ void __cdecl G_EntUnlink(gentity_s *ent)
             }
         }
         Scr_SetString(&tagInfo->name, 0);
-        MT_Free(tagInfo, 112);
+        MT_Free((byte*)tagInfo, 112);
     }
 }
 
@@ -901,7 +909,7 @@ void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1080, 0, "%s", "obj");
     if (!SV_DObjCreateSkelForBones(obj, partBits))
     {
-        controller = (void(__cdecl *)(const gentity_s *, int *))dword_946734[10 * ent->handler];
+        controller = entityHandlers[ent->handler].controller;
         if (controller)
             controller(ent, partBits);
         DObjCalcSkel(obj, partBits);
@@ -920,7 +928,7 @@ void __cdecl G_DObjCalcBone(const gentity_s *ent, int boneIndex)
     if (!SV_DObjCreateSkelForBone(obj, boneIndex))
     {
         DObjGetHierarchyBits(obj, boneIndex, partBits);
-        controller = (void(__cdecl *)(const gentity_s *, int *))dword_946734[10 * ent->handler];
+        controller = entityHandlers[ent->handler].controller;
         if (controller)
             controller(ent, partBits);
         DObjCalcSkel(obj, partBits);
@@ -1184,7 +1192,7 @@ gentity_s *__cdecl G_Spawn()
         if (level.num_entities == 1022)
         {
             G_PrintEntities();
-            Com_Error(ERR_DROP, &byte_891804);
+            Com_Error(ERR_DROP, "G_Spawn: no free entities");
         }
         e = &level.gentities[level.num_entities++];
         SV_LocateGameData(level.gentities, level.num_entities, 628, &level.clients->ps, 12676);
@@ -1267,7 +1275,7 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
             }
         }
     }
-    if ((((unsigned int)&loc_7FFFFF + 1) & ed->flags) != 0)
+    if ((ed->flags & 0x800000) != 0)
         Missile_FreeAttractorRefs(ed);
 }
 

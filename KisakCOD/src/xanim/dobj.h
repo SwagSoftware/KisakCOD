@@ -126,3 +126,46 @@ int __cdecl DObjGetBoneIndex(const DObj_s *obj, unsigned int name, unsigned __in
 int __cdecl DObjGetModelBoneIndex(const DObj_s *obj, const char *modelName, unsigned int name, unsigned __int8 *index);
 void __cdecl DObjGetBasePoseMatrix(const DObj_s *obj, unsigned __int8 boneIndex, DObjAnimMat *outMat);
 void __cdecl DObjSetHidePartBits(DObj_s *obj, const unsigned int *partBits);
+
+
+// dobj_skel
+void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits);
+void __cdecl GetControlAndDuplicatePartBits(
+    const DObj_s *obj,
+    const int *partBits,
+    const int *ignorePartBits,
+    const int *savedDuplicatePartBits,
+    int *calcPartBits,
+    int *controlPartBits);
+const unsigned __int8 *__cdecl CalcSkelDuplicateBones(
+    const XModel *model,
+    DSkel *skel,
+    int minBoneIndex,
+    const unsigned __int8 *pos);
+void __cdecl CalcSkelRootBonesNoParentOrDuplicate(
+    const XModel *model,
+    DSkel *skel,
+    int minBoneIndex,
+    int *calcPartBits);
+void __cdecl CalcSkelRootBonesWithParent(
+    const XModel *model,
+    DSkel *skel,
+    unsigned int minBoneIndex,
+    unsigned int modelParent,
+    int *calcPartBits,
+    const int *controlPartBits);
+void __cdecl CalcSkelNonRootBones(
+    const XModel *model,
+    DSkel *skel,
+    int minBoneIndex,
+    int *calcPartBits,
+    const int *controlPartBits);
+void __cdecl DObjCalcBaseSkel(const DObj_s *obj, DObjAnimMat *mat, int *partBits);
+void __cdecl DObjCalcBaseAnim(const DObj_s *obj, DObjAnimMat *mat, int *partBits);
+void __cdecl DObjGetBaseControlAndDuplicatePartBits(
+    const DObj_s *obj,
+    const int *partBits,
+    const int *ignorePartBits,
+    const int *savedDuplicatePartBits,
+    int *calcPartBits,
+    int *controlPartBits);

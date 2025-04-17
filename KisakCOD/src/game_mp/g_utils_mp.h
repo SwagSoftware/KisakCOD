@@ -71,3 +71,6 @@ double __cdecl G_flrand(float min, float max);
 int __cdecl G_irand(int min, int max);
 double __cdecl G_random();
 double __cdecl G_crandom();
+
+
+extern scr_data_t g_scr_data;

@@ -1,4 +1,6 @@
 #include "g_public_mp.h"
+#include "g_utils_mp.h"
+#include <server/sv_world.h>
 
 
 int __cdecl G_GetPlayerCorpseIndex(gentity_s *ent)

@@ -23,6 +23,7 @@
 #include <qcommon/threads.h>
 
 #include <universal/com_files.h>
+#include <universal/com_sndalias.h>
 
 //struct bgs_t level_bgs     82d8f0f8     g_main_mp.obj
 //struct entityHandler_t *entityHandlers 827b5088     g_main_mp.obj
@@ -105,6 +106,10 @@ const dvar_t *g_motd    ;
 const dvar_t *g_TeamColor_EnemyTeam;
 const dvar_t *g_debugDamage;
 const dvar_t *g_clonePlayerMaxVelocity;
+
+const dvar_t *voice_global;
+const dvar_t *voice_localEcho;
+const dvar_t *voice_deadChat;
 
 bgs_t level_bgs;
 level_locals_t level;
@@ -250,8 +255,8 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     level_bgs.GetXModel = (XModel * (__cdecl *)(const char *))SV_XModelGet;
     level_bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *))G_CreateDObj;
     level_bgs.AttachWeapon = 0;
-    level_bgs.GetDObj = (DObj_s * (__cdecl *)(int, int))G_GetDObj;
-    level_bgs.SafeDObjFree = (void(__cdecl *)(int, int))G_SafeDObjFree;
+    level_bgs.GetDObj = G_GetDObj;
+    level_bgs.SafeDObjFree = G_SafeDObjFree;
     level_bgs.AllocXAnim = (void *(__cdecl *)(int))Hunk_AllocXAnimServer;
     level_bgs.anim_user = 1;
     if (*(_BYTE *)g_log->current.integer)
@@ -342,6 +347,9 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     SaveRegisteredWeapons();
     SaveRegisteredItems();
 }
+
+const char *g_dedicatedEnumNames[4] = { "listen server", "dedicated LAN server", "dedicated internet server", NULL }; // idb
+int MY_DEFAULT_USEHOLDSPAWNDELAY = 500;
 
 const dvar_s *G_RegisterDvars()
 {
@@ -775,6 +783,19 @@ void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
     Com_SafeServerDObjFree(handle);
 }
 
+void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
+{
+    if (unusedLocalClientNum != -1)
+        MyAssertHandler(
+            ".\\game_mp\\g_main_mp.cpp",
+            850,
+            0,
+            "unusedLocalClientNum == UNUSED_LOCAL_CLIENT_NUM\n\t%i, %i",
+            unusedLocalClientNum,
+            -1);
+    Com_SafeServerDObjFree(handle);
+}
+
 XAnimTree_s *G_LoadAnimTreeInstances()
 {
     XAnimTree_s *result; // eax
@@ -1043,7 +1064,7 @@ void __cdecl CheckVote()
             level.voteExecuteTime = level.time + 3000;
         LABEL_13:
             level.voteTime = 0;
-            SV_SetConfigstring(13, (char *)&String);
+            SV_SetConfigstring(13, (char *)"");
             return;
         }
         passCount = level.numVotingClients / 2 + 1;
@@ -1117,7 +1138,7 @@ void __cdecl G_RunThink(gentity_s *ent)
         ent->nextthink = 0;
         think = entityHandlers[ent->handler].think;
         if (!think)
-            Com_Error(ERR_DROP, &byte_889468);
+            Com_Error(ERR_DROP, "NULL ent->think");
         think(ent);
     }
 }
@@ -1136,6 +1157,31 @@ void __cdecl G_XAnimUpdateEnt(gentity_s *ent)
 {
     while (ent->r.inuse && (ent->flags & 0x2000) == 0 && G_DObjUpdateServerTime(ent, 1))
         Scr_RunCurrentThreads();
+}
+
+void __cdecl TeamplayInfoMessage(gentity_s *ent)
+{
+    ent->client->ps.stats[3] = -1;
+}
+
+void __cdecl CheckTeamStatus()
+{
+    gentity_s *ent; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    if (level.time - level.lastTeammateHealthTime > 0)
+    {
+        level.lastTeammateHealthTime = level.time;
+        for (i = 0; i < g_maxclients->current.integer; ++i)
+        {
+            ent = &g_entities[i];
+            if (ent->r.inuse)
+            {
+                if ((ent->client->ps.otherFlags & 2) == 0)
+                    TeamplayInfoMessage(ent);
+            }
+        }
+    }
 }
 
 void __cdecl G_RunFrame(int levelTime)
@@ -1600,7 +1646,7 @@ void __cdecl G_TraceCapsule(
     IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
     SV_SetupIgnoreEntParams(&ignoreEntParams, passEntityNum);
-    SV_Trace(results, start, mins, maxs, end, &ignoreEntParams, contentmask, 0, 0, 0);
+    SV_Trace(results, (float*)start, (float *)mins, (float *)maxs, (float *)end, &ignoreEntParams, contentmask, 0, 0, 0);
 }
 
 int __cdecl G_TraceCapsuleComplete(

@@ -299,6 +299,26 @@ const dvar_t *zone_reorder;
 volatile unsigned int g_loadingAssets;
 XZoneInfoInternal g_zoneInfo[8];
 
+void __cdecl Hunk_OverrideDataForFile(int type, const char *name, void *data)
+{
+    fileData_s *searchFileData; // [esp+4h] [ebp-4h]
+
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\universal\\com_memory.cpp", 1539, 0, "%s", "Sys_IsMainThread()");
+    for (searchFileData = com_fileDataHashTable[FS_HashFileName(name, 1024)];
+        searchFileData;
+        searchFileData = searchFileData->next)
+    {
+        if (searchFileData->type == type && !I_stricmp(searchFileData->name, name))
+        {
+            searchFileData->data = data;
+            return;
+        }
+    }
+    if (!alwaysfails)
+        MyAssertHandler(".\\universal\\com_memory.cpp", 1554, 0, "Hunk_OverrideDataForFile: could not find data");
+}
+
 void __cdecl DB_InitPool_RawFile_(void *pool, int size)
 {
     int i; // [esp+4h] [ebp-4h]

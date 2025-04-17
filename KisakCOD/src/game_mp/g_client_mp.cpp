@@ -1,4 +1,9 @@
 #include "g_public_mp.h"
+#include "g_utils_mp.h"
+#include <server_mp/server.h>
+#include <server/sv_game.h>
+#include <server/sv_world.h>
+#include <script/scr_vm.h>
 
 
 void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
@@ -123,7 +128,7 @@ void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
         if (ps->viewlocked_entNum == 1023)
             MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 98, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
         if (!G_DObjGetWorldTagPos(&g_entities[ps->viewlocked_entNum], scr_const.tag_player, origin))
-            Com_Error(ERR_DROP, &byte_883EB8);
+            Com_Error(ERR_DROP, "G_GetPlayerViewOrigin: Couldn't find [tag_player] on turret");
     }
     else
     {
@@ -138,7 +143,7 @@ void __cdecl ClientUserinfoChanged(unsigned int clientNum)
     char userinfo[1024]; // [esp+404h] [ebp-410h] BYREF
     clientInfo_t *ci; // [esp+808h] [ebp-Ch]
     gentity_s *ent; // [esp+80Ch] [ebp-8h]
-    char *s; // [esp+810h] [ebp-4h]
+    const char *s; // [esp+810h] [ebp-4h]
 
     ent = &g_entities[clientNum];
     client = ent->client;
@@ -244,7 +249,7 @@ char *__cdecl ClientConnect(unsigned int clientNum, unsigned __int16 scriptPersI
     char userinfo[1024]; // [esp+1Ch] [ebp-410h] BYREF
     clientInfo_t *ci; // [esp+420h] [ebp-Ch]
     gentity_s *ent; // [esp+424h] [ebp-8h]
-    char *value; // [esp+428h] [ebp-4h]
+    const char *value; // [esp+428h] [ebp-4h]
 
     if (!scriptPersId)
         MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 302, 0, "%s", "scriptPersId");
@@ -268,7 +273,7 @@ char *__cdecl ClientConnect(unsigned int clientNum, unsigned __int16 scriptPersI
     ci->nextValid = 1;
     client->sess.connected = CON_CONNECTING;
     client->sess.scriptPersId = scriptPersId;
-    client->sess.cs.team = jpeg_mem_init();
+    client->sess.cs.team = (team_t)RETURN_ZERO32();
     client->sess.sessionState = SESS_STATE_SPECTATOR;
     client->spectatorClient = -1;
     client->sess.forceSpectatorClient = -1;
@@ -299,7 +304,7 @@ char *__cdecl ClientConnect(unsigned int clientNum, unsigned __int16 scriptPersI
     else
     {
         G_FreeEntity(ent);
-        return "GAME_INVALIDPASSWORD";
+        return (char*)"GAME_INVALIDPASSWORD";
     }
 }
 

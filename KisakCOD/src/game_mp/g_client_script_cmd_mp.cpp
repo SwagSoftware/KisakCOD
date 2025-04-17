@@ -1,6 +1,10 @@
 #include "g_public_mp.h"
 
 #include <script/scr_vm.h>
+#include <server/sv_game.h>
+#include <server/sv_world.h>
+#include "g_utils_mp.h"
+#include <xanim/dobj.h>
 
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
 {
@@ -612,12 +616,12 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t entref)
         }
         else
         {
-            Scr_AddFloat(COERCE_VARIABLEUNION(0.0));
+            Scr_AddFloat(0.0f);
         }
     }
     else
     {
-        Scr_AddFloat(COERCE_VARIABLEUNION(1.0));
+        Scr_AddFloat(1.0f);
     }
 }
 
@@ -662,12 +666,12 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t entref)
         }
         else
         {
-            Scr_AddFloat(COERCE_VARIABLEUNION(0.0));
+            Scr_AddFloat(0.0f);
         }
     }
     else
     {
-        Scr_AddFloat(COERCE_VARIABLEUNION(1.0));
+        Scr_AddFloat(1.0f);
     }
 }
 
@@ -949,7 +953,7 @@ void __cdecl PlayerCmd_secondaryOffhandButtonPressed(scr_entref_t entref)
         Scr_AddInt(0);
 }
 
-void __cdecl PlayerCmd_buttonPressedDEVONLY()
+void __cdecl PlayerCmd_buttonPressedDEVONLY(scr_entref_t entref)
 {
     Scr_AddInt(0);
 }
@@ -1278,7 +1282,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
             if (Scr_GetType(1u) && Scr_GetPointerType(1u) == 20)
                 attacker = Scr_GetEntity(1u);
             dflags = Scr_GetInt(3u).intValue;
-            mod = G_MeansOfDeathFromScriptParam(4u);
+            mod = (meansOfDeath_t)G_MeansOfDeathFromScriptParam(4);
             String = Scr_GetString(5u);
             iWeapon = G_GetWeaponIndexForName(String);
             if (Scr_GetType(6u))
@@ -1292,7 +1296,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 dir = vDir;
             }
             floatValue = (unsigned __int16)Scr_GetConstString(8u).floatValue;
-            hitLoc = G_GetHitLocationIndexFromString(floatValue);
+            hitLoc = (hitLocation_t)G_GetHitLocationIndexFromString(floatValue);
             psTimeOffset = Scr_GetInt(9u).intValue;
             if (pSelf->client->ps.pm_type == 7)
             {
@@ -1442,11 +1446,11 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 Scr_AddEntity(attacker);
                 Scr_AddInt(damage);
                 Scr_Notify(pSelf, scr_const.damage, 2u);
-                if (!dword_946730[10 * pSelf->handler])
+                if (!entityHandlers[pSelf->handler].die)
                     Com_Printf(1, "No die handler for player entity type %i", pSelf->handler);
                 if (pSelf->health > 0)
                 {
-                    pain = (void(__cdecl *)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int))dword_94672C[10 * pSelf->handler];
+                    pain = entityHandlers[pSelf->handler].pain;
                     if (pain)
                         pain(pSelf, attacker, damage, point, mod, localdir, hitLoc, iWeapon);
                     goto LABEL_93;
@@ -1466,7 +1470,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                     tempBulletHitEntity->s.un1.scale |= 2u;
                 if (pSelf->health <= 0xFFFFFC18)
                     pSelf->health = -999;
-                die = (void(__cdecl *)(gentity_s *, gentity_s *, gentity_s *, int, int, const int, const float *, const hitLocation_t, int))dword_946730[10 * pSelf->handler];
+                die = entityHandlers[pSelf->handler].die;
                 if (die)
                     die(pSelf, inflictor, attacker, damage, mod, iWeapon, localdir, hitLoc, psTimeOffset);
                 if (pSelf->r.inuse)
@@ -2424,35 +2428,33 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     }
 }
 
-void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t entref)
+void __fastcall PlayerCmd_DeactivateReverb(scr_entref_t *entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    _BYTE v3[12]; // [esp+0h] [ebp-1Ch]
-    double pSelf; // [esp+Ch] [ebp-10h]
-    double prio_name; // [esp+14h] [ebp-8h]
+    unsigned __int16 v1; // r30
+    const char *v2; // r3
+    double Float; // fp31
+    unsigned int NumParam; // r3
+    int ConstString; // r10
+    const char *v6; // r3
 
-    if (entref.classnum)
+    v1 = HIWORD(entref);
+    if ((_WORD)entref)
     {
-        Scr_ObjectError("not an entity");
-        LODWORD(pSelf) = 0;
+        v2 = "not an entity";
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1771, 0, "%s", "entref.entnum < MAX_GENTITIES");
-        LODWORD(pSelf) = &g_entities[entref.entnum];
-        if (!*(unsigned int *)(LODWORD(pSelf) + 348))
-        {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
-        }
+        if (g_entities[HIWORD(entref)].client)
+            goto LABEL_6;
+        v2 = va("entity %i is not a player", HIWORD(entref));
     }
-    *((float *)&pSelf + 1) = 0.0;
-    *(unsigned int *)&v3[8] = Scr_GetNumParam();
-    if (*(unsigned int *)&v3[8] != 1)
+    Scr_ObjectError(v2);
+LABEL_6:
+    Float = 0.0;
+    NumParam = Scr_GetNumParam();
+    if (NumParam != 1)
     {
-        if (*(unsigned int *)&v3[8] != 2)
+        if (NumParam != 2)
         {
             Scr_Error(
                 "USAGE: player deactivateReverb(\"priority\", fadetime = 0);\n"
@@ -2460,32 +2462,13 @@ void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t entref)
                 "nt fading to the next lowest active reverb priority level in seconds\n");
             return;
         }
-        *((float *)&pSelf + 1) = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1u);
     }
-    LOWORD(prio_name) = (unsigned __int16)Scr_GetConstString(0).floatValue;
-    HIDWORD(prio_name) = 1;
-    if (LOWORD(prio_name) == scr_const.snd_enveffectsprio_level)
-    {
-        HIDWORD(prio_name) = 1;
-    }
-    else if (LOWORD(prio_name) == scr_const.snd_enveffectsprio_shellshock)
-    {
-        HIDWORD(prio_name) = 2;
-    }
-    else
-    {
+    ConstString = (unsigned __int16)Scr_GetConstString(0);
+    if (ConstString != scr_const.snd_enveffectsprio_level && ConstString != scr_const.snd_enveffectsprio_shellshock)
         Scr_Error("priority must be 'snd_enveffectsprio_level' or 'snd_enveffectsprio_shellshock'\n");
-    }
-    *(double *)v3 = *((float *)&pSelf + 1);
-    v2 = va(
-        "%c %i \"%s\" %g %g %g",
-        68,
-        HIDWORD(prio_name),
-        (const char *)COERCE_UNSIGNED_INT64(*((float *)&pSelf + 1)),
-        *(double *)&v3[4],
-        pSelf,
-        prio_name);
-    SV_GameSendServerCommand(entref.entnum, SV_CMD_RELIABLE, v2);
+    v6 = va("%c %i \"%s\" %g %g %g", 68, Float);
+    SV_GameSendServerCommand(v1, SV_CMD_RELIABLE, v6);
 }
 
 void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
@@ -2552,35 +2535,33 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
     SV_GameSendServerCommand(entref.entnum, SV_CMD_RELIABLE, v3);
 }
 
-void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t entref)
+void __fastcall PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    _BYTE v3[12]; // [esp+0h] [ebp-1Ch]
-    double pSelf; // [esp+Ch] [ebp-10h]
-    double prio_name; // [esp+14h] [ebp-8h]
+    unsigned __int16 v1; // r30
+    const char *v2; // r3
+    double Float; // fp31
+    unsigned int NumParam; // r3
+    int ConstString; // r10
+    const char *v6; // r3
 
-    if (entref.classnum)
+    v1 = HIWORD(entref);
+    if ((_WORD)entref)
     {
-        Scr_ObjectError("not an entity");
-        LODWORD(pSelf) = 0;
+        v2 = "not an entity";
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1844, 0, "%s", "entref.entnum < MAX_GENTITIES");
-        LODWORD(pSelf) = &g_entities[entref.entnum];
-        if (!*(unsigned int *)(LODWORD(pSelf) + 348))
-        {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
-        }
+        if (g_entities[HIWORD(entref)].client)
+            goto LABEL_6;
+        v2 = va("entity %i is not a player", HIWORD(entref));
     }
-    *((float *)&pSelf + 1) = 0.0;
-    *(unsigned int *)&v3[8] = Scr_GetNumParam();
-    if (*(unsigned int *)&v3[8] != 1)
+    Scr_ObjectError(v2);
+LABEL_6:
+    Float = 0.0;
+    NumParam = Scr_GetNumParam();
+    if (NumParam != 1)
     {
-        if (*(unsigned int *)&v3[8] != 2)
+        if (NumParam != 2)
         {
             Scr_Error(
                 "USAGE: player deactivatechannelvolumes(\"priority\", fadetime = 0);\n"
@@ -2588,37 +2569,18 @@ void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t entref)
                 "llshock\", fadetime is the time spent fading to the next lowest active reverb priority level in seconds\n");
             return;
         }
-        *((float *)&pSelf + 1) = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1u);
     }
-    LOWORD(prio_name) = (unsigned __int16)Scr_GetConstString(0).floatValue;
-    HIDWORD(prio_name) = 1;
-    if (LOWORD(prio_name) == scr_const.snd_channelvolprio_holdbreath)
-    {
-        HIDWORD(prio_name) = 1;
-    }
-    else if (LOWORD(prio_name) == scr_const.snd_channelvolprio_pain)
-    {
-        HIDWORD(prio_name) = 2;
-    }
-    else if (LOWORD(prio_name) == scr_const.snd_channelvolprio_shellshock)
-    {
-        HIDWORD(prio_name) = 3;
-    }
-    else
+    ConstString = (unsigned __int16)Scr_GetConstString(0);
+    if (ConstString != scr_const.snd_channelvolprio_holdbreath
+        && ConstString != scr_const.snd_channelvolprio_pain
+        && ConstString != scr_const.snd_channelvolprio_shellshock)
     {
         Scr_Error(
             "priority must be 'snd_channelvolprio_holdbreath', 'snd_channelvolprio_pain', or 'snd_channelvolprio_shellshock'\n");
     }
-    *(double *)v3 = *((float *)&pSelf + 1);
-    v2 = va(
-        "%c %i \"%s\" %g %g %g",
-        70,
-        HIDWORD(prio_name),
-        (const char *)COERCE_UNSIGNED_INT64(*((float *)&pSelf + 1)),
-        *(double *)&v3[4],
-        pSelf,
-        prio_name);
-    SV_GameSendServerCommand(entref.entnum, SV_CMD_RELIABLE, v2);
+    v6 = va("%c %i \"%s\" %g %g %g", 70, Float);
+    SV_GameSendServerCommand(v1, SV_CMD_RELIABLE, v6);
 }
 
 void __cdecl ScrCmd_PlayLocalSound(scr_entref_t entref)
@@ -3161,7 +3123,7 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
             {
                 if (I_stricmp(str, "nightvision"))
                 {
-                    if (I_stricmp(str, &String))
+                    if (I_stricmp(str, ""))
                         Scr_Error("Invalid option: expected \"weapon\", \"altweapon\", or \"nightvision\".\n");
                     else
                         pSelf->client->ps.actionSlotType[slota] = ACTIONSLOTTYPE_DONOTHING;
@@ -3592,6 +3554,97 @@ void __cdecl PlayerCmd_SetRank(scr_entref_t entref)
         Scr_Error(v2);
     }
 }
+
+const BuiltinMethodDef methods[83] =
+{
+  { "giveweapon", &PlayerCmd_giveWeapon, 0 },
+  { "takeweapon", &PlayerCmd_takeWeapon, 0 },
+  { "takeallweapons", &PlayerCmd_takeAllWeapons, 0 },
+  { "getcurrentweapon", &PlayerCmd_getCurrentWeapon, 0 },
+  { "getcurrentoffhand", &PlayerCmd_getCurrentOffhand, 0 },
+  { "hasweapon", &PlayerCmd_hasWeapon, 0 },
+  { "switchtoweapon", &PlayerCmd_switchToWeapon, 0 },
+  { "switchtooffhand", &PlayerCmd_switchToOffhand, 0 },
+  { "givestartammo", &PlayerCmd_giveStartAmmo, 0 },
+  { "givemaxammo", &PlayerCmd_giveMaxAmmo, 0 },
+  { "getfractionstartammo", &PlayerCmd_getFractionStartAmmo, 0 },
+  { "getfractionmaxammo", &PlayerCmd_getFractionMaxAmmo, 0 },
+  { "setorigin", &PlayerCmd_setOrigin, 0 },
+  { "getvelocity", &PlayerCmd_GetVelocity, 0 },
+  { "setplayerangles", &PlayerCmd_setAngles, 0 },
+  { "getplayerangles", &PlayerCmd_getAngles, 0 },
+  { "usebuttonpressed", &PlayerCmd_useButtonPressed, 0 },
+  { "attackbuttonpressed", &PlayerCmd_attackButtonPressed, 0 },
+  { "adsbuttonpressed", &PlayerCmd_adsButtonPressed, 0 },
+  { "meleebuttonpressed", &PlayerCmd_meleeButtonPressed, 0 },
+  { "fragbuttonpressed", &PlayerCmd_fragButtonPressed, 0 },
+  {
+    "secondaryoffhandbuttonpressed",
+    &PlayerCmd_secondaryOffhandButtonPressed,
+    0
+  },
+  { "playerads", &PlayerCmd_playerADS, 0 },
+  { "isonground", &PlayerCmd_isOnGround, 0 },
+  { "pingplayer", &PlayerCmd_pingPlayer, 0 },
+  { "setviewmodel", &PlayerCmd_SetViewmodel, 0 },
+  { "getviewmodel", &PlayerCmd_GetViewmodel, 0 },
+  { "setoffhandsecondaryclass", &PlayerCmd_setOffhandSecondaryClass, 0 },
+  { "getoffhandsecondaryclass", &PlayerCmd_getOffhandSecondaryClass, 0 },
+  { "beginlocationselection", &PlayerCmd_BeginLocationSelection, 0 },
+  { "endlocationselection", &PlayerCmd_EndLocationSelection, 0 },
+  { "buttonpressed", &PlayerCmd_buttonPressedDEVONLY, 0 },
+  { "sayall", &PlayerCmd_SayAll, 0 },
+  { "sayteam", &PlayerCmd_SayTeam, 0 },
+  { "showscoreboard", &PlayerCmd_showScoreboard, 0 },
+  { "setspawnweapon", &PlayerCmd_setSpawnWeapon, 0 },
+  { "dropitem", &PlayerCmd_dropItem, 0 },
+  { "finishplayerdamage", &PlayerCmd_finishPlayerDamage, 0 },
+  { "suicide", &PlayerCmd_Suicide, 0 },
+  { "openmenu", &PlayerCmd_OpenMenu, 0 },
+  { "openmenunomouse", &PlayerCmd_OpenMenuNoMouse, 0 },
+  { "closemenu", &PlayerCmd_CloseMenu, 0 },
+  { "closeingamemenu", &PlayerCmd_CloseInGameMenu, 0 },
+  { "freezecontrols", &PlayerCmd_FreezeControls, 0 },
+  { "disableweapons", &PlayerCmd_DisableWeapons, 0 },
+  { "enableweapons", &PlayerCmd_EnableWeapons, 0 },
+  { "setreverb", &PlayerCmd_SetReverb, 0 },
+  { "deactivatereverb", &PlayerCmd_DeactivateReverb, 0 },
+  { "setchannelvolumes", &PlayerCmd_SetChannelVolumes, 0 },
+  { "deactivatechannelvolumes", &PlayerCmd_DeactivateChannelVolumes, 0 },
+  { "setweaponammoclip", &PlayerCmd_SetWeaponAmmoClip, 0 },
+  { "setweaponammostock", &PlayerCmd_SetWeaponAmmoStock, 0 },
+  { "getweaponammoclip", &PlayerCmd_GetWeaponAmmoClip, 0 },
+  { "getweaponammostock", &PlayerCmd_GetWeaponAmmoStock, 0 },
+  { "anyammoforweaponmodes", &PlayerCmd_AnyAmmoForWeaponModes, 0 },
+  { "iprintln", &iclientprintln, 0 },
+  { "iprintlnbold", &iclientprintlnbold, 0 },
+  { "spawn", &PlayerCmd_spawn, 0 },
+  { "setentertime", &PlayerCmd_setEnterTime, 0 },
+  { "cloneplayer", &PlayerCmd_ClonePlayer, 0 },
+  { "setclientdvar", &PlayerCmd_SetClientDvar, 0 },
+  { "setclientdvars", &PlayerCmd_SetClientDvars, 0 },
+  { "playlocalsound", &ScrCmd_PlayLocalSound, 0 },
+  { "stoplocalsound", &ScrCmd_StopLocalSound, 0 },
+  { "istalking", &PlayerCmd_IsTalking, 0 },
+  { "allowspectateteam", &PlayerCmd_AllowSpectateTeam, 0 },
+  { "getguid", &PlayerCmd_GetGuid, 0 },
+  { "getxuid", &PlayerCmd_GetXuid, 0 },
+  { "allowads", &PlayerCmd_AllowADS, 0 },
+  { "allowjump", &PlayerCmd_AllowJump, 0 },
+  { "allowsprint", &PlayerCmd_AllowSprint, 0 },
+  { "setspreadoverride", &PlayerCmd_SetSpreadOverride, 0 },
+  { "resetspreadoverride", &PlayerCmd_ResetSpreadOverride, 0 },
+  { "setactionslot", &PlayerCmd_SetActionSlot, 0 },
+  { "getweaponslist", &PlayerCmd_GetWeaponsList, 0 },
+  { "getweaponslistprimaries", &PlayerCmd_GetWeaponsListPrimaries, 0 },
+  { "setperk", &PlayerCmd_SetPerk, 0 },
+  { "hasperk", &PlayerCmd_HasPerk, 0 },
+  { "clearperks", &PlayerCmd_ClearPerks, 0 },
+  { "unsetperk", &PlayerCmd_UnsetPerk, 0 },
+  { "updatescores", &PlayerCmd_UpdateScores, 0 },
+  { "updatedmscores", &PlayerCmd_UpdateDMScores, 0 },
+  { "setrank", &PlayerCmd_SetRank, 0 }
+}; // idb
 
 void(__cdecl *__cdecl Player_GetMethod(const char **pName))(scr_entref_t)
 {

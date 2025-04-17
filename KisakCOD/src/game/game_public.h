@@ -572,7 +572,7 @@ gentity_s *__cdecl Weapon_RocketLauncher_Fire(
     gentity_s *ent,
     unsigned int weaponIndex,
     float spread,
-    weaponParms *wp,
+    struct weaponParms *wp,
     const float *gunVel,
     gentity_s *target,
     const float *targetOffset);

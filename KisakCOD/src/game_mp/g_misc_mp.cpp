@@ -1,4 +1,10 @@
 #include "g_public_mp.h"
+#include "g_utils_mp.h"
+#include <server/sv_world.h>
+#include <script/scr_vm.h>
+#include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
+#include <game/bullet.h>
 
 
 
@@ -32,7 +38,7 @@ void __cdecl SP_light(gentity_s *self)
                 "self->s.index.primaryLight == primaryLightIndex\n\t%i, %i",
                 self->s.index.brushmodel,
                 primaryLightIndex);
-        self->s.lerp.u.turret.gunAngles[1] = ColorNormalize(light->color, normalizedColor);
+        self->s.lerp.u.turret.gunAngles[1] = ColorNormalize((float*)light->color, normalizedColor);
         Byte4PackRgba(normalizedColor, (unsigned __int8 *)&self->s.lerp.u);
         self->s.lerp.u.primaryLight.colorAndExp[3] = light->exponent;
         self->s.lerp.u.turret.gunAngles[2] = light->radius;
@@ -150,6 +156,8 @@ void __cdecl TeleportPlayer(gentity_s *player, float *origin, float *angles)
     if (linked)
         SV_LinkEntity(player);
 }
+
+turretInfo_s turretInfo[32];
 
 void __cdecl G_InitTurrets()
 {
@@ -420,7 +428,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                 if (!numVertChildren)
                 {
                     AnimDebugName = XAnimGetAnimDebugName(pXAnims, baseAnim);
-                    Com_Error(ERR_DROP, &byte_86CEEC, AnimDebugName);
+                    Com_Error(ERR_DROP, "Player anim %s has no children", AnimDebugName);
                 }
                 i = 0;
                 do
@@ -430,7 +438,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                     if (!numHorChildren)
                     {
                         v3 = XAnimGetAnimDebugName(pXAnims, heightAnim);
-                        Com_Error(ERR_DROP, &byte_86CEEC, v3);
+                        Com_Error(ERR_DROP, "Player anim %s has no children", v3);
                     }
                     fBlend = (double)numHorChildren * 0.5 + localYaw / weapDef->fAnimHorRotateInc;
                     if (fBlend >= 0.0)
@@ -510,7 +518,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                 end[2] = client->ps.origin[2];
                 start[2] = start[2] + ent->client->ps.viewHeightCurrent;
                 end[2] = end[2] - 60.0;
-                G_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ent->s.number, (int)&off_810011);
+                G_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ent->s.number, 0x810011);
                 if (trace.fraction < 1.0)
                 {
                     Vec3Lerp(start, end, trace.fraction, endpos);
@@ -654,7 +662,7 @@ void __cdecl Turret_FillWeaponParms(gentity_s *ent, gentity_s *activator, weapon
     if (!G_DObjGetWorldTagMatrix(ent, scr_const.tag_flash, flashTag))
     {
         v3 = SL_ConvertToString(ent->classname);
-        Com_Error(ERR_DROP, &byte_889934, "tag_flash", ent->s.number, v3);
+        Com_Error(ERR_DROP, "Couldn't find %s on turret (entity %d, classname %s )", "tag_flash", ent->s.number, v3);
     }
     if (!activator->client)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 137, 0, "%s", "activator->client");
@@ -824,6 +832,15 @@ LABEL_29:
     self->s.lerp.u.turret.gunAngles[2] = self->s.lerp.u.turret.gunAngles[2] - self->s.lerp.u.turret.gunAngles[0];
     return bComplete;
 }
+
+unsigned __int8 bulletPriorityMap[] =
+{
+    0x3030301,
+    0x3030303,
+    0x3030303,
+    0x3030303,
+    0x303
+};
 
 void __cdecl turret_think_init(gentity_s *self)
 {
@@ -1123,14 +1140,14 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
             break;
     }
     if (i == 32)
-        Com_Error(ERR_DROP, &byte_889B08, 32);
+        Com_Error(ERR_DROP, "G_SpawnTurret: max number of turrets (%d) exceeded", 32);
     memset((unsigned __int8 *)pTurretInfo, 0, sizeof(turretInfo_s));
     self->pTurretInfo = pTurretInfo;
     pTurretInfo->inuse = 1;
     self->s.weapon = G_GetWeaponIndexForName(weaponinfoname);
     self->s.weaponModel = 0;
     if (!self->s.weapon)
-        Com_Error(ERR_DROP, &byte_889ADC, weaponinfoname);
+        Com_Error(ERR_DROP, "bad weaponinfo ',27h,'%s',27h,' specified for turret", weaponinfoname);
     weapDef = BG_GetWeaponDef(self->s.weapon);
     if (weapDef->weapClass != WEAPCLASS_TURRET)
     {
@@ -1227,7 +1244,7 @@ void __cdecl SP_turret(gentity_s *self)
     const char *weaponinfoname; // [esp+0h] [ebp-4h] BYREF
 
     if (!G_LevelSpawnString("weaponinfo", "", &weaponinfoname))
-        Com_Error(ERR_DROP, &byte_889B3C);
+        Com_Error(ERR_DROP, "no weaponinfo specified for turret");
     G_SpawnTurret(self, weaponinfoname);
 }
 

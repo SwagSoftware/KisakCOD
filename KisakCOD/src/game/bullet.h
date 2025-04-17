@@ -1,5 +1,6 @@
 #pragma once
 #include <bgame/bg_local.h>
+#include "bullet.h"
 
 // KISAKTODO: these extern?
 static unsigned __int8 bulletPriorityMap[] = { 1u, 3u, 3u, 3u }; // idb

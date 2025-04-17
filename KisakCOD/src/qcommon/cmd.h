@@ -84,3 +84,5 @@ char __cdecl Cmd_ExecFromDisk(int localClientNum, int controllerIndex, const cha
 char __cdecl Cmd_ExecFromFastFile(int localClientNum, int controllerIndex, const char *filename);
 
 void __cdecl SV_Cmd_ArgvBuffer(int arg, char *buffer, int bufferLength);
+
+extern CmdArgs sv_cmd_args;

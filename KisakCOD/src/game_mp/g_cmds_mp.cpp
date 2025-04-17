@@ -1,4 +1,8 @@
 #include "g_public_mp.h"
+#include <server/sv_game.h>
+#include <qcommon/cmd.h>
+#include "g_utils_mp.h"
+#include <script/scr_vm.h>
 
 
 void __cdecl SendScoreboard(gentity_s *ent)
@@ -124,6 +128,7 @@ int __cdecl CheatsOk(gentity_s *ent)
     }
 }
 
+char line[1024];
 char *__cdecl ConcatArgs(int start)
 {
     unsigned int v1; // kr00_4
@@ -170,7 +175,7 @@ void __cdecl G_setfog(const char *fogstring)
     float fNear; // [esp+14h] [ebp-8h] BYREF
     int time; // [esp+18h] [ebp-4h] BYREF
 
-    SV_SetConfigstring(9, fogstring);
+    SV_SetConfigstring(9, (char*)fogstring);
     level.fFogOpaqueDist = 3.4028235e38;
     level.fFogOpaqueDistSqrd = 3.4028235e38;
     if (sscanf(fogstring, "%f %f %f %f %f %f %i", &fNear, &fFar, &fDensity, clr, &clr[1], &clr[2], &time) == 7
@@ -571,7 +576,7 @@ void __cdecl StopFollowing(gentity_s *ent)
         vMaxs[0] = 8.0;
         vMaxs[1] = 8.0;
         vMaxs[2] = 8.0;
-        G_TraceCapsule(&trace, vPos, vMins, vMaxs, vEnd, 1023, (int)&off_810011);
+        G_TraceCapsule(&trace, vPos, vMins, vMaxs, vEnd, 1023, 0x810011);
         Vec3Lerp(vPos, vEnd, trace.fraction, vPos);
         client->ps.clientNum = ent - g_entities;
         client->ps.eFlags &= 0xFFFFFCFF;
@@ -602,7 +607,7 @@ int __cdecl Cmd_FollowCycle_f(gentity_s *ent, int dir)
     playerState_s ps; // [esp+70h] [ebp-2F70h] BYREF
 
     if (dir != 1 && dir != -1)
-        Com_Error(ERR_DROP, &byte_885A2C, dir);
+        Com_Error(ERR_DROP, "Cmd_FollowCycle_f: bad dir %i", dir);
     if (!ent->client)
         MyAssertHandler(".\\game_mp\\g_cmds_mp.cpp", 793, 0, "%s", "ent->client");
     if (ent->client->sess.sessionState != SESS_STATE_SPECTATOR)
@@ -745,29 +750,30 @@ void __cdecl G_SayTo(
         }
         if (ent->client->sess.cs.team == TEAM_SPECTATOR)
         {
-            Com_sprintf(szStateString, 0x40u, &byte_885B28);
+            // KISAKTODO: cleaner strings here
+            Com_sprintf(szStateString, 0x40u, (const char*)"\x15\x28\x14\x47\x41\x4d\x45\x5f\x53\x50\x45\x43\x54\x41\x54\x4f\x52\x15\x29");
         }
         else if (ent->client->sess.sessionState)
         {
-            Com_sprintf(szStateString, 0x40u, &byte_885B14, team_color);
+            Com_sprintf(szStateString, 0x40u, (const char*)"\x15\x25\x73\x28\x14\x47\x41\x4d\x45\x5f\x44\x45\x41\x44\x15\x29", team_color);
         }
         else
         {
-            Com_sprintf(szStateString, 0x40u, off_8572F4, team_color);
+            Com_sprintf(szStateString, 0x40u, (const char*)"\x15\x25\x73\x0", team_color);
         }
         if (mode == 1)
         {
-            Com_sprintf(name, 0x80u, aS_43, szStateString, teamString, cleanname, a7);
+            Com_sprintf(name, 0x80u, (const char*)"%s(\x14\x25\x73\x15\x29\x25\x73\x25\x73\x3a\x20", szStateString, teamString, cleanname, "^7");
         }
         else if (mode == 2)
         {
-            Com_sprintf(name, 0x80u, "%s[%s]%s: ", szStateString, cleanname, a7);
+            Com_sprintf(name, 0x80u, "%s[%s]%s: ", szStateString, cleanname, "^7");
         }
         else
         {
-            Com_sprintf(name, 0x80u, "%s%s%s: ", szStateString, cleanname, a7);
+            Com_sprintf(name, 0x80u, "%s%s%s: ", szStateString, cleanname, "^7");
         }
-        v7 = va(aC_12, (char)((mode == 1) + 104), name, 94, color, message);
+        v7 = va("%c \"\x15\x25\x73\x25\x63\x25\x63\x25\x73\x22", (char)((mode == 1) + 104), name, 94, color, message);
         SV_GameSendServerCommand(other - g_entities, SV_CMD_CAN_IGNORE, v7);
     }
 }
@@ -778,7 +784,7 @@ void __cdecl Cmd_Where_f(gentity_s *ent)
     const char *v2; // eax
 
     v1 = vtos(ent->r.currentOrigin);
-    v2 = va(aC_8, 101, v1);
+    v2 = va("%c \"\x15\x25\x73\x0a\x22", 101, v1);
     SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v2);
 }
 
@@ -817,6 +823,14 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     int i; // [esp+254h] [ebp-10Ch]
     char arg3[260]; // [esp+258h] [ebp-108h] BYREF
 
+    const char aCGameCalledavo[] = "%c \"GAME_CALLEDAVOTE"; // idb
+    const char aGameVoteKick[] = "GAME_VOTE_KICK"; // idb
+    const char aGameVoteGamety[] = "GAME_VOTE_GAMETYPE"; // idb
+    const char aGameVoteMap[] = "GAME_VOTE_MAP"; // idb
+    const char aGameVoteGamety_0[] = "GAME_VOTE_GAMETYPE"; // idb
+
+    const char aC_7[] = "%c \""; // idb
+
     if (!g_allowVote->current.enabled)
     {
         v1 = va("%c \"GAME_VOTINGNOTENABLED\"", 101);
@@ -853,8 +867,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     SV_Cmd_ArgvBuffer(1, arg1, 256);
     SV_Cmd_ArgvBuffer(2, arg2, 256);
     SV_Cmd_ArgvBuffer(3, arg3, 256);
-    strchr((unsigned __int8 *)arg1, 0x3Bu);
-    if (v6 || (strchr((unsigned __int8 *)arg2, 0x3Bu), v7) || (strchr((unsigned __int8 *)arg3, 0x3Bu), v8))
+    if (strchr(arg1, 0x3Bu) || (strchr(arg2, 0x3Bu), v7) || (strchr(arg3, 0x3Bu), v8))
     {
         v9 = va("%c \"GAME_INVALIDVOTESTRING\"", 101);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v9);
@@ -877,6 +890,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     {
         v10 = va("%c \"GAME_INVALIDVOTESTRING\"", 101);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v10);
+        const char aCGameVotecomma[] = "%c \"GAME_VOTECOMMANDSARE"; // idb
         v11 = va(aCGameVotecomma, 101);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v11);
         return;
@@ -1080,7 +1094,7 @@ void __cdecl Cmd_Vote_f(gentity_s *ent)
         }
         else
         {
-            Scr_PlayerVote(ent, "yes");
+            Scr_PlayerVote(ent, (char *)"yes");
         }
     }
     else if (g_oldVoting->current.enabled)
@@ -1090,9 +1104,11 @@ void __cdecl Cmd_Vote_f(gentity_s *ent)
     }
     else
     {
-        Scr_PlayerVote(ent, "no");
+        Scr_PlayerVote(ent, (char*)"no");
     }
 }
+
+const char aCGameUsage[] = "%c \"GAME_USAGE"; // idb
 
 void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 {
@@ -1181,6 +1197,8 @@ void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
     Scr_AddString(szMenuName);
     Scr_Notify(pEnt, scr_const.menuresponse, 2u);
 }
+
+const char aCGameUnknowncl[] = "%c \"GAME_UNKNOWNCLIENTCOMMAND"; // idb
 
 void __cdecl ClientCommand(int clientNum)
 {

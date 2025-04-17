@@ -1,4 +1,10 @@
 #include "g_public_mp.h"
+#include <qcommon/mem_track.h>
+#include <script/scr_vm.h>
+#include "g_utils_mp.h"
+#include <server/sv_world.h>
+#include <server_mp/server.h>
+#include <xanim/dobj.h>
 
 
 // unsigned char *bulletPriorityMap  827b4d2c     g_combat_mp.obj
@@ -6,6 +12,31 @@
 // unsigned short **modNames         827b4da0     g_combat_mp.obj
 // float *g_fHitLocDamageMult 82cc4e00     g_combat_mp.obj
 
+
+unsigned __int16 g_HitLocConstNames[19]; // idb
+float g_fHitLocDamageMult[19]; // idb
+const char *g_HitLocNames[19] =
+{
+  "none",
+  "helmet",
+  "head",
+  "neck",
+  "torso_upper",
+  "torso_lower",
+  "right_arm_upper",
+  "left_arm_upper",
+  "right_arm_lower",
+  "left_arm_lower",
+  "right_hand",
+  "left_hand",
+  "right_leg_upper",
+  "left_leg_upper",
+  "right_leg_lower",
+  "left_leg_lower",
+  "right_foot",
+  "left_foot",
+  "gun"
+}; // idb
 
 void __cdecl TRACK_g_combat()
 {
@@ -31,8 +62,8 @@ void __cdecl G_ParseHitLocDmgTable()
         prev = Scr_AllocString((char *)g_HitLocNames[i], 1).prev;
         g_HitLocConstNames[i] = prev;
     }
-    flt_1473A88 = 0.0;
-    pszBuffer = Com_LoadInfoString("info/mp_lochit_dmgtable", "hitloc damage table", "LOCDMGTABLE", loadBuffer);
+    g_fHitLocDamageMult[18] = 0.0;
+    pszBuffer = Com_LoadInfoString((char*)"info/mp_lochit_dmgtable", "hitloc damage table", "LOCDMGTABLE", loadBuffer);
     if (!ParseConfigStringToStruct(
         (unsigned __int8 *)g_fHitLocDamageMult,
         pFieldList,
@@ -41,7 +72,7 @@ void __cdecl G_ParseHitLocDmgTable()
         0,
         0,
         BG_StringCopy))
-        Com_Error(ERR_DROP, &byte_886178, "info/mp_lochit_dmgtable");
+        Com_Error(ERR_DROP, "Error parsing hitloc damage table %s", "info/mp_lochit_dmgtable");
 }
 
 void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *attacker)
@@ -395,7 +426,7 @@ void __cdecl G_Damage(
                 DamageNotify(scr_const.damage, targ, attacker, dir, point, damage, mod, dFlags, modelIndex, partName);
                 if (targ->health > 0)
                 {
-                    pain = (void(__cdecl *)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int))dword_94672C[10 * targ->handler];
+                    pain = entityHandlers[targ->handler].pain;
                     if (pain)
                         pain(targ, attacker, damage, point, mod, localdir, hitLoc, weapon);
                 }
@@ -405,7 +436,7 @@ void __cdecl G_Damage(
                         targ->health = -999;
                     Scr_AddEntity(attacker);
                     Scr_Notify(targ, scr_const.death, 1u);
-                    die = (void(__cdecl *)(gentity_s *, gentity_s *, gentity_s *, int, int, const int, const float *, const hitLocation_t, int))dword_946730[10 * targ->handler];
+                    die = entityHandlers[targ->handler].die;
                     if (die)
                         die(targ, inflictor, attacker, damage, mod, weapon, localdir, hitLoc, timeOffset);
                 }
@@ -432,7 +463,7 @@ void __cdecl DamageNotify(
     if (partName)
         Scr_AddConstString(partName);
     else
-        Scr_AddString((char *)&String);
+        Scr_AddString((char *)"");
     if (modelIndex)
     {
         if (!targ->attachModelNames[modelIndex + 18])
@@ -445,8 +476,8 @@ void __cdecl DamageNotify(
     }
     else
     {
-        Scr_AddString((char *)&String);
-        Scr_AddString((char *)&String);
+        Scr_AddString((char *)"");
+        Scr_AddString((char *)"");
     }
     Scr_AddConstString(*modNames[mod]);
     if (point)
@@ -939,7 +970,7 @@ int __cdecl G_RadiusDamage(
             {
                 v12 = sqrt(RadiusDamageDistanceSquared);
                 v17 = v12;
-                v24 = CanDamage(ent, inflictor, origin, coneAngleCos, coneDirection, (int)&loc_80200B + 6);
+                v24 = CanDamage(ent, inflictor, origin, coneAngleCos, coneDirection, 0x802011);
                 if (v24 > 0.0)
                 {
                     if (LogAccuracyHit(ent, attacker))

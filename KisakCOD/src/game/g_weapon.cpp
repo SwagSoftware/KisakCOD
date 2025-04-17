@@ -3,9 +3,9 @@
 #include <server/sv_world.h>
 #include <game_mp/g_utils_mp.h>
 #include <DynEntity/DynEntity_client.h>
-#include "bullet.h"
 #include <script/scr_const.h>
 #include <server/sv_game.h>
+#include "bullet.h"
 
 
 void __cdecl G_AntiLagRewindClientPos(int gameTime, AntilagClientStore *antilagStore)

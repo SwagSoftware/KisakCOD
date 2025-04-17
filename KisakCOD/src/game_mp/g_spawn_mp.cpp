@@ -38,6 +38,16 @@ void __cdecl Scr_ReadOnlyField()
     Scr_Error("Tried to set a read only entity field");
 }
 
+const SpawnFuncEntry s_bspOrDynamicSpawns[6] =
+{
+  { "info_notnull", &SP_info_notnull },
+  { "info_notnull_big", &SP_info_notnull },
+  { "trigger_radius", &SP_trigger_radius },
+  { "script_model", &SP_script_model },
+  { "script_origin", &SP_script_origin },
+  { "script_vehicle_collmap", &G_VehCollmapSpawner }
+}; // idb
+
 int __cdecl G_CallSpawnEntity(gentity_s *ent)
 {
     const gitem_s *item; // [esp+0h] [ebp-Ch]
@@ -108,6 +118,29 @@ void(__cdecl *__cdecl G_FindSpawnFunc(
     }
     return 0;
 }
+
+struct ent_field_t // sizeof=0x10
+{                                       // ...
+    const char *name;
+    int ofs;
+    fieldtype_t type;
+    void(__cdecl *callback)(gentity_s *, int);
+};
+
+const ent_field_t fields_1[11] =
+{
+  { "classname", 368, F_STRING, &Scr_ReadOnlyField },
+  { "origin", 316, F_VECTOR, &Scr_SetOrigin },
+  { "model", 360, F_MODEL, &Scr_ReadOnlyField },
+  { "spawnflags", 380, F_INT, &Scr_ReadOnlyField },
+  { "target", 370, F_STRING, NULL },
+  { "targetname", 372, F_STRING, NULL },
+  { "count", 428, F_INT, NULL },
+  { "health", 416, F_INT, &Scr_SetHealth },
+  { "dmg", 424, F_INT, NULL },
+  { "angles", 328, F_VECTOR, &Scr_SetAngles },
+  { NULL, 0, F_INT, NULL }
+}; // idb
 
 void __cdecl GScr_AddFieldsForEntity()
 {
