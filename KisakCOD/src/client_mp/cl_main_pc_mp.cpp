@@ -4,7 +4,9 @@
 #include <sound/snd_public.h>
 #include <server_mp/server.h>
 #include <client/client.h>
+#include <cgame_mp/cg_local_mp.h>
 
+bool s_playerMute[64];
 
 void __cdecl CL_SetServerInfoByAddress(netadr_t from, char *info, __int16 ping)
 {
@@ -125,11 +127,11 @@ void __cdecl CL_SetServerInfo(serverInfo_t *server, char *info, __int16 ping)
 
 void __cdecl CL_ServerInfoPacket(netadr_t from, msg_t *msg, int time)
 {
-    char *v3; // eax
-    char *v4; // eax
+    const char *v3; // eax
+    const char *v4; // eax
     const char *v5; // eax
     char *String; // eax
-    char *v7; // eax
+    const char *v7; // eax
     int v8; // [esp+24h] [ebp-424h]
     int prot; // [esp+2Ch] [ebp-41Ch]
     char info[1028]; // [esp+30h] [ebp-418h] BYREF
@@ -230,7 +232,8 @@ void __cdecl CL_Connect_f()
 
     if (Cmd_Argc() >= 2)
     {
-        if (MEMORY[0xE7A7CC][0] < 3 || Cmd_Argc() == 3 && (v0 = Cmd_Argv(2), !I_stricmp(v0, "reconnect")))
+        if (clientUIActives[0].connectionState < CA_CONNECTING
+            || Cmd_Argc() == 3 && (v0 = Cmd_Argv(2), !I_stricmp(v0, "reconnect")))
         {
             SND_StopSounds(SND_STOP_ALL);
             CL_GetLocalClientGlobals(0);
@@ -265,15 +268,15 @@ void __cdecl CL_Connect_f()
                     {
                         if (NET_IsLocalAddress(clc->serverAddress))
                         {
-                            MEMORY[0xE7A7CC][0] = 4;
+                            clientUIActives[0].connectionState = CA_CHALLENGING;
                             clc->lastPacketTime = Sys_Milliseconds();
                         }
                         else
                         {
-                            MEMORY[0xE7A7CC][0] = 3;
+                            clientUIActives[0].connectionState = CA_CONNECTING;
                         }
-                        MEMORY[0xE7A7C4][0] = 0;
-                        MEMORY[0xE7A7C8] = 0;
+                        clientUIActives[0].keyCatchers = 0;
+                        clientUIActives[0].displayHUDWithKeycatchUI = 0;
                         clc->connectTime = -99999;
                         clc->connectPacketCount = 0;
                         clc->qport = g_qport;
@@ -294,7 +297,7 @@ void __cdecl CL_Connect_f()
             else
             {
                 Com_Printf(0, "Bad server address\n");
-                MEMORY[0xE7A7CC][0] = 0;
+                clientUIActives[0].connectionState = CA_DISCONNECTED;
             }
         }
         else

@@ -5,6 +5,7 @@
 #include <qcommon/mem_track.h>
 #include "q_shared.h"
 #include <qcommon/qcommon.h>
+#include <win32/win_local.h>
 
 PhysicalMemory g_mem;
 int g_overAllocatedSize;

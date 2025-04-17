@@ -4,6 +4,7 @@
 #include <sound/snd_local.h>
 #include "com_files.h"
 #include <qcommon/cmd.h>
+#include <database/database.h>
 
 SoundAliasGlobals g_sa;
 const char ***varXStringPtr;
@@ -394,6 +395,138 @@ bool __cdecl Com_AliasNameRefersToSingleAlias(const char *aliasname)
     return aliasList && aliasList->count == 1;
 }
 
+void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCurGame, const char *sourceFile)
+{
+    int bHasName; // [esp+4h] [ebp-620h]
+    int bHasFile; // [esp+8h] [ebp-61Ch]
+    char filename[64]; // [esp+Ch] [ebp-618h] BYREF
+    char *file; // [esp+4Ch] [ebp-5D8h] BYREF
+    const char *ptr[257]; // [esp+50h] [ebp-5D4h] BYREF
+    snd_alias_build_s alias; // [esp+454h] [ebp-1D0h] BYREF
+    const char *token; // [esp+5F4h] [ebp-30h]
+    int i; // [esp+5F8h] [ebp-2Ch]
+    char isFieldSet[32]; // [esp+5FCh] [ebp-28h] BYREF
+    int iColCount; // [esp+620h] [ebp-4h]
+
+    memset((unsigned __int8 *)&alias, 0, sizeof(alias));
+    Com_sprintf(filename, 0x40u, "soundaliases/%s", sourceFile);
+    if (FS_ReadFile(filename, (void **)&file) >= 0)
+    {
+        if (!saLoadObjGlob.volumeModGroupsInitialized)
+        {
+            if (!saLoadObjGlob.refreshVolumeModGroupsCommandInitialized)
+            {
+                Cmd_AddCommandInternal(
+                    "snd_refreshVolumeModGroups",
+                    Com_RefreshVolumeModGroups_f,
+                    &Com_RefreshVolumeModGroups_f_VAR);
+                saLoadObjGlob.refreshVolumeModGroupsCommandInitialized = 1;
+            }
+            Com_LoadVolumeModGroups(saLoadObjGlob.volumeModGroups);
+            saLoadObjGlob.volumeModGroupsInitialized = 1;
+        }
+        Com_BeginParseSession(filename);
+        Com_SetCSV(1);
+        ptr[0] = file;
+        iColCount = 0;
+        while (1)
+        {
+            token = (const char *)Com_Parse(ptr);
+            if (!ptr[0])
+                break;
+            if (*token && *token != 35)
+            {
+                if (iColCount)
+                {
+                    memset(isFieldSet, 0, 29);
+                    Com_LoadSoundAliasDefaults(&alias, sourceFile, loadspec);
+                    i = 0;
+                    while (1)
+                    {
+                        if (*token)
+                            Com_LoadSoundAliasField(
+                                loadspec,
+                                loadspecCurGame,
+                                sourceFile,
+                                (char *)token,
+                                (snd_alias_members_t)ptr[i + 1],
+                                isFieldSet,
+                                &alias);
+                        if (++i == iColCount)
+                            break;
+                        token = (const char *)Com_ParseOnLine(ptr);
+                    }
+                    if (!isFieldSet[1] || !isFieldSet[3])
+                    {
+                        if (saLoadObjGlob.tempAliases)
+                            Com_PrintError(
+                                9,
+                                "ERROR: Sound alias file '%s': alias entry missing name and/or file. Error details:\n"
+                                "\talias name: '%s', sound file: '%s', previous alias in file: '%s'\n",
+                                sourceFile,
+                                alias.aliasName,
+                                alias.soundFile,
+                                saLoadObjGlob.tempAliases->aliasName);
+                        else
+                            Com_PrintError(
+                                9,
+                                "ERROR: Sound alias file '%s': alias entry missing name and/or file. Error details:\n"
+                                "\talias name: '%s', sound file: '%s', previous alias in file: '%s'\n",
+                                sourceFile,
+                                alias.aliasName,
+                                alias.soundFile,
+                                &String);
+                        break;
+                    }
+                    if (!isFieldSet[16])
+                        alias.keep = Com_SoundAliasLoadSpec(loadspec, loadspecCurGame, &String, sourceFile);
+                    if (alias.keep && !alias.error && Com_FinishBuildingSoundAlias(&alias))
+                        Com_AddBuildSoundAlias(&alias);
+                }
+                else
+                {
+                    bHasName = 0;
+                    bHasFile = 0;
+                    while (2)
+                    {
+                        ptr[iColCount + 1] = 0;
+                        for (i = 1; i < 29; ++i)
+                        {
+                            if (!I_stricmp(g_pszSndAliasKeyNames[i], token))
+                            {
+                                ptr[iColCount + 1] = (const char *)i;
+                                if (i == 1)
+                                {
+                                    bHasName = 1;
+                                }
+                                else if (i == 3)
+                                {
+                                    bHasFile = 1;
+                                }
+                                break;
+                            }
+                        }
+                        if (++iColCount != 256 && ptr[0] && *ptr[0] != 10)
+                        {
+                            token = (const char *)Com_ParseOnLine(ptr);
+                            continue;
+                        }
+                        break;
+                    }
+                    if (!bHasName || !bHasFile)
+                    {
+                        Com_PrintError(9, "ERROR: Sound alias file %s: missing 'name' and/or 'file' columns\n", sourceFile);
+                        Com_EndParseSession();
+                        return;
+                    }
+                }
+            }
+            Com_SkipRestOfLine(ptr);
+        }
+        Com_EndParseSession();
+    }
+}
+
 void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurGame, snd_alias_system_t system)
 {
     char *v3; // ecx
@@ -522,5 +655,89 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
                 Com_Error((errorParm_t)(system != SASYS_UI), v4);
             }
         }
+    }
+}
+
+void __cdecl Com_UnloadSoundAliasSounds(snd_alias_system_t system)
+{
+    int j; // [esp+4h] [ebp-Ch]
+    int i; // [esp+8h] [ebp-8h]
+    snd_alias_t *aliases; // [esp+Ch] [ebp-4h]
+
+    if ((unsigned int)system > SASYS_CGAME)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            828,
+            0,
+            "%s\n\t(system) = %i",
+            "(system == SASYS_UI || system == SASYS_CGAME)",
+            system);
+    SND_StopSounds(SND_STOP_ALL);
+    aliases = (snd_alias_t *)*(&g_sa.soundFileInfo[-4].count + 3 * system);
+    for (i = 0; i < g_sa.aliasInfo[system].count; ++i)
+    {
+        if ((aliases[i].flags & 0xC0) >> 6 == 1)
+        {
+            for (j = 0;
+                j < i
+                && (aliases[j].soundFile != aliases[i].soundFile
+                    || (aliases[j].flags & 0xC0) >> 6 != (aliases[i].flags & 0xC0) >> 6);
+                    ++j)
+            {
+                ;
+            }
+            aliases[i].soundFile->exists = 0;
+        }
+    }
+}
+
+void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system)
+{
+    if ((unsigned int)system > SASYS_GAME)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            1019,
+            0,
+            "%s\n\t(system) = %i",
+            "(system >= 0 && system < SASYS_COUNT)",
+            system);
+    if (g_sa.initialized[system])
+    {
+        if (system != SASYS_GAME)
+            Com_UnloadSoundAliasSounds(system);
+        if (system == SASYS_UI && g_sa.initialized[1])
+            MyAssertHandler(
+                ".\\universal\\com_sndalias.cpp",
+                1032,
+                0,
+                "%s",
+                "system != SASYS_UI || !g_sa.initialized[SASYS_CGAME]");
+        if (system == SASYS_GAME && g_sa.initialized[1])
+            MyAssertHandler(
+                ".\\universal\\com_sndalias.cpp",
+                1033,
+                0,
+                "%s",
+                "system != SASYS_GAME || !g_sa.initialized[SASYS_CGAME]");
+        if (*(&g_sa.soundFileInfo[-4].count + 3 * system))
+        {
+            *(&g_sa.soundFileInfo[-4].count + 3 * system) = 0;
+            g_sa.aliasInfo[system].count = 0;
+            memset((unsigned __int8 *)g_sa.hash, 0, 4 * g_sa.hashSize);
+            g_sa.hashUsed = 0;
+        }
+        else if (g_sa.aliasInfo[system].count)
+        {
+            MyAssertHandler(
+                ".\\universal\\com_sndalias.cpp",
+                1049,
+                0,
+                "%s\n\t(g_sa.aliasInfo[system].count) = %i",
+                "(g_sa.aliasInfo[system].count == 0)",
+                g_sa.aliasInfo[system].count);
+        }
+        g_sa.initialized[system] = 0;
+        if ((unsigned int)system <= SASYS_CGAME && !g_sa.initialized[1] && !g_sa.initialized[0])
+            Cmd_RemoveCommand("snd_list");
     }
 }

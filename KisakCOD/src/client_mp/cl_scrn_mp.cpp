@@ -1,6 +1,19 @@
 #include "client_mp.h"
 
 #include <client/client.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include <win32/win_local.h>
+#include <qcommon/threads.h>
+#include <sound/snd_public.h>
+#include <gfx_d3d/r_dvars.h>
+#include <gfx_d3d/r_reflection_probe.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
+#include <devgui/devgui.h>
+#include <universal/com_files.h>
+#include <qcommon/cmd.h>
+#include <gfx_d3d/r_screenshot.h>
+#include <qcommon/qcommon.h>
 
 int scr_initialized;
 BOOL updateScreenCalled;
@@ -86,8 +99,8 @@ void SCR_UpdateFrame()
 
 int __cdecl CL_CGameRendering(int localClientNum)
 {
-    bool DemoType; // eax
-    bool v3; // [esp-4h] [ebp-Ch]
+    BOOL demType; // eax
+    BOOL v3; // [esp-4h] [ebp-Ch]
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
 
     if (localClientNum)
@@ -98,13 +111,13 @@ int __cdecl CL_CGameRendering(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] != 9)
+    if (clientUIActives[0].connectionState != CA_ACTIVE)
         return 0;
     R_BeginClientCmdList2D();
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     v3 = UI_IsFullscreen(localClientNum) == 0;
-    DemoType = CL_GetDemoType();
-    if (CG_DrawActiveFrame(localClientNum, LocalClientGlobals->serverTime, (DemoType)DemoType, CUBEMAPSHOT_NONE, 0, v3))
+    demType = CL_GetDemoType();
+    if (CG_DrawActiveFrame(localClientNum, LocalClientGlobals->serverTime, (DemoType)demType, CUBEMAPSHOT_NONE, 0, v3))
     {
         if (localClientNum)
             MyAssertHandler(
@@ -114,7 +127,7 @@ int __cdecl CL_CGameRendering(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if ((MEMORY[0xE7A7C4][0] & 0x10) != 0)
+        if ((clientUIActives[0].keyCatchers & 0x10) != 0)
         {
             UI_UpdateTime(localClientNum, cls.realtime);
             UI_Refresh(localClientNum);
@@ -129,9 +142,9 @@ int __cdecl CL_CGameRendering(int localClientNum)
     }
 }
 
-bool __cdecl CL_GetDemoType()
+DemoType __cdecl CL_GetDemoType()
 {
-    return CL_GetLocalClientConnection(0)->demoplaying != 0;
+    return (DemoType)(CL_GetLocalClientConnection(0)->demoplaying != 0);
 }
 
 void __cdecl CL_DrawScreen(int localClientNum)
@@ -146,11 +159,11 @@ void __cdecl CL_DrawScreen(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (MEMORY[0xE7A7CC][0] == 9)
+        if (clientUIActives[0].connectionState == CA_ACTIVE)
         {
-            //Profile_Begin(345);
+            Profile_Begin(345);
             CG_DrawFullScreenDebugOverlays(localClientNum);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             CG_DrawUpperRightDebugInfo(localClientNum);
         }
         R_AddCmdDrawProfile();
@@ -179,7 +192,7 @@ void __cdecl SCR_DrawScreenField(int localClientNum, int refreshedUI)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    clcState = MEMORY[0xE7A7CC][0];
+    clcState = clientUIActives[0].connectionState;
     if (!UI_IsFullscreen(localClientNum))
     {
         switch (clcState)
@@ -238,7 +251,7 @@ void __cdecl SCR_DrawScreenField(int localClientNum, int refreshedUI)
     else if (clcState != CA_ACTIVE)
     {
     LABEL_23:
-        Com_Error(ERR_FATAL, &byte_877AB8);
+        Com_Error(ERR_FATAL, "SCR_DrawScreenField: bad clcState");
     }
 LABEL_26:
     if (!refreshedUI && Key_IsCatcherActive(localClientNum, 16))
@@ -284,6 +297,37 @@ void __cdecl SCR_UpdateLoadScreen()
         SCR_UpdateScreen();
 }
 
+const char *WeaponStateNames_65[27] =
+{
+  "WEAPON_READY",
+  "WEAPON_RAISING",
+  "WEAPON_RAISING_ALTSWITCH",
+  "WEAPON_DROPPING",
+  "WEAPON_DROPPING_QUICK",
+  "WEAPON_FIRING",
+  "WEAPON_RECHAMBERING",
+  "WEAPON_RELOADING",
+  "WEAPON_RELOADING_INTERUPT",
+  "WEAPON_RELOAD_START",
+  "WEAPON_RELOAD_START_INTERUPT",
+  "WEAPON_RELOAD_END",
+  "WEAPON_MELEE_INIT",
+  "WEAPON_MELEE_FIRE",
+  "WEAPON_MELEE_END",
+  "WEAPON_OFFHAND_INIT",
+  "WEAPON_OFFHAND_PREPARE",
+  "WEAPON_OFFHAND_HOLD",
+  "WEAPON_OFFHAND_START",
+  "WEAPON_OFFHAND",
+  "WEAPON_OFFHAND_END",
+  "WEAPON_DETONATING",
+  "WEAPON_SPRINT_RAISE",
+  "WEAPON_SPRINT_LOOP",
+  "WEAPON_SPRINT_DROP",
+  "WEAPON_NIGHTVISION_WEAR",
+  "WEAPON_NIGHTVISION_REMOVE"
+}; // idb
+
 void __cdecl CL_CubemapShot_f()
 {
     const char *v0; // eax
@@ -294,7 +338,7 @@ void __cdecl CL_CubemapShot_f()
     const char *v5; // eax
     const char *v6; // eax
     const char *v7; // eax
-    bool DemoType; // eax
+    bool demType; // eax
     char *v9; // eax
     CubemapShot v10; // [esp-4h] [ebp-98h]
     float v11; // [esp+0h] [ebp-94h]
@@ -383,8 +427,8 @@ LABEL_24:
         R_BeginFrame();
         R_BeginSharedCmdList();
         R_ClearClientCmdList2D();
-        DemoType = CL_GetDemoType();
-        CG_DrawActiveFrame(localClientNum, LocalClientGlobals->serverTime, (DemoType)DemoType, (CubemapShot)shot, size, 1);
+        demType = CL_GetDemoType();
+        CG_DrawActiveFrame(localClientNum, LocalClientGlobals->serverTime, (DemoType)demType, (CubemapShot)shot, size, 1);
         R_EndFrame();
         R_IssueRenderCommands(0xFFFFFFFF);
         R_EndCubemapShot((CubemapShot)shot);
@@ -395,7 +439,7 @@ LABEL_24:
     {
         v12 = n1;
         v11 = n0;
-        v10 = shot;
+        v10 = (CubemapShot)shot;
         v9 = va("env/%s%s.tga", szBaseName, WeaponStateNames_65[shot + 22]);
         R_SaveCubemapShot(v9, v10, v11, v12);
     }

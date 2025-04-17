@@ -331,6 +331,28 @@ extern const dvar_t *sv_mapRotation;
 extern serverStatic_t svs;
 extern int com_inServerFrame;
 
+extern const dvar_t *sv_punkbuster;
+extern const dvar_t *sv_allowAnonymous;
+extern const dvar_t *sv_privatePassword;
+extern const dvar_t *sv_allowDownload;
+extern const dvar_t *sv_iwds;
+extern const dvar_t *sv_iwdNames;
+extern const dvar_t *sv_referencedIwds;
+extern const dvar_t *sv_referencedIwdNames;
+extern const dvar_t *sv_FFCheckSums;
+extern const dvar_t *sv_FFNames;
+extern const dvar_t *sv_referencedFFCheckSums;
+extern const dvar_t *sv_referencedFFNames;
+extern const dvar_t *sv_voice;
+extern const dvar_t *sv_voiceQuality;
+extern const dvar_t *sv_pure;
+extern const dvar_t *rcon_password;
+extern const dvar_t *sv_wwwDownload;
+extern const dvar_t *sv_wwwBaseURL;
+extern const dvar_t *sv_wwwDlDisconnected;
+extern const dvar_t *sv_loadMyChanges;
+extern const dvar_t *sv_clientArchive;
+
 
 // sv_net_chan_mp
 bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan);

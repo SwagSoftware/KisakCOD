@@ -22,12 +22,12 @@ const dvar_s *fs_basegame;
 
 int fs_numServerIwds;
 int fs_serverIwds[1024];
-
 int com_fileAccessed;
 void *g_writeLogEvent;
 int marker_com_files;
 void *g_writeLogCompleteEvent;
 int fs_loadStack;
+const char *fs_serverIwdNames[1024];
 
 static fileHandleData_t fsh[65];
 
@@ -38,6 +38,68 @@ void __cdecl FS_CheckFileSystemStarted()
 {
     if (!fs_searchpaths)
         MyAssertHandler(".\\universal\\com_files.cpp", 708, 0, "%s", "fs_searchpaths");
+}
+
+int __cdecl FS_GetFileOsPath(const char *filename, char *ospath)
+{
+    char sanitizedName[256]; // [esp+0h] [ebp-110h] BYREF
+    directory_t *dir; // [esp+104h] [ebp-Ch]
+    searchpath_s *search; // [esp+108h] [ebp-8h]
+    iobuf *fp; // [esp+10Ch] [ebp-4h]
+
+    if (!filename)
+        MyAssertHandler(".\\universal\\com_files.cpp", 2932, 0, "%s", "filename");
+    if (!ospath)
+        MyAssertHandler(".\\universal\\com_files.cpp", 2933, 0, "%s", "ospath");
+    if (!FS_SanitizeFilename(filename, sanitizedName, 256))
+        return -1;
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (FS_UseSearchPath(search))
+        {
+            if (!search->iwd)
+            {
+                dir = search->dir;
+                FS_BuildOSPathForThread(dir->path, dir->gamedir, sanitizedName, ospath, FS_THREAD_MAIN);
+                fp = FS_FileOpenReadBinary(ospath);
+                if (fp)
+                {
+                    FS_FileClose(fp);
+                    return 0;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+int __cdecl FS_OpenFileOverwrite(char *qpath)
+{
+    DWORD oldAttributes; // [esp+0h] [ebp-10Ch]
+    char ospath[256]; // [esp+4h] [ebp-108h] BYREF
+    unsigned int attributes; // [esp+108h] [ebp-4h]
+
+    FS_CheckFileSystemStarted();
+    if (!qpath)
+        MyAssertHandler(".\\universal\\com_files.cpp", 2971, 0, "%s", "qpath");
+    if (FS_GetFileOsPath(qpath, ospath) >= 0)
+    {
+        if (fs_debug->current.integer)
+            Com_Printf(10, "FS_FOpenFileOverWrite: %s\n", ospath);
+        oldAttributes = GetFileAttributesA(ospath);
+        attributes = oldAttributes & 0xFFFFFFFE;
+        if ((oldAttributes & 0xFFFFFFFE) != oldAttributes)
+            SetFileAttributesA(ospath, attributes);
+        return FS_GetHandleAndOpenFile(qpath, ospath, FS_THREAD_MAIN);
+    }
+    else
+    {
+        Com_Error(
+            ERR_DROP,
+            "FS_FOpenFileOverWrite: Failed to open %s for writing.  It either does not exist or is in a iwd file.",
+            qpath);
+        return 0;
+    }
 }
 
 int __cdecl FS_LoadStack()
@@ -1991,6 +2053,19 @@ const char **__cdecl FS_ListFilesInLocation(
     return FS_ListFilteredFilesInLocation(path, extension, 0, behavior, numfiles, lookInFlags);
 }
 
+char buf[1024];
+char *__cdecl FS_ShiftStr(const char *string, char shift)
+{
+    signed int v2; // kr00_4
+    int i; // [esp+14h] [ebp-4h]
+
+    v2 = strlen(string);
+    for (i = 0; i < v2; ++i)
+        buf[i] = shift + string[i];
+    buf[i] = 0;
+    return buf;
+}
+
 int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
 {
     iobuf *Binary; // eax
@@ -2004,7 +2079,7 @@ int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
     f = FS_HandleForFile(FS_THREAD_MAIN);
     fsh[f].zipFile = 0;
     I_strncpyz(fsh[f].name, filename, 256);
-    FS_BuildOSPath((char *)fs_homepath->current.integer, filename, (char *)"", ospath);
+    FS_BuildOSPath((char *)fs_homepath->current.integer, (char*)filename, (char *)"", ospath);
     v6 = ospath;
     v6 += strlen(v6) + 1;
     ospath[v6 - &ospath[1] - 1] = 0;
@@ -2070,6 +2145,128 @@ int __cdecl FS_SV_FOpenFileWrite(const char *filename)
     if (!fsh[f].handleFiles.file.o)
         return 0;
     return f;
+}
+
+void __cdecl FS_CopyFile(char *fromOSPath, char *toOSPath)
+{
+    unsigned __int8 *buf; // [esp+0h] [ebp-Ch]
+    int len; // [esp+4h] [ebp-8h]
+    iobuf *f; // [esp+8h] [ebp-4h]
+    iobuf *fa; // [esp+8h] [ebp-4h]
+
+    f = FS_FileOpenReadBinary(fromOSPath);
+    if (f)
+    {
+        len = FS_FileGetFileSize(f);
+        buf = (unsigned __int8 *)malloc(len);
+        if (FS_FileRead(buf, len, f) != len)
+            Com_Error(ERR_FATAL, "Short read in FS_CopyFile()");
+        FS_FileClose(f);
+        if (FS_CreatePath(toOSPath) || (fa = FS_FileOpenWriteBinary(toOSPath)) == 0)
+        {
+            free(buf);
+        }
+        else
+        {
+            if (FS_FileWrite(buf, len, fa) != len)
+                Com_Error(ERR_FATAL, "Short write in FS_CopyFile()");
+            FS_FileClose(fa);
+            free(buf);
+        }
+    }
+}
+
+void __cdecl FS_Remove(const char *osPath)
+{
+    remove(osPath);
+}
+
+void __cdecl FS_SV_Rename(char *from, char *to)
+{
+    char *v2; // [esp+1Ch] [ebp-20Ch]
+    char to_ospath[256]; // [esp+20h] [ebp-208h] BYREF
+    char from_ospath[260]; // [esp+120h] [ebp-108h] BYREF
+
+    FS_CheckFileSystemStarted();
+    FS_BuildOSPath((char *)fs_homepath->current.integer, from, (char *)"", from_ospath);
+    FS_BuildOSPath((char *)fs_homepath->current.integer, to, (char *)"", to_ospath);
+    v2 = from_ospath;
+    v2 += strlen(v2) + 1;
+    to_ospath[v2 - &from_ospath[1] + 255] = 0;
+    to_ospath[&to_ospath[strlen(to_ospath) + 1] - &to_ospath[1] - 1] = 0;
+    if (fs_debug->current.integer)
+        Com_Printf(10, "FS_SV_Rename: %s --> %s\n", from_ospath, to_ospath);
+    if (rename(from_ospath, to_ospath))
+    {
+        FS_CopyFile(from_ospath, to_ospath);
+        FS_Remove(from_ospath);
+    }
+}
+
+int __cdecl FS_SV_FileExists(char *file)
+{
+    iobuf *f; // [esp+10h] [ebp-10Ch]
+    char testpath[260]; // [esp+14h] [ebp-108h] BYREF
+
+    FS_BuildOSPath((char *)fs_homepath->current.integer, file, (char *)"", testpath);
+    testpath[&testpath[strlen(testpath) + 1] - &testpath[1] - 1] = 0;
+    f = FS_FileOpenReadBinary(testpath);
+    if (!f)
+        return 0;
+    FS_FileClose(f);
+    return 1;
+}
+
+void __cdecl FS_Restart(int localClientNum, int checksumFeed)
+{
+    const char *v2; // eax
+
+    FS_Shutdown();
+    fs_checksumFeed = checksumFeed;
+    FS_ClearIwdReferences();
+    ProfLoad_Begin("Start file system");
+    FS_Startup("main");
+    ProfLoad_End();
+    ProfLoad_Begin("Init text localization");
+    SEH_Init_StringEd();
+    SEH_UpdateLanguageInfo();
+    ProfLoad_End();
+    ProfLoad_Begin("Set restrictions");
+    FS_SetRestrictions();
+    ProfLoad_End();
+    ProfLoad_Begin("Default config");
+    if (FS_ReadFile("default_mp.cfg", 0) <= 0)
+    {
+        if (lastValidBase[0])
+        {
+            FS_PureServerSetLoadedIwds((char *)&String, (char *)&String);
+            Dvar_SetString((dvar_s *)fs_basepath, lastValidBase);
+            Dvar_SetString((dvar_s *)fs_gameDirVar, lastValidGame);
+            lastValidBase[0] = 0;
+            lastValidGame[0] = 0;
+            Dvar_SetBool((dvar_s *)fs_restrict, 0);
+            FS_Restart(localClientNum, checksumFeed);
+            Com_Error(ERR_DROP, "Invalid game folder\n");
+        }
+        Com_Error(ERR_FATAL, "Couldn't load %s.  Make sure Call of Duty is run from the correct folder.", "default_mp.cfg");
+    }
+    if (I_stricmp(fs_gameDirVar->current.string, lastValidGame) && !Com_SafeMode())
+    {
+        v2 = va("exec %s\n", "config_mp.cfg");
+        Cbuf_AddText(0, v2);
+    }
+    I_strncpyz(lastValidBase, (char *)fs_basepath->current.integer, 256);
+    I_strncpyz(lastValidGame, (char *)fs_gameDirVar->current.integer, 256);
+    ProfLoad_End();
+}
+
+bool __cdecl FS_NeedRestart(int checksumFeed)
+{
+    if (com_sv_running->current.enabled)
+        return 0;
+    if (fs_gameDirVar->modified)
+        return 1;
+    return checksumFeed != fs_checksumFeed;
 }
 
 int __cdecl FS_FOpenFileWriteToDir(char *filename, char *dir)

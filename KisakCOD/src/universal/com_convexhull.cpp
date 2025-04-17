@@ -2,6 +2,7 @@
 #include "com_math.h"
 #include "assertive.h"
 
+#include <cstring> //memmove
 
 unsigned int __cdecl Com_ConvexHull(float (*points)[2], unsigned int pointCount, float (*hull)[2])
 {

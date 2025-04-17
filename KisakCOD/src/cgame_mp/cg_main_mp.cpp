@@ -2178,11 +2178,9 @@ void __cdecl CG_LoadAnimTreeInstances(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    generic_human = (XAnim_s *)MEMORY[0xA7B0C8];
+    generic_human = cgArray[0].bgs.generic_human.tree.anims;
     for (i = 0; i < 64; ++i)
-        cgArray[0].bgs.clientinfo[i].pXAnimTree = XAnimCreateTree(
-            generic_human,
-            (void *(__cdecl *)(int))Hunk_AllocXAnimClient);
+        cgArray[0].bgs.clientinfo[i].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -2192,9 +2190,7 @@ void __cdecl CG_LoadAnimTreeInstances(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     for (ia = 0; ia < 8; ++ia)
-        cgsArray[0].corpseinfo[ia].pXAnimTree = XAnimCreateTree(
-            generic_human,
-            (void *(__cdecl *)(int))Hunk_AllocXAnimClient);
+        cgsArray[0].corpseinfo[ia].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
 }
 
 void __cdecl CG_InitEntities(int localClientNum)
@@ -2217,7 +2213,7 @@ void __cdecl CG_InitEntities(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    MEMORY[0x9D84DC] = localClientNum;
+    cgArray[0].predictedPlayerEntity.pose.localClientNum = localClientNum;
 }
 
 void __cdecl CG_InitViewDimensions(int localClientNum)
@@ -2323,7 +2319,7 @@ void __cdecl CG_Shutdown(int localClientNum)
         {
             if (cent->pose.physObjId != -1)
             {
-                Phys_ObjDestroy(PHYS_WORLD_FX, (dxBody *)cent->pose.physObjId);
+                Phys_ObjDestroy(PHYS_WORLD_FX, cent->pose.physObjId);
                 cent->pose.physObjId = 0;
             }
         }
@@ -2352,8 +2348,9 @@ void __cdecl CG_Shutdown(int localClientNum)
             localClientNum);
     if (!cgsArray[0].localServer)
         Scr_ShutdownGameStrings();
-    memset((unsigned __int8 *)cgArray, 0, sizeof(cgArray));
-    if (MEMORY[0x98F45C])
+    cgArray[0].nextSnap = 0;
+    memset(cgArray, 0, 0xFF580u);
+    if (cgArray[0].nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2298, 0, "%s", "!cgameGlob->nextSnap");
     CG_ClearCompassPingData();
     CG_ShutdownConsoleCommands();
@@ -2398,7 +2395,7 @@ void __cdecl CG_FreeAnimTreeInstances(int localClientNum)
     }
 }
 
-unsigned __int8 *__cdecl Hunk_AllocXAnimClient(unsigned int size)
+void *__cdecl Hunk_AllocXAnimClient(int size)
 {
     return Hunk_Alloc(size, "Hunk_AllocXAnimClient", 11);
 }

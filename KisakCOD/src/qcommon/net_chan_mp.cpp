@@ -36,6 +36,8 @@ ClientSnapshotData s_clientSnapshotData[64];
 
 int net_iProfilingOn;
 
+int g_qport;
+
 const char *netsrcString[2] =
 {
     "client1",
@@ -627,7 +629,6 @@ void __cdecl FakeLag_Shutdown()
 
 
 
-int g_qport;
 
 void __cdecl Net_SetQPort_f()
 {

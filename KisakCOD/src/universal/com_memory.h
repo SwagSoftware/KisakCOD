@@ -2,12 +2,15 @@
 
 #include <xanim/xanim.h>
 #include <script/scr_stringlist.h>
+#include "q_shared.h"
 
 void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data);
 
+void Com_TouchMemory();
+
 unsigned __int8* __cdecl Hunk_AllocXAnimPrecache(unsigned int size);
 unsigned __int8* __cdecl Hunk_AllocPhysPresetPrecache(unsigned int size);
-unsigned __int8* __cdecl Hunk_AllocXAnimClient(unsigned int size);
+void* __cdecl Hunk_AllocXAnimClient(int size);
 unsigned __int8* __cdecl Hunk_AllocXAnimServer(unsigned int size);
 
 //void __cdecl TRACK_com_memory();

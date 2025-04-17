@@ -81,6 +81,7 @@ struct fileHandleData_t // sizeof=0x11C
 };
 
 void __cdecl FS_CheckFileSystemStarted();
+int __cdecl FS_OpenFileOverwrite(char *qpath);
 int __cdecl FS_LoadStack();
 int __cdecl FS_HashFileName(const char *fname, int hashSize);
 int __cdecl FS_filelength(int f);
@@ -98,6 +99,7 @@ unsigned int __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, 
 unsigned int __cdecl FS_FOpenFileReadDatabase(const char *filename, int *file);
 unsigned int __cdecl FS_FOpenFileRead(const char *filename, int *file);
 bool __cdecl FS_Delete(char *filename);
+int __cdecl FS_FilenameCompare(const char *s1, const char *s2);
 unsigned int __cdecl FS_Read(unsigned __int8 *buffer, unsigned int len, int h);
 unsigned int __cdecl FS_Write(char *buffer, unsigned int len, int h);
 unsigned int __cdecl FS_WriteLog(char *buffer, unsigned int len, int h);
@@ -117,8 +119,13 @@ void __cdecl FS_Flush(int f);
 void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname);
 void __cdecl FS_FreeFileList(const char **list);
 
+void __cdecl FS_CopyFile(char *fromOSPath, char *toOSPath);
+
+char *__cdecl FS_ShiftStr(const char *string, char shift);
 int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp);
 int __cdecl FS_SV_FOpenFileWrite(const char *filename);
+void __cdecl FS_SV_Rename(char *from, char *to);
+int __cdecl FS_SV_FileExists(char *file);
 
 unsigned int __cdecl FS_FTell(int f);
 enum FsListBehavior_e : __int32
@@ -146,6 +153,10 @@ int __cdecl FS_FOpenFileWriteToDirForThread(char *filename, char *dir, FsThread 
 int __cdecl FS_FOpenFileWriteToDir(char *filename, char *dir);
 int __cdecl FS_WriteFileToDir(char *filename, char *path, char *buffer, unsigned int size);
 
+void __cdecl FS_Restart(int localClientNum, int checksumFeed);
+bool __cdecl FS_NeedRestart(int checksumFeed);
+
+
 void FS_RegisterDvars();
 void __cdecl FS_Shutdown();
 
@@ -160,3 +171,14 @@ extern const dvar_s *fs_copyfiles;
 extern const dvar_s *fs_cdpath;
 extern const dvar_s *fs_gameDirVar;
 extern const dvar_s *fs_basegame;
+
+extern searchpath_s *fs_searchpaths;
+
+extern int fs_numServerIwds;
+extern int fs_serverIwds[1024];
+extern int com_fileAccessed;
+extern void *g_writeLogEvent;
+extern int marker_com_files;
+extern void *g_writeLogCompleteEvent;
+extern int fs_loadStack;
+extern const char *fs_serverIwdNames[1024];

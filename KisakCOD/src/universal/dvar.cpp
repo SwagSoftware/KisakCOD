@@ -7,6 +7,10 @@
 #include "com_memory.h"
 #include <stringed/stringed_hooks.h>
 #include "q_parse.h"
+#include <client_mp/client_mp.h>
+#include <gfx_d3d/r_dvars.h>
+#include <win32/win_net.h>
+#include <devgui/devgui.h>
 
 static FastCriticalSection g_dvarCritSect;
 
@@ -1167,15 +1171,20 @@ char __cdecl Dvar_VectorInDomain(const float *vector, int components, float min,
     return 1;
 }
 
-const char *__cdecl Dvar_DomainToString(unsigned __int8 type, DvarLimits domain, __int64 outBuffer)
+const char *__fastcall Dvar_DomainToString(
+    unsigned __int8 type,
+    DvarLimits *domain,
+    char *outBuffer,
+    unsigned int outBufferLen)
 {
-    return Dvar_DomainToString_Internal(type, domain, outBuffer, 0);
+    return Dvar_DomainToString_Internal(type, *domain, outBuffer, outBufferLen, 0);
 }
 
 const char *__cdecl Dvar_DomainToString_Internal(
     unsigned __int8 type,
     DvarLimits domain,
-    __int64 outBuffer,
+    char *outBuffer,
+    unsigned int outBufferLen,
     int *outLineCount)
 {
     const char *v4; // eax
@@ -1219,13 +1228,13 @@ const char *__cdecl Dvar_DomainToString_Internal(
         }
         break;
     case 2u:
-        Dvar_VectorDomainToString(2, domain, outBuffer);
+        Dvar_VectorDomainToString(2, domain, outBuffer, outBufferLen);
         break;
     case 3u:
-        Dvar_VectorDomainToString(3, domain, outBuffer);
+        Dvar_VectorDomainToString(3, domain, outBuffer, outBufferLen);
         break;
     case 4u:
-        Dvar_VectorDomainToString(4, domain, outBuffer);
+        Dvar_VectorDomainToString(4, domain, outBuffer, outBufferLen);
         break;
     case 5u:
         if (domain.enumeration.stringCount == 0x80000000)
@@ -1293,16 +1302,16 @@ const char *__cdecl Dvar_DomainToString_Internal(
     return (const char *)outBuffer;
 }
 
-void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int64 outBuffer)
+void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen)
 {
     if (domain.value.min == -3.402823466385289e38)
     {
         if (domain.value.max == 3.402823466385289e38)
-            _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any %iD vector", components);
+            _snprintf(outBuffer, outBufferLen, "Domain is any %iD vector", components);
         else
             _snprintf(
-                (char *)outBuffer,
-                HIDWORD(outBuffer),
+                outBuffer,
+                outBufferLen,
                 "Domain is any %iD vector with components %g or smaller",
                 components,
                 domain.value.max);
@@ -1310,8 +1319,8 @@ void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int6
     else if (domain.value.max == 3.402823466385289e38)
     {
         _snprintf(
-            (char *)outBuffer,
-            HIDWORD(outBuffer),
+            outBuffer,
+            outBufferLen,
             "Domain is any %iD vector with components %g or bigger",
             components,
             domain.value.min);
@@ -1319,8 +1328,8 @@ void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int6
     else
     {
         _snprintf(
-            (char *)outBuffer,
-            HIDWORD(outBuffer),
+            outBuffer,
+            outBufferLen,
             "Domain is any %iD vector with components from %g to %g",
             components,
             domain.value.min,
@@ -1328,15 +1337,16 @@ void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int6
     }
 }
 
-const char *__cdecl Dvar_DomainToString_GetLines(
+const char *Dvar_DomainToString_GetLines(
     unsigned __int8 type,
-    DvarLimits domain,
-    __int64 outBuffer,
+    DvarLimits *domain,
+    char *outBuffer,
+    unsigned int outBufferLen,
     int *outLineCount)
 {
     if (!outLineCount)
         MyAssertHandler(".\\universal\\dvar.cpp", 812, 0, "%s", "outLineCount");
-    return Dvar_DomainToString_Internal(type, domain, outBuffer, outLineCount);
+    return Dvar_DomainToString_Internal(type, *domain, outBuffer, outBufferLen, outLineCount);
 }
 
 void __cdecl Dvar_PrintDomain(unsigned __int8 type, DvarLimits domain)
@@ -2693,7 +2703,7 @@ void __cdecl Dvar_UpdateValue(dvar_s *dvar, DvarValue value)
 
 char *__cdecl Dvar_AllocNameString(const char *name)
 {
-    return CopyString(name);
+    return (char *)CopyString(name);
 }
 
 const dvar_s *__cdecl Dvar_RegisterInt(

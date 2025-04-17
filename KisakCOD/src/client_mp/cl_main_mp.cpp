@@ -7,6 +7,23 @@
 #include <qcommon/mem_track.h>
 
 #include <universal/com_memory.h>
+#include <win32/win_local.h>
+#include <win32/win_storage.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include <physics/phys_local.h>
+#include <devgui/devgui.h>
+#include <client/client.h>
+#include <qcommon/sv_msg_write_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <universal/com_files.h>
+#include <ragdoll/ragdoll.h>
+#include <DynEntity/DynEntity_client.h>
+#include <database/database.h>
+#include <sound/snd_local.h>
+#include <stringed/stringed_hooks.h>
+#include <gfx_d3d/r_init.h>
+#include <ui/ui.h>
+#include <qcommon/dl_main.h>
 
 const dvar_t *cl_conXOffset;
 const dvar_t *cl_hudDrawsBehindsUI;
@@ -55,6 +72,21 @@ const dvar_t *onlineunreankedgameandhost;
 const dvar_t *cl_freelook;
 const dvar_t *cl_shownet;
 
+const dvar_t *cl_updateavailable;
+const dvar_t *cl_updatefiles;
+const dvar_t *cl_updateoldversion;
+const dvar_t *cl_updateversion;
+const dvar_t *cl_allowDownload;
+const dvar_t *cl_wwwDownload;
+const dvar_t *cl_talking;
+const dvar_t *cl_bypassMouseInput;
+const dvar_t *cl_anglespeedkey;
+const dvar_t *cl_pitchspeed;
+const dvar_t *cl_yawspeed;
+const dvar_t *cl_hudDrawsBehindUI;
+const dvar_t *cl_voice;
+const dvar_t *name;
+
 const char **customClassDvars;
 
 BOOL g_waitingForServer;
@@ -72,7 +104,6 @@ unsigned int frame_msec;
 clientConnection_t clientConnections[MAX_CLIENTS];
 clientUIActive_t clientUIActives[MAX_CLIENTS];
 clientActive_t clients[MAX_CLIENTS];
-dvar_t *name;
 
 clientStatic_t cls;
 
@@ -83,6 +114,16 @@ void __cdecl TRACK_cl_main()
     track_static_alloc_internal(clientConnections, sizeof(clientConnection_t) * MAX_CLIENTS /*398824*/, "clientConnections", 9);
     track_static_alloc_internal(clientUIActives, sizeof(clientUIActive_t) * MAX_CLIENTS, "clientUIActives", 9);
     track_static_alloc_internal(&cls, sizeof(clientStatic_t)/*3002480*/, "cls", 9);
+}
+
+int autoupdateChecked;
+void __cdecl CL_GetAutoUpdate()
+{
+    if (autoupdateChecked)
+    {
+        if (strlen(cl_updatefiles->current.string))
+            Sys_OpenURL(cl_updatefiles->current.string, 1);
+    }
 }
 
 char __cdecl CL_IsLocalClientActive(int localClientNum)
@@ -326,7 +367,21 @@ void __cdecl CL_ClearState(int localClientNum)
         dst = CL_GetLocalClientGlobals(localClientNum);
         memset((unsigned __int8 *)dst, 0, sizeof(clientActive_t));
     }
-    Com_ClientDObjClearAllSkel(localClientNum);
+    Com_ClientDObjClearAllSkel();
+}
+
+void __cdecl CL_ClearStaticDownload()
+{
+    if (cls.wwwDlDisconnected)
+        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 1540, 0, "%s", "!cls.wwwDlDisconnected");
+    cls.downloadRestart = 0;
+    cls.downloadTempName[0] = 0;
+    cls.downloadName[0] = 0;
+    cls.originalDownloadName[0] = 0;
+    cls.wwwDlInProgress = 0;
+    cls.wwwDlDisconnected = 0;
+    cls.downloadFlags = 0;
+    DL_CancelDownload();
 }
 
 void __cdecl CL_Disconnect(int localClientNum)
@@ -363,7 +418,7 @@ void __cdecl CL_Disconnect(int localClientNum)
         if (connstate >= CA_CONNECTED && clc->demorecording)
         {
             v1 = CL_ControllerIndexFromClientNum(localClientNum);
-            Cmd_ExecuteSingleCommand(localClientNum, v1, "stoprecord");
+            Cmd_ExecuteSingleCommand(localClientNum, v1, (char*)"stoprecord");
         }
         if (!cls.wwwDlDisconnected)
         {
@@ -616,7 +671,7 @@ void __cdecl CL_Vid_Restart_f()
 {
     unsigned __int8 *v0; // eax
     char *v1; // eax
-    bool v2; // [esp+0h] [ebp-D4h]
+    BOOL v2; // [esp+0h] [ebp-D4h]
     char *info; // [esp+4h] [ebp-D0h]
     XZoneInfo zoneInfo[1]; // [esp+8h] [ebp-CCh] BYREF
     char zoneName[64]; // [esp+14h] [ebp-C0h] BYREF
@@ -644,10 +699,10 @@ void __cdecl CL_Vid_Restart_f()
         connstate = clientUIActives[0].connectionState;
         clientStateBuf = 0;
         clientStateBytes = 0;
-        if (byte_E7A7C2)
+        if (clientUIActives[0].cgameInitialized)
         {
-            v0 = (unsigned __int8 *)Z_VirtualAlloc((int)&unk_A00000, "demo", 0);
-            MemFile_InitForWriting(&memFile, (int)&unk_A00000, v0, 1, 0);
+            v0 = (unsigned __int8 *)Z_VirtualAlloc(0xA00000, "demo", 0);
+            MemFile_InitForWriting(&memFile, 0xA00000, v0, 1, 0);
             CL_ArchiveClientState(localClientNum, &memFile);
             MemFile_StartSegment(&memFile, -1);
             clientStateBytes = memFile.bytesUsed;
@@ -669,7 +724,7 @@ void __cdecl CL_Vid_Restart_f()
         v2 = FS_ConditionalRestart(localClientNum, clc->checksumFeed) || cls.gameDirChanged;
         fileSystemRestarted = v2;
         SEH_UpdateLanguageInfo();
-        Dvar_SetInt((dvar_s *)cl_paused, 0);
+        Dvar_SetInt(cl_paused, 0);
         CL_InitRef();
         CL_InitRenderer();
         CL_StartHunkUsers();
@@ -773,6 +828,11 @@ void __cdecl CL_Clientinfo_f()
     Com_Printf(0, "--------------------------------------\n");
 }
 
+bool __cdecl CL_WasMapAlreadyLoaded()
+{
+    return com_sv_running->current.enabled;
+}
+
 void __cdecl CL_DownloadsComplete(int localClientNum)
 {
     char *v1; // eax
@@ -789,7 +849,7 @@ void __cdecl CL_DownloadsComplete(int localClientNum)
     {
         if (autoupdateFilename)
         {
-            if ((unsigned int)(&autoupdateFilename[strlen(autoupdateFilename) + 1] - (char *)&unk_B99511) > 4)
+            if (strlen(autoupdateFilename) > 4)
             {
                 v1 = FS_ShiftStr("ni]Zm^l", 7);
                 fn = va("%s/%s", v1, autoupdateFilename);
@@ -911,7 +971,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                     CL_RequestAuthorization(localClientNum);
                 strcpy(pkt, "getchallenge");
                 pktlen = &pkt[strlen(pkt) + 1] - &pkt[1];
-                PbClientConnecting(1, pkt, &pktlen);
+                //PbClientConnecting(1, pkt, &pktlen);
                 CL_BuildMd5StrFromCDKey(md5Str);
                 v1 = va("getchallenge 0 \"%s\"", md5Str);
                 NET_OutOfBandPrint(localClientNum, clc->serverAddress, v1);
@@ -1018,7 +1078,7 @@ void __cdecl CL_DisconnectError(char *message)
     if (!message)
         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 3157, 0, "%s", "message");
     v3 = SEH_SafeTranslateString(message);
-    v1 = SEH_SafeTranslateString("EXE_SERVERDISCONNECTREASON");
+    v1 = SEH_SafeTranslateString((char*)"EXE_SERVERDISCONNECTREASON");
     v2 = UI_ReplaceConversionString(v1, v3);
     Com_Error(ERR_SERVERDISCONNECT, v2);
 }
@@ -1034,10 +1094,11 @@ char __cdecl CL_ConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg
     CL_Netchan_AddOOBProfilePacket(localClientNum, msg->cursize);
     if (!strnicmp((const char *)msg->data + 4, "PB_", 3u))
     {
-        if (msg->data[7] == 83 || msg->data[7] == 50 || msg->data[7] == 73)
-            PbSvAddEvent(13, -1, msg->cursize - 4, (char *)msg->data + 4);
-        else
-            PbClAddEvent(13, msg->cursize - 4, (char *)msg->data + 4);
+        // LWSS: Remove Punkbuster crap
+        //if (msg->data[7] == 83 || msg->data[7] == 50 || msg->data[7] == 73)
+        //    PbSvAddEvent(13, -1, msg->cursize - 4, (char *)msg->data + 4);
+        //else
+        //    PbClAddEvent(13, msg->cursize - 4, (char *)msg->data + 4);
         return 1;
     }
     else
@@ -1055,10 +1116,202 @@ char __cdecl CL_ConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg
     }
 }
 
+void __cdecl CL_UpdateInfoPacket(netadr_t from)
+{
+    __int16 v1; // ax
+    __int16 v2; // ax
+    const char *v3; // eax
+    int v4; // eax
+    char *v5; // eax
+    char *v6; // eax
+
+    if (cls.autoupdateServer.type == NA_BAD)
+    {
+        Com_DPrintf(14, "CL_UpdateInfoPacket:  Auto-Updater has bad address\n");
+    }
+    else
+    {
+        v1 = BigShort(cls.autoupdateServer.port);
+        Com_DPrintf(
+            14,
+            "Auto-Updater resolved to %i.%i.%i.%i:%i\n",
+            cls.autoupdateServer.ip[0],
+            cls.autoupdateServer.ip[1],
+            cls.autoupdateServer.ip[2],
+            cls.autoupdateServer.ip[3],
+            v1);
+        if (NET_CompareAdr(from, cls.autoupdateServer))
+        {
+            v3 = Cmd_Argv(1);
+            v4 = atoi(v3);
+            Dvar_SetBool(cl_updateavailable, v4 != 0);
+            if (cl_updateavailable->current.enabled)
+            {
+                v5 = (char *)Cmd_Argv(2);
+                Dvar_SetString((dvar_s *)cl_updatefiles, v5);
+                v6 = (char *)Cmd_Argv(3);
+                Dvar_SetString((dvar_s *)cl_updateversion, v6);
+                Dvar_SetString((dvar_s *)cl_updateoldversion, (char*)"1.0");
+            }
+        }
+        else
+        {
+            v2 = BigShort(from.port);
+            Com_DPrintf(
+                14,
+                "CL_UpdateInfoPacket:  Received packet from %i.%i.%i.%i:%i\n",
+                from.ip[0],
+                from.ip[1],
+                from.ip[2],
+                from.ip[3],
+                v2);
+        }
+    }
+}
+
+void __cdecl CL_InitServerInfo(serverInfo_t *server, netadr_t adr)
+{
+    server->adr = adr;
+    server->clients = 0;
+    server->hostName[0] = 0;
+    server->mapName[0] = 0;
+    server->maxClients = 0;
+    server->maxPing = 0;
+    server->minPing = 0;
+    server->ping = -1;
+    server->game[0] = 0;
+    server->gameType[0] = 0;
+    server->netType = 0;
+    server->allowAnonymous = 0;
+    server->dirty = 1;
+    server->requestCount = 0;
+}
+
+int __cdecl CL_FindServerInfo(netadr_t adr)
+{
+    int cmp; // [esp+0h] [ebp-14h]
+    int low; // [esp+4h] [ebp-10h]
+    int i; // [esp+8h] [ebp-Ch]
+    int ia; // [esp+8h] [ebp-Ch]
+    int high; // [esp+Ch] [ebp-8h]
+
+    low = 0;
+    high = cls.numglobalservers;
+    while (1)
+    {
+        while (1)
+        {
+            if (low >= high)
+                return 0;
+            i = (high + low) / 2;
+            cmp = NET_CompareAdrSigned(&adr, &cls.globalServers[i].adr);
+            if (cmp >= 0)
+                break;
+            high = (high + low) / 2;
+        }
+        if (cmp <= 0)
+            break;
+        low = i + 1;
+    }
+    do
+        --i;
+    while (i >= 0 && !NET_CompareAdrSigned(&adr, &cls.globalServers[i].adr));
+    ia = i + 1;
+    do
+        CL_InitServerInfo(&cls.globalServers[ia++], adr);
+    while (ia < cls.numglobalservers && !NET_CompareAdrSigned(&adr, &cls.globalServers[ia].adr));
+    return 1;
+}
+
+int __cdecl CL_CompareAdrSigned(netadr_t *a, netadr_t *b)
+{
+    return NET_CompareAdrSigned(a, b);
+}
+
+void __cdecl CL_SortGlobalServers()
+{
+    qsort(
+        cls.globalServers,
+        cls.numglobalservers,
+        0x94u,
+        (int(__cdecl *)(const void *, const void *))CL_CompareAdrSigned);
+}
+
+void __cdecl CL_ServersResponsePacket(netadr_t from, msg_t *msg)
+{
+    int v2; // eax
+    netadr_t v3; // [esp-14h] [ebp-64Ch]
+    int numservers; // [esp+8h] [ebp-630h]
+    unsigned __int8 *buffend; // [esp+Ch] [ebp-62Ch]
+    serverAddress_t addresses[256]; // [esp+10h] [ebp-628h] BYREF
+    unsigned __int8 *buffptr; // [esp+610h] [ebp-28h]
+    int i; // [esp+614h] [ebp-24h]
+    serverInfo_t *server; // [esp+618h] [ebp-20h]
+    int count; // [esp+61Ch] [ebp-1Ch]
+    netadr_t adr; // [esp+620h] [ebp-18h]
+
+    Com_Printf(14, "CL_ServersResponsePacket\n");
+    cls.waitglobalserverresponse = 0;
+    numservers = 0;
+    buffptr = msg->data;
+    buffend = &buffptr[msg->cursize];
+    do
+    {
+        if (buffptr + 1 >= buffend)
+            break;
+        do
+            v2 = *buffptr++;
+        while (v2 != 92 && buffptr < buffend);
+        if (buffptr >= buffend - 6)
+            break;
+        addresses[numservers].ip[0] = *buffptr++;
+        addresses[numservers].ip[1] = *buffptr++;
+        addresses[numservers].ip[2] = *buffptr++;
+        addresses[numservers].ip[3] = *buffptr++;
+        addresses[numservers].port = *buffptr++ << 8;
+        addresses[numservers].port += *buffptr++;
+        addresses[numservers].port = BigShort(addresses[numservers].port);
+        if (*buffptr != 92)
+            break;
+        Com_DPrintf(
+            14,
+            "server: %d ip: %d.%d.%d.%d:%d\n",
+            numservers,
+            addresses[numservers].ip[0],
+            addresses[numservers].ip[1],
+            addresses[numservers].ip[2],
+            addresses[numservers].ip[3],
+            addresses[numservers].port);
+        if (++numservers >= 256)
+            break;
+    } while (buffptr[1] != 69 || buffptr[2] != 79 || buffptr[3] != 84);
+    count = cls.numglobalservers;
+    for (i = 0; i < numservers && count < 20000; ++i)
+    {
+        adr.type = NA_IP;
+        adr.ip[0] = addresses[i].ip[0];
+        adr.ip[1] = addresses[i].ip[1];
+        adr.ip[2] = addresses[i].ip[2];
+        adr.ip[3] = addresses[i].ip[3];
+        adr.port = addresses[i].port;
+        *(_QWORD *)&v3.type = __PAIR64__(*(unsigned int *)adr.ip, 4);
+        *(_DWORD *)&v3.port = *(_DWORD *)&adr.port;
+        *(_QWORD *)&v3.ipx[2] = *(_QWORD *)&adr.ipx[2];
+        if (!CL_FindServerInfo(v3))
+        {
+            server = &cls.globalServers[count++];
+            CL_InitServerInfo(server, adr);
+        }
+    }
+    cls.numglobalservers = count;
+    CL_SortGlobalServers();
+    Com_Printf(14, "%d servers parsed (total %d)\n", numservers, count);
+}
+
 char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg_t *msg, int time)
 {
     const char *v5; // eax
-    char *v6; // eax
+    const char *v6; // eax
     const char *v7; // eax
     char *v8; // eax
     const char *v9; // eax
@@ -1068,7 +1321,7 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
     clientConnection_t *LocalClientConnection; // eax
     netadr_t v14; // [esp-14h] [ebp-80h]
     netadr_t serverAddress; // [esp-14h] [ebp-80h]
-    char *v16; // [esp-4h] [ebp-70h]
+    const char *v16; // [esp-4h] [ebp-70h]
     bool v17; // [esp+0h] [ebp-6Ch]
     char *v18; // [esp+4h] [ebp-68h]
     connstate_t connstate; // [esp+Ch] [ebp-60h]
@@ -1430,17 +1683,72 @@ void __cdecl CL_InitLoad(const char *mapname, const char *gametype)
     if (CL_AnyLocalClientsRunning())
     {
         com_expectedHunkUsage = 0;
-        UI_SetMap(mapname, gametype);
-        clientUIActives[0].connectionState = clientUIActives[0].connectionState < 5 ? 0 : 5;
+        UI_SetMap((char*)mapname, (char*)gametype);
+        clientUIActives[0].connectionState = (connstate_t)(clientUIActives[0].connectionState < 5 ? 0 : 5);
         SCR_UpdateScreen();
     }
 }
 
+void __cdecl CL_WriteDemoClientArchive(
+    const clientConnection_t *clc,
+    const clientActive_t *cl,
+    int localClientNum,
+    int index)
+{
+    char *archive; // [esp+0h] [ebp-8h]
+    unsigned __int8 msgType; // [esp+7h] [ebp-1h] BYREF
+
+    archive = (char *)&cl->clientArchive[index];
+    msgType = 1;
+    FS_Write((char *)&msgType, 1u, clc->demofile);
+    FS_Write((char *)&index, 4u, clc->demofile);
+    FS_Write(archive + 4, 0xCu, clc->demofile);
+    FS_Write(archive + 16, 0xCu, clc->demofile);
+    FS_Write(archive + 32, 4u, clc->demofile);
+    FS_Write(archive + 28, 4u, clc->demofile);
+    FS_Write(archive, 4u, clc->demofile);
+    FS_Write(archive + 36, 0xCu, clc->demofile);
+}
+
+void __cdecl CL_WriteNewDemoClientArchive(int localClientNum)
+{
+    clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
+    clientConnection_t *clc; // [esp+4h] [ebp-4h]
+
+    clc = CL_GetLocalClientConnection(localClientNum);
+    LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
+    while (clc->lastClientArchiveIndex != LocalClientGlobals->clientArchiveIndex)
+    {
+        CL_WriteDemoClientArchive(clc, LocalClientGlobals, localClientNum, clc->lastClientArchiveIndex);
+        clc->lastClientArchiveIndex = (clc->lastClientArchiveIndex + 1) % 256;
+    }
+}
+
+void __cdecl CL_WriteDemoMessage(int localClientNum, msg_t *msg, int headerBytes)
+{
+    clientConnection_t *LocalClientConnection; // eax
+    unsigned int len; // [esp+0h] [ebp-10h]
+    clientConnection_t *clc; // [esp+4h] [ebp-Ch]
+    int swlen; // [esp+8h] [ebp-8h] BYREF
+    unsigned __int8 networkPacketMarker; // [esp+Fh] [ebp-1h] BYREF
+
+    LocalClientConnection = CL_GetLocalClientConnection(0);
+    networkPacketMarker = 0;
+    FS_Write((char *)&networkPacketMarker, 1u, LocalClientConnection->demofile);
+    clc = CL_GetLocalClientConnection(localClientNum);
+    swlen = clc->serverMessageSequence;
+    FS_Write((char *)&swlen, 4u, clc->demofile);
+    swlen = msg->cursize - headerBytes;
+    len = swlen;
+    FS_Write((char *)&swlen, 4u, clc->demofile);
+    FS_Write((char *)&msg->data[headerBytes], len, clc->demofile);
+}
+
 char __cdecl CL_PacketEvent(netsrc_t localClientNum, netadr_t from, msg_t *msg, int time)
 {
-    char *v5; // eax
-    char *v6; // eax
-    char *v7; // eax
+    const char *v5; // eax
+    const char *v6; // eax
+    const char *v7; // eax
     int v8; // [esp-8h] [ebp-24h]
     connstate_t connstate; // [esp+4h] [ebp-18h]
     int savedServerMessageSequence; // [esp+8h] [ebp-14h]
@@ -1875,6 +2183,10 @@ void __cdecl CL_StartHunkUsers()
     }
 }
 
+cmd_function_s CL_DevGuiDvar_f_VAR;
+cmd_function_s CL_DevGuiCmd_f_VAR;
+cmd_function_s CL_DevGuiOpen_f_VAR;
+
 void CL_InitDevGui()
 {
     DevGui_Init();
@@ -1895,7 +2207,7 @@ void __cdecl CL_DevGuiDvar_f()
     if (Cmd_Argc() == 3)
     {
         v1 = Cmd_Argv(2);
-        dvar = _Dvar_FindVar(v1);
+        dvar = Dvar_FindVar(v1);
         if (dvar)
         {
             v3 = Cmd_Argv(1);
@@ -1953,6 +2265,18 @@ void __cdecl CL_DevGuiOpen_f()
 int __cdecl CL_ScaledMilliseconds()
 {
     return cls.realtime;
+}
+
+void __cdecl CL_SetFastFileNames(GfxConfiguration *config, bool dedicatedServer)
+{
+    if (!config)
+        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 4468, 0, "%s", "config");
+    config->codeFastFileName = "code_post_gfx_mp";
+    config->uiFastFileName = !dedicatedServer ? "ui_mp" : 0;
+    config->commonFastFileName = "common_mp";
+    config->localizedCodeFastFileName = "localized_code_post_gfx_mp";
+    config->localizedCommonFastFileName = "localized_common_mp";
+    config->modFastFileName = DB_ModFileExists() != 0 ? "mod" : 0;
 }
 
 void __cdecl CL_InitRef()
@@ -2139,20 +2463,20 @@ void __cdecl CL_StopLogoOrCinematic(int localClientNum)
 
 void __cdecl CL_ToggleMenu_f()
 {
-    int ActiveMenu; // [esp+0h] [ebp-18h]
+    uiMenuCommand_t ActiveMenu; // [esp+0h] [ebp-18h]
     connstate_t connstate; // [esp+8h] [ebp-10h]
     clientConnection_t *clc; // [esp+10h] [ebp-8h]
 
     clc = CL_GetLocalClientConnection(0);
     connstate = clientUIActives[0].connectionState;
-    if ((dword_E7A7C4[0] & 0x10) != 0)
+    if ((clientUIActives[0].keyCatchers & 0x10) != 0)
         ActiveMenu = UI_GetActiveMenu(0);
     else
-        ActiveMenu = 0;
+        ActiveMenu = UIMENU_NONE;
     if (clc->demoplaying)
     {
     LABEL_13:
-        UI_SetActiveMenu(0, 1);
+        UI_SetActiveMenu(0, UIMENU_MAIN);
         return;
     }
     if (connstate != CA_ACTIVE)
@@ -2161,15 +2485,214 @@ void __cdecl CL_ToggleMenu_f()
             return;
         goto LABEL_13;
     }
-    if ((dword_E7A7C4[0] & 0x10) != 0 && ActiveMenu == 2)
+    if ((clientUIActives[0].keyCatchers & 0x10) != 0 && ActiveMenu == UIMENU_INGAME)
     {
-        UI_SetActiveMenu(0, 0);
+        UI_SetActiveMenu(0, UIMENU_NONE);
     }
-    else if (!dword_E7A7C4[0])
+    else if (!clientUIActives[0].keyCatchers)
     {
-        UI_SetActiveMenu(0, 2);
+        UI_SetActiveMenu(0, UIMENU_INGAME);
     }
 }
+
+cmd_function_s CL_ForwardToServer_f_VAR;
+cmd_function_s CL_Configstrings_f_VAR;
+cmd_function_s CL_Clientinfo_f_VAR;
+cmd_function_s CL_Vid_Restart_f_VAR;
+cmd_function_s CL_Vid_Restart_f_VAR_SERVER;
+cmd_function_s CL_Snd_Restart_f_VAR;
+cmd_function_s CL_Snd_Restart_f_VAR_SERVER;
+cmd_function_s CL_Disconnect_f_VAR;
+cmd_function_s CL_Disconnect_f_VAR_SERVER;
+cmd_function_s CL_Record_f_VAR;
+cmd_function_s CL_StopRecord_f_VAR;
+cmd_function_s CL_PlayDemo_f_VAR_0;
+cmd_function_s CL_PlayDemo_f_VAR_SERVER_0;
+cmd_function_s CL_PlayDemo_f_VAR;
+cmd_function_s CL_PlayDemo_f_VAR_SERVER;
+cmd_function_s CL_PlayCinematic_f_VAR;
+cmd_function_s CL_PlayUnskippableCinematic_f_VAR;
+cmd_function_s CL_PlayLogo_f_VAR;
+cmd_function_s CL_Connect_f_VAR;
+cmd_function_s CL_Connect_f_VAR_SERVER;
+cmd_function_s CL_Reconnect_f_VAR;
+cmd_function_s CL_Reconnect_f_VAR_SERVER;
+cmd_function_s CL_LocalServers_f_VAR;
+cmd_function_s CL_GlobalServers_f_VAR;
+cmd_function_s CL_Rcon_f_VAR;
+cmd_function_s CL_Ping_f_VAR;
+cmd_function_s CL_Ping_f_VAR_SERVER;
+cmd_function_s CL_ServerStatus_f_VAR;
+cmd_function_s CL_ServerStatus_f_VAR_SERVER;
+cmd_function_s CL_Setenv_f_VAR;
+cmd_function_s CL_ShowIP_f_VAR;
+cmd_function_s CL_ToggleMenu_f_VAR;
+cmd_function_s CL_OpenedIWDList_f_VAR;
+cmd_function_s CL_ReferencedIWDList_f_VAR;
+cmd_function_s CL_UpdateLevelHunkUsage_VAR;
+cmd_function_s CL_startSingleplayer_f_VAR;
+cmd_function_s CL_ParseBadPacket_f_VAR;
+cmd_function_s CL_CubemapShot_f_VAR;
+cmd_function_s CL_OpenScriptMenu_f_VAR;
+cmd_function_s UI_OpenMenu_f_VAR;
+cmd_function_s UI_CloseMenu_f_VAR;
+cmd_function_s UI_ListMenus_f_VAR;
+cmd_function_s Com_WriteLocalizedSoundAliasFiles_VAR;
+cmd_function_s CL_SelectStringTableEntryInDvar_f_VAR;
+cmd_function_s CL_ResetStats_f_VAR;
+
+void __cdecl CL_Record_f()
+{
+    int v0; // eax
+    int number; // [esp+4h] [ebp-2C8h]
+    clientActive_t *LocalClientGlobals; // [esp+8h] [ebp-2C4h]
+    __int16 configStringCount; // [esp+Ch] [ebp-2C0h]
+    int compressedSize; // [esp+18h] [ebp-2B4h]
+    connstate_t connstate; // [esp+1Ch] [ebp-2B0h]
+    unsigned __int8 (*bufData)[131072]; // [esp+20h] [ebp-2ACh]
+    char demoName[64]; // [esp+24h] [ebp-2A8h] BYREF
+    entityState_s nullstate; // [esp+64h] [ebp-268h] BYREF
+    unsigned __int8 (*compressedBuf)[131072]; // [esp+15Ch] [ebp-170h]
+    int localClientNum; // [esp+160h] [ebp-16Ch]
+    msg_t buf; // [esp+164h] [ebp-168h] BYREF
+    SnapshotInfo_s snapInfo; // [esp+18Ch] [ebp-140h] BYREF
+    char name[260]; // [esp+1A4h] [ebp-128h] BYREF
+    int len; // [esp+2ACh] [ebp-20h] BYREF
+    clientConnection_t *clc; // [esp+2B0h] [ebp-1Ch]
+    unsigned __int8 type; // [esp+2BFh] [ebp-Dh] BYREF
+    const entityState_s *ent; // [esp+2C0h] [ebp-Ch]
+    const char *s; // [esp+2C4h] [ebp-8h]
+    int i; // [esp+2C8h] [ebp-4h]
+
+    LargeLocal bufData_large_local(0x20000); // [esp+2B4h] [ebp-18h] BYREF
+    LargeLocal compressedBuf_large_local(0x20000); // [esp+10h] [ebp-2BCh] BYREF
+
+    //LargeLocal::LargeLocal(&bufData_large_local, 0x20000);
+    //bufData = (unsigned __int8 (*)[131072])LargeLocal::GetBuf(&bufData_large_local);
+    bufData = (unsigned __int8 (*)[131072])bufData_large_local.GetBuf();
+    //LargeLocal::LargeLocal(&compressedBuf_large_local, 0x20000);
+    //compressedBuf = (unsigned __int8 (*)[131072])LargeLocal::GetBuf(&compressedBuf_large_local);
+    compressedBuf = (unsigned __int8 (*)[131072])compressedBuf_large_local.GetBuf();
+    if (Cmd_Argc() <= 2)
+    {
+        localClientNum = 0;
+        clc = CL_GetLocalClientConnection(0);
+        if (localClientNum)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
+                1112,
+                0,
+                "%s\n\t(localClientNum) = %i",
+                "(localClientNum == 0)",
+                localClientNum);
+        connstate = clientUIActives[0].connectionState;
+        if (clc->demorecording)
+        {
+            Com_Printf(0, "Already recording.\n");
+        }
+        else if (connstate == CA_ACTIVE)
+        {
+            if (Cmd_Argc() == 2)
+            {
+                s = Cmd_Argv(1);
+                I_strncpyz(demoName, (char *)s, 64);
+                Com_sprintf(name, 0x100u, "demos/%s.dm_%d", demoName, 1);
+            }
+            else
+            {
+                for (number = 0; number <= 9999; ++number)
+                {
+                    Com_sprintf(demoName, 0x40u, "demo%04i", number);
+                    Com_sprintf(name, 0x100u, "demos/%s.dm_%d", demoName, 1);
+                    if (!FS_FileExists(name))
+                        break;
+                }
+            }
+            Com_Printf(0, "recording to %s.\n", name);
+            v0 = FS_FOpenFileWrite(name);
+            clc->demofile = v0;
+            if (clc->demofile)
+            {
+                clc->demorecording = 1;
+                I_strncpyz(clc->demoName, demoName, 64);
+                clc->demowaiting = 1;
+                MSG_Init(&buf, (unsigned __int8 *)bufData, 0x20000);
+                MSG_WriteLong(&buf, clc->reliableSequence);
+                MSG_WriteByte(&buf, 1u);
+                MSG_WriteLong(&buf, clc->serverCommandSequence);
+                LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
+                MSG_WriteByte(&buf, 2u);
+                configStringCount = 0;
+                for (i = 0; i < 2442; ++i)
+                {
+                    if (LocalClientGlobals->gameState.stringOffsets[i])
+                        ++configStringCount;
+                }
+                MSG_WriteShort(&buf, configStringCount);
+                for (i = 0; i < 2442; ++i)
+                {
+                    if (LocalClientGlobals->gameState.stringOffsets[i])
+                    {
+                        s = &LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.stringOffsets[i]];
+                        MSG_WriteBit0(&buf);
+                        MSG_WriteBits(&buf, i, 0xCu);
+                        MSG_WriteBigString(&buf, (char *)s);
+                    }
+                }
+                svsHeaderValid = 1;
+                svsHeader.mapCenter[0] = cls.mapCenter[0];
+                svsHeader.mapCenter[1] = cls.mapCenter[1];
+                svsHeader.mapCenter[2] = cls.mapCenter[2];
+                memset(&snapInfo, 0, sizeof(snapInfo));
+                memset((unsigned __int8 *)&nullstate, 0, sizeof(nullstate));
+                for (i = 0; i < 1024; ++i)
+                {
+                    ent = &LocalClientGlobals->entityBaselines[i];
+                    if (ent->number)
+                    {
+                        MSG_WriteByte(&buf, 3u);
+                        MSG_WriteEntity(&snapInfo, &buf, -90000, &nullstate, ent, 1);
+                    }
+                }
+                MSG_WriteByte(&buf, 7u);
+                MSG_WriteLong(&buf, clc->clientNum);
+                MSG_WriteLong(&buf, clc->checksumFeed);
+                MSG_WriteByte(&buf, 7u);
+                if (buf.cursize < 4)
+                    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 987, 0, "%s", "buf.cursize >= CL_DECODE_START");
+                *(_DWORD *)compressedBuf = *(_DWORD *)buf.data;
+                compressedSize = MSG_WriteBitsCompress(
+                    0,
+                    (const unsigned __int8 *)buf.data + 4,
+                    &(*compressedBuf)[4],
+                    buf.cursize - 4)
+                    + 4;
+                type = 0;
+                FS_Write((char *)&type, 1u, clc->demofile);
+                len = clc->serverMessageSequence;
+                FS_Write((char *)&len, 4u, clc->demofile);
+                len = compressedSize;
+                FS_Write((char *)&len, 4u, clc->demofile);
+                FS_Write((char *)compressedBuf, compressedSize, clc->demofile);
+                CL_WriteAllDemoClientArchive(localClientNum);
+                clc->lastClientArchiveIndex = LocalClientGlobals->clientArchiveIndex;
+            }
+            else
+            {
+                Com_PrintError(0, "ERROR: couldn't open.\n");
+            }
+        }
+        else
+        {
+            Com_Printf(0, "You must be in a level to record.\n");
+        }
+    }
+    else
+    {
+        Com_Printf(0, "record <demoname>\n");
+    }
+}
+
 void __cdecl CL_InitOnceForAllClients()
 {
     DWORD v0; // eax
@@ -2441,7 +2964,7 @@ void __cdecl CL_Init(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    clientUIActives[0].connectionState = 0;
+    clientUIActives[0].connectionState = CA_DISCONNECTED;
     cls.realtime = 0;
     clientUIActives[0].active = 1;
     cl_serverLoadingMap = 0;
@@ -2449,7 +2972,7 @@ void __cdecl CL_Init(int localClientNum)
     g_waitingForServer = 0;
     v1 = CL_ControllerIndexFromClientNum(localClientNum);
     Cbuf_Execute(localClientNum, v1);
-    byte_E7A7C1[0] = 1;
+    clientUIActives[0].isRunning = 1;
     Com_Printf(14, "----- Client Initialization Complete -----\n");
 }
 
@@ -2467,6 +2990,7 @@ int __cdecl CountBitsEnabled(unsigned int num)
     return HIWORD(numb) + (unsigned __int16)numb;
 }
 
+int recursive;
 void __cdecl CL_Shutdown(int localClientNum)
 {
     if (!Sys_IsMainThread())
@@ -2523,7 +3047,7 @@ void __cdecl CL_Shutdown(int localClientNum)
             Cmd_RemoveCommand("closemenu");
             memset((unsigned __int8 *)&cls, 0, sizeof(cls));
         }
-        byte_E7A7C1[16 * localClientNum] = 0;
+        clientUIActives[localClientNum].isRunning = 0;
         recursive = 0;
         Com_Printf(14, "-----------------------\n");
     }
@@ -2560,7 +3084,7 @@ void __cdecl CL_LocalServers_f()
 
 void __cdecl CL_GetPing(int n, char *buf, int buflen, int *pingtime)
 {
-    char *str; // [esp+0h] [ebp-Ch]
+    const char *str; // [esp+0h] [ebp-Ch]
     signed int time; // [esp+4h] [ebp-8h]
     int maxPing; // [esp+8h] [ebp-4h]
 
@@ -2708,6 +3232,7 @@ int __cdecl CL_UpdateDirtyPings(netsrc_t localClientNum, unsigned int source)
     }
     return status;
 }
+
 
 void __cdecl CL_ShowIP_f()
 {

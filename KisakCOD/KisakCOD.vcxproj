@@ -74,7 +74,7 @@
     <IncludePath>$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
+    <IncludePath>$(LocalDebuggerWorkingDirectory)src\libwww\src;$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -340,6 +340,7 @@
     <ClCompile Include="src\gfx_d3d\r_pixelcost_load_obj.cpp" />
     <ClCompile Include="src\gfx_d3d\r_pretess.cpp" />
     <ClCompile Include="src\gfx_d3d\r_primarylights.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_reflection_probe.cpp" />
     <ClCompile Include="src\gfx_d3d\r_rendercmds.cpp" />
     <ClCompile Include="src\gfx_d3d\r_rendertarget.cpp" />
     <ClCompile Include="src\gfx_d3d\r_scene.cpp" />
@@ -405,6 +406,7 @@
     <ClCompile Include="src\qcommon\com_fileaccess.cpp" />
     <ClCompile Include="src\qcommon\com_playerprofile.cpp" />
     <ClCompile Include="src\qcommon\com_profilemapload.cpp" />
+    <ClCompile Include="src\qcommon\dl_main.cpp" />
     <ClCompile Include="src\qcommon\dobj_management.cpp" />
     <ClCompile Include="src\qcommon\files.cpp" />
     <ClCompile Include="src\qcommon\graph.cpp" />
@@ -450,6 +452,7 @@
     <ClCompile Include="src\stringed\stringed_hooks.cpp" />
     <ClCompile Include="src\stringed\stringed_ingame.cpp" />
     <ClCompile Include="src\ui\ui_atoms.cpp" />
+    <ClCompile Include="src\ui\ui_component.cpp" />
     <ClCompile Include="src\ui\ui_expressions.cpp" />
     <ClCompile Include="src\ui\ui_expressions_logicfunctions.cpp" />
     <ClCompile Include="src\ui\ui_localvars.cpp" />
@@ -601,6 +604,7 @@
     <ClInclude Include="src\gfx_d3d\r_pixelcost_load_obj.h" />
     <ClInclude Include="src\gfx_d3d\r_pretess.h" />
     <ClInclude Include="src\gfx_d3d\r_primarylights.h" />
+    <ClInclude Include="src\gfx_d3d\r_reflection_probe.h" />
     <ClInclude Include="src\gfx_d3d\r_rendercmds.h" />
     <ClInclude Include="src\gfx_d3d\r_rendertarget.h" />
     <ClInclude Include="src\gfx_d3d\r_scene.h" />
@@ -659,6 +663,7 @@
     <ClInclude Include="src\qcommon\com_bsp.h" />
     <ClInclude Include="src\qcommon\com_fileaccess.h" />
     <ClInclude Include="src\qcommon\com_playerprofile.h" />
+    <ClInclude Include="src\qcommon\dl_main.h" />
     <ClInclude Include="src\qcommon\ent.h" />
     <ClInclude Include="src\qcommon\files.h" />
     <ClInclude Include="src\qcommon\graph.h" />

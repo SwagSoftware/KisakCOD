@@ -335,10 +335,10 @@ notSet:
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 LocalClientNum);
-        v30 = MEMORY[0x9D8748];
-        viewOffset[0] = MEMORY[0x9D8748][0];
-        viewOffset[1] = MEMORY[0x9D8748][1];
-        viewOffset[2] = MEMORY[0x9D8748][2];
+        v30 = cgArray[0].refdef.viewOffset;
+        viewOffset[0] = cgArray[0].refdef.viewOffset[0];
+        viewOffset[1] = cgArray[0].refdef.viewOffset[1];
+        viewOffset[2] = cgArray[0].refdef.viewOffset[2];
         partIndex = 0;
         while (partIndex <= rootBoneCount)
         {
@@ -439,13 +439,13 @@ notSet:
                 DObjSetTrans(mat, origin);
             }
             ++partIndex;
-            partBits[3] = (partBits[3] << 31) | ((unsigned int)partBits[3] >> 1);
+            partBits[3] = (partBits[3] << 31) | (partBits[3] >> 1);
             ++mat;
         }
     }
 }
 
-double __cdecl Vec4LengthSq(const float *v)
+float __cdecl Vec4LengthSq(const float *v)
 {
     return (float)(*v * *v + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
 }

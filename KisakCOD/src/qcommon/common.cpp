@@ -1387,9 +1387,16 @@ void __cdecl Com_Freeze_f()
     }
 }
 
+/*
+=================
+Com_Crash_f
+
+A way to force a bus error for development reasons
+=================
+*/
 void __cdecl Com_Crash_f()
 {
-    MEMORY[0] = 305419896;
+    *(volatile int *)0 = 0x12345678;
 }
 
 void __cdecl Com_Assert_f()

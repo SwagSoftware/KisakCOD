@@ -7,6 +7,8 @@
 #include <EffectsCore/fx_system.h>
 
 #include <string.h>
+#include <gfx_d3d/r_model.h>
+#include "com_sndalias.h"
 
 //Line 53466:  0006 : 02bc009c       int marker_q_shared      8537009c     q_shared.obj
 //Line 53467 : 0006 : 02bc58d0       struct TraceThreadInfo *g_traceThreadInfo 853758d0     q_shared.obj
@@ -1055,13 +1057,13 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     if (!com_dedicated->current.integer)
                     {
                         v9 = FX_Register(src);
-                        *(unsigned int *)&pStruct[v20->iOffset] = v9;
+                        *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v9;
                     }
                     break;
                 case 9:
                     I_strncpyz(dest, src, 0x2000);
                     v22 = R_RegisterModel(dest);
-                    *(unsigned int *)&pStruct[v20->iOffset] = v22;
+                    *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v22;
                     if (!v22)
                         v18 = 1;
                     break;
@@ -1069,12 +1071,12 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     if (!com_dedicated->current.integer)
                     {
                         v10 = Material_RegisterHandle(src, 0);
-                        *(unsigned int *)&pStruct[v20->iOffset] = v10;
+                        *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v10;
                     }
                     break;
                 case 0xB:
                     SoundAlias = Com_FindSoundAlias(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = SoundAlias;
+                    *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)SoundAlias;
                     break;
                 default:
                     if (v20->iFieldType >= 0)

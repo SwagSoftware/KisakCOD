@@ -1,4 +1,10 @@
 #include "client_mp.h"
+#include <cgame_mp/cg_local_mp.h>
+#include <win32/win_local.h>
+#include <server_mp/server.h>
+
+unsigned __int8 tempVoicePacketBuf[2048];
+voiceCommunication_t cl_voiceCommunication;
 
 void __cdecl CL_WriteVoicePacket(int localClientNum)
 {
@@ -25,7 +31,10 @@ void __cdecl CL_WriteVoicePacket(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     }
-    if (!clc->demoplaying && (MEMORY[0xE7A7CC][0] == 9 || MEMORY[0xE7A7CC][0] == 7 || MEMORY[0xE7A7CC][0] == 8))
+    if (!clc->demoplaying
+        && (clientUIActives[0].connectionState == CA_ACTIVE
+            || clientUIActives[0].connectionState == CA_LOADING
+            || clientUIActives[0].connectionState == CA_PRIMED))
     {
         MSG_Init(&msg, tempVoicePacketBuf, 2048);
         MSG_WriteString(&msg, "v");

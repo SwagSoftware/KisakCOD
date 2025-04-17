@@ -848,12 +848,6 @@ struct centity_s // sizeof=0x1DC
 };
 
 
-enum DemoType : __int32
-{                                       // ...
-    DEMO_TYPE_NONE = 0x0,
-    DEMO_TYPE_CLIENT = 0x1,
-    DEMO_TYPE_SERVER = 0x2,
-};
 enum CubemapShot : __int32
 {                                       // ...
     CUBEMAPSHOT_NONE = 0x0,
@@ -865,6 +859,16 @@ enum CubemapShot : __int32
     CUBEMAPSHOT_DOWN = 0x6,
     CUBEMAPSHOT_COUNT = 0x7,
 };
+CubemapShot &operator++(CubemapShot &e) {
+    static_cast<CubemapShot>(static_cast<int>(e) + 1);
+    return e;
+}
+CubemapShot &operator++(CubemapShot &e, int i)
+{
+    CubemapShot temp = e;
+    ++e;
+    return temp;
+}
 
 
 struct turretInfo_s // sizeof=0x48

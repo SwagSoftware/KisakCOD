@@ -1,5 +1,6 @@
 #include "client_mp.h"
 
+#include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
 
 #include <qcommon/cmd.h>
@@ -10,6 +11,20 @@
 #include <xanim/xanim.h>
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
+#include <stringed/stringed_hooks.h>
+#include <qcommon/com_bsp.h>
+#include <universal/com_sndalias.h>
+#include <gfx_d3d/r_scene.h>
+#include <gfx_d3d/r_bsp.h>
+#include <database/database.h>
+#include <universal/com_files.h>
+#include <universal/q_parse.h>
+#include <ui/ui.h>
+#include <EffectsCore/fx_system.h>
+#include <gfx_d3d/r_fog.h>
+
+float color_allies[4];
+float color_axis[4];
 
 char bigConfigString[8192];
 const float g_color_table[8][4]
@@ -242,10 +257,10 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
         Com_Printf(14, "===== CL_CGameNeedsServerCommand =====\n");
         Com_Printf(14, "serverCommandNumber: %d\n", serverCommandNumber & 0x7F);
         CL_DumpReliableCommands(localClientNum);
-        Com_Error(ERR_DROP, &byte_8714B8);
+        Com_Error(ERR_DROP, "CL_CGameNeedsServerCommand: EXE_ERR_RELIABLE_CYCLED_OUT");
     }
     if (serverCommandNumber > clc->serverCommandSequence)
-        Com_Error(ERR_DROP, &byte_871484);
+        Com_Error(ERR_DROP, "CL_CGameNeedsServerCommand: EXE_ERRO_NOT_RECEIVED");
     s = clc->serverCommands[serverCommandNumber & 0x7F];
     clc->lastExecutedServerCommand = serverCommandNumber;
     if (cl_showServerCommands->current.enabled)
@@ -272,13 +287,13 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
             if (argc >= 3 && (v3 = Cmd_Argv(2), !_stricmp(v3, "PB")))
             {
                 v9 = Cmd_Argv(1);
-                v4 = SEH_SafeTranslateString("EXE_SERVERDISCONNECTREASON");
+                v4 = SEH_SafeTranslateString((char*)"EXE_SERVERDISCONNECTREASON");
                 v5 = UI_ReplaceConversionString(v4, v9);
-                v6 = va(off_8572F4, v5);
+                v6 = va("%s", v5);
                 Com_Error(ERR_SERVERDISCONNECT, v6);
             }
             else if (argc >= 2)
-            {
+            {   
                 v7 = (char *)Cmd_Argv(1);
                 CL_DisconnectError(v7);
             }
@@ -302,7 +317,7 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
             Cmd_TokenizeStringWithLimit(s, 3);
             sa = Cmd_Argv(2);
             if (strlen(sa) + strlen(bigConfigString) >= 0x2000)
-                Com_Error(ERR_DROP, &byte_871408);
+                Com_Error(ERR_DROP, "bcs exceeded BIG_INFO_STRING");
             strcat(bigConfigString, sa);
             Cmd_EndTokenizedString();
             result = 0;
@@ -312,7 +327,7 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
             Cmd_TokenizeStringWithLimit(s, 3);
             sb = Cmd_Argv(2);
             if (strlen(bigConfigString) + strlen(sb) + 1 >= 0x2000)
-                Com_Error(ERR_DROP, &byte_871408);
+                Com_Error(ERR_DROP, "bcs exceeded BIG_INFO_STRING");
             strcat(bigConfigString, sb);
             s = bigConfigString;
             Cmd_EndTokenizedString();
@@ -332,18 +347,19 @@ void __cdecl CL_ConfigstringModified(int localClientNum)
     clientActive_t *LocalClientGlobals; // [esp+24h] [ebp-28h]
     unsigned __int8 *oldGs; // [esp+28h] [ebp-24h]
     char *dup; // [esp+2Ch] [ebp-20h]
-    LargeLocal oldGs_large_local; // [esp+34h] [ebp-18h] BYREF
     int index; // [esp+3Ch] [ebp-10h]
     const char *s; // [esp+40h] [ebp-Ch]
     int i; // [esp+44h] [ebp-8h]
     const char *old; // [esp+48h] [ebp-4h]
 
-    LargeLocal::LargeLocal(&oldGs_large_local, 140844);
-    oldGs = LargeLocal::GetBuf(&oldGs_large_local);
+    LargeLocal oldGs_large_local(0x2262C);
+    //LargeLocal::LargeLocal(&oldGs_large_local, 140844);
+    //oldGs = LargeLocal::GetBuf(&oldGs_large_local);
+    oldGs = oldGs_large_local.GetBuf();
     v1 = Cmd_Argv(1);
     index = atoi(v1);
-    if ((unsigned int)index >= 0x98A)
-        Com_Error(ERR_DROP, &byte_871558);
+    if ((unsigned int)index >= 2442)
+        Com_Error(ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
     s = Cmd_Argv(2);
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     old = &LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.stringOffsets[index]];
@@ -362,7 +378,7 @@ void __cdecl CL_ConfigstringModified(int localClientNum)
             {
                 v2 = strlen(dup);
                 if ((int)(v2 + LocalClientGlobals->gameState.dataCount + 1) > 0x20000)
-                    Com_Error(ERR_DROP, &byte_871538);
+                    Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
                 LocalClientGlobals->gameState.stringOffsets[i] = LocalClientGlobals->gameState.dataCount;
                 memcpy(
                     (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
@@ -374,7 +390,7 @@ void __cdecl CL_ConfigstringModified(int localClientNum)
         if (index == 1)
             CL_SystemInfoChanged(localClientNum);
     }
-    LargeLocal::~LargeLocal(&oldGs_large_local);
+    //LargeLocal::~LargeLocal(&oldGs_large_local);
 }
 
 void __cdecl CL_CM_LoadMap(char *mapname)
@@ -402,19 +418,20 @@ void __cdecl CL_ShutdownCGame(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7C3])
+    if (clientUIActives[0].cgameInitCalled)
     {
         CG_Shutdown(localClientNum);
-        MEMORY[0xE7A7C3] = 0;
-        MEMORY[0xE7A7C2] = 0;
+        clientUIActives[0].cgameInitCalled = 0;
+        clientUIActives[0].cgameInitialized = 0;
         track_shutdown(1);
     }
-    else if (MEMORY[0xE7A7C2])
+    else if (clientUIActives[0].cgameInitialized)
     {
         MyAssertHandler(".\\client_mp\\cl_cgame_mp.cpp", 599, 0, "%s", "!cl->cgameInitialized");
     }
 }
 
+int warnCount;
 bool __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
 {
     char *buf; // [esp+0h] [ebp-Ch]
@@ -634,7 +651,7 @@ void __cdecl CL_SyncTimes(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] == 9)
+    if (clientUIActives[0].connectionState == CA_ACTIVE)
         CL_FirstSnapshot(localClientNum);
 }
 
@@ -658,9 +675,52 @@ void __cdecl CL_StartLoading()
     }
 }
 
+void __cdecl CL_SetExpectedHunkUsage(const char *mapname)
+{
+    int handle[2]; // [esp+0h] [ebp-18h] BYREF
+    char *buf; // [esp+8h] [ebp-10h]
+    int len; // [esp+Ch] [ebp-Ch]
+    const char *token; // [esp+10h] [ebp-8h]
+    const char *buftrav; // [esp+14h] [ebp-4h] BYREF
+
+    handle[1] = (int)"hunkusage.dat";
+    len = FS_FOpenFileByMode((char*)"hunkusage.dat", handle, FS_READ);
+    if (len >= 0)
+    {
+        buf = (char *)Z_Malloc(len + 1, "CL_SetExpectedHunkUsage", 10);
+        memset((unsigned __int8 *)buf, 0, len + 1);
+        FS_Read((unsigned __int8 *)buf, len, handle[0]);
+        FS_FCloseFile(handle[0]);
+        buftrav = buf;
+        while (1)
+        {
+            token = (const char *)Com_Parse(&buftrav);
+            if (!token)
+                MyAssertHandler(".\\client_mp\\cl_cgame_mp.cpp", 536, 0, "%s", "token");
+            if (!*token)
+                break;
+            if (!I_stricmp(token, mapname))
+            {
+                token = (const char *)Com_Parse(&buftrav);
+                if (token)
+                {
+                    if (*token)
+                    {
+                        com_expectedHunkUsage = atoi(token);
+                        Z_Free(buf, 10);
+                        return;
+                    }
+                }
+            }
+        }
+        Z_Free(buf, 10);
+    }
+    com_expectedHunkUsage = 0;
+}
+
 void __cdecl CL_InitCGame(int localClientNum)
 {
-    char *v1; // eax
+    const char *v1; // eax
     int v2; // eax
     XZoneInfo zoneInfo; // [esp+10h] [ebp-70h] BYREF
     clientUIActive_t *clientUIActive; // [esp+20h] [ebp-60h]
@@ -712,7 +772,7 @@ void __cdecl CL_InitCGame(int localClientNum)
             "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
             localClientNum,
             1);
-    MEMORY[0xE7A7CC][4 * localClientNum] = 7;
+    clientUIActives[localClientNum].connectionState = CA_LOADING;
     Com_Printf(14, "Setting state to CA_LOADING in CL_InitCGame\n");
     clientUIActive->cgameInitCalled = 1;
     cl_serverLoadingMap = 0;
@@ -728,7 +788,7 @@ void __cdecl CL_InitCGame(int localClientNum)
             "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
             localClientNum,
             1);
-    MEMORY[0xE7A7CC][4 * localClientNum] = 8;
+    clientUIActives[localClientNum].connectionState = CA_PRIMED;
     t2 = Sys_Milliseconds();
     Com_Printf(14, "CL_InitCGame: %5.2f seconds\n", (double)(t2 - t1) / 1000.0);
     R_EndRegistration();
@@ -739,7 +799,7 @@ void __cdecl CL_InitCGame(int localClientNum)
     if (!useFastFile->current.enabled)
     {
         v2 = CL_ControllerIndexFromClientNum(localClientNum);
-        Cmd_ExecuteSingleCommand(localClientNum, v2, "updatehunkusage");
+        Cmd_ExecuteSingleCommand(localClientNum, v2, (char*)"updatehunkusage");
     }
     R_EndRemoteScreenUpdate();
     if (useFastFile->current.enabled)
@@ -764,7 +824,7 @@ void __cdecl CL_FirstSnapshot(int localClientNum)
                 "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                 localClientNum,
                 1);
-        MEMORY[0xE7A7CC][4 * localClientNum] = 9;
+        clientUIActives[localClientNum].connectionState = CA_ACTIVE;
         clc->isServerRestarting = 0;
         UI_CloseAll(localClientNum);
         LocalClientGlobals->serverTimeDelta = LocalClientGlobals->snap.serverTime - cls.realtime;
@@ -776,8 +836,230 @@ void __cdecl CL_FirstSnapshot(int localClientNum)
         {
             Cbuf_AddText(localClientNum, cl_activeAction->current.string);
             Cbuf_AddText(localClientNum, "\n");
-            Dvar_SetString(cl_activeAction, &String);
+            Dvar_SetString((dvar_s *)cl_activeAction, (char *)"");
         }
+    }
+}
+
+char *__cdecl CL_TimeDemoLogBaseName(const char *mapname)
+{
+    char *result; // eax
+    const char *pos; // [esp+0h] [ebp-10h]
+    const char *start; // [esp+4h] [ebp-Ch]
+    const char *end; // [esp+8h] [ebp-8h]
+
+    end = 0;
+    start = mapname;
+    for (pos = mapname; *pos; ++pos)
+    {
+        if (*pos == 47 || *pos == 92)
+        {
+            start = pos + 1;
+            end = 0;
+        }
+        else if (*pos == 46)
+        {
+            end = pos;
+        }
+    }
+    if (!end)
+        return (char *)start;
+    result = va("%s", start);
+    result[end - start] = 0;
+    return result;
+}
+
+void __cdecl CL_UpdateTimeDemo(int localClientNum)
+{
+    char *v1; // eax
+    char *v2; // eax
+    int Int; // [esp-4h] [ebp-10h]
+    clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-Ch]
+    clientConnection_t *clc; // [esp+4h] [ebp-8h]
+    DWORD currentTime; // [esp+8h] [ebp-4h]
+
+    LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
+    clc = CL_GetLocalClientConnection(localClientNum);
+    currentTime = Sys_Milliseconds();
+    if (!clc->timeDemoLog)
+    {
+        Int = Dvar_GetInt("r_mode");
+        v1 = CL_TimeDemoLogBaseName(LocalClientGlobals->mapname);
+        v2 = va("demos/timedemo_%s_mode_%i.csv", v1, Int);
+        clc->timeDemoLog = FS_FOpenFileWrite(v2);
+    }
+    if (clc->timeDemoStart)
+    {
+        if (clc->timeDemoLog)
+            FS_Printf(clc->timeDemoLog, "%i,%i\n", clc->timeDemoFrames, currentTime - clc->timeDemoPrev);
+    }
+    else
+    {
+        clc->timeDemoStart = currentTime;
+    }
+    clc->timeDemoPrev = currentTime;
+    ++clc->timeDemoFrames;
+    LocalClientGlobals->serverTime = clc->timeDemoBaseTime + 50 * clc->timeDemoFrames;
+}
+
+void __cdecl CL_NextDemo(int localClientNum)
+{
+    char v[1028]; // [esp+0h] [ebp-408h] BYREF
+
+    I_strncpyz(v, (char *)nextdemo->current.integer, 1024);
+    Com_DPrintf(14, "CL_NextDemo: %s\n", v);
+    if (v[0])
+    {
+        Dvar_SetString((dvar_s *)nextdemo, (char *)"");
+        Cbuf_AddText(localClientNum, v);
+        Cbuf_AddText(localClientNum, "\n");
+        Cbuf_Execute(localClientNum, 0);
+    }
+    else
+    {
+        Com_Error(ERR_DISCONNECT, "Demo is over");
+    }
+}
+
+void __cdecl CL_DemoCompleted(int localClientNum)
+{
+    int time; // [esp+10h] [ebp-8h]
+    clientConnection_t *clc; // [esp+14h] [ebp-4h]
+
+    clc = CL_GetLocalClientConnection(localClientNum);
+    if (clc->isTimeDemo)
+    {
+        time = Sys_Milliseconds() - clc->timeDemoStart;
+        if (time > 0)
+            Com_Printf(
+                14,
+                "%i frames, %3.1f seconds: %3.1f fps\n",
+                clc->timeDemoFrames,
+                (double)time / 1000.0,
+                (double)clc->timeDemoFrames * 1000.0 / (double)time);
+    }
+    if (clc->timeDemoLog)
+    {
+        FS_FCloseFile(clc->timeDemoLog);
+        clc->timeDemoLog = 0;
+    }
+    CL_Disconnect(0);
+    CL_NextDemo(0);
+}
+
+void __cdecl CL_ReadDemoClientArchive(int localClientNum)
+{
+    clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-14h]
+    unsigned __int8 *archive; // [esp+8h] [ebp-Ch]
+    clientConnection_t *clc; // [esp+Ch] [ebp-8h]
+    int index; // [esp+10h] [ebp-4h] BYREF
+
+    clc = CL_GetLocalClientConnection(localClientNum);
+    LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
+    if (FS_Read((unsigned __int8 *)&index, 4u, clc->demofile) == 4)
+    {
+        if ((unsigned int)index < 0x100)
+        {
+            archive = (unsigned __int8 *)&LocalClientGlobals->clientArchive[index];
+            FS_Read((unsigned __int8 *)LocalClientGlobals->clientArchive[index].origin, 0xCu, clc->demofile);
+            FS_Read(archive + 16, 0xCu, clc->demofile);
+            FS_Read(archive + 32, 4u, clc->demofile);
+            FS_Read(archive + 28, 4u, clc->demofile);
+            FS_Read(archive, 4u, clc->demofile);
+            FS_Read(archive + 36, 0xCu, clc->demofile);
+            LocalClientGlobals->clientArchiveIndex = index + 1;
+        }
+        else
+        {
+            Com_Printf(14, "Demo file was corrupt.\n");
+            CL_DemoCompleted(localClientNum);
+        }
+    }
+    else
+    {
+        CL_DemoCompleted(localClientNum);
+    }
+}
+
+void __cdecl CL_ReadDemoNetworkPacket(int localClientNum)
+{
+    unsigned int v1; // edx
+    int v2; // eax
+    unsigned __int8 *bufData; // [esp+4h] [ebp-3Ch]
+    msg_t buf; // [esp+8h] [ebp-38h] BYREF
+    clientConnection_t *clc; // [esp+30h] [ebp-10h]
+    int s; // [esp+3Ch] [ebp-4h] BYREF
+
+    LargeLocal bufData_large_local(0x20000);
+    //LargeLocal::LargeLocal(&bufData_large_local, 0x20000);
+    //bufData = LargeLocal::GetBuf(&bufData_large_local);
+    bufData = bufData_large_local.GetBuf();
+    clc = CL_GetLocalClientConnection(localClientNum);
+    if (FS_Read((unsigned __int8 *)&s, 4u, clc->demofile) == 4)
+    {
+        clc->serverMessageSequence = s;
+        MSG_Init(&buf, bufData, 0x20000);
+        if (FS_Read((unsigned __int8 *)&buf.cursize, 4u, clc->demofile) != 4 || buf.cursize == -1)
+        {
+            CL_DemoCompleted(localClientNum);
+        }
+        else
+        {
+            if (buf.cursize > buf.maxsize)
+                Com_Error(ERR_DROP, "CL_ReadDemoMessage: demoMsglen > MAX_MSGLEN");
+            v1 = FS_Read(buf.data, buf.cursize, clc->demofile);
+            if (v1 == buf.cursize)
+            {
+                clc->lastPacketTime = cls.realtime;
+                buf.readcount = 0;
+                v2 = MSG_ReadLong(&buf);
+                clc->reliableAcknowledge = v2;
+                if (clc->reliableAcknowledge >= clc->reliableSequence - 128)
+                    CL_ParseServerMessage((netsrc_t)localClientNum, &buf);
+                else
+                    clc->reliableAcknowledge = clc->reliableSequence;
+            }
+            else
+            {
+                Com_Printf(14, "Demo file was truncated.\n");
+                CL_DemoCompleted(localClientNum);
+            }
+        }
+    }
+    else
+    {
+        CL_DemoCompleted(localClientNum);
+    }
+}
+
+void __cdecl CL_ReadDemoMessage(netsrc_t localClientNum)
+{
+    clientConnection_t *clc; // [esp+8h] [ebp-8h]
+    unsigned __int8 s; // [esp+Fh] [ebp-1h] BYREF
+
+    clc = CL_GetLocalClientConnection(localClientNum);
+    if (clc->demofile)
+    {
+        if (FS_Read(&s, 1u, clc->demofile) == 1)
+        {
+            if (s)
+            {
+                if (s == 1)
+                    CL_ReadDemoClientArchive(localClientNum);
+            }
+            else
+            {
+                CL_ReadDemoNetworkPacket(localClientNum);
+            }
+        }
+        else
+        {
+            CL_DemoCompleted(localClientNum);
+        }
+    }
+    else
+    {
+        CL_DemoCompleted(localClientNum);
     }
 }
 
@@ -794,19 +1076,19 @@ void __cdecl CL_SetCGameTime(netsrc_t localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] == 9)
+    if (clientUIActives[0].connectionState == CA_ACTIVE)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         clc = CL_GetLocalClientConnection(localClientNum);
     LABEL_16:
         if (!LocalClientGlobals->snap.valid)
-            Com_Error(ERR_DROP, &byte_8718C4);
+            Com_Error(ERR_DROP, "CL_SetCGameTime: !cl->snap.valid");
         if (!sv_paused->current.integer || !cl_paused->current.integer || !com_sv_running->current.enabled)
         {
             if (LocalClientGlobals->snap.serverTime < LocalClientGlobals->oldFrameServerTime)
             {
                 if (I_stricmp(cls.servername, "localhost"))
-                    Com_Error(ERR_DROP, &byte_871888);
+                    Com_Error(ERR_DROP, "cl->snap.serverTime < cl->oldFrameServerTime");
                 else
                     CL_FirstSnapshot(localClientNum);
             }
@@ -843,12 +1125,12 @@ void __cdecl CL_SetCGameTime(netsrc_t localClientNum)
                             "%s\n\t(localClientNum) = %i",
                             "(localClientNum == 0)",
                             localClientNum);
-                } while (MEMORY[0xE7A7CC][0] == 9);
+                } while (clientUIActives[0].connectionState == CA_ACTIVE);
             }
         }
         return;
     }
-    if (MEMORY[0xE7A7CC][0] != 8)
+    if (clientUIActives[0].connectionState != CA_PRIMED)
         return;
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     clc = CL_GetLocalClientConnection(localClientNum);
@@ -874,7 +1156,7 @@ void __cdecl CL_SetCGameTime(netsrc_t localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] == 9)
+    if (clientUIActives[0].connectionState == CA_ACTIVE)
         goto LABEL_16;
 }
 
@@ -1077,7 +1359,7 @@ void __cdecl CL_UpdateColor(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] >= 5)
+    if (clientUIActives[0].connectionState >= CA_CONNECTED)
     {
         if (localClientNum)
             MyAssertHandler(
@@ -1105,7 +1387,7 @@ void __cdecl CL_UpdateColorInternal(const char *var_name, float *color)
     color[3] = 1.0;
 }
 
-int __cdecl CL_IsCgameInitialized(int localClientNum)
+BOOL __cdecl CL_IsCgameInitialized(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -1115,6 +1397,6 @@ int __cdecl CL_IsCgameInitialized(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (unsigned __int8)MEMORY[0xE7A7C2];
+    return clientUIActives[0].cgameInitialized;
 }
 

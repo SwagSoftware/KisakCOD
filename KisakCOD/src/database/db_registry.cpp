@@ -577,6 +577,21 @@ void __cdecl DB_GetVertexBufferAndOffset(unsigned __int8 zoneHandle, _BYTE *vert
     *vb = g_zones[zoneHandle].mem.vertexBuffer;
 }
 
+bool __cdecl DB_ModFileExists()
+{
+    char filename[256]; // [esp+0h] [ebp-108h] BYREF
+    void *zoneFile; // [esp+104h] [ebp-4h]
+
+    if (!*(_BYTE *)fs_gameDirVar->current.integer)
+        return 0;
+    DB_BuildOSPath_Mod("mod", 0x100u, filename);
+    zoneFile = CreateFileA(filename, 0x80000000, 1u, 0, 3u, 0x60000000u, 0);
+    if (zoneFile == (void *)-1)
+        return 0;
+    CloseHandle(zoneFile);
+    return 1;
+}
+
 void __cdecl DB_EndRecoverLostDevice()
 {
     int zoneIter; // [esp+4h] [ebp-4h]

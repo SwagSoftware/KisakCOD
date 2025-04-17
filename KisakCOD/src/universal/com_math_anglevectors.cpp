@@ -78,7 +78,7 @@ void __cdecl AnglesToAxis(const float *angles, float (*axis)[3])
     (*axis)[8] = cr * cp;
 }
 
-double __cdecl Vec4Normalize(float *v)
+float __cdecl Vec4Normalize(float *v)
 {
     float v2; // [esp+0h] [ebp-Ch]
     float ilength; // [esp+4h] [ebp-8h]

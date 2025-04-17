@@ -531,6 +531,7 @@ void __cdecl CL_MapLoading(const char *mapname);
 void __cdecl CL_ResetSkeletonCache(int localClientNum);
 void __cdecl CL_ClearState(int localClientNum);
 void __cdecl CL_Disconnect(int localClientNum);
+void __cdecl CL_ClearStaticDownload();
 void __cdecl CL_ForwardCommandToServer(int localClientNum, const char *string);
 void __cdecl CL_RequestAuthorization(netsrc_t localClientNum);
 void __cdecl CL_ForwardToServer_f();
@@ -541,6 +542,7 @@ void __cdecl CL_Vid_Restart_f();
 void __cdecl CL_Snd_Restart_f();
 void __cdecl CL_Configstrings_f();
 void __cdecl CL_Clientinfo_f();
+bool __cdecl CL_WasMapAlreadyLoaded();
 void __cdecl CL_DownloadsComplete(int localClientNum);
 void __cdecl CL_CheckForResend(netsrc_t localClientNum);
 int __cdecl CL_HighestPriorityStatPacket(clientConnection_t *clc);
@@ -729,14 +731,30 @@ extern const dvar_t *onlineunreankedgameandhost;
 extern const dvar_t *cl_freelook;
 extern const dvar_t *cl_shownet;
 
+extern const dvar_t *cl_updateavailable;
+extern const dvar_t *cl_updatefiles;
+extern const dvar_t *cl_updateoldversion;
+extern const dvar_t *cl_updateversion;
+extern const dvar_t *cl_allowDownload;
+extern const dvar_t *cl_wwwDownload;
+extern const dvar_t *cl_talking;
+extern const dvar_t *cl_bypassMouseInput;
+extern const dvar_t *cl_anglespeedkey;
+extern const dvar_t *cl_pitchspeed;
+extern const dvar_t *cl_yawspeed;
+extern const dvar_t *cl_hudDrawsBehindUI;
+extern const dvar_t *cl_voice;
+extern const dvar_t *name;
+
 extern BOOL g_waitingForServer;
+
+extern BOOL cl_serverLoadingMap;
 
 #define MAX_CLIENTS 1 // LWSS Add
 
 extern clientConnection_t clientConnections[MAX_CLIENTS];
 extern clientUIActive_t clientUIActives[MAX_CLIENTS];
 extern clientActive_t clients[MAX_CLIENTS];
-extern dvar_t *name;
 
 extern clientStatic_t cls;
 
@@ -896,6 +914,8 @@ void __cdecl CL_Netchan_AddOOBProfilePacket(int localClientNum, int iLength);
 void __cdecl CL_Netchan_PrintProfileStats(int localClientNum, int bPrintToConsole);
 void __cdecl CL_Netchan_UpdateProfileStats(int localClientNum);
 void __cdecl CL_ProfDraw(int y, char *pszString);
+void __cdecl CL_Netchan_Encode(unsigned __int8 *data, int size);
+void __cdecl CL_Netchan_Decode(unsigned __int8 *data, int size);
 
 
 

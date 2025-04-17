@@ -31,6 +31,9 @@ void	Sys_ShowConsole(int visLevel, qboolean quitOnClose);
 
 char	*Sys_ConsoleInput (void);
 
+void Sys_ShowIP();
+bool Sys_IsLANAddress(netadr_t adr);
+
 struct netadr_t;
 struct msg_t;
 
@@ -169,6 +172,7 @@ void Sys_UnlockWrite(FastCriticalSection* critSect);
 void Sys_SetErrorText(const char* buf);
 void Sys_Error(const char *error, ...);
 void __cdecl Sys_OutOfMemErrorInternal(const char* filename, int line);
+void __cdecl Sys_NormalExit();
 
 double __cdecl ConvertToMB(int bytes);
 void __cdecl Sys_OpenURL(const char *url, int doexit);

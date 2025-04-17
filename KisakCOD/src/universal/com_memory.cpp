@@ -10,6 +10,8 @@
 
 #include <qcommon/mem_track.h>
 #include <win32/win_local.h>
+#include <win32/win_net.h>
+#include <database/database.h>
 
 static HunkUser* g_debugUser;
 static int g_largeLocalPos;
@@ -41,6 +43,26 @@ void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data)
     if (*data >= data[1])
         MyAssertHandler(".\\universal\\com_memory.cpp", 1735, 0, "%s", "assetList->assetCount < assetList->maxCount");
     *(XAssetHeader *)(data[2] + 4 * (*data)++) = header;
+}
+
+void Com_TouchMemory()
+{
+    int sum; // [esp+4h] [ebp-10h]
+    DWORD start; // [esp+8h] [ebp-Ch]
+    DWORD end; // [esp+Ch] [ebp-8h]
+    int i; // [esp+10h] [ebp-4h]
+    int ia; // [esp+10h] [ebp-4h]
+
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\universal\\com_memory.cpp", 1218, 0, "%s", "Sys_IsMainThread()");
+    start = Sys_Milliseconds();
+    sum = 0;
+    for (i = 0; i < hunk_low.permanent >> 2; i += 64)
+        sum += *(_DWORD *)&s_hunkData[4 * i];
+    for (ia = (s_hunkTotal - hunk_high.permanent) >> 2; ia < hunk_high.permanent >> 2; ia += 64)
+        sum += *(_DWORD *)&s_hunkData[4 * ia];
+    end = Sys_Milliseconds();
+    Com_Printf(16, "Com_TouchMemory: %i msec. Using sum: %d\n", end - start, sum);
 }
 
 /*
@@ -88,92 +110,6 @@ unsigned __int8* __cdecl Hunk_AllocXAnimClient(unsigned int size)
     return Hunk_Alloc(size, "Hunk_AllocXAnimClient", 11);
 }
 
-void __cdecl DB_EnumXAssets_FastFile(
-    XAssetType type,
-    void(__cdecl* func)(XAssetHeader, void*),
-    void* inData,
-    bool includeOverride)
-{
-    unsigned int hash; // [esp+4h] [ebp-14h]
-    unsigned int assetEntryIndex; // [esp+8h] [ebp-10h]
-    XAssetEntryPoolEntry* assetEntry; // [esp+10h] [ebp-8h]
-    unsigned int overrideAssetEntryIndex; // [esp+14h] [ebp-4h]
-
-    InterlockedIncrement(&db_hashCritSect.readCount);
-    while (db_hashCritSect.writeCount)
-        NET_Sleep(0);
-    for (hash = 0; hash < 0x8000; ++hash)
-    {
-        for (assetEntryIndex = db_hashTable[hash]; assetEntryIndex; assetEntryIndex = assetEntry->entry.nextHash)
-        {
-            assetEntry = &g_assetEntryPool[assetEntryIndex];
-            if (assetEntry->entry.asset.type == type)
-            {
-                ((void(__cdecl*)(unsigned int, unsigned int))func)((XAssetHeader)assetEntry->entry.asset.header.xmodelPieces, inData);
-                if (includeOverride)
-                {
-                    for (overrideAssetEntryIndex = assetEntry->entry.nextOverride;
-                        overrideAssetEntryIndex;
-                        overrideAssetEntryIndex = g_assetEntryPool[overrideAssetEntryIndex].entry.nextOverride)
-                    {
-                        ((void(__cdecl*)(unsigned int, unsigned int))func)(
-                            (XAssetHeader)g_assetEntryPool[overrideAssetEntryIndex].entry.asset.header.xmodelPieces,
-                            inData);
-                    }
-                }
-            }
-        }
-    }
-    if (db_hashCritSect.readCount <= 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
-            76,
-            0,
-            "%s",
-            "critSect->readCount > 0");
-    InterlockedDecrement(&db_hashCritSect.readCount);
-}
-
-int __cdecl DB_GetAllXAssetOfType_FastFile(XAssetType type, XAssetHeader* assets, int maxCount)
-{
-    unsigned int hash; // [esp+4h] [ebp-10h]
-    unsigned int assetEntryIndex; // [esp+8h] [ebp-Ch]
-    int assetCount; // [esp+Ch] [ebp-8h]
-    XAssetEntryPoolEntry* assetEntry; // [esp+10h] [ebp-4h]
-
-    assetCount = 0;
-    InterlockedIncrement(&db_hashCritSect.readCount);
-
-    while (db_hashCritSect.writeCount)
-        NET_Sleep(0);
-
-    for (hash = 0; hash < 0x8000; ++hash)
-    {
-        for (assetEntryIndex = db_hashTable[hash]; assetEntryIndex; assetEntryIndex = assetEntry->entry.nextHash)
-        {
-            assetEntry = &g_assetEntryPool[assetEntryIndex];
-            if (assetEntry->entry.asset.type == type)
-            {
-                if (assets)
-                {
-                    if (assetCount >= maxCount)
-                        MyAssertHandler(".\\database\\db_registry.cpp", 2877, 0, "%s", "assetCount < maxCount");
-                    assets[assetCount] = assetEntry->entry.asset.header;
-                }
-                ++assetCount;
-            }
-        }
-    }
-    if (db_hashCritSect.readCount <= 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/threads_interlock.h",
-            76,
-            0,
-            "%s",
-            "critSect->readCount > 0");
-    InterlockedDecrement(&db_hashCritSect.readCount);
-    return assetCount;
-}
 
 unsigned __int8* __cdecl Hunk_AllocXAnimServer(unsigned int size)
 {

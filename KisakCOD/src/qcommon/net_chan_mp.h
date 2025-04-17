@@ -30,6 +30,16 @@ enum netsrc_t : __int32
     NS_MAXCLIENTS = 0x1,
     NS_PACKET = 0x2,
 };
+netsrc_t &operator++(netsrc_t &e) {
+    static_cast<netsrc_t>(static_cast<int>(e) + 1);
+    return e;
+}
+netsrc_t &operator++(netsrc_t &e, int i)
+{
+    netsrc_t temp = e;
+    ++e;
+    return temp;
+}
 
 struct netadr_t {
     netadrtype_t	type;
@@ -206,6 +216,8 @@ extern const dvar_t* fakelag_jitterinterval;
 extern const dvar_t* net_showprofile;
 extern const dvar_t* msg_printEntityNums;
 extern const dvar_t* msg_hudelemspew;
+
+extern int g_qport;
 
 void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg);
 void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg);

@@ -1,5 +1,6 @@
 #include "q_shared.h"
 #include <qcommon/qcommon.h>
+#include <database/database.h>
 
 
 const char *__cdecl StringTable_GetColumnValueForRow(const StringTable *table, int row, int column)

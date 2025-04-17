@@ -3,6 +3,7 @@
 #include <qcommon/threads.h>
 #include <win32/win_local.h>
 #include <client_mp/client_mp.h>
+#include <universal/com_files.h>
 
 //unsigned int volatile g_loadingAssets      828e3f3c     db_file_load.obj
 //int marker_db_file_load  828e3f40     db_file_load.obj

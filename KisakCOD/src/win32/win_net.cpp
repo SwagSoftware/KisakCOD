@@ -452,6 +452,29 @@ char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
 
 //=============================================================================
 
+BOOL __cdecl Sys_IsLANAddress_IgnoreSubnet(netadr_t adr)
+{
+	switch (adr.type)
+	{
+	case NA_LOOPBACK:
+		return 1;
+	case NA_BOT:
+		return 1;
+	case NA_IPX:
+		return 1;
+	}
+	if (adr.type != NA_IP)
+		return 0;
+	if (adr.ip[0] == 10)
+		return 1;
+	if (adr.ip[0] == 127)
+		return 1;
+	if (adr.ip[0] == 169 && adr.ip[1] == 254)
+		return 1;
+	if (adr.ip[0] == 172 && (adr.ip[1] & 0xF0) == 0x10)
+		return 1;
+	return adr.ip[0] == 192 && adr.ip[1] == 168;
+}
 
 /*
 ==================
@@ -460,91 +483,18 @@ Sys_IsLANAddress
 LAN clients will have their rate var ignored
 ==================
 */
-qboolean Sys_IsLANAddress( netadr_t adr ) {
-	int		i;
+bool __cdecl Sys_IsLANAddress(netadr_t adr)
+{
+	int i; // [esp+0h] [ebp-8h]
 
-	if (!net_forcenonlocal)
+	if (Sys_IsLANAddress_IgnoreSubnet(adr))
+		return 1;
+	for (i = 0; i < numIP; ++i)
 	{
-		net_forcenonlocal = Cvar_Get( "net_forcenonlocal", "0", 0 );
+		if (adr.ip[0] == localIP[i][0] && adr.ip[1] == localIP[i][1] && adr.ip[2] == localIP[i][2])
+			return 1;
 	}
-
-	if (net_forcenonlocal && net_forcenonlocal->integer)
-	{
-		return qfalse;
-	}
-
-	if( adr.type == NA_LOOPBACK ) {
-		return qtrue;
-	}
-
-	if( adr.type == NA_IPX ) {
-		return qtrue;
-	}
-
-	if( adr.type != NA_IP ) {
-		return qfalse;
-	}
-
-	// choose which comparison to use based on the class of the address being tested
-	// any local adresses of a different class than the address being tested will fail based on the first byte
-
-	if( adr.ip[0] == 127 && adr.ip[1] == 0 && adr.ip[2] == 0 && adr.ip[3] == 1 ) {
-		return qtrue;
-	}
-
-	if ( (adr.ip[0] == 192 && adr.ip[1] == 168) || 
-		 (adr.ip[0] == 10 && adr.ip[1] == 100)  ||
-		 (adr.ip[0] == 172 && adr.ip[1] == 16)      )
-	{
-		return qtrue;
-	} 
-
-	/*
-	// Class A
-	if( (adr.ip[0] & 0x80) == 0x00 ) {
-		for ( i = 0 ; i < numIP ; i++ ) {
-			if( adr.ip[0] == localIP[i][0] ) {
-				return qtrue;
-			}
-		}
-		// the RFC1918 class a block will pass the above test
-		return qfalse;
-	}
-
-	// Class B
-	if( (adr.ip[0] & 0xc0) == 0x80 ) {
-		for ( i = 0 ; i < numIP ; i++ ) {
-			if( adr.ip[0] == localIP[i][0] && adr.ip[1] == localIP[i][1] ) {
-				return qtrue;
-			}
-			// also check against the RFC1918 class b blocks
-			if( adr.ip[0] == 172 && localIP[i][0] == 172 && (adr.ip[1] & 0xf0) == 16 && (localIP[i][1] & 0xf0) == 16 ) {
-				return qtrue;
-			}
-		}
-		return qfalse;
-	}
-	*/
-	//we only look at class C since ISPs and Universities are using class A but we don't want to consider them on the same LAN.
-
-	// Class C
-	for ( i = 0 ; i < numIP ; i++ ) {
-		if( adr.ip[0] == localIP[i][0] && adr.ip[1] == localIP[i][1] && adr.ip[2] == localIP[i][2] ) {
-			return qtrue;
-		}
-		
-		//check for both on a local lan type thing
-		if( adr.ip[0] == 10 && localIP[i][0] == 10 ) 
-		{
-			return qtrue;
-		}
-
-		// also check against the RFC1918 class c blocks
-//		if( adr.ip[0] == 192 && localIP[i][0] == 192 && adr.ip[1] == 168 && localIP[i][1] == 168 ) {
-//			return qtrue;
-//		}
-	}
-	return qfalse;
+	return 0;
 }
 
 /*
@@ -556,7 +506,7 @@ void Sys_ShowIP(void) {
 	int i;
 
 	for (i = 0; i < numIP; i++) {
-		Com_Printf( "IP: %i.%i.%i.%i\n", localIP[i][0], localIP[i][1], localIP[i][2], localIP[i][3] );
+		Com_Printf( 16, "IP: %i.%i.%i.%i\n", localIP[i][0], localIP[i][1], localIP[i][2], localIP[i][3] );
 	}
 }
 
@@ -819,50 +769,58 @@ void NET_OpenSocks( int port ) {
 NET_GetLocalAddress
 =====================
 */
+int numIP;
+void __cdecl Sys_ShowIP()
+{
+	int i; // [esp+0h] [ebp-4h]
+
+	for (i = 0; i < numIP; ++i)
+		Com_Printf(16, "IP: %i.%i.%i.%i\n", localIP[i][0], localIP[i][1], localIP[i][2], localIP[i][3]);
+}
+
 #ifndef _XBOX
 
-void NET_GetLocalAddress( void )
+int NET_GetLocalAddress()
 {
-	char				hostname[256];
-	struct hostent		*hostInfo;
-	int					error;
-	char				*p;
-	int					ip;
-	int					n;
+	int result; // eax
+	u_long v1; // [esp+0h] [ebp-114h]
+	char hostname[256]; // [esp+4h] [ebp-110h] BYREF
+	hostent *hostInfo; // [esp+108h] [ebp-Ch]
+	int n; // [esp+10Ch] [ebp-8h]
+	char *p; // [esp+110h] [ebp-4h]
 
-    // Set this early so we can just return if there is an error
-	numIP = 0;
-
-	if( gethostname( hostname, 256 ) == SOCKET_ERROR ) {
-		error = WSAGetLastError();
-		return;
-	}
-
-	hostInfo = gethostbyname( hostname );
-	if( !hostInfo ) {
-		error = WSAGetLastError();
-		return;
-	}
-
-	Com_Printf( "Hostname: %s\n", hostInfo->h_name );
+	if (gethostname(hostname, 256) == -1)
+		return WSAGetLastError();
+	hostInfo = gethostbyname(hostname);
+	if (!hostInfo)
+		return WSAGetLastError();
+	Com_Printf(16, "Hostname: %s\n", hostInfo->h_name);
 	n = 0;
-	while( ( p = hostInfo->h_aliases[n++] ) != NULL ) {
-		Com_Printf( "Alias: %s\n", p );
+	while (1)
+	{
+		p = hostInfo->h_aliases[n++];
+		if (!p)
+			break;
+		Com_Printf(16, "Alias: %s\n", p);
 	}
-
-	if ( hostInfo->h_addrtype != AF_INET ) {
-		return;
+	result = hostInfo->h_addrtype;
+	if (result == 2)
+	{
+		for (numIP = 0; ; ++numIP)
+		{
+			result = numIP;
+			p = hostInfo->h_addr_list[numIP];
+			if (!p || numIP >= 16)
+				break;
+			v1 = ntohl(*(_DWORD *)p);
+			localIP[numIP][0] = *p;
+			localIP[numIP][1] = p[1];
+			localIP[numIP][2] = p[2];
+			localIP[numIP][3] = p[3];
+			Com_Printf(16, "IP: %i.%i.%i.%i\n", HIBYTE(v1), BYTE2(v1), BYTE1(v1), (unsigned __int8)v1);
+		}
 	}
-
-	while( ( p = hostInfo->h_addr_list[numIP] ) != NULL && numIP < MAX_IPS ) {
-		ip = ntohl( *(int *)p );
-		localIP[ numIP ][0] = p[0];
-		localIP[ numIP ][1] = p[1];
-		localIP[ numIP ][2] = p[2];
-		localIP[ numIP ][3] = p[3];
-		Com_Printf( "IP: %i.%i.%i.%i\n", ( ip >> 24 ) & 0xff, ( ip >> 16 ) & 0xff, ( ip >> 8 ) & 0xff, ip & 0xff );
-		numIP++;
-	}
+	return result;
 }
 
 #else

@@ -6,6 +6,7 @@
 #include "mem_track.h"
 #include "threads.h"
 #include <win32/win_local.h>
+#include <universal/com_files.h>
 
 static cmd_function_s* cmd_functions = NULL;
 
@@ -34,6 +35,22 @@ unsigned __int8 sv_cmd_text_buf[65536];
 int marker_cmd;
 int cmd_wait;
 BOOL *cmd_insideCBufExecute;
+
+const char **__cdecl Cmd_GetAutoCompleteFileList(const char *cmdName, int *fileCount)
+{
+    cmd_function_s *cmd; // [esp+0h] [ebp-4h]
+
+    if (!cmdName)
+        MyAssertHandler(".\\qcommon\\cmd.cpp", 1170, 0, "%s", "cmdName");
+    if (!fileCount)
+        MyAssertHandler(".\\qcommon\\cmd.cpp", 1171, 0, "%s", "fileCount");
+    *fileCount = 0;
+    cmd = _Cmd_FindCommand(cmdName);
+    if (cmd && cmd->autoCompleteDir && cmd->autoCompleteExt)
+        return FS_ListFiles(cmd->autoCompleteDir, cmd->autoCompleteExt, FS_LIST_PURE_ONLY, fileCount);
+    else
+        return 0;
+}
 
 /*
 ============

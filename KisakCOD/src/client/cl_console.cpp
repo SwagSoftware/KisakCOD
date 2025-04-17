@@ -2,41 +2,100 @@
 #include <qcommon/mem_track.h>
 
 #include <client_mp/client_mp.h>
+#include <qcommon/cmd.h>
+#include <stringed/stringed_hooks.h>
+#include <win32/win_local.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include <qcommon/threads.h>
+#include <universal/com_files.h>
+#include <buildnumber_mp.h>
 
 //int con_inputMaxMatchesShown 827b26dc     cl_console.obj
 //int g_console_field_width 827b26e0     cl_console.obj
 //float g_console_char_height 827b26e4     cl_console.obj
-//struct dvar_s const *const con_typewriterPrintSpeed 82850d74     cl_console.obj
 //char (*)[29] con_gameMsgWindowNFadeInTime_Names 82850d78     cl_console.obj
 //char (*)[55] con_gameMsgWindowNFadeOutTime_Descs 82850df0     cl_console.obj
-//struct dvar_s const *const con_typewriterDecayDuration 82850eec     cl_console.obj
-//struct dvar_s const *const con_typewriterDecayStartTime 82850ef0     cl_console.obj
-//struct dvar_s const *const con_restricted 82850ef4     cl_console.obj
+
 //char (*)[48] con_gameMsgWindowNSplitscreenScale_Descs 82850ef8     cl_console.obj
-//struct dvar_s const *const con_typewriterColorGlowUpdated 8285101c     cl_console.obj
 //char (*)[26] con_gameMsgWindowNMsgTime_Names 82851020     cl_console.obj
 //char (*)[73] con_gameMsgWindowNLineCount_Descs 82851088     cl_console.obj
-//struct dvar_s const *const con_matchPrefixOnly 828511ac     cl_console.obj
 //char (*)[28] con_gameMsgWindowNLineCount_Names 828511b0     cl_console.obj
 //char (*)[84] con_gameMsgWindowNScrollTime_Descs 82851220     cl_console.obj
-//BOOL con_ignoreMatchPrefixOnly 82851380     cl_console.obj
-//struct dvar_s const *const con_typewriterColorBase 82851388     cl_console.obj
 //char (*)[69] con_gameMsgWindowNMsgTime_Descs 82851390     cl_console.obj
-//struct dvar_s const *const cl_deathMessageWidth 828514a4     cl_console.obj
 //char (*)[30] con_gameMsgWindowNFadeOutTime_Names 828514a8     cl_console.obj
 //char (*)[35] con_gameMsgWindowNSplitscreenScale_Names 82851520     cl_console.obj
-//struct dvar_s const *const con_typewriterColorGlowCheckpoint 828515ac     cl_console.obj
-//int marker_cl_console    82873998     cl_console.obj
 //char (*)[29] con_gameMsgWindowNScrollTime_Names 828739a8     cl_console.obj
 //char (*)[54] con_gameMsgWindowNFadeInTime_Descs 82873a20     cl_console.obj
-//struct dvar_s const *const con_typewriterColorGlowFailed 82873af8     cl_console.obj
-//struct dvar_s const *const con_typewriterColorGlowCompleted 82873afc     cl_console.obj
+//BOOL con_ignoreMatchPrefixOnly 82851380     cl_console.obj
+// 
+const dvar_t *con_typewriterColorGlowFailed;
+const dvar_t *con_typewriterColorGlowCompleted;
+const dvar_t *con_typewriterColorGlowCheckpoint;
+const dvar_t *cl_deathMessageWidth;
+const dvar_t *con_typewriterColorBase;
+const dvar_t *con_matchPrefixOnly;
+const dvar_t *con_typewriterColorGlowUpdated;
+const dvar_t *con_typewriterDecayDuration;
+const dvar_t *con_typewriterDecayStartTime;
+const dvar_t *con_restricted;
+const dvar_t *con_typewriterPrintSpeed;
+
+const dvar_t *con_inputBoxColor;
+const dvar_t *con_inputHintBoxColor;
+const dvar_t *con_outputBarColor;
+const dvar_t *con_outputSliderColor;
+const dvar_t *con_errormessagetime;
+const dvar_t *con_minicontime;
+const dvar_t *con_miniconlines;
+const dvar_t *con_inputBoxColor;
+const dvar_t *con_outputWindowColor;
 
 Console con;
-field_t g_consoleField;
 
 int g_console_field_width = 620;
 float g_console_char_height = 16.0f;
+
+int callDepth;
+
+char con_gameMsgWindowNMsgTime_Descs[4][69];
+char con_gameMsgWindowNMsgTime_Names[4][26];
+const dvar_s *con_gameMsgWindowNMsgTime[4];
+const float defaultGameMessageTimes[4] = { 5.0f, 8.0f, 5.0f, 5.0f };
+char con_gameMsgWindowNLineCount_Descs[4][73];
+char con_gameMsgWindowNLineCount_Names[4][28];
+const dvar_s *con_gameMsgWindowNLineCount[4];
+const int defaultGameMessageWindowLineCounts[4] = { 4, 5, 7, 5 };
+char con_gameMsgWindowNScrollTime_Descs[4][84];
+char con_gameMsgWindowNScrollTime_Names[4][29];
+const dvar_s *con_gameMsgWindowNScrollTime[4];
+char con_gameMsgWindowNFadeInTime_Descs[4][54];
+char con_gameMsgWindowNFadeInTime_Names[4][29];
+const dvar_s *con_gameMsgWindowNFadeInTime[4];
+char con_gameMsgWindowNFadeOutTime_Descs[4][55];
+char con_gameMsgWindowNFadeOutTime_Names[4][30];
+const dvar_s *con_gameMsgWindowNFadeOutTime[4];
+char con_gameMsgWindowNSplitscreenScale_Descs[4][48];
+char con_gameMsgWindowNSplitscreenScale_Names[4][35];
+const dvar_s *con_gameMsgWindowNSplitscreenScale[4];
+
+ConDrawInputGlob conDrawInputGlob;
+bool con_ignoreMatchPrefixOnly;
+int con_inputMaxMatchesShown;
+
+const float con_versionColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
+const float con_screenPadding = 4.0f;
+const float con_inputCommandMatchColor[4] = { 0.8f, 0.8f, 1.0f, 1.0f };
+const float con_inputDvarMatchColor[4] = { 1.0f, 1.0f, 0.8f, 1.0f };
+const float con_inputDvarValueColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+const float con_inputDvarInactiveValueColor[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
+const float con_inputDvarInfoColor[4] = { 0.8f, 0.8f, 1.0f, 1.0f };
+const float con_inputDvarDescriptionColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+const float con_inputBoxPad = 6.0f;
+const float con_outputVertStart = 32.0f;
+const float con_outputTextPad = 6.0f;
+const float con_outputBarSize = 10.0f;
 
 void __cdecl TRACK_cl_console()
 {
@@ -323,6 +382,10 @@ void __cdecl Con_CheckResize()
     }
 }
 
+cmd_function_s Con_ChatModePublic_f_VAR;
+cmd_function_s Con_ChatModeTeam_f_VAR;
+cmd_function_s Con_Clear_f_VAR;
+
 void __cdecl Con_Init()
 {
     int i; // [esp+0h] [ebp-4h]
@@ -348,6 +411,34 @@ void __cdecl Con_Init()
     Cmd_AddCommandInternal("chatmodepublic", Con_ChatModePublic_f, &Con_ChatModePublic_f_VAR);
     Cmd_AddCommandInternal("chatmodeteam", Con_ChatModeTeam_f, &Con_ChatModeTeam_f_VAR);
     Cmd_AddCommandInternal("clear", Con_Clear_f, &Con_Clear_f_VAR);
+}
+
+void __cdecl SetupChatField(int localClientNum, int teamChat, int widthInPixels)
+{
+    PlayerKeyState *chatField; // [esp+4h] [ebp-10h]
+    int width; // [esp+8h] [ebp-Ch] BYREF
+    int height; // [esp+Ch] [ebp-8h] BYREF
+    float aspect; // [esp+10h] [ebp-4h] BYREF
+
+    CL_GetScreenDimensions(&width, &height, &aspect);
+    playerKeys[localClientNum].chat_team = teamChat;
+    chatField = &playerKeys[localClientNum];
+    Field_Clear(&chatField->chatField);
+    chatField->chatField.widthInPixels = widthInPixels;
+    chatField->chatField.fixedSize = 0;
+    if (height <= 768)
+        chatField->chatField.charHeight = 16.0;
+    else
+        chatField->chatField.charHeight = 10.0;
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\client\\../client_mp/client_mp.h",
+            1063,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    clientUIActives[0].keyCatchers ^= 0x20u;
 }
 
 void __cdecl Con_ChatModePublic_f()
@@ -1706,7 +1797,7 @@ unsigned int __cdecl CL_AddDeathMessageIcon(
     deathMsgLend = deathMsgLenc + 1;
     if (deathMsgLend + 4 > deathMsgMaxLen)
         MyAssertHandler(".\\client\\cl_console.cpp", 1449, 0, "%s", "deathMsgLen + sizeof( iconShader ) <= deathMsgMaxLen");
-    *(unsigned int *)&deathMsg[deathMsgLend] = iconShader;
+    *(unsigned int *)&deathMsg[deathMsgLend] = (unsigned int)iconShader;
     deathMsgLene = deathMsgLend + 4;
     if (deathMsgLene - deathMsgLen != 8)
         MyAssertHandler(
@@ -2184,6 +2275,8 @@ void __cdecl Con_DrawMessageWindowNewToOld(
     }
 }
 
+float MY_GLOWCOLOR[4] = { 0.0f, 0.3f, 0.0f, 1.0f };
+
 void __cdecl Con_DrawMessageLineOnHUD(
     int localClientNum,
     const ScreenPlacement *scrPlace,
@@ -2265,19 +2358,19 @@ void __cdecl Con_DrawMessageLineOnHUD(
             typewriterColor[3] = 1.0;
             if ((line->flags & 0x10) != 0)
             {
-                glowColor = &con_typewriterColorGlowCheckpoint->current;
+                glowColor = (DvarValue*)&con_typewriterColorGlowCheckpoint->current;
             }
             else if ((line->flags & 4) != 0)
             {
-                glowColor = &con_typewriterColorGlowCompleted->current;
+                glowColor = (DvarValue *)&con_typewriterColorGlowCompleted->current;
             }
             else if ((line->flags & 8) != 0)
             {
-                glowColor = &con_typewriterColorGlowFailed->current;
+                glowColor = (DvarValue *)&con_typewriterColorGlowFailed->current;
             }
             else
             {
-                glowColor = &con_typewriterColorGlowUpdated->current;
+                glowColor = (DvarValue *)&con_typewriterColorGlowUpdated->current;
             }
             TypewriterSounds(localClientNum, msgwnd, line);
             R_AddCmdDrawConsoleTextPulseFX(
@@ -2649,7 +2742,7 @@ bool __cdecl Con_IsGameMessageWindowActive(int localClientNum, unsigned int wind
             "windowIndex doesn't index GAMEMSG_WINDOW_COUNT\n\t%i not in [0, %i)",
             windowIndex,
             4);
-    return SLOunsigned int(con.color[4630 * localClientNum - 2571 + 13 * windowIndex]) > 0;
+    return SLODWORD(con.color[4630 * localClientNum - 2571 + 13 * windowIndex]) > 0;
 }
 
 void __cdecl Con_DrawSay(int localClientNum, int x, int y)
@@ -2666,9 +2759,9 @@ void __cdecl Con_DrawSay(int localClientNum, int x, int y)
     if (Key_IsCatcherActive(localClientNum, 32))
     {
         if (playerKeys[localClientNum].chat_team)
-            v3 = SEH_SafeTranslateString("EXE_SAYTEAM");
+            v3 = SEH_SafeTranslateString((char*)"EXE_SAYTEAM");
         else
-            v3 = SEH_SafeTranslateString("EXE_SAY");
+            v3 = SEH_SafeTranslateString((char*)"EXE_SAY");
         string = va("%s: ", v3);
         normalizedScale = playerKeys[localClientNum].chatField.charHeight / 48.0;
         font = UI_GetFontHandle(&scrPlaceView[localClientNum], 0, normalizedScale);
@@ -2717,6 +2810,7 @@ void __cdecl Con_DrawSolidConsole(int localClientNum)
         Con_DrawOuputWindow();
     Con_DrawInput(localClientNum);
 }
+
 
 void __cdecl Con_DrawInput(int localClientNum)
 {
@@ -2956,7 +3050,7 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
     if (Con_IsAutoCompleteMatch(str, conDrawInputGlob.inputText, conDrawInputGlob.inputTextLen)
         && (!conDrawInputGlob.hasExactMatch || !str[conDrawInputGlob.inputTextLen]))
     {
-        dvar = _Dvar_FindVar(str);
+        dvar = Dvar_FindVar(str);
         if (!dvar)
             MyAssertHandler(".\\client\\cl_console.cpp", 2007, 0, "%s", "dvar");
         hasLatchedValue = Dvar_HasLatchedValue(dvar);
@@ -2972,23 +3066,21 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
         conDrawInputGlob.x = conDrawInputGlob.leftX;
         if (hasLatchedValue)
         {
-            ConDrawInput_Text("  latched value", con_inputDvarInactiveValueColor);
+            ConDrawInput_Text((char*)"  latched value", con_inputDvarInactiveValueColor);
             conDrawInputGlob.x = conDrawInputGlob.x + 300.0;
             v2 = (char *)Dvar_DisplayableLatchedValue(dvar);
             ConDrawInput_TextLimitChars(v2, 40, con_inputDvarInactiveValueColor);
             conDrawInputGlob.y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
             conDrawInputGlob.x = conDrawInputGlob.leftX;
         }
-        ConDrawInput_Text("  default", con_inputDvarInactiveValueColor);
+        ConDrawInput_Text((char*)"  default", con_inputDvarInactiveValueColor);
         conDrawInputGlob.x = conDrawInputGlob.x + 300.0;
         v3 = (char *)Dvar_DisplayableResetValue(dvar);
         ConDrawInput_TextLimitChars(v3, 40, con_inputDvarInactiveValueColor);
         conDrawInputGlob.y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
         conDrawInputGlob.y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
         conDrawInputGlob.x = conDrawInputGlob.leftX;
-        HIunsigned int(v4) = 1024;
-        LOunsigned int(v4) = dvarInfo;
-        Dvar_DomainToString_GetLines(dvar->type, dvar->domain, v4, &infoLineCount);
+        Dvar_DomainToString_GetLines(dvar->type, dvar->domain, dvarInfo, 1024, &infoLineCount);
         if (dvar->description)
             descriptionLineCount = ConDrawInput_GetDvarDescriptionLines(dvar);
         else
@@ -3242,9 +3334,9 @@ int __cdecl Con_GetAutoCompleteColorCodedStringDiscontiguous(
         {
             wasMatching = isMatching;
             if (isMatching)
-                v9 = a2_0;
+                v9 = "^2";
             else
-                v9 = a7;
+                v9 = "^7";
             v8 = v9;
             v7 = &colorCoded[colorCodedPos];
             do
@@ -3522,7 +3614,7 @@ void __cdecl Con_Close(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7C1][0])
+    if (clientUIActives[0].isRunning)
     {
         Field_Clear(&g_consoleField);
         Con_CancelAutoComplete();
@@ -3530,7 +3622,7 @@ void __cdecl Con_Close(int localClientNum)
         Con_ClearMiniConsole(localClientNum);
         Con_ClearErrors(localClientNum);
         for (client = 0; client < 1; ++client)
-            MEMORY[0xE7A7C4][4 * client] &= ~1u;
+            clientUIActives[client].keyCatchers &= ~1u;
     }
 }
 

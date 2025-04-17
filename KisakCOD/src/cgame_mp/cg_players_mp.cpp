@@ -7,6 +7,10 @@
 #include <client_mp/client_mp.h>
 
 #include <EffectsCore/fx_system.h>
+#include <script/scr_const.h>
+#include <gfx_d3d/r_scene.h>
+#include <xanim/xmodel.h>
+#include <xanim/dobj.h>
 
 void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int localClientNum)
 {
@@ -142,6 +146,7 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
     }
 }
 
+// KISAKTODO: this function is fubar'd and needs a manual redo
 void  CG_AddPlayerSpriteDrawSurf(
     int localClientNum,
     const centity_s *cent,
@@ -157,13 +162,13 @@ void  CG_AddPlayerSpriteDrawSurf(
     float v11; // [esp+48h] [ebp-2Ch]
     float origin[3]; // [esp+4Ch] [ebp-28h]
     DObj_s *obj; // [esp+58h] [ebp-1Ch]
-    int radius; // [esp+5Ch] [ebp-18h]
+    snapshot_s* radius; // [esp+5Ch] [ebp-18h]
     int renderFxFlags; // [esp+60h] [ebp-14h]
     int v16; // [esp+68h] [ebp-Ch]
     const cg_s *cgameGlob; // [esp+6Ch] [ebp-8h]
     const cg_s *retaddr; // [esp+74h] [ebp+0h]
 
-    v16 = a1;
+    //v16 = a1;
     cgameGlob = retaddr;
     if (additionalRadiusSize < 0.0)
         MyAssertHandler(
@@ -184,8 +189,8 @@ void  CG_AddPlayerSpriteDrawSurf(
             "(localClientNum == 0)",
             localClientNum);
     renderFxFlags = (int)cgArray;
-    radius = MEMORY[0x98F45C];
-    obj = (DObj_s *)((*(unsigned int *)(MEMORY[0x98F45C] + 32) & 6) != 0 && cent->nextState.number == *(unsigned int *)(radius + 232));
+    radius = cgArray[0].nextSnap;
+    obj = ((radius->ps.otherFlags & 6) != 0 && cent->nextState.number == radius->ps.clientNum);
     if (!(_BYTE)obj || *(unsigned int *)(renderFxFlags + 287032))
     {
         if (fixedScreenSize)
@@ -372,7 +377,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                 "(localClientNum == 0)",
                 localClientNum);
         clientNum = cent->nextState.clientNum;
-        if ((unsigned int)clientNum >= 0x40)
+        if (clientNum >= 0x40)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_players_mp.cpp",
                 273,
@@ -401,7 +406,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                 {
                                     if (CG_DObjGetWorldTagMatrix(&pTurretCEnt->pose, turretObj, scr_const.tag_weapon, tagAxis, tagOrigin))
                                     {
-                                        if (MEMORY[0x9D555C])
+                                        if (cgArray[0].frametime)
                                         {
                                             if (!pTurretCEnt->nextState.weapon)
                                                 MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 304, 0, "%s", "pTurretCEnt->nextState.weapon");
@@ -416,7 +421,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                             if (weapDef->fAnimHorRotateInc == 0.0)
                                                 MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 307, 0, "%s", "weapDef->fAnimHorRotateInc");
                                             pAnimTree = ci->pXAnimTree;
-                                            pXAnims = (XAnim_s *)MEMORY[0xA7B0B0];
+                                            pXAnims = cgArray[0].bgs.animScriptData.animTree.anims;
                                             baseAnim = pLerpAnim->animationNumber & 0xFFFFFDFF;
                                             yaw = vectosignedyaw(tagAxis[0]);
                                             localYaw = AngleDelta(yaw, pTurretCEnt->pose.angles[1]);
@@ -435,7 +440,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                             if (!numVertChildren)
                                             {
                                                 AnimDebugName = XAnimGetAnimDebugName(pXAnims, baseAnim);
-                                                Com_Error(ERR_DROP, &byte_86CEEC, AnimDebugName);
+                                                Com_Error(ERR_DROP, "Player anim %s has no children.", AnimDebugName);
                                             }
                                             i = 0;
                                             do
@@ -445,21 +450,21 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                                 if (!numHorChildren)
                                                 {
                                                     v3 = XAnimGetAnimDebugName(pXAnims, heightAnim);
-                                                    Com_Error(ERR_DROP, &byte_86CEEC, v3);
+                                                    Com_Error(ERR_DROP, "Player anim %s has no children.", v3);
                                                 }
-                                                fBlend = (double)numHorChildren * 0.5 + localYaw / weapDef->fAnimHorRotateInc;
+                                                fBlend = numHorChildren * 0.5 + localYaw / weapDef->fAnimHorRotateInc;
                                                 if (fBlend >= 0.0)
                                                 {
-                                                    if (fBlend >= (double)(numHorChildren - 1))
-                                                        fBlend = (float)(numHorChildren - 1);
+                                                    if (fBlend >= (numHorChildren - 1))
+                                                        fBlend = (numHorChildren - 1);
                                                 }
                                                 else
                                                 {
                                                     fBlend = 0.0;
                                                 }
-                                                v4 = (int)fBlend;
+                                                v4 = fBlend;
                                                 iBlend = v4;
-                                                fBlend = fBlend - (double)v4;
+                                                fBlend = fBlend - v4;
                                                 leafAnim1 = XAnimGetChildAt(pXAnims, heightAnim, v4);
                                                 XAnimGetAbsDelta(pXAnims, leafAnim1, rot, trans, 0.0);
                                                 if (fBlend != 0.0)
@@ -468,7 +473,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                                     XAnimGetAbsDelta(pXAnims, leafAnim2, rot, trans2, 0.0);
                                                     Vec3Lerp(trans, trans2, fBlend, trans);
                                                 }
-                                                if (fDelta <= (double)trans[2])
+                                                if (fDelta <= trans[2])
                                                     break;
                                                 fPrevTransZ = trans[2];
                                                 iPrevBlend = iBlend;
@@ -521,14 +526,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                             end[1] = cent->pose.origin[1];
                                             end[2] = cent->pose.origin[2];
                                             start[2] = pTurretCEnt->pose.origin[2];
-                                            CG_TraceCapsule(
-                                                &trace,
-                                                start,
-                                                (float *)vec3_origin,
-                                                (float *)vec3_origin,
-                                                end,
-                                                cent->nextState.number,
-                                                (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1);
+                                            CG_TraceCapsule(&trace, start, vec3_origin, vec3_origin, end, cent->nextState.number, 0x2810011);
                                             if (trace.fraction < 1.0)
                                             {
                                                 Vec3Lerp(start, end, trace.fraction, endpos);
@@ -768,7 +766,7 @@ const char *__cdecl CG_GetPlayerTeamName(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] < 8)
+    if (clientUIActives[0].connectionState < CA_PRIMED)
         return CG_GetTeamName(TEAM_FREE);
     if (localClientNum)
         MyAssertHandler(
@@ -802,7 +800,7 @@ const char *__cdecl CG_GetPlayerOpposingTeamName(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0xE7A7CC][0] < 8)
+    if (clientUIActives[0].connectionState < CA_PRIMED)
         return CG_GetOpposingTeamName(TEAM_FREE);
     if (localClientNum)
         MyAssertHandler(
@@ -836,7 +834,7 @@ bool __cdecl CG_IsPlayerDead(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (client_state[0] < 8)
+    if (clientUIActives[0].connectionState < CA_PRIMED)
         return 0;
     if (localClientNum)
         MyAssertHandler(

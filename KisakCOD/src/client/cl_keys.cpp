@@ -4,6 +4,12 @@
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
 #include <universal/com_memory.h>
+#include <client_mp/client_mp.h>
+#include <cgame/cg_local.h>
+#include <stringed/stringed_hooks.h>
+#include <win32/win_local.h>
+#include <universal/com_files.h>
+#include <cgame_mp/cg_local_mp.h>
 
 //struct keyname_t *keynames 827b29b0     cl_keys.obj
 //struct keyname_t *keynames_localized 827b2d50     cl_keys.obj
@@ -21,6 +27,12 @@ field_t historyEditLines[32];
 keyname_t keynames[96];
 keyname_t keynames_localized[96];
 char s_shortestMatch[1024];
+
+bool s_shouldCompleteCmd;
+const char *s_completionString;
+int s_matchCount;
+int s_prefixMatchCount;
+bool s_hasExactMatch;
 
 void __cdecl TRACK_cl_keys()
 {
@@ -246,7 +258,7 @@ void __cdecl Console_Key(int localClientNum, int key)
             Cbuf_AddText(localClientNum, "\n");
         }
         else if (Console_IsClientDisconnected()
-            && I_strnicmp(g_consoleField.buffer, aQuit_1, 4)
+            && I_strnicmp(g_consoleField.buffer, "quit", 4)
             && I_strnicmp(g_consoleField.buffer, "kill", 4))
         {
             Cbuf_AddText(localClientNum, g_consoleField.buffer);
@@ -556,19 +568,20 @@ void CompleteCommand()
 
     v2 = g_consoleField.buffer[0] == 47 || g_consoleField.buffer[0] == 92;
     offset = v2;
-    if (!strnicmp(&g_consoleField.buffer[v2], "pb_", 3u))
-    {
-        strncpy((unsigned __int8 *)pbbuf, (unsigned __int8 *)&g_consoleField.buffer[offset], 0xFFu);
-        pbbuf[255] = 0;
-        if (!strnicmp(pbbuf, "pb_sv_", 6u))
-            PbServerCompleteCommand(pbbuf, 255);
-        else
-            PbClientCompleteCommand(pbbuf, 255);
-        Com_sprintf(g_consoleField.buffer, 0x100u, "\\%s", pbbuf);
-        g_consoleField.cursor = strlen(g_consoleField.buffer);
-        Field_AdjustScroll(&scrPlaceFull, &g_consoleField);
-    }
-    else
+    // LWSS: Remove Punkbuster crap
+    //if (!strnicmp(&g_consoleField.buffer[v2], "pb_", 3u))
+    //{
+    //    strncpy((unsigned __int8 *)pbbuf, (unsigned __int8 *)&g_consoleField.buffer[offset], 0xFFu);
+    //    pbbuf[255] = 0;
+    //    if (!strnicmp(pbbuf, "pb_sv_", 6u))
+    //        PbServerCompleteCommand(pbbuf, 255);
+    //    else
+    //        PbClientCompleteCommand(pbbuf, 255);
+    //    Com_sprintf(g_consoleField.buffer, 0x100u, "\\%s", pbbuf);
+    //    g_consoleField.cursor = strlen(g_consoleField.buffer);
+    //    Field_AdjustScroll(&scrPlaceFull, &g_consoleField);
+    //}
+    //else
     {
         s_completionString = Con_TokenizeInput();
         s_matchCount = 0;
@@ -760,7 +773,7 @@ void CompleteDvarArgument()
     char dvarValue[260]; // [esp+1Ch] [ebp-108h] BYREF
 
     dvarName = Con_TokenizeInput();
-    dvar = _Dvar_FindVar(dvarName);
+    dvar = Dvar_FindVar(dvarName);
     if (!dvar)
         MyAssertHandler(".\\client\\cl_keys.cpp", 898, 0, "%s", "dvar");
     if (dvar->type == 6)
@@ -1004,7 +1017,7 @@ void __cdecl Key_Unbind_f()
         }
         else
         {
-            Key_SetBinding(0, b, (char *)&String);
+            Key_SetBinding(0, b, (char *)"");
         }
     }
     else
@@ -1073,7 +1086,7 @@ void __cdecl Key_Unbindall_f()
     for (keynum = 0; keynum < 256; ++keynum)
     {
         if (playerKeys[0].keys[keynum].binding)
-            Key_SetBinding(0, keynum, (char *)&String);
+            Key_SetBinding(0, keynum, (char *)"");
     }
 }
 
@@ -1260,7 +1273,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (key == 96 || key == 126 || (MEMORY[0xE7A7C4][0] & 3) != 0)
+    if (key == 96 || key == 126 || (clientUIActives[0].keyCatchers & 3) != 0)
     {
         if (DevGui_IsActive())
             DevGui_Toggle();
@@ -1286,15 +1299,15 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
     if (!down || keys[key].repeats <= 1)
     {
     LABEL_38:
-        if ((MEMORY[0xE7A7C4][0] & 2) == 0 || (MEMORY[0xE7A7C4][0] & 1) != 0)
+        if ((clientUIActives[0].keyCatchers & 2) == 0 || (clientUIActives[0].keyCatchers & 1) != 0)
         {
-            if (!con_restricted->current.enabled || (MEMORY[0xE7A7C4][0] & 1) != 0)
+            if (!con_restricted->current.enabled || (clientUIActives[0].keyCatchers & 1) != 0)
             {
                 if (key == 96 || key == 126)
                 {
                     if (!down)
                         return;
-                    if ((MEMORY[0xE7A7C4][0] & 1) == 0
+                    if ((clientUIActives[0].keyCatchers & 1) == 0
                         && !com_sv_running->current.enabled
                         && sv_disableClientConsole->current.enabled)
                     {
@@ -1321,7 +1334,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
             }
         }
         locSelInputState = &playerKeys[localClientNum].locSelInputState;
-        if ((MEMORY[0xE7A7C4][0] & 8) != 0 && down > 0)
+        if ((clientUIActives[0].keyCatchers & 8) != 0 && down > 0)
         {
             if (key == 27)
             {
@@ -1342,31 +1355,31 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        clcState = MEMORY[0xE7A7CC][0];
+        clcState = clientUIActives[0].connectionState;
         if (down)
         {
             v6 = key == 200 || key < 128;
             if (v6
                 && (CL_GetLocalClientConnection(localClientNum)->demoplaying || clcState == CA_CINEMATIC || clcState == CA_LOGO)
-                && !MEMORY[0xE7A7C4][0])
+                && !clientUIActives[0].keyCatchers)
             {
-                Dvar_SetString((dvar_s *)nextdemo, (char *)&String);
+                Dvar_SetString(nextdemo, &String);
                 key = 27;
             }
         }
         if (key == 27 && down)
         {
-            if ((MEMORY[0xE7A7C4][0] & 2) != 0)
+            if ((clientUIActives[0].keyCatchers & 2) != 0)
             {
-                if ((MEMORY[0xE7A7C4][0] & 1) != 0)
+                if ((clientUIActives[0].keyCatchers & 1) != 0)
                     Con_ToggleConsole();
                 return;
             }
-            if ((MEMORY[0xE7A7C4][0] & 0x20) == 0)
+            if ((clientUIActives[0].keyCatchers & 0x20) == 0)
             {
-                if ((MEMORY[0xE7A7C4][0] & 1) != 0)
+                if ((clientUIActives[0].keyCatchers & 1) != 0)
                     Con_CancelAutoComplete();
-                if ((MEMORY[0xE7A7C4][0] & 0x10) != 0)
+                if ((clientUIActives[0].keyCatchers & 0x10) != 0)
                 {
                     UI_KeyEvent(localClientNum, 27, down);
                 }
@@ -1386,16 +1399,16 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
                         if (CL_GetLocalClientConnection(localClientNum)->demoplaying
                             || cl_waitingOnServerToLoadMap[localClientNum])
                         {
-                            UI_SetActiveMenu(localClientNum, 1);
+                            UI_SetActiveMenu(localClientNum, UIMENU_MAIN);
                         }
                         else
                         {
-                            UI_SetActiveMenu(localClientNum, 2);
+                            UI_SetActiveMenu(localClientNum, UIMENU_INGAME);
                         }
                         break;
                     default:
                         if (cls.uiStarted)
-                            UI_SetActiveMenu(localClientNum, 1);
+                            UI_SetActiveMenu(localClientNum, UIMENU_MAIN);
                         break;
                     }
                 }
@@ -1403,7 +1416,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
             }
             goto LABEL_91;
         }
-        if (MEMORY[0xE7A7C2]
+        if (clientUIActives[0].cgameInitialized
             && CG_IsScoreboardDisplayed(localClientNum)
             && down
             && Scoreboard_HandleInput(localClientNum, key))
@@ -1418,24 +1431,24 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
                 Com_sprintf(cmd, 0x400u, "-%s %i %i\n", kba + 1, key, time);
                 Cbuf_AddText(localClientNum, cmd);
             }
-            if ((MEMORY[0xE7A7C4][0] & 0x10) != 0 && cls.uiStarted)
+            if ((clientUIActives[0].keyCatchers & 0x10) != 0 && cls.uiStarted)
                 UI_KeyEvent(localClientNum, key, 0);
             return;
         }
-        if ((MEMORY[0xE7A7C4][0] & 1) == 0)
+        if ((clientUIActives[0].keyCatchers & 1) == 0)
         {
-            if ((MEMORY[0xE7A7C4][0] & 2) != 0)
+            if ((clientUIActives[0].keyCatchers & 2) != 0)
             {
                 Scr_KeyEvent(key);
                 return;
             }
-            if ((MEMORY[0xE7A7C4][0] & 0x10) != 0 && !CL_MouseInputShouldBypassMenus(localClientNum, key))
+            if ((clientUIActives[0].keyCatchers & 0x10) != 0 && !CL_MouseInputShouldBypassMenus(localClientNum, key))
             {
                 if (cls.uiStarted)
                     UI_KeyEvent(localClientNum, key, down);
                 return;
             }
-            if ((MEMORY[0xE7A7C4][0] & 0x20) != 0)
+            if ((clientUIActives[0].keyCatchers & 0x20) != 0)
             {
             LABEL_91:
                 Message_Key(localClientNum, key);
@@ -1468,16 +1481,16 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
         Console_Key(localClientNum, key);
         return;
     }
-    if ((MEMORY[0xE7A7C4][0] & 0x21) != 0)
+    if ((clientUIActives[0].keyCatchers & 0x21) != 0)
     {
     LABEL_34:
         if (key == 96 || key == 126 || key == 27)
             return;
         goto LABEL_38;
     }
-    if ((MEMORY[0xE7A7C4][0] & 0x12) != 0)
+    if ((clientUIActives[0].keyCatchers & 0x12) != 0)
     {
-        if ((MEMORY[0xE7A7C4][0] & 2) != 0)
+        if ((clientUIActives[0].keyCatchers & 2) != 0)
         {
             switch (key)
             {
@@ -1496,7 +1509,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
         }
         else
         {
-            if ((MEMORY[0xE7A7C4][0] & 0x10) == 0)
+            if ((clientUIActives[0].keyCatchers & 0x10) == 0)
                 MyAssertHandler(".\\client\\cl_keys.cpp", 1942, 0, "%s", "cl->keyCatchers & KEYCATCH_UI");
             switch (key)
             {
@@ -1529,7 +1542,7 @@ void __cdecl Message_Key(int localClientNum, int key)
             localClientNum);
     if (key == 27)
     {
-        MEMORY[0xE7A7C4][0] &= ~0x20u;
+        clientUIActives[0].keyCatchers &= ~0x20u;
         Field_Clear(chatField);
     }
     else if (key == 13 || key == 191)
@@ -1542,7 +1555,7 @@ void __cdecl Message_Key(int localClientNum, int key)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        clcState = MEMORY[0xE7A7CC][0];
+        clcState = clientUIActives[0].connectionState;
         if (chatField->buffer[0] && clcState == CA_ACTIVE)
         {
             if (playerKeys[localClientNum].chat_team)
@@ -1551,7 +1564,7 @@ void __cdecl Message_Key(int localClientNum, int key)
                 Com_sprintf(buffer, 0x400u, aSay, chatField->buffer);
             CL_AddReliableCommand(localClientNum, buffer);
         }
-        MEMORY[0xE7A7C4][0] &= ~0x20u;
+        clientUIActives[0].keyCatchers &= ~0x20u;
         Field_Clear(chatField);
     }
     else
@@ -1573,7 +1586,7 @@ bool __cdecl CL_MouseInputShouldBypassMenus(int localClientNum, int key)
 
 void __cdecl CL_CharEvent(int localClientNum, int key)
 {
-    if (DevGui_IsActive() || key == 96 || key == 126)
+    if (DevGui_IsActive() || key == '`' || key == '~')
         return;
     if (localClientNum)
         MyAssertHandler(
@@ -1583,7 +1596,7 @@ void __cdecl CL_CharEvent(int localClientNum, int key)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((MEMORY[0xE7A7C4][0] & 1) != 0)
+    if ((clientUIActives[0].keyCatchers & 1) != 0)
     {
         if (key == 8 && Con_CancelAutoComplete())
             return;
@@ -1591,12 +1604,12 @@ void __cdecl CL_CharEvent(int localClientNum, int key)
         CL_ConsoleCharEvent(localClientNum, key);
         return;
     }
-    if ((MEMORY[0xE7A7C4][0] & 0x20) != 0)
+    if ((clientUIActives[0].keyCatchers & 0x20) != 0)
     {
         Field_CharEvent(localClientNum, &scrPlaceView[localClientNum], &playerKeys[localClientNum].chatField, key);
         return;
     }
-    if ((MEMORY[0xE7A7C4][0] & 0x10) != 0)
+    if ((clientUIActives[0].keyCatchers & 0x10) != 0)
     {
         UI_KeyEvent(localClientNum, key | 0x400, 1);
         return;
@@ -1609,7 +1622,7 @@ void __cdecl CL_CharEvent(int localClientNum, int key)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (!MEMORY[0xE7A7CC][0])
+    if (clientUIActives[0].connectionState == CA_DISCONNECTED)
         goto LABEL_18;
 }
 

@@ -5,6 +5,7 @@
 #include <aim_assist/aim_assist.h>
 #include <win32/win_local.h>
 #include <qcommon/cmd.h>
+#include <cgame_mp/cg_local_mp.h>
 
 
 const dvar_t *cl_stanceHoldTime;

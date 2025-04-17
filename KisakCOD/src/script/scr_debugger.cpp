@@ -963,7 +963,7 @@ void Scr_Step()
     }
     else
     {
-        MEMORY[0xE7A7C4][0] &= ~2u;
+        clientUIActives[0].keyCatchers &= ~2u;
         if (scrDebuggerGlob.step_mode && scrVmPub.function_count)
         {
             if (scrDebuggerGlob.step_mode == 3)
@@ -991,7 +991,7 @@ void Scr_Step()
                     &localId);
                 scrVarPub.evaluate = evaluate;
             }
-            Scr_SetTempBreakpoint((char *)codePos, localId);
+            Scr_SetTempBreakpoint(codePos, localId);
         }
     }
 }
@@ -1286,18 +1286,18 @@ Scr_WatchElement_s *Scr_DisplayDebugger()
             "%s",
             "!Key_IsCatcherActive( ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT )");
     Key_AddCatcher(0, 2);
-    if ((MEMORY[0xE7A7C4][0] & 2) != 0)
+    if ((clientUIActives[0].keyCatchers & 2) != 0)
     {
         startTime = cls.realtime;
-        keyCatchers = MEMORY[0xE7A7C4][0] & 0xFFFFFFFC;
-        MEMORY[0xE7A7C4][0] = MEMORY[0xE7A7C4][0] & 3;
+        keyCatchers = clientUIActives[0].keyCatchers & 0xFFFFFFFC;
+        clientUIActives[0].keyCatchers &= 3u;
         _IN_ActivateMouse(1);
         remoteScreenUpdateNesting = R_PopRemoteScreenUpdate();
-        while ((MEMORY[0xE7A7C4][0] & 2) != 0)
+        while ((clientUIActives[0].keyCatchers & 2) != 0)
             Debug_Frame(0);
         R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
         _IN_ActivateMouse(1);
-        MEMORY[0xE7A7C4][0] = keyCatchers | MEMORY[0xE7A7C4][0] & 3;
+        clientUIActives[0].keyCatchers = keyCatchers | clientUIActives[0].keyCatchers & 3;
         CL_EndScriptDebugger(cls.realtime - startTime);
     }
     Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);

@@ -1,4 +1,11 @@
 #include "client.h"
+#include <sound/snd_public.h>
+#include <gfx_d3d/r_cinematic.h>
+#include <client_mp/client_mp.h>
+#include <qcommon/cmd.h>
+
+bool cin_skippable;
+const dvar_s *nextmap;
 
 int __cdecl CIN_PlayCinematic(int localClientNum, char *arg)
 {
@@ -9,7 +16,7 @@ int __cdecl CIN_PlayCinematic(int localClientNum, char *arg)
     volume = SND_GetVolumeNormalized() * snd_cinematicVolumeScale->current.value;
     R_Cinematic_StartPlayback(arg, 5u, volume);
     if (cls.uiStarted)
-        UI_SetActiveMenu(localClientNum, 0);
+        UI_SetActiveMenu(localClientNum, UIMENU_NONE);
     Con_Close(localClientNum);
     if (localClientNum)
         MyAssertHandler(
@@ -19,7 +26,7 @@ int __cdecl CIN_PlayCinematic(int localClientNum, char *arg)
             "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
             localClientNum,
             1);
-    MEMORY[0xE7A7CC][4 * localClientNum] = 1;
+    clientUIActives[localClientNum].connectionState = CA_CINEMATIC;
     return 1;
 }
 
@@ -67,7 +74,7 @@ void __cdecl SCR_StopCinematic(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (MEMORY[0xE7A7CC][0] == 1)
+        if (clientUIActives[0].connectionState == CA_CINEMATIC)
         {
             if (localClientNum)
                 MyAssertHandler(
@@ -77,12 +84,12 @@ void __cdecl SCR_StopCinematic(int localClientNum)
                     "client doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                     localClientNum,
                     1);
-            MEMORY[0xE7A7CC][4 * localClientNum] = 0;
-            if (*(_BYTE *)nextmap->current.integer)
+            clientUIActives[localClientNum].connectionState = CA_DISCONNECTED;
+            if (nextmap->current.integer)
             {
                 v1 = va("%s\n", nextmap->current.string);
                 Cbuf_AddText(0, v1);
-                Dvar_SetString((dvar_s *)nextmap, (char *)&String);
+                Dvar_SetString(nextmap, (char*)"");
             }
         }
     }

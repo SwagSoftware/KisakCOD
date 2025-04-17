@@ -1286,7 +1286,7 @@ void __cdecl QuatToAxis(const float *quat, mat3x3 &axis)
     (axis)[2][2] = 1.0 - (xxa + yya);
 }
 
-void __cdecl UnitQuatToAxis(const float *quat, float (*axis)[3])
+void __cdecl UnitQuatToAxis(const float *quat, mat3x3 &axis)
 {
     const char *v2; // eax
     float yy; // [esp+24h] [ebp-30h]

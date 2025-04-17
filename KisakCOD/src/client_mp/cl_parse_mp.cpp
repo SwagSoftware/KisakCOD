@@ -1,8 +1,20 @@
 #include "client_mp.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/msg_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <universal/com_files.h>
+#include <win32/win_local.h>
+#include <qcommon/cmd.h>
+#include <qcommon/dl_main.h>
+#include <universal/com_constantconfigstrings.h>
+#include <database/database.h>
+#include <qcommon/files.h>
+#include <client/client.h>
 
 char *svc_strings[256];
+int autoupdateStarted;
+char autoupdateFilename[64];
+int cl_connectedToPureServer;
 
 void __cdecl TRACK_cl_parse()
 {
@@ -183,30 +195,34 @@ void __cdecl CL_DeltaClient(
 
 void __cdecl CL_SystemInfoChanged(int localClientNum)
 {
-    char *v1; // eax
-    char *v2; // eax
-    char *v3; // eax
+    const char *v1; // eax
+    const char *v2; // eax
+    const char *v3; // eax
     clientActive_t *LocalClientGlobals; // [esp+4h] [ebp-28h]
-    char *t; // [esp+8h] [ebp-24h]
-    LargeLocal value_large_local; // [esp+Ch] [ebp-20h] BYREF
+    const char *t; // [esp+8h] [ebp-24h]
     char *systemInfo; // [esp+14h] [ebp-18h]
     char (*key)[8192]; // [esp+18h] [ebp-14h]
-    LargeLocal key_large_local; // [esp+1Ch] [ebp-10h] BYREF
     const char *s; // [esp+24h] [ebp-8h] BYREF
     char (*value)[8192]; // [esp+28h] [ebp-4h]
 
-    LargeLocal::LargeLocal(&key_large_local, 0x2000);
-    key = (char (*)[8192])LargeLocal::GetBuf(&key_large_local);
-    LargeLocal::LargeLocal(&value_large_local, 0x2000);
-    value = (char (*)[8192])LargeLocal::GetBuf(&value_large_local);
+    LargeLocal key_large_local(0x2000); // [esp+1Ch] [ebp-10h] BYREF
+    //LargeLocal::LargeLocal(&key_large_local, 0x2000);
+    //key = (char (*)[8192])LargeLocal::GetBuf(&key_large_local);
+    key = (char (*)[8192])key_large_local.GetBuf();
+
+    LargeLocal value_large_local(0x2000); // [esp+Ch] [ebp-20h] BYREF
+    //LargeLocal::LargeLocal(&value_large_local, 0x2000);
+    //value = (char (*)[8192])LargeLocal::GetBuf(&value_large_local);
+    value = (char (*)[8192])value_large_local.GetBuf();
+
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     systemInfo = &LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.stringOffsets[1]];
     v1 = Info_ValueForKey(systemInfo, "sv_serverid");
     LocalClientGlobals->serverId = atoi(v1);
     if (CL_GetLocalClientConnection(localClientNum)->demoplaying)
     {
-        LargeLocal::~LargeLocal(&value_large_local);
-        LargeLocal::~LargeLocal(&key_large_local);
+        //LargeLocal::~LargeLocal(&value_large_local);
+       // LargeLocal::~LargeLocal(&key_large_local);
     }
     else
     {
@@ -220,7 +236,7 @@ void __cdecl CL_SystemInfoChanged(int localClientNum)
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            if (MEMORY[0xE7A7CC][0] < 9)
+            if (clientUIActives[0].connectionState < CA_ACTIVE)
             {
                 s = Info_ValueForKey(systemInfo, "sv_cheats");
                 if (!atoi(s))
@@ -229,13 +245,13 @@ void __cdecl CL_SystemInfoChanged(int localClientNum)
         }
         s = Info_ValueForKey(systemInfo, "sv_iwds");
         v2 = Info_ValueForKey(systemInfo, "sv_iwdNames");
-        FS_PureServerSetLoadedIwds((char *)s, v2);
+        FS_PureServerSetLoadedIwds((char *)s, (char*)v2);
         s = Info_ValueForKey(systemInfo, "sv_referencedIwds");
         v3 = Info_ValueForKey(systemInfo, "sv_referencedIwdNames");
-        FS_ServerSetReferencedIwds((char *)s, v3);
+        FS_ServerSetReferencedIwds((char *)s, (char*)v3);
         s = Info_ValueForKey(systemInfo, "sv_referencedFFCheckSums");
         t = Info_ValueForKey(systemInfo, "sv_referencedFFNames");
-        FS_ServerSetReferencedFFs((char *)s, t);
+        FS_ServerSetReferencedFFs((char *)s, (char*)t);
         if (!com_sv_running->current.enabled)
         {
             s = systemInfo;
@@ -248,8 +264,8 @@ void __cdecl CL_SystemInfoChanged(int localClientNum)
             }
         }
         cl_connectedToPureServer = Dvar_GetBool("sv_pure");
-        LargeLocal::~LargeLocal(&value_large_local);
-        LargeLocal::~LargeLocal(&key_large_local);
+        //LargeLocal::~LargeLocal(&value_large_local);
+        //LargeLocal::~LargeLocal(&key_large_local);
     }
 }
 
@@ -261,6 +277,216 @@ void __cdecl CL_ParseMapCenter(int localClientNum)
     sscanf(mapCenterString, "%f %f %f", cls.mapCenter, &cls.mapCenter[1], &cls.mapCenter[2]);
 }
 
+void __cdecl CL_ParseWWWDownload(int localClientNum, msg_t *msg)
+{
+    char *String; // eax
+    char *fs_homepath; // [esp+10h] [ebp-10Ch]
+    char toOSPath[260]; // [esp+14h] [ebp-108h] BYREF
+
+    fs_homepath = (char *)Dvar_GetString("fs_homepath");
+    I_strncpyz(cls.originalDownloadName, cls.downloadName, 64);
+    String = MSG_ReadString(msg);
+    I_strncpyz(cls.downloadName, String, 256);
+    cls.downloadSize = MSG_ReadLong(msg);
+    cls.downloadFlags = MSG_ReadLong(msg);
+    if ((cls.downloadFlags & 2) != 0)
+    {
+        Sys_OpenURL(cls.downloadName, 1);
+        Cbuf_AddText(localClientNum, "quit\n");
+        CL_AddReliableCommand(localClientNum, "wwwdl bbl8r");
+        DL_CancelDownload();
+        cls.wwwDlInProgress = 0;
+    }
+    else
+    {
+        legacyHacks.cl_downloadSize = cls.downloadSize;
+        Com_DPrintf(14, "Server redirected download: %s\n", cls.downloadName);
+        cls.wwwDlInProgress = 1;
+        CL_AddReliableCommand(localClientNum, "wwwdl ack");
+        FS_BuildOSPath(fs_homepath, cls.downloadTempName, (char *)"", toOSPath);
+        I_strncpyz(cls.downloadTempName, toOSPath, 256);
+        cls.downloadTempName[strlen(cls.downloadTempName) - 1] = 0;
+        if (!DL_BeginDownload(cls.downloadTempName, cls.downloadName))
+        {
+            CL_AddReliableCommand(localClientNum, "wwwdl fail");
+            DL_CancelDownload();
+            cls.wwwDlInProgress = 0;
+            Com_Printf(14, "Failed to initialize download for '%s'\n", cls.downloadName);
+        }
+        if ((cls.downloadFlags & 1) != 0)
+        {
+            CL_AddReliableCommand(localClientNum, "wwwdl bbl8r");
+            cls.wwwDlDisconnected = 1;
+        }
+    }
+}
+
+void __cdecl CL_BeginDownload(char *localName, char *remoteName)
+{
+    const char *v2; // eax
+
+    Com_DPrintf(
+        14,
+        "***** CL_BeginDownload *****\nLocalname: %s\nRemotename: %s\n****************************\n",
+        localName,
+        remoteName);
+    CL_GetLocalClientConnection(0);
+    I_strncpyz(cls.downloadName, localName, 256);
+    Com_sprintf(cls.downloadTempName, 0x100u, "%s.tmp", localName);
+    I_strncpyz(legacyHacks.cl_downloadName, remoteName, 64);
+    legacyHacks.cl_downloadSize = 0;
+    legacyHacks.cl_downloadCount = 0;
+    legacyHacks.cl_downloadTime = cls.realtime;
+    cls.downloadBlock = 0;
+    cls.downloadCount = 0;
+    v2 = va("download %s", remoteName);
+    CL_AddReliableCommand(0, v2);
+}
+
+void __cdecl CL_NextDownload(int localClientNum)
+{
+    char *localName; // [esp+24h] [ebp-Ch]
+    char *s; // [esp+28h] [ebp-8h]
+    char *sa; // [esp+28h] [ebp-8h]
+    char *sb; // [esp+28h] [ebp-8h]
+    unsigned __int8 *sc; // [esp+28h] [ebp-8h]
+    char *remoteName; // [esp+2Ch] [ebp-4h]
+
+    CL_GetLocalClientConnection(localClientNum);
+    if (!cls.downloadList[0])
+        goto LABEL_11;
+    if (com_sv_running->current.enabled)
+        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2721, 0, "%s", "!com_sv_running->current.enabled");
+    s = cls.downloadList;
+    if (cls.downloadList[0] == 64)
+        s = &cls.downloadList[1];
+    remoteName = s;
+    sa = strchr(s, '@');
+    if (sa)
+    {
+        *sa = 0;
+        localName = sa + 1;
+        sb = strchr(sa + 1, '@');
+        if (sb)
+        {
+            *sb = 0;
+            sc = (unsigned __int8 *)(sb + 1);
+        }
+        else
+        {
+            sc = (unsigned __int8 *)&localName[strlen(localName)];
+        }
+        CL_BeginDownload(localName, remoteName);
+        cls.downloadRestart = 1;
+        memmove((unsigned __int8 *)cls.downloadList, sc, strlen((const char *)sc) + 1);
+    }
+    else
+    {
+    LABEL_11:
+        CL_DownloadsComplete(localClientNum);
+    }
+}
+
+char parseDownloadData[2048];
+void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
+{
+    const char *String; // eax
+    const char *v3; // eax
+    const char *v4; // eax
+    const char *v5; // eax
+    int block; // [esp+0h] [ebp-Ch]
+    int size; // [esp+4h] [ebp-8h]
+
+    CL_GetLocalClientConnection(localClientNum);
+    block = MSG_ReadLong(msg);
+    if (block == -1)
+    {
+        if (cls.wwwDlInProgress)
+        {
+            MSG_ReadString(msg);
+            MSG_ReadLong(msg);
+            MSG_ReadLong(msg);
+        }
+        else
+        {
+            CL_ParseWWWDownload(localClientNum, msg);
+        }
+    }
+    else
+    {
+        if (!block)
+        {
+            cls.downloadSize = MSG_ReadLong(msg);
+            legacyHacks.cl_downloadSize = cls.downloadSize;
+            if (cls.downloadSize < 0)
+            {
+                String = MSG_ReadString(msg);
+                v3 = va("%s", String);
+                Com_Error(ERR_DROP, v3);
+                return;
+            }
+        }
+        size = MSG_ReadShort(msg);
+        if (size > 0)
+            MSG_ReadData(msg, (unsigned __int8 *)parseDownloadData, size);
+        if (cls.downloadBlock == block)
+        {
+            if (cls.download)
+                goto LABEL_19;
+            if (!cls.downloadTempName[0])
+            {
+                Com_Printf(14, "Server sending download, but no download was requested\n");
+                CL_AddReliableCommand(localClientNum, "stopdl");
+                return;
+            }
+            cls.download = FS_SV_FOpenFileWrite(cls.downloadTempName);
+            if (cls.download)
+            {
+            LABEL_19:
+                if (size)
+                    FS_Write(parseDownloadData, size, cls.download);
+                v5 = va("nextdl %d", cls.downloadBlock);
+                CL_AddReliableCommand(localClientNum, v5);
+                ++cls.downloadBlock;
+                cls.downloadCount += size;
+                legacyHacks.cl_downloadCount = cls.downloadCount;
+                if (!size)
+                {
+                    if (cls.download)
+                    {
+                        FS_FCloseFile(cls.download);
+                        cls.download = 0;
+                        FS_SV_Rename(cls.downloadTempName, cls.downloadName);
+                    }
+                    cls.downloadName[0] = 0;
+                    cls.downloadTempName[0] = 0;
+                    legacyHacks.cl_downloadName[0] = 0;
+                    CL_WritePacket(localClientNum);
+                    CL_WritePacket(localClientNum);
+                    CL_NextDownload(localClientNum);
+                }
+            }
+            else
+            {
+                Com_Printf(14, "Could not create %s\n", cls.downloadTempName);
+                CL_AddReliableCommand(localClientNum, "stopdl");
+                CL_NextDownload(localClientNum);
+            }
+        }
+        else
+        {
+            Com_DPrintf(14, "CL_ParseDownload: Expected block %d, got %d\n", cls.downloadBlock, block);
+            if (block > cls.downloadBlock)
+            {
+                Com_DPrintf(14, "CL_ParseDownload: Sending retransmit request to get the missed block\n");
+                v4 = va("retransdl %d", cls.downloadBlock);
+                CL_AddReliableCommand(localClientNum, v4);
+            }
+        }
+    }
+}
+
+unsigned __int8 msgCompressed_buf[131072];
 void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
 {
     msg_t msgCompressed; // [esp+4h] [ebp-30h] BYREF
@@ -289,7 +515,7 @@ void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
         cmd = MSG_ReadByte(&msgCompressed);
         if (cmd == 7)
         {
-            SHOWNET(&msgCompressed, "END OF MESSAGE");
+            SHOWNET(&msgCompressed, (char*)"END OF MESSAGE");
         LABEL_23:
             if (msgCompressed.overflowed)
                 MSG_Discard(msg);
@@ -319,7 +545,7 @@ void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
             CL_ParseSnapshot(localClientNum, &msgCompressed);
             continue;
         default:
-            file = FS_FOpenFileWrite("badpacket.dat");
+            file = FS_FOpenFileWrite((char*)"badpacket.dat");
             if (file)
             {
                 FS_Write((char *)msg->data, msg->cursize, file);
@@ -333,6 +559,7 @@ void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
     }
 }
 
+clSnapshot_t newSnap;
 void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
 {
     const char *v2; // eax
@@ -393,7 +620,7 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
         clc->demowaiting = 0;
     }
     serverTimeBackup = LocalClientGlobals->serverTime;
-    SHOWNET(msg, "playerstate");
+    SHOWNET(msg, (char *)"playerstate");
     if (old)
         MSG_ReadDeltaPlayerstate(localClientNum, msg, newSnap.serverTime, &old->ps, &newSnap.ps, 1);
     else
@@ -407,14 +634,10 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
         MyAssertHandler(".\\client_mp\\cl_parse_mp.cpp", 669, 0, "%s\n\t%s", "serverTimeBackup == cl->serverTime", v2);
     }
     MSG_ClearLastReferencedEntity(msg);
-    SHOWNET(msg, "packet entities");
-    CL_ParsePacketEntities(
-        __SPAIR64__((unsigned int)msg, (unsigned int)LocalClientGlobals),
-        newSnap.serverTime,
-        old,
-        &newSnap);
+    SHOWNET(msg, (char *)"packet entities");
+    CL_ParsePacketEntities(LocalClientGlobals, msg, newSnap.serverTime, old, &newSnap);
     MSG_ClearLastReferencedEntity(msg);
-    SHOWNET(msg, "packet clients");
+    SHOWNET(msg, (char*)"packet clients");
     CL_ParsePacketClients(LocalClientGlobals, msg, newSnap.serverTime, old, &newSnap);
     if (msg->overflowed)
     {
@@ -454,19 +677,24 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
     }
 }
 
-void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe, clSnapshot_t *newframe)
+void __cdecl CL_ParsePacketEntities(
+    clientActive_t *cl,
+    msg_t *msg,
+    int time,
+    clSnapshot_t *oldframe,
+    clSnapshot_t *newframe)
 {
     char *EntityTypeName; // eax
-    char *v5; // eax
-    double v6; // [esp+0h] [ebp-28h]
-    double v7; // [esp+8h] [ebp-20h]
-    double v8; // [esp+10h] [ebp-18h]
+    char *v6; // eax
+    double v7; // [esp+0h] [ebp-28h]
+    double v8; // [esp+8h] [ebp-20h]
+    double v9; // [esp+10h] [ebp-18h]
     entityState_s *oldstate; // [esp+18h] [ebp-10h]
     signed int newnum; // [esp+1Ch] [ebp-Ch]
     int oldindex; // [esp+20h] [ebp-8h]
     int oldnum; // [esp+24h] [ebp-4h]
 
-    newframe->parseEntitiesNum = *(unsigned int *)(cl + 153128);
+    newframe->parseEntitiesNum = cl->parseEntitiesNum;
     newframe->numEntities = 0;
     oldindex = 0;
     oldstate = 0;
@@ -474,7 +702,7 @@ void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe
     {
         if (oldframe->numEntities > 0)
         {
-            oldstate = (entityState_s *)(cl + 244 * (oldframe->parseEntitiesNum & 0x7FF) + 1071824);
+            oldstate = &cl->parseEntities[oldframe->parseEntitiesNum & 0x7FF];
             oldnum = oldstate->number;
         }
         else
@@ -486,9 +714,9 @@ void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe
     {
         oldnum = 99999;
     }
-    while (!*(unsigned int *)HIDWORD(cl))
+    while (!msg->overflowed)
     {
-        newnum = MSG_ReadEntityIndex((msg_t *)HIDWORD(cl), 0xAu);
+        newnum = MSG_ReadEntityIndex(msg, 0xAu);
         if ((unsigned int)newnum >= 0x400)
             MyAssertHandler(
                 ".\\client_mp\\cl_parse_mp.cpp",
@@ -499,18 +727,16 @@ void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe
                 newnum);
         if (newnum == 1023)
             break;
-        if (*(unsigned int *)(HIDWORD(cl) + 28) > *(unsigned int *)(HIDWORD(cl) + 20))
-            Com_Error(ERR_DROP, &byte_8776F8);
-        while (oldnum < newnum && !*(unsigned int *)HIDWORD(cl))
+        if (msg->readcount > msg->cursize)
+            Com_Error(ERR_DROP, "CL_ParsePacketEntities: end of message");
+        while (oldnum < newnum && !msg->overflowed)
         {
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  unchanged: %i\n", *(unsigned int *)(HIDWORD(cl) + 28), oldnum);
-            CL_CopyOldEntity((clientActive_t *)cl, newframe, oldstate);
+                Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
+            CL_CopyOldEntity(cl, newframe, oldstate);
             if (++oldindex < oldframe->numEntities)
             {
-                oldstate = (entityState_s *)(cl
-                    + 244 * (((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF)
-                    + 1071824);
+                oldstate = &cl->parseEntities[((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF];
                 oldnum = oldstate->number;
             }
             else
@@ -526,13 +752,11 @@ void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe
         if (oldnum == newnum)
         {
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  delta: %i\n", *(unsigned int *)(HIDWORD(cl) + 28), newnum);
-            CL_DeltaEntity((clientActive_t *)cl, (msg_t *)HIDWORD(cl), time, newframe, newnum, oldstate);
+                Com_Printf(14, "%3i:  delta: %i\n", msg->readcount, newnum);
+            CL_DeltaEntity(cl, msg, time, newframe, newnum, oldstate);
             if (++oldindex < oldframe->numEntities)
             {
-                oldstate = (entityState_s *)(cl
-                    + 244 * (((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF)
-                    + 1071824);
+                oldstate = &cl->parseEntities[((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF];
                 oldnum = oldstate->number;
             }
             else
@@ -545,26 +769,18 @@ void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe
             if (oldnum <= newnum)
                 MyAssertHandler(".\\client_mp\\cl_parse_mp.cpp", 374, 0, "%s", "oldnum > newnum");
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  baseline: %i\n", *(unsigned int *)(HIDWORD(cl) + 28), newnum);
-            CL_DeltaEntity(
-                (clientActive_t *)cl,
-                (msg_t *)HIDWORD(cl),
-                time,
-                newframe,
-                newnum,
-                (entityState_s *)(cl + 244 * newnum + 821968));
+                Com_Printf(14, "%3i:  baseline: %i\n", msg->readcount, newnum);
+            CL_DeltaEntity(cl, msg, time, newframe, newnum, &cl->entityBaselines[newnum]);
         }
     }
-    while (oldnum != 99999 && !*(unsigned int *)HIDWORD(cl))
+    while (oldnum != 99999 && !msg->overflowed)
     {
         if (cl_shownet->current.integer == 3)
-            Com_Printf(14, "%3i:  unchanged: %i\n", *(unsigned int *)(HIDWORD(cl) + 28), oldnum);
-        CL_CopyOldEntity((clientActive_t *)cl, newframe, oldstate);
+            Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
+        CL_CopyOldEntity(cl, newframe, oldstate);
         if (++oldindex < oldframe->numEntities)
         {
-            oldstate = (entityState_s *)(cl
-                + 244 * (((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF)
-                + 1071824);
+            oldstate = &cl->parseEntities[((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF];
             oldnum = oldstate->number;
         }
         else
@@ -573,11 +789,11 @@ void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe
         }
         if (msg_dumpEnts->current.enabled)
         {
-            v8 = oldstate->lerp.pos.trBase[2];
-            v7 = oldstate->lerp.pos.trBase[1];
-            v6 = oldstate->lerp.pos.trBase[0];
-            v5 = BG_GetEntityTypeName(oldstate->eType);
-            Com_Printf(14, "%3i: unchanged ent, eType %s at %f, %f, %f\n", oldnum, v5, v6, v7, v8);
+            v9 = oldstate->lerp.pos.trBase[2];
+            v8 = oldstate->lerp.pos.trBase[1];
+            v7 = oldstate->lerp.pos.trBase[0];
+            v6 = BG_GetEntityTypeName(oldstate->eType);
+            Com_Printf(14, "%3i: unchanged ent, eType %s at %f, %f, %f\n", oldnum, v6, v7, v8, v9);
         }
     }
     if (cl_shownuments->current.enabled || msg_dumpEnts->current.enabled)
@@ -645,7 +861,7 @@ void __cdecl CL_ParsePacketClients(
     {
         newnum = MSG_ReadEntityIndex(msg, 6u);
         if (msg->readcount > msg->cursize)
-            Com_Error(ERR_DROP, &byte_877770);
+            Com_Error(ERR_DROP, "CL_ParsePacketClients: end of message");
         while (oldnum < newnum)
         {
             if (cl_shownet->current.integer == 3)
@@ -705,13 +921,76 @@ void __cdecl CL_ParsePacketClients(
         Com_Printf(14, "Clients in packet: %i\n", newframe->numClients);
 }
 
+void __cdecl CL_InitDownloads(int localClientNum)
+{
+    char *v1; // eax
+    const char *dir; // [esp+10h] [ebp-414h]
+    FS_SERVER_COMPARE_RESULT compareResult; // [esp+14h] [ebp-410h]
+    FS_SERVER_COMPARE_RESULT compareResulta; // [esp+14h] [ebp-410h]
+    clientConnection_t *clc; // [esp+18h] [ebp-40Ch]
+    char missingfiles[1028]; // [esp+1Ch] [ebp-408h] BYREF
+
+    dir = FS_ShiftStr("ni]Zm^l", 7);
+    clc = CL_GetLocalClientConnection(localClientNum);
+    cls.wwwDlInProgress = 0;
+    cls.wwwDlDisconnected = 0;
+    CL_ClearStaticDownload();
+    if (autoupdateStarted && NET_CompareAdr(cls.autoupdateServer, clc->serverAddress))
+    {
+        if (strlen(cl_updatefiles->current.string) > 4)
+        {
+            I_strncpyz(autoupdateFilename, (char *)cl_updatefiles->current.integer, 64);
+            v1 = va("@%s/%s@%s/%s", dir, cl_updatefiles->current.string, dir, cl_updatefiles->current.string);
+            I_strncpyz(cls.downloadList, v1, 1024);
+            clientUIActives[localClientNum].connectionState = CA_CONNECTED;
+            CL_NextDownload(localClientNum);
+            return;
+        }
+    }
+    else if (!com_sv_running->current.enabled)
+    {
+        if (cl_allowDownload->current.enabled)
+        {
+            compareResulta = FS_CompareWithServerFiles(cls.downloadList, 1024, 1);
+            if (compareResulta == NEED_DOWNLOAD)
+            {
+                Com_Printf(14, "Need files: %s\n", cls.downloadList);
+                if (cls.downloadList[0])
+                {
+                    clientUIActives[localClientNum].connectionState = CA_CONNECTED;
+                    CL_NextDownload(localClientNum);
+                    return;
+                }
+            }
+            else if (compareResulta == NOT_DOWNLOADABLE)
+            {
+                Com_Error(ERR_DROP, "%s is different from the server", cls.downloadList);
+            }
+        }
+        else
+        {
+            compareResult = FS_CompareWithServerFiles(missingfiles, 1024, 0);
+            if (compareResult == NEED_DOWNLOAD)
+            {
+                Com_Error(ERR_DROP, "You are missing some files referenced by the server: %sGo to the Multiplayer options menu to allow downloads", missingfiles);
+            }
+            else if (compareResult == NOT_DOWNLOADABLE)
+            {
+                Com_Error(ERR_DROP, "%s is different from the server", missingfiles);
+            }
+        }
+    }
+    CL_DownloadsComplete(localClientNum);
+}
+
 void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
 {
     int Long; // eax
     int v3; // eax
-    unsigned int v4; // [esp+0h] [ebp-164h]
-    unsigned int v5; // [esp+10h] [ebp-154h]
-    unsigned int v6; // [esp+20h] [ebp-144h]
+    int v4; // eax
+    unsigned int v5; // [esp+0h] [ebp-164h]
+    unsigned int v6; // [esp+10h] [ebp-154h]
+    unsigned int v7; // [esp+20h] [ebp-144h]
     int constConfigStringIndex; // [esp+34h] [ebp-130h]
     int constConfigStringIndexa; // [esp+34h] [ebp-130h]
     int lastStringIndex; // [esp+3Ch] [ebp-128h]
@@ -753,47 +1032,47 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
                     configStringIndex = lastStringIndex + 1;
                 else
                     configStringIndex = MSG_ReadBits(msg, 0xCu);
-                if (configStringIndex >= 0x98A)
-                    Com_Error(ERR_DROP, &byte_871558);
+                if (configStringIndex >= 2442)
+                    Com_Error(ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
                 while (constantConfigStrings[currentConstConfigString].configStringNum
                     && constantConfigStrings[currentConstConfigString].configStringNum < (signed int)configStringIndex)
                 {
                     constConfigStringIndex = constantConfigStrings[currentConstConfigString].configStringNum;
-                    s = (&MEMORY[0x94A784])[4 * currentConstConfigString];
-                    v6 = strlen(s);
+                    s = constantConfigStrings[currentConstConfigString].configString;
+                    v7 = strlen(s);
                     LocalClientGlobals->gameState.stringOffsets[constConfigStringIndex] = LocalClientGlobals->gameState.dataCount;
                     memcpy(
                         (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
                         (unsigned __int8 *)s,
-                        v6 + 1);
-                    LocalClientGlobals->gameState.dataCount += v6 + 1;
+                        v7 + 1);
+                    LocalClientGlobals->gameState.dataCount += v7 + 1;
                     ++currentConstConfigString;
                 }
                 if (constantConfigStrings[currentConstConfigString].configStringNum == configStringIndex)
                     ++currentConstConfigString;
                 s = MSG_ReadBigString(msg);
-                v5 = strlen(s);
-                if ((int)(v5 + LocalClientGlobals->gameState.dataCount + 1) > 0x20000)
-                    Com_Error(ERR_DROP, &byte_871538);
+                v6 = strlen(s);
+                if ((int)(v6 + LocalClientGlobals->gameState.dataCount + 1) > 0x20000)
+                    Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
                 LocalClientGlobals->gameState.stringOffsets[configStringIndex] = LocalClientGlobals->gameState.dataCount;
                 memcpy(
                     (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
                     (unsigned __int8 *)s,
-                    v5 + 1);
-                LocalClientGlobals->gameState.dataCount += v5 + 1;
+                    v6 + 1);
+                LocalClientGlobals->gameState.dataCount += v6 + 1;
                 lastStringIndex = configStringIndex;
             }
             while (constantConfigStrings[currentConstConfigString].configStringNum)
             {
                 constConfigStringIndexa = constantConfigStrings[currentConstConfigString].configStringNum;
-                s = (&MEMORY[0x94A784])[4 * currentConstConfigString];
-                v4 = strlen(s);
+                s = constantConfigStrings[currentConstConfigString].configString;
+                v5 = strlen(s);
                 LocalClientGlobals->gameState.stringOffsets[constConfigStringIndexa] = LocalClientGlobals->gameState.dataCount;
                 memcpy(
                     (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
                     (unsigned __int8 *)s,
-                    v4 + 1);
-                LocalClientGlobals->gameState.dataCount += v4 + 1;
+                    v5 + 1);
+                LocalClientGlobals->gameState.dataCount += v5 + 1;
                 ++currentConstConfigString;
             }
             CL_ParseMapCenter(localClientNum);
@@ -802,7 +1081,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
         {
             if (cmd != 3)
             {
-                file = FS_FOpenFileWrite("badpacket.dat");
+                file = FS_FOpenFileWrite((char*)"badpacket.dat");
                 if (file)
                 {
                     FS_Write((char *)msg->data, msg->cursize, file);
@@ -814,7 +1093,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
             }
             newnum = MSG_ReadEntityIndex(msg, 0xAu);
             if (newnum >= 0x400)
-                Com_Error(ERR_DROP, &byte_8777C0, newnum);
+                Com_Error(ERR_DROP, "Baseline number out of range: %i", newnum);
             memset((unsigned __int8 *)&nullstate, 0, sizeof(nullstate));
             to = &LocalClientGlobals->entityBaselines[newnum];
             MSG_ReadDeltaEntity(msg, 0, &nullstate, to, newnum);
@@ -833,7 +1112,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
     if (net_lanauthorize->current.enabled || !Sys_IsLANAddress(clc->serverAddress))
         CL_RequestAuthorization(localClientNum);
     CL_InitDownloads(localClientNum);
-    Dvar_SetInt((dvar_s *)cl_paused, 0);
+    Dvar_SetInt(cl_paused, 0);
 }
 
 void __cdecl CL_ParseCommandString(int localClientNum, msg_t *msg)

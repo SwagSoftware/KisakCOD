@@ -1,5 +1,6 @@
 #include <qcommon/qcommon.h>
 #include "com_files.h"
+#include <database/database.h>
 
 char *__cdecl Com_LoadInfoString(char *fileName, const char *fileDesc, const char *ident, char *loadBuffer)
 {

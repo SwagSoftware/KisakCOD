@@ -181,6 +181,7 @@ void __cdecl DB_EnumXAssetsFor(
     void* inData);
 
 int __cdecl DB_FileSize(const char *zoneName, int isMod);
+bool __cdecl DB_ModFileExists();
 
 
 // db_assetnames
@@ -679,3 +680,5 @@ extern unsigned __int8 *g_streamPos;
 extern unsigned int g_streamPosStackIndex;
 
 extern XAsset *varXAsset;
+
+extern FastCriticalSection db_hashCritSect;

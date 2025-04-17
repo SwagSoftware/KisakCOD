@@ -1,8 +1,16 @@
 #include "com_bsp.h"
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
+#include <database/database.h>
 
 BspGlob comBspGlob;
+
+unsigned int __cdecl Com_GetBspVersion()
+{
+    if (!Com_IsBspLoaded())
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 253, 0, "%s", "Com_IsBspLoaded()");
+    return comBspGlob.header->version;
+}
 
 char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count)
 {
@@ -194,4 +202,343 @@ char *__cdecl Com_EntityString(int *numEntityChars)
     if (numEntityChars)
         *numEntityChars = count;
     return entityString;
+}
+
+const char *__cdecl Com_GetHunkStringCopy(char *string)
+{
+    unsigned int v2; // [esp+0h] [ebp-18h]
+    unsigned __int8 *hunkCopy; // [esp+14h] [ebp-4h]
+
+    v2 = strlen(string);
+    hunkCopy = Hunk_AllocAlign(v2 + 1, 1, "Com_GetLightDefName", 12);
+    memcpy(hunkCopy, (unsigned __int8 *)string, v2 + 1);
+    return (const char *)hunkCopy;
+}
+
+const char *__cdecl Com_GetLightDefName(
+    char *defName,
+    const ComPrimaryLight *primaryLights,
+    unsigned int primaryLightCount)
+{
+    unsigned int primaryLightIndex; // [esp+14h] [ebp-8h]
+
+    for (primaryLightIndex = 0; primaryLightIndex < primaryLightCount; ++primaryLightIndex)
+    {
+        if (primaryLights[primaryLightIndex].defName && !strcmp(defName, primaryLights[primaryLightIndex].defName))
+            return primaryLights[primaryLightIndex].defName;
+    }
+    return Com_GetHunkStringCopy(defName);
+}
+
+ComPrimaryLight *Com_LoadPrimaryLights_Version14()
+{
+    ComPrimaryLight *result; // eax
+
+    comWorld.primaryLightCount = 2;
+    comWorld.primaryLights = (ComPrimaryLight *)Hunk_Alloc(0x88u, "Com_LoadPrimaryLights", 12);
+    if (comWorld.primaryLights->type)
+        MyAssertHandler(
+            ".\\qcommon\\com_bsp_load_obj.cpp",
+            508,
+            1,
+            "%s",
+            "comWorld.primaryLights[0].type == GFX_LIGHT_TYPE_NONE");
+    result = comWorld.primaryLights;
+    comWorld.primaryLights[1].type = 1;
+    return result;
+}
+
+const DiskPrimaryLight_Version16 *Com_LoadPrimaryLights_Version16()
+{
+    const DiskPrimaryLight_Version16 *result; // eax
+    const float *origin; // [esp+4h] [ebp-2Ch]
+    const float *dir; // [esp+Ch] [ebp-24h]
+    const float *color; // [esp+14h] [ebp-1Ch]
+    int exponent; // [esp+18h] [ebp-18h]
+    ComPrimaryLight *out; // [esp+1Ch] [ebp-14h]
+    const DiskPrimaryLight_Version16 *diskLights; // [esp+20h] [ebp-10h]
+    unsigned int diskLightCount; // [esp+24h] [ebp-Ch] BYREF
+    const DiskPrimaryLight_Version16 *in; // [esp+28h] [ebp-8h]
+    unsigned int lightIndex; // [esp+2Ch] [ebp-4h]
+
+    diskLights = (const DiskPrimaryLight_Version16 *)Com_GetBspLump(LUMP_PRIMARY_LIGHTS, 0x60u, &diskLightCount);
+    if (diskLightCount <= 1)
+        Com_Error(ERR_DROP, "no primary lights in bsp\n");
+    comWorld.primaryLightCount = diskLightCount;
+    comWorld.primaryLights = (ComPrimaryLight *)Hunk_Alloc(68 * diskLightCount, "Com_LoadPrimaryLights", 12);
+    result = diskLights;
+    in = diskLights;
+    out = comWorld.primaryLights;
+    lightIndex = 0;
+    while (lightIndex < diskLightCount)
+    {
+        out->type = in->type;
+        out->canUseShadowMap = 0;
+        exponent = in->exponent;
+        if (exponent != (unsigned __int8)exponent)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+                281,
+                0,
+                "i == static_cast< Type >( i )\n\t%i, %i",
+                exponent,
+                (unsigned __int8)exponent);
+        out->exponent = exponent;
+        color = in->color;
+        out->color[0] = in->color[0];
+        out->color[1] = color[1];
+        out->color[2] = color[2];
+        dir = in->dir;
+        out->dir[0] = in->dir[0];
+        out->dir[1] = dir[1];
+        out->dir[2] = dir[2];
+        origin = in->origin;
+        out->origin[0] = in->origin[0];
+        out->origin[1] = origin[1];
+        out->origin[2] = origin[2];
+        out->radius = in->radius;
+        out->cosHalfFovOuter = in->cosHalfFovOuter;
+        out->cosHalfFovInner = in->cosHalfFovInner;
+        out->cosHalfFovExpanded = out->cosHalfFovOuter;
+        out->rotationLimit = 1.0;
+        out->translationLimit = 0.0;
+        if (in->type && in->type != 1)
+            out->defName = Com_GetLightDefName((char*)in->defName, comWorld.primaryLights, lightIndex);
+        else
+            out->defName = 0;
+        ++lightIndex;
+        result = ++in;
+        ++out;
+    }
+    return result;
+}
+
+ComPrimaryLight *Com_LoadPrimaryLights()
+{
+    ComPrimaryLight *result; // eax
+    const float *origin; // [esp+14h] [ebp-2Ch]
+    const float *dir; // [esp+1Ch] [ebp-24h]
+    const float *color; // [esp+24h] [ebp-1Ch]
+    int exponent; // [esp+28h] [ebp-18h]
+    ComPrimaryLight *out; // [esp+2Ch] [ebp-14h]
+    const DiskPrimaryLight *diskLights; // [esp+30h] [ebp-10h]
+    unsigned int diskLightCount; // [esp+34h] [ebp-Ch] BYREF
+    const DiskPrimaryLight *in; // [esp+38h] [ebp-8h]
+    unsigned int lightIndex; // [esp+3Ch] [ebp-4h]
+
+    if (comBspGlob.header->version <= 0xE)
+        return Com_LoadPrimaryLights_Version14();
+    if (comBspGlob.header->version <= 0x10)
+        return (ComPrimaryLight *)Com_LoadPrimaryLights_Version16();
+    diskLights = (const DiskPrimaryLight *)Com_GetBspLump(LUMP_PRIMARY_LIGHTS, 0x80u, &diskLightCount);
+    if (diskLightCount <= 1)
+        Com_Error(ERR_DROP, "no primary lights in bsp\n");
+    comWorld.primaryLightCount = diskLightCount;
+    comWorld.primaryLights = (ComPrimaryLight *)Hunk_Alloc(68 * diskLightCount, "Com_LoadPrimaryLights", 12);
+    in = diskLights;
+    result = comWorld.primaryLights;
+    out = comWorld.primaryLights;
+    lightIndex = 0;
+    while (lightIndex < diskLightCount)
+    {
+        out->type = in->type;
+        out->canUseShadowMap = in->canUseShadowMap;
+        exponent = in->exponent;
+        if (exponent != (unsigned __int8)exponent)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+                281,
+                0,
+                "i == static_cast< Type >( i )\n\t%i, %i",
+                exponent,
+                (unsigned __int8)exponent);
+        out->exponent = exponent;
+        color = in->color;
+        out->color[0] = in->color[0];
+        out->color[1] = color[1];
+        out->color[2] = color[2];
+        dir = in->dir;
+        out->dir[0] = in->dir[0];
+        out->dir[1] = dir[1];
+        out->dir[2] = dir[2];
+        origin = in->origin;
+        out->origin[0] = in->origin[0];
+        out->origin[1] = origin[1];
+        out->origin[2] = origin[2];
+        out->radius = in->radius;
+        out->cosHalfFovOuter = in->cosHalfFovOuter;
+        out->cosHalfFovInner = in->cosHalfFovInner;
+        out->rotationLimit = in->rotationLimit;
+        out->translationLimit = in->translationLimit;
+        if (in->type && in->type != 1)
+        {
+            out->defName = Com_GetLightDefName((char*)in->defName, comWorld.primaryLights, lightIndex);
+            if (out->cosHalfFovOuter >= (double)out->cosHalfFovInner)
+                out->cosHalfFovInner = out->cosHalfFovOuter * 0.75 + 0.25;
+            if (out->rotationLimit == 1.0)
+            {
+                out->cosHalfFovExpanded = out->cosHalfFovOuter;
+            }
+            else if (out->rotationLimit > -out->cosHalfFovOuter)
+            {
+                out->cosHalfFovExpanded = CosOfSumOfArcCos(out->cosHalfFovOuter, out->rotationLimit);
+            }
+            else
+            {
+                out->cosHalfFovExpanded = -1.0;
+            }
+        }
+        else
+        {
+            out->defName = 0;
+            out->cosHalfFovExpanded = in->cosHalfFovOuter;
+        }
+        ++lightIndex;
+        ++in;
+        result = ++out;
+    }
+    return result;
+}
+
+void __cdecl Com_LoadWorld_LoadObj(char *name)
+{
+    if (!Com_IsBspLoaded())
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 623, 0, "%s", "Com_IsBspLoaded()");
+    Com_LoadPrimaryLights();
+    comWorld.name = Com_GetHunkStringCopy(name);
+    comWorld.isInUse = 1;
+}
+
+void __cdecl Com_LoadWorld(char *name)
+{
+    if (useFastFile->current.enabled)
+        Com_LoadWorld_FastFile(name);
+    else
+        Com_LoadWorld_LoadObj(name);
+}
+
+void __cdecl Com_LoadWorld_FastFile(const char *name)
+{
+    if (DB_FindXAssetHeader(ASSET_TYPE_COMWORLD, name).comWorld != &comWorld)
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 640, 0, "%s", "asset == &comWorld");
+    if (!comWorld.isInUse)
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 641, 0, "%s", "comWorld.isInUse");
+}
+
+void __cdecl Com_ShutdownWorld()
+{
+    comWorld.isInUse = 0;
+}
+
+void __cdecl Com_SaveLump(LumpType type, const void *newLump, unsigned int size, ComSaveLumpBehavior behavior)
+{
+    char v4; // [esp+3h] [ebp-535h]
+    char *v5; // [esp+8h] [ebp-530h]
+    BspGlob *v6; // [esp+Ch] [ebp-52Ch]
+    char savedName[68]; // [esp+10h] [ebp-528h] BYREF
+    unsigned int chunkIter; // [esp+58h] [ebp-4E0h]
+    unsigned int zero; // [esp+5Ch] [ebp-4DCh] BYREF
+    BspHeader newHeader; // [esp+60h] [ebp-4D8h] BYREF
+    unsigned int offset; // [esp+394h] [ebp-1A4h]
+    const BspChunk *chunk; // [esp+398h] [ebp-1A0h]
+    bool isNewChunk; // [esp+39Fh] [ebp-199h]
+    const void *chunkData[100]; // [esp+3A0h] [ebp-198h]
+    int h; // [esp+530h] [ebp-8h]
+    unsigned int zeroCount; // [esp+534h] [ebp-4h]
+
+    if (!Com_IsBspLoaded())
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 399, 0, "%s", "Com_IsBspLoaded()");
+    if (comBspGlob.header->version != 22)
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 400, 0, "%s", "comBspGlob.header->version == BSP_VERSION");
+    if (comBspGlob.header->chunkCount > 0x64)
+        MyAssertHandler(
+            ".\\qcommon\\com_bsp_load_obj.cpp",
+            402,
+            0,
+            "comBspGlob.header->chunkCount <= ARRAY_COUNT( newHeader.chunks )\n\t%i, %i",
+            comBspGlob.header->chunkCount,
+            100);
+    newHeader.ident = 1347633737;
+    newHeader.version = 22;
+    newHeader.chunkCount = 0;
+    isNewChunk = 1;
+    offset = 8 * comBspGlob.header->chunkCount + 12;
+    for (chunkIter = 0; chunkIter < comBspGlob.header->chunkCount; ++chunkIter)
+    {
+        chunk = &comBspGlob.header->chunks[chunkIter];
+        if (chunk->type == type)
+        {
+            isNewChunk = 0;
+            if (size)
+            {
+                newHeader.chunks[newHeader.chunkCount].type = type;
+                newHeader.chunks[newHeader.chunkCount].length = size;
+                chunkData[newHeader.chunkCount++] = newLump;
+            }
+        }
+        else
+        {
+            newHeader.chunks[newHeader.chunkCount].type = chunk->type;
+            newHeader.chunks[newHeader.chunkCount].length = chunk->length;
+            chunkData[newHeader.chunkCount++] = comBspGlob.header + offset;
+        }
+        offset += (chunk->length + 3) & 0xFFFFFFFC;
+    }
+    if (isNewChunk && size)
+    {
+        if (newHeader.chunkCount >= 0x64)
+            MyAssertHandler(
+                ".\\qcommon\\com_bsp_load_obj.cpp",
+                436,
+                0,
+                "newHeader.chunkCount < ARRAY_COUNT( newHeader.chunks )\n\t%i, %i",
+                newHeader.chunkCount,
+                100);
+        newHeader.chunks[newHeader.chunkCount].type = type;
+        newHeader.chunks[newHeader.chunkCount].length = size;
+        chunkData[newHeader.chunkCount++] = newLump;
+    }
+    h = FS_OpenFileOverwrite(comBspGlob.name);
+    if (h)
+    {
+        FS_Write((char*)&newHeader, 8 * newHeader.chunkCount + 12, h);
+        for (chunkIter = 0; chunkIter < newHeader.chunkCount; ++chunkIter)
+        {
+            FS_Write((char*)chunkData[chunkIter], newHeader.chunks[chunkIter].length, h);
+            zeroCount = -newHeader.chunks[chunkIter].length & 3;
+            if (zeroCount)
+                FS_Write((char*)&zero, zeroCount, h);
+        }
+        FS_FCloseFile(h);
+        if (behavior)
+        {
+            if (behavior != COM_SAVE_LUMP_AND_REOPEN)
+                MyAssertHandler(
+                    ".\\qcommon\\com_bsp_load_obj.cpp",
+                    465,
+                    1,
+                    "%s\n\t(behavior) = %i",
+                    "(behavior == COM_SAVE_LUMP_AND_REOPEN)",
+                    behavior);
+            v6 = &comBspGlob;
+            v5 = savedName;
+            do
+            {
+                v4 = v6->name[0];
+                *v5 = v6->name[0];
+                v6 = (v6 + 1);
+                ++v5;
+            } while (v4);
+            Com_UnloadBsp();
+            Com_LoadBsp(savedName);
+        }
+        else
+        {
+            Com_UnloadBsp();
+        }
+    }
+    else
+    {
+        Com_Error(ERR_DROP, "Failed to open file %s for writing", comBspGlob.name);
+    }
 }

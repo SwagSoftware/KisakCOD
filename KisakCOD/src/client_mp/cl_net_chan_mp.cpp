@@ -1,8 +1,37 @@
 #include "client_mp.h"
 
 #include <qcommon/qcommon.h>
+#include <cgame_mp/cg_local_mp.h>
 
-static void __cdecl CL_Netchan_Encode(unsigned __int8 *data, int size)
+void __cdecl CL_Netchan_Decode(unsigned __int8 *data, int size)
+{
+    unsigned __int8 *string; // [esp+0h] [ebp-14h]
+    clientConnection_t *clc; // [esp+4h] [ebp-10h]
+    _BYTE key[5]; // [esp+Bh] [ebp-9h]
+    int i; // [esp+10h] [ebp-4h]
+
+    clc = CL_GetLocalClientConnection(0);
+    string = (unsigned __int8 *)clc->reliableCommands[clc->reliableAcknowledge & 0x7F];
+    key[4] = 0;
+    *(_DWORD *)key = (unsigned __int8)(LOBYTE(clc->serverMessageSequence) ^ LOBYTE(clc->challenge));
+    for (i = 0; i < size; ++i)
+    {
+        if (!string[*(_DWORD *)&key[1]])
+            *(_DWORD *)&key[1] = 0;
+        if (string[*(_DWORD *)&key[1]] == 37)
+            MyAssertHandler(
+                ".\\client_mp\\cl_net_chan_mp.cpp",
+                83,
+                0,
+                "%s\n\t(clc->reliableCommands[clc->reliableAcknowledge & (128 - 1)]) = %s",
+                "(string[index] != '%')",
+                clc->reliableCommands[clc->reliableAcknowledge & 0x7F]);
+        key[0] ^= string[(*(_DWORD *)&key[1])++] << (i & 1);
+        *data++ ^= key[0];
+    }
+}
+
+void __cdecl CL_Netchan_Encode(unsigned __int8 *data, int size)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-18h]
     unsigned __int8 *string; // [esp+4h] [ebp-14h]

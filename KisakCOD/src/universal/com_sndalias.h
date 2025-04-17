@@ -54,5 +54,6 @@ snd_alias_t *__cdecl Com_PickSoundAlias(const char *aliasname);
 bool __cdecl Com_AliasNameRefersToSingleAlias(const char *aliasname);
 
 void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurGame, snd_alias_system_t system);
+void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system);
 
 extern SoundAliasGlobals g_sa;

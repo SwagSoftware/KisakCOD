@@ -22,6 +22,13 @@ struct field_t // sizeof=0x118
 	char buffer[256];                   // ...
 };
 
+enum DemoType : __int32
+{                                       // ...
+    DEMO_TYPE_NONE = 0x0,
+    DEMO_TYPE_CLIENT = 0x1,
+    DEMO_TYPE_SERVER = 0x2,
+};
+
 const char *WeaponStateNames[27] =
 {
   "WEAPON_READY",
@@ -293,18 +300,14 @@ const char *__cdecl Dvar_DisplayableResetValue(const dvar_s *dvar);
 const char *__cdecl Dvar_DisplayableLatchedValue(const dvar_s *dvar);
 char __cdecl Dvar_ValueInDomain(unsigned __int8 type, DvarValue value, DvarLimits domain);
 char __cdecl Dvar_VectorInDomain(const float *vector, int components, float min, float max);
-const char *__cdecl Dvar_DomainToString(unsigned __int8 type, DvarLimits domain, __int64 outBuffer);
-const char *__cdecl Dvar_DomainToString_Internal(
-    unsigned __int8 type,
-    DvarLimits domain,
-    __int64 outBuffer,
-    int *outLineCount);
-void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int64 outBuffer);
 const char *__cdecl Dvar_DomainToString_GetLines(
     unsigned __int8 type,
     DvarLimits domain,
-    __int64 outBuffer,
+    char *outBuffer,
+    int outBufferLen,
     int *outLineCount);
+void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int64 outBuffer);
+
 void __cdecl Dvar_PrintDomain(unsigned __int8 type, DvarLimits domain);
 bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar);
 int __cdecl Dvar_ValuesEqual(unsigned __int8 type, DvarValue val0, DvarValue val1);
@@ -1188,7 +1191,7 @@ double __cdecl CL_GetMenuBlurRadius(int localClientNum);
 void __cdecl SCR_UpdateScreen();
 void SCR_UpdateFrame();
 int __cdecl CL_CGameRendering(int localClientNum);
-bool __cdecl CL_GetDemoType();
+DemoType __cdecl CL_GetDemoType();
 void __cdecl CL_DrawScreen(int localClientNum);
 void __cdecl SCR_DrawScreenField(int localClientNum, int refreshedUI);
 void SCR_DrawDemoRecording();

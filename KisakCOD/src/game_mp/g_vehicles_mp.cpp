@@ -1,4 +1,7 @@
 #include "g_public_mp.h"
+#include <gfx_d3d/r_scene.h>
+#include <EffectsCore/fx_system.h>
+#include <xanim/dobj.h>
 
 
 
@@ -106,15 +109,15 @@ clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (MEMORY[0x9D5650] >= 0x40u)
+    if (cgArray[0].predictedPlayerState.clientNum >= 0x40u)
         MyAssertHandler(
             ".\\cgame_mp\\cg_vehicles_mp.cpp",
             71,
             0,
             "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            MEMORY[0x9D5650],
+            cgArray[0].predictedPlayerState.clientNum,
             64);
-    return (clientInfo_t *)((char *)&MEMORY[0x9E06F8] + 1228 * MEMORY[0x9D5650] + 633352);
+    return &cgArray[0].bgs.clientinfo[cgArray[0].predictedPlayerState.clientNum];
 }
 
 bool __cdecl CG_VehLocalClientUsingVehicle(int localClientNum)
@@ -267,12 +270,12 @@ double __cdecl Veh_GetTurretBarrelRoll(int localClientNum, centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    msecs = MEMORY[0x9D5560] - vehFx->lastBarrelUpdateTime;
-    vehFx->lastBarrelUpdateTime = MEMORY[0x9D5560];
-    vehFx->barrelPos = (double)msecs / 1000.0 * vehFx->barrelVelocity + vehFx->barrelPos;
+    msecs = cgArray[0].time - vehFx->lastBarrelUpdateTime;
+    vehFx->lastBarrelUpdateTime = cgArray[0].time;
+    vehFx->barrelPos = msecs / 1000.0 * vehFx->barrelVelocity + vehFx->barrelPos;
     if (vehFx->barrelPos > 360.0)
         vehFx->barrelPos = vehFx->barrelPos - 360.0;
-    vehFx->barrelVelocity = vehFx->barrelVelocity - (double)msecs * heli_barrelSlowdown->current.value / 1000.0;
+    vehFx->barrelVelocity = vehFx->barrelVelocity - msecs * heli_barrelSlowdown->current.value / 1000.0;
     if (vehFx->barrelVelocity < 0.0)
         vehFx->barrelVelocity = 0.0;
     return vehFx->barrelPos;
@@ -403,9 +406,9 @@ void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent)
             else
             {
                 time = p_currentState->u.vehicle.materialTime
-                    + (int)((double)(ns->lerp.u.vehicle.materialTime - p_currentState->u.vehicle.materialTime)
-                        * MEMORY[0x9D5558]);
-                materialTime = (double)(MEMORY[0x9D5560] - time) * 0.001000000047497451;
+                    + ((ns->lerp.u.vehicle.materialTime - p_currentState->u.vehicle.materialTime)
+                        * cgArray[0].frameInterpolation);
+                materialTime = (cgArray[0].time - time) * 0.001000000047497451;
             }
             R_AddDObjToScene(obj, &cent->pose, ns->number, 4u, lightingOrigin, materialTime);
         }
@@ -699,8 +702,8 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                             "%s\n\t(localClientNum) = %i",
                             "(localClientNum == 0)",
                             localClientNum);
-                    startMsec = MEMORY[0x9D5560];
-                    FX_PlayOrientedEffect(localClientNum, fx, MEMORY[0x9D5560], fxInfo->tireGroundPoint[tireIdx], axis);
+                    startMsec = cgArray[0].time;
+                    FX_PlayOrientedEffect(localClientNum, fx, cgArray[0].time, fxInfo->tireGroundPoint[tireIdx], axis);
                     if (vehDebugClient->current.enabled)
                     {
                         v4 = va("#%i", fxInfo->tireGroundSurfType[tireIdx]);
@@ -766,7 +769,7 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
     {
         entityNum = CG_GetEntityIndex(localClientNum, cent);
         vehFx = VehicleGetFxInfo(localClientNum, entityNum);
-        if (vehFx->nextDustFx <= (signed int)Sys_Milliseconds())
+        if (vehFx->nextDustFx <= Sys_Milliseconds())
         {
             mins[0] = -0.5;
             mins[1] = -0.5;
@@ -789,12 +792,12 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                 dist = Vec3Length(diff);
                 if (dist < 1200.0)
                 {
-                    nextDustInc = (int)(((dist - 350.0) / 850.0 * 0.1000000089406967 + 0.05000000074505806) * 1000.0);
+                    nextDustInc = (((dist - 350.0) / 850.0 * 0.1000000089406967 + 0.05000000074505806) * 1000.0);
                     axis[0][0] = 0.0;
                     axis[0][1] = 0.0;
                     axis[0][2] = 1.0;
                     Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
-                    if ((FxMarksSystem *)(trace.surfaceFlags & 0x1F00000) == (FxMarksSystem *)&fx_marksSystemPool[0].pointGroups[930].pointGroup.points[0].xyz[2])
+                    if ((trace.surfaceFlags & 0x1F00000) == &fx_marksSystemPool[0].pointGroups[930].pointGroup.points[0].xyz[2])
                         fx = cgMedia.heliWaterEffect;
                     else
                         fx = cgMedia.heliDustEffect;
@@ -806,14 +809,14 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                             "%s\n\t(localClientNum) = %i",
                             "(localClientNum == 0)",
                             localClientNum);
-                    FX_PlayOrientedEffect(localClientNum, fx, MEMORY[0x9D5560], groundpos, axis);
+                    FX_PlayOrientedEffect(localClientNum, fx, cgArray[0].time, groundpos, axis);
                 }
             }
             vehFx->nextDustFx = nextDustInc + Sys_Milliseconds();
         }
-        if (cent->nextState.un1.scale != 3 && vehFx->nextSmokeFx <= (signed int)Sys_Milliseconds())
+        if (cent->nextState.un1.scale != 3 && vehFx->nextSmokeFx <= Sys_Milliseconds())
         {
-            v6.scale = (int)cent->nextState.un1;
+            v6.scale = cent->nextState.un1;
             switch (v6.scale)
             {
             case 0:
@@ -842,7 +845,7 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                         "%s\n\t(localClientNum) = %i",
                         "(localClientNum == 0)",
                         localClientNum);
-                FX_PlayBoltedEffect(localClientNum, fx, MEMORY[0x9D5560], cent->nextState.number, boneIndex);
+                FX_PlayBoltedEffect(localClientNum, fx, cgArray[0].time, cent->nextState.number, boneIndex);
                 vehFx->nextSmokeFx = Sys_Milliseconds() + 50;
                 return;
             }
@@ -873,12 +876,12 @@ double __cdecl GetSpeed(int localClientNum, centity_s *cent)
             localClientNum);
     p_currentState = &cent->currentState;
     ns = &cent->nextState;
-    serverTimeDelta = *(unsigned int *)(MEMORY[0x98F45C] + 8) - *(unsigned int *)(MEMORY[0x98F458] + 8);
+    serverTimeDelta = cgArray[0].nextSnap->serverTime - cgArray[0].snap->serverTime;
     Vec3Sub(cent->nextState.lerp.pos.trBase, cent->currentState.pos.trBase, posDelta);
     len = Vec3Length(posDelta);
-    if ((double)serverTimeDelta <= 0.0)
+    if (serverTimeDelta <= 0.0)
         return 0.0;
-    return (float)(len / (double)serverTimeDelta);
+    return (len / serverTimeDelta);
 }
 
 void __cdecl CG_VehSphereCoordsToPos(float sphereDistance, float sphereYaw, float sphereAltitude, float *result)

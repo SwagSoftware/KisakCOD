@@ -598,3 +598,49 @@ void __cdecl Item_SetupKeywordHash();
 void __cdecl Menu_SetupKeywordHash();
 MenuList *__cdecl UI_LoadMenu_LoadObj(char *menuFile, int imageTrack);
 MenuList *__cdecl UI_LoadMenus_LoadObj(char *menuFile, int imageTrack);
+
+
+// ui_component
+struct UI_Component_data_t // sizeof=0xAC
+{                                       // ...
+    float screenWidth;                  // ...
+    float screenHeight;                 // ...
+    float charWidth;                    // ...
+    float charHeight;                   // ...
+    float scrollBarSize;                // ...
+    Material *cursor;                   // ...
+    float cursorPos[2];                 // ...
+    int hideCursor;                     // ...
+    Material *filledCircle;             // ...
+    int consoleReason;                  // ...
+    char findText[128];                 // ...
+};
+struct UI_Component // sizeof=0x10
+{                                       // ...
+    //void(__thiscall *Init)(UI_Component *this);
+    //void(__thiscall *Shutdown)(UI_Component *this);
+    //void(__thiscall * ~UI_Component)(UI_Component *this);
+    //void(__thiscall *Draw)(UI_Component *this, float, float, float, float, float, float);
+    //bool(__thiscall *KeyEvent)(UI_Component *this, float *, int);
+    //UI_Component *(__thiscall *GetCompAtLocation)(UI_Component *this, float *);
+    //void(__thiscall *AddText)(UI_Component *this, const char *);
+
+    //UI_Component_vtbl *__vftable;
+
+    virtual void Init();
+    virtual void Shutdown();
+    virtual ~UI_Component();
+    virtual void Draw(float one, float two, float three, float four, float five, float six);
+    virtual bool KeyEvent(float *, int);
+    virtual UI_Component *GetCompAtLocation(float *location);
+    virtual void AddText(const char *text);
+
+    float size[2];
+    UI_Component *selectionParent;      // ...
+
+    static void InitAssets();
+    static Material *RegisterMaterialNoMip(char *name, int imageTrack);
+
+    static UI_Component_data_t g;
+};
+void __cdecl UI_Component_Init();

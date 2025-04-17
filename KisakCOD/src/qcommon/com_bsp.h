@@ -1,6 +1,36 @@
 #pragma once
 #include <cgame_mp/cg_local_mp.h>
 
+struct DiskPrimaryLight_Version16 // sizeof=0x60
+{
+    unsigned __int16 falloffStart;
+    unsigned __int8 falloffSizeLessOne;
+    unsigned __int8 type;
+    float color[3];
+    float dir[3];
+    float origin[3];
+    float radius;
+    float cosHalfFovOuter;
+    float cosHalfFovInner;
+    int exponent;
+    char defName[40];
+};
+struct DiskPrimaryLight // sizeof=0x80
+{
+    unsigned __int8 type;
+    unsigned __int8 canUseShadowMap;
+    unsigned __int8 unused[2];
+    float color[3];
+    float dir[3];
+    float origin[3];
+    float radius;
+    float cosHalfFovOuter;
+    float cosHalfFovInner;
+    int exponent;
+    float rotationLimit;
+    float translationLimit;
+    char defName[64];
+};
 
 char __cdecl Com_CanPrimaryLightAffectPoint(const ComPrimaryLight *light, const float *point);
 double __cdecl CosOfSumOfArcCos(float cos0, float cos1);
@@ -66,6 +96,12 @@ enum LumpType : __int32
     LUMP_LIGHTREGION_AXES = 0x36,
 };
 
+enum ComSaveLumpBehavior : __int32
+{                                       // ...
+    COM_SAVE_LUMP_AND_CLOSE = 0x0,
+    COM_SAVE_LUMP_AND_REOPEN = 0x1,
+};
+
 struct BspChunk // sizeof=0x8
 {                                       // ...
     LumpType type;                      // ...
@@ -88,6 +124,7 @@ struct BspGlob // sizeof=0x54
     const void *loadedLumpData;         // ...
 };
 
+#define $0368CFE3C958026DEB0A011CBC6EA813 BspGlob // sizeof=0x54
 
 // com_bsp_load_obj
 char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count);
@@ -105,8 +142,14 @@ char *__cdecl Com_ValidateBspLumpData(
     unsigned int length,
     unsigned int elemSize,
     unsigned int *count);
+unsigned int __cdecl Com_GetBspVersion();
 
 int __cdecl Com_BlockChecksumKey32(const unsigned __int8 *data, unsigned int length, unsigned int initialCrc);
 char *__cdecl Com_EntityString(int *numEntityChars);
+
+void __cdecl Com_LoadWorld(char *name);
+void __cdecl Com_LoadWorld_FastFile(const char *name);
+void __cdecl Com_ShutdownWorld();
+void __cdecl Com_SaveLump(LumpType type, const void *newLump, unsigned int size, ComSaveLumpBehavior behavior);
 
 extern ComWorld comWorld;

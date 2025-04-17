@@ -5,14 +5,6 @@
 #include "q_shared.h"
 
 
-struct constantConfigString // sizeof=0x10
-{
-    int configStringNum;
-    char *configString;
-    int configStringHash;
-    int lowercaseConfigStringHash;
-};
-
 char tempString[2048];
 // struct constantConfigString *constantConfigStrings 827b8848     com_constantconfigstrings.obj
 constantConfigString constantConfigStrings[833];
@@ -34,6 +26,21 @@ unsigned int __cdecl GetHashCode(const char *str, unsigned int len)
         --len;
     }
     return hash % 0x4E1F + 1;
+}
+
+unsigned int __cdecl GetHashCode_0(const char *str, unsigned int len)
+{
+    unsigned int hash; // [esp+4h] [ebp-8h]
+
+    if (len >= 0x100)
+        return (len >> 2) % 0x7FFFFFFE + 1;
+    hash = 0;
+    while (len)
+    {
+        hash = *str++ + 31 * hash;
+        --len;
+    }
+    return hash % 0x7FFFFFFE + 1;
 }
 
 unsigned int __cdecl lowercaseHash(const char *str)
@@ -64,9 +71,11 @@ void __cdecl CCS_InitConstantConfigStrings()
                 "%s",
                 "index == 0 || constantConfigStrings[index-1].configStringNum < constantConfigStrings[index].configStringNum");
         if (constantConfigStrings[index].configStringNum < 821)
-            dword_94A788[4 * index] = GetHashCode_0((&off_94A784)[4 * index], strlen((&off_94A784)[4 * index]));
+            constantConfigStrings[index].configStringHash = GetHashCode_0(
+                constantConfigStrings[index].configString,
+                strlen(constantConfigStrings[index].configString));
         else
-            dword_94A788[4 * index] = lowercaseHash((&off_94A784)[4 * index]);
+            constantConfigStrings[index].configStringHash = lowercaseHash(constantConfigStrings[index].configString);
         reservedConfigStrings[constantConfigStrings[index].configStringNum / 32] |= 1 << (constantConfigStrings[index].configStringNum
             % 32);
     }
@@ -80,16 +89,20 @@ int __cdecl CCS_GetConstConfigStringIndex(const char *configString)
     unsigned int lcaseHash; // [esp+2Ch] [ebp-4h]
 
     index = 0;
-    hash = GetHashCode(configString, strlen(configString));
+    hash = GetHashCode_0(configString, strlen(configString));
     lcaseHash = lowercaseHash(configString);
     while (constantConfigStrings[index].configStringNum)
     {
         if (constantConfigStrings[index].configStringNum < 821)
         {
-            if (dword_94A788[4 * index] == hash && !strcmp(configString, (&off_94A784)[4 * index]))
+            if (constantConfigStrings[index].configStringHash == hash
+                && !strcmp(configString, constantConfigStrings[index].configString))
+            {
                 return index;
+            }
         }
-        else if (dword_94A788[4 * index] == lcaseHash && !I_stricmp(configString, (&off_94A784)[4 * index]))
+        else if (constantConfigStrings[index].configStringHash == lcaseHash
+            && !I_stricmp(configString, constantConfigStrings[index].configString))
         {
             return index;
         }

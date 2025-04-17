@@ -23,6 +23,16 @@ enum print_msg_dest_t : __int32
     CON_DEST_GAME_LAST = 0x6,
     CON_DEST_COUNT = 0x7,
 };
+print_msg_dest_t &operator++(print_msg_dest_t &e) {
+    static_cast<print_msg_dest_t>(static_cast<int>(e) + 1);
+    return e;
+}
+print_msg_dest_t &operator++(print_msg_dest_t &e, int i)
+{
+    print_msg_dest_t temp = e;
+    ++e;
+    return temp;
+}
 
 struct ConDrawInputGlob // sizeof=0x64
 {                                       // ...
@@ -358,6 +368,32 @@ void __cdecl CL_PlayTextFXPulseSounds(
     int fxDecayStartTime,
     int *soundTimeKeeper);
 
+extern const dvar_t *con_typewriterColorGlowFailed;
+extern const dvar_t *con_typewriterColorGlowCompleted;
+extern const dvar_t *con_typewriterColorGlowCheckpoint;
+extern const dvar_t *cl_deathMessageWidth;
+extern const dvar_t *con_typewriterColorBase;
+extern const dvar_t *con_matchPrefixOnly;
+extern const dvar_t *con_typewriterColorGlowUpdated;
+extern const dvar_t *con_typewriterDecayDuration;
+extern const dvar_t *con_typewriterDecayStartTime;
+extern const dvar_t *con_restricted;
+extern const dvar_t *con_typewriterPrintSpeed;
+
+extern const dvar_t *con_inputBoxColor;
+extern const dvar_t *con_inputHintBoxColor;
+extern const dvar_t *con_outputBarColor;
+extern const dvar_t *con_outputSliderColor;
+extern const dvar_t *con_errormessagetime;
+extern const dvar_t *con_minicontime;
+extern const dvar_t *con_miniconlines;
+extern const dvar_t *con_inputBoxColor;
+extern const dvar_t *con_outputWindowColor;
+
+extern ConDrawInputGlob conDrawInputGlob;
+extern bool con_ignoreMatchPrefixOnly;
+extern int con_inputMaxMatchesShown;
+
 
 // cl_keys
 enum LocSelInputState : __int32
@@ -445,7 +481,7 @@ void __cdecl Key_AddCatcher(int localClientNum, int orMask);
 void __cdecl Key_RemoveCatcher(int localClientNum, int andMask);
 void __cdecl Key_SetCatcher(int localClientNum, int catcher);
 
-
+extern field_t g_consoleField;
 
 
 // screen_placement
@@ -585,3 +621,8 @@ void __cdecl CL_PlayCinematic_f();
 void __cdecl CL_PlayUnskippableCinematic_f();
 void __cdecl SCR_DrawCinematic(int localClientNum);
 void __cdecl SCR_StopCinematic(int localClientNum);
+
+
+extern int g_console_field_width;
+extern float g_console_char_height;
+extern field_t historyEditLines[32];

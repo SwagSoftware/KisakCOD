@@ -7,6 +7,21 @@ enum GfxScreenshotType : __int32
     R_SCREENSHOT_TGA = 0x1,
 };
 
+enum CubeCoord : __int32
+{                                       // ...
+    CUBE_X0 = 0x0,
+    CUBE_X1 = 0x1,
+    CUBE_Y0 = 0x2,
+    CUBE_Y1 = 0x3,
+    CUBE_NUM_COORDS = 0x4,
+};
+
+enum FlipEdge : __int32
+{                                       // ...
+    DONT_FLIP_EDGE = 0x0,
+    FLIP_EDGE = 0x1,
+};
+
 void __cdecl TRACK_r_screenshot();
 void __cdecl R_LevelShot();
 void __cdecl R_SaveGameShot(const char *saveName);
@@ -36,3 +51,5 @@ void __cdecl R_CubemapShotExtractLinearLight(
     float (**linearColors)[3]);
 
 void __cdecl R_ScreenshotCommand(GfxScreenshotType type);
+
+void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *probeRawData, int downSampleRes);

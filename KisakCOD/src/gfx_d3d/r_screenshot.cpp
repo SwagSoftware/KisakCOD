@@ -8,12 +8,23 @@
 #include "r_state.h"
 #include "rb_state.h"
 #include <qcommon/cmd.h>
+#include "r_reflection_probe.h"
 
 struct $EF604BEDDA69129AF7FD28DC5064E1AD // sizeof=0x18
 {                                       // ...
     unsigned __int8 *pixels[6];         // ...
 };
 $EF604BEDDA69129AF7FD28DC5064E1AD cubeShotGlob;
+
+struct __declspec(align(4)) $8245A080F03119DF8EECD02BF0FDD113 // sizeof=0x48004
+{                                       // ...
+    float cubeDirs[6][64][64][3];
+    bool cubeDirsInited;                // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+$8245A080F03119DF8EECD02BF0FDD113 cubeMapUtilsGlob;
 
 const float cubemapShotAxis[7][3][3] =
 {
@@ -30,6 +41,779 @@ void __cdecl TRACK_r_screenshot()
 {
     track_static_alloc_internal((void *)cubemapShotAxis, 252, "cubemapShotAxis", 18);
     track_static_alloc_internal(&cubeShotGlob, 24, "cubeShotGlob", 18);
+}
+
+void __cdecl Image_Blend1x1Faces(unsigned __int8 *(*pixels)[15], int mipLevel)
+{
+    int i; // [esp+10h] [ebp-10h]
+    int face; // [esp+14h] [ebp-Ch]
+    int color; // [esp+18h] [ebp-8h]
+    float value; // [esp+1Ch] [ebp-4h]
+    float valuea; // [esp+1Ch] [ebp-4h]
+
+    for (color = 0; color < 4; ++color)
+    {
+        value = 0.0;
+        for (face = 0; face < 6; ++face)
+            value = (&(*pixels)[15 * face])[mipLevel][color] + value;
+        valuea = value / 6.0;
+        for (i = 0; i < 6; ++i)
+            (&(*pixels)[15 * i])[mipLevel][color] = valuea;
+    }
+}
+
+unsigned __int8 *__cdecl Image_GetCubeCornerPixel(
+    unsigned __int8 *facePixels,
+    unsigned int coordx,
+    int coordy,
+    int edgeSize)
+{
+    const char *v4; // eax
+    const char *v6; // eax
+    int x; // [esp+8h] [ebp-8h]
+    int y; // [esp+Ch] [ebp-4h]
+
+    if (coordx > 1 || coordy != 2 && coordy != 3)
+        MyAssertHandler(
+            ".\\r_cubemap_utils.cpp",
+            372,
+            0,
+            "%s",
+            "( coordx == CUBE_X0 || coordx == CUBE_X1 ) && ( coordy == CUBE_Y0 || coordy == CUBE_Y1 )");
+    if (coordx)
+    {
+        if (coordx != 1)
+        {
+            if (!alwaysfails)
+            {
+                v4 = va("Unhandled coordx %d", coordx);
+                MyAssertHandler(".\\r_cubemap_utils.cpp", 385, 0, v4);
+            }
+            return 0;
+        }
+        x = edgeSize - 1;
+    }
+    else
+    {
+        x = 0;
+    }
+    if (coordy == 2)
+    {
+        y = 0;
+        return &facePixels[4 * x + 4 * y * edgeSize];
+    }
+    if (coordy == 3)
+    {
+        y = edgeSize - 1;
+        return &facePixels[4 * x + 4 * y * edgeSize];
+    }
+    if (!alwaysfails)
+    {
+        v6 = va("Unhandled coordy %d", coordy);
+        MyAssertHandler(".\\r_cubemap_utils.cpp", 401, 0, v6);
+    }
+    return 0;
+}
+
+unsigned __int8 *__cdecl Image_GetCubeFaceEdgePixel(
+    unsigned __int8 *facePixels,
+    int pixel,
+    int edgeSize,
+    CubeCoord edge)
+{
+    unsigned __int8 *result; // eax
+    const char *v5; // eax
+
+    switch (edge)
+    {
+    case CUBE_X0:
+        result = &facePixels[pixel * 4 * edgeSize];
+        break;
+    case CUBE_X1:
+        result = &facePixels[4 * edgeSize - 4 + 4 * pixel * edgeSize];
+        break;
+    case CUBE_Y0:
+        result = &facePixels[4 * pixel];
+        break;
+    case CUBE_Y1:
+        result = &facePixels[4 * pixel + 4 * edgeSize * (edgeSize - 1)];
+        break;
+    default:
+        if (!alwaysfails)
+        {
+            v5 = va("Unhandled edge %d", edge);
+            MyAssertHandler(".\\r_cubemap_utils.cpp", 328, 0, v5);
+        }
+        result = 0;
+        break;
+    }
+    return result;
+}
+
+void __cdecl Image_BlendCubeCorner(
+    unsigned __int8 *facePixels0,
+    unsigned __int8 *facePixels1,
+    unsigned __int8 *facePixels2,
+    int edgeSize,
+    CubeCoord coord0x,
+    CubeCoord coord0y,
+    CubeCoord coord1x,
+    CubeCoord coord1y,
+    CubeCoord coord2x,
+    CubeCoord coord2y)
+{
+    int color; // [esp+10h] [ebp-10h]
+    unsigned __int8 *pixel2; // [esp+14h] [ebp-Ch]
+    unsigned __int8 *pixel0; // [esp+18h] [ebp-8h]
+    unsigned __int8 *pixel1; // [esp+1Ch] [ebp-4h]
+
+    pixel0 = Image_GetCubeCornerPixel(facePixels0, coord0x, coord0y, edgeSize);
+    pixel1 = Image_GetCubeCornerPixel(facePixels1, coord1x, coord1y, edgeSize);
+    pixel2 = Image_GetCubeCornerPixel(facePixels2, coord2x, coord2y, edgeSize);
+    for (color = 0; color < 4; ++color)
+    {
+        pixel0[color] = ((pixel2[color] + pixel1[color] + pixel0[color]) / 3.0);
+        pixel1[color] = pixel0[color];
+        pixel2[color] = pixel0[color];
+    }
+}
+
+void __cdecl Image_BlendCubeFaceEdge(
+    unsigned __int8 *thisFacePixels,
+    unsigned __int8 *otherFacePixels,
+    int edgeSize,
+    CubeCoord thisEdge,
+    CubeCoord otherEdge,
+    FlipEdge flip)
+{
+    int color; // [esp+0h] [ebp-14h]
+    unsigned __int8 *otherPixel; // [esp+4h] [ebp-10h]
+    int i; // [esp+8h] [ebp-Ch]
+    int iother; // [esp+Ch] [ebp-8h]
+    unsigned __int8 *thisPixel; // [esp+10h] [ebp-4h]
+
+    for (i = 0; i < edgeSize; ++i)
+    {
+        if (flip == FLIP_EDGE)
+            iother = edgeSize - i - 1;
+        else
+            iother = i;
+        thisPixel = Image_GetCubeFaceEdgePixel(thisFacePixels, i, edgeSize, thisEdge);
+        otherPixel = Image_GetCubeFaceEdgePixel(otherFacePixels, iother, edgeSize, otherEdge);
+        for (color = 0; color < 4; ++color)
+        {
+            thisPixel[color] = (otherPixel[color] + thisPixel[color]) / 2;
+            otherPixel[color] = thisPixel[color];
+        }
+    }
+}
+
+void __cdecl CubeMap_BlendFaceEdges(unsigned __int8 *(*pixels)[15], int mipLevel, int edgeSize)
+{
+    if (edgeSize == 1)
+    {
+        Image_Blend1x1Faces(pixels, mipLevel);
+    }
+    else
+    {
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel],
+            (*pixels)[mipLevel + 60],
+            (*pixels)[mipLevel + 30],
+            edgeSize,
+            CUBE_X0,
+            CUBE_Y0,
+            CUBE_X1,
+            CUBE_Y0,
+            CUBE_X1,
+            CUBE_Y1);
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel],
+            (*pixels)[mipLevel + 60],
+            (*pixels)[mipLevel + 45],
+            edgeSize,
+            CUBE_X0,
+            CUBE_Y1,
+            CUBE_X1,
+            CUBE_Y1,
+            CUBE_X1,
+            CUBE_Y0);
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel],
+            (*pixels)[mipLevel + 75],
+            (*pixels)[mipLevel + 30],
+            edgeSize,
+            CUBE_X1,
+            CUBE_Y0,
+            CUBE_X0,
+            CUBE_Y0,
+            CUBE_X1,
+            CUBE_Y0);
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel],
+            (*pixels)[mipLevel + 75],
+            (*pixels)[mipLevel + 45],
+            edgeSize,
+            CUBE_X1,
+            CUBE_Y1,
+            CUBE_X0,
+            CUBE_Y1,
+            CUBE_X1,
+            CUBE_Y1);
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel + 15],
+            (*pixels)[mipLevel + 60],
+            (*pixels)[mipLevel + 30],
+            edgeSize,
+            CUBE_X1,
+            CUBE_Y0,
+            CUBE_X0,
+            CUBE_Y0,
+            CUBE_X0,
+            CUBE_Y1);
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel + 15],
+            (*pixels)[mipLevel + 60],
+            (*pixels)[mipLevel + 45],
+            edgeSize,
+            CUBE_X1,
+            CUBE_Y1,
+            CUBE_X0,
+            CUBE_Y1,
+            CUBE_X0,
+            CUBE_Y0);
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel + 15],
+            (*pixels)[mipLevel + 75],
+            (*pixels)[mipLevel + 30],
+            edgeSize,
+            CUBE_X0,
+            CUBE_Y0,
+            CUBE_X1,
+            CUBE_Y0,
+            CUBE_X0,
+            CUBE_Y0);
+        Image_BlendCubeCorner(
+            (*pixels)[mipLevel + 15],
+            (*pixels)[mipLevel + 75],
+            (*pixels)[mipLevel + 45],
+            edgeSize,
+            CUBE_X0,
+            CUBE_Y1,
+            CUBE_X1,
+            CUBE_Y1,
+            CUBE_X0,
+            CUBE_Y1);
+        Image_BlendCubeFaceEdge((*pixels)[mipLevel], (*pixels)[mipLevel + 60], edgeSize, CUBE_X0, CUBE_X1, DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge((*pixels)[mipLevel], (*pixels)[mipLevel + 75], edgeSize, CUBE_X1, CUBE_X0, DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge((*pixels)[mipLevel], (*pixels)[mipLevel + 30], edgeSize, CUBE_Y0, CUBE_X1, FLIP_EDGE);
+        Image_BlendCubeFaceEdge((*pixels)[mipLevel], (*pixels)[mipLevel + 45], edgeSize, CUBE_Y1, CUBE_X1, DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge(
+            (*pixels)[mipLevel + 15],
+            (*pixels)[mipLevel + 30],
+            edgeSize,
+            CUBE_Y0,
+            CUBE_X0,
+            DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge((*pixels)[mipLevel + 15], (*pixels)[mipLevel + 45], edgeSize, CUBE_Y1, CUBE_X0, FLIP_EDGE);
+        Image_BlendCubeFaceEdge(
+            (*pixels)[mipLevel + 15],
+            (*pixels)[mipLevel + 60],
+            edgeSize,
+            CUBE_X1,
+            CUBE_X0,
+            DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge(
+            (*pixels)[mipLevel + 15],
+            (*pixels)[mipLevel + 75],
+            edgeSize,
+            CUBE_X0,
+            CUBE_X1,
+            DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge(
+            (*pixels)[mipLevel + 45],
+            (*pixels)[mipLevel + 60],
+            edgeSize,
+            CUBE_Y0,
+            CUBE_Y1,
+            DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge((*pixels)[mipLevel + 45], (*pixels)[mipLevel + 75], edgeSize, CUBE_Y1, CUBE_Y1, FLIP_EDGE);
+        Image_BlendCubeFaceEdge(
+            (*pixels)[mipLevel + 30],
+            (*pixels)[mipLevel + 60],
+            edgeSize,
+            CUBE_Y1,
+            CUBE_Y0,
+            DONT_FLIP_EDGE);
+        Image_BlendCubeFaceEdge((*pixels)[mipLevel + 30], (*pixels)[mipLevel + 75], edgeSize, CUBE_Y0, CUBE_Y0, FLIP_EDGE);
+    }
+}
+
+void __cdecl R_CubemapShotDownSample(unsigned __int8 *pixels, int baseRes, int downSampleRes)
+{
+    int i; // [esp+10h] [ebp-34h]
+    int colIndex; // [esp+14h] [ebp-30h]
+    int subx; // [esp+18h] [ebp-2Ch]
+    int suby; // [esp+1Ch] [ebp-28h]
+    int x; // [esp+20h] [ebp-24h]
+    int y; // [esp+24h] [ebp-20h]
+    float total[6]; // [esp+28h] [ebp-1Ch]
+    unsigned __int8 *pixel; // [esp+40h] [ebp-4h]
+
+    LODWORD(total[5]) = 4;
+    LODWORD(total[4]) = 4;
+    if (baseRes != 4 * downSampleRes)
+        MyAssertHandler(".\\r_screenshot.cpp", 950, 0, "%s", "baseRes == ratio * downSampleRes");
+    for (y = 0; y < downSampleRes; ++y)
+    {
+        for (x = 0; x < downSampleRes; ++x)
+        {
+            total[0] = 0.0;
+            total[1] = 0.0;
+            total[2] = 0.0;
+            total[3] = 0.0;
+            for (suby = 0; suby < 4; ++suby)
+            {
+                for (subx = 0; subx < 4; ++subx)
+                {
+                    pixel = &pixels[16 * x + 4 * subx + 4 * baseRes * (suby + 4 * y)];
+                    for (colIndex = 0; colIndex < 4; ++colIndex)
+                        total[colIndex] = pixel[colIndex] + total[colIndex];
+                }
+            }
+            pixel = &pixels[4 * x + 4 * downSampleRes * y];
+            for (i = 0; i < 4; ++i)
+            {
+                total[i] = total[i] / 16.0;
+                if (total[i] < 0.0 || total[i] > 255.0)
+                    MyAssertHandler(".\\r_screenshot.cpp", 974, 1, "%s", "total[colIndex] >= 0.0f && total[colIndex] <= 255.0f");
+                pixel[i] = total[i];
+            }
+        }
+    }
+}
+
+void __cdecl Image_FlipVertically(unsigned __int8 *pic, int size)
+{
+    int *v2; // ecx
+    int t; // [esp+4h] [ebp-1Ch]
+    int cache; // [esp+8h] [ebp-18h]
+    int s; // [esp+14h] [ebp-Ch]
+    int *p; // [esp+1Ch] [ebp-4h]
+
+    for (s = 0; s < size; ++s)
+    {
+        p = (int*)&pic[4 * s];
+        for (t = 0; t < size / 2; ++t)
+        {
+            v2 = &p[size * (size - 1) - size * t];
+            cache = p[size * t];
+            p[size * t] = *v2;
+            *v2 = cache;
+        }
+    }
+}
+
+void __cdecl Image_FlipDiagonally(unsigned __int8 *pic, int size)
+{
+    int t; // [esp+0h] [ebp-14h]
+    int cache; // [esp+4h] [ebp-10h]
+    int s; // [esp+10h] [ebp-4h]
+
+    for (s = 1; s < size; ++s)
+    {
+        for (t = 0; t < s; ++t)
+        {
+            cache = *&pic[4 * s + 4 * size * t];
+            *&pic[4 * s + 4 * size * t] = *&pic[4 * t + 4 * size * s];
+            *&pic[4 * t + 4 * size * s] = cache;
+        }
+    }
+}
+
+void __cdecl Image_FlipHorizontally(unsigned __int8 *pic, int size)
+{
+    int t; // [esp+0h] [ebp-1Ch]
+    int cache; // [esp+4h] [ebp-18h]
+    int *pb; // [esp+8h] [ebp-14h]
+    int *pa; // [esp+10h] [ebp-Ch]
+    int s; // [esp+18h] [ebp-4h]
+
+    for (t = 0; t < size; ++t)
+    {
+        pa = (int*)&pic[4 * size * t];
+        pb = &pa[size - 1];
+        for (s = 0; s < size / 2; ++s)
+        {
+            cache = pa[s];
+            pa[s] = pb[-s];
+            pb[-s] = cache;
+        }
+    }
+}
+
+void __cdecl CubeMap_FlipSides(unsigned __int8 **pic, int size)
+{
+    Image_FlipDiagonally(*pic, size);
+    Image_FlipDiagonally(pic[1], size);
+    Image_FlipHorizontally(pic[1], size);
+    Image_FlipVertically(pic[1], size);
+    Image_FlipVertically(pic[2], size);
+    Image_FlipHorizontally(pic[3], size);
+    Image_FlipDiagonally(pic[4], size);
+    Image_FlipDiagonally(pic[5], size);
+}
+
+void __cdecl Image_CubeMapDirRemap(float *dir, int size)
+{
+    double v2; // st7
+    int i; // [esp+4h] [ebp-4h]
+
+    for (i = 0; i < 3; ++i)
+    {
+        v2 = dir[i] / (size - 1);
+        dir[i] = v2 + v2 - 1.0;
+    }
+}
+
+void __cdecl Image_CubeMapDir(int face, int u, int v, int size, float *dir)
+{
+    const char *v5; // eax
+
+    switch (face)
+    {
+    case 0:
+        *dir = (size - 1);
+        dir[1] = (size - 1 - v);
+        dir[2] = (size - 1 - u);
+        break;
+    case 1:
+        *dir = 0.0;
+        dir[1] = (size - 1 - v);
+        dir[2] = u;
+        break;
+    case 2:
+        *dir = u;
+        dir[1] = (size - 1);
+        dir[2] = v;
+        break;
+    case 3:
+        *dir = u;
+        dir[1] = 0.0;
+        dir[2] = (size - 1 - v);
+        break;
+    case 4:
+        *dir = u;
+        dir[1] = (size - 1 - v);
+        dir[2] = (size - 1);
+        break;
+    case 5:
+        *dir = (size - 1 - u);
+        dir[1] = (size - 1 - v);
+        dir[2] = 0.0;
+        break;
+    default:
+        if (!alwaysfails)
+        {
+            v5 = va("Image_CubeMapDir: unknown face %d", face);
+            MyAssertHandler(".\\r_cubemap_utils.cpp", 206, 0, v5);
+        }
+        break;
+    }
+    Image_CubeMapDirRemap(dir, size);
+    Vec3Normalize(dir);
+}
+
+void __cdecl CubeMap_CacheHighMipDirs()
+{
+    int u; // [esp+0h] [ebp-Ch]
+    int v; // [esp+4h] [ebp-8h]
+    int face; // [esp+8h] [ebp-4h]
+
+    if (!cubeMapUtilsGlob.cubeDirsInited)
+    {
+        cubeMapUtilsGlob.cubeDirsInited = 1;
+        for (face = 0; face < 6; ++face)
+        {
+            for (v = 0; v < 64; ++v)
+            {
+                for (u = 0; u < 64; ++u)
+                    Image_CubeMapDir(face, u, v, 64, cubeMapUtilsGlob.cubeDirs[face][v][u]);
+            }
+        }
+    }
+}
+
+double __cdecl Image_CubeMipMapBlurDot(int mipSize)
+{
+    double result; // st7
+    const char *v2; // eax
+    float v3; // [esp+0h] [ebp-20h]
+    float v4; // [esp+4h] [ebp-1Ch]
+    float v5; // [esp+8h] [ebp-18h]
+    float v6; // [esp+Ch] [ebp-14h]
+    float v7; // [esp+10h] [ebp-10h]
+    float v8; // [esp+14h] [ebp-Ch]
+    float v9; // [esp+18h] [ebp-8h]
+
+    switch (mipSize)
+    {
+    case 1:
+        v4 = cos(3.1415927);
+        result = v4;
+        break;
+    case 2:
+        v5 = cos(1.5707964);
+        result = v5;
+        break;
+    case 4:
+        v6 = cos(0.78539819);
+        result = v6;
+        break;
+    case 8:
+        v7 = cos(0.38397244);
+        result = v7;
+        break;
+    case 16:
+        v8 = cos(0.19198622);
+        result = v8;
+        break;
+    case 32:
+        v9 = cos(0.08726646);
+        result = v9;
+        break;
+    default:
+        if (!alwaysfails)
+        {
+            v2 = va("ERROR: mipSize %d unexpected for cube map", mipSize);
+            MyAssertHandler(".\\r_cubemap_utils.cpp", 295, 0, v2);
+        }
+        v3 = cos(0.08726646);
+        result = v3;
+        break;
+    }
+    return result;
+}
+
+void __cdecl Image_CubeMapFaceDir(int face, float *dir)
+{
+    const char *v2; // eax
+
+    switch (face)
+    {
+    case 0:
+        *dir = 1.0;
+        dir[1] = 0.0;
+        dir[2] = 0.0;
+        break;
+    case 1:
+        *dir = -1.0;
+        dir[1] = 0.0;
+        dir[2] = 0.0;
+        break;
+    case 2:
+        *dir = 0.0;
+        dir[1] = 1.0;
+        dir[2] = 0.0;
+        break;
+    case 3:
+        *dir = 0.0;
+        dir[1] = -1.0;
+        dir[2] = 0.0;
+        break;
+    case 4:
+        *dir = 0.0;
+        dir[1] = 0.0;
+        dir[2] = 1.0;
+        break;
+    case 5:
+        *dir = 0.0;
+        dir[1] = 0.0;
+        dir[2] = -1.0;
+        break;
+    default:
+        if (!alwaysfails)
+        {
+            v2 = va("Image_CubeMapDir: unknown face %d", face);
+            MyAssertHandler(".\\r_cubemap_utils.cpp", 166, 0, v2);
+        }
+        break;
+    }
+}
+
+void __cdecl Vec4Mad(const float *start, float scale, const float *dir, float *result)
+{
+    *result = scale * *dir + *start;
+    result[1] = scale * dir[1] + start[1];
+    result[2] = scale * dir[2] + start[2];
+    result[3] = scale * dir[3] + start[3];
+}
+
+void __cdecl Image_CalcCubeMipMapTexel32SubSample(
+    int face,
+    int u,
+    int v,
+    float *dir,
+    unsigned __int8 *(*sourceFacePixels)[15],
+    int sourceSize,
+    float minDot,
+    float *color,
+    float *weight)
+{
+    int i; // [esp+10h] [ebp-1Ch]
+    float sourceColor[4]; // [esp+14h] [ebp-18h] BYREF
+    float adjustedDot; // [esp+24h] [ebp-8h]
+    float dot; // [esp+28h] [ebp-4h]
+
+    dot = Vec3Dot(cubeMapUtilsGlob.cubeDirs[face][v][u], dir);
+    if (minDot < dot)
+    {
+        adjustedDot = dot - minDot;
+        for (i = 0; i < 4; ++i)
+            sourceColor[i] = (*sourceFacePixels)[15 * face][4 * u + 4 * sourceSize * v + i] / 255.0;
+        Vec4Mad(color, adjustedDot, sourceColor, color);
+        *weight = *weight + adjustedDot;
+    }
+}
+
+void __cdecl Image_CalcCubeMipMapTexel32(
+    unsigned __int8 *pixel,
+    float *dir,
+    unsigned __int8 *(*sourceFacePixels)[15],
+    int sourceSize,
+    float blurDotMin)
+{
+    int j; // [esp+18h] [ebp-28h]
+    int u; // [esp+1Ch] [ebp-24h]
+    int v; // [esp+20h] [ebp-20h]
+    int face; // [esp+24h] [ebp-1Ch]
+    int i; // [esp+28h] [ebp-18h]
+    float weight; // [esp+2Ch] [ebp-14h] BYREF
+    float color[4]; // [esp+30h] [ebp-10h] BYREF
+
+    weight = 0.0;
+    for (i = 0; i < 4; ++i)
+        color[i] = 0.0;
+    for (face = 0; face < 6; ++face)
+    {
+        for (v = 0; v < sourceSize; ++v)
+        {
+            for (u = 0; u < sourceSize; ++u)
+                Image_CalcCubeMipMapTexel32SubSample(face, u, v, dir, sourceFacePixels, sourceSize, blurDotMin, color, &weight);
+        }
+    }
+    if (weight <= 0.0)
+        MyAssertHandler(".\\r_cubemap_utils.cpp", 256, 1, "%s", "weight > 0.0f");
+    for (j = 0; j < 4; ++j)
+    {
+        color[j] = color[j] / weight;
+        if (color[j] > 1.0)
+            color[j] = 1.0;
+        pixel[j] = (color[j] * 255.0);
+    }
+}
+
+void __cdecl CubeMap_GenerateMipMap32(
+    unsigned __int8 *image,
+    int size,
+    unsigned __int8 *(*sourceFacePixels)[15],
+    int sourceSize,
+    int face)
+{
+    float dir[3]; // [esp+4h] [ebp-18h] BYREF
+    float blurDotMin; // [esp+10h] [ebp-Ch]
+    int u; // [esp+14h] [ebp-8h]
+    int v; // [esp+18h] [ebp-4h]
+    int sizea; // [esp+28h] [ebp+Ch]
+
+    if (size <= 1)
+        MyAssertHandler(".\\r_cubemap_utils.cpp", 520, 0, "%s", "size > 1");
+    if (sourceSize != 64)
+        MyAssertHandler(".\\r_cubemap_utils.cpp", 522, 0, "%s", "sourceSize == CUBE_MAP_HIGH_MIP_SIZE");
+    sizea = size >> 1;
+    blurDotMin = Image_CubeMipMapBlurDot(sizea);
+    if (sizea == 1)
+    {
+        Image_CubeMapFaceDir(face, dir);
+        Image_CalcCubeMipMapTexel32(image, dir, sourceFacePixels, sourceSize, blurDotMin);
+    }
+    else
+    {
+        for (v = 0; v < sizea; ++v)
+        {
+            for (u = 0; u < sizea; ++u)
+            {
+                Image_CubeMapDir(face, u, v, sizea, dir);
+                Image_CalcCubeMipMapTexel32(&image[4 * u + 4 * sizea * v], dir, sourceFacePixels, sourceSize, blurDotMin);
+            }
+        }
+    }
+}
+
+void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *probeRawData, int downSampleRes)
+{
+    int v2; // [esp+0h] [ebp-190h]
+    int mip; // [esp+4h] [ebp-18Ch]
+    unsigned __int8 *data; // [esp+Ch] [ebp-184h]
+    unsigned __int8 *pixels[6][15]; // [esp+10h] [ebp-180h] BYREF
+    unsigned __int8 *rawPixels; // [esp+17Ch] [ebp-14h]
+    int mipmapLevelSize; // [esp+180h] [ebp-10h]
+    int imgIndex; // [esp+184h] [ebp-Ch]
+    int scaledSize; // [esp+188h] [ebp-8h]
+    int mipLevel; // [esp+18Ch] [ebp-4h]
+
+    if (downSampleRes > gfxMetrics.cubemapShotRes)
+        MyAssertHandler(".\\r_screenshot.cpp", 993, 0, "%s", "downSampleRes <= gfxMetrics.cubemapShotRes");
+    for (imgIndex = 0; imgIndex < 6; ++imgIndex)
+    {
+        R_CubemapShotDownSample(cubeShotGlob.pixels[imgIndex], gfxMetrics.cubemapShotRes, downSampleRes);
+        Image_FlipVertically(cubeShotGlob.pixels[imgIndex], downSampleRes);
+    }
+    CubeMap_FlipSides(cubeShotGlob.pixels, downSampleRes);
+    mipLevel = 0;
+    mipmapLevelSize = downSampleRes * 4 * downSampleRes;
+    rawPixels = probeRawData->pixels;
+    for (imgIndex = 0; imgIndex < 6; ++imgIndex)
+    {
+        pixels[imgIndex][0] = rawPixels;
+        rawPixels += mipmapLevelSize;
+        memcpy(pixels[imgIndex][0], cubeShotGlob.pixels[imgIndex], mipmapLevelSize);
+    }
+    CubeMap_CacheHighMipDirs();
+    if (downSampleRes != 64)
+        MyAssertHandler(".\\r_screenshot.cpp", 1016, 0, "%s", "downSampleRes == CUBE_MAP_HIGH_MIP_SIZE");
+    for (imgIndex = 0; imgIndex < 6; ++imgIndex)
+    {
+        scaledSize = downSampleRes;
+        data = cubeShotGlob.pixels[imgIndex];
+        mipLevel = 1;
+        do
+        {
+            CubeMap_GenerateMipMap32(data, scaledSize, pixels, downSampleRes, imgIndex);
+            if (scaledSize >> 1 >= 1)
+                v2 = scaledSize >> 1;
+            else
+                v2 = 1;
+            scaledSize = v2;
+            mipmapLevelSize = v2 * 4 * v2;
+            pixels[imgIndex][mipLevel] = rawPixels;
+            rawPixels += mipmapLevelSize;
+            memcpy(pixels[imgIndex][mipLevel++], data, mipmapLevelSize);
+        } while (scaledSize != 1);
+    }
+    for (mip = 0; mip < mipLevel; ++mip)
+        CubeMap_BlendFaceEdges(pixels, mip, downSampleRes >> mip);
+    if (mipLevel < 1 || mipLevel >= 0xF)
+        MyAssertHandler(".\\r_screenshot.cpp", 1046, 1, "%s", "mipLevel >= 1 && mipLevel < ARRAY_COUNT( pixels[0] )");
+    for (imgIndex = 0; imgIndex < 6; ++imgIndex)
+        Z_VirtualFree(cubeShotGlob.pixels[imgIndex]);
+    if (rawPixels - probeRawData->pixels != 131064)
+        MyAssertHandler(
+            ".\\r_screenshot.cpp",
+            1051,
+            1,
+            "%s",
+            "rawPixels - probeRawData->pixels == sizeof( probeRawData->pixels )");
 }
 
 char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytesPerPixel, unsigned __int8 *buffer)

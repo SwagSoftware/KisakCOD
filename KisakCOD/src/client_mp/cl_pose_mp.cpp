@@ -1,10 +1,11 @@
 #include "client_mp.h"
 
 #include <gfx_d3d/r_scene.h>
+#include <xanim/dobj_utils.h>
 
 char *__cdecl CL_AllocSkelMemory(unsigned int size)
 {
-    volatile int *Addend; // [esp+0h] [ebp-Ch]
+    volatile unsigned int *Addend; // [esp+0h] [ebp-Ch]
     char *result; // [esp+4h] [ebp-8h]
     int skelMemPos; // [esp+8h] [ebp-4h]
     unsigned int sizea; // [esp+14h] [ebp+8h]
@@ -31,6 +32,7 @@ int __cdecl CL_GetSkelTimeStamp()
     return clients[R_GetLocalClientNum()].skelTimeStamp;
 }
 
+int warnCount_0;
 int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnimMat **pMatOut)
 {
     char *buf; // [esp+0h] [ebp-Ch]
@@ -52,7 +54,7 @@ int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnim
         if (buf)
         {
             *pMatOut = (DObjAnimMat *)buf;
-            DObjCreateSkel(obj, buf, timeStamp);
+            DObjCreateSkel((DObj_s*)obj, buf, timeStamp);
             return 0;
         }
         else

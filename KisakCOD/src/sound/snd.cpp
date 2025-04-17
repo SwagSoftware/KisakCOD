@@ -3509,13 +3509,10 @@ void SND_UpdatePhysics()
 
 bool __cdecl SND_ShouldGiveCpuWarning()
 {
-    int v0; // eax
-
     if (g_snd.cpu > 2)
-        return MEMORY[0xE7A7CC][0] >= 9;
+        return clientUIActives[0].connectionState >= CA_ACTIVE;
     else
-        LOBYTE(v0) = 0;
-    return v0;
+        return false;
 }
 
 void __cdecl SND_StopSounds(snd_stopsounds_arg_t which)
