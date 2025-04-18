@@ -47,7 +47,14 @@ unsigned int __cdecl Sys_GetCpuCount()
     return s_cpuCount;
 }
 
-BOOL __cdecl Sys_IsRendererReady()
+void __cdecl Sys_EndLoadThreadPriorities()
+{
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\qcommon\\threads.cpp", 700, 0, "%s", "Sys_IsMainThread()");
+    SetThreadPriority(threadHandle[0], 0);
+}
+
+bool __cdecl Sys_IsRendererReady()
 {
     return Sys_WaitForSingleObjectTimeout(&renderCompletedEvent, 0);
 }
@@ -634,6 +641,11 @@ void __cdecl Win_SetThreadLock(WinThreadLock threadLock)
                 SetThreadAffinityMask(threadHandle[3], s_affinityMaskForProcess);
         }
     }
+}
+
+WinThreadLock __cdecl Win_GetThreadLock()
+{
+    return s_threadLock;
 }
 
 void Win_UpdateThreadLock()

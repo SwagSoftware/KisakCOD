@@ -626,3 +626,5 @@ void __cdecl SCR_StopCinematic(int localClientNum);
 extern int g_console_field_width;
 extern float g_console_char_height;
 extern field_t historyEditLines[32];
+
+extern int dvar_modifiedFlags;

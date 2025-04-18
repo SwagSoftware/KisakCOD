@@ -28,6 +28,8 @@ struct AssetList // sizeof=0xC
 
 // db_registry
 void __cdecl TRACK_db_registry();
+char *__cdecl DB_ReferencedFFChecksums();
+char *__cdecl DB_ReferencedFFNameList();
 void __cdecl Hunk_OverrideDataForFile(int type, const char *name, void *data);
 void __cdecl DB_GetIndexBufferAndBase(unsigned __int8 zoneHandle, void *indices, void **ib, int *baseIndex);
 void __cdecl DB_GetVertexBufferAndOffset(unsigned __int8 zoneHandle, _BYTE *verts, void **vb, int *vertexOffset);

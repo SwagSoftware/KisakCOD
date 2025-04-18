@@ -12,6 +12,9 @@
 #include <win32/win_local.h>
 #include <win32/win_net.h>
 #include <database/database.h>
+#include "com_files.h"
+
+HunkUser *g_user;
 
 static HunkUser* g_debugUser;
 static int g_largeLocalPos;
@@ -808,7 +811,7 @@ int __cdecl Hunk_AllocDebugMem(unsigned int size)
     return Hunk_UserAlloc(g_debugUser, size, 4);
 }
 
-void __cdecl Hunk_FreeDebugMem()
+void __cdecl Hunk_FreeDebugMem(void* ptr)
 {
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\universal\\com_memory.cpp", 2804, 0, "%s", "Sys_IsMainThread()");
@@ -1038,4 +1041,37 @@ char *__cdecl Z_MallocGarbage(int size, const char *name, int type)
     if (!buf)
         Z_MallocFailed(size + 32);
     return buf;
+}
+
+char *__cdecl TempMalloc(unsigned int len)
+{
+    return (char*)Hunk_UserAlloc(g_user, len, 1);
+}
+
+void __cdecl TempMemorySetPos(char *pos)
+{
+    Hunk_UserSetPos(g_user, (unsigned char*)pos);
+}
+
+void __cdecl TempMemoryReset(HunkUser *user)
+{
+    g_user = user;
+}
+
+char *__cdecl TempMallocAlignStrict(unsigned int len)
+{
+    return (char *)Hunk_UserAllocAlignStrict(g_user, len);
+}
+
+bool __cdecl TempInfoSort(TempMemInfo *info1, TempMemInfo *info2)
+{
+    if (!info1->data.type && info2->data.type)
+        return 1;
+    if (info1->data.type && !info2->data.type)
+        return 0;
+    if (info1->highExtra < info2->highExtra)
+        return 1;
+    if (info1->highExtra <= info2->highExtra)
+        return info1->high < info2->high;
+    return 0;
 }

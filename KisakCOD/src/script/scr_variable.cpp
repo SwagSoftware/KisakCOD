@@ -6,6 +6,10 @@
 
 #include <qcommon/qcommon.h>
 #include <Windows.h>
+#include <universal/com_files.h>
+#include "scr_parser.h"
+#include <database/database.h>
+#include <universal/q_parse.h>
 
 #undef GetObject
 #undef FindObject
@@ -14,7 +18,6 @@ scrVarPub_t scrVarPub;
 scrVarDebugPub_t* scrVarDebugPub;
 scrVarDebugPub_t scrVarDebugPubBuf;
 scrVarGlob_t scrVarGlob;
-char const** var_typename;
 
 static scr_classStruct_t g_classMap[4] =
 {
@@ -223,7 +226,7 @@ unsigned int  AllocValue(void)
 
 	if (!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next)
 	{
-		Com_Error(1, "exceeded maximum number of script variables (KISAK)");
+		Com_Error(ERR_DROP, "exceeded maximum number of script variables (KISAK)");
 		//Scr_TerminalError("exceeded maximum number of script variables");
 	}
 
@@ -417,9 +420,6 @@ float const* Scr_AllocVector(float const* v)
 	result[2] = v[2];
 	return result;
 }
-
-extern scrStringDebugGlob_t* scrStringDebugGlob;
-extern scrMemTreePub_t scrMemTreePub;
 
 void  AddRefToVector(float const* vectorValue)
 {
@@ -656,7 +656,7 @@ VariableValueInternal_u Scr_EvalVariableObject(unsigned int id)
 	else
 	{
 		const char* v2 = va("%s is not a field object", var_typename[type]);
-		Com_Error(1, "%s", v2);
+		Com_Error(ERR_DROP, "%s", v2);
 		//Scr_Error(v2);
 	}
 }
@@ -990,6 +990,30 @@ unsigned int  Scr_FindField(char const* name, int* type)
 	return 0;
 }
 
+void __cdecl Scr_AddFields_LoadObj(const char *path, const char *extension)
+{
+	char filename[68]; // [esp+10h] [ebp-58h] BYREF
+	int numFiles; // [esp+58h] [ebp-10h] BYREF
+	char *targetPos; // [esp+5Ch] [ebp-Ch]
+	int i; // [esp+60h] [ebp-8h]
+	const char **files; // [esp+64h] [ebp-4h]
+
+	files = FS_ListFiles(path, extension, FS_LIST_PURE_ONLY, &numFiles);
+	scrVarPub.fieldBuffer = TempMalloc(0);
+	*scrVarPub.fieldBuffer = 0;
+	for (i = 0; i < numFiles; ++i)
+	{
+		sprintf(filename, "%s/%s", path, files[i]);
+		if (strlen(filename) >= 0x40)
+			MyAssertHandler(".\\script\\scr_variable.cpp", 5191, 0, "%s", "strlen( filename ) < MAX_QPATH");
+		Scr_AddFieldsForFile(filename);
+	}
+	if (files)
+		FS_FreeFileList(files);
+	targetPos = TempMalloc(1u);
+	*targetPos = 0;
+}
+
 void  Scr_AddFields(char const* path, char const* extension)
 {
 	if (useFastFile->current.enabled)
@@ -1170,16 +1194,16 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 				if (pos)
 				{
 					pInfo = &infoArray[num];
-					if (!fileName || Scr_PrevCodePosFileNameMatches(pos, fileName))
+					if (!fileName || Scr_PrevCodePosFileNameMatches((char*)pos, fileName))
 					{
 						if (functionName || functionSummary)
-							pInfo->functionName = Scr_PrevCodePosFunctionName(pos);
+							pInfo->functionName = Scr_PrevCodePosFunctionName((char *)pos);
 						else
 							pInfo->functionName = 0;
 						if (!functionName || pInfo->functionName && I_stristr(pInfo->functionName, functionName))
 						{
 							pInfo->pos = pos;
-							pInfo->fileName = Scr_PrevCodePosFileName(pos);
+							pInfo->fileName = Scr_PrevCodePosFileName((char *)pos);
 							pInfo->varUsage = 1;
 							++num;
 						}
@@ -1189,7 +1213,7 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 			if (total)
 			{
 				Com_Printf(0, "num vars:          %d\n", num);
-				Z_VirtualFree(infoArray, 0);
+				Z_VirtualFree(infoArray);
 			}
 			else
 			{
@@ -1252,14 +1276,14 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 							if (spreadsheet)
 							{
 								Com_Printf(0, "%d\t", pInfob->varUsage);
-								Scr_PrintPrevCodePosSpreadSheet(0, pInfob->pos, summary, functionSummary);
+								Scr_PrintPrevCodePosSpreadSheet(0, (char *)pInfob->pos, summary, functionSummary);
 							}
 							else
 							{
 								if (summary)
 									MyAssertHandler(".\\script\\scr_variable.cpp", 746, 0, "%s", "!summary");
 								Com_Printf(0, "count: %d\n", pInfob->varUsage);
-								Scr_PrintPrevCodePos(0, pInfob->pos, 0);
+								Scr_PrintPrevCodePos(0, (char*)pInfob->pos, 0);
 							}
 						}
 					}
@@ -3647,7 +3671,7 @@ char* Scr_GetSourceFile_FastFile(char const* filename)
 		v1 = va("cannot find %s", filename);
 		Com_Error(ERR_DROP, v1);
 	}
-	return (XModelPiece*)rawfile->buffer;
+	return (char*)rawfile->buffer;
 }
 
 char* Scr_GetSourceFile(char const* filename)
@@ -3657,14 +3681,34 @@ char* Scr_GetSourceFile(char const* filename)
 	int len; // [esp+4h] [ebp-8h]
 	int f; // [esp+8h] [ebp-4h] BYREF
 
-	len = FS_FOpenFileByMode(filename, &f, FS_READ);
+	len = FS_FOpenFileByMode((char*)filename, &f, FS_READ);
 	if (len < 0)
 	{
 		v1 = va("cannot find %s", filename);
 		Com_Error(ERR_DROP, v1);
 	}
 	sourceBuffer = (char*)Hunk_AllocateTempMemoryHigh(len + 1, "Scr_LoadAnimTreeInternal");
-	FS_Read(sourceBuffer, len, f);
+	FS_Read((unsigned char*)sourceBuffer, len, f);
+	sourceBuffer[len] = 0;
+	FS_FCloseFile(f);
+	return sourceBuffer;
+}
+
+char *__cdecl Scr_GetSourceFile_LoadObj(const char *filename)
+{
+	const char *v1; // eax
+	char *sourceBuffer; // [esp+0h] [ebp-Ch]
+	int len; // [esp+4h] [ebp-8h]
+	int f; // [esp+8h] [ebp-4h] BYREF
+
+	len = FS_FOpenFileByMode((char*)filename, &f, FS_READ);
+	if (len < 0)
+	{
+		v1 = va("cannot find %s", filename);
+		Com_Error(ERR_DROP, v1);
+	}
+	sourceBuffer = (char*)Hunk_AllocateTempMemoryHigh(len + 1, "Scr_LoadAnimTreeInternal");
+	FS_Read((unsigned char*)sourceBuffer, len, f);
 	sourceBuffer[len] = 0;
 	FS_FCloseFile(f);
 	return sourceBuffer;

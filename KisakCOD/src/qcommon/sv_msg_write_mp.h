@@ -30,6 +30,16 @@ enum PacketEntityType : __int32
     ANALYZE_DATATYPE_ENTITYTYPE_COUNT = 0x17,
 };
 
+struct netFieldOrderInfo_t // sizeof=0x6C0
+{                                       // ...
+    int entState[64];
+    int arcEntState[128];               // ...
+    int clientState[32];                // ...
+    int playerState[160];               // ...
+    int objective[8];                   // ...
+    int hudElem[40];                    // ...
+};
+
 struct SnapshotInfo_s // sizeof=0x18
 {                                       // ...
     int clientNum;                      // ...
@@ -47,8 +57,9 @@ struct SnapshotInfo_s // sizeof=0x18
 void __cdecl TRACK_msg();
 const NetFieldList* __cdecl MSG_GetStateFieldListForEntityType(int eType);
 void __cdecl MSG_WriteReliableCommandToBuffer(const char* pszCommand, char* pszBuffer, int iBufferSize);
-void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, float oldValue);
-void __cdecl MSG_WriteOriginZFloat(__int64 clientNum, float value, float oldValue);
+void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int index, int indexBits);
+void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, double value, double oldValue);
+void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, double value, double oldValue);
 bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s* snapInfo, int bits, const int* fromF, const int* toF);
 void __cdecl MSG_WriteLastChangedField(msg_t* msg, int lastChangedFieldNum, unsigned int numFields);
 void __cdecl MSG_WriteEventNum(int clientNum, msg_t* msg, unsigned __int8 eventNum);

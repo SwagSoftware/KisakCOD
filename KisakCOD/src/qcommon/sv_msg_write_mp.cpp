@@ -5,6 +5,9 @@
 #include "huffman.h"
 
 #include "net_chan_mp.h"
+#include <server_mp/server.h>
+
+netFieldOrderInfo_t orderInfo;
 
 unsigned int kbitmask[33] =
 {
@@ -1018,9 +1021,55 @@ void __cdecl MSG_WriteReliableCommandToBuffer(const char *pszCommand, char *pszB
         pszBuffer[i] = 0;
 }
 
-void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, float oldValue)
+void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int index, int indexBits)
 {
-    int v4; // eax
+    const char *v4; // eax
+
+    if (msg->readOnly)
+        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 419, 0, "%s", "!msg->readOnly");
+    if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
+        Com_Printf(15, "Writing entity num %i\n", index);
+    if (index - msg->lastEntityRef <= 0)
+    {
+        v4 = va("lastEntityReferenced is %i, index is %i", msg->lastEntityRef, index);
+        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 426, 0, "%s\n\t%s", "index - msg->lastEntityRef > 0", v4);
+    }
+    if (index - msg->lastEntityRef == 1)
+    {
+        if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
+            Com_Printf(16, "Wrote entity num: 1 bit (inc)\n");
+        MSG_WriteBit1(msg);
+    }
+    else
+    {
+        MSG_WriteBit0(msg);
+        if (indexBits == 10 && index - msg->lastEntityRef < 16)
+        {
+            if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
+                Com_Printf(16, "Wrote entity num: %i bits (delta)\n", 6);
+            if (index - msg->lastEntityRef <= 0)
+            {
+                const char* someError = va("index was %i, lastEntityRef is %i", index, msg->lastEntityRef);
+                MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 6969, 0, "%s", someError);
+            }
+            MSG_WriteBit0(msg);
+            MSG_WriteBits(msg, index - msg->lastEntityRef, 4u);
+        }
+        else
+        {
+            if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
+                Com_Printf(16, "Wrote entity num: %i bits (full)\n", indexBits + 2);
+            if (indexBits == 10)
+                MSG_WriteBit1(msg);
+            MSG_WriteBits(msg, index, indexBits);
+        }
+    }
+    msg->lastEntityRef = index;
+}
+
+void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, double value, double oldValue)
+{
+    int v5; // eax
     int MinBitCountForNum; // [esp+58h] [ebp-20h]
     int roundedValue; // [esp+60h] [ebp-18h]
     unsigned int roundedValuea; // [esp+60h] [ebp-18h]
@@ -1031,15 +1080,15 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
     int index; // [esp+70h] [ebp-8h]
     int indexa; // [esp+70h] [ebp-8h]
 
-    if (*(unsigned int *)(HIDWORD(clientNum) + 4))
+    if (msg->readOnly)
         MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 186, 0, "%s", "!msg->readOnly");
-    roundedValue = (int)(value + 9.313225746154785e-10);
-    roundedOldValue = (int)(oldValue + 9.313225746154785e-10);
+    roundedValue = (*&value + 9.313225746154785e-10);
+    roundedOldValue = (*(&value + 1) + 9.313225746154785e-10);
     truncDelta = roundedValue - roundedOldValue;
-    SV_PacketDataIsOverhead(clientNum, (const msg_t *)HIDWORD(clientNum));
-    if ((unsigned int)(roundedValue - roundedOldValue + 64) >= 0x80)
+    SV_PacketDataIsOverhead(clientNum, msg);
+    if ((roundedValue - roundedOldValue + 64) >= 0x80)
     {
-        MSG_WriteBit1((msg_t *)HIDWORD(clientNum));
+        MSG_WriteBit1(msg);
         if (bits == -92)
         {
             indexa = 0;
@@ -1052,9 +1101,9 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
         }
         if (!svsHeaderValid)
             MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 253, 0, "%s", "svsHeaderValid");
-        roundedCentera = (int)(svsHeader.mapCenter[indexa] + 0.5);
+        roundedCentera = (svsHeader.mapCenter[indexa] + 0.5);
         roundedValuea = (roundedOldValue + 0x8000 - roundedCentera) ^ (roundedValue - roundedCentera + 0x8000);
-        SV_PacketDataIsOrigin(clientNum, (const msg_t *)HIDWORD(clientNum));
+        SV_PacketDataIsOrigin(clientNum, msg);
         MinBitCountForNum = GetMinBitCountForNum(roundedValuea);
         if (MinBitCountForNum > 16)
         {
@@ -1064,7 +1113,7 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "Y",
-                    value,
+                    *&value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1077,7 +1126,7 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "X",
-                    value,
+                    *&value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1086,15 +1135,15 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
                     svsHeader.mapCenter[2] + 32768.0 - 1.0);
         }
         SV_TrackOriginFullBits(MinBitCountForNum);
-        MSG_WriteBits((msg_t *)HIDWORD(clientNum), roundedValuea, 0x10u);
+        MSG_WriteBits(msg, roundedValuea, 0x10u);
     }
     else
     {
-        MSG_WriteBit0((msg_t *)HIDWORD(clientNum));
-        SV_PacketDataIsOriginDelta(clientNum, (const msg_t *)HIDWORD(clientNum));
-        v4 = GetMinBitCountForNum(truncDelta + 64);
-        SV_TrackOriginDeltaBits(v4);
-        MSG_WriteBits((msg_t *)HIDWORD(clientNum), truncDelta + 64, 7u);
+        MSG_WriteBit0(msg);
+        SV_PacketDataIsOriginDelta(clientNum, msg);
+        v5 = GetMinBitCountForNum(truncDelta + 64);
+        SV_TrackOriginDeltaBits(v5);
+        MSG_WriteBits(msg, truncDelta + 64, 7u);
         if (bits == -92)
         {
             index = 0;
@@ -1107,7 +1156,7 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
         }
         if (!svsHeaderValid)
             MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 221, 0, "%s", "svsHeaderValid");
-        roundedCenter = (int)(svsHeader.mapCenter[index] + 0.5);
+        roundedCenter = (svsHeader.mapCenter[index] + 0.5);
         if (GetMinBitCountForNum((roundedOldValue + 0x8000 - roundedCenter) ^ (roundedValue - roundedCenter + 0x8000)) > 16)
         {
             if (index)
@@ -1116,7 +1165,7 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "Y",
-                    value,
+                    *&value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1129,7 +1178,7 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "X",
-                    value,
+                    *&value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1140,9 +1189,9 @@ void __cdecl MSG_WriteOriginFloat(__int64 clientNum, int bits, float value, floa
     }
 }
 
-void __cdecl MSG_WriteOriginZFloat(__int64 clientNum, float value, float oldValue)
+void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, double value, double oldValue)
 {
-    int v3; // eax
+    int v4; // eax
     int MinBitCountForNum; // eax
     int roundedValue; // [esp+58h] [ebp-14h]
     unsigned int roundedValuea; // [esp+58h] [ebp-14h]
@@ -1151,26 +1200,26 @@ void __cdecl MSG_WriteOriginZFloat(__int64 clientNum, float value, float oldValu
     int roundedCenter; // [esp+64h] [ebp-8h]
     int roundedCentera; // [esp+64h] [ebp-8h]
 
-    if (*(unsigned int *)(HIDWORD(clientNum) + 4))
+    if (msg->readOnly)
         MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 286, 0, "%s", "!msg->readOnly");
-    roundedValue = (int)(value + 9.313225746154785e-10);
-    roundedOldValue = (int)(oldValue + 9.313225746154785e-10);
+    roundedValue = (*&value + 9.313225746154785e-10);
+    roundedOldValue = (*(&value + 1) + 9.313225746154785e-10);
     truncDelta = roundedValue - roundedOldValue;
-    SV_PacketDataIsOverhead(clientNum, (const msg_t *)HIDWORD(clientNum));
-    if ((unsigned int)(roundedValue - roundedOldValue + 64) >= 0x80)
+    SV_PacketDataIsOverhead(clientNum, msg);
+    if ((roundedValue - roundedOldValue + 64) >= 0x80)
     {
-        MSG_WriteBit1((msg_t *)HIDWORD(clientNum));
+        MSG_WriteBit1(msg);
         if (!svsHeaderValid)
             MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 330, 0, "%s", "svsHeaderValid");
-        roundedCentera = (int)(svsHeader.mapCenter[2] + 0.5);
+        roundedCentera = (svsHeader.mapCenter[2] + 0.5);
         roundedValuea = (roundedOldValue + 0x8000 - roundedCentera) ^ (roundedValue - roundedCentera + 0x8000);
-        SV_PacketDataIsOrigin(clientNum, (const msg_t *)HIDWORD(clientNum));
+        SV_PacketDataIsOrigin(clientNum, msg);
         if (GetMinBitCountForNum(roundedValuea) > 16)
             Com_Error(
                 ERR_DROP,
                 "Entity with Z coordinate of %f is too far outside the playable area of the map.  The playable area goes from ( %"
                 "f, %f, %f ) to ( %f, %f, %f )\n",
-                value,
+                *&value,
                 svsHeader.mapCenter[0] - 32768.0,
                 svsHeader.mapCenter[1] - 32768.0,
                 svsHeader.mapCenter[2] - 32768.0,
@@ -1179,30 +1228,30 @@ void __cdecl MSG_WriteOriginZFloat(__int64 clientNum, float value, float oldValu
                 svsHeader.mapCenter[2] + 32768.0 - 1.0);
         MinBitCountForNum = GetMinBitCountForNum(roundedValuea);
         SV_TrackOriginZFullBits(MinBitCountForNum);
-        MSG_WriteBits((msg_t *)HIDWORD(clientNum), roundedValuea, 0x10u);
+        MSG_WriteBits(msg, roundedValuea, 0x10u);
     }
     else
     {
-        MSG_WriteBit0((msg_t *)HIDWORD(clientNum));
-        SV_PacketDataIsOriginDelta(clientNum, (const msg_t *)HIDWORD(clientNum));
+        MSG_WriteBit0(msg);
+        SV_PacketDataIsOriginDelta(clientNum, msg);
         if (!svsHeaderValid)
             MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 304, 0, "%s", "svsHeaderValid");
-        roundedCenter = (int)(svsHeader.mapCenter[2] + 0.5);
+        roundedCenter = (svsHeader.mapCenter[2] + 0.5);
         if (GetMinBitCountForNum((roundedOldValue + 0x8000 - roundedCenter) ^ (roundedValue - roundedCenter + 0x8000)) > 16)
             Com_Error(
                 ERR_DROP,
                 "Entity with Z coordinate of %f is too far outside the playable area of the map.  The playable area goes from ( %"
                 "f, %f, %f ) to ( %f, %f, %f )\n",
-                value,
+                *&value,
                 svsHeader.mapCenter[0] - 32768.0,
                 svsHeader.mapCenter[1] - 32768.0,
                 svsHeader.mapCenter[2] - 32768.0,
                 svsHeader.mapCenter[0] + 32768.0 - 1.0,
                 svsHeader.mapCenter[1] + 32768.0 - 1.0,
                 svsHeader.mapCenter[2] + 32768.0 - 1.0);
-        v3 = GetMinBitCountForNum(truncDelta + 64);
-        SV_TrackOriginZDeltaBits(v3);
-        MSG_WriteBits((msg_t *)HIDWORD(clientNum), truncDelta + 64, 7u);
+        v4 = GetMinBitCountForNum(truncDelta + 64);
+        SV_TrackOriginZDeltaBits(v4);
+        MSG_WriteBits(msg, truncDelta + 64, 7u);
     }
 }
 
@@ -1810,16 +1859,18 @@ void __cdecl MSG_WriteDeltaField(
             case 0xFFFFFFA5:
                 fullFloat = *(float *)toF;
                 oldValue = *(float *)fromF;
-                HIDWORD(v13) = msg;
-                LODWORD(v13) = snapInfo->clientNum;
-                MSG_WriteOriginFloat(v13, field->bits, fullFloat, oldValue);
+                //HIDWORD(v13) = msg;
+                //LODWORD(v13) = snapInfo->clientNum;
+                //MSG_WriteOriginFloat(v13, field->bits, fullFloat, oldValue);
+                MSG_WriteOriginFloat(snapInfo->clientNum, msg, field->bits, fullFloat, oldValue);
                 break;
             case 0xFFFFFFA6:
                 fullFloat = *(float *)toF;
                 oldValue = *(float *)fromF;
-                HIDWORD(v14) = msg;
-                LODWORD(v14) = snapInfo->clientNum;
-                MSG_WriteOriginZFloat(v14, fullFloat, oldValue);
+                //HIDWORD(v14) = msg;
+                //LODWORD(v14) = snapInfo->clientNum;
+                //MSG_WriteOriginZFloat(v14, fullFloat, oldValue);
+                MSG_WriteOriginZFloat(snapInfo->clientNum, msg, fullFloat, oldValue);
                 break;
             case 0xFFFFFFA1:
                 value = *toF;
@@ -2076,8 +2127,8 @@ bool __cdecl MSG_CheckWritingEnoughBits(int value, unsigned int bits)
         checkValue = value;
         checkBits = bits;
     }
-    if (!_BitScanReverse((unsigned int *)&v3, checkValue))
-        v3 = `CountLeadingZeros'::`2': : notFound;
+    if (!_BitScanReverse((DWORD *)&v3, checkValue))
+        v3 = 63; // `CountLeadingZeros'::`2': : notFound;
     return checkBits >= 32 - (v3 ^ 0x1Fu);
 }
 
@@ -2777,15 +2828,15 @@ void __cdecl MSG_WriteDeltaHudElems(
         lc = 0;
         for (j = 0; j < 0x28; ++j)
         {
-            fromF = (int *)((char *)&from[i] + dword_89FC74[4 * j]);
-            toF = (int *)((char *)&to[i] + dword_89FC74[4 * j]);
-            if (!MSG_ValuesAreEqual(snapInfo, dword_89FC78[4 * j], fromF, toF))
+            fromF = (int*)(&from[i] + hudElemFields[j].offset);
+            toF = (int*)(&to[i] + hudElemFields[j].offset);
+            if (!MSG_ValuesAreEqual(snapInfo, hudElemFields[j].bits, fromF, toF))
             {
                 if (*fromF == *toF)
                     MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1815, 0, "%s", "*fromF != *toF");
                 if (!snapInfo->archived && msg_hudelemspew->current.enabled)
                 {
-                    bits = MSG_GetBitCount(dword_89FC78[4 * j], &est, *fromF, *toF);
+                    bits = MSG_GetBitCount(hudElemFields[j].bits, &est, *fromF, *toF);
                     if (est)
                         Com_Printf(
                             15,
@@ -2805,7 +2856,7 @@ void __cdecl MSG_WriteDeltaHudElems(
                             *fromF,
                             *toF,
                             bits,
-                            &String);
+                            "");
                 }
                 SV_TrackFieldChange(snapInfo->clientNum, 21, j);
                 lc = j;

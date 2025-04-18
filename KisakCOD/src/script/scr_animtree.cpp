@@ -137,6 +137,32 @@ unsigned int __cdecl Scr_UsingTreeInternal(const char *filename, unsigned int *i
     return names;
 }
 
+void __cdecl Scr_PrecacheAnimationTree(unsigned int parentNode)
+{
+    VariableValueInternal_u Object; // eax
+    char *v2; // eax
+    unsigned int node; // [esp+0h] [ebp-8h]
+    unsigned int name; // [esp+4h] [ebp-4h]
+
+    for (node = FindFirstSibling(parentNode); node; node = FindNextSibling(node))
+    {
+        name = GetVariableName(node);
+        if (name < 0x10000)
+        {
+            if (GetValueType(node) == 1)
+            {
+                Object = FindObject(node);
+                Scr_PrecacheAnimationTree(Object.u.stringValue);
+            }
+            else
+            {
+                v2 = SL_ConvertToString(name);
+                XAnimPrecache(v2, (void *(__cdecl *)(int))Hunk_AllocXAnimPrecache);
+            }
+        }
+    }
+}
+
 void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(int), int user)
 {
     char *v3; // eax
@@ -192,7 +218,7 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
                 MyAssertHandler(".\\script\\scr_animtree.cpp", 688, 0, "%s", "size");
             v6 = SL_ConvertToString(filenameId);
             animtree = XAnimCreateAnims(v6, size, Alloc);
-            name.prev = SL_GetString_("root", 0, 4).prev;
+            name.prev = SL_GetString_("root", 0, 4);
             ConnectScriptToAnim(namesa, 0, filenameId, name.prev, index);
             SL_RemoveRefToString(name.prev);
             if (!useFastFile->current.enabled)
@@ -276,7 +302,7 @@ void __cdecl ConnectScriptToAnim(
         {
             v6 = SL_ConvertToString(filename);
             v5 = SL_ConvertToString(name);
-            Com_Error(ERR_DROP, &byte_8A1858, v5, v6);
+            Com_Error(ERR_DROP, "duplicate animation %s in animtrees/%s.atr", v5, v6);
         }
         anim.index = index;
         anim.tree = treeIndex;
@@ -414,7 +440,7 @@ void __cdecl Scr_CheckAnimsDefined(unsigned int names, unsigned int filename)
             if (Scr_IsInOpcodeMemory(value->u.codePosValue))
                 CompileError2((char *)value->u.intValue, "%s", msg);
             else
-                Com_Error(ERR_DROP, off_8572F4, msg);
+                Com_Error(ERR_DROP, "%s", msg);
         }
     }
 }
@@ -575,15 +601,17 @@ end:
     if (bIncludeParent && !GetArraySize(parentNode))
     {
         if (bLoop)
-            prev = SL_GetString_("void_loop", 0, 4).prev;
+            prev = SL_GetString_("void_loop", 0, 4);
         else
-            prev = SL_GetString_("void", 0, 4).prev;
+            prev = SL_GetString_("void", 0, 4);
         animNamea = prev;
         GetVariable(parentNode, prev);
         SL_RemoveRefToString(animNamea);
     }
     return bResult;
 }
+
+const char *propertyNames[4] = { "loopsync", "nonloopsync", "complete", "additive" }; // idb
 
 int __cdecl GetAnimTreeParseProperties()
 {
@@ -621,7 +649,7 @@ int __cdecl GetAnimTreeParseProperties()
     return flags;
 }
 
-scr_animtree_t __cdecl Scr_FindAnimTree(const char *filename)
+scr_animtree_t *__cdecl Scr_FindAnimTree(const char *filename)
 {
     VariableValue v2; // [esp+0h] [ebp-20h]
     unsigned int xanimId; // [esp+Ch] [ebp-14h]
@@ -648,7 +676,7 @@ scr_animtree_t __cdecl Scr_FindAnimTree(const char *filename)
     v2 = Scr_EvalVariable(xanimId);
     if (v2.type != 7)
         MyAssertHandler(".\\script\\scr_animtree.cpp", 751, 0, "%s", "tempValue.type == VAR_CODEPOS");
-    return (scr_animtree_t)v2.u.intValue;
+    return (scr_animtree_t*)v2.u.intValue;
 }
 
 void __cdecl Scr_FindAnim(const char *filename, const char *animName, scr_anim_s *anim, int user)

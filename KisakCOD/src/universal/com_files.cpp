@@ -34,6 +34,115 @@ static fileHandleData_t fsh[65];
 char fs_gamedir[256];
 searchpath_s *fs_searchpaths;
 
+char info8[8192];
+char *__cdecl FS_ReferencedIwdNames()
+{
+    searchpath_s *search; // [esp+0h] [ebp-4h]
+
+    info8[0] = 0;
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->iwd && (search->iwd->referenced || I_strnicmp(search->iwd->iwdGamename, "main", 4)))
+        {
+            if (info8[0])
+                I_strncat(info8, 0x2000, " ");
+            I_strncat(info8, 0x2000, search->iwd->iwdGamename);
+            I_strncat(info8, 0x2000, "/");
+            I_strncat(info8, 0x2000, search->iwd->iwdBasename);
+        }
+    }
+    return info8;
+}
+
+char info5[8192];
+char *__cdecl FS_ReferencedIwdChecksums()
+{
+    char *v0; // eax
+    searchpath_s *search; // [esp+0h] [ebp-4h]
+
+    info5[0] = 0;
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->iwd && (search->iwd->referenced || I_strnicmp(search->iwd->iwdGamename, "main", 4)))
+        {
+            v0 = va("%i ", search->iwd->checksum);
+            I_strncat(info5, 0x2000, v0);
+        }
+    }
+    return info5;
+}
+
+char info3[8192];
+char *__cdecl FS_LoadedIwdNames()
+{
+    searchpath_s *search; // [esp+0h] [ebp-4h]
+
+    info3[0] = 0;
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->iwd && !search->bLocalized)
+        {
+            if (info3[0])
+                I_strncat(info3, 0x2000, " ");
+            I_strncat(info3, 0x2000, search->iwd->iwdBasename);
+        }
+    }
+    return info3;
+}
+
+char info2_0[8192];
+char *__cdecl FS_LoadedIwdChecksums()
+{
+    char *v0; // eax
+    searchpath_s *search; // [esp+0h] [ebp-4h]
+
+    info2_0[0] = 0;
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->iwd)
+        {
+            if (!search->bLocalized)
+            {
+                v0 = va("%i ", search->iwd->checksum);
+                I_strncat(info2_0, 0x2000, v0);
+            }
+        }
+    }
+    return info2_0;
+}
+
+void __cdecl FS_ClearIwdReferences()
+{
+    searchpath_s *search; // [esp+0h] [ebp-4h]
+
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->iwd)
+            search->iwd->referenced = 0;
+    }
+}
+
+char info4[8192];
+char *__cdecl FS_LoadedIwdPureChecksums()
+{
+    char *v0; // eax
+    searchpath_s *search; // [esp+0h] [ebp-4h]
+
+    info4[0] = 0;
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->iwd)
+        {
+            if (!search->bLocalized)
+            {
+                v0 = va("%i ", search->iwd->pure_checksum);
+                I_strncat(info4, 0x2000, v0);
+            }
+        }
+    }
+    return info4;
+}
+
 void __cdecl FS_CheckFileSystemStarted()
 {
     if (!fs_searchpaths)

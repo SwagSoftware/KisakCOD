@@ -318,9 +318,6 @@
     <ClCompile Include="src\gfx_d3d\r_sky.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\server\sv_main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gfx_d3d\r_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1165,6 +1162,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\ui_component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\server_mp\sv_snapshot_profile_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\server_mp\sv_voice_mp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\server_mp\ucmds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

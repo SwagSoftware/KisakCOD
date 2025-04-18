@@ -16,70 +16,13 @@
 #include <universal/com_memory.h>
 
 #include <win32/win_net_debug.h>
-
-
-struct scrDebuggerGlob_t // sizeof=0x2B8
-{                                       // ...
-    int prevMouseTime;                  // ...
-    float prevMousePos[2];              // ...
-    UI_ScrollPane scriptScrollPane;     // ...
-    UI_ScrollPane miscScrollPane;       // ...
-    Scr_ScriptList scriptList;          // ...
-    Scr_OpenScriptList openScriptList;  // ...
-    Scr_ScriptWatch scriptWatch;        // ...
-    Scr_ScriptCallStack scriptCallStack; // ...
-    UI_VerticalDivider mainWindow;      // ...
-    char *breakpoints;                  // ...
-    int breakpointOpcode;               // ...
-    const char *breakpointCodePos;      // ...
-    Scr_SourcePos_t breakpointPos;      // ...
-    bool atBreakpoint;                  // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    char *nextBreakpointCodePos;        // ...
-    unsigned int nextBreakpointThreadId; // ...
-    bool nextBreakpointCodePosMasked;   // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    char *killThreadCodePos;            // ...
-    bool kill_thread;                   // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    VariableValue *breakpointTop;       // ...
-    bool run_debugger;                  // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    int step_mode;                      // ...
-    Scr_OpcodeList_s *assignHead;       // ...
-    char *assignHeadCodePos;            // ...
-    bool assignBreakpointSet;           // ...
-    bool add;                           // ...
-    // padding byte
-    // padding byte
-    Scr_WatchElement_s *currentElement; // ...
-    unsigned int removeId;              // ...
-    Scr_WatchElementDoubleNode_t **variableBreakpoints; // ...
-    bool debugger_inited_main;          // ...
-    bool debugger_inited;               // ...
-    bool debugger_inited_system;        // ...
-    // padding byte
-    unsigned int objectId;              // ...
-    char *colBuf;                       // ...
-    int prevBreakpointLineNum;          // ...
-    bool disableBreakpoints;            // ...
-    bool showConsole;                   // ...
-    // padding byte
-    // padding byte
-    volatile int disableDebuggerRemote;
-    int breakpointCount;                // ...
-    int gainFocusTime;                  // ...
-};
+#include <ui/ui.h>
+#include "scr_evaluate.h"
 
 scrDebuggerGlob_t scrDebuggerGlob;
+Scr_Breakpoint g_breakpoints[128];
+
+Scr_Breakpoint *g_breakpointsHead;
 
 void __cdecl TRACK_scr_debugger()
 {
@@ -169,7 +112,8 @@ Scr_WatchElement_s *__cdecl Scr_ReadElement()
 
     id = Sys_ReadDebugSocketInt();
     if (id)
-        return Scr_ScriptWatch::GetElementWithId(&scrDebuggerGlob.scriptWatch, id);
+        return scrDebuggerGlob.scriptWatch.GetElementWithId(id);
+        //return Scr_ScriptWatch::GetElementWithId(&scrDebuggerGlob.scriptWatch, id);
     else
         return 0;
 }
@@ -187,7 +131,10 @@ void __cdecl Scr_FreeLineBreakpoint(Scr_Breakpoint *breakpoint, bool deleteEleme
     breakpointType = element->breakpointType;
     breakpoint->element = 0;
     if (deleteElement)
-        Scr_ScriptWatch::DeleteElementInternal(&scrDebuggerGlob.scriptWatch, element);
+    {
+        //Scr_ScriptWatch::DeleteElementInternal(&scrDebuggerGlob.scriptWatch, element);
+        scrDebuggerGlob.scriptWatch.DeleteElementInternal(element);
+    }
     if (breakpointType >= 4u && breakpointType <= 5u && !Sys_IsRemoteDebugClient())
     {
         if (!breakpoint->codePos)
@@ -290,7 +237,7 @@ void __cdecl Scr_FreeDebugMem(void *ptr)
 
 unsigned int *__cdecl Scr_AllocDebugMem(int size, const char *name)
 {
-    return Z_Malloc(size, name, 0);
+    return (unsigned int*)Z_Malloc(size, name, 0);
 }
 
 Scr_WatchElement_s *__cdecl Scr_GetElementRoot(Scr_WatchElement_s *element)
@@ -320,7 +267,8 @@ void __cdecl Scr_FreeWatchElementChildrenStrict(Scr_WatchElement_s *element)
         element->childCount = 0;
         element->childArrayHead = 0;
         element->childHead = 0;
-        Scr_ScriptWatch::UpdateHeight(&scrDebuggerGlob.scriptWatch);
+        //Scr_ScriptWatch::UpdateHeight(&scrDebuggerGlob.scriptWatch);
+        scrDebuggerGlob.scriptWatch.UpdateHeight();
     }
 }
 
@@ -657,7 +605,8 @@ Scr_WatchElement_s *__cdecl Scr_CreateWatchElement(char *text, Scr_WatchElement_
 
 void __cdecl Scr_Evaluate()
 {
-    Scr_ScriptWatch::Evaluate(&scrDebuggerGlob.scriptWatch);
+    //Scr_ScriptWatch::Evaluate(&scrDebuggerGlob.scriptWatch);
+    scrDebuggerGlob.scriptWatch.eval
 }
 
 void __cdecl Scr_CheckBreakonNotify(
@@ -1160,7 +1109,7 @@ void __cdecl Scr_ShutdownDebuggerSystem(int restart)
         if (!restart && Key_IsCatcherActive(0, 2))
         {
             Key_RemoveCatcher(0, -3);
-            _IN_ActivateMouse(1);
+            IN_ActivateMouse(1);
         }
         if (scrDebuggerGlob.debugger_inited_system)
         {
@@ -1184,16 +1133,6 @@ void __cdecl Scr_ShutdownDebuggerSystem(int restart)
             }
         }
     }
-}
-
-void __cdecl Scr_ShutdownRemoteClient(int restart)
-{
-    if (!Sys_IsRemoteDebugClient())
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 8244, 0, "%s", "Sys_IsRemoteDebugClient()");
-    Scr_ShutdownDebuggerSystem(restart);
-    Scr_ShutdownDebugger();
-    Scr_ShutdownDebuggerMain();
-    Scr_ShutdownOpcodeLookup();
 }
 
 void __cdecl Scr_AddAssignmentPos(char *codePos)

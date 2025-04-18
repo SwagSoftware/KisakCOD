@@ -221,3 +221,6 @@ extern int g_qport;
 
 void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg);
 void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg);
+
+
+extern ClientSnapshotData s_clientSnapshotData[64];

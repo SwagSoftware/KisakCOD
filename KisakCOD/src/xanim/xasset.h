@@ -1,5 +1,7 @@
 #pragma once
 
+#include "xanim.h"
+
 extern "C" {
     // win32
     struct _OVERLAPPED;

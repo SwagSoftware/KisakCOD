@@ -4,6 +4,33 @@
 
 #include <universal/com_memory.h>
 
+const char *var_typename[] =
+{
+    "undefined",
+    "object",
+    "string",
+    "localized string",
+    "vector",
+    "float",
+    "int",
+    "codepos",
+    "precodepos",
+    "function",
+    "stack",
+    "animation",
+    "developer codepos",
+    "include codepos",
+    "thread",
+    "thread",
+    "thread",
+    "thread",
+    "struct",
+    "removed entity",
+    "entity",
+    "array",
+    "removed thread",
+};
+
 struct scrCompilePub_t
 {
     int value_count;
@@ -88,3 +115,5 @@ void Scr_BeginLoadScripts(void);
 
 //int marker_scr_main      83043248     scr_main.obj
 //int Scr_IsInScriptMemory(char const*);
+
+extern scrVarDebugPub_t *scrVarDebugPub;

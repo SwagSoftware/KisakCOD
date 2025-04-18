@@ -1,5 +1,7 @@
 #include "server.h"
 
+#include <cgame_mp/cg_local_mp.h>
+
 void __cdecl SV_ArchiveSnapshot(msg_t *msg)
 {
     clientState_s *ClientStateLocal; // eax
@@ -235,7 +237,7 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
                 MSG_WriteBit0(msg);
             }
             if (++svsHeader.nextCachedSnapshotClients >= 2147483646)
-                Com_Error(ERR_FATAL, &byte_8AD8AC);
+                Com_Error(ERR_FATAL, "svsHeader.nextCachedSnapshotClients wrapped");
             ++v23->num_clients;
         }
         ++i;
@@ -290,13 +292,13 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
                 MSG_WriteDeltaArchivedEntity(&snapInfo, msg, svsHeader.time, from, v20, 1);
                 snapInfo.fromBaseline = 0;
                 if (++svsHeader.nextCachedSnapshotEntities >= 2147483646)
-                    Com_Error(ERR_FATAL, &byte_8AD87C);
+                    Com_Error(ERR_FATAL, "svsHeader.nextCachedSnapshotEntities wrapped");
                 ++v23->num_entities;
             }
         }
     }
     if (++svsHeader.nextCachedSnapshotFrames >= 2147483646)
-        Com_Error(ERR_FATAL, &byte_8AD850);
+        Com_Error(ERR_FATAL, "svsHeader.nextCachedSnapshotFrames wrapped");
 skipDelta:
     MSG_WriteEntityIndex(&snapInfo, msg, 1023, 10);
     SV_PacketDataIsUnknown(clientNum, msg);
@@ -317,6 +319,7 @@ const clientState_s *__cdecl G_GetClientStateLocal(int clientNum)
     return (clientState_s *)((char *)svsHeader.firstClientState + clientNum * svsHeader.clientSize);
 }
 
+hudelem_s g_dummyHudCurrent_1;
 int __cdecl GetFollowPlayerStateLocal(int clientNum, playerState_s *ps)
 {
     unsigned int index; // [esp+8h] [ebp-8h]

@@ -218,6 +218,9 @@ void Com_InitCurves();
 void __cdecl Com_InitSoundAlias();
 void Com_InitEntChannels(char* file);
 
+void		Com_BeginRedirect(char *buffer, int buffersize, void (*flush)(char *));
+void		Com_EndRedirect(void);
+
 struct SndCurve;
 struct SpeakerMapInfo;
 struct XModelPiece;

@@ -10,6 +10,10 @@
 #include <qcommon/threads.h>
 #include <qcommon/com_bsp.h>
 #include <universal/com_sndalias.h>
+#include <qcommon/cmd.h>
+#include <ui/ui.h>
+#include <stringed/stringed_hooks.h>
+#include <client/client.h>
 
 
 
@@ -307,6 +311,89 @@ void __cdecl SV_InitDvar()
     Dvar_ResetScriptInfo();
 }
 
+void __cdecl SV_ChangeMaxClients()
+{
+    int oldMaxClients; // [esp+0h] [ebp-10h]
+    client_t *oldClients; // [esp+4h] [ebp-Ch]
+    int i; // [esp+8h] [ebp-8h]
+    int ia; // [esp+8h] [ebp-8h]
+    int ib; // [esp+8h] [ebp-8h]
+    int count; // [esp+Ch] [ebp-4h]
+    int counta; // [esp+Ch] [ebp-4h]
+
+    count = 0;
+    for (i = 0; i < sv_maxclients->current.integer; ++i)
+    {
+        if (svs.clients[i].header.state >= 2 && i > count)
+            count = i;
+    }
+    counta = count + 1;
+    oldMaxClients = sv_maxclients->current.integer;
+    SV_BoundMaxClients(counta);
+    if (sv_maxclients->current.integer != oldMaxClients)
+    {
+        oldClients = (client_t *)Hunk_AllocateTempMemory(677432 * counta, "SV_ChangeMaxClients");
+        for (ia = 0; ia < counta; ++ia)
+        {
+            if (svs.clients[ia].header.state < 2)
+                Com_Memset(&oldClients[ia], 0, 677432);
+            else
+                memcpy(&oldClients[ia], &svs.clients[ia], sizeof(client_t));
+        }
+        Com_Memset(svs.clients, 0, 677432 * sv_maxclients->current.integer);
+        for (ib = 0; ib < counta; ++ib)
+        {
+            if (oldClients[ib].header.state >= 2)
+                memcpy(&svs.clients[ib], &oldClients[ib], sizeof(svs.clients[ib]));
+        }
+        Hunk_FreeTempMemory((char*)oldClients);
+        svs.numSnapshotEntities = 172032;
+        svs.numSnapshotClients = sv_maxclients->current.integer * 32 * sv_maxclients->current.integer;
+    }
+}
+
+void __cdecl SV_SetExpectedHunkUsage(char *mapname)
+{
+    int handle[2]; // [esp+0h] [ebp-18h] BYREF
+    char *buf; // [esp+8h] [ebp-10h]
+    int len; // [esp+Ch] [ebp-Ch]
+    const char *token; // [esp+10h] [ebp-8h]
+    const char *buftrav; // [esp+14h] [ebp-4h] BYREF
+
+    handle[1] = (int)"hunkusage.dat"; // KISAKTODO: handle fubar?
+    len = FS_FOpenFileByMode((char*)"hunkusage.dat", handle, FS_READ);
+    if (len >= 0)
+    {
+        buf = (char*)Z_Malloc(len + 1, "SV_SetExpectedHunkUsage", 10);
+        memset(buf, 0, len + 1);
+        FS_Read((unsigned char*)buf, len, handle[0]);
+        FS_FCloseFile(handle[0]);
+        buftrav = buf;
+        while (1)
+        {
+            token = Com_Parse(&buftrav)->token;
+            if (!token)
+                MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 573, 0, "%s", "token");
+            if (!*token)
+                break;
+            if (!I_stricmp(token, mapname))
+            {
+                token = Com_Parse(&buftrav)->token;
+                if (token)
+                {
+                    if (*token)
+                    {
+                        com_expectedHunkUsage = atoi(token);
+                        Z_Free(buf, 10);
+                        return;
+                    }
+                }
+            }
+        }
+        Z_Free(buf, 10);
+    }
+}
+
 void __cdecl SV_SpawnServer(char *server)
 {
     int v1; // eax
@@ -436,7 +523,7 @@ void __cdecl SV_SpawnServer(char *server)
     sv.emptyConfigString = SL_GetString_((char *)"", 0, 19);
     for (i = 0; i < 2442; ++i)
     {
-        prev = SL_GetString_((char *)"", 0, 19).prev;
+        prev = SL_GetString_((char *)"", 0, 19);
         sv.configstrings[i] = prev;
     }
     SV_InitDvar();
@@ -445,7 +532,7 @@ void __cdecl SV_SpawnServer(char *server)
     SV_InitArchivedSnapshot();
     SV_InitSnapshot();
     svs.snapFlagServerBit ^= 4u;
-    Dvar_SetString((dvar_s *)nextmap, "map_restart");
+    Dvar_SetString((dvar_s *)nextmap, (char*)"map_restart");
     Dvar_SetInt((dvar_s *)cl_paused, 0);
     Com_GetBspFilename(filename, 0x40u, server);
     if (!useFastFile->current.enabled)
@@ -528,10 +615,11 @@ void __cdecl SV_SpawnServer(char *server)
     SV_Heartbeat_f();
     ProfLoad_Deactivate();
     Com_Printf(15, "-----------------------------------\n");
-    if (Dvar_GetBool("sv_punkbuster"))
-        EnablePbSv();
-    else
-        DisablePbSv();
+    // LWSS: Remove punkbuster junk
+    //if (Dvar_GetBool("sv_punkbuster"))
+    //    EnablePbSv();
+    //else
+    //    DisablePbSv();
     R_EndRemoteScreenUpdate();
     Sys_EndLoadThreadPriorities();
 }

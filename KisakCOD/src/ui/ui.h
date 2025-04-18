@@ -3,6 +3,8 @@
 #include <ui_mp/ui_mp.h>
 #include <physics/ode/objects.h>
 #include <bgame/bg_local.h>
+#include <script/scr_debugger.h>
+#include <script/scr_vm.h>
 
 
 
@@ -112,6 +114,7 @@ void __cdecl Menus_AddToStack(UiContext *dc, menuDef_t *pMenu);
 void __cdecl Menu_LoseFocusDueToOpen(UiContext *dc, menuDef_t *menu);
 int __cdecl Menus_OpenByName(UiContext *dc, const char *p);
 void __cdecl Menus_PrintAllLoadedMenus(UiContext *dc);
+int __cdecl Display_MouseMove(UiContext *dc);
 void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down);
 bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key);
 void __cdecl Item_TextField_EnsureCursorVisible(int localClientNum, itemDef_s *item, const char *text);
@@ -640,7 +643,152 @@ struct UI_Component // sizeof=0x10
 
     static void InitAssets();
     static Material *RegisterMaterialNoMip(char *name, int imageTrack);
+    static void MouseEvent(int x, int y);
 
     static UI_Component_data_t g;
 };
+
+struct UI_LinesComponent : UI_Component // sizeof=0x24
+{                                       // ...
+    virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+
+    int selectedLine;                   // ...
+    bool focusOnSelectedLine;
+    bool focusOnSelectedLineUser;
+    // padding byte
+    // padding byte
+    int numLines;                       // ...
+    float pos[2];
+
+    void UpdateHeight();
+};
+
+struct __declspec(align(4)) UI_ScrollPane : UI_Component // sizeof=0x34
+{                                       // ...
+    UI_LinesComponent *comp;            // ...
+    bool forceHorScoll;                 // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    float mouseHeldScale[2];
+    float mouseHeldPos[2];
+    float mouseHeldCompPos[2];
+    bool mouseWasDown[2];
+    // padding byte
+    // padding byte
+};
+
+struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
+{
+    unsigned int bufferIndex;
+    int currentTopLine;
+    const char *currentBufPos;
+    Scr_Breakpoint *breakpointHead;
+    Scr_Breakpoint *builtinHead;
+    int numCols;
+};
+
+struct Scr_AbstractScriptList : UI_LinesComponent // sizeof=0x28
+{                                       // ...
+    Scr_ScriptWindow **scriptWindows;   // ...
+};
+
+struct Scr_ScriptList : Scr_AbstractScriptList // sizeof=0x28
+{                                       // ...
+};
+
+struct Scr_OpenScriptList : Scr_AbstractScriptList // sizeof=0x2C
+{                                       // ...
+    virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+
+    Scr_StringNode_s *usedHead;
+};
+
+struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
+{                                       // ...
+    virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+
+    Scr_WatchElement_s *elementHead;    // ...
+    int elementId;                      // ...
+    unsigned int localId;               // ...
+    int dirty;                          // ...
+
+    Scr_WatchElement_s *GetElementWithId_r(Scr_WatchElement_s *element, int id)
+    {
+        Scr_WatchElement_s *childElement; // [esp+4h] [ebp-4h]
+
+        while (element)
+        {
+            if (element->id == id)
+                return element;
+            if (element->childHead)
+            {
+                childElement = Scr_ScriptWatch::GetElementWithId_r(element->childHead, id);
+                if (childElement)
+                    return childElement;
+            }
+            element = element->next;
+        }
+        return 0;
+    }
+
+    Scr_WatchElement_s *GetElementWithId(int id)
+    {
+        return GetElementWithId_r(this->elementHead, id);
+    }
+
+    void DeleteElement();
+    void DeleteElementInternal(Scr_WatchElement_s *element);
+
+    Scr_WatchElement_s *GetSelectedElement();
+    Scr_WatchElement_s *GetSelectedElement_r(Scr_WatchElement_s *element, int *currentline);
+
+    Scr_WatchElement_s ** GetElementRef(Scr_WatchElement_s *element);
+
+    void UpdateHeight();
+
+    void SetSelectedElement(Scr_WatchElement_s *selElement, bool user);
+    bool SetSelectedElement_r(Scr_WatchElement_s *selElement, Scr_WatchElement_s *element, int *currentLine, bool user);
+
+    void Evaluate();
+    void EvaluateWatchElement(Scr_WatchElement_s *element);
+    void EvaluateWatchElementExpression(
+        Scr_WatchElement_s *element,
+        VariableValue *value);
+
+    bool EvaluateWatchChildElement(
+        Scr_WatchElement_s *element,
+        unsigned int fieldName,
+        Scr_WatchElement_s *childElement,
+        bool hardcodedField);
+    void EvaluateWatchChildren(Scr_WatchElement_s *parentElement);
+    bool PostEvaluateWatchElement(
+        Scr_WatchElement_s *element,
+        VariableValue *value);
+
+    void LoadSelectedLine(Scr_SelectedLineInfo *info);
+    void SaveSelectedLine(Scr_SelectedLineInfo *info);
+
+};
+
+struct Scr_SourcePos2_t // sizeof=0x8
+{                                       // ...
+    unsigned int bufferIndex;           // ...
+    unsigned int sourcePos;             // ...
+};
+
+struct Scr_ScriptCallStack : UI_LinesComponent // sizeof=0x12C
+{                                       // ...
+    virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+
+    Scr_SourcePos2_t stack[33];         // ...
+};
+
+struct UI_VerticalDivider : UI_Component // sizeof=0x1C
+{                                       // ...
+    UI_ScrollPane *topComp;             // ...
+    UI_ScrollPane *bottomComp;          // ...
+    float posY;                         // ...
+};
+
 void __cdecl UI_Component_Init();

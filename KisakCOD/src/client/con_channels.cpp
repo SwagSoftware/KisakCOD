@@ -1,10 +1,26 @@
 #include "client.h"
+#include <bgame/bg_local.h>
+#include <universal/com_files.h>
+#include <qcommon/cmd.h>
 
+struct PrintChannel // sizeof=0x21
+{                                       // ...
+    char name[32];                      // ...
+    bool allowScript;                   // ...
+};
+struct PrintChannelGlob // sizeof=0x21E0
+{                                       // ...
+    PrintChannel openChannels[256];     // ...
+    unsigned int filters[7][8];         // ...
+};
 
 // char const **defaultGameWindowFilters 827b3bcc     con_channels.obj
 // char (*)[25] con_gameMsgWindowNFilter_Names 828a7160     con_channels.obj
 // struct dvar_s const **con_gameMsgWindowNFilter 828a71c4     con_channels.obj
 // char (*)[91] con_gameMsgWindowNFilter_Descs 828a71d8     con_channels.obj
+
+PrintChannelGlob pcGlob;
+int dvar_modifiedFlags;
 
 char __cdecl Con_OpenChannel(char *name, bool allowScript)
 {
@@ -100,6 +116,16 @@ void __cdecl Con_WriteFilterConfigString(int f)
     FS_Printf(f, "\n");
 }
 
+char con_gameMsgWindowNFilter_Descs[4][91];
+char con_gameMsgWindowNFilter_Names[4][25];
+const dvar_s *con_gameMsgWindowNFilter[4];
+const char *defaultGameWindowFilters[4] =
+{
+    "gamenotify obituary",
+    "boldgame",
+    "subtitle",
+    NULL
+};
 void __cdecl Con_InitGameMsgChannels()
 {
     unsigned int gameWindowIndex; // [esp+24h] [ebp-8h]
@@ -209,6 +235,41 @@ void __cdecl Con_FilterShowChannel(print_msg_dest_t dest, const char *channelNam
         Com_Printf(0, "No channels added or hidden\n");
 }
 
+const char *builtinChannels[25] =
+{
+  "dontfilter",
+  "error",
+  "gamenotify",
+  "boldgame",
+  "subtitle",
+  "obituary",
+  "logfile_only",
+  "console_only",
+  "gfx",
+  "sound",
+  "files",
+  "devgui",
+  "profile",
+  "ui",
+  "client",
+  "server",
+  "system",
+  "playerweap",
+  "ai",
+  "anim",
+  "physics",
+  "fx",
+  "leaderboards",
+  "parserscript",
+  "script"
+}; // idb
+
+cmd_function_s Con_ChannelList_f_VAR;
+cmd_function_s Con_FilterAdd_f_VAR;
+cmd_function_s Con_FilterRemove_f_VAR;
+cmd_function_s Con_FilterList_f_VAR;
+
+const dvar_t *con_default_console_filter;
 void __cdecl Con_InitChannels()
 {
     unsigned int channel; // [esp+0h] [ebp-4h]

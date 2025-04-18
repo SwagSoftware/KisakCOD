@@ -51,3 +51,5 @@ void __cdecl SV_RestartGameProgs(int savepersist);
 void __cdecl SV_InitGameVM(int restart, int savepersist);
 void __cdecl SV_InitGameProgs(int savepersist);
 int __cdecl SV_GameCommand();
+
+extern int gameInitialized;

@@ -434,3 +434,6 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 void  Scr_ClearThread(unsigned int parentId);
 
 //int marker_scr_variable
+
+extern scrStringDebugGlob_t *scrStringDebugGlob;
+extern scrMemTreePub_t scrMemTreePub;

@@ -2,6 +2,25 @@
 #include "scr_variable.h"
 #include "scr_debugger.h"
 
+struct ArchivedCanonicalStringInfo // sizeof=0x8
+{
+    unsigned __int16 canonicalStr;
+    // padding byte
+    // padding byte
+    const char *value;
+};
+
+struct __declspec(align(2)) scrEvaluateGlob_t // sizeof=0x10
+{                                       // ...
+    char *archivedCanonicalStringsBuf;  // ...
+    ArchivedCanonicalStringInfo *archivedCanonicalStrings; // ...
+    int *canonicalStringLookup;         // ...
+    bool freezeScope;                   // ...
+    bool freezeObjects;                 // ...
+    bool objectChanged;                 // ...
+    // padding byte
+};
+
 void __cdecl TRACK_scr_evaluate();
 int __cdecl Scr_CompareCanonicalStrings(unsigned int *arg1, unsigned int *arg2);
 void __cdecl Scr_ArchiveCanonicalStrings();
@@ -71,3 +90,6 @@ bool __cdecl Scr_RefMethod(sval_u expr, sval_u params);
 bool __cdecl Scr_RefBinaryOperatorExpression(sval_u expr1, sval_u expr2);
 bool __cdecl Scr_RefVector(sval_u expr1, sval_u expr2, sval_u expr3);
 void __cdecl Scr_FreeDebugExprValue(sval_u val);
+
+
+extern scrEvaluateGlob_t scrEvaluateGlob;

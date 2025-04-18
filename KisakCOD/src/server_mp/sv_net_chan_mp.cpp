@@ -3,6 +3,39 @@
 #include <cstring>
 #include <qcommon/net_chan_mp.h>
 
+void __cdecl SV_Netchan_Decode(client_t *client, unsigned __int8 *data, int size)
+{
+    svscmd_info_t *string; // [esp+0h] [ebp-10h]
+    _BYTE key[5]; // [esp+7h] [ebp-9h]
+    int i; // [esp+Ch] [ebp-4h]
+
+    if (client->reliableSequence - client->reliableAcknowledge >= 128)
+        MyAssertHandler(
+            ".\\server_mp\\sv_net_chan_mp.cpp",
+            62,
+            0,
+            "%s",
+            "client->reliableSequence - client->reliableAcknowledge < MAX_RELIABLE_COMMANDS");
+    string = &client->reliableCommandInfo[client->reliableAcknowledge & 0x7F];
+    key[4] = 0;
+    *key = (LOBYTE(client->messageAcknowledge) ^ LOBYTE(client->serverId) ^ LOBYTE(client->challenge));
+    for (i = 0; i < size; ++i)
+    {
+        if (!string->cmd[*&key[1]])
+            *&key[1] = 0;
+        if (string->cmd[*&key[1]] == 37)
+            MyAssertHandler(
+                ".\\server_mp\\sv_net_chan_mp.cpp",
+                73,
+                0,
+                "%s\n\t(client->reliableCommandInfo[client->reliableAcknowledge & (128 - 1)].cmd) = %s",
+                "(string[index] != '%')",
+                client->reliableCommandInfo[client->reliableAcknowledge & 0x7F].cmd);
+        key[0] ^= string->cmd[(*&key[1])++] << (i & 1);
+        *data++ ^= key[0];
+    }
+}
+
 void __cdecl SV_Netchan_Encode(client_t *client, unsigned __int8 *data, int size)
 {
     unsigned __int8 *string; // [esp+0h] [ebp-10h]

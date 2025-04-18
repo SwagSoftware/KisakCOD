@@ -299,6 +299,51 @@ const dvar_t *zone_reorder;
 volatile unsigned int g_loadingAssets;
 XZoneInfoInternal g_zoneInfo[8];
 
+char *__cdecl DB_ReferencedFFChecksums()
+{
+    int v0; // kr00_4
+    int i; // [esp+10h] [ebp-20h]
+    char zoneSizeStr[16]; // [esp+1Ch] [ebp-14h] BYREF
+
+    v0 = strlen("localized_");
+    g_zoneNameList[0] = 0;
+    for (i = 0; i < 32; ++i)
+    {
+        if (g_zones[i].name[0] && I_strncmp(g_zones[i].name, "localized_", v0))
+        {
+            if (g_zoneNameList[0])
+                I_strncat(g_zoneNameList, 2080, " ");
+            itoa(g_zones[i].fileSize, zoneSizeStr, 0xAu);
+            I_strncat(g_zoneNameList, 2080, zoneSizeStr);
+        }
+    }
+    return g_zoneNameList;
+}
+
+char *__cdecl DB_ReferencedFFNameList()
+{
+    int v0; // kr00_4
+    int i; // [esp+10h] [ebp-Ch]
+
+    v0 = strlen("localized_");
+    g_zoneNameList[0] = 0;
+    for (i = 0; i < 32; ++i)
+    {
+        if (g_zones[i].name[0] && I_strncmp(g_zones[i].name, "localized_", v0))
+        {
+            if (g_zoneNameList[0])
+                I_strncat(g_zoneNameList, 2080, " ");
+            if (g_zones[i].modZone)
+            {
+                I_strncat(g_zoneNameList, 2080, (const char*)fs_gameDirVar->current.integer);
+                I_strncat(g_zoneNameList, 2080, "/");
+            }
+            I_strncat(g_zoneNameList, 2080, g_zones[i].name);
+        }
+    }
+    return g_zoneNameList;
+}
+
 void __cdecl Hunk_OverrideDataForFile(int type, const char *name, void *data)
 {
     fileData_s *searchFileData; // [esp+4h] [ebp-4h]

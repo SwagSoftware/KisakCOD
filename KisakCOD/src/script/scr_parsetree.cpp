@@ -6,6 +6,8 @@
 
 //struct debugger_sval_s *g_debugExprHead 83123658     scr_parsetree.obj
 
+HunkUser *g_allocNodeUser;
+
 XAssetHeader __cdecl node1_(void *pool)
 {
     return (XAssetHeader)pool;
@@ -168,40 +170,41 @@ sval_u __cdecl node8(
     return result;
 }
 
-sval_u __cdecl linked_list_end(sval_u val)
+// KISAKTODO: These linked_list functions are horrible
+sval_u *__cdecl linked_list_end(sval_u *val)
 {
-    sval_u result; // eax
+    sval_u *result; // eax
     sval_u *node; // [esp+0h] [ebp-8h]
 
     node = Scr_AllocNode(2);
-    node->type = val.type;
+    node[0] = *val;
     node[1].type = 0;
-    result.type = (int)Scr_AllocNode(2);
-    *(unsigned int *)result.type = node;
-    *(unsigned int *)(result.type + 4) = node;
+    result = Scr_AllocNode(2);
+    result[0] = node[0];
+    result[1] = node[0];
     return result;
 }
 
-sval_u __cdecl prepend_node(sval_u val1, sval_u val2)
+sval_u *__cdecl prepend_node(sval_u *val1, sval_u *val2)
 {
     sval_u *v2; // eax
 
     v2 = Scr_AllocNode(2);
-    v2->type = val1.type;
-    v2[1].type = val2.node->type;
-    *(unsigned int *)val2.type = v2;
+    v2[0] = *val1;
+    v2[1] = *val2;
+    *val2 = v2[0];
     return val2;
 }
 
-sval_u __cdecl append_node(sval_u val1, sval_u val2)
+sval_u *__cdecl append_node(sval_u *val1, sval_u *val2)
 {
     sval_u *v2; // eax
 
     v2 = Scr_AllocNode(2);
-    v2->type = val2.type;
+    v2[0] = *val2;
     v2[1].type = 0;
-    *(unsigned int *)(*(unsigned int *)(val1.type + 4) + 4) = v2;
-    *(unsigned int *)(val1.type + 4) = v2;
+    *(sval_u**)(val1[1].type + 4) = v2;
+    val1[1].type = (int)v2;
     return val1;
 }
 
@@ -209,7 +212,7 @@ void __cdecl Scr_ClearDebugExpr(debugger_sval_s *debugExprHead)
 {
     while (debugExprHead)
     {
-        Scr_ClearDebugExprValue((sval_u)&debugExprHead[1]);
+        Scr_ClearDebugExprValue(*(sval_u*)&debugExprHead[1]);
         debugExprHead = debugExprHead->next;
     }
 }

@@ -2,6 +2,17 @@
 
 #include <qcommon/qcommon.h>
 #include <qcommon/mem_track.h>
+#include <qcommon/cmd.h>
+#include <server/sv_game.h>
+#include <game_mp/g_main_mp.h>
+#include <qcommon/files.h>
+#include <universal/com_files.h>
+#include <qcommon/threads.h>
+#include <script/scr_variable.h>
+#include <client/client.h>
+#include <script/scr_vm.h>
+#include <universal/timing.h>
+#include <script/scr_debugger.h>
 
 
 
@@ -59,12 +70,13 @@ void __cdecl TRACK_sv_main()
     track_static_alloc_internal(&sv, 392288, "sv", 9);
 }
 
+char string_2[1024];
 char *__cdecl SV_ExpandNewlines(char *in)
 {
     unsigned int l; // [esp+0h] [ebp-4h]
 
     l = 0;
-    while (*in && l < 0x3FD)
+    while (*in && l < 1021)
     {
         if (*in == 10)
         {
@@ -73,7 +85,7 @@ char *__cdecl SV_ExpandNewlines(char *in)
             l += 2;
             goto LABEL_10;
         }
-        if (*in == 20 || *in == 21)
+        if (*in == '\x14' || *in == '\x15')
         {
             ++in;
         }
@@ -227,6 +239,7 @@ void __cdecl SV_CullIgnorableServerCommands(client_t *client)
     client->reliableSequence = to - 1;
 }
 
+unsigned __int8 tempServerCommandBuf[131072];
 void SV_SendServerCommand(client_t *cl, svscmd_type type, const char *fmt, ...)
 {
     const char *v3; // eax
@@ -288,8 +301,8 @@ client_t *__cdecl SV_FindClientByAddress(netadr_t from, int qport)
 void __cdecl SVC_Status(netadr_t from)
 {
     const char *v1; // eax
-    char *v2; // eax
-    char *v3; // eax
+    const char *v2; // eax
+    const char *v3; // eax
     const char *v4; // eax
     char v5; // [esp+3h] [ebp-4861h]
     unsigned __int8 *v6; // [esp+8h] [ebp-485Ch]
@@ -380,7 +393,7 @@ void __cdecl SVC_Status(netadr_t from)
             for (num = 0; num < v26; ++num)
             {
                 v3 = (char *)SV_Cmd_Argv(num);
-                if (!FS_iwIwd(v3, "main"))
+                if (!FS_iwIwd((char*)v3, (char*)"main"))
                 {
                     v22 = 1;
                     break;
@@ -398,7 +411,7 @@ void __cdecl SVC_Status(netadr_t from)
 void __cdecl SVC_GameCompleteStatus(netadr_t from)
 {
     const char *v1; // eax
-    char *v2; // eax
+    const char *v2; // eax
     int ClientScore; // eax
     const char *v4; // eax
     int ping; // [esp-8h] [ebp-C58h]
@@ -590,7 +603,7 @@ void __cdecl SVC_Info(netadr_t from)
             for (i = 0; i < count; ++i)
             {
                 v13 = (char *)SV_Cmd_Argv(i);
-                if (!FS_iwIwd(v13, "main"))
+                if (!FS_iwIwd(v13, (char*)"main"))
                 {
                     serverModded = 1;
                     break;
@@ -612,8 +625,8 @@ void __cdecl SVC_Info(netadr_t from)
 
 void __cdecl SV_ConnectionlessPacket(netadr_t from, msg_t *msg)
 {
-    char *v2; // eax
-    char *v3; // eax
+    const char *v2; // eax
+    const char *v3; // eax
     char *fromAddr; // [esp+0h] [ebp-1Ch]
     client_t *clients; // [esp+4h] [ebp-18h]
     const char *c; // [esp+8h] [ebp-14h]
@@ -675,15 +688,16 @@ void __cdecl SV_ConnectionlessPacket(netadr_t from, msg_t *msg)
                         }
                         else
                         {
-                            if (NET_IsLocalAddress(from))
-                            {
-                                PbPassConnectString("localhost", (char *)msg->data);
-                            }
-                            else
-                            {
-                                fromAddr = NET_AdrToString(from);
-                                PbPassConnectString(fromAddr, (char *)msg->data);
-                            }
+                            // LWSS: Remove punkbuster junk
+                            //if (NET_IsLocalAddress(from))
+                            //{
+                            //    PbPassConnectString("localhost", (char *)msg->data);
+                            //}
+                            //else
+                            //{
+                            //    fromAddr = NET_AdrToString(from);
+                            //    PbPassConnectString(fromAddr, (char *)msg->data);
+                            //}
                             SV_DirectConnect(from);
                         }
                     }
@@ -727,19 +741,20 @@ void __cdecl SV_ConnectionlessPacket(netadr_t from, msg_t *msg)
             ++i;
             ++clients;
         }
-        if (msg->data[7] != 67 && msg->data[7] != 49 && msg->data[7] != 74)
-            PbSvAddEvent(13, clientIndex, msg->cursize - 4, (char *)msg->data + 4);
-        if (msg->data[7] != 83
-            && msg->data[7] != 50
-            && msg->data[7] != 71
-            && msg->data[7] != 73
-            && msg->data[7] != 89
-            && msg->data[7] != 66
-            && msg->data[7] != 76
-            && (!com_dedicated || !com_dedicated->current.integer))
-        {
-            PbClAddEvent(13, msg->cursize - 4, (char *)msg->data + 4);
-        }
+        // LWSS: Remove punkbuster crap
+        //if (msg->data[7] != 67 && msg->data[7] != 49 && msg->data[7] != 74)
+        //    PbSvAddEvent(13, clientIndex, msg->cursize - 4, (char *)msg->data + 4);
+        //if (msg->data[7] != 83
+        //    && msg->data[7] != 50
+        //    && msg->data[7] != 71
+        //    && msg->data[7] != 73
+        //    && msg->data[7] != 89
+        //    && msg->data[7] != 66
+        //    && msg->data[7] != 76
+        //    && (!com_dedicated || !com_dedicated->current.integer))
+        //{
+        //    PbClAddEvent(13, msg->cursize - 4, (char *)msg->data + 4);
+        //}
     }
 }
 
@@ -979,13 +994,16 @@ void __cdecl SV_RunFrame()
     //Profile_EndInternal(0);
 }
 
+int s_lastWallClockEndTime;
+int s_serverDebugFrame;
+ServerProfileTimes s_serverProfileTimes[10];
 void __cdecl SV_UpdatePerformanceFrame(float time)
 {
     float v1; // [esp+0h] [ebp-28h]
     float v2; // [esp+4h] [ebp-24h]
     float v3; // [esp+8h] [ebp-20h]
     float v4; // [esp+Ch] [ebp-1Ch]
-    unsigned intwallClockEndTime; // [esp+14h] [ebp-14h]
+    DWORD wallClockEndTime; // [esp+14h] [ebp-14h]
     ServerProfileTimes *profile; // [esp+18h] [ebp-10h]
     float maxTime; // [esp+1Ch] [ebp-Ch]
     float minTime; // [esp+20h] [ebp-8h]
@@ -994,10 +1012,11 @@ void __cdecl SV_UpdatePerformanceFrame(float time)
     minTime = 3.4028235e38;
     maxTime = -3.4028235e38;
     wallClockEndTime = Sys_Milliseconds();
-    profile = (ServerProfileTimes *)(8 * (s_serverDebugFrame % 10) + 229164768);
+    //profile = (8 * (s_serverDebugFrame % 10) + 229164768);
+    profile = &s_serverProfileTimes[s_serverDebugFrame % 10];
     ++s_serverDebugFrame;
     profile->frameTime = time;
-    profile->wallClockTime = (float)(int)(wallClockEndTime - s_lastWallClockEndTime);
+    profile->wallClockTime = (wallClockEndTime - s_lastWallClockEndTime);
     s_lastWallClockEndTime = wallClockEndTime;
     if (s_serverDebugFrame >= 10)
     {
@@ -1007,9 +1026,9 @@ void __cdecl SV_UpdatePerformanceFrame(float time)
         {
             sv.profile.frameTime = sv.profile.frameTime + s_serverProfileTimes[i].frameTime;
             sv.profile.wallClockTime = sv.profile.wallClockTime + s_serverProfileTimes[i].wallClockTime;
-            if (s_serverProfileTimes[i].frameTime < (double)minTime)
+            if (s_serverProfileTimes[i].frameTime < minTime)
                 minTime = s_serverProfileTimes[i].frameTime;
-            if (s_serverProfileTimes[i].frameTime > (double)maxTime)
+            if (s_serverProfileTimes[i].frameTime > maxTime)
                 maxTime = s_serverProfileTimes[i].frameTime;
         }
         sv.profile.frameTime = sv.profile.frameTime * 0.1000000014901161;
@@ -1134,6 +1153,25 @@ void __cdecl SV_KillLocalServer()
         sv.killServer = 1;
 }
 
+void __cdecl SV_SetSystemInfoConfig()
+{
+    char *v0; // eax
+    char dest; // [esp+24h] [ebp-2008h] BYREF
+    _BYTE v2[3]; // [esp+25h] [ebp-2007h] BYREF
+
+    v0 = Dvar_InfoString_Big(8);
+    I_strncpyz(&dest, v0, 0x2000);
+    if (!fs_gameDirVar->current.integer)
+    {
+        if (&v2[strlen(&dest)] - v2 + strlen("\\fs_game\\\\") <= 0x400)
+            I_strncat(&dest, 1024, "\\fs_game\\\\");
+        else
+            Com_Printf(16, "Info string length exceeded key: fs_game Info string: %s", &dest);
+    }
+    SV_SetConfigstring(1, &dest);
+    dvar_modifiedFlags &= ~8u;
+}
+
 void __cdecl SV_PreFrame()
 {
     char *v0; // eax
@@ -1221,7 +1259,7 @@ void __cdecl SV_FrameInternal(int msec)
     }
 }
 
-int SV_PostFrame()
+void SV_PostFrame()
 {
     Scr_UpdateDebugger();
     //Profile_Begin(305);
@@ -1231,7 +1269,7 @@ int SV_PostFrame()
     SV_MasterHeartbeat("COD-4");
     //Profile_Begin(306);
     FakeLag_Frame();
-    return //Profile_EndInternal(0);
+    //return Profile_EndInternal(0);
 }
 
 char __cdecl SV_CheckOverflow()
@@ -1267,7 +1305,7 @@ char __cdecl SV_CheckOverflow()
                                 else
                                 {
                                     I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
-                                    Com_Shutdown(aExeServerresta_3);
+                                    Com_Shutdown("EXE_SERVERRESTARTMISC numSnapshotClients");
                                     v8 = va("map %s\n", mapname);
                                     Cbuf_AddText(0, v8);
                                     return 1;
@@ -1276,7 +1314,7 @@ char __cdecl SV_CheckOverflow()
                             else
                             {
                                 I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
-                                Com_Shutdown(aExeServerresta_2);
+                                Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                                 v7 = va("map %s\n", mapname);
                                 Cbuf_AddText(0, v7);
                                 return 1;
@@ -1285,7 +1323,7 @@ char __cdecl SV_CheckOverflow()
                         else
                         {
                             I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
-                            Com_Shutdown(aExeServerresta_1);
+                            Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                             v6 = va("map %s\n", mapname);
                             Cbuf_AddText(0, v6);
                             return 1;
@@ -1294,7 +1332,7 @@ char __cdecl SV_CheckOverflow()
                     else
                     {
                         I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
-                        Com_Shutdown(aExeServerresta_4);
+                        Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                         v5 = va("map %s\n", mapname);
                         Cbuf_AddText(0, v5);
                         return 1;
@@ -1303,7 +1341,7 @@ char __cdecl SV_CheckOverflow()
                 else
                 {
                     I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
-                    Com_Shutdown(aExeServerresta_0);
+                    Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                     v4 = va("map %s\n", mapname);
                     Cbuf_AddText(0, v4);
                     return 1;
@@ -1312,7 +1350,7 @@ char __cdecl SV_CheckOverflow()
             else
             {
                 I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
-                Com_Shutdown(aExeServerresta_6);
+                Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                 v3 = va("map %s\n", mapname);
                 Cbuf_AddText(0, v3);
                 return 1;
@@ -1321,7 +1359,7 @@ char __cdecl SV_CheckOverflow()
         else
         {
             I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
-            Com_Shutdown(aExeServerresta_5);
+            Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
             v2 = va("map %s\n", mapname);
             Cbuf_AddText(0, v2);
             return 1;

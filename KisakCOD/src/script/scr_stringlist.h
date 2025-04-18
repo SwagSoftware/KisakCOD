@@ -48,7 +48,7 @@ struct __declspec(align(128)) scrStringGlob_t
              unsigned __int32 user : 8;
              unsigned __int32 byteLen : 8;
          };
-         volatile int data;
+         volatile unsigned int data;
      };
      char str[1];
  };
@@ -100,6 +100,8 @@ unsigned int SL_GetStringForFloat(float f);
 unsigned int SL_GetString(const char* str, unsigned int user);
 unsigned int SL_GetLowercaseString_(const char* str, unsigned int user, int type);
 unsigned int SL_GetLowercaseString(const char* str, unsigned int user);
+
+void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user);
 
 int SL_GetRefStringLen(RefString* refString);
 int SL_GetStringLen(unsigned int stringValue);

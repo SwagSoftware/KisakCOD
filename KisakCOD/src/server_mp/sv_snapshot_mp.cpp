@@ -1,8 +1,14 @@
 #include "server.h"
+#include <game_mp/g_public_mp.h>
+#include <server/sv_game.h>
+#include <win32/win_local.h>
+#include <universal/com_files.h>
+#include <qcommon/files.h>
 
-
+serverStaticHeader_t svsHeader;
 //struct dvar_s const *const sv_clientArchive 84ff2600     sv_snapshot_mp.obj
 //int svsHeaderValid       84ff262c     sv_snapshot_mp.obj
+int svsHeaderValid;
 //struct serverStaticHeader_t svsHeader 85012680     sv_snapshot_mp.obj
 
 void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
@@ -71,7 +77,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
                     svs.nextSnapshotEntities,
                     oldframe->num_entities);
                 oldframe = 0;
-                LOBYTE(lastframe) = 0;
+                lastframe = 0;
                 lastServerTime = 0;
             }
             if (oldframe && oldframe->first_client < svsHeader.nextSnapshotClients - svsHeader.numSnapshotClients)
@@ -86,7 +92,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
                     svs.nextSnapshotClients,
                     oldframe->num_clients);
                 oldframe = 0;
-                LOBYTE(lastframe) = 0;
+                lastframe = 0;
                 lastServerTime = 0;
             }
         }
@@ -94,14 +100,14 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
         {
             Com_DPrintf(15, "%s: Delta request from out of date packet.\n", client->name);
             oldframe = 0;
-            LOBYTE(lastframe) = 0;
+            lastframe = 0;
             lastServerTime = 0;
         }
     }
     else
     {
         oldframe = 0;
-        LOBYTE(lastframe) = 0;
+        lastframe = 0;
         lastServerTime = 0;
     }
     SV_PacketDataIsHeader(clientNum, msg);
@@ -736,8 +742,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
     cachedSnapshot_t *oldCachedFrame; // [esp+58h] [ebp-8h]
     cachedClient_s *cachedClient; // [esp+5Ch] [ebp-4h]
 
-    if (svs.archivedSnapshotFrames[archivedFrame % 1200].start < svs.nextArchivedSnapshotBuffer
-        - (int)&g_hunk_track[370234].type)
+    if (svs.archivedSnapshotFrames[archivedFrame % 1200].start < svs.nextArchivedSnapshotBuffer - 0x2000000)
         return 0;
     firstCachedSnapshotFrame = svs.nextCachedSnapshotFrames - 512;
     if (svs.nextCachedSnapshotFrames - 512 < 0)
@@ -756,8 +761,8 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
         }
     }
     v2 = svs.archivedSnapshotFrames[archivedFrame % 1200].start % 0x2000000;
-    partSize = (int)(&g_hunk_track[370234].type - v2);
-    if (*(unsigned int *)&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596] > (int)(&g_hunk_track[370234].type - v2))
+    partSize = 0x2000000 - v2;
+    if (*&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596] > 0x2000000 - v2)
         MSG_InitReadOnlySplit(
             &msg,
             &svs.archivedSnapshotBuffer[v2],
@@ -786,7 +791,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
         {
             newnumb = MSG_ReadEntityIndex(&msg, 6u);
             if (msg.overflowed)
-                Com_Error(ERR_DROP, &byte_8B1D5C);
+                Com_Error(ERR_DROP, "SV_GetCachedSnapshot: end of message");
             cachedClient = &svs.cachedSnapshotClients[svs.nextCachedSnapshotClients % 4096];
             MSG_ReadDeltaClient(&msg, cachedFrame->time, 0, &cachedClient->cs, newnumb);
             v7 = MSG_ReadBit(&msg);
@@ -796,7 +801,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
             if (svsHeaderValid)
                 MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1340, 0, "%s", "!svsHeaderValid");
             if (++svs.nextCachedSnapshotClients >= 2147483646)
-                Com_Error(ERR_FATAL, &byte_8B1D24);
+                Com_Error(ERR_FATAL, "svs.nextCachedSnapshotClients wrapped");
             ++cachedFrame->num_clients;
         }
         MSG_ClearLastReferencedEntity(&msg);
@@ -806,7 +811,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
             if (newnumc == 1023)
                 break;
             if (msg.overflowed)
-                Com_Error(ERR_DROP, &byte_8B1D5C);
+                Com_Error(ERR_DROP, "SV_GetCachedSnapshot: end of message");
             MSG_ReadDeltaArchivedEntity(
                 &msg,
                 cachedFrame->time,
@@ -814,19 +819,18 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
                 &svs.cachedSnapshotEntities[svs.nextCachedSnapshotEntities % 0x4000],
                 newnumc);
             if (++svs.nextCachedSnapshotEntities >= 2147483646)
-                Com_Error(ERR_FATAL, &byte_8B1CFC);
+                Com_Error(ERR_FATAL, "svs.nextCachedSnapshotEntities wrapped");
             ++cachedFrame->num_entities;
         }
         if (++svs.nextCachedSnapshotFrames >= 2147483646)
-            Com_Error(ERR_FATAL, &byte_8B1CD4);
+            Com_Error(ERR_FATAL, "svs.nextCachedSnapshotFrames wrapped");
     }
     else
     {
         oldArchivedFrame = MSG_ReadLong(&msg);
         if (oldArchivedFrame < svs.nextArchivedSnapshotFrames - 1200)
             return 0;
-        if (svs.archivedSnapshotFrames[oldArchivedFrame % 1200].start < svs.nextArchivedSnapshotBuffer
-            - (int)&g_hunk_track[370234].type)
+        if (svs.archivedSnapshotFrames[oldArchivedFrame % 1200].start < svs.nextArchivedSnapshotBuffer - 0x2000000)
             return 0;
         oldCachedFrame = SV_GetCachedSnapshotInternal(oldArchivedFrame);
         if (!oldCachedFrame)
@@ -860,7 +864,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
             if (newnum < 0)
                 MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1209, 0, "%s\n\t(newnum) = %i", "(newnum >= 0)", newnum);
             if (msg.overflowed)
-                Com_Error(ERR_DROP, &byte_8B1D5C);
+                Com_Error(ERR_DROP, "SV_GetCachedSnapshot: end of message");
             while (oldnum < newnum)
             {
                 if (++oldindex < oldCachedFrame->num_clients)
@@ -889,7 +893,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
                 if (svsHeaderValid)
                     MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1243, 0, "%s", "!svsHeaderValid");
                 if (++svs.nextCachedSnapshotClients >= 2147483646)
-                    Com_Error(ERR_FATAL, &byte_8B1D24);
+                    Com_Error(ERR_FATAL, "svs.nextCachedSnapshotClients wrapped");
                 ++cachedFrame->num_clients;
                 if (++oldindex < oldCachedFrame->num_clients)
                 {
@@ -914,7 +918,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
                 if (svsHeaderValid)
                     MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1273, 0, "%s", "!svsHeaderValid");
                 if (++svs.nextCachedSnapshotClients >= 2147483646)
-                    Com_Error(ERR_FATAL, &byte_8B1D24);
+                    Com_Error(ERR_FATAL, "svs.nextCachedSnapshotClients wrapped");
                 ++cachedFrame->num_clients;
             }
         }
@@ -925,7 +929,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
             if (newnuma == 1023)
                 break;
             if (msg.overflowed)
-                Com_Error(ERR_DROP, &byte_8B1D5C);
+                Com_Error(ERR_DROP, "SV_GetCachedSnapshot: end of message");
             MSG_ReadDeltaArchivedEntity(
                 &msg,
                 cachedFrame->time,
@@ -933,11 +937,11 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
                 &svs.cachedSnapshotEntities[svs.nextCachedSnapshotEntities % 0x4000],
                 newnuma);
             if (++svs.nextCachedSnapshotEntities >= 2147483646)
-                Com_Error(ERR_FATAL, &byte_8B1CFC);
+                Com_Error(ERR_FATAL, "svs.nextCachedSnapshotEntities wrapped");
             ++cachedFrame->num_entities;
         }
         if (++svs.nextCachedSnapshotFrames >= 2147483646)
-            Com_Error(ERR_FATAL, &byte_8B1CD4);
+            Com_Error(ERR_FATAL, "svs.nextCachedSnapshotFrames wrapped");
     }
     if (cachedFrame->num_entities >= 0x4000)
         MyAssertHandler(
@@ -1031,7 +1035,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                 memcpy(dst, v1, 0x2F64u);
                 clientNum = *((unsigned int *)dst + 55);
                 if ((unsigned int)clientNum >= 0x400)
-                    Com_Error(ERR_DROP, &byte_8B1E3C);
+                    Com_Error(ERR_DROP, "SV_BuildClientSnapshot: bad gEnt");
                 position[0] = *((float *)dst + 7);
                 position[1] = *((float *)dst + 8);
                 v14 = *((float *)dst + 9);
@@ -1066,7 +1070,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                             v4->lerp.u.missile.launchTime += v19;
                         }
                         if (++svs.nextSnapshotEntities >= 2147483646)
-                            Com_Error(ERR_FATAL, &byte_8B1E18);
+                            Com_Error(ERR_FATAL, "svs.nextSnapshotEntities wrapped");
                         ++v5->num_entities;
                     }
                     for (i = 0; i < CachedSnapshot->num_clients; ++i)
@@ -1083,7 +1087,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                                 "!clientIndex[clientState->clientIndex]");
                         v12[v9->clientIndex] = 1;
                         if (++svs.nextSnapshotClients >= 2147483646)
-                            Com_Error(ERR_FATAL, &byte_8B1DF4);
+                            Com_Error(ERR_FATAL, "svs.nextSnapshotClients wrapped");
                         if (++v5->num_clients + v5->first_client != svs.nextSnapshotClients)
                             MyAssertHandler(
                                 ".\\server_mp\\sv_snapshot_mp.cpp",
@@ -1104,7 +1108,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                             v15,
                             sizeof(svs.snapshotEntities[svs.nextSnapshotEntities++ % svs.numSnapshotEntities]));
                         if (svs.nextSnapshotEntities >= 2147483646)
-                            Com_Error(ERR_FATAL, &byte_8B1E18);
+                            Com_Error(ERR_FATAL, "svs.nextSnapshotEntities wrapped");
                         ++v5->num_entities;
                     }
                     i = 0;
@@ -1127,7 +1131,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                                         "!clientIndex[clientState->clientIndex]");
                                 v12[v9->clientIndex] = 1;
                                 if (++svs.nextSnapshotClients >= 2147483646)
-                                    Com_Error(ERR_FATAL, &byte_8B1DF4);
+                                    Com_Error(ERR_FATAL, "svs.nextSnapshotClients wrapped");
                                 if (++v5->num_clients + v5->first_client != svs.nextSnapshotClients)
                                     MyAssertHandler(
                                         ".\\server_mp\\sv_snapshot_mp.cpp",
@@ -1303,6 +1307,8 @@ void __cdecl SV_AddArchivedEntToSnapshot(int e, snapshotEntityNumbers_t *eNums)
         eNums->snapshotEntities[eNums->numSnapshotEntities++] = e;
 }
 
+unsigned __int8 svCompressedBuf[131072];
+unsigned __int8 to;
 void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
 {
     int v2; // [esp+Ch] [ebp-30h]
@@ -1339,7 +1345,8 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
     {
         if (client->snapshotBackoffCount < 0)
             MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1951, 0, "%s", "client->snapshotBackoffCount >= 0");
-        v3 = _Pow_int<double>(2.0, client->snapshotBackoffCount);
+        //v3 = _Pow_int<double>(2.0, client->snapshotBackoffCount);
+        v3 = pow(2.0, (double)client->snapshotBackoffCount);
         client->nextSnapshotTime = svs.time + irand(0, (int)v3) * client->snapshotMsec;
         if (client->snapshotBackoffCount + 1 < 8)
             v2 = client->snapshotBackoffCount + 1;
@@ -1400,6 +1407,7 @@ int __cdecl SV_RateMsec(client_t *client, int messageSize)
     return 1000 * (messageSize + 48) / rate;
 }
 
+unsigned __int8 tempSnapshotMsgBuf[131072];
 void __cdecl SV_BeginClientSnapshot(client_t *client, msg_t *msg)
 {
     unsigned int clientNum; // [esp+0h] [ebp-4h]
@@ -1432,6 +1440,181 @@ void __cdecl SV_BeginClientSnapshot(client_t *client, msg_t *msg)
         SV_PacketDataIsReliableData(clientNum, msg);
         SV_UpdateServerCommandsToClient(client, msg);
         SV_PacketDataIsUnknown(clientNum, msg);
+    }
+}
+
+void __cdecl SV_Download_Clear(client_t *cl)
+{
+    if (!cl)
+        MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1711, 0, "%s", "cl");
+    cl->downloading = 0;
+    cl->download = 0;
+    cl->downloadName[0] = 0;
+}
+
+void __cdecl SV_WriteDownloadErrorMessage(client_t *cl, msg_t *msg, const char *errorMessage)
+{
+    MSG_WriteByte(msg, 5u);
+    MSG_WriteShort(msg, 0);
+    MSG_WriteLong(msg, -1);
+    MSG_WriteString(msg, errorMessage);
+    SV_Download_Clear(cl);
+}
+
+int __cdecl SV_WWWRedirectClient(client_t *cl, msg_t *msg)
+{
+    char *v2; // eax
+    int handle; // [esp+0h] [ebp-Ch] BYREF
+    int download_flag; // [esp+4h] [ebp-8h]
+    int downloadSize; // [esp+8h] [ebp-4h]
+
+    download_flag = 0;
+    downloadSize = FS_SV_FOpenFileRead(cl->downloadName, &handle);
+    if (downloadSize)
+    {
+        FS_FCloseFile(handle);
+        v2 = va("%s/%s", sv_wwwBaseURL->current.string, cl->downloadName);
+        I_strncpyz(cl->downloadURL, v2, 256);
+        Com_Printf(15, "Redirecting client '%s' to %s\n", cl->name, cl->downloadURL);
+        cl->downloadingWWW = 1;
+        MSG_WriteByte(msg, 5u);
+        MSG_WriteLong(msg, -1);
+        MSG_WriteString(msg, cl->downloadURL);
+        MSG_WriteLong(msg, downloadSize);
+        if (sv_wwwDlDisconnected->current.enabled)
+            download_flag |= 1u;
+        MSG_WriteLong(msg, download_flag);
+        SV_Download_Clear(cl);
+        return 1;
+    }
+    else
+    {
+        Com_Printf(15, "ERROR: Client '%s': couldn't extract file size for %s\n", cl->downloadName, handle);
+        return 0;
+    }
+}
+
+void __cdecl SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
+{
+    int v2; // edx
+    int rate; // [esp+0h] [ebp-414h]
+    char errorMessage[1024]; // [esp+4h] [ebp-410h] BYREF
+    int blockspersnap; // [esp+40Ch] [ebp-8h]
+    int curindex; // [esp+410h] [ebp-4h]
+
+    if (cl->downloadName[0] && !cl->clientDownloadingWWW)
+    {
+        if (cl->download)
+        {
+        LABEL_20:
+            while (cl->downloadCurrentBlock - cl->downloadClientBlock < 8 && cl->downloadSize != cl->downloadCount)
+            {
+                curindex = cl->downloadCurrentBlock % 8;
+                if (!cl->downloadBlocks[curindex])
+                    cl->downloadBlocks[curindex] = (unsigned char*)Z_Malloc(2048, "SV_WriteDownloadToClient", 9);
+                cl->downloadBlockSize[curindex] = FS_Read(cl->downloadBlocks[curindex], 0x800u, cl->download);
+                if (cl->downloadBlockSize[curindex] < 0)
+                {
+                    cl->downloadCount = cl->downloadSize;
+                    break;
+                }
+                cl->downloadCount += cl->downloadBlockSize[curindex];
+                ++cl->downloadCurrentBlock;
+            }
+            if (cl->downloadCount == cl->downloadSize
+                && !cl->downloadEOF
+                && cl->downloadCurrentBlock - cl->downloadClientBlock < 8)
+            {
+                cl->downloadBlockSize[cl->downloadCurrentBlock++ % 8] = 0;
+                cl->downloadEOF = 1;
+            }
+            rate = cl->rate;
+            if (sv_maxRate->current.integer)
+            {
+                if (sv_maxRate->current.integer < 1000)
+                    Dvar_SetInt(sv_maxRate, 1000);
+                if (sv_maxRate->current.integer < rate)
+                    rate = sv_maxRate->current.integer;
+            }
+            if (rate)
+                blockspersnap = (cl->snapshotMsec * rate / 1000 + 2048) / 2048;
+            else
+                blockspersnap = 1;
+            if (blockspersnap < 0)
+                blockspersnap = 1;
+            while (1)
+            {
+                v2 = blockspersnap--;
+                if (!v2 || cl->downloadClientBlock == cl->downloadCurrentBlock)
+                    break;
+                if (cl->downloadXmitBlock == cl->downloadCurrentBlock)
+                {
+                    if (svs.time - cl->downloadSendTime <= 1000)
+                        return;
+                    cl->downloadXmitBlock = cl->downloadClientBlock;
+                }
+                curindex = cl->downloadXmitBlock % 8;
+                MSG_WriteByte(msg, 5u);
+                MSG_WriteLong(msg, cl->downloadXmitBlock);
+                if (!cl->downloadXmitBlock)
+                    MSG_WriteLong(msg, cl->downloadSize);
+                MSG_WriteShort(msg, cl->downloadBlockSize[curindex]);
+                if (cl->downloadBlockSize[curindex])
+                    MSG_WriteData(msg, cl->downloadBlocks[curindex], cl->downloadBlockSize[curindex]);
+                Com_DPrintf(15, "clientDownload: %d : writing block %d\n", cl - svs.clients, cl->downloadXmitBlock);
+                ++cl->downloadXmitBlock;
+                cl->downloadSendTime = svs.time;
+            }
+        }
+        else
+        {
+            if (sv_allowDownload->current.enabled)
+            {
+                if (FS_iwIwd(cl->downloadName, (char*)"main"))
+                {
+                    Com_Printf(
+                        15,
+                        "clientDownload: %d : \"%s\" cannot download IW iwd files\n",
+                        cl - svs.clients,
+                        cl->downloadName);
+                    Com_sprintf(errorMessage, 0x400u, "EXE_CANTAUTODLGAMEPAK %s", cl->downloadName);
+                    SV_WriteDownloadErrorMessage(cl, msg, errorMessage);
+                    return;
+                }
+                Com_Printf(15, "clientDownload: %d : beginning \"%s\"\n", cl - svs.clients, cl->downloadName);
+                cl->downloadSize = FS_SV_FOpenFileRead(cl->downloadName, &cl->download);
+                if (cl->downloadSize <= 0)
+                {
+                    Com_Printf(15, "clientDownload: %d : \"%s\" file not found on server\n", cl - svs.clients, cl->downloadName);
+                    Com_sprintf(errorMessage, 0x400u, "EXE_AUTODL_FILENOTONSERVER %s", cl->downloadName);
+                    SV_WriteDownloadErrorMessage(cl, msg, errorMessage);
+                    return;
+                }
+                if (sv_wwwDownload->current.enabled && cl->wwwOk)
+                {
+                    if (cl->wwwFallback)
+                    {
+                        cl->wwwFallback = 0;
+                        return;
+                    }
+                    if (SV_WWWRedirectClient(cl, msg))
+                        return;
+                }
+                cl->downloadingWWW = 0;
+                cl->downloadXmitBlock = 0;
+                cl->downloadClientBlock = 0;
+                cl->downloadCurrentBlock = 0;
+                cl->downloadCount = 0;
+                cl->downloadEOF = 0;
+                goto LABEL_20;
+            }
+            Com_Printf(15, "clientDownload: %d : \"%s\" download disabled", cl - svs.clients, cl->downloadName);
+            if (sv_pure->current.enabled)
+                Com_sprintf(errorMessage, 0x400u, "EXE_AUTODL_SERVERDISABLED_PURE %s", cl->downloadName);
+            else
+                Com_sprintf(errorMessage, 0x400u, "EXE_AUTODL_SERVERDISABLED %s", cl->downloadName);
+            SV_WriteDownloadErrorMessage(cl, msg, errorMessage);
+        }
     }
 }
 
@@ -1678,6 +1861,67 @@ void __cdecl SV_GetServerStaticHeader()
     svsHeaderValid = 0;
 }
 
+void __cdecl SV_WriteVoiceDataToClient(client_t *client, msg_t *msg)
+{
+    int packet; // [esp+0h] [ebp-4h]
+
+    if (client->voicePacketCount <= 0)
+        MyAssertHandler(".\\server_mp\\sv_voice_mp.cpp", 30, 0, "%s", "client->voicePacketCount > 0");
+    if (client->voicePacketCount > 40)
+        MyAssertHandler(
+            ".\\server_mp\\sv_voice_mp.cpp",
+            31,
+            0,
+            "%s",
+            "client->voicePacketCount <= MAX_SERVER_QUEUED_VOICE_PACKETS");
+    MSG_WriteByte(msg, client->voicePacketCount);
+    for (packet = 0; packet < client->voicePacketCount; ++packet)
+    {
+        MSG_WriteByte(msg, client->voicePackets[packet].talker);
+        if (client->voicePackets[packet].dataSize >= 0x10000)
+            MyAssertHandler(".\\server_mp\\sv_voice_mp.cpp", 40, 0, "%s", "client->voicePackets[packet].dataSize < (2<<15)");
+        MSG_WriteByte(msg, client->voicePackets[packet].dataSize);
+        MSG_WriteData(msg, client->voicePackets[packet].data, client->voicePackets[packet].dataSize);
+    }
+    if (msg->overflowed)
+        MyAssertHandler(".\\server_mp\\sv_voice_mp.cpp", 50, 0, "%s", "!msg->overflowed");
+}
+
+void __cdecl SV_SendClientVoiceData(client_t *client)
+{
+    unsigned __int8 *msg_buf; // [esp+0h] [ebp-34h]
+    msg_t msg; // [esp+Ch] [ebp-28h] BYREF
+
+    LargeLocal msg_buf_large_local(0x20000);
+    //LargeLocal::LargeLocal(&msg_buf_large_local, 0x20000);
+    //msg_buf = LargeLocal::GetBuf(&msg_buf_large_local);
+    msg_buf = msg_buf_large_local.GetBuf();
+    if (client->voicePacketCount < 0)
+        MyAssertHandler(".\\server_mp\\sv_voice_mp.cpp", 66, 0, "%s", "client->voicePacketCount >= 0");
+    if (client->header.state == 4 && client->voicePacketCount)
+    {
+        MSG_Init(&msg, msg_buf, 0x20000);
+        if (msg.cursize)
+            MyAssertHandler(".\\server_mp\\sv_voice_mp.cpp", 75, 0, "%s", "msg.cursize == 0");
+        if (msg.bit)
+            MyAssertHandler(".\\server_mp\\sv_voice_mp.cpp", 76, 0, "%s", "msg.bit == 0");
+        MSG_WriteString(&msg, "v");
+        SV_WriteVoiceDataToClient(client, &msg);
+        if (msg.overflowed)
+        {
+            Com_PrintWarning(15, "WARNING: voice msg overflowed for %s\n", client->name);
+        }
+        else
+        {
+            NET_OutOfBandVoiceData(NS_SERVER, client->header.netchan.remoteAddress, msg.data, msg.cursize);
+            client->voicePacketCount = 0;
+        }
+    }
+    //LargeLocal::~LargeLocal(&msg_buf_large_local);
+}
+
+msg_t g_archiveMsg;
+unsigned __int8 tempServerMsgBuf[131072];
 void __cdecl SV_SendClientMessages()
 {
     float comp_ratio; // [esp+C0h] [ebp-94h]
@@ -1812,9 +2056,9 @@ void __cdecl SV_SendClientMessages()
             startIndex = svs.nextArchivedSnapshotBuffer % 0x2000000;
             svs.nextArchivedSnapshotBuffer += g_archiveMsg.cursize;
             if (svs.nextArchivedSnapshotBuffer >= 2147483646)
-                Com_Error(ERR_FATAL, &byte_8B25A8);
-            partSize = (int)(&g_hunk_track[370234].type - startIndex);
-            if (g_archiveMsg.cursize > (int)(&g_hunk_track[370234].type - startIndex))
+                Com_Error(ERR_FATAL, "svs.nextArchivedSnapshotBuffer wrapped");
+            partSize = 0x2000000 - startIndex;
+            if (g_archiveMsg.cursize > 0x2000000 - startIndex)
             {
                 memcpy(&svs.archivedSnapshotBuffer[startIndex], g_archiveMsg.data, partSize);
                 memcpy(svs.archivedSnapshotBuffer, &g_archiveMsg.data[partSize], g_archiveMsg.cursize - partSize);
@@ -1824,7 +2068,7 @@ void __cdecl SV_SendClientMessages()
                 memcpy(&svs.archivedSnapshotBuffer[startIndex], g_archiveMsg.data, g_archiveMsg.cursize);
             }
             if (++svs.nextArchivedSnapshotFrames >= 2147483646)
-                Com_Error(ERR_FATAL, &byte_8B2580);
+                Com_Error(ERR_FATAL, "svs.nextArchivedSnapshotFrames wrapped");
         }
     }
     g_archivingSnapshot = 0;

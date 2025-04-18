@@ -61,7 +61,7 @@ bool __cdecl AnimTreeParseInternal(
     bool bLoop,
     bool bComplete);
 int __cdecl GetAnimTreeParseProperties();
-scr_animtree_t __cdecl Scr_FindAnimTree(const char *filename);
+scr_animtree_t *__cdecl Scr_FindAnimTree(const char *filename);
 void __cdecl Scr_FindAnim(const char *filename, const char *animName, scr_anim_s *anim, int user);
 
 extern scrAnimPub_t scrAnimPub;

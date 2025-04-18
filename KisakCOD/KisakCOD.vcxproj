@@ -435,7 +435,6 @@
     <ClCompile Include="src\script\scr_variable.cpp" />
     <ClCompile Include="src\script\scr_vm.cpp" />
     <ClCompile Include="src\server\sv_game.cpp" />
-    <ClCompile Include="src\server\sv_main.cpp" />
     <ClCompile Include="src\server\sv_world.cpp" />
     <ClCompile Include="src\server_mp\sv_archive_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_ccmds_mp.cpp" />
@@ -445,6 +444,9 @@
     <ClCompile Include="src\server_mp\sv_main_pc_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_net_chan_mp.cpp" />
     <ClCompile Include="src\server_mp\sv_snapshot_mp.cpp" />
+    <ClCompile Include="src\server_mp\sv_snapshot_profile_mp.cpp" />
+    <ClCompile Include="src\server_mp\sv_voice_mp.cpp" />
+    <ClCompile Include="src\server_mp\ucmds.cpp" />
     <ClCompile Include="src\sound\snd.cpp" />
     <ClCompile Include="src\sound\snd_driver.cpp" />
     <ClCompile Include="src\sound\snd_mss.cpp" />

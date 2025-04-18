@@ -4,9 +4,23 @@
 #include <xanim/xanim.h>
 
 #include <universal/q_shared.h>
+#include "scr_debugger.h"
 
-struct scr_block_s;
-struct Scr_StringNode_s;
+struct scr_block_s // sizeof=0x218
+{
+    int abortLevel;
+    int localVarsCreateCount;
+    int localVarsPublicCount;
+    int localVarsCount;
+    unsigned __int8 localVarsInitBits[8];
+    scr_localVar_t localVars[64];
+};
+
+struct Scr_StringNode_s // sizeof=0x8
+{
+    const char *text;
+    Scr_StringNode_s *next;
+};
 
 struct function_stack_t // sizeof=0x14
 {                                       // ...

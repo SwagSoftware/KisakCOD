@@ -1,11 +1,19 @@
 #include "scr_evaluate.h"
 #include <qcommon/mem_track.h>
+#include "scr_main.h"
+#include "scr_vm.h"
+#include "scr_parser.h"
+#include "scr_parsetree.h"
+#include <qcommon/qcommon.h>
 
 
 //  unsigned int g_breakonObject      83043224     scr_evaluate.obj
 //  int marker_scr_evaluate  83043238     scr_evaluate.obj
 //  int g_breakonHit         8304323c     scr_evaluate.obj
 //  unsigned int g_breakonString      83043244     scr_evaluate.obj
+
+scrEvaluateGlob_t scrEvaluateGlob;
+int g_script_error_level;
 
 void __cdecl TRACK_scr_evaluate()
 {
@@ -183,7 +191,7 @@ void __cdecl Scr_GetFieldValue(unsigned int objectId, const char *fieldName, int
     unsigned int stringValue; // [esp+0h] [ebp-Ch]
     VariableValue tempValue; // [esp+4h] [ebp-8h] BYREF
 
-    stringValue = SL_FindString(fieldName).prev;
+    stringValue = SL_FindString(fieldName);
     if (stringValue)
     {
         v4 = Scr_CompileCanonicalString(stringValue);

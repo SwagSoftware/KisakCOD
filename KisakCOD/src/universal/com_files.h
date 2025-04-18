@@ -80,6 +80,13 @@ struct fileHandleData_t // sizeof=0x11C
     char name[256];
 };
 
+char *__cdecl FS_ReferencedIwdNames();
+char *__cdecl FS_ReferencedIwdChecksums();
+char *__cdecl FS_LoadedIwdNames();
+char *__cdecl FS_LoadedIwdChecksums();
+void __cdecl FS_ClearIwdReferences();
+
+char *__cdecl FS_LoadedIwdPureChecksums();
 void __cdecl FS_CheckFileSystemStarted();
 int __cdecl FS_OpenFileOverwrite(char *qpath);
 int __cdecl FS_LoadStack();

@@ -329,6 +329,42 @@ typedef ull             uint64;
 #define WORD5(x)   WORDn(x,  5)
 #define WORD6(x)   WORDn(x,  6)
 #define WORD7(x)   WORDn(x,  7)
+
+// now signed macros (the same but with sign extension)
+#define SBYTEn(x, n)   (*((int8*)&(x)+n))
+#define SWORDn(x, n)   (*((int16*)&(x)+n))
+#define SDWORDn(x, n)  (*((int32*)&(x)+n))
+
+#define SLOBYTE(x)  SBYTEn(x,LOW_IND(x,int8))
+#define SLOWORD(x)  SWORDn(x,LOW_IND(x,int16))
+#define SLODWORD(x) SDWORDn(x,LOW_IND(x,int32))
+#define SHIBYTE(x)  SBYTEn(x,HIGH_IND(x,int8))
+#define SHIWORD(x)  SWORDn(x,HIGH_IND(x,int16))
+#define SHIDWORD(x) SDWORDn(x,HIGH_IND(x,int32))
+#define SBYTE1(x)   SBYTEn(x,  1)
+#define SBYTE2(x)   SBYTEn(x,  2)
+#define SBYTE3(x)   SBYTEn(x,  3)
+#define SBYTE4(x)   SBYTEn(x,  4)
+#define SBYTE5(x)   SBYTEn(x,  5)
+#define SBYTE6(x)   SBYTEn(x,  6)
+#define SBYTE7(x)   SBYTEn(x,  7)
+#define SBYTE8(x)   SBYTEn(x,  8)
+#define SBYTE9(x)   SBYTEn(x,  9)
+#define SBYTE10(x)  SBYTEn(x, 10)
+#define SBYTE11(x)  SBYTEn(x, 11)
+#define SBYTE12(x)  SBYTEn(x, 12)
+#define SBYTE13(x)  SBYTEn(x, 13)
+#define SBYTE14(x)  SBYTEn(x, 14)
+#define SBYTE15(x)  SBYTEn(x, 15)
+#define SWORD1(x)   SWORDn(x,  1)
+#define SWORD2(x)   SWORDn(x,  2)
+#define SWORD3(x)   SWORDn(x,  3)
+#define SWORD4(x)   SWORDn(x,  4)
+#define SWORD5(x)   SWORDn(x,  5)
+#define SWORD6(x)   SWORDn(x,  6)
+#define SWORD7(x)   SWORDn(x,  7)
+
+
 //=============================================
 void Com_Memset(void* dest, const int val, const size_t count);
 void Com_Memcpy(void* dest, const void* src, const size_t count);

@@ -5,7 +5,98 @@
 #include <game_mp/g_public_mp.h>
 #include <server/sv_game.h>
 #include <stringed/stringed_hooks.h>
+#include <win32/win_local.h>
+#include <universal/com_constantconfigstrings.h>
 
+struct ucmd_t // sizeof=0xC
+{                                       // ...
+    const char *name;
+    void(__cdecl *func)(client_t *);
+    int allowFromOldServer;
+};
+
+ucmd_t ucmds[13] =
+{
+  { "userinfo", &SV_UpdateUserinfo_f, 0 },
+  { "disconnect", &SV_Disconnect_f, 1 },
+  { "cp", &SV_VerifyIwds_f, 0 },
+  { "vdr", &SV_ResetPureClient_f, 0 },
+  { "download", &SV_BeginDownload_f, 0 },
+  { "nextdl", &SV_NextDownload_f, 0 },
+  { "stopdl", &SV_StopDownload_f, 0 },
+  { "donedl", &SV_DoneDownload_f, 0 },
+  { "retransdl", &SV_RetransmitDownload_f, 0 },
+  { "wwwdl", &SV_WWWDownload_f, 0 },
+  { "muteplayer", &SV_MutePlayer_f, 0 },
+  { "unmuteplayer", &SV_UnmutePlayer_f, 0 },
+  { NULL, NULL, 0 }
+}; // idb
+
+unsigned __int16 botport;
+
+BOOL __cdecl SV_ShouldAuthorizeAddress(netadr_t adr)
+{
+    if (net_lanauthorize->current.enabled)
+        return 1;
+    if (com_dedicated->current.integer == 2)
+        return !Sys_IsLANAddress_IgnoreSubnet(adr);
+    return Sys_IsLANAddress(adr) == 0;
+}
+
+void __cdecl SV_AuthorizeRequest(netadr_t from, int challenge, const char *cdkeyHash)
+{
+    const char *v3; // eax
+    const char *v4; // eax
+    char v5; // [esp+3h] [ebp-419h]
+    char *v6; // [esp+8h] [ebp-414h]
+    char *integer; // [esp+Ch] [ebp-410h]
+    const dvar_s *v8; // [esp+10h] [ebp-40Ch]
+    char game[1027]; // [esp+14h] [ebp-408h] BYREF
+    bool allowAnonymous; // [esp+417h] [ebp-5h]
+
+    if (!SV_ShouldAuthorizeAddress(from))
+        MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 398, 0, "%s", "SV_ShouldAuthorizeAddress( from )");
+    if (svs.authorizeAddress.type != NA_BAD)
+    {
+        game[0] = 0;
+        v8 = Dvar_RegisterString("fs_game", "", 0x1Cu, "File sysytem base game name");
+        if (v8 && v8->current.integer)
+        {
+            integer = (char*)v8->current.integer;
+            v6 = game;
+            do
+            {
+                v5 = *integer;
+                *v6++ = *integer++;
+            } while (v5);
+        }
+        v3 = NET_AdrToString(from);
+        Com_DPrintf(15, "sending getIpAuthorize for %s\n", v3);
+        allowAnonymous = Dvar_GetBool("sv_allowAnonymous");
+        if (*cdkeyHash)
+            v4 = va(
+                "getIpAuthorize %i %i.%i.%i.%i \"%s\" %i PB \"%s\"",
+                challenge,
+                from.ip[0],
+                from.ip[1],
+                from.ip[2],
+                from.ip[3],
+                game,
+                allowAnonymous,
+                cdkeyHash);
+        else
+            v4 = va(
+                "getIpAuthorize %i %i.%i.%i.%i \"%s\" %i",
+                challenge,
+                from.ip[0],
+                from.ip[1],
+                from.ip[2],
+                from.ip[3],
+                game,
+                allowAnonymous);
+        NET_OutOfBandPrint(NS_SERVER, svs.authorizeAddress, v4);
+    }
+}
 
 void __cdecl SV_GetChallenge(netadr_t from)
 {
@@ -48,14 +139,14 @@ void __cdecl SV_GetChallenge(netadr_t from)
     if (SV_IsBannedGuid(cdkeyHash))
     {
         Com_Printf(15, "rejected connection from permanently banned GUID \"%s\"\n", cdkeyHash);
-        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, aError_2);
+        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error #KISAKTODO");
         memset((unsigned __int8 *)&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
     }
     if (SV_IsTempBannedGuid(cdkeyHash))
     {
         Com_Printf(15, "rejected connection from temporarily banned GUID \"%s\"\n", cdkeyHash);
-        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, aError_3);
+        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error #KISAKTODO");
         memset((unsigned __int8 *)&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
     }
@@ -100,6 +191,23 @@ void __cdecl SV_GetChallenge(netadr_t from)
         v4 = va("challengeResponse %i", challenge->challenge);
         NET_OutOfBandPrint(NS_SERVER, challenge->adr, v4);
     }
+}
+
+int __cdecl SV_IsTempBannedGuid(const char *cdkeyHash)
+{
+    unsigned int banSlot; // [esp+Ch] [ebp-4h]
+
+    if (!*cdkeyHash)
+        return 0;
+    for (banSlot = 0; banSlot < 0x10; ++banSlot)
+    {
+        if (!memcmp(&svs.tempBans[banSlot], cdkeyHash, 0x20u)
+            && sv_kickBanTime->current.value * 1000.0 >= (svs.time - LODWORD(svs.mapCenter[9 * banSlot - 136])))
+        {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int __cdecl SV_IsBannedGuid(const char *cdkeyHash)
@@ -366,12 +474,30 @@ void __cdecl SV_UnbanClient(char *name)
                 text = line;
             }
         }
-        FS_WriteFile("ban.txt", file, fileSize);
+        FS_WriteFile((char*)"ban.txt", file, fileSize);
         FS_FreeFile(file);
         if (found)
             Com_Printf(15, "unbanned %i user(s) named %s\n", found, cleanName);
         else
             Com_Printf(15, "no banned user has name %s\n", cleanName);
+    }
+}
+
+void __cdecl SV_CloseDownload(client_t *cl)
+{
+    int i; // [esp+0h] [ebp-4h]
+
+    if (cl->download)
+        FS_FCloseFile(cl->download);
+    cl->download = 0;
+    cl->downloadName[0] = 0;
+    for (i = 0; i < 8; ++i)
+    {
+        if (cl->downloadBlocks[i])
+        {
+            Z_Free(cl->downloadBlocks[i], 9);
+            cl->downloadBlocks[i] = 0;
+        }
     }
 }
 
@@ -404,16 +530,16 @@ void __cdecl SV_FreeClients()
 
 void __cdecl SV_DirectConnect(netadr_t from)
 {
-    char *v1; // eax
-    char *v2; // eax
+    const char *v1; // eax
+    const char *v2; // eax
     const char *v3; // eax
-    char *v4; // eax
-    char *v5; // eax
-    char *v6; // eax
-    char *v7; // eax
-    char *v8; // eax
-    char *v9; // eax
-    char *v10; // eax
+    const char *v4; // eax
+    const char *v5; // eax
+    const char *v6; // eax
+    const char *v7; // eax
+    const char *v8; // eax
+    const char *v9; // eax
+    const char *v10; // eax
     char *v11; // edi
     const char *v12; // eax
     char *v13; // edi
@@ -430,7 +556,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
     client_t *newcl; // [esp+58h] [ebp-430h]
     int challenge; // [esp+5Ch] [ebp-42Ch]
     int startIndex; // [esp+60h] [ebp-428h]
-    char *password; // [esp+64h] [ebp-424h]
+    const char *password; // [esp+64h] [ebp-424h]
     char userinfo[1024]; // [esp+68h] [ebp-420h] BYREF
     gentity_s *ent; // [esp+468h] [ebp-20h]
     unsigned int scriptId; // [esp+46Ch] [ebp-1Ch]
@@ -447,7 +573,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
     version = atoi(v2);
     if (version != 1)
     {
-        v3 = va(aErrorExeServer_0, "1.0");
+        v3 = va("EXE_SERVER_IS_DIFFERENT_VER %s", "1.0");
         NET_OutOfBandPrint(NS_SERVER, from, v3);
         Com_DPrintf(15, "    rejected connect from protocol version %i (should be %i)\n", version, 1);
         return;
@@ -513,24 +639,25 @@ void __cdecl SV_DirectConnect(netadr_t from)
     if (!sv_maxPing->current.integer || ping <= sv_maxPing->current.integer)
     {
     LABEL_31:
-        v8 = Info_ValueForKey(userinfo, "cl_punkbuster");
-        cl_pb = atoi(v8);
-        if (NET_IsLocalAddress(from))
-        {
-            v9 = PbAuthClient("localhost", cl_pb, cdkeyHash);
-        }
-        else
-        {
-            fromAddr = NET_AdrToString(from);
-            v9 = PbAuthClient(fromAddr, cl_pb, cdkeyHash);
-        }
-        pb_authmsg = v9;
-        if (v9)
-        {
-            if (!I_strnicmp(pb_authmsg, "error\n", 6))
-                NET_OutOfBandPrint(NS_SERVER, from, pb_authmsg);
-        }
-        else
+        // LWSS: Remove punkbuster crap
+        //v8 = Info_ValueForKey(userinfo, "cl_punkbuster");
+        //cl_pb = atoi(v8);
+        //if (NET_IsLocalAddress(from))
+        //{
+        //    v9 = PbAuthClient("localhost", cl_pb, cdkeyHash);
+        //}
+        //else
+        //{
+        //    fromAddr = NET_AdrToString(from);
+        //    v9 = PbAuthClient(fromAddr, cl_pb, cdkeyHash);
+        //}
+        //pb_authmsg = v9;
+        //if (v9)
+        //{
+        //    if (!I_strnicmp(pb_authmsg, "error\n", 6))
+        //        NET_OutOfBandPrint(NS_SERVER, from, pb_authmsg);
+        //}
+        //else
         {
             i = 0;
             clients = svs.clients;
@@ -793,17 +920,17 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
         if (I_stricmp(reason, "EXE_DISCONNECTED"))
         {
             if (translationForReason)
-                SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, aC_4, 101, droppedClientName, &unk_8AEBD8, reason);
+                SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, "%c %s^7 %s%s", 101, droppedClientName, "", reason);
             else
-                SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, aC_4, 101, droppedClientName, "", reason);
+                SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, "%c %s^7 %s%s", 101, droppedClientName, "", reason);
         }
         else if (translationForReason)
         {
-            SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, aC_4, 101, droppedClientName, &unk_8AEBD8, "EXE_LEFTGAME");
+            SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, "%c %s^7 %s%s", 101, droppedClientName, "", "EXE_LEFTGAME");
         }
         else
         {
-            SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, aC_4, 101, droppedClientName, "", "EXE_LEFTGAME");
+            SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, "%c %s^7 %s%s", 101, droppedClientName, "", "EXE_LEFTGAME");
         }
         Com_Printf(15, "%i:%s %s\n", drop - svs.clients, droppedClientName, reason);
         SV_SendServerCommand(0, SV_CMD_RELIABLE, "%c %d", 75, drop - svs.clients);
@@ -841,6 +968,7 @@ void __cdecl SV_DelayDropClient(client_t *drop, const char *reason)
     }
 }
 
+unsigned __int8 msgBuffer_0[131072];
 void __cdecl SV_SendClientGameState(client_t *client)
 {
     int configStringCount; // [esp+38h] [ebp-16Ch]
@@ -945,7 +1073,7 @@ void __cdecl SV_SendClientGameState(client_t *client)
         }
         if (sv.configstrings[start] != sv.emptyConfigString)
         {
-            configString = _SL_ConvertToString(sv.configstrings[start]);
+            configString = SL_ConvertToString(sv.configstrings[start]);
             if (configStringCount < 0)
                 MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1573, 0, "%s", "configStringCount >= 0");
             if (start == lastStringIndex + 1)
@@ -1314,7 +1442,7 @@ void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta)
                         Com_Printf(15, "key: %i\n", key);
                         Com_Printf(15, "key ^= cmd->serverTime: %i\n", cmd->serverTime ^ key);
                         Com_Printf(15, "########################################\n");
-                        SV_DropClient(cl, &byte_8AF46C, 1);
+                        SV_DropClient(cl, "Corrupted network messaging detected", 1);
                     }
                     oldcmd = cmd;
                 }
@@ -1380,6 +1508,22 @@ void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta)
     }
 }
 
+int __cdecl SV_ProcessClientCommands(client_t *cl, msg_t *msg, int fromOldServer, int *lastCommand)
+{
+    do
+    {
+        *lastCommand = MSG_ReadBits(msg, 3u);
+        if (*lastCommand == 3)
+            return 1;
+        if (*lastCommand != 2)
+            return 1;
+        if (!SV_ClientCommand(cl, msg, fromOldServer))
+            return 0;
+    } while (cl->header.state != 1);
+    return 0;
+}
+
+unsigned __int8 msgCompressed_buf_0[2048];
 void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
 {
     msg_t v2; // [esp+60h] [ebp-54h] BYREF

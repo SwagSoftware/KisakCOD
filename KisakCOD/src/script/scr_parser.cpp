@@ -3,6 +3,14 @@
 #include <universal/assertive.h>
 #include "scr_main.h"
 #include <universal/com_memory.h>
+#include <win32/win_net_debug.h>
+#include <universal/com_files.h>
+#include <database/database.h>
+#include <qcommon/qcommon.h>
+#include <universal/profile.h>
+#include <qcommon/threads.h>
+#include "scr_vm.h"
+#include <ui/ui.h>
 
 
 scrParserGlob_t scrParserGlob;
@@ -27,16 +35,16 @@ void __cdecl Scr_InitOpcodeLookup()
         scrParserGlob.delayedSourceIndex = -1;
         scrParserGlob.opcodeLookupMaxLen = 0x40000;
         scrParserGlob.opcodeLookupLen = 0;
-        scrParserGlob.opcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(6291456, "Scr_InitOpcodeLookup");
+        scrParserGlob.opcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(6291456);// , "Scr_InitOpcodeLookup");
         memset((unsigned __int8 *)scrParserGlob.opcodeLookup, 0, 24 * scrParserGlob.opcodeLookupMaxLen);
         scrParserGlob.sourcePosLookupMaxLen = 0x40000;
         scrParserGlob.sourcePosLookupLen = 0;
-        scrParserGlob.sourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(0x200000, "Scr_InitOpcodeLookup");
+        scrParserGlob.sourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(0x200000);// , "Scr_InitOpcodeLookup");
         scrParserGlob.currentCodePos = 0;
         scrParserGlob.currentSourcePosCount = 0;
         scrParserGlob.sourceBufferLookupMaxLen = 256;
         scrParserPub.sourceBufferLookupLen = 0;
-        scrParserPub.sourceBufferLookup = (SourceBufferInfo *)Hunk_AllocDebugMem(11264, "Scr_InitOpcodeLookup");
+        scrParserPub.sourceBufferLookup = (SourceBufferInfo *)Hunk_AllocDebugMem(11264);// , "Scr_InitOpcodeLookup");
     }
 }
 
@@ -438,6 +446,40 @@ OpcodeLookup *__cdecl Scr_GetPrevSourcePosOpcodeLookup(const char *codePos)
     return 0;
 }
 
+void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum)
+{
+    unsigned int sortedIndex; // [esp+0h] [ebp-8h]
+
+    if (bufferIndex >= scrParserPub.sourceBufferLookupLen)
+        MyAssertHandler(
+            ".\\script\\scr_debugger.cpp",
+            1742,
+            0,
+            "bufferIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
+            bufferIndex,
+            scrParserPub.sourceBufferLookupLen);
+    sortedIndex = scrParserPub.sourceBufferLookup[bufferIndex].sortedIndex;
+    if (sortedIndex >= scrParserPub.sourceBufferLookupLen)
+        MyAssertHandler(
+            ".\\script\\scr_debugger.cpp",
+            1747,
+            0,
+            "sortedIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
+            sortedIndex,
+            scrParserPub.sourceBufferLookupLen);
+    //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, sortedIndex, 1);
+    ((UI_LinesComponent)scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
+
+    scrDebuggerGlob.scriptList.scriptWindows[sortedIndex]->SetSelectedLineFocus(
+        lineNum,
+        0);
+
+    Scr_AbstractScriptList::AddEntry(
+        &scrDebuggerGlob.openScriptList,
+        scrDebuggerGlob.scriptList.scriptWindows[sortedIndex],
+        0);
+}
+
 unsigned int __cdecl Scr_GetLineNum(unsigned int bufferIndex, unsigned int sourcePos)
 {
     const char *startLine; // [esp+0h] [ebp-8h] BYREF
@@ -705,6 +747,31 @@ char *__cdecl Scr_AddSourceBuffer(const char *filename, char *extFilename, const
     return sourceBuf;
 }
 
+bool g_loadedImpureScript;
+char *__cdecl Scr_ReadFile_LoadObj(const char *filename, char *extFilename, const char *codePos, bool archive)
+{
+    int len; // [esp+0h] [ebp-Ch]
+    int f; // [esp+4h] [ebp-8h] BYREF
+    char *sourceBuf; // [esp+8h] [ebp-4h]
+
+    len = FS_FOpenFileByMode(extFilename, &f, FS_READ);
+    if (len >= 0)
+    {
+        g_loadedImpureScript = 1;
+        sourceBuf = (char*)Hunk_AllocateTempMemoryHigh(len + 1, "Scr_ReadFile");
+        FS_Read((unsigned char*)sourceBuf, len, f);
+        sourceBuf[len] = 0;
+        FS_FCloseFile(f);
+        Scr_AddSourceBufferInternal(extFilename, codePos, sourceBuf, len, 1, archive);
+        return sourceBuf;
+    }
+    else
+    {
+        Scr_AddSourceBufferInternal(extFilename, codePos, 0, -1, 1, archive);
+        return 0;
+    }
+}
+
 char *__cdecl Scr_ReadFile(const char *filename, char *extFilename, const char *codePos, bool archive)
 {
     int file; // [esp+24h] [ebp-4h] BYREF
@@ -835,6 +902,7 @@ unsigned int __cdecl Scr_GetSourceBuffer(const char *codePos)
     return bufferIndex;
 }
 
+char g_EndPos;
 void __cdecl Scr_PrintPrevCodePos(int channel, char *codePos, unsigned int index)
 {
     char *v3; // eax
@@ -904,7 +972,7 @@ void __cdecl Scr_PrintSourcePos(int channel, const char *filename, const char *b
     Com_PrintMessage(channel, "*\n", 0);
 }
 
-char *__cdecl Scr_PrevCodePosFileName(char *codePos)
+const char *__cdecl Scr_PrevCodePosFileName(char *codePos)
 {
     if (!scrVarPub.developer)
         MyAssertHandler(".\\script\\scr_parser.cpp", 1096, 0, "%s", "scrVarPub.developer");
@@ -930,7 +998,7 @@ const char *__cdecl Scr_PrevCodePosFunctionName(char *codePos)
     if (codePos == &g_EndPos)
         return "<removed thread>";
     if (!scrVarPub.programBuffer || !Scr_IsInOpcodeMemory(codePos))
-        return aUnk;
+        return "<unknown>";
     bufferIndex = Scr_GetSourceBuffer(codePos - 1);
     PrevSourcePos = Scr_GetPrevSourcePos(codePos - 1, 0);
     Scr_GetFunctionLineNumInternal(scrParserPub.sourceBufferLookup[bufferIndex].sourceBuf, PrevSourcePos, &startLine);
@@ -939,7 +1007,7 @@ const char *__cdecl Scr_PrevCodePosFunctionName(char *codePos)
 
 bool __cdecl Scr_PrevCodePosFileNameMatches(char *codePos, const char *fileName)
 {
-    char *codePosFileName; // [esp+0h] [ebp-4h]
+    const char *codePosFileName; // [esp+0h] [ebp-4h]
 
     if (!fileName)
         MyAssertHandler(".\\script\\scr_parser.cpp", 1149, 0, "%s", "fileName");
@@ -1161,7 +1229,7 @@ void __cdecl Scr_CalcScriptFileProfile()
     v4[1024] = (const GfxStaticModelDrawInst *)1024;
     if (scrVarPub.developer)
     {
-        Script = //Profile_GetScript();
+        Script = Profile_GetScript();
             Script->srcTotal = 0;
         for (i = 0; i < scrParserGlob.opcodeLookupLen; ++i)
         {
@@ -1437,7 +1505,7 @@ void CompileError(unsigned int sourcePos, const char *msg, ...)
             line[0] = 0;
         }
         Com_Printf(23, "************************************\n");
-        Com_Error(ERR_SCRIPT_DROP, &byte_8A559C, text, line);
+        Com_Error(ERR_SCRIPT_DROP, "script compile error %s %s", text, line);
     }
 }
 
@@ -1473,7 +1541,7 @@ void CompileError2(char *codePos, char *msg, ...)
     Scr_PrintPrevCodePos(23, codePos, 0);
     Com_Printf(23, "************************************\n");
     Scr_GetTextSourcePos(scrParserPub.sourceBuf, codePos, line);
-    Com_Error(ERR_SCRIPT_DROP, &byte_8A559C, text, line);
+    Com_Error(ERR_SCRIPT_DROP, "script compile error %s %s", text, line);
 }
 
 void __cdecl Scr_GetTextSourcePos(const char *buf, char *codePos, char *line)
@@ -1533,9 +1601,9 @@ void __cdecl RuntimeError(char *codePos, unsigned int index, const char *msg, co
             else
                 v4 = "";
             if (dialogMessage)
-                Com_Error((errorParm_t)(scrVmPub.terminal_error + 4), &byte_8A563C, msg, "\n", v4);
+                Com_Error((errorParm_t)(scrVmPub.terminal_error + 4), "script runtime error (see console for details) %s%s%s", msg, "\n", v4);
             else
-                Com_Error((errorParm_t)(scrVmPub.terminal_error + 4), &byte_8A563C, msg, "", v4);
+                Com_Error((errorParm_t)(scrVmPub.terminal_error + 4), "script runtime error (see console for details) %s%s%s", msg, "", v4);
         }
     }
 }

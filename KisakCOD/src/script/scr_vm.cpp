@@ -13,6 +13,11 @@
 #include <game_mp/g_public_mp.h>
 
 #include <universal/com_memory.h>
+#include <universal/com_files.h>
+#include <win32/win_net_debug.h>
+#include <ui/ui.h>
+#include <win32/win_input.h>
+#include <client/client.h>
 
 scrVmPub_t scrVmPub;
 scrVmGlob_t scrVmGlob;
@@ -233,12 +238,12 @@ Scr_StringNode_s* __cdecl Scr_GetStringList(const char* filename, char** pBuf)
     Scr_StringNode_s** pTail; // [esp+18h] [ebp-8h]
     char* text; // [esp+1Ch] [ebp-4h]
 
-    len = FS_FOpenFileByMode(filename, &f, FS_READ);
+    len = FS_FOpenFileByMode((char*)filename, &f, FS_READ);
     if (len >= 0)
     {
-        buf = (char*)Hunk_AllocDebugMem(len + 1, "Scr_GetStringList");
+        buf = (char*)Hunk_AllocDebugMem(len + 1);
         *pBuf = buf;
-        FS_Read(buf, len, f);
+        FS_Read((unsigned char*)buf, len, f);
         buf[len] = 0;
         FS_FCloseFile(f);
         head = 0;
@@ -256,7 +261,7 @@ Scr_StringNode_s* __cdecl Scr_GetStringList(const char* filename, char** pBuf)
         LABEL_10:
             if (*end == 10)
                 ++end;
-            v3 = (Scr_StringNode_s*)Hunk_AllocDebugMem(8, "Scr_GetStringList2");
+            v3 = (Scr_StringNode_s*)Hunk_AllocDebugMem(8);
             *pTail = v3;
             v3->text = text;
             v3->next = 0;
@@ -281,7 +286,7 @@ void __cdecl Scr_InitDebuggerMain()
         {
             scrDebuggerGlob.variableBreakpoints = (Scr_WatchElementDoubleNode_t**)Hunk_AllocDebugMem(
                 393216,
-                "scrDebuggerGlob.variableBreakpoints");
+                /*"scrDebuggerGlob.variableBreakpoints"*/);
             memset((unsigned __int8*)scrDebuggerGlob.variableBreakpoints, 0, 0x60000u);
             scrDebuggerGlob.assignHead = 0;
             scrDebuggerGlob.assignHeadCodePos = 0;
@@ -435,7 +440,7 @@ void __cdecl Scr_ShutdownDebuggerSystem(int restart)
         if (!restart && Key_IsCatcherActive(0, 2))
         {
             Key_RemoveCatcher(0, -3);
-            _IN_ActivateMouse(1);
+            IN_ActivateMouse(1);
         }
         if (scrDebuggerGlob.debugger_inited_system)
         {
@@ -5603,7 +5608,7 @@ void __cdecl Scr_AddString(const char* value)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4946, 0, "%s", "value");
     IncInParam();
     scrVmPub.top->type = 2;
-    scrVmPub.top->u.intValue = SL_GetString(value, 0).prev;
+    scrVmPub.top->u.intValue = SL_GetString(value, 0);
 }
 
 void __cdecl Scr_AddIString(const char* value)
@@ -5612,7 +5617,7 @@ void __cdecl Scr_AddIString(const char* value)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4956, 0, "%s", "value");
     IncInParam();
     scrVmPub.top->type = 3;
-    scrVmPub.top->u.intValue = SL_GetString(value, 0).prev;
+    scrVmPub.top->u.intValue = SL_GetString(value, 0);
 }
 
 void __cdecl Scr_AddConstString(unsigned int value)
@@ -5680,6 +5685,7 @@ void __cdecl Scr_Error(const char* error)
     Scr_ErrorInternal();
 }
 
+char error_message[1024];
 void __cdecl Scr_SetErrorMessage(const char* error)
 {
     if (!scrVarPub.error_message)

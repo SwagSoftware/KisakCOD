@@ -9,6 +9,7 @@
 #include <client_mp/client_mp.h>
 
 #include "scr_memorytree.h"
+#include <universal/profile.h>
 
 scrStringDebugGlob_t* scrStringDebugGlob;
 static scrStringDebugGlob_t scrStringDebugGlobBuf;
@@ -468,13 +469,54 @@ unsigned int SL_FindString(const char* str)
 	return FindStringOfSize(str, strlen(str) + 1).prev;
 }
 
-static int SL_GetRefStringLen(RefString* refString)
+void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user)
 {
-	int len;
+	const char *v2; // eax
+	const char *v3; // eax
+	volatile LONG Comperand; // [esp+20h] [ebp-28h]
+	RefString *refStr; // [esp+44h] [ebp-4h]
 
-	for (len = (unsigned __int8)(HIBYTE(refString->data) - 1); refString->str[len]; len += 256)
-
-	return len;
+	Profile_Begin(334);
+	refStr = GetRefString(stringValue);
+	if ((user & BYTE2(refStr->data)) != 0)
+	{
+		if (refStr->data <= 1u)
+		{
+			v2 = SL_DebugConvertToString(stringValue);
+			MyAssertHandler(
+				".\\script\\scr_stringlist.cpp",
+				803,
+				0,
+				"%s\n\t(SL_DebugConvertToString( stringValue )) = %s",
+				"(refStr->refCount > 1)",
+				v2);
+		}
+		if (scrStringDebugGlob)
+		{
+			if (!scrStringDebugGlob->refCount[stringValue])
+			{
+				v3 = SL_DebugConvertToString(stringValue);
+				MyAssertHandler(
+					".\\script\\scr_stringlist.cpp",
+					808,
+					0,
+					"%s\n\t(SL_DebugConvertToString( stringValue )) = %s",
+					"(scrStringDebugGlob->refCount[stringValue])",
+					v3);
+			}
+			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
+			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+		}
+		InterlockedDecrement(&refStr->data);
+		Profile_EndInternal(0);
+	}
+	else
+	{
+		do
+			Comperand = refStr->data;
+		while (InterlockedCompareExchange(&refStr->data, Comperand | (user << 16), Comperand) != Comperand);
+		Profile_EndInternal(0);
+	}
 }
 
 unsigned int SL_GetStringForVector(const float* v)

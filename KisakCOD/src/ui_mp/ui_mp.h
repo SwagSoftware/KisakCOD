@@ -549,6 +549,7 @@ void __cdecl UI_CloseInGameMenu(int localClientNum);
 void __cdecl UI_CloseAllMenus(int localClientNum);
 bool __cdecl Menu_IsMenuOpenAndVisible(int localClientNum, const char *menuName);
 bool __cdecl UI_ShouldDrawCrosshair();
+void __cdecl UI_MouseEvent(int localClientNum, int x, int y);
 
 extern const dvar_t *ui_showList;
 extern const dvar_t *ui_customClassName;

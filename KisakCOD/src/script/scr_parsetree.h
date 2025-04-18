@@ -33,7 +33,7 @@ sval_u __cdecl node8(
     sval_u val6,
     sval_u val7,
     sval_u val8);
-sval_u __cdecl linked_list_end(sval_u val);
+sval_u* __cdecl linked_list_end(sval_u val);
 sval_u __cdecl prepend_node(sval_u val1, sval_u val2);
 sval_u __cdecl append_node(sval_u val1, sval_u val2);
 void __cdecl Scr_ClearDebugExpr(debugger_sval_s *debugExprHead);

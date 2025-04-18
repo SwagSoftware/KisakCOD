@@ -211,27 +211,21 @@ void GScr_printChannelSet()
     }
 }
 
-const dvar_s *print()
+void print()
 {
-    const dvar_s *result; // eax
-    char *DebugString; // eax
-    int num; // [esp+0h] [ebp-8h]
-    signed int i; // [esp+4h] [ebp-4h]
+    signed int NumParam; // r28
+    signed int i; // r31
+    const char *DebugString; // r3
 
-    result = g_NoScriptSpam;
     if (!g_NoScriptSpam->current.enabled)
     {
-        num = Scr_GetNumParam();
-        for (i = 0; ; ++i)
+        NumParam = Scr_GetNumParam();
+        for (i = 0; i < NumParam; ++i)
         {
-            result = (const dvar_s *)i;
-            if (i >= num)
-                break;
             DebugString = Scr_GetDebugString(i);
             Com_Printf(level.scriptPrintChannel, "%s", DebugString);
         }
     }
-    return result;
 }
 
 void println()
@@ -2083,7 +2077,7 @@ void __cdecl ClearObjective(objective_t *obj)
     obj->icon = 0;
 }
 
-objective_t *Scr_Objective_Add()
+void Scr_Objective_Add()
 {
     const char *v0; // eax
     char *v1; // eax
@@ -2128,7 +2122,6 @@ objective_t *Scr_Objective_Add()
             SetObjectiveIcon(obj, 3u);
     }
     obj->teamNum = 0;
-    return result;
 }
 
 void __cdecl ClearObjective_OnEntity(objective_t *obj)
@@ -2232,7 +2225,7 @@ void Scr_Objective_Icon()
     SetObjectiveIcon(&level.objectives[objNum], 1u);
 }
 
-objective_t *Scr_Objective_Position()
+void Scr_Objective_Position()
 {
     const char *v0; // eax
     objective_t *result; // eax
@@ -2252,7 +2245,6 @@ objective_t *Scr_Objective_Position()
     obj->origin[1] = (float)(int)obj->origin[1];
     result = obj;
     obj->origin[2] = (float)(int)obj->origin[2];
-    return result;
 }
 
 objective_t *Scr_Objective_OnEntity()
@@ -3836,7 +3828,7 @@ void Scr_AmbientStop()
     SV_SetConfigstring(821, v2);
 }
 
-int Scr_GrenadeExplosionEffect()
+void Scr_GrenadeExplosionEffect()
 {
     unsigned __int8 v0; // al
     int result; // eax
@@ -3863,7 +3855,6 @@ int Scr_GrenadeExplosionEffect()
     G_TraceCapsule(&trace, vPos, (float *)vec3_origin, (float *)vec3_origin, vEnd, 1023, 2065);
     result = (trace.surfaceFlags & 0x1F00000) >> 20;
     pEnt->s.surfType = result;
-    return result;
 }
 
 void GScr_RadiusDamage()
@@ -4346,7 +4337,7 @@ LABEL_12:
     Scr_AddEntity(ent);
 }
 
-int Scr_TriggerFX()
+void Scr_TriggerFX()
 {
     int result; // eax
     float v1; // [esp+4h] [ebp-14h]
@@ -4370,10 +4361,9 @@ int Scr_TriggerFX()
     {
         ent->s.time2 = level.time;
     }
-    return result;
 }
 
-gentity_s *Scr_PhysicsExplosionSphere()
+void Scr_PhysicsExplosionSphere()
 {
     double Float; // st7
     gentity_s *result; // eax
@@ -4393,7 +4383,6 @@ gentity_s *Scr_PhysicsExplosionSphere()
     Float = Scr_GetFloat(3u);
     result = ent;
     ent->s.lerp.u.turret.gunAngles[1] = Float;
-    return result;
 }
 
 void Scr_PhysicsRadiusJolt()
@@ -4441,7 +4430,7 @@ void Scr_PhysicsRadiusJitter()
         Scr_Error("Maximum jitter is less than minimum jitter");
 }
 
-gentity_s *Scr_PhysicsExplosionCylinder()
+void Scr_PhysicsExplosionCylinder()
 {
     double Float; // st7
     gentity_s *result; // eax
@@ -4461,7 +4450,6 @@ gentity_s *Scr_PhysicsExplosionCylinder()
     Float = Scr_GetFloat(3u);
     result = ent;
     ent->s.lerp.u.turret.gunAngles[1] = Float;
-    return result;
 }
 
 void Scr_SetExponentialFog()
@@ -4805,7 +4793,7 @@ void GScr_SetClientNameMode()
     }
 }
 
-int GScr_UpdateClientNames()
+void GScr_UpdateClientNames()
 {
     int result; // eax
     gclient_s *j; // [esp+14h] [ebp-2Ch]
@@ -4831,7 +4819,6 @@ int GScr_UpdateClientNames()
         }
         ++i;
     }
-    return result;
 }
 
 void GScr_GetTeamPlayersAlive()
@@ -6314,222 +6301,6 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref)
         itemEnt->item[altIndex].clipAmmoCount = v3.intValue;
     }
 }
-
-struct BuiltinFunctionDef // sizeof=0xC
-{
-    const char *actionString;
-    void(__cdecl *actionFunc)();
-    int type;
-};
-
-BuiltinFunctionDef functions[205] =
-{
-  { "createprintchannel", &GScr_CreatePrintChannel, 1 },
-  { "setprintchannel", &GScr_printChannelSet, 1 },
-  { "print", &print, 1 },
-  { "println", &println, 1 },
-  { "iprintln", &iprintln, 0 },
-  { "iprintlnbold", &iprintlnbold, 0 },
-  { "print3d", &GScr_print3d, 1 },
-  { "line", &GScr_line, 1 },
-  { "logstring", &CL_ResetStats_f, 0 },
-  { "getent", &Scr_GetEnt, 0 },
-  { "getentarray", &Scr_GetEntArray, 0 },
-  { "spawn", &GScr_Spawn, 0 },
-  { "spawnplane", &GScr_SpawnPlane, 0 },
-  { "spawnturret", &GScr_SpawnTurret, 0 },
-  { "precacheturret", &GScr_PrecacheTurret, 0 },
-  { "spawnstruct", &Scr_AddStruct, 0 },
-  { "spawnhelicopter", &GScr_SpawnHelicopter, 0 },
-  { "assert", &assertCmd, 1 },
-  { "assertex", &assertexCmd, 1 },
-  { "assertmsg", &assertmsgCmd, 1 },
-  { "isdefined", &GScr_IsDefined, 0 },
-  { "isstring", &GScr_IsString, 0 },
-  { "isalive", &GScr_IsAlive, 0 },
-  { "getdvar", &GScr_GetDvar, 0 },
-  { "getdvarint", &GScr_GetDvarInt, 0 },
-  { "getdvarfloat", &GScr_GetDvarFloat, 0 },
-  { "setdvar", &GScr_SetDvar, 0 },
-  { "gettime", &GScr_GetTime, 0 },
-  { "getentbynum", &Scr_GetEntByNum, 1 },
-  { "getweaponmodel", &Scr_GetWeaponModel, 0 },
-  { "getanimlength", &GScr_GetAnimLength, 0 },
-  { "animhasnotetrack", &GScr_AnimHasNotetrack, 0 },
-  { "getnotetracktimes", &GScr_GetNotetrackTimes, 0 },
-  { "getbrushmodelcenter", &GScr_GetBrushModelCenter, 0 },
-  { "objective_add", &Scr_Objective_Add, 0 },
-  { "objective_delete", &Scr_Objective_Delete, 0 },
-  { "objective_state", &Scr_Objective_State, 0 },
-  { "objective_icon", &Scr_Objective_Icon, 0 },
-  { "objective_position", &Scr_Objective_Position, 0 },
-  { "objective_onentity", &Scr_Objective_OnEntity, 0 },
-  { "objective_current", &Scr_Objective_Current, 0 },
-  { "missile_createattractorent", &Scr_MissileCreateAttractorEnt, 0 },
-  { "missile_createattractororigin", &Scr_MissileCreateAttractorOrigin, 0 },
-  { "missile_createrepulsorent", &Scr_MissileCreateRepulsorEnt, 0 },
-  { "missile_createrepulsororigin", &Scr_MissileCreateRepulsorOrigin, 0 },
-  { "missile_deleteattractor", &Scr_MissileDeleteAttractor, 0 },
-  { "bullettrace", &Scr_BulletTrace, 0 },
-  { "bullettracepassed", &Scr_BulletTracePassed, 0 },
-  { "sighttracepassed", &Scr_SightTracePassed, 0 },
-  { "physicstrace", &Scr_PhysicsTrace, 0 },
-  { "playerphysicstrace", &Scr_PlayerPhysicsTrace, 0 },
-  { "getmovedelta", &GScr_GetMoveDelta, 0 },
-  { "getangledelta", &GScr_GetAngleDelta, 0 },
-  { "getnorthyaw", &GScr_GetNorthYaw, 0 },
-  { "randomint", &Scr_RandomInt, 0 },
-  { "randomfloat", &Scr_RandomFloat, 0 },
-  { "randomintrange", &Scr_RandomIntRange, 0 },
-  { "randomfloatrange", &Scr_RandomFloatRange, 0 },
-  { "sin", &GScr_sin, 0 },
-  { "cos", &GScr_cos, 0 },
-  { "tan", &GScr_tan, 0 },
-  { "asin", &GScr_asin, 0 },
-  { "acos", &GScr_acos, 0 },
-  { "atan", &GScr_atan, 0 },
-  { "int", &GScr_CastInt, 0 },
-  { "abs", &GScr_abs, 0 },
-  { "min", &GScr_min, 0 },
-  { "max", &GScr_max, 0 },
-  { "floor", &GScr_floor, 0 },
-  { "ceil", &GScr_ceil, 0 },
-  { "sqrt", &GScr_sqrt, 0 },
-  { "vectorfromlinetopoint", &GScr_VectorFromLineToPoint, 0 },
-  { "pointonsegmentnearesttopoint", &GScr_PointOnSegmentNearestToPoint, 0 },
-  { "distance", &Scr_Distance, 0 },
-  { "distance2d", &Scr_Distance2D, 0 },
-  { "distancesquared", &Scr_DistanceSquared, 0 },
-  { "length", &Scr_Length, 0 },
-  { "lengthsquared", &Scr_LengthSquared, 0 },
-  { "closer", &Scr_Closer, 0 },
-  { "vectordot", &Scr_VectorDot, 0 },
-  { "vectornormalize", &Scr_VectorNormalize, 0 },
-  { "vectortoangles", &Scr_VectorToAngles, 0 },
-  { "vectorlerp", &Scr_VectorLerp, 0 },
-  { "anglestoup", &Scr_AnglesToUp, 0 },
-  { "anglestoright", &Scr_AnglesToRight, 0 },
-  { "anglestoforward", &Scr_AnglesToForward, 0 },
-  { "combineangles", &Scr_CombineAngles, 0 },
-  { "issubstr", &Scr_IsSubStr, 0 },
-  { "getsubstr", &Scr_GetSubStr, 0 },
-  { "tolower", &Scr_ToLower, 0 },
-  { "strtok", &Scr_StrTok, 0 },
-  { "musicplay", &Scr_MusicPlay, 0 },
-  { "musicstop", &Scr_MusicStop, 0 },
-  { "soundfade", &Scr_SoundFade, 0 },
-  { "ambientplay", &Scr_AmbientPlay, 0 },
-  { "ambientstop", &Scr_AmbientStop, 0 },
-  { "precachemodel", &Scr_PrecacheModel, 0 },
-  { "precacheshellshock", &Scr_PrecacheShellShock, 0 },
-  { "precacheitem", &Scr_PrecacheItem, 0 },
-  { "precacheshader", &Scr_PrecacheShader, 0 },
-  { "precachestring", &Scr_PrecacheString, 0 },
-  { "precacherumble", &CL_ResetStats_f, 0 },
-  { "loadfx", &Scr_LoadFX, 0 },
-  { "playfx", &Scr_PlayFX, 0 },
-  { "playfxontag", &Scr_PlayFXOnTag, 0 },
-  { "playloopedfx", &Scr_PlayLoopedFX, 0 },
-  { "spawnfx", &Scr_SpawnFX, 0 },
-  { "triggerfx", &Scr_TriggerFX, 0 },
-  { "physicsexplosionsphere", &Scr_PhysicsExplosionSphere, 0 },
-  { "physicsexplosioncylinder", &Scr_PhysicsExplosionCylinder, 0 },
-  { "physicsjolt", &Scr_PhysicsRadiusJolt, 0 },
-  { "physicsjitter", &Scr_PhysicsRadiusJitter, 0 },
-  { "setexpfog", &Scr_SetExponentialFog, 0 },
-  { "grenadeexplosioneffect", &Scr_GrenadeExplosionEffect, 0 },
-  { "radiusdamage", &GScr_RadiusDamage, 0 },
-  { "setplayerignoreradiusdamage", &GScr_SetPlayerIgnoreRadiusDamage, 0 },
-  { "getnumparts", &GScr_GetNumParts, 0 },
-  { "getpartname", &GScr_GetPartName, 0 },
-  { "earthquake", &GScr_Earthquake, 0 },
-  { "newhudelem", &GScr_NewHudElem, 0 },
-  { "newclienthudelem", &GScr_NewClientHudElem, 0 },
-  { "newteamhudelem", &GScr_NewTeamHudElem, 0 },
-  { "resettimeout", &Scr_ResetTimeout, 0 },
-  { "weaponfiretime", &GScr_WeaponFireTime, 0 },
-  { "isweaponcliponly", &GScr_IsWeaponClipOnly, 0 },
-  { "isweapondetonationtimed", &GScr_IsWeaponDetonationTimed, 0 },
-  { "weaponfiretime", &GScr_WeaponFireTime, 0 },
-  { "weaponclipsize", &GScr_WeaponClipSize, 0 },
-  { "weaponissemiauto", &GScr_WeaponIsSemiAuto, 0 },
-  { "weaponisboltaction", &GScr_WeaponIsBoltAction, 0 },
-  { "weapontype", &GScr_WeaponType, 0 },
-  { "weaponclass", &GScr_WeaponClass, 0 },
-  { "weaponinventorytype", &GScr_WeaponInventoryType, 0 },
-  { "weaponstartammo", &GScr_WeaponStartAmmo, 0 },
-  { "weaponmaxammo", &GScr_WeaponMaxAmmo, 0 },
-  { "weaponaltweaponname", &GScr_WeaponAltWeaponName, 0 },
-  { "isplayer", &GScr_IsPlayer, 0 },
-  { "isplayernumber", &GScr_IsPlayerNumber, 0 },
-  { "setwinningplayer", &GScr_SetWinningPlayer, 0 },
-  { "setwinningteam", &GScr_SetWinningTeam, 0 },
-  { "announcement", &GScr_Announcement, 0 },
-  { "clientannouncement", &GScr_ClientAnnouncement, 0 },
-  { "getteamscore", &GScr_GetTeamScore, 0 },
-  { "setteamscore", &GScr_SetTeamScore, 0 },
-  { "setclientnamemode", &GScr_SetClientNameMode, 0 },
-  { "updateclientnames", &GScr_UpdateClientNames, 0 },
-  { "getteamplayersalive", &GScr_GetTeamPlayersAlive, 0 },
-  { "objective_team", &GScr_Objective_Team, 0 },
-  { "logprint", &GScr_LogPrint, 0 },
-  { "worldentnumber", &GScr_WorldEntNumber, 0 },
-  { "obituary", &GScr_Obituary, 0 },
-  { "positionwouldtelefrag", &GScr_positionWouldTelefrag, 0 },
-  { "getstarttime", &GScr_getStartTime, 0 },
-  { "precachemenu", &GScr_PrecacheMenu, 0 },
-  { "precachestatusicon", &GScr_PrecacheStatusIcon, 0 },
-  { "precacheheadicon", &GScr_PrecacheHeadIcon, 0 },
-  { "precachelocationselector", &GScr_PrecacheLocationSelector, 0 },
-  { "map_restart", &GScr_MapRestart, 0 },
-  { "exitlevel", &GScr_ExitLevel, 0 },
-  { "addtestclient", &GScr_AddTestClient, 0 },
-  { "makedvarserverinfo", &GScr_MakeDvarServerInfo, 0 },
-  { "setarchive", &CL_ResetStats_f, 0 },
-  { "allclientsprint", &GScr_AllClientsPrint, 0 },
-  { "clientprint", &GScr_ClientPrint, 0 },
-  { "mapexists", &GScr_MapExists, 0 },
-  { "isvalidgametype", &GScr_IsValidGameType, 0 },
-  { "matchend", &CL_ResetStats_f, 0 },
-  { "setplayerteamrank", &CL_ResetStats_f, 0 },
-  { "sendranks", &CL_ResetStats_f, 0 },
-  { "endparty", &CL_ResetStats_f, 0 },
-  { "setteamradar", &GScr_SetTeamRadar, 0 },
-  { "getteamradar", &GScr_GetTeamRadar, 0 },
-  { "getassignedteam", &PlayerCmd_buttonPressedDEVONLY, 0 },
-  { "setvotestring", &GScr_SetVoteString, 0 },
-  { "setvotetime", &GScr_SetVoteTime, 0 },
-  { "setvoteyescount", &GScr_SetVoteYesCount, 0 },
-  { "setvotenocount", &GScr_SetVoteNoCount, 0 },
-  { "openfile", &GScr_OpenFile, 1 },
-  { "closefile", &GScr_CloseFile, 1 },
-  { "fprintln", &GScr_FPrintln, 1 },
-  { "fprintfields", &GScr_FPrintFields, 1 },
-  { "freadln", &GScr_FReadLn, 1 },
-  { "fgetarg", &GScr_FGetArg, 1 },
-  { "kick", &GScr_KickPlayer, 0 },
-  { "ban", &GScr_BanPlayer, 0 },
-  { "map", &GScr_LoadMap, 0 },
-  { "playrumbleonposition", &CL_ResetStats_f, 0 },
-  { "playrumblelooponposition", &CL_ResetStats_f, 0 },
-  { "stopallrumbles", &CL_ResetStats_f, 0 },
-  { "soundexists", &ScrCmd_SoundExists, 0 },
-  { "issplitscreen", &PlayerCmd_buttonPressedDEVONLY, 0 },
-  { "setminimap", &GScr_SetMiniMap, 0 },
-  { "setmapcenter", &GScr_SetMapCenter, 0 },
-  { "setgameendtime", &GScr_SetGameEndTime, 0 },
-  { "getarraykeys", &GScr_GetArrayKeys, 0 },
-  { "searchforonlinegames", &CL_ResetStats_f, 0 },
-  { "quitlobby", &CL_ResetStats_f, 0 },
-  { "quitparty", &CL_ResetStats_f, 0 },
-  { "startparty", &CL_ResetStats_f, 0 },
-  { "startprivatematch", &CL_ResetStats_f, 0 },
-  { "visionsetnaked", &Scr_VisionSetNaked, 0 },
-  { "visionsetnight", &Scr_VisionSetNight, 0 },
-  { "tablelookup", &Scr_TableLookup, 0 },
-  { "tablelookupistring", &Scr_TableLookupIString, 0 },
-  { "endlobby", &CL_ResetStats_f, 0 }
-}; // idb
 
 void(__cdecl *__cdecl Scr_GetFunction(const char **pName, int *type))()
 {

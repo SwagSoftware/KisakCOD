@@ -1021,6 +1021,8 @@ struct __declspec(align(4)) kbutton_t // sizeof=0x14
     // padding byte
 };
 void __cdecl TRACK_cl_input();
+void __cdecl CL_ShowSystemCursor(BOOL show);
+int __cdecl CL_MouseEvent(int x, int y, int dx, int dy);
 void __cdecl CL_SetStance(int localClientNum, StanceState stance);
 void __cdecl IN_CenterView();
 void __cdecl CL_UpdateCmdButton(int localClientNum, int *cmdButtons, int kbButton, int buttonFlag);

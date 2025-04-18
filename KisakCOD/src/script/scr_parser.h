@@ -89,6 +89,7 @@ const char *__cdecl Scr_GetOpcodePosOfType(
 unsigned int __cdecl Scr_GetClosestSourcePosOfType(unsigned int bufferIndex, unsigned int sourcePos, int type);
 unsigned int __cdecl Scr_GetPrevSourcePos(const char *codePos, unsigned int index);
 OpcodeLookup *__cdecl Scr_GetPrevSourcePosOpcodeLookup(const char *codePos);
+void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum);
 unsigned int __cdecl Scr_GetLineNum(unsigned int bufferIndex, unsigned int sourcePos);
 unsigned int __cdecl Scr_GetLineNumInternal(const char *buf, unsigned int sourcePos, const char **startLine, int *col);
 unsigned int __cdecl Scr_GetFunctionLineNumInternal(const char *buf, unsigned int sourcePos, const char **startLine);
@@ -115,7 +116,7 @@ void __cdecl Scr_CopyFormattedLine(char *line, const char *rawLine);
 unsigned int __cdecl Scr_GetSourceBuffer(const char *codePos);
 void __cdecl Scr_PrintPrevCodePos(int channel, char *codePos, unsigned int index);
 void __cdecl Scr_PrintSourcePos(int channel, const char *filename, const char *buf, unsigned int sourcePos);
-char *__cdecl Scr_PrevCodePosFileName(char *codePos);
+const char *__cdecl Scr_PrevCodePosFileName(char *codePos);
 const char *__cdecl Scr_PrevCodePosFunctionName(char *codePos);
 bool __cdecl Scr_PrevCodePosFileNameMatches(char *codePos, const char *fileName);
 void __cdecl Scr_PrintPrevCodePosSpreadSheet(int channel, char *codePos, bool summary, bool functionSummary);

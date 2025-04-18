@@ -15,6 +15,45 @@
 #include <qcommon/threads.h>
 #include <client/client.h>
 
+int __cdecl GetFollowPlayerState(int clientNum, playerState_s *ps)
+{
+    gclient_s *client; // [esp+8h] [ebp-8h]
+    unsigned int index; // [esp+Ch] [ebp-4h]
+
+    client = &level.clients[clientNum];
+    if (!client)
+        MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1221, 0, "%s", "client");
+    if (client != g_entities[clientNum].client)
+        MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1222, 0, "%s", "client == g_entities[clientNum].client");
+    if ((client->ps.otherFlags & 4) != 0)
+    {
+        memcpy(ps, client, sizeof(playerState_s));
+        for (index = 0; index < 0x1F && ps->hud.current[index].type; ++index)
+        {
+            memset(&ps->hud.current[index], 0, sizeof(ps->hud.current[index]));
+            if (ps->hud.current[index].type)
+                MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1237, 0, "%s", "ps->hud.current[index].type == HE_TYPE_FREE");
+        }
+        while (index < 0x1F)
+        {
+            if (memcmp(&ps->hud.current[index], &g_dummyHudCurrent, 0xA0u))
+                MyAssertHandler(
+                    ".\\game_mp\\g_active_mp.cpp",
+                    1244,
+                    0,
+                    "%s",
+                    "!memcmp( &ps->hud.current[index], &g_dummyHudCurrent, sizeof( g_dummyHudCurrent ) )");
+            ++index;
+        }
+        return 1;
+    }
+    else
+    {
+        memset(ps, 0, sizeof(playerState_s));
+        return 0;
+    }
+}
+
 void __cdecl P_DamageFeedback(gentity_s *player)
 {
     gclient_s *client; // [esp+8h] [ebp-40h]

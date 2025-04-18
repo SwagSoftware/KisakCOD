@@ -1,4 +1,5 @@
 #include "client.h"
+#include <client_mp/client_mp.h>
 
 struct ScreenPlacement *scrPlaceView;
 struct ScreenPlacement scrPlaceFull;

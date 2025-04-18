@@ -45,6 +45,7 @@ bool __cdecl Sys_IsDatabaseReady2();
 void __cdecl Sys_WakeDatabase2();
 bool __cdecl Sys_FinishRenderer();
 int __cdecl Sys_IsMainThreadReady();
+void __cdecl Sys_EndLoadThreadPriorities();
 void __cdecl Sys_WaitForMainThread();
 void __cdecl Sys_StopRenderer();
 void __cdecl Sys_StartRenderer();
@@ -72,7 +73,7 @@ bool __cdecl Sys_WaitForCinematicsHostOutstandingRequestEventTimeout(unsigned in
 void __cdecl Sys_SetCinematicsHostOutstandingRequestEvent();
 void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent();
 
-BOOL __cdecl Sys_IsRendererReady();
+bool __cdecl Sys_IsRendererReady();
 void __cdecl Sys_BeginLoadThreadPriorities();
 
 
@@ -83,3 +84,4 @@ enum WinThreadLock : __int32
     THREAD_LOCK_ALL = 0x2,
 };
 void __cdecl Win_SetThreadLock(WinThreadLock threadLock);
+WinThreadLock __cdecl Win_GetThreadLock();

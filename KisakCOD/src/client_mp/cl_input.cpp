@@ -6,6 +6,9 @@
 #include <win32/win_local.h>
 #include <qcommon/cmd.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <devgui/devgui.h>
+
+#include <ui/ui.h>
 
 
 const dvar_t *cl_stanceHoldTime;
@@ -23,6 +26,51 @@ kbutton_t playersKb[1][30];
 void __cdecl TRACK_cl_input()
 {
     track_static_alloc_internal(playersKb, 600, "playersKb", 10);
+}
+
+void __cdecl CL_ShowSystemCursor(BOOL show)
+{
+    IN_ShowSystemCursor(show);
+}
+
+void __cdecl Scr_MouseEvent(int x, int y)
+{
+    UI_Component::MouseEvent(x, y);
+}
+
+int __cdecl CL_MouseEvent(int x, int y, int dx, int dy)
+{
+    clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
+
+    if (DevGui_IsActive())
+    {
+        DevGui_MouseEvent(dx, dy);
+        return 1;
+    }
+    else if (Key_IsCatcherActive(0, 2))
+    {
+        Scr_MouseEvent(x, y);
+        CL_ShowSystemCursor(1);
+        return 0;
+    }
+    else
+    {
+        LocalClientGlobals = CL_GetLocalClientGlobals(0);
+        if ((clientUIActives[0].keyCatchers & 0x10) == 0
+            || UI_GetActiveMenu(0) == UIMENU_SCOREBOARD
+            || cl_bypassMouseInput->current.enabled)
+        {
+            CL_ShowSystemCursor(0);
+            LocalClientGlobals->mouseDx[LocalClientGlobals->mouseIndex] += dx;
+            LocalClientGlobals->mouseDy[LocalClientGlobals->mouseIndex] += dy;
+            return 1;
+        }
+        else
+        {
+            UI_MouseEvent(0, x, y);
+            return 0;
+        }
+    }
 }
 
 void __cdecl CL_SetStance(int localClientNum, StanceState stance)

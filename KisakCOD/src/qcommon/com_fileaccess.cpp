@@ -1,7 +1,12 @@
 #include "com_fileaccess.h"
+#include "qcommon.h"
 
+int __cdecl FS_FileGetFileSize(FILE *file)
+{
+    return FileWrapper_GetFileSize(file);
+}
 
-unsigned int __cdecl FS_FileRead(void *ptr, unsigned int len, iobuf *stream)
+unsigned int __cdecl FS_FileRead(void *ptr, unsigned int len, FILE *stream)
 {
     unsigned int read_size; // [esp+0h] [ebp-4h]
 
@@ -11,14 +16,14 @@ unsigned int __cdecl FS_FileRead(void *ptr, unsigned int len, iobuf *stream)
     return read_size;
 }
 
-unsigned int __cdecl FS_FileWrite(const void *ptr, unsigned int len, iobuf *stream)
+unsigned int __cdecl FS_FileWrite(const void *ptr, unsigned int len, FILE *stream)
 {
     return fwrite(ptr, 1u, len, stream);
 }
 
-iobuf *__cdecl FS_FileOpenReadBinary(const char *filename)
+FILE *__cdecl FS_FileOpenReadBinary(const char *filename)
 {
-    iobuf *file; // [esp+0h] [ebp-4h]
+    FILE *file; // [esp+0h] [ebp-4h]
 
     ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_OPEN);
     file = fopen(filename, "rb");
@@ -26,9 +31,9 @@ iobuf *__cdecl FS_FileOpenReadBinary(const char *filename)
     return file;
 }
 
-iobuf *__cdecl FS_FileOpenReadText(const char *filename)
+FILE *__cdecl FS_FileOpenReadText(const char *filename)
 {
-    iobuf *file; // [esp+0h] [ebp-4h]
+    FILE *file; // [esp+0h] [ebp-4h]
 
     ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_OPEN);
     file = fopen(filename, "rt");
@@ -36,9 +41,9 @@ iobuf *__cdecl FS_FileOpenReadText(const char *filename)
     return file;
 }
 
-iobuf *__cdecl FS_FileOpenWriteBinary(const char *filename)
+FILE *__cdecl FS_FileOpenWriteBinary(const char *filename)
 {
-    iobuf *file; // [esp+0h] [ebp-4h]
+    FILE *file; // [esp+0h] [ebp-4h]
 
     ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_OPEN);
     file = fopen(filename, "wb");
@@ -46,9 +51,9 @@ iobuf *__cdecl FS_FileOpenWriteBinary(const char *filename)
     return file;
 }
 
-iobuf *__cdecl FS_FileOpenAppendText(const char *filename)
+FILE *__cdecl FS_FileOpenAppendText(const char *filename)
 {
-    iobuf *file; // [esp+0h] [ebp-4h]
+    FILE *file; // [esp+0h] [ebp-4h]
 
     ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_OPEN);
     file = fopen(filename, "at");
@@ -56,9 +61,9 @@ iobuf *__cdecl FS_FileOpenAppendText(const char *filename)
     return file;
 }
 
-iobuf *__cdecl FS_FileOpenWriteText(const char *filename)
+FILE *__cdecl FS_FileOpenWriteText(const char *filename)
 {
-    iobuf *file; // [esp+0h] [ebp-4h]
+    FILE *file; // [esp+0h] [ebp-4h]
 
     ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_OPEN);
     file = fopen(filename, "w+t");
@@ -66,12 +71,12 @@ iobuf *__cdecl FS_FileOpenWriteText(const char *filename)
     return file;
 }
 
-void __cdecl FS_FileClose(iobuf *stream)
+void __cdecl FS_FileClose(FILE *stream)
 {
     fclose(stream);
 }
 
-int __cdecl FS_FileSeek(iobuf *file, int offset, int whence)
+int __cdecl FS_FileSeek(FILE *file, int offset, int whence)
 {
     int seek; // [esp+4h] [ebp-4h]
 
@@ -81,7 +86,7 @@ int __cdecl FS_FileSeek(iobuf *file, int offset, int whence)
     return seek;
 }
 
-int __cdecl FileWrapper_Seek(iobuf *h, int offset, int origin)
+int __cdecl FileWrapper_Seek(FILE *h, int offset, int origin)
 {
     const char *v4; // eax
 
@@ -102,12 +107,12 @@ int __cdecl FileWrapper_Seek(iobuf *h, int offset, int origin)
     return 0;
 }
 
-int __cdecl FS_FileGetFileSize(iobuf *file)
+int __cdecl FS_FileGetFileSize(FILE *file)
 {
     return FileWrapper_GetFileSize(file);
 }
 
-int __cdecl FileWrapper_GetFileSize(iobuf *h)
+int __cdecl FileWrapper_GetFileSize(FILE *h)
 {
     int startPos; // [esp+0h] [ebp-8h]
     int fileSize; // [esp+4h] [ebp-4h]

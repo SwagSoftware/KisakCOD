@@ -3,10 +3,22 @@
 
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
+#include "sv_world.h"
+#include <game_mp/g_main_mp.h>
+#include <client/client.h>
+#include <universal/com_files.h>
+#include <universal/com_sndalias.h>
+#include <game_mp/g_public_mp.h>
 
 
 //int gameInitialized      834a4d50     sv_game.obj
 char g_sv_skel_memory[262144];
+
+char *g_sv_skel_memory_start;
+
+int gameInitialized;
+
+
 
 void __cdecl TRACK_sv_game()
 {
@@ -26,7 +38,7 @@ playerState_s *__cdecl SV_GameClientNum(int num)
 svEntity_s *__cdecl SV_SvEntityForGentity(const gentity_s *gEnt)
 {
     if (!gEnt || gEnt->s.number >= 1024)
-        Com_Error(ERR_DROP, &byte_8AFDA4);
+        Com_Error(ERR_DROP, "SV_SvEntityForGentity: bad gEnt");
     return &sv.svEntities[gEnt->s.number];
 }
 
@@ -235,7 +247,7 @@ void __cdecl SV_GetServerinfo(char *buffer, int bufferSize)
     char *v2; // eax
 
     if (bufferSize < 1)
-        Com_Error(ERR_DROP, &byte_8AFE98, bufferSize);
+        Com_Error(ERR_DROP, "SV_GetServerinfo: bufferSize == %i", bufferSize);
     v2 = Dvar_InfoString(0, 4);
     I_strncpyz(buffer, v2, bufferSize);
 }
@@ -324,6 +336,7 @@ bool __cdecl SV_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
     return 0;
 }
 
+int warnCount_2;
 char *__cdecl SV_AllocSkelMemory(unsigned int size)
 {
     char *result; // [esp+0h] [ebp-4h]
@@ -442,6 +455,33 @@ XAnimTree_s *__cdecl SV_DObjGetTree(gentity_s *ent)
         return 0;
 }
 
+int boxVerts_0[24][3] =
+{
+  { 0, 0, 0 },
+  { 1, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 1, 0 },
+  { 1, 1, 0 },
+  { 1, 0, 0 },
+  { 1, 1, 0 },
+  { 0, 1, 0 },
+  { 0, 0, 1 },
+  { 1, 0, 1 },
+  { 0, 0, 1 },
+  { 0, 1, 1 },
+  { 1, 1, 1 },
+  { 1, 0, 1 },
+  { 1, 1, 1 },
+  { 0, 1, 1 },
+  { 0, 0, 0 },
+  { 0, 0, 1 },
+  { 1, 0, 0 },
+  { 1, 0, 1 },
+  { 0, 1, 0 },
+  { 0, 1, 1 },
+  { 1, 1, 0 },
+  { 1, 1, 1 }
+}; // idb
 void __cdecl SV_XModelDebugBoxes(gentity_s *ent)
 {
     const XModel *Model; // eax
@@ -648,7 +688,7 @@ void __cdecl SV_RestartGameProgs(int savepersist)
 
 void __cdecl SV_InitGameVM(int restart, int savepersist)
 {
-    unsigned intv2; // eax
+    unsigned int v2; // eax
     int i; // [esp+0h] [ebp-4h]
 
     G_ResetEntityParsePoint();

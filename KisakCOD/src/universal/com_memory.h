@@ -4,6 +4,16 @@
 #include <script/scr_stringlist.h>
 #include "q_shared.h"
 
+struct TempMemInfo // sizeof=0x28
+{                                       // ...
+    int permanent;
+    int high;
+    int highExtra;
+    int hunkSize;
+    int low;
+    mem_track_t data;                   // ...
+};
+
 void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data);
 
 void Com_TouchMemory();
@@ -96,7 +106,7 @@ void __cdecl Hunk_InitDebugMemory();
 void __cdecl Hunk_ShutdownDebugMemory();
 void __cdecl Hunk_ResetDebugMem();
 int __cdecl Hunk_AllocDebugMem(unsigned int size);
-void __cdecl Hunk_FreeDebugMem();
+void __cdecl Hunk_FreeDebugMem(void* ptr = NULL);
 HunkUser* __cdecl Hunk_UserCreate(int maxSize, const char* name, bool fixed, bool tempMem, int type);
 int __cdecl Hunk_UserAlloc(HunkUser* user, unsigned int size, int alignment);
 int __cdecl Hunk_UserAllocAlignStrict(HunkUser* user, unsigned int size);
@@ -111,6 +121,13 @@ void* __cdecl Hunk_FindDataForFileInternal(int type, const char* name, int hash)
 bool __cdecl Hunk_DataOnHunk(unsigned __int8* data);
 char* __cdecl Hunk_SetDataForFile(int type, const char* name, void* data, void* (__cdecl* alloc)(int));
 void __cdecl Hunk_AddData(int type, void* data, void* (__cdecl* alloc)(int));
+
+char *__cdecl TempMalloc(unsigned int len);
+void __cdecl TempMemorySetPos(char *pos);
+void __cdecl TempMemoryReset(HunkUser *user);
+bool __cdecl TempInfoSort(TempMemInfo *info1, TempMemInfo *info2);
+char *__cdecl TempMallocAlignStrict(unsigned int len);
+void __cdecl TempMemoryReset(HunkUser *user);
 
 
 class LargeLocal

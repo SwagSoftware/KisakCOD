@@ -13,6 +13,8 @@
 #include <script/scr_memorytree.h>
 #include <database/database.h>
 
+int sv_serverId_value;
+
 // Jesus christ these are ugly, koutsie go fix this
 const char ERRMSG_PLURAL[85] =
 {
@@ -434,7 +436,6 @@ void __cdecl SV_MapRestart_f()
     SV_MapRestart(0);
 }
 
-int sv_serverId_value;
 void __cdecl SV_MapRestart(int fast_restart)
 {
     char *String; // eax

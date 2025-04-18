@@ -1,5 +1,7 @@
 #include "sv_world.h"
 #include "sv_game.h"
+#include <xanim/dobj.h>
+#include <game_mp/g_utils_mp.h>
 
 
 entityState_s_type_index __cdecl SV_ClipHandleForEntity(const gentity_s *ent)
@@ -20,6 +22,9 @@ void __cdecl SV_UnlinkEntity(gentity_s *gEnt)
     CM_UnlinkEntity(ent);
     //Profile_EndInternal(0);
 }
+
+float actorLocationalMins[3] = { -64.0f, -64.0f, -32.0f };
+float actorLocationalMaxs[3] = { 64.0f, 64.0f, 72.0f };
 
 void __cdecl SV_LinkEntity(gentity_s *gEnt)
 {
@@ -53,9 +58,9 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     ent = SV_SvEntityForGentity(gEnt);
     if (gEnt->r.bmodel)
     {
-        gEnt->s.solid = (int)&clients[0].parseClients[238].attachTagIndex[4] + 3;
+        gEnt->s.solid = 0xFFFFFF;
     }
-    else if (((unsigned int)&g_hunk_track[370234].usageType & gEnt->r.contents) != 0)
+    else if ((gEnt->r.contents & 0x2000001) != 0)
     {
         i = (int)gEnt->r.maxs[0];
         if (i < 1)
@@ -282,24 +287,19 @@ void __cdecl SV_ClipMoveToEntity(const moveclip_t *clip, svEntity_s *check, trac
     }
 }
 
-void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, trace_t *trace)
+int __cdecl SV_PointSightTraceToEntity(const sightpointtrace_t *clip, svEntity_s *check)
 {
-    const char *v3; // eax
-    __int64 v4; // [esp+8h] [ebp-F8h]
-    __int64 v5; // [esp+Ch] [ebp-F4h]
+    float v3; // [esp+10h] [ebp-F0h]
+    float v4; // [esp+14h] [ebp-ECh]
+    float v5; // [esp+18h] [ebp-E8h]
     float v6; // [esp+1Ch] [ebp-E4h]
-    unsigned __int16 number; // [esp+22h] [ebp-DEh]
-    float v8; // [esp+28h] [ebp-D8h]
-    float v9; // [esp+38h] [ebp-C8h]
-    float v10; // [esp+3Ch] [ebp-C4h]
-    float v11; // [esp+40h] [ebp-C0h]
-    float v12; // [esp+44h] [ebp-BCh]
-    float v13; // [esp+48h] [ebp-B8h]
-    float v14; // [esp+4Ch] [ebp-B4h]
-    float radius; // [esp+58h] [ebp-A8h]
-    gentity_s *touch; // [esp+5Ch] [ebp-A4h]
-    float entAxis[4][3]; // [esp+60h] [ebp-A0h] BYREF
-    unsigned int clipHandle; // [esp+90h] [ebp-70h]
+    float v7; // [esp+20h] [ebp-E0h]
+    float v8; // [esp+24h] [ebp-DCh]
+    float radius; // [esp+30h] [ebp-D0h]
+    gentity_s *touch; // [esp+34h] [ebp-CCh]
+    float entAxis[4][3]; // [esp+3Ch] [ebp-C4h] BYREF
+    unsigned int clipHandle; // [esp+6Ch] [ebp-94h]
+    TraceExtents extents; // [esp+70h] [ebp-90h] BYREF
     DObj_s *obj; // [esp+94h] [ebp-6Ch]
     float absmin[3]; // [esp+98h] [ebp-68h] BYREF
     float localStart[3]; // [esp+A4h] [ebp-5Ch] BYREF
@@ -307,155 +307,110 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
     DObjTrace_s objTrace; // [esp+B4h] [ebp-4Ch] BYREF
     float localEnd[3]; // [esp+D0h] [ebp-30h] BYREF
     float absmax[3]; // [esp+DCh] [ebp-24h] BYREF
-    int entnum; // [esp+E8h] [ebp-18h]
-    int partBits[4]; // [esp+ECh] [ebp-14h] BYREF
-    float oldFraction; // [esp+FCh] [ebp-4h]
+    int passEntityIdx; // [esp+E8h] [ebp-18h]
+    int entnum; // [esp+ECh] [ebp-14h]
+    int partBits[4]; // [esp+F0h] [ebp-10h] BYREF
 
     entnum = check - sv.svEntities;
     touch = SV_GentityNum(entnum);
-    if ((touch->r.contents & clip->contentmask) == 0
-        || clip->ignoreEntParams
-        && clip->ignoreEntParams->baseEntity != 1023
-        && (clip->ignoreEntParams->ignoreSelf && entnum == clip->ignoreEntParams->baseEntity
-            || clip->ignoreEntParams->ignoreParent && entnum == clip->ignoreEntParams->parentEntity
-            || EntHandle::isDefined(&touch->r.ownerNum)
-            && (clip->ignoreEntParams->ignoreSiblings
-                && EntHandle::entnum(&touch->r.ownerNum) == clip->ignoreEntParams->parentEntity
-                && entnum != clip->ignoreEntParams->baseEntity
-                || clip->ignoreEntParams->ignoreChildren
-                && EntHandle::entnum(&touch->r.ownerNum) == clip->ignoreEntParams->baseEntity)))
+    if ((touch->r.contents & clip->contentmask) == 0)
+        return 0;
+    for (passEntityIdx = 0; passEntityIdx < 2; ++passEntityIdx)
     {
-        return;
+        if (clip->passEntityNum[passEntityIdx] != 1023)
+        {
+            if (entnum == clip->passEntityNum[passEntityIdx])
+                return 0;
+            if (EntHandle::isDefined(&touch->r.ownerNum)
+                && EntHandle::entnum(&touch->r.ownerNum) == clip->passEntityNum[passEntityIdx])
+            {
+                return 0;
+            }
+        }
     }
-    obj = SV_LocationalTraceDObj(clip, touch);
+    obj = SV_LocationalSightTraceDObj(clip, touch);
     if (obj)
     {
         if ((touch->r.svFlags & 4) != 0)
         {
             if (!DObjHasContents(obj, clip->contentmask))
-                return;
+                return 0;
             entAxis[3][0] = touch->r.currentOrigin[0];
             entAxis[3][1] = touch->r.currentOrigin[1];
             entAxis[3][2] = touch->r.currentOrigin[2];
             radius = DObjGetRadius(obj);
-            v12 = entAxis[3][0] - radius;
-            v13 = entAxis[3][1] - radius;
-            v14 = entAxis[3][2] - radius;
-            absmin[0] = v12;
-            absmin[1] = v13;
-            absmin[2] = v14;
-            v9 = radius + entAxis[3][0];
-            v10 = radius + entAxis[3][1];
-            v11 = radius + entAxis[3][2];
-            absmax[0] = v9;
-            absmax[1] = v10;
-            absmax[2] = v11;
+            v6 = entAxis[3][0] - radius;
+            v7 = entAxis[3][1] - radius;
+            v8 = entAxis[3][2] - radius;
+            absmin[0] = v6;
+            absmin[1] = v7;
+            absmin[2] = v8;
+            v3 = radius + entAxis[3][0];
+            v4 = radius + entAxis[3][1];
+            v5 = radius + entAxis[3][2];
+            absmax[0] = v3;
+            absmax[1] = v4;
+            absmax[2] = v5;
         }
         else
         {
             if (!clip->priorityMap)
-                MyAssertHandler(".\\server\\sv_world.cpp", 442, 0, "%s", "clip->priorityMap");
+                MyAssertHandler(".\\server\\sv_world.cpp", 634, 0, "%s", "clip->priorityMap");
             entAxis[3][0] = touch->r.currentOrigin[0];
             entAxis[3][1] = touch->r.currentOrigin[1];
             entAxis[3][2] = touch->r.currentOrigin[2];
             Vec3Add(entAxis[3], actorLocationalMins, absmin);
             Vec3Add(entAxis[3], actorLocationalMaxs, absmax);
         }
-        if (!CM_TraceBox(&clip->extents, absmin, absmax, trace->fraction))
+        extents.start[0] = clip->start[0];
+        extents.start[1] = clip->start[1];
+        extents.start[2] = clip->start[2];
+        extents.end[0] = clip->end[0];
+        extents.end[1] = clip->end[1];
+        extents.end[2] = clip->end[2];
+        CM_CalcTraceExtents(&extents);
+        if (CM_TraceBox(&extents, absmin, absmax, 1.0))
+            return 0;
+        AnglesToAxis(touch->r.currentAngles, entAxis);
+        MatrixTransposeTransformVector43(extents.start, entAxis, localStart);
+        MatrixTransposeTransformVector43(extents.end, entAxis, localEnd);
+        objTrace.fraction = 1.0;
+        if ((touch->r.svFlags & 4) != 0)
         {
-            AnglesToAxis(touch->r.currentAngles, entAxis);
-            MatrixTransposeTransformVector43(clip->extents.start, entAxis, localStart);
-            MatrixTransposeTransformVector43(clip->extents.end, entAxis, localEnd);
-            objTrace.fraction = trace->fraction;
-            if ((touch->r.svFlags & 4) != 0)
-            {
-                DObjGeomTracelinePartBits(obj, clip->contentmask, partBits);
-                G_DObjCalcPose(touch, partBits);
-                HIDWORD(v5) = clip->contentmask;
-                LODWORD(v5) = localEnd;
-                DObjGeomTraceline(obj, localStart, v5, &objTrace);
-            }
-            else
-            {
-                DObjTracelinePartBits(obj, partBits);
-                G_DObjCalcPose(touch, partBits);
-                DObjTraceline(obj, localStart, localEnd, clip->priorityMap, &objTrace);
-            }
-            if (trace->fraction > (double)objTrace.fraction)
-            {
-                if (objTrace.fraction >= 1.0 || objTrace.fraction < 0.0)
-                    MyAssertHandler(
-                        ".\\server\\sv_world.cpp",
-                        474,
-                        0,
-                        "%s\n\t(objTrace.fraction) = %g",
-                        "(objTrace.fraction < 1.0f && objTrace.fraction >= 0)",
-                        objTrace.fraction);
-                trace->fraction = objTrace.fraction;
-                trace->surfaceFlags = objTrace.surfaceflags;
-                trace->modelIndex = objTrace.modelIndex;
-                trace->partName = objTrace.partName;
-                trace->partGroup = objTrace.partGroup;
-                MatrixTransformVector(objTrace.normal, entAxis, trace->normal);
-                v8 = Vec3Length(trace->normal) - 1.0;
-                v6 = fabs(v8);
-                if (v6 >= 0.01 && Vec3Length(trace->normal) >= 0.01)
-                {
-                    v3 = va("%g %g %g", trace->normal[0], trace->normal[1], trace->normal[2]);
-                    MyAssertHandler(
-                        ".\\server\\sv_world.cpp",
-                        482,
-                        0,
-                        "%s\n\t%s",
-                        "(I_fabs( Vec3Length( trace->normal ) - 1.0f ) < 0.01) || (Vec3Length( trace->normal ) < 0.01)",
-                        v3);
-                }
-                trace->walkable = trace->normal[2] >= DOUBLE_0_699999988079071;
-                goto LABEL_40;
-            }
+            DObjGeomTracelinePartBits(obj, clip->contentmask, partBits);
+            G_DObjCalcPose(touch, partBits);
+            DObjGeomTraceline(obj, localStart, localEnd, clip->contentmask, &objTrace);
         }
+        else
+        {
+            DObjTracelinePartBits(obj, partBits);
+            G_DObjCalcPose(touch, partBits);
+            DObjTraceline(obj, localStart, localEnd, clip->priorityMap, &objTrace);
+        }
+        if (objTrace.fraction < 1.0)
+            return -1;
     }
-    else if ((check->linkcontents & clip->contentmask) != 0
-        && !CM_TraceBox(&clip->extents, touch->r.absmin, touch->r.absmax, trace->fraction))
+    else
     {
         clipHandle = SV_ClipHandleForEntity(touch).brushmodel;
         angles = touch->r.currentAngles;
         if (!touch->r.bmodel)
             angles = vec3_origin;
-        oldFraction = trace->fraction;
-        HIDWORD(v4) = clip->contentmask;
-        LODWORD(v4) = clipHandle;
-        CM_TransformedBoxTrace(
-            trace,
-            clip->extents.start,
-            clip->extents.end,
+        if (CM_TransformedBoxSightTrace(
+            0,
+            clip->start,
+            clip->end,
             vec3_origin,
             vec3_origin,
-            v4,
+            clipHandle,
+            clip->contentmask,
             touch->r.currentOrigin,
-            angles);
-        if (oldFraction > (double)trace->fraction)
+            angles))
         {
-            trace->modelIndex = 0;
-            trace->partName = 0;
-            trace->partGroup = 0;
-        LABEL_40:
-            if (touch->s.number != LOWORD(touch->s.number))
-                MyAssertHandler(
-                    ".\\server\\sv_world.cpp",
-                    512,
-                    0,
-                    "%s",
-                    "touch->s.number == static_cast<unsigned short>( touch->s.number )");
-            number = touch->s.number;
-            if (!trace)
-                MyAssertHandler("c:\\trees\\cod3\\src\\server_mp\\../qcommon/cm_public.h", 135, 0, "%s", "trace");
-            trace->hitType = TRACE_HITTYPE_ENTITY;
-            trace->hitId = number;
-            trace->contents = touch->r.contents;
-            trace->material = 0;
+            return -1;
         }
     }
+    return 0;
 }
 
 DObj_s *__cdecl SV_LocationalTraceDObj(const pointtrace_t *clip, const gentity_s *touch)
@@ -610,9 +565,7 @@ int __cdecl SV_PointSightTraceToEntity(const sightpointtrace_t *clip, svEntity_s
         {
             DObjGeomTracelinePartBits(obj, clip->contentmask, partBits);
             G_DObjCalcPose(touch, partBits);
-            HIDWORD(v3) = clip->contentmask;
-            LODWORD(v3) = localEnd;
-            DObjGeomTraceline(obj, localStart, v3, &objTrace);
+            DObjGeomTraceline(obj, localStart, localEnd, clip->contentmask, &objTrace);
         }
         else
         {

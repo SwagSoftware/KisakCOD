@@ -674,6 +674,34 @@ Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, 
     }
 }
 
+void __cdecl UI_MouseEvent(int localClientNum, int x, int y)
+{
+    BOOL v3; // [esp+0h] [ebp-8h]
+
+    if (localClientNum)
+        MyAssertHandler(
+            ".\\ui_mp\\ui_main_mp.cpp",
+            332,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+
+    uiInfoArray.uiDC.cursor.x = x / scrPlaceFull.scaleVirtualToFull[0];
+    uiInfoArray.uiDC.cursor.y = y / scrPlaceFull.scaleVirtualToFull[1];
+    v3 = uiInfoArray.uiDC.cursor.x >= 0.0
+        && uiInfoArray.uiDC.cursor.x <= 640.0
+        && uiInfoArray.uiDC.cursor.y >= 0.0
+        && uiInfoArray.uiDC.cursor.y <= 480.0;
+    uiInfoArray.uiDC.isCursorVisible = v3;
+    CL_ShowSystemCursor(uiInfoArray.uiDC.isCursorVisible == 0);
+    if (uiInfoArray.uiDC.isCursorVisible)
+    {
+        if (Menu_Count(&uiInfoArray.uiDC) > 0)
+            Display_MouseMove(&uiInfoArray.uiDC);
+    }
+}
+
 void __cdecl UI_UpdateTime(int localClientNum, int realtime)
 {
     int frameTimeIndex; // [esp+4h] [ebp-Ch]

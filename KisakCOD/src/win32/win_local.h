@@ -20,6 +20,7 @@
 #endif
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
+#include <qcommon/net_chan_mp.h>
 
 void	IN_MouseEvent (int mstate);
 
@@ -33,6 +34,7 @@ char	*Sys_ConsoleInput (void);
 
 void Sys_ShowIP();
 bool Sys_IsLANAddress(netadr_t adr);
+bool Sys_IsLANAddress_IgnoreSubnet(netadr_t adr);
 
 struct netadr_t;
 struct msg_t;
@@ -45,6 +47,8 @@ qboolean	Sys_GetBroadcastPacket( msg_t *net_message );
 void	IN_Init (void);
 void	IN_Shutdown (void);
 void	IN_JoystickCommands (void);
+
+void __cdecl IN_ShowSystemCursor(BOOL show);
 
 // KISAKTODO void	IN_Move (usercmd_s *cmd); // usercmd_t -> usercmd_s
 // add additional non keyboard / non mouse movement on top of the keyboard move cmd

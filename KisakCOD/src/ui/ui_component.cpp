@@ -1,5 +1,9 @@
 #include "ui.h"
 #include <client_mp/client_mp.h>
+#include <win32/win_net_debug.h>
+#include <script/scr_parser.h>
+#include <script/scr_main.h>
+#include <script/scr_evaluate.h>
 
 void __cdecl UI_Component::InitAssets()
 {
@@ -22,7 +26,795 @@ Material *__cdecl UI_Component::RegisterMaterialNoMip(char *name, int imageTrack
     return Material_RegisterHandle(name, imageTrack);
 }
 
+void UI_Component::MouseEvent(int x, int y)
+{
+    UI_Component::g.hideCursor = 0;
+    if (x < 0 || UI_Component::g.screenWidth <= x)
+        UI_Component::g.hideCursor = 1;
+    if (y < 0 || UI_Component::g.screenHeight <= y)
+        UI_Component::g.hideCursor = 1;
+    if (!UI_Component::g.hideCursor)
+    {
+        UI_Component::g.cursorPos[0] = x;
+        UI_Component::g.cursorPos[1] = y;
+    }
+}
+
 void __cdecl UI_Component_Init()
 {
 	UI_Component::InitAssets();
+}
+
+
+void Scr_ScriptWatch::DeleteElement()
+{
+    Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (element)
+    {
+        // KISAKTODO: meh
+        //if (Sys_IsRemoteDebugClient())
+        //{
+        //    Sys_WriteDebugSocketMessageType(0xAu);
+        //    Scr_WriteElement(element);
+        //    Sys_EndWriteDebugSocket();
+        //}
+        //else
+        {
+            Scr_ScriptWatch::DeleteElementInternal(element);
+        }
+    }
+}
+
+bool __cdecl Scr_ElementChildrenExist(Scr_WatchElement_s *element)
+{
+    if (element->threadList || element->endonList)
+        return 1;
+    return element->childHead && element->expand && element->objectType && element->objectType < 0x16u;
+}
+
+int __cdecl Scr_GetWatchElementSize(Scr_WatchElement_s *element)
+{
+    int size; // [esp+0h] [ebp-4h]
+
+    size = 0;
+    while (element)
+    {
+        ++size;
+        if (Scr_ElementChildrenExist(element))
+            size += Scr_GetWatchElementSize(element->childHead);
+        element = element->next;
+    }
+    return size;
+}
+
+void Scr_ScriptWatch::DeleteElementInternal(Scr_WatchElement_s *element)
+{
+    if (!element)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 4396, 0, "%s", "element");
+    if (!element->parent)
+    {
+        *Scr_ScriptWatch::GetElementRef(element) = element->next;
+        Scr_ScriptWatch::UpdateHeight();
+        Scr_ScriptWatch::SetSelectedElement(this, element->next, 1);
+        Scr_ScriptWatch::FreeWatchElement(this, element);
+    }
+}
+
+Scr_WatchElement_s *Scr_ScriptWatch::GetSelectedElement_r(Scr_WatchElement_s *element, int *currentLine)
+{
+    Scr_WatchElement_s *childElement; // [esp+4h] [ebp-4h]
+
+    while (element)
+    {
+        if (*currentLine == this->selectedLine)
+            return element;
+        ++*currentLine;
+        if (Scr_ElementChildrenExist(element))
+        {
+            //childElement = Scr_ScriptWatch::GetSelectedElement_r(this, element->childHead, currentLine);
+            childElement = GetSelectedElement_r(element->childHead, currentLine);
+            if (childElement)
+                return childElement;
+        }
+        element = element->next;
+    }
+    return 0;
+}
+
+Scr_WatchElement_s **Scr_ScriptWatch::GetElementRef(Scr_WatchElement_s *element)
+{
+    Scr_WatchElement_s **pElement; // [esp+4h] [ebp-4h]
+
+    for (pElement = &this->elementHead; *pElement != element; pElement = &(*pElement)->next)
+    {
+        if (!*pElement)
+            MyAssertHandler(".\\script\\scr_debugger.cpp", 3677, 0, "%s", "*pElement");
+    }
+    return pElement;
+}
+
+void Scr_ScriptWatch::UpdateHeight()
+{
+    this->numLines = Scr_GetWatchElementSize(this->elementHead);
+    UI_LinesComponent::UpdateHeight();
+}
+
+void UI_LinesComponent::UpdateHeight()
+{
+    this->size[1] = this->numLines * UI_Component::g.charHeight;
+}
+
+void Scr_ScriptWatch::SetSelectedElement(Scr_WatchElement_s *selElement, bool user)
+{
+    int currentLine; // [esp+4h] [ebp-4h] BYREF
+
+    if (selElement)
+    {
+        currentLine = 0;
+        Scr_ScriptWatch::SetSelectedElement_r(selElement, this->elementHead, &currentLine, user);
+    }
+    else
+    {
+        this->selectedLine = -1;
+    }
+}
+
+bool __thiscall Scr_ScriptWatch::SetSelectedElement_r(
+    Scr_WatchElement_s *selElement,
+    Scr_WatchElement_s *element,
+    int *currentLine,
+    bool user)
+{
+    while (element)
+    {
+        if (element == selElement)
+        {
+            SetSelectedLineFocus(*currentLine, user);
+            return 1;
+        }
+        ++ * currentLine;
+        if (Scr_ElementChildrenExist(element)
+            && Scr_ScriptWatch::SetSelectedElement_r(selElement, element->childHead, currentLine, user))
+        {
+            return 1;
+        }
+        element = element->next;
+    }
+    return 0;
+}
+
+bool UI_LinesComponent::SetSelectedLineFocus(int newSelectedLine, bool user)
+{
+    if (newSelectedLine >= user - 1 && newSelectedLine < this->numLines)
+    {
+        this->selectedLine = newSelectedLine;
+        this->focusOnSelectedLine = 1;
+        this->focusOnSelectedLineUser = user;
+        return 1;
+    }
+    else
+    {
+        this->selectedLine = -1;
+        return 0;
+    }
+}
+
+
+bool __thiscall Scr_ScriptWatch::SetSelectedLineFocus(int newSelectedLine, bool user)
+{
+    Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
+
+    if (!UI_LinesComponent::SetSelectedLineFocus(newSelectedLine, user))
+        return 0;
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (!element)
+        return 1;
+    if (element->objectType != 14 && element->objectType != 22)
+        return 1;
+    // KISAKTODO: meh
+    //if (Sys_IsRemoteDebugClient())
+    //{
+    //    Sys_WriteDebugSocketMessageType(0x27u);
+    //    Scr_WriteElement(element);
+    //    Sys_EndWriteDebugSocket();
+    //}
+    //else
+    {
+        //Scr_ScriptWatch::DisplayThreadPos(this, element);
+        DisplayThreadPos(element);
+    }
+    return 1;
+}
+
+bool __thiscall Scr_ScriptCallStack::SetSelectedLineFocus(int newSelectedLine, bool user)
+{
+    unsigned int LineNum; // eax
+    unsigned int bufferIndex; // [esp+4h] [ebp-8h]
+
+    if (!UI_LinesComponent::SetSelectedLineFocus(newSelectedLine, user))
+        return 0;
+    if (newSelectedLine < 0)
+        return 1;
+    bufferIndex = this->stack[newSelectedLine].bufferIndex;
+    if (bufferIndex != -1)
+    {
+        LineNum = Scr_GetLineNum(bufferIndex, this->stack[newSelectedLine].sourcePos);
+        Scr_SelectScriptLine(bufferIndex, LineNum);
+    }
+    return 1;
+}
+
+bool Scr_OpenScriptList::SetSelectedLineFocus(
+    int newSelectedLine,
+    bool user)
+{
+    unsigned int sortedIndex; // [esp+4h] [ebp-Ch]
+    unsigned int bufferIndex; // [esp+8h] [ebp-8h]
+
+    if (!UI_LinesComponent::SetSelectedLineFocus(newSelectedLine, user))
+        return 0;
+    if ((newSelectedLine & 0x80000000) != 0)
+        return 1;
+    if (newSelectedLine >= scrParserPub.sourceBufferLookupLen)
+        MyAssertHandler(
+            ".\\script\\scr_debugger.cpp",
+            2875,
+            0,
+            "newSelectedLine doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
+            newSelectedLine,
+            scrParserPub.sourceBufferLookupLen);
+    bufferIndex = this->scriptWindows[newSelectedLine]->bufferIndex;
+    if (bufferIndex == -1)
+        return 1;
+    if (bufferIndex >= scrParserPub.sourceBufferLookupLen)
+        MyAssertHandler(
+            ".\\script\\scr_debugger.cpp",
+            2881,
+            0,
+            "bufferIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
+            bufferIndex,
+            scrParserPub.sourceBufferLookupLen);
+    sortedIndex = scrParserPub.sourceBufferLookup[bufferIndex].sortedIndex;
+    if (sortedIndex >= scrParserPub.sourceBufferLookupLen)
+        MyAssertHandler(
+            ".\\script\\scr_debugger.cpp",
+            2886,
+            0,
+            "sortedIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
+            sortedIndex,
+            scrParserPub.sourceBufferLookupLen);
+    //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, sortedIndex, 1);
+   ((UI_LinesComponent)scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
+    return 1;
+}
+
+
+void Scr_ScriptWatch::Evaluate()
+{
+    Scr_SelectedLineInfo info; // [esp+4h] [ebp-10h] BYREF
+    Scr_WatchElement_s *element; // [esp+10h] [ebp-4h]
+
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6860, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    if (!scrVarPub.evaluate)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6863, 0, "%s", "scrVarPub.evaluate");
+    if (scrVmPub.outparamcount)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6864, 0, "%s", "!scrVmPub.outparamcount");
+    if (scrVmPub.inparamcount)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6865, 0, "%s", "!scrVmPub.inparamcount");
+
+    Scr_ScriptWatch::SaveSelectedLine(&info);
+
+    for (element = this->elementHead; element; element = element->next)
+    {
+        if (!element->breakpoint)
+            Scr_ScriptWatch::EvaluateWatchElement( element);
+    }
+
+    Scr_ScriptWatch::LoadSelectedLine(&info);
+}
+
+
+void Scr_ScriptWatch::SaveSelectedLine(Scr_SelectedLineInfo *info)
+{
+    int id; // [esp+0h] [ebp-Ch]
+    Scr_WatchElement_s *selectedElement; // [esp+8h] [ebp-4h]
+
+    selectedElement = Scr_ScriptWatch::GetSelectedElement();
+    if (selectedElement)
+        id = selectedElement->id;
+    else
+        id = 0;
+    info->selectedId = id;
+    info->oldSelectedLine = this->selectedLine;
+    info->oldFocusOnSelectedLine = this->focusOnSelectedLine;
+}
+
+void __thiscall Scr_ScriptWatch::LoadSelectedLine(Scr_SelectedLineInfo *info)
+{
+    Scr_WatchElement_s *selectedElement; // [esp+8h] [ebp-4h]
+
+    selectedElement = Scr_ScriptWatch::GetElementWithId(info->selectedId);
+    if (selectedElement)
+    {
+        Scr_ScriptWatch::SetSelectedElement(selectedElement, 1);
+        this->pos[1] = (this->selectedLine - info->oldSelectedLine) * UI_Component::g.charHeight + this->pos[1];
+        this->focusOnSelectedLine = info->oldFocusOnSelectedLine;
+    }
+}
+
+bool Scr_ScriptWatch::EvaluateWatchChildElement(
+    Scr_WatchElement_s *element,
+    unsigned int fieldName,
+    Scr_WatchElement_s *childElement,
+    bool hardcodedField)
+{
+    unsigned __int8 objectType; // [esp+4h] [ebp-18h]
+    VariableValue value; // [esp+14h] [ebp-8h] BYREF
+
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6354, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    if (element->breakpoint)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6357, 0, "%s", "!element->breakpoint");
+    if (!scrVarPub.evaluate)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6359, 0, "%s", "scrVarPub.evaluate");
+    childElement->fieldName = fieldName;
+    if (hardcodedField)
+    {
+        value.type = 1;
+        value.u.intValue = element->objectId;
+        switch (fieldName)
+        {
+        case 0u:
+            AddRefToObject(value.u.stringValue);
+            Scr_EvalSizeValue(&value);
+            break;
+        case 1u:
+            break;
+        case 2u:
+        case 4u:
+            value.type = 0;
+            break;
+        case 3u:
+            value.u.intValue = Scr_GetSelf(value.u.stringValue);
+            break;
+        default:
+            value.u.intValue = fieldName - 5;
+            if (fieldName == 5)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 6415, 0, "%s", "value.u.pointerValue");
+            break;
+        }
+        AddRefToValue(value.type, value.u);
+    }
+    else
+    {
+        objectType = element->objectType;
+        switch (objectType)
+        {
+        case 0x15u:
+            value = Scr_GetArrayIndexValue(fieldName);
+            AddRefToValue(value.type, value.u);
+            Scr_EvalArrayVariable(element->objectId, &value);
+            break;
+        case 0x18u:
+            value.u.intValue = fieldName;
+            value.type = 1;
+            AddRefToObject(fieldName);
+            break;
+        case 0x19u:
+            value.u.intValue = fieldName;
+            value.type = 2;
+            SL_AddRefToString(fieldName);
+            break;
+        default:
+            Scr_EvalFieldVariable(fieldName, &value, element->objectId);
+            break;
+        }
+    }
+    return Scr_ScriptWatch::PostEvaluateWatchElement(childElement, &value);
+}
+
+void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
+{
+    unsigned int AllVariableField_DONE; // eax
+    const char *v3; // eax
+    const char *v4; // eax
+    const char *CanonicalString; // eax
+    unsigned __int8 v6; // [esp+4h] [ebp-12Ch]
+    bool v7; // [esp+8h] [ebp-128h]
+    int v8; // [esp+Ch] [ebp-124h]
+    bool v9; // [esp+10h] [ebp-120h]
+    int(__cdecl * v10)(unsigned int *, unsigned int *); // [esp+14h] [ebp-11Ch]
+    unsigned __int8 v11; // [esp+18h] [ebp-118h]
+    unsigned __int8 objectType; // [esp+1Ch] [ebp-114h]
+    bool oldHardcodedField; // [esp+2Fh] [ebp-101h]
+    char fieldText[136]; // [esp+30h] [ebp-100h] BYREF
+    unsigned int hardcodedNames[5]; // [esp+BCh] [ebp-74h] BYREF
+    Scr_WatchElement_s *childElement; // [esp+D0h] [ebp-60h]
+    unsigned int newIndex; // [esp+D4h] [ebp-5Ch]
+    unsigned int oldChildCount; // [esp+D8h] [ebp-58h]
+    int(__cdecl * compare)(unsigned int *, unsigned int *); // [esp+DCh] [ebp-54h]
+    unsigned __int8 oldObjectType; // [esp+E2h] [ebp-4Eh]
+    bool isArray; // [esp+E3h] [ebp-4Dh]
+    Scr_WatchElement_s *newElements; // [esp+E4h] [ebp-4Ch]
+    Scr_WatchElement_s *oldElements; // [esp+E8h] [ebp-48h]
+    unsigned int hardcodedCount; // [esp+ECh] [ebp-44h]
+    Scr_WatchElement_s *newElement; // [esp+F0h] [ebp-40h]
+    int function_count; // [esp+F4h] [ebp-3Ch]
+    unsigned int objectId; // [esp+F8h] [ebp-38h]
+    Scr_WatchElement_s *oldElement; // [esp+FCh] [ebp-34h]
+    Scr_WatchElement_s **newElementOldRef; // [esp+100h] [ebp-30h]
+    int compareResult; // [esp+104h] [ebp-2Ch]
+    bool elementChanged; // [esp+10Bh] [ebp-25h]
+    unsigned int threadId; // [esp+10Ch] [ebp-24h]
+    unsigned int oldIndex; // [esp+110h] [ebp-20h]
+    unsigned int *names; // [esp+114h] [ebp-1Ch]
+    bool hardcodedField; // [esp+11Bh] [ebp-15h]
+    unsigned int nameIndex; // [esp+11Ch] [ebp-14h]
+    unsigned int count; // [esp+120h] [ebp-10h]
+    VariableValue value; // [esp+124h] [ebp-Ch] BYREF
+    bool setChildCount; // [esp+12Eh] [ebp-2h]
+    bool sameType; // [esp+12Fh] [ebp-1h]
+
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 5768, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    oldObjectType = parentElement->oldObjectType;
+    parentElement->oldObjectType = parentElement->objectType;
+    if (parentElement->expand && parentElement->objectType)
+    {
+        if (!scrVarPub.evaluate)
+            MyAssertHandler(".\\script\\scr_debugger.cpp", 5780, 0, "%s", "scrVarPub.evaluate");
+        isArray = parentElement->objectType == 21;
+        hardcodedCount = 0;
+        if (parentElement->objectType == 24)
+        {
+            if (!parentElement->parent)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 5787, 0, "%s", "parentElement->parent");
+            objectId = parentElement->parent->objectId;
+            if (!objectId)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 5789, 0, "%s", "objectId");
+            count = Scr_FindAllThreads(objectId, 0, this->localId);
+        }
+        else if (parentElement->objectType == 25)
+        {
+            if (!parentElement->parent)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 5795, 0, "%s", "parentElement->parent");
+            objectId = parentElement->parent->objectId;
+            if (!objectId)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 5797, 0, "%s", "objectId");
+            count = Scr_FindAllEndons(objectId, 0);
+        }
+        else
+        {
+            objectId = parentElement->objectId;
+            if (!objectId)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 5804, 0, "%s", "objectId");
+            if (parentElement->directObject)
+            {
+                objectType = parentElement->objectType;
+                if (objectType == 14)
+                {
+                    threadId = GetSafeParentLocalId(parentElement->objectId);
+                    if (!threadId && GetObjectType(parentElement->objectId) == 14)
+                    {
+                        for (function_count = scrVmPub.function_count; ; --function_count)
+                        {
+                            if (!function_count)
+                                MyAssertHandler(".\\script\\scr_debugger.cpp", 5824, 0, "%s", "function_count");
+                            if (parentElement->objectId == scrVmPub.function_frame_start[function_count].fs.localId)
+                                break;
+                        }
+                        do
+                            threadId = scrVmPub.function_frame_start[--function_count].fs.localId;
+                        while (!threadId && function_count);
+                    }
+                    if (threadId)
+                        hardcodedNames[hardcodedCount++] = threadId + 5;
+                }
+                else if (objectType > 0x11u && objectType <= 0x14u)
+                {
+                    hardcodedNames[hardcodedCount++] = 4;
+                }
+            }
+            else
+            {
+                hardcodedNames[hardcodedCount++] = 1;
+            }
+            v11 = parentElement->objectType;
+            if (v11 == 14)
+            {
+                hardcodedNames[hardcodedCount++] = 2;
+                hardcodedNames[hardcodedCount++] = 3;
+            }
+            else if (v11 == 21)
+            {
+                hardcodedNames[hardcodedCount++] = 0;
+            }
+            if (hardcodedCount > 5)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 5872, 0, "%s", "hardcodedCount <= ARRAY_COUNT( hardcodedNames )");
+            AllVariableField_DONE = Scr_FindAllVariableField(objectId, 0);
+            count = hardcodedCount + AllVariableField_DONE;
+        }
+        if (count)
+        {
+            names = Scr_AllocDebugMem(4 * count, "Scr_ScriptWatch::EvaluateWatchChildren");
+            memcpy(names, hardcodedNames, 4 * hardcodedCount);
+            if (parentElement->objectType == 24)
+            {
+                Scr_FindAllThreads(objectId, names, this->localId);
+                compare = CompareThreadIndices;
+            }
+            else if (parentElement->objectType == 25)
+            {
+                Scr_FindAllEndons(objectId, names);
+                compare = CompareArrayIndices;
+            }
+            else
+            {
+                Scr_FindAllVariableField(objectId, &names[hardcodedCount]);
+                if (isArray)
+                    v10 = CompareArrayIndices;
+                else
+                    v10 = Scr_CompareCanonicalStrings;
+                compare = v10;
+            }
+            qsort(&names[hardcodedCount], count - hardcodedCount, 4u, (int(__cdecl *)(void const *, void const *))compare);
+            oldElements = parentElement->childArrayHead;
+            oldChildCount = parentElement->childCount;
+            newElements = (Scr_WatchElement_s*)Scr_AllocDebugMem(100 * count, "Scr_ScriptWatch::EvaluateWatchChildren3");
+            memset(newElements, 0, 100 * count);
+            newElementOldRef = (Scr_WatchElement_s**)Scr_AllocDebugMem(4 * count, "Scr_ScriptWatch::EvaluateWatchChildren");
+            v9 = oldElements && parentElement->objectType == oldObjectType;
+            sameType = v9;
+            elementChanged = 0;
+            oldIndex = 0;
+            newIndex = 0;
+            for (nameIndex = 0; nameIndex < count; ++nameIndex)
+            {
+                newElement = &newElements[newIndex];
+                v3 = CopyString("");
+                newElement->valueText = v3;
+                v4 = CopyString("");
+                newElement->refText = v4;
+                hardcodedField = newIndex < hardcodedCount;
+                if (Scr_ScriptWatch::EvaluateWatchChildElement(
+                    parentElement,
+                    names[nameIndex],
+                    newElement,
+                    newIndex < hardcodedCount))
+                {
+                    newElement->parent = parentElement;
+                    if (!++this->elementId)
+                        MyAssertHandler(".\\script\\scr_debugger.cpp", 5943, 0, "%s", "elementId");
+                    newElement->id = this->elementId;
+                    newElementOldRef[newIndex] = 0;
+                    if (sameType)
+                    {
+                        while (oldIndex < oldChildCount)
+                        {
+                            oldElement = &oldElements[oldIndex];
+                            oldHardcodedField = oldIndex < parentElement->hardcodedCount;
+                            if (oldHardcodedField == hardcodedField)
+                            {
+                                if (hardcodedField)
+                                    v8 = oldElement->fieldName - newElement->fieldName;
+                                else
+                                    v8 = compare(&oldElement->fieldName, &newElement->fieldName);
+                                compareResult = v8;
+                            }
+                            else
+                            {
+                                compareResult = oldHardcodedField - hardcodedField;
+                            }
+                            if (compareResult >= 0)
+                            {
+                                Scr_RemoveValue(oldElement);
+                                if (compareResult)
+                                {
+                                    elementChanged = 1;
+                                }
+                                else
+                                {
+                                    if (!this->elementId)
+                                        MyAssertHandler(".\\script\\scr_debugger.cpp", 5977, 0, "%s", "elementId");
+                                    --this->elementId;
+                                    newElement->expand = oldElement->expand;
+                                    newElement->childArrayHead = oldElement->childArrayHead;
+                                    newElement->childHead = oldElement->childHead;
+                                    newElement->childCount = oldElement->childCount;
+                                    newElement->hardcodedCount = oldElement->hardcodedCount;
+                                    newElement->objectType = oldElement->objectType;
+                                    newElement->oldObjectType = oldElement->oldObjectType;
+                                    newElement->directObject = oldElement->directObject;
+                                    newElement->bufferIndex = oldElement->bufferIndex;
+                                    newElement->sourcePos = oldElement->sourcePos;
+                                    newElement->changed = oldElement->changed;
+                                    newElement->changedTime = oldElement->changedTime;
+                                    if (!oldElement->id)
+                                        MyAssertHandler(".\\script\\scr_debugger.cpp", 5991, 0, "%s", "oldElement->id");
+                                    newElement->id = oldElement->id;
+                                    for (childElement = oldElement->childHead; childElement; childElement = childElement->next)
+                                        childElement->parent = newElement;
+                                    newElementOldRef[newIndex] = oldElement;
+                                    ++oldIndex;
+                                }
+                                break;
+                            }
+                            elementChanged = 1;
+                            Scr_FreeWatchElementChildren(oldElement);
+                            ++oldIndex;
+                        }
+                    }
+                    ++newIndex;
+                }
+                else
+                {
+                    Scr_FreeWatchElementText(newElement);
+                }
+            }
+            Scr_FreeDebugMem(names);
+            while (oldIndex < oldChildCount)
+            {
+                oldElement = &oldElements[oldIndex];
+                elementChanged = 1;
+                Scr_FreeWatchElementChildren(oldElement);
+                ++oldIndex;
+            }
+            count = newIndex;
+            v7 = newIndex && (!sameType || elementChanged || count != oldChildCount);
+            setChildCount = v7;
+            for (newIndex = 0; newIndex < count; ++newIndex)
+            {
+                newElement = &newElements[newIndex];
+                oldElement = newElementOldRef[newIndex];
+                hardcodedField = newIndex < hardcodedCount;
+                if (newIndex >= hardcodedCount)
+                {
+                    v6 = parentElement->objectType;
+                    if (v6 == 21)
+                    {
+                        value = Scr_GetArrayIndexValue(newElement->fieldName);
+                        Scr_GetValueString(0, &value, 129, fieldText);
+                    }
+                    else if (v6 > 0x17u && v6 <= 0x19u)
+                    {
+                        I_strncpyz(fieldText, newElement->valueText, 129);
+                    }
+                    else
+                    {
+                        CanonicalString = Scr_GetCanonicalString(newElement->fieldName);
+                        I_strncpyz(fieldText, CanonicalString, 129);
+                    }
+                    Scr_SetElementRefText(newElement, fieldText);
+                }
+                else
+                {
+                    Scr_SetNonFieldElementRefText(newElement);
+                }
+                if (oldElement)
+                    Scr_DeltaElementValueText(newElement, oldElement->valueText);
+                else
+                    Scr_DeltaElementValueText(newElement, "");
+                if (oldElement)
+                    Scr_FreeWatchElementText(oldElement);
+            }
+            Scr_FreeDebugMem(newElementOldRef);
+            if (oldElements)
+                Scr_FreeDebugMem(oldElements);
+            if (count)
+            {
+                parentElement->childCount = count;
+                parentElement->hardcodedCount = hardcodedCount;
+                parentElement->childArrayHead = newElements;
+                Scr_ConnectElementChildren(parentElement);
+                if (Scr_IsSortWatchElement(parentElement))
+                    Scr_SortElementChildren(parentElement);
+                for (newElement = parentElement->childHead; newElement; newElement = newElement->next)
+                    Scr_ScriptWatch::EvaluateWatchChildren(newElement);
+            }
+            else
+            {
+                Scr_FreeDebugMem(newElements);
+                if (parentElement->childCount)
+                    Scr_FreeWatchElementChildren(parentElement);
+            }
+        }
+        else if (parentElement->childCount)
+        {
+            Scr_FreeWatchElementChildren(parentElement);
+        }
+    }
+    else
+    {
+        Scr_FreeWatchElementChildrenStrict(parentElement);
+    }
+}
+
+void Scr_ScriptWatch::EvaluateWatchElement(Scr_WatchElement_s *element)
+{
+    char v2; // [esp+3h] [ebp-129h]
+    char *v3; // [esp+8h] [ebp-124h]
+    const char *valueText; // [esp+Ch] [ebp-120h]
+    VariableValue value; // [esp+14h] [ebp-118h] BYREF
+    char oldValueText[268]; // [esp+1Ch] [ebp-110h] BYREF
+
+    Scr_ScriptWatch::EvaluateWatchElementExpression(element, &value);
+    valueText = element->valueText;
+    v3 = oldValueText;
+    do
+    {
+        v2 = *valueText;
+        *v3++ = *valueText++;
+    } while (v2);
+    Scr_ScriptWatch::PostEvaluateWatchElement(element, &value);
+    Scr_PostSetText(element);
+    Scr_DeltaElementValueText(element, oldValueText);
+    Scr_ScriptWatch::EvaluateWatchChildren(element);
+}
+
+void  Scr_ScriptWatch::EvaluateWatchElementExpression(
+    Scr_WatchElement_s *element,
+    VariableValue *value)
+{
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6441, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    if (element->breakpoint)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6444, 0, "%s", "!element->breakpoint");
+    if (!element->expr.exprHead)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6447, 0, "%s", "expr->exprHead");
+    if (!scrVarPub.evaluate)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6449, 0, "%s", "scrVarPub.evaluate");
+    if (element->valueDefined && (element->breakpointType == 1 || element->breakpointType == 3))
+        Scr_EvalScriptExpression(&element->expr, this->localId, value, 1, 0);
+    else
+        Scr_EvalScriptExpression(&element->expr, this->localId, value, 0, 0);
+}
+
+
+bool __thiscall Scr_ScriptWatch::PostEvaluateWatchElement(
+    Scr_WatchElement_s *element,
+    VariableValue *value)
+{
+    int type; // eax
+    unsigned int intValue; // [esp+0h] [ebp-118h]
+    char valueText[268]; // [esp+8h] [ebp-110h] BYREF
+
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6307, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    if (!scrVarPub.evaluate)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 6310, 0, "%s", "scrVarPub.evaluate");
+    Scr_RemoveValue(element);
+    if (scrVarPub.error_message)
+    {
+        Com_sprintf(valueText, 0x101u, "<%s>", scrVarPub.error_message);
+        ReplaceString(&element->valueText, valueText);
+        element->objectId = 0;
+        Scr_ClearErrorMessage();
+        RemoveRefToValue(value->type, value->u);
+        return 0;
+    }
+    else
+    {
+        Scr_GetValueString(this->localId, value, 257, valueText);
+        ReplaceString(&element->valueText, valueText);
+        if (value->type == 1)
+            intValue = value->u.intValue;
+        else
+            intValue = 0;
+        element->objectId = intValue;
+        if (element->objectId || element->breakpointType == 1 || element->breakpointType == 3)
+        {
+            element->valueDefined = 1;
+            type = value->type;
+            element->value.u.intValue = value->u.intValue;
+            element->value.type = type;
+        }
+        else
+        {
+            RemoveRefToValue(value->type, value->u);
+        }
+        return 1;
+    }
 }
