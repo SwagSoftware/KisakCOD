@@ -1254,6 +1254,13 @@ void __cdecl Vec3Mad(const float *start, float scale, const float *dir, float *r
     result[2] = scale * dir[2] + start[2];
 }
 
+void __cdecl Vec3Accum(const float *subTotal, const float *weight, const float *added, float *total)
+{
+    *total = *weight * *added + *subTotal;
+    total[1] = weight[1] * added[1] + subTotal[1];
+    total[2] = weight[2] * added[2] + subTotal[2];
+}
+
 void __cdecl BG_Player_DoControllersSetup(const entityState_s *es, clientInfo_t *ci, int frametime)
 {
     float maxOffsetChange; // [esp+8h] [ebp-6Ch]
@@ -2943,7 +2950,7 @@ scr_animtree_t __cdecl BG_FindAnimTree(const char *filename, int bEnforceExists)
 {
     scr_animtree_t tree; // [esp+4h] [ebp-4h]
 
-    tree.anims = Scr_FindAnimTree(filename).anims;
+    tree.anims = Scr_FindAnimTree(filename)->anims;
     if (!tree.anims && bEnforceExists)
         Com_Error(ERR_DROP, "Could not find animation tree %s", filename);
     return tree;

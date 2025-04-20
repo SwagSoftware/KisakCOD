@@ -2521,12 +2521,42 @@ void __cdecl Vec4Lerp(const float* from, const float* to, float frac, float* res
     result[3] = (to[3] - from[3]) * frac + from[3];
 }
 
+float __cdecl Vec4Length(const float *v)
+{
+    float v3; // [esp+4h] [ebp-4h]
+
+    v3 = v[3] * v[3] + v[2] * v[2] + v[1] * v[1] + *v * *v;
+    return sqrt(v3);
+}
+
 void __cdecl Vec4Scale(const float* v, float scale, float* result)
 {
     *result = scale * *v;
     result[1] = scale * v[1];
     result[2] = scale * v[2];
     result[3] = scale * v[3];
+}
+
+void __cdecl Vec4Mad(const float *start, float scale, const float *dir, float *result)
+{
+    *result = scale * *dir + *start;
+    result[1] = scale * dir[1] + start[1];
+    result[2] = scale * dir[2] + start[2];
+    result[3] = scale * dir[3] + start[3];
+}
+
+void __cdecl Vec4MadMad(
+    const float *start,
+    float scale0,
+    const float *dir0,
+    float scale1,
+    const float *dir1,
+    float *result)
+{
+    *result = scale0 * *dir0 + *start + scale1 * *dir1;
+    result[1] = scale0 * dir0[1] + start[1] + scale1 * dir1[1];
+    result[2] = scale0 * dir0[2] + start[2] + scale1 * dir1[2];
+    result[3] = scale0 * dir0[3] + start[3] + scale1 * dir1[3];
 }
 
 void __cdecl Vec3Cross(const float* v0, const float* v1, float* cross)

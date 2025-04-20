@@ -1,4 +1,5 @@
 #pragma once
+#include <universal/q_shared.h>
 
 #undef GetObject
 
@@ -435,5 +436,6 @@ void  Scr_ClearThread(unsigned int parentId);
 
 //int marker_scr_variable
 
+extern scr_classStruct_t g_classMap[4];
 extern scrStringDebugGlob_t *scrStringDebugGlob;
 extern scrMemTreePub_t scrMemTreePub;

@@ -78,3 +78,5 @@ void __cdecl R_FlushStaticModelCache();
 void __cdecl R_StaticModelCacheStats_f();
 void __cdecl R_StaticModelCacheFlush_f();
 void __cdecl R_ClearAllStaticModelCacheRefs();
+
+GfxCachedSModelSurf *__cdecl R_GetCachedSModelSurf(unsigned int cacheIndex);

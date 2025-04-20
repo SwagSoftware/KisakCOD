@@ -406,6 +406,30 @@ enum
 
 union DvarValue 
 {                
+	DvarValue()
+	{
+		integer = 0;
+	}
+	DvarValue(int i)
+	{
+		integer = i;
+	}
+	DvarValue(bool b)
+	{
+		enabled = b;
+	}
+	DvarValue(float f)
+	{
+		value = f;
+	}
+	DvarValue(const char *str)
+	{
+		string = str;
+	}
+	DvarValue(char *str)
+	{
+		string = str;
+	}
     bool enabled;
     int integer;
     unsigned int unsignedInt;

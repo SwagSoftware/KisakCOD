@@ -12,6 +12,20 @@
 XModelDefault g_default;
 Material *g_materials[1];
 
+void __cdecl XModelPartsFree(XModelPartsLoad *modelParts)
+{
+    int size; // [esp+0h] [ebp-Ch]
+    int i; // [esp+4h] [ebp-8h]
+    unsigned __int16 *boneNames; // [esp+8h] [ebp-4h]
+
+    if (!modelParts)
+        MyAssertHandler(".\\xanim\\xmodel.cpp", 81, 0, "%s", "modelParts");
+    boneNames = modelParts->boneNames;
+    size = modelParts->numBones;
+    for (i = 0; i < size; ++i)
+        SL_RemoveRefToString(boneNames[i]);
+}
+
 bool __cdecl XModelBad(const XModel *model)
 {
     if (!model)

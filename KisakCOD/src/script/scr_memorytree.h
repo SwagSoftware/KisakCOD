@@ -79,3 +79,6 @@ bool MT_RemoveMemoryNode(int oldNode, unsigned int size);
 void MT_RemoveHeadMemoryNode(int size);
 void MT_Error(char const* funcName, int numBytes);
 int MT_GetSize(int numBytes);
+
+
+extern scrMemTreeGlob_t scrMemTreeGlob;

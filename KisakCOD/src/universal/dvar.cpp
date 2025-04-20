@@ -3398,14 +3398,14 @@ void __cdecl Dvar_SetStringByName(const char *dvarName, char *value)
         Dvar_RegisterString(dvarName, value, 0x4000u, "External Dvar");
 }
 
-const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, char *string, DvarSetSource source)
+const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, const char *string, DvarSetSource source)
 {
     dvar_s *dvar; // [esp+0h] [ebp-4h]
 
     dvar = (dvar_s *)Dvar_FindVar(dvarName);
     if (!dvar)
         return Dvar_RegisterString(dvarName, string, 0x4000u, "External Dvar");
-    Dvar_SetFromStringFromSource(dvar, string, source);
+    Dvar_SetFromStringFromSource(dvar, (char*)string, source);
     return dvar;
 }
 

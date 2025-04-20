@@ -106,6 +106,10 @@ void __cdecl Hunk_InitDebugMemory();
 void __cdecl Hunk_ShutdownDebugMemory();
 void __cdecl Hunk_ResetDebugMem();
 int __cdecl Hunk_AllocDebugMem(unsigned int size);
+inline int Hunk_AllocDebugMem(unsigned int size, const char *shit)
+{
+    return Hunk_AllocDebugMem(size);
+}
 void __cdecl Hunk_FreeDebugMem(void* ptr = NULL);
 HunkUser* __cdecl Hunk_UserCreate(int maxSize, const char* name, bool fixed, bool tempMem, int type);
 int __cdecl Hunk_UserAlloc(HunkUser* user, unsigned int size, int alignment);

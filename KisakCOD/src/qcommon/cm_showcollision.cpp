@@ -326,8 +326,13 @@ void __cdecl CM_PickProjectionAxes(const float *normal, int *i, int *j)
     k = v5 > (double)v6;
     v4 = fabs(normal[k]);
     v3 = fabs(normal[2]);
+
     if (v3 > (double)v4)
-        LOBYTE(k) = 2;
+    {
+        //LOBYTE(k) = 2;
+        k = 2;
+    }
+
     *i = (k & 1) == 0;
     *j = ~(_BYTE)k & 2;
 }

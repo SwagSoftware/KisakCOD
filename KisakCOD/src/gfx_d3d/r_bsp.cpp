@@ -4,6 +4,12 @@
 #include "r_model_lighting.h"
 #include "r_staticmodelcache.h"
 #include "rb_logfile.h"
+#include "r_buffers.h"
+#include "rb_light.h"
+#include "r_dpvs.h"
+#include "r_shadowcookie.h"
+#include "r_sky.h"
+#include <database/database.h>
 
 
 //struct GfxWorld s_world    85b28080     gfx_d3d : r_bsp.obj
@@ -88,9 +94,10 @@ void __cdecl R_UpdateLightsFromDvars()
 
     if (!sm_enable->current.enabled)
     {
-        v2 = r_lightTweakSunDirection.integer + 44;
-        v3 = r_lightTweakSunDirection.integer + 12;
-        if (*(float *)(r_lightTweakSunDirection.integer + 44) != *(float *)(r_lightTweakSunDirection.integer + 12)
+        const auto& dvarValue = r_lightTweakSunDirection->current;
+        v2 = dvarValue.integer + 44;
+        v3 = dvarValue.integer + 12;
+        if (*(float *)(dvarValue.integer + 44) != *(float *)(dvarValue.integer + 12)
             || *(float *)(v2 + 4) != *(float *)(v3 + 4)
             || *(float *)(v2 + 8) != *(float *)(v3 + 8))
         {
@@ -119,15 +126,17 @@ void __cdecl R_CopyParseParamsFromDvars(SunLightParseParams *sunParse)
         sunParse->sunLight = sunLightMin;
         sunParse->diffuseFraction = 1.0;
         Dvar_SetFloat((dvar_s *)r_lightTweakSunLight, sunLightMin);
-        Dvar_ClearModified(r_lightTweakSunLight);
+        Dvar_ClearModified((dvar_s*)r_lightTweakSunLight);
     }
+    const auto &dvarValue = r_lightTweakSunDirection->current;
+
     Dvar_SetFloat((dvar_s *)r_lightTweakDiffuseFraction, sunParse->diffuseFraction);
     R_GetNormalizedColorFromDvar(r_lightTweakSunColor, sunParse->sunColor);
     sunParse->diffuseColorHasBeenSet = 1;
-    if (r_lightTweakSunDirection.integer == -12)
+    if (dvarValue.integer == -12)
         MyAssertHandler(".\\r_bsp.cpp", 148, 0, "%s", "r_lightTweakSunDirection->current.vector");
-    v1 = r_lightTweakSunDirection.integer + 12;
-    sunParse->angles[0] = *(float *)(r_lightTweakSunDirection.integer + 12);
+    v1 = dvarValue.integer + 12;
+    sunParse->angles[0] = *(float *)(dvarValue.integer + 12);
     sunParse->angles[1] = *(float *)(v1 + 4);
     sunParse->angles[2] = *(float *)(v1 + 8);
 }
@@ -181,17 +190,19 @@ void __cdecl R_CopyParseParamsToDvars(const SunLightParseParams *sunParse, int s
     float saveDirection_4; // [esp+18h] [ebp-8h]
     float saveDirection_8; // [esp+1Ch] [ebp-4h]
 
-    if ((*(_WORD *)(r_lightTweakSunDirection.integer + 8) & 0x1000) == 0)
+    const auto &dvarValue = r_lightTweakSunDirection->current;
+
+    if ((*(_WORD *)(dvarValue.integer + 8) & 0x1000) == 0)
         MyAssertHandler(
             ".\\r_bsp.cpp",
             239,
             0,
             "%s\n\t(r_lightTweakSunDirection->name) = %s",
             "(r_lightTweakSunDirection->flags & (1 << 12))",
-            *(const char **)r_lightTweakSunDirection.integer);
-    saveDirection = *(float *)(r_lightTweakSunDirection.integer + 12);
-    saveDirection_4 = *(float *)(r_lightTweakSunDirection.integer + 16);
-    saveDirection_8 = *(float *)(r_lightTweakSunDirection.integer + 20);
+            *(const char **)dvarValue.integer);
+    saveDirection = *(float *)(dvarValue.integer + 12);
+    saveDirection_4 = *(float *)(dvarValue.integer + 16);
+    saveDirection_8 = *(float *)(dvarValue.integer + 20);
     Dvar_SetFloat((dvar_s *)r_lightTweakAmbient, sunParse->ambientScale);
     Dvar_SetFloat((dvar_s *)r_lightTweakDiffuseFraction, sunParse->diffuseFraction);
     Dvar_SetFloat((dvar_s *)r_lightTweakSunLight, sunParse->sunLight);
@@ -214,7 +225,7 @@ void __cdecl R_CopyParseParamsToDvars(const SunLightParseParams *sunParse, int s
         sunParse->diffuseColor[2],
         1.0);
     Dvar_SetVec3(
-        (dvar_s *)r_lightTweakSunDirection.integer,
+        (dvar_s *)dvarValue.integer,
         sunParse->angles[0],
         sunParse->angles[1],
         sunParse->angles[2]);
@@ -225,15 +236,22 @@ void __cdecl R_CopyParseParamsToDvars(const SunLightParseParams *sunParse, int s
     Dvar_ChangeResetValue((dvar_s *)r_lightTweakSunColor, r_lightTweakSunColor->current);
     Dvar_ChangeResetValue((dvar_s *)r_lightTweakSunDiffuseColor, r_lightTweakSunDiffuseColor->current);
     Dvar_ChangeResetValue(
-        (dvar_s *)r_lightTweakSunDirection.integer,
-        *(DvarValue *)(r_lightTweakSunDirection.integer + 12));
+        (dvar_s *)dvarValue.integer,
+        *(DvarValue *)(dvarValue.integer + 12));
     if (savegame)
-        Dvar_SetVec3((dvar_s *)r_lightTweakSunDirection.integer, saveDirection, saveDirection_4, saveDirection_8);
+        Dvar_SetVec3((dvar_s *)dvarValue.integer, saveDirection, saveDirection_4, saveDirection_8);
 }
 
 void R_InitDynamicData()
 {
     R_InitStaticModelLighting();
+}
+
+void __cdecl R_SetWorldPtr_LoadObj(const char *name)
+{
+    rgp.world = R_LoadWorldInternal(name);
+    if (!rgp.world)
+        MyAssertHandler(".\\r_bsp.cpp", 275, 0, "%s", "rgp.world");
 }
 
 void __cdecl R_SetWorldPtr_FastFile(const char *name)

@@ -110,6 +110,69 @@ void QDECL Com_PrintMessage(int channel, char* msg, int error)
 
 }
 
+void __cdecl Debug_Frame(int localClientNum)
+{
+    unsigned int v1; // edx
+    int lastFrameIndex; // [esp+0h] [ebp-18h]
+    int newEvent; // [esp+4h] [ebp-14h]
+    int msec; // [esp+8h] [ebp-10h]
+    bgs_t *oldBgs; // [esp+Ch] [ebp-Ch]
+    int minMsec; // [esp+10h] [ebp-8h]
+    int newEvent2; // [esp+14h] [ebp-4h]
+
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\qcommon\\common.cpp", 4297, 0, "%s", "Sys_IsMainThread()");
+    oldBgs = bgs;
+    bgs = 0;
+    IN_Frame();
+    if (Sys_IsRemoteDebugClient())
+    {
+        minMsec = 33;
+    }
+    else
+    {
+        minMsec = 1;
+        if (com_maxfps->current.integer > 0 && !com_dedicated->current.integer)
+        {
+            minMsec = 1000 / com_maxfps->current.integer;
+            if (minMsec < 0)
+                MyAssertHandler(".\\qcommon\\common.cpp", 4319, 0, "%s", "minMsec >= 0");
+            if (!minMsec)
+                minMsec = 1;
+        }
+    }
+    v1 = com_lastFrameIndex & 0x80000000;
+    if (com_lastFrameIndex < 0)
+        v1 = 0;
+    lastFrameIndex = v1;
+    ++com_lastFrameIndex;
+    while (1)
+    {
+        newEvent = Scr_UpdateDebugSocket();
+        newEvent2 = Debug_EventLoop(localClientNum);
+        com_frameTime = Sys_Milliseconds();
+        if (com_lastFrameTime[lastFrameIndex] > com_frameTime)
+            com_lastFrameTime[lastFrameIndex] = com_frameTime;
+        msec = com_frameTime - com_lastFrameTime[lastFrameIndex];
+        if (newEvent || newEvent2 || msec >= minMsec)
+            break;
+        NET_Sleep(1u);
+    }
+    com_lastFrameTime[lastFrameIndex] = com_frameTime;
+    cls.realFrametime = Com_ModifyMsec(msec);
+    cls.realtime += cls.frametime;
+    CL_UpdateSound();
+    if (Scr_CanDrawScript())
+    {
+        R_BeginDebugFrame();
+        Scr_DrawScript();
+        R_EndDebugFrame();
+    }
+    if (bgs)
+        MyAssertHandler(".\\qcommon\\common.cpp", 4370, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
+    bgs = oldBgs;
+}
+
 void QDECL Com_Printf(int channel, const char* fmt, ...)
 {
 	char string[4100];

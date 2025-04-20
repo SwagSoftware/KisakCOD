@@ -303,3 +303,5 @@ int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2);
 
 
 extern scrDebuggerGlob_t scrDebuggerGlob;
+extern Scr_Breakpoint g_breakpoints[128];
+extern Scr_Breakpoint *g_breakpointsHead;

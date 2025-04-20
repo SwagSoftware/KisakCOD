@@ -11,6 +11,14 @@ typedef enum
     SE_CONSOLE = 0x3,
 } sysEventType_t;
 
+enum SphereEdgeTraceResult : __int32
+{                                       // ...
+    SPHERE_HITS_EDGE = 0x0,
+    SPHERE_MISSES_EDGE = 0x1,
+    SPHERE_MAY_HIT_V0 = 0x2,
+    SPHERE_MAY_HIT_V1 = 0x3,
+};
+
 struct field_t // sizeof=0x118
 {                                       // ...
 	int cursor;                         // ...
@@ -136,6 +144,8 @@ void Com_Frame(void);
 void __cdecl Com_ShutdownInternal(const char* finalmsg);
 void Com_Shutdown(const char* finalmsg);
 
+void __cdecl Debug_Frame(int localClientNum);
+
 void __cdecl Com_ShutdownWorld();
 void __cdecl Com_InitPlayerProfiles(int localClientNum);
 void __cdecl Com_PrintMessage(int channel, const char* msg, int error);
@@ -208,6 +218,7 @@ void __cdecl Com_InitialHull(
 	unsigned int pointCount,
 	unsigned int* hullOrder);
 void Com_InitHunkMemory();
+unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type);
 void __cdecl Com_InitSoundDevGuiGraphs();
 void Com_InitSoundDevGuiGraphs_LoadObj();
 void Com_InitSoundDevGuiGraphs_FastFile();
@@ -501,7 +512,7 @@ inline void __cdecl Dvar_SetStringByName(const char *dvarName, const char *value
 {
     Dvar_SetStringByName(dvarName, (char *)value);
 }
-const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, char *string, DvarSetSource source);
+const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, const char *string, DvarSetSource source);
 void __cdecl Dvar_SetFromStringByName(const char *dvarName, char *string);
 void __cdecl Dvar_SetCommand(const char *dvarName, char *string);
 void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *, DvarValue));
@@ -833,7 +844,7 @@ void __cdecl CM_TraceCapsuleThroughTriangle(
     int triIndex,
     const unsigned __int16 *indices,
     trace_t *trace);
-int __cdecl CM_TraceSphereThroughEdge(
+SphereEdgeTraceResult __cdecl CM_TraceSphereThroughEdge(
     const traceWork_t *tw,
     const float *sphereStart,
     const float *v0,
@@ -1002,6 +1013,8 @@ void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs);
 
 // cm_load_obj
 void __cdecl CM_LoadMapData_LoadObj(const char *name);
+cplane_s *__cdecl CM_GetPlanes();
+int __cdecl CM_GetPlaneCount();
 
 // cm_showcollision
 struct __declspec(align(4)) ShowCollisionBrushPt // sizeof=0x14

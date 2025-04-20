@@ -2,7 +2,107 @@
 #include "r_gfx.h"
 #include <universal/q_shared.h>
 
+#include <xanim/xanim.h>
 
+enum TrisType : __int32
+{                                       // ...
+    TRIS_TYPE_LAYERED = 0x0,
+    TRIS_TYPE_SIMPLE = 0x1,
+    TRIS_TYPE_COUNT = 0x2,
+};
+
+struct mnode_load_t // sizeof=0x10
+{
+    int cellIndex;
+    int planeIndex;
+    unsigned int children[2];
+};
+struct r_lightmapGroup_t // sizeof=0x8
+{                                       // ...
+    int wideCount;                      // ...
+    int highCount;                      // ...
+};
+struct LightDefCopyConfig // sizeof=0x8
+{                                       // ...
+    unsigned __int8 *dest;              // ...
+    unsigned int zoom;                  // ...
+};
+struct DiskLightRegion // sizeof=0x1
+{
+    unsigned __int8 hullCount;
+};
+struct r_lightmapMerge_t // sizeof=0x14
+{                                       // ...
+    unsigned __int8 index;
+    // padding byte
+    // padding byte
+    // padding byte
+    float shift[2];
+    float scale[2];
+};
+
+struct DiskTriangleSoup // sizeof=0x18
+{
+    unsigned __int16 materialIndex;
+    unsigned __int8 lightmapIndex;
+    unsigned __int8 reflectionProbeIndex;
+    unsigned __int8 primaryLightIndex;
+    bool castsSunShadow;
+    unsigned __int8 unused[2];
+    int vertexLayerData;
+    unsigned int firstVertex;
+    unsigned __int16 vertexCount;
+    unsigned __int16 indexCount;
+    int firstIndex;
+};
+
+struct DiskTriangleSoup_Version8 // sizeof=0x10
+{
+    unsigned __int16 materialIndex;
+    unsigned __int8 lightmapIndex;
+    unsigned __int8 reflectionProbeIndex;
+    int firstVertex;
+    unsigned __int16 vertexCount;
+    unsigned __int16 indexCount;
+    int firstIndex;
+};
+
+struct DiskTriangleSoup_Version12 // sizeof=0x14
+{
+    unsigned __int16 materialIndex;
+    unsigned __int8 lightmapIndex;
+    unsigned __int8 reflectionProbeIndex;
+    int vertexLayerData;
+    int firstVertex;
+    unsigned __int16 vertexCount;
+    unsigned __int16 indexCount;
+    int firstIndex;
+};
+
+
+struct GfxBspLoad // sizeof=0x2A8
+{                                       // ...
+    unsigned int bspVersion;            // ...
+    TrisType trisType;                  // ...
+    const dmaterial_t *diskMaterials;   // ...
+    unsigned int materialCount;
+    float outdoorMins[3];               // ...
+    float outdoorMaxs[3];               // ...
+    r_lightmapMerge_t lmapMergeInfo[32];
+};
+
+struct r_globals_load_t // sizeof=0x2C8
+{                                       // ...
+    int *cullGroupIndices;              // ...
+    float (*portalVerts)[3];            // ...
+    GfxAabbTree *aabbTrees;             // ...
+    int aabbTreeCount;                  // ...
+    int nodeCount;                      // ...
+    mnode_load_t *nodes;                // ...
+    int reflectionProbesLoaded;         // ...
+    int staticModelReflectionProbesLoaded; // ...
+    GfxBspLoad load;                    // ...
+};
 
 // r_bsp
 void __cdecl R_ReloadWorld();
@@ -20,6 +120,7 @@ void __cdecl R_SetWorldPtr_FastFile(const char *name);
 extern GfxWorld s_world;
 
 // r_bsp_load_obj
+GfxWorld *__cdecl R_LoadWorldInternal(const char *name);
 void __cdecl R_InterpretSunLightParseParamsIntoLights(SunLightParseParams *sunParse, GfxLight *sunLight);
 void __cdecl R_SetUpSunLight(const float *sunColor, const float *sunDirection, GfxLight *light);
 void __cdecl R_InitPrimaryLights(GfxLight *primaryLights);

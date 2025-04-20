@@ -680,21 +680,29 @@ struct __declspec(align(4)) UI_ScrollPane : UI_Component // sizeof=0x34
 
 struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
 {
+
     unsigned int bufferIndex;
     int currentTopLine;
     const char *currentBufPos;
     Scr_Breakpoint *breakpointHead;
     Scr_Breakpoint *builtinHead;
     int numCols;
+
+
+    char *GetFilename();
 };
 
 struct Scr_AbstractScriptList : UI_LinesComponent // sizeof=0x28
 {                                       // ...
     Scr_ScriptWindow **scriptWindows;   // ...
+
+    bool AddEntryName(const char *filename, bool select);
+    void AddEntry(Scr_ScriptWindow *scriptWindow, bool select);
 };
 
 struct Scr_ScriptList : Scr_AbstractScriptList // sizeof=0x28
 {                                       // ...
+    void LoadScriptPos();
 };
 
 struct Scr_OpenScriptList : Scr_AbstractScriptList // sizeof=0x2C
@@ -747,6 +755,9 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
 
     void UpdateHeight();
 
+    void FreeWatchElement(Scr_WatchElement_s *element);
+    Scr_WatchElement_s *RemoveBreakpoint(Scr_WatchElement_s *element);
+
     void SetSelectedElement(Scr_WatchElement_s *selElement, bool user);
     bool SetSelectedElement_r(Scr_WatchElement_s *selElement, Scr_WatchElement_s *element, int *currentLine, bool user);
 
@@ -769,6 +780,7 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     void LoadSelectedLine(Scr_SelectedLineInfo *info);
     void SaveSelectedLine(Scr_SelectedLineInfo *info);
 
+    void UpdateBreakpoints(bool add);
 };
 
 struct Scr_SourcePos2_t // sizeof=0x8

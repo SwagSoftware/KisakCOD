@@ -72,6 +72,47 @@ union XAnimDeltaPartQuatData // sizeof=0x8
     XAnimDeltaPartQuatDataFrames frames;
     __int16 frame0[2];
 };
+union XAnimPartQuatFrames // sizeof=0x4
+{                                       // ...
+    __int16 (*frames)[4];
+    __int16 (*frames2)[2];
+};
+struct __declspec(align(4)) XAnimPartQuatDataFrames // sizeof=0x8
+{                                       // ...
+    XAnimPartQuatFrames u;
+    XAnimDynamicIndices indices;
+    // padding byte
+    // padding byte
+};
+union XAnimPartQuatData // sizeof=0x8
+{                                       // ...
+    XAnimPartQuatDataFrames frames;
+    __int16 frame0[4];
+    __int16 frame02[2];
+};
+struct XAnimPartQuat // sizeof=0xC
+{
+    unsigned __int16 size;
+    // padding byte
+    // padding byte
+    XAnimPartQuatData u;
+};
+struct __declspec(align(4)) XAnimPartQuatPtr // sizeof=0x8
+{                                       // ...
+    XAnimPartQuat *quat;                // ...
+    unsigned __int8 partIndex;          // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+struct __declspec(align(4)) XAnimPartTransPtr // sizeof=0x8
+{                                       // ...
+    XAnimPartTrans *trans;              // ...
+    unsigned __int8 partIndex;          // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
 
 struct XAnimDeltaPartQuat // sizeof=0xC
 {
@@ -84,6 +125,12 @@ struct XAnimDeltaPart // sizeof=0x8
 {
     XAnimPartTrans *trans;
     XAnimDeltaPartQuat *quat;
+};
+struct XAnimTime // sizeof=0xC
+{                                       // ...
+    float time;
+    float frameFrac;
+    int frameIndex;
 };
 struct XAnimParts // sizeof=0x58
 {                                       // ...
@@ -1337,12 +1384,13 @@ bool __cdecl IsNodeAdditive(const XAnimEntry* node);
 BOOL __cdecl IsLeafNode(const XAnimEntry* anim);
 XAnim_s* __cdecl XAnimCreateAnims(const char* debugName, unsigned int size, void* (__cdecl* Alloc)(int));
 void __cdecl XAnimFreeList(XAnim_s* anims);
+void __cdecl XAnimFree(XAnimParts *parts);
 int __cdecl XAnimTreeSize();
 XAnimTree_s* __cdecl XAnimCreateTree(XAnim_s* anims, void* (__cdecl* Alloc)(int));
 void __cdecl XAnimFreeTree(XAnimTree_s* tree, void(__cdecl* Free)(void*, int));
 void XAnimCheckTreeLeak();
 XAnim_s* __cdecl XAnimGetAnims(const XAnimTree_s* tree);
-void XAnimResetAnimMap(XModelNameMap a1, const DObj_s* obj, unsigned int infoIndex);
+void XAnimResetAnimMap(const DObj_s* obj, unsigned int infoIndex);
 void __cdecl XAnimInitModelMap(XModel* const* models, unsigned int numModels, XModelNameMap* modelMap);
 void __cdecl XAnimResetAnimMap_r(XModelNameMap* modelMap, unsigned int infoIndex);
 void __cdecl XAnimResetAnimMapLeaf(const XModelNameMap* modelMap, unsigned int infoIndex);
@@ -1555,3 +1603,4 @@ XAnimInfo* __cdecl GetAnimInfo(int infoIndex);
 
 // xanim_load_obj
 XModelPieces *__cdecl XModelPiecesPrecache(const char *name, void *(__cdecl *Alloc)(int));
+XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int));

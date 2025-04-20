@@ -222,6 +222,7 @@ struct XModelDefault // sizeof=0x4C
 };
 
 // xmodel
+void __cdecl XModelPartsFree(XModelPartsLoad *modelParts);
 bool __cdecl XModelBad(const XModel *model);
 void __cdecl TRACK_xmodel();
 XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int));

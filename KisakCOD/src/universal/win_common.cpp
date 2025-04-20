@@ -143,6 +143,45 @@ void __cdecl Sys_Mkdir(const char *path)
     _mkdir(path);
 }
 
+BOOL __cdecl Sys_RemoveDirTree(const char *path)
+{
+    bool v2; // [esp+8h] [ebp-250h]
+    int handle; // [esp+1Ch] [ebp-23Ch]
+    char childPath[256]; // [esp+20h] [ebp-238h] BYREF
+    _finddata64i32_t find; // [esp+120h] [ebp-138h] BYREF
+    bool hasError; // [esp+252h] [ebp-6h]
+    bool hasTrailingSeparater; // [esp+253h] [ebp-5h]
+    int length; // [esp+254h] [ebp-4h]
+
+    length = strlen(path);
+    v2 = path[length - 1] == 92 || path[length - 1] == 47;
+    hasTrailingSeparater = v2;
+    if (v2)
+        Com_sprintf(childPath, 0x100u, "%s*", path);
+    else
+        Com_sprintf(childPath, 0x100u, "%s\\*", path);
+    handle = _findfirst64i32(childPath, &find);
+    if (handle == -1)
+        return _rmdir(path) != -1;
+    hasError = 0;
+    do
+    {
+        if (find.name[0] != 46 || find.name[1] && (find.name[1] != 46 || find.name[2]))
+        {
+            if (hasTrailingSeparater)
+                Com_sprintf(childPath, 0x100u, "%s%s", path, find.name);
+            else
+                Com_sprintf(childPath, 0x100u, "%s\\%s", path, find.name);
+            if ((find.attrib & 0x10) != 0)
+                hasError = !Sys_RemoveDirTree(childPath);
+            else
+                hasError = remove(childPath) == -1;
+        }
+    } while (!hasError && _findnext64i32(handle, &find) != -1);
+    _findclose(handle);
+    return !hasError && _rmdir(path) != -1;
+}
+
 void __cdecl Sys_ListFilteredFiles(
     HunkUser *user,
     const char *basedir,

@@ -641,14 +641,6 @@ void __cdecl Image_CubeMapFaceDir(int face, float *dir)
     }
 }
 
-void __cdecl Vec4Mad(const float *start, float scale, const float *dir, float *result)
-{
-    *result = scale * *dir + *start;
-    result[1] = scale * dir[1] + start[1];
-    result[2] = scale * dir[2] + start[2];
-    result[3] = scale * dir[3] + start[3];
-}
-
 void __cdecl Image_CalcCubeMipMapTexel32SubSample(
     int face,
     int u,

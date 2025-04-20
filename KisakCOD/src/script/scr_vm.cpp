@@ -18,9 +18,18 @@
 #include <ui/ui.h>
 #include <win32/win_input.h>
 #include <client/client.h>
+#include <qcommon/mem_track.h>
+#include "scr_evaluate.h"
+#include "scr_memorytree.h"
+#include "scr_parsetree.h"
+#include <universal/profile.h>
+#include <gfx_d3d/r_dvars.h>
+#include <qcommon/threads.h>
 
 scrVmPub_t scrVmPub;
 scrVmGlob_t scrVmGlob;
+int g_script_error[33][16];
+scrVmDebugPub_t scrVmDebugPub;
 
 function_stack_t pos;
 
@@ -284,17 +293,20 @@ void __cdecl Scr_InitDebuggerMain()
             MyAssertHandler(".\\script\\scr_debugger.cpp", 7941, 0, "%s", "!scrDebuggerGlob.debugger_inited_main");
         if (!Sys_IsRemoteDebugClient())
         {
-            scrDebuggerGlob.variableBreakpoints = (Scr_WatchElementDoubleNode_t**)Hunk_AllocDebugMem(
-                393216,
-                /*"scrDebuggerGlob.variableBreakpoints"*/);
+            scrDebuggerGlob.variableBreakpoints = (Scr_WatchElementDoubleNode_t **)Hunk_AllocDebugMem(
+                393216);/*,
+                "scrDebuggerGlob.variableBreakpoints");*/
             memset((unsigned __int8*)scrDebuggerGlob.variableBreakpoints, 0, 0x60000u);
             scrDebuggerGlob.assignHead = 0;
             scrDebuggerGlob.assignHeadCodePos = 0;
             scrDebuggerGlob.disableBreakpoints = 0;
         }
-        UI_ScrollPane::Init(&scrDebuggerGlob.scriptScrollPane);
-        UI_ScrollPane::Init(&scrDebuggerGlob.miscScrollPane);
-        UI_VerticalDivider::Init(&scrDebuggerGlob.mainWindow);
+        //UI_ScrollPane::Init(&scrDebuggerGlob.scriptScrollPane);
+        scrDebuggerGlob.scriptScrollPane.Init();
+        //UI_ScrollPane::Init(&scrDebuggerGlob.miscScrollPane);
+        scrDebuggerGlob.miscScrollPane.Init();
+        //UI_VerticalDivider::Init(&scrDebuggerGlob.mainWindow);
+        scrDebuggerGlob.mainWindow.Init();
         scrDebuggerGlob.debugger_inited_main = 1;
     }
 }
@@ -337,11 +349,13 @@ void __cdecl Scr_InitDebugger()
             MyAssertHandler(".\\script\\scr_debugger.cpp", 8028, 0, "%s", "!scrDebuggerGlob.debugger_inited");
         if (!Sys_IsRemoteDebugClient())
         {
-            scrDebuggerGlob.breakpoints = (char*)Hunk_AllocDebugMem(scrCompilePub.programLen, "scrDebuggerGlob.breakpoints");
+            scrDebuggerGlob.breakpoints = (char *)Hunk_AllocDebugMem(scrCompilePub.programLen);// , "scrDebuggerGlob.breakpoints");
             memset((unsigned __int8*)scrDebuggerGlob.breakpoints, 0x7Fu, scrCompilePub.programLen);
         }
-        Scr_ScriptList::Init(&scrDebuggerGlob.scriptList);
-        Scr_OpenScriptList::Init(&scrDebuggerGlob.openScriptList);
+        //Scr_ScriptList::Init(&scrDebuggerGlob.scriptList);
+        scrDebuggerGlob.scriptList.Init();
+        //Scr_OpenScriptList::Init(&scrDebuggerGlob.openScriptList);
+        scrDebuggerGlob.openScriptList.Init();
         scrDebuggerGlob.debugger_inited = 1;
         if (cls.uiStarted)
             UI_Component_Init();
@@ -353,8 +367,10 @@ void __cdecl Scr_ShutdownDebugger()
     if (scrVarPub.developer && scrDebuggerGlob.debugger_inited)
     {
         scrDebuggerGlob.debugger_inited = 0;
-        Scr_OpenScriptList::Shutdown(&scrDebuggerGlob.openScriptList);
-        Scr_ScriptList::Shutdown(&scrDebuggerGlob.scriptList);
+        //Scr_OpenScriptList::Shutdown(&scrDebuggerGlob.openScriptList);
+        scrDebuggerGlob.openScriptList.Shutdown();
+        //Scr_ScriptList::Shutdown(&scrDebuggerGlob.scriptList);
+        scrDebuggerGlob.scriptList.Shutdown();
         if (!Sys_IsRemoteDebugClient())
         {
             if (scrDebuggerGlob.breakpoints)
@@ -387,10 +403,13 @@ void __cdecl Scr_InitDebuggerSystem()
         scrDebuggerGlob.breakpointPos.bufferIndex = -1;
         scrDebuggerGlob.atBreakpoint = 0;
         scrDebuggerGlob.run_debugger = 0;
-        Scr_ScriptWatch::Init(&scrDebuggerGlob.scriptWatch);
+        //Scr_ScriptWatch::Init(&scrDebuggerGlob.scriptWatch);
+        scrDebuggerGlob.scriptWatch.Init();
         scrDebuggerGlob.gainFocusTime = 0;
-        Scr_ScriptList::LoadScriptPos(&scrDebuggerGlob.scriptList);
-        Scr_ScriptCallStack::Init(&scrDebuggerGlob.scriptCallStack);
+        //Scr_ScriptList::LoadScriptPos(&scrDebuggerGlob.scriptList);
+        scrDebuggerGlob.scriptList.LoadScriptPos();
+        //Scr_ScriptCallStack::Init(&scrDebuggerGlob.scriptCallStack);
+        scrDebuggerGlob.scriptCallStack.Init();
         if (Sys_IsRemoteDebugClient())
         {
             scrDebuggerGlob.atBreakpoint = 1;
@@ -413,7 +432,10 @@ void __cdecl Scr_InitDebuggerSystem()
         scrDebuggerGlob.scriptCallStack.selectionParent = &scrDebuggerGlob.miscScrollPane;
         Scr_SetSelectionComp(&scrDebuggerGlob.miscScrollPane);
         if (!Sys_IsRemoteDebugClient())
-            Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
+        {
+            //Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
+            scrDebuggerGlob.scriptWatch.UpdateBreakpoints(1);
+        }
     }
 }
 
@@ -446,7 +468,8 @@ void __cdecl Scr_ShutdownDebuggerSystem(int restart)
         {
             scrDebuggerGlob.debugger_inited_system = 0;
             scrVarPub.evaluate = 0;
-            Scr_ScriptWatch::Shutdown(&scrDebuggerGlob.scriptWatch);
+            //Scr_ScriptWatch::Shutdown(&scrDebuggerGlob.scriptWatch);
+            scrDebuggerGlob.scriptWatch.Shutdown();
             if (!Sys_IsRemoteDebugClient())
             {
                 if (scrDebuggerGlob.nextBreakpointCodePos)
@@ -576,16 +599,16 @@ void __cdecl Scr_InitOpcodeLookup()
         scrParserGlob.delayedSourceIndex = -1;
         scrParserGlob.opcodeLookupMaxLen = 0x40000;
         scrParserGlob.opcodeLookupLen = 0;
-        scrParserGlob.opcodeLookup = (OpcodeLookup*)Hunk_AllocDebugMem(6291456, "Scr_InitOpcodeLookup");
+        scrParserGlob.opcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(6291456);// , "Scr_InitOpcodeLookup");
         memset((unsigned __int8*)scrParserGlob.opcodeLookup, 0, 24 * scrParserGlob.opcodeLookupMaxLen);
         scrParserGlob.sourcePosLookupMaxLen = 0x40000;
         scrParserGlob.sourcePosLookupLen = 0;
-        scrParserGlob.sourcePosLookup = (SourceLookup*)Hunk_AllocDebugMem(0x200000, "Scr_InitOpcodeLookup");
+        scrParserGlob.sourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(0x200000);// , "Scr_InitOpcodeLookup");
         scrParserGlob.currentCodePos = 0;
         scrParserGlob.currentSourcePosCount = 0;
         scrParserGlob.sourceBufferLookupMaxLen = 256;
         scrParserPub.sourceBufferLookupLen = 0;
-        scrParserPub.sourceBufferLookup = (SourceBufferInfo*)Hunk_AllocDebugMem(11264, "Scr_InitOpcodeLookup");
+        scrParserPub.sourceBufferLookup = (SourceBufferInfo *)Hunk_AllocDebugMem(11264);// , "Scr_InitOpcodeLookup");
     }
 }
 

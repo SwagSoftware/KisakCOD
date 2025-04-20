@@ -1,4 +1,5 @@
 #include "qcommon.h"
+#include <EffectsCore/fx_system.h>
 
 void __cdecl CM_TraceThroughAabbTree(const traceWork_t *tw, const CollisionAabbTree *aabbTree, trace_t *trace)
 {
@@ -354,7 +355,7 @@ void __cdecl CM_TraceCapsuleThroughTriangle(
     }
 }
 
-int __cdecl CM_TraceSphereThroughEdge(
+SphereEdgeTraceResult __cdecl CM_TraceSphereThroughEdge(
     const traceWork_t *tw,
     const float *sphereStart,
     const float *v0,
@@ -394,7 +395,7 @@ int __cdecl CM_TraceSphereThroughEdge(
     radiusSq = radius * radius;
     discriminant = radiusSq * perpendicularLenSq - scaledDist * scaledDist;
     if (discriminant <= 0.0)
-        return 1;
+        return SPHERE_MISSES_EDGE;
     edgeLenSq = Vec3LengthSq(v0_v1);
     v11 = discriminant * edgeLenSq;
     v10 = sqrt(v11);
@@ -404,10 +405,10 @@ int __cdecl CM_TraceSphereThroughEdge(
     t = tScaled / perpendicularLenSq;
     fracLeave = t + f;
     if (fracLeave < 0.0)
-        return 1;
+        return SPHERE_MISSES_EDGE;
     fracEnter = t - f;
     if (trace->fraction <= (double)fracEnter)
-        return 1;
+        return SPHERE_MISSES_EDGE;
     if (fracEnter >= 0.0)
     {
         Vec3Mad(startDelta, fracEnter, tw->delta, hitDelta);
@@ -448,16 +449,16 @@ int __cdecl CM_TraceSphereThroughEdge(
                         v6);
                 }
                 trace->fraction = fracEnter;
-                return 0;
+                return SPHERE_HITS_EDGE;
             }
             else
             {
-                return 3;
+                return SPHERE_MAY_HIT_V1;
             }
         }
         else
         {
-            return 2;
+            return SPHERE_MAY_HIT_V0;
         }
     }
     else
@@ -475,21 +476,21 @@ int __cdecl CM_TraceSphereThroughEdge(
                     trace->fraction = 0.0;
                     discriminant = tw->radius * tw->radius * perpendicularLenSq - scaledDist * scaledDist;
                     trace->startsolid = edgeLenSq * discriminant > tScaled * tScaled;
-                    return 0;
+                    return SPHERE_HITS_EDGE;
                 }
                 else
                 {
-                    return 1;
+                    return SPHERE_MISSES_EDGE;
                 }
             }
             else
             {
-                return 3;
+                return SPHERE_MAY_HIT_V1;
             }
         }
         else
         {
-            return 2;
+            return SPHERE_MAY_HIT_V0;
         }
     }
 }

@@ -5,6 +5,7 @@
 #include "com_files.h"
 #include <qcommon/cmd.h>
 #include <database/database.h>
+#include "q_parse.h"
 
 SoundAliasGlobals g_sa;
 const char ***varXStringPtr;

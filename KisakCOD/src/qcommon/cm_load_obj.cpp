@@ -1,6 +1,9 @@
 #include "qcommon.h"
 #include <xanim/xmodel.h>
 #include <universal/com_memory.h>
+#include "com_bsp.h"
+#include <universal/q_parse.h>
+#include <DynEntity/DynEntity_client.h>
 
 void __cdecl CM_InitStaticModel(cStaticModel_s *staticModel, float *origin, float *angles, float scale)
 {
@@ -80,6 +83,11 @@ unsigned __int8 *__cdecl CM_Hunk_AllocXModelColl(unsigned int size)
     return Hunk_Alloc(size, "CM_Hunk_AllocXModelColl", 27);
 }
 
+unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type)
+{
+    return Hunk_Alloc(size, name, type);
+}
+
 XModel *__cdecl CM_XModelPrecache(char *name)
 {
     return XModelPrecache(
@@ -117,9 +125,9 @@ char __cdecl CM_CreateStaticModel(cStaticModel_s *staticModel, char *name, float
     if ((LODWORD(scale) & 0x7F800000) == 0x7F800000)
         MyAssertHandler(".\\qcommon\\cm_staticmodel_load_obj.cpp", 62, 0, "%s", "!IS_NAN(scale)");
     if (!name || !*name)
-        Com_Error(ERR_DROP, &byte_894AC8, *origin, origin[1], origin[2]);
+        Com_Error(ERR_DROP, "Missing model name at %.0f %.0f %.0f", *origin, origin[1], origin[2]);
     if (scale == 0.0)
-        Com_Error(ERR_DROP, &byte_894AA4, name);
+        Com_Error(ERR_DROP, "Static model [%s] has scale of 0.0", name);
     model = CM_XModelPrecache(name);
     if (!model)
         return 0;
@@ -287,3 +295,14 @@ void __cdecl CM_LoadMapData_LoadObj(const char *name)
     }
 }
 
+cplane_s *__cdecl CM_GetPlanes()
+{
+    if (!cm.planes)
+        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 1412, 0, "%s", "cm.planes");
+    return cm.planes;
+}
+
+int __cdecl CM_GetPlaneCount()
+{
+    return cm.planeCount;
+}

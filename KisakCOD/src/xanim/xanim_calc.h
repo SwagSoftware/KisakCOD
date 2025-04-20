@@ -9,6 +9,16 @@ struct XAnimCalcAnimInfo // sizeof=0x6020
     bitarray<128> ignorePartBits;
 };
 
+struct __declspec(align(4)) XAnimToXModel // sizeof=0x94
+{                                       // ...
+    bitarray<128> partBits;             // ...
+    unsigned __int8 boneCount;          // ...
+    unsigned __int8 boneIndex[128];     // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+
 void __cdecl XAnimCalc(
     const DObj_s *obj,
     XAnimInfo *info,
@@ -55,3 +65,27 @@ void __cdecl XAnimWeightedAccumLerpedTrans(
     const float *dataInt,
     DObjAnimMat *totalRotTrans);
 void __cdecl XAnimWeightedAccumTrans(float weightScale, int *dataInt, DObjAnimMat *totalRotTrans);
+
+void __cdecl XAnim_CalcRotDeltaDuring_unsigned_short_(
+    const XAnimDeltaPart *animDelta,
+    float time,
+    int frameCount,
+    float *rotDelta);
+
+void __cdecl XAnim_CalcPosDeltaDuring_unsigned_short_(
+    const XAnimDeltaPart *animDelta,
+    float time,
+    int frameCount,
+    float4 *posDelta);
+
+void __cdecl XAnim_CalcRotDeltaDuring_unsigned_char_(
+    const XAnimDeltaPart *animDelta,
+    float time,
+    int frameCount,
+    float *rotDelta);
+
+void __cdecl XAnim_CalcPosDeltaDuring_unsigned_char_(
+    const XAnimDeltaPart *animDelta,
+    float time,
+    int frameCount,
+    float4 *posDelta);

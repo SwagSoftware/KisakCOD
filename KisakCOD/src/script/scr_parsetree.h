@@ -47,3 +47,6 @@ sval_u __cdecl debugger_node4(debugger_sval_s *type, sval_u val1, sval_u val2, s
 sval_u __cdecl debugger_prepend_node(sval_u val1, sval_u val2);
 sval_u __cdecl debugger_buffer(debugger_sval_s *type, char *buf, unsigned int size, int alignment);
 sval_u __cdecl debugger_string(debugger_sval_s *type, char *s);
+
+
+extern HunkUser *g_allocNodeUser;

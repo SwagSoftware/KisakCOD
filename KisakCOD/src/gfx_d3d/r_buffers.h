@@ -31,4 +31,6 @@ void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle);
 
 void __cdecl R_FinishStaticIndexBuffer(IDirect3DIndexBuffer9 *ib);
 
+void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData, unsigned int sizeInBytes);
+
 extern GfxBuffers gfxBuf;

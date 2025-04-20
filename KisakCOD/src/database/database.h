@@ -669,6 +669,8 @@ void __cdecl DB_LoadDObjs();
 
 extern XAssetList *varXAssetList;
 
+fileData_s *com_fileDataHashTable[1024];
+
 extern unsigned int volatile g_mainThreadBlocked;
 
 extern unsigned int g_streamDelayIndex;

@@ -474,10 +474,8 @@ void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum)
         lineNum,
         0);
 
-    Scr_AbstractScriptList::AddEntry(
-        &scrDebuggerGlob.openScriptList,
-        scrDebuggerGlob.scriptList.scriptWindows[sortedIndex],
-        0);
+    //Scr_AbstractScriptList::AddEntry(&scrDebuggerGlob.openScriptList, scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
+    scrDebuggerGlob.openScriptList.AddEntry(scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
 }
 
 unsigned int __cdecl Scr_GetLineNum(unsigned int bufferIndex, unsigned int sourcePos)
@@ -1416,7 +1414,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
             24 * profileCount / 24,
             (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))Scr_CompareProfileTimes);
         Com_Printf(23, "\n");
-        profile = //Profile_GetScript();
+        profile = Profile_GetScript();
             maxNameLength = 0;
         for (profileIndexa = 0; profileIndexa < 40; ++profileIndexa)
         {

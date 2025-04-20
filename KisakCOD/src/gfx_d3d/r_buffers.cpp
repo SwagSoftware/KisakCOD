@@ -5,6 +5,7 @@
 #include "r_dvars.h"
 #include "rb_logfile.h"
 #include "r_utils.h"
+#include <universal/profile.h>
 
 
 //struct GfxBuffers gfxBuf   85b3aa20     gfx_d3d : r_buffers.obj
@@ -562,4 +563,31 @@ void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle)
     if (!handle)
         MyAssertHandler(".\\r_buffers.cpp", 153, 0, "%s", "handle");
     handle->Unlock();
+}
+
+void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData, unsigned int sizeInBytes)
+{
+    int dummyData; // [esp+30h] [ebp-8h] BYREF
+    void *dstData; // [esp+34h] [ebp-4h]
+
+    if (r_loadForRenderer->current.enabled)
+    {
+        if ((srcData == 0) != (sizeInBytes == 0))
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 301, 0, "%s", "(srcData == NULL) == (sizeInBytes == 0)");
+        if (!sizeInBytes)
+        {
+            dummyData = 0;
+            srcData = &dummyData;
+            sizeInBytes = 4;
+        }
+        dstData = R_AllocStaticVertexBuffer(vb, sizeInBytes);
+        Profile_Begin(166);
+        Com_Memcpy(dstData, srcData, sizeInBytes);
+        Profile_EndInternal(0);
+        R_FinishStaticVertexBuffer(*vb);
+    }
+    else
+    {
+        *vb = 0;
+    }
 }

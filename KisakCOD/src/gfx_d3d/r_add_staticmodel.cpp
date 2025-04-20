@@ -14,6 +14,12 @@
 #include "r_pretess.h"
 #include <universal/profile.h>
 #include "r_buffers.h"
+#include "r_staticmodelcache.h"
+#include <cgame/cg_local.h>
+
+int g_dumpStaticModelCount;
+int g_dumpStaticModelFileHandle;
+char g_dumpStaticModelFilePath[20] = "staticModelInfo.csv";
 
 char __cdecl R_PreTessStaticModelCachedList(
     const XModel *model,
@@ -582,6 +588,8 @@ void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
     FS_Write(&dest, &v2[strlen(&dest)] - v2, fileHandle);
 }
 
+unsigned int _S1_0; 
+float radius2pixels;
 void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst *smodelDrawInst, const float dist)
 {
     float v3; // [esp+5Ch] [ebp-101Ch]
@@ -778,7 +786,7 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
                             }
                             else
                             {
-                                *v21 = surfData.drawSurf[2].current;
+                                *v21 = (uint16)surfData.drawSurf[2].current;
                             }
                         }
                         else
@@ -862,7 +870,7 @@ void __cdecl R_SkinStaticModelsShadowForLod(
                     0,
                     "%s",
                     "Material_HasTechnique( material, shadowmapBuildTechType )");
-            *(unsigned int *)&drawSurf.fields = material->info.drawSurf.fields;
+            drawSurf.fields = material->info.drawSurf.fields;
             HIDWORD(drawSurf.packed) = ((surfType & 0xF) << 18) | HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF;
             if (surfType != 4
                 || (!dx.deviceLost ? (enabled = r_pretess->current.enabled) : (enabled = 0),
@@ -1033,7 +1041,7 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
                         }
                         else
                         {
-                            *v23 = (uint16*)surfData.drawSurf[1].end;
+                            *v23 = (uint16)surfData.drawSurf[1].end;
                         }
                     }
                     else

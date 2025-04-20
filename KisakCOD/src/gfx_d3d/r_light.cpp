@@ -13,6 +13,20 @@
 LightGlobals lightGlob;
 int s_lmapPixelsUsedForFalloff;
 
+void __cdecl R_EnumLightDefs(void(__cdecl *func)(GfxLightDef *, void *), void *data)
+{
+    GfxLightDef *header; // [esp+0h] [ebp-8h]
+    int defIndex; // [esp+4h] [ebp-4h]
+
+    for (defIndex = 0; defIndex < lightGlob.defCount; ++defIndex)
+    {
+        header = lightGlob.defs[defIndex];
+        if (!header)
+            MyAssertHandler(".\\r_light.cpp", 118, 0, "%s", "header.lightDef");
+        func(header, data);
+    }
+}
+
 unsigned __int8 *__cdecl R_LoadLightImage(unsigned __int8 *readPos, GfxLightImage *lightImage)
 {
     unsigned int v3; // [esp+0h] [ebp-18h]

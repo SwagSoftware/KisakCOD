@@ -19,6 +19,7 @@ struct PhysicalMemory // sizeof=0x21C
 };
 
 void __cdecl PMem_Init();
+void __cdecl PMem_DumpMemStats();
 void __cdecl PMem_InitPhysicalMemory(PhysicalMemory *pmem, unsigned __int8 *memory, unsigned int memorySize);
 void __cdecl PMem_BeginAlloc(const char *name, unsigned int allocType);
 void __cdecl PMem_BeginAllocInPrim(PhysicalMemoryPrim *prim, const char *name);

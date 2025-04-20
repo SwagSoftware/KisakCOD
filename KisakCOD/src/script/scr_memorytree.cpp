@@ -7,7 +7,7 @@
 scrMemTreePub_t scrMemTreePub;
 int marker_scr_memorytree;
 
-static scrMemTreeGlob_t scrMemTreeGlob;
+scrMemTreeGlob_t scrMemTreeGlob;
 
 struct scrMemTreeDebugGlob_t // sizeof=0x20000
 {                                       // ...

@@ -7,6 +7,10 @@
 #include "threads.h"
 #include <win32/win_local.h>
 #include <universal/com_files.h>
+#include <script/scr_debugger.h>
+#include <database/db_registry.cpp>
+#include <server/sv_game.h>
+#include <server_mp/server.h>
 
 static cmd_function_s* cmd_functions = NULL;
 

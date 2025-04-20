@@ -1,5 +1,25 @@
 #include "dobj.h"
 #include "xmodel.h"
+#include <qcommon/qcommon.h>
+#include <script/scr_memorytree.h>
+#include <physics/phys_local.h>
+#include "dobj_utils.h"
+
+struct SavedDObjModel // sizeof=0x2
+{                                       // ...
+    unsigned __int16 boneName;
+};
+
+struct SavedDObj // sizeof=0x60
+{                                       // ...
+    SavedDObjModel dobjModels[32];
+    XModel **models;                    // ...
+    unsigned int ignoreCollision;       // ...
+    unsigned __int16 numModels;         // ...
+    unsigned __int16 entnum;            // ...
+    XAnimTree_s *tree;                  // ...
+    unsigned int hidePartBits[4];       // ...
+};
 
 unsigned int g_empty;
 
@@ -198,7 +218,7 @@ void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree)
     if (tree)
     {
         if (tree->children)
-            XAnimResetAnimMap((XModelNameMap)&savedregs, obj, tree->children);
+            XAnimResetAnimMap(obj, tree->children);
     }
 }
 
@@ -278,7 +298,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
             if (!currNumModels)
                 MyAssertHandler(".\\xanim\\dobj.cpp", 198, 0, "%s", "currNumModels");
             DObjDumpCreationInfo(dobjModels, numModels);
-            Com_Error(ERR_DROP, &byte_8CB220, models[0]->name, 128);
+            Com_Error(ERR_DROP, "dobj for xmodel %s has more than %d bones (see console for details)", models[0]->name, 128);
         }
         models[currNumModels] = model;
         modelParents[currNumModels] = -1;
@@ -462,7 +482,7 @@ void __cdecl DObjFree(DObj_s *obj)
     models = obj->models;
     if (models)
     {
-        MT_Free(models, 5 * obj->numModels);
+        MT_Free((byte*)models, 5 * obj->numModels);
         obj->models = 0;
     }
     if (obj->tree)
@@ -867,9 +887,9 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
         MyAssertHandler(".\\xanim\\dobj.cpp", 1134, 0, "%s", "obj->duplicateParts");
     pos = (const unsigned __int8 *)(SL_ConvertToString(obj->duplicateParts) + 16);
     v77 = *start;
-    if ((LOunsigned int(v77) & 0x7F800000) == 0x7F800000
-        || (v76 = start[1], (LOunsigned int(v76) & 0x7F800000) == 0x7F800000)
-        || (v75 = start[2], (LOunsigned int(v75) & 0x7F800000) == 0x7F800000))
+    if ((LODWORD(v77) & 0x7F800000) == 0x7F800000
+        || (v76 = start[1], (LODWORD(v76) & 0x7F800000) == 0x7F800000)
+        || (v75 = start[2], (LODWORD(v75) & 0x7F800000) == 0x7F800000))
     {
         MyAssertHandler(
             ".\\xanim\\dobj.cpp",
@@ -879,9 +899,9 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
             "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
     }
     v74 = *end;
-    if ((LOunsigned int(v74) & 0x7F800000) == 0x7F800000
-        || (v73 = end[1], (LOunsigned int(v73) & 0x7F800000) == 0x7F800000)
-        || (v72 = end[2], (LOunsigned int(v72) & 0x7F800000) == 0x7F800000))
+    if ((LODWORD(v74) & 0x7F800000) == 0x7F800000
+        || (v73 = end[1], (LODWORD(v73) & 0x7F800000) == 0x7F800000)
+        || (v72 = end[2], (LODWORD(v72) & 0x7F800000) == 0x7F800000))
     {
         MyAssertHandler(".\\xanim\\dobj.cpp", 1139, 0, "%s", "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
     }
@@ -942,7 +962,7 @@ LABEL_17:
             if (!ignoreCollision)
             {
                 boneInfo = &model->boneInfo[localBoneIndex];
-                if (LOunsigned int(boneInfo->radiusSquared))
+                if (LODWORD(boneInfo->radiusSquared))
                 {
                     if ((obj->hidePartBits[globalBoneIndex >> 5] & (0x80000000 >> (globalBoneIndex & 0x1F))) == 0)
                     {
@@ -956,10 +976,10 @@ LABEL_17:
                         if (lowestPriority <= currentPriority)
                         {
                             v71 = boneMatrix->quat[0];
-                            if ((LOunsigned int(v71) & 0x7F800000) == 0x7F800000
-                                || (v70 = boneMatrix->quat[1], (LOunsigned int(v70) & 0x7F800000) == 0x7F800000)
-                                || (v69 = boneMatrix->quat[2], (LOunsigned int(v69) & 0x7F800000) == 0x7F800000)
-                                || (v68 = boneMatrix->quat[3], (LOunsigned int(v68) & 0x7F800000) == 0x7F800000))
+                            if ((LODWORD(v71) & 0x7F800000) == 0x7F800000
+                                || (v70 = boneMatrix->quat[1], (LODWORD(v70) & 0x7F800000) == 0x7F800000)
+                                || (v69 = boneMatrix->quat[2], (LODWORD(v69) & 0x7F800000) == 0x7F800000)
+                                || (v68 = boneMatrix->quat[3], (LODWORD(v68) & 0x7F800000) == 0x7F800000))
                             {
                                 MyAssertHandler(
                                     ".\\xanim\\dobj.cpp",
@@ -970,9 +990,9 @@ LABEL_17:
                                     "!IS_NAN((boneMatrix->quat)[3])");
                             }
                             v67 = boneMatrix->trans[0];
-                            if ((LOunsigned int(v67) & 0x7F800000) == 0x7F800000
-                                || (v66 = boneMatrix->trans[1], (LOunsigned int(v66) & 0x7F800000) == 0x7F800000)
-                                || (v65 = boneMatrix->trans[2], (LOunsigned int(v65) & 0x7F800000) == 0x7F800000))
+                            if ((LODWORD(v67) & 0x7F800000) == 0x7F800000
+                                || (v66 = boneMatrix->trans[1], (LODWORD(v66) & 0x7F800000) == 0x7F800000)
+                                || (v65 = boneMatrix->trans[2], (LODWORD(v65) & 0x7F800000) == 0x7F800000))
                             {
                                 MyAssertHandler(
                                     ".\\xanim\\dobj.cpp",
@@ -983,10 +1003,10 @@ LABEL_17:
                             }
                             v38 = boneInfo->offset;
                             v43 = boneMatrix->quat[0];
-                            if ((LOunsigned int(v43) & 0x7F800000) == 0x7F800000
-                                || (v42 = boneMatrix->quat[1], (LOunsigned int(v42) & 0x7F800000) == 0x7F800000)
-                                || (v41 = boneMatrix->quat[2], (LOunsigned int(v41) & 0x7F800000) == 0x7F800000)
-                                || (v40 = boneMatrix->quat[3], (LOunsigned int(v40) & 0x7F800000) == 0x7F800000))
+                            if ((LODWORD(v43) & 0x7F800000) == 0x7F800000
+                                || (v42 = boneMatrix->quat[1], (LODWORD(v42) & 0x7F800000) == 0x7F800000)
+                                || (v41 = boneMatrix->quat[2], (LODWORD(v41) & 0x7F800000) == 0x7F800000)
+                                || (v40 = boneMatrix->quat[3], (LODWORD(v40) & 0x7F800000) == 0x7F800000))
                             {
                                 MyAssertHandler(
                                     "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
@@ -996,7 +1016,7 @@ LABEL_17:
                                     "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
                             }
                             transWeight = boneMatrix->transWeight;
-                            if ((LOunsigned int(transWeight) & 0x7F800000) == 0x7F800000)
+                            if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
                                 MyAssertHandler(
                                     "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
                                     433,
@@ -1044,9 +1064,9 @@ LABEL_17:
                                     LocalInvMatrixTransformVectorQuatTrans(start, boneMatrix, localStart);
                                     LocalInvMatrixTransformVectorQuatTrans(end, boneMatrix, localEnd);
                                     v35 = localStart[0];
-                                    if ((LOunsigned int(localStart[0]) & 0x7F800000) == 0x7F800000
-                                        || (v34 = localStart[1], (LOunsigned int(localStart[1]) & 0x7F800000) == 0x7F800000)
-                                        || (v33 = localStart[2], (LOunsigned int(localStart[2]) & 0x7F800000) == 0x7F800000))
+                                    if ((LODWORD(localStart[0]) & 0x7F800000) == 0x7F800000
+                                        || (v34 = localStart[1], (LODWORD(localStart[1]) & 0x7F800000) == 0x7F800000)
+                                        || (v33 = localStart[2], (LODWORD(localStart[2]) & 0x7F800000) == 0x7F800000))
                                     {
                                         MyAssertHandler(
                                             ".\\xanim\\dobj.cpp",
@@ -1056,9 +1076,9 @@ LABEL_17:
                                             "!IS_NAN((localStart)[0]) && !IS_NAN((localStart)[1]) && !IS_NAN((localStart)[2])");
                                     }
                                     v32 = localEnd[0];
-                                    if ((LOunsigned int(localEnd[0]) & 0x7F800000) == 0x7F800000
-                                        || (v31 = localEnd[1], (LOunsigned int(localEnd[1]) & 0x7F800000) == 0x7F800000)
-                                        || (v30 = localEnd[2], (LOunsigned int(localEnd[2]) & 0x7F800000) == 0x7F800000))
+                                    if ((LODWORD(localEnd[0]) & 0x7F800000) == 0x7F800000
+                                        || (v31 = localEnd[1], (LODWORD(localEnd[1]) & 0x7F800000) == 0x7F800000)
+                                        || (v30 = localEnd[2], (LODWORD(localEnd[2]) & 0x7F800000) == 0x7F800000))
                                     {
                                         MyAssertHandler(
                                             ".\\xanim\\dobj.cpp",
@@ -1078,9 +1098,9 @@ LABEL_17:
                                     for (bounds = (float *)boneInfo; ; bounds += 3)
                                     {
                                         v29 = *bounds;
-                                        if ((LOunsigned int(v29) & 0x7F800000) == 0x7F800000
-                                            || (v28 = bounds[1], (LOunsigned int(v28) & 0x7F800000) == 0x7F800000)
-                                            || (v27 = bounds[2], (LOunsigned int(v27) & 0x7F800000) == 0x7F800000))
+                                        if ((LODWORD(v29) & 0x7F800000) == 0x7F800000
+                                            || (v28 = bounds[1], (LODWORD(v28) & 0x7F800000) == 0x7F800000)
+                                            || (v27 = bounds[2], (LODWORD(v27) & 0x7F800000) == 0x7F800000))
                                         {
                                             MyAssertHandler(
                                                 ".\\xanim\\dobj.cpp",
@@ -1336,7 +1356,7 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
         {
             for (localBoneIndex = 0; localBoneIndex < size; ++localBoneIndex)
             {
-                if (LOunsigned int(model->boneInfo[localBoneIndex].radiusSquared))
+                if (LODWORD(model->boneInfo[localBoneIndex].radiusSquared))
                 {
                     if ((obj->hidePartBits[globalBoneIndex >> 5] & (0x80000000 >> (globalBoneIndex & 0x1F))) == 0)
                         partBits[globalBoneIndex >> 5] |= 0x80000000 >> (globalBoneIndex & 0x1F);

@@ -18,6 +18,8 @@
 #include <win32/win_net_debug.h>
 #include <ui/ui.h>
 #include "scr_evaluate.h"
+#include <client/client.h>
+#include <win32/win_input.h>
 
 scrDebuggerGlob_t scrDebuggerGlob;
 Scr_Breakpoint g_breakpoints[128];
@@ -606,7 +608,7 @@ Scr_WatchElement_s *__cdecl Scr_CreateWatchElement(char *text, Scr_WatchElement_
 void __cdecl Scr_Evaluate()
 {
     //Scr_ScriptWatch::Evaluate(&scrDebuggerGlob.scriptWatch);
-    scrDebuggerGlob.scriptWatch.eval
+    scrDebuggerGlob.scriptWatch.Evaluate();
 }
 
 void __cdecl Scr_CheckBreakonNotify(
@@ -649,7 +651,8 @@ retry_13:
             RemoveRefToValue(newValue.type, newValue.u);
         retry2:
             updateBreakpoints = 1;
-            Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 0);
+            //Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 0);
+            scrDebuggerGlob.scriptWatch.UpdateBreakpoints(0);
             goto retry_13;
         }
         if (scrVarPub.error_message)
@@ -675,7 +678,10 @@ retry_13:
         }
     }
     if (updateBreakpoints)
-        Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
+    {
+        //Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
+        scrDebuggerGlob.scriptWatch.UpdateBreakpoints(1);
+    }
     if (!scrVarPub.evaluate)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 7042, 0, "%s", "scrVarPub.evaluate");
     scrVarPub.evaluate = 0;
@@ -838,7 +844,8 @@ bool __cdecl Scr_RefToVariable(unsigned int id, int isObject)
                         element = elementNodea->element;
                         if (Scr_RefScriptExpression(&elementNodea->element->expr))
                         {
-                            Scr_ScriptWatch::EvaluateWatchElementExpression(&scrDebuggerGlob.scriptWatch, element, &value);
+                            //Scr_ScriptWatch::EvaluateWatchElementExpression(&scrDebuggerGlob.scriptWatch, element, &value);
+                            scrDebuggerGlob.scriptWatch.EvaluateWatchElementExpression(element, &value);
                             if (scrVarPub.error_message)
                                 Scr_ClearErrorMessage();
                             RemoveRefToValue(value.type, value.u);
@@ -940,7 +947,7 @@ void Scr_Step()
                     &localId);
                 scrVarPub.evaluate = evaluate;
             }
-            Scr_SetTempBreakpoint(codePos, localId);
+            Scr_SetTempBreakpoint((char*)codePos, localId);
         }
     }
 }
@@ -953,17 +960,18 @@ void __cdecl Scr_InitDebuggerMain()
             MyAssertHandler(".\\script\\scr_debugger.cpp", 7941, 0, "%s", "!scrDebuggerGlob.debugger_inited_main");
         if (!Sys_IsRemoteDebugClient())
         {
-            scrDebuggerGlob.variableBreakpoints = (Scr_WatchElementDoubleNode_t **)Hunk_AllocDebugMem(
-                393216,
-                "scrDebuggerGlob.variableBreakpoints");
+            scrDebuggerGlob.variableBreakpoints = (Scr_WatchElementDoubleNode_t **)Hunk_AllocDebugMem(393216);// , "scrDebuggerGlob.variableBreakpoints");
             memset((unsigned __int8 *)scrDebuggerGlob.variableBreakpoints, 0, 0x60000u);
             scrDebuggerGlob.assignHead = 0;
             scrDebuggerGlob.assignHeadCodePos = 0;
             scrDebuggerGlob.disableBreakpoints = 0;
         }
-        UI_ScrollPane::Init(&scrDebuggerGlob.scriptScrollPane);
-        UI_ScrollPane::Init(&scrDebuggerGlob.miscScrollPane);
-        UI_VerticalDivider::Init(&scrDebuggerGlob.mainWindow);
+        //UI_ScrollPane::Init(&scrDebuggerGlob.scriptScrollPane);
+        scrDebuggerGlob.scriptScrollPane.Init();
+        //UI_ScrollPane::Init(&scrDebuggerGlob.miscScrollPane);
+        scrDebuggerGlob.miscScrollPane.Init();
+        //UI_VerticalDivider::Init(&scrDebuggerGlob.mainWindow);
+        scrDebuggerGlob.mainWindow.Init();
         scrDebuggerGlob.debugger_inited_main = 1;
     }
 }
@@ -1006,11 +1014,13 @@ void __cdecl Scr_InitDebugger()
             MyAssertHandler(".\\script\\scr_debugger.cpp", 8028, 0, "%s", "!scrDebuggerGlob.debugger_inited");
         if (!Sys_IsRemoteDebugClient())
         {
-            scrDebuggerGlob.breakpoints = (char *)Hunk_AllocDebugMem(scrCompilePub.programLen, "scrDebuggerGlob.breakpoints");
+            scrDebuggerGlob.breakpoints = (char *)Hunk_AllocDebugMem(scrCompilePub.programLen);// , "scrDebuggerGlob.breakpoints");
             memset((unsigned __int8 *)scrDebuggerGlob.breakpoints, 0x7Fu, scrCompilePub.programLen);
         }
-        Scr_ScriptList::Init(&scrDebuggerGlob.scriptList);
-        Scr_OpenScriptList::Init(&scrDebuggerGlob.openScriptList);
+        //Scr_ScriptList::Init(&scrDebuggerGlob.scriptList);
+        scrDebuggerGlob.scriptList.Init();
+        //Scr_OpenScriptList::Init(&scrDebuggerGlob.openScriptList);
+        scrDebuggerGlob.openScriptList.Init();
         scrDebuggerGlob.debugger_inited = 1;
         if (cls.uiStarted)
             UI_Component_Init();
@@ -1022,8 +1032,10 @@ void __cdecl Scr_ShutdownDebugger()
     if (scrVarPub.developer && scrDebuggerGlob.debugger_inited)
     {
         scrDebuggerGlob.debugger_inited = 0;
-        Scr_OpenScriptList::Shutdown(&scrDebuggerGlob.openScriptList);
-        Scr_ScriptList::Shutdown(&scrDebuggerGlob.scriptList);
+        //Scr_OpenScriptList::Shutdown(&scrDebuggerGlob.openScriptList);
+        scrDebuggerGlob.openScriptList.Shutdown();
+        //Scr_ScriptList::Shutdown(&scrDebuggerGlob.scriptList);
+        scrDebuggerGlob.scriptList.Shutdown();
         if (!Sys_IsRemoteDebugClient())
         {
             if (scrDebuggerGlob.breakpoints)
@@ -1034,6 +1046,16 @@ void __cdecl Scr_ShutdownDebugger()
         }
         scrDebuggerGlob.debugger_inited = 0;
     }
+}
+
+void __cdecl Scr_SetSelectionComp(UI_ScrollPane *comp)
+{
+    UI_Component::selectionComp = comp;
+    if (comp == &scrDebuggerGlob.scriptScrollPane && scrDebuggerGlob.scriptList.selectedLine >= 0)
+        Scr_AbstractScriptList::AddEntry(
+            &scrDebuggerGlob.openScriptList,
+            scrDebuggerGlob.scriptList.scriptWindows[scrDebuggerGlob.scriptList.selectedLine],
+            0);
 }
 
 void __cdecl Scr_InitDebuggerSystem()
@@ -1056,10 +1078,13 @@ void __cdecl Scr_InitDebuggerSystem()
         scrDebuggerGlob.breakpointPos.bufferIndex = -1;
         scrDebuggerGlob.atBreakpoint = 0;
         scrDebuggerGlob.run_debugger = 0;
-        Scr_ScriptWatch::Init(&scrDebuggerGlob.scriptWatch);
+        //Scr_ScriptWatch::Init(&scrDebuggerGlob.scriptWatch);
+        scrDebuggerGlob.scriptWatch.Init();
         scrDebuggerGlob.gainFocusTime = 0;
-        Scr_ScriptList::LoadScriptPos(&scrDebuggerGlob.scriptList);
-        Scr_ScriptCallStack::Init(&scrDebuggerGlob.scriptCallStack);
+        //Scr_ScriptList::LoadScriptPos(&scrDebuggerGlob.scriptList);
+        scrDebuggerGlob.scriptList.LoadScriptPos();
+        //Scr_ScriptCallStack::Init(&scrDebuggerGlob.scriptCallStack);
+        scrDebuggerGlob.scriptCallStack.Init();
         if (Sys_IsRemoteDebugClient())
         {
             scrDebuggerGlob.atBreakpoint = 1;
@@ -1082,7 +1107,10 @@ void __cdecl Scr_InitDebuggerSystem()
         scrDebuggerGlob.scriptCallStack.selectionParent = &scrDebuggerGlob.miscScrollPane;
         Scr_SetSelectionComp(&scrDebuggerGlob.miscScrollPane);
         if (!Sys_IsRemoteDebugClient())
-            Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
+        {
+            //Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
+            scrDebuggerGlob.scriptWatch.UpdateBreakpoints(1);
+        }
     }
 }
 
@@ -1115,7 +1143,8 @@ void __cdecl Scr_ShutdownDebuggerSystem(int restart)
         {
             scrDebuggerGlob.debugger_inited_system = 0;
             scrVarPub.evaluate = 0;
-            Scr_ScriptWatch::Shutdown(&scrDebuggerGlob.scriptWatch);
+            //Scr_ScriptWatch::Shutdown(&scrDebuggerGlob.scriptWatch);
+            scrDebuggerGlob.scriptWatch.Shutdown();
             if (!Sys_IsRemoteDebugClient())
             {
                 if (scrDebuggerGlob.nextBreakpointCodePos)
@@ -1164,10 +1193,10 @@ void __cdecl Scr_RunDebuggerRemote()
             "!Key_IsCatcherActive( ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT )");
     Con_CloseConsole(0);
     Key_AddCatcher(0, 2);
-    _IN_ActivateMouse(1);
+    IN_ActivateMouse(1);
     while (Key_IsCatcherActive(0, 2))
         Debug_Frame(0);
-    _IN_ActivateMouse(1);
+    IN_ActivateMouse(1);
 }
 
 void __cdecl Scr_RunDebugger()

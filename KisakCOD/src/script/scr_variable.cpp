@@ -19,7 +19,7 @@ scrVarDebugPub_t* scrVarDebugPub;
 scrVarDebugPub_t scrVarDebugPubBuf;
 scrVarGlob_t scrVarGlob;
 
-static scr_classStruct_t g_classMap[4] =
+scr_classStruct_t g_classMap[4] =
 {
 	{ 0, 0, 0x65, "entity" },
 	{ 0, 0, 0x68, "hudelem" },
@@ -2431,11 +2431,11 @@ void Scr_DumpScriptThreads(void)
 				varUsage = varUsage + info.varUsage;
 				endonUsage = endonUsage + info.endonUsage;
 				Com_Printf(23, "count: %d, var usage: %d, endon usage: %d\n", count, (int)info.varUsage, (int)info.endonUsage);
-				Scr_PrintPrevCodePos(23, pInfo->pos[0], 0);
+				Scr_PrintPrevCodePos(23, (char*)pInfo->pos[0], 0);
 				for (ja = 1; ja < pInfo->posSize; ++ja)
 				{
 					Com_Printf(23, "called from:\n");
-					Scr_PrintPrevCodePos(23, pInfo->pos[ja], 0);
+					Scr_PrintPrevCodePos(23, (char*)pInfo->pos[ja], 0);
 				}
 			}
 			Z_VirtualFree(infoArray);

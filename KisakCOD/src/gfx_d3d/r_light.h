@@ -23,6 +23,7 @@ struct BspSpotLightCallback // sizeof=0x64
 
 GfxLightDef *__cdecl R_RegisterLightDef(const char *name);
 GfxLightDef *__cdecl R_RegisterLightDef_FastFile(const char *name);
+void __cdecl R_EnumLightDefs(void(__cdecl *func)(GfxLightDef *, void *), void *data);
 void __cdecl R_InitLightDefs();
 void __cdecl R_ShutdownLightDefs();
 int __cdecl R_GetPointLightPartitions(const GfxLight **visibleLights);

@@ -13,8 +13,12 @@
 #include <win32/win_net.h>
 #include <database/database.h>
 #include "com_files.h"
+#include <qcommon/cmd.h>
+#include <gfx_d3d/r_dvars.h>
+#include "physicalmemory.h"
 
 HunkUser *g_user;
+fileData_s *com_hunkData;
 
 static HunkUser* g_debugUser;
 static int g_largeLocalPos;
@@ -37,6 +41,7 @@ static hunkUsed_t hunk_high;
 static hunkUsed_t hunk_low;
 
 static unsigned char* s_hunkData;
+unsigned __int8 *s_origHunkData;
 static int s_hunkTotal;
 
 void __cdecl Hunk_AddAsset(XAssetHeader header, _DWORD *data)
@@ -232,6 +237,17 @@ void __cdecl ReplaceString(const char** str, const char* in)
     *str = newStr;
 }
 
+cmd_function_s Com_Meminfo_f_VAR;
+cmd_function_s Com_TempMeminfo_f_VAR;
+
+void __cdecl Com_TempMeminfo_f()
+{
+    if (!Sys_IsMainThread())
+        MyAssertHandler(".\\universal\\com_memory.cpp", 1194, 0, "%s", "Sys_IsMainThread()");
+    //track_PrintTempInfo();
+    Com_Printf(0, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
+}
+
 void Com_InitHunkMemory()
 {
     if (!Sys_IsMainThread())
@@ -239,15 +255,15 @@ void Com_InitHunkMemory()
     if (s_hunkData)
         MyAssertHandler(".\\universal\\com_memory.cpp", 1259, 0, "%s", "!s_hunkData");
     if (FS_LoadStack())
-        Com_Error(ERR_FATAL, &byte_8C0604);
+        Com_Error(ERR_FATAL, "Hunk initialization failed. File system load stack not zero");
     if (!useFastFile->current.enabled)
-        s_hunkTotal = (int)&svs.archivedSnapshotBuffer[22495840];
+        s_hunkTotal = 0xA000000;
     if (useFastFile->current.enabled)
-        s_hunkTotal = (int)&unk_A00000;
+        s_hunkTotal = 0xA00000;
     R_ReflectionProbeRegisterDvars();
     if (r_reflectionProbeGenerate->current.enabled)
         s_hunkTotal = 0x20000000;
-    s_hunkData = (unsigned __int8*)Z_VirtualReserve(s_hunkTotal);
+    s_hunkData = (unsigned char*)Z_VirtualReserve(s_hunkTotal);
     if (!s_hunkData)
         Sys_OutOfMemErrorInternal(".\\universal\\com_memory.cpp", 1318);
     s_origHunkData = s_hunkData;
@@ -780,7 +796,7 @@ void __cdecl Hunk_InitDebugMemory()
         MyAssertHandler(".\\universal\\com_memory.cpp", 2743, 0, "%s", "Sys_IsMainThread()");
     if (g_debugUser)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2744, 0, "%s", "!g_debugUser");
-    g_debugUser = Hunk_UserCreate((int)&clients[0].parseClients[238].attachTagIndex[5], "Hunk_InitDebugMemory", 0, 0, 0);
+    g_debugUser = Hunk_UserCreate(0x1000000, "Hunk_InitDebugMemory", 0, 0, 0);
 }
 
 void __cdecl Hunk_ShutdownDebugMemory()

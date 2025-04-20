@@ -18,6 +18,39 @@ void __cdecl PMem_Init()
     PMem_InitPhysicalMemory(&g_mem, memory, 0x8000000u);
 }
 
+void __cdecl PMem_DumpMemStats()
+{
+    double v0; // st7
+    int FreeAmount; // eax
+    double v2; // st7
+    double v3; // st7
+    signed int j; // [esp+8h] [ebp-14h]
+    unsigned int i; // [esp+Ch] [ebp-10h]
+    unsigned int top; // [esp+14h] [ebp-8h]
+    unsigned int bottom; // [esp+18h] [ebp-4h]
+
+    for (i = 0; i < g_mem.prim[1].allocListCount; ++i)
+    {
+        if (i == g_mem.prim[1].allocListCount - 1)
+            bottom = g_mem.prim[1].pos;
+        else
+            bottom = g_mem.prim[1].allocList[i + 1].pos;
+        v0 = ConvertToMB(g_mem.prim[1].allocList[i].pos - bottom);
+        Com_Printf(16, "%-18.18s %5.1f\n", g_mem.prim[1].allocList[i].name, v0);
+    }
+    FreeAmount = PMem_GetFreeAmount();
+    v2 = ConvertToMB(FreeAmount);
+    Com_Printf(16, "free physical      %5.1f\n", v2);
+    top = g_mem.prim[0].pos;
+    for (j = g_mem.prim[0].allocListCount - 1; j >= 0; --j)
+    {
+        v3 = ConvertToMB(top - g_mem.prim[0].allocList[j].pos);
+        Com_Printf(16, "%-18.18s %5.1f\n", g_mem.prim[0].allocList[j].name, v3);
+        top = g_mem.prim[0].allocList[j].pos;
+    }
+    Com_Printf(16, "------------------------\n");
+}
+
 void __cdecl PMem_InitPhysicalMemory(PhysicalMemory *pmem, unsigned __int8 *memory, unsigned int memorySize)
 {
     if (!pmem)

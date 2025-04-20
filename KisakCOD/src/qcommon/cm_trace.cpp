@@ -700,29 +700,28 @@ bool __cdecl CM_TraceThroughLeafBrushNode(const traceWork_t *tw, cLeaf_t *leaf, 
     end[2] = tw->extents.end[2];
     start[3] = 0.0;
     end[3] = trace->fraction;
-    HIDWORD(_FFFFFFFC) = trace;
-    LODWORD(_FFFFFFFC) = end;
-    CM_TraceThroughLeafBrushNode_r(tw, &cm.leafbrushNodes[leaf->leafBrushNode], start, _FFFFFFFC);
+    CM_TraceThroughLeafBrushNode_r(tw, &cm.leafbrushNodes[leaf->leafBrushNode], start, end, trace);
     return trace->fraction == 0.0;
 }
 
 void __cdecl CM_TraceThroughLeafBrushNode_r(
     const traceWork_t *tw,
     cLeafBrushNode_s *node,
-    const float *p1_,
-    __int64 p2)
+    float *p1_,
+    const float *p2,
+    trace_t *trace)
 {
-    float v4; // [esp+10h] [ebp-8Ch]
-    float v5; // [esp+14h] [ebp-88h]
-    float v6; // [esp+18h] [ebp-84h]
-    float v7; // [esp+1Ch] [ebp-80h]
-    float v8; // [esp+24h] [ebp-78h]
-    float v9; // [esp+28h] [ebp-74h]
-    float v10; // [esp+2Ch] [ebp-70h]
-    float v11; // [esp+30h] [ebp-6Ch]
-    float v12; // [esp+34h] [ebp-68h]
-    float v13; // [esp+38h] [ebp-64h]
-    bool side; // [esp+3Ch] [ebp-60h]
+    float v5; // [esp+10h] [ebp-8Ch]
+    float v6; // [esp+14h] [ebp-88h]
+    float v7; // [esp+18h] [ebp-84h]
+    float v8; // [esp+1Ch] [ebp-80h]
+    float v9; // [esp+24h] [ebp-78h]
+    float v10; // [esp+28h] [ebp-74h]
+    float v11; // [esp+2Ch] [ebp-70h]
+    float v12; // [esp+30h] [ebp-6Ch]
+    float v13; // [esp+34h] [ebp-68h]
+    float v14; // [esp+38h] [ebp-64h]
+    BOOL side; // [esp+3Ch] [ebp-60h]
     float diff; // [esp+40h] [ebp-5Ch]
     float t1; // [esp+48h] [ebp-54h]
     float frac; // [esp+4Ch] [ebp-50h]
@@ -756,37 +755,37 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
                 {
                     brushnum = brushes[k];
                     if ((tw->contents & cm.brushes[brushnum].contents) != 0)
-                        CM_TraceThroughBrush(tw, &cm.brushes[brushnum], (trace_t *)HIDWORD(p2));
+                        CM_TraceThroughBrush(tw, &cm.brushes[brushnum], trace);
                 }
                 return;
             }
-            CM_TraceThroughLeafBrushNode_r(tw, node + 1, p1, (const float *)p2, (trace_t *)HIDWORD(p2));
+            CM_TraceThroughLeafBrushNode_r(tw, node + 1, p1, p2, trace);
         }
         t1 = p1[node->axis] - node->data.children.dist;
-        t2 = *(float *)(p2 + 4 * node->axis) - node->data.children.dist;
+        t2 = p2[node->axis] - node->data.children.dist;
         offset = tw->size[node->axis] + 0.125 - node->data.children.range;
-        v13 = t1 - t2;
-        if (v13 < 0.0)
-            v12 = t2;
+        v14 = t1 - t2;
+        if (v14 < 0.0)
+            v13 = t2;
         else
-            v12 = t1;
-        tmax = v12;
-        v11 = t2 - t1;
-        if (v11 < 0.0)
-            v10 = t2;
+            v13 = t1;
+        tmax = v13;
+        v12 = t2 - t1;
+        if (v12 < 0.0)
+            v11 = t2;
         else
-            v10 = t1;
-        tmin = v10;
-        if (offset > (double)v10)
+            v11 = t1;
+        tmin = v11;
+        if (offset > v11)
         {
             if (tmax > -offset)
             {
-                if (p1[3] >= (double)*(float *)HIDWORD(p2))
+                if (p1[3] >= trace->fraction)
                     return;
                 diff = t2 - t1;
-                v9 = fabs(diff);
-                absDiff = v9;
-                if (v9 <= 0.000000476837158203125)
+                v10 = fabs(diff);
+                absDiff = v10;
+                if (v10 <= 0.000000476837158203125)
                 {
                     side = 0;
                     frac = 1.0;
@@ -795,31 +794,26 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
                 else
                 {
                     if (diff < 0.0)
-                        v8 = t1;
+                        v9 = t1;
                     else
-                        v8 = -t1;
+                        v9 = -t1;
                     invDist = 1.0 / absDiff;
-                    frac2 = (v8 - offset) * invDist;
-                    frac = (v8 + offset) * invDist;
+                    frac2 = (v9 - offset) * invDist;
+                    frac = (v9 + offset) * invDist;
                     side = diff >= 0.0;
                 }
                 if (frac < 0.0)
                     MyAssertHandler(".\\qcommon\\cm_trace.cpp", 825, 0, "frac >= 0.0f\n\t%g, %g", frac, 0.0);
-                v7 = 1.0 - frac;
-                if (v7 < 0.0)
-                    v6 = 1.0;
+                v8 = 1.0 - frac;
+                if (v8 < 0.0)
+                    v7 = 1.0;
                 else
-                    v6 = frac;
-                mid[0] = (*(float *)p2 - p1[0]) * v6 + p1[0];
-                mid[1] = (*(float *)(p2 + 4) - p1[1]) * v6 + p1[1];
-                mid[2] = (*(float *)(p2 + 8) - p1[2]) * v6 + p1[2];
-                mid[3] = (*(float *)(p2 + 12) - p1[3]) * v6 + p1[3];
-                CM_TraceThroughLeafBrushNode_r(
-                    tw,
-                    &node[node->data.children.childOffset[side]],
-                    p1,
-                    mid,
-                    (trace_t *)HIDWORD(p2));
+                    v7 = frac;
+                mid[0] = (*p2 - p1[0]) * v7 + p1[0];
+                mid[1] = (p2[1] - p1[1]) * v7 + p1[1];
+                mid[2] = (p2[2] - p1[2]) * v7 + p1[2];
+                mid[3] = (p2[3] - p1[3]) * v7 + p1[3];
+                CM_TraceThroughLeafBrushNode_r(tw, &node[node->data.children.childOffset[side]], p1, mid, trace);
                 if (frac2 > 1.000000476837158)
                     MyAssertHandler(
                         ".\\qcommon\\cm_trace.cpp",
@@ -828,16 +822,16 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
                         "frac2 <= 1.0f + TRACE_EPSILON\n\t%g, %g",
                         frac2,
                         1.000000476837158);
-                v5 = frac2 - 0.0;
-                if (v5 < 0.0)
-                    v4 = 0.0;
+                v6 = frac2 - 0.0;
+                if (v6 < 0.0)
+                    v5 = 0.0;
                 else
-                    v4 = frac2;
-                frac2 = v4;
-                p1[0] = (*(float *)p2 - p1[0]) * v4 + p1[0];
-                p1[1] = (*(float *)(p2 + 4) - p1[1]) * v4 + p1[1];
-                p1[2] = (*(float *)(p2 + 8) - p1[2]) * v4 + p1[2];
-                p1[3] = (*(float *)(p2 + 12) - p1[3]) * v4 + p1[3];
+                    v5 = frac2;
+                frac2 = v5;
+                p1[0] = (*p2 - p1[0]) * v5 + p1[0];
+                p1[1] = (p2[1] - p1[1]) * v5 + p1[1];
+                p1[2] = (p2[2] - p1[2]) * v5 + p1[2];
+                p1[3] = (p2[3] - p1[3]) * v5 + p1[3];
                 node += node->data.children.childOffset[1 - side];
             }
             else

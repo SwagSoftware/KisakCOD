@@ -204,6 +204,7 @@ void __cdecl Vec3Copy(const vec3r from, vec3r to);
 void __cdecl Vec3ProjectionCoords(const float *dir, int *xCoord, int *yCoord);
 float __cdecl Vec3NormalizeTo(const vec3r v, vec3r out);
 void __cdecl Vec3Mad(const vec3r start, float scale, const vec3r dir, vec3r result);
+void __cdecl Vec3Accum(const float *subTotal, const float *weight, const float *added, float *total);
 void __cdecl Vec3Rotate(const vec3r in, const mat3x3& matrix, vec3r out);
 void __cdecl Vec3RotateTranspose(const vec3r in, const mat3x3& matrix, vec3r out);
 
@@ -229,8 +230,17 @@ float __cdecl Vec4Normalize(float* v);
 void __cdecl Vec4Mul(const float* a, const float* b, float* product);
 float __cdecl Vec4LengthSq(const float* v);
 void __cdecl Vec4Scale(const float* v, float scale, float* result);
+void __cdecl Vec4Mad(const float *start, float scale, const float *dir, float *result);
+void __cdecl Vec4MadMad(
+    const float *start,
+    float scale0,
+    const float *dir0,
+    float scale1,
+    const float *dir1,
+    float *result);
 
 void __cdecl Vec4Lerp(const float* from, const float* to, float frac, float* result);
+float __cdecl Vec4Length(const float *v);
 
 float __cdecl vectoyaw(const float *vec);
 float __cdecl vectosignedyaw(const float *vec);
