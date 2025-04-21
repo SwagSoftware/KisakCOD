@@ -74,7 +74,8 @@
     <IncludePath>$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(LocalDebuggerWorkingDirectory)src\libwww\src;$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
+    <IncludePath>$(LocalDebuggerWorkingDirectory)src\libwww\src;$(LocalDebuggerWorkingDirectory)src;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -418,6 +419,7 @@
     <ClCompile Include="src\qcommon\statmonitor.cpp" />
     <ClCompile Include="src\qcommon\sv_msg_write_mp.cpp" />
     <ClCompile Include="src\qcommon\threads.cpp" />
+    <ClCompile Include="src\qcommon\unzip.cpp" />
     <ClCompile Include="src\ragdoll\ragdoll.cpp" />
     <ClCompile Include="src\ragdoll\ragdoll_controller.cpp" />
     <ClCompile Include="src\ragdoll\ragdoll_quat.cpp" />
@@ -472,6 +474,7 @@
     <ClCompile Include="src\universal\com_memory.cpp" />
     <ClCompile Include="src\universal\com_shared.cpp" />
     <ClCompile Include="src\universal\com_sndalias.cpp" />
+    <ClCompile Include="src\universal\com_sndalias_load_obj.cpp" />
     <ClCompile Include="src\universal\com_stringtable.cpp" />
     <ClCompile Include="src\universal\dvar.cpp" />
     <ClCompile Include="src\universal\dvar_cmds.cpp" />
@@ -506,6 +509,9 @@
     <ClCompile Include="src\xanim\xmodel.cpp" />
     <ClCompile Include="src\xanim\xmodel_load_obj.cpp" />
     <ClCompile Include="src\xanim\xmodel_utils.cpp" />
+    <ClCompile Include="src\zlib32\deflate.cpp" />
+    <ClCompile Include="src\zlib32\inflate.cpp" />
+    <ClCompile Include="src\zlib32\zipcommon.cpp" />
     <ClCompile Include="src\zlib\adler32.c" />
     <ClCompile Include="src\zlib\compress.c" />
     <ClCompile Include="src\zlib\crc32.c" />
@@ -675,6 +681,7 @@
     <ClInclude Include="src\qcommon\msg_mp.h" />
     <ClInclude Include="src\qcommon\net_chan_mp.h" />
     <ClInclude Include="src\qcommon\sv_msg_write_mp.h" />
+    <ClInclude Include="src\qcommon\unzip.h" />
     <ClInclude Include="src\ragdoll\ragdoll.h" />
     <ClInclude Include="src\script\scr_animtree.h" />
     <ClInclude Include="src\script\scr_const.h" />
@@ -732,6 +739,9 @@
     <ClInclude Include="src\xanim\xanim_public.h" />
     <ClInclude Include="src\xanim\xasset.h" />
     <ClInclude Include="src\xanim\xmodel.h" />
+    <ClInclude Include="src\zlib32\deflate.h" />
+    <ClInclude Include="src\zlib32\inflate.h" />
+    <ClInclude Include="src\zlib32\zip.h" />
     <ClInclude Include="src\zlib\deflate.h" />
     <ClInclude Include="src\zlib\infblock.h" />
     <ClInclude Include="src\zlib\infcodes.h" />

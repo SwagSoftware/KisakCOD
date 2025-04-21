@@ -2723,6 +2723,24 @@ const dvar_s *__cdecl Dvar_RegisterInt(
     return Dvar_RegisterVariant(dvarName, 5u, flags, v6, min, description);
 }
 
+const dvar_t *__cdecl Dvar_RegisterInt(
+    const char *dvarName,
+    int value,
+    unsigned int min,
+    unsigned int max,
+    unsigned int flags,
+    const char *description)
+{
+    DvarValue dvarValue; // [esp+4h] [ebp-20h]
+    DvarLimits dvarDomain; // [esp+14h] [ebp-10h]
+
+    dvarValue.integer = value;
+    dvarDomain.integer.min = min;
+    dvarDomain.integer.max = max;
+
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_INT, flags, dvarValue, dvarDomain, description);
+}
+
 const dvar_s *__cdecl Dvar_RegisterFloat(
     const char *dvarName,
     float value,
@@ -2738,6 +2756,24 @@ const dvar_s *__cdecl Dvar_RegisterFloat(
     *(_QWORD *)(&v6.value + 1) = dvarValue_4;
     v6.vector[3] = dvarValue_12;
     return Dvar_RegisterVariant(dvarName, 1u, flags, v6, min, description);
+}
+
+const dvar_s *__cdecl Dvar_RegisterFloat(
+    const char *dvarName,
+    float value,
+    float min,
+    float max,
+    unsigned __int16 flags,
+    const char *description)
+{
+    DvarValue dvarValue; // [esp+4h] [ebp-20h]
+    DvarLimits dvarDomain; // [esp+14h] [ebp-10h]
+
+    dvarValue.value = value;
+    dvarDomain.value.min = min;
+    dvarDomain.value.max = max;
+
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT, flags, dvarValue, dvarDomain, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterVec2(

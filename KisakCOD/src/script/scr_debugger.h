@@ -197,6 +197,8 @@ struct scrDebuggerGlob_t // sizeof=0x2B8
 };
 
 void __cdecl TRACK_scr_debugger();
+void __cdecl Scr_KeyEvent(int key);
+void __cdecl Scr_AddDebugText(char *text);
 void __cdecl Scr_AddManualBreakpoint(unsigned __int8 *codePos);
 void __cdecl Scr_AddBreakpoint(const unsigned __int8 *codePos);
 char *__cdecl Scr_FindBreakpointInfo(const char *codePos);

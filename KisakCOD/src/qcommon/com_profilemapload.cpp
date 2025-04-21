@@ -1,6 +1,12 @@
 #include "qcommon.h"
 #include "mem_track.h"
 #include "threads.h"
+#include <universal/timing.h>
+#include <ui_mp/ui_mp.h>
+#include <client/client.h>
+#include <ui/ui.h>
+
+#include <algorithm>
 
 mapLoadProfile_t mapLoadProfile;
 
@@ -236,11 +242,13 @@ void ProfLoad_PrintHotSpots()
         LODWORD(v11[v3].ticksFile) = v2;
         HIDWORD(v11[v3].ticksFile) = HIDWORD(v2);
     }
-    std::_Sort<MapProfileHotSpot *, int, bool(__cdecl *)(MapProfileHotSpot const &, MapProfileHotSpot const &)>(
-        v11,
-        &v11[mapLoadProfile.profileEntryCount],
-        24 * mapLoadProfile.profileEntryCount / 24,
-        (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))ProfLoad_CompareHotSpotNames);
+    //std::_Sort<MapProfileHotSpot *, int, bool(__cdecl *)(MapProfileHotSpot const &, MapProfileHotSpot const &)>(
+    //    v11,
+    //    &v11[mapLoadProfile.profileEntryCount],
+    //    24 * mapLoadProfile.profileEntryCount / 24,
+    //    (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))ProfLoad_CompareHotSpotNames);
+    //std::sort(&v11[0], &v11[mapLoadProfile.profileEntryCount], 24 * mapLoadProfile.profileEntryCount / 24, ProfLoad_CompareHotSpotNames);
+    std::sort(&v11[0], &v11[mapLoadProfile.profileEntryCount], ProfLoad_CompareHotSpotNames);
     v14 = 0;
     i = 0;
     while (i != mapLoadProfile.profileEntryCount)
@@ -269,11 +277,12 @@ void ProfLoad_PrintHotSpots()
         }
         ++v14;
     }
-    std::_Sort<MapProfileHotSpot *, int, bool(__cdecl *)(MapProfileHotSpot const &, MapProfileHotSpot const &)>(
-        v11,
-        &v11[v14],
-        24 * v14 / 24,
-        ProfLoad_CompareHotSpotTicks);
+    //std::_Sort<MapProfileHotSpot *, int, bool(__cdecl *)(MapProfileHotSpot const &, MapProfileHotSpot const &)>(
+    //    v11,
+    //    &v11[v14],
+    //    24 * v14 / 24,
+    //    ProfLoad_CompareHotSpotTicks);
+    std::sort(&v11[0], &v11[v14], ProfLoad_CompareHotSpotTicks);
     Com_Printf(12, "\n\n^6---------- Load time hot spots ----------\n");
     if (v14 > 16)
         v10 = 16;
@@ -378,6 +387,10 @@ void __cdecl ProfLoad_End()
     }
 }
 
+const float PROFLOAD_FONT_SCALE = 0.36f;
+const float PROFLOAD_TEXT_COLOR[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+const float PROFLOAD_BACKGROUND_COLOR[4] = { 0.0f, 0.0f, 0.0f, 0.8f };
+
 void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
 {
     MapProfileEntry *v1; // eax
@@ -402,7 +415,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             rect->horzAlign,
             rect->vertAlign,
             PROFLOAD_BACKGROUND_COLOR);
-        ProfLoad_DrawTree(v1);
+        ProfLoad_DrawTree();
         fileOpenElement = mapLoadProfile.elements;
         fileOpenCount = mapLoadProfile.elementAccessCount[0];
         fileSeekCount = mapLoadProfile.elementAccessCount[1];

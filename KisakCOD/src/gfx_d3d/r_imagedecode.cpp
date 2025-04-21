@@ -10,6 +10,97 @@ unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHea
         fileHeader->dimensions[2]);
 }
 
+void __cdecl Image_FreeRawPixels(GfxRawImage *image)
+{
+    Z_Free(image->pixels, 22);
+}
+
+void __cdecl Image_GetRawPixels(char *imageName, GfxRawImage *image)
+{
+    char v2; // [esp+7h] [ebp-5Dh]
+    GfxRawImage *v3; // [esp+Ch] [ebp-58h]
+    char *v4; // [esp+10h] [ebp-54h]
+    GfxImageFileHeader *imageData; // [esp+14h] [ebp-50h]
+    char filepath[64]; // [esp+1Ch] [ebp-48h] BYREF
+    GfxImageFileHeader *imageFile; // [esp+60h] [ebp-4h] BYREF
+
+    if (!imageName)
+        MyAssertHandler(".\\r_imagedecode.cpp", 492, 0, "%s", "imageName");
+    Com_AssembleFilepath("images/", imageName, ".iwi", filepath, 64);
+    if (FS_ReadFile(filepath, &imageFile) < 0)
+        Com_Error(ERR_DROP, "image '%s' is missing", filepath);
+    if (!Image_ValidateHeader(imageFile, filepath))
+        Com_Error(ERR_DROP, "image '%s' is not valid", filepath);
+    v4 = imageName;
+    v3 = image;
+    do
+    {
+        v2 = *v4;
+        v3->name[0] = *v4++;
+        v3 = (v3 + 1);
+    } while (v2);
+    image->width = imageFile->dimensions[0];
+    image->height = imageFile->dimensions[1];
+    image->pixels = Z_Malloc(4 * image->height * image->width, "Image_GetRawPixels", 22);
+    imageData = imageFile + 1;
+    switch (imageFile->format)
+    {
+    case 1u:
+        image->hasAlpha = 1;
+        Image_DecodeBitmap(image, imageFile, imageData, 4);
+        break;
+    case 2u:
+        image->hasAlpha = 0;
+        Image_DecodeBitmap(image, imageFile, imageData, 3);
+        break;
+    case 3u:
+        image->hasAlpha = 1;
+        Image_DecodeBitmap(image, imageFile, imageData, 2);
+        break;
+    case 4u:
+        image->hasAlpha = 0;
+        Image_DecodeBitmap(image, imageFile, imageData, 1);
+        break;
+    case 5u:
+        image->hasAlpha = 1;
+        Image_DecodeBitmap(image, imageFile, imageData, 1);
+        break;
+    case 6u:
+        image->hasAlpha = 1;
+        Image_DecodeWavelet(image, imageFile, imageData, 4);
+        break;
+    case 7u:
+        image->hasAlpha = 0;
+        Image_DecodeWavelet(image, imageFile, imageData, 3);
+        break;
+    case 8u:
+        image->hasAlpha = 1;
+        Image_DecodeWavelet(image, imageFile, imageData, 2);
+        break;
+    case 9u:
+        image->hasAlpha = 0;
+        Image_DecodeWavelet(image, imageFile, imageData, 1);
+        break;
+    case 0xAu:
+        image->hasAlpha = 1;
+        Image_DecodeWavelet(image, imageFile, imageData, 1);
+        break;
+    case 0xBu:
+        image->hasAlpha = 0;
+        Image_DecodeDxtc(image, imageFile, imageData, 8);
+        break;
+    case 0xCu:
+    case 0xDu:
+        image->hasAlpha = 1;
+        Image_DecodeDxtc(image, imageFile, imageData, 16);
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\r_imagedecode.cpp", 565, 1, "unhandled case");
+        break;
+    }
+    FS_FreeFile(imageFile->tag);
+}
 
 int __cdecl Image_CountMipmapsForFile(GfxImageFileHeader *imageFile)
 {

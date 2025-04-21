@@ -72,6 +72,15 @@
 #endif
 #endif
 
+#define ID_INLINE __inline 
+
+
+static ID_INLINE short BigShort(short l) { return ShortSwap(l); }
+#define LittleShort
+static ID_INLINE int BigLong(int l) { return LongSwap(l); }
+#define LittleLong
+//static ID_INLINE float BigFloat(const float *l) { FloatSwap(l); }
+#define LittleFloat
 
 #define	PATH_SEP '\\'
 
@@ -363,6 +372,16 @@ typedef ull             uint64;
 #define SWORD5(x)   SWORDn(x,  5)
 #define SWORD6(x)   SWORDn(x,  6)
 #define SWORD7(x)   SWORDn(x,  7)
+
+// Generate a pair of operands. S stands for 'signed'
+#define __SPAIR16__(high, low)  (((int16)  (high) <<  8) | (uint8) (low))
+#define __SPAIR32__(high, low)  (((int32)  (high) << 16) | (uint16)(low))
+#define __SPAIR64__(high, low)  (((int64)  (high) << 32) | (uint32)(low))
+#define __SPAIR128__(high, low) (((int128) (high) << 64) | (uint64)(low))
+#define __PAIR16__(high, low)   (((uint16) (high) <<  8) | (uint8) (low))
+#define __PAIR32__(high, low)   (((uint32) (high) << 16) | (uint16)(low))
+#define __PAIR64__(high, low)   (((uint64) (high) << 32) | (uint32)(low))
+#define __PAIR128__(high, low)  (((uint128)(high) << 64) | (uint64)(low))
 
 
 //=============================================

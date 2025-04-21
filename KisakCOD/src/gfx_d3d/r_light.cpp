@@ -10,8 +10,31 @@
 #include "r_bsp.h"
 #include "r_marks.h"
 
+#include <algorithm>
+#include "r_staticmodelcache.h"
+#include "r_add_staticmodel.h"
+#include <DynEntity/DynEntity_client.h>
+#include "fxprimitives.h"
+#include <EffectsCore/fx_system.h>
+#include "r_pretess.h"
+#include <qcommon/com_bsp.h>
+#include <universal/profile.h>
+
+struct StaticModelLightCallback // sizeof=0x74
+{                                       // ...
+    unsigned __int8 *smodelVisData;     // ...
+    float position[3];                  // ...
+    float radiusSq;                     // ...
+    float planes[6][4];                 // ...
+};
+
 LightGlobals lightGlob;
 int s_lmapPixelsUsedForFalloff;
+
+StaticModelLightCallback g_staticModelLightCallback;
+
+int(__cdecl *allowSurf_0[1])(int, void *) = { R_AllowBspOmniLight };
+int(__cdecl *allowSurf_1[2])(int, void *) = { R_AllowBspSpotLight, R_AllowBspSpotLightShadows };
 
 void __cdecl R_EnumLightDefs(void(__cdecl *func)(GfxLightDef *, void *), void *data)
 {
@@ -336,6 +359,11 @@ void __cdecl R_GetBspLightSurfs(const GfxLight **visibleLights, int visibleCount
     }
 }
 
+BOOL __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1)
+{
+    return surface0 < surface1;
+}
+
 void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData)
 {
     unsigned __int16 triSurfList[2]; // [esp+F0h] [ebp-4Ch] BYREF
@@ -379,11 +407,12 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     {
         surfData->drawSurfList.current = drawSurfs;
         surfData->drawSurfList.end = (GfxDrawSurf *)&scene.visLightShadow[lightIndex - 3];
-        std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-            (const GfxStaticModelDrawInst **)surfaces[0],
-            (const GfxStaticModelDrawInst **)&surfaces[0][visLightDrawSurfCount],
-            (int)(4 * visLightDrawSurfCount) >> 2,
-            (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+        //    (const GfxStaticModelDrawInst **)surfaces[0],
+        //    (const GfxStaticModelDrawInst **)&surfaces[0][visLightDrawSurfCount],
+        //    (int)(4 * visLightDrawSurfCount) >> 2,
+        //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+        std::sort(&surfaces[0][0], &surfaces[0][visLightDrawSurfCount], R_SortBspShadowReceiverSurfaces);
         for (listSurfIndex = 0; listSurfIndex < visLightDrawSurfCount; ++listSurfIndex)
         {
             if (listSurfIndex >= rgp.world->surfaceCount)
@@ -408,7 +437,7 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     }
 }
 
-bool __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid)
+int __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid)
 {
     return *(_BYTE *)(*(unsigned int *)bspLightCallbackAsVoid + surfIndex)
         && *((float *)bspLightCallbackAsVoid + 4) >= PointToBoxDistSq(
@@ -454,11 +483,12 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
         scene.visLightShadow[lightIndex - 4].drawSurfCount = surfCounts[0];
         surfData->drawSurfList.current = drawSurfs[0];
         surfData->drawSurfList.end = (GfxDrawSurf *)&scene.visLightShadow[lightIndex - 3];
-        std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-            (const GfxStaticModelDrawInst **)surfaces[0],
-            (const GfxStaticModelDrawInst **)&surfaces[0][surfCounts[0]],
-            (signed int)(4 * surfCounts[0]) >> 2,
-            (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+        //    (const GfxStaticModelDrawInst **)surfaces[0],
+        //    (const GfxStaticModelDrawInst **)&surfaces[0][surfCounts[0]],
+        //    (signed int)(4 * surfCounts[0]) >> 2,
+        //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+        std::sort(&surfaces[0][0], &surfaces[0][surfCounts[0]], R_SortBspShadowReceiverSurfaces);
         for (listSurfIndex = 0; listSurfIndex < surfCounts[0]; ++listSurfIndex)
         {
             if (listSurfIndex >= rgp.world->surfaceCount)
@@ -486,11 +516,12 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
         scene.visLightShadow[lightIndex].drawSurfCount = surfCounts[1];
         surfData[1].drawSurfList.current = drawSurfs[1];
         surfData[1].drawSurfList.end = (GfxDrawSurf *)((char *)scene.cookie + 8200 * lightIndex);
-        std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-            (const GfxStaticModelDrawInst **)surfaces[1],
-            (const GfxStaticModelDrawInst **)&surfaces[1][surfCounts[1]],
-            (signed int)(4 * surfCounts[1]) >> 2,
-            (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+        //    (const GfxStaticModelDrawInst **)surfaces[1],
+        //    (const GfxStaticModelDrawInst **)&surfaces[1][surfCounts[1]],
+        //    (signed int)(4 * surfCounts[1]) >> 2,
+        //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+        std::sort(&surfaces[1][0], &surfaces[1][surfCounts[1]], R_SortBspShadowReceiverSurfaces);
         for (listSurfIndex = 0; listSurfIndex < surfCounts[1]; ++listSurfIndex)
         {
             if (listSurfIndex >= rgp.world->surfaceCount)
@@ -515,11 +546,11 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     }
 }
 
-int __cdecl R_AllowBspSpotLightShadows(int surfIndex, char *bspLightCallbackAsVoid)
+int __cdecl R_AllowBspSpotLightShadows(int surfIndex, void *bspLightCallbackAsVoid)
 {
     if (r_spotLightShadows->current.enabled)
         return R_BoxInPlanes(
-            (const float (*)[4])(bspLightCallbackAsVoid + 4),
+            (const float (*)[4])((unsigned int)bspLightCallbackAsVoid + 4),
             rgp.world->dpvs.surfaces[surfIndex].bounds[0],
             rgp.world->dpvs.surfaces[surfIndex].bounds[1]);
     else
@@ -612,11 +643,11 @@ int __cdecl R_BoxInPlanes(const float (*planes)[4], const float *mins, const flo
     return 1;
 }
 
-int __cdecl R_AllowBspSpotLight(int surfIndex, char *bspLightCallbackAsVoid)
+int __cdecl R_AllowBspSpotLight(int surfIndex, void *bspLightCallbackAsVoid)
 {
     if (*(_BYTE *)(*(unsigned int *)bspLightCallbackAsVoid + surfIndex))
         return R_BoxInPlanes(
-            (const float (*)[4])(bspLightCallbackAsVoid + 4),
+            (const float (*)[4])((unsigned int)bspLightCallbackAsVoid + 4),
             rgp.world->dpvs.surfaces[surfIndex].bounds[0],
             rgp.world->dpvs.surfaces[surfIndex].bounds[1]);
     else
@@ -737,7 +768,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
     for (lightIndex = 0; lightIndex < visibleCount; ++lightIndex)
     {
         shadowSurfData.drawSurf[2].current = (GfxDrawSurf *)visibleLights[lightIndex];
-        if (shadowSurfData.drawSurf[2].current->fields != 3 && shadowSurfData.drawSurf[2].current->fields != 2)
+        if (shadowSurfData.drawSurf[2].current->packed != 3 && shadowSurfData.drawSurf[2].current->packed != 2)
             MyAssertHandler(
                 ".\\r_light.cpp",
                 720,
@@ -758,7 +789,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
             + *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
         surfData_16.current = &scene.visLight[lightIndex].drawSurfs[scene.visLightShadow[lightIndex - 4].drawSurfCount];
         surfData_16.end = (GfxDrawSurf *)&scene.visLightShadow[lightIndex - 3];
-        if (shadowSurfData.drawSurf[2].current->fields == 3)
+        if (shadowSurfData.drawSurf[2].current->packed == 3)
         {
             g_staticModelLightCallback.position[0] = *((float *)&shadowSurfData.drawSurf[2].current[3].packed + 1);
             g_staticModelLightCallback.position[1] = *(float *)&shadowSurfData.drawSurf[2].current[4].fields;
@@ -772,7 +803,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
             shadowSurfData.drawSurf[0].current = &scene.visLightShadow[lightIndex].drawSurfs[scene.visLightShadow[lightIndex].drawSurfCount];
             shadowSurfData.drawSurf[0].end = (GfxDrawSurf *)((char *)scene.cookie + 8200 * lightIndex);
             R_CalcSpotLightPlanes((const GfxLight *)shadowSurfData.drawSurf[2].current, g_staticModelLightCallback.planes);
-            smodelCount = R_BoxStaticModels((int)&savedregs, mins, maxs, R_AllowStaticModelSpotLight, smodels, 1024);
+            smodelCount = R_BoxStaticModels(mins, maxs, R_AllowStaticModelSpotLight, smodels, 1024);
         }
         for (index = 0; index < smodelCount; ++index)
         {
@@ -802,13 +833,13 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
                         "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
                 if (Material_GetTechnique(material, TECHNIQUE_LIGHT_OMNI))
                 {
-                    drawSurf.fields = (GfxDrawSurfFields)material->info.drawSurf;
+                    drawSurf.fields = material->info.drawSurf.fields;
                     HIDWORD(drawSurf.packed) = (((int)shadowSurfData.drawSurf[2].end & 0xF) << 18)
                         | HIDWORD(drawSurf.packed) & 0xFFC3FFFF;
                     if (!R_AllocDrawSurf(&surfData, drawSurf, &surfData_16, 3u))
                         break;
                     R_AddDelayedStaticModelDrawSurf(&surfData, &surfaces[surfaceIndex], (unsigned __int8 *)list, 1u);
-                    if (shadowSurfData.drawSurf[2].current->fields == 2
+                    if (shadowSurfData.drawSurf[2].current->packed == 2
                         && r_spotLightShadows->current.enabled
                         && r_spotLightSModelShadows->current.enabled)
                     {
@@ -1295,6 +1326,13 @@ bool __cdecl R_SpotLightIsAttachedToDobj(const DObj_s *obj)
     return attachedDobj && attachedDobj == obj;
 }
 
+void __cdecl R_ReverseSortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount)
+{
+    Profile_Begin(88);
+    qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>(drawSurfList, surfCount);
+    Profile_EndInternal(0);
+}
+
 int __cdecl R_EmitPointLightPartitionSurfs(
     GfxViewInfo *viewInfo,
     const GfxLight **visibleLights,
@@ -1319,7 +1357,7 @@ int __cdecl R_EmitPointLightPartitionSurfs(
         R_ReverseSortDrawSurfs(scene.visLight[lightIndex].drawSurfs, lightDrawSurfCount);
         partition = &partitions[partitionCount];
         R_InitDrawSurfListInfo(&partition->info);
-        partition->info.baseTechType = R_GetTechniqueForLightType(light, viewInfo);
+        partition->info.baseTechType = (MaterialTechniqueType)R_GetTechniqueForLightType(light, viewInfo);
         partition->info.viewInfo = viewInfo;
         partition->info.viewOrigin[0] = *viewOrigin;
         partition->info.viewOrigin[1] = viewOrigin[1];

@@ -10,6 +10,208 @@
 #include <win32/win_local.h>
 #include <universal/com_files.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <devgui/devgui.h>
+#include <server_mp/server.h>
+#include <script/scr_debugger.h>
+
+keyname_t keynames[96] =
+{
+  { "TAB", 9 },
+  { "ENTER", 13 },
+  { "ESCAPE", 27 },
+  { "SPACE", 32 },
+  { "BACKSPACE", 127 },
+  { "UPARROW", 154 },
+  { "DOWNARROW", 155 },
+  { "LEFTARROW", 156 },
+  { "RIGHTARROW", 157 },
+  { "ALT", 158 },
+  { "CTRL", 159 },
+  { "SHIFT", 160 },
+  { "CAPSLOCK", 151 },
+  { "F1", 167 },
+  { "F2", 168 },
+  { "F3", 169 },
+  { "F4", 170 },
+  { "F5", 171 },
+  { "F6", 172 },
+  { "F7", 173 },
+  { "F8", 174 },
+  { "F9", 175 },
+  { "F10", 176 },
+  { "F11", 177 },
+  { "F12", 178 },
+  { "INS", 161 },
+  { "DEL", 162 },
+  { "PGDN", 163 },
+  { "PGUP", 164 },
+  { "HOME", 165 },
+  { "END", 166 },
+  { "MOUSE1", 200 },
+  { "MOUSE2", 201 },
+  { "MOUSE3", 202 },
+  { "MOUSE4", 203 },
+  { "MOUSE5", 204 },
+  { "MWHEELUP", 206 },
+  { "MWHEELDOWN", 205 },
+  { "AUX1", 207 },
+  { "AUX2", 208 },
+  { "AUX3", 209 },
+  { "AUX4", 210 },
+  { "AUX5", 211 },
+  { "AUX6", 212 },
+  { "AUX7", 213 },
+  { "AUX8", 214 },
+  { "AUX9", 215 },
+  { "AUX10", 216 },
+  { "AUX11", 217 },
+  { "AUX12", 218 },
+  { "AUX13", 219 },
+  { "AUX14", 220 },
+  { "AUX15", 221 },
+  { "AUX16", 222 },
+  { "KP_HOME", 182 },
+  { "KP_UPARROW", 183 },
+  { "KP_PGUP", 184 },
+  { "KP_LEFTARROW", 185 },
+  { "KP_5", 186 },
+  { "KP_RIGHTARROW", 187 },
+  { "KP_END", 188 },
+  { "KP_DOWNARROW", 189 },
+  { "KP_PGDN", 190 },
+  { "KP_ENTER", 191 },
+  { "KP_INS", 192 },
+  { "KP_DEL", 193 },
+  { "KP_SLASH", 194 },
+  { "KP_MINUS", 195 },
+  { "KP_PLUS", 196 },
+  { "KP_NUMLOCK", 197 },
+  { "KP_STAR", 198 },
+  { "KP_EQUALS", 199 },
+  { "PAUSE", 153 },
+  { "SEMICOLON", 59 },
+  { "COMMAND", 150 },
+  { "181", 128 },
+  { "191", 129 },
+  { "223", 130 },
+  { "224", 131 },
+  { "225", 132 },
+  { "228", 133 },
+  { "229", 134 },
+  { "230", 135 },
+  { "231", 136 },
+  { "232", 137 },
+  { "233", 138 },
+  { "236", 139 },
+  { "241", 140 },
+  { "242", 141 },
+  { "243", 142 },
+  { "246", 143 },
+  { "248", 144 },
+  { "249", 145 },
+  { "250", 146 },
+  { "252", 147 },
+  { NULL, 0 }
+}; // idb
+keyname_t keynames_localized[96] =
+{
+  { "KEY_TAB", 9 },
+  { "KEY_ENTER", 13 },
+  { "KEY_ESCAPE", 27 },
+  { "KEY_SPACE", 32 },
+  { "KEY_BACKSPACE", 127 },
+  { "KEY_UPARROW", 154 },
+  { "KEY_DOWNARROW", 155 },
+  { "KEY_LEFTARROW", 156 },
+  { "KEY_RIGHTARROW", 157 },
+  { "KEY_ALT", 158 },
+  { "KEY_CTRL", 159 },
+  { "KEY_SHIFT", 160 },
+  { "KEY_CAPSLOCK", 151 },
+  { "KEY_F1", 167 },
+  { "KEY_F2", 168 },
+  { "KEY_F3", 169 },
+  { "KEY_F4", 170 },
+  { "KEY_F5", 171 },
+  { "KEY_F6", 172 },
+  { "KEY_F7", 173 },
+  { "KEY_F8", 174 },
+  { "KEY_F9", 175 },
+  { "KEY_F10", 176 },
+  { "KEY_F11", 177 },
+  { "KEY_F12", 178 },
+  { "KEY_INS", 161 },
+  { "KEY_DEL", 162 },
+  { "KEY_PGDN", 163 },
+  { "KEY_PGUP", 164 },
+  { "KEY_HOME", 165 },
+  { "KEY_END", 166 },
+  { "KEY_MOUSE1", 200 },
+  { "KEY_MOUSE2", 201 },
+  { "KEY_MOUSE3", 202 },
+  { "KEY_MOUSE4", 203 },
+  { "KEY_MOUSE5", 204 },
+  { "KEY_MWHEELUP", 206 },
+  { "KEY_MWHEELDOWN", 205 },
+  { "KEY_AUX1", 207 },
+  { "KEY_AUX2", 208 },
+  { "KEY_AUX3", 209 },
+  { "KEY_AUX4", 210 },
+  { "KEY_AUX5", 211 },
+  { "KEY_AUX6", 212 },
+  { "KEY_AUX7", 213 },
+  { "KEY_AUX8", 214 },
+  { "KEY_AUX9", 215 },
+  { "KEY_AUX10", 216 },
+  { "KEY_AUX11", 217 },
+  { "KEY_AUX12", 218 },
+  { "KEY_AUX13", 219 },
+  { "KEY_AUX14", 220 },
+  { "KEY_AUX15", 221 },
+  { "KEY_AUX16", 222 },
+  { "KEY_KP_HOME", 182 },
+  { "KEY_KP_UPARROW", 183 },
+  { "KEY_KP_PGUP", 184 },
+  { "KEY_KP_LEFTARROW", 185 },
+  { "KEY_KP_5", 186 },
+  { "KEY_KP_RIGHTARROW", 187 },
+  { "KEY_KP_END", 188 },
+  { "KEY_KP_DOWNARROW", 189 },
+  { "KEY_KP_PGDN", 190 },
+  { "KEY_KP_ENTER", 191 },
+  { "KEY_KP_INS", 192 },
+  { "KEY_KP_DEL", 193 },
+  { "KEY_KP_SLASH", 194 },
+  { "KEY_KP_MINUS", 195 },
+  { "KEY_KP_PLUS", 196 },
+  { "KEY_KP_NUMLOCK", 197 },
+  { "KEY_KP_STAR", 198 },
+  { "KEY_KP_EQUALS", 199 },
+  { "KEY_PAUSE", 153 },
+  { "KEY_SEMICOLON", 59 },
+  { "KEY_COMMAND", 150 },
+  { "µ", 128 },
+  { "KISAK", 129},
+  { "ß", 130 },
+  { "à", 131 },
+  { "á", 132 },
+  { "ä", 133 },
+  { "å", 134 },
+  { "æ", 135 },
+  { "ç", 136 },
+  { "è", 137 },
+  { "é", 138 },
+  { "ì", 139 },
+  { "ñ", 140 },
+  { "ò", 141 },
+  { "ó", 142 },
+  { "ö", 143 },
+  { "ø", 144 },
+  { "ù", 145 },
+  { "ú", 146 },
+  { "ü", 147 },
+  { NULL, 0 }
+}; // idb
 
 //struct keyname_t *keynames 827b29b0     cl_keys.obj
 //struct keyname_t *keynames_localized 827b2d50     cl_keys.obj
@@ -28,6 +230,8 @@ keyname_t keynames[96];
 keyname_t keynames_localized[96];
 char s_shortestMatch[1024];
 
+int historyLine;
+int nextHistoryLine;
 bool s_shouldCompleteCmd;
 const char *s_completionString;
 int s_matchCount;
@@ -884,6 +1088,7 @@ int __cdecl Key_IsDown(int localClientNum, int keynum)
         return playerKeys[localClientNum].keys[keynum].down;
 }
 
+char tinystr[5];
 const char *__cdecl Key_KeynumToString(int keynum, int translate)
 {
     char v3; // [esp+0h] [ebp-14h]
@@ -894,14 +1099,14 @@ const char *__cdecl Key_KeynumToString(int keynum, int translate)
 
     if (keynum == -1)
         return "<KEY NOT FOUND>";
-    if ((unsigned int)keynum >= 0x100)
+    if (keynum >= 0x100)
         return "<OUT OF RANGE>";
     if (translate && SEH_GetCurrentLanguage() == 1 && keynum >= 48 && keynum <= 57)
-        return (&off_944720)[keynum];
-    if (keynum > 32 && keynum < 127 && keynum != 34)
+        return *(&keynames_localized[72].name + keynum);
+    if (keynum > ' ' && keynum < 127 && keynum != '"')
     {
         tinystr[0] = toupper(keynum);
-        byte_B37441 = 0;
+        tinystr[1] = 0;
         if (keynum != 59 || translate)
             return tinystr;
     }
@@ -917,19 +1122,18 @@ const char *__cdecl Key_KeynumToString(int keynum, int translate)
     }
     i = keynum >> 4;
     j = keynum & 0xF;
-    tinystr[0] = 48;
-    byte_B37441 = 120;
+    qmemcpy(tinystr, "0x", 2);
     if (keynum >> 4 <= 9)
         v4 = i + 48;
     else
         v4 = i + 87;
-    byte_B37442 = v4;
+    tinystr[2] = v4;
     if ((keynum & 0xFu) <= 9)
         v3 = j + 48;
     else
         v3 = j + 87;
-    byte_B37443 = v3;
-    byte_B37444 = 0;
+    tinystr[3] = v3;
+    tinystr[4] = 0;
     return tinystr;
 }
 
@@ -1143,8 +1347,7 @@ void __cdecl Key_Bind_f()
                     if (argc > 3)
                     {
                         v4 = (unsigned __int8 *)Cmd_Argv(i);
-                        strchr(v4, 0x20u);
-                        if (v5)
+                        if (strchr((char *)v4, 0x20u))
                             v7 = 1;
                     }
                     if (v7)
@@ -1232,6 +1435,10 @@ void __cdecl Key_Bindlist_f()
     }
 }
 
+cmd_function_s Key_Bind_f_VAR;
+cmd_function_s Key_Unbind_f_VAR;
+cmd_function_s Key_Unbindall_f_VAR;
+cmd_function_s Key_Bindlist_f_VAR;
 void __cdecl CL_InitKeyCommands()
 {
     Cmd_AddCommandInternal("bind", Key_Bind_f, &Key_Bind_f_VAR);
@@ -1363,7 +1570,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
                 && (CL_GetLocalClientConnection(localClientNum)->demoplaying || clcState == CA_CINEMATIC || clcState == CA_LOGO)
                 && !clientUIActives[0].keyCatchers)
             {
-                Dvar_SetString(nextdemo, &String);
+                Dvar_SetString(nextdemo, (char*)"");
                 key = 27;
             }
         }
@@ -1559,9 +1766,9 @@ void __cdecl Message_Key(int localClientNum, int key)
         if (chatField->buffer[0] && clcState == CA_ACTIVE)
         {
             if (playerKeys[localClientNum].chat_team)
-                Com_sprintf(buffer, 0x400u, aSayTeam_0, chatField->buffer);
+                Com_sprintf(buffer, 0x400u, "say_team %s", chatField->buffer);
             else
-                Com_sprintf(buffer, 0x400u, aSay, chatField->buffer);
+                Com_sprintf(buffer, 0x400u, "say %s", chatField->buffer);
             CL_AddReliableCommand(localClientNum, buffer);
         }
         clientUIActives[0].keyCatchers &= ~0x20u;

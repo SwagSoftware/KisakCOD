@@ -17,6 +17,13 @@
 #include <qcommon/threads.h>
 #include <stringed/stringed_hooks.h>
 #include <database/database.h>
+#include <bgame/bg_public.h>
+#include <gfx_d3d/r_bsp.h>
+#include <gfx_d3d/r_primarylights.h>
+#include <gfx_d3d/r_model.h>
+
+bool g_mapLoaded;
+bool g_ambientStarted;
 
 float cg_entityOriginArray[1][1024][3];
 weaponInfo_s cg_weaponsArray[1][128];
@@ -1762,6 +1769,11 @@ int __cdecl CG_GetClientNum(int localClientNum)
     return cgArray[0].clientNum;
 }
 
+void __cdecl CL_LoadSoundAliases(const char *loadspec)
+{
+    Com_LoadSoundAliases(loadspec, "all_mp", SASYS_CGAME);
+}
+
 void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommandSequence, int clientNum)
 {
     char *s; // [esp+24h] [ebp-4Ch]
@@ -1817,9 +1829,9 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     cgArray[0].bgs.GetXModel = FX_RegisterModel;
     cgArray[0].bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *))CG_CreateDObj;
     cgArray[0].bgs.AttachWeapon = CG_AttachWeapon;
-    cgArray[0].bgs.GetDObj = (DObj_s * (__cdecl *)(int, int))CG_GetDObj;
-    cgArray[0].bgs.SafeDObjFree = (void(__cdecl *)(int, int))Com_SafeClientDObjFree;
-    cgArray[0].bgs.AllocXAnim = (void *(__cdecl *)(int))Hunk_AllocXAnimClient;
+    cgArray[0].bgs.GetDObj = CG_GetDObj;
+    cgArray[0].bgs.SafeDObjFree = Com_SafeClientDObjFree;
+    cgArray[0].bgs.AllocXAnim = Hunk_AllocXAnimClient;
     cgArray[0].bgs.anim_user = 0;
     cgArray[0].clientNum = clientNum;
     cgArray[0].drawHud = 1;
@@ -2057,7 +2069,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
         if (*shellshock)
         {
             if (!BG_LoadShellShockDvars(shellshock))
-                Com_Error(ERR_DROP, &byte_86B96C, shellshock);
+                Com_Error(ERR_DROP, "couldn't register shell shock %s -- see console", shellshock);
             ShellshockParms = BG_GetShellshockParms(ib);
             BG_SetShellShockParmsFromDvars(ShellshockParms);
         }
@@ -2067,7 +2079,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     BG_SetShellShockParmsFromDvars(&cgsArray[0].holdBreathParams);
     cgMedia.fx = CG_RegisterImpactEffects(mapname);
     if (!cgMedia.fx)
-        Com_Error(ERR_DROP, &byte_86B8E8);
+        Com_Error(ERR_DROP, "Error reading CSV files in the fx directory to identify impact effects");
     cgMedia.fxNoBloodFleshHit = FX_Register("impacts/flesh_hit_noblood");
     cgMedia.fxKnifeBlood = FX_Register("impacts/flesh_hit_knife");
     cgMedia.fxKnifeNoBlood = FX_Register("impacts/flesh_hit_knife_noblood");
@@ -2091,7 +2103,7 @@ void __cdecl CG_LoadHudMenu(int localClientNum)
     menuDef_t *menu; // [esp+4h] [ebp-Ch]
     MenuList *menuList; // [esp+8h] [ebp-8h]
 
-    menuList = UI_LoadMenus("ui_mp/hud.txt", 7);
+    menuList = UI_LoadMenus((char*)"ui_mp/hud.txt", 7);
     UI_AddMenuList(&cgDC[localClientNum], menuList);
     if (CL_GetLocalClientActiveCount() == 1)
         menu = Menus_FindByName(&cgDC[localClientNum], "Compass");
@@ -2319,7 +2331,7 @@ void __cdecl CG_Shutdown(int localClientNum)
         {
             if (cent->pose.physObjId != -1)
             {
-                Phys_ObjDestroy(PHYS_WORLD_FX, cent->pose.physObjId);
+                Phys_ObjDestroy(PHYS_WORLD_FX, (dxBody*)cent->pose.physObjId);
                 cent->pose.physObjId = 0;
             }
         }

@@ -118,6 +118,7 @@ void R_InitDynamicData();
 void __cdecl R_SetWorldPtr_FastFile(const char *name);
 
 extern GfxWorld s_world;
+extern r_globals_load_t rgl;
 
 // r_bsp_load_obj
 GfxWorld *__cdecl R_LoadWorldInternal(const char *name);

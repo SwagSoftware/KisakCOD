@@ -219,6 +219,7 @@ struct VariableDebugInfo // sizeof=0x10
 };
 
 //void  TRACK_scr_variable(void);
+void __cdecl Scr_Cleanup();
 bool  IsObject(VariableValueInternal* entryValue);
 bool  IsObject(VariableValue* value);
 void  Scr_InitVariables(void);

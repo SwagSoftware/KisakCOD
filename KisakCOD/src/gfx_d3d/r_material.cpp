@@ -8,6 +8,10 @@
 #include "r_utils.h"
 #include "r_dvars.h"
 #include "r_image.h"
+#include "r_shadowcookie.h"
+
+#include <algorithm>
+#include <universal/com_files.h>
 
 MaterialGlobals materialGlobals;
 
@@ -16,6 +20,7 @@ const stream_dest_info_t s_streamDestInfo[12];
 const BuiltInMaterialTable s_builtInMaterials[50];
 
 bool g_generateOverrideTechniques;
+bool g_alwaysUseDefaultMaterial;
 
 void __cdecl TRACK_r_material()
 {
@@ -37,7 +42,7 @@ void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, Mate
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
         ProfLoad_Begin("Create pixel shader");
-        dx.device->CreatePixelShader(loadDef->program, (IDirect3DPixelShader9 **)&mtlShader->prog);
+        dx.device->CreatePixelShader((DWORD*)loadDef->program, (IDirect3DPixelShader9 **)&mtlShader->prog);
         ProfLoad_End();
     }
     else
@@ -53,7 +58,7 @@ void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, Ma
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
         ProfLoad_Begin("Create vertex shader");
-        dx.device->CreateVertexShader(loadDef->program, (IDirect3DVertexShader9 **)&mtlShader->prog);
+        dx.device->CreateVertexShader((DWORD*)loadDef->program, (IDirect3DVertexShader9 **)&mtlShader->prog);
         ProfLoad_End();
     }
     else
@@ -183,7 +188,7 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("dx.device->CreateVertexDeclaration( elemTable, &decl )\n");
-        hr = dx.device->CreateVertexDeclaration(dx. elemTable, &decl);
+        hr = dx.device->CreateVertexDeclaration(elemTable, &decl);
         if (hr < 0)
         {
             do
@@ -247,12 +252,98 @@ Material *__cdecl Material_Register_FastFile(const char *name)
     return DB_FindXAssetHeader(ASSET_TYPE_MATERIAL, name).material;
 }
 
+void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists)
+{
+    unsigned __int16 beginHashIndex; // [esp+14h] [ebp-4h]
+
+    if (!name)
+        MyAssertHandler(".\\r_material.cpp", 1193, 0, "%s", "name");
+    if (!hashIndex)
+        MyAssertHandler(".\\r_material.cpp", 1194, 0, "%s", "hashIndex");
+    if (!exists)
+        MyAssertHandler(".\\r_material.cpp", 1195, 0, "%s", "exists");
+    beginHashIndex = R_HashAssetName(name) % 0x7FF;
+    *hashIndex = beginHashIndex;
+    do
+    {
+        if (!rg.materialHashTable[*hashIndex])
+            break;
+        if (!strcmp(rg.materialHashTable[*hashIndex]->info.name, name))
+        {
+            *exists = 1;
+            return;
+        }
+        *hashIndex = (*hashIndex + 1) % 0x7FF;
+    } while (*hashIndex != beginHashIndex);
+    *exists = 0;
+}
+
+Material *__cdecl Material_MakeDefault(char *name)
+{
+    if (!name)
+        MyAssertHandler(".\\r_material.cpp", 1158, 0, "%s", "name");
+    if (!rgp.defaultMaterial)
+    {
+        if (strcmp(name, "$default"))
+            MyAssertHandler(".\\r_material.cpp", 1162, 0, "%s", "!strcmp( name, MATERIAL_DEFAULT_NAME )");
+        Com_Error(ERR_FATAL, "couldn't load material '$default'");
+    }
+    Com_PrintWarning(8, "WARNING: Could not find material '%s'\n", name);
+    return Material_Duplicate(rgp.defaultMaterial, name);
+}
+
+void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex)
+{
+    unsigned __int64 v2; // rax
+    unsigned int v3; // ecx
+
+    if (!material)
+        MyAssertHandler(".\\r_material.cpp", 1084, 0, "%s", "material");
+    rgp.needSortMaterials = 1;
+    if (rg.materialHashTable[hashIndex])
+        MyAssertHandler(".\\r_material.cpp", 1088, 1, "%s", "rg.materialHashTable[hashIndex] == NULL");
+    material->info.hashIndex = hashIndex;
+    v2 = (rgp.materialCount & 0x7FF) << 29;
+    v3 = HIDWORD(v2) | HIDWORD(material->info.drawSurf.packed) & 0xFFFFFF00;
+    *&material->info.drawSurf.packed = v2 | *&material->info.drawSurf.packed & 0x1FFFFFFF;
+    HIDWORD(material->info.drawSurf.packed) = v3;
+    rgp.sortedMaterials[rgp.materialCount] = material;
+    rg.materialHashTable[hashIndex] = material;
+    if (++rgp.materialCount == 2048)
+        Com_Error(ERR_FATAL, "Too many unique materials (%i or more)\n", 2048);
+}
+
+Material *__cdecl Material_Register_LoadObj(char *name, int imageTrack)
+{
+    Material *material; // [esp+0h] [ebp-Ch]
+    bool exists; // [esp+7h] [ebp-5h] BYREF
+    unsigned __int16 hashIndex; // [esp+8h] [ebp-4h] BYREF
+
+    if (!name)
+        MyAssertHandler(".\\r_material.cpp", 1222, 0, "%s", "name");
+    if (!*name)
+        MyAssertHandler(".\\r_material.cpp", 1223, 0, "%s", "name[0]");
+    Material_GetHashIndex(name, &hashIndex, &exists);
+    if (exists)
+        return rg.materialHashTable[hashIndex];
+    ProfLoad_Begin("Load material");
+    material = Material_Load(name, imageTrack);
+    ProfLoad_End();
+    if (!material)
+        return Material_MakeDefault(name);
+    Material_GetHashIndex(name, &hashIndex, &exists);
+    if (exists)
+        MyAssertHandler(".\\r_material.cpp", 1236, 1, "%s", "!exists");
+    Material_Add(material, hashIndex);
+    return material;
+}
+
 Material *__cdecl Material_Register(const char *name, int imageTrack)
 {
     if (useFastFile->current.enabled)
         return Material_Register_FastFile(name);
     else
-        return Material_Register_LoadObj(name, imageTrack);
+        return Material_Register_LoadObj((char*)name, imageTrack);
 }
 
 Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack)
@@ -271,7 +362,7 @@ Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack)
 
 void __cdecl R_MaterialList_f()
 {
-    char *fmt; // [esp+8h] [ebp-4150h]
+    const char *fmt; // [esp+8h] [ebp-4150h]
     unsigned int i; // [esp+138h] [ebp-4020h]
     const char **sceneEntIndex; // [esp+13Ch] [ebp-401Ch]
     int v3; // [esp+140h] [ebp-4018h]
@@ -284,11 +375,12 @@ void __cdecl R_MaterialList_f()
     Com_Printf(8, "-----------------------\n");
     inData = 0;
     DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void *))R_GetMaterialList, &inData, 0);
-    std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
-        v6,
-        &v6[inData],
-        (int)(8 * inData) >> 3,
-        (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))R_MaterialCompare);
+    //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
+    //    v6,
+    //    &v6[inData],
+    //    (int)(8 * inData) >> 3,
+    //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))R_MaterialCompare);
+    std::sort(&v6[0], &v6[inData], R_MaterialCompare);
     Com_Printf(8, "geo KB   name\n");
     for (i = 0; i < inData; ++i)
     {
@@ -296,8 +388,8 @@ void __cdecl R_MaterialList_f()
         sceneEntIndex = (const char **)v4->sceneEntIndex;
         if (!v4->sceneEntIndex)
             MyAssertHandler(".\\r_material.cpp", 1431, 0, "%s", "material");
-        v3 += LOunsigned int(v4->weight);
-        v7 = (double)SLOunsigned int(v4->weight) / 1024.0;
+        v3 += LODWORD(v4->weight);
+        v7 = (double)SLODWORD(v4->weight) / 1024.0;
         if (v7 >= 10.0)
             fmt = "%6.0f";
         else
@@ -479,7 +571,7 @@ void __cdecl Material_ReloadTechniqueSet(XAssetHeader header)
     Material_ReloadTechniqueSetResources(header.techniqueSet);
 }
 
-void __cdecl Material_ReleaseTechniqueSet(XAssetHeader header)
+void __cdecl Material_ReleaseTechniqueSet(XAssetHeader header, void* crap)
 {
     Material_ReleaseTechniqueSetResources(header.techniqueSet);
 }
@@ -563,11 +655,79 @@ void __cdecl Material_PreventOverrideTechniqueGeneration()
     g_generateOverrideTechniques = 0;
 }
 
+void __cdecl Material_UpdatePicmipForTexdef(const MaterialTextureDef *texdef)
+{
+    if (!texdef)
+        MyAssertHandler(".\\r_material.cpp", 1654, 0, "%s", "texdef");
+    if (texdef->semantic != 11)
+    {
+        if (texdef->u.image)
+            Image_UpdatePicmip(texdef->u.image);
+    }
+}
+
+
+void __cdecl Material_UpdatePicmipSingle(XAssetHeader header)
+{
+    int textureIndex; // [esp+4h] [ebp-4h]
+
+    for (textureIndex = 0; textureIndex < BYTE2(header.xmodelPieces[4].pieces); ++textureIndex)
+        Material_UpdatePicmipForTexdef((MaterialTextureDef*)header.xmodelPieces[5].pieces + textureIndex);
+}
+
 void __cdecl Material_UpdatePicmipAll()
 {
     R_SyncRenderThread();
     R_SetPicmip();
     DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void *))Material_UpdatePicmipSingle, 0, 1);
+}
+
+Material *__cdecl Material_Find(const char *name)
+{
+    Material *material; // [esp+0h] [ebp-Ch]
+    unsigned __int16 hashIndex[3]; // [esp+4h] [ebp-8h] BYREF
+    bool exists; // [esp+Bh] [ebp-1h] BYREF
+
+    Material_GetHashIndex(name, hashIndex, &exists);
+    if (!exists)
+        return 0;
+    material = rg.materialHashTable[hashIndex[0]];
+    if (!material)
+        MyAssertHandler(".\\r_material.cpp", 1313, 1, "%s", "material");
+    return material;
+}
+
+void __cdecl Material_ReloadTextures(const Material *material)
+{
+    GfxImage *image; // [esp+0h] [ebp-18h]
+    GfxImage *maxConvert; // [esp+4h] [ebp-14h]
+    GfxImage *lastConverted; // [esp+8h] [ebp-10h]
+    int textureIter; // [esp+Ch] [ebp-Ch]
+    int textureCount; // [esp+10h] [ebp-8h]
+    const MaterialTextureDef *texture; // [esp+14h] [ebp-4h]
+
+    if (!material)
+        MyAssertHandler(".\\r_material.cpp", 1621, 0, "%s", "material");
+    textureCount = material->textureCount;
+    lastConverted = 0;
+    while (1)
+    {
+        maxConvert = 0;
+        for (textureIter = 0; textureIter != textureCount; ++textureIter)
+        {
+            texture = &material->textureTable[textureIter];
+            if (texture->semantic != 11)
+            {
+                image = texture->u.image;
+                if (image > maxConvert && (!lastConverted || image < lastConverted))
+                    maxConvert = texture->u.image;
+            }
+        }
+        lastConverted = maxConvert;
+        if (!maxConvert)
+            break;
+        Image_Reload(maxConvert);
+    }
 }
 
 void __cdecl R_Cmd_ReloadMaterialTextures()

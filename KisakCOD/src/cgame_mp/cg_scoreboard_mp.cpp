@@ -209,6 +209,33 @@ void __cdecl CG_DrawScoreboard_Backdrop(int localClientNum, float alpha)
     CG_DrawBackdropServerInfo(localClientNum, alpha);
 }
 
+char szServerIPAddress[128];
+char *__cdecl CL_GetServerIPAddress()
+{
+    __int16 v1; // ax
+    clientConnection_t *clc; // [esp+0h] [ebp-4h]
+
+    if (clientUIActives[0].connectionState >= CA_CONNECTED)
+    {
+        clc = CL_GetLocalClientConnection(0);
+        v1 = BigShort(clc->serverAddress.port);
+        Com_sprintf(
+            szServerIPAddress,
+            0x80u,
+            "%i.%i.%i.%i:%i",
+            clc->serverAddress.ip[0],
+            clc->serverAddress.ip[1],
+            clc->serverAddress.ip[2],
+            clc->serverAddress.ip[3],
+            v1);
+    }
+    else
+    {
+        memset(szServerIPAddress, 0, sizeof(szServerIPAddress));
+    }
+    return szServerIPAddress;
+}
+
 void __cdecl CG_DrawBackdropServerInfo(int localClientNum, float alpha)
 {
     int v2; // esi

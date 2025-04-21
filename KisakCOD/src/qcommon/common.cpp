@@ -5,6 +5,40 @@
 #include "../win32/win_local.h"
 
 #include <universal/com_memory.h>
+#include <client/client.h>
+#include <win32/win_net_debug.h>
+#include <bgame/bg_local.h>
+#include <script/scr_debugger.h>
+#include <client_mp/client_mp.h>
+#include "com_bsp.h"
+#include "com_playerprofile.h"
+#include <universal/com_files.h>
+#include <stringed/stringed_hooks.h>
+#include "files.h"
+#include <server_mp/server.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include <script/scr_vm.h>
+#include <gfx_d3d/r_init.h>
+#include <EffectsCore/fx_system.h>
+#include <database/database.h>
+#include <universal/com_constantconfigstrings.h>
+#include <universal/physicalmemory.h>
+#include <win32/win_storage.h>
+#include <buildnumber_mp.h>
+#include <win32/win_net.h>
+#include <xanim/dobj.h>
+#include <sound/snd_local.h>
+#include <game_mp/g_public_mp.h>
+#include <script/scr_animtree.h>
+#include <gfx_d3d/r_scene.h>
+#include <ragdoll/ragdoll.h>
+#include <devgui/devgui.h>
+#include <ui/ui.h>
+#include <server/sv_game.h>
+#include <gfx_d3d/r_workercmds.h>
+#include <universal/com_convexhull.h>
+#include <gfx_d3d/r_dvars.h>
+#include "mem_track.h"
 
 int marker_common;
 
@@ -69,6 +103,50 @@ static char* rd_buffer = NULL;
 static void(QDECL* rd_flush)(char*) = NULL;
 static unsigned int rd_buffersize = 0;
 
+char com_errorMessage[4096];
+
+int com_lastFrameIndex;
+int com_lastFrameTime[1];
+int com_fullyInitialized;
+float com_codeTimeScale;
+int timeClientFrame;
+
+int logfile;
+
+int com_numConsoleLines;
+char *com_consoleLines[32];
+
+int weaponInfoSource;
+
+errorParm_t errorcode;
+int lastErrorTime;
+int errorCount;
+int com_safemode;
+
+int opening_qconsole;
+
+char *noticeErrors[10];
+const char *noticeErrors[10] =
+{
+  "EXE_SERVER_DISCONNECTED",
+  "EXE_DISCONNECTED",
+  "EXE_SERVERISFULL",
+  "XBOXLIVE_SIGNEDOUTOFLIVE",
+  "XBOXLIVE_CANTJOINSESSION",
+  "XBOXLIVE_MPNOTALLOWED",
+  "XBOXLIVE_MUSTLOGIN",
+  "MENU_RESETCUSTOMCLASSES",
+  "XBOXLIVE_NETCONNECTION",
+  ""
+}; // idb
+
+int objFreeCount;
+int com_lastDObjIndex;
+int g_bDObjInited;
+bool objAlloced[2048];
+__int16 clientObjMap[1152];
+__int16 serverObjMap[1024];
+
 void QDECL Com_PrintMessage(int channel, char* msg, int error)
 {
 	// LWSS: Punkbuster stuff
@@ -112,6 +190,8 @@ void QDECL Com_PrintMessage(int channel, char* msg, int error)
 
 void __cdecl Debug_Frame(int localClientNum)
 {
+    // KISAKTODO
+#if 0
     unsigned int v1; // edx
     int lastFrameIndex; // [esp+0h] [ebp-18h]
     int newEvent; // [esp+4h] [ebp-14h]
@@ -171,6 +251,7 @@ void __cdecl Debug_Frame(int localClientNum)
     if (bgs)
         MyAssertHandler(".\\qcommon\\common.cpp", 4370, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
     bgs = oldBgs;
+#endif
 }
 
 void QDECL Com_Printf(int channel, const char* fmt, ...)
@@ -571,10 +652,10 @@ void __cdecl Com_PrintMessage(int channel, const char* msg, int error)
             && (!com_filter_output || !com_filter_output->current.enabled
                 || Con_IsChannelVisible(CON_DEST_CONSOLE, channel, 3)))
         {
-            Sys_Print(msg);
+            Sys_Print((char*)msg);
         }
         if (channel != 7 && com_logfile && com_logfile->current.integer)
-            Com_LogPrintMessage(channel, msg);
+            Com_LogPrintMessage(channel, (char *)msg);
     }
 }
 
@@ -688,6 +769,20 @@ void __cdecl Com_Shutdown(const char* finalmsg)
     }
 }
 
+void __cdecl CL_ShutdownDemo()
+{
+    clientConnection_t *clc; // [esp+0h] [ebp-4h]
+
+    clc = CL_GetLocalClientConnection(0);
+    if (clc->demofile)
+    {
+        FS_FCloseFile(clc->demofile);
+        clc->demofile = 0;
+        clc->demoplaying = 0;
+        clc->demorecording = 0;
+    }
+}
+
 void __cdecl Com_ShutdownInternal(const char* finalmsg)
 {
     int localClientNum; // [esp+0h] [ebp-4h]
@@ -754,10 +849,11 @@ char __cdecl Com_ErrorIsNotice(const char* errorMessage)
 
 void __cdecl Com_PrintStackTrace()
 {
-    DoStackTrace(g_stackTrace, 1);
-    Com_Printf(16, "STACKBEGIN -------------------------------------------------------------------\n");
-    Com_Printf(16, g_stackTrace);
-    Com_Printf(16, "STACKEND ---------------------------------------------------------------------\n");
+    // KISAKTODO
+   //DoStackTrace(g_stackTrace, 1);
+   //Com_Printf(16, "STACKBEGIN -------------------------------------------------------------------\n");
+   //Com_Printf(16, g_stackTrace);
+   //Com_Printf(16, "STACKEND ---------------------------------------------------------------------\n");
 }
 
 void __cdecl  Com_ErrorAbort()
@@ -807,7 +903,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         errorcode = code;
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
         Value = (int*)Sys_GetValue(2);
-        longjmp(Value, -1);
+        //longjmp(Value, -1);
     }
     if (code == ERR_SCRIPT_DROP)
     {
@@ -834,9 +930,9 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     {
         if (!com_dedicated->current.integer)
             goto LABEL_27;
-        Sys_Print("\n==========================\n");
+        Sys_Print((char*)"\n==========================\n");
         Sys_Print(com_errorMessage);
-        Sys_Print("\n==========================\n");
+        Sys_Print((char*)"\n==========================\n");
         com_errorEntered = 0;
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
     }
@@ -998,9 +1094,10 @@ void __cdecl Info_Print(const char* s)
 
 unsigned int* __cdecl Com_AllocEvent(int size)
 {
-    return Z_Malloc(size, "Com_AllocEvent", 10);
+    return (unsigned int *)Z_Malloc(size, "Com_AllocEvent", 10);
 }
 
+unsigned __int8 clientCommonMsgBuf[131072];
 void __cdecl Com_ClientPacketEvent()
 {
     msg_t netmsg; // [esp+4Ch] [ebp-40h] BYREF
@@ -1039,6 +1136,7 @@ void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg)
     CL_PacketEvent(NS_CLIENT1, adr, netmsg, v2);
 }
 
+unsigned __int8 serverCommonMsgBuf[131072];
 void __cdecl Com_ServerPacketEvent()
 {
     msg_t netmsg; // [esp+30h] [ebp-40h] BYREF
@@ -1099,7 +1197,7 @@ void __cdecl Com_EventLoop()
         default:
             if (ev.evPtr)
                 MyAssertHandler(".\\qcommon\\common.cpp", 2146, 0, "%s", "!ev.evPtr");
-            Com_Error(ERR_FATAL, &byte_896E8C, ev.evType);
+            Com_Error(ERR_FATAL, "Com_EventLoop: bad event type %i", ev.evType);
             break;
         }
     }
@@ -1116,7 +1214,7 @@ void __cdecl Com_SetScriptSettings()
 void __cdecl Com_RunAutoExec(int localClientNum, int controllerIndex)
 {
     Dvar_SetInAutoExec(1);
-    Cmd_ExecuteSingleCommand(localClientNum, controllerIndex, "exec autoexec_dev_mp.cfg");
+    Cmd_ExecuteSingleCommand(localClientNum, controllerIndex, (char*)"exec autoexec_dev_mp.cfg");
     Dvar_SetInAutoExec(0);
 }
 
@@ -1153,31 +1251,39 @@ void __cdecl Com_Init(char* commandLine)
     const char* v5; // eax
 
     Value = Sys_GetValue(2);
-    if (_setjmp3(Value, 0))
-    {
-        v2 = va("Error during initialization:\n%s\n", com_errorMessage);
-        Sys_Error(v2);
-    }
+    //if (_setjmp3(Value, 0))
+    //{
+    //    v2 = va("Error during initialization:\n%s\n", com_errorMessage);
+    //    Sys_Error(v2);
+    //}
     Com_Init_Try_Block_Function(commandLine);
     v3 = Sys_GetValue(2);
-    if (!_setjmp3(v3, 0))
+    //if (!_setjmp3(v3, 0))
         Com_AddStartupCommands();
     if (com_errorEntered)
         Com_ErrorCleanup();
     if (!com_sv_running->current.enabled && !com_dedicated->current.integer)
     {
         v4 = Sys_GetValue(2);
-        if (_setjmp3(v4, 0))
-        {
-            v5 = va("Error during initialization:\n%s\n", com_errorMessage);
-            Sys_Error(v5);
-        }
+        //if (_setjmp3(v4, 0))
+        //{
+        //    v5 = va("Error during initialization:\n%s\n", com_errorMessage);
+        //    Sys_Error(v5);
+        //}
         if (!cls.rendererStarted)
             CL_InitRenderer();
         R_BeginRemoteScreenUpdate();
         CL_StartHunkUsers();
         R_EndRemoteScreenUpdate();
     }
+}
+
+bool __cdecl QuitOnError()
+{
+    // KISAKTODO
+    return true;
+    //RefreshQuitOnErrorCondition();
+    //return shouldQuitOnError;
 }
 
 void Com_ErrorCleanup()
@@ -1311,6 +1417,15 @@ void Com_AddStartupCommands()
     }
 }
 
+cmd_function_s Com_Error_f_VAR;
+cmd_function_s Com_Crash_f_VAR;
+cmd_function_s Com_Freeze_f_VAR;
+cmd_function_s Com_Assert_f_VAR;
+cmd_function_s Com_Quit_f_VAR;
+cmd_function_s Com_WriteConfig_f_VAR;
+cmd_function_s Com_WriteDefaults_f_VAR;
+cmd_function_s Com_Error_f_VAR;
+
 void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 {
     int v1; // eax
@@ -1326,7 +1441,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     SL_Init();
     Swap_Init();
     Cbuf_Init();
-    _Cmd_Init();
+    Cmd_Init();
     Com_StartupVariable(0);
     Com_InitDvars();
     CCS_InitConstantConfigStrings();
@@ -1370,7 +1485,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         Cmd_AddCommandInternal("freeze", Com_Freeze_f, &Com_Freeze_f_VAR);
         Cmd_AddCommandInternal("assert", Com_Assert_f, &Com_Assert_f_VAR);
     }
-    Cmd_AddCommandInternal(aQuit_1, Com_Quit_f, &Com_Quit_f_VAR);
+    Cmd_AddCommandInternal("quit", Com_Quit_f, &Com_Quit_f_VAR);
     Cmd_AddCommandInternal("writeconfig", Com_WriteConfig_f, &Com_WriteConfig_f_VAR);
     Cmd_AddCommandInternal("writedefaults", Com_WriteDefaults_f, &Com_WriteDefaults_f_VAR);
     BuildNumber = getBuildNumber();
@@ -1387,7 +1502,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     DObjInit();
     SV_Init();
     NET_Init();
-    Dvar_ClearModified(com_dedicated);
+    Dvar_ClearModified((dvar_s*)com_dedicated);
     if (!com_dedicated->current.integer)
     {
         CL_ResetStats_f();
@@ -1425,9 +1540,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 void __cdecl Com_Error_f()
 {
     if (Cmd_Argc() <= 1)
-        Com_Error(ERR_FATAL, &byte_8975D0);
+        Com_Error(ERR_FATAL, "Testing fatal error");
     else
-        Com_Error(ERR_DROP, &byte_8975E8);
+        Com_Error(ERR_DROP, "Testing drop error");
 }
 
 void __cdecl Com_Freeze_f()
@@ -1499,10 +1614,12 @@ void COM_PlayIntroMovies()
     if (!com_dedicated->current.integer && !com_introPlayed->current.enabled)
     {
         Cbuf_AddText(0, "cinematic IW_logo\n");
-        Dvar_SetString((dvar_s*)nextmap, "cinematic atvi; set nextmap cinematic cod_intro");
+        Dvar_SetString((dvar_s*)nextmap, (char*)"cinematic atvi; set nextmap cinematic cod_intro");
         Dvar_SetBool((dvar_s*)com_introPlayed, 1);
     }
 }
+
+const char *s_lockThreadNames[4] = { "none", "minimal", "all" };
 
 void Com_InitDvars()
 {
@@ -1626,7 +1743,7 @@ void __cdecl Com_WriteConfigToFile(int localClientNum, char* filename)
 {
     int f; // [esp+0h] [ebp-4h]
 
-    f = FS_FOpenFileWriteToDir(filename, "players");
+    f = FS_FOpenFileWriteToDir(filename, (char*)"players");
     if (f)
     {
         FS_Printf(f, "// generated by Call of Duty, do not modify\n");
@@ -1679,6 +1796,50 @@ void __cdecl Com_AdjustMaxFPS(int* maxFPS)
             maxUserCmdsPerSecond = 1;
         if (!*maxFPS || *maxFPS > maxUserCmdsPerSecond)
             *maxFPS = maxUserCmdsPerSecond;
+    }
+}
+
+void Com_DedicatedModified()
+{
+    int localClientNum; // [esp+0h] [ebp-4h]
+
+    if ((com_dedicated->flags & 0x40) == 0)
+    {
+        if ((com_dedicated->flags & 0x20) == 0)
+            MyAssertHandler(".\\qcommon\\common.cpp", 3727, 0, "%s", "com_dedicated->flags & DVAR_LATCH");
+        if (com_dedicated->latched.integer != com_dedicated->current.integer)
+        {
+            com_dedicated = Dvar_RegisterEnum(
+                "dedicated",
+                g_dedicatedEnumNames,
+                0,
+                0x20u,
+                "True if this is a dedicated server");
+            if (com_dedicated->current.integer)
+                Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "True if this is a dedicated server");
+            if (!com_dedicated->current.integer)
+                MyAssertHandler(
+                    ".\\qcommon\\common.cpp",
+                    3735,
+                    0,
+                    "%s\n\t(com_dedicated->current.integer) = %i",
+                    "(com_dedicated->current.integer != 0)",
+                    com_dedicated->current.integer);
+            if ((com_dedicated->flags & 0x40) == 0)
+                MyAssertHandler(
+                    ".\\qcommon\\common.cpp",
+                    3736,
+                    0,
+                    "%s\n\t(com_dedicated->flags) = %i",
+                    "(com_dedicated->flags & (1 << 6))",
+                    com_dedicated->flags);
+            Dvar_ClearModified((dvar_s*)com_dedicated);
+            for (localClientNum = 0; localClientNum < 1; ++localClientNum)
+                CL_Shutdown(localClientNum);
+            CL_ShutdownRef();
+            CL_InitDedicated();
+            SV_AddDedicatedCommands();
+        }
     }
 }
 
@@ -1892,14 +2053,14 @@ void Com_Statmon()
 int Com_UpdateMenu()
 {
     int result; // eax
-    int MenuScreen; // eax
+    uiMenuCommand_t MenuScreen; // eax
     connstate_t clcState; // [esp+4h] [ebp-4h]
 
-    clcState = client_state[0];
+    clcState = clientUIActives[0].connectionState;
     result = UI_IsFullscreen(0);
     if (!result && clcState == CA_DISCONNECTED)
     {
-        MenuScreen = UI_GetMenuScreen();
+        MenuScreen = (uiMenuCommand_t)UI_GetMenuScreen();
         return UI_SetActiveMenu(0, MenuScreen);
     }
     return result;
@@ -1935,11 +2096,11 @@ void __cdecl Com_Frame()
 
     CL_ResetStats_f();
     Value = Sys_GetValue(2);
-    if (_setjmp3(Value, 0))
-    {
-        //Profile_Recover(1);
-    }
-    else
+    //if (_setjmp3(Value, 0))
+    //{
+    //    //Profile_Recover(1);
+    //}
+    //else
     {
         //Profile_Guard(1);
         Com_CheckSyncFrame();
@@ -1973,8 +2134,8 @@ void Com_StartHunkUsers()
 
     Value = Sys_GetValue(2);
 
-    if (_setjmp3(Value, 0))
-        Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
+    //if (_setjmp3(Value, 0))
+    //    Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
 
     Com_AssetLoadUI();
     MenuScreen = UI_GetMenuScreen();
@@ -2243,219 +2404,6 @@ void __cdecl Com_InitialHull(
         Com_SwapHullPoints(pointOrder, minIndex, pointCount - 1);
         Com_SwapHullPoints(pointOrder, maxIndex, pointCount - 2);
     }
-}
-
-void Com_InitHunkMemory()
-{
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1258, 0, "%s", "Sys_IsMainThread()");
-    if (s_hunkData)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1259, 0, "%s", "!s_hunkData");
-    if (FS_LoadStack())
-        Com_Error(ERR_FATAL, &byte_8C0604);
-    if (!useFastFile->current.enabled)
-        s_hunkTotal = (int)&svs.archivedSnapshotBuffer[22495840];
-    if (useFastFile->current.enabled)
-        s_hunkTotal = (int)&unk_A00000;
-    R_ReflectionProbeRegisterDvars();
-    if (r_reflectionProbeGenerate->current.enabled)
-        s_hunkTotal = 0x20000000;
-    s_hunkData = (unsigned __int8*)Z_VirtualReserve(s_hunkTotal);
-    if (!s_hunkData)
-        Sys_OutOfMemErrorInternal(".\\universal\\com_memory.cpp", 1318);
-    s_origHunkData = s_hunkData;
-    track_set_hunk_size(s_hunkTotal);
-    Hunk_Clear();
-    _Cmd_AddCommandInternal("meminfo", Com_Meminfo_f, &Com_Meminfo_f_VAR);
-    _Cmd_AddCommandInternal("tempmeminfo", Com_TempMeminfo_f, &Com_TempMeminfo_f_VAR);
-}
-
-void __cdecl Com_InitSoundDevGuiGraphs()
-{
-    if (useFastFile->current.enabled)
-        ((void(__cdecl*)(void (*)()))Com_InitSoundDevGuiGraphs_FastFile)(Com_InitSoundDevGuiGraphs_FastFile);
-    else
-        ((void(__cdecl*)(void (*)()))Com_InitSoundDevGuiGraphs_LoadObj)(Com_InitSoundDevGuiGraphs_LoadObj);
-}
-
-void Com_InitSoundDevGuiGraphs_LoadObj()
-{
-    char devguiPath[256]; // [esp+0h] [ebp-108h] BYREF
-    int i; // [esp+104h] [ebp-4h]
-
-    if (!g_sa.curvesInitialized)
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 240, 0, "%s", "g_sa.curvesInitialized");
-    for (i = 1; i < 16; ++i)
-    {
-        if (*(unsigned int*)&g_sa.volumeFalloffCurveNames[-18][72 * i])
-        {
-            sprintf(
-                devguiPath,
-                "Main/Snd:6/Volume Falloff Curves/%s:%d",
-                *(const char**)&g_sa.volumeFalloffCurveNames[-18][72 * i],
-                i);
-            g_sa.curveDevGraphs[i].knotCountMax = 8;
-            g_sa.curveDevGraphs[i].knots = g_sa.volumeFalloffCurves[i].knots;
-            g_sa.curveDevGraphs[i].knotCount = &g_sa.volumeFalloffCurves[i].knotCount;
-            g_sa.curveDevGraphs[i].eventCallback = (void(__cdecl*)(const DevGraph*, DevEventType, int))Com_VolumeFalloffCurveGraphEventCallback;
-            g_sa.curveDevGraphs[i].data = (void*)i;
-            g_sa.curveDevGraphs[i].disableEditingEndPoints = 1;
-            DevGui_AddGraph(devguiPath, &g_sa.curveDevGraphs[i]);
-        }
-    }
-}
-
-void Com_InitSoundDevGuiGraphs_FastFile()
-{
-    int counter; // [esp+0h] [ebp-4h] BYREF
-
-    counter = 0;
-    DB_EnumXAssets(ASSET_TYPE_SOUND_CURVE, (void(__cdecl*)(XAssetHeader, void*))Com_GetGraphList, &counter, 0);
-}
-
-void __cdecl Com_InitSoundAliasHash(unsigned int aliasCount)
-{
-    g_sa.hashUsed = 0;
-    g_sa.hashSize = (3 * aliasCount + 1) >> 1;
-    g_sa.hash = (snd_alias_list_t**)CM_Hunk_Alloc(4 * ((3 * aliasCount + 1) >> 1), "Com_InitSoundAliasHash", 15);
-    memset((unsigned __int8*)g_sa.hash, 0, 4 * ((3 * aliasCount + 1) >> 1));
-}
-
-void Com_InitSpeakerMaps()
-{
-    int fileIndex; // [esp+10h] [ebp-58h]
-    const char** fileNames; // [esp+14h] [ebp-54h]
-    char name[68]; // [esp+18h] [ebp-50h] BYREF
-    int len; // [esp+60h] [ebp-8h]
-    int fileCount; // [esp+64h] [ebp-4h] BYREF
-
-    if (g_sa.speakerMapsInitialized)
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 360, 0, "%s", "!g_sa.speakerMapsInitialized");
-    Com_InitDefaultSpeakerMap();
-    fileNames = FS_ListFiles("soundaliases", "spkrmap", FS_LIST_PURE_ONLY, &fileCount);
-    if (fileCount > 15)
-        Com_Error(ERR_DROP, &byte_8C1120, fileCount, 15);
-    for (fileIndex = 0; fileIndex < fileCount; ++fileIndex)
-    {
-        len = strlen(fileNames[fileIndex]) - 8;
-        if (len >= 64)
-            Com_Error(ERR_DROP, &byte_8C1100, fileNames[fileIndex]);
-        strncpy((unsigned __int8*)name, (unsigned __int8*)fileNames[fileIndex], len);
-        name[len] = 0;
-        if (!Com_LoadSpkrMapFile(name, &g_sa.speakerMaps[fileIndex + 1]))
-            Com_Error(ERR_DROP, &byte_8C10DC, fileNames[fileIndex]);
-    }
-    FS_FreeFileList(fileNames);
-    Cmd_AddCommandInternal("snd_refreshSpeakerMaps", Com_RefreshSpeakerMaps_f, &Com_RefreshSpeakerMaps_f_VAR);
-    g_sa.speakerMapsInitialized = 1;
-}
-
-void Com_InitDefaultSpeakerMap()
-{
-    Com_InitDefaultSoundAliasSpeakerMap(g_sa.speakerMaps);
-}
-
-void Com_InitCurves()
-{
-    int fileIndex; // [esp+10h] [ebp-10h]
-    const char** fileNames; // [esp+14h] [ebp-Ch]
-    char* name; // [esp+18h] [ebp-8h]
-    int fileCount; // [esp+1Ch] [ebp-4h] BYREF
-
-    if (g_sa.curvesInitialized)
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 867, 0, "%s", "!g_sa.curvesInitialized");
-    memset((unsigned __int8*)g_sa.volumeFalloffCurves, 0, sizeof(g_sa.volumeFalloffCurves));
-    Com_InitDefaultSoundAliasVolumeFalloffCurve(g_sa.volumeFalloffCurves);
-    fileNames = FS_ListFiles("soundaliases", "vfcurve", FS_LIST_PURE_ONLY, &fileCount);
-    if (fileCount > 15)
-        Com_Error(ERR_DROP, &byte_8C1120, fileCount, 15);
-    for (fileIndex = 0; fileIndex < fileCount; ++fileIndex)
-    {
-        name = g_sa.volumeFalloffCurveNames[fileIndex + 1];
-        I_strncpyz(name, (char*)fileNames[fileIndex], strlen(fileNames[fileIndex]) - 7);
-        if (!Com_LoadVolumeFalloffCurve(name, &g_sa.volumeFalloffCurves[fileIndex + 1]))
-            Com_Error(ERR_FATAL, &byte_8C134C, fileNames[fileIndex]);
-    }
-    FS_FreeFileList(fileNames);
-    g_sa.curvesInitialized = 1;
-}
-
-void __cdecl Com_InitSoundAlias()
-{
-    saLoadObjGlob.tempAliases = 0;
-    saLoadObjGlob.tempAliasCount = 0;
-}
-
-void __thiscall Com_InitEntChannels(char* file_1)
-{
-    char* file; // [esp+0h] [ebp-4h] BYREF
-
-    file = file_1;
-    if (FS_ReadFile("soundaliases/channels.def", (void**)&file) < 0)
-        Com_Error(ERR_DROP, "unable to load entity channel file [%s].\n", "soundaliases/channels.def");
-    Com_ParseEntChannelFile(file);
-}
-
-void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve* sndCurve)
-{
-    sndCurve->filename = "";
-    sndCurve->knots[0][0] = 0.0;
-    sndCurve->knots[0][1] = 1.0;
-    sndCurve->knots[1][0] = 1.0;
-    sndCurve->knots[1][1] = 0.0;
-    sndCurve->knotCount = 2;
-}
-
-void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo* info)
-{
-    Com_PreLoadSpkrMapFile(info);
-    info->speakerMap.isDefault = 1;
-    Com_SetChannelMapEntry(info->speakerMap.channelMaps[0], 0, 0, 0.5);
-    Com_SetChannelMapEntry(info->speakerMap.channelMaps[0], 0, 1u, 0.5);
-    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 0, 0, 1.0);
-    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 1u, 0, 0.0);
-    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 0, 1u, 0.0);
-    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 1u, 1u, 1.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 0, 0.5);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 1u, 0.5);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 2u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 3u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 4u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 5u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 0, 1.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 0, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 1u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 1u, 1.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 2u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 2u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 3u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 3u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 4u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 4u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 5u, 0.0);
-    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 5u, 0.0);
-}
-
-void __cdecl Com_InitParse()
-{
-    unsigned int i; // [esp+0h] [ebp-4h]
-
-    for (i = 0; i < 3; ++i)
-        Com_InitParseInfo(g_parse[i].parseInfo);
-}
-
-void __cdecl Com_InitParseInfo(parseInfo_t* pi)
-{
-    pi->lines = 1;
-    pi->ungetToken = 0;
-    pi->spaceDelimited = 1;
-    pi->keepStringQuotes = 0;
-    pi->csv = 0;
-    pi->negativeNumbers = 0;
-    pi->errorPrefix = "";
-    pi->warningPrefix = "";
-    pi->backup_lines = 0;
-    pi->backup_text = 0;
 }
 
 void __cdecl Com_InitThreadData(int threadContext)

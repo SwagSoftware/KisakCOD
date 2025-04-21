@@ -318,6 +318,7 @@ struct GfxGlobals // sizeof=0x10
 
 void __cdecl TRACK_r_init();
 const char *__stdcall DXGetErrorDescription9A(int a1);
+void __cdecl R_SyncGpu(int(__cdecl *WorkCallback)(unsigned __int64));
 bool __cdecl R_IsUsingAdaptiveGpuSync();
 void __cdecl  R_FatalInitError(const char *msg);
 void __cdecl  R_FatalLockError(HRESULT hr);
@@ -340,6 +341,8 @@ void __cdecl R_StoreDirect3DCaps(unsigned int adapterIndex);
 void __cdecl R_GetDirect3DCaps(unsigned int adapterIndex, _D3DCAPS9 *caps);
 void __cdecl R_SetShadowmapFormats_DX(unsigned int adapterIndex);
 unsigned int __cdecl R_ChooseAdapter();
+void __cdecl Sys_HideSplashWindow();
+void __cdecl Sys_DestroySplashWindow();
 char __cdecl R_CreateGameWindow(GfxWindowParms *wndParms);
 char __cdecl R_InitHardware(const GfxWindowParms *wndParms);
 void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms);

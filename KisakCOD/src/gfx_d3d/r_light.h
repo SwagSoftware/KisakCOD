@@ -31,11 +31,11 @@ void __cdecl R_MostImportantLights(const GfxLight **lights, int lightCount, int 
 bool __cdecl R_LightImportanceGreaterEqual(const GfxLight *light0, const GfxLight *light1);
 void __cdecl R_GetBspLightSurfs(const GfxLight **visibleLights, int visibleCount);
 void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData);
-bool __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid);
+int __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid);
 void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData);
-int __cdecl R_AllowBspSpotLightShadows(int surfIndex, char *bspLightCallbackAsVoid);
+int __cdecl R_AllowBspSpotLightShadows(int surfIndex, void *bspLightCallbackAsVoid);
 int __cdecl R_BoxInPlanes(const float (*planes)[4], const float *mins, const float *maxs);
-int __cdecl R_AllowBspSpotLight(int surfIndex, char *bspLightCallbackAsVoid);
+int __cdecl R_AllowBspSpotLight(int surfIndex, void *bspLightCallbackAsVoid);
 void __cdecl R_CalcSpotLightPlanes(const GfxLight *light, float (*planes)[4]);
 void __cdecl R_CalcPlaneFromPointDir(float *plane, const float *origin, const float *dir);
 void __cdecl R_ComputeSpotLightCrossDirs(const GfxLight *light, float (*crossDirs)[3]);

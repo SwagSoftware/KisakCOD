@@ -311,6 +311,34 @@ int g_disableRendering;
 const dvar_t *r_mode;
 const dvar_t *r_displayRefresh;
 
+void __cdecl R_SyncGpu(int(__cdecl *WorkCallback)(unsigned __int64))
+{
+    int useWorkCallback; // [esp+30h] [ebp-4h]
+
+    if (dx.gpuSync)
+    {
+        Profile_Begin(121);
+        useWorkCallback = WorkCallback != 0;
+        dx.gpuSyncStart = __rdtsc();
+        R_AcquireGpuFenceLock();
+        while (!R_GpuFenceTimeout())
+        {
+            if (useWorkCallback)
+            {
+                R_ReleaseGpuFenceLock();
+                useWorkCallback = (WorkCallback)(dx.gpuSyncEnd);
+                R_AcquireGpuFenceLock();
+            }
+            else
+            {
+                R_ProcessWorkerCmdsWithTimeout((int(*)())R_GpuFenceTimeout, 0);
+            }
+        }
+        R_ReleaseGpuFenceLock();
+        Profile_EndInternal(0);
+    }
+}
+
 bool __cdecl R_IsUsingAdaptiveGpuSync()
 {
     return dx.gpuSync == 1;
@@ -3609,6 +3637,16 @@ void __cdecl Sys_HideSplashWindow()
 {
     if (g_splashWnd)
         ShowWindow(g_splashWnd, 0);
+}
+
+void __cdecl Sys_DestroySplashWindow()
+{
+    if (g_splashWnd)
+    {
+        Sys_HideSplashWindow();
+        DestroyWindow(g_splashWnd);
+        g_splashWnd = 0;
+    }
 }
 
 char __cdecl R_CreateGameWindow(GfxWindowParms *wndParms)

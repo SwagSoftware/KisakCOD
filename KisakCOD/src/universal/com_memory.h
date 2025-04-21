@@ -152,3 +152,7 @@ unsigned __int8* __cdecl LargeLocalGetBuf(int startPos);
 void __cdecl LargeLocalReset();
 unsigned int __cdecl LargeLocalRoundSize(int size);
 
+
+extern unsigned char *s_hunkData;
+extern unsigned __int8 *s_origHunkData;
+extern int s_hunkTotal;

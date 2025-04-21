@@ -5,26 +5,6 @@
 #include "r_rendercmds.h"
 #include <database/database.h>
 
-struct __declspec(align(4)) GfxMtlFeatureMap // sizeof=0x10
-{                                       // ...
-    const char *name;
-    unsigned int mask;
-    unsigned int value;
-    bool valueRequired;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-
-struct $4ABF24606230B73E4E420CE33A1F14B1 // sizeof=0xC
-{                                       // ...
-    bool isRegisteringOverrides;        // ...
-    bool isDirty;                       // ...
-    // padding byte
-    // padding byte
-    unsigned int remapMask;             // ...
-    unsigned int remapValue;            // ...
-};
 $4ABF24606230B73E4E420CE33A1F14B1 mtlOverrideGlob;
 
 const GfxMtlFeatureMap s_materialFeatures[20] =

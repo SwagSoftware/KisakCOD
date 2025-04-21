@@ -906,7 +906,7 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
             ++newLmapIndex;
         }
         s_world.lightmapCount = newLmapIndex;
-        Hunk_FreeTempMemory(primaryImage);
+        Hunk_FreeTempMemory((char*)primaryImage);
         if (s_world.lightmapCount > 31)
             MyAssertHandler(
                 ".\\r_bsp_load_obj.cpp",
@@ -915,8 +915,8 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
                 "%s\n\t(s_world.lightmapCount) = %i",
                 "(s_world.lightmapCount <= ((93 * 1024 * 1024) / ((1024 * 1024 * 1 * 1) + (512 * 512 * 4 * 2))))",
                 s_world.lightmapCount);
-        s_world.lightmapPrimaryTextures = Hunk_Alloc(4 * s_world.lightmapCount, "R_LoadLightmaps", 20);
-        s_world.lightmapSecondaryTextures = Hunk_Alloc(4 * s_world.lightmapCount, "R_LoadLightmaps", 20);
+        s_world.lightmapPrimaryTextures = (GfxTexture*)Hunk_Alloc(4 * s_world.lightmapCount, "R_LoadLightmaps", 20);
+        s_world.lightmapSecondaryTextures = (GfxTexture*)Hunk_Alloc(4 * s_world.lightmapCount, "R_LoadLightmaps", 20);
     }
     else
     {

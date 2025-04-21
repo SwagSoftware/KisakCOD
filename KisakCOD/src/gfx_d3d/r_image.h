@@ -72,6 +72,7 @@ struct GfxImageFileHeader // sizeof=0x1C
 };
 
 void __cdecl TRACK_r_image();
+void __cdecl R_DelayLoadImage(XAssetHeader header);
 void __cdecl R_ShutdownImages();
 void __cdecl Image_SetupAndLoad(
     GfxImage *image,
@@ -215,6 +216,8 @@ void __cdecl Image_GenerateCube(
     unsigned int mipCount);
 
 // r_image_decode
+void __cdecl Image_FreeRawPixels(GfxRawImage *image);
+void __cdecl Image_GetRawPixels(char *imageName, GfxRawImage *image);
 unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader);
 int __cdecl Image_CountMipmapsForFile_0(GfxImageFileHeader *imageFile);
 int __cdecl Image_CountMipmapsForFile(GfxImageFileHeader *imageFile);
@@ -331,3 +334,6 @@ void __cdecl Image_TrackFullscreenTexture(
     int fullscreenHeight,
     int picmip,
     _D3DFORMAT format);
+
+void __cdecl Image_Reload(GfxImage *image);
+void __cdecl Image_UpdatePicmip(GfxImage *image);

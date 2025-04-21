@@ -38,7 +38,7 @@ struct iwd_t // sizeof=0x324
     unsigned __int8* handle;
     int checksum;
     int pure_checksum;
-    volatile int hasOpenFile;
+    volatile unsigned int hasOpenFile;
     int numfiles;
     unsigned __int8 referenced;
     // padding byte
@@ -61,7 +61,7 @@ struct searchpath_s // sizeof=0x1C
 
 union qfile_gus // sizeof=0x4
 {                                       // ...
-    _iobuf *o;
+    FILE *o;
     unsigned __int8 *z;
 };
 struct qfile_us // sizeof=0x8
@@ -79,6 +79,8 @@ struct fileHandleData_t // sizeof=0x11C
     int streamed;
     char name[256];
 };
+
+bool __cdecl FS_Initialized();
 
 char *__cdecl FS_ReferencedIwdNames();
 char *__cdecl FS_ReferencedIwdChecksums();

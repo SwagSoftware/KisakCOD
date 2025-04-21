@@ -535,7 +535,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
         if ((clientActive_t *)cent->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
             + 3))
             goto LABEL_43;
-        CG_UpdateBModelWorldBounds((int)&savedregs, localClientNum, cent, 1);
+        CG_UpdateBModelWorldBounds(localClientNum, cent, 1);
         break;
     case 8:
     case 9:

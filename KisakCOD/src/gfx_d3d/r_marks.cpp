@@ -3,6 +3,9 @@
 #include "r_gfx.h"
 #include "r_init.h"
 #include <xanim/dobj_utils.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <EffectsCore/fx_system.h>
+#include "r_model_skin.h"
 
 void  R_BoxSurfaces(
     const float *mins,
@@ -1035,7 +1038,6 @@ void __cdecl R_MarkFragments_Begin(
         if (markAgainst != MARK_FRAGMENTS_AGAINST_MODELS)
             MyAssertHandler(".\\r_marks.cpp", 1867, 0, "%s", "markAgainst == MARK_FRAGMENTS_AGAINST_MODELS");
         markInfo->smodelCollidedCount = R_BoxStaticModels(
-            (int)&savedregs,
             markInfo->mins,
             markInfo->maxs,
             (int(__cdecl *)(int))CL_GetLocalClientActiveCount,
@@ -1183,6 +1185,7 @@ void __cdecl R_MarkFragments_Go(
             markInfo->origin[2]);
 }
 
+int(__cdecl *allowSurf[1])(int, void *) = { (int(*)(int, void*))R_AllowMarks };
 char __cdecl R_MarkFragments_WorldBrushes(MarkInfo *markInfo)
 {
     GfxSurface **surfacesArray[1]; // [esp+298h] [ebp-41Ch] BYREF
@@ -1199,7 +1202,6 @@ char __cdecl R_MarkFragments_WorldBrushes(MarkInfo *markInfo)
     markContext.modelIndex = 0;
     surfacesArray[0] = surfaces;
     R_BoxSurfaces(
-        (int)&savedregs,
         markInfo->mins,
         markInfo->maxs,
         allowSurf,
@@ -1361,16 +1363,16 @@ char __cdecl R_MarkFragments_BrushSurface(
             triVert1[0] = (const GfxWorldVertex *)&triVerts1[triVerts1Stride * *indices];
             triVert1[1] = (const GfxWorldVertex *)&triVerts1[triVerts1Stride * indices[1]];
             triVert1[2] = (const GfxWorldVertex *)&triVerts1[triVerts1Stride * indices[2]];
-            v26 = triVert1[0]->lmapCoord;
+            v26 = (float*)triVert1[0]->lmapCoord;
             lmapCoord[0][0] = triVert1[0]->lmapCoord[0];
             lmapCoord[0][1] = triVert1[0]->lmapCoord[1];
             v24 = lmapCoord[1];
-            v25 = triVert1[1]->lmapCoord;
+            v25 = (float*)triVert1[1]->lmapCoord;
             *(_QWORD *)&lmapCoord[1][0] = *(_QWORD *)triVert1[1]->lmapCoord;
             v22 = lmapCoord[2];
-            v23 = triVert1[2]->lmapCoord;
+            v23 = (float*)triVert1[2]->lmapCoord;
             *(_QWORD *)&lmapCoord[2][0] = *(_QWORD *)triVert1[2]->lmapCoord;
-            v17.packed = (unsigned int)triVert1[0]->normal;
+            v17.packed = triVert1[0]->normal.packed;
             out.packed = v17.packed;
             v19 = *(float *)&v17.packed;
             v20 = *(float *)&v17.packed;
@@ -1381,7 +1383,7 @@ char __cdecl R_MarkFragments_BrushSurface(
             normal[0][1] = v19;
             normal[0][2] = v20;
             v11 = normal[1];
-            v12.packed = (unsigned int)triVert1[1]->normal;
+            v12.packed = (unsigned int)triVert1[1]->normal.packed;
             v13.packed = v12.packed;
             v14 = *(float *)&v12.packed;
             v15 = *(float *)&v12.packed;
@@ -1391,7 +1393,7 @@ char __cdecl R_MarkFragments_BrushSurface(
             *v11 = *(float *)&v13.packed;
             v11[1] = v14;
             v11[2] = v15;
-            v7.packed = (unsigned int)triVert1[2]->normal;
+            v7.packed = (unsigned int)triVert1[2]->normal.packed;
             v8 = *(float *)&v7.packed;
             v9 = *(float *)&v7.packed;
             v10.packed = v7.packed;
@@ -1824,7 +1826,6 @@ char __cdecl R_MarkFragments_AnimatedXModel(
                                 "(markContext->lmapIndex == boneOffset)",
                                 boneOffset);
                         if (!R_MarkFragments_AnimatedXModel_VertList(
-                            COERCE_FLOAT(&savedregs),
                             markInfo,
                             vertListIndex,
                             &boneMtxList[boneOffset],
@@ -1861,6 +1862,84 @@ char __cdecl R_MarkFragments_AnimatedXModel(
         MyAssertHandler(".\\r_marks.cpp", 1700, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
     //Profile_EndInternal(0);
     return 1;
+}
+
+bool __cdecl R_MarkModelCoreCallback_1_(
+    MarkModelCoreContext *contextAsVoid,
+    const GfxPackedVertex **triVerts0,
+    const GfxPackedVertex **triVerts1)
+{
+    float *vertWeights; // [esp+2Ch] [ebp-1D8h]
+    const GfxPackedVertex *v5; // [esp+38h] [ebp-1CCh]
+    float pos[3]; // [esp+3Ch] [ebp-1C8h] BYREF
+    MarkModelCoreContext *context; // [esp+48h] [ebp-1BCh]
+    FxModelMarkPoint clipPoints[2][9]; // [esp+4Ch] [ebp-1B8h] BYREF
+    int vertIndex; // [esp+200h] [ebp-4h]
+
+    context = contextAsVoid;
+    for (vertIndex = 0; vertIndex != 3; ++vertIndex)
+    {
+        v5 = triVerts0[vertIndex];
+        pos[0] = v5->xyz[0];
+        pos[1] = v5->xyz[1];
+        pos[2] = v5->xyz[2];
+        MatrixTransformVector43(pos, context->transformMatrix, clipPoints[0][vertIndex].xyz);
+        vertWeights = clipPoints[0][vertIndex].vertWeights;
+        *vertWeights = 0.0;
+        vertWeights[1] = 0.0;
+        vertWeights[2] = 0.0;
+        clipPoints[0][vertIndex].vertWeights[vertIndex] = 1.0;
+    }
+    return R_MarkFragment_IsTriangleRejected(
+        context->markDir,
+        clipPoints[0][0].xyz,
+        clipPoints[0][1].xyz,
+        clipPoints[0][2].xyz)
+        || R_MarkFragment_DoTriangle_1_(
+            context->markInfo,
+            context->clipPlanes,
+            context->markContext,
+            triVerts1,
+            context->transformNormalMatrix,
+            clipPoints) != 0;
+}
+
+bool __cdecl R_MarkModelCoreCallback_0_(
+    void *contextAsVoid,
+    const GfxPackedVertex **triVerts0,
+    const GfxPackedVertex **triVerts1)
+{
+    float *vertWeights; // [esp+2Ch] [ebp-1D8h]
+    float *xyz; // [esp+30h] [ebp-1D4h]
+    const GfxPackedVertex *v6; // [esp+34h] [ebp-1D0h]
+    FxModelMarkPoint clipPoints[2][9]; // [esp+4Ch] [ebp-1B8h] BYREF
+    int vertIndex; // [esp+200h] [ebp-4h]
+
+    for (vertIndex = 0; vertIndex != 3; ++vertIndex)
+    {
+        xyz = clipPoints[0][vertIndex].xyz;
+        v6 = triVerts0[vertIndex];
+        *xyz = v6->xyz[0];
+        xyz[1] = v6->xyz[1];
+        xyz[2] = v6->xyz[2];
+        vertWeights = clipPoints[0][vertIndex].vertWeights;
+        *vertWeights = 0.0;
+        vertWeights[1] = 0.0;
+        vertWeights[2] = 0.0;
+        clipPoints[0][vertIndex].vertWeights[vertIndex] = 1.0;
+    }
+    return R_MarkFragment_IsTriangleRejected(
+        *(contextAsVoid + 3),
+        clipPoints[0][0].xyz,
+        clipPoints[0][1].xyz,
+        clipPoints[0][2].xyz)
+        || R_MarkFragment_DoTriangle_0_(
+            *contextAsVoid,
+            *(contextAsVoid + 4),
+            *(contextAsVoid + 1),
+            triVerts1,
+            *(contextAsVoid + 6),
+            clipPoints) != 0;
 }
 
 char  R_MarkFragments_AnimatedXModel_VertList(

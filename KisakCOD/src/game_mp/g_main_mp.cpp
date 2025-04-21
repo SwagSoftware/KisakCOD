@@ -348,7 +348,6 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     SaveRegisteredItems();
 }
 
-const char *g_dedicatedEnumNames[4] = { "listen server", "dedicated LAN server", "dedicated internet server", NULL }; // idb
 int MY_DEFAULT_USEHOLDSPAWNDELAY = 500;
 
 const dvar_s *G_RegisterDvars()

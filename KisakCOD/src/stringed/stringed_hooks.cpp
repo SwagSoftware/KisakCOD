@@ -2,6 +2,9 @@
 
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>
+#include "stringed_ingame.h"
+#include <universal/com_files.h>
+#include <database/database.h>
 
 
 // struct dvar_s const *const loc_warningsAsErrors 85059680     stringed_hooks.obj
@@ -528,3 +531,93 @@ int __cdecl SEH_GetLanguageIndexForName(const char *pszLanguageName, int *piLang
     return 0;
 }
 
+void __cdecl SEH_Init_StringEd()
+{
+    SE_Init();
+}
+
+void __cdecl SEH_Shutdown_StringEd()
+{
+    SE_ShutDown();
+}
+
+int __cdecl FS_LanguageHasAssets(int iLanguage)
+{
+    searchpath_s *pSearch; // [esp+0h] [ebp-4h]
+
+    for (pSearch = fs_searchpaths; pSearch; pSearch = pSearch->next)
+    {
+        if (pSearch->bLocalized && pSearch->language == iLanguage)
+            return 1;
+    }
+    return 0;
+}
+
+int __cdecl SEH_StringEd_SetLanguageStrings(unsigned int iLanguage)
+{
+    const char *LanguageName; // eax
+    const char *v3; // eax
+    char *pszError; // [esp+0h] [ebp-4h]
+
+    if (!g_languages[iLanguage].bPresent)
+        return 0;
+    if (!loc_forceEnglish)
+        MyAssertHandler(".\\stringed\\stringed_hooks.cpp", 278, 0, "%s", "loc_forceEnglish");
+    pszError = SE_LoadLanguage(loc_forceEnglish->current.enabled);
+    if (!pszError)
+        return 1;
+    if (!fs_ignoreLocalized->current.enabled && loc_warnings->current.enabled)
+    {
+        if (loc_warningsAsErrors->current.enabled)
+        {
+            LanguageName = SEH_GetLanguageName(iLanguage);
+            Com_Error(ERR_LOCALIZATION, "Could not load localization strings for %s: %s", LanguageName, pszError);
+        }
+        else
+        {
+            v3 = SEH_GetLanguageName(iLanguage);
+            Com_PrintWarning(16, "WARNING: Could not load localization strings for %s: %s\n", v3, pszError);
+        }
+    }
+    return 1;
+}
+
+void __cdecl SEH_UpdateLanguageInfo()
+{
+    int iNumLanguages; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+    int ia; // [esp+4h] [ebp-4h]
+
+    if (!loc_language)
+        MyAssertHandler(".\\stringed\\stringed_hooks.cpp", 172, 0, "%s", "loc_language");
+    Dvar_RegisterInt(loc_language->name, 0, 0xE00000000LL, 0x21u, "Language");
+    Dvar_RegisterBool(loc_forceEnglish->name, 0, 0x21u, "Force english language");
+    SEH_UpdateCurrentLanguage();
+    iNumLanguages = 0;
+    for (i = 0; i < 15; ++i)
+    {
+        if (FS_LanguageHasAssets(i))
+        {
+            g_languages[i].bPresent = 1;
+            ++iNumLanguages;
+        }
+        else
+        {
+            g_languages[i].bPresent = 0;
+        }
+    }
+    if (iNumLanguages < 1)
+        Com_PrintError(16, "ERROR: No languages available because no localized assets were found\n");
+    if (!SEH_StringEd_SetLanguageStrings(loc_language->current.unsignedInt))
+    {
+        for (ia = 0; ia < 15; ++ia)
+        {
+            Dvar_SetInt(loc_language, ia);
+            SEH_UpdateCurrentLanguage();
+            if (SEH_StringEd_SetLanguageStrings(ia))
+                return;
+        }
+        Dvar_SetInt(loc_language, 0);
+        SEH_UpdateCurrentLanguage();
+    }
+}

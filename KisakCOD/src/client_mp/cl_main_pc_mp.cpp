@@ -7,6 +7,7 @@
 #include <cgame_mp/cg_local_mp.h>
 
 bool s_playerMute[64];
+serverStatus_s cl_serverStatusList[16];
 
 void __cdecl CL_SetServerInfoByAddress(netadr_t from, char *info, __int16 ping)
 {
@@ -262,7 +263,7 @@ void __cdecl CL_Connect_f()
                     clc->serverAddress.ip[2],
                     clc->serverAddress.ip[3],
                     v1);
-                if (NET_IsLocalAddress(clc->serverAddress) || CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
+                if (NET_IsLocalAddress(clc->serverAddress))//  || CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
                 {
                     if (Com_HasPlayerProfile())
                     {
@@ -388,7 +389,7 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
     int l; // [esp+430h] [ebp-20h]
     int ping; // [esp+434h] [ebp-1Ch] BYREF
     int len; // [esp+438h] [ebp-18h]
-    char *s; // [esp+43Ch] [ebp-14h]
+    const char *s; // [esp+43Ch] [ebp-14h]
     serverStatus_s *serverStatus; // [esp+440h] [ebp-10h]
     int i; // [esp+444h] [ebp-Ch]
     int score; // [esp+448h] [ebp-8h] BYREF
@@ -452,12 +453,10 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
                 ping = 0;
                 score = 0;
                 sscanf(s, "%d %d", &score, &ping);
-                strchr((unsigned __int8 *)s, 0x20u);
-                s = v2;
+                s = strchr((char *)s, 0x20u);
                 if (v2)
                 {
-                    strchr((unsigned __int8 *)s + 1, 0x20u);
-                    s = v3;
+                    s = strchr((char *)s + 1, 0x20u);
                 }
                 if (s)
                     ++s;

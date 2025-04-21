@@ -19,6 +19,18 @@
 
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
+#include <script/scr_memorytree.h>
+
+unsigned __int16 *controller_names[] =
+{
+    &scr_const.back_mid,
+    &scr_const.back_up,
+    &scr_const.neck,
+    &scr_const.head,
+    &scr_const.pelvis
+};
+
+float g_entMoveTolVec[3] = { 16.0f, 16.0f, 16.0f };
 
 void __cdecl CG_Player_PreControllers(DObj_s *obj, centity_s *cent)
 {
@@ -279,7 +291,7 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v46 = 0;
     else
         v46 = -1;
-    HIunsigned int(v47) = v46;
+    HIDWORD(v47) = v46;
     if (v74 >= 0.0)
         v45 = 0;
     else
@@ -314,7 +326,7 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v32 = 0;
     else
         v32 = -1;
-    HIunsigned int(v33) = v32;
+    HIDWORD(v33) = v32;
     if (v69 >= 0.0)
         v31 = 0;
     else
@@ -349,7 +361,7 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
         v18 = 0;
     else
         v18 = -1;
-    HIunsigned int(v19) = v18;
+    HIDWORD(v19) = v18;
     if (v64 >= 0.0)
         v17 = 0;
     else
@@ -378,19 +390,19 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
     v9 = *((float *)&v13 + 1) * v63 + v9;
     v10 = *(float *)&v14 * v64 + v10;
     rotatedBounds[0].v[0] = *(float *)&v15 * v65 + rotatedBounds[0].v[0];
-    LODWORD(maxs[11]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[11]) = (uint32) & rotatedBounds[0].v[1];
     rotatedBounds[0].v[1] = *(float *)&v38 * v72 + v58;
     rotatedBounds[0].v[2] = *((float *)&v38 + 1) * v73 + v59;
     rotatedBounds[0].v[3] = *(float *)&v39 * v74 + v60;
     rotatedBounds[1].v[0] = *(float *)&v40 * v75 + v61;
-    LODWORD(maxs[10]) = &rotatedBounds[0].v[1];
-    LODWORD(maxs[9]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[10]) = (uint32) & rotatedBounds[0].v[1];
+    LODWORD(maxs[9]) = (uint32) & rotatedBounds[0].v[1];
     rotatedBounds[0].v[1] = *(float *)&v24 * v67 + rotatedBounds[0].v[1];
     rotatedBounds[0].v[2] = *((float *)&v24 + 1) * v68 + rotatedBounds[0].v[2];
     rotatedBounds[0].v[3] = *(float *)&v25 * v69 + rotatedBounds[0].v[3];
     rotatedBounds[1].v[0] = *(float *)&v26 * v70 + rotatedBounds[1].v[0];
-    LODWORD(maxs[8]) = &rotatedBounds[0].v[1];
-    LODWORD(maxs[7]) = &rotatedBounds[0].v[1];
+    LODWORD(maxs[8]) = (uint32) & rotatedBounds[0].v[1];
+    LODWORD(maxs[7]) = (uint32) & rotatedBounds[0].v[1];
     rotatedBounds[0].v[1] = rotatedBounds[1].v[1] * v62 + rotatedBounds[0].v[1];
     rotatedBounds[0].v[2] = rotatedBounds[1].v[2] * v63 + rotatedBounds[0].v[2];
     rotatedBounds[0].v[3] = rotatedBounds[1].v[3] * v64 + rotatedBounds[0].v[3];
@@ -1515,7 +1527,7 @@ XAnim_s *__cdecl CG_GetHelicopterAnims(centity_s *cent)
 
 char *__cdecl CG_AllocAnimTree(int size)
 {
-    return MT_Alloc(size, 5);
+    return (char*)MT_Alloc(size, 5);
 }
 
 void __cdecl CG_DObjCalcBone(const cpose_t *pose, DObj_s *obj, int boneIndex)
@@ -1650,7 +1662,7 @@ void __cdecl CG_ProcessEntity(int localClientNum, centity_s *cent)
         CG_ScriptMover(localClientNum, cent);
         break;
     default:
-        Com_Error(ERR_DROP, &byte_866A24, cent->nextState.eType);
+        Com_Error(ERR_DROP, "Bad entity type: %i", cent->nextState.eType);
         break;
     }
 }
@@ -1715,7 +1727,7 @@ void __cdecl CG_Item(int localClientNum, centity_s *cent)
     WeaponDef *weapDef; // [esp+28h] [ebp-4h]
 
     if (cent->nextState.index.brushmodel >= 2048)
-        Com_Error(ERR_DROP, &byte_866A84, cent->nextState.index.brushmodel);
+        Com_Error(ERR_DROP, "Bad item index %i on entity", cent->nextState.index.brushmodel);
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
     {
         weapIdx = cent->nextState.index.brushmodel % 128;
@@ -1724,7 +1736,7 @@ void __cdecl CG_Item(int localClientNum, centity_s *cent)
         if (!weapDef)
             MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 127, 0, "%s", "weapDef");
         if (!weapDef->worldModel[weapModel])
-            Com_Error(ERR_DROP, &byte_866A40, cent->nextState.index.brushmodel, weapIdx, weapModel, weapDef->szDisplayName);
+            Com_Error(ERR_DROP, "No XModel loaded for item index %i, weap index %i, model %i (%s)", cent->nextState.index.brushmodel, weapIdx, weapModel, weapDef->szDisplayName);
         obj = CG_PreProcess_GetDObj(
             localClientNum,
             cent->nextState.number,

@@ -3475,3 +3475,20 @@ int __cdecl CL_GetLocalClientActiveCount()
     return 1;
 }
 
+void __cdecl CL_InitDedicated()
+{
+    GfxConfiguration config; // [esp+0h] [ebp-30h] BYREF
+
+    if (!onlinegame)
+        onlinegame = Dvar_RegisterBool(
+            "onlinegame",
+            1,
+            0x80u,
+            "Current game is an online game with stats, custom classes, unlocks");
+    SetupGfxConfig(&config);
+    CL_SetFastFileNames(&config, 1);
+    R_MakeDedicated(&config);
+    Sys_HideSplashWindow();
+    Sys_ShowConsole();
+    Sys_NormalExit();
+}

@@ -250,7 +250,7 @@ struct clientActive_t // sizeof=0x1B1BDC
     float viewangles[3];
     int serverId;
     int skelTimeStamp;                  // XREF: CL_GetSkelTimeStamp(void)+E/r
-    volatile int skelMemPos;            // XREF: CL_AllocSkelMemory(uint)+97/o
+    volatile unsigned int skelMemPos;            // XREF: CL_AllocSkelMemory(uint)+97/o
     char skelMemory[262144];
     char *skelMemoryStart;              // XREF: CL_AllocSkelMemory(uint)+66/r
                                         // CL_AllocSkelMemory(uint)+BB/r
@@ -683,6 +683,7 @@ void __cdecl CL_UpdateSound();
 float (*__cdecl CL_GetMapCenter())[3];
 void __cdecl CL_ResetStats_f();
 int __cdecl CL_GetLocalClientActiveCount();
+void __cdecl CL_InitDedicated();
 
 extern const dvar_t *cl_conXOffset;
 extern const dvar_t *cl_hudDrawsBehindsUI;
@@ -746,8 +747,10 @@ extern const dvar_t *cl_hudDrawsBehindUI;
 extern const dvar_t *cl_voice;
 extern const dvar_t *name;
 
-extern BOOL g_waitingForServer;
+extern ping_t *cl_pinglist;
 
+extern BOOL g_waitingForServer;
+extern BOOL *cl_waitingOnServerToLoadMap;
 extern BOOL cl_serverLoadingMap;
 
 #define MAX_CLIENTS 1 // LWSS Add
@@ -759,6 +762,8 @@ extern clientActive_t clients[MAX_CLIENTS];
 extern clientStatic_t cls;
 
 extern unsigned int frame_msec;
+
+extern BOOL updateScreenCalled;
 
 
 inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int localClientNum)

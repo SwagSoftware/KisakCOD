@@ -12,6 +12,7 @@
 #include <client_mp/client_mp.h>
 
 #include <win32/win_local.h>
+#include <gfx_d3d/r_model.h>
 
 int fx_maxLocalClients;
 int fx_serverVisClient;
@@ -25,6 +26,11 @@ void __cdecl TRACK_fx_system()
     track_static_alloc_internal(fx_systemPool, 2656, "fx_systemPool", 8);
     track_static_alloc_internal(fx_systemBufferPool, 291968, "fx_systemBufferPool", 8);
     track_static_alloc_internal(fx_marksSystemPool, 294940, "fx_marksSystemPool", 8);
+}
+
+XModel *__cdecl FX_RegisterModel(const char *modelName)
+{
+    return R_RegisterModel(modelName);
 }
 
 FxSystem *__cdecl FX_GetSystem(int clientIndex)

@@ -14,6 +14,7 @@
 #include <win32/win_storage.h>
 #include <qcommon/cmd.h>
 #include <gfx_d3d/r_model.h>
+#include <gfx_d3d/r_primarylights.h>
 
 struct __declspec(align(4)) $59835072FC2CD3936CE4A4C9F556010B // sizeof=0x48
 {                                       // ...

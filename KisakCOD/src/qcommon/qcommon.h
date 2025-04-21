@@ -219,15 +219,7 @@ void __cdecl Com_InitialHull(
 	unsigned int* hullOrder);
 void Com_InitHunkMemory();
 unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type);
-void __cdecl Com_InitSoundDevGuiGraphs();
-void Com_InitSoundDevGuiGraphs_LoadObj();
-void Com_InitSoundDevGuiGraphs_FastFile();
-void __cdecl Com_InitSoundAliasHash(unsigned int aliasCount);
-void Com_InitSpeakerMaps();
-void Com_InitDefaultSpeakerMap();
-void Com_InitCurves();
-void __cdecl Com_InitSoundAlias();
-void Com_InitEntChannels(char* file);
+
 
 void		Com_BeginRedirect(char *buffer, int buffersize, void (*flush)(char *));
 void		Com_EndRedirect(void);
@@ -418,10 +410,24 @@ const dvar_s *__cdecl Dvar_RegisterInt(
     DvarLimits min,
     unsigned __int16 flags,
     const char *description);
+const dvar_t *__cdecl Dvar_RegisterInt(
+    const char *dvarName,
+    int value,
+    unsigned int min,
+    unsigned int max,
+    unsigned int flags,
+    const char *description);
 const dvar_s *__cdecl Dvar_RegisterFloat(
     const char *dvarName,
     float value,
     DvarLimits min,
+    unsigned __int16 flags,
+    const char *description);
+const dvar_s *__cdecl Dvar_RegisterFloat(
+    const char *dvarName,
+    float value,
+    float min,
+    float max,
     unsigned __int16 flags,
     const char *description);
 const dvar_s *__cdecl Dvar_RegisterVec2(

@@ -15,6 +15,14 @@ struct cplane_s // sizeof=0x14
 
 union PackedUnitVec // sizeof=0x4
 {                                       // ...
+    operator unsigned int()
+    {
+        return packed;
+    }
+    operator int()
+    {
+        return packed;
+    }
     unsigned int packed;
     unsigned __int8 array[4];
 };

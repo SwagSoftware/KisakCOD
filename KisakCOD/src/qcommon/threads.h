@@ -85,3 +85,4 @@ enum WinThreadLock : __int32
 };
 void __cdecl Win_SetThreadLock(WinThreadLock threadLock);
 WinThreadLock __cdecl Win_GetThreadLock();
+void Win_UpdateThreadLock();

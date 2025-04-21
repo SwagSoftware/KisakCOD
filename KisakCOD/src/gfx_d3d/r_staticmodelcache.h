@@ -53,6 +53,8 @@ struct static_model_cache_t // sizeof=0x410E0
 void __cdecl R_InitStaticModelCache();
 void __cdecl R_ShutdownStaticModelCache();
 
+GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod);
+
 void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lod, unsigned int cacheBaseVertIndex);
 char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex);
 char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listIndex);

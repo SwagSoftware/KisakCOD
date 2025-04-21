@@ -32,6 +32,181 @@ void __cdecl TRACK_scr_debugger()
     track_static_alloc_internal(g_breakpoints, 3584, "g_breakpoints", 0);
 }
 
+void __cdecl Scr_AddDebugText(char *text)
+{
+    if (UI_Component::g.consoleReason == 1)
+    {
+        I_strncpyz(UI_Component::g.findText, text, 128);
+        Scr_SetSelectionComp(&scrDebuggerGlob.scriptScrollPane);
+        if (scrDebuggerGlob.scriptScrollPane.comp)
+            Scr_ScriptWindow::FindNext(scrDebuggerGlob.scriptScrollPane.comp);
+    }
+    else
+    {
+        UI_Component::selectionComp->AddText(UI_Component::selectionComp, text);
+    }
+}
+
+void __cdecl Scr_KeyEvent(int key)
+{
+    float v1; // [esp+0h] [ebp-34h]
+    float v2; // [esp+4h] [ebp-30h]
+    float v3; // [esp+1Ch] [ebp-18h]
+    float v4; // [esp+20h] [ebp-14h]
+    UI_VerticalDivider *comp; // [esp+24h] [ebp-10h]
+    DWORD newMouseTime; // [esp+28h] [ebp-Ch]
+    float point[2]; // [esp+2Ch] [ebp-8h] BYREF
+
+    if (!scrDebuggerGlob.debugger_inited_system)
+        return;
+    if (UI_Component::g.hideCursor)
+        IN_ActivateMouse(1);
+    if (!Key_IsCatcherActive(0, 2))
+        MyAssertHandler(
+            ".\\script\\scr_debugger.cpp",
+            7788,
+            0,
+            "%s",
+            "Key_IsCatcherActive( ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT )");
+    if (!Key_IsDown(0, 158) && !Key_IsDown(0, 159) && !Key_IsDown(0, 160))
+    {
+        switch (key)
+        {
+        case 49:
+            goto $LN41_4;
+        case 50:
+            Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.scriptWatch);
+            return;
+        case 51:
+            Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.scriptList);
+            return;
+        case 52:
+            Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.scriptCallStack);
+            return;
+        case 53:
+            Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.openScriptList);
+            return;
+        case 153:
+            if (Sys_IsRemoteDebugClient())
+            {
+                Sys_WriteDebugSocketMessageType(0x2Cu);
+                Sys_EndWriteDebugSocket();
+            }
+            return;
+        case 167:
+            UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, 0, 0);
+            UI_LinesComponent::ClearFocus(&scrDebuggerGlob.scriptList);
+        $LN41_4:
+            Scr_SetSelectionComp(&scrDebuggerGlob.scriptScrollPane);
+            if (scrDebuggerGlob.scriptScrollPane.comp)
+                scrDebuggerGlob.scriptScrollPane.comp->SetSelectedLineFocus(
+                    scrDebuggerGlob.scriptScrollPane.comp,
+                    scrDebuggerGlob.scriptScrollPane.comp->selectedLine,
+                    0);
+            break;
+        case 169:
+            Scr_SetSelectionComp(&scrDebuggerGlob.scriptScrollPane);
+            if (scrDebuggerGlob.scriptScrollPane.comp)
+                Scr_ScriptWindow::FindNext(scrDebuggerGlob.scriptScrollPane.comp);
+            break;
+        case 171:
+            scrDebuggerGlob.step_mode = 0;
+            Scr_Step();
+            break;
+        case 176:
+            scrDebuggerGlob.step_mode = 1;
+            Scr_Step();
+            break;
+        case 177:
+            scrDebuggerGlob.step_mode = 2;
+            Scr_Step();
+            break;
+        default:
+            goto LABEL_50;
+        }
+        return;
+    }
+    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || !Key_IsDown(0, 160))
+    {
+        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        {
+            if (!Key_IsDown(0, 158) && Key_IsDown(0, 159) && Key_IsDown(0, 160) && key == 9)
+            {
+                UI_LinesComponent::IncSelectedLineFocus(&scrDebuggerGlob.openScriptList, 1);
+                return;
+            }
+        }
+        else
+        {
+            if (key == 9)
+            {
+                UI_LinesComponent::DecSelectedLineFocus(&scrDebuggerGlob.openScriptList, 1);
+                return;
+            }
+            if (key == 102)
+            {
+                UI_Component::g.consoleReason = 1;
+                Con_OpenConsole(0);
+                return;
+            }
+        }
+        goto LABEL_50;
+    }
+    if (key != 169)
+    {
+        if (key == 177)
+        {
+            scrDebuggerGlob.step_mode = 3;
+            Scr_Step();
+            return;
+        }
+    LABEL_50:
+        point[0] = UI_Component::g.cursorPos[0];
+        point[1] = UI_Component::g.cursorPos[1];
+        if (key == 200)
+        {
+            if (!UI_Component::g.hideCursor)
+            {
+                comp = UI_VerticalDivider::GetCompAtLocation(&scrDebuggerGlob.mainWindow, point);
+                if (comp)
+                {
+                    if (comp->selectionParent)
+                        Scr_SetSelectionComp(comp->selectionParent);
+                    if (comp->KeyEvent(comp, point, 200))
+                    {
+                        scrDebuggerGlob.prevMouseTime = 0;
+                    }
+                    else
+                    {
+                        newMouseTime = Sys_Milliseconds();
+                        if ((newMouseTime - scrDebuggerGlob.prevMouseTime) > 300
+                            || (v4 = UI_Component::g.cursorPos[0] - scrDebuggerGlob.prevMousePos[0], v2 = fabs(v4), v2 >= 5.0)
+                            || (v3 = UI_Component::g.cursorPos[1] - scrDebuggerGlob.prevMousePos[1], v1 = fabs(v3), v1 >= 5.0))
+                        {
+                            scrDebuggerGlob.prevMouseTime = newMouseTime;
+                            scrDebuggerGlob.prevMousePos[0] = UI_Component::g.cursorPos[0];
+                            scrDebuggerGlob.prevMousePos[1] = UI_Component::g.cursorPos[1];
+                        }
+                        else
+                        {
+                            comp->KeyEvent(comp, point, 223);
+                            scrDebuggerGlob.prevMouseTime = 0;
+                        }
+                    }
+                }
+            }
+        }
+        else if (!UI_Component::selectionComp->KeyEvent(UI_Component::selectionComp, point, key))
+        {
+            UI_VerticalDivider::KeyEvent(&scrDebuggerGlob.mainWindow, UI_Component::g.cursorPos, key);
+        }
+        return;
+    }
+    Scr_SetSelectionComp(&scrDebuggerGlob.scriptScrollPane);
+    if (scrDebuggerGlob.scriptScrollPane.comp)
+        Scr_ScriptWindow::FindPrev(scrDebuggerGlob.scriptScrollPane.comp);
+}
+
 void __cdecl Scr_AddManualBreakpoint(unsigned __int8 *codePos)
 {
     if (Sys_IsRemoteDebugClient())

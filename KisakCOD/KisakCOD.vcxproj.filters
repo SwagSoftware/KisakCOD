@@ -1173,6 +1173,21 @@
     <ClCompile Include="src\server_mp\ucmds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universal\com_sndalias_load_obj.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\qcommon\unzip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib32\zipcommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib32\deflate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zlib32\inflate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\qcommon\qcommon.h">
@@ -1827,6 +1842,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gfx_d3d\r_reflection_probe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qcommon\unzip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib32\deflate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib32\inflate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zlib32\zip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

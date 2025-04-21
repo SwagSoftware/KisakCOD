@@ -1017,7 +1017,8 @@ void __cdecl CG_CompassDrawPlayerEastCoord(
     const rectDef_s *rect,
     Font_s *font,
     Material *material,
-    __int64 color);
+    float *const color,
+    int style);
 void __cdecl CG_CompassDrawPlayerNCoordScroll(
     int localClientNum,
     CompassType compassType,

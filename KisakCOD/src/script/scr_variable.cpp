@@ -27,6 +27,11 @@ scr_classStruct_t g_classMap[4] =
 	{ 0, 0, 0x76, "vehiclenode" }
 };
 
+void __cdecl Scr_Cleanup()
+{
+	scrVarPub.evaluate = 0;
+}
+
 bool IsObject(VariableValueInternal* entryValue)
 {
 	iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);

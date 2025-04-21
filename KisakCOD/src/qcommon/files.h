@@ -14,3 +14,5 @@ void __cdecl FS_PureServerSetLoadedIwds(char *iwdSums, char *iwdNames);
 void __cdecl FS_ServerSetReferencedIwds(char *iwdSums, char *iwdNames);
 void __cdecl FS_ServerSetReferencedFFs(char *FFSums, char *FFNames);
 void __cdecl FS_ShutdownServerIwdNames();
+void __cdecl FS_ShutdownServerReferencedIwds();
+void __cdecl FS_ShutdownServerReferencedFFs();

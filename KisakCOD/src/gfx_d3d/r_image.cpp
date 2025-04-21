@@ -15,6 +15,8 @@
 #include "rb_state.h"
 #include "r_state.h"
 
+#include <algorithm>
+
 ImgGlobals imageGlobals;
 GfxImage g_imageProgs[14];
 
@@ -24,6 +26,31 @@ void __cdecl TRACK_r_image()
     track_static_alloc_internal(imageTypeName, 40, "imageTypeName", 18);
 }
 
+void __cdecl R_DelayLoadImage(XAssetHeader header)
+{
+    LONG externalDataSize; // [esp+4h] [ebp-8h]
+    HRESULT hr; // [esp+8h] [ebp-4h]
+
+    if (HIBYTE(header.xmodelPieces[2].numpieces))
+    {
+        HIBYTE(header.xmodelPieces[2].numpieces) = 0;
+        externalDataSize = header.xmodelPieces[1].numpieces;
+        header.xmodelPieces[1].numpieces = 0;
+        header.xmodelPieces[1].pieces = 0;
+        if (r_loadForRenderer->current.enabled && !dx.deviceLost)
+        {
+            if (!Image_LoadFromFile(header.image))
+                Image_AssignDefaultTexture(header.image);
+            if (!header.xmodelPieces->numpieces)
+            {
+                hr = dx.device->TestCooperativeLevel();
+                if (hr != 0x88760868 && hr != 0x88760869)
+                    Com_Error(ERR_DROP, "Couldn't load image '%s'\n", header.xmodelPieces[2].pieces);
+            }
+        }
+        DB_LoadedExternalData(externalDataSize);
+    }
+}
 
 void __cdecl R_GetImageList(ImageList *imageList)
 {
@@ -1514,11 +1541,12 @@ void __cdecl R_ImageList_f()
                 imageList.image[imageList.count++] = &g_imageProgs[i];
         }
     }
-    std::sort(
-        imageList.image,
-        &imageList.image[imageList.count],
-        (signed int)(4 * imageList.count) >> 2,
-        imagecompare);
+    //std::sort(
+    //    imageList.image,
+    //    &imageList.image[imageList.count],
+    //    (signed int)(4 * imageList.count) >> 2,
+    //    imagecompare);
+    std::sort(&imageList.image[0], &imageList.image[imageList.count], imagecompare);
     Com_Printf(8, "\n-fmt- -dimension-");
     for (j = 0; j < 2; ++j)
         Com_Printf(8, "%s", g_platform_name[j]);
@@ -1950,5 +1978,28 @@ void __cdecl RB_UnbindAllImages()
     {
         for (samplerIndex = 0; samplerIndex < vidConfig.maxTextureMaps; ++samplerIndex)
             R_DisableSampler(&gfxCmdBufState, samplerIndex);
+    }
+}
+
+void __cdecl Image_Reload(GfxImage *image)
+{
+    if (!image)
+        MyAssertHandler(".\\r_image.cpp", 1092, 0, "%s", "image");
+    Image_Release(image);
+    if (!Image_ReloadFromFile(image) && !Image_AssignDefaultTexture(image))
+        Com_Error(ERR_FATAL, "failed to load image '%s'", image->name);
+}
+
+void __cdecl Image_UpdatePicmip(GfxImage *image)
+{
+    Picmip picmip; // [esp+0h] [ebp-4h] BYREF
+
+    if (!image)
+        MyAssertHandler(".\\r_image.cpp", 1078, 0, "%s", "image");
+    if (image->category == 3 && !image->noPicmip)
+    {
+        Image_GetPicmip(image, &picmip);
+        if (image->picmip.platform[0] != picmip.platform[0])
+            Image_Reload(image);
     }
 }

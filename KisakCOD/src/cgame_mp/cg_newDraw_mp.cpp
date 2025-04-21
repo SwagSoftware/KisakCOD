@@ -6,6 +6,8 @@
 #include <client/client.h>
 
 #include <ui/ui.h>
+#include <cgame/cg_public.h>
+#include <stringed/stringed_hooks.h>
 
 const dvar_t *hud_fade_sprint;
 const dvar_t *hud_health_pulserate_injured;
@@ -288,7 +290,7 @@ bool __cdecl CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned in
 {
     int maxAmmo; // [esp+4h] [ebp-10h]
     int curAmmo; // [esp+8h] [ebp-Ch]
-    playerState_s *ps; // [esp+Ch] [ebp-8h]
+    const playerState_s *ps; // [esp+Ch] [ebp-8h]
 
     ps = &cgameGlob->predictedPlayerState;
     if (!weapIndex)
@@ -642,7 +644,9 @@ void __cdecl CG_OwnerDraw(
             &rect,
             font,
             material,
-            __SPAIR64__(textStyle, (unsigned int)color));
+            color,
+            textStyle
+        );
         break;
     case 161:
         CG_CompassDrawPlayerEastCoord(
@@ -652,7 +656,9 @@ void __cdecl CG_OwnerDraw(
             &rect,
             font,
             material,
-            __SPAIR64__(textStyle, (unsigned int)color));
+            color,
+            textStyle
+        );
         break;
     case 162:
         CG_CompassDrawPlayerNCoordScroll(
@@ -703,7 +709,7 @@ void __cdecl CG_OwnerDraw(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (!dword_9E06F0)
+        if (!cgArray[0].inKillCam)
         {
             switch (ownerDraw)
             {
@@ -762,14 +768,14 @@ void __cdecl CG_DrawPlayerAmmoBackdrop(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (dword_9D565C)
+    if (cgArray[0].predictedPlayerState.weapon)
     {
         v4 = hud_fade_ammodisplay->current.value * 1000.0;
         drawColor[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_ammodisplay,
-            dword_9DF8F0[1],
-            (int)(v4 + 9.313225746154785e-10));
+            cgArray[0].ammoFadeTime,
+            (v4 + 9.313225746154785e-10));
         if (drawColor[3] != 0.0)
         {
             if (CG_CheckPlayerForLowAmmo(cgArray))
@@ -836,14 +842,14 @@ void __cdecl CG_DrawPlayerAmmoValue(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (dword_9D565C)
+    if (cgArray[0].predictedPlayerState.weapon)
     {
         v8 = hud_fade_ammodisplay->current.value * 1000.0;
         color[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_ammodisplay,
             cgameGlob->ammoFadeTime,
-            (int)(v8 + 9.313225746154785e-10));
+            (v8 + 9.313225746154785e-10));
         if (color[3] != 0.0)
         {
             if (!cgameGlob->nextSnap)
@@ -890,8 +896,8 @@ void __cdecl CG_DrawPlayerAmmoValue(
                     flashColor[0] = 0.88999999;
                     flashColor[1] = 0.18000001;
                     flashColor[2] = 0.0099999998;
-                    flashColor[3] = (double)(cgameGlob->lastClipFlashTime + 800 - cgameGlob->time) / 800.0;
-                    if (flashColor[3] > (double)color[3])
+                    flashColor[3] = (cgameGlob->lastClipFlashTime + 800 - cgameGlob->time) / 800.0;
+                    if (flashColor[3] > color[3])
                         flashColor[3] = color[3];
                 }
                 if (lowAmmo)
@@ -936,7 +942,7 @@ void __cdecl CG_DrawPlayerAmmoValue(
                             flashColor,
                             textStyle);
                     v7 = rect->x + rect->w;
-                    x = v7 - (double)UI_TextWidth(ammoString, 0, font, scale);
+                    x = v7 - UI_TextWidth(ammoString, 0, font, scale);
                     UI_DrawText(
                         scrPlace,
                         ammoString,
@@ -949,7 +955,7 @@ void __cdecl CG_DrawPlayerAmmoValue(
                         scale,
                         ammoColor,
                         textStyle);
-                    x = (rect->w - (double)UI_TextWidth("|", 0, font, scale)) * 0.5 + rect->x - 5.0;
+                    x = (rect->w - UI_TextWidth("|", 0, font, scale)) * 0.5 + rect->x - 5.0;
                     UI_DrawText(
                         scrPlace,
                         "|",
@@ -965,7 +971,7 @@ void __cdecl CG_DrawPlayerAmmoValue(
                 }
                 else if (drawClip)
                 {
-                    x = (rect->w - (double)UI_TextWidth(clipString, 0, font, scale)) * 0.5 + rect->x;
+                    x = (rect->w - UI_TextWidth(clipString, 0, font, scale)) * 0.5 + rect->x;
                     UI_DrawText(
                         scrPlace,
                         clipString,
@@ -994,7 +1000,7 @@ void __cdecl CG_DrawPlayerAmmoValue(
                 }
                 else if (drawAmmo)
                 {
-                    x = (rect->w - (double)UI_TextWidth(ammoString, 0, font, scale)) * 0.5 + rect->x;
+                    x = (rect->w - UI_TextWidth(ammoString, 0, font, scale)) * 0.5 + rect->x;
                     UI_DrawText(
                         scrPlace,
                         ammoString,
@@ -1038,10 +1044,10 @@ void __cdecl CG_DrawPlayerWeaponName(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    fadeColor = CG_FadeColor(time, dword_9DF71C[35], 1800, 700);
+    fadeColor = CG_FadeColor(cgArray[0].time, cgArray[0].weaponSelectTime, 1800, 700);
     if (fadeColor)
     {
-        if ((unk_9D5584 & 0x80) == 0)
+        if ((cgArray[0].predictedPlayerState.weapFlags & 0x80) == 0)
         {
             drawColor[3] = fadeColor[3];
             drawColor[0] = *color;
@@ -1065,7 +1071,7 @@ void __cdecl CG_DrawPlayerWeaponName(
                 else
                     string = va("%s", weapInfo->translatedDisplayName);
                 v6 = rect->x + rect->w;
-                x = v6 - (double)UI_TextWidth(string, 0, font, scale) - 28.0;
+                x = v6 - UI_TextWidth(string, 0, font, scale) - 28.0;
                 UI_DrawText(
                     &scrPlaceView[localClientNum],
                     string,
@@ -1107,7 +1113,7 @@ void __cdecl CG_DrawPlayerWeaponNameBack(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    drawColor[3] = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, dword_9DF71C[35], 1800);
+    drawColor[3] = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgArray[0].weaponSelectTime, 1800);
     if (drawColor[3] != 0.0)
     {
         drawColor[0] = *color;
@@ -1130,7 +1136,7 @@ void __cdecl CG_DrawPlayerWeaponNameBack(
                 string = va("%s / %s", weapInfo->translatedDisplayName, weapInfo->translatedModename);
             else
                 string = va("%s", weapInfo->translatedDisplayName);
-            w = (double)UI_TextWidth(string, 0, font, scale) + 28.0 + 8.0;
+            w = UI_TextWidth(string, 0, font, scale) + 28.0 + 8.0;
             x = rect->x + rect->w - w;
             UI_DrawHandlePic(
                 &scrPlaceView[localClientNum],
@@ -1176,19 +1182,19 @@ void __cdecl CG_DrawPlayerStance(
             "(localClientNum == 0)",
             localClientNum);
     v10 = hud_fade_stance->current.value * 1000.0;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, dword_9DF8F0[2], (int)(v10 + 9.313225746154785e-10));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgArray[0].stanceFadeTime, (v10 + 9.313225746154785e-10));
     if (fadeAlpha != 0.0)
     {
         if (cg_hudStanceHintPrints->current.enabled)
         {
-            if (dword_9DF71C[30] != (word_9D5580 & 3))
-                dword_9DF71C[31] = time;
+            if (cgArray[0].lastStance != (cgArray[0].predictedPlayerState.pm_flags & 3))
+                cgArray[0].lastStanceChangeTime = cgArray[0].time;
         }
         else
         {
-            dword_9DF71C[31] = 0;
+            cgArray[0].lastStanceChangeTime = 0;
         }
-        dword_9DF71C[30] = word_9D5580 & 3;
+        cgArray[0].lastStance = cgArray[0].predictedPlayerState.pm_flags & 3;
         if (localClientNum)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -1197,23 +1203,23 @@ void __cdecl CG_DrawPlayerStance(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        LODWORD(drawColor[4]) = cgsArray;
-        x = (compassSize->current.value - 1.0) * cgsArray[0].compassWidth * DOUBLE_0_699999988079071 + rect->x;
+        drawColor[4] = 1.4025731e-38;
+        x = (compassSize->current.value - 1.0) * cgsArray[0].compassWidth * 0.699999988079071 + rect->x;
         y = rect->y;
         CL_ResetStats_f();
         drawColor[0] = *color;
         drawColor[1] = color[1];
         drawColor[2] = color[2];
-        if ((word_9D5580 & 0x1000) != 0 && dword_9DF71C[29] < time)
-            dword_9DF71C[29] = time + 1500;
-        if (dword_9DF71C[29] > time)
+        if ((cgArray[0].predictedPlayerState.pm_flags & 0x1000) != 0 && cgArray[0].proneBlockedEndTime < cgArray[0].time)
+            cgArray[0].proneBlockedEndTime = cgArray[0].time + 1500;
+        if (cgArray[0].proneBlockedEndTime > cgArray[0].time)
         {
-            if (BG_WeaponBlocksProne(dword_9D565C))
+            if (BG_WeaponBlocksProne(cgArray[0].predictedPlayerState.weapon))
                 proneStr = UI_SafeTranslateString("CGAME_PRONE_BLOCKED_WEAPON");
             else
                 proneStr = UI_SafeTranslateString("CGAME_PRONE_BLOCKED");
-            halfWidth = (double)UI_TextWidth(proneStr, 0, font, scale) * 0.5;
-            deltaTime = (float)(dword_9DF71C[29] - time);
+            halfWidth = UI_TextWidth(proneStr, 0, font, scale) * 0.5;
+            deltaTime = (cgArray[0].proneBlockedEndTime - cgArray[0].time);
             v9 = deltaTime / 1500.0 * 540.0 * 0.01745329238474369;
             v8 = sin(v9);
             v7 = fabs(v8);
@@ -1221,7 +1227,7 @@ void __cdecl CG_DrawPlayerStance(
             v6 = -halfWidth;
             UI_DrawText(
                 &scrPlaceView[localClientNum],
-                (char *)proneStr,
+                proneStr,
                 0x7FFFFFFF,
                 font,
                 v6,
@@ -1232,7 +1238,7 @@ void __cdecl CG_DrawPlayerStance(
                 drawColor,
                 textStyle);
         }
-        if (cg_hudStanceHintPrints->current.enabled && dword_9DF71C[31] + 3000 > time)
+        if (cg_hudStanceHintPrints->current.enabled && cgArray[0].lastStanceChangeTime + 3000 > cgArray[0].time)
             CG_DrawStanceHintPrints(localClientNum, rect, x, color, fadeAlpha, font, scale, textStyle);
         drawColor[3] = color[3] * fadeAlpha;
         CG_DrawStanceIcon(localClientNum, rect, drawColor, x, y, fadeAlpha);
@@ -1264,11 +1270,11 @@ void __cdecl CG_DrawStanceIcon(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((dword_9DF71C[30] & 1) != 0)
+    if ((cgArray[0].lastStance & 1) != 0)
     {
         icon = cgMedia.stanceMaterials[2];
     }
-    else if ((dword_9DF71C[30] & 2) != 0)
+    else if ((cgArray[0].lastStance & 2) != 0)
     {
         icon = cgMedia.stanceMaterials[1];
     }
@@ -1286,11 +1292,11 @@ void __cdecl CG_DrawStanceIcon(
         rect->vertAlign,
         drawColor,
         icon);
-    if (dword_9DF71C[31] + 1000 > time)
+    if (cgArray[0].lastStanceChangeTime + 1000 > cgArray[0].time)
     {
         Dvar_GetUnpackedColor(cg_hudStanceFlash, drawColor);
-        drawColor[3] = (double)(dword_9DF71C[31] + 1000 - time) / 1000.0 * 0.800000011920929;
-        if (drawColor[3] > (double)fadeAlpha)
+        drawColor[3] = (cgArray[0].lastStanceChangeTime + 1000 - cgArray[0].time) / 1000.0 * 0.800000011920929;
+        if (drawColor[3] > fadeAlpha)
             drawColor[3] = fadeAlpha;
         UI_DrawHandlePic(
             &scrPlaceView[localClientNum],
@@ -1337,26 +1343,26 @@ void __cdecl CG_DrawStanceHintPrints(
     standCmds[1][1] = "togglecrouch";
     standCmds[1][2] = "lowerstance";
     standCmds[1][3] = "+movedown";
-    *(_QWORD *)&standCmds[1][4] = 0;
+    *&standCmds[1][4] = 0;
     standCmds[2][0] = "goprone";
     standCmds[2][1] = "+prone";
-    *(_QWORD *)&standCmds[2][2] = 0;
-    *(_QWORD *)&standCmds[2][4] = 0;
+    *&standCmds[2][2] = 0;
+    *&standCmds[2][4] = 0;
     duckCmds[0][0] = "+gostand";
     duckCmds[0][1] = "raisestance";
     duckCmds[0][2] = "+moveup";
-    *(_QWORD *)&duckCmds[0][3] = 0;
+    *&duckCmds[0][3] = 0;
     duckCmds[0][5] = 0;
     memset(duckCmds[1], 0, sizeof(const char *[6]));
     duckCmds[2][0] = "goprone";
     duckCmds[2][1] = "lowerstance";
     duckCmds[2][2] = "toggleprone";
     duckCmds[2][3] = "+prone";
-    *(_QWORD *)&duckCmds[2][4] = 0;
+    *&duckCmds[2][4] = 0;
     proneCmds[0][0] = "+gostand";
     proneCmds[0][1] = "toggleprone";
-    *(_QWORD *)&proneCmds[0][2] = 0;
-    *(_QWORD *)&proneCmds[0][4] = 0;
+    *&proneCmds[0][2] = 0;
+    *&proneCmds[0][4] = 0;
     proneCmds[1][0] = "gocrouch";
     proneCmds[1][1] = "togglecrouch";
     proneCmds[1][2] = "raisestance";
@@ -1379,11 +1385,11 @@ void __cdecl CG_DrawStanceHintPrints(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    if (dword_9DF71C[31] + 3000 - time <= 1000)
-        drawColor[3] = (double)(cgameGlob->lastStanceChangeTime + 3000 - cgameGlob->time) * 0.001000000047497451;
+    if (cgArray[0].lastStanceChangeTime + 3000 - cgArray[0].time <= 1000)
+        drawColor[3] = (cgameGlob->lastStanceChangeTime + 3000 - cgameGlob->time) * 0.001000000047497451;
     else
         drawColor[3] = 1.0;
-    height = (float)UI_TextHeight(font, scale);
+    height = UI_TextHeight(font, scale);
     numHintLines = 0;
     for (i = 0; i < 3; ++i)
     {
@@ -1433,19 +1439,19 @@ void __cdecl CG_DrawStanceHintPrints(
     {
         y = y - (height * 0.5 + 1.5);
     }
-    if (drawColor[3] > (double)fadeAlpha)
+    if (drawColor[3] > fadeAlpha)
         drawColor[3] = fadeAlpha;
     for (i = 0; i < 3; ++i)
     {
         if (hintLineCmds[i])
         {
             UI_GetKeyBindingLocalizedString(localClientNum, hintLineCmds[i], keyBinding);
-            string = UI_SafeTranslateString((char *)hintTypeStrings[i]);
-            string = UI_ReplaceConversionString((char *)string, keyBinding);
+            string = UI_SafeTranslateString(hintTypeStrings[i]);
+            string = UI_ReplaceConversionString((char*)string, keyBinding);
             v8 = x + rect->w;
             UI_DrawText(
                 &scrPlaceView[localClientNum],
-                (char *)string,
+                string,
                 0x7FFFFFFF,
                 font,
                 v8,
@@ -1475,7 +1481,7 @@ void __cdecl CG_DrawPlayerSprintBack(int localClientNum, const rectDef_s *rect, 
             "(localClientNum == 0)",
             localClientNum);
     v4 = hud_fade_sprint->current.value * 1000.0;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, dword_9DF8F0[3], (int)(v4 + 9.313225746154785e-10));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (v4 + 9.313225746154785e-10));
     if (fadeAlpha != 0.0)
     {
         drawColor[0] = *color;
@@ -1521,14 +1527,14 @@ void __cdecl CG_DrawPlayerSprintMeter(int localClientNum, const rectDef_s *rect,
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    ps = (playerState_s *)&byte_9D5574;
+    ps = &cgArray[0].predictedPlayerState;
     v4 = hud_fade_sprint->current.value * 1000.0;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, dword_9DF8F0[3], (int)(v4 + 9.313225746154785e-10));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (v4 + 9.313225746154785e-10));
     if (fadeAlpha != 0.0)
     {
-        sprintLeft = PM_GetSprintLeft(ps, time);
+        sprintLeft = PM_GetSprintLeft(ps, cgArray[0].time);
         maxSprint = BG_GetMaxSprintTime(ps);
-        sprint = (double)sprintLeft / (double)maxSprint;
+        sprint = sprintLeft / maxSprint;
         if (sprint > 0.0)
         {
             x = rect->x;
@@ -1563,7 +1569,7 @@ void __cdecl CG_DrawPlayerSprintMeter(int localClientNum, const rectDef_s *rect,
 void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s *ps, float *color)
 {
     float frac; // [esp+8h] [ebp-18h]
-    DvarValue *p_current; // [esp+Ch] [ebp-14h]
+    const DvarValue *p_current; // [esp+Ch] [ebp-14h]
     int sprintLeft; // [esp+18h] [ebp-8h]
     int maxSprint; // [esp+1Ch] [ebp-4h]
 
@@ -1601,7 +1607,7 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
     float v7; // [esp+3Ch] [ebp-40h]
     float v8; // [esp+44h] [ebp-38h]
     float health; // [esp+58h] [ebp-24h]
-    const playerState_s *ps; // [esp+64h] [ebp-18h]
+    playerState_s *ps; // [esp+64h] [ebp-18h]
     float x; // [esp+68h] [ebp-14h]
     float xa; // [esp+68h] [ebp-14h]
     float y; // [esp+6Ch] [ebp-10h]
@@ -1621,12 +1627,16 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        health = CG_CalcPlayerHealth((const playerState_s *)(dword_98F45C + 12));
+        health = CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps);
         v8 = hud_fade_healthbar->current.value * 1000.0;
-        color[3] = CG_FadeHudMenu(localClientNum, hud_fade_healthbar, dword_9DF8F0[0], (int)(v8 + 9.313225746154785e-10));
+        color[3] = CG_FadeHudMenu(
+            localClientNum,
+            hud_fade_healthbar,
+            cgArray[0].healthFadeTime,
+            (v8 + 9.313225746154785e-10));
         if (color[3] != 0.0)
         {
-            ps = (const playerState_s *)(dword_98F45C + 12);
+            ps = &cgArray[0].nextSnap->ps;
             v6 = health - 1.0;
             if (v6 < 0.0)
                 v7 = health;
@@ -1668,40 +1678,40 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
                     color,
                     material);
             }
-            if (dword_9DF71C[18] == ps->clientNum)
+            if (cgArray[0].lastHealthClient == ps->clientNum)
             {
-                if (*(float *)&dword_9DF71C[19] <= (double)health)
+                if (cgArray[0].lastHealth <= health)
                 {
-                    *(float *)&dword_9DF71C[19] = health;
-                    dword_9DF71C[17] = 1;
+                    cgArray[0].lastHealth = health;
+                    cgArray[0].lastHealthLerpDelay = 1;
                 }
-                else if (dword_9DF71C[17])
+                else if (cgArray[0].lastHealthLerpDelay)
                 {
-                    dword_9DF71C[17] -= dword_9D555C;
-                    if (dword_9DF71C[17] < 0)
-                        dword_9DF71C[17] = 0;
+                    cgArray[0].lastHealthLerpDelay -= cgArray[0].frametime;
+                    if (cgArray[0].lastHealthLerpDelay < 0)
+                        cgArray[0].lastHealthLerpDelay = 0;
                 }
                 else
                 {
-                    *(float *)&dword_9DF71C[19] = *(float *)&dword_9DF71C[19] - (double)dword_9D555C * (float)0.0012000001;
-                    if (health >= (double)*(float *)&dword_9DF71C[19])
+                    cgArray[0].lastHealth = cgArray[0].lastHealth - cgArray[0].frametime * 0.0012000001;
+                    if (health >= cgArray[0].lastHealth)
                     {
-                        *(float *)&dword_9DF71C[19] = health;
-                        dword_9DF71C[17] = 1;
+                        cgArray[0].lastHealth = health;
+                        cgArray[0].lastHealthLerpDelay = 1;
                     }
                 }
             }
             else
             {
-                dword_9DF71C[18] = ps->clientNum;
-                *(float *)&dword_9DF71C[19] = health;
-                dword_9DF71C[17] = 1;
+                cgArray[0].lastHealthClient = ps->clientNum;
+                cgArray[0].lastHealth = health;
+                cgArray[0].lastHealthLerpDelay = 1;
             }
-            if (health < (double)*(float *)&dword_9DF71C[19])
+            if (health < cgArray[0].lastHealth)
             {
                 xa = rect->w * health + rect->x;
                 ya = rect->y;
-                wa = (*(float *)&dword_9DF71C[19] - health) * rect->w;
+                wa = (cgArray[0].lastHealth - health) * rect->w;
                 ha = rect->h;
                 *color = 1.0;
                 color[1] = 0.0;
@@ -1716,7 +1726,7 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
                     rect->vertAlign,
                     health,
                     0.0,
-                    *(float *)&dword_9DF71C[19],
+                    cgArray[0].lastHealth,
                     1.0,
                     color,
                     material);
@@ -1749,7 +1759,11 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                 "(localClientNum == 0)",
                 localClientNum);
         v6 = hud_fade_healthbar->current.value * 1000.0;
-        fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_healthbar, dword_9DF8F0[0], (int)(v6 + 9.313225746154785e-10));
+        fadeAlpha = CG_FadeHudMenu(
+            localClientNum,
+            hud_fade_healthbar,
+            cgArray[0].healthFadeTime,
+            (v6 + 9.313225746154785e-10));
         if (fadeAlpha != 0.0)
         {
             color[3] = fadeAlpha;
@@ -1771,35 +1785,38 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                 1.0,
                 color,
                 material);
-            health = CG_CalcPlayerHealth((const playerState_s *)(dword_98F45C + 12));
+            health = CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps);
             if (health != 0.0)
             {
-                if (hud_health_startpulse_critical->current.value <= (double)health)
+                if (hud_health_startpulse_critical->current.value <= health)
                 {
-                    if (hud_health_startpulse_injured->current.value <= (double)health)
+                    if (hud_health_startpulse_injured->current.value <= health)
                     {
                         flashTime = 0;
                     }
                     else
                     {
                         v4 = hud_health_pulserate_injured->current.value * 1000.0;
-                        flashTime = (int)(v4 + 9.313225746154785e-10);
+                        flashTime = (v4 + 9.313225746154785e-10);
                     }
                 }
                 else
                 {
                     v5 = hud_health_pulserate_critical->current.value * 1000.0;
-                    flashTime = (int)(v5 + 9.313225746154785e-10);
+                    flashTime = (v5 + 9.313225746154785e-10);
                 }
                 if (flashTime)
                 {
-                    if (dword_9DF71C[16] > time || flashTime + dword_9DF71C[16] < time)
-                        dword_9DF71C[16] = time;
+                    if (cgArray[0].lastHealthPulseTime > cgArray[0].time
+                        || flashTime + cgArray[0].lastHealthPulseTime < cgArray[0].time)
+                    {
+                        cgArray[0].lastHealthPulseTime = cgArray[0].time;
+                    }
                     *color = 0.88999999;
                     color[1] = 0.18000001;
                     color[2] = 0.0099999998;
-                    color[3] = (double)(flashTime + dword_9DF71C[16] - time) / (double)flashTime;
-                    if (color[3] > (double)fadeAlpha)
+                    color[3] = (flashTime + cgArray[0].lastHealthPulseTime - cgArray[0].time) / flashTime;
+                    if (color[3] > fadeAlpha)
                         color[3] = fadeAlpha;
                     CL_DrawStretchPic(
                         &scrPlaceView[localClientNum],
@@ -1833,7 +1850,7 @@ void __cdecl CG_DrawPlayerLowHealthOverlay(int localClientNum, const rectDef_s *
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    healthRatio = CG_CalcPlayerHealth((const playerState_s *)(dword_98F45C + 12));
+    healthRatio = CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps);
     if (healthRatio != 0.0)
     {
         CG_PulseLowHealthOverlay(cgArray, healthRatio);
@@ -2055,7 +2072,7 @@ void __cdecl CG_DrawCursorhint(
     float heighta; // [esp+9Ch] [ebp-134h]
     float height; // [esp+9Ch] [ebp-134h]
     float halfscale; // [esp+A0h] [ebp-130h]
-    int weaponIndex; // [esp+A4h] [ebp-12Ch]
+    unsigned int weaponIndex; // [esp+A4h] [ebp-12Ch]
     char *displayString; // [esp+A8h] [ebp-128h]
     char *displayStringa; // [esp+A8h] [ebp-128h]
     float scale; // [esp+ACh] [ebp-124h]
@@ -2079,10 +2096,10 @@ void __cdecl CG_DrawCursorhint(
                 "(localClientNum == 0)",
                 localClientNum);
         CG_UpdateCursorHints(cgArray);
-        color[3] = CG_FadeAlpha(time, dword_9DF71C[10], dword_9DF71C[11], 100) * color[3];
+        color[3] = CG_FadeAlpha(cgArray[0].time, cgArray[0].cursorHintTime, cgArray[0].cursorHintFade, 100) * color[3];
         if (color[3] == 0.0)
         {
-            dword_9DF71C[9] = 0;
+            cgArray[0].cursorHintIcon = 0;
         }
         else
         {
@@ -2093,7 +2110,7 @@ void __cdecl CG_DrawCursorhint(
             secondaryString = 0;
             if (cg_cursorHints->current.integer == 3)
             {
-                v28 = (double)time / 150.0;
+                v28 = cgArray[0].time / 150.0;
                 v26 = sin(v28);
                 color[3] = (v26 * 0.5 + 0.5) * color[3];
             }
@@ -2101,11 +2118,11 @@ void __cdecl CG_DrawCursorhint(
             {
                 if (cg_cursorHints->current.integer == 2)
                 {
-                    v6 = (double)(dword_9DF71C[10] % 1000) / 100.0;
+                    v6 = (cgArray[0].cursorHintTime % 1000) / 100.0;
                 }
                 else
                 {
-                    v27 = (double)time / 150.0;
+                    v27 = cgArray[0].time / 150.0;
                     v25 = sin(v27);
                     v6 = (v25 * 0.5 + 0.5) * 10.0;
                 }
@@ -2117,17 +2134,17 @@ void __cdecl CG_DrawCursorhint(
                 halfscale = 0.0;
                 scale = 0.0;
             }
-            if (dword_9DF71C[9] == 1)
+            if (cgArray[0].cursorHintIcon == 1)
             {
-                if (dword_9DF71C[12] >= 0)
+                if (cgArray[0].cursorHintString >= 0)
                 {
                     displayStringa = CG_GetUseString(localClientNum);
                     if (displayStringa)
                     {
                         if (*displayStringa)
                         {
-                            length = (float)UI_TextWidth(displayStringa, 0, font, fontscale);
-                            heighta = (float)UI_TextHeight(font, fontscale);
+                            length = UI_TextWidth(displayStringa, 0, font, fontscale);
+                            heighta = UI_TextHeight(font, fontscale);
                             x = (scale + length) * -0.5;
                             y = rect->y - rect->h * 0.5;
                             v24 = heighta * 0.5 + rect->y;
@@ -2149,14 +2166,14 @@ void __cdecl CG_DrawCursorhint(
             }
             else
             {
-                hintIcon = cgMedia.hintMaterials[dword_9DF71C[9]];
+                hintIcon = cgMedia.hintMaterials[cgArray[0].cursorHintIcon];
                 if (hintIcon)
                 {
-                    if (dword_9DF71C[9] < 5 || dword_9DF71C[9] > 132)
+                    if (cgArray[0].cursorHintIcon < 5 || cgArray[0].cursorHintIcon > 132)
                     {
-                        if (dword_9DF71C[12] < 0)
+                        if (cgArray[0].cursorHintString < 0)
                         {
-                            if (dword_9DF71C[9] == 3)
+                            if (cgArray[0].cursorHintIcon == 3)
                             {
                                 UI_GetKeyBindingLocalizedString(localClientNum, "+activate", binding);
                                 v7 = UI_SafeTranslateString("PLATFORM_PICKUPHEALTH");
@@ -2170,8 +2187,8 @@ void __cdecl CG_DrawCursorhint(
                     }
                     else
                     {
-                        weaponIndex = dword_9DF71C[9] - 4;
-                        weapDef = BG_GetWeaponDef(dword_9DF71C[9] - 4);
+                        weaponIndex = cgArray[0].cursorHintIcon - 4;
+                        weapDef = BG_GetWeaponDef(weaponIndex);
                         if (weapDef->hudIcon)
                         {
                             hudIconRatio = weapDef->hudIconRatio;
@@ -2200,7 +2217,7 @@ void __cdecl CG_DrawCursorhint(
                         }
                         if (weapDef->weapClass == WEAPCLASS_TURRET)
                         {
-                            if (dword_9DF71C[12] >= 0)
+                            if (cgArray[0].cursorHintString >= 0)
                                 displayString = CG_GetUseString(localClientNum);
                             if (localClientNum)
                                 MyAssertHandler(
@@ -2220,11 +2237,11 @@ void __cdecl CG_DrawCursorhint(
                     scrPlace = &scrPlaceView[localClientNum];
                     if (displayString && *displayString)
                     {
-                        length = (float)UI_TextWidth(displayString, 0, font, fontscale);
-                        height = (float)UI_TextHeight(font, fontscale);
+                        length = UI_TextWidth(displayString, 0, font, fontscale);
+                        height = UI_TextHeight(font, fontscale);
                         if (secondaryString && cg_weaponHintsCoD1Style->current.enabled)
                         {
-                            secondaryLength = (float)UI_TextWidth(secondaryString, 0, font, fontscale);
+                            secondaryLength = UI_TextWidth(secondaryString, 0, font, fontscale);
                             x = (length + secondaryLength) * -0.5;
                             y = rect->y - rect->h * 0.5 * heightScale;
                             v22 = height * 0.5 + rect->y;
@@ -2306,7 +2323,7 @@ void __cdecl CG_UpdateCursorHints(cg_s *cgameGlob)
 char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondaryString)
 {
     const weaponInfo_s *weapInfo; // [esp+0h] [ebp-120h]
-    unsigned int weaponIndex; // [esp+8h] [ebp-118h]
+    int weaponIndex; // [esp+8h] [ebp-118h]
     char *displayString; // [esp+Ch] [ebp-114h]
     char binding[260]; // [esp+10h] [ebp-110h] BYREF
     WeaponDef *weapDef; // [esp+118h] [ebp-8h]
@@ -2320,16 +2337,16 @@ char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondarySt
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (dword_9DF71C[9] < 5 || dword_9DF71C[9] > 132)
+    if (cgArray[0].cursorHintIcon < 5 || cgArray[0].cursorHintIcon > 132)
         MyAssertHandler(
             ".\\cgame_mp\\cg_newDraw_mp.cpp",
             1259,
             0,
             "%s",
             "(cgameGlob->cursorHintIcon >= FIRST_WEAPON_HINT) && (cgameGlob->cursorHintIcon <= LAST_WEAPON_HINT)");
-    weaponIndex = dword_9DF71C[9] - 4;
-    ps = (const playerState_s *)&byte_9D5574;
-    weapDef = BG_GetWeaponDef(dword_9DF71C[9] - 4);
+    weaponIndex = cgArray[0].cursorHintIcon - 4;
+    ps = &cgArray[0].predictedPlayerState;
+    weapDef = BG_GetWeaponDef(weaponIndex);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -2380,9 +2397,9 @@ char *__cdecl CG_GetUseString(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (dword_9DF71C[12] < 0)
+    if (cgArray[0].cursorHintString < 0)
         MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1310, 0, "%s", "cgameGlob->cursorHintString >= 0");
-    displayString = CL_GetConfigString(localClientNum, dword_9DF71C[12] + 277);
+    displayString = CL_GetConfigString(localClientNum, cgArray[0].cursorHintString + 277);
     if (!displayString || !*displayString)
         return 0;
     if (!UI_GetKeyBindingLocalizedString(localClientNum, "+activate", binding))
@@ -2420,8 +2437,8 @@ void __cdecl CG_DrawHoldBreathHint(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        ps = (const playerState_s *)&byte_9D5574;
-        if ((unk_9D5584 & 4) == 0)
+        ps = &cgArray[0].predictedPlayerState;
+        if ((cgArray[0].predictedPlayerState.weapFlags & 4) == 0)
         {
             ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(ps);
             weapDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
@@ -2436,8 +2453,8 @@ void __cdecl CG_DrawHoldBreathHint(
                     }
                     v6 = UI_SafeTranslateString("PLATFORM_HOLD_BREATH");
                     string = UI_ReplaceConversionString(v6, binding);
-                    v7 = (double)UI_TextWidth(string, 0, font, fontscale) * 0.5;
-                    x = rect->x - (double)(int)(v7 + 9.313225746154785e-10);
+                    v7 = UI_TextWidth(string, 0, font, fontscale) * 0.5;
+                    x = rect->x - (v7 + 9.313225746154785e-10);
                     UI_DrawText(
                         &scrPlaceView[localClientNum],
                         string,
@@ -2485,15 +2502,15 @@ void __cdecl CG_DrawMantleHint(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        ps = (const playerState_s *)&byte_9D5574;
-        if ((unk_9D5B60 & 8) != 0)
+        ps = &cgArray[0].predictedPlayerState;
+        if ((cgArray[0].predictedPlayerState.mantleState.flags & 8) != 0)
         {
             if (!UI_GetKeyBindingLocalizedString(localClientNum, "+gostand", binding))
                 UI_GetKeyBindingLocalizedString(localClientNum, "+moveup", binding);
             v6 = UI_SafeTranslateString("PLATFORM_MANTLE");
             string = UI_ReplaceConversionString(v6, binding);
-            length = (float)UI_TextWidth(string, 0, font, fontscale);
-            height = (float)UI_TextHeight(font, fontscale);
+            length = UI_TextWidth(string, 0, font, fontscale);
+            height = UI_TextHeight(font, fontscale);
             x = rect->x - (rect->w + length) * 0.5;
             y = height * 0.5 + rect->y;
             UI_DrawText(
@@ -2549,40 +2566,40 @@ void __cdecl CG_DrawInvalidCmdHint(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (cg_invalidCmdHintDuration->current.integer + dword_9DF71C[15] < time)
-        dword_9DF71C[14] = 0;
-    switch (dword_9DF71C[14])
+    if (cg_invalidCmdHintDuration->current.integer + cgArray[0].invalidCmdHintTime < cgArray[0].time)
+        cgArray[0].invalidCmdHintType = INVALID_CMD_NONE;
+    switch (cgArray[0].invalidCmdHintType)
     {
-    case 1:
+    case INVALID_CMD_NO_AMMO_BULLETS:
         string = UI_SafeTranslateString("WEAPON_NO_AMMO");
         goto LABEL_21;
-    case 2:
+    case INVALID_CMD_NO_AMMO_FRAG_GRENADE:
         string = UI_SafeTranslateString("WEAPON_NO_FRAG_GRENADE");
         goto LABEL_21;
-    case 3:
+    case INVALID_CMD_NO_AMMO_SPECIAL_GRENADE:
         string = UI_SafeTranslateString("WEAPON_NO_SPECIAL_GRENADE");
         goto LABEL_21;
-    case 5:
+    case INVALID_CMD_STAND_BLOCKED:
         string = UI_SafeTranslateString("GAME_STAND_BLOCKED");
         goto LABEL_21;
-    case 6:
+    case INVALID_CMD_CROUCH_BLOCKED:
         string = UI_SafeTranslateString("GAME_CROUCH_BLOCKED");
         goto LABEL_21;
-    case 7:
+    case INVALID_CMD_TARGET_TOO_CLOSE:
         string = UI_SafeTranslateString("WEAPON_TARGET_TOO_CLOSE");
         goto LABEL_21;
-    case 8:
+    case INVALID_CMD_LOCKON_REQUIRED:
         string = UI_SafeTranslateString("WEAPON_LOCKON_REQUIRED");
         goto LABEL_21;
-    case 9:
+    case INVALID_CMD_NOT_ENOUGH_CLEARANCE:
         string = UI_SafeTranslateString("WEAPON_TARGET_NOT_ENOUGH_CLEARANCE");
     LABEL_21:
         blinkInterval = cg_invalidCmdHintBlinkInterval->current.integer;
         if (blinkInterval <= 0)
             MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1667, 0, "%s", "blinkInterval > 0");
-        color[3] = (double)((time - dword_9DF71C[15]) % blinkInterval) / (double)blinkInterval;
-        v6 = (double)UI_TextWidth(string, 0, font, fontscale) * 0.5;
-        x = rect->x - (double)(int)(v6 + 9.313225746154785e-10);
+        color[3] = ((cgArray[0].time - cgArray[0].invalidCmdHintTime) % blinkInterval) / blinkInterval;
+        v6 = UI_TextWidth(string, 0, font, fontscale) * 0.5;
+        x = rect->x - (v6 + 9.313225746154785e-10);
         UI_DrawText(
             &scrPlaceView[localClientNum],
             string,
@@ -2597,7 +2614,7 @@ void __cdecl CG_DrawInvalidCmdHint(
             textStyle);
         break;
     default:
-        if (dword_9DF71C[14])
+        if (cgArray[0].invalidCmdHintType)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_newDraw_mp.cpp",
                 1629,
@@ -2664,10 +2681,10 @@ void __cdecl CG_DrawTalkerNum(
                     textColor[1] = color[1];
                     textColor[2] = color[2];
                     textColor[3] = color[3];
-                    if (*(unsigned int *)(dword_98F45C + 16) != 5 && isEnemy && (*(unsigned int *)(dword_98F45C + 1544) & 0x200) != 0)
+                    if (cgArray[0].nextSnap->ps.pm_type != 5 && isEnemy && (cgArray[0].nextSnap->ps.perks & 0x200) != 0)
                     {
                         CG_RelativeTeamColor(client, "g_TeamColor", textColor, localClientNum);
-                        material = Material_RegisterHandle((char *)perk_parabolicIcon->current.integer, 7);
+                        material = Material_RegisterHandle((const char*)perk_parabolicIcon->current.integer, 7);
                     }
                     else
                     {
@@ -2684,7 +2701,7 @@ void __cdecl CG_DrawTalkerNum(
                         rect->vertAlign,
                         color,
                         material);
-                    v8 = (double)textHeight + rect->y + (rect->h - (double)textHeight) / 2.0;
+                    v8 = textHeight + rect->y + (rect->h - textHeight) / 2.0;
                     v7 = rect->x + rect->w + 2.0;
                     UI_DrawText(
                         &scrPlaceView[localClientNum],
@@ -2718,21 +2735,21 @@ void __cdecl CG_ArchiveState(int localClientNum, MemoryFile *memFile)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    MemFile_ArchiveData(memFile, 4, dword_9DF8F0);
-    MemFile_ArchiveData(memFile, 4, &dword_9DF8F0[1]);
-    MemFile_ArchiveData(memFile, 4, &dword_9DF8F0[2]);
-    MemFile_ArchiveData(memFile, 4, &displayStartTime);
-    MemFile_ArchiveData(memFile, 4, &dword_9DF8F0[4]);
-    MemFile_ArchiveData(memFile, 4, &dword_9DF8F0[3]);
-    MemFile_ArchiveData(memFile, 4, &dword_9DF71C[4]);
-    MemFile_ArchiveData(memFile, 1024, byte_9DE7D9);
-    MemFile_ArchiveData(memFile, 256, &unk_9DEBD9);
-    MemFile_ArchiveData(memFile, 160, &flt_A8E428[159]);
-    MemFile_ArchiveData(memFile, 160, &flt_A8E428[199]);
-    MemFile_ArchiveData(memFile, 160, &flt_A8E428[239]);
-    MemFile_ArchiveData(memFile, 24, &flt_A8E428[279]);
-    MemFile_ArchiveData(memFile, 64, &flt_A8E428[285]);
-    MemFile_ArchiveData(memFile, 64, &flt_A8E428[301]);
-    MemFile_ArchiveData(memFile, 128, &dword_A8E91C[6]);
+    MemFile_ArchiveData(memFile, 4, &cgArray[0].healthFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgArray[0].ammoFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgArray[0].stanceFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgArray[0].compassFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgArray[0].offhandFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgArray[0].sprintFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgArray[0].drawHud);
+    MemFile_ArchiveData(memFile, 1024, cgArray[0].objectiveText);
+    MemFile_ArchiveData(memFile, 256, cgArray[0].scriptMainMenu);
+    MemFile_ArchiveData(memFile, 160, cgArray[0].visionSetFrom);
+    MemFile_ArchiveData(memFile, 160, cgArray[0].visionSetTo);
+    MemFile_ArchiveData(memFile, 160, cgArray[0].visionSetCurrent);
+    MemFile_ArchiveData(memFile, 24, cgArray[0].visionSetLerpData);
+    MemFile_ArchiveData(memFile, 64, cgArray[0].visionNameNaked);
+    MemFile_ArchiveData(memFile, 64, cgArray[0].visionNameNight);
+    MemFile_ArchiveData(memFile, 128, cgArray[0].hudElemSound);
 }
 

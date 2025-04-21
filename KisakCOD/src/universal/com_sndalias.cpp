@@ -10,6 +10,95 @@
 SoundAliasGlobals g_sa;
 const char ***varXStringPtr;
 
+char __cdecl Com_LoadVolumeFalloffCurve(const char *name, SndCurve *curve)
+{
+    char dest[68]; // [esp+10h] [ebp-2058h] BYREF
+    signed int v4; // [esp+54h] [ebp-2014h]
+    unsigned char buffer[8192]; // [esp+58h] [ebp-2010h] BYREF
+    const char *last; // [esp+205Ch] [ebp-Ch]
+    int file; // [esp+2060h] [ebp-8h] BYREF
+    int len; // [esp+2064h] [ebp-4h]
+
+    last = "SNDCURVE";
+    len = strlen("SNDCURVE");
+    Com_sprintf(dest, 0x40u, "soundaliases/%s.vfcurve", name);
+    v4 = FS_FOpenFileRead(dest, &file);
+    if (v4 >= 0)
+    {
+        if (v4)
+        {
+            FS_Read(buffer, len, file);
+            buffer[len] = 0;
+            if (!strncmp((const char*)buffer, last, len))
+            {
+                if (v4 - len < 0x2000)
+                {
+                    memset(buffer, 0, sizeof(buffer));
+                    FS_Read(buffer, v4 - len, file);
+                    buffer[v4 - len] = 0;
+                    FS_FCloseFile(file);
+                    if (Com_ParseSndCurveFile((const char*)buffer, dest, curve))
+                    {
+                        curve->filename = name;
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                else
+                {
+                    FS_FCloseFile(file);
+                    Com_PrintError(9, "ERROR: \"%s\" Is too long of a sndcurve file to parse\n", dest);
+                    return 0;
+                }
+            }
+            else
+            {
+                FS_FCloseFile(file);
+                Com_PrintError(9, "ERROR: \"%s\" does not appear to be a sndcurve file\n", dest);
+                return 0;
+            }
+        }
+        else
+        {
+            FS_FCloseFile(file);
+            Com_PrintError(9, "ERROR: sndcurve file '%s' is empty\n", dest);
+            return 0;
+        }
+    }
+    else
+    {
+        Com_PrintError(9, "ERROR: Could not load sndcurve file '%s'\n", dest);
+        return 0;
+    }
+}
+
+void Com_InitCurves()
+{
+    int fileIndex; // [esp+10h] [ebp-10h]
+    const char **fileNames; // [esp+14h] [ebp-Ch]
+    char *name; // [esp+18h] [ebp-8h]
+    int fileCount; // [esp+1Ch] [ebp-4h] BYREF
+
+    if (g_sa.curvesInitialized)
+        MyAssertHandler(".\\universal\\com_sndalias.cpp", 867, 0, "%s", "!g_sa.curvesInitialized");
+    memset(g_sa.volumeFalloffCurves, 0, sizeof(g_sa.volumeFalloffCurves));
+    Com_InitDefaultSoundAliasVolumeFalloffCurve(g_sa.volumeFalloffCurves);
+    fileNames = FS_ListFiles("soundaliases", "vfcurve", FS_LIST_PURE_ONLY, &fileCount);
+    if (fileCount > 15)
+        Com_Error(ERR_DROP, "Snd_Alias Curve initialization: .vfcurve file count (%d) exceeds maximum (%d)", fileCount, 15);
+    for (fileIndex = 0; fileIndex < fileCount; ++fileIndex)
+    {
+        name = g_sa.volumeFalloffCurveNames[fileIndex + 1];
+        I_strncpyz(name, fileNames[fileIndex], strlen(fileNames[fileIndex]) - 7);
+        if (!Com_LoadVolumeFalloffCurve(name, &g_sa.volumeFalloffCurves[fileIndex + 1]))
+            Com_Error(ERR_FATAL, "Failed to load sndcurve file %s", fileNames[fileIndex]);
+    }
+    FS_FreeFileList(fileNames);
+    g_sa.curvesInitialized = 1;
+}
 
 double __cdecl Com_GetVolumeFalloffCurveValue(SndCurve *volumeFalloffCurve, float fraction)
 {
@@ -396,136 +485,89 @@ bool __cdecl Com_AliasNameRefersToSingleAlias(const char *aliasname)
     return aliasList && aliasList->count == 1;
 }
 
-void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCurGame, const char *sourceFile)
+void __cdecl Com_StreamedSoundList(snd_alias_system_t system)
 {
-    int bHasName; // [esp+4h] [ebp-620h]
-    int bHasFile; // [esp+8h] [ebp-61Ch]
-    char filename[64]; // [esp+Ch] [ebp-618h] BYREF
-    char *file; // [esp+4Ch] [ebp-5D8h] BYREF
-    const char *ptr[257]; // [esp+50h] [ebp-5D4h] BYREF
-    snd_alias_build_s alias; // [esp+454h] [ebp-1D0h] BYREF
-    const char *token; // [esp+5F4h] [ebp-30h]
-    int i; // [esp+5F8h] [ebp-2Ch]
-    char isFieldSet[32]; // [esp+5FCh] [ebp-28h] BYREF
-    int iColCount; // [esp+620h] [ebp-4h]
+    int j; // [esp+4h] [ebp-94h]
+    char filename[132]; // [esp+8h] [ebp-90h] BYREF
+    int i; // [esp+90h] [ebp-8h]
+    snd_alias_t *aliases; // [esp+94h] [ebp-4h]
 
-    memset((unsigned __int8 *)&alias, 0, sizeof(alias));
-    Com_sprintf(filename, 0x40u, "soundaliases/%s", sourceFile);
-    if (FS_ReadFile(filename, (void **)&file) >= 0)
+    if (g_sa.initialized[system])
     {
-        if (!saLoadObjGlob.volumeModGroupsInitialized)
+        aliases = *(snd_alias_t **)(&g_sa.soundFileInfo[-4].count + 3 * system);
+        for (i = 0; i < g_sa.aliasInfo[system].count; ++i)
         {
-            if (!saLoadObjGlob.refreshVolumeModGroupsCommandInitialized)
+            if ((aliases[i].flags & 0xC0) >> 6 == 2)
             {
-                Cmd_AddCommandInternal(
-                    "snd_refreshVolumeModGroups",
-                    Com_RefreshVolumeModGroups_f,
-                    &Com_RefreshVolumeModGroups_f_VAR);
-                saLoadObjGlob.refreshVolumeModGroupsCommandInitialized = 1;
-            }
-            Com_LoadVolumeModGroups(saLoadObjGlob.volumeModGroups);
-            saLoadObjGlob.volumeModGroupsInitialized = 1;
-        }
-        Com_BeginParseSession(filename);
-        Com_SetCSV(1);
-        ptr[0] = file;
-        iColCount = 0;
-        while (1)
-        {
-            token = (const char *)Com_Parse(ptr);
-            if (!ptr[0])
-                break;
-            if (*token && *token != 35)
-            {
-                if (iColCount)
+                for (j = 0; j < i; ++j)
                 {
-                    memset(isFieldSet, 0, 29);
-                    Com_LoadSoundAliasDefaults(&alias, sourceFile, loadspec);
-                    i = 0;
-                    while (1)
-                    {
-                        if (*token)
-                            Com_LoadSoundAliasField(
-                                loadspec,
-                                loadspecCurGame,
-                                sourceFile,
-                                (char *)token,
-                                (snd_alias_members_t)ptr[i + 1],
-                                isFieldSet,
-                                &alias);
-                        if (++i == iColCount)
-                            break;
-                        token = (const char *)Com_ParseOnLine(ptr);
-                    }
-                    if (!isFieldSet[1] || !isFieldSet[3])
-                    {
-                        if (saLoadObjGlob.tempAliases)
-                            Com_PrintError(
-                                9,
-                                "ERROR: Sound alias file '%s': alias entry missing name and/or file. Error details:\n"
-                                "\talias name: '%s', sound file: '%s', previous alias in file: '%s'\n",
-                                sourceFile,
-                                alias.aliasName,
-                                alias.soundFile,
-                                saLoadObjGlob.tempAliases->aliasName);
-                        else
-                            Com_PrintError(
-                                9,
-                                "ERROR: Sound alias file '%s': alias entry missing name and/or file. Error details:\n"
-                                "\talias name: '%s', sound file: '%s', previous alias in file: '%s'\n",
-                                sourceFile,
-                                alias.aliasName,
-                                alias.soundFile,
-                                &String);
-                        break;
-                    }
-                    if (!isFieldSet[16])
-                        alias.keep = Com_SoundAliasLoadSpec(loadspec, loadspecCurGame, &String, sourceFile);
-                    if (alias.keep && !alias.error && Com_FinishBuildingSoundAlias(&alias))
-                        Com_AddBuildSoundAlias(&alias);
+                    if ((aliases[j].flags & 0xC0) >> 6 == 2 && aliases[j].soundFile == aliases[i].soundFile)
+                        goto LABEL_3;
+                }
+                Com_GetSoundFileName(&aliases[i], filename, 128);
+                if (aliases[i].soundFile->exists)
+                    Com_Printf(9, "%-64s\n", filename);
+                else
+                    Com_Printf(9, "%-64s FILE NOT FOUND\n", filename);
+            }
+        LABEL_3:
+            ;
+        }
+    }
+}
+
+void __cdecl Com_LoadedSoundList(snd_alias_system_t system)
+{
+    int j; // [esp+Ch] [ebp-9Ch]
+    char filename[132]; // [esp+10h] [ebp-98h] BYREF
+    int i; // [esp+98h] [ebp-10h]
+    snd_alias_t *aliases; // [esp+9Ch] [ebp-Ch]
+    int totalMem; // [esp+A0h] [ebp-8h]
+    int fileMem; // [esp+A4h] [ebp-4h]
+
+    if (g_sa.initialized[system])
+    {
+        totalMem = 0;
+        aliases = *(snd_alias_t **)(&g_sa.soundFileInfo[-4].count + 3 * system);
+        for (i = 0; i < g_sa.aliasInfo[system].count; ++i)
+        {
+            if ((aliases[i].flags & 0xC0) >> 6 == 1)
+            {
+                for (j = 0; j < i; ++j)
+                {
+                    if ((aliases[j].flags & 0xC0) >> 6 == 1 && aliases[j].soundFile == aliases[i].soundFile)
+                        goto LABEL_3;
+                }
+                Com_GetSoundFileName(&aliases[i], filename, 128);
+                if (aliases[i].soundFile->exists)
+                {
+                    fileMem = SND_GetSoundFileSize((unsigned int*)&aliases[i].soundFile->u.loadSnd->sound.info.format);
+                    totalMem += fileMem;
+                    Com_Printf(9, "%-64s %7.1f KB\n", filename, fileMem * 0.0009765625);
                 }
                 else
                 {
-                    bHasName = 0;
-                    bHasFile = 0;
-                    while (2)
-                    {
-                        ptr[iColCount + 1] = 0;
-                        for (i = 1; i < 29; ++i)
-                        {
-                            if (!I_stricmp(g_pszSndAliasKeyNames[i], token))
-                            {
-                                ptr[iColCount + 1] = (const char *)i;
-                                if (i == 1)
-                                {
-                                    bHasName = 1;
-                                }
-                                else if (i == 3)
-                                {
-                                    bHasFile = 1;
-                                }
-                                break;
-                            }
-                        }
-                        if (++iColCount != 256 && ptr[0] && *ptr[0] != 10)
-                        {
-                            token = (const char *)Com_ParseOnLine(ptr);
-                            continue;
-                        }
-                        break;
-                    }
-                    if (!bHasName || !bHasFile)
-                    {
-                        Com_PrintError(9, "ERROR: Sound alias file %s: missing 'name' and/or 'file' columns\n", sourceFile);
-                        Com_EndParseSession();
-                        return;
-                    }
+                    Com_Printf(9, "%-64s FAILED TO LOAD\n", filename);
                 }
             }
-            Com_SkipRestOfLine(ptr);
+        LABEL_3:
+            ;
         }
-        Com_EndParseSession();
+        Com_Printf(9, "\ntotal usage %7.3f MB\n", totalMem * 0.00000095367431640625);
     }
+}
+
+void __cdecl Com_SoundList_f()
+{
+    Com_Printf(0, "\n________________________________________\ncurrently streamed menu sounds:\n");
+    Com_StreamedSoundList(SASYS_UI);
+    Com_Printf(0, "\n________________________________________\ncurrently streamed in-game sounds:\n");
+    Com_StreamedSoundList(SASYS_CGAME);
+    Com_Printf(0, "________________________________________\ncurrently loaded menu sounds:\n");
+    Com_LoadedSoundList(SASYS_UI);
+    Com_Printf(0, "\n________________________________________\ncurrently loaded in-game sounds:\n");
+    Com_LoadedSoundList(SASYS_CGAME);
+    Com_Printf(0, "\n");
 }
 
 void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurGame, snd_alias_system_t system)
@@ -741,4 +783,54 @@ void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system)
         if ((unsigned int)system <= SASYS_CGAME && !g_sa.initialized[1] && !g_sa.initialized[0])
             Cmd_RemoveCommand("snd_list");
     }
+}
+
+void __thiscall Com_InitEntChannels(char *file_1)
+{
+    char *file; // [esp+0h] [ebp-4h] BYREF
+
+    file = file_1;
+    if (FS_ReadFile("soundaliases/channels.def", (void **)&file) < 0)
+        Com_Error(ERR_DROP, "unable to load entity channel file [%s].\n", "soundaliases/channels.def");
+    Com_ParseEntChannelFile(file);
+}
+
+void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve *sndCurve)
+{
+    sndCurve->filename = "";
+    sndCurve->knots[0][0] = 0.0;
+    sndCurve->knots[0][1] = 1.0;
+    sndCurve->knots[1][0] = 1.0;
+    sndCurve->knots[1][1] = 0.0;
+    sndCurve->knotCount = 2;
+}
+
+void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo *info)
+{
+    Com_PreLoadSpkrMapFile(info);
+    info->speakerMap.isDefault = 1;
+    Com_SetChannelMapEntry(info->speakerMap.channelMaps[0], 0, 0, 0.5);
+    Com_SetChannelMapEntry(info->speakerMap.channelMaps[0], 0, 1u, 0.5);
+    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 0, 0, 1.0);
+    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 1u, 0, 0.0);
+    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 0, 1u, 0.0);
+    Com_SetChannelMapEntry(info->speakerMap.channelMaps[1], 1u, 1u, 1.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 0, 0.5);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 1u, 0.5);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 2u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 3u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 4u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[0][1], 0, 5u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 0, 1.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 0, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 1u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 1u, 1.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 2u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 2u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 3u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 3u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 4u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 4u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 0, 5u, 0.0);
+    Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 5u, 0.0);
 }
