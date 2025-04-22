@@ -8,6 +8,8 @@
 #include <server_mp/server.h>
 #include <gfx_d3d/r_shadowcookie.h>
 
+#include <algorithm>
+
 const dvar_t *dynEnt_active;
 const dvar_t *dynEnt_bulletForce;
 const dvar_t *dynEnt_explodeForce;
@@ -1583,7 +1585,7 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
     {
         for (i = 0; i < unsignedInt_low; ++i)
         {
-            LOWORD(v10[i].weight) = hitEnts[i];
+            v10[i].weight = hitEnts[i];
             ClientEntity = DynEnt_GetClientEntity(hitEnts[i], drawType);
             if ((ClientEntity->flags & 1) == 0)
                 MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1201, 0, "%s", "dynEntClient->flags & DYNENT_CL_ACTIVE");
@@ -1594,11 +1596,12 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
                 CylindricalRadiusDistSqr = DynEnt_GetRadiusDistSqr(dynEntPose, origin);
             *(float *)&v10[i].sceneEntIndex = CylindricalRadiusDistSqr;
         }
-        std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
-            v10,
-            &v10[unsignedInt_low],
-            (int)(8 * unsignedInt_low) >> 3,
-            (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
+        //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
+        //    v10,
+        //    &v10[unsignedInt_low],
+        //    (int)(8 * unsignedInt_low) >> 3,
+        //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
+        std::sort(&v10[0], &v10[unsignedInt_low], DynEntCl_CompareDynEntsForExplosion);
         unsignedInt_low = LOWORD(dynEnt_explodeMaxEnts->current.unsignedInt);
         if (unsignedInt_low != dynEnt_explodeMaxEnts->current.integer)
             MyAssertHandler(
@@ -1663,7 +1666,7 @@ void __cdecl DynEntCl_JitterEvent(
             {
                 for (i = 0; i < (int)unsignedInt; ++i)
                 {
-                    LOWORD(v15[i].weight) = dynEntList[i];
+                    v15[i].weight = dynEntList[i];
                     ClientEntity = DynEnt_GetClientEntity(dynEntList[i], drawType);
                     if ((ClientEntity->flags & 1) == 0)
                         MyAssertHandler(
@@ -1676,11 +1679,12 @@ void __cdecl DynEntCl_JitterEvent(
                     CylindricalRadiusDistSqr = DynEnt_GetCylindricalRadiusDistSqr(dynEntPose, origin);
                     *(float *)&v15[i].sceneEntIndex = CylindricalRadiusDistSqr;
                 }
-                std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
-                    v15,
-                    &v15[unsignedInt],
-                    (8 * unsignedInt) >> 3,
-                    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
+                //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
+                //    v15,
+                //    &v15[unsignedInt],
+                //    (8 * unsignedInt) >> 3,
+                //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
+                std::sort(&v15[0], &v15[unsignedInt], DynEntCl_CompareDynEntsForExplosion);
                 unsignedInt = dynEnt_explodeMaxEnts->current.unsignedInt;
                 if (unsignedInt != dynEnt_explodeMaxEnts->current.integer)
                     MyAssertHandler(

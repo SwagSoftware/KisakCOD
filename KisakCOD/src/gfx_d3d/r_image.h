@@ -39,6 +39,35 @@ const char *g_platform_name[2] =
     "min_pc"
 };
 
+enum GfxRefBlendMode : __int32
+{                                       // ...
+    BLENDMODE_OPAQUE = 0x0,
+    BLENDMODE_BLEND = 0x1,
+    BLENDMODE_GT0 = 0x2,
+    BLENDMODE_GE128 = 0x3,
+    BLENDMODE_LT128 = 0x4,
+    BLENDMODE_ADD = 0x5,
+};
+struct GfxRawPixel // sizeof=0x4
+{                                       // ...
+    unsigned __int8 r;                  // ...
+    unsigned __int8 g;                  // ...
+    unsigned __int8 b;                  // ...
+    unsigned __int8 a;                  // ...
+};
+struct GfxRawImage // sizeof=0x54
+{                                       // ...
+    char name[64];
+    GfxRefBlendMode blendMode;
+    bool hasAlpha;
+    // padding byte
+    // padding byte
+    // padding byte
+    int width;                          // ...
+    int height;
+    GfxRawPixel *pixels;                // ...
+};
+
 struct ImageList // sizeof=0x2004
 {                                       // ...
     unsigned int count;                 // ...
@@ -103,6 +132,7 @@ GfxImage *__cdecl Image_FindExisting_FastFile(const char *name);
 GfxImage *__cdecl Image_Register_LoadObj(char *imageName, unsigned __int8 semantic, unsigned __int8 imageTrack);
 GfxImage *__cdecl Image_Register(const char *imageName, unsigned __int8 semantic, int imageTrack);
 GfxImage *__cdecl Image_Register_FastFile(const char *imageName);
+char __cdecl Image_ValidateHeader(GfxImageFileHeader *imageFile, const char *filepath);
 IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image);
 void __cdecl R_InitImages();
 void R_InitCodeImages();
@@ -216,6 +246,28 @@ void __cdecl Image_GenerateCube(
     unsigned int mipCount);
 
 // r_image_decode
+struct ddscolor_t_s // sizeof=0x2
+{                                       // ...
+    unsigned __int16 b : 5;
+    unsigned __int16 g : 6;
+    unsigned __int16 r : 5;
+};
+union ddscolor_t // sizeof=0x2
+{                                       // ...
+    ddscolor_t_s c;
+    unsigned __int16 rgb;
+};
+struct DdsBlock_Dxt1_t // sizeof=0x8
+{                                       // ...
+    ddscolor_t color0;
+    ddscolor_t color1;
+    unsigned __int8 bits[4];
+};
+struct DdsBlock_Dxt3_t // sizeof=0x10
+{
+    unsigned __int8 alpha[8];
+    DdsBlock_Dxt1_t color;
+};
 void __cdecl Image_FreeRawPixels(GfxRawImage *image);
 void __cdecl Image_GetRawPixels(char *imageName, GfxRawImage *image);
 unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader);
@@ -243,34 +295,6 @@ struct __declspec(align(4)) WaveletDecode // sizeof=0x20
     // padding byte
     // padding byte
     // padding byte
-};
-enum GfxRefBlendMode : __int32
-{                                       // ...
-    BLENDMODE_OPAQUE = 0x0,
-    BLENDMODE_BLEND = 0x1,
-    BLENDMODE_GT0 = 0x2,
-    BLENDMODE_GE128 = 0x3,
-    BLENDMODE_LT128 = 0x4,
-    BLENDMODE_ADD = 0x5,
-};
-struct GfxRawPixel // sizeof=0x4
-{                                       // ...
-    unsigned __int8 r;                  // ...
-    unsigned __int8 g;                  // ...
-    unsigned __int8 b;                  // ...
-    unsigned __int8 a;                  // ...
-};
-struct GfxRawImage // sizeof=0x54
-{                                       // ...
-    char name[64];
-    GfxRefBlendMode blendMode;
-    bool hasAlpha;
-    // padding byte
-    // padding byte
-    // padding byte
-    int width;                          // ...
-    int height;
-    GfxRawPixel *pixels;                // ...
 };
 void __cdecl Image_LoadWavelet(
     GfxImage *image,

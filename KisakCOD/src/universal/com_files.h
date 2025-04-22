@@ -82,6 +82,9 @@ struct fileHandleData_t // sizeof=0x11C
 
 bool __cdecl FS_Initialized();
 
+int __cdecl FS_ConditionalRestart(int localClientNum, int checksumFeed);
+
+char *__cdecl FS_ReferencedIwdPureChecksums();
 char *__cdecl FS_ReferencedIwdNames();
 char *__cdecl FS_ReferencedIwdChecksums();
 char *__cdecl FS_LoadedIwdNames();
@@ -129,6 +132,8 @@ void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *m
 void __cdecl FS_FreeFileList(const char **list);
 
 void __cdecl FS_CopyFile(char *fromOSPath, char *toOSPath);
+
+void __cdecl FS_Remove(const char *osPath);
 
 char *__cdecl FS_ShiftStr(const char *string, char shift);
 int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp);
@@ -191,3 +196,7 @@ extern int marker_com_files;
 extern void *g_writeLogCompleteEvent;
 extern int fs_loadStack;
 extern const char *fs_serverIwdNames[1024];
+
+extern int fs_checksumFeed;
+
+extern char fs_gamedir[256];

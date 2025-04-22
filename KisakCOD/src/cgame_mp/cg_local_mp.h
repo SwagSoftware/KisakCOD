@@ -1203,6 +1203,9 @@ struct TestEffect // sizeof=0x54
     int time;
     int respawnTime;
 };
+
+void __cdecl CL_SyncGpu(int(__cdecl *WorkCallback)(unsigned __int64));
+
 void __cdecl TRACK_cg_view();
 void __cdecl CG_FxSetTestPosition();
 void __cdecl CG_FxTest();
@@ -1454,6 +1457,16 @@ extern centity_s cg_entitiesArray[1][1024];
 extern cg_s cgArray[1];
 extern cgs_t cgsArray[1];
 extern UiContext cgDC[1];
+
+extern vehicleEffects vehEffects[1][8];
+
+const unsigned __int16 *wheelTags[4] =
+{
+  (const unsigned __int16 *)&scr_const.tag_wheel_front_left,
+  (const unsigned __int16 *)&scr_const.tag_wheel_front_right,
+  (const unsigned __int16 *)&scr_const.tag_wheel_back_left,
+  (const unsigned __int16 *)&scr_const.tag_wheel_back_right
+}; // idb
 
 inline centity_s *__cdecl CG_GetEntity(int localClientNum, unsigned int entityIndex)
 {

@@ -1,4 +1,7 @@
 #include "devgui.h"
+#include <client_mp/client_mp.h>
+#include <cgame/cg_local.h>
+#include <gfx_d3d/r_rendercmds.h>
 
 
 unsigned int __cdecl DevGui_GetScreenWidth()

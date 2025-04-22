@@ -4801,3 +4801,39 @@ void __cdecl SND_SetHWND(HWND* hwnd)
     if (g_snd.Initialized2d)
         AIL_set_DirectSound_HWND(milesGlob.driver, hwnd);
 }
+
+void __cdecl SND_SetData(MssSound *mssSound, void *srcData)
+{
+    _AILMIXINFO mixinfo; // [esp+Ch] [ebp-80h] BYREF
+    int digitalFormat; // [esp+88h] [ebp-4h]
+
+    if (mssSound->info.rate > g_snd.playback_rate && mssSound->info.format != 17)
+    {
+        memset(&mixinfo, 0, sizeof(mixinfo));
+        qmemcpy(&mixinfo, mssSound, 0x24u);
+        mixinfo.Info.data_ptr = srcData;
+        mixinfo.Info.initial_ptr = srcData;
+        while (mssSound->info.rate > g_snd.playback_rate)
+        {
+            mssSound->info.rate >>= 1;
+            mssSound->info.samples >>= 1;
+        }
+        digitalFormat = MSS_DigitalFormatType(mssSound->info.format, mssSound->info.bits, mssSound->info.channels);
+        mssSound->info.data_len = AIL_size_processed_digital_audio(mssSound->info.rate, digitalFormat, 1, &mixinfo);
+        mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
+        AIL_process_digital_audio(
+            mssSound->data,
+            mssSound->info.data_len,
+            mssSound->info.rate,
+            mssSound->info.format,
+            1,
+            &mixinfo);
+    }
+    else
+    {
+        mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
+        Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
+    }
+    mssSound->info.data_ptr = mssSound->data;
+    mssSound->info.initial_ptr = mssSound->data;
+}

@@ -40,7 +40,7 @@ void __cdecl Load_DelayStream()
     unsigned int index; // [esp+4h] [ebp-8h]
 
     for (index = 0; index < g_streamDelayIndex; ++index)
-        DB_LoadXFileData((unsigned __int8 *)g_streamDelayArray[index].ptr, dword_13B927C[2 * index]);
+        DB_LoadXFileData((unsigned char*)g_streamDelayArray[index].ptr, g_streamDelayArray[index].size);
 }
 
 void __cdecl DB_ConvertOffsetToAlias(unsigned int *data)
@@ -61,7 +61,7 @@ void __cdecl DB_ConvertOffsetToAlias(unsigned int *data)
 
 void __cdecl DB_ConvertOffsetToPointer(unsigned int *data)
 {
-    *data = &g_streamZoneMem->blocks[(unsigned int)(*data - 1) >> 28].data[(*data - 1) & 0xFFFFFFF];
+    *data = (unsigned int)&g_streamZoneMem->blocks[(unsigned int)(*data - 1) >> 28].data[(*data - 1) & 0xFFFFFFF];
 }
 
 void __cdecl Load_XStringCustom(char **str)
@@ -85,7 +85,7 @@ void __cdecl Load_TempStringCustom(char **str)
 
     Load_XStringCustom(str);
     if (*str)
-        v1.prev = SL_GetString(*str, 4u).prev;
+        v1.prev = SL_GetString(*str, 4u);
     else
         v1.prev = 0;
     *str = (char *)v1.prev;

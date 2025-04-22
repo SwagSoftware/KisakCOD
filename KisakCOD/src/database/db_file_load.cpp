@@ -6,6 +6,7 @@
 #include <universal/com_files.h>
 
 #include <gfx_d3d/r_image.h>
+#include <gfx_d3d/r_buffers.h>
 
 //unsigned int volatile g_loadingAssets      828e3f3c     db_file_load.obj
 //int marker_db_file_load  828e3f40     db_file_load.obj
@@ -24,6 +25,7 @@ struct DB_LoadData // sizeof=0x68
     int allocType;                      // ...
 };
 
+bool g_minimumFastFileLoaded;
 
 DB_LoadData g_load;
 LONG g_loadedSize;
@@ -31,6 +33,9 @@ LONG g_loadedExternalBytes;
 volatile int g_totalSize;
 volatile int g_totalExternalBytes;
 int g_trackLoadProgress;
+
+XAssetList g_varXAssetList;
+ScriptStringList *varScriptStringList;
 
 void __cdecl DB_CancelLoadXFile()
 {
@@ -183,6 +188,20 @@ void __cdecl DB_LoadDelayedImages()
     {
         if (g_copyInfo[copyIter]->asset.type == ASSET_TYPE_IMAGE)
             R_DelayLoadImage(g_copyInfo[copyIter]->asset.header);
+    }
+}
+
+void __cdecl DB_FinishGeometryBlocks(XZoneMemory *zoneMem)
+{
+    if (zoneMem->lockedVertexData)
+    {
+        R_FinishStaticVertexBuffer((IDirect3DVertexBuffer9*)zoneMem->vertexBuffer);
+        zoneMem->lockedVertexData = 0;
+    }
+    if (zoneMem->lockedIndexData)
+    {
+        R_FinishStaticIndexBuffer((IDirect3DIndexBuffer9*)zoneMem->indexBuffer);
+        zoneMem->lockedIndexData = 0;
     }
 }
 

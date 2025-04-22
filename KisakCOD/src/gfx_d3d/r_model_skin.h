@@ -3,6 +3,7 @@
 #include <universal/q_shared.h>
 
 void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out);
+void __cdecl Vec2UnpackTexCoords(PackedTexCoords in, float *out);
 
 
 void  R_SkinXModelCmd(_WORD *data);

@@ -11,6 +11,42 @@ enum TrisType : __int32
     TRIS_TYPE_COUNT = 0x2,
 };
 
+struct DiskGfxAabbTree // sizeof=0xC
+{
+    unsigned int firstSurface;
+    unsigned int surfaceCount;
+    unsigned int childCount;
+};
+
+struct DiskGfxCullGroup // sizeof=0x20
+{
+    float mins[3];
+    float maxs[3];
+    unsigned int firstSurface;
+    unsigned int surfaceCount;
+};
+
+struct DiskGfxVertex // sizeof=0x44
+{
+    float xyz[3];
+    float normal[3];
+    unsigned __int8 color[4];
+    float texCoord[2];
+    float lmapCoord[2];
+    float tangent[3];
+    float binormal[3];
+};
+
+struct DiskLeaf // sizeof=0x18
+{
+    int cluster;
+    int firstCollAabbIndex;
+    int collAabbCount;
+    int firstLeafBrush;
+    int numLeafBrushes;
+    int cellNum;
+};
+
 struct mnode_load_t // sizeof=0x10
 {
     int cellIndex;
@@ -121,6 +157,7 @@ extern GfxWorld s_world;
 extern r_globals_load_t rgl;
 
 // r_bsp_load_obj
+void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColors, GfxLightGridColors *modernColors);
 GfxWorld *__cdecl R_LoadWorldInternal(const char *name);
 void __cdecl R_InterpretSunLightParseParamsIntoLights(SunLightParseParams *sunParse, GfxLight *sunLight);
 void __cdecl R_SetUpSunLight(const float *sunColor, const float *sunDirection, GfxLight *light);

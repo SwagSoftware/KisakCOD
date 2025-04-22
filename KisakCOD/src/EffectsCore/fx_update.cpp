@@ -9,6 +9,8 @@
 #include <physics/phys_local.h>
 
 #include <win32/win_local.h>
+#include <aim_assist/aim_assist.h>
+#include <cgame_mp/cg_local_mp.h>
 
 void __cdecl FX_SpawnlAlFutureLooping(
     FxSystem *system,
@@ -470,7 +472,7 @@ char __cdecl FX_GetBoneOrientation(int localClientNum, unsigned int dobjHandle, 
         {
             if (boneIndex < DObjNumBones(obj))
             {
-                pose = CG_GetPose(localClientNum, dobjHandle);
+                pose = (centity_s *)CG_GetPose(localClientNum, dobjHandle);
                 if (CG_DObjGetWorldBoneMatrix(&pose->pose, obj, boneIndex, orient->axis, orient->origin))
                 {
                     if ((COERCE_UNSIGNED_INT(orient->origin[0]) & 0x7F800000) == 0x7F800000

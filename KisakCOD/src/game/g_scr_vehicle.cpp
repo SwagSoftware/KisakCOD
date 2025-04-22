@@ -31,6 +31,7 @@ struct VehiclePhysicsBackup // sizeof=0x1B8
 };
 
 VehicleLocalPhysics s_phys_0;
+VehiclePhysicsBackup s_backup_0;
 vehicle_info_t s_vehicleInfos[32];
 VehicleLocalPhysics s_phys;
 

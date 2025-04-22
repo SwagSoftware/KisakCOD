@@ -1029,9 +1029,16 @@ void __cdecl FX_DrawElement_Setup_1_(
 
 using ElementHandlerFn = void(*)(FxDrawState*);
 
-static ElementHandlerFn s_drawElemHandler[] =
+static ElementHandlerFn s_drawElemHandler[8] =
 {
-
+    FX_DrawElem_BillboardSprite,
+    FX_DrawElem_OrientedSprite,
+    FX_DrawElem_Tail,
+    NULL,
+    FX_DrawElem_Cloud,
+    FX_DrawElem_Model,
+    FX_DrawElem_Light,
+    FX_DrawElem_SpotLight
 };
 
 void __cdecl FX_DrawElement(FxSystem *system, const FxElemDef *elemDef, const FxElem *elem, FxDrawState *draw)

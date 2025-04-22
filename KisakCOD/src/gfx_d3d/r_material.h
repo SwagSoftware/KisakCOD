@@ -271,9 +271,9 @@ struct MaterialShaderArgument // sizeof=0x8
 };
 struct MaterialPass // sizeof=0x14
 {                                       // ...
-    MaterialVertexDeclaration *vertexDecl; // ...
-    MaterialVertexShader *vertexShader;
-    MaterialPixelShader *pixelShader;
+    MaterialVertexDeclaration *vertexDecl; // ... // 0
+    MaterialVertexShader *vertexShader; // 4
+    MaterialPixelShader *pixelShader; // 8
     unsigned __int8 perPrimArgCount;
     unsigned __int8 perObjArgCount;
     unsigned __int8 stableArgCount;
@@ -602,6 +602,8 @@ Material *__cdecl Material_Register_FastFile(const char *name);
 Material *__cdecl Material_Register(char *name, int imageTrack);
 Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack);
 
+void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists);
+
 void __cdecl R_MaterialList_f();
 void __cdecl R_GetMaterialList(XAssetHeader header, char *data);
 int __cdecl R_GetMaterialMemory(Material *material);
@@ -623,11 +625,19 @@ struct __declspec(align(4)) GfxMtlFeatureMap // sizeof=0x10
     // padding byte
 };
 
+struct GfxShaderConstantBlock // sizeof=0x64
+{                                       // ...
+    unsigned int count;                 // ...
+    unsigned __int16 dest[16];          // ...
+    const float *value[16];             // ...
+};
+
 extern bool g_generateOverrideTechniques;
 extern MaterialGlobals materialGlobals;
 extern $4ABF24606230B73E4E420CE33A1F14B1 mtlOverrideGlob;
 
 // r_material_load_obj
+Material *__cdecl R_GetBspMaterial(unsigned int materialIndex);
 void __cdecl Material_FreeAll();
 void __cdecl Material_PreLoadAllShaderText();
 Material *__cdecl Material_Load(char *assetName, int imageTrack);
@@ -638,6 +648,8 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
 void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo);
 
 Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name);
+
+void __cdecl Material_Sort();
 
 // r_material_override
 void __cdecl Material_OverrideTechniqueSets();

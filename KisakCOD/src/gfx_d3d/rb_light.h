@@ -115,5 +115,13 @@ void __cdecl R_AverageLightGridColors(const GfxLightGridColors *colors, float su
 void __cdecl R_InitLightVisHistory(char *bspName);
 void __cdecl R_LightVisHistoryFilename(char *bspName, char *filename);
 void __cdecl R_SaveLightVisHistory();
+unsigned __int8 __cdecl R_GetPrimaryLightForModel(
+    const XModel *model,
+    const float *origin,
+    const float (*axis)[3],
+    float scale,
+    const float *mins,
+    const float *maxs,
+    const GfxLightRegion *lightRegions);
 
 GfxModelLightingPatch *__cdecl R_BackEndDataAllocAndClearModelLightingPatch(GfxBackEndData *frontEndDataOut);

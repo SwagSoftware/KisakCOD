@@ -12,6 +12,12 @@
 
 #include <ui_mp/ui_mp.h>
 
+struct serverAddress_t // sizeof=0x6
+{                                       // ...
+    unsigned __int8 ip[4];              // ...
+    unsigned __int16 port;              // ...
+};
+
 struct clSnapshot_t // sizeof=0x2F94
 {                                       // XREF: .data:newSnap/r
                                         // clientActive_t/r ...
@@ -765,6 +771,11 @@ extern unsigned int frame_msec;
 
 extern BOOL updateScreenCalled;
 
+extern char *svc_strings[256];
+extern int autoupdateStarted;
+extern char autoupdateFilename[64];
+extern int cl_connectedToPureServer;
+
 
 inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int localClientNum)
 {
@@ -788,6 +799,7 @@ struct refdef_s;
 struct MemoryFile;
 
 void __cdecl TRACK_cl_cgame();
+void __cdecl CL_ReadDemoMessage(int localClientNum);
 void __cdecl CL_GetScreenDimensions(int *width, int *height, float *aspect);
 double __cdecl CL_GetScreenAspectRatioDisplayPixel();
 int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd);

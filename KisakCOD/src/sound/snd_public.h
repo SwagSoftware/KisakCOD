@@ -577,6 +577,7 @@ void __cdecl StopChannel(int chanId);
 void __cdecl SND_AddPhysicsSound(snd_alias_list_t *aliasList, float *org);
 double __cdecl SND_GetVolumeNormalized();
 void __cdecl SND_SetHWND(HWND* hwnd);
+void __cdecl SND_SetData(MssSound *mssSound, void *srcData);
 
 
 extern const dvar_t *snd_cinematicVolumeScale;

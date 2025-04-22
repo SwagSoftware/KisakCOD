@@ -579,7 +579,7 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
             v4);
     }
     Scr_SetString((unsigned __int16 *)tagInfo + 4, tagName);
-    *((unsigned int *)tagInfo + 1) = parent->tagChildren;
+    *((unsigned int *)tagInfo + 1) = (unsigned int)parent->tagChildren;
     *((unsigned int *)tagInfo + 3) = index;
     memset((unsigned __int8 *)tagInfo + 16, 0, 0x30u);
     parent->tagChildren = ent;

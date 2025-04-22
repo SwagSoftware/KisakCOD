@@ -8,6 +8,15 @@
 #include "r_dvars.h"
 #include <universal/q_parse.h>
 #include "r_image.h"
+#include <qcommon/com_pack.h>
+#include "r_utils.h"
+#include "r_buffers.h"
+
+#include <algorithm>
+#include "r_model.h"
+#include "r_xsurface.h"
+#include "rb_light.h"
+#include "r_reflection_probe.h"
 
 r_globals_load_t rgl;
 
@@ -700,7 +709,7 @@ void __cdecl R_CopyLightmap(
     }
 }
 
-void __cdecl R_CopyLightDefAttenuationImage(XAssetHeader header, _DWORD *anonymousConfig)
+void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *header, _DWORD *anonymousConfig)
 {
     int endCount; // [esp+30h] [ebp-7Ch]
     unsigned __int8 *dstPixel; // [esp+38h] [ebp-74h]
@@ -711,10 +720,10 @@ void __cdecl R_CopyLightDefAttenuationImage(XAssetHeader header, _DWORD *anonymo
     GfxRawPixel lerpedPixel; // [esp+A4h] [ebp-8h]
     int iter; // [esp+A8h] [ebp-4h]
 
-    Image_GetRawPixels(*(header.xmodelPieces->numpieces + 32), &rawImage);
-    if (rawImage.width != *(header.xmodelPieces->numpieces + 24))
+    Image_GetRawPixels((char*)header->attenuation.image->name, &rawImage);
+    if (rawImage.width != header->attenuation.image->width)
         MyAssertHandler(".\\r_light_load_obj.cpp", 144, 0, "%s", "rawImage.width == def->attenuation.image->width");
-    dstPixel = (*anonymousConfig + anonymousConfig[1] * (4 * header.xmodelPieces[1].name - 4));
+    dstPixel = (unsigned char*)(*anonymousConfig + anonymousConfig[1] * (4 * header->lmapLookupStart - 4));
     srcPixel = rawImage.pixels;
     if (anonymousConfig[1] == 1)
     {
@@ -771,15 +780,14 @@ void __cdecl R_CopyLightDefAttenuationImage(XAssetHeader header, _DWORD *anonymo
             lerp = 1;
             ++srcPixel;
         } while (srcPixel != &rawImage.pixels[rawImage.width - 1]);
-        if (&dstPixel[-*anonymousConfig] >> 2 != anonymousConfig[1] * &header.xmodelPieces[1].name[rawImage.width + 1]
-            - endCount)
+        if ((unsigned int)((unsigned int)&dstPixel[-*anonymousConfig] >> 2) != ((unsigned int)(anonymousConfig[1] * (header->lmapLookupStart + rawImage.width + 1) - endCount)))
             MyAssertHandler(
                 ".\\r_light_load_obj.cpp",
                 193,
                 1,
                 "(dstPixel - cfg->dest) / 4u == (def->lmapLookupStart + rawImage.width + 1) * cfg->zoom - endCount\n\t%i, %i",
-                &dstPixel[-*anonymousConfig] >> 2,
-                anonymousConfig[1] * &header.xmodelPieces[1].name[rawImage.width + 1] - endCount);
+                (unsigned int)&dstPixel[-*anonymousConfig] >> 2,
+                anonymousConfig[1] * (header->lmapLookupStart + rawImage.width + 1) - endCount);
         for (iter = 0; iter < endCount; ++iter)
         {
             *dstPixel = (srcPixel->a << 24) | srcPixel->b | (srcPixel->g << 8) | (srcPixel->r << 16);
@@ -885,7 +893,7 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
             }
             defCopyCfg.dest = secondaryImage;
             defCopyCfg.zoom = groupInfo[newLmapIndex].wideCount;
-            R_EnumLightDefs(R_CopyLightDefAttenuationImage, &defCopyCfg);
+            R_EnumLightDefs((void(*)(GfxLightDef*, void*))R_CopyLightDefAttenuationImage, &defCopyCfg);
             v1 = va("*lightmap%i_primary", newLmapIndex);
             v2 = Image_Alloc(v1, 2u, 1u, 4u);
             s_world.lightmaps[newLmapIndex].primary = v2;
@@ -922,6 +930,1935 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
     {
         s_world.lightmapCount = 0;
     }
+}
+
+GfxShadowGeometry *R_AllocShadowGeometryHeaderMemory()
+{
+    GfxShadowGeometry *result; // eax
+
+    if (s_world.shadowGeom)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4250, 1, "%s", "s_world.shadowGeom == NULL");
+    result = (GfxShadowGeometry*)Hunk_Alloc(12 * s_world.primaryLightCount, "R_AllocShadowGeometryHeaderMemory", 20);
+    s_world.shadowGeom = result;
+    return result;
+}
+
+void __cdecl R_LoadSubmodels(TrisType trisType)
+{
+    __int16 v1; // [esp+4h] [ebp-18h]
+    GfxBrushModel *out; // [esp+8h] [ebp-14h]
+    char *in; // [esp+Ch] [ebp-10h]
+    int axis; // [esp+10h] [ebp-Ch]
+    unsigned int modelIndex; // [esp+14h] [ebp-8h]
+    unsigned int modelCount; // [esp+18h] [ebp-4h] BYREF
+
+    in = Com_GetBspLump(LUMP_MODELS, 48u, &modelCount);
+    out = (GfxBrushModel*)Hunk_Alloc(56 * modelCount, "R_LoadSubmodels", 20);
+    s_world.models = out;
+    s_world.modelCount = modelCount;
+    for (modelIndex = 0; modelIndex < modelCount; ++modelIndex)
+    {
+        for (axis = 0; axis < 3; ++axis)
+        {
+            out->bounds[0][axis] = *&in[4 * axis];
+            out->bounds[1][axis] = *&in[4 * axis + 12];
+        }
+        out->surfaceCount = *&in[2 * trisType + 28];
+        if (out->surfaceCount)
+            v1 = *&in[2 * trisType + 24];
+        else
+            v1 = -1;
+        out->startSurfIndex = v1;
+        in += 48;
+        ++out;
+    }
+}
+
+void __cdecl R_SurfCalculateMagicPortalVerts(
+    const Material *material,
+    GfxSurface *surface,
+    const DiskGfxVertex *vertsDisk,
+    const r_lightmapMerge_t *merge,
+    GfxWorldVertex *vertsMem)
+{
+    float scale; // [esp+8h] [ebp-5058h]
+    float *v6; // [esp+Ch] [ebp-5054h]
+    int v7; // [esp+10h] [ebp-5050h]
+    int kk; // [esp+14h] [ebp-504Ch]
+    int v9; // [esp+18h] [ebp-5048h]
+    int v10; // [esp+1Ch] [ebp-5044h]
+    int jj; // [esp+24h] [ebp-503Ch]
+    int ii; // [esp+28h] [ebp-5038h]
+    int v13[3]; // [esp+2Ch] [ebp-5034h]
+    int n; // [esp+38h] [ebp-5028h]
+    int k; // [esp+3Ch] [ebp-5024h]
+    unsigned int m; // [esp+40h] [ebp-5020h]
+    int v17[3]; // [esp+44h] [ebp-501Ch]
+    unsigned int j; // [esp+50h] [ebp-5010h]
+    char v19; // [esp+57h] [ebp-5009h]
+    float a[4096]; // [esp+58h] [ebp-5008h] BYREF
+    unsigned int triCount; // [esp+4058h] [ebp-1008h]
+    unsigned int i; // [esp+405Ch] [ebp-1004h]
+    int v23[1024]; // [esp+4060h] [ebp-1000h]
+
+    triCount = surface->tris.triCount;
+    if (triCount > 0x400)
+    {
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1678, 0, "%s", "triCount <= ARRAY_COUNT( triFillId )");
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1679, 0, "%s", "triCount <= ARRAY_COUNT( centerAccum )");
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1680, 0, "%s", "triCount <= ARRAY_COUNT( centerWeight )");
+    }
+    for (i = 0; i < triCount; ++i)
+    {
+        v23[i] = i;
+        v6 = &a[3 * i];
+        *v6 = 0.0;
+        v6[1] = 0.0;
+        v6[2] = 0.0;
+        a[i + 3072] = 0.0;
+    }
+    v19 = 0;
+    while (!v19)
+    {
+        v19 = 1;
+        for (j = 0; j < triCount; ++j)
+        {
+            for (k = 0; k != 3; ++k)
+                v17[k] = surface->tris.firstVertex + s_world.indices[3 * j + k + surface->tris.baseIndex];
+            for (m = 0; m < triCount; ++m)
+            {
+                for (k = 0; k != 3; ++k)
+                    v13[k] = surface->tris.firstVertex + s_world.indices[3 * m + k + surface->tris.baseIndex];
+                for (n = 0; n != 3; ++n)
+                {
+                    for (ii = 0; ii != 3; ++ii)
+                    {
+                        if (v17[n] == v13[ii] && v23[j] != v23[m])
+                        {
+                            if (v23[j] >= v23[m])
+                                v23[j] = v23[m];
+                            else
+                                v23[m] = v23[j];
+                            v19 = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (i = 0; i < triCount; ++i)
+    {
+        for (jj = 0; jj != 3; ++jj)
+        {
+            v10 = v23[i];
+            Vec3Add(
+                &a[3 * v10],
+                vertsMem[surface->tris.firstVertex + s_world.indices[3 * i + jj + surface->tris.baseIndex]].xyz,
+                &a[3 * v10]);
+            a[v10 + 3072] = a[v10 + 3072] + 1.0;
+        }
+    }
+    for (i = 0; i < triCount; ++i)
+    {
+        if (a[i + 3072] > 0.0)
+        {
+            scale = 1.0 / a[i + 3072];
+            Vec3Scale(&a[3 * i], scale, &a[3 * i]);
+        }
+    }
+    for (i = 0; i < triCount; ++i)
+    {
+        v9 = v23[i];
+        for (kk = 0; kk != 3; ++kk)
+        {
+            v7 = surface->tris.firstVertex + s_world.indices[3 * i + kk + surface->tris.baseIndex];
+            vertsMem[v7].texCoord[0] = a[3 * v9];
+            vertsMem[v7].texCoord[1] = a[3 * v9 + 1];
+            vertsMem[v7].lmapCoord[0] = a[3 * v9 + 2];
+            vertsMem[v7].lmapCoord[1] = 1.0;
+        }
+    }
+}
+
+void __cdecl R_FinalizeSurfVerts(
+    const Material *material,
+    GfxSurface *surface,
+    const DiskGfxVertex *vertsDisk,
+    const r_lightmapMerge_t *merge,
+    GfxWorldVertex *vertsMem,
+    unsigned int vertCount)
+{
+    float v6; // [esp+0h] [ebp-14h]
+    float v7; // [esp+4h] [ebp-10h]
+    unsigned int indexCount; // [esp+8h] [ebp-Ch]
+    unsigned int vertIndex; // [esp+Ch] [ebp-8h]
+    unsigned int indexIndex; // [esp+10h] [ebp-4h]
+
+    if (!material)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1779, 0, "%s", "material");
+    if (!surface)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1780, 0, "%s", "surface");
+    if (!vertsDisk)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1781, 0, "%s", "vertsDisk");
+    if (!merge)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1782, 0, "%s", "merge");
+    if (!vertsMem)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1783, 0, "%s", "vertsMem");
+    ClearBounds(surface->bounds[0], surface->bounds[1]);
+    indexCount = 3 * surface->tris.triCount;
+    if (surface->tris.baseIndex + indexCount - 1 >= s_world.indexCount)
+        MyAssertHandler(
+            ".\\r_bsp_load_obj.cpp",
+            1787,
+            0,
+            "surface->tris.baseIndex + indexCount - 1 doesn't index s_world.indexCount\n\t%i not in [0, %i)",
+            surface->tris.baseIndex + indexCount - 1,
+            s_world.indexCount);
+    for (indexIndex = 0; indexIndex < indexCount; ++indexIndex)
+    {
+        vertIndex = surface->tris.firstVertex + s_world.indices[indexIndex + surface->tris.baseIndex];
+        if (vertIndex >= vertCount)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                1791,
+                0,
+                "vertIndex doesn't index vertCount\n\t%i not in [0, %i)",
+                vertIndex,
+                vertCount);
+        AddPointToBounds(vertsMem[vertIndex].xyz, surface->bounds[0], surface->bounds[1]);
+        v7 = vertsDisk[vertIndex].lmapCoord[0] * merge->scale[0] + merge->shift[0];
+        vertsMem[vertIndex].lmapCoord[0] = v7;
+        v6 = vertsDisk[vertIndex].lmapCoord[1] * merge->scale[1] + merge->shift[1];
+        vertsMem[vertIndex].lmapCoord[1] = v6;
+    }
+    if ((material->info.gameFlags & 0x20) != 0)
+        R_SurfCalculateMagicPortalVerts(material, surface, vertsDisk, merge, vertsMem);
+}
+
+unsigned __int8 *__cdecl R_LoadSurfaceAlloc(unsigned int bytes)
+{
+    return Hunk_Alloc(bytes, "R_LoadSurfaces", 20);
+}
+
+MaterialUsage *__cdecl R_GetMaterialUsageData(Material *material)
+{
+    MaterialUsage *materialUsage; // [esp+0h] [ebp-Ch]
+    bool exists; // [esp+7h] [ebp-5h] BYREF
+    unsigned __int16 hashIndex; // [esp+8h] [ebp-4h] BYREF
+
+    Material_GetHashIndex(material->info.name, &hashIndex, &exists);
+    if (!exists)
+        return 0;
+    materialUsage = &rg.materialUsage[hashIndex];
+    if (material != rg.materialHashTable[hashIndex])
+        MyAssertHandler(".\\r_bsp.cpp", 42, 0, "%s", "material == rg.materialHashTable[hashIndex]");
+    materialUsage->material = material;
+    return materialUsage;
+}
+
+void __cdecl R_MaterialUsage(Material *material, unsigned int firstVertex, int vertexCount, int surfPlusIndexSize)
+{
+    unsigned int *v4; // eax
+    VertUsage *vertUsage; // [esp+0h] [ebp-8h]
+    MaterialUsage *materialUsage; // [esp+4h] [ebp-4h]
+
+    materialUsage = R_GetMaterialUsageData(material);
+    if (materialUsage)
+    {
+        materialUsage->memory += surfPlusIndexSize + 48;
+        for (vertUsage = materialUsage->verts; vertUsage; vertUsage = vertUsage->next)
+        {
+            if (firstVertex == vertUsage->index)
+                return;
+        }
+        v4 = (unsigned int *)Z_Malloc(8, "R_MaterialUsage", 0);
+        *v4 = firstVertex;
+        v4[1] = (unsigned int)materialUsage->verts;
+        materialUsage->verts = (VertUsage*)v4;
+        materialUsage->memory += 44 * vertexCount;
+    }
+}
+
+void __cdecl R_ValidateSurfaceLightmapUsage(const GfxSurface *surface)
+{
+    const MaterialTechnique *technique; // [esp+8h] [ebp-Ch]
+    MaterialTechniqueType techType; // [esp+Ch] [ebp-8h]
+    unsigned int passIter; // [esp+10h] [ebp-4h]
+
+    if (surface->lightmapIndex == 31)
+    {
+        for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
+        {
+            technique = Material_GetTechnique(surface->material, techType);
+            if (technique)
+            {
+                for (passIter = 0; passIter < technique->passCount; ++passIter)
+                {
+                    if ((technique->passArray[passIter].customSamplerFlags & 6) != 0)
+                        Com_Error(
+                            ERR_DROP,
+                            "World surface using material '%s' doesn't have a lightmap.  This usually means the map was compiled with a"
+                            " different version of this material than you have locally.",
+                            surface->material->info.name);
+                }
+            }
+        }
+    }
+}
+
+void __cdecl R_SetSkyImage(const Material *skyMaterial)
+{
+    unsigned int colorMapHash; // [esp+0h] [ebp-Ch]
+    int textureIndex; // [esp+4h] [ebp-8h]
+    const MaterialTextureDef *texdef; // [esp+8h] [ebp-4h]
+
+    colorMapHash = R_HashString("colorMap");
+    for (textureIndex = 0; textureIndex < skyMaterial->textureCount; ++textureIndex)
+    {
+        texdef = &skyMaterial->textureTable[textureIndex];
+        if (texdef->nameHash == colorMapHash)
+        {
+            if (texdef->semantic == 11 || texdef->u.image->mapType != MAPTYPE_CUBE)
+                Com_Error(
+                    ERR_DROP,
+                    "colorMap '%s' for sky material '%s' is not a cubemap\n",
+                    texdef->u.image->name,
+                    skyMaterial->info.name);
+            s_world.skyImage = texdef->u.image;
+            s_world.skySamplerState = texdef->samplerState;
+            return;
+        }
+    }
+}
+
+void __cdecl R_CalculateWorldBounds(float *mins, float *maxs)
+{
+    int surfIndex; // [esp+0h] [ebp-8h]
+
+    if (s_world.surfaceCount)
+    {
+        ClearBounds(mins, maxs);
+        for (surfIndex = 0; surfIndex < s_world.surfaceCount; ++surfIndex)
+            ExpandBounds(s_world.dpvs.surfaces[surfIndex].bounds[0], s_world.dpvs.surfaces[surfIndex].bounds[1], mins, maxs);
+    }
+    else
+    {
+        *mins = 0.0;
+        mins[1] = 0.0;
+        mins[2] = 0.0;
+        *maxs = 0.0;
+        maxs[1] = 0.0;
+        maxs[2] = 0.0;
+    }
+}
+
+void __cdecl R_CalculateOutdoorBounds(GfxBspLoad *load, const DiskTriangleSoup *diskSurfaces)
+{
+    int surfIndex; // [esp+0h] [ebp-10h]
+    int surfCount; // [esp+4h] [ebp-Ch]
+
+    ClearBounds(load->outdoorMins, load->outdoorMaxs);
+    if (s_world.modelCount <= 0)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1895, 0, "%s", "s_world.modelCount > 0");
+    if (s_world.models->startSurfIndex)
+        MyAssertHandler(
+            ".\\r_bsp_load_obj.cpp",
+            1896,
+            0,
+            "%s\n\t(s_world.models[0].startSurfIndex) = %i",
+            "(s_world.models[0].startSurfIndex == 0)",
+            s_world.models->startSurfIndex);
+    surfCount = s_world.models->surfaceCount;
+    for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
+    {
+        if ((s_world.dpvs.surfaces[surfIndex].material->info.gameFlags & 8) == 0
+            && (load->diskMaterials[diskSurfaces[surfIndex].materialIndex].contentFlags & 0x2001) != 0)
+        {
+            ExpandBounds(
+                s_world.dpvs.surfaces[surfIndex].bounds[0],
+                s_world.dpvs.surfaces[surfIndex].bounds[1],
+                load->outdoorMins,
+                load->outdoorMaxs);
+        }
+    }
+}
+
+void __cdecl R_CreateMaterialList()
+{
+    int memory; // [esp+4h] [ebp-10h]
+    unsigned __int16 hashIndex; // [esp+8h] [ebp-Ch]
+    unsigned __int16 hashIndexa; // [esp+8h] [ebp-Ch]
+    MaterialMemory *materialMemory; // [esp+Ch] [ebp-8h]
+    int index; // [esp+10h] [ebp-4h]
+
+    s_world.materialMemoryCount = 0;
+    for (hashIndex = 0; hashIndex < 0x800u; ++hashIndex)
+    {
+        if (rg.materialUsage[hashIndex].memory)
+            ++s_world.materialMemoryCount;
+    }
+    if (s_world.materialMemoryCount)
+    {
+        s_world.materialMemory = (MaterialMemory*)Hunk_Alloc(8 * s_world.materialMemoryCount, "R_CreateMaterialList", 20);
+        index = 0;
+        for (hashIndexa = 0; hashIndexa < 0x800u; ++hashIndexa)
+        {
+            memory = rg.materialUsage[hashIndexa].memory;
+            if (memory)
+            {
+                if (index >= s_world.materialMemoryCount)
+                    MyAssertHandler(".\\r_bsp.cpp", 79, 0, "%s", "index < s_world.materialMemoryCount");
+                materialMemory = &s_world.materialMemory[index];
+                materialMemory->material = rg.materialUsage[hashIndexa].material;
+                materialMemory->memory = memory;
+                ++index;
+            }
+        }
+        if (index != s_world.materialMemoryCount)
+            MyAssertHandler(".\\r_bsp.cpp", 86, 0, "%s", "index == s_world.materialMemoryCount");
+    }
+}
+
+void __cdecl R_LoadSurfaces(GfxBspLoad *load)
+{
+    float v1; // [esp+4h] [ebp-94h]
+    PackedUnitVec v2; // [esp+10h] [ebp-88h]
+    PackedUnitVec v3; // [esp+14h] [ebp-84h]
+    unsigned __int8 *vertLayerDataMem; // [esp+18h] [ebp-80h]
+    unsigned int firstSurfIndex; // [esp+1Ch] [ebp-7Ch]
+    unsigned __int8 dummyData[4]; // [esp+20h] [ebp-78h] BYREF
+    unsigned int surfIndex; // [esp+24h] [ebp-74h]
+    int baseIndex; // [esp+28h] [ebp-70h]
+    int lmapIndex; // [esp+2Ch] [ebp-6Ch]
+    const unsigned __int8 *vertLayerDataDisk; // [esp+30h] [ebp-68h]
+    Material *material; // [esp+34h] [ebp-64h]
+    srfTriangles_t *tris; // [esp+38h] [ebp-60h]
+    float normal[3]; // [esp+3Ch] [ebp-5Ch] BYREF
+    float tangent[3]; // [esp+48h] [ebp-50h] BYREF
+    unsigned int surfCount; // [esp+54h] [ebp-44h] BYREF
+    float binormal[3]; // [esp+58h] [ebp-40h] BYREF
+    DiskTriangleSoup *diskSurfaces; // [esp+64h] [ebp-34h] BYREF
+    unsigned int indexCount; // [esp+68h] [ebp-30h] BYREF
+    const unsigned __int16 *indices; // [esp+6Ch] [ebp-2Ch]
+    LumpType lumpType; // [esp+70h] [ebp-28h]
+    const DiskGfxVertex *vertsDisk; // [esp+74h] [ebp-24h]
+    unsigned int vertCount; // [esp+78h] [ebp-20h] BYREF
+    const Material *skyMaterial; // [esp+7Ch] [ebp-1Ch]
+    GfxSurface *surface; // [esp+80h] [ebp-18h]
+    GfxWorldVertex *vertsMem; // [esp+84h] [ebp-14h]
+    unsigned int vertIndex; // [esp+88h] [ebp-10h]
+    unsigned int vertLayerDataSize; // [esp+8Ch] [ebp-Ch] BYREF
+    unsigned __int16 *worldIndices; // [esp+90h] [ebp-8h]
+    unsigned __int16 surfIndexCount; // [esp+94h] [ebp-4h]
+
+    if (!load)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2613, 0, "%s", "load");
+    if (load->bspVersion < 0x16)
+        Com_PrintWarning(8, "Bsp compiled with old version of cod2map.\n");
+    R_LoadTriangleSurfaces(load->bspVersion, load->trisType, &diskSurfaces, &surfCount);
+    if (!surfCount)
+        Com_Error(ERR_DROP, "LoadMap: no surfaces in %s", s_world.name);
+    lumpType = load->trisType != TRIS_TYPE_LAYERED ? LUMP_UNLAYERED_DRAWVERTS : LUMP_DRAWVERTS;
+    vertsDisk = (const DiskGfxVertex*)Com_GetBspLump(lumpType, 0x44u, &vertCount);
+    if (!vertCount)
+        Com_Error(ERR_DROP, "LoadMap: no vertices in %s", s_world.name);
+    s_world.vertexCount = vertCount;
+    if (load->trisType)
+    {
+        vertLayerDataSize = 4;
+        vertLayerDataDisk = dummyData;
+    }
+    else
+    {
+        vertLayerDataDisk = (const unsigned __int8 *)Com_GetBspLump(LUMP_VERTEX_LAYER_DATA, 1u, &vertLayerDataSize);
+        if (!vertLayerDataSize)
+        {
+            vertLayerDataSize = 4;
+            vertLayerDataDisk = dummyData;
+        }
+    }
+    vertLayerDataMem = R_LoadSurfaceAlloc(vertLayerDataSize);
+    Com_Memcpy(vertLayerDataMem, vertLayerDataDisk, vertLayerDataSize);
+    s_world.vertexLayerDataSize = vertLayerDataSize;
+    s_world.vld.data = vertLayerDataMem;
+    vertsMem = (GfxWorldVertex*)R_LoadSurfaceAlloc(44 * vertCount);
+    if (!vertsMem)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2651, 0, "%s", "vertsMem");
+    s_world.vd.vertices = vertsMem;
+    for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
+    {
+        vertsMem[vertIndex].xyz[0] = vertsDisk[vertIndex].xyz[0];
+        vertsMem[vertIndex].xyz[1] = vertsDisk[vertIndex].xyz[1];
+        vertsMem[vertIndex].xyz[2] = vertsDisk[vertIndex].xyz[2];
+        Byte4CopyBgraToVertexColor(vertsDisk[vertIndex].color, (unsigned char*)&vertsMem[vertIndex].color);
+        vertsMem[vertIndex].texCoord[0] = vertsDisk[vertIndex].texCoord[0];
+        vertsMem[vertIndex].texCoord[1] = vertsDisk[vertIndex].texCoord[1];
+        vertsMem[vertIndex].lmapCoord[0] = vertsDisk[vertIndex].lmapCoord[0];
+        vertsMem[vertIndex].lmapCoord[1] = vertsDisk[vertIndex].lmapCoord[1];
+        tangent[0] = vertsDisk[vertIndex].tangent[0];
+        tangent[1] = vertsDisk[vertIndex].tangent[1];
+        tangent[2] = vertsDisk[vertIndex].tangent[2];
+        v3.packed = Vec3PackUnitVec(tangent).packed;
+        vertsMem[vertIndex].tangent = v3;
+        normal[0] = vertsDisk[vertIndex].normal[0];
+        normal[1] = vertsDisk[vertIndex].normal[1];
+        normal[2] = vertsDisk[vertIndex].normal[2];
+        v2.packed = Vec3PackUnitVec(normal).packed;
+        vertsMem[vertIndex].normal = v2;
+        Vec3Cross(vertsDisk[vertIndex].normal, vertsDisk[vertIndex].tangent, binormal);
+        if (Vec3Dot(binormal, vertsDisk[vertIndex].binormal) < 0.0)
+            v1 = -1.0;
+        else
+            v1 = 1.0;
+        vertsMem[vertIndex].binormalSign = v1;
+    }
+    lumpType = load->trisType != TRIS_TYPE_LAYERED ? LUMP_UNLAYERED_DRAWINDICES : LUMP_DRAWINDICES;
+    indices = (const unsigned short*)Com_GetBspLump(lumpType, 2u, &indexCount);
+    if (surfCount > 0x10000)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2692, 0, "%s\n\t(surfCount) = %i", "(surfCount <= 65536)", surfCount);
+    s_world.surfaceCount = surfCount;
+    s_world.dpvs.surfaces = (GfxSurface*)Hunk_Alloc(48 * surfCount, "R_LoadSurfaces", 20);
+    s_world.indexCount = 0;
+    for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
+    {
+        s_world.indexCount += diskSurfaces[surfIndex].indexCount;
+        s_world.dpvs.surfaces[surfIndex].tris.baseIndex = -1;
+    }
+    worldIndices = (unsigned short*)R_LoadSurfaceAlloc(2 * s_world.indexCount);
+    s_world.indices = worldIndices;
+    baseIndex = 0;
+    for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
+    {
+        if (diskSurfaces[surfIndex].firstVertex + diskSurfaces[surfIndex].vertexCount > s_world.vertexCount)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                2712,
+                0,
+                "%s",
+                "diskSurfaces[surfIndex].firstVertex + diskSurfaces[surfIndex].vertexCount <= s_world.vertexCount");
+    }
+    for (firstSurfIndex = 0; firstSurfIndex < surfCount; ++firstSurfIndex)
+    {
+        surface = &s_world.dpvs.surfaces[firstSurfIndex];
+        if (surface->tris.baseIndex < 0)
+        {
+            for (surfIndex = firstSurfIndex; surfIndex < surfCount; ++surfIndex)
+            {
+                surface = &s_world.dpvs.surfaces[surfIndex];
+                if (surface->tris.baseIndex < 0
+                    && (diskSurfaces[surfIndex].materialIndex == diskSurfaces[firstSurfIndex].materialIndex
+                        || !I_stricmp(
+                            load->diskMaterials[diskSurfaces[surfIndex].materialIndex].material,
+                            load->diskMaterials[firstSurfIndex].material))
+                    && diskSurfaces[surfIndex].reflectionProbeIndex == diskSurfaces[firstSurfIndex].reflectionProbeIndex
+                    && diskSurfaces[surfIndex].lightmapIndex == diskSurfaces[firstSurfIndex].lightmapIndex)
+                {
+                    tris = &surface->tris;
+                    surfIndexCount = diskSurfaces[surfIndex].indexCount;
+                    surface->tris.baseIndex = baseIndex;
+                    if (surface->flags)
+                        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2744, 0, "%s", "surface->flags == 0");
+                    if (load->bspVersion <= 0x13 || diskSurfaces[surfIndex].castsSunShadow)
+                        surface->flags |= 1u;
+                    if (surfIndexCount % 3)
+                        MyAssertHandler(
+                            ".\\r_bsp_load_obj.cpp",
+                            2749,
+                            0,
+                            "%s\n\t(surfIndexCount) = %i",
+                            "(!(surfIndexCount % 3))",
+                            surfIndexCount);
+                    tris->triCount = surfIndexCount / 3;
+                    if (!tris->triCount)
+                        MyAssertHandler(
+                            ".\\r_bsp_load_obj.cpp",
+                            2751,
+                            0,
+                            "%s\n\t(tris->triCount) = %i",
+                            "(tris->triCount > 0)",
+                            tris->triCount);
+                    Com_Memcpy(&worldIndices[baseIndex], &indices[diskSurfaces[surfIndex].firstIndex], 2 * surfIndexCount);
+                    baseIndex += surfIndexCount;
+                }
+            }
+        }
+    }
+    skyMaterial = 0;
+    s_world.skySurfCount = 0;
+    for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
+    {
+        surface = &s_world.dpvs.surfaces[surfIndex];
+        tris = &surface->tris;
+        surface->tris.vertexLayerData = diskSurfaces[surfIndex].vertexLayerData;
+        tris->firstVertex = diskSurfaces[surfIndex].firstVertex;
+        tris->vertexCount = diskSurfaces[surfIndex].vertexCount;
+        lmapIndex = diskSurfaces[surfIndex].lightmapIndex;
+        if (lmapIndex >= 32)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                2768,
+                0,
+                "%s\n\t(lmapIndex) = %i",
+                "((lmapIndex >= 0 && lmapIndex < ((93 * 1024 * 1024) / ((1024 * 1024 * 1 * 1) + (512 * 512 * 4 * 2)))) || lmapIndex == 31)",
+                lmapIndex);
+        if (load->lmapMergeInfo[lmapIndex].index >= 0x20u)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                2769,
+                0,
+                "%s\n\t(load->lmapMergeInfo[lmapIndex].index) = %i",
+                "((load->lmapMergeInfo[lmapIndex].index >= 0 && load->lmapMergeInfo[lmapIndex].index < ((93 * 1024 * 1024) / ((10"
+                "24 * 1024 * 1 * 1) + (512 * 512 * 4 * 2)))) || load->lmapMergeInfo[lmapIndex].index == 31)",
+                load->lmapMergeInfo[lmapIndex].index);
+        material = R_GetBspMaterial(diskSurfaces[surfIndex].materialIndex);
+        R_FinalizeSurfVerts(material, surface, vertsDisk, &load->lmapMergeInfo[lmapIndex], vertsMem, vertCount);
+        surface->material = material;
+        surface->lightmapIndex = load->lmapMergeInfo[lmapIndex].index;
+        surface->reflectionProbeIndex = diskSurfaces[surfIndex].reflectionProbeIndex;
+        surface->primaryLightIndex = diskSurfaces[surfIndex].primaryLightIndex;
+        R_MaterialUsage(material, tris->firstVertex, tris->vertexCount, 6 * tris->triCount + 16);
+        if ((material->info.gameFlags & 8) != 0)
+        {
+            if (skyMaterial && skyMaterial != material)
+                Com_Error(
+                    ERR_DROP,
+                    "map has at least two different skies: %s and %s\nOnly one sky per map is supported\n",
+                    material->info.name,
+                    skyMaterial->info.name);
+            skyMaterial = material;
+            ++s_world.skySurfCount;
+            if (surface->primaryLightIndex
+                && surface->primaryLightIndex != s_world.sunPrimaryLightIndex
+                && (load->bspVersion > 0xC || surface->primaryLightIndex != 1))
+            {
+                MyAssertHandler(
+                    ".\\r_bsp_load_obj.cpp",
+                    2794,
+                    0,
+                    "%s\n\t(surface->primaryLightIndex) = %i",
+                    "(surface->primaryLightIndex == 0 || surface->primaryLightIndex == s_world.sunPrimaryLightIndex || (load->bspVe"
+                    "rsion <= 12 && surface->primaryLightIndex == 1))",
+                    surface->primaryLightIndex);
+            }
+            surface->primaryLightIndex = s_world.sunPrimaryLightIndex;
+        }
+        R_ValidateSurfaceLightmapUsage(surface);
+    }
+    if (s_world.skySurfCount)
+    {
+        if (!skyMaterial)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2809, 0, "%s", "skyMaterial != NULL");
+        R_SetSkyImage(skyMaterial);
+        s_world.skyStartSurfs = (int*)Hunk_Alloc(4 * s_world.skySurfCount, "Sky surfaces", 20);
+        s_world.skySurfCount = 0;
+        for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
+        {
+            surface = &s_world.dpvs.surfaces[surfIndex];
+            if (surface->material == skyMaterial)
+                s_world.skyStartSurfs[s_world.skySurfCount++] = surfIndex;
+        }
+    }
+    else
+    {
+        if (skyMaterial)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2803, 0, "%s", "skyMaterial == NULL");
+        s_world.skyImage = 0;
+        s_world.skyStartSurfs = 0;
+    }
+    R_CalculateWorldBounds(s_world.mins, s_world.maxs);
+    R_CalculateOutdoorBounds(load, diskSurfaces);
+    R_UnloadTriangleSurfaces(load->bspVersion, diskSurfaces);
+    R_CreateWorldVertexBuffer(&s_world.vd.worldVb, (int*)s_world.vd.vertices, 44 * s_world.vertexCount);
+    R_CreateWorldVertexBuffer(&s_world.vld.layerVb, (int*)s_world.vld.data, s_world.vertexLayerDataSize);
+    R_ShutdownMaterialUsage();
+    R_CreateMaterialList();
+}
+
+void __cdecl R_LoadCullGroups(TrisType trisType)
+{
+    unsigned int firstSurface; // [esp+4h] [ebp-20h]
+    GfxCullGroup *out; // [esp+8h] [ebp-1Ch]
+    unsigned int surfaceCount; // [esp+Ch] [ebp-18h]
+    unsigned int cullGroupCount; // [esp+10h] [ebp-14h] BYREF
+    const DiskGfxCullGroup *in; // [esp+14h] [ebp-10h]
+    LumpType lumpType; // [esp+18h] [ebp-Ch]
+    unsigned int cullGroupIndex; // [esp+1Ch] [ebp-8h]
+    unsigned int axis; // [esp+20h] [ebp-4h]
+
+    lumpType = trisType != TRIS_TYPE_LAYERED ? LUMP_UNLAYERED_CULLGROUPS : LUMP_CULLGROUPS;
+    in = (const DiskGfxCullGroup *)Com_GetBspLump(lumpType, 0x20u, &cullGroupCount);
+    out = (GfxCullGroup *)Hunk_Alloc(32 * cullGroupCount, "R_LoadCullGroups", 22);
+    s_world.dpvs.cullGroups = out;
+    s_world.cullGroupCount = cullGroupCount;
+    for (cullGroupIndex = 0; cullGroupIndex < cullGroupCount; ++cullGroupIndex)
+    {
+        for (axis = 0; axis < 3; ++axis)
+        {
+            out[cullGroupIndex].mins[axis] = in[cullGroupIndex].mins[axis];
+            out[cullGroupIndex].maxs[axis] = in[cullGroupIndex].maxs[axis];
+        }
+        surfaceCount = in[cullGroupIndex].surfaceCount;
+        if (surfaceCount)
+            firstSurface = in[cullGroupIndex].firstSurface;
+        else
+            firstSurface = -1;
+        out[cullGroupIndex].startSurfIndex = firstSurface;
+        out[cullGroupIndex].surfaceCount = surfaceCount;
+    }
+}
+
+void R_LoadCullGroupIndices()
+{
+    int *out; // [esp+0h] [ebp-Ch]
+    unsigned int indexCount; // [esp+4h] [ebp-8h] BYREF
+    const int *in; // [esp+8h] [ebp-4h]
+
+    in = (int*)Com_GetBspLump(LUMP_CULLGROUPINDICES, 4u, &indexCount);
+    out = (int*)Hunk_Alloc(4 * indexCount, "R_LoadCullGroupIndices", 22);
+    rgl.cullGroupIndices = out;
+    if (indexCount && !s_world.dpvs.cullGroups)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3844, 0, "%s", "!indexCount || s_world.dpvs.cullGroups");
+    Com_Memcpy(out, in, 4 * indexCount);
+}
+
+void R_LoadPortalVerts()
+{
+    char *in; // [esp+4h] [ebp-8h]
+    unsigned int vertCount; // [esp+8h] [ebp-4h] BYREF
+
+    in = Com_GetBspLump(LUMP_PORTALVERTS, 0xCu, &vertCount);
+    rgl.portalVerts = (float(*)[3])Hunk_Alloc(12 * vertCount, "R_LoadPortalVerts", 22);
+    Com_Memcpy(rgl.portalVerts, in, 12 * vertCount);
+}
+
+int __cdecl R_FinishLoadingAabbTrees_r(GfxAabbTree *tree, int totalTreesUsed)
+{
+    GfxAabbTree *children; // [esp+0h] [ebp-10h]
+    int childIndex; // [esp+4h] [ebp-Ch]
+    const GfxSurface *surf; // [esp+8h] [ebp-8h]
+    int surfNodeIndex; // [esp+Ch] [ebp-4h]
+
+    if (!tree)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3582, 0, "%s", "tree");
+    if (!rgl.aabbTrees)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3583, 0, "%s", "rgl.aabbTrees");
+    ClearBounds(tree->mins, tree->maxs);
+    if (tree->childCount)
+    {
+        tree->childrenOffset = &rgl.aabbTrees[totalTreesUsed] - tree;
+        children = (tree + tree->childrenOffset);
+        if (children->startSurfIndex != tree->startSurfIndex)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3596, 0, "%s", "children[0].startSurfIndex == tree->startSurfIndex");
+        totalTreesUsed += tree->childCount;
+        for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
+        {
+            totalTreesUsed = R_FinishLoadingAabbTrees_r(&children[childIndex], totalTreesUsed);
+            ExpandBounds(children[childIndex].mins, children[childIndex].maxs, tree->mins, tree->maxs);
+        }
+    }
+    else
+    {
+        surfNodeIndex = 0;
+        surf = &s_world.dpvs.surfaces[tree->startSurfIndex];
+        while (surfNodeIndex < tree->surfaceCount)
+        {
+            ExpandBounds(surf->bounds[0], surf->bounds[1], tree->mins, tree->maxs);
+            ++surfNodeIndex;
+            ++surf;
+        }
+    }
+    return totalTreesUsed;
+}
+
+void __cdecl R_LoadAabbTrees(TrisType trisType)
+{
+    GfxAabbTree *out; // [esp+4h] [ebp-18h]
+    unsigned int aabbTreeIndex; // [esp+8h] [ebp-14h]
+    unsigned int aabbTreeIndexa; // [esp+8h] [ebp-14h]
+    unsigned int aabbTreeCount; // [esp+Ch] [ebp-10h] BYREF
+    int surfaceCount; // [esp+10h] [ebp-Ch]
+    const DiskGfxAabbTree *in; // [esp+14h] [ebp-8h]
+    LumpType lumpType; // [esp+18h] [ebp-4h]
+
+    lumpType = trisType != TRIS_TYPE_LAYERED ? LUMP_UNLAYERED_AABBTREES : LUMP_AABBTREES;
+    in = (const DiskGfxAabbTree *)Com_GetBspLump(lumpType, 0xCu, &aabbTreeCount);
+    out = (GfxAabbTree *)Hunk_Alloc(44 * aabbTreeCount, "R_LoadAabbTrees", 22);
+    rgl.aabbTrees = out;
+    rgl.aabbTreeCount = aabbTreeCount;
+    for (aabbTreeIndex = 0; aabbTreeIndex < aabbTreeCount; ++aabbTreeIndex)
+    {
+        surfaceCount = in[aabbTreeIndex].surfaceCount;
+        if (surfaceCount)
+        {
+            out[aabbTreeIndex].startSurfIndex = in[aabbTreeIndex].firstSurface;
+            if (out[aabbTreeIndex].startSurfIndex != in[aabbTreeIndex].firstSurface)
+                MyAssertHandler(
+                    ".\\r_bsp_load_obj.cpp",
+                    3633,
+                    0,
+                    "%s",
+                    "out[aabbTreeIndex].startSurfIndex == in[aabbTreeIndex].firstSurface");
+        }
+        else
+        {
+            out[aabbTreeIndex].startSurfIndex = 0;
+        }
+        out[aabbTreeIndex].surfaceCount = surfaceCount;
+        if (out[aabbTreeIndex].surfaceCount != surfaceCount)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3641, 0, "%s", "out[aabbTreeIndex].surfaceCount == surfaceCount");
+        out[aabbTreeIndex].childCount = in[aabbTreeIndex].childCount;
+        if (out[aabbTreeIndex].childCount != in[aabbTreeIndex].childCount)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                3644,
+                0,
+                "%s",
+                "out[aabbTreeIndex].childCount == in[aabbTreeIndex].childCount");
+    }
+    for (aabbTreeIndexa = 0;
+        aabbTreeIndexa < aabbTreeCount;
+        aabbTreeIndexa = R_FinishLoadingAabbTrees_r(&rgl.aabbTrees[aabbTreeIndexa], aabbTreeIndexa + 1))
+    {
+        ;
+    }
+}
+
+void __cdecl R_LoadCells(unsigned int bspVersion, TrisType trisType)
+{
+    int *v2; // [esp+0h] [ebp-18h]
+    GfxCell *out; // [esp+4h] [ebp-14h]
+    unsigned int cellIndex; // [esp+8h] [ebp-10h]
+    char *in; // [esp+Ch] [ebp-Ch]
+    int cullGroupCount; // [esp+10h] [ebp-8h]
+    unsigned int cellCount; // [esp+14h] [ebp-4h] BYREF
+
+    if (bspVersion > 0xE)
+    {
+        if (bspVersion > 0x15)
+            in = Com_GetBspLump(LUMP_CELLS, 0x70u, &cellCount);
+        else
+            in = Com_GetBspLump(LUMP_CELLS, 0x2Cu, &cellCount);
+    }
+    else
+    {
+        in = Com_GetBspLump(LUMP_CELLS, 0x34u, &cellCount);
+    }
+    out = (GfxCell*)Hunk_Alloc(56 * cellCount, "R_LoadCells", 22);
+    s_world.cells = out;
+    s_world.dpvsPlanes.cellCount = cellCount;
+    s_world.cellBitsCount = 16 * ((cellCount + 127) >> 7);
+    for (cellIndex = 0; cellIndex < cellCount; ++cellIndex)
+    {
+        out->mins[0] = *in;
+        out->mins[1] = *(in + 1);
+        out->mins[2] = *(in + 2);
+        out->maxs[0] = *(in + 3);
+        out->maxs[1] = *(in + 4);
+        out->maxs[2] = *(in + 5);
+        out->aabbTree = &rgl.aabbTrees[*&in[2 * trisType + 24]];
+        out->portals = (GfxPortal*)(68 * *(in + 7));
+        out->portalCount = *(in + 8);
+        cullGroupCount = *(in + 10);
+        if (cullGroupCount)
+            v2 = &rgl.cullGroupIndices[*(in + 9)];
+        else
+            v2 = 0;
+        out->cullGroups = v2;
+        out->cullGroupCount = cullGroupCount;
+        out->reflectionProbeCount = 0;
+        out->reflectionProbes = 0;
+        if (bspVersion > 0xE)
+        {
+            if (bspVersion > 0x15)
+            {
+                out->reflectionProbeCount = in[44];
+                if (out->reflectionProbeCount)
+                {
+                    out->reflectionProbes = Hunk_Alloc(in[44], "R_LoadCells", 22);
+                    memcpy(out->reflectionProbes, in + 45, in[44]);
+                }
+                else
+                {
+                    out->reflectionProbes = Hunk_Alloc(1u, "R_LoadCells", 22);
+                    out->reflectionProbeCount = 1;
+                    *out->reflectionProbes = 0;
+                }
+                in += 112;
+            }
+            else
+            {
+                in += 44;
+            }
+        }
+        else
+        {
+            in += 52;
+        }
+        ++out;
+    }
+}
+
+unsigned int R_LoadPortals()
+{
+    unsigned int result; // eax
+    GfxPortal *v1; // [esp+4h] [ebp-28h]
+    DpvsPlane *p_plane; // [esp+10h] [ebp-1Ch]
+    GfxPortal *out; // [esp+14h] [ebp-18h]
+    cplane_s *plane; // [esp+18h] [ebp-14h]
+    int cellIndex; // [esp+1Ch] [ebp-10h]
+    char *in; // [esp+20h] [ebp-Ch]
+    unsigned int portalIndex; // [esp+24h] [ebp-8h]
+    unsigned int portalCount; // [esp+28h] [ebp-4h] BYREF
+
+    in = Com_GetBspLump(LUMP_PORTALS, 0x10u, &portalCount);
+    out = (GfxPortal*)Hunk_Alloc(68 * portalCount, "R_LoadPortals", 22);
+    if (!s_world.cells)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3776, 0, "%s", "s_world.cells");
+    if (!s_world.dpvsPlanes.planes)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3777, 0, "%s", "s_world.dpvsPlanes.planes");
+    for (portalIndex = 0; ; ++portalIndex)
+    {
+        result = portalIndex;
+        if (portalIndex >= portalCount)
+            break;
+        plane = &s_world.dpvsPlanes.planes[*&in[16 * portalIndex]];
+        p_plane = &out[portalIndex].plane;
+        p_plane->coeffs[0] = plane->normal[0];
+        p_plane->coeffs[1] = plane->normal[1];
+        p_plane->coeffs[2] = plane->normal[2];
+        out[portalIndex].plane.coeffs[3] = -plane->dist;
+        out[portalIndex].plane.side[0] = COERCE_INT(p_plane->coeffs[0]) <= 0 ? 0 : 0xC;
+        p_plane->side[1] = COERCE_INT(out[portalIndex].plane.coeffs[1]) <= 0 ? 4 : 16;
+        p_plane->side[2] = COERCE_INT(out[portalIndex].plane.coeffs[2]) <= 0 ? 8 : 20;
+        if (*&in[16 * portalIndex + 4] >= s_world.dpvsPlanes.cellCount)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                3785,
+                0,
+                "in[portalIndex].cellIndex doesn't index s_world.dpvsPlanes.cellCount\n\t%i not in [0, %i)",
+                *&in[16 * portalIndex + 4],
+                s_world.dpvsPlanes.cellCount);
+        out[portalIndex].cell = &s_world.cells[*&in[16 * portalIndex + 4]];
+        if (!rgl.portalVerts)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3787, 0, "%s", "rgl.portalVerts");
+        out[portalIndex].vertices = (float(*)[3])rgl.portalVerts[*&in[16 * portalIndex + 8]];
+        out[portalIndex].vertexCount = in[16 * portalIndex + 12];
+        PerpendicularVector(plane->normal, out[portalIndex].hullAxis[0]);
+        Vec3Cross(plane->normal, out[portalIndex].hullAxis[0], out[portalIndex].hullAxis[1]);
+    }
+    for (cellIndex = 0; cellIndex < s_world.dpvsPlanes.cellCount; ++cellIndex)
+    {
+        if (s_world.cells[cellIndex].portalCount)
+            v1 = &out[(uintptr_t)s_world.cells[cellIndex].portals / 68];
+        else
+            v1 = 0;
+        s_world.cells[cellIndex].portals = v1;
+        result = cellIndex + 1;
+    }
+    return result;
+}
+
+void __cdecl R_SetParentAndCell_r(mnode_load_t *node)
+{
+    int cellIndex; // [esp+0h] [ebp-8h]
+
+    if (node - rgl.nodes < rgl.nodeCount)
+    {
+        R_SetParentAndCell_r(&rgl.nodes[node->children[0]]);
+        R_SetParentAndCell_r(&rgl.nodes[node->children[1]]);
+        node->cellIndex = -2;
+        cellIndex = rgl.nodes[node->children[0]].cellIndex;
+        if (cellIndex == rgl.nodes[node->children[1]].cellIndex)
+            node->cellIndex = cellIndex;
+    }
+}
+
+unsigned int __cdecl R_CountNodes_r(mnode_load_t *node)
+{
+    unsigned int v2; // esi
+
+    if (node->cellIndex != -2)
+        return 1;
+    v2 = R_CountNodes_r(&rgl.nodes[node->children[0]]);
+    return v2 + R_CountNodes_r(&rgl.nodes[node->children[1]]) + 2;
+}
+
+mnode_t *__cdecl R_SortNodes_r(mnode_load_t *node, mnode_t *out)
+{
+    mnode_t *outa; // [esp+14h] [ebp+Ch]
+    mnode_t *outb; // [esp+14h] [ebp+Ch]
+
+    if (node->cellIndex == -2)
+    {
+        outa = out + 1;
+        out->cellIndex = LOWORD(s_world.dpvsPlanes.cellCount) + node->planeIndex + 1;
+        if (out->cellIndex != s_world.dpvsPlanes.cellCount + node->planeIndex + 1)
+            Com_Error(ERR_DROP, "Max planes exceeded");
+        outb = R_SortNodes_r(&rgl.nodes[node->children[0]], outa);
+        out->rightChildOffset = (outb - out) >> 1;
+        if (out->rightChildOffset != (outb - out) >> 1)
+            Com_Error(ERR_DROP, "Max cells exceeded");
+        return R_SortNodes_r(&rgl.nodes[node->children[1]], outb);
+    }
+    else
+    {
+        out->cellIndex = node->cellIndex + 1;
+        if (out->cellIndex != node->cellIndex + 1)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3886, 0, "%s", "out->cellIndex == node->cellIndex + 1");
+        return (mnode_t *)&out->rightChildOffset;
+    }
+}
+
+void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
+{
+    char *inNode; // [esp+0h] [ebp-30h]
+    mnode_load_t *out; // [esp+4h] [ebp-2Ch]
+    unsigned int nodeIndex; // [esp+8h] [ebp-28h]
+    unsigned int leafIndex; // [esp+Ch] [ebp-24h]
+    unsigned int leafIndexa; // [esp+Ch] [ebp-24h]
+    int nodeOrLeafIndex; // [esp+10h] [ebp-20h]
+    int childIndex; // [esp+18h] [ebp-18h]
+    char *inLeaf_v14; // [esp+1Ch] [ebp-14h]
+    unsigned int leafCount; // [esp+20h] [ebp-10h] BYREF
+    unsigned int nodeCount; // [esp+24h] [ebp-Ch] BYREF
+    const DiskLeaf *inLeaf; // [esp+28h] [ebp-8h]
+    int totalNodeCount; // [esp+2Ch] [ebp-4h]
+
+    inNode = Com_GetBspLump(LUMP_NODES, 0x24u, &nodeCount);
+    if (bspVersion > 0xE)
+    {
+        inLeaf = (const DiskLeaf*)Com_GetBspLump(LUMP_LEAFS, 0x18u, &leafCount);
+        inLeaf_v14 = 0;
+    }
+    else
+    {
+        inLeaf_v14 = Com_GetBspLump(LUMP_LEAFS, 0x24u, &leafCount);
+        inLeaf = 0;
+    }
+    totalNodeCount = leafCount + nodeCount;
+    out = (mnode_load_t*)Z_Malloc(16 * (leafCount + nodeCount), "R_LoadNodesAndLeafs", 22);
+    rgl.nodes = out;
+    rgl.nodeCount = nodeCount;
+    for (nodeIndex = 0; nodeIndex < nodeCount; ++nodeIndex)
+    {
+        out->planeIndex = *inNode;
+        for (childIndex = 0; childIndex < 2; ++childIndex)
+        {
+            nodeOrLeafIndex = *&inNode[4 * childIndex + 4];
+            if (nodeOrLeafIndex < 0)
+                out->children[childIndex] = nodeCount + -1 - nodeOrLeafIndex;
+            else
+                out->children[childIndex] = nodeOrLeafIndex;
+        }
+        inNode += 36;
+        ++out;
+    }
+    if (bspVersion > 0xE)
+    {
+        for (leafIndexa = 0; leafIndexa < leafCount; ++leafIndexa)
+        {
+            out->cellIndex = SLOWORD(inLeaf->cellNum);
+            if (out->cellIndex != inLeaf->cellNum)
+                MyAssertHandler(".\\r_bsp_load_obj.cpp", 3977, 0, "%s", "out->cellIndex == inLeaf->cellNum");
+            ++inLeaf;
+            ++out;
+        }
+    }
+    else
+    {
+        for (leafIndex = 0; leafIndex < leafCount; ++leafIndex)
+        {
+            out->cellIndex = *(inLeaf_v14 + 12);
+            if (out->cellIndex != *(inLeaf_v14 + 6))
+                MyAssertHandler(".\\r_bsp_load_obj.cpp", 3967, 0, "%s", "out->cellIndex == inLeaf_v14->cellNum");
+            inLeaf_v14 += 36;
+            ++out;
+        }
+    }
+    R_SetParentAndCell_r(rgl.nodes);
+    s_world.nodeCount = R_CountNodes_r(rgl.nodes);
+    s_world.dpvsPlanes.nodes = (unsigned short*)Hunk_Alloc(16 * s_world.nodeCount, "R_LoadNodesAndLeafs", 22);
+    if ((R_SortNodes_r(rgl.nodes, (mnode_t*)s_world.dpvsPlanes.nodes) - (mnode_t*)s_world.dpvsPlanes.nodes) >> 1 != s_world.nodeCount)
+        MyAssertHandler(
+            ".\\r_bsp_load_obj.cpp",
+            3989,
+            0,
+            "%s",
+            "reinterpret_cast< ushort * >( out2 ) - s_world.dpvsPlanes.nodes == s_world.nodeCount");
+    Z_Free(rgl.nodes, 22);
+}
+
+BOOL __cdecl R_CompareSurfaces(const GfxSurface *surf0, const GfxSurface *surf1)
+{
+    const MaterialTechnique *techniqueEmissive; // [esp+28h] [ebp-64h]
+    int surfIndex; // [esp+30h] [ebp-5Ch]
+    int surfIndex_4; // [esp+34h] [ebp-58h]
+    const MaterialTechnique *techniqueLit; // [esp+38h] [ebp-54h]
+    Material *material; // [esp+40h] [ebp-4Ch]
+    Material *material_4; // [esp+44h] [ebp-48h]
+    int firstVertex; // [esp+48h] [ebp-44h]
+    int firstVertex_4; // [esp+4Ch] [ebp-40h]
+    int reflectionProbeIndex; // [esp+58h] [ebp-34h]
+    int reflectionProbeIndex_4; // [esp+5Ch] [ebp-30h]
+    int hasTechniqueLit; // [esp+70h] [ebp-1Ch]
+    int hasTechniqueLit_4; // [esp+74h] [ebp-18h]
+    int lightmapIndex; // [esp+78h] [ebp-14h]
+    int lightmapIndex_4; // [esp+7Ch] [ebp-10h]
+    MaterialTechniqueSet *techSet; // [esp+80h] [ebp-Ch]
+    MaterialTechniqueSet *techSet_4; // [esp+84h] [ebp-8h]
+    int comparison; // [esp+88h] [ebp-4h]
+    int comparisona; // [esp+88h] [ebp-4h]
+    int comparisonb; // [esp+88h] [ebp-4h]
+    int comparisonc; // [esp+88h] [ebp-4h]
+
+    material = surf0->material;
+    material_4 = surf1->material;
+    techSet = Material_GetTechniqueSet(material);
+    techSet_4 = Material_GetTechniqueSet(material_4);
+    if (!techSet || !techSet_4)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2030, 0, "%s", "techSet[0] && techSet[1]");
+    techniqueLit = Material_GetTechnique(material, TECHNIQUE_LIT_BEGIN);
+    hasTechniqueLit = techniqueLit != 0;
+    hasTechniqueLit_4 = Material_GetTechnique(material_4, TECHNIQUE_LIT_BEGIN) != 0;
+    if (hasTechniqueLit_4 != hasTechniqueLit)
+        return hasTechniqueLit_4 - hasTechniqueLit < 0;
+    if (!techniqueLit)
+    {
+        techniqueEmissive = Material_GetTechnique(material, TECHNIQUE_EMISSIVE);
+        comparison = (Material_GetTechnique(material_4, TECHNIQUE_EMISSIVE) != 0) - (techniqueEmissive != 0);
+        if (comparison)
+            return comparison < 0;
+    }
+    comparisona = ((material->info.drawSurf.packed >> 54) & 0x3F) - ((material_4->info.drawSurf.packed >> 54) & 0x3F);
+    if (comparisona)
+        return comparisona < 0;
+    Com_GetPrimaryLight(surf0->primaryLightIndex);
+    Com_GetPrimaryLight(surf1->primaryLightIndex);
+    comparisonb = surf0->primaryLightIndex - surf1->primaryLightIndex;
+    if (comparisonb)
+        return comparisonb < 0;
+    comparisonc = ((material->info.drawSurf.packed >> 29) & 0x7FF) - ((material_4->info.drawSurf.packed >> 29) & 0x7FF);
+    if (comparisonc)
+    {
+        if (surf0->tris.firstVertex == surf1->tris.firstVertex)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2075, 0, "%s", "surf0.tris.firstVertex != surf1.tris.firstVertex");
+        return comparisonc < 0;
+    }
+    else
+    {
+        if (material != material_4)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2080, 0, "%s", "material[0] == material[1]");
+        reflectionProbeIndex = surf0->reflectionProbeIndex;
+        reflectionProbeIndex_4 = surf1->reflectionProbeIndex;
+        if (reflectionProbeIndex == reflectionProbeIndex_4)
+        {
+            lightmapIndex = surf0->lightmapIndex;
+            lightmapIndex_4 = surf1->lightmapIndex;
+            if (lightmapIndex == lightmapIndex_4)
+            {
+                firstVertex = surf0->tris.firstVertex;
+                firstVertex_4 = surf1->tris.firstVertex;
+                if (firstVertex == firstVertex_4)
+                {
+                    surfIndex = surf0->tris.vertexCount;
+                    surfIndex_4 = surf1->tris.vertexCount;
+                    if (surfIndex == surfIndex_4)
+                        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2104, 0, "%s", "comparison");
+                    return surfIndex - surfIndex_4 < 0;
+                }
+                else
+                {
+                    return firstVertex - firstVertex_4 < 0;
+                }
+            }
+            else
+            {
+                return lightmapIndex - lightmapIndex_4 < 0;
+            }
+        }
+        else
+        {
+            return reflectionProbeIndex - reflectionProbeIndex_4 < 0;
+        }
+    }
+}
+
+unsigned int R_SortSurfaces()
+{
+    unsigned int result; // eax
+    int origSurfIndex; // [esp+68h] [ebp-14h]
+    int surfIndex; // [esp+6Ch] [ebp-10h]
+    int surfIndexa; // [esp+6Ch] [ebp-10h]
+    signed int surfIndexb; // [esp+6Ch] [ebp-10h]
+    int surfaceCount; // [esp+70h] [ebp-Ch]
+    int surfaceCounta; // [esp+70h] [ebp-Ch]
+    GfxSurface *surface; // [esp+78h] [ebp-4h]
+
+    if (s_world.modelCount <= 0)
+        MyAssertHandler(
+            ".\\r_bsp_load_obj.cpp",
+            2144,
+            0,
+            "%s\n\t(s_world.modelCount) = %i",
+            "(s_world.modelCount > 0)",
+            s_world.modelCount);
+    if (s_world.models->startSurfIndex)
+        MyAssertHandler(
+            ".\\r_bsp_load_obj.cpp",
+            2145,
+            0,
+            "%s\n\t(s_world.models[0].startSurfIndex) = %i",
+            "(s_world.models[0].startSurfIndex == 0)",
+            s_world.models->startSurfIndex);
+    surfaceCount = s_world.models->surfaceCount;
+    if (s_world.models->surfaceCount)
+        s_world.dpvs.sortedSurfIndex = (unsigned short*)Hunk_Alloc(4 * surfaceCount, "R_InitDynamicData", 20);
+    else
+        s_world.dpvs.sortedSurfIndex = 0;
+    for (surfIndex = 0; surfIndex < surfaceCount; ++surfIndex)
+    {
+        surface = &s_world.dpvs.surfaces[surfIndex];
+        s_world.dpvs.sortedSurfIndex[surfIndex] = surface->tris.vertexCount;
+        surface->tris.vertexCount = surfIndex;
+        if (surface->tris.vertexCount != surfIndex)
+            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2167, 0, "%s", "surface->tris.vertexCount == surfIndex");
+    }
+    //std::_Sort<GfxSurface *, int, bool(__cdecl *)(GfxSurface const &, GfxSurface const &)>(
+    //    s_world.dpvs.surfaces,
+    //    &s_world.dpvs.surfaces[surfaceCount],
+    //    48 * surfaceCount / 48,
+    //    R_CompareSurfaces);
+    std::sort(&s_world.dpvs.surfaces[0], &s_world.dpvs.surfaces[surfaceCount], R_CompareSurfaces);
+
+    for (surfIndexa = 0; surfIndexa < surfaceCount; ++surfIndexa)
+    {
+        origSurfIndex = s_world.dpvs.surfaces[surfIndexa].tris.vertexCount;
+        s_world.dpvs.surfaces[surfIndexa].tris.vertexCount = s_world.dpvs.sortedSurfIndex[origSurfIndex];
+        s_world.dpvs.sortedSurfIndex[origSurfIndex] = surfIndexa;
+        if (s_world.dpvs.sortedSurfIndex[origSurfIndex] != surfIndexa)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                2179,
+                0,
+                "%s",
+                "s_world.dpvs.sortedSurfIndex[origSurfIndex] == surfIndex");
+    }
+    surfIndexb = 0;
+    surfaceCounta = s_world.models->surfaceCount;
+    s_world.dpvs.litSurfsBegin = 0;
+    while (surfIndexb < surfaceCounta
+        && s_world.dpvs.surfaces[surfIndexb].material->techniqueSet
+        && Material_GetTechnique(s_world.dpvs.surfaces[surfIndexb].material, TECHNIQUE_LIT_BEGIN)
+        && s_world.dpvs.surfaces[surfIndexb].material->info.sortKey < 0x18u)
+        ++surfIndexb;
+    s_world.dpvs.litSurfsEnd = surfIndexb;
+    result = surfIndexb;
+    s_world.dpvs.decalSurfsBegin = surfIndexb;
+    while (surfIndexb < surfaceCounta)
+    {
+        result = 48 * surfIndexb;
+        if (!s_world.dpvs.surfaces[surfIndexb].material->techniqueSet)
+            break;
+        result = (uint)Material_GetTechnique(s_world.dpvs.surfaces[surfIndexb].material, TECHNIQUE_LIT_BEGIN);
+        if (!result)
+            break;
+        result = s_world.dpvs.surfaces[surfIndexb].material->info.sortKey;
+        if (result < 0x18)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                2378,
+                0,
+                "%s",
+                "s_world.dpvs.surfaces[surfIndex].material->info.sortKey >= SORTKEY_DECAL");
+        ++surfIndexb;
+    }
+    s_world.dpvs.decalSurfsEnd = surfIndexb;
+    s_world.dpvs.emissiveSurfsBegin = surfIndexb;
+    while (surfIndexb < surfaceCounta)
+    {
+        result = (uint)s_world.dpvs.surfaces;
+        if (!s_world.dpvs.surfaces[surfIndexb].material->techniqueSet)
+            break;
+        result = (uint)Material_GetTechnique(s_world.dpvs.surfaces[surfIndexb].material, TECHNIQUE_EMISSIVE);
+        if (!result)
+            break;
+        result = ++surfIndexb;
+    }
+    s_world.dpvs.emissiveSurfsEnd = surfIndexb;
+    return result;
+}
+
+char __cdecl R_DoWorldTrisCoincide(const float **xyz0, const float **xyz1)
+{
+    char v3; // [esp+0h] [ebp-78h]
+    BOOL v5; // [esp+8h] [ebp-70h]
+    char v7; // [esp+10h] [ebp-68h]
+    BOOL v9; // [esp+18h] [ebp-60h]
+    char v11; // [esp+20h] [ebp-58h]
+    BOOL v13; // [esp+28h] [ebp-50h]
+    const float *v15; // [esp+30h] [ebp-48h]
+    const float *v16; // [esp+34h] [ebp-44h]
+    int v17; // [esp+38h] [ebp-40h]
+    const float *v18; // [esp+3Ch] [ebp-3Ch]
+    const float *v19; // [esp+40h] [ebp-38h]
+    int v20; // [esp+44h] [ebp-34h]
+    int v21; // [esp+48h] [ebp-30h]
+    const float *v22; // [esp+4Ch] [ebp-2Ch]
+    const float *v23; // [esp+50h] [ebp-28h]
+    const float *v24; // [esp+54h] [ebp-24h]
+    const float *v25; // [esp+58h] [ebp-20h]
+    int v26; // [esp+5Ch] [ebp-1Ch]
+    const float *v27; // [esp+60h] [ebp-18h]
+    const float *v28; // [esp+64h] [ebp-14h]
+    const float *v29; // [esp+68h] [ebp-10h]
+    const float *v30; // [esp+6Ch] [ebp-Ch]
+    int v31; // [esp+70h] [ebp-8h]
+    int v32; // [esp+74h] [ebp-4h]
+
+    v31 = *xyz1;
+    v32 = *xyz0;
+    if (**xyz1 == **xyz0 && *(v31 + 4) == *(v32 + 4) && *(v31 + 8) == *(v32 + 8))
+    {
+        v29 = xyz1[1];
+        v30 = xyz0[1];
+        v13 = *v29 == *v30 && v29[1] == v30[1] && v29[2] == v30[2];
+        v11 = 0;
+        if (v13)
+        {
+            v27 = xyz1[2];
+            v28 = xyz0[2];
+            if (*v27 == *v28 && v27[1] == v28[1] && v27[2] == v28[2])
+                return 1;
+        }
+        return v11;
+    }
+    else
+    {
+        v25 = xyz1[1];
+        v26 = *xyz0;
+        if (*v25 == **xyz0 && v25[1] == *(v26 + 4) && v25[2] == *(v26 + 8))
+        {
+            v23 = xyz1[2];
+            v24 = xyz0[1];
+            v9 = *v23 == *v24 && v23[1] == v24[1] && v23[2] == v24[2];
+            v7 = 0;
+            if (v9)
+            {
+                v21 = *xyz1;
+                v22 = xyz0[2];
+                if (**xyz1 == *v22 && *(v21 + 4) == v22[1] && *(v21 + 8) == v22[2])
+                    return 1;
+            }
+            return v7;
+        }
+        else
+        {
+            v19 = xyz1[2];
+            v20 = *xyz0;
+            if (*v19 == **xyz0 && v19[1] == *(v20 + 4) && v19[2] == *(v20 + 8))
+            {
+                v17 = *xyz1;
+                v18 = xyz0[1];
+                v5 = **xyz1 == *v18 && *(v17 + 4) == v18[1] && *(v17 + 8) == v18[2];
+                v3 = 0;
+                if (v5)
+                {
+                    v15 = xyz1[1];
+                    v16 = xyz0[2];
+                    if (*v15 == *v16 && v15[1] == v16[1] && v15[2] == v16[2])
+                        return 1;
+                }
+                return v3;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+}
+
+char __cdecl R_DoesTriCoverAnyOtherTri(
+    unsigned int modelSurfIndexBegin,
+    unsigned int modelSurfIndexEnd,
+    unsigned int firstVertex,
+    unsigned int baseIndex,
+    unsigned int materialSortedIndex)
+{
+    unsigned int surfFirstVertex; // [esp+18h] [ebp-44h]
+    float mins[3]; // [esp+1Ch] [ebp-40h] BYREF
+    unsigned int surfBaseIndex; // [esp+28h] [ebp-34h]
+    float maxs[3]; // [esp+2Ch] [ebp-30h] BYREF
+    const GfxSurface *surf; // [esp+38h] [ebp-24h]
+    unsigned int surfIter; // [esp+3Ch] [ebp-20h]
+    unsigned int triIter; // [esp+40h] [ebp-1Ch]
+    const float *xyzRef[3]; // [esp+44h] [ebp-18h] BYREF
+    const float *xyzSurf[3]; // [esp+50h] [ebp-Ch] BYREF
+
+    xyzRef[0] = s_world.vd.vertices[firstVertex + s_world.indices[baseIndex]].xyz;
+    xyzRef[1] = s_world.vd.vertices[firstVertex + s_world.indices[baseIndex + 1]].xyz;
+    xyzRef[2] = s_world.vd.vertices[firstVertex + s_world.indices[baseIndex + 2]].xyz;
+    ClearBounds(mins, maxs);
+    AddPointToBounds(xyzRef[0], mins, maxs);
+    AddPointToBounds(xyzRef[1], mins, maxs);
+    AddPointToBounds(xyzRef[2], mins, maxs);
+    for (surfIter = modelSurfIndexBegin; surfIter != modelSurfIndexEnd; ++surfIter)
+    {
+        surf = &s_world.dpvs.surfaces[surfIter];
+        if (materialSortedIndex > ((surf->material->info.drawSurf.packed >> 29) & 0x7FF)
+            && BoundsOverlap(surf->bounds[0], surf->bounds[1], mins, maxs))
+        {
+            surfFirstVertex = surf->tris.firstVertex;
+            for (triIter = 0; triIter < surf->tris.triCount; ++triIter)
+            {
+                surfBaseIndex = surf->tris.baseIndex + 3 * triIter;
+                xyzSurf[0] = s_world.vd.vertices[surfFirstVertex + s_world.indices[surfBaseIndex]].xyz;
+                xyzSurf[1] = s_world.vd.vertices[surfFirstVertex + s_world.indices[surfBaseIndex + 1]].xyz;
+                xyzSurf[2] = s_world.vd.vertices[surfFirstVertex + s_world.indices[surfBaseIndex + 2]].xyz;
+                if (R_DoWorldTrisCoincide(xyzRef, xyzSurf))
+                    return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+char __cdecl R_IsSurfaceDecalLayer(
+    unsigned int surfIndex,
+    unsigned int modelSurfIndexBegin,
+    unsigned int modelSurfIndexEnd)
+{
+    unsigned int materialSortedIndex; // [esp+0h] [ebp-Ch]
+    const GfxSurface *surf; // [esp+4h] [ebp-8h]
+    unsigned int triIter; // [esp+8h] [ebp-4h]
+
+    surf = &s_world.dpvs.surfaces[surfIndex];
+    materialSortedIndex = (surf->material->info.drawSurf.packed >> 29) & 0x7FF;
+    for (triIter = 0; triIter < surf->tris.triCount; ++triIter)
+    {
+        if (!R_DoesTriCoverAnyOtherTri(
+            modelSurfIndexBegin,
+            modelSurfIndexEnd,
+            surf->tris.firstVertex,
+            surf->tris.baseIndex,
+            materialSortedIndex))
+            return 0;
+    }
+    return 1;
+}
+
+unsigned int __cdecl R_BuildNoDecalAabbTree_r(GfxAabbTree *tree, unsigned int startSurfIndex)
+{
+    int startSurfIndexNoDecal; // eax
+    int v4; // [esp+0h] [ebp-18h]
+    unsigned __int16 childIter; // [esp+4h] [ebp-14h]
+    GfxAabbTree *children; // [esp+8h] [ebp-10h]
+    unsigned __int16 surfIndex; // [esp+Ch] [ebp-Ch]
+    const unsigned __int16 *srcIndices; // [esp+10h] [ebp-8h]
+    unsigned __int16 surfIter; // [esp+14h] [ebp-4h]
+
+    if (startSurfIndex != startSurfIndex)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            startSurfIndex,
+            startSurfIndex);
+    tree->startSurfIndexNoDecal = startSurfIndex;
+    if (tree->childCount)
+    {
+        children = (tree + tree->childrenOffset);
+        for (childIter = 0; childIter < tree->childCount; ++childIter)
+            startSurfIndex = R_BuildNoDecalAabbTree_r(&children[childIter], startSurfIndex);
+    }
+    else
+    {
+        srcIndices = &s_world.dpvs.sortedSurfIndex[tree->startSurfIndex];
+        for (surfIter = 0; surfIter < tree->surfaceCount; ++surfIter)
+        {
+            surfIndex = srcIndices[surfIter];
+            if ((s_world.dpvs.surfaces[surfIndex].flags & 2) == 0)
+                s_world.dpvs.sortedSurfIndex[startSurfIndex++] = surfIndex;
+        }
+    }
+    startSurfIndexNoDecal = tree->startSurfIndexNoDecal;
+    v4 = startSurfIndex - startSurfIndexNoDecal;
+    if (startSurfIndex - startSurfIndexNoDecal != (startSurfIndex - startSurfIndexNoDecal))
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            v4,
+            v4);
+    tree->surfaceCountNoDecal = v4;
+    return startSurfIndex;
+}
+
+void R_BuildNoDecalSubModels()
+{
+    unsigned int modelSurfIndexBegin; // [esp+0h] [ebp-20h]
+    unsigned int surfIndex; // [esp+4h] [ebp-1Ch]
+    GfxBrushModel *model; // [esp+8h] [ebp-18h]
+    unsigned int modelSurfIndexEnd; // [esp+Ch] [ebp-14h]
+    int cellIter; // [esp+10h] [ebp-10h]
+    unsigned int surfIter; // [esp+14h] [ebp-Ch]
+    int modelIndex; // [esp+18h] [ebp-8h]
+    unsigned int startSurfIndex; // [esp+1Ch] [ebp-4h]
+
+    for (modelIndex = 0; modelIndex < s_world.modelCount; ++modelIndex)
+    {
+        model = &s_world.models[modelIndex];
+        modelSurfIndexBegin = model->startSurfIndex;
+        modelSurfIndexEnd = model->surfaceCount + modelSurfIndexBegin;
+        model->surfaceCountNoDecal = 0;
+        for (surfIter = 0; surfIter < model->surfaceCount; ++surfIter)
+        {
+            surfIndex = surfIter + model->startSurfIndex;
+            if (R_IsSurfaceDecalLayer(surfIndex, modelSurfIndexBegin, modelSurfIndexEnd))
+                s_world.dpvs.surfaces[surfIndex].flags |= 2u;
+            else
+                ++model->surfaceCountNoDecal;
+        }
+    }
+    startSurfIndex = s_world.models->surfaceCount;
+    for (cellIter = 0; cellIter < s_world.dpvsPlanes.cellCount; ++cellIter)
+        startSurfIndex = R_BuildNoDecalAabbTree_r(s_world.cells[cellIter].aabbTree, startSurfIndex);
+    if (s_world.models->surfaceCountNoDecal != startSurfIndex - s_world.models->surfaceCount)
+        MyAssertHandler(
+            ".\\r_bsp_load_obj.cpp",
+            2579,
+            1,
+            "s_world.models[0].surfaceCountNoDecal == startSurfIndex - s_world.models[0].surfaceCount\n\t%i, %i",
+            s_world.models->surfaceCountNoDecal,
+            startSurfIndex - s_world.models->surfaceCount);
+}
+
+char *__cdecl R_ValueForKey(const char *key, char *(*spawnVars)[2], int spawnVarCount)
+{
+    int i; // [esp+0h] [ebp-4h]
+
+    for (i = 1; i < spawnVarCount; ++i)
+    {
+        if (!I_stricmp((*spawnVars)[2 * i], key))
+            return (*spawnVars)[2 * i + 1];
+    }
+    return 0;
+}
+
+bool __cdecl R_VectorForKey(const char *key, char *defaultString, char *(*spawnVars)[2], int spawnVarCount, float *v)
+{
+    char *string; // [esp+0h] [ebp-8h]
+    bool success; // [esp+7h] [ebp-1h]
+
+    if (!defaultString)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2912, 0, "%s", "defaultString");
+    success = 1;
+    string = R_ValueForKey(key, spawnVars, spawnVarCount);
+    if (!string)
+    {
+        success = 0;
+        string = defaultString;
+    }
+    *v = 0.0;
+    v[1] = 0.0;
+    v[2] = 0.0;
+    sscanf(string, "%f %f %f", v, v + 1, v + 2);
+    return success;
+}
+
+void __cdecl R_CheckValidStaticModel(char *(*spawnVars)[2], XModel **model, float *origin)
+{
+    bool v4; // [esp+1Bh] [ebp-15h]
+    char *modelName; // [esp+1Ch] [ebp-14h]
+    float tempOrigin[3]; // [esp+20h] [ebp-10h] BYREF
+    XModel *tempModel; // [esp+2Ch] [ebp-4h]
+
+    if (!R_VectorForKey("origin", (char*)"0 0 0", (char *(*)[2])spawnVars, SHIDWORD(spawnVars), tempOrigin))
+        Com_Error(ERR_DROP, "R_CheckValidStaticModel: no origin specified");
+    modelName = R_ValueForKey("model", spawnVars, SHIDWORD(spawnVars));
+    if (!modelName)
+        Com_Error(ERR_DROP, "R_CheckValidStaticModel: no model specified in misc_model at (%.0f %.0f %.0f)", tempOrigin[0], tempOrigin[1], tempOrigin[2]);
+    if (Com_IsLegacyXModelName(modelName))
+        modelName += 7;
+    tempModel = R_RegisterModel(modelName);
+    if (tempModel)
+        v4 = XModelBad(tempModel);
+    else
+        v4 = 1;
+    if (v4)
+    {
+        Com_PrintError(
+            8,
+            "bad static model '%s' at (%.0f %.0f %.0f)\n",
+            modelName,
+            tempOrigin[0],
+            tempOrigin[1],
+            tempOrigin[2]);
+        tempModel = R_RegisterModel("default_static_model");
+        if (!tempModel || XModelBad(tempModel))
+            Com_Error(ERR_DROP, "R_CheckValidStaticModel: could not find xmodel 'default_static_model'");
+    }
+    if (!model)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3017, 0, "%s", "model");
+    *model = tempModel;
+    if (!origin)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3020, 0, "%s", "origin");
+    *origin = tempOrigin[0];
+    origin[1] = tempOrigin[1];
+    origin[2] = tempOrigin[2];
+}
+
+double __cdecl R_FloatForKey(const char *key, float defaultValue, char *(*spawnVars)[2], int spawnVarCount)
+{
+    char *string; // [esp+4h] [ebp-4h]
+
+    string = R_ValueForKey(key, spawnVars, spawnVarCount);
+    if (!string)
+        return defaultValue;
+    return atof(string);
+}
+
+int __cdecl R_IntForKey(const char *key, int defaultValue, char *(*spawnVars)[2], int spawnVarCount)
+{
+    char *string; // [esp+0h] [ebp-4h]
+
+    string = R_ValueForKey(key, spawnVars, spawnVarCount);
+    if (string)
+        return atoi(string);
+    else
+        return defaultValue;
+}
+
+void __cdecl R_GetXModelBounds(XModel *model, const float (*axes)[3], float *mins, float *maxs)
+{
+    float coord; // [esp+0h] [ebp-24h]
+    int surfaceCount; // [esp+4h] [ebp-20h]
+    int axisIndex; // [esp+8h] [ebp-1Ch]
+    XSurface *surfaces; // [esp+Ch] [ebp-18h] BYREF
+    int index; // [esp+10h] [ebp-14h]
+    XSurface *xsurf; // [esp+14h] [ebp-10h]
+    int vertCount; // [esp+18h] [ebp-Ch]
+    int vertIndex; // [esp+1Ch] [ebp-8h]
+    float (*vert)[3]; // [esp+20h] [ebp-4h]
+
+    *mins = 3.4028235e38;
+    mins[1] = 3.4028235e38;
+    mins[2] = 3.4028235e38;
+    *maxs = -3.4028235e38;
+    maxs[1] = -3.4028235e38;
+    maxs[2] = -3.4028235e38;
+    surfaceCount = XModelGetSurfaces(model, &surfaces, 0);
+    if (!surfaces)
+        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 922, 0, "%s", "surfaces");
+    vert = (float(*)[3])Hunk_AllocateTempMemory(393216, "R_GetXModelBounds");
+    if (surfaceCount <= 0)
+        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 926, 0, "%s", "surfaceCount > 0");
+    for (index = 0; index < surfaceCount; ++index)
+    {
+        xsurf = &surfaces[index];
+        vertCount = XSurfaceGetNumVerts(xsurf);
+        XSurfaceGetVerts(xsurf, (float*)vert, 0, 0);
+        if (vertCount <= 0)
+            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 933, 0, "%s", "vertCount > 0");
+        for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
+        {
+            for (axisIndex = 0; axisIndex < 3; ++axisIndex)
+            {
+                coord = vert[vertIndex][0] * (*axes)[axisIndex]
+                    + vert[vertIndex][1] * (*axes)[axisIndex + 3]
+                        + vert[vertIndex][2] * (*axes)[axisIndex + 6];
+                    if (coord < mins[axisIndex])
+                        mins[axisIndex] = coord;
+                    if (coord > maxs[axisIndex])
+                        maxs[axisIndex] = coord;
+            }
+        }
+    }
+    Hunk_FreeTempMemory((char*)vert);
+}
+
+void __cdecl R_CreateStaticModel(
+    XModel *model,
+    const float *origin,
+    const float (*axis)[3],
+    float scale,
+    GfxStaticModelDrawInst *smodelDrawInst,
+    GfxStaticModelInst *smodelInst,
+    unsigned __int8 staticModelFlags)
+{
+    smodelDrawInst->model = model;
+    smodelDrawInst->placement.origin[0] = *origin;
+    smodelDrawInst->placement.origin[1] = origin[1];
+    smodelDrawInst->placement.origin[2] = origin[2];
+    AxisCopy(axis, smodelDrawInst->placement.axis);
+    smodelDrawInst->placement.scale = scale;
+    R_GetXModelBounds(model, axis, smodelInst->mins, smodelInst->maxs);
+    Vec3Mad(origin, scale, smodelInst->mins, smodelInst->mins);
+    Vec3Mad(origin, scale, smodelInst->maxs, smodelInst->maxs);
+    if (scale == 0.0)
+        MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 582, 0, "%s", "scale");
+    smodelDrawInst->cullDist = XModelGetLodOutDist(model) * scale;
+    smodelDrawInst->reflectionProbeIndex = 0;
+    smodelDrawInst->flags = staticModelFlags;
+}
+
+unsigned __int8 __cdecl XModelGetFlags(const XModel *model)
+{
+    return model->flags;
+}
+
+bool __cdecl R_DecodeGroundLighting(
+    const char *key,
+    const char *defaultString,
+    char *(*spawnVars)[2],
+    int spawnVarCount,
+    int bspVersion,
+    unsigned __int8 *outPrimaryLightIndex,
+    unsigned __int8 *outValue)
+{
+    unsigned int valueInt[4]; // [esp+0h] [ebp-24h] BYREF
+    const char *string; // [esp+10h] [ebp-14h]
+    unsigned int primaryLightIndex; // [esp+14h] [ebp-10h] BYREF
+    bool success; // [esp+1Bh] [ebp-9h]
+    int fieldsRead; // [esp+1Ch] [ebp-8h]
+    int dimIter; // [esp+20h] [ebp-4h]
+
+    if (!defaultString)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2937, 0, "%s", "defaultString");
+    success = 1;
+    string = R_ValueForKey(key, spawnVars, spawnVarCount);
+    if (!string)
+    {
+        success = 0;
+        string = defaultString;
+    }
+    fieldsRead = sscanf(
+        string,
+        "%02x%02x%02x%02x%02x",
+        &valueInt[2],
+        &valueInt[1],
+        valueInt,
+        &valueInt[3],
+        &primaryLightIndex);
+    if (fieldsRead == 4)
+    {
+        primaryLightIndex = s_world.sunPrimaryLightIndex;
+    }
+    else if (fieldsRead == 5)
+    {
+        if (bspVersion <= 14)
+        {
+            if (primaryLightIndex == 255)
+                primaryLightIndex = 0;
+            else
+                ++primaryLightIndex;
+        }
+    }
+    else
+    {
+        Com_Error(ERR_DROP, "R_Vec4ForKeyHex: invalid value");
+    }
+    for (dimIter = 0; dimIter != 4; ++dimIter)
+        outValue[dimIter] = valueInt[dimIter];
+    *outPrimaryLightIndex = primaryLightIndex;
+    return success;
+}
+
+void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int bspVersion)
+{
+    bool groundLightContainsValidData; // [esp+13h] [ebp-69h]
+    GfxStaticModelDrawInst *smodelDrawInst; // [esp+14h] [ebp-68h]
+    float origin[3]; // [esp+18h] [ebp-64h] BYREF
+    XModel *model; // [esp+24h] [ebp-58h] BYREF
+    bool isModelGroundLit; // [esp+2Bh] [ebp-51h]
+    GfxStaticModelInst *smodelInst; // [esp+2Ch] [ebp-50h]
+    float angle; // [esp+30h] [ebp-4Ch]
+    float angles[3]; // [esp+34h] [ebp-48h] BYREF
+    int spawnflags; // [esp+40h] [ebp-3Ch]
+    float scale; // [esp+44h] [ebp-38h]
+    float lightingOrigin[3]; // [esp+48h] [ebp-34h] BYREF
+    float axis[3][3]; // [esp+54h] [ebp-28h] BYREF
+    unsigned __int8 staticModelFlags; // [esp+7Bh] [ebp-1h]
+
+    R_CheckValidStaticModel(spawnVars, &model, origin);
+    smodelDrawInst = &s_world.dpvs.smodelDrawInsts[s_world.dpvs.smodelCount];
+    smodelInst = &s_world.dpvs.smodelInsts[s_world.dpvs.smodelCount++];
+    angle = R_FloatForKey("angle", 0.0, spawnVars, SHIDWORD(spawnVars));
+    if (angle == 0.0)
+    {
+        R_VectorForKey("angles", (char*)"0 0 0", spawnVars, SHIDWORD(spawnVars), angles);
+    }
+    else
+    {
+        angles[0] = 0.0;
+        angles[1] = angle;
+        angles[2] = 0.0;
+    }
+    AnglesToAxis(angles, axis);
+    scale = R_FloatForKey("modelscale", 1.0, spawnVars, SHIDWORD(spawnVars));
+    spawnflags = R_IntForKey("spawnflags", 0, spawnVars, SHIDWORD(spawnVars));
+    staticModelFlags = 0;
+    if ((spawnflags & 2) != 0)
+        staticModelFlags |= 1u;
+    R_CreateStaticModel(model, origin, axis, scale, smodelDrawInst, smodelInst, staticModelFlags);
+    isModelGroundLit = (XModelGetFlags(model) & 1) != 0;
+    groundLightContainsValidData = R_DecodeGroundLighting(
+        "gndLt",
+        "FF00000000",
+        spawnVars,
+        SHIDWORD(spawnVars),
+        bspVersion,
+        &smodelDrawInst->primaryLightIndex,
+        (unsigned char*)&smodelInst->groundLighting);
+    if (!isModelGroundLit || !groundLightContainsValidData || !smodelInst->groundLighting.packed)
+    {
+        smodelInst->groundLighting.packed = 0;
+        smodelDrawInst->primaryLightIndex = R_GetPrimaryLightForModel(
+            model,
+            origin,
+            axis,
+            scale,
+            smodelInst->mins,
+            smodelInst->maxs,
+            s_world.lightRegion);
+        if (!smodelDrawInst->primaryLightIndex && s_world.sunPrimaryLightIndex == 1)
+        {
+            Vec3Avg(smodelInst->mins, smodelInst->maxs, lightingOrigin);
+            smodelDrawInst->primaryLightIndex = R_GetPrimaryLightFromGrid(&s_world.lightGrid, lightingOrigin, 1u);
+            if (smodelDrawInst->primaryLightIndex != 1)
+                smodelDrawInst->primaryLightIndex = 0;
+        }
+        if (smodelDrawInst->primaryLightIndex >= s_world.primaryLightCount)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                3084,
+                0,
+                "smodelDrawInst->primaryLightIndex doesn't index s_world.primaryLightCount\n\t%i not in [0, %i)",
+                smodelDrawInst->primaryLightIndex,
+                s_world.primaryLightCount);
+    }
+    ++s_world.shadowGeom[smodelDrawInst->primaryLightIndex].smodelCount;
+}
+
+void __cdecl R_LoadEntities(unsigned int bspVersion)
+{
+    __int64 v1; // [esp-Ch] [ebp-278h]
+    unsigned int v2; // [esp+0h] [ebp-26Ch]
+    unsigned int v3; // [esp+10h] [ebp-25Ch]
+    unsigned int v4; // [esp+20h] [ebp-24Ch]
+    unsigned int v5; // [esp+30h] [ebp-23Ch]
+    int spawnVarCount; // [esp+44h] [ebp-228h]
+    int spawnVarCounta; // [esp+44h] [ebp-228h]
+    char *startPos; // [esp+48h] [ebp-224h]
+    char *spawnVars[64][2]; // [esp+4Ch] [ebp-220h] BYREF
+    unsigned int smodelCount; // [esp+250h] [ebp-1Ch]
+    unsigned int textLen; // [esp+254h] [ebp-18h] BYREF
+    char *textPool; // [esp+258h] [ebp-14h]
+    const char *token; // [esp+25Ch] [ebp-10h]
+    int charsUsed; // [esp+260h] [ebp-Ch]
+    const char *text; // [esp+264h] [ebp-8h] BYREF
+    int spawnVarIndex; // [esp+268h] [ebp-4h]
+
+    startPos = Com_GetBspLump(LUMP_ENTITIES, 1u, &textLen);
+    Hunk_CheckTempMemoryClear();
+    textPool = (char*)Hunk_AllocateTempMemory(textLen, "R_LoadEntities");
+    smodelCount = 0;
+    text = startPos;
+    while (1)
+    {
+        token = Com_Parse(&text)->token;
+        if (!text || *token != 123)
+            break;
+        spawnVars[0][0] = (char *)"";
+        spawnVarCount = 1;
+        charsUsed = 0;
+        while (1)
+        {
+            token = Com_Parse(&text)->token;
+            if (!*token || *token == 125)
+                break;
+            if (I_stricmp(token, "classname"))
+            {
+                if (spawnVarCount == 64)
+                    Com_Error(ERR_DROP, "R_LoadEntities: MAX_SPAWN_VARS (%i) reached", 64);
+                spawnVarIndex = spawnVarCount++;
+            }
+            else
+            {
+                spawnVarIndex = 0;
+            }
+            spawnVars[spawnVarIndex][0] = &textPool[charsUsed];
+            v5 = strlen(token);
+            charsUsed += v5 + 1;
+            memcpy(spawnVars[spawnVarIndex][0], token, v5 + 1);
+            token = Com_Parse(&text)->token;
+            spawnVars[spawnVarIndex][1] = &textPool[charsUsed];
+            v4 = strlen(token);
+            charsUsed += v4 + 1;
+            memcpy(spawnVars[spawnVarIndex][1], token, v4 + 1);
+        }
+        if (!*spawnVars[0][0])
+            Com_Error(ERR_DROP, "R_LoadEntities: entity without a classname");
+        if (!I_stricmp(spawnVars[0][1], "misc_model"))
+            ++smodelCount;
+    }
+    s_world.dpvs.smodelDrawInsts = (GfxStaticModelDrawInst*)Hunk_Alloc(76 * smodelCount, "R_LoadEntities", 21);
+    s_world.dpvs.smodelInsts = (GfxStaticModelInst*)Hunk_Alloc(28 * smodelCount, "R_LoadEntities", 21);
+    s_world.dpvs.smodelCount = 0;
+    text = startPos;
+    if (!s_world.cells)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3517, 0, "%s", "s_world.cells");
+    while (1)
+    {
+        token = Com_Parse(&text)->token;
+        if (*token != 123)
+            break;
+        spawnVars[0][0] = (char*)"";
+        spawnVarCounta = 1;
+        charsUsed = 0;
+        while (1)
+        {
+            token = Com_Parse(&text)->token;
+            if (!*token || *token == 125)
+                break;
+            if (I_stricmp(token, "classname"))
+            {
+                if (spawnVarCounta == 64)
+                    Com_Error(ERR_DROP, "R_LoadEntities: MAX_SPAWN_VARS (%i) reached", 64);
+                spawnVarIndex = spawnVarCounta++;
+            }
+            else
+            {
+                spawnVarIndex = 0;
+            }
+            spawnVars[spawnVarIndex][0] = &textPool[charsUsed];
+            v3 = strlen(token);
+            charsUsed += v3 + 1;
+            memcpy(spawnVars[spawnVarIndex][0], token, v3 + 1);
+            token = Com_Parse(&text)->token;
+            spawnVars[spawnVarIndex][1] = &textPool[charsUsed];
+            v2 = strlen(token);
+            charsUsed += v2 + 1;
+            memcpy(spawnVars[spawnVarIndex][1], token, v2 + 1);
+        }
+        if (!*spawnVars[0][0])
+            Com_Error(ERR_DROP, "R_LoadEntities: entity without a classname");
+        if (!I_stricmp(spawnVars[0][1], "misc_model"))
+        {
+            char *ptrs[2] = { (char *)&spawnVarCounta, (char *)&spawnVars };
+            //HIDWORD(v1) = spawnVarCounta;
+            //LODWORD(v1) = spawnVars;
+            //R_LoadMiscModel(v1, bspVersion);
+            R_LoadMiscModel(&ptrs, bspVersion);
+        }
+    }
+    if (s_world.dpvs.smodelCount != smodelCount)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3566, 0, "%s", "s_world.dpvs.smodelCount == smodelCount");
+    if (smodelCount > 0x10000)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3567, 0, "%s\n\t(smodelCount) = %i", "(smodelCount <= 65536)", smodelCount);
+    Hunk_FreeTempMemory(textPool);
 }
 
 GfxWorld *__cdecl R_LoadWorldInternal(const char *name)

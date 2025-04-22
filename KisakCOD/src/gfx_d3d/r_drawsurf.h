@@ -38,3 +38,4 @@ void __cdecl R_AddMarkMeshDrawSurf(
     unsigned int indexCount);
 
 void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount);
+GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex);

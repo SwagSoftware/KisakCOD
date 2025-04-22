@@ -7,13 +7,7 @@
 
 //struct vehicleEffects(*)[8] vehEffects 8284e650     cg_vehicles_mp.obj
 
-const unsigned __int16 *wheelTags[4] =
-{
-  (const unsigned __int16 *)&scr_const.tag_wheel_front_left,
-  (const unsigned __int16 *)&scr_const.tag_wheel_front_right,
-  (const unsigned __int16 *)&scr_const.tag_wheel_back_left,
-  (const unsigned __int16 *)&scr_const.tag_wheel_back_right
-}; // idb
+vehicleEffects vehEffects[1][8];
 
 const dvar_t *vehDebugClient;
 const dvar_t *heli_barrelSlowdown;
@@ -330,7 +324,6 @@ int __cdecl CG_GetEntityIndex(int localClientNum, const centity_s *cent)
     return cent->nextState.number;
 }
 
-vehicleEffects vehEffects[1][8];
 vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
 {
     vehicleEffects *v3; // edx

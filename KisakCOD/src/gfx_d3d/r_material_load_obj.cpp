@@ -1893,7 +1893,7 @@ ID3DXBuffer *__cdecl Material_CompileShader(
     HRESULT hr; // [esp+54h] [ebp-8434h]
     GfxAssembledShaderText prog; // [esp+58h] [ebp-8430h] BYREF
     char *shaderString; // [esp+8478h] [ebp-10h]
-    char **fileName; // [esp+847Ch] [ebp-Ch] BYREF
+    LPD3DXBUFFER fileName; // [esp+847Ch] [ebp-Ch] BYREF
     ID3DXBuffer *shader[2]; // [esp+8480h] [ebp-8h] BYREF
 
     Com_sprintf(dest, 0x40u, "shaders/%s", shaderName);
@@ -1986,8 +1986,9 @@ MaterialVertexShader *__cdecl Material_LoadVertexShader(char *shaderName, int sh
     memcpy((void*)mtlShader->name, shaderName, nameSize);
     v6 = shader;
     v4 = (unsigned __int8*)shader->GetBufferPointer();
-    memcpy(program, v4, v6);
-    hr = (dx.device->CreateVertexShader)(dx.device, dx.device, program, &mtlShader->prog, programSize);
+    //memcpy(program, v4, v6);
+    memcpy(program, v4, totalSize);
+    hr = dx.device->CreateVertexShader((const DWORD*)program, &mtlShader->prog.vs);
     if (hr >= 0)
     {
         mtlShader->prog.loadDef.loadForRenderer = renderer;
@@ -2061,7 +2062,7 @@ char __cdecl Material_LoadPassVertexShader(
         text,
         mtlShader->name,
         MTL_VERTEX_SHADER,
-        &mtlShader[1],
+        (uint*)&mtlShader[1],
         techFlags,
         paramSet,
         argLimit,
@@ -2158,7 +2159,7 @@ char __cdecl Material_GetPixelShaderHashIndex(
 
 MaterialPixelShader *__cdecl Material_LoadPixelShader(char *shaderName, int shaderVersion, GfxRenderer renderer)
 {
-    unsigned __int8 *v4; // eax
+    void *v4; // eax
     const char *v5; // eax
     ID3DXBuffer *v6; // [esp-8h] [ebp-4Ch]
     unsigned int programSize; // [esp+10h] [ebp-34h]
@@ -2181,12 +2182,14 @@ MaterialPixelShader *__cdecl Material_LoadPixelShader(char *shaderName, int shad
     totalSize = programSize + nameSize + 16;
     mtlShader = (MaterialPixelShader*)Material_Alloc(totalSize);
     program = (unsigned int *)&mtlShader[1];
-    mtlShader->name = &mtlShader[1] + programSize;
+    mtlShader->name = (const char*)&mtlShader[1] + programSize;
     memcpy((void*)mtlShader->name, shaderName, nameSize);
     v6 = shader;
-    v4 = (shader->GetBufferPointer)();
-    memcpy(program, v4, v6);
-    hr = (dx.device->CreatePixelShader)(dx.device, dx.device, program, &mtlShader->prog, programSize);
+    v4 = shader->GetBufferPointer();
+    //memcpy(program, v4, v6);
+    memcpy(program, v4, totalSize);
+    //hr = dx.device->CreatePixelShader(dx.device, dx.device, program, &mtlShader->prog, programSize);
+    hr = dx.device->CreatePixelShader((const DWORD*)program, &mtlShader->prog.ps);
     if (hr >= 0)
     {
         mtlShader->prog.loadDef.loadForRenderer = renderer;
@@ -2358,7 +2361,7 @@ unsigned int __cdecl Material_CombineShaderArguments(unsigned int usedCount, Mat
         if (!Material_AttemptCombineShaderArguments(&localArgs[dstIndex], &localArgs[srcIndex]))
         {
             ++dstIndex;
-            LODWORD(v2.literalConst) = localArgs[srcIndex].u;
+            v2.nameHash = localArgs[srcIndex].u.nameHash;
             *&localArgs[dstIndex].type = *&localArgs[srcIndex].type;
             localArgs[dstIndex].u = v2;
         }
@@ -2639,7 +2642,7 @@ char __cdecl Material_AddShaderArgumentFromLiteral(
             "arg->dest doesn't index R_MAX_PIXEL_SHADER_CONSTS\n\t%i not in [0, %i)",
             arg->dest,
             256);
-    arg->u.codeSampler = literal;
+    arg->u.codeSampler = (uint32)literal;
     return MaterialAddShaderArgument(shaderName, paramName, arg, registerUsage);
 }
 
@@ -2749,9 +2752,9 @@ bool __cdecl Material_AddShaderArgument(
             {
                 if (Material_AddShaderArgumentFromMaterial(
                     shaderName,
-                    argDest->paramName,
+                    (char *)argDest->paramName,
                     argSource->type,
-                    argSource->u.literalConst,
+                    (char *)argSource->u.literalConst,
                     destc,
                     &argTable[*usedCount],
                     registerUsage))
@@ -2784,7 +2787,7 @@ bool __cdecl Material_AddShaderArgument(
             {
                 if (Material_AddShaderArgumentFromLiteral(
                     shaderName,
-                    argDest->paramName,
+                    (char*)argDest->paramName,
                     argSource->type,
                     argSource->u.literalConst,
                     dest,
@@ -2823,7 +2826,7 @@ bool __cdecl Material_AddShaderArgument(
                 return 0;
             if (!Material_AddShaderArgumentFromCodeConst(
                 shaderName,
-                argDest->paramName,
+                (char *)argDest->paramName,
                 argSource->type,
                 argSource->u.codeIndex,
                 indexOffset + LOWORD(argSource->indexRange.first),
@@ -4669,32 +4672,6 @@ void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex)
         Com_Error(ERR_FATAL, "Too many unique materials (%i or more)\n", 2048);
 }
 
-void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists)
-{
-    unsigned __int16 beginHashIndex; // [esp+14h] [ebp-4h]
-
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 1193, 0, "%s", "name");
-    if (!hashIndex)
-        MyAssertHandler(".\\r_material.cpp", 1194, 0, "%s", "hashIndex");
-    if (!exists)
-        MyAssertHandler(".\\r_material.cpp", 1195, 0, "%s", "exists");
-    beginHashIndex = R_HashAssetName(name) % 0x7FF;
-    *hashIndex = beginHashIndex;
-    do
-    {
-        if (!rg.materialHashTable[*hashIndex])
-            break;
-        if (!strcmp(rg.materialHashTable[*hashIndex]->info.name, name))
-        {
-            *exists = 1;
-            return;
-        }
-        *hashIndex = ((unsigned int)*hashIndex + 1) % 0x7FF;
-    } while (*hashIndex != beginHashIndex);
-    *exists = 0;
-}
-
 Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name)
 {
     unsigned int v3; // [esp+8h] [ebp-30h]
@@ -6222,4 +6199,387 @@ void __cdecl Material_FreeAll()
         memset(mtlLoadGlob.pixelShaderHashTable, 0, sizeof(mtlLoadGlob.pixelShaderHashTable));
         mtlLoadGlob.pixelShaderCount = 0;
     }
+}
+
+void __cdecl Material_GetVertexShaderName(char *dest, const MaterialPass *pass, int destsize)
+{
+    if (!pass->vertexShader)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 6975, 0, "%s", "pass->vertexShader");
+    I_strncpyz(dest, pass->vertexShader->name, destsize);
+}
+
+unsigned int __cdecl R_DrawSurfStandardPrepassSortKey(const Material *material)
+{
+    MaterialTechniqueSet *techSet; // [esp+0h] [ebp-8h]
+    const MaterialTechnique *prepassTech; // [esp+4h] [ebp-4h]
+
+    techSet = material->techniqueSet;
+    if (!techSet)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 6927, 0, "%s", "techSet");
+    prepassTech = techSet->techniques[0];
+    if (prepassTech)
+    {
+        if ((material->stateFlags & 4) != 0)
+            return 3;
+        else
+            return (prepassTech->flags & 4) == 0;
+    }
+    else if (techSet->techniques[1])
+    {
+        return 2;
+    }
+    else
+    {
+        return 3;
+    }
+}
+
+void __cdecl R_RegisterShaderConst(unsigned int dest, const float *value, GfxShaderConstantBlock *consts)
+{
+    unsigned int sortedIndex; // [esp+4h] [ebp-4h]
+
+    if (consts->count >= 0x10)
+        MyAssertHandler(
+            ".\\r_material_consts.cpp",
+            15,
+            1,
+            "consts->count doesn't index ARRAY_COUNT( consts->dest )\n\t%i not in [0, %i)",
+            consts->count,
+            16);
+    for (sortedIndex = consts->count;
+        sortedIndex && *(&consts->count + sortedIndex + 1) > dest;
+        consts->value[sortedIndex + 1] = consts->value[sortedIndex])
+    {
+        --sortedIndex;
+        consts->dest[sortedIndex + 1] = consts->dest[sortedIndex];
+    }
+    consts->dest[sortedIndex] = dest;
+    consts->value[sortedIndex] = value;
+    ++consts->count;
+}
+
+void __cdecl R_GetPixelLiteralConsts(
+    const Material *mtl,
+    const MaterialPass *pass,
+    GfxShaderConstantBlock *pixelLiteralConsts)
+{
+    const char *v3; // eax
+    MaterialConstantDef *constDef; // [esp+0h] [ebp-Ch]
+    unsigned int argCount; // [esp+4h] [ebp-8h]
+    const MaterialShaderArgument *arg; // [esp+8h] [ebp-4h]
+
+    pixelLiteralConsts->count = 0;
+    argCount = pass->stableArgCount;
+    if (pass->stableArgCount)
+    {
+        for (arg = &pass->args[pass->perPrimArgCount + pass->perObjArgCount]; arg->type < 6u; ++arg)
+        {
+            if (!--argCount)
+                return;
+        }
+        constDef = mtl->constantTable;
+        while (arg->type == 6)
+        {
+            while (constDef->nameHash != arg->u.codeSampler)
+            {
+                if (++constDef == &mtl->constantTable[mtl->constantCount])
+                {
+                    v3 = va("material '%s' is missing a required named constant", mtl->info.name);
+                    MyAssertHandler(
+                        ".\\r_material_consts.cpp",
+                        59,
+                        0,
+                        "%s\n\t%s",
+                        "constDef != &mtl->constantTable[mtl->constantCount]",
+                        v3);
+                }
+            }
+            R_RegisterShaderConst(arg->dest, constDef->literal, pixelLiteralConsts);
+            ++arg;
+            if (!--argCount)
+                return;
+        }
+        do
+        {
+            if (arg->type != 7)
+                break;
+            R_RegisterShaderConst(arg->dest, arg->u.literalConst, pixelLiteralConsts);
+            ++arg;
+            --argCount;
+        } while (argCount);
+    }
+}
+
+int __cdecl R_ComparePixelConsts(const Material **material, const MaterialPass **pass)
+{
+    int j; // [esp+0h] [ebp-4ECh]
+    GfxShaderConstantBlock pixelLiteralConsts[2]; // [esp+4h] [ebp-4E8h] BYREF
+    unsigned __int16 pixelConsts[2][256]; // [esp+CCh] [ebp-420h] BYREF
+    unsigned int argCount; // [esp+4D0h] [ebp-1Ch]
+    const MaterialShaderArgument *arg; // [esp+4D4h] [ebp-18h]
+    int i; // [esp+4D8h] [ebp-14h]
+    int comparison; // [esp+4DCh] [ebp-10h]
+    unsigned int constIndex; // [esp+4E0h] [ebp-Ch]
+    unsigned int pixelConstsCount[2]; // [esp+4E4h] [ebp-8h]
+
+    for (i = 0; i < 2; ++i)
+    {
+        pixelConstsCount[i] = 0;
+        pixelLiteralConsts[i].count = 0;
+        arg = &pass[i]->args[pass[i]->perPrimArgCount + pass[i]->perObjArgCount];
+        argCount = pass[i]->stableArgCount;
+        if (argCount)
+        {
+            while (arg->type < 5u)
+            {
+                ++arg;
+                if (!--argCount)
+                    goto done_2;
+            }
+            while (arg->type == 5)
+            {
+                if (pixelConstsCount[i] >= 0x100)
+                    MyAssertHandler(
+                        ".\\r_material_consts.cpp",
+                        148,
+                        0,
+                        "pixelConstsCount[i] doesn't index ARRAY_COUNT( pixelConsts[i] )\n\t%i not in [0, %i)",
+                        pixelConstsCount[i],
+                        256);
+                pixelConsts[i][pixelConstsCount[i]++] = arg->u.codeConst.index;
+                ++arg;
+                if (!--argCount)
+                    goto done_2;
+            }
+            R_GetPixelLiteralConsts(material[i], pass[i], &pixelLiteralConsts[i]);
+        }
+    done_2:
+        ;
+    }
+    comparison = pixelConstsCount[0] - pixelConstsCount[1];
+    if (pixelConstsCount[0] != pixelConstsCount[1])
+        return comparison;
+    for (constIndex = 0; constIndex < pixelConstsCount[0]; ++constIndex)
+    {
+        comparison = pixelConsts[0][constIndex] - pixelConsts[1][constIndex];
+        if (comparison)
+            return comparison;
+    }
+    comparison = pixelLiteralConsts[0].count - pixelLiteralConsts[1].count;
+    if (pixelLiteralConsts[0].count != pixelLiteralConsts[1].count)
+        return comparison;
+    for (constIndex = 0; constIndex < pixelLiteralConsts[0].count; ++constIndex)
+    {
+        comparison = pixelLiteralConsts[0].dest[constIndex] - pixelLiteralConsts[1].dest[constIndex];
+        if (comparison)
+            return comparison;
+        for (j = 0; j < 4; ++j)
+        {
+            if (pixelLiteralConsts[1].value[constIndex][j] > pixelLiteralConsts[0].value[constIndex][j])
+                return -1;
+            if (pixelLiteralConsts[1].value[constIndex][j] < pixelLiteralConsts[0].value[constIndex][j])
+                return 1;
+        }
+    }
+    return 0;
+}
+
+int __cdecl Material_ComparePixelConsts(const Material *mtl0, const Material *mtl1, MaterialTechniqueType techType)
+{
+    const MaterialPass *pass[2]; // [esp+10h] [ebp-18h] BYREF
+    const MaterialTechnique *techniqueLit[2]; // [esp+18h] [ebp-10h]
+    const Material *mtl[2]; // [esp+20h] [ebp-8h] BYREF
+
+    techniqueLit[0] = Material_GetTechnique(mtl0, techType);
+    techniqueLit[1] = Material_GetTechnique(mtl1, techType);
+    if (!techniqueLit[0])
+        MyAssertHandler(".\\r_material_load_obj.cpp", 6990, 0, "%s", "techniqueLit[0]");
+    if (!techniqueLit[1])
+        MyAssertHandler(".\\r_material_load_obj.cpp", 6991, 0, "%s", "techniqueLit[1]");
+    mtl[0] = mtl0;
+    mtl[1] = mtl1;
+    pass[0] = techniqueLit[0]->passArray;
+    pass[1] = techniqueLit[1]->passArray;
+    return R_ComparePixelConsts(mtl, pass);
+}
+
+BOOL __cdecl Material_Compare(const Material *mtl0, const Material *mtl1)
+{
+    int writesDepth; // [esp+98h] [ebp-148h]
+    int writesDepth_4; // [esp+9Ch] [ebp-144h]
+    const MaterialTechnique *techniqueEmissive; // [esp+A0h] [ebp-140h]
+    const MaterialTechnique *techniqueEmissive_4; // [esp+A4h] [ebp-13Ch]
+    const MaterialTechnique *techniqueLit; // [esp+A8h] [ebp-138h]
+    const MaterialTechnique *techniqueLit_4; // [esp+ACh] [ebp-134h]
+    char name0[128]; // [esp+B0h] [ebp-130h] BYREF
+    int hasTechniqueEmissive[2]; // [esp+130h] [ebp-B0h]
+    int hasTechniqueLit[2]; // [esp+138h] [ebp-A8h]
+    int prepass[2]; // [esp+140h] [ebp-A0h]
+    char name1[128]; // [esp+148h] [ebp-98h] BYREF
+    const MaterialTechniqueSet *techSet[2]; // [esp+1CCh] [ebp-14h]
+    int comparison; // [esp+1D4h] [ebp-Ch]
+    int hasLightmap[2]; // [esp+1D8h] [ebp-8h]
+
+    if (!mtl0)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 7022, 0, "%s", "mtl0");
+    if (!mtl1)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 7023, 0, "%s", "mtl1");
+    techSet[0] = Material_GetTechniqueSet(mtl0);
+    techSet[1] = Material_GetTechniqueSet(mtl1);
+    if (!techSet[0] || !techSet[1])
+        MyAssertHandler(".\\r_material_load_obj.cpp", 7039, 0, "%s", "techSet[0] && techSet[1]");
+    techniqueLit = Material_GetTechnique(mtl0, TECHNIQUE_LIT_BEGIN);
+    techniqueLit_4 = Material_GetTechnique(mtl1, TECHNIQUE_LIT_BEGIN);
+    hasTechniqueLit[0] = techniqueLit != 0;
+    hasTechniqueLit[1] = techniqueLit_4 != 0;
+    comparison = hasTechniqueLit[1] - hasTechniqueLit[0];
+    if (hasTechniqueLit[1] != hasTechniqueLit[0])
+        return comparison < 0;
+    hasLightmap[0] = (mtl0->info.gameFlags & 2) != 0;
+    hasLightmap[1] = (mtl1->info.gameFlags & 2) != 0;
+    techniqueEmissive = Material_GetTechnique(mtl0, TECHNIQUE_EMISSIVE);
+    techniqueEmissive_4 = Material_GetTechnique(mtl1, TECHNIQUE_EMISSIVE);
+    hasTechniqueEmissive[0] = techniqueEmissive != 0;
+    hasTechniqueEmissive[1] = techniqueEmissive_4 != 0;
+    if (hasTechniqueLit[0])
+    {
+        if (hasTechniqueEmissive[0])
+            MyAssertHandler(".\\r_material_load_obj.cpp", 7062, 0, "%s", "!hasTechniqueEmissive[0]");
+        if (hasTechniqueEmissive[1])
+            MyAssertHandler(".\\r_material_load_obj.cpp", 7063, 0, "%s", "!hasTechniqueEmissive[1]");
+        comparison = mtl0->info.sortKey - mtl1->info.sortKey;
+        if (comparison)
+            return comparison < 0;
+        comparison = hasLightmap[1] - hasLightmap[0];
+        if (hasLightmap[1] != hasLightmap[0])
+            return comparison < 0;
+    }
+    else
+    {
+        if (hasLightmap[0])
+            MyAssertHandler(".\\r_material_load_obj.cpp", 7076, 0, "%s", "!hasLightmap[0]");
+        if (hasLightmap[1])
+            MyAssertHandler(".\\r_material_load_obj.cpp", 7077, 0, "%s", "!hasLightmap[1]");
+        comparison = hasTechniqueEmissive[1] - hasTechniqueEmissive[0];
+        if (hasTechniqueEmissive[1] != hasTechniqueEmissive[0])
+            return comparison < 0;
+        comparison = mtl0->info.sortKey - mtl1->info.sortKey;
+        if (comparison)
+            return comparison < 0;
+    }
+    prepass[0] = R_DrawSurfStandardPrepassSortKey(mtl0);
+    prepass[1] = R_DrawSurfStandardPrepassSortKey(mtl1);
+    comparison = prepass[0] - prepass[1];
+    if (prepass[0] != prepass[1])
+        return comparison < 0;
+    writesDepth = (mtl0->stateFlags & 8) != 0;
+    writesDepth_4 = (mtl1->stateFlags & 8) != 0;
+    comparison = writesDepth_4 - writesDepth;
+    if (writesDepth_4 != writesDepth)
+        return comparison < 0;
+    if (hasTechniqueLit[0])
+    {
+        comparison = strcmp(techniqueLit->passArray[0].pixelShader->name, techniqueLit_4->passArray[0].pixelShader->name);
+        if (comparison)
+            return comparison < 0;
+        if (writesDepth)
+        {
+            comparison = Material_ComparePixelConsts(mtl0, mtl1, TECHNIQUE_LIT_BEGIN);
+            if (comparison)
+                return comparison < 0;
+        }
+        Material_GetVertexShaderName(name0, techniqueLit->passArray, 128);
+        Material_GetVertexShaderName(name1, techniqueLit_4->passArray, 128);
+        comparison = strcmp(name0, name1);
+        if (comparison)
+            return comparison < 0;
+    }
+    else if (hasTechniqueEmissive[0])
+    {
+        comparison = strcmp(
+            techniqueEmissive->passArray[0].pixelShader->name,
+            techniqueEmissive_4->passArray[0].pixelShader->name);
+        if (comparison)
+            return comparison < 0;
+        comparison = Material_ComparePixelConsts(mtl0, mtl1, TECHNIQUE_EMISSIVE);
+        if (comparison)
+            return comparison < 0;
+        Material_GetVertexShaderName(name0, techniqueEmissive->passArray, 128);
+        Material_GetVertexShaderName(name1, techniqueEmissive_4->passArray, 128);
+        comparison = strcmp(name0, name1);
+        if (comparison)
+            return comparison < 0;
+    }
+    comparison = strcmp(techSet[0]->name, techSet[1]->name);
+    if (comparison)
+        return comparison < 0;
+    if (mtl0 == mtl1)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 7145, 0, "%s", "mtl0 != mtl1");
+    comparison = strcmp(mtl0->info.name, mtl1->info.name);
+    if (!comparison)
+        MyAssertHandler(".\\r_material_load_obj.cpp", 7147, 0, "%s", "comparison");
+    return comparison < 0;
+}
+
+unsigned int __cdecl R_DrawSurfPrimarySortKey(const Material *material)
+{
+    if (material->info.sortKey >= 0x40u)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\gfx_d3d\\r_drawsurf.h",
+            23,
+            0,
+            "material->info.sortKey doesn't index 1 << MTL_SORT_PRIMARY_SORT_KEY_BITS\n\t%i not in [0, %i)",
+            material->info.sortKey,
+            64);
+    return material->info.sortKey;
+}
+
+void __cdecl Material_SortInternal(Material **sortedMaterials, unsigned int materialCount)
+{
+    unsigned __int64 v2; // rax
+    unsigned int v3; // ecx
+    unsigned __int64 v4; // rax
+    unsigned int v5; // ecx
+    unsigned __int64 v6; // rax
+    int v7; // ecx
+    unsigned __int64 v8; // rax
+    unsigned int v9; // ecx
+    unsigned int sortedIndex; // [esp+98h] [ebp-Ch]
+    Material *material; // [esp+A0h] [ebp-4h]
+
+    //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+    //    sortedMaterials,
+    //    &sortedMaterials[materialCount],
+    //    (4 * materialCount) >> 2,
+    //    Material_Compare);
+    std::sort(&sortedMaterials[0], &sortedMaterials[materialCount], Material_Compare);
+    for (sortedIndex = 0; sortedIndex < materialCount; ++sortedIndex)
+    {
+        material = sortedMaterials[sortedIndex];
+        *&material->info.drawSurf.packed = 0;
+        HIDWORD(material->info.drawSurf.packed) = 0;
+        v2 = (R_DrawSurfPrimarySortKey(material) & 0x3F) << 54;
+        v3 = HIDWORD(v2) | HIDWORD(material->info.drawSurf.packed) & 0xF03FFFFF;
+        *&material->info.drawSurf.packed |= v2;
+        HIDWORD(material->info.drawSurf.packed) = v3;
+        v4 = (R_DrawSurfStandardPrepassSortKey(material) & 3) << 40;
+        v5 = HIDWORD(v4) | HIDWORD(material->info.drawSurf.packed) & 0xFFFFFCFF;
+        *&material->info.drawSurf.packed |= v4;
+        HIDWORD(material->info.drawSurf.packed) = v5;
+        v6 = ((material->info.gameFlags & 0x40) != 0) << 24;
+        v7 = HIDWORD(v6) | HIDWORD(material->info.drawSurf.packed);
+        *&material->info.drawSurf.packed = v6 | *&material->info.drawSurf.packed & 0xE0FFFFFF;
+        HIDWORD(material->info.drawSurf.packed) = v7;
+        v8 = (sortedIndex & 0x7FF) << 29;
+        v9 = HIDWORD(v8) | HIDWORD(material->info.drawSurf.packed) & 0xFFFFFF00;
+        *&material->info.drawSurf.packed = v8 | *&material->info.drawSurf.packed & 0x1FFFFFFF;
+        HIDWORD(material->info.drawSurf.packed) = v9;
+    }
+}
+
+void __cdecl Material_Sort()
+{
+    if (useFastFile->current.enabled)
+        rgp.materialCount = DB_GetAllXAssetOfType(ASSET_TYPE_MATERIAL, (XAssetHeader *)&rgp, 2048);
+    Material_SortInternal(rgp.sortedMaterials, rgp.materialCount);
 }

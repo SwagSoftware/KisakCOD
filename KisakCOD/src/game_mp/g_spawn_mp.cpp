@@ -47,6 +47,23 @@ const SpawnFuncEntry s_bspOrDynamicSpawns[6] =
   { "script_origin", &SP_script_origin },
   { "script_vehicle_collmap", &G_VehCollmapSpawner }
 }; // idb
+const SpawnFuncEntry s_bspOnlySpawns[14] =
+{
+  { "trigger_use", &trigger_use },
+  { "trigger_use_touch", &trigger_use },
+  { "trigger_multiple", &SP_trigger_multiple },
+  { "trigger_disk", &SP_trigger_disk },
+  { "trigger_hurt", &SP_trigger_hurt },
+  { "trigger_once", &SP_trigger_once },
+  { "trigger_damage", &SP_trigger_damage },
+  { "trigger_lookat", &SP_trigger_lookat },
+  { "light", &SP_light },
+  { "misc_mg42", &SP_turret },
+  { "misc_turret", &SP_turret },
+  { "script_brushmodel", &SP_script_brushmodel },
+  { "script_struct", &G_FreeEntity },
+  { "script_vehicle_mp", &G_VehSpawner }
+}; // idb
 
 int __cdecl G_CallSpawnEntity(gentity_s *ent)
 {
@@ -187,7 +204,7 @@ void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
         *(float *)&b[ofs + 8] = vec[2];
         break;
     case F_ENTITY:
-        *(unsigned int *)&b[ofs] = Scr_GetEntityAllowNull(0);
+        *(unsigned int *)&b[ofs] = (unsigned int)Scr_GetEntityAllowNull(0);
         break;
     case F_ENTHANDLE:
         EntityAllowNull = Scr_GetEntityAllowNull(0);
@@ -291,7 +308,7 @@ void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
         Scr_AddInt(*(unsigned int *)&b[ofs]);
         break;
     case F_FLOAT:
-        Scr_AddFloat(COERCE_VARIABLEUNION(*(float *)&b[ofs]));
+        Scr_AddFloat(*(float *)&b[ofs]);
         break;
     case F_LSTRING:
         Scr_AddString((char *)&b[ofs]);
@@ -646,8 +663,8 @@ void __cdecl SP_worldspawn()
 
     G_LevelSpawnString("classname", "", &s);
     if (I_stricmp(s, "worldspawn"))
-        Com_Error(ERR_DROP, &byte_890EAC);
-    SV_SetConfigstring(2, "cod");
+        Com_Error(ERR_DROP, "SP_worldspawn: The first entity isn't worldspawn");
+    SV_SetConfigstring(2, (char*)"cod");
     G_LevelSpawnString("ambienttrack", "", &s);
     if (*s)
     {
@@ -656,7 +673,7 @@ void __cdecl SP_worldspawn()
     }
     else
     {
-        SV_SetConfigstring(821, (char *)&String);
+        SV_SetConfigstring(821, (char *)"");
     }
     G_LevelSpawnString("message", "", &s);
     SV_SetConfigstring(3, (char *)s);
@@ -677,7 +694,7 @@ void __cdecl SP_worldspawn()
     }
     else
     {
-        SV_SetConfigstring(822, "0");
+        SV_SetConfigstring(822, (char*)"0");
         level.compassNorth[0] = 1.0;
         level.compassNorth[1] = 0.0;
     }
@@ -693,7 +710,7 @@ void __cdecl SP_worldspawn()
 void __cdecl G_SpawnEntitiesFromString()
 {
     if (!G_ParseSpawnVars(&level.spawnVar))
-        Com_Error(ERR_DROP, &byte_890EEC);
+        Com_Error(ERR_DROP, "SpawnEntities: no entities");
     SP_worldspawn();
     while (G_ParseSpawnVars(&level.spawnVar))
         G_CallSpawn();

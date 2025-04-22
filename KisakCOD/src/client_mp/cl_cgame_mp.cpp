@@ -1032,7 +1032,7 @@ void __cdecl CL_ReadDemoNetworkPacket(int localClientNum)
     }
 }
 
-void __cdecl CL_ReadDemoMessage(netsrc_t localClientNum)
+void __cdecl CL_ReadDemoMessage(int localClientNum)
 {
     clientConnection_t *clc; // [esp+8h] [ebp-8h]
     unsigned __int8 s; // [esp+Fh] [ebp-1h] BYREF

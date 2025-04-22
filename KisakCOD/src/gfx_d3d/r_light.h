@@ -3,6 +3,49 @@
 #include <xanim/dobj.h>
 #include "r_rendercmds.h"
 
+struct AnnotatedLightGridPoint // sizeof=0xA
+{                                       // ...
+    unsigned __int16 pos[3];            // ...
+    GfxLightGridEntry entry;            // ...
+};
+
+struct GfxLightGridEntry_Version15 // sizeof=0x8
+{
+    unsigned int xyzHighBits;
+    unsigned __int8 xyzLowBitsAndPrimaryVis;
+    unsigned __int8 needsTrace;
+    unsigned __int16 colorsIndex;
+};
+
+struct DiskGfxCell_Version14 // sizeof=0x34
+{
+    float mins[3];
+    float maxs[3];
+    int aabbTreeIndex;
+    int firstPortal;
+    int portalCount;
+    int firstCullGroup;
+    int cullGroupCount;
+    int unused0;
+    int unused1;
+};
+
+struct __declspec(align(4)) DiskGfxCell // sizeof=0x70
+{
+    float mins[3];
+    float maxs[3];
+    unsigned __int16 aabbTreeIndex[2];
+    int firstPortal;
+    int portalCount;
+    int firstCullGroup;
+    int cullGroupCount;
+    unsigned __int8 reflectionProbeCount;
+    unsigned __int8 reflectionProbes[64];
+    // padding byte
+    // padding byte
+    // padding byte
+};
+
 struct LightGlobals // sizeof=0x104
 {                                       // ...
     int defCount;                       // ...
@@ -63,3 +106,12 @@ void __cdecl R_EmitShadowedLightPartitionSurfs(
     unsigned int lightDrawSurfCount,
     GfxDrawSurf *lightDrawSurfs,
     GfxDrawSurfListInfo *info);
+
+
+
+// r_light_load_obj
+void __cdecl R_LoadLightGridColors(unsigned int bspVersion);
+void R_LoadLightGridRowData();
+unsigned __int8 *R_LoadLightGridEntries();
+void R_LoadLightGridHeader();
+void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion);

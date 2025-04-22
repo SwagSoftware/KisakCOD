@@ -4457,3 +4457,13 @@ bool R_CheckLostDevice()
     
     return false;
 }
+
+void __cdecl R_MakeDedicated(const GfxConfiguration *config)
+{
+    SetGfxConfig(config);
+    if (!r_loadForRenderer)
+        R_RegisterDvars();
+    Dvar_SetBool(r_loadForRenderer, 0);
+    Dvar_MakeLatchedValueCurrent((dvar_s*)r_loadForRenderer);
+    R_LoadGraphicsAssets();
+}

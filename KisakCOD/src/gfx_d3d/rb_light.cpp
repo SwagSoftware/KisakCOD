@@ -6,6 +6,9 @@
 #include <qcommon/com_bsp.h>
 #include <qcommon/threads.h>
 #include <universal/com_files.h>
+#include <xanim/xmodel.h>
+#include "r_xsurface.h"
+#include "r_primarylights.h"
 
 struct // sizeof=0x8
 {                                       // ...
@@ -1532,3 +1535,223 @@ void __cdecl R_SaveLightVisHistory()
     }
 }
 
+char __cdecl R_IsPointInLightRegionHull(const float *relPoint, const GfxLightRegionHull *hull)
+{
+    float v3; // [esp+0h] [ebp-80h]
+    float v4; // [esp+4h] [ebp-7Ch]
+    float v5; // [esp+8h] [ebp-78h]
+    float v6; // [esp+Ch] [ebp-74h]
+    float v7; // [esp+10h] [ebp-70h]
+    float v8; // [esp+14h] [ebp-6Ch]
+    float v9; // [esp+18h] [ebp-68h]
+    float v10; // [esp+1Ch] [ebp-64h]
+    float v11; // [esp+20h] [ebp-60h]
+    float v12; // [esp+24h] [ebp-5Ch]
+    float v13; // [esp+2Ch] [ebp-54h]
+    float v14; // [esp+34h] [ebp-4Ch]
+    float v15; // [esp+3Ch] [ebp-44h]
+    float v16; // [esp+44h] [ebp-3Ch]
+    float v17; // [esp+4Ch] [ebp-34h]
+    float v18; // [esp+54h] [ebp-2Ch]
+    float v19; // [esp+5Ch] [ebp-24h]
+    float v20; // [esp+64h] [ebp-1Ch]
+    float v21; // [esp+6Ch] [ebp-14h]
+    float v22; // [esp+74h] [ebp-Ch]
+    unsigned int axisIter; // [esp+78h] [ebp-8h]
+    float midPointAlongDir; // [esp+7Ch] [ebp-4h]
+
+    v22 = *relPoint - hull->kdopMidPoint[0];
+    v12 = fabs(v22);
+    if (hull->kdopHalfSize[0] <= v12)
+        return 0;
+    v21 = relPoint[1] - hull->kdopMidPoint[1];
+    v11 = fabs(v21);
+    if (hull->kdopHalfSize[1] <= v11)
+        return 0;
+    v20 = relPoint[2] - hull->kdopMidPoint[2];
+    v10 = fabs(v20);
+    if (hull->kdopHalfSize[2] <= v10)
+        return 0;
+    v19 = relPoint[1] + *relPoint - hull->kdopMidPoint[3];
+    v9 = fabs(v19);
+    if (hull->kdopHalfSize[3] <= v9)
+        return 0;
+    v18 = *relPoint - relPoint[1] - hull->kdopMidPoint[4];
+    v8 = fabs(v18);
+    if (hull->kdopHalfSize[4] <= v8)
+        return 0;
+    v17 = relPoint[2] + *relPoint - hull->kdopMidPoint[5];
+    v7 = fabs(v17);
+    if (hull->kdopHalfSize[5] <= v7)
+        return 0;
+    v16 = *relPoint - relPoint[2] - hull->kdopMidPoint[6];
+    v6 = fabs(v16);
+    if (hull->kdopHalfSize[6] <= v6)
+        return 0;
+    v15 = relPoint[2] + relPoint[1] - hull->kdopMidPoint[7];
+    v5 = fabs(v15);
+    if (hull->kdopHalfSize[7] <= v5)
+        return 0;
+    v14 = relPoint[1] - relPoint[2] - hull->kdopMidPoint[8];
+    v4 = fabs(v14);
+    if (hull->kdopHalfSize[8] <= v4)
+        return 0;
+    for (axisIter = 0; axisIter < hull->axisCount; ++axisIter)
+    {
+        midPointAlongDir = Vec3Dot(hull->axis[axisIter].dir, relPoint);
+        v13 = midPointAlongDir - hull->axis[axisIter].midPoint;
+        v3 = fabs(v13);
+        if (hull->axis[axisIter].halfSize <= v3)
+            return 0;
+    }
+    return 1;
+}
+
+unsigned int __cdecl R_GetPrimaryLightForModelVertex(
+    const float *point,
+    unsigned int primaryLightCount,
+    const bool *checkLight,
+    const GfxLightRegion *lightRegions)
+{
+    float v5; // [esp+0h] [ebp-28h]
+    unsigned int hullIter; // [esp+4h] [ebp-24h]
+    const ComPrimaryLight *light; // [esp+8h] [ebp-20h]
+    unsigned int primaryLightIter; // [esp+Ch] [ebp-1Ch]
+    float cosHalfFov; // [esp+10h] [ebp-18h]
+    float lenSq; // [esp+14h] [ebp-14h]
+    float relPoint[3]; // [esp+18h] [ebp-10h] BYREF
+    float dot; // [esp+24h] [ebp-4h]
+
+    for (primaryLightIter = 0; primaryLightIter < primaryLightCount; ++primaryLightIter)
+    {
+        if (checkLight[primaryLightIter])
+        {
+            light = Com_GetPrimaryLight(primaryLightIter);
+            if (light->type != 3 && light->type != 2)
+                MyAssertHandler(
+                    ".\\rb_light.cpp",
+                    1273,
+                    0,
+                    "%s\n\t(light->type) = %i",
+                    "(light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT)",
+                    light->type);
+            Vec3Sub(point, light->origin, relPoint);
+            lenSq = Vec3LengthSq(relPoint);
+            v5 = light->radius * light->radius;
+            if (lenSq <= v5)
+            {
+                if (light->type == 2)
+                {
+                    cosHalfFov = light->cosHalfFovExpanded;
+                    dot = Vec3Dot(relPoint, light->dir);
+                    if (cosHalfFov >= 0.0)
+                    {
+                        if (dot > 0.0 || cosHalfFov * cosHalfFov * lenSq > dot * dot)
+                            continue;
+                    }
+                    else if (dot > 0.0 && cosHalfFov * cosHalfFov * lenSq < dot * dot)
+                    {
+                        continue;
+                    }
+                }
+                if (!lightRegions[primaryLightIter].hullCount)
+                    return primaryLightIter;
+                for (hullIter = 0; hullIter < lightRegions[primaryLightIter].hullCount; ++hullIter)
+                {
+                    if (R_IsPointInLightRegionHull(relPoint, &lightRegions[primaryLightIter].hulls[hullIter]))
+                        return primaryLightIter;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+unsigned __int8 __cdecl R_GetPrimaryLightForModel(
+    const XModel *model,
+    const float *origin,
+    const float (*axis)[3],
+    float scale,
+    const float *mins,
+    const float *maxs,
+    const GfxLightRegion *lightRegions)
+{
+    unsigned int chosenLight; // [esp+Ch] [ebp-564h]
+    unsigned int primaryLightCount; // [esp+10h] [ebp-560h]
+    const ComPrimaryLight *light; // [esp+14h] [ebp-55Ch]
+    unsigned int surfCount; // [esp+18h] [ebp-558h]
+    unsigned int primaryLightIter; // [esp+1Ch] [ebp-554h]
+    unsigned int lod; // [esp+20h] [ebp-550h]
+    float *verts; // [esp+24h] [ebp-54Ch]
+    unsigned int checkCount; // [esp+28h] [ebp-548h]
+    float boxHalfSize[3]; // [esp+2Ch] [ebp-544h] BYREF
+    unsigned int votes[255]; // [esp+38h] [ebp-538h] BYREF
+    unsigned int mostVotes; // [esp+43Ch] [ebp-134h]
+    unsigned int surfIter; // [esp+440h] [ebp-130h]
+    unsigned int vertCount; // [esp+444h] [ebp-12Ch]
+    bool checkLight[255]; // [esp+448h] [ebp-128h] BYREF
+    unsigned int bestLight; // [esp+54Ch] [ebp-24h]
+    XSurface *surfs; // [esp+550h] [ebp-20h] BYREF
+    unsigned int vertIter; // [esp+554h] [ebp-1Ch]
+    float boxMidPoint[3]; // [esp+558h] [ebp-18h] BYREF
+    float point[3]; // [esp+564h] [ebp-Ch] BYREF
+
+    Vec3Avg(mins, maxs, boxMidPoint);
+    Vec3Sub(boxMidPoint, mins, boxHalfSize);
+    if (!comWorld.isInUse)
+        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+    primaryLightCount = comWorld.primaryLightCount;
+    Com_Memset(checkLight, 0, comWorld.primaryLightCount);
+    checkCount = 0;
+    for (primaryLightIter = 0; primaryLightIter < primaryLightCount; ++primaryLightIter)
+    {
+        light = Com_GetPrimaryLight(primaryLightIter);
+        if (light->type && light->type != 1 && !Com_CullBoxFromPrimaryLight(light, boxMidPoint, boxHalfSize))
+        {
+            checkLight[primaryLightIter] = 1;
+            ++checkCount;
+        }
+    }
+    if (!checkCount)
+        return 0;
+    verts = Hunk_AllocateTempMemory(393216, "R_GetXModelBounds");
+    memset(votes, 0, 4 * primaryLightCount);
+    mostVotes = 0;
+    bestLight = 0;
+    lod = XModelGetNumLods(model) - 1;
+    surfCount = XModelGetSurfaces(model, &surfs, lod);
+    for (surfIter = 0; surfIter < surfCount; ++surfIter)
+    {
+        vertCount = XSurfaceGetNumVerts(&surfs[surfIter]);
+        if (vertCount > 0x8000)
+            MyAssertHandler(".\\rb_light.cpp", 1364, 0, "vertCount <= MODELSURF_MAX_VERTICES\n\t%i, %i", vertCount, 0x8000);
+        XSurfaceGetVerts(&surfs[surfIter], verts, 0, 0);
+        for (vertIter = 0; vertIter < vertCount; ++vertIter)
+        {
+            MatrixTransformVector(&verts[3 * vertIter], axis, point);
+            Vec3Mad(origin, scale, point, point);
+            chosenLight = R_GetPrimaryLightForModelVertex(point, primaryLightCount, checkLight, lightRegions);
+            ++votes[chosenLight];
+            if (chosenLight)
+            {
+                if (votes[chosenLight] > mostVotes)
+                {
+                    mostVotes = votes[chosenLight];
+                    bestLight = chosenLight;
+                    if (checkCount == 1)
+                        break;
+                }
+            }
+        }
+    }
+    Hunk_FreeTempMemory((char*)verts);
+    if (bestLight != bestLight)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            bestLight,
+            bestLight);
+    return bestLight;
+}

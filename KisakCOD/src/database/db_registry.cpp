@@ -19,6 +19,8 @@
 #include <gfx_d3d/r_staticmodelcache.h>
 #include <win32/win_localize.h>
 
+#include <algorithm>
+
 struct DBReorderAssetEntry // sizeof=0x10
 {                                       // ...
     unsigned int sequence;
@@ -1399,6 +1401,36 @@ void DB_SetReorderIncludeSequence()
     }
 }
 
+bool __cdecl DB_CompareReorderEntries(const DBReorderAssetEntry *e0, const DBReorderAssetEntry *e1)
+{
+    int comparison; // [esp+0h] [ebp-4h]
+
+    if (e0->sequence != e1->sequence)
+        return e0->sequence < e1->sequence;
+    if (e0->type == 33)
+    {
+        if (e1->type != 33)
+            return 1;
+        comparison = _stricmp(e0->typeString, e1->typeString);
+        if (comparison)
+            return comparison < 0;
+        return _stricmp(e0->assetName, e1->assetName) < 0;
+    }
+    if (e1->type == 33)
+        return 0;
+    if (e0->type == e1->type)
+        return _stricmp(e0->assetName, e1->assetName) < 0;
+    if (e0->sequence != -1)
+        return e0->type < e1->type;
+    if (e0->type == 7)
+        return 1;
+    if (e1->type == 7)
+        return 0;
+    if (e0->type == 22)
+        return 1;
+    return e1->type != 22 && e0->type < e1->type;
+}
+
 void DB_EndReorderZone()
 {
     DBReorderAssetEntry *entry; // [esp+180h] [ebp-41Ch]
@@ -1424,11 +1456,12 @@ void DB_EndReorderZone()
         {
             wroteBlank = 0;
             DB_SetReorderIncludeSequence();
-            std::_Sort<DBReorderAssetEntry *, int, bool(__cdecl *)(DBReorderAssetEntry const &, DBReorderAssetEntry const &)>(
-                (GfxSModelSurfStats *)s_dbReorder.entries,
-                (GfxSModelSurfStats *)&s_dbReorder.entries[s_dbReorder.entryCount],
-                (signed int)(16 * s_dbReorder.entryCount) >> 4,
-                (bool(__cdecl *)(GfxSModelSurfStats *, GfxSModelSurfStats *))DB_CompareReorderEntries);
+            //std::_Sort<DBReorderAssetEntry *, int, bool(__cdecl *)(DBReorderAssetEntry const &, DBReorderAssetEntry const &)>(
+            //    (GfxSModelSurfStats *)s_dbReorder.entries,
+            //    (GfxSModelSurfStats *)&s_dbReorder.entries[s_dbReorder.entryCount],
+            //    (signed int)(16 * s_dbReorder.entryCount) >> 4,
+            //    (bool(__cdecl *)(GfxSModelSurfStats *, GfxSModelSurfStats *))DB_CompareReorderEntries);
+            std::sort(&s_dbReorder.entries[0], &s_dbReorder.entries[s_dbReorder.entryCount], DB_CompareReorderEntries);
             for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
             {
                 entry = &s_dbReorder.entries[entryIter];
@@ -2077,7 +2110,7 @@ void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry)
 
     if (g_sync)
     {
-        DB_LinkXAssetEntry(newEntry, 1);
+        DB_LinkXAssetEntry((XAssetEntryPoolEntry*)newEntry, 1);
     }
     else
     {
@@ -3211,4 +3244,22 @@ int __cdecl DB_FileSize(const char *zoneName, int isMod)
     size = GetFileSize(zoneFile, 0);
     CloseHandle(zoneFile);
     return size;
+}
+
+void __cdecl Load_GetCurrentZoneHandle(unsigned __int8 *handle)
+{
+    unsigned __int8 v1; // [esp+0h] [ebp-4h]
+
+    if (!g_loadingZone)
+        MyAssertHandler(".\\database\\db_registry.cpp", 4262, 0, "%s", "g_loadingZone");
+    v1 = g_zoneIndex;
+    if (g_zoneIndex != g_zoneIndex)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            g_zoneIndex,
+            g_zoneIndex);
+    *handle = v1;
 }

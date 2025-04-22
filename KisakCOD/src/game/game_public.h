@@ -175,6 +175,7 @@ VariableUnion __cdecl GetIntGTZero(unsigned int index);
 void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t);
 void __cdecl HudElem_UpdateClient(gclient_s *client, int clientNum, hudelem_update_t which);
 
+extern game_hudelem_s g_hudelems[1024];
 
 
 // g_items
@@ -766,3 +767,8 @@ const entityHandler_t entityHandlers[] =
 
 extern vehicle_info_t s_vehicleInfos[32];
 extern GameWorldMp gameWorldMp;
+
+extern VehicleLocalPhysics s_phys;
+extern VehicleLocalPhysics s_phys_0;
+extern VehiclePhysicsBackup s_backup_0;
+extern VehiclePhysicsBackup s_backup;

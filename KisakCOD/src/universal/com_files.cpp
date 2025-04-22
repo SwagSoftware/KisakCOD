@@ -50,6 +50,54 @@ bool __cdecl FS_Initialized()
     return fs_searchpaths != 0;
 }
 
+int __cdecl FS_ConditionalRestart(int localClientNum, int checksumFeed)
+{
+    if (!FS_NeedRestart(checksumFeed))
+        return 0;
+    FS_Restart(localClientNum, checksumFeed);
+    return 1;
+}
+
+char info6[8192];
+char *__cdecl FS_ReferencedIwdPureChecksums()
+{
+    char *v0; // eax
+    char *v1; // eax
+    char *v2; // eax
+    int checksum; // [esp+40h] [ebp-Ch]
+    searchpath_s *search; // [esp+44h] [ebp-8h]
+    int numIwds; // [esp+48h] [ebp-4h]
+
+    info6[0] = 0;
+    checksum = fs_checksumFeed;
+    numIwds = 0;
+    info6[8191] = 0;
+    info6[8190] = 0;
+    info6[strlen(info6)] = '@';
+    info6[strlen(info6)] = ' ';
+    for (search = fs_searchpaths; search; search = search->next)
+    {
+        if (search->iwd && !search->bLocalized)
+        {
+            if (search->iwd->referenced)
+            {
+                v0 = va("%i ", search->iwd->pure_checksum);
+                I_strncat(info6, 0x2000, v0);
+                checksum ^= search->iwd->pure_checksum;
+                ++numIwds;
+            }
+        }
+    }
+    if (fs_fakeChkSum)
+    {
+        v1 = va("%i ", fs_fakeChkSum);
+        I_strncat(info6, 0x2000, v1);
+    }
+    v2 = va("%i ", numIwds ^ checksum);
+    I_strncat(info6, 0x2000, v2);
+    return info6;
+}
+
 BOOL __cdecl FS_PureIgnoresExtension(const char *extension)
 {
     if (*extension == 46)

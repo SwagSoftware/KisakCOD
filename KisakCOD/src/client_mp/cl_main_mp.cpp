@@ -5,8 +5,10 @@
 #include <qcommon/threads.h>
 #include <qcommon/cmd.h>
 #include <qcommon/mem_track.h>
+#include <qcommon/com_fileaccess.h>
 
 #include <universal/com_memory.h>
+#include <universal/q_parse.h>
 #include <win32/win_local.h>
 #include <win32/win_storage.h>
 #include <gfx_d3d/r_rendercmds.h>
@@ -24,6 +26,8 @@
 #include <gfx_d3d/r_init.h>
 #include <ui/ui.h>
 #include <qcommon/dl_main.h>
+#include <server_mp/server.h>
+#include <universal/profile.h>
 
 const dvar_t *cl_conXOffset;
 const dvar_t *cl_hudDrawsBehindsUI;
@@ -107,6 +111,16 @@ clientActive_t clients[MAX_CLIENTS];
 
 clientStatic_t cls;
 
+int lastUpdateKeyAuthTime;
+
+char cl_cdkey[34] = {"                                "};
+
+struct $03EB187DDD3425F4F7BCEA9E0EB47FBF // sizeof=0x2C
+{                                       // ...
+    char password[24];                  // ...
+    netadr_t host;                      // ...
+};
+$03EB187DDD3425F4F7BCEA9E0EB47FBF rconGlob;
 
 void __cdecl TRACK_cl_main()
 {
@@ -508,17 +522,18 @@ void __cdecl CL_RequestAuthorization(netsrc_t localClientNum)
     const char *v2; // eax
     int j; // [esp+10h] [ebp-78h]
     int l; // [esp+14h] [ebp-74h]
-    char md5Str[36]; // [esp+18h] [ebp-70h] BYREF
+    char md5Str[36]{ 0 }; // [esp+18h] [ebp-70h] BYREF
     const dvar_s *v6; // [esp+3Ch] [ebp-4Ch]
     char nums[64]; // [esp+40h] [ebp-48h] BYREF
     int i; // [esp+84h] [ebp-4h]
 
     lastUpdateKeyAuthTime = cls.realtime;
-    if (!CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
-    {
-        Com_Error(ERR_DROP, "EXE_ERR_INVALID_CD_KEY");
-        return;
-    }
+    // KISAKKEY
+    //if (!CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
+    //{
+    //    Com_Error(ERR_DROP, "EXE_ERR_INVALID_CD_KEY");
+    //    return;
+    //}
     if (!cls.authorizeServer.port)
     {
         Com_Printf(14, "Resolving %s\n", com_authServerName->current.string);
@@ -563,7 +578,7 @@ void __cdecl CL_RequestAuthorization(netsrc_t localClientNum)
             nums[j] = 0;
         }
         v6 = Dvar_RegisterBool("cl_anonymous", 0, 0x1Bu, "Allow anonymous log in");
-        CL_BuildMd5StrFromCDKey(md5Str);
+        //CL_BuildMd5StrFromCDKey(md5Str);
         v2 = va("getKeyAuthorize %i %s PB %s", v6->current.color[0], nums, md5Str);
         NET_OutOfBandPrint(localClientNum, cls.authorizeServer, v2);
     }
@@ -667,10 +682,31 @@ void __cdecl CL_Reconnect_f()
     }
 }
 
+void __cdecl CL_ResetPureClientAtServer(int localClientNum)
+{
+    const char *v1; // eax
+
+    v1 = va("vdr");
+    CL_AddReliableCommand(localClientNum, v1);
+}
+
+void __cdecl CL_SendPureChecksums(int localClientNum)
+{
+    char *pChecksums; // [esp+0h] [ebp-40Ch]
+    char cMsg[1028]; // [esp+4h] [ebp-408h] BYREF
+
+    pChecksums = FS_ReferencedIwdPureChecksums();
+    Com_sprintf(cMsg, 0x400u, "Va ");
+    I_strncat(cMsg, 1024, pChecksums);
+    cMsg[0] += 13;
+    cMsg[1] += 15;
+    CL_AddReliableCommand(localClientNum, cMsg);
+}
+
 void __cdecl CL_Vid_Restart_f()
 {
     unsigned __int8 *v0; // eax
-    char *v1; // eax
+    const char *v1; // eax
     BOOL v2; // [esp+0h] [ebp-D4h]
     char *info; // [esp+4h] [ebp-D0h]
     XZoneInfo zoneInfo[1]; // [esp+8h] [ebp-CCh] BYREF
@@ -759,6 +795,19 @@ void __cdecl CL_Vid_Restart_f()
     }
 }
 
+char sys_exitCmdLine[1024];
+void __cdecl Sys_QuitAndStartProcess(const char *exeName, const char *parameters)
+{
+    char pathOrig[268]; // [esp+0h] [ebp-110h] BYREF
+
+    GetCurrentDirectoryA(0x104u, pathOrig);
+    if (parameters)
+        Com_sprintf(sys_exitCmdLine, 0x400u, "\"%s\\%s\" %s", pathOrig, exeName, parameters);
+    else
+        Com_sprintf(sys_exitCmdLine, 0x400u, "\"%s\\%s\"", pathOrig, exeName);
+    Cbuf_AddText(0, "quit\n");
+}
+
 void __cdecl CL_Snd_Restart_f()
 {
     unsigned __int8 *v0; // eax
@@ -773,8 +822,8 @@ void __cdecl CL_Snd_Restart_f()
     else
     {
         Hunk_CheckTempMemoryClear();
-        v0 = (unsigned __int8 *)Z_VirtualAlloc((int)&unk_A00000, "demo", 0);
-        MemFile_InitForWriting(&memFile, (int)&unk_A00000, v0, 1, 0);
+        v0 = (unsigned __int8 *)Z_VirtualAlloc(0xA00000, "demo", 0);
+        MemFile_InitForWriting(&memFile, 0xA00000, v0, 1, 0);
         SND_Save(&memFile);
         MemFile_StartSegment(&memFile, -1);
         soundStateBuf = (unsigned __int8 *)Z_VirtualAlloc(memFile.bytesUsed, "CL_Snd_Restart_f", 10);
@@ -833,11 +882,26 @@ bool __cdecl CL_WasMapAlreadyLoaded()
     return com_sv_running->current.enabled;
 }
 
+void __cdecl LoadMapLoadscreen(const char *mapname)
+{
+    XZoneInfo zoneInfo[1]; // [esp+0h] [ebp-54h] BYREF
+    char zoneName[68]; // [esp+Ch] [ebp-48h] BYREF
+
+    DB_ResetZoneSize(0);
+    Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
+    zoneInfo[0].name = zoneName;
+    zoneInfo[0].allocFlags = 32;
+    zoneInfo[0].freeFlags = 96;
+    DB_LoadXAssets(zoneInfo, 1u, 0);
+    DB_SyncXAssets();
+    DB_UpdateDebugZone();
+}
+
 void __cdecl CL_DownloadsComplete(int localClientNum)
 {
     char *v1; // eax
-    char *v2; // eax
-    char *v3; // eax
+    const char *v2; // eax
+    const char *v3; // eax
     char *info; // [esp+10h] [ebp-98h]
     char *fn; // [esp+14h] [ebp-94h]
     char gametype[68]; // [esp+18h] [ebp-90h] BYREF
@@ -913,6 +977,7 @@ void __cdecl CL_DownloadsComplete(int localClientNum)
         goto LABEL_25;
 }
 
+unsigned __int8 msgBuffer[2048];
 void __cdecl CL_CheckForResend(netsrc_t localClientNum)
 {
     const char *v1; // eax
@@ -972,7 +1037,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 strcpy(pkt, "getchallenge");
                 pktlen = &pkt[strlen(pkt) + 1] - &pkt[1];
                 //PbClientConnecting(1, pkt, &pktlen);
-                CL_BuildMd5StrFromCDKey(md5Str);
+                //CL_BuildMd5StrFromCDKey(md5Str); // KISAKKEY
                 v1 = va("getchallenge 0 \"%s\"", md5Str);
                 NET_OutOfBandPrint(localClientNum, clc->serverAddress, v1);
                 break;
@@ -994,7 +1059,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 dst[count + 1] = 0;
                 pktlen = count + 10;
                 memcpy((unsigned __int8 *)pkt, src, count + 10);
-                PbClientConnecting(2, pkt, &pktlen);
+                //PbClientConnecting(2, pkt, &pktlen); // 
                 NET_OutOfBandData(localClientNum, clc->serverAddress, src, count + 10);
                 dvar_modifiedFlags &= ~2u;
                 break;
@@ -1308,6 +1373,7 @@ void __cdecl CL_ServersResponsePacket(netadr_t from, msg_t *msg)
     Com_Printf(14, "%d servers parsed (total %d)\n", numservers, count);
 }
 
+char printBuf[2048];
 char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg_t *msg, int time)
 {
     const char *v5; // eax
@@ -1875,7 +1941,7 @@ void __cdecl CL_RunOncePerClientFrame(int localClientNum, int msec)
         if (clientUIActives[0].connectionState == 9 || cl_forceavidemo->current.enabled)
         {
             v2 = CL_ControllerIndexFromClientNum(localClientNum);
-            Cmd_ExecuteSingleCommand(0, v2, "screenshot silent\n");
+            Cmd_ExecuteSingleCommand(0, v2, (char*)"screenshot silent\n");
         }
         msec = (int)(1000.0 / (double)cl_avidemo->current.integer * com_timescaleValue);
         if (!msec)
@@ -1890,6 +1956,165 @@ void __cdecl CL_RunOncePerClientFrame(int localClientNum, int msec)
     if (frame_msec > 0xC8)
         frame_msec = 200;
     old_com_frameTime = com_frameTime;
+}
+
+void __cdecl CL_FinishMotdDownload()
+{
+    void *buf; // [esp+0h] [ebp-8h] BYREF
+    int fileSize; // [esp+4h] [ebp-4h]
+
+    fileSize = FS_ReadFile("motd.txt", &buf);
+    if (fileSize >= 0)
+    {
+        Dvar_SetStringByName("motd", (const char*)buf);
+        FS_FreeFile((char*)buf);
+    }
+}
+
+void __cdecl CL_BeginDownload(char *localName, char *remoteName)
+{
+    const char *v2; // eax
+
+    Com_DPrintf(
+        14,
+        "***** CL_BeginDownload *****\nLocalname: %s\nRemotename: %s\n****************************\n",
+        localName,
+        remoteName);
+    CL_GetLocalClientConnection(0);
+    I_strncpyz(cls.downloadName, localName, 256);
+    Com_sprintf(cls.downloadTempName, 0x100u, "%s.tmp", localName);
+    I_strncpyz(legacyHacks.cl_downloadName, remoteName, 64);
+    legacyHacks.cl_downloadSize = 0;
+    legacyHacks.cl_downloadCount = 0;
+    legacyHacks.cl_downloadTime = cls.realtime;
+    cls.downloadBlock = 0;
+    cls.downloadCount = 0;
+    v2 = va("download %s", remoteName);
+    CL_AddReliableCommand(0, v2);
+}
+
+void __cdecl CL_NextDownload(int localClientNum)
+{
+    char *localName; // [esp+24h] [ebp-Ch]
+    char *s; // [esp+28h] [ebp-8h]
+    char *sa; // [esp+28h] [ebp-8h]
+    char *sb; // [esp+28h] [ebp-8h]
+    char *sc; // [esp+28h] [ebp-8h]
+    char *remoteName; // [esp+2Ch] [ebp-4h]
+
+    CL_GetLocalClientConnection(localClientNum);
+    if (!cls.downloadList[0])
+        goto LABEL_11;
+    if (com_sv_running->current.enabled)
+        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2721, 0, "%s", "!com_sv_running->current.enabled");
+    s = cls.downloadList;
+    if (cls.downloadList[0] == 64)
+        s = &cls.downloadList[1];
+    remoteName = s;
+    sa = strchr(s, '@');
+    if (sa)
+    {
+        *sa = 0;
+        localName = sa + 1;
+        sb = strchr(sa + 1, '@');
+        if (sb)
+        {
+            *sb = 0;
+            sc = (sb + 1);
+        }
+        else
+        {
+            sc = &localName[strlen(localName)];
+        }
+        CL_BeginDownload(localName, remoteName);
+        cls.downloadRestart = 1;
+        memmove(cls.downloadList, sc, strlen(sc) + 1);
+    }
+    else
+    {
+    LABEL_11:
+        CL_DownloadsComplete(localClientNum);
+    }
+}
+
+void __cdecl CL_WWWDownload()
+{
+    char *error; // [esp+10h] [ebp-110h]
+    dlStatus_t ret; // [esp+14h] [ebp-10Ch]
+    char to_ospath[260]; // [esp+18h] [ebp-108h] BYREF
+
+    ret = (dlStatus_t)DL_DownloadLoop();
+    if (ret)
+    {
+        if (DL_DLIsMotd())
+        {
+            if (ret == DL_DONE)
+                CL_FinishMotdDownload();
+            cls.wwwDlInProgress = 0;
+        }
+        else if (ret == DL_DONE)
+        {
+            cls.download = 0;
+            FS_BuildOSPath((char*)fs_homepath->current.integer, cls.originalDownloadName, (char*)"", to_ospath);
+            to_ospath[&to_ospath[strlen(to_ospath) + 1] - &to_ospath[1] - 1] = 0;
+            if (rename(cls.downloadTempName, to_ospath))
+            {
+                FS_CopyFile(cls.downloadTempName, to_ospath);
+                remove(cls.downloadTempName);
+            }
+            cls.downloadName[0] = 0;
+            cls.downloadTempName[0] = 0;
+            I_strncpyz(legacyHacks.cl_downloadName, "", 64);
+            if (cls.wwwDlDisconnected)
+            {
+                if (!autoupdateStarted)
+                    Cbuf_AddText(0, "reconnect\n");
+            }
+            else
+            {
+                CL_AddReliableCommand(0, "wwwdl done");
+            }
+            cls.wwwDlInProgress = 0;
+            CL_NextDownload(0);
+        }
+        else if (cls.wwwDlDisconnected)
+        {
+            error = va("Download failure while getting %s", cls.downloadName);
+            cls.wwwDlDisconnected = 0;
+            CL_ClearStaticDownload();
+            Com_Error(ERR_DROP, error);
+        }
+        else
+        {
+            Com_Printf(14, "Download failure while getting %s", cls.downloadName);
+            CL_AddReliableCommand(0, "wwwdl fail");
+            cls.wwwDlInProgress = 0;
+        }
+    }
+}
+
+void __cdecl CL_CheckForUpdateKeyAuth(netsrc_t localClientNum)
+{
+    int v1; // eax
+    clientConnection_t *clc; // [esp+0h] [ebp-4h]
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
+            1112,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    if (clientUIActives[0].connectionState == CA_ACTIVE)
+    {
+        clc = CL_GetLocalClientConnection(localClientNum);
+        if (cls.realtime - lastUpdateKeyAuthTime > 300000)
+        {
+            if (net_lanauthorize->current.enabled || !Sys_IsLANAddress(clc->serverAddress))
+                CL_RequestAuthorization(localClientNum);
+        }
+    }
 }
 
 void __cdecl CL_Frame(netsrc_t localClientNum)
@@ -1916,18 +2141,20 @@ void __cdecl CL_Frame(netsrc_t localClientNum)
     connstate = clientUIActives[0].connectionState;
     Hunk_CheckTempMemoryClear();
     Hunk_CheckTempMemoryHighClear();
-    if (byte_E7A7C1[0])
+    if (clientUIActives[0].isRunning)
     {
         CL_DevGuiFrame(localClientNum);
-        //Profile_Begin(357);
+        Profile_Begin(357);
         CL_VoiceFrame(localClientNum);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         CL_UpdateColor(localClientNum);
         CL_CheckUserinfo(localClientNum);
         CL_CheckForResend(localClientNum);
         CL_CheckTimeout(localClientNum);
+
         if (DL_InProgress())
             CL_WWWDownload();
+
         CL_UpdateInGameState(localClientNum);
         CL_SetCGameTime(localClientNum);
         CL_CreateCmdsDuringConnection(localClientNum);
@@ -2495,6 +2722,18 @@ void __cdecl CL_ToggleMenu_f()
     }
 }
 
+void __cdecl CL_WriteAllDemoClientArchive(int localClientNum)
+{
+    const clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-Ch]
+    clientConnection_t *clc; // [esp+4h] [ebp-8h]
+    int index; // [esp+8h] [ebp-4h]
+
+    clc = CL_GetLocalClientConnection(localClientNum);
+    LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
+    for (index = 0; index < 256; ++index)
+        CL_WriteDemoClientArchive(clc, LocalClientGlobals, localClientNum, index);
+}
+
 cmd_function_s CL_ForwardToServer_f_VAR;
 cmd_function_s CL_Configstrings_f_VAR;
 cmd_function_s CL_Clientinfo_f_VAR;
@@ -2690,6 +2929,704 @@ void __cdecl CL_Record_f()
     else
     {
         Com_Printf(0, "record <demoname>\n");
+    }
+}
+
+void __cdecl CL_StopRecord_f()
+{
+    int len; // [esp+0h] [ebp-Ch] BYREF
+    clientConnection_t *clc; // [esp+4h] [ebp-8h]
+    char type; // [esp+Bh] [ebp-1h] BYREF
+
+    clc = CL_GetLocalClientConnection(0);
+    if (clc->demorecording)
+    {
+        type = 0;
+        FS_Write(&type, 1u, clc->demofile);
+        len = -1;
+        FS_Write((char*)&len, 4u, clc->demofile);
+        FS_Write((char *)&len, 4u, clc->demofile);
+        FS_FCloseFile(clc->demofile);
+        clc->demofile = 0;
+        clc->demorecording = 0;
+        Com_Printf(0, "Stopped demo.\n");
+    }
+    else
+    {
+        Com_Printf(0, "Not recording a demo.\n");
+    }
+}
+
+void __cdecl CL_PlayDemo_f()
+{
+    const char *v0; // eax
+    const char *v1; // eax
+    const char *v2; // eax
+    const char *v3; // eax
+    int v4; // eax
+    const char *v5; // eax
+    char extension[32]; // [esp+24h] [ebp-134h] BYREF
+    int localClientNum; // [esp+44h] [ebp-114h]
+    char name[260]; // [esp+48h] [ebp-110h] BYREF
+    clientConnection_t *clc; // [esp+150h] [ebp-8h]
+    const char *arg; // [esp+154h] [ebp-4h]
+
+    if (Cmd_Argc() == 2)
+    {
+        if (com_sv_running->current.enabled)
+        {
+            Com_Printf(14, "listen server cannot play a demo.\n");
+        }
+        else
+        {
+            localClientNum = 0;
+            CL_Disconnect(0);
+            arg = Cmd_Argv(1);
+            Com_sprintf(extension, 0x20u, ".dm_%d", 1);
+            if (I_stricmp(&arg[strlen(arg) - (&extension[strlen(extension) + 1] - &extension[1])], extension))
+                Com_sprintf(name, 0x100u, "demos/%s.dm_%d", arg, 1);
+            else
+                Com_sprintf(name, 0x100u, "demos/%s", arg);
+            if (localClientNum)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
+                    1112,
+                    0,
+                    "%s\n\t(localClientNum) = %i",
+                    "(localClientNum == 0)",
+                    localClientNum);
+            clc = CL_GetLocalClientConnection(localClientNum);
+            FS_FOpenFileRead(name, &clc->demofile);
+            if (!clc->demofile)
+            {
+                v1 = va("EXE_ERR_NOT_FOUND %s", name);
+                Com_Error(ERR_DROP, v1);
+            }
+            v2 = Cmd_Argv(1);
+            I_strncpyz(clc->demoName, v2, 64);
+            Con_Close(localClientNum);
+            CL_ResetStats_f();
+            clientUIActives[localClientNum].connectionState = CA_CONNECTED;
+            clc->demoplaying = 1;
+            v3 = Cmd_Argv(0);
+            v4 = I_stricmp(v3, "timedemo");
+            clc->isTimeDemo = v4 == 0;
+            clc->lastClientArchiveIndex = 0;
+            v5 = Cmd_Argv(1);
+            I_strncpyz(cls.servername, v5, 256);
+            while (clientUIActives[localClientNum].connectionState >= CA_CONNECTED
+                && clientUIActives[localClientNum].connectionState < CA_PRIMED)
+                CL_ReadDemoMessage(localClientNum);
+            clc->firstDemoFrameSkipped = 0;
+        }
+    }
+    else
+    {
+        v0 = Cmd_Argv(0);
+        Com_Printf(14, "%s <demoname>\n", v0);
+    }
+}
+
+void __cdecl CL_RconInit()
+{
+    rconGlob.password[0] = 0;
+    rconGlob.host.type = NA_BAD;
+}
+
+void CL_RconLogin()
+{
+    unsigned int v0; // [esp+Ch] [ebp-Ch]
+    const char *password; // [esp+14h] [ebp-4h]
+
+    if (Cmd_Argc() == 3)
+    {
+        password = Cmd_Argv(2);
+        if (strlen(password) < 24)
+            memcpy(&rconGlob, password, strlen(password));
+        else
+            Com_Printf(14, "rcon password must be %i characters or less\n", 24);
+    }
+    else
+    {
+        Com_Printf(14, "USAGE: rcon login <password>\n");
+    }
+}
+
+void CL_RconLogout()
+{
+    if (rconGlob.password[0])
+        rconGlob.password[0] = 0;
+    else
+        Com_Printf(14, "Not logged in\n");
+}
+
+ping_t *__cdecl CL_GetFreePing()
+{
+    ping_t *best; // [esp+0h] [ebp-18h]
+    DWORD currentTime; // [esp+8h] [ebp-10h]
+    int oldest; // [esp+Ch] [ebp-Ch]
+    int i; // [esp+10h] [ebp-8h]
+    int ia; // [esp+10h] [ebp-8h]
+    ping_t *pingptr; // [esp+14h] [ebp-4h]
+    ping_t *pingptra; // [esp+14h] [ebp-4h]
+
+    currentTime = Sys_Milliseconds();
+    pingptr = cl_pinglist;
+    for (i = 0; i < 16; ++i)
+    {
+        if (!pingptr->adr.port)
+            goto LABEL_9;
+        if (pingptr->time)
+        {
+            if (pingptr->time >= 500)
+            {
+            LABEL_9:
+                pingptr->adr.port = 0;
+                return pingptr;
+            }
+        }
+        else if ((currentTime - pingptr->start) >= 500)
+        {
+            goto LABEL_9;
+        }
+        ++pingptr;
+    }
+    pingptra = cl_pinglist;
+    best = cl_pinglist;
+    oldest = 0x80000000;
+    for (ia = 0; ia < 16; ++ia)
+    {
+        if ((currentTime - pingptra->start) > oldest)
+        {
+            oldest = currentTime - pingptra->start;
+            best = pingptra;
+        }
+        ++pingptra;
+    }
+    return best;
+}
+
+void __cdecl CL_Ping_f()
+{
+    netadr_t to; // [esp+0h] [ebp-20h] BYREF
+    ping_t *pingptr; // [esp+18h] [ebp-8h]
+    const char *server; // [esp+1Ch] [ebp-4h]
+
+    if (Cmd_Argc() == 2)
+    {
+        memset(&to, 0, sizeof(to));
+        server = Cmd_Argv(1);
+        if (NET_StringToAdr((char*)server, &to))
+        {
+            pingptr = CL_GetFreePing();
+            pingptr->adr = to;
+            pingptr->start = Sys_Milliseconds();
+            pingptr->time = 0;
+            CL_SetServerInfoByAddress(pingptr->adr, 0, 0);
+            NET_OutOfBandPrint(NS_CLIENT1, to, "getinfo xxx");
+        }
+    }
+    else
+    {
+        Com_Printf(0, "usage: ping [server]\n");
+    }
+}
+
+void CL_RconHost()
+{
+    const char *hostName; // [esp+0h] [ebp-4h]
+
+    if (Cmd_Argc() == 3)
+    {
+        hostName = Cmd_Argv(2);
+        if (NET_StringToAdr((char*)hostName, &rconGlob.host))
+        {
+            if (rconGlob.host.type == NA_BAD)
+                MyAssertHandler(".\\client_mp\\cl_main_pc_mp.cpp", 782, 1, "%s", "rconGlob.host.type != NA_BAD");
+            if (!rconGlob.host.port)
+                rconGlob.host.port = BigShort(28960);
+        }
+        else
+        {
+            Com_Printf(14, "bad host address\n");
+            if (rconGlob.host.type != NA_BAD)
+                MyAssertHandler(
+                    ".\\client_mp\\cl_main_pc_mp.cpp",
+                    779,
+                    1,
+                    "%s\n\t(rconGlob.host.type) = %i",
+                    "(rconGlob.host.type == NA_BAD)",
+                    rconGlob.host.type);
+        }
+    }
+    else
+    {
+        Com_Printf(14, "USAGE: rcon host <address>\n");
+    }
+}
+
+void __cdecl CL_Rcon_f()
+{
+    const char *v0; // eax
+    int v1; // [esp-Ch] [ebp-450h]
+    int v2; // [esp-8h] [ebp-44Ch]
+    connstate_t connstate; // [esp+10h] [ebp-434h]
+    char message[1028]; // [esp+14h] [ebp-430h] BYREF
+    int maxlen; // [esp+418h] [ebp-2Ch]
+    int len; // [esp+41Ch] [ebp-28h]
+    const clientConnection_t *clc; // [esp+420h] [ebp-24h]
+    int i; // [esp+424h] [ebp-20h]
+    netadr_t to; // [esp+428h] [ebp-1Ch]
+    const char *cmd; // [esp+440h] [ebp-4h]
+
+    if (Cmd_Argc() < 2)
+    {
+        Com_Printf(0, "USAGE: rcon <command> <options...>\n");
+        return;
+    }
+    cmd = Cmd_Argv(1);
+    if (!I_stricmp(cmd, "login"))
+    {
+        CL_RconLogin();
+        return;
+    }
+    if (!I_stricmp(cmd, "logout"))
+    {
+        CL_RconLogout();
+        return;
+    }
+    if (!I_stricmp(cmd, "host"))
+    {
+        CL_RconHost();
+        return;
+    }
+    if (!rconGlob.password[0])
+    {
+        Com_Printf(0, "You need to log in with 'rcon login <password>' before using rcon.\n");
+        return;
+    }
+    maxlen = 1024;
+    len = Com_AddToString("rcon ", message, 0, 1024, 0);
+    len = Com_AddToString(rconGlob.password, message, len, maxlen, 0);
+    for (i = 1; i < Cmd_Argc(); ++i)
+    {
+        len = Com_AddToString(" ", message, len, maxlen, 0);
+        v2 = maxlen;
+        v1 = len;
+        v0 = Cmd_Argv(i);
+        len = Com_AddToString(v0, message, v1, v2, 1);
+    }
+    if (len == maxlen)
+    {
+        Com_Printf(0, "rcon commands are limited to %i characters\n", maxlen - 1);
+        return;
+    }
+    message[len] = 0;
+    connstate = clientUIActives[0].connectionState;
+    clc = CL_GetLocalClientConnection(0);
+    if (connstate < CA_CONNECTED)
+    {
+        if (rconGlob.host.type == NA_BAD)
+        {
+            Com_Printf(0, "Can't determine rcon target.  You can fix this by either:\n");
+            Com_Printf(0, "1) Joining the server as a player.\n");
+            Com_Printf(0, "2) Setting the host server with 'rcon host <address>'.\n");
+            return;
+        }
+        to = rconGlob.host;
+    }
+    else
+    {
+        to = clc->netchan.remoteAddress;
+    }
+    NET_OutOfBandData(NS_CLIENT1, to, (const unsigned char*)message, &message[strlen(message) + 1] - &message[1] + 1);
+}
+
+void __cdecl CL_OpenedIWDList_f()
+{
+    char *v0; // eax
+
+    v0 = FS_LoadedIwdNames();
+    Com_Printf(0, "Opened IWD Names: %s\n", v0);
+}
+
+void __cdecl CL_ReferencedIWDList_f()
+{
+    char *v0; // eax
+
+    v0 = FS_ReferencedIwdNames();
+    Com_Printf(0, "Referenced IWD Names: %s\n", v0);
+}
+
+void __cdecl CL_UpdateLevelHunkUsage()
+{
+    int v0; // eax
+    const char *v1; // eax
+    unsigned int v2; // eax
+    int handle; // [esp+20h] [ebp-130h] BYREF
+    clientActive_t *LocalClientGlobals; // [esp+24h] [ebp-12Ch]
+    const char *memlistfile; // [esp+28h] [ebp-128h]
+    char *buf; // [esp+2Ch] [ebp-124h]
+    int localClientNum; // [esp+30h] [ebp-120h]
+    int len; // [esp+34h] [ebp-11Ch]
+    char *outbuftrav; // [esp+38h] [ebp-118h]
+    int memusage; // [esp+3Ch] [ebp-114h]
+    char outstr[256]; // [esp+40h] [ebp-110h] BYREF
+    const char *token; // [esp+144h] [ebp-Ch]
+    char *outbuf; // [esp+148h] [ebp-8h]
+    const char *buftrav; // [esp+14Ch] [ebp-4h] BYREF
+
+    memlistfile = "hunkusage.dat";
+    memusage = Hunk_Used();
+    localClientNum = 0;
+    LocalClientGlobals = CL_GetLocalClientGlobals(0);
+    len = FS_FOpenFileByMode((char*)"hunkusage.dat", &handle, FS_READ);
+    if (len >= 0)
+    {
+        buf = (char*)Z_Malloc(len + 1, "CL_UpdateLevelHunkUsage", 10);
+        memset(buf, 0, len + 1);
+        outbuf = (char*)Z_Malloc(len + 1, "CL_UpdateLevelHunkUsage", 10);
+        memset(outbuf, 0, len + 1);
+        FS_Read((unsigned char*)buf, len, handle);
+        FS_FCloseFile(handle);
+        buftrav = buf;
+        outbuftrav = outbuf;
+        *outbuf = 0;
+        while (1)
+        {
+            token = Com_Parse(&buftrav)->token;
+            if (!token || !*token)
+                break;
+            if (I_stricmp(token, LocalClientGlobals->mapname))
+            {
+                I_strncat(outbuftrav, len + 1, token);
+                I_strncat(outbuftrav, len + 1, " ");
+                token = Com_Parse(&buftrav)->token;
+                if (token && *token)
+                {
+                    I_strncat(outbuftrav, len + 1, token);
+                    I_strncat(outbuftrav, len + 1, "\n");
+                }
+                else
+                {
+                    Com_Error(ERR_DROP, "EXE_ERR_HUNGUSAGE_CORRUPT");
+                }
+            }
+            else
+            {
+                token = Com_Parse(&buftrav)->token;
+                if (token)
+                {
+                    if (*token)
+                    {
+                        v0 = atoi(token);
+                        if (v0 == memusage)
+                        {
+                            Z_Free(buf, 10);
+                            Z_Free(outbuf, 10);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        handle = FS_FOpenFileWrite((char*)memlistfile);
+        if (!handle)
+        {
+            v1 = va("EXE_ERR_CANT_CREATE %s", memlistfile);
+            Com_Error(ERR_DROP, v1);
+        }
+        len = strlen(outbuf);
+        v2 = FS_Write(outbuf, len, handle);
+        if (v2 != len)
+            Com_Error(ERR_DROP, "EXE_ERR_CANT_WRITE %s", memlistfile);
+        FS_FCloseFile(handle);
+        Z_Free(buf, 10);
+        Z_Free(outbuf, 10);
+    }
+    FS_FOpenFileByMode((char*)memlistfile, &handle, FS_APPEND);
+    if (!handle)
+        Com_Error(ERR_DROP, "EXE_ERR_HUNKUSAGE_CANT_WRITE");
+    Com_sprintf(outstr, 0x100u, "%s %i\n", LocalClientGlobals->mapname, memusage);
+    FS_Write(outstr, &outstr[strlen(outstr) + 1] - &outstr[1], handle);
+    FS_FCloseFile(handle);
+    len = FS_FOpenFileByMode((char *)memlistfile, &handle, FS_READ);
+    if (len >= 0)
+        FS_FCloseFile(handle);
+}
+
+void __cdecl CL_OpenScriptMenu_f()
+{
+    int Int; // eax
+    const char *v1; // eax
+    char *menuName; // [esp+0h] [ebp-10h]
+    const char *menuResponse; // [esp+4h] [ebp-Ch]
+    int menuIndex; // [esp+8h] [ebp-8h]
+    const char *parentMenuName; // [esp+Ch] [ebp-4h]
+
+    if (Cmd_Argc() == 3)
+    {
+        if (UI_AllowScriptMenuResponse(0))
+        {
+            if (cls.uiStarted)
+            {
+                parentMenuName = Cmd_Argv(1);
+                menuResponse = Cmd_Argv(2);
+                if (parentMenuName)
+                {
+                    if (menuResponse)
+                    {
+                        for (menuIndex = 0; menuIndex < 32; ++menuIndex)
+                        {
+                            menuName = CL_GetConfigString(0, menuIndex + 1970);
+                            if (*menuName)
+                            {
+                                if (!I_stricmp(parentMenuName, menuName))
+                                    break;
+                            }
+                        }
+                        if (menuIndex == 32)
+                            menuIndex = -1;
+                        Int = Dvar_GetInt("sv_serverId");
+                        v1 = va("cmd mr %i %i %s\n", Int, menuIndex, menuResponse);
+                        Cbuf_AddText(0, v1);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        Com_Printf(0, "USAGE: openscriptmenu <parent menu name> <script menu response>\n");
+        Com_Printf(0, "EXAMPLE: openscriptmenu ingame changeweapon\n");
+    }
+}
+
+void __cdecl COM_WriteFinalStringEdFile(char *fromOSPath, char *toOSPath)
+{
+    unsigned __int8 *buf; // [esp+0h] [ebp-Ch]
+    int len; // [esp+4h] [ebp-8h]
+    FILE *f; // [esp+8h] [ebp-4h]
+    FILE *fa; // [esp+8h] [ebp-4h]
+
+    f = FS_FileOpenReadBinary(fromOSPath);
+    if (f)
+    {
+        len = FS_FileGetFileSize(f);
+        buf = (unsigned char*)malloc(len);
+        if (FS_FileRead(buf, len, f) != len)
+            Com_Error(ERR_FATAL, "Short read in COM_WriteFinalStringEdFile()");
+        FS_FileClose(f);
+        fa = FS_FileOpenWriteBinary(toOSPath);
+        if (fa)
+        {
+            if (FS_FileWrite(buf, len, fa) != len)
+                Com_Error(ERR_FATAL, "Short write in COM_WriteFinalStringEdFile()");
+            FS_FileClose(fa);
+            free(buf);
+        }
+        else
+        {
+            free(buf);
+        }
+    }
+}
+
+void __cdecl Com_WriteLocalizedSoundAliasFiles()
+{
+    char stringEdFileName[256]; // [esp+10h] [ebp-218h] BYREF
+    int mark; // [esp+110h] [ebp-118h]
+    const char **fileNames; // [esp+114h] [ebp-114h]
+    char stringEdExternalFileName[256]; // [esp+118h] [ebp-110h] BYREF
+    FILE *f; // [esp+21Ch] [ebp-Ch]
+    int i; // [esp+220h] [ebp-8h]
+    int fileCount; // [esp+224h] [ebp-4h] BYREF
+
+    FS_BuildOSPath(
+        (char*)fs_homepath->current.integer,
+        (char*)"../source_data/string_resources/subtitle.st",
+        (char*)"",
+        stringEdExternalFileName);
+    stringEdExternalFileName[&stringEdExternalFileName[strlen(stringEdExternalFileName) + 1]
+        - &stringEdExternalFileName[1]
+        - 1] = 0;
+    f = fopen(stringEdExternalFileName, "r+");
+    if (f)
+    {
+        fclose(f);
+        FS_BuildOSPath((char*)fs_basepath->current.integer, fs_gamedir, (char*)"soundaliases/subtitle.st", stringEdFileName);
+        FS_CopyFile(stringEdExternalFileName, stringEdFileName);
+        if (FS_FileExists((char*)"soundaliases/subtitle.st"))
+        {
+            Com_Printf(9, "Localizing sound alias subtitle text...\n");
+            Com_Printf(9, "Writing to StringEd file %s\n", stringEdExternalFileName);
+            fileNames = FS_ListFiles("soundaliases", "csv", FS_LIST_PURE_ONLY, &fileCount);
+            if (fileCount)
+            {
+                mark = Hunk_HideTempMemory();
+                for (i = 0; i < fileCount; ++i)
+                {
+                    Com_ProcessSoundAliasFileLocalization((char*)fileNames[i], (char*)"all_mp");
+                    Hunk_ClearTempMemory();
+                }
+                Hunk_ShowTempMemory(mark);
+                FS_FreeFileList(fileNames);
+                COM_WriteFinalStringEdFile(stringEdFileName, stringEdExternalFileName);
+                FS_Remove(stringEdFileName);
+                Com_Printf(9, "done\n");
+            }
+            else
+            {
+                Com_PrintWarning(9, "WARNING: can't find any sound alias files (soundaliases/*.csv)\n");
+            }
+        }
+        else
+        {
+            Com_PrintWarning(9, "WARNING: Could not make local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+        }
+    }
+    else
+    {
+        Com_PrintWarning(9, "WARNING: Can not write to StringEd file %s\n", stringEdExternalFileName);
+    }
+}
+
+void __cdecl CL_CheckAutoUpdate()
+{
+    __int16 v0; // ax
+    const char *v1; // eax
+    int rnd; // [esp+0h] [ebp-3Ch]
+    netadr_t temp; // [esp+4h] [ebp-38h] BYREF
+    const char *servername; // [esp+1Ch] [ebp-20h]
+    int i; // [esp+20h] [ebp-1Ch]
+    int validServerNum; // [esp+24h] [ebp-18h]
+    const char *pszGoodServers[5]; // [esp+28h] [ebp-14h]
+
+    validServerNum = 0;
+    i = 0;
+    if (!autoupdateChecked)
+    {
+        for (i = 0; i < 5; ++i)
+        {
+            if (NET_StringToAdr(cls.autoupdateServerNames[i], &temp))
+                pszGoodServers[validServerNum++] = cls.autoupdateServerNames[i];
+        }
+        if (validServerNum)
+        {
+            rnd = rand() % validServerNum;
+            servername = pszGoodServers[rnd];
+            Com_DPrintf(14, "Resolving AutoUpdate Server... ");
+            if (NET_StringToAdr((char*)servername, &cls.autoupdateServer))
+                goto LABEL_17;
+            Com_DPrintf(14, "\nCouldn't resolve first address, trying others... ");
+            for (i = 1; i < validServerNum; ++i)
+            {
+                servername = pszGoodServers[(i + rnd) % validServerNum];
+                if (NET_StringToAdr((char *)servername, &cls.autoupdateServer))
+                {
+                    Com_DPrintf(14, "\nAlternate server address resolved... ");
+                    break;
+                }
+            }
+            if (i != validServerNum)
+            {
+            LABEL_17:
+                cls.autoupdateServer.port = BigShort(28960);
+                v0 = BigShort(cls.autoupdateServer.port);
+                Com_DPrintf(
+                    14,
+                    "%i.%i.%i.%i:%i\n",
+                    cls.autoupdateServer.ip[0],
+                    cls.autoupdateServer.ip[1],
+                    cls.autoupdateServer.ip[2],
+                    cls.autoupdateServer.ip[3],
+                    v0);
+                v1 = va("getUpdateInfo2 \"%s\" \"%s\" \"%s\"\n", "CoD4 MP", "1.0", "win-x86");
+                NET_OutOfBandPrint(NS_CLIENT1, cls.autoupdateServer, v1);
+                autoupdateChecked = 1;
+            }
+            else
+            {
+                Com_DPrintf(14, "\nFailed to resolve any Auto-update servers.\n");
+                autoupdateChecked = 1;
+            }
+        }
+        else
+        {
+            Com_DPrintf(14, "Couldn't resolve an AutoUpdate Server address.\n");
+            autoupdateChecked = 1;
+        }
+    }
+}
+
+serverStatus_s cl_serverStatusList[16];
+int serverStatusCount;
+serverStatus_s *__cdecl CL_GetServerStatus(netadr_t from)
+{
+    int oldest; // [esp+0h] [ebp-10h]
+    int i; // [esp+4h] [ebp-Ch]
+    int ia; // [esp+4h] [ebp-Ch]
+    int ib; // [esp+4h] [ebp-Ch]
+    int oldestTime; // [esp+8h] [ebp-8h]
+
+    for (i = 0; i < 16; ++i)
+    {
+        if (NET_CompareAdr(from, cl_serverStatusList[i].address))
+            return &cl_serverStatusList[i];
+    }
+    for (ia = 0; ia < 16; ++ia)
+    {
+        if (cl_serverStatusList[ia].retrieved)
+            return &cl_serverStatusList[ia];
+    }
+    oldest = -1;
+    oldestTime = 0;
+    for (ib = 0; ib < 16; ++ib)
+    {
+        if (oldest == -1 || cl_serverStatusList[ib].startTime < oldestTime)
+        {
+            oldest = ib;
+            oldestTime = cl_serverStatusList[ib].startTime;
+        }
+    }
+    if (oldest == -1)
+        return &cl_serverStatusList[++serverStatusCount & 0xF];
+    else
+        return &cl_serverStatusList[oldest];
+}
+
+void __cdecl CL_ServerStatus_f()
+{
+    connstate_t connstate; // [esp+0h] [ebp-28h]
+    clientConnection_t *clc; // [esp+4h] [ebp-24h]
+    serverStatus_s *serverStatus; // [esp+8h] [ebp-20h]
+    netadr_t to; // [esp+Ch] [ebp-1Ch] BYREF
+    const char *server; // [esp+24h] [ebp-4h]
+
+    Com_Memset(&to, 0, 20);
+    if (Cmd_Argc() == 2)
+    {
+        server = Cmd_Argv(1);
+    }
+    else
+    {
+        connstate = clientUIActives[0].connectionState;
+        clc = CL_GetLocalClientConnection(0);
+        if (connstate != CA_ACTIVE || clc->demoplaying)
+        {
+            Com_Printf(0, "Not connected to a server.\n");
+            Com_Printf(0, "Usage: serverstatus [server]\n");
+            return;
+        }
+        server = cls.servername;
+    }
+    if (NET_StringToAdr((char*)server, &to))
+    {
+        NET_OutOfBandPrint(NS_CLIENT1, to, "getstatus");
+        serverStatus = CL_GetServerStatus(to);
+        serverStatus->address = to;
+        serverStatus->print = 1;
+        serverStatus->pending = 1;
     }
 }
 

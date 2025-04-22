@@ -416,38 +416,19 @@ void Sys_DestroyConsole( void )
 /*
 ** Sys_ShowConsole
 */
-void Sys_ShowConsole( int visLevel, qboolean quitOnClose )
+void __cdecl Sys_ShowConsole()
 {
-	s_wcd.quitOnClose = quitOnClose;
+	HMODULE ModuleHandleA; // eax
 
-	if ( visLevel == s_wcd.visLevel )
+	if (!s_wcd.hWnd)
 	{
-		return;
+		ModuleHandleA = GetModuleHandleA(0);
+		Sys_CreateConsole(ModuleHandleA);
+		if (!s_wcd.hWnd)
+			MyAssertHandler(".\\win32\\win_syscon.cpp", 385, 0, "%s", "s_wcd.hWnd");
 	}
-
-	s_wcd.visLevel = visLevel;
-
-	if ( !s_wcd.hWnd )
-	{
-		return;
-	}
-
-	switch ( visLevel )
-	{
-	case 0:
-		ShowWindow( s_wcd.hWnd, SW_HIDE );
-		break;
-	case 1:
-		ShowWindow( s_wcd.hWnd, SW_SHOWNORMAL );
-		SendMessage( s_wcd.hwndBuffer, EM_LINESCROLL, 0, 0xffff );
-		break;
-	case 2:
-		ShowWindow( s_wcd.hWnd, SW_MINIMIZE );
-		break;
-	default:
-		Sys_Error( "Invalid visLevel %d sent to Sys_ShowConsole\n", visLevel );
-		break;
-	}
+	ShowWindow(s_wcd.hWnd, 1);
+	SendMessageA(s_wcd.hwndBuffer, 0xB6u, 0, 0xFFFF);
 }
 
 /*

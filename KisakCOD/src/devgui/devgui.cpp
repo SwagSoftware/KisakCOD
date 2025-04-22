@@ -474,7 +474,7 @@ void __cdecl DevGui_FreeMenu_r(unsigned __int16 handle)
             DevGui_FreeMenu_r(menu->menus[0].child.menu);
         }
         DevGui_FreeMenu_r(menu->menus[0].nextSibling);
-        *(unsigned int *)menu->menus[0].label = devguiGlob.nextFreeMenu;
+        *(unsigned int*)menu->menus[0].label = (unsigned int)devguiGlob.nextFreeMenu;
         devguiGlob.nextFreeMenu = (DevMenuItem *)menu;
     }
 }
@@ -852,9 +852,9 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
         {
             HIDWORD(x) += rowHeight + 2;
             if (row == devguiGlob.selRow)
-                p_current = &devgui_colorSliderKnobSel->current;
+                p_current = (DvarValue *)&devgui_colorSliderKnobSel->current;
             else
-                p_current = &devgui_colorSliderKnob->current;
+                p_current = (DvarValue *)&devgui_colorSliderKnob->current;
             fractiona = (double)dvar->latched.color[row] * 1.0 / 255.0;
             DevGui_DrawSingleSlider(x, rowWidth, rowHeight, fractiona, (const unsigned __int8 *)p_current);
         }
@@ -865,9 +865,9 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
         {
             HIDWORD(x) += rowHeight + 2;
             if (rowa == devguiGlob.selRow)
-                v5 = &devgui_colorSliderKnobSel->current;
+                v5 = (DvarValue *)&devgui_colorSliderKnobSel->current;
             else
-                v5 = &devgui_colorSliderKnob->current;
+                v5 = (DvarValue *)&devgui_colorSliderKnob->current;
             fractionb = (dvar->latched.vector[rowa] - dvar->domain.value.min)
                 / (dvar->domain.value.max - dvar->domain.value.min);
             DevGui_DrawSingleSlider(x, rowWidth, rowHeight, fractionb, (const unsigned __int8 *)v5);
@@ -1178,7 +1178,7 @@ void __cdecl DevGui_Init()
     screen_xPad = jpeg_mem_init();
     screen_yPad = jpeg_mem_init();
     for (menuIndex = 0; menuIndex < 0x257; ++menuIndex)
-        *(unsigned int *)devguiGlob.menus[menuIndex].label = &devguiGlob.menus[menuIndex + 1];
+        *(unsigned int *)devguiGlob.menus[menuIndex].label = (unsigned int)&devguiGlob.menus[menuIndex + 1];
     *(unsigned int *)devguiGlob.menus[menuIndex].label = 0;
     devguiGlob.nextFreeMenu = (DevMenuItem *)&devguiGlob;
     devguiGlob.topmostMenu.childType = 0;
@@ -1627,7 +1627,7 @@ void __cdecl DevGui_Accept(int localClientNum)
             if (devguiGlob.editingMenuItem)
             {
                 Dvar_MakeLatchedValueCurrent((dvar_s *)menu->menus[0].child.command);
-                Dvar_SetModified(menu->menus[0].child.dvar);
+                Dvar_SetModified((dvar_s*)menu->menus[0].child.dvar);
             }
             devguiGlob.editingMenuItem = !devguiGlob.editingMenuItem;
             devguiGlob.selRow = 0;
@@ -1747,8 +1747,8 @@ int DevGui_ScrollUpInternal()
     {
         DevGui_MoveUp();
         menu = DevGui_GetMenu(devguiGlob.selectedMenu);
-        LOBYTE(result) = DevGui_EditableMenuItem(menu->menus);
-    } while (!(_BYTE)result);
+        result = DevGui_EditableMenuItem(menu->menus);
+    } while (!result);
     return result;
 }
 
@@ -1785,8 +1785,8 @@ int DevGui_ScrollDownInternal()
     {
         DevGui_MoveDown();
         menu = DevGui_GetMenu(devguiGlob.selectedMenu);
-        LOBYTE(result) = DevGui_EditableMenuItem(menu->menus);
-    } while (!(_BYTE)result);
+        result = DevGui_EditableMenuItem(menu->menus);
+    } while (!result);
     return result;
 }
 

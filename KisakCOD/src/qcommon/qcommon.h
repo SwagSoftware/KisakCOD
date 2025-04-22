@@ -233,6 +233,8 @@ void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo* info);
 void __cdecl Com_InitThreadData(int threadContext);
 void __cdecl Com_FreeEvent(char* ptr);
 
+void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loadspecCurGame);
+
 // com_loadutils.cpp
 char *__cdecl Com_LoadInfoString(char *fileName, const char *fileDesc, const char *ident, char *loadBuffer);
 const char *__cdecl Com_LoadInfoString_FastFile(const char *fileName, const char *fileDesc, const char *ident);

@@ -2,6 +2,12 @@
 #include <gfx_d3d/r_scene.h>
 #include <EffectsCore/fx_system.h>
 #include <xanim/dobj.h>
+#include <xanim/dobj_utils.h>
+#include "g_utils_mp.h"
+#include <server/sv_world.h>
+#include <script/scr_vm.h>
+#include <server/sv_game.h>
+#include <game/bullet.h>
 
 
 
@@ -24,6 +30,72 @@
 //    struct dvar_s const *const vehTestWeight 82e97274     g_vehicles_mp.obj
 //    struct dvar_s const *const vehTextureScrollScale 82e97278     g_vehicles_mp.obj
 //    short s_numVehicleInfos    82e9727c     g_vehicles_mp.obj
+
+unsigned __int16 *s_wheelTags[4] =
+{
+    &scr_const.tag_wheel_front_left,
+    &scr_const.tag_wheel_front_right,
+    &scr_const.tag_wheel_back_left,
+    &scr_const.tag_wheel_back_right
+};
+
+unsigned __int16 *s_flashTags[] =
+{
+    &scr_const.tag_flash,
+    &scr_const.tag_flash_11,
+    &scr_const.tag_flash_2,
+    &scr_const.tag_flash_22,
+    &scr_const.tag_flash_3,
+};
+
+const char *s_vehicleTypeNames[6] = { "4 wheel", "tank", "plane", "boat", "artillery", "helicopter" }; // idb
+
+cspField_t s_vehicleFields[33] =
+{
+  { "type", 64, 12 },
+  { "steerWheels", 68, 5 },
+  { "texureScroll", 72, 5 },
+  { "quadBarrel", 76, 5 },
+  { "bulletDamage", 80, 5 },
+  { "armorPiercingDamage", 84, 5 },
+  { "grenadeDamage", 88, 5 },
+  { "projectileDamage", 92, 5 },
+  { "projectileSplashDamage", 96, 5 },
+  { "heavyExplosiveDamage", 100, 5 },
+  { "texureScrollScale", 104, 6 },
+  { "maxSpeed", 108, 6 },
+  { "accel", 112, 6 },
+  { "rotRate", 116, 6 },
+  { "rotAccel", 120, 6 },
+  { "collisionDamage", 132, 6 },
+  { "collisionSpeed", 136, 6 },
+  { "suspensionTravel", 140, 6 },
+  { "maxBodyPitch", 124, 6 },
+  { "maxBodyRoll", 128, 6 },
+  { "turretWeapon", 144, 0 },
+  { "turretHorizSpanLeft", 208, 6 },
+  { "turretHorizSpanRight", 212, 6 },
+  { "turretVertSpanUp", 216, 6 },
+  { "turretVertSpanDown", 220, 6 },
+  { "turretRotRate", 224, 6 },
+  { "lowIdleSnd", 228, 0 },
+  { "highIdleSnd", 292, 0 },
+  { "lowEngineSnd", 356, 0 },
+  { "highEngineSnd", 420, 0 },
+  { "turretSpinSnd", 484, 0 },
+  { "turretStopSnd", 548, 0 },
+  { "engineSndSpeed", 620, 6 }
+}; // idb
+
+short s_numVehicleInfos;
+
+scr_vehicle_s s_vehicles[8];
+
+const dvar_t *vehDebugServer;
+const dvar_t *vehTextureScrollScale;
+const dvar_t *vehTestHorsepower;
+const dvar_t *vehTestWeight;
+const dvar_t *vehTestMaxMPH;
 
 void __cdecl CG_VehRegisterDvars()
 {
@@ -60,10 +132,10 @@ void __cdecl CG_VehRegisterDvars()
         "How much to rotate the turret barrel when a helicopter fires");
     minc.value.max = 3.4028235e38;
     minc.value.min = -360.0;
-    heli_barrelMaxVelocity = Dvar_RegisterFloat("heli_barrelMaxVelocity", 1250.0, minc, 0, &String);
+    heli_barrelMaxVelocity = Dvar_RegisterFloat("heli_barrelMaxVelocity", 1250.0, minc, 0, "");
     mind.value.max = 3.4028235e38;
     mind.value.min = -360.0;
-    heli_barrelSlowdown = Dvar_RegisterFloat("heli_barrelSlowdown", 360.0, mind, 0, &String);
+    heli_barrelSlowdown = Dvar_RegisterFloat("heli_barrelSlowdown", 360.0, mind, 0, "");
 }
 
 DObj_s *__cdecl GetVehicleEntDObj(int localClientNum, centity_s *centVeh)
@@ -304,9 +376,9 @@ vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
 
     for (veh = 0; veh < 8 && vehEffects[localClientNum][veh].active; ++veh)
     {
-        if (dword_B0BD08[80 * localClientNum + 10 * veh] == entityNum)
+        if (vehEffects[localClientNum][veh].entityNum == entityNum)
         {
-            dword_B0BD04[80 * localClientNum + 10 * veh] = Sys_Milliseconds();
+            vehEffects[localClientNum][veh].lastAccessed = Sys_Milliseconds();
             return &vehEffects[localClientNum][veh];
         }
     }
@@ -317,25 +389,25 @@ vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
         oldest = 0;
         for (vehb = 1; vehb < 8; ++vehb)
         {
-            if (dword_B0BD04[80 * localClientNum + 10 * vehb] < dword_B0BD04[80 * localClientNum + 10 * oldest])
+            if (vehEffects[localClientNum][vehb].lastAccessed < vehEffects[localClientNum][oldest].lastAccessed)
                 oldest = vehb;
         }
         veha = oldest;
     }
     v3 = &vehEffects[localClientNum][veha];
-    *(unsigned int *)&v3->active = 0;
+    *&v3->active = 0;
     v3->lastAccessed = 0;
     v3->entityNum = 0;
     v3->nextDustFx = 0;
     v3->nextSmokeFx = 0;
-    *(unsigned int *)&v3->soundPlaying = 0;
+    *&v3->soundPlaying = 0;
     v3->barrelVelocity = 0.0;
     v3->barrelPos = 0.0;
     v3->lastBarrelUpdateTime = 0;
-    *(unsigned int *)&v3->tag_engine_left = 0;
+    *&v3->tag_engine_left = 0;
     v3->active = 1;
-    dword_B0BD04[80 * localClientNum + 10 * veha] = Sys_Milliseconds();
-    dword_B0BD08[80 * localClientNum + 10 * veha] = entityNum;
+    vehEffects[localClientNum][veha].lastAccessed = Sys_Milliseconds();
+    vehEffects[localClientNum][veha].entityNum = entityNum;
     return &vehEffects[localClientNum][veha];
 }
 
@@ -452,7 +524,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     float v36; // [esp+90h] [ebp-158h]
     float v37; // [esp+94h] [ebp-154h]
     float v38; // [esp+98h] [ebp-150h]
-    double v39; // [esp+9Ch] [ebp-14Ch]
+    double frameInterpolation; // [esp+9Ch] [ebp-14Ch]
     float v40; // [esp+A4h] [ebp-144h]
     float v41; // [esp+A8h] [ebp-140h]
     float v42; // [esp+B4h] [ebp-134h]
@@ -507,65 +579,65 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v41 = ns->lerp.u.turret.gunAngles[0] - v55;
     v56 = v41 * 0.002777777845039964;
     v40 = v56 + 0.5;
-    v39 = MEMORY[0x9D5558];
+    frameInterpolation = cgArray[0].frameInterpolation;
     v38 = floor(v40);
     v37 = (v56 - v38) * 360.0;
-    v54 = v37 * v39 + v55;
+    v54 = v37 * frameInterpolation + v55;
     v36 = v54 * 182.0444488525391 + 0.5;
     v35 = floor(v36);
-    cent->pose.vehicle.pitch = (int)v35;
+    cent->pose.vehicle.pitch = v35;
     v52 = p_currentState->u.turret.gunAngles[1];
     v34 = ns->lerp.u.turret.gunAngles[1] - v52;
     v53 = v34 * 0.002777777845039964;
     v33 = v53 + 0.5;
-    v32 = MEMORY[0x9D5558];
+    v32 = cgArray[0].frameInterpolation;
     v31 = floor(v33);
     v30 = (v53 - v31) * 360.0;
     v51 = v30 * v32 + v52;
     v29 = v51 * 182.0444488525391 + 0.5;
     v28 = floor(v29);
-    cent->pose.vehicle.roll = (int)v28;
+    cent->pose.vehicle.roll = v28;
     cosHalfFovInner = p_currentState->u.primaryLight.cosHalfFovInner;
     v27 = ns->lerp.u.primaryLight.cosHalfFovInner - cosHalfFovInner;
     v50 = v27 * 0.002777777845039964;
     v26 = v50 + 0.5;
-    v25 = MEMORY[0x9D5558];
+    v25 = cgArray[0].frameInterpolation;
     v24 = floor(v26);
     v23 = (v50 - v24) * 360.0;
     v48 = v23 * v25 + cosHalfFovInner;
     v22 = v48 * 182.0444488525391 + 0.5;
     v21 = floor(v22);
-    cent->pose.vehicle.barrelPitch = (int)v21;
+    cent->pose.vehicle.barrelPitch = v21;
     gunYaw = p_currentState->u.vehicle.gunYaw;
     v20 = ns->lerp.u.vehicle.gunYaw - gunYaw;
     v47 = v20 * 0.002777777845039964;
     v19 = v47 + 0.5;
-    v18 = MEMORY[0x9D5558];
+    v18 = cgArray[0].frameInterpolation;
     v17 = floor(v19);
     v16 = (v47 - v17) * 360.0;
     v45 = v16 * v18 + gunYaw;
     v15 = v45 * 182.0444488525391 + 0.5;
     v14 = floor(v15);
-    cent->pose.vehicle.yaw = (int)v14;
+    cent->pose.vehicle.yaw = v14;
     cent->pose.turret.barrelPitch = Veh_GetTurretBarrelRoll(localClientNum, cent);
     v43 = p_currentState->u.turret.gunAngles[2];
     v13 = ns->lerp.u.turret.gunAngles[2] - v43;
     v44 = v13 * 0.002777777845039964;
     v12 = v44 + 0.5;
-    v11 = MEMORY[0x9D5558];
+    v11 = cgArray[0].frameInterpolation;
     v10 = floor(v12);
     v9 = (v44 - v10) * 360.0;
     v42 = v9 * v11 + v43;
     v8 = v42 * 182.0444488525391 + 0.5;
     v7 = floor(v8);
-    cent->pose.vehicle.steerYaw = (int)v7;
-    cent->pose.vehicle.time = (double)ns->time2 * 0.001000000047497451;
+    cent->pose.vehicle.steerYaw = v7;
+    cent->pose.vehicle.time = ns->time2 * 0.001000000047497451;
     DObjGetBoneIndex(obj, scr_const.tag_body, &cent->pose.vehicle.tag_body);
     DObjGetBoneIndex(obj, scr_const.tag_turret, &cent->pose.vehicle.tag_turret);
     DObjGetBoneIndex(obj, scr_const.tag_barrel, &cent->pose.vehicle.tag_barrel);
     if (cent->pose.cullIn == 2)
     {
-        CG_DObjGetWorldTagMatrix(&cent->pose, obj, scr_const.tag_origin, (float (*)[3])axis[4], fxInfo->soundEngineOrigin);
+        CG_DObjGetWorldTagMatrix(&cent->pose, obj, scr_const.tag_origin, axis[4], fxInfo->soundEngineOrigin);
         fxInfo->soundEnabled = 1;
         suspTravel = cent->pose.vehicle.time;
         AnglesToAxis(cent->pose.angles, axis);
@@ -596,10 +668,10 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
                 Vec3Mad(wheelPos, 40.0, axis[2], traceStart);
                 scale = -suspTravel;
                 Vec3Mad(wheelPos, scale, axis[2], traceEnd);
-                CG_TraceCapsule(&trace, traceStart, (float *)vec3_origin, (float *)vec3_origin, traceEnd, ns->number, 529);
+                CG_TraceCapsule(&trace, traceStart, vec3_origin, vec3_origin, traceEnd, ns->number, 529);
                 v5 = CompressUnit(trace.fraction);
                 cent->pose.vehicle.wheelFraction[tireIdx] = v5;
-                if (tireIdx == MEMORY[0xA8E91C][38] % 4)
+                if (tireIdx == cgArray[0].vehicleFrame % 4)
                 {
                     fxInfo->tireActive[tireIdx] = 1;
                     Vec3Lerp(traceStart, traceEnd, trace.fraction, fxInfo->tireGroundPoint[tireIdx]);
@@ -797,7 +869,7 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                     axis[0][1] = 0.0;
                     axis[0][2] = 1.0;
                     Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
-                    if ((trace.surfaceFlags & 0x1F00000) == &fx_marksSystemPool[0].pointGroups[930].pointGroup.points[0].xyz[2])
+                    if ((trace.surfaceFlags & 0x1F00000) == 0x1400000)
                         fx = cgMedia.heliWaterEffect;
                     else
                         fx = cgMedia.heliDustEffect;
@@ -1143,7 +1215,7 @@ void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out)
     float backoff; // [esp+8h] [ebp-4h]
     float backoffa; // [esp+8h] [ebp-4h]
 
-    if (normal[2] < DOUBLE_0_699999988079071 || in[2] * in[2] > *in * *in + in[1] * in[1])
+    if (normal[2] < 0.699999988079071 || in[2] * in[2] > *in * *in + in[1] * in[1])
     {
         backoff = Vec3Dot(in, normal);
         if (backoff >= 0.0)
@@ -1191,7 +1263,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     DObj_s *obj; // [esp+24h] [ebp-1068h]
     scr_vehicle_s *scr_vehicle; // [esp+28h] [ebp-1064h]
     float b[3]; // [esp+2Ch] [ebp-1060h] BYREF
-    void(__cdecl * v6)(gentity_s *, gentity_s *, int); // [esp+38h] [ebp-1054h]
+    void(__cdecl * touch)(gentity_s *, gentity_s *, int); // [esp+38h] [ebp-1054h]
     float v7; // [esp+3Ch] [ebp-1050h]
     gentity_s *target; // [esp+40h] [ebp-104Ch]
     float out[3]; // [esp+44h] [ebp-1048h] BYREF
@@ -1208,7 +1280,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 1917, 0, "%s", "ent->scr_vehicle");
     scr_vehicle = ent->scr_vehicle;
-    v6 = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * ent->handler];
+    touch = entityHandlers[ent->handler].touch;
     Vec3Sub(scr_vehicle->phys.origin, scr_vehicle->phys.prevOrigin, diff);
     AnglesSubtract(scr_vehicle->phys.angles, scr_vehicle->phys.prevAngles, v3);
     Vec3NormalizeTo(scr_vehicle->phys.vel, out);
@@ -1222,11 +1294,11 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     Vec3Add(scr_vehicle->phys.prevOrigin, b, b);
     Vec3Add(scr_vehicle->phys.prevOrigin, sum, sum);
     ExtendBounds(b, sum, diff);
-    v1 = CM_AreaEntities(b, sum, entityList, 1024, (int)&sv.svEntities[337].baseline.s.legsAnim + 1);
+    v1 = CM_AreaEntities(b, sum, entityList, 1024, 0x2806081);
     for (i = 0; i < v1; ++i)
     {
         target = &g_entities[entityList[i]];
-        v12 = (void(__cdecl *)(gentity_s *, gentity_s *, int))dword_946724[10 * target->handler];
+        v12 = entityHandlers[target->handler].touch;
         if (target->s.number != ent->s.number
             && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 4 || target->s.eType == 14)
             && target->s.eType == 4)
@@ -1268,8 +1340,8 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
                     }
                     if (v12)
                         v12(target, ent, 1);
-                    if (v6)
-                        v6(ent, target, 1);
+                    if (touch)
+                        touch(ent, target, 1);
                     if (target->s.eType == 1)
                         VEH_PushEntity(ent, target, out, diff, v3);
                 }
@@ -1372,13 +1444,13 @@ void __cdecl G_VehRegisterDvars()
         "Scale vehicle texture scroll scale by this amount (debug only)");
     mina.value.max = 3.4028235e38;
     mina.value.min = 0.0;
-    vehTestHorsepower = Dvar_RegisterFloat("vehTestHorsepower", 200.0, mina, 0x80u, &String);
+    vehTestHorsepower = Dvar_RegisterFloat("vehTestHorsepower", 200.0, mina, 0x80u, "");
     minb.value.max = 3.4028235e38;
     minb.value.min = 0.0;
     vehTestWeight = Dvar_RegisterFloat("vehTestWeight", 5200.0, minb, 0x80u, "lbs");
     minc.value.max = 3.4028235e38;
     minc.value.min = 0.0;
-    vehTestMaxMPH = Dvar_RegisterFloat("vehTestMaxMPH", 40.0, minc, 0x80u, &String);
+    vehTestMaxMPH = Dvar_RegisterFloat("vehTestMaxMPH", 40.0, minc, 0x80u, "");
 }
 
 vehicle_info_t *__cdecl VEH_GetVehicleInfo(__int16 index)
@@ -1401,7 +1473,7 @@ int __cdecl G_VehPlayerRideSlot(gentity_s *vehicle, int playerEntNum)
         if (vehicle->scr_vehicle->boneIndex.riderSlots[i].entNum == playerEntNum)
             return i;
     }
-    Com_Error(ERR_DROP, &byte_891C98, playerEntNum);
+    Com_Error(ERR_DROP, "VehicleGetPlayerRideSlot(): player ent #%i was not using vehicle.", playerEntNum);
     return 0;
 }
 
@@ -1513,7 +1585,7 @@ void __cdecl G_VehUnlinkPlayer(gentity_s *ent, gentity_s *player)
     if (ent != EntHandle::ent(&player->r.ownerNum))
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2587, 0, "%s", "ent == player->r.ownerNum.ent()");
     if ((client->ps.pm_flags & 0x100000) == 0)
-        Com_Error(ERR_DROP, &byte_891CDC);
+        Com_Error(ERR_DROP, "G_VehUnlinkPlayer: Player is not using a vehicle");
     veh = ent->scr_vehicle;
     if (!veh)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2593, 0, "%s", "veh");
@@ -1548,7 +1620,7 @@ void __cdecl VehicleClearRideSlotForPlayer(gentity_s *ent, int playerEntNum)
             return;
         }
     }
-    Com_Error(ERR_DROP, &byte_891D50, playerEntNum);
+    Com_Error(ERR_DROP, "VehicleClearRideSlotForPlayer(): player ent #%i was not using vehicle.", playerEntNum);
 }
 
 void __cdecl G_VehiclesInit(int restarting)
@@ -1623,7 +1695,7 @@ void __cdecl SetupCollisionMap(gentity_s *ent)
         {
             ent->s.index.brushmodel = cmEnt->s.index.brushmodel;
             SV_SetBrushModel(ent);
-            ent->r.contents = (int)&loc_7FFFFF + 1;
+            ent->r.contents = 0x800000;
             if ((ent->spawnflags & 1) != 0)
                 ent->r.contents |= 0x200000u;
         }
@@ -1680,10 +1752,10 @@ void __cdecl SpawnVehicle(gentity_s *ent, const char *typeName)
             break;
     }
     if (i == 8)
-        Com_Error(ERR_DROP, &byte_891E74, 8);
+        Com_Error(ERR_DROP, "Hit max vehicle count [%d]", 8);
     infoIdx = VEH_GetVehicleInfoFromName(typeName);
     if (infoIdx < 0)
-        Com_Error(ERR_DROP, &byte_891E48, typeName);
+        Com_Error(ERR_DROP, "Can't find info for script vehicle [%s]", typeName);
     ent->s.eType = 14;
     VEH_InitModelAndValidateTags(ent, &infoIdx);
     if (!level.initializing)
@@ -1728,7 +1800,7 @@ int __cdecl VEH_GetVehicleInfoFromName(const char *name)
     ic = G_LoadVehicle("defaultvehicle_mp");
     if (ic >= 0)
         return ic;
-    Com_Error(ERR_DROP, &byte_891E98);
+    Com_Error(ERR_DROP, "Cannot find vehicle info for 'defaultvehicle'. This is a default vehicle info that you should have.");
     return -1;
 }
 
@@ -1804,7 +1876,7 @@ int __cdecl VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue,
             }
         }
         if (i == 6)
-            Com_Error(ERR_DROP, &byte_891FCC, pValue);
+            Com_Error(ERR_DROP, "Unknown vehicle type [%s]", pValue);
         return 1;
     }
     else
@@ -1814,7 +1886,7 @@ int __cdecl VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue,
             v3 = va("Bad vehicle field type %i\n", fieldType);
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 411, 0, v3);
         }
-        Com_Error(ERR_DROP, &byte_891F94, fieldType);
+        Com_Error(ERR_DROP, "Bad vehicle field type %i", fieldType);
         return 0;
     }
 }
@@ -1831,13 +1903,13 @@ void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int *infoIdx)
     if (*infoIdx == defaultInfoIdx)
     {
         isDefault = 1;
-        G_SetModel(ent, "defaultvehicle_mp");
+        G_SetModel(ent, (char*)"defaultvehicle_mp");
         *infoIdx = defaultInfoIdx;
     }
     else if (ent->model && G_XModelBad(ent->model))
     {
         isDefault = 1;
-        G_OverrideModel(ent->model, "defaultvehicle_mp");
+        G_OverrideModel(ent->model, (char*)"defaultvehicle_mp");
         *infoIdx = defaultInfoIdx;
     }
     G_DObjUpdate(ent);
@@ -1851,7 +1923,7 @@ void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int *infoIdx)
             15,
             "WARNING: vehicle '%s' is missing a required tag! switching to default vehicle model and info.\n",
             v3);
-        G_SetModel(ent, "defaultvehicle_mp");
+        G_SetModel(ent, (char*)"defaultvehicle_mp");
         *infoIdx = defaultInfoIdx;
         G_DObjUpdate(ent);
         if (!VEH_DObjHasRequiredTags(ent, *infoIdx))
@@ -1909,6 +1981,53 @@ void __cdecl InitVehicleTags(gentity_s *ent)
         veh->boneIndex.wheel[ib] = SV_DObjGetBoneIndex(ent, *s_wheelTags[ib]);
 }
 
+void __cdecl VEH_InitPhysics_0(gentity_s *ent)
+{
+    vehicle_physic_t *phys; // [esp+34h] [ebp-Ch]
+    int i; // [esp+3Ch] [ebp-4h]
+
+    phys = &ent->scr_vehicle->phys;
+    phys->origin[0] = ent->r.currentOrigin[0];
+    phys->origin[1] = ent->r.currentOrigin[1];
+    phys->origin[2] = ent->r.currentOrigin[2];
+    phys->prevOrigin[0] = ent->r.currentOrigin[0];
+    phys->prevOrigin[1] = ent->r.currentOrigin[1];
+    phys->prevOrigin[2] = ent->r.currentOrigin[2];
+    phys->angles[0] = ent->r.currentAngles[0];
+    phys->angles[1] = ent->r.currentAngles[1];
+    phys->angles[2] = ent->r.currentAngles[2];
+    phys->prevAngles[0] = ent->r.currentAngles[0];
+    phys->prevAngles[1] = ent->r.currentAngles[1];
+    phys->prevAngles[2] = ent->r.currentAngles[2];
+    phys->mins[0] = 0.0;
+    phys->mins[1] = 0.0;
+    phys->mins[2] = 0.0;
+    phys->maxs[0] = 0.0;
+    phys->maxs[1] = 0.0;
+    phys->maxs[2] = 0.0;
+    phys->vel[0] = 0.0;
+    phys->vel[1] = 0.0;
+    phys->vel[2] = 0.0;
+    phys->bodyVel[0] = 0.0;
+    phys->bodyVel[1] = 0.0;
+    phys->bodyVel[2] = 0.0;
+    phys->rotVel[0] = 0.0;
+    phys->rotVel[1] = 0.0;
+    phys->rotVel[2] = 0.0;
+    for (i = 0; i < 4; ++i)
+    {
+        phys->wheelZVel[i] = 0.0;
+        phys->wheelZPos[i] = 0.0;
+        phys->wheelSurfType[i] = 0;
+    }
+    phys->maxPitchAngle = 30.0;
+    phys->maxRollAngle = 30.0;
+    phys->onGround = 0;
+    phys->colVelDelta[0] = 0.0;
+    phys->colVelDelta[1] = 0.0;
+    phys->colVelDelta[2] = 0.0;
+}
+
 void __cdecl InitEntityVehicleVars(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx)
 {
     VEH_InitPhysics_0(ent);
@@ -1959,7 +2078,7 @@ void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int infoIdx)
     ent->s.lerp.u.vehicle.materialTime = 0;
     ent->s.time2 = 0;
     ent->s.loopSound = 0;
-    ent->s.weapon = (unsigned __int8)G_GetWeaponIndexForName(s_vehicleInfos[infoIdx].turretWeapon);
+    ent->s.weapon = G_GetWeaponIndexForName(s_vehicleInfos[infoIdx].turretWeapon);
     ent->s.weaponModel = 0;
     ent->s.lerp.u.turret.gunAngles[2] = 0.0;
     ent->s.lerp.u.turret.gunAngles[0] = 0.0;
@@ -1970,7 +2089,7 @@ void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int infoIdx)
     ent->nextthink = level.time + 50;
     ent->takedamage = 1;
     ent->active = 1;
-    ent->clipmask = (int)&loc_81020F + 2;
+    ent->clipmask = 0x810211;
     SV_DObjGetBounds(ent, ent->r.mins, ent->r.maxs);
     SV_LinkEntity(ent);
 }
@@ -2076,6 +2195,287 @@ bool __cdecl G_VehImmuneToDamage(gentity_s *ent, int mod, char damageFlags, unsi
         break;
     }
     return result;
+}
+
+void __cdecl VEH_BackupPosition_0(gentity_s *ent)
+{
+    scr_vehicle_s *veh; // [esp+18h] [ebp-4h]
+
+    if (!ent)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1241, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1242, 0, "%s", "ent->scr_vehicle");
+    veh = ent->scr_vehicle;
+    veh->phys.prevOrigin[0] = ent->r.currentOrigin[0];
+    veh->phys.prevOrigin[1] = ent->r.currentOrigin[1];
+    veh->phys.prevOrigin[2] = ent->r.currentOrigin[2];
+    veh->phys.prevAngles[0] = ent->r.currentAngles[0];
+    veh->phys.prevAngles[1] = ent->r.currentAngles[1];
+    veh->phys.prevAngles[2] = ent->r.currentAngles[2];
+    qmemcpy(&s_backup_0, veh, 0xC0u);
+    qmemcpy(&s_backup_0.phys, &veh->phys, sizeof(s_backup_0.phys));
+}
+
+bool __cdecl AttachedStickyMissile_0(gentity_s *vehicle, gentity_s *missile)
+{
+    WeaponDef *weapDef; // [esp+0h] [ebp-4h]
+
+    if (!vehicle)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1345, 0, "%s", "vehicle");
+    if (!missile)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1346, 0, "%s", "missile");
+    if (missile->s.groundEntityNum != vehicle->s.number)
+        return 0;
+    if (missile->s.eType != 4)
+        return 0;
+    weapDef = BG_GetWeaponDef(missile->s.weapon);
+    if (!weapDef)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1354, 0, "%s", "weapDef");
+    return weapDef->stickiness == WEAPSTICKINESS_ALL;
+}
+
+void __cdecl PushAttachedStickyMissile_0(gentity_s *vehicle, gentity_s *missile)
+{
+    scr_vehicle_s *scr_vehicle; // edx
+    float newVehMat[3][3]; // [esp+10h] [ebp-F4h] BYREF
+    vehicle_physic_t *phys; // [esp+34h] [ebp-D0h]
+    float origin[3]; // [esp+38h] [ebp-CCh] BYREF
+    float oldMissileMat[3][3]; // [esp+44h] [ebp-C0h] BYREF
+    float newMissileMat[3][3]; // [esp+68h] [ebp-9Ch] BYREF
+    float oldVehMatInv[3][3]; // [esp+8Ch] [ebp-78h] BYREF
+    float deltaMat[3][3]; // [esp+B0h] [ebp-54h] BYREF
+    float oldVehMat[3][3]; // [esp+D4h] [ebp-30h] BYREF
+    float relativeOrig[3]; // [esp+F8h] [ebp-Ch] BYREF
+
+    if (!vehicle)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1375, 0, "%s", "vehicle");
+    if (!vehicle->scr_vehicle)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1376, 0, "%s", "vehicle->scr_vehicle");
+    if (!missile)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1377, 0, "%s", "missile");
+    scr_vehicle = vehicle->scr_vehicle;
+    phys = &scr_vehicle->phys;
+    if (scr_vehicle == (scr_vehicle_s*)-192)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1380, 0, "%s", "phys");
+    Vec3Sub(missile->r.currentOrigin, phys->prevOrigin, relativeOrig);
+    AnglesToAxis(phys->angles, newVehMat);
+    AnglesToAxis(phys->prevAngles, oldVehMat);
+    MatrixTranspose(oldVehMat, oldVehMatInv);
+    MatrixMultiply(oldVehMatInv, newVehMat, deltaMat);
+    MatrixTransformVector(relativeOrig, deltaMat, origin);
+    Vec3Add(origin, phys->origin, origin);
+    missile->r.currentOrigin[0] = origin[0];
+    missile->r.currentOrigin[1] = origin[1];
+    missile->r.currentOrigin[2] = origin[2];
+    missile->s.lerp.pos.trBase[0] = origin[0];
+    missile->s.lerp.pos.trBase[1] = origin[1];
+    missile->s.lerp.pos.trBase[2] = origin[2];
+    AnglesToAxis(missile->r.currentAngles, oldMissileMat);
+    MatrixMultiply(oldMissileMat, deltaMat, newMissileMat);
+    AxisToAngles(newMissileMat, missile->r.currentAngles);
+    missile->s.lerp.apos.trBase[0] = missile->r.currentAngles[0];
+    missile->s.lerp.apos.trBase[1] = missile->r.currentAngles[1];
+    missile->s.lerp.apos.trBase[2] = missile->r.currentAngles[2];
+}
+
+void __cdecl VEH_PushEntity_0(
+    gentity_s *ent,
+    gentity_s *target,
+    float frameTime,
+    float *pushDir,
+    float *deltaOrigin,
+    float *deltaAngles)
+{
+    float damagea; // [esp+4h] [ebp-10h]
+    float damage; // [esp+4h] [ebp-10h]
+    float dist; // [esp+8h] [ebp-Ch]
+    float mph; // [esp+10h] [ebp-4h]
+
+    if (!ent)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1410, 0, "%s", "ent");
+    if (!target)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1411, 0, "%s", "target");
+    if (!target->tagInfo
+        && (Vec3LengthSq(deltaOrigin) >= 0.001000000047497451 || Vec3LengthSq(deltaAngles) >= 0.001000000047497451))
+    {
+        if (AttachedStickyMissile_0(ent, target))
+        {
+            PushAttachedStickyMissile_0(ent, target);
+        }
+        else if (G_TryPushingEntity(target, ent, deltaOrigin, deltaAngles))
+        {
+            dist = Vec3Length(deltaOrigin);
+            mph = dist / frameTime * 0.056818184;
+            if (target->s.eType == 1 && target->s.groundEntityNum != ent->s.number && mph >= 10.0)
+            {
+                if (mph >= 50.0)
+                {
+                    damage = 100.0;
+                }
+                else
+                {
+                    damagea = (mph - 10.0) / (50.0 - 10.0);
+                    damage = (100.0 - 5.0) * damagea;
+                }
+                InflictDamage(ent, target, pushDir, damage);
+            }
+        }
+        else if (target->takedamage)
+        {
+            InflictDamage(ent, target, pushDir, 999999);
+        }
+    }
+}
+
+void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
+{
+    scr_vehicle_s *v2; // eax
+    scr_vehicle_s *ecx26; // ecx
+    float v4; // [esp+10h] [ebp-10D4h]
+    float scale; // [esp+14h] [ebp-10D0h]
+    float v[3]; // [esp+38h] [ebp-10ACh] BYREF
+    float v7; // [esp+44h] [ebp-10A0h]
+    float v8[3]; // [esp+48h] [ebp-109Ch] BYREF
+    float result[2]; // [esp+54h] [ebp-1090h] BYREF
+    float v10; // [esp+5Ch] [ebp-1088h]
+    float *origin; // [esp+60h] [ebp-1084h]
+    int contentmask; // [esp+64h] [ebp-1080h]
+    int v13; // [esp+68h] [ebp-107Ch]
+    float *a; // [esp+6Ch] [ebp-1078h]
+    vehicle_info_t *v15; // [esp+70h] [ebp-1074h]
+    float maxs; // [esp+74h] [ebp-1070h] BYREF
+    float v17; // [esp+78h] [ebp-106Ch]
+    float v18; // [esp+7Ch] [ebp-1068h]
+    scr_vehicle_s *scr_vehicle; // [esp+80h] [ebp-1064h]
+    float b[3]; // [esp+84h] [ebp-1060h] BYREF
+    void(__cdecl * touch)(gentity_s *, gentity_s *, int); // [esp+90h] [ebp-1054h]
+    float v22; // [esp+94h] [ebp-1050h]
+    gentity_s *target; // [esp+98h] [ebp-104Ch]
+    float out[3]; // [esp+9Ch] [ebp-1048h] BYREF
+    float v3[3]; // [esp+A8h] [ebp-103Ch] BYREF
+    float sum[3]; // [esp+B4h] [ebp-1030h] BYREF
+    void(__cdecl * v27)(gentity_s *, gentity_s *, int); // [esp+C0h] [ebp-1024h]
+    int entityList[1025]; // [esp+C4h] [ebp-1020h] BYREF
+    int i; // [esp+10C8h] [ebp-1Ch]
+    float mins; // [esp+10CCh] [ebp-18h] BYREF
+    float v31; // [esp+10D0h] [ebp-14h]
+    float v32; // [esp+10D4h] [ebp-10h]
+    float diff[3]; // [esp+10D8h] [ebp-Ch] BYREF
+
+    if (!ent)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1481, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1482, 0, "%s", "ent->scr_vehicle");
+    if (ent->r.bmodel)
+    {
+        scr_vehicle = ent->scr_vehicle;
+        a = scr_vehicle->phys.origin;
+        v15 = &s_vehicleInfos[scr_vehicle->infoIdx];
+        touch = entityHandlers[ent->handler].touch;
+        Vec3Sub(scr_vehicle->phys.origin, scr_vehicle->phys.prevOrigin, diff);
+        AnglesSubtract(scr_vehicle->phys.angles, scr_vehicle->phys.prevAngles, v3);
+        Vec3NormalizeTo(scr_vehicle->phys.vel, out);
+        v22 = RadiusFromBounds(ent->r.mins, ent->r.maxs);
+        b[0] = -v22;
+        b[1] = b[0];
+        b[2] = b[0];
+        sum[0] = v22;
+        sum[1] = v22;
+        sum[2] = v22;
+        Vec3Add(scr_vehicle->phys.prevOrigin, b, b);
+        Vec3Add(scr_vehicle->phys.prevOrigin, sum, sum);
+        ExtendBounds(b, sum, diff);
+        contentmask = 0x2806081;
+        v13 = CM_AreaEntities(b, sum, entityList, 1024, 0x2806081);
+        for (i = 0; ; ++i)
+        {
+            if (i >= v13)
+                return;
+            target = &g_entities[entityList[i]];
+            v27 = entityHandlers[target->handler].touch;
+            if (target->s.number != ent->s.number
+                && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == 4)
+                && (!EntHandle::isDefined(&target->r.ownerNum)
+                    || target->s.eType == 4 && EntHandle::ent(&target->r.ownerNum) != ent))
+            {
+                if (target->s.groundEntityNum == ent->s.number)
+                    goto LABEL_18;
+                if (target->classname == scr_const.script_model)
+                {
+                    if (!target->model)
+                        continue;
+                    SV_DObjGetBounds(target, &mins, &maxs);
+                    Vec3Add(target->r.currentOrigin, &mins, &mins);
+                    Vec3Add(target->r.currentOrigin, &maxs, &maxs);
+                }
+                else if (target->classname == scr_const.script_vehicle)
+                {
+                    if (!target->model)
+                        continue;
+                    if (!target->scr_vehicle)
+                        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1553, 0, "%s", "hit->scr_vehicle");
+                    v2 = target->scr_vehicle;
+                    mins = v2->phys.mins[0];
+                    v31 = v2->phys.mins[1];
+                    v32 = v2->phys.mins[2];
+                    Vec3Scale(&mins, 2.0, &mins);
+                    Vec3Add(target->r.currentOrigin, &mins, &mins);
+                    ecx26 = target->scr_vehicle;
+                    maxs = ecx26->phys.maxs[0];
+                    v17 = ecx26->phys.maxs[1];
+                    v18 = ecx26->phys.maxs[2];
+                    Vec3Scale(&maxs, 2.0, &maxs);
+                    Vec3Add(target->r.currentOrigin, &maxs, &maxs);
+                }
+                else
+                {
+                    mins = target->r.absmin[0];
+                    v31 = target->r.absmin[1];
+                    v32 = target->r.absmin[2];
+                    maxs = target->r.absmax[0];
+                    v17 = target->r.absmax[1];
+                    v18 = target->r.absmax[2];
+                }
+                ExpandBoundsToWidth(&mins, &maxs);
+                if (SV_EntityContact(&mins, &maxs, ent))
+                {
+                    if (Scr_IsSystemActive())
+                    {
+                        Scr_AddEntity(ent);
+                        Scr_Notify(target, scr_const.touch, 1u);
+                        Scr_AddEntity(target);
+                        Scr_Notify(ent, scr_const.touch, 1u);
+                    }
+                    if (v27)
+                        v27(target, ent, 1);
+                    if (touch)
+                        touch(ent, target, 1);
+                    if (target->s.eType == 1)
+                    {
+                    LABEL_18:
+                        VEH_PushEntity_0(ent, target, frameTime, out, diff, v3);
+                        continue;
+                    }
+                    if (target->s.eType == 14)
+                    {
+                        if (!target->scr_vehicle)
+                            MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1604, 0, "%s", "hit->scr_vehicle");
+                        origin = target->scr_vehicle->phys.origin;
+                        v7 = Vec3Length(a + 30);
+                        Vec3Sub(origin, a, v);
+                        Vec3Normalize(v);
+                        scale = -v7 * 0.80000001;
+                        Vec3Scale(v, scale, result);
+                        v10 = v7 * 0.1 + v10;
+                        Vec3Add(a + 21, result, a + 21);
+                        v4 = v7 * 0.15000001;
+                        Vec3Scale(v, v4, v8);
+                        Vec3Add(origin + 21, v8, origin + 21);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void __cdecl G_VehEntHandler_Think(gentity_s *pSelf)
@@ -2186,7 +2586,6 @@ void __cdecl VEH_DebugBox(float *pos, float width, float r, float g, float b)
 
 void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int damage)
 {
-    double v4; // [esp-4h] [ebp-Ch]
     int attackerNum; // [esp+4h] [ebp-4h]
 
     if (!vehEnt)
@@ -2196,16 +2595,15 @@ void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int
     attackerNum = VehicleEntDriver(vehEnt);
     if (attackerNum == 1023)
         attackerNum = 1022;
-    HIDWORD(v4) = &g_entities[attackerNum];
     if (vehDebugServer->current.enabled)
     {
-        LODWORD(v4) = damage;
-        Com_Printf(16, "Vehicle damage to ent #%i: %.2f\n", target->s.number, v4);
+        float dmg = (float)damage;
+        Com_Printf(16, "Vehicle damage to ent #%i: %.2f\n", target->s.number, dmg);
     }
     G_Damage(
         target,
         vehEnt,
-        (gentity_s *)HIDWORD(v4),
+        &g_entities[attackerNum],
         dir,
         target->r.currentOrigin,
         damage,
@@ -2369,7 +2767,7 @@ void __cdecl FireTurret(gentity_s *ent, gentity_s *player)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1750, 0, "%s", "veh");
         FillWeaponParms(ent, player, &wp);
         if (wp.weapDef->weapType)
-            Com_Error(ERR_DROP, &byte_892188);
+            Com_Error(ERR_DROP, "FireTurret(): WeapDef is not a bullet type.");
         else
             Bullet_Fire(player, wp.weapDef->fAdsSpread, &wp, ent, level.time);
         G_AddEvent(ent, 0x1Au, 0);
@@ -2402,7 +2800,7 @@ void __cdecl FillWeaponParms(gentity_s *vehEnt, gentity_s *player, weaponParms *
     }
     else
     {
-        Com_Error(ERR_DROP, &byte_8921B8, "tag_flash", vehEnt->s.number);
+        Com_Error(ERR_DROP, "Couldn't find tag %s on vehicle (entity %d).", "tag_flash", vehEnt->s.number);
     }
 }
 
@@ -2742,7 +3140,7 @@ void __cdecl VEH_GroundTrace(gentity_s *ent)
         && (veh->phys.vel[2] <= 0.0 || Vec3Dot(veh->phys.vel, trace.normal) <= 10.0))
     {
         s_phys_0.hasGround = 1;
-        if (trace.normal[2] >= DOUBLE_0_699999988079071)
+        if (trace.normal[2] >= 0.699999988079071)
             s_phys_0.onGround = 1;
     }
 }
@@ -2793,7 +3191,7 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int gravity, float frameTime)
         down[1] = startOrigin[1];
         down[2] = startOrigin[2] - 18.0;
         G_TraceCapsule(&trace, startOrigin, veh->phys.mins, veh->phys.maxs, down, ent->s.number, ent->clipmask);
-        if (veh->phys.vel[2] <= 0.0 || trace.fraction != 1.0 && trace.normal[2] >= DOUBLE_0_699999988079071)
+        if (veh->phys.vel[2] <= 0.0 || trace.fraction != 1.0 && trace.normal[2] >=0.699999988079071)
         {
             up[0] = startOrigin[0];
             up[1] = startOrigin[1];
@@ -3189,7 +3587,7 @@ void __cdecl VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
     {
         v4 = SL_ConvertToString(*s_wheelTags[idx]);
         v3 = SL_ConvertToString(ent->targetname);
-        Com_Error(ERR_DROP, &byte_892250, v3, v4);
+        Com_Error(ERR_DROP, "Script vehicle [%s] needs [%s]", v3, v4);
     }
     mtx = G_DObjGetLocalBoneIndexMatrix(ent, veh->boneIndex.wheel[idx]);
     if (!mtx)
@@ -3422,11 +3820,11 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     if (!alwaysfails)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2489, 0, "Trying to attach a player to a vehicle!");
     if ((client->ps.pm_flags & 0x100000) != 0)
-        Com_Error(ERR_DROP, &byte_892398);
+        Com_Error(ERR_DROP, "LinkPlayerToVehicle: Player is already using a vehicle");
     if (EntHandle::isDefined(&player->r.ownerNum))
-        Com_Error(ERR_DROP, &byte_892364);
+        Com_Error(ERR_DROP, "LinkPlayerToVehicle: Player already has an owner");
     if (!VehicleHasSeatFree(ent))
-        Com_Error(ERR_DROP, &byte_892330);
+        Com_Error(ERR_DROP, "LinkPlayerToVehicle: Vehicle has all seats filled");
     bestRiderTag = 0;
     bestRiderDist = 999999.0;
     for (i = 0; i < 3; ++i)
@@ -3445,7 +3843,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
         }
     }
     if (!bestRiderTag)
-        Com_Error(ERR_DROP, &byte_8922F0);
+        Com_Error(ERR_DROP, "LinkPlayerToVehicle: Tried to mount player on a full vehicle.");
     G_DObjGetWorldBoneIndexMatrix(ent, bestRiderTag->boneIdx, playerMtx);
     AxisToAngles(playerMtx, playerAngles);
     playerAngles[2] = 0.0;
@@ -3460,7 +3858,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     if (!G_EntLinkToWithOffset(player, ent, bestRiderTag->tagName, originOffset, vec3_origin))
     {
         v2 = SL_ConvertToString(bestRiderTag->tagName);
-        Com_Error(ERR_DROP, &byte_8922B4, v2);
+        Com_Error(ERR_DROP, "LinkPlayerToVehicle: Cannot link to vehicle bone %s", v2);
     }
     veh->flags |= 1u;
     bestRiderTag->entNum = player->s.number;

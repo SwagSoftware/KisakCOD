@@ -1,6 +1,14 @@
 #include "devgui.h"
+#include <qcommon/cmd.h>
+#include <client/client.h>
+#include <client_mp/client_mp.h>
+
+int s_butMapsKey[11] = { 154, 155, 156, 157, 13, 27, 9, 32, 161, 162, 171 }; // idb
+
+DevGuiInput s_input;
 
 
+cmd_function_s DevGui_Toggle_VAR;
 void __cdecl DevGui_InputInit()
 {
     Cmd_AddCommandInternal("devgui", DevGui_Toggle, &DevGui_Toggle_VAR);
@@ -9,6 +17,12 @@ void __cdecl DevGui_InputInit()
 void __cdecl DevGui_InputShutdown()
 {
     Cmd_RemoveCommand("devgui");
+}
+
+void DevGui_InputUpdateMouse()
+{
+    s_input.sliderScrollTime = 100.0;
+    s_input.sliderScrollMaxTimeStep = 0.30000001;
 }
 
 char __cdecl DevGui_InputUpdate(int localClientNum, float deltaTime)

@@ -1,7 +1,82 @@
 #include "game_public.h"
+#include <qcommon/mem_track.h>
+#include <script/scr_vm.h>
+#include <game_mp/g_utils_mp.h>
 
+const char *g_he_font[6] = { "default", "bigfixed", "smallfixed", "objective", "big", "small" }; // idb
+const char *g_he_alignx[3] = { "left", "center", "right" };
+const char *g_he_aligny[3] = { "top", "middle", "bottom" };
+const char *g_he_horzalign[8] = { "subleft", "left", "center", "right", "fullscreen", "noscale", "alignto640", "center_safearea" };
+const char *g_he_vertalign[8] = { "subtop", "top", "middle", "bottom", "fullscreen", "noscale", "alignto480", "center_safearea" };
+
+
+const game_hudelem_field_t fields_0[20] =
+{
+  { "x", 4, F_FLOAT, 0, 0, NULL, NULL },
+  { "y", 8, F_FLOAT, 0, 0, NULL, NULL },
+  { "z", 12, F_FLOAT, 0, 0, NULL, NULL },
+  { "fontscale", 20, F_FLOAT, -1, 0, &HudElem_SetFontScale, NULL },
+  { "font", 24, F_INT, -1, 0, &HudElem_SetFont, &HudElem_GetFont },
+  { "alignx", 28, F_INT, 3, 2, &HudElem_SetAlignX, &HudElem_GetAlignX },
+  { "aligny", 28, F_INT, 3, 0, &HudElem_SetAlignY, &HudElem_GetAlignY },
+  { "horzalign", 32, F_INT, 7, 3, &HudElem_SetHorzAlign, &HudElem_GetHorzAlign },
+  { "vertalign", 32, F_INT, 7, 0, &HudElem_SetVertAlign, &HudElem_GetVertAlign },
+  { "color", 36, F_INT, -1, 0, &HudElem_SetColor, &HudElem_GetColor },
+  { "alpha", 36, F_INT, -1, 0, &HudElem_SetAlpha, &HudElem_GetAlpha },
+  { "label", 52, F_INT, -1, 0, &HudElem_SetLocalizedString, NULL },
+  { "sort", 128, F_FLOAT, 0, 0, NULL, NULL },
+  {
+    "foreground",
+    156,
+    F_INT,
+    -1,
+    0,
+    &HudElem_SetFlagForeground,
+    &HudElem_GetFlagForeground
+  },
+  {
+    "hidewhendead",
+    156,
+    F_INT,
+    -1,
+    0,
+    &HudElem_SetFlagHideWhenDead,
+    &HudElem_GetFlagHideWhenDead
+  },
+  {
+    "hidewheninmenu",
+    156,
+    F_INT,
+    -1,
+    0,
+    &HudElem_SetFlagHideWhenInMenu,
+    &HudElem_GetFlagHideWhenInMenu
+  },
+  {
+    "glowcolor",
+    132,
+    F_INT,
+    -1,
+    0,
+    &HudElem_SetGlowColor,
+    &HudElem_GetGlowColor
+  },
+  {
+    "glowalpha",
+    132,
+    F_INT,
+    -1,
+    0,
+    &HudElem_SetGlowAlpha,
+    &HudElem_GetGlowAlpha
+  },
+  { "archived", 168, F_INT, -1, 0, &HudElem_SetBoolean, NULL },
+  { NULL, 0, F_INT, 0, 0, NULL, NULL }
+}; // idb
 
 //Line 53047:  0006 : 00514eb0       struct game_hudelem_s *g_hudelems 82cc4eb0     g_hudelem.obj
+
+game_hudelem_s g_hudelems[1024];
 
 
 void __cdecl TRACK_g_hudelem()
@@ -18,8 +93,8 @@ game_hudelem_s *__cdecl HudElem_Alloc(int clientNum, int teamNum)
         if (g_hudelems[i].elem.type == HE_TYPE_FREE)
         {
             HudElem_SetDefaults(&g_hudelems[i]);
-            dword_1473B90[43 * i] = clientNum;
-            dword_1473B94[43 * i] = teamNum;
+            g_hudelems[i].clientNum = clientNum;
+            g_hudelems[i].team = teamNum;
             return &g_hudelems[i];
         }
     }
@@ -117,7 +192,7 @@ void __cdecl HudElem_ClientDisconnect(gentity_s *ent)
     {
         if (g_hudelems[i].elem.type)
         {
-            if (dword_1473B90[43 * i] == ent->s.number)
+            if (g_hudelems[i].clientNum == ent->s.number)
                 HudElem_Free(&g_hudelems[i]);
         }
     }
@@ -140,7 +215,7 @@ void __cdecl HudElem_SetLocalizedString(game_hudelem_s *hud, int offset)
     char *string; // [esp+0h] [ebp-8h]
 
     string = Scr_GetIString(0);
-    *(he_type_t *)((char *)&hud->elem.type + fields_0[offset].ofs) = G_LocalizedStringIndex(string);
+    *(he_type_t *)((char *)&hud->elem.type + fields_0[offset].ofs) = (he_type_t)G_LocalizedStringIndex(string);
 }
 
 void __cdecl HudElem_SetFlagForeground(game_hudelem_s *hud, int offset)

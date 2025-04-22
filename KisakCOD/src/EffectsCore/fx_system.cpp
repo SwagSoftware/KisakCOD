@@ -13,6 +13,7 @@
 
 #include <win32/win_local.h>
 #include <gfx_d3d/r_model.h>
+#include <cgame_mp/cg_local_mp.h>
 
 int fx_maxLocalClients;
 int fx_serverVisClient;

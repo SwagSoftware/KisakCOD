@@ -329,6 +329,7 @@ void __cdecl R_GammaCorrect(unsigned __int8 *buffer, int bufSize);
 void __cdecl SetGfxConfig(const GfxConfiguration *config);
 void __cdecl R_InitThreads();
 void __cdecl R_ShutdownStreams();
+void __cdecl R_ShutdownMaterialUsage();
 void __cdecl R_Shutdown(int destroyWindow);
 void R_ShutdownDirect3D();
 void __cdecl R_UnloadWorld();
@@ -363,6 +364,7 @@ void __cdecl R_UpdateTeamColors(int team, const float *color_allies, const float
 void __cdecl R_ConfigureRenderer(const GfxConfiguration *config);
 void __cdecl R_ComErrorCleanup();
 bool R_CheckLostDevice();
+void __cdecl R_MakeDedicated(const GfxConfiguration *config);
 
 void __cdecl R_UpdateGpuSyncType();
 

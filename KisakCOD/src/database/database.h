@@ -185,6 +185,8 @@ void __cdecl DB_EnumXAssetsFor(
 int __cdecl DB_FileSize(const char *zoneName, int isMod);
 bool __cdecl DB_ModFileExists();
 
+void __cdecl Load_GetCurrentZoneHandle(unsigned __int8 *handle);
+
 
 // db_assetnames
 void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
@@ -271,7 +273,7 @@ void __cdecl Load_byteArray(bool atStreamStart, int count);
 void __cdecl Load_charArray(bool atStreamStart, int count);
 void __cdecl Load_int(bool atStreamStart);
 void __cdecl Load_intArray(bool atStreamStart, int count);
-void __cdecl LoaduintArray(bool atStreamStart, int count);
+void __cdecl Load_uintArray(bool atStreamStart, int count);
 void __cdecl Load_uint(bool atStreamStart);
 void __cdecl Load_uintArray(bool atStreamStart, int count);
 void __cdecl Load_float(bool atStreamStart);

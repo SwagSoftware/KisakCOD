@@ -544,3 +544,10 @@ void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount)
     SortMyShit(drawSurfList, surfCount);
     Profile_EndInternal(0);
 }
+
+GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex)
+{
+    if (!g_processMarkMesh)
+        MyAssertHandler(".\\r_drawsurf.cpp", 815, 0, "%s", "g_processMarkMesh");
+    return (GfxWorldVertex*)R_GetMeshVerts(&frontEndDataOut->markMesh, baseVertex);
+}

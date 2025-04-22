@@ -13,6 +13,8 @@
 
 #include <DynEntity/DynEntity_client.h>
 #include <gfx_d3d/r_water.h>
+#include <gfx_d3d/r_image.h>
+#include <universal/com_sndalias.h>
 
 void *varint;
 void *varuint;
@@ -42,6 +44,7 @@ unsigned long *varXAUDIOSAMPLERATE     ;
 mnode_t *varmnode_t     ;
 union FxElemDefVisuals *varFxElemDefVisuals     ;
 XModelCollSurf_s *varXModelCollSurf     ;
+XModelCollTri_s *varXModelCollTri;
 unsigned int *varuint                ;
 DynEntityServer *varDynEntityServer     ;
 MaterialStreamRouting *varMaterialStreamRouting     ;
@@ -100,6 +103,7 @@ FxImpactTable **varFxImpactTablePtr     ;
 float *varXAUDIOVOLUME        ;
 //XaReverbSettings *varXaReverbSettings     ;
 unsigned __int8 *varvec2_           ;
+float (*varvec2_t)[2];
 FxElemAtlas *varFxElemAtlas     ;
 MaterialVertexStreamRouting *varMaterialVertexStreamRouting     ;
 CollisionPartition *varCollisionPartition     ;
@@ -160,7 +164,7 @@ union XAssetHeader *varXAssetHeader     ;
 CollisionAabbTree *varCollisionAabbTree     ;
 cplane_s *varcplane_t     ;
 union operandInternalDataUnion *varoperandInternalDataUnion     ;
-short (*)[4] varXQuat            ;
+short *varXQuat[4]            ;
 expressionEntry *varexpressionEntry     ;
 XAssetList *varXAssetList     ;
 enum weapClass_t *varweapClass_t     ;
@@ -179,7 +183,8 @@ unsigned char *varuint8_t             ;
 GfxShadowGeometry *varGfxShadowGeometry     ;
 union SoundFileRef *varSoundFileRef     ;
 XModelPieces *varXModelPieces     ;
-unsigned __int8 *varvec3_t           ;
+//unsigned __int8 *varvec3_t           ;
+float (*varvec3_t)[3];
 Font_s **varFontHandle     ;
 GfxImage *varGfxImage     ;
 union MaterialTextureDefInfo *varMaterialTextureDefInfo     ;
@@ -282,7 +287,7 @@ GfxStaticModelDrawInst *varGfxStaticModelDrawInst     ;
 enum PenetrateType *varPenetrateType     ;
 int marker_db_load           ;
 GfxLightDef *varGfxLightDef     ;
-union MaterialVertexShaderProgram *varMaterialVertexShaderProgram     ;
+//union MaterialVertexShaderProgram *varMaterialVertexShaderProgram     ;
 SndDriverGlobals **varSndDriverGlobalsPtr     ;
 cStaticModel_s *varcStaticModel_t     ;
 menuDef_t *varmenuDef_t     ;
@@ -296,8 +301,8 @@ cLeafBrushNode_s *varcLeafBrushNode_t     ;
 complex_s *varcomplex_t     ;
 WeaponDef **varWeaponDefPtr     ;
 LoadedSound *varLoadedSound     ;
-XaSeekTable *varXaSeekTable     ;
-XAUDIOSOURCEFORMAT *varXAUDIOSOURCEFORMAT     ;
+//XaSeekTable *varXaSeekTable     ;
+//XAUDIOSOURCEFORMAT *varXAUDIOSOURCEFORMAT     ;
 unsigned char *varGfxImageCategory     ;
 unsigned char *varXAUDIOXMASTREAMCOUNT     ;
 GfxSceneDynModel *varGfxSceneDynModel     ;
@@ -318,7 +323,7 @@ enum weapProjExposion_t *varweapProjExposion_t     ;
 snd_alias_t *varsnd_alias_t     ;
 unsigned char *varraw_byte16          ;
 SpeakerMap *varSpeakerMap     ;
-D3DIndexBuffer *varGfxIndexBuffer     ;
+//D3DIndexBuffer *varGfxIndexBuffer     ;
 unsigned char *varGfxSamplerState     ;
 unsigned short *varraw_ushort          ;
 MaterialArgumentCodeConst *varMaterialArgumentCodeConst     ;
@@ -357,22 +362,22 @@ MapEnts **varMapEntsPtr     ;
 enum ImpactType *varImpactType     ;
 FxImpactTable *varFxImpactTable     ;
 cbrush_t *varcbrush_t     ;
-D3DVertexBuffer *varGfxVertexBuffer     ;
+//D3DVertexBuffer *varGfxVertexBuffer     ;
 GfxWorldVertexLayerData *varGfxWorldVertexLayerData     ;
 MapEnts *varMapEnts     ;
 unsigned char *varXAUDIOCHANNEL       ;
 char *varchar2048            ;
-XAUDIOPACKET_ALIGNED *varXAUDIOPACKET_ALIGNED     ;
+//XAUDIOPACKET_ALIGNED *varXAUDIOPACKET_ALIGNED     ;
 unsigned short *varScriptString        ;
 windowDef_t *varWindow     ;
 CollisionBorder *varCollisionBorder     ;
 FxElemVelStateSample *varFxElemVelStateSample     ;
 XAnimDeltaPart *varXAnimDeltaPart     ;
 GfxWorldVertex *varGfxWorldVertex0     ;
-float (*)[3] varshared_vec3_t     ;
+//float (*)[3] varshared_vec3_t     ;
 listBoxDef_s **varlistBoxDef_ptr     ;
 PhysGeomInfo *varPhysGeomInfo     ;
-unsigned char (*)[3] varByteVec          ;
+//unsigned char (*)[3] varByteVec          ;
 unsigned short *varuint16_t            ;
 enum weapFireType_t *varweapFireType_t     ;
 enum weaponAltModel_t *varweaponAltModel_t     ;
@@ -384,6 +389,11 @@ GfxImage **varGfxImagePtr     ;
 snd_alias_list_t *varsnd_alias_list_t     ;
 cLeafBrushNodeChildren_t *varcLeafBrushNodeChildren_t     ;
 LocalizeEntry **varLocalizeEntryPtr     ;
+unsigned __int8 (*varByteVec)[3];
+MssSound *varMssSound;
+IDirect3DVertexBuffer9 **varGfxVertexBuffer;
+unsigned __int8 *varXZoneHandle;
+MaterialVertexShaderProgram *varMaterialVertexShaderProgram;
 
 void __cdecl Load_byte(bool atStreamStart)
 {
@@ -410,9 +420,9 @@ void __cdecl Load_intArray(bool atStreamStart, int count)
     Load_Stream(atStreamStart, (unsigned __int8 *)varint, 4 * count);
 }
 
-void __cdecl LoaduintArray(bool atStreamStart, int count)
+void __cdecl Load_uintArray(bool atStreamStart, int count)
 {
-    Load_Stream(atStreamStart, (unsigned __int8 *)varunsigned int, 4 * count);
+    Load_Stream(atStreamStart, (unsigned char*)varuint, 4 * count);
 }
 
 void __cdecl Load_uint(bool atStreamStart)
@@ -732,7 +742,7 @@ void __cdecl Load_XAnimDeltaPartQuatDataFrames(bool atStreamStart)
     if (varXAnimDeltaPartQuatDataFrames->frames)
     {
         varXAnimDeltaPartQuatDataFrames->frames = (__int16 (*)[2])AllocLoad_FxElemVisStateSample();
-        varXQuat2 = varXAnimDeltaPartQuatDataFrames->frames;
+        varXQuat2 = (unsigned char*)varXAnimDeltaPartQuatDataFrames->frames;
         if (varXAnimDeltaPartQuat->size)
             Load_XQuat2Array(1, varXAnimDeltaPartQuat->size + 1);
         else
@@ -749,7 +759,7 @@ void __cdecl Load_XAnimDeltaPartQuatData(bool atStreamStart)
     }
     else if (atStreamStart)
     {
-        varXQuat2 = (__int16 (*)[2])varXAnimDeltaPartQuatData;
+        varXQuat2 = (unsigned char*)varXAnimDeltaPartQuatData;
         Load_XQuat2(atStreamStart);
     }
 }
@@ -848,7 +858,7 @@ void __cdecl Load_XAnimDynamicFrames()
     else if (varXAnimDynamicFrames->_1)
     {
         varXAnimDynamicFrames->_1 = (unsigned __int8 (*)[3])AllocLoad_FxElemVisStateSample();
-        varUShortVec = (unsigned __int16 (*)[3])varXAnimDynamicFrames->_1;
+        varUShortVec = (unsigned char*)varXAnimDynamicFrames->_1;
         if (varXAnimPartTrans->size)
             Load_UShortVecArray(1, varXAnimPartTrans->size + 1);
         else
@@ -1096,6 +1106,42 @@ void __cdecl Load_StreamFileName(bool atStreamStart)
     Load_Stream(atStreamStart, (unsigned __int8 *)varStreamFileName, 8);
     varStreamFileInfo = &varStreamFileName->info;
     Load_StreamFileInfo(0);
+}
+
+void __cdecl Load_SetSoundData(unsigned __int8 **data, MssSound *mssSound)
+{
+    SND_SetData(mssSound, *data);
+}
+
+void __cdecl Load_MssSound(bool atStreamStart)
+{
+    const void **inserted; // [esp+0h] [ebp-Ch]
+    unsigned int value; // [esp+4h] [ebp-8h]
+
+    Load_Stream(atStreamStart, (unsigned char*)varMssSound, 40);
+    DB_PushStreamPos(0);
+    if (varMssSound->data)
+    {
+        value = (unsigned int)varMssSound->data;
+        if (value < 0xFFFFFFFE)
+        {
+            DB_ConvertOffsetToAlias((unsigned int*)&varMssSound->data);
+        }
+        else
+        {
+            varMssSound->data = AllocLoad_raw_byte();
+            varbyte = varMssSound->data;
+            if (value == -2)
+                inserted = DB_InsertPointer();
+            else
+                inserted = 0;
+            Load_byteArray(1, varMssSound->info.data_len);
+            Load_SetSoundData(&varMssSound->data, varMssSound);
+            if (inserted)
+                *inserted = varMssSound->data;
+        }
+    }
+    DB_PopStreamPos();
 }
 
 void __cdecl Load_LoadedSound(bool atStreamStart)
@@ -1571,6 +1617,14 @@ void __cdecl Load_r_index16_tArray(bool atStreamStart, int count)
     Load_Stream(atStreamStart, (unsigned __int8 *)varr_index16_t, 2 * count);
 }
 
+void __cdecl Load_XZoneHandle(bool atStreamStart)
+{
+    Load_Stream(atStreamStart, varXZoneHandle, 1);
+    varbyte = varXZoneHandle;
+    Load_byte(0);
+    Load_GetCurrentZoneHandle(varXZoneHandle);
+}
+
 void __cdecl Load_XSurface(bool atStreamStart)
 {
     Load_Stream(atStreamStart, &varXSurface->tileMode, 56);
@@ -1641,25 +1695,23 @@ void __cdecl Load_XSurfaceArray(bool atStreamStart, int count)
 void __cdecl Load_GfxTextureLoad(bool atStreamStart)
 {
     const void **inserted; // [esp+0h] [ebp-Ch]
-    unsigned int value; // [esp+4h] [ebp-8h]
 
     Load_Stream(atStreamStart, (unsigned __int8 *)varGfxTextureLoad, 4);
     DB_PushStreamPos(0);
-    if (*varGfxTextureLoad)
+    if (varGfxTextureLoad->map)
     {
-        value = (unsigned int)*varGfxTextureLoad;
-        if (*varGfxTextureLoad == (GfxImageLoadDef *)-1 || value == -2)
+        if (varGfxTextureLoad->loadDef == (GfxImageLoadDef *)-1 || varGfxTextureLoad->loadDef == (GfxImageLoadDef *)-2)
         {
-            *varGfxTextureLoad = (GfxImageLoadDef *)AllocLoad_FxElemVisStateSample();
-            varGfxImageLoadDef = *varGfxTextureLoad;
-            if (value == -2)
+            varGfxTextureLoad->loadDef = (GfxImageLoadDef *)AllocLoad_FxElemVisStateSample();
+            varGfxImageLoadDef = varGfxTextureLoad->loadDef;
+            if (varGfxTextureLoad->loadDef == (GfxImageLoadDef *)-2)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
             Load_GfxImageLoadDef(1);
             Load_Texture((GfxTexture *)varGfxTextureLoad, varGfxImage);
             if (inserted)
-                *inserted = *varGfxTextureLoad;
+                *inserted = varGfxTextureLoad->loadDef;
         }
         else
         {
@@ -1696,7 +1748,7 @@ void __cdecl Load_GfxImage(bool atStreamStart)
     DB_PushStreamPos(4u);
     varXString = &varGfxImage->name;
     Load_XString(0);
-    varGfxTextureLoad = (GfxImageLoadDef **)&varGfxImage->texture;
+    varGfxTextureLoad = &varGfxImage->texture;
     Load_GfxTextureLoad(0);
     DB_PopStreamPos();
 }
@@ -1773,7 +1825,7 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
     {
         varGfxVertexShaderLoadDef->program = (unsigned int *)AllocLoad_FxElemVisStateSample();
         varuint = varGfxVertexShaderLoadDef->program;
-        LoaduintArray(1, varGfxVertexShaderLoadDef->programSize);
+        Load_uintArray(1, varGfxVertexShaderLoadDef->programSize);
     }
 }
 
@@ -1784,7 +1836,7 @@ void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
     {
         varGfxPixelShaderLoadDef->program = (unsigned int *)AllocLoad_FxElemVisStateSample();
         varuint = varGfxPixelShaderLoadDef->program;
-        LoaduintArray(1, varGfxPixelShaderLoadDef->programSize);
+        Load_uintArray(1, varGfxPixelShaderLoadDef->programSize);
     }
 }
 
@@ -1943,14 +1995,14 @@ void __cdecl Load_GfxStateBitsArray(bool atStreamStart, int count)
 void __cdecl Load_MaterialPass(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialPass, 20);
-    if (*varMaterialPass)
+    if (varMaterialPass->vertexDecl)
     {
-        if (*varMaterialPass == (MaterialVertexDeclaration *)-1)
+        if (varMaterialPass->vertexDecl == (MaterialVertexDeclaration *)-1)
         {
-            *varMaterialPass = (MaterialVertexDeclaration *)AllocLoad_FxElemVisStateSample();
-            varMaterialVertexDeclaration = *varMaterialPass;
+            varMaterialPass->vertexDecl = (MaterialVertexDeclaration *)AllocLoad_FxElemVisStateSample();
+            varMaterialVertexDeclaration = varMaterialPass->vertexDecl;
             Load_MaterialVertexDeclaration(1);
-            Load_BuildVertexDecl(varMaterialPass);
+            Load_BuildVertexDecl(&varMaterialPass->vertexDecl);
         }
         else
         {
@@ -1961,15 +2013,13 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
     Load_MaterialVertexShaderPtr(0);
     varMaterialPixelShaderPtr = (MaterialPixelShader **)(varMaterialPass + 2);
     Load_MaterialPixelShaderPtr(0);
-    if (varMaterialPass[4])
+    if (varMaterialPass->args)
     {
-        varMaterialPass[4] = (MaterialVertexDeclaration *)AllocLoad_FxElemVisStateSample();
-        varMaterialShaderArgument = (MaterialShaderArgument *)varMaterialPass[4];
+        varMaterialPass->args = (MaterialShaderArgument*)AllocLoad_FxElemVisStateSample();
+        varMaterialShaderArgument = varMaterialPass->args;
         Load_MaterialShaderArgumentArray(
             1,
-            *((unsigned __int8 *)varMaterialPass + 14)
-            + *((unsigned __int8 *)varMaterialPass + 13)
-            + *((unsigned __int8 *)varMaterialPass + 12));
+            varMaterialPass->stableArgCount + varMaterialPass->perObjArgCount + varMaterialPass->perPrimArgCount);
     }
 }
 
@@ -1982,7 +2032,7 @@ void __cdecl Load_MaterialPassArray(bool atStreamStart, int count)
     var = (MaterialPass *)varMaterialPass;
     for (i = 0; i < count; ++i)
     {
-        varMaterialPass = &var->vertexDecl;
+        varMaterialPass = (MaterialPass*)&var->vertexDecl;
         Load_MaterialPass(0);
         ++var;
     }
@@ -2000,7 +2050,7 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
             0,
             "%s",
             "DB_GetStreamPos() == reinterpret_cast< byte * >( varMaterialTechnique->passArray )");
-    varMaterialPass = &varMaterialTechnique->passArray[0].vertexDecl;
+    varMaterialPass = (MaterialPass*)&varMaterialTechnique->passArray[0].vertexDecl;
     Load_MaterialPassArray(1, varMaterialTechnique->passCount);
     varXString = &varMaterialTechnique->name;
     Load_XString(0);
@@ -2010,14 +2060,14 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
 {
     if (varMaterialTextureDef->semantic == 11)
     {
-        if (*varMaterialTextureDefInfo)
+        if (varMaterialTextureDefInfo->water)
         {
-            if (*varMaterialTextureDefInfo == (water_t *)-1)
+            if (varMaterialTextureDefInfo->water == (water_t *)-1)
             {
-                *varMaterialTextureDefInfo = (water_t *)AllocLoad_FxElemVisStateSample();
-                varwater_t = *varMaterialTextureDefInfo;
+                varMaterialTextureDefInfo->image = ((MaterialTextureDefInfo *)AllocLoad_FxElemVisStateSample())->image;
+                varwater_t = *(water_t**)varMaterialTextureDefInfo;
                 Load_water_t(1);
-                Load_PicmipWater(varMaterialTextureDefInfo);
+                Load_PicmipWater((water_t**)varMaterialTextureDefInfo);
             }
             else
             {
@@ -2035,7 +2085,7 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
 void __cdecl Load_MaterialTextureDef(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialTextureDef, 12);
-    varMaterialTextureDefInfo = (water_t **)&varMaterialTextureDef->u;
+    varMaterialTextureDefInfo = &varMaterialTextureDef->u;
     Load_MaterialTextureDefInfo(0);
 }
 
@@ -2234,9 +2284,9 @@ void __cdecl Mark_MaterialTextureDefInfo()
 {
     if (varMaterialTextureDef->semantic == 11)
     {
-        if (*varMaterialTextureDefInfo)
+        if (varMaterialTextureDefInfo)
         {
-            varwater_t = *varMaterialTextureDefInfo;
+            varwater_t = (water_t*)varMaterialTextureDefInfo;
             Mark_water_t();
         }
     }
@@ -2249,7 +2299,7 @@ void __cdecl Mark_MaterialTextureDefInfo()
 
 void __cdecl Mark_MaterialTextureDef()
 {
-    varMaterialTextureDefInfo = (water_t **)&varMaterialTextureDef->u;
+    varMaterialTextureDefInfo = &varMaterialTextureDef->u;
     Mark_MaterialTextureDefInfo();
 }
 
@@ -2590,6 +2640,11 @@ void __cdecl Load_cbrushedge_t(bool atStreamStart)
 void __cdecl Load_cbrushedge_tArray(bool atStreamStart, int count)
 {
     Load_Stream(atStreamStart, varcbrushedge_t, count);
+}
+
+void __cdecl Load_XModelCollTriArray(bool atStreamStart, int count)
+{
+    Load_Stream(atStreamStart, (unsigned char*)varXModelCollTri, 48 * count);
 }
 
 void __cdecl Load_XModelCollSurf(bool atStreamStart)
@@ -3501,13 +3556,13 @@ void __cdecl Load_FxElemDef(bool atStreamStart)
     Load_Stream(atStreamStart, (unsigned __int8 *)varFxElemDef, 252);
     if (varFxElemDef->velSamples)
     {
-        varFxElemDef->velSamples = (const FxElemVelStateSample *)AllocLoad_FxElemVisStateSample();
+        varFxElemDef->velSamples = (FxElemVelStateSample *)AllocLoad_FxElemVisStateSample();
         varFxElemVelStateSample = varFxElemDef->velSamples;
         Load_FxElemVelStateSampleArray(1, varFxElemDef->velIntervalCount + 1);
     }
     if (varFxElemDef->visSamples)
     {
-        varFxElemDef->visSamples = (const FxElemVisStateSample *)AllocLoad_FxElemVisStateSample();
+        varFxElemDef->visSamples = (FxElemVisStateSample *)AllocLoad_FxElemVisStateSample();
         varFxElemVisStateSample = varFxElemDef->visSamples;
         Load_FxElemVisStateSampleArray(1, varFxElemDef->visStateIntervalCount + 1);
     }
@@ -3551,7 +3606,7 @@ void __cdecl Load_FxEffectDef(bool atStreamStart)
     if (varFxEffectDef->elemDefs)
     {
         varFxEffectDef->elemDefs = (const FxElemDef *)AllocLoad_FxElemVisStateSample();
-        varFxElemDef = varFxEffectDef->elemDefs;
+        varFxElemDef = (FxElemDef*)varFxEffectDef->elemDefs;
         Load_FxElemDefArray(
             1,
             varFxEffectDef->elemDefCountEmission + varFxEffectDef->elemDefCountOneShot + varFxEffectDef->elemDefCountLooping);
@@ -3683,7 +3738,7 @@ void __cdecl Mark_FxEffectDef()
 {
     if (varFxEffectDef->elemDefs)
     {
-        varFxElemDef = varFxEffectDef->elemDefs;
+        varFxElemDef = (FxElemDef*)varFxEffectDef->elemDefs;
         Mark_FxElemDefArray(varFxEffectDef->elemDefCountEmission + varFxEffectDef->elemDefCountOneShot
             + varFxEffectDef->elemDefCountLooping);
     }
@@ -5887,7 +5942,7 @@ void __cdecl Load_GfxPortal(bool atStreamStart)
     if (varGfxPortal->vertices)
     {
         varGfxPortal->vertices = (float (*)[3])AllocLoad_FxElemVisStateSample();
-        varvec3_t = (unsigned char*)varGfxPortal->vertices;
+        varvec3_t = varGfxPortal->vertices;
         Load_vec3_tArray(1, varGfxPortal->vertexCount);
     }
 }

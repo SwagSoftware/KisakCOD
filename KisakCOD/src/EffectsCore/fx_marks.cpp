@@ -14,6 +14,7 @@
 #include <win32/win_local.h>
 
 #include <algorithm>
+#include <aim_assist/aim_assist.h>
 
 FxMarkPoint g_fxMarkPoints[765];
 
@@ -1625,6 +1626,205 @@ void __cdecl FX_GenerateMarkVertsForMark_SetReflectionProbeIndex(
     drawSurf->context.reflectionProbeIndex = reflectionProbeIndexOverride;
 }
 
+void __cdecl FX_ExpandMarkVerts_Transform_GfxWorldVertex_(
+    FxMarksSystem *marksSystem,
+    const FxMark *mark,
+    unsigned __int16 baseVertex,
+    const float (*matrixTransform)[3])
+{
+    double v4; // st7
+    double v5; // st7
+    int v6; // [esp+50h] [ebp-C0h]
+    PackedUnitVec v7; // [esp+54h] [ebp-BCh]
+    PackedUnitVec v8; // [esp+74h] [ebp-9Ch]
+    float *lmapCoord; // [esp+94h] [ebp-7Ch]
+    GfxWorldVertex *castOutVert; // [esp+A8h] [ebp-68h]
+    unsigned int groupHandle; // [esp+ACh] [ebp-64h]
+    float delta[3]; // [esp+B0h] [ebp-60h] BYREF
+    float transformedNormal[3]; // [esp+BCh] [ebp-54h] BYREF
+    float texCoordScale; // [esp+C8h] [ebp-48h]
+    float binormal[3]; // [esp+CCh] [ebp-44h] BYREF
+    const FxMarkPoint *markPoint; // [esp+D8h] [ebp-38h]
+    GfxWorldVertex *verts; // [esp+DCh] [ebp-34h]
+    float transformedDelta[3]; // [esp+E0h] [ebp-30h] BYREF
+    __int64 texCoord; // [esp+ECh] [ebp-24h]
+    int pointCount; // [esp+F4h] [ebp-1Ch]
+    int loopCount; // [esp+F8h] [ebp-18h]
+    float transformedTexCoordAxis[3]; // [esp+FCh] [ebp-14h] BYREF
+    const FxPointGroup *group; // [esp+108h] [ebp-8h]
+    GfxWorldVertex *outVert; // [esp+10Ch] [ebp-4h]
+
+    if (!mark)
+        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1163, 0, "%s", "mark");
+    verts = R_GetMarkMeshVerts(baseVertex);
+    if (mark->radius < 0.1000000014901161)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1167,
+            0,
+            "%s\n\t(mark->radius) = %g",
+            "(mark->radius >= 0.1f)",
+            mark->radius);
+    texCoordScale = 0.5 / mark->radius;
+    groupHandle = mark->points;
+    pointCount = mark->pointCount;
+    outVert = verts;
+    do
+    {
+        if (groupHandle == 0xFFFF)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1175, 0, "%s", "groupHandle != FX_HANDLE_NONE");
+        group = (const FxPointGroup *)FX_PointGroupFromHandle(marksSystem, groupHandle);
+        groupHandle = group->next;
+        if (pointCount > 2)
+            v6 = 2;
+        else
+            v6 = pointCount;
+        loopCount = v6;
+        if (v6 <= 0)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1180, 0, "%s\n\t(loopCount) = %i", "(loopCount > 0)", loopCount);
+        pointCount -= loopCount;
+        markPoint = (const FxMarkPoint * )group;
+        do
+        {
+            castOutVert = outVert;
+            Vec3Sub(markPoint->xyz, mark->origin, delta);
+            MatrixTransformVector(delta, matrixTransform, transformedDelta);
+            MatrixTransformVector(mark->texCoordAxis, matrixTransform, transformedTexCoordAxis);
+            MatrixTransformVector(markPoint->normal, matrixTransform, transformedNormal);
+            Vec3Cross(transformedTexCoordAxis, transformedNormal, binormal);
+            MatrixTransformVector43(markPoint->xyz, matrixTransform, castOutVert->xyz);
+            castOutVert->binormalSign = -1.0;
+            castOutVert->color.packed = *mark->nativeColor;
+            v4 = Vec3Dot(transformedDelta, transformedTexCoordAxis);
+            *&texCoord = v4 * texCoordScale + 0.5;
+            v5 = Vec3Dot(transformedDelta, binormal);
+            *(&texCoord + 1) = v5 * texCoordScale + 0.5;
+            lmapCoord = (float*)markPoint->lmapCoord;
+            *castOutVert->texCoord = texCoord;
+            *castOutVert->lmapCoord = *lmapCoord;
+            v8.array[0] = (transformedNormal[0] * 127.0 + 127.5);
+            v8.array[1] = (transformedNormal[1] * 127.0 + 127.5);
+            v8.array[2] = (transformedNormal[2] * 127.0 + 127.5);
+            v8.array[3] = 63;
+            castOutVert->normal = v8;
+            v7.array[0] = (transformedTexCoordAxis[0] * 127.0 + 127.5);
+            v7.array[1] = (transformedTexCoordAxis[1] * 127.0 + 127.5);
+            v7.array[2] = (transformedTexCoordAxis[2] * 127.0 + 127.5);
+            v7.array[3] = 63;
+            castOutVert->tangent = v7;
+            ++markPoint;
+            ++outVert;
+            --loopCount;
+        } while (loopCount);
+    } while (pointCount);
+    if (groupHandle != 0xFFFF)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1208,
+            0,
+            "%s\n\t(groupHandle) = %i",
+            "(groupHandle == 0xffff)",
+            groupHandle);
+}
+
+void __cdecl FX_ExpandMarkVerts_Transform_GfxPackedVertex_(
+    FxMarksSystem *marksSystem,
+    const FxMark *mark,
+    unsigned __int16 baseVertex,
+    const float (*matrixTransform)[3])
+{
+    double v4; // st7
+    double v5; // st7
+    int v6; // [esp+50h] [ebp-F0h]
+    PackedUnitVec v7; // [esp+54h] [ebp-ECh]
+    PackedUnitVec v8; // [esp+74h] [ebp-CCh]
+    GfxPackedVertex *castOutVert; // [esp+D8h] [ebp-68h]
+    unsigned int groupHandle; // [esp+DCh] [ebp-64h]
+    float delta[3]; // [esp+E0h] [ebp-60h] BYREF
+    float transformedNormal[3]; // [esp+ECh] [ebp-54h] BYREF
+    float texCoordScale; // [esp+F8h] [ebp-48h]
+    float binormal[3]; // [esp+FCh] [ebp-44h] BYREF
+    const FxMarkPoint *markPoint; // [esp+108h] [ebp-38h]
+    GfxWorldVertex *verts; // [esp+10Ch] [ebp-34h]
+    float transformedDelta[3]; // [esp+110h] [ebp-30h] BYREF
+    float texCoord[2]; // [esp+11Ch] [ebp-24h] BYREF
+    int pointCount; // [esp+124h] [ebp-1Ch]
+    int loopCount; // [esp+128h] [ebp-18h]
+    float transformedTexCoordAxis[3]; // [esp+12Ch] [ebp-14h] BYREF
+    const FxPointGroup *group; // [esp+138h] [ebp-8h]
+    GfxWorldVertex *outVert; // [esp+13Ch] [ebp-4h]
+
+    if (!mark)
+        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1163, 0, "%s", "mark");
+    verts = R_GetMarkMeshVerts(baseVertex);
+    if (mark->radius < 0.1000000014901161)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1167,
+            0,
+            "%s\n\t(mark->radius) = %g",
+            "(mark->radius >= 0.1f)",
+            mark->radius);
+    texCoordScale = 0.5 / mark->radius;
+    groupHandle = mark->points;
+    pointCount = mark->pointCount;
+    outVert = verts;
+    do
+    {
+        if (groupHandle == 0xFFFF)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1175, 0, "%s", "groupHandle != FX_HANDLE_NONE");
+        group = (const FxPointGroup*)FX_PointGroupFromHandle(marksSystem, groupHandle);
+        groupHandle = group->next;
+        if (pointCount > 2)
+            v6 = 2;
+        else
+            v6 = pointCount;
+        loopCount = v6;
+        if (v6 <= 0)
+            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1180, 0, "%s\n\t(loopCount) = %i", "(loopCount > 0)", loopCount);
+        pointCount -= loopCount;
+        markPoint = (const FxMarkPoint *)group;
+        do
+        {
+            castOutVert = (GfxPackedVertex*)outVert;
+            Vec3Sub(markPoint->xyz, mark->origin, delta);
+            MatrixTransformVector(delta, matrixTransform, transformedDelta);
+            MatrixTransformVector(mark->texCoordAxis, matrixTransform, transformedTexCoordAxis);
+            MatrixTransformVector(markPoint->normal, matrixTransform, transformedNormal);
+            Vec3Cross(transformedTexCoordAxis, transformedNormal, binormal);
+            MatrixTransformVector43(markPoint->xyz, matrixTransform, castOutVert->xyz);
+            castOutVert->binormalSign = -1.0;
+            castOutVert->color.packed = *mark->nativeColor;
+            v4 = Vec3Dot(transformedDelta, transformedTexCoordAxis);
+            texCoord[0] = v4 * texCoordScale + 0.5;
+            v5 = Vec3Dot(transformedDelta, binormal);
+            texCoord[1] = v5 * texCoordScale + 0.5;
+            setTexCoordAndLMap_GfxPackedVertex_(castOutVert, texCoord);
+            v8.array[0] = (transformedNormal[0] * 127.0 + 127.5);
+            v8.array[1] = (transformedNormal[1] * 127.0 + 127.5);
+            v8.array[2] = (transformedNormal[2] * 127.0 + 127.5);
+            v8.array[3] = 63;
+            castOutVert->normal = v8;
+            v7.array[0] = (transformedTexCoordAxis[0] * 127.0 + 127.5);
+            v7.array[1] = (transformedTexCoordAxis[1] * 127.0 + 127.5);
+            v7.array[2] = (transformedTexCoordAxis[2] * 127.0 + 127.5);
+            v7.array[3] = 63;
+            castOutVert->tangent = v7;
+            ++markPoint;
+            ++outVert;
+            --loopCount;
+        } while (loopCount);
+    } while (pointCount);
+    if (groupHandle != 0xFFFF)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_marks.cpp",
+            1208,
+            0,
+            "%s\n\t(groupHandle) = %i",
+            "(groupHandle == 0xffff)",
+            groupHandle);
+}
+
 void __cdecl FX_GenerateMarkVertsForMark_FinishAnimated(
     FxMarksSystem *marksSystem,
     FxMark *mark,
@@ -2298,6 +2498,35 @@ void __cdecl FX_GenerateMarkVertsForStaticModels(
     //Profile_EndInternal(0);
 }
 
+void __cdecl setTexCoordAndLMap_GfxPackedVertex_(GfxPackedVertex *outVert, const float *texCoord)
+{
+    __int16 v2; // [esp+0h] [ebp-40h]
+    __int16 v3; // [esp+4h] [ebp-3Ch]
+    int v4; // [esp+Ch] [ebp-34h]
+    float v5; // [esp+18h] [ebp-28h]
+    int v6; // [esp+20h] [ebp-20h]
+
+    if (((unsigned int)(2 * texCoord[0]) ^ 0x80000000) >> 14 < 0x3FFF)
+        v6 = ((unsigned int)(2 * texCoord[0]) ^ 0x80000000) >> 14;
+    else
+        v6 = 0x3FFF;
+    if (v6 > -16384)
+        v3 = v6;
+    else
+        v3 = -16384;
+    v5 = texCoord[1];
+    if (((2 * LODWORD(v5)) ^ 0x80000000) >> 14 < 0x3FFF)
+        v4 = ((2 * LODWORD(v5)) ^ 0x80000000) >> 14;
+    else
+        v4 = 0x3FFF;
+    if (v4 > -16384)
+        v2 = v4;
+    else
+        v2 = -16384;
+    outVert->texCoord.packed = (v2 & 0x3FFF | (SLODWORD(v5) >> 16) & 0xC000)
+        + ((v3 & 0x3FFF | (COERCE_INT(*texCoord) >> 16) & 0xC000) << 16);
+}
+
 void __cdecl FX_ExpandMarkVerts_NoTransform_GfxPackedVertex_(
     FxMarksSystem *marksSystem,
     const FxMark *mark,
@@ -2480,7 +2709,7 @@ void __cdecl FX_ExpandMarkVerts_NoTransform_GfxWorldVertex_(
             *(float *)&texCoord = v3 * texCoordScale + 0.5;
             v4 = Vec3Dot(delta, binormal);
             *((float *)&texCoord + 1) = v4 * texCoordScale + 0.5;
-            lmapCoord = markPoint->lmapCoord;
+            lmapCoord = (float*)markPoint->lmapCoord;
             *(_QWORD *)castOutVert->texCoord = texCoord;
             *(double *)castOutVert->lmapCoord = *(double *)lmapCoord;
             v7.array[0] = (int)(markPoint->normal[0] * 127.0 + 127.5);
