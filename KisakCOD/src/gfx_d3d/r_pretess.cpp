@@ -3,6 +3,8 @@
 #include <universal/q_shared.h>
 #include "r_scene.h"
 #include "r_buffers.h"
+#include "rb_tess.h"
+#include "r_draw_staticmodel.h"
 
 
 void __cdecl R_InitDrawSurfListInfo(GfxDrawSurfListInfo *info)
@@ -188,4 +190,18 @@ void __cdecl R_BeginPreTess()
         2 * gfxBuf.preTessIndexBuffer->total,
         0x2000);
     gfxBuf.preTessIndexBuffer->used = 0;
+}
+
+int __cdecl R_ReadBspPreTessDrawSurfs(
+    GfxReadCmdBuf *cmdBuf,
+    const GfxBspPreTessDrawSurf **list,
+    unsigned int *count,
+    unsigned int *baseIndex)
+{
+    *count = R_ReadPrimDrawSurfInt(cmdBuf);
+    if (!*count)
+        return 0;
+    *baseIndex = R_ReadPrimDrawSurfInt(cmdBuf);
+    *list = (const GfxBspPreTessDrawSurf *)R_ReadPrimDrawSurfData(cmdBuf, *count);
+    return 1;
 }

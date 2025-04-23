@@ -532,8 +532,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
     case 6:
     case 0xD:
         cent->previousEventSequence = cent->nextState.eventSequence;
-        if ((clientActive_t *)cent->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+        if (cent->nextState.solid != 0xFFFFFF)
             goto LABEL_43;
         CG_UpdateBModelWorldBounds(localClientNum, cent, 1);
         break;

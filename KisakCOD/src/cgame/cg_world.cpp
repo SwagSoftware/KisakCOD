@@ -606,10 +606,7 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, unsigned int entIndex, 
     p_nextState = &cent->nextState;
     if (entIndex == clip->passEntityNum)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 306, 0, "%s", "entIndex != clip->passEntityNum");
-    if (p_nextState->solid
-        && ((clientActive_t *)p_nextState->solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3)
-            || (p_nextState->lerp.eFlags & 1) == 0))
+    if (p_nextState->solid && (p_nextState->solid != 0xFFFFFF || (p_nextState->lerp.eFlags & 1) == 0))
     {
         contents = CG_GetEntityBModelContents(cent);
         if ((clip->contentmask & contents) != 0)
@@ -619,8 +616,7 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, unsigned int entIndex, 
             Vec3Add(absMaxs, clip->maxs, absMaxs);
             if (!CM_TraceBox(&clip->extents, absMins, absMaxs, results->fraction))
             {
-                if ((clientActive_t *)p_nextState->solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-                    + 3))
+                if (p_nextState->solid == 0xFFFFFF)
                 {
                     cmodel = p_nextState->index.brushmodel;
                     angles[0] = cent->pose.angles[0];
@@ -668,8 +664,7 @@ int __cdecl CG_GetEntityBModelContents(const centity_s *cent)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 25, 0, "%s", "cent");
     if (!cent->nextState.solid)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 28, 0, "%s", "es->solid");
-    if ((clientActive_t *)cent->nextState.solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-        + 3))
+    if (cent->nextState.solid == 0xFFFFFF)
         return CM_ContentsOfModel(cent->nextState.index.brushmodel);
     if (cent->nextState.eType == 1)
         return 0x2000000;
@@ -907,9 +902,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
         {
             if (!p_nextState->solid)
                 MyAssertHandler(".\\cgame\\cg_world.cpp", 572, 0, "%s", "es->solid");
-            if ((clientActive_t *)p_nextState->solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-                + 3)
-                || (p_nextState->lerp.eFlags & 1) == 0)
+            if (p_nextState->solid != 0xFFFFFF || (p_nextState->lerp.eFlags & 1) == 0)
             {
                 contents = CG_GetEntityBModelContents(cent);
                 if ((clip->contentmask & contents) != 0)
@@ -917,8 +910,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
                     CG_GetEntityBModelBounds(cent, mins, maxs, absMins, absMaxs);
                     if (!CM_TraceBox(&clip->extents, absMins, absMaxs, results->fraction))
                     {
-                        if ((clientActive_t *)p_nextState->solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-                            + 3))
+                        if (p_nextState->solid == 0xFFFFFF)
                         {
                             cmodel = p_nextState->index.brushmodel;
                             angles[0] = cent->pose.angles[0];

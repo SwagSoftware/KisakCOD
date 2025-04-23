@@ -28,7 +28,7 @@ void	IN_KillRumbleScripts( void );
 // LWSS add
 void IN_ActivateMouse(qboolean force);
 void __cdecl IN_RecenterMouse();
-
+void __cdecl IN_SetCursorPos(tagPOINT x);
 // LWSS end
 
 #define IN_CMD_GOTO_XTIMES	-5

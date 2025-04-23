@@ -13,7 +13,12 @@
 #include "r_xsurface.h"
 #include <database/database.h>
 #include "r_dobj_skin.h"
+#include <cgame/cg_local.h>
+#include "r_draw_staticmodel.h"
+#include "r_draw_xmodel.h"
+#include "r_pretess.h"
 
+GfxScaledPlacement s_manualObjectPlacement;
 
 void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const char *tessName, const float *color)
 {
@@ -851,7 +856,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
             R_DrawXModelSkinnedModelSurf(context, modelSurfa);
             if (++drawSurfIndex == drawSurfCount)
                 break;
-            &drawSurf.fields = drawSurfList[drawSurfIndex].fields;
+            drawSurf.packed = drawSurfList[drawSurfIndex].packed;
             if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFE0000000uLL) != __PAIR64__(
                 HIDWORD(drawSurf.packed),
                 drawSurfKeyb))
@@ -977,7 +982,6 @@ void __cdecl R_DrawXModelSkinnedCached(GfxCmdBufContext context, const GfxModelS
     //Profile_EndInternal(0);
 }
 
-GfxScaledPlacement s_manualObjectPlacement;
 unsigned int __cdecl R_TessXModelRigidDrawSurfList(
     const GfxDrawSurfListArgs *listArgs,
     GfxCmdBufContext prepassContext)
@@ -1029,7 +1033,7 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
         gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
         if (modelSurf->surf.info.gfxEntIndex)
         {
-            depthHackFlags = data->gfxEnts[gfxEntIndex].renderFxFlags & 2;
+            depthHackFlags = (GfxDepthRangeType)(data->gfxEnts[gfxEntIndex].renderFxFlags & 2);
             materialTime = data->gfxEnts[gfxEntIndex].materialTime;
         }
         else
@@ -1063,7 +1067,7 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
             if (prepassContext.state)
                 R_SetupPassPerObjectArgs(prepassContext);
             R_SetupPassPerObjectArgs(context);
-            drawSurfIndex = R_DrawXModelRigidSurfLit(drawSurfList, drawSurfCount, context, prepassContext, info);
+            drawSurfIndex = R_DrawXModelRigidSurfLit(drawSurfList, drawSurfCount, context);
         }
         else
         {
@@ -1092,6 +1096,160 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
     if (!drawSurfIndex)
         MyAssertHandler(".\\rb_tess.cpp", 1295, 0, "%s", "drawSurfIndex");
     return drawSurfIndex;
+}
+
+unsigned int __cdecl R_TessStaticModelCachedList(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
+{
+    const char *v2; // eax
+    GfxDepthRangeType depthRangeType; // [esp+1Ch] [ebp-34h]
+    GfxCmdBufContext context; // [esp+34h] [ebp-1Ch]
+    const GfxDrawSurfListInfo *info; // [esp+3Ch] [ebp-14h]
+    GfxCmdBufSourceState *commonSource; // [esp+44h] [ebp-Ch]
+    MaterialTechniqueType baseTechType; // [esp+48h] [ebp-8h]
+    const unsigned int *primDrawSurfPos; // [esp+4Ch] [ebp-4h]
+
+    //Profile_Begin(107);
+    context = listArgs->context;
+    commonSource = listArgs->context.source;
+    if (prepassContext.state)
+        MyAssertHandler(".\\rb_tess.cpp", 1676, 0, "%s", "prepassContext.state == NULL");
+    info = listArgs->info;
+    if (r_logFile->current.integer)
+    {
+        v2 = va("--- RB_TessStaticModelCached( %s ) ---\n", context.state->material->info.name);
+        RB_LogPrint(v2);
+    }
+    R_SetupPassCriticalPixelShaderArgs(context);
+    baseTechType = info->baseTechType;
+    R_ChangeDepthHackNearClip(commonSource, 0);
+    if (commonSource->objectPlacement != &rg.identityPlacement)
+        R_ChangeObjectPlacement(commonSource, &rg.identityPlacement);
+    R_SetVertexDeclTypeNormal(context.state, VERTDECL_STATICMODELCACHE);
+    depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
+    if (depthRangeType != context.state->depthRangeType)
+        R_ChangeDepthRange(context.state, depthRangeType);
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    R_TrackPrims(context.state, GFX_PRIM_STATS_SMODELCACHED);
+    if (baseTechType == TECHNIQUE_LIT_BEGIN)
+        R_DrawStaticModelCachedSurfLit(primDrawSurfPos, context);
+    else
+        R_DrawStaticModelCachedSurf(primDrawSurfPos, context);
+    g_primStats = 0;
+    //Profile_EndInternal(0);
+    return 1;
+}
+
+void __cdecl R_DrawStaticModelPreTessSurfLit(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    GfxReadCmdBuf readCmdBuf; // [esp+0h] [ebp-10h] BYREF
+    unsigned int firstIndex; // [esp+4h] [ebp-Ch] BYREF
+    unsigned int count; // [esp+8h] [ebp-8h] BYREF
+    GfxStaticModelPreTessSurf pretessSurf; // [esp+Ch] [ebp-4h] BYREF
+
+    R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    R_SetupCachedStaticModelLighting(context.source);
+    R_SetupPassPerObjectArgs(context);
+    readCmdBuf.primDrawSurfPos = primDrawSurfPos;
+    while (R_ReadStaticModelPreTessDrawSurf(&readCmdBuf, &pretessSurf, &firstIndex, &count))
+        R_DrawStaticModelsPreTessDrawSurfLighting(pretessSurf, firstIndex, count, context);
+}
+
+void __cdecl R_DrawStaticModelPreTessSurf(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    GfxReadCmdBuf readCmdBuf; // [esp+0h] [ebp-10h] BYREF
+    unsigned int firstIndex; // [esp+4h] [ebp-Ch] BYREF
+    unsigned int count; // [esp+8h] [ebp-8h] BYREF
+    GfxStaticModelPreTessSurf pretessSurf; // [esp+Ch] [ebp-4h] BYREF
+
+    R_SetupPassPerObjectArgs(context);
+    readCmdBuf.primDrawSurfPos = primDrawSurfPos;
+    while (R_ReadStaticModelPreTessDrawSurf(&readCmdBuf, &pretessSurf, &firstIndex, &count))
+        R_DrawStaticModelsPreTessDrawSurf(pretessSurf, firstIndex, count, context);
+}
+
+unsigned int __cdecl R_TessStaticModelPreTessList(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
+{
+    const char *v2; // eax
+    GfxDepthRangeType depthRangeType; // [esp+1Ch] [ebp-34h]
+    GfxCmdBufContext context; // [esp+34h] [ebp-1Ch]
+    const GfxDrawSurfListInfo *info; // [esp+3Ch] [ebp-14h]
+    GfxCmdBufSourceState *commonSource; // [esp+44h] [ebp-Ch]
+    MaterialTechniqueType baseTechType; // [esp+48h] [ebp-8h]
+    const unsigned int *primDrawSurfPos; // [esp+4Ch] [ebp-4h]
+
+    //Profile_Begin(107);
+    context = listArgs->context;
+    commonSource = listArgs->context.source;
+    if (prepassContext.state)
+        MyAssertHandler(".\\rb_tess.cpp", 1622, 0, "%s", "prepassContext.state == NULL");
+    info = listArgs->info;
+    if (r_logFile->current.integer)
+    {
+        v2 = va("--- RB_TessStaticModelCached( %s ) ---\n", context.state->material->info.name);
+        RB_LogPrint(v2);
+    }
+    R_SetupPassCriticalPixelShaderArgs(context);
+    baseTechType = info->baseTechType;
+    R_ChangeDepthHackNearClip(commonSource, 0);
+    if (commonSource->objectPlacement != &rg.identityPlacement)
+        R_ChangeObjectPlacement(commonSource, &rg.identityPlacement);
+    R_SetVertexDeclTypeNormal(context.state, VERTDECL_STATICMODELCACHE);
+    depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
+    if (depthRangeType != context.state->depthRangeType)
+        R_ChangeDepthRange(context.state, depthRangeType);
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    R_TrackPrims(context.state, GFX_PRIM_STATS_SMODELCACHED);
+    if (baseTechType == TECHNIQUE_LIT_BEGIN)
+        R_DrawStaticModelPreTessSurfLit(primDrawSurfPos, context);
+    else
+        R_DrawStaticModelPreTessSurf(primDrawSurfPos, context);
+    g_primStats = 0;
+    //Profile_EndInternal(0);
+    return 1;
+}
+
+unsigned int __cdecl R_TessStaticModelSkinnedDrawSurfList(
+    const GfxDrawSurfListArgs *listArgs,
+    GfxCmdBufContext prepassContext)
+{
+    const char *v2; // eax
+    GfxDepthRangeType depthRangeType; // [esp+1Ch] [ebp-34h]
+    GfxCmdBufContext context; // [esp+34h] [ebp-1Ch]
+    const GfxDrawSurfListInfo *info; // [esp+3Ch] [ebp-14h]
+    GfxCmdBufSourceState *commonSource; // [esp+44h] [ebp-Ch]
+    MaterialTechniqueType baseTechType; // [esp+48h] [ebp-8h]
+    const unsigned int *primDrawSurfPos; // [esp+4Ch] [ebp-4h]
+
+    //Profile_Begin(105);
+    context = listArgs->context;
+    commonSource = listArgs->context.source;
+    if (prepassContext.state)
+        MyAssertHandler(".\\rb_tess.cpp", 1567, 0, "%s", "prepassContext.state == NULL");
+    info = listArgs->info;
+    if (r_logFile->current.integer)
+    {
+        v2 = va("--- R_TessStaticModelSkinnedDrawSurfList( %s ) ---\n", context.state->material->info.name);
+        RB_LogPrint(v2);
+    }
+    R_SetupPassCriticalPixelShaderArgs(context);
+    baseTechType = info->baseTechType;
+    commonSource->objectPlacement = &s_manualObjectPlacement;
+    R_ChangeDepthHackNearClip(commonSource, 0);
+    R_SetVertexDeclTypeNormal(context.state, VERTDECL_PACKED);
+    depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
+    if (depthRangeType != context.state->depthRangeType)
+        R_ChangeDepthRange(context.state, depthRangeType);
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    RB_TrackImmediatePrims(GFX_PRIM_STATS_SMODELRIGID);
+    if (!g_primStats)
+        MyAssertHandler(".\\rb_tess.cpp", 1588, 0, "%s", "g_primStats");
+    if (baseTechType == TECHNIQUE_LIT_BEGIN)
+        R_DrawStaticModelSkinnedSurfLit(primDrawSurfPos, context);
+    else
+        R_DrawStaticModelSkinnedSurf(primDrawSurfPos, context);
+    RB_EndTrackImmediatePrims();
+    //Profile_EndInternal(0);
+    return 1;
 }
 
 unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
@@ -1159,6 +1317,217 @@ unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
         R_DrawStaticModelSurf(primDrawSurfPos, context);
     }
     RB_EndTrackImmediatePrims();
+    //Profile_EndInternal(0);
+    return 1;
+}
+
+
+unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
+    const GfxDrawSurfListArgs *listArgs,
+    GfxCmdBufContext prepassContext)
+{
+    const char *v2; // eax
+    GfxCmdBufContext context; // [esp+54h] [ebp-74h]
+    const GfxDrawSurfListInfo *info; // [esp+5Ch] [ebp-6Ch]
+    GfxDrawSurf drawSurf; // [esp+60h] [ebp-68h]
+    const GfxBackEndData *data; // [esp+6Ch] [ebp-5Ch]
+    GfxCmdBufSourceState *commonSource; // [esp+70h] [ebp-58h]
+    int setupPixelShader; // [esp+74h] [ebp-54h]
+    unsigned __int64 drawSurfSubKey; // [esp+78h] [ebp-50h]
+    GfxDrawSurf drawSurfSubMask; // [esp+80h] [ebp-48h]
+    MaterialTechniqueType baseTechType; // [esp+88h] [ebp-40h]
+    int setupVertexShader; // [esp+8Ch] [ebp-3Ch]
+    unsigned int drawSurfIndex; // [esp+90h] [ebp-38h]
+    const GfxModelRigidSurface *modelSurf; // [esp+A4h] [ebp-24h]
+    GfxDepthRangeType depthHackFlags; // [esp+A8h] [ebp-20h]
+    unsigned int gfxEntIndex; // [esp+ACh] [ebp-1Ch]
+    float materialTime; // [esp+B0h] [ebp-18h]
+    const GfxDrawSurf *drawSurfList; // [esp+B4h] [ebp-14h]
+    unsigned __int64 drawSurfKey; // [esp+B8h] [ebp-10h]
+    unsigned int drawSurfCount; // [esp+C4h] [ebp-4h]
+
+    //Profile_Begin(105);
+    context = listArgs->context;
+    commonSource = listArgs->context.source;
+    if (prepassContext.state && commonSource != prepassContext.source)
+        MyAssertHandler(
+            ".\\rb_tess.cpp",
+            1328,
+            0,
+            "%s",
+            "prepassContext.state == NULL || commonSource == prepassContext.source");
+    data = commonSource->input.data;
+    info = listArgs->info;
+    baseTechType = info->baseTechType;
+    if (r_logFile->current.integer)
+    {
+        v2 = va("--- R_TessXModelRigidSkinnedDrawSurfList( %s ) ---\n", context.state->material->info.name);
+        RB_LogPrint(v2);
+    }
+    drawSurfCount = info->drawSurfCount - listArgs->firstDrawSurfIndex;
+    drawSurfList = &info->drawSurfs[listArgs->firstDrawSurfIndex];
+    if (!info->cameraView)
+    {
+        R_SetupPassCriticalPixelShaderArgs(context);
+        R_ChangeDepthHackNearClip(commonSource, 0);
+        if (context.state->depthRangeType != GFX_DEPTH_RANGE_FULL)
+            R_ChangeDepthRange(context.state, GFX_DEPTH_RANGE_FULL);
+    }
+    R_SetVertexDeclTypeNormal(context.state, VERTDECL_PACKED);
+    setupPixelShader = 1;
+    drawSurfSubMask.packed = -65536;
+    if (baseTechType != TECHNIQUE_LIT_BEGIN)
+        *&drawSurfSubMask.packed = -536870912;
+    drawSurf.fields = drawSurfList->fields;
+    drawSurfKey = drawSurfList->packed & 0xFFFFFFFFE0000000uLL;
+    RB_TrackImmediatePrims(GFX_PRIM_STATS_XMODELRIGID);
+    if (!g_primStats)
+        MyAssertHandler(".\\rb_tess.cpp", 1369, 0, "%s", "g_primStats");
+    drawSurfIndex = 0;
+    do
+    {
+        if (baseTechType == TECHNIQUE_LIT_BEGIN)
+        {
+            if (sc_enable->current.enabled && ((drawSurf.packed >> 24) & 0x1F) != 0)
+                R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
+            else
+                R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
+        }
+        drawSurfSubKey = drawSurfSubMask.packed & drawSurf.packed;
+        do
+        {
+            modelSurf = (const GfxModelRigidSurface *)(data + 4 * LOWORD(drawSurf.packed));
+            if (info->cameraView)
+            {
+                gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
+                if (modelSurf->surf.info.gfxEntIndex)
+                {
+                    depthHackFlags = (GfxDepthRangeType)(data->gfxEnts[gfxEntIndex].renderFxFlags & 2);
+                    materialTime = data->gfxEnts[gfxEntIndex].materialTime;
+                }
+                else
+                {
+                    depthHackFlags = GFX_DEPTH_RANGE_SCENE;
+                    materialTime = 0.0;
+                }
+                setupVertexShader = R_UpdateMaterialTime(commonSource, materialTime);
+                if (setupVertexShader | setupPixelShader)
+                    R_SetupPassCriticalPixelShaderArgs(context);
+                if (setupVertexShader)
+                    R_SetupPassVertexShaderArgs(context);
+                R_ChangeDepthHackNearClip(commonSource, depthHackFlags);
+                if (baseTechType == TECHNIQUE_LIT_BEGIN)
+                {
+                    R_SetModelLightingCoordsForSource(modelSurf->surf.info.lightingHandle, commonSource);
+                    R_SetReflectionProbe(context, BYTE2(drawSurf.packed));
+                }
+                if (depthHackFlags != context.state->depthRangeType)
+                    R_ChangeDepthRange(context.state, depthHackFlags);
+                setupPixelShader = 0;
+            }
+            if (commonSource->objectPlacement != &modelSurf->placement)
+                R_ChangeObjectPlacement(commonSource, &modelSurf->placement);
+            R_SetupPassPerObjectArgs(context);
+            R_SetupPassPerPrimArgs(context);
+            R_DrawXModelSkinnedUncached(context, modelSurf->surf.xsurf, modelSurf->surf.xsurf->verts0);
+            if (++drawSurfIndex == drawSurfCount)
+                break;
+            drawSurf = drawSurfList[drawSurfIndex];
+        } while ((drawSurfSubMask.packed & drawSurf.packed) == drawSurfSubKey);
+    } while (drawSurfIndex != drawSurfCount
+        && __PAIR64__(HIDWORD(drawSurf.packed), *&drawSurf.packed & 0xE0000000) == drawSurfKey);
+    RB_EndTrackImmediatePrims();
+    //Profile_EndInternal(0);
+    return drawSurfIndex;
+}
+
+void __cdecl R_DrawBspDrawSurfsLitPreTess(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    unsigned int baseIndex; // [esp+4h] [ebp-28h] BYREF
+    unsigned int surfIndex; // [esp+8h] [ebp-24h]
+    GfxReadCmdBuf cmdBuf; // [esp+Ch] [ebp-20h] BYREF
+    const srfTriangles_t *tris; // [esp+10h] [ebp-1Ch]
+    const GfxBspPreTessDrawSurf *list; // [esp+14h] [ebp-18h] BYREF
+    unsigned int reflectionProbeIndex; // [esp+18h] [ebp-14h]
+    const GfxSurface *bspSurf; // [esp+1Ch] [ebp-10h]
+    unsigned int index; // [esp+20h] [ebp-Ch]
+    unsigned int lightmapIndex; // [esp+24h] [ebp-8h]
+    unsigned int count; // [esp+28h] [ebp-4h] BYREF
+
+    if (sc_enable->current.enabled)
+        R_SetCodeImageTexture(context.source, 0x10u, gfxRenderTargets[6].image);
+    else
+        R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    cmdBuf.primDrawSurfPos = primDrawSurfPos;
+    while (R_ReadBspPreTessDrawSurfs(&cmdBuf, &list, &count, &baseIndex))
+    {
+        reflectionProbeIndex = 255;
+        lightmapIndex = 31;
+        for (index = 0; index < count; ++index)
+        {
+            surfIndex = list[index].baseSurfIndex;
+            if (surfIndex >= rgp.world->surfaceCount)
+                MyAssertHandler(
+                    ".\\r_draw_bsp.cpp",
+                    623,
+                    0,
+                    "surfIndex doesn't index rgp.world->surfaceCount\n\t%i not in [0, %i)",
+                    surfIndex,
+                    rgp.world->surfaceCount);
+            bspSurf = &rgp.world->dpvs.surfaces[surfIndex];
+            tris = &bspSurf->tris;
+            if (reflectionProbeIndex != bspSurf->reflectionProbeIndex || lightmapIndex != bspSurf->lightmapIndex)
+            {
+                reflectionProbeIndex = bspSurf->reflectionProbeIndex;
+                lightmapIndex = bspSurf->lightmapIndex;
+                R_SetReflectionProbe(context, reflectionProbeIndex);
+                R_SetLightmap(context, lightmapIndex);
+                R_SetupPassPerObjectArgs(context);
+                R_SetupPassPerPrimArgs(context);
+            }
+            R_DrawPreTessTris(&context.state->prim, tris, baseIndex, list[index].totalTriCount);
+            baseIndex += 3 * list[index].totalTriCount;
+        }
+    }
+}
+
+unsigned int __cdecl R_TessTrianglesPreTessList(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
+{
+    IDirect3DIndexBuffer9 *ib; // [esp+1Ch] [ebp-44h]
+    GfxDepthRangeType depthRangeType; // [esp+2Ch] [ebp-34h]
+    GfxCmdBufContext context; // [esp+44h] [ebp-1Ch]
+    const GfxDrawSurfListInfo *info; // [esp+4Ch] [ebp-14h]
+    const GfxBackEndData *data; // [esp+50h] [ebp-10h]
+    GfxCmdBufSourceState *commonSource; // [esp+54h] [ebp-Ch]
+    MaterialTechniqueType baseTechType; // [esp+58h] [ebp-8h]
+    const unsigned int *primDrawSurfPos; // [esp+5Ch] [ebp-4h]
+
+    //Profile_Begin(108);
+    context = listArgs->context;
+    commonSource = listArgs->context.source;
+    if (prepassContext.state)
+        MyAssertHandler(".\\rb_tess.cpp", 1825, 0, "%s", "prepassContext.state == NULL");
+    info = listArgs->info;
+    R_SetupPassCriticalPixelShaderArgs(context);
+    baseTechType = info->baseTechType;
+    if (commonSource->objectPlacement != &rg.identityPlacement)
+        R_ChangeObjectPlacement(commonSource, &rg.identityPlacement);
+    R_ChangeDepthHackNearClip(commonSource, 0);
+    R_SetVertexDeclTypeWorld(context.state);
+    depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
+    if (depthRangeType != context.state->depthRangeType)
+        R_ChangeDepthRange(context.state, depthRangeType);
+    data = commonSource->input.data;
+    ib = data->preTessIb;
+    if (context.state->prim.indexBuffer != ib)
+        R_ChangeIndices(&context.state->prim, ib);
+    primDrawSurfPos = &data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    R_TrackPrims(context.state, GFX_PRIM_STATS_WORLD);
+    if (baseTechType == TECHNIQUE_LIT_BEGIN)
+        R_DrawBspDrawSurfsLitPreTess(primDrawSurfPos, context);
+    else
+        R_DrawBspDrawSurfsPreTess(primDrawSurfPos, context);
+    g_primStats = 0;
     //Profile_EndInternal(0);
     return 1;
 }

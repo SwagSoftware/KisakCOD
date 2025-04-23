@@ -74,6 +74,8 @@
 
 #define ID_INLINE __inline 
 
+int __cdecl ShortSwap(__int16 l);
+int __cdecl LongSwap(int l);
 
 static ID_INLINE short BigShort(short l) { return ShortSwap(l); }
 #define LittleShort

@@ -9,6 +9,7 @@
 #include <client_mp/client_mp.h>
 
 #include <sound/snd_public.h>
+#include <script/scr_const.h>
 
 const float up[3] = { 0.0f, 0.0f, 1.0f };
 

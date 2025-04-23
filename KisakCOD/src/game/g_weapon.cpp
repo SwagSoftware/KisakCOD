@@ -239,13 +239,7 @@ char __cdecl Melee_Trace(
         Vec3Mad(end, v13, wp->up, end);
         if (melee_debug->current.enabled)
             G_DebugLineWithDuration(wp->muzzleTrace, end, colorRed, 1, 200);
-        G_LocationalTrace(
-            trace,
-            wp->muzzleTrace,
-            end,
-            ent->s.number,
-            (int)&sv.svEntities[343].baseline.s.lerp.pos.trType + 1,
-            bulletPriorityMap);
+        G_LocationalTrace(trace, wp->muzzleTrace, end, ent->s.number, 0x2806891, bulletPriorityMap);
         Vec3Lerp(wp->muzzleTrace, end, trace->fraction, endPos);
         if (!traceIndex)
             G_CheckHitTriggerDamage(ent, wp->muzzleTrace, endPos, damage, 7u);
@@ -269,13 +263,7 @@ char __cdecl Melee_Trace(
         Vec3Mad(end, v9, wp->up, end);
         if (melee_debug->current.enabled)
             G_DebugLineWithDuration(start, end, colorRed, 1, 200);
-        G_LocationalTrace(
-            trace,
-            start,
-            end,
-            ent->s.number,
-            (int)&sv.svEntities[343].baseline.s.lerp.pos.trType + 1,
-            bulletPriorityMap);
+        G_LocationalTrace(trace, start, end, ent->s.number, 0x2806891, bulletPriorityMap);
         Vec3Lerp(start, end, trace->fraction, endPos);
         if ((trace->surfaceFlags & 0x10) == 0 && !trace->startsolid && trace->fraction != 1.0)
             return 1;

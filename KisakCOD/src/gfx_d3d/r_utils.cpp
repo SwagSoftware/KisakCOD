@@ -107,12 +107,12 @@ char __cdecl R_CullPointAndRadius(const float *pt, float radius, const DpvsPlane
     return 0;
 }
 
-void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned __int8 *colorBytes)
+void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned int *colorBytes)
 {
     if (colorFloat)
-        Byte4PackVertexColor(colorFloat, colorBytes);
+        Byte4PackVertexColor(colorFloat, (unsigned char*)colorBytes);
     else
-        *(unsigned int *)colorBytes = -1;
+        *colorBytes = -1;
 }
 
 int __cdecl R_PickMaterial(

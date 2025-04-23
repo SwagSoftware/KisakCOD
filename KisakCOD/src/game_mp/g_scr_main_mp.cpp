@@ -2850,7 +2850,7 @@ void Scr_BulletTrace()
 
     pIgnoreEnt = 0;
     iIgnoreEntNum = 1023;
-    iClipMask = (int)&sv.svEntities[342].clusternums[2] + 1;
+    iClipMask = 0x2806831;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
     if (!Scr_GetInt(2u).intValue)
@@ -2904,7 +2904,7 @@ void Scr_BulletTracePassed()
 
     pIgnoreEnt = 0;
     iIgnoreEntNum = 1023;
-    iClipMask = (int)&sv.svEntities[342].clusternums[2] + 1;
+    iClipMask = 0x2806831;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
     if (!Scr_GetInt(2u).intValue)

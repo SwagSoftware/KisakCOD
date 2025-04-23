@@ -7,7 +7,7 @@ static int g_debugClient;
 static int g_debugPacketPos[1];
 static int sys_debugMessageType[1];
 
-static unsigned char g_debugPacket[0x2000];
+unsigned __int8 g_debugPacket[1][8192];
 
 static int g_debugReadBytesRemote;
 static int g_debugReadBytesSent;

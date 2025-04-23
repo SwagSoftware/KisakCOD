@@ -381,7 +381,7 @@ void __cdecl RB_SetupFilterPass(const GfxImageFilterPass *filterPass)
             filterPass->tapHalfCount,
             9);
     for (constIndex = 0; constIndex < filterPass->tapHalfCount; ++constIndex)
-        R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, constIndex + 21, filterPass->tapOffsetsAndWeights[constIndex]);
+        R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, constIndex + 21, (float*)filterPass->tapOffsetsAndWeights[constIndex]);
 }
 
 void __cdecl RB_FilterPingPong(const GfxImageFilter *filter, int passIndex)

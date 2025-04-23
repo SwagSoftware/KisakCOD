@@ -102,7 +102,7 @@ unsigned int __cdecl R_HashAssetName(const char *name);
 unsigned int __cdecl R_HashString(const char *string);
 char *__cdecl R_AllocGlobalVariable(unsigned int bytes, const char *name);
 char __cdecl R_CullPointAndRadius(const float *pt, float radius, const DpvsPlane *clipPlanes, int clipPlaneCount);
-void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned __int8 *colorBytes);
+void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned int *colorBytes);
 int __cdecl R_PickMaterial(
     int traceMask,
     const float *org,
@@ -123,7 +123,6 @@ unsigned int __cdecl R_HashAssetName(const char *name);
 unsigned int __cdecl R_HashString(const char *string);
 char *__cdecl R_AllocGlobalVariable(unsigned int bytes, const char *name);
 char __cdecl R_CullPointAndRadius(const float *pt, float radius, const DpvsPlane *clipPlanes, int clipPlaneCount);
-void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned __int8 *colorBytes);
 int __cdecl R_PickMaterial(
     int traceMask,
     const float *org,
@@ -145,6 +144,8 @@ void __cdecl R_InitCmdBufState(GfxCmdBufState *state);
 void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdBufInput *input, int cameraView);
 
 void __cdecl R_MatrixIdentity44(float (*out)[4]);
+double __cdecl R_GetBaseLodDist(const float *origin);
+double __cdecl R_GetAdjustedLodDist(float dist, XModelLodRampType lodRampType);
 
 template <typename T>
 inline void __cdecl R_ReleaseAndSetNULL(

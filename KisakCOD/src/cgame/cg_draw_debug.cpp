@@ -443,8 +443,8 @@ void __cdecl CG_DrawMaterial(int localClientNum, unsigned int drawMaterialType)
 
     traceMask[0] = 0;
     traceMask[1] = 1;
-    traceMask[2] = (int)&sv.svEntities[342].clusternums[2] + 1;
-    traceMask[3] = (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1;
+    traceMask[2] = 0x2806831;
+    traceMask[3] = 0x2810011;
     if (!drawMaterialType)
         MyAssertHandler(".\\cgame\\cg_draw_debug.cpp", 847, 0, "%s", "drawMaterialType != 0");
     if (drawMaterialType >= 4)

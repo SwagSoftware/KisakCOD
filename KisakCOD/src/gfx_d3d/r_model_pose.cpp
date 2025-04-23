@@ -1,6 +1,7 @@
 #include "r_model_pose.h"
 #include <xanim/dobj_utils.h>
 #include "r_dobj_skin.h"
+#include <cgame_mp/cg_local_mp.h>
 
 
 DObjAnimMat *__fastcall R_UpdateSceneEntBounds(

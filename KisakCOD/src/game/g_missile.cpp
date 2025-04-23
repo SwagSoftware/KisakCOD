@@ -3,7 +3,26 @@
 #include <game_mp/g_utils_mp.h>
 #include <server/sv_world.h>
 #include <script/scr_vm.h>
+#include "bullet.h"
 
+struct AttractorRepulsor_t // sizeof=0x1C
+{                                       // ...
+    bool inUse;                         // ...
+    bool isAttractor;                   // ...
+    // padding byte
+    // padding byte
+    int entnum;                         // ...
+    float origin[3];                    // ...
+    float strength;
+    float maxDist;
+};
+
+struct $BC9161899B8BF9011D942B4F1507C18F // sizeof=0x380
+{                                       // ...
+    AttractorRepulsor_t attractors[32]; // ...
+};
+
+$BC9161899B8BF9011D942B4F1507C18F attrGlob;
 
 const dvar_t *missileJavSpeedLimitDescend;
 const dvar_t *missileJavClimbHeightTop;
@@ -494,7 +513,7 @@ void __cdecl Scr_MissileCreateAttractorEnt()
     if (attrGlob.attractors[attractorIndex].maxDist <= 0.0)
         Scr_ParamError(2u, "maxDist must be greater than zero");
     attrGlob.attractors[attractorIndex].entnum = ent->s.number;
-    ent->flags |= (unsigned int)&loc_7FFFFF + 1;
+    ent->flags |= 0x800000u;
     attrGlob.attractors[attractorIndex].inUse = 1;
     Scr_AddInt(attractorIndex);
 }
@@ -729,7 +748,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
     {
         G_MissileTrace(&tr, ent->r.currentOrigin, origin, 1023, ent->clipmask | 0x20);
     }
-    if ((FxMarksSystem *)(tr.surfaceFlags & 0x1F00000) == (FxMarksSystem *)&fx_marksSystemPool[0].pointGroups[930].pointGroup.points[0].xyz[2])
+    if ((tr.surfaceFlags & 0x1F00000) == 0x1400000)
     {
         RunMissile_CreateWaterSplash(ent, &tr);
         if (EntHandle::isDefined(&ent->r.ownerNum))
@@ -750,11 +769,11 @@ void __cdecl G_RunMissile(gentity_s *ent)
     ent->r.currentOrigin[0] = endpos[0];
     v14[1] = endpos[1];
     v14[2] = endpos[2];
-    if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & ent->s.lerp.eFlags) != 0)
+    if ((ent->s.lerp.eFlags & 0x1000000) != 0)
     {
         if (weapDef->stickiness == WEAPSTICKINESS_ALL
             || (weapDef->stickiness == WEAPSTICKINESS_GROUND || weapDef->stickiness == WEAPSTICKINESS_GROUND_WITH_YAW)
-            && tr.normal[2] > DOUBLE_0_699999988079071)
+            && tr.normal[2] > 0.699999988079071)
         {
             if (tr.fraction < 1.0)
             {
@@ -779,7 +798,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
                 }
             }
         }
-        else if (tr.fraction == 1.0 || tr.fraction < 1.0 && tr.normal[2] > DOUBLE_0_699999988079071)
+        else if (tr.fraction == 1.0 || tr.fraction < 1.0 && tr.normal[2] > 0.699999988079071)
         {
             v13 = ent->r.currentOrigin;
             traceStart[0] = ent->r.currentOrigin[0];
@@ -820,13 +839,13 @@ void __cdecl G_RunMissile(gentity_s *ent)
         v9 = Vec3Length(diff);
         ent->mover.speed = ent->mover.speed + v9;
     }
-    if (dword_946738[10 * ent->handler] == 3)
+    if (entityHandlers[ent->handler].methodOfDeath == 3)
         G_GrenadeTouchTriggerDamage(
             ent,
             vOldOrigin,
             ent->r.currentOrigin,
             weapDef->iExplosionInnerDamage,
-            dword_946738[10 * ent->handler]);
+            entityHandlers[ent->handler].methodOfDeath);
     if (tr.fraction == 1.0)
     {
         if (Vec3Length(ent->s.lerp.pos.trDelta) != 0.0)
@@ -981,19 +1000,19 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
     }
     else if (explodeOnImpact)
     {
-        methodOfDeath = dword_946738[10 * ent->handler];
+        methodOfDeath = entityHandlers[ent->handler].methodOfDeath;
     }
     else
     {
         methodOfDeath = 15;
     }
     if (methodOfDeath == 15)
-        partGroup = trace->partGroup;
+        partGroup = (hitLocation_t)trace->partGroup;
     else
         partGroup = HITLOC_NONE;
     hitLocation = partGroup;
     if (!other->takedamage
-        && ((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & ent->s.lerp.eFlags) != 0
+        && (ent->s.lerp.eFlags & 0x1000000) != 0
         && !explodeOnImpact
         && !CheckCrumpleMissile(ent, trace))
     {
@@ -1068,7 +1087,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
         if (!explodeOnImpact)
         {
             if (other->client && !trace->surfaceFlags)
-                trace->surfaceFlags = (int)&loc_6FFFFC + 4;
+                trace->surfaceFlags = 0x700000;
             if (!CheckCrumpleMissile(ent, trace))
             {
                 if (BounceMissile(ent, trace) && !trace->startsolid)
@@ -1257,7 +1276,7 @@ bool __cdecl CheckCrumpleMissile(gentity_s *ent, trace_t *trace)
         MyAssertHandler(".\\game\\g_missile.cpp", 235, 0, "%s", "weapDef");
     if (weapDef->weapType != WEAPTYPE_PROJECTILE)
         return 0;
-    if ((_UNKNOWN *)trace->surfaceFlags == (_UNKNOWN *)((char *)&loc_6FFFFC + 4))
+    if (trace->surfaceFlags == 0x700000)
         return 1;
     hitTime = level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction);
     BG_EvaluateTrajectoryDelta(&ent->s.lerp.pos, hitTime, velocity);
@@ -1314,12 +1333,12 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
     mayStop = v3;
     if (g_entities[Trace_GetEntityHitId(trace)].s.eType == 4)
         mayStop = 0;
-    if (mayStop && (weapDef->stickiness == WEAPSTICKINESS_ALL || trace->normal[2] > DOUBLE_0_699999988079071))
+    if (mayStop && (weapDef->stickiness == WEAPSTICKINESS_ALL || trace->normal[2] > 0.699999988079071))
     {
         ent->s.groundEntityNum = Trace_GetEntityHitId(trace);
         g_entities[ent->s.groundEntityNum].flags |= 0x100000u;
     }
-    if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & ent->s.lerp.eFlags) == 0)
+    if ((ent->s.lerp.eFlags & 0x1000000) == 0)
         goto LABEL_40;
     bounceFactor = Vec3Length(velocity);
     if (bounceFactor > 0.0 && dot <= 0.0)
@@ -1342,7 +1361,7 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
     }
     if (mayStop
         && (weapDef->stickiness == WEAPSTICKINESS_ALL
-            || trace->normal[2] > DOUBLE_0_699999988079071
+            || trace->normal[2] > 0.699999988079071
             && (weapDef->stickiness == WEAPSTICKINESS_GROUND
                 || weapDef->stickiness == WEAPSTICKINESS_GROUND_WITH_YAW
                 || Vec3Length(ent->s.lerp.pos.trDelta) < 20.0)))
@@ -1640,8 +1659,8 @@ void __cdecl Missile_PenetrateGlass(
                             v7 = EntHandle::ent(&ent->r.ownerNum);
                         else
                             v7 = 0;
-                        LODWORD(vel[3]) = v7;
-                        hitLoc = results->partGroup;
+                        //LODWORD(vel[3]) = v7;
+                        hitLoc = (hitLocation_t)results->partGroup;
                         G_Damage(
                             hitEnt,
                             ent,
@@ -2601,7 +2620,7 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 2501, 0, "%s", "weapDef");
     grenade->s.eType = 4;
-    grenade->s.lerp.eFlags = (int)&clients[0].parseClients[238].attachTagIndex[5];
+    grenade->s.lerp.eFlags = 0x1000000;
     grenade->s.lerp.u.missile.launchTime = level.time;
     grenade->r.contents = 256;
     grenade->r.contents |= 0x2000u;
@@ -2629,7 +2648,7 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
             EntHandle::setEnt(&grenade->parent, 0);
         }
     }
-    grenade->clipmask = (int)&sv.svEntities[343].baseline.s.lerp.pos.trType + 1;
+    grenade->clipmask = 0x2806891;
     grenade->handler = 7;
     EntHandle::setEnt(&grenade->missileTargetEnt, 0);
     G_BroadcastEntity(grenade);
@@ -2803,6 +2822,9 @@ void __cdecl InitGrenadeTimer(const gentity_s *parent, gentity_s *grenade, const
         grenade->nextthink = level.time + 60000;
 }
 
+float MYJAVELINOFFSET = 0.3f;
+float MYJAVELINOFFSET_RIGHT = 10.0f;
+
 gentity_s *__cdecl G_FireRocket(
     gentity_s *parent,
     unsigned int weaponIndex,
@@ -2862,7 +2884,7 @@ gentity_s *__cdecl G_FireRocket(
     }
     EntHandle::setEnt(&bolt->r.ownerNum, parent);
     EntHandle::setEnt(&bolt->parent, parent);
-    bolt->clipmask = (int)&sv.svEntities[343].baseline.s.lerp.pos.trType + 1;
+    bolt->clipmask = 0x2806891;
     bolt->handler = 9;
     InitRocketTimer(bolt, weapDef);
     bolt->mover.speed = 0.0;

@@ -12,6 +12,13 @@
 #include <win32/win_net.h>
 #include <devgui/devgui.h>
 
+#include <algorithm>
+
+const dvar_s *dvar_cheats;
+int dvar_modifiedFlags;
+
+LONG isSortingDvars;
+
 static FastCriticalSection g_dvarCritSect;
 
 static dvar_s* dvarHashTable[0x100];
@@ -863,11 +870,12 @@ void Dvar_Sort()
     }
     else
     {
-        std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-            (const GfxStaticModelDrawInst **)sortedDvars,
-            (const GfxStaticModelDrawInst **)(4 * dvarCount + 230766384),
-            (4 * dvarCount + 230766384 - (int)sortedDvars) >> 2,
-            (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Material_CachedShaderTextLess);
+        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+        //    (const GfxStaticModelDrawInst **)sortedDvars,
+        //    (const GfxStaticModelDrawInst **)(4 * dvarCount + 230766384),
+        //    (4 * dvarCount + 230766384 - (int)sortedDvars) >> 2,
+        //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Material_CachedShaderTextLess);
+        std::sort(&sortedDvars[0], &sortedDvars[0x1000 - 1], Material_CachedShaderTextLess);
         areDvarsSorted = 1;
         isSortingDvars = 0;
     }
@@ -1883,7 +1891,7 @@ void __cdecl Dvar_Shutdown()
 
 void __cdecl Dvar_FreeNameString(const char *name)
 {
-    FreeString(name, 10);
+    FreeString(name);
 }
 
 bool __cdecl Dvar_ShouldFreeCurrentString(dvar_s *dvar)
@@ -2137,7 +2145,7 @@ void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source
             shouldFreeString = Dvar_ShouldFreeCurrentString(dvar);
             if (shouldFreeString)
                 oldString.integer = dvar->current.integer;
-            Dvar_AssignCurrentStringValue(dvar, &currentString, value.string);
+            Dvar_AssignCurrentStringValue(dvar, &currentString, (char*)value.string);
             dvar->current.integer = currentString.integer;
             if (Dvar_ShouldFreeLatchedString(dvar))
                 Dvar_FreeString(&dvar->latched);
@@ -2199,7 +2207,7 @@ void __cdecl Dvar_SetLatchedValue(dvar_s *dvar, DvarValue value)
             shouldFree = Dvar_ShouldFreeLatchedString(dvar);
             if (shouldFree)
                 oldString.integer = dvar->latched.integer;
-            Dvar_AssignLatchedStringValue(dvar, &latchedString, value.string);
+            Dvar_AssignLatchedStringValue(dvar, &latchedString, (char*)value.string);
             dvar->latched.integer = latchedString.integer;
             if (shouldFree)
                 Dvar_FreeString(&oldString);
@@ -3490,7 +3498,7 @@ void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *
     }
 }
 
-void __cdecl Dvar_AddFlags(const dvar_s *dvar, int flags)
+void __cdecl Dvar_AddFlags(dvar_s *dvar, int flags)
 {
     if (!dvar)
         MyAssertHandler(".\\universal\\dvar.cpp", 2212, 0, "%s", "dvar");

@@ -4,6 +4,7 @@
 #include "r_image.h"
 #include "r_state.h"
 #include "rb_imagefilter.h"
+#include <devgui/devgui.h>
 
 
 bool __cdecl R_UsingGlow(const GfxViewInfo *viewInfo)
@@ -79,8 +80,8 @@ void RB_GetResolvedScene()
                 "gfxCmdBufState.renderTargetId == R_RENDERTARGET_SCENE\n\t%i, %i",
                 gfxCmdBufState.renderTargetId,
                 2);
-        R_Resolve(gfxCmdBufContext, image.image);
-        R_SetCodeImageTexture(&gfxCmdBufSourceState, 0xBu, image.image);
+        R_Resolve(gfxCmdBufContext, gfxRenderTargets[4].image);
+        R_SetCodeImageTexture(&gfxCmdBufSourceState, 0xBu, gfxRenderTargets[4].image);
     }
 }
 
@@ -98,7 +99,7 @@ void __cdecl RB_GetDepthOfFieldInputImages(float radius)
     RB_FullScreenFilter(rgp.dofNearCocMaterial);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_POST_EFFECT_1);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_POST_EFFECT_1);
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, stru_EA74F7C.image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[7].image);
     RB_FullScreenFilter(rgp.smallBlurMaterial);
 }
 
@@ -164,7 +165,7 @@ void __cdecl RB_CalcGlowEffect(const GfxViewInfo *viewInfo)
 
 void __cdecl RB_ApplyGlowEffect(const GfxViewInfo *viewInfo)
 {
-    if ((IDirect3DSurface9 *)dword_EA74EF4[5 * gfxCmdBufState.renderTargetId] != stru_EA74F04.surface.color)
+    if (gfxRenderTargets[gfxCmdBufState.renderTargetId].surface.color != gfxRenderTargets[1].surface.color)
         MyAssertHandler(
             ".\\rb_postfx.cpp",
             143,
@@ -402,18 +403,19 @@ void __cdecl RB_BlurScreen(const GfxViewInfo *viewInfo, float blurRadius)
 
     if (!viewInfo)
         MyAssertHandler(".\\rb_postfx.cpp", 381, 0, "%s", "viewInfo");
-    blurRadiusMin = 1440.0 / (double)gfxCmdBufSourceState.sceneViewport.height;
+    blurRadiusMin = 1440.0 / gfxCmdBufSourceState.sceneViewport.height;
     color = -1;
-    if (blurRadiusMin > (double)blurRadius)
+    if (blurRadiusMin > blurRadius)
     {
         v2 = blurRadius / blurRadiusMin * 255.0;
-        HIBYTE(color) = (int)(v2 + 9.313225746154785e-10);
-        blurRadius = 1440.0 / (double)gfxCmdBufSourceState.sceneViewport.height;
+        //HIBYTE(color) = (v2 + 9.313225746154785e-10);
+        color = (v2 + 9.313225746154785e-10);
+        blurRadius = 1440.0 / gfxCmdBufSourceState.sceneViewport.height;
     }
     RB_GaussianFilterImage(blurRadius, R_RENDERTARGET_RESOLVED_SCENE, R_RENDERTARGET_POST_EFFECT_0);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, stru_EA74FCC.image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[11].image);
     if (viewInfo->film.enabled)
         RB_FullScreenColoredFilter(rgp.feedbackFilmBlendMaterial, color);
     else

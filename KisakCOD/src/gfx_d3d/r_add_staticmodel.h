@@ -1,18 +1,12 @@
 #pragma once
 #include "r_gfx.h"
-#include <xanim/xasset.h>
+#include <xanim/xanim.h>
 #include "r_bsp.h"
 
 struct GfxSModelDrawSurfData // sizeof=0x18
 {                                       // ...
     GfxDelayedCmdBuf delayedCmdBuf;
     GfxDrawSurfList drawSurfList;       // ...
-};
-
-struct GfxStaticModelId // sizeof=0x4
-{                                       // ...
-    unsigned __int16 surfType;          // ...
-    unsigned __int16 objectId;          // ...
 };
 
 void __cdecl R_AddDelayedStaticModelDrawSurf(

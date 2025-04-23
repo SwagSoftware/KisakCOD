@@ -28,6 +28,8 @@
 #include "r_meshdata.h"
 #include <qcommon/com_bsp.h>
 #include "r_cinematic.h"
+#include <win32/win_net.h>
+#include <universal/profile.h>
 
 
 //struct GfxScene scene      859c8280     gfx_d3d : r_scene.obj
@@ -558,7 +560,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     GfxDrawSurf **lastDrawSurfs,
     unsigned int reflectionProbeIndex)
 {
-    const XSurface *XSurface; // eax
+    const XSurface *xSurf; // eax
     const XSurface *v12; // eax
     char *v13; // eax
     char *v14; // eax
@@ -583,7 +585,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     if (!model)
         MyAssertHandler(".\\r_scene.cpp", 681, 0, "%s", "model");
     surfId = modelInfo->surfId;
-    modelSurf = (GfxModelRigidSurface *)((char *)frontEndDataOut + 4 * surfId);
+    modelSurf = (GfxModelRigidSurface*)(frontEndDataOut + 4 * surfId);
     lod = modelInfo->lod;
     numsurfs = XModelGetSurfCount(model, lod);
     material = XModelGetSkins(model, lod);
@@ -597,7 +599,7 @@ void __cdecl R_AddXModelSurfacesCamera(
             "reflectionProbeIndex doesn't index 1 << MTL_SORT_ENVMAP_BITS\n\t%i not in [0, %i)",
             reflectionProbeIndex,
             256);
-    if (gfxDrawMethod.emissiveTechType >= (unsigned int)TECHNIQUE_COUNT)
+    if (gfxDrawMethod.emissiveTechType >= TECHNIQUE_COUNT)
         MyAssertHandler(
             ".\\r_scene.cpp",
             695,
@@ -611,7 +613,7 @@ void __cdecl R_AddXModelSurfacesCamera(
         if (modelSurf->surf.skinnedCachedOffset == -3)
         {
             ++surfId;
-            modelSurf = (GfxModelRigidSurface *)((char *)modelSurf + 4);
+            modelSurf = (modelSurf + 4);
         }
         else
         {
@@ -668,20 +670,20 @@ void __cdecl R_AddXModelSurfacesCamera(
                     | (((((drawSurf >> 54) & 0x3F) - depthHack) & 0x3F) << 22)
                     | HIDWORD(drawSurf) & 0xF003FFFF;
                 LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24)
-                    | ((unsigned __int8)reflectionProbeIndex << 16) & 0xE0FFFFFF
-                    | (unsigned __int16)surfId
+                    | (reflectionProbeIndex << 16) & 0xE0FFFFFF
+                    | surfId
                     | drawSurf & 0xE0000000;
                 HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF;
                 drawSurfs[region]->packed = drawSurf;
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {
-                    XSurface = R_GetXSurface((unsigned int*)modelSurf, surfType);
-                    totalTriCount += XSurfaceGetNumTris(XSurface);
+                    xSurf = R_GetXSurface((unsigned int*)modelSurf, surfType);
+                    totalTriCount += XSurfaceGetNumTris(xSurf);
                 }
                 else if (r_showVertCounts->current.enabled)
                 {
-                    v12 = R_GetXSurface((unsigned int*)modelSurf, surfType);
+                    v12 = R_GetXSurface((unsigned int *)modelSurf, surfType);
                     totalVertCount += XSurfaceGetNumVerts(v12);
                 }
                 surfId += 14;
@@ -813,7 +815,7 @@ void __cdecl R_AddDObjSurfacesCamera(
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs)
 {
-    const XSurface *XSurface; // eax
+    const XSurface *xSurf; // eax
     const XSurface *v6; // eax
     char *v7; // eax
     char *v8; // eax
@@ -954,8 +956,8 @@ LABEL_15:
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {
-                    XSurface = R_GetXSurface((unsigned int *)modelSurf, surfType);
-                    totalTriCount += XSurfaceGetNumTris(XSurface);
+                    xSurf = R_GetXSurface((unsigned int *)modelSurf, surfType);
+                    totalTriCount += XSurfaceGetNumTris(xSurf);
                 }
                 else if (r_showVertCounts->current.enabled)
                 {
@@ -1098,7 +1100,7 @@ bool __cdecl R_EndFencePending()
 {
     _BYTE v2[4]; // [esp+Ch] [ebp-4h] BYREF
 
-    return frontEndDataOut->endFence && frontEndDataOut->endFence->GetData(frontEndDataOut->endFence, v2, 4u, 1u) == 1;
+    return frontEndDataOut->endFence && frontEndDataOut->endFence->GetData(v2, 4u, 1u) == 1;
 }
 
 void __cdecl R_SetEndTime(int endTime)
@@ -1379,12 +1381,13 @@ bool R_UpdateFrameSun()
         color[2] = rg.sunLightOverride[2];
     }
     v2 = 0;
+    const DvarValue &dvarVal = r_lightTweakSunDirection->current;
     if (sm_enable->current.enabled)
     {
         if (rg.useSunDirOverride
-            || (*(float *)(r_lightTweakSunDirection.integer + 44) != *(float *)(r_lightTweakSunDirection.integer + 12)
-                || *(float *)(r_lightTweakSunDirection.integer + 48) != *(float *)(r_lightTweakSunDirection.integer + 16)
-                || *(float *)(r_lightTweakSunDirection.integer + 52) != *(float *)(r_lightTweakSunDirection.integer + 20)
+            || (*(float *)(dvarVal.integer + 44) != *(float *)(dvarVal.integer + 12)
+                || *(float *)(dvarVal.integer + 48) != *(float *)(dvarVal.integer + 16)
+                || *(float *)(dvarVal.integer + 52) != *(float *)(dvarVal.integer + 20)
                 ? (v3 = 0)
                 : (v3 = 1),
                 !v3))
@@ -1394,8 +1397,8 @@ bool R_UpdateFrameSun()
     }
     frontEndDataOut->prim.hasSunDirChanged = v2;
     v1 = rg.useSunDirOverride
-        || AngleDelta(*(float *)(r_lightTweakSunDirection.integer + 12), *(float *)(r_lightTweakSunDirection.integer + 44)) > 5.0
-        || AngleDelta(*(float *)(r_lightTweakSunDirection.integer + 16), *(float *)(r_lightTweakSunDirection.integer + 48)) > 5.0;
+        || AngleDelta(*(float *)(dvarVal.integer + 12), *(float *)(dvarVal.integer + 44)) > 5.0
+        || AngleDelta(*(float *)(dvarVal.integer + 16), *(float *)(dvarVal.integer + 48)) > 5.0;
     result = v1;
     frontEndDataOut->hasApproxSunDirChanged = v1;
     return result;
@@ -1515,6 +1518,34 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
         R_GenerateSortedDrawSurfs(&sceneParms, v1, viewParmsDraw);
         //Profile_EndInternal(0);
     }
+}
+
+char __cdecl R_DoesDrawSurfListInfoNeedFloatz(GfxDrawSurfListInfo *emissiveInfo)
+{
+    const MaterialTechnique *technique; // [esp+38h] [ebp-Ch]
+    unsigned int surfIndex; // [esp+3Ch] [ebp-8h]
+
+    Profile_Begin(70);
+    for (surfIndex = 0; ; ++surfIndex)
+    {
+        if (surfIndex == emissiveInfo->drawSurfCount)
+        {
+            Profile_EndInternal(0);
+            return 0;
+        }
+        technique = Material_GetTechnique(
+            rgp.sortedMaterials[(emissiveInfo->drawSurfs[surfIndex].packed >> 29) & 0x7FF],
+            emissiveInfo->baseTechType);
+        if (technique)
+        {
+            if ((technique->flags & 0x20) != 0)
+                break;
+        }
+    }
+    Profile_EndInternal(0);
+    if (!gfxRenderTargets[5].surface.color)
+        Com_Error(ERR_FATAL, "Renderer attempted to use technique that uses floatz buffer, but it wasn't created.\n");
+    return 1;
 }
 
 void __cdecl R_GenerateSortedDrawSurfs(
@@ -1738,10 +1769,10 @@ void __cdecl R_GenerateSortedDrawSurfs(
         }
         else if (dynamicShadowType == SHADOW_COOKIE)
         {
+            data[0] = (unsigned int)viewParmsDpvs;
+            data[1] = (unsigned int)viewParmsDraw;
+            data[2] = (unsigned int)&viewInfo->shadowCookieList;
             data[3] = viewInfo->localClientNum;
-            data[0] = viewParmsDpvs;
-            data[1] = viewParmsDraw;
-            data[2] = &viewInfo->shadowCookieList;
             R_AddWorkerCmd(10, (unsigned __int8 *)data);
         }
     }
@@ -1922,10 +1953,13 @@ void __cdecl R_SetFilmInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
         viewInfo->film.brightness = r_filmTweakBrightness->current.value;
         viewInfo->film.desaturation = r_filmTweakDesaturation->current.value;
         viewInfo->film.invert = r_filmTweakInvert->current.enabled;
-        v3 = LODWORD(r_lightTweakSunDirection.vector[1]) + 12;
-        viewInfo->film.tintLight[0] = *(float *)(LODWORD(r_lightTweakSunDirection.vector[1]) + 12);
-        viewInfo->film.tintLight[1] = *(float *)(v3 + 4);
-        viewInfo->film.tintLight[2] = *(float *)(v3 + 8);
+        //v3 = LODWORD(r_lightTweakSunDirection.vector[1]) + 12;
+        //viewInfo->film.tintLight[0] = *(float *)(LODWORD(r_lightTweakSunDirection.vector[1]) + 12);
+        //viewInfo->film.tintLight[1] = *(float *)(v3 + 4);
+        //viewInfo->film.tintLight[2] = *(float *)(v3 + 8);
+        viewInfo->film.tintLight[0] = r_lightTweakSunDirection->current.vector[0];
+        viewInfo->film.tintLight[1] = r_lightTweakSunDirection->current.vector[1];
+        viewInfo->film.tintLight[2] = r_lightTweakSunDirection->current.vector[2];
         p_current = &r_filmTweakDarkTint->current;
         viewInfo->film.tintDark[0] = r_filmTweakDarkTint->current.value;
         viewInfo->film.tintDark[1] = p_current->vector[1];

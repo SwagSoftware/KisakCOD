@@ -206,7 +206,7 @@ int __cdecl WeaponPickup_Grab(gentity_s *weaponEnt, gentity_s *player, int weapI
     {
         if (!weaponEnt->r.inuse)
             MyAssertHandler(".\\game\\g_items.cpp", 444, 0, "%s", "weaponEnt->r.inuse");
-        weaponEnt->flags |= (unsigned int)&clients[0].parseClients[238].attachTagIndex[5];
+        weaponEnt->flags |= 0x1000000u;
         gotWeapon = WeaponPickup_AddWeapon(weaponEnt, player, weapIdx, weaponModel, &droppedEnt);
         if (!weaponEnt->r.inuse)
             MyAssertHandler(".\\game\\g_items.cpp", 449, 0, "%s", "weaponEnt->r.inuse");
@@ -721,10 +721,10 @@ int __cdecl GetFreeDropCueIdx()
     fBestDistSqrd = -1.0;
     for (i = 0; i < maxDroppedWeapon; ++i)
     {
-        if (!EntHandle::isDefined((EntHandle *)(4 * i + 23802164)))
+        if (!EntHandle::isDefined(&level.droppedWeaponCue[i]))
             return i;
-        ent = EntHandle::ent((EntHandle *)(4 * i + 23802164));
-        if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & ent->flags) == 0)
+        ent = EntHandle::ent(&level.droppedWeaponCue[i]);
+        if ((ent->flags & 0x1000000) == 0)
         {
             if (bg_itemlist[ent->s.index.brushmodel] != 1)
                 MyAssertHandler(".\\game\\g_items.cpp", 670, 0, "%s", "bg_itemlist[ ent->s.index.item ].giType == IT_WEAPON");

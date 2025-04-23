@@ -12,15 +12,18 @@
 #include "r_utils.h"
 #include "r_light.h"
 #include <devgui/devgui.h>
+#include <cgame/cg_local.h>
+#include <cgame_mp/cg_local_mp.h>
+#include "rb_light.h"
 
 
 DpvsGlobals dpvsGlob;
 
-static thread_local DpvsView *g_dpvsView;
-static thread_local int g_viewIndex;
-static thread_local EntVisData g_dynEntVisData;
-static thread_local byte *g_smodelVisData;
-static thread_local byte *g_surfaceVisData;
+thread_local DpvsView *g_dpvsView;
+thread_local int g_viewIndex;
+thread_local EntVisData g_dynEntVisData;
+thread_local byte *g_smodelVisData;
+thread_local byte *g_surfaceVisData;
 
 void __cdecl TRACK_r_dpvs()
 {

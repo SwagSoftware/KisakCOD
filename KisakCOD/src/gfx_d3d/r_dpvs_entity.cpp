@@ -1,6 +1,7 @@
 #include "r_dpvs.h"
 #include "r_model_pose.h"
 #include "r_dobj_skin.h"
+#include <cgame/cg_local.h>
 
 
 

@@ -4,6 +4,7 @@
 #include "r_init.h"
 #include "r_rendercmds.h"
 #include <database/database.h>
+#include "rb_uploadshaders.h"
 
 $4ABF24606230B73E4E420CE33A1F14B1 mtlOverrideGlob;
 
@@ -342,4 +343,17 @@ void __cdecl Material_ClearShaderUploadList()
     mtlUploadGlob.get = 0;
     mtlUploadGlob.put = 0;
     mtlUploadGlob.techTypeIter = 0;
+}
+
+bool __cdecl Material_WouldTechniqueSetBeOverridden(const MaterialTechniqueSet *techSet)
+{
+    unsigned int remapValue; // [esp+14h] [ebp-10Ch] BYREF
+    char remapName[256]; // [esp+18h] [ebp-108h] BYREF
+    unsigned int remapMask; // [esp+11Ch] [ebp-4h] BYREF
+
+    if (!techSet)
+        MyAssertHandler(".\\r_material_override.cpp", 418, 0, "%s", "techSet");
+    Material_GetRemappedFeatures_RunTime(&remapMask, &remapValue);
+    Material_RemapTechniqueSetName(techSet->name, remapName, remapMask, remapValue, s_materialFeatures, 0x14u);
+    return strcmp(techSet->name, remapName) != 0;
 }

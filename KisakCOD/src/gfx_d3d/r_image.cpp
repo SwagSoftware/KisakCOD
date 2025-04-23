@@ -20,6 +20,23 @@
 ImgGlobals imageGlobals;
 GfxImage g_imageProgs[14];
 
+struct BuiltinImageConstructorTable // sizeof=0x8
+{                                       // ...
+    const char *name;                   // ...
+    void(__cdecl *LoadCallback)(GfxImage *); // ...
+};
+const BuiltinImageConstructorTable constructorTable[8] =
+{
+    {"$white", Image_LoadWhite},
+    {"$black", Image_LoadBlack},
+    {"$black_3d", Image_LoadBlack3D},
+    {"$black_cube", Image_LoadBlackCube},
+    {"$gray", Image_LoadGray},
+    {"$identitynormalmap", Image_LoadIdentityNormalMap},
+    {"$outdoor", (void(__cdecl *)(GfxImage *))Outdoor_SetRendererOutdoorLookupMatrix},
+    {"$pixelcostcolorcode", Image_LoadPixelCostColorCode}
+};
+
 void __cdecl TRACK_r_image()
 {
     track_static_alloc_internal(g_imageProgs, 504, "g_imageProgs", 18);
@@ -1157,25 +1174,6 @@ int __cdecl Outdoor_TransformToTextureClamped(int dimension, float inWorld)
     return v4;
 }
 
-
-
-
-struct BuiltinImageConstructorTable // sizeof=0x8
-{                                       // ...
-    const char *name;                   // ...
-    void(__cdecl *LoadCallback)(GfxImage *); // ...
-};
-const BuiltinImageConstructorTable constructorTable[8] =
-{
-    {"$white", Image_LoadWhite},
-    {"$black", Image_LoadBlack},
-    {"$black_3d", Image_LoadBlack3D},
-    {"$black_cube", Image_LoadBlackCube},
-    {"$gray", Image_LoadGray},
-    {"$identitynormalmap", Image_LoadIdentityNormalMap},
-    {"$outdoor", (void(__cdecl*)(GfxImage*))Outdoor_SetRendererOutdoorLookupMatrix},
-    {"$pixelcostcolorcode", Image_LoadPixelCostColorCode}
-};
 void __cdecl Image_Construct(
     char *name,
     int nameSize,
@@ -1241,43 +1239,7 @@ void __cdecl Image_Free(GfxImage *image)
 {
     Image_Release(image);
 }
-static GfxImage *__cdecl Image_LoadBuiltin(char *name, unsigned __int8 semantic, unsigned __int8 imageTrack)
-{
-    GfxImage *image; // [esp+14h] [ebp-8h]
-    unsigned int tableIndex; // [esp+18h] [ebp-4h]
 
-    for (tableIndex = 0; ; ++tableIndex)
-    {
-        if (tableIndex >= 8)
-        {
-            Com_PrintError(8, "ERROR: Unknown built-in image '%s'", name);
-            return 0;
-        }
-        if (!strcmp(constructorTable[tableIndex].name, name))
-            break;
-    }
-    image = Image_Alloc(name, 1u, semantic, imageTrack);
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 1117, 1, "%s", "image");
-    constructorTable[tableIndex].LoadCallback(image);
-    return image;
-}
-static GfxImage *__cdecl Image_Load(char *name, unsigned __int8 semantic, unsigned __int8 imageTrack)
-{
-    GfxImage *image; // [esp+0h] [ebp-4h]
-
-    if (*name == 36)
-        return Image_LoadBuiltin(name, semantic, imageTrack);
-    image = Image_Alloc(name, 3u, semantic, imageTrack);
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 1136, 1, "%s", "image");
-    if (image->texture.basemap)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 1138, 1, "%s", "image->texture.basemap == NULL");
-    if (Image_LoadFromFile(image))
-        return image;
-    else
-        return 0;
-}
 GfxImage *__cdecl Image_Register_LoadObj(char *imageName, unsigned __int8 semantic, unsigned __int8 imageTrack)
 {
     GfxImage *image; // [esp+0h] [ebp-4h]
@@ -1330,32 +1292,6 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
         }
     } while (alwaysfails);
     return surface;
-}
-
-void __cdecl R_DelayLoadImage(XAssetHeader header)
-{
-    LONG externalDataSize; // [esp+4h] [ebp-8h]
-    HRESULT hr; // [esp+8h] [ebp-4h]
-
-    if (HIBYTE(header.xmodelPieces[2].numpieces))
-    {
-        HIBYTE(header.xmodelPieces[2].numpieces) = 0;
-        externalDataSize = header.xmodelPieces[1].numpieces;
-        header.xmodelPieces[1].numpieces = 0;
-        header.xmodelPieces[1].pieces = 0;
-        if (r_loadForRenderer->current.enabled && !dx.deviceLost)
-        {
-            if (!Image_LoadFromFile(header.image))
-                Image_AssignDefaultTexture(header.image);
-            if (!header.xmodelPieces->numpieces)
-            {
-                hr = dx.device->TestCooperativeLevel();
-                if (hr != -2005530520 && hr != -2005530519)
-                    Com_Error(ERR_DROP, "Couldn't load image '%s'\n", (const char *)header.xmodelPieces[2].pieces);
-            }
-        }
-        DB_LoadedExternalData(externalDataSize);
-    }
 }
 
 void __cdecl R_SetPicmip()

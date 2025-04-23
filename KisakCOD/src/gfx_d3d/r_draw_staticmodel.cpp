@@ -6,6 +6,9 @@
 #include "r_shade.h"
 #include "r_draw_bsp.h"
 #include "r_utils.h"
+#include "r_staticmodelcache.h"
+#include "rb_tess.h"
+#include "r_xsurface.h"
 
 
 void __cdecl R_SetupStaticModelPrim(XSurface *xsurf, GfxDrawPrimArgs *args, GfxCmdBufPrimState *primState)
@@ -195,3 +198,457 @@ void __cdecl R_DrawStaticModelDrawSurfPlacement(
     MatrixSet44((float (*)[4])matrix, origin, axis, scale);
 }
 
+void __cdecl R_SetupCachedStaticModelLighting(GfxCmdBufSourceState *source)
+{
+    source->input.consts[57][0] = 0.0;
+    source->input.consts[57][1] = 0.0;
+    source->input.consts[57][2] = 0.5;
+    source->input.consts[57][3] = 1.0;
+    R_DirtyCodeConstant(source, 0x39u);
+}
+
+int __cdecl R_GetNextStaticModelCachedSurf(GfxStaticModelDrawStream *drawStream)
+{
+    const GfxStaticModelDrawInst *smodelDrawInst; // [esp+0h] [ebp-Ch]
+    XSurface *xsurf; // [esp+8h] [ebp-4h]
+
+    drawStream->smodelCount = *drawStream->primDrawSurfPos++;
+    if (!drawStream->smodelCount)
+        return 0;
+    xsurf = (XSurface *)*drawStream->primDrawSurfPos++;
+    drawStream->smodelList = (const unsigned short*)drawStream->primDrawSurfPos;
+    drawStream->primDrawSurfPos += (drawStream->smodelCount + 1) >> 1;
+    smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[R_GetCachedSModelSurf(*drawStream->smodelList)->smodelIndex];
+    drawStream->localSurf = xsurf;
+    drawStream->reflectionProbeIndex = smodelDrawInst->reflectionProbeIndex;
+    g_frameStatsCur.geoIndexCount += 3 * drawStream->smodelCount * xsurf->triCount;
+    if (!g_primStats)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1870, 0, "%s", "g_primStats");
+    g_primStats->dynamicIndexCount += 3 * drawStream->smodelCount * xsurf->triCount;
+    g_primStats->dynamicVertexCount += drawStream->smodelCount * xsurf->vertCount;
+    return 1;
+}
+
+XSurface *__cdecl R_GetCurrentStaticModelCachedSurf(
+    GfxStaticModelDrawStream *drawStream,
+    unsigned int *reflectionProbeIndex)
+{
+    if (reflectionProbeIndex)
+        *reflectionProbeIndex = drawStream->reflectionProbeIndex;
+    return drawStream->localSurf;
+}
+
+void __cdecl R_SetStaticModelCachedPrimArgs(const XSurface *xsurf, GfxDrawPrimArgs *args)
+{
+    if (!xsurf)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1901, 0, "%s", "xsurf");
+    args->vertexCount = 0x10000;
+    args->triCount = xsurf->triCount;
+}
+
+void __cdecl R_SetStaticModelCachedBuffer(GfxCmdBufState *state, unsigned int cachedIndex)
+{
+    R_SetStreamSource(&state->prim, gfxBuf.smodelCacheVb, ((cachedIndex - 1) & 0xFFFFF000) << 9, 0x20u);
+}
+
+int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
+{
+    unsigned int v2; // edx
+    int indexCount; // [esp+8h] [ebp-4h]
+
+    indexCount = 3 * triCount;
+    if (3 * triCount > gfxBuf.dynamicIndexBuffer->total)
+        MyAssertHandler(
+            ".\\r_shade.cpp",
+            590,
+            0,
+            "%s\n\t(indexCount) = %i",
+            "(indexCount <= gfxBuf.dynamicIndexBuffer->total)",
+            indexCount);
+    if (indexCount + gfxBuf.dynamicIndexBuffer->used > gfxBuf.dynamicIndexBuffer->total)
+        gfxBuf.dynamicIndexBuffer->used = 0;
+    if (!gfxBuf.dynamicIndexBuffer->used)
+    {
+        v2 = (gfxBuf.dynamicIndexBuffer - gfxBuf.dynamicIndexBufferPool + 1) & 0x80000000;
+        if (gfxBuf.dynamicIndexBuffer - gfxBuf.dynamicIndexBufferPool + 1 < 0)
+            v2 = 0;
+        gfxBuf.dynamicIndexBuffer = &gfxBuf.dynamicIndexBufferPool[v2];
+    }
+    return gfxBuf.dynamicIndexBuffer->used;
+}
+
+void __cdecl R_DrawStaticModelsCachedDrawSurfLighting(GfxStaticModelDrawStream *drawStream, GfxCmdBufContext context)
+{
+    unsigned int copyBaseIndex; // [esp+0h] [ebp-30h]
+    unsigned int baseIndex; // [esp+4h] [ebp-2Ch]
+    unsigned int surfBaseIndex; // [esp+8h] [ebp-28h]
+    unsigned int reflectionProbeIndex; // [esp+10h] [ebp-20h] BYREF
+    const unsigned __int16 *list; // [esp+14h] [ebp-1Ch]
+    unsigned int smodelCount; // [esp+18h] [ebp-18h]
+    unsigned int index; // [esp+1Ch] [ebp-14h]
+    const XSurface *xsurf; // [esp+20h] [ebp-10h]
+    GfxDrawPrimArgs args; // [esp+24h] [ebp-Ch] BYREF
+
+    xsurf = R_GetCurrentStaticModelCachedSurf(drawStream, &reflectionProbeIndex);
+    list = drawStream->smodelList;
+    smodelCount = drawStream->smodelCount;
+    R_SetStaticModelCachedPrimArgs(xsurf, &args);
+    R_SetStaticModelCachedBuffer(context.state, *list);
+    R_SetupPassPerPrimArgs(context);
+    R_SetReflectionProbe(context, reflectionProbeIndex);
+    surfBaseIndex = 3 * xsurf->baseTriIndex;
+    args.triCount = smodelCount * xsurf->triCount;
+    args.baseIndex = R_ReserveIndexData(&context.state->prim, args.triCount);
+    index = 0;
+    do
+    {
+        baseIndex = surfBaseIndex + 4 * R_GetCachedSModelSurf(list[index])->baseVertIndex;
+        if (baseIndex >= 0x100000)
+            MyAssertHandler(".\\r_draw_staticmodel.cpp", 1952, 0, "%s", "baseIndex < SMC_MAX_INDEX_IN_CACHE");
+        if (baseIndex + 3 * xsurf->triCount > 0x100000)
+            MyAssertHandler(
+                ".\\r_draw_staticmodel.cpp",
+                1953,
+                0,
+                "%s",
+                "baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE");
+        copyBaseIndex = R_SetIndexData(&context.state->prim, (unsigned char*)&gfxBuf.smodelCache.indices[baseIndex], xsurf->triCount);
+        if (copyBaseIndex != args.baseIndex + index * 3 * xsurf->triCount)
+            MyAssertHandler(
+                ".\\r_draw_staticmodel.cpp",
+                1956,
+                1,
+                "copyBaseIndex == args.baseIndex + xsurf->triCount * 3 * index\n\t%i, %i",
+                copyBaseIndex,
+                args.baseIndex + index * 3 * xsurf->triCount);
+        ++index;
+    } while (index < smodelCount);
+    R_DrawIndexedPrimitive(&context.state->prim, &args);
+}
+
+void __cdecl R_DrawStaticModelsCachedDrawSurf(GfxStaticModelDrawStream *drawStream, GfxCmdBufContext context)
+{
+    unsigned int copyBaseIndex; // [esp+0h] [ebp-2Ch]
+    unsigned int baseIndex; // [esp+4h] [ebp-28h]
+    unsigned int surfBaseIndex; // [esp+8h] [ebp-24h]
+    const unsigned __int16 *list; // [esp+10h] [ebp-1Ch]
+    unsigned int smodelCount; // [esp+14h] [ebp-18h]
+    unsigned int index; // [esp+18h] [ebp-14h]
+    const XSurface *xsurf; // [esp+1Ch] [ebp-10h]
+    GfxDrawPrimArgs args; // [esp+20h] [ebp-Ch] BYREF
+
+    xsurf = R_GetCurrentStaticModelCachedSurf(drawStream, 0);
+    list = drawStream->smodelList;
+    smodelCount = drawStream->smodelCount;
+    R_SetStaticModelCachedPrimArgs(xsurf, &args);
+    R_SetStaticModelCachedBuffer(context.state, *list);
+    R_SetupPassPerPrimArgs(context);
+    surfBaseIndex = 3 * xsurf->baseTriIndex;
+    args.triCount = smodelCount * xsurf->triCount;
+    args.baseIndex = R_ReserveIndexData(&context.state->prim, args.triCount);
+    index = 0;
+    do
+    {
+        baseIndex = surfBaseIndex + 4 * R_GetCachedSModelSurf(list[index])->baseVertIndex;
+        if (baseIndex >= 0x100000)
+            MyAssertHandler(".\\r_draw_staticmodel.cpp", 2017, 0, "%s", "baseIndex < SMC_MAX_INDEX_IN_CACHE");
+        if (baseIndex + 3 * xsurf->triCount > 0x100000)
+            MyAssertHandler(
+                ".\\r_draw_staticmodel.cpp",
+                2018,
+                0,
+                "%s",
+                "baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE");
+        copyBaseIndex = R_SetIndexData(&context.state->prim, (unsigned char*)&gfxBuf.smodelCache.indices[baseIndex], xsurf->triCount);
+        if (copyBaseIndex != args.baseIndex + index * 3 * xsurf->triCount)
+            MyAssertHandler(
+                ".\\r_draw_staticmodel.cpp",
+                2021,
+                1,
+                "copyBaseIndex == args.baseIndex + xsurf->triCount * 3 * index\n\t%i, %i",
+                copyBaseIndex,
+                args.baseIndex + index * 3 * xsurf->triCount);
+        ++index;
+    } while (index < smodelCount);
+    R_DrawIndexedPrimitive(&context.state->prim, &args);
+}
+
+void __cdecl R_DrawStaticModelCachedSurfLit(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    GfxStaticModelDrawStream drawStream; // [esp+0h] [ebp-1Ch] BYREF
+
+    R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    R_SetupCachedStaticModelLighting(context.source);
+    R_SetupPassPerObjectArgs(context);
+    drawStream.primDrawSurfPos = primDrawSurfPos;
+    drawStream.reflectionProbeTexture = context.state->samplerTexture[1];
+    drawStream.customSamplerFlags = context.state->pass->customSamplerFlags;
+    while (R_GetNextStaticModelCachedSurf(&drawStream))
+        R_DrawStaticModelsCachedDrawSurfLighting(&drawStream, context);
+    context.state->samplerTexture[1] = drawStream.reflectionProbeTexture;
+}
+
+void __cdecl R_DrawStaticModelCachedSurf(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    GfxStaticModelDrawStream drawStream; // [esp+0h] [ebp-1Ch] BYREF
+
+    R_SetupPassPerObjectArgs(context);
+    drawStream.primDrawSurfPos = primDrawSurfPos;
+    drawStream.reflectionProbeTexture = context.state->samplerTexture[1];
+    drawStream.customSamplerFlags = context.state->pass->customSamplerFlags;
+    while (R_GetNextStaticModelCachedSurf(&drawStream))
+        R_DrawStaticModelsCachedDrawSurf(&drawStream, context);
+    if (context.state->samplerTexture[1] != drawStream.reflectionProbeTexture)
+        MyAssertHandler(
+            ".\\r_draw_staticmodel.cpp",
+            2076,
+            0,
+            "%s",
+            "context.state->samplerTexture[TEXTURE_DEST_CODE_REFLECTION_PROBE] == drawStream.reflectionProbeTexture");
+}
+
+const unsigned int *__cdecl R_ReadPrimDrawSurfData(GfxReadCmdBuf *cmdBuf, unsigned int count)
+{
+    const unsigned int *result; // [esp+0h] [ebp-4h]
+
+    result = cmdBuf->primDrawSurfPos;
+    cmdBuf->primDrawSurfPos += count;
+    return result;
+}
+
+unsigned int __cdecl R_ReadPrimDrawSurfInt(GfxReadCmdBuf *cmdBuf)
+{
+    return *cmdBuf->primDrawSurfPos++;
+}
+
+int __cdecl R_ReadStaticModelPreTessDrawSurf(
+    GfxReadCmdBuf *readCmdBuf,
+    GfxStaticModelPreTessSurf *pretessSurf,
+    unsigned int *firstIndex,
+    unsigned int *count)
+{
+    *count = R_ReadPrimDrawSurfInt(readCmdBuf);
+    if (!*count)
+        return 0;
+    pretessSurf->packed = R_ReadPrimDrawSurfInt(readCmdBuf);
+    *firstIndex = R_ReadPrimDrawSurfInt(readCmdBuf);
+    if (*firstIndex >= 0x100000)
+        MyAssertHandler(
+            ".\\r_draw_staticmodel.cpp",
+            1894,
+            0,
+            "*firstIndex doesn't index R_MAX_PRETESS_INDICES\n\t%i not in [0, %i)",
+            *firstIndex,
+            0x100000);
+    return 1;
+}
+
+void __cdecl R_DrawStaticModelsPreTessDrawSurf(
+    GfxStaticModelPreTessSurf pretessSurf,
+    unsigned int firstIndex,
+    unsigned int count,
+    GfxCmdBufContext context)
+{
+    IDirect3DIndexBuffer9 *ib; // [esp+0h] [ebp-2Ch]
+    GfxDrawPrimArgs args; // [esp+20h] [ebp-Ch] BYREF
+
+    if (!count)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 2034, 0, "%s", "count");
+    R_SetupCachedSModelSurface(
+        context.state,
+        pretessSurf.fields.cachedIndex,
+        pretessSurf.fields.lod,
+        pretessSurf.fields.surfIndex,
+        count,
+        &args,
+        0);
+    R_SetupPassPerPrimArgs(context);
+    ib = context.source->input.data->preTessIb;
+    if (context.state->prim.indexBuffer != ib)
+        R_ChangeIndices(&context.state->prim, ib);
+    args.baseIndex = firstIndex;
+    R_DrawIndexedPrimitive(&context.state->prim, &args);
+}
+
+const GfxStaticModelDrawInst *__cdecl R_SetupCachedSModelSurface(
+    GfxCmdBufState *state,
+    unsigned int cachedIndex,
+    unsigned int lod,
+    unsigned int surfIndex,
+    unsigned int count,
+    GfxDrawPrimArgs *args,
+    unsigned int *baseIndex)
+{
+    const GfxStaticModelDrawInst *smodelDrawInst; // [esp+14h] [ebp-Ch]
+    const XSurface *xsurf; // [esp+1Ch] [ebp-4h]
+
+    if (!cachedIndex)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1822, 0, "%s", "cachedIndex");
+    smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[R_GetCachedSModelSurf(cachedIndex)->smodelIndex];
+    xsurf = XModelGetSurface(smodelDrawInst->model, lod, surfIndex);
+    if (baseIndex)
+        *baseIndex = 3 * xsurf->baseTriIndex;
+    args->vertexCount = 0x10000;
+    args->triCount = count * xsurf->triCount;
+    R_SetStreamSource(&state->prim, gfxBuf.smodelCacheVb, ((cachedIndex - 1) & 0xFFFFF000) << 9, 0x20u);
+    g_frameStatsCur.geoIndexCount += 3 * count * xsurf->triCount;
+    if (!g_primStats)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1837, 0, "%s", "g_primStats");
+    g_primStats->dynamicIndexCount += 3 * count * xsurf->triCount;
+    g_primStats->dynamicVertexCount += count * xsurf->vertCount;
+    return smodelDrawInst;
+}
+
+void __cdecl R_DrawStaticModelsPreTessDrawSurfLighting(
+    GfxStaticModelPreTessSurf pretessSurf,
+    unsigned int firstIndex,
+    unsigned int count,
+    GfxCmdBufContext context)
+{
+    IDirect3DIndexBuffer9 *ib; // [esp+0h] [ebp-30h]
+    const GfxStaticModelDrawInst *smodelDrawInst; // [esp+20h] [ebp-10h]
+    GfxDrawPrimArgs args; // [esp+24h] [ebp-Ch] BYREF
+
+    if (!count)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1970, 0, "%s", "count");
+    smodelDrawInst = R_SetupCachedSModelSurface(
+        context.state,
+        pretessSurf.fields.cachedIndex,
+        pretessSurf.fields.lod,
+        pretessSurf.fields.surfIndex,
+        count,
+        &args,
+        0);
+    R_SetupPassPerPrimArgs(context);
+    R_SetReflectionProbe(context, smodelDrawInst->reflectionProbeIndex);
+    ib = context.source->input.data->preTessIb;
+    if (context.state->prim.indexBuffer != ib)
+        R_ChangeIndices(&context.state->prim, ib);
+    args.baseIndex = firstIndex;
+    R_DrawIndexedPrimitive(&context.state->prim, &args);
+}
+
+void __cdecl R_SetStaticModelSkinnedPrimArgs(GfxCmdBufPrimState *state, const XSurface *xsurf, GfxDrawPrimArgs *args)
+{
+    if (!xsurf)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1685, 0, "%s", "xsurf");
+    args->triCount = XSurfaceGetNumTris(xsurf);
+    args->vertexCount = XSurfaceGetNumVerts(xsurf);
+    args->baseIndex = R_SetIndexData(state, (unsigned char*)xsurf->triIndices, args->triCount);
+}
+
+void __cdecl R_DrawStaticModelSkinnedDrawSurfLighting(
+    const GfxStaticModelDrawInst *smodelDrawInst,
+    unsigned __int16 lightingHandle,
+    GfxDrawPrimArgs *args,
+    GfxCmdBufContext context)
+{
+    R_SetReflectionProbe(context, smodelDrawInst->reflectionProbeIndex);
+    R_DrawStaticModelDrawSurfPlacement(smodelDrawInst, context.source);
+    R_SetModelLightingCoordsForSource(lightingHandle, context.source);
+    R_SetupPassPerPrimArgs(context);
+    R_DrawIndexedPrimitive(&context.state->prim, args);
+}
+
+void __cdecl R_DrawStaticModelsSkinnedDrawSurfLighting(GfxStaticModelDrawStream *drawStream, GfxCmdBufContext context)
+{
+    const GfxStaticModelDrawInst *smodelDrawInst; // [esp+10h] [ebp-30h]
+    IDirect3DVertexBuffer9 *vb; // [esp+14h] [ebp-2Ch]
+    unsigned int vertexOffset; // [esp+18h] [ebp-28h]
+    GfxStaticModelDrawInst *smodelDrawInsts; // [esp+1Ch] [ebp-24h]
+    const unsigned __int16 *list; // [esp+20h] [ebp-20h]
+    unsigned int smodelCount; // [esp+24h] [ebp-1Ch]
+    unsigned int index; // [esp+28h] [ebp-18h]
+    XSurface *xsurf; // [esp+2Ch] [ebp-14h]
+    GfxDrawPrimArgs args; // [esp+30h] [ebp-10h] BYREF
+    unsigned __int16 lightingHandle; // [esp+3Ch] [ebp-4h]
+
+    xsurf = drawStream->localSurf;
+    R_SetStaticModelSkinnedPrimArgs(&context.state->prim, xsurf, &args);
+    R_CheckVertexDataOverflow(32 * args.vertexCount);
+    vertexOffset = R_SetVertexData(context.state, xsurf->verts0, args.vertexCount, 32);
+    vb = gfxBuf.dynamicVertexBuffer->buffer;
+    if (!vb)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1714, 0, "%s", "vb");
+    R_SetStreamSource(&context.state->prim, vb, vertexOffset, 0x20u);
+    smodelCount = drawStream->smodelCount;
+    smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
+    list = drawStream->smodelList;
+    for (index = 0; index < smodelCount; ++index)
+    {
+        smodelDrawInst = &smodelDrawInsts[list[index]];
+        lightingHandle = smodelDrawInst->lightingHandle;
+        R_DrawStaticModelSkinnedDrawSurfLighting(smodelDrawInst, lightingHandle, &args, context);
+    }
+}
+
+void __cdecl R_DrawStaticModelSkinnedSurfLit(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    GfxStaticModelDrawStream drawStream; // [esp+0h] [ebp-20h] BYREF
+    XSurface *surf; // [esp+1Ch] [ebp-4h] BYREF
+
+    R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    R_SetupPassPerObjectArgs(context);
+    drawStream.primDrawSurfPos = primDrawSurfPos;
+    drawStream.reflectionProbeTexture = context.state->samplerTexture[1];
+    drawStream.customSamplerFlags = context.state->pass->customSamplerFlags;
+    while (R_GetNextStaticModelSurf(&drawStream, &surf))
+        R_DrawStaticModelsSkinnedDrawSurfLighting(&drawStream, context);
+    context.state->samplerTexture[1] = drawStream.reflectionProbeTexture;
+}
+
+void __cdecl R_DrawStaticModelSkinnedDrawSurf(
+    const GfxStaticModelDrawInst *smodelDrawInst,
+    GfxDrawPrimArgs *args,
+    GfxCmdBufContext context)
+{
+    R_DrawStaticModelDrawSurfPlacement(smodelDrawInst, context.source);
+    R_SetupPassPerPrimArgs(context);
+    R_DrawIndexedPrimitive(&context.state->prim, args);
+}
+
+void __cdecl R_DrawStaticModelsSkinnedDrawSurf(GfxStaticModelDrawStream *drawStream, GfxCmdBufContext context)
+{
+    IDirect3DVertexBuffer9 *vb; // [esp+14h] [ebp-28h]
+    unsigned int vertexOffset; // [esp+18h] [ebp-24h]
+    GfxStaticModelDrawInst *smodelDrawInsts; // [esp+1Ch] [ebp-20h]
+    const unsigned __int16 *list; // [esp+20h] [ebp-1Ch]
+    unsigned int smodelCount; // [esp+24h] [ebp-18h]
+    unsigned int index; // [esp+28h] [ebp-14h]
+    XSurface *xsurf; // [esp+2Ch] [ebp-10h]
+    GfxDrawPrimArgs args; // [esp+30h] [ebp-Ch] BYREF
+
+    xsurf = drawStream->localSurf;
+    R_SetStaticModelSkinnedPrimArgs(&context.state->prim, xsurf, &args);
+    R_CheckVertexDataOverflow(32 * args.vertexCount);
+    vertexOffset = R_SetVertexData(context.state, xsurf->verts0, args.vertexCount, 32);
+    vb = gfxBuf.dynamicVertexBuffer->buffer;
+    if (!vb)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1752, 0, "%s", "vb");
+    R_SetStreamSource(&context.state->prim, vb, vertexOffset, 0x20u);
+    smodelCount = drawStream->smodelCount;
+    smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
+    list = drawStream->smodelList;
+    for (index = 0; index < smodelCount; ++index)
+        R_DrawStaticModelSkinnedDrawSurf(&smodelDrawInsts[list[index]], &args, context);
+}
+
+void __cdecl R_DrawStaticModelSkinnedSurf(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    GfxStaticModelDrawStream drawStream; // [esp+0h] [ebp-20h] BYREF
+    XSurface *surf; // [esp+1Ch] [ebp-4h] BYREF
+
+    R_SetupPassPerObjectArgs(context);
+    drawStream.primDrawSurfPos = primDrawSurfPos;
+    drawStream.reflectionProbeTexture = context.state->samplerTexture[1];
+    drawStream.customSamplerFlags = context.state->pass->customSamplerFlags;
+    while (R_GetNextStaticModelSurf(&drawStream, &surf))
+        R_DrawStaticModelsSkinnedDrawSurf(&drawStream, context);
+    if (context.state->samplerTexture[1] != drawStream.reflectionProbeTexture)
+        MyAssertHandler(
+            ".\\r_draw_staticmodel.cpp",
+            1799,
+            0,
+            "%s",
+            "context.state->samplerTexture[TEXTURE_DEST_CODE_REFLECTION_PROBE] == drawStream.reflectionProbeTexture");
+}

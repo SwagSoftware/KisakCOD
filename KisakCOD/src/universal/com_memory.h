@@ -1,8 +1,8 @@
 #pragma once
 
-#include <xanim/xanim.h>
 #include <script/scr_stringlist.h>
 #include "q_shared.h"
+#include <qcommon/mem_track.h>
 
 struct TempMemInfo // sizeof=0x28
 {                                       // ...

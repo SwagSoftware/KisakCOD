@@ -29,6 +29,63 @@ enum physStuckState_t : __int32
     PHYS_OBJ_STATE_FREE = 0x2,
 };
 
+struct __declspec(align(4)) PhysPreset // sizeof=0x2C
+{                                       // ...
+    const char *name;                   // ...
+    int type;                           // ...
+    float mass;                         // ...
+    float bounce;                       // ...
+    float friction;                     // ...
+    float bulletForceScale;             // ...
+    float explosiveForceScale;          // ...
+    const char *sndAliasPrefix;         // ...
+    float piecesSpreadFraction;
+    float piecesUpwardVelocity;
+    bool tempDefaultToCylinder;
+    // padding byte
+    // padding byte
+    // padding byte
+};
+struct BrushWrapper // sizeof=0x50
+{
+    float mins[3];
+    int contents;
+    float maxs[3];
+    unsigned int numsides;
+    cbrushside_t *sides;
+    __int16 axialMaterialNum[2][3];
+    unsigned __int8 *baseAdjacentSide;
+    __int16 firstAdjacentSideOffsets[2][3];
+    unsigned __int8 edgeCount[2][3];
+    // padding byte
+    // padding byte
+    int totalEdgeCount;
+    cplane_s *planes;
+};
+
+struct PhysMass // sizeof=0x24
+{                                       // ...
+    float centerOfMass[3];
+    float momentsOfInertia[3];
+    float productsOfInertia[3];
+};
+
+struct PhysGeomInfo // sizeof=0x44
+{
+    BrushWrapper *brush;
+    int type;
+    float orientation[3][3];
+    float offset[3];
+    float halfLengths[3];
+};
+
+struct PhysGeomList // sizeof=0x2C
+{
+    unsigned int count;
+    PhysGeomInfo *geoms;
+    PhysMass mass;
+};
+
 struct PhysContact // sizeof=0x24
 {                                       // ...
     float pos[3];

@@ -3920,11 +3920,9 @@ int __cdecl CountBitsEnabled(unsigned int num)
 
     numa = (((((num >> 1) & 0x55555555) + (num & 0x55555555)) >> 2) & 0x33333333)
         + ((((num >> 1) & 0x55555555) + (num & 0x55555555)) & 0x33333333);
-    numb = (((unsigned int)&clients[0].parseEntities[1878].lerp.apos.trTime + 3)
-        & ((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) >> 8))
-        + (((unsigned int)&clients[0].parseEntities[1878].lerp.apos.trTime + 3)
-            & (((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)));
-    return HIWORD(numb) + (unsigned __int16)numb;
+    numb = (((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) >> 8) & 0xFF00FF)
+        + ((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) & 0xFF00FF);
+    return HIWORD(numb) + numb;
 }
 
 int recursive;

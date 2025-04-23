@@ -4,6 +4,13 @@
 #include "rb_backend.h"
 #include "r_utils.h"
 #include "rb_logfile.h"
+#include "rb_shade.h"
+#include "r_state.h"
+#include "rb_state.h"
+#include <cgame/cg_local.h>
+#include "r_dvars.h"
+#include "rb_stats.h"
+#include "rb_pixelcost.h"
 
 
 SunFlareDynamic sunFlareArray[4];
@@ -53,7 +60,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("dx.device->BeginScene()\n");
-        v8 = dx.device->BeginScene(dx.device);
+        v8 = dx.device->BeginScene();
         if (v8 < 0)
         {
             do
@@ -70,7 +77,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("occlusionQuery->Issue( (1 << 1) )\n");
-        v7 = occlusionQuery->Issue(occlusionQuery, 2u);
+        v7 = occlusionQuery->Issue(2u);
         if (v7 < 0)
         {
             do
@@ -90,10 +97,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("occlusionQuery->Issue( (1 << 0) )\n");
-        v6 = ((int(__thiscall *)(IDirect3DQuery9 *, IDirect3DQuery9 *, int))occlusionQuery->Issue)(
-            occlusionQuery,
-            occlusionQuery,
-            1);
+        v6 = occlusionQuery->Issue(1);
         if (v6 < 0)
         {
             do
@@ -108,7 +112,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("dx.device->EndScene()\n");
-        v5 = dx.device->EndScene(dx.device);
+        v5 = dx.device->EndScene();
         if (v5 < 0)
         {
             do
@@ -121,7 +125,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     } while (alwaysfails);
     while (1)
     {
-        hr = occlusionQuery->GetData(occlusionQuery, &sampleCount, 4u, 1u);
+        hr = occlusionQuery->GetData(&sampleCount, 4u, 1u);
         if (hr != 1)
             break;
         Sleep(0);
@@ -221,7 +225,7 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
         {
             RB_HW_BeginOcclusionQuery(sunFlare->sunQuery[queryIndex]);
             RB_EndTessSurface();
-            sunFlare->sunQuery[queryIndex]->Issue(sunFlare->sunQuery[queryIndex], 1u);
+            sunFlare->sunQuery[queryIndex]->Issue(1u);
             sunFlare->sunQueryIssued[queryIndex] = 1;
         }
         //Profile_EndInternal(0);
@@ -236,7 +240,7 @@ void __cdecl RB_HW_BeginOcclusionQuery(IDirect3DQuery9 *query)
 {
     if (!query)
         MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\rb_query_d3d.h", 26, 0, "%s", "query");
-    query->Issue(query, 2u);
+    query->Issue(2u);
 }
 
 unsigned int __cdecl RB_HW_ReadOcclusionQuery(IDirect3DQuery9 *query)
@@ -246,7 +250,7 @@ unsigned int __cdecl RB_HW_ReadOcclusionQuery(IDirect3DQuery9 *query)
 
     while (1)
     {
-        hr = query->GetData(query, &pixelCount, 4u, 1u);
+        hr = query->GetData(&pixelCount, 4u, 1u);
         if (hr != 1)
             break;
         Sleep(0);
@@ -269,7 +273,7 @@ void __cdecl RB_TessSunBillboard(float widthInClipSpace, float heightInClipSpace
     float sunTransformedPosition_8; // [esp+34h] [ebp-Ch]
     float sunTransformedPosition_12; // [esp+38h] [ebp-8h]
 
-    transform = &gfxCmdBufSourceState.viewParms3D->viewProjectionMatrix;
+    transform = (GfxMatrix*)&gfxCmdBufSourceState.viewParms3D->viewProjectionMatrix;
     if (!rgp.world)
         MyAssertHandler(".\\rb_sky.cpp", 198, 0, "%s", "rgp.world");
     sunTransformedPosition = rgp.world->sun.sunFxPosition[0] * transform->m[0][0]
@@ -392,7 +396,7 @@ double __cdecl RB_GetSunSampleRectRelativeArea(int widthInPixels, int heightInPi
     float sunTransformedPosition_12; // [esp+50h] [ebp-Ch]
     signed int bottom; // [esp+54h] [ebp-8h]
 
-    transform = &gfxCmdBufSourceState.viewParms3D->viewProjectionMatrix;
+    transform = (GfxMatrix*)&gfxCmdBufSourceState.viewParms3D->viewProjectionMatrix;
     if (!rgp.world)
         MyAssertHandler(".\\rb_sky.cpp", 254, 0, "%s", "rgp.world");
     sunTransformedPosition_12 = rgp.world->sun.sunFxPosition[0] * transform->m[0][3]

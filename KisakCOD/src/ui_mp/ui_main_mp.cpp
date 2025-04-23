@@ -15,6 +15,10 @@
 #include <gfx_d3d/r_dvars.h>
 #include <win32/win_local.h>
 #include <qcommon/com_playerprofile.h>
+#include <cgame/cg_local.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <server_mp/server.h>
+#include <win32/win_input.h>
 
 enum sscType_t : __int32
 {                                       // ...
@@ -3135,7 +3139,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                                                                                             (const char **)args,
                                                                                                                                                             &status))
                                                                                                                                                         {
-                                                                                                                                                            CLUI_SetPbClStatus(status);
+                                                                                                                                                            //CLUI_SetPbClStatus(status); // LWSS: Remove punkbuster shit
                                                                                                                                                         }
                                                                                                                                                     }
                                                                                                                                                     else if (String_Parse(
@@ -3485,7 +3489,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                     {
                         v10 = UI_SafeTranslateString("EXE_CDKEYVALID");
                         Dvar_SetStringByName("ui_cdkeyvalid", v10);
-                        CLUI_SetCDKey(key, checksum);
+                        //CLUI_SetCDKey(key, checksum); // KISAKKEY
                     }
                     else
                     {
@@ -3496,7 +3500,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
             }
             else
             {
-                CLUI_GetCDKey(&buf, 17, buf2, 5);
+                //CLUI_GetCDKey(&buf, 17, buf2, 5); // KISAKKEY
                 Dvar_SetStringByName("cdkey1", (char *)"");
                 Dvar_SetStringByName("cdkey2", (char *)"");
                 Dvar_SetStringByName("cdkey3", (char *)"");
@@ -6150,6 +6154,11 @@ int __cdecl UI_Popup(int localClientNum, const char *menu)
         UI_SetActiveMenu(localClientNum, 7);
     }
     return 1;
+}
+
+void __cdecl CL_SetCursorPos(tagPOINT x)
+{
+    IN_SetCursorPos(x);
 }
 
 void __cdecl UI_SetSystemCursorPos(UiContext *dc, float x, float y)

@@ -534,3 +534,12 @@ void __cdecl IN_RecenterMouse()
 	window_center_y = (window_rect.bottom + window_rect.top) / 2;
 	SetCursorPos((window_rect.left + window_rect.right) / 2, (window_rect.bottom + window_rect.top) / 2);
 }
+void __cdecl IN_SetCursorPos(tagPOINT x)
+{
+	tagPOINT curPos; // [esp+0h] [ebp-8h] BYREF
+
+	curPos = x;
+	ClientToScreen(g_wv.hWnd, &curPos);
+	SetCursorPos(curPos.x, curPos.y);
+	s_wmv.oldPos = curPos;
+}

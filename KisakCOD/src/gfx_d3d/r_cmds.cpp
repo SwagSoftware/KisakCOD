@@ -15,6 +15,9 @@
 #include "rb_stats.h"
 #include <DynEntity/DynEntity_client.h>
 #include <database/database.h>
+#include "r_staticmodelcache.h"
+
+#include <algorithm>
 
 void __cdecl R_Cmd_ScreenshotJpeg()
 {
@@ -65,11 +68,12 @@ void __cdecl R_ImageList_f()
                 imageList.image[imageList.count++] = &g_imageProgs[i];
         }
     }
-    std::_Sort<GfxImage **, int, int(__cdecl *)(GfxImage *, GfxImage *)>(
-        imageList.image,
-        &imageList.image[imageList.count],
-        (signed int)(4 * imageList.count) >> 2,
-        imagecompare);
+    //std::_Sort<GfxImage **, int, int(__cdecl *)(GfxImage *, GfxImage *)>(
+    //    imageList.image,
+    //    &imageList.image[imageList.count],
+    //    (signed int)(4 * imageList.count) >> 2,
+    //    imagecompare);
+    std::sort(&imageList.image[0], &imageList.image[imageList.count], imagecompare);
     Com_Printf(8, "\n-fmt- -dimension-");
     for (j = 0; j < 2; ++j)
         Com_Printf(8, "%s", g_platform_name[j]);
@@ -231,7 +235,8 @@ void __cdecl R_ModelList_f()
     v6 = 0;
     inData = 0;
     DB_EnumXAssets(ASSET_TYPE_XMODEL, (void(__cdecl *)(XAssetHeader, void *))R_GetModelList, &inData, 1);
-    std::_Sort<XModel **, int, bool(__cdecl *)(XModel *&, XModel *&)>(v4, &v4[inData], (4 * inData) >> 2, R_ModelSort);
+    //std::_Sort<XModel **, int, bool(__cdecl *)(XModel *&, XModel *&)>(v4, &v4[inData], (4 * inData) >> 2, R_ModelSort);
+    std::sort(&v4[0], &v4[inData], R_ModelSort);
     Com_Printf(8, "---------------------------\n");
     Com_Printf(8, "SM# is the number of static model instances\n");
     Com_Printf(8, "instKB is static model instance usage\n");

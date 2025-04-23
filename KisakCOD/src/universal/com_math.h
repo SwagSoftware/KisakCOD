@@ -268,6 +268,8 @@ void __cdecl YawToAxis(float yaw, mat3x3& axis);
 void __cdecl AxisToAngles(const mat3x3& axis, vec3r angles);
 
 // == MATRICES ==
+void __cdecl OrthographicMatrix(float (*mtx)[4], float width, float height, float depth);
+
 void __cdecl MatrixIdentity33(mat3x3& out);
 void __cdecl MatrixIdentity44(mat4x4& out);
 

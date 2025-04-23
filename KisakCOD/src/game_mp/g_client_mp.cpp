@@ -560,10 +560,9 @@ unsigned int __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, i
     {
         iPos_4 = 1024;
     }
-    return ((unsigned __int8)(int)(pEnt->r.currentAngles[1] * 0.7111111283302307) << 24)
-        | ((unsigned int)&clients[0].parseClients[238].attachTagIndex[4] + 3)
-        & (((((unsigned __int16)((iPos_4 + 2) / 4) + 255) & 0x1FF) << 15)
-            | ((((unsigned __int16)((iPos + 2) / 4) + 255) & 0x1FF) << 6) & 0x7FFF
-            | pEnt->s.number & 0xFF00003F);
+ return ((int)(pEnt->r.currentAngles[1] * 0.7111111283302307) << 24)
+       | (((((iPos_4 + 2) / 4) + 255) & 0x1FF) << 15) & 0xFFFFFF
+       | (((((iPos + 2) / 4) + 255) & 0x1FF) << 6) & 0x7FFF
+       | pEnt->s.number & 0x3F;
 }
 

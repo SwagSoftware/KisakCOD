@@ -557,6 +557,27 @@ void __cdecl Com_LoadedSoundList(snd_alias_system_t system)
     }
 }
 
+char __cdecl Com_AddAliasList(const char *name, snd_alias_list_t *aliasList)
+{
+    unsigned int hashIndex; // [esp+0h] [ebp-4h]
+
+    for (hashIndex = Com_HashAliasName(name); g_sa.hash[hashIndex]; hashIndex = (hashIndex + 1) % g_sa.hashSize)
+    {
+        if (!I_stricmp(name, g_sa.hash[hashIndex]->aliasName))
+            return 0;
+    }
+    if (++g_sa.hashUsed >= g_sa.hashSize)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias.cpp",
+            788,
+            0,
+            "g_sa.hashUsed < g_sa.hashSize\n\t%i, %i",
+            g_sa.hashUsed,
+            g_sa.hashSize);
+    g_sa.hash[hashIndex] = aliasList;
+    return 1;
+}
+
 void __cdecl Com_SoundList_f()
 {
     Com_Printf(0, "\n________________________________________\ncurrently streamed menu sounds:\n");
@@ -569,6 +590,8 @@ void __cdecl Com_SoundList_f()
     Com_LoadedSoundList(SASYS_CGAME);
     Com_Printf(0, "\n");
 }
+
+cmd_function_s Com_SoundList_f_VAR;
 
 void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurGame, snd_alias_system_t system)
 {
@@ -689,12 +712,12 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
     g_sa.initialized[system] = 1;
     if ((unsigned int)system <= SASYS_CGAME)
     {
-        numMissing = Com_LoadSoundAliasSounds((SoundFileInfo *)(8 * system + 230749208));
+        numMissing = Com_LoadSoundAliasSounds(&g_sa.soundFileInfo[system]);
         if (numMissing)
         {
             if (snd_errorOnMissing->current.enabled)
             {
-                v4 = va(&byte_8C0EE8, numMissing);
+                v4 = va("%i sound file(s) are missing or in a bad format", numMissing);
                 Com_Error((errorParm_t)(system != SASYS_UI), v4);
             }
         }
@@ -785,7 +808,7 @@ void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system)
     }
 }
 
-void __thiscall Com_InitEntChannels(char *file_1)
+void Com_InitEntChannels(char *file_1)
 {
     char *file; // [esp+0h] [ebp-4h] BYREF
 
@@ -803,6 +826,15 @@ void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve *sndCurve)
     sndCurve->knots[1][0] = 1.0;
     sndCurve->knots[1][1] = 0.0;
     sndCurve->knotCount = 2;
+}
+
+void __cdecl Com_PreLoadSpkrMapFile(SpeakerMapInfo *info)
+{
+    info->speakerMap.channelMaps[0][0].speakerCount = 2;
+    info->speakerMap.channelMaps[1][0].speakerCount = 2;
+    info->speakerMap.channelMaps[0][1].speakerCount = 6;
+    info->speakerMap.channelMaps[1][1].speakerCount = 6;
+    info->speakerMap.name = info->name;
 }
 
 void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo *info)
@@ -835,6 +867,198 @@ void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo *info)
     Com_SetChannelMapEntry(&info->speakerMap.channelMaps[1][1], 1u, 5u, 0.0);
 }
 
+int __cdecl Com_StringEdReferenceExists(const char *pszReference)
+{
+    char *file; // [esp+14h] [ebp-10h] BYREF
+    const char *ptr; // [esp+18h] [ebp-Ch] BYREF
+    const char *token; // [esp+1Ch] [ebp-8h]
+    int bReferenceFound; // [esp+20h] [ebp-4h]
+
+    bReferenceFound = 0;
+    if (I_strncmp(pszReference, "SUBTITLE_", 9))
+        return 0;
+    if (FS_ReadFile("soundaliases/subtitle.st", (void**)&file) >= 0)
+    {
+        Com_BeginParseSession("soundaliases/subtitle.st");
+        for (ptr = file; ; Com_SkipRestOfLine(&ptr))
+        {
+            token = Com_Parse(&ptr)->token;
+            if (!ptr)
+                break;
+            if (!strcmp(token, "REFERENCE"))
+            {
+                token = Com_ParseOnLine(&ptr)->token;
+                if (!I_stricmp(pszReference + 9, token))
+                {
+                    bReferenceFound = 1;
+                    break;
+                }
+            }
+        }
+        Com_EndParseSession();
+        FS_FreeFile(file);
+        return bReferenceFound;
+    }
+    else
+    {
+        Com_PrintWarning(9, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+        return 0;
+    }
+}
+
+char szReference[1024];
+char *__cdecl Com_GetSubtitleStringEdReference(const char *subtitle)
+{
+    char v2; // [esp+17h] [ebp-2Dh]
+    char *v3; // [esp+1Ch] [ebp-28h]
+    const char *v4; // [esp+20h] [ebp-24h]
+    char *file; // [esp+38h] [ebp-Ch] BYREF
+    const char *ptr; // [esp+3Ch] [ebp-8h] BYREF
+    const char *token; // [esp+40h] [ebp-4h]
+
+    if (FS_ReadFile("soundaliases/subtitle.st", (void**)&file) >= 0)
+    {
+        Com_BeginParseSession("soundaliases/subtitle.st");
+        for (ptr = file; ; Com_SkipRestOfLine(&ptr))
+        {
+            token = Com_Parse(&ptr)->token;
+            if (!ptr)
+                break;
+            if (!strcmp(token, "REFERENCE"))
+            {
+                token = Com_ParseOnLine(&ptr)->token;
+                v4 = token;
+                v3 = szReference;
+                do
+                {
+                    v2 = *v4;
+                    *v3++ = *v4++;
+                } while (v2);
+                Com_SkipRestOfLine(&ptr);
+                do
+                {
+                    token = Com_Parse(&ptr)->token;
+                    if (!ptr)
+                        Com_Error(ERR_DROP, "StringEd file %s has bad syntax", "soundaliases/subtitle.st");
+                } while (strcmp(token, "LANG_ENGLISH"));
+                token = Com_ParseOnLine(&ptr)->token;
+                if (!I_stricmp(subtitle, token))
+                {
+                    Com_EndParseSession();
+                    FS_FreeFile(file);
+                    return szReference;
+                }
+            }
+        }
+        Com_EndParseSession();
+        FS_FreeFile(file);
+        return 0;
+    }
+    else
+    {
+        Com_PrintWarning(9, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+        return 0;
+    }
+}
+
+void __cdecl Com_WriteStringEdReferenceToFile(char *pszReference, char *subtitle, int hOutFile)
+{
+    FS_Write((char*)"REFERENCE           ", strlen("REFERENCE           "), hOutFile);
+    FS_Write(pszReference, strlen(pszReference), hOutFile);
+    FS_Write((char *)"\r\nLANG_ENGLISH        \"", strlen("\r\nLANG_ENGLISH        \""), hOutFile);
+    FS_Write(subtitle, strlen(subtitle), hOutFile);
+    FS_Write((char *)"\"\r\n\r\n", strlen("\"\r\n\r\n"), hOutFile);
+
+}
+void __cdecl Com_SetStringEdReference(const char *pszReference, char *subtitle)
+{
+    int hOutFile; // [esp+74h] [ebp-22Ch]
+    int bReferenceAdded; // [esp+7Ch] [ebp-224h]
+    char szFromFile[256]; // [esp+80h] [ebp-220h] BYREF
+    int iLen; // [esp+180h] [ebp-120h]
+    const char *pszInFileReference; // [esp+184h] [ebp-11Ch]
+    char *file; // [esp+188h] [ebp-118h] BYREF
+    const char *ptr; // [esp+18Ch] [ebp-114h] BYREF
+    char szToFile[260]; // [esp+190h] [ebp-110h] BYREF
+    const char *token; // [esp+298h] [ebp-8h]
+    const char *startmarker; // [esp+29Ch] [ebp-4h]
+
+    bReferenceAdded = 0;
+    pszInFileReference = pszReference + 9;
+    hOutFile = FS_FOpenFileWrite((char*)"soundaliases/temp.st");
+    if (hOutFile)
+    {
+        if (FS_ReadFile("soundaliases/subtitle.st", (void**)&file) >= 0)
+        {
+            Com_BeginParseSession("soundaliases/subtitle.st");
+            ptr = file;
+            startmarker = file;
+            while (1)
+            {
+                token = Com_Parse(&ptr)->token;
+                if (!ptr)
+                    break;
+                if (!strcmp(token, "ENDMARKER"))
+                {
+                    if (startmarker < ptr)
+                    {
+                        iLen = ptr - startmarker - 11;
+                        FS_Write((char*)startmarker, iLen, hOutFile);
+                    }
+                    break;
+                }
+                if (!strcmp(token, "REFERENCE"))
+                {
+                    token = Com_ParseOnLine(&ptr)->token;
+                    if (!strcmp(token, pszInFileReference))
+                    {
+                        if (startmarker < ptr)
+                        {
+                            iLen = ptr - startmarker;
+                            FS_Write((char*)startmarker, ptr - startmarker, hOutFile);
+                        }
+                        Com_WriteStringEdReferenceToFile((char*)pszInFileReference, subtitle, hOutFile);
+                        bReferenceAdded = 1;
+                        do
+                        {
+                            startmarker = ptr;
+                            token = Com_Parse(&ptr)->token;
+                            if (!ptr)
+                            {
+                                startmarker = 0;
+                                goto LABEL_22;
+                            }
+                        } while (strcmp(token, "REFERENCE") && strcmp(token, "ENDMARKER"));
+                        Com_UngetToken();
+                    }
+                }
+            LABEL_22:
+                Com_SkipRestOfLine(&ptr);
+            }
+            if (!bReferenceAdded)
+                Com_WriteStringEdReferenceToFile((char*)pszInFileReference, subtitle, hOutFile);
+            Com_EndParseSession();
+            FS_FreeFile(file);
+            token = "\r\nENDMARKER\r\n\r\n\r\n";
+            FS_Write((char*)"\r\nENDMARKER\r\n\r\n\r\n", strlen("\r\nENDMARKER\r\n\r\n\r\n"), hOutFile);
+            FS_FCloseFile(hOutFile);
+            FS_BuildOSPath((char*)fs_basepath->current.integer, fs_gamedir, (char*)"soundaliases/temp.st", szFromFile);
+            FS_BuildOSPath((char*)fs_basepath->current.integer, fs_gamedir, (char*)"soundaliases/subtitle.st", szToFile);
+            FS_CopyFile(szFromFile, szToFile);
+            FS_Remove(szFromFile);
+        }
+        else
+        {
+            Com_PrintWarning(9, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+            FS_FCloseFile(hOutFile);
+        }
+    }
+    else
+    {
+        Com_PrintWarning(9, "WARNING: Could not open output file %s for writing\n", "soundaliases/temp.st");
+    }
+}
+
 void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loadspecCurGame)
 {
     int v2; // eax
@@ -856,7 +1080,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
     char v18[2048]; // [esp+86Ch] [ebp-7A00h] BYREF
     char pszReference; // [esp+106Ch] [ebp-7200h] BYREF
     _BYTE v20[3]; // [esp+106Dh] [ebp-71FFh] BYREF
-    char *filename; // [esp+746Ch] [ebp-E00h]
+    const char *filename; // [esp+746Ch] [ebp-E00h]
     int len; // [esp+7470h] [ebp-DFCh]
     char dest[256]; // [esp+7474h] [ebp-DF8h] BYREF
     char fromOSPath[260]; // [esp+7574h] [ebp-CF8h] BYREF
@@ -865,7 +1089,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
     void *buffer; // [esp+7A7Ch] [ebp-7F0h] BYREF
     char *v28; // [esp+7A80h] [ebp-7ECh]
     char *data_p; // [esp+7A84h] [ebp-7E8h] BYREF
-    iobuf *stream; // [esp+7A88h] [ebp-7E4h]
+    FILE *stream; // [esp+7A88h] [ebp-7E4h]
     snd_alias_members_t field[256]; // [esp+7A8Ch] [ebp-7E0h]
     snd_alias_build_s alias; // [esp+7E8Ch] [ebp-3E0h] BYREF
     snd_alias_members_t i; // [esp+8030h] [ebp-23Ch]
@@ -886,7 +1110,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
 
     filename = "soundaliases/temp.csv";
     Com_sprintf(dest, 0x100u, "soundaliases/%s", sourceFile);
-    FS_BuildOSPath(fs_basepath->current.integer, fs_gamedir, dest, ospath);
+    FS_BuildOSPath((char*)fs_basepath->current.integer, fs_gamedir, dest, ospath);
     Com_Printf(9, "Processing sound alias file %s..\n", ospath);
     stream = fopen(ospath, "r+");
     if (!stream)
@@ -900,7 +1124,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
         Com_PrintWarning(9, "WARNING: Could not read sound alias file %s\n", dest);
         return;
     }
-    h = FS_FOpenFileWrite(filename);
+    h = FS_FOpenFileWrite((char*)filename);
     if (!h)
     {
         Com_PrintWarning(9, "WARNING: Could not open output file %s for writing\n", filename);
@@ -908,7 +1132,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
     }
     Com_BeginParseSession(dest);
     Com_SetCSV(1);
-    data_p = buffer;
+    data_p = (char*)buffer;
     v46 = SA_INVALID;
     v37 = 0;
     while (data_p)
@@ -921,10 +1145,10 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
         if (*data_p == 10)
         {
             ++data_p;
-            FS_Write("\r\n", 2u, h);
+            FS_Write((char*)"\r\n", 2u, h);
         }
         v47 = data_p;
-        s0 = Com_Parse(&data_p);
+        s0 = Com_Parse(&data_p)->token;
         if (!data_p)
             break;
         if (!I_stricmp(s0, "#Chateau"))
@@ -932,8 +1156,8 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
         if (!*s0 || *s0 == 35)
         {
             Com_SkipRestOfLine(&data_p);
-            if (*v47 == 10)
-                FS_Write("\r", 1u, h);
+            if (*(char*)v47 == 10)
+                FS_Write((char*)"\r", 1u, h);
             goto LABEL_21;
         }
         if (v46)
@@ -961,10 +1185,10 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
                     Com_LoadSoundAliasField("menu", loadspecCurGame, sourceFile, s0, field[i], isFieldSet, &alias);
                 if (++i == v46)
                     break;
-                s0 = Com_ParseOnLine(&data_p);
+                s0 = Com_ParseOnLine(&data_p)->token;
             }
             if (!isFieldSet[1] || !isFieldSet[3])
-                Com_Error(ERR_DROP, &byte_8C2858, sourceFile);
+                Com_Error(ERR_DROP, "Sound alias file %s: alias entry missing name and/or file", sourceFile);
             v25 = 0;
             if (v39)
             {
@@ -1039,17 +1263,17 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
                     }
                     else if (i != v46 - 1)
                     {
-                        FS_Write(",", 1u, h);
+                        FS_Write((char*)",", 1u, h);
                     }
                 }
-                FS_Write("\r\n", 2u, h);
+                FS_Write((char*)"\r\n", 2u, h);
                 Com_SkipRestOfLine(&data_p);
             }
             else
             {
                 Com_SkipRestOfLine(&data_p);
                 v28 = data_p;
-                FS_Write(v47, data_p - v47, h);
+                FS_Write((char*)v47, data_p - v47, h);
             }
         }
         else
@@ -1077,25 +1301,25 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
                 }
                 if (++v46 != 256 && data_p && *data_p != 10)
                 {
-                    s0 = Com_ParseOnLine(&data_p);
+                    s0 = Com_ParseOnLine(&data_p)->token;
                     continue;
                 }
                 break;
             }
             if (!v13 || !v14)
-                Com_Error(ERR_DROP, &byte_8C2894, sourceFile);
+                Com_Error(ERR_DROP, "Sound alias file %s: missing name and/or file columns", sourceFile);
             Com_SkipRestOfLine(&data_p);
-            if (*v47 == 10)
-                FS_Write("\r", 1u, h);
+            if (*(char*)v47 == 10)
+                FS_Write((char*)"\r", 1u, h);
         LABEL_21:
             v28 = data_p;
-            FS_Write(v47, data_p - v47, h);
+            FS_Write((char *)v47, data_p - v47, h);
         }
     }
     Com_EndParseSession();
     FS_FCloseFile(h);
-    FS_BuildOSPath(fs_basepath->current.integer, fs_gamedir, filename, fromOSPath);
-    FS_BuildOSPath(fs_basepath->current.integer, fs_gamedir, dest, toOSPath);
+    FS_BuildOSPath((char *)fs_basepath->current.integer, fs_gamedir, (char *)filename, fromOSPath);
+    FS_BuildOSPath((char *)fs_basepath->current.integer, fs_gamedir, dest, toOSPath);
     if (v37)
         FS_CopyFile(fromOSPath, toOSPath);
     FS_Remove(fromOSPath);

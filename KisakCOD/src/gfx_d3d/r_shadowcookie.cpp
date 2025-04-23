@@ -6,7 +6,25 @@
 #include <algorithm>
 #include <xanim/dobj.h>
 #include "r_dvars.h"
+#include "r_dpvs.h"
+#include "r_model_pose.h"
+#include "r_model.h"
+#include "r_drawsurf.h"
+#include <cgame/cg_local.h>
+#include "r_sunshadow.h"
+#include "r_marks.h"
 
+struct ShadowReceiverCallback // sizeof=0x4
+{                                       // ...
+    unsigned __int8 *surfaceVisData;    // ...
+};
+struct ShadowCookieGlob // sizeof=0x8
+{                                       // ...
+    float weightCap;                    // ...
+    int lastTime;                       // ...
+};
+
+ShadowCookieGlob shadowCookieGlob;
 
 bool __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1)
 {
@@ -163,12 +181,14 @@ bool __cdecl R_ShadowCandidatePred(const ShadowCandidate *a, const ShadowCandida
     return b->weight > (double)a->weight;
 }
 
-struct ShadowCandidate // sizeof=0x8
-{                                       // ...
-    int sceneEntIndex;                  // ...
-    float weight;                       // ...
-};
-
+const float shadowFrustumSidePlanes[5][4] =
+{
+  { -1.0, 0.0, 0.0, 1.0 },
+  { 1.0, 0.0, 0.0, 1.0 },
+  { 0.0, -1.0, 0.0, 1.0 },
+  { 0.0, 1.0, 0.0, 1.0 },
+  { 0.0, 0.0, 1.0, 0.0 }
+}; // idb
 
 void __cdecl R_GenerateShadowCookies(
     int localClientNum,
@@ -182,9 +202,9 @@ void __cdecl R_GenerateShadowCookies(
 
     CL_ResetStats_f();
     //Profile_Begin(150);
-    R_PopulateCandidates(viewParmsDraw, candidates);
+    R_PopulateCandidates(viewParmsDraw, &candidates[0]);
 
-    std::sort< ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(candidates, &candidates[23], R_ShadowCandidatePred);
+    std::sort(&candidates[0], &candidates[23], R_ShadowCandidatePred);
 
     //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
     //    candidates,
@@ -271,11 +291,13 @@ void __cdecl R_AddCasters(
     }
     if (!sc_wantCount)
         MyAssertHandler(".\\r_shadowcookie.cpp", 487, 0, "%s", "sc_wantCount");
-    if (!LODWORD(r_lightTweakSunDirection.vector[2]))
+    //if (!LODWORD(r_lightTweakSunDirection.vector[2]))
+    if (!sc_wantCountMargin)
         MyAssertHandler(".\\r_shadowcookie.cpp", 488, 0, "%s", "sc_wantCountMargin");
-    if (candidateIter <= *(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[2]) + 12) + sc_wantCount->current.integer)
+    if (candidateIter <= sc_wantCountMargin->current.integer + 12 + sc_wantCount->current.integer)
     {
-        if (candidateIter < sc_wantCount->current.integer - *(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[2]) + 12))
+        //if (candidateIter < sc_wantCount->current.integer - *(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[2]) + 12))
+        if (candidateIter < sc_wantCount->current.integer - sc_wantCountMargin->current.integer + 12)
             moveWeightCap = 1;
     }
     else
@@ -335,7 +357,7 @@ void __cdecl R_AddShadowCookie(
 
     //Profile_Begin(152);
     sceneEnt = &scene.sceneDObj[sceneEntIndex];
-    if (R_UpdateSceneEntBounds((GfxSceneEntity *)&savedregs, sceneEnt, &localSceneEnt, &obj, 1))
+    if (R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1))
     {
         if (cookieList->cookieCount >= 0x18)
             MyAssertHandler(
@@ -552,7 +574,6 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
         drawSurfs = scene.cookie[cookieIndex].drawSurfs;
         surfaces = (GfxSurface **)&drawSurfs[128];
         cookieDrawSurfCount = R_CylinderSurfaces(
-            (int)&savedregs,
             start,
             end,
             radius,
@@ -566,11 +587,12 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
         {
             surfData.drawSurfList.current = drawSurfs;
             surfData.drawSurfList.end = (GfxDrawSurf *)&scene.cookie[cookieIndex + 1];
-            std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-                (const GfxStaticModelDrawInst **)surfaces,
-                (const GfxStaticModelDrawInst **)&surfaces[cookieDrawSurfCount],
-                (int)(4 * cookieDrawSurfCount) >> 2,
-                (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+            //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+            //    (const GfxStaticModelDrawInst **)surfaces,
+            //    (const GfxStaticModelDrawInst **)&surfaces[cookieDrawSurfCount],
+            //    (int)(4 * cookieDrawSurfCount) >> 2,
+            //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
+            std::sort(&surfaces[0], &surfaces[cookieDrawSurfCount], R_SortBspShadowReceiverSurfaces);
             for (listSurfIndex = 0; listSurfIndex < cookieDrawSurfCount; ++listSurfIndex)
             {
                 if (listSurfIndex >= rgp.world->surfaceCount)

@@ -551,3 +551,148 @@ GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex)
         MyAssertHandler(".\\r_drawsurf.cpp", 815, 0, "%s", "g_processMarkMesh");
     return (GfxWorldVertex*)R_GetMeshVerts(&frontEndDataOut->markMesh, baseVertex);
 }
+
+GfxDrawSurf __cdecl R_GetWorldDrawSurf(GfxSurface *worldSurf)
+{
+    GfxDrawSurf drawSurf; // [esp+1Ch] [ebp-8h]
+
+    drawSurf.fields = worldSurf->material->info.drawSurf.fields;
+    if ((drawSurf.packed >> 42))
+        MyAssertHandler(".\\r_drawsurf.cpp", 321, 1, "%s", "drawSurf.fields.primaryLightIndex == 0");
+    HIDWORD(drawSurf.packed) = (worldSurf->primaryLightIndex << 10) | HIDWORD(drawSurf.packed) & 0xFFFC03FF;
+    if ((drawSurf.packed >> 42) != worldSurf->primaryLightIndex)
+        MyAssertHandler(
+            ".\\r_drawsurf.cpp",
+            323,
+            1,
+            "drawSurf.fields.primaryLightIndex == worldSurf->primaryLightIndex\n\t%i, %i",
+            (drawSurf.packed >> 42),
+            worldSurf->primaryLightIndex);
+    return drawSurf;
+}
+
+GfxWorld *R_SetPrimaryLightShadowSurfaces()
+{
+    GfxWorld *result; // eax
+    unsigned int surfIndex; // [esp+8h] [ebp-14h]
+    unsigned int primaryLightIndex; // [esp+18h] [ebp-4h]
+
+    for (primaryLightIndex = 0; primaryLightIndex < rgp.world->primaryLightCount; ++primaryLightIndex)
+        rgp.world->shadowGeom[primaryLightIndex].surfaceCount = 0;
+    for (surfIndex = 0; ; ++surfIndex)
+    {
+        result = rgp.world;
+        if (surfIndex >= rgp.world->models->surfaceCount)
+            break;
+        if (((rgp.world->dpvs.surfaceMaterials[surfIndex].packed >> 24) & 0x1F) != 0)
+            R_ForEachPrimaryLightAffectingSurface(
+                rgp.world,
+                &rgp.world->dpvs.surfaces[surfIndex],
+                surfIndex,
+                R_AddShadowSurfaceToPrimaryLight);
+    }
+    return result;
+}
+
+void __cdecl R_SortWorldSurfaces()
+{
+    GfxDrawSurf v0; // [esp+Ch] [ebp-20h]
+    unsigned int surfIndex; // [esp+18h] [ebp-14h]
+    unsigned int worldSurfCount; // [esp+24h] [ebp-8h]
+    GfxSurface *worldSurfArray; // [esp+28h] [ebp-4h]
+
+    if (!rgp.world)
+        MyAssertHandler(".\\r_drawsurf.cpp", 336, 0, "%s", "rgp.world");
+    if (rgp.world->models->startSurfIndex)
+        MyAssertHandler(
+            ".\\r_drawsurf.cpp",
+            337,
+            0,
+            "%s\n\t(rgp.world->models[0].startSurfIndex) = %i",
+            "(rgp.world->models[0].startSurfIndex == 0)",
+            rgp.world->models->startSurfIndex);
+    worldSurfArray = rgp.world->dpvs.surfaces;
+    worldSurfCount = rgp.world->models->surfaceCount;
+    if (rgp.world->models->surfaceCount)
+        memset(rgp.world->dpvs.surfaceCastsSunShadow, 0, 4 * ((worldSurfCount - 1) >> 5) + 4);
+    if (worldSurfArray != rgp.world->dpvs.surfaces)
+        MyAssertHandler(".\\r_drawsurf.cpp", 347, 1, "%s", "worldSurfArray == rgp.world->dpvs.surfaces");
+    if (worldSurfCount != rgp.world->models->surfaceCount)
+        MyAssertHandler(".\\r_drawsurf.cpp", 348, 1, "%s", "worldSurfCount == rgp.world->models[0].surfaceCount");
+    for (surfIndex = 0; surfIndex < worldSurfCount; ++surfIndex)
+    {
+        v0.fields = R_GetWorldDrawSurf(&worldSurfArray[surfIndex]).fields;
+        rgp.world->dpvs.surfaceMaterials[surfIndex] = v0;
+        if (((v0.packed >> 24) & 0x1F) != 0 && (worldSurfArray[surfIndex].flags & 1) != 0)
+            rgp.world->dpvs.surfaceCastsSunShadow[surfIndex >> 5] |= 1 << (surfIndex & 0x1F);
+    }
+    R_SetPrimaryLightShadowSurfaces();
+}
+
+char __cdecl R_AddParticleCloudDrawSurf(volatile unsigned int cloudIndex, Material *material)
+{
+    int packed_high; // ecx
+    unsigned int v4; // edx
+    int MaterialSortKey; // [esp+20h] [ebp-18h]
+    GfxDrawSurf *drawSurf; // [esp+2Ch] [ebp-Ch]
+    int region; // [esp+30h] [ebp-8h]
+
+    if (cloudIndex >= frontEndDataOut->cloudCount)
+        MyAssertHandler(
+            ".\\r_drawsurf.cpp",
+            561,
+            0,
+            "cloudIndex doesn't index frontEndDataOut->cloudCount\n\t%i not in [0, %i)",
+            cloudIndex,
+            frontEndDataOut->cloudCount);
+    if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
+        MyAssertHandler(
+            ".\\r_drawsurf.cpp",
+            562,
+            0,
+            "%s",
+            "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+    if (Material_GetTechnique(material, gfxDrawMethod.emissiveTechType))
+    {
+        MaterialSortKey = R_GetMaterialSortKey(material);
+        region = (MaterialSortKey == 48) + (MaterialSortKey != 24 ? 0 : 2) + 12;
+        drawSurf = R_AllocFxDrawSurf(region);
+        if (drawSurf)
+        {
+            drawSurf->fields = R_GetMaterialInfoPacked(material).fields;
+            packed_high = HIDWORD(drawSurf->packed);
+            *&drawSurf->packed = cloudIndex | *&drawSurf->packed & 0xFFFF0000;
+            HIDWORD(drawSurf->packed) = packed_high;
+            v4 = HIDWORD(drawSurf->packed) & 0xFFC3FFFF | 0x300000;
+            *&drawSurf->fields = drawSurf->fields;
+            HIDWORD(drawSurf->packed) = v4;
+            *&drawSurf->fields = drawSurf->fields;
+            HIDWORD(drawSurf->packed) = HIDWORD(drawSurf->packed);
+            if (((drawSurf->packed >> 40) & 3) != 3)
+                MyAssertHandler(".\\r_drawsurf.cpp", 582, 1, "%s", "localDrawSurf->fields.prepass == MTL_PREPASS_NONE");
+            if ((MaterialSortKey == 48) + (MaterialSortKey != 24 ? 0 : 2)
+                && drawSurf != scene.drawSurfs[region]
+                && ((drawSurf->packed >> 54) & 0x3F) < ((drawSurf[-1].packed >> 54) & 0x3F))
+            {
+                MyAssertHandler(
+                    ".\\r_drawsurf.cpp",
+                    584,
+                    1,
+                    "%s\n\t(region) = %i",
+                    "((region == DRAW_SURF_FX_CAMERA_EMISSIVE) || (drawSurf == scene.drawSurfs[region]) || (drawSurf->fields.primar"
+                    "ySortKey >= (drawSurf - 1)->fields.primarySortKey))",
+                    region);
+            }
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        R_WarnOncePerFrame(R_WARN_NONEMISSIVE_FX_MATERIAL, material->info.name);
+        return 0;
+    }
+}

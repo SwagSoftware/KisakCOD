@@ -1,7 +1,6 @@
 #pragma once
 #include <universal/com_memory.h>
 
-
 enum weapType_t : __int32
 {                                       // ...
     WEAPTYPE_BULLET = 0x0,
@@ -190,9 +189,10 @@ enum OffhandClass : __int32
 struct SurfaceTypeSoundList // sizeof=0x8
 {
     char *surfaceSoundBase;
-    snd_alias_list_t **soundAliasList;
+    struct snd_alias_list_t **soundAliasList;
 };
-WeaponDef *__cdecl BG_LoadWeaponDef_LoadObj(const char *name);
+
+struct WeaponDef *__cdecl BG_LoadWeaponDef_LoadObj(const char *name);
 
 inline void __cdecl SetConfigString(char **ppszConfigString, const char *pszKeyValue)
 {

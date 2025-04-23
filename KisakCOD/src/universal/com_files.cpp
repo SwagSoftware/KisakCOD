@@ -2865,3 +2865,37 @@ void __cdecl FS_Shutdown()
     fs_searchpaths = 0;
     FS_RemoveCommands();
 }
+
+bool __cdecl FS_DeleteInDir(char *filename, char *dir)
+{
+    char ospath[260]; // [esp+0h] [ebp-108h] BYREF
+
+    FS_CheckFileSystemStarted();
+    if (!filename)
+        MyAssertHandler(".\\universal\\com_files.cpp", 2231, 0, "%s", "filename");
+    if (!*filename)
+        return 0;
+    FS_BuildOSPath(fs_homepath->current.integer, dir, filename, ospath);
+    return remove(ospath) != -1;
+}
+
+void __cdecl FS_Rename(char *from, char *fromDir, char *to, char *toDir)
+{
+    char to_ospath[256]; // [esp+0h] [ebp-208h] BYREF
+    char from_ospath[260]; // [esp+100h] [ebp-108h] BYREF
+
+    FS_CheckFileSystemStarted();
+    FS_BuildOSPath(fs_homepath->current.integer, fromDir, from, from_ospath);
+    FS_BuildOSPath(fs_homepath->current.integer, toDir, to, to_ospath);
+    if (fs_debug->current.integer)
+        Com_Printf(10, "FS_Rename: %s --> %s\n", from_ospath, to_ospath);
+    if (rename(from_ospath, to_ospath))
+    {
+        FS_Remove(to_ospath);
+        if (rename(from_ospath, to_ospath))
+        {
+            FS_CopyFile(from_ospath, to_ospath);
+            FS_Remove(from_ospath);
+        }
+    }
+}

@@ -1,8 +1,8 @@
 #pragma once
-#include "r_rendercmds.h"
 
+const float shadowmapClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 void R_DrawSunShadowMap(
-    const GfxViewInfo *viewInfo,
+    const struct GfxViewInfo *viewInfo,
     unsigned int partitionIndex,
-    GfxCmdBuf *cmdBuf);
+    struct GfxCmdBuf *cmdBuf);

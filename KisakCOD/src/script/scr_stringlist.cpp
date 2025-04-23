@@ -348,8 +348,7 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 	refStrB->data = ((unsigned __int8)user << 16) | refStrB->data & 0xFF00FFFF;
 	iassert(refStr->user == user);
 	refStrB->data = refStrB->data & 0xFFFF0000 | 1;
-	// KISAKTODO: seems fked up below
-	//refStrB->data = ((unsigned __int8)len << 24) | ((unsigned int)&clients[0].parseClients[238].attachTagIndex[4] + 3) & refStrB->data;
+	refStrB->data = (len << 24) | refStrB->data & 0xFFFFFF;
 	if (scrStringDebugGlob)
 	{
 		InterlockedIncrement(&scrStringDebugGlob->totalRefCount);

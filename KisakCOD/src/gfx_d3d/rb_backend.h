@@ -272,6 +272,9 @@ struct __declspec(align(8)) materialCommands_t // sizeof=0x22A960
     // padding byte
 };
 
+
+
+
 void __cdecl TRACK_rb_backend();
 void __cdecl RB_CopyBackendStats();
 void __cdecl RB_SetIdentity();
@@ -530,5 +533,5 @@ void __cdecl RB_TouchAllImages();
 extern r_backEndGlobals_t backEnd;
 extern materialCommands_t tess;
 extern GfxCmdBufInput gfxCmdBufInput;
-extern const GfxBackEndData *backEndData;
+extern GfxBackEndData *backEndData;
 extern GfxRenderTarget gfxRenderTargets[15];

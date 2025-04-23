@@ -1352,7 +1352,7 @@ void __cdecl DynEntCl_TestPhysicsEntities(
 
     memset((unsigned __int8 *)&trace, 0, sizeof(trace));
     trace.fraction = 1.0;
-    CG_LocationalTraceEntitiesOnly(&trace, start, end, sourceEntityNum, (int)&sv.svEntities[342].clusternums[2] + 1);
+    CG_LocationalTraceEntitiesOnly(&trace, start, end, sourceEntityNum, 0x2806831);
     if (trace.hitType)
     {
         Vec3Lerp(start, end, trace.fraction, hitPos);

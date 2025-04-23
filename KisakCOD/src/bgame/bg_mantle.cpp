@@ -562,7 +562,7 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
     scale = -innerDist;
     Vec3Mad(ps->origin, scale, traceDir, start);
     Vec3Mad(ps->origin, traceDist, traceDir, end);
-    PM_trace(pm, trace, start, mins, maxs, end, ps->clientNum, (int)&clients[0].parseClients[238].attachTagIndex[5]);
+    PM_trace(pm, trace, start, mins, maxs, end, ps->clientNum, 0x1000000);
     if (trace->startsolid || trace->allsolid)
     {
         Mantle_DebugPrint("Mantle Failed: Mantle brush is too thick");

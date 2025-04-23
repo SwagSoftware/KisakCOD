@@ -2,6 +2,10 @@
 #include "rb_logfile.h"
 #include "rb_state.h"
 #include "rb_stats.h"
+#include "rb_pixelcost.h"
+#include "r_shade.h"
+#include "r_state.h"
+#include "r_draw_bsp.h"
 
 
 
@@ -26,10 +30,11 @@ void __cdecl R_SetVertexDecl(GfxCmdBufPrimState *primState, const MaterialVertex
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetVertexDeclaration( decl )\n");
-            hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, IDirect3DVertexDeclaration9 *))device->SetVertexDeclaration)(
-                device,
-                device,
-                v3);
+            //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, IDirect3DVertexDeclaration9 *))device->SetVertexDeclaration)(
+            //    device,
+            //    device,
+            //    v3);
+            hr = device->SetVertexDeclaration(v3);
             if (hr < 0)
             {
                 do
@@ -69,9 +74,13 @@ void __cdecl R_HW_SetPixelShader(IDirect3DDevice9 *device, const MaterialPixelSh
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetPixelShader( mtlShader ? mtlShader->prog.ps : 0 )\n");
         if (mtlShader)
-            v2 = device->SetPixelShader(device, mtlShader->prog.ps);
+        {
+            v2 = device->SetPixelShader(mtlShader->prog.ps);
+        }
         else
-            v2 = device->SetPixelShader(device, 0);
+        {
+            v2 = device->SetPixelShader(0);
+        }
         hr = v2;
         if (v2 < 0)
         {
@@ -110,9 +119,13 @@ void __cdecl R_HW_SetVertexShader(IDirect3DDevice9 *device, const MaterialVertex
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetVertexShader( mtlShader ? mtlShader->prog.vs : 0 )\n");
         if (mtlShader)
-            v2 = device->SetVertexShader(device, mtlShader->prog.vs);
+        {
+            v2 = device->SetVertexShader(mtlShader->prog.vs);
+        }
         else
-            v2 = device->SetVertexShader(device, 0);
+        {
+            v2 = device->SetVertexShader(0);
+        }
         hr = v2;
         if (v2 < 0)
         {
@@ -233,7 +246,7 @@ void RB_EndSurfaceEpilogue()
     tess.finishedFilling = 0;
 }
 
-int RB_DrawTessSurface()
+void RB_DrawTessSurface()
 {
     GfxViewport viewport; // [esp+30h] [ebp-1Ch] BYREF
     GfxDrawPrimArgs args; // [esp+40h] [ebp-Ch] BYREF
@@ -261,7 +274,7 @@ int RB_DrawTessSurface()
     R_DrawTessTechnique(gfxCmdBufContext, &args);
     tess.indexCount = 0;
     tess.vertexCount = 0;
-    return //Profile_EndInternal(0);
+    //Profile_EndInternal(0);
 }
 
 void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs *args)

@@ -15,3 +15,5 @@ void __cdecl Sys_Listen_f();
 void Sys_DebugSocketError(const char *message);
 
 int __cdecl Sys_ReadDebugSocketInt();
+
+extern unsigned __int8 g_debugPacket[1][8192];

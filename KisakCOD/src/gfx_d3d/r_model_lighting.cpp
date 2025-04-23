@@ -1,5 +1,78 @@
 #include "r_model_lighting.h"
+#include "r_dvars.h"
+#include "r_staticmodelcache.h"
+#include "r_dpvs.h"
+#include "r_primarylights.h"
+#include "rb_light.h"
+#include "rb_logfile.h"
 
+struct $D83B18AC5ED51685DB5F92059A920C50 // sizeof=0x4
+{                                       // ...
+    unsigned int baseIndex;             // ...
+};
+
+struct $616C0C4E0125F5DAA7F70C1AB2F0F42D // sizeof=0x6C
+{                                       // ...
+    float invImageHeight;               // ...
+    $D83B18AC5ED51685DB5F92059A920C50 xmodel; // ...
+    unsigned int totalEntryLimit;       // ...
+    unsigned int entryBitsY;            // ...
+    unsigned int imageHeight;           // ...
+    const GfxEntity *entities;
+    unsigned int modFrameCount;         // ...
+    GfxImage *lightImages[2];           // ...
+    GfxImage *image;                    // ...
+    unsigned int xmodelEntryLimit;      // ...
+    GfxLightingInfo *lightingInfo;      // ...
+    float (*lightingOrigins)[3];        // ...
+    int allocModelFail;                 // ...
+    unsigned int *pixelFreeBits[4];     // ...
+    unsigned int *prevPrevPixelFreeBits; // ...
+    unsigned int *prevPixelFreeBits;    // ...
+    unsigned int *currPixelFreeBits;    // ...
+    unsigned int pixelFreeBitsSize;     // ...
+    unsigned int pixelFreeBitsWordCount; // ...
+    unsigned int pixelFreeRover;        // ...
+    _D3DLOCKED_BOX lockedBox;           // ...
+};
+
+struct GfxSmodelLightGlob_s // sizeof=0x6080
+{                                       // ...
+    unsigned __int16 smodelIndex[4096]; // ...
+    unsigned int usedFrameCount[4096];  // ...
+    unsigned int entryLimit;            // ...
+    unsigned int assignedCount;         // ...
+    unsigned int freeableCount;         // ...
+    unsigned int frameCount;            // ...
+    int anyNewLighting;                 // ...
+    unsigned int pad[27];
+};
+struct GfxSmodelLightGlob // sizeof=0xA080
+{                                       // ...
+    unsigned __int16 freeableHandles[4096]; // ...
+    unsigned int lightingBits[2048];    // ...
+    GfxSmodelLightGlob_s local; // ...
+};
+
+struct GfxFindLightForBox // sizeof=0x1C
+{                                       // ...
+    const GfxViewInfo *viewInfo;        // ...
+    float midPoint[3];                  // ...
+    float halfSize[3];                  // ...
+};
+
+struct GfxFindLightForSphere // sizeof=0x14
+{                                       // ...
+    const GfxViewInfo *viewInfo;        // ...
+    float origin[3];                    // ...
+    float radius;                       // ...
+};
+
+$616C0C4E0125F5DAA7F70C1AB2F0F42D modelLightGlob;
+
+GfxSmodelLightGlob smodelLightGlob;
+
+int s_modelLightingSampleDelta[64];
 
 void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out)
 {
@@ -73,7 +146,7 @@ unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle)
     return handle - 1;
 }
 
-char __cdecl R_AllocStaticModelLighting(const GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex)
+char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex)
 {
     unsigned __int16 handle; // [esp+0h] [ebp-10h]
     unsigned __int16 handlea; // [esp+0h] [ebp-10h]
@@ -476,6 +549,7 @@ void __cdecl R_SetStaticModelLightingCoordsForSource(unsigned int smodelIndex, G
     R_DirtyCodeConstant(source, 0x39u);
 }
 
+
 unsigned int R_SetModelLightingSampleDeltas()
 {
     unsigned int result; // eax
@@ -675,3 +749,167 @@ void __cdecl R_InitStaticModelLighting()
     smodelLightGlob.local.freeableCount = 0;
 }
 
+void __cdecl R_ApplyLightGridColorsPatch(const GfxModelLightingPatch *patch, unsigned __int8 *pixels)
+{
+    GfxLightGridColors packed; // [esp+170h] [ebp-A8h] BYREF
+
+    if (patch->colorsCount == 1)
+    {
+        R_SetLightGridColors(&rgp.world->lightGrid.colors[patch->colorsIndex[0]], patch->primaryLightWeight, pixels);
+    }
+    else
+    {
+        R_FixedPointBlendLightGridColors(
+            &rgp.world->lightGrid,
+            patch->colorsIndex,
+            (unsigned short*)patch->colorsWeight,
+            patch->colorsCount,
+            &packed);
+        R_SetLightGridColors(&packed, patch->primaryLightWeight, pixels);
+    }
+}
+
+void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsigned int patchCount)
+{
+    const char *v2; // eax
+    const char *v3; // eax
+    const char *v4; // eax
+    unsigned int modelLightingIndex; // [esp+4h] [ebp-4Ch]
+    int v6; // [esp+8h] [ebp-48h]
+    int v7; // [esp+Ch] [ebp-44h]
+    int hr; // [esp+10h] [ebp-40h]
+    unsigned __int8 *pixels; // [esp+18h] [ebp-38h]
+    unsigned int sampleIndex; // [esp+1Ch] [ebp-34h]
+    unsigned int patchIter; // [esp+20h] [ebp-30h]
+    const GfxModelLightingPatch *patch; // [esp+24h] [ebp-2Ch]
+    unsigned int y0; // [esp+28h] [ebp-28h]
+    GfxImage *lightImage; // [esp+2Ch] [ebp-24h]
+    _D3DBOX dirtyBox; // [esp+30h] [ebp-20h] BYREF
+    unsigned int lockValue; // [esp+48h] [ebp-8h]
+    bool useAltUpdate; // [esp+4Fh] [ebp-1h]
+
+    if (patchCount)
+    {
+        if (modelLightGlob.lockedBox.pBits)
+            MyAssertHandler(".\\r_model_lighting.cpp", 893, 0, "%s", "modelLightGlob.lockedBox.pBits == NULL");
+        useAltUpdate = Dvar_GetBool("r_altModelLightingUpdate");
+        if (useAltUpdate)
+            lightImage = modelLightGlob.lightImages[1];
+        else
+            lightImage = modelLightGlob.lightImages[0];
+        if (!lightImage)
+            MyAssertHandler(".\\r_model_lighting.cpp", 901, 0, "%s", "lightImage");
+        if (useAltUpdate)
+        {
+            memset(&dirtyBox, 0, 20);
+            dirtyBox.Back = 4;
+            lockValue = 0x8000;
+        }
+        else
+        {
+            lockValue = 0;
+        }
+        do
+        {
+            if (r_logFile && r_logFile->current.integer)
+                RB_LogPrint("lightImage->texture.volmap->LockBox( 0, &modelLightGlob.lockedBox, 0, lockValue )\n");
+            hr = lightImage->texture.volmap->LockBox(0, &modelLightGlob.lockedBox, 0, lockValue);
+            //hr = (lightImage->texture.basemap->__vftable[1].Release)(
+            //    lightImage->texture.basemap,
+            //    0,
+            //    &modelLightGlob.lockedBox,
+            //    0,
+            //    lockValue);
+            if (hr < 0)
+            {
+                do
+                {
+                    ++g_disableRendering;
+                    v2 = R_ErrorDescription(hr);
+                    Com_Error(
+                        ERR_FATAL,
+                        ".\\r_model_lighting.cpp (%i) lightImage->texture.volmap->LockBox( 0, &modelLightGlob.lockedBox, 0, lockValue ) failed: %s\n",
+                        916,
+                        v2);
+                } while (alwaysfails);
+            }
+        } while (alwaysfails);
+        R_SetModelLightingSampleDeltas();
+        R_SetLightGridSampleDeltas(modelLightGlob.lockedBox.RowPitch, modelLightGlob.lockedBox.SlicePitch);
+        for (patchIter = 0; patchIter < patchCount; ++patchIter)
+        {
+            patch = &patchList[patchIter];
+            modelLightingIndex = patch->modelLightingIndex;
+            y0 = (modelLightingIndex >> 4) & 0xFFFFFFFC;
+            if (useAltUpdate)
+            {
+                dirtyBox.Left = 4 * (modelLightingIndex & 0x3F);
+                dirtyBox.Right = dirtyBox.Left + 4;
+                dirtyBox.Top = (modelLightingIndex >> 4) & 0xFFFFFFFC;
+                dirtyBox.Bottom = y0 + 4;
+                //(lightImage->texture.basemap->__vftable[1].SetPrivateData)(lightImage->texture.basemap, &dirtyBox);
+                
+            }
+            pixels = (unsigned char*)modelLightGlob.lockedBox.pBits
+                + 16 * (modelLightingIndex & 0x3F)
+                + modelLightGlob.lockedBox.RowPitch * y0;
+            if (patch->colorsCount)
+            {
+                R_ApplyLightGridColorsPatch(patch, pixels);
+            }
+            else
+            {
+                for (sampleIndex = 0; sampleIndex < 0x40; ++sampleIndex)
+                    *&pixels[s_modelLightingSampleDelta[sampleIndex]] = *patch->groundLighting;
+            }
+        }
+        if (!modelLightGlob.lockedBox.pBits)
+            MyAssertHandler(".\\r_model_lighting.cpp", 947, 0, "%s", "modelLightGlob.lockedBox.pBits");
+        do
+        {
+            if (r_logFile && r_logFile->current.integer)
+                RB_LogPrint("lightImage->texture.volmap->UnlockBox( 0 )\n");
+            //v7 = lightImage->texture.basemap->__vftable[1].GetDevice(lightImage->texture.basemap, 0);
+            v7 = lightImage->texture.volmap->UnlockBox(0);
+            if (v7 < 0)
+            {
+                do
+                {
+                    ++g_disableRendering;
+                    v3 = R_ErrorDescription(v7);
+                    Com_Error(
+                        ERR_FATAL,
+                        ".\\r_model_lighting.cpp (%i) lightImage->texture.volmap->UnlockBox( 0 ) failed: %s\n",
+                        949,
+                        v3);
+                } while (alwaysfails);
+            }
+        } while (alwaysfails);
+        modelLightGlob.lockedBox.pBits = 0;
+        if (useAltUpdate)
+        {
+            do
+            {
+                if (r_logFile && r_logFile->current.integer)
+                    RB_LogPrint("dx.device->UpdateTexture( lightImage->texture.volmap, modelLightGlob.lightImages[0]->texture.volmap )\n");
+                v6 = dx.device->UpdateTexture(
+                    lightImage->texture.volmap,
+                    modelLightGlob.lightImages[0]->texture.volmap);
+                if (v6 < 0)
+                {
+                    do
+                    {
+                        ++g_disableRendering;
+                        v4 = R_ErrorDescription(v6);
+                        Com_Error(
+                            ERR_FATAL,
+                            ".\\r_model_lighting.cpp (%i) dx.device->UpdateTexture( lightImage->texture.volmap, modelLightGlob.lightIma"
+                            "ges[0]->texture.volmap ) failed: %s\n",
+                            953,
+                            v4);
+                    } while (alwaysfails);
+                }
+            } while (alwaysfails);
+        }
+    }
+}

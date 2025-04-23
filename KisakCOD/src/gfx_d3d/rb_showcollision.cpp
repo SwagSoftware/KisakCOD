@@ -3,7 +3,31 @@
 #include <universal/assertive.h>
 #include "r_dvars.h"
 #include "rb_shade.h"
+#include "r_dpvs.h"
+#include "r_utils.h"
+#include "rb_stats.h"
+#include "rb_state.h"
 
+const float shadowFrustumSidePlanes[5][4] =
+{
+  { -1.0, 0.0, 0.0, 1.0 },
+  { 1.0, 0.0, 0.0, 1.0 },
+  { 0.0, -1.0, 0.0, 1.0 },
+  { 0.0, 1.0, 0.0, 1.0 },
+  { 0.0, 0.0, 1.0, 0.0 }
+}; // idb
+const float frustumSidePlanes[5][4] =
+{
+  { -1.0, 0.0, 0.0, 1.0 },
+  { 1.0, 0.0, 0.0, 1.0 },
+  { 0.0, -1.0, 0.0, 1.0 },
+  { 0.0, 1.0, 0.0, 1.0 },
+  { 0.0, 0.0, 1.0, 1.0 }
+}; // idb
+
+int showCollisionContentMasks[10] = { 0, 210624, 65536, 8192, 128, 512, 131072, 1024, 64, 4096 }; // idb
+
+GfxPointVertex debugLineVerts[2725];
 
 void __cdecl TRACK_rb_showcollision()
 {
@@ -20,9 +44,11 @@ void __cdecl RB_ShowCollision(const GfxViewParms *viewParms)
 
     if (!viewParms)
         MyAssertHandler(".\\rb_showcollision.cpp", 133, 0, "%s", "viewParms");
-    if (*(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[3]) + 12))
+    if (r_showCollision && r_showCollision->current.integer != 0)
     {
-        contentMask = showCollisionContentMasks[*(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[3]) + 12)];
+        //contentMask = showCollisionContentMasks[*(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[3]) + 12)];
+        contentMask = showCollisionContentMasks[r_showCollision->current.integer];
+
         BuildFrustumPlanes(viewParms, frustumPlanes);
         Vec3Scale(frustumPlanes[4].normal, -1.0, frustumPlanes[5].normal);
         frustumPlanes[5].dist = -frustumPlanes[4].dist - r_showCollisionDist->current.value;
@@ -102,6 +128,21 @@ void __cdecl BuildFrustumPlanes(const GfxViewParms *viewParms, cplane_s *frustum
         frustumPlanes[planeIndex].type = v4;
         SetPlaneSignbits(&frustumPlanes[planeIndex]);
     }
+}
+
+void __cdecl RB_SetPolyVert(float *xyz, GfxColor color, int tessVertIndex)
+{
+    float *xyzw; // [esp+4h] [ebp-4h]
+
+    xyzw = tess.verts[tessVertIndex].xyzw;
+    *xyzw = *xyz;
+    xyzw[1] = xyz[1];
+    xyzw[2] = xyz[2];
+    *&tess.indices[16 * tessVertIndex - 87194] = 1.0;
+    *&tess.indices[16 * tessVertIndex - 87186] = 1073643391;
+    *&tess.indices[16 * tessVertIndex - 87192] = color;
+    *&tess.indices[16 * tessVertIndex - 87190] = 0.0;
+    *&tess.indices[16 * tessVertIndex - 87188] = 0.0;
 }
 
 void __cdecl RB_DrawCollisionPoly(int numPoints, float (*points)[3], const float *colorFloat)

@@ -15,6 +15,16 @@
 #include <gfx_d3d/r_water.h>
 #include <gfx_d3d/r_image.h>
 #include <universal/com_sndalias.h>
+#include <gfx_d3d/r_sky.h>
+
+struct DynEntityServer // sizeof=0x24
+{
+    GfxPlacement pose;
+    unsigned __int16 flags;
+    // padding byte
+    // padding byte
+    int health;
+};
 
 void *varint;
 void *varuint;

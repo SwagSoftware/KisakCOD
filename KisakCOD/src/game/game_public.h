@@ -33,6 +33,19 @@ struct client_fields_s // sizeof=0x14
     void(__cdecl *getter)(gclient_s *, const client_fields_s *);
 };
 
+struct VehicleLocalPhysics // sizeof=0x34
+{                                       // ...
+    trace_t groundTrace;                // ...
+    int hasGround;                      // ...
+    int onGround;                       // ...
+};
+
+struct VehiclePhysicsBackup // sizeof=0x1B8
+{                                       // ...
+    vehicle_pathpos_t pathPos;
+    vehicle_physic_t phys;              // ...
+};
+
 void __cdecl ClientScr_ReadOnly(gclient_s *pSelf, const client_fields_s *pField);
 void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *pField);
 void __cdecl ClientScr_GetName(gclient_s *pSelf, const client_fields_s *pField);
@@ -645,6 +658,8 @@ void __cdecl Svcmd_AddIP_f();
 void __cdecl Svcmd_RemoveIP_f();
 void __cdecl Svcmd_EntityList_f();
 int __cdecl ConsoleCommand();
+
+void __cdecl G_FreeEntity(gentity_s *ed);
 
 
 const entityHandler_t entityHandlers[] =

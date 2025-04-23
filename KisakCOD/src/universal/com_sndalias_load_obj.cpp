@@ -3,39 +3,6 @@
 #include "com_files.h"
 #include <qcommon/cmd.h>
 
-const char *g_pszSndAliasKeyNames[29] =
-{
-  NULL,
-  "name",
-  "sequence",
-  "file",
-  "subtitle",
-  "vol_min",
-  "vol_max",
-  "vol_mod",
-  "pitch_min",
-  "pitch_max",
-  "dist_min",
-  "dist_max",
-  "channel",
-  "type",
-  "loop",
-  "probability",
-  "loadspec",
-  "masterslave",
-  "secondaryaliasname",
-  "chainaliasname",
-  "volumefalloffcurve",
-  "startdelay",
-  "speakermap",
-  "reverb",
-  "lfe percentage",
-  "center percentage",
-  "envelop_min",
-  "envelop_max",
-  "envelop percentage"
-}; // idb
-
 SoundAliasLoadGlobals saLoadObjGlob;
 
 cmd_function_s Com_RefreshVolumeModGroups_f_VAR;
@@ -1183,4 +1150,632 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
             curve->knotCount);
         return 0;
     }
+}
+
+snd_alias_build_s *__cdecl Com_SortTempSoundAliases_r(
+    snd_alias_build_s *pAliasList,
+    int *piAliasCount,
+    int(__cdecl *test)(snd_alias_build_s *, snd_alias_build_s *),
+    bool isRemovingDups)
+{
+    snd_alias_build_s *pFrontList; // [esp+0h] [ebp-18h]
+    int iFrontCount; // [esp+4h] [ebp-14h] BYREF
+    snd_alias_build_s **ppListPos; // [esp+8h] [ebp-10h]
+    int iBackCount; // [esp+Ch] [ebp-Ch] BYREF
+    snd_alias_build_s *pBackList; // [esp+10h] [ebp-8h]
+    int i; // [esp+14h] [ebp-4h]
+
+    if (!pAliasList)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 1290, 0, "%s", "pAliasList");
+    if (*piAliasCount <= 0)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 1291, 0, "%s", "*piAliasCount > 0");
+    if (*piAliasCount == 1)
+    {
+        pAliasList->pNext = 0;
+        return pAliasList;
+    }
+    else
+    {
+        iFrontCount = *piAliasCount / 2;
+        iBackCount = *piAliasCount - iFrontCount;
+        i = 0;
+        pBackList = pAliasList;
+        while (i < iFrontCount)
+        {
+            ++i;
+            pBackList = pBackList->pNext;
+        }
+        pFrontList = Com_SortTempSoundAliases_r(pAliasList, &iFrontCount, test, isRemovingDups);
+        pBackList = Com_SortTempSoundAliases_r(pBackList, &iBackCount, test, isRemovingDups);
+        *piAliasCount = 0;
+        pAliasList = 0;
+        ppListPos = &pAliasList;
+        while (iFrontCount && iBackCount)
+        {
+            i = test(pFrontList, pBackList);
+            if (!isRemovingDups || i || (i = pFrontList->sequence - pBackList->sequence) != 0)
+            {
+                if (i > 0)
+                {
+                    *ppListPos = pBackList;
+                    pBackList = pBackList->pNext;
+                    --iBackCount;
+                }
+                else
+                {
+                    *ppListPos = pFrontList;
+                    pFrontList = pFrontList->pNext;
+                    --iFrontCount;
+                }
+                ++ * piAliasCount;
+                ppListPos = &(*ppListPos)->pNext;
+            }
+            else
+            {
+                i = I_stricmp(pFrontList->szSourceFile, pBackList->szSourceFile);
+                if (i)
+                {
+                    if (i >= 0)
+                    {
+                        pBackList = pBackList->pNext;
+                        --iBackCount;
+                    }
+                    else
+                    {
+                        pFrontList = pFrontList->pNext;
+                        --iFrontCount;
+                    }
+                }
+                else
+                {
+                    Com_PrintError(
+                        9,
+                        "ERROR: sound alias file %s: duplicate alias '%s'\n",
+                        pFrontList->szSourceFile,
+                        pFrontList->aliasName);
+                    pFrontList = pFrontList->pNext;
+                    --iFrontCount;
+                    pBackList = pBackList->pNext;
+                    --iBackCount;
+                }
+            }
+        }
+        if (iFrontCount)
+        {
+            *ppListPos = pFrontList;
+            *piAliasCount += iFrontCount;
+        }
+        else
+        {
+            *ppListPos = pBackList;
+            *piAliasCount += iBackCount;
+        }
+        return pAliasList;
+    }
+}
+
+int __cdecl AliasNameCompare(snd_alias_build_s *pFrontList, snd_alias_build_s *pBackList)
+{
+    return I_stricmp(pFrontList->aliasName, pBackList->aliasName);
+}
+
+int __cdecl FileNameTypeCompare(snd_alias_build_s *frontList, snd_alias_build_s *backList)
+{
+    int fileComp; // [esp+4h] [ebp-4h]
+
+    fileComp = I_stricmp(frontList->soundFile, backList->soundFile);
+    if (fileComp)
+        return fileComp;
+    if (frontList->eType == backList->eType)
+        return AliasNameCompare(frontList, backList);
+    return frontList->eType - backList->eType;
+}
+
+void __cdecl Com_SameFileWarning(snd_alias_build_s *alias1, snd_alias_build_s *alias2)
+{
+    const char *alias1TypeString; // [esp+20h] [ebp-Ch]
+
+    if (strcmp(alias1->soundFile, alias2->soundFile))
+        MyAssertHandler(
+            ".\\universal\\com_sndalias_load_obj.cpp",
+            1427,
+            0,
+            "%s",
+            "strcmp( alias1->soundFile, alias2->soundFile ) == 0");
+    if (alias1->eType == alias2->eType)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 1428, 0, "%s", "alias1->eType != alias2->eType");
+    if (alias1->eType == SAT_STREAMED)
+        alias1TypeString = "streamed";
+    else
+        alias1TypeString = "loaded";
+    if (alias2->eType == SAT_STREAMED)
+        Com_PrintWarning(
+            9,
+            "WARNING: sound file '%s' used as %s in alias '%s' and %s in alias '%s'\n",
+            alias1->soundFile,
+            alias1TypeString,
+            alias1->aliasName,
+            "streamed",
+            alias2->aliasName);
+    else
+        Com_PrintWarning(
+            9,
+            "WARNING: sound file '%s' used as %s in alias '%s' and %s in alias '%s'\n",
+            alias1->soundFile,
+            alias1TypeString,
+            alias1->aliasName,
+            "loaded",
+            alias2->aliasName);
+}
+
+void __cdecl Com_AddSoundAlias(
+    snd_alias_build_s *build,
+    snd_alias_t *alias,
+    const char *aliasName,
+    SoundFile *soundFile,
+    const char *subtitle)
+{
+    int v5; // eax
+    int v6; // eax
+    int v7; // edx
+    int v8; // ecx
+    int v9; // eax
+    char v10; // [esp+3h] [ebp-3Dh]
+    char *v11; // [esp+8h] [ebp-38h]
+    char *chainAliasName; // [esp+Ch] [ebp-34h]
+    char v13; // [esp+23h] [ebp-1Dh]
+    char *v14; // [esp+28h] [ebp-18h]
+    char *secondaryAliasName; // [esp+2Ch] [ebp-14h]
+
+    if (!build->aliasName[0])
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 1538, 0, "%s", "build->aliasName[0]");
+    if (!build->soundFile[0])
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 1539, 0, "%s", "build->soundFile[0]");
+    alias->aliasName = aliasName;
+    if (build->secondaryAliasName[0])
+    {
+        alias->secondaryAliasName = (const char*)CM_Hunk_Alloc(strlen(build->secondaryAliasName) + 1, "_secondary alias strings", 15);
+        secondaryAliasName = build->secondaryAliasName;
+        v14 = (char*)alias->secondaryAliasName;
+        do
+        {
+            v13 = *secondaryAliasName;
+            *v14++ = *secondaryAliasName++;
+        } while (v13);
+    }
+    else
+    {
+        alias->secondaryAliasName = 0;
+    }
+    if (build->chainAliasName[0])
+    {
+        alias->chainAliasName = (const char*)CM_Hunk_Alloc(strlen(build->chainAliasName) + 1, "_chain alias strings", 15);
+        chainAliasName = build->chainAliasName;
+        v11 = (char*)alias->chainAliasName;
+        do
+        {
+            v10 = *chainAliasName;
+            *v11++ = *chainAliasName++;
+        } while (v10);
+    }
+    else
+    {
+        alias->chainAliasName = 0;
+    }
+    alias->soundFile = soundFile;
+    alias->subtitle = subtitle;
+    alias->sequence = 0;
+    alias->volMin = build->volMin;
+    alias->volMax = build->volMax;
+    alias->pitchMin = build->pitchMin;
+    alias->pitchMax = build->pitchMax;
+    alias->distMin = build->distMin;
+    alias->distMax = build->distMax;
+    alias->flags = (build->iChannel << 8) | alias->flags & 0xFFFFC0FF;
+    alias->flags = (build->eType << 6) | alias->flags & 0xFFFFFF3F;
+    alias->volumeFalloffCurve = build->volumeFalloffCurve;
+    alias->speakerMap = build->speakerMap;
+    if (build->bLooping)
+        v5 = alias->flags | 1;
+    else
+        v5 = alias->flags & 0xFFFFFFFE;
+    alias->flags = v5;
+    if (build->bRandomLooping)
+    {
+        if (!build->bLooping)
+            MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 1589, 0, "%s", "build->bLooping");
+        alias->flags |= 0x20u;
+    }
+    else
+    {
+        alias->flags &= ~0x20u;
+    }
+    if (build->bMaster)
+        v6 = alias->flags | 2;
+    else
+        v6 = alias->flags & 0xFFFFFFFD;
+    alias->flags = v6;
+    if (build->bSlave)
+        v7 = alias->flags | 4;
+    else
+        v7 = alias->flags & 0xFFFFFFFB;
+    alias->flags = v7;
+    if (build->bFullDryLevel)
+        v8 = alias->flags | 8;
+    else
+        v8 = alias->flags & 0xFFFFFFF7;
+    alias->flags = v8;
+    if (build->bNoWetLevel)
+        v9 = alias->flags | 0x10;
+    else
+        v9 = alias->flags & 0xFFFFFFEF;
+    alias->flags = v9;
+    alias->slavePercentage = build->slavePercentage;
+    alias->probability = build->probability;
+    alias->lfePercentage = build->lfePercentage;
+    alias->centerPercentage = build->centerPercentage;
+    alias->startDelay = build->startDelay;
+}
+
+void __cdecl Com_AddLoadedSoundFile(SoundFile *soundFile, char *fileName)
+{
+    I_strlwr(fileName);
+    soundFile->u.loadSnd = SND_LoadSoundFile(fileName);
+    if (soundFile->u.loadSnd)
+    {
+        soundFile->exists = 1;
+    }
+    else
+    {
+        soundFile->exists = 0;
+        soundFile->u.loadSnd = (LoadedSound*)CM_Hunk_Alloc(0x2Cu, "_loaded", 15);
+        soundFile->u.loadSnd->name = fileName;
+    }
+}
+
+void __cdecl Com_AddStreamedSoundFile(SoundFile *soundFile, char *fileName)
+{
+    const char *name; // [esp+0h] [ebp-4h]
+
+    soundFile->exists = 1;
+    name = Com_GetFilenameSubString(fileName);
+    if (name == fileName)
+        fileName = (char*)"";
+    else
+        *(char*)(name - 1) = 0;
+    soundFile->u.loadSnd = (LoadedSound*)fileName;
+    soundFile->u.streamSnd.filename.info.raw.name = name;
+}
+
+void __cdecl Com_MakeSoundAliasesPermanent(snd_alias_list_t *aliasInfo, SoundFileInfo *soundFileInfo)
+{
+    char v2; // [esp+13h] [ebp-D5h]
+    char *v3; // [esp+18h] [ebp-D0h]
+    char *soundFile; // [esp+1Ch] [ebp-CCh]
+    char v5; // [esp+33h] [ebp-B5h]
+    char *v6; // [esp+38h] [ebp-B0h]
+    char *subtitleText; // [esp+3Ch] [ebp-ACh]
+    char v8; // [esp+53h] [ebp-95h]
+    char *v9; // [esp+58h] [ebp-90h]
+    char *aliasName; // [esp+5Ch] [ebp-8Ch]
+    bool v11; // [esp+80h] [ebp-68h]
+    bool v12; // [esp+84h] [ebp-64h]
+    bool v13; // [esp+88h] [ebp-60h]
+    snd_alias_type_t eType; // [esp+9Ch] [ebp-4Ch]
+    char *fileName; // [esp+A0h] [ebp-48h]
+    int savedBytesCount; // [esp+A4h] [ebp-44h]
+    char *strings; // [esp+B0h] [ebp-38h]
+    SoundFile *currentSound; // [esp+B4h] [ebp-34h]
+    char *currentName; // [esp+B8h] [ebp-30h]
+    char *currentNamea; // [esp+B8h] [ebp-30h]
+    char *currentNameb; // [esp+B8h] [ebp-30h]
+    char *subtitle; // [esp+BCh] [ebp-2Ch]
+    unsigned int aliasCount; // [esp+C0h] [ebp-28h]
+    snd_alias_build_s *other; // [esp+C4h] [ebp-24h]
+    snd_alias_list_t *aliasList; // [esp+C8h] [ebp-20h]
+    snd_alias_build_s *build; // [esp+CCh] [ebp-1Ch]
+    snd_alias_build_s *builda; // [esp+CCh] [ebp-1Ch]
+    snd_alias_build_s *buildb; // [esp+CCh] [ebp-1Ch]
+    snd_alias_t *alias; // [esp+D0h] [ebp-18h]
+    int soundCount; // [esp+D4h] [ebp-14h]
+    int bytesCount; // [esp+D8h] [ebp-10h]
+    int bytesCounta; // [esp+D8h] [ebp-10h]
+    unsigned int stringBytesCount; // [esp+E0h] [ebp-8h]
+
+    soundFileInfo->count = 0;
+    aliasInfo->count = 0;
+    if (saLoadObjGlob.tempAliasCount)
+    {
+        saLoadObjGlob.tempAliases = Com_SortTempSoundAliases_r(
+            saLoadObjGlob.tempAliases,
+            &saLoadObjGlob.tempAliasCount,
+            AliasNameCompare,
+            1);
+        if (saLoadObjGlob.tempAliases)
+        {
+            saLoadObjGlob.tempAliases = Com_SortTempSoundAliases_r(
+                saLoadObjGlob.tempAliases,
+                &saLoadObjGlob.tempAliasCount,
+                FileNameTypeCompare,
+                0);
+            if (saLoadObjGlob.tempAliases)
+            {
+                stringBytesCount = 0;
+                savedBytesCount = 0;
+                other = 0;
+                currentName = 0;
+                soundCount = 0;
+                for (build = saLoadObjGlob.tempAliases; build; build = build->pNext)
+                {
+                    bytesCount = strlen(build->soundFile) + 1;
+                    v13 = other && build->eType == other->eType;
+                    v12 = currentName && !I_stricmp(currentName, build->soundFile);
+                    v11 = v12 && v13;
+                    if (currentName && v11)
+                    {
+                        savedBytesCount += bytesCount;
+                        build->pSameSoundFile = other;
+                    }
+                    else
+                    {
+                        if (v12 && !v13)
+                            Com_SameFileWarning(build, other);
+                        other = build;
+                        currentName = build->soundFile;
+                        build->pSameSoundFile = 0;
+                        stringBytesCount += bytesCount;
+                        ++soundCount;
+                    }
+                }
+                saLoadObjGlob.tempAliases = Com_SortTempSoundAliases_r(
+                    saLoadObjGlob.tempAliases,
+                    &saLoadObjGlob.tempAliasCount,
+                    AliasNameCompare,
+                    1);
+                if (saLoadObjGlob.tempAliases)
+                {
+                    aliasCount = 0;
+                    currentNamea = 0;
+                    for (builda = saLoadObjGlob.tempAliases; builda; builda = builda->pNext)
+                    {
+                        bytesCounta = strlen(builda->aliasName) + 1;
+                        if (currentNamea && !I_stricmp(currentNamea, builda->aliasName))
+                        {
+                            savedBytesCount += bytesCounta;
+                        }
+                        else
+                        {
+                            ++aliasCount;
+                            stringBytesCount += bytesCounta;
+                            currentNamea = builda->aliasName;
+                        }
+                        if (builda->subtitleText)
+                            stringBytesCount += strlen(builda->subtitleText) + 1;
+                    }
+                    Com_InitSoundAliasHash(aliasCount);
+                    aliasInfo->head = (snd_alias_t*)CM_Hunk_Alloc(92 * saLoadObjGlob.tempAliasCount, "_aliases", 15);
+                    soundFileInfo->files = (SoundFile*)CM_Hunk_Alloc(sizeof(SoundFile) * soundCount, "_sound files", 15);
+                    strings = (char*)CM_Hunk_Alloc(stringBytesCount, "_strings", 15);
+                    currentNameb = 0;
+                    aliasList = 0;
+                    for (buildb = saLoadObjGlob.tempAliases; ; buildb = buildb->pNext)
+                    {
+                        if (!buildb)
+                            return;
+                        if (!currentNameb || I_stricmp(currentNameb, buildb->aliasName))
+                        {
+                            currentNameb = strings;
+                            aliasName = buildb->aliasName;
+                            v9 = strings;
+                            do
+                            {
+                                v8 = *aliasName;
+                                *v9++ = *aliasName++;
+                            } while (v8);
+                            strings += strlen(strings) + 1;
+                        }
+                        if (buildb->subtitleText)
+                        {
+                            subtitle = strings;
+                            subtitleText = buildb->subtitleText;
+                            v6 = strings;
+                            do
+                            {
+                                v5 = *subtitleText;
+                                *v6++ = *subtitleText++;
+                            } while (v5);
+                            strings += strlen(strings) + 1;
+                        }
+                        else
+                        {
+                            subtitle = 0;
+                        }
+                        alias = &aliasInfo->head[aliasInfo->count];
+                        if (!aliasList || I_stricmp(aliasList->head->aliasName, currentNameb))
+                        {
+                            aliasList = (snd_alias_list_t*)CM_Hunk_Alloc(0xCu, "_alias list", 15);
+                            if (!Com_AddAliasList(currentNameb, aliasList))
+                            {
+                                aliasList = 0;
+                                Com_PrintError(9, "ERROR: alias '%s' already added - ignoring\n", currentNameb);
+                                continue;
+                            }
+                            aliasList->aliasName = currentNameb;
+                            aliasList->head = alias;
+                        }
+                        if (buildb->pSameSoundFile)
+                        {
+                            currentSound = buildb->pSameSoundFile->permSoundFile;
+                        }
+                        else
+                        {
+                            fileName = strings;
+                            soundFile = buildb->soundFile;
+                            v3 = strings;
+                            do
+                            {
+                                v2 = *soundFile;
+                                *v3++ = *soundFile++;
+                            } while (v2);
+                            strings += strlen(strings) + 1;
+                            currentSound = &soundFileInfo->files[soundFileInfo->count];
+                            eType = buildb->eType;
+                            if (!fileName)
+                                MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 1521, 0, "%s", "fileName");
+                            currentSound->type = eType;
+                            if (eType == SAT_LOADED)
+                                Com_AddLoadedSoundFile(currentSound, fileName);
+                            else
+                                Com_AddStreamedSoundFile(currentSound, fileName);
+                            ++soundFileInfo->count;
+                        }
+                        buildb->permSoundFile = currentSound;
+                        Com_AddSoundAlias(buildb, alias, currentNameb, currentSound, subtitle);
+                        ++aliasInfo->count;
+                        ++aliasList->count;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int __cdecl Com_LoadSoundAliasSounds(SoundFileInfo *soundFileInfo)
+{
+    unsigned __int8 v1; // al
+    char filepath[256]; // [esp+0h] [ebp-110h] BYREF
+    int numMissing; // [esp+104h] [ebp-Ch]
+    int soundIndex; // [esp+108h] [ebp-8h]
+    SoundFile *soundFile; // [esp+10Ch] [ebp-4h]
+
+    numMissing = 0;
+    for (soundIndex = 0; soundIndex < soundFileInfo->count; ++soundIndex)
+    {
+        soundFile = &soundFileInfo->files[soundIndex];
+        if (soundFile->type == 1)
+        {
+            if (!soundFile->u.loadSnd)
+                MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2067, 0, "%s", "soundFile->u.loadSnd");
+            if (!soundFile->exists)
+                ++numMissing;
+        }
+        else
+        {
+            if (soundFile->type != 2)
+                MyAssertHandler(
+                    ".\\universal\\com_sndalias_load_obj.cpp",
+                    2073,
+                    0,
+                    "%s\n\t(soundFile->type) = %i",
+                    "(soundFile->type == SAT_STREAMED)",
+                    soundFile->type);
+            if (!soundFile->exists)
+                MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2074, 0, "%s", "soundFile->exists");
+            if (snd_touchStreamFilesOnLoad->current.enabled || fs_copyfiles->current.enabled)
+            {
+                ProfLoad_Begin("Verify streamed sound");
+                Com_sprintf(
+                    filepath,
+                    0x100u,
+                    "sound/%s/%s",
+                    soundFile->u.streamSnd.filename.info.raw.dir,
+                    soundFile->u.streamSnd.filename.info.raw.name);
+                v1 = FS_TouchFile(filepath);
+                soundFile->exists = v1;
+                ProfLoad_End();
+                if (!soundFile->exists)
+                    Com_PrintError(9, "ERROR: Streamed sound file '%s' not found\n", filepath);
+            }
+        }
+    }
+    return numMissing;
+}
+
+void __cdecl Com_ParseEntChannelFile(const char *buffer)
+{
+    char v1; // [esp+3h] [ebp-25h]
+    char *v2; // [esp+8h] [ebp-20h]
+    parseInfo_t *v3; // [esp+Ch] [ebp-1Ch]
+    int i; // [esp+20h] [ebp-8h]
+    parseInfo_t *value; // [esp+24h] [ebp-4h]
+
+    if (!buffer)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 960, 0, "%s", "buffer");
+    saLoadObjGlob.entChannelCount = 0;
+    Com_BeginParseSession("soundaliases/channels.def");
+    Com_SetCSV(1);
+    while (1)
+    {
+        value = Com_Parse(&buffer);
+        if (!buffer)
+            break;
+        if (value->token[0] && value->token[0] != 35)
+        {
+            if (strlen(value->token) > 0x40)
+            {
+                Com_EndParseSession();
+                Com_Error(
+                    ERR_DROP,
+                    "channel name too long (max chars %d): %s in file [%s].\n",
+                    64,
+                    value->token,
+                    "soundaliases/channels.def");
+            }
+            for (i = 0; i < saLoadObjGlob.entChannelCount; ++i)
+            {
+                if (!I_stricmp(saLoadObjGlob.entChannels[i], value->token))
+                {
+                    Com_EndParseSession();
+                    Com_Error(ERR_DROP, "duplicate channel name '%s' in file [%s].\n", value->token, "soundaliases/channels.def");
+                }
+            }
+            v3 = value;
+            v2 = saLoadObjGlob.entChannels[saLoadObjGlob.entChannelCount];
+            do
+            {
+                v1 = v3->token[0];
+                *v2 = v3->token[0];
+                v3 = (v3 + 1);
+                ++v2;
+            } while (v1);
+            if (++saLoadObjGlob.entChannelCount > 64)
+            {
+                Com_EndParseSession();
+                Com_Error(ERR_DROP, "exceeded max number of channels (%d) in file [%s].\n", 64, "soundaliases/channels.def");
+            }
+        }
+        Com_SkipRestOfLine(&buffer);
+    }
+    Com_EndParseSession();
+}
+
+void __cdecl Com_SetChannelMapEntry(
+    MSSChannelMap *entry,
+    unsigned int inputChannel,
+    unsigned int outputChannel,
+    float volume)
+{
+    MSSSpeakerLevels *speaker; // [esp+0h] [ebp-4h]
+
+    if (!entry)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2531, 0, "%s", "entry");
+    if (inputChannel > 2)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias_load_obj.cpp",
+            2532,
+            0,
+            "%s",
+            "inputChannel >= 0 && inputChannel <= MSS_MAXSRCCHANNELS");
+    if (outputChannel > 6)
+        MyAssertHandler(
+            ".\\universal\\com_sndalias_load_obj.cpp",
+            2533,
+            0,
+            "%s",
+            "outputChannel >= 0 && outputChannel <= MSS_MAXDSTCHANNELS");
+    speaker = &entry->speakers[outputChannel];
+    if (entry->speakers[outputChannel].numLevels <= inputChannel)
+        entry->speakers[outputChannel].numLevels = inputChannel + 1;
+    speaker->levels[inputChannel] = volume;
+    speaker->speaker = outputChannel;
 }

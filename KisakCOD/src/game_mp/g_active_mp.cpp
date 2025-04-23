@@ -175,7 +175,7 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
     }
     Vec3Sub(ent->r.absmin, range, diff);
     Vec3Add(ent->r.absmax, range, sum);
-    v7 = CM_AreaEntities(diff, sum, entityList, 1024, 1079771144);
+    v7 = CM_AreaEntities(diff, sum, entityList, 1024, 0x405C0008);
     Vec3Add(ent->client->ps.origin, ent->r.mins, diff);
     Vec3Add(ent->client->ps.origin, ent->r.maxs, sum);
     ExpandBoundsToWidth(diff, sum);

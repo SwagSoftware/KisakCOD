@@ -28,7 +28,20 @@ FxCmd g_UpdateFxNonDependentBuf[1];
 FxCmd g_UpdateFxRemainingBuf[1];
 SkinCachedStaticModelCmd g_skinCachedStaticModelBuf[512];
 SkinXModelCmd g_SkinXModelBuf[1024];
+DpvsStaticCellCmd g_dpvsCellStaticBuf[256];
+DpvsDynamicCellCmd g_dpvsCellSceneEntBuf[512];
+DpvsDynamicCellCmd g_dpvsCellDynModelBuf[512];
+DpvsDynamicCellCmd g_dpvsCellDynBrushBuf[512];
+DpvsEntityCmd g_dpvsEntityBuf[2048];
+FxCmd g_UpdateFxSpotLightBuf[1];
+FxGenerateVertsCmd g_GenerateFxVertsBuf[2];
+FxCmd g_GenerateMarkVertsBuf[1];
+SceneEntCmd g_addSceneEntBuf[1];
+GfxSpotShadowEntCmd g_spotShadowEntBuf[256];
+ShadowCookieCmd g_shadowCookieBuf[1];
+
 WorkerCmds g_workerCmds[17];
+
 
 int __cdecl R_FXNonDependentOrSpotLightPending(void* args)
 {
@@ -546,9 +559,9 @@ void __cdecl  R_WorkerThread()
 {
     void *Value; // eax
 
-    Value = Sys_GetValue(2);
-    if (_setjmp3(Value, 0))
-        Com_ErrorAbort();
+    //Value = Sys_GetValue(2);
+    //if (_setjmp3(Value, 0))
+    //    Com_ErrorAbort();
     //Profile_Guard(1);
     while (1)
     {

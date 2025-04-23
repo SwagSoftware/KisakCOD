@@ -1,5 +1,6 @@
 #pragma once
 #include "rb_backend.h"
+#include "r_buffers.h"
 
 struct GfxShaderConstantState_s // sizeof=0x8
 {                                       // ...

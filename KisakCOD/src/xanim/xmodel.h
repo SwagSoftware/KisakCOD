@@ -1,11 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
-
-#include "xanim.h"
-
-#include <gfx_d3d/r_material.h>
-
 enum XModelLodRampType : __int32
 {                                       // ...
     XMODEL_LOD_RAMP_RIGID = 0x0,
@@ -54,63 +48,6 @@ struct XModelStreamInfo // sizeof=0x0
 {                                       // ...
 };
 
-struct __declspec(align(4)) PhysPreset // sizeof=0x2C
-{                                       // ...
-    const char* name;                   // ...
-    int type;                           // ...
-    float mass;                         // ...
-    float bounce;                       // ...
-    float friction;                     // ...
-    float bulletForceScale;             // ...
-    float explosiveForceScale;          // ...
-    const char* sndAliasPrefix;         // ...
-    float piecesSpreadFraction;
-    float piecesUpwardVelocity;
-    bool tempDefaultToCylinder;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct BrushWrapper // sizeof=0x50
-{
-    float mins[3];
-    int contents;
-    float maxs[3];
-    unsigned int numsides;
-    cbrushside_t* sides;
-    __int16 axialMaterialNum[2][3];
-    unsigned __int8* baseAdjacentSide;
-    __int16 firstAdjacentSideOffsets[2][3];
-    unsigned __int8 edgeCount[2][3];
-    // padding byte
-    // padding byte
-    int totalEdgeCount;
-    cplane_s* planes;
-};
-
-struct PhysMass // sizeof=0x24
-{                                       // ...
-    float centerOfMass[3];
-    float momentsOfInertia[3];
-    float productsOfInertia[3];
-};
-
-struct PhysGeomInfo // sizeof=0x44
-{
-    BrushWrapper* brush;
-    int type;
-    float orientation[3][3];
-    float offset[3];
-    float halfLengths[3];
-};
-
-struct PhysGeomList // sizeof=0x2C
-{
-    unsigned int count;
-    PhysGeomInfo* geoms;
-    PhysMass mass;
-};
-
 struct XModel // sizeof=0xDC
 {                                       // ...
     const char* name;
@@ -124,7 +61,7 @@ struct XModel // sizeof=0xDC
     float* trans;
     unsigned __int8* partClassification;
     DObjAnimMat* baseMat;
-    XSurface* surfs;
+    struct XSurface* surfs;
     Material** materialHandles;
     XModelLodInfo lodInfo[4];
     XModelCollSurf_s* collSurfs;
@@ -146,7 +83,7 @@ struct XModel // sizeof=0xDC
     // padding byte
     // padding byte
     PhysPreset* physPreset;
-    PhysGeomList* physGeoms;
+    struct PhysGeomList* physGeoms;
 };
 
 struct XModelPiece // sizeof=0x10
@@ -172,10 +109,10 @@ struct XSurfaceGetTriCandidatesLocals // sizeof=0x2A4
 {                                       // ...
     int mins[3];
     int maxs[3];                        // ...
-    const XSurfaceCollisionTree *tree;  // ...
+    const struct XSurfaceCollisionTree *tree;  // ...
     const unsigned __int16 *inIndices;  // ...
-    const GfxPackedVertex *inVertices0; // ...
-    bool(__cdecl *visitorFunc)(void *, const GfxPackedVertex **, const GfxPackedVertex **); // ...
+    const struct GfxPackedVertex *inVertices0; // ...
+    bool(__cdecl *visitorFunc)(void *, const struct GfxPackedVertex **, const struct GfxPackedVertex **); // ...
     void *visitorContext;               // ...
     unsigned int nodeQueueBegin;        // ...
     unsigned int nodeQueueEnd;          // ...
@@ -193,7 +130,7 @@ struct XSurfaceGetTriCandidatesLocals // sizeof=0x2A4
 
 struct XModelSurfs // sizeof=0x14
 {                                       // ...
-    XSurface *surfs;                    // ...
+    struct XSurface *surfs;                    // ...
     int partBits[4];                    // ...
 };
 struct XModelPartsLoad // sizeof=0x1C
@@ -258,14 +195,14 @@ void __cdecl XModelTraceLineAnimatedPartBits(
     int contentmask,
     int *partBits);
 char __cdecl XSurfaceVisitTrianglesInAabb(
-    const XSurface *surface,
+    const struct XSurface *surface,
     unsigned int vertListIndex,
     const float *aabbMins,
     const float *aabbMaxs,
-    bool(__cdecl *visitorFunc)(void *, const GfxPackedVertex **, const GfxPackedVertex **),
+    bool(__cdecl *visitorFunc)(void *, const struct GfxPackedVertex **, const struct GfxPackedVertex **),
     void *visitorContext);
 void __cdecl XSurfaceVisitTrianglesInAabb_ConvertAabb(
-    const XSurfaceCollisionTree *tree,
+    const struct XSurfaceCollisionTree *tree,
     const float *aabbMins,
     const float *aabbMaxs,
     int *mins,
@@ -280,8 +217,8 @@ unsigned __int16 *__cdecl XModelBoneNames(XModel *model);
 
 // xmodel_utils
 const char *__cdecl XModelGetName(const XModel *model);
-int __cdecl XModelGetSurfaces(const XModel *model, XSurface **surfaces, int lod);
-XSurface *__cdecl XModelGetSurface(const XModel *model, int lod, int surfIndex);
+int __cdecl XModelGetSurfaces(const XModel *model, struct XSurface **surfaces, int lod);
+struct XSurface *__cdecl XModelGetSurface(const XModel *model, int lod, int surfIndex);
 const XModelLodInfo *__cdecl XModelGetLodInfo(const XModel *model, int lod);
 unsigned int __cdecl XModelGetSurfCount(const XModel *model, int lod);
 Material **__cdecl XModelGetSkins(const XModel *model, int lod);

@@ -81,12 +81,6 @@ struct DpvsView // sizeof=0x120
     int frustumPlaneCount;              // ...
 };
 
-struct DpvsClipPlaneSet // sizeof=0x44
-{                                       // ...
-    const DpvsPlane *planes[16];        // ...
-    unsigned int count;                 // ...
-};
-
 struct DpvsGlobals // sizeof=0xAE78
 {                                       // ...
     DpvsPlane viewPlane;                // ...
@@ -315,3 +309,9 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data);
 void __cdecl R_AddCellStaticSurfacesInFrustumCmd(DpvsStaticCellCmd *data);
 
 extern DpvsGlobals dpvsGlob;
+
+extern thread_local DpvsView *g_dpvsView;       // +8 
+extern thread_local int g_viewIndex;            // +12(0xC)
+extern thread_local EntVisData g_dynEntVisData; // +16(0x10)
+extern thread_local byte *g_smodelVisData;      // +24(0x18)
+extern thread_local byte *g_surfaceVisData;     // +28(0x1C)

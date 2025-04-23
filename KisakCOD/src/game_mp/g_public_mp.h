@@ -422,17 +422,6 @@ void __cdecl SP_turret(gentity_s *self);
 
 
 // g_player_corpse_mp
-struct __declspec(align(4)) corpseInfo_t // sizeof=0x4DC
-{                                       // ...
-    XAnimTree_s *tree;                  // ...
-    int entnum;                         // ...
-    int time;
-    clientInfo_t ci;
-    bool falling;
-    // padding byte
-    // padding byte
-    // padding byte
-};
 int __cdecl G_GetPlayerCorpseIndex(gentity_s *ent);
 int __cdecl G_GetFreePlayerCorpseIndex();
 void __cdecl PlayerCorpse_Free(gentity_s *ent);
@@ -998,7 +987,7 @@ void __cdecl VEH_PushEntity(gentity_s *ent, gentity_s *target, float *pushDir, f
 bool __cdecl AttachedStickyMissile(gentity_s *vehicle, gentity_s *missile);
 void __cdecl PushAttachedStickyMissile(gentity_s *vehicle, gentity_s *missile);
 void __cdecl G_VehRegisterDvars();
-vehicle_info_t *__cdecl VEH_GetVehicleInfo(__int16 index);
+struct vehicle_info_t *__cdecl VEH_GetVehicleInfo(__int16 index);
 int __cdecl G_VehPlayerRideSlot(gentity_s *vehicle, int playerEntNum);
 void __cdecl VEH_DebugCapsule(float *pos, float rad, float height, float r, float g, float b);
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *angles);
@@ -1132,6 +1121,8 @@ extern const dvar_t *vehHelicopterHeadSwayDontSwayTheTurret;
 extern const dvar_t *vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt;
 extern const dvar_t *vehHelicopterDecelerationSide;
 
+void __cdecl Scr_AddStruct();
+void __cdecl Scr_ResetTimeout();
 
 BuiltinFunctionDef functions[205] =
 {

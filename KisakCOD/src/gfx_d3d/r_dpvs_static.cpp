@@ -1,5 +1,6 @@
 #include "r_dpvs.h"
 #include "r_dvars.h"
+#include <cgame/cg_local.h>
 
 void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const DpvsClipPlaneSet *clipSet)
 {
@@ -74,7 +75,8 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
                     for (i = 0; i < v16; ++i)
                     {
                         v7 = smodelIndexes[i];
-                        if (!*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) + v7))
+                        //if (!*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) + v7))
+                        if (!g_smodelVisData[v7])
                         {
                             for (j = 0; j < clipSetChild.count; ++j)
                             {
@@ -92,7 +94,10 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
                             v8 = 0;
                         LABEL_42:
                             if (!v8)
-                                *(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) + v7) = 1;
+                            {
+                                //*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) + v7) = 1;
+                                g_smodelVisData[v7] = 1;
+                            }
                         }
                     }
                 }
@@ -115,7 +120,8 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
                     for (k = 0; k < surfaceCountNoDecal; ++k)
                     {
                         v2 = v13[k];
-                        if (!*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + v2))
+                        //if (!*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + v2))
+                        if (!g_surfaceVisData[v2])
                         {
                             v6 = &rgp.world->dpvs.surfaces[v2];
                             for (m = 0; m < clipSetChild.count; ++m)
@@ -136,7 +142,8 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
                             {
                                 if ((r_showAabbTrees->current.integer & 2) != 0)
                                     R_AddDebugBox(&frontEndDataOut->debugGlobals, v6->bounds[0], v6->bounds[1], colorGreen);
-                                *(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + v2) = 1;
+                                //*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + v2) = 1;
+                                g_surfaceVisData[v2] = 1;
                             }
                         }
                     }
@@ -157,7 +164,8 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
                 for (smodelIndexIter = 0; smodelIndexIter < smodelIndexCount; ++smodelIndexIter)
                 {
                     smodelIndex = indices[smodelIndexIter];
-                    *(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) + smodelIndex) = 1;
+                    //*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) + smodelIndex) = 1;
+                    g_smodelVisData[smodelIndex] = 1;
                 }
             }
         }
@@ -177,8 +185,10 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
             {
                 v20 = &rgp.world->dpvs.sortedSurfIndex[startSurfIndex];
                 for (surfNodeIndex = 0; surfNodeIndex < surfaceCount; ++surfNodeIndex)
-                    *(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28)
-                        + v20[surfNodeIndex]) = 1;
+                {
+                    //*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + v20[surfNodeIndex]) = 1;
+                    g_surfaceVisData[v20[surfNodeIndex]] = 1;
+                }
             }
         }
     }
@@ -253,7 +263,10 @@ LABEL_7:
         {
             indices = &rgp.world->dpvs.sortedSurfIndex[group->startSurfIndex];
             for (count = 0; count < group->surfaceCount; ++count)
-                *(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + indices[count]) = 1;
+            {
+                //*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + indices[count]) = 1;
+                g_surfaceVisData[indices[count]] = 1;
+            }
         }
     }
 }
@@ -280,8 +293,10 @@ void __cdecl R_AddCellStaticSurfacesInFrustumCmd(DpvsStaticCellCmd *data)
     unsigned int viewIndex; // [esp+4h] [ebp-4h]
 
     viewIndex = data->viewIndex;
-    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) = rgp.world->dpvs.smodelVisData[viewIndex];
-    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) = rgp.world->dpvs.surfaceVisData[viewIndex];
+    g_smodelVisData[0] = *rgp.world->dpvs.smodelVisData[viewIndex];
+    g_surfaceVisData[0] = *rgp.world->dpvs.surfaceVisData[viewIndex];
+//    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) = rgp.world->dpvs.smodelVisData[viewIndex];
+//    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) = rgp.world->dpvs.surfaceVisData[viewIndex];
     R_AddCellStaticSurfacesInFrustum(data);
     if (rg.drawWorld)
         R_AddCellCullGroupsInFrustum(data);

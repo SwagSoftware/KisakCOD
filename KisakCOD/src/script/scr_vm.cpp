@@ -3803,11 +3803,11 @@ unsigned int __cdecl VM_Execute_0()
                     v8 = va("type %s is not a float", var_typename[::pos.top->type]);
                     Scr_Error(v8);
                 }
-                if (waitTime < (unsigned int)&clients[0].parseClients[238].attachTagIndex[4] + 3)
+                if (waitTime < 0xFFFFFF)
                 {
                     if (waitTime)
                         Scr_ResetTimeout();
-                    waitTime = ((unsigned int)&clients[0].parseClients[238].attachTagIndex[4] + 3) & (waitTime + scrVarPub.time);
+                    waitTime = (waitTime + scrVarPub.time) & 0xFFFFFF;
                     --::pos.top;
                     scrVmDebugPub.profileEnable[::pos.localId] = *profileEnablePos;
                     stackValue.type = 10;
@@ -5870,7 +5870,7 @@ void __cdecl Scr_IncTime()
     if ((scrVarPub.time & 0xFF000000) != 0)
         MyAssertHandler(".\\script\\scr_vm.cpp", 5198, 0, "%s", "!(scrVarPub.time & ~VAR_NAME_LOW_MASK)");
     ++scrVarPub.time;
-    scrVarPub.time &= (unsigned int)&clients[0].parseClients[238].attachTagIndex[4] + 3;
+    scrVarPub.time &= 0xFFFFFFu;
     scrVmPub.showError = scrVmPub.abort_on_error;
 }
 

@@ -8,6 +8,7 @@
 #include "r_dvars.h"
 #include "r_workercmds.h"
 #include "r_buffers.h"
+#include "r_model_pose.h"
 
 void __cdecl R_FlagXModelAsSkinned(GfxSceneEntity *sceneEnt, unsigned int surfaceCount)
 {
@@ -637,13 +638,12 @@ void __cdecl R_SkinGfxEntityCmd(GfxSceneEntity **data)
     GfxSceneEntity *localSceneEnt; // [esp+8h] [ebp-Ch] BYREF
     GfxSceneEntity *sceneEnt; // [esp+Ch] [ebp-8h]
     GfxSceneEntity **pSceneEnt; // [esp+10h] [ebp-4h]
-    int savedregs; // [esp+14h] [ebp+0h] BYREF
 
     if (!data)
         MyAssertHandler(".\\r_dobj_skin.cpp", 608, 0, "%s", "data");
     pSceneEnt = data;
     sceneEnt = *data;
-    boneMatrix = R_UpdateSceneEntBounds((GfxSceneEntity *)&savedregs, sceneEnt, &localSceneEnt, &obj, 0);
+    boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 0);
     if (boneMatrix)
     {
         if (!localSceneEnt)

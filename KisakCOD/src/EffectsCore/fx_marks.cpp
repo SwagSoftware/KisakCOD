@@ -288,9 +288,7 @@ void __cdecl FX_ImpactMark_Generate_AddEntityBrush(
         Vec3AddScalar(origin, s, markMins);
         Vec3AddScalar(origin, radius, markMaxs);
         ent = CG_GetEntity(localClientNum, entityIndex);
-        if (ent->nextValid
-            && (clientActive_t *)ent->nextState.solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-                + 3))
+        if (ent->nextValid && ent->nextState.solid == 0xFFFFFF)
         {
             brushModel = R_GetBrushModel(ent->nextState.index.brushmodel);
             AnglesToAxis(ent->pose.angles, entAxis);

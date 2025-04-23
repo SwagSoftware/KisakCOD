@@ -24,13 +24,49 @@
 #include <win32/win_net.h>
 #include <qcommon/threads.h>
 #include "r_workercmds.h"
+#include "rb_tess.h"
+#include "r_cinematic.h"
+#include "r_model_lighting.h"
+#include "r_draw_bsp.h"
+#include "r_dobj_skin.h"
+#include "r_draw_xmodel.h"
+#include "r_staticmodelcache.h"
+#include "rb_uploadshaders.h"
+#include <universal/timing.h>
+
+void(__cdecl *const RB_RenderCommandTable[22])(GfxRenderCommandExecState *) =
+{
+  NULL,
+  &RB_SetMaterialColorCmd,
+  &RB_SaveScreenCmd,
+  &RB_SaveScreenSectionCmd,
+  &RB_ClearScreenCmd,
+  &RB_SetViewportCmd,
+  &RB_StretchPicCmd,
+  &RB_StretchPicCmdFlipST,
+  &RB_StretchPicRotateXYCmd,
+  &RB_StretchPicRotateSTCmd,
+  &RB_StretchRawCmd,
+  &RB_DrawQuadPicCmd,
+  &RB_DrawFullScreenColoredQuadCmd,
+  &RB_DrawText2DCmd,
+  &RB_DrawText3DCmd,
+  &RB_BlendSavedScreenBlurredCmd,
+  &RB_BlendSavedScreenFlashedCmd,
+  &RB_DrawPointsCmd,
+  &RB_DrawLinesCmd,
+  &RB_DrawTrianglesCmd,
+  &RB_DrawProfileCmd,
+  &RB_ProjectionSetCmd
+}; // idb
+
 //
 // struct GfxBackEndData const *const backEndData 85b28f60     gfx_d3d : rb_backend.obj
 // int marker_rb_backend    85b28f64     gfx_d3d : rb_backend.obj
 // struct materialCommands_t tess 85b28f70     gfx_d3d : rb_backend.obj
 // struct r_backEndGlobals_t backEnd 85b3a790     gfx_d3d : rb_backend.obj
 
-const GfxBackEndData *backEndData;
+GfxBackEndData *backEndData;
 GfxRenderTarget gfxRenderTargets[15];
 
 r_backEndGlobals_t backEnd;
@@ -774,6 +810,24 @@ void __cdecl R_DrawSurfs(GfxCmdBufContext context, GfxCmdBufState *prepassState,
     //Profile_EndInternal(0);
 }
 
+
+unsigned int(__cdecl *const rb_tessTable[13])(const GfxDrawSurfListArgs *, GfxCmdBufContext) =
+{
+  &R_TessTrianglesList,
+  &R_TessTrianglesPreTessList,
+  &R_TessStaticModelRigidDrawSurfList,
+  &R_TessStaticModelPreTessList,
+  &R_TessStaticModelCachedList,
+  &R_TessStaticModelSkinnedDrawSurfList,
+  &R_TessBModel,
+  &R_TessXModelRigidDrawSurfList,
+  &R_TessXModelRigidSkinnedDrawSurfList,
+  &R_TessXModelSkinnedDrawSurfList,
+  &R_TessCodeMeshList,
+  &R_TessMarkMeshList,
+  &R_TessParticleCloudList
+}; // idb
+
 unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
 {
     GfxCmdBufSourceState *passPrepassContext; // [esp+4h] [ebp-28h]
@@ -856,12 +910,12 @@ void __cdecl R_TessEnd(GfxCmdBufContext context, GfxCmdBufContext prepassContext
             "prepassContext.state == NULL || commonSource == prepassContext.source");
     context.source->objectPlacement = 0;
     R_ChangeDepthHackNearClip(context.source, 0);
-    depthRangeType = (context.source->cameraView != 0) - 1;
+    depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
     if (depthRangeType != context.state->depthRangeType)
         R_ChangeDepthRange(context.state, depthRangeType);
     if (prepassContext.state)
     {
-        v2 = (prepassContext.source->cameraView != 0) - 1;
+        v2 = (GfxDepthRangeType)((prepassContext.source->cameraView != 0) - 1);
         if (v2 != prepassContext.state->depthRangeType)
             R_ChangeDepthRange(prepassContext.state, v2);
     }
@@ -898,7 +952,7 @@ void __cdecl RB_SetGammaRamp(const GfxGammaRamp *gammaTable)
         d3dGammaRamp.green[colorIndex] = gammaTable->entries[colorIndex];
         d3dGammaRamp.blue[colorIndex] = gammaTable->entries[colorIndex];
     }
-    dx.device->SetGammaRamp(dx.device, dx.targetWindowIndex, 0, &d3dGammaRamp);
+    dx.device->SetGammaRamp(dx.targetWindowIndex, 0, &d3dGammaRamp);
 }
 
 void __cdecl RB_SaveScreenCmd(GfxRenderCommandExecState *execState)
@@ -2605,7 +2659,7 @@ void __cdecl RB_BeginFrame(const GfxBackEndData *data)
     const char *v1; // eax
     int hr; // [esp+0h] [ebp-4h]
 
-    backEndData = data;
+    backEndData = (GfxBackEndData*)data;
     if ((data->drawType & 1) != 0)
     {
         ++r_glob.backEndFrameCount;
@@ -2621,7 +2675,7 @@ void __cdecl RB_BeginFrame(const GfxBackEndData *data)
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("dx.device->BeginScene()\n");
-            hr = dx.device->BeginScene(dx.device);
+            hr = dx.device->BeginScene();
             if (hr < 0)
             {
                 do
@@ -2654,8 +2708,8 @@ void __cdecl RB_EndFrame(char drawType)
             MyAssertHandler(".\\rb_backend.cpp", 2867, 0, "%s", "r_ignoreHwGamma");
         if (r_gamma->modified || r_ignoreHwGamma->modified)
         {
-            Dvar_ClearModified(r_gamma);
-            Dvar_ClearModified(r_ignoreHwGamma);
+            Dvar_ClearModified((dvar_s*)r_gamma);
+            Dvar_ClearModified((dvar_s*)r_ignoreHwGamma);
             if (!r_ignoreHwGamma->current.enabled)
                 R_SetColorMappings();
         }
@@ -2774,6 +2828,47 @@ void __cdecl RB_Draw3D()
     }
 }
 
+int RB_AdaptiveGpuSyncFinal()
+{
+    unsigned __int64 v0; // rax
+    int waitedTime; // [esp+18h] [ebp-8h]
+    int startTime; // [esp+1Ch] [ebp-4h]
+
+    LODWORD(v0) = RB_IsGpuFenceFinished();
+    if (v0)
+    {
+        if (dx.gpuSyncDelay > 0x4E20)
+        {
+            v0 = 127 * ((dx.gpuSyncDelay - 20000) / 0x80);
+            dx.gpuSyncDelay = v0;
+        }
+        else
+        {
+            dx.gpuSyncDelay = 0;
+        }
+    }
+    else
+    {
+        startTime = __rdtsc();
+        while (!RB_IsGpuFenceFinished())
+        {
+            if ((__rdtsc() - startTime) < 0)
+            {
+                RB_AbandonGpuFence();
+                break;
+            }
+        }
+        LODWORD(v0) = __rdtsc() - startTime;
+        waitedTime = v0;
+        if ((v0 & 0x80000000) == 0LL)
+        {
+            LODWORD(v0) = LODWORD(dx.gpuSyncDelay) + v0 / 16;
+            dx.gpuSyncDelay += waitedTime / 16;
+        }
+    }
+    return v0;
+}
+
 void __cdecl RB_CallExecuteRenderCommands()
 {
     const char *v0; // eax
@@ -2850,7 +2945,8 @@ void __cdecl RB_CallExecuteRenderCommands()
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("dx.device->EndScene()\n");
-            hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *))dx.device->EndScene)(dx.device, dx.device);
+            //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *))dx.device->EndScene)(dx.device, dx.device);
+            hr = dx.device->EndScene();
             if (hr < 0)
             {
                 do
@@ -2904,9 +3000,9 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
         NET_Sleep(1u);
     while (1)
     {
-        Value = Sys_GetValue(2);
-        if (!_setjmp3(Value, 0))
-            break;
+        //Value = Sys_GetValue(2);
+        //if (!_setjmp3(Value, 0))
+        //    break;
         //Profile_Recover(1);
         if (r_glob.isRenderingRemoteUpdate)
         {
@@ -3084,11 +3180,11 @@ void __cdecl RB_InitCodeImages()
     gfxCmdBufInput.codeImages[3] = 0;
     gfxCmdBufInput.codeImageSamplerStates[3] = -30;
     rg.codeImageNames[3] = 0;
-    gfxCmdBufInput.codeImages[6] = stru_EA74FA4.image;
+    gfxCmdBufInput.codeImages[6] = gfxRenderTargets[9].image;
     gfxCmdBufInput.codeImageSamplerStates[6] = 98;
     rg.codeImageNames[6] = "shadowCookieSampler";
     shadowmapSamplerState = gfxMetrics.shadowmapSamplerState;
-    gfxCmdBufInput.codeImages[7] = stru_EA74FF4.image;
+    gfxCmdBufInput.codeImages[7] = gfxRenderTargets[13].image;
     gfxCmdBufInput.codeImageSamplerStates[7] = shadowmapSamplerState;
     rg.codeImageNames[7] = "shadowmapSamplerSun";
     v0 = gfxMetrics.shadowmapSamplerState;
@@ -3104,10 +3200,10 @@ void __cdecl RB_InitCodeImages()
     gfxCmdBufInput.codeImages[11] = 0;
     gfxCmdBufInput.codeImageSamplerStates[11] = 98;
     rg.codeImageNames[11] = 0;
-    gfxCmdBufInput.codeImages[12] = stru_EA74FCC.image;
+    gfxCmdBufInput.codeImages[12] = gfxRenderTargets[11].image;
     gfxCmdBufInput.codeImageSamplerStates[12] = 98;
     rg.codeImageNames[12] = "postEffect0";
-    gfxCmdBufInput.codeImages[13] = stru_EA74FE0.image;
+    gfxCmdBufInput.codeImages[13] = gfxRenderTargets[12].image;
     gfxCmdBufInput.codeImageSamplerStates[13] = 98;
     rg.codeImageNames[13] = "postEffect1";
     gfxCmdBufInput.codeImages[14] = 0;
@@ -3122,7 +3218,7 @@ void __cdecl RB_InitCodeImages()
     gfxCmdBufInput.codeImages[17] = 0;
     gfxCmdBufInput.codeImageSamplerStates[17] = 98;
     rg.codeImageNames[17] = 0;
-    gfxCmdBufInput.codeImages[18] = renderTarget.image;
+    gfxCmdBufInput.codeImages[18] = gfxRenderTargets[5].image;
     gfxCmdBufInput.codeImageSamplerStates[18] = 97;
     rg.codeImageNames[18] = 0;
     gfxCmdBufInput.codeImages[22] = 0;

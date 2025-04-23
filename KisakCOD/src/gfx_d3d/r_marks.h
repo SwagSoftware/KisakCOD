@@ -1,6 +1,7 @@
 #pragma once
 
 #include "r_gfx.h"
+#include <EffectsCore/fx_system.h>
 
 struct FxWorldMarkPoint // sizeof=0x18
 {                                       // ...

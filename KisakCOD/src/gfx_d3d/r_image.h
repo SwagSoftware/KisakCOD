@@ -141,6 +141,42 @@ bool __cdecl Image_IsCodeImage(int track);
 bool __cdecl imagecompare(GfxImage *image1, GfxImage *image2);
 _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image);
 
+char __cdecl Image_LoadFromFile(GfxImage *image);
+void __cdecl Image_LoadFromData(GfxImage *image, GfxImageFileHeader *fileHeader, unsigned __int8 *srcData);
+char __cdecl Image_AssignDefaultTexture(GfxImage *image);
+int __cdecl Image_GetAvailableHashLocation(const char *name);
+char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFileRead)(const char *, int *));
+void __cdecl Image_LoadBitmap(
+    GfxImage *image,
+    const GfxImageFileHeader *fileHeader,
+    unsigned __int8 *data,
+    _D3DFORMAT format,
+    int bytesPerPixel);
+void __cdecl Image_LoadDxtc(
+    GfxImage *image,
+    const GfxImageFileHeader *fileHeader,
+    const unsigned __int8 *data,
+    _D3DFORMAT format,
+    int bytesPerBlock);
+void __cdecl Image_LoadSolid(
+    GfxImage *image,
+    unsigned __int8 r,
+    unsigned __int8 g,
+    unsigned __int8 b,
+    unsigned __int8 a);
+GfxImage *__cdecl Image_LoadBuiltin(char *name, unsigned __int8 semantic, unsigned __int8 imageTrack);
+double __cdecl Outdoor_TraceHeightInWorld(float worldX, float worldY);
+int __cdecl Outdoor_TransformToTextureClamped(int dimension, float inWorld);
+void __cdecl Image_LoadWhite(GfxImage *image);
+void __cdecl Image_LoadBlack(GfxImage *image);
+void __cdecl Image_LoadBlack3D(GfxImage *image);
+void __cdecl Image_LoadBlackCube(GfxImage *image);
+void __cdecl Image_LoadPixelCostColorCode(GfxImage *image);
+void __cdecl Image_LoadGray(GfxImage *image);
+void __cdecl Image_LoadIdentityNormalMap(GfxImage *image);
+void __cdecl Outdoor_SetRendererOutdoorLookupMatrix(GfxWorld *world);
+
+
 void __cdecl R_ReleaseLostImages();
 void __cdecl R_ReloadLostImages();
 

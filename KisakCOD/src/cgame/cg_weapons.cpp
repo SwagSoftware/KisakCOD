@@ -2880,7 +2880,7 @@ char __cdecl BulletTrace(
             lastSurfaceType,
             29);
     Com_Memset((unsigned int *)br, 0, 68);
-    CG_LocationalTrace(&br->trace, (float*)bp->start, (float *)bp->end, bp->ignoreEntIndex, (int)&sv.svEntities[342].clusternums[2] + 1);
+    CG_LocationalTrace(&br->trace, (float*)bp->start, (float*)bp->end, bp->ignoreEntIndex, 0x2806831);
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
     hitEntId = Trace_GetEntityHitId(&br->trace);

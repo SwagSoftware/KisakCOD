@@ -4,8 +4,9 @@
 
 #include <cstddef>
 
-#include <xanim/xasset.h>
+#include <xanim/xanim.h>
 #include <xanim/xmodel.h>
+#include <win32/win_local.h>
 
 struct StreamDelayInfo // sizeof=0x8
 {

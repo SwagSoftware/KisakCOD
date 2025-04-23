@@ -1085,9 +1085,9 @@ char __cdecl Material_ParseRuleSet(
     char *token; // [esp+202Ch] [ebp-8h]
     int i; // [esp+2030h] [ebp-4h]
 
-    if (!Material_MatchToken(text, ruleSetName))
+    if (!Material_MatchToken((const char**)text, (const char*)ruleSetName))
         return 0;
-    if (!Material_MatchToken(text, "{"))
+    if (!Material_MatchToken((const char**)text, "{"))
         return 0;
     memset(dst, 0, sizeof(dst));
     v7 = 0;
@@ -1099,10 +1099,10 @@ char __cdecl Material_ParseRuleSet(
             Com_ScriptError("state %s has more than %i rules\n", ruleSetName, 256);
             return 0;
         }
-        token = Com_Parse(text)->token;
+        token = Com_Parse((const char**)text)->token;
         if (*token == 125)
             break;
-        v9 = Material_ParseRuleSetCondition(text, token, &dst[ruleCount]);
+        v9 = Material_ParseRuleSetCondition((const char **)text, token, &dst[ruleCount]);
         if (v9)
         {
             if (v9 == 2)
@@ -1112,7 +1112,7 @@ char __cdecl Material_ParseRuleSet(
                 Com_ScriptError("missing rule condition for state %s\n", ruleSetName);
                 return 0;
             }
-            if (!Material_ParseRuleSetValue(text, token, stateSet, &dst[v7]))
+            if (!Material_ParseRuleSetValue((const char **)text, token, stateSet, &dst[v7]))
                 return 0;
             for (i = v7 + 1; i < ruleCount; ++i)
             {
@@ -1408,7 +1408,8 @@ bool __cdecl Material_IncludeShader(GfxAssembledShaderText *prog, char *includeN
     unsigned int fileSize; // [esp+48h] [ebp-8h] BYREF
     bool hasLibPrefix; // [esp+4Fh] [ebp-1h]
 
-    hasLibPrefix = strnicmp(includeName, "lib/", 4u) == 0;
+    //hasLibPrefix = strnicmp(includeName, "lib/", 4u) == 0;
+    hasLibPrefix = _strnicmp(includeName, "lib/", 4u) == 0;
     if (isInLibDir)
     {
         if (hasLibPrefix)

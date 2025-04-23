@@ -6,6 +6,7 @@
 #include <universal/profile.h>
 #include "r_buffers.h"
 #include "r_utils.h"
+#include "r_water.h"
 
 
 int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
@@ -283,7 +284,7 @@ void __cdecl R_HW_SetPixelShaderConstant(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetPixelShaderConstantF( dest, data, rowCount )\n");
-        hr = device->SetPixelShaderConstantF(device, dest, data, rowCount);
+        hr = device->SetPixelShaderConstantF(dest, data, rowCount);
         if (hr < 0)
         {
             do

@@ -212,14 +212,6 @@ char __cdecl R_CullPointAndRadius(const float *pt, float radius, const DpvsPlane
     return 0;
 }
 
-void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned __int8 *colorBytes)
-{
-    if (colorFloat)
-        Byte4PackVertexColor(colorFloat, colorBytes);
-    else
-        *(unsigned int *)colorBytes = -1;
-}
-
 int __cdecl R_PickMaterial(
     int traceMask,
     const float *org,
@@ -490,6 +482,13 @@ GfxCmdBufSourceState *__cdecl R_GetActiveWorldMatrix(GfxCmdBufSourceState *sourc
 {
     R_WorldMatrixChanged(source);
     return source;
+}
+
+double __cdecl R_GetAdjustedLodDist(float dist, XModelLodRampType lodRampType)
+{
+    if (!rg.lodParms.valid)
+        MyAssertHandler(".\\r_model_lod.cpp", 34, 0, "%s", "model_lod_glob->valid");
+    return (dist * rg.lodParms.ramp[lodRampType].scale + rg.lodParms.ramp[lodRampType].bias);
 }
 
 double __cdecl R_GetBaseLodDist(const float* origin)

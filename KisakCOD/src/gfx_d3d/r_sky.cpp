@@ -2,6 +2,7 @@
 #include <universal/com_files.h>
 #include "r_init.h"
 #include <qcommon/cmd.h>
+#include "r_dvars.h"
 
 
 const dvar_t *r_sunflare_min_size;

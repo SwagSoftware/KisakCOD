@@ -34,3 +34,4 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo);
 
 unsigned int R_InitSpotShadowMeshes();
 void __cdecl R_ShutdownSpotShadowMeshes();
+void RB_SpotShadowMaps(const GfxBackEndData *data, const GfxViewInfo *viewInfo);

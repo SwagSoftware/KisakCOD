@@ -170,9 +170,12 @@ int __cdecl FS_WriteFileToDir(char *filename, char *path, char *buffer, unsigned
 void __cdecl FS_Restart(int localClientNum, int checksumFeed);
 bool __cdecl FS_NeedRestart(int checksumFeed);
 
+int __cdecl FS_TouchFile(const char *name);
 
 void FS_RegisterDvars();
 void __cdecl FS_Shutdown();
+bool __cdecl FS_DeleteInDir(char *filename, char *dir);
+void __cdecl FS_Rename(char *from, char *fromDir, char *to, char *toDir);
 
 extern const dvar_t *fs_remotePCDirectory;
 extern const dvar_t *fs_remotePCName;

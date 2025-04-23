@@ -1,6 +1,8 @@
 #include "r_model_skin.h"
 #include "r_init.h"
 #include "r_dvars.h"
+#include <qcommon/com_playerprofile.h>
+#include "r_buffers.h"
 
 
 //unsigned int const *const g_shortBoneWeightPerm__uint4 820f4950     gfx_d3d : r_model_skin.obj
@@ -73,7 +75,7 @@ void  R_SkinXModelCmd(_WORD *data)
     void *v63; // [esp+218Ch] [ebp-8h]
     void *retaddr; // [esp+2194h] [ebp+0h]
 
-    v62 = a1;
+    //v62 = a1;
     v63 = retaddr;
     v2 = alloca(8576);
     if (!dx.deviceLost)
@@ -112,7 +114,7 @@ void  R_SkinXModelCmd(_WORD *data)
                             if (v59)
                             {
                                 v59 = 0;
-                                _m_empty();
+                                //_m_empty();
                             }
                             v48 = (const float *)(v50 + 32 * j);
                             v47 = *v48;
@@ -264,34 +266,35 @@ void  R_SkinXModelCmd(_WORD *data)
                                 *v52);
                         v6 = (GfxPackedVertex *)&gfxBuf.skinnedCacheLockAddr[*v52];
                     }
-                    if (v60)
-                    {
-                        if (!v59)
-                        {
-                            v59 = 1;
-                            _m_empty();
-                        }
-                        v5 = 0;
-                        v4 = 0;
-                        if (fastSkin)
-                        {
-                            if ((int)*v52 >= 0)
-                                v4 = &gfxBuf.skinnedCacheNormalsAddr[(int)*v52 >> 5];
-                            v3 = v52[5];
-                            if (v3 >= 0)
-                                v5 = &gfxBuf.oldSkinnedCacheNormalsAddr[v3 >> 5];
-                        }
-                        R_SkinXSurfaceSkinnedSse(v7, (const DObjSkelMat *)&v8[64 * v54], v5, v4, v6);
-                    }
-                    else
+                    // KISAKTODO: SSE Skinning
+                    //if (v60)
+                    //{
+                    //    if (!v59)
+                    //    {
+                    //        v59 = 1;
+                    //        _m_empty();
+                    //    }
+                    //    v5 = 0;
+                    //    v4 = 0;
+                    //    if (fastSkin)
+                    //    {
+                    //        if ((int)*v52 >= 0)
+                    //            v4 = &gfxBuf.skinnedCacheNormalsAddr[(int)*v52 >> 5];
+                    //        v3 = v52[5];
+                    //        if (v3 >= 0)
+                    //            v5 = &gfxBuf.oldSkinnedCacheNormalsAddr[v3 >> 5];
+                    //    }
+                    //    R_SkinXSurfaceSkinnedSse(v7, (const DObjSkelMat *)&v8[64 * v54], v5, v4, v6);
+                    //}
+                    //else
                     {
                         R_SkinXSurfaceSkinned(v7, (const DObjSkelMat *)&v8[64 * v54], v6);
                     }
                 }
             }
         }
-        if (v59)
-            _m_empty();
+        //if (v59)
+        //    _m_empty();
         //Profile_EndInternal(0);
     }
 }

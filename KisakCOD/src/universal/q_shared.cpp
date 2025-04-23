@@ -12,29 +12,6 @@
 
 //Line 53466:  0006 : 02bc009c       int marker_q_shared      8537009c     q_shared.obj
 //Line 53467 : 0006 : 02bc58d0       struct TraceThreadInfo *g_traceThreadInfo 853758d0     q_shared.obj
-//Line 14255:  0001 : 0006f99c       float const *const colorBlack         8206ff9c     q_shared.obj
-//Line 14256 : 0001 : 0006f9ac       float const *const colorRed           8206ffac     q_shared.obj
-//Line 14257 : 0001 : 0006f9bc       float const *const colorGreen         8206ffbc     q_shared.obj
-//Line 14258 : 0001 : 0006f9cc       float const *const colorLtGreen       8206ffcc     q_shared.obj
-//Line 14259 : 0001 : 0006f9dc       float const *const colorBlue          8206ffdc     q_shared.obj
-//Line 14260 : 0001 : 0006f9ec       float const *const colorLtBlue        8206ffec     q_shared.obj
-//Line 14261 : 0001 : 0006f9fc       float const *const colorYellow        8206fffc     q_shared.obj
-//Line 14262 : 0001 : 0006fa0c       float const *const colorLtYellow      8207000c     q_shared.obj
-//Line 14263 : 0001 : 0006fa1c       float const *const colorMdYellow      8207001c     q_shared.obj
-//Line 14264 : 0001 : 0006fa2c       float const *const colorMagenta       8207002c     q_shared.obj
-//Line 14265 : 0001 : 0006fa3c       float const *const colorCyan          8207003c     q_shared.obj
-//Line 14266 : 0001 : 0006fa4c       float const *const colorLtCyan        8207004c     q_shared.obj
-//Line 14267 : 0001 : 0006fa5c       float const *const colorMdCyan        8207005c     q_shared.obj
-//Line 14268 : 0001 : 0006fa6c       float const *const colorDkCyan        8207006c     q_shared.obj
-//Line 14269 : 0001 : 0006fa7c       float const *const colorWhite         8207007c     q_shared.obj
-//Line 14270 : 0001 : 0006fa8c       float const *const colorLtGrey        8207008c     q_shared.obj
-//Line 14271 : 0001 : 0006fa9c       float const *const colorMdGrey        8207009c     q_shared.obj
-//Line 14272 : 0001 : 0006faac       float const *const colorDkGrey        820700ac     q_shared.obj
-//Line 14273 : 0001 : 0006fabc       float const *const colorOrange        820700bc     q_shared.obj
-//Line 14274 : 0001 : 0006facc       float const *const colorLtOrange      820700cc     q_shared.obj
-//Line 14275 : 0001 : 0006fadc       float const *const colorWhiteFaded    820700dc     q_shared.obj
-//Line 14276 : 0001 : 0006faec       float const *const colorGreenFaded    820700ec     q_shared.obj
-//Line 14277 : 0001 : 0006fafc       float const *const colorRedFaded      820700fc     q_shared.obj
 //Line 14278 : 0001 : 0006fb0c       struct orientation_t const orIdentity 8207010c     q_shared.obj
 
 void I_strncat(char* dest, int size, const char* src)

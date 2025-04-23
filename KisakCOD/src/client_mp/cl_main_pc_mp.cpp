@@ -9,6 +9,66 @@
 bool s_playerMute[64];
 serverStatus_s cl_serverStatusList[16];
 
+int __cdecl CL_ServerStatus(char *serverAddress, char *serverStatusString, int maxLen)
+{
+    serverStatus_s *serverStatus; // [esp+0h] [ebp-20h]
+    int i; // [esp+4h] [ebp-1Ch]
+    netadr_t to; // [esp+8h] [ebp-18h] BYREF
+
+    if (serverAddress)
+    {
+        if (!NET_StringToAdr(serverAddress, &to))
+            return 0;
+        serverStatus = CL_GetServerStatus(to);
+        if (!serverStatusString)
+        {
+            serverStatus->retrieved = 1;
+            return 0;
+        }
+        if (NET_CompareAdr(to, serverStatus->address))
+        {
+            if (!serverStatus->pending)
+            {
+                I_strncpyz(serverStatusString, serverStatus->string, maxLen);
+                serverStatus->retrieved = 1;
+                serverStatus->startTime = 0;
+                return 1;
+            }
+            if (serverStatus->startTime < (Sys_Milliseconds() - cl_serverStatusResendTime->current.integer))
+            {
+                serverStatus->print = 0;
+                serverStatus->pending = 1;
+                serverStatus->retrieved = 0;
+                serverStatus->time = 0;
+                serverStatus->startTime = Sys_Milliseconds();
+                NET_OutOfBandPrint(NS_CLIENT1, to, "getstatus");
+                return 0;
+            }
+        }
+        else if (serverStatus->retrieved)
+        {
+            serverStatus->address = to;
+            serverStatus->print = 0;
+            serverStatus->pending = 1;
+            serverStatus->retrieved = 0;
+            serverStatus->startTime = Sys_Milliseconds();
+            serverStatus->time = 0;
+            NET_OutOfBandPrint(NS_CLIENT1, to, "getstatus");
+            return 0;
+        }
+        return 0;
+    }
+    else
+    {
+        for (i = 0; i < 16; ++i)
+        {
+            cl_serverStatusList[i].address.port = 0;
+            cl_serverStatusList[i].retrieved = 1;
+        }
+        return 0;
+    }
+}
+
 void __cdecl CL_SetServerInfoByAddress(netadr_t from, char *info, __int16 ping)
 {
     int cmp; // [esp+0h] [ebp-14h]

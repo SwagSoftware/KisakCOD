@@ -19,6 +19,12 @@ struct // sizeof=0x8
 static int s_lightGridRowDelta;
 static int s_lightGridSliceDelta;
 
+void __cdecl R_SetLightGridSampleDeltas(int rowStride, int sliceStride)
+{
+    s_lightGridRowDelta = rowStride;
+    s_lightGridSliceDelta = sliceStride - 3 * rowStride;
+}
+
 void __cdecl R_ShowLightVisCachePoints(const float *viewOrigin, const DpvsPlane *clipPlanes, int clipPlaneCount)
 {
     float *color; // [esp+Ch] [ebp-A4h]
@@ -1714,7 +1720,7 @@ unsigned __int8 __cdecl R_GetPrimaryLightForModel(
     }
     if (!checkCount)
         return 0;
-    verts = Hunk_AllocateTempMemory(393216, "R_GetXModelBounds");
+    verts = (float*)Hunk_AllocateTempMemory(393216, "R_GetXModelBounds");
     memset(votes, 0, 4 * primaryLightCount);
     mostVotes = 0;
     bestLight = 0;

@@ -3,6 +3,39 @@
 #include <qcommon/graph.h>
 #include <sound/snd_public.h>
 
+const char *g_pszSndAliasKeyNames[29] =
+{
+  NULL,
+  "name",
+  "sequence",
+  "file",
+  "subtitle",
+  "vol_min",
+  "vol_max",
+  "vol_mod",
+  "pitch_min",
+  "pitch_max",
+  "dist_min",
+  "dist_max",
+  "channel",
+  "type",
+  "loop",
+  "probability",
+  "loadspec",
+  "masterslave",
+  "secondaryaliasname",
+  "chainaliasname",
+  "volumefalloffcurve",
+  "startdelay",
+  "speakermap",
+  "reverb",
+  "lfe percentage",
+  "center percentage",
+  "envelop_min",
+  "envelop_max",
+  "envelop percentage"
+}; // idb
+
 enum snd_alias_type_t : __int32
 {                                       // ...
     SAT_UNKNOWN = 0x0,
@@ -44,6 +77,16 @@ enum snd_alias_members_t : __int32
     SA_ENVELOPPERCENTAGE = 0x1C,
     SA_NUMFIELDS = 0x1D,
 };
+snd_alias_members_t &operator++(snd_alias_members_t &e) {
+    static_cast<snd_alias_members_t>(static_cast<int>(e) + 1);
+    return e;
+}
+snd_alias_members_t &operator++(snd_alias_members_t &e, int i)
+{
+    snd_alias_members_t temp = e;
+    ++e;
+    return temp;
+}
 
 struct SoundFileInfo // sizeof=0x8
 {                                       // ...
@@ -159,6 +202,8 @@ bool __cdecl Com_AliasNameRefersToSingleAlias(const char *aliasname);
 void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurGame, snd_alias_system_t system);
 void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system);
 
+char __cdecl Com_AddAliasList(const char *name, snd_alias_list_t *aliasList);
+
 void __cdecl Com_InitSoundDevGuiGraphs();
 void Com_InitSoundDevGuiGraphs_LoadObj();
 void Com_InitSoundDevGuiGraphs_FastFile();
@@ -170,5 +215,27 @@ void __cdecl Com_InitSoundAlias();
 void Com_InitEntChannels(char *file);
 
 bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, SndCurve *curve);
+
+void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCurGame, const char *sourceFile);
+
+void __cdecl Com_MakeSoundAliasesPermanent(snd_alias_list_t *aliasInfo, SoundFileInfo *soundFileInfo);
+
+int __cdecl Com_LoadSoundAliasSounds(SoundFileInfo *soundFileInfo);
+
+void __cdecl Com_ParseEntChannelFile(const char *buffer);
+void __cdecl Com_LoadSoundAliasField(
+    const char *loadspec,
+    const char *loadspecCurGame,
+    const char *sourceFile,
+    char *token,
+    snd_alias_members_t field,
+    char *isFieldSet,
+    snd_alias_build_s *alias);
+void __cdecl Com_LoadSoundAliasDefaults(snd_alias_build_s *alias, const char *sourceFile, const char *loadspec);
+void __cdecl Com_SetChannelMapEntry(
+    MSSChannelMap *entry,
+    unsigned int inputChannel,
+    unsigned int outputChannel,
+    float volume);
 
 extern SoundAliasGlobals g_sa;

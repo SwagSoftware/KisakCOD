@@ -610,9 +610,7 @@ void __cdecl CG_AddPacketEntity(int localClientNum, int entnum)
     angles[1] = cent->pose.angles[1];
     angles[2] = cent->pose.angles[2];
     entMoved = 0;
-    if ((eType == 6 || eType == 13)
-        && (clientActive_t *)cent->nextState.solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+    if ((eType == 6 || eType == 13) && cent->nextState.solid == 0xFFFFFF)
     {
         CG_CalcEntityLerpPositions(localClientNum, cent);
         v4 = origin[0] == cent->pose.origin[0] && origin[1] == cent->pose.origin[1] && origin[2] == cent->pose.origin[2];
@@ -1219,10 +1217,7 @@ void __cdecl CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent)
             0,
             "%s",
             "cent->currentState.pos.trType == TR_PHYSICS && cent->currentState.apos.trType == TR_PHYSICS");
-    if (cent->nextValid
-        && (cent->nextState.lerp.eFlags & 0x20) == 0
-        && (clientActive_t *)cent->nextState.solid != (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+    if (cent->nextValid && (cent->nextState.lerp.eFlags & 0x20) == 0 && cent->nextState.solid != 0xFFFFFF)
     {
         if (localClientNum)
             MyAssertHandler(
@@ -1768,8 +1763,7 @@ void __cdecl CG_AddEntityLoopSound(int localClientNum, const centity_s *cent)
     float origin[3]; // [esp+Ch] [ebp-10h] BYREF
     GfxBrushModel *bmodel; // [esp+18h] [ebp-4h]
 
-    if ((clientActive_t *)cent->nextState.solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-        + 3))
+    if (cent->nextState.solid == 0xFFFFFF)
     {
         bmodel = R_GetBrushModel(cent->nextState.index.brushmodel);
         Vec3Avg(bmodel->bounds[0], bmodel->bounds[1], midpoint);
@@ -1920,8 +1914,7 @@ void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if ((clientActive_t *)cent->nextState.solid == (clientActive_t *)((char *)&clients[0].parseClients[238].attachTagIndex[4]
-            + 3))
+        if (cent->nextState.solid == 0xFFFFFF)
         {
             if (cent->nextValid && (cent->nextState.lerp.eFlags & 0x800) != 0)
                 AimTarget_ProcessEntity(localClientNum, cent);

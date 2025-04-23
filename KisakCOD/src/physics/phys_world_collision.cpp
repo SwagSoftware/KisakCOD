@@ -5,6 +5,7 @@
 #include <ode/objects.h>
 #include <universal/assertive.h>
 #include <qcommon/qcommon.h>
+#include <qcommon/threads.h>
 
 // LWSS HACK - unfk some types
 #define float dReal
@@ -468,7 +469,7 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
     CM_BoxLeafnums_r(&ll, 0);
     if (ll.count)
     {
-        input.clipMask = (int)sv.svEntities[345].clusternums + 1;
+        input.clipMask = 0x2806C91;
         results.contacts = contact;
         results.contactCount = 0;
         results.maxContacts = flags;

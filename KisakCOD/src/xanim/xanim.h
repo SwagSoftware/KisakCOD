@@ -1,18 +1,16 @@
 #pragma once
 
 // LWSS: This file has way too many structs. KISAKTODO: move out later.
-
 #include "xanim_public.h"
-
 #include <script/scr_stringlist.h>
-
 #include <gfx_d3d/r_font.h>
-
+#include <gfx_d3d/r_bsp.h>
 #include <universal/com_math.h>
-
 #include <bgame/bg_weapons.h>
-
-#include <xanim/xasset.h>
+#include <xanim/xanim.h>
+#include <sound/snd_public.h>
+#include "dobj.h"
+#include "xmodel.h"
 
 union XAnimIndices // sizeof=0x4
 {                                       // ...
@@ -209,15 +207,6 @@ struct mnode_t // sizeof=0x4
     unsigned __int16 rightChildOffset;
 };
 
-struct DynEntityServer // sizeof=0x24
-{
-    GfxPlacement pose;
-    unsigned __int16 flags;
-    // padding byte
-    // padding byte
-    int health;
-};
-
 struct __declspec(align(4)) XAnimState // sizeof=0x20
 {                                       // ...
     float currentAnimTime;              // ...
@@ -308,19 +297,7 @@ struct cNode_t // sizeof=0x8
     cplane_s* plane;
     __int16 children[2];
 };
-struct __declspec(align(4)) cLeaf_t // sizeof=0x2C
-{                                       // ...
-    unsigned __int16 firstCollAabbIndex;
-    unsigned __int16 collAabbCount;
-    int brushContents;                  // ...
-    int terrainContents;                // ...
-    float mins[3];                      // ...
-    float maxs[3];                      // ...
-    int leafBrushNode;                  // ...
-    __int16 cluster;
-    // padding byte
-    // padding byte
-};
+
 struct cLeafBrushNodeLeaf_t // sizeof=0x4
 {                                       // ...
     unsigned __int16* brushes;
@@ -374,13 +351,6 @@ struct CollisionAabbTree // sizeof=0x20
     unsigned __int16 childCount;
     CollisionAabbTreeIndex u;
 };
-struct cmodel_t // sizeof=0x48
-{                                       // ...
-    float mins[3];
-    float maxs[3];
-    float radius;
-    cLeaf_t leaf;                       // ...
-};
 
 struct __declspec(align(2)) cbrushside_t // sizeof=0xC
 {                                       // ...
@@ -425,62 +395,6 @@ struct DynEntityDef;
 struct DynEntityPose;
 struct DynEntityClient;
 struct DynEntityColl;
-
-struct clipMap_t // sizeof=0x11C
-{                                       // ...
-    const char* name;                   // ...
-    int isInUse;                        // ...
-    int planeCount;                     // ...
-    cplane_s* planes;                   // ...
-    unsigned int numStaticModels;       // ...
-    cStaticModel_s* staticModelList;    // ...
-    unsigned int numMaterials;          // ...
-    dmaterial_t* materials;             // ...
-    unsigned int numBrushSides;         // ...
-    cbrushside_t* brushsides;           // ...
-    unsigned int numBrushEdges;         // ...
-    unsigned __int8* brushEdges;        // ...
-    unsigned int numNodes;              // ...
-    cNode_t* nodes;                     // ...
-    unsigned int numLeafs;              // ...
-    cLeaf_t* leafs;                     // ...
-    unsigned int leafbrushNodesCount;   // ...
-    cLeafBrushNode_s* leafbrushNodes;   // ...
-    unsigned int numLeafBrushes;        // ...
-    unsigned __int16* leafbrushes;      // ...
-    unsigned int numLeafSurfaces;       // ...
-    unsigned int* leafsurfaces;         // ...
-    unsigned int vertCount;             // ...
-    float (*verts)[3];                  // ...
-    int triCount;                       // ...
-    unsigned __int16* triIndices;       // ...
-    unsigned __int8* triEdgeIsWalkable; // ...
-    int borderCount;                    // ...
-    CollisionBorder* borders;           // ...
-    int partitionCount;                 // ...
-    CollisionPartition* partitions;     // ...
-    int aabbTreeCount;                  // ...
-    CollisionAabbTree* aabbTrees;       // ...
-    unsigned int numSubModels;          // ...
-    cmodel_t* cmodels;                  // ...
-    unsigned __int16 numBrushes;        // ...
-    // padding byte
-    // padding byte
-    cbrush_t* brushes;                  // ...
-    int numClusters;                    // ...
-    int clusterBytes;                   // ...
-    unsigned __int8* visibility;        // ...
-    int vised;                          // ...
-    MapEnts* mapEnts;                   // ...
-    cbrush_t* box_brush;                // ...
-    cmodel_t box_model;                 // ...
-    unsigned __int16 dynEntCount[2];    // ...
-    DynEntityDef* dynEntDefList[2];     // ...
-    DynEntityPose* dynEntPoseList[2];   // ...
-    DynEntityClient* dynEntClientList[2]; // ...
-    DynEntityColl* dynEntCollList[2];   // ...
-    unsigned int checksum;              // ...
-};
 
 struct ComPrimaryLight // sizeof=0x44
 {
@@ -657,96 +571,6 @@ struct GfxLightRegion // sizeof=0x8
     unsigned int hullCount;
     GfxLightRegionHull* hulls;
 };
-struct sunflare_t // sizeof=0x60
-{                                       // ...
-    bool hasValidData;
-    // padding byte
-    // padding byte
-    // padding byte
-    Material* spriteMaterial;
-    Material* flareMaterial;
-    float spriteSize;
-    float flareMinSize;
-    float flareMinDot;
-    float flareMaxSize;
-    float flareMaxDot;
-    float flareMaxAlpha;
-    int flareFadeInTime;
-    int flareFadeOutTime;
-    float blindMinDot;
-    float blindMaxDot;
-    float blindMaxDarken;
-    int blindFadeInTime;
-    int blindFadeOutTime;
-    float glareMinDot;
-    float glareMaxDot;
-    float glareMaxLighten;
-    int glareFadeInTime;
-    int glareFadeOutTime;
-    float sunFxPosition[3];
-};
-struct GfxWorld // sizeof=0x2DC
-{                                       // ...
-    const char* name;                   // ...
-    const char* baseName;               // ...
-    int planeCount;                     // ...
-    int nodeCount;                      // ...
-    int indexCount;                     // ...
-    unsigned __int16* indices;          // ...
-    int surfaceCount;                   // ...
-    GfxWorldStreamInfo streamInfo;
-    // padding byte
-    // padding byte
-    // padding byte
-    int skySurfCount;                   // ...
-    int* skyStartSurfs;                 // ...
-    GfxImage* skyImage;                 // ...
-    unsigned __int8 skySamplerState;    // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    unsigned int vertexCount;           // ...
-    GfxWorldVertexData vd;              // ...
-    unsigned int vertexLayerDataSize;   // ...
-    GfxWorldVertexLayerData vld;        // ...
-    SunLightParseParams sunParse;       // ...
-    GfxLight* sunLight;                 // ...
-    float sunColorFromBsp[3];
-    unsigned int sunPrimaryLightIndex;  // ...
-    unsigned int primaryLightCount;     // ...
-    int cullGroupCount;                 // ...
-    unsigned int reflectionProbeCount;  // ...
-    GfxReflectionProbe* reflectionProbes; // ...
-    GfxTexture* reflectionProbeTextures; // ...
-    GfxWorldDpvsPlanes dpvsPlanes;      // ...
-    int cellBitsCount;                  // ...
-    GfxCell* cells;                     // ...
-    int lightmapCount;                  // ...
-    GfxLightmapArray* lightmaps;        // ...
-    GfxLightGrid lightGrid;             // ...
-    GfxTexture* lightmapPrimaryTextures; // ...
-    GfxTexture* lightmapSecondaryTextures; // ...
-    int modelCount;                     // ...
-    GfxBrushModel* models;              // ...
-    float mins[3];                      // ...
-    float maxs[3];                      // ...
-    unsigned int checksum;
-    int materialMemoryCount;            // ...
-    MaterialMemory* materialMemory;     // ...
-    sunflare_t sun;                     // ...
-    float outdoorLookupMatrix[4][4];
-    GfxImage* outdoorImage;
-    unsigned int* cellCasterBits;       // ...
-    GfxSceneDynModel* sceneDynModel;    // ...
-    GfxSceneDynBrush* sceneDynBrush;    // ...
-    unsigned int* primaryLightEntityShadowVis; // ...
-    unsigned int* primaryLightDynEntShadowVis[2]; // ...
-    unsigned __int8* nonSunPrimaryLightForModelDynEnt; // ...
-    GfxShadowGeometry* shadowGeom;      // ...
-    GfxLightRegion* lightRegion;        // ...
-    GfxWorldDpvsStatic dpvs;            // ...
-    GfxWorldDpvsDynamic dpvsDyn;        // ...
-};
 
 
 
@@ -907,7 +731,7 @@ struct itemDef_s // sizeof=0x174
     int gameMsgWindowMode;
     const char* text;
     int itemFlags;
-    menuDef_t* parent;                  // ...
+    struct menuDef_t* parent;                  // ...
     const char* mouseEnterText;
     const char* mouseExitText;
     const char* mouseEnter;
@@ -974,7 +798,6 @@ struct LocalizeEntry // sizeof=0x8
     const char* value;
     const char* name;
 };
-
 
 struct WeaponDef // sizeof=0x878
 {                                       // ...
@@ -1354,6 +1177,314 @@ struct RawFile // sizeof=0xC
     int len;
     const char* buffer;
 };
+
+
+extern "C" {
+    // win32
+    struct _OVERLAPPED;
+}
+
+union XAssetHeader // sizeof=0x4
+{                                       // ...
+    XAssetHeader() { data = NULL; }
+    // LWSS: This is used for lots of places in db_registry
+    // XAssetHeader(XModelPieces *arg) { xmodelPieces = arg; }
+    // XAssetHeader(PhysPreset *arg) { physPreset = arg; }
+    // XAssetHeader(XAnimParts *arg) { parts = arg; }
+    // XAssetHeader(XModel *arg) { model = arg; }
+    // XAssetHeader(Material *arg) { material = arg; }
+    // XAssetHeader(MaterialPixelShader *arg) { pixelShader = arg; }
+    // XAssetHeader(MaterialVertexShader *arg) { vertexShader = arg; }
+    // XAssetHeader(MaterialTechniqueSet *arg) { techniqueSet = arg; }
+    // XAssetHeader(GfxImage *arg) { image = arg; }
+    // XAssetHeader(snd_alias_list_t *arg) { sound = arg; }
+    // XAssetHeader(SndCurve *arg) { sndCurve = arg; }
+    // XAssetHeader(LoadedSound *arg) { loadSnd = arg; }
+    // XAssetHeader(clipMap_t *arg) { clipMap = arg; }
+    // XAssetHeader(ComWorld *arg) { comWorld = arg; }
+    // XAssetHeader(GameWorldSp *arg) { gameWorldSp = arg; }
+    // XAssetHeader(GameWorldMp *arg) { gameWorldMp = arg; }
+    // XAssetHeader(MapEnts *arg) { mapEnts = arg; }
+    // XAssetHeader(GfxWorld *arg) { gfxWorld = arg; }
+    // XAssetHeader(GfxLightDef *arg) { lightDef = arg; }
+    // XAssetHeader(Font_s *arg) { font = arg; }
+    // XAssetHeader(MenuList *arg) { menuList = arg; }
+    // XAssetHeader(menuDef_t *arg) { menu = arg; }
+    // XAssetHeader(LocalizeEntry *arg) { localize = arg; }
+    // XAssetHeader(WeaponDef *arg) { weapon = arg; }
+    // XAssetHeader(SndDriverGlobals *arg) { sndDriverGlobals = arg; }
+    // XAssetHeader(const FxEffectDef *arg) { fx = arg; }
+    // XAssetHeader(FxImpactTable *arg) { impactFx = arg; }
+    // XAssetHeader(RawFile *arg) { rawfile = arg; }
+    // XAssetHeader(StringTable *arg) { stringTable = arg; }
+    XAssetHeader(void *arg) { data = arg; }
+
+    struct XModelPieces *xmodelPieces;
+    struct PhysPreset *physPreset;
+    struct XAnimParts *parts;
+    struct XModel *model;
+    struct Material *material;
+    struct MaterialPixelShader *pixelShader;
+    struct MaterialVertexShader *vertexShader;
+    struct MaterialTechniqueSet *techniqueSet;
+    struct GfxImage *image;
+    struct snd_alias_list_t *sound;
+    struct SndCurve *sndCurve;
+    struct LoadedSound *loadSnd;
+    struct clipMap_t *clipMap;
+    struct ComWorld *comWorld;
+    struct GameWorldSp *gameWorldSp;
+    struct GameWorldMp *gameWorldMp;
+    struct MapEnts *mapEnts;
+    struct GfxWorld *gfxWorld;
+    struct GfxLightDef *lightDef;
+    struct Font_s *font;
+    struct MenuList *menuList;
+    struct menuDef_t *menu;
+    struct LocalizeEntry *localize;
+    struct WeaponDef *weapon;
+    struct SndDriverGlobals *sndDriverGlobals;
+    const struct FxEffectDef *fx;
+    struct FxImpactTable *impactFx;
+    struct RawFile *rawfile;
+    struct StringTable *stringTable;
+
+    void *data;
+};
+
+enum XAssetType : __int32
+{
+    ASSET_TYPE_XMODELPIECES = 0x0,
+    ASSET_TYPE_PHYSPRESET = 0x1,
+    ASSET_TYPE_XANIMPARTS = 0x2,
+    ASSET_TYPE_XMODEL = 0x3,
+    ASSET_TYPE_MATERIAL = 0x4,
+    ASSET_TYPE_TECHNIQUE_SET = 0x5,
+    ASSET_TYPE_IMAGE = 0x6,
+    ASSET_TYPE_SOUND = 0x7,
+    ASSET_TYPE_SOUND_CURVE = 0x8,
+    ASSET_TYPE_LOADED_SOUND = 0x9,
+    ASSET_TYPE_CLIPMAP = 0xA,
+    ASSET_TYPE_CLIPMAP_PVS = 0xB,
+    ASSET_TYPE_COMWORLD = 0xC,
+    ASSET_TYPE_GAMEWORLD_SP = 0xD,
+    ASSET_TYPE_GAMEWORLD_MP = 0xE,
+    ASSET_TYPE_MAP_ENTS = 0xF,
+    ASSET_TYPE_GFXWORLD = 0x10,
+    ASSET_TYPE_LIGHT_DEF = 0x11,
+    ASSET_TYPE_UI_MAP = 0x12,
+    ASSET_TYPE_FONT = 0x13,
+    ASSET_TYPE_MENULIST = 0x14,
+    ASSET_TYPE_MENU = 0x15,
+    ASSET_TYPE_LOCALIZE_ENTRY = 0x16,
+    ASSET_TYPE_WEAPON = 0x17,
+    ASSET_TYPE_SNDDRIVER_GLOBALS = 0x18,
+    ASSET_TYPE_FX = 0x19,
+    ASSET_TYPE_IMPACT_FX = 0x1A,
+    ASSET_TYPE_AITYPE = 0x1B,
+    ASSET_TYPE_MPTYPE = 0x1C,
+    ASSET_TYPE_CHARACTER = 0x1D,
+    ASSET_TYPE_XMODELALIAS = 0x1E,
+    ASSET_TYPE_RAWFILE = 0x1F,
+    ASSET_TYPE_STRINGTABLE = 0x20,
+    ASSET_TYPE_COUNT = 0x21,
+    ASSET_TYPE_STRING = 0x21,
+    ASSET_TYPE_ASSETLIST = 0x22,
+};
+XAssetType &operator++(XAssetType &e) {
+    static_cast<XAssetType>(static_cast<int>(e) + 1);
+    return e;
+}
+XAssetType &operator++(XAssetType &e, int i)
+{
+    XAssetType temp = e;
+    ++e;
+    return temp;
+}
+
+struct XAsset // sizeof=0x8
+{                                       // ...
+    XAssetType type;                    // ...
+    XAssetHeader header;                // ...
+};
+
+union XAssetSize // sizeof=0x878
+{                                       // ...
+    XAssetSize()
+    {
+        fx = NULL;
+    }
+    XAnimParts parts;
+    XModel model;
+    Material material;
+    MaterialPixelShader pixelShader;
+    MaterialVertexShader vertexShader;
+    MaterialTechniqueSet techniqueSet;
+    GfxImage image;
+    snd_alias_list_t sound;
+    SndCurve sndCurve;
+    clipMap_t clipMap;
+    ComWorld comWorld;
+    MapEnts mapEnts;
+    GfxWorld gfxWorld;
+    GfxLightDef lightDef;
+    Font_s font;
+    MenuList menuList;
+    menuDef_t menu;
+    LocalizeEntry localize;
+    WeaponDef weapon;
+    SndDriverGlobals sndDriverGlobals;
+    const FxEffectDef *fx;
+    FxImpactTable impactFx;
+    RawFile rawfile;
+    StringTable stringTable;
+};
+
+template <typename T>
+union XAssetPoolEntry // sizeof=0x10
+{                                       // ...
+    StringTable entry;
+    XAssetPoolEntry<T> *next;
+};
+
+template <typename T, int LEN>
+struct XAssetPool
+{
+    XAssetPoolEntry<T> *freeHead;
+    XAssetPoolEntry<T> entries[LEN];
+};
+
+struct XAssetEntry // sizeof=0x10
+{                                       // ...
+    XAsset asset;                       // ...
+    unsigned __int8 zoneIndex;
+    bool inuse;
+    unsigned __int16 nextHash;
+    unsigned __int16 nextOverride;
+    unsigned __int16 usageFrame;
+};
+
+union XAssetEntryPoolEntry // sizeof=0x10
+{                                       // ...
+    XAssetEntry entry;
+    XAssetEntryPoolEntry *next;
+};
+
+struct XZoneInfo // sizeof=0xC
+{                                       // ...
+    const char *name;                   // ...
+    int allocFlags;                     // ...
+    int freeFlags;                      // ...
+};
+
+struct XBlock // sizeof=0x8
+{                                       // ...
+    unsigned __int8 *data;
+    unsigned int size;
+};
+
+struct XZoneMemory // sizeof=0x58
+{                                       // ...
+    XBlock blocks[9];
+    unsigned __int8 *lockedVertexData;
+    unsigned __int8 *lockedIndexData;
+    void *vertexBuffer;
+    void *indexBuffer;
+};
+
+struct __declspec(align(4)) XZone // sizeof=0xA8
+{                                       // ...
+    char name[64];                      // ...
+    int flags;                          // ...
+    int allocType;
+    XZoneMemory mem;                    // ...
+    int fileSize;                       // ...
+    bool modZone;                       // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+
+struct ScriptStringList // sizeof=0x8
+{                                       // ...
+    int count;
+    const char **strings;
+};
+
+struct XAssetList // sizeof=0x10
+{                                       // ...
+    ScriptStringList stringList;
+    int assetCount;
+    XAsset *assets;
+};
+
+struct XFile // sizeof=0x2C
+{                                       // ...
+    unsigned int size;
+    unsigned int externalSize;          // ...
+    unsigned int blockSize[9];          // ...
+};
+
+struct XSurfaceCollisionAabb // sizeof=0xC
+{                                       // ...
+    unsigned __int16 mins[3];
+    unsigned __int16 maxs[3];
+};
+
+struct XSurfaceCollisionNode // sizeof=0x10
+{
+    XSurfaceCollisionAabb aabb;
+    unsigned __int16 childBeginIndex;
+    unsigned __int16 childCount;
+};
+
+struct XSurfaceCollisionLeaf // sizeof=0x2
+{
+    unsigned __int16 triangleBeginIndex;
+};
+
+struct XSurfaceCollisionTree // sizeof=0x28
+{
+    float trans[3];
+    float scale[3];
+    unsigned int nodeCount;
+    XSurfaceCollisionNode *nodes;
+    unsigned int leafCount;
+    XSurfaceCollisionLeaf *leafs;
+};
+struct XRigidVertList // sizeof=0xC
+{                                       // ...
+    unsigned __int16 boneOffset;        // ...
+    unsigned __int16 vertCount;         // ...
+    unsigned __int16 triOffset;         // ...
+    unsigned __int16 triCount;          // ...
+    XSurfaceCollisionTree *collisionTree;
+};
+
+struct XSurfaceVertexInfo // sizeof=0xC
+{                                       // ...
+    __int16 vertCount[4];
+    unsigned __int16 *vertsBlend;
+};
+
+struct XSurface // sizeof=0x38
+{
+    unsigned __int8 tileMode;
+    bool deformed;
+    unsigned __int16 vertCount;
+    unsigned __int16 triCount;
+    unsigned __int8 zoneHandle;
+    // padding byte
+    unsigned __int16 baseTriIndex;
+    unsigned __int16 baseVertIndex;
+    unsigned __int16 *triIndices;
+    XSurfaceVertexInfo vertInfo;
+    GfxPackedVertex *verts0;
+    unsigned int vertListCount;
+    XRigidVertList *vertList;
+    int partBits[4];
+};
+
 struct DObj_s;
 
 struct gentity_s;

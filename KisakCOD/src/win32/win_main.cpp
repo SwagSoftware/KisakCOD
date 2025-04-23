@@ -296,7 +296,7 @@ void Sys_Error(const char *error, ...)
 
 	if (com_dedicated->current.integer && Sys_IsMainThread())
 	{
-		Sys_ShowConsole(0, qfalse);
+		Sys_ShowConsole();
 		Conbuf_AppendText("\n\n");
 		Conbuf_AppendText(string);
 		Conbuf_AppendText("\n");

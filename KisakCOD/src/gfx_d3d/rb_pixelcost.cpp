@@ -1,5 +1,6 @@
 #include "rb_pixelcost.h"
 #include "rb_sky.h"
+#include <universal/timing.h>
 
 struct GfxPixelCostKey_s // sizeof=0x8
 {                                       // ...
@@ -283,10 +284,11 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
 
     if (pixelCostMode == GFX_PIXEL_COST_MODE_MEASURE_COST)
     {
-        ((void(__thiscall *)(IDirect3DQuery9 *, IDirect3DQuery9 *, int))gfxAssets.pixelCountQuery->Issue)(
-            gfxAssets.pixelCountQuery,
-            gfxAssets.pixelCountQuery,
-            1);
+        gfxAssets.pixelCountQuery->Issue(1);
+        //((void(__thiscall *)(IDirect3DQuery9 *, IDirect3DQuery9 *, int))gfxAssets.pixelCountQuery->Issue)(
+        //    gfxAssets.pixelCountQuery,
+        //    gfxAssets.pixelCountQuery,
+        //    1);
         RB_PixelCost_EndTiming();
         pixelCount = RB_HW_ReadOcclusionQuery(gfxAssets.pixelCountQuery);
         if (pixelCount)
@@ -358,9 +360,9 @@ void RB_PixelCost_EndTiming()
 GfxRenderTargetId __cdecl RB_PixelCost_OverrideRenderTarget(GfxRenderTargetId targetId)
 {
     if (targetId < R_RENDERTARGET_SCENE)
-        return 1;
+        return R_RENDERTARGET_FRAME_BUFFER;
     if (targetId >= R_RENDERTARGET_SHADOWCOOKIE)
         return targetId;
-    return 2;
+    return R_RENDERTARGET_SCENE;
 }
 

@@ -52,4 +52,4 @@ void __cdecl R_CubemapShotExtractLinearLight(
 
 void __cdecl R_ScreenshotCommand(GfxScreenshotType type);
 
-void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *probeRawData, int downSampleRes);
+void __cdecl R_CreateReflectionRawDataFromCubemapShot(struct DiskGfxReflectionProbe *probeRawData, int downSampleRes);

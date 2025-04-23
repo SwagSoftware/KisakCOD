@@ -554,20 +554,20 @@ char __cdecl SND_BooleanFromString(const char *value, const char *trueValue, con
 void __cdecl SND_Shutdown();
 void __cdecl SND_ShutdownChannels();
 void __cdecl SND_ErrorCleanup();
-void __cdecl SND_Save(MemoryFile *memFile);
-void __cdecl SND_Save3DChannel(int chanIndex, MemoryFile *memFile);
-void __cdecl SND_SaveSoundAlias(const snd_alias_t *alias, MemoryFile *memFile);
-void __cdecl SND_SaveChanInfo(const snd_channel_info_t *chaninfo, MemoryFile *memFile);
-void __cdecl SND_SaveLengthNotifyInfo(const sndLengthNotifyInfo *info, MemoryFile *memFile);
-void __cdecl SND_Save2DChannel(int chanIndex, MemoryFile *memFile);
-void __cdecl SND_SaveStreamChannel(int chanIndex, MemoryFile *memFile);
-void __cdecl SND_Restore(MemoryFile *memFile);
-char __cdecl SND_Restore3DChannel(MemoryFile *memFile);
-snd_alias_t *__cdecl SND_RestoreSoundAlias(MemoryFile *memFile);
-void __cdecl SND_RestoreChanInfo(snd_channel_info_t *chaninfo, MemoryFile *memFile);
-void __cdecl SND_RestoreLengthNotifyInfo(MemoryFile *memFile, sndLengthNotifyInfo *info);
-char __cdecl SND_Restore2DChannel(MemoryFile *memFile);
-char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile);
+void __cdecl SND_Save(struct MemoryFile *memFile);
+void __cdecl SND_Save3DChannel(int chanIndex, struct MemoryFile *memFile);
+void __cdecl SND_SaveSoundAlias(const snd_alias_t *alias, struct MemoryFile *memFile);
+void __cdecl SND_SaveChanInfo(const snd_channel_info_t *chaninfo, struct MemoryFile *memFile);
+void __cdecl SND_SaveLengthNotifyInfo(const sndLengthNotifyInfo *info, struct MemoryFile *memFile);
+void __cdecl SND_Save2DChannel(int chanIndex, struct MemoryFile *memFile);
+void __cdecl SND_SaveStreamChannel(int chanIndex, struct MemoryFile *memFile);
+void __cdecl SND_Restore(struct MemoryFile *memFile);
+char __cdecl SND_Restore3DChannel(struct MemoryFile *memFile);
+snd_alias_t *__cdecl SND_RestoreSoundAlias(struct MemoryFile *memFile);
+void __cdecl SND_RestoreChanInfo(snd_channel_info_t *chaninfo, struct MemoryFile *memFile);
+void __cdecl SND_RestoreLengthNotifyInfo(struct MemoryFile *memFile, sndLengthNotifyInfo *info);
+char __cdecl SND_Restore2DChannel(struct MemoryFile *memFile);
+char __cdecl SND_RestoreStreamChannel(int channel, struct MemoryFile *memFile);
 int __cdecl SND_GetSoundOverlay(snd_overlay_type_t type, snd_overlay_info_t *info, int maxcount, int *cpu);
 int __cdecl SND_GetSoundOverlay2D(snd_overlay_info_t *info, int maxcount);
 int __cdecl SND_GetSoundOverlay3D(snd_overlay_info_t *info, int maxcount);
@@ -579,6 +579,8 @@ double __cdecl SND_GetVolumeNormalized();
 void __cdecl SND_SetHWND(HWND* hwnd);
 void __cdecl SND_SetData(MssSound *mssSound, void *srcData);
 
+// snd_driver_load_obj
+struct LoadedSound *__cdecl SND_LoadSoundFile(const char *name);
 
 extern const dvar_t *snd_cinematicVolumeScale;
 extern const dvar_t *snd_enable3D;
@@ -597,3 +599,4 @@ extern const dvar_t *snd_slaveFadeTime;
 extern const dvar_t *snd_enableStream;
 extern const dvar_t *snd_drawEqChannels;
 extern const dvar_t *snd_levelFadeTime;
+extern const dvar_t *snd_touchStreamFilesOnLoad;

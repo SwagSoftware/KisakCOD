@@ -302,7 +302,7 @@ r_globals_t rg;
 GfxMetrics gfxMetrics;
 //int marker_r_init        85827c18     gfx_d3d : r_init.obj
 //BOOL g_allocateMinimalResources 85827c1c     gfx_d3d : r_init.obj
-BOOL g_allocateMinimalResources;
+bool g_allocateMinimalResources;
 GfxConfiguration gfxCfg;
 GfxGlobals r_glob;
 
@@ -3840,7 +3840,6 @@ void R_InitGamma()
     Dvar_SetModified((dvar_s*)r_gamma);
 }
 
-bool g_allocateMinimalResources;
 char __cdecl R_CreateForInitOrReset()
 {
     const char *v0; // eax
@@ -4134,7 +4133,7 @@ const char *__cdecl R_ClosestRefreshRateForMode(unsigned int width, unsigned int
         comparison = (const char *)(dx.displayModes[mid].Width - width);
         if (!comparison)
         {
-            comparison = &dx.resolutionNameTable[4 * mid - 1023][-height];
+            comparison = &dx.resolutionNameTable[4 * mid - 1023][-(int)height];
             if (!comparison)
             {
                 comparison = &dx.resolutionNameTable[4 * mid - 1022][-refreshRate];

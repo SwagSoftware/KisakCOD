@@ -129,6 +129,12 @@ enum FullscreenType : __int32
     FULLSCREEN_SCENE = 0x2,
 };
 
+struct GfxCmdHeader // sizeof=0x4
+{                                       // ...
+    unsigned __int16 id;
+    unsigned __int16 byteCount;
+};
+
 struct GfxCmdStretchPic // sizeof=0x2C
 {
     GfxCmdHeader header;
@@ -195,12 +201,6 @@ struct StateBitsTable // sizeof=0x8
 {                                       // ...
     int stateBits;                      // ...
     const char *name;                   // ...
-};
-
-struct GfxCmdHeader // sizeof=0x4
-{                                       // ...
-    unsigned __int16 id;
-    unsigned __int16 byteCount;
 };
 
 struct GfxCmdArray // sizeof=0x10
@@ -574,6 +574,7 @@ const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
 };
 
 void __cdecl TRACK_r_rendercmds();
+void __cdecl R_FreeGlobalVariable(void *var);
 void __cdecl R_InitRenderCommands();
 void __cdecl R_InitRenderBuffers();
 void __cdecl R_InitDynamicMesh(
@@ -784,7 +785,7 @@ void __cdecl R_AddCmdDrawConsoleTextPulseFX(
     Material *fxMaterialGlow);
 void __cdecl R_AddCmdDrawQuadPic(const float (*verts)[2], const float *color, Material *material);
 void __cdecl R_BeginFrame();
-const dvar_s *R_UpdateFrontEndDvarOptions();
+void R_UpdateFrontEndDvarOptions();
 void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, unsigned int constant, float *value);
 void __cdecl R_SetInputCodeImageTexture(GfxCmdBufInput *input, unsigned int codeTexture, const GfxImage *image);
 bool __cdecl R_LightTweaksModified();

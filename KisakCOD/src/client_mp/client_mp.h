@@ -522,6 +522,8 @@ struct ping_t // sizeof=0x41C
 
 // cl_main_mp
 //void __cdecl TRACK_cl_main();
+void __cdecl CL_SortGlobalServers();
+struct serverStatus_s *__cdecl CL_GetServerStatus(netadr_t from);
 char __cdecl CL_IsLocalClientActive(int localClientNum);
 int __cdecl CL_LocalActiveIndexFromClientNum(int localClientNum);
 int __cdecl CL_ControllerIndexFromClientNum(int clientIndex);
@@ -768,6 +770,8 @@ extern clientActive_t clients[MAX_CLIENTS];
 extern clientStatic_t cls;
 
 extern unsigned int frame_msec;
+
+extern char cl_cdkey[34];
 
 extern BOOL updateScreenCalled;
 
@@ -1170,7 +1174,8 @@ void __cdecl CL_InitUI();
 
 
 
-// cl_main_win32_mp
+// cl_main_pc_mp
+int __cdecl CL_ServerStatus(char *serverAddress, char *serverStatusString, int maxLen);
 void __cdecl CL_SetServerInfoByAddress(netadr_t from, char *info, __int16 ping);
 void __cdecl CL_SetServerInfo(serverInfo_t *server, char *info, __int16 ping);
 void __cdecl CL_ServerInfoPacket(netadr_t from, msg_t *msg, int time);

@@ -6,6 +6,8 @@
 #include "r_dvars.cpp"
 #include "r_shade.h"
 #include "rb_stats.h"
+#include "rb_tess.h"
+#include "r_pretess.h"
 
 //int *g_layerDataStride  827dc14c     gfx_d3d : r_draw_bsp.obj
 
@@ -396,3 +398,73 @@ void __cdecl R_DrawTriangles(GfxTrianglesDrawStream *drawStream, GfxCmdBufPrimSt
         R_DrawBspTris(state, prevTris, triCount);
 }
 
+void __cdecl R_DrawPreTessTris(
+    GfxCmdBufPrimState *state,
+    const srfTriangles_t *tris,
+    unsigned int baseIndex,
+    unsigned int triCount)
+{
+    GfxDrawPrimArgs args; // [esp+0h] [ebp-Ch] BYREF
+
+    R_SetStreamsForBspSurface(state, tris);
+    args.vertexCount = tris->vertexCount;
+    args.triCount = triCount;
+    args.baseIndex = baseIndex;
+    R_DrawIndexedPrimitive(state, &args);
+    g_frameStatsCur.geoIndexCount += 3 * triCount;
+    if (!g_primStats)
+        MyAssertHandler(".\\r_draw_bsp.cpp", 190, 0, "%s", "g_primStats");
+    g_primStats->dynamicIndexCount += 3 * triCount;
+}
+
+void __cdecl R_DrawBspDrawSurfsPreTess(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    unsigned int baseIndex; // [esp+0h] [ebp-2Ch] BYREF
+    unsigned int surfIndex; // [esp+4h] [ebp-28h]
+    GfxReadCmdBuf cmdBuf; // [esp+8h] [ebp-24h] BYREF
+    const srfTriangles_t *tris; // [esp+Ch] [ebp-20h]
+    const srfTriangles_t *prevTris; // [esp+10h] [ebp-1Ch]
+    const GfxBspPreTessDrawSurf *list; // [esp+14h] [ebp-18h] BYREF
+    unsigned int triCount; // [esp+18h] [ebp-14h]
+    const GfxSurface *bspSurf; // [esp+1Ch] [ebp-10h]
+    unsigned int index; // [esp+20h] [ebp-Ch]
+    unsigned int count; // [esp+24h] [ebp-8h] BYREF
+    int baseVertex; // [esp+28h] [ebp-4h]
+
+    R_SetupPassPerObjectArgs(context);
+    R_SetupPassPerPrimArgs(context);
+    cmdBuf.primDrawSurfPos = primDrawSurfPos;
+    while (R_ReadBspPreTessDrawSurfs(&cmdBuf, &list, &count, &baseIndex))
+    {
+        prevTris = 0;
+        triCount = 0;
+        baseVertex = -1;
+        for (index = 0; index < count; ++index)
+        {
+            surfIndex = list[index].baseSurfIndex;
+            if (surfIndex >= rgp.world->surfaceCount)
+                MyAssertHandler(
+                    ".\\r_draw_bsp.cpp",
+                    675,
+                    0,
+                    "surfIndex doesn't index rgp.world->surfaceCount\n\t%i not in [0, %i)",
+                    surfIndex,
+                    rgp.world->surfaceCount);
+            bspSurf = &rgp.world->dpvs.surfaces[surfIndex];
+            tris = &bspSurf->tris;
+            if (baseVertex != bspSurf->tris.firstVertex)
+            {
+                if (triCount)
+                {
+                    R_DrawPreTessTris(&context.state->prim, prevTris, baseIndex, triCount);
+                    baseIndex += 3 * triCount;
+                    triCount = 0;
+                }
+                prevTris = tris;
+                baseVertex = tris->firstVertex;
+            }
+            triCount += list[index].totalTriCount;
+        }
+        R_DrawPreTessTris(&context.state->prim, prevTris, baseIndex, triCount);
+    }
+}

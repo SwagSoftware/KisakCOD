@@ -13,7 +13,7 @@ void __cdecl RB_BeginSurface(const Material *material, MaterialTechniqueType tec
 void __cdecl RB_EndTessSurface();
 GfxPrimStats *RB_EndSurfacePrologue();
 void RB_EndSurfaceEpilogue();
-int RB_DrawTessSurface();
+void RB_DrawTessSurface();
 void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs *args);
 void __cdecl RB_TessOverflow();
 

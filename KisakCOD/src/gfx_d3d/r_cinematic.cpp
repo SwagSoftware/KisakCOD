@@ -12,6 +12,7 @@
 #include "r_image.h"
 #include <database/database.h>
 #include <qcommon/com_fileaccess.h>
+#include <cgame/cg_local.h>
 
 CinematicGlob cinematicGlob;
 bool g_cinematicThreadInitialized;
@@ -686,33 +687,6 @@ void __cdecl R_Cinematic_HunksAllocate(int activeTexture, char playbackFlags)
     CinematicHunk_Open(&cinematicGlob.residentHunk, residentBufferBase, (int)newResidentBufferSize);
 }
 
-int __cdecl CinematicHunk_Alloc(CinematicHunk *hunk, int size)
-{
-    const char *v2; // eax
-    char *alloced; // [esp+0h] [ebp-4h]
-
-    if (!hunk->base)
-        MyAssertHandler(".\\r_cinematic.cpp", 366, 0, "%s", "hunk->base");
-    if (!hunk->atFront)
-        MyAssertHandler(".\\r_cinematic.cpp", 367, 0, "%s", "hunk->atFront");
-    if (!hunk->atBack)
-        MyAssertHandler(".\\r_cinematic.cpp", 368, 0, "%s", "hunk->atBack");
-    if (!hunk->end)
-        MyAssertHandler(".\\r_cinematic.cpp", 369, 0, "%s", "hunk->end");
-    if (size < 0)
-        MyAssertHandler(".\\r_cinematic.cpp", 370, 0, "%s", "size >= 0");
-    alloced = (char *)hunk->atFront;
-    hunk->atFront = &alloced[size];
-    if (hunk->atFront <= hunk->atBack)
-        return (int)alloced;
-    if (!alwaysfails)
-    {
-        v2 = va("CinematicHunk_Alloc failed: 0x%08x 0x%08x 0x%08x\n", hunk->atFront, size, hunk->atBack);
-        MyAssertHandler(".\\r_cinematic.cpp", 376, 0, v2);
-    }
-    return -1;
-}
-
 void __cdecl R_Cinematic_HunksReset(int activeTexture, char playbackFlags)
 {
     CinematicHunk_Close(&cinematicGlob.binkHunk);
@@ -1002,7 +976,7 @@ char __cdecl R_Cinematic_BinkOpenPath_MemoryResident(
     unsigned int errTextSize)
 {
     void *allocedBuffer; // [esp+Ch] [ebp-18h]
-    iobuf *fileHandle; // [esp+10h] [ebp-14h]
+    FILE *fileHandle; // [esp+10h] [ebp-14h]
     int fileSize; // [esp+14h] [ebp-10h]
     int numberOfBytesRead; // [esp+1Ch] [ebp-8h]
     int freeBufferSpace; // [esp+20h] [ebp-4h]

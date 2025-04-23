@@ -6,6 +6,35 @@
 #include "rb_postfx.h"
 
 
+void __cdecl R_DrawSunShadowMapCallback(const GfxSunShadowPartition *userData, GfxCmdBufContext context)
+{
+    int height; // [esp+10h] [ebp-28h]
+    int width; // [esp+14h] [ebp-24h]
+    int v4; // [esp+18h] [ebp-20h]
+    IDirect3DDevice9 *device; // [esp+20h] [ebp-18h]
+    RECT v6; // [esp+24h] [ebp-14h] BYREF
+    const GfxSunShadowPartition *partition; // [esp+34h] [ebp-4h]
+
+    partition = userData;
+    R_SetRenderTarget(context, R_RENDERTARGET_SHADOWMAP_SUN);
+    if (!userData->partitionIndex)
+        R_ClearScreen(context.state->prim.device, 3u, shadowmapClearColor, 1.0, 0, 0);
+    height = partition->viewport.height;
+    width = partition->viewport.width;
+    v4 = partition->viewport.y + (partition->partitionIndex << 10);
+    device = context.state->prim.device;
+    v6.left = partition->viewport.x;
+    v6.top = v4;
+    v6.right = width + v6.left;
+    v6.bottom = height + v4;
+    device->SetRenderState(D3DRS_SCISSORTESTENABLE, 1u);
+    device->SetScissorRect(&v6);
+    R_DrawSurfs(context, 0, &partition->info);
+    context.state->prim.device->SetRenderState(
+        D3DRS_SCISSORTESTENABLE,
+        0);
+}
+
 void R_DrawSunShadowMap(
     const GfxViewInfo *viewInfo,
     unsigned int partitionIndex,
@@ -42,35 +71,5 @@ void R_DrawSunShadowMap(
         &viewInfo->sunShadow.partition[partitionIndex].info,
         &viewInfo->sunShadow.partition[partitionIndex].shadowViewParms,
         cmdBuf,
-        0);
-}
-
-const float shadowmapClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-void __cdecl R_DrawSunShadowMapCallback(const GfxSunShadowPartition *userData, GfxCmdBufContext context)
-{
-    int height; // [esp+10h] [ebp-28h]
-    int width; // [esp+14h] [ebp-24h]
-    int v4; // [esp+18h] [ebp-20h]
-    IDirect3DDevice9 *device; // [esp+20h] [ebp-18h]
-    RECT v6; // [esp+24h] [ebp-14h] BYREF
-    const GfxSunShadowPartition *partition; // [esp+34h] [ebp-4h]
-
-    partition = userData;
-    R_SetRenderTarget(context, R_RENDERTARGET_SHADOWMAP_SUN);
-    if (!userData->partitionIndex)
-        R_ClearScreen(context.state->prim.device, 3u, shadowmapClearColor, 1.0, 0, 0);
-    height = partition->viewport.height;
-    width = partition->viewport.width;
-    v4 = partition->viewport.y + (partition->partitionIndex << 10);
-    device = context.state->prim.device;
-    v6.left = partition->viewport.x;
-    v6.top = v4;
-    v6.right = width + v6.left;
-    v6.bottom = height + v4;
-    device->SetRenderState(D3DRS_SCISSORTESTENABLE, 1u);
-    device->SetScissorRect(&v6);
-    R_DrawSurfs(context, 0, &partition->info);
-    context.state->prim.device->SetRenderState(
-        D3DRS_SCISSORTESTENABLE,
         0);
 }

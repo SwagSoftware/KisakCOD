@@ -273,6 +273,7 @@
     <ClCompile Include="src\game_mp\g_vehicles_mp.cpp" />
     <ClCompile Include="src\game_mp\player_use_mp.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_backend.cpp" />
+    <ClCompile Include="src\gfx_d3d\rb_debug.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_depthprepass.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_draw3d.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_drawprofile.cpp" />
@@ -284,8 +285,10 @@
     <ClCompile Include="src\gfx_d3d\rb_pixelcost.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_postfx.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_shade.cpp" />
+    <ClCompile Include="src\gfx_d3d\rb_shadowcookie.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_showcollision.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_sky.cpp" />
+    <ClCompile Include="src\gfx_d3d\rb_spotshadow.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_state.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_stats.cpp" />
     <ClCompile Include="src\gfx_d3d\rb_sunshadow.cpp" />
@@ -311,6 +314,7 @@
     <ClCompile Include="src\gfx_d3d\r_dpvs_static.cpp" />
     <ClCompile Include="src\gfx_d3d\r_drawsurf.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_bsp.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_draw_lit.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_material.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_method.cpp" />
     <ClCompile Include="src\gfx_d3d\r_draw_pixelshader.cpp" />
@@ -454,6 +458,7 @@
     <ClCompile Include="src\server_mp\ucmds.cpp" />
     <ClCompile Include="src\sound\snd.cpp" />
     <ClCompile Include="src\sound\snd_driver.cpp" />
+    <ClCompile Include="src\sound\snd_driver_load_obj.cpp" />
     <ClCompile Include="src\sound\snd_mss.cpp" />
     <ClCompile Include="src\sound\snd_utils.cpp" />
     <ClCompile Include="src\stringed\stringed_hooks.cpp" />
@@ -561,6 +566,7 @@
     <ClInclude Include="src\game_mp\g_utils_mp.h" />
     <ClInclude Include="src\gfx_d3d\fxprimitives.h" />
     <ClInclude Include="src\gfx_d3d\rb_backend.h" />
+    <ClInclude Include="src\gfx_d3d\rb_debug.h" />
     <ClInclude Include="src\gfx_d3d\rb_depthprepass.h" />
     <ClInclude Include="src\gfx_d3d\rb_draw3d.h" />
     <ClInclude Include="src\gfx_d3d\rb_drawprofile.h" />
@@ -571,8 +577,10 @@
     <ClInclude Include="src\gfx_d3d\rb_pixelcost.h" />
     <ClInclude Include="src\gfx_d3d\rb_postfx.h" />
     <ClInclude Include="src\gfx_d3d\rb_shade.h" />
+    <ClInclude Include="src\gfx_d3d\rb_shadowcookie.h" />
     <ClInclude Include="src\gfx_d3d\rb_showcollision.h" />
     <ClInclude Include="src\gfx_d3d\rb_sky.h" />
+    <ClInclude Include="src\gfx_d3d\rb_spotshadow.h" />
     <ClInclude Include="src\gfx_d3d\rb_state.h" />
     <ClInclude Include="src\gfx_d3d\rb_stats.h" />
     <ClInclude Include="src\gfx_d3d\rb_sunshadow.h" />
@@ -590,6 +598,7 @@
     <ClInclude Include="src\gfx_d3d\r_dpvs.h" />
     <ClInclude Include="src\gfx_d3d\r_drawsurf.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_bsp.h" />
+    <ClInclude Include="src\gfx_d3d\r_draw_lit.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_material.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_method.h" />
     <ClInclude Include="src\gfx_d3d\r_draw_shadowable_light.h" />
@@ -741,7 +750,6 @@
     <ClInclude Include="src\xanim\xanim_calc.h" />
     <ClInclude Include="src\xanim\xanim_load_db.h" />
     <ClInclude Include="src\xanim\xanim_public.h" />
-    <ClInclude Include="src\xanim\xasset.h" />
     <ClInclude Include="src\xanim\xmodel.h" />
     <ClInclude Include="src\zlib32\deflate.h" />
     <ClInclude Include="src\zlib32\inflate.h" />

@@ -20,6 +20,8 @@
 #include <xanim/xmodel.h>
 #include <win32/win_net.h>
 #include <database/database.h>
+#include <cgame/cg_local.h>
+#include "r_drawsurf.h"
 
 //  struct GfxBackEndData *frontEndDataOut 85827c80     gfx_d3d : r_rendercmds.obj
 GfxBackEndData *frontEndDataOut;
@@ -353,7 +355,7 @@ void __cdecl R_ToggleSmpFrameCmd(char type)
     R_ReleaseThreadOwnership();
     //Profile_Begin(133);
     CL_ResetStats_f();
-    R_ProcessWorkerCmdsWithTimeout(Sys_IsRendererReady, 1);
+    R_ProcessWorkerCmdsWithTimeout((int(__cdecl*)())Sys_IsRendererReady, 1);
     //Profile_EndInternal(0);
     if ((type & 2) != 0)
         R_PerformanceCounters();
@@ -1260,6 +1262,16 @@ void __cdecl R_BeginFrame()
     }
 }
 
+int __cdecl R_GpuSyncModified()
+{
+    if (!r_gpuSync)
+        MyAssertHandler(".\\r_rendercmds.cpp", 1723, 0, "%s", "r_gpuSync");
+    if (!r_multiGpu)
+        MyAssertHandler(".\\r_rendercmds.cpp", 1724, 0, "%s", "r_multiGpu");
+
+    return R_CheckDvarModified(r_gpuSync) || R_CheckDvarModified(r_multiGpu);
+}
+
 const float s_debugShaderConsts[5][4] =
 {
   { 0.0, 0.0, 0.0, 0.0 },
@@ -1268,10 +1280,9 @@ const float s_debugShaderConsts[5][4] =
   { 0.0, 1.0, 0.0, 0.0 },
   { 0.0, 0.0, 1.0, 0.0 }
 }; // idb
-const dvar_s *R_UpdateFrontEndDvarOptions()
+void R_UpdateFrontEndDvarOptions()
 {
-    const dvar_s *result; // eax
-    bool v1; // [esp+0h] [ebp-Ch]
+    bool v0; // [esp+0h] [ebp-Ch]
 
     if (R_LightTweaksModified())
         R_UpdateLightsFromDvars();
@@ -1288,14 +1299,14 @@ const dvar_s *R_UpdateFrontEndDvarOptions()
     }
     if (r_fullbright->modified || r_debugShader->modified)
     {
-        Dvar_ClearModified((dvar_t*)r_fullbright);
-        Dvar_ClearModified((dvar_t*)r_debugShader);
+        Dvar_ClearModified((dvar_s*)r_fullbright);
+        Dvar_ClearModified((dvar_s*)r_debugShader);
         R_SyncRenderThread();
         R_InitDrawMethod();
     }
     if (R_CheckDvarModified(r_outdoorFeather))
         R_SetOutdoorFeatherConst();
-    R_SetInputCodeConstantFromVec4(&gfxCmdBufInput, 0x27u, (float *)s_debugShaderConsts[r_debugShader->current.integer]);
+    R_SetInputCodeConstantFromVec4(&gfxCmdBufInput, 0x27u, (float*)s_debugShaderConsts[r_debugShader->current.integer]);
     if (R_CheckDvarModified(r_envMapOverride)
         || R_CheckDvarModified(r_envMapMinIntensity)
         || R_CheckDvarModified(r_envMapMaxIntensity)
@@ -1304,18 +1315,15 @@ const dvar_s *R_UpdateFrontEndDvarOptions()
     {
         R_EnvMapOverrideConstants();
     }
-    v1 = r_distortion->current.enabled && CL_GetLocalClientActiveCount() == 1;
-    if (rg.distortion != v1)
+    v0 = r_distortion->current.enabled && CL_GetLocalClientActiveCount() == 1;
+    if (rg.distortion != v0)
         R_SyncRenderThread();
-    rg.distortion = v1;
-    R_SetInputCodeImageTexture(&gfxCmdBufInput, 0xAu, v1 ? gfxRenderTargets[3].image : 0);
+    rg.distortion = v0;
+    R_SetInputCodeImageTexture(&gfxCmdBufInput, 0xAu, v0 ? gfxRenderTargets[3].image : 0);
     rg.drawWorld = r_drawWorld->current.enabled;
-    result = r_drawBModels;
     rg.drawBModels = r_drawBModels->current.enabled;
-    LOBYTE(result) = r_drawSModels->current.enabled;
-    rg.drawSModels = (char)result;
+    rg.drawSModels = r_drawSModels->current.enabled;
     rg.drawXModels = r_drawXModels->current.enabled;
-    return result;
 }
 
 void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, unsigned int constant, float *value)

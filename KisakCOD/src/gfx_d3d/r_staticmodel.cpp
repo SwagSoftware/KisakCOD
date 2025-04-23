@@ -5,6 +5,7 @@
 #include <universal/com_files.h>
 #include <xanim/xmodel.h>
 #include "r_xsurface.h"
+#include <cgame_mp/cg_local_mp.h>
 
 
 void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
@@ -18,56 +19,6 @@ void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
         0x1000u,
         "index,name,radius,numLods,lodDist,lodPixels720p,1PixelDist720p,scaledDist,posx,posy,posz,pixels\n");
     FS_Write(&dest, &v2[strlen(&dest)] - v2, fileHandle);
-}
-
-void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst *smodelDrawInst, const float dist)
-{
-    float v3; // [esp+5Ch] [ebp-101Ch]
-    char dest; // [esp+60h] [ebp-1018h] BYREF
-    _BYTE v5[4103]; // [esp+61h] [ebp-1017h] BYREF
-    float v6; // [esp+1068h] [ebp-10h]
-    XModel *model; // [esp+106Ch] [ebp-Ch]
-    float v8; // [esp+1070h] [ebp-8h]
-    float v9; // [esp+1074h] [ebp-4h]
-
-    if ((_S1_0 & 1) == 0)
-    {
-        _S1_0 |= 1u;
-        v3 = tan(22.5);
-        radius2pixels = 720.0 / v3;
-    }
-    *(_DWORD *)&v5[4099] = 4096;
-    model = smodelDrawInst->model;
-    if (!model)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 538, 0, "%s", "xmodel");
-    if (!model->name)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 539, 0, "%s", "xmodel->name");
-    if (model->numLods <= 0)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 540, 0, "%s", "xmodel->numLods > 0");
-    v9 = *((float *)&model->parentList + 7 * model->numLods);
-    if (v9 <= 0.0)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 544, 0, "%s", "lodDist > 0.0f");
-    v6 = radius2pixels * model->radius / v9;
-    v8 = radius2pixels * model->radius;
-    ++g_dumpStaticModelCount;
-    if (smodelDrawInst->placement.scale > 0.0 && dist > 0.0)
-        Com_sprintf(
-            &dest,
-            0x1000u,
-            "%d,%s,%.1f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
-            g_dumpStaticModelCount,
-            model->name,
-            model->radius,
-            model->numLods,
-            v9,
-            v6,
-            v8,
-            dist / smodelDrawInst->placement.scale,
-            smodelDrawInst->placement.origin[0],
-            smodelDrawInst->placement.origin[1],
-            smodelDrawInst->placement.origin[2],
-            v8 / (dist / smodelDrawInst->placement.scale));
-    FS_Write(&dest, &v5[strlen(&dest)] - v5, fileHandle);
 }
 
 BOOL __cdecl R_StaticModelHasLighting(unsigned int smodelIndex)

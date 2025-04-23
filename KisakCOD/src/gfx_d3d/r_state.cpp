@@ -2791,7 +2791,7 @@ void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBit
 
 // bad sp value at call has been detected, the output may be wrong!
 void  R_DrawCall(
-    void(__cdecl *callback)(const void *, GfxCmdBufContext, GfxCmdBufContext),
+    void(__cdecl *callback)(const void *, GfxCmdBufContext*, GfxCmdBufContext*),
     const void *userData,
     GfxCmdBufSourceState *source,
     const GfxViewInfo *viewInfo,

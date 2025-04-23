@@ -3,7 +3,9 @@
 #include "client_mp/client_mp.h"
 
 #include "r_gfx.h"
+#include "r_bsp.h"
 #include "r_rendercmds.h"
+#include "r_image.h"
 
 #include <Windows.h>
 #include <d3d9.h>
@@ -68,12 +70,6 @@ struct GfxGammaRamp // sizeof=0x200
     unsigned __int16 entries[256];      // ...
 };
 
-struct Image_MemUsage // sizeof=0xC
-{                                       // ...
-    int total;                          // ...
-    int lightmap;
-    int minspec;                        // ...
-};
 struct trStatistics_t // sizeof=0x28
 {                                       // ...
     int c_indexes;                      // ...
@@ -332,6 +328,7 @@ void __cdecl R_ShutdownStreams();
 void __cdecl R_ShutdownMaterialUsage();
 void __cdecl R_Shutdown(int destroyWindow);
 void R_ShutdownDirect3D();
+void R_ReleaseForShutdownOrReset();
 void __cdecl R_UnloadWorld();
 void __cdecl R_BeginRegistration(vidConfig_t *vidConfigOut);
 void R_Init();
@@ -377,4 +374,4 @@ extern GfxConfiguration gfxCfg;
 extern GfxAssets gfxAssets;
 extern GfxGlobals r_glob;
 extern GfxMetrics gfxMetrics;
-extern BOOL g_allocateMinimalResources;
+extern bool g_allocateMinimalResources;

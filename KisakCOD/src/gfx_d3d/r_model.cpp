@@ -2,7 +2,46 @@
 #include <qcommon/mem_track.h>
 #include <universal/com_memory.h>
 #include "r_buffers.h"
+#include <universal/profile.h>
+#include <database/database.h>
 
+#include <algorithm>
+#include "r_staticmodel.h"
+#include <DynEntity/DynEntity_client.h>
+#include "r_dvars.h"
+#include <xanim/dobj_utils.h>
+#include "r_dobj_skin.h"
+#include "r_utils.h"
+#include <cgame/cg_local.h>
+#include "r_model_pose.h"
+
+const int boxVerts[24][3] =
+{
+  { 0, 0, 0 },
+  { 1, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 1, 0 },
+  { 1, 1, 0 },
+  { 1, 0, 0 },
+  { 1, 1, 0 },
+  { 0, 1, 0 },
+  { 0, 0, 1 },
+  { 1, 0, 1 },
+  { 0, 0, 1 },
+  { 0, 1, 1 },
+  { 1, 1, 1 },
+  { 1, 0, 1 },
+  { 1, 1, 1 },
+  { 0, 1, 1 },
+  { 0, 0, 0 },
+  { 0, 0, 1 },
+  { 1, 0, 0 },
+  { 1, 0, 1 },
+  { 0, 1, 0 },
+  { 0, 1, 1 },
+  { 1, 1, 0 },
+  { 1, 1, 1 }
+}; // idb
 
 void __cdecl TRACK_r_model()
 {
@@ -29,8 +68,8 @@ void __cdecl R_UnlockSkinnedCache()
 void __cdecl R_ModelList_f()
 {
     const char *Name; // eax
-    char *v1; // [esp+Ch] [ebp-212Ch]
-    char *fmt; // [esp+10h] [ebp-2128h]
+    const char *v1; // [esp+Ch] [ebp-212Ch]
+    const char *fmt; // [esp+10h] [ebp-2128h]
     int inData; // [esp+108h] [ebp-2030h] BYREF
     XModel *v4[2050]; // [esp+10Ch] [ebp-202Ch] BYREF
     XModel *model; // [esp+2114h] [ebp-24h]
@@ -47,7 +86,8 @@ void __cdecl R_ModelList_f()
     v6 = 0;
     inData = 0;
     DB_EnumXAssets(ASSET_TYPE_XMODEL, (void(__cdecl *)(XAssetHeader, void *))R_GetModelList, &inData, 1);
-    std::_Sort<XModel **, int, bool(__cdecl *)(XModel *&, XModel *&)>(v4, &v4[inData], (4 * inData) >> 2, R_ModelSort);
+    //std::_Sort<XModel **, int, bool(__cdecl *)(XModel *&, XModel *&)>(v4, &v4[inData], (4 * inData) >> 2, R_ModelSort);
+    std::sort(&v4[0], &v4[inData], R_ModelSort);
     Com_Printf(8, "---------------------------\n");
     Com_Printf(8, "SM# is the number of static model instances\n");
     Com_Printf(8, "instKB is static model instance usage\n");
@@ -113,7 +153,7 @@ void __cdecl R_GetModelList(XAssetHeader header, XAssetHeader *data)
 XModel *__cdecl R_RegisterModel(const char *name)
 {
     return XModelPrecache(
-        name,
+        (char*)name,
         (void *(__cdecl *)(int))Hunk_AllocXModelPrecache,
         (void *(__cdecl *)(int))Hunk_AllocXModelPrecacheColl);
 }
@@ -357,7 +397,7 @@ int __cdecl R_SkinAndBoundSceneEnt(GfxSceneEntity *sceneEnt)
     GfxSceneEntity *localSceneEnt; // [esp+8h] [ebp-4h] BYREF
     int savedregs; // [esp+Ch] [ebp+0h] BYREF
 
-    boneMatrix = R_UpdateSceneEntBounds((GfxSceneEntity *)&savedregs, sceneEnt, &localSceneEnt, &obj, 1);
+    boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1);
     if (boneMatrix)
     {
         if (!localSceneEnt)
@@ -374,3 +414,27 @@ int __cdecl R_SkinAndBoundSceneEnt(GfxSceneEntity *sceneEnt)
     }
 }
 
+void __cdecl R_LockSkinnedCache()
+{
+    IDirect3DVertexBuffer9 *vb; // [esp+30h] [ebp-4h]
+
+    if (gfxBuf.skinnedCacheLockAddr)
+        MyAssertHandler(".\\r_model.cpp", 337, 0, "%s", "!gfxBuf.skinnedCacheLockAddr");
+    if (!dx.deviceLost)
+    {
+        vb = frontEndDataOut->skinnedCacheVb->buffer;
+        if (!vb)
+            MyAssertHandler(".\\r_model.cpp", 342, 0, "%s", "vb");
+        Profile_Begin(159);
+        gfxBuf.skinnedCacheLockAddr = (unsigned char*)R_LockVertexBuffer(vb, 0, 0, 0x2000);
+        if (((unsigned int)gfxBuf.skinnedCacheLockAddr & 0xF) != 0)
+        {
+            R_UnlockVertexBuffer(vb);
+            gfxBuf.skinnedCacheLockAddr = 0;
+        }
+        Profile_EndInternal(0);
+        gfxBuf.oldSkinnedCacheNormalsAddr = gfxBuf.skinnedCacheNormals[gfxBuf.skinnedCacheNormalsFrameCount & 1];
+        ++gfxBuf.skinnedCacheNormalsFrameCount;
+        gfxBuf.skinnedCacheNormalsAddr = gfxBuf.skinnedCacheNormals[gfxBuf.skinnedCacheNormalsFrameCount & 1];
+    }
+}

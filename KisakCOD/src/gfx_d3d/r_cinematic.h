@@ -108,7 +108,6 @@ bool __cdecl CinematicHunk_IsEmpty(CinematicHunk *hunk);
 void __cdecl R_Cinematic_HunksOpen(int activeTexture, char playbackFlags);
 void __cdecl CinematicHunk_Open(CinematicHunk *hunk, char *memory, int size);
 void __cdecl R_Cinematic_HunksAllocate(int activeTexture, char playbackFlags);
-int __cdecl CinematicHunk_Alloc(CinematicHunk *hunk, int size);
 void __cdecl R_Cinematic_HunksReset(int activeTexture, char playbackFlags);
 IDirect3DTexture9 *R_Cinematic_InitBinkTextures();
 void* __stdcall R_Cinematic_Bink_Alloc(unsigned int bytes);

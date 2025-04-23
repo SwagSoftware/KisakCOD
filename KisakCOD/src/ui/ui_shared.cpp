@@ -2334,7 +2334,7 @@ int __cdecl Display_MouseMove(UiContext *dc)
     int i; // [esp+8h] [ebp-4h]
 
     menu = Menu_GetFocused(dc);
-    if (menu && ((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & menu->window.staticFlags) != 0)
+    if (menu && (menu->window.staticFlags & 0x1000000) != 0)
     {
         Menu_HandleMouseMove(dc, menu);
         return 1;
@@ -2400,7 +2400,7 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
                 Cbuf_ExecuteBuffer(dc->localClientNum, v4, (char *)binding);
             }
             else if (!down
-                || ((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & menu->window.staticFlags) != 0
+                || (menu->window.staticFlags & 0x1000000) != 0
                 || menu->fullScreen
                 || Rect_ContainsPoint(dc->localClientNum, &menu->window.rect, dc->cursor.x, dc->cursor.y)
                 || inHandleKey

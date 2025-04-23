@@ -11,6 +11,10 @@
 #include "r_light.h"
 #include "r_pretess.h"
 #include "r_add_staticmodel.h"
+#include "r_cmdbuf.h"
+#include "r_utils.h"
+#include "r_state.h"
+#include "r_draw_sunshadow.h"
 
 
 void __cdecl R_AddSpotShadowEntCmd(const GfxSpotShadowEntCmd *data)
@@ -418,4 +422,54 @@ void __cdecl R_ShutdownSpotShadowMeshes()
         R_ShutdownDynamicMesh(&gfxMeshGlob.spotShadowClearMeshData[spotShadowIndex]);
     for (sunShadowIndex = 0; sunShadowIndex < 2; ++sunShadowIndex)
         R_ShutdownDynamicMesh(&gfxMeshGlob.sunShadowClearMeshData[sunShadowIndex]);
+}
+
+void __cdecl R_DrawSpotShadowMapCallback(
+    char *userData,
+    GfxCmdBufContext *context,
+    GfxCmdBufContext *prepassContext)
+{
+    R_SetRenderTarget(*context, (GfxRenderTargetId)*(userData + 114));
+    if (*(userData + 119))
+        R_ClearScreen(context->state->prim.device, 3u, shadowmapClearColor, 1.0, 0, 0);
+    if (!gfxMetrics.hasHardwareShadowmap)
+        R_DrawQuadMesh(*context, rgp.shadowClearMaterial, (GfxMeshData*)*(userData + 120));
+    R_DrawSurfs(*context, 0, (const GfxDrawSurfListInfo*)(userData + 396));
+}
+void __fastcall R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
+{
+    unsigned int v4; // r30
+    GfxSpotShadow *spotShadows; // r31
+    GfxCmdBufSourceState v6; // [sp+50h] [-F10h] BYREF
+
+    R_InitCmdBufSourceState(&v6, &viewInfo->input, 0);
+    R_SetRenderTargetSize(&v6, R_RENDERTARGET_SHADOWMAP_SPOT);
+    R_SetViewportValues(&v6, 0, 0, 512, 512);
+    v4 = 0;
+    if (viewInfo->spotShadowCount)
+    {
+        spotShadows = (GfxSpotShadow*)viewInfo->spotShadows;
+        do
+        {
+            R_DrawCall(
+                (void(__cdecl*)(const void*, GfxCmdBufContext*, GfxCmdBufContext*))R_DrawSpotShadowMapCallback,
+                spotShadows,
+                &v6,
+                viewInfo,
+                &spotShadows->info,
+                &spotShadows->shadowViewParms,
+                cmdBuf,
+                0);
+            ++v4;
+            ++spotShadows;
+        } while (v4 < viewInfo->spotShadowCount);
+    }
+}
+
+void RB_SpotShadowMaps(const GfxBackEndData *data, const GfxViewInfo *viewInfo)
+{
+    GfxCmdBuf v3[4]; // [sp+50h] [-20h] BYREF
+
+    R_InitContext(data, v3);
+    R_DrawSpotShadowMapArray(viewInfo, v3);
 }

@@ -50,6 +50,12 @@ struct static_model_cache_t // sizeof=0x410E0
     static_model_tree_list_t usedlist[4]; // ...
 };
 
+struct GfxStaticModelId // sizeof=0x4
+{                                       // ...
+    unsigned __int16 surfType;          // ...
+    unsigned __int16 objectId;          // ...
+};
+
 void __cdecl R_InitStaticModelCache();
 void __cdecl R_ShutdownStaticModelCache();
 
@@ -81,4 +87,8 @@ void __cdecl R_StaticModelCacheStats_f();
 void __cdecl R_StaticModelCacheFlush_f();
 void __cdecl R_ClearAllStaticModelCacheRefs();
 
+void __cdecl R_UncacheStaticModel(unsigned int smodelIndex);
+
 GfxCachedSModelSurf *__cdecl R_GetCachedSModelSurf(unsigned int cacheIndex);
+
+void __cdecl R_SkinCachedStaticModelCmd(SkinCachedStaticModelCmd *skinCmd);

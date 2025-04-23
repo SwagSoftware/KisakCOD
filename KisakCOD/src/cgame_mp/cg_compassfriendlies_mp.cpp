@@ -579,10 +579,7 @@ void __cdecl CG_CompassUpdateActors(int localClientNum)
                 actor->enemy = v1;
                 actor->perks = cgameGlob->bgs.clientinfo[index].perks;
                 posDelta[0] = (float)(4 * ((cgameGlob->nextSnap->ps.iCompassPlayerInfo & 0x7FC0) >> 6) - 1020);
-                posDelta[1] = (float)(4
-                    * ((int)((unsigned int)&clients[0].parseEntities[2011].otherEntityNum
-                        & cgameGlob->nextSnap->ps.iCompassPlayerInfo) >> 15)
-                    - 1020);
+                posDelta[1] = (4 * ((cgameGlob->nextSnap->ps.iCompassPlayerInfo & 0xFF8000) >> 15) - 1020);
                 clientPos[0] = cgameGlob->refdef.vieworg[0];
                 clientPos[1] = cgameGlob->refdef.vieworg[1];
                 clientPos[2] = cgameGlob->refdef.vieworg[2];

@@ -17,19 +17,6 @@
 
 //Line 51763:  0006 : 00006554       unsigned short **s_flashTags      827b6554     g_scr_vehicle.obj
 
-struct VehicleLocalPhysics // sizeof=0x34
-{                                       // ...
-    trace_t groundTrace;                // ...
-    int hasGround;                      // ...
-    int onGround;                       // ...
-};
-
-struct VehiclePhysicsBackup // sizeof=0x1B8
-{                                       // ...
-    vehicle_pathpos_t pathPos;
-    vehicle_physic_t phys;              // ...
-};
-
 VehicleLocalPhysics s_phys_0;
 VehiclePhysicsBackup s_backup_0;
 vehicle_info_t s_vehicleInfos[32];
@@ -678,7 +665,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     Vec3Add(scr_vehicle->phys.prevOrigin, b, b);
     Vec3Add(scr_vehicle->phys.prevOrigin, sum, sum);
     ExtendBounds(b, sum, diff);
-    v1 = CM_AreaEntities(b, sum, entityList, 1024, (int)&sv.svEntities[337].baseline.s.legsAnim + 1);
+    v1 = CM_AreaEntities(b, sum, entityList, 1024, 0x2806081);
     for (i = 0; i < v1; ++i)
     {
         target = &g_entities[entityList[i]];

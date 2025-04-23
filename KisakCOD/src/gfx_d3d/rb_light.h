@@ -8,6 +8,7 @@ enum GfxSortedHistoryAdd : __int32
     SH_ADD_IF_NEW = 0x1,
 };
 
+void __cdecl R_SetLightGridSampleDeltas(int rowStride, int sliceStride);
 void __cdecl R_ShowLightVisCachePoints(const float *viewOrigin, const DpvsPlane *clipPlanes, int clipPlaneCount);
 int __cdecl R_SortedHistoryEntry(int x, int y, int z, GfxSortedHistoryAdd addMode);
 char __cdecl R_AddSortedHistoryEntry(unsigned __int16 x, unsigned __int16 y, unsigned __int16 z, int pos);

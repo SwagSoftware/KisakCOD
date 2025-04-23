@@ -21,8 +21,8 @@ struct Font_s // sizeof=0x18
     const char *fontName;
     int pixelHeight;
     int glyphCount;
-    Material *material;
-    Material *glowMaterial;
+    struct Material *material;
+    struct Material *glowMaterial;
     Glyph *glyphs;
 };
 

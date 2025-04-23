@@ -19,7 +19,7 @@ struct GfxLightingInfo // sizeof=0x2
 void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out);
 unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle);
 void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, PackedLightingCoords *packedCoords);
-char __cdecl R_AllocStaticModelLighting(const GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex);
+char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex);
 unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
     float *lightingOrigin,
     unsigned int dynEntId,
@@ -70,3 +70,5 @@ void __cdecl R_ResetModelLighting();
 void __cdecl R_InitModelLightingImage();
 void __cdecl R_ShutdownModelLightingImage();
 void __cdecl R_InitStaticModelLighting();
+
+void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsigned int patchCount);

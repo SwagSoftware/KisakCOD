@@ -854,6 +854,24 @@ mat4x4 identityMatrix44 = {
     {0, 0, 0, 1}
 };
 
+void __cdecl OrthographicMatrix(float (*mtx)[4], float width, float height, float depth)
+{
+    if (!mtx)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2281, 0, "%s", "mtx");
+    if (width == 0.0)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2282, 0, "%s", "width != 0");
+    if (height == 0.0)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2283, 0, "%s", "height != 0");
+    if (depth == 0.0)
+        MyAssertHandler(".\\universal\\com_math.cpp", 2284, 0, "%s", "depth != 0");
+    memset(mtx, 0, 0x40u);
+    (*mtx)[0] = 2.0 / width;
+    (*mtx)[5] = 2.0 / height;
+    (*mtx)[10] = 0.5 / depth;
+    (*mtx)[14] = 0.5;
+    (*mtx)[15] = 1.0;
+}
+
 void __cdecl MatrixIdentity33(mat3x3& out)
 {
     iassert(out);

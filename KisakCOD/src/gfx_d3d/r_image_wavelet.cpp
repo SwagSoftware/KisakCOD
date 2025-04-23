@@ -14440,7 +14440,7 @@ void __cdecl Image_LoadWavelet(
             from[faceIndex] = to[faceIndex];
             to[faceIndex] = &pixels[faceIndex][totalSize - sizeForLevel];
             Wavelet_DecompressLevel(from[faceIndex], to[faceIndex], &decode);
-            face = Image_CubemapFace(faceIndex);
+            face = (D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
             Image_UploadData(image, format, face, decode.mipLevel - picmip, to[faceIndex]);
         }
         --decode.mipLevel;
@@ -14667,7 +14667,7 @@ int __cdecl Wavelet_DecodeValue(
     index = decode->value & 0xFFF;
     Wavelet_ConsumeBits(decodeTable[index].bits, decode);
     value = decodeTable[index].value;
-    if (value == -0x8000u)
+    if (value == -(int)0x8000u)
     {
         value = (((1 << bitCount) - 1) & decode->value) - bias;
         Wavelet_ConsumeBits(bitCount, decode);

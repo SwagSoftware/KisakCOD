@@ -1,9 +1,9 @@
 #pragma once
 
+#include "r_rendercmds.h"
+#include "rb_backend.h"
 
-void __cdecl R_DepthPrepassCallback(const GfxViewInfo *userData, GfxCmdBufContext context);
-void __usercall R_DepthPrepass(
-    int a1@<ebp>,
+void R_DepthPrepass(
     GfxRenderTargetId renderTargetId,
-    const GfxViewInfo *viewInfo,
-    GfxCmdBuf *cmdBuf);
+    const struct GfxViewInfo *viewInfo,
+    struct GfxCmdBuf *cmdBuf);

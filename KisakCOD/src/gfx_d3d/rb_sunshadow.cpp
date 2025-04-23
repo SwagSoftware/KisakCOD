@@ -5,6 +5,10 @@
 #include "r_draw_sunshadow.h"
 #include "r_cmdbuf.h"
 #include "rb_pixelcost.h"
+#include "rb_state.h"
+#include "rb_shade.h"
+#include "r_sunshadow.h"
+#include "rb_postfx.h"
 
 GfxPointVertex g_overlayPoints[36];
 
@@ -26,7 +30,7 @@ void __cdecl RB_SunShadowMaps(const GfxBackEndData *data, const GfxViewInfo *vie
         R_InitContext(data, &cmdBuf);
         CL_ResetStats_f();
         for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
-            R_DrawSunShadowMap((int)&savedregs, viewInfo, partitionIndex, &cmdBuf);
+            R_DrawSunShadowMap(viewInfo, partitionIndex, &cmdBuf);
     }
 }
 
@@ -85,7 +89,7 @@ void __cdecl RB_DrawSunShadowOverlay()
     w = h;
     RB_SetSunShadowOverlayScaleAndBias();
     gfxCmdBufSourceState.input.codeImageSamplerStates[9] = 97;
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, stru_EA74FF4.image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[13].image);
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
         t0 = (double)partitionIndex * 0.5;

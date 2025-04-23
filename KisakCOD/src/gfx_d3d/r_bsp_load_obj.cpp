@@ -197,7 +197,7 @@ char *__cdecl R_ParseSunLight(SunLightParseParams *params, char *text)
         MyAssertHandler(".\\r_bsp_load_obj.cpp", 3097, 0, "%s", "params");
     while (1)
     {
-        src = Com_Parse(&text);
+        src = Com_Parse((const char**)&text);
         if (!src->token[0] || src->token[0] == 125)
             break;
         if (src->token[0] == 123)
@@ -219,7 +219,7 @@ char *__cdecl R_ParseSunLight(SunLightParseParams *params, char *text)
         else
         {
             I_strncpyz(dest, src->token, 2048);
-            srca = Com_Parse(&text);
+            srca = Com_Parse((const char **)&text);
             if (!srca->token[0] || srca->token[0] == 125)
                 return text;
             I_strncpyz(nptr, srca->token, 2048);

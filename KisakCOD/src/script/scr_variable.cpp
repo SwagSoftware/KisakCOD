@@ -519,7 +519,6 @@ void  RemoveRefToValue(int type, VariableUnion u)
 
 bool  IsValidArrayIndex(unsigned int unsignedValue)
 {
-	//  return (char *)&clients[0].parseEntities[1742].un1.helicopterStage + 3 >= (char *)&loc_7E7FFB + unsignedValue + 5;
 	return unsignedValue + 0x7E8000 <= 0xFE7FFF;
 }
 

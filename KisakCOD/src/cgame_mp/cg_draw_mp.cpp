@@ -1386,7 +1386,7 @@ bool __cdecl CG_CanSeeFriendlyHead(int localClientNum, const centity_s *cent)
     v3 = cg_overheadNamesMaxDist->current.value * cg_overheadNamesMaxDist->current.value;
     if (v4 > (double)v3)
         return 0;
-    CG_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ps->clientNum, 41955329);
+    CG_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ps->clientNum, 0x2803001);
     hitEntId = Trace_GetEntityHitId(&trace);
     if (hitEntId != 1023 && hitEntId != cent->nextState.clientNum)
         return 0;

@@ -1241,7 +1241,7 @@ void __cdecl FX_IntegrateVelocityAcrossSegments(
     t1ScaledByIntegral = t1 * integralScale;
     w1[1] = t1 * 0.5 * t1ScaledByIntegral;
     w1[0] = t1ScaledByIntegral - w1[1];
-    if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & elemDefFlags) != 0)
+    if ((elemDefFlags & 0x1000000) != 0)
     {
         FX_IntegrateVelocityFromZeroInSegment(
             &velState1->local,
@@ -1320,7 +1320,7 @@ void __cdecl FX_IntegrateVelocityInSegment(
         MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 727, 0, "%s\n\t(t1) = %g", "(t1 >= 0.0f && t1 <= 1.0f)", t1);
     weight[1] = integralScale * 0.5 * (t1 * t1 - t0 * t0);
     weight[0] = (t1 - t0) * integralScale - weight[1];
-    if (((unsigned int)&clients[0].parseClients[238].attachTagIndex[5] & elemDefFlags) != 0)
+    if ((elemDefFlags & 0x1000000) != 0)
         FX_IntegrateVelocityInSegmentInFrame(
             &velState->local,
             &velState[1].local,
@@ -2158,7 +2158,7 @@ void __cdecl FX_UpdateEffectBolt(FxSystem *system, FxEffect *effect)
         else
         {
             FX_StopEffect(system, effect);
-            *(unsigned int *)&effect->boltAndSortOrder |= (unsigned int)&clients[0].parseClients[156].name[4];
+            *(unsigned int *)&effect->boltAndSortOrder |= 0xFFE000u;
             *(unsigned int *)&effect->boltAndSortOrder |= 0xFFFu;
         }
     }
