@@ -646,6 +646,7 @@ struct UI_Component // sizeof=0x10
     static void MouseEvent(int x, int y);
 
     static UI_Component_data_t g;
+    static UI_Component *selectionComp;
 };
 
 struct UI_LinesComponent : UI_Component // sizeof=0x24
@@ -661,6 +662,9 @@ struct UI_LinesComponent : UI_Component // sizeof=0x24
     float pos[2];
 
     void UpdateHeight();
+    void ClearFocus();
+    void IncSelectedLineFocus(bool wrap);
+    void DecSelectedLineFocus(bool wrap);
 };
 
 struct __declspec(align(4)) UI_ScrollPane : UI_Component // sizeof=0x34
@@ -690,6 +694,34 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
 
 
     char *GetFilename();
+
+    void FindNext();
+    void FindPrev();
+    void SetCurrentLine(int line);
+
+    void GetSourcePos(unsigned int *start, unsigned int *end);
+
+    void AddBreakpoint(
+        Scr_Breakpoint **pBreakpoint,
+        char *codePos,
+        int builtinIndex,
+        Scr_WatchElement_s *element,
+        unsigned __int8 type);
+
+    bool AddBreakpointAtSourcePos(
+        Scr_WatchElement_s *element,
+        unsigned __int8 breakpointType,
+        bool user,
+        Scr_Breakpoint **pBreakpoint,
+        unsigned int startSourcePos,
+        unsigned int endSourcePos);
+
+    void ToggleBreakpointInternal(
+        Scr_WatchElement_s *element,
+        bool force,
+        bool overwrite,
+        unsigned __int8 breakpointType,
+        bool user);
 };
 
 struct Scr_AbstractScriptList : UI_LinesComponent // sizeof=0x28
@@ -745,17 +777,31 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
         return GetElementWithId_r(this->elementHead, id);
     }
 
+    void AddElement(Scr_WatchElement_s *element, char *text);
+    Scr_WatchElement_s *CloneElement(Scr_WatchElement_s *element);
+
     void DeleteElement();
     void DeleteElementInternal(Scr_WatchElement_s *element);
+
+    void ToggleBreakpointInternal(Scr_WatchElement_s *element, unsigned __int8 type);
+    void ToggleWatchElementBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type);
 
     Scr_WatchElement_s *GetSelectedElement();
     Scr_WatchElement_s *GetSelectedElement_r(Scr_WatchElement_s *element, int *currentline);
 
     Scr_WatchElement_s ** GetElementRef(Scr_WatchElement_s *element);
+    Scr_WatchElement_s *GetElementPrev(Scr_WatchElement_s *element);
+
+    void ToggleExpandElement(Scr_WatchElement_s *element);
+
+    Scr_WatchElement_s *BackspaceElementInternal(Scr_WatchElement_s *element);
 
     void UpdateHeight();
 
     void FreeWatchElement(Scr_WatchElement_s *element);
+    Scr_WatchElement_s *AddBreakpoint(
+        Scr_WatchElement_s *element,
+        unsigned __int8 type);
     Scr_WatchElement_s *RemoveBreakpoint(Scr_WatchElement_s *element);
 
     void SetSelectedElement(Scr_WatchElement_s *selElement, bool user);
@@ -780,7 +826,27 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     void LoadSelectedLine(Scr_SelectedLineInfo *info);
     void SaveSelectedLine(Scr_SelectedLineInfo *info);
 
+    Scr_WatchElement_s* PasteNonBreakpointElement(
+        Scr_WatchElement_s *element,
+        char *text,
+        bool user);
+
     void UpdateBreakpoints(bool add);
+
+    void DisplayThreadPos(Scr_WatchElement_s *element);
+
+    void SortHitBreakpointsTop();
+
+    Scr_WatchElement_s* CreateWatchElement(
+        char *text,
+        Scr_WatchElement_s **prevElem,
+        const char *name);
+
+    Scr_WatchElement_s* CreateBreakpointElement(
+        Scr_WatchElement_s *element,
+        unsigned int bufferIndex,
+        unsigned int sourcePos,
+        bool user);
 };
 
 struct Scr_SourcePos2_t // sizeof=0x8
@@ -794,6 +860,8 @@ struct Scr_ScriptCallStack : UI_LinesComponent // sizeof=0x12C
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
 
     Scr_SourcePos2_t stack[33];         // ...
+
+    void UpdateStack();
 };
 
 struct UI_VerticalDivider : UI_Component // sizeof=0x1C

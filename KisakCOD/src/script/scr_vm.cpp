@@ -25,6 +25,7 @@
 #include <universal/profile.h>
 #include <gfx_d3d/r_dvars.h>
 #include <qcommon/threads.h>
+#include "scr_compiler.h"
 
 scrVmPub_t scrVmPub;
 scrVmGlob_t scrVmGlob;
@@ -33,7 +34,10 @@ scrVmDebugPub_t scrVmDebugPub;
 
 function_stack_t pos;
 
+const dvar_s *logScriptTimes;
+
 int scr_initialized;
+int thread_count;
 
 void __cdecl SCR_Init()
 {
@@ -1694,7 +1698,7 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
                             if (scrVarPub.error_message)
                             {
                                 RuntimeError(
-                                    *(const char**)stackValue.intValue,
+                                    *(char**)stackValue.intValue,
                                     **(char**)stackValue.intValue - size + 3,
                                     scrVarPub.error_message,
                                     scrVmGlob.dialog_error_message);
@@ -1778,7 +1782,7 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
                             newStackValue->pos = *(const char**)stackValue.intValue;
                             newStackValue->localId = *(_WORD*)(stackValue.intValue + 8);
                             memcpy((unsigned __int8*)newStackValue->buf, (unsigned __int8*)(stackValue.intValue + 11), len);
-                            MT_Free((VariableUnion)stackValue.intValue, *(unsigned __int16*)(stackValue.intValue + 6));
+                            MT_Free((byte*)stackValue.intValue, *(unsigned __int16*)(stackValue.intValue + 6));
                             stackValue.intValue = (int)newStackValue;
                             tempValue->intValue = (int)newStackValue;
                         }
@@ -1910,7 +1914,7 @@ void __cdecl VM_TerminateStack(unsigned int endLocalId, unsigned int startLocalI
     VariableValueInternal_u Array; // eax
     unsigned int stackId; // [esp+0h] [ebp-24h]
     unsigned int localId; // [esp+4h] [ebp-20h]
-    const char* buf; // [esp+8h] [ebp-1Ch]
+    char* buf; // [esp+8h] [ebp-1Ch]
     const char* bufa; // [esp+8h] [ebp-1Ch]
     int size; // [esp+Ch] [ebp-18h]
     int sizea; // [esp+Ch] [ebp-18h]
@@ -1927,7 +1931,7 @@ void __cdecl VM_TerminateStack(unsigned int endLocalId, unsigned int startLocalI
     {
         bufa = buf - 4;
         u = *(const char**)bufa;
-        buf = bufa - 1;
+        buf = (char*)bufa - 1;
         --size;
         if (*buf == 7)
         {
@@ -1970,7 +1974,7 @@ void __cdecl VM_TerminateStack(unsigned int endLocalId, unsigned int startLocalI
     Scr_KillThread(localId);
     RemoveRefToObject(localId);
     --scrVarPub.numScriptThreads;
-    MT_Free(stackValue, stackValue->bufLen);
+    MT_Free((byte*)stackValue, stackValue->bufLen);
 }
 
 void __cdecl Scr_TerminateWaittillThread(unsigned int localId, unsigned int startLocalId)
@@ -2156,7 +2160,7 @@ void __cdecl VM_TrimStack(unsigned int startLocalId, VariableStackBuffer* stackV
     Scr_KillThread(startLocalId);
     RemoveRefToObject(startLocalId);
     --scrVarPub.numScriptThreads;
-    MT_Free(stackValue, stackValue->bufLen);
+    MT_Free((unsigned char*)stackValue, stackValue->bufLen);
 }
 
 void __cdecl Scr_CancelWaittill(unsigned int startLocalId)
@@ -2249,7 +2253,7 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char* pos, unsigned 
         }
         ++scrVmPub.top;
         scrVmPub.top->type = 0;
-        RuntimeError(pos, 0, "script stack overflow (too many embedded function calls)", 0);
+        RuntimeError((char*)pos, 0, "script stack overflow (too many embedded function calls)", 0);
         return localId;
     }
     else

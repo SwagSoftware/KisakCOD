@@ -114,7 +114,7 @@ void __cdecl Scr_InitDebuggerMain();
 void __cdecl Scr_ShutdownDebuggerMain();
 void __cdecl Scr_InitDebugger();
 void __cdecl Scr_ShutdownDebugger();
-void __cdecl Scr_SetSelectionComp(struct UI_ScrollPane *comp);
+void __cdecl Scr_SetSelectionComp(struct UI_Component *comp);
 void __cdecl Scr_InitDebuggerSystem();
 void Scr_InitBreakpoints();
 void __cdecl Scr_ShutdownDebuggerSystem(int restart);
@@ -254,3 +254,4 @@ char __cdecl Scr_PrintProfileBuiltinTimes(float minTime);
 int __cdecl Scr_BuiltinCompare(_DWORD* a, _DWORD* b);
 
 extern scrVmPub_t scrVmPub;
+extern scrVmDebugPub_t scrVmDebugPub;

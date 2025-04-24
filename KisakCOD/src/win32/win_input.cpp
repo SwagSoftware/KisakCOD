@@ -231,6 +231,12 @@ BOOL __cdecl IN_IsForegroundWindow()
 	return GetForegroundWindow() == g_wv.hWnd;
 }
 
+void __cdecl IN_SetForegroundWindow()
+{
+	SetForegroundWindow(g_wv.hWnd);
+	SetFocus(g_wv.hWnd);
+}
+
 /*
 ============================================================
 

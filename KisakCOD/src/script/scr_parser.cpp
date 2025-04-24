@@ -16,6 +16,8 @@
 scrParserGlob_t scrParserGlob;
 scrParserPub_t scrParserPub;
 
+char g_EndPos;
+
 void __cdecl TRACK_scr_parser()
 {
     track_static_alloc_internal(&scrParserGlob, 52, "scrParserGlob", 7);
@@ -900,7 +902,6 @@ unsigned int __cdecl Scr_GetSourceBuffer(const char *codePos)
     return bufferIndex;
 }
 
-char g_EndPos;
 void __cdecl Scr_PrintPrevCodePos(int channel, char *codePos, unsigned int index)
 {
     char *v3; // eax

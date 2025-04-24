@@ -443,6 +443,7 @@
     <ClCompile Include="src\script\scr_stringlist.cpp" />
     <ClCompile Include="src\script\scr_variable.cpp" />
     <ClCompile Include="src\script\scr_vm.cpp" />
+    <ClCompile Include="src\script\scr_yacc.cpp" />
     <ClCompile Include="src\server\sv_game.cpp" />
     <ClCompile Include="src\server\sv_world.cpp" />
     <ClCompile Include="src\server_mp\sv_archive_mp.cpp" />
@@ -697,11 +698,13 @@
     <ClInclude Include="src\qcommon\unzip.h" />
     <ClInclude Include="src\ragdoll\ragdoll.h" />
     <ClInclude Include="src\script\scr_animtree.h" />
+    <ClInclude Include="src\script\scr_compiler.h" />
     <ClInclude Include="src\script\scr_const.h" />
     <ClInclude Include="src\script\scr_debugger.h" />
     <ClInclude Include="src\script\scr_evaluate.h" />
     <ClInclude Include="src\script\scr_parser.h" />
     <ClInclude Include="src\script\scr_parsetree.h" />
+    <ClInclude Include="src\script\scr_yacc.h" />
     <ClInclude Include="src\server\sv_game.h" />
     <ClInclude Include="src\server\sv_world.h" />
     <ClInclude Include="src\server_mp\server.h" />

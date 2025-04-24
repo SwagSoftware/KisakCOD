@@ -66,6 +66,14 @@ union VariableUnion // sizeof=0x4
     {
         intValue = i;
     }
+    VariableUnion(char *str)
+    {
+        codePosValue = str;
+    }
+    VariableUnion(const char *str)
+    {
+        codePosValue = str;
+    }
     VariableUnion()
     {
         intValue = 0;
@@ -395,7 +403,6 @@ void  Scr_CheckLeaks(void);
 int  ThreadInfoCompare(_DWORD* info1, _DWORD* info2);
 //int  VariableInfoCompare(void const*, void const*);
 int VariableInfoFileNameCompare(_DWORD* info1, _DWORD* info2);
-int  VariableInfoFunctionCompare(_DWORD* info1, _DWORD* info2);
 int VariableInfoCountCompare(_DWORD* info1, _DWORD* info2);
 int VariableInfoFileLineCompare(_DWORD* info1, _DWORD* info2);
 unsigned int  FindVariableIndexInternal2(unsigned int name, unsigned int index);

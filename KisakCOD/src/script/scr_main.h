@@ -31,26 +31,6 @@ const char *var_typename[] =
     "removed thread",
 };
 
-struct scrCompilePub_t
-{
-    int value_count;
-    int far_function_count;
-    unsigned int loadedscripts;
-    unsigned int scripts;
-    unsigned int builtinFunc;
-    unsigned int builtinMeth;
-    word canonicalStrings[65536];
-    const char* in_ptr;
-    const char* parseBuf;
-    bool script_loading;
-    bool allowedBreakpoint;
-    int developer_statement;
-    byte* opcodePos;
-    unsigned int programLen;
-    int func_table_size;
-    int func_table[1024];
-};
-
 struct scrVarPub_t // sizeof=0x2007C
 {
     char* fieldBuffer;
@@ -91,7 +71,14 @@ struct scrVarPub_t // sizeof=0x2007C
     volatile unsigned int totalVectorRefCount;
 };
 
-extern scrCompilePub_t scrCompilePub;
+struct PrecacheEntry // sizeof=0x8
+{                                       // ...
+    unsigned __int16 filename;
+    bool include;
+    // padding byte
+    unsigned int sourcePos;
+};
+
 extern scrVarPub_t scrVarPub;
 extern scrVarDebugPub_t scrVarDebugPubBuf;
 extern scrVarGlob_t scrVarGlob;

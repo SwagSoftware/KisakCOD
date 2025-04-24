@@ -971,3 +971,5 @@ const char *__cdecl Profile_MissingEnd();
 extern const dvar_t *profile;
 extern const dvar_t *profile_thread;
 extern const dvar_t *profile_rowcount;
+
+extern ProfileScript profileScript;

@@ -1,16 +1,24 @@
 #include "scr_evaluate.h"
-#include <qcommon/mem_track.h>
+#include "scr_variable.h"
 #include "scr_main.h"
 #include "scr_vm.h"
 #include "scr_parser.h"
 #include "scr_parsetree.h"
 #include <qcommon/qcommon.h>
+#include <game_mp/g_public_mp.h>
+#include "scr_yacc.h"
+#include "scr_compiler.h"
+
+#include <qcommon/mem_track.h>
 
 
 //  unsigned int g_breakonObject      83043224     scr_evaluate.obj
 //  int marker_scr_evaluate  83043238     scr_evaluate.obj
 //  int g_breakonHit         8304323c     scr_evaluate.obj
 //  unsigned int g_breakonString      83043244     scr_evaluate.obj
+
+debugger_sval_s *g_debugExprHead;
+int g_breakonExpr;
 
 scrEvaluateGlob_t scrEvaluateGlob;
 int g_script_error_level;
@@ -598,6 +606,17 @@ void __cdecl Scr_CompilePrimitiveExpressionFieldObject(sval_u *expr)
     }
 }
 
+int __cdecl GetExpressionCount(sval_u exprlist)
+{
+    sval_u *node; // [esp+0h] [ebp-8h]
+    int expr_count; // [esp+4h] [ebp-4h]
+
+    expr_count = 0;
+    for (node = *(sval_u**)exprlist.type; node; node = node[1].node)
+        ++expr_count;
+    return expr_count;
+}
+
 void __cdecl Scr_CompilePrimitiveExpressionList(sval_u *exprlist)
 {
     sval_u *nodea; // [esp+8h] [ebp-18h]
@@ -652,6 +671,24 @@ char __cdecl Scr_CompileCallExpression(sval_u *expr)
             *(sval_u *)(expr->type + 12)).type;
         return 1;
     }
+    return 0;
+}
+
+unsigned int __cdecl Scr_GetBuiltin(sval_u func_name)
+{
+    _DWORD *func_namea; // [esp+8h] [ebp+8h]
+    _DWORD *func_nameb; // [esp+8h] [ebp+8h]
+
+    if (*(char*)func_name.type != 26)
+        return 0;
+    func_namea = *(_DWORD**)(func_name.type + 4);
+    if (*func_namea != 18)
+        return 0;
+    func_nameb = (DWORD*)func_namea[1];
+    if (*func_nameb != 20)
+        return 0;
+    if (scrCompilePub.developer_statement == 3 || !FindVariable(scrCompileGlob.fileId, func_nameb[1]))
+        return func_nameb[1];
     return 0;
 }
 
@@ -833,11 +870,11 @@ void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue
         break;
     case 0x32:
         Scr_EvalExpression(*(sval_u *)(expr.type + 4), localId, value);
-        Scr_EvalBoolNot(value);
+        Scr_EvalboolNot(value);
         break;
     case 0x33:
         Scr_EvalExpression(*(sval_u *)(expr.type + 4), localId, value);
-        Scr_EvalBoolComplement(value);
+        Scr_EvalboolComplement(value);
         break;
     case 0x4F:
         Scr_EvalVector(
@@ -905,11 +942,11 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
         break;
     case 0xB:
         value->type = 2;
-        value->u.stringValue = SL_GetString_(*(char **)(expr.type + 4), 0, 20).prev;
+        value->u.stringValue = SL_GetString_(*(char **)(expr.type + 4), 0, 20);
         break;
     case 0xC:
         value->type = 3;
-        value->u.stringValue = SL_GetString_(*(char **)(expr.type + 4), 0, 20).prev;
+        value->u.stringValue = SL_GetString_(*(char **)(expr.type + 4), 0, 20);
         break;
     case 0x11:
         Scr_EvalVariableExpression(*(sval_u *)(expr.type + 4), localId, value);
@@ -1336,7 +1373,7 @@ void __cdecl Scr_EvalFunction(sval_u func_name, sval_u params, unsigned int loca
             "g_script_error_level doesn't index ARRAY_COUNT( g_script_error )\n\t%i not in [0, %i)",
             g_script_error_level,
             33);
-    if (!_setjmp3(g_script_error[g_script_error_level], 0))
+    //if (!_setjmp3(g_script_error[g_script_error_level], 0)) // KISAKTRYCATCH
         ((void (*)(void))func_name.type)();
     if (g_script_error_level < 0)
         MyAssertHandler(
@@ -1427,7 +1464,7 @@ void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, unsign
             "g_script_error_level doesn't index ARRAY_COUNT( g_script_error )\n\t%i not in [0, %i)",
             g_script_error_level,
             33);
-    if (!_setjmp3(g_script_error[g_script_error_level], 0))
+    //if (!_setjmp3(g_script_error[g_script_error_level], 0)) // KISAKTRYCATCH
     {
         if (objectValue.type != 1)
         {
@@ -1448,7 +1485,7 @@ void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, unsign
         }
         entref = Scr_GetEntityIdRef(objectId.stringValue);
         RemoveRefToObject(objectId.stringValue);
-        ((void(__cdecl *)(unsigned int))func_name.type)(entref);
+        ((void(__cdecl *)(unsigned int))func_name.type)(entref.entnum); // KISAKTODO: fubar'd union 'entref'
     }
     if (g_script_error_level < 0)
         MyAssertHandler(

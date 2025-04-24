@@ -4,6 +4,10 @@
 
 
 XAssetHeader __cdecl node1_(void *pool);
+XAssetHeader __cdecl node1_(unsigned int pool)
+{
+    return node1_((void *)pool);
+}
 void __cdecl Scr_InitAllocNode();
 void __cdecl Scr_ShutdownAllocNode();
 sval_u __cdecl node0(int type);

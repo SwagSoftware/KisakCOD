@@ -32,6 +32,8 @@ union sval_u // sizeof=0x4
         return *this;
     }
 
+
+
     sval_u()
     {
     }
@@ -273,12 +275,13 @@ void __cdecl Scr_DebugTerminateThread(int topThread);
 int __cdecl Scr_UpdateDebugSocket();
 void Scr_ToggleBreakpointRemote();
 void Scr_SelectScriptLineRemote();
+void __cdecl Scr_SetMiscScrollPaneComp(struct UI_LinesComponent *comp);
 void Scr_UpdateWatchHeightRemote();
 void Scr_SelectElementRemote();
 void Scr_ToggleExpandElementRemote();
 void Scr_PasteElementRemote();
 Scr_WatchElement_s *Scr_InsertElementRemote();
-Scr_WatchElement_s *Scr_DeleteElementRemote();
+void Scr_DeleteElementRemote();
 Scr_WatchElement_s *Scr_BackspaceElementRemote();
 void Scr_FreeWatchElementChildrenRemote();
 bool Scr_SetElementObjectTypeRemote();
@@ -301,9 +304,12 @@ void __cdecl Scr_UpdateDebugger();
 char __cdecl Scr_WatchElementHasSameValue(Scr_WatchElement_s *element, VariableValue *newValue);
 int __cdecl Scr_HitAssignmentBreakpoint(VariableValue *top, char *pos, unsigned int localId, int forceBreak);
 bool __cdecl Scr_IgnoreErrors();
-int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2);
 
 
 extern scrDebuggerGlob_t scrDebuggerGlob;
 extern Scr_Breakpoint g_breakpoints[128];
 extern Scr_Breakpoint *g_breakpointsHead;
+
+extern unsigned int g_breakonObject;
+extern unsigned int g_breakonString;
+extern int g_breakonHit;

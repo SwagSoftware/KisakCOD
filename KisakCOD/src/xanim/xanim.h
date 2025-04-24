@@ -1219,6 +1219,7 @@ union XAssetHeader // sizeof=0x4
     // XAssetHeader(StringTable *arg) { stringTable = arg; }
     XAssetHeader(void *arg) { data = arg; }
 
+    int xmodelPieces; // LWSS: lmao hack for scr_yacc
     struct XModelPieces *xmodelPieces;
     struct PhysPreset *physPreset;
     struct XAnimParts *parts;

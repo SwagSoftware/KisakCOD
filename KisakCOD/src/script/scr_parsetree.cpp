@@ -2,6 +2,7 @@
 #include <universal/assertive.h>
 #include <universal/com_memory.h>
 #include "scr_evaluate.h"
+#include "scr_vm.h"
 
 
 //struct debugger_sval_s *g_debugExprHead 83123658     scr_parsetree.obj
@@ -225,7 +226,7 @@ sval_u __cdecl Scr_AllocDebugExpr(debugger_sval_s *type, int size, const char *n
     v3->next = g_debugExprHead;
     g_debugExprHead = v3;
     v3[1].next = type;
-    return (sval_u)&v3[1];
+    return *(sval_u*)&v3[1];
 }
 
 void __cdecl Scr_FreeDebugExpr(ScriptExpression_t *expr)
@@ -240,7 +241,7 @@ void __cdecl Scr_FreeDebugExpr(ScriptExpression_t *expr)
         MyAssertHandler(".\\script\\scr_parsetree.cpp", 395, 0, "%s", "debugExprHead");
     while (debugExprHead)
     {
-        Scr_FreeDebugExprValue((sval_u)(debugExprHead + 4));
+        Scr_FreeDebugExprValue(*(sval_u*)(debugExprHead + 4));
         nextDebugExprHead = *(debugger_sval_s **)debugExprHead;
         Z_Free(debugExprHead, 0);
         debugExprHead = (char *)nextDebugExprHead;
@@ -312,7 +313,7 @@ sval_u __cdecl debugger_buffer(debugger_sval_s *type, char *buf, unsigned int si
     result.type = Scr_AllocDebugExpr(type, size + alignmenta + 8, "debugger_buffer").type;
     bufCopy = (unsigned __int8 *)(~alignmenta & (result.type + alignmenta + 8));
     memcpy(bufCopy, (unsigned __int8 *)buf, size);
-    *(unsigned int *)(result.type + 4) = bufCopy;
+    *(unsigned int *)(result.type + 4) = (unsigned int)bufCopy;
     return result;
 }
 

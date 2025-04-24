@@ -3,6 +3,7 @@
 
 #include <universal/assertive.h>
 #include <universal/q_shared.h>
+#include "scr_compiler.h"
 
 bool Scr_IsInOpcodeMemory(char const* pos)
 {

@@ -26,6 +26,8 @@ void	IN_KillRumbleScripts(int controller);
 void	IN_KillRumbleScripts( void );
 
 // LWSS add
+void __cdecl IN_SetForegroundWindow();
+
 void IN_ActivateMouse(qboolean force);
 void __cdecl IN_RecenterMouse();
 void __cdecl IN_SetCursorPos(tagPOINT x);

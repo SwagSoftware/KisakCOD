@@ -147,3 +147,4 @@ void __cdecl RuntimeErrorInternal(int channel, char *codePos, unsigned int index
 
 extern scrParserGlob_t scrParserGlob;
 extern scrParserPub_t scrParserPub;
+extern char g_EndPos;

@@ -2,6 +2,17 @@
 #include "scr_variable.h"
 #include "scr_debugger.h"
 
+struct __declspec(align(4)) Scr_SelectedLineInfo // sizeof=0xC
+{                                       // ...
+    int selectedId;
+    int oldSelectedLine;
+    bool oldFocusOnSelectedLine;
+    // padding byte
+    // padding byte
+    // padding byte
+};
+
+
 struct ArchivedCanonicalStringInfo // sizeof=0x8
 {
     unsigned __int16 canonicalStr;
@@ -22,6 +33,7 @@ struct __declspec(align(2)) scrEvaluateGlob_t // sizeof=0x10
 };
 
 void __cdecl TRACK_scr_evaluate();
+unsigned int __cdecl Scr_GetBuiltin(sval_u func_name);
 int __cdecl Scr_CompareCanonicalStrings(unsigned int *arg1, unsigned int *arg2);
 void __cdecl Scr_ArchiveCanonicalStrings();
 int __cdecl CompareCanonicalStrings(const char **arg1, const char **arg2);
@@ -41,6 +53,7 @@ void __cdecl Scr_CompileExpression(sval_u *expr);
 void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr);
 void __cdecl Scr_CompileVariableExpression(sval_u *expr);
 void __cdecl Scr_CompilePrimitiveExpressionFieldObject(sval_u *expr);
+int __cdecl GetExpressionCount(sval_u exprlist);
 void __cdecl Scr_CompilePrimitiveExpressionList(sval_u *exprlist);
 char __cdecl Scr_CompileCallExpression(sval_u *expr);
 char __cdecl Scr_CompileFunction(sval_u *func_name, sval_u *params);
@@ -93,3 +106,5 @@ void __cdecl Scr_FreeDebugExprValue(sval_u val);
 
 
 extern scrEvaluateGlob_t scrEvaluateGlob;
+extern debugger_sval_s *g_debugExprHead;
+extern int g_script_error_level;
