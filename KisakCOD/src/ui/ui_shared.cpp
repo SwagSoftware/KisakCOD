@@ -7,7 +7,9 @@
 #include <win32/win_storage.h>
 #include <qcommon/mem_track.h>
 #include <database/database.h>
+#include <cgame/cg_local.h>
 
+#include <algorithm>
 
 int g_waitingForKey;
 int g_editingField;
@@ -6334,8 +6336,6 @@ void __cdecl Menu_PaintAll_AppendToVisibleList(char *stringBegin, unsigned int s
 {
     unsigned int v3; // [esp+0h] [ebp-64h]
     std::reverse_iterator<char *> result; // [esp+44h] [ebp-20h] BYREF
-    std::reverse_iterator<char *> _First; // [esp+48h] [ebp-1Ch]
-    std::reverse_iterator<char *> _Last; // [esp+4Ch] [ebp-18h]
     char _Val; // [esp+53h] [ebp-11h] BYREF
     const char *lastNewline; // [esp+54h] [ebp-10h]
     int VISIBLE_LIST_LINE_LENGTH; // [esp+58h] [ebp-Ch]
@@ -6347,14 +6347,24 @@ void __cdecl Menu_PaintAll_AppendToVisibleList(char *stringBegin, unsigned int s
     stringEnd = &stringBegin[v3];
     I_strncat(stringBegin, stringSize, stringToAppend);
     _Val = 10;
-    _Last.current = stringBegin;
-    _First.current = &stringBegin[v3];
-    lastNewline = std::find<std::reverse_iterator<char *>, char>(
-        &result,
-        (std::reverse_iterator<char *>) & stringBegin[v3],
-        (std::reverse_iterator<char *>)stringBegin,
-        &_Val)->current
-        - 1;
+
+    std::reverse_iterator<char *> _First = std::reverse_iterator<char *>(stringBegin); // [esp+48h] [ebp-1Ch]
+    std::reverse_iterator<char *> _Last = std::reverse_iterator<char *>(&stringBegin[v3]); // [esp+4Ch] [ebp-18h]
+
+    std::string kisak(stringBegin);
+
+    //_Last.current = stringBegin;
+    //_First.current = &stringBegin[v3];
+    //lastNewline = std::find<std::reverse_iterator<char *>, char>(
+    //    &result,
+    //    _Last,
+    //    _First,
+    //    //(std::reverse_iterator<char *>) & stringBegin[v3],
+    //    //(std::reverse_iterator<char *>)stringBegin,
+    //    &_Val)->current - 1;
+    auto it = std::find<std::reverse_iterator<char *>, char>(_Last, _First, _Val); // KISAKTODO: i'd be surprised if this works.
+    lastNewline = it._Get_current() - 1;
+
     if (stringEnd - lastNewline <= 80)
         terminus = ", ";
     else

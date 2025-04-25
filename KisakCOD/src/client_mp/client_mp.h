@@ -523,6 +523,7 @@ struct ping_t // sizeof=0x41C
 // cl_main_mp
 //void __cdecl TRACK_cl_main();
 void __cdecl CL_SortGlobalServers();
+void __cdecl CL_GetAutoUpdate();
 struct serverStatus_s *__cdecl CL_GetServerStatus(netadr_t from);
 char __cdecl CL_IsLocalClientActive(int localClientNum);
 int __cdecl CL_LocalActiveIndexFromClientNum(int localClientNum);
@@ -1187,3 +1188,6 @@ void __cdecl CL_ResetPlayerMuting(unsigned int muteClientIndex);
 void __cdecl CL_MutePlayer(int localClientNum, unsigned int muteClientIndex);
 bool __cdecl CL_IsPlayerMuted(int localClientNum, unsigned int muteClientIndex);
 void __cdecl CL_ClearMutedList();
+
+
+extern voiceCommunication_t cl_voiceCommunication;

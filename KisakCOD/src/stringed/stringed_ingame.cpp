@@ -7,6 +7,9 @@
 
 CStringEdPackage *TheStringPackage;
 
+int giFilesFound;
+char sTemp[64];
+
 void __cdecl SE_Init()
 {
     CStringEdPackage *v0; // eax
@@ -82,26 +85,31 @@ char *__cdecl SE_Load(char *psFileName, bool forceEnglish)
     return (char *)v6;
 }
 
+// KISAKTODO: my god this is aids
 const char *__cdecl SE_GetString_LoadObj(const char *psPackageAndStringReference)
 {
     const std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > const, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > > *v1; // eax
     std::map<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t> > *p_m_StringEntries; // [esp+18h] [ebp-88h]
     std::_Tree_nod<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::_Node *Myhead; // [esp+1Ch] [ebp-84h]
     std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::const_iterator _Right; // [esp+70h] [ebp-30h] BYREF
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > _Keyval; // [esp+78h] [ebp-28h] BYREF
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > *Entry; // [esp+94h] [ebp-Ch]
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > _Keyval; // [esp+78h] [ebp-28h] BYREF
+    std::string _Keyval;
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > *Entry; // [esp+94h] [ebp-Ch]
+    std::string *Entry;
     std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::iterator itEntry; // [esp+98h] [ebp-8h] BYREF
 
     std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 0, 0);
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        &_Keyval,
-        psPackageAndStringReference,
-        strlen(psPackageAndStringReference));
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
+    //    &_Keyval,
+    //    psPackageAndStringReference,
+    //    strlen(psPackageAndStringReference));
+    _Keyval.assign(psPackageAndStringReference);
+    //TheStringPackage->m_StringEntries.find()
     std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::find(
         &TheStringPackage->m_StringEntries,
         &itEntry,
         &_Keyval);
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 1, 0);
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 1, 0);
     p_m_StringEntries = &TheStringPackage->m_StringEntries;
     Myhead = TheStringPackage->m_StringEntries._Myhead;
     _Right._Myaux = 0;
@@ -115,39 +123,41 @@ const char *__cdecl SE_GetString_LoadObj(const char *psPackageAndStringReference
         return 0;
     v1 = std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::const_iterator::operator*(&itEntry);
     Entry = &v1->second;
-    if (v1->second._Myres < 0x10)
-        return Entry->_Bx._Buf;
-    else
-        return Entry->_Bx._Ptr;
+
+    return Entry->data();
+    //if (v1->second._Myres < 0x10)
+    //    return Entry->_Bx._Buf;
+    //else
+    //    return Entry->_Bx._Ptr;
 }
 
 void __cdecl SE_NewLanguage()
 {
     if (!TheStringPackage)
         MyAssertHandler(".\\stringed\\stringed_ingame.cpp", 799, 0, "%s", "TheStringPackage");
-    CStringEdPackage::Clear(TheStringPackage);
+    //CStringEdPackage::Clear(TheStringPackage);
+    TheStringPackage->Clear();
 }
 
 void __cdecl SE_Init()
 {
-    CStringEdPackage *v0; // eax
     CStringEdPackage *v1; // [esp+0h] [ebp-68h]
-    CStringEdPackage *v2; // [esp+64h] [ebp-4h]
 
     if (TheStringPackage)
         MyAssertHandler(".\\stringed\\stringed_ingame.cpp", 811, 0, "%s", "!TheStringPackage");
-    v2 = (CStringEdPackage *)Z_Malloc(120, "CStringEdPackage", 33);
+    void* v2 = Z_Malloc(120, "CStringEdPackage", 33);
     if (v2)
     {
-        CStringEdPackage::CStringEdPackage(v2);
-        v1 = v0;
+        //CStringEdPackage::CStringEdPackage(v2);
+        v1 = new (v2) CStringEdPackage();
     }
     else
     {
         v1 = 0;
     }
     TheStringPackage = v1;
-    CStringEdPackage::Clear(v1);
+    //CStringEdPackage::Clear(v1);
+    v1->Clear();
 }
 
 void __cdecl SE_ShutDown()
@@ -156,12 +166,13 @@ void __cdecl SE_ShutDown()
 
     if (TheStringPackage)
     {
-        CStringEdPackage::Clear(TheStringPackage);
+        //CStringEdPackage::Clear(TheStringPackage);
+        TheStringPackage->Clear();
         v0 = TheStringPackage;
         if (TheStringPackage)
         {
-            CStringEdPackage::~CStringEdPackage(TheStringPackage);
-            Z_Free((char *)v0, 33);
+            //CStringEdPackage::~CStringEdPackage(TheStringPackage);
+            //Z_Free((char *)v0, 33);
         }
         TheStringPackage = 0;
     }
@@ -170,55 +181,65 @@ void __cdecl SE_ShutDown()
 char *__cdecl SE_LoadLanguage(bool forceEnglish)
 {
     char *psErrorMessage; // [esp+30h] [ebp-28h]
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > strResults; // [esp+34h] [ebp-24h] BYREF
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > strResults; // [esp+34h] [ebp-24h] BYREF
+    std::string strResults;
     const char *p; // [esp+54h] [ebp-4h]
 
     psErrorMessage = 0;
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&strResults, 0, 0);
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&strResults, 0, 0);
+    strResults.clear();
     SE_NewLanguage();
     SE_BuildFileList("localizedstrings", &strResults);
     while (1)
     {
-        p = SE_GetFoundFile((std::string *)&strResults);
+        p = SE_GetFoundFile(&strResults);
         if (!p || psErrorMessage)
             break;
         psErrorMessage = SE_Load((char *)p, forceEnglish);
     }
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&strResults, 1, 0);
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&strResults, 1, 0);
     return psErrorMessage;
 }
 
 char *__cdecl SE_GetFoundFile(std::string *strResult)
 {
     _BYTE *v2; // eax
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *p_Bx; // [esp+14h] [ebp-38h]
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *p_Bx; // [esp+14h] [ebp-38h]
 
-    if (strResult->_Myres < 0x10)
-        p_Bx = (std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *) & strResult->_Bx;
-    else
-        p_Bx = (std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *)strResult->_Bx._Ptr;
-    if (!strlen(p_Bx->_Buf))
-        return 0;
-    if (strResult->_Myres < 0x10)
-        strncpy((unsigned __int8 *)sTemp, (unsigned __int8 *)&strResult->_Bx, 0x3Fu);
-    else
-        strncpy((unsigned __int8 *)sTemp, (unsigned __int8 *)strResult->_Bx._Ptr, 0x3Fu);
+    //if (strResult->_Myres < 0x10)
+    //    p_Bx = (std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *) & strResult->_Bx;
+    //else
+    //    p_Bx = (std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *)strResult->_Bx._Ptr;
+    //if (!strlen(p_Bx->_Buf))
+    //    return 0;
+    if (!strResult->size())
+    {
+        return NULL;
+    }
+    //if (strResult->_Myres < 0x10)
+    //    strncpy((unsigned __int8 *)sTemp, (unsigned __int8 *)&strResult->_Bx, 0x3Fu);
+    //else
+    //    strncpy((unsigned __int8 *)sTemp, (unsigned __int8 *)strResult->_Bx._Ptr, 0x3Fu);
+
+    strncpy(sTemp, strResult->data(), 63);
     sTemp[63] = 0;
-    strchr((unsigned __int8 *)sTemp, 0x3Bu);
+    v2 = (_BYTE *)strchr(sTemp, ';');
     if (v2)
     {
         *v2 = 0;
-        std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::erase(
-            strResult,
-            0,
-            v2 - sTemp + 1);
+        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::erase(
+        //    strResult,
+        //    0,
+        //    v2 - sTemp + 1);
+        strResult->erase(0, (char*)v2 - sTemp + 1);
     }
     else
     {
-        std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::erase(
-            strResult,
-            0,
-            std::string::npos);
+        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::erase(
+        //    strResult,
+        //    0,
+        //    std::string::npos);
+        strResult->erase(0, std::string::npos);
     }
     return sTemp;
 }
@@ -244,10 +265,11 @@ int __cdecl SE_BuildFileList(
     std::string *strResults)
 {
     giFilesFound = 0;
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        strResults,
-        "",
-        &String + strlen("") + 1 - algn_85A0F1);
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
+    //    strResults,
+    //    "",
+    //    &String + strlen("") + 1 - algn_85A0F1);
+    strResults->assign("");
     SE_R_ListFiles("str", psStartDir, strResults);
     return giFilesFound;
 }
@@ -281,11 +303,13 @@ void __cdecl SE_R_ListFiles(
     for (i = 0; i < numSysFiles; ++i)
     {
         sprintf(sFilename, "%s/%s", psDir, sysFiles[i]);
-        std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::append(
-            strResults,
-            sFilename,
-            &sFilename[strlen(sFilename) + 1] - &sFilename[1]);
-        std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::append(strResults, 1u, 59);
+        strResults->append(sFilename);
+        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::append(
+        //    strResults,
+        //    sFilename,
+        //    &sFilename[strlen(sFilename) + 1] - &sFilename[1]);
+        strResults->append(1, ';');
+        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::append(strResults, 1u, 59);
         ++giFilesFound;
     }
     FS_FreeFileList(sysFiles);

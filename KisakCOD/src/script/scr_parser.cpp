@@ -11,6 +11,9 @@
 #include <qcommon/threads.h>
 #include "scr_vm.h"
 #include <ui/ui.h>
+#include "scr_compiler.h"
+
+#include <algorithm>
 
 
 scrParserGlob_t scrParserGlob;
@@ -1276,11 +1279,12 @@ void __cdecl Scr_CalcScriptFileProfile()
                 "scrParserPub.sourceBufferLookupLen < MAX_SCRIPT_FILES");
         for (i = 0; i < scrParserPub.sourceBufferLookupLen; ++i)
             v4[i] = (const GfxStaticModelDrawInst *)i;
-        std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-            v4,
-            &v4[scrParserPub.sourceBufferLookupLen],
-            (signed int)(4 * scrParserPub.sourceBufferLookupLen) >> 2,
-            (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Scr_CompareScriptSourceProfileTimes);
+        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+        //    v4,
+        //    &v4[scrParserPub.sourceBufferLookupLen],
+        //    (signed int)(4 * scrParserPub.sourceBufferLookupLen) >> 2,
+        //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Scr_CompareScriptSourceProfileTimes);
+        std::sort(&v4[0], &v4[scrParserPub.sourceBufferLookupLen], Scr_CompareScriptSourceProfileTimes);
         memcpy(Script->scriptSrcBufferIndex, v4, sizeof(Script->scriptSrcBufferIndex));
     }
 }
@@ -1409,11 +1413,12 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
         }
         if (profileIndex != profileCount)
             MyAssertHandler(".\\script\\scr_parser.cpp", 1492, 0, "%s", "profileIndex == profileCount");
-        std::_Sort<MapProfileHotSpot *, int, bool(__cdecl *)(MapProfileHotSpot const &, MapProfileHotSpot const &)>(
-            (MapProfileHotSpot *)sortedOpcodeLookup,
-            (MapProfileHotSpot *)&sortedOpcodeLookup[24 * profileCount],
-            24 * profileCount / 24,
-            (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))Scr_CompareProfileTimes);
+        //std::_Sort<MapProfileHotSpot *, int, bool(__cdecl *)(MapProfileHotSpot const &, MapProfileHotSpot const &)>(
+        //    (MapProfileHotSpot *)sortedOpcodeLookup,
+        //    (MapProfileHotSpot *)&sortedOpcodeLookup[24 * profileCount],
+        //    24 * profileCount / 24,
+        //    (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))Scr_CompareProfileTimes);
+        std::sort(&sortedOpcodeLookup[0], &sortedOpcodeLookup[24 * profileCount], Scr_CompareProfileTimes);
         Com_Printf(23, "\n");
         profile = Profile_GetScript();
             maxNameLength = 0;

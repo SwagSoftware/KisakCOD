@@ -150,7 +150,16 @@ enum ViewLockTypes : __int32
 //    const char *linkPointer;
 //};
 struct scr_anim_s // sizeof=0x4
-{                                       // ...
+{   
+    scr_anim_s()
+    {
+        linkPointer = NULL;
+    }
+    scr_anim_s(int i)
+    {
+        linkPointer = (const char *)i; // KISAKHACK
+    }
+    // ...
     //$76411D3CC105A18E6E4A61D5A929E310 ___u0; // ...
     union
     {

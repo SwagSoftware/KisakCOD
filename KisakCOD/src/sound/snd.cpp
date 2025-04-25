@@ -5,6 +5,19 @@
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/com_sndalias.h>
+#include <database/database.h>
+#include <universal/q_parse.h>
+#include <client/client.h>
+
+struct AsyncPlaySound // sizeof=0x14
+{                                       // ...
+    snd_alias_t *alias;
+    SndEntHandle sndEnt;
+    float origin[3];
+};
+
+const char *snd_draw3DNames[5] = { "Off", "Targets", "Names", "Verbose", NULL }; // idb
 
 const dvar_t *snd_cinematicVolumeScale;
 const dvar_t *snd_enable3D;
@@ -26,6 +39,10 @@ const dvar_t *snd_levelFadeTime;
 const dvar_t *snd_touchStreamFilesOnLoad;
 
 snd_local_t g_snd;
+snd_physics g_sndPhysics;
+
+unsigned int g_FXPlaySoundCount;
+AsyncPlaySound g_FXPlaySounds[32];
 
 const char *snd_roomStrings[27] =
 {
@@ -1522,15 +1539,15 @@ void __cdecl SND_PlayFXSounds()
 
 int __cdecl SND_PlaySoundAlias(
     const snd_alias_t *alias,
-    SndEntHandle sndEnt,
-    const float *org,
+    SndEntHandle *sndEnt,
+    SndEntHandle *org,
     int timeshift,
     snd_alias_system_t system)
 {
     if (!org)
         MyAssertHandler(".\\snd.cpp", 1819, 0, "%s", "org");
     if (alias)
-        return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, (unsigned int)org, timeshift, 0, 1, system);
+        return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, 0, timeshift, 0, 1, system);
     else
         return -1;
 }
@@ -1540,8 +1557,9 @@ int __cdecl SND_PlaySoundAlias_Internal(
     const snd_alias_t *alias1,
     float lerp,
     float volumeScale,
-    SndEntHandle sndEnt,
-    __int64 org,
+    SndEntHandle *sndEnt,
+    SndEntHandle *org,
+    float *pChannel,
     int timeshift,
     bool treatAsMaster,
     bool useTimescale,
@@ -1580,7 +1598,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
     if (SND_IsAliasChannel3D(alias0Channel))
     {
         distMax = (1.0 - lerp) * alias0->distMax + alias1->distMax * lerp;
-        a = &g_snd.listeners[SND_GetListenerIndexNearestToOrigin((const float *)org)];
+        a = &g_snd.listeners[SND_GetListenerIndexNearestToOrigin(pChannel)];
         Vec3Sub(a->orient.origin, (const float *)org, diff);
         distListenerSq = Vec3LengthSq(diff);
         outOfRange = distListenerSq > distMax * distMax;
@@ -1593,7 +1611,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
     }
     if (!outOfRange)
     {
-        if (SND_ContinueLoopingSound(alias0, alias1, lerp, volumeScale, sndEnt, (const float *)org, (int *)HIDWORD(org)))
+        if (SND_ContinueLoopingSound(alias0, alias1, lerp, volumeScale, *sndEnt, (const float *)org, (int *)HIDWORD(org)))
         {
             if (alias0->secondaryAliasName)
             {
@@ -1601,31 +1619,34 @@ int __cdecl SND_PlaySoundAlias_Internal(
                 if (secondaryAlias)
                 {
                     if ((secondaryAlias->flags & 1) != 0)
-                        SND_PlaySoundAlias_Internal(
-                            secondaryAlias,
-                            secondaryAlias,
-                            lerp,
-                            volumeScale,
-                            sndEnt,
-                            (const float *)org,
-                            0,
-                            timeshift,
-                            treatAsMaster,
-                            useTimescale,
-                            system);
+                    {
+                            SND_PlaySoundAlias_Internal(
+                                secondaryAlias,
+                                secondaryAlias,
+                                lerp,
+                                volumeScale,
+                                sndEnt,
+                                org,
+                                pChannel,
+                                timeshift,
+                                treatAsMaster,
+                                useTimescale,
+                                system);
+                    }
+
                 }
             }
             return 0;
         }
         if (SND_IsRestricted(alias0Channel))
-            SND_StopEntityChannel(sndEnt, alias0Channel);
+            SND_StopEntityChannel(*sndEnt, alias0Channel);
         if (SND_IsNullSoundFile(alias0->soundFile))
             return -1;
         SND_ChoosePitchAndVolume(alias0, alias1, lerp, volumeScale, &startAliasInfo.volume, &startAliasInfo.pitch);
         startAliasInfo.alias0 = alias0;
         startAliasInfo.alias1 = alias1;
         startAliasInfo.lerp = lerp;
-        startAliasInfo.sndEnt = sndEnt;
+        startAliasInfo.sndEnt = *sndEnt;
         startAliasInfo.org[0] = *(float *)org;
         startAliasInfo.org[1] = *(float *)(org + 4);
         startAliasInfo.org[2] = *(float *)(org + 8);
@@ -1704,7 +1725,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
                 lerp,
                 volumeScale,
                 sndEnt,
-                (const float *)org,
+                org,
                 0,
                 timeshift,
                 treatAsMaster,
@@ -2156,6 +2177,11 @@ void __cdecl SND_ContinueLoopingSound_Internal(
         *pChannel = chanIndex;
 }
 
+BOOL __cdecl StreamFileNameIsNullSound(const StreamFileName *streamFileName)
+{
+    return !*streamFileName->info.raw.dir && !I_stricmp("null.wav", streamFileName->info.raw.name);
+}
+
 bool __cdecl SND_IsNullSoundFile(const SoundFile *soundFile)
 {
     if (soundFile->type == 2)
@@ -2167,15 +2193,15 @@ bool __cdecl SND_IsNullSoundFile(const SoundFile *soundFile)
 
 int __cdecl SND_PlaySoundAliasAsMaster(
     const snd_alias_t *alias,
-    SndEntHandle sndEnt,
-    const float *org,
+    SndEntHandle *sndEnt,
+    SndEntHandle *org,
     int timeshift,
     snd_alias_system_t system)
 {
     if (!org)
         MyAssertHandler(".\\snd.cpp", 1829, 0, "%s", "org");
     if (alias)
-        return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, (unsigned int)org, timeshift, 1, 1, system);
+        return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, NULL, timeshift, 1, 1, system);
     else
         return -1;
 }
@@ -2186,7 +2212,7 @@ int __cdecl SND_PlayBlendedSoundAliases(
     float lerp,
     float volumeScale,
     SndEntHandle sndEnt,
-    const float *org,
+    SndEntHandle *org,
     int timeshift,
     snd_alias_system_t system)
 {
@@ -2200,8 +2226,9 @@ int __cdecl SND_PlayBlendedSoundAliases(
         alias1,
         lerp,
         volumeScale,
-        sndEnt,
-        (unsigned int)org,
+        &sndEnt,
+        org,
+        NULL,
         timeshift,
         0,
         1,
@@ -2247,7 +2274,7 @@ char __cdecl SND_ValidateSoundAliasBlend(const snd_alias_t *alias0, const snd_al
                                                         if (alias0->secondaryAliasName || alias1->secondaryAliasName)
                                                         {
                                                             if (bReport)
-                                                                Com_Error(ERR_DROP, &byte_8D7F78, alias0->aliasName, alias1->aliasName);
+                                                                Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but one or both has a secondary alias", alias0->aliasName, alias1->aliasName);
                                                             return 0;
                                                         }
                                                         else
@@ -2258,91 +2285,91 @@ char __cdecl SND_ValidateSoundAliasBlend(const snd_alias_t *alias0, const snd_al
                                                     else
                                                     {
                                                         if (bReport)
-                                                            Com_Error(ERR_DROP, &byte_8D7FD8, alias0->aliasName, alias1->aliasName);
+                                                            Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they are looping and at least one of them has a random volume", alias0->aliasName, alias1->aliasName);
                                                         return 0;
                                                     }
                                                 }
                                                 else
                                                 {
                                                     if (bReport)
-                                                        Com_Error(ERR_DROP, &byte_8D8050, alias0->aliasName, alias1->aliasName);
+                                                        Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but htey are looping and at least one of them has a random pitch", alias0->aliasName, alias1->aliasName);
                                                     return 0;
                                                 }
                                             }
                                             else
                                             {
                                                 if (bReport)
-                                                    Com_Error(ERR_DROP, &byte_8D80C8, alias0->aliasName, alias1->aliasName);
+                                                    Com_Error(ERR_DROP, "tried to blend aliases %s and %s, but they do not have the same start delay.", alias0->aliasName, alias1->aliasName);
                                                 return 0;
                                             }
                                         }
                                         else
                                         {
                                             if (bReport)
-                                                Com_Error(ERR_DROP, &byte_8D8130, alias0->aliasName, alias1->aliasName);
+                                                Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they do not have the same slave percentages", alias0->aliasName, alias1->aliasName);
                                             return 0;
                                         }
                                     }
                                     else
                                     {
                                         if (bReport)
-                                            Com_Error(ERR_DROP, &byte_8D8198, alias0->aliasName, alias1->aliasName);
+                                            Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they don't use the same nowetlevel setting", alias0->aliasName, alias1->aliasName);
                                         return 0;
                                     }
                                 }
                                 else
                                 {
                                     if (bReport)
-                                        Com_Error(ERR_DROP, &byte_8D8200, alias0->aliasName, alias1->aliasName);
+                                        Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s but they don't use the same fulldrylevel setting", alias0->aliasName, alias1->aliasName);
                                     return 0;
                                 }
                             }
                             else
                             {
                                 if (bReport)
-                                    Com_Error(ERR_DROP, &byte_8D8268, alias0->aliasName, alias1->aliasName);
+                                    Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but only one of them is a 'slave' alias", alias0->aliasName, alias1->aliasName);
                                 return 0;
                             }
                         }
                         else
                         {
                             if (bReport)
-                                Com_Error(ERR_DROP, &byte_8D82C8, alias0->aliasName, alias1->aliasName);
+                                Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but only one of them is a 'master' alias", alias0->aliasName, alias1->aliasName);
                             return 0;
                         }
                     }
                     else
                     {
                         if (bReport)
-                            Com_Error(ERR_DROP, &byte_8D8328, alias0->aliasName, alias1->aliasName);
+                            Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they don't use the same channel", alias0->aliasName, alias1->aliasName);
                         return 0;
                     }
                 }
                 else
                 {
                     if (bReport)
-                        Com_Error(ERR_DROP, &byte_8D8388, alias0->aliasName, alias1->aliasName);
+                        Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they are not both loaded or both streamed", alias0->aliasName, alias1->aliasName);
                     return 0;
                 }
             }
             else
             {
                 if (bReport)
-                    Com_Error(ERR_DROP, &byte_8D83F0, alias0->aliasName, alias1->aliasName);
+                    Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they do not have the same looping status", alias0->aliasName, alias1->aliasName);
                 return 0;
             }
         }
         else
         {
             if (bReport)
-                Com_Error(ERR_DROP, &byte_8D8458, alias0->aliasName, alias1->aliasName);
+                Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they do not have the same volume falloff curve", alias0->aliasName, alias1->aliasName);
             return 0;
         }
     }
     else
     {
         if (bReport)
-            Com_Error(ERR_DROP, &byte_8D84C8, alias0->aliasName, alias1->aliasName);
+            Com_Error(ERR_DROP, "tried to blend between sound aliases %s and %s, but they don't use the same sound file", alias0->aliasName, alias1->aliasName);
         return 0;
     }
 }
@@ -2359,13 +2386,28 @@ int __cdecl SND_PlayLocalSoundAlias(unsigned int localClientNum, const snd_alias
             "localClientNum doesn't index ARRAY_COUNT( g_snd.listeners )\n\t%i not in [0, %i)",
             localClientNum,
             2);
+
+    //int __cdecl SND_PlaySoundAlias_Internal(
+    //    const snd_alias_t * alias0,
+    //    const snd_alias_t * alias1,
+    //    float lerp,
+    //    float volumeScale,
+    //    SndEntHandle * sndEnt,
+    //    SndEntHandle * org,
+    //    float *pChannel,
+    //    int timeshift,
+    //    bool treatAsMaster,
+    //    bool useTimescale,
+    //    snd_alias_system_t system)
+
     return SND_PlaySoundAlias_Internal(
         alias,
         alias,
         0.0,
         1.0,
-        0,
-        (unsigned int)&g_snd.listeners[localClientNum],
+        NULL,
+        (SndEntHandle *)(((4 * g_snd.listeners[localClientNum].clientNum) | localClientNum & 3) << 20),
+        g_snd.listeners[localClientNum].orient.origin,
         0,
         0,
         1,
@@ -2437,12 +2479,12 @@ void __cdecl SND_StartBackground(
     if (SND_IsAliasChannel3D((alias->flags & 0x3F00) >> 8))
     {
         Com_GetSoundFileName(alias, filename, 128);
-        Com_Error(ERR_DROP, &byte_8D8688, alias->aliasName, filename);
+        Com_Error(ERR_DROP, "lias %s sound %s played as an ambient / music track uses a 3D channel type; should probably be channel 'local'", alias->aliasName, filename);
     }
     if ((alias->flags & 0xC0) >> 6 != 2)
     {
         Com_GetSoundFileName(alias, filename, 128);
-        Com_Error(ERR_DROP, &byte_8D8628, alias->aliasName, filename);
+        Com_Error(ERR_DROP, "alias %s sound %s played as an ambient / music track is not streamed; type must be 'streamed'", alias->aliasName, filename);
     }
     v8 = alias->volMax - alias->volMin;
     volume = random() * v8 + alias->volMin;
@@ -3045,7 +3087,7 @@ void __cdecl SND_Update()
         g_snd.cpu = SND_GetDriverCPUPercentage();
         if (com_statmon->current.enabled && SND_ShouldGiveCpuWarning())
             StatMon_Warning(2, 3000, "code_warning_soundcpu");
-        v0 = Sys_Milliseconds();
+        int v0 = Sys_Milliseconds();
         frametime = v0 - g_snd.time;
         g_snd.time = v0;
         CL_ResetStats_f();
@@ -3093,7 +3135,7 @@ void __cdecl SND_UpdateMasterVolumes(int frametime)
         if (g_snd.mastervol.volume == 0.0 && g_snd.mastervol.goalrate == 0.0)
             SND_StopSounds(SND_STOP_ALL);
     }
-    Dvar_ClearModified(snd_volume);
+    Dvar_ClearModified((dvar_s*)snd_volume);
     g_snd.volume = g_snd.mastervol.volume * snd_volume->current.value * 0.75;
 }
 
@@ -3563,6 +3605,16 @@ void __cdecl SND_StopSounds(snd_stopsounds_arg_t which)
     }
 }
 
+cmd_function_s SND_SetEnvironmentEffects_f_VAR;
+cmd_function_s SND_DeactivateEnvironmentEffects_f_VAR;
+cmd_function_s SND_PlayLocal_f_VAR;
+cmd_function_s SND_SetEq_f_VAR;
+cmd_function_s SND_SetEqFreq_f_VAR;
+cmd_function_s SND_SetEqGain_f_VAR;
+cmd_function_s SND_SetEqQ_f_VAR;
+cmd_function_s SND_SetEqType_f_VAR;
+cmd_function_s SND_DeactivateEq_f_VAR;
+
 void __cdecl SND_Init()
 {
     DvarLimits min; // [esp+4h] [ebp-20h]
@@ -3724,7 +3776,7 @@ void __cdecl SND_PlayLocal_f()
         if (v6)
         {
             RelativeToListener(g_snd.listeners, yaw, pitch, dist, soundPos);
-            SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, 0, (unsigned int)soundPos, 0, 0, 1, SASYS_CGAME);
+            SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, NULL, (SndEntHandle *)(g_snd.listeners[0].clientNum << 22), soundPos, 0, 0, 1, SASYS_CGAME);
             v12 = soundPos[2];
             v11 = soundPos[1];
             v10 = soundPos[0];
@@ -3957,19 +4009,19 @@ void __cdecl SND_Save(MemoryFile *memFile)
         for (ib = 8; ib < g_snd.max_3D_channels + 8; ++ib)
             SND_Save3DChannel(ib, memFile);
     }
-    MemFile_WriteCString(memFile, (char *)&String);
+    MemFile_WriteCString(memFile, (char *)"");
     if (g_snd.Initialized2d)
     {
         for (ic = 0; ic < g_snd.max_2D_channels; ++ic)
             SND_Save2DChannel(ic, memFile);
     }
-    MemFile_WriteCString(memFile, (char *)&String);
+    MemFile_WriteCString(memFile, (char *)"");
     if (g_snd.Initialized2d)
     {
         for (id = 40; id < g_snd.max_stream_channels + 40; ++id)
             SND_SaveStreamChannel(id, memFile);
     }
-    MemFile_WriteCString(memFile, (char *)&String);
+    MemFile_WriteCString(memFile, (char *)"");
 }
 
 void __cdecl SND_Save3DChannel(int chanIndex, MemoryFile *memFile)
@@ -4146,7 +4198,7 @@ void __cdecl SND_SaveStreamChannel(int chanIndex, MemoryFile *memFile)
             return;
         if (SND_IsStreamChannelFree(chanIndex))
         {
-            MemFile_WriteCString(memFile, (char *)&String);
+            MemFile_WriteCString(memFile, (char *)"");
             return;
         }
     }
@@ -4165,7 +4217,7 @@ void __cdecl SND_SaveStreamChannel(int chanIndex, MemoryFile *memFile)
     }
     else if (chanIndex < 45)
     {
-        MemFile_WriteCString(memFile, (char *)&String);
+        MemFile_WriteCString(memFile, (char *)"");
     }
 }
 
@@ -4356,7 +4408,7 @@ void __cdecl SND_RestoreLengthNotifyInfo(MemoryFile *memFile, sndLengthNotifyInf
         for (i = 0; i < info->count; ++i)
         {
             MemFile_ReadData(memFile, 1, &v4);
-            id = v4;
+            id = (SndLengthId)v4;
             if (v4 >= 2u)
                 MyAssertHandler(".\\snd.cpp", 3869, 0, "id doesn't index SndLengthNotifyCount\n\t%i not in [0, %i)", id, 2);
             info->id[i] = id;
@@ -4796,7 +4848,7 @@ double __cdecl SND_GetVolumeNormalized()
     return (float)(g_snd.volume * 1.333333373069763);
 }
 
-void __cdecl SND_SetHWND(HWND* hwnd)
+void __cdecl SND_SetHWND(HWND hwnd)
 {
     if (g_snd.Initialized2d)
         AIL_set_DirectSound_HWND(milesGlob.driver, hwnd);

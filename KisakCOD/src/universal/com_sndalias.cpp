@@ -193,7 +193,7 @@ void __cdecl Com_GetGraphList(XAssetHeader header, int *data)
     if (index < 16)
     {
         graph = &g_sa.curveDevGraphs[index];
-        if (*header.xmodelPieces->name)
+        if (header.xmodelPieces->name)
         {
             sprintf(devguiPath, "Main:1/Snd:6/Volume Falloff Curves/%s:%d", header.xmodelPieces->name, index);
             graph->knotCountMax = 8;

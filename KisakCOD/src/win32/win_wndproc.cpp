@@ -11,6 +11,7 @@
 #include <sound/snd_public.h>
 
 #include <gfx_d3d/r_dvars.h>
+#include <qcommon/cmd.h>
 
 static UINT MSH_MOUSEWHEEL;
 
@@ -240,6 +241,20 @@ static unsigned char MapKey(int key, unsigned int wParam)
 	return result;
 }
 
+void __cdecl VID_AppActivate(unsigned int activeState, int minimize)
+{
+	BOOL v2; // [esp+0h] [ebp-8h]
+
+	g_wv.isMinimized = minimize;
+	Key_ClearStates(0);
+	v2 = activeState && !g_wv.isMinimized;
+	g_wv.activeApp = v2;
+	if (v2)
+		Com_TouchMemory();
+	IN_Activate(g_wv.activeApp);
+}
+
+const dvar_t *r_autopriority;
 LRESULT WINAPI MainWndProc(
     HWND    hWnd,
     UINT    uMsg,
@@ -417,7 +432,7 @@ LRESULT WINAPI MainWndProc(
 		break;
 
 	case WM_MOVE:
-		if (r_fullscreen->enabled)
+		if (r_fullscreen->current.enabled)
 		{
 			IN_ActivateMouse(0);
 		}
@@ -433,8 +448,8 @@ LRESULT WINAPI MainWndProc(
 			AdjustWindowRect(&r, style, 0);
 			Dvar_SetInt(vid_xpos, r.left + xPos);
 			Dvar_SetInt(vid_ypos, r.top + yPos);
-			Dvar_ClearModified(vid_xpos);
-			Dvar_ClearModified(vid_ypos);
+			Dvar_ClearModified((dvar_s*)vid_xpos);
+			Dvar_ClearModified((dvar_s*)vid_ypos);
 			if (g_wv.activeApp)
 				IN_Activate(1);
 		}

@@ -100,12 +100,6 @@ const char *__cdecl SE_GetString(const char *psPackageAndStringReference)
         return (const char *)SE_GetString_LoadObj(psPackageAndStringReference);
 }
 
-const char *__cdecl SE_GetString_LoadObj(const char *psPackageAndStringReference)
-{
-    // KISAKTODO: this function is annoying atm.
-    return "swag";
-}
-
 const char *__cdecl SE_GetString_FastFile(const char *psPackageAndStringReference)
 {
     LocalizeEntry *localize; // [esp+8h] [ebp-4h]

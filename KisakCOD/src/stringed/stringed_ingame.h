@@ -13,6 +13,13 @@ struct mapStringEntriesName_t : LocalizeName // sizeof=0x0
 
 struct CStringEdPackage // sizeof=0x78
 {
+    void Clear()
+    {
+        m_StringEntries.clear();
+        m_bEndMarkerFound_ParseOnly = 0;
+        m_strCurrentEntryRef_ParseOnly = "";
+        m_strCurrentEntryEnglish_ParseOnly = "";
+    }
     void REMKill(char *psBuffer)
     {
         char *v2; // eax

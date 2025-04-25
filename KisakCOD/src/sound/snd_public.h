@@ -317,6 +317,16 @@ struct snd_amplifier // sizeof=0x18
     float minVol;
     float maxVol;
 };
+struct snd_physics_info // sizeof=0x10
+{                                       // ...
+    snd_alias_list_t *aliasList;        // ...
+    float org[3];                       // ...
+};
+struct snd_physics // sizeof=0x204
+{                                       // ...
+    snd_physics_info info[32];          // ...
+    int count;                          // ...
+};
 struct snd_local_t // sizeof=0x7EF8
 {                                       // ...
     bool Initialized2d;                 // ...
@@ -426,12 +436,13 @@ int __cdecl SND_PlaySoundAlias(
     int timeshift,
     snd_alias_system_t system);
 int __cdecl SND_PlaySoundAlias_Internal(
-    const snd_alias_t *alias0,
-    const snd_alias_t *alias1,
+    const snd_alias_t * alias0,
+    const snd_alias_t * alias1,
     float lerp,
     float volumeScale,
-    SndEntHandle sndEnt,
-    __int64 org,
+    SndEntHandle * sndEnt,
+    SndEntHandle * org,
+    float *pChannel,
     int timeshift,
     bool treatAsMaster,
     bool useTimescale,
@@ -576,7 +587,7 @@ void __cdecl SND_StopChannelAndPlayChainAlias(unsigned int chanId);
 void __cdecl StopChannel(int chanId);
 void __cdecl SND_AddPhysicsSound(snd_alias_list_t *aliasList, float *org);
 double __cdecl SND_GetVolumeNormalized();
-void __cdecl SND_SetHWND(HWND* hwnd);
+void __cdecl SND_SetHWND(HWND hwnd);
 void __cdecl SND_SetData(MssSound *mssSound, void *srcData);
 
 // snd_driver_load_obj

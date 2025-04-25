@@ -5,6 +5,8 @@
 #include <qcommon/qcommon.h>
 #include <universal/com_files.h>
 #include <gfx_d3d/r_cinematic.h>
+#include <universal/com_sndalias.h>
+#include <cgame_mp/cg_local_mp.h>
 
 MssLocal milesGlob;
 
@@ -244,14 +246,14 @@ void __cdecl SND_StopStreamChannel(int index)
             0,
             "%s",
             "milesGlob.handle_stream[index - SND_FIRST_STREAM_CHANNEL]");
-    if (!milesGlob.handle_sample[index]->start[0])
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            726,
-            0,
-            "%s",
-            "milesGlob.handle_stream[index - SND_FIRST_STREAM_CHANNEL]->samp");
-    AIL_close_stream(milesGlob.handle_sample[index]);
+    //if (!milesGlob.handle_sample[index]->)
+    //    MyAssertHandler(
+    //        ".\\win32\\snd_driver.cpp",
+    //        726,
+    //        0,
+    //        "%s",
+    //        "milesGlob.handle_stream[index - SND_FIRST_STREAM_CHANNEL]->samp");
+    AIL_close_stream((HSTREAM)milesGlob.handle_sample[index]);
     milesGlob.handle_sample[index] = 0;
     SND_ResetChannelInfo(index);
     SND_RemoveVoice(g_snd.chaninfo[index].entchannel);
@@ -267,7 +269,7 @@ void __cdecl SND_PauseStreamChannel(int index)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    AIL_pause_stream(milesGlob.handle_sample[index], 1);
+    AIL_pause_stream((HSTREAM)milesGlob.handle_sample[index], 1);
     g_snd.chaninfo[index].paused = 1;
 }
 
@@ -282,7 +284,7 @@ void __cdecl SND_UnpauseStreamChannel(int index, int timeshift)
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
     if (!g_snd.chaninfo[index].startDelay)
-        AIL_pause_stream(milesGlob.handle_sample[index], 0);
+        AIL_pause_stream((HSTREAM)milesGlob.handle_sample[index], 0);
     g_snd.chaninfo[index].soundFileInfo.endtime += timeshift;
     g_snd.chaninfo[index].startTime += timeshift;
     g_snd.chaninfo[index].paused = 0;
@@ -303,6 +305,39 @@ bool __cdecl SND_IsStreamChannelFree(int index)
     if (g_snd.chaninfo[index].paused || g_snd.chaninfo[index].startDelay)
         return 0;
     return g_snd.chaninfo[index].alias0 == 0;
+}
+
+void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int srcChannelCount)
+{
+    float v3; // [esp+0h] [ebp-60h]
+    float v4; // [esp+4h] [ebp-5Ch]
+    float v5; // [esp+8h] [ebp-58h]
+    float v6; // [esp+Ch] [ebp-54h]
+    float outVolumes[18]; // [esp+10h] [ebp-50h] BYREF
+    MSSChannelMap *channelMap; // [esp+58h] [ebp-8h]
+    int i; // [esp+5Ch] [ebp-4h]
+
+    if (!handle)
+        MyAssertHandler(".\\win32\\snd_driver.cpp", 771, 0, "%s", "handle");
+    if (!alias)
+        MyAssertHandler(".\\win32\\snd_driver.cpp", 772, 0, "%s", "alias");
+    channelMap = Com_GetSpeakerMap(alias->speakerMap, srcChannelCount);
+    if (channelMap)
+    {
+        memset(outVolumes, 0, sizeof(outVolumes));
+        for (i = 0; i < channelMap->speakerCount; ++i)
+        {
+            v5 = channelMap->speakers[i].levels[0];
+            v6 = channelMap->speakers[i].levels[1];
+            v4 = v5 - v6;
+            if (v4 < 0.0)
+                v3 = v6;
+            else
+                v3 = v5;
+            outVolumes[i] = v3;
+        }
+        AIL_set_sample_channel_levels(handle, NULL, NULL, outVolumes, channelMap->speakerCount); // KISAKTODO: can these even be null?
+    }
 }
 
 int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChannel)
@@ -376,7 +411,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     handle = milesGlob.handle_sample[index];
     sound = &startAliasInfo->alias0->soundFile->u.loadSnd->sound;
     //Profile_Begin(336);
-    AIL_set_sample_info(handle, sound);
+    AIL_set_sample_info(handle, &sound->info);
     //Profile_EndInternal(0);
     MSS_ApplyEqFilter(handle, entchannel);
     if (startAliasInfo->timescale)
@@ -442,6 +477,34 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     if (playbackId != -1)
         SND_AddVoice(entchannel);
     return playbackId;
+}
+
+void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t *alias)
+{
+    float outVolumes[19]; // [esp+0h] [ebp-58h] BYREF
+    int index; // [esp+4Ch] [ebp-Ch]
+    float notCenterPercentage; // [esp+50h] [ebp-8h]
+    int numChannels; // [esp+54h] [ebp-4h] BYREF
+
+    if (!handle)
+        MyAssertHandler(".\\win32\\snd_driver.cpp", 797, 0, "%s", "handle");
+    if (!alias)
+        MyAssertHandler(".\\win32\\snd_driver.cpp", 798, 0, "%s", "alias");
+    if (SND_IsMultiChannel())
+    {
+        AIL_sample_channel_levels(handle, NULL, NULL, outVolumes, 19); // KISAKTODO: PROB WRONG
+        for (index = 0; index < numChannels; ++index)
+            outVolumes[index] = 1.0;
+        if (alias->centerPercentage != 0.0 && SND_IsMultiChannel())
+        {
+            notCenterPercentage = 1.0 - alias->centerPercentage;
+            for (index = 0; index < numChannels; ++index)
+                outVolumes[index] = outVolumes[index] * notCenterPercentage;
+        }
+        outVolumes[2] = alias->centerPercentage;
+        outVolumes[3] = alias->lfePercentage;
+        AIL_set_sample_channel_levels(handle, NULL, NULL, outVolumes, numChannels); // KISAKTODO: WRONG
+    }
 }
 
 int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChannel)
@@ -529,7 +592,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     distMax = (1.0 - startAliasInfo->lerp) * startAliasInfo->alias0->distMax
         + startAliasInfo->alias1->distMax * startAliasInfo->lerp;
     //Profile_Begin(337);
-    AIL_set_sample_info(handle, sound);
+    AIL_set_sample_info(handle, &sound->info);
     //Profile_EndInternal(0);
     MSS_ApplyEqFilter(handle, entchannel);
     listener = g_snd.listeners[SND_GetListenerIndexNearestToOrigin(startAliasInfo->org)].orient.origin;
@@ -547,11 +610,12 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     }
     SND_Apply3DSpatializationTweaks(handle, startAliasInfo->alias0);
     SND_Set3DChannelVolume(index, realVolume);
-    ((void(__stdcall *)(unsigned int, unsigned int, unsigned int, unsigned int))AIL_set_sample_3D_distances)(
-        handle,
-        startAliasInfo->alias0->distMax,
-        startAliasInfo->alias0->distMin,
-        1);
+    //((void(__stdcall *)(unsigned int, unsigned int, unsigned int, unsigned int))AIL_set_sample_3D_distances)(
+    //    handle,
+    //    startAliasInfo->alias0->distMax,
+    //    startAliasInfo->alias0->distMin,
+    //    1);
+    AIL_set_sample_3D_distances(handle, startAliasInfo->alias0->distMax, startAliasInfo->alias0->distMin, 1);
     if (startAliasInfo->timescale)
     {
         timescale = g_snd.timescale;
@@ -684,7 +748,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     {
         if (milesGlob.handle_sample[index])
         {
-            AIL_close_stream(milesGlob.handle_sample[index]);
+            AIL_close_stream((HSTREAM)milesGlob.handle_sample[index]);
             milesGlob.handle_sample[index] = 0;
         }
         Com_GetSoundFileName(startAliasInfo->alias0, filename, 128);
@@ -696,8 +760,8 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
         if (handle)
         {
             milesGlob.handle_sample[index] = handle;
-            handle_sample = (_SAMPLE *)AIL_stream_sample_handle(handle);
-            AIL_stream_info(handle, 0, &filetype, 0, 0);
+            handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)handle);
+            AIL_stream_info((HSTREAM)handle, 0, &filetype, 0, 0);
             srcChannelCount = ((filetype & 2) != 0) + 1;
             MSS_ApplyEqFilter(handle_sample, entchannel);
             baserate = AIL_sample_playback_rate(handle_sample);
@@ -719,11 +783,11 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
                 LerpedSlavePercentage = SND_GetLerpedSlavePercentage(startAliasInfo->alias0->slavePercentage);
                 realVolume = LerpedSlavePercentage * realVolume;
             }
-            AIL_set_stream_loop_count(handle, (startAliasInfo->alias0->flags & 1) == 0);
+            AIL_set_stream_loop_count((HSTREAM)handle, (startAliasInfo->alias0->flags & 1) == 0);
             baseSlavePercentage = MSS_GetWetLevel(startAliasInfo->alias0);
             v6 = CG_BannerScoreboardScaleMultiplier();
             AIL_set_sample_reverb_levels(handle_sample, LODWORD(v6), LODWORD(baseSlavePercentage));
-            AIL_stream_ms_position(handle, total_msec, 0);
+            AIL_stream_ms_position((HSTREAM)handle, total_msec, 0);
             if (startAliasInfo->timeshift < total_msec[0])
             {
                 if (total_msec[0])
@@ -751,11 +815,11 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
                     }
                     if (start_msec)
                         startAliasInfo->startDelay = 0;
-                    AIL_set_stream_ms_position(handle, start_msec);
+                    AIL_set_stream_ms_position((HSTREAM)handle, start_msec);
                     if (!startAliasInfo->startDelay
                         && (!g_snd.paused || !g_snd.pauseSettings[(startAliasInfo->alias0->flags & 0x3F00) >> 8]))
                     {
-                        AIL_pause_stream(handle, 0);
+                        AIL_pause_stream((HSTREAM)handle, 0);
                     }
                     total_msec[0] += startAliasInfo->startDelay;
                     if ((startAliasInfo->alias0->flags & 1) != 0)
@@ -776,11 +840,12 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
                         SND_Set3DStreamPosition(index, listenerIndex, g_snd.chaninfo[index].org);
                         Stream3DVolumeFallOff = SND_GetStream3DVolumeFallOff(index, listenerIndex);
                         realVolume = Stream3DVolumeFallOff * realVolume;
-                        ((void(__stdcall *)(unsigned int, unsigned int, unsigned int, unsigned int))AIL_set_sample_3D_distances)(
-                            handle_sample,
-                            startAliasInfo->alias0->distMax,
-                            startAliasInfo->alias0->distMin,
-                            1);
+                        //((void(__stdcall *)(unsigned int, unsigned int, unsigned int, unsigned int))AIL_set_sample_3D_distances)(
+                        //    handle_sample,
+                        //    startAliasInfo->alias0->distMax,
+                        //    startAliasInfo->alias0->distMin,
+                        //    1);
+                        AIL_set_sample_3D_distances(handle_sample, startAliasInfo->alias0->distMax, startAliasInfo->alias0->distMin, 1);
                         SND_Apply3DSpatializationTweaks(handle_sample, startAliasInfo->alias0);
                     }
                     else
@@ -855,7 +920,7 @@ void __cdecl SND_UpdateEqs()
                 {
                     if (SND_IsStreamChannelFree(channelIndex))
                         continue;
-                    handle = (_SAMPLE *)AIL_stream_sample_handle(milesGlob.handle_sample[channelIndex]);
+                    handle = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[channelIndex]);
                 }
             }
             else
@@ -1134,7 +1199,7 @@ double __cdecl SND_GetStreamChannelVolume(int index)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    handle_sample = (_SAMPLE *)AIL_stream_sample_handle(milesGlob.handle_sample[index]);
+    handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     AIL_sample_volume_levels(handle_sample, &left, &right);
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2
         || !SND_IsAliasChannel3D((g_snd.chaninfo[index].alias0->flags & 0x3F00) >> 8))
@@ -1157,7 +1222,7 @@ void __cdecl SND_SetStreamChannelVolume(int index, float volume)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    handle_sample = (_SAMPLE *)AIL_stream_sample_handle(milesGlob.handle_sample[index]);
+    handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2
         || !SND_IsAliasChannel3D((g_snd.chaninfo[index].alias0->flags & 0x3F00) >> 8))
     {
@@ -1234,7 +1299,7 @@ int __cdecl SND_GetStreamChannelPlaybackRate(int index)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    handle_sample = (_SAMPLE *)AIL_stream_sample_handle(milesGlob.handle_sample[index]);
+    handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     return AIL_sample_playback_rate(handle_sample);
 }
 
@@ -1250,7 +1315,7 @@ void __cdecl SND_SetStreamChannelPlaybackRate(int index, int rate)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    handle_sample = (_SAMPLE *)AIL_stream_sample_handle(milesGlob.handle_sample[index]);
+    handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     AIL_set_sample_playback_rate(handle_sample, rate);
 }
 
@@ -1304,7 +1369,7 @@ void __cdecl SND_UpdateStreamChannelReverb(int index)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    handle_sample = (_SAMPLE *)AIL_stream_sample_handle(milesGlob.handle_sample[index]);
+    handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     WetLevel = MSS_GetWetLevel(g_snd.chaninfo[index].alias0);
     v1 = CG_BannerScoreboardScaleMultiplier();
     AIL_set_sample_reverb_levels(handle_sample, LODWORD(v1), LODWORD(WetLevel));
@@ -1354,7 +1419,7 @@ int __cdecl SND_GetStreamChannelLength(int index)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    AIL_stream_ms_position(milesGlob.handle_sample[index], &length, 0);
+    AIL_stream_ms_position((HSTREAM)milesGlob.handle_sample[index], &length, 0);
     return length;
 }
 
@@ -1451,7 +1516,7 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
     handle = (_STREAM *)milesGlob.handle_sample[index];
     if (!handle)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1658, 0, "%s", "handle");
-    handle_sample = (_SAMPLE *)AIL_stream_sample_handle(milesGlob.handle_sample[index]);
+    handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     AIL_stream_ms_position(handle, &length, &offset);
     info->fraction = (double)offset / (double)length;
     if (g_snd.chaninfo[index].timescale)
@@ -1634,6 +1699,63 @@ void __cdecl SND_Update3DChannel(int i, int frametime)
     }
 }
 
+void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *org)
+{
+    float v3; // [esp+0h] [ebp-28h]
+    float delta[3]; // [esp+Ch] [ebp-1Ch] BYREF
+    _SAMPLE *handle_sample; // [esp+18h] [ebp-10h]
+    float transformed[3]; // [esp+1Ch] [ebp-Ch] BYREF
+
+    if (index < 40 || index >= g_snd.max_stream_channels + 40)
+        MyAssertHandler(
+            ".\\win32\\snd_driver.cpp",
+            619,
+            0,
+            "%s\n\t(index) = %i",
+            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
+            index);
+    Vec3Sub(org, g_snd.listeners[listenerIndex].orient.origin, delta);
+    MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
+    handle_sample = AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
+    v3 = -transformed[1];
+    AIL_set_sample_3D_position(handle_sample, LODWORD(v3), LODWORD(transformed[2]), LODWORD(transformed[0]));
+}
+
+double __cdecl SND_GetStream3DVolumeFallOff(int index, int listenerIndex)
+{
+    float diff[3]; // [esp+10h] [ebp-24h] BYREF
+    float maxdist; // [esp+1Ch] [ebp-18h]
+    float dist; // [esp+20h] [ebp-14h]
+    float lerp; // [esp+24h] [ebp-10h]
+    const snd_alias_t *alias1; // [esp+28h] [ebp-Ch]
+    const snd_alias_t *alias0; // [esp+2Ch] [ebp-8h]
+    float mindist; // [esp+30h] [ebp-4h]
+
+    if (index < 40 || index >= g_snd.max_stream_channels + 40)
+        MyAssertHandler(
+            ".\\win32\\snd_driver.cpp",
+            581,
+            0,
+            "%s\n\t(index) = %i",
+            "(index >= ((0 + 8) + 32) && index < g_snd.max_stream_channels + ((0 + 8) + 32))",
+            index);
+    alias0 = g_snd.chaninfo[index].alias0;
+    alias1 = g_snd.chaninfo[index].alias1;
+    if (!SND_IsAliasChannel3D((alias0->flags & 0x3F00) >> 8))
+        MyAssertHandler(
+            ".\\win32\\snd_driver.cpp",
+            585,
+            0,
+            "%s",
+            "SND_IsAliasChannel3D( SNDALIASFLAGS_GET_CHANNEL( alias0->flags ) )");
+    Vec3Sub(g_snd.listeners[listenerIndex].orient.origin, g_snd.chaninfo[index].org, diff);
+    dist = Vec3Length(diff);
+    lerp = g_snd.chaninfo[index].lerp;
+    mindist = (1.0 - lerp) * alias0->distMin + alias1->distMin * lerp;
+    maxdist = (1.0 - lerp) * alias0->distMax + alias1->distMax * lerp;
+    return SND_Attenuate(alias0->volumeFalloffCurve, dist, mindist, maxdist);
+}
+
 void __cdecl SND_UpdateStreamChannel(int i, int frametime)
 {
     int v2; // [esp+4h] [ebp-1Ch]
@@ -1663,7 +1785,7 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
         if (!alias1)
             MyAssertHandler(".\\win32\\snd_driver.cpp", 1861, 0, "%s", "alias1");
         volume = chaninfo->basevolume;
-        if (g_snd.chaninfo[i].startDelay || AIL_stream_status(milesGlob.handle_sample[i]) != 2)
+        if (g_snd.chaninfo[i].startDelay || AIL_stream_status((HSTREAM)milesGlob.handle_sample[i]) != 2)
         {
             if (SND_IsAliasChannel3D((alias0->flags & 0x3F00) >> 8))
             {
@@ -1694,7 +1816,7 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
                     v2 = 0;
                 g_snd.chaninfo[i].startDelay = v2;
                 if (!g_snd.chaninfo[i].startDelay)
-                    AIL_pause_stream(milesGlob.handle_sample[i], 0);
+                    AIL_pause_stream((HSTREAM)milesGlob.handle_sample[i], 0);
             }
         }
         else

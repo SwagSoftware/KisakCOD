@@ -95,7 +95,6 @@ const char **customClassDvars;
 
 BOOL g_waitingForServer;
 BOOL cl_serverLoadingMap;
-voiceCommunication_t cl_voiceCommunication;
 
 ping_t *cl_pinglist;
 

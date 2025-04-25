@@ -196,6 +196,16 @@ struct scrVarGlob_t // sizeof=0x180000
 
 struct scr_entref_t // sizeof=0x4
 {                                       // ...
+    scr_entref_t()
+    {
+        entnum = 0;
+        classnum = 0;
+    }
+    scr_entref_t(int i)
+    {
+        entnum = i;
+        classnum = i;
+    }
     unsigned __int16 entnum;            // ...
     unsigned __int16 classnum;          // ...
 };

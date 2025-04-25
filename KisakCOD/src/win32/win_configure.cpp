@@ -3,6 +3,7 @@
 #include <qcommon/qcommon.h>
 
 #include "win_local.h"
+#include <universal/timing.h>
 
 void Sys_DetectVideoCard(int descLimit, char* description)
 {

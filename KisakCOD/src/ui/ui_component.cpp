@@ -5,6 +5,7 @@
 #include <script/scr_main.h>
 #include <script/scr_evaluate.h>
 #include <script/scr_parsetree.h>
+#include <script/scr_compiler.h>
 
 void __cdecl UI_Component::InitAssets()
 {
@@ -187,7 +188,7 @@ void __thiscall Scr_ScriptWatch::ToggleWatchElementBreakpoint(
 
     if (element->breakpointType == type)
     {
-        elementa = Scr_ScriptWatch::RemoveBreakpoint(this, element);
+        elementa = Scr_ScriptWatch::RemoveBreakpoint(element);
         if (!Sys_IsRemoteDebugClient())
         {
             Scr_FreeDebugExpr(&elementa->expr);
@@ -196,12 +197,12 @@ void __thiscall Scr_ScriptWatch::ToggleWatchElementBreakpoint(
     }
     else
     {
-        elementa = Scr_ScriptWatch::AddBreakpoint(this, element, type);
+        elementa = Scr_ScriptWatch::AddBreakpoint(element, type);
     }
     if (!Sys_IsRemoteDebugClient())
     {
         ElementRoot = Scr_GetElementRoot(elementa);
-        Scr_ScriptWatch::EvaluateWatchElement(this, ElementRoot);
+        Scr_ScriptWatch::EvaluateWatchElement(ElementRoot);
     }
 }
 
@@ -940,6 +941,11 @@ bool Scr_ScriptWatch::EvaluateWatchChildElement(
         }
     }
     return Scr_ScriptWatch::PostEvaluateWatchElement(childElement, &value);
+}
+
+int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2)
+{
+    return *arg1 - *arg2;
 }
 
 void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)

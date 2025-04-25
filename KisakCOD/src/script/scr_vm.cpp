@@ -27,6 +27,8 @@
 #include <qcommon/threads.h>
 #include "scr_compiler.h"
 
+#undef GetObject
+
 scrVmPub_t scrVmPub;
 scrVmGlob_t scrVmGlob;
 int g_script_error[33][16];
@@ -36,6 +38,8 @@ function_stack_t pos;
 
 const dvar_s *logScriptTimes;
 
+int opcode;
+int caseCount;
 int scr_initialized;
 int thread_count;
 
@@ -2309,6 +2313,32 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char* pos, unsigned 
     }
 }
 
+void __cdecl Scr_EvalBoolComplement(VariableValue *value)
+{
+    const char *v1; // eax
+    int type; // [esp+0h] [ebp-4h]
+
+    if (value->type == 6)
+    {
+        value->u.intValue = ~value->u.intValue;
+    }
+    else
+    {
+        type = value->type;
+        RemoveRefToValue(type, value->u);
+        value->type = 0;
+        v1 = va("~ cannot be applied to \"%s\"", var_typename[type]);
+        Scr_Error(v1);
+    }
+}
+
+void __cdecl Scr_EvalBoolNot(VariableValue *value)
+{
+    Scr_CastBool(value);
+    if (value->type == 6)
+        value->u.intValue = value->u.intValue == 0;
+}
+
 unsigned int __cdecl VM_Execute_0()
 {
     int v0; // edx
@@ -2458,8 +2488,8 @@ unsigned int __cdecl VM_Execute_0()
                 "g_script_error_level doesn't index ARRAY_COUNT( g_script_error )\n\t%i not in [0, %i)",
                 g_script_error_level,
                 33);
-        if (!_setjmp3(g_script_error[g_script_error_level], 0))
-            break;
+        //if (!_setjmp3(g_script_error[g_script_error_level], 0)) // KISAKTRYCATCH
+            //break;
     error_1:
         Com_PrintMessage(6, "caught script exception\n", 0);
         v46 = opcode - 33;
@@ -2518,7 +2548,7 @@ unsigned int __cdecl VM_Execute_0()
         default:
             break;
         }
-        RuntimeError(::pos.pos, scrVarPub.error_index, scrVarPub.error_message, scrVmGlob.dialog_error_message);
+        RuntimeError((char*)::pos.pos, scrVarPub.error_index, scrVarPub.error_message, scrVmGlob.dialog_error_message);
         Scr_ClearErrorMessage();
         v45 = opcode - 31;
         switch (opcode)
@@ -2747,7 +2777,7 @@ unsigned int __cdecl VM_Execute_0()
         {
             scrVmPub.showError = 0;
             Scr_ShowConsole();
-            Scr_HitBreakpoint(::pos.top, ::pos.pos, ::pos.localId, 0);
+            Scr_HitBreakpoint(::pos.top, (char*)::pos.pos, ::pos.localId, 0);
         }
     }
     while (2)
@@ -3474,7 +3504,7 @@ unsigned int __cdecl VM_Execute_0()
             else if (::pos.top->type == 2)
             {
                 fieldValueIndex = GetVariableIndexInternal(objectId, ::pos.top->u.stringValue);
-                _SL_RemoveRefToString(::pos.top->u.stringValue);
+                SL_RemoveRefToString(::pos.top->u.stringValue);
             }
             else
             {
@@ -3859,7 +3889,7 @@ unsigned int __cdecl VM_Execute_0()
             }
             builtInTime = scrVmDebugPub.builtInTime;
             time = __rdtsc();
-            ((void(__cdecl*)(_DWORD))scrCompilePub.func_table[builtinIndex])(entref);
+            ((void(__cdecl*)(_DWORD))scrCompilePub.func_table[builtinIndex])(entref.entnum); // KISAKTODO: entnum might not be correct
             timeSpent = __rdtsc() - time;
             scrVmDebugPub.builtInTime = timeSpent + builtInTime;
             scrVmDebugPub.func_table[builtinIndex].prof += timeSpent;
@@ -4193,7 +4223,7 @@ unsigned int __cdecl VM_Execute_0()
                 }
                 if (!scrVmGlob.loading)
                 {
-                    VM_PrintJumpHistory(v45, v46);
+                    VM_PrintJumpHistory();
                     if (scrVmPub.showError)
                     {
                         if (scrVmPub.debugCode)
@@ -4205,7 +4235,7 @@ unsigned int __cdecl VM_Execute_0()
                     if (!scrVmPub.abort_on_error)
                     {
                         Com_PrintError(23, "script runtime error: potential infinite loop in script - killing thread.\n");
-                        Scr_PrintPrevCodePos(23, ::pos.pos, 0);
+                        Scr_PrintPrevCodePos(23, (char*)::pos.pos, 0);
                         Scr_ResetTimeout();
                         while (1)
                         {
@@ -4309,7 +4339,7 @@ unsigned int __cdecl VM_Execute_0()
                 if (scrVmPub.abort_on_error)
                     scrVmPub.showError = 1;
                 Com_PrintWarning(23, "script runtime warning: potential infinite loop in script.\n");
-                Scr_PrintPrevCodePos(23, ::pos.pos, 0);
+                Scr_PrintPrevCodePos(23, (char*)::pos.pos, 0);
                 v62 = *(_WORD*)::pos.pos;
                 ::pos.pos += 2;
                 jumpOffset = v62;
@@ -4477,12 +4507,12 @@ unsigned int __cdecl VM_Execute_0()
             stringValue = ::pos.top->u.stringValue;
             --::pos.top;
             if (scrVmDebugPub.checkBreakon)
-                Scr_CheckBreakonNotify(id, stringValue, ::pos.top, ::pos.pos, ::pos.localId);
+                Scr_CheckBreakonNotify(id, stringValue, ::pos.top, (char*)::pos.pos, ::pos.localId);
             scrVmPub.function_frame->fs.pos = ::pos.pos;
             VM_Notify(id, stringValue, ::pos.top);
             ::pos.pos = scrVmPub.function_frame->fs.pos;
             RemoveRefToObject(id);
-            _SL_RemoveRefToString(stringValue);
+            SL_RemoveRefToString(stringValue);
             if (::pos.top->type == 7)
                 MyAssertHandler(
                     ".\\script\\scr_vm.cpp",
@@ -4605,7 +4635,7 @@ unsigned int __cdecl VM_Execute_0()
                     Scr_Error(v32);
                 LABEL_522:
                     caseValue = ::pos.top->u.stringValue;
-                    _SL_RemoveRefToString(::pos.top->u.stringValue);
+                    SL_RemoveRefToString(::pos.top->u.stringValue);
                 }
             }
             else
@@ -4734,18 +4764,18 @@ unsigned int __cdecl VM_Execute_0()
         case 135:
             if (!scrVarPub.developer)
                 continue;
-            opcode = Scr_HitBreakpoint(::pos.top, ::pos.pos, ::pos.localId, 0);
+            opcode = Scr_HitBreakpoint(::pos.top, (char *)::pos.pos, ::pos.localId, 0);
             goto interrupt_return;
         case 136:
-            opcode = Scr_HitAssignmentBreakpoint(::pos.top, ::pos.pos, ::pos.localId, 0);
+            opcode = Scr_HitAssignmentBreakpoint(::pos.top, (char *)::pos.pos, ::pos.localId, 0);
             goto interrupt_return;
         case 137:
-            opcode = Scr_HitAssignmentBreakpoint(::pos.top, ::pos.pos, ::pos.localId, 1);
+            opcode = Scr_HitAssignmentBreakpoint(::pos.top, (char *)::pos.pos, ::pos.localId, 1);
             goto interrupt_return;
         default:
             scrVmPub.terminal_error = 1;
             v36 = va("CODE ERROR: unknown opcode %d", opcode);
-            RuntimeError(::pos.pos, 0, v36, 0);
+            RuntimeError((char*)::pos.pos, 0, v36, 0);
             continue;
         }
     }
@@ -4778,7 +4808,7 @@ void VM_PrintJumpHistory()
         pos = scrVmDebugPub.jumpbackHistory[--index];
         if (!pos)
             break;
-        Scr_PrintPrevCodePos(23, pos, 0);
+        Scr_PrintPrevCodePos(23, (char*)pos, 0);
     } while (index != scrVmDebugPub.jumpbackHistoryIndex);
     Com_Printf(23, "********************************\n");
 }
@@ -4800,13 +4830,13 @@ VariableStackBuffer* __cdecl VM_ArchiveStack()
     bufLen = 5 * size + 11;
     if (bufLen != (unsigned __int16)bufLen)
         MyAssertHandler(".\\script\\scr_vm.cpp", 2770, 0, "%s", "bufLen == (unsigned short)bufLen");
-    stackValue = MT_Alloc(bufLen, 1);
+    stackValue = (char*)MT_Alloc(bufLen, 1);
     ++scrVarPub.numScriptThreads;
     localId = pos.localId;
     *((_WORD*)stackValue + 4) = pos.localId;
     *((_WORD*)stackValue + 2) = size;
     *((_WORD*)stackValue + 3) = bufLen;
-    *(_DWORD*)stackValue = pos.pos;
+    *(_DWORD*)stackValue = (DWORD)pos.pos;
     stackValue[10] = scrVarPub.time;
     scrVmPub.localVars -= pos.localVarCount;
     buf = &stackValue[5 * size + 11];
@@ -4817,7 +4847,7 @@ VariableStackBuffer* __cdecl VM_ArchiveStack()
         {
             --scrVmPub.function_count;
             --scrVmPub.function_frame;
-            *(_DWORD*)bufa = scrVmPub.function_frame->fs.pos;
+            *(_DWORD*)bufa = (DWORD)scrVmPub.function_frame->fs.pos;
             scrVmPub.localVars -= scrVmPub.function_frame->fs.localVarCount;
             localId = GetParentLocalId(localId);
         }
@@ -5239,7 +5269,7 @@ BOOL Scr_ErrorInternal()
                     "g_script_error_level doesn't index ARRAY_COUNT( g_script_error )\n\t%i not in [0, %i)",
                     g_script_error_level,
                     33);
-            longjmp(g_script_error[g_script_error_level], -1);
+            //longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
         }
     error_2:
         Sys_Error("%s", scrVarPub.error_message);
@@ -5319,7 +5349,7 @@ VariableUnion __cdecl Scr_GetConstLowercaseString(unsigned int index)
     if (value->type != 2)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4635, 0, "%s", "value->type == VAR_STRING");
     stringValue.intValue = (int)value->u;
-    v4 = _SL_ConvertToString(value->u.intValue);
+    v4 = SL_ConvertToString(value->u.intValue);
     for (i = 0; ; ++i)
     {
         str[i] = tolower(v4[i]);
@@ -5328,9 +5358,9 @@ VariableUnion __cdecl Scr_GetConstLowercaseString(unsigned int index)
     }
     if (value->type != 2)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4646, 0, "%s", "value->type == VAR_STRING");
-    v1.prev = SL_GetString(str, 0).prev;
+    v1.prev = SL_GetString(str, 0);
     value->u.stringValue = v1.prev;
-    _SL_RemoveRefToString(stringValue.stringValue);
+    SL_RemoveRefToString(stringValue.stringValue);
     SL_CheckExists(value->u.intValue);
     return value->u;
 }
@@ -5340,7 +5370,7 @@ char* __cdecl Scr_GetString(unsigned int index)
     VariableUnion v1; // eax
 
     v1.intValue = Scr_GetConstString(index).intValue;
-    return _SL_ConvertToString(v1.stringValue);
+    return SL_ConvertToString(v1.stringValue);
 }
 
 VariableUnion __cdecl Scr_GetConstStringIncludeNull(unsigned int index)
@@ -5367,7 +5397,7 @@ char* __cdecl Scr_GetDebugString(unsigned int index)
         Scr_CastDebugString(value);
         if (value->type != 2)
             MyAssertHandler(".\\script\\scr_vm.cpp", 4693, 0, "%s", "value->type == VAR_STRING");
-        return _SL_ConvertToString(value->u.intValue);
+        return SL_ConvertToString(value->u.intValue);
     }
 }
 
@@ -5396,7 +5426,7 @@ char* __cdecl Scr_GetIString(unsigned int index)
     VariableUnion v1; // eax
 
     v1.intValue = Scr_GetConstIString(index).intValue;
-    return _SL_ConvertToString(v1.stringValue);
+    return SL_ConvertToString(v1.stringValue);
 }
 
 void __cdecl Scr_GetVector(unsigned int index, float* vectorValue)
@@ -5735,7 +5765,7 @@ void __cdecl Scr_NeverTerminalError(const char* error)
     if (scrVmGlob.loading)
     {
         Scr_SetErrorMessage(error);
-        longjmp(g_script_error[g_script_error_level], -1);
+        //longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
     }
     Scr_Error(error);
 }
@@ -6055,7 +6085,7 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
     if (stackValue->time != LOBYTE(scrVarPub.time))
         Scr_ResetTimeout();
     --scrVarPub.numScriptThreads;
-    MT_Free(stackValue, stackValue->bufLen);
+    MT_Free((byte*)stackValue, stackValue->bufLen);
     if (scrVmPub.stack[0].type != 7)
         MyAssertHandler(".\\script\\scr_vm.cpp", 2917, 0, "%s", "scrVmPub.stack[0].type == VAR_CODEPOS");
 }
@@ -6188,7 +6218,7 @@ char __cdecl Scr_PrintProfileBuiltinTimes(float minTime)
         order = (int*)Z_VirtualAlloc(4 * scrCompilePub.func_table_size, "Scr_PrintProfileBuiltinTimes", 0);
         for (ib = 0; ib < scrCompilePub.func_table_size; ++ib)
             order[ib] = ib;
-        qsort(order, scrCompilePub.func_table_size, 4u, Scr_BuiltinCompare);
+        qsort(order, scrCompilePub.func_table_size, 4u, (int(*)(const void*, const void*))Scr_BuiltinCompare);
         for (ic = 0; ic < scrCompilePub.func_table_size; ++ic)
         {
             j = order[ic];
