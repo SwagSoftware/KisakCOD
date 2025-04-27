@@ -1,6 +1,7 @@
 #pragma once
 #include "xanim.h"
 #include "dobj.h"
+#include <qcommon/bitarray.h>
 
 struct XAnimCalcAnimInfo // sizeof=0x6020
 {

@@ -2113,7 +2113,7 @@ void __cdecl MSG_WriteGroundEntityNum(int clientNum, msg_t *msg, int groundEntit
 
 bool __cdecl MSG_CheckWritingEnoughBits(int value, unsigned int bits)
 {
-    int v3; // eax
+    DWORD v3; // eax
     unsigned int checkBits; // [esp+4h] [ebp-8h]
     unsigned int checkValue; // [esp+8h] [ebp-4h]
 
@@ -2127,7 +2127,7 @@ bool __cdecl MSG_CheckWritingEnoughBits(int value, unsigned int bits)
         checkValue = value;
         checkBits = bits;
     }
-    if (!_BitScanReverse((DWORD *)&v3, checkValue))
+    if (!_BitScanReverse(&v3, checkValue))
         v3 = 63; // `CountLeadingZeros'::`2': : notFound;
     return checkBits >= 32 - (v3 ^ 0x1Fu);
 }

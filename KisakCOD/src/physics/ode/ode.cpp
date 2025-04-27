@@ -937,7 +937,7 @@ dxJoint * dJointCreateSlider (dWorldID w, dxJointSlider* joint)
 
 dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
     const dSurfaceParameters *surfParms,
-    const dContact *c)
+    const dContactGeom *c)
 {
     dAASSERT(w);
   dAASSERT(c);

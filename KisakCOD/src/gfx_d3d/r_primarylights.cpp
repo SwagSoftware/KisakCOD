@@ -49,7 +49,7 @@ bool __cdecl R_IsPrimaryLight(unsigned int shadowableLightIndex)
 
 void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
 {
-    int v2; // eax
+    DWORD v2; // eax
     GfxCandidateShadowedLight candidateLights[5]; // [esp+14h] [ebp-74h] BYREF
     unsigned int timeDelta; // [esp+3Ch] [ebp-4Ch]
     unsigned int entryIndex; // [esp+40h] [ebp-48h]
@@ -88,8 +88,8 @@ void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
             usedBits = scene.shadowableLightIsUsed[scanIndex];
             while (1)
             {
-                if (!_BitScanReverse((unsigned int *)&v2, usedBits))
-                    v2 = `CountLeadingZeros'::`2': : notFound;
+                if (!_BitScanReverse(&v2, usedBits))
+                    v2 = 63;// `CountLeadingZeros'::`2': : notFound;
                 leadingZeros = v2 ^ 0x1F;
                 if ((v2 ^ 0x1F) == 0x20)
                     break;

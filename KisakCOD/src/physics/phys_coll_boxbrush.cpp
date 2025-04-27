@@ -1970,7 +1970,7 @@ void __cdecl Phys_TransformPlane(
     const float (*rotate)[3],
     float *outPlane)
 {
-    MatrixTransformVector(normal, rotate, outPlane);
+    MatrixTransformVector(normal, *(const mat3x3*)rotate, outPlane);
     outPlane[3] = Vec3Dot(outPlane, translate) + dist;
 }
 
@@ -2622,9 +2622,9 @@ void __cdecl Phys_DrawPolyTransformed(const Poly *poly, const float *color, cons
     lastEdgeIndex = poly->ptCount - 1;
     for (edgeIndex = 0; edgeIndex < poly->ptCount; ++edgeIndex)
     {
-        MatrixTransformVector(poly->pts[lastEdgeIndex], R, pt1);
+        MatrixTransformVector(poly->pts[lastEdgeIndex], *(const mat3x3*)R, pt1);
         Vec3Add(pt1, pos, pt1);
-        MatrixTransformVector(poly->pts[edgeIndex], R, pt2);
+        MatrixTransformVector(poly->pts[edgeIndex], *(const mat3x3 *)R, pt2);
         Vec3Add(pt2, pos, pt2);
         CG_DebugLine(pt1, pt2, color, 0, 8);
         lastEdgeIndex = edgeIndex;

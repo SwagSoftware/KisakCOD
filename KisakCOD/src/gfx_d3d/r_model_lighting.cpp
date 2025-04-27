@@ -241,7 +241,7 @@ unsigned int __cdecl R_AllocModelLighting(
     const void *userData,
     GfxLightingInfo *lightingInfoOut)
 {
-    int v7; // eax
+    DWORD v7; // eax
     int v8; // [esp+4h] [ebp-2Ch]
     float *v9; // [esp+8h] [ebp-28h]
     float *v10; // [esp+10h] [ebp-20h]
@@ -281,12 +281,8 @@ unsigned int __cdecl R_AllocModelLighting(
         pixelFreeRover = modelLightGlob.pixelFreeRover;
         while (1)
         {
-            if (!_BitScanReverse(
-                (unsigned int *)&v7,
-                modelLightGlob.prevPrevPixelFreeBits[pixelFreeRover]
-                & modelLightGlob.prevPixelFreeBits[pixelFreeRover]
-                    & modelLightGlob.currPixelFreeBits[pixelFreeRover]))
-                v7 = `CountLeadingZeros'::`2': : notFound;
+            if (!_BitScanReverse(&v7, modelLightGlob.prevPrevPixelFreeBits[pixelFreeRover] & modelLightGlob.prevPixelFreeBits[pixelFreeRover & modelLightGlob.currPixelFreeBits[pixelFreeRover]]))
+                v7 = 63;// `CountLeadingZeros'::`2': : notFound;
             usedCount = v7 ^ 0x1F;
             if ((v7 ^ 0x1Fu) < 0x20)
                 break;
@@ -457,7 +453,7 @@ void __cdecl R_BeginAllStaticModelLighting()
 
 void __cdecl R_SetAllStaticModelLighting()
 {
-    int v1; // eax
+    DWORD v1; // eax
     unsigned int wordCount; // [esp+34h] [ebp-18h]
     unsigned int bits; // [esp+38h] [ebp-14h]
     unsigned int indexLow; // [esp+40h] [ebp-Ch]
@@ -477,8 +473,8 @@ void __cdecl R_SetAllStaticModelLighting()
             {
                 while (1)
                 {
-                    if (!_BitScanReverse((unsigned int *)&v1, bits))
-                        v1 = `CountLeadingZeros'::`2': : notFound;
+                    if (!_BitScanReverse(&v1, bits))
+                        v1 = 63;// `CountLeadingZeros'::`2': : notFound;
                     indexLow = v1 ^ 0x1F;
                     if ((v1 ^ 0x1Fu) >= 0x20)
                         break;
@@ -602,13 +598,13 @@ void __cdecl R_ShutdownModelLightingGlobals()
 
 void __cdecl R_InitModelLightingGlobals()
 {
-    int v1; // eax
+    DWORD v1; // eax
     unsigned int totalBitsNeeded; // [esp+Ch] [ebp-8h]
     unsigned int i; // [esp+10h] [ebp-4h]
 
     modelLightGlob.xmodelEntryLimit = gfxCfg.maxClientViews << 10;
-    if (!_BitScanReverse((unsigned int *)&v1, gfxCfg.maxClientViews << 10))
-        v1 = `CountLeadingZeros'::`2': : notFound;
+    if (!_BitScanReverse(&v1, gfxCfg.maxClientViews << 10))
+        v1 = 63;// `CountLeadingZeros'::`2': : notFound;
     totalBitsNeeded = 32 - (v1 ^ 0x1F);
     for (smodelLightGlob.local.entryLimit = (1 << (32 - (v1 ^ 0x1F))) - modelLightGlob.xmodelEntryLimit;
         smodelLightGlob.local.entryLimit < 0x800;

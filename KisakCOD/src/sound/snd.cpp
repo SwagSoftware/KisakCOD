@@ -740,7 +740,7 @@ void __cdecl SND_SetListener(int localClientNum, int clientNum, const float *ori
                 "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                 localClientNum,
                 1);
-        AxisCopy(axis, g_snd.listeners[localClientNum].orient.axis);
+        AxisCopy(*(const mat3x3 *)axis, g_snd.listeners[localClientNum].orient.axis);
         v4 = &g_snd.listeners[localClientNum];
         v4->orient.origin[0] = *origin;
         v4->orient.origin[1] = origin[1];
@@ -748,7 +748,7 @@ void __cdecl SND_SetListener(int localClientNum, int clientNum, const float *ori
         g_snd.listeners[localClientNum].clientNum = clientNum;
         g_snd.listeners[localClientNum].active = 1;
         if (g_snd.amplifier.listener->active)
-            AxisCopy(axis, g_snd.amplifier.listener->orient.axis);
+            AxisCopy(*(const mat3x3*)axis, g_snd.amplifier.listener->orient.axis);
     }
 }
 

@@ -88,43 +88,50 @@ char *__cdecl SE_Load(char *psFileName, bool forceEnglish)
 // KISAKTODO: my god this is aids
 const char *__cdecl SE_GetString_LoadObj(const char *psPackageAndStringReference)
 {
-    const std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > const, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > > *v1; // eax
-    std::map<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t> > *p_m_StringEntries; // [esp+18h] [ebp-88h]
-    std::_Tree_nod<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::_Node *Myhead; // [esp+1Ch] [ebp-84h]
-    std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::const_iterator _Right; // [esp+70h] [ebp-30h] BYREF
+    //const std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > const, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > > *v1; // eax
+    //std::map<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t> > *p_m_StringEntries; // [esp+18h] [ebp-88h]
+    //std::_Tree_nod<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::_Node *Myhead; // [esp+1Ch] [ebp-84h]
+    //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::const_iterator _Right; // [esp+70h] [ebp-30h] BYREF
     //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > _Keyval; // [esp+78h] [ebp-28h] BYREF
-    std::string _Keyval;
+    //std::string _Keyval;
     //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > *Entry; // [esp+94h] [ebp-Ch]
-    std::string *Entry;
-    std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::iterator itEntry; // [esp+98h] [ebp-8h] BYREF
+    //std::string *Entry;
+    //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::iterator itEntry; // [esp+98h] [ebp-8h] BYREF
 
-    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 0, 0);
+    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 0, 0);
     //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
     //    &_Keyval,
     //    psPackageAndStringReference,
     //    strlen(psPackageAndStringReference));
-    _Keyval.assign(psPackageAndStringReference);
+    //_Keyval.assign(psPackageAndStringReference);
     //TheStringPackage->m_StringEntries.find()
-    std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::find(
-        &TheStringPackage->m_StringEntries,
-        &itEntry,
-        &_Keyval);
+    //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::find(
+    //    &TheStringPackage->m_StringEntries,
+    //    &itEntry,
+    //    &_Keyval);
+    auto itEntry = TheStringPackage->m_StringEntries.find(psPackageAndStringReference);
     //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 1, 0);
-    p_m_StringEntries = &TheStringPackage->m_StringEntries;
-    Myhead = TheStringPackage->m_StringEntries._Myhead;
-    _Right._Myaux = 0;
-    _Right._Ptr = Myhead;
-    if (TheStringPackage == (CStringEdPackage *)-88)
-        _invalid_parameter_noinfo();
-    _Right._Myaux = p_m_StringEntries->_Myownedaux;
-    if (!std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::const_iterator::operator!=(
-        &itEntry,
-        &_Right))
-        return 0;
-    v1 = std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::const_iterator::operator*(&itEntry);
-    Entry = &v1->second;
+    //auto p_m_StringEntries = &TheStringPackage->m_StringEntries;
+    //Myhead = TheStringPackage->m_StringEntries._Myhead;
+    //_Right._Myaux = 0;
+    //_Right._Ptr = Myhead;
+    //if (TheStringPackage == (CStringEdPackage *)-88)
+    //    _invalid_parameter_noinfo();
+    //_Right._Myaux = p_m_StringEntries->_Myownedaux;
 
-    return Entry->data();
+    //if (!std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::const_iterator::operator!=(
+    //    &itEntry,
+    //    &_Right))
+    //    return 0;
+    if (itEntry == TheStringPackage->m_StringEntries.end())
+    {
+        return NULL;
+    }
+
+    //auto v1 = *itEntry; // std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::const_iterator::operator*(&itEntry);
+    //Entry = v1.second.c_str();
+
+    return (const char *)&itEntry->second;
     //if (v1->second._Myres < 0x10)
     //    return Entry->_Bx._Buf;
     //else

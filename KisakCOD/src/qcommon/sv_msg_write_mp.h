@@ -1,6 +1,7 @@
 #pragma once
 
 #include "net_chan_mp.h"
+#include "huffman.h"
 
 enum PacketEntityType : __int32
 {                                       // ...

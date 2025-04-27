@@ -20,10 +20,34 @@ void Sys_DetectVideoCard(int descLimit, char* description)
     }
 }
 
+unsigned int __cdecl Sys_AddApicIdIfUnique(
+    unsigned int apicId,
+    unsigned int *existingApicId,
+    unsigned int existingCount)
+{
+    unsigned int existingIter; // [esp+0h] [ebp-4h]
+
+    for (existingIter = 0; existingIter < existingCount; ++existingIter)
+    {
+        if (existingIter)
+            MyAssertHandler(
+                ".\\win32\\win_configure.cpp",
+                261,
+                0,
+                "existingIter doesn't index ARRAY_COUNT( existingApicId )\n\t%i not in [0, %i)",
+                existingIter,
+                1);
+        if (existingApicId[existingIter] == apicId)
+            return existingCount;
+    }
+    existingApicId[existingCount] = apicId;
+    return existingCount + 1;
+}
+
 void __cdecl Sys_GetPhysicalCpuCount(SysInfo* sysInfo)
 {
     bool v1; // cf
-    int v8; // eax
+    DWORD v8; // eax
     _DWORD v14[5]; // [esp+0h] [ebp-E8h] BYREF
     int v15; // [esp+14h] [ebp-D4h]
     unsigned __int8 v16; // [esp+1Ah] [ebp-CEh]
@@ -38,9 +62,9 @@ void __cdecl Sys_GetPhysicalCpuCount(SysInfo* sysInfo)
     void* process; // [esp+3Ch] [ebp-ACh]
     unsigned int apicId; // [esp+40h] [ebp-A8h]
     unsigned int logicalPerPhysical; // [esp+44h] [ebp-A4h]
-    unsigned int systemAffinityMask; // [esp+48h] [ebp-A0h] BYREF
+    DWORD systemAffinityMask; // [esp+48h] [ebp-A0h] BYREF
     unsigned int logicalIdMask; // [esp+4Ch] [ebp-9Ch]
-    unsigned int processAffinityMask; // [esp+50h] [ebp-98h] BYREF
+    DWORD processAffinityMask; // [esp+50h] [ebp-98h] BYREF
     unsigned int testAffinityMask; // [esp+54h] [ebp-94h]
     unsigned int existingApicId[32]; // [esp+58h] [ebp-90h] BYREF
     _DWORD* v33; // [esp+D8h] [ebp-10h]
@@ -76,21 +100,25 @@ LABEL_8:
     v14[4] = v15;
     if (!v15)
     {
-        _EAX = 1;
+        //_EAX = 1; // LWSS: lmao I am writing inline ASM again. It's 2010. We did it boys. We turned back time. (Why does x64 not have this? I dig it)
+        __asm { mov eax, 1 }
         __asm { cpuid }
-        regEax = _EAX;
-        regEbx = _EBX;
-        regEdx = _EDX;
+        __asm { mov regEax, eax }
+        //regEax = _EAX;
+        __asm { mov regEbx, ebx }
+        //regEbx = _EBX;
+        __asm { mov regEdx, edx }
+        //regEdx = _EDX;
         v34 = -1;
-        if ((_EAX & 0xF00) == 0xF00 || ((unsigned int)&clients[0].snapshots[9].ps.hud.current[17].alignOrg & regEax) != 0)
+        if ((regEax & 0xF00) == 0xF00 || (regEax & 0xF00000) != 0)
         {
             logicalPerPhysical = BYTE2(regEbx);
             if (BYTE2(regEbx))
             {
                 if (logicalPerPhysical != 255)
                 {
-                    if (!_BitScanReverse((unsigned int*)&v8, logicalPerPhysical))
-                        v8 = `CountLeadingZeros'::`2': : notFound;
+                    if (!_BitScanReverse(&v8, logicalPerPhysical))
+                        v8 = 63;// `CountLeadingZeros'::`2': : notFound;
                     v21 = v8 ^ 0x1F;
                     v20 = 1 << (32 - (v8 ^ 0x1F));
                     logicalIdMask = v20 - 1;
@@ -108,10 +136,12 @@ LABEL_8:
                         if (SetProcessAffinityMask(process, testAffinityMask))
                         {
                             Sleep(0);
-                            _EAX = 1;
+                            //_EAX = 1;
+                            __asm { mov eax, 1 }
                             __asm { cpuid }
-                            regEbx = _EBX;
-                            apicId = ~logicalIdMask & HIBYTE(_EBX);
+                            //regEbx = _EBX;
+                            __asm { mov regEbx, ebx }
+                            apicId = ~logicalIdMask & HIBYTE(regEbx);
                         }
                         else
                         {

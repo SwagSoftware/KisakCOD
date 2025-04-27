@@ -1734,7 +1734,7 @@ unsigned __int8 __cdecl R_GetPrimaryLightForModel(
         XSurfaceGetVerts(&surfs[surfIter], verts, 0, 0);
         for (vertIter = 0; vertIter < vertCount; ++vertIter)
         {
-            MatrixTransformVector(&verts[3 * vertIter], axis, point);
+            MatrixTransformVector(&verts[3 * vertIter], *(const mat3x3*)axis, point);
             Vec3Mad(origin, scale, point, point);
             chosenLight = R_GetPrimaryLightForModelVertex(point, primaryLightCount, checkLight, lightRegions);
             ++votes[chosenLight];

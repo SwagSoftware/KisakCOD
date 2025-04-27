@@ -11,12 +11,12 @@ unsigned int huffBytesSeen[256];
 
 int __cdecl GetMinBitCountForNum(unsigned int num)
 {
-    int v2; // eax
+    DWORD v2; // eax
 
-    if (!_BitScanReverse((DWORD*)&v2, num))
+    if (!_BitScanReverse(&v2, num))
     {
         //v2 = `CountLeadingZeros'::`2': : notFound;
-        v2 = 0x3F;
+        v2 = 63;
     }
 
     return 32 - (v2 ^ 0x1F);

@@ -123,6 +123,10 @@ struct dxJoint : public dObject {
   dxJointTypeNum typenum; // MOD
   int flags;			// dJOINT_xxx flags
   dxJointNode node[2];		// connections to bodies. node[1].body can be 0
+
+  // KISAK ADD
+  bool debug;
+  // KISAK END
   
   // MOD
   // dJointFeedback *feedback;	// optional feedback structure

@@ -1201,7 +1201,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                     + parentAnimMat->trans[1] * invParentMat_20
                     + parentAnimMat->trans[2] * invParentMat_32);
                 Ragdoll_AnimMatToMat43(boneAnimMat, boneMat);
-                MatrixMultiply43(boneMat, (const float (*)[3]) & currentLocalRot[4], relMat);
+                MatrixMultiply43(boneMat, *(const mat4x3*)&currentLocalRot[4], relMat);
                 AxisToQuat(relMat, currentLocalRot);
                 currentOffset[0] = relMat[3][0];
                 currentOffset[1] = relMat[3][1];

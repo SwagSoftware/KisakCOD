@@ -1729,7 +1729,6 @@ void __cdecl XAnimCloneAnimTree_r(
     unsigned int fromInfoIndex,
     unsigned int toInfoParentIndex);
 XAnimInfo* __cdecl GetAnimInfo(int infoIndex);
-//void __thiscall bitarray<128>::setBit(bitarray<128>* this, unsigned int pos);
 
 
 // xanim_load_obj

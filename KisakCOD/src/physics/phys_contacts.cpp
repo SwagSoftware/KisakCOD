@@ -464,7 +464,7 @@ void __cdecl Phys_CreateJointForEachContact(
     double pz; // [esp+18h] [ebp-64h]
     double pza; // [esp+18h] [ebp-64h]
     float *v7; // [esp+20h] [ebp-5Ch]
-    dxBodyInfo *Position; // [esp+24h] [ebp-58h]
+    float *Position; // [esp+24h] [ebp-58h]
     float *v9; // [esp+28h] [ebp-54h]
     float *contactCentroid; // [esp+2Ch] [ebp-50h]
     dContactGeom *contact; // [esp+30h] [ebp-4Ch]
@@ -514,10 +514,10 @@ void __cdecl Phys_CreateJointForEachContact(
             else
             {
                 v7 = pos[bodyIndex];
-                Position = dBodyGetPosition(body);
-                *v7 = Position->pos[0];
-                v7[1] = Position->pos[1];
-                v7[2] = Position->pos[2];
+                Position = (float*)dBodyGetPosition(body);
+                *v7 = *Position;
+                v7[1] = Position[1];
+                v7[2] = Position[2];
             }
         }
         ++bodyIndex;

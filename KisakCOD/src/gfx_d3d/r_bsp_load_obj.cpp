@@ -17,6 +17,9 @@
 #include "r_xsurface.h"
 #include "rb_light.h"
 #include "r_reflection_probe.h"
+#include "r_staticmodel.h"
+#include "r_dpvs.h"
+#include "r_outdoor.h"
 
 r_globals_load_t rgl;
 
@@ -2215,9 +2218,9 @@ char __cdecl R_DoWorldTrisCoincide(const float **xyz0, const float **xyz1)
     int v31; // [esp+70h] [ebp-8h]
     int v32; // [esp+74h] [ebp-4h]
 
-    v31 = *xyz1;
-    v32 = *xyz0;
-    if (**xyz1 == **xyz0 && *(v31 + 4) == *(v32 + 4) && *(v31 + 8) == *(v32 + 8))
+    v31 = *(int *)xyz1;
+    v32 = *(int *)xyz0;
+    if (**xyz1 == **xyz0 && *(int*)(v31 + 4) == *(int*)(v32 + 4) && *(int *)(v31 + 8) == *(int *)(v32 + 8))
     {
         v29 = xyz1[1];
         v30 = xyz0[1];
@@ -2235,8 +2238,8 @@ char __cdecl R_DoWorldTrisCoincide(const float **xyz0, const float **xyz1)
     else
     {
         v25 = xyz1[1];
-        v26 = *xyz0;
-        if (*v25 == **xyz0 && v25[1] == *(v26 + 4) && v25[2] == *(v26 + 8))
+        v26 = *(int *)xyz0;
+        if (*v25 == **xyz0 && v25[1] == *(int *)(v26 + 4) && v25[2] == *(int *)(v26 + 8))
         {
             v23 = xyz1[2];
             v24 = xyz0[1];
@@ -2244,9 +2247,9 @@ char __cdecl R_DoWorldTrisCoincide(const float **xyz0, const float **xyz1)
             v7 = 0;
             if (v9)
             {
-                v21 = *xyz1;
+                v21 = *(int *)xyz1;
                 v22 = xyz0[2];
-                if (**xyz1 == *v22 && *(v21 + 4) == v22[1] && *(v21 + 8) == v22[2])
+                if (**xyz1 == *v22 && *(int *)(v21 + 4) == v22[1] && *(int *)(v21 + 8) == v22[2])
                     return 1;
             }
             return v7;
@@ -2254,12 +2257,12 @@ char __cdecl R_DoWorldTrisCoincide(const float **xyz0, const float **xyz1)
         else
         {
             v19 = xyz1[2];
-            v20 = *xyz0;
-            if (*v19 == **xyz0 && v19[1] == *(v20 + 4) && v19[2] == *(v20 + 8))
+            v20 = *(int *)xyz0;
+            if (*v19 == **xyz0 && v19[1] == *(int *)(v20 + 4) && v19[2] == *(int *)(v20 + 8))
             {
-                v17 = *xyz1;
+                v17 = *(int *)xyz1;
                 v18 = xyz0[1];
-                v5 = **xyz1 == *v18 && *(v17 + 4) == v18[1] && *(v17 + 8) == v18[2];
+                v5 = **xyz1 == *v18 && *(int *)(v17 + 4) == v18[1] && *(int *)(v17 + 8) == v18[2];
                 v3 = 0;
                 if (v5)
                 {
@@ -2592,7 +2595,7 @@ void __cdecl R_CreateStaticModel(
     smodelDrawInst->placement.origin[0] = *origin;
     smodelDrawInst->placement.origin[1] = origin[1];
     smodelDrawInst->placement.origin[2] = origin[2];
-    AxisCopy(axis, smodelDrawInst->placement.axis);
+    AxisCopy(*(const mat3x3*)axis, smodelDrawInst->placement.axis);
     smodelDrawInst->placement.scale = scale;
     R_GetXModelBounds(model, axis, smodelInst->mins, smodelInst->maxs);
     Vec3Mad(origin, scale, smodelInst->mins, smodelInst->mins);
@@ -2859,6 +2862,1167 @@ void __cdecl R_LoadEntities(unsigned int bspVersion)
     if (smodelCount > 0x10000)
         MyAssertHandler(".\\r_bsp_load_obj.cpp", 3567, 0, "%s\n\t(smodelCount) = %i", "(smodelCount <= 65536)", smodelCount);
     Hunk_FreeTempMemory(textPool);
+}
+
+void R_AddAllProbesToAllCells()
+{
+    GfxCell *cell; // [esp+0h] [ebp-Ch]
+    GfxCell *cella; // [esp+0h] [ebp-Ch]
+    int cellIndex; // [esp+4h] [ebp-8h]
+    int cellIndexa; // [esp+4h] [ebp-8h]
+    unsigned __int8 reflectionProbeIndex; // [esp+Bh] [ebp-1h]
+
+    if (!s_world.reflectionProbeCount)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4355, 0, "%s", "s_world.reflectionProbeCount > 0");
+    if (s_world.reflectionProbeCount == 1)
+    {
+        for (cellIndex = 0; cellIndex < s_world.dpvsPlanes.cellCount; ++cellIndex)
+        {
+            cell = &s_world.cells[cellIndex];
+            if (cell->reflectionProbeCount)
+                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4362, 0, "%s", "cell->reflectionProbeCount == 0");
+            if (cell->reflectionProbes)
+                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4363, 0, "%s", "cell->reflectionProbes == NULL");
+            cell->reflectionProbeCount = 1;
+            cell->reflectionProbes = Hunk_Alloc(1u, "R_AddAllProbesToAllCells", 22);
+            *cell->reflectionProbes = 0;
+        }
+    }
+    else
+    {
+        for (cellIndexa = 0; cellIndexa < s_world.dpvsPlanes.cellCount; ++cellIndexa)
+        {
+            cella = &s_world.cells[cellIndexa];
+            if (cella->reflectionProbeCount)
+                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4374, 0, "%s", "cell->reflectionProbeCount == 0");
+            if (cella->reflectionProbes)
+                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4375, 0, "%s", "cell->reflectionProbes == NULL");
+            cella->reflectionProbeCount = LOBYTE(s_world.reflectionProbeCount) - 1;
+            if (cella->reflectionProbeCount != s_world.reflectionProbeCount - 1)
+                MyAssertHandler(
+                    ".\\r_bsp_load_obj.cpp",
+                    4377,
+                    0,
+                    "%s",
+                    "cell->reflectionProbeCount == s_world.reflectionProbeCount - 1");
+            cella->reflectionProbes = Hunk_Alloc(cella->reflectionProbeCount, "R_AddAllProbesToAllCells", 22);
+            for (reflectionProbeIndex = 0; reflectionProbeIndex < s_world.reflectionProbeCount - 1; ++reflectionProbeIndex)
+                cella->reflectionProbes[reflectionProbeIndex] = reflectionProbeIndex + 1;
+        }
+    }
+}
+
+void __cdecl R_SetStaticModelReflectionProbe(
+    const GfxWorld *world,
+    const GfxStaticModelInst *smodelInst,
+    GfxStaticModelDrawInst *smodelDrawInst)
+{
+    unsigned int reflectionProbeIndex; // [esp+0h] [ebp-10h]
+    float center[3]; // [esp+4h] [ebp-Ch] BYREF
+
+    Vec3Avg(smodelInst->mins, smodelInst->maxs, center);
+    reflectionProbeIndex = R_CalcReflectionProbeIndex(world, center);
+    smodelDrawInst->reflectionProbeIndex = reflectionProbeIndex;
+    if (smodelDrawInst->reflectionProbeIndex != reflectionProbeIndex)
+        MyAssertHandler(
+            ".\\r_staticmodel_load_obj.cpp",
+            566,
+            0,
+            "%s",
+            "smodelDrawInst->reflectionProbeIndex == reflectionProbeIndex");
+}
+
+void R_SetStaticModelReflectionProbes()
+{
+    unsigned int smodelIndex; // [esp+0h] [ebp-4h]
+
+    if (!rgl.reflectionProbesLoaded)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4239, 0, "%s", "rgl.reflectionProbesLoaded");
+    for (smodelIndex = 0; smodelIndex < s_world.dpvs.smodelCount; ++smodelIndex)
+        R_SetStaticModelReflectionProbe(
+            &s_world,
+            &s_world.dpvs.smodelInsts[smodelIndex],
+            &s_world.dpvs.smodelDrawInsts[smodelIndex]);
+    rgl.staticModelReflectionProbesLoaded = 1;
+}
+
+void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, int smodelIndex)
+{
+    int v3; // [esp+4h] [ebp-30h]
+    unsigned __int8 *children; // [esp+14h] [ebp-20h]
+    GfxAabbTree *childTree; // [esp+18h] [ebp-1Ch]
+    GfxAabbTree *childTreea; // [esp+18h] [ebp-1Ch]
+    unsigned __int8 *newChildren; // [esp+1Ch] [ebp-18h]
+    int childIndex; // [esp+20h] [ebp-14h]
+    int childIndexa; // [esp+20h] [ebp-14h]
+    int childIndexb; // [esp+20h] [ebp-14h]
+    unsigned __int8 *smodelIndexes; // [esp+24h] [ebp-10h]
+    GfxStaticModelInst *smodelInst; // [esp+28h] [ebp-Ch]
+    int i; // [esp+30h] [ebp-4h]
+
+    if (((tree->smodelIndexCount - 1) & tree->smodelIndexCount) == 0)
+    {
+        if (tree->smodelIndexCount)
+            v3 = 2 * tree->smodelIndexCount;
+        else
+            v3 = 1;
+        smodelIndexes = (unsigned __int8 *)Hunk_AllocateTempMemory(2 * v3, "R_AddModelToCell");
+        memcpy(smodelIndexes, tree->smodelIndexes, 2 * tree->smodelIndexCount);
+        tree->smodelIndexes = (unsigned short *)smodelIndexes;
+    }
+    tree->smodelIndexes[tree->smodelIndexCount] = smodelIndex;
+    if (tree->smodelIndexes[tree->smodelIndexCount] != smodelIndex)
+        MyAssertHandler(
+            ".\\r_staticmodel_load_obj.cpp",
+            281,
+            0,
+            "%s",
+            "tree->smodelIndexes[tree->smodelIndexCount] == smodelIndex");
+    ++tree->smodelIndexCount;
+    if (tree->childCount)
+    {
+        smodelInst = &world->dpvs.smodelInsts[smodelIndex];
+        for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
+        {
+            childTree = (&tree[childIndex] + tree->childrenOffset);
+            if (smodelInst->mins[0] >= childTree->mins[0]
+                && smodelInst->mins[1] >= childTree->mins[1]
+                && smodelInst->mins[2] >= childTree->mins[2]
+                && smodelInst->maxs[0] <= childTree->maxs[0]
+                && smodelInst->maxs[1] <= childTree->maxs[1]
+                && smodelInst->maxs[2] <= childTree->maxs[2])
+            {
+                goto LABEL_18;
+            }
+        }
+        for (childIndexa = 0; ; ++childIndexa)
+        {
+            if (childIndexa >= tree->childCount)
+            {
+                newChildren = Hunk_AllocAlign(44 * (tree->childCount + 1), 4, "R_AddStaticModelToAabbTree_r", 21);
+                children = (unsigned char*)tree + tree->childrenOffset;
+                memcpy(newChildren, children, 44 * tree->childCount);
+                tree->childrenOffset = newChildren - (unsigned char*)tree;
+                for (childIndexb = 0; childIndexb < tree->childCount; ++childIndexb)
+                    *&newChildren[44 * childIndexb + 40] = &children[44 * childIndexb + *&children[44 * childIndexb + 40]]
+                    - &newChildren[44 * childIndexb];
+                childTreea = (&tree[tree->childCount++] + tree->childrenOffset);
+                childTreea->mins[0] = smodelInst->mins[0];
+                childTreea->mins[1] = smodelInst->mins[1];
+                childTreea->mins[2] = smodelInst->mins[2];
+                childTreea->maxs[0] = smodelInst->maxs[0];
+                childTreea->maxs[1] = smodelInst->maxs[1];
+                childTreea->maxs[2] = smodelInst->maxs[2];
+                R_AddStaticModelToAabbTree_r(world, childTreea, smodelIndex);
+                return;
+            }
+            childTree = (&tree[childIndexa] + tree->childrenOffset);
+            if (!childTree->surfaceCount)
+                break;
+        }
+        for (i = 0; i < 3; ++i)
+        {
+            if (smodelInst->mins[i] < childTree->mins[i])
+                childTree->mins[i] = smodelInst->mins[i];
+            if (smodelInst->maxs[i] > childTree->maxs[i])
+                childTree->maxs[i] = smodelInst->maxs[i];
+        }
+    LABEL_18:
+        R_AddStaticModelToAabbTree_r(world, childTree, smodelIndex);
+    }
+}
+
+void __cdecl R_AddStaticModelToCell(GfxWorld *world, GfxStaticModelInst *smodelInst, int cellIndex)
+{
+    GfxCell *cell; // [esp+0h] [ebp-Ch]
+    GfxAabbTree *tree; // [esp+4h] [ebp-8h]
+    int smodelIndex; // [esp+8h] [ebp-4h]
+
+    if (!smodelInst)
+        MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 355, 0, "%s", "smodelInst");
+    if (cellIndex < 0 || cellIndex >= world->dpvsPlanes.cellCount)
+        MyAssertHandler(
+            ".\\r_staticmodel_load_obj.cpp",
+            356,
+            0,
+            "%s",
+            "cellIndex >= 0 && cellIndex < world->dpvsPlanes.cellCount");
+    cell = &world->cells[cellIndex];
+    smodelIndex = smodelInst - world->dpvs.smodelInsts;
+    tree = cell->aabbTree;
+    if (!tree)
+        MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 361, 0, "%s", "tree");
+    if (!tree->smodelIndexCount || tree->smodelIndexes[tree->smodelIndexCount - 1] != smodelIndex)
+        R_AddStaticModelToAabbTree_r(world, cell->aabbTree, smodelIndex);
+}
+
+void __cdecl R_FilterStaticModelIntoCells_r(
+    GfxWorld *world,
+    mnode_t *node,
+    GfxStaticModelInst *smodelInst,
+    const float *mins,
+    const float *maxs)
+{
+    float localmaxs[3]; // [esp+0h] [ebp-50h]
+    float dist; // [esp+Ch] [ebp-44h]
+    float localmins[3]; // [esp+10h] [ebp-40h] BYREF
+    unsigned int type; // [esp+1Ch] [ebp-34h]
+    cplane_s *plane; // [esp+20h] [ebp-30h]
+    int cellIndex; // [esp+24h] [ebp-2Ch]
+    int boxSide; // [esp+28h] [ebp-28h]
+    float mins2[4]; // [esp+2Ch] [ebp-24h] BYREF
+    float maxs2[3]; // [esp+3Ch] [ebp-14h] BYREF
+    mnode_t *rightNode; // [esp+48h] [ebp-8h]
+    int planeIndex; // [esp+4Ch] [ebp-4h]
+
+    LODWORD(mins2[3]) = world->dpvsPlanes.cellCount + 1;
+    mins2[0] = *mins;
+    mins2[1] = mins[1];
+    mins2[2] = mins[2];
+    maxs2[0] = *maxs;
+    maxs2[1] = maxs[1];
+    maxs2[2] = maxs[2];
+    while (1)
+    {
+        cellIndex = node->cellIndex;
+        planeIndex = cellIndex - (world->dpvsPlanes.cellCount + 1);
+        if (planeIndex < 0)
+            break;
+        plane = &world->dpvsPlanes.planes[planeIndex];
+        boxSide = BoxOnPlaneSide(mins2, maxs2, plane, (const cplane_s*)LODWORD(localmaxs[0])); // KISAKTODO: yolo cast
+        if (boxSide == 3)
+        {
+            type = plane->type;
+            rightNode = (node + 2 * node->rightChildOffset);
+            if (type >= 3)
+            {
+                R_FilterStaticModelIntoCells_r(world, node + 1, smodelInst, mins2, maxs2);
+            }
+            else
+            {
+                dist = plane->dist;
+                localmins[0] = mins2[0];
+                localmins[1] = mins2[1];
+                localmins[2] = mins2[2];
+                localmins[plane->type] = dist;
+                localmaxs[0] = maxs2[0];
+                localmaxs[1] = maxs2[1];
+                localmaxs[2] = maxs2[2];
+                localmaxs[plane->type] = dist;
+                if (!BoxOnPlaneSide(localmins, maxs2, plane, (const cplane_s*)LODWORD(localmaxs[0]))) // KISAKTODO: yolo cast
+                    MyAssertHandler(
+                        ".\\r_staticmodel_load_obj.cpp",
+                        423,
+                        0,
+                        "%s",
+                        "BoxOnPlaneSide( localmins, maxs2, plane ) == BOXSIDE_FRONT");
+                if (maxs2[plane->type] > dist)
+                    R_FilterStaticModelIntoCells_r(world, node + 1, smodelInst, localmins, maxs2);
+                maxs2[0] = localmaxs[0];
+                maxs2[1] = localmaxs[1];
+                maxs2[2] = localmaxs[2];
+            }
+            node = rightNode;
+        }
+        else
+        {
+            if (boxSide != 1 && boxSide != 2)
+                MyAssertHandler(
+                    ".\\r_staticmodel_load_obj.cpp",
+                    444,
+                    0,
+                    "%s\n\t(boxSide) = %i",
+                    "(boxSide == (1 << 0) || boxSide == (1 << 1))",
+                    boxSide);
+            node = (node + 2 * (boxSide - 1) * (node->rightChildOffset - 2) + 4);
+        }
+    }
+    if (cellIndex)
+        R_AddStaticModelToCell(world, smodelInst, cellIndex - 1);
+}
+
+void __cdecl R_AllocStaticModels(GfxAabbTree *tree)
+{
+    GfxAabbTree *children; // [esp+0h] [ebp-Ch]
+    int childIndex; // [esp+4h] [ebp-8h]
+    unsigned __int8 *smodelIndexes; // [esp+8h] [ebp-4h]
+
+    if (tree->smodelIndexCount)
+    {
+        smodelIndexes = Hunk_AllocAlign(2 * tree->smodelIndexCount, 4, "R_AllocStaticModels", 21);
+        memcpy(smodelIndexes, tree->smodelIndexes, 2 * tree->smodelIndexCount);
+        tree->smodelIndexes = (unsigned short*)smodelIndexes;
+    }
+    children = (tree + tree->childrenOffset);
+    for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
+        R_AllocStaticModels(&children[childIndex]);
+}
+
+int __cdecl CompareStaticModels(unsigned __int16 *smodel0, unsigned __int16 *smodel1)
+{
+    return *smodel0 - *smodel1;
+}
+
+int __cdecl R_SortGfxAabbTreeChildren(
+    GfxWorld *world,
+    float *mins,
+    float *maxs,
+    unsigned __int16 *staticModels,
+    int staticModelCount)
+{
+    GfxStaticModelInst *smodelInst; // [esp+0h] [ebp-14h]
+    int smodelSwapIndex; // [esp+4h] [ebp-10h]
+    int childCount; // [esp+8h] [ebp-Ch]
+    int smodelChildIndex; // [esp+Ch] [ebp-8h]
+    int smodelIndex; // [esp+10h] [ebp-4h]
+
+    childCount = 0;
+    for (smodelChildIndex = 0; smodelChildIndex < staticModelCount; ++smodelChildIndex)
+    {
+        smodelIndex = staticModels[smodelChildIndex];
+        smodelInst = &world->dpvs.smodelInsts[smodelIndex];
+        if (*mins <= smodelInst->mins[0]
+            && mins[1] <= smodelInst->mins[1]
+            && mins[2] <= smodelInst->mins[2]
+            && *maxs >= smodelInst->maxs[0]
+            && maxs[1] >= smodelInst->maxs[1]
+            && maxs[2] >= smodelInst->maxs[2])
+        {
+            smodelSwapIndex = staticModels[childCount];
+            staticModels[childCount] = smodelIndex;
+            if (staticModels[childCount] != smodelIndex)
+                MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 73, 0, "%s", "staticModels[childCount] == smodelIndex");
+            staticModels[smodelChildIndex] = smodelSwapIndex;
+            if (staticModels[smodelChildIndex] != smodelSwapIndex)
+                MyAssertHandler(
+                    ".\\r_staticmodel_load_obj.cpp",
+                    76,
+                    0,
+                    "%s",
+                    "staticModels[smodelChildIndex] == smodelSwapIndex");
+            ++childCount;
+        }
+    }
+    return childCount < 2 ? 0 : childCount;
+}
+
+void __cdecl R_SortGfxAabbTree(GfxWorld *world, GfxAabbTree *tree)
+{
+    float *v2; // [esp+8h] [ebp-84h]
+    int j; // [esp+14h] [ebp-78h]
+    int ja; // [esp+14h] [ebp-78h]
+    float middle[3]; // [esp+18h] [ebp-74h] BYREF
+    GfxAabbTree *children; // [esp+24h] [ebp-68h]
+    int smodelIndexIter; // [esp+28h] [ebp-64h]
+    GfxAabbTree *childTree; // [esp+2Ch] [ebp-60h]
+    float mins[3]; // [esp+30h] [ebp-5Ch] BYREF
+    float childMaxs[3]; // [esp+3Ch] [ebp-50h] BYREF
+    unsigned __int16 *smodelIndexes; // [esp+48h] [ebp-44h]
+    int childIndex; // [esp+4Ch] [ebp-40h]
+    GfxStaticModelInst *smodelInst; // [esp+50h] [ebp-3Ch]
+    float childMins[3]; // [esp+54h] [ebp-38h] BYREF
+    float maxs[3]; // [esp+60h] [ebp-2Ch] BYREF
+    int smodelIndexCount; // [esp+6Ch] [ebp-20h]
+    int i; // [esp+70h] [ebp-1Ch]
+    int childCount[4]; // [esp+74h] [ebp-18h]
+    int count; // [esp+84h] [ebp-8h]
+    int smodelIndex; // [esp+88h] [ebp-4h]
+
+    qsort(tree->smodelIndexes, tree->smodelIndexCount, 2u, (int(*)(const void *, const void *))CompareStaticModels);
+    if (tree->childCount)
+    {
+        children = (tree + tree->childrenOffset);
+        for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
+            R_SortGfxAabbTree(world, &children[childIndex]);
+    }
+    else
+    {
+        mins[0] = 3.4028235e38;
+        mins[1] = 3.4028235e38;
+        mins[2] = 3.4028235e38;
+        maxs[0] = -3.4028235e38;
+        maxs[1] = -3.4028235e38;
+        maxs[2] = -3.4028235e38;
+        for (smodelIndexIter = 0; smodelIndexIter < tree->smodelIndexCount; ++smodelIndexIter)
+        {
+            smodelIndex = tree->smodelIndexes[smodelIndexIter];
+            smodelInst = &world->dpvs.smodelInsts[smodelIndex];
+            for (i = 0; i < 3; ++i)
+            {
+                if (smodelInst->mins[i] < mins[i])
+                    mins[i] = smodelInst->mins[i];
+                if (smodelInst->maxs[i] > maxs[i])
+                    maxs[i] = smodelInst->maxs[i];
+            }
+        }
+        if (!tree->surfaceCount)
+        {
+            tree->mins[0] = mins[0];
+            tree->mins[1] = mins[1];
+            tree->mins[2] = mins[2];
+            tree->maxs[0] = maxs[0];
+            tree->maxs[1] = maxs[1];
+            tree->maxs[2] = maxs[2];
+        }
+        if (tree->smodelIndexCount >= 8u)
+        {
+            Vec3Add(mins, maxs, middle);
+            Vec3Scale(middle, 0.5, middle);
+            smodelIndexes = tree->smodelIndexes;
+            smodelIndexCount = tree->smodelIndexCount;
+            childMins[0] = mins[0];
+            childMins[1] = mins[1];
+            childMins[2] = mins[2];
+            childMaxs[1] = maxs[1];
+            childMaxs[2] = maxs[2];
+            childMaxs[0] = middle[0];
+            childCount[0] = R_SortGfxAabbTreeChildren(world, childMins, childMaxs, smodelIndexes, smodelIndexCount);
+            smodelIndexes += childCount[0];
+            smodelIndexCount -= childCount[0];
+            childMins[1] = mins[1];
+            childMins[2] = mins[2];
+            childMaxs[0] = maxs[0];
+            childMaxs[1] = maxs[1];
+            childMaxs[2] = maxs[2];
+            childMins[0] = middle[0];
+            childCount[1] = R_SortGfxAabbTreeChildren(world, childMins, childMaxs, smodelIndexes, smodelIndexCount);
+            smodelIndexes += childCount[1];
+            smodelIndexCount -= childCount[1];
+            childMins[0] = mins[0];
+            childMins[1] = mins[1];
+            childMins[2] = mins[2];
+            childMaxs[0] = maxs[0];
+            childMaxs[2] = maxs[2];
+            childMaxs[1] = middle[1];
+            childCount[2] = R_SortGfxAabbTreeChildren(world, childMins, childMaxs, smodelIndexes, smodelIndexCount);
+            smodelIndexes += childCount[2];
+            smodelIndexCount -= childCount[2];
+            childMins[0] = mins[0];
+            childMins[2] = mins[2];
+            childMaxs[0] = maxs[0];
+            childMaxs[1] = maxs[1];
+            childMaxs[2] = maxs[2];
+            childMins[1] = middle[1];
+            childCount[3] = R_SortGfxAabbTreeChildren(world, childMins, childMaxs, smodelIndexes, smodelIndexCount);
+            smodelIndexes += childCount[3];
+            smodelIndexCount -= childCount[3];
+            count = 0;
+            for (j = 0; j < 4; ++j)
+                count += childCount[j] != 0;
+            if (count)
+            {
+                if (tree->surfaceCount)
+                    ++count;
+                if (smodelIndexCount)
+                    ++count;
+                tree->childrenOffset = Hunk_AllocAlign(44 * count, 4, "R_SortGfxAabbTree", 21) - (unsigned char*)tree;
+                if (tree->surfaceCount)
+                {
+                    children = (tree + tree->childrenOffset);
+                    childTree = &children[tree->childCount++];
+                    childTree->mins[0] = tree->mins[0];
+                    childTree->mins[1] = tree->mins[1];
+                    childTree->mins[2] = tree->mins[2];
+                    v2 = childTree->maxs;
+                    childTree->maxs[0] = tree->maxs[0];
+                    v2[1] = tree->maxs[1];
+                    v2[2] = tree->maxs[2];
+                    childTree->startSurfIndex = tree->startSurfIndex;
+                    childTree->surfaceCount = tree->surfaceCount;
+                    childTree->startSurfIndexNoDecal = tree->startSurfIndexNoDecal;
+                    childTree->surfaceCountNoDecal = tree->surfaceCountNoDecal;
+                }
+                smodelIndexes = tree->smodelIndexes;
+                smodelIndexCount = tree->smodelIndexCount;
+                for (ja = 0; ja < 4; ++ja)
+                {
+                    count = childCount[ja];
+                    if (count)
+                    {
+                        children = (tree + tree->childrenOffset);
+                        childTree = &children[tree->childCount++];
+                        childTree->smodelIndexCount = count;
+                        if (childTree->smodelIndexCount != count)
+                            MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 235, 0, "%s", "childTree->smodelIndexCount == count");
+                        childTree->smodelIndexes = smodelIndexes;
+                        R_SortGfxAabbTree(world, childTree);
+                        smodelIndexes += count;
+                        smodelIndexCount -= count;
+                    }
+                }
+                if (smodelIndexCount)
+                {
+                    children = (tree + tree->childrenOffset);
+                    childTree = &children[tree->childCount++];
+                    childTree->smodelIndexCount = smodelIndexCount;
+                    if (childTree->smodelIndexCount != smodelIndexCount)
+                        MyAssertHandler(
+                            ".\\r_staticmodel_load_obj.cpp",
+                            253,
+                            0,
+                            "%s",
+                            "childTree->smodelIndexCount == smodelIndexCount");
+                    childTree->smodelIndexes = smodelIndexes;
+                    R_SortGfxAabbTree(world, childTree);
+                }
+            }
+        }
+    }
+}
+
+int __cdecl R_AabbTreeChildrenCount_r(GfxAabbTree *tree)
+{
+    GfxAabbTree *children; // [esp+0h] [ebp-Ch]
+    unsigned int childIndex; // [esp+4h] [ebp-8h]
+    int count; // [esp+8h] [ebp-4h]
+
+    count = 1;
+    children = (tree + tree->childrenOffset);
+    for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
+        count += R_AabbTreeChildrenCount_r(&children[childIndex]);
+    return count;
+}
+
+GfxAabbTree *__cdecl R_AabbTreeMove_r(GfxAabbTree *tree, GfxAabbTree *newTree, GfxAabbTree *newChildren)
+{
+    GfxAabbTree *children; // [esp+8h] [ebp-Ch]
+    unsigned int childIndex; // [esp+Ch] [ebp-8h]
+    GfxAabbTree *allocChildren; // [esp+10h] [ebp-4h]
+
+    qmemcpy(newTree, tree, sizeof(GfxAabbTree));
+    children = (tree + tree->childrenOffset);
+    newTree->childrenOffset = newChildren - newTree;
+    allocChildren = &newChildren[tree->childCount];
+    for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
+        allocChildren = R_AabbTreeMove_r(&children[childIndex], &newChildren[childIndex], allocChildren);
+    return allocChildren;
+}
+
+void __cdecl R_FixupGfxAabbTrees(GfxCell *cell)
+{
+    GfxAabbTree *tree; // [esp+0h] [ebp-Ch]
+    GfxAabbTree *newTree; // [esp+4h] [ebp-8h]
+
+    tree = cell->aabbTree;
+    if (!tree)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3378, 0, "%s", "tree");
+    cell->aabbTreeCount = R_AabbTreeChildrenCount_r(tree);
+    newTree = (GfxAabbTree*)Hunk_AllocAlign(44 * cell->aabbTreeCount, 4, "R_FixupGfxAabbTrees", 21);
+    if (R_AabbTreeMove_r(tree, newTree, newTree + 1) - newTree != cell->aabbTreeCount)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3383, 0, "%s", "allocChildren - newTree == cell->aabbTreeCount");
+    cell->aabbTree = newTree;
+}
+
+int R_PostLoadEntities()
+{
+    int result; // eax
+    int cellIndex; // [esp+514h] [ebp-10h]
+    int cellIndexa; // [esp+514h] [ebp-10h]
+    int cellIndexb; // [esp+514h] [ebp-10h]
+    GfxStaticModelCombinedInst *smodelCombinedInsts; // [esp+51Ch] [ebp-8h]
+    unsigned int smodelIndex; // [esp+520h] [ebp-4h]
+    unsigned int smodelIndexa; // [esp+520h] [ebp-4h]
+    unsigned int smodelIndexb; // [esp+520h] [ebp-4h]
+
+    if (!rgl.staticModelReflectionProbesLoaded)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3396, 0, "%s", "rgl.staticModelReflectionProbesLoaded");
+    smodelCombinedInsts = (GfxStaticModelCombinedInst*)Z_Malloc(104 * s_world.dpvs.smodelCount, "R_PostLoadEntities", 21);
+    for (smodelIndex = 0; smodelIndex < s_world.dpvs.smodelCount; ++smodelIndex)
+    {
+        qmemcpy(&smodelCombinedInsts[smodelIndex], &s_world.dpvs.smodelDrawInsts[smodelIndex], 0x4Cu);
+        qmemcpy(
+            &smodelCombinedInsts[smodelIndex].smodelInst,
+            &s_world.dpvs.smodelInsts[smodelIndex],
+            sizeof(smodelCombinedInsts[smodelIndex].smodelInst));
+    }
+    //std::_Sort<GfxStaticModelCombinedInst *, int, bool(__cdecl *)(GfxStaticModelCombinedInst const &, GfxStaticModelCombinedInst const &)>(
+    //    smodelCombinedInsts,
+    //    &smodelCombinedInsts[s_world.dpvs.smodelCount],
+    //    (104 * s_world.dpvs.smodelCount) / 104,
+    //    R_StaticModelCompare);
+    std::sort(&smodelCombinedInsts[0], &smodelCombinedInsts[s_world.dpvs.smodelCount], R_StaticModelCompare);
+    for (smodelIndexa = 0; smodelIndexa < s_world.dpvs.smodelCount; ++smodelIndexa)
+    {
+        qmemcpy(
+            &s_world.dpvs.smodelDrawInsts[smodelIndexa],
+            &smodelCombinedInsts[smodelIndexa],
+            sizeof(s_world.dpvs.smodelDrawInsts[smodelIndexa]));
+        qmemcpy(
+            &s_world.dpvs.smodelInsts[smodelIndexa],
+            &smodelCombinedInsts[smodelIndexa].smodelInst,
+            sizeof(s_world.dpvs.smodelInsts[smodelIndexa]));
+    }
+    Z_Free(smodelCombinedInsts, 21);
+    if (!s_world.dpvsPlanes.nodes)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3418, 0, "%s", "s_world.dpvsPlanes.nodes");
+    for (smodelIndexb = 0; smodelIndexb < s_world.dpvs.smodelCount; ++smodelIndexb)
+        R_FilterStaticModelIntoCells_r(
+            &s_world,
+            (mnode_t*)s_world.dpvsPlanes.nodes,
+            &s_world.dpvs.smodelInsts[smodelIndexb],
+            s_world.dpvs.smodelInsts[smodelIndexb].mins,
+            s_world.dpvs.smodelInsts[smodelIndexb].maxs);
+    for (cellIndex = 0; cellIndex < s_world.dpvsPlanes.cellCount; ++cellIndex)
+        R_AllocStaticModels(s_world.cells[cellIndex].aabbTree);
+    for (cellIndexa = 0; cellIndexa < s_world.dpvsPlanes.cellCount; ++cellIndexa)
+        R_SortGfxAabbTree(&s_world, s_world.cells[cellIndexa].aabbTree);
+    Hunk_ClearTempMemory();
+    for (cellIndexb = 0; ; ++cellIndexb)
+    {
+        result = cellIndexb;
+        if (cellIndexb >= s_world.dpvsPlanes.cellCount)
+            break;
+        R_FixupGfxAabbTrees(&s_world.cells[cellIndexb]);
+    }
+    return result;
+}
+
+void __cdecl R_ForEachShadowCastingSurfaceOnEachLight(void(__cdecl *Callback)(GfxWorld *, unsigned int, unsigned int))
+{
+    unsigned int sortedSurfIndex; // [esp+0h] [ebp-8h]
+
+    if (!s_world.shadowGeom)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4260, 1, "%s", "s_world.shadowGeom");
+    if (!s_world.lightRegion)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4261, 1, "%s", "s_world.lightRegion");
+    for (sortedSurfIndex = 0; sortedSurfIndex < s_world.models->surfaceCount; ++sortedSurfIndex)
+    {
+        if ((s_world.dpvs.surfaces[sortedSurfIndex].material->info.gameFlags & 0x40) != 0)
+            R_ForEachPrimaryLightAffectingSurface(
+                &s_world,
+                &s_world.dpvs.surfaces[sortedSurfIndex],
+                sortedSurfIndex,
+                Callback);
+    }
+}
+
+void __cdecl R_AddShadowSurfaceToPrimaryLight(
+    GfxWorld *world,
+    unsigned int primaryLightIndex,
+    unsigned int sortedSurfIndex)
+{
+    GfxShadowGeometry *shadowGeom; // [esp+0h] [ebp-4h]
+
+    shadowGeom = &world->shadowGeom[primaryLightIndex];
+    if (shadowGeom->sortedSurfIndex)
+    {
+        if (sortedSurfIndex != sortedSurfIndex)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+                281,
+                0,
+                "i == static_cast< Type >( i )\n\t%i, %i",
+                sortedSurfIndex,
+                sortedSurfIndex);
+        shadowGeom->sortedSurfIndex[shadowGeom->surfaceCount++] = sortedSurfIndex;
+    }
+}
+
+void __cdecl R_IncrementShadowGeometryCount(GfxWorld *world, unsigned int primaryLightIndex, unsigned int idk)
+{
+    ++world->shadowGeom[primaryLightIndex].surfaceCount;
+}
+
+unsigned int R_InitShadowGeometryArrays()
+{
+    unsigned int result; // eax
+    GfxStaticModelDrawInst *smodelDrawInst; // [esp+0h] [ebp-10h]
+    unsigned int primaryLightIndex; // [esp+4h] [ebp-Ch]
+    GfxShadowGeometry *shadowGeom; // [esp+8h] [ebp-8h]
+    GfxShadowGeometry *shadowGeoma; // [esp+8h] [ebp-8h]
+    unsigned int smodelIndex; // [esp+Ch] [ebp-4h]
+
+    if (!s_world.shadowGeom)
+        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4285, 1, "%s", "s_world.shadowGeom");
+    R_ForEachShadowCastingSurfaceOnEachLight(R_IncrementShadowGeometryCount);
+    s_world.shadowGeom->surfaceCount = 0;
+    s_world.shadowGeom[s_world.sunPrimaryLightIndex].surfaceCount = 0;
+    for (primaryLightIndex = 0; primaryLightIndex < s_world.primaryLightCount; ++primaryLightIndex)
+    {
+        shadowGeom = &s_world.shadowGeom[primaryLightIndex];
+        if (shadowGeom->surfaceCount)
+        {
+            shadowGeom->sortedSurfIndex = (unsigned short*)Hunk_Alloc(2 * shadowGeom->surfaceCount, "R_AllocShadowGeometryArrayMemory", 20);
+            shadowGeom->surfaceCount = 0;
+        }
+        if (shadowGeom->smodelCount)
+        {
+            shadowGeom->smodelIndex = (unsigned short*)Hunk_Alloc(2 * shadowGeom->smodelCount, "R_AllocShadowGeometryArrayMemory", 20);
+            shadowGeom->smodelCount = 0;
+        }
+    }
+    R_ForEachShadowCastingSurfaceOnEachLight(R_AddShadowSurfaceToPrimaryLight);
+    for (smodelIndex = 0; ; ++smodelIndex)
+    {
+        result = smodelIndex;
+        if (smodelIndex >= s_world.dpvs.smodelCount)
+            break;
+        smodelDrawInst = &s_world.dpvs.smodelDrawInsts[smodelIndex];
+        if (smodelDrawInst->primaryLightIndex >= s_world.primaryLightCount)
+            MyAssertHandler(
+                ".\\r_bsp_load_obj.cpp",
+                4312,
+                0,
+                "smodelDrawInst->primaryLightIndex doesn't index s_world.primaryLightCount\n\t%i not in [0, %i)",
+                smodelDrawInst->primaryLightIndex,
+                s_world.primaryLightCount);
+        shadowGeoma = &s_world.shadowGeom[smodelDrawInst->primaryLightIndex];
+        if (shadowGeoma->smodelIndex)
+        {
+            shadowGeoma->smodelIndex[shadowGeoma->smodelCount] = smodelIndex;
+            if (shadowGeoma->smodelIndex[shadowGeoma->smodelCount] != smodelIndex)
+                MyAssertHandler(
+                    ".\\r_bsp_load_obj.cpp",
+                    4318,
+                    1,
+                    "shadowGeom->smodelIndex[shadowGeom->smodelCount] == smodelIndex\n\t%i, %i",
+                    shadowGeoma->smodelIndex[shadowGeoma->smodelCount],
+                    smodelIndex);
+            ++shadowGeoma->smodelCount;
+        }
+    }
+    return result;
+}
+
+void __cdecl R_LoadSun(const char *name, sunflare_t *sun)
+{
+    char *v2; // eax
+    const char *nameIter; // [esp+0h] [ebp-54h]
+    char sunFile[68]; // [esp+4h] [ebp-50h] BYREF
+    const char *firstCharToCopy; // [esp+4Ch] [ebp-8h]
+    char *firstPeriod; // [esp+50h] [ebp-4h]
+
+    if (!name)
+        MyAssertHandler(".\\r_sky_load_obj.cpp", 16, 0, "%s", "name");
+    if (!sun)
+        MyAssertHandler(".\\r_sky_load_obj.cpp", 17, 0, "%s", "sun");
+    Com_Memset(sun, 0, 96);
+    firstCharToCopy = name;
+    for (nameIter = name; *nameIter; ++nameIter)
+    {
+        if (*nameIter == 47 || *nameIter == 92)
+            firstCharToCopy = nameIter + 1;
+    }
+    I_strncpyz(sunFile, firstCharToCopy, 64);
+    strchr(sunFile, 0x2Eu);
+    firstPeriod = v2;
+    if (v2)
+        *firstPeriod = 0;
+    if (sunFile[0])
+        R_LoadSunThroughDvars(sunFile, sun);
+}
+
+unsigned __int8 *R_AllocPrimaryLightBuffers()
+{
+    unsigned __int16 EntityCount; // ax
+    unsigned __int16 v1; // ax
+    unsigned __int8 *result; // eax
+    unsigned int relevantPrimaryLightCount; // [esp+4h] [ebp-Ch]
+    unsigned int totalDynEntBits; // [esp+8h] [ebp-8h]
+
+    if (s_world.sunPrimaryLightIndex > 1)
+        MyAssertHandler(
+            ".\\r_bsp_load_obj.cpp",
+            4170,
+            0,
+            "%s",
+            "s_world.sunPrimaryLightIndex == PRIMARY_LIGHT_SUN || s_world.sunPrimaryLightIndex == PRIMARY_LIGHT_NONE");
+    relevantPrimaryLightCount = s_world.primaryLightCount - (s_world.sunPrimaryLightIndex + 1);
+    s_world.primaryLightEntityShadowVis = (unsigned int*)Hunk_Alloc(
+        4 * (((relevantPrimaryLightCount << 12) + 31) >> 5),
+        "R_AllocPrimaryLightBuffers",
+        20);
+    EntityCount = DynEnt_GetEntityCount(DYNENT_COLL_CLIENT_FIRST);
+    s_world.nonSunPrimaryLightForModelDynEnt = Hunk_Alloc(EntityCount, "R_AllocPrimaryLightBuffers", 20);
+    v1 = DynEnt_GetEntityCount(DYNENT_COLL_CLIENT_FIRST);
+    s_world.primaryLightDynEntShadowVis[0] = (unsigned int *)Hunk_Alloc(
+        4 * ((relevantPrimaryLightCount * v1 + 31) >> 5),
+        "R_AllocPrimaryLightBuffers",
+        20);
+    totalDynEntBits = relevantPrimaryLightCount * DynEnt_GetEntityCount(DYNENT_COLL_CLIENT_BRUSH);
+    result = Hunk_Alloc(4 * ((totalDynEntBits + 31) >> 5), "R_AllocPrimaryLightBuffers", 20);
+    s_world.primaryLightDynEntShadowVis[1] = (unsigned int *)result;
+    return result;
+}
+
+unsigned __int8 *R_LoadWorldRuntime()
+{
+    unsigned __int8 *v1; // [esp+0h] [ebp-24h]
+    unsigned __int8 *v2; // [esp+4h] [ebp-20h]
+    unsigned __int8 *v3; // [esp+8h] [ebp-1Ch]
+    unsigned __int8 *v4; // [esp+Ch] [ebp-18h]
+    unsigned __int8 *v5; // [esp+10h] [ebp-14h]
+    unsigned __int8 *v6; // [esp+14h] [ebp-10h]
+    unsigned __int8 *v7; // [esp+18h] [ebp-Ch]
+    unsigned int drawType; // [esp+1Ch] [ebp-8h]
+    unsigned int drawTypea; // [esp+1Ch] [ebp-8h]
+    int i; // [esp+20h] [ebp-4h]
+
+    for (i = 0; i < 3; ++i)
+    {
+        s_world.dpvs.smodelVisDataCount = 4 * ((s_world.dpvs.smodelCount + 127) >> 7);
+        s_world.dpvs.surfaceVisDataCount = 4 * ((s_world.models->surfaceCount + 127) >> 7);
+        if (s_world.dpvs.smodelCount)
+            v7 = Hunk_Alloc(s_world.dpvs.smodelCount, "R_InitDynamicData", 21);
+        else
+            v7 = 0;
+        s_world.dpvs.smodelVisData[i] = v7;
+        if (s_world.models->surfaceCount)
+            v6 = Hunk_Alloc(s_world.models->surfaceCount, "R_InitDynamicData", 20);
+        else
+            v6 = 0;
+        s_world.dpvs.surfaceVisData[i] = v6;
+        for (drawType = 0; drawType < 2; ++drawType)
+            s_world.dpvsDyn.dynEntVisData[drawType][i] = Hunk_Alloc(
+                32 * s_world.dpvsDyn.dynEntClientWordCount[drawType],
+                "R_InitDynamicData",
+                20);
+    }
+    if (s_world.dpvs.smodelCount)
+        v5 = Hunk_Alloc(8 * s_world.dpvs.smodelVisDataCount, "R_InitDynamicData", 21);
+    else
+        v5 = 0;
+    s_world.dpvs.lodData = (unsigned int*)v5;
+    s_world.dpvs.staticSurfaceCount = s_world.models->surfaceCount;
+    s_world.dpvs.staticSurfaceCountNoDecal = s_world.models->surfaceCountNoDecal;
+    if (s_world.dpvs.staticSurfaceCount)
+        v4 = Hunk_Alloc(8 * s_world.dpvs.staticSurfaceCount, "R_InitDynamicData", 20);
+    else
+        v4 = 0;
+    s_world.dpvs.surfaceMaterials = (GfxDrawSurf*)v4;
+    if (s_world.dpvs.staticSurfaceCount)
+        v3 = Hunk_Alloc(4 * s_world.dpvs.surfaceVisDataCount, "R_InitDynamicData", 20);
+    else
+        v3 = 0;
+    s_world.dpvs.surfaceCastsSunShadow = (unsigned int*)v3;
+    if (s_world.dpvsPlanes.cellCount)
+        v2 = Hunk_Alloc(
+            4 * s_world.dpvsPlanes.cellCount * ((s_world.dpvsPlanes.cellCount + 31) >> 5),
+            "R_InitDynamicData",
+            20);
+    else
+        v2 = 0;
+    s_world.cellCasterBits = (unsigned int*)v2;
+    if (s_world.dpvsPlanes.cellCount)
+        v1 = Hunk_Alloc(s_world.dpvsPlanes.cellCount << 10, "R_InitDynamicData", 20);
+    else
+        v1 = 0;
+    s_world.dpvsPlanes.sceneEntCellBits = (unsigned int*)v1;
+    for (drawTypea = 0; drawTypea < 2; ++drawTypea)
+        s_world.dpvsDyn.dynEntCellBits[drawTypea] = (unsigned int*)Hunk_Alloc(
+            4
+            * s_world.dpvsPlanes.cellCount
+            * s_world.dpvsDyn.dynEntClientWordCount[drawTypea],
+            "R_InitDynamicData",
+            20);
+    s_world.sceneDynModel = (GfxSceneDynModel*)Hunk_Alloc(6 * s_world.dpvsDyn.dynEntClientCount[0], "R_InitDynamicData", 20);
+    s_world.sceneDynBrush = (GfxSceneDynBrush*)Hunk_Alloc(4 * s_world.dpvsDyn.dynEntClientCount[1], "R_InitDynamicData", 20);
+    return R_AllocPrimaryLightBuffers();
+}
+
+struct GfxSModelSurfStats // sizeof=0x10
+{                                       // ...
+    XModel *model;                      // ...
+    unsigned int lod;                   // ...
+    unsigned int smcAllocBits;          // ...
+    unsigned int useCount;              // ...
+};
+
+BOOL __cdecl R_CompareSModels_Model(const GfxStaticModelDrawInst *s0, const GfxStaticModelDrawInst *s1)
+{
+    return s0->model < s1->model;
+}
+
+int __cdecl R_GetSModelCacheAllocBits(const XModel *model, unsigned int lod)
+{
+    DWORD v3; // eax
+    int v6; // [esp+4h] [ebp-30h]
+    unsigned int surfCount; // [esp+18h] [ebp-1Ch]
+    unsigned int triCount; // [esp+1Ch] [ebp-18h]
+    unsigned int surfIter; // [esp+24h] [ebp-10h]
+    unsigned int vertCount; // [esp+28h] [ebp-Ch]
+    XSurface *surfs; // [esp+2Ch] [ebp-8h] BYREF
+    unsigned int minPoolSize; // [esp+30h] [ebp-4h]
+
+    surfCount = XModelGetSurfCount(model, lod);
+    XModelGetSurfaces(model, &surfs, lod);
+    triCount = 0;
+    vertCount = 0;
+    for (surfIter = 0; surfIter < surfCount; ++surfIter)
+    {
+        vertCount += XSurfaceGetNumVerts(&surfs[surfIter]);
+        triCount += XSurfaceGetNumTris(&surfs[surfIter]);
+    }
+    if ((4 * vertCount) < (3 * triCount))
+        v6 = 3 * triCount;
+    else
+        v6 = 4 * vertCount;
+    minPoolSize = (v6 + 3) / 4;
+    if (!_BitScanReverse(&v3, minPoolSize - 1))
+        v3 = 63;
+    if (32 - (v3 ^ 0x1F) > 4)
+        return 32 - (v3 ^ 0x1F);
+    else
+        return 4;
+}
+
+unsigned int __cdecl R_MaxModelsInDistRange(
+    const GfxStaticModelDrawInst **drawInstArray,
+    unsigned int drawInstCount,
+    const float *mins,
+    const float *maxs,
+    float distMin,
+    float distMax)
+{
+    float radiusDeviate; // [esp+0h] [ebp-50h]
+    float yawDeviate; // [esp+4h] [ebp-4Ch]
+    unsigned int v9; // [esp+Ch] [ebp-44h]
+    unsigned int maxModelsInRange; // [esp+14h] [ebp-3Ch]
+    unsigned int drawInstCutoff; // [esp+18h] [ebp-38h]
+    float distMinSq; // [esp+1Ch] [ebp-34h]
+    float size; // [esp+20h] [ebp-30h]
+    float size_4; // [esp+24h] [ebp-2Ch]
+    unsigned int modelsInRange; // [esp+28h] [ebp-28h]
+    unsigned int drawInstIter; // [esp+2Ch] [ebp-24h]
+    unsigned int dartIndex; // [esp+34h] [ebp-1Ch]
+    float distMaxSq; // [esp+38h] [ebp-18h]
+    float distSq; // [esp+3Ch] [ebp-14h]
+    float mid; // [esp+40h] [ebp-10h]
+    float mid_4; // [esp+44h] [ebp-Ch]
+    float testPos[2]; // [esp+48h] [ebp-8h] BYREF
+
+    mid = (*mins + *maxs) * 0.5;
+    mid_4 = (mins[1] + maxs[1]) * 0.5;
+    size = mid - *mins;
+    size_4 = mid_4 - mins[1];
+    maxModelsInRange = 0;
+    if (drawInstCount >> 2 > 0x64)
+        v9 = drawInstCount >> 2;
+    else
+        v9 = 100;
+    for (dartIndex = 0; dartIndex < v9; ++dartIndex)
+    {
+        yawDeviate = random();
+        radiusDeviate = random();
+        PointInCircleFromUniformDeviates(radiusDeviate, yawDeviate, testPos);
+        testPos[0] = testPos[0] * size + mid;
+        testPos[1] = testPos[1] * size_4 + mid_4;
+        modelsInRange = 0;
+        drawInstCutoff = drawInstCount - maxModelsInRange;
+        for (drawInstIter = 0; drawInstIter < drawInstCutoff; ++drawInstIter)
+        {
+            distSq = Vec2DistanceSq(testPos, drawInstArray[drawInstIter]->placement.origin);
+            distMinSq = distMin * distMin;
+            if (distMinSq < distSq)
+            {
+                distMaxSq = distMax * distMax;
+                if (distMaxSq > distSq)
+                {
+                    ++modelsInRange;
+                    if (drawInstCutoff < drawInstCount)
+                        ++drawInstCutoff;
+                }
+            }
+        }
+        if (maxModelsInRange < modelsInRange)
+        {
+            maxModelsInRange = modelsInRange;
+            if (modelsInRange == drawInstCount)
+                break;
+        }
+    }
+    return maxModelsInRange;
+}
+
+unsigned int __cdecl R_AddSModelListStats(
+    const GfxStaticModelDrawInst **drawInstArray,
+    unsigned int drawInstCount,
+    GfxSModelSurfStats *stats,
+    unsigned int statsCount,
+    unsigned int statsLimit)
+{
+    unsigned int lodIter; // [esp+8h] [ebp-30h]
+    XModel *model; // [esp+Ch] [ebp-2Ch]
+    float mins[2]; // [esp+10h] [ebp-28h] BYREF
+    float prevLodDist; // [esp+18h] [ebp-20h]
+    unsigned int lodCount; // [esp+1Ch] [ebp-1Ch]
+    float maxs[2]; // [esp+20h] [ebp-18h] BYREF
+    unsigned int drawInstIter; // [esp+28h] [ebp-10h]
+    unsigned int useCount; // [esp+2Ch] [ebp-Ch]
+    unsigned int smcAllocBits; // [esp+30h] [ebp-8h]
+    float lodDist; // [esp+34h] [ebp-4h]
+
+    if (drawInstCount < 0x10)
+        return statsCount;
+    model = (*drawInstArray)->model;
+    lodCount = XModelGetNumLods(model);
+    if (lodCount + statsCount > statsLimit)
+        return statsCount;
+    ClearBounds2D(mins, maxs);
+    for (drawInstIter = 0; drawInstIter < drawInstCount; ++drawInstIter)
+        AddPointToBounds2D(drawInstArray[drawInstIter]->placement.origin, mins, maxs);
+    lodIter = 0;
+    prevLodDist = 0.0;
+    while (lodIter < lodCount)
+    {
+        lodDist = XModelGetLodDist(model, lodIter);
+        smcAllocBits = R_GetSModelCacheAllocBits(model, lodIter);
+        if (smcAllocBits <= 9)
+        {
+            useCount = R_MaxModelsInDistRange(drawInstArray, drawInstCount, mins, maxs, prevLodDist, lodDist);
+            if (useCount >= 0x10)
+            {
+                stats[statsCount].model = model;
+                stats[statsCount].lod = lodIter;
+                stats[statsCount].useCount = useCount;
+                stats[statsCount++].smcAllocBits = smcAllocBits;
+            }
+        }
+        ++lodIter;
+        prevLodDist = lodDist;
+    }
+    return statsCount;
+}
+
+unsigned int __cdecl R_OptimalSModelResourceStats(GfxWorld *world, GfxSModelSurfStats *stats, unsigned int statLimit)
+{
+    const GfxStaticModelDrawInst **drawInstArray; // [esp+ECh] [ebp-14h]
+    unsigned int smodelIter; // [esp+F0h] [ebp-10h]
+    unsigned int smodelItera; // [esp+F0h] [ebp-10h]
+    unsigned int smodelIterNext; // [esp+F8h] [ebp-8h]
+    unsigned int statCount; // [esp+FCh] [ebp-4h]
+
+    if (!world)
+        MyAssertHandler(".\\r_staticmodelcache_load_obj.cpp", 202, 0, "%s", "world");
+    if (!world->dpvs.smodelCount)
+        return 0;
+    drawInstArray = (const GfxStaticModelDrawInst **)Hunk_AllocateTempMemory(4 * world->dpvs.smodelCount, "R_AssignSModelCacheResources");
+    for (smodelIter = 0; smodelIter != world->dpvs.smodelCount; ++smodelIter)
+        drawInstArray[smodelIter] = &world->dpvs.smodelDrawInsts[smodelIter];
+    //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
+    //    drawInstArray,
+    //    &drawInstArray[world->dpvs.smodelCount],
+    //    (4 * world->dpvs.smodelCount) >> 2,
+    //    R_CompareSModels_Model);
+    std::sort(&drawInstArray[0], &drawInstArray[world->dpvs.smodelCount], R_CompareSModels_Model);
+    statCount = 0;
+    for (smodelItera = 0; smodelItera != world->dpvs.smodelCount; smodelItera = smodelIterNext)
+    {
+        for (smodelIterNext = smodelItera;
+            smodelIterNext != world->dpvs.smodelCount
+            && drawInstArray[smodelIterNext]->model == drawInstArray[smodelItera]->model;
+            ++smodelIterNext)
+        {
+            ;
+        }
+        statCount = R_AddSModelListStats(
+            &drawInstArray[smodelItera],
+            smodelIterNext - smodelItera,
+            stats,
+            statCount,
+            statLimit);
+    }
+    Hunk_FreeTempMemory((char*)drawInstArray);
+    return statCount;
+}
+
+BOOL __cdecl R_CompareSModelStats_Score(GfxSModelSurfStats *s0, GfxSModelSurfStats *s1)
+{
+    return s1->useCount << s0->smcAllocBits < s0->useCount << s1->smcAllocBits;
+}
+
+unsigned int __cdecl R_GetEntryCount(GfxSModelSurfStats *stats)
+{
+    if (1 << (16 - LOBYTE(stats->smcAllocBits)) < stats->useCount)
+        return 1 << (16 - LOBYTE(stats->smcAllocBits));
+    else
+        return stats->useCount;
+}
+
+unsigned __int8 __cdecl R_AssignSModelCacheIndex(
+    char smcAllocBits,
+    unsigned int maxEntryCount,
+    unsigned int *smcUseCount)
+{
+    unsigned int leastUsedCache; // [esp+8h] [ebp-8h]
+    unsigned int cacheIter; // [esp+Ch] [ebp-4h]
+
+    leastUsedCache = 0;
+    for (cacheIter = 1; cacheIter < 4; ++cacheIter)
+    {
+        if (smcUseCount[cacheIter] < smcUseCount[leastUsedCache])
+            leastUsedCache = cacheIter;
+    }
+    smcUseCount[leastUsedCache] += maxEntryCount << smcAllocBits;
+    return leastUsedCache;
+}
+
+void __cdecl XModelSetSModelCacheForLod(
+    XModel *model,
+    unsigned int lod,
+    unsigned int smcIndex,
+    unsigned int smcAllocBits)
+{
+    int v4; // [esp+0h] [ebp-4h]
+
+    if (!model)
+        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 106, 0, "%s", "model");
+    if (lod >= 4)
+        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 107, 0, "lod doesn't index MAX_LODS\n\t%i not in [0, %i)", lod, 4);
+    if (model->lodInfo[lod].smcIndexPlusOne)
+        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 108, 0, "%s", "model->lodInfo[lod].smcIndexPlusOne == 0");
+    if (model->lodInfo[lod].lod != lod)
+        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 109, 0, "%s", "model->lodInfo[lod].lod == lod");
+    v4 = smcIndex + 1;
+    if (smcIndex + 1 != (smcIndex + 1))
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            v4,
+            v4);
+    model->lodInfo[lod].smcIndexPlusOne = v4;
+    if (smcAllocBits != smcAllocBits)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+            281,
+            0,
+            "i == static_cast< Type >( i )\n\t%i, %i",
+            smcAllocBits,
+            smcAllocBits);
+    model->lodInfo[lod].smcAllocBits = smcAllocBits;
+}
+
+void __cdecl R_AssignSModelCacheResources(GfxWorld *world)
+{
+    unsigned __int8 v1; // [esp+17Bh] [ebp-2029h]
+    XModel *model; // [esp+17Ch] [ebp-2028h]
+    unsigned int smcUseCount[4]; // [esp+180h] [ebp-2024h] BYREF
+    unsigned int lod; // [esp+190h] [ebp-2014h]
+    GfxSModelSurfStats stats[512]; // [esp+194h] [ebp-2010h] BYREF
+    unsigned int maxEntryCount; // [esp+2198h] [ebp-Ch]
+    unsigned int v7; // [esp+219Ch] [ebp-8h]
+    unsigned int i; // [esp+21A0h] [ebp-4h]
+
+    if (!world)
+        MyAssertHandler(".\\r_staticmodelcache_load_obj.cpp", 239, 0, "%s", "world");
+    memset(smcUseCount, 0, sizeof(smcUseCount));
+    v7 = R_OptimalSModelResourceStats(world, stats, 0x200u);
+    //std::_Sort<DBReorderAssetEntry *, int, bool(__cdecl *)(DBReorderAssetEntry const &, DBReorderAssetEntry const &)>(
+    //    stats,
+    //    &stats[v7],
+    //    (16 * v7) >> 4,
+    //    R_CompareSModelStats_Score);
+    std::sort(&stats[0], &stats[v7], R_CompareSModelStats_Score);
+    for (i = 0; i < v7; ++i)
+    {
+        model = stats[i].model;
+        lod = stats[i].lod;
+        maxEntryCount = R_GetEntryCount(&stats[i]);
+        v1 = R_AssignSModelCacheIndex(stats[i].smcAllocBits, maxEntryCount, smcUseCount);
+        XModelSetSModelCacheForLod(model, lod, v1, stats[i].smcAllocBits);
+    }
 }
 
 GfxWorld *__cdecl R_LoadWorldInternal(const char *name)

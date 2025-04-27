@@ -167,7 +167,10 @@ int dBodyGetGravityMode (dBodyID b);
 dJointID dJointCreateBall (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
-dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
+//dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
+dxJoint *dJointCreateContact(dWorldID w, dJointGroupID group,
+	const dSurfaceParameters *surfParms,
+	const dContactGeom *c);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
 dJointID dJointCreateFixed (dWorldID, dJointGroupID);

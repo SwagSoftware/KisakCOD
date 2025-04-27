@@ -1,7 +1,9 @@
 #include "dobj.h"
 #include <universal/profile.h>
+#include "xanim.h"
+#include "xanim_calc.h"
 
-void __usercall DObjCalcAnim(int a1@<ebp>, const DObj_s *obj, int *partBits)
+void DObjCalcAnim(const DObj_s *obj, int *partBits)
 {
     void *v3; // esp
     const char *v4; // eax
@@ -41,13 +43,12 @@ void __usercall DObjCalcAnim(int a1@<ebp>, const DObj_s *obj, int *partBits)
     void *v38; // [esp+612Ch] [ebp-8h]
     void *retaddr; // [esp+6134h] [ebp+0h]
 
-    v37 = a1;
     v38 = retaddr;
     v3 = alloca(24844);
     Profile_Begin(309);
     if (!obj)
         MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1504, 0, "%s", "obj");
-    p_skel = &obj->skel;
+    p_skel = (DSkel *)&obj->skel;
     if (obj == (const DObj_s *)-20)
         MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1507, 0, "%s", "skel");
     v35 = partBits;
@@ -117,7 +118,8 @@ LABEL_20:
             InterlockedIncrement(&tree->calcRefCount);
             if (tree->modifyRefCount)
                 MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1553, 0, "%s", "!tree->modifyRefCount");
-            bitarray<128>::setBit(&v32.ignorePartBits, 0x7Fu);
+            //bitarray<128>::setBit(&v32.ignorePartBits, 0x7Fu);
+            v32.ignorePartBits.setBit(0x7F);
             AnimInfo = GetAnimInfo(tree->children);
             XAnimCalc(obj, AnimInfo, 1.0, 1, 0, &v32, 0, p_skel->mat);
             if (tree->modifyRefCount)
@@ -276,7 +278,7 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
     //Profile_Begin(310);
     if (!obj)
         MyAssertHandler(".\\xanim\\dobj_skel.cpp", 382, 0, "%s", "obj");
-    skel = &obj->skel;
+    skel = (DSkel *)&obj->skel;
     if (obj == (const DObj_s *)-20)
         MyAssertHandler(".\\xanim\\dobj_skel.cpp", 385, 0, "%s", "skel");
     bFinished = 1;
@@ -292,7 +294,7 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
     }
     else
     {
-        DObjCalcAnim((int)&savedregs, obj, partBits);
+        DObjCalcAnim(obj, partBits);
         if (!obj->duplicateParts)
             MyAssertHandler(".\\xanim\\dobj_skel.cpp", 404, 0, "%s", "obj->duplicateParts");
         savedDuplicatePartBits = (const int *)SL_ConvertToString(obj->duplicateParts);
@@ -366,7 +368,7 @@ void __cdecl GetControlAndDuplicatePartBits(
     int i; // [esp+10h] [ebp-8h]
     unsigned int boneIndexLow; // [esp+14h] [ebp-4h]
 
-    skel = &obj->skel;
+    skel = (DSkel *)&obj->skel;
     if (obj == (const DObj_s *)-20)
         MyAssertHandler(".\\xanim\\dobj_skel.cpp", 86, 0, "%s", "skel");
     for (i = 0; i < 4; ++i)
@@ -428,7 +430,7 @@ void __cdecl CalcSkelRootBonesNoParentOrDuplicate(
     int minBoneIndex,
     int *calcPartBits)
 {
-    int v5; // eax
+    DWORD v5; // eax
     int v6; // [esp+0h] [ebp-50h]
     float *v; // [esp+20h] [ebp-30h]
     float v8; // [esp+24h] [ebp-2Ch]
@@ -455,8 +457,8 @@ void __cdecl CalcSkelRootBonesNoParentOrDuplicate(
             v6 = maxBoneIndex;
         while (1)
         {
-            if (!_BitScanReverse((unsigned int *)&v5, bits))
-                v5 = `CountLeadingZeros'::`2': : notFound;
+            if (!_BitScanReverse(&v5, bits))
+                v5 = 63; // `CountLeadingZeros'::`2': : notFound;
             boneIndexLow = v5 ^ 0x1F;
             if ((v5 ^ 0x1F) >= v6)
                 break;
@@ -514,7 +516,7 @@ void __cdecl CalcSkelRootBonesWithParent(
     int *calcPartBits,
     const int *controlPartBits)
 {
-    int v7; // eax
+    DWORD v7; // eax
     unsigned int v8; // [esp+8h] [ebp-104h]
     float *trans; // [esp+18h] [ebp-F4h]
     float v10; // [esp+30h] [ebp-DCh]
@@ -586,8 +588,8 @@ void __cdecl CalcSkelRootBonesWithParent(
         maxBoneIndexLow = v8;
         while (1)
         {
-            if (!_BitScanReverse((unsigned int *)&v7, bits))
-                v7 = `CountLeadingZeros'::`2': : notFound;
+            if (!_BitScanReverse(&v7, bits))
+                v7 = 63;// `CountLeadingZeros'::`2': : notFound;
             boneIndexLow = v7 ^ 0x1F;
             if ((v7 ^ 0x1Fu) >= maxBoneIndexLow)
                 break;
@@ -797,7 +799,7 @@ void __cdecl CalcSkelNonRootBones(
     int *calcPartBits,
     const int *controlPartBits)
 {
-    int v6; // eax
+    DWORD v6; // eax
     int v7; // [esp+8h] [ebp-124h]
     float *v8; // [esp+18h] [ebp-114h]
     float v9; // [esp+30h] [ebp-FCh]
@@ -876,8 +878,8 @@ void __cdecl CalcSkelNonRootBones(
         maxBoneIndexLow = v7;
         while (1)
         {
-            if (!_BitScanReverse((unsigned int *)&v6, bits))
-                v6 = `CountLeadingZeros'::`2': : notFound;
+            if (!_BitScanReverse(&v6, bits))
+                v6 = 63;// `CountLeadingZeros'::`2': : notFound;
             v52 = v6 ^ 0x1F;
             boneIndexLow = v6 ^ 0x1F;
             if ((v6 ^ 0x1F) >= maxBoneIndexLow)

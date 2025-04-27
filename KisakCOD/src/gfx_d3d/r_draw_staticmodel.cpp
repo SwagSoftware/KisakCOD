@@ -195,7 +195,7 @@ void __cdecl R_DrawStaticModelDrawSurfPlacement(
     scale = smodelDrawInst->placement.scale;
     matrix = R_GetActiveWorldMatrix(source);
     Vec3Sub(smodelDrawInst->placement.origin, source->eyeOffset, origin);
-    MatrixSet44((float (*)[4])matrix, origin, axis, scale);
+    MatrixSet44(*(mat4x4*)matrix, origin, axis, scale);
 }
 
 void __cdecl R_SetupCachedStaticModelLighting(GfxCmdBufSourceState *source)

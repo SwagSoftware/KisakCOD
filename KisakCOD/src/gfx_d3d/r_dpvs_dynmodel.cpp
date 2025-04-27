@@ -42,7 +42,7 @@ void __cdecl R_CullDynModelInCell(
     int planeCount,
     unsigned __int8 *dynEntVisData)
 {
-    int v7; // eax
+    DWORD v7; // eax
     int v8; // [esp+4h] [ebp-28h]
     float radius; // [esp+8h] [ebp-24h]
     const DpvsPlane *a; // [esp+Ch] [ebp-20h]
@@ -57,8 +57,8 @@ void __cdecl R_CullDynModelInCell(
         bits = dynEntCellBits[wordIndex];
         while (1)
         {
-            if (!_BitScanReverse((unsigned int *)&v7, bits))
-                v7 = `CountLeadingZeros'::`2': : notFound;
+            if (!_BitScanReverse(&v7, bits))
+                v7 = 63;// `CountLeadingZeros'::`2': : notFound;
             indexLow = v7 ^ 0x1F;
             if ((v7 ^ 0x1Fu) >= 0x20)
                 break;

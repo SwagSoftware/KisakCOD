@@ -5,7 +5,6 @@
 #include <script/scr_stringlist.h>
 #include <script/scr_variable.h>
 #include <game_mp/g_public_mp.h>
-#include <game_mp/g_public_mp.h>
 
 const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
 

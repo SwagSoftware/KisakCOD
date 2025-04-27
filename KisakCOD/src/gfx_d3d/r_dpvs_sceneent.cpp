@@ -5,8 +5,8 @@
 void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
 {
     bool v2; // zf
-    int v3; // eax
-    int v4; // eax
+    DWORD v3; // eax
+    DWORD v4; // eax
     int v5; // [esp-1Ch] [ebp-E4h]
     unsigned int v6; // [esp-14h] [ebp-DCh]
     signed int v7; // [esp-10h] [ebp-D8h]
@@ -117,7 +117,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
         {
             v2 = !_BitScanReverse((DWORD*)&v3, (DWORD)bit);
             if (v2)
-                v3 = `CountLeadingZeros'::`2': : notFound;
+                v3 = 63;// `CountLeadingZeros'::`2': : notFound;
             sceneEntIndex = v3 ^ 0x1F;
             if ((v3 ^ 0x1Fu) >= 0x20)
                 break;
@@ -212,7 +212,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
         {
             v2 = !_BitScanReverse((DWORD *)&v4, (DWORD)bita);
             if (v2)
-                v4 = `CountLeadingZeros'::`2': : notFound;
+                v4 = 63;// `CountLeadingZeros'::`2': : notFound;
             sceneEntIndexa = v4 ^ 0x1F;
             if ((v4 ^ 0x1Fu) >= 0x20)
                 break;
