@@ -1,4 +1,5 @@
 #include "com_pack.h"
+#include <universal/q_shared.h>
 
 // KISAKTODO: Move more stuff into here. The Bgra/4byte stuff probably belongs in here.
 
@@ -54,4 +55,32 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
     if (!out.packed)
         MyAssertHandler(".\\universal\\com_pack.cpp", 163, 0, "%s", "out.packed != 0");
     return out;
+}
+
+PackedTexCoords __cdecl Vec2PackTexCoords(const float *in)
+{
+    __int16 v2; // [esp+0h] [ebp-3Ch]
+    __int16 v3; // [esp+4h] [ebp-38h]
+    int v4; // [esp+Ch] [ebp-30h]
+    float v5; // [esp+18h] [ebp-24h]
+    int v6; // [esp+20h] [ebp-1Ch]
+
+    if (((uintptr_t)(2 * *in) ^ 0x80000000) >> 14 < 0x3FFF)
+        v6 = ((uintptr_t)(2 * *in) ^ 0x80000000) >> 14;
+    else
+        v6 = 0x3FFF;
+    if (v6 > -16384)
+        v3 = v6;
+    else
+        v3 = -16384;
+    v5 = in[1];
+    if (((2 * LODWORD(v5)) ^ 0x80000000) >> 14 < 0x3FFF)
+        v4 = ((2 * LODWORD(v5)) ^ 0x80000000) >> 14;
+    else
+        v4 = 0x3FFF;
+    if (v4 > -16384)
+        v2 = v4;
+    else
+        v2 = -16384;
+    return ((v2 & 0x3FFF | (SLODWORD(v5) >> 16) & 0xC000) + ((v3 & 0x3FFF | (COERCE_INT(*in) >> 16) & 0xC000) << 16));
 }

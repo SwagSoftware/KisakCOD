@@ -1022,7 +1022,7 @@ void __cdecl R_MarkFragments_Begin(
     markInfo->origin[0] = *origin;
     markInfo->origin[1] = origin[1];
     markInfo->origin[2] = origin[2];
-    AxisCopy(axis, markInfo->axis);
+    AxisCopy(*(const mat3x3*)axis, markInfo->axis);
     markInfo->viewOffset[0] = *viewOffset;
     markInfo->viewOffset[1] = viewOffset[1];
     markInfo->viewOffset[2] = viewOffset[2];
@@ -1650,7 +1650,7 @@ char __cdecl R_MarkFragments_EntBrushes(MarkInfo *markInfo)
         AnglesToAxis(poseAngles, poseMatrix);
         CG_GetPoseOrigin(brushModelCollided->pose, poseMatrix[3]);
         R_Mark_TransformClipPlanes(markInfo->planes, poseMatrix, clipPlanes);
-        MatrixTransposeTransformVector(markInfo->axis[0], poseMatrix, markDir);
+        MatrixTransposeTransformVector(markInfo->axis[0], *(const mat3x3*)poseMatrix, markDir);
         anyMarks = 0;
         brushModel = brushModelCollided->brushModel;
         surfaceBegin = brushModel->startSurfIndex;
@@ -1666,13 +1666,13 @@ char __cdecl R_MarkFragments_EntBrushes(MarkInfo *markInfo)
         }
         if (anyMarks)
         {
-            MatrixTranspose(poseMatrix, invPoseMatrix);
+            MatrixTranspose(*(const mat3x3 *)poseMatrix, *(mat3x3*)invPoseMatrix);
             negatedPoseOrigin[0] = -poseMatrix[3][0];
             negatedPoseOrigin[1] = -poseMatrix[3][1];
             negatedPoseOrigin[2] = -poseMatrix[3][2];
-            MatrixTransformVector(negatedPoseOrigin, invPoseMatrix, invPoseMatrix[3]);
+            MatrixTransformVector(negatedPoseOrigin, *(const mat3x3 *)invPoseMatrix, invPoseMatrix[3]);
             MatrixTransformVector43(markInfo->origin, invPoseMatrix, transformedOrigin);
-            MatrixTransposeTransformVector(markInfo->axis[1], poseMatrix, transformedTexCoordAxis);
+            MatrixTransposeTransformVector(markInfo->axis[1], *(const mat3x3 *)poseMatrix, transformedTexCoordAxis);
             markInfo->callback(
                 markInfo->callbackContext,
                 markInfo->usedTriCount,
@@ -1864,6 +1864,146 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     return 1;
 }
 
+int __cdecl R_AddMarkFragment_1_(
+    FxModelMarkPoint(*clipPoints)[9],
+    const float (*planes)[4],
+    const GfxMarkContext *markContext,
+    unsigned __int16 baseIndex,
+    int maxTris,
+    FxMarkTri *tris,
+    int maxPoints,
+    const GfxPackedVertex **triVerts,
+    const float (*transformNormalMatrix)[3],
+    FxMarkPoint *points)
+{
+    float out3[3]; // [esp+54h] [ebp-8Ch] BYREF
+    PackedUnitVec v12; // [esp+60h] [ebp-80h]
+    PackedUnitVec v13; // [esp+68h] [ebp-78h]
+    float out2[3]; // [esp+6Ch] [ebp-74h] BYREF
+    PackedUnitVec v15; // [esp+78h] [ebp-68h]
+    PackedUnitVec v16; // [esp+80h] [ebp-60h]
+    float out[3]; // [esp+84h] [ebp-5Ch] BYREF
+    PackedUnitVec in; // [esp+90h] [ebp-50h]
+    float tempNormal[3]; // [esp+98h] [ebp-48h] BYREF
+    float normal[3][3]; // [esp+A4h] [ebp-3Ch] BYREF
+    FxModelMarkPoint *clipPoint; // [esp+C8h] [ebp-18h]
+    int pointIndex; // [esp+CCh] [ebp-14h]
+    int pingPong; // [esp+D0h] [ebp-10h]
+    int clipPointCount; // [esp+D4h] [ebp-Ch]
+    int planeIndex; // [esp+D8h] [ebp-8h]
+    FxMarkPoint *point; // [esp+DCh] [ebp-4h]
+
+    pingPong = 0;
+    clipPointCount = 3;
+    for (planeIndex = 0; planeIndex < 6; ++planeIndex)
+    {
+        clipPointCount = R_ChopPolyBehindPlane(
+            clipPointCount,
+            &(*clipPoints)[9 * pingPong],
+            &(*clipPoints)[9 * (pingPong == 0)],
+            &(*planes)[4 * planeIndex]);
+        if (clipPointCount > 9)
+            MyAssertHandler(
+                ".\\r_marks.cpp",
+                1016,
+                0,
+                "%s\n\t(clipPointCount) = %i",
+                "(clipPointCount <= 3 + 6)",
+                clipPointCount);
+        pingPong ^= 1u;
+        if (!clipPointCount)
+            return 0;
+    }
+    if (clipPointCount > maxPoints || 3 * (clipPointCount - 2) > maxTris)
+        return -1;
+
+    Vec3UnpackUnitVec(triVerts[0]->normal, out);
+    tempNormal[0] = out[0];
+    tempNormal[1] = out[1];
+    tempNormal[2] = out[2];
+    MatrixTransformVector(tempNormal, *(const mat3x3 *)transformNormalMatrix, normal[0]);
+
+    Vec3UnpackUnitVec(triVerts[1]->normal, out2);
+    tempNormal[0] = out2[0];
+    tempNormal[1] = out2[1];
+    tempNormal[2] = out2[2];
+    MatrixTransformVector(tempNormal, *(const mat3x3 *)transformNormalMatrix, normal[1]);
+
+    Vec3UnpackUnitVec(triVerts[2]->normal, out3);
+    tempNormal[0] = out3[0];
+    tempNormal[1] = out3[1];
+    tempNormal[2] = out3[2];
+    MatrixTransformVector(tempNormal, *(const mat3x3*)transformNormalMatrix, normal[2]);
+
+    for (pointIndex = 0; pointIndex < clipPointCount; ++pointIndex)
+    {
+        point = &points[pointIndex];
+        clipPoint = &(*clipPoints)[9 * pingPong + pointIndex];
+        point->xyz[0] = clipPoint->xyz[0];
+        point->xyz[1] = clipPoint->xyz[1];
+        point->xyz[2] = clipPoint->xyz[2];
+        point->lmapCoord[0] = 0.0;
+        point->lmapCoord[1] = 0.0;
+        point->normal[0] = clipPoint->vertWeights[0] * normal[0][0]
+            + clipPoint->vertWeights[1] * normal[1][0]
+            + clipPoint->vertWeights[2] * normal[2][0];
+        point->normal[1] = clipPoint->vertWeights[0] * normal[0][1]
+            + clipPoint->vertWeights[1] * normal[1][1]
+            + clipPoint->vertWeights[2] * normal[2][1];
+        point->normal[2] = clipPoint->vertWeights[0] * normal[0][2]
+            + clipPoint->vertWeights[1] * normal[1][2]
+            + clipPoint->vertWeights[2] * normal[2][2];
+    }
+    for (pointIndex = 2; pointIndex < clipPointCount; ++pointIndex)
+    {
+        tris->indices[0] = baseIndex + pointIndex - 1;
+        tris->indices[1] = pointIndex + baseIndex;
+        tris->indices[2] = baseIndex;
+        tris->context = *markContext;
+        ++tris;
+    }
+    return clipPointCount;
+}
+
+char __cdecl R_MarkFragment_DoTriangle_1_(
+    MarkInfo *markInfo,
+    const float (*clipPlanes)[4],
+    const GfxMarkContext *markContext,
+    const GfxPackedVertex **triVerts,
+    const float (*transformNormalMatrix)[3],
+    FxModelMarkPoint(*clipPoints)[9])
+{
+    int fragmentPointCount; // [esp+0h] [ebp-4h]
+
+    fragmentPointCount = R_AddMarkFragment_1_(
+        clipPoints,
+        clipPlanes,
+        markContext,
+        markInfo->usedPointCount,
+        markInfo->maxTris - markInfo->usedTriCount,
+        &markInfo->tris[markInfo->usedTriCount],
+        markInfo->maxPoints - markInfo->usedPointCount,
+        triVerts,
+        transformNormalMatrix,
+        &markInfo->points[markInfo->usedPointCount]);
+    if (fragmentPointCount == -1)
+        return 0;
+    if (fragmentPointCount)
+    {
+        if (fragmentPointCount < 3)
+            MyAssertHandler(
+                ".\\r_marks.cpp",
+                1161,
+                0,
+                "%s\n\t(fragmentPointCount) = %i",
+                "(fragmentPointCount >= 3)",
+                fragmentPointCount);
+        markInfo->usedPointCount += fragmentPointCount;
+        markInfo->usedTriCount = fragmentPointCount + markInfo->usedTriCount - 2;
+    }
+    return 1;
+}
+
 bool __cdecl R_MarkModelCoreCallback_1_(
     MarkModelCoreContext *contextAsVoid,
     const GfxPackedVertex **triVerts0,
@@ -1883,7 +2023,7 @@ bool __cdecl R_MarkModelCoreCallback_1_(
         pos[0] = v5->xyz[0];
         pos[1] = v5->xyz[1];
         pos[2] = v5->xyz[2];
-        MatrixTransformVector43(pos, context->transformMatrix, clipPoints[0][vertIndex].xyz);
+        MatrixTransformVector43(pos, *(const mat4x3 *)context->transformMatrix, clipPoints[0][vertIndex].xyz);
         vertWeights = clipPoints[0][vertIndex].vertWeights;
         *vertWeights = 0.0;
         vertWeights[1] = 0.0;
@@ -1902,6 +2042,143 @@ bool __cdecl R_MarkModelCoreCallback_1_(
             triVerts1,
             context->transformNormalMatrix,
             clipPoints) != 0;
+}
+
+int __cdecl R_AddMarkFragment_0_(
+    FxModelMarkPoint(*clipPoints)[9],
+    const float (*planes)[4],
+    const GfxMarkContext *markContext,
+    unsigned __int16 baseIndex,
+    int maxTris,
+    FxMarkTri *tris,
+    int maxPoints,
+    const GfxPackedVertex **triVerts,
+    const float (*transformNormalMatrix)[3],
+    FxMarkPoint *points)
+{
+    float out3[3]; // [esp+8h] [ebp-D8h] BYREF
+    PackedUnitVec v12; // [esp+14h] [ebp-CCh]
+    float *v13; // [esp+1Ch] [ebp-C4h]
+    PackedUnitVec v14; // [esp+20h] [ebp-C0h]
+    float out2[3]; // [esp+24h] [ebp-BCh] BYREF
+    PackedUnitVec v16; // [esp+30h] [ebp-B0h]
+    PackedUnitVec v17; // [esp+38h] [ebp-A8h]
+    float out[3]; // [esp+3Ch] [ebp-A4h] BYREF
+    PackedUnitVec v19; // [esp+48h] [ebp-98h]
+    float normal[3][3]; // [esp+A4h] [ebp-3Ch] BYREF
+    FxModelMarkPoint *clipPoint; // [esp+C8h] [ebp-18h]
+    int pointIndex; // [esp+CCh] [ebp-14h]
+    int pingPong; // [esp+D0h] [ebp-10h]
+    int clipPointCount; // [esp+D4h] [ebp-Ch]
+    int planeIndex; // [esp+D8h] [ebp-8h]
+    FxMarkPoint *point; // [esp+DCh] [ebp-4h]
+
+    pingPong = 0;
+    clipPointCount = 3;
+    for (planeIndex = 0; planeIndex < 6; ++planeIndex)
+    {
+        clipPointCount = R_ChopPolyBehindPlane(
+            clipPointCount,
+            &(*clipPoints)[9 * pingPong],
+            &(*clipPoints)[9 * (pingPong == 0)],
+            &(*planes)[4 * planeIndex]);
+        if (clipPointCount > 9)
+            MyAssertHandler(
+                ".\\r_marks.cpp",
+                1016,
+                0,
+                "%s\n\t(clipPointCount) = %i",
+                "(clipPointCount <= 3 + 6)",
+                clipPointCount);
+        pingPong ^= 1u;
+        if (!clipPointCount)
+            return 0;
+    }
+    if (clipPointCount > maxPoints || 3 * (clipPointCount - 2) > maxTris)
+        return -1;
+
+    Vec3UnpackUnitVec(triVerts[0]->normal, out);
+    normal[0][0] = out[0];
+    normal[0][1] = out[1];
+    normal[0][2] = out[2];
+
+    Vec3UnpackUnitVec(triVerts[1]->normal, out2);
+    normal[1][0] = out2[0];
+    normal[1][1] = out2[1];
+    normal[1][2] = out2[2];
+
+    Vec3UnpackUnitVec(triVerts[2]->normal, out3);
+    normal[2][0] = out3[0];
+    normal[2][1] = out3[1];
+    normal[2][2] = out3[2];
+
+    for (pointIndex = 0; pointIndex < clipPointCount; ++pointIndex)
+    {
+        point = &points[pointIndex];
+        clipPoint = &(*clipPoints)[9 * pingPong + pointIndex];
+        point->xyz[0] = clipPoint->xyz[0];
+        point->xyz[1] = clipPoint->xyz[1];
+        point->xyz[2] = clipPoint->xyz[2];
+        point->lmapCoord[0] = 0.0;
+        point->lmapCoord[1] = 0.0;
+        point->normal[0] = clipPoint->vertWeights[0] * normal[0][0]
+            + clipPoint->vertWeights[1] * normal[1][0]
+            + clipPoint->vertWeights[2] * normal[2][0];
+        point->normal[1] = clipPoint->vertWeights[0] * normal[0][1]
+            + clipPoint->vertWeights[1] * normal[1][1]
+            + clipPoint->vertWeights[2] * normal[2][1];
+        point->normal[2] = clipPoint->vertWeights[0] * normal[0][2]
+            + clipPoint->vertWeights[1] * normal[1][2]
+            + clipPoint->vertWeights[2] * normal[2][2];
+    }
+    for (pointIndex = 2; pointIndex < clipPointCount; ++pointIndex)
+    {
+        tris->indices[0] = baseIndex + pointIndex - 1;
+        tris->indices[1] = pointIndex + baseIndex;
+        tris->indices[2] = baseIndex;
+        tris->context = *markContext;
+        ++tris;
+    }
+    return clipPointCount;
+}
+
+char __cdecl R_MarkFragment_DoTriangle_0_(
+    MarkInfo *markInfo,
+    const float (*clipPlanes)[4],
+    const GfxMarkContext *markContext,
+    const GfxPackedVertex **triVerts,
+    const float (*transformNormalMatrix)[3],
+    FxModelMarkPoint(*clipPoints)[9])
+{
+    int fragmentPointCount; // [esp+0h] [ebp-4h]
+
+    fragmentPointCount = R_AddMarkFragment_0_(
+        clipPoints,
+        clipPlanes,
+        markContext,
+        markInfo->usedPointCount,
+        markInfo->maxTris - markInfo->usedTriCount,
+        &markInfo->tris[markInfo->usedTriCount],
+        markInfo->maxPoints - markInfo->usedPointCount,
+        triVerts,
+        transformNormalMatrix,
+        &markInfo->points[markInfo->usedPointCount]);
+    if (fragmentPointCount == -1)
+        return 0;
+    if (fragmentPointCount)
+    {
+        if (fragmentPointCount < 3)
+            MyAssertHandler(
+                ".\\r_marks.cpp",
+                1161,
+                0,
+                "%s\n\t(fragmentPointCount) = %i",
+                "(fragmentPointCount >= 3)",
+                fragmentPointCount);
+        markInfo->usedPointCount += fragmentPointCount;
+        markInfo->usedTriCount = fragmentPointCount + markInfo->usedTriCount - 2;
+    }
+    return 1;
 }
 
 bool __cdecl R_MarkModelCoreCallback_0_(
@@ -1929,17 +2206,129 @@ bool __cdecl R_MarkModelCoreCallback_0_(
         clipPoints[0][vertIndex].vertWeights[vertIndex] = 1.0;
     }
     return R_MarkFragment_IsTriangleRejected(
-        *(contextAsVoid + 3),
+        *(const float**)((uintptr_t)contextAsVoid + 12),
         clipPoints[0][0].xyz,
         clipPoints[0][1].xyz,
         clipPoints[0][2].xyz)
         || R_MarkFragment_DoTriangle_0_(
-            *contextAsVoid,
-            *(contextAsVoid + 4),
-            *(contextAsVoid + 1),
+            *(MarkInfo**)contextAsVoid,
+            *(const float(**)[4])((uintptr_t)contextAsVoid + 16),
+            *(const GfxMarkContext**)((uintptr_t)contextAsVoid + 4),
             triVerts1,
-            *(contextAsVoid + 6),
+            *(const float(**)[3])((uintptr_t)contextAsVoid + 24),
             clipPoints) != 0;
+}
+
+void __fastcall LocalConvertQuatToInverseSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat)
+{
+    double v2; // fp0
+    double v3; // fp10
+    double transWeight; // fp13
+    double v5; // fp12
+    double v6; // fp8
+    double v7; // fp9
+    double v8; // fp11
+    double v9; // fp13
+    double v10; // fp7
+    double v11; // fp6
+    double v12; // fp5
+    double v13; // fp9
+    double v14; // fp4
+    double v15; // fp0
+    double v16; // fp12
+    double v17; // fp11
+    double v18; // fp13
+    double v19; // fp2
+    double v20; // fp1
+    double v21; // fp9
+    double v22; // fp8
+    double v23; // fp12
+    double v24; // fp10
+    double v25; // fp13
+    double v26; // fp7
+    double v27; // fp13
+    double v28; // fp12
+    double v29; // fp11
+
+    v2 = mat->quat[2];
+    v3 = mat->quat[3];
+    transWeight = mat->transWeight;
+    v5 = mat->quat[1];
+    v6 = (float)(mat->quat[2] * mat->transWeight);
+    v7 = mat->quat[0];
+    skelMat->axis[0][3] = 0.0;
+    skelMat->axis[1][3] = 0.0;
+    skelMat->axis[2][3] = 0.0;
+    v8 = (float)((float)v5 * (float)transWeight);
+    v10 = (float)((float)v2 * (float)v6);
+    v11 = (float)((float)v5 * (float)((float)v5 * (float)transWeight));
+    v9 = (float)((float)v7 * (float)transWeight);
+    v12 = (float)((float)v2 * (float)v9);
+    v13 = (float)((float)v7 * (float)v9);
+    v14 = (float)((float)v2 * (float)v8);
+    v16 = (float)((float)v5 * (float)v9);
+    v18 = (float)((float)v3 * (float)v9);
+    v19 = (float)((float)((float)v2 * (float)v6) + (float)v13);
+    v15 = (float)((float)v3 * (float)v8);
+    v20 = (float)((float)v11 + (float)v13);
+    v21 = (float)((float)((float)v3 * (float)v8) + (float)v12);
+    skelMat->axis[0][2] = (float)((float)v3 * (float)v8) + (float)v12;
+    v17 = (float)((float)v3 * (float)v6);
+    v22 = (float)((float)v16 - (float)((float)v3 * (float)v6));
+    skelMat->axis[0][1] = v22;
+    v23 = (float)((float)v17 + (float)v16);
+    skelMat->axis[1][0] = v23;
+    v24 = (float)((float)v14 - (float)v18);
+    skelMat->axis[2][0] = (float)v12 - (float)v15;
+    v25 = (float)((float)v14 + (float)v18);
+    skelMat->axis[2][1] = v25;
+    v26 = (float)((float)1.0 - (float)((float)v10 + (float)v11));
+    skelMat->axis[1][2] = v24;
+    skelMat->axis[0][0] = v26;
+    skelMat->axis[1][1] = (float)1.0 - (float)v19;
+    skelMat->axis[2][2] = (float)1.0 - (float)v20;
+    skelMat->origin[0] = -(float)((float)(mat->trans[0] * (float)v26)
+        + (float)((float)((float)v23 * mat->trans[1])
+            + (float)((float)((float)v12 - (float)v15) * mat->trans[2])));
+    skelMat->origin[1] = -(float)((float)(mat->trans[0] * (float)v22)
+        + (float)((float)((float)((float)1.0 - (float)v19) * mat->trans[1])
+            + (float)((float)v25 * mat->trans[2])));
+    v27 = (float)((float)((float)1.0 - (float)v20) * mat->trans[2]);
+    v28 = mat->trans[1];
+    v29 = mat->trans[0];
+    skelMat->origin[3] = 1.0;
+    skelMat->origin[2] = -(float)((float)((float)v29 * (float)v21) + (float)((float)((float)v24 * (float)v28) + (float)v27));
+}
+
+void __fastcall DObjSkelMatToMatrix43(const DObjSkelMat *inSkelMat, float (*outMatrix)[3])
+{
+    float *v2; // r10
+    const float *v3; // r11
+    int v4; // r9
+    double v5; // fp0
+    double v6; // fp13
+    double v7; // fp0
+    double v8; // fp13
+
+    v2 = &(*outMatrix)[2];
+    v3 = &inSkelMat->axis[0][1];
+    v4 = 3;
+    do
+    {
+        --v4;
+        v5 = v3[1];
+        v6 = *v3;
+        *(v2 - 2) = *(v3 - 1);
+        v3 += 4;
+        *v2 = v5;
+        *(v2 - 1) = v6;
+        v2 += 3;
+    } while (v4);
+    v7 = inSkelMat->origin[2];
+    v8 = inSkelMat->origin[1];
+    (*outMatrix)[9] = inSkelMat->origin[0];
+    (*outMatrix)[10] = v8;
+    (*outMatrix)[11] = v7;
 }
 
 char  R_MarkFragments_AnimatedXModel_VertList(
@@ -1950,476 +2339,80 @@ char  R_MarkFragments_AnimatedXModel_VertList(
     GfxMarkContext *markContext,
     XSurface *surface)
 {
-    float scale; // [esp+0h] [ebp-534h]
-    unsigned int v9[3]; // [esp+10h] [ebp-524h] BYREF
-    MarkModelCoreContext markModelCoreContext; // [esp+1Ch] [ebp-518h] BYREF
-    float localMaxs[3]; // [esp+38h] [ebp-4FCh] BYREF
-    float localMins[3]; // [esp+44h] [ebp-4F0h] BYREF
-    float originalOrigin[27]; // [esp+50h] [ebp-4E4h] BYREF
-    float baseBoneMatrix[4][3]; // [esp+BCh] [ebp-478h] BYREF
-    float v15; // [esp+ECh] [ebp-448h]
-    float v16; // [esp+F0h] [ebp-444h]
-    float v17; // [esp+F4h] [ebp-440h]
-    float *v18; // [esp+F8h] [ebp-43Ch]
-    float v19; // [esp+FCh] [ebp-438h]
-    float v20; // [esp+100h] [ebp-434h]
-    float v21; // [esp+104h] [ebp-430h]
-    float *v22; // [esp+108h] [ebp-42Ch]
-    float v23; // [esp+10Ch] [ebp-428h]
-    float v24; // [esp+110h] [ebp-424h]
-    float v25; // [esp+114h] [ebp-420h]
-    float *v26; // [esp+118h] [ebp-41Ch]
-    float v27[3]; // [esp+11Ch] [ebp-418h] BYREF
-    float invPoseBoneMatrix[4][3]; // [esp+128h] [ebp-40Ch] BYREF
-    float v29; // [esp+158h] [ebp-3DCh]
-    float v30; // [esp+15Ch] [ebp-3D8h]
-    float v31; // [esp+160h] [ebp-3D4h]
-    DObjSkelMat invPoseBoneSkelMat; // [esp+164h] [ebp-3D0h]
-    float v33; // [esp+1A4h] [ebp-390h]
-    float v34; // [esp+1A8h] [ebp-38Ch]
-    float v35; // [esp+1ACh] [ebp-388h]
-    float v36; // [esp+1B0h] [ebp-384h]
-    float v37; // [esp+1B4h] [ebp-380h]
-    float v38; // [esp+1B8h] [ebp-37Ch]
-    float v39; // [esp+1BCh] [ebp-378h]
-    float v40; // [esp+1C0h] [ebp-374h]
-    float v41; // [esp+1C4h] [ebp-370h]
-    float v42; // [esp+1C8h] [ebp-36Ch] BYREF
-    float v43; // [esp+1CCh] [ebp-368h]
-    float v44; // [esp+1D0h] [ebp-364h]
-    float v45; // [esp+1D4h] [ebp-360h]
-    float v46; // [esp+1D8h] [ebp-35Ch]
-    float v47; // [esp+1DCh] [ebp-358h]
-    float v48; // [esp+1E0h] [ebp-354h]
-    float v49; // [esp+1E4h] [ebp-350h]
-    float v50; // [esp+1E8h] [ebp-34Ch]
-    float v51; // [esp+1ECh] [ebp-348h]
-    float v52; // [esp+1F0h] [ebp-344h]
-    DObjSkelMat baseBoneSkelMat; // [esp+1F4h] [ebp-340h] BYREF
-    float v54; // [esp+234h] [ebp-300h]
-    float v55; // [esp+238h] [ebp-2FCh]
-    float v56; // [esp+23Ch] [ebp-2F8h]
-    float v57; // [esp+240h] [ebp-2F4h]
-    float v58; // [esp+244h] [ebp-2F0h]
-    float v59; // [esp+248h] [ebp-2ECh]
-    float v60; // [esp+24Ch] [ebp-2E8h]
-    float v61; // [esp+250h] [ebp-2E4h]
-    float v62; // [esp+254h] [ebp-2E0h] BYREF
-    float v63; // [esp+258h] [ebp-2DCh]
-    float v64; // [esp+25Ch] [ebp-2D8h]
-    float v65; // [esp+260h] [ebp-2D4h]
-    float v66; // [esp+264h] [ebp-2D0h]
-    float v67; // [esp+268h] [ebp-2CCh]
-    float v68; // [esp+26Ch] [ebp-2C8h]
-    float v69; // [esp+270h] [ebp-2C4h]
-    float v70[3]; // [esp+274h] [ebp-2C0h] BYREF
-    float markDir[24]; // [esp+280h] [ebp-2B4h] BYREF
-    float clipPlanes_84[27]; // [esp+2E0h] [ebp-254h] BYREF
-    float invBaseBoneMatrix[4][3]; // [esp+34Ch] [ebp-1E8h] BYREF
-    float v74; // [esp+37Ch] [ebp-1B8h]
-    float v75; // [esp+380h] [ebp-1B4h]
-    float v76; // [esp+384h] [ebp-1B0h]
-    float *v77; // [esp+388h] [ebp-1ACh]
-    float v78; // [esp+38Ch] [ebp-1A8h]
-    float v79; // [esp+390h] [ebp-1A4h]
-    float v80; // [esp+394h] [ebp-1A0h]
-    float *v81; // [esp+398h] [ebp-19Ch]
-    float v82; // [esp+39Ch] [ebp-198h]
-    float v83; // [esp+3A0h] [ebp-194h]
-    float v84; // [esp+3A4h] [ebp-190h]
-    float *v85; // [esp+3A8h] [ebp-18Ch]
-    float v86[3]; // [esp+3ACh] [ebp-188h] BYREF
-    float poseBoneMatrix[4][3]; // [esp+3B8h] [ebp-17Ch] BYREF
-    float v88; // [esp+3E8h] [ebp-14Ch]
-    float v89; // [esp+3ECh] [ebp-148h]
-    float v90; // [esp+3F0h] [ebp-144h]
-    DObjSkelMat invBaseBoneSkelMat; // [esp+3F4h] [ebp-140h]
-    float v92; // [esp+434h] [ebp-100h]
-    float v93; // [esp+438h] [ebp-FCh]
-    float v94; // [esp+43Ch] [ebp-F8h]
-    float v95; // [esp+440h] [ebp-F4h]
-    float v96; // [esp+444h] [ebp-F0h]
-    float v97; // [esp+448h] [ebp-ECh]
-    float v98; // [esp+44Ch] [ebp-E8h]
-    float v99; // [esp+450h] [ebp-E4h]
-    float v100; // [esp+454h] [ebp-E0h]
-    float v101; // [esp+458h] [ebp-DCh] BYREF
-    float v102; // [esp+45Ch] [ebp-D8h]
-    float v103; // [esp+460h] [ebp-D4h]
-    float transWeight; // [esp+464h] [ebp-D0h]
-    float v105; // [esp+468h] [ebp-CCh]
-    float v106; // [esp+46Ch] [ebp-C8h]
-    float v107; // [esp+470h] [ebp-C4h]
-    float v108; // [esp+474h] [ebp-C0h]
-    float v109; // [esp+478h] [ebp-BCh]
-    float v110; // [esp+47Ch] [ebp-B8h]
-    float v111; // [esp+480h] [ebp-B4h]
-    DObjSkelMat poseBoneSkelMat; // [esp+484h] [ebp-B0h] BYREF
-    float v113; // [esp+4C4h] [ebp-70h]
-    float v114; // [esp+4C8h] [ebp-6Ch]
-    float v115; // [esp+4CCh] [ebp-68h]
-    float v116; // [esp+4D0h] [ebp-64h]
-    float v117; // [esp+4D4h] [ebp-60h]
-    float v118; // [esp+4D8h] [ebp-5Ch]
-    float v119; // [esp+4DCh] [ebp-58h]
-    float v120; // [esp+4E0h] [ebp-54h]
-    float v121; // [esp+4E4h] [ebp-50h]
-    float v122; // [esp+4E8h] [ebp-4Ch] BYREF
-    float v123; // [esp+4ECh] [ebp-48h]
-    float v124; // [esp+4F0h] [ebp-44h]
-    float v125; // [esp+4F4h] [ebp-40h]
-    float v126; // [esp+4F8h] [ebp-3Ch]
-    float v127; // [esp+4FCh] [ebp-38h]
-    float v128; // [esp+500h] [ebp-34h]
-    float v129; // [esp+504h] [ebp-30h]
-    float v130[11]; // [esp+508h] [ebp-2Ch] BYREF
-    float retaddr; // [esp+534h] [ebp+0h]
+    DObjAnimMat *v12; // r10
+    int v13; // ctr
+    double v14; // fp13
+    double radius; // fp0
+    double v16; // fp11
+    double v17; // fp9
+    double v18; // fp10
+    float v20[4]; // [sp+50h] [-2B0h] BYREF
+    float v21[4]; // [sp+60h] [-2A0h] BYREF
+    float v22[4]; // [sp+70h] [-290h] BYREF
+    DObjAnimMat v23; // [sp+80h] [-280h] BYREF
+    void* v24[8]; // [sp+A0h] [-260h] BYREF
+    float v25[4]; // [sp+C0h] [-240h] BYREF
+    float v26[4][3]; // [sp+D0h] [-230h] BYREF
+    DObjSkelMat v27; // [sp+100h] [-200h] BYREF
+    DObjSkelMat v28; // [sp+140h] [-1C0h] BYREF
+    float v29[4][3]; // [sp+180h] [-180h] BYREF
+    float v30[4][3]; // [sp+1B0h] [-150h] BYREF
+    float v31[4][3]; // [sp+1E0h] [-120h] BYREF
+    float v32[4][3]; // [sp+210h] [-F0h] BYREF
+    float v33[4][3]; // [sp+240h] [-C0h] BYREF
+    float v34[9][4]; // [sp+270h] [-90h] BYREF
 
-    v130[8] = a1;
-    v130[9] = retaddr;
-    //Profile_Begin(219);
-    memcpy(v130, poseBone, 0x20u);
-    Vec3Add(&v130[4], markInfo->viewOffset, &v130[4]);
-    v129 = v130[0];
-    if ((LODWORD(v130[0]) & 0x7F800000) == 0x7F800000
-        || (v128 = v130[1], (LODWORD(v130[1]) & 0x7F800000) == 0x7F800000)
-        || (v127 = v130[2], (LODWORD(v130[2]) & 0x7F800000) == 0x7F800000)
-        || (v126 = v130[3], (LODWORD(v130[3]) & 0x7F800000) == 0x7F800000))
+    v12 = &v23;
+    v13 = 8;
+    do
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            473,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    v125 = v130[7];
-    if ((LODWORD(v130[7]) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            474,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(v130, v130[7], &v122);
-    v121 = v122 * v130[0];
-    v120 = v122 * v130[1];
-    v119 = v122 * v130[2];
-    v118 = v122 * v130[3];
-    v117 = v123 * v130[1];
-    v116 = v123 * v130[2];
-    v115 = v123 * v130[3];
-    v114 = v124 * v130[2];
-    v113 = v124 * v130[3];
-    v109 = 1.0 - (v117 + v114);
-    v110 = v120 + v113;
-    v111 = v119 - v115;
-    poseBoneSkelMat.axis[0][0] = 0.0;
-    poseBoneSkelMat.axis[0][1] = v120 - v113;
-    poseBoneSkelMat.axis[0][2] = 1.0 - (v121 + v114);
-    poseBoneSkelMat.axis[0][3] = v116 + v118;
-    poseBoneSkelMat.axis[1][0] = 0.0;
-    poseBoneSkelMat.axis[1][1] = v119 + v115;
-    poseBoneSkelMat.axis[1][2] = v116 - v118;
-    poseBoneSkelMat.axis[1][3] = 1.0 - (v121 + v117);
-    poseBoneSkelMat.axis[2][0] = 0.0;
-    Vec3Copy(&v130[4], &poseBoneSkelMat.axis[2][1]);
-    poseBoneSkelMat.origin[0] = 1.0;
-    v108 = baseBone->quat[0];
-    if ((LODWORD(v108) & 0x7F800000) == 0x7F800000
-        || (v107 = baseBone->quat[1], (LODWORD(v107) & 0x7F800000) == 0x7F800000)
-        || (v106 = baseBone->quat[2], (LODWORD(v106) & 0x7F800000) == 0x7F800000)
-        || (v105 = baseBone->quat[3], (LODWORD(v105) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            581,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    transWeight = baseBone->transWeight;
-    if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            582,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(baseBone->quat, baseBone->transWeight, &v101);
-    v100 = v101 * baseBone->quat[0];
-    v99 = v101 * baseBone->quat[1];
-    v98 = v101 * baseBone->quat[2];
-    v97 = v101 * baseBone->quat[3];
-    v96 = v102 * baseBone->quat[1];
-    v95 = v102 * baseBone->quat[2];
-    v94 = v102 * baseBone->quat[3];
-    v93 = v103 * baseBone->quat[2];
-    v92 = v103 * baseBone->quat[3];
-    v88 = 1.0 - (v96 + v93);
-    v89 = v99 - v92;
-    v90 = v98 + v94;
-    invBaseBoneSkelMat.axis[0][0] = 0.0;
-    invBaseBoneSkelMat.axis[0][1] = v99 + v92;
-    invBaseBoneSkelMat.axis[0][2] = 1.0 - (v100 + v93);
-    invBaseBoneSkelMat.axis[0][3] = v95 - v97;
-    invBaseBoneSkelMat.axis[1][0] = 0.0;
-    invBaseBoneSkelMat.axis[1][1] = v98 - v94;
-    invBaseBoneSkelMat.axis[1][2] = v95 + v97;
-    invBaseBoneSkelMat.axis[1][3] = 1.0 - (v100 + v96);
-    invBaseBoneSkelMat.axis[2][0] = 0.0;
-    invBaseBoneSkelMat.axis[2][1] = -(baseBone->trans[0] * v88
-        + baseBone->trans[1] * invBaseBoneSkelMat.axis[0][1]
-        + baseBone->trans[2] * invBaseBoneSkelMat.axis[1][1]);
-    invBaseBoneSkelMat.axis[2][2] = -(baseBone->trans[0] * v89
-        + baseBone->trans[1] * invBaseBoneSkelMat.axis[0][2]
-        + baseBone->trans[2] * invBaseBoneSkelMat.axis[1][2]);
-    invBaseBoneSkelMat.axis[2][3] = -(baseBone->trans[0] * v90
-        + baseBone->trans[1] * invBaseBoneSkelMat.axis[0][3]
-        + baseBone->trans[2] * invBaseBoneSkelMat.axis[1][3]);
-    invBaseBoneSkelMat.origin[0] = 1.0;
-    poseBoneMatrix[3][2] = v109;
-    poseBoneMatrix[3][1] = v110;
-    poseBoneMatrix[3][0] = v111;
-    v86[0] = v109;
-    v86[1] = v110;
-    v86[2] = v111;
-    v85 = poseBoneMatrix[0];
-    v84 = poseBoneSkelMat.axis[0][1];
-    v83 = poseBoneSkelMat.axis[0][2];
-    v82 = poseBoneSkelMat.axis[0][3];
-    poseBoneMatrix[0][0] = poseBoneSkelMat.axis[0][1];
-    poseBoneMatrix[0][1] = poseBoneSkelMat.axis[0][2];
-    poseBoneMatrix[0][2] = poseBoneSkelMat.axis[0][3];
-    v81 = poseBoneMatrix[1];
-    v80 = poseBoneSkelMat.axis[1][1];
-    v79 = poseBoneSkelMat.axis[1][2];
-    v78 = poseBoneSkelMat.axis[1][3];
-    poseBoneMatrix[1][0] = poseBoneSkelMat.axis[1][1];
-    poseBoneMatrix[1][1] = poseBoneSkelMat.axis[1][2];
-    poseBoneMatrix[1][2] = poseBoneSkelMat.axis[1][3];
-    v77 = poseBoneMatrix[2];
-    v76 = poseBoneSkelMat.axis[2][1];
-    v75 = poseBoneSkelMat.axis[2][2];
-    v74 = poseBoneSkelMat.axis[2][3];
-    poseBoneMatrix[2][0] = poseBoneSkelMat.axis[2][1];
-    poseBoneMatrix[2][1] = poseBoneSkelMat.axis[2][2];
-    poseBoneMatrix[2][2] = poseBoneSkelMat.axis[2][3];
-    invBaseBoneMatrix[3][2] = v88;
-    invBaseBoneMatrix[3][1] = v89;
-    invBaseBoneMatrix[3][0] = v90;
-    clipPlanes_84[24] = v88;
-    clipPlanes_84[25] = v89;
-    clipPlanes_84[26] = v90;
-    LODWORD(clipPlanes_84[23]) = invBaseBoneMatrix;
-    clipPlanes_84[22] = invBaseBoneSkelMat.axis[0][1];
-    clipPlanes_84[21] = invBaseBoneSkelMat.axis[0][2];
-    clipPlanes_84[20] = invBaseBoneSkelMat.axis[0][3];
-    invBaseBoneMatrix[0][0] = invBaseBoneSkelMat.axis[0][1];
-    invBaseBoneMatrix[0][1] = invBaseBoneSkelMat.axis[0][2];
-    invBaseBoneMatrix[0][2] = invBaseBoneSkelMat.axis[0][3];
-    LODWORD(clipPlanes_84[19]) = invBaseBoneMatrix[1];
-    clipPlanes_84[18] = invBaseBoneSkelMat.axis[1][1];
-    clipPlanes_84[17] = invBaseBoneSkelMat.axis[1][2];
-    clipPlanes_84[16] = invBaseBoneSkelMat.axis[1][3];
-    invBaseBoneMatrix[1][0] = invBaseBoneSkelMat.axis[1][1];
-    invBaseBoneMatrix[1][1] = invBaseBoneSkelMat.axis[1][2];
-    invBaseBoneMatrix[1][2] = invBaseBoneSkelMat.axis[1][3];
-    LODWORD(clipPlanes_84[15]) = invBaseBoneMatrix[2];
-    clipPlanes_84[14] = invBaseBoneSkelMat.axis[2][1];
-    clipPlanes_84[13] = invBaseBoneSkelMat.axis[2][2];
-    clipPlanes_84[12] = invBaseBoneSkelMat.axis[2][3];
-    invBaseBoneMatrix[2][0] = invBaseBoneSkelMat.axis[2][1];
-    invBaseBoneMatrix[2][1] = invBaseBoneSkelMat.axis[2][2];
-    invBaseBoneMatrix[2][2] = invBaseBoneSkelMat.axis[2][3];
-    MatrixMultiply43((const float (*)[3]) & clipPlanes_84[24], (const float (*)[3])v86, (float (*)[3])clipPlanes_84);
-    if (markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1586, 0, "%s", "markInfo->usedPointCount == 0");
-    R_Mark_TransformClipPlanes(markInfo->planes, (float (*)[3])clipPlanes_84, (float (*)[4])markDir);
-    MatrixTransposeTransformVector(markInfo->axis[0], (const float (*)[3])clipPlanes_84, v70);
-    v69 = baseBone->quat[0];
-    if ((LODWORD(v69) & 0x7F800000) == 0x7F800000
-        || (v68 = baseBone->quat[1], (LODWORD(v68) & 0x7F800000) == 0x7F800000)
-        || (v67 = baseBone->quat[2], (LODWORD(v67) & 0x7F800000) == 0x7F800000)
-        || (v66 = baseBone->quat[3], (LODWORD(v66) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            473,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    v65 = baseBone->transWeight;
-    if ((LODWORD(v65) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            474,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(baseBone->quat, baseBone->transWeight, &v62);
-    v61 = v62 * baseBone->quat[0];
-    v60 = v62 * baseBone->quat[1];
-    v59 = v62 * baseBone->quat[2];
-    v58 = v62 * baseBone->quat[3];
-    v57 = v63 * baseBone->quat[1];
-    v56 = v63 * baseBone->quat[2];
-    v55 = v63 * baseBone->quat[3];
-    v54 = v64 * baseBone->quat[2];
-    baseBoneSkelMat.origin[3] = v64 * baseBone->quat[3];
-    v50 = 1.0 - (v57 + v54);
-    v51 = v60 + baseBoneSkelMat.origin[3];
-    v52 = v59 - v55;
-    baseBoneSkelMat.axis[0][0] = 0.0;
-    baseBoneSkelMat.axis[0][1] = v60 - baseBoneSkelMat.origin[3];
-    baseBoneSkelMat.axis[0][2] = 1.0 - (v61 + v54);
-    baseBoneSkelMat.axis[0][3] = v56 + v58;
-    baseBoneSkelMat.axis[1][0] = 0.0;
-    baseBoneSkelMat.axis[1][1] = v59 + v55;
-    baseBoneSkelMat.axis[1][2] = v56 - v58;
-    baseBoneSkelMat.axis[1][3] = 1.0 - (v61 + v57);
-    baseBoneSkelMat.axis[2][0] = 0.0;
-    Vec3Copy(baseBone->trans, &baseBoneSkelMat.axis[2][1]);
-    baseBoneSkelMat.origin[0] = 1.0;
-    v49 = v130[0];
-    if ((LODWORD(v130[0]) & 0x7F800000) == 0x7F800000
-        || (v48 = v130[1], (LODWORD(v130[1]) & 0x7F800000) == 0x7F800000)
-        || (v47 = v130[2], (LODWORD(v130[2]) & 0x7F800000) == 0x7F800000)
-        || (v46 = v130[3], (LODWORD(v130[3]) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            581,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    v45 = v130[7];
-    if ((LODWORD(v130[7]) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            582,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(v130, v130[7], &v42);
-    v41 = v42 * v130[0];
-    v40 = v42 * v130[1];
-    v39 = v42 * v130[2];
-    v38 = v42 * v130[3];
-    v37 = v43 * v130[1];
-    v36 = v43 * v130[2];
-    v35 = v43 * v130[3];
-    v34 = v44 * v130[2];
-    v33 = v44 * v130[3];
-    v29 = 1.0 - (v37 + v34);
-    v30 = v40 - v33;
-    v31 = v39 + v35;
-    invPoseBoneSkelMat.axis[0][0] = 0.0;
-    invPoseBoneSkelMat.axis[0][1] = v40 + v33;
-    invPoseBoneSkelMat.axis[0][2] = 1.0 - (v41 + v34);
-    invPoseBoneSkelMat.axis[0][3] = v36 - v38;
-    invPoseBoneSkelMat.axis[1][0] = 0.0;
-    invPoseBoneSkelMat.axis[1][1] = v39 - v35;
-    invPoseBoneSkelMat.axis[1][2] = v36 + v38;
-    invPoseBoneSkelMat.axis[1][3] = 1.0 - (v41 + v37);
-    invPoseBoneSkelMat.axis[2][0] = 0.0;
-    invPoseBoneSkelMat.axis[2][1] = -(v130[4] * v29
-        + v130[5] * invPoseBoneSkelMat.axis[0][1]
-        + v130[6] * invPoseBoneSkelMat.axis[1][1]);
-    invPoseBoneSkelMat.axis[2][2] = -(v130[4] * v30
-        + v130[5] * invPoseBoneSkelMat.axis[0][2]
-        + v130[6] * invPoseBoneSkelMat.axis[1][2]);
-    invPoseBoneSkelMat.axis[2][3] = -(v130[4] * v31
-        + v130[5] * invPoseBoneSkelMat.axis[0][3]
-        + v130[6] * invPoseBoneSkelMat.axis[1][3]);
-    invPoseBoneSkelMat.origin[0] = 1.0;
-    invPoseBoneMatrix[3][2] = v29;
-    invPoseBoneMatrix[3][1] = v30;
-    invPoseBoneMatrix[3][0] = v31;
-    v27[0] = v29;
-    v27[1] = v30;
-    v27[2] = v31;
-    v26 = invPoseBoneMatrix[0];
-    v25 = invPoseBoneSkelMat.axis[0][1];
-    v24 = invPoseBoneSkelMat.axis[0][2];
-    v23 = invPoseBoneSkelMat.axis[0][3];
-    invPoseBoneMatrix[0][0] = invPoseBoneSkelMat.axis[0][1];
-    invPoseBoneMatrix[0][1] = invPoseBoneSkelMat.axis[0][2];
-    invPoseBoneMatrix[0][2] = invPoseBoneSkelMat.axis[0][3];
-    v22 = invPoseBoneMatrix[1];
-    v21 = invPoseBoneSkelMat.axis[1][1];
-    v20 = invPoseBoneSkelMat.axis[1][2];
-    v19 = invPoseBoneSkelMat.axis[1][3];
-    invPoseBoneMatrix[1][0] = invPoseBoneSkelMat.axis[1][1];
-    invPoseBoneMatrix[1][1] = invPoseBoneSkelMat.axis[1][2];
-    invPoseBoneMatrix[1][2] = invPoseBoneSkelMat.axis[1][3];
-    v18 = invPoseBoneMatrix[2];
-    v17 = invPoseBoneSkelMat.axis[2][1];
-    v16 = invPoseBoneSkelMat.axis[2][2];
-    v15 = invPoseBoneSkelMat.axis[2][3];
-    invPoseBoneMatrix[2][0] = invPoseBoneSkelMat.axis[2][1];
-    invPoseBoneMatrix[2][1] = invPoseBoneSkelMat.axis[2][2];
-    invPoseBoneMatrix[2][2] = invPoseBoneSkelMat.axis[2][3];
-    baseBoneMatrix[3][2] = v50;
-    baseBoneMatrix[3][1] = v51;
-    baseBoneMatrix[3][0] = v52;
-    originalOrigin[24] = v50;
-    originalOrigin[25] = v51;
-    originalOrigin[26] = v52;
-    LODWORD(originalOrigin[23]) = baseBoneMatrix;
-    originalOrigin[22] = baseBoneSkelMat.axis[0][1];
-    originalOrigin[21] = baseBoneSkelMat.axis[0][2];
-    originalOrigin[20] = baseBoneSkelMat.axis[0][3];
-    baseBoneMatrix[0][0] = baseBoneSkelMat.axis[0][1];
-    baseBoneMatrix[0][1] = baseBoneSkelMat.axis[0][2];
-    baseBoneMatrix[0][2] = baseBoneSkelMat.axis[0][3];
-    LODWORD(originalOrigin[19]) = baseBoneMatrix[1];
-    originalOrigin[18] = baseBoneSkelMat.axis[1][1];
-    originalOrigin[17] = baseBoneSkelMat.axis[1][2];
-    originalOrigin[16] = baseBoneSkelMat.axis[1][3];
-    baseBoneMatrix[1][0] = baseBoneSkelMat.axis[1][1];
-    baseBoneMatrix[1][1] = baseBoneSkelMat.axis[1][2];
-    baseBoneMatrix[1][2] = baseBoneSkelMat.axis[1][3];
-    LODWORD(originalOrigin[15]) = baseBoneMatrix[2];
-    originalOrigin[14] = baseBoneSkelMat.axis[2][1];
-    originalOrigin[13] = baseBoneSkelMat.axis[2][2];
-    originalOrigin[12] = baseBoneSkelMat.axis[2][3];
-    baseBoneMatrix[2][0] = baseBoneSkelMat.axis[2][1];
-    baseBoneMatrix[2][1] = baseBoneSkelMat.axis[2][2];
-    baseBoneMatrix[2][2] = baseBoneSkelMat.axis[2][3];
-    MatrixMultiply43((const float (*)[3])v27, (const float (*)[3]) & originalOrigin[24], (float (*)[3])originalOrigin);
-    localMins[0] = markInfo->origin[0];
-    localMins[1] = markInfo->origin[1];
-    localMins[2] = markInfo->origin[2];
-    MatrixTransformVector43(localMins, (const float (*)[3])originalOrigin, markInfo->localOrigin);
-    scale = -markInfo->radius;
-    Vec3AddScalar(markInfo->localOrigin, scale, localMaxs);
-    Vec3AddScalar(markInfo->localOrigin, markInfo->radius, (float *)&markModelCoreContext.clipPlanes);
-    v9[0] = markInfo;
-    v9[1] = markContext;
-    v9[2] = markInfo->localOrigin;
-    markModelCoreContext.markInfo = (MarkInfo *)v70;
-    markModelCoreContext.markContext = (GfxMarkContext *)markDir;
-    if (XSurfaceVisitTrianglesInAabb(
-        surface,
-        vertListIndex,
-        localMaxs,
-        (const float *)&markModelCoreContext.clipPlanes,
-        R_MarkModelCoreCallback_0_,
-        v9))
-    {
-        if (markInfo->usedPointCount)
-            MatrixTransposeTransformVector(markInfo->axis[1], (const float (*)[3])clipPlanes_84, markInfo->localTexCoordAxis);
-        //Profile_EndInternal(0);
-        return 1;
-    }
-    else
-    {
-        //Profile_EndInternal(0);
+        v12->quat[0] = poseBone->quat[0];
+        poseBone = (const DObjAnimMat *)((char *)poseBone + 4);
+        v12 = (DObjAnimMat *)((char *)v12 + 4);
+        --v13;
+    } while (v13);
+    v14 = (float)(markInfo->viewOffset[1] + v23.trans[1]);
+    v23.trans[0] = markInfo->viewOffset[0] + v23.trans[0];
+    v23.trans[1] = v14;
+    v23.trans[2] = markInfo->viewOffset[2] + v23.trans[2];
+    LocalConvertQuatToSkelMat(&v23, &v28);
+    LocalConvertQuatToInverseSkelMat(baseBone, &v27);
+    DObjSkelMatToMatrix43(&v28, v29);
+    DObjSkelMatToMatrix43(&v27, v30);
+    MatrixMultiply43(v30, v29, v26);
+    R_Mark_TransformClipPlanes(markInfo->planes, v26, v34);
+    MatrixTransposeTransformVector(markInfo->axis[0], *(const mat3x3*)&v26[0][0], v25);
+    LocalConvertQuatToSkelMat(baseBone, &v28);
+    LocalConvertQuatToInverseSkelMat(&v23, &v27);
+    DObjSkelMatToMatrix43(&v27, v31);
+    DObjSkelMatToMatrix43(&v28, v32);
+    MatrixMultiply43(v31, v32, v33);
+    v22[0] = markInfo->origin[0];
+    v22[1] = markInfo->origin[1];
+    v22[2] = markInfo->origin[2];
+    MatrixTransformVector43(v22, v33, markInfo->localOrigin);
+    radius = markInfo->radius;
+    v16 = markInfo->localOrigin[1];
+    v17 = markInfo->localOrigin[0];
+    v18 = markInfo->localOrigin[2];
+
+    v24[0] = markInfo;
+    v24[1] = markContext;
+    v24[2] = markInfo->localOrigin;
+    v24[3] = v25;
+    v24[4] = v34;
+
+    v21[0] = (float)v17 + (float)-radius;
+    v21[2] = (float)v18 + (float)-radius;
+    v20[0] = (float)v17 + (float)radius;
+    v21[1] = (float)v16 + (float)-radius;
+    v20[1] = (float)v16 + (float)radius;
+    v20[2] = (float)v18 + (float)radius;
+    if (!(unsigned __int8)XSurfaceVisitTrianglesInAabb(surface, vertListIndex, v21, v20, R_MarkModelCoreCallback_0_, v24))
         return 0;
-    }
+    if (markInfo->usedPointCount)
+        MatrixTransposeTransformVector(markInfo->axis[1], *(const mat3x3*)&v26[0][0], markInfo->localTexCoordAxis);
+    return 1;
 }
 
 char __cdecl R_MarkFragments_StaticModels(MarkInfo *markInfo)
@@ -2591,7 +2584,7 @@ char __cdecl R_MarkFragments_XModelSurface_Basic(
     surfTransform[3][2] = modelOrigin[2];
     invModelScale = 1.0 / modelScale;
     Vec3Sub(markInfo->origin, modelOrigin, localOriginTranslated);
-    MatrixTransposeTransformVector(localOriginTranslated, modelAxis, localOriginRotated);
+    MatrixTransposeTransformVector(localOriginTranslated, *(const mat3x3*)modelAxis, localOriginRotated);
     Vec3Scale(localOriginRotated, invModelScale, localOrigin);
     localRadius = markInfo->radius * invModelScale;
     scale = -localRadius;

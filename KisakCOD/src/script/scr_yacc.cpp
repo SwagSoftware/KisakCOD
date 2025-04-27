@@ -6465,166 +6465,166 @@ int __cdecl yyparse()
             switch (yyn)
             {
             case 1:
-                v320.type = node1(yyvsp[-1].val.type, yyvsp->val).type;
+                v320.type = (int)node1(yyvsp[-1].val.type, yyvsp->val).type;
                 yaccResult.type = v320.type;
                 break;
             case 2:
-                v319.type = node1(65, yyvsp->val).type;
+                v319.type = (int)node1(65, yyvsp->val).type;
                 yaccResult.type = v319.type;
                 break;
             case 3:
-                v318.type = node1(83, yyvsp->val).type;
+                v318.type = (int)node1(83, yyvsp->val).type;
                 yaccResult.type = v318.type;
                 break;
             case 4:
-                v317.type = node1(83, yyvsp->val).type;
+                v317.type = (int)node1(83, yyvsp->val).type;
                 yaccResult.type = v317.type;
                 break;
             case 5:
-                val2.type = node1_(yyvsp->pos).xmodelPieces;
+                val2.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v316.type = node2(6, yyvsp->val, val2).type;
                 yyval.val = v316;
                 break;
             case 6:
-                val5.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                val4.type = node1_(yyvsp->pos).xmodelPieces;
-                val3.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                val5.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                val4.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                val3.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v314.type = node5(47, yyvsp[-2].val, yyvsp->val, val3, val4, val5).type;
                 yyval.val = v314;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 7:
-                v309.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v308.type = node1_(yyvsp->pos).xmodelPieces;
-                v307.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v309.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v308.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v307.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v310.type = node5(48, yyvsp[-2].val, yyvsp->val, v307, v308, v309).type;
                 yyval.val = v310;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 8:
-                v305.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v304.type = node1_(0x66).xmodelPieces;
+                v305.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v304.type = (int)node1_(0x66).xmodelPieces;
                 v306.type = node4(49, yyvsp[-2].val, yyvsp->val, v304, v305).type;
                 yyval.val = v306;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 9:
-                v302.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v301.type = node1_(0x67).xmodelPieces;
+                v302.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v301.type = (int)node1_(0x67).xmodelPieces;
                 v303.type = node4(49, yyvsp[-2].val, yyvsp->val, v301, v302).type;
                 yyval.val = v303;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 10:
-                v299.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v298.type = node1_(0x68).xmodelPieces;
+                v299.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v298.type = (int)node1_(0x68).xmodelPieces;
                 v300.type = node4(49, yyvsp[-2].val, yyvsp->val, v298, v299).type;
                 yyval.val = v300;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 11:
-                v296.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v295.type = node1_(0x69).xmodelPieces;
+                v296.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v295.type = (int)node1_(0x69).xmodelPieces;
                 v297.type = node4(49, yyvsp[-2].val, yyvsp->val, v295, v296).type;
                 yyval.val = v297;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 12:
-                v293.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v292.type = node1_(0x6A).xmodelPieces;
+                v293.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v292.type = (int)node1_(0x6A).xmodelPieces;
                 v294.type = node4(49, yyvsp[-2].val, yyvsp->val, v292, v293).type;
                 yyval.val = v294;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 13:
-                v290.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v289.type = node1_(0x6B).xmodelPieces;
+                v290.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v289.type = (int)node1_(0x6B).xmodelPieces;
                 v291.type = node4(49, yyvsp[-2].val, yyvsp->val, v289, v290).type;
                 yyval.val = v291;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 14:
-                v287.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v286.type = node1_(0x6C).xmodelPieces;
+                v287.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v286.type = (int)node1_(0x6C).xmodelPieces;
                 v288.type = node4(49, yyvsp[-2].val, yyvsp->val, v286, v287).type;
                 yyval.val = v288;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 15:
-                v284.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v283.type = node1_(0x6D).xmodelPieces;
+                v284.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v283.type = (int)node1_(0x6D).xmodelPieces;
                 v285.type = node4(49, yyvsp[-2].val, yyvsp->val, v283, v284).type;
                 yyval.val = v285;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 16:
-                v281.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v280.type = node1_(0x6E).xmodelPieces;
+                v281.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v280.type = (int)node1_(0x6E).xmodelPieces;
                 v282.type = node4(49, yyvsp[-2].val, yyvsp->val, v280, v281).type;
                 yyval.val = v282;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 17:
-                v278.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v277.type = node1_(0x6F).xmodelPieces;
+                v278.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v277.type = (int)node1_(0x6F).xmodelPieces;
                 v279.type = node4(49, yyvsp[-2].val, yyvsp->val, v277, v278).type;
                 yyval.val = v279;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 18:
-                v275.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v274.type = node1_(0x70).xmodelPieces;
+                v275.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v274.type = (int)node1_(0x70).xmodelPieces;
                 v276.type = node4(49, yyvsp[-2].val, yyvsp->val, v274, v275).type;
                 yyval.val = v276;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 19:
-                v272.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v271.type = node1_(0x71).xmodelPieces;
+                v272.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v271.type = (int)node1_(0x71).xmodelPieces;
                 v273.type = node4(49, yyvsp[-2].val, yyvsp->val, v271, v272).type;
                 yyval.val = v273;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 20:
-                v269.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v268.type = node1_(0x72).xmodelPieces;
+                v269.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v268.type = (int)node1_(0x72).xmodelPieces;
                 v270.type = node4(49, yyvsp[-2].val, yyvsp->val, v268, v269).type;
                 yyval.val = v270;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 21:
-                v266.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v265.type = node1_(0x73).xmodelPieces;
+                v266.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v265.type = (int)node1_(0x73).xmodelPieces;
                 v267.type = node4(49, yyvsp[-2].val, yyvsp->val, v265, v266).type;
                 yyval.val = v267;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 22:
-                v263.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v262.type = node1_(0x74).xmodelPieces;
+                v263.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v262.type = (int)node1_(0x74).xmodelPieces;
                 v264.type = node4(49, yyvsp[-2].val, yyvsp->val, v262, v263).type;
                 yyval.val = v264;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 23:
-                v260.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v259.type = node1_(0x75).xmodelPieces;
+                v260.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v259.type = (int)node1_(0x75).xmodelPieces;
                 v261.type = node4(49, yyvsp[-2].val, yyvsp->val, v259, v260).type;
                 yyval.val = v261;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 24:
-                v257.type = node1_(yyvsp->pos).xmodelPieces;
+                v257.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v258.type = node2(50, yyvsp->val, v257).type;
                 yyval.val = v258;
                 break;
             case 25:
-                v255.type = node1_(yyvsp->pos).xmodelPieces;
+                v255.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v256.type = node2(51, yyvsp->val, v255).type;
                 yyval.val = v256;
                 break;
             case 26:
-                v254.type = node1(65, yyvsp->val).type;
+                v254.type = (int)node1(65, yyvsp->val).type;
                 yyval.val = v254;
                 break;
             case 27:
@@ -6640,7 +6640,7 @@ int __cdecl yyparse()
             case 30:
                 v5.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v5.prev;
-                v251.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v251.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v252.type = node3(21, yyvsp[-2].val, yyvsp->val, v251).type;
                 yyval.val = v252;
                 ++scrCompilePub.far_function_count;
@@ -6648,14 +6648,14 @@ int __cdecl yyparse()
             case 31:
                 v6.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v6.prev;
-                v249.type = node1_(yyvsp->pos).xmodelPieces;
+                v249.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v250.type = node2(20, yyvsp->val, v249).type;
                 yyval.val = v250;
                 break;
             case 32:
                 v7.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v7.prev;
-                v247.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v247.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v248.type = node3(21, yyvsp[-2].val, yyvsp->val, v247).type;
                 yyval.val = v248;
                 yyval.pos = yyvsp[-1].pos;
@@ -6664,168 +6664,168 @@ int __cdecl yyparse()
             case 33:
                 v8.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v8.prev;
-                v245.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v245.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v246.type = node2(20, yyvsp->val, v245).type;
                 yyval.val = v246;
                 break;
             case 34:
-                v243.type = node1_(yyvsp->pos).xmodelPieces;
+                v243.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v244.type = node2(18, yyvsp->val, v243).type;
                 yyval.val = v244;
                 break;
             case 35:
-                v241.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v241.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v242.type = node2(22, yyvsp[-2].val, v241).type;
                 yyval.val = v242;
                 break;
             case 36:
-                v239.type = node1_(yyvsp->pos).xmodelPieces;
+                v239.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v240.type = node2(26, yyvsp->val, v239).type;
                 yyval.val = v240;
                 break;
             case 37:
-                v237.type = node1_(yyvsp->pos).xmodelPieces;
-                v236.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v237.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v236.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v238.type = node3(30, yyvsp->val, v236, v237).type;
                 yyval.val = v238;
                 yyval.pos = yyvsp->pos;
                 break;
             case 38:
-                v234.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v234.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v235.type = node3(23, yyvsp[-3].val, yyvsp[-1].val, v234).type;
                 yyval.val = v235;
                 yyval.pos = yyvsp[-2].pos;
                 break;
             case 39:
-                v232.type = node1_(yyvsp[-2].pos).xmodelPieces;
-                v231.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v232.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
+                v231.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v233.type = node5(24, yyvsp[-4].val, yyvsp[-3].val, yyvsp[-1].val, v231, v232).type;
                 yyval.val = v233;
                 yyval.pos = yyvsp[-2].pos;
                 break;
             case 40:
-                v229.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v229.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v230.type = node2(46, yyvsp[-1].val, v229).type;
                 yyval.val = v230;
                 break;
             case 41:
-                v227.type = node1_(yyvsp->pos).xmodelPieces;
+                v227.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v228.type = node2(7, yyvsp->val, v227).type;
                 yyval.val = v228;
                 break;
             case 42:
-                v225.type = node1_(yyvsp->pos).xmodelPieces;
+                v225.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v226.type = node2(8, yyvsp->val, v225).type;
                 yyval.val = v226;
                 break;
             case 43:
-                v223.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v223.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v224.type = node2(9, yyvsp->val, v223).type;
                 yyval.val = v224;
                 break;
             case 44:
-                v221.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v221.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v222.type = node2(10, yyvsp->val, v221).type;
                 yyval.val = v222;
                 break;
             case 45:
-                v219.type = node1_(yyvsp->pos).xmodelPieces;
+                v219.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v220.type = node2(11, yyvsp->val, v219).type;
                 yyval.val = v220;
                 break;
             case 46:
-                v217.type = node1_(yyvsp->pos).xmodelPieces;
+                v217.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v218.type = node2(12, yyvsp->val, v217).type;
                 yyval.val = v218;
                 break;
             case 47:
-                v216.type = node1(19, yyvsp->val).type;
+                v216.type = (int)node1(19, yyvsp->val).type;
                 yyval.val = v216;
                 break;
             case 48:
-                v214.type = node1_(yyvsp->pos).xmodelPieces;
+                v214.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v215.type = node2(17, yyvsp->val, v214).type;
                 yyval.val = v215;
                 break;
             case 49:
-                v212.type = node1_(yyvsp->pos).xmodelPieces;
-                v213.type = node1(31, v212).type;
+                v212.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v213.type = (int)node1(31, v212).type;
                 yyval.val = v213;
                 break;
             case 50:
-                v210.type = node1_(yyvsp->pos).xmodelPieces;
-                v211.type = node1(32, v210).type;
+                v210.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v211.type = (int)node1(32, v210).type;
                 yyval.val = v211;
                 break;
             case 51:
-                v208.type = node1_(yyvsp->pos).xmodelPieces;
-                v209.type = node1(34, v208).type;
+                v208.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v209.type = (int)node1(34, v208).type;
                 yyval.val = v209;
                 break;
             case 52:
-                v206.type = node1_(yyvsp->pos).xmodelPieces;
-                v207.type = node1(35, v206).type;
+                v206.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v207.type = (int)node1(35, v206).type;
                 yyval.val = v207;
                 break;
             case 53:
-                v204.type = node1_(yyvsp->pos).xmodelPieces;
-                v205.type = node1(36, v204).type;
+                v204.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v205.type = (int)node1(36, v204).type;
                 yyval.val = v205;
                 break;
             case 54:
-                v202.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v202.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v203.type = node2(52, yyvsp[-1].val, v202).type;
                 yyval.val = v203;
                 yyval.pos = yyvsp->pos;
                 break;
             case 55:
-                v200.type = node1_(yyvsp->pos).xmodelPieces;
+                v200.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v201.type = node2(18, yyvsp->val, v200).type;
                 yyval.val = v201;
                 break;
             case 56:
-                v198.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v199.type = node1(66, v198).type;
+                v198.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v199.type = (int)node1(66, v198).type;
                 yyval.val = v199;
                 break;
             case 57:
                 v9.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v9.prev;
-                v196.type = node1_(yyvsp->pos).xmodelPieces;
+                v196.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v197.type = node2(67, yyvsp->val, v196).type;
                 yyval.val = v197;
                 break;
             case 58:
-                v194.type = node1_(yyvsp->pos).xmodelPieces;
-                v195.type = node1(72, v194).type;
+                v194.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v195.type = (int)node1(72, v194).type;
                 yyval.val = v195;
                 break;
             case 59:
-                v192.type = node1_(yyvsp->pos).xmodelPieces;
-                v193.type = node1(73, v192).type;
+                v192.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v193.type = (int)node1(73, v192).type;
                 yyval.val = v193;
                 break;
             case 60:
-                v190.type = node1_(yyvsp->pos).xmodelPieces;
-                v191.type = node1(74, v190).type;
+                v190.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v191.type = (int)node1(74, v190).type;
                 yyval.val = v191;
                 break;
             case 61:
-                v188.type = node1_(yyvsp[-3].pos).xmodelPieces;
+                v188.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
                 v189.type = node3(75, yyvsp[-4].val, yyvsp[-1].val, v188).type;
                 yyval.val = v189;
                 break;
             case 62:
                 v10.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v10.prev;
-                v186.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v186.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v187.type = node3(15, yyvsp[-2].val, yyvsp->val, v186).type;
                 yyval.val = v187;
                 yyval.pos = yyvsp->pos;
                 break;
             case 63:
-                v184.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v183.type = node1_(yyvsp[-3].pos).xmodelPieces;
+                v184.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v183.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
                 v185.type = node4(13, yyvsp[-3].val, yyvsp[-1].val, v183, v184).type;
                 yyval.val = v185;
                 yyval.pos = yyvsp[-2].pos;
@@ -6833,171 +6833,171 @@ int __cdecl yyparse()
             case 64:
                 v11.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v11.prev;
-                v181.type = node1_(yyvsp->pos).xmodelPieces;
+                v181.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v182.type = node2(4, yyvsp->val, v181).type;
                 yyval.val = v182;
                 break;
             case 65:
                 v12.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v12.prev;
-                v179.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v179.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v180.type = node2(80, yyvsp->val, v179).type;
                 yyval.val = v180;
                 break;
             case 66:
-                v177.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v177.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v178.type = node2(53, yyvsp[-2].val, v177).type;
                 yyval.val = v178;
                 yyval.pos = yyvsp->pos;
                 break;
             case 67:
-                v175.type = node1_(yyvsp->pos).xmodelPieces;
-                v174.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v175.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v174.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v176.type = node4(2, yyvsp[-2].val, yyvsp->val, v174, v175).type;
                 yyval.val = v176;
                 break;
             case 68:
-                v172.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v172.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v173.type = node2(27, yyvsp->val, v172).type;
                 yyval.val = v173;
                 break;
             case 69:
-                v170.type = node1_(yyvsp->pos).xmodelPieces;
-                v171.type = node1(28, v170).type;
+                v170.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v171.type = (int)node1(28, v170).type;
                 yyval.val = v171;
                 break;
             case 70:
-                v168.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v167.type = node1_(yyvsp->pos).xmodelPieces;
+                v168.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v167.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v169.type = node3(29, yyvsp->val, v167, v168).type;
                 yyval.val = v169;
                 break;
             case 71:
-                v165.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v165.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v166.type = node2(41, yyvsp[-1].val, v165).type;
                 yyval.val = v166;
                 break;
             case 72:
-                v163.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v163.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v164.type = node2(42, yyvsp[-1].val, v163).type;
                 yyval.val = v164;
                 break;
             case 73:
-                v161.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v160.type = node1_(0x66).xmodelPieces;
+                v161.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v160.type = (int)node1_(0x66).xmodelPieces;
                 v162.type = node4(43, yyvsp[-2].val, yyvsp->val, v160, v161).type;
                 yyval.val = v162;
                 break;
             case 74:
-                v158.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v157.type = node1_(0x67).xmodelPieces;
+                v158.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v157.type = (int)node1_(0x67).xmodelPieces;
                 v159.type = node4(43, yyvsp[-2].val, yyvsp->val, v157, v158).type;
                 yyval.val = v159;
                 break;
             case 75:
-                v155.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v154.type = node1_(0x68).xmodelPieces;
+                v155.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v154.type = (int)node1_(0x68).xmodelPieces;
                 v156.type = node4(43, yyvsp[-2].val, yyvsp->val, v154, v155).type;
                 yyval.val = v156;
                 break;
             case 76:
-                v152.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v151.type = node1_(0x6F).xmodelPieces;
+                v152.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v151.type = (int)node1_(0x6F).xmodelPieces;
                 v153.type = node4(43, yyvsp[-2].val, yyvsp->val, v151, v152).type;
                 yyval.val = v153;
                 break;
             case 77:
-                v149.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v148.type = node1_(0x70).xmodelPieces;
+                v149.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v148.type = (int)node1_(0x70).xmodelPieces;
                 v150.type = node4(43, yyvsp[-2].val, yyvsp->val, v148, v149).type;
                 yyval.val = v150;
                 break;
             case 78:
-                v146.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v145.type = node1_(0x71).xmodelPieces;
+                v146.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v145.type = (int)node1_(0x71).xmodelPieces;
                 v147.type = node4(43, yyvsp[-2].val, yyvsp->val, v145, v146).type;
                 yyval.val = v147;
                 break;
             case 79:
-                v143.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v142.type = node1_(0x72).xmodelPieces;
+                v143.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v142.type = (int)node1_(0x72).xmodelPieces;
                 v144.type = node4(43, yyvsp[-2].val, yyvsp->val, v142, v143).type;
                 yyval.val = v144;
                 break;
             case 80:
-                v140.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v139.type = node1_(0x73).xmodelPieces;
+                v140.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v139.type = (int)node1_(0x73).xmodelPieces;
                 v141.type = node4(43, yyvsp[-2].val, yyvsp->val, v139, v140).type;
                 yyval.val = v141;
                 break;
             case 81:
-                v137.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v136.type = node1_(0x74).xmodelPieces;
+                v137.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v136.type = (int)node1_(0x74).xmodelPieces;
                 v138.type = node4(43, yyvsp[-2].val, yyvsp->val, v136, v137).type;
                 yyval.val = v138;
                 break;
             case 82:
-                v134.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v133.type = node1_(0x75).xmodelPieces;
+                v134.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v133.type = (int)node1_(0x75).xmodelPieces;
                 v135.type = node4(43, yyvsp[-2].val, yyvsp->val, v133, v134).type;
                 yyval.val = v135;
                 break;
             case 83:
-                v131.type = node1_(yyvsp[-3].pos).xmodelPieces;
-                v130.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v131.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
+                v130.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v132.type = node4(55, yyvsp[-4].val, yyvsp[-1].val, v130, v131).type;
                 yyval.val = v132;
                 break;
             case 84:
-                v128.type = node1_(yyvsp[-3].pos).xmodelPieces;
-                v127.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v128.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
+                v127.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v129.type = node4(56, yyvsp[-4].val, yyvsp[-1].val, v127, v128).type;
                 yyval.val = v129;
                 break;
             case 85:
-                v125.type = node1_(yyvsp->pos).xmodelPieces;
-                v126.type = node1(57, v125).type;
+                v125.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v126.type = (int)node1(57, v125).type;
                 yyval.val = v126;
                 break;
             case 86:
-                v123.type = node1_(yyvsp[-3].pos).xmodelPieces;
-                v122.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v123.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
+                v122.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v124.type = node4(58, yyvsp[-4].val, yyvsp[-1].val, v122, v123).type;
                 yyval.val = v124;
                 break;
             case 87:
-                v120.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v119.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v120.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v119.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v121.type = node4(59, yyvsp[-4].val, yyvsp[-1].val, v119, v120).type;
                 yyval.val = v121;
                 break;
             case 88:
-                v117.type = node1_(yyvsp->pos).xmodelPieces;
-                v118.type = node1(63, v117).type;
+                v117.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v118.type = (int)node1(63, v117).type;
                 yyval.val = v118;
                 break;
             case 89:
-                v115.type = node1_(yyvsp->pos).xmodelPieces;
-                v116.type = node1(64, v115).type;
+                v115.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v116.type = (int)node1(64, v115).type;
                 yyval.val = v116;
                 break;
             case 90:
-                v113.type = node1_(yyvsp->pos).xmodelPieces;
-                v114.type = node1(76, v113).type;
+                v113.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v114.type = (int)node1(76, v113).type;
                 yyval.val = v114;
                 break;
             case 91:
-                v111.type = node1_(yyvsp[-3].pos).xmodelPieces;
+                v111.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
                 v112.type = node2(77, yyvsp[-1].val, v111).type;
                 yyval.val = v112;
                 break;
             case 92:
-                v109.type = node1_(yyvsp[-3].pos).xmodelPieces;
+                v109.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
                 v110.type = node2(78, yyvsp[-1].val, v109).type;
                 yyval.val = v110;
                 break;
             case 93:
-                v108.type = node1(25, yyvsp->val).type;
+                v108.type = (int)node1(25, yyvsp->val).type;
                 yyval.val = v108;
                 break;
             case 95:
@@ -7005,31 +7005,31 @@ int __cdecl yyparse()
                 yyval.val = v107;
                 break;
             case 98:
-                v105.type = node1_(yyvsp->pos).xmodelPieces;
-                v104.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v105.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v104.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v106.type = node3(44, yyvsp[-1].val, v104, v105).type;
                 yyval.val = v106;
                 break;
             case 99:
-                v102.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v102.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v103.type = node4(37, yyvsp[-2].val, yyvsp->val, v102, g_dummyVal).type;
                 yyval.val = v103;
                 break;
             case 100:
-                v100.type = node1_(yyvsp[-1].pos).xmodelPieces;
-                v99.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v100.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
+                v99.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v101.type = node7(38, yyvsp[-4].val, yyvsp[-2].val, yyvsp->val, v99, v100, g_dummyVal, g_dummyVal).type;
                 yyval.val = v101;
                 break;
             case 101:
-                v97.type = node1_(yyvsp[-4].pos).xmodelPieces;
-                v96.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v97.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
+                v96.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v98.type = node5(39, yyvsp[-2].val, yyvsp->val, v96, v97, g_dummyVal).type;
                 yyval.val = v98;
                 break;
             case 102:
-                val6.type = node1_(yyvsp[-7].pos).xmodelPieces;
-                v93.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                val6.type = (int)node1_(yyvsp[-7].pos).xmodelPieces;
+                v93.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v95.type = node8(
                     40,
                     yyvsp[-5].val,
@@ -7043,12 +7043,12 @@ int __cdecl yyparse()
                 yyval.val = v95;
                 break;
             case 103:
-                v91.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v91.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v92.type = node3(60, yyvsp[-4].val, yyvsp[-1].val, v91).type;
                 yyval.val = v92;
                 break;
             case 104:
-                v89.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v89.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v90.type = node3(45, yyvsp[-1].val, v89, g_dummyVal).type;
                 yyval.val = v90;
                 break;
@@ -7057,12 +7057,12 @@ int __cdecl yyparse()
                 yyval.val = v88;
                 break;
             case 106:
-                v86.type = node1_(yyvsp[-2].pos).xmodelPieces;
+                v86.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
                 v87.type = node3(61, yyvsp[-1].val, v86, g_dummyVal).type;
                 yyval.val = v87;
                 break;
             case 107:
-                val1.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                val1.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v85.type = node2(62, val1, g_dummyVal).type;
                 yyval.val = v85;
                 break;
@@ -7076,15 +7076,15 @@ int __cdecl yyparse()
                 yyval.val = v82;
                 break;
             case 111:
-                v78.type = node1_(yyvsp->pos).xmodelPieces;
-                v79.type = node1(yyvsp->val.type, v78).type;
+                v78.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v79.type = (int)node1(yyvsp->val.type, v78).type;
                 v80.type = prepend_node(v79, yyvsp[-2].val).type;
                 yyval.val = v80;
                 break;
             case 112:
                 v76.type = node0(0).type;
-                v74.type = node1_(yyvsp->pos).xmodelPieces;
-                v75.type = node1(yyvsp->val.type, v74).type;
+                v74.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v75.type = (int)node1(yyvsp->val.type, v74).type;
                 v77.type = prepend_node(v75, v76).type;
                 yyval.val = v77;
                 break;
@@ -7095,16 +7095,16 @@ int __cdecl yyparse()
             case 115:
                 v13.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v13.prev;
-                v70.type = node1_(yyvsp->pos).xmodelPieces;
-                v71.type = node1(yyvsp->val.type, v70).type;
+                v70.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v71.type = (int)node1(yyvsp->val.type, v70).type;
                 v72.type = append_node(yyvsp[-2].val, v71).type;
                 yyval.val = v72;
                 break;
             case 116:
                 v14.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v14.prev;
-                v67.type = node1_(yyvsp->pos).xmodelPieces;
-                v68.type = node1(yyvsp->val.type, v67).type;
+                v67.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v68.type = (int)node1(yyvsp->val.type, v67).type;
                 v65.type = node0(0).type;
                 v66.type = linked_list_end(v65)->type;
                 v69.type = append_node(v66, v68).type;
@@ -7118,68 +7118,68 @@ int __cdecl yyparse()
             case 119:
                 v15.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v15.prev;
-                v60.type = node1_(yyvsp->pos).xmodelPieces;
-                v61.type = node1(yyvsp->val.type, v60).type;
+                v60.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v61.type = (int)node1(yyvsp->val.type, v60).type;
                 v62.type = append_node(yyvsp[-2].val, v61).type;
                 yyval.val = v62;
                 break;
             case 120:
-                v57.type = node1_(yyvsp->pos).xmodelPieces;
-                v58.type = node1(yyvsp->val.type, v57).type;
+                v57.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v58.type = (int)node1(yyvsp->val.type, v57).type;
                 v55.type = node0(0).type;
                 v56.type = linked_list_end(v55)->type;
                 v59.type = append_node(v56, v58).type;
                 yyval.val = v59;
                 break;
             case 121:
-                v52.type = node1_(yyvsp->pos).xmodelPieces;
-                v53.type = node1(yyvsp->val.type, v52).type;
+                v52.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v53.type = (int)node1(yyvsp->val.type, v52).type;
                 v54.type = append_node(yyvsp[-2].val, v53).type;
                 yyval.val = v54;
                 break;
             case 122:
-                v49.type = node1_(yyvsp->pos).xmodelPieces;
-                v50.type = node1(yyvsp->val.type, v49).type;
+                v49.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v50.type = (int)node1(yyvsp->val.type, v49).type;
                 v47.type = node0(0).type;
                 v48.type = linked_list_end(v47)->type;
                 v51.type = append_node(v48, v50).type;
                 yyval.val = v51;
                 break;
             case 123:
-                v44.type = node1_(yyvsp->pos).xmodelPieces;
-                v45.type = node1(yyvsp->val.type, v44).type;
+                v44.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v45.type = (int)node1(yyvsp->val.type, v44).type;
                 v46.type = prepend_node(v45, yyvsp[-2].val).type;
                 yyval.val = v46;
                 break;
             case 124:
                 v42.type = node0(0).type;
-                v40.type = node1_(yyvsp->pos).xmodelPieces;
-                v41.type = node1(yyvsp->val.type, v40).type;
+                v40.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v41.type = (int)node1(yyvsp->val.type, v40).type;
                 v43.type = prepend_node(v41, v42).type;
                 yyval.val = v43;
                 break;
             case 125:
                 v16.prev = LowerCase(yyvsp[-6].val.stringValue).prev;
                 yyvsp[-6].val.stringValue = v16.prev;
-                v38.type = node1_(yyvsp->pos).xmodelPieces;
-                v37.type = node1_(yyvsp[-6].pos).xmodelPieces;
+                v38.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v37.type = (int)node1_(yyvsp[-6].pos).xmodelPieces;
                 v39.type = node6(68, yyvsp[-6].val, yyvsp[-4].val, yyvsp[-1].val, v37, v38, g_dummyVal).type;
                 yyval.val = v39;
                 break;
             case 126:
-                v35.type = node1_(yyvsp[-2].pos).xmodelPieces;
-                v34.type = node1_(yyvsp[-4].pos).xmodelPieces;
+                v35.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
+                v34.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
                 v36.type = node3(71, yyvsp[-2].val, v34, v35).type;
                 yyval.val = v36;
                 break;
             case 127:
-                v32.type = node1_(yyvsp->pos).xmodelPieces;
-                v33.type = node1(69, v32).type;
+                v32.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v33.type = (int)node1(69, v32).type;
                 yyval.val = v33;
                 break;
             case 128:
-                v30.type = node1_(yyvsp->pos).xmodelPieces;
-                v31.type = node1(70, v30).type;
+                v30.type = (int)node1_(yyvsp->pos).xmodelPieces;
+                v31.type = (int)node1(70, v30).type;
                 yyval.val = v31;
                 break;
             case 129:
@@ -7192,7 +7192,7 @@ int __cdecl yyparse()
                 yyval.val = v28;
                 break;
             case 131:
-                v25.type = node1_(yyvsp[-1].pos).xmodelPieces;
+                v25.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
                 v26.type = node2(86, yyvsp->val, v25).type;
                 yyval.val = v26;
                 ++scrCompilePub.far_function_count;

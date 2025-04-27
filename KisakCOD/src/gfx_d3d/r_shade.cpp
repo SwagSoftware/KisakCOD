@@ -79,74 +79,59 @@ void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context)
         R_SetPassShaderPrimArguments(context, pass->perPrimArgCount, pass->args);
 }
 
-void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData)
+void __cdecl R_HW_SetVertexShaderConstant(
+    IDirect3DDevice9 *device,
+    unsigned int dest,
+    const float *data,
+    unsigned int rowCount)
 {
-    __int64 v2; // [esp-10h] [ebp-1Ch]
-    __int64 v3; // [esp-8h] [ebp-14h]
-    const float *data; // [esp+8h] [ebp-4h]
-
-    if (!R_IsVertexShaderConstantUpToDate(context, routingData))
-    {
-        if (routingData->u.codeConst.index < 0x3Au)
-            data = (const float *)R_GetCodeConstant(context, routingData->u.codeConst.index);
-        else
-            data = (const float *)R_GetCodeMatrix(
-                context.source,
-                routingData->u.codeConst.index,
-                routingData->u.codeConst.firstRow);
-        HIDWORD(v3) = routingData->u.codeConst.rowCount;
-        LODWORD(v3) = data;
-        HIDWORD(v2) = routingData->dest;
-        LODWORD(v2) = context.state->prim.device;
-        R_HW_SetVertexShaderConstant(v2, v3);
-    }
-}
-
-void __cdecl R_HW_SetVertexShaderConstant(__int64 device, __int64 data)
-{
-    const char *v2; // eax
-    const char *v3; // eax
+    const char *v4; // eax
+    const char *v5; // eax
     int hr; // [esp+30h] [ebp-4h]
 
     do
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetVertexShaderConstantF( dest, data, rowCount )\n");
-        hr = (*(int(__stdcall **)(unsigned int, unsigned int, unsigned int, unsigned int))(*(unsigned int *)device + 376))(
-            device,
-            HIDWORD(device),
-            data,
-            HIDWORD(data));
+        hr = device->SetVertexShaderConstantF(dest, data, rowCount);
         if (hr < 0)
         {
             do
             {
                 ++g_disableRendering;
-                v2 = R_ErrorDescription(hr);
+                v4 = R_ErrorDescription(hr);
                 Com_Error(
                     ERR_FATAL,
                     "c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h (%i) device->SetVertexShaderConstantF( dest, data, rowCount ) failed: %s\n",
                     94,
-                    v2);
+                    v4);
             } while (alwaysfails);
         }
     } while (alwaysfails);
     if (r_logFile->current.integer)
     {
-        while (HIDWORD(data))
+        while (rowCount)
         {
-            v3 = va(
-                "vertex const %i: %g %g %g %g\n",
-                HIDWORD(device),
-                *(float *)data,
-                *(float *)(data + 4),
-                *(float *)(data + 8),
-                *(float *)(data + 12));
-            RB_LogPrint(v3);
-            ++HIDWORD(device);
-            LODWORD(data) = data + 16;
-            --HIDWORD(data);
+            v5 = va("vertex const %i: %g %g %g %g\n", dest, *data, data[1], data[2], data[3]);
+            RB_LogPrint(v5);
+            ++dest;
+            data += 4;
+            --rowCount;
         }
+    }
+}
+
+void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData)
+{
+    const float *data; // [esp+8h] [ebp-4h]
+
+    if (!R_IsVertexShaderConstantUpToDate(context, routingData))
+    {
+        if (routingData->u.codeConst.index < 0x3Au)
+            data = &R_GetCodeConstant(context, routingData->u.codeConst.index)->consts[0][0];
+        else
+            data = (float *)&R_GetCodeMatrix(context.source, routingData->u.codeConst.index, routingData->u.codeConst.firstRow)->matrices.matrix[0];
+        R_HW_SetVertexShaderConstant(context.state->prim.device, routingData->dest, data, routingData->u.codeConst.rowCount);
     }
 }
 
@@ -589,8 +574,6 @@ void __cdecl R_SetState(GfxCmdBufState *state, unsigned int *stateBits)
 
 void __cdecl R_SetVertexShaderConstantFromLiteral(GfxCmdBufState *state, unsigned int dest, const float *literal)
 {
-    __int64 v3; // [esp-10h] [ebp-14h]
-
     if (dest >= 0x20)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
@@ -601,9 +584,7 @@ void __cdecl R_SetVertexShaderConstantFromLiteral(GfxCmdBufState *state, unsigne
             32);
     LODWORD(state->vertexShaderConstState[dest]) = -1;
     HIDWORD(state->vertexShaderConstState[dest]) = -1;
-    HIDWORD(v3) = dest;
-    LODWORD(v3) = state->prim.device;
-    R_HW_SetVertexShaderConstant(v3, (unsigned int)literal | 0x100000000LL);
+    R_HW_SetVertexShaderConstant(state->prim.device, dest, literal, 1u);
 }
 
 const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
@@ -877,7 +858,7 @@ void __cdecl R_ChangeObjectPlacement(GfxCmdBufSourceState *source, const GfxScal
     }
     matrix = R_GetActiveWorldMatrix(source);
     Vec3Sub(placement->base.origin, source->eyeOffset, origin);
-    MatrixSet44((float (*)[4])matrix, origin, axis, placement->scale);
+    MatrixSet44(*(mat4x4*)&R_GetActiveWorldMatrix(source)->matrices.matrix[0], origin, axis, placement->scale);
     source->objectPlacement = placement;
 }
 

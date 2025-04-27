@@ -395,7 +395,7 @@ double __cdecl R_GetDefaultNearClip()
 void __cdecl R_SetupViewProjectionMatrices(GfxViewParms *viewParms)
 {
     MatrixMultiply44(viewParms->viewMatrix.m, viewParms->projectionMatrix.m, viewParms->viewProjectionMatrix.m);
-    MatrixInverse44((const float *)&viewParms->viewProjectionMatrix, (float *)&viewParms->inverseViewProjectionMatrix);
+    MatrixInverse44(&viewParms->viewProjectionMatrix, &viewParms->inverseViewProjectionMatrix);
 }
 
 void __cdecl R_AddBModelSurfacesCamera(

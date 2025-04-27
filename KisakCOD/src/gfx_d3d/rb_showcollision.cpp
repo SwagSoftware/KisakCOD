@@ -7,6 +7,7 @@
 #include "r_utils.h"
 #include "rb_stats.h"
 #include "rb_state.h"
+#include "rb_debug.h"
 
 const float shadowFrustumSidePlanes[5][4] =
 {
@@ -160,7 +161,7 @@ void __cdecl RB_DrawCollisionPoly(int numPoints, float (*points)[3], const float
         MyAssertHandler(".\\rb_showcollision.cpp", 85, 0, "%s", "points");
     if (r_showCollisionPolyType->current.integer == 2 || !r_showCollisionPolyType->current.integer)
     {
-        R_ConvertColorToBytes(colorFloat, (unsigned __int8 *)&color);
+        R_ConvertColorToBytes(colorFloat, (unsigned int *)&color);
         RB_BeginSurface(rgp.whiteMaterial, TECHNIQUE_UNLIT);
         R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_DEBUG);
         RB_CheckTessOverflow(numPoints, 3 * (numPoints - 2));

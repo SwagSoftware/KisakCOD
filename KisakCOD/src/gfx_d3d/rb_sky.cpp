@@ -691,7 +691,7 @@ void __cdecl RB_DrawBlindAndGlare(SunFlareDynamic *sunFlare, int frameTime)
     colorVec[1] = glare;
     colorVec[2] = glare;
     colorVec[3] = blind;
-    R_ConvertColorToBytes(colorVec, (unsigned __int8 *)&color);
+    R_ConvertColorToBytes(colorVec, (unsigned int*)&color);
     RB_DrawFullScreenColoredQuad(rgp.glareBlindMaterial, 0.0, 0.0, 1.0, 1.0, color.packed);
 }
 

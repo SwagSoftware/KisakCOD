@@ -208,6 +208,7 @@
     <ClCompile Include="src\client\cl_keys.cpp" />
     <ClCompile Include="src\client_mp\cl_main_mp.cpp" />
     <ClCompile Include="src\client_mp\cl_voice.cpp" />
+    <ClCompile Include="src\common\brush_edges.cpp" />
     <ClCompile Include="src\database\db_assetnames.cpp" />
     <ClCompile Include="src\database\db_auth.cpp" />
     <ClCompile Include="src\database\db_file_load.cpp" />
@@ -518,6 +519,7 @@
     <ClCompile Include="src\ui\ui_utils.cpp" />
     <ClCompile Include="src\ui_mp\ui_gameinfo_mp.cpp" />
     <ClCompile Include="src\ui_mp\ui_main_mp.cpp" />
+    <ClCompile Include="src\universal\aabbtree.cpp" />
     <ClCompile Include="src\universal\com_constantconfigstrings.cpp" />
     <ClCompile Include="src\universal\com_convexhull.cpp" />
     <ClCompile Include="src\universal\com_files.cpp" />
@@ -561,6 +563,7 @@
     <ClCompile Include="src\xanim\xanim_load_obj.cpp" />
     <ClCompile Include="src\xanim\xmodel.cpp" />
     <ClCompile Include="src\xanim\xmodel_load_obj.cpp" />
+    <ClCompile Include="src\xanim\xmodel_load_phys_collmap.cpp" />
     <ClCompile Include="src\xanim\xmodel_utils.cpp" />
     <ClCompile Include="src\zlib32\deflate.cpp" />
     <ClCompile Include="src\zlib32\inflate.cpp" />
@@ -599,6 +602,7 @@
     <ClInclude Include="src\cgame_mp\cg_public_mp.h" />
     <ClInclude Include="src\client\client.h" />
     <ClInclude Include="src\client_mp\client_mp.h" />
+    <ClInclude Include="src\common\brush.h" />
     <ClInclude Include="src\database\database.h" />
     <ClInclude Include="src\devgui\devgui.h" />
     <ClInclude Include="src\DynEntity\DynEntity_client.h" />
@@ -796,6 +800,7 @@
     <ClInclude Include="src\stringed\stringed_ingame.h" />
     <ClInclude Include="src\ui\ui.h" />
     <ClInclude Include="src\ui_mp\ui_mp.h" />
+    <ClInclude Include="src\universal\aabbtree.h" />
     <ClInclude Include="src\universal\com_constantconfigstrings.h" />
     <ClInclude Include="src\universal\com_convexhull.h" />
     <ClInclude Include="src\universal\com_files.h" />

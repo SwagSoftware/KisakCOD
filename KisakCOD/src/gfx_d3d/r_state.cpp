@@ -394,8 +394,8 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
     if (source->constVersions[(matrixIndex ^ 2) + 58] == matrixVersion)
     {
         MatrixTranspose44(
-            (const float *)&source->matrices.matrix[transposeIndex],
-            (float *)&source->matrices.matrix[matrixIndex]);
+            &source->matrices.matrix[transposeIndex],
+            &source->matrices.matrix[matrixIndex]);
         return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
     }
     else
@@ -404,8 +404,8 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
         if (source->constVersions[(matrixIndex ^ 1) + 58] == matrixVersion)
         {
             MatrixInverse44(
-                (const float *)&source->matrices.matrix[inverseIndex],
-                (float *)&source->matrices.matrix[matrixIndex]);
+                &source->matrices.matrix[inverseIndex],
+                &source->matrices.matrix[matrixIndex]);
             return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
         }
         else
@@ -422,12 +422,12 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
             if (inverseIndex != (baseIndex | 2))
                 MyAssertHandler(".\\r_state.cpp", 595, 0, "%s", "inverseIndex == (baseIndex | CONST_SRC_MATRIX_TRANSPOSE_BIT)");
             MatrixTranspose44(
-                (const float *)&source->matrices.matrix[baseIndex],
-                (float *)&source->matrices.matrix[inverseIndex]);
+                &source->matrices.matrix[baseIndex],
+                &source->matrices.matrix[inverseIndex]);
             source->constVersions[inverseIndex + 58] = matrixVersion;
             MatrixInverse44(
-                (const float *)&source->matrices.matrix[inverseIndex],
-                (float *)&source->matrices.matrix[matrixIndex]);
+                &source->matrices.matrix[inverseIndex],
+                &source->matrices.matrix[matrixIndex]);
             return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
         }
     }
@@ -492,7 +492,7 @@ void  R_DeriveWorldViewMatrix(GfxCmdBufSourceState *source)
         MyAssertHandler(".\\r_state.cpp", 338, 0, "%s", "R_IsMatrixConstantUpToDate( source, CONST_SRC_CODE_WORLD_MATRIX )");
     memcpy(v2, world_60, 0x40u);
     Vec3Add(&v2[12], source->eyeOffset, &v2[12]);
-    MatrixMultiply44((const float (*)[4])v2, p_viewParms->viewMatrix.m, (float (*)[4])(world_60 + 48));
+    MatrixMultiply44(*(const mat4x4*)&v2[0], p_viewParms->viewMatrix.m, *(mat4x4 *)(world_60 + 48));
     source->constVersions[70] = source->matrixVersions[3];
 }
 
@@ -544,12 +544,12 @@ void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source)
     {
         if (source->constVersions[74] != source->matrixVersions[4])
             R_DeriveViewProjectionMatrix(source);
-        MatrixMultiply44((const float (*)[4])v3, (const float (*)[4])(world_60 + 64), (float (*)[4])v2);
+        MatrixMultiply44(*(const mat4x4 *)&v3[0], *(mat4x4 *)(world_60 + 64), *(mat4x4 *)v2);
     }
     else
     {
         Vec3Add(&v3[12], source->eyeOffset, &v3[12]);
-        MatrixMultiply44((const float (*)[4])v3, p_viewParms->viewProjectionMatrix.m, (float (*)[4])v2);
+        MatrixMultiply44(*(const mat4x4 *)&v3[0], p_viewParms->viewProjectionMatrix.m, *(mat4x4 *)v2);
     }
     source->constVersions[78] = source->matrixVersions[5];
 }
@@ -565,38 +565,37 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     GfxCmdBufSourceState *source,
     float (*outMatrix)[4])
 {
-    float v3[16]; // [esp-Ch] [ebp-8Ch] BYREF
-    float world_52[3]; // [esp+34h] [ebp-4Ch] BYREF
-    float zInTimesInvViewTimesOutdoorLookup[4]; // [esp+40h] [ebp-40h] BYREF
-    float zInTimesInvView[5]; // [esp+50h] [ebp-30h] BYREF
-    const float (*zIn_4)[4]; // [esp+64h] [ebp-1Ch]
+    GfxMatrix v3; // [esp-Ch] [ebp-8Ch] BYREF
+    float world_52[4]; // [esp+34h] [ebp-4Ch] BYREF
+    float zInTimesInvViewTimesOutdoorLookup_4[4]; // [esp+44h] [ebp-3Ch] BYREF
+    float zInTimesInvView_4[4]; // [esp+54h] [ebp-2Ch] BYREF
+    //GfxCmdBufSourceState *matrix0; // [esp+64h] [ebp-1Ch]
     const void *zIn_8; // [esp+68h] [ebp-18h]
     float zIn_12; // [esp+6Ch] [ebp-14h]
-    const float *invViewProjMatrix; // [esp+70h] [ebp-10h]
-    //GfxCodeMatrices *activeMatrices; // [esp+74h] [ebp-Ch]
+    float awayBias; // [esp+70h] [ebp-10h]
+    GfxCodeMatrices *activeMatrices; // [esp+74h] [ebp-Ch]
     float downBias; // [esp+78h] [ebp-8h]
     float retaddr; // [esp+80h] [ebp+0h]
 
-    //activeMatrices = a1;
     downBias = retaddr;
-    invViewProjMatrix = (const float *)r_outdoorAwayBias->current.integer;
+    awayBias = r_outdoorAwayBias->current.value;
     zIn_12 = r_outdoorDownBias->current.value;
     zIn_8 = source;
-    zIn_4 = (const float (*)[4])R_GetCodeMatrix(source, 0x3Fu, 0);
-    zInTimesInvView[1] = 0.0;
-    zInTimesInvView[2] = 0.0;
-    zInTimesInvView[3] = -*(float *)&invViewProjMatrix;
-    zInTimesInvView[4] = 0.0;
-    MatrixTransformVector44(&zInTimesInvView[1], zIn_4, &zInTimesInvViewTimesOutdoorLookup[1]);
-    zInTimesInvViewTimesOutdoorLookup[3] = zInTimesInvViewTimesOutdoorLookup[3] + zIn_12;
+    //matrix0 = R_GetCodeMatrix(source, 63u, 0);
+    zInTimesInvView_4[0] = 0.0;
+    zInTimesInvView_4[1] = 0.0;
+    zInTimesInvView_4[2] = -awayBias;
+    zInTimesInvView_4[3] = 0.0;
+    MatrixTransformVector44(zInTimesInvView_4, *(const mat4x4*)&R_GetCodeMatrix(source, 63u, 0)->matrices.matrix[0], zInTimesInvViewTimesOutdoorLookup_4);
+    zInTimesInvViewTimesOutdoorLookup_4[2] = zInTimesInvViewTimesOutdoorLookup_4[2] + zIn_12;
     if (!rgp.world)
         MyAssertHandler(".\\r_state.cpp", 495, 0, "%s", "rgp.world");
-    MatrixTransformVector44(&zInTimesInvViewTimesOutdoorLookup[1], rgp.world->outdoorLookupMatrix, world_52);
+    MatrixTransformVector44(zInTimesInvViewTimesOutdoorLookup_4, rgp.world->outdoorLookupMatrix, world_52);
     if (source->constVersions[58] != source->matrixVersions[0])
         MyAssertHandler(".\\r_state.cpp", 498, 0, "%s", "R_IsMatrixConstantUpToDate( source, CONST_SRC_CODE_WORLD_MATRIX )");
-    memcpy(v3, zIn_8, sizeof(v3));
-    Vec3Add(&v3[12], source->eyeOffset, &v3[12]);
-    MatrixMultiply44((const float (*)[4])v3, rgp.world->outdoorLookupMatrix, outMatrix);
+    qmemcpy(&v3, zIn_8, sizeof(v3));
+    Vec3Add(v3.m[3], source->eyeOffset, v3.m[3]);
+    MatrixMultiply44(v3.m, rgp.world->outdoorLookupMatrix, *(mat4x4*)outMatrix);
     Vec4Add(&(*outMatrix)[12], world_52, &(*outMatrix)[12]);
     source->constVersions[86] = source->matrixVersions[7];
 }

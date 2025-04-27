@@ -1,4 +1,6 @@
 #pragma once
+#include <universal/com_math.h>
+#include <physics/phys_local.h>
 
 enum XModelLodRampType : __int32
 {                                       // ...
@@ -133,6 +135,23 @@ struct XModelSurfs // sizeof=0x14
     struct XSurface *surfs;                    // ...
     int partBits[4];                    // ...
 };
+struct XModelConfigEntry // sizeof=0x404
+{                                       // ...
+    char filename[1024];                // ...
+    float dist;                         // ...
+};
+struct __declspec(align(4)) XModelConfig // sizeof=0x1430
+{                                       // ...
+    XModelConfigEntry entries[4];       // ...
+    float mins[3];
+    float maxs[3];                      // ...
+    int collLod;                        // ...
+    unsigned __int8 flags;              // ...
+    char physicsPresetFilename[1024];   // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
 struct XModelPartsLoad // sizeof=0x1C
 {                                       // ...
     unsigned __int8 numBones;
@@ -156,6 +175,50 @@ struct XModelDefault // sizeof=0x4C
     unsigned __int8 partClassification[1]; // ...
     // padding byte
     unsigned __int16 surfNames[1];
+};
+
+struct XVertexInfo_s // sizeof=0x40
+{                                       // ...
+    float normal[3];
+    unsigned __int8 color[4];
+    float binormal[3];
+    float texCoordX;
+    float tangent[3];
+    float texCoordY;
+    float offset[3];
+    unsigned __int8 numWeights;
+    unsigned __int8 pad;
+    __int16 boneOffset;
+};
+struct XBlendLoadInfo // sizeof=0x4
+{                                       // ...
+    unsigned __int16 boneOffset;
+    unsigned __int16 boneWeight;
+};
+struct XVertexBuffer // sizeof=0x44
+{
+    XVertexInfo_s v;
+    XBlendLoadInfo w[1];
+};
+
+struct XVertexInfo0 // sizeof=0x2
+{                                       // ...
+    unsigned __int16 boneOffset;
+};
+struct XVertexInfo3 // sizeof=0xE
+{
+    XVertexInfo0 vert0;
+    XBlendLoadInfo blend[3];
+};
+struct XVertexInfo2 // sizeof=0xA
+{
+    XVertexInfo0 vert0;
+    XBlendLoadInfo blend[2];
+};
+struct XVertexInfo1 // sizeof=0x6
+{
+    XVertexInfo0 vert0;
+    XBlendLoadInfo blend[1];
 };
 
 // xmodel
@@ -237,3 +300,15 @@ int __cdecl XModelGetStaticModelCacheVertCount(XModel *model, unsigned int lod);
 
 // xmodel_load_obj
 int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3 &axis, float *mins, float *maxs);
+void __cdecl ConsumeQuatNoSwap(const unsigned __int8 **pos, __int16 *out);
+int __cdecl XModelSurfsPrecache(
+    XModel *model,
+    const char *name,
+    void *(__cdecl *Alloc)(int),
+    __int16 modelNumsurfs,
+    const char *modelName,
+    XModelSurfs *outModelSurfs);
+
+
+// xmodel_load_phys_collmap
+PhysGeomList *__cdecl XModel_LoadPhysicsCollMap(const char *name, void *(__cdecl *Alloc)(int));

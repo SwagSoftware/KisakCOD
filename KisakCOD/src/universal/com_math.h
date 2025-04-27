@@ -41,6 +41,11 @@ using mat3x3 = float[3][3];
 using mat4x3 = float[4][3];
 using mat4x4 = float[4][4];
 
+struct GfxMatrix // sizeof=0x40
+{                                       // ...
+    float m[4][4];                      // ...
+};
+
 // TODO fun fact: if we initialize these to -0.0 instead the compiler can remove the float addition without -ffast-math or some equivalent
 constexpr vec2 vec2_origin = { 0.0, 0.0 };
 constexpr vec3 vec3_origin = { 0.0, 0.0, 0.0 };
@@ -281,9 +286,17 @@ void __cdecl MatrixMultiply44(const mat4x4& in1, const mat4x4& int2, mat4x4& out
 
 void __cdecl MatrixTranspose(const mat3x3& in, mat3x3& out);
 void __cdecl MatrixTranspose44(const mat4x4& in, mat4x4& out);
+inline void __cdecl MatrixTranspose44(const GfxMatrix* const in, GfxMatrix *out)
+{
+    MatrixTranspose44((const mat4x4 &)*in, (mat4x4 &)*out);
+}
 
 void __cdecl MatrixInverseOrthogonal43(const mat4x3& in, mat4x3& out);
 void __cdecl MatrixInverse44(const mat4x4& mat, mat4x4& dst);
+inline void __cdecl MatrixInverse44(const GfxMatrix *const in, GfxMatrix *out)
+{
+    MatrixInverse44((const mat4x4 &)*in, (mat4x4 &)*out);
+}
 
 void __cdecl MatrixTransformVector(const vec3r in1, const mat3x3& in2, vec3r out);
 void __cdecl MatrixTransformVector43(const vec3r in1, const mat4x3& in2, vec3r out);

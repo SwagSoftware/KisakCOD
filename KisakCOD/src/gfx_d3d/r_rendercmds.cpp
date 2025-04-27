@@ -642,7 +642,7 @@ void __cdecl R_AddCmdDrawStretchPic(
         cmd->t0 = t0;
         cmd->s1 = s1;
         cmd->t1 = t1;
-        R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+        R_ConvertColorToBytes(color, &cmd->color);
     }
 }
 
@@ -747,7 +747,7 @@ void __cdecl R_AddCmdDrawStretchPicFlipST(
         cmd->t0 = t0;
         cmd->s1 = s1;
         cmd->t1 = t1;
-        R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+        R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
     }
 }
 
@@ -783,7 +783,7 @@ void __cdecl R_AddCmdDrawStretchPicRotateXY(
         cmd->t0 = t0;
         cmd->s1 = s1;
         cmd->t1 = t1;
-        R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+        R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
         cmd->rotation = AngleNormalize360(angle);
     }
 }
@@ -822,7 +822,7 @@ void __cdecl R_AddCmdDrawStretchPicRotateST(
         cmd->radiusST = radiusST;
         cmd->scaleFinalS = scaleFinalS;
         cmd->scaleFinalT = scaleFinalT;
-        R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+        R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
         cmd->rotation = AngleNormalize360(angle);
     }
 }
@@ -877,7 +877,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
     cmd->font = font;
     cmd->xScale = xScale;
     cmd->yScale = yScale;
-    R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+    R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
     cmd->maxChars = maxChars;
     cmd->renderFlags = 0;
     switch (style)

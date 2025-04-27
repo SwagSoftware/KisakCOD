@@ -236,6 +236,7 @@ void __cdecl R_ForEachPrimaryLightAffectingSurface(
     const GfxSurface *surface,
     unsigned int sortedSurfIndex,
     void(__cdecl *Callback)(GfxWorld *, unsigned int, unsigned int));
+void __cdecl R_GetXModelBounds(XModel *model, const float (*axes)[3], float *mins, float *maxs);
 
 
 

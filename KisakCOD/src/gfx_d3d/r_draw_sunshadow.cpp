@@ -64,7 +64,7 @@ void R_DrawSunShadowMap(
     }
     R_SetViewportValues((GfxCmdBufSourceState *)&v7, 0, partitionIndex << 10, 1024, 1024);
     R_DrawCall(
-        (void(__cdecl *)(const void *, GfxCmdBufContext, GfxCmdBufContext))R_DrawSunShadowMapCallback,
+        (void(__cdecl *)(const void *, GfxCmdBufContext*, GfxCmdBufContext*))R_DrawSunShadowMapCallback,
         &viewInfo->sunShadow.partition[partitionIndex],
         (GfxCmdBufSourceState *)&v7,
         viewInfo,

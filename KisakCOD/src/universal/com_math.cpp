@@ -1076,7 +1076,7 @@ void __cdecl MatrixTranspose(const mat3x3& in, mat3x3& out)
     (out)[2][2] = (in)[2][2];
 }
 
-void __cdecl MatrixTranspose44(const mat4x4 in, mat4x4 out)
+void __cdecl MatrixTranspose44(const mat4x4 &in, mat4x4 &out)
 {
     iassert(in != out);
 

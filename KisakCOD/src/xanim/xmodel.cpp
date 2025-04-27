@@ -8,6 +8,8 @@
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
 #include <database/database.h>
+#include <devgui/devgui.h>
+#include <physics/phys_local.h>
 
 XModelDefault g_default;
 Material *g_materials[1];
@@ -156,6 +158,125 @@ XModel *__cdecl XModelLoad(char *name, void *(__cdecl *Alloc)(int), void *(__cde
         return model;
     else
         return 0;
+}
+
+void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
+{
+    float *v1; // [esp+18h] [ebp-A0h]
+    DObjAnimMat *v; // [esp+1Ch] [ebp-9Ch]
+    float v3; // [esp+34h] [ebp-84h]
+    float v4; // [esp+38h] [ebp-80h]
+    float v5; // [esp+3Ch] [ebp-7Ch]
+    float v6; // [esp+40h] [ebp-78h]
+    float result; // [esp+44h] [ebp-74h] BYREF
+    float v8; // [esp+48h] [ebp-70h]
+    float v9; // [esp+4Ch] [ebp-6Ch]
+    float v10; // [esp+50h] [ebp-68h]
+    float v11; // [esp+54h] [ebp-64h]
+    float v12; // [esp+58h] [ebp-60h]
+    float v13; // [esp+5Ch] [ebp-5Ch]
+    float v14; // [esp+60h] [ebp-58h]
+    float v15; // [esp+64h] [ebp-54h]
+    float v16; // [esp+68h] [ebp-50h]
+    float v17; // [esp+6Ch] [ebp-4Ch]
+    float v18; // [esp+70h] [ebp-48h]
+    float v19; // [esp+74h] [ebp-44h]
+    float v20; // [esp+78h] [ebp-40h]
+    float v21; // [esp+7Ch] [ebp-3Ch]
+    float v22; // [esp+80h] [ebp-38h]
+    float v23; // [esp+84h] [ebp-34h]
+    float v24; // [esp+88h] [ebp-30h]
+    float *v25; // [esp+8Ch] [ebp-2Ch]
+    int numBones; // [esp+90h] [ebp-28h]
+    float *trans; // [esp+94h] [ebp-24h]
+    __int16 *quats; // [esp+98h] [ebp-20h]
+    unsigned __int8 *parentList; // [esp+9Ch] [ebp-1Ch]
+    int i; // [esp+A0h] [ebp-18h]
+    float tempQuat[4]; // [esp+A4h] [ebp-14h] BYREF
+    DObjAnimMat *quatTrans; // [esp+B4h] [ebp-4h]
+
+    parentList = modelParts->parentList;
+    numBones = modelParts->numBones;
+    quats = modelParts->quats;
+    trans = modelParts->trans;
+    quatTrans = modelParts->baseMat;
+    i = modelParts->numRootBones;
+    while (i)
+    {
+        quatTrans->quat[0] = 0.0;
+        quatTrans->quat[1] = 0.0;
+        quatTrans->quat[2] = 0.0;
+        quatTrans->quat[3] = 1.0;
+        v25 = quatTrans->trans;
+        quatTrans->trans[0] = 0.0;
+        v25[1] = 0.0;
+        v25[2] = 0.0;
+        quatTrans->transWeight = 2.0;
+        --i;
+        ++quatTrans;
+    }
+    i = numBones - modelParts->numRootBones;
+    while (i)
+    {
+        tempQuat[0] = *quats * 0.00003051850944757462;
+        tempQuat[1] = quats[1] * 0.00003051850944757462;
+        tempQuat[2] = quats[2] * 0.00003051850944757462;
+        tempQuat[3] = quats[3] * 0.00003051850944757462;
+        QuatMultiply(tempQuat, quatTrans[-*parentList].quat, quatTrans->quat);
+        v24 = Vec4LengthSq(quatTrans->quat);
+        if (v24 == 0.0)
+        {
+            quatTrans->quat[3] = 1.0;
+            quatTrans->transWeight = 2.0;
+        }
+        else
+        {
+            quatTrans->transWeight = 2.0 / v24;
+        }
+        v1 = quatTrans->trans;
+        v = &quatTrans[-*parentList];
+        if ((COERCE_UNSIGNED_INT(v->quat[0]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(v->quat[1]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(v->quat[2]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(v->quat[3]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
+                432,
+                0,
+                "%s",
+                "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
+        }
+        if ((COERCE_UNSIGNED_INT(v->transWeight) & 0x7F800000) == 0x7F800000)
+            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
+        Vec3Scale(v->quat, v->transWeight, &result);
+        v13 = result * v->quat[0];
+        v4 = result * v->quat[1];
+        v11 = result * v->quat[2];
+        v14 = result * v->quat[3];
+        v3 = v8 * v->quat[1];
+        v12 = v8 * v->quat[2];
+        v10 = v8 * v->quat[3];
+        v5 = v9 * v->quat[2];
+        v6 = v9 * v->quat[3];
+        v15 = 1.0 - (v3 + v5);
+        v16 = v4 + v6;
+        v17 = v11 - v10;
+        v18 = v4 - v6;
+        v19 = 1.0 - (v13 + v5);
+        v20 = v12 + v14;
+        v21 = v11 + v10;
+        v22 = v12 - v14;
+        v23 = 1.0 - (v13 + v3);
+        *v1 = *trans * v15 + trans[1] * v18 + trans[2] * v21 + v->trans[0];
+        v1[1] = *trans * v16 + trans[1] * v19 + trans[2] * v22 + v->trans[1];
+        v1[2] = *trans * v17 + trans[1] * v20 + trans[2] * v23 + v->trans[2];
+        --i;
+        quats += 4;
+        trans += 3;
+        ++quatTrans;
+        ++parentList;
+    }
 }
 
 static XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
@@ -336,6 +457,11 @@ static XModelPartsLoad *__cdecl XModelPartsFindData(const char *name)
     return (XModelPartsLoad *)Hunk_FindDataForFile(4, name);
 }
 
+void __cdecl XModelPartsSetData(const char *name, XModelPartsLoad *modelParts, void *(__cdecl *Alloc)(int))
+{
+    Hunk_SetDataForFile(4, name, modelParts, Alloc);
+
+}
 XModelPartsLoad *__cdecl XModelPartsPrecache(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
 {
     XModelPartsLoad *modelParts; // [esp+0h] [ebp-4h]
@@ -355,6 +481,248 @@ XModelPartsLoad *__cdecl XModelPartsPrecache(XModel *model, const char *name, vo
         Com_PrintError(19, "ERROR: Cannot find xmodelparts '%s'.\n", name);
         return 0;
     }
+}
+
+PhysPreset *__cdecl XModel_PhysPresetPrecache(const char *name, void *(__cdecl *Alloc)(int))
+{
+    if (!name)
+        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 37, 0, "%s", "name");
+    return PhysPresetPrecache(name, Alloc);
+}
+
+char __cdecl XModelLoadConfigFile(const char *name, float **pos, XModelConfig *config)
+{
+    char v4; // al
+    char v5; // al
+    XModelConfigEntry *v6; // [esp+18h] [ebp-54h]
+    float *v7; // [esp+1Ch] [ebp-50h]
+    char *physicsPresetFilename; // [esp+38h] [ebp-34h]
+    float *v9; // [esp+3Ch] [ebp-30h]
+    int v10; // [esp+40h] [ebp-2Ch]
+    float v11; // [esp+44h] [ebp-28h]
+    float v12; // [esp+48h] [ebp-24h]
+    float v13; // [esp+4Ch] [ebp-20h]
+    float v14; // [esp+50h] [ebp-1Ch]
+    float v15; // [esp+54h] [ebp-18h]
+    float v16; // [esp+58h] [ebp-14h]
+    float v17; // [esp+5Ch] [ebp-10h]
+    __int16 v18; // [esp+60h] [ebp-Ch]
+    int i; // [esp+68h] [ebp-4h]
+
+    v18 = **pos;
+    *pos = (*pos + 2);
+    if (v18 == 25)
+    {
+        config->flags = **pos;
+        *pos = (*pos + 1);
+        v17 = *(*pos)++;
+        config->mins[0] = v17;
+        v16 = *(*pos)++;
+        config->mins[1] = v16;
+        v15 = *(*pos)++;
+        config->mins[2] = v15;
+        v14 = *(*pos)++;
+        config->maxs[0] = v14;
+        v13 = *(*pos)++;
+        config->maxs[1] = v13;
+        v12 = *(*pos)++;
+        config->maxs[2] = v12;
+        v9 = *pos;
+        physicsPresetFilename = config->physicsPresetFilename;
+        do
+        {
+            v4 = *v9;
+            *physicsPresetFilename = *v9;
+            v9 = (v9 + 1);
+            ++physicsPresetFilename;
+        } while (v4);
+        *pos = (*pos + strlen((char*)*pos) + 1);
+        for (i = 0; i < 4; ++i)
+        {
+            v11 = *(*pos)++;
+            config->entries[i].dist = v11;
+            v7 = *pos;
+            v6 = &config->entries[i];
+            do
+            {
+                v5 = *v7;
+                v6->filename[0] = *v7;
+                v7 = (v7 + 1);
+                v6 = (v6 + 1);
+            } while (v5);
+            *pos = (*pos + strlen((char*)*pos) + 1);
+        }
+        v10 = *(*pos)++;
+        config->collLod = v10;
+        return 1;
+    }
+    else
+    {
+        Com_PrintError(19, "ERROR: xmodel '%s' out of date (version %d, expecting %d).\n", name, v18, 25);
+        return 0;
+    }
+}
+
+void __cdecl XModelLoadCollData(
+    const unsigned __int8 **pos,
+    XModel *model,
+    void *(__cdecl *AllocColl)(int),
+    const char *name)
+{
+    float v4; // [esp+0h] [ebp-B4h]
+    int v5; // [esp+4h] [ebp-B0h]
+    int v6; // [esp+8h] [ebp-ACh]
+    int v7; // [esp+Ch] [ebp-A8h]
+    float v8; // [esp+10h] [ebp-A4h]
+    float v9; // [esp+14h] [ebp-A0h]
+    float v10; // [esp+18h] [ebp-9Ch]
+    float v11; // [esp+1Ch] [ebp-98h]
+    float v12; // [esp+20h] [ebp-94h]
+    float v13; // [esp+24h] [ebp-90h]
+    float *v14; // [esp+28h] [ebp-8Ch]
+    float *svec; // [esp+2Ch] [ebp-88h]
+    float v16; // [esp+30h] [ebp-84h]
+    float v17; // [esp+34h] [ebp-80h]
+    float v18; // [esp+38h] [ebp-7Ch]
+    float v19; // [esp+3Ch] [ebp-78h]
+    float v20; // [esp+40h] [ebp-74h]
+    float v21; // [esp+44h] [ebp-70h]
+    float v22; // [esp+48h] [ebp-6Ch]
+    float v23; // [esp+4Ch] [ebp-68h]
+    float v24; // [esp+50h] [ebp-64h]
+    float v25; // [esp+58h] [ebp-5Ch]
+    float v26; // [esp+5Ch] [ebp-58h]
+    float v27; // [esp+60h] [ebp-54h]
+    float v28; // [esp+64h] [ebp-50h]
+    int v29; // [esp+68h] [ebp-4Ch]
+    int v30; // [esp+6Ch] [ebp-48h]
+    int j; // [esp+80h] [ebp-34h]
+    float plane[4]; // [esp+84h] [ebp-30h] BYREF
+    XModelCollTri_s *tri; // [esp+94h] [ebp-20h]
+    XModelCollSurf_s *surf; // [esp+98h] [ebp-1Ch]
+    float tvec[4]; // [esp+9Ch] [ebp-18h]
+    int i; // [esp+ACh] [ebp-8h]
+    int numCollTris; // [esp+B0h] [ebp-4h]
+
+    if (model->contents)
+        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 319, 0, "%s", "!model->contents");
+    v30 = **pos;
+    *pos += 4;
+    model->numCollSurfs = v30;
+    if (model->numCollSurfs)
+    {
+        model->collSurfs = (XModelCollSurf_s*)AllocColl(44 * model->numCollSurfs);
+        for (i = 0; i < model->numCollSurfs; ++i)
+        {
+            surf = &model->collSurfs[i];
+            v29 = **pos;
+            *pos += 4;
+            numCollTris = v29;
+            if (!v29)
+                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 334, 0, "%s", "numCollTris");
+            surf->numCollTris = numCollTris;
+            surf->collTris = (XModelCollTri_s*)AllocColl(48 * surf->numCollTris);
+            for (j = 0; j < numCollTris; ++j)
+            {
+                v28 = **pos;
+                *pos += 4;
+                plane[0] = v28;
+                v27 = **pos;
+                *pos += 4;
+                plane[1] = v27;
+                v26 = **pos;
+                *pos += 4;
+                plane[2] = v26;
+                v25 = **pos;
+                *pos += 4;
+                plane[3] = v25;
+                v24 = Vec3Length(plane) - 1.0;
+                v4 = fabs(v24);
+                if (v4 >= 0.009999999776482582)
+                    MyAssertHandler(
+                        ".\\xanim\\xmodel_load_obj.cpp",
+                        348,
+                        0,
+                        "%s\n\t(name) = %s",
+                        "(I_fabs( Vec3Length( plane ) - 1.0f ) < 0.01f)",
+                        name);
+                v23 = **pos;
+                *pos += 4;
+                v22 = **pos;
+                *pos += 4;
+                v21 = **pos;
+                *pos += 4;
+                v20 = **pos;
+                *pos += 4;
+                v19 = **pos;
+                *pos += 4;
+                tvec[0] = v19;
+                v18 = **pos;
+                *pos += 4;
+                tvec[1] = v18;
+                v17 = **pos;
+                *pos += 4;
+                tvec[2] = v17;
+                v16 = **pos;
+                *pos += 4;
+                tvec[3] = v16;
+                tri = &surf->collTris[j];
+                tri->plane[0] = plane[0];
+                tri->plane[1] = plane[1];
+                tri->plane[2] = plane[2];
+                tri->plane[3] = plane[3];
+                svec = tri->svec;
+                tri->svec[0] = v23;
+                svec[1] = v22;
+                svec[2] = v21;
+                svec[3] = v20;
+                v14 = tri->tvec;
+                tri->tvec[0] = tvec[0];
+                v14[1] = tvec[1];
+                v14[2] = tvec[2];
+                v14[3] = tvec[3];
+            }
+            v13 = **pos;
+            *pos += 4;
+            surf->mins[0] = v13 - 0.001000000047497451;
+            v12 = **pos;
+            *pos += 4;
+            surf->mins[1] = v12 - 0.001000000047497451;
+            v11 = **pos;
+            *pos += 4;
+            surf->mins[2] = v11 - 0.001000000047497451;
+            v10 = **pos;
+            *pos += 4;
+            surf->maxs[0] = v10 + 0.001000000047497451;
+            v9 = **pos;
+            *pos += 4;
+            surf->maxs[1] = v9 + 0.001000000047497451;
+            v8 = **pos;
+            *pos += 4;
+            surf->maxs[2] = v8 + 0.001000000047497451;
+            v7 = **pos;
+            *pos += 4;
+            surf->boneIdx = v7;
+            v6 = **pos;
+            *pos += 4;
+            surf->contents = v6 & 0xDFFFFFFB;
+            if (surf->contents && surf->boneIdx < 0)
+                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 379, 0, "%s", "!surf->contents || (surf->boneIdx >= 0)");
+            v5 = **pos;
+            *pos += 4;
+            surf->surfFlags = v5;
+            model->contents |= surf->contents;
+        }
+    }
+    else if (model->collSurfs)
+    {
+        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 323, 0, "%s", "!model->collSurfs");
+    }
+}
+
+bool __cdecl XModelAllowLoadMesh()
+{
+    return com_dedicated->current.integer == 0;
 }
 
 XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
@@ -657,7 +1025,7 @@ int __cdecl XModelTraceLine(
     for (i = 0; i < model->numCollSurfs; ++i)
     {
         csurf = &model->collSurfs[i];
-        if ((contentmask & csurf->contents) != 0 && !CM_TraceBox(&boneExtents, csurf->mins, csurf->maxs, results->fraction))
+        if ((contentmask & csurf->contents) != 0 && !CM_TraceBox(&boneExtents, (float*)csurf->mins, (float *)csurf->maxs, results->fraction))
         {
             for (j = 0; j < csurf->numCollTris; ++j)
             {
@@ -735,48 +1103,36 @@ int __cdecl XModelTraceLineAnimated(
     float v17; // [esp+3Ch] [ebp-1B0h]
     float v18; // [esp+40h] [ebp-1ACh]
     float v19; // [esp+44h] [ebp-1A8h]
-    float v20; // [esp+48h] [ebp-1A4h] BYREF
-    float v21; // [esp+4Ch] [ebp-1A0h]
-    float v22; // [esp+50h] [ebp-19Ch]
-    float v23; // [esp+54h] [ebp-198h]
-    float v24; // [esp+58h] [ebp-194h]
-    float v25; // [esp+5Ch] [ebp-190h]
-    float v26; // [esp+60h] [ebp-18Ch]
-    float v27; // [esp+64h] [ebp-188h]
+    float v20[3]; // [esp+48h] [ebp-1A4h] BYREF
+    float v21; // [esp+54h] [ebp-198h]
+    float v22; // [esp+58h] [ebp-194h]
+    float v23; // [esp+5Ch] [ebp-190h]
+    float v24; // [esp+60h] [ebp-18Ch]
+    float v25; // [esp+64h] [ebp-188h]
     float transWeight; // [esp+68h] [ebp-184h]
-    float v29; // [esp+6Ch] [ebp-180h]
-    float v30; // [esp+70h] [ebp-17Ch]
-    float v31; // [esp+74h] [ebp-178h]
-    float v32; // [esp+78h] [ebp-174h]
-    float v33; // [esp+7Ch] [ebp-170h]
-    float v34; // [esp+80h] [ebp-16Ch]
-    float v35; // [esp+84h] [ebp-168h]
-    float v36; // [esp+88h] [ebp-164h]
-    float result; // [esp+8Ch] [ebp-160h] BYREF
-    float v38; // [esp+90h] [ebp-15Ch]
-    float v39; // [esp+94h] [ebp-158h]
-    float v40; // [esp+98h] [ebp-154h]
-    float v41; // [esp+9Ch] [ebp-150h]
-    float v42; // [esp+A0h] [ebp-14Ch]
-    float v43; // [esp+A4h] [ebp-148h]
-    float v44; // [esp+A8h] [ebp-144h]
-    float *trans; // [esp+ACh] [ebp-140h]
-    float *v46; // [esp+B0h] [ebp-13Ch]
+    float v27; // [esp+6Ch] [ebp-180h]
+    float v28; // [esp+70h] [ebp-17Ch]
+    float v29; // [esp+74h] [ebp-178h]
+    float v30; // [esp+78h] [ebp-174h]
+    float v31; // [esp+7Ch] [ebp-170h]
+    float v32; // [esp+80h] [ebp-16Ch]
+    float v33; // [esp+84h] [ebp-168h]
+    float v34; // [esp+88h] [ebp-164h]
+    float result[3]; // [esp+8Ch] [ebp-160h] BYREF
+    float v36; // [esp+98h] [ebp-154h]
+    float v37; // [esp+9Ch] [ebp-150h]
+    float v38; // [esp+A0h] [ebp-14Ch]
+    float v39; // [esp+A4h] [ebp-148h]
+    float v40; // [esp+A8h] [ebp-144h]
+    const float *trans; // [esp+ACh] [ebp-140h]
+    const float *v42; // [esp+B0h] [ebp-13Ch]
     float endDist; // [esp+B4h] [ebp-138h]
     int j; // [esp+B8h] [ebp-134h]
     TraceExtents boneExtents; // [esp+BCh] [ebp-130h] BYREF
     const DObjAnimMat *baseMatList; // [esp+E0h] [ebp-10Ch]
     float t; // [esp+E4h] [ebp-108h]
-    float delta[6]; // [esp+E8h] [ebp-104h] BYREF
-    float invBaseMat_12; // [esp+100h] [ebp-ECh]
-    float invBaseMat_16; // [esp+104h] [ebp-E8h]
-    float invBaseMat_20; // [esp+108h] [ebp-E4h]
-    float invBaseMat_24; // [esp+10Ch] [ebp-E0h]
-    float invBaseMat_28; // [esp+110h] [ebp-DCh]
-    float invBaseMat_32; // [esp+114h] [ebp-D8h]
-    float invBaseMat_36; // [esp+118h] [ebp-D4h]
-    float invBaseMat_40; // [esp+11Ch] [ebp-D0h]
-    float invBaseMat_44; // [esp+120h] [ebp-CCh]
+    float delta[3]; // [esp+E8h] [ebp-104h] BYREF
+    float invBaseMat[4][3]; // [esp+F4h] [ebp-F8h] BYREF
     float hitFrac; // [esp+124h] [ebp-C8h]
     float localStart2[3]; // [esp+128h] [ebp-C4h] BYREF
     const XModelCollTri_s *ctri; // [esp+134h] [ebp-B8h]
@@ -785,8 +1141,10 @@ int __cdecl XModelTraceLineAnimated(
     int partIndex; // [esp+140h] [ebp-ACh]
     float startDist; // [esp+144h] [ebp-A8h]
     const XModelCollSurf_s *csurf; // [esp+148h] [ebp-A4h]
-    float localEnd2[4]; // [esp+14Ch] [ebp-A0h] BYREF
-    float hit[15]; // [esp+15Ch] [ebp-90h] BYREF
+    float localEnd2[3]; // [esp+14Ch] [ebp-A0h] BYREF
+    int globalBoneIndex; // [esp+158h] [ebp-94h]
+    float hit[3]; // [esp+15Ch] [ebp-90h] BYREF
+    float in2[12]; // [esp+168h] [ebp-84h] BYREF
     unsigned int hidePartBits[4]; // [esp+198h] [ebp-54h] BYREF
     const DObjAnimMat *baseMat; // [esp+1A8h] [ebp-44h]
     float s; // [esp+1ACh] [ebp-40h]
@@ -807,15 +1165,15 @@ int __cdecl XModelTraceLineAnimated(
         if ((contentmask & csurf->contents) != 0)
         {
             boneIdx = csurf->boneIdx;
-            LODWORD(localEnd2[3]) = boneIdx + baseBoneIndex;
+            globalBoneIndex = boneIdx + baseBoneIndex;
             if ((hidePartBits[(boneIdx + baseBoneIndex) >> 5] & (0x80000000 >> ((boneIdx + baseBoneIndex) & 0x1F))) == 0)
             {
                 boneMtx = &boneMtxList[boneIdx];
                 baseMat = &baseMatList[boneIdx];
                 if (Vec4Compare(boneMtx->quat, baseMat->quat)
-                    && ((trans = baseMat->trans, v46 = boneMtx->trans, baseMat->trans[0] != boneMtx->trans[0])
-                        || trans[1] != v46[1]
-                        || trans[2] != v46[2]
+                    && ((trans = baseMat->trans, v42 = boneMtx->trans, baseMat->trans[0] != boneMtx->trans[0])
+                        || trans[1] != v42[1]
+                        || trans[2] != v42[2]
                         ? (v15 = 0)
                         : (v15 = 1),
                         v15))
@@ -829,11 +1187,11 @@ int __cdecl XModelTraceLineAnimated(
                 }
                 else
                 {
-                    v32 = baseMat->quat[0];
-                    if ((LODWORD(v32) & 0x7F800000) == 0x7F800000
-                        || (v31 = baseMat->quat[1], (LODWORD(v31) & 0x7F800000) == 0x7F800000)
-                        || (v30 = baseMat->quat[2], (LODWORD(v30) & 0x7F800000) == 0x7F800000)
-                        || (v29 = baseMat->quat[3], (LODWORD(v29) & 0x7F800000) == 0x7F800000))
+                    v30 = baseMat->quat[0];
+                    if ((LODWORD(v30) & 0x7F800000) == 0x7F800000
+                        || (v29 = baseMat->quat[1], (LODWORD(v29) & 0x7F800000) == 0x7F800000)
+                        || (v28 = baseMat->quat[2], (LODWORD(v28) & 0x7F800000) == 0x7F800000)
+                        || (v27 = baseMat->quat[3], (LODWORD(v27) & 0x7F800000) == 0x7F800000))
                     {
                         MyAssertHandler(
                             "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
@@ -845,34 +1203,34 @@ int __cdecl XModelTraceLineAnimated(
                     transWeight = baseMat->transWeight;
                     if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
                         MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 537, 0, "%s", "!IS_NAN(mat->transWeight)");
-                    Vec3Scale(baseMat->quat, baseMat->transWeight, &result);
-                    v43 = result * baseMat->quat[0];
-                    v34 = result * baseMat->quat[1];
-                    v41 = result * baseMat->quat[2];
-                    v44 = result * baseMat->quat[3];
-                    v33 = v38 * baseMat->quat[1];
-                    v42 = v38 * baseMat->quat[2];
-                    v40 = v38 * baseMat->quat[3];
-                    v35 = v39 * baseMat->quat[2];
-                    v36 = v39 * baseMat->quat[3];
-                    delta[3] = 1.0 - (v33 + v35);
-                    delta[4] = v34 - v36;
-                    delta[5] = v41 + v40;
-                    invBaseMat_12 = v34 + v36;
-                    invBaseMat_16 = 1.0 - (v43 + v35);
-                    invBaseMat_20 = v42 - v44;
-                    invBaseMat_24 = v41 - v40;
-                    invBaseMat_28 = v42 + v44;
-                    invBaseMat_32 = 1.0 - (v43 + v33);
-                    invBaseMat_36 = -(baseMat->trans[0] * delta[3]
-                        + baseMat->trans[1] * invBaseMat_12
-                        + baseMat->trans[2] * invBaseMat_24);
-                    invBaseMat_40 = -(baseMat->trans[0] * delta[4]
-                        + baseMat->trans[1] * invBaseMat_16
-                        + baseMat->trans[2] * invBaseMat_28);
-                    invBaseMat_44 = -(baseMat->trans[0] * delta[5]
-                        + baseMat->trans[1] * invBaseMat_20
-                        + baseMat->trans[2] * invBaseMat_32);
+                    Vec3Scale(baseMat->quat, baseMat->transWeight, result);
+                    v39 = result[0] * baseMat->quat[0];
+                    v32 = result[0] * baseMat->quat[1];
+                    v37 = result[0] * baseMat->quat[2];
+                    v40 = result[0] * baseMat->quat[3];
+                    v31 = result[1] * baseMat->quat[1];
+                    v38 = result[1] * baseMat->quat[2];
+                    v36 = result[1] * baseMat->quat[3];
+                    v33 = result[2] * baseMat->quat[2];
+                    v34 = result[2] * baseMat->quat[3];
+                    invBaseMat[0][0] = 1.0 - (v31 + v33);
+                    invBaseMat[0][1] = v32 - v34;
+                    invBaseMat[0][2] = v37 + v36;
+                    invBaseMat[1][0] = v32 + v34;
+                    invBaseMat[1][1] = 1.0 - (v39 + v33);
+                    invBaseMat[1][2] = v38 - v40;
+                    invBaseMat[2][0] = v37 - v36;
+                    invBaseMat[2][1] = v38 + v40;
+                    invBaseMat[2][2] = 1.0 - (v39 + v31);
+                    invBaseMat[3][0] = -(baseMat->trans[0] * invBaseMat[0][0]
+                        + baseMat->trans[1] * invBaseMat[1][0]
+                        + baseMat->trans[2] * invBaseMat[2][0]);
+                    invBaseMat[3][1] = -(baseMat->trans[0] * invBaseMat[0][1]
+                        + baseMat->trans[1] * invBaseMat[1][1]
+                        + baseMat->trans[2] * invBaseMat[2][1]);
+                    invBaseMat[3][2] = -(baseMat->trans[0] * invBaseMat[0][2]
+                        + baseMat->trans[1] * invBaseMat[1][2]
+                        + baseMat->trans[2] * invBaseMat[2][2]);
                     if ((COERCE_UNSIGNED_INT(boneMtx->quat[0]) & 0x7F800000) == 0x7F800000
                         || (COERCE_UNSIGNED_INT(boneMtx->quat[1]) & 0x7F800000) == 0x7F800000
                         || (COERCE_UNSIGNED_INT(boneMtx->quat[2]) & 0x7F800000) == 0x7F800000
@@ -887,36 +1245,36 @@ int __cdecl XModelTraceLineAnimated(
                     }
                     if ((COERCE_UNSIGNED_INT(boneMtx->transWeight) & 0x7F800000) == 0x7F800000)
                         MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-                    Vec3Scale(boneMtx->quat, boneMtx->transWeight, &v20);
-                    v26 = v20 * boneMtx->quat[0];
-                    v17 = v20 * boneMtx->quat[1];
-                    v24 = v20 * boneMtx->quat[2];
-                    v27 = v20 * boneMtx->quat[3];
-                    v16 = v21 * boneMtx->quat[1];
-                    v25 = v21 * boneMtx->quat[2];
-                    v23 = v21 * boneMtx->quat[3];
-                    v18 = v22 * boneMtx->quat[2];
-                    v19 = v22 * boneMtx->quat[3];
-                    hit[3] = 1.0 - (v16 + v18);
-                    hit[4] = v17 + v19;
-                    hit[5] = v24 - v23;
-                    hit[6] = v17 - v19;
-                    hit[7] = 1.0 - (v26 + v18);
-                    hit[8] = v25 + v27;
-                    hit[9] = v24 + v23;
-                    hit[10] = v25 - v27;
-                    hit[11] = 1.0 - (v26 + v16);
-                    hit[12] = boneMtx->trans[0];
-                    hit[13] = boneMtx->trans[1];
-                    hit[14] = boneMtx->trans[2];
-                    MatrixMultiply43((const float (*)[3]) & delta[3], (const float (*)[3]) & hit[3], axis);
+                    Vec3Scale(boneMtx->quat, boneMtx->transWeight, v20);
+                    v24 = v20[0] * boneMtx->quat[0];
+                    v17 = v20[0] * boneMtx->quat[1];
+                    v22 = v20[0] * boneMtx->quat[2];
+                    v25 = v20[0] * boneMtx->quat[3];
+                    v16 = v20[1] * boneMtx->quat[1];
+                    v23 = v20[1] * boneMtx->quat[2];
+                    v21 = v20[1] * boneMtx->quat[3];
+                    v18 = v20[2] * boneMtx->quat[2];
+                    v19 = v20[2] * boneMtx->quat[3];
+                    in2[0] = 1.0 - (v16 + v18);
+                    in2[1] = v17 + v19;
+                    in2[2] = v22 - v21;
+                    in2[3] = v17 - v19;
+                    in2[4] = 1.0 - (v24 + v18);
+                    in2[5] = v23 + v25;
+                    in2[6] = v22 + v21;
+                    in2[7] = v23 - v25;
+                    in2[8] = 1.0 - (v24 + v16);
+                    in2[9] = boneMtx->trans[0];
+                    in2[10] = boneMtx->trans[1];
+                    in2[11] = boneMtx->trans[2];
+                    MatrixMultiply43(invBaseMat, *(mat4x3*)&in2[0], axis);
                     Vec3Sub(localStart, axis[3], localStart2);
                     Vec3Sub(localEnd, axis[3], localEnd2);
                     LocalMatrixTransposeTransformVector(localStart2, axis, boneExtents.start);
                     LocalMatrixTransposeTransformVector(localEnd2, axis, boneExtents.end);
                 }
                 CM_CalcTraceExtents(&boneExtents);
-                if (!CM_TraceBox(&boneExtents, csurf->mins, csurf->maxs, results->fraction))
+                if (!CM_TraceBox(&boneExtents, (float*) csurf->mins, (float*) csurf->maxs, results->fraction))
                 {
                     Vec3Sub(boneExtents.end, boneExtents.start, delta);
                     for (j = 0; j < csurf->numCollTris; ++j)
@@ -934,7 +1292,7 @@ int __cdecl XModelTraceLineAnimated(
                                 v14 = frac - 0.0;
                                 v13 = v14 < 0.0 ? 0.0 : frac;
                                 frac = v13;
-                                if (results->fraction > (double)v13)
+                                if (results->fraction > v13)
                                 {
                                     hitFrac = startDist / (startDist - endDist);
                                     Vec3Mad(boneExtents.start, hitFrac, delta, hit);
@@ -1011,6 +1369,18 @@ void __cdecl XModelTraceLineAnimatedPartBits(
             }
         }
     }
+}
+
+void __cdecl PrefetchArray_XSurfaceCollisionNode_(const XSurfaceCollisionNode *mem, unsigned int elementCount)
+{
+    const unsigned __int8 *memIter; // [esp+0h] [ebp-8h]
+
+    if (!elementCount)
+        MyAssertHandler(".\\xanim\\xmodel.cpp", 883, 0, "%s", "elementCount");
+    for (memIter = (const unsigned __int8 *)((uintptr_t)mem & 0xFFFFFF80); 
+        memIter <= (const unsigned __int8 *)(((uintptr_t) & mem[elementCount - 1].childCount + 1) & 0xFFFFFF80);
+        memIter += 128)
+        ;
 }
 
 char __cdecl XSurfaceVisitTrianglesInAabb(
@@ -1205,6 +1575,17 @@ int __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidate
         verts0);
 }
 
+void __cdecl PrefetchArray_GfxPackedVertex_(const GfxPackedVertex *mem, unsigned int elementCount)
+{
+    const unsigned __int8 *memIter; // [esp+0h] [ebp-8h]
+
+    if (!elementCount)
+        MyAssertHandler(".\\xanim\\xmodel.cpp", 883, 0, "%s", "elementCount");
+    for (memIter = (const unsigned __int8*)((uintptr_t)mem & 0xFFFFFF80); 
+        memIter <= (const unsigned __int8*)(((uintptr_t) & mem[elementCount - 1].tangent + 3) & 0xFFFFFF80);
+        memIter += 128)
+        ;
+}
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandidatesLocals *locals)
 {
     unsigned __int16 index; // [esp+1Ch] [ebp-18h]
@@ -1234,6 +1615,20 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandida
         }
     }
     return 1;
+}
+
+void __cdecl PrefetchArray_XSurfaceCollisionLeaf_(const XSurfaceCollisionLeaf *mem, unsigned int elementCount)
+{
+    const unsigned __int8 *memIter; // [esp+0h] [ebp-8h]
+
+    if (!elementCount)
+        MyAssertHandler(".\\xanim\\xmodel.cpp", 883, 0, "%s", "elementCount");
+    for (memIter = (const unsigned __int8*)((uintptr_t)mem & 0xFFFFFF80);
+        memIter <= (const unsigned __int8*)(((uintptr_t) & mem[elementCount - 1].triangleBeginIndex + 1) & 0xFFFFFF80);
+        memIter += 128)
+    {
+        ;
+    }
 }
 
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessLeaf(XSurfaceGetTriCandidatesLocals *locals)

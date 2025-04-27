@@ -1347,6 +1347,15 @@
     <ClCompile Include="src\groupvoice\speex\exc_5_64_table.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\xanim\xmodel_load_phys_collmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universal\aabbtree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\brush_edges.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\qcommon\qcommon.h">
@@ -2145,6 +2154,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\speex\speex_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universal\aabbtree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\brush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

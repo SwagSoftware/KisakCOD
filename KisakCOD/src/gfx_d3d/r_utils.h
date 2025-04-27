@@ -103,6 +103,14 @@ unsigned int __cdecl R_HashString(const char *string);
 char *__cdecl R_AllocGlobalVariable(unsigned int bytes, const char *name);
 char __cdecl R_CullPointAndRadius(const float *pt, float radius, const DpvsPlane *clipPlanes, int clipPlaneCount);
 void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned int *colorBytes);
+inline void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned char *colorBytes)
+{
+    R_ConvertColorToBytes(colorFloat, (unsigned int *)colorBytes);
+}
+inline inline void __cdecl R_ConvertColorToBytes(const float *colorFloat, GfxColor *colorBytes)
+{
+    R_ConvertColorToBytes(colorFloat, (unsigned int *)colorBytes);
+}
 int __cdecl R_PickMaterial(
     int traceMask,
     const float *org,
