@@ -33,7 +33,7 @@ char __cdecl Com_Filter(const char *filter, char *name, int casesensitive)
                 }
                 else
                 {
-                    strstr((char*)name, (char*)buf);
+                    v3 = strstr((char*)name, (char*)buf);
                     ptr = v3;
                 }
                 if (!ptr)

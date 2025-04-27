@@ -248,7 +248,7 @@ void __cdecl CG_TranslateHudElemMessage(
 
 char __cdecl ReplaceDirective(int localClientNum, unsigned int *searchPos, unsigned int *dstLen, char *dstString)
 {
-    unsigned __int8 *v4; // eax
+    const char *v4; // eax
     const char *v6; // eax
     const char *v7; // eax
     const char *v8; // eax
@@ -292,11 +292,11 @@ char __cdecl ReplaceDirective(int localClientNum, unsigned int *searchPos, unsig
             strlen(dstString));
     memcpy(srcString, (unsigned __int8 *)dstString, *dstLen);
     srcString[*dstLen] = 0;
-    strstr((const char*)&srcString[*searchPos], "[{");
+    v4 = strstr((const char*)&srcString[*searchPos], "[{");
     startTokenPos = (const char *)v4;
     if (!v4)
         return 0;
-    strstr((const char*)v4, "}]");
+    v6 = strstr((const char*)v4, "}]");
     endTokenPos = v6;
     if (v6)
     {

@@ -434,11 +434,11 @@ void __cdecl FS_BuildOSPathForThread(char *base, char *game, char *qpath, char *
 
 int __cdecl FS_CreatePath(char *OSPath)
 {
-    int v1; // eax
+    const char *v1; // eax
     int v2; // eax
     char *ofs; // [esp+0h] [ebp-4h]
 
-    strstr(OSPath, "..");
+    v1 = strstr(OSPath, "..");
     if (v1 || (strstr(OSPath, "::"), v2))
     {
         Com_PrintWarning(10, "WARNING: refusing to create relative path \"%s\"\n", OSPath);

@@ -27,7 +27,7 @@ dsound_sample_t *s_clientSamples[64];
 
 static unsigned int __cdecl mixerGetRecordLevel(char *SrcName)
 {
-    int v2; // eax
+    const char *v2; // eax
     tagMIXERCONTROLA mxc; // [esp+0h] [ebp-188h] BYREF
     unsigned int jj; // [esp+98h] [ebp-F0h]
     tagMIXERLINECONTROLSA mxlc; // [esp+9Ch] [ebp-ECh] BYREF
@@ -51,7 +51,7 @@ static unsigned int __cdecl mixerGetRecordLevel(char *SrcName)
     {
         mixerline.dwSource = ii;
         mixerGetLineInfoA((HMIXEROBJ)phmx, &mixerline, 1u);
-        strstr(mixerline.szName, SrcName);
+        v2 = strstr(mixerline.szName, SrcName);
         if (v2)
         {
             mxlc.cbStruct = 24;
@@ -90,7 +90,7 @@ bool __cdecl Voice_SendVoiceData()
 
 int __cdecl mixerSetRecordSource(char *SrcName)
 {
-    int v2; // eax
+    const char *v2; // eax
     int jj; // [esp+0h] [ebp-100h]
     tagMIXERLINECONTROLSA mxlc; // [esp+4h] [ebp-FCh] BYREF
     unsigned int err; // [esp+1Ch] [ebp-E4h]
@@ -158,7 +158,7 @@ int __cdecl mixerSetRecordSource(char *SrcName)
                     {
                         for (jj = 0; jj < iMultipleItems; ++jj)
                         {
-                            strstr(lpListText[jj].szName, SrcName);
+                            v2 = strstr(lpListText[jj].szName, SrcName);
                             if (v2)
                                 lpListBool[jj].fValue = 1;
                             else
@@ -294,7 +294,7 @@ int __cdecl mixerGetRecordSource(char *srcName)
 
 int __cdecl mixerSetRecordLevel(char *SrcName, unsigned __int16 newLevel)
 {
-    int v3; // eax
+    const char *v3; // eax
     tagMIXERCONTROLA mxc; // [esp+0h] [ebp-188h] BYREF
     unsigned int jj; // [esp+98h] [ebp-F0h]
     tagMIXERLINECONTROLSA mxlc; // [esp+9Ch] [ebp-ECh] BYREF
@@ -325,7 +325,7 @@ int __cdecl mixerSetRecordLevel(char *SrcName, unsigned __int16 newLevel)
         mixerline.dwSource = ii;
         if (!mixerGetLineInfoA(phmx, &mixerline, 1u))
         {
-            strstr(mixerline.szName, SrcName);
+            v3 = strstr(mixerline.szName, SrcName);
             if (v3)
             {
                 mxlc.cbStruct = 24;
@@ -360,7 +360,7 @@ int __cdecl mixerSetRecordLevel(char *SrcName, unsigned __int16 newLevel)
 
 int __cdecl mixerSetMicrophoneMute(unsigned __int8 bMute)
 {
-    int v2; // eax
+    const char *v2; // eax
     tagMIXERCONTROLA mxc; // [esp+0h] [ebp-188h] BYREF
     unsigned int jj; // [esp+98h] [ebp-F0h]
     tagMIXERLINECONTROLSA mxlc; // [esp+9Ch] [ebp-ECh] BYREF
@@ -391,7 +391,7 @@ int __cdecl mixerSetMicrophoneMute(unsigned __int8 bMute)
         {
             mixerline.dwSource = ii;
             mixerGetLineInfoA(phmx, &mixerline, 1u);
-            strstr(mixerline.szName, "Mic");
+            v2 = strstr(mixerline.szName, "Mic");
             if (v2)
             {
                 mxlc.cbStruct = 24;

@@ -2656,7 +2656,7 @@ char __cdecl DB_ShouldLoadFromModDir(const char *zoneName)
 
 int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
 {
-    int v3; // eax
+    const char* v3; // eax
     unsigned int v4; // eax
     unsigned __int8 v5; // [esp+0h] [ebp-11Ch]
     unsigned int startWaitingTime; // [esp+4h] [ebp-118h]
@@ -2704,7 +2704,7 @@ int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
     }
     if (zoneFile == (void *)-1)
     {
-        strstr(filename, "_load");
+        v3 = strstr(filename, "_load");
         if (v3)
         {
             Com_PrintWarning(10, "WARNING: Could not find zone '%s'\n", filename);
