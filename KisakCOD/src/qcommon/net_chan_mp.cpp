@@ -6,6 +6,7 @@
 #include <universal/com_files.h>
 #include <server_mp/server.h>
 #include <win32/win_net.h>
+#include <cgame_mp/cg_local_mp.h>
 
 
 const dvar_t *showpackets;
@@ -1575,7 +1576,7 @@ int __cdecl NET_StringToAdr(char *s, netadr_t *a)
     else
     {
         I_strncpyz(base, s, 1024);
-        strstr((unsigned __int8 *)base, (unsigned __int8 *)":");
+        v3 = strstr(base, ":");
         port = v3;
         if (v3)
             *port++ = 0;

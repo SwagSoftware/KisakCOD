@@ -1340,7 +1340,6 @@ int __cdecl BG_ParseConditions(const char **text_pp, animScriptItem_t *scriptIte
 void BG_FindAnims();
 bgs_t *BG_FindAnimTrees();
 scr_animtree_t __cdecl BG_FindAnimTree(const char *filename, int bEnforceExists);
-void __cdecl strstr(unsigned __int8 *str1, unsigned __int8 *str2);
 
 extern bgs_t *bgs;
 

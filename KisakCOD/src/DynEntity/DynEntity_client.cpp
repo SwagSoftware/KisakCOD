@@ -80,7 +80,7 @@ void __cdecl DynEntCl_InitEntities(int localClientNum)
     unsigned __int16 dynEntId; // [esp+24h] [ebp-8h]
     DynEntityColl *dynEntColl; // [esp+28h] [ebp-4h]
 
-    if (localClientNum == jpeg_mem_init())
+    if (localClientNum == RETURN_ZERO32())
     {
         for (int d = DYNENT_DRAW_MODEL; d < (int)DYNENT_DRAW_COUNT; ++d)
         {
@@ -432,7 +432,7 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
     unsigned __int16 dynEntCount; // [esp+50h] [ebp-8h]
     unsigned __int16 dynEntId; // [esp+54h] [ebp-4h]
 
-    if (localClientNum == jpeg_mem_init())
+    if (localClientNum == RETURN_ZERO32())
     {
         CL_ResetStats_f();
         //Profile_Begin(386);
@@ -513,7 +513,7 @@ void __cdecl DynEntCl_Shutdown(int localClientNum)
     unsigned __int16 dynEntId; // [esp+8h] [ebp-4h]
     unsigned __int16 dynEntIda; // [esp+8h] [ebp-4h]
 
-    if (CL_GetLocalClientActiveCount() && localClientNum == jpeg_mem_init())
+    if (CL_GetLocalClientActiveCount() && localClientNum == RETURN_ZERO32())
     {
         dynEntCount = DynEnt_GetEntityCount(DYNENT_COLL_CLIENT_FIRST);
         for (dynEntId = 0; dynEntId < (int)dynEntCount; ++dynEntId)

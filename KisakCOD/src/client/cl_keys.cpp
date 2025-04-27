@@ -883,9 +883,9 @@ void __cdecl PrintMatches(const char *s)
 
 void __cdecl ConcatRemaining(char *src, char *start)
 {
-    int v2; // eax
+    char* v2; // eax
 
-    strstr((unsigned __int8 *)src, (unsigned __int8 *)start);
+    v2 = strstr((char *)src, (char *)start);
     if (v2)
         I_strncat(g_consoleField.buffer, 256, (char *)(strlen(start) + v2));
     else

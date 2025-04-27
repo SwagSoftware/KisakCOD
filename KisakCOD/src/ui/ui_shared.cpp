@@ -357,7 +357,7 @@ int __cdecl Menu_ItemsMatchingGroup(menuDef_t *menu, char *name)
 
     count = 0;
     wildcard = -1;
-    strstr((unsigned __int8 *)name, (unsigned __int8 *)"*");
+    v2 = (int)strstr(name, "*");
     if (v2)
         wildcard = v2 - (unsigned int)name;
     for (i = 0; i < menu->itemCount; ++i)
@@ -388,7 +388,7 @@ itemDef_s *__cdecl Menu_GetMatchingItemByNumber(menuDef_t *menu, int index, char
 
     count = 0;
     wildcard = -1;
-    strstr((unsigned __int8 *)name, (unsigned __int8 *)"*");
+    v3 = (int)strstr(name, "*");
     if (v3)
         wildcard = v3 - (unsigned int)name;
     for (i = 0; i < menu->itemCount; ++i)

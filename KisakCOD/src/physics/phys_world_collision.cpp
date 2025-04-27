@@ -673,7 +673,7 @@ void __cdecl Phys_InitBrushmodelGeomClass()
 
     gclass.aabb_test = 0;
     *(unsigned int *)&gclass.isPlaceable = 1;
-    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))jpeg_mem_init;
+    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))RETURN_ZERO32;
     gclass.aabb = Phys_GetBrushmodelAABB;
     gclass.bytes = 16;
     classID = dCreateGeomClass(&gclass);
@@ -771,7 +771,7 @@ void __cdecl Phys_InitCylinderGeomClass()
 
     gclass.aabb_test = 0;
     *(unsigned int *)&gclass.isPlaceable = 1;
-    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))jpeg_mem_init;
+    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))RETURN_ZERO32;
     gclass.aabb = Phys_GetCylinderAABB;
     gclass.bytes = 12;
     classID = dCreateGeomClass(&gclass);
@@ -853,7 +853,7 @@ void __cdecl Phys_InitCapsuleGeomClass()
 
     gclass.aabb_test = 0;
     *(unsigned int *)&gclass.isPlaceable = 1;
-    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))jpeg_mem_init;
+    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))RETURN_ZERO32;
     gclass.aabb = Phys_GetCapsuleAABB;
     gclass.bytes = 12;
     classID = dCreateGeomClass(&gclass);

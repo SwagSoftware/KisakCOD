@@ -32,7 +32,7 @@ struct CStringEdPackage // sizeof=0x78
 
         for (iDoubleQuotesSoFar = 0; ; iDoubleQuotesSoFar = iDoubleQuoteCount)
         {
-            strstr((unsigned __int8 *)psBuffer, (unsigned __int8 *)"//");
+            v2 = strstr(psBuffer, "//");
             if (!v2)
                 break;
             iDoubleQuoteCount = iDoubleQuotesSoFar;

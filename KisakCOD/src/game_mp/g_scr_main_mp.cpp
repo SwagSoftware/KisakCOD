@@ -3485,12 +3485,12 @@ void Scr_CombineAngles()
 void Scr_IsSubStr()
 {
     unsigned __int8 *v0; // eax
-    int v1; // eax
+    char* v1; // eax
     unsigned __int8 *String; // [esp-4h] [ebp-4h]
 
     String = (unsigned __int8 *)Scr_GetString(1u);
     v0 = (unsigned __int8 *)Scr_GetString(0);
-    strstr(v0, String);
+    v1 = strstr((char*)v0, (char *)String);
     Scr_AddBool(v1 != 0);
 }
 

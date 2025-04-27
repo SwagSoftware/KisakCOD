@@ -1231,11 +1231,11 @@ bool __cdecl FS_GameDirDomainFunc(dvar_s *dvar, DvarValue newValue)
         return 0;
     if (strlen(newValue.string) < 6 || *(_BYTE *)(newValue.integer + 4) != 47 && *(_BYTE *)(newValue.integer + 4) != 92)
         return 0;
-    strstr((unsigned __int8 *)newValue.integer, (unsigned __int8 *)"..");
+    v3 = (int)strstr((char*)newValue.integer, "..");
     result = 0;
     if (!v3)
     {
-        strstr((unsigned __int8 *)newValue.integer, (unsigned __int8 *)"::");
+        v4 = (int)strstr((char*)newValue.integer, "::");
         if (!v4)
             return 1;
     }

@@ -412,7 +412,7 @@ void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0)
 
     if (!directive)
         MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 139, 0, "%s", "directive");
-    strstr((unsigned __int8 *)directive, (unsigned __int8 *)":");
+    v3 = strstr((char *)directive, (char*)":");
     argpos = v3;
     if (v3)
     {

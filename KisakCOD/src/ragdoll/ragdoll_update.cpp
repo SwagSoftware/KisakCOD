@@ -903,7 +903,7 @@ void __cdecl Ragdoll_ExplosionEvent(
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1075, 0, "%s", "innerRadius >= 0.0f");
     if (innerRadius > (double)outerRadius)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1076, 0, "%s", "outerRadius >= innerRadius");
-    if (localClientNum == jpeg_mem_init() && outerRadius != 0.0)
+    if (localClientNum == RETURN_ZERO32() && outerRadius != 0.0)
     {
         outerRadiusSqr = outerRadius * outerRadius;
         innerRadiusSqr = innerRadius * innerRadius;

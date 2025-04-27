@@ -1175,8 +1175,8 @@ void __cdecl DevGui_Init()
     int screen_xPad; // [esp+8h] [ebp-4h]
 
     DevGui_RegisterDvars();
-    screen_xPad = jpeg_mem_init();
-    screen_yPad = jpeg_mem_init();
+    screen_xPad = RETURN_ZERO32();
+    screen_yPad = RETURN_ZERO32();
     for (menuIndex = 0; menuIndex < 0x257; ++menuIndex)
         *(unsigned int *)devguiGlob.menus[menuIndex].label = (unsigned int)&devguiGlob.menus[menuIndex + 1];
     *(unsigned int *)devguiGlob.menus[menuIndex].label = 0;

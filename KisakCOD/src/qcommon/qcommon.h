@@ -1307,24 +1307,9 @@ void CL_CubemapShotUsage();
 
 
 // RANDOM INLINE SHIT
-
-// LWSS: Note that this strstr() does not return anything. It's a common paradigm in this codebase to use this one.
-// KISAKTODO: I think these functions need a global refactor (and maybe take by ref if left)
-inline void __cdecl strstr(unsigned __int8 *str1, unsigned const __int8 * const str2)
-{
-    char *found = strstr((char *)str1, (char *)str2);
-    str1 = (unsigned __int8*)found;
-}
-
-inline void __cdecl strncpy(unsigned __int8 *&dest, unsigned __int8 *src, unsigned int count)
+inline void __cdecl strncpy(unsigned __int8 *dest, unsigned __int8 *src, unsigned int count)
 {
     strncpy((char *)dest, (char *)src, count);
-}
-
-void __cdecl strncpy(unsigned __int8 *dest, unsigned __int8 *source, unsigned int count)
-{
-    char *result = strncpy((char*)dest, (char*)source, count);
-    dest = (unsigned __int8 *)result;
 }
 
 /**
@@ -1408,5 +1393,4 @@ int __cdecl RETURN_ZERO32()
 {
     return 0;
 }
-#define jpeg_mem_init RETURN_ZERO32
 #define qmemcpy memcpy

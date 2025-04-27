@@ -6041,7 +6041,7 @@ void __cdecl UI_ReplaceConversions(
 
     if (!sourceString)
         MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 7349, 0, "%s", "sourceString");
-    strstr((unsigned __int8 *)sourceString, (unsigned __int8 *)"&&");
+    v4 = (int)strstr(sourceString, "&&");
     if (v4)
     {
         if (!arguments)

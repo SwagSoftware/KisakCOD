@@ -396,7 +396,7 @@ void __cdecl SV_SetExpectedHunkUsage(char *mapname)
 
 void __cdecl SV_SpawnServer(char *server)
 {
-    int v1; // eax
+    char* v1; // eax
     unsigned int v2; // eax
     int v3; // esi
     int v4; // esi
@@ -460,7 +460,7 @@ void __cdecl SV_SpawnServer(char *server)
     {
         savepersist = 0;
     }
-    strstr((unsigned __int8 *)server, (unsigned __int8 *)"\\");
+    v1 = strstr((char*)server, (char*)"\\");
     if (v1)
         MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 871, 0, "%s", "!strstr( server, \"\\\\\" )");
     Dvar_SetStringByName("mapname", server);
