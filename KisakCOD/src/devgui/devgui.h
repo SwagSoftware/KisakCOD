@@ -1,5 +1,6 @@
 #pragma once
 #include <universal/q_shared.h>
+#include <qcommon/graph.h>
 
 enum DevGuiInputState : __int32
 {                                       // ...
@@ -13,29 +14,6 @@ enum DevGuiTokenResult : __int32
     DEVGUI_TOKEN_ERROR = 0x0,
     DEVGUI_TOKEN_MORE = 0x1,
     DEVGUI_TOKEN_LAST = 0x2,
-};
-enum DevEventType : __int32
-{                                       // ...
-    EVENT_ACTIVATE = 0x0,
-    EVENT_DEACTIVATE = 0x1,
-    EVENT_ACCEPT = 0x2,
-    EVENT_UPDATE = 0x3,
-    EVENT_DRAW = 0x4,
-    EVENT_SAVE = 0x5,
-};
-struct __declspec(align(4)) DevGraph // sizeof=0x20
-{                                       // ...
-    float (*knots)[2];                  // ...
-    int *knotCount;                     // ...
-    int knotCountMax;                   // ...
-    int selectedKnot;
-    void(__cdecl *eventCallback)(const DevGraph *, DevEventType, int); // ...
-    void(__cdecl *textCallback)(const DevGraph *, const float, const float, char *, const int);
-    void *data;                         // ...
-    bool disableEditingEndPoints;       // ...
-    // padding byte
-    // padding byte
-    // padding byte
 };
 struct DevGuiInput // sizeof=0x70
 {                                       // ...

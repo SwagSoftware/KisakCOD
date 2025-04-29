@@ -32,7 +32,7 @@ int __cdecl G_GetFreePlayerCorpseIndex()
     ent = G_Find(0, 368, scr_const.player);
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_player_corpse_mp.cpp", 122, 0, "%s", "ent");
-    LODWORD(diff[3]) = ent->s.lerp.pos.trBase;
+    //LODWORD(diff[3]) = ent->s.lerp.pos.trBase; // KISAKTODO??
     playerPos[0] = ent->s.lerp.pos.trBase[0];
     playerPos[1] = ent->s.lerp.pos.trBase[1];
     playerPos[2] = ent->s.lerp.pos.trBase[2];

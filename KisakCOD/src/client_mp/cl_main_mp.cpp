@@ -1156,7 +1156,8 @@ char __cdecl CL_ConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg
     MSG_BeginReading(msg);
     MSG_ReadLong(msg);
     CL_Netchan_AddOOBProfilePacket(localClientNum, msg->cursize);
-    if (!strnicmp((const char *)msg->data + 4, "PB_", 3u))
+    //if (!strnicmp((const char *)msg->data + 4, "PB_", 3u))
+    if (!_strnicmp((const char *)msg->data + 4, "PB_", 3u))
     {
         // LWSS: Remove Punkbuster crap
         //if (msg->data[7] == 83 || msg->data[7] == 50 || msg->data[7] == 73)
@@ -4011,7 +4012,7 @@ void __cdecl CL_LocalServers_f()
         {
             to.port = BigShort(j + 28960);
             to.type = NA_BROADCAST;
-            NET_OutOfBandData(NS_CLIENT1, to, "getinfo xxx", strlen("getinfo xxx"));
+            NET_OutOfBandData(NS_CLIENT1, to, (const unsigned char*)"getinfo xxx", strlen("getinfo xxx"));
         }
     }
 }

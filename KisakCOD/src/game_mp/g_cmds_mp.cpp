@@ -867,7 +867,8 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     SV_Cmd_ArgvBuffer(1, arg1, 256);
     SV_Cmd_ArgvBuffer(2, arg2, 256);
     SV_Cmd_ArgvBuffer(3, arg3, 256);
-    if (strchr(arg1, 0x3Bu) || (strchr(arg2, 0x3Bu), v7) || (strchr(arg3, 0x3Bu), v8))
+    //if (strchr(arg1, 0x3Bu) || (strchr(arg2, 0x3Bu), v7) || (strchr(arg3, 0x3Bu), v8))
+    if (strchr(arg1, 0x3Bu) || (strchr(arg2, 0x3Bu) || (strchr(arg3, 0x3Bu))))
     {
         v9 = va("%c \"GAME_INVALIDVOTESTRING\"", 101);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v9);

@@ -8,6 +8,9 @@
 #include <script/scr_const.h>
 #include <bgame/bg_local.h>
 
+struct game_hudelem_s;
+struct weaponParms;
+
 const char *g_dedicatedEnumNames[4] = { "listen server", "dedicated LAN server", "dedicated internet server", NULL }; // idb
 
 struct BuiltinFunctionDef // sizeof=0xC
@@ -905,43 +908,6 @@ void __cdecl SP_trigger_lookat(gentity_s *self);
 
 
 // g_vehicles_mp
-struct vehicle_info_t // sizeof=0x270
-{                                       // ...
-    char name[64];
-    __int16 type;
-    // padding byte
-    // padding byte
-    int steerWheels;
-    int texScroll;
-    int quadBarrel;
-    int bulletDamage;
-    int armorPiercingDamage;
-    int grenadeDamage;
-    int projectileDamage;
-    int projectileSplashDamage;
-    int heavyExplosiveDamage;
-    float texScrollScale;
-    float maxSpeed;
-    float accel;
-    float rotRate;
-    float rotAccel;
-    float maxBodyPitch;
-    float maxBodyRoll;
-    float collisionDamage;
-    float collisionSpeed;
-    float suspensionTravel;
-    char turretWeapon[64];
-    float turretHorizSpanLeft;
-    float turretHorizSpanRight;
-    float turretVertSpanUp;
-    float turretVertSpanDown;
-    float turretRotRate;
-    char sndNames[6][64];
-    unsigned __int8 sndIndices[6];
-    // padding byte
-    // padding byte
-    float engineSndSpeed;
-};
 unsigned __int16 __cdecl BG_VehiclesGetSlotTagName(int slotIndex);
 void __cdecl CG_VehRegisterDvars();
 DObj_s *__cdecl GetVehicleEntDObj(int localClientNum, centity_s *centVeh);

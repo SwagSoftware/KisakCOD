@@ -513,7 +513,7 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
                 ping = 0;
                 score = 0;
                 sscanf(s, "%d %d", &score, &ping);
-                s = strchr((char *)s, 0x20u);
+                v2 = strchr((char *)s, 0x20u);
                 if (v2)
                 {
                     s = strchr((char *)s + 1, 0x20u);

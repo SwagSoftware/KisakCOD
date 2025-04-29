@@ -11,6 +11,7 @@
 #include <sound/snd_public.h>
 #include "dobj.h"
 #include "xmodel.h"
+//#include <gfx_d3d/r_material.h>
 
 union XAnimIndices // sizeof=0x4
 {                                       // ...
@@ -1187,36 +1188,6 @@ extern "C" {
 union XAssetHeader // sizeof=0x4
 {                                       // ...
     XAssetHeader() { data = NULL; }
-    // LWSS: This is used for lots of places in db_registry
-    // XAssetHeader(XModelPieces *arg) { xmodelPieces = arg; }
-    // XAssetHeader(PhysPreset *arg) { physPreset = arg; }
-    // XAssetHeader(XAnimParts *arg) { parts = arg; }
-    // XAssetHeader(XModel *arg) { model = arg; }
-    // XAssetHeader(Material *arg) { material = arg; }
-    // XAssetHeader(MaterialPixelShader *arg) { pixelShader = arg; }
-    // XAssetHeader(MaterialVertexShader *arg) { vertexShader = arg; }
-    // XAssetHeader(MaterialTechniqueSet *arg) { techniqueSet = arg; }
-    // XAssetHeader(GfxImage *arg) { image = arg; }
-    // XAssetHeader(snd_alias_list_t *arg) { sound = arg; }
-    // XAssetHeader(SndCurve *arg) { sndCurve = arg; }
-    // XAssetHeader(LoadedSound *arg) { loadSnd = arg; }
-    // XAssetHeader(clipMap_t *arg) { clipMap = arg; }
-    // XAssetHeader(ComWorld *arg) { comWorld = arg; }
-    // XAssetHeader(GameWorldSp *arg) { gameWorldSp = arg; }
-    // XAssetHeader(GameWorldMp *arg) { gameWorldMp = arg; }
-    // XAssetHeader(MapEnts *arg) { mapEnts = arg; }
-    // XAssetHeader(GfxWorld *arg) { gfxWorld = arg; }
-    // XAssetHeader(GfxLightDef *arg) { lightDef = arg; }
-    // XAssetHeader(Font_s *arg) { font = arg; }
-    // XAssetHeader(MenuList *arg) { menuList = arg; }
-    // XAssetHeader(menuDef_t *arg) { menu = arg; }
-    // XAssetHeader(LocalizeEntry *arg) { localize = arg; }
-    // XAssetHeader(WeaponDef *arg) { weapon = arg; }
-    // XAssetHeader(SndDriverGlobals *arg) { sndDriverGlobals = arg; }
-    // XAssetHeader(const FxEffectDef *arg) { fx = arg; }
-    // XAssetHeader(FxImpactTable *arg) { impactFx = arg; }
-    // XAssetHeader(RawFile *arg) { rawfile = arg; }
-    // XAssetHeader(StringTable *arg) { stringTable = arg; }
     XAssetHeader(void *arg) { data = arg; }
 
     struct XModelPieces *xmodelPieces;
@@ -1366,6 +1337,9 @@ struct XAssetEntry // sizeof=0x10
 
 union XAssetEntryPoolEntry // sizeof=0x10
 {                                       // ...
+    XAssetEntryPoolEntry()
+    {
+    }
     XAssetEntry entry;
     XAssetEntryPoolEntry *next;
 };

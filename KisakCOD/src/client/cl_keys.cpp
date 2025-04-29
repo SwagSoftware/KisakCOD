@@ -226,8 +226,6 @@ keyname_t keynames_localized[96] =
 PlayerKeyState playerKeys[1];
 field_t g_consoleField;
 field_t historyEditLines[32];
-keyname_t keynames[96];
-keyname_t keynames_localized[96];
 char s_shortestMatch[1024];
 
 int historyLine;

@@ -326,6 +326,31 @@ void __cdecl FX_RunGarbageCollection_FreeSpotLight(FxSystem *system, unsigned __
     }
 }
 
+void __cdecl FX_FreePool_Generic_FxTrail_(FxTrail *item, volatile long *firstFreeIndex, FxPool<FxTrail> *pool)
+{
+    volatile unsigned int freedIndex; // [esp+4h] [ebp-4h]
+
+    freedIndex = ((char *)item - (char *)pool) >> 3;
+    if (freedIndex >= 0x80)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            228,
+            0,
+            "%s",
+            "freedIndex >= 0 && freedIndex < ITEM_TYPE::POOL_SIZE");
+    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
+    if (*firstFreeIndex != -1 && *firstFreeIndex >= 0x80u)
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_system.cpp",
+            243,
+            0,
+            "%s",
+            "*firstFreeIndex == -1 || (*firstFreeIndex >= 0 && *firstFreeIndex < ITEM_TYPE::POOL_SIZE)");
+    *(_DWORD *)&item->nextTrailHandle = *firstFreeIndex;
+    *firstFreeIndex = freedIndex;
+    Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
+}
+
 void __cdecl FX_RunGarbageCollection_FreeTrails(FxSystem *system, FxEffect *effect)
 {
     unsigned __int16 firstTrailHandle; // [esp+Ah] [ebp-6h]
@@ -556,31 +581,6 @@ void __cdecl FX_FreePool_Generic_FxTrailElem_(
             "%s",
             "*firstFreeIndex == -1 || (*firstFreeIndex >= 0 && *firstFreeIndex < ITEM_TYPE::POOL_SIZE)");
     LODWORD(item->origin[0]) = *firstFreeIndex;
-    *firstFreeIndex = freedIndex;
-    Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
-}
-
-void __cdecl FX_FreePool_Generic_FxTrail_(FxTrail* item, volatile long* firstFreeIndex, FxPool<FxTrail>* pool)
-{
-    volatile unsigned int freedIndex; // [esp+4h] [ebp-4h]
-
-    freedIndex = ((char*)item - (char*)pool) >> 3;
-    if (freedIndex >= 0x80)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_system.cpp",
-            228,
-            0,
-            "%s",
-            "freedIndex >= 0 && freedIndex < ITEM_TYPE::POOL_SIZE");
-    Sys_EnterCriticalSection(CRITSECT_FX_ALLOC);
-    if (*firstFreeIndex != -1 && *firstFreeIndex >= 0x80u)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_system.cpp",
-            243,
-            0,
-            "%s",
-            "*firstFreeIndex == -1 || (*firstFreeIndex >= 0 && *firstFreeIndex < ITEM_TYPE::POOL_SIZE)");
-    *(_DWORD*)&item->nextTrailHandle = *firstFreeIndex;
     *firstFreeIndex = freedIndex;
     Sys_LeaveCriticalSection(CRITSECT_FX_ALLOC);
 }

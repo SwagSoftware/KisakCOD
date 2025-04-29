@@ -1,4 +1,8 @@
 #include "game_public.h"
+#include <server/sv_game.h>
+#include <game_mp/g_utils_mp.h>
+#include <server/sv_world.h>
+#include <script/scr_vm.h>
 
 
 //Line 53050:  0006 : 0053ff60       int *itemRegistered     82ceff60     g_items.obj
@@ -123,7 +127,8 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int touched)
             if (other->health >= 1 && !level.clientIsSpawning)
             {
                 weapIndex = ent->s.index.brushmodel % 128;
-                item = (gitem_s *)(4 * ent->s.index.brushmodel + 9917736);
+                //item = (gitem_s *)(4 * ent->s.index.brushmodel + 9917736);
+                item = &bg_itemlist[ent->s.index.brushmodel];
                 if (BG_CanItemBeGrabbed(&ent->s, &other->client->ps, touched))
                 {
                     I_strncpyz(cleanname, other->client->sess.cs.name, 64);
@@ -442,9 +447,9 @@ void __cdecl PrintPlayerPickupMessage(gentity_s *player, unsigned int weapIdx, W
     if (!weapDef)
         MyAssertHandler(".\\game\\g_items.cpp", 273, 0, "%s", "weapDef");
     if (BG_WeaponIsClipOnly(weapIdx))
-        v3 = va(aCGamePickupCli, 102, weapDef->szDisplayName);
+        v3 = va("*WARNING* One or more selections were skipped as they could not be interpreted as c data", 102, weapDef->szDisplayName);
     else
-        v3 = va(aCGamePickupAmm, 102, weapDef->szDisplayName);
+        v3 = va("*WARNING* One or more selections were skipped as they could not be interpreted as c data", 102, weapDef->szDisplayName);
     SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, v3);
 }
 
@@ -549,7 +554,7 @@ void __cdecl PrintMessage_CannotGrabItem(gentity_s *ent, gentity_s *player, int 
         if (Com_BitCheckAssert(client->ps.weapons, weapIndex, 16))
         {
             WeaponDef = BG_GetWeaponDef(weapIndex);
-            v6 = va(aCGamePickupCan, 102, WeaponDef->szDisplayName);
+            v6 = va("%c \"GAME_PICKUP_CANTCARRYMOREAMMO", 102, WeaponDef->szDisplayName);
         }
         else
         {
@@ -726,7 +731,7 @@ int __cdecl GetFreeDropCueIdx()
         ent = EntHandle::ent(&level.droppedWeaponCue[i]);
         if ((ent->flags & 0x1000000) == 0)
         {
-            if (bg_itemlist[ent->s.index.brushmodel] != 1)
+            if (bg_itemlist[ent->s.index.brushmodel].giType != IT_WEAPON)
                 MyAssertHandler(".\\game\\g_items.cpp", 670, 0, "%s", "bg_itemlist[ ent->s.index.item ].giType == IT_WEAPON");
             weapIndex = ent->item[0].index % 128;
             weapDef = BG_GetWeaponDef(weapIndex);
@@ -821,8 +826,9 @@ gentity_s *__cdecl Drop_Weapon(gentity_s *ent, int weapIdx, unsigned __int8 weap
         weapIdx = altWeapIdx;
     }
     v6 = weapIdx + (weaponModel << 7);
-    weapItem = (const gitem_s *)(4 * v6 + 9917736);
-    if (bg_itemlist[v6] != 1)
+    //weapItem = (const gitem_s *)(4 * v6 + 9917736);
+    weapItem = &bg_itemlist[v6];
+    if (bg_itemlist[v6].giType != IT_WEAPON)
         MyAssertHandler(".\\game\\g_items.cpp", 1038, 0, "%s", "weapItem->giType == IT_WEAPON");
     if (ent->client)
     {
@@ -993,9 +999,10 @@ void __cdecl FinishSpawningItem(gentity_s *ent)
     }
     else
     {
-        v1.brushmodel = (int)ent->s.index;
-        item = (gitem_s *)(4 * v1.brushmodel + 9917736);
-        if (bg_itemlist[v1.brushmodel] != 1)
+        v1.brushmodel = ent->s.index.brushmodel;
+        //item = (gitem_s *)(4 * v1.brushmodel + 9917736);
+        item = &bg_itemlist[v1.brushmodel];
+        if (bg_itemlist[v1.brushmodel].giType != IT_WEAPON)
             MyAssertHandler(".\\game\\g_items.cpp", 1131, 0, "%s", "item->giType == IT_WEAPON");
         mins[0] = -1.0;
         mins[1] = -1.0;
@@ -1047,7 +1054,7 @@ void __cdecl FinishSpawningItem(gentity_s *ent)
             Vec3Cross(vAxis[2], vAxis[0], vAxis[1]);
             Vec3Cross(vAxis[1], vAxis[2], vAxis[0]);
             AxisToAngles(vAxis, vAngles);
-            if (bg_itemlist[ent->s.index.brushmodel] != 1)
+            if (bg_itemlist[ent->s.index.brushmodel].giType != IT_WEAPON)
                 MyAssertHandler(".\\game\\g_items.cpp", 1176, 0, "%s", "bg_itemlist[ent->s.index.item].giType == IT_WEAPON");
             vAngles[2] = vAngles[2] + 90.0;
             G_SetAngle(ent, vAngles);
@@ -1134,10 +1141,10 @@ void __cdecl G_RegisterWeapon(unsigned int weapIndex)
     if (*weapDef->szUseHintString
         && !G_GetHintStringIndex(&weapDef->iUseHintStringIndex, (char *)weapDef->szUseHintString))
     {
-        Com_Error(ERR_DROP, &byte_887CA8, 32);
+        Com_Error(ERR_DROP, "Too many different hintstring values on weapons. Max allowed is %i different strings", 32);
     }
     if (*weapDef->dropHintString && !G_GetHintStringIndex(&weapDef->dropHintStringIndex, (char *)weapDef->dropHintString))
-        Com_Error(ERR_DROP, &byte_887CA8, 32);
+        Com_Error(ERR_DROP, "Too many different hintstring values on weapons. Max allowed is %i different strings", 32);
     for (weapModel = 0; weapModel < 0x10u; ++weapModel)
     {
         if (weapDef->worldModel[weapModel])
@@ -1145,7 +1152,7 @@ void __cdecl G_RegisterWeapon(unsigned int weapIndex)
             Name = (char *)XModelGetName(weapDef->worldModel[weapModel]);
             modelindex = G_ModelIndex(Name);
             if (XModelBad(weapDef->worldModel[weapModel]))
-                G_OverrideModel(modelindex, "defaultweapon");
+                G_OverrideModel(modelindex, (char*)"defaultweapon");
         }
     }
     if (weapDef->projectileModel)
@@ -1388,7 +1395,7 @@ void __cdecl G_OrientItemToGround(gentity_s *ent, trace_t *trace)
     AxisToAngles(vAxis, vAngles);
     if (ent->s.index.brushmodel)
     {
-        if (bg_itemlist[ent->s.index.brushmodel] != 1)
+        if (bg_itemlist[ent->s.index.brushmodel].giType != IT_WEAPON)
             MyAssertHandler(".\\game\\g_items.cpp", 1443, 0, "%s", "bg_itemlist[ent->s.index.item].giType == IT_WEAPON");
         vAngles[2] = vAngles[2] + 90.0;
     }

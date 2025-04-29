@@ -24,87 +24,6 @@ VehicleLocalPhysics s_phys;
 
 VehiclePhysicsBackup s_backup;
 
-const float  s_correctSolidDeltas[] = {
-    0.0,
-    0.0,
-    1.0,
-    -1.0,
-    0.0,
-    1.0,
-    0.0,
-    -1.0,
-    1.0,
-    1.0,
-    0.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    -1.0,
-    0.0,
-    0.0,
-    0.0,
-    -1.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    0.0,
-    -1.0,
-    -1.0,
-    0.0,
-    -1.0,
-    0.0,
-    -1.0,
-    -1.0,
-    1.0,
-    0.0,
-    -1.0,
-    0.0,
-    1.0,
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    0.0,
-    1.0,
-    -1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-    -1.0,
-    1.0,
-    0.0,
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-};
-
 gentity_s *__cdecl GScr_GetVehicle(scr_entref_t entref)
 {
     if (!entref.classnum)
@@ -350,7 +269,7 @@ int __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace)
     phys = &ent->scr_vehicle->phys;
     for (i = 0; i < 0x1A; ++i)
     {
-        Vec3Add(phys->origin, &s_correctSolidDeltas[i], point);
+        Vec3Add(phys->origin, (const float*)&s_correctSolidDeltas[i], point);
         G_TraceCapsule(trace, point, phys->mins, phys->maxs, point, ent->s.number, ent->clipmask);
         if (!trace->startsolid)
         {
@@ -861,7 +780,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
             else
             {
                 G_DObjGetWorldBoneIndexMatrix(ent, veh->boneIndex.turret_base, turretBaseMat);
-                AxisToAngles(turretBaseMat, angles);
+                AxisToAngles(*(const mat3x3*)turretBaseMat, angles);
             }
             if (EntHandle::isDefined(&ent->r.ownerNum) && veh->targetEnt == 1023)
             {

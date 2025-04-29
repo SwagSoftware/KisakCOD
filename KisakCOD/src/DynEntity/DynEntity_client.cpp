@@ -1547,9 +1547,9 @@ void __cdecl DynEntCl_ExplosionEvent(
                             v10 = flrand(-1.0, 1.0);
                             outPosition = v10 * dynEnt_explodeSpinScale->current.value + outPosition;
                             v11 = flrand(-1.0, 1.0);
-                            v30 = v11 * dynEnt_explodeSpinScale->current.value + v30;
+                            v30 = v11 * dynEnt_explodeSpinScale->current.value;// +v30;
                             v12 = flrand(-1.0, 1.0);
-                            v31 = v12 * dynEnt_explodeSpinScale->current.value + v31;
+                            v31 = v12 * dynEnt_explodeSpinScale->current.value;// +v31;
                             Phys_ObjAddForce(PHYS_WORLD_DYNENT, (dxBody *)ClientEntity->physObjId, &outPosition, result);
                         }
                     }
@@ -1601,7 +1601,7 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
         //    &v10[unsignedInt_low],
         //    (int)(8 * unsignedInt_low) >> 3,
         //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
-        std::sort(&v10[0], &v10[unsignedInt_low], DynEntCl_CompareDynEntsForExplosion);
+        std::sort((const DynEntSortStruct **)&v10[0], (const DynEntSortStruct **)&v10[unsignedInt_low], DynEntCl_CompareDynEntsForExplosion);
         unsignedInt_low = LOWORD(dynEnt_explodeMaxEnts->current.unsignedInt);
         if (unsignedInt_low != dynEnt_explodeMaxEnts->current.integer)
             MyAssertHandler(
@@ -1684,7 +1684,7 @@ void __cdecl DynEntCl_JitterEvent(
                 //    &v15[unsignedInt],
                 //    (8 * unsignedInt) >> 3,
                 //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
-                std::sort(&v15[0], &v15[unsignedInt], DynEntCl_CompareDynEntsForExplosion);
+                std::sort((const DynEntSortStruct **)&v15[0], (const DynEntSortStruct **)&v15[unsignedInt], DynEntCl_CompareDynEntsForExplosion);
                 unsignedInt = dynEnt_explodeMaxEnts->current.unsignedInt;
                 if (unsignedInt != dynEnt_explodeMaxEnts->current.integer)
                     MyAssertHandler(

@@ -168,8 +168,11 @@ void  CG_AddPlayerSpriteDrawSurf(
     const cg_s *cgameGlob; // [esp+6Ch] [ebp-8h]
     const cg_s *retaddr; // [esp+74h] [ebp+0h]
 
+    const float *sprite_24; // [esp+3Ch] [ebp-38h]
+    float sprite_28; // [esp+40h] [ebp-34h] BYREF
+    float v12; // [esp+48h] [ebp-2Ch]
     //v16 = a1;
-    cgameGlob = retaddr;
+    //cgameGlob = retaddr;
     if (additionalRadiusSize < 0.0)
         MyAssertHandler(
             ".\\cgame_mp\\cg_players_mp.cpp",
@@ -188,10 +191,12 @@ void  CG_AddPlayerSpriteDrawSurf(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    renderFxFlags = (int)cgArray;
+    //renderFxFlags = (int)cgArray;
     radius = cgArray[0].nextSnap;
-    obj = ((radius->ps.otherFlags & 6) != 0 && cent->nextState.number == radius->ps.clientNum);
-    if (!(_BYTE)obj || *(unsigned int *)(renderFxFlags + 287032))
+    //obj = ;
+    //if (!(_BYTE)obj || *(unsigned int *)(renderFxFlags + 287032))
+    //if (!((radius->ps.otherFlags & 6) != 0 && cent->nextState.number == radius->ps.clientNum) || *(unsigned int *)(renderFxFlags + 287032))
+    if (!((radius->ps.otherFlags & 6) != 0 && cent->nextState.number == radius->ps.clientNum) || cgArray[0].renderingThirdPerson)
     {
         if (fixedScreenSize)
         {
@@ -204,31 +209,35 @@ void  CG_AddPlayerSpriteDrawSurf(
             v7 = additionalRadiusSize + 10.0;
         }
         origin[1] = v7;
-        LODWORD(origin[0]) = Com_GetClientDObj(cent->nextState.number, localClientNum);
-        if (LODWORD(origin[0])
-            && CG_DObjGetWorldTagPos(&cent->pose, (DObj_s *)LODWORD(origin[0]), scr_const.j_head, (float *)&sprite.flags))
+        //LODWORD(origin[0]) = Com_GetClientDObj(cent->nextState.number, localClientNum);
+        DObj_s *swag = Com_GetClientDObj(cent->nextState.number, localClientNum);
+        if (swag  && CG_DObjGetWorldTagPos(&cent->pose, (DObj_s *)LODWORD(origin[0]), scr_const.j_head, &sprite_28))
+        // if ( LODWORD(origin[0]) && CG_DObjGetWorldTagPos(&cent->pose, LODWORD(origin[0]), scr_const.j_head, &sprite.flags) )
         {
-            v11 = (double)height + 21.0 + v11;
+            //v12 = height + 21.0 + v12;
+            v12 = height + 21.0;
         }
         else
         {
-            LODWORD(sprite.minScreenRadius) = cent->pose.origin;
-            *(float *)&sprite.flags = cent->pose.origin[0];
-            v10 = cent->pose.origin[1];
-            v11 = cent->pose.origin[2];
-            v11 = (double)height + 82.0 + v11;
+            sprite_24 = cent->pose.origin;
+            sprite_28 = cent->pose.origin[0];
+            v11 = cent->pose.origin[1];
+            v12 = cent->pose.origin[2];
+            //v12 = height + 82.0 + v12;
+            v12 = height + 82.0;
         }
-        v8[1] = sprite.flags;
-        *(float *)&v8[2] = v10;
-        *(float *)&sprite.material = v11;
-        sprite.pos[0] = NAN;
-        v8[0] = material;
-        sprite.pos[1] = origin[1];
-        sprite.pos[2] = cg_headIconMinScreenRadius->current.value;
-        *(float *)sprite.rgbaColor = origin[2];
+        FxSprite v8;
+        v8.pos[0] = sprite_28;
+        v8.pos[1] = v11;
+        v8.pos[2] = v12;
+        *v8.rgbaColor = -1;
+        v8.material = material;
+        v8.radius = origin[1];
+        v8.minScreenRadius = cg_headIconMinScreenRadius->current.value;
+        *&v8.flags = origin[2];
         if (!cg_headIconMinScreenRadius)
             MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 113, 0, "%s", "cg_headIconMinScreenRadius");
-        FX_SpriteAdd((FxSprite *)v8);
+        FX_SpriteAdd(&v8);
     }
 }
 
@@ -514,8 +523,8 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                             axis[3][2] = tagHeight + turretAxis[3][2];
                                             v5 = RotationToYaw(rot);
                                             yaw = v5 + yaw;
-                                            YawToAxis(yaw, axis);
-                                            AxisToAngles(axis, cent->pose.angles);
+                                            YawToAxis(yaw, *(mat3x3*)&axis);
+                                            AxisToAngles(*(const mat3x3*)&axis, cent->pose.angles);
                                             cent->pose.origin[0] = axis[3][0];
                                             cent->pose.origin[1] = axis[3][1];
                                             cent->pose.origin[2] = axis[3][2];
@@ -693,7 +702,7 @@ void __cdecl CG_ResetPlayerEntity(int localClientNum, cg_s *cgameGlob, centity_s
             17,
             "%i ResetPlayerEntity yaw=%i\n",
             cent->nextState.number,
-            (unsigned int)COERCE_UNSIGNED_INT64(ci->torso.yawAngle));
+            (unsigned int)(ci->torso.yawAngle));
 }
 
 const char *__cdecl CG_GetTeamName(team_t team)

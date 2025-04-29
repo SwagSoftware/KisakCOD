@@ -1,5 +1,5 @@
 #pragma once
-#include "r_material.h"
+//#include "r_material.h"
 
 struct Glyph // sizeof=0x18
 {

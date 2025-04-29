@@ -66,10 +66,29 @@ int g_poolSize[33] =
   50
 }; // idb
 
+bool g_archiveBuf;
+
 XAssetHeader __cdecl node1_(void *pool)
 {
     return (XAssetHeader)pool;
 }
+
+XAssetHeader __cdecl DB_AllocXAsset_StringTable_(XAssetHeader *pool)
+{
+    XAssetHeader header; // [esp+4h] [ebp-8h]
+
+    if (pool->xmodelPieces)
+    {
+        header.xmodelPieces = pool->xmodelPieces;
+        pool->xmodelPieces = (XModelPieces *)pool->xmodelPieces->name;
+    }
+    else
+    {
+        header.xmodelPieces = 0;
+    }
+    return header;
+}
+
 
 XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[33])(void *) =
 {
@@ -107,6 +126,15 @@ XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[33])(void *) =
   (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
   (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_
 }; // idb
+
+void __cdecl DB_FreeXAssetHeader_StringTable_(XAssetPoolEntry<StringTable> **pool, XAssetHeader header)
+{
+    XAssetPoolEntry<StringTable> *oldFreeHead; // [esp+8h] [ebp-4h]
+
+    oldFreeHead = *pool;
+    *pool = (XAssetPoolEntry<StringTable> *)header.xmodelPieces;
+    header.xmodelPieces->name = (const char *)oldFreeHead;
+}
 
 void(__cdecl *DB_FreeXAssetHeaderHandler[33])(void *, XAssetHeader) =
 {
@@ -315,7 +343,8 @@ char *__cdecl DB_ReferencedFFChecksums()
         {
             if (g_zoneNameList[0])
                 I_strncat(g_zoneNameList, 2080, " ");
-            itoa(g_zones[i].fileSize, zoneSizeStr, 0xAu);
+            //itoa(g_zones[i].fileSize, zoneSizeStr, 0xAu);
+            _itoa(g_zones[i].fileSize, zoneSizeStr, 0xAu);
             I_strncat(g_zoneNameList, 2080, zoneSizeStr);
         }
     }
@@ -622,6 +651,18 @@ void __cdecl DB_GetVertexBufferAndOffset(unsigned __int8 zoneHandle, _BYTE *vert
 {
     *vertexOffset = verts - g_zones[zoneHandle].mem.blocks[7].data;
     *vb = g_zones[zoneHandle].mem.vertexBuffer;
+}
+
+void __cdecl DB_BuildOSPath_Mod(const char *zoneName, unsigned int size, char *filename)
+{
+    char *v3; // eax
+    const char *string; // [esp-8h] [ebp-8h]
+
+    if (!*(_BYTE *)fs_gameDirVar->current.integer)
+        MyAssertHandler(".\\database\\db_registry.cpp", 3204, 0, "%s", "IsUsingMods()");
+    string = fs_gameDirVar->current.string;
+    v3 = Sys_DefaultInstallPath();
+    Com_sprintf(filename, size, "%s\\%s\\%s.ff", v3, string, zoneName);
 }
 
 bool __cdecl DB_ModFileExists()
@@ -1017,35 +1058,10 @@ void __cdecl Mark_StringTableAsset(StringTable *stringTable)
     DB_GetXAsset(ASSET_TYPE_STRINGTABLE, (XAssetHeader)stringTable);
 }
 
-XAssetHeader __cdecl DB_AllocXAsset_StringTable_(XAssetHeader *pool)
-{
-    XAssetHeader header; // [esp+4h] [ebp-8h]
-
-    if (pool->xmodelPieces)
-    {
-        header.xmodelPieces = pool->xmodelPieces;
-        pool->xmodelPieces = (XModelPieces *)pool->xmodelPieces->name;
-    }
-    else
-    {
-        header.xmodelPieces = 0;
-    }
-    return header;
-}
-
 XAssetHeader __cdecl DB_AllocMaterial(XAssetHeader *pool)
 {
     Material_DirtySort();
     return DB_AllocXAsset_StringTable_(pool);
-}
-
-void __cdecl DB_FreeXAssetHeader_StringTable_(XAssetPoolEntry<StringTable> **pool, XAssetHeader header)
-{
-    XAssetPoolEntry<StringTable> *oldFreeHead; // [esp+8h] [ebp-4h]
-
-    oldFreeHead = *pool;
-    *pool = (XAssetPoolEntry<StringTable> *)header.xmodelPieces;
-    header.xmodelPieces->name = (const char *)oldFreeHead;
 }
 
 void __cdecl DB_FreeMaterial(XAssetPoolEntry<StringTable> **pool, XAssetHeader header)
@@ -1401,7 +1417,7 @@ void DB_SetReorderIncludeSequence()
     }
 }
 
-bool __cdecl DB_CompareReorderEntries(const DBReorderAssetEntry *e0, const DBReorderAssetEntry *e1)
+bool __cdecl DB_CompareReorderEntries(DBReorderAssetEntry *e0, DBReorderAssetEntry *e1)
 {
     int comparison; // [esp+0h] [ebp-4h]
 
@@ -1461,7 +1477,7 @@ void DB_EndReorderZone()
             //    (GfxSModelSurfStats *)&s_dbReorder.entries[s_dbReorder.entryCount],
             //    (signed int)(16 * s_dbReorder.entryCount) >> 4,
             //    (bool(__cdecl *)(GfxSModelSurfStats *, GfxSModelSurfStats *))DB_CompareReorderEntries);
-            std::sort(&s_dbReorder.entries[0], &s_dbReorder.entries[s_dbReorder.entryCount], DB_CompareReorderEntries);
+            std::sort((DBReorderAssetEntry **)&s_dbReorder.entries[0], (DBReorderAssetEntry **)&s_dbReorder.entries[s_dbReorder.entryCount], DB_CompareReorderEntries); // KISAKTODO: sketchy double ptr cast
             for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
             {
                 entry = &s_dbReorder.entries[entryIter];
@@ -2498,7 +2514,8 @@ void __cdecl DB_AddReorderAsset(const char *typeString, const char *assetName)
         ;
     if (type == 23)
     {
-        if (strnicmp(assetName, "mp/", 3u))
+        //if (strnicmp(assetName, "mp/", 3u))
+        if (_strnicmp(assetName, "mp/", 3u))
             MyAssertHandler(
                 ".\\database\\db_registry.cpp",
                 1911,
@@ -2930,7 +2947,7 @@ void(__cdecl *DB_RemoveXAssetHandler[33])(XAssetHeader) =
   NULL,
   NULL,
   NULL,
-  &Material_ReleaseTechniqueSet,
+  (void(*)(XAssetHeader))&Material_ReleaseTechniqueSet,
   (void(*)(XAssetHeader))&Image_Free,
   NULL,
   NULL,
@@ -3118,7 +3135,6 @@ void DB_SyncExternalAssets()
     RB_ClearVertexDecl();
 }
 
-bool g_archiveBuf;
 void DB_ArchiveAssets()
 {
     if (!g_archiveBuf)
@@ -3214,18 +3230,6 @@ void __cdecl DB_Cleanup()
     Sys_SyncDatabase();
     if (g_archiveBuf)
         MyAssertHandler(".\\database\\db_registry.cpp", 4256, 0, "%s", "!g_archiveBuf");
-}
-
-void __cdecl DB_BuildOSPath_Mod(const char *zoneName, unsigned int size, char *filename)
-{
-    char *v3; // eax
-    const char *string; // [esp-8h] [ebp-8h]
-
-    if (!*(_BYTE *)fs_gameDirVar->current.integer)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3204, 0, "%s", "IsUsingMods()");
-    string = fs_gameDirVar->current.string;
-    v3 = Sys_DefaultInstallPath();
-    Com_sprintf(filename, size, "%s\\%s\\%s.ff", v3, string, zoneName);
 }
 
 int __cdecl DB_FileSize(const char *zoneName, int isMod)

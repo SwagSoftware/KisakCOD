@@ -17,6 +17,9 @@
 #include <database/database.h>
 #include "g_public_mp.h"
 #include <server/sv_world.h>
+#include <universal/profile.h>
+
+XModel *cached_models[512];
 
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
 {
@@ -281,7 +284,6 @@ bool __cdecl G_GetModelBounds(int index, float *outMins, float *outMaxs)
     return XModelGetStaticBounds(xmodel, identityBasis, outMins, outMaxs) != 0;
 }
 
-XModel *cached_models[512];
 XModel *__cdecl G_GetModel(int index)
 {
     if (index <= 0)
@@ -719,16 +721,14 @@ void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
     float v4; // [esp+28h] [ebp-A8h]
     float v5; // [esp+2Ch] [ebp-A4h]
     float v6; // [esp+30h] [ebp-A0h]
-    float result; // [esp+34h] [ebp-9Ch] BYREF
-    float v8; // [esp+38h] [ebp-98h]
-    float v9; // [esp+3Ch] [ebp-94h]
-    float v10; // [esp+40h] [ebp-90h]
-    float v11; // [esp+44h] [ebp-8Ch]
-    float v12; // [esp+48h] [ebp-88h]
-    float v13; // [esp+4Ch] [ebp-84h]
-    float v14; // [esp+50h] [ebp-80h]
-    float *v15; // [esp+68h] [ebp-68h]
-    float *v16; // [esp+6Ch] [ebp-64h]
+    float result[3]; // [esp+34h] [ebp-9Ch] BYREF
+    float v8; // [esp+40h] [ebp-90h]
+    float v9; // [esp+44h] [ebp-8Ch]
+    float v10; // [esp+48h] [ebp-88h]
+    float v11; // [esp+4Ch] [ebp-84h]
+    float v12; // [esp+50h] [ebp-80h]
+    float *v13; // [esp+68h] [ebp-68h]
+    float *v14; // [esp+6Ch] [ebp-64h]
     tagInfo_s *tagInfo; // [esp+70h] [ebp-60h]
     float tempAxis[4][3]; // [esp+74h] [ebp-5Ch] BYREF
     gentity_s *parent; // [esp+A4h] [ebp-2Ch]
@@ -752,14 +752,14 @@ void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
     else
     {
         AnglesToAxis(parent->r.currentAngles, tempAxis);
-        v15 = tempAxis[3];
-        v16 = parent->r.currentOrigin;
+        v13 = tempAxis[3];
+        v14 = parent->r.currentOrigin;
         tempAxis[3][0] = parent->r.currentOrigin[0];
         tempAxis[3][1] = parent->r.currentOrigin[1];
         tempAxis[3][2] = parent->r.currentOrigin[2];
-        //Profile_Begin(313);
+        Profile_Begin(313);
         G_DObjCalcBone(parent, tagInfo->index);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         mat = &SV_DObjGetMatrixArray(parent)[tagInfo->index];
         if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
             || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
@@ -775,26 +775,26 @@ void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
         }
         if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
             MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-        Vec3Scale(mat->quat, mat->transWeight, &result);
-        v13 = result * mat->quat[0];
-        v4 = result * mat->quat[1];
-        v11 = result * mat->quat[2];
-        v14 = result * mat->quat[3];
-        v3 = v8 * mat->quat[1];
-        v12 = v8 * mat->quat[2];
-        v10 = v8 * mat->quat[3];
-        v5 = v9 * mat->quat[2];
-        v6 = v9 * mat->quat[3];
+        Vec3Scale(mat->quat, mat->transWeight, result);
+        v11 = result[0] * mat->quat[0];
+        v4 = result[0] * mat->quat[1];
+        v9 = result[0] * mat->quat[2];
+        v12 = result[0] * mat->quat[3];
+        v3 = result[1] * mat->quat[1];
+        v10 = result[1] * mat->quat[2];
+        v8 = result[1] * mat->quat[3];
+        v5 = result[2] * mat->quat[2];
+        v6 = result[2] * mat->quat[3];
         axis[0][0] = 1.0 - (v3 + v5);
         axis[0][1] = v4 + v6;
-        axis[0][2] = v11 - v10;
+        axis[0][2] = v9 - v8;
         axis[1][0] = v4 - v6;
-        axis[1][1] = 1.0 - (v13 + v5);
-        axis[1][2] = v12 + v14;
-        axis[2][0] = v11 + v10;
-        axis[2][1] = v12 - v14;
-        axis[2][2] = 1.0 - (v13 + v3);
-        MatrixMultiply(axis, tempAxis, parentAxis);
+        axis[1][1] = 1.0 - (v11 + v5);
+        axis[1][2] = v10 + v12;
+        axis[2][0] = v9 + v8;
+        axis[2][1] = v10 - v12;
+        axis[2][2] = 1.0 - (v11 + v3);
+        MatrixMultiply(axis, *(const mat3x3*)&tempAxis, *(mat3x3*)parentAxis);
         MatrixTransformVector43(mat->trans, tempAxis, &(*parentAxis)[9]);
     }
 }
@@ -813,8 +813,8 @@ void __cdecl G_CalcTagAxis(gentity_s *ent, int bAnglesOnly)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 965, 0, "%s", "tagInfo");
     if (bAnglesOnly)
     {
-        MatrixTranspose(parentAxis, invParentAxis);
-        MatrixMultiply(axis, invParentAxis, tagInfo->axis);
+        MatrixTranspose(*(const mat3x3*)&parentAxis, *(mat3x3*)&invParentAxis);
+        MatrixMultiply(*(const mat3x3*)&axis, *(const mat3x3*)&invParentAxis, *(mat3x3*)&tagInfo->axis);
     }
     else
     {
@@ -860,7 +860,7 @@ void __cdecl G_SetFixedLink(gentity_s *ent, int eAngles)
         ent->r.currentOrigin[0] = axis[3][0];
         ent->r.currentOrigin[1] = axis[3][1];
         ent->r.currentOrigin[2] = axis[3][2];
-        AxisToAngles(axis, ent->r.currentAngles);
+        AxisToAngles(*(const mat3x3*)&axis, ent->r.currentAngles);
     }
 }
 
@@ -954,15 +954,13 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     float v5; // [esp+20h] [ebp-8Ch]
     float v6; // [esp+24h] [ebp-88h]
     float v7; // [esp+28h] [ebp-84h]
-    float result; // [esp+2Ch] [ebp-80h] BYREF
-    float v9; // [esp+30h] [ebp-7Ch]
-    float v10; // [esp+34h] [ebp-78h]
-    float v11; // [esp+38h] [ebp-74h]
-    float v12; // [esp+3Ch] [ebp-70h]
-    float v13; // [esp+40h] [ebp-6Ch]
-    float v14; // [esp+44h] [ebp-68h]
-    float v15; // [esp+48h] [ebp-64h]
-    float *v16; // [esp+4Ch] [ebp-60h]
+    float result[3]; // [esp+2Ch] [ebp-80h] BYREF
+    float v9; // [esp+38h] [ebp-74h]
+    float v10; // [esp+3Ch] [ebp-70h]
+    float v11; // [esp+40h] [ebp-6Ch]
+    float v12; // [esp+44h] [ebp-68h]
+    float v13; // [esp+48h] [ebp-64h]
+    float *v14; // [esp+4Ch] [ebp-60h]
     float *currentOrigin; // [esp+50h] [ebp-5Ch]
     float ent_axis[4][3]; // [esp+54h] [ebp-58h] BYREF
     DObjAnimMat *mat; // [esp+84h] [ebp-28h]
@@ -972,7 +970,7 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     if (!mat)
         return 0;
     AnglesToAxis(ent->r.currentAngles, ent_axis);
-    v16 = ent_axis[3];
+    v14 = ent_axis[3];
     currentOrigin = ent->r.currentOrigin;
     ent_axis[3][0] = ent->r.currentOrigin[0];
     ent_axis[3][1] = ent->r.currentOrigin[1];
@@ -991,26 +989,26 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     }
     if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-    Vec3Scale(mat->quat, mat->transWeight, &result);
-    v14 = result * mat->quat[0];
-    v5 = result * mat->quat[1];
-    v12 = result * mat->quat[2];
-    v15 = result * mat->quat[3];
-    v4 = v9 * mat->quat[1];
-    v13 = v9 * mat->quat[2];
-    v11 = v9 * mat->quat[3];
-    v6 = v10 * mat->quat[2];
-    v7 = v10 * mat->quat[3];
+    Vec3Scale(mat->quat, mat->transWeight, result);
+    v12 = result[0] * mat->quat[0];
+    v5 = result[0] * mat->quat[1];
+    v10 = result[0] * mat->quat[2];
+    v13 = result[0] * mat->quat[3];
+    v4 = result[1] * mat->quat[1];
+    v11 = result[1] * mat->quat[2];
+    v9 = result[1] * mat->quat[3];
+    v6 = result[2] * mat->quat[2];
+    v7 = result[2] * mat->quat[3];
     axis[0][0] = 1.0 - (v4 + v6);
     axis[0][1] = v5 + v7;
-    axis[0][2] = v12 - v11;
+    axis[0][2] = v10 - v9;
     axis[1][0] = v5 - v7;
-    axis[1][1] = 1.0 - (v14 + v6);
-    axis[1][2] = v13 + v15;
-    axis[2][0] = v12 + v11;
-    axis[2][1] = v13 - v15;
-    axis[2][2] = 1.0 - (v14 + v4);
-    MatrixMultiply(axis, ent_axis, tagMat);
+    axis[1][1] = 1.0 - (v12 + v6);
+    axis[1][2] = v11 + v13;
+    axis[2][0] = v10 + v9;
+    axis[2][1] = v11 - v13;
+    axis[2][2] = 1.0 - (v12 + v4);
+    MatrixMultiply(axis, *(const mat3x3*)&ent_axis, *(mat3x3*)tagMat);
     MatrixTransformVector43(mat->trans, ent_axis, &(*tagMat)[9]);
     return 1;
 }
@@ -1058,15 +1056,13 @@ void __cdecl G_DObjGetWorldBoneIndexMatrix(gentity_s *ent, int boneIndex, float 
     float v4; // [esp+20h] [ebp-8Ch]
     float v5; // [esp+24h] [ebp-88h]
     float v6; // [esp+28h] [ebp-84h]
-    float result; // [esp+2Ch] [ebp-80h] BYREF
-    float v8; // [esp+30h] [ebp-7Ch]
-    float v9; // [esp+34h] [ebp-78h]
-    float v10; // [esp+38h] [ebp-74h]
-    float v11; // [esp+3Ch] [ebp-70h]
-    float v12; // [esp+40h] [ebp-6Ch]
-    float v13; // [esp+44h] [ebp-68h]
-    float v14; // [esp+48h] [ebp-64h]
-    float *v15; // [esp+4Ch] [ebp-60h]
+    float result[3]; // [esp+2Ch] [ebp-80h] BYREF
+    float v8; // [esp+38h] [ebp-74h]
+    float v9; // [esp+3Ch] [ebp-70h]
+    float v10; // [esp+40h] [ebp-6Ch]
+    float v11; // [esp+44h] [ebp-68h]
+    float v12; // [esp+48h] [ebp-64h]
+    float *v13; // [esp+4Ch] [ebp-60h]
     float *currentOrigin; // [esp+50h] [ebp-5Ch]
     float ent_axis[4][3]; // [esp+54h] [ebp-58h] BYREF
     DObjAnimMat *mat; // [esp+84h] [ebp-28h]
@@ -1074,7 +1070,7 @@ void __cdecl G_DObjGetWorldBoneIndexMatrix(gentity_s *ent, int boneIndex, float 
 
     mat = G_DObjGetLocalBoneIndexMatrix(ent, boneIndex);
     AnglesToAxis(ent->r.currentAngles, ent_axis);
-    v15 = ent_axis[3];
+    v13 = ent_axis[3];
     currentOrigin = ent->r.currentOrigin;
     ent_axis[3][0] = ent->r.currentOrigin[0];
     ent_axis[3][1] = ent->r.currentOrigin[1];
@@ -1093,26 +1089,26 @@ void __cdecl G_DObjGetWorldBoneIndexMatrix(gentity_s *ent, int boneIndex, float 
     }
     if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-    Vec3Scale(mat->quat, mat->transWeight, &result);
-    v13 = result * mat->quat[0];
-    v4 = result * mat->quat[1];
-    v11 = result * mat->quat[2];
-    v14 = result * mat->quat[3];
-    v3 = v8 * mat->quat[1];
-    v12 = v8 * mat->quat[2];
-    v10 = v8 * mat->quat[3];
-    v5 = v9 * mat->quat[2];
-    v6 = v9 * mat->quat[3];
+    Vec3Scale(mat->quat, mat->transWeight, result);
+    v11 = result[0] * mat->quat[0];
+    v4 = result[0] * mat->quat[1];
+    v9 = result[0] * mat->quat[2];
+    v12 = result[0] * mat->quat[3];
+    v3 = result[1] * mat->quat[1];
+    v10 = result[1] * mat->quat[2];
+    v8 = result[1] * mat->quat[3];
+    v5 = result[2] * mat->quat[2];
+    v6 = result[2] * mat->quat[3];
     axis[0][0] = 1.0 - (v3 + v5);
     axis[0][1] = v4 + v6;
-    axis[0][2] = v11 - v10;
+    axis[0][2] = v9 - v8;
     axis[1][0] = v4 - v6;
-    axis[1][1] = 1.0 - (v13 + v5);
-    axis[1][2] = v12 + v14;
-    axis[2][0] = v11 + v10;
-    axis[2][1] = v12 - v14;
-    axis[2][2] = 1.0 - (v13 + v3);
-    MatrixMultiply(axis, ent_axis, tagMat);
+    axis[1][1] = 1.0 - (v11 + v5);
+    axis[1][2] = v10 + v12;
+    axis[2][0] = v9 + v8;
+    axis[2][1] = v10 - v12;
+    axis[2][2] = 1.0 - (v11 + v3);
+    MatrixMultiply(axis, *(const mat3x3*)&ent_axis, *(mat3x3*)tagMat);
     MatrixTransformVector43(mat->trans, ent_axis, &(*tagMat)[9]);
 }
 

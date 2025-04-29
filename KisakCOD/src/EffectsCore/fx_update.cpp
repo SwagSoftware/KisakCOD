@@ -1144,31 +1144,33 @@ void __cdecl FX_IntegrateVelocity(const FxUpdateElem *update, float t0, float t1
         }
         if (startIndex < 0 || startIndex >= intervalCount)
         {
-            v7 = va("%i for %g on %i intervals", startIndex, t0, intervalCount);
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_update.cpp",
-                789,
-                1,
-                "%s\n\t(va( \"%i for %g on %i intervals\", startIndex, t0, intervalCount )) = %i",
-                "(startIndex >= 0 && startIndex < intervalCount)",
-                v7,
-                v9,
-                v10,
-                v11);
+            iassert(0);
+            //v7 = va("%i for %g on %i intervals", startIndex, t0, intervalCount);
+            //MyAssertHandler(
+            //    ".\\EffectsCore\\fx_update.cpp",
+            //    789,
+            //    1,
+            //    "%s\n\t(va( \"%i for %g on %i intervals\", startIndex, t0, intervalCount )) = %i",
+            //    "(startIndex >= 0 && startIndex < intervalCount)",
+            //    v7,
+            //    v9,
+            //    v10,
+            //    v11);
         }
         if (endIndex < 0 || endIndex >= intervalCount)
         {
-            v8 = va("%i for %g on %i intervals", endIndex, t1, intervalCount);
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_update.cpp",
-                790,
-                1,
-                "%s\n\t(va( \"%i for %g on %i intervals\", endIndex, t1, intervalCount )) = %i",
-                "(endIndex >= 0 && endIndex < intervalCount)",
-                v8,
-                v9,
-                v10,
-                v11);
+            iassert(0);
+            //v8 = va("%i for %g on %i intervals", endIndex, t1, intervalCount);
+            //MyAssertHandler(
+            //    ".\\EffectsCore\\fx_update.cpp",
+            //    790,
+            //    1,
+            //    "%s\n\t(va( \"%i for %g on %i intervals\", endIndex, t1, intervalCount )) = %i",
+            //    "(endIndex >= 0 && endIndex < intervalCount)",
+            //    v8,
+            //    v9,
+            //    v10,
+            //    v11);
         }
         if (startIndex == endIndex)
             FX_IntegrateVelocityInSegment(

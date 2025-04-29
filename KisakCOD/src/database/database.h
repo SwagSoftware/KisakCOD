@@ -38,7 +38,7 @@ void __cdecl DB_EndRecoverLostDevice();
 void __cdecl DB_BeginRecoverLostDevice();
 void __cdecl DB_InitSingleton(void *pool, int size);
 void __cdecl Load_PhysPresetAsset(XAssetHeader *physPreset);
-void __cdecl Mark_PhysPresetAsset(PhysPreset *physPreset);
+void __cdecl Mark_PhysPresetAsset(struct PhysPreset *physPreset);
 void __cdecl Load_XAnimPartsAsset(XAssetHeader *parts);
 void __cdecl Mark_XAnimPartsAsset(XAnimParts *parts);
 void __cdecl Load_XModelAsset(XAssetHeader *model);
@@ -112,7 +112,7 @@ XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type);
 void __cdecl DB_PrintAssetName(XAssetHeader header, int *data);
 void __cdecl DB_CloneXAssetInternal(const XAsset *from, XAsset *to);
 XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type);
-void __cdecl PrintWaitedError(XAssetType type, char *name, int waitedMsec);
+void __cdecl PrintWaitedError(XAssetType type, const char *name, int waitedMsec);
 void __cdecl DB_Update();
 void __cdecl DB_SetInitializing(bool inUse);
 bool __cdecl DB_GetInitializing();
@@ -677,7 +677,7 @@ extern volatile unsigned int g_loadingAssets;
 
 extern XAssetList *varXAssetList;
 
-fileData_s *com_fileDataHashTable[1024];
+extern struct fileData_s *com_fileDataHashTable[1024];
 
 extern unsigned int volatile g_mainThreadBlocked;
 

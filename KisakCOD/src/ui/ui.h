@@ -3,10 +3,8 @@
 #include <ui_mp/ui_mp.h>
 #include <physics/ode/objects.h>
 #include <bgame/bg_local.h>
-#include <script/scr_debugger.h>
-#include <script/scr_vm.h>
 
-
+struct Scr_WatchElement_s;
 
 // ui_shared
 bool __cdecl Window_IsVisible(int localClientNum, const windowDef_t *w);
@@ -688,8 +686,8 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
     unsigned int bufferIndex;
     int currentTopLine;
     const char *currentBufPos;
-    Scr_Breakpoint *breakpointHead;
-    Scr_Breakpoint *builtinHead;
+    struct Scr_Breakpoint *breakpointHead;
+    struct Scr_Breakpoint *builtinHead;
     int numCols;
 
 
@@ -702,7 +700,7 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
     void GetSourcePos(unsigned int *start, unsigned int *end);
 
     void AddBreakpoint(
-        Scr_Breakpoint **pBreakpoint,
+        struct Scr_Breakpoint **pBreakpoint,
         char *codePos,
         int builtinIndex,
         Scr_WatchElement_s *element,
@@ -712,7 +710,7 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
         Scr_WatchElement_s *element,
         unsigned __int8 breakpointType,
         bool user,
-        Scr_Breakpoint **pBreakpoint,
+        struct Scr_Breakpoint **pBreakpoint,
         unsigned int startSourcePos,
         unsigned int endSourcePos);
 
@@ -741,7 +739,7 @@ struct Scr_OpenScriptList : Scr_AbstractScriptList // sizeof=0x2C
 {                                       // ...
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
 
-    Scr_StringNode_s *usedHead;
+    struct Scr_StringNode_s *usedHead;
 };
 
 struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
@@ -753,24 +751,7 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     unsigned int localId;               // ...
     int dirty;                          // ...
 
-    Scr_WatchElement_s *GetElementWithId_r(Scr_WatchElement_s *element, int id)
-    {
-        Scr_WatchElement_s *childElement; // [esp+4h] [ebp-4h]
-
-        while (element)
-        {
-            if (element->id == id)
-                return element;
-            if (element->childHead)
-            {
-                childElement = Scr_ScriptWatch::GetElementWithId_r(element->childHead, id);
-                if (childElement)
-                    return childElement;
-            }
-            element = element->next;
-        }
-        return 0;
-    }
+    Scr_WatchElement_s *GetElementWithId_r(Scr_WatchElement_s *element, int id);
 
     Scr_WatchElement_s *GetElementWithId(int id)
     {
@@ -811,7 +792,7 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     void EvaluateWatchElement(Scr_WatchElement_s *element);
     void EvaluateWatchElementExpression(
         Scr_WatchElement_s *element,
-        VariableValue *value);
+        struct VariableValue *value);
 
     bool EvaluateWatchChildElement(
         Scr_WatchElement_s *element,
@@ -821,10 +802,10 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     void EvaluateWatchChildren(Scr_WatchElement_s *parentElement);
     bool PostEvaluateWatchElement(
         Scr_WatchElement_s *element,
-        VariableValue *value);
+        struct VariableValue *value);
 
-    void LoadSelectedLine(Scr_SelectedLineInfo *info);
-    void SaveSelectedLine(Scr_SelectedLineInfo *info);
+    void LoadSelectedLine(struct Scr_SelectedLineInfo *info);
+    void SaveSelectedLine(struct Scr_SelectedLineInfo *info);
 
     Scr_WatchElement_s* PasteNonBreakpointElement(
         Scr_WatchElement_s *element,

@@ -920,6 +920,16 @@ void __cdecl CL_Input(int localClientNum)
     }
 }
 
+void __cdecl IN_TalkDown()
+{
+    IN_KeyDown(&playersKb[0][29]);
+}
+
+void __cdecl IN_TalkUp()
+{
+    IN_KeyUp(&playersKb[0][29]);
+}
+
 cmd_function_s IN_CenterView_VAR;
 cmd_function_s IN_UpDown_VAR;
 cmd_function_s IN_UpUp_VAR;
@@ -947,7 +957,6 @@ cmd_function_s IN_SpeedDown_VAR;
 cmd_function_s IN_SpeedUp_VAR;
 cmd_function_s IN_Attack_Down_VAR;
 cmd_function_s IN_Attack_Up_VAR;
-cmd_function_s IN_CenterView_VAR;
 cmd_function_s IN_Melee_Down_VAR;
 cmd_function_s IN_Melee_Up_VAR;
 cmd_function_s IN_Breath_Down_VAR;
@@ -996,7 +1005,6 @@ cmd_function_s IN_TalkDown_VAR;
 cmd_function_s IN_TalkUp_VAR;
 cmd_function_s IN_SprintDown_VAR;
 cmd_function_s IN_SprintUp_VAR;
-
 
 void __cdecl CL_InitInput()
 {
@@ -1656,16 +1664,6 @@ void __cdecl IN_GoStandUp()
         IN_KeyUp(&playersKb[0][12]);
         IN_KeyUp(&playersKb[0][10]);
     }
-}
-
-void __cdecl IN_TalkDown()
-{
-    IN_KeyDown(&playersKb[0][29]);
-}
-
-void __cdecl IN_TalkUp()
-{
-    IN_KeyUp(&playersKb[0][29]);
 }
 
 void __cdecl IN_SprintDown()

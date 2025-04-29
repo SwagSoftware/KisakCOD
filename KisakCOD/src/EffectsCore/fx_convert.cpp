@@ -1,4 +1,5 @@
 #include "fx_system.h"
+#include <gfx_d3d/r_material.h>
 
 bool __cdecl FX_ElemUsesMaterial(const FxEditorElemDef *edElemDef)
 {

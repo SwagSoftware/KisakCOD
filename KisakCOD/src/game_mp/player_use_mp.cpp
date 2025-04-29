@@ -478,7 +478,7 @@ int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *t
             "%s\n\t(index) = %i",
             "((0 <= index) && (index < (128 * NUM_WEAP_ALTMODELS )))",
             index);
-    if (bg_itemlist[index] != 1)
+    if (bg_itemlist[index].giType != 1)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 444, 0, "%s", "item->giType == IT_WEAPON");
     weapIndex = index % 128;
     weapDefItem = BG_GetWeaponDef(index % 128);

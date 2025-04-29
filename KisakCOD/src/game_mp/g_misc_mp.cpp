@@ -297,14 +297,12 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
     float v14; // [esp+6Ch] [ebp-1C0h]
     float v15; // [esp+70h] [ebp-1BCh]
     float v16; // [esp+74h] [ebp-1B8h]
-    float result; // [esp+78h] [ebp-1B4h] BYREF
-    float v18; // [esp+7Ch] [ebp-1B0h]
-    float v19; // [esp+80h] [ebp-1ACh]
-    float v20; // [esp+84h] [ebp-1A8h]
-    float v21; // [esp+88h] [ebp-1A4h]
-    float v22; // [esp+8Ch] [ebp-1A0h]
-    float v23; // [esp+90h] [ebp-19Ch]
-    float v24; // [esp+94h] [ebp-198h]
+    float result[3]; // [esp+78h] [ebp-1B4h] BYREF
+    float v18; // [esp+84h] [ebp-1A8h]
+    float v19; // [esp+88h] [ebp-1A4h]
+    float v20; // [esp+8Ch] [ebp-1A0h]
+    float v21; // [esp+90h] [ebp-19Ch]
+    float v22; // [esp+94h] [ebp-198h]
     float fHeightRatio; // [esp+98h] [ebp-194h]
     int iPrevBlend; // [esp+9Ch] [ebp-190h]
     float fPrevTransZ; // [esp+A0h] [ebp-18Ch]
@@ -344,7 +342,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
     float vDelta[3]; // [esp+220h] [ebp-Ch] BYREF
 
     clientNum = ent->s.clientNum;
-    if ((unsigned int)clientNum >= 0x40)
+    if (clientNum >= 0x40)
         MyAssertHandler(
             ".\\game_mp\\g_misc_mp.cpp",
             230,
@@ -393,25 +391,25 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                         0,
                         "%s",
                         "!IS_NAN(mat->transWeight)");
-                Vec3Scale(tagMat->quat, tagMat->transWeight, &result);
-                v23 = result * tagMat->quat[0];
-                v14 = result * tagMat->quat[1];
-                v21 = result * tagMat->quat[2];
-                v24 = result * tagMat->quat[3];
-                v13 = v18 * tagMat->quat[1];
-                v22 = v18 * tagMat->quat[2];
-                v20 = v18 * tagMat->quat[3];
-                v15 = v19 * tagMat->quat[2];
-                v16 = v19 * tagMat->quat[3];
+                Vec3Scale(tagMat->quat, tagMat->transWeight, result);
+                v21 = result[0] * tagMat->quat[0];
+                v14 = result[0] * tagMat->quat[1];
+                v19 = result[0] * tagMat->quat[2];
+                v22 = result[0] * tagMat->quat[3];
+                v13 = result[1] * tagMat->quat[1];
+                v20 = result[1] * tagMat->quat[2];
+                v18 = result[1] * tagMat->quat[3];
+                v15 = result[2] * tagMat->quat[2];
+                v16 = result[2] * tagMat->quat[3];
                 tagAxis[0][0] = 1.0 - (v13 + v15);
                 tagAxis[0][1] = v14 + v16;
-                tagAxis[0][2] = v21 - v20;
+                tagAxis[0][2] = v19 - v18;
                 tagAxis[1][0] = v14 - v16;
-                tagAxis[1][1] = 1.0 - (v23 + v15);
-                tagAxis[1][2] = v22 + v24;
-                tagAxis[2][0] = v21 + v20;
-                tagAxis[2][1] = v22 - v24;
-                tagAxis[2][2] = 1.0 - (v23 + v13);
+                tagAxis[1][1] = 1.0 - (v21 + v15);
+                tagAxis[1][2] = v20 + v22;
+                tagAxis[2][0] = v19 + v18;
+                tagAxis[2][1] = v20 - v22;
+                tagAxis[2][2] = 1.0 - (v21 + v13);
                 localYaw = vectosignedyaw(tagAxis[0]);
                 AnglesToAxis(pTurretEnt->r.currentAngles, turretAxis);
                 turretAxis[3][0] = pTurretEnt->r.currentOrigin[0];
@@ -440,19 +438,19 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                         v3 = XAnimGetAnimDebugName(pXAnims, heightAnim);
                         Com_Error(ERR_DROP, "Player anim %s has no children", v3);
                     }
-                    fBlend = (double)numHorChildren * 0.5 + localYaw / weapDef->fAnimHorRotateInc;
+                    fBlend = numHorChildren * 0.5 + localYaw / weapDef->fAnimHorRotateInc;
                     if (fBlend >= 0.0)
                     {
-                        if (fBlend >= (double)(numHorChildren - 1))
-                            fBlend = (float)(numHorChildren - 1);
+                        if (fBlend >= (numHorChildren - 1))
+                            fBlend = (numHorChildren - 1);
                     }
                     else
                     {
                         fBlend = 0.0;
                     }
-                    v4 = (int)fBlend;
+                    v4 = fBlend;
                     iBlend = v4;
-                    fBlend = fBlend - (double)v4;
+                    fBlend = fBlend - v4;
                     leafAnim1 = XAnimGetChildAt(pXAnims, heightAnim, v4);
                     XAnimGetAbsDelta(pXAnims, leafAnim1, rot, trans, 0.0);
                     if (fBlend != 0.0)
@@ -461,7 +459,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                         XAnimGetAbsDelta(pXAnims, leafAnim2, rot, trans2, 0.0);
                         Vec3Lerp(trans, trans2, fBlend, trans);
                     }
-                    if (fDelta <= (double)trans[2])
+                    if (fDelta <= trans[2])
                         break;
                     fPrevTransZ = trans[2];
                     iPrevBlend = iBlend;
@@ -502,7 +500,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                 localAxis[3][2] = tagHeight;
                 v5 = RotationToYaw(rot);
                 yaw = v5 + localYaw;
-                YawToAxis(yaw, localAxis);
+                YawToAxis(yaw, *(mat3x3*)localAxis);
                 MatrixMultiply43(localAxis, turretAxis, axis);
                 origin = ent->client->ps.origin;
                 *origin = axis[3][0];
@@ -518,7 +516,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                 end[2] = client->ps.origin[2];
                 start[2] = start[2] + ent->client->ps.viewHeightCurrent;
                 end[2] = end[2] - 60.0;
-                G_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ent->s.number, 0x810011);
+                G_TraceCapsule(&trace, start, vec3_origin, vec3_origin, end, ent->s.number, 0x810011);
                 if (trace.fraction < 1.0)
                 {
                     Vec3Lerp(start, end, trace.fraction, endpos);
@@ -529,7 +527,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                 ent->r.currentOrigin[0] = *v10;
                 ent->r.currentOrigin[1] = v10[1];
                 ent->r.currentOrigin[2] = v10[2];
-                AxisToAngles(axis, ent->r.currentAngles);
+                AxisToAngles(*(const mat3x3*)axis, ent->r.currentAngles);
                 SV_LinkEntity(ent);
             }
         }
@@ -539,7 +537,6 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
         }
     }
 }
-
 void __cdecl turret_clientaim(gentity_s *self, gentity_s *other)
 {
     float v2; // [esp+8h] [ebp-48h]
@@ -832,15 +829,6 @@ LABEL_29:
     self->s.lerp.u.turret.gunAngles[2] = self->s.lerp.u.turret.gunAngles[2] - self->s.lerp.u.turret.gunAngles[0];
     return bComplete;
 }
-
-unsigned __int8 bulletPriorityMap[] =
-{
-    0x3030301,
-    0x3030303,
-    0x3030303,
-    0x3030303,
-    0x303
-};
 
 void __cdecl turret_think_init(gentity_s *self)
 {

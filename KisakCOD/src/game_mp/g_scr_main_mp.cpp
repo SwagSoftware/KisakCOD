@@ -4153,7 +4153,7 @@ void __cdecl Scr_SetFxAngles(unsigned int givenAxisCount, float (*axis)[3], floa
             Scr_Error(v3);
         }
         Vec3Cross(&(*axis)[6], (const float *)axis, &(*axis)[3]);
-        AxisToAngles(axis, angles);
+        AxisToAngles(*(const mat3x3*)axis, angles);
     }
     else
     {
@@ -4182,7 +4182,7 @@ void Scr_PlayFXOnTag()
 {
     const char *v0; // eax
     char *v1; // eax
-    int v2; // eax
+    char* v2; // eax
     unsigned int v3; // eax
     char *v4; // eax
     const char *v5; // eax
@@ -4207,7 +4207,7 @@ void Scr_PlayFXOnTag()
         Scr_ParamError(1u, "cannot play fx on entity with no model");
     tag = Scr_GetConstLowercaseString(2u).stringValue;
     v1 = SL_ConvertToString(tag);
-    strchr(v1, '"');
+    v2 = strchr(v1, '"');
     if (v2)
         Scr_ParamError(2u, "cannot use \" characters in tag names\n");
     if (SV_DObjGetBoneIndex(ent, tag) < 0)
@@ -5044,7 +5044,7 @@ void __cdecl GScr_GetTagAngles(scr_entref_t entref)
     ent = GetEntity(entref);
     tagName.intValue = Scr_GetConstLowercaseString(0).intValue;
     GScr_UpdateTagInternal(ent, tagName.stringValue, &level.cachedTagMat, 1);
-    AxisToAngles(level.cachedTagMat.tagMat, angles);
+    AxisToAngles(*(const mat3x3*)&level.cachedTagMat.tagMat, angles);
     Scr_AddVector(angles);
 }
 
@@ -6269,7 +6269,7 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref)
     itemEnt = GetEntity(entref);
     if (itemEnt->s.eType != 3)
         Scr_Error("Entity is not an item.");
-    if (bg_itemlist[itemEnt->s.index.brushmodel] != 1)
+    if (bg_itemlist[itemEnt->s.index.brushmodel].giType != IT_WEAPON)
         Scr_Error("Item entity is not a weapon.");
     clipAmmo = Scr_GetInt(0).intValue;
     if (clipAmmo < 0)
@@ -6450,7 +6450,8 @@ int Scr_ParseGameTypeList_LoadObj()
             }
             dest = g_scr_data.gametype.list[v11].pszScript;
             I_strncpyz(dest, src, 64);
-            strlwr(dest);
+            //strlwr(dest);
+            _strlwr(dest);
             qpath = va("maps/mp/gametypes/%s.txt", src);
             len = FS_FOpenFileByMode(qpath, &f, FS_READ);
             if (len > 0 && len < 1024)

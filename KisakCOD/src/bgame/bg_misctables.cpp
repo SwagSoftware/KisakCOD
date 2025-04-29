@@ -2,7 +2,8 @@
 #include "bg_public.h"
 #include <qcommon/mem_track.h>
 
-_DWORD bg_itemlist[2048];
+gitem_s bg_itemlist[2048];
+int itemRegistered[2048];
 
 void __cdecl TRACK_bg_misctables()
 {

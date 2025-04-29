@@ -127,7 +127,7 @@ void __cdecl TRACK_g_main()
     track_static_alloc_internal(&level, 11884, "level", 9);
     track_static_alloc_internal(g_entities, 643072, "g_entities", 9);
     track_static_alloc_internal(g_clients, 811264, "g_clients", 9);
-    track_static_alloc_internal(entityHandlers, 960, "entityHandlers", 9);
+    //track_static_alloc_internal(entityHandlers, 960, "entityHandlers", 9);
     track_static_alloc_internal(g_entinfoNames, 12, "g_entinfoNames", 0);
 }
 
@@ -767,19 +767,6 @@ DObj_s *__cdecl G_GetDObj(unsigned int handle, int unusedLocalClientNum)
             unusedLocalClientNum,
             -1);
     return Com_GetServerDObj(handle);
-}
-
-void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
-{
-    if (unusedLocalClientNum != -1)
-        MyAssertHandler(
-            ".\\game_mp\\g_main_mp.cpp",
-            850,
-            0,
-            "unusedLocalClientNum == UNUSED_LOCAL_CLIENT_NUM\n\t%i, %i",
-            unusedLocalClientNum,
-            -1);
-    Com_SafeServerDObjFree(handle);
 }
 
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)

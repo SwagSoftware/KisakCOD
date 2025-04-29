@@ -423,15 +423,15 @@ void __cdecl FX_GenerateMarkVertsForMark_FinishAnimated(
     FxMark *mark,
     unsigned __int16 baseVertex,
     FxActiveMarkSurf *drawSurf,
-    const float (*transform)[3][3]);
+    const float (*transform)[3]);
 void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
     const GfxScaledPlacement *placement,
     const float *viewOffset,
-    float (*outTransform)[3][3]);
+    float (*outTransform)[3]);
 void  FX_GenerateMarkVertsForMark_MatrixFromPlacement(
     const GfxPlacement *placement,
     const float *viewOffset,
-    float (*outTransform)[3][3]);
+    float (*outTransform)[3]);
 void __cdecl FX_GenerateMarkVertsForEntDObj(
     int localClientNum,
     int entId,
@@ -1314,7 +1314,7 @@ enum FxSampleChannel : __int32
 const FxEffectDef *__cdecl FX_Register(const char *name);
 const FxEffectDef *__cdecl FX_Register_FastFile(const char *name);
 void __cdecl FX_RegisterDefaultEffect();
-PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name);
+struct PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name);
 void __cdecl FX_ForEachEffectDef(void(__cdecl* callback)(const FxEffectDef*, void*), void* data);
 void FX_UnregisterAll();
 

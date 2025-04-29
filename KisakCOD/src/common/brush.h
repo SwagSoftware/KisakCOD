@@ -59,11 +59,11 @@ bool __cdecl CycleLess(
     float perimiter2,
     int nodeCount1,
     int nodeCount2);
-int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int ptsCount);
+int __cdecl ReduceToACycle(int basePlane, const SimplePlaneIntersection **pts, int ptsCount);
 char __cdecl IntAlreadyInList(const int *list, int listCount, int value);
 char __cdecl FindCycleBFS(
     int basePlane,
-    SimplePlaneIntersection **pts,
+    const SimplePlaneIntersection **pts,
     int ptsCount,
     const SimplePlaneIntersection *start,
     const SimplePlaneIntersection *end,
@@ -81,13 +81,13 @@ int __cdecl GetPtsFormedByPlane(
 int __cdecl ChooseEdgeToRemove(
     int basePlane,
     int connectingPlane,
-    SimplePlaneIntersection **pts,
+    const SimplePlaneIntersection **pts,
     int ptsCount,
     const SimplePlaneIntersection **edges);
 int __cdecl PartitionEdges(
     int basePlane,
     int connectingPlane,
-    SimplePlaneIntersection **pts,
+    const SimplePlaneIntersection **pts,
     int ptsCount,
     const SimplePlaneIntersection **edges,
     int edgeCount,

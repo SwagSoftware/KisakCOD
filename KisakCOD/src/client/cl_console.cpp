@@ -48,7 +48,6 @@ const dvar_t *con_outputSliderColor;
 const dvar_t *con_errormessagetime;
 const dvar_t *con_minicontime;
 const dvar_t *con_miniconlines;
-const dvar_t *con_inputBoxColor;
 const dvar_t *con_outputWindowColor;
 
 Console con;

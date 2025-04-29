@@ -637,7 +637,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     DObjGetBoneIndex(obj, scr_const.tag_barrel, &cent->pose.vehicle.tag_barrel);
     if (cent->pose.cullIn == 2)
     {
-        CG_DObjGetWorldTagMatrix(&cent->pose, obj, scr_const.tag_origin, axis[4], fxInfo->soundEngineOrigin);
+        CG_DObjGetWorldTagMatrix(&cent->pose, obj, scr_const.tag_origin, (float(*)[3])axis[4], fxInfo->soundEngineOrigin);
         fxInfo->soundEnabled = 1;
         suspTravel = cent->pose.vehicle.time;
         AnglesToAxis(cent->pose.angles, axis);
@@ -664,7 +664,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
         {
             if (DObjGetBoneIndex(obj, *wheelTags[tireIdx], &cent->pose.vehicle.wheelBoneIndex[tireIdx]))
             {
-                MatrixTransformVector43(boneMtxList[cent->pose.vehicle.wheelBoneIndex[tireIdx]].trans, axis, wheelPos);
+                MatrixTransformVector43(boneMtxList[cent->pose.vehicle.wheelBoneIndex[tireIdx]].trans, *(const mat4x3*)&axis, wheelPos);
                 Vec3Mad(wheelPos, 40.0, axis[2], traceStart);
                 scale = -suspTravel;
                 Vec3Mad(wheelPos, scale, axis[2], traceEnd);
@@ -2336,30 +2336,25 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
     float v[3]; // [esp+38h] [ebp-10ACh] BYREF
     float v7; // [esp+44h] [ebp-10A0h]
     float v8[3]; // [esp+48h] [ebp-109Ch] BYREF
-    float result[2]; // [esp+54h] [ebp-1090h] BYREF
-    float v10; // [esp+5Ch] [ebp-1088h]
+    float result[3]; // [esp+54h] [ebp-1090h] BYREF
     float *origin; // [esp+60h] [ebp-1084h]
     int contentmask; // [esp+64h] [ebp-1080h]
-    int v13; // [esp+68h] [ebp-107Ch]
+    int v12; // [esp+68h] [ebp-107Ch]
     float *a; // [esp+6Ch] [ebp-1078h]
-    vehicle_info_t *v15; // [esp+70h] [ebp-1074h]
-    float maxs; // [esp+74h] [ebp-1070h] BYREF
-    float v17; // [esp+78h] [ebp-106Ch]
-    float v18; // [esp+7Ch] [ebp-1068h]
+    vehicle_info_t *v14; // [esp+70h] [ebp-1074h]
+    float maxs[3]; // [esp+74h] [ebp-1070h] BYREF
     scr_vehicle_s *scr_vehicle; // [esp+80h] [ebp-1064h]
     float b[3]; // [esp+84h] [ebp-1060h] BYREF
     void(__cdecl * touch)(gentity_s *, gentity_s *, int); // [esp+90h] [ebp-1054h]
-    float v22; // [esp+94h] [ebp-1050h]
+    float v19; // [esp+94h] [ebp-1050h]
     gentity_s *target; // [esp+98h] [ebp-104Ch]
     float out[3]; // [esp+9Ch] [ebp-1048h] BYREF
     float v3[3]; // [esp+A8h] [ebp-103Ch] BYREF
     float sum[3]; // [esp+B4h] [ebp-1030h] BYREF
-    void(__cdecl * v27)(gentity_s *, gentity_s *, int); // [esp+C0h] [ebp-1024h]
+    void(__cdecl * v24)(gentity_s *, gentity_s *, int); // [esp+C0h] [ebp-1024h]
     int entityList[1025]; // [esp+C4h] [ebp-1020h] BYREF
     int i; // [esp+10C8h] [ebp-1Ch]
-    float mins; // [esp+10CCh] [ebp-18h] BYREF
-    float v31; // [esp+10D0h] [ebp-14h]
-    float v32; // [esp+10D4h] [ebp-10h]
+    float mins[3]; // [esp+10CCh] [ebp-18h] BYREF
     float diff[3]; // [esp+10D8h] [ebp-Ch] BYREF
 
     if (!ent)
@@ -2370,29 +2365,29 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
     {
         scr_vehicle = ent->scr_vehicle;
         a = scr_vehicle->phys.origin;
-        v15 = &s_vehicleInfos[scr_vehicle->infoIdx];
+        v14 = &s_vehicleInfos[scr_vehicle->infoIdx];
         touch = entityHandlers[ent->handler].touch;
         Vec3Sub(scr_vehicle->phys.origin, scr_vehicle->phys.prevOrigin, diff);
         AnglesSubtract(scr_vehicle->phys.angles, scr_vehicle->phys.prevAngles, v3);
         Vec3NormalizeTo(scr_vehicle->phys.vel, out);
-        v22 = RadiusFromBounds(ent->r.mins, ent->r.maxs);
-        b[0] = -v22;
+        v19 = RadiusFromBounds(ent->r.mins, ent->r.maxs);
+        b[0] = -v19;
         b[1] = b[0];
         b[2] = b[0];
-        sum[0] = v22;
-        sum[1] = v22;
-        sum[2] = v22;
+        sum[0] = v19;
+        sum[1] = v19;
+        sum[2] = v19;
         Vec3Add(scr_vehicle->phys.prevOrigin, b, b);
         Vec3Add(scr_vehicle->phys.prevOrigin, sum, sum);
         ExtendBounds(b, sum, diff);
         contentmask = 0x2806081;
-        v13 = CM_AreaEntities(b, sum, entityList, 1024, 0x2806081);
+        v12 = CM_AreaEntities(b, sum, entityList, 1024, 0x2806081);
         for (i = 0; ; ++i)
         {
-            if (i >= v13)
+            if (i >= v12)
                 return;
             target = &g_entities[entityList[i]];
-            v27 = entityHandlers[target->handler].touch;
+            v24 = entityHandlers[target->handler].touch;
             if (target->s.number != ent->s.number
                 && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == 4)
                 && (!EntHandle::isDefined(&target->r.ownerNum)
@@ -2404,9 +2399,9 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
                 {
                     if (!target->model)
                         continue;
-                    SV_DObjGetBounds(target, &mins, &maxs);
-                    Vec3Add(target->r.currentOrigin, &mins, &mins);
-                    Vec3Add(target->r.currentOrigin, &maxs, &maxs);
+                    SV_DObjGetBounds(target, mins, maxs);
+                    Vec3Add(target->r.currentOrigin, mins, mins);
+                    Vec3Add(target->r.currentOrigin, maxs, maxs);
                 }
                 else if (target->classname == scr_const.script_vehicle)
                 {
@@ -2415,29 +2410,29 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
                     if (!target->scr_vehicle)
                         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1553, 0, "%s", "hit->scr_vehicle");
                     v2 = target->scr_vehicle;
-                    mins = v2->phys.mins[0];
-                    v31 = v2->phys.mins[1];
-                    v32 = v2->phys.mins[2];
-                    Vec3Scale(&mins, 2.0, &mins);
-                    Vec3Add(target->r.currentOrigin, &mins, &mins);
+                    mins[0] = v2->phys.mins[0];
+                    mins[1] = v2->phys.mins[1];
+                    mins[2] = v2->phys.mins[2];
+                    Vec3Scale(mins, 2.0, mins);
+                    Vec3Add(target->r.currentOrigin, mins, mins);
                     ecx26 = target->scr_vehicle;
-                    maxs = ecx26->phys.maxs[0];
-                    v17 = ecx26->phys.maxs[1];
-                    v18 = ecx26->phys.maxs[2];
-                    Vec3Scale(&maxs, 2.0, &maxs);
-                    Vec3Add(target->r.currentOrigin, &maxs, &maxs);
+                    maxs[0] = ecx26->phys.maxs[0];
+                    maxs[1] = ecx26->phys.maxs[1];
+                    maxs[2] = ecx26->phys.maxs[2];
+                    Vec3Scale(maxs, 2.0, maxs);
+                    Vec3Add(target->r.currentOrigin, maxs, maxs);
                 }
                 else
                 {
-                    mins = target->r.absmin[0];
-                    v31 = target->r.absmin[1];
-                    v32 = target->r.absmin[2];
-                    maxs = target->r.absmax[0];
-                    v17 = target->r.absmax[1];
-                    v18 = target->r.absmax[2];
+                    mins[0] = target->r.absmin[0];
+                    mins[1] = target->r.absmin[1];
+                    mins[2] = target->r.absmin[2];
+                    maxs[0] = target->r.absmax[0];
+                    maxs[1] = target->r.absmax[1];
+                    maxs[2] = target->r.absmax[2];
                 }
-                ExpandBoundsToWidth(&mins, &maxs);
-                if (SV_EntityContact(&mins, &maxs, ent))
+                ExpandBoundsToWidth(mins, maxs);
+                if (SV_EntityContact(mins, maxs, ent))
                 {
                     if (Scr_IsSystemActive())
                     {
@@ -2446,8 +2441,8 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
                         Scr_AddEntity(target);
                         Scr_Notify(ent, scr_const.touch, 1u);
                     }
-                    if (v27)
-                        v27(target, ent, 1);
+                    if (v24)
+                        v24(target, ent, 1);
                     if (touch)
                         touch(ent, target, 1);
                     if (target->s.eType == 1)
@@ -2466,7 +2461,7 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
                         Vec3Normalize(v);
                         scale = -v7 * 0.80000001;
                         Vec3Scale(v, scale, result);
-                        v10 = v7 * 0.1 + v10;
+                        result[2] = v7 * 0.1 + result[2];
                         Vec3Add(a + 21, result, a + 21);
                         v4 = v7 * 0.15000001;
                         Vec3Scale(v, v4, v8);
@@ -2477,7 +2472,6 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
         }
     }
 }
-
 void __cdecl G_VehEntHandler_Think(gentity_s *pSelf)
 {
     float frameTime; // [esp+10h] [ebp-14h]
@@ -2784,7 +2778,7 @@ void __cdecl FillWeaponParms(gentity_s *vehEnt, gentity_s *player, weaponParms *
     wp->weapDef = BG_GetWeaponDef(vehEnt->s.weapon);
     if (G_DObjGetWorldTagMatrix(vehEnt, scr_const.tag_flash, flashTag))
     {
-        AxisToAngles(flashTag, flashAngles);
+        AxisToAngles(*(const mat3x3*)&flashTag, flashAngles);
         AngleVectors(flashAngles, wp->forward, wp->right, wp->up);
         wp->gunForward[0] = wp->forward[0];
         wp->gunForward[1] = wp->forward[1];
@@ -3510,7 +3504,7 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
     Vec3Normalize(axis[1]);
     Vec3Cross(axis[1], plane, axis[0]);
     Vec3Normalize(axis[0]);
-    AxisToAngles(axis, angles);
+    AxisToAngles(*(const mat3x3*)&axis, angles);
     v5 = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0, frameTime);
     phys->angles[0] = v5;
     v6 = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0, frameTime);
@@ -3845,7 +3839,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     if (!bestRiderTag)
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Tried to mount player on a full vehicle.");
     G_DObjGetWorldBoneIndexMatrix(ent, bestRiderTag->boneIdx, playerMtx);
-    AxisToAngles(playerMtx, playerAngles);
+    AxisToAngles(*(const mat3x3*)&playerMtx, playerAngles);
     playerAngles[2] = 0.0;
     player->r.currentOrigin[0] = playerMtx[3][0];
     player->r.currentOrigin[1] = playerMtx[3][1];

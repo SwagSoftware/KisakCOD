@@ -932,58 +932,57 @@ int __cdecl G_RadiusDamage(
     float v12; // [esp+Ch] [ebp-1058h]
     int j; // [esp+10h] [ebp-1054h]
     float v14; // [esp+14h] [ebp-1050h]
-    float diff[2]; // [esp+18h] [ebp-104Ch] BYREF
-    float v16; // [esp+20h] [ebp-1044h]
-    float v17; // [esp+24h] [ebp-1040h]
+    float diff[3]; // [esp+18h] [ebp-104Ch] BYREF
+    float v16; // [esp+24h] [ebp-1040h]
     float mins[3]; // [esp+28h] [ebp-103Ch] BYREF
-    float v19; // [esp+34h] [ebp-1030h]
-    float v20; // [esp+38h] [ebp-102Ch]
+    float v18; // [esp+34h] [ebp-1030h]
+    float v19; // [esp+38h] [ebp-102Ch]
     float RadiusDamageDistanceSquared; // [esp+3Ch] [ebp-1028h]
-    int v22; // [esp+40h] [ebp-1024h]
+    int v21; // [esp+40h] [ebp-1024h]
     float maxs[3]; // [esp+44h] [ebp-1020h] BYREF
-    float v24; // [esp+50h] [ebp-1014h]
+    float v23; // [esp+50h] [ebp-1014h]
     int entityList[1025]; // [esp+54h] [ebp-1010h] BYREF
     gentity_s *ent; // [esp+1058h] [ebp-Ch]
     int i; // [esp+105Ch] [ebp-8h]
-    int v28; // [esp+1060h] [ebp-4h]
+    int v27; // [esp+1060h] [ebp-4h]
 
-    v28 = 0;
+    v27 = 0;
     if (!attacker)
         return 0;
     if (radius < 1.0)
         radius = 1.0;
-    v19 = radius * radius;
-    v20 = radius * 1.414213538169861;
+    v18 = radius * radius;
+    v19 = radius * 1.414213538169861;
     for (i = 0; i < 3; ++i)
     {
-        mins[i] = origin[i] - v20;
-        maxs[i] = origin[i] + v20;
+        mins[i] = origin[i] - v19;
+        maxs[i] = origin[i] + v19;
     }
-    v22 = CM_AreaEntities(mins, maxs, entityList, 1024, -1);
-    for (j = 0; j < v22; ++j)
+    v21 = CM_AreaEntities(mins, maxs, entityList, 1024, -1);
+    for (j = 0; j < v21; ++j)
     {
         ent = &g_entities[entityList[j]];
         if (ent != ignore && ent->takedamage && (!ent->client || !level.bPlayerIgnoreRadiusDamage))
         {
             RadiusDamageDistanceSquared = G_GetRadiusDamageDistanceSquared(origin, ent);
-            if (v19 > (double)RadiusDamageDistanceSquared)
+            if (v18 > RadiusDamageDistanceSquared)
             {
                 v12 = sqrt(RadiusDamageDistanceSquared);
-                v17 = v12;
-                v24 = CanDamage(ent, inflictor, origin, coneAngleCos, coneDirection, 0x802011);
-                if (v24 > 0.0)
+                v16 = v12;
+                v23 = CanDamage(ent, inflictor, origin, coneAngleCos, coneDirection, 0x802011);
+                if (v23 > 0.0)
                 {
                     if (LogAccuracyHit(ent, attacker))
-                        v28 = 1;
+                        v27 = 1;
                     Vec3Sub(ent->r.currentOrigin, origin, diff);
-                    v16 = v16 + 24.0;
+                    diff[2] = diff[2] + 24.0;
                     v14 = (fInnerDamage - fOuterDamage) * (1.0 - v12 / radius) + fOuterDamage;
-                    G_Damage(ent, inflictor, attacker, diff, origin, (int)(v14 * v24), 5, mod, weapon, HITLOC_NONE, 0, 0, 0);
+                    G_Damage(ent, inflictor, attacker, diff, origin, (v14 * v23), 5, mod, weapon, HITLOC_NONE, 0, 0, 0);
                 }
             }
         }
     }
-    return v28;
+    return v27;
 }
 
 unsigned __int16 __cdecl G_GetHitLocationString(hitLocation_t hitLoc)

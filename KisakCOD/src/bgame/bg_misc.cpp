@@ -1052,7 +1052,8 @@ const gitem_s *__cdecl BG_FindItemForWeapon(unsigned int weapon, int model)
             weapon,
             NumWeapons);
     }
-    return (const gitem_s *)(4 * (weapon + (model << 7)) + 9917736);
+    //return (const gitem_s *)(4 * (weapon + (model << 7)) + 9917736);
+    return &bg_itemlist[(weapon + (model << 7))];
 }
 
 const gitem_s *__cdecl G_FindItem(const char *pickupName, int model)
@@ -1061,7 +1062,8 @@ const gitem_s *__cdecl G_FindItem(const char *pickupName, int model)
 
     iIndex = G_GetWeaponIndexForName(pickupName);
     if (iIndex)
-        return (const gitem_s *)(4 * (iIndex + (model << 7)) + 9917736);
+        return &bg_itemlist[(iIndex + (model << 7))];
+        //return (const gitem_s *)(4 * (iIndex + (model << 7)) + 9917736);
     else
         return 0;
 }
@@ -1113,7 +1115,7 @@ bool __cdecl BG_CanItemBeGrabbed(const entityState_s *ent, const playerState_s *
         return 0;
     weapIdx = ent->index.brushmodel % 128;
     weapDef = BG_GetWeaponDef(weapIdx);
-    if (bg_itemlist[128 * (ent->index.brushmodel / 128) + weapIdx] != 1)
+    if (bg_itemlist[128 * (ent->index.brushmodel / 128) + weapIdx].giType != IT_WEAPON)
         MyAssertHandler(
             ".\\bgame\\bg_misc.cpp",
             877,
@@ -1200,7 +1202,7 @@ bool __cdecl BG_PlayerHasRoomForEntAllAmmoTypes(const entityState_s *ent, const 
     weapIdx = v3;
     if (!v3)
         return 0;
-    if (bg_itemlist[128 * (ent->index.brushmodel / 128) + v3] != 1)
+    if (bg_itemlist[128 * (ent->index.brushmodel / 128) + v3].giType != IT_WEAPON)
         MyAssertHandler(
             ".\\bgame\\bg_misc.cpp",
             902,

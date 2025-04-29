@@ -21,6 +21,7 @@
 #include <gfx_d3d/r_bsp.h>
 #include <gfx_d3d/r_primarylights.h>
 #include <gfx_d3d/r_model.h>
+#include <script/scr_vm.h>
 
 bool g_mapLoaded;
 bool g_ambientStarted;

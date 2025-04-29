@@ -61,7 +61,26 @@ Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CloneElement(Scr_WatchElement_s 
     return newElement;
 }
 
-void __thiscall Scr_ScriptWatch::AddElement(Scr_WatchElement_s *element, char *text)
+Scr_WatchElement_s *Scr_ScriptWatch::GetElementWithId_r(Scr_WatchElement_s *element, int id)
+{
+    Scr_WatchElement_s *childElement; // [esp+4h] [ebp-4h]
+
+    while (element)
+    {
+        if (element->id == id)
+            return element;
+        if (element->childHead)
+        {
+            childElement = GetElementWithId_r(element->childHead, id);
+            if (childElement)
+                return childElement;
+        }
+        element = element->next;
+    }
+    return 0;
+}
+
+void Scr_ScriptWatch::AddElement(Scr_WatchElement_s *element, char *text)
 {
     int v3; // [esp+0h] [ebp-18h]
     ScriptExpression_t scriptExpr; // [esp+8h] [ebp-10h] BYREF

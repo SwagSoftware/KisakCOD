@@ -41,10 +41,7 @@ using mat3x3 = float[3][3];
 using mat4x3 = float[4][3];
 using mat4x4 = float[4][4];
 
-struct GfxMatrix // sizeof=0x40
-{                                       // ...
-    float m[4][4];                      // ...
-};
+struct GfxMatrix; // sizeof=0x40
 
 // TODO fun fact: if we initialize these to -0.0 instead the compiler can remove the float addition without -ffast-math or some equivalent
 constexpr vec2 vec2_origin = { 0.0, 0.0 };

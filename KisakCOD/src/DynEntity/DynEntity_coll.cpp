@@ -647,12 +647,12 @@ void __cdecl DynEnt_PointTraceToModel(
         dynEntAxis[3][0] = dynEntPose->pose.origin[0];
         dynEntAxis[3][1] = dynEntPose->pose.origin[1];
         dynEntAxis[3][2] = dynEntPose->pose.origin[2];
-        UnitQuatToAxis(dynEntPose->pose.quat, dynEntAxis);
+        UnitQuatToAxis(dynEntPose->pose.quat, *(mat3x3*)dynEntAxis);
         MatrixTransposeTransformVector43(clip->extents.start, dynEntAxis, localStart);
         MatrixTransposeTransformVector43(clip->extents.end, dynEntAxis, localEnd);
         if (!XModelTraceLine(dynEntDef->xModel, results, localStart, localEnd, clip->contentmask))
         {
-            MatrixTransformVector(results->normal, dynEntAxis, normal);
+            MatrixTransformVector(results->normal, *(const mat3x3*)dynEntAxis, normal);
             Vec3NormalizeTo(normal, results->normal);
             Id = DynEnt_GetId(dynEntDef, DYNENT_DRAW_MODEL);
             if (!results)

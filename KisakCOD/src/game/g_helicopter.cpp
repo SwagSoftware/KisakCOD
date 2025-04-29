@@ -94,7 +94,7 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
     axis[3][0] = 0.0;
     axis[3][1] = 0.0;
     axis[3][2] = 0.0;
-    MatrixTransformVector(bodyAccel, axis, worldAccel);
+    MatrixTransformVector(bodyAccel, *(const mat3x3*)axis, worldAccel);
     if (vehHelicopterSoftCollisions->current.enabled)
         HELI_SoftenCollisions(ent, worldAccel);
     Vec3Mad(veh->phys.vel, 0.050000001, worldAccel, veh->phys.vel);
@@ -483,7 +483,7 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
         v7 = -1.0;
     targetTilt[1] = v7;
     targetTilt[2] = 0.0;
-    MatrixTransformVector(targetTilt, bodyMat, worldTargetTilt);
+    MatrixTransformVector(targetTilt, *(const mat3x3*)bodyMat, worldTargetTilt);
     deltaTilt[0] = worldTargetTilt[0] - phys->worldTilt[0];
     deltaTilt[1] = worldTargetTilt[1] - phys->worldTilt[1];
     if (vehHelicopterTiltMomentum->current.value == 0.0)

@@ -1,5 +1,14 @@
 #include "game_public.h"
 
+const char *g_entityBeginParsePoint;
+const char *g_entityEndParsePoint;
+
+char *__cdecl CM_EntityString()
+{
+    if (!cm.mapEnts)
+        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 1435, 0, "%s", "cm.mapEnts");
+    return cm.mapEnts->entityString;
+}
 
 void __cdecl G_ResetEntityParsePoint()
 {
@@ -35,19 +44,19 @@ int __cdecl G_ParseSpawnVars(SpawnVar *spawnVar)
     if (!G_GetEntityToken(com_token, 1024))
         return 0;
     if (com_token[0] != 123)
-        Com_Error(ERR_DROP, &byte_887F00, com_token);
+        Com_Error(ERR_DROP, "G_ParseSpawnVars: found %s when expecting {", com_token);
     while (1)
     {
         if (!G_GetEntityToken(keyname, 1024))
-            Com_Error(ERR_DROP, &byte_887ED0);
+            Com_Error(ERR_DROP, "G_ParseSpawnVars: EOF without closing brace");
         if (keyname[0] == 125)
             break;
         if (!G_GetEntityToken(com_token, 1024))
-            Com_Error(ERR_DROP, &byte_887ED0);
+            Com_Error(ERR_DROP, "G_ParseSpawnVars: EOF without closing brace");
         if (com_token[0] == 125)
-            Com_Error(ERR_DROP, &byte_887EA0);
+            Com_Error(ERR_DROP, "G_ParseSpawnVars: closing brace without data");
         if (spawnVar->numSpawnVars == 64)
-            Com_Error(ERR_DROP, &byte_887E7C);
+            Com_Error(ERR_DROP, "G_ParseSpawnVars: MAX_SPAWN_VARS");
         spawnVar->spawnVars[spawnVar->numSpawnVars][0] = G_AddSpawnVarToken(keyname, spawnVar);
         spawnVar->spawnVars[spawnVar->numSpawnVars++][1] = G_AddSpawnVarToken(com_token, spawnVar);
     }
@@ -62,7 +71,7 @@ char *__cdecl G_AddSpawnVarToken(char *string, SpawnVar *spawnVar)
 
     v3 = strlen(string);
     if ((int)(spawnVar->numSpawnVarChars + v3 + 1) > 2048)
-        Com_Error(ERR_DROP, &byte_887F30);
+        Com_Error(ERR_DROP, "G_AddSpawnVarToken: MAX_SPAWN_VARS");
     dest = &spawnVar->spawnVarChars[spawnVar->numSpawnVarChars];
     memcpy((unsigned __int8 *)dest, (unsigned __int8 *)string, v3 + 1);
     spawnVar->numSpawnVarChars += v3 + 1;
@@ -89,14 +98,14 @@ int __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const char 
 
 HashEntry_unnamed_type_u __cdecl G_NewString(const char *string)
 {
-    char str[16384]; // [esp+10h] [ebp-4010h] BYREF
+    char str[0x4000]; // [esp+10h] [ebp-4010h] BYREF
     unsigned int v3; // [esp+4014h] [ebp-Ch]
     char *v4; // [esp+4018h] [ebp-8h]
     unsigned int i; // [esp+401Ch] [ebp-4h]
 
     v3 = strlen(string) + 1;
     if (v3 > 0x4000)
-        Com_Error(ERR_DROP, &byte_887F88, v3, 0x4000);
+        Com_Error(ERR_DROP, "G_NewString: len = %i > %i", v3, 0x4000);
     v4 = str;
     for (i = 0; i < v3; ++i)
     {
@@ -116,6 +125,8 @@ HashEntry_unnamed_type_u __cdecl G_NewString(const char *string)
     return SL_GetString(str, 0);
 }
 
+char str[8][32];
+int index;
 char *__cdecl vtos(const float *v)
 {
     char *s; // [esp+0h] [ebp-4h]

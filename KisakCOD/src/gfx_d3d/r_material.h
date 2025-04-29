@@ -2,9 +2,8 @@
 
 #include <d3d9.h>
 
-#include <xanim/xanim.h>
-
 #include "r_gfx.h"
+#include <xanim/xanim.h>
 
 enum MaterialTextureSource : __int32
 {                                       // ...

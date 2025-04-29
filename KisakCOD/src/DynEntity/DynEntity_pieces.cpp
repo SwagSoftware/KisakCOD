@@ -121,7 +121,7 @@ bool __cdecl DynEntPieces_SpawnPhysicsModel(
     }
     else
     {
-        MatrixTransformVector(offset, axis, worldOffset);
+        MatrixTransformVector(offset, *(const mat3x3*)axis, worldOffset);
         Vec3Add(worldOffset, origin, worldOffset);
         AxisToQuat(axis, quat);
         velocity[0] = dynEntPieces_velocity->current.value;

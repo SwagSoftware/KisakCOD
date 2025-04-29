@@ -84,7 +84,7 @@ struct XModel // sizeof=0xDC
     bool bad;
     // padding byte
     // padding byte
-    PhysPreset* physPreset;
+    struct PhysPreset* physPreset;
     struct PhysGeomList* physGeoms;
 };
 

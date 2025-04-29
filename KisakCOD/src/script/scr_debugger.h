@@ -1,5 +1,7 @@
 #pragma once
 #include "scr_variable.h"
+#include "scr_parser.h"
+#include <ui/ui.h>
 
 struct debugger_sval_s // sizeof=0x4
 {
@@ -69,6 +71,17 @@ struct __declspec(align(4)) Scr_SelectedLineInfo // sizeof=0xC
     // padding byte
 };
 
+struct Scr_Breakpoint // sizeof=0x1C
+{                                       // ...
+    int line;
+    unsigned int bufferIndex;
+    char *codePos;
+    struct Scr_WatchElement_s *element;
+    int builtinIndex;
+    Scr_Breakpoint *next;               // ...
+    Scr_Breakpoint **prev;
+};
+
 struct Scr_WatchElement_s // sizeof=0x64
 {
     ScriptExpression_t expr;
@@ -107,16 +120,6 @@ struct Scr_WatchElement_s // sizeof=0x64
     Scr_WatchElement_s *next;
 };
 
-struct Scr_Breakpoint // sizeof=0x1C
-{                                       // ...
-    int line;
-    unsigned int bufferIndex;
-    char *codePos;
-    Scr_WatchElement_s *element;
-    int builtinIndex;
-    Scr_Breakpoint *next;               // ...
-    Scr_Breakpoint **prev;
-};
 
 struct Scr_OpcodeList_s // sizeof=0x8
 {

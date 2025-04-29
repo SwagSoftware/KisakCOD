@@ -46,6 +46,7 @@ struct __declspec(align(4)) PhysPreset // sizeof=0x2C
     // padding byte
     // padding byte
 };
+
 struct BrushWrapper // sizeof=0x50
 {
     float mins[3];
@@ -258,7 +259,7 @@ void __cdecl DynEntPieces_RegisterDvars();
 void __cdecl DynEntPieces_AddDrawSurfs();
 void __cdecl DynEntPieces_SpawnPieces(
     int localClientNum,
-    const XModelPieces *pieces,
+    const struct XModelPieces *pieces,
     const float *origin,
     const float (*axis)[3],
     const float *hitPos,
@@ -504,8 +505,7 @@ void __cdecl CM_TestGeomInLeafBrushNode(cLeaf_t *leaf, const objInfo *input, Res
 void __cdecl Phys_TestGeomInBrush(const cbrush_t *brush, unsigned int *userData);
 void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results);
 void __cdecl Phys_InitWorldCollision();
-int(__cdecl *__cdecl dGetColliderWorld(
-    int classnum))(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip);
+int(__cdecl *__cdecl dGetColliderWorld(int classnum))(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip);
 void __cdecl Phys_InitBrushmodelGeomClass();
 void __cdecl Phys_GetBrushmodelAABB(dxGeom *geom, float *aabb);
 void __cdecl Phys_InitBrushGeomClass();

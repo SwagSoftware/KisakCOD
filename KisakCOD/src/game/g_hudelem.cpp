@@ -2,6 +2,9 @@
 #include <qcommon/mem_track.h>
 #include <script/scr_vm.h>
 #include <game_mp/g_utils_mp.h>
+#include <game_mp/g_public_mp.h>
+#include <server_mp/server.h>
+#include <server/sv_game.h>
 
 const char *g_he_font[6] = { "default", "bigfixed", "smallfixed", "objective", "big", "small" }; // idb
 const char *g_he_alignx[3] = { "left", "center", "right" };
@@ -811,7 +814,7 @@ void __cdecl HECmd_ClearAllTextAfterHudElem(scr_entref_t entref)
     if (!hud->elem.text)
         Scr_Error("Hud elem doesn't reference any text.  Make sure to call setText before using clearAllTextAfterHudElem.");
     for (configStringIndex = hud->elem.text + 1; configStringIndex < 512; ++configStringIndex)
-        SV_SetConfigstring(configStringIndex + 309, (char *)&String);
+        SV_SetConfigstring(configStringIndex + 309, (char *)"");
 }
 
 void __cdecl HECmd_SetMaterial(scr_entref_t entref)
@@ -1287,6 +1290,32 @@ VariableUnion __cdecl GetIntGTZero(unsigned int index)
     return (VariableUnion)number;
 }
 
+const BuiltinMethodDef methods_0[22] =
+{
+  { "settext", &HECmd_SetText, 0 },
+  { "clearalltextafterhudelem", &HECmd_ClearAllTextAfterHudElem, 0 },
+  { "setshader", &HECmd_SetMaterial, 0 },
+  { "settargetent", &HECmd_SetTargetEnt, 0 },
+  { "cleartargetent", &HECmd_ClearTargetEnt, 0 },
+  { "settimer", &HECmd_SetTimer, 0 },
+  { "settimerup", &HECmd_SetTimerUp, 0 },
+  { "settenthstimer", &HECmd_SetTenthsTimer, 0 },
+  { "settenthstimerup", &HECmd_SetTenthsTimerUp, 0 },
+  { "setclock", &HECmd_SetClock, 0 },
+  { "setclockup", &HECmd_SetClockUp, 0 },
+  { "setvalue", &HECmd_SetValue, 0 },
+  { "setwaypoint", &HECmd_SetWaypoint, 0 },
+  { "fadeovertime", &HECmd_FadeOverTime, 0 },
+  { "scaleovertime", &HECmd_ScaleOverTime, 0 },
+  { "moveovertime", &HECmd_MoveOverTime, 0 },
+  { "reset", &HECmd_Reset, 0 },
+  { "destroy", &HECmd_Destroy, 0 },
+  { "setpulsefx", &HECmd_SetPulseFX, 0 },
+  { "setplayernamestring", &HECmd_SetPlayerNameString, 0 },
+  { "setmapnamestring", &HECmd_SetMapNameString, 0 },
+  { "setgametypestring", &HECmd_SetGameTypeString, 0 }
+};
+
 void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t)
 {
     unsigned int i; // [esp+18h] [ebp-4h]
@@ -1302,6 +1331,7 @@ void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t)
     return 0;
 }
 
+hudelem_s g_dummyHudCurrent_0;
 void __cdecl HudElem_UpdateClient(gclient_s *client, int clientNum, hudelem_update_t which)
 {
     int archivalCount; // [esp+8h] [ebp-14h]

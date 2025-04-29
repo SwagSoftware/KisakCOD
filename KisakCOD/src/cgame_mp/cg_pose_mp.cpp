@@ -1,6 +1,8 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <xanim/dobj_utils.h>
+#include <ragdoll/ragdoll.h>
+#include <gfx_d3d/r_scene.h>
 
 
 void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int *partBits)
@@ -149,7 +151,7 @@ void  CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBit
     for (j = 0; j < 4; ++j)
     {
         trans.u[3] = pose->vehicle.wheelBoneIndex[j];
-        if (trans.u[3] < 0xFE && DObjSetRotTransIndex(obj, partBits, trans.u[3]))
+        if (trans.u[3] < 0xFE && DObjSetRotTransIndex((DObj_s*)obj, partBits, trans.u[3]))
         {
             trans.u[2] = (unsigned int)&mtx[trans.u[3]];
             trans.u[1] = trans.u[2] + 16;
@@ -208,7 +210,6 @@ void  CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBit
 void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     int setPartBits[4]; // [esp+34h] [ebp-10h] BYREF
-    int savedregs; // [esp+44h] [ebp+0h] BYREF
 
     //Profile_Begin(323);
     DObjGetSetBones(obj, setPartBits);
@@ -222,14 +223,14 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
         break;
     case 0xCu:
     case 0xEu:
-        CG_VehPoseControllers(COERCE_FLOAT(&savedregs), pose, obj, partBits);
+        CG_VehPoseControllers(pose, obj, partBits);
         break;
     default:
         break;
     }
     CG_DoBaseOriginController(pose, obj, setPartBits);
     if (pose->isRagdoll && (pose->ragdollHandle || pose->killcamRagdollHandle))
-        Ragdoll_DoControllers(pose, obj, partBits);
+        Ragdoll_DoControllers(pose, (DObj_s*)obj, partBits);
     //Profile_EndInternal(0);
 }
 
@@ -252,15 +253,17 @@ void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *
     }
     else
     {
-        angles[0] = pose->turret.$9D88A49AD898204B3D6E378457DD8419::angles.pitch;
-        angles[1] = pose->turret.$9D88A49AD898204B3D6E378457DD8419::angles.yaw;
+        //angles[0] = pose->turret.$9D88A49AD898204B3D6E378457DD8419::angles.pitch;
+        angles[0] = pose->turret.angles.pitch;
+        //angles[1] = pose->turret.$9D88A49AD898204B3D6E378457DD8419::angles.yaw;
+        angles[1] = pose->turret.angles.yaw;
     }
     angles[2] = 0.0;
-    DObjSetControlTagAngles(obj, partBits, pose->turret.tag_aim, angles);
-    DObjSetControlTagAngles(obj, partBits, pose->turret.tag_aim_animated, angles);
+    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_aim, angles);
+    DObjSetControlTagAngles((DObj_s *)obj, partBits, pose->turret.tag_aim_animated, angles);
     angles[0] = pose->turret.barrelPitch;
     angles[1] = 0.0;
-    DObjSetControlTagAngles(obj, partBits, pose->turret.tag_flash, angles);
+    DObjSetControlTagAngles((DObj_s *)obj, partBits, pose->turret.tag_flash, angles);
 }
 
 void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits)
@@ -345,13 +348,13 @@ notSet:
             highIndex = partIndex >> 5;
             if ((setPartBits[partIndex >> 5] & partBits[3]) == 0)
             {
-                if (DObjSetRotTransIndex(obj, &partBits[3 - highIndex], partIndex))
+                if (DObjSetRotTransIndex((DObj_s*)obj, &partBits[3 - highIndex], partIndex))
                 {
                     mat->quat[0] = baseQuat[0];
                     mat->quat[1] = baseQuat[1];
                     mat->quat[2] = baseQuat[2];
                     mat->quat[3] = baseQuat[3];
-                    v29 = pose->origin;
+                    v29 = (float*)pose->origin;
                     origin[0] = pose->origin[0];
                     origin[1] = pose->origin[1];
                     origin[2] = pose->origin[2];

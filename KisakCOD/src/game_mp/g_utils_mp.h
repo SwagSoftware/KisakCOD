@@ -1,5 +1,6 @@
 #pragma once
 #include <qcommon/qcommon.h>
+#include "g_public_mp.h"
 
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
 void __cdecl TRACK_g_utils();

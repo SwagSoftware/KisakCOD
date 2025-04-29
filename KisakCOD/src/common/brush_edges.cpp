@@ -13,24 +13,23 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     adjacencyWinding_t *optionalOutWinding,
     int optionalOutWindingCount)
 {
-    SimplePlaneIntersection *v7; // eax
+    const SimplePlaneIntersection *v7; // eax
     float *v8; // [esp+10h] [ebp-6054h]
-    SimplePlaneIntersection *v9; // [esp+14h] [ebp-6050h]
+    const SimplePlaneIntersection *v9; // [esp+14h] [ebp-6050h]
     adjacencyWinding_t *w; // [esp+1Ch] [ebp-6048h]
     int i2; // [esp+20h] [ebp-6044h] BYREF
     float perimiter1; // [esp+24h] [ebp-6040h]
     float plane[4]; // [esp+28h] [ebp-603Ch] BYREF
     int ptsCount; // [esp+38h] [ebp-602Ch]
-    float v15[3073]; // [esp+3Ch] [ebp-6028h] BYREF
-    SimplePlaneIntersection *xyz[1024]; // [esp+3044h] [ebp-3020h] BYREF
-    SimplePlaneIntersection *point[1024]; // [esp+4044h] [ebp-2020h] BYREF
-    SimplePlaneIntersection *v19[1024]; // [esp+5044h] [ebp-1020h] BYREF
+    float v0[3073]; // [esp+3Ch] [ebp-6028h] BYREF
+    const SimplePlaneIntersection *xyz[1024]; // [esp+3044h] [ebp-3020h] BYREF
+    const SimplePlaneIntersection *point[1024]; // [esp+4044h] [ebp-2020h] BYREF
+    const SimplePlaneIntersection *v19[1024]; // [esp+5044h] [ebp-1020h] BYREF
     int i0; // [esp+6044h] [ebp-20h] BYREF
-    bool v21; // [esp+6048h] [ebp-1Ch]
-    bool v22; // [esp+6049h] [ebp-1Bh]
+    char v21; // [esp+6048h] [ebp-1Ch]
+    char v22; // [esp+6049h] [ebp-1Bh]
     int v23; // [esp+604Ch] [ebp-18h]
-    unsigned int v24; // [esp+6050h] [ebp-14h]
-    unsigned int v25; // [esp+6054h] [ebp-10h]
+    unsigned int v24[2]; // [esp+6050h] [ebp-14h]
     int i1; // [esp+6058h] [ebp-Ch] BYREF
     float perimiter2; // [esp+605Ch] [ebp-8h]
     int plane2; // [esp+6060h] [ebp-4h]
@@ -47,17 +46,17 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     while (ptsCount)
     {
         point[1024 * v23] = xyz[--ptsCount];
-        *(&v24 + v23) = 1;
+        v24[v23] = 1;
         plane2 = SecondPlane(point[1024 * v23], basePlaneIndex);
         while (ptsCount)
         {
-            v7 = (SimplePlaneIntersection*)RemoveNextPointFormedByThisPlane(plane2, xyz, &xyz[ptsCount]);
-            *(&point[1024 * v23] + *(&v24 + v23)) = v7;
-            if (!*(&point[1024 * v23] + *(&v24 + v23)))
+            v7 = RemoveNextPointFormedByThisPlane(plane2, xyz, &xyz[ptsCount]);
+            *(&point[1024 * v23] + v24[v23]) = v7;
+            if (!*(&point[1024 * v23] + v24[v23]))
                 break;
-            plane2 = ThirdPlane(*(&point[1024 * v23] + *(&v24 + v23)), basePlaneIndex, plane2);
+            plane2 = ThirdPlane(*(&point[1024 * v23] + v24[v23]), basePlaneIndex, plane2);
             --ptsCount;
-            ++*(&v24 + v23);
+            ++v24[v23];
         }
         if (!IsPtFormedByThisPlane(plane2, point[1024 * v23]))
             MyAssertHandler(
@@ -72,24 +71,24 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
         }
         else
         {
-            perimiter1 = CyclePerimiter(point, v24);
-            perimiter2 = CyclePerimiter(v19, v25);
-            v21 = TestConvexWithoutNearPoints(point, v24);
-            v22 = TestConvexWithoutNearPoints(v19, v25);
-            if (CycleLess(v21, v22, perimiter1, perimiter2, v24, v25))
+            perimiter1 = CyclePerimiter(point, v24[0]);
+            perimiter2 = CyclePerimiter(v19, v24[1]);
+            v21 = TestConvexWithoutNearPoints(point, v24[0]);
+            v22 = TestConvexWithoutNearPoints(v19, v24[1]);
+            if (CycleLess(v21, v22, perimiter1, perimiter2, v24[0], v24[1]))
             {
-                memcpy(point, v19, 4 * v25);
-                v24 = v25;
+                memcpy(point, v19, 4 * v24[1]);
+                v24[0] = v24[1];
             }
         }
     }
-    if (v24 <= 2)
+    if (v24[0] <= 2)
         MyAssertHandler("..\\common\\brush_edges.cpp", 850, 1, "%s", "cycleCount[0] > 2");
     w = 0;
     if (optionalOutWinding)
     {
         w = optionalOutWinding;
-        if (optionalOutWindingCount < v24)
+        if (optionalOutWindingCount < v24[0])
         {
             Com_PrintError(1, "Brush face has too many edges");
             return 0;
@@ -101,30 +100,30 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     }
     if (!w)
         MyAssertHandler("..\\common\\brush_edges.cpp", 873, 0, "%s", "winding");
-    if (!PlaneInCommonExcluding(point[0], xyz[v24 + 1023], basePlaneIndex, w->sides))
+    if (!PlaneInCommonExcluding(point[0], xyz[v24[0] + 1023], basePlaneIndex, w->sides))
         MyAssertHandler("..\\common\\brush_edges.cpp", 875, 1, "%s", "rv");
-    v15[0] = point[0]->xyz[0];
-    v15[1] = point[0]->xyz[1];
-    v15[2] = point[0]->xyz[2];
-    for (w->numsides = 1; w->numsides < v24; ++w->numsides)
+    v0[0] = point[0]->xyz[0];
+    v0[1] = point[0]->xyz[1];
+    v0[2] = point[0]->xyz[2];
+    for (w->numsides = 1; w->numsides < v24[0]; ++w->numsides)
     {
         w->sides[w->numsides] = ThirdPlane(xyz[w->numsides + 1023], basePlaneIndex, *(&w->numsides + w->numsides));
-        v8 = &v15[3 * w->numsides];
+        v8 = &v0[3 * w->numsides];
         v9 = point[w->numsides];
         *v8 = v9->xyz[0];
         v8[1] = v9->xyz[1];
         v8[2] = v9->xyz[2];
     }
-    if (w->sides[0] != ThirdPlane(xyz[v24 + 1023], basePlaneIndex, *(&w->numsides + w->numsides)))
+    if (w->sides[0] != ThirdPlane(xyz[v24[0] + 1023], basePlaneIndex, *(&w->numsides + w->numsides)))
         MyAssertHandler(
             "..\\common\\brush_edges.cpp",
             884,
             1,
             "%s",
             "winding->sides[0] == ThirdPlane( cycle[0][cycleCount[0]-1], basePlaneIndex, winding->sides[winding->numsides-1] )");
-    if (RepresentativeTriangleFromWinding((const float(*)[3])v15, w->numsides, sideNormal, &i0, &i1, &i2) < 0.001000000047497451)
+    if (RepresentativeTriangleFromWinding((const float(*)[3])v0, w->numsides, sideNormal, &i0, &i1, &i2) < 0.001000000047497451)
         return 0;
-    PlaneFromPoints(plane, &v15[3 * i0], &v15[3 * i1], &v15[3 * i2]);
+    PlaneFromPoints(plane, &v0[3 * i0], &v0[3 * i1], &v0[3 * i2]);
     if (Vec3Dot(plane, sideNormal) < 0.0)
         ReverseAdjacencyWinding(w);
     return w;
@@ -448,7 +447,7 @@ bool __cdecl CycleLess(
     return perimiter1 < perimiter2 - 1.0 || perimiter2 >= perimiter1 - 1.0 && nodeCount1 > nodeCount2;
 }
 
-int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int ptsCount)
+int __cdecl ReduceToACycle(int basePlane, const SimplePlaneIntersection **pts, int ptsCount)
 {
     int v4; // eax
     int v5; // eax
@@ -458,8 +457,8 @@ int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int pts
     char CycleBFS; // [esp+1018h] [ebp-4038h]
     char v10; // [esp+1019h] [ebp-4037h]
     int v11; // [esp+101Ch] [ebp-4034h]
-    SimplePlaneIntersection *resultCycle[1024]; // [esp+1020h] [ebp-4030h] BYREF
-    SimplePlaneIntersection *v13[1024]; // [esp+2020h] [ebp-3030h] BYREF
+    const SimplePlaneIntersection *resultCycle[1024]; // [esp+1020h] [ebp-4030h] BYREF
+    const SimplePlaneIntersection *v13[1024]; // [esp+2020h] [ebp-3030h] BYREF
     int list[1024]; // [esp+3020h] [ebp-2030h] BYREF
     int v15; // [esp+4020h] [ebp-1030h]
     char v16; // [esp+4024h] [ebp-102Ch]
@@ -472,10 +471,7 @@ int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int pts
     int ptCount; // [esp+403Ch] [ebp-1014h] BYREF
     float perimiter1; // [esp+4040h] [ebp-1010h]
     float perimiter2; // [esp+4044h] [ebp-100Ch]
-    SimplePlaneIntersection *result; // [esp+4048h] [ebp-1008h] BYREF
-    SimplePlaneIntersection *end; // [esp+404Ch] [ebp-1004h]
-    SimplePlaneIntersection *start; // [esp+4050h] [ebp-1000h]
-    SimplePlaneIntersection *removePoint; // [esp+4054h] [ebp-FFCh]
+    const SimplePlaneIntersection *points[4]; // [esp+4048h] [ebp-1008h] BYREF
     int j; // [esp+504Ch] [ebp-4h]
     int ptsCounta; // [esp+5060h] [ebp+10h]
 
@@ -507,10 +503,10 @@ int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int pts
     {
         while (1)
         {
-            edgeCount = GetPtsFormedByPlane(list[j], pts, ptsCounta, &result, 1024);
+            edgeCount = GetPtsFormedByPlane(list[j], pts, ptsCounta, points, 1024);
             if (edgeCount <= 2)
                 break;
-            v15 = PartitionEdges(basePlane, list[j], pts, ptsCounta, &result, edgeCount, partition);
+            v15 = PartitionEdges(basePlane, list[j], pts, ptsCounta, points, edgeCount, partition);
             v7 = 0;
             for (k = 0; k < v15 && k < 2; ++k)
             {
@@ -519,13 +515,13 @@ int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int pts
                     MyAssertHandler("..\\common\\brush_edges.cpp", 699, 0, "%s", "partitionSize > 0");
                 if (v11 == 1)
                 {
-                    ptsCounta = Remove(pts, ptsCounta, *(&result + v7));
+                    ptsCounta = Remove(pts, ptsCounta, points[v7]);
                     break;
                 }
                 if (v11 > 2)
                 {
-                    v19 = ChooseEdgeToRemove(basePlane, list[j], pts, ptsCounta, &result + v7);
-                    ptsCounta = Remove(pts, ptsCounta, *(&result + v19 + v7));
+                    v19 = ChooseEdgeToRemove(basePlane, list[j], pts, ptsCounta, &points[v7]);
+                    ptsCounta = Remove(pts, ptsCounta, *(&points[v19] + v7));
                     break;
                 }
                 v7 = partition[k];
@@ -536,8 +532,16 @@ int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int pts
                     MyAssertHandler("..\\common\\brush_edges.cpp", 720, 0, "%s", "partitions[0] == 2");
                 if (partition[1] != 4)
                     MyAssertHandler("..\\common\\brush_edges.cpp", 721, 0, "%s", "partitions[1] == 4");
-                CycleBFS = FindCycleBFS(basePlane, pts, ptsCounta, result, end, list[j], resultCycle, &resultCycleCount);
-                v10 = FindCycleBFS(basePlane, pts, ptsCounta, start, removePoint, list[j], v13, &ptCount);
+                CycleBFS = FindCycleBFS(
+                    basePlane,
+                    pts,
+                    ptsCounta,
+                    points[0],
+                    points[1],
+                    list[j],
+                    resultCycle,
+                    &resultCycleCount);
+                v10 = FindCycleBFS(basePlane, pts, ptsCounta, points[2], points[3], list[j], v13, &ptCount);
                 if (!CycleBFS || !v10)
                     MyAssertHandler("..\\common\\brush_edges.cpp", 725, 0, "%s", "isCycle[0] && isCycle[1]");
                 perimiter1 = CyclePerimiter(resultCycle, resultCycleCount);
@@ -546,13 +550,13 @@ int __cdecl ReduceToACycle(int basePlane, SimplePlaneIntersection **pts, int pts
                 v17 = TestConvexWithoutNearPoints(v13, ptCount);
                 if (CycleLess(v16, v17, perimiter1, perimiter2, resultCycleCount, ptCount))
                 {
-                    v4 = Remove(pts, ptsCounta, result);
-                    ptsCounta = Remove(pts, v4, end);
+                    v4 = Remove(pts, ptsCounta, points[0]);
+                    ptsCounta = Remove(pts, v4, points[1]);
                 }
                 else
                 {
-                    v5 = Remove(pts, ptsCounta, start);
-                    ptsCounta = Remove(pts, v5, removePoint);
+                    v5 = Remove(pts, ptsCounta, points[2]);
+                    ptsCounta = Remove(pts, v5, points[3]);
                 }
             }
             if (ptsCounta < 3)
@@ -576,7 +580,7 @@ char __cdecl IntAlreadyInList(const int *list, int listCount, int value)
 
 char __cdecl FindCycleBFS(
     int basePlane,
-    SimplePlaneIntersection **pts,
+    const SimplePlaneIntersection **pts,
     int ptsCount,
     const SimplePlaneIntersection *start,
     const SimplePlaneIntersection *end,
@@ -746,7 +750,7 @@ int __cdecl GetPtsFormedByPlane(
 int __cdecl ChooseEdgeToRemove(
     int basePlane,
     int connectingPlane,
-    SimplePlaneIntersection **pts,
+    const SimplePlaneIntersection **pts,
     int ptsCount,
     const SimplePlaneIntersection **edges)
 {
@@ -754,9 +758,9 @@ int __cdecl ChooseEdgeToRemove(
     char v7; // [esp+11h] [ebp-302Bh]
     char v8; // [esp+12h] [ebp-302Ah]
     int v9; // [esp+14h] [ebp-3028h]
-    SimplePlaneIntersection *resultCycle[1024]; // [esp+1Ch] [ebp-3020h] BYREF
-    SimplePlaneIntersection *v11[1024]; // [esp+101Ch] [ebp-2020h] BYREF
-    SimplePlaneIntersection *v12[1025]; // [esp+201Ch] [ebp-1020h] BYREF
+    const SimplePlaneIntersection *resultCycle[1024]; // [esp+1Ch] [ebp-3020h] BYREF
+    const SimplePlaneIntersection *v11[1024]; // [esp+101Ch] [ebp-2020h] BYREF
+    const SimplePlaneIntersection *v12[1025]; // [esp+201Ch] [ebp-1020h] BYREF
     char v13; // [esp+3020h] [ebp-1Ch]
     char v14; // [esp+3021h] [ebp-1Bh]
     char v15; // [esp+3022h] [ebp-1Ah]
@@ -787,14 +791,14 @@ int __cdecl ChooseEdgeToRemove(
 int __cdecl PartitionEdges(
     int basePlane,
     int connectingPlane,
-    SimplePlaneIntersection **pts,
+    const SimplePlaneIntersection **pts,
     int ptsCount,
     const SimplePlaneIntersection **edges,
     int edgeCount,
     int *partition)
 {
     const SimplePlaneIntersection *v8; // [esp+0h] [ebp-1020h]
-    SimplePlaneIntersection *resultCycle; // [esp+8h] [ebp-1018h] BYREF
+    const SimplePlaneIntersection *resultCycle; // [esp+8h] [ebp-1018h] BYREF
     int v10; // [esp+100Ch] [ebp-14h]
     int i; // [esp+1010h] [ebp-10h]
     int resultCycleCount; // [esp+1014h] [ebp-Ch] BYREF

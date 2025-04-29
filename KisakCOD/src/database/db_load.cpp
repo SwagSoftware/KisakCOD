@@ -28,7 +28,6 @@ struct DynEntityServer // sizeof=0x24
 
 void *varint;
 void *varuint;
-unsigned __int8 *varbyte;
 GfxVertex *varGfxVertex;
 unsigned __int64 *varuint64_t           ;
 int *varexpressionEntryType     ;
@@ -55,7 +54,6 @@ mnode_t *varmnode_t     ;
 union FxElemDefVisuals *varFxElemDefVisuals     ;
 XModelCollSurf_s *varXModelCollSurf     ;
 XModelCollTri_s *varXModelCollTri;
-unsigned int *varuint                ;
 DynEntityServer *varDynEntityServer     ;
 MaterialStreamRouting *varMaterialStreamRouting     ;
 GfxScaledPlacement *varGfxScaledPlacement     ;
@@ -244,7 +242,6 @@ MaterialTechnique **varMaterialTechniquePtr     ;
 union GfxTexture *varGfxTexture     ;
 GfxWorldDpvsPlanes *varGfxWorldDpvsPlanes     ;
 MaterialPixelShader *varMaterialPixelShader     ;
-int *varint                 ;
 Picmip *varPicmip      ;
 int *varint32_t             ;
 Material *varMaterial     ;
@@ -438,11 +435,6 @@ void __cdecl Load_uintArray(bool atStreamStart, int count)
 void __cdecl Load_uint(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (unsigned __int8 *)varuint, 4);
-}
-
-void __cdecl Load_uintArray(bool atStreamStart, int count)
-{
-    Load_Stream(atStreamStart, (unsigned __int8 *)varuint, 4 * count);
 }
 
 void __cdecl Load_float(bool atStreamStart)

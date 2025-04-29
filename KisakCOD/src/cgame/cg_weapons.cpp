@@ -131,7 +131,8 @@ void __cdecl CG_RegisterWeapon(int localClientNum, unsigned int weaponNum)
             SCR_UpdateLoadScreen();
             memset((unsigned __int8 *)weapInfo, 0, sizeof(weaponInfo_s));
             weapInfo->registered = 1;
-            weapInfo->item = (const gitem_s *)(4 * weaponNum + 9917736);
+            //weapInfo->item = (const gitem_s *)(4 * weaponNum + 9917736);
+            weapInfo->item = &bg_itemlist[4 * weaponNum];
             weapInfo->iPrevAnim = -1;
             if (weapDef->gunXModel[0] && weapDef->handXModel)
             {

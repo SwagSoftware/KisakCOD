@@ -4,7 +4,7 @@
 
 #include <script/scr_stringlist.h>
 #include <script/scr_variable.h>
-#include <game_mp/g_public_mp.h>
+//#include <game_mp/g_public_mp.h>
 
 const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
 
@@ -21,6 +21,44 @@ enum fieldtype_t : __int32
     F_VECTORHACK = 0x7,
     F_OBJECT = 0x8,                 // ...
     F_MODEL = 0x9,                 // ...
+};
+
+struct vehicle_info_t // sizeof=0x270
+{                                       // ...
+    char name[64];
+    __int16 type;
+    // padding byte
+    // padding byte
+    int steerWheels;
+    int texScroll;
+    int quadBarrel;
+    int bulletDamage;
+    int armorPiercingDamage;
+    int grenadeDamage;
+    int projectileDamage;
+    int projectileSplashDamage;
+    int heavyExplosiveDamage;
+    float texScrollScale;
+    float maxSpeed;
+    float accel;
+    float rotRate;
+    float rotAccel;
+    float maxBodyPitch;
+    float maxBodyRoll;
+    float collisionDamage;
+    float collisionSpeed;
+    float suspensionTravel;
+    char turretWeapon[64];
+    float turretHorizSpanLeft;
+    float turretHorizSpanRight;
+    float turretVertSpanUp;
+    float turretVertSpanDown;
+    float turretRotRate;
+    char sndNames[6][64];
+    unsigned __int8 sndIndices[6];
+    // padding byte
+    // padding byte
+    float engineSndSpeed;
 };
 
 struct client_fields_s // sizeof=0x14
@@ -548,15 +586,7 @@ struct AntilagClientStore // sizeof=0x340
     float realClientPositions[64][3];
     bool clientMoved[64];
 };
-struct weaponParms // sizeof=0x40
-{                                       // ...
-    float forward[3];                   // ...
-    float right[3];                     // ...
-    float up[3];                        // ...
-    float muzzleTrace[3];               // ...
-    float gunForward[3];                // ...
-    WeaponDef *weapDef;                 // ...
-};
+struct weaponParms;
 void __cdecl G_AntiLagRewindClientPos(int gameTime, AntilagClientStore *antilagStore);
 void __cdecl G_AntiLag_RestoreClientPos(AntilagClientStore *antilagStore);
 gentity_s *__cdecl Weapon_Melee(gentity_s *ent, weaponParms *wp, float range, float width, float height, int gametime);
@@ -660,6 +690,73 @@ int __cdecl ConsoleCommand();
 
 void __cdecl G_FreeEntity(gentity_s *ed);
 
+void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int extra);
+void __cdecl hurt_use(gentity_s *self, gentity_s *other, gentity_s *third);
+void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int extra);
+void __cdecl Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s *third);
+void __cdecl Pain_trigger_damage(gentity_s *pSelf, gentity_s *pAttacker, int iDamage, const float *vPoint, int iMod, const float *idk, hitLocation_t hit, int swag);
+void Die_trigger_damage(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    int iDamage,
+    int iMod,
+    int iWeapon,
+    const float *vDir,
+    const hitLocation_t hitLoc,
+    int timeOffset);
+void __cdecl player_die(
+    gentity_s *self,
+    gentity_s *inflictor,
+    gentity_s *attacker,
+    int damage,
+    int meansOfDeath,
+    int iWeapon,
+    const float *vDir,
+    hitLocation_t hitLoc,
+    int psTimeOffset);
+void __cdecl G_PlayerController(const gentity_s *self, int *partBits);
+void __cdecl BodyEnd(gentity_s *ent);
+void __cdecl turret_think_init(gentity_s *self);
+void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s *activator);
+void __cdecl turret_controller(const gentity_s *self, int *partBits);
+void __cdecl turret_think(gentity_s *self);
+void __cdecl G_VehEntHandler_Think(gentity_s *pSelf);
+void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched);
+void __cdecl G_VehEntHandler_Use(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator);
+void __cdecl Helicopter_Pain(
+    gentity_s *pSelf,
+    gentity_s *pAttacker,
+    int damage,
+    const float *point,
+    const int mod,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    const int weaponIdx);
+void __cdecl G_VehEntHandler_Die(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    int psTimeOffset);
+void __cdecl G_VehEntHandler_Controller(const gentity_s *pSelf, int *partBits);
+void __cdecl Helicopter_Think(gentity_s *ent);
+void __cdecl Helicopter_Die(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    int psTimeOffset);
+
+void __cdecl Helicopter_Controller(const gentity_s *pSelf, int *partBits);
 
 const entityHandler_t entityHandlers[] =
 {

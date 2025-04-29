@@ -387,7 +387,6 @@ extern const dvar_t *con_outputSliderColor;
 extern const dvar_t *con_errormessagetime;
 extern const dvar_t *con_minicontime;
 extern const dvar_t *con_miniconlines;
-extern const dvar_t *con_inputBoxColor;
 extern const dvar_t *con_outputWindowColor;
 
 extern ConDrawInputGlob conDrawInputGlob;

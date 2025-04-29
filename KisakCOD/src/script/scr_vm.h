@@ -7,16 +7,6 @@
 #include "scr_debugger.h"
 #include <bgame/bg_local.h>
 
-struct scr_block_s // sizeof=0x218
-{
-    int abortLevel;
-    int localVarsCreateCount;
-    int localVarsPublicCount;
-    int localVarsCount;
-    unsigned __int8 localVarsInitBits[8];
-    scr_localVar_t localVars[64];
-};
-
 struct Scr_StringNode_s // sizeof=0x8
 {
     const char *text;
@@ -108,7 +98,7 @@ void __cdecl GScr_SetDynamicEntityField(gentity_s* ent, unsigned int index);
 int __cdecl Scr_GetAnimsIndex(const XAnim_s* anims);
 XAnim_s* __cdecl Scr_GetAnims(unsigned int index);
 int __cdecl Scr_GetAnimTreeSize(unsigned int parentNode);
-void __cdecl Scr_InitFromChildBlocks(scr_block_s** childBlocks, int childCount, scr_block_s* block);
+void __cdecl Scr_InitFromChildBlocks(struct scr_block_s** childBlocks, int childCount, struct scr_block_s* block);
 Scr_StringNode_s* __cdecl Scr_GetStringList(const char* filename, char** pBuf);
 void __cdecl Scr_InitDebuggerMain();
 void __cdecl Scr_ShutdownDebuggerMain();

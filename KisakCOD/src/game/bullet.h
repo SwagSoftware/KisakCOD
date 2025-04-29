@@ -2,9 +2,35 @@
 #include <bgame/bg_local.h>
 #include "bullet.h"
 
-// KISAKTODO: these extern?
-static unsigned __int8 bulletPriorityMap[] = { 1u, 3u, 3u, 3u }; // idb
-static unsigned __int8 riflePriorityMap[19] = { 1u, 9u, 9u, 9u, 8u, 7u, 6u, 6u, 6u, 6u, 5u, 5u, 4u, 4u, 4u, 4u, 3u, 3u, 0u }; // idb
+static unsigned __int8 bulletPriorityMap[20] =
+{
+  1u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  3u,
+  0u,
+  0u
+};
+
+static unsigned __int8 riflePriorityMap[20] =
+{ 1u, 9u, 9u, 9u, 8u, 7u, 6u, 6u, 6u, 6u, 5u, 5u, 4u, 4u, 4u, 4u, 3u, 3u, 0u, 0  };
+
+
+
 
 struct weaponParms // sizeof=0x40
 {                                       // ...

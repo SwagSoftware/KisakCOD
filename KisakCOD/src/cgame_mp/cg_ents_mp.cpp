@@ -247,7 +247,7 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
     GfxBrushModel *bmodel; // [esp+1D8h] [ebp-8h]
     GfxBrushModel *retaddr; // [esp+1E0h] [ebp+0h]
 
-    bmodel = retaddr;
+    //bmodel = retaddr;
     bounds_20 = R_GetBrushModel(cent->nextState.index.brushmodel);
     axis_24 = *(_QWORD *)&bounds_20->bounds[0][0];
     axis_32 = *(_QWORD *)&bounds_20->bounds[0][2];
@@ -795,14 +795,12 @@ int __cdecl CG_DObjGetWorldBoneMatrix(
     float v7; // [esp+24h] [ebp-34h]
     float v8; // [esp+28h] [ebp-30h]
     float v9; // [esp+2Ch] [ebp-2Ch]
-    float result; // [esp+30h] [ebp-28h] BYREF
-    float v11; // [esp+34h] [ebp-24h]
-    float v12; // [esp+38h] [ebp-20h]
-    float v13; // [esp+3Ch] [ebp-1Ch]
-    float v14; // [esp+40h] [ebp-18h]
-    float v15; // [esp+44h] [ebp-14h]
-    float v16; // [esp+48h] [ebp-10h]
-    float v17; // [esp+4Ch] [ebp-Ch]
+    float result[3]; // [esp+30h] [ebp-28h] BYREF
+    float v11; // [esp+3Ch] [ebp-1Ch]
+    float v12; // [esp+40h] [ebp-18h]
+    float v13; // [esp+44h] [ebp-14h]
+    float v14; // [esp+48h] [ebp-10h]
+    float v15; // [esp+4Ch] [ebp-Ch]
     cg_s *cgameGlob; // [esp+50h] [ebp-8h]
     DObjAnimMat *mat; // [esp+54h] [ebp-4h]
 
@@ -827,25 +825,25 @@ int __cdecl CG_DObjGetWorldBoneMatrix(
     }
     if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-    Vec3Scale(mat->quat, mat->transWeight, &result);
-    v16 = result * mat->quat[0];
-    v7 = result * mat->quat[1];
-    v14 = result * mat->quat[2];
-    v17 = result * mat->quat[3];
-    v6 = v11 * mat->quat[1];
-    v15 = v11 * mat->quat[2];
-    v13 = v11 * mat->quat[3];
-    v8 = v12 * mat->quat[2];
-    v9 = v12 * mat->quat[3];
+    Vec3Scale(mat->quat, mat->transWeight, result);
+    v14 = result[0] * mat->quat[0];
+    v7 = result[0] * mat->quat[1];
+    v12 = result[0] * mat->quat[2];
+    v15 = result[0] * mat->quat[3];
+    v6 = result[1] * mat->quat[1];
+    v13 = result[1] * mat->quat[2];
+    v11 = result[1] * mat->quat[3];
+    v8 = result[2] * mat->quat[2];
+    v9 = result[2] * mat->quat[3];
     (*tagMat)[0] = 1.0 - (v6 + v8);
     (*tagMat)[1] = v7 + v9;
-    (*tagMat)[2] = v14 - v13;
+    (*tagMat)[2] = v12 - v11;
     (*tagMat)[3] = v7 - v9;
-    (*tagMat)[4] = 1.0 - (v16 + v8);
-    (*tagMat)[5] = v15 + v17;
-    (*tagMat)[6] = v14 + v13;
-    (*tagMat)[7] = v15 - v17;
-    (*tagMat)[8] = 1.0 - (v16 + v6);
+    (*tagMat)[4] = 1.0 - (v14 + v8);
+    (*tagMat)[5] = v13 + v15;
+    (*tagMat)[6] = v12 + v11;
+    (*tagMat)[7] = v13 - v15;
+    (*tagMat)[8] = 1.0 - (v14 + v6);
     if (pose->localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -886,14 +884,12 @@ int __cdecl CG_DObjGetWorldTagMatrix(
     float v7; // [esp+24h] [ebp-34h]
     float v8; // [esp+28h] [ebp-30h]
     float v9; // [esp+2Ch] [ebp-2Ch]
-    float result; // [esp+30h] [ebp-28h] BYREF
-    float v11; // [esp+34h] [ebp-24h]
-    float v12; // [esp+38h] [ebp-20h]
-    float v13; // [esp+3Ch] [ebp-1Ch]
-    float v14; // [esp+40h] [ebp-18h]
-    float v15; // [esp+44h] [ebp-14h]
-    float v16; // [esp+48h] [ebp-10h]
-    float v17; // [esp+4Ch] [ebp-Ch]
+    float result[3]; // [esp+30h] [ebp-28h] BYREF
+    float v11; // [esp+3Ch] [ebp-1Ch]
+    float v12; // [esp+40h] [ebp-18h]
+    float v13; // [esp+44h] [ebp-14h]
+    float v14; // [esp+48h] [ebp-10h]
+    float v15; // [esp+4Ch] [ebp-Ch]
     cg_s *cgameGlob; // [esp+50h] [ebp-8h]
     DObjAnimMat *mat; // [esp+54h] [ebp-4h]
 
@@ -918,25 +914,25 @@ int __cdecl CG_DObjGetWorldTagMatrix(
     }
     if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-    Vec3Scale(mat->quat, mat->transWeight, &result);
-    v16 = result * mat->quat[0];
-    v7 = result * mat->quat[1];
-    v14 = result * mat->quat[2];
-    v17 = result * mat->quat[3];
-    v6 = v11 * mat->quat[1];
-    v15 = v11 * mat->quat[2];
-    v13 = v11 * mat->quat[3];
-    v8 = v12 * mat->quat[2];
-    v9 = v12 * mat->quat[3];
+    Vec3Scale(mat->quat, mat->transWeight, result);
+    v14 = result[0] * mat->quat[0];
+    v7 = result[0] * mat->quat[1];
+    v12 = result[0] * mat->quat[2];
+    v15 = result[0] * mat->quat[3];
+    v6 = result[1] * mat->quat[1];
+    v13 = result[1] * mat->quat[2];
+    v11 = result[1] * mat->quat[3];
+    v8 = result[2] * mat->quat[2];
+    v9 = result[2] * mat->quat[3];
     (*tagMat)[0] = 1.0 - (v6 + v8);
     (*tagMat)[1] = v7 + v9;
-    (*tagMat)[2] = v14 - v13;
+    (*tagMat)[2] = v12 - v11;
     (*tagMat)[3] = v7 - v9;
-    (*tagMat)[4] = 1.0 - (v16 + v8);
-    (*tagMat)[5] = v15 + v17;
-    (*tagMat)[6] = v14 + v13;
-    (*tagMat)[7] = v15 - v17;
-    (*tagMat)[8] = 1.0 - (v16 + v6);
+    (*tagMat)[4] = 1.0 - (v14 + v8);
+    (*tagMat)[5] = v13 + v15;
+    (*tagMat)[6] = v12 + v11;
+    (*tagMat)[7] = v13 - v15;
+    (*tagMat)[8] = 1.0 - (v14 + v6);
     if (pose->localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -949,7 +945,6 @@ int __cdecl CG_DObjGetWorldTagMatrix(
     Vec3Add(mat->trans, cgArray[0].refdef.viewOffset, origin);
     return 1;
 }
-
 DObjAnimMat *__cdecl CG_DObjGetLocalTagMatrix(const cpose_t *pose, DObj_s *obj, unsigned int tagName)
 {
     unsigned __int8 boneIndex; // [esp+3h] [ebp-1h] BYREF

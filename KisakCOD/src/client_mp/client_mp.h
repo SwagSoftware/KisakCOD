@@ -973,7 +973,12 @@ void __cdecl CL_SystemInfoChanged(int localClientNum);
 void __cdecl CL_ParseMapCenter(int localClientNum);
 void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg);
 void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg);
-void __cdecl CL_ParsePacketEntities(__int64 cl, int time, clSnapshot_t *oldframe, clSnapshot_t *newframe);
+void __cdecl CL_ParsePacketEntities(
+    clientActive_t *cl,
+    msg_t *msg,
+    int time,
+    clSnapshot_t *oldframe,
+    clSnapshot_t *newframe);
 void __cdecl CL_DeltaEntity(
     clientActive_t *cl,
     msg_t *msg,

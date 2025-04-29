@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../universal/q_shared.h"
-#include <xanim/xanim.h>
 
 typedef enum
 {
@@ -1026,7 +1025,7 @@ void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs);
 
 // cm_load_obj
 void __cdecl CM_LoadMapData_LoadObj(const char *name);
-cplane_s *__cdecl CM_GetPlanes();
+struct cplane_s *__cdecl CM_GetPlanes();
 int __cdecl CM_GetPlaneCount();
 
 // cm_showcollision

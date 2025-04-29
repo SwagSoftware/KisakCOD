@@ -542,8 +542,8 @@ void __cdecl FX_AllocAndConstructMark(
     int tris; // [esp+34h] [ebp-4h]
 
     std::sort(
-        markTris,
-        &markTris[triCount],
+        (const FxMarkTri **)markTris,
+        (const FxMarkTri **)&markTris[triCount],
         FX_CompareMarkTris);
     Sys_EnterCriticalSection(CRITSECT_ALLOC_MARK);
     if (InterlockedIncrement(&g_markThread[localClientNum]) != 1)
@@ -1400,7 +1400,7 @@ char __cdecl FX_GenerateMarkVertsForList_EntXModel(
     unsigned __int16 baseVertex; // [esp+110h] [ebp-34h] BYREF
     float transformMatrix[4][3]; // [esp+114h] [ebp-30h] BYREF
 
-    FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(placement, vec3_origin, (float (*)[3][3])transformMatrix);
+    FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(placement, vec3_origin, (float (*)[3])transformMatrix);
     for (markHandle = head; markHandle != 0xFFFF; markHandle = mark->nextMark)
     {
         mark = FX_MarkFromHandle(marksSystem, markHandle);
@@ -1410,7 +1410,7 @@ char __cdecl FX_GenerateMarkVertsForList_EntXModel(
                 return 0;
             FX_GenerateMarkVertsForMark_SetLightHandle(&drawSurf, lightHandleOverride);
             FX_GenerateMarkVertsForMark_SetReflectionProbeIndex(&drawSurf, reflectionProbeIndexOverride);
-            FX_GenerateMarkVertsForMark_FinishAnimated(marksSystem, mark, baseVertex, &drawSurf, transformMatrix);
+            FX_GenerateMarkVertsForMark_FinishAnimated(marksSystem, mark, baseVertex, &drawSurf, (const float(*)[3])transformMatrix);
         }
     }
     return 1;
@@ -1645,7 +1645,8 @@ void __cdecl FX_ExpandMarkVerts_Transform_GfxWorldVertex_(
     const FxMarkPoint *markPoint; // [esp+D8h] [ebp-38h]
     GfxWorldVertex *verts; // [esp+DCh] [ebp-34h]
     float transformedDelta[3]; // [esp+E0h] [ebp-30h] BYREF
-    __int64 texCoord; // [esp+ECh] [ebp-24h]
+    //__int64 texCoord; // [esp+ECh] [ebp-24h]
+    float texCoord[2];
     int pointCount; // [esp+F4h] [ebp-1Ch]
     int loopCount; // [esp+F8h] [ebp-18h]
     float transformedTexCoordAxis[3]; // [esp+FCh] [ebp-14h] BYREF
@@ -1686,19 +1687,23 @@ void __cdecl FX_ExpandMarkVerts_Transform_GfxWorldVertex_(
         {
             castOutVert = outVert;
             Vec3Sub(markPoint->xyz, mark->origin, delta);
-            MatrixTransformVector(delta, matrixTransform, transformedDelta);
-            MatrixTransformVector(mark->texCoordAxis, matrixTransform, transformedTexCoordAxis);
-            MatrixTransformVector(markPoint->normal, matrixTransform, transformedNormal);
+            MatrixTransformVector(delta, *(mat3x3*)matrixTransform, transformedDelta);
+            MatrixTransformVector(mark->texCoordAxis, *(mat3x3 *)matrixTransform, transformedTexCoordAxis);
+            MatrixTransformVector(markPoint->normal, *(mat3x3 *)matrixTransform, transformedNormal);
             Vec3Cross(transformedTexCoordAxis, transformedNormal, binormal);
-            MatrixTransformVector43(markPoint->xyz, matrixTransform, castOutVert->xyz);
+            MatrixTransformVector43(markPoint->xyz, *(mat4x3 *)matrixTransform, castOutVert->xyz);
             castOutVert->binormalSign = -1.0;
             castOutVert->color.packed = *mark->nativeColor;
             v4 = Vec3Dot(transformedDelta, transformedTexCoordAxis);
-            *&texCoord = v4 * texCoordScale + 0.5;
+            //*&texCoord = v4 * texCoordScale + 0.5;
+            texCoord[0] = v4 * texCoordScale + 0.5f;
             v5 = Vec3Dot(transformedDelta, binormal);
-            *(&texCoord + 1) = v5 * texCoordScale + 0.5;
+            //*(&texCoord + 1) = v5 * texCoordScale + 0.5;
+            texCoord[1] = v5 * texCoordScale + 0.5f;
             lmapCoord = (float*)markPoint->lmapCoord;
-            *castOutVert->texCoord = texCoord;
+            //*castOutVert->texCoord = texCoord;
+            castOutVert->texCoord[0] = texCoord[0];
+            castOutVert->texCoord[1] = texCoord[1];
             *castOutVert->lmapCoord = *lmapCoord;
             v8.array[0] = (transformedNormal[0] * 127.0 + 127.5);
             v8.array[1] = (transformedNormal[1] * 127.0 + 127.5);
@@ -1724,6 +1729,36 @@ void __cdecl FX_ExpandMarkVerts_Transform_GfxWorldVertex_(
             "(groupHandle == 0xffff)",
             groupHandle);
 }
+
+void __cdecl setTexCoordAndLMap_GfxPackedVertex_(GfxPackedVertex *outVert, const float *texCoord)
+{
+    __int16 v2; // [esp+0h] [ebp-40h]
+    __int16 v3; // [esp+4h] [ebp-3Ch]
+    int v4; // [esp+Ch] [ebp-34h]
+    float v5; // [esp+18h] [ebp-28h]
+    int v6; // [esp+20h] [ebp-20h]
+
+    if (((unsigned int)(2 * texCoord[0]) ^ 0x80000000) >> 14 < 0x3FFF)
+        v6 = ((unsigned int)(2 * texCoord[0]) ^ 0x80000000) >> 14;
+    else
+        v6 = 0x3FFF;
+    if (v6 > -16384)
+        v3 = v6;
+    else
+        v3 = -16384;
+    v5 = texCoord[1];
+    if (((2 * LODWORD(v5)) ^ 0x80000000) >> 14 < 0x3FFF)
+        v4 = ((2 * LODWORD(v5)) ^ 0x80000000) >> 14;
+    else
+        v4 = 0x3FFF;
+    if (v4 > -16384)
+        v2 = v4;
+    else
+        v2 = -16384;
+    outVert->texCoord.packed = (v2 & 0x3FFF | (SLODWORD(v5) >> 16) & 0xC000)
+        + ((v3 & 0x3FFF | (COERCE_INT(*texCoord) >> 16) & 0xC000) << 16);
+}
+
 
 void __cdecl FX_ExpandMarkVerts_Transform_GfxPackedVertex_(
     FxMarksSystem *marksSystem,
@@ -1786,11 +1821,11 @@ void __cdecl FX_ExpandMarkVerts_Transform_GfxPackedVertex_(
         {
             castOutVert = (GfxPackedVertex*)outVert;
             Vec3Sub(markPoint->xyz, mark->origin, delta);
-            MatrixTransformVector(delta, matrixTransform, transformedDelta);
-            MatrixTransformVector(mark->texCoordAxis, matrixTransform, transformedTexCoordAxis);
-            MatrixTransformVector(markPoint->normal, matrixTransform, transformedNormal);
+            MatrixTransformVector(delta, *(const mat3x3*)matrixTransform, transformedDelta);
+            MatrixTransformVector(mark->texCoordAxis, *(const mat3x3*)matrixTransform, transformedTexCoordAxis);
+            MatrixTransformVector(markPoint->normal, *(const mat3x3*)matrixTransform, transformedNormal);
             Vec3Cross(transformedTexCoordAxis, transformedNormal, binormal);
-            MatrixTransformVector43(markPoint->xyz, matrixTransform, castOutVert->xyz);
+            MatrixTransformVector43(markPoint->xyz, *(const mat4x3*)matrixTransform, castOutVert->xyz);
             castOutVert->binormalSign = -1.0;
             castOutVert->color.packed = *mark->nativeColor;
             v4 = Vec3Dot(transformedDelta, transformedTexCoordAxis);
@@ -1853,7 +1888,7 @@ void __cdecl FX_GenerateMarkVertsForMark_FinishAnimated(
 void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
     const GfxScaledPlacement* placement,
     const float* viewOffset,
-    float (*outTransform)[3][3])
+    float (*outTransform)[3])
 {
     if (placement->scale != 1.0)
         MyAssertHandler(
@@ -1869,109 +1904,24 @@ void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
 void FX_GenerateMarkVertsForMark_MatrixFromPlacement(
     const GfxPlacement* placement,
     const float* viewOffset,
-    float (*outTransform)[3][3])
+    float (*outTransform)[3])
 {
-    int v3; // ebp
-    float v4; // [esp+58h] [ebp-BCh]
-    float v5; // [esp+5Ch] [ebp-B8h]
-    float v6; // [esp+60h] [ebp-B4h]
-    float skelMat_4; // [esp+68h] [ebp-ACh]
-    float skelMat_8; // [esp+6Ch] [ebp-A8h]
-    float skelMat_12; // [esp+70h] [ebp-A4h]
-    float skelMat_20; // [esp+78h] [ebp-9Ch]
-    float skelMat_24; // [esp+7Ch] [ebp-98h]
-    float skelMat_28; // [esp+80h] [ebp-94h]
-    float skelMat_36; // [esp+88h] [ebp-8Ch]
-    float skelMat_40; // [esp+8Ch] [ebp-88h]
-    float skelMat_44; // [esp+90h] [ebp-84h]
-    float v16; // [esp+A4h] [ebp-70h]
-    float v17; // [esp+A8h] [ebp-6Ch]
-    float v18; // [esp+ACh] [ebp-68h]
-    float v19; // [esp+B0h] [ebp-64h]
-    float v20; // [esp+B4h] [ebp-60h]
-    float v21; // [esp+B8h] [ebp-5Ch]
-    float v22; // [esp+BCh] [ebp-58h]
-    float v23; // [esp+C0h] [ebp-54h]
-    float v24; // [esp+C4h] [ebp-50h]
-    float v25; // [esp+C8h] [ebp-4Ch] BYREF
-    float v26; // [esp+CCh] [ebp-48h]
-    float v27; // [esp+D0h] [ebp-44h]
-    float transWeight; // [esp+D4h] [ebp-40h]
-    float v29; // [esp+D8h] [ebp-3Ch]
-    float v30; // [esp+DCh] [ebp-38h]
-    float v31; // [esp+E0h] [ebp-34h]
-    float v32; // [esp+E4h] [ebp-30h]
-    DObjAnimMat scale; // [esp+E8h] [ebp-2Ch] BYREF
-    int animMat_20; // [esp+108h] [ebp-Ch]
-    void* animMat_24; // [esp+10Ch] [ebp-8h]
-    void* retaddr; // [esp+114h] [ebp+0h]
+    DObjAnimMat v5; // [sp+50h] [-80h] BYREF
+    DObjSkelMat v6; // [sp+70h] [-60h] BYREF
 
-    animMat_20 = v3;
-    animMat_24 = retaddr;
-    scale.quat[0] = placement->quat[0];
-    scale.quat[1] = placement->quat[1];
-    scale.quat[2] = placement->quat[2];
-    scale.quat[3] = placement->quat[3];
-    scale.transWeight = 2.0;
-    scale.trans[0] = placement->origin[0];
-    scale.trans[1] = placement->origin[1];
-    scale.trans[2] = placement->origin[2];
-    v32 = scale.quat[0];
-    if ((LODWORD(scale.quat[0]) & 0x7F800000) == 0x7F800000
-        || (v31 = scale.quat[1], (LODWORD(scale.quat[1]) & 0x7F800000) == 0x7F800000)
-        || (v30 = scale.quat[2], (LODWORD(scale.quat[2]) & 0x7F800000) == 0x7F800000)
-        || (v29 = scale.quat[3], (LODWORD(scale.quat[3]) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            473,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    transWeight = scale.transWeight;
-    if ((LODWORD(scale.transWeight) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            474,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(scale.quat, scale.transWeight, &v25);
-    v24 = v25 * scale.quat[0];
-    v23 = v25 * scale.quat[1];
-    v22 = v25 * scale.quat[2];
-    v21 = v25 * scale.quat[3];
-    v20 = v26 * scale.quat[1];
-    v19 = v26 * scale.quat[2];
-    v18 = v26 * scale.quat[3];
-    v17 = v27 * scale.quat[2];
-    v16 = v27 * scale.quat[3];
-    v4 = 1.0 - (v20 + v17);
-    v5 = v23 + v16;
-    v6 = v22 - v18;
-    skelMat_4 = v23 - v16;
-    skelMat_8 = 1.0 - (v24 + v17);
-    skelMat_12 = v19 + v21;
-    skelMat_20 = v22 + v18;
-    skelMat_24 = v19 - v21;
-    skelMat_28 = 1.0 - (v24 + v20);
-    skelMat_36 = scale.trans[0];
-    skelMat_40 = scale.trans[1];
-    skelMat_44 = scale.trans[2];
-    (*outTransform)[0][0] = v4;
-    (*outTransform)[0][1] = v5;
-    (*outTransform)[0][2] = v6;
-    (*outTransform)[1][0] = skelMat_4;
-    (*outTransform)[1][1] = skelMat_8;
-    (*outTransform)[1][2] = skelMat_12;
-    (*outTransform)[2][0] = skelMat_20;
-    (*outTransform)[2][1] = skelMat_24;
-    (*outTransform)[2][2] = skelMat_28;
-    (*outTransform)[3][0] = skelMat_36;
-    (*outTransform)[3][1] = skelMat_40;
-    (*outTransform)[3][2] = skelMat_44;
-    Vec3Add((*outTransform)[3], viewOffset, (*outTransform)[3]);
+    v5.quat[0] = placement->quat[0];
+    v5.quat[1] = placement->quat[1];
+    v5.quat[2] = placement->quat[2];
+    v5.transWeight = 2.0;
+    v5.quat[3] = placement->quat[3];
+    v5.trans[0] = placement->origin[0];
+    v5.trans[1] = placement->origin[1];
+    v5.trans[2] = placement->origin[2];
+    LocalConvertQuatToSkelMat(&v5, &v6);
+    DObjSkelMatToMatrix43(&v6, outTransform);
+    (*outTransform)[9] = (*outTransform)[9] + *viewOffset;
+    (*outTransform)[10] = (*outTransform)[10] + viewOffset[1];
+    (*outTransform)[11] = (*outTransform)[11] + viewOffset[2];
 }
 
 void __cdecl FX_GenerateMarkVertsForEntDObj(
@@ -2066,269 +2016,69 @@ void __cdecl FX_GenerateMarkVertsForMark_MatrixFromAnim(
     const vec3r viewOffset,
     mat4x3 &outTransform)
 {
-    int v5; // ebp
-    float v6[4][3]; // [esp+3Ch] [ebp-1E8h] BYREF
-    float v7; // [esp+6Ch] [ebp-1B8h]
-    float v8; // [esp+70h] [ebp-1B4h]
-    float v9; // [esp+74h] [ebp-1B0h]
-    float v10; // [esp+78h] [ebp-1ACh]
-    float v11; // [esp+7Ch] [ebp-1A8h]
-    float v12; // [esp+80h] [ebp-1A4h]
-    float v13; // [esp+84h] [ebp-1A0h]
-    float v14; // [esp+88h] [ebp-19Ch]
-    float v15; // [esp+8Ch] [ebp-198h]
-    float v16; // [esp+90h] [ebp-194h]
-    float v17; // [esp+94h] [ebp-190h]
-    float v18; // [esp+98h] [ebp-18Ch]
-    float v19; // [esp+9Ch] [ebp-188h]
-    float v20; // [esp+A0h] [ebp-184h]
-    float v21; // [esp+A4h] [ebp-180h]
-    float v22; // [esp+A8h] [ebp-17Ch]
-    float v23; // [esp+ACh] [ebp-178h]
-    float v24; // [esp+B0h] [ebp-174h]
-    float v25; // [esp+B4h] [ebp-170h]
-    float v26; // [esp+B8h] [ebp-16Ch]
-    float v27; // [esp+BCh] [ebp-168h]
-    float v28; // [esp+C0h] [ebp-164h]
-    float v29; // [esp+C4h] [ebp-160h]
-    float v30; // [esp+C8h] [ebp-15Ch]
-    float v31; // [esp+CCh] [ebp-158h]
-    float v32; // [esp+D0h] [ebp-154h]
-    float v33; // [esp+D4h] [ebp-150h]
-    float v34; // [esp+D8h] [ebp-14Ch]
-    float v35; // [esp+DCh] [ebp-148h] BYREF
-    float v36; // [esp+E0h] [ebp-144h]
-    float v37; // [esp+E4h] [ebp-140h]
-    float v38; // [esp+E8h] [ebp-13Ch]
-    float v39; // [esp+ECh] [ebp-138h]
-    float v40; // [esp+F0h] [ebp-134h]
-    float v41; // [esp+F4h] [ebp-130h]
-    float v42; // [esp+F8h] [ebp-12Ch]
-    const DObjAnimMat *v43; // [esp+FCh] [ebp-128h]
-    const DObjAnimMat *BasePose; // [esp+100h] [ebp-124h]
-    float v45; // [esp+104h] [ebp-120h]
-    float v46; // [esp+108h] [ebp-11Ch]
-    float v47; // [esp+10Ch] [ebp-118h]
-    float *v48; // [esp+110h] [ebp-114h]
-    float v49; // [esp+114h] [ebp-110h]
-    float v50; // [esp+118h] [ebp-10Ch]
-    float v51; // [esp+11Ch] [ebp-108h]
-    float *v52; // [esp+120h] [ebp-104h]
-    float v53; // [esp+124h] [ebp-100h]
-    float v54; // [esp+128h] [ebp-FCh]
-    float v55; // [esp+12Ch] [ebp-F8h]
-    float *v56; // [esp+130h] [ebp-F4h]
-    float v57[4][3]; // [esp+134h] [ebp-F0h] BYREF
-    float v58; // [esp+164h] [ebp-C0h]
-    float v59; // [esp+168h] [ebp-BCh]
-    float v60; // [esp+16Ch] [ebp-B8h]
-    const float *trans; // [esp+170h] [ebp-B4h]
-    float *v62; // [esp+174h] [ebp-B0h]
-    float v63; // [esp+178h] [ebp-ACh]
-    float v64; // [esp+17Ch] [ebp-A8h]
-    float v65; // [esp+180h] [ebp-A4h]
-    float v66; // [esp+184h] [ebp-A0h]
-    float v67; // [esp+188h] [ebp-9Ch]
-    float v68; // [esp+18Ch] [ebp-98h]
-    float v69; // [esp+190h] [ebp-94h]
-    float v70; // [esp+194h] [ebp-90h]
-    float v71; // [esp+198h] [ebp-8Ch]
-    float v72; // [esp+19Ch] [ebp-88h]
-    float v73; // [esp+1A0h] [ebp-84h]
-    float v74; // [esp+1A4h] [ebp-80h]
-    float v75; // [esp+1A8h] [ebp-7Ch] BYREF
-    float v76; // [esp+1ACh] [ebp-78h]
-    float v77; // [esp+1B0h] [ebp-74h]
-    float v78; // [esp+1B4h] [ebp-70h]
-    float v79; // [esp+1BCh] [ebp-68h]
-    float v80; // [esp+1C0h] [ebp-64h]
-    float v81; // [esp+1C4h] [ebp-60h]
-    float v82; // [esp+1C8h] [ebp-5Ch]
-    float v83; // [esp+1CCh] [ebp-58h]
-    float v84; // [esp+1D0h] [ebp-54h]
-    float v85; // [esp+1D4h] [ebp-50h]
-    float v86; // [esp+1D8h] [ebp-4Ch]
-    float v87; // [esp+1DCh] [ebp-48h]
-    float v88; // [esp+1E0h] [ebp-44h] BYREF
-    float v89; // [esp+1E4h] [ebp-40h]
-    float v90; // [esp+1E8h] [ebp-3Ch]
-    float transWeight; // [esp+1ECh] [ebp-38h]
-    float v92; // [esp+1F0h] [ebp-34h]
-    float v93; // [esp+1F4h] [ebp-30h]
-    float v94; // [esp+1F8h] [ebp-2Ch]
-    float v95; // [esp+1FCh] [ebp-28h]
-    const DObjAnimMat *v96; // [esp+200h] [ebp-24h]
-    const XModel *Model; // [esp+204h] [ebp-20h]
-    int i; // [esp+208h] [ebp-1Ch]
-    int v99; // [esp+20Ch] [ebp-18h]
-    int v100; // [esp+210h] [ebp-14h]
-    int lmapIndex; // [esp+214h] [ebp-10h]
-    void *v103; // [esp+21Ch] [ebp-8h]
+    int lmapIndex; // r26
+    int v8; // r29
+    int v11; // r30
+    int i; // r31
+    const XModel *Model; // r3
+    float *v14; // r11
+    float *v15; // r10
+    int v16; // r9
+    double v17; // fp13
+    double v18; // fp12
+    const XModel *v19; // r3
+    const DObjAnimMat *BasePose; // r3
+    float *v21; // r11
+    float *v22; // r10
+    int v23; // r9
+    double v24; // fp13
+    double v25; // fp12
+    _DWORD v26[60]; // [sp+50h] [-F0h] BYREF
 
-    if (!dobj)
-        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1452, 0, "%s", "dobj");
-    if (!boneMtxList)
-        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1453, 0, "%s", "boneMtxList");
     lmapIndex = mark->context.lmapIndex;
-    v100 = mark->context.modelTypeAndSurf & 0x3F;
-    if (v100 >= DObjGetNumModels(dobj))
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_marks.cpp",
-            1458,
-            0,
-            "%s\n\t(dObjModelIndexForMark) = %i",
-            "(dObjModelIndexForMark < DObjGetNumModels( dobj ))",
-            v100);
-    v99 = 0;
-    for (i = 0; i != v100; ++i)
+    v8 = mark->context.modelTypeAndSurf & 0x3F;
+    v11 = 0;
+    for (i = 0; i != v8; v11 += XModelNumBones(Model))
+        Model = DObjGetModel(dobj, i++);
+    LocalConvertQuatToSkelMat(&boneMtxList[v11 + lmapIndex], (DObjSkelMat *)v26);
+    v14 = (float *)&v26[1];
+    v15 = (float *)&v26[30];
+    v16 = 3;
+    do
     {
-        Model = DObjGetModel(dobj, i);
-        v99 += XModelNumBones(Model);
-    }
-    v96 = &boneMtxList[lmapIndex + v99];
-    v95 = v96->quat[0];
-    if ((LODWORD(v95) & 0x7F800000) == 0x7F800000
-        || (v94 = v96->quat[1], (LODWORD(v94) & 0x7F800000) == 0x7F800000)
-        || (v93 = v96->quat[2], (LODWORD(v93) & 0x7F800000) == 0x7F800000)
-        || (v92 = v96->quat[3], (LODWORD(v92) & 0x7F800000) == 0x7F800000))
+        --v16;
+        v17 = *v14;
+        v18 = v14[1];
+        *(v15 - 2) = *(v14 - 1);
+        v14 += 4;
+        *(v15 - 1) = v17;
+        *v15 = v18;
+        v15 += 3;
+    } while (v16);
+    *(float *)&v26[37] = *viewOffset + *(float *)&v26[12];
+    *(float *)&v26[38] = viewOffset[1] + *(float *)&v26[13];
+    *(float *)&v26[39] = viewOffset[2] + *(float *)&v26[14];
+    v19 = DObjGetModel(dobj, v8);
+    BasePose = XModelGetBasePose(v19);
+    LocalConvertQuatToInverseSkelMat(&BasePose[lmapIndex], (DObjSkelMat *)v26);
+    v21 = (float *)&v26[1];
+    v22 = (float *)&v26[18];
+    v23 = 3;
+    do
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            473,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    transWeight = v96->transWeight;
-    if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            474,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(v96->quat, v96->transWeight, &v88);
-    v87 = v88 * v96->quat[0];
-    v86 = v88 * v96->quat[1];
-    v85 = v88 * v96->quat[2];
-    v84 = v88 * v96->quat[3];
-    v83 = v89 * v96->quat[1];
-    v82 = v89 * v96->quat[2];
-    v81 = v89 * v96->quat[3];
-    v80 = v90 * v96->quat[2];
-    v79 = v90 * v96->quat[3];
-    v63 = 1.0 - (v83 + v80);
-    v64 = v86 + v79;
-    v65 = v85 - v81;
-    v66 = 0.0;
-    v67 = v86 - v79;
-    v68 = 1.0 - (v87 + v80);
-    v69 = v82 + v84;
-    v70 = 0.0;
-    v71 = v85 + v81;
-    v72 = v82 - v84;
-    v73 = 1.0 - (v87 + v83);
-    v74 = 0.0;
-    v62 = &v75;
-    trans = v96->trans;
-    v75 = v96->trans[0];
-    v76 = v96->trans[1];
-    v77 = v96->trans[2];
-    v78 = 1.0;
-    v60 = v63;
-    v59 = v64;
-    v58 = v65;
-    v57[0][0] = v63;
-    v57[0][1] = v64;
-    v57[0][2] = v65;
-    v56 = v57[1];
-    v55 = v67;
-    v54 = v68;
-    v53 = v69;
-    v57[1][0] = v67;
-    v57[1][1] = v68;
-    v57[1][2] = v69;
-    v52 = v57[2];
-    v51 = v71;
-    v50 = v72;
-    v49 = v73;
-    v57[2][0] = v71;
-    v57[2][1] = v72;
-    v57[2][2] = v73;
-    v48 = v57[3];
-    v47 = v75;
-    v46 = v76;
-    v45 = v77;
-    v57[3][0] = v75;
-    v57[3][1] = v76;
-    v57[3][2] = v77;
-    Vec3Add(v57[3], (const float *)viewOffset, v57[3]);
-    Model = DObjGetModel(dobj, v100);
-    BasePose = XModelGetBasePose(Model);
-    v43 = &BasePose[lmapIndex];
-    v42 = v43->quat[0];
-    if ((LODWORD(v42) & 0x7F800000) == 0x7F800000
-        || (v41 = v43->quat[1], (LODWORD(v41) & 0x7F800000) == 0x7F800000)
-        || (v40 = v43->quat[2], (LODWORD(v40) & 0x7F800000) == 0x7F800000)
-        || (v39 = v43->quat[3], (LODWORD(v39) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            581,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    v38 = v43->transWeight;
-    if ((LODWORD(v38) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            582,
-            0,
-            "%s",
-            "!IS_NAN(mat->transWeight)");
-    Vec3Scale(v43->quat, v43->transWeight, &v35);
-    v34 = v35 * v43->quat[0];
-    v33 = v35 * v43->quat[1];
-    v32 = v35 * v43->quat[2];
-    v31 = v35 * v43->quat[3];
-    v30 = v36 * v43->quat[1];
-    v29 = v36 * v43->quat[2];
-    v28 = v36 * v43->quat[3];
-    v27 = v37 * v43->quat[2];
-    v26 = v37 * v43->quat[3];
-    v10 = 1.0 - (v30 + v27);
-    v11 = v33 - v26;
-    v12 = v32 + v28;
-    v13 = 0.0;
-    v14 = v33 + v26;
-    v15 = 1.0 - (v34 + v27);
-    v16 = v29 - v31;
-    v17 = 0.0;
-    v18 = v32 - v28;
-    v19 = v29 + v31;
-    v20 = 1.0 - (v34 + v30);
-    v21 = 0.0;
-    v22 = -(v43->trans[0] * v10 + v43->trans[1] * v14 + v43->trans[2] * v18);
-    v23 = -(v43->trans[0] * v11 + v43->trans[1] * v15 + v43->trans[2] * v19);
-    v24 = -(v43->trans[0] * v12 + v43->trans[1] * v16 + v43->trans[2] * v20);
-    v25 = 1.0;
-    v9 = v10;
-    v8 = v11;
-    v7 = v12;
-    v6[0][0] = v10;
-    v6[0][1] = v11;
-    v6[0][2] = v12;
-    v6[1][0] = v14;
-    v6[1][1] = v15;
-    v6[1][2] = v16;
-    v6[2][0] = v18;
-    v6[2][1] = v19;
-    v6[2][2] = v20;
-    v6[3][0] = v22;
-    v6[3][1] = v23;
-    v6[3][2] = v24;
-    MatrixMultiply43(v6, v57, outTransform);
+        --v23;
+        v24 = *v21;
+        v25 = v21[1];
+        *(v22 - 2) = *(v21 - 1);
+        v21 += 4;
+        *(v22 - 1) = v24;
+        *v22 = v25;
+        v22 += 3;
+    } while (v23);
+    v26[25] = v26[12];
+    v26[26] = v26[13];
+    v26[27] = v26[14];
+    MatrixMultiply43(*(const mat4x3*)&v26[16], *(const mat4x3*)&v26[28], outTransform);
 }
 
 void __cdecl FX_GenerateMarkVertsForEntBrush(
@@ -2382,7 +2132,7 @@ char __cdecl FX_GenerateMarkVertsForList_EntBrush(
     float transformMatrix[4][3]; // [esp+114h] [ebp-30h] BYREF
     int savedregs; // [esp+144h] [ebp+0h] BYREF
 
-    FX_GenerateMarkVertsForMark_MatrixFromPlacement(placement, vec3_origin, (float(*)[3][3])transformMatrix);
+    FX_GenerateMarkVertsForMark_MatrixFromPlacement(placement, vec3_origin, (float(*)[3])transformMatrix);
     for (markHandle = head; markHandle != 0xFFFF; markHandle = mark->nextMark)
     {
         mark = FX_MarkFromHandle(marksSystem, markHandle);
@@ -2494,35 +2244,6 @@ void __cdecl FX_GenerateMarkVertsForStaticModels(
             "Sys_InterlockedDecrement( &g_markThread[localClientNum] ) == 0");
     R_EndMarkMeshVerts();
     //Profile_EndInternal(0);
-}
-
-void __cdecl setTexCoordAndLMap_GfxPackedVertex_(GfxPackedVertex *outVert, const float *texCoord)
-{
-    __int16 v2; // [esp+0h] [ebp-40h]
-    __int16 v3; // [esp+4h] [ebp-3Ch]
-    int v4; // [esp+Ch] [ebp-34h]
-    float v5; // [esp+18h] [ebp-28h]
-    int v6; // [esp+20h] [ebp-20h]
-
-    if (((unsigned int)(2 * texCoord[0]) ^ 0x80000000) >> 14 < 0x3FFF)
-        v6 = ((unsigned int)(2 * texCoord[0]) ^ 0x80000000) >> 14;
-    else
-        v6 = 0x3FFF;
-    if (v6 > -16384)
-        v3 = v6;
-    else
-        v3 = -16384;
-    v5 = texCoord[1];
-    if (((2 * LODWORD(v5)) ^ 0x80000000) >> 14 < 0x3FFF)
-        v4 = ((2 * LODWORD(v5)) ^ 0x80000000) >> 14;
-    else
-        v4 = 0x3FFF;
-    if (v4 > -16384)
-        v2 = v4;
-    else
-        v2 = -16384;
-    outVert->texCoord.packed = (v2 & 0x3FFF | (SLODWORD(v5) >> 16) & 0xC000)
-        + ((v3 & 0x3FFF | (COERCE_INT(*texCoord) >> 16) & 0xC000) << 16);
 }
 
 void __cdecl FX_ExpandMarkVerts_NoTransform_GfxPackedVertex_(

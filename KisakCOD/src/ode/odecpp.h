@@ -534,21 +534,21 @@ public:
 };
 
 
-class dContactJoint : public dJoint {
-  // intentionally undefined, don't use these
-  dContactJoint (const dContactJoint &);
-  void operator = (const dContactJoint &);
-
-public:
-  dContactJoint() { }
-  dContactJoint (dWorldID world, dJointGroupID group, dContact *contact)
-    { _id = dJointCreateContact (world, group, contact); }
-
-  void create (dWorldID world, dJointGroupID group, dContact *contact) {
-    if (_id) dJointDestroy (_id);
-    _id = dJointCreateContact (world, group, contact);
-  }
-};
+//class dContactJoint : public dJoint {
+//  // intentionally undefined, don't use these
+//  dContactJoint (const dContactJoint &);
+//  void operator = (const dContactJoint &);
+//
+//public:
+//  dContactJoint() { }
+//  dContactJoint (dWorldID world, dJointGroupID group, dContact *contact)
+//    { _id = dJointCreateContact (world, group, contact); }
+//
+//  void create (dWorldID world, dJointGroupID group, dContact *contact) {
+//    if (_id) dJointDestroy (_id);
+//    _id = dJointCreateContact (world, group, contact);
+//  }
+//};
 
 
 class dNullJoint : public dJoint {
