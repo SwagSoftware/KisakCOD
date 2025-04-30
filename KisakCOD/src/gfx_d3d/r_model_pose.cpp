@@ -3,15 +3,14 @@
 #include "r_dobj_skin.h"
 #include <cgame_mp/cg_local_mp.h>
 
-
-DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
+DObjAnimMat *R_UpdateSceneEntBounds(
     GfxSceneEntity *sceneEnt,
     GfxSceneEntity **pLocalSceneEnt,
     const DObj_s **pObj,
     int waitForCullState)
 {
-    int v6; // [esp+18h] [ebp-33Ch]
-    int v7; // [esp+1Ch] [ebp-338h]
+    float *maxs; // [esp+18h] [ebp-33Ch]
+    float *mins; // [esp+1Ch] [ebp-338h]
     int v8; // [esp+40h] [ebp-314h]
     int v9; // [esp+40h] [ebp-314h]
     int v10; // [esp+40h] [ebp-314h]
@@ -39,7 +38,7 @@ DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
     float v32; // [esp+48h] [ebp-30Ch]
     float v33; // [esp+48h] [ebp-30Ch]
     float v34; // [esp+48h] [ebp-30Ch]
-    int v35; // [esp+4Ch] [ebp-308h]
+    XBoneInfo *v35; // [esp+4Ch] [ebp-308h]
     float boneInfo; // [esp+58h] [ebp-2FCh]
     float v37; // [esp+5Ch] [ebp-2F8h]
     float v38; // [esp+60h] [ebp-2F4h]
@@ -53,30 +52,35 @@ DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
     float v46; // [esp+BCh] [ebp-298h]
     float v47; // [esp+C0h] [ebp-294h]
     float v48; // [esp+C4h] [ebp-290h]
-    float v49; // [esp+C8h] [ebp-28Ch] BYREF
-    float v50; // [esp+CCh] [ebp-288h]
-    float v51; // [esp+D0h] [ebp-284h]
-    float v52; // [esp+D4h] [ebp-280h]
-    float v53; // [esp+D8h] [ebp-27Ch]
-    float v54; // [esp+DCh] [ebp-278h]
-    float v55; // [esp+E0h] [ebp-274h]
-    float v56; // [esp+E4h] [ebp-270h]
-    const float *v57; // [esp+E8h] [ebp-26Ch]
-    int v58; // [esp+ECh] [ebp-268h]
-    unsigned int v59; // [esp+F0h] [ebp-264h]
-    DObjAnimMat *bone; // [esp+F4h] [ebp-260h]
-    int boneIndex[130]; // [esp+F8h] [ebp-25Ch] BYREF
+    float v49[3]; // [esp+C8h] [ebp-28Ch] BYREF
+    float transWeight; // [esp+D4h] [ebp-280h]
+    float v51; // [esp+D8h] [ebp-27Ch]
+    float v52; // [esp+DCh] [ebp-278h]
+    float v53; // [esp+E0h] [ebp-274h]
+    float v54; // [esp+E4h] [ebp-270h]
+    DObjAnimMat *bone; // [esp+E8h] [ebp-26Ch]
+    int boneIndex; // [esp+ECh] [ebp-268h]
+    unsigned int animPartBit; // [esp+F0h] [ebp-264h]
+    int boneCount; // [esp+F4h] [ebp-260h]
+    XBoneInfo *boneInfoArray[128]; // [esp+F8h] [ebp-25Ch] BYREF
+    unsigned int *v60; // [esp+2FCh] [ebp-58h]
     float boneInfoArray_508; // [esp+300h] [ebp-54h]
-    float v63; // [esp+304h] [ebp-50h]
-    float v64; // [esp+308h] [ebp-4Ch]
-    float4 bounds[2]; // [esp+30Ch] [ebp-48h] BYREF
-    int partBits[4]; // [esp+334h] [ebp-20h]
-    GfxSceneEntity *localSceneEnt; // [esp+348h] [ebp-Ch]
-    unsigned int state; // [esp+34Ch] [ebp-8h]
-    unsigned int retaddr; // [esp+354h] [ebp+0h]
+    float bounds_4; // [esp+304h] [ebp-50h]
+    float bounds_8; // [esp+308h] [ebp-4Ch]
+    float4 bounds; // [esp+30Ch] [ebp-48h] BYREF
+    float partBits; // [esp+31Ch] [ebp-38h]
+    DObjAnimMat *partBits_4; // [esp+320h] [ebp-34h]
+    int partBits_8; // [esp+324h] [ebp-30h]
+    int partBits_12[4]; // [esp+328h] [ebp-2Ch] BYREF
+    const DObj_s *obj; // [esp+338h] [ebp-1Ch]
+    GfxSceneEntity *localSceneEnt; // [esp+33Ch] [ebp-18h]
+    unsigned int state; // [esp+340h] [ebp-14h]
+    //_UNKNOWN *cuck; // [esp+348h] [ebp-Ch]
+    GfxSceneEntity *sceneEnta; // [esp+34Ch] [ebp-8h]
+    const DObj_s **pObja; // [esp+354h] [ebp+0h]
 
-    //localSceneEnt = a1;
-    state = retaddr;
+    //cuck = a1;
+    //sceneEnta = pObja;
     if (InterlockedCompareExchange(&sceneEnt->cull.state, 1, 0))
     {
         *pLocalSceneEnt = 0;
@@ -84,8 +88,8 @@ DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
         {
             do
             {
-                partBits[3] = sceneEnt->cull.state;
-                if (!partBits[3])
+                state = sceneEnt->cull.state;
+                if (!state)
                     MyAssertHandler(
                         ".\\r_model_pose.cpp",
                         258,
@@ -93,20 +97,20 @@ DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
                         "%s\n\t(state) = %i",
                         "(state >= CULL_STATE_BOUNDED_PENDING)",
                         0);
-            } while (partBits[3] == 1);
-            if (partBits[3] == 4)
+            } while (state == 1);
+            if (state == 4)
             {
                 return 0;
             }
             else
             {
-                partBits[2] = (int)sceneEnt;
+                localSceneEnt = sceneEnt;
                 *pLocalSceneEnt = sceneEnt;
-                partBits[1] = *(unsigned int *)(partBits[2] + 112);
-                *pObj = (const DObj_s *)partBits[1];
-                if (!partBits[1])
+                obj = localSceneEnt->obj;
+                *pObj = obj;
+                if (!obj)
                     MyAssertHandler(".\\r_model_pose.cpp", 269, 0, "%s", "obj");
-                return I_dmaGetDObjSkel((const DObj_s *)partBits[1]);
+                return I_dmaGetDObjSkel(obj);
             }
         }
         else
@@ -116,56 +120,49 @@ DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
     }
     else
     {
-        partBits[2] = (int)sceneEnt;
+        localSceneEnt = sceneEnt;
         *pLocalSceneEnt = sceneEnt;
-        if (!*(unsigned int *)(partBits[2] + 112))
+        if (!localSceneEnt->obj)
             MyAssertHandler(".\\r_model_pose.cpp", 282, 0, "%s", "localSceneEnt->obj");
-        partBits[1] = *(unsigned int *)(partBits[2] + 112);
-        *pObj = (const DObj_s *)partBits[1];
-        if (!partBits[1])
+        obj = localSceneEnt->obj;
+        *pObj = obj;
+        if (!obj)
             MyAssertHandler(".\\r_model_pose.cpp", 285, 0, "%s", "obj");
         DObjGetSurfaceData(
-            (const DObj_s *)partBits[1],
-            (const float *)(partBits[2] + 28),
-            *(float *)(partBits[2] + 40),
-            (char *)(partBits[2] + 72));
-        if (useFastFile->current.enabled || !DObjBad((const DObj_s *)partBits[1]))
+            obj,
+            localSceneEnt->placement.base.origin,
+            localSceneEnt->placement.scale,
+            localSceneEnt->cull.lods);
+        if (useFastFile->current.enabled || !DObjBad(obj))
         {
-            bounds[1].u[2] = DObjGetSurfaces(
-                (const DObj_s *)partBits[1],
-                (int *)&bounds[1].u[3],
-                (const char *)(partBits[2] + 72));
-            if (bounds[1].u[2]
-                && (bounds[1].u[1] = (unsigned int)R_DObjCalcPose(
-                    (const GfxSceneEntity *)partBits[2],
-                    (const DObj_s *)partBits[1],
-                    (int *)&bounds[1].u[3])) != 0)
+            partBits_8 = DObjGetSurfaces(obj, partBits_12, localSceneEnt->cull.lods);
+            if (partBits_8 && (partBits_4 = R_DObjCalcPose(localSceneEnt, obj, partBits_12)) != 0)
             {
-                if (!DObjSkelAreBonesUpToDate((const DObj_s *)partBits[1], (int *)&bounds[1].u[3]))
+                if (!DObjSkelAreBonesUpToDate(obj, partBits_12))
                     MyAssertHandler(".\\r_model_pose.cpp", 315, 0, "%s", "DObjSkelAreBonesUpToDate( obj, partBits )");
                 boneInfoArray_508 = 131072.0;
-                v63 = 131072.0;
-                v64 = 131072.0;
-                bounds[0].v[0] = 0.0;
-                boneIndex[129] = (int)&bounds[0].u[1];
-                bounds[0].v[1] = -131072.0;
-                bounds[0].v[2] = -131072.0;
-                bounds[0].v[3] = -131072.0;
-                bounds[1].v[0] = 0.0;
-                DObjGetBoneInfo((const DObj_s *)partBits[1], (XBoneInfo **)boneIndex);
-                bone = (DObjAnimMat *)DObjNumBones((const DObj_s *)partBits[1]);
-                v59 = 0x80000000;
-                v58 = 0;
-                while (v58 < (int)bone)
+                bounds_4 = 131072.0;
+                bounds_8 = 131072.0;
+                bounds.v[0] = 0.0;
+                v60 = &bounds.u[1];
+                bounds.v[1] = -131072.0;
+                bounds.v[2] = -131072.0;
+                bounds.v[3] = -131072.0;
+                partBits = 0.0;
+                DObjGetBoneInfo(obj, boneInfoArray);
+                boneCount = DObjNumBones(obj);
+                animPartBit = 0x80000000;
+                boneIndex = 0;
+                while (boneIndex < boneCount)
                 {
-                    if ((v59 & bounds[1].u[(v58 >> 5) + 3]) != 0)
+                    if ((animPartBit & partBits_12[boneIndex >> 5]) != 0)
                     {
-                        v57 = (const float *)(bounds[1].u[1] + 32 * v58);
-                        v56 = *v57;
-                        if ((LODWORD(v56) & 0x7F800000) == 0x7F800000
-                            || (v55 = v57[1], (LODWORD(v55) & 0x7F800000) == 0x7F800000)
-                            || (v54 = v57[2], (LODWORD(v54) & 0x7F800000) == 0x7F800000)
-                            || (v53 = v57[3], (LODWORD(v53) & 0x7F800000) == 0x7F800000))
+                        bone = &partBits_4[boneIndex];
+                        v54 = bone->quat[0];
+                        if ((LODWORD(v54) & 0x7F800000) == 0x7F800000
+                            || (v53 = bone->quat[1], (LODWORD(v53) & 0x7F800000) == 0x7F800000)
+                            || (v52 = bone->quat[2], (LODWORD(v52) & 0x7F800000) == 0x7F800000)
+                            || (v51 = bone->quat[3], (LODWORD(v51) & 0x7F800000) == 0x7F800000))
                         {
                             MyAssertHandler(
                                 "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
@@ -174,24 +171,24 @@ DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
                                 "%s",
                                 "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
                         }
-                        v52 = v57[7];
-                        if ((LODWORD(v52) & 0x7F800000) == 0x7F800000)
+                        transWeight = bone->transWeight;
+                        if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
                             MyAssertHandler(
                                 "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
                                 474,
                                 0,
                                 "%s",
                                 "!IS_NAN(mat->transWeight)");
-                        Vec3Scale(v57, v57[7], &v49);
-                        v48 = v49 * *v57;
-                        v47 = v49 * v57[1];
-                        v46 = v49 * v57[2];
-                        v45 = v49 * v57[3];
-                        v44 = v50 * v57[1];
-                        v43 = v50 * v57[2];
-                        v42 = v50 * v57[3];
-                        v41 = v51 * v57[2];
-                        v40 = v51 * v57[3];
+                        Vec3Scale(bone->quat, bone->transWeight, v49);
+                        v48 = v49[0] * bone->quat[0];
+                        v47 = v49[0] * bone->quat[1];
+                        v46 = v49[0] * bone->quat[2];
+                        v45 = v49[0] * bone->quat[3];
+                        v44 = v49[1] * bone->quat[1];
+                        v43 = v49[1] * bone->quat[2];
+                        v42 = v49[1] * bone->quat[3];
+                        v41 = v49[2] * bone->quat[2];
+                        v40 = v49[2] * bone->quat[3];
                         boneInfo = 1.0 - (v44 + v41);
                         v37 = v47 + v40;
                         v38 = v46 - v42;
@@ -201,73 +198,73 @@ DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
                         boneAxis.axis[1][1] = v46 + v42;
                         boneAxis.axis[1][2] = v43 - v45;
                         boneAxis.axis[1][3] = 1.0 - (v48 + v44);
-                        boneAxis.axis[2][1] = v57[4];
-                        boneAxis.axis[2][2] = v57[5];
-                        boneAxis.axis[2][3] = v57[6];
+                        boneAxis.axis[2][1] = bone->trans[0];
+                        boneAxis.axis[2][2] = bone->trans[1];
+                        boneAxis.axis[2][3] = bone->trans[2];
                         boneAxis.origin[0] = 1.0;
                         Vec3Add(&boneAxis.axis[2][1], scene.def.viewOffset, &boneAxis.axis[2][1]);
-                        v35 = boneIndex[v58];
+                        v35 = boneInfoArray[boneIndex];
                         v8 = boneInfo >= 0.0 ? 0 : 0xC;
-                        v26 = *(float *)(v8 + v35) * boneInfo + boneAxis.axis[2][1];
-                        v17 = *(float *)(v35 + 12 - v8) * boneInfo + boneAxis.axis[2][1];
+                        v26 = *(v35->bounds[0] + v8) * boneInfo + boneAxis.axis[2][1];
+                        v17 = *(v35->bounds[1] - v8) * boneInfo + boneAxis.axis[2][1];
                         v9 = boneAxis.axis[0][1] >= 0.0 ? 0 : 0xC;
-                        v27 = *(float *)(v9 + v35 + 4) * boneAxis.axis[0][1] + v26;
-                        v18 = *(float *)(v35 + 16 - v9) * boneAxis.axis[0][1] + v17;
+                        v27 = *(&v35->bounds[0][1] + v9) * boneAxis.axis[0][1] + v26;
+                        v18 = *(&v35->bounds[1][1] - v9) * boneAxis.axis[0][1] + v17;
                         v10 = boneAxis.axis[1][1] >= 0.0 ? 0 : 0xC;
-                        v28 = *(float *)(v10 + v35 + 8) * boneAxis.axis[1][1] + v27;
-                        v19 = *(float *)(v35 + 20 - v10) * boneAxis.axis[1][1] + v18;
-                        if (v28 < (double)boneInfoArray_508)
+                        v28 = *(&v35->bounds[0][2] + v10) * boneAxis.axis[1][1] + v27;
+                        v19 = *(&v35->bounds[1][2] - v10) * boneAxis.axis[1][1] + v18;
+                        if (v28 < boneInfoArray_508)
                             boneInfoArray_508 = v28;
-                        if (v19 > (double)bounds[0].v[1])
-                            bounds[0].v[1] = v19;
+                        if (v19 > bounds.v[1])
+                            bounds.v[1] = v19;
                         v11 = v37 >= 0.0 ? 0 : 0xC;
-                        v29 = *(float *)(v11 + v35) * v37 + boneAxis.axis[2][2];
-                        v20 = *(float *)(v35 + 12 - v11) * v37 + boneAxis.axis[2][2];
+                        v29 = *(v35->bounds[0] + v11) * v37 + boneAxis.axis[2][2];
+                        v20 = *(v35->bounds[1] - v11) * v37 + boneAxis.axis[2][2];
                         v12 = boneAxis.axis[0][2] >= 0.0 ? 0 : 0xC;
-                        v30 = *(float *)(v12 + v35 + 4) * boneAxis.axis[0][2] + v29;
-                        v21 = *(float *)(v35 + 16 - v12) * boneAxis.axis[0][2] + v20;
+                        v30 = *(&v35->bounds[0][1] + v12) * boneAxis.axis[0][2] + v29;
+                        v21 = *(&v35->bounds[1][1] - v12) * boneAxis.axis[0][2] + v20;
                         v13 = boneAxis.axis[1][2] >= 0.0 ? 0 : 0xC;
-                        v31 = *(float *)(v13 + v35 + 8) * boneAxis.axis[1][2] + v30;
-                        v22 = *(float *)(v35 + 20 - v13) * boneAxis.axis[1][2] + v21;
-                        if (v31 < (double)v63)
-                            v63 = v31;
-                        if (v22 > (double)bounds[0].v[2])
-                            bounds[0].v[2] = v22;
+                        v31 = *(&v35->bounds[0][2] + v13) * boneAxis.axis[1][2] + v30;
+                        v22 = *(&v35->bounds[1][2] - v13) * boneAxis.axis[1][2] + v21;
+                        if (v31 < bounds_4)
+                            bounds_4 = v31;
+                        if (v22 > bounds.v[2])
+                            bounds.v[2] = v22;
                         v14 = v38 >= 0.0 ? 0 : 0xC;
-                        v32 = *(float *)(v14 + v35) * v38 + boneAxis.axis[2][3];
-                        v23 = *(float *)(v35 + 12 - v14) * v38 + boneAxis.axis[2][3];
+                        v32 = *(v35->bounds[0] + v14) * v38 + boneAxis.axis[2][3];
+                        v23 = *(v35->bounds[1] - v14) * v38 + boneAxis.axis[2][3];
                         v15 = boneAxis.axis[0][3] >= 0.0 ? 0 : 0xC;
-                        v33 = *(float *)(v15 + v35 + 4) * boneAxis.axis[0][3] + v32;
-                        v24 = *(float *)(v35 + 16 - v15) * boneAxis.axis[0][3] + v23;
+                        v33 = *(&v35->bounds[0][1] + v15) * boneAxis.axis[0][3] + v32;
+                        v24 = *(&v35->bounds[1][1] - v15) * boneAxis.axis[0][3] + v23;
                         v16 = boneAxis.axis[1][3] >= 0.0 ? 0 : 0xC;
-                        v34 = *(float *)(v16 + v35 + 8) * boneAxis.axis[1][3] + v33;
-                        v25 = *(float *)(v35 + 20 - v16) * boneAxis.axis[1][3] + v24;
-                        if (v34 < (double)v64)
-                            v64 = v34;
-                        if (v25 > (double)bounds[0].v[3])
-                            bounds[0].v[3] = v25;
+                        v34 = *(&v35->bounds[0][2] + v16) * boneAxis.axis[1][3] + v33;
+                        v25 = *(&v35->bounds[1][2] - v16) * boneAxis.axis[1][3] + v24;
+                        if (v34 < bounds_8)
+                            bounds_8 = v34;
+                        if (v25 > bounds.v[3])
+                            bounds.v[3] = v25;
                     }
-                    ++v58;
-                    v59 = (v59 << 31) | (v59 >> 1);
+                    ++boneIndex;
+                    animPartBit = (animPartBit << 31) | (animPartBit >> 1);
                 }
-                v7 = partBits[2] + 48;
-                *(float *)(partBits[2] + 48) = boneInfoArray_508;
-                *(float *)(v7 + 4) = v63;
-                *(float *)(v7 + 8) = v64;
-                v6 = partBits[2] + 60;
-                *(float *)(partBits[2] + 60) = bounds[0].v[1];
-                *(float *)(v6 + 4) = bounds[0].v[2];
-                *(float *)(v6 + 8) = bounds[0].v[3];
-                if (*(unsigned int *)(partBits[2] + 44) != 1)
+                mins = localSceneEnt->cull.mins;
+                localSceneEnt->cull.mins[0] = boneInfoArray_508;
+                mins[1] = bounds_4;
+                mins[2] = bounds_8;
+                maxs = localSceneEnt->cull.maxs;
+                localSceneEnt->cull.maxs[0] = bounds.v[1];
+                maxs[1] = bounds.v[2];
+                maxs[2] = bounds.v[3];
+                if (localSceneEnt->cull.state != 1)
                     MyAssertHandler(
                         ".\\r_model_pose.cpp",
                         339,
                         0,
                         "%s\n\t(localSceneEnt->cull.state) = %i",
                         "(localSceneEnt->cull.state == CULL_STATE_BOUNDED_PENDING)",
-                        *(unsigned int *)(partBits[2] + 44));
-                *(unsigned int *)(partBits[2] + 44) = 2;
-                return (DObjAnimMat *)bounds[1].u[1];
+                        localSceneEnt->cull.state);
+                localSceneEnt->cull.state = 2;
+                return partBits_4;
             }
             else
             {

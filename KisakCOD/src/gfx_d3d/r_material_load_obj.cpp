@@ -1791,7 +1791,7 @@ bool __cdecl Material_ParseLineNumber(char *errorMessage, unsigned int *lineNumb
     const char *lineNumberStart; // [esp+0h] [ebp-8h]
     int charNumber; // [esp+4h] [ebp-4h] BYREF
 
-    strchr(errorMessage, 0x28u);
+    v2 = strchr(errorMessage, 0x28u);
     lineNumberStart = v2;
     if (!v2)
         return 0;
@@ -6159,7 +6159,7 @@ void __cdecl Material_PreLoadAllShaderText()
     //    &mtlLoadGlob.cachedShaderText[mtlLoadGlob.cachedShaderCount],
     //    (12 * mtlLoadGlob.cachedShaderCount) / 12,
     //    Material_CachedShaderTextLess);
-    std::sort(&mtlLoadGlob.cachedShaderText[0], &mtlLoadGlob.cachedShaderText[mtlLoadGlob.cachedShaderCount], Material_CachedShaderTextLess);
+    std::sort((const GfxCachedShaderText **)&mtlLoadGlob.cachedShaderText[0], (const GfxCachedShaderText **)&mtlLoadGlob.cachedShaderText[mtlLoadGlob.cachedShaderCount], Material_CachedShaderTextLess);
     FS_FreeFileList(shaderListLib);
 }
 
@@ -6553,7 +6553,7 @@ void __cdecl Material_SortInternal(Material **sortedMaterials, unsigned int mate
     //    &sortedMaterials[materialCount],
     //    (4 * materialCount) >> 2,
     //    Material_Compare);
-    std::sort(&sortedMaterials[0], &sortedMaterials[materialCount], Material_Compare);
+    std::sort((const Material **)&sortedMaterials[0], (const Material **)&sortedMaterials[materialCount], Material_Compare);
     for (sortedIndex = 0; sortedIndex < materialCount; ++sortedIndex)
     {
         material = sortedMaterials[sortedIndex];

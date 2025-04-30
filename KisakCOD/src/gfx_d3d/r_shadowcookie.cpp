@@ -204,7 +204,7 @@ void __cdecl R_GenerateShadowCookies(
     //Profile_Begin(150);
     R_PopulateCandidates(viewParmsDraw, &candidates[0]);
 
-    std::sort(&candidates[0], &candidates[23], R_ShadowCandidatePred);
+    std::sort((const ShadowCandidate **)&candidates[0], (const ShadowCandidate **)&candidates[23], R_ShadowCandidatePred);
 
     //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
     //    candidates,
@@ -592,7 +592,7 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
             //    (const GfxStaticModelDrawInst **)&surfaces[cookieDrawSurfCount],
             //    (int)(4 * cookieDrawSurfCount) >> 2,
             //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
-            std::sort(&surfaces[0], &surfaces[cookieDrawSurfCount], R_SortBspShadowReceiverSurfaces);
+            std::sort((GfxSurface **)&surfaces[0], (GfxSurface **)&surfaces[cookieDrawSurfCount], R_SortBspShadowReceiverSurfaces);
             for (listSurfIndex = 0; listSurfIndex < cookieDrawSurfCount; ++listSurfIndex)
             {
                 if (listSurfIndex >= rgp.world->surfaceCount)

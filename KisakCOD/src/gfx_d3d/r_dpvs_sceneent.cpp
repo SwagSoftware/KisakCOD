@@ -61,7 +61,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
     GfxSceneDpvs *retaddr; // [esp+C8h] [ebp+0h]
 
     //localClientNum = a1;
-    sceneDpvs = retaddr;
+    //sceneDpvs = retaddr;
     worldDpvs = data;
     wordCount = (unsigned int)&scene.dpvs;
     entInfo = (GfxEntCellRefInfo *)scene.dpvs.localClientNum;

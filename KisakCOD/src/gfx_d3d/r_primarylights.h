@@ -23,6 +23,32 @@ struct GfxShadowedLightHistory // sizeof=0x48
     unsigned int lastUpdateTime;
 };
 
+struct GfxShadowGeometry // sizeof=0xC
+{
+    unsigned __int16 surfaceCount;
+    unsigned __int16 smodelCount;
+    unsigned __int16 *sortedSurfIndex;
+    unsigned __int16 *smodelIndex;
+};
+struct GfxLightRegionAxis // sizeof=0x14
+{
+    float dir[3];
+    float midPoint;
+    float halfSize;
+};
+struct GfxLightRegionHull // sizeof=0x50
+{
+    float kdopMidPoint[9];
+    float kdopHalfSize[9];
+    unsigned int axisCount;
+    GfxLightRegionAxis *axis;
+};
+struct GfxLightRegion // sizeof=0x8
+{
+    unsigned int hullCount;
+    GfxLightRegionHull *hulls;
+};
+
 void __cdecl R_ClearShadowedPrimaryLightHistory(int localClientNum);
 void __cdecl R_AddDynamicShadowableLight(GfxViewInfo *viewInfo, const GfxLight *visibleLight);
 bool __cdecl R_IsDynamicShadowedLight(unsigned int shadowableLightIndex);
@@ -64,7 +90,7 @@ void __cdecl R_LinkDynEntToPrimaryLights(
     const float *mins,
     const float *maxs);
 bool __cdecl Com_CullBoxFromPrimaryLight(
-    const ComPrimaryLight *light,
+    const struct ComPrimaryLight *light,
     const float *boxMidPoint,
     const float *boxHalfSize);
 unsigned int __cdecl R_GetPrimaryLightDynEntShadowBit(unsigned int entnum, unsigned int primaryLightIndex);
@@ -94,4 +120,4 @@ unsigned int __cdecl R_GetNonSunPrimaryLightForBox(
     const float *boxHalfSize);
 unsigned int __cdecl R_GetNonSunPrimaryLightForSphere(const GfxViewInfo *viewInfo, const float *origin, float radius);
 char __cdecl R_CullSphereFromLightRegionHull(const GfxLightRegionHull *hull, const float *origin, float radius);
-bool __cdecl Com_CullSphereFromPrimaryLight(const ComPrimaryLight *light, const float *origin, float radius);
+bool __cdecl Com_CullSphereFromPrimaryLight(const struct ComPrimaryLight *light, const float *origin, float radius);

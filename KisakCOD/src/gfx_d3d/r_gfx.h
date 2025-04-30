@@ -3,6 +3,7 @@
 #include <d3d9.h>
 
 #include <universal/com_math.h>
+#include <qcommon/com_pack.h>
 
 struct Material;
 struct XModel;
@@ -30,13 +31,12 @@ union GfxColor // sizeof=0x4
     {
         packed = i;
     }
+    GfxColor(unsigned int i)
+    {
+        packed = i;
+    }
     unsigned int packed;
     unsigned __int8 array[4];
-};
-
-struct PackedTexCoords // sizeof=0x4
-{                                       // ...
-    unsigned int packed;
 };
 
 struct GfxPackedVertex // sizeof=0x20

@@ -2,6 +2,7 @@
 #include <universal/assertive.h>
 #include "r_model_skin.h"
 
+#include <xanim/xanim.h>
 
 void __cdecl XSurfaceGetVerts(const XSurface *surf, float *pVert, float *pTexCoord, float *pNormal)
 {

@@ -19,6 +19,7 @@
 #include "r_model_pose.h"
 
 void(__cdecl *g_cmdExecFailed[17])();
+volatile int g_waitTypeMainThread;
 
 //long volatile g_workerCmdWaitCount 85b4fc54     gfx_d3d : r_workercmds.obj
 
@@ -142,7 +143,6 @@ void __cdecl R_ProcessWorkerCmdsWithTimeout(int(__cdecl *timeout)(), int forever
     }
 }
 
-volatile int g_waitTypeMainThread;
 void __cdecl R_WaitWorkerCmdsOfType(int type)
 {
     if (!Sys_IsMainThread())
@@ -290,7 +290,8 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
         CL_ResetStats_f();
         for (i = 0; i < count; ++i)
             R_ProcessWorkerCmdInternal(type, (FxCmd *)&data[dataSize * i]);
-        InterlockedExchangeAdd(&workerCmds->inSize, -count);
+        //InterlockedExchangeAdd(&workerCmds->inSize, -count);
+        InterlockedExchangeAdd(&workerCmds->inSize, -(int)count);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
     }
@@ -380,7 +381,8 @@ int __cdecl R_ProcessWorkerCmd(int type)
         CL_ResetStats_f();
         for (i = 0; i < count; ++i)
             R_ProcessWorkerCmdInternal(type, (FxCmd *)&data[dataSize * i]);
-        InterlockedExchangeAdd(&workerCmds->inSize, -count);
+        //InterlockedExchangeAdd(&workerCmds->inSize, -count);
+        InterlockedExchangeAdd(&workerCmds->inSize, -(int)count);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
     }

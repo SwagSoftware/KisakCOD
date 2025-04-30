@@ -3,8 +3,6 @@
 #include "r_sky.h"
 #include <universal/q_shared.h>
 
-#include <xanim/xanim.h>
-
 enum TrisType : __int32
 {                                       // ...
     TRIS_TYPE_LAYERED = 0x0,

@@ -427,8 +427,8 @@ void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport)
     float invHeight; // [esp+8Ch] [ebp-8h]
     float retaddr; // [esp+94h] [ebp+0h]
 
-    viewParms = v2;
-    invHeight = retaddr;
+    //viewParms = v2;
+    //invHeight = retaddr;
     if (viewport->width <= 0)
         MyAssertHandler(
             ".\\r_state_utils.cpp",

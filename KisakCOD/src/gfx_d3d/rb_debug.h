@@ -11,4 +11,4 @@ int __cdecl RB_AddDebugLine(
 
 int __cdecl RB_EndDebugLines(bool depthTest, int vertCount, const struct GfxPointVertex *verts);
 
-void __cdecl RB_DrawDebug(const GfxViewParms *viewParms);
+void __cdecl RB_DrawDebug(const struct GfxViewParms *viewParms);

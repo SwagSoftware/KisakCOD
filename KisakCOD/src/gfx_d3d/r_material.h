@@ -3,7 +3,6 @@
 #include <d3d9.h>
 
 #include "r_gfx.h"
-#include <xanim/xanim.h>
 
 enum MaterialTextureSource : __int32
 {                                       // ...
@@ -575,10 +574,11 @@ void __cdecl Material_Init();
 void __cdecl Material_Shutdown();
 void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable* mtlTable, int mtlTableCount);
 void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl* callback)(MaterialTechniqueSet*));
-void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader* userData);
 bool __cdecl IsValidMaterialHandle(Material* const handle);
 
-void __cdecl Material_ReleaseTechniqueSet(XAssetHeader header, void* crap);
+//void __cdecl R_GetMaterialList(XAssetHeader header, char *data);
+//void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader *userData);
+//void __cdecl Material_ReleaseTechniqueSet(XAssetHeader header, void* crap);
 
 void __cdecl TRACK_r_material();
 
@@ -604,7 +604,6 @@ Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack);
 void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists);
 
 void __cdecl R_MaterialList_f();
-void __cdecl R_GetMaterialList(XAssetHeader header, char *data);
 int __cdecl R_GetMaterialMemory(Material *material);
 bool __cdecl R_MaterialCompare(const MaterialMemory *material0, const MaterialMemory *material1);
 

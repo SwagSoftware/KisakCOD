@@ -197,6 +197,12 @@ void __cdecl R_GetFullScreenRes(FullscreenType screenType, int *fullscreenWidth,
     *fullscreenHeight = sceneHeight;
 }
 
+void __cdecl R_GetFrameBufferDepthStencilRes(int *depthStencilWidth, int *depthStencilHeight)
+{
+    *depthStencilWidth = vidConfig.displayWidth;
+    *depthStencilHeight = vidConfig.displayHeight;
+}
+
 IDirect3DSurface9 *__cdecl R_AssignSingleSampleDepthStencilSurface()
 {
     const char *v1; // eax
@@ -453,12 +459,6 @@ const char *__cdecl R_DescribeFormat(_D3DFORMAT format)
         break;
     }
     return result;
-}
-
-void __cdecl R_GetFrameBufferDepthStencilRes(int *depthStencilWidth, int *depthStencilHeight)
-{
-    *depthStencilWidth = vidConfig.displayWidth;
-    *depthStencilHeight = vidConfig.displayHeight;
 }
 
 void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)

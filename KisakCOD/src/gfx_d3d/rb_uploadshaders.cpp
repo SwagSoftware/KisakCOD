@@ -97,7 +97,7 @@ unsigned int RB_UploadMaterialPass(
     unsigned int retaddr; // [esp+A8h] [ebp+0h]
 
     //argIter = a1;
-    argCount = retaddr;
+    //argCount = retaddr;
     if (!pass->vertexShader)
         MyAssertHandler(".\\rb_uploadshaders.cpp", 110, 0, "%s", "pass->vertexShader");
     if (!pass->vertexShader->prog.vs)

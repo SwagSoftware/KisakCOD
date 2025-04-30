@@ -552,7 +552,7 @@ void __cdecl CG_UpdateAirstrikeKillCam(int localClientNum)
     Vec3Sub(centTarget->pose.origin, cgameGlob->refdef.vieworg, delta);
     distance = Vec3Normalize(delta);
     CG_UpdateAirstrikeKillCamDof(distance, &cgameGlob->refdef.dof);
-    AxisToAngles((const float (*)[3][3])cgameGlob->refdef.viewaxis, cgameGlob->refdefViewAngles);
+    AxisToAngles(*(const mat3x3*)cgameGlob->refdef.viewaxis, cgameGlob->refdefViewAngles);
     CG_ShakeCamera(localClientNum);
     CG_PerturbCamera(cgameGlob);
     CG_UpdateFov(localClientNum, cg_airstrikeKillCamFov->current.value);
@@ -1072,7 +1072,7 @@ void __cdecl CG_ApplyViewAnimation(int localClientNum)
                     cgArray[0].refdef.viewaxis,
                     cgArray[0].refdef.vieworg))
                 {
-                    AxisToAngles((const float (*)[3][3])cgArray[0].refdef.viewaxis, cgArray[0].refdefViewAngles);
+                    AxisToAngles(*(const mat3x3*)cgArray[0].refdef.viewaxis, cgArray[0].refdefViewAngles);
                 }
             }
         }

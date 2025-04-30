@@ -290,6 +290,7 @@ void __cdecl Image_Upload3D_CopyData_PC(
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("image->texture.volmap->UnlockBox( mipLevel )\n");
         //v9 = image->texture.basemap->__vftable[1].GetDevice(image->texture.basemap, (IDirect3DDevice9 **)mipLevel);
+        v9 = image->texture.volmap->UnlockBox(mipLevel);
         if (v9 < 0)
         {
             do

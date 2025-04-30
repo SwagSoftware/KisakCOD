@@ -25,7 +25,7 @@ void  R_BoxSurfaces(
     void *retaddr; // [esp+98h] [ebp+0h]
 
     //v12 = a1;
-    v13 = retaddr;
+    //v13 = retaddr;
     if (!rgp.world)
         MyAssertHandler(".\\r_marks.cpp", 944, 0, "%s", "rgp.world");
     if (rgp.world->dpvsPlanes.cellCount > 1024)
@@ -77,6 +77,70 @@ void __cdecl R_BoxSurfaces_r(
     unsigned int listCount,
     unsigned __int8 *cellBits)
 {
+    int side; // [esp+0h] [ebp-10h]
+    int cellIndex; // [esp+4h] [ebp-Ch]
+    int cellCount; // [esp+8h] [ebp-8h]
+
+    cellCount = rgp.world->dpvsPlanes.cellCount + 1;
+    while (1)
+    {
+        cellIndex = node->cellIndex;
+        if (cellIndex - cellCount < 0)
+            break;
+        side = BoxOnPlaneSide(mins, maxs, &rgp.world->dpvsPlanes.planes[cellIndex - cellCount]);
+        if (side == 1)
+        {
+            ++node;
+        }
+        else
+        {
+            if (side != 2)
+                R_BoxSurfaces_r(
+                    node + 1,
+                    mins,
+                    maxs,
+                    allowSurf,
+                    callbackContext,
+                    surfLists,
+                    surfListSize,
+                    surfCounts,
+                    listCount,
+                    cellBits);
+            node = (node + 2 * node->rightChildOffset);
+        }
+    }
+    if (node->cellIndex)
+    {
+        if (listCount == 1)
+        {
+            R_CellSurfaces(
+                cellIndex - 1,
+                mins,
+                maxs,
+                *allowSurf,
+                callbackContext,
+                *surfLists,
+                surfListSize,
+                surfCounts,
+                cellBits);
+        }
+        else
+        {
+            if (listCount != 2)
+                MyAssertHandler(".\\r_marks.cpp", 792, 0, "%s", "listCount == 2");
+            R_CellSurfacesTwoLists(
+                cellIndex - 1,
+                mins,
+                maxs,
+                allowSurf,
+                callbackContext,
+                surfLists,
+                surfListSize,
+                surfCounts,
+                cellBits);
+        }
+    }
+#if 0 
     const cplane_s *side; // [esp+0h] [ebp-10h]
     int cellIndex; // [esp+4h] [ebp-Ch]
     int cellCount; // [esp+8h] [ebp-8h]
@@ -87,7 +151,7 @@ void __cdecl R_BoxSurfaces_r(
         cellIndex = node->cellIndex;
         if (cellIndex - cellCount < 0)
             break;
-        side = (const cplane_s *)BoxOnPlaneSide(mins, maxs, &rgp.world->dpvsPlanes.planes[cellIndex - cellCount], side);
+        side = (const cplane_s *)BoxOnPlaneSide(mins, maxs, &rgp.world->dpvsPlanes.planes[cellIndex - cellCount]);
         if (side == (const cplane_s *)1)
         {
             ++node;
@@ -140,6 +204,7 @@ void __cdecl R_BoxSurfaces_r(
                 cellBits);
         }
     }
+#endif
 }
 
 void __cdecl R_CellSurfaces(
@@ -448,7 +513,7 @@ int  R_BoxStaticModels(
     void *retaddr; // [esp+94h] [ebp+0h]
 
     //v9 = a1;
-    v10 = retaddr;
+    //v10 = retaddr;
     if (!rgp.world)
         MyAssertHandler(".\\r_marks.cpp", 966, 0, "%s", "rgp.world");
     if (rgp.world->dpvsPlanes.cellCount > 1024)
@@ -495,7 +560,7 @@ void __cdecl R_BoxStaticModels_r(
     int *smodelCount,
     unsigned __int8 *cellBits)
 {
-    const cplane_s *side; // [esp+0h] [ebp-10h]
+    int side; // [esp+0h] [ebp-10h]
     int cellIndex; // [esp+4h] [ebp-Ch]
     int cellCount; // [esp+8h] [ebp-8h]
 
@@ -505,16 +570,16 @@ void __cdecl R_BoxStaticModels_r(
         cellIndex = node->cellIndex;
         if (cellIndex - cellCount < 0)
             break;
-        side = (const cplane_s *)BoxOnPlaneSide(mins, maxs, &rgp.world->dpvsPlanes.planes[cellIndex - cellCount], side);
-        if (side == (const cplane_s *)1)
+        side = BoxOnPlaneSide(mins, maxs, &rgp.world->dpvsPlanes.planes[cellIndex - cellCount]);
+        if (side == 1)
         {
             ++node;
         }
         else
         {
-            if (side != (const cplane_s *)2)
+            if (side != 2)
                 R_BoxStaticModels_r(node + 1, mins, maxs, allowSModel, smodelList, smodelListSize, smodelCount, cellBits);
-            node = (mnode_t *)((char *)node + 2 * node->rightChildOffset);
+            node = (node + 2 * node->rightChildOffset);
         }
     }
     if (node->cellIndex)
@@ -638,7 +703,7 @@ unsigned int  R_CylinderSurfaces(
     void *retaddr; // [esp+D0h] [ebp+0h]
 
     //v13 = a1;
-    v14 = retaddr;
+    //v14 = retaddr;
     if (!rgp.world)
         MyAssertHandler(".\\r_marks.cpp", 986, 0, "%s", "rgp.world");
     if (rgp.world->dpvsPlanes.cellCount > 1024)

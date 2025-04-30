@@ -179,6 +179,20 @@ void __cdecl R_ClearForFrameBuffer(IDirect3DDevice9 *device, const GfxViewport *
     R_ClearScreen(device, 7u, clearColor, 1.0, 0, viewport);
 }
 
+void R_DrawFullbrightOrDebugShader(
+    void(__cdecl *callback)(const void *, GfxCmdBufContext *, GfxCmdBufContext *),
+    const GfxViewInfo *viewInfo,
+    const GfxDrawSurfListInfo *info,
+    GfxCmdBuf *cmdBuf)
+{
+    GfxCmdBufSourceState v8; // [sp+50h] [-F10h] BYREF
+
+    R_InitCmdBufSourceState(&v8, &viewInfo->input, 1);
+    R_SetRenderTargetSize(&v8, R_RENDERTARGET_SCENE);
+    R_SetViewportStruct(&v8, &viewInfo->sceneViewport);
+    R_DrawCall(callback, viewInfo, &v8, viewInfo, info, &viewInfo->viewParms, cmdBuf, 0);
+}
+
 void __cdecl R_DrawFullbright(const GfxViewInfo *viewInfo, GfxCmdBufInput *input, GfxCmdBuf *cmdBuf)
 {
     int savedregs; // [esp+0h] [ebp+0h] BYREF
@@ -306,20 +320,6 @@ void __cdecl RB_DebugShaderDrawCommands(const GfxViewInfo *viewInfo)
     R_InitContext(data, &cmdBuf);
     R_DrawDebugShader(viewInfo, &cmdBuf);
     RB_EndSceneRendering(gfxCmdBufContext, &viewInfo->input, viewInfo);
-}
-
-void R_DrawFullbrightOrDebugShader(
-    void(__cdecl *callback)(const void *, GfxCmdBufContext*, GfxCmdBufContext*),
-    const GfxViewInfo *viewInfo,
-    const GfxDrawSurfListInfo *info,
-    GfxCmdBuf *cmdBuf)
-{
-    GfxCmdBufSourceState v8; // [sp+50h] [-F10h] BYREF
-
-    R_InitCmdBufSourceState(&v8, &viewInfo->input, 1);
-    R_SetRenderTargetSize(&v8, R_RENDERTARGET_SCENE);
-    R_SetViewportStruct(&v8, &viewInfo->sceneViewport);
-    R_DrawCall(callback, viewInfo, &v8, viewInfo, info, &viewInfo->viewParms, cmdBuf, 0);
 }
 
 void __cdecl R_DrawDebugShader(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)

@@ -8,12 +8,12 @@ void __cdecl Vec2UnpackTexCoords(PackedTexCoords in, float *out);
 
 void  R_SkinXModelCmd(_WORD *data);
 void __cdecl R_SkinXSurfaceSkinned(
-    const XSurface *xsurf,
+    const struct XSurface *xsurf,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *skinVerticesOut);
 void __cdecl R_SkinXSurfaceWeight(
     const GfxPackedVertex *inVerts,
-    const XSurfaceVertexInfo *vertexInfo,
+    const struct XSurfaceVertexInfo *vertexInfo,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *outVerts);
 void __cdecl R_SkinXSurfaceWeight0(

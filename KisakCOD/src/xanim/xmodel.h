@@ -1,6 +1,7 @@
 #pragma once
 #include <universal/com_math.h>
-#include <physics/phys_local.h>
+#include <gfx_d3d/r_material.h>
+//#include <physics/phys_local.h>
 
 enum XModelLodRampType : __int32
 {                                       // ...
@@ -237,12 +238,12 @@ void __cdecl XModelGetBounds(const XModel *model, float *mins, float *maxs);
 int __cdecl XModelGetMemUsage(const XModel *model);
 int __cdecl XModelTraceLine(
     const XModel *model,
-    trace_t *results,
+    struct trace_t *results,
     const float *localStart,
     const float *localEnd,
     int contentmask);
 int __cdecl XModelTraceLineAnimated(
-    const DObj_s *obj,
+    const struct DObj_s *obj,
     unsigned int modelIndex,
     int baseBoneIndex,
     trace_t *results,
@@ -252,7 +253,7 @@ int __cdecl XModelTraceLineAnimated(
     int contentmask);
 void __cdecl LocalMatrixTransposeTransformVector(const float *in1, const float (*in2)[3], float *out);
 void __cdecl XModelTraceLineAnimatedPartBits(
-    const DObj_s *obj,
+    const struct DObj_s *obj,
     unsigned int modelIndex,
     int baseBoneIndex,
     int contentmask,
@@ -290,7 +291,7 @@ int __cdecl XModelGetNumLods(const XModel *model);
 double __cdecl XModelGetLodOutDist(const XModel *model);
 int __cdecl XModelNumBones(const XModel *model);
 const DObjAnimMat *__cdecl XModelGetBasePose(const XModel *model);
-int __cdecl XModelGetLodForDist(const XModel *model, float dist);
+XModelLodRampType __cdecl XModelGetLodForDist(const XModel *model, float dist);
 void __cdecl XModelSetTestLods(unsigned int lodLevel, float dist);
 double __cdecl XModelGetLodDist(const XModel *model, unsigned int lod);
 int __cdecl XModelGetContents(const XModel *model);
@@ -311,4 +312,4 @@ int __cdecl XModelSurfsPrecache(
 
 
 // xmodel_load_phys_collmap
-PhysGeomList *__cdecl XModel_LoadPhysicsCollMap(const char *name, void *(__cdecl *Alloc)(int));
+struct PhysGeomList *__cdecl XModel_LoadPhysicsCollMap(const char *name, void *(__cdecl *Alloc)(int));

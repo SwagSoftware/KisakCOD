@@ -294,7 +294,8 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     Com_Printf(8, "|%-14s", label);
     if (primStats->primCount)
     {
-        v7 = itoa(primStats->primCount, text, 0xAu);
+        //v7 = itoa(primStats->primCount, text, 0xAu);
+        v7 = _itoa(primStats->primCount, text, 0xAu);
         Com_Printf(8, "|%5s", v7);
     }
     else
@@ -303,7 +304,8 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     }
     if (primStats->triCount)
     {
-        v6 = itoa(primStats->triCount, text, 0xAu);
+        //v6 = itoa(primStats->triCount, text, 0xAu);
+        v6 = _itoa(primStats->triCount, text, 0xAu);
         Com_Printf(8, "|%7s", v6);
     }
     else
@@ -312,7 +314,8 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     }
     if (primStats->staticIndexCount)
     {
-        v5 = itoa(primStats->staticIndexCount, text, 0xAu);
+        //v5 = itoa(primStats->staticIndexCount, text, 0xAu);
+        v5 = _itoa(primStats->staticIndexCount, text, 0xAu);
         Com_Printf(8, "|%7s", v5);
     }
     else
@@ -321,7 +324,8 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     }
     if (primStats->staticVertexCount)
     {
-        v4 = itoa(primStats->staticVertexCount, text, 0xAu);
+        //v4 = itoa(primStats->staticVertexCount, text, 0xAu);
+        v4 = _itoa(primStats->staticVertexCount, text, 0xAu);
         Com_Printf(8, "|%7s", v4);
     }
     else
@@ -330,7 +334,8 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     }
     if (primStats->dynamicIndexCount)
     {
-        v3 = itoa(primStats->dynamicIndexCount, text, 0xAu);
+        //v3 = itoa(primStats->dynamicIndexCount, text, 0xAu);
+        v3 = _itoa(primStats->dynamicIndexCount, text, 0xAu);
         Com_Printf(8, "|%7s", v3);
     }
     else
@@ -339,7 +344,8 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     }
     if (primStats->dynamicVertexCount)
     {
-        v2 = itoa(primStats->dynamicVertexCount, text, 0xAu);
+        //v2 = itoa(primStats->dynamicVertexCount, text, 0xAu);
+        v2 = _itoa(primStats->dynamicVertexCount, text, 0xAu);
         Com_Printf(8, "|%7s|\n", v2);
     }
     else

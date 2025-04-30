@@ -205,7 +205,7 @@ void __cdecl BG_ClearWeaponDef()
     bg_weapClips[0] = bg_weaponDefs[0];
     bg_numWeapClips = 1;
     for (itemIdx = 1; itemIdx < 2048; ++itemIdx)
-        bg_itemlist[itemIdx] = 0;
+        bg_itemlist[itemIdx].giType = IT_BAD;
     BG_LoadPlayerAnimTypes();
     BG_InitWeaponStrings();
 }
@@ -233,7 +233,7 @@ void __cdecl BG_FillInWeaponItems(unsigned int weapIndex)
     int model; // [esp+0h] [ebp-8h]
 
     for (model = 0; model < 16; ++model)
-        bg_itemlist[128 * model + weapIndex] = 1;
+        bg_itemlist[128 * model + weapIndex].giType = IT_WEAPON;
 }
 
 void __cdecl BG_SetupAmmoIndexes(unsigned int weapIndex)

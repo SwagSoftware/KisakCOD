@@ -1,5 +1,6 @@
 #pragma once
 #include "r_material.h"
+#include <xanim/xanim.h>
 
 const char *g_imageProgNames[14] =
 {

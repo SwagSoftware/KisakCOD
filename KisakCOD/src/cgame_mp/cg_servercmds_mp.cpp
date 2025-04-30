@@ -644,41 +644,41 @@ void __cdecl CG_DeployServerCommand(int localClientNum)
         v9 = Cmd_Argv(2);
         drawType = atoi(v9);
         v10 = Cmd_Argv(3);
-        atof(v10);
-        __asm { fstp[ebp + var_1E4] }
+        pos[2] = atof(v10);
+        //__asm { fstp[ebp + var_1E4] }
         v11 = Cmd_Argv(4);
-        atof(v11);
-        __asm { fstp[ebp + var_1E0] }
+        pos[1] = atof(v11);
+        //__asm { fstp[ebp + var_1E0] }
         v12 = Cmd_Argv(5);
-        atof(v12);
-        __asm
-        {
-            fstp[ebp + var_1DC]
-            fld[ebp + var_1E4]
-            fstp[ebp + pos]
-            fld[ebp + var_1E0]
-            fstp[ebp + pos + 4]
-            fld[ebp + var_1DC]
-            fstp[ebp + pos + 8]
-        }
+        pos[0] = atof(v12);
+        //__asm
+        //{
+        //    fstp[ebp + var_1DC]
+        //    fld[ebp + var_1E4]
+        //    fstp[ebp + pos]
+        //    fld[ebp + var_1E0]
+        //    fstp[ebp + pos + 4]
+        //    fld[ebp + var_1DC]
+        //    fstp[ebp + pos + 8]
+        //}
         v13 = Cmd_Argv(6);
-        atof(v13);
-        __asm { fstp[ebp + var_1F0] }
+        dir[2] = atof(v13);
+        //__asm { fstp[ebp + var_1F0] }
         v14 = Cmd_Argv(7);
-        atof(v14);
-        __asm { fstp[ebp + var_1EC] }
+        dir[1] = atof(v14);
+        //__asm { fstp[ebp + var_1EC] }
         v15 = Cmd_Argv(8);
-        atof(v15);
-        __asm
-        {
-            fstp[ebp + var_1E8]
-            fld[ebp + var_1F0]
-            fstp[ebp + dir]
-            fld[ebp + var_1EC]
-            fstp[ebp + dir + 4]
-            fld[ebp + var_1E8]
-            fstp[ebp + dir + 8]
-        }
+        dir[0] = atof(v15);
+        //__asm
+        //{
+        //    fstp[ebp + var_1E8]
+        //    fld[ebp + var_1F0]
+        //    fstp[ebp + dir]
+        //    fld[ebp + var_1EC]
+        //    fstp[ebp + dir + 4]
+        //    fld[ebp + var_1E8]
+        //    fstp[ebp + dir + 8]
+        //}
         DynEntCl_DestroyEvent(localClientNum, id, (DynEntityCollType)drawType, pos, dir);
         break;
     case 0x6B:
@@ -711,13 +711,13 @@ void __cdecl CG_DeployServerCommand(int localClientNum)
             v21 = Cmd_Argv(2);
             v45 = atoi(v21);
             v22 = Cmd_Argv(1);
-            atof(v22);
-            __asm
-            {
-                fstp[ebp + var_1F8]
-                fld[ebp + var_1F8]
-            }
-            __asm { fstp[esp + 200h + volume] }
+            volumea = atof(v22);
+            //__asm
+            //{
+            //    fstp[ebp + var_1F8]
+            //    fld[ebp + var_1F8]
+            //}
+            //__asm { fstp[esp + 200h + volume] }
             SND_FadeAllSounds(volumea, v45);
         }
         break;

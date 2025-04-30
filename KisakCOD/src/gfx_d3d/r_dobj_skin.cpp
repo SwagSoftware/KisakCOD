@@ -430,7 +430,7 @@ int  R_PreSkinXSurface(
     void *retaddr; // [esp+174h] [ebp+0h]
 
     //rigidSurf = a1;
-    v55 = retaddr;
+    //v55 = retaddr;
     if (!obj)
         MyAssertHandler(".\\r_dobj_skin.cpp", 65, 0, "%s", "obj");
     if (!surf)

@@ -485,7 +485,7 @@ void  R_DeriveWorldViewMatrix(GfxCmdBufSourceState *source)
     GfxCodeMatrices *activeMatrices; // [esp+4Ch] [ebp-8h]
     GfxCodeMatrices *retaddr; // [esp+54h] [ebp+0h]
 
-    activeMatrices = retaddr;
+    //activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
     world_60 = (float *)source;
     if (source->constVersions[58] != source->matrixVersions[0])
@@ -533,7 +533,7 @@ void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source)
     GfxCodeMatrices *activeMatrices; // [esp+50h] [ebp-8h]
     GfxCodeMatrices *retaddr; // [esp+58h] [ebp+0h]
 
-    activeMatrices = retaddr;
+    //activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
     world_60 = (const float *)source;
     if (source->constVersions[58] != source->matrixVersions[0])
@@ -577,7 +577,7 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     float downBias; // [esp+78h] [ebp-8h]
     float retaddr; // [esp+80h] [ebp+0h]
 
-    downBias = retaddr;
+    //downBias = retaddr;
     awayBias = r_outdoorAwayBias->current.value;
     zIn_12 = r_outdoorDownBias->current.value;
     zIn_8 = source;
@@ -2809,7 +2809,7 @@ void  R_DrawCall(
     void *retaddr; // [esp+Ch] [ebp+0h]
 
     //v14 = a1;
-    v15 = retaddr;
+    //v15 = retaddr;
     v9 = alloca(5192);
     p_input = &viewInfo->input;
     p_sceneDef = &viewInfo->sceneDef;

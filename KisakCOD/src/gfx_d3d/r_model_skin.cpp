@@ -3,13 +3,14 @@
 #include "r_dvars.h"
 #include <qcommon/com_playerprofile.h>
 #include "r_buffers.h"
+#include <universal/profile.h>
 
 
 //unsigned int const *const g_shortBoneWeightPerm__uint4 820f4950     gfx_d3d : r_model_skin.obj
 //struct __vector4 const g_shortBoneWeightPerm 85b981d0     gfx_d3d : r_model_skin.obj
 
 
-void  R_SkinXModelCmd(_WORD *data)
+void R_SkinXModelCmd(_WORD *data)
 {
     void *v2; // esp
     int v3; // [esp+Ch] [ebp-2188h]
@@ -30,98 +31,94 @@ void  R_SkinXModelCmd(_WORD *data)
     float v18; // [esp+2098h] [ebp-FCh]
     float v19; // [esp+209Ch] [ebp-F8h]
     float v20; // [esp+20A0h] [ebp-F4h]
-    float v21; // [esp+20A4h] [ebp-F0h] BYREF
-    float v22; // [esp+20A8h] [ebp-ECh]
-    float v23; // [esp+20ACh] [ebp-E8h]
-    float v24; // [esp+20B0h] [ebp-E4h]
-    float v25; // [esp+20B4h] [ebp-E0h]
-    float v26; // [esp+20B8h] [ebp-DCh]
-    float v27; // [esp+20BCh] [ebp-D8h]
-    float v28; // [esp+20C0h] [ebp-D4h]
-    const float *v29; // [esp+20C4h] [ebp-D0h]
-    DObjSkelMat v30; // [esp+20C8h] [ebp-CCh] BYREF
-    float v31; // [esp+2114h] [ebp-80h]
-    float v32; // [esp+2118h] [ebp-7Ch]
-    float v33; // [esp+211Ch] [ebp-78h]
-    float v34; // [esp+2120h] [ebp-74h]
-    float v35; // [esp+2124h] [ebp-70h]
-    float v36; // [esp+2128h] [ebp-6Ch]
-    float v37; // [esp+212Ch] [ebp-68h]
-    float v38; // [esp+2130h] [ebp-64h]
-    float v39; // [esp+2134h] [ebp-60h]
-    float v40; // [esp+2138h] [ebp-5Ch] BYREF
-    float v41; // [esp+213Ch] [ebp-58h]
-    float v42; // [esp+2140h] [ebp-54h]
-    float v43; // [esp+2144h] [ebp-50h]
-    float v44; // [esp+2148h] [ebp-4Ch]
-    float v45; // [esp+214Ch] [ebp-48h]
-    float v46; // [esp+2150h] [ebp-44h]
-    float v47; // [esp+2154h] [ebp-40h]
-    const float *v48; // [esp+2158h] [ebp-3Ch]
+    float v21[3]; // [esp+20A4h] [ebp-F0h] BYREF
+    float v22; // [esp+20B0h] [ebp-E4h]
+    float v23; // [esp+20B4h] [ebp-E0h]
+    float v24; // [esp+20B8h] [ebp-DCh]
+    float v25; // [esp+20BCh] [ebp-D8h]
+    float v26; // [esp+20C0h] [ebp-D4h]
+    const float *v27; // [esp+20C4h] [ebp-D0h]
+    DObjSkelMat v28; // [esp+20C8h] [ebp-CCh] BYREF
+    float v29; // [esp+2114h] [ebp-80h]
+    float v30; // [esp+2118h] [ebp-7Ch]
+    float v31; // [esp+211Ch] [ebp-78h]
+    float v32; // [esp+2120h] [ebp-74h]
+    float v33; // [esp+2124h] [ebp-70h]
+    float v34; // [esp+2128h] [ebp-6Ch]
+    float v35; // [esp+212Ch] [ebp-68h]
+    float v36; // [esp+2130h] [ebp-64h]
+    float v37; // [esp+2134h] [ebp-60h]
+    float v38[3]; // [esp+2138h] [ebp-5Ch] BYREF
+    float v39; // [esp+2144h] [ebp-50h]
+    float v40; // [esp+2148h] [ebp-4Ch]
+    float v41; // [esp+214Ch] [ebp-48h]
+    float v42; // [esp+2150h] [ebp-44h]
+    float v43; // [esp+2154h] [ebp-40h]
+    const float *v44; // [esp+2158h] [ebp-3Ch]
     int j; // [esp+215Ch] [ebp-38h]
-    int v50; // [esp+2160h] [ebp-34h]
-    int v51; // [esp+2164h] [ebp-30h]
-    unsigned int *v52; // [esp+2168h] [ebp-2Ch]
+    int v46; // [esp+2160h] [ebp-34h]
+    int v47; // [esp+2164h] [ebp-30h]
+    _DWORD *v48; // [esp+2168h] [ebp-2Ch]
     unsigned int i; // [esp+216Ch] [ebp-28h]
-    int v54; // [esp+2170h] [ebp-24h]
-    int v55; // [esp+2174h] [ebp-20h]
-    unsigned int *v56; // [esp+2178h] [ebp-1Ch]
-    _WORD *v57; // [esp+217Ch] [ebp-18h]
+    int v50; // [esp+2170h] [ebp-24h]
+    int v51; // [esp+2174h] [ebp-20h]
+    _DWORD *v52; // [esp+2178h] [ebp-1Ch]
+    _WORD *v53; // [esp+217Ch] [ebp-18h]
     bool fastSkin; // [esp+2181h] [ebp-13h]
-    char v59; // [esp+2182h] [ebp-12h]
-    bool v60; // [esp+2183h] [ebp-11h]
-    bool v61; // [esp+2184h] [ebp-10h]
-    int v62; // [esp+2188h] [ebp-Ch]
-    void *v63; // [esp+218Ch] [ebp-8h]
+    char v55; // [esp+2182h] [ebp-12h]
+    bool v56; // [esp+2183h] [ebp-11h]
+    BOOL v57; // [esp+2184h] [ebp-10h]
+    int v58; // [esp+2188h] [ebp-Ch]
+    void *v59; // [esp+218Ch] [ebp-8h]
     void *retaddr; // [esp+2194h] [ebp+0h]
 
-    //v62 = a1;
-    v63 = retaddr;
+    //v58 = a1;
+    //v59 = retaddr;
     v2 = alloca(8576);
     if (!dx.deviceLost)
     {
-        //Profile_Begin(89);
-        v61 = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
-        v60 = v61;
-        v59 = 0;
+        Profile_Begin(89);
+        v57 = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
+        v56 = v57;
+        v55 = 0;
         fastSkin = gfxBuf.fastSkin;
-        v57 = data;
+        v53 = data;
         if (!data)
             MyAssertHandler(".\\r_model_skin.cpp", 2325, 0, "%s", "skinCmd");
-        if (!v57[12])
+        if (!v53[12])
             MyAssertHandler(".\\r_model_skin.cpp", 2326, 0, "%s", "skinCmd->surfCount");
-        v56 = *(unsigned int **)v57;
-        v55 = *((unsigned int *)v57 + 1);
-        v54 = -1;
-        for (i = 0; i < (unsigned __int16)v57[12]; ++i)
+        v52 = (_DWORD*)*v53;
+        v51 = *(v53 + 1);
+        v50 = -1;
+        for (i = 0; i < v53[12]; ++i)
         {
-            v52 = v56;
-            if (*v56 == -3)
+            v48 = v52;
+            if (*v52 == -3)
             {
-                ++v56;
+                ++v52;
             }
             else
             {
-                if (v54 != *((unsigned __int8 *)v52 + 12))
+                if (v50 != *(v48 + 12))
                 {
-                    v54 = *((unsigned __int8 *)v52 + 12);
-                    v51 = v54 + *((unsigned __int8 *)v52 + 13);
-                    v50 = v52[2] - 32 * v54;
-                    for (j = v54; j < v51; ++j)
+                    v50 = *(v48 + 12);
+                    v47 = v50 + *(v48 + 13);
+                    v46 = v48[2] - 32 * v50;
+                    for (j = v50; j < v47; ++j)
                     {
-                        if ((*(unsigned int *)&v57[2 * (j >> 5) + 4] & (0x80000000 >> (j & 0x1F))) != 0)
+                        if ((*&v53[2 * (j >> 5) + 4] & (0x80000000 >> (j & 0x1F))) != 0)
                         {
-                            if (v59)
+                            if (v55)
                             {
-                                v59 = 0;
+                                v55 = 0;
                                 //_m_empty();
                             }
-                            v48 = (const float *)(v50 + 32 * j);
-                            v47 = *v48;
-                            if ((LODWORD(v47) & 0x7F800000) == 0x7F800000
-                                || (v46 = v48[1], (LODWORD(v46) & 0x7F800000) == 0x7F800000)
-                                || (v45 = v48[2], (LODWORD(v45) & 0x7F800000) == 0x7F800000)
-                                || (v44 = v48[3], (LODWORD(v44) & 0x7F800000) == 0x7F800000))
+                            v44 = (const float*)(v46 + 32 * j);
+                            v43 = *v44;
+                            if ((LODWORD(v43) & 0x7F800000) == 0x7F800000
+                                || (v42 = v44[1], (LODWORD(v42) & 0x7F800000) == 0x7F800000)
+                                || (v41 = v44[2], (LODWORD(v41) & 0x7F800000) == 0x7F800000)
+                                || (v40 = v44[3], (LODWORD(v40) & 0x7F800000) == 0x7F800000))
                             {
                                 MyAssertHandler(
                                     "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
@@ -130,46 +127,46 @@ void  R_SkinXModelCmd(_WORD *data)
                                     "%s",
                                     "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
                             }
-                            v43 = v48[7];
-                            if ((LODWORD(v43) & 0x7F800000) == 0x7F800000)
+                            v39 = v44[7];
+                            if ((LODWORD(v39) & 0x7F800000) == 0x7F800000)
                                 MyAssertHandler(
                                     "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
                                     582,
                                     0,
                                     "%s",
                                     "!IS_NAN(mat->transWeight)");
-                            Vec3Scale(v48, v48[7], &v40);
-                            v39 = v40 * *v48;
-                            v38 = v40 * v48[1];
-                            v37 = v40 * v48[2];
-                            v36 = v40 * v48[3];
-                            v35 = v41 * v48[1];
-                            v34 = v41 * v48[2];
-                            v33 = v41 * v48[3];
-                            v32 = v42 * v48[2];
-                            v31 = v42 * v48[3];
-                            v30.axis[0][0] = 1.0 - (v35 + v32);
-                            v30.axis[0][1] = v38 - v31;
-                            v30.axis[0][2] = v37 + v33;
-                            v30.axis[0][3] = 0.0;
-                            v30.axis[1][0] = v38 + v31;
-                            v30.axis[1][1] = 1.0 - (v39 + v32);
-                            v30.axis[1][2] = v34 - v36;
-                            v30.axis[1][3] = 0.0;
-                            v30.axis[2][0] = v37 - v33;
-                            v30.axis[2][1] = v34 + v36;
-                            v30.axis[2][2] = 1.0 - (v39 + v35);
-                            v30.axis[2][3] = 0.0;
-                            v30.origin[0] = -(v48[4] * v30.axis[0][0] + v48[5] * v30.axis[1][0] + v48[6] * v30.axis[2][0]);
-                            v30.origin[1] = -(v48[4] * v30.axis[0][1] + v48[5] * v30.axis[1][1] + v48[6] * v30.axis[2][1]);
-                            v30.origin[2] = -(v48[4] * v30.axis[0][2] + v48[5] * v30.axis[1][2] + v48[6] * v30.axis[2][2]);
-                            v30.origin[3] = 1.0;
-                            v29 = (const float *)(v55 + 32 * j);
-                            v28 = *v29;
-                            if ((LODWORD(v28) & 0x7F800000) == 0x7F800000
-                                || (v27 = v29[1], (LODWORD(v27) & 0x7F800000) == 0x7F800000)
-                                || (v26 = v29[2], (LODWORD(v26) & 0x7F800000) == 0x7F800000)
-                                || (v25 = v29[3], (LODWORD(v25) & 0x7F800000) == 0x7F800000))
+                            Vec3Scale(v44, v44[7], v38);
+                            v37 = v38[0] * *v44;
+                            v36 = v38[0] * v44[1];
+                            v35 = v38[0] * v44[2];
+                            v34 = v38[0] * v44[3];
+                            v33 = v38[1] * v44[1];
+                            v32 = v38[1] * v44[2];
+                            v31 = v38[1] * v44[3];
+                            v30 = v38[2] * v44[2];
+                            v29 = v38[2] * v44[3];
+                            v28.axis[0][0] = 1.0 - (v33 + v30);
+                            v28.axis[0][1] = v36 - v29;
+                            v28.axis[0][2] = v35 + v31;
+                            v28.axis[0][3] = 0.0;
+                            v28.axis[1][0] = v36 + v29;
+                            v28.axis[1][1] = 1.0 - (v37 + v30);
+                            v28.axis[1][2] = v32 - v34;
+                            v28.axis[1][3] = 0.0;
+                            v28.axis[2][0] = v35 - v31;
+                            v28.axis[2][1] = v32 + v34;
+                            v28.axis[2][2] = 1.0 - (v37 + v33);
+                            v28.axis[2][3] = 0.0;
+                            v28.origin[0] = -(v44[4] * v28.axis[0][0] + v44[5] * v28.axis[1][0] + v44[6] * v28.axis[2][0]);
+                            v28.origin[1] = -(v44[4] * v28.axis[0][1] + v44[5] * v28.axis[1][1] + v44[6] * v28.axis[2][1]);
+                            v28.origin[2] = -(v44[4] * v28.axis[0][2] + v44[5] * v28.axis[1][2] + v44[6] * v28.axis[2][2]);
+                            v28.origin[3] = 1.0;
+                            v27 = (const float*)(v51 + 32 * j);
+                            v26 = *v27;
+                            if ((LODWORD(v26) & 0x7F800000) == 0x7F800000
+                                || (v25 = v27[1], (LODWORD(v25) & 0x7F800000) == 0x7F800000)
+                                || (v24 = v27[2], (LODWORD(v24) & 0x7F800000) == 0x7F800000)
+                                || (v23 = v27[3], (LODWORD(v23) & 0x7F800000) == 0x7F800000))
                             {
                                 MyAssertHandler(
                                     "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
@@ -178,24 +175,24 @@ void  R_SkinXModelCmd(_WORD *data)
                                     "%s",
                                     "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
                             }
-                            v24 = v29[7];
-                            if ((LODWORD(v24) & 0x7F800000) == 0x7F800000)
+                            v22 = v27[7];
+                            if ((LODWORD(v22) & 0x7F800000) == 0x7F800000)
                                 MyAssertHandler(
                                     "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
                                     474,
                                     0,
                                     "%s",
                                     "!IS_NAN(mat->transWeight)");
-                            Vec3Scale(v29, v29[7], &v21);
-                            v20 = v21 * *v29;
-                            v19 = v21 * v29[1];
-                            v18 = v21 * v29[2];
-                            v17 = v21 * v29[3];
-                            v16 = v22 * v29[1];
-                            v15 = v22 * v29[2];
-                            v14 = v22 * v29[3];
-                            v13 = v23 * v29[2];
-                            v12 = v23 * v29[3];
+                            Vec3Scale(v27, v27[7], v21);
+                            v20 = v21[0] * *v27;
+                            v19 = v21[0] * v27[1];
+                            v18 = v21[0] * v27[2];
+                            v17 = v21[0] * v27[3];
+                            v16 = v21[1] * v27[1];
+                            v15 = v21[1] * v27[2];
+                            v14 = v21[1] * v27[3];
+                            v13 = v21[2] * v27[2];
+                            v12 = v21[2] * v27[3];
                             v11.axis[0][0] = 1.0 - (v16 + v13);
                             v11.axis[0][1] = v19 + v12;
                             v11.axis[0][2] = v18 - v14;
@@ -209,40 +206,40 @@ void  R_SkinXModelCmd(_WORD *data)
                             v11.axis[2][2] = 1.0 - (v20 + v16);
                             v11.axis[2][3] = 0.0;
                             origin = v11.origin;
-                            v9 = v29 + 4;
-                            v11.origin[0] = v29[4];
-                            v11.origin[1] = v29[5];
-                            v11.origin[2] = v29[6];
+                            v9 = v27 + 4;
+                            v11.origin[0] = v27[4];
+                            v11.origin[1] = v27[5];
+                            v11.origin[2] = v27[6];
                             v11.origin[3] = 1.0;
-                            R_MultiplySkelMat(&v30, &v11, (DObjSkelMat *)&v8[64 * j]);
-                            *(float *)&v8[64 * j + 12] = 0.0;
-                            *(float *)&v8[64 * j + 28] = 0.0;
-                            *(float *)&v8[64 * j + 44] = 0.0;
-                            *(float *)&v8[64 * j + 60] = 1.0;
+                            R_MultiplySkelMat(&v28, &v11, (DObjSkelMat*)&v8[64 * j]);
+                            *&v8[64 * j + 12] = 0.0;
+                            *&v8[64 * j + 28] = 0.0;
+                            *&v8[64 * j + 44] = 0.0;
+                            *&v8[64 * j + 60] = 1.0;
                         }
                     }
                 }
-                if (*v52 == -2)
+                if (*v48 == -2)
                 {
-                    v56 += 14;
+                    v52 += 14;
                 }
                 else
                 {
-                    v56 = v52 + 6;
-                    v7 = (const XSurface *)v52[1];
+                    v52 = v48 + 6;
+                    v7 = (const XSurface*)v48[1];
                     if (!v7)
                         MyAssertHandler(".\\r_model_skin.cpp", 2375, 0, "%s", "xsurf");
-                    if ((int)*v52 < 0)
+                    if (*v48 < 0)
                     {
-                        if ((v52[5] & 0xF) != 0)
+                        if ((v48[5] & 0xF) != 0)
                             MyAssertHandler(
                                 ".\\r_model_skin.cpp",
                                 2391,
                                 0,
                                 "%s\n\t(reinterpret_cast< uint >( skinnedSurf->skinnedVert )) = %i",
                                 "((reinterpret_cast< uint >( skinnedSurf->skinnedVert ) & 15) == 0)",
-                                v52[5]);
-                        v6 = (GfxPackedVertex *)v52[5];
+                                v48[5]);
+                        v6 = (GfxPackedVertex*)v48[5];
                     }
                     else
                     {
@@ -256,48 +253,49 @@ void  R_SkinXModelCmd(_WORD *data)
                                 "%s\n\t(reinterpret_cast< uint >( gfxBuf.skinnedCacheLockAddr )) = %i",
                                 "((reinterpret_cast< uint >( gfxBuf.skinnedCacheLockAddr ) & 15) == 0)",
                                 gfxBuf.skinnedCacheLockAddr);
-                        if ((*v52 & 0xF) != 0)
+                        if ((*v48 & 0xF) != 0)
                             MyAssertHandler(
                                 ".\\r_model_skin.cpp",
                                 2386,
                                 0,
                                 "%s\n\t(skinnedSurf->skinnedCachedOffset) = %i",
                                 "((skinnedSurf->skinnedCachedOffset & 15) == 0)",
-                                *v52);
-                        v6 = (GfxPackedVertex *)&gfxBuf.skinnedCacheLockAddr[*v52];
+                                *v48);
+                        v6 = (GfxPackedVertex*)&gfxBuf.skinnedCacheLockAddr[*v48];
                     }
-                    // KISAKTODO: SSE Skinning
-                    //if (v60)
+                    // KISAKTODO: SSE version
+                    //if (v56)
                     //{
-                    //    if (!v59)
+                    //    if (!v55)
                     //    {
-                    //        v59 = 1;
-                    //        _m_empty();
+                    //        v55 = 1;
+                    //        //_m_empty();
                     //    }
                     //    v5 = 0;
                     //    v4 = 0;
                     //    if (fastSkin)
                     //    {
-                    //        if ((int)*v52 >= 0)
-                    //            v4 = &gfxBuf.skinnedCacheNormalsAddr[(int)*v52 >> 5];
-                    //        v3 = v52[5];
+                    //        if (*v48 >= 0)
+                    //            v4 = &gfxBuf.skinnedCacheNormalsAddr[*v48 >> 5];
+                    //        v3 = v48[5];
                     //        if (v3 >= 0)
                     //            v5 = &gfxBuf.oldSkinnedCacheNormalsAddr[v3 >> 5];
                     //    }
-                    //    R_SkinXSurfaceSkinnedSse(v7, (const DObjSkelMat *)&v8[64 * v54], v5, v4, v6);
+                    //    R_SkinXSurfaceSkinnedSse(v7, &v8[64 * v50], v5, v4, v6);
                     //}
                     //else
                     {
-                        R_SkinXSurfaceSkinned(v7, (const DObjSkelMat *)&v8[64 * v54], v6);
+                        R_SkinXSurfaceSkinned(v7, (const DObjSkelMat*)&v8[64 * v50], v6);
                     }
                 }
             }
         }
-        //if (v59)
-        //    _m_empty();
-        //Profile_EndInternal(0);
+        if (v55)
+            //_m_empty();
+        Profile_EndInternal(0);
     }
 }
+
 
 void __cdecl R_SkinXSurfaceSkinned(
     const XSurface *xsurf,
@@ -345,64 +343,6 @@ void __cdecl R_SkinXSurfaceWeight(
     //Profile_EndInternal(0);
 }
 
-void __cdecl R_SkinXSurfaceWeight0(
-    const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
-    int vertCount,
-    const DObjSkelMat *boneMatrix,
-    GfxPackedVertex *vertsOut)
-{
-    int vertIndex; // [esp+1Ch] [ebp-4h]
-
-    if (!vertsOut)
-        MyAssertHandler(".\\r_model_skin.cpp", 632, 0, "%s", "vertsOut");
-    vertIndex = 0;
-    while (vertIndex < vertCount)
-    {
-        MatrixTransformVertexAndBasis(
-            vertsIn->xyz,
-            vertsIn->binormalSign,
-            vertsIn->normal,
-            vertsIn->tangent,
-            (const DObjSkelMat *)((char *)boneMatrix + *vertexBlend),
-            vertsOut);
-        vertsOut->color.packed = vertsIn->color.packed;
-        vertsOut->texCoord.packed = vertsIn->texCoord.packed;
-        ++vertIndex;
-        ++vertsIn;
-        ++vertexBlend;
-        ++vertsOut;
-    }
-}
-
-void __cdecl Vec2UnpackTexCoords(PackedTexCoords in, float *out)
-{
-    float v2; // [esp+0h] [ebp-20h]
-    float v3; // [esp+10h] [ebp-10h]
-
-    if (HIWORD(in.packed))
-        LODWORD(v3) = (HIWORD(in.packed) << 16) & 0x80000000
-        | (((((HIWORD(in.packed) << 14) & 0xFFFC000) - (~(HIWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
-    else
-        v3 = 0.0;
-    *out = v3;
-    if (LOWORD(in.packed))
-        LODWORD(v2) = (LOWORD(in.packed) << 16) & 0x80000000
-        | (((((LOWORD(in.packed) << 14) & 0xFFFC000) - (~(LOWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
-    else
-        v2 = 0.0;
-    out[1] = v2;
-}
-
-void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)
-{
-    float decodeScale; // [esp+10h] [ebp-4h]
-
-    decodeScale = ((double)in.array[3] - -192.0) / 32385.0;
-    *out = ((double)in.array[0] - 127.0) * decodeScale;
-    out[1] = ((double)in.array[1] - 127.0) * decodeScale;
-    out[2] = ((double)in.array[2] - 127.0) * decodeScale;
-}
 
 void __cdecl MatrixTransformVertexAndBasis(
     const float *offset,
@@ -477,6 +417,65 @@ void __cdecl MatrixTransformVertexAndBasis(
     v6.array[2] = (int)(rotated[2] * 127.0 + 127.5);
     v6.array[3] = 63;
     vert->tangent = v6;
+}
+
+void __cdecl R_SkinXSurfaceWeight0(
+    const GfxPackedVertex *vertsIn,
+    const unsigned __int16 *vertexBlend,
+    int vertCount,
+    const DObjSkelMat *boneMatrix,
+    GfxPackedVertex *vertsOut)
+{
+    int vertIndex; // [esp+1Ch] [ebp-4h]
+
+    if (!vertsOut)
+        MyAssertHandler(".\\r_model_skin.cpp", 632, 0, "%s", "vertsOut");
+    vertIndex = 0;
+    while (vertIndex < vertCount)
+    {
+        MatrixTransformVertexAndBasis(
+            vertsIn->xyz,
+            vertsIn->binormalSign,
+            vertsIn->normal,
+            vertsIn->tangent,
+            (const DObjSkelMat *)((char *)boneMatrix + *vertexBlend),
+            vertsOut);
+        vertsOut->color.packed = vertsIn->color.packed;
+        vertsOut->texCoord.packed = vertsIn->texCoord.packed;
+        ++vertIndex;
+        ++vertsIn;
+        ++vertexBlend;
+        ++vertsOut;
+    }
+}
+
+void __cdecl Vec2UnpackTexCoords(PackedTexCoords in, float *out)
+{
+    float v2; // [esp+0h] [ebp-20h]
+    float v3; // [esp+10h] [ebp-10h]
+
+    if (HIWORD(in.packed))
+        LODWORD(v3) = (HIWORD(in.packed) << 16) & 0x80000000
+        | (((((HIWORD(in.packed) << 14) & 0xFFFC000) - (~(HIWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
+    else
+        v3 = 0.0;
+    *out = v3;
+    if (LOWORD(in.packed))
+        LODWORD(v2) = (LOWORD(in.packed) << 16) & 0x80000000
+        | (((((LOWORD(in.packed) << 14) & 0xFFFC000) - (~(LOWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
+    else
+        v2 = 0.0;
+    out[1] = v2;
+}
+
+void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)
+{
+    float decodeScale; // [esp+10h] [ebp-4h]
+
+    decodeScale = ((double)in.array[3] - -192.0) / 32385.0;
+    *out = ((double)in.array[0] - 127.0) * decodeScale;
+    out[1] = ((double)in.array[1] - 127.0) * decodeScale;
+    out[2] = ((double)in.array[2] - 127.0) * decodeScale;
 }
 
 void __cdecl R_SkinXSurfaceWeight1(

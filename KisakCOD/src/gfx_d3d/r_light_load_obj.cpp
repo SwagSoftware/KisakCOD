@@ -779,7 +779,7 @@ void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
             //    &points[entryCount],
             //    (10 * entryCount) / 10,
             //    R_AnnotatedLightGridPointSortsBefore);
-            std::sort(&points[0], &points[entryCount], R_AnnotatedLightGridPointSortsBefore);
+            std::sort((const AnnotatedLightGridPoint **)&points[0], (const AnnotatedLightGridPoint **)&points[entryCount], R_AnnotatedLightGridPointSortsBefore);
             for (entryIndex = 0; entryIndex < entryCount; ++entryIndex)
             {
                 if (points[entryIndex].entry.needsTrace)

@@ -3,7 +3,7 @@
 #include "r_scene.h"
 
 
-DObjAnimMat *__fastcall R_UpdateSceneEntBounds(
+DObjAnimMat * R_UpdateSceneEntBounds(
     GfxSceneEntity *sceneEnt,
     GfxSceneEntity **pLocalSceneEnt,
     const DObj_s **pObj,

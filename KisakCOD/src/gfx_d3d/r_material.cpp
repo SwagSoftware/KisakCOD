@@ -380,7 +380,7 @@ void __cdecl R_MaterialList_f()
     //    &v6[inData],
     //    (int)(8 * inData) >> 3,
     //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))R_MaterialCompare);
-    std::sort(&v6[0], &v6[inData], R_MaterialCompare);
+    std::sort((const MaterialMemory **)&v6[0], (const MaterialMemory **)&v6[inData], R_MaterialCompare);
     Com_Printf(8, "geo KB   name\n");
     for (i = 0; i < inData; ++i)
     {

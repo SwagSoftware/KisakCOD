@@ -470,7 +470,7 @@ void __cdecl CG_RegisterItemVisuals(int localClientNum, unsigned int weapIdx)
             128);
     for (modelIdx = 0; modelIdx < 16; ++modelIdx)
     {
-        if (bg_itemlist[128 * modelIdx + weapIdx] != 1)
+        if (bg_itemlist[128 * modelIdx + weapIdx].giType != IT_WEAPON)
             MyAssertHandler(".\\cgame\\cg_weapons.cpp", 1199, 0, "%s", "item->giType == IT_WEAPON");
     }
     CG_RegisterWeapon(localClientNum, weapIdx);

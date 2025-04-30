@@ -443,33 +443,6 @@ int __cdecl R_ReadStaticModelPreTessDrawSurf(
     return 1;
 }
 
-void __cdecl R_DrawStaticModelsPreTessDrawSurf(
-    GfxStaticModelPreTessSurf pretessSurf,
-    unsigned int firstIndex,
-    unsigned int count,
-    GfxCmdBufContext context)
-{
-    IDirect3DIndexBuffer9 *ib; // [esp+0h] [ebp-2Ch]
-    GfxDrawPrimArgs args; // [esp+20h] [ebp-Ch] BYREF
-
-    if (!count)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 2034, 0, "%s", "count");
-    R_SetupCachedSModelSurface(
-        context.state,
-        pretessSurf.fields.cachedIndex,
-        pretessSurf.fields.lod,
-        pretessSurf.fields.surfIndex,
-        count,
-        &args,
-        0);
-    R_SetupPassPerPrimArgs(context);
-    ib = context.source->input.data->preTessIb;
-    if (context.state->prim.indexBuffer != ib)
-        R_ChangeIndices(&context.state->prim, ib);
-    args.baseIndex = firstIndex;
-    R_DrawIndexedPrimitive(&context.state->prim, &args);
-}
-
 const GfxStaticModelDrawInst *__cdecl R_SetupCachedSModelSurface(
     GfxCmdBufState *state,
     unsigned int cachedIndex,
@@ -497,6 +470,33 @@ const GfxStaticModelDrawInst *__cdecl R_SetupCachedSModelSurface(
     g_primStats->dynamicIndexCount += 3 * count * xsurf->triCount;
     g_primStats->dynamicVertexCount += count * xsurf->vertCount;
     return smodelDrawInst;
+}
+
+void __cdecl R_DrawStaticModelsPreTessDrawSurf(
+    GfxStaticModelPreTessSurf pretessSurf,
+    unsigned int firstIndex,
+    unsigned int count,
+    GfxCmdBufContext context)
+{
+    IDirect3DIndexBuffer9 *ib; // [esp+0h] [ebp-2Ch]
+    GfxDrawPrimArgs args; // [esp+20h] [ebp-Ch] BYREF
+
+    if (!count)
+        MyAssertHandler(".\\r_draw_staticmodel.cpp", 2034, 0, "%s", "count");
+    R_SetupCachedSModelSurface(
+        context.state,
+        pretessSurf.fields.cachedIndex,
+        pretessSurf.fields.lod,
+        pretessSurf.fields.surfIndex,
+        count,
+        &args,
+        0);
+    R_SetupPassPerPrimArgs(context);
+    ib = context.source->input.data->preTessIb;
+    if (context.state->prim.indexBuffer != ib)
+        R_ChangeIndices(&context.state->prim, ib);
+    args.baseIndex = firstIndex;
+    R_DrawIndexedPrimitive(&context.state->prim, &args);
 }
 
 void __cdecl R_DrawStaticModelsPreTessDrawSurfLighting(

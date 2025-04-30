@@ -622,7 +622,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
         {
             if (DObjGetBoneIndex(obj, *wheelTags[tireIdx], &cent->pose.vehicle.wheelBoneIndex[tireIdx]))
             {
-                MatrixTransformVector43(boneMtxList[cent->pose.vehicle.wheelBoneIndex[tireIdx]].trans, axis, wheelPos);
+                MatrixTransformVector43(boneMtxList[cent->pose.vehicle.wheelBoneIndex[tireIdx]].trans, *(const mat4x3*)axis, wheelPos);
                 Vec3Mad(wheelPos, 40.0, axis[2], traceStart);
                 scale = -suspTravel;
                 Vec3Mad(wheelPos, scale, axis[2], traceEnd);

@@ -1,5 +1,6 @@
 #pragma once
 #include "rb_backend.h"
+#include "rb_tess.h"
 
 struct GfxStaticModelDrawStream // sizeof=0x1C
 {                                       // ...

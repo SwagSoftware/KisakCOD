@@ -1,6 +1,5 @@
 #pragma once
 #include "r_gfx.h"
-#include <xanim/xanim.h>
 #include "r_bsp.h"
 
 struct GfxSModelDrawSurfData // sizeof=0x18
@@ -11,7 +10,7 @@ struct GfxSModelDrawSurfData // sizeof=0x18
 
 void __cdecl R_AddDelayedStaticModelDrawSurf(
     GfxDelayedCmdBuf *delayedCmdBuf,
-    XSurface *xsurf,
+    struct XSurface *xsurf,
     unsigned __int8 *list,
     unsigned int count);
 void __cdecl R_EndDumpStaticModelLodInfo();

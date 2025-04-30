@@ -22,24 +22,6 @@ struct __declspec(align(8)) DrawProfileGlobals // sizeof=0x81A8
     // padding byte
 };
 
-struct SourceBufferInfo // sizeof=0x2C
-{
-    const char *codePos;
-    char *buf;
-    const char *sourceBuf;
-    int len;
-    int sortedIndex;
-    bool archive;
-    // padding byte
-    // padding byte
-    // padding byte
-    int time;
-    int avgTime;
-    int maxTime;
-    float totalTime;
-    float totalBuiltIn;
-};
-
 
 void __cdecl TRACK_rb_drawprofile();
 void __cdecl RB_AddProfileThread(int threadContext);

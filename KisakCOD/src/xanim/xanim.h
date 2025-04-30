@@ -11,7 +11,7 @@
 #include <sound/snd_public.h>
 #include "dobj.h"
 #include "xmodel.h"
-//#include <gfx_d3d/r_material.h>
+#include <gfx_d3d/r_material.h>
 
 union XAnimIndices // sizeof=0x4
 {                                       // ...
@@ -546,31 +546,6 @@ struct GfxSceneDynBrush // sizeof=0x4
 {
     BModelDrawInfo info;
     unsigned __int16 dynEntId;
-};
-struct GfxShadowGeometry // sizeof=0xC
-{
-    unsigned __int16 surfaceCount;
-    unsigned __int16 smodelCount;
-    unsigned __int16* sortedSurfIndex;
-    unsigned __int16* smodelIndex;
-};
-struct GfxLightRegionAxis // sizeof=0x14
-{
-    float dir[3];
-    float midPoint;
-    float halfSize;
-};
-struct GfxLightRegionHull // sizeof=0x50
-{
-    float kdopMidPoint[9];
-    float kdopHalfSize[9];
-    unsigned int axisCount;
-    GfxLightRegionAxis* axis;
-};
-struct GfxLightRegion // sizeof=0x8
-{
-    unsigned int hullCount;
-    GfxLightRegionHull* hulls;
 };
 
 
@@ -1708,3 +1683,9 @@ XAnimInfo* __cdecl GetAnimInfo(int infoIndex);
 // xanim_load_obj
 XModelPieces *__cdecl XModelPiecesPrecache(const char *name, void *(__cdecl *Alloc)(int));
 XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int));
+
+
+// KISAK HACK: These are for gfx_d3d/r_material.h
+void __cdecl R_GetMaterialList(XAssetHeader header, char *data);
+void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader *userData);
+void __cdecl Material_ReleaseTechniqueSet(XAssetHeader header, void *crap);

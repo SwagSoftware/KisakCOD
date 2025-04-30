@@ -6,6 +6,7 @@
 #include "r_font.h"
 #include "r_gfx.h"
 #include "r_material.h"
+#include <qcommon/com_pack.h>
 
 enum GfxRenderCommand : __int32
 {                                       // ...

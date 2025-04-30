@@ -154,8 +154,9 @@ GfxLightDef *__cdecl R_RegisterLightDef_LoadObj(const char *name)
         Com_Error(
             ERR_DROP,
             "Can't load light def %s; %i unique light defs already loaded",
-            (const char *)lightGlob.defCount,
-            def);
+            name,
+            lightGlob.defCount
+            );
     }
     defa = R_LoadLightDef(name);
     if (defa)

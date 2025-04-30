@@ -202,13 +202,6 @@ int __cdecl CG_DrawScoreboard(int localClientNum)
     return 1;
 }
 
-void __cdecl CG_DrawScoreboard_Backdrop(int localClientNum, float alpha)
-{
-    CG_BackdropLeft(localClientNum);
-    CG_BackdropTop();
-    CG_DrawBackdropServerInfo(localClientNum, alpha);
-}
-
 char szServerIPAddress[128];
 char *__cdecl CL_GetServerIPAddress()
 {
@@ -290,6 +283,13 @@ void __cdecl CG_DrawBackdropServerInfo(int localClientNum, float alpha)
     xa = CG_BackdropLeft(localClientNum) + v4 - 3.0 - 2.0 - 4.0;
     xb = xa - (double)(UI_TextWidth(serverIP, 0, footerFont, fontScale) + 4);
     UI_DrawText(scrPlace, serverIP, 0x7FFFFFFF, footerFont, xb, y, 1, 0, fontScale, color, 3);
+}
+
+void __cdecl CG_DrawScoreboard_Backdrop(int localClientNum, float alpha)
+{
+    CG_BackdropLeft(localClientNum);
+    CG_BackdropTop();
+    CG_DrawBackdropServerInfo(localClientNum, alpha);
 }
 
 double __cdecl CG_BackdropLeft(int localClientNum)

@@ -22,7 +22,7 @@ void __cdecl R_EndPreTess();
 void __cdecl R_BeginPreTess();
 
 int __cdecl R_ReadBspPreTessDrawSurfs(
-    GfxReadCmdBuf *cmdBuf,
-    const GfxBspPreTessDrawSurf **list,
+    struct GfxReadCmdBuf *cmdBuf,
+    const struct GfxBspPreTessDrawSurf **list,
     unsigned int *count,
     unsigned int *baseIndex);

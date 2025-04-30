@@ -2,6 +2,7 @@
 
 #include "r_gfx.h"
 #include <EffectsCore/fx_system.h>
+#include <xanim/xanim.h>
 
 struct FxWorldMarkPoint // sizeof=0x18
 {                                       // ...

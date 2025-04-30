@@ -783,13 +783,13 @@ void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *header, _DWORD *anonymo
             lerp = 1;
             ++srcPixel;
         } while (srcPixel != &rawImage.pixels[rawImage.width - 1]);
-        if ((unsigned int)((unsigned int)&dstPixel[-*anonymousConfig] >> 2) != ((unsigned int)(anonymousConfig[1] * (header->lmapLookupStart + rawImage.width + 1) - endCount)))
+        if ((int)((int)&dstPixel[-(int)*anonymousConfig] >> 2) != ((int)(anonymousConfig[1] * (header->lmapLookupStart + rawImage.width + 1) - endCount)))
             MyAssertHandler(
                 ".\\r_light_load_obj.cpp",
                 193,
                 1,
                 "(dstPixel - cfg->dest) / 4u == (def->lmapLookupStart + rawImage.width + 1) * cfg->zoom - endCount\n\t%i, %i",
-                (unsigned int)&dstPixel[-*anonymousConfig] >> 2,
+                (int)&dstPixel[-(int)*anonymousConfig] >> 2,
                 anonymousConfig[1] * (header->lmapLookupStart + rawImage.width + 1) - endCount);
         for (iter = 0; iter < endCount; ++iter)
         {
@@ -2131,7 +2131,7 @@ unsigned int R_SortSurfaces()
     //    &s_world.dpvs.surfaces[surfaceCount],
     //    48 * surfaceCount / 48,
     //    R_CompareSurfaces);
-    std::sort(&s_world.dpvs.surfaces[0], &s_world.dpvs.surfaces[surfaceCount], R_CompareSurfaces);
+    std::sort((const GfxSurface **)&s_world.dpvs.surfaces[0], (const GfxSurface **)& s_world.dpvs.surfaces[surfaceCount], R_CompareSurfaces);
 
     for (surfIndexa = 0; surfIndexa < surfaceCount; ++surfIndexa)
     {
@@ -3440,7 +3440,7 @@ int R_PostLoadEntities()
     //    &smodelCombinedInsts[s_world.dpvs.smodelCount],
     //    (104 * s_world.dpvs.smodelCount) / 104,
     //    R_StaticModelCompare);
-    std::sort(&smodelCombinedInsts[0], &smodelCombinedInsts[s_world.dpvs.smodelCount], R_StaticModelCompare);
+    std::sort((const GfxStaticModelCombinedInst **)&smodelCombinedInsts[0], (const GfxStaticModelCombinedInst **)&smodelCombinedInsts[s_world.dpvs.smodelCount], R_StaticModelCompare);
     for (smodelIndexa = 0; smodelIndexa < s_world.dpvs.smodelCount; ++smodelIndexa)
     {
         qmemcpy(
@@ -3493,28 +3493,6 @@ void __cdecl R_ForEachShadowCastingSurfaceOnEachLight(void(__cdecl *Callback)(Gf
                 &s_world.dpvs.surfaces[sortedSurfIndex],
                 sortedSurfIndex,
                 Callback);
-    }
-}
-
-void __cdecl R_AddShadowSurfaceToPrimaryLight(
-    GfxWorld *world,
-    unsigned int primaryLightIndex,
-    unsigned int sortedSurfIndex)
-{
-    GfxShadowGeometry *shadowGeom; // [esp+0h] [ebp-4h]
-
-    shadowGeom = &world->shadowGeom[primaryLightIndex];
-    if (shadowGeom->sortedSurfIndex)
-    {
-        if (sortedSurfIndex != sortedSurfIndex)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                281,
-                0,
-                "i == static_cast< Type >( i )\n\t%i, %i",
-                sortedSurfIndex,
-                sortedSurfIndex);
-        shadowGeom->sortedSurfIndex[shadowGeom->surfaceCount++] = sortedSurfIndex;
     }
 }
 
@@ -3604,7 +3582,7 @@ void __cdecl R_LoadSun(const char *name, sunflare_t *sun)
             firstCharToCopy = nameIter + 1;
     }
     I_strncpyz(sunFile, firstCharToCopy, 64);
-    strchr(sunFile, 0x2Eu);
+    v2 = strchr(sunFile, 0x2Eu);
     firstPeriod = v2;
     if (v2)
         *firstPeriod = 0;
@@ -3904,7 +3882,7 @@ unsigned int __cdecl R_OptimalSModelResourceStats(GfxWorld *world, GfxSModelSurf
     //    &drawInstArray[world->dpvs.smodelCount],
     //    (4 * world->dpvs.smodelCount) >> 2,
     //    R_CompareSModels_Model);
-    std::sort(&drawInstArray[0], &drawInstArray[world->dpvs.smodelCount], R_CompareSModels_Model);
+    std::sort((const GfxStaticModelDrawInst **)&drawInstArray[0], (const GfxStaticModelDrawInst **)&drawInstArray[world->dpvs.smodelCount], R_CompareSModels_Model);
     statCount = 0;
     for (smodelItera = 0; smodelItera != world->dpvs.smodelCount; smodelItera = smodelIterNext)
     {
@@ -4014,7 +3992,7 @@ void __cdecl R_AssignSModelCacheResources(GfxWorld *world)
     //    &stats[v7],
     //    (16 * v7) >> 4,
     //    R_CompareSModelStats_Score);
-    std::sort(&stats[0], &stats[v7], R_CompareSModelStats_Score);
+    std::sort((GfxSModelSurfStats **)&stats[0], (GfxSModelSurfStats **)&stats[v7], R_CompareSModelStats_Score);
     for (i = 0; i < v7; ++i)
     {
         model = stats[i].model;
