@@ -313,7 +313,7 @@ const char *__cdecl Dvar_DomainToString_GetLines(
     char *outBuffer,
     int outBufferLen,
     int *outLineCount);
-void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, __int64 outBuffer);
+void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen);
 
 void __cdecl Dvar_PrintDomain(unsigned __int8 type, DvarLimits domain);
 bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar);
@@ -757,8 +757,9 @@ bool __cdecl CM_TraceThroughLeafBrushNode(const traceWork_t *tw, cLeaf_t *leaf, 
 void __cdecl CM_TraceThroughLeafBrushNode_r(
     const traceWork_t *tw,
     cLeafBrushNode_s *node,
-    const float *p1_,
-    __int64 p2);
+    float *p1_,
+    const float *p2,
+    trace_t *trace);
 void __cdecl CM_TraceThroughBrush(const traceWork_t *tw, cbrush_t *brush, trace_t *trace);
 void __cdecl CM_TraceCapsuleThroughCapsule(const traceWork_t *tw, trace_t *trace);
 int __cdecl CM_TraceSphereThroughSphere(

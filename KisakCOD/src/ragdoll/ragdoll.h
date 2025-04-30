@@ -140,7 +140,7 @@ void __cdecl TRACK_ragdoll();
 void __cdecl Ragdoll_DebugDraw();
 RagdollDef *__cdecl Ragdoll_BodyDef(RagdollBody *body);
 DObj_s *__cdecl Ragdoll_BodyDObj(RagdollBody *body);
-centity_s *__cdecl Ragdoll_BodyPose(RagdollBody *body);
+const cpose_t *__cdecl Ragdoll_BodyPose(RagdollBody *body);
 void __cdecl Ragdoll_BodyRootOrigin(RagdollBody *body, float *origin);
 void __cdecl Ragdoll_GetRootOrigin(int ragdollHandle, float *origin);
 int __cdecl Ragdoll_CountPhysicsBodies();

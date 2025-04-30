@@ -1,8 +1,9 @@
-#include "../game/q_shared.h"
+//#include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
 
 #include "zip.h"
 #include "deflate.h"
+#include <universal/com_memory.h>
 
 #ifdef _TIMING
 int		totalDeflateTime[Z_MAX_COMPRESSION + 1];
@@ -1800,7 +1801,8 @@ EStatus deflateInit(z_stream *z, ELevel level, int noWrap)
 		deflate_error = "Invalid compression level";
         return(Z_STREAM_ERROR);
     }
-    s = (deflate_state *)Z_Malloc(sizeof(deflate_state), TAG_DEFLATE, qtrue);
+    //s = (deflate_state *)Z_Malloc(sizeof(deflate_state), TAG_DEFLATE, qtrue);
+    s = (deflate_state *)Z_Malloc(sizeof(deflate_state), "DEFLATE2", qtrue);
     z->dstate = (deflate_state *)s;
     s->z = z;
 
@@ -1842,7 +1844,8 @@ EStatus deflateCopy(z_stream *dest, z_stream *source)
     *dest = *source;
 
     ss = source->dstate;
-    ds = (deflate_state *)Z_Malloc(sizeof(deflate_state), TAG_DEFLATE, qtrue);
+    //ds = (deflate_state *)Z_Malloc(sizeof(deflate_state), TAG_DEFLATE, qtrue);
+    ds = (deflate_state *)Z_Malloc(sizeof(deflate_state), "DEFLATE", qtrue);
     dest->dstate = ds;
     *ds = *ss;
     ds->z = dest;
@@ -2019,7 +2022,7 @@ EStatus deflateEnd(z_stream *z)
 		return(Z_STREAM_ERROR);
     }
 
-    Z_Free(z->dstate);
+    Z_Free(z->dstate, qtrue);
     z->dstate = NULL;
 
 	if(status == BUSY_STATE)

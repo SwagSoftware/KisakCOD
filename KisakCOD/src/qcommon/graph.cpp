@@ -6,6 +6,7 @@
 #include <universal/com_files.h>
 #include <win32/win_local.h>
 #include <universal/q_parse.h>
+#include <devgui/devgui.h>
 
 void __cdecl GraphFloat_Load(GraphFloat *graph, char *fileName, float scale)
 {

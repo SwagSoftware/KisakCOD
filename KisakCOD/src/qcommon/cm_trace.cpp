@@ -539,9 +539,8 @@ void __cdecl CM_TestCapsuleInCapsule(const traceWork_t *tw, trace_t *trace)
     float top[3]; // [esp+10h] [ebp-78h] BYREF
     float offs; // [esp+1Ch] [ebp-6Ch]
     float halfheight; // [esp+20h] [ebp-68h]
-    float p1[6]; // [esp+24h] [ebp-64h] BYREF
-    float symetricSize_12[2]; // [esp+3Ch] [ebp-4Ch]
-    float symetricSize_20; // [esp+44h] [ebp-44h]
+    float p1[3]; // [esp+24h] [ebp-64h] BYREF
+    float symetricSize[2][3]; // [esp+30h] [ebp-58h]
     float radius; // [esp+48h] [ebp-40h]
     float fTotalHalfHeight; // [esp+4Ch] [ebp-3Ch]
     float offset[3]; // [esp+50h] [ebp-38h]
@@ -560,12 +559,12 @@ void __cdecl CM_TestCapsuleInCapsule(const traceWork_t *tw, trace_t *trace)
     for (i = 0; i < 3; ++i)
     {
         offset[i] = (tw->threadInfo.box_model->mins[i] + tw->threadInfo.box_model->maxs[i]) * 0.5;
-        p1[i + 3] = tw->threadInfo.box_model->mins[i] - offset[i];
-        symetricSize_12[i] = tw->threadInfo.box_model->maxs[i] - offset[i];
+        symetricSize[0][i] = tw->threadInfo.box_model->mins[i] - offset[i];
+        symetricSize[1][i] = tw->threadInfo.box_model->maxs[i] - offset[i];
     }
-    halfheight = symetricSize_20;
-    if (symetricSize_20 >= (double)symetricSize_12[0])
-        v3 = symetricSize_12[0];
+    halfheight = symetricSize[1][2];
+    if (symetricSize[1][2] >= symetricSize[1][0])
+        v3 = symetricSize[1][0];
     else
         v3 = halfheight;
     radius = v3;
@@ -607,7 +606,7 @@ void __cdecl CM_TestCapsuleInCapsule(const traceWork_t *tw, trace_t *trace)
     if (fTotalHalfHeight < 0.0)
         MyAssertHandler(".\\qcommon\\cm_trace.cpp", 462, 0, "%s", "fTotalHalfHeight >= 0");
     v2 = fabs(fHeightDiff);
-    if (fTotalHalfHeight >= (double)v2)
+    if (fTotalHalfHeight >= v2)
     {
         p1[2] = 0.0;
         top[2] = 0.0;

@@ -1284,7 +1284,7 @@ void __cdecl Scr_CalcScriptFileProfile()
         //    &v4[scrParserPub.sourceBufferLookupLen],
         //    (signed int)(4 * scrParserPub.sourceBufferLookupLen) >> 2,
         //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Scr_CompareScriptSourceProfileTimes);
-        std::sort(&v4[0], &v4[scrParserPub.sourceBufferLookupLen], Scr_CompareScriptSourceProfileTimes);
+        std::sort((int*)&v4[0], (int*)&v4[scrParserPub.sourceBufferLookupLen], Scr_CompareScriptSourceProfileTimes);
         memcpy(Script->scriptSrcBufferIndex, v4, sizeof(Script->scriptSrcBufferIndex));
     }
 }
@@ -1418,7 +1418,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
         //    (MapProfileHotSpot *)&sortedOpcodeLookup[24 * profileCount],
         //    24 * profileCount / 24,
         //    (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))Scr_CompareProfileTimes);
-        std::sort(&sortedOpcodeLookup[0], &sortedOpcodeLookup[24 * profileCount], Scr_CompareProfileTimes);
+        std::sort((const OpcodeLookup**)&sortedOpcodeLookup[0], (const OpcodeLookup **)&sortedOpcodeLookup[24 * profileCount], Scr_CompareProfileTimes);
         Com_Printf(23, "\n");
         profile = Profile_GetScript();
             maxNameLength = 0;
@@ -1515,7 +1515,7 @@ void CompileError(unsigned int sourcePos, const char *msg, ...)
 
 scrStringDebugGlob_t *Scr_IgnoreLeaks()
 {
-    scrStringDebugGlob_t *result; // eax
+    scrStringDebugGlob_t *result = NULL; // eax
 
     if (scrStringDebugGlob)
     {

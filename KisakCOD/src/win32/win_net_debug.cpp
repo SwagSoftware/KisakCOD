@@ -148,6 +148,8 @@ void __cdecl Sys_SendDebugReadBytes(int read)
 		Sys_SendDebugReadBytesInternal();
 }
 
+void __cdecl Sys_DebugSend(int channel, const char *buf, int len, const char *name);
+
 void __cdecl Sys_WriteDebugSocketData(unsigned __int8 *buffer, int len)
 {
 	int pos; // [esp+0h] [ebp-10h]

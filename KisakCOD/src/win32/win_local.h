@@ -14,7 +14,7 @@
 #ifndef _XBOX
 #define DIRECTINPUT_VERSION 0x0800  //[ 0x0300 | 0x0500 | 0x0700 | 0x0800 ]
 #include <dinput.h>
-#include <dsound.h>
+//#include <dsound.h>
 #include <winsock.h>
 #include <wsipx.h>
 #endif

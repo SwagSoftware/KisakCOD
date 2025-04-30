@@ -15,6 +15,8 @@ int g_waitingForKey;
 int g_editingField;
 struct itemDef_s *g_editItem;
 int g_debugMode;
+void(__cdecl *captureFunc)(UiContext *, void *);
+void *captureData;
 
 struct commandDef_t // sizeof=0x8
 {                                       // ...
@@ -83,7 +85,7 @@ bool __cdecl Window_IsVisible(int localClientNum, const windowDef_t *w)
     return (w->dynamicFlags[localClientNum] & 4) != 0;
 }
 
-void __cdecl Script_GetAutoUpdate(UiContext *dc, itemDef_s *item, const char **args = NULL)
+void __cdecl Script_GetAutoUpdate(UiContext *dc, itemDef_s *item, const char **args)
 {
     CL_GetAutoUpdate();
 }
@@ -2418,7 +2420,7 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
                 }
                 if (key != 205 && key != 206 || item && item->type == 6)
                 {
-                    if (item && Item_HandleKey(dc, item, down))
+                    if (item && Item_HandleKey(dc, item, key, down))
                     {
                         Item_Action(dc, item);
                         inHandler = 0;
@@ -2879,6 +2881,8 @@ int __cdecl Item_Slider_OverSlider(int localClientNum, itemDef_s *item, float x,
         return 0;
 }
 
+void __cdecl Scroll_Slider_SetThumbPos(UiContext *dc, itemDef_s *item);
+
 void __cdecl Scroll_Slider_ThumbFunc(UiContext *dc, itemDef_s **p)
 {
     Scroll_Slider_SetThumbPos(dc, p[6]);
@@ -2940,12 +2944,9 @@ void __cdecl Item_StartCapture(UiContext *dc, itemDef_s *item, int key)
     }
 }
 
-void(__cdecl *captureFunc)(UiContext *, void *);
-void *captureData;
-int __cdecl Item_HandleKey(UiContext *dc, itemDef_s *item, int down)
+int Item_HandleKey(UiContext *dc, itemDef_s *item, int key, int down)
 {
-    int result; // eax
-    int downa; // [esp+18h] [ebp+14h]
+    int result; // r3
 
     if (itemCapture)
     {
@@ -2953,57 +2954,40 @@ int __cdecl Item_HandleKey(UiContext *dc, itemDef_s *item, int down)
         captureFunc = 0;
         captureData = 0;
     }
-    else if (downa && (down == 200 || down == 201 || down == 202))
+    else
     {
-        Item_StartCapture(dc, item, down);
+        if (!down)
+            return 0;
+        if (key == 200 || key == 201 || key == 202)
+            Item_StartCapture(dc, item, key);
     }
-    if (!downa)
+    if (!down)
         return 0;
     switch (item->type)
     {
-    case 1:
-        result = 0;
-        break;
-    case 2:
-        result = 0;
-        break;
-    case 3:
-        result = 0;
-        break;
-    case 4:
-    case 9:
-    case 0x10:
-    case 0x11:
-    case 0x12:
-        result = 0;
-        break;
-    case 5:
-        result = 0;
-        break;
     case 6:
-        result = Item_ListBox_HandleKey(dc, item, down, downa, 0);
+        result = Item_ListBox_HandleKey(dc, item, key, down, 0);
         break;
     case 8:
-        result = Item_OwnerDraw_HandleKey(item, down);
+        result = UI_OwnerDrawHandleKey(item->window.ownerDraw, item->window.ownerDrawFlags, &item->special, key);
         break;
     case 0xA:
-        result = Item_Slider_HandleKey(dc, item);
+        result = Item_Slider_HandleKey(dc, item, key, down);
         break;
     case 0xB:
-        result = Item_YesNo_HandleKey(dc, item, down);
+        result = Item_YesNo_HandleKey(dc, item, key);
         break;
     case 0xC:
-        result = Item_Multi_HandleKey(dc, item);
+        result = Item_Multi_HandleKey(dc, item, key);
         break;
     case 0xD:
-        result = Item_DvarEnum_HandleKey(dc, item, down);
+        result = Item_DvarEnum_HandleKey(dc, item, key);
         break;
     case 0xE:
-        result = Item_Bind_HandleKey(dc, item, down, downa);
+        result = Item_Bind_HandleKey(dc, item, key, down);
         break;
     default:
-        result = 0;
-        break;
+        return 0;
     }
     return result;
 }
@@ -3333,14 +3317,13 @@ bool __cdecl Item_ShouldHandleKey(UiContext *dc, itemDef_s *item, int key)
     return key != 200 && key != 201 && key != 202 || Item_ContainsMouse(dc, item);
 }
 
-int __cdecl Item_Multi_HandleKey(UiContext *dc, itemDef_s *item)
+int __cdecl Item_Multi_HandleKey(UiContext *dc, itemDef_s *item, int key)
 {
-    char *v3; // eax
+    char *v4; // eax
     multiDef_s *multiPtr; // [esp+8h] [ebp-10h]
     int next; // [esp+Ch] [ebp-Ch]
     int count; // [esp+10h] [ebp-8h]
     int current; // [esp+14h] [ebp-4h]
-    int v8; // [esp+28h] [ebp+10h]
 
     if (!dc)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 3219, 0, "%s", "dc");
@@ -3351,21 +3334,21 @@ int __cdecl Item_Multi_HandleKey(UiContext *dc, itemDef_s *item)
     multiPtr = Item_GetMultiDef(item);
     if (!multiPtr)
         return 0;
-    if (!Item_ShouldHandleKey(dc, item, v8))
+    if (!Item_ShouldHandleKey(dc, item, key))
         return 0;
     current = Item_Multi_FindDvarByValue(item);
     count = Item_Multi_CountSettings(item);
-    next = Item_List_NextEntryForKey(v8, current, count);
+    next = Item_List_NextEntryForKey(key, current, count);
     if (next == current)
         return 0;
     if (multiPtr->strDef)
     {
-        Dvar_SetFromStringByName(item->dvar, (char *)multiPtr->dvarStr[next]);
+        Dvar_SetFromStringByName(item->dvar, (char*)multiPtr->dvarStr[next]);
     }
     else
     {
-        v3 = va("%g", multiPtr->dvarValue[next]);
-        Dvar_SetFromStringByName(item->dvar, v3);
+        v4 = va("%g", multiPtr->dvarValue[next]);
+        Dvar_SetFromStringByName(item->dvar, v4);
     }
     return 1;
 }
@@ -3690,29 +3673,28 @@ void __cdecl Scroll_Slider_SetThumbPos(UiContext *dc, itemDef_s *item)
     }
 }
 
-int __cdecl Item_Slider_HandleKey(UiContext *dc, itemDef_s *item)
+int __cdecl Item_Slider_HandleKey(UiContext *dc, itemDef_s *item, int key, int down)
 {
     const char *VariantString; // eax
-    char *v4; // eax
-    char *v5; // [esp+4h] [ebp-38h]
-    float v6; // [esp+8h] [ebp-34h]
-    float v7; // [esp+Ch] [ebp-30h]
-    float v9; // [esp+14h] [ebp-28h]
-    float v10; // [esp+18h] [ebp-24h]
-    float v12; // [esp+20h] [ebp-1Ch]
+    char *v6; // eax
+    char *v7; // [esp+4h] [ebp-38h]
+    float v8; // [esp+8h] [ebp-34h]
+    float v9; // [esp+Ch] [ebp-30h]
+    float v11; // [esp+14h] [ebp-28h]
+    float v12; // [esp+18h] [ebp-24h]
+    float v14; // [esp+20h] [ebp-1Ch]
     float maxVal; // [esp+24h] [ebp-18h]
-    float v14; // [esp+28h] [ebp-14h]
+    float v16; // [esp+28h] [ebp-14h]
     float minVal; // [esp+2Ch] [ebp-10h]
     editFieldDef_s *editDef; // [esp+30h] [ebp-Ch]
     float step; // [esp+34h] [ebp-8h]
     float value; // [esp+38h] [ebp-4h]
-    int v19; // [esp+4Ch] [ebp+10h]
 
     if (!item->dvar)
         return 0;
-    if (!Item_ShouldHandleKey(dc, item, v19))
+    if (!Item_ShouldHandleKey(dc, item, key))
         return 0;
-    if (v19 == 200 || v19 == 201 || v19 == 202)
+    if (key == 200 || key == 201 || key == 202)
     {
         Scroll_Slider_SetThumbPos(dc, item);
         return 1;
@@ -3725,30 +3707,30 @@ int __cdecl Item_Slider_HandleKey(UiContext *dc, itemDef_s *item)
             step = (editDef->maxVal - editDef->minVal) * 0.05000000074505806;
             VariantString = Dvar_GetVariantString(item->dvar);
             value = atof(VariantString);
-            if (v19 == 156 || v19 == 164)
+            if (key == 156 || key == 164)
             {
-                v14 = value - step;
+                v16 = value - step;
                 minVal = editDef->minVal;
-                v10 = v14 - minVal;
-                if (v10 < 0.0)
-                    v9 = minVal;
+                v12 = v16 - minVal;
+                if (v12 < 0.0)
+                    v11 = minVal;
                 else
-                    v9 = value - step;
-                v4 = va("%g", v9);
-                Dvar_SetFromStringByName(item->dvar, v4);
+                    v11 = value - step;
+                v6 = va("%g", v11);
+                Dvar_SetFromStringByName(item->dvar, v6);
                 return 1;
             }
-            else if (v19 == 157 || v19 == 163)
+            else if (key == 157 || key == 163)
             {
-                v12 = step + value;
+                v14 = step + value;
                 maxVal = editDef->maxVal;
-                v7 = maxVal - v12;
-                if (v7 < 0.0)
-                    v6 = maxVal;
+                v9 = maxVal - v14;
+                if (v9 < 0.0)
+                    v8 = maxVal;
                 else
-                    v6 = step + value;
-                v5 = va("%g", v6);
-                Dvar_SetFromStringByName(item->dvar, v5);
+                    v8 = step + value;
+                v7 = va("%g", v8);
+                Dvar_SetFromStringByName(item->dvar, v7);
                 return 1;
             }
             else

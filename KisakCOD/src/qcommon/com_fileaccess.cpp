@@ -107,11 +107,6 @@ int __cdecl FileWrapper_Seek(FILE *h, int offset, int origin)
     return 0;
 }
 
-int __cdecl FS_FileGetFileSize(FILE *file)
-{
-    return FileWrapper_GetFileSize(file);
-}
-
 int __cdecl FileWrapper_GetFileSize(FILE *h)
 {
     int startPos; // [esp+0h] [ebp-8h]

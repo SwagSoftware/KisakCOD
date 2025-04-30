@@ -441,7 +441,7 @@ struct CStringEdPackage // sizeof=0x78
         unsigned int v13; // esi
         std::string *v14; // eax
         std::string *v15; // eax
-        BOOL v16; // eax
+        bool v16; // eax
         std::string *v17; // ecx
         std::string v19; // [esp-1Ch] [ebp-450h] BYREF
         const char *psErrorMessage; // [esp+Ch] [ebp-428h]
@@ -478,6 +478,7 @@ struct CStringEdPackage // sizeof=0x78
                     //if (sentence._Myres < 0x10)
                     //    p_sentence = &sentence;
                     //CStringEdPackage::AddEntry(p_sentence->_Bx._Buf);
+                    p_sentence = &sentence;
                     CStringEdPackage::AddEntry(p_sentence->data());
                     //std::string::~string(&sentence);
                 }
@@ -567,7 +568,7 @@ struct CStringEdPackage // sizeof=0x78
 
         if (!**psParsePos)
             return 0;
-        strchr(*psParsePos, 10);
+        v3 = (int)strchr(*psParsePos, 10);
         if (v3)
         {
             iCharsToCopy = v3 - (_DWORD)*psParsePos;
@@ -575,7 +576,7 @@ struct CStringEdPackage // sizeof=0x78
             psDest[iCharsToCopy] = 0;
             for (*psParsePos += iCharsToCopy; **psParsePos; ++*psParsePos)
             {
-                strchr("\r\n", **psParsePos);
+                v4 = (int)strchr("\r\n", **psParsePos);
                 if (!v4)
                     break;
             }
@@ -607,7 +608,7 @@ struct CStringEdPackage // sizeof=0x78
     {
         char *v2; // eax
         char *v3; // eax
-        unsigned int v4; // eax
+        char* v4; // eax
         char v6; // [esp+3h] [ebp-1Dh]
         char *v7; // [esp+8h] [ebp-18h]
         char *p2; // [esp+18h] [ebp-8h]
@@ -621,11 +622,12 @@ struct CStringEdPackage // sizeof=0x78
             *v7++ = *psFilename++;
         } while (v6);
         strrchr((unsigned __int8 *)sString, '.');
-        p = v2;
+        p = sString;
         strrchr((unsigned __int8 *)sString, '\\');
-        p2 = v3;
+        p2 = sString;
         strrchr((unsigned __int8 *)sString, '/');
-        if (p && (!p2 || p > p2) && (!v4 || (unsigned int)p > v4))
+        v4 = sString;
+        if (p && (!p2 || p > p2) && (!v4 || p > v4))
             *p = 0;
         return sString;
     }

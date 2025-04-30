@@ -96,7 +96,7 @@ void Scr_InitVariables()
 void Scr_InitVariableRange(unsigned int begin, unsigned int end)
 {
 	unsigned int index; // [esp+4h] [ebp-8h]
-	VariableValueInternal* value; // [esp+8h] [ebp-4h]
+	VariableValueInternal* value = NULL; // [esp+8h] [ebp-4h]
 	VariableValueInternal* valuea; // [esp+8h] [ebp-4h]
 
 	for (index = begin + 1; index < end; ++index)
@@ -1653,9 +1653,10 @@ void  SetVariableEntityFieldValue(unsigned int entId, unsigned int fieldName, Va
 
 	iassert(!IsObject(value));
 	iassert(value->type != VAR_STACK);
-	iassert((entValue->w.type & VAR_MASK) == VAR_ENTITY);
 
 	entValue = &scrVarGlob.variableList[entId + 1];
+
+	iassert((entValue->w.type & VAR_MASK) == VAR_ENTITY);
 	iassert((entValue->w.classnum >> VAR_NAME_BITS) < CLASS_NUM_COUNT);
 	fieldId = FindArrayVariable(g_classMap[entValue->w.status >> 8].id, fieldName);
 	if (!fieldId
@@ -3179,7 +3180,8 @@ VariableValue Scr_FindVariableField(unsigned int parentId, unsigned int name)
 		return Scr_EvalVariable(id);
 	if ((scrVarGlob.variableList[parentId + 1].w.status & 0x1F) == 0x14)
 		return Scr_EvalVariableEntityField(parentId, name);
-	return (VariableValue)value;
+	//return (VariableValue)value;
+	return (VariableValue)0;
 }
 
 void  Scr_KillThread(unsigned int parentId)
@@ -4896,7 +4898,8 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 	}
 	else
 	{
-		return (VariableUnion)value;
+		//return (VariableUnion)value;
+		return (VariableUnion)0;
 	}
 }
 

@@ -1,6 +1,7 @@
 #include "qcommon.h"
 #include "mem_track.h"
 #include "threads.h"
+#include <xanim/dobj.h>
 
 char objBuf[2048][100];
 bool objAlloced[2048];

@@ -254,11 +254,6 @@ void __cdecl Com_DefaultExtension(char *path, unsigned int maxSize, const char *
     Com_sprintf(path, maxSize, "%s%s", oldPath, extension);
 }
 
-__int16 __cdecl BigShort(__int16 l)
-{
-    return _BigShort(l);
-}
-
 int __cdecl ShortSwap(__int16 l)
 {
     return HIBYTE(l) + ((unsigned __int8)l << 8);
@@ -650,7 +645,7 @@ void __cdecl Info_NextPair(const char **head, char *key, char *value)
 
 void __cdecl Info_RemoveKey(char *s, const char *key)
 {
-    int v2; // eax
+    char *v2; // eax
     char v3; // al
     char *v4; // [esp+8h] [ebp-83Ch]
     char *v5; // [esp+Ch] [ebp-838h]
@@ -663,7 +658,7 @@ void __cdecl Info_RemoveKey(char *s, const char *key)
     if (strlen(s) >= 0x400)
         Com_Error(ERR_DROP, "Info_RemoveKey: oversize infostring");
 
-    strchr(key, 0x5Cu);
+    v2 = (char*)strchr(key, 0x5Cu);
 
     if (!v2)
     {
@@ -702,7 +697,7 @@ void __cdecl Info_RemoveKey(char *s, const char *key)
 
 void __cdecl Info_RemoveKey_Big(char *s, const char *key)
 {
-    int v2; // eax
+    char *v2; // eax
     char v3; // al
     char *v4; // [esp+8h] [ebp-403Ch]
     char *v5; // [esp+Ch] [ebp-4038h]
@@ -715,7 +710,7 @@ void __cdecl Info_RemoveKey_Big(char *s, const char *key)
     if (strlen(s) >= 0x2000)
         Com_Error(ERR_DROP, "Info_RemoveKey_Big: oversize infostring");
 
-    strchr(key, 0x5Cu);
+    v2 = (char*)strchr(key, 0x5Cu);
 
     if (!v2)
     {
@@ -757,12 +752,12 @@ bool __cdecl Info_Validate(const char *s)
     int v1; // eax
     int v3; // eax
 
-    strchr(s, 0x22u);
+    v1 = (int)strchr(s, 0x22u);
 
     if (v1)
         return 0;
 
-    strchr(s, 0x3Bu);
+    v3 = (int)strchr(s, 0x3Bu);
 
     return v3 == 0;
 }
@@ -799,21 +794,21 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
         if (j >= 1024)
             MyAssertHandler(".\\universal\\q_shared.cpp", 1275, 0, "%s", "j < MAX_INFO_STRING");
         cleanValue[j] = 0;
-        strchr(key, 0x5Cu);
+        v3 = (int)strchr(key, 0x5Cu);
         if (v3)
         {
             Com_Printf(16, (char *)"Can't use keys with a \\ key: %s value: %s", key, value);
         }
         else
         {
-            strchr(key, 0x3Bu);
+            v4 = (int)strchr(key, 0x3Bu);
             if (v4)
             {
                 Com_Printf(16, (char *)"Can't use keys with a semicolon. key: %s value: %s", key, value);
             }
             else
             {
-                strchr(key, 0x22u);
+                v5 = (int)strchr(key, 0x22u);
                 if (v5)
                 {
                     Com_Printf(16, (char *)"Can't use keys with a \". key: %s value: %s", key, value);
@@ -880,21 +875,21 @@ void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value
         if (v6 >= 0x2000)
             MyAssertHandler(".\\universal\\q_shared.cpp", 1355, 0, "%s", "j < BIG_INFO_STRING");
         v8[v6] = 0;
-        strchr(key, 0x5Cu);
+        v3 = (int)strchr(key, 0x5Cu);
         if (v3)
         {
             Com_Printf(16, "Can't use keys with a \\ key: %s value: %s", key, value);
         }
         else
         {
-            strchr(key, 0x3Bu);
+            v4 = (int)strchr(key, 0x3Bu);
             if (v4)
             {
                 Com_Printf(16, "Can't use keys with a semicolon. key: %s value: %s", key, value);
             }
             else
             {
-                strchr(key, 0x22u);
+                v5 = (int)strchr(key, 0x22u);
                 if (v5)
                 {
                     Com_Printf(16, "Can't use keys with a \". key: %s value: %s", key, value);

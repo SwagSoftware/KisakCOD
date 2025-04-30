@@ -61,7 +61,7 @@ int MT_GetSubTreeSize(int nodeNum);
 void MT_DumpTree(void);
 void MT_FreeIndex(unsigned int nodeNum, int numBytes);
 
-void MT_Free(byte* p, int numBytes);
+void MT_Free(unsigned char* p, int numBytes);
 bool MT_Realloc(int oldNumBytes, int newNumbytes);
 
 void MT_Init(void);

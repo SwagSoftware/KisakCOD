@@ -151,7 +151,7 @@ void MSS_InitChannels()
     milesGlob.handle_sample[i] = (_SAMPLE *)AIL_allocate_sample_handle(milesGlob.driver);
     if ( !milesGlob.handle_sample[i] )
       Com_Error(ERR_DROP, "MILES sound sample allocation failed on channel %i", i + 1);
-    AIL_init_sample(milesGlob.handle_sample[i], 1);
+    AIL_init_sample(milesGlob.handle_sample[i], 1, 0);
   }
   g_snd.ambient_track = 1;
 }
@@ -238,23 +238,21 @@ void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel)
     AIL_set_sample_processor(s, SP_FILTER, milesGlob.eqFilter);
     AIL_set_sample_processor(s, SP_FILTER_1, milesGlob.eqFilter);
     stage = SP_FILTER;
-    for ( eqIndex = 0; eqIndex < 2; ++eqIndex )
+    for (eqIndex = 0; eqIndex < 2; ++eqIndex)
     {
-      for ( band = 0; band < 3; ++band )
-      {
-        params = &milesGlob.eq[eqIndex].params[band][entchannel];
-        enabled = params->enabled;
-        // KISAKTODO: -1 might not be the proper option here...
-        AIL_sample_stage_property(s, stage, MSS_EQ_ENABLED[band], -1, 0, &enabled, 0);
-        if ( enabled )
+        for (band = 0; band < 3; ++band)
         {
-          AIL_sample_stage_property(s, stage, MSS_EQ_TYPE[band], -1, 0, params, 0);
-          AIL_sample_stage_property(s, stage, MSS_EQ_FREQ[band], -1, 0, &params->freq, 0);
-          AIL_sample_stage_property(s, stage, MSS_EQ_GAIN[band], -1, 0, &params->gain, 0);
-          AIL_sample_stage_property(s, stage, MSS_EQ_Q[band], -1, 0, &params->q, 0);
+            params = &milesGlob.eq[eqIndex].params[band][entchannel];
+            AIL_sample_stage_property(s, stage, MSS_EQ_ENABLED[band], 0, &enabled, 0);
+            if (enabled)
+            {
+                AIL_sample_stage_property(s, stage, MSS_EQ_TYPE[band], 0, params, 0);
+                AIL_sample_stage_property(s, stage, MSS_EQ_FREQ[band], 0, &params->freq, 0);
+                AIL_sample_stage_property(s, stage, MSS_EQ_GAIN[band], 0, &params->gain, 0);
+                AIL_sample_stage_property(s, stage, MSS_EQ_Q[band], 0, &params->q, 0);
+            }
         }
-      }
-      stage = SP_FILTER_1;
+        stage = SP_FILTER_1;
     }
   }
 }

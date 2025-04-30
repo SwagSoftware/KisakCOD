@@ -13,6 +13,18 @@
 scrCompilePub_t scrCompilePub;
 scrCompileGlob_t scrCompileGlob;
 
+void __cdecl EmitOpcode(unsigned int op, int offset, int callType);
+char __cdecl EmitOrEvalPrimitiveExpression(sval_u expr, VariableCompileValue *constValue, scr_block_s *block);
+void __cdecl EmitExpression(sval_u expr, scr_block_s *block);
+void __cdecl EmitExpressionFieldObject(sval_u expr, sval_u sourcePos, scr_block_s *block);
+void __cdecl EmitVariableExpression(sval_u expr, scr_block_s *block);
+void __cdecl EmitPrimitiveExpressionFieldObject(sval_u expr, sval_u sourcePos, scr_block_s *block);
+char __cdecl EmitOrEvalExpression(sval_u expr, VariableCompileValue *constValue, scr_block_s *block);
+char __cdecl EvalExpression(sval_u expr, VariableCompileValue *constValue);
+void __cdecl EmitStatement(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block);
+char __cdecl EvalPrimitiveExpression(sval_u expr, VariableCompileValue *constValue);
+void __cdecl EmitArrayPrimitiveExpressionRef(sval_u expr, sval_u sourcePos, scr_block_s *block);
+
 bool __cdecl IsUndefinedPrimitiveExpression(sval_u expr)
 {
     return *expr.codePosValue == 31;
@@ -1088,7 +1100,7 @@ void __cdecl EmitObject(sval_u expr, sval_u sourcePos)
         return;
     }
     classnum = (const char*)Scr_GetClassnumForCharId(*s);
-    if (classnum < 0)
+    if ((int)classnum < 0)
         goto LABEL_17;
     entnum = (const char*)atoi(s + 1); // KISAKTODO: seems wrong
     if (!entnum && s[1] != 48)

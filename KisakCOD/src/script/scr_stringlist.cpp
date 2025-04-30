@@ -70,6 +70,11 @@ void SL_InitCheckLeaks()
 	scrStringDebugGlob->totalRefCount = 0;
 }
 
+static unsigned int SL_ConvertFromRefString(RefString *refString)
+{
+	return ((char *)refString - scrMemTreePub.mt_buffer) / MT_NODE_SIZE;
+}
+
 void SL_AddUserInternal(RefString* refStr, unsigned int user)
 {
 	if (((unsigned __int8)user & refStr->user) == 0)
@@ -223,7 +228,7 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
-	RefString* refStr;
+	RefString* refStr = NULL;
 	RefString* refStrA; // [esp+90h] [ebp-10h]
 	RefString* refStrB; // [esp+90h] [ebp-10h]
 	HashEntry_unnamed_type_u stringValue = 0;
@@ -686,11 +691,6 @@ const char* __cdecl SL_DebugConvertToString(unsigned int stringValue)
 			return "<BINARY>";
 	}
 	return refString->str;
-}
-
-static unsigned int SL_ConvertFromRefString(RefString* refString)
-{
-	return ((char*)refString - scrMemTreePub.mt_buffer) / MT_NODE_SIZE;
 }
 
 unsigned int SL_ConvertFromString(const char* str)

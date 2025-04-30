@@ -1,8 +1,9 @@
-#include "../game/q_shared.h"
+//#include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
 
 #include "zip.h"
 #include "inflate.h"
+#include <universal/com_memory.h>
 
 #ifdef _TIMING
 int		totalInflateTime;
@@ -331,11 +332,11 @@ static void inflate_blocks_reset(z_stream *z, inflate_blocks_state_t *s)
 {
 	if((s->mode == BTREE) || (s->mode == DTREE))
 	{
-		Z_Free(s->trees.blens);
+		Z_Free(s->trees.blens, qtrue);
 	}
 	if(s->mode == CODES)
 	{
-		Z_Free(s->decode.codes);
+		Z_Free(s->decode.codes, qtrue);
 	}
 	s->mode = TYPE;
 	s->bitk = 0;
@@ -351,9 +352,9 @@ static void inflate_blocks_reset(z_stream *z, inflate_blocks_state_t *s)
 static int inflate_blocks_free(z_stream *z, inflate_blocks_state_t *s)
 {
 	inflate_blocks_reset(z, s);
-	Z_Free(s->hufts);
+	Z_Free(s->hufts, qtrue);
 	s->hufts = NULL;
-	Z_Free(s);
+	Z_Free(s, qtrue);
 	return(Z_OK);
 }
 
@@ -364,8 +365,10 @@ static inflate_blocks_state_t *inflate_blocks_new(z_stream *z, check_func check)
 {
 	inflate_blocks_state_t *s;
 
-	s = (inflate_blocks_state_t *)Z_Malloc(sizeof(inflate_blocks_state_t), TAG_INFLATE, qtrue);
-	s->hufts = (inflate_huft_t *)Z_Malloc(sizeof(inflate_huft_t) * MANY, TAG_INFLATE, qtrue);
+	//s = (inflate_blocks_state_t *)Z_Malloc(sizeof(inflate_blocks_state_t), TAG_INFLATE, qtrue);
+	s = (inflate_blocks_state_t *)Z_Malloc(sizeof(inflate_blocks_state_t), "INFLATE", qtrue);
+	//s->hufts = (inflate_huft_t *)Z_Malloc(sizeof(inflate_huft_t) * MANY, TAG_INFLATE, qtrue);
+	s->hufts = (inflate_huft_t *)Z_Malloc(sizeof(inflate_huft_t) * MANY, "INFLATE2", qtrue);
 	s->end = s->window + WINDOW_SIZE;
 	s->mode = TYPE;
 	inflate_blocks_reset(z, s);
@@ -945,7 +948,8 @@ static inflate_codes_state_t *inflate_codes_new(z_stream *z, ulong bl, ulong bd,
 {
 	inflate_codes_state_t		*c;
 
-	c = (inflate_codes_state_t *)Z_Malloc(sizeof(inflate_codes_state_t), TAG_INFLATE, qtrue);
+	//c = (inflate_codes_state_t *)Z_Malloc(sizeof(inflate_codes_state_t), TAG_INFLATE, qtrue);
+	c = (inflate_codes_state_t *)Z_Malloc(sizeof(inflate_codes_state_t), "INFLATE3", qtrue);
 	c->mode = START;
 	c->lbits = (byte)bl;
 	c->dbits = (byte)bd;
@@ -1441,7 +1445,8 @@ static void inflate_blocks(inflate_blocks_state_t *s, z_stream *z)
 				return;
 			}
 			t = 258 + (t & 0x1f) + ((t >> 5) & 0x1f);
-			s->trees.blens = (ulong *)Z_Malloc(t * sizeof(ulong), TAG_INFLATE, qfalse);
+			//s->trees.blens = (ulong *)Z_Malloc(t * sizeof(ulong), TAG_INFLATE, qfalse);
+			s->trees.blens = (ulong *)Z_Malloc(t * sizeof(ulong), "INFLATE4", qfalse);
 			s->bitb >>= 14;
 			s->bitk -= 14;
 			s->trees.index = 0;
@@ -1465,7 +1470,7 @@ static void inflate_blocks(inflate_blocks_state_t *s, z_stream *z)
 			inflate_trees_bits(z, s->trees.blens, &s->trees.bb, &s->trees.tb, s->hufts);
 			if(z->error != Z_OK)
 			{
-				Z_Free(s->trees.blens);
+				Z_Free(s->trees.blens, qtrue);
 				s->mode = BAD;
 				inflate_flush(z, s);
 				return;
@@ -1509,7 +1514,7 @@ static void inflate_blocks(inflate_blocks_state_t *s, z_stream *z)
 					t = s->trees.table;
 					if(i + j > 258 + (t & 0x1f) + ((t >> 5) & 0x1f) || (c == 16 && i < 1))
 					{
-						Z_Free(s->trees.blens);
+						Z_Free(s->trees.blens, qtrue);
 						s->mode = BAD;
 						inflate_error = "Inflate data: Invalid bit length repeat";
 						z->error = Z_DATA_ERROR;
@@ -1530,7 +1535,7 @@ static void inflate_blocks(inflate_blocks_state_t *s, z_stream *z)
 			bd = 6; 					// must be <= 9 for lookahead assumptions
 			t = s->trees.table;
 			inflate_trees_dynamic(z, 257 + (t & 0x1f), 1 + ((t >> 5) & 0x1f), s->trees.blens, &bl, &bd, &lengthTree, &distTree, s->hufts);
-			Z_Free(s->trees.blens);
+			Z_Free(s->trees.blens, qtrue);
 			if(z->error != Z_OK)
 			{
 				s->mode = BAD;
@@ -1548,7 +1553,7 @@ static void inflate_blocks(inflate_blocks_state_t *s, z_stream *z)
 				return;
 			}
 			z->error = Z_OK;
-			Z_Free(s->decode.codes);
+			Z_Free(s->decode.codes, qtrue);
 			bytesToEnd = s->write < s->read ? s->read - s->write - 1 : s->end - s->write; 
 			if(!s->last)
 			{
@@ -1594,7 +1599,7 @@ EStatus inflateEnd(z_stream *z)
 	}
 	if(z->istate)
 	{
-		Z_Free(z->istate);
+		Z_Free(z->istate, qtrue);
 		z->istate = NULL;
 	}
 	return(Z_OK);
@@ -1610,7 +1615,8 @@ EStatus inflateInit(z_stream *z, EFlush flush, int noWrap)
 
 	inflate_error = "OK";
 
-	z->istate = (inflate_state *)Z_Malloc(sizeof(inflate_state), TAG_INFLATE, qtrue);
+	//z->istate = (inflate_state *)Z_Malloc(sizeof(inflate_state), TAG_INFLATE, qtrue);
+	z->istate = (inflate_state *)Z_Malloc(sizeof(inflate_state), "INFLATE5", qtrue);
 	z->istate->blocks = NULL;
 
 	// handle nowrap option (no zlib header or check)

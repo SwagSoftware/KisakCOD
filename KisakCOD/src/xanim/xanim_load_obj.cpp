@@ -505,7 +505,7 @@ unsigned __int8 *__cdecl GetDeltaQuaternions(
     {
         if (numQuatIndices == 1)
         {
-            ConsumeQuat2(&pos, quat);
+            ConsumeQuat2((const unsigned char **)&pos, quat);
             deltaPart->quat = (XAnimDeltaPartQuat *)Alloc(8);
             deltaPart->quat->size = 0;
             deltaPart->quat->u.frame0[0] = quat[0];
@@ -549,7 +549,7 @@ unsigned __int8 *__cdecl GetDeltaQuaternions(
             deltaPart->quat->u.frames.frames = (__int16 (*)[2])Alloc(4 * numQuatIndices);
             for (k = 0; k < numQuatIndices; ++k)
             {
-                ConsumeQuat2(&pos, quat);
+                ConsumeQuat2((const unsigned char **)&pos, quat);
                 deltaPart->quat->u.frames.frames[k][0] = quat[0];
                 deltaPart->quat->u.frames.frames[k][1] = quat[1];
             }
@@ -680,7 +680,7 @@ unsigned __int8 *__cdecl GetQuaternions(
         {
             if (bSimpleQuat)
             {
-                ConsumeQuat2(&pos, quat);
+                ConsumeQuat2((const unsigned char**)&pos, quat);
                 if (bFlipQuat)
                 {
                     quat[0] = -quat[0];
@@ -692,7 +692,7 @@ unsigned __int8 *__cdecl GetQuaternions(
             }
             else
             {
-                ConsumeQuat(&pos, quat);
+                ConsumeQuat((const unsigned char **)&pos, quat);
                 if (bFlipQuat)
                 {
                     quat[0] = -quat[0];
@@ -746,7 +746,7 @@ unsigned __int8 *__cdecl GetQuaternions(
             if (bSimpleQuat)
             {
                 part->quat->u.frames.u.frames = (__int16 (*)[4])XAnimTempAlloc(4 * numQuatIndices);
-                ConsumeQuat2(&pos, quat);
+                ConsumeQuat2((const unsigned char **)&pos, quat);
                 if (bFlipQuat)
                 {
                     quat[0] = -quat[0];
@@ -756,7 +756,7 @@ unsigned __int8 *__cdecl GetQuaternions(
                 (*part->quat->u.frames.u.frames)[1] = quat[1];
                 for (k = 1; k < numQuatIndices; ++k)
                 {
-                    ConsumeQuat2(&pos, quat);
+                    ConsumeQuat2((const unsigned char **)&pos, quat);
                     (*part->quat->u.frames.u.frames)[2 * k] = quat[0];
                     (*part->quat->u.frames.u.frames)[2 * k + 1] = quat[1];
                 }
@@ -773,7 +773,7 @@ unsigned __int8 *__cdecl GetQuaternions(
             else
             {
                 part->quat->u.frames.u.frames = (__int16 (*)[4])XAnimTempAlloc(8 * numQuatIndices);
-                ConsumeQuat(&pos, quat);
+                ConsumeQuat((const unsigned char **)&pos, quat);
                 if (bFlipQuat)
                 {
                     quat[0] = -quat[0];
@@ -784,7 +784,7 @@ unsigned __int8 *__cdecl GetQuaternions(
                 *&(*part->quat->u.frames.u.frames)[0] = *quat;
                 for (n = 1; n < numQuatIndices; ++n)
                 {
-                    ConsumeQuat(&pos, quat);
+                    ConsumeQuat((const unsigned char **)&pos, quat);
                     part->quat->u.frames.u.frames[n][0] = quat[0];
                     part->quat->u.frames.u.frames[n][1] = quat[1];
                     part->quat->u.frames.u.frames[n][2] = quat[2];

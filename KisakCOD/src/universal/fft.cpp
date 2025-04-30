@@ -1,4 +1,5 @@
 #include "fft.h"
+#include "q_shared.h"
 
 void __cdecl FFT(complex_s *data_inout, unsigned int log2_count, int *bitSwap, complex_s *trigTable)
 {

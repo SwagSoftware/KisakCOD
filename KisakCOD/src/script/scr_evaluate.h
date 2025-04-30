@@ -2,17 +2,6 @@
 #include "scr_variable.h"
 #include "scr_debugger.h"
 
-struct __declspec(align(4)) Scr_SelectedLineInfo // sizeof=0xC
-{                                       // ...
-    int selectedId;
-    int oldSelectedLine;
-    bool oldFocusOnSelectedLine;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-
-
 struct ArchivedCanonicalStringInfo // sizeof=0x8
 {
     unsigned __int16 canonicalStr;

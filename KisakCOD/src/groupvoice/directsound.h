@@ -1,4 +1,6 @@
 #pragma once
+
+#include <Windows.h>
 #include <dsound.h>
 
 static const int MIN_COMFORTABLE_BUFFER_AMOUNT = 0x140;

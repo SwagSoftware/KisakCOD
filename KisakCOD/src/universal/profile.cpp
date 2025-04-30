@@ -3,6 +3,8 @@
 #include <qcommon/threads.h>
 #include "timing.h"
 
+#include <Windows.h>
+
 ProfileScript profileScript;
 int g_profileStack[256];
 int prof_parity[2];

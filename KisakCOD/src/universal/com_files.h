@@ -1,5 +1,7 @@
 #pragma once
 
+#include "q_shared.h"
+
 enum FsThread : __int32
 {                                       // ...
     FS_THREAD_MAIN = 0x0,

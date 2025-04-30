@@ -173,25 +173,6 @@ int __cdecl FS_CompareIwds(char *needediwds, int len, int dlstring)
     return 1;
 }
 
-FS_SERVER_COMPARE_RESULT __cdecl FS_CompareWithServerFiles(char *neededFiles, int len, int dlstring)
-{
-    FS_SERVER_COMPARE_RESULT iwdCompareResult; // [esp+10h] [ebp-Ch]
-    int neededIWDStrLen; // [esp+14h] [ebp-8h]
-    FS_SERVER_COMPARE_RESULT ffCompareResult; // [esp+18h] [ebp-4h]
-
-    *neededFiles = 0;
-    iwdCompareResult = (FS_SERVER_COMPARE_RESULT)FS_CompareIwds(neededFiles, len, dlstring);
-    if (iwdCompareResult == NOT_DOWNLOADABLE)
-        return (FS_SERVER_COMPARE_RESULT)2;
-    neededIWDStrLen = strlen(neededFiles);
-    if (len < neededIWDStrLen)
-        MyAssertHandler(".\\qcommon\\files.cpp", 829, 0, "%s", "len >= neededIWDStrLen");
-    ffCompareResult = (FS_SERVER_COMPARE_RESULT)FS_CompareFFs(&neededFiles[neededIWDStrLen], len - neededIWDStrLen, dlstring);
-    if (ffCompareResult == NOT_DOWNLOADABLE)
-        return (FS_SERVER_COMPARE_RESULT)2;
-    return (FS_SERVER_COMPARE_RESULT)(iwdCompareResult == NEED_DOWNLOAD || ffCompareResult == NEED_DOWNLOAD);
-}
-
 int fs_numServerReferencedFFs;
 const char *fs_serverReferencedFFNames[32];
 int fs_serverReferencedFFCheckSums[32];
@@ -260,6 +241,25 @@ int __cdecl FS_CompareFFs(char *neededFFs, int len, int dlstring)
         return 0;
     Com_Printf(10, "Need FFs: %s\n", neededFFs);
     return 1;
+}
+
+FS_SERVER_COMPARE_RESULT __cdecl FS_CompareWithServerFiles(char *neededFiles, int len, int dlstring)
+{
+    FS_SERVER_COMPARE_RESULT iwdCompareResult; // [esp+10h] [ebp-Ch]
+    int neededIWDStrLen; // [esp+14h] [ebp-8h]
+    FS_SERVER_COMPARE_RESULT ffCompareResult; // [esp+18h] [ebp-4h]
+
+    *neededFiles = 0;
+    iwdCompareResult = (FS_SERVER_COMPARE_RESULT)FS_CompareIwds(neededFiles, len, dlstring);
+    if (iwdCompareResult == NOT_DOWNLOADABLE)
+        return (FS_SERVER_COMPARE_RESULT)2;
+    neededIWDStrLen = strlen(neededFiles);
+    if (len < neededIWDStrLen)
+        MyAssertHandler(".\\qcommon\\files.cpp", 829, 0, "%s", "len >= neededIWDStrLen");
+    ffCompareResult = (FS_SERVER_COMPARE_RESULT)FS_CompareFFs(&neededFiles[neededIWDStrLen], len - neededIWDStrLen, dlstring);
+    if (ffCompareResult == NOT_DOWNLOADABLE)
+        return (FS_SERVER_COMPARE_RESULT)2;
+    return (FS_SERVER_COMPARE_RESULT)(iwdCompareResult == NEED_DOWNLOAD || ffCompareResult == NEED_DOWNLOAD);
 }
 
 void __cdecl FS_ShutdownServerFileReferences(int *numFiles, const char **fileNames)

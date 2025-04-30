@@ -1,6 +1,6 @@
 #include "qcommon.h"
 #include <xanim/xmodel.h>
-
+#include <xanim/xanim.h>
 
 void __cdecl CM_TraceStaticModel(
     cStaticModel_s *sm,

@@ -209,9 +209,6 @@ const dvar_t *ui_playerProfileCount;
 const dvar_t *ui_playerProfileSelected;
 const dvar_t *ui_playerProfileNameNew;
 const dvar_t *ui_showEndOfGame;
-const dvar_t *ui_playerProfileNameNew;
-const dvar_t *ui_playerProfileNameNew;
-const dvar_t *ui_playerProfileNameNew;
 
 const dvar_t *ui_netGameType;
 
@@ -242,6 +239,19 @@ const char *MonthAbbrev[12] =
 }; // idb
 
 char menuBuf2[32768];
+
+void __cdecl LAN_GetServerAddressString(int source, unsigned int n, char *buf, int buflen);
+Material *__cdecl UI_GetLevelShot(int index);
+void __cdecl UI_SortPlayerProfiles(int selectIndex);
+int __cdecl UI_GetPlayerProfileListIndexFromName(const char *name);
+void __cdecl UI_SelectPlayerProfileIndex(int index);
+void __cdecl UI_SortPlayerProfiles(int selectIndex);
+int __cdecl UI_MapCountByGameType();
+int __cdecl UI_GetListIndexFromMapIndex(int testMapIndex);
+int __cdecl UI_GetClientNumForPlayerListNum(int playerListIndex);
+char *__cdecl UI_SelectedMap(int index, int *actual);
+void __cdecl UI_SetSystemCursorPos(UiContext *dc, float x, float y);
+
 
 UILocalVarContext *__cdecl UI_GetLocalVarsContext(int localClientNum)
 {
@@ -814,9 +824,9 @@ int __cdecl UI_GetServerStatusInfo(char *serverAddress, serverStatusInfo_t *info
 {
     char *v3; // eax
     char *v4; // eax
-    _BYTE *v5; // eax
-    _BYTE *v6; // eax
-    _BYTE *v7; // eax
+    char *v5; // eax
+    char *v6; // eax
+    char *v7; // eax
     char *ping; // [esp+10h] [ebp-18h]
     int len; // [esp+18h] [ebp-10h]
     int i; // [esp+1Ch] [ebp-Ch]
@@ -842,7 +852,7 @@ int __cdecl UI_GetServerStatusInfo(char *serverAddress, serverStatusInfo_t *info
                     break;
                 if (!*p)
                     break;
-                strchr(p, 0x5Cu);
+                v3 = strchr(p, 0x5Cu);
                 p = v3;
                 if (!v3)
                     break;
@@ -853,7 +863,7 @@ int __cdecl UI_GetServerStatusInfo(char *serverAddress, serverStatusInfo_t *info
                 info->lines[info->numLines][0] = p;
                 info->lines[info->numLines][1] = "";
                 info->lines[info->numLines][2] = "";
-                strchr(p, 0x5Cu);
+                v4 = strchr(p, 0x5Cu);
                 p = v4;
                 if (!v4)
                     break;
@@ -880,12 +890,12 @@ int __cdecl UI_GetServerStatusInfo(char *serverAddress, serverStatusInfo_t *info
                     if (!p)
                         break;
                     score = p;
-                    strchr(p, 0x20u);
+                    v5 = strchr(p, 0x20u);
                     if (!v5)
                         break;
                     *v5 = 0;
                     ping = (char*)(v5 + 1);
-                    strchr((char*)(v5 + 1), 0x20u);
+                    v6 = strchr((char*)(v5 + 1), 0x20u);
                     if (!v6)
                         break;
                     *v6 = 0;
@@ -898,7 +908,7 @@ int __cdecl UI_GetServerStatusInfo(char *serverAddress, serverStatusInfo_t *info
                     info->lines[info->numLines][3] = pa;
                     if (++info->numLines >= 128)
                         break;
-                    strchr(pa, 0x5Cu);
+                    v7 = strchr(pa, 0x5Cu);
                     if (!v7)
                         break;
                     *v7 = 0;

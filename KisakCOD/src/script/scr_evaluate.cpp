@@ -934,7 +934,7 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
         break;
     case 9:
         value->type = 6;
-        value->u.intValue = -*(unsigned int *)(expr.type + 4);
+        value->u.intValue = -(int)*(unsigned int *)(expr.type + 4); // KISAKTODO: int cast bad
         break;
     case 0xA:
         value->type = 5;
@@ -1282,7 +1282,7 @@ void __cdecl Scr_GetValue(unsigned int index, VariableValue *value)
     }
     else
     {
-        v2 = &scrVmPub.top[-index];
+        v2 = &scrVmPub.top[-(int)index]; // KISAKTODO: int cast bad
         type = v2->type;
         value->u.intValue = v2->u.intValue;
         value->type = type;

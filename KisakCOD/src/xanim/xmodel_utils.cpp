@@ -1,4 +1,5 @@
 #include "xmodel.h"
+#include "xanim.h"
 
 struct TestLod // sizeof=0x8
 {                                       // ...

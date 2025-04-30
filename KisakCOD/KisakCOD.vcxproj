@@ -695,7 +695,7 @@
     <ClInclude Include="src\gfx_d3d\r_workercmds.h" />
     <ClInclude Include="src\gfx_d3d\r_workercmds_common.h" />
     <ClInclude Include="src\gfx_d3d\r_xsurface.h" />
-    <ClInclude Include="src\groupvoice\dsound.h" />
+    <ClInclude Include="src\groupvoice\directsound.h" />
     <ClInclude Include="src\groupvoice\speex\arch.h" />
     <ClInclude Include="src\groupvoice\speex\cb_search.h" />
     <ClInclude Include="src\groupvoice\speex\cb_search_arm4.h" />

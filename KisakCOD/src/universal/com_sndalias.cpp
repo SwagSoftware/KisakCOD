@@ -156,7 +156,7 @@ void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, Dev
     char string[8196]; // [esp+14h] [ebp-2030h] BYREF
     int data; // [esp+2018h] [ebp-2Ch]
     char dest[32]; // [esp+201Ch] [ebp-28h] BYREF
-    int i; // [esp+2040h] [ebp-4h]
+    //int i; // [esp+2040h] [ebp-4h]
 
     if (!graph)
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 213, 0, "%s", "graph");
@@ -221,14 +221,6 @@ MSSChannelMap *__cdecl Com_GetSpeakerMap(SpeakerMap *speakerMap, int sourceChann
     return &speakerMap->channelMaps[sourceChannelCount == 2][SND_IsMultiChannel()];
 }
 
-snd_alias_list_t *__cdecl Com_TryFindSoundAlias(const char *name)
-{
-    if (useFastFile->current.enabled)
-        return Com_TryFindSoundAlias_FastFile(name);
-    else
-        return Com_TryFindSoundAlias_LoadObj(name);
-}
-
 unsigned int __cdecl Com_HashAliasName(const char *name)
 {
     unsigned int hash; // [esp+4h] [ebp-4h]
@@ -238,6 +230,7 @@ unsigned int __cdecl Com_HashAliasName(const char *name)
         hash = tolower(*name++) ^ (33 * hash);
     return hash % g_sa.hashSize;
 }
+
 
 snd_alias_list_t *__cdecl Com_TryFindSoundAlias_LoadObj(const char *name)
 {
@@ -251,6 +244,14 @@ snd_alias_list_t *__cdecl Com_TryFindSoundAlias_LoadObj(const char *name)
             return g_sa.hash[hashIndex];
     }
     return 0;
+}
+
+snd_alias_list_t *__cdecl Com_TryFindSoundAlias(const char *name)
+{
+    if (useFastFile->current.enabled)
+        return Com_TryFindSoundAlias_FastFile(name);
+    else
+        return Com_TryFindSoundAlias_LoadObj(name);
 }
 
 snd_alias_list_t *__cdecl Com_FindSoundAlias_LoadObj(const char *name)
@@ -696,7 +697,7 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
         ProfLoad_Begin("Load sound alias files");
         mark = Hunk_HideTempMemory();
         Com_InitSoundAlias();
-        Com_InitEntChannels(v3);
+        Com_InitEntChannels();
         for (i = 0; i < fileCount; ++i)
             Com_LoadSoundAliasFile(trimspec, loadspecCurGame, fileNames[i]);
         ProfLoad_End();
@@ -808,14 +809,14 @@ void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system)
     }
 }
 
-void Com_InitEntChannels(char *file_1)
+void Com_InitEntChannels()
 {
-    char *file; // [esp+0h] [ebp-4h] BYREF
+    void *file; // [esp+0h] [ebp-4h] BYREF
 
-    file = file_1;
+    //file = file_1;
     if (FS_ReadFile("soundaliases/channels.def", (void **)&file) < 0)
         Com_Error(ERR_DROP, "unable to load entity channel file [%s].\n", "soundaliases/channels.def");
-    Com_ParseEntChannelFile(file);
+    Com_ParseEntChannelFile((const char*)file);
 }
 
 void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve *sndCurve)
@@ -1061,7 +1062,7 @@ void __cdecl Com_SetStringEdReference(const char *pszReference, char *subtitle)
 
 void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loadspecCurGame)
 {
-    int v2; // eax
+    char *v2; // eax
     int v3; // eax
     int v4; // eax
     int v5; // eax
@@ -1155,7 +1156,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
             i = SA_INVALID;
         if (!*s0 || *s0 == 35)
         {
-            Com_SkipRestOfLine(&data_p);
+            Com_SkipRestOfLine((const char **)&data_p);
             if (*(char*)v47 == 10)
                 FS_Write((char*)"\r", 1u, h);
             goto LABEL_21;
@@ -1230,11 +1231,15 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
                         }
                         else if (i == v46 - 1)
                         {
-                            strchr(&v16[1024 * field[i]], 0x2Cu);
-                            if (v2
-                                || (strchr(&v16[1024 * field[i]], 0x20u), v3)
-                                || (strchr(&v16[1024 * field[i]], 0xAu), v4)
-                                || (strchr(&v16[1024 * field[i]], 0xDu), v5))
+                            //v2 = strchr(&v16[1024 * field[i]], 0x2Cu);
+                            //if (v2
+                            //    || (strchr(&v16[1024 * field[i]], 0x20u), v3)
+                            //    || (strchr(&v16[1024 * field[i]], 0xAu), v4)
+                            //    || (strchr(&v16[1024 * field[i]], 0xDu), v5))
+                            if ( strchr(&v16[1024 * field[i]], 0x2Cu) || 
+                                strchr(&v16[1024 * field[i]], 0x20u) || 
+                                strchr(&v16[1024 * field[i]], 0xAu) || 
+                                strchr(&v16[1024 * field[i]], 0xDu))
                             {
                                 s0 = va("\"%s\"", &v16[1024 * field[i]]);
                             }
@@ -1245,11 +1250,12 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
                         }
                         else
                         {
-                            strchr(&v16[1024 * field[i]], 0x2Cu);
-                            if (v6
-                                || (strchr(&v16[1024 * field[i]], 0x20u), v7)
-                                || (strchr(&v16[1024 * field[i]], 0xAu), v8)
-                                || (strchr(&v16[1024 * field[i]], 0xDu), v9))
+                            //strchr(&v16[1024 * field[i]], 0x2Cu);
+                            //if (v6
+                            //    || (strchr(&v16[1024 * field[i]], 0x20u), v7)
+                            //    || (strchr(&v16[1024 * field[i]], 0xAu), v8)
+                            //    || (strchr(&v16[1024 * field[i]], 0xDu), v9))
+                            if (strchr(&v16[1024 * field[i]], 0x2Cu) || strchr(&v16[1024 * field[i]], 0x20u) || strchr(&v16[1024 * field[i]], 0xAu) || strchr(&v16[1024 * field[i]], 0xDu))
                             {
                                 s0 = va("\"%s\",", &v16[1024 * field[i]]);
                             }
@@ -1267,11 +1273,11 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
                     }
                 }
                 FS_Write((char*)"\r\n", 2u, h);
-                Com_SkipRestOfLine(&data_p);
+                Com_SkipRestOfLine((const char**)&data_p);
             }
             else
             {
-                Com_SkipRestOfLine(&data_p);
+                Com_SkipRestOfLine((const char **)&data_p);
                 v28 = data_p;
                 FS_Write((char*)v47, data_p - v47, h);
             }
@@ -1308,7 +1314,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
             }
             if (!v13 || !v14)
                 Com_Error(ERR_DROP, "Sound alias file %s: missing name and/or file columns", sourceFile);
-            Com_SkipRestOfLine(&data_p);
+            Com_SkipRestOfLine((const char **)&data_p);
             if (*(char*)v47 == 10)
                 FS_Write((char*)"\r", 1u, h);
         LABEL_21:

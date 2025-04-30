@@ -1,4 +1,5 @@
 #include "qcommon.h"
+#include <xanim/xanim.h>
 
 int __cdecl CM_PointLeafnum_r(const float *p, int num)
 {
@@ -40,7 +41,8 @@ void __cdecl CM_BoxLeafnums_r(leafList_s *ll, int nodenum)
         MyAssertHandler(".\\qcommon\\cm_test.cpp", 87, 0, "%s", "ll");
     while (nodenum >= 0)
     {
-        s = BoxOnPlaneSide(ll->bounds[0], ll->bounds[1], cm.nodes[nodenum].plane, (const cplane_s *)&cm.nodes[nodenum]);
+        node = &cm.nodes[nodenum];
+        s = BoxOnPlaneSide(ll->bounds[0], ll->bounds[1], node->plane);
         if (s == 1)
         {
             nodenum = node->children[0];

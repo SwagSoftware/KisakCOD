@@ -45,7 +45,6 @@ int originsSentDueToServerTimeMismatch;
 float s_stdSnapshotDeviation;
 int s_maxSnapshotSize;
 unsigned int huffBytesSeen[256];
-int s_maxSnapshotSize;
 int s_numSnapshotSamples;
 int s_numSnapshotsBuiltSinceLastPoll;
 int s_uncompressedDataSinceLastPoll;

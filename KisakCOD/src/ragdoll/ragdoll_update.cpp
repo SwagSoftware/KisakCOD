@@ -75,14 +75,12 @@ void __cdecl Ragdoll_SnapshotBaseLerpOffsets(RagdollBody *body)
     float v2; // [esp+24h] [ebp-114h]
     float v3; // [esp+28h] [ebp-110h]
     float v4; // [esp+2Ch] [ebp-10Ch]
-    float result; // [esp+30h] [ebp-108h] BYREF
-    float v6; // [esp+34h] [ebp-104h]
-    float v7; // [esp+38h] [ebp-100h]
-    float v8; // [esp+3Ch] [ebp-FCh]
-    float v9; // [esp+40h] [ebp-F8h]
-    float v10; // [esp+44h] [ebp-F4h]
-    float v11; // [esp+48h] [ebp-F0h]
-    float v12; // [esp+4Ch] [ebp-ECh]
+    float result[3]; // [esp+30h] [ebp-108h] BYREF
+    float v6; // [esp+3Ch] [ebp-FCh]
+    float v7; // [esp+40h] [ebp-F8h]
+    float v8; // [esp+44h] [ebp-F4h]
+    float v9; // [esp+48h] [ebp-F0h]
+    float v10; // [esp+4Ch] [ebp-ECh]
     RagdollDef *def; // [esp+50h] [ebp-E8h]
     BoneOrientation *boneOrientation; // [esp+54h] [ebp-E4h]
     DObj_s *obj; // [esp+58h] [ebp-E0h]
@@ -109,7 +107,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpOffsets(RagdollBody *body)
     while (i < def->numBaseLerpBones)
     {
         parentIndex = bone->parentBone;
-        if ((unsigned int)parentIndex >= body->numBones)
+        if (parentIndex >= body->numBones)
             MyAssertHandler(
                 ".\\ragdoll\\ragdoll_update.cpp",
                 672,
@@ -138,25 +136,25 @@ void __cdecl Ragdoll_SnapshotBaseLerpOffsets(RagdollBody *body)
                 0,
                 "%s",
                 "!IS_NAN(mat->transWeight)");
-        Vec3Scale(parentAnimMat.quat, parentAnimMat.transWeight, &result);
-        v11 = result * parentAnimMat.quat[0];
-        v2 = result * parentAnimMat.quat[1];
-        v9 = result * parentAnimMat.quat[2];
-        v12 = result * parentAnimMat.quat[3];
-        v1 = v6 * parentAnimMat.quat[1];
-        v10 = v6 * parentAnimMat.quat[2];
-        v8 = v6 * parentAnimMat.quat[3];
-        v3 = v7 * parentAnimMat.quat[2];
-        v4 = v7 * parentAnimMat.quat[3];
+        Vec3Scale(parentAnimMat.quat, parentAnimMat.transWeight, result);
+        v9 = result[0] * parentAnimMat.quat[0];
+        v2 = result[0] * parentAnimMat.quat[1];
+        v7 = result[0] * parentAnimMat.quat[2];
+        v10 = result[0] * parentAnimMat.quat[3];
+        v1 = result[1] * parentAnimMat.quat[1];
+        v8 = result[1] * parentAnimMat.quat[2];
+        v6 = result[1] * parentAnimMat.quat[3];
+        v3 = result[2] * parentAnimMat.quat[2];
+        v4 = result[2] * parentAnimMat.quat[3];
         invParentMat[0][0] = 1.0 - (v1 + v3);
         invParentMat[0][1] = v2 - v4;
-        invParentMat[0][2] = v9 + v8;
+        invParentMat[0][2] = v7 + v6;
         invParentMat[1][0] = v2 + v4;
-        invParentMat[1][1] = 1.0 - (v11 + v3);
-        invParentMat[1][2] = v10 - v12;
-        invParentMat[2][0] = v9 - v8;
-        invParentMat[2][1] = v10 + v12;
-        invParentMat[2][2] = 1.0 - (v11 + v1);
+        invParentMat[1][1] = 1.0 - (v9 + v3);
+        invParentMat[1][2] = v8 - v10;
+        invParentMat[2][0] = v7 - v6;
+        invParentMat[2][1] = v8 + v10;
+        invParentMat[2][2] = 1.0 - (v9 + v1);
         invParentMat[3][0] = -(parentAnimMat.trans[0] * invParentMat[0][0]
             + parentAnimMat.trans[1] * invParentMat[1][0]
             + parentAnimMat.trans[2] * invParentMat[2][0]);
@@ -191,19 +189,17 @@ void __cdecl Ragdoll_AnimMatToMat43(const DObjAnimMat *mat, float (*out)[3])
     float v3; // [esp+28h] [ebp-2Ch]
     float v4; // [esp+2Ch] [ebp-28h]
     float v5; // [esp+30h] [ebp-24h]
-    float result; // [esp+34h] [ebp-20h] BYREF
-    float v7; // [esp+38h] [ebp-1Ch]
-    float v8; // [esp+3Ch] [ebp-18h]
-    float v9; // [esp+40h] [ebp-14h]
-    float v10; // [esp+44h] [ebp-10h]
-    float v11; // [esp+48h] [ebp-Ch]
-    float v12; // [esp+4Ch] [ebp-8h]
-    float v13; // [esp+50h] [ebp-4h]
+    float result[3]; // [esp+34h] [ebp-20h] BYREF
+    float v7; // [esp+40h] [ebp-14h]
+    float v8; // [esp+44h] [ebp-10h]
+    float v9; // [esp+48h] [ebp-Ch]
+    float v10; // [esp+4Ch] [ebp-8h]
+    float v11; // [esp+50h] [ebp-4h]
 
-    if ((unsigned int(mat->quat[0]) & 0x7F800000) == 0x7F800000
-        || (unsigned int(mat->quat[1]) & 0x7F800000) == 0x7F800000
-        || (unsigned int(mat->quat[2]) & 0x7F800000) == 0x7F800000
-        || (unsigned int(mat->quat[3]) & 0x7F800000) == 0x7F800000)
+    if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(mat->quat[2]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(mat->quat[3]) & 0x7F800000) == 0x7F800000)
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h",
@@ -212,27 +208,27 @@ void __cdecl Ragdoll_AnimMatToMat43(const DObjAnimMat *mat, float (*out)[3])
             "%s",
             "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
     }
-    if ((unsigned int(mat->transWeight) & 0x7F800000) == 0x7F800000)
+    if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-    Vec3Scale(mat->quat, mat->transWeight, &result);
-    v12 = result * mat->quat[0];
-    v3 = result * mat->quat[1];
-    v10 = result * mat->quat[2];
-    v13 = result * mat->quat[3];
-    v2 = v7 * mat->quat[1];
-    v11 = v7 * mat->quat[2];
-    v9 = v7 * mat->quat[3];
-    v4 = v8 * mat->quat[2];
-    v5 = v8 * mat->quat[3];
+    Vec3Scale(mat->quat, mat->transWeight, result);
+    v10 = result[0] * mat->quat[0];
+    v3 = result[0] * mat->quat[1];
+    v8 = result[0] * mat->quat[2];
+    v11 = result[0] * mat->quat[3];
+    v2 = result[1] * mat->quat[1];
+    v9 = result[1] * mat->quat[2];
+    v7 = result[1] * mat->quat[3];
+    v4 = result[2] * mat->quat[2];
+    v5 = result[2] * mat->quat[3];
     (*out)[0] = 1.0 - (v2 + v4);
     (*out)[1] = v3 + v5;
-    (*out)[2] = v10 - v9;
+    (*out)[2] = v8 - v7;
     (*out)[3] = v3 - v5;
-    (*out)[4] = 1.0 - (v12 + v4);
-    (*out)[5] = v11 + v13;
-    (*out)[6] = v10 + v9;
-    (*out)[7] = v11 - v13;
-    (*out)[8] = 1.0 - (v12 + v2);
+    (*out)[4] = 1.0 - (v10 + v4);
+    (*out)[5] = v9 + v11;
+    (*out)[6] = v8 + v7;
+    (*out)[7] = v9 - v11;
+    (*out)[8] = 1.0 - (v10 + v2);
     (*out)[9] = mat->trans[0];
     (*out)[10] = mat->trans[1];
     (*out)[11] = mat->trans[2];
@@ -1009,13 +1005,13 @@ void __cdecl Ragdoll_GetTorsoPosition(RagdollBody *body, float *center)
     center[2] = boneOrientation->origin[2];
 }
 
-bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState curState, BodyState newState)
+char __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body)
 {
     BoneOrientation *v2; // eax
     BoneOrientation *v3; // eax
     BoneOrientation *boneOrientation; // [esp+0h] [ebp-Ch]
     char tunnelPassed; // [esp+7h] [ebp-5h]
-    centity_s *pose; // [esp+8h] [ebp-4h]
+    const cpose_t *pose; // [esp+8h] [ebp-4h]
 
     if (Ragdoll_CreateBodyPhysics(body))
     {
@@ -1027,24 +1023,24 @@ bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState curState, Body
         if (!pose)
             MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1442, 0, "%s", "pose");
         boneOrientation = Ragdoll_BodyBoneOrientations(body);
-        Vec3Sub(pose->pose.origin, boneOrientation->origin, body->poseOffset);
+        Vec3Sub(pose->origin, boneOrientation->origin, body->poseOffset);
         v3 = Ragdoll_BodyBoneOrientations(body);
         Ragdoll_SnapshotBaseLerpBones(body, v3);
         Ragdoll_UpdateBodyContactCentroids(body);
         if (tunnelPassed)
         {
-            Ragdoll_BodyNewState(body, BodyState::BS_RUNNING);
+            Ragdoll_BodyNewState(body, BS_RUNNING);
         }
         else
         {
             Ragdoll_PrintTunnelFail(body);
-            Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
+            Ragdoll_BodyNewState(body, BS_DEAD);
         }
         return 1;
     }
     else
     {
-        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
+        Ragdoll_BodyNewState(body, BS_DEAD);
         return 0;
     }
 }
@@ -1059,15 +1055,13 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
     float v7; // [esp+38h] [ebp-178h]
     float v8; // [esp+3Ch] [ebp-174h]
     float v9; // [esp+40h] [ebp-170h]
-    float result; // [esp+44h] [ebp-16Ch] BYREF
-    float v11; // [esp+48h] [ebp-168h]
-    float v12; // [esp+4Ch] [ebp-164h]
-    float v13; // [esp+50h] [ebp-160h]
-    float v14; // [esp+54h] [ebp-15Ch]
-    float v15; // [esp+58h] [ebp-158h]
-    float v16; // [esp+5Ch] [ebp-154h]
-    float v17; // [esp+60h] [ebp-150h]
-    float v18; // [esp+64h] [ebp-14Ch]
+    float result[3]; // [esp+44h] [ebp-16Ch] BYREF
+    float v11; // [esp+50h] [ebp-160h]
+    float v12; // [esp+54h] [ebp-15Ch]
+    float v13; // [esp+58h] [ebp-158h]
+    float v14; // [esp+5Ch] [ebp-154h]
+    float v15; // [esp+60h] [ebp-150h]
+    float v16; // [esp+64h] [ebp-14Ch]
     RagdollDef *def; // [esp+68h] [ebp-148h]
     int parentBoneNum; // [esp+6Ch] [ebp-144h]
     DObj_s *obj; // [esp+70h] [ebp-140h]
@@ -1107,7 +1101,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
     obj = Ragdoll_BodyDObj(body);
     if (obj)
     {
-        pose = (const cpose_t *)Ragdoll_BodyPose(body);
+        pose = Ragdoll_BodyPose(body);
         if (pose)
         {
             lerpBone = body->lerpBones;
@@ -1123,22 +1117,22 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                 }
                 else
                 {
-                    lerp = (double)body->stateMsec / (double)goalMsec;
+                    lerp = body->stateMsec / goalMsec;
                     v5 = lerp - 1.0;
                     if (v5 < 0.0)
-                        v18 = lerp;
+                        v16 = lerp;
                     else
-                        v18 = 1.0;
+                        v16 = 1.0;
                     v4 = 0.0 - lerp;
                     if (v4 < 0.0)
-                        v3 = v18;
+                        v3 = v16;
                     else
                         v3 = 0.0;
                     lerp = v3;
                 }
                 boneIdx = lerpBone->animBone;
                 parentBoneNum = lerpBone->parentBone;
-                if ((unsigned int)parentBoneNum >= body->numBones)
+                if (parentBoneNum >= body->numBones)
                     MyAssertHandler(
                         ".\\ragdoll\\ragdoll_update.cpp",
                         202,
@@ -1153,10 +1147,10 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                 parentAnimMat = Ragdoll_GetDObjLocalBoneMatrix(pose, obj, parentBoneIdx);
                 if (!boneAnimMat || !parentAnimMat || boneAnimMat == parentAnimMat)
                     break;
-                if ((unsigned int(parentAnimMat->quat[0]) & 0x7F800000) == 0x7F800000
-                    || (unsigned int(parentAnimMat->quat[1]) & 0x7F800000) == 0x7F800000
-                    || (unsigned int(parentAnimMat->quat[2]) & 0x7F800000) == 0x7F800000
-                    || (unsigned int(parentAnimMat->quat[3]) & 0x7F800000) == 0x7F800000)
+                if ((COERCE_UNSIGNED_INT(parentAnimMat->quat[0]) & 0x7F800000) == 0x7F800000
+                    || (COERCE_UNSIGNED_INT(parentAnimMat->quat[1]) & 0x7F800000) == 0x7F800000
+                    || (COERCE_UNSIGNED_INT(parentAnimMat->quat[2]) & 0x7F800000) == 0x7F800000
+                    || (COERCE_UNSIGNED_INT(parentAnimMat->quat[3]) & 0x7F800000) == 0x7F800000)
                 {
                     MyAssertHandler(
                         "c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h",
@@ -1165,32 +1159,32 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                         "%s",
                         "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
                 }
-                if ((unsigned int(parentAnimMat->transWeight) & 0x7F800000) == 0x7F800000)
+                if ((COERCE_UNSIGNED_INT(parentAnimMat->transWeight) & 0x7F800000) == 0x7F800000)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h",
                         537,
                         0,
                         "%s",
                         "!IS_NAN(mat->transWeight)");
-                Vec3Scale(parentAnimMat->quat, parentAnimMat->transWeight, &result);
-                v16 = result * parentAnimMat->quat[0];
-                v7 = result * parentAnimMat->quat[1];
-                v14 = result * parentAnimMat->quat[2];
-                v17 = result * parentAnimMat->quat[3];
-                v6 = v11 * parentAnimMat->quat[1];
-                v15 = v11 * parentAnimMat->quat[2];
-                v13 = v11 * parentAnimMat->quat[3];
-                v8 = v12 * parentAnimMat->quat[2];
-                v9 = v12 * parentAnimMat->quat[3];
+                Vec3Scale(parentAnimMat->quat, parentAnimMat->transWeight, result);
+                v14 = result[0] * parentAnimMat->quat[0];
+                v7 = result[0] * parentAnimMat->quat[1];
+                v12 = result[0] * parentAnimMat->quat[2];
+                v15 = result[0] * parentAnimMat->quat[3];
+                v6 = result[1] * parentAnimMat->quat[1];
+                v13 = result[1] * parentAnimMat->quat[2];
+                v11 = result[1] * parentAnimMat->quat[3];
+                v8 = result[2] * parentAnimMat->quat[2];
+                v9 = result[2] * parentAnimMat->quat[3];
                 currentLocalRot[4] = 1.0 - (v6 + v8);
                 currentLocalRot[5] = v7 - v9;
-                currentLocalRot[6] = v14 + v13;
+                currentLocalRot[6] = v12 + v11;
                 invParentMat_12 = v7 + v9;
-                invParentMat_16 = 1.0 - (v16 + v8);
-                invParentMat_20 = v15 - v17;
-                invParentMat_24 = v14 - v13;
-                invParentMat_28 = v15 + v17;
-                invParentMat_32 = 1.0 - (v16 + v6);
+                invParentMat_16 = 1.0 - (v14 + v8);
+                invParentMat_20 = v13 - v15;
+                invParentMat_24 = v12 - v11;
+                invParentMat_28 = v13 + v15;
+                invParentMat_32 = 1.0 - (v14 + v6);
                 invParentMat_36 = -(parentAnimMat->trans[0] * currentLocalRot[4]
                     + parentAnimMat->trans[1] * invParentMat_12
                     + parentAnimMat->trans[2] * invParentMat_24);
@@ -1533,7 +1527,7 @@ char __cdecl Ragdoll_BoneTrace(trace_t *trace, trace_t *revTrace, float *start, 
 void __cdecl Ragdoll_PrintTunnelFail(RagdollBody *body)
 {
     DObj_s *obj; // [esp+18h] [ebp-8h]
-    centity_s *pose; // [esp+1Ch] [ebp-4h]
+    const cpose_t *pose; // [esp+1Ch] [ebp-4h]
 
     if (ragdoll_dump_anims->current.enabled)
     {
@@ -1546,9 +1540,9 @@ void __cdecl Ragdoll_PrintTunnelFail(RagdollBody *body)
         Com_Printf(
             20,
             "Ragdoll initial state in solid, using regular anim. Pos (%0.f %0.f %0.f)\n",
-            pose->pose.origin[0],
-            pose->pose.origin[1],
-            pose->pose.origin[2]);
+            pose->origin[0],
+            pose->origin[1],
+            pose->origin[2]);
         DObjDisplayAnim(obj, "Ragdoll anim tree: ");
     }
 }
@@ -1581,7 +1575,7 @@ void __cdecl Ragdoll_SnapshotAnimOrientations(RagdollBody *body, BoneOrientation
     RagdollDef *def; // [esp+0h] [ebp-18h]
     DObj_s *obj; // [esp+4h] [ebp-14h]
     BoneDef *boneDef; // [esp+8h] [ebp-10h]
-    centity_s *pose; // [esp+Ch] [ebp-Ch]
+    const cpose_t *pose; // [esp+Ch] [ebp-Ch]
     int i; // [esp+10h] [ebp-8h]
     Bone *bone; // [esp+14h] [ebp-4h]
 
@@ -1599,7 +1593,7 @@ void __cdecl Ragdoll_SnapshotAnimOrientations(RagdollBody *body, BoneOrientation
         {
             Ragdoll_GetDObjWorldBoneOriginQuat(
                 body->localClientNum,
-                &pose->pose,
+                pose,
                 obj,
                 bone->animBones[0],
                 snapshot->origin,
@@ -1612,7 +1606,7 @@ void __cdecl Ragdoll_SnapshotAnimOrientations(RagdollBody *body, BoneOrientation
     }
     else
     {
-        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
+        Ragdoll_BodyNewState(body, BS_DEAD);
     }
 }
 

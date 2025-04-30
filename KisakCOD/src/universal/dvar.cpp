@@ -875,7 +875,7 @@ void Dvar_Sort()
         //    (const GfxStaticModelDrawInst **)(4 * dvarCount + 230766384),
         //    (4 * dvarCount + 230766384 - (int)sortedDvars) >> 2,
         //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Material_CachedShaderTextLess);
-        std::sort(&sortedDvars[0], &sortedDvars[0x1000 - 1], Material_CachedShaderTextLess);
+        std::sort((const GfxCachedShaderText **)&sortedDvars[0], (const GfxCachedShaderText **)&sortedDvars[0x1000 - 1], Material_CachedShaderTextLess);
         areDvarsSorted = 1;
         isSortingDvars = 0;
     }
@@ -1179,15 +1179,6 @@ char __cdecl Dvar_VectorInDomain(const float *vector, int components, float min,
     return 1;
 }
 
-const char *__fastcall Dvar_DomainToString(
-    unsigned __int8 type,
-    DvarLimits *domain,
-    char *outBuffer,
-    unsigned int outBufferLen)
-{
-    return Dvar_DomainToString_Internal(type, *domain, outBuffer, outBufferLen, 0);
-}
-
 const char *__cdecl Dvar_DomainToString_Internal(
     unsigned __int8 type,
     DvarLimits domain,
@@ -1308,6 +1299,15 @@ const char *__cdecl Dvar_DomainToString_Internal(
     }
     *(outBufferEnd - 1) = 0;
     return (const char *)outBuffer;
+}
+
+const char *__fastcall Dvar_DomainToString(
+    unsigned __int8 type,
+    DvarLimits *domain,
+    char *outBuffer,
+    unsigned int outBufferLen)
+{
+    return Dvar_DomainToString_Internal(type, *domain, outBuffer, outBufferLen, 0);
 }
 
 void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen)
@@ -2726,8 +2726,8 @@ const dvar_s *__cdecl Dvar_RegisterInt(
     float dvarValue_12; // [esp+14h] [ebp-8h]
 
     v6.integer = value;
-    *(_QWORD *)(&v6.value + 1) = dvarValue_4;
-    v6.vector[3] = dvarValue_12;
+    //*(_QWORD *)(&v6.value + 1) = dvarValue_4;
+    //v6.vector[3] = dvarValue_12;
     return Dvar_RegisterVariant(dvarName, 5u, flags, v6, min, description);
 }
 
@@ -2761,8 +2761,8 @@ const dvar_s *__cdecl Dvar_RegisterFloat(
     float dvarValue_12; // [esp+14h] [ebp-8h]
 
     v6.value = value;
-    *(_QWORD *)(&v6.value + 1) = dvarValue_4;
-    v6.vector[3] = dvarValue_12;
+    //*(_QWORD *)(&v6.value + 1) = dvarValue_4;
+    //v6.vector[3] = dvarValue_12;
     return Dvar_RegisterVariant(dvarName, 1u, flags, v6, min, description);
 }
 
@@ -2795,11 +2795,13 @@ const dvar_s *__cdecl Dvar_RegisterVec2(
     DvarValue v7; // [esp-1Ch] [ebp-38h]
     __int64 dvarValue_4; // [esp+Ch] [ebp-10h]
     float dvarValue_12; // [esp+14h] [ebp-8h]
-
-    *(float *)&dvarValue_4 = y;
-    v7.value = x;
-    *(_QWORD *)(&v7.value + 1) = dvarValue_4;
-    v7.vector[3] = dvarValue_12;
+    
+    //*(float *)&dvarValue_4 = y;
+    //v7.value = x;
+    //*(_QWORD *)(&v7.value + 1) = dvarValue_4;
+    //v7.vector[3] = dvarValue_12;
+    v7.vector[0] = x;
+    v7.vector[1] = y;
     return Dvar_RegisterVariant(dvarName, 2u, flags, v7, min, description);
 }
 
@@ -2816,11 +2818,14 @@ const dvar_s *__cdecl Dvar_RegisterVec3(
     __int64 dvarValue_4; // [esp+Ch] [ebp-10h]
     float dvarValue_12; // [esp+14h] [ebp-8h]
 
-    *(float *)&dvarValue_4 = y;
-    *((float *)&dvarValue_4 + 1) = z;
-    v8.value = x;
-    *(_QWORD *)(&v8.value + 1) = dvarValue_4;
-    v8.vector[3] = dvarValue_12;
+    //*(float *)&dvarValue_4 = y;
+    //*((float *)&dvarValue_4 + 1) = z;
+    //v8.value = x;
+    //*(_QWORD *)(&v8.value + 1) = dvarValue_4;
+    //v8.vector[3] = dvarValue_12;
+    v8.vector[0] = x;
+    v8.vector[1] = y;
+    v8.vector[2] = z;
     return Dvar_RegisterVariant(dvarName, 3u, flags, v8, min, description);
 }
 
@@ -2868,8 +2873,8 @@ const dvar_s *__cdecl Dvar_RegisterString(
             "((flags & (1 << 14)) || CanKeepStringPointer( value ))",
             dvarName);
     v5.integer = (int)value;
-    *(_QWORD *)(&v5.value + 1) = dvarValue_4;
-    v5.vector[3] = dvarValue_12;
+    //*(_QWORD *)(&v5.value + 1) = dvarValue_4;
+    //v5.vector[3] = dvarValue_12;
     return Dvar_RegisterVariant(dvarName, 7u, flags, v5, 0, description);
 }
 

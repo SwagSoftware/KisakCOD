@@ -505,7 +505,8 @@ void __cdecl Com_SaveLump(LumpType type, const void *newLump, unsigned int size,
         for (chunkIter = 0; chunkIter < newHeader.chunkCount; ++chunkIter)
         {
             FS_Write((char*)chunkData[chunkIter], newHeader.chunks[chunkIter].length, h);
-            zeroCount = -newHeader.chunks[chunkIter].length & 3;
+            //zeroCount = -newHeader.chunks[chunkIter].length & 3;
+            zeroCount = -(int)(newHeader.chunks[chunkIter].length & 3); // KISAKTODO sus int cast
             if (zeroCount)
                 FS_Write((char*)&zero, zeroCount, h);
         }

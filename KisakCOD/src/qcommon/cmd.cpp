@@ -40,6 +40,19 @@ int marker_cmd;
 int cmd_wait;
 BOOL *cmd_insideCBufExecute;
 
+
+cmd_function_s *__cdecl _Cmd_FindCommand(const char *cmdName)
+{
+    cmd_function_s *cmd; // [esp+14h] [ebp-4h]
+
+    for (cmd = cmd_functions; cmd; cmd = cmd->next)
+    {
+        if (!strcmp(cmdName, cmd->name))
+            return cmd;
+    }
+    return 0;
+}
+
 const char **__cdecl Cmd_GetAutoCompleteFileList(const char *cmdName, int *fileCount)
 {
     cmd_function_s *cmd; // [esp+0h] [ebp-4h]
@@ -869,41 +882,6 @@ void __cdecl SV_Cmd_TokenizeString(char *text_in)
 void __cdecl SV_Cmd_EndTokenizedString()
 {
     Cmd_EndTokenizedStringKernel(&sv_cmd_args, &sv_cmd_argsPrivate);
-}
-
-cmd_function_s *__cdecl _Cmd_FindCommand(const char *cmdName)
-{
-    cmd_function_s *cmd; // [esp+14h] [ebp-4h]
-
-    for (cmd = cmd_functions; cmd; cmd = cmd->next)
-    {
-        if (!strcmp(cmdName, cmd->name))
-            return cmd;
-    }
-    return 0;
-}
-
-void __cdecl Cmd_AddCommandInternal(const char *cmdName, void(__cdecl *function)(), cmd_function_s *allocedCmd)
-{
-    cmd_function_s *cmd; // [esp+0h] [ebp-4h]
-
-    if (!cmdName)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1080, 0, "%s", "cmdName");
-    cmd = _Cmd_FindCommand(cmdName);
-    if (cmd)
-    {
-        if (cmd != allocedCmd)
-            MyAssertHandler(".\\qcommon\\cmd.cpp", 1085, 0, "%s", "cmd == allocedCmd");
-        if (function)
-            Com_Printf(16, "Cmd_AddCommand: %s already defined\n", cmdName);
-    }
-    else
-    {
-        allocedCmd->name = cmdName;
-        allocedCmd->function = function;
-        allocedCmd->next = cmd_functions;
-        cmd_functions = allocedCmd;
-    }
 }
 
 void __cdecl Cmd_RemoveCommand(const char *cmdName)

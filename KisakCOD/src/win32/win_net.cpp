@@ -741,14 +741,6 @@ void __cdecl NET_OpenSocks(u_short port)
 NET_GetLocalAddress
 =====================
 */
-int numIP;
-void __cdecl Sys_ShowIP()
-{
-	int i; // [esp+0h] [ebp-4h]
-
-	for (i = 0; i < numIP; ++i)
-		Com_Printf(16, "IP: %i.%i.%i.%i\n", localIP[i][0], localIP[i][1], localIP[i][2], localIP[i][3]);
-}
 
 #ifndef _XBOX
 

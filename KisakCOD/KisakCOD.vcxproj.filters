@@ -2045,7 +2045,7 @@
     <ClInclude Include="src\script\scr_compiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\groupvoice\dsound.h">
+    <ClInclude Include="src\groupvoice\directsound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\groupvoice\speex\filters.h">

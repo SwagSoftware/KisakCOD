@@ -125,7 +125,6 @@ int com_safemode;
 
 int opening_qconsole;
 
-char *noticeErrors[10];
 const char *noticeErrors[10] =
 {
   "EXE_SERVER_DISCONNECTED",
@@ -263,11 +262,6 @@ void QDECL Com_Printf(int channel, const char* fmt, ...)
 	_vsnprintf(string, 0x1000u, fmt, va);
 	string[4095] = 0;
 	Com_PrintMessage(channel, string, 0);
-}
-
-void QDECL Com_Error(errorParm_t code, const char* fmt, ...)
-{
-	// KISAKTODO
 }
 
 typedef enum
@@ -568,34 +562,6 @@ void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type)
 }
 
 
-/*
-=================
-Com_Init
-=================
-*/
-void Com_Init(char* commandLine) {
-	char* s;
-
-	try
-	{
-		Com_Printf(16, "%s %s build %s %s\n", "KisakCOD", "1.0", "win-x86", __DATE__); // KISAKTODO: incorporate CPUSTRING 
-
-
-
-		com_fullyInitialized = qtrue;
-		Com_Printf(16, "--- Common Initialization Complete ---\n");
-	}
-
-	catch (const char* reason) 
-	{
-		Sys_Error("Error during initialization: %s", reason);
-	}
-}
-
-
-
-
-
 void __cdecl Com_ShutdownWorld()
 {
     comWorld.isInUse = 0;
@@ -613,8 +579,9 @@ void __cdecl Com_InitPlayerProfiles(int localClientNum)
         (DvarLimits)0x100000000LL,
         0x200u,
         "true if player profile has been selected.");
-    *(_QWORD*)&v1.enabled = __PAIR64__(value_4, 1);
-    *(_QWORD*)&v1.color[8] = value_8;
+    v1.enabled = 1;
+    //*(_QWORD*)&v1.enabled = __PAIR64__(value_4, 1);
+    //*(_QWORD*)&v1.color[8] = value_8;
     Dvar_ChangeResetValue((dvar_s*)ui_playerProfileAlreadyChosen, v1);
     com_playerProfile = Dvar_RegisterString("com_playerProfile", (char*)"", 0x40u, "Player profile");
     if (!Com_SetInitialPlayerProfile(localClientNum))
@@ -695,17 +662,6 @@ void Com_OpenLogFile()
         Com_Printf(16, "Build %s\nlogfile opened on %s\n", BuildNumber, v1);
         opening_qconsole = 0;
     }
-}
-
-void Com_Printf(int channel, const char* fmt, ...)
-{
-    char string[4100]; // [esp+4h] [ebp-1008h] BYREF
-    va_list va; // [esp+101Ch] [ebp+10h] BYREF
-
-    va_start(va, fmt);
-    _vsnprintf(string, 0x1000u, fmt, va);
-    string[4095] = 0;
-    Com_PrintMessage(channel, string, 0);
 }
 
 void Com_DPrintf(int channel, const char* fmt, ...)
@@ -1424,7 +1380,6 @@ cmd_function_s Com_Assert_f_VAR;
 cmd_function_s Com_Quit_f_VAR;
 cmd_function_s Com_WriteConfig_f_VAR;
 cmd_function_s Com_WriteDefaults_f_VAR;
-cmd_function_s Com_Error_f_VAR;
 
 void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 {
@@ -1564,10 +1519,6 @@ void __cdecl Com_Freeze_f()
         Com_Printf(0, "freeze <seconds>\n");
     }
 }
-
-static char *rd_buffer;
-static int	rd_buffersize;
-static void	(*rd_flush)(char *buffer);
 
 void Com_BeginRedirect(char *buffer, int buffersize, void (*flush)(char *))
 {

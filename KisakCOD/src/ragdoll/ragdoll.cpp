@@ -98,15 +98,15 @@ DObj_s *__cdecl Ragdoll_BodyDObj(RagdollBody *body)
     return Com_GetClientDObj(body->dobj, body->localClientNum);
 }
 
-centity_s *__cdecl Ragdoll_BodyPose(RagdollBody *body)
+const cpose_t *__cdecl Ragdoll_BodyPose(RagdollBody *body)
 {
     if (!body)
         MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 207, 0, "%s", "body");
     if (body->pose)
-        return (centity_s *)body->pose;
+        return body->pose;
     if (body->dobj == -1)
         MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 215, 0, "%s", "body->dobj != DOBJ_HANDLE_NONE");
-    return (centity_s*)CG_GetPose(body->localClientNum, body->dobj);
+    return CG_GetPose(body->localClientNum, body->dobj);
 }
 
 void __cdecl Ragdoll_BodyRootOrigin(RagdollBody *body, float *origin)

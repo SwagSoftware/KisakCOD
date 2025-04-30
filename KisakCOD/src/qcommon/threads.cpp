@@ -6,6 +6,7 @@
 
 #include <client_mp/client_mp.h>
 #include <gfx_d3d/rb_drawprofile.h>
+#include <gfx_d3d/r_init.h>
 
 void Com_InitThreadData(int threadContext);
 unsigned int Win_InitThreads();
@@ -31,6 +32,15 @@ static volatile unsigned int smpData;
 static volatile unsigned int renderPausedCount;
 
 static WinThreadLock s_threadLock;
+
+static void *renderPausedEvent;
+static void *renderCompletedEvent;
+static void *noThreadOwnershipEvent;
+static void *rendererRunningEvent;
+static void *backendEvent[2];
+static void *ackendEvent;
+static void *updateSpotLightEffectEvent;
+static void *updateEffectsEvent;
 
 static const char* s_threadNames[7] =
 {
@@ -87,14 +97,6 @@ void __cdecl Sys_InitThread(int threadContext)
     //Profile_InitContext(threadContext);
 }
 
-static void* renderPausedEvent;
-static void* renderCompletedEvent;
-static void* noThreadOwnershipEvent;
-static void* rendererRunningEvent;
-static void* backendEvent[2];
-static void* ackendEvent;
-static void* updateSpotLightEffectEvent;
-static void* updateEffectsEvent;
 char __cdecl Sys_SpawnRenderThread(void(__cdecl* function)(unsigned int))
 {
     Sys_CreateEvent(0, 0, &renderPausedEvent);

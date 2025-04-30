@@ -8,6 +8,7 @@
 
 #include <direct.h>
 #include <io.h>
+#include "com_memory.h"
 
 
 _RTL_CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];

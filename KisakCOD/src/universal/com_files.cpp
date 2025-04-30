@@ -45,6 +45,20 @@ static fileHandleData_t fsh[65];
 char fs_gamedir[256];
 searchpath_s *fs_searchpaths;
 
+char __cdecl FS_SanitizeFilename(const char *filename, char *sanitizedName, int sanitizedNameSize);
+BOOL __cdecl FS_UseSearchPath(const searchpath_s *pSearch);
+int __cdecl FS_GetHandleAndOpenFile(char *filename, const char *ospath, FsThread thread);
+int __cdecl FS_IwdIsPure(iwd_t *iwd);
+const char **__cdecl FS_ListFilteredFiles(
+    searchpath_s *searchPath,
+    const char *path,
+    const char *extension,
+    const char *filter,
+    FsListBehavior_e behavior,
+    int *numfiles);
+
+
+
 bool __cdecl FS_Initialized()
 {
     return fs_searchpaths != 0;
@@ -439,7 +453,7 @@ int __cdecl FS_CreatePath(char *OSPath)
     char *ofs; // [esp+0h] [ebp-4h]
 
     v1 = strstr(OSPath, "..");
-    if (v1 || (strstr(OSPath, "::"), v2))
+    if (v1 || (strstr(OSPath, "::")))
     {
         Com_PrintWarning(10, "WARNING: refusing to create relative path \"%s\"\n", OSPath);
         return 1;
@@ -849,7 +863,7 @@ unsigned int __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, 
                         Com_Printf(10, "FS_FOpenFileRead: %s (found in '%s/%s')\n", sanitizedName, dir->path, dir->gamedir);
                     if (fs_copyfiles->current.enabled && !I_stricmp(dir->path, fs_cdpath->current.string))
                     {
-                        FS_BuildOSPathForThread(fs_basepath->current.integer, dir->gamedir, sanitizedName, copypath, thread);
+                        FS_BuildOSPathForThread((char*)fs_basepath->current.integer, dir->gamedir, sanitizedName, copypath, thread);
                         FS_CopyFile(netpath, copypath);
                     }
                     return FS_filelength(*file);
@@ -1885,7 +1899,6 @@ void __cdecl FS_TouchFile_f()
 
 cmd_function_s FS_Path_f_VAR;
 cmd_function_s FS_FullPath_f_VAR;
-cmd_function_s FS_FullPath_f_VAR;
 cmd_function_s FS_NewDir_f_VAR;
 cmd_function_s FS_TouchFile_f_VAR;
 void __cdecl FS_AddCommands()
@@ -1964,7 +1977,7 @@ void __cdecl FS_Startup(char *gameName)
     Com_ReadCDKey();
     FS_AddCommands();
     FS_Path_f();
-    Dvar_ClearModified(fs_gameDirVar);
+    Dvar_ClearModified((dvar_s*)fs_gameDirVar);
     Com_Printf(10, "----------------------\n");
     Com_Printf(10, "%d files in iwd files\n", fs_iwdFileCount);
 }
@@ -2875,7 +2888,7 @@ bool __cdecl FS_DeleteInDir(char *filename, char *dir)
         MyAssertHandler(".\\universal\\com_files.cpp", 2231, 0, "%s", "filename");
     if (!*filename)
         return 0;
-    FS_BuildOSPath(fs_homepath->current.integer, dir, filename, ospath);
+    FS_BuildOSPath((char*)fs_homepath->current.integer, dir, filename, ospath);
     return remove(ospath) != -1;
 }
 
@@ -2885,8 +2898,8 @@ void __cdecl FS_Rename(char *from, char *fromDir, char *to, char *toDir)
     char from_ospath[260]; // [esp+100h] [ebp-108h] BYREF
 
     FS_CheckFileSystemStarted();
-    FS_BuildOSPath(fs_homepath->current.integer, fromDir, from, from_ospath);
-    FS_BuildOSPath(fs_homepath->current.integer, toDir, to, to_ospath);
+    FS_BuildOSPath((char*)fs_homepath->current.integer, fromDir, from, from_ospath);
+    FS_BuildOSPath((char*)fs_homepath->current.integer, toDir, to, to_ospath);
     if (fs_debug->current.integer)
         Com_Printf(10, "FS_Rename: %s --> %s\n", from_ospath, to_ospath);
     if (rename(from_ospath, to_ospath))

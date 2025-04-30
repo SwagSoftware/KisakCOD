@@ -1,4 +1,4 @@
-#include "dsound.h"
+#include "directsound.h"
 #include <qcommon/qcommon.h>
 
 dsound_sample_t *s_recordingSamplePtr;

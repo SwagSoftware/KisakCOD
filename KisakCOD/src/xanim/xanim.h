@@ -1506,7 +1506,7 @@ void __cdecl XAnimUpdateTimeAndNotetrack(const DObj_s* obj, unsigned int infoInd
 void __cdecl XAnimCheckFreeInfo(XAnimTree_s* tree, unsigned int infoIndex, int hasWeight);
 void __cdecl XAnimFreeInfo(XAnimTree_s* tree, unsigned int infoIndex);
 void __cdecl XAnimClearServerNotify(XAnimInfo* info);
-double __cdecl XAnimGetAverageRateFrequency(__int64 tree);
+double __cdecl XAnimGetAverageRateFrequency(const XAnimTree_s *tree, unsigned int infoIndex);
 void __cdecl XAnimUpdateTimeAndNotetrackLeaf(
     const DObj_s* obj,
     const XAnimParts* parts,
@@ -1549,7 +1549,13 @@ double __cdecl XAnimGetServerNotifyFracSyncTotal(
     float dtime);
 int __cdecl DObjGetClientNotifyList(XAnimNotify_s** notifyList);
 void __cdecl DObjDisplayAnimToBuffer(const DObj_s* obj, const char* header, char* buffer, int bufferSize);
-void __cdecl XAnimDisplay(const XAnimTree_s* tree, __int64 infoIndex, char* buffer, __int64 bufferSize);
+void __cdecl XAnimDisplay(
+    const XAnimTree_s *tree,
+    unsigned int infoIndex,
+    int depth,
+    char *buffer,
+    int bufferSize,
+    int *bufferPos);
 void __cdecl DObjDisplayAnim(const DObj_s* obj, const char* header);
 void __cdecl XAnimCalcDelta(DObj_s* obj, unsigned int animIndex, float* rot, float* trans, bool bUseGoalWeight);
 void __cdecl XAnimCalcDeltaTree(

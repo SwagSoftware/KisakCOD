@@ -57,10 +57,18 @@ void __cdecl Com_ParseReturnToMark(const char **text, com_parse_mark_t *mark);
 int __cdecl Com_Compress(char *data_p);
 const char *__cdecl Com_GetLastTokenPos();
 parseInfo_t *__cdecl Com_Parse(const char **data_p);
+inline parseInfo_t *Com_Parse(char **data_p)
+{
+    return Com_Parse((const char **)data_p);
+}
 parseInfo_t *__cdecl Com_ParseExt(const char **data_p, int allowLineBreaks);
 const char *__cdecl SkipWhitespace(const char *data, int *hasNewLines);
 parseInfo_t *__cdecl Com_ParseCSV(const char **data_p, int allowLineBreaks);
 parseInfo_t *__cdecl Com_ParseOnLine(const char **data_p);
+inline parseInfo_t *__cdecl Com_ParseOnLine(char **data_p)
+{
+    return Com_ParseOnLine((const char **)data_p);
+}
 int __cdecl Com_MatchToken(const char **buf_p, const char *match, int warning);
 int __cdecl Com_SkipBracedSection(const char **program, unsigned int startDepth, int iMaxNesting);
 void __cdecl Com_SkipRestOfLine(const char **data);

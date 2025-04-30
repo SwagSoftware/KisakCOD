@@ -1,5 +1,6 @@
 #include "qcommon.h"
 #include <EffectsCore/fx_system.h>
+#include <xanim/xanim.h>
 
 void __cdecl CM_TraceThroughAabbTree(const traceWork_t *tw, const CollisionAabbTree *aabbTree, trace_t *trace)
 {

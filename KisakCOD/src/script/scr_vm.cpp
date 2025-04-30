@@ -1563,7 +1563,7 @@ void __cdecl Scr_NotifyNum(
     if (paramcount > scrVmPub.inparamcount)
         MyAssertHandler(".\\script\\scr_vm.cpp", 3671, 0, "%s", "paramcount <= scrVmPub.inparamcount");
     Scr_ClearOutParams();
-    startTop = &scrVmPub.top[-paramcount];
+    startTop = &scrVmPub.top[-(int)paramcount];
     paramcounta = scrVmPub.inparamcount - paramcount;
     id = FindEntityId(entnum, classnum).u.stringValue;
     if (id)
@@ -2241,7 +2241,7 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char* pos, unsigned 
     if (paramcount > scrVmPub.inparamcount)
         MyAssertHandler(".\\script\\scr_vm.cpp", 3915, 0, "%s", "paramcount <= scrVmPub.inparamcount");
     Scr_ClearOutParams();
-    startTop = &scrVmPub.top[-paramcount];
+    startTop = &scrVmPub.top[-(int)paramcount];
     paramcounta = scrVmPub.inparamcount - paramcount;
     if (scrVmPub.function_count >= 30)
     {
@@ -2345,7 +2345,7 @@ unsigned int __cdecl VM_Execute_0()
     const char* v1; // eax
     const char* v2; // eax
     unsigned int Variable; // eax
-    unsigned int Variable; // eax
+    //unsigned int Variable; // eax
     unsigned int v5; // eax
     const char* v6; // eax
     const char* v7; // eax
@@ -5185,7 +5185,7 @@ VariableUnion __cdecl Scr_GetInt(unsigned int index)
 
     if (index < scrVmPub.outparamcount)
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         if (value->type == 6)
             return value->u;
         scrVarPub.error_index = index + 1;
@@ -5212,7 +5212,7 @@ scr_anim_s __cdecl Scr_GetAnim(unsigned int index, XAnimTree_s* tree)
 
     if (index < scrVmPub.outparamcount)
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         if (value->type == 11)
         {
             anim = (scr_anim_s)value->u.intValue;
@@ -5287,7 +5287,7 @@ double __cdecl Scr_GetFloat(unsigned int index)
 
     if (index < scrVmPub.outparamcount)
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         if (value->type == 5)
             return value->u.floatValue;
         if (value->type == 6)
@@ -5308,7 +5308,7 @@ VariableUnion __cdecl Scr_GetConstString(unsigned int index)
 
     if (index >= scrVmPub.outparamcount)
         goto LABEL_7;
-    value = &scrVmPub.top[-index];
+    value = &scrVmPub.top[-(int)index];
     if (!Scr_CastString(value))
     {
         scrVarPub.error_index = index + 1;
@@ -5336,7 +5336,7 @@ VariableUnion __cdecl Scr_GetConstLowercaseString(unsigned int index)
 
     if (index >= scrVmPub.outparamcount)
         goto LABEL_12;
-    value = &scrVmPub.top[-index];
+    value = &scrVmPub.top[-(int)index];
     if (!Scr_CastString(value))
     {
         scrVarPub.error_index = index + 1;
@@ -5375,7 +5375,7 @@ char* __cdecl Scr_GetString(unsigned int index)
 
 VariableUnion __cdecl Scr_GetConstStringIncludeNull(unsigned int index)
 {
-    if (index >= scrVmPub.outparamcount || scrVmPub.top[-index].type)
+    if (index >= scrVmPub.outparamcount || scrVmPub.top[-(int)index].type)
         return Scr_GetConstString(index);
     return 0;
 }
@@ -5393,7 +5393,7 @@ char* __cdecl Scr_GetDebugString(unsigned int index)
     }
     else
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         Scr_CastDebugString(value);
         if (value->type != 2)
             MyAssertHandler(".\\script\\scr_vm.cpp", 4693, 0, "%s", "value->type == VAR_STRING");
@@ -5409,7 +5409,7 @@ VariableUnion __cdecl Scr_GetConstIString(unsigned int index)
 
     if (index < scrVmPub.outparamcount)
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         if (value->type == 3)
             return value->u;
         scrVarPub.error_index = index + 1;
@@ -5438,7 +5438,7 @@ void __cdecl Scr_GetVector(unsigned int index, float* vectorValue)
 
     if (index < scrVmPub.outparamcount)
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         if (value->type == 4)
         {
             intValue = (float*)value->u.intValue;
@@ -5466,7 +5466,7 @@ scr_entref_t __cdecl Scr_GetEntityRef(unsigned int index)
 
     if (index < scrVmPub.outparamcount)
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         if (value->type == 1)
         {
             id = value->u.intValue;
@@ -5494,7 +5494,7 @@ VariableUnion __cdecl Scr_GetObject(unsigned int index)
 
     if (index < scrVmPub.outparamcount)
     {
-        value = &scrVmPub.top[-index];
+        value = &scrVmPub.top[-(int)index];
         if (value->type == 1)
             return value->u;
         scrVarPub.error_index = index + 1;
@@ -5511,7 +5511,7 @@ int __cdecl Scr_GetType(unsigned int index)
     const char* v2; // eax
 
     if (index < scrVmPub.outparamcount)
-        return scrVmPub.top[-index].type;
+        return scrVmPub.top[-(int)index].type;
     v2 = va("parameter %d does not exist", index + 1);
     Scr_Error(v2);
     return 0;
@@ -5522,7 +5522,7 @@ const char* __cdecl Scr_GetTypeName(unsigned int index)
     const char* v2; // eax
 
     if (index < scrVmPub.outparamcount)
-        return var_typename[scrVmPub.top[-index].type];
+        return var_typename[scrVmPub.top[-(int)index].type];
     v2 = va("parameter %d does not exist", index + 1);
     Scr_Error(v2);
     return 0;
@@ -5535,9 +5535,9 @@ unsigned int __cdecl Scr_GetPointerType(unsigned int index)
 
     if (index < scrVmPub.outparamcount)
     {
-        if (scrVmPub.top[-index].type == 1)
-            return GetObjectType(scrVmPub.top[-index].u.stringValue);
-        v2 = va("type %s is not an object", var_typename[scrVmPub.top[-index].type]);
+        if (scrVmPub.top[-(int)index].type == 1)
+            return GetObjectType(scrVmPub.top[-(int)index].u.stringValue);
+        v2 = va("type %s is not an object", var_typename[scrVmPub.top[-(int)index].type]);
         Scr_Error(v2);
     }
     v3 = va("parameter %d does not exist", index + 1);
@@ -5846,7 +5846,7 @@ VariableValue __cdecl GetEntityFieldValue(unsigned int classnum, int entnum, int
         MyAssertHandler(".\\script\\scr_vm.cpp", 5132, 0, "%s", "!scrVmPub.inparamcount || scrVmPub.inparamcount == 1");
     if (scrVmPub.outparamcount)
         MyAssertHandler(".\\script\\scr_vm.cpp", 5133, 0, "%s", "!scrVmPub.outparamcount");
-    if (&scrVmPub.top[-scrVmPub.inparamcount] != (VariableValue*)((char*)&scrVmGlob - 8))
+    if (&scrVmPub.top[-(int)scrVmPub.inparamcount] != (VariableValue*)((char*)&scrVmGlob - 8))
         MyAssertHandler(
             ".\\script\\scr_vm.cpp",
             5134,

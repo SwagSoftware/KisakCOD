@@ -248,7 +248,7 @@ void ProfLoad_PrintHotSpots()
     //    24 * mapLoadProfile.profileEntryCount / 24,
     //    (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))ProfLoad_CompareHotSpotNames);
     //std::sort(&v11[0], &v11[mapLoadProfile.profileEntryCount], 24 * mapLoadProfile.profileEntryCount / 24, ProfLoad_CompareHotSpotNames);
-    std::sort(&v11[0], &v11[mapLoadProfile.profileEntryCount], ProfLoad_CompareHotSpotNames);
+    std::sort((const MapProfileHotSpot **)&v11[0], (const MapProfileHotSpot **)&v11[mapLoadProfile.profileEntryCount], ProfLoad_CompareHotSpotNames);
     v14 = 0;
     i = 0;
     while (i != mapLoadProfile.profileEntryCount)
@@ -282,7 +282,7 @@ void ProfLoad_PrintHotSpots()
     //    &v11[v14],
     //    24 * v14 / 24,
     //    ProfLoad_CompareHotSpotTicks);
-    std::sort(&v11[0], &v11[v14], ProfLoad_CompareHotSpotTicks);
+    std::sort((const MapProfileHotSpot **)&v11[0], (const MapProfileHotSpot **)&v11[v14], ProfLoad_CompareHotSpotTicks);
     Com_Printf(12, "\n\n^6---------- Load time hot spots ----------\n");
     if (v14 > 16)
         v10 = 16;

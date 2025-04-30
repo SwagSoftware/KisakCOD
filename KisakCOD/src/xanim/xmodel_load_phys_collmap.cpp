@@ -2,6 +2,9 @@
 #include <universal/com_files.h>
 #include <universal/q_parse.h>
 #include <common/brush.h>
+#include <ode/mass.h>
+#include <qcommon/qcommon.h>
+#include <physics/phys_local.h>
 
 // KISAKTODO: move to "mass.cpp", but it's different from the ODE one.
 void __cdecl Phys_ComputeMassProperties(
@@ -128,9 +131,9 @@ void __cdecl Phys_ComputeMassProperties(
 
 char __cdecl SkipEpair(char *token, const char **file)
 {
-    int v3; // eax
-    int v4; // eax
-    int v5; // eax
+    char *v3; // eax
+    char *v4; // eax
+    char *v5; // eax
     int v6; // eax
     int v7; // eax
     int v8; // eax
@@ -143,15 +146,15 @@ char __cdecl SkipEpair(char *token, const char **file)
     }
     else
     {
-        strchr(token, 0xAu);
-        if (v3 || (strchr(token, 0xDu), v4))
+        v3 = strchr(token, 0xAu);
+        if (v3 || (strchr(token, 0xDu)))
         {
             Com_PrintError(19, "SkipEpair: key '%s' contains a newline character\n", token);
             return 0;
         }
         else
         {
-            strchr(token, 0x22u);
+            v5 = strchr(token, 0x22u);
             if (v5)
             {
                 Com_PrintError(19, "SkipEpair: key '%s' contains a \" character, will cause parsing errors\n", token);
@@ -167,7 +170,7 @@ char __cdecl SkipEpair(char *token, const char **file)
                 }
                 else
                 {
-                    if (strchr(tokena->token, 0xAu) || (strchr(tokena->token, 0xDu), v7))
+                    if (strchr(tokena->token, 0xAu) || (strchr(tokena->token, 0xDu)))
                     {
                         Com_PrintError(
                             19,
@@ -874,43 +877,42 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     float perimiter1; // [esp+24h] [ebp-6040h]
     float plane[4]; // [esp+28h] [ebp-603Ch] BYREF
     int ptsCount; // [esp+38h] [ebp-602Ch]
-    float v15[3073]; // [esp+3Ch] [ebp-6028h] BYREF
+    float v0[3073]; // [esp+3Ch] [ebp-6028h] BYREF
     SimplePlaneIntersection *xyz[1024]; // [esp+3044h] [ebp-3020h] BYREF
     SimplePlaneIntersection *point[1024]; // [esp+4044h] [ebp-2020h] BYREF
     SimplePlaneIntersection *v19[1024]; // [esp+5044h] [ebp-1020h] BYREF
     int i0; // [esp+6044h] [ebp-20h] BYREF
-    bool v21; // [esp+6048h] [ebp-1Ch]
-    bool v22; // [esp+6049h] [ebp-1Bh]
+    char v21; // [esp+6048h] [ebp-1Ch]
+    char v22; // [esp+6049h] [ebp-1Bh]
     int v23; // [esp+604Ch] [ebp-18h]
-    unsigned int v24; // [esp+6050h] [ebp-14h]
-    unsigned int v25; // [esp+6054h] [ebp-10h]
+    unsigned int v24[2]; // [esp+6050h] [ebp-14h]
     int i1; // [esp+6058h] [ebp-Ch] BYREF
     float perimiter2; // [esp+605Ch] [ebp-8h]
     int plane2; // [esp+6060h] [ebp-4h]
 
-    ptsCount = GetPointListAllowDupes(basePlaneIndex, InPts, InPtCount, xyz, 1024);
+    ptsCount = GetPointListAllowDupes(basePlaneIndex, InPts, InPtCount, (const SimplePlaneIntersection **)xyz, 1024);
     if (ptsCount < 3)
         return 0;
-    if (NumberOfUniquePoints(xyz, ptsCount) < 3)
+    if (NumberOfUniquePoints((const SimplePlaneIntersection **)xyz, ptsCount) < 3)
         return 0;
-    ptsCount = ReduceToACycle(basePlaneIndex, xyz, ptsCount);
+    ptsCount = ReduceToACycle(basePlaneIndex, (const SimplePlaneIntersection **)xyz, ptsCount);
     if (ptsCount < 3)
         return 0;
     v23 = 0;
     while (ptsCount)
     {
         point[1024 * v23] = xyz[--ptsCount];
-        *(&v24 + v23) = 1;
+        v24[v23] = 1;
         plane2 = SecondPlane(point[1024 * v23], basePlaneIndex);
         while (ptsCount)
         {
-            v7 = (SimplePlaneIntersection*)RemoveNextPointFormedByThisPlane(plane2, xyz, &xyz[ptsCount]);
-            *(&point[1024 * v23] + *(&v24 + v23)) = v7;
-            if (!*(&point[1024 * v23] + *(&v24 + v23)))
+            v7 = (SimplePlaneIntersection*)RemoveNextPointFormedByThisPlane(plane2, (const SimplePlaneIntersection **)xyz, (const SimplePlaneIntersection **)&xyz[ptsCount]);
+            *(&point[1024 * v23] + v24[v23]) = v7;
+            if (!*(&point[1024 * v23] + v24[v23]))
                 break;
-            plane2 = ThirdPlane(*(&point[1024 * v23] + *(&v24 + v23)), basePlaneIndex, plane2);
+            plane2 = ThirdPlane(*(&point[1024 * v23] + v24[v23]), basePlaneIndex, plane2);
             --ptsCount;
-            ++*(&v24 + v23);
+            ++v24[v23];
         }
         if (!IsPtFormedByThisPlane(plane2, point[1024 * v23]))
             MyAssertHandler(
@@ -925,24 +927,24 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
         }
         else
         {
-            perimiter1 = CyclePerimiter(point, v24);
-            perimiter2 = CyclePerimiter(v19, v25);
-            v21 = TestConvexWithoutNearPoints(point, v24);
-            v22 = TestConvexWithoutNearPoints(v19, v25);
-            if (CycleLess(v21, v22, perimiter1, perimiter2, v24, v25))
+            perimiter1 = CyclePerimiter((const SimplePlaneIntersection**)point, v24[0]);
+            perimiter2 = CyclePerimiter((const SimplePlaneIntersection**)v19, v24[1]);
+            v21 = TestConvexWithoutNearPoints((const SimplePlaneIntersection**)point, v24[0]);
+            v22 = TestConvexWithoutNearPoints((const SimplePlaneIntersection**)v19, v24[1]);
+            if (CycleLess(v21, v22, perimiter1, perimiter2, v24[0], v24[1]))
             {
-                memcpy(point, v19, 4 * v25);
-                v24 = v25;
+                memcpy(point, v19, 4 * v24[1]);
+                v24[0] = v24[1];
             }
         }
     }
-    if (v24 <= 2)
+    if (v24[0] <= 2)
         MyAssertHandler("..\\common\\brush_edges.cpp", 850, 1, "%s", "cycleCount[0] > 2");
     w = 0;
     if (optionalOutWinding)
     {
         w = optionalOutWinding;
-        if (optionalOutWindingCount < v24)
+        if (optionalOutWindingCount < v24[0])
         {
             Com_PrintError(1, "Brush face has too many edges");
             return 0;
@@ -954,30 +956,30 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     }
     if (!w)
         MyAssertHandler("..\\common\\brush_edges.cpp", 873, 0, "%s", "winding");
-    if (!PlaneInCommonExcluding(point[0], xyz[v24 + 1023], basePlaneIndex, w->sides))
+    if (!PlaneInCommonExcluding(point[0], xyz[v24[0] + 1023], basePlaneIndex, w->sides))
         MyAssertHandler("..\\common\\brush_edges.cpp", 875, 1, "%s", "rv");
-    v15[0] = point[0]->xyz[0];
-    v15[1] = point[0]->xyz[1];
-    v15[2] = point[0]->xyz[2];
-    for (w->numsides = 1; w->numsides < v24; ++w->numsides)
+    v0[0] = point[0]->xyz[0];
+    v0[1] = point[0]->xyz[1];
+    v0[2] = point[0]->xyz[2];
+    for (w->numsides = 1; w->numsides < v24[0]; ++w->numsides)
     {
         w->sides[w->numsides] = ThirdPlane(xyz[w->numsides + 1023], basePlaneIndex, *(&w->numsides + w->numsides));
-        v8 = &v15[3 * w->numsides];
-        v9 = (SimplePlaneIntersection*)point[w->numsides];
+        v8 = &v0[3 * w->numsides];
+        v9 = point[w->numsides];
         *v8 = v9->xyz[0];
         v8[1] = v9->xyz[1];
         v8[2] = v9->xyz[2];
     }
-    if (w->sides[0] != ThirdPlane(xyz[v24 + 1023], basePlaneIndex, *(&w->numsides + w->numsides)))
+    if (w->sides[0] != ThirdPlane(xyz[v24[0] + 1023], basePlaneIndex, *(&w->numsides + w->numsides)))
         MyAssertHandler(
             "..\\common\\brush_edges.cpp",
             884,
             1,
             "%s",
             "winding->sides[0] == ThirdPlane( cycle[0][cycleCount[0]-1], basePlaneIndex, winding->sides[winding->numsides-1] )");
-    if (RepresentativeTriangleFromWinding((const float(*)[3])v15, w->numsides, sideNormal, &i0, &i1, &i2) < 0.001000000047497451)
+    if (RepresentativeTriangleFromWinding((const float(*)[3])v0, w->numsides, sideNormal, &i0, &i1, &i2) < 0.001000000047497451)
         return 0;
-    PlaneFromPoints(plane, &v15[3 * i0], &v15[3 * i1], &v15[3 * i2]);
+    PlaneFromPoints(plane, &v0[3 * i0], &v0[3 * i1], &v0[3 * i2]);
     if (Vec3Dot(plane, sideNormal) < 0.0)
         ReverseAdjacencyWinding(w);
     return w;
@@ -1022,10 +1024,10 @@ char __cdecl Xmodel_ParsePhysicsBrush(
     if (!geom)
         MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 301, 0, "%s", "geom");
     sideCount = 0;
-    Map_SkipOptionalArg(file, "layer");
-    if (!Map_SkipNamedFlags(file, "contents"))
+    Map_SkipOptionalArg((const char**)file, "layer");
+    if (!Map_SkipNamedFlags((const char**)file, "contents"))
         return 0;
-    if (!Map_SkipNamedFlags(file, "toolFlags"))
+    if (!Map_SkipNamedFlags((const char **)file, "toolFlags"))
         return 0;
     while (1)
     {
@@ -1040,12 +1042,12 @@ char __cdecl Xmodel_ParsePhysicsBrush(
             Com_PrintError(19, "ERROR: MAX_BUILD_SIDES (%i) -- brush too many sides.  Simplify the collision geometry.", 32);
             return 0;
         }
-        Com_Parse1DMatrix(file, 3, m);
-        Com_Parse1DMatrix(file, 3, v1);
-        Com_Parse1DMatrix(file, 3, v2);
+        Com_Parse1DMatrix((const char**)file, 3, m);
+        Com_Parse1DMatrix((const char**)file, 3, v1);
+        Com_Parse1DMatrix((const char**)file, 3, v2);
         PlaneFromPoints(&plane[4 * sideCount], m, v1, v2);
         SnapPlane(&plane[4 * sideCount++]);
-        Com_SkipRestOfLine(file);
+        Com_SkipRestOfLine((const char**)file);
     }
     if (!RemoveDuplicateBrushPlanes((float(*)[4])plane, &sideCount, mapname, brushCount))
         return 0;

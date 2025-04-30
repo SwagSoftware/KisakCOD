@@ -6,6 +6,7 @@
 #include "../client/client.h"
 #include "win_local.h"
 #include <client_mp/client_mp.h>
+#include <gfx_d3d/r_dvars.h>
 
 
 struct __declspec(align(4)) WinMouseVars_t // sizeof=0x10
@@ -387,6 +388,7 @@ void __cdecl IN_ClampMouseMove(tagPOINT *curPos)
 IN_MouseMove
 ===========
 */
+void __cdecl IN_RecenterMouse();
 int IN_MouseMove()
 {
 	int result; // eax

@@ -1,6 +1,7 @@
 #include "snd_local.h"
 #include "snd_public.h"
 #include <universal/com_files.h>
+#include <universal/com_memory.h>
 
 LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, const char *soundName)
 {

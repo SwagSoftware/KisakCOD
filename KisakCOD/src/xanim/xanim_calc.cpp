@@ -2,6 +2,26 @@
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 
+void __cdecl Short2LerpAsVec2(const __int16 *from, const __int16 *to, float frac, float *out)
+{
+    *out = frac * (*to - *from) + *from;
+    out[1] = frac * (to[1] - from[1]) + from[1];
+}
+
+void __cdecl XAnim_SetTime(float time, int frameCount, XAnimTime *animTime);
+void __cdecl XAnim_GetTimeIndex_unsigned_char_(
+    const XAnimTime *animTime,
+    const unsigned __int8 *indices,
+    int tableSize,
+    int *keyFrameIndex,
+    float *keyFrameLerpFrac);
+
+void __cdecl XAnim_GetTimeIndex_unsigned_short_(
+    const XAnimTime *animTime,
+    const unsigned __int16 *indices,
+    int tableSize,
+    int *keyFrameIndex,
+    float *keyFrameLerpFrac);
 
 void __cdecl XAnimCalc(
     const DObj_s *obj,
@@ -260,20 +280,24 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     unsigned __int16 *v70; // [esp+1D0h] [ebp-120h]
     int v71; // [esp+1D4h] [ebp-11Ch] BYREF
     unsigned __int16 *v72; // [esp+1D8h] [ebp-118h]
-    __int64 v73; // [esp+1DCh] [ebp-114h]
+    //__int64 v73; // [esp+1DCh] [ebp-114h]
+    __int16 v73[4];
     float v74; // [esp+1E4h] [ebp-10Ch]
     float v75; // [esp+1E8h] [ebp-108h]
     float v76; // [esp+1ECh] [ebp-104h] BYREF
-    __int64 v77; // [esp+1F0h] [ebp-100h]
+    //__int64 v77; // [esp+1F0h] [ebp-100h]
+    __int16 v77[4];
     float v78; // [esp+1F8h] [ebp-F8h]
     float v79; // [esp+1FCh] [ebp-F4h]
     int v80; // [esp+200h] [ebp-F0h] BYREF
     unsigned __int8 *v81; // [esp+204h] [ebp-ECh]
-    __int64 v82; // [esp+208h] [ebp-E8h]
+    //__int64 v82; // [esp+208h] [ebp-E8h]
+    __int16 v82[4];
     float v83; // [esp+210h] [ebp-E0h]
     float v84; // [esp+214h] [ebp-DCh]
     float v85; // [esp+218h] [ebp-D8h] BYREF
-    __int64 v86; // [esp+21Ch] [ebp-D4h]
+    //__int64 v86; // [esp+21Ch] [ebp-D4h]
+    __int16 v86[4];
     float v87; // [esp+224h] [ebp-CCh]
     float v88; // [esp+228h] [ebp-C8h]
     float v89; // [esp+22Ch] [ebp-C4h]
@@ -671,19 +695,19 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         if (v27)
         {
             v81 = &randomDataByte[3 * v80];
-            *&v86 = *v81;
-            *(&v86 + 1) = v81[1];
+            *v86 = *v81;
+            *&v86[2] = v81[1];
             v87 = v81[2];
             v88 = 0.0;
             v26 = v81 + 3;
-            *&v82 = v81[3];
-            *(&v82 + 1) = v81[4];
+            *v82 = v81[3];
+            *&v82[2] = v81[4];
             v83 = v81[5];
             v84 = 0.0;
-            *v10.v = v82;
+            *v10.v = *v82;
             v10.v[2] = v83;
             v10.v[3] = 0.0;
-            *v8.v = v86;
+            *v8.v = *v86;
             v8.v[2] = v87;
             v8.v[3] = 0.0;
             XAnimWeightedAccumLerpedTrans(v8, v10, v85, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
@@ -748,18 +772,18 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         if (v21)
         {
             v72 = (unsigned short *)&randomDataShort[3 * v71];
-            *&v77 = *v72;
-            *(&v77 + 1) = v72[1];
+            *v77 = *v72;
+            *&v77[2] = v72[1];
             v78 = v72[2];
             v79 = 0.0;
-            *&v73 = v72[3];
-            *(&v73 + 1) = v72[4];
+            *v73 = v72[3];
+            *&v73[2] = v72[4];
             v74 = v72[5];
             v75 = 0.0;
-            *v11.v = v73;
+            *v11.v = *v73;
             v11.v[2] = v74;
             v11.v[3] = 0.0;
-            *v9.v = v77;
+            *v9.v = *v77;
             v9.v[2] = v78;
             v9.v[3] = 0.0;
             XAnimWeightedAccumLerpedTrans(v9, v11, v76, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
@@ -857,20 +881,24 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     unsigned __int8 *v49; // [esp+180h] [ebp-120h]
     int v50; // [esp+184h] [ebp-11Ch] BYREF
     unsigned __int16 *v51; // [esp+188h] [ebp-118h]
-    __int64 v52; // [esp+18Ch] [ebp-114h]
+    //__int64 v52; // [esp+18Ch] [ebp-114h]
+    __int16 v52[4];
     float v53; // [esp+194h] [ebp-10Ch]
     float v54; // [esp+198h] [ebp-108h]
     float v55; // [esp+19Ch] [ebp-104h] BYREF
-    __int64 v56; // [esp+1A0h] [ebp-100h]
+    //__int64 v56; // [esp+1A0h] [ebp-100h]
+    __int16 v56[4];
     float v57; // [esp+1A8h] [ebp-F8h]
     float v58; // [esp+1ACh] [ebp-F4h]
     int v59; // [esp+1B0h] [ebp-F0h] BYREF
     unsigned __int8 *v60; // [esp+1B4h] [ebp-ECh]
-    __int64 v61; // [esp+1B8h] [ebp-E8h]
+    //__int64 v61; // [esp+1B8h] [ebp-E8h]
+    __int16 v61[4];
     float v62; // [esp+1C0h] [ebp-E0h]
     float v63; // [esp+1C4h] [ebp-DCh]
     float v64; // [esp+1C8h] [ebp-D8h] BYREF
-    __int64 v65; // [esp+1CCh] [ebp-D4h]
+    //__int64 v65; // [esp+1CCh] [ebp-D4h]
+    __int16 v65[4];
     float v66; // [esp+1D4h] [ebp-CCh]
     float v67; // [esp+1D8h] [ebp-C8h]
     float v68; // [esp+1DCh] [ebp-C4h]
@@ -1183,21 +1211,21 @@ void __cdecl XAnimCalcParts_unsigned_char_(
         if (v19)
         {
             v60 = &randomDataByte[3 * v59];
-            *&v65 = *v60;
-            *(&v65 + 1) = v60[1];
+            *v65 = *v60;
+            *&v65[2] = v60[1];
             v66 = v60[2];
             v67 = 0.0;
-            *&v61 = v60[3];
-            *(&v61 + 1) = v60[4];
+            *v61 = v60[3];
+            *&v61[2] = v60[4];
             v62 = v60[5];
             v63 = 0.0;
-            *v10.v = v61;
+            *v10.v = *v61;
             v10.v[2] = v62;
             v10.v[3] = 0.0;
-            *v8.v = v65;
+            *v8.v = *v65;
             v8.v[2] = v66;
             v8.v[3] = 0.0;
-            XAnimWeightedAccumLerpedTrans(v8, v10, v64, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
+            XAnimWeightedAccumLerpedTrans(v8, v10, v64, weightScale, (const float*)dataInt, &rotTransArray[modelPartIndex]);
         }
         ++animPartIndex;
         dataInt += 6;
@@ -1232,21 +1260,23 @@ void __cdecl XAnimCalcParts_unsigned_char_(
         if (v17)
         {
             v51 = (unsigned short*)&randomDataShort[3 * v50];
-            *&v56 = *v51;
-            *(&v56 + 1) = v51[1];
+            *v56 = *v51;
+            *&v56[2] = v51[1];
             v57 = v51[2];
             v58 = 0.0;
-            *&v52 = v51[3];
-            *(&v52 + 1) = v51[4];
+            *v52 = v51[3];
+            *&v52[2] = v51[4];
             v53 = v51[5];
             v54 = 0.0;
-            *v11.v = v52;
+            //*v11.v = v52;
+            *v11.v = *v52;
             v11.v[2] = v53;
             v11.v[3] = 0.0;
-            *v9.v = v56;
+            //*v9.v = v56;
+            *v9.v = *v56;
             v9.v[2] = v57;
             v9.v[3] = 0.0;
-            XAnimWeightedAccumLerpedTrans(v9, v11, v55, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
+            XAnimWeightedAccumLerpedTrans(v9, v11, v55, weightScale, (const float*)dataInt, &rotTransArray[modelPartIndex]);
         }
         ++animPartIndex;
         dataInt += 6;
@@ -2246,12 +2276,6 @@ void __cdecl XAnim_CalcRotDeltaDuring_unsigned_short_(
         *rotDelta = 0.0;
         rotDelta[1] = 32767.0;
     }
-}
-
-void __cdecl Short2LerpAsVec2(const __int16 *from, const __int16 *to, float frac, float *out)
-{
-    *out = frac * (*to - *from) + *from;
-    out[1] = frac * (to[1] - from[1]) + from[1];
 }
 
 void __cdecl XAnim_CalcRotDeltaDuring_unsigned_char_(

@@ -1,6 +1,8 @@
 #include "qcommon.h"
 #include "mem_track.h"
-#include <minwindef.h>
+#include <xanim/xanim.h>
+
+#include <Windows.h>
 
 
 unsigned __int8 windingPool[12292];
@@ -595,14 +597,12 @@ char __cdecl CM_BrushInView(const cbrush_t *brush, cplane_s *frustumPlanes, int 
 
     if (!frustumPlanes)
         MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 49, 0, "%s", "frustumPlanes");
-    for (frustumPlaneIndex = 0; frustumPlaneIndex < frustumPlaneCount; frustumPlaneIndex = frustumPlaneIndexa + 1)
+    for (frustumPlaneIndex = 0; frustumPlaneIndex < frustumPlaneCount; frustumPlaneIndex++)// = frustumPlaneIndexa + 1)
     {
         if ((BoxOnPlaneSide(
             brush->mins,
             brush->maxs,
-            &frustumPlanes[frustumPlaneIndex],
-            (const cplane_s *)frustumPlaneIndex)
-            & 1) == 0)
+            &frustumPlanes[frustumPlaneIndex])))
             return 0;
     }
     return 1;
@@ -632,12 +632,61 @@ BOOL __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane
     //if ((unsigned __int8)signbits < 8u)
     //    __asm { jmp     Ljmptab[eax * 4] }
     //__debugbreak();
-    //if (!alwaysfails)
-    //    MyAssertHandler(".\\universal\\com_math.cpp", 3473, 1, "BoxOnPlaneSide: invalid signbits for plane");
-    //__debugbreak();
-    //__debugbreak();
-    //__debugbreak();
-    //__debugbreak();
-    //__debugbreak();
-    return BoxDistSqrdExceeds(emins, emaxs, p->normal, *(float *)&pa);
+
+    float v3;
+    float v4;
+
+    // LWSS: Note that this is not generic-able. The maths are slightly changed for each case.
+    // These are opposite per-line
+    // v3 = MAX, MAX, MAX
+    // v4 = MIN, MIN, MIN
+    // ... 
+    // v3 = MIN, MAX, MIN
+    // v4 = MAX, MIN, MAX
+    switch (p->signbits)
+    {
+    case 0:
+        v3 = (p->normal[0] * emaxs[0]) + (emaxs[1] * p->normal[1]) + (emaxs[2] * p->normal[2]); 
+        v4 = (p->normal[0] * emins[0]) + (emins[1] * p->normal[1]) + (emins[2] * p->normal[2]);
+        break;
+    case 1:
+        v3 = (p->normal[0] * emins[0]) + (emaxs[1] * p->normal[1]) + (emaxs[2] * p->normal[2]);
+        v4 = (p->normal[0] * emaxs[0]) + (emins[1] * p->normal[1]) + (emins[2] * p->normal[2]);
+        break;
+    case 2:
+        v3 = (p->normal[0] * emaxs[0]) + (emaxs[2] * p->normal[2]) + (emins[1] * p->normal[1]);
+        v4 = (p->normal[0] * emins[0]) + (emins[2] * p->normal[2]) + (emaxs[1] * p->normal[1]);
+        break;
+    case 3:
+        v3 = (p->normal[0] * emins[0]) + (emaxs[2] * p->normal[2]) + (emins[1] * p->normal[1]);
+        v4 = (p->normal[0] * emaxs[0]) + (emins[2] * p->normal[2]) + (emaxs[1] * p->normal[1]);
+        break;
+    case 4:
+        v3 = (p->normal[0] * emaxs[0]) + (emaxs[1] * p->normal[1]) + (emins[2] * p->normal[2]);
+        v4 = (p->normal[0] * emins[0]) + (emins[1] * p->normal[1]) + (emaxs[2] * p->normal[2]);
+        break;
+    case 5:
+        v3 = (p->normal[0] * emins[0]) + (emaxs[1] * p->normal[1]) + (emins[2] * p->normal[2]);
+        v4 = (p->normal[0] * emaxs[0]) + (emins[1] * p->normal[1]) + (emaxs[2] * p->normal[2]);
+        break;
+    case 6:
+        v3 = (p->normal[0] * emaxs[0]) + (emins[1] * p->normal[1]) + (emins[2] * p->normal[2]);
+        v4 = (p->normal[0] * emins[0]) + (emaxs[1] * p->normal[1]) + (emaxs[2] * p->normal[2]);
+        break;
+    case 7:
+        v3 = (p->normal[0] * emins[0]) + (emins[1] * p->normal[1]) + (emins[2] * p->normal[2]);
+        v4 = (p->normal[0] * emaxs[0]) + (emaxs[1] * p->normal[1]) + (emaxs[2] * p->normal[2]);
+        break;
+    }
+    
+    if (!alwaysfails)
+        MyAssertHandler(".\\universal\\com_math.cpp", 3473, 1, "BoxOnPlaneSide: invalid signbits for plane");
+
+    __debugbreak();
+    __debugbreak();
+    __debugbreak();
+    __debugbreak();
+    __debugbreak();
+    return false; // LWSS: Note it shouldn't reach this point(Therefore the below function is un-impl'd)
+    //return BoxDistSqrdExceeds(emins, emaxs, p->normal, *(float *)&pa);
 }

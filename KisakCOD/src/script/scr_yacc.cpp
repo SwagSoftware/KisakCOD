@@ -20,6 +20,8 @@
 // as an extern variable.The original YACC neglects to do this for you, so you should add the following to
 // your lexter, just beneath #include <y.tab.h>:
 
+#include <Windows.h>
+
 #include "scr_yacc.h"
 
 #include <malloc.h> // alloca
@@ -6011,7 +6013,6 @@ FILE *yyout;
 
 sval_u yaccResult;
 
-int yy_init;
 int yy_start;
 yy_buffer_state *yy_current_buffer;
 char *yy_c_buf_p;

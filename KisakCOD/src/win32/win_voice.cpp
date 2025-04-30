@@ -1,6 +1,6 @@
 #include "win_local.h"
 #include <server_mp/server.h>
-#include <groupvoice/dsound.h>
+#include <groupvoice/directsound.h>
 
 const dvar_t *winvoice_mic_mute;
 const dvar_t *winvoice_mic_reclevel;
@@ -601,6 +601,8 @@ bool __cdecl Voice_Init()
         s_clientSamples[client] = Sound_NewSample();
     return 0;
 }
+
+int __cdecl Record_DestroySample(dsound_sample_t *sample);
 
 int __cdecl Sound_DestroySample(struct dsound_sample_t *sample)
 {

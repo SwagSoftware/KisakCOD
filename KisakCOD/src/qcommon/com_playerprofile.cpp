@@ -129,23 +129,6 @@ bool __cdecl Com_IsValidPlayerProfileDir(const char *profileName)
     return isValid;
 }
 
-char __cdecl Com_SetInitialPlayerProfile(int localClientNum)
-{
-    parseInfo_t *activeProfileName; // [esp+0h] [ebp-Ch]
-    const char *parse; // [esp+4h] [ebp-8h] BYREF
-    char *activeProfileFile; // [esp+8h] [ebp-4h] BYREF
-
-    if (FS_ReadFile("profiles/active.txt", (void **)&activeProfileFile) < 0)
-        return 0;
-    parse = activeProfileFile;
-    activeProfileName = Com_Parse(&parse);
-    FS_FreeFile(activeProfileFile);
-    if (!Com_IsValidPlayerProfileDir(activeProfileName->token))
-        return 0;
-    Com_SetPlayerProfile(localClientNum, activeProfileName->token);
-    return 1;
-}
-
 void __cdecl Com_SetPlayerProfile(int localClientNum, char *profileName)
 {
     char configFile[64]; // [esp+0h] [ebp-48h] BYREF
@@ -165,6 +148,24 @@ void __cdecl Com_SetPlayerProfile(int localClientNum, char *profileName)
         Dvar_SetStringByName("name", profileName);
     LiveStorage_NewUser();
 }
+
+char __cdecl Com_SetInitialPlayerProfile(int localClientNum)
+{
+    parseInfo_t *activeProfileName; // [esp+0h] [ebp-Ch]
+    const char *parse; // [esp+4h] [ebp-8h] BYREF
+    char *activeProfileFile; // [esp+8h] [ebp-4h] BYREF
+
+    if (FS_ReadFile("profiles/active.txt", (void **)&activeProfileFile) < 0)
+        return 0;
+    parse = activeProfileFile;
+    activeProfileName = Com_Parse(&parse);
+    FS_FreeFile(activeProfileFile);
+    if (!Com_IsValidPlayerProfileDir(activeProfileName->token))
+        return 0;
+    Com_SetPlayerProfile(localClientNum, activeProfileName->token);
+    return 1;
+}
+
 
 char __cdecl Com_DeletePlayerProfile(const char *profileName)
 {
@@ -338,7 +339,7 @@ char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char
                     qmemcpy(v7, v10, sizeof(v7));
                     v8 = 1;
                 }
-                Com_GetConfigureDvarValues(dvarCount, text, (char(*)[32])(v9 != 0 ? dvarValues : 0));
+                Com_GetConfigureDvarValues(dvarCount, (const char**)text, (char(*)[32])(v9 != 0 ? dvarValues : 0));
             }
             else
             {
@@ -347,12 +348,12 @@ char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char
                 s0 = Com_ParseOnLine(text)->token;
                 if (I_stricmp(s0, "sys mb"))
                     Com_Error(ERR_FATAL, "configure_mp.csv: \"sys mb\" should be the second column");
-                dvarCount = Com_GetConfigureDvarNames(text, (char(*)[32])dvarNames);
+                dvarCount = Com_GetConfigureDvarNames((const char **)text, (char(*)[32])dvarNames);
             }
         }
         else
         {
-            Com_SkipRestOfLine(text);
+            Com_SkipRestOfLine((const char **)text);
         }
     }
     if (!v8)
@@ -453,7 +454,7 @@ char __cdecl Com_SetRecommendedGpu(const SysInfo *info, char **text)
     }
     else
     {
-        dvarCount = Com_GetConfigureDvarNames(text, (char(*)[32])dvarNames);
+        dvarCount = Com_GetConfigureDvarNames((const char **)text, (char(*)[32])dvarNames);
         v6 = 0;
         while (1)
         {
@@ -464,19 +465,19 @@ char __cdecl Com_SetRecommendedGpu(const SysInfo *info, char **text)
             {
                 if (v6 || !Com_DoesGpuStringMatch(s0, info->gpuDescription))
                 {
-                    Com_GetConfigureDvarValues(dvarCount, text, 0);
+                    Com_GetConfigureDvarValues(dvarCount, (const char **)text, 0);
                 }
                 else
                 {
                     Com_Printf(16, "configure_mp.csv: using GPU configuration \"%s\"\n", s0);
-                    Com_GetConfigureDvarValues(dvarCount, text, (char(*)[32])dvarValues);
+                    Com_GetConfigureDvarValues(dvarCount, (const char **)text, (char(*)[32])dvarValues);
                     Com_SetConfigureDvars(dvarCount, (char(*)[32])dvarNames, (char(*)[32])dvarValues);
                     v6 = 1;
                 }
             }
             else
             {
-                Com_SkipRestOfLine(text);
+                Com_SkipRestOfLine((const char **)text);
             }
         }
         return v6;
@@ -492,6 +493,31 @@ int __cdecl Com_ConfigureChecksum(const char *csv, int filesize)
     for (i = 0; i < filesize; ++i)
         checksum = csv[i] + 0x7A69 * checksum;
     return (checksum & 0xFFFFFFF) + 1;
+}
+
+void Sys_RegisterInfoDvars()
+{
+    DvarLimits min; // [esp+4h] [ebp-14h]
+    DvarLimits mina; // [esp+4h] [ebp-14h]
+    float value; // [esp+14h] [ebp-4h]
+
+    min.value.max = 3.4028235e38;
+    min.value.min = -3.4028235e38;
+    sys_configureGHz = Dvar_RegisterFloat(
+        "sys_configureGHz",
+        0.0,
+        min,
+        0x11u,
+        "Normalized total CPU power, based on cpu type, count, and speed; used in autoconfigure");
+    sys_sysMB = Dvar_RegisterInt("sys_sysMB", 0, 0x7FFFFFFF80000000LL, 0x11u, "Physical memory in the system");
+    sys_gpu = Dvar_RegisterString("sys_gpu", "", 0x11u, "GPU description");
+    sys_configSum = Dvar_RegisterInt("sys_configSum", 0, 0x7FFFFFFF80000000LL, 0x11u, "Configuration checksum");
+    sys_SSE = Dvar_RegisterBool("sys_SSE", sys_info.SSE, 0x40u, "Operating system allows Streaming SIMD Extensions");
+    mina.value.max = 3.4028235e38;
+    mina.value.min = -3.4028235e38;
+    value = sys_info.cpuGHz;
+    Dvar_RegisterFloat("sys_cpuGHz", value, mina, 0x40u, "Measured CPU speed");
+    Dvar_RegisterString("sys_cpuName", sys_info.cpuName, 0x40u, "CPU name description");
 }
 
 void __cdecl Sys_ArchiveInfo(int checksum)
@@ -543,31 +569,6 @@ void __cdecl Com_SetRecommended(int localClientNum, int restart)
         if (Dvar_AnyLatchedValues())
             Cbuf_AddText(localClientNum, "snd_restart\n");
     }
-}
-
-const dvar_s *Sys_RegisterInfoDvars()
-{
-    DvarLimits min; // [esp+4h] [ebp-14h]
-    DvarLimits mina; // [esp+4h] [ebp-14h]
-    float value; // [esp+14h] [ebp-4h]
-
-    min.value.max = 3.4028235e38;
-    min.value.min = -3.4028235e38;
-    sys_configureGHz = Dvar_RegisterFloat(
-        "sys_configureGHz",
-        0.0,
-        min,
-        0x11u,
-        "Normalized total CPU power, based on cpu type, count, and speed; used in autoconfigure");
-    sys_sysMB = Dvar_RegisterInt("sys_sysMB", 0, 0x7FFFFFFF80000000LL, 0x11u, "Physical memory in the system");
-    sys_gpu = Dvar_RegisterString("sys_gpu", "", 0x11u, "GPU description");
-    sys_configSum = Dvar_RegisterInt("sys_configSum", 0, 0x7FFFFFFF80000000LL, 0x11u, "Configuration checksum");
-    sys_SSE = Dvar_RegisterBool("sys_SSE", sys_info.SSE, 0x40u, "Operating system allows Streaming SIMD Extensions");
-    mina.value.max = 3.4028235e38;
-    mina.value.min = -3.4028235e38;
-    value = sys_info.cpuGHz;
-    Dvar_RegisterFloat("sys_cpuGHz", value, mina, 0x40u, "Measured CPU speed");
-    return Dvar_RegisterString("sys_cpuName", sys_info.cpuName, 0x40u, "CPU name description");
 }
 
 bool __cdecl Sys_ShouldUpdateForInfoChange()

@@ -212,7 +212,7 @@ void Com_InitSpeakerMaps();
 void Com_InitDefaultSpeakerMap();
 void Com_InitCurves();
 void __cdecl Com_InitSoundAlias();
-void Com_InitEntChannels(char *file);
+void Com_InitEntChannels();
 
 bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, SndCurve *curve);
 

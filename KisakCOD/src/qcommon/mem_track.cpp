@@ -7,16 +7,6 @@
 #include "threads.h"
 #include <xanim/xanim.h>
 
-struct TempMemInfo // sizeof=0x28
-{                                       // ...
-    int permanent;
-    int high;
-    int highExtra;
-    int hunkSize;
-    int low;
-    mem_track_t data;                   // ...
-};
-
 const char* g_mem_track_filename;
 
 static _RTL_CRITICAL_SECTION g_crit;
@@ -393,23 +383,6 @@ static void __cdecl CheckLowMemInfo(TempMemInfo* tempMemInfo)
 {
     if (tempMemInfo->low > tempMemInfo->data.size)
         tempMemInfo->low = tempMemInfo->data.size;
-}
-
-static void __cdecl AddTempMemInfo(
-    int size,
-    int hunkSize,
-    int permanent,
-    const char* name,
-    int type,
-    int usageType,
-    TempMemInfo* tempMemInfoArray,
-    int* tempMemInfoCount)
-{
-    TempMemInfo* TempMemInfo; // eax
-
-    TempMemInfo = GetTempMemInfo(permanent, name, type, usageType, tempMemInfoArray, tempMemInfoCount);
-    TempMemInfo->data.size += size;
-    CheckHighMemInfo(TempMemInfo, hunkSize);
 }
 
 static void __cdecl AddTempMemInfo(

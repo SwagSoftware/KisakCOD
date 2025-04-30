@@ -336,7 +336,7 @@ void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int 
                 v3 = v5;
             outVolumes[i] = v3;
         }
-        AIL_set_sample_channel_levels(handle, NULL, NULL, outVolumes, channelMap->speakerCount); // KISAKTODO: can these even be null?
+        AIL_set_sample_channel_levels(handle, outVolumes, channelMap->speakerCount);
     }
 }
 
@@ -492,7 +492,7 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t 
         MyAssertHandler(".\\win32\\snd_driver.cpp", 798, 0, "%s", "alias");
     if (SND_IsMultiChannel())
     {
-        AIL_sample_channel_levels(handle, NULL, NULL, outVolumes, 19); // KISAKTODO: PROB WRONG
+        AIL_sample_channel_levels(handle, &numChannels);
         for (index = 0; index < numChannels; ++index)
             outVolumes[index] = 1.0;
         if (alias->centerPercentage != 0.0 && SND_IsMultiChannel())
@@ -503,7 +503,7 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t 
         }
         outVolumes[2] = alias->centerPercentage;
         outVolumes[3] = alias->lfePercentage;
-        AIL_set_sample_channel_levels(handle, NULL, NULL, outVolumes, numChannels); // KISAKTODO: WRONG
+        AIL_set_sample_channel_levels(handle, outVolumes, numChannels);
     }
 }
 
@@ -686,6 +686,64 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
         SND_AddVoice(entchannel);
     return playbackId;
 }
+
+void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *org)
+{
+    float v3; // [esp+0h] [ebp-28h]
+    float delta[3]; // [esp+Ch] [ebp-1Ch] BYREF
+    _SAMPLE *handle_sample; // [esp+18h] [ebp-10h]
+    float transformed[3]; // [esp+1Ch] [ebp-Ch] BYREF
+
+    if (index < 40 || index >= g_snd.max_stream_channels + 40)
+        MyAssertHandler(
+            ".\\win32\\snd_driver.cpp",
+            619,
+            0,
+            "%s\n\t(index) = %i",
+            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
+            index);
+    Vec3Sub(org, g_snd.listeners[listenerIndex].orient.origin, delta);
+    MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
+    handle_sample = AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
+    v3 = -transformed[1];
+    AIL_set_sample_3D_position(handle_sample, LODWORD(v3), LODWORD(transformed[2]), LODWORD(transformed[0]));
+}
+
+double __cdecl SND_GetStream3DVolumeFallOff(int index, int listenerIndex)
+{
+    float diff[3]; // [esp+10h] [ebp-24h] BYREF
+    float maxdist; // [esp+1Ch] [ebp-18h]
+    float dist; // [esp+20h] [ebp-14h]
+    float lerp; // [esp+24h] [ebp-10h]
+    const snd_alias_t *alias1; // [esp+28h] [ebp-Ch]
+    const snd_alias_t *alias0; // [esp+2Ch] [ebp-8h]
+    float mindist; // [esp+30h] [ebp-4h]
+
+    if (index < 40 || index >= g_snd.max_stream_channels + 40)
+        MyAssertHandler(
+            ".\\win32\\snd_driver.cpp",
+            581,
+            0,
+            "%s\n\t(index) = %i",
+            "(index >= ((0 + 8) + 32) && index < g_snd.max_stream_channels + ((0 + 8) + 32))",
+            index);
+    alias0 = g_snd.chaninfo[index].alias0;
+    alias1 = g_snd.chaninfo[index].alias1;
+    if (!SND_IsAliasChannel3D((alias0->flags & 0x3F00) >> 8))
+        MyAssertHandler(
+            ".\\win32\\snd_driver.cpp",
+            585,
+            0,
+            "%s",
+            "SND_IsAliasChannel3D( SNDALIASFLAGS_GET_CHANNEL( alias0->flags ) )");
+    Vec3Sub(g_snd.listeners[listenerIndex].orient.origin, g_snd.chaninfo[index].org, diff);
+    dist = Vec3Length(diff);
+    lerp = g_snd.chaninfo[index].lerp;
+    mindist = (1.0 - lerp) * alias0->distMin + alias1->distMin * lerp;
+    maxdist = (1.0 - lerp) * alias0->distMax + alias1->distMax * lerp;
+    return SND_Attenuate(alias0->volumeFalloffCurve, dist, mindist, maxdist);
+}
+
 
 int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int index)
 {
@@ -1697,63 +1755,6 @@ void __cdecl SND_Update3DChannel(int i, int frametime)
             MSS_ResumeSample(i, frametime);
         }
     }
-}
-
-void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *org)
-{
-    float v3; // [esp+0h] [ebp-28h]
-    float delta[3]; // [esp+Ch] [ebp-1Ch] BYREF
-    _SAMPLE *handle_sample; // [esp+18h] [ebp-10h]
-    float transformed[3]; // [esp+1Ch] [ebp-Ch] BYREF
-
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            619,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
-    Vec3Sub(org, g_snd.listeners[listenerIndex].orient.origin, delta);
-    MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
-    handle_sample = AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
-    v3 = -transformed[1];
-    AIL_set_sample_3D_position(handle_sample, LODWORD(v3), LODWORD(transformed[2]), LODWORD(transformed[0]));
-}
-
-double __cdecl SND_GetStream3DVolumeFallOff(int index, int listenerIndex)
-{
-    float diff[3]; // [esp+10h] [ebp-24h] BYREF
-    float maxdist; // [esp+1Ch] [ebp-18h]
-    float dist; // [esp+20h] [ebp-14h]
-    float lerp; // [esp+24h] [ebp-10h]
-    const snd_alias_t *alias1; // [esp+28h] [ebp-Ch]
-    const snd_alias_t *alias0; // [esp+2Ch] [ebp-8h]
-    float mindist; // [esp+30h] [ebp-4h]
-
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            581,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < g_snd.max_stream_channels + ((0 + 8) + 32))",
-            index);
-    alias0 = g_snd.chaninfo[index].alias0;
-    alias1 = g_snd.chaninfo[index].alias1;
-    if (!SND_IsAliasChannel3D((alias0->flags & 0x3F00) >> 8))
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            585,
-            0,
-            "%s",
-            "SND_IsAliasChannel3D( SNDALIASFLAGS_GET_CHANNEL( alias0->flags ) )");
-    Vec3Sub(g_snd.listeners[listenerIndex].orient.origin, g_snd.chaninfo[index].org, diff);
-    dist = Vec3Length(diff);
-    lerp = g_snd.chaninfo[index].lerp;
-    mindist = (1.0 - lerp) * alias0->distMin + alias1->distMin * lerp;
-    maxdist = (1.0 - lerp) * alias0->distMax + alias1->distMax * lerp;
-    return SND_Attenuate(alias0->volumeFalloffCurve, dist, mindist, maxdist);
 }
 
 void __cdecl SND_UpdateStreamChannel(int i, int frametime)

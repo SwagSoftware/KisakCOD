@@ -2,6 +2,7 @@
 #include "q_parse.h"
 #include "com_files.h"
 #include <qcommon/cmd.h>
+#include "com_memory.h"
 
 SoundAliasLoadGlobals saLoadObjGlob;
 

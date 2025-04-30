@@ -490,7 +490,7 @@ unsigned __int8* __cdecl Hunk_AllocAlign(unsigned int size, int alignment, const
     if ((alignmenta & (unsigned int)buf) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2011, 0, "%s", "!(((psize_int)buf) & alignment)");
     if (endBuf != (unsigned __int8*)((unsigned int)buf & 0xFFFFF000))
-        Z_VirtualCommit((void*)((unsigned int)buf & 0xFFFFF000), (int)&endBuf[-((unsigned int)buf & 0xFFFFF000)]);
+        Z_VirtualCommit((void*)((unsigned int)buf & 0xFFFFF000), (int)&endBuf[-(int)((unsigned int)buf & 0xFFFFF000)]); // KISAKTODO: sus int cast
     track_hunk_alloc(hunk_high.permanent - old_permanent, hunk_high.temp, name, type);
     memset(buf, 0, size);
     return buf;
@@ -517,7 +517,7 @@ unsigned int __cdecl Hunk_AllocateTempMemoryHigh(int size, const char* name)
     if ((((_BYTE)s_hunkTotal + (_BYTE)s_hunkData - LOBYTE(hunk_high.temp)) & 0xF) != 0)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2074, 0, "%s", "!(((psize_int)buf) & 15)");
     if (endBuf != (unsigned __int8*)(buf & 0xFFFFF000))
-        Z_VirtualCommit((void*)(buf & 0xFFFFF000), (int)&endBuf[-(buf & 0xFFFFF000)]);
+        Z_VirtualCommit((void*)(buf & 0xFFFFF000), (int)&endBuf[-(int)(buf & 0xFFFFF000)]); // KISAKTODO: sus int cast
     track_temp_high_alloc(size, hunk_high.temp + hunk_low.temp, hunk_high.permanent, name);
     return buf;
 }

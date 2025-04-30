@@ -182,7 +182,7 @@ bool __thiscall Scr_ScriptWindow::AddBreakpointAtSourcePos(
     unsigned __int16 v11; // [esp+8h] [ebp-1Ch]
     int builtinIndex; // [esp+Ch] [ebp-18h]
     bool success; // [esp+1Bh] [ebp-9h]
-    const char *codePos; // [esp+1Ch] [ebp-8h]
+    char *codePos; // [esp+1Ch] [ebp-8h]
     unsigned __int8 *codePosa; // [esp+1Ch] [ebp-8h]
     unsigned int sourcePos; // [esp+20h] [ebp-4h] BYREF
 
@@ -202,7 +202,7 @@ bool __thiscall Scr_ScriptWindow::AddBreakpointAtSourcePos(
         {
         case 4u:
         case 5u:
-            codePos = Scr_GetOpcodePosOfType(this->bufferIndex, startSourcePos, endSourcePos, 1, &sourcePos);
+            codePos = (char*)Scr_GetOpcodePosOfType(this->bufferIndex, startSourcePos, endSourcePos, 1, &sourcePos);
             if (codePos && (*Scr_FindBreakpointInfo(codePos) != 127 || *codePos != 135))
                 success = 1;
             break;
@@ -245,12 +245,11 @@ bool __thiscall Scr_ScriptWindow::AddBreakpointAtSourcePos(
     //    this->bufferIndex,
     //    sourcePos,
     //    user);
-    scrDebuggerGlob.scriptWatch.CreateBreakpointElement(element, this->bufferIndex, sourcePos, user);
+    BreakpointElement = scrDebuggerGlob.scriptWatch.CreateBreakpointElement(element, this->bufferIndex, sourcePos, user);
     //Scr_ScriptWindow::AddBreakpoint(this, pBreakpoint, codePos, builtinIndex, BreakpointElement, breakpointType);
-    this->AddBreakpoint(pBreakpoint, (char*)codePos, builtinIndex, BreakpointElement, breakpointType);
+    this->AddBreakpoint(pBreakpoint, codePos, builtinIndex, BreakpointElement, breakpointType);
     return 1;
 }
-
 void __thiscall Scr_ScriptWindow::AddBreakpoint(
     Scr_Breakpoint **pBreakpoint,
     char *codePos,
@@ -3185,7 +3184,8 @@ retry_15:
         if (scrVarPub.evaluate)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 9731, 0, "%s", "!scrVarPub.evaluate");
         scrVarPub.evaluate = 1;
-        scrDebuggerGlob.objectId = *(unsigned int *)&Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]) + 1;
+        //scrDebuggerGlob.objectId = *(unsigned int *)&Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]) + 1;
+        scrDebuggerGlob.objectId = Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]).next + 1; // KISAKTODO: shitty
         if (!scrVarPub.evaluate)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 9734, 0, "%s", "scrVarPub.evaluate");
         scrVarPub.evaluate = 0;

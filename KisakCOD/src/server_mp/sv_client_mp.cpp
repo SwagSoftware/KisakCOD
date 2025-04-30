@@ -98,6 +98,23 @@ void __cdecl SV_AuthorizeRequest(netadr_t from, int challenge, const char *cdkey
     }
 }
 
+int __cdecl SV_IsTempBannedGuid(const char *cdkeyHash)
+{
+    unsigned int banSlot; // [esp+Ch] [ebp-4h]
+
+    if (!*cdkeyHash)
+        return 0;
+    for (banSlot = 0; banSlot < 0x10; ++banSlot)
+    {
+        if (!memcmp(&svs.tempBans[banSlot], cdkeyHash, 0x20u)
+            && sv_kickBanTime->current.value * 1000.0 >= (svs.time - LODWORD(svs.mapCenter[9 * banSlot - 136])))
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void __cdecl SV_GetChallenge(netadr_t from)
 {
     int v1; // esi
@@ -191,23 +208,6 @@ void __cdecl SV_GetChallenge(netadr_t from)
         v4 = va("challengeResponse %i", challenge->challenge);
         NET_OutOfBandPrint(NS_SERVER, challenge->adr, v4);
     }
-}
-
-int __cdecl SV_IsTempBannedGuid(const char *cdkeyHash)
-{
-    unsigned int banSlot; // [esp+Ch] [ebp-4h]
-
-    if (!*cdkeyHash)
-        return 0;
-    for (banSlot = 0; banSlot < 0x10; ++banSlot)
-    {
-        if (!memcmp(&svs.tempBans[banSlot], cdkeyHash, 0x20u)
-            && sv_kickBanTime->current.value * 1000.0 >= (svs.time - LODWORD(svs.mapCenter[9 * banSlot - 136])))
-        {
-            return 1;
-        }
-    }
-    return 0;
 }
 
 int __cdecl SV_IsBannedGuid(const char *cdkeyHash)

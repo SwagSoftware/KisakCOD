@@ -1,6 +1,11 @@
 #include "msg_mp.h"
 #include "huffman.h"
 
+#include <Windows.h>
+#include <bgame/bg_local.h>
+#include "sv_msg_write_mp.h"
+#include <server_mp/server.h>
+#include <client_mp/client_mp.h>
 
 //  struct netFieldOrderInfo_t orderInfo 82f87210     msg_mp.obj
 //  unsigned int *huffBytesSeen      82f878d0     msg_mp.obj
@@ -1453,6 +1458,23 @@ int __cdecl MSG_ReadLastChangedField(msg_t *msg, int totalFields)
     return lastChanged;
 }
 
+
+const int numEntityStateFields = 59;
+const int numEventEntityStateFields = 59;
+const int numPlayerEntityStateFields = 59;
+const int numCorpseEntityStateFields = 59;
+const int numVehicleEntityStateFields = 59;
+const int numItemEntityStateFields = 59;
+const int numSoundBlendEntityStateFields = 59;
+const int numLoopFxEntityStateFields = 59;
+const int numMissileEntityStateFields = 59;
+const int numArchivedEntityFields = 69;
+const int numClientStateFields = 24;
+const int numPlayerStateFields = 141;
+const int numObjectiveFields = 6;
+const int numHudElemFields = 40;
+
+
 int __cdecl MSG_ReadDeltaArchivedEntity(
     msg_t *msg,
     int time,
@@ -1714,7 +1736,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     {
         for (j = 0; j < 16; ++j)
         {
-            v8 = MSG_ReadBits(msg, 3u);
+            v8 = (objectiveState_t)MSG_ReadBits(msg, 3u);
             to->objective[j].state = v8;
             MSG_ReadDeltaFields(
                 msg,
@@ -1782,11 +1804,10 @@ void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s *from, 
     {
         lc = MSG_ReadBits(msg, 6u);
         for (j = 0; j <= lc; ++j)
-            MSG_ReadDeltaField(msg, time, (char *)&from[i], (char *)&to[i], &hudElemFields[j], 0, 0);
+            MSG_ReadDeltaField(msg, time, (char*)&from[i], (char*)&to[i], &hudElemFields[j], 0, 0);
         while (j < numHudElemFields)
         {
-            *(he_type_t *)((char *)&to[i].type + dword_89FC74[4 * j]) = *(he_type_t *)((char *)&from[i].type
-                + dword_89FC74[4 * j]);
+            *(&to[i].type + hudElemFields[j].offset) = *(&from[i].type + hudElemFields[j].offset);
             ++j;
         }
         if ((from[i].alignOrg & 0xFFFFFFF0) != 0)
@@ -1840,7 +1861,7 @@ void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s *from, 
     }
     while (inuse < count && to[inuse].type)
     {
-        memset((unsigned __int8 *)&to[inuse], 0, sizeof(hudelem_s));
+        memset(&to[inuse], 0, sizeof(hudelem_s));
         if (to[inuse].type)
             MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1923, 0, "%s", "to[inuse].type == HE_TYPE_FREE");
         ++inuse;
@@ -1853,10 +1874,272 @@ void __cdecl MSG_InitHuffman()
     MSG_initHuffmanInternal();
 }
 
+const int msg_hData[256] =
+{
+  274054,
+  68777,
+  40460,
+  40266,
+  48059,
+  39006,
+  48630,
+  27692,
+  17712,
+  15439,
+  12386,
+  10758,
+  9420,
+  9979,
+  9346,
+  15256,
+  13184,
+  14319,
+  7750,
+  7221,
+  6095,
+  5666,
+  12606,
+  7263,
+  7322,
+  5807,
+  11628,
+  6199,
+  7826,
+  6349,
+  7698,
+  9656,
+  28968,
+  5164,
+  13629,
+  6058,
+  4745,
+  4519,
+  5199,
+  4807,
+  5323,
+  3433,
+  3455,
+  3563,
+  6979,
+  5229,
+  5002,
+  4423,
+  14108,
+  13631,
+  11908,
+  11801,
+  10261,
+  7635,
+  7215,
+  7218,
+  9353,
+  6161,
+  5689,
+  4649,
+  5026,
+  5866,
+  8002,
+  10534,
+  15381,
+  8874,
+  11798,
+  7199,
+  12814,
+  6103,
+  4982,
+  5972,
+  6779,
+  4929,
+  5333,
+  3503,
+  4345,
+  6098,
+  14117,
+  16440,
+  6446,
+  3062,
+  4695,
+  3085,
+  4198,
+  4013,
+  3878,
+  3414,
+  5514,
+  4092,
+  3261,
+  4740,
+  4544,
+  3127,
+  3385,
+  7688,
+  11126,
+  6417,
+  5297,
+  4529,
+  6333,
+  4210,
+  7056,
+  4658,
+  6190,
+  3512,
+  2843,
+  3479,
+  9369,
+  5203,
+  4980,
+  5881,
+  7509,
+  4292,
+  6097,
+  5492,
+  4648,
+  2996,
+  4988,
+  4163,
+  6534,
+  4001,
+  4342,
+  4488,
+  6039,
+  4827,
+  7112,
+  8654,
+  26712,
+  8688,
+  9677,
+  9368,
+  7209,
+  3399,
+  4473,
+  4677,
+  11087,
+  4094,
+  3404,
+  4176,
+  6733,
+  3702,
+  11420,
+  4867,
+  5968,
+  3475,
+  3722,
+  3560,
+  4571,
+  2720,
+  3189,
+  3099,
+  4595,
+  4044,
+  4402,
+  3889,
+  4989,
+  3186,
+  3153,
+  5387,
+  8020,
+  3322,
+  3775,
+  2886,
+  4191,
+  2879,
+  3110,
+  2576,
+  3693,
+  2436,
+  4935,
+  3017,
+  3538,
+  5688,
+  3444,
+  3410,
+  9170,
+  4708,
+  3425,
+  3273,
+  3684,
+  4564,
+  6957,
+  4817,
+  5224,
+  3285,
+  3143,
+  4227,
+  5630,
+  6053,
+  5851,
+  6507,
+  13692,
+  8270,
+  8260,
+  5583,
+  7568,
+  4082,
+  3984,
+  4574,
+  6440,
+  3533,
+  2992,
+  2708,
+  5190,
+  3889,
+  3799,
+  4582,
+  6020,
+  3464,
+  4431,
+  3495,
+  2906,
+  2243,
+  3856,
+  3321,
+  8759,
+  3928,
+  2905,
+  3875,
+  4382,
+  3885,
+  5869,
+  6235,
+  10685,
+  4433,
+  4639,
+  4305,
+  4683,
+  2849,
+  3379,
+  4683,
+  5477,
+  4127,
+  3853,
+  3515,
+  4913,
+  3601,
+  5237,
+  6617,
+  9019,
+  4857,
+  4112,
+  5180,
+  5998,
+  4925,
+  4986,
+  6365,
+  7930,
+  5948,
+  8085,
+  7732,
+  8643,
+  8901,
+  9653,
+  32647
+};
+
+
+
 void MSG_initHuffmanInternal()
 {
-    unsigned inttime2; // [esp+0h] [ebp-8h]
-    unsigned inttime; // [esp+4h] [ebp-4h]
+    DWORD time2; // [esp+0h] [ebp-8h]
+    DWORD time; // [esp+4h] [ebp-4h]
 
     Huff_Init(&msgHuff);
     time = Sys_Milliseconds();

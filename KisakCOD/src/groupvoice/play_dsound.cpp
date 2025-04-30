@@ -1,4 +1,4 @@
-#include "dsound.h"
+#include "directsound.h"
 #include <universal/assertive.h>
 #include <qcommon/qcommon.h>
 

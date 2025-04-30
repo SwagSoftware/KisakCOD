@@ -6,6 +6,7 @@
 #include <script/scr_evaluate.h>
 #include <script/scr_parsetree.h>
 #include <script/scr_compiler.h>
+#include <script/scr_vm.h>
 
 void __cdecl UI_Component::InitAssets()
 {

@@ -482,6 +482,7 @@ int boxVerts_0[24][3] =
   { 1, 1, 0 },
   { 1, 1, 1 }
 }; // idb
+
 void __cdecl SV_XModelDebugBoxes(gentity_s *ent)
 {
     const XModel *Model; // eax
@@ -489,14 +490,12 @@ void __cdecl SV_XModelDebugBoxes(gentity_s *ent)
     float v3; // [esp+28h] [ebp-2ECh]
     float v4; // [esp+2Ch] [ebp-2E8h]
     float v5; // [esp+30h] [ebp-2E4h]
-    float result; // [esp+34h] [ebp-2E0h] BYREF
-    float v7; // [esp+38h] [ebp-2DCh]
-    float v8; // [esp+3Ch] [ebp-2D8h]
-    float v9; // [esp+40h] [ebp-2D4h]
-    float v10; // [esp+44h] [ebp-2D0h]
-    float v11; // [esp+48h] [ebp-2CCh]
-    float v12; // [esp+4Ch] [ebp-2C8h]
-    float v13; // [esp+50h] [ebp-2C4h]
+    float result[3]; // [esp+34h] [ebp-2E0h] BYREF
+    float v7; // [esp+40h] [ebp-2D4h]
+    float v8; // [esp+44h] [ebp-2D0h]
+    float v9; // [esp+48h] [ebp-2CCh]
+    float v10; // [esp+4Ch] [ebp-2C8h]
+    float v11; // [esp+50h] [ebp-2C4h]
     DObjAnimMat *boneMatrix; // [esp+54h] [ebp-2C0h]
     unsigned int j; // [esp+58h] [ebp-2BCh]
     XBoneInfo *boneInfoArray[128]; // [esp+5Ch] [ebp-2B8h] BYREF
@@ -560,25 +559,25 @@ void __cdecl SV_XModelDebugBoxes(gentity_s *ent)
                         0,
                         "%s",
                         "!IS_NAN(mat->transWeight)");
-                Vec3Scale(boneMatrix->quat, boneMatrix->transWeight, &result);
-                v12 = result * boneMatrix->quat[0];
-                v3 = result * boneMatrix->quat[1];
-                v10 = result * boneMatrix->quat[2];
-                v13 = result * boneMatrix->quat[3];
-                v2 = v7 * boneMatrix->quat[1];
-                v11 = v7 * boneMatrix->quat[2];
-                v9 = v7 * boneMatrix->quat[3];
-                v4 = v8 * boneMatrix->quat[2];
-                v5 = v8 * boneMatrix->quat[3];
+                Vec3Scale(boneMatrix->quat, boneMatrix->transWeight, result);
+                v10 = result[0] * boneMatrix->quat[0];
+                v3 = result[0] * boneMatrix->quat[1];
+                v8 = result[0] * boneMatrix->quat[2];
+                v11 = result[0] * boneMatrix->quat[3];
+                v2 = result[1] * boneMatrix->quat[1];
+                v9 = result[1] * boneMatrix->quat[2];
+                v7 = result[1] * boneMatrix->quat[3];
+                v4 = result[2] * boneMatrix->quat[2];
+                v5 = result[2] * boneMatrix->quat[3];
                 boneAxis[0][0] = 1.0 - (v2 + v4);
                 boneAxis[0][1] = v3 + v5;
-                boneAxis[0][2] = v10 - v9;
+                boneAxis[0][2] = v8 - v7;
                 boneAxis[1][0] = v3 - v5;
-                boneAxis[1][1] = 1.0 - (v12 + v4);
-                boneAxis[1][2] = v11 + v13;
-                boneAxis[2][0] = v10 + v9;
-                boneAxis[2][1] = v11 - v13;
-                boneAxis[2][2] = 1.0 - (v12 + v2);
+                boneAxis[1][1] = 1.0 - (v10 + v4);
+                boneAxis[1][2] = v9 + v11;
+                boneAxis[2][0] = v8 + v7;
+                boneAxis[2][1] = v9 - v11;
+                boneAxis[2][2] = 1.0 - (v10 + v2);
                 boneAxis[3][0] = boneMatrix->trans[0];
                 boneAxis[3][1] = boneMatrix->trans[1];
                 boneAxis[3][2] = boneMatrix->trans[2];

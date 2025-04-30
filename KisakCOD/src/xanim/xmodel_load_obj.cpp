@@ -6,6 +6,7 @@
 #include <qcommon/com_pack.h>
 #include <universal/aabbtree.h>
 #include <gfx_d3d/r_dvars.h>
+#include "xanim.h"
 
 int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3& axis, float *mins, float *maxs)
 {

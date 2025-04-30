@@ -10,30 +10,6 @@ CStringEdPackage *TheStringPackage;
 int giFilesFound;
 char sTemp[64];
 
-void __cdecl SE_Init()
-{
-    CStringEdPackage *v0; // eax
-    CStringEdPackage *v1; // [esp+0h] [ebp-68h]
-    CStringEdPackage *v2; // [esp+64h] [ebp-4h]
-
-    if (TheStringPackage)
-        MyAssertHandler(".\\stringed\\stringed_ingame.cpp", 811, 0, "%s", "!TheStringPackage");
-    //v2 = (CStringEdPackage *)Z_Malloc(120, "CStringEdPackage", 33);
-    void* mem = Z_Malloc(sizeof(CStringEdPackage), "CStringEdPackage", 33);
-    TheStringPackage = new (mem) CStringEdPackage;
-    //if (v2)
-    //{
-    //    CStringEdPackage::CStringEdPackage(v2);
-    //    v1 = v0;
-    //}
-    //else
-    //{
-    //    v1 = 0;
-    //}
-    //TheStringPackage = v1;
-    //CStringEdPackage::Clear(v1);
-}
-
 const char *__cdecl SE_GetString(const char *psPackageAndStringReference)
 {
     if (useFastFile->current.enabled)

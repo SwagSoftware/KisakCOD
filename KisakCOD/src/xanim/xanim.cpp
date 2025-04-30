@@ -2755,6 +2755,8 @@ void __cdecl XAnimCalcDeltaTree(
     }
 }
 
+void __cdecl XAnim_CalcDeltaForTime(const XAnimParts *anim, float time, float *rotDelta, float4 *posDelta);
+
 void __cdecl XAnimCalcRelDeltaParts(
     const XAnimParts* parts,
     float weightScale,

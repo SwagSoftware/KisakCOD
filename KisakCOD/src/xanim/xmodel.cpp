@@ -168,25 +168,23 @@ void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
     float v4; // [esp+38h] [ebp-80h]
     float v5; // [esp+3Ch] [ebp-7Ch]
     float v6; // [esp+40h] [ebp-78h]
-    float result; // [esp+44h] [ebp-74h] BYREF
-    float v8; // [esp+48h] [ebp-70h]
-    float v9; // [esp+4Ch] [ebp-6Ch]
-    float v10; // [esp+50h] [ebp-68h]
-    float v11; // [esp+54h] [ebp-64h]
-    float v12; // [esp+58h] [ebp-60h]
-    float v13; // [esp+5Ch] [ebp-5Ch]
-    float v14; // [esp+60h] [ebp-58h]
-    float v15; // [esp+64h] [ebp-54h]
-    float v16; // [esp+68h] [ebp-50h]
-    float v17; // [esp+6Ch] [ebp-4Ch]
-    float v18; // [esp+70h] [ebp-48h]
-    float v19; // [esp+74h] [ebp-44h]
-    float v20; // [esp+78h] [ebp-40h]
-    float v21; // [esp+7Ch] [ebp-3Ch]
-    float v22; // [esp+80h] [ebp-38h]
-    float v23; // [esp+84h] [ebp-34h]
-    float v24; // [esp+88h] [ebp-30h]
-    float *v25; // [esp+8Ch] [ebp-2Ch]
+    float result[3]; // [esp+44h] [ebp-74h] BYREF
+    float v8; // [esp+50h] [ebp-68h]
+    float v9; // [esp+54h] [ebp-64h]
+    float v10; // [esp+58h] [ebp-60h]
+    float v11; // [esp+5Ch] [ebp-5Ch]
+    float v12; // [esp+60h] [ebp-58h]
+    float v13; // [esp+64h] [ebp-54h]
+    float v14; // [esp+68h] [ebp-50h]
+    float v15; // [esp+6Ch] [ebp-4Ch]
+    float v16; // [esp+70h] [ebp-48h]
+    float v17; // [esp+74h] [ebp-44h]
+    float v18; // [esp+78h] [ebp-40h]
+    float v19; // [esp+7Ch] [ebp-3Ch]
+    float v20; // [esp+80h] [ebp-38h]
+    float v21; // [esp+84h] [ebp-34h]
+    float v22; // [esp+88h] [ebp-30h]
+    float *v23; // [esp+8Ch] [ebp-2Ch]
     int numBones; // [esp+90h] [ebp-28h]
     float *trans; // [esp+94h] [ebp-24h]
     __int16 *quats; // [esp+98h] [ebp-20h]
@@ -207,10 +205,10 @@ void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
         quatTrans->quat[1] = 0.0;
         quatTrans->quat[2] = 0.0;
         quatTrans->quat[3] = 1.0;
-        v25 = quatTrans->trans;
+        v23 = quatTrans->trans;
         quatTrans->trans[0] = 0.0;
-        v25[1] = 0.0;
-        v25[2] = 0.0;
+        v23[1] = 0.0;
+        v23[2] = 0.0;
         quatTrans->transWeight = 2.0;
         --i;
         ++quatTrans;
@@ -223,15 +221,15 @@ void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
         tempQuat[2] = quats[2] * 0.00003051850944757462;
         tempQuat[3] = quats[3] * 0.00003051850944757462;
         QuatMultiply(tempQuat, quatTrans[-*parentList].quat, quatTrans->quat);
-        v24 = Vec4LengthSq(quatTrans->quat);
-        if (v24 == 0.0)
+        v22 = Vec4LengthSq(quatTrans->quat);
+        if (v22 == 0.0)
         {
             quatTrans->quat[3] = 1.0;
             quatTrans->transWeight = 2.0;
         }
         else
         {
-            quatTrans->transWeight = 2.0 / v24;
+            quatTrans->transWeight = 2.0 / v22;
         }
         v1 = quatTrans->trans;
         v = &quatTrans[-*parentList];
@@ -249,28 +247,28 @@ void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
         }
         if ((COERCE_UNSIGNED_INT(v->transWeight) & 0x7F800000) == 0x7F800000)
             MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-        Vec3Scale(v->quat, v->transWeight, &result);
-        v13 = result * v->quat[0];
-        v4 = result * v->quat[1];
-        v11 = result * v->quat[2];
-        v14 = result * v->quat[3];
-        v3 = v8 * v->quat[1];
-        v12 = v8 * v->quat[2];
-        v10 = v8 * v->quat[3];
-        v5 = v9 * v->quat[2];
-        v6 = v9 * v->quat[3];
-        v15 = 1.0 - (v3 + v5);
-        v16 = v4 + v6;
-        v17 = v11 - v10;
-        v18 = v4 - v6;
-        v19 = 1.0 - (v13 + v5);
-        v20 = v12 + v14;
-        v21 = v11 + v10;
-        v22 = v12 - v14;
-        v23 = 1.0 - (v13 + v3);
-        *v1 = *trans * v15 + trans[1] * v18 + trans[2] * v21 + v->trans[0];
-        v1[1] = *trans * v16 + trans[1] * v19 + trans[2] * v22 + v->trans[1];
-        v1[2] = *trans * v17 + trans[1] * v20 + trans[2] * v23 + v->trans[2];
+        Vec3Scale(v->quat, v->transWeight, result);
+        v11 = result[0] * v->quat[0];
+        v4 = result[0] * v->quat[1];
+        v9 = result[0] * v->quat[2];
+        v12 = result[0] * v->quat[3];
+        v3 = result[1] * v->quat[1];
+        v10 = result[1] * v->quat[2];
+        v8 = result[1] * v->quat[3];
+        v5 = result[2] * v->quat[2];
+        v6 = result[2] * v->quat[3];
+        v13 = 1.0 - (v3 + v5);
+        v14 = v4 + v6;
+        v15 = v9 - v8;
+        v16 = v4 - v6;
+        v17 = 1.0 - (v11 + v5);
+        v18 = v10 + v12;
+        v19 = v9 + v8;
+        v20 = v10 - v12;
+        v21 = 1.0 - (v11 + v3);
+        *v1 = *trans * v13 + trans[1] * v16 + trans[2] * v19 + v->trans[0];
+        v1[1] = *trans * v14 + trans[1] * v17 + trans[2] * v20 + v->trans[1];
+        v1[2] = *trans * v15 + trans[1] * v18 + trans[2] * v21 + v->trans[2];
         --i;
         quats += 4;
         trans += 3;

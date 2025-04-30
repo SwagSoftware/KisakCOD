@@ -628,7 +628,6 @@ void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userDat
 }
 
 cmd_function_s Dvar_Toggle_f_VAR;
-cmd_function_s Dvar_Toggle_f_VAR;
 cmd_function_s Dvar_TogglePrint_f_VAR;
 cmd_function_s Dvar_Set_f_VAR;
 cmd_function_s Dvar_SetS_f_VAR;
