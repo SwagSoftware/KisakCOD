@@ -215,13 +215,14 @@ class dBox : public dGeom {
 
 public:
   dBox () { }
-  dBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
-    { _id = dCreateBox (space,lx,ly,lz); }
-
-  void create (dSpaceID space, dReal lx, dReal ly, dReal lz) {
-    if (_id) dGeomDestroy (_id);
-    _id = dCreateBox (space,lx,ly,lz);
-  }
+  // LWSS: Remove
+  //dBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
+  //  { _id = dCreateBox (space,lx,ly,lz); }
+  //
+  //void create (dSpaceID space, dReal lx, dReal ly, dReal lz) {
+  //  if (_id) dGeomDestroy (_id);
+  //  _id = dCreateBox (space,lx,ly,lz);
+  //}
 
   void setLengths (dReal lx, dReal ly, dReal lz)
     { dGeomBoxSetLengths (_id, lx, ly, lz); }
@@ -317,13 +318,14 @@ class dGeomTransform : public dGeom {
 
 public:
   dGeomTransform() { }
-  dGeomTransform (dSpaceID space)
-    { _id = dCreateGeomTransform (space); }
-
-  void create (dSpaceID space=0) {
-    if (_id) dGeomDestroy (_id);
-    _id = dCreateGeomTransform (space);
-  }
+  // LWSS: Remove
+  //dGeomTransform (dSpaceID space)
+  //  { _id = dCreateGeomTransform (space); }
+  //
+  //void create (dSpaceID space=0) {
+  //  if (_id) dGeomDestroy (_id);
+  //  _id = dCreateGeomTransform (space);
+  //}
 
   void setGeom (dGeomID geom)
     { dGeomTransformSetGeom (_id, geom); }

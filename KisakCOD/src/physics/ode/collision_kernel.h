@@ -206,6 +206,13 @@ struct dxSpace : public dxGeom {
 struct dxSimpleSpace : public dxSpace {
     dxSimpleSpace(dSpaceID _space);
 
+    // LWSS ADD - HACK for re-construction
+    inline void ReInit()
+    {
+        dxSimpleSpace();
+    }
+    // LWSS END
+
     // ADDITION
     dxSimpleSpace() : dxSimpleSpace(nullptr) { }
 

@@ -105,7 +105,8 @@ void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
 dReal dGeomSphereGetRadius (dGeomID sphere);
 dReal dGeomSpherePointDepth (dGeomID sphere, dReal x, dReal y, dReal z);
 
-dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
+//dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
+dGeomID dCreateBox(dSpaceID space, dxBody *body, dReal lx, dReal ly, dReal lz); // KISAK
 void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz);
 void dGeomBoxGetLengths (dGeomID box, dVector3 result);
 dReal dGeomBoxPointDepth (dGeomID box, dReal x, dReal y, dReal z);
@@ -139,7 +140,8 @@ int dGeomRayGetClosestHit (dGeomID g);
 
 #include "collision_trimesh.h"
 
-dGeomID dCreateGeomTransform (dSpaceID space);
+//dGeomID dCreateGeomTransform (dSpaceID space);
+dGeomID dCreateGeomTransform(dSpaceID space, dxBody *body); // KISAK NEW
 void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
 dGeomID dGeomTransformGetGeom (dGeomID g);
 void dGeomTransformSetCleanup (dGeomID g, int mode);

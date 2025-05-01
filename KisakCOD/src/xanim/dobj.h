@@ -7,14 +7,6 @@ struct PhysPreset;
 struct XAnimTree_s;
 struct XModel;
 
-enum PhysWorld : __int32
-{                                       // ...
-    PHYS_WORLD_DYNENT = 0x0,
-    PHYS_WORLD_FX = 0x1,
-    PHYS_WORLD_RAGDOLL = 0x2,
-    PHYS_WORLD_COUNT = 0x3,
-};
-
 struct __declspec(align(4)) DObjTrace_s // sizeof=0x1C
 {                                       // ...
     float fraction;                     // ...

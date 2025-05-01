@@ -1,11 +1,16 @@
 #include "phys_local.h"
 
+#include <cgame_mp/cg_local_mp.h>
 #include "ode/common.h"
 #include "ode/collision_kernel.h"
 #include <ode/objects.h>
 #include <universal/assertive.h>
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
+#include <cgame/cg_local.h>
+#include "ode/odeext.h"
+#include <universal/profile.h>
+#include <game_mp/g_main_mp.h>
 
 // LWSS HACK - unfk some types
 #define float dReal
@@ -238,7 +243,7 @@ bool __cdecl CM_CullBox2(const objInfo *input, const float *origin, const float 
 int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip)
 {
     dxBody *Body; // eax
-    float *Rotation; // eax
+    const float *Rotation; // eax
     float v8; // [esp+Ch] [ebp-AE0h]
     float v9; // [esp+10h] [ebp-ADCh]
     float v10; // [esp+14h] [ebp-AD8h]
@@ -262,8 +267,8 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
     float v28; // [esp+F4h] [ebp-9F8h]
     float v29; // [esp+FCh] [ebp-9F0h]
     float halfHeight; // [esp+100h] [ebp-9ECh]
-    float *v31; // [esp+140h] [ebp-9ACh]
-    dxBodyInfo *Position; // [esp+144h] [ebp-9A8h]
+    const float *v31; // [esp+140h] [ebp-9ACh]
+    const dReal *Position; // [esp+144h] [ebp-9A8h]
     int k; // [esp+170h] [ebp-97Ch]
     int j; // [esp+174h] [ebp-978h]
     int c; // [esp+178h] [ebp-974h]
@@ -286,17 +291,17 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
 
     LODWORD(lengths[4]) = 1024;
     narrowLen = &phys_narrowObjMaxLength->current.value;
-    //Profile_Begin(368);
-    //Profile_Begin(369);
+    Profile_Begin(368);
+    Profile_Begin(369);
     if (skip < 44)
         MyAssertHandler(".\\physics\\phys_world_collision.cpp", 374, 0, "%s", "skip >= (int)sizeof(dContactGeom)");
     if (dGeomGetClass(o1) != 15)
         MyAssertHandler(".\\physics\\phys_world_collision.cpp", 375, 0, "%s", "dGeomGetClass( o1 ) == GEOM_CLASS_WORLD");
     Body = dGeomGetBody(o2);
     Position = dBodyGetPosition(Body);
-    input.bodyCenter[0] = Position->pos[0];
-    input.bodyCenter[1] = Position->pos[1];
-    input.bodyCenter[2] = Position->pos[2];
+    input.bodyCenter[0] = *Position;
+    input.bodyCenter[1] = Position[1];
+    input.bodyCenter[2] = Position[2];
     v31 = dGeomGetPosition(o2);
     input.pos[0] = *v31;
     input.pos[1] = v31[1];
@@ -322,12 +327,12 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
             }
         }
         MatrixTransformVector(input.u.sideExtents, absR, maxs);
-        v25 = *narrowLen > (double)lengths[0] || *narrowLen > (double)lengths[1] || *narrowLen > (double)lengths[2];
+        v25 = *narrowLen > lengths[0] || *narrowLen > lengths[1] || *narrowLen > lengths[2];
         input.isNarrow = v25;
         break;
     case 11:
         input.type = PHYS_GEOM_BRUSHMODEL;
-        brushInfo = (BrushInfo *)dGeomGetClassData(o2);
+        brushInfo = (BrushInfo*)dGeomGetClassData(o2);
         if (!brushInfo->u.brushModel)
             MyAssertHandler(".\\physics\\phys_world_collision.cpp", 402, 0, "%s", "brushInfo->u.brushModel");
         if (brushInfo->u.brushModel == 4095)
@@ -343,49 +348,49 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
         maxs[0] = input.u.brushModel->radius;
         maxs[1] = maxs[0];
         maxs[2] = maxs[0];
-        input.isNarrow = *narrowLen > (double)input.u.brushModel->radius;
+        input.isNarrow = *narrowLen > input.u.brushModel->radius;
         break;
     case 12:
         input.type = PHYS_GEOM_BRUSH;
-        brushInfo = (BrushInfo *)dGeomGetClassData(o2);
+        brushInfo = (BrushInfo*)dGeomGetClassData(o2);
         if (!brushInfo->u.brush)
             MyAssertHandler(".\\physics\\phys_world_collision.cpp", 419, 0, "%s", "brushInfo->u.brush");
-        input.u.brushModel = (const cmodel_t *)brushInfo->u.brush;
+        input.u.brushModel = (cmodel_t*)brushInfo->u.brush;
         MatrixTransformVector(brushInfo->centerOfMass, input.R, rotatedCenterOfMass);
         Vec3Sub(input.pos, rotatedCenterOfMass, input.pos);
         radius = 0.0;
         v24 = fabs(input.u.brushModel->maxs[1]);
-        if ((float)0.0 < (double)v24)
+        if (0.0 < v24)
         {
             v23 = fabs(input.u.brushModel->maxs[1]);
             radius = v23;
         }
         v22 = fabs(input.u.brushModel->maxs[2]);
-        if (radius < (double)v22)
+        if (radius < v22)
         {
             v21 = fabs(input.u.brushModel->maxs[2]);
             radius = v21;
         }
         v20 = fabs(input.u.brushModel->radius);
-        if (radius < (double)v20)
+        if (radius < v20)
         {
             v19 = fabs(input.u.brushModel->radius);
             radius = v19;
         }
         v18 = fabs(input.u.brushModel->mins[0]);
-        if (radius < (double)v18)
+        if (radius < v18)
         {
             v17 = fabs(input.u.brushModel->mins[0]);
             radius = v17;
         }
         v16 = fabs(input.u.brushModel->mins[1]);
-        if (radius < (double)v16)
+        if (radius < v16)
         {
             v15 = fabs(input.u.brushModel->mins[1]);
             radius = v15;
         }
         v14 = fabs(input.u.brushModel->mins[2]);
-        if (radius < (double)v14)
+        if (radius < v14)
         {
             v13 = fabs(input.u.brushModel->mins[2]);
             radius = v13;
@@ -393,7 +398,7 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
         maxs[0] = radius * 1.732050776481628;
         maxs[1] = maxs[0];
         maxs[2] = maxs[0];
-        input.isNarrow = *narrowLen > (double)input.u.brushModel->radius;
+        input.isNarrow = *narrowLen > input.u.brushModel->radius;
         break;
     case 13:
         input.type = PHYS_GEOM_CYLINDER;
@@ -416,7 +421,7 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
         break;
     case 14:
         input.type = PHYS_GEOM_CAPSULE;
-        cyl = (GeomStateCylinder *)dGeomGetClassData(o2);
+        cyl = (GeomStateCylinder*)dGeomGetClassData(o2);
         input.cylDirection = cyl->direction;
         input.u.sideExtents[0] = cyl->radius;
         input.u.sideExtents[1] = cyl->radius;
@@ -457,9 +462,9 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
         ll.bounds[0][i] = ll.bounds[0][i] - (maxs[i] + 1.0);
         ll.bounds[1][i] = maxs[i] + 1.0 + ll.bounds[1][i];
     }
-    *(_QWORD *)&input.bounds[0][0] = *(_QWORD *)&ll.bounds[0][0];
+    *&input.bounds[0][0] = *&ll.bounds[0][0];
     input.bounds[0][2] = ll.bounds[0][2];
-    *(_QWORD *)&input.bounds[1][0] = *(_QWORD *)&ll.bounds[1][0];
+    *&input.bounds[1][0] = *&ll.bounds[1][0];
     input.bounds[1][2] = ll.bounds[1][2];
     ll.count = 0;
     ll.maxcount = 1024;
@@ -474,7 +479,7 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
         results.contactCount = 0;
         results.maxContacts = flags;
         results.stride = skip;
-        value = (TraceThreadInfo *)Sys_GetValue(3);
+        value = (TraceThreadInfo*)Sys_GetValue(3);
         if (!value)
             MyAssertHandler(".\\physics\\phys_world_collision.cpp", 524, 0, "%s", "value");
         ++value->checkcount.global;
@@ -486,9 +491,9 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
                 0,
                 "%s",
                 "input.threadInfo.checkcount.partitions || cm.partitionCount == 0");
-        //Profile_EndInternal(0);
-        //Profile_Begin(370);
-        Vec3Sub(input.bounds[0], input.pos, bounds[0]);
+        Profile_EndInternal(0);
+        Profile_Begin(370);
+        Vec3Sub((const float*)input.bounds, input.pos, bounds[0]);
         Vec3Sub(input.bounds[1], input.pos, bounds[1]);
         input.radius = RadiusFromBounds(bounds[0], bounds[1]);
         for (i = 0; i < ll.count; ++i)
@@ -500,14 +505,14 @@ int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dC
             results.contacts[i].contact.g1 = o1;
             results.contacts[i].contact.g2 = o2;
         }
-        //Profile_EndInternal(0);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return results.contactCount;
     }
     else
     {
-        //Profile_EndInternal(0);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 0;
     }
 }
@@ -593,7 +598,8 @@ void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results)
     float capRadius; // [esp+14h] [ebp-10C4h]
     int entityList[1024]; // [esp+28h] [ebp-10B0h] BYREF
     float v4; // [esp+1028h] [ebp-B0h]
-    float out[9]; // [esp+102Ch] [ebp-ACh] BYREF
+    //float out[9]; // [esp+102Ch] [ebp-ACh] BYREF
+    mat3x3 out;
     float result[3]; // [esp+1050h] [ebp-88h] BYREF
     float sum[3]; // [esp+105Ch] [ebp-7Ch] BYREF
     float capHalfHeight; // [esp+1068h] [ebp-70h]
@@ -604,7 +610,7 @@ void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results)
     int v13; // [esp+10D4h] [ebp-4h]
 
     v13 = CM_AreaEntities(input->bounds[0], input->bounds[1], entityList, 1024, input->clipMask);
-    MatrixIdentity33((float (*)[3])out);
+    MatrixIdentity33(out);
     for (i = 0; i < v13; ++i)
     {
         v11 = &g_entities[entityList[i]];
@@ -787,14 +793,14 @@ void __cdecl Phys_InitCylinderGeomClass()
 
 void __cdecl Phys_GetCylinderAABB(dxGeom *geom, float *aabb)
 {
-    float *Rotation; // eax
+    const float *Rotation; // eax
     float v3; // [esp+0h] [ebp-78h]
     float v4; // [esp+4h] [ebp-74h]
     float v5; // [esp+8h] [ebp-70h]
     float v6; // [esp+Ch] [ebp-6Ch]
     float v7; // [esp+14h] [ebp-64h]
     float v8; // [esp+1Ch] [ebp-5Ch]
-    float *Position; // [esp+20h] [ebp-58h]
+    const float *Position; // [esp+20h] [ebp-58h]
     float pos[3]; // [esp+2Ch] [ebp-4Ch]
     int axisIdx; // [esp+38h] [ebp-40h]
     float R[4][3]; // [esp+3Ch] [ebp-3Ch] BYREF

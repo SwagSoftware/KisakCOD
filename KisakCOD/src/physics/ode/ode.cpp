@@ -1465,8 +1465,13 @@ extern "C" void dTestDataStructures()
 #include <universal/pool_allocator.h>
 #include <win32/win_local.h>
 
-
+#include <string>
 odeGlob_t odeGlob;
+
+dxUserGeom *__cdecl Phys_GetWorldGeom()
+{
+    return &odeGlob.worldGeom;
+}
 
 void __cdecl ODE_Init()
 {
@@ -1476,6 +1481,22 @@ void __cdecl ODE_Init()
 
 // MOD
 #include <xanim/dobj.h>
+
+dxJointGroup *__cdecl dGetContactJointGroup(PhysWorld worldIndex)
+{
+    odeGlob.contactsGroup[worldIndex].num = 0;
+    return &odeGlob.contactsGroup[worldIndex];
+}
+
+dxSimpleSpace *__cdecl dGetSimpleSpace(PhysWorld worldIndex)
+{
+    if (&odeGlob.space[worldIndex])
+    {
+        //dxSimpleSpace::dxSimpleSpace(&odeGlob.space[worldIndex], 0);
+        odeGlob.space[worldIndex].ReInit();
+    }
+    return &odeGlob.space[worldIndex];
+}
 
 dxWorld* dWorldCreate(PhysWorld worldIndex)
 {

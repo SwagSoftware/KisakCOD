@@ -515,8 +515,10 @@ void __cdecl Phys_GetWindingForBrushFace2(
                     ++outWinding->ptCount;
                 }
             }
-            LODWORD(v[3]) = planes[1];
-            LODWORD(v[4]) = planes[2];
+            //LODWORD(v[3]) = planes[1];
+            v[3] = *planes[1];
+            //LODWORD(v[4]) = planes[2];
+            v[4] = *planes[2];
             planes[1][0] = planes[2][0];
             planes[1][1] = planes[2][1];
             planes[1][2] = planes[2][2];
@@ -1831,8 +1833,10 @@ void __cdecl Phys_GetWindingForBrushFace(
                     ++outWinding->ptCount;
                 }
             }
-            LODWORD(v[3]) = planes[1];
-            LODWORD(v[4]) = planes[2];
+            //LODWORD(v[3]) = planes[1];
+            v[3] = *planes[1];
+            //LODWORD(v[4]) = planes[2];
+            v[4] = *planes[2];
             planes[1][0] = planes[2][0];
             planes[1][1] = planes[2][1];
             planes[1][2] = planes[2][2];

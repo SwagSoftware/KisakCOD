@@ -38,10 +38,11 @@ class dWorld {
   void operator= (const dWorld &);
 
 public:
-  dWorld()
-    { _id = dWorldCreate(); }
-  ~dWorld()
-    { dWorldDestroy (_id); }
+  // LWSS: Remove
+  //dWorld()
+  //  { _id = dWorldCreate(); }
+  //~dWorld()
+  //  { dWorldDestroy (_id); }
 
   dWorldID id() const
     { return _id; }

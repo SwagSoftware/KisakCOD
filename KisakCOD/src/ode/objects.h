@@ -27,13 +27,37 @@
 #include <ode/mass.h>
 #include <ode/contact.h>
 
+// LWSS ADD: this enum has to not be "extern C"
+enum PhysWorld : __int32
+{                                       // ...
+	PHYS_WORLD_DYNENT = 0x0,
+	PHYS_WORLD_FX = 0x1,
+	PHYS_WORLD_RAGDOLL = 0x2,
+	PHYS_WORLD_COUNT = 0x3,
+};
+PhysWorld &operator++(PhysWorld &e) {
+	static_cast<PhysWorld>(static_cast<int>(e) + 1);
+	return e;
+}
+PhysWorld &operator++(PhysWorld &e, int i)
+{
+	PhysWorld temp = e;
+	++e;
+	return temp;
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include <xanim/dobj.h>
 
 /* world */
 
-dWorldID dWorldCreate();
+//dWorldID dWorldCreate();
+struct dxWorld *dWorldCreate(PhysWorld worldIndex); // KISAK
+struct dxSimpleSpace * dGetSimpleSpace(PhysWorld worldIndex); // KISAK
+struct dxJointGroup *__cdecl dGetContactJointGroup(PhysWorld worldIndex); // KISAK
+
 void dWorldDestroy (dWorldID);
 
 void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);

@@ -3,6 +3,9 @@
 
 #include <physics/ode/collision_kernel.h>
 
+int g_phys_msecStep[3] = { 0x11, 0x11, 0x11 };
+int g_phys_maxMsecStep[3] = { 67, 67, 34 };
+int g_phys_minMsecStep[3] = { 17, 17, 17 };
 
 void __cdecl Phys_CheckOpposingNormals(dxBody *body0, dxBody *body1, ContactList *contacts)
 {
@@ -624,7 +627,6 @@ void __cdecl Phys_CreateJointForEachContact(
     }
 }
 
-int g_phys_msecStep[3] = { 0x11, 0x11, 0x11 };
 void __cdecl Phys_ApplyContactJitter(PhysWorld worldIndex, dContactGeom *contact, dxBody *body1, dxBody *body2)
 {
     double v4; // [esp+8h] [ebp-6Ch]
