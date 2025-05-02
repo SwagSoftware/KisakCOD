@@ -3,177 +3,41 @@
 #include <universal/q_parse.h>
 #include <universal/com_sndalias.h>
 
-enum parseSkip_t : __int32
-{                                       // ...
-    SKIP_NO = 0x0,
-    SKIP_YES = 0x1,
-    SKIP_ALL_ELIFS = 0x2,
-};
-
-struct pc_token_s // sizeof=0x410
-{                                       // ...
-    int type;                           // ...
-    int subtype;
-    int intvalue;                       // ...
-    float floatvalue;                   // ...
-    char string[1024];                  // ...
-};
-
-struct loadAssets_t // sizeof=0x10
-{                                       // ...
-    float fadeClamp;                    // ...
-    int fadeCycle;                      // ...
-    float fadeAmount;                   // ...
-    float fadeInAmount;                 // ...
-};
-
-struct $F99A9AECA2B60514CA5C8024B8EAC369 // sizeof=0xC1C
-{                                       // ...
-    loadAssets_t loadAssets;            // ...
-    MenuList menuList;                  // ...
-    itemDef_s *items[256];              // ...
-    menuDef_t *menus[512];              // ...
-};
-
 $F99A9AECA2B60514CA5C8024B8EAC369 g_load_0;
+char menuBuf1[4096];
 
-struct operator_s // sizeof=0x14
-{                                       // ...
-    int op;
-    int priority;
-    int parentheses;
-    operator_s *prev;
-    operator_s *next;
-};
-struct __declspec(align(8)) token_s // sizeof=0x430
-{                                       // ...
-    char string[1024];                  // ...
-    int type;                           // ...
-    int subtype;                        // ...
-    unsigned int intvalue;              // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    long double floatvalue;             // ...
-    char *whitespace_p;                 // ...
-    char *endwhitespace_p;              // ...
-    int line;                           // ...
-    int linescrossed;                   // ...
-    token_s *next;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct __declspec(align(8)) value_s // sizeof=0x20
-{                                       // ...
-    int intvalue;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    long double floatvalue;
-    int parentheses;
-    value_s *prev;
-    value_s *next;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct __declspec(align(8)) script_s // sizeof=0x4B0
-{
-    char filename[64];
-    char *buffer;
-    char *script_p;
-    char *end_p;
-    char *lastscript_p;
-    char *whitespace_p;
-    char *endwhitespace_p;
-    int length;
-    int line;
-    int lastline;
-    int tokenavailable;
-    int flags;
-    punctuation_s *punctuations;
-    punctuation_s **punctuationtable;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    token_s token;
-    script_s *next;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-};
-struct define_s // sizeof=0x20
-{
-    char *name;
-    int flags;
-    int builtin;
-    int numparms;
-    token_s *parms;
-    token_s *tokens;
-    define_s *next;
-    define_s *hashnext;
-};
-struct indent_s // sizeof=0x10
-{
-    int type;
-    parseSkip_t skip;
-    script_s *script;
-    indent_s *next;
-};
-struct source_s // sizeof=0x4D0
-{                                       // ...
-    char filename[64];
-    char includepath[64];
-    punctuation_s *punctuations;
-    script_s *scriptstack;              // ...
-    token_s *tokens;                    // ...
-    define_s *defines;                  // ...
-    define_s **definehash;              // ...
-    indent_s *indentstack;
-    int skip;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    token_s token;
-};
-struct directive_s // sizeof=0x8
-{                                       // ...
-    char *name;                         // ...
-    int(__cdecl *func)(source_s *);    // ...
-};
+const KeywordHashEntry<menuDef_t, 128, 128> *menuParseKeywordHash[128];
+const KeywordHashEntry<itemDef_s, 256, 3855> *itemParseKeywordHash[256];
 
-struct punctuation_s // sizeof=0xC
+int s_consumedOperandCount[26] =
 {
-    char *p;
-    int n;
-    punctuation_s *next;
-};
-
-struct source_s // sizeof=0x4D0
-{                                       // ...
-    char filename[64];
-    char includepath[64];
-    punctuation_s *punctuations;
-    script_s *scriptstack;              // ...
-    token_s *tokens;                    // ...
-    define_s *defines;                  // ...
-    define_s **definehash;              // ...
-    indent_s *indentstack;
-    int skip;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    token_s token;
-};
+  1,
+  -1,
+  2,
+  0,
+  1,
+  1,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  0,
+  1,
+  1,
+  1,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+}; // idb
 
 punctuation_s default_punctuations[53] =
 {
@@ -231,6 +95,28 @@ punctuation_s default_punctuations[53] =
   { (char*)"$", 52, NULL },
   { NULL, 0, NULL }
 }; // idb
+
+int __cdecl PC_Directive_include(source_s *source);
+int __cdecl PC_Directive_undef(source_s *source);
+int __cdecl PC_Directive_define(source_s *source);
+int __cdecl PC_Directive_if_def(source_s *source, int type);
+int __cdecl PC_Directive_ifdef(source_s *source);
+int __cdecl PC_Directive_ifndef(source_s *source);
+int __cdecl PC_Directive_else(source_s *source);
+int __cdecl PC_Directive_endif(source_s *source);
+int __cdecl PC_Directive_elif(source_s *source);
+int __cdecl PC_Directive_if(source_s *source);
+int __cdecl PC_Directive_line(source_s *source);
+int __cdecl PC_Directive_error(source_s *source);
+int __cdecl PC_Directive_pragma(source_s *source);
+int __cdecl PC_Directive_evalfloat(source_s *source);
+int __cdecl PC_Directive_eval(source_s *source);
+int __cdecl PC_Evaluate(source_s *source, int *intvalue, double *floatvalue, int integer);
+int __cdecl PC_ExpandDefineIntoSource(source_s *source, token_s *deftoken, define_s *define);
+int __cdecl PC_Float_Expression_Parse(int handle, float *f);
+
+int __cdecl PC_DollarDirective_evalfloat(source_s *source);
+int __cdecl PC_DollarDirective_evalint(source_s *source);
 
 const directive_s directives[15] =
 {
@@ -2232,7 +2118,7 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
             v = &value_heap[numvalues++];
             if (negativevalue)
             {
-                v->intvalue = -tokens->intvalue;
+                v->intvalue = -(int)tokens->intvalue;
                 v5 = -tokens->floatvalue;
             }
             else
@@ -3424,112 +3310,6 @@ void PC_SourceError(int handle, char *format, ...)
     Com_PrintError(13, "Menu load error: %s, line %d: %s\n", filename, line, string_3);
 }
 
-enum EvalValueType : __int32
-{                                       // ...
-    EVAL_VALUE_DOUBLE = 0x0,
-    EVAL_VALUE_INT = 0x1,
-    EVAL_VALUE_STRING = 0x2,
-};
-enum EvalOperatorType : __int32
-{                                       // ...
-    EVAL_OP_LPAREN = 0x0,
-    EVAL_OP_RPAREN = 0x1,
-    EVAL_OP_COLON = 0x2,
-    EVAL_OP_QUESTION = 0x3,
-    EVAL_OP_PLUS = 0x4,
-    EVAL_OP_MINUS = 0x5,
-    EVAL_OP_UNARY_PLUS = 0x6,
-    EVAL_OP_UNARY_MINUS = 0x7,
-    EVAL_OP_MULTIPLY = 0x8,
-    EVAL_OP_DIVIDE = 0x9,
-    EVAL_OP_MODULUS = 0xA,
-    EVAL_OP_LSHIFT = 0xB,
-    EVAL_OP_RSHIFT = 0xC,
-    EVAL_OP_BITWISE_NOT = 0xD,
-    EVAL_OP_BITWISE_AND = 0xE,
-    EVAL_OP_BITWISE_OR = 0xF,
-    EVAL_OP_BITWISE_XOR = 0x10,
-    EVAL_OP_LOGICAL_NOT = 0x11,
-    EVAL_OP_LOGICAL_AND = 0x12,
-    EVAL_OP_LOGICAL_OR = 0x13,
-    EVAL_OP_EQUALS = 0x14,
-    EVAL_OP_NOT_EQUAL = 0x15,
-    EVAL_OP_LESS = 0x16,
-    EVAL_OP_LESS_EQUAL = 0x17,
-    EVAL_OP_GREATER = 0x18,
-    EVAL_OP_GREATER_EQUAL = 0x19,
-    EVAL_OP_COUNT = 0x1A,
-};
-EvalOperatorType operator-=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) - static_cast<int>(rhs));
-}
-EvalOperatorType operator+=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) + static_cast<int>(rhs));
-}
-EvalOperatorType operator/=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) / static_cast<int>(rhs));
-}
-EvalOperatorType operator*=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) * static_cast<int>(rhs));
-}
-EvalOperatorType operator<<=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) << static_cast<int>(rhs));
-}
-EvalOperatorType operator>>=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) >> static_cast<int>(rhs));
-}
-EvalOperatorType operator%=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) % static_cast<int>(rhs));
-}
-EvalOperatorType operator&=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) & static_cast<int>(rhs));
-}
-EvalOperatorType operator|=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) | static_cast<int>(rhs));
-}
-EvalOperatorType operator^=(EvalOperatorType lhs, EvalOperatorType rhs)
-{
-    return (EvalOperatorType)(static_cast<int>(lhs) ^ static_cast<int>(rhs));
-}
-
-union EvalValue_u // sizeof=0x8
-{                                       // ...
-    double d;
-    int i;
-    char *s;
-};
-struct EvalValue // sizeof=0x10
-{                                       // ...
-    EvalValueType type;
-    // padding byte
-    // padding byte
-    // padding byte
-    // padding byte
-    EvalValue_u u;
-};
-
-struct __declspec(align(4)) Eval // sizeof=0x5010
-{                                       // ...
-    EvalOperatorType opStack[1024];
-    EvalValue valStack[1024];
-    int opStackPos;                     // ...
-    int valStackPos;                    // ...
-    int parenCount;                     // ...
-    bool pushedOp;                      // ...
-    // padding byte
-    // padding byte
-    // padding byte
-};
-
 bool __cdecl Eval_CanPushValue(const Eval *eval)
 {
     const char *pExceptionObject; // [esp+0h] [ebp-4h] BYREF
@@ -4376,22 +4156,6 @@ int __cdecl PC_Int_Expression_Parse(int handle, int *i)
     return 1;
 }
 
-int __cdecl PC_Rect_Parse(int handle, rectDef_s *r)
-{
-    if (!PC_Float_Parse(handle, &r->x)
-        || !PC_Float_Parse(handle, &r->y)
-        || !PC_Float_Parse(handle, &r->w)
-        || !PC_Float_Parse(handle, &r->h))
-    {
-        return 0;
-    }
-    if (!PC_Int_ParseLine(handle, &r->horzAlign))
-        r->horzAlign = 0;
-    if (!PC_Int_ParseLine(handle, &r->vertAlign))
-        r->vertAlign = 0;
-    return 1;
-}
-
 int __cdecl PC_Float_Parse(int handle, float *f)
 {
     pc_token_s token; // [esp+0h] [ebp-418h] BYREF
@@ -4418,9 +4182,25 @@ int __cdecl PC_Float_Parse(int handle, float *f)
     }
     else
     {
-        PC_SourceError(handle, (char*)"expected float but found %s\n", token.string);
+        PC_SourceError(handle, (char *)"expected float but found %s\n", token.string);
         return 0;
     }
+}
+
+int __cdecl PC_Rect_Parse(int handle, rectDef_s *r)
+{
+    if (!PC_Float_Parse(handle, &r->x)
+        || !PC_Float_Parse(handle, &r->y)
+        || !PC_Float_Parse(handle, &r->w)
+        || !PC_Float_Parse(handle, &r->h))
+    {
+        return 0;
+    }
+    if (!PC_Int_ParseLine(handle, &r->horzAlign))
+        r->horzAlign = 0;
+    if (!PC_Int_ParseLine(handle, &r->vertAlign))
+        r->vertAlign = 0;
+    return 1;
 }
 
 char __cdecl Eval_PushNumber(Eval *eval, long double value)
@@ -4443,36 +4223,6 @@ bool __cdecl Eval_AnyMissingOperands(const Eval *eval)
         requiredOperandCount += s_consumedOperandCount[eval->opStack[opIndex]];
     return requiredOperandCount != eval->valStackPos;
 }
-
-int s_consumedOperandCount[26] =
-{
-  1,
-  -1,
-  2,
-  0,
-  1,
-  1,
-  0,
-  0,
-  1,
-  1,
-  1,
-  1,
-  1,
-  0,
-  1,
-  1,
-  1,
-  0,
-  1,
-  1,
-  1,
-  1,
-  1,
-  1,
-  1,
-  1
-}; // idb
 
 EvalValue *__cdecl Eval_Solve(EvalValue *result, Eval *eval)
 {
@@ -5190,6 +4940,17 @@ void __cdecl Item_Init(itemDef_s *item, int imageTrack)
     Window_Init(&item->window);
 }
 
+int __cdecl KeywordHash_Key_256_3855_(const char *keyword)
+{
+    int hash; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    hash = 0;
+    for (i = 0; keyword[i]; ++i)
+        hash += (i + 3855) * tolower(keyword[i]);
+    return (unsigned __int8)(hash + BYTE1(hash));
+}
+
 const KeywordHashEntry<itemDef_s, 256, 3855> *__cdecl KeywordHash_Find_itemDef_s_256_3855_(
     const KeywordHashEntry<itemDef_s, 256, 3855> **table,
     const char *keyword)
@@ -5707,6 +5468,11 @@ bool __cdecl ItemParse_align(itemDef_s *item, int handle)
     return PC_Int_Parse(handle, &item->alignment) != 0;
 }
 
+bool __cdecl ItemParse_IsValidTextAlignment(unsigned int textAlignMode)
+{
+    return textAlignMode < 0x10 && (textAlignMode & 3) != 3;
+}
+
 int __cdecl ItemParse_textalign(itemDef_s *item, int handle)
 {
     if (!PC_Int_Parse(handle, &item->textAlignMode))
@@ -5715,11 +5481,6 @@ int __cdecl ItemParse_textalign(itemDef_s *item, int handle)
         return 1;
     PC_SourceError(handle, (char*)"expected ITEM_ALIGN_* value\n");
     return 0;
-}
-
-bool __cdecl ItemParse_IsValidTextAlignment(unsigned int textAlignMode)
-{
-    return textAlignMode < 0x10 && (textAlignMode & 3) != 3;
 }
 
 bool __cdecl ItemParse_textalignx(itemDef_s *item, int handle)
@@ -6321,8 +6082,6 @@ const KeywordHashEntry<menuDef_t, 128, 128> menuParseKeywords[36] =
   { "hiddenDuringUI", &MenuParse_hiddenDuringUI },
   { "allowedBinding", &MenuParse_allowedBinding }
 }; // idb
-const KeywordHashEntry<menuDef_t, 128, 128> *menuParseKeywordHash[128];
-const KeywordHashEntry<itemDef_s, 256, 3855> *itemParseKeywordHash[256];
 const KeywordHashEntry<itemDef_s, 256, 3855> itemParseKeywords[71] =
 {
   { "name", &ItemParse_name },
@@ -6397,7 +6156,6 @@ const KeywordHashEntry<itemDef_s, 256, 3855> itemParseKeywords[71] =
   { "disablecolor", &ItemParse_disableColor },
   { "selectIcon", &ItemParse_selectIcon }
 }; // idb
-char menuBuf1[4096];
 
 int __cdecl KeywordHash_KeySeed(const char *keyword, int hashCount, int seed)
 {
@@ -6430,16 +6188,6 @@ char __cdecl KeywordHash_IsValidSeed_itemDef_s_256_3855_(
     return 1;
 }
 
-int __cdecl KeywordHash_Key_256_3855_(const char *keyword)
-{
-    int hash; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
-
-    hash = 0;
-    for (i = 0; keyword[i]; ++i)
-        hash += (i + 3855) * tolower(keyword[i]);
-    return (unsigned __int8)(hash + BYTE1(hash));
-}
 void __cdecl KeywordHash_Add_itemDef_s_256_3855_(
     const KeywordHashEntry<itemDef_s, 256, 3855> **table,
     const KeywordHashEntry<itemDef_s, 256, 3855> *key)
@@ -6575,20 +6323,6 @@ void __cdecl Menu_SetupKeywordHash()
         KeywordHash_Add_menuDef_t_128_128_(
             menuParseKeywordHash,
             (const KeywordHashEntry<menuDef_t, 128, 128> *)(8 * i + 9146728));
-}
-
-void __cdecl Menu_FreeItemMemory(itemDef_s *item)
-{
-    if (!item)
-        MyAssertHandler(".\\ui\\ui_shared_obj.cpp", 106, 0, "%s", "item");
-    free_expression(&item->visibleExp);
-    free_expression(&item->materialExp);
-    free_expression(&item->textExp);
-    free_expression(&item->rectXExp);
-    free_expression(&item->rectYExp);
-    free_expression(&item->rectWExp);
-    free_expression(&item->rectHExp);
-    free_expression(&item->forecolorAExp);
 }
 
 void __cdecl Menu_Init(menuDef_t *menu, int imageTrack)

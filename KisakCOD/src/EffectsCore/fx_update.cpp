@@ -2242,7 +2242,7 @@ void __cdecl FX_RunPhysics(int localClientNum)
 
     system = FX_GetSystem(localClientNum);
     Sys_EnterCriticalSection(CRITSECT_PHYSICS);
-    Phys_RunToTime(localClientNum, PHYS_WORLD_FX, (dxSpace *)system->msecNow);
+    Phys_RunToTime(localClientNum, PHYS_WORLD_FX, system->msecNow);
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
 }
 

@@ -868,11 +868,11 @@ enum CubemapShot : __int32
     CUBEMAPSHOT_DOWN = 0x6,
     CUBEMAPSHOT_COUNT = 0x7,
 };
-CubemapShot &operator++(CubemapShot &e) {
+inline CubemapShot &operator++(CubemapShot &e) {
     static_cast<CubemapShot>(static_cast<int>(e) + 1);
     return e;
 }
-CubemapShot &operator++(CubemapShot &e, int i)
+inline CubemapShot &operator++(CubemapShot &e, int i)
 {
     CubemapShot temp = e;
     ++e;

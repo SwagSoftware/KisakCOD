@@ -498,7 +498,7 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
             }
         }
         //Profile_Begin(387);
-        Phys_RunToTime(localClientNum, PHYS_WORLD_DYNENT, (dxSpace *)cgameGlob->time);
+        Phys_RunToTime(localClientNum, PHYS_WORLD_DYNENT, cgameGlob->time);
         //Profile_EndInternal(0);
         //Profile_EndInternal(0);
     }

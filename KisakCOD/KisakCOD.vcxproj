@@ -409,11 +409,6 @@
     <ClCompile Include="src\groupvoice\speex\speex_callbacks.c" />
     <ClCompile Include="src\groupvoice\speex\speex_header.c" />
     <ClCompile Include="src\groupvoice\speex\stereo.c" />
-    <ClCompile Include="src\groupvoice\speex\testdenoise.c" />
-    <ClCompile Include="src\groupvoice\speex\testecho.c" />
-    <ClCompile Include="src\groupvoice\speex\testenc.c" />
-    <ClCompile Include="src\groupvoice\speex\testenc_uwb.c" />
-    <ClCompile Include="src\groupvoice\speex\testenc_wb.c" />
     <ClCompile Include="src\groupvoice\speex\vbr.c" />
     <ClCompile Include="src\groupvoice\speex\vq.c" />
     <ClCompile Include="src\physics\ode\collision_kernel.cpp" />
@@ -524,6 +519,7 @@
     <ClCompile Include="src\ui_mp\ui_gameinfo_mp.cpp" />
     <ClCompile Include="src\ui_mp\ui_main_mp.cpp" />
     <ClCompile Include="src\universal\aabbtree.cpp" />
+    <ClCompile Include="src\universal\assertive.cpp" />
     <ClCompile Include="src\universal\com_constantconfigstrings.cpp" />
     <ClCompile Include="src\universal\com_convexhull.cpp" />
     <ClCompile Include="src\universal\com_files.cpp" />
@@ -554,7 +550,6 @@
     <ClCompile Include="src\win32\win_main.cpp" />
     <ClCompile Include="src\win32\win_net.cpp" />
     <ClCompile Include="src\win32\win_net_debug.cpp" />
-    <ClCompile Include="src\win32\win_remote.cpp" />
     <ClCompile Include="src\win32\win_storage.cpp" />
     <ClCompile Include="src\win32\win_syscon.cpp" />
     <ClCompile Include="src\win32\win_voice.cpp" />
@@ -840,7 +835,6 @@
     <ClInclude Include="src\win32\win_local.h" />
     <ClInclude Include="src\win32\win_localize.h" />
     <ClInclude Include="src\win32\win_net_debug.h" />
-    <ClInclude Include="src\win32\win_remote.h" />
     <ClInclude Include="src\win32\win_storage.h" />
     <ClInclude Include="src\xanim\dobj.h" />
     <ClInclude Include="src\xanim\dobj_utils.h" />

@@ -30,11 +30,11 @@ enum netsrc_t : __int32
     NS_MAXCLIENTS = 0x1,
     NS_PACKET = 0x2,
 };
-netsrc_t &operator++(netsrc_t &e) {
+inline netsrc_t &operator++(netsrc_t &e) {
     static_cast<netsrc_t>(static_cast<int>(e) + 1);
     return e;
 }
-netsrc_t &operator++(netsrc_t &e, int i)
+inline netsrc_t &operator++(netsrc_t &e, int i)
 {
     netsrc_t temp = e;
     ++e;

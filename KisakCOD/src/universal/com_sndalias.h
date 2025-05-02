@@ -77,11 +77,11 @@ enum snd_alias_members_t : __int32
     SA_ENVELOPPERCENTAGE = 0x1C,
     SA_NUMFIELDS = 0x1D,
 };
-snd_alias_members_t &operator++(snd_alias_members_t &e) {
+inline snd_alias_members_t &operator++(snd_alias_members_t &e) {
     static_cast<snd_alias_members_t>(static_cast<int>(e) + 1);
     return e;
 }
-snd_alias_members_t &operator++(snd_alias_members_t &e, int i)
+inline snd_alias_members_t &operator++(snd_alias_members_t &e, int i)
 {
     snd_alias_members_t temp = e;
     ++e;

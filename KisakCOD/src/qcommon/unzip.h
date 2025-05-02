@@ -1,6 +1,7 @@
 //unzip.h
 
-#include <zlib32/zip.h>
+//#include <zlib32/zip.h>
+#include <zlib/zlib.h>
 #define ZIP_FILE	FILE
 
 #if defined(STRICTUNZIP) || defined(STRICTZIPUNZIP)

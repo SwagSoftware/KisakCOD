@@ -2029,7 +2029,7 @@ void __cdecl Ragdoll_Update(int msec)
                     Ragdoll_BodyUpdate(msec, body);
             }
             Phys_SetCollisionCallback(PHYS_WORLD_RAGDOLL, Ragdoll_GenerateAllSelfCollisionContacts);
-            Phys_RunToTime(0, PHYS_WORLD_RAGDOLL, (dxSpace *)ragdollTime);
+            Phys_RunToTime(0, PHYS_WORLD_RAGDOLL, ragdollTime);
         }
         //Profile_EndInternal(0);
     }

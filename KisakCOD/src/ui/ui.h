@@ -6,6 +6,266 @@
 
 struct Scr_WatchElement_s;
 
+enum parseSkip_t : __int32
+{                                       // ...
+    SKIP_NO = 0x0,
+    SKIP_YES = 0x1,
+    SKIP_ALL_ELIFS = 0x2,
+};
+
+struct directive_s // sizeof=0x8
+{                                       // ...
+    char *name;                         // ...
+    int(__cdecl *func)(struct source_s *);    // ...
+};
+
+struct punctuation_s // sizeof=0xC
+{
+    char *p;
+    int n;
+    punctuation_s *next;
+};
+
+struct pc_token_s // sizeof=0x410
+{                                       // ...
+    int type;                           // ...
+    int subtype;
+    int intvalue;                       // ...
+    float floatvalue;                   // ...
+    char string[1024];                  // ...
+};
+
+struct loadAssets_t // sizeof=0x10
+{                                       // ...
+    float fadeClamp;                    // ...
+    int fadeCycle;                      // ...
+    float fadeAmount;                   // ...
+    float fadeInAmount;                 // ...
+};
+
+struct $F99A9AECA2B60514CA5C8024B8EAC369 // sizeof=0xC1C
+{                                       // ...
+    loadAssets_t loadAssets;            // ...
+    MenuList menuList;                  // ...
+    itemDef_s *items[256];              // ...
+    menuDef_t *menus[512];              // ...
+};
+
+struct operator_s // sizeof=0x14
+{                                       // ...
+    int op;
+    int priority;
+    int parentheses;
+    operator_s *prev;
+    operator_s *next;
+};
+struct __declspec(align(8)) token_s // sizeof=0x430
+{                                       // ...
+    char string[1024];                  // ...
+    int type;                           // ...
+    int subtype;                        // ...
+    unsigned int intvalue;              // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    long double floatvalue;             // ...
+    char *whitespace_p;                 // ...
+    char *endwhitespace_p;              // ...
+    int line;                           // ...
+    int linescrossed;                   // ...
+    token_s *next;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+};
+struct __declspec(align(8)) value_s // sizeof=0x20
+{                                       // ...
+    int intvalue;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    long double floatvalue;
+    int parentheses;
+    value_s *prev;
+    value_s *next;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+};
+struct __declspec(align(8)) script_s // sizeof=0x4B0
+{
+    char filename[64];
+    char *buffer;
+    char *script_p;
+    char *end_p;
+    char *lastscript_p;
+    char *whitespace_p;
+    char *endwhitespace_p;
+    int length;
+    int line;
+    int lastline;
+    int tokenavailable;
+    int flags;
+    punctuation_s *punctuations;
+    punctuation_s **punctuationtable;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    token_s token;
+    script_s *next;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+};
+struct define_s // sizeof=0x20
+{
+    char *name;
+    int flags;
+    int builtin;
+    int numparms;
+    token_s *parms;
+    token_s *tokens;
+    define_s *next;
+    define_s *hashnext;
+};
+struct indent_s // sizeof=0x10
+{
+    int type;
+    parseSkip_t skip;
+    script_s *script;
+    indent_s *next;
+};
+struct source_s // sizeof=0x4D0
+{                                       // ...
+    char filename[64];
+    char includepath[64];
+    punctuation_s *punctuations;
+    script_s *scriptstack;              // ...
+    token_s *tokens;                    // ...
+    define_s *defines;                  // ...
+    define_s **definehash;              // ...
+    indent_s *indentstack;
+    int skip;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    token_s token;
+};
+
+
+enum EvalValueType : __int32
+{                                       // ...
+    EVAL_VALUE_DOUBLE = 0x0,
+    EVAL_VALUE_INT = 0x1,
+    EVAL_VALUE_STRING = 0x2,
+};
+enum EvalOperatorType : __int32
+{                                       // ...
+    EVAL_OP_LPAREN = 0x0,
+    EVAL_OP_RPAREN = 0x1,
+    EVAL_OP_COLON = 0x2,
+    EVAL_OP_QUESTION = 0x3,
+    EVAL_OP_PLUS = 0x4,
+    EVAL_OP_MINUS = 0x5,
+    EVAL_OP_UNARY_PLUS = 0x6,
+    EVAL_OP_UNARY_MINUS = 0x7,
+    EVAL_OP_MULTIPLY = 0x8,
+    EVAL_OP_DIVIDE = 0x9,
+    EVAL_OP_MODULUS = 0xA,
+    EVAL_OP_LSHIFT = 0xB,
+    EVAL_OP_RSHIFT = 0xC,
+    EVAL_OP_BITWISE_NOT = 0xD,
+    EVAL_OP_BITWISE_AND = 0xE,
+    EVAL_OP_BITWISE_OR = 0xF,
+    EVAL_OP_BITWISE_XOR = 0x10,
+    EVAL_OP_LOGICAL_NOT = 0x11,
+    EVAL_OP_LOGICAL_AND = 0x12,
+    EVAL_OP_LOGICAL_OR = 0x13,
+    EVAL_OP_EQUALS = 0x14,
+    EVAL_OP_NOT_EQUAL = 0x15,
+    EVAL_OP_LESS = 0x16,
+    EVAL_OP_LESS_EQUAL = 0x17,
+    EVAL_OP_GREATER = 0x18,
+    EVAL_OP_GREATER_EQUAL = 0x19,
+    EVAL_OP_COUNT = 0x1A,
+};
+EvalOperatorType operator-=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) - static_cast<int>(rhs));
+}
+EvalOperatorType operator+=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) + static_cast<int>(rhs));
+}
+EvalOperatorType operator/=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) / static_cast<int>(rhs));
+}
+EvalOperatorType operator*=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) * static_cast<int>(rhs));
+}
+EvalOperatorType operator<<=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) << static_cast<int>(rhs));
+}
+EvalOperatorType operator>>=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) >> static_cast<int>(rhs));
+}
+EvalOperatorType operator%=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) % static_cast<int>(rhs));
+}
+EvalOperatorType operator&=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) & static_cast<int>(rhs));
+}
+EvalOperatorType operator|=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) | static_cast<int>(rhs));
+}
+EvalOperatorType operator^=(EvalOperatorType lhs, EvalOperatorType rhs)
+{
+    return (EvalOperatorType)(static_cast<int>(lhs) ^ static_cast<int>(rhs));
+}
+
+union EvalValue_u // sizeof=0x8
+{                                       // ...
+    double d;
+    int i;
+    char *s;
+};
+struct EvalValue // sizeof=0x10
+{                                       // ...
+    EvalValueType type;
+    // padding byte
+    // padding byte
+    // padding byte
+    // padding byte
+    EvalValue_u u;
+};
+
+struct __declspec(align(4)) Eval // sizeof=0x5010
+{                                       // ...
+    EvalOperatorType opStack[1024];
+    EvalValue valStack[1024];
+    int opStackPos;                     // ...
+    int valStackPos;                    // ...
+    int parenCount;                     // ...
+    bool pushedOp;                      // ...
+    // padding byte
+    // padding byte
+    // padding byte
+};
+
 // ui_shared
 bool __cdecl Window_IsVisible(int localClientNum, const windowDef_t *w);
 void __cdecl Menu_Setup(UiContext *dc);
@@ -593,6 +853,17 @@ struct KeywordHashEntry
     const char *keyword;
     int(__cdecl *func)(T *, int);
 };
+int __cdecl PC_CheckTokenString(source_s *source, const char *string);
+EvalValue *__cdecl Eval_Solve(EvalValue *result, Eval *eval);
+bool __cdecl Eval_AnyMissingOperands(const Eval *eval);
+int __cdecl PC_Int_Expression_Parse(int handle, int *i);
+int __cdecl PC_Int_ParseLine(int handle, int *i);
+void __cdecl PC_PopIndent(source_s *source, int *type, parseSkip_t *skip);
+void __cdecl PC_PushIndent(source_s *source, int type, parseSkip_t skip);
+int __cdecl PC_ReadLine(source_s *source, token_s *token, bool expandDefines);
+void PC_SourceError(int handle, char *format, ...);
+void __cdecl PC_UnreadToken(source_s *source, token_s *token);
+
 void __cdecl free_expression(statement_s *statement);
 void __cdecl Menu_FreeItemMemory(itemDef_s *item);
 void __cdecl Item_SetupKeywordHash();

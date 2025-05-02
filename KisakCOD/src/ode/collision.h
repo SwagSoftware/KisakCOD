@@ -193,7 +193,7 @@ enum PhysicsGeomType : __int32
     PHYS_GEOM_COUNT = 0x6,
 };
 
-const char *geomNames[6] = { "n", "box", "brushmodel", "brush", "cyl", "cap" }; // idb
+static const char *geomNames[6] = { "n", "box", "brushmodel", "brush", "cyl", "cap" }; // idb
 
 
 struct GeomStateCylinder // sizeof=0xC

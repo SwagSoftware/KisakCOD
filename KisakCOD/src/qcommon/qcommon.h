@@ -36,7 +36,7 @@ enum DemoType : __int32
     DEMO_TYPE_SERVER = 0x2,
 };
 
-const char *WeaponStateNames[27] =
+static const char *WeaponStateNames[27] =
 {
   "WEAPON_READY",
   "WEAPON_RAISING",
@@ -712,11 +712,11 @@ enum DynEntityDrawType : __int32
     DYNENT_DRAW_BRUSH = 0x1,
     DYNENT_DRAW_COUNT = 0x2,
 };
-DynEntityDrawType &operator++(DynEntityDrawType &e) {
+inline DynEntityDrawType &operator++(DynEntityDrawType &e) {
     static_cast<DynEntityDrawType>(static_cast<int>(e) + 1);
     return e;
 }
-DynEntityDrawType& operator++(DynEntityDrawType &e, int i) 
+inline DynEntityDrawType& operator++(DynEntityDrawType &e, int i)
 {
     DynEntityDrawType temp = e;
     ++e;

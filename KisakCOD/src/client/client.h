@@ -23,11 +23,11 @@ enum print_msg_dest_t : __int32
     CON_DEST_GAME_LAST = 0x6,
     CON_DEST_COUNT = 0x7,
 };
-print_msg_dest_t &operator++(print_msg_dest_t &e) {
+inline print_msg_dest_t &operator++(print_msg_dest_t &e) {
     static_cast<print_msg_dest_t>(static_cast<int>(e) + 1);
     return e;
 }
-print_msg_dest_t &operator++(print_msg_dest_t &e, int i)
+inline print_msg_dest_t &operator++(print_msg_dest_t &e, int i)
 {
     print_msg_dest_t temp = e;
     ++e;

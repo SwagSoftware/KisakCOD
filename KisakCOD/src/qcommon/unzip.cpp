@@ -14,8 +14,8 @@
 #define ZIP_fread	fread
 #define ZIP_ftell	ftell
 
-#include "../zlib32/zip.h"
-//#include "../zlib/zlib.h"
+//#include "../zlib32/zip.h"
+#include "../zlib/zlib.h"
 #include "unzip.h"
 
 /* unzip.h -- IO for uncompress .zip files using zlib 
@@ -61,7 +61,7 @@
 typedef unsigned char  Byte;  /* 8 bits */
 typedef unsigned int   uInt;  /* 16 bits or more */
 typedef unsigned long  uLong; /* 32 bits or more */
-typedef Byte    *voidp;
+//typedef Byte    *voidp;
 
 #ifndef SEEK_SET
 #  define SEEK_SET        0       /* Seek from beginning of file.  */
@@ -71,34 +71,34 @@ typedef Byte    *voidp;
 
 typedef voidp gzFile;
 
-gzFile gzopen  OF((const char *path, const char *mode));
-/*
-     Opens a gzip (.gz) file for reading or writing. The mode parameter
-   is as in fopen ("rb" or "wb") but can also include a compression level
-   ("wb9") or a strategy: 'f' for filtered data as in "wb6f", 'h' for
-   Huffman only compression as in "wb1h". (See the description
-   of deflateInit2 for more information about the strategy parameter.)
-
-     gzopen can be used to read a file which is not in gzip format; in this
-   case gzread will directly read from the file without decompression.
-
-     gzopen returns NULL if the file could not be opened or if there was
-   insufficient memory to allocate the (de)compression state; errno
-   can be checked to distinguish the two cases (if errno is zero, the
-   zlib error is Z_MEM_ERROR).  */
-
-gzFile gzdopen  OF((int fd, const char *mode));
-/*
-     gzdopen() associates a gzFile with the file descriptor fd.  File
-   descriptors are obtained from calls like open, dup, creat, pipe or
-   fileno (in the file has been previously opened with fopen).
-   The mode parameter is as in gzopen.
-     The next call of gzclose on the returned gzFile will also close the
-   file descriptor fd, just like fclose(fdopen(fd), mode) closes the file
-   descriptor fd. If you want to keep fd open, use gzdopen(dup(fd), mode).
-     gzdopen returns NULL if there was insufficient memory to allocate
-   the (de)compression state.
-*/
+//gzFile gzopen  OF((const char *path, const char *mode));
+///*
+//     Opens a gzip (.gz) file for reading or writing. The mode parameter
+//   is as in fopen ("rb" or "wb") but can also include a compression level
+//   ("wb9") or a strategy: 'f' for filtered data as in "wb6f", 'h' for
+//   Huffman only compression as in "wb1h". (See the description
+//   of deflateInit2 for more information about the strategy parameter.)
+//
+//     gzopen can be used to read a file which is not in gzip format; in this
+//   case gzread will directly read from the file without decompression.
+//
+//     gzopen returns NULL if the file could not be opened or if there was
+//   insufficient memory to allocate the (de)compression state; errno
+//   can be checked to distinguish the two cases (if errno is zero, the
+//   zlib error is Z_MEM_ERROR).  */
+//
+//gzFile gzdopen  OF((int fd, const char *mode));
+///*
+//     gzdopen() associates a gzFile with the file descriptor fd.  File
+//   descriptors are obtained from calls like open, dup, creat, pipe or
+//   fileno (in the file has been previously opened with fopen).
+//   The mode parameter is as in gzopen.
+//     The next call of gzclose on the returned gzFile will also close the
+//   file descriptor fd, just like fclose(fdopen(fd), mode) closes the file
+//   descriptor fd. If you want to keep fd open, use gzdopen(dup(fd), mode).
+//     gzdopen returns NULL if there was insufficient memory to allocate
+//   the (de)compression state.
+//*/
 
 int gzsetparams OF((gzFile file, int level, int strategy));
 /*
@@ -913,7 +913,7 @@ static int unzlocal_CheckCurrentFileCoherencyHeader (unz_s* s, uInt* piSizeVar,
 		err=UNZ_BADZIPFILE;
 
     if ((err==UNZ_OK) && (s->cur_file_info.compression_method!=0) &&
-                         (s->cur_file_info.compression_method!=ZF_DEFLATED))
+                         (s->cur_file_info.compression_method!=8/*ZF_DEFLATED*/))
         err=UNZ_BADZIPFILE;
 
 	if (unzlocal_getLong(s->file,&uData) != UNZ_OK) /* date/time */
@@ -993,7 +993,7 @@ extern int unzOpenCurrentFile (unzFile file)
 	pfile_in_zip_read_info->stream_initialised=0;
 	
 	if ((s->cur_file_info.compression_method!=0) &&
-        (s->cur_file_info.compression_method!=ZF_DEFLATED))
+        (s->cur_file_info.compression_method!=/*ZF_DEFLATED*/8))
 		err=UNZ_BADZIPFILE;
 	Store = s->cur_file_info.compression_method==0;
 
@@ -1141,7 +1141,7 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 				(pfile_in_zip_read_info->rest_read_compressed == 0))
 				flush = Z_FINISH;
 			*/
-			err=inflate(&pfile_in_zip_read_info->stream);
+			err=inflate(&pfile_in_zip_read_info->stream, 2);
 
 			uTotalOutAfter = pfile_in_zip_read_info->stream.total_out;
 			uOutThis = uTotalOutAfter-uTotalOutBefore;

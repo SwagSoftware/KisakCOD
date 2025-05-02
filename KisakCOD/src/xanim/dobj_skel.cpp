@@ -43,7 +43,7 @@ void DObjCalcAnim(const DObj_s *obj, int *partBits)
     void *v38; // [esp+612Ch] [ebp-8h]
     void *retaddr; // [esp+6134h] [ebp+0h]
 
-    v38 = retaddr;
+    //v38 = retaddr;
     v3 = alloca(24844);
     Profile_Begin(309);
     if (!obj)
@@ -523,42 +523,40 @@ void __cdecl CalcSkelRootBonesWithParent(
     float v11; // [esp+34h] [ebp-D8h]
     float v12; // [esp+38h] [ebp-D4h]
     float v13; // [esp+3Ch] [ebp-D0h]
-    float result; // [esp+40h] [ebp-CCh] BYREF
-    float v15; // [esp+44h] [ebp-C8h]
-    float v16; // [esp+48h] [ebp-C4h]
-    float v17; // [esp+4Ch] [ebp-C0h]
-    float v18; // [esp+50h] [ebp-BCh]
-    float v19; // [esp+54h] [ebp-B8h]
-    float v20; // [esp+58h] [ebp-B4h]
-    float v21; // [esp+5Ch] [ebp-B0h]
-    float v22; // [esp+60h] [ebp-ACh]
-    float v23; // [esp+64h] [ebp-A8h]
-    float v24; // [esp+68h] [ebp-A4h]
-    float v25; // [esp+6Ch] [ebp-A0h]
-    float v26; // [esp+70h] [ebp-9Ch]
-    float v27; // [esp+74h] [ebp-98h]
-    float v28; // [esp+78h] [ebp-94h]
-    float v29; // [esp+7Ch] [ebp-90h]
-    float v30; // [esp+80h] [ebp-8Ch]
-    float v31; // [esp+84h] [ebp-88h]
-    float v32; // [esp+88h] [ebp-84h]
-    float v33; // [esp+8Ch] [ebp-80h]
-    float v34; // [esp+90h] [ebp-7Ch]
-    float v35; // [esp+94h] [ebp-78h]
-    float v36; // [esp+98h] [ebp-74h]
-    float v37; // [esp+9Ch] [ebp-70h]
-    float v38; // [esp+A0h] [ebp-6Ch]
-    float v39; // [esp+A4h] [ebp-68h]
-    float v40; // [esp+A8h] [ebp-64h]
-    float v41; // [esp+ACh] [ebp-60h]
-    float v42; // [esp+B0h] [ebp-5Ch]
-    float v43; // [esp+B4h] [ebp-58h]
-    float v44; // [esp+B8h] [ebp-54h]
-    float v45; // [esp+BCh] [ebp-50h]
-    float v46; // [esp+C0h] [ebp-4Ch]
-    float v47; // [esp+C4h] [ebp-48h]
-    float v48; // [esp+C8h] [ebp-44h]
-    float v49; // [esp+CCh] [ebp-40h]
+    float result[3]; // [esp+40h] [ebp-CCh] BYREF
+    float v15; // [esp+4Ch] [ebp-C0h]
+    float v16; // [esp+50h] [ebp-BCh]
+    float v17; // [esp+54h] [ebp-B8h]
+    float v18; // [esp+58h] [ebp-B4h]
+    float v19; // [esp+5Ch] [ebp-B0h]
+    float v20; // [esp+60h] [ebp-ACh]
+    float v21; // [esp+64h] [ebp-A8h]
+    float v22; // [esp+68h] [ebp-A4h]
+    float v23; // [esp+6Ch] [ebp-A0h]
+    float v24; // [esp+70h] [ebp-9Ch]
+    float v25; // [esp+74h] [ebp-98h]
+    float v26; // [esp+78h] [ebp-94h]
+    float v27; // [esp+7Ch] [ebp-90h]
+    float v28; // [esp+80h] [ebp-8Ch]
+    float v29; // [esp+84h] [ebp-88h]
+    float v30; // [esp+88h] [ebp-84h]
+    float v31; // [esp+8Ch] [ebp-80h]
+    float v32; // [esp+90h] [ebp-7Ch]
+    float v33; // [esp+94h] [ebp-78h]
+    float v34; // [esp+98h] [ebp-74h]
+    float v35; // [esp+9Ch] [ebp-70h]
+    float v36; // [esp+A0h] [ebp-6Ch]
+    float v37; // [esp+A4h] [ebp-68h]
+    float v38; // [esp+A8h] [ebp-64h]
+    float v39; // [esp+ACh] [ebp-60h]
+    float v40; // [esp+B0h] [ebp-5Ch]
+    float v41; // [esp+B4h] [ebp-58h]
+    float v42; // [esp+B8h] [ebp-54h]
+    float v43; // [esp+BCh] [ebp-50h]
+    float v44; // [esp+C0h] [ebp-4Ch]
+    float v45; // [esp+C4h] [ebp-48h]
+    float v46; // [esp+C8h] [ebp-44h]
+    float v47; // [esp+CCh] [ebp-40h]
     const DObjAnimMat *parentMat; // [esp+D0h] [ebp-3Ch]
     DObjAnimMat *childMat; // [esp+D4h] [ebp-38h]
     unsigned int boneIndex; // [esp+D8h] [ebp-34h]
@@ -581,7 +579,7 @@ void __cdecl CalcSkelRootBonesWithParent(
     while (boneIndexHigh <= maxBoneIndexHigh)
     {
         bits = calcPartBits[boneIndexHigh];
-        if ((int)maxBoneIndex > 32)
+        if (maxBoneIndex > 32)
             v8 = 32;
         else
             v8 = maxBoneIndex;
@@ -589,7 +587,7 @@ void __cdecl CalcSkelRootBonesWithParent(
         while (1)
         {
             if (!_BitScanReverse(&v7, bits))
-                v7 = 63;// `CountLeadingZeros'::`2': : notFound;
+                v7 = 63;
             boneIndexLow = v7 ^ 0x1F;
             if ((v7 ^ 0x1Fu) >= maxBoneIndexLow)
                 break;
@@ -624,6 +622,305 @@ void __cdecl CalcSkelRootBonesWithParent(
                     MyAssertHandler(".\\xanim\\dobj_skel.cpp", 243, 0, "%s", "skel->partBits.skel[0] & HIGH_BIT");
                 if (skel->partBits.anim[0] >= 0)
                     MyAssertHandler(".\\xanim\\dobj_skel.cpp", 244, 0, "%s", "skel->partBits.anim[0] & HIGH_BIT");
+                quat[0] = parentMat->quat[0] * mat->quat[3]
+                    - parentMat->quat[3] * mat->quat[0]
+                    - parentMat->quat[2] * mat->quat[1]
+                    + parentMat->quat[1] * mat->quat[2];
+                quat[1] = parentMat->quat[1] * mat->quat[3]
+                    + parentMat->quat[2] * mat->quat[0]
+                    - parentMat->quat[3] * mat->quat[1]
+                    - parentMat->quat[0] * mat->quat[2];
+                quat[2] = parentMat->quat[2] * mat->quat[3]
+                    - parentMat->quat[1] * mat->quat[0]
+                    + parentMat->quat[0] * mat->quat[1]
+                    - parentMat->quat[3] * mat->quat[2];
+                quat[3] = parentMat->quat[3] * mat->quat[3]
+                    + parentMat->quat[0] * mat->quat[0]
+                    + parentMat->quat[1] * mat->quat[1]
+                    + parentMat->quat[2] * mat->quat[2];
+                v42 = quat[0] * childMat->quat[3]
+                    + quat[3] * childMat->quat[0]
+                    + quat[2] * childMat->quat[1]
+                    - quat[1] * childMat->quat[2];
+                v43 = quat[1] * childMat->quat[3]
+                    - quat[2] * childMat->quat[0]
+                    + quat[3] * childMat->quat[1]
+                    + quat[0] * childMat->quat[2];
+                v44 = quat[2] * childMat->quat[3]
+                    + quat[1] * childMat->quat[0]
+                    - quat[0] * childMat->quat[1]
+                    + quat[3] * childMat->quat[2];
+                childMat->quat[3] = quat[3] * childMat->quat[3]
+                    - quat[0] * childMat->quat[0]
+                    - quat[1] * childMat->quat[1]
+                    - quat[2] * childMat->quat[2];
+                childMat->quat[0] = v42;
+                childMat->quat[1] = v43;
+                childMat->quat[2] = v44;
+                v39 = childMat->quat[0] * mat->quat[3]
+                    + childMat->quat[3] * mat->quat[0]
+                    + childMat->quat[2] * mat->quat[1]
+                    - childMat->quat[1] * mat->quat[2];
+                v40 = childMat->quat[1] * mat->quat[3]
+                    - childMat->quat[2] * mat->quat[0]
+                    + childMat->quat[3] * mat->quat[1]
+                    + childMat->quat[0] * mat->quat[2];
+                v41 = childMat->quat[2] * mat->quat[3]
+                    + childMat->quat[1] * mat->quat[0]
+                    - childMat->quat[0] * mat->quat[1]
+                    + childMat->quat[3] * mat->quat[2];
+                childMat->quat[3] = childMat->quat[3] * mat->quat[3]
+                    - childMat->quat[0] * mat->quat[0]
+                    - childMat->quat[1] * mat->quat[1]
+                    - childMat->quat[2] * mat->quat[2];
+                childMat->quat[0] = v39;
+                childMat->quat[1] = v40;
+                childMat->quat[2] = v41;
+            }
+            else
+            {
+                v45 = childMat->quat[0] * parentMat->quat[3]
+                    + childMat->quat[3] * parentMat->quat[0]
+                    + childMat->quat[2] * parentMat->quat[1]
+                    - childMat->quat[1] * parentMat->quat[2];
+                v46 = childMat->quat[1] * parentMat->quat[3]
+                    - childMat->quat[2] * parentMat->quat[0]
+                    + childMat->quat[3] * parentMat->quat[1]
+                    + childMat->quat[0] * parentMat->quat[2];
+                v47 = childMat->quat[2] * parentMat->quat[3]
+                    + childMat->quat[1] * parentMat->quat[0]
+                    - childMat->quat[0] * parentMat->quat[1]
+                    + childMat->quat[3] * parentMat->quat[2];
+                childMat->quat[3] = childMat->quat[3] * parentMat->quat[3]
+                    - childMat->quat[0] * parentMat->quat[0]
+                    - childMat->quat[1] * parentMat->quat[1]
+                    - childMat->quat[2] * parentMat->quat[2];
+                childMat->quat[0] = v45;
+                childMat->quat[1] = v46;
+                childMat->quat[2] = v47;
+            }
+            v38 = childMat->quat[0];
+            if ((LODWORD(v38) & 0x7F800000) == 0x7F800000
+                || (v37 = childMat->quat[1], (LODWORD(v37) & 0x7F800000) == 0x7F800000)
+                || (v36 = childMat->quat[2], (LODWORD(v36) & 0x7F800000) == 0x7F800000)
+                || (v35 = childMat->quat[3], (LODWORD(v35) & 0x7F800000) == 0x7F800000))
+            {
+                MyAssertHandler(
+                    ".\\xanim\\dobj_skel.cpp",
+                    251,
+                    0,
+                    "%s",
+                    "!IS_NAN((childMat->quat)[0]) && !IS_NAN((childMat->quat)[1]) && !IS_NAN((childMat->quat)[2]) && !IS_NAN((childMat->quat)[3])");
+            }
+            v34 = childMat->trans[0];
+            if ((LODWORD(v34) & 0x7F800000) == 0x7F800000
+                || (v33 = childMat->trans[1], (LODWORD(v33) & 0x7F800000) == 0x7F800000)
+                || (v32 = childMat->trans[2], (LODWORD(v32) & 0x7F800000) == 0x7F800000))
+            {
+                MyAssertHandler(
+                    ".\\xanim\\dobj_skel.cpp",
+                    252,
+                    0,
+                    "%s",
+                    "!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2])");
+            }
+            v31 = Vec4LengthSq(childMat->quat);
+            if (v31 == 0.0)
+            {
+                childMat->quat[3] = 1.0;
+                childMat->transWeight = 2.0;
+            }
+            else
+            {
+                childMat->transWeight = 2.0 / v31;
+            }
+            trans = childMat->trans;
+            if ((COERCE_UNSIGNED_INT(parentMat->quat[0]) & 0x7F800000) == 0x7F800000
+                || (COERCE_UNSIGNED_INT(parentMat->quat[1]) & 0x7F800000) == 0x7F800000
+                || (COERCE_UNSIGNED_INT(parentMat->quat[2]) & 0x7F800000) == 0x7F800000
+                || (COERCE_UNSIGNED_INT(parentMat->quat[3]) & 0x7F800000) == 0x7F800000)
+            {
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
+                    432,
+                    0,
+                    "%s",
+                    "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
+            }
+            if ((COERCE_UNSIGNED_INT(parentMat->transWeight) & 0x7F800000) == 0x7F800000)
+                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
+            Vec3Scale(parentMat->quat, parentMat->transWeight, result);
+            v18 = result[0] * parentMat->quat[0];
+            v11 = result[0] * parentMat->quat[1];
+            v16 = result[0] * parentMat->quat[2];
+            v19 = result[0] * parentMat->quat[3];
+            v10 = result[1] * parentMat->quat[1];
+            v17 = result[1] * parentMat->quat[2];
+            v15 = result[1] * parentMat->quat[3];
+            v12 = result[2] * parentMat->quat[2];
+            v13 = result[2] * parentMat->quat[3];
+            v22 = 1.0 - (v10 + v12);
+            v23 = v11 + v13;
+            v24 = v16 - v15;
+            v25 = v11 - v13;
+            v26 = 1.0 - (v18 + v12);
+            v27 = v17 + v19;
+            v28 = v16 + v15;
+            v29 = v17 - v19;
+            v30 = 1.0 - (v18 + v10);
+            v20 = *trans * v22 + trans[1] * v25 + trans[2] * v28 + parentMat->trans[0];
+            v21 = *trans * v23 + trans[1] * v26 + trans[2] * v29 + parentMat->trans[1];
+            trans[2] = *trans * v24 + trans[1] * v27 + trans[2] * v30 + parentMat->trans[2];
+            *trans = v20;
+            trans[1] = v21;
+            if ((COERCE_UNSIGNED_INT(childMat->trans[0]) & 0x7F800000) == 0x7F800000
+                || (COERCE_UNSIGNED_INT(childMat->trans[1]) & 0x7F800000) == 0x7F800000
+                || (COERCE_UNSIGNED_INT(childMat->trans[2]) & 0x7F800000) == 0x7F800000)
+            {
+                MyAssertHandler(
+                    ".\\xanim\\dobj_skel.cpp",
+                    257,
+                    0,
+                    "%s",
+                    "!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2])");
+            }
+        }
+        ++boneIndexHigh;
+        maxBoneIndex -= 32;
+    }
+}
+
+void __cdecl CalcSkelNonRootBones(
+    const XModel *model,
+    DSkel *skel,
+    int minBoneIndex,
+    int *calcPartBits,
+    const int *controlPartBits)
+{
+    DWORD v6; // eax
+    int v7; // [esp+8h] [ebp-124h]
+    float *v8; // [esp+18h] [ebp-114h]
+    float v9; // [esp+30h] [ebp-FCh]
+    float v10; // [esp+34h] [ebp-F8h]
+    float v11; // [esp+38h] [ebp-F4h]
+    float v12; // [esp+3Ch] [ebp-F0h]
+    float result[3]; // [esp+40h] [ebp-ECh] BYREF
+    float v14; // [esp+4Ch] [ebp-E0h]
+    float v15; // [esp+50h] [ebp-DCh]
+    float v16; // [esp+54h] [ebp-D8h]
+    float v17; // [esp+58h] [ebp-D4h]
+    float v18; // [esp+5Ch] [ebp-D0h]
+    float v19; // [esp+60h] [ebp-CCh]
+    float v20; // [esp+64h] [ebp-C8h]
+    float v21; // [esp+68h] [ebp-C4h]
+    float v22; // [esp+6Ch] [ebp-C0h]
+    float v23; // [esp+70h] [ebp-BCh]
+    float v24; // [esp+74h] [ebp-B8h]
+    float v25; // [esp+78h] [ebp-B4h]
+    float v26; // [esp+7Ch] [ebp-B0h]
+    float v27; // [esp+80h] [ebp-ACh]
+    float v28; // [esp+84h] [ebp-A8h]
+    float v29; // [esp+88h] [ebp-A4h]
+    float v30; // [esp+8Ch] [ebp-A0h]
+    float v31; // [esp+90h] [ebp-9Ch]
+    float v32; // [esp+94h] [ebp-98h]
+    float v33; // [esp+98h] [ebp-94h]
+    float v34; // [esp+9Ch] [ebp-90h]
+    float v35; // [esp+A0h] [ebp-8Ch]
+    float v36; // [esp+A4h] [ebp-88h]
+    float v37; // [esp+A8h] [ebp-84h]
+    float v38; // [esp+ACh] [ebp-80h]
+    float v39; // [esp+B0h] [ebp-7Ch]
+    float v40; // [esp+B4h] [ebp-78h]
+    float v41; // [esp+B8h] [ebp-74h]
+    float v42; // [esp+BCh] [ebp-70h]
+    float v43; // [esp+C0h] [ebp-6Ch]
+    float v44; // [esp+C4h] [ebp-68h]
+    float v45; // [esp+C8h] [ebp-64h]
+    float v46; // [esp+CCh] [ebp-60h]
+    float v47; // [esp+D0h] [ebp-5Ch]
+    float v48; // [esp+D4h] [ebp-58h]
+    float v49; // [esp+D8h] [ebp-54h]
+    int v50; // [esp+DCh] [ebp-50h]
+    DObjAnimMat *childMat; // [esp+E0h] [ebp-4Ch]
+    const DObjAnimMat *parentMat; // [esp+E4h] [ebp-48h]
+    int boneIndex; // [esp+E8h] [ebp-44h]
+    int maxBoneIndexHigh; // [esp+ECh] [ebp-40h]
+    int maxBoneIndexLow; // [esp+F0h] [ebp-3Ch]
+    const float *trans; // [esp+F4h] [ebp-38h]
+    float quat[4]; // [esp+F8h] [ebp-34h]
+    int bits; // [esp+108h] [ebp-24h]
+    DObjAnimMat *mat; // [esp+10Ch] [ebp-20h]
+    int boneOffset; // [esp+110h] [ebp-1Ch]
+    const unsigned __int8 *parentList; // [esp+114h] [ebp-18h]
+    int parentOffset; // [esp+118h] [ebp-14h]
+    int boneIndexHigh; // [esp+11Ch] [ebp-10h]
+    int boneIndexLow; // [esp+120h] [ebp-Ch]
+    int boneBit; // [esp+124h] [ebp-8h]
+    int maxBoneIndex; // [esp+128h] [ebp-4h]
+
+    maxBoneIndex = minBoneIndex + model->numBones - model->numRootBones;
+    boneIndexHigh = minBoneIndex >> 5;
+    maxBoneIndexHigh = (maxBoneIndex - 1) >> 5;
+    maxBoneIndex -= 32 * (minBoneIndex >> 5);
+    mat = skel->mat;
+    while (boneIndexHigh <= maxBoneIndexHigh)
+    {
+        bits = calcPartBits[boneIndexHigh];
+        if (maxBoneIndex > 32)
+            v7 = 32;
+        else
+            v7 = maxBoneIndex;
+        maxBoneIndexLow = v7;
+        while (1)
+        {
+            if (!_BitScanReverse(&v6, bits))
+                v6 = 63;
+            v50 = v6 ^ 0x1F;
+            boneIndexLow = v6 ^ 0x1F;
+            if ((v6 ^ 0x1F) >= maxBoneIndexLow)
+                break;
+            boneIndex = boneIndexLow + 32 * boneIndexHigh;
+            boneBit = 0x80000000 >> boneIndexLow;
+            if (((0x80000000 >> boneIndexLow) & bits) == 0)
+                MyAssertHandler(".\\xanim\\dobj_skel.cpp", 306, 0, "%s", "bits & boneBit");
+            bits &= ~boneBit;
+            calcPartBits[boneIndexHigh] = bits;
+            childMat = &mat[boneIndex];
+            boneOffset = boneIndex - minBoneIndex;
+            if (boneIndex - minBoneIndex >= model->numBones - model->numRootBones)
+                MyAssertHandler(
+                    ".\\xanim\\dobj_skel.cpp",
+                    313,
+                    0,
+                    "boneOffset doesn't index model->numBones - model->numRootBones\n\t%i not in [0, %i)",
+                    boneOffset,
+                    model->numBones - model->numRootBones);
+            parentList = &model->parentList[boneOffset];
+            parentOffset = *parentList;
+            parentMat = &childMat[-parentOffset];
+            if ((boneBit & skel->partBits.anim[boneIndexHigh]) == 0)
+                MyAssertHandler(".\\xanim\\dobj_skel.cpp", 319, 0, "%s", "skel->partBits.anim[boneIndexHigh] & boneBit");
+            if ((skel->partBits.skel[(boneIndex - parentOffset) >> 5] & (0x80000000 >> ((boneIndex - parentOffset) & 0x1F))) == 0)
+                MyAssertHandler(
+                    ".\\xanim\\dobj_skel.cpp",
+                    320,
+                    0,
+                    "%s",
+                    "skel->partBits.skel[(boneIndex - parentOffset) >> 5] & (HIGH_BIT >> ((boneIndex - parentOffset) & 31))");
+            if ((skel->partBits.anim[(boneIndex - parentOffset) >> 5] & (0x80000000 >> ((boneIndex - parentOffset) & 0x1F))) == 0)
+                MyAssertHandler(
+                    ".\\xanim\\dobj_skel.cpp",
+                    321,
+                    0,
+                    "%s",
+                    "skel->partBits.anim[(boneIndex - parentOffset) >> 5] & (HIGH_BIT >> ((boneIndex - parentOffset) & 31))");
+            if ((boneBit & controlPartBits[boneIndexHigh]) != 0)
+            {
+                if (skel->partBits.skel[0] >= 0)
+                    MyAssertHandler(".\\xanim\\dobj_skel.cpp", 329, 0, "%s", "skel->partBits.skel[0] & HIGH_BIT");
+                if (skel->partBits.anim[0] >= 0)
+                    MyAssertHandler(".\\xanim\\dobj_skel.cpp", 330, 0, "%s", "skel->partBits.anim[0] & HIGH_BIT");
                 quat[0] = parentMat->quat[0] * mat->quat[3]
                     - parentMat->quat[3] * mat->quat[0]
                     - parentMat->quat[2] * mat->quat[1]
@@ -709,7 +1006,7 @@ void __cdecl CalcSkelRootBonesWithParent(
             {
                 MyAssertHandler(
                     ".\\xanim\\dobj_skel.cpp",
-                    251,
+                    337,
                     0,
                     "%s",
                     "!IS_NAN((childMat->quat)[0]) && !IS_NAN((childMat->quat)[1]) && !IS_NAN((childMat->quat)[2]) && !IS_NAN((childMat->quat)[3])");
@@ -721,7 +1018,7 @@ void __cdecl CalcSkelRootBonesWithParent(
             {
                 MyAssertHandler(
                     ".\\xanim\\dobj_skel.cpp",
-                    252,
+                    338,
                     0,
                     "%s",
                     "!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2])");
@@ -736,312 +1033,11 @@ void __cdecl CalcSkelRootBonesWithParent(
             {
                 childMat->transWeight = 2.0 / v33;
             }
-            trans = childMat->trans;
-            if ((COERCE_UNSIGNED_INT(parentMat->quat[0]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(parentMat->quat[1]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(parentMat->quat[2]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(parentMat->quat[3]) & 0x7F800000) == 0x7F800000)
-            {
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
-                    432,
-                    0,
-                    "%s",
-                    "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-            }
-            if ((COERCE_UNSIGNED_INT(parentMat->transWeight) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-            Vec3Scale(parentMat->quat, parentMat->transWeight, &result);
-            v20 = result * parentMat->quat[0];
-            v11 = result * parentMat->quat[1];
-            v18 = result * parentMat->quat[2];
-            v21 = result * parentMat->quat[3];
-            v10 = v15 * parentMat->quat[1];
-            v19 = v15 * parentMat->quat[2];
-            v17 = v15 * parentMat->quat[3];
-            v12 = v16 * parentMat->quat[2];
-            v13 = v16 * parentMat->quat[3];
-            v24 = 1.0 - (v10 + v12);
-            v25 = v11 + v13;
-            v26 = v18 - v17;
-            v27 = v11 - v13;
-            v28 = 1.0 - (v20 + v12);
-            v29 = v19 + v21;
-            v30 = v18 + v17;
-            v31 = v19 - v21;
-            v32 = 1.0 - (v20 + v10);
-            v22 = *trans * v24 + trans[1] * v27 + trans[2] * v30 + parentMat->trans[0];
-            v23 = *trans * v25 + trans[1] * v28 + trans[2] * v31 + parentMat->trans[1];
-            trans[2] = *trans * v26 + trans[1] * v29 + trans[2] * v32 + parentMat->trans[2];
-            *trans = v22;
-            trans[1] = v23;
-            if ((COERCE_UNSIGNED_INT(childMat->trans[0]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(childMat->trans[1]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(childMat->trans[2]) & 0x7F800000) == 0x7F800000)
-            {
-                MyAssertHandler(
-                    ".\\xanim\\dobj_skel.cpp",
-                    257,
-                    0,
-                    "%s",
-                    "!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2])");
-            }
-        }
-        ++boneIndexHigh;
-        maxBoneIndex -= 32;
-    }
-}
-
-void __cdecl CalcSkelNonRootBones(
-    const XModel *model,
-    DSkel *skel,
-    int minBoneIndex,
-    int *calcPartBits,
-    const int *controlPartBits)
-{
-    DWORD v6; // eax
-    int v7; // [esp+8h] [ebp-124h]
-    float *v8; // [esp+18h] [ebp-114h]
-    float v9; // [esp+30h] [ebp-FCh]
-    float v10; // [esp+34h] [ebp-F8h]
-    float v11; // [esp+38h] [ebp-F4h]
-    float v12; // [esp+3Ch] [ebp-F0h]
-    float result; // [esp+40h] [ebp-ECh] BYREF
-    float v14; // [esp+44h] [ebp-E8h]
-    float v15; // [esp+48h] [ebp-E4h]
-    float v16; // [esp+4Ch] [ebp-E0h]
-    float v17; // [esp+50h] [ebp-DCh]
-    float v18; // [esp+54h] [ebp-D8h]
-    float v19; // [esp+58h] [ebp-D4h]
-    float v20; // [esp+5Ch] [ebp-D0h]
-    float v21; // [esp+60h] [ebp-CCh]
-    float v22; // [esp+64h] [ebp-C8h]
-    float v23; // [esp+68h] [ebp-C4h]
-    float v24; // [esp+6Ch] [ebp-C0h]
-    float v25; // [esp+70h] [ebp-BCh]
-    float v26; // [esp+74h] [ebp-B8h]
-    float v27; // [esp+78h] [ebp-B4h]
-    float v28; // [esp+7Ch] [ebp-B0h]
-    float v29; // [esp+80h] [ebp-ACh]
-    float v30; // [esp+84h] [ebp-A8h]
-    float v31; // [esp+88h] [ebp-A4h]
-    float v32; // [esp+8Ch] [ebp-A0h]
-    float v33; // [esp+90h] [ebp-9Ch]
-    float v34; // [esp+94h] [ebp-98h]
-    float v35; // [esp+98h] [ebp-94h]
-    float v36; // [esp+9Ch] [ebp-90h]
-    float v37; // [esp+A0h] [ebp-8Ch]
-    float v38; // [esp+A4h] [ebp-88h]
-    float v39; // [esp+A8h] [ebp-84h]
-    float v40; // [esp+ACh] [ebp-80h]
-    float v41; // [esp+B0h] [ebp-7Ch]
-    float v42; // [esp+B4h] [ebp-78h]
-    float v43; // [esp+B8h] [ebp-74h]
-    float v44; // [esp+BCh] [ebp-70h]
-    float v45; // [esp+C0h] [ebp-6Ch]
-    float v46; // [esp+C4h] [ebp-68h]
-    float v47; // [esp+C8h] [ebp-64h]
-    float v48; // [esp+CCh] [ebp-60h]
-    float v49; // [esp+D0h] [ebp-5Ch]
-    float v50; // [esp+D4h] [ebp-58h]
-    float v51; // [esp+D8h] [ebp-54h]
-    int v52; // [esp+DCh] [ebp-50h]
-    DObjAnimMat *childMat; // [esp+E0h] [ebp-4Ch]
-    const DObjAnimMat *parentMat; // [esp+E4h] [ebp-48h]
-    int boneIndex; // [esp+E8h] [ebp-44h]
-    int maxBoneIndexHigh; // [esp+ECh] [ebp-40h]
-    int maxBoneIndexLow; // [esp+F0h] [ebp-3Ch]
-    const float *trans; // [esp+F4h] [ebp-38h]
-    float quat[4]; // [esp+F8h] [ebp-34h]
-    int bits; // [esp+108h] [ebp-24h]
-    DObjAnimMat *mat; // [esp+10Ch] [ebp-20h]
-    int boneOffset; // [esp+110h] [ebp-1Ch]
-    const unsigned __int8 *parentList; // [esp+114h] [ebp-18h]
-    int parentOffset; // [esp+118h] [ebp-14h]
-    int boneIndexHigh; // [esp+11Ch] [ebp-10h]
-    int boneIndexLow; // [esp+120h] [ebp-Ch]
-    int boneBit; // [esp+124h] [ebp-8h]
-    int maxBoneIndex; // [esp+128h] [ebp-4h]
-
-    maxBoneIndex = minBoneIndex + model->numBones - model->numRootBones;
-    boneIndexHigh = minBoneIndex >> 5;
-    maxBoneIndexHigh = (maxBoneIndex - 1) >> 5;
-    maxBoneIndex -= 32 * (minBoneIndex >> 5);
-    mat = skel->mat;
-    while (boneIndexHigh <= maxBoneIndexHigh)
-    {
-        bits = calcPartBits[boneIndexHigh];
-        if (maxBoneIndex > 32)
-            v7 = 32;
-        else
-            v7 = maxBoneIndex;
-        maxBoneIndexLow = v7;
-        while (1)
-        {
-            if (!_BitScanReverse(&v6, bits))
-                v6 = 63;// `CountLeadingZeros'::`2': : notFound;
-            v52 = v6 ^ 0x1F;
-            boneIndexLow = v6 ^ 0x1F;
-            if ((v6 ^ 0x1F) >= maxBoneIndexLow)
-                break;
-            boneIndex = boneIndexLow + 32 * boneIndexHigh;
-            boneBit = 0x80000000 >> boneIndexLow;
-            if (((0x80000000 >> boneIndexLow) & bits) == 0)
-                MyAssertHandler(".\\xanim\\dobj_skel.cpp", 306, 0, "%s", "bits & boneBit");
-            bits &= ~boneBit;
-            calcPartBits[boneIndexHigh] = bits;
-            childMat = &mat[boneIndex];
-            boneOffset = boneIndex - minBoneIndex;
-            if (boneIndex - minBoneIndex >= model->numBones - (unsigned int)model->numRootBones)
-                MyAssertHandler(
-                    ".\\xanim\\dobj_skel.cpp",
-                    313,
-                    0,
-                    "boneOffset doesn't index model->numBones - model->numRootBones\n\t%i not in [0, %i)",
-                    boneOffset,
-                    model->numBones - model->numRootBones);
-            parentList = &model->parentList[boneOffset];
-            parentOffset = *parentList;
-            parentMat = &childMat[-parentOffset];
-            if ((boneBit & skel->partBits.anim[boneIndexHigh]) == 0)
-                MyAssertHandler(".\\xanim\\dobj_skel.cpp", 319, 0, "%s", "skel->partBits.anim[boneIndexHigh] & boneBit");
-            if ((skel->partBits.skel[(boneIndex - parentOffset) >> 5] & (0x80000000 >> ((boneIndex - parentOffset) & 0x1F))) == 0)
-                MyAssertHandler(
-                    ".\\xanim\\dobj_skel.cpp",
-                    320,
-                    0,
-                    "%s",
-                    "skel->partBits.skel[(boneIndex - parentOffset) >> 5] & (HIGH_BIT >> ((boneIndex - parentOffset) & 31))");
-            if ((skel->partBits.anim[(boneIndex - parentOffset) >> 5] & (0x80000000 >> ((boneIndex - parentOffset) & 0x1F))) == 0)
-                MyAssertHandler(
-                    ".\\xanim\\dobj_skel.cpp",
-                    321,
-                    0,
-                    "%s",
-                    "skel->partBits.anim[(boneIndex - parentOffset) >> 5] & (HIGH_BIT >> ((boneIndex - parentOffset) & 31))");
-            if ((boneBit & controlPartBits[boneIndexHigh]) != 0)
-            {
-                if (skel->partBits.skel[0] >= 0)
-                    MyAssertHandler(".\\xanim\\dobj_skel.cpp", 329, 0, "%s", "skel->partBits.skel[0] & HIGH_BIT");
-                if (skel->partBits.anim[0] >= 0)
-                    MyAssertHandler(".\\xanim\\dobj_skel.cpp", 330, 0, "%s", "skel->partBits.anim[0] & HIGH_BIT");
-                quat[0] = parentMat->quat[0] * mat->quat[3]
-                    - parentMat->quat[3] * mat->quat[0]
-                    - parentMat->quat[2] * mat->quat[1]
-                    + parentMat->quat[1] * mat->quat[2];
-                quat[1] = parentMat->quat[1] * mat->quat[3]
-                    + parentMat->quat[2] * mat->quat[0]
-                    - parentMat->quat[3] * mat->quat[1]
-                    - parentMat->quat[0] * mat->quat[2];
-                quat[2] = parentMat->quat[2] * mat->quat[3]
-                    - parentMat->quat[1] * mat->quat[0]
-                    + parentMat->quat[0] * mat->quat[1]
-                    - parentMat->quat[3] * mat->quat[2];
-                quat[3] = parentMat->quat[3] * mat->quat[3]
-                    + parentMat->quat[0] * mat->quat[0]
-                    + parentMat->quat[1] * mat->quat[1]
-                    + parentMat->quat[2] * mat->quat[2];
-                v46 = quat[0] * childMat->quat[3]
-                    + quat[3] * childMat->quat[0]
-                    + quat[2] * childMat->quat[1]
-                    - quat[1] * childMat->quat[2];
-                v47 = quat[1] * childMat->quat[3]
-                    - quat[2] * childMat->quat[0]
-                    + quat[3] * childMat->quat[1]
-                    + quat[0] * childMat->quat[2];
-                v48 = quat[2] * childMat->quat[3]
-                    + quat[1] * childMat->quat[0]
-                    - quat[0] * childMat->quat[1]
-                    + quat[3] * childMat->quat[2];
-                childMat->quat[3] = quat[3] * childMat->quat[3]
-                    - quat[0] * childMat->quat[0]
-                    - quat[1] * childMat->quat[1]
-                    - quat[2] * childMat->quat[2];
-                childMat->quat[0] = v46;
-                childMat->quat[1] = v47;
-                childMat->quat[2] = v48;
-                v43 = childMat->quat[0] * mat->quat[3]
-                    + childMat->quat[3] * mat->quat[0]
-                    + childMat->quat[2] * mat->quat[1]
-                    - childMat->quat[1] * mat->quat[2];
-                v44 = childMat->quat[1] * mat->quat[3]
-                    - childMat->quat[2] * mat->quat[0]
-                    + childMat->quat[3] * mat->quat[1]
-                    + childMat->quat[0] * mat->quat[2];
-                v45 = childMat->quat[2] * mat->quat[3]
-                    + childMat->quat[1] * mat->quat[0]
-                    - childMat->quat[0] * mat->quat[1]
-                    + childMat->quat[3] * mat->quat[2];
-                childMat->quat[3] = childMat->quat[3] * mat->quat[3]
-                    - childMat->quat[0] * mat->quat[0]
-                    - childMat->quat[1] * mat->quat[1]
-                    - childMat->quat[2] * mat->quat[2];
-                childMat->quat[0] = v43;
-                childMat->quat[1] = v44;
-                childMat->quat[2] = v45;
-            }
-            else
-            {
-                v49 = childMat->quat[0] * parentMat->quat[3]
-                    + childMat->quat[3] * parentMat->quat[0]
-                    + childMat->quat[2] * parentMat->quat[1]
-                    - childMat->quat[1] * parentMat->quat[2];
-                v50 = childMat->quat[1] * parentMat->quat[3]
-                    - childMat->quat[2] * parentMat->quat[0]
-                    + childMat->quat[3] * parentMat->quat[1]
-                    + childMat->quat[0] * parentMat->quat[2];
-                v51 = childMat->quat[2] * parentMat->quat[3]
-                    + childMat->quat[1] * parentMat->quat[0]
-                    - childMat->quat[0] * parentMat->quat[1]
-                    + childMat->quat[3] * parentMat->quat[2];
-                childMat->quat[3] = childMat->quat[3] * parentMat->quat[3]
-                    - childMat->quat[0] * parentMat->quat[0]
-                    - childMat->quat[1] * parentMat->quat[1]
-                    - childMat->quat[2] * parentMat->quat[2];
-                childMat->quat[0] = v49;
-                childMat->quat[1] = v50;
-                childMat->quat[2] = v51;
-            }
-            v42 = childMat->quat[0];
-            if ((LODWORD(v42) & 0x7F800000) == 0x7F800000
-                || (v41 = childMat->quat[1], (LODWORD(v41) & 0x7F800000) == 0x7F800000)
-                || (v40 = childMat->quat[2], (LODWORD(v40) & 0x7F800000) == 0x7F800000)
-                || (v39 = childMat->quat[3], (LODWORD(v39) & 0x7F800000) == 0x7F800000))
-            {
-                MyAssertHandler(
-                    ".\\xanim\\dobj_skel.cpp",
-                    337,
-                    0,
-                    "%s",
-                    "!IS_NAN((childMat->quat)[0]) && !IS_NAN((childMat->quat)[1]) && !IS_NAN((childMat->quat)[2]) && !IS_NAN((childMat->quat)[3])");
-            }
-            v38 = childMat->trans[0];
-            if ((LODWORD(v38) & 0x7F800000) == 0x7F800000
-                || (v37 = childMat->trans[1], (LODWORD(v37) & 0x7F800000) == 0x7F800000)
-                || (v36 = childMat->trans[2], (LODWORD(v36) & 0x7F800000) == 0x7F800000))
-            {
-                MyAssertHandler(
-                    ".\\xanim\\dobj_skel.cpp",
-                    338,
-                    0,
-                    "%s",
-                    "!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2])");
-            }
-            v35 = Vec4LengthSq(childMat->quat);
-            if (v35 == 0.0)
-            {
-                childMat->quat[3] = 1.0;
-                childMat->transWeight = 2.0;
-            }
-            else
-            {
-                childMat->transWeight = 2.0 / v35;
-            }
             trans = &model->trans[3 * boneOffset];
-            v34 = *trans;
-            if ((LODWORD(v34) & 0x7F800000) == 0x7F800000
-                || (v33 = trans[1], (LODWORD(v33) & 0x7F800000) == 0x7F800000)
-                || (v32 = trans[2], (LODWORD(v32) & 0x7F800000) == 0x7F800000))
+            v32 = *trans;
+            if ((LODWORD(v32) & 0x7F800000) == 0x7F800000
+                || (v31 = trans[1], (LODWORD(v31) & 0x7F800000) == 0x7F800000)
+                || (v30 = trans[2], (LODWORD(v30) & 0x7F800000) == 0x7F800000))
             {
                 MyAssertHandler(
                     ".\\xanim\\dobj_skel.cpp",
@@ -1066,30 +1062,30 @@ void __cdecl CalcSkelNonRootBones(
             }
             if ((COERCE_UNSIGNED_INT(parentMat->transWeight) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-            Vec3Scale(parentMat->quat, parentMat->transWeight, &result);
-            v19 = result * parentMat->quat[0];
-            v10 = result * parentMat->quat[1];
-            v17 = result * parentMat->quat[2];
-            v20 = result * parentMat->quat[3];
-            v9 = v14 * parentMat->quat[1];
-            v18 = v14 * parentMat->quat[2];
-            v16 = v14 * parentMat->quat[3];
-            v11 = v15 * parentMat->quat[2];
-            v12 = v15 * parentMat->quat[3];
-            v23 = 1.0 - (v9 + v11);
-            v24 = v10 + v12;
-            v25 = v17 - v16;
-            v26 = v10 - v12;
-            v27 = 1.0 - (v19 + v11);
-            v28 = v18 + v20;
-            v29 = v17 + v16;
-            v30 = v18 - v20;
-            v31 = 1.0 - (v19 + v9);
-            v21 = *v8 * v23 + v8[1] * v26 + v8[2] * v29 + parentMat->trans[0];
-            v22 = *v8 * v24 + v8[1] * v27 + v8[2] * v30 + parentMat->trans[1];
-            v8[2] = *v8 * v25 + v8[1] * v28 + v8[2] * v31 + parentMat->trans[2];
-            *v8 = v21;
-            v8[1] = v22;
+            Vec3Scale(parentMat->quat, parentMat->transWeight, result);
+            v17 = result[0] * parentMat->quat[0];
+            v10 = result[0] * parentMat->quat[1];
+            v15 = result[0] * parentMat->quat[2];
+            v18 = result[0] * parentMat->quat[3];
+            v9 = result[1] * parentMat->quat[1];
+            v16 = result[1] * parentMat->quat[2];
+            v14 = result[1] * parentMat->quat[3];
+            v11 = result[2] * parentMat->quat[2];
+            v12 = result[2] * parentMat->quat[3];
+            v21 = 1.0 - (v9 + v11);
+            v22 = v10 + v12;
+            v23 = v15 - v14;
+            v24 = v10 - v12;
+            v25 = 1.0 - (v17 + v11);
+            v26 = v16 + v18;
+            v27 = v15 + v14;
+            v28 = v16 - v18;
+            v29 = 1.0 - (v17 + v9);
+            v19 = *v8 * v21 + v8[1] * v24 + v8[2] * v27 + parentMat->trans[0];
+            v20 = *v8 * v22 + v8[1] * v25 + v8[2] * v28 + parentMat->trans[1];
+            v8[2] = *v8 * v23 + v8[1] * v26 + v8[2] * v29 + parentMat->trans[2];
+            *v8 = v19;
+            v8[1] = v20;
             if ((COERCE_UNSIGNED_INT(childMat->trans[0]) & 0x7F800000) == 0x7F800000
                 || (COERCE_UNSIGNED_INT(childMat->trans[1]) & 0x7F800000) == 0x7F800000
                 || (COERCE_UNSIGNED_INT(childMat->trans[2]) & 0x7F800000) == 0x7F800000)

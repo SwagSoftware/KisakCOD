@@ -35,11 +35,11 @@ enum PhysWorld : __int32
 	PHYS_WORLD_RAGDOLL = 0x2,
 	PHYS_WORLD_COUNT = 0x3,
 };
-PhysWorld &operator++(PhysWorld &e) {
+inline PhysWorld &operator++(PhysWorld &e) {
 	static_cast<PhysWorld>(static_cast<int>(e) + 1);
 	return e;
 }
-PhysWorld &operator++(PhysWorld &e, int i)
+inline PhysWorld &operator++(PhysWorld &e, int i)
 {
 	PhysWorld temp = e;
 	++e;

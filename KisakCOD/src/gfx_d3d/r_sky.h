@@ -32,7 +32,7 @@ struct sunflare_t // sizeof=0x60
     float sunFxPosition[3];
 };
 
-const char* sunDvarNames[] =
+static const char* sunDvarNames[] =
 {
     "r_sunsprite_shader",
     "r_sunsprite_size",

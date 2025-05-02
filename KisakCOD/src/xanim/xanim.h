@@ -1237,11 +1237,11 @@ enum XAssetType : __int32
     ASSET_TYPE_STRING = 0x21,
     ASSET_TYPE_ASSETLIST = 0x22,
 };
-XAssetType &operator++(XAssetType &e) {
+inline XAssetType &operator++(XAssetType &e) {
     static_cast<XAssetType>(static_cast<int>(e) + 1);
     return e;
 }
-XAssetType &operator++(XAssetType &e, int i)
+inline XAssetType &operator++(XAssetType &e, int i)
 {
     XAssetType temp = e;
     ++e;
