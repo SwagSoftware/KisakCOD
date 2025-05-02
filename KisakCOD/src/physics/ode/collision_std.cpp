@@ -1821,3 +1821,46 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
   contact->g2 = plane;
   return 1;
 }
+
+// LWSS ADD
+int __cdecl ODE_CollideCapsuleBox(
+    const float *boxPos,
+    const float *boxRot,
+    float *boxLengths,
+    const float *capPos,
+    const float *capRot,
+    float capRadius,
+    float capHalfHeight,
+    int maxc,
+    dContactGeom *contact,
+    int skip)
+{
+    float endpoint1[4]; // [esp+10h] [ebp-50h] BYREF
+    float pb[4]; // [esp+20h] [ebp-40h] BYREF
+    float endpoint2[4]; // [esp+30h] [ebp-30h] BYREF
+    float pl[4]; // [esp+40h] [ebp-20h] BYREF
+    float endOffset[4]; // [esp+50h] [ebp-10h]
+
+    if (skip < 44)
+        MyAssertHandler(
+            ".\\physics\\ode\\src\\collision_std.cpp",
+            1392,
+            0,
+            "skip >= (int)sizeof( dContactGeom )\n\t%i, %i",
+            skip,
+            44);
+    if (maxc <= 0)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_std.cpp", 1393, 0, "%s", "maxc > 0");
+    endOffset[0] = capHalfHeight * capRot[2];
+    endOffset[1] = capHalfHeight * capRot[6];
+    endOffset[2] = capHalfHeight * capRot[10];
+    endpoint1[0] = *capPos + endOffset[0];
+    endpoint1[1] = capPos[1] + endOffset[1];
+    endpoint1[2] = capPos[2] + endOffset[2];
+    endpoint2[0] = *capPos - endOffset[0];
+    endpoint2[1] = capPos[1] - endOffset[1];
+    endpoint2[2] = capPos[2] - endOffset[2];
+    dClosestLineBoxPoints(endpoint1, endpoint2, boxPos, boxRot, boxLengths, pl, pb);
+    return dCollideSpheres(pl, capRadius, pb, 0.0, contact);
+}
+// LWSS END

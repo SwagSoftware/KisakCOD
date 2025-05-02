@@ -7,6 +7,7 @@
 #include "joint.h"
 
 dxUserGeom *__cdecl Phys_GetWorldGeom();
+void __cdecl ODE_LeakCheck();
 
 void __cdecl ODE_Init();
 

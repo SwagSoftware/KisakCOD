@@ -612,6 +612,87 @@ void dCloseODE()
 #include <universal/pool_allocator.h> // lwss add
 
 #include "odeext.h"
+#include <physics/phys_local.h>
+
+void __cdecl dInitUserGeom(dxUserGeom *geom, int classnum, dxSpace *space, dxBody *body)
+{
+    if (!geom)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_kernel.cpp", 749, 0, "%s", "geom");
+    if (classnum < 11 || classnum > 15)
+        MyAssertHandler(
+            ".\\physics\\ode\\src\\collision_kernel.cpp",
+            750,
+            0,
+            "%s\n\t%s",
+            "( classnum >= dFirstUserClass ) && ( classnum <= dLastUserClass )",
+            "not a custom class");
+    if (geom)
+    {
+        //dxUserGeom::dxUserGeom(geom, classnum, space, body);
+        geom->ReInit(classnum, space, body);
+    }
+}
+
+void __cdecl ODE_GeomTransformGetAAContainedBox(dxGeomTransform *geom, float *mins, float *maxs)
+{
+    if (geom->type != 6)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 105, 0, "%s", "geom->type == dGeomTransformClass");
+    if (!geom->obj)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 109, 0, "%s", "tr->obj");
+    if ((geom->gflags & 2) != 0)
+    {
+        //dxGeomTransform::computeFinalTx(geom);
+        geom->computeFinalTx();
+    }
+    geom->obj->pos = geom->finalPos;
+    geom->obj->R = geom->finalR;
+    ODE_GeomGetAAContainedBox((dxGeomTransform*)geom->obj, mins, maxs);
+}
+
+void __cdecl ODE_GeomGetAAContainedBox(dxGeomTransform *geom, float *mins, float *maxs)
+{
+    const char *v3; // eax
+    float lengths[4]; // [esp+1Ch] [ebp-14h] BYREF
+    float minlength; // [esp+2Ch] [ebp-4h]
+
+    switch (dGeomGetClass(geom))
+    {
+    case 1:
+        dGeomBoxGetLengths(geom, lengths);
+        minlength = lengths[0];
+        if (lengths[1] < lengths[0])
+            minlength = lengths[1];
+        if (lengths[2] < minlength)
+            minlength = lengths[2];
+        if (minlength <= 0.0)
+        {
+            v3 = va("%f %f %f", lengths[0], lengths[1], lengths[2]);
+            MyAssertHandler(".\\physics\\ode\\src\\collision_kernel.cpp", 637, 0, "%s\n\t%s", "minlength > 0", v3);
+        }
+        minlength = minlength * 0.5;
+        *mins = -minlength;
+        mins[1] = -minlength;
+        mins[2] = -minlength;
+        *maxs = minlength;
+        maxs[1] = minlength;
+        maxs[2] = minlength;
+        break;
+    case 6:
+        ODE_GeomTransformGetAAContainedBox(geom, mins, maxs);
+        break;
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+        Phys_GeomUserGetAAContainedBox(geom, mins, maxs);
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\physics\\ode\\src\\collision_kernel.cpp", 657, 0, "Invalid geom");
+        break;
+    }
+}
 
 dxGeom *ODE_CreateGeom(int classnum, dxSpace *space, dxBody *body)
 {

@@ -234,7 +234,7 @@ struct __declspec(align(4)) PhysObjUserData // sizeof=0x70
      bool isMember(void* ptr)
      {
          uintptr_t p = (uintptr_t)ptr;
-         return (p >= &entries[0] && p < &entries[N]);
+         return (p >= (uintptr_t)&entries[0] && p < (uintptr_t)&entries[N]);
      }
  };
 

@@ -49,7 +49,6 @@ PhysWorld &operator++(PhysWorld &e, int i)
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <xanim/dobj.h>
 
 /* world */
 

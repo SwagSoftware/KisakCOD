@@ -8,6 +8,8 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if 0 // LWSS: All removed in cod4
+
 //------------------------------------------------------------------------------
 /**
   @brief Finds the shortest distance squared between a point and a triangle.
@@ -1253,3 +1255,5 @@ dReal SqrDistanceSegTri( const dVector3 segOrigin, const dVector3 segEnd,
 
   return fSqrDist;
 }
+
+#endif

@@ -16,6 +16,7 @@
 #include <gfx_d3d/r_image.h>
 #include <universal/com_sndalias.h>
 #include <gfx_d3d/r_sky.h>
+#include <gfx_d3d/r_primarylights.h>
 
 struct DynEntityServer // sizeof=0x24
 {

@@ -11,6 +11,8 @@
 #include "ode/odeext.h"
 #include <universal/profile.h>
 #include <game_mp/g_main_mp.h>
+#include "ode/collision_std.h"
+#include "phys_coll_local.h"
 
 // LWSS HACK - unfk some types
 #define float dReal

@@ -1468,6 +1468,24 @@ extern "C" void dTestDataStructures()
 #include <string>
 odeGlob_t odeGlob;
 
+void __cdecl ODE_LeakCheck()
+{
+    if (Pool_FreeCount(&odeGlob.bodyPool) != 512)
+        MyAssertHandler(
+            ".\\physics\\ode\\src\\ode.cpp",
+            255,
+            0,
+            "%s",
+            "Pool_FreeCount( &odeGlob.bodyPool ) == ARRAY_COUNT( odeGlob.bodies )");
+    if (Pool_FreeCount(&odeGlob.geomPool) != 2048)
+        MyAssertHandler(
+            ".\\physics\\ode\\src\\ode.cpp",
+            256,
+            0,
+            "%s",
+            "Pool_FreeCount( &odeGlob.geomPool ) == ODE_GEOM_POOL_COUNT");
+}
+
 dxUserGeom *__cdecl Phys_GetWorldGeom()
 {
     return &odeGlob.worldGeom;

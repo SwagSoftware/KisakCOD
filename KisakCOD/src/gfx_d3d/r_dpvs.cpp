@@ -1330,7 +1330,7 @@ void __cdecl R_FilterEntIntoCells_r(FilterEntInfo *entInfo, mnode_t *node, const
         if (cellIndex - cellCount < 0)
             break;
         plane = &rgp.world->dpvsPlanes.planes[planeIndex];
-        side = BoxOnPlaneSide(mins2, maxs2, plane, (const cplane_s *)LODWORD(localmaxs[0]));
+        side = BoxOnPlaneSide(mins2, maxs2, plane);
         if (side == 3)
         {
             type = plane->type;
@@ -1350,7 +1350,7 @@ void __cdecl R_FilterEntIntoCells_r(FilterEntInfo *entInfo, mnode_t *node, const
                 localmaxs[1] = maxs2[1];
                 localmaxs[2] = maxs2[2];
                 localmaxs[type] = dist;
-                if (BoxOnPlaneSide(localmins, maxs2, plane, (const cplane_s *)LODWORD(localmaxs[0])) != 1)
+                if (BoxOnPlaneSide(localmins, maxs2, plane) != 1)
                     MyAssertHandler(".\\r_dpvs.cpp", 1933, 0, "%s", "BoxOnPlaneSide( localmins, maxs2, plane ) == BOXSIDE_FRONT");
                 if (maxs2[type] > (double)dist)
                     R_FilterEntIntoCells_r(entInfo, node + 1, localmins, maxs2);
@@ -1479,7 +1479,7 @@ void __cdecl R_FilterDynEntIntoCells_r(
         if (cellIndex - cellCount < 0)
             break;
         plane = &rgp.world->dpvsPlanes.planes[planeIndex];
-        side = BoxOnPlaneSide(mins2, maxs2, plane, (const cplane_s *)LODWORD(localmaxs[0]));
+        side = BoxOnPlaneSide(mins2, maxs2, plane);
         if (side == 3)
         {
             type = plane->type;
@@ -1499,7 +1499,7 @@ void __cdecl R_FilterDynEntIntoCells_r(
                 localmaxs[1] = maxs2[1];
                 localmaxs[2] = maxs2[2];
                 localmaxs[type] = dist;
-                if (BoxOnPlaneSide(localmins, maxs2, plane, (const cplane_s *)LODWORD(localmaxs[0])) != 1)
+                if (BoxOnPlaneSide(localmins, maxs2, plane) != 1)
                     MyAssertHandler(".\\r_dpvs.cpp", 2018, 0, "%s", "BoxOnPlaneSide( localmins, maxs2, plane ) == BOXSIDE_FRONT");
                 if (maxs2[type] > (double)dist)
                     R_FilterDynEntIntoCells_r(node + 1, dynEntIndex, drawType, localmins, maxs2);

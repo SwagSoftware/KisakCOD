@@ -3089,7 +3089,7 @@ void __cdecl R_FilterStaticModelIntoCells_r(
         if (planeIndex < 0)
             break;
         plane = &world->dpvsPlanes.planes[planeIndex];
-        boxSide = BoxOnPlaneSide(mins2, maxs2, plane, (const cplane_s*)LODWORD(localmaxs[0])); // KISAKTODO: yolo cast
+        boxSide = BoxOnPlaneSide(mins2, maxs2, plane);
         if (boxSide == 3)
         {
             type = plane->type;
@@ -3109,7 +3109,7 @@ void __cdecl R_FilterStaticModelIntoCells_r(
                 localmaxs[1] = maxs2[1];
                 localmaxs[2] = maxs2[2];
                 localmaxs[plane->type] = dist;
-                if (!BoxOnPlaneSide(localmins, maxs2, plane, (const cplane_s*)LODWORD(localmaxs[0]))) // KISAKTODO: yolo cast
+                if (!BoxOnPlaneSide(localmins, maxs2, plane))
                     MyAssertHandler(
                         ".\\r_staticmodel_load_obj.cpp",
                         423,

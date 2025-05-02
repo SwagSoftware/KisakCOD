@@ -36,6 +36,7 @@ geom transform
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
+#include <physics/phys_local.h>
 
 //****************************************************************************
 // dxGeomTransform class
@@ -47,8 +48,12 @@ dxGeomTransform::dxGeomTransform (dSpaceID space, dxBody *body) : dxGeom (space,
   obj = 0;
   cleanup = 0;
   infomode = 0;
-  dSetZero (final_pos,4);
-  dRSetIdentity (final_R);
+  //dSetZero (final_pos,4);
+  //dRSetIdentity (final_R);
+  dRSetIdentity(finalR);
+  dRSetIdentity(localR);
+  dSetZero(localPos, 3);
+  dSetZero(finalPos, 3);
 }
 
 dxGeomTransform::~dxGeomTransform()
@@ -77,8 +82,12 @@ void dxGeomTransform::computeAABB()
 
   // compute temporary pos and R for the encapsulated geom object
   computeFinalTx();
-  obj->pos = final_pos;
-  obj->R = final_R;
+
+  obj->pos = finalPos;
+  obj->R = finalR;
+
+  //obj->pos = final_pos;
+  //obj->R = final_R;
 
   // compute the AABB
   obj->computeAABB();
@@ -95,11 +104,15 @@ void dxGeomTransform::computeAABB()
 
 void dxGeomTransform::computeFinalTx()
 {
-  dMULTIPLY0_331 (final_pos,R,obj->pos);
-  final_pos[0] += pos[0];
-  final_pos[1] += pos[1];
-  final_pos[2] += pos[2];
-  dMULTIPLY0_333 (final_R,R,obj->R);
+  //dMULTIPLY0_331 (final_pos,R,obj->pos);
+  dMULTIPLY0_331 (finalR, R, localR);
+  //dMULTIPLY0_333(final_R, R, obj->R);
+  dMULTIPLY0_333(finalPos, R, localPos);
+
+  Vec3Add(finalPos, pos, finalPos);
+  //final_pos[0] += pos[0];
+  //final_pos[1] += pos[1];
+  //final_pos[2] += pos[2];
 }
 
 //****************************************************************************
@@ -133,8 +146,10 @@ int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
   // dxGeomTransform::computeAABB()
 
   if (tr->gflags & GEOM_AABB_BAD) tr->computeFinalTx();
-  tr->obj->pos = tr->final_pos;
-  tr->obj->R = tr->final_R;
+  //tr->obj->pos = tr->final_pos;
+  tr->obj->pos = tr->finalPos;
+  //tr->obj->R = tr->final_R;
+  tr->obj->R = tr->finalR;
   tr->obj->body = o1->body;
 
   // do the collision
@@ -219,3 +234,60 @@ int dGeomTransformGetInfo (dGeomID g)
   dxGeomTransform *tr = (dxGeomTransform*) g;
   return tr->infomode;
 }
+
+// LWSS ADD
+void __cdecl ODE_GeomTransformSetRotation(dxGeom *g, const float *origin, const float (*rotation)[3])
+{
+	if (!g)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 273, 0, "%s", "g");
+	if (g->type != 6)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 274, 0, "%s", "g->type == dGeomTransformClass");
+	Phys_AxisToOdeMatrix3(rotation, (float*)&g[1].data);
+	g[1].aabb[4] = *origin;
+	g[1].aabb[5] = origin[1];
+	*&g[1].category_bits = origin[2];
+	*&g[1].collide_bits = 0.0;
+}
+void __cdecl ODE_GeomTransformGetOffset(dxGeom *g, float *origin)
+{
+	if (!g)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 298, 0, "%s", "g");
+	if (g->type != 6)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 299, 0, "%s", "g->type == dGeomTransformClass");
+	*origin = g[1].aabb[4];
+	origin[1] = g[1].aabb[5];
+	origin[2] = *&g[1].category_bits;
+}
+void __cdecl ODE_GeomTransformSetOffset(dxGeom *g, const float *origin)
+{
+	if (!g)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 286, 0, "%s", "g");
+	if (g->type != 6)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 287, 0, "%s", "g->type == dGeomTransformClass");
+	g[1].aabb[4] = *origin;
+	g[1].aabb[5] = origin[1];
+	*&g[1].category_bits = origin[2];
+	*&g[1].collide_bits = 0.0;
+}
+dxWorld *__cdecl ODE_BodyGetWorld(dxBody *b)
+{
+	return b->world;
+}
+dxGeom *__cdecl ODE_GeomTransformUpdateGeomOrientation(dxGeomTransform *g)
+{
+	if (!g)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 310, 0, "%s", "g");
+	if (g->type != 6)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 311, 0, "%s", "g->type == dGeomTransformClass");
+	if (!g->obj)
+		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 315, 0, "%s", "tr->obj");
+	if ((g->gflags & 2) != 0)
+	{
+		//dxGeomTransform::computeFinalTx(g);
+		g->computeFinalTx();
+	}
+	g->obj->pos = g->finalPos;
+	g->obj->R = g->finalR;
+	return g->obj;
+}
+// LWSS END

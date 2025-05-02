@@ -421,6 +421,7 @@
     <ClCompile Include="src\physics\ode\collision_space.cpp" />
     <ClCompile Include="src\physics\ode\collision_std.cpp" />
     <ClCompile Include="src\physics\ode\collision_transform.cpp" />
+    <ClCompile Include="src\physics\ode\collision_trimesh_box.cpp" />
     <ClCompile Include="src\physics\ode\collision_util.cpp" />
     <ClCompile Include="src\physics\ode\error.cpp" />
     <ClCompile Include="src\physics\ode\export-dif.cpp" />
@@ -440,6 +441,8 @@
     <ClCompile Include="src\physics\ode\util.cpp" />
     <ClCompile Include="src\physics\physpreset_load_obj.cpp" />
     <ClCompile Include="src\physics\phys_coll_boxbrush.cpp" />
+    <ClCompile Include="src\physics\phys_coll_capsulebrush.cpp" />
+    <ClCompile Include="src\physics\phys_coll_cylinderbrush.cpp" />
     <ClCompile Include="src\physics\phys_contacts.cpp" />
     <ClCompile Include="src\physics\phys_ode.cpp" />
     <ClCompile Include="src\physics\phys_world_collision.cpp" />
@@ -750,13 +753,16 @@
     <ClInclude Include="src\physics\ode\collision_space_internal.h" />
     <ClInclude Include="src\physics\ode\collision_std.h" />
     <ClInclude Include="src\physics\ode\collision_transform.h" />
+    <ClInclude Include="src\physics\ode\collision_trimesh_internal.h" />
     <ClInclude Include="src\physics\ode\collision_util.h" />
     <ClInclude Include="src\physics\ode\joint.h" />
+    <ClInclude Include="src\physics\ode\collision_trimesh_KISAK.h" />
     <ClInclude Include="src\physics\ode\objects.h" />
     <ClInclude Include="src\physics\ode\obstack.h" />
     <ClInclude Include="src\physics\ode\quickstep.h" />
     <ClInclude Include="src\physics\ode\stack.h" />
     <ClInclude Include="src\physics\ode\util.h" />
+    <ClInclude Include="src\physics\phys_coll_local.h" />
     <ClInclude Include="src\physics\phys_local.h" />
     <ClInclude Include="src\qcommon\bitarray.h" />
     <ClInclude Include="src\qcommon\cmd.h" />

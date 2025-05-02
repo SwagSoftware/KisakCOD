@@ -99,7 +99,7 @@ bool __cdecl R_BoundsInCell_r(mnode_t *node, int findCellIndex, const float *min
         if (cellIndex - cellCount < 0)
             break;
         plane = &rgp.world->dpvsPlanes.planes[planeIndex];
-        side = BoxOnPlaneSide(mins2, maxs2, plane, (const cplane_s *)LODWORD(localmaxs[0]));
+        side = BoxOnPlaneSide(mins2, maxs2, plane);
         if (side == 3)
         {
             type = plane->type;
@@ -121,7 +121,7 @@ bool __cdecl R_BoundsInCell_r(mnode_t *node, int findCellIndex, const float *min
                 localmaxs[1] = maxs2[1];
                 localmaxs[2] = maxs2[2];
                 localmaxs[type] = dist;
-                if (BoxOnPlaneSide(localmins, maxs2, plane, (const cplane_s *)LODWORD(localmaxs[0])) != 1)
+                if (BoxOnPlaneSide(localmins, maxs2, plane) != 1)
                     MyAssertHandler(
                         ".\\r_dpvs_entity.cpp",
                         128,

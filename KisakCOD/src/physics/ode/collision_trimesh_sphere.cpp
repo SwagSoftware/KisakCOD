@@ -20,6 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
+// LWSS: Removed in Cod4
+// 
 // TriMesh code by Erwin de Vries.
 
 #include <ode/collision.h>
@@ -256,6 +258,7 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 	else return false;
 }
 
+#if 0 // LWSS: Removed in COD4
 int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contacts, int Stride){
 	dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
@@ -481,3 +484,5 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 	}
 	else return 0;
 }
+
+#endif

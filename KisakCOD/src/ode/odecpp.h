@@ -28,6 +28,7 @@
 #ifdef __cplusplus
 
 #include <ode/error.h>
+#include <ode/objects.h>
 
 
 class dWorld {

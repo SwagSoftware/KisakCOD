@@ -803,3 +803,33 @@ void dxSpace::clear()
         }
     }
 }
+
+// LWSS ADD
+void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2); // phys_ode.cpp
+void __cdecl ODE_CollideSimpleSpaceWithGeomNoAABBTest(dxSpace *space, dxGeom *geom, void *data)
+{
+    dxGeom *geom2; // [esp+0h] [ebp-8h]
+
+    if (!geom)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 322, 0, "%s", "geom");
+    if (!space)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 323, 0, "%s", "space");
+    if (geom->body && (geom->body->flags & 4) != 0)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 324, 0, "%s", "!GEOM_BODY_DISABLED( geom )");
+    if ((geom->gflags & 8) == 0)
+        MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 325, 0, "%s", "GEOM_ENABLED( geom )");
+    ++space->lock_count;
+    for (geom2 = space->first; geom2; geom2 = geom2->next)
+    {
+        if ((!geom2->body || (geom2->body->flags & 4) == 0) && (geom2->gflags & 8) != 0)
+        {
+            if (geom == geom2)
+                MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 337, 0, "%s", "geom != geom2");
+            if (geom->body == geom2->body)
+                MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 338, 0, "%s", "geom->body != geom2->body");
+            Phys_NearCallback((int*)data, geom2, geom);
+        }
+    }
+    --space->lock_count;
+}
+// LWSS END

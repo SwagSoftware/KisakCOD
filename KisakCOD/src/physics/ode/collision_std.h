@@ -66,7 +66,17 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
 
 // LWSS ADD - Custom for COD4
 dxGeom *__cdecl ODE_AllocateGeom();
-
+int __cdecl ODE_CollideCapsuleBox(
+	const float *boxPos,
+	const float *boxRot,
+	float *boxLengths,
+	const float *capPos,
+	const float *capRot,
+	float capRadius,
+	float capHalfHeight,
+	int maxc,
+	dContactGeom *contact,
+	int skip);
 // LWSS END
 
 #endif

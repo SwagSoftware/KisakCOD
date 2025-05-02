@@ -36,5 +36,13 @@ geom transform
 int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
 		       dContactGeom *contact, int skip);
 
+// LWSS ADD
+void __cdecl ODE_GeomTransformSetRotation(dxGeom *g, const float *origin, const float (*rotation)[3]);
+void __cdecl ODE_GeomTransformGetOffset(dxGeom *g, float *origin);
+void __cdecl ODE_GeomTransformSetOffset(dxGeom *g, const float *origin);
+struct dxWorld *__cdecl ODE_BodyGetWorld(dxBody *b);
+dxGeom *__cdecl ODE_GeomTransformUpdateGeomOrientation(dxGeomTransform *g);
+// LWSS END
+
 
 #endif

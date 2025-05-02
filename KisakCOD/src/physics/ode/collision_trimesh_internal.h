@@ -34,7 +34,8 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 //****************************************************************************
 // dxTriMesh class
 
-#ifdef TRIMESH_INTERNAL
+//#ifdef TRIMESH_INTERNAL
+#if 0 // LWSS: Remove this. it's not in cod4.
 
 #include "collision_kernel.h"
 #include <ode/collision_trimesh.h>

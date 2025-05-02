@@ -1359,6 +1359,15 @@
     <ClCompile Include="src\gfx_d3d\r_outdoor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\physics\ode\collision_trimesh_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\phys_coll_cylinderbrush.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\phys_coll_capsulebrush.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\qcommon\qcommon.h">
@@ -2166,6 +2175,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gfx_d3d\r_outdoor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\ode\collision_trimesh_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\ode\collision_trimesh_KISAK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\phys_coll_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

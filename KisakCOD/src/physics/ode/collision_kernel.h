@@ -226,6 +226,11 @@ struct dxUserGeom : public dxGeom {
 
     dxUserGeom(int class_num, dxSpace *space, dxBody *body); // MOD
 
+    void ReInit(int class_num, dxSpace *space, dxBody *body)
+    {
+        this->dxUserGeom::dxUserGeom(class_num, space, body);
+    }
+
     dxUserGeom() : dxUserGeom(0, nullptr, nullptr) { } // ADD
 
     ~dxUserGeom();
@@ -235,6 +240,8 @@ struct dxUserGeom : public dxGeom {
 // END
 
 // LWSS ADD- Custom for COD4
+void __cdecl ODE_GeomGetAAContainedBox(struct dxGeomTransform *geom, float *mins, float *maxs);
+void __cdecl dInitUserGeom(dxUserGeom *geom, int classnum, dxSpace *space, dxBody *body);
 
 inline dxGeom *__cdecl ODE_BodyGetFirstGeom(dxBody *body)
 {
@@ -251,8 +258,12 @@ struct dxGeomTransform : public dxGeom {
 
     // cached final object transform (body tx + relative tx). this is set by
     // computeAABB(), and it is valid while the AABB is valid.
-    dVector3 final_pos;
-    dMatrix3 final_R;
+    //dVector3 final_pos;
+    //dMatrix3 final_R;
+    dMatrix3 localR;
+    dVector3 localPos;
+    dMatrix3 finalR;
+    dVector3 finalPos;
 
     dxGeomTransform(dSpaceID space, dxBody* body); // MOD
     ~dxGeomTransform();

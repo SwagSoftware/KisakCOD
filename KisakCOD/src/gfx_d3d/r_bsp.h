@@ -1,6 +1,8 @@
 #pragma once
 #include "r_gfx.h"
 #include "r_sky.h"
+#include "r_primarylights.h"
+
 #include <universal/q_shared.h>
 
 enum TrisType : __int32

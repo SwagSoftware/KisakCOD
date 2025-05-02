@@ -12,6 +12,7 @@
 #include "ode/odeext.h"
 #include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
+#include "ode/collision_transform.h"
 //int *g_phys_msecStep    827c0304     phys_ode.obj
 //struct PhysGlob physGlob   85513d50     phys_ode.obj
 
@@ -2100,7 +2101,7 @@ void __cdecl Phys_ObjDraw(dxBody *body)
             type = dGeomGetClass(geomIter);
             if (type == 6)
             {
-                geom = ODE_GeomTransformUpdateGeomOrientation(geom);
+                geom = ODE_GeomTransformUpdateGeomOrientation((dxGeomTransform*)geom);
                 type = dGeomGetClass(geom);
             }
             v1 = dGeomGetRotation(geom);
@@ -2262,6 +2263,8 @@ void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
         Profile_EndInternal(0);
     }
 }
+
+void __cdecl ODE_CollideSimpleSpaceWithGeomNoAABBTest(dxSpace *space, dxGeom *geom, void *data);
 
 void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float seconds)
 {
