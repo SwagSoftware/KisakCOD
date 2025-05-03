@@ -5,7 +5,7 @@
 
 #include <sound/snd_local.h>
 
-#include <gfx_d3d/fxprimitives.h>>
+#include <gfx_d3d/fxprimitives.h>
 #include <gfx_d3d/r_material.h>
 #include <gfx_d3d/r_gfx.h>
 #include <xanim/dobj.h>

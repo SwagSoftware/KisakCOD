@@ -275,54 +275,56 @@ typedef enum
 
 void _copyDWord(unsigned int* dest, const unsigned int constant, const unsigned int count) 
 {
-	__asm
-	{
-		mov		edx, dest
-		mov		eax, constant
-		mov		ecx, count
-		and ecx, ~7
-		jz		padding
-		sub		ecx, 8
-		jmp		loopu
-		align	16
-		loopu:
-		test[edx + ecx * 4 + 28], ebx		// fetch next block destination to L1 cache
-		mov[edx + ecx * 4 + 0], eax
-		mov[edx + ecx * 4 + 4], eax
-		mov[edx + ecx * 4 + 8], eax
-		mov[edx + ecx * 4 + 12], eax
-		mov[edx + ecx * 4 + 16], eax
-		mov[edx + ecx * 4 + 20], eax
-		mov[edx + ecx * 4 + 24], eax
-		mov[edx + ecx * 4 + 28], eax
-		sub		ecx, 8
-		jge		loopu
-		padding : mov		ecx, count
-		mov		ebx, ecx
-		and ecx, 7
-		jz		outta
-		and ebx, ~7
-		lea		edx, [edx + ebx * 4]				// advance dest pointer
-		test[edx + 0], eax					// fetch destination to L1 cache
-		cmp		ecx, 4
-		jl		skip4
-		mov[edx + 0], eax
-		mov[edx + 4], eax
-		mov[edx + 8], eax
-		mov[edx + 12], eax
-		add		edx, 16
-		sub		ecx, 4
-		skip4:		cmp		ecx, 2
-		jl		skip2
-		mov[edx + 0], eax
-		mov[edx + 4], eax
-		add		edx, 8
-		sub		ecx, 2
-		skip2 : cmp		ecx, 1
-		jl		outta
-		mov[edx + 0], eax
-		outta :
-	}
+	// __asm
+	// {
+	// 	mov		edx, dest
+	// 	mov		eax, constant
+	// 	mov		ecx, count
+	// 	and ecx, ~7
+	// 	jz		padding
+	// 	sub		ecx, 8
+	// 	jmp		loopu
+	// 	align	16
+	// 	loopu:
+	// 	test[edx + ecx * 4 + 28], ebx		// fetch next block destination to L1 cache
+	// 	mov[edx + ecx * 4 + 0], eax
+	// 	mov[edx + ecx * 4 + 4], eax
+	// 	mov[edx + ecx * 4 + 8], eax
+	// 	mov[edx + ecx * 4 + 12], eax
+	// 	mov[edx + ecx * 4 + 16], eax
+	// 	mov[edx + ecx * 4 + 20], eax
+	// 	mov[edx + ecx * 4 + 24], eax
+	// 	mov[edx + ecx * 4 + 28], eax
+	// 	sub		ecx, 8
+	// 	jge		loopu
+	// 	padding : mov		ecx, count
+	// 	mov		ebx, ecx
+	// 	and ecx, 7
+	// 	jz		outta
+	// 	and ebx, ~7
+	// 	lea		edx, [edx + ebx * 4]				// advance dest pointer
+	// 	test[edx + 0], eax					// fetch destination to L1 cache
+	// 	cmp		ecx, 4
+	// 	jl		skip4
+	// 	mov[edx + 0], eax
+	// 	mov[edx + 4], eax
+	// 	mov[edx + 8], eax
+	// 	mov[edx + 12], eax
+	// 	add		edx, 16
+	// 	sub		ecx, 4
+	// 	skip4:		cmp		ecx, 2
+	// 	jl		skip2
+	// 	mov[edx + 0], eax
+	// 	mov[edx + 4], eax
+	// 	add		edx, 8
+	// 	sub		ecx, 2
+	// 	skip2 : cmp		ecx, 1
+	// 	jl		outta
+	// 	mov[edx + 0], eax
+	// 	outta :
+	// }
+    for (unsigned i = 0; i < count; i++)
+        dest[i] = constant;
 }
 
 // optimized memory copy routine that handles all alignment
@@ -535,7 +537,7 @@ void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type)
 	case PRE_WRITE: break;
 	case PRE_READ:
 	case PRE_READ_WRITE:
-
+#ifdef _M_X686
 		__asm
 		{
 			mov		ebx, s
@@ -556,6 +558,10 @@ void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type)
 			jnz		loopie
 			skip :
 		}
+#else
+        // DI: lol
+        PreFetchCacheLine(PF_NON_TEMPORAL_LEVEL_ALL, s);
+#endif
 
 		break;
 	}
@@ -2259,60 +2265,6 @@ void __cdecl Com_SyncThreads()
         MyAssertHandler(".\\qcommon\\common.cpp", 4655, 0, "%s", "Sys_IsMainThread()");
     R_SyncRenderThread();
     R_WaitWorkerCmds();
-}
-
-void __cdecl Com_InitDObj()
-{
-    Com_Memset((unsigned int*)objAlloced, 0, 2048);
-    objFreeCount = 2047;
-    Com_Memset((unsigned int*)clientObjMap, 0, 2304);
-    Com_Memset((unsigned int*)serverObjMap, 0, 2048);
-    com_lastDObjIndex = 1;
-    g_bDObjInited = 1;
-}
-
-void __cdecl Com_ShutdownDObj()
-{
-    const char* v0; // eax
-    const char* v1; // eax
-    unsigned int i; // [esp+0h] [ebp-4h]
-    unsigned int ia; // [esp+0h] [ebp-4h]
-    unsigned int ib; // [esp+0h] [ebp-4h]
-
-    if (g_bDObjInited)
-    {
-        g_bDObjInited = 0;
-        for (i = 0; i < 0x800; ++i)
-        {
-            if (objAlloced[i])
-                MyAssertHandler(".\\qcommon\\dobj_management.cpp", 492, 0, "%s\n\t(i) = %i", "(!objAlloced[i])", i);
-        }
-        for (ia = 0; ia < 0x480; ++ia)
-        {
-            if (clientObjMap[ia])
-            {
-                v0 = va("i: %d, clientObjMap[i]: %d", ia, clientObjMap[ia]);
-                MyAssertHandler(".\\qcommon\\dobj_management.cpp", 494, 0, "%s\n\t%s", "!clientObjMap[i]", v0);
-            }
-        }
-        for (ib = 0; ib < 0x400; ++ib)
-        {
-            if (serverObjMap[ib])
-            {
-                v1 = va("i: %d, serverObjMap[i]: %d", ib, serverObjMap[ib]);
-                MyAssertHandler(".\\qcommon\\dobj_management.cpp", 500, 0, "%s\n\t%s", "!serverObjMap[i]", v1);
-            }
-        }
-        if (objFreeCount != 2047)
-            MyAssertHandler(
-                ".\\qcommon\\dobj_management.cpp",
-                501,
-                0,
-                "%s\n\t(objFreeCount) = %i",
-                "(objFreeCount == (sizeof( objAlloced ) / (sizeof( objAlloced[0] ) * (sizeof( objAlloced ) != 4 || sizeof( objAll"
-                "oced[0] ) <= 4))) - 1)",
-                objFreeCount);
-    }
 }
 
 void __cdecl Com_InitialHull(

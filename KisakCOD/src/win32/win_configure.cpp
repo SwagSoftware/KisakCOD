@@ -62,9 +62,9 @@ void __cdecl Sys_GetPhysicalCpuCount(SysInfo* sysInfo)
     void* process; // [esp+3Ch] [ebp-ACh]
     unsigned int apicId; // [esp+40h] [ebp-A8h]
     unsigned int logicalPerPhysical; // [esp+44h] [ebp-A4h]
-    DWORD systemAffinityMask; // [esp+48h] [ebp-A0h] BYREF
+    DWORD_PTR systemAffinityMask; // [esp+48h] [ebp-A0h] BYREF
     unsigned int logicalIdMask; // [esp+4Ch] [ebp-9Ch]
-    DWORD processAffinityMask; // [esp+50h] [ebp-98h] BYREF
+    DWORD_PTR processAffinityMask; // [esp+50h] [ebp-98h] BYREF
     unsigned int testAffinityMask; // [esp+54h] [ebp-94h]
     unsigned int existingApicId[32]; // [esp+58h] [ebp-90h] BYREF
     _DWORD* v33; // [esp+D8h] [ebp-10h]
@@ -100,15 +100,14 @@ LABEL_8:
     v14[4] = v15;
     if (!v15)
     {
-        //_EAX = 1; // LWSS: lmao I am writing inline ASM again. It's 2010. We did it boys. We turned back time. (Why does x64 not have this? I dig it)
-        __asm { mov eax, 1 }
-        __asm { cpuid }
-        __asm { mov regEax, eax }
-        //regEax = _EAX;
-        __asm { mov regEbx, ebx }
-        //regEbx = _EBX;
-        __asm { mov regEdx, edx }
-        //regEdx = _EDX;
+        int cpuinfo[4]{};
+
+        // TODO: ecx??
+        __cpuidex(cpuinfo, 1, 0);
+        regEax = cpuinfo[0];
+        regEbx = cpuinfo[1];
+        regEdx = cpuinfo[2];
+
         v34 = -1;
         if ((regEax & 0xF00) == 0xF00 || (regEax & 0xF00000) != 0)
         {
@@ -136,11 +135,11 @@ LABEL_8:
                         if (SetProcessAffinityMask(process, testAffinityMask))
                         {
                             Sleep(0);
-                            //_EAX = 1;
-                            __asm { mov eax, 1 }
-                            __asm { cpuid }
-                            //regEbx = _EBX;
-                            __asm { mov regEbx, ebx }
+
+                            // TODO: ecx??
+                            __cpuidex(cpuinfo, 1, 0);
+                            regEbx = cpuinfo[1];
+
                             apicId = ~logicalIdMask & HIBYTE(regEbx);
                         }
                         else

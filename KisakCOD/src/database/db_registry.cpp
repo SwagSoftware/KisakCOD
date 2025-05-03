@@ -1,4 +1,6 @@
 #include "database.h"
+
+#include <qcommon/files.h>
 #include <qcommon/mem_track.h>
 
 #include <xanim/xmodel.h>
@@ -2634,8 +2636,6 @@ void __cdecl DB_BeginReorderZone(const char *zoneName)
     }
 }
 
-int fs_numServerReferencedFFs;
-const char *fs_serverReferencedFFNames[32];
 char __cdecl DB_ShouldLoadFromModDir(const char *zoneName)
 {
     const char *strPos; // [esp+0h] [ebp-8h]

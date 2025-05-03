@@ -1039,12 +1039,12 @@ void* Z_Malloc(int size, const char* name, int type)
     return buf;
 }
 
-void __cdecl Z_Free(char *ptr, int type)
+void __cdecl Z_Free(void *ptr, int type)
 {
     if (ptr)
     {
        // track_z_free(type, ptr, 32);
-        free(ptr - 32);
+        free((char*)ptr - 32);
     }
 }
 

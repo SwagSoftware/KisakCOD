@@ -4,15 +4,15 @@
 #include <qcommon/qcommon.h>
 #include <universal/com_memory.h>
 
-unsigned int __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, unsigned int *phFileHandle)
+unsigned int __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle)
 {
     return (FS_FOpenFileReadStream(pszFilename, (int *)phFileHandle) & 0x80000000) == 0;
 }
-void __stdcall MSS_FileCloseCallback(unsigned int hFileHandle)
+void __stdcall MSS_FileCloseCallback(UINTa hFileHandle)
 {
     FS_FCloseFile(hFileHandle);
 }
-int __stdcall MSS_FileSeekCallback(unsigned int hFileHandle, int offset, unsigned int type)
+int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, unsigned int type)
 {
     if (type)
     {
@@ -33,7 +33,7 @@ int __stdcall MSS_FileSeekCallback(unsigned int hFileHandle, int offset, unsigne
     }
     return FS_FTell(hFileHandle);
 }
-unsigned int __stdcall MSS_FileReadCallback(unsigned int hFileHandle, void *pBuffer, unsigned int bytes)
+unsigned int __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, unsigned int bytes)
 {
     return FS_Read((unsigned char *)pBuffer, bytes, hFileHandle);
 }

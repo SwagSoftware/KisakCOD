@@ -38,7 +38,7 @@ struct __declspec(align(128)) scrStringGlob_t
     HashEntry * nextFreeEntry;
 };
 
- struct __declspec(align(4)) RefString
+ struct RefString
  {
      union
      {

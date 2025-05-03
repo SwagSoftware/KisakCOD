@@ -16,7 +16,7 @@ struct $EF604BEDDA69129AF7FD28DC5064E1AD // sizeof=0x18
 };
 $EF604BEDDA69129AF7FD28DC5064E1AD cubeShotGlob;
 
-struct __declspec(align(4)) $8245A080F03119DF8EECD02BF0FDD113 // sizeof=0x48004
+struct $8245A080F03119DF8EECD02BF0FDD113 // sizeof=0x48004
 {                                       // ...
     float cubeDirs[6][64][64][3];
     bool cubeDirsInited;                // ...

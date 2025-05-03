@@ -179,7 +179,7 @@ struct VariableValueInternal // sizeof=0x10
     unsigned __int16 nextSibling;       // ...
 };
 
-struct __declspec(align(4)) scrVarDebugPub_t // sizeof=0xE0004
+struct scrVarDebugPub_t // sizeof=0xE0004
 {                                       // ...
     const char* varUsage[0x18000];
     unsigned __int16 extRefCount[0x8000];

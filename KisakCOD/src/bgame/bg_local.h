@@ -270,7 +270,7 @@ struct shellshock_parms_t_movement // sizeof=0x1
 {                                       // ...
     bool affect;
 };
-const struct __declspec(align(4)) shellshock_parms_t // sizeof=0x268
+const struct shellshock_parms_t // sizeof=0x268
 {                                       // ...
     shellshock_parms_t_screenblend screenBlend;
     shellshock_parms_t_view view;
@@ -408,7 +408,7 @@ enum team_t : __int32
     TEAM_NUM_TEAMS = 0x4,
 };
 
-struct __declspec(align(4)) clientInfo_t // sizeof=0x4CC
+struct clientInfo_t // sizeof=0x4CC
 {                                       // ...
     int infoValid;                      // ...
     int nextValid;
@@ -748,7 +748,7 @@ struct playerState_s // sizeof=0x2F64
 };
 
 
-struct __declspec(align(4)) CEntPlayerInfo // sizeof=0xC
+struct CEntPlayerInfo // sizeof=0xC
 {                                       // ...
     clientControllers_t* control;       // ...
     unsigned __int8 tag[6];             // ...
@@ -775,7 +775,7 @@ struct CEntTurretInfo // sizeof=0x10
     unsigned __int8 tag_aim_animated;
     unsigned __int8 tag_flash;
 };
-struct __declspec(align(2)) CEntVehicleInfo // sizeof=0x24
+struct CEntVehicleInfo // sizeof=0x24
 {                                       // ...
     __int16 pitch;
     __int16 yaw;
@@ -1033,7 +1033,7 @@ struct item_ent_t // sizeof=0xC
     int clipAmmoCount;
     int index;
 };
-struct __declspec(align(4)) trigger_ent_t // sizeof=0x14
+struct trigger_ent_t // sizeof=0x14
 {                                       // ...
     int threshold;
     int accumulate;
@@ -1204,7 +1204,7 @@ struct viewLerpWaypoint_s // sizeof=0xC
 };
 
 
-struct __declspec(align(2)) usercmd_s // sizeof=0x20
+struct usercmd_s // sizeof=0x20
 {                                       // XREF: ?SV_BotUserMove@@YAXPAUclient_t@@@Z/r
                                         // ?SV_UserMove@@YAXPAUclient_t@@PAUmsg_t@@H@Z/r ...
     int serverTime;                     // XREF: CG_DrawDisconnect+85/r

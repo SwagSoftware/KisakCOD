@@ -18,7 +18,7 @@ struct msg_t // sizeof=0x28
 };
 
 
-struct __declspec(align(4)) NetField // sizeof=0x10
+struct NetField // sizeof=0x10
 {                                       // ...
     const char* name;
     int offset;

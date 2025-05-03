@@ -25,14 +25,6 @@ bool __cdecl SND_IsMultiChannel()
     return milesGlob.isMultiChannel;
 }
 
-typedef S32(AILCALLBACK FAR *AIL_file_seek_callback)  (U32 FileHandle,
-    S32 Offset,
-    U32 Type);
-
-typedef U32(AILCALLBACK FAR *AIL_file_read_callback)  (U32 FileHandle,
-    void FAR *Buffer,
-    U32 Bytes);
-
 char __cdecl SND_InitDriver()
 {
     snd_khz = Dvar_RegisterInt("snd_khz", 44, (DvarLimits)0x2C0000000BLL, 0x21u, "The game sound frequency.");

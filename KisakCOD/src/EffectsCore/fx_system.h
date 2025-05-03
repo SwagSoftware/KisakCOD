@@ -190,7 +190,7 @@ struct FxMarkTri // sizeof=0xC
     unsigned __int16 indices[3];        // ...
     GfxMarkContext context;             // ...
 };
-struct __declspec(align(4)) MarkInfoCollidedDObj // sizeof=0xC
+struct MarkInfoCollidedDObj // sizeof=0xC
 {                                       // ...
     DObj_s *dObj;
     cpose_t *pose;
@@ -198,7 +198,7 @@ struct __declspec(align(4)) MarkInfoCollidedDObj // sizeof=0xC
     // padding byte
     // padding byte
 };
-struct __declspec(align(4)) MarkInfoCollidedBModel // sizeof=0xC
+struct MarkInfoCollidedBModel // sizeof=0xC
 {                                       // ...
     GfxBrushModel *brushModel;
     cpose_t *pose;
@@ -775,7 +775,7 @@ void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int randomSeed, mat
 
 
 // fx_sort
-struct __declspec(align(4)) FxInsertSortElem // sizeof=0x14
+struct FxInsertSortElem // sizeof=0x14
 {                                       // ...
     int defSortOrder;                   // ...
     float distToCamSq;

@@ -183,7 +183,7 @@ struct CardMemory // sizeof=0x8
     int platform[2];                    // ...
 };
 
-__declspec(align(4)) struct GfxImageLoadDef // sizeof=0x14
+struct GfxImageLoadDef // sizeof=0x14
 {
     unsigned __int8 levelCount;
     unsigned __int8 flags;
@@ -230,7 +230,7 @@ struct GfxCodeMatrices // sizeof=0x800
     GfxMatrix matrix[32];
 };
 
-struct __declspec(align(4)) GfxBuffers // sizeof=0x2400A0
+struct GfxBuffers // sizeof=0x2400A0
 {                                       // ...
     GfxDynamicIndices smodelCache;      // ...
     IDirect3DVertexBuffer9* smodelCacheVb; // ...
@@ -296,7 +296,7 @@ struct GfxPackedPlacement // sizeof=0x34
     float scale;
 };
 
-struct __declspec(align(4)) GfxStaticModelDrawInst // sizeof=0x4C
+struct GfxStaticModelDrawInst // sizeof=0x4C
 {                                       // ...
     float cullDist;
     GfxPackedPlacement placement;
@@ -334,7 +334,7 @@ union GfxDrawSurf // sizeof=0x8
     {
         return fields;
     }
-    operator int()
+    operator __int64()
     {
         return packed;
     }
@@ -438,7 +438,7 @@ struct SunLightParseParams // sizeof=0x80
     float angles[3];
 };
 
-struct __declspec(align(4)) GfxLightImage // sizeof=0x8
+struct GfxLightImage // sizeof=0x8
 {                                       // ...
     GfxImage* image;
     unsigned __int8 samplerState;
@@ -602,7 +602,7 @@ struct GfxBrushModelWritable // sizeof=0x18
     float maxs[3];
 };
 
-struct __declspec(align(4)) GfxBrushModel // sizeof=0x38
+struct GfxBrushModel // sizeof=0x38
 {
     GfxBrushModelWritable writable;
     float bounds[2][3];

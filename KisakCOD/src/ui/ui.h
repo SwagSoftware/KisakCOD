@@ -196,43 +196,43 @@ enum EvalOperatorType : __int32
     EVAL_OP_GREATER_EQUAL = 0x19,
     EVAL_OP_COUNT = 0x1A,
 };
-EvalOperatorType operator-=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator-=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) - static_cast<int>(rhs));
 }
-EvalOperatorType operator+=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator+=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) + static_cast<int>(rhs));
 }
-EvalOperatorType operator/=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator/=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) / static_cast<int>(rhs));
 }
-EvalOperatorType operator*=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator*=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) * static_cast<int>(rhs));
 }
-EvalOperatorType operator<<=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator<<=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) << static_cast<int>(rhs));
 }
-EvalOperatorType operator>>=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator>>=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) >> static_cast<int>(rhs));
 }
-EvalOperatorType operator%=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator%=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) % static_cast<int>(rhs));
 }
-EvalOperatorType operator&=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator&=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) & static_cast<int>(rhs));
 }
-EvalOperatorType operator|=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator|=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) | static_cast<int>(rhs));
 }
-EvalOperatorType operator^=(EvalOperatorType lhs, EvalOperatorType rhs)
+static EvalOperatorType operator^=(EvalOperatorType lhs, EvalOperatorType rhs)
 {
     return (EvalOperatorType)(static_cast<int>(lhs) ^ static_cast<int>(rhs));
 }
@@ -253,7 +253,7 @@ struct EvalValue // sizeof=0x10
     EvalValue_u u;
 };
 
-struct __declspec(align(4)) Eval // sizeof=0x5010
+struct Eval // sizeof=0x5010
 {                                       // ...
     EvalOperatorType opStack[1024];
     EvalValue valStack[1024];
@@ -936,7 +936,7 @@ struct UI_LinesComponent : UI_Component // sizeof=0x24
     void DecSelectedLineFocus(bool wrap);
 };
 
-struct __declspec(align(4)) UI_ScrollPane : UI_Component // sizeof=0x34
+struct UI_ScrollPane : UI_Component // sizeof=0x34
 {                                       // ...
     UI_LinesComponent *comp;            // ...
     bool forceHorScoll;                 // ...

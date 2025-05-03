@@ -24,7 +24,7 @@ union GfxStaticModelPreTessSurf // sizeof=0x4
 //    int oldSkinnedCachedOffset;
 //};
 
-struct __declspec(align(4)) GfxModelSurfaceInfo // sizeof=0xC
+struct GfxModelSurfaceInfo // sizeof=0xC
 {                                       // ...
     const DObjAnimMat *baseMat;
     unsigned __int8 boneIndex;

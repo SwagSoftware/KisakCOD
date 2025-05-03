@@ -3,7 +3,7 @@
 #include <qcommon/graph.h>
 #include <sound/snd_public.h>
 
-const char *g_pszSndAliasKeyNames[29] =
+static const char *g_pszSndAliasKeyNames[29] =
 {
   NULL,
   "name",
@@ -162,7 +162,7 @@ struct VolumeModGroup // sizeof=0x44
     float value;
 };
 
-struct __declspec(align(4)) SoundAliasLoadGlobals // sizeof=0x1894
+struct SoundAliasLoadGlobals // sizeof=0x1894
 {                                       // ...
     snd_alias_build_s *tempAliases;     // ...
     int tempAliasCount;                 // ...

@@ -61,7 +61,7 @@ struct ScriptExpression_t // sizeof=0xC
     debugger_sval_s *exprHead;          // ...
 };
 
-struct __declspec(align(4)) Scr_SelectedLineInfo // sizeof=0xC
+struct Scr_SelectedLineInfo // sizeof=0xC
 {                                       // ...
     int selectedId;
     int oldSelectedLine;

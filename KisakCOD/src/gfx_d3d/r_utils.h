@@ -107,7 +107,7 @@ inline void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned char
 {
     R_ConvertColorToBytes(colorFloat, (unsigned int *)colorBytes);
 }
-inline inline void __cdecl R_ConvertColorToBytes(const float *colorFloat, GfxColor *colorBytes)
+inline void __cdecl R_ConvertColorToBytes(const float *colorFloat, GfxColor *colorBytes)
 {
     R_ConvertColorToBytes(colorFloat, (unsigned int *)colorBytes);
 }

@@ -35,7 +35,7 @@ union objInfo_u // sizeof=0xC
     const cmodel_t *brushModel;
     const cbrush_t *brush;
 };
-struct __declspec(align(4)) objInfo // sizeof=0xA8
+struct objInfo // sizeof=0xA8
 {                                       // ...
     int clipMask;                       // ...
     int cylDirection;                   // ...
@@ -66,7 +66,7 @@ struct InputOutput // sizeof=0x8
     Results *Output;                    // ...
 };
 
-struct __declspec(align(4)) PhysPreset // sizeof=0x2C
+struct PhysPreset // sizeof=0x2C
 {                                       // ...
     const char *name;                   // ...
     int type;                           // ...
@@ -156,7 +156,7 @@ struct PhysWorldData // sizeof=0xCC
     // padding byte
     Jitter jitterRegions[5];
 };
-struct __declspec(align(4)) PhysObjUserData // sizeof=0x70
+struct PhysObjUserData // sizeof=0x70
 {                                       // ...
     float translation[3];
     dxBody *body;

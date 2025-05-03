@@ -270,10 +270,10 @@ void __cdecl YawToAxis(float yaw, mat3x3& axis);
 void __cdecl AxisToAngles(const mat3x3& axis, vec3r angles);
 
 // == MATRICES ==
-void __cdecl OrthographicMatrix(float (*mtx)[4], float width, float height, float depth);
+void __cdecl OrthographicMatrix(mat4x4 &mtx, float width, float height, float depth);
 
-void __cdecl MatrixIdentity33(mat3x3& out);
-void __cdecl MatrixIdentity44(mat4x4& out);
+void __cdecl MatrixIdentity33(mat3x3 &out);
+void __cdecl MatrixIdentity44(mat4x4 &out);
 
 void __cdecl MatrixSet44(mat4x4& out, const vec3r origin, const mat3x3& axis, float scale);
 
@@ -304,7 +304,7 @@ void __cdecl MatrixTransposeTransformVector43(const vec3r in1, const mat4x3&, ve
 
 void __cdecl MatrixTransformVectorQuatTrans(const vec3r in, const struct DObjAnimMat* mat, vec3r out);
 
-void __cdecl MatrixForViewer(float (*mtx)[4], const float *origin, const float (*axis)[3]);
+void __cdecl MatrixForViewer(mat4x4 &mtx, const vec3r origin, const mat3x3 &axis);
 void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear);
 
 void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear, float zFar);

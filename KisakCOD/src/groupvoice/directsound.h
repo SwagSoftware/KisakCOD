@@ -19,7 +19,7 @@ static const float maxScalingDownMultiplier = 0.0099999998f;
 static const float maxScalingUpMultiplier = 0.0099999998f;
 
 
-struct __declspec(align(4)) dsound_sample_t // sizeof=0x48
+struct dsound_sample_t // sizeof=0x48
 {                                       // ...
     IDirectSoundCaptureBuffer *DSCB;
     IDirectSoundBuffer *DSB;

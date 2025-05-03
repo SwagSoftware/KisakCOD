@@ -1,7 +1,7 @@
 #pragma once
 #include "q_shared.h"
 
-const char *prof_enumNames[433] =
+static const char *prof_enumNames[433] =
 {
   "",
   "Probe1",
@@ -538,7 +538,7 @@ struct ProfileScript // sizeof=0x80C
     unsigned int srcMaxTime;
 };
 
-const ProfileDrawInfo s_profileMain[18] =
+static const ProfileDrawInfo s_profileMain[18] =
 {
   { 255, 0 },
   { 230, 0 },
@@ -559,7 +559,7 @@ const ProfileDrawInfo s_profileMain[18] =
   { 339, 0 },
   { 340, 0 }
 }; // idb
-const ProfileDrawInfo s_profileGenericCGame[12] =
+static const ProfileDrawInfo s_profileGenericCGame[12] =
 {
   { 34, 0 },
   { 129, 1 },
@@ -574,7 +574,7 @@ const ProfileDrawInfo s_profileGenericCGame[12] =
   { 345, 0 },
   { 322, 0 }
 }; // idb
-const ProfileDrawInfo s_profileGenericGame[16] =
+static const ProfileDrawInfo s_profileGenericGame[16] =
 {
   { 238, 1 },
   { 239, 2 },
@@ -593,7 +593,7 @@ const ProfileDrawInfo s_profileGenericGame[16] =
   { 252, 0 },
   { 253, 0 }
 }; // idb
-const ProfileDrawInfo s_profileProbes[12] =
+static const ProfileDrawInfo s_profileProbes[12] =
 {
   { 1, 0 },
   { 2, 0 },
@@ -608,7 +608,7 @@ const ProfileDrawInfo s_profileProbes[12] =
   { 10, 0 },
   { 0, 0 }
 }; // idb
-const ProfileDrawInfo s_profileFrontEnd[9] =
+static const ProfileDrawInfo s_profileFrontEnd[9] =
 {
   { 34, 0 },
   { 71, 1 },
@@ -620,7 +620,7 @@ const ProfileDrawInfo s_profileFrontEnd[9] =
   { 89, 2 },
   { 70, 0 }
 }; // idb
-const ProfileDrawInfo s_profileRenderer[16] =
+static const ProfileDrawInfo s_profileRenderer[16] =
 {
   { 34, 0 },
   { 129, 0 },
@@ -639,7 +639,7 @@ const ProfileDrawInfo s_profileRenderer[16] =
   { 113, 1 },
   { 114, 1 }
 }; // idb
-const ProfileDrawInfo s_profileRenderer2[9] =
+static const ProfileDrawInfo s_profileRenderer2[9] =
 {
   { 166, 0 },
   { 168, 1 },
@@ -651,7 +651,7 @@ const ProfileDrawInfo s_profileRenderer2[9] =
   { 90, 0 },
   { 189, 0 }
 }; // idb
-const ProfileDrawInfo s_profileRenderer3[22] =
+static const ProfileDrawInfo s_profileRenderer3[22] =
 {
   { 128, 0 },
   { 156, 0 },
@@ -676,8 +676,8 @@ const ProfileDrawInfo s_profileRenderer3[22] =
   { 65, 0 },
   { 144, 0 }
 }; // idb
-const ProfileDrawInfo s_profileCinematics[5] = { { 144, 0 }, { 145, 0 }, { 146, 1 }, { 147, 1 }, { 148, 1 } }; // idb
-const ProfileDrawInfo s_profileWater[7] =
+static const ProfileDrawInfo s_profileCinematics[5] = { { 144, 0 }, { 145, 0 }, { 146, 1 }, { 147, 1 }, { 148, 1 } }; // idb
+static const ProfileDrawInfo s_profileWater[7] =
 {
   { 119, 0 },
   { 122, 1 },
@@ -687,8 +687,8 @@ const ProfileDrawInfo s_profileWater[7] =
   { 126, 1 },
   { 127, 1 }
 }; // idb
-const ProfileDrawInfo s_profileSnd[4] = { { 336, 0 }, { 337, 0 }, { 338, 0 }, { 344, 0 } }; // idb
-const ProfileDrawInfo s_profileXanim[12] =
+static const ProfileDrawInfo s_profileSnd[4] = { { 336, 0 }, { 337, 0 }, { 338, 0 }, { 344, 0 } }; // idb
+static const ProfileDrawInfo s_profileXanim[12] =
 {
   { 313, 0 },
   { 314, 0 },
@@ -703,7 +703,7 @@ const ProfileDrawInfo s_profileXanim[12] =
   { 310, 0 },
   { 311, 0 }
 }; // idb
-const ProfileDrawInfo s_profileXanim2[8] =
+static const ProfileDrawInfo s_profileXanim2[8] =
 {
   { 324, 0 },
   { 325, 0 },
@@ -714,8 +714,8 @@ const ProfileDrawInfo s_profileXanim2[8] =
   { 330, 0 },
   { 323, 0 }
 }; // idb
-const ProfileDrawInfo s_profileScript[4] = { { 331, 0 }, { 332, 0 }, { 334, 0 }, { 335, 0 } }; // idb
-const ProfileDrawInfo s_profileFx[30] =
+static const ProfileDrawInfo s_profileScript[4] = { { 331, 0 }, { 332, 0 }, { 334, 0 }, { 335, 0 } }; // idb
+static const ProfileDrawInfo s_profileFx[30] =
 {
   { 193, 0 },
   { 194, 1 },
@@ -748,8 +748,8 @@ const ProfileDrawInfo s_profileFx[30] =
   { 136, 0 },
   { 135, 0 }
 }; // idb
-const ProfileDrawInfo s_profilePrediction[2] = { { 34, 0 }, { 322, 1 } }; // idb
-const ProfileDrawInfo s_profileTrace[18] =
+static const ProfileDrawInfo s_profilePrediction[2] = { { 34, 0 }, { 322, 1 } }; // idb
+static const ProfileDrawInfo s_profileTrace[18] =
 {
   { 37, 0 },
   { 38, 0 },
@@ -770,7 +770,7 @@ const ProfileDrawInfo s_profileTrace[18] =
   { 317, 0 },
   { 233, 0 }
 }; // idb
-const ProfileDrawInfo s_profileServer[37] =
+static const ProfileDrawInfo s_profileServer[37] =
 {
   { 254, 0 },
   { 255, 0 },
@@ -810,9 +810,9 @@ const ProfileDrawInfo s_profileServer[37] =
   { 284, 2 },
   { 286, 2 }
 }; // idb
-const ProfileDrawInfo s_profileTrigger[1] = { { 350, 0 } }; // idb
+static const ProfileDrawInfo s_profileTrigger[1] = { { 350, 0 } }; // idb
 
-const ProfileDrawInfo s_profileUpdateScreen[13] =
+static const ProfileDrawInfo s_profileUpdateScreen[13] =
 {
                 {0x22, 0}    ,
                 {0x12, 1}    ,
@@ -828,7 +828,7 @@ const ProfileDrawInfo s_profileUpdateScreen[13] =
                 {0x15, 2}    ,
                 { 0x0F, 3 }  ,
 };
-const ProfileDrawInfo s_profileThread[6] =
+static const ProfileDrawInfo s_profileThread[6] =
 {
     {0x168, 0},
     {0xBD, 0},
@@ -838,7 +838,7 @@ const ProfileDrawInfo s_profileThread[6] =
     {0x87, 0}
 };
 
-const ProfileDrawInfo s_profilePhys[22] =
+static const ProfileDrawInfo s_profilePhys[22] =
 {
     { 0x16B, 0},
     { 0x16C, 1},
@@ -864,7 +864,7 @@ const ProfileDrawInfo s_profilePhys[22] =
     { 0x181, 3 },
 };
 
-const ProfileDrawInfo s_shadowCookie[6] =
+static const ProfileDrawInfo s_shadowCookie[6] =
 {
     {0x96, 0},
     {0x97, 0},
@@ -874,7 +874,7 @@ const ProfileDrawInfo s_shadowCookie[6] =
     {0x9A, 0}
 };
 
-const ProfileDrawInfo s_profileCgTrace[9] =
+static const ProfileDrawInfo s_profileCgTrace[9] =
 {
     {0x31, 0},
     {0x32, 0},
@@ -887,7 +887,7 @@ const ProfileDrawInfo s_profileCgTrace[9] =
     {0x39, 2}
 };
 
-const ProfileDrawInfo s_profileDynEnts[11] =
+static const ProfileDrawInfo s_profileDynEnts[11] =
 {
     {0x182, 0},
     {0x183, 2},
@@ -902,7 +902,7 @@ const ProfileDrawInfo s_profileDynEnts[11] =
     {0x18D, 0},
 };
 
-const ProfileDrawInfo s_profileAimAssist[7] =
+static const ProfileDrawInfo s_profileAimAssist[7] =
 {
     {0x3A, 0}  ,
     {0x3B, 1}  ,
@@ -913,7 +913,7 @@ const ProfileDrawInfo s_profileAimAssist[7] =
     { 0x40, 0 },
 };
 
-const ProfileSettings s_profileArrays[29] =
+static const ProfileSettings s_profileArrays[29] =
 {
   { "main", s_profileMain, 18, {230, 34, 339, 0, 0}},
   { "updateScreen", s_profileUpdateScreen, 13, { 0, 0, 0, 0, 0 } },

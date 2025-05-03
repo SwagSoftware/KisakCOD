@@ -31,7 +31,7 @@ union XAnimDynamicIndices // sizeof=0x2
     unsigned __int8 _1[1];
     unsigned __int16 _2[1];
 };
-struct __declspec(align(4)) XAnimDeltaPartQuatDataFrames // sizeof=0x8
+struct XAnimDeltaPartQuatDataFrames // sizeof=0x8
 {                                       // ...
     __int16 (*frames)[2];
     XAnimDynamicIndices indices;
@@ -44,7 +44,7 @@ union XAnimDynamicFrames // sizeof=0x4
     unsigned __int8 (*_1)[3];
     unsigned __int16 (*_2)[3];
 };
-struct __declspec(align(4)) XAnimPartTransFrames // sizeof=0x20
+struct XAnimPartTransFrames // sizeof=0x20
 {                                       // ...
     float mins[3];
     float size[3];
@@ -76,7 +76,7 @@ union XAnimPartQuatFrames // sizeof=0x4
     __int16 (*frames)[4];
     __int16 (*frames2)[2];
 };
-struct __declspec(align(4)) XAnimPartQuatDataFrames // sizeof=0x8
+struct XAnimPartQuatDataFrames // sizeof=0x8
 {                                       // ...
     XAnimPartQuatFrames u;
     XAnimDynamicIndices indices;
@@ -96,7 +96,7 @@ struct XAnimPartQuat // sizeof=0xC
     // padding byte
     XAnimPartQuatData u;
 };
-struct __declspec(align(4)) XAnimPartQuatPtr // sizeof=0x8
+struct XAnimPartQuatPtr // sizeof=0x8
 {                                       // ...
     XAnimPartQuat *quat;                // ...
     unsigned __int8 partIndex;          // ...
@@ -104,7 +104,7 @@ struct __declspec(align(4)) XAnimPartQuatPtr // sizeof=0x8
     // padding byte
     // padding byte
 };
-struct __declspec(align(4)) XAnimPartTransPtr // sizeof=0x8
+struct XAnimPartTransPtr // sizeof=0x8
 {                                       // ...
     XAnimPartTrans *trans;              // ...
     unsigned __int8 partIndex;          // ...
@@ -192,7 +192,7 @@ struct XAnim_s // sizeof=0x14
     XAnimEntry entries[1];
 };
 
-struct __declspec(align(4)) XAnimTree_s // sizeof=0x14
+struct XAnimTree_s // sizeof=0x14
 {
     XAnim_s *anims;
     int info_usage;
@@ -208,7 +208,7 @@ struct mnode_t // sizeof=0x4
     unsigned __int16 rightChildOffset;
 };
 
-struct __declspec(align(4)) XAnimState // sizeof=0x20
+struct XAnimState // sizeof=0x20
 {                                       // ...
     float currentAnimTime;              // ...
     float oldTime;                      // ...
@@ -353,7 +353,7 @@ struct CollisionAabbTree // sizeof=0x20
     CollisionAabbTreeIndex u;
 };
 
-struct __declspec(align(2)) cbrushside_t // sizeof=0xC
+struct cbrushside_t // sizeof=0xC
 {                                       // ...
     cplane_s* plane;                    // ...
     unsigned int materialNum;           // ...
@@ -1341,7 +1341,7 @@ struct XZoneMemory // sizeof=0x58
     void *indexBuffer;
 };
 
-struct __declspec(align(4)) XZone // sizeof=0xA8
+struct XZone // sizeof=0xA8
 {                                       // ...
     char name[64];                      // ...
     int flags;                          // ...

@@ -146,7 +146,7 @@ struct LayeredTechniqueSetName // sizeof=0x10
     const char *nameChunk;
 };
 
-struct __declspec(align(4)) ShaderUniformDef // sizeof=0x10
+struct ShaderUniformDef // sizeof=0x10
 {                                       // ...
     ShaderParamType type;
     const char *name;
@@ -158,7 +158,7 @@ struct __declspec(align(4)) ShaderUniformDef // sizeof=0x10
     // padding byte
 };
 
-struct __declspec(align(2)) ShaderVaryingDef // sizeof=0x8
+struct ShaderVaryingDef // sizeof=0x8
 {                                       // ...
     const char *name;
     unsigned __int8 streamDest;
@@ -313,7 +313,7 @@ struct water_t // sizeof=0x44
     GfxImage *image;                    // ...
 };
 
-struct __declspec(align(4)) ShaderIndexRange // sizeof=0xC
+struct ShaderIndexRange // sizeof=0xC
 {                                       // ...
     unsigned int first;                 // ...
     unsigned int count;                 // ...
@@ -408,7 +408,7 @@ struct MaterialConstantDef // sizeof=0x20
     float literal[4];
 };
 
-struct __declspec(align(4)) MaterialInfo // sizeof=0x18
+struct MaterialInfo // sizeof=0x18
 {                                       // ...
     const char *name;                   // ...
     unsigned __int8 gameFlags;
@@ -612,7 +612,7 @@ void __cdecl Material_PreventOverrideTechniqueGeneration();
 void __cdecl Material_UpdatePicmipAll();
 void __cdecl R_Cmd_ReloadMaterialTextures();
 
-struct __declspec(align(4)) GfxMtlFeatureMap // sizeof=0x10
+struct GfxMtlFeatureMap // sizeof=0x10
 {                                       // ...
     const char *name;
     unsigned int mask;

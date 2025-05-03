@@ -1208,26 +1208,77 @@ static void lm_init(deflate_state *s)
 // OUT assertion: the match length is not greater than s->lookahead.
 // ===========================================================================
 
+/* Copyright (C) 1991-2025 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+
+/* Return the first occurrence of NEEDLE in HAYSTACK.  */
+
+#if !defined(__GCC__) && !defined(__clang__)
+#define __builtin_expect(x, y) (x)
+#endif
+
+static void *p_memmem(const void *haystack, size_t haystack_len, const void *needle,
+	size_t needle_len)
+{
+	const char *begin;
+	const char *const last_possible
+		= (const char *)haystack + haystack_len - needle_len;
+
+	if (needle_len == 0)
+		/* The first occurrence of the empty string is deemed to occur at
+		   the beginning of the string.  */
+		return (void *)haystack;
+
+	/* Sanity check, otherwise the loop might search through the whole
+	   memory.  */
+	if (__builtin_expect(haystack_len < needle_len, 0))
+		return NULL;
+
+	for (begin = (const char *)haystack; begin <= last_possible; ++begin)
+		if (begin[0] == ((const char *)needle)[0] &&
+			!memcmp((const void *)&begin[1],
+				(const void *)((const char *)needle + 1),
+				needle_len - 1))
+			return (void *)begin;
+
+	return NULL;
+}
+
 inline byte *qcmp(byte *scan, byte *match, ulong count)
 {
-	byte	*retval;
-	_asm
-	{
-		push	esi
-		push	edi
-		push	ecx
-
-		mov		esi, [scan]
-		mov		edi, [match]
-		mov		ecx, [count]
-		repe	cmpsb
-
-		pop		ecx
-		pop		edi
-		mov		[retval], esi
-		pop		esi
-	}
-	return(--retval);
+	return (byte*)p_memmem(scan, count, match, count);
+	// byte	*retval;
+	// _asm
+	// {
+	// 	push	esi
+	// 	push	edi
+	// 	push	ecx
+	// 
+	// 	mov		esi, [scan]
+	// 	mov		edi, [match]
+	// 	mov		ecx, [count]
+	// 	repe	cmpsb
+	// 
+	// 	pop		ecx
+	// 	pop		edi
+	// 	mov		[retval], esi
+	// 	pop		esi
+	// }
+	// return(--retval);
 }
 
 static ulong longest_match(deflate_state *s, ulong cur_match)

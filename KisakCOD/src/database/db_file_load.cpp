@@ -346,7 +346,7 @@ void __cdecl DB_LoadXFile(
     unsigned __int8 *buf,
     int allocType)
 {
-    if (((unsigned __int8)buf & 3) != 0)
+    if (((uintptr_t)buf & 3) != 0)
         MyAssertHandler(".\\database\\db_file_load.cpp", 749, 0, "%s", "!(reinterpret_cast< psize_int >( buf ) & 3)");
     memset((unsigned __int8 *)&g_load, 0, sizeof(g_load));
     g_load.f = f;

@@ -9,7 +9,7 @@ enum JointType : __int32
     RAGDOLL_JOINT_HINGE = 0x1,
     RAGDOLL_JOINT_SWIVEL = 0x2,
 };
-const char *jointNames[3] = { "none", "hinge", "swivel" }; // idb
+static const char *jointNames[3] = { "none", "hinge", "swivel" }; // idb
 
 struct BoneDef // sizeof=0x4C
 {                                       // ...
@@ -60,7 +60,7 @@ struct SelfPairDef // sizeof=0x2
     unsigned __int8 bones[2];
 };
 
-struct __declspec(align(4)) RagdollDef // sizeof=0xED0
+struct RagdollDef // sizeof=0xED0
 {
     bool inUse;
     bool bound;
@@ -88,7 +88,7 @@ struct Bone // sizeof=0x1C
     float length;
     float center[3];
 };
-struct __declspec(align(4)) LerpBone // sizeof=0x8
+struct LerpBone // sizeof=0x8
 {                                       // ...
     int parentBone;
     unsigned __int8 animBone;

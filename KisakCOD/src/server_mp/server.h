@@ -426,7 +426,7 @@ struct clientSnapshot_t // sizeof=0x2F84
     int serverTime;
 };
 
-struct __declspec(align(2)) client_t // sizeof=0xA5638
+struct client_t // sizeof=0xA5638
 {                                       // ...
     clientHeader_t header;              // ...
     const char *dropReason;
@@ -534,7 +534,7 @@ struct cachedClient_s // sizeof=0x2FCC
     clientState_s cs;
     playerState_s ps;                   // ...
 };
-struct __declspec(align(4)) challenge_t // sizeof=0x50
+struct challenge_t // sizeof=0x50
 {                                       // ...
     netadr_t adr;
     int challenge;                      // ...

@@ -6,7 +6,7 @@
 #include <script/scr_variable.h>
 //#include <game_mp/g_public_mp.h>
 
-const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
+static const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
 
 // g_client_fields
 enum fieldtype_t : __int32

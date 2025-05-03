@@ -54,7 +54,7 @@ void __cdecl FreeString(const char* str);
 void Com_InitHunkMemory();
 void __cdecl Com_Meminfo_f();
 
-struct __declspec(align(4)) HunkUser // sizeof=0x24
+struct HunkUser // sizeof=0x24
 {
     HunkUser* current;
     HunkUser* next;
@@ -74,7 +74,7 @@ struct __declspec(align(4)) HunkUser // sizeof=0x24
 };
 
 // KISAKTODO: Move to proper spot?
-struct __declspec(align(4)) fileData_s // sizeof=0xC
+struct fileData_s // sizeof=0xC
 {
     void* data;
     fileData_s* next;

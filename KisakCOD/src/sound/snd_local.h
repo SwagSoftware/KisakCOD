@@ -41,7 +41,7 @@ struct MssFileHandle // sizeof=0x9C
     int fileLength;
 };
 
-struct __declspec(align(4)) SndEqParams // sizeof=0x14
+struct SndEqParams // sizeof=0x14
 {                                       // ...
     SND_EQTYPE type;                    // ...
     float gain;                         // ...
@@ -66,7 +66,7 @@ struct MssEqInfo // sizeof=0xF00
 
 typedef struct _SAMPLE FAR *HSAMPLE;           // Handle to sample
 
-struct __declspec(align(4)) MssLocal // sizeof=0x26D0
+struct MssLocal // sizeof=0x26D0
 {                                       // ...
     _DIG_DRIVER *driver;                // ...
     HSAMPLE handle_sample[40];         // ...
@@ -154,10 +154,10 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime);
 
 
 // snd_mss
-unsigned int __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, unsigned int *phFileHandle);
-void __stdcall MSS_FileCloseCallback(unsigned int hFileHandle);
-int __stdcall MSS_FileSeekCallback(unsigned int hFileHandle, int offset, unsigned int type);
-unsigned int __stdcall MSS_FileReadCallback(unsigned int hFileHandle, void *pBuffer, unsigned int bytes);
+unsigned int __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle);
+void __stdcall MSS_FileCloseCallback(UINTa hFileHandle);
+int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, unsigned int type);
+unsigned int __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, unsigned int bytes);
 
 _DIG_DRIVER *__cdecl MSS_open_digital_driver(int hertz, int bits, int channels);
 void MSS_InitFailed();

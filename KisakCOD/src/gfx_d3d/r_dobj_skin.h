@@ -8,7 +8,7 @@ struct GfxModelRigidSurface // sizeof=0x38
     GfxScaledPlacement placement;
 };
 
-struct __declspec(align(4)) SkinXModelCmd // sizeof=0x1C
+struct SkinXModelCmd // sizeof=0x1C
 {                                       // ...
     void *modelSurfs;
     const DObjAnimMat *mat;

@@ -69,7 +69,7 @@ struct DynEntityAreaParms // sizeof=0x14
     unsigned __int16 count;             // ...
 };
 
-struct __declspec(align(4)) DynEntSortStruct // sizeof=0x8
+struct DynEntSortStruct // sizeof=0x8
 {
     float distSq;
     unsigned __int16 id;
@@ -78,7 +78,7 @@ struct __declspec(align(4)) DynEntSortStruct // sizeof=0x8
 };
 //std::pair<DynEntSortStruct *first, DynEntSortStruct *second>; // sizeof=0x8
 
-struct __declspec(align(2)) BreakablePiece // sizeof=0xC
+struct BreakablePiece // sizeof=0xC
 {                                       // ...
     const XModel *model;                // ...
     int physObjId;                      // ...
@@ -277,7 +277,7 @@ struct DynEntityCollTree // sizeof=0xC
     DynEntityCollTree_u u;
     unsigned __int16 child[2];
 };
-struct __declspec(align(4)) DynEntityCollSector // sizeof=0x14
+struct DynEntityCollSector // sizeof=0x14
 {                                       // ...
     DynEntityCollTree tree;
     int contents;

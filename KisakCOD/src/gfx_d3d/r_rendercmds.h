@@ -216,7 +216,7 @@ struct GfxRenderCommandExecState // sizeof=0x4
 {                                       // ...
     const void *cmd;                    // ...
 };
-struct __declspec(align(2)) GfxCmdDrawText2D // sizeof=0x54
+struct GfxCmdDrawText2D // sizeof=0x54
 {
     GfxCmdHeader header;
     float x;

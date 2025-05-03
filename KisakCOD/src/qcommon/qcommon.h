@@ -285,7 +285,6 @@ char *__cdecl Dvar_InfoString(int localClientNum, char bit);
 void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, unsigned int *userData);
 char *__cdecl Dvar_InfoString_Big(int bit);
 void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userData);
-void __cdecl Dvar_AddCommands();
 void __cdecl Dvar_RegisterBool_f();
 void __cdecl Dvar_RegisterInt_f();
 void __cdecl Dvar_RegisterFloat_f();
@@ -1030,7 +1029,7 @@ struct cplane_s *__cdecl CM_GetPlanes();
 int __cdecl CM_GetPlaneCount();
 
 // cm_showcollision
-struct __declspec(align(4)) ShowCollisionBrushPt // sizeof=0x14
+struct ShowCollisionBrushPt // sizeof=0x14
 {                                       // ...
     float xyz[3];
     __int16 sideIndex[3];
@@ -1042,7 +1041,7 @@ struct winding_t // sizeof=0x34
     int numpoints;
     float p[4][3];
 };
-struct __declspec(align(4)) cLeaf_t // sizeof=0x2C
+struct cLeaf_t // sizeof=0x2C
 {                                       // ...
     unsigned __int16 firstCollAabbIndex;
     unsigned __int16 collAabbCount;
@@ -1389,7 +1388,7 @@ inline void __cdecl strrchr(unsigned __int8 *string, unsigned __int8 chr)
 }
 
 // LWSS: Random return 0 Stub function that IDA thinks is jpeg-related.
-int __cdecl RETURN_ZERO32()
+inline int __cdecl RETURN_ZERO32()
 {
     return 0;
 }

@@ -1123,7 +1123,7 @@ struct CgEntCollTree // sizeof=0xC
     CgEntCollTree_u u;
     unsigned __int16 child[2];
 };
-struct __declspec(align(4)) CgEntCollSector // sizeof=0x10
+struct CgEntCollSector // sizeof=0x10
 {                                       // ...
     CgEntCollTree tree;
     unsigned __int16 entListHead;

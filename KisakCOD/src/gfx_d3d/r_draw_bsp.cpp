@@ -3,7 +3,6 @@
 #include "rb_logfile.h"
 #include "r_dvars.h"
 #include "r_state.h"
-#include "r_dvars.cpp"
 #include "r_shade.h"
 #include "rb_stats.h"
 #include "rb_tess.h"

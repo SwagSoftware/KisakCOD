@@ -178,7 +178,7 @@ int __cdecl Com_RealTime(qtime_s *qtime)
     return t;
 }
 
-static void __cdecl Com_Prefetch(char *s, signed int bytes)
+static void __cdecl Com_Prefetch(const char *s, signed int bytes)
 {
     signed int v3; // ecx
     unsigned int i; // ecx
@@ -190,11 +190,14 @@ static void __cdecl Com_Prefetch(char *s, signed int bytes)
         s += 32;
 }
 
-void __cdecl Com_Memcpy(char *dest, char *src, int count)
+void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
 {
+    char *dest = (char *)dest_p;
+    const char *src = (const char *)src_p;
+
     int v3; // ecx
     char *v4; // edx
-    char *v5; // ebx
+    const char *v5; // ebx
     signed int v6; // edi
     int v7; // esi
     int v8; // esi
@@ -280,8 +283,11 @@ void __cdecl Com_Memcpy(char *dest, char *src, int count)
     }
 }
 
-void __cdecl Com_Memset(unsigned int *dest, int val, int count)
+
+void __cdecl Com_Memset(void *dest_p, const int val, const size_t count)
 {
+    unsigned int *dest = (unsigned int *)dest_p;
+
     unsigned int *v3; // edx
     int v4; // eax
     int v5; // eax

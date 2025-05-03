@@ -2,7 +2,9 @@
 #include "r_material.h"
 #include <xanim/xanim.h>
 
-const char *g_imageProgNames[14] =
+// KISAKTODO move out of header file
+
+static const char *g_imageProgNames[14] =
 {
   "$shadow_cookie",
   "$shadow_cookie_blur",
@@ -20,7 +22,7 @@ const char *g_imageProgNames[14] =
   "$model_lighting1"
 }; // idb
 
-const char *imageTypeName[10] =
+static const char *imageTypeName[10] =
 {
     "misc",
     "debug",
@@ -34,7 +36,7 @@ const char *imageTypeName[10] =
     "world"
 };
 
-const char *g_platform_name[2] =
+static const char *g_platform_name[2] =
 {
     "current",
     "min_pc"
@@ -318,7 +320,7 @@ void __cdecl Image_DecodeWavelet(
     int bytesPerPixel);
 
 // r_image_wavelet
-struct __declspec(align(4)) WaveletDecode // sizeof=0x20
+struct WaveletDecode // sizeof=0x20
 {                                       // ...
     unsigned __int16 value;             // ...
     unsigned __int16 bit;               // ...

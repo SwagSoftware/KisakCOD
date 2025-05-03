@@ -854,7 +854,7 @@ mat4x4 identityMatrix44 = {
     {0, 0, 0, 1}
 };
 
-void __cdecl OrthographicMatrix(float (*mtx)[4], float width, float height, float depth)
+void __cdecl OrthographicMatrix(mat4x4 &mtx, float width, float height, float depth)
 {
     if (!mtx)
         MyAssertHandler(".\\universal\\com_math.cpp", 2281, 0, "%s", "mtx");
@@ -864,12 +864,12 @@ void __cdecl OrthographicMatrix(float (*mtx)[4], float width, float height, floa
         MyAssertHandler(".\\universal\\com_math.cpp", 2283, 0, "%s", "height != 0");
     if (depth == 0.0)
         MyAssertHandler(".\\universal\\com_math.cpp", 2284, 0, "%s", "depth != 0");
-    memset(mtx, 0, 0x40u);
-    (*mtx)[0] = 2.0 / width;
-    (*mtx)[5] = 2.0 / height;
-    (*mtx)[10] = 0.5 / depth;
-    (*mtx)[14] = 0.5;
-    (*mtx)[15] = 1.0;
+    memset(&mtx, 0, sizeof(mat4x4));
+    (mtx)[0][0] = 2.0 / width;
+    (mtx)[1][1] = 2.0 / height;
+    (mtx)[2][2] = 0.5 / depth;
+    (mtx)[3][2] = 0.5;
+    (mtx)[3][3] = 1.0;
 }
 
 void __cdecl MatrixIdentity33(mat3x3& out)
@@ -886,7 +886,7 @@ void __cdecl MatrixIdentity44(mat4x4& out)
     memcpy(&out, &identityMatrix44, sizeof(out));
 }
 
-void __cdecl MatrixSet44(mat4x4 &out, const vec3 &origin, const mat3x3 &axis, float scale)
+void __cdecl MatrixSet44(mat4x4 &out, const vec3r origin, const mat3x3 &axis, float scale)
 {
     (out)[0][0] = (axis)[0][0] * scale;
     (out)[0][1] = (axis)[0][1] * scale;
@@ -1198,10 +1198,9 @@ void __cdecl MatrixInverse44(const mat4x4 &mat, mat4x4& dst)
         (dst)[0][i] = (dst)[0][i] * det;
 }
 
-void __cdecl MatrixTransformVector44(const float *vec, const mat4x4 &mat, float *out)
+void __cdecl MatrixTransformVector44(const vec4r vec, const mat4x4 &mat, vec4r out)
 {
-    if (vec == out)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1789, 0, "%s", "vec != out");
+    iassert(vec != out);
     out[0] = vec[0] * (mat)[0][0] + vec[1] * (mat)[1][0] + vec[2] * (mat)[2][0] + vec[3] * (mat)[3][0];
     out[1] = vec[0] * (mat)[0][1] + vec[1] * (mat)[1][1] + vec[2] * (mat)[2][1] + vec[3] * (mat)[3][1];
     out[2] = vec[0] * (mat)[0][2] + vec[1] * (mat)[1][2] + vec[2] * (mat)[2][2] + vec[3] * (mat)[3][2];
@@ -1715,14 +1714,14 @@ void __cdecl AxisTranspose(const mat3x3& in, mat3x3& out)
     (out)[2][2] = (in)[2][2];
 }
 
-void __cdecl AxisTransformVec3(const float (*axes)[3], const float *vec, float *out)
+void __cdecl AxisTransformVec3(const mat3x3 &axes, const float *vec, float *out)
 {
     out[0] = *vec * (axes)[0][0] + vec[1] * (axes)[1][0] + vec[2] * (axes)[2][0];
     out[1] = *vec * (axes)[0][1] + vec[1] * (axes)[1][1] + vec[2] * (axes)[2][1];
     out[2] = *vec * (axes)[0][2] + vec[1] * (axes)[1][2] + vec[2] * (axes)[2][2];
 }
 
-void __cdecl YawToAxis(float yaw, float (*axis)[3])
+void __cdecl YawToAxis(float yaw, mat3x3 &axis)
 {
     float right[3]; // [esp+Ch] [ebp-Ch] BYREF
 
@@ -2577,7 +2576,7 @@ void __cdecl Vec4MadMad(
     result[3] = scale0 * dir0[3] + start[3] + scale1 * dir1[3];
 }
 
-void __cdecl Vec3Cross(const float* v0, const float* v1, float* cross)
+void __cdecl Vec3Cross(const vec3r v0, const vec3r v1, vec3r cross)
 {
     if (v0 == cross)
         MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector.h", 401, 0, "%s", "v0 != cross");
@@ -2588,7 +2587,7 @@ void __cdecl Vec3Cross(const float* v0, const float* v1, float* cross)
     cross[2] = *v0 * v1[1] - v0[1] * *v1;
 }
 
-void __cdecl Vec3Copy(const float *from, float *to)
+void __cdecl Vec3Copy(const vec3r from, vec3r to)
 {
     *to = *from;
     to[1] = from[1];
@@ -2603,12 +2602,17 @@ float __cdecl Vec3Length(const vec3r v)
     return (float)sqrt(v3);
 }
 
+float __cdecl Vec3Dot(const vec3r a, const vec3r b)
+{
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
 float __cdecl Vec4Dot(const float *a, const float *b)
 {
     return (float)(*a * *b + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]);
 }
 
-void __cdecl MatrixForViewer(float (*mtx)[4], const float *origin, const float (*axis)[3])
+void __cdecl MatrixForViewer(mat4x4 &mtx, const vec3r origin, const mat3x3 &axis)
 {
     if (!mtx)
         MyAssertHandler(".\\universal\\com_math.cpp", 2302, 0, "%s", "mtx");
@@ -2616,22 +2620,22 @@ void __cdecl MatrixForViewer(float (*mtx)[4], const float *origin, const float (
         MyAssertHandler(".\\universal\\com_math.cpp", 2303, 0, "%s", "origin");
     if (!axis)
         MyAssertHandler(".\\universal\\com_math.cpp", 2304, 0, "%s", "axis");
-    (*mtx)[0] = -(*axis)[3];
-    (*mtx)[4] = -(*axis)[4];
-    (*mtx)[8] = -(*axis)[5];
-    (*mtx)[12] = -(*origin * (*mtx)[0] + origin[1] * (*mtx)[4] + origin[2] * (*mtx)[8]);
-    (*mtx)[1] = (*axis)[6];
-    (*mtx)[5] = (*axis)[7];
-    (*mtx)[9] = (*axis)[8];
-    (*mtx)[13] = -(*origin * (*mtx)[1] + origin[1] * (*mtx)[5] + origin[2] * (*mtx)[9]);
-    (*mtx)[2] = (*axis)[0];
-    (*mtx)[6] = (*axis)[1];
-    (*mtx)[10] = (*axis)[2];
-    (*mtx)[14] = -(*origin * (*mtx)[2] + origin[1] * (*mtx)[6] + origin[2] * (*mtx)[10]);
-    (*mtx)[3] = 0.0;
-    (*mtx)[7] = 0.0;
-    (*mtx)[11] = 0.0;
-    (*mtx)[15] = 1.0;
+    (mtx)[0][0] = -(axis)[1][0];
+    (mtx)[1][0] = -(axis)[1][1];
+    (mtx)[2][0] = -(axis)[1][2];
+    (mtx)[3][0] = -(*origin * (mtx)[0][0] + origin[1] * (mtx)[1][0] + origin[2] * (mtx)[2][0]);
+    (mtx)[0][1] = (axis)[2][0];
+    (mtx)[1][1] = (axis)[2][1];
+    (mtx)[2][1] = (axis)[2][2];
+    (mtx)[3][1] = -(*origin * (mtx)[0][1] + origin[1] * (mtx)[1][1] + origin[2] * (mtx)[2][1]);
+    (mtx)[0][2] = (axis)[0][0];
+    (mtx)[1][2] = (axis)[0][1];
+    (mtx)[2][2] = (axis)[0][2];
+    (mtx)[3][2] = -(*origin * (mtx)[0][2] + origin[1] * (mtx)[1][2] + origin[2] * (mtx)[2][2]);
+    (mtx)[0][3] = 0.0;
+    (mtx)[1][3] = 0.0;
+    (mtx)[2][3] = 0.0;
+    (mtx)[3][3] = 1.0;
 }
 
 void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear)
@@ -2640,7 +2644,7 @@ void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float
         MyAssertHandler(".\\universal\\com_math.cpp", 2251, 0, "%s", "mtx");
     if (zNear <= 0.0)
         MyAssertHandler(".\\universal\\com_math.cpp", 2252, 0, "%s", "zNear > 0");
-    memset((unsigned __int8 *)mtx, 0, 0x40u);
+    memset((unsigned __int8 *)mtx, 0, sizeof(mat4x4));
     (*mtx)[0] = (float)0.99951172 / tanHalfFovX;
     (*mtx)[5] = (float)0.99951172 / tanHalfFovY;
     (*mtx)[10] = 0.99951172;

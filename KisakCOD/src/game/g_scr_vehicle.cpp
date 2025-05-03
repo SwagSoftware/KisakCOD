@@ -2373,7 +2373,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     veh->turret.fireBarrel = veh->turret.fireBarrel == 0;
 }
 
-unsigned __int16 *s_flashTags[] =
+static unsigned __int16 *s_flashTags[] =
 {
     &scr_const.tag_flash,
     &scr_const.tag_flash_11,

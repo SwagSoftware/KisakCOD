@@ -30,7 +30,7 @@ struct DiskGfxCell_Version14 // sizeof=0x34
     int unused1;
 };
 
-struct __declspec(align(4)) DiskGfxCell // sizeof=0x70
+struct DiskGfxCell // sizeof=0x70
 {
     float mins[3];
     float maxs[3];

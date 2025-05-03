@@ -100,6 +100,7 @@ void __cdecl DB_EnumXAssets_FastFile(
     void(__cdecl *func)(XAssetHeader, void *),
     void *inData,
     bool includeOverride);
+bool __cdecl DB_IsMinimumFastFileLoaded();
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name);
 void __cdecl DB_Sleep(unsigned int msec);
 void __cdecl DB_LogMissingAsset(XAssetType type, const char *name);

@@ -4,7 +4,7 @@
 #define abs8(x) abs(x)
 #define abs32(x) abs(x)
 
-const char *entityTypeNames[17] =
+static const char *entityTypeNames[17] =
 {
     "ET_GENERAL",
     "ET_PLAYER",
@@ -25,7 +25,7 @@ const char *entityTypeNames[17] =
     "ET_VEHICLE_CORPSE"
 };
 
-const char *eventnames[135] =
+static const char *eventnames[135] =
 {
   "EV_NONE",
   "EV_FOLIAGE_SOUND",
@@ -164,7 +164,7 @@ const char *eventnames[135] =
   "EV_LANDING_PAIN_PAINTEDMETAL"
 };
 
-struct __declspec(align(4)) pmove_t // sizeof=0x110
+struct pmove_t // sizeof=0x110
 {                                       // ...
     playerState_s *ps;                  // ...
     usercmd_s cmd;                      // ...
@@ -216,7 +216,7 @@ void __cdecl CG_TraceCapsule(
     int passEntityNum,
     int contentMask);
 
-pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent}}; // idb
+static const pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent}}; // idb
 
 // bg_jump
 extern const dvar_t *jump_height;

@@ -726,7 +726,7 @@ void __cdecl CG_ArchiveState(int localClientNum, MemoryFile *memFile);
 
 
 // cg_draw_mp
-struct __declspec(align(4)) OverheadFade // sizeof=0xC
+struct OverheadFade // sizeof=0xC
 {                                       // ...
     int lastTime;                       // ...
     int startTime;                      // ...
@@ -907,7 +907,7 @@ bool __cdecl Scoreboard_HandleInput(int localClientNum, int key);
 
 
 // cg_vehicles_mp
-struct __declspec(align(4)) vehicleEffects // sizeof=0x28
+struct vehicleEffects // sizeof=0x28
 {
     bool active;
     // padding byte
@@ -1461,13 +1461,7 @@ extern UiContext cgDC[1];
 
 extern vehicleEffects vehEffects[1][8];
 
-const unsigned __int16 *wheelTags[4] =
-{
-  (const unsigned __int16 *)&scr_const.tag_wheel_front_left,
-  (const unsigned __int16 *)&scr_const.tag_wheel_front_right,
-  (const unsigned __int16 *)&scr_const.tag_wheel_back_left,
-  (const unsigned __int16 *)&scr_const.tag_wheel_back_right
-}; // idb
+extern const unsigned __int16 *wheelTags[4];
 
 inline centity_s *__cdecl CG_GetEntity(int localClientNum, unsigned int entityIndex)
 {

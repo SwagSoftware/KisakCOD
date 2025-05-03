@@ -5,7 +5,7 @@
 #include <universal/com_memory.h>
 #include "scr_variable.h"
 
-const char *var_typename[] =
+static const char *var_typename[] =
 {
     "undefined",
     "object",

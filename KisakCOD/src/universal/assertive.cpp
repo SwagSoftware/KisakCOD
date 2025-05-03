@@ -6,7 +6,7 @@ char message[1024];
 int isHandlingAssert;
 
 bool __cdecl QuitOnError();
-void MyAssertHandler(char *filename, int line, int type, const char *fmt, ...)
+void MyAssertHandler(const char *filename, int line, int type, const char *fmt, ...)
 {
     __debugbreak(); // KISAKTODO
     //char shouldBreak; // [esp+3h] [ebp-5h]
