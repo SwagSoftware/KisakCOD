@@ -1,12 +1,12 @@
 #include "buildnumber_mp.h"
 #include <stdio.h>
 
-char buf[128];
+char buildnumbuf[128];
 
 char *__cdecl getBuildNumber()
 {
-	sprintf_s(buf, "%d %s", 13620, "Thu Oct 04 00:43:04 2007");
-	return buf;
+	sprintf_s(buildnumbuf, "%d %s", 13620, "Thu Oct 04 00:43:04 2007");
+	return buildnumbuf;
 }
 
 int getBuildNumberAsInt()

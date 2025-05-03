@@ -897,32 +897,6 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
     }
 }
 
-double __cdecl GetSpeed(int localClientNum, centity_s *cent)
-{
-    int serverTimeDelta; // [esp+Ch] [ebp-1Ch]
-    float posDelta[3]; // [esp+10h] [ebp-18h] BYREF
-    float len; // [esp+1Ch] [ebp-Ch]
-    LerpEntityState *p_currentState; // [esp+20h] [ebp-8h]
-    entityState_s *ns; // [esp+24h] [ebp-4h]
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    p_currentState = &cent->currentState;
-    ns = &cent->nextState;
-    serverTimeDelta = cgArray[0].nextSnap->serverTime - cgArray[0].snap->serverTime;
-    Vec3Sub(cent->nextState.lerp.pos.trBase, cent->currentState.pos.trBase, posDelta);
-    len = Vec3Length(posDelta);
-    if ((double)serverTimeDelta <= 0.0)
-        return 0.0;
-    return (float)(len / (double)serverTimeDelta);
-}
-
 void __cdecl CG_VehSphereCoordsToPos(float sphereDistance, float sphereYaw, float sphereAltitude, float *result)
 {
     float v4; // [esp+8h] [ebp-20h]

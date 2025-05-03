@@ -108,3 +108,4 @@ int __cdecl Decode_Sample(char *buffer, int maxLength, __int16 *out, int frame_s
 
 
 extern int g_frame_size;
+extern int g_current_bandwidth_setting;

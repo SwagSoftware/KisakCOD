@@ -1154,16 +1154,6 @@ void __cdecl FX_GetVisualSampleRouting(const FxEditorElemDef *edElem, FxSampleCh
     }
 }
 
-int __cdecl FX_DecideIntervalLimit(const FxEditorElemDef *edElemDef)
-{
-    int intervalLimit; // [esp+0h] [ebp-8h]
-
-    intervalLimit = (edElemDef->lifeSpanMsec.base + edElemDef->lifeSpanMsec.amplitude / 2) / 100;
-    if (intervalLimit > 80)
-        return 80;
-    return intervalLimit;
-}
-
 const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
 {
     char v2; // [esp+3h] [ebp-55h]

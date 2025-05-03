@@ -3014,28 +3014,6 @@ void __cdecl EmitBreakpointStatement(sval_u sourcePos)
     }
 }
 
-int __cdecl Profile_AddScriptName(char *profileName)
-{
-    char *name; // [esp+0h] [ebp-8h]
-    unsigned int i; // [esp+4h] [ebp-4h]
-
-    for (i = 0; i < 0x28; ++i)
-    {
-        name = profileScript.profileScriptNames[i];
-        if (!I_strnicmp(profileName, name, 19))
-            return i;
-        if (!*name)
-        {
-            I_strncpyz(name, profileName, 20);
-            profileScript.avgTime[i] = 0;
-            profileScript.maxTime[i] = 0;
-            profileScript.cumulative[i] = 0.0;
-            return i;
-        }
-    }
-    return -1;
-}
-
 void __cdecl EmitProfStatement(sval_u profileName, sval_u sourcePos, unsigned __int8 op)
 {
     char *v3; // eax

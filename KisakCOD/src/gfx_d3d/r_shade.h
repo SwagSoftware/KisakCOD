@@ -13,6 +13,7 @@ union GfxShaderConstantState // sizeof=0x8
     unsigned __int64 packed;
 };
 
+int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount);
 int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexCount, int stride);
 void __cdecl R_ChangeObjectPlacement(GfxCmdBufSourceState *source, const GfxScaledPlacement *placement);
 int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, int triCount);

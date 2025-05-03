@@ -1,7 +1,6 @@
 #include "fx_system.h"
 
 int warnCount_1;
-int fx_serverVisClient;
 
 void __cdecl FX_OffsetSpawnOrigin(
     const FxSpatialFrame* effectFrame,

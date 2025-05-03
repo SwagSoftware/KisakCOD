@@ -89,7 +89,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(LocalDebuggerWorkingDirectory)src\binklib\binkw32.lib;$(LocalDebuggerWorkingDirectory)src\msslib\mss32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -579,7 +579,6 @@
     <ClCompile Include="src\zlib\compress.c" />
     <ClCompile Include="src\zlib\crc32.c" />
     <ClCompile Include="src\zlib\deflate.c" />
-    <ClCompile Include="src\zlib\example.c" />
     <ClCompile Include="src\zlib\gzio.c" />
     <ClCompile Include="src\zlib\infblock.c" />
     <ClCompile Include="src\zlib\infcodes.c" />
@@ -588,7 +587,6 @@
     <ClCompile Include="src\zlib\inftrees.c" />
     <ClCompile Include="src\zlib\infutil.c" />
     <ClCompile Include="src\zlib\maketree.c" />
-    <ClCompile Include="src\zlib\minigzip.c" />
     <ClCompile Include="src\zlib\trees.c" />
     <ClCompile Include="src\zlib\uncompr.c" />
     <ClCompile Include="src\zlib\zutil.c" />

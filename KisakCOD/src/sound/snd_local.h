@@ -3,6 +3,8 @@
 #include <msslib/mss.h>
 #include "snd_public.h"
 
+static const char *snd_outputConfigurationStrings[6] = { "Windows default", "Mono", "Stereo", "4 speakers", "5.1 speakers", NULL }; // idb
+
 struct snd_save_2D_sample_t // sizeof=0x10
 {                                       // ...
     float fraction;                     // ...

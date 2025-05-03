@@ -20,7 +20,6 @@ struct PrintChannelGlob // sizeof=0x21E0
 // char (*)[91] con_gameMsgWindowNFilter_Descs 828a71d8     con_channels.obj
 
 PrintChannelGlob pcGlob;
-int dvar_modifiedFlags;
 
 char __cdecl Con_OpenChannel(char *name, bool allowScript)
 {

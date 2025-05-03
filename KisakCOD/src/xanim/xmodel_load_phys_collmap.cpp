@@ -836,31 +836,6 @@ unsigned int __cdecl GetPlaneIntersections(
     return ptCount;
 }
 
-int __cdecl GetPointListAllowDupes(
-    int planeIndex,
-    const SimplePlaneIntersection *pts,
-    int ptCount,
-    const SimplePlaneIntersection **xyz,
-    int xyzLimit)
-{
-    int xyzCount; // [esp+0h] [ebp-8h]
-    int ptIndex; // [esp+4h] [ebp-4h]
-
-    xyzCount = 0;
-    for (ptIndex = 0; ptIndex < ptCount; ++ptIndex)
-    {
-        if (planeIndex == pts[ptIndex].planeIndex[0]
-            || planeIndex == pts[ptIndex].planeIndex[1]
-            || planeIndex == pts[ptIndex].planeIndex[2])
-        {
-            if (xyzCount == xyzLimit)
-                return 0;
-            xyz[xyzCount++] = &pts[ptIndex];
-        }
-    }
-    return xyzCount;
-}
-
 adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     float *sideNormal,
     int basePlaneIndex,

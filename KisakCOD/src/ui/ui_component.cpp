@@ -963,10 +963,7 @@ bool Scr_ScriptWatch::EvaluateWatchChildElement(
     return Scr_ScriptWatch::PostEvaluateWatchElement(childElement, &value);
 }
 
-int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2)
-{
-    return *arg1 - *arg2;
-}
+int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2);
 
 void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
 {

@@ -82,9 +82,6 @@ MSS_MC_SPEC mss_spec[5] =
     MSS_MC_51_DISCRETE
 };
 
-const char *snd_outputConfigurationStrings[6] = { "Windows default", "Mono", "Stereo", "4 speakers", "5.1 speakers", NULL }; // idb
-
-
 char __cdecl MSS_Init()
 {
   const char *error; // eax

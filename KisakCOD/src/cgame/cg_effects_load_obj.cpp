@@ -112,10 +112,7 @@ LABEL_20:
         63);
 }
 
-int __cdecl compare_impact_files(const char **pe0, const char **pe1)
-{
-    return I_stricmp(*pe0, *pe1);
-}
+int __cdecl compare_impact_files(const char **pe0, const char **pe1);
 
 int __cdecl CG_RegisterImpactEffects_Generic_29_char_const_____cdecl_int__(
     const char **szEffectFile,

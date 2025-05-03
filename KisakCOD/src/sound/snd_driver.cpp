@@ -13,8 +13,6 @@ MssLocal milesGlob;
 const dvar_t *snd_khz;
 const dvar_t *snd_outputConfiguration;
 
-const char *snd_outputConfigurationStrings[6] = { "Windows default", "Mono", "Stereo", "4 speakers", "5.1 speakers", NULL }; // idb
-
 void __cdecl TRACK_snd_driver()
 {
     track_static_alloc_internal(&milesGlob, 9936, "milesGlob", 13);

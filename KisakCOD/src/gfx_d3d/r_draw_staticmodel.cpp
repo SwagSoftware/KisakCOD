@@ -251,32 +251,6 @@ void __cdecl R_SetStaticModelCachedBuffer(GfxCmdBufState *state, unsigned int ca
     R_SetStreamSource(&state->prim, gfxBuf.smodelCacheVb, ((cachedIndex - 1) & 0xFFFFF000) << 9, 0x20u);
 }
 
-int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
-{
-    unsigned int v2; // edx
-    int indexCount; // [esp+8h] [ebp-4h]
-
-    indexCount = 3 * triCount;
-    if (3 * triCount > gfxBuf.dynamicIndexBuffer->total)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            590,
-            0,
-            "%s\n\t(indexCount) = %i",
-            "(indexCount <= gfxBuf.dynamicIndexBuffer->total)",
-            indexCount);
-    if (indexCount + gfxBuf.dynamicIndexBuffer->used > gfxBuf.dynamicIndexBuffer->total)
-        gfxBuf.dynamicIndexBuffer->used = 0;
-    if (!gfxBuf.dynamicIndexBuffer->used)
-    {
-        v2 = (gfxBuf.dynamicIndexBuffer - gfxBuf.dynamicIndexBufferPool + 1) & 0x80000000;
-        if (gfxBuf.dynamicIndexBuffer - gfxBuf.dynamicIndexBufferPool + 1 < 0)
-            v2 = 0;
-        gfxBuf.dynamicIndexBuffer = &gfxBuf.dynamicIndexBufferPool[v2];
-    }
-    return gfxBuf.dynamicIndexBuffer->used;
-}
-
 void __cdecl R_DrawStaticModelsCachedDrawSurfLighting(GfxStaticModelDrawStream *drawStream, GfxCmdBufContext context)
 {
     unsigned int copyBaseIndex; // [esp+0h] [ebp-30h]

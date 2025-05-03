@@ -1320,5 +1320,7 @@ void FX_UnregisterAll();
 
 // fx_convert
 const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(* Alloc)(unsigned int));
+int __cdecl FX_DecideIntervalLimit(const FxEditorElemDef *edElemDef);
 
 extern const float fx_randomTable[];
+extern int fx_serverVisClient;

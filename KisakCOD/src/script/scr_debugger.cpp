@@ -3214,9 +3214,3 @@ bool __cdecl Scr_IgnoreErrors()
 {
     return scrDebuggerGlob.disableBreakpoints;
 }
-
-int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2)
-{
-    return *arg1 - *arg2;
-}
-

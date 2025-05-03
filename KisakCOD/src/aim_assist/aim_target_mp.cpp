@@ -10,26 +10,6 @@ AimTargetGlob atGlobArray[1];
 
 const dvar_t *aim_target_sentient_radius;
 
-int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsigned int tagName, float *pos)
-{
-    char *v5; // eax
-    DObj_s *dobj; // [esp+0h] [ebp-4h]
-
-    if (!cent)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 646, 0, "%s", "cent");
-    if (!pos)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 647, 0, "%s", "pos");
-    dobj = Com_GetClientDObj(cent->nextState.number, localClientNum);
-    if (!dobj)
-        return 0;
-    if (!CG_DObjGetWorldTagPos(&cent->pose, dobj, tagName, pos))
-    {
-        v5 = SL_ConvertToString(tagName);
-        Com_Error(ERR_DROP, "AimTarget_GetTagPos: Cannot find tag [%s] on entity\n", v5);
-    }
-    return 1;
-}
-
 void __cdecl TRACK_aim_target()
 {
     track_static_alloc_internal(atGlobArray, 5640, "atGlobArray", 10);

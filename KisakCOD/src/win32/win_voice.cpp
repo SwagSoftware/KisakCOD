@@ -10,7 +10,6 @@ const dvar_t *winvoice_mic_scaler;
 char old_rec_source[256];
 int mic_old_reclevel;
 int mic_current_reclevel;
-int g_current_bandwidth_setting;
 int g_voice_initialized;
 int s_clientTalkTime[64];
 bool recording;
