@@ -20,15 +20,7 @@
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
 #include <script/scr_memorytree.h>
-
-unsigned __int16 *controller_names[] =
-{
-    &scr_const.back_mid,
-    &scr_const.back_up,
-    &scr_const.neck,
-    &scr_const.head,
-    &scr_const.pelvis
-};
+#include <game_mp/g_public_mp.h>
 
 float g_entMoveTolVec[3] = { 16.0f, 16.0f, 16.0f };
 

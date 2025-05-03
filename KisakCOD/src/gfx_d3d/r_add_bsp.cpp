@@ -5,14 +5,6 @@
 #include "r_pretess.h"
 #include "r_buffers.h"
 
-void __cdecl R_InitDelayedCmdBuf(GfxDelayedCmdBuf *delayedCmdBuf)
-{
-    delayedCmdBuf->primDrawSurfPos = -1;
-    delayedCmdBuf->primDrawSurfSize = 0;
-    *(_DWORD *)&delayedCmdBuf->drawSurfKey.fields = -1;
-    HIDWORD(delayedCmdBuf->drawSurfKey.packed) = -1;
-}
-
 void __cdecl R_InitBspDrawSurf(GfxSModelDrawSurfLightingData *surfData)
 {
     R_InitDelayedCmdBuf(&surfData->delayedCmdBuf);

@@ -355,7 +355,6 @@ void __cdecl UI_DrawMapLevelshot(int localClientNum);
 void __cdecl UI_LoadIngameMenus(int localClientNum);
 void __cdecl UI_SetMap(char *mapname, char *gametype);
 int __cdecl UI_GetTalkerClientNum(int localClientNum, int num);
-void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect);
 char __cdecl UI_DrawRecordLevel(int localClientNum, rectDef_s *rect);
 void __cdecl UI_DrawGameType(
     int localClientNum,

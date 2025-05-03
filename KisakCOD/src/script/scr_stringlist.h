@@ -68,8 +68,6 @@ struct scrStringDebugGlob_t
     int ignoreLeaks;
 };
 
-unsigned int GetHashCode(const char* str, unsigned int len);
-
 void SL_Init();
 void SL_InitCheckLeaks();
 

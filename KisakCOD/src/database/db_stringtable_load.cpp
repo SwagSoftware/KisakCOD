@@ -1,7 +1,5 @@
 #include "database.h"
 
-XAssetList *varXAssetList;
-
 void __cdecl Load_ScriptStringCustom(unsigned __int16 *var)
 {
     *var = (unsigned __int16)varXAssetList->stringList.strings[*var];

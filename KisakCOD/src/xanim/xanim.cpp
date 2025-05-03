@@ -23,24 +23,6 @@ static bool g_anim_developer;
 static XAnimNotify_s g_notifyList[0x80];
 static XAnimInfo g_xAnimInfo[0x1000];
 
-void __cdecl SV_DObjInitServerTime(gentity_s* ent, float dtime)
-{
-    DObj_s* obj; // [esp+4h] [ebp-4h]
-
-    obj = Com_GetServerDObj(ent->s.number);
-    if (obj)
-        DObjInitServerTime(obj, dtime);
-}
-
-void __cdecl SV_DObjDisplayAnim(gentity_s* ent, const char* header)
-{
-    DObj_s* obj; // [esp+0h] [ebp-4h]
-
-    obj = Com_GetServerDObj(ent->s.number);
-    if (obj)
-        DObjDisplayAnim(obj, header);
-}
-
 int __cdecl XAnimGetTreeHighMemUsage()
 {
     return g_info_high_usage << 6;
@@ -103,11 +85,6 @@ XAnimParts* __cdecl XAnimFindData_LoadObj(const char* name)
 XAnimParts* __cdecl XAnimFindData_FastFile(const char* name)
 {
     return DB_FindXAssetHeader(ASSET_TYPE_XANIMPARTS, name).parts;
-}
-
-unsigned __int8 *__cdecl Hunk_AllocXAnimPrecache(unsigned int size)
-{
-    return Hunk_AllocAlign(size, 4, "XAnimPrecache", 11);
 }
 
 void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* name)
@@ -2876,28 +2853,6 @@ void __cdecl TransformToQuatRefFrame(const float* rot, float* trans)
         temp = (1.0 - zza) * *trans + zw * trans[1];
         trans[1] = trans[1] - (zw * *trans + zza * trans[1]);
         *trans = temp;
-    }
-}
-
-void __cdecl XAnim_CalcRotDeltaEntire(const XAnimDeltaPart *animDelta, float *rotDelta)
-{
-    XAnimDeltaPartQuat *rotFrameDeltas; // [esp+8h] [ebp-8h]
-    const __int16 *rotDeltaLastFrame; // [esp+Ch] [ebp-4h]
-
-    if (animDelta->quat)
-    {
-        rotFrameDeltas = animDelta->quat;
-        if (rotFrameDeltas->size)
-            rotDeltaLastFrame = rotFrameDeltas->u.frames.frames[rotFrameDeltas->size];
-        else
-            rotDeltaLastFrame = (const int16*)&rotFrameDeltas->u;
-        *rotDelta = *rotDeltaLastFrame;
-        rotDelta[1] = rotDeltaLastFrame[1];
-    }
-    else
-    {
-        *rotDelta = 0.0;
-        rotDelta[1] = 32767.0;
     }
 }
 

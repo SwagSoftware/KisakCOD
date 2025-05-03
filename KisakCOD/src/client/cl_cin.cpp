@@ -5,7 +5,6 @@
 #include <qcommon/cmd.h>
 
 bool cin_skippable;
-const dvar_s *nextmap;
 
 int __cdecl CIN_PlayCinematic(int localClientNum, char *arg)
 {

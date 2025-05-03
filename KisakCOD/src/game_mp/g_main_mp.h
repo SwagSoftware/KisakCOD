@@ -143,7 +143,6 @@ clientState_s *__cdecl G_GetClientState(int clientNum);
 gclient_s *__cdecl G_GetPlayerState(int clientNum);
 int __cdecl G_GetClientSize();
 void __cdecl G_FreeEntities();
-unsigned __int8 *__cdecl Hunk_AllocXAnimServer(unsigned int size);
 bool __cdecl G_ExitAfterConnectPaths();
 int __cdecl G_IsServerGameSystem(int clientNum);
 void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepersist);
@@ -155,8 +154,6 @@ void __cdecl G_CreateDObj(
     unsigned int handle,
     int unusedLocalClientNum);
 DObj_s *__cdecl G_GetDObj(unsigned int handle, int unusedLocalClientNum);
-void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
-void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
 XAnimTree_s *G_LoadAnimTreeInstances();
 void G_PrintAllFastFileErrors();
 void __cdecl G_PrintFastFileErrors(const char *fastfile);
@@ -222,7 +219,6 @@ int __cdecl G_LocationalTracePassed(
     unsigned __int8 *priorityMap);
 void __cdecl G_SightTrace(int *hitNum, float *start, float *end, int passEntityNum, int contentmask);
 void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int duration);
-void __cdecl G_SafeDObjFree(gentity_s *ent);
 BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2);
 
 extern const dvar_t *pickupPrints;

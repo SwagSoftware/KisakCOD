@@ -47,7 +47,7 @@ searchpath_s *fs_searchpaths;
 
 char __cdecl FS_SanitizeFilename(const char *filename, char *sanitizedName, int sanitizedNameSize);
 BOOL __cdecl FS_UseSearchPath(const searchpath_s *pSearch);
-int __cdecl FS_GetHandleAndOpenFile(char *filename, const char *ospath, FsThread thread);
+int __cdecl FS_GetHandleAndOpenFile(const char *filename, const char *ospath, FsThread thread);
 int __cdecl FS_IwdIsPure(iwd_t *iwd);
 const char **__cdecl FS_ListFilteredFiles(
     searchpath_s *searchPath,

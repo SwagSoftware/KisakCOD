@@ -14,6 +14,7 @@
 #include "scr_compiler.h"
 
 #include <algorithm>
+#include "scr_parsetree.h"
 
 
 scrParserGlob_t scrParserGlob;

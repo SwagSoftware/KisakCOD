@@ -71,7 +71,6 @@ GfxRenderTarget gfxRenderTargets[15];
 
 r_backEndGlobals_t backEnd;
 materialCommands_t tess;
-GfxCmdBufInput gfxCmdBufInput;
 
 void __cdecl TRACK_rb_backend()
 {

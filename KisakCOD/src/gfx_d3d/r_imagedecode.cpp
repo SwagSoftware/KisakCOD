@@ -3,15 +3,6 @@
 #include <universal/com_files.h>
 #include <qcommon/qcommon.h>
 
-unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader)
-{
-    return Image_CountMipmaps(
-        fileHeader->flags,
-        fileHeader->dimensions[0],
-        fileHeader->dimensions[1],
-        fileHeader->dimensions[2]);
-}
-
 void __cdecl Image_FreeRawPixels(GfxRawImage *image)
 {
     Z_Free(image->pixels, 22);

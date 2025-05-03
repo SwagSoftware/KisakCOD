@@ -1284,13 +1284,6 @@ void __cdecl EmitEmptyArray(sval_u sourcePos)
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
-void __cdecl Scr_EmitAnimation(char *pos, unsigned int animName, unsigned int sourcePos)
-{
-    if (scrAnimPub.animTreeNames)
-        Scr_EmitAnimationInternal(pos, animName, scrAnimPub.animTreeNames);
-    else
-        CompileError(sourcePos, "#using_animtree was not specified");
-}
 
 void __cdecl EmitAnimation(sval_u anim, sval_u sourcePos)
 {

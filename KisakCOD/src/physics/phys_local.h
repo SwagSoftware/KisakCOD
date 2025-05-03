@@ -292,33 +292,6 @@ struct ContactList // sizeof=0x1804
     int contactCount;                   // ...
 };
 
-void __cdecl DynEntPieces_RegisterDvars();
-void __cdecl DynEntPieces_AddDrawSurfs();
-void __cdecl DynEntPieces_SpawnPieces(
-    int localClientNum,
-    const struct XModelPieces *pieces,
-    const float *origin,
-    const float (*axis)[3],
-    const float *hitPos,
-    const float *hitDir);
-bool __cdecl DynEntPieces_SpawnPhysicsModel(
-    int localClientNum,
-    const XModel *model,
-    const float *offset,
-    const float *origin,
-    const float (*axis)[3],
-    const float *hitPos,
-    const float *hitDir);
-dxBody *__cdecl DynEntPieces_SpawnPhysObj(
-    const char *modelName,
-    const float *mins,
-    const float *maxs,
-    float *position,
-    float *quat,
-    float *velocity,
-    float *angularVelocity,
-    const PhysPreset *physPreset);
-void __cdecl DynEntPieces_CalcForceDir(const float *hitDir, float spreadFraction, float *forceDir);
 void __cdecl TRACK_phys();
 void __cdecl Phys_Init();
 void __cdecl Phys_Go_f();

@@ -32,30 +32,6 @@ void __cdecl TRACK_dvar_cmds()
     track_static_alloc_internal(info2, sizeof(info2), "info2", 10);
 }
 
-void __cdecl Dvar_GetCombinedString(char *combined, int first)
-{
-    char *v2; // eax
-    int c; // [esp+10h] [ebp-10h]
-    int l; // [esp+14h] [ebp-Ch]
-    int len; // [esp+18h] [ebp-8h]
-
-    c = Cmd_Argc();
-    *combined = 0;
-    l = 0;
-    while (first < c)
-    {
-        len = strlen(Cmd_Argv(first)) + 1;
-        if (len + l >= 4094)
-            break;
-        v2 = (char *)Cmd_Argv(first);
-        I_strncat(combined, 4096, v2);
-        if (first != c - 1)
-            I_strncat(combined, 4096, " ");
-        l += len;
-        ++first;
-    }
-}
-
 void __cdecl Dvar_Toggle_f()
 {
     Dvar_ToggleInternal();

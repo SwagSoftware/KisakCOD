@@ -4,6 +4,7 @@
 #include <gfx_d3d/r_scene.h>
 #include <xanim/dobj_utils.h>
 #include <EffectsCore/fx_system.h>
+#include <game_mp/g_public_mp.h>
 
 //struct vehicleEffects(*)[8] vehEffects 8284e650     cg_vehicles_mp.obj
 
@@ -97,27 +98,6 @@ void __cdecl CG_VehGunnerPOV(int localClientNum, float *resultOrigin, float *res
         MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 170, 0, "%s", "ci->attachedVehEntNum != ENTITYNUM_NONE");
     GetTagMatrix(localClientNum, ci->attachedVehEntNum, scr_const.tag_gunner_pov, tagMtx, resultOrigin);
     AxisToAngles(tagMtx, resultAngles);
-}
-
-clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
-{
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].predictedPlayerState.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_vehicles_mp.cpp",
-            71,
-            0,
-            "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgArray[0].predictedPlayerState.clientNum,
-            64);
-    return &cgArray[0].bgs.clientinfo[cgArray[0].predictedPlayerState.clientNum];
 }
 
 void __cdecl GetTagMatrix(
@@ -333,69 +313,24 @@ int __cdecl CG_GetEntityIndex(int localClientNum, const centity_s *cent)
     return cent->nextState.number;
 }
 
-vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
-{
-    vehicleEffects *v3; // edx
-    int veh; // [esp+4h] [ebp-8h]
-    int veha; // [esp+4h] [ebp-8h]
-    int vehb; // [esp+4h] [ebp-8h]
-    int oldest; // [esp+8h] [ebp-4h]
-
-    for (veh = 0; veh < 8 && vehEffects[localClientNum][veh].active; ++veh)
-    {
-        if (vehEffects[localClientNum][veh].entityNum == entityNum)
-        {
-            vehEffects[localClientNum][veh].lastAccessed = Sys_Milliseconds();
-            return &vehEffects[localClientNum][veh];
-        }
-    }
-    for (veha = 0; veha < 8 && vehEffects[localClientNum][veha].active; ++veha)
-        ;
-    if (veha >= 8)
-    {
-        oldest = 0;
-        for (vehb = 1; vehb < 8; ++vehb)
-        {
-            if (vehEffects[localClientNum][vehb].lastAccessed < vehEffects[localClientNum][oldest].lastAccessed)
-                oldest = vehb;
-        }
-        veha = oldest;
-    }
-    v3 = &vehEffects[localClientNum][veha];
-    *(_DWORD *)&v3->active = 0;
-    v3->lastAccessed = 0;
-    v3->entityNum = 0;
-    v3->nextDustFx = 0;
-    v3->nextSmokeFx = 0;
-    *(_DWORD *)&v3->soundPlaying = 0;
-    v3->barrelVelocity = 0.0;
-    v3->barrelPos = 0.0;
-    v3->lastBarrelUpdateTime = 0;
-    *(_DWORD *)&v3->tag_engine_left = 0;
-    v3->active = 1;
-    vehEffects[localClientNum][veha].lastAccessed = Sys_Milliseconds();
-    vehEffects[localClientNum][veha].entityNum = entityNum;
-    return &vehEffects[localClientNum][veha];
-}
-
-void __cdecl Veh_IncTurretBarrelRoll(int localClientNum, int entityNum, float rotation)
-{
-    float v3; // [esp+0h] [ebp-14h]
-    float v4; // [esp+4h] [ebp-10h]
-    float v5; // [esp+8h] [ebp-Ch]
-    float value; // [esp+Ch] [ebp-8h]
-    vehicleEffects *vehFx; // [esp+10h] [ebp-4h]
-
-    vehFx = VehicleGetFxInfo(localClientNum, entityNum);
-    v5 = rotation + vehFx->barrelVelocity;
-    value = heli_barrelMaxVelocity->current.value;
-    v4 = value - v5;
-    if (v4 < 0.0)
-        v3 = value;
-    else
-        v3 = rotation + vehFx->barrelVelocity;
-    vehFx->barrelVelocity = v3;
-}
+//void __cdecl Veh_IncTurretBarrelRoll(int localClientNum, int entityNum, float rotation)
+//{
+//    float v3; // [esp+0h] [ebp-14h]
+//    float v4; // [esp+4h] [ebp-10h]
+//    float v5; // [esp+8h] [ebp-Ch]
+//    float value; // [esp+Ch] [ebp-8h]
+//    vehicleEffects *vehFx; // [esp+10h] [ebp-4h]
+//
+//    vehFx = VehicleGetFxInfo(localClientNum, entityNum);
+//    v5 = rotation + vehFx->barrelVelocity;
+//    value = heli_barrelMaxVelocity->current.value;
+//    v4 = value - v5;
+//    if (v4 < 0.0)
+//        v3 = value;
+//    else
+//        v3 = rotation + vehFx->barrelVelocity;
+//    vehFx->barrelVelocity = v3;
+//}
 
 void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent)
 {
@@ -652,19 +587,6 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
         for (tireIdx = 0; tireIdx < 4; ++tireIdx)
             cent->pose.vehicle.wheelBoneIndex[tireIdx] = -2;
     }
-}
-
-unsigned __int16 __cdecl CompressUnit(float unit)
-{
-    if (unit < 0.0 || unit > 1.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\bgame\\../cgame_mp/cg_pose_mp.h",
-            102,
-            0,
-            "%s\n\t(unit) = %g",
-            "(unit >= 0.0f && unit <= 1.0f)",
-            unit);
-    return (int)(unit * 65535.0 + 0.5);
 }
 
 void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cent, vehfx_t *fxInfo)

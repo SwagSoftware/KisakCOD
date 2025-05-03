@@ -65,6 +65,76 @@ void __cdecl R_UnlockSkinnedCache()
     }
 }
 
+void __cdecl R_ModelList_f()
+{
+    const char *Name; // eax
+    const char *v1; // [esp+Ch] [ebp-212Ch]
+    const char *fmt; // [esp+10h] [ebp-2128h]
+    int inData; // [esp+108h] [ebp-2030h] BYREF
+    XModel *v4[2050]; // [esp+10Ch] [ebp-202Ch] BYREF
+    XModel *model; // [esp+2114h] [ebp-24h]
+    int v6; // [esp+2118h] [ebp-20h]
+    int v7; // [esp+211Ch] [ebp-1Ch]
+    int XModelUsageCount; // [esp+2120h] [ebp-18h]
+    int MemoryUsage; // [esp+2124h] [ebp-14h]
+    int MemUsage; // [esp+2128h] [ebp-10h]
+    int i; // [esp+212Ch] [ebp-Ch]
+    float v12; // [esp+2130h] [ebp-8h]
+    int modelCount; // [esp+2134h] [ebp-4h] BYREF
+
+    v7 = 0;
+    v6 = 0;
+    inData = 0;
+    DB_EnumXAssets(ASSET_TYPE_XMODEL, (void(__cdecl *)(XAssetHeader, void *))R_GetModelList, &inData, 1);
+    //std::_Sort<XModel **, int, bool(__cdecl *)(XModel *&, XModel *&)>(v4, &v4[inData], (4 * inData) >> 2, R_ModelSort);
+    std::sort((XModel ***)&v4[0], (XModel ***)&v4[inData], R_ModelSort);
+    Com_Printf(8, "---------------------------\n");
+    Com_Printf(8, "SM# is the number of static model instances\n");
+    Com_Printf(8, "instKB is static model instance usage\n");
+    Com_Printf(8, "DE# is the number of dyn entity instances\n");
+    Com_Printf(8, "   SM#  instKB   DE#   geoKB  name\n");
+    for (i = 0; i < inData; ++i)
+    {
+        model = v4[i];
+        MemUsage = XModelGetMemUsage(model);
+        v7 += MemUsage;
+        MemoryUsage = R_StaticModelGetMemoryUsage(model, &modelCount);
+        if (MemoryUsage)
+        {
+            v6 += MemoryUsage;
+            v12 = (double)MemoryUsage / 1024.0;
+            Com_Printf(8, "  %4i  ", modelCount);
+            if (v12 >= 10.0)
+                fmt = "%6.0f";
+            else
+                fmt = "%6.1f";
+            Com_Printf(8, fmt, v12);
+        }
+        else
+        {
+            Com_Printf(8, "              ");
+        }
+        XModelUsageCount = DynEnt_GetXModelUsageCount(model);
+        if (XModelUsageCount)
+            Com_Printf(8, "  %4i  ", XModelUsageCount);
+        else
+            Com_Printf(8, "        ");
+        v12 = (double)MemUsage / 1024.0;
+        if (v12 >= 10.0)
+            v1 = "%6.0f";
+        else
+            v1 = "%6.1f";
+        Com_Printf(8, v1, v12);
+        Name = XModelGetName(model);
+        Com_Printf(8, "  %s\n", Name);
+    }
+    Com_Printf(8, "---------------------------\n");
+    Com_Printf(8, "current inst total  %4.1f MB\n", (double)v6 / 1048576.0);
+    Com_Printf(8, "current geo total   %4.1f MB\n", (double)v7 / 1048576.0);
+    Com_Printf(8, "current total       %4.1f MB\n", (double)(v7 + v6) / 1048576.0);
+    Com_Printf(8, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
+}
+
 bool __cdecl R_ModelSort(XModel **model1, XModel **model2)
 {
     int MemUsage; // esi
@@ -86,16 +156,6 @@ XModel *__cdecl R_RegisterModel(const char *name)
         (char*)name,
         (void *(__cdecl *)(int))Hunk_AllocXModelPrecache,
         (void *(__cdecl *)(int))Hunk_AllocXModelPrecacheColl);
-}
-
-unsigned __int8 *__cdecl Hunk_AllocXModelPrecache(unsigned int size)
-{
-    return Hunk_Alloc(size, "Hunk_AllocXModelPrecache", 21);
-}
-
-unsigned __int8 *__cdecl Hunk_AllocXModelPrecacheColl(unsigned int size)
-{
-    return Hunk_Alloc(size, "Hunk_AllocXModelPrecacheColl", 27);
 }
 
 void __cdecl R_XModelDebug(const DObj_s *obj, int *partBits)

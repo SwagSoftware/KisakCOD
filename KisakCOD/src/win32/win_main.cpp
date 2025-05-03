@@ -52,6 +52,8 @@ cmd_function_s Sys_In_Restart_f_VAR;
 cmd_function_s Sys_Net_Restart_f_VAR;
 cmd_function_s Sys_Listen_f_VAR;
 
+WinVars_t	g_wv;
+
 static char sys_processSemaphoreFile[0x20];
 
 static void PrintWorkingDir()

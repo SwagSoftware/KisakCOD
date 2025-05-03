@@ -602,6 +602,7 @@ Material *__cdecl Material_Register(const char *name, int imageTrack);
 Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack);
 
 void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists);
+void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex);
 
 void __cdecl R_MaterialList_f();
 int __cdecl R_GetMaterialMemory(Material *material);
@@ -675,6 +676,17 @@ bool __cdecl Material_GenerateShaderString_r(
     bool isInLibDir);
 
 // r_material_override
+const GfxMtlFeatureMap *__cdecl Material_FindFeature(
+    const char *featureName,
+    const GfxMtlFeatureMap *featureMap,
+    unsigned int featureCount);
+unsigned int __cdecl Material_ExtendTechniqueSetName(
+    char *nameSoFar,
+    unsigned int nameLen,
+    char *token,
+    unsigned int tokenLen,
+    bool prependUnderscore);
+unsigned int __cdecl Material_NextTechniqueSetNameToken(const char **parse, char *token);
 void __cdecl Material_OverrideTechniqueSets();
 void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet);
 void __cdecl Material_DirtyTechniqueSetOverrides();

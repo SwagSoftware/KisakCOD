@@ -25,7 +25,7 @@ const dvar_t *snd_enableEq;
 const dvar_t *snd_debugReplace;
 const dvar_t *snd_debugAlias;
 const dvar_t *snd_enable2D;
-const dvar_t *snd_khz;
+//const dvar_t *snd_khz;
 const dvar_t *snd_draw3D;
 const dvar_t *snd_volume;
 const dvar_t *snd_errorOnMissing;

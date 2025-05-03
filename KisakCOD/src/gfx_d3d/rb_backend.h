@@ -532,6 +532,5 @@ void __cdecl RB_TouchAllImages();
 
 extern r_backEndGlobals_t backEnd;
 extern materialCommands_t tess;
-extern GfxCmdBufInput gfxCmdBufInput;
 extern GfxBackEndData *backEndData;
 extern GfxRenderTarget gfxRenderTargets[15];

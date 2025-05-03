@@ -13,8 +13,6 @@
 const dvar_t *ui_playerProfileAlreadyChosen;
 const dvar_t *com_playerProfile;
 
-SysInfo sys_info;
-
 const dvar_t *sys_configureGHz;
 const dvar_t *sys_sysMB;
 const dvar_t *sys_gpu;

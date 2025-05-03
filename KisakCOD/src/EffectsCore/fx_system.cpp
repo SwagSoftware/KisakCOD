@@ -2181,31 +2181,3 @@ double __cdecl FX_GetClientVisibility(int localClientNum, const float *start, co
         return 1.0;
     }
 }
-
-void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBasis)[3])
-{
-    int v2; // [esp+0h] [ebp-10h]
-    int v3; // [esp+4h] [ebp-Ch]
-    int basisVecIter; // [esp+8h] [ebp-8h]
-    int dimIter; // [esp+Ch] [ebp-4h]
-
-    for (basisVecIter = 0; basisVecIter != 2; ++basisVecIter)
-    {
-        for (dimIter = 0; dimIter != 3; ++dimIter)
-        {
-            v3 = (int)((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
-            if (v3 >= -128)
-            {
-                if (v3 <= 127)
-                    v2 = (int)((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
-                else
-                    v2 = 127;
-            }
-            else
-            {
-                v2 = 0x80;
-            }
-            (*outBasis)[3 * basisVecIter + dimIter] = v2;
-        }
-    }
-}

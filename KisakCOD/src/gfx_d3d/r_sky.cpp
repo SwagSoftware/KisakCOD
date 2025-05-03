@@ -27,8 +27,6 @@ const dvar_t *r_sunflare_shader;
 const dvar_t *r_sunsprite_size;
 const dvar_t *r_sunglare_max_lighten;
 
-SunFlareDynamic sunFlareArray[4];
-
 unsigned int __cdecl R_GetSunDvarCount()
 {
     return 21;

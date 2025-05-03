@@ -145,7 +145,6 @@ void Com_Shutdown(const char* finalmsg);
 
 void __cdecl Debug_Frame(int localClientNum);
 
-void __cdecl Com_ShutdownWorld();
 void __cdecl Com_InitPlayerProfiles(int localClientNum);
 void __cdecl Com_PrintMessage(int channel, const char* msg, int error);
 void __cdecl Com_LogPrintMessage(int channel, char* msg);
@@ -211,11 +210,6 @@ void __cdecl Com_LocalizedFloatToString(float f, char* buffer, unsigned int maxl
 void __cdecl Com_SyncThreads();
 void __cdecl Com_InitDObj();
 void __cdecl Com_ShutdownDObj();
-void __cdecl Com_InitialHull(
-	const float (*points)[2],
-	unsigned int* pointOrder,
-	unsigned int pointCount,
-	unsigned int* hullOrder);
 void Com_InitHunkMemory();
 unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type);
 
@@ -229,7 +223,6 @@ struct XModelPiece;
 
 void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve* sndCurve);
 void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo* info);
-void __cdecl Com_InitThreadData(int threadContext);
 void __cdecl Com_FreeEvent(char* ptr);
 
 void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loadspecCurGame);

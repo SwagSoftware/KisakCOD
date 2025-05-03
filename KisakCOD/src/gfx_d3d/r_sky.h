@@ -102,3 +102,5 @@ extern const dvar_t *r_sunflare_max_size;
 extern const dvar_t *r_sunflare_shader;
 extern const dvar_t *r_sunsprite_size;
 extern const dvar_t *r_sunglare_max_lighten;
+
+extern SunFlareDynamic sunFlareArray[4];

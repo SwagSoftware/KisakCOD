@@ -129,26 +129,6 @@ int __cdecl R_SetMaterial(GfxCmdBufContext context, GfxDrawSurf drawSurf, Materi
     return 1;
 }
 
-void __cdecl R_SetGameTime(GfxCmdBufSourceState *source, float gameTime)
-{
-    float v2; // [esp+8h] [ebp-30h]
-    float v3; // [esp+28h] [ebp-10h]
-    float cosOfFracPartOfGameTime; // [esp+2Ch] [ebp-Ch]
-    float sinOfFracPartOfGameTime; // [esp+30h] [ebp-8h]
-    float fracPartOfGameTime; // [esp+34h] [ebp-4h]
-
-    v2 = floor(gameTime);
-    fracPartOfGameTime = gameTime - v2;
-    v3 = fracPartOfGameTime * 6.283185482025146;
-    cosOfFracPartOfGameTime = cos(v3);
-    sinOfFracPartOfGameTime = sin(v3);
-    source->input.consts[18][0] = sinOfFracPartOfGameTime;
-    source->input.consts[18][1] = cosOfFracPartOfGameTime;
-    source->input.consts[18][2] = fracPartOfGameTime;
-    source->input.consts[18][3] = gameTime;
-    R_DirtyCodeConstant(source, 0x12u);
-}
-
 int __cdecl R_UpdateMaterialTime(GfxCmdBufSourceState *source, float materialTime)
 {
     float gameTime; // [esp+4h] [ebp-4h]

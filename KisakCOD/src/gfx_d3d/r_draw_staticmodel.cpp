@@ -28,21 +28,6 @@ void __cdecl R_SetupStaticModelPrim(XSurface *xsurf, GfxDrawPrimArgs *args, GfxC
         R_ChangeIndices(primState, ib);
 }
 
-void __cdecl R_SetModelLightingCoordsForSource(unsigned __int16 handle, GfxCmdBufSourceState *source)
-{
-    R_SetModelLightingCoords(handle, source->input.consts[57]);
-    R_DirtyCodeConstant(source, 0x39u);
-}
-
-void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context)
-{
-    const MaterialPass *pass; // [esp+0h] [ebp-4h]
-
-    pass = context.state->pass;
-    if (pass->perPrimArgCount)
-        R_SetPassShaderPrimArguments(context, pass->perPrimArgCount, pass->args);
-}
-
 void __cdecl R_DrawStaticModelDrawSurfLightingNonOptimized(
     GfxStaticModelDrawStream *drawStream,
     GfxCmdBufContext context)

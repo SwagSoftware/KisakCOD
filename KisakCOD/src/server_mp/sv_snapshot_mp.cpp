@@ -11,6 +11,9 @@ serverStaticHeader_t svsHeader;
 int svsHeaderValid;
 //struct serverStaticHeader_t svsHeader 85012680     sv_snapshot_mp.obj
 
+msg_t g_archiveMsg;
+unsigned __int8 tempServerMsgBuf[131072];
+
 void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
 {
     int v2; // edx
@@ -1920,8 +1923,6 @@ void __cdecl SV_SendClientVoiceData(client_t *client)
     //LargeLocal::~LargeLocal(&msg_buf_large_local);
 }
 
-msg_t g_archiveMsg;
-unsigned __int8 tempServerMsgBuf[131072];
 void __cdecl SV_SendClientMessages()
 {
     float comp_ratio; // [esp+C0h] [ebp-94h]

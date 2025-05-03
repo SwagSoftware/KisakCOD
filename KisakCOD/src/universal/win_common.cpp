@@ -132,13 +132,6 @@ static void Sys_SetValue(int valueIndex, void* data)
     g_threadValues[valueIndex][0] = data;
 }
 
-void Com_InitThreadData(int threadContext)
-{
-    Sys_SetValue(1, &va_info[threadContext]);
-    Sys_SetValue(2, g_com_error[threadContext]);
-    Sys_SetValue(3, &g_traceThreadInfo[threadContext]);
-}
-
 void __cdecl Sys_Mkdir(const char *path)
 {
     _mkdir(path);

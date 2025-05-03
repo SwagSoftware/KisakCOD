@@ -10,6 +10,7 @@
 
 #include "scr_memorytree.h"
 #include <universal/profile.h>
+#include <universal/com_constantconfigstrings.h>
 
 scrStringDebugGlob_t* scrStringDebugGlob;
 static scrStringDebugGlob_t scrStringDebugGlobBuf;
@@ -21,21 +22,6 @@ HashEntry_unnamed_type_u __cdecl Scr_AllocString(char *s, int sys)
 	if (sys != 1)
 		MyAssertHandler(".\\script\\scr_stringlist.cpp", 1030, 0, "%s", "sys == SCR_SYS_GAME");
 	return SL_GetString(s, 1u);
-}
-
-unsigned int GetHashCode(const char* str, unsigned int len)
-{
-	unsigned int hash;
-
-	if (len >= 0x100)
-		return (len >> 2) % 0x4E1F + 1;
-	hash = 0;
-	while (len)
-	{
-		hash = *str++ + 31 * hash;
-		--len;
-	}
-	return hash % 0x4E1F + 1;
 }
 
 void SL_Init()

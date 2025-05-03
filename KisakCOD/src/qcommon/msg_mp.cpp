@@ -590,43 +590,6 @@ void __cdecl MSG_WriteDeltaKey(msg_t *msg, int key, int oldV, int newV, unsigned
     }
 }
 
-unsigned int kbitmask[33] =
-{
-  0u,
-  1u,
-  3u,
-  7u,
-  15u,
-  31u,
-  63u,
-  127u,
-  255u,
-  511u,
-  1023u,
-  2047u,
-  4095u,
-  8191u,
-  16383u,
-  32767u,
-  65535u,
-  131071u,
-  262143u,
-  524287u,
-  1048575u,
-  2097151u,
-  4194303u,
-  8388607u,
-  16777215u,
-  33554431u,
-  67108863u,
-  134217727u,
-  268435455u,
-  536870911u,
-  1073741823u,
-  2147483647u,
-  4294967295u
-}; // idb
-
 unsigned int __cdecl MSG_ReadDeltaKey(msg_t *msg, int key, int oldV, unsigned int bits)
 {
     if (MSG_ReadBit(msg))

@@ -1438,11 +1438,6 @@ struct DObj_s;
 
 struct gentity_s;
 
-void __cdecl SV_DObjInitServerTime(gentity_s* ent, float dtime);
-void __cdecl SV_DObjDisplayAnim(gentity_s* ent, const char* header);
-
-unsigned __int8 *__cdecl Hunk_AllocXAnimPrecache(unsigned int size);
-
 int __cdecl XAnimGetTreeHighMemUsage();
 int __cdecl XAnimGetTreeMemUsage();
 void __cdecl TRACK_xanim();

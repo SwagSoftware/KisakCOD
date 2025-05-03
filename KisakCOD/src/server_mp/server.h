@@ -1062,3 +1062,5 @@ extern int s_numSnapshotsBuiltSinceLastPoll;
 extern int s_uncompressedDataSinceLastPoll;
 extern int s_compressedDataSinceLastPoll;
 extern int s_numSnapshotsSentSinceLastPoll;
+
+extern unsigned __int8 tempServerMsgBuf[131072];

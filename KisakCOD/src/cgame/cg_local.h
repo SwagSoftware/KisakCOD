@@ -492,7 +492,7 @@ void __cdecl CG_MeleeBloodEvent(int localClientNum, const centity_s *cent);
 void __cdecl CG_SetupWeaponDef(int localClientNum);
 void __cdecl ParseWeaponDefFiles(const char **ppszFiles, int iNumFiles);
 unsigned int __cdecl ValidLatestPrimaryWeapIdx(unsigned int weaponIndex);
-void __cdecl CG_SelectWeaponIndex(int localClientNum, int weaponIndex);
+void __cdecl CG_SelectWeaponIndex(int localClientNum, unsigned int weaponIndex);
 char __cdecl CG_ScopeIsOverlayed(int localClientNum);
 int __cdecl CG_PlayerTurretWeaponIdx(int localClientNum);
 bool __cdecl CG_PlayerUsingScopedTurret(int localClientNum);

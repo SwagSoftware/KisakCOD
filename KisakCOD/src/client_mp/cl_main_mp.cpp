@@ -28,6 +28,7 @@
 #include <qcommon/dl_main.h>
 #include <server_mp/server.h>
 #include <universal/profile.h>
+#include <qcommon/com_bsp.h>
 
 const dvar_t *cl_conXOffset;
 const dvar_t *cl_hudDrawsBehindsUI;
@@ -83,10 +84,12 @@ const dvar_t *cl_updateversion;
 const dvar_t *cl_allowDownload;
 const dvar_t *cl_wwwDownload;
 const dvar_t *cl_talking;
-const dvar_t *cl_bypassMouseInput;
 const dvar_t *cl_hudDrawsBehindUI;
 const dvar_t *cl_voice;
 const dvar_t *name;
+
+serverStatus_s cl_serverStatusList[16];
+int serverStatusCount;
 
 const char **customClassDvars;
 
@@ -1955,71 +1958,9 @@ void __cdecl CL_FinishMotdDownload()
     }
 }
 
-void __cdecl CL_BeginDownload(char *localName, char *remoteName)
-{
-    const char *v2; // eax
+void __cdecl CL_BeginDownload(char *localName, char *remoteName);
 
-    Com_DPrintf(
-        14,
-        "***** CL_BeginDownload *****\nLocalname: %s\nRemotename: %s\n****************************\n",
-        localName,
-        remoteName);
-    CL_GetLocalClientConnection(0);
-    I_strncpyz(cls.downloadName, localName, 256);
-    Com_sprintf(cls.downloadTempName, 0x100u, "%s.tmp", localName);
-    I_strncpyz(legacyHacks.cl_downloadName, remoteName, 64);
-    legacyHacks.cl_downloadSize = 0;
-    legacyHacks.cl_downloadCount = 0;
-    legacyHacks.cl_downloadTime = cls.realtime;
-    cls.downloadBlock = 0;
-    cls.downloadCount = 0;
-    v2 = va("download %s", remoteName);
-    CL_AddReliableCommand(0, v2);
-}
-
-void __cdecl CL_NextDownload(int localClientNum)
-{
-    char *localName; // [esp+24h] [ebp-Ch]
-    char *s; // [esp+28h] [ebp-8h]
-    char *sa; // [esp+28h] [ebp-8h]
-    char *sb; // [esp+28h] [ebp-8h]
-    char *sc; // [esp+28h] [ebp-8h]
-    char *remoteName; // [esp+2Ch] [ebp-4h]
-
-    CL_GetLocalClientConnection(localClientNum);
-    if (!cls.downloadList[0])
-        goto LABEL_11;
-    if (com_sv_running->current.enabled)
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2721, 0, "%s", "!com_sv_running->current.enabled");
-    s = cls.downloadList;
-    if (cls.downloadList[0] == 64)
-        s = &cls.downloadList[1];
-    remoteName = s;
-    sa = strchr(s, '@');
-    if (sa)
-    {
-        *sa = 0;
-        localName = sa + 1;
-        sb = strchr(sa + 1, '@');
-        if (sb)
-        {
-            *sb = 0;
-            sc = (sb + 1);
-        }
-        else
-        {
-            sc = &localName[strlen(localName)];
-        }
-        CL_BeginDownload(localName, remoteName);
-        cls.downloadRestart = 1;
-        memmove(cls.downloadList, sc, strlen(sc) + 1);
-    }
-    else
-    {
-    LABEL_11:
-        CL_DownloadsComplete(localClientNum);
-    }
-}
+void __cdecl CL_NextDownload(int localClientNum);
 
 void __cdecl CL_WWWDownload()
 {
@@ -3543,8 +3484,6 @@ void __cdecl CL_CheckAutoUpdate()
     }
 }
 
-serverStatus_s cl_serverStatusList[16];
-int serverStatusCount;
 serverStatus_s *__cdecl CL_GetServerStatus(netadr_t from)
 {
     int oldest; // [esp+0h] [ebp-10h]

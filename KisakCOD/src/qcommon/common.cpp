@@ -561,32 +561,6 @@ void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type)
 }
 
 
-void __cdecl Com_ShutdownWorld()
-{
-    comWorld.isInUse = 0;
-}
-
-void __cdecl Com_InitPlayerProfiles(int localClientNum)
-{
-    DvarValue v1; // [esp-10h] [ebp-24h]
-    unsigned int value_4; // [esp+4h] [ebp-10h]
-    __int64 value_8; // [esp+8h] [ebp-Ch]
-
-    ui_playerProfileAlreadyChosen = Dvar_RegisterInt(
-        "ui_playerProfileAlreadyChosen",
-        0,
-        (DvarLimits)0x100000000LL,
-        0x200u,
-        "true if player profile has been selected.");
-    v1.enabled = 1;
-    //*(_QWORD*)&v1.enabled = __PAIR64__(value_4, 1);
-    //*(_QWORD*)&v1.color[8] = value_8;
-    Dvar_ChangeResetValue((dvar_s*)ui_playerProfileAlreadyChosen, v1);
-    com_playerProfile = Dvar_RegisterString("com_playerProfile", (char*)"", 0x40u, "Player profile");
-    if (!Com_SetInitialPlayerProfile(localClientNum))
-        Com_ExecStartupConfigs(localClientNum, 0);
-}
-
 void __cdecl Com_PrintMessage(int channel, const char* msg, int error)
 {
     //PbCaptureConsoleOutput(msg, 4096);
@@ -2258,55 +2232,6 @@ void __cdecl Com_SyncThreads()
         MyAssertHandler(".\\qcommon\\common.cpp", 4655, 0, "%s", "Sys_IsMainThread()");
     R_SyncRenderThread();
     R_WaitWorkerCmds();
-}
-
-void __cdecl Com_InitialHull(
-    const float (*points)[2],
-    unsigned int* pointOrder,
-    unsigned int pointCount,
-    unsigned int* hullOrder)
-{
-    unsigned int maxIndex; // [esp+0h] [ebp-Ch]
-    unsigned int pointIndex; // [esp+4h] [ebp-8h]
-    unsigned int minIndex; // [esp+8h] [ebp-4h]
-
-    minIndex = 0;
-    maxIndex = 0;
-    *pointOrder = 0;
-    for (pointIndex = 1; pointIndex < pointCount; ++pointIndex)
-    {
-        pointOrder[pointIndex] = pointIndex;
-        if ((*points)[2 * pointIndex + 1] < (double)(*points)[2 * maxIndex + 1])
-        {
-            if ((*points)[2 * pointIndex + 1] < (double)(*points)[2 * minIndex + 1])
-                minIndex = pointIndex;
-        }
-        else
-        {
-            maxIndex = pointIndex;
-        }
-    }
-    if (minIndex == maxIndex)
-        MyAssertHandler(".\\universal\\com_convexhull.cpp", 36, 1, "%s", "minIndex != maxIndex");
-    *hullOrder = minIndex;
-    hullOrder[1] = maxIndex;
-    if (minIndex <= maxIndex)
-    {
-        Com_SwapHullPoints(pointOrder, maxIndex, pointCount - 1);
-        Com_SwapHullPoints(pointOrder, minIndex, pointCount - 2);
-    }
-    else
-    {
-        Com_SwapHullPoints(pointOrder, minIndex, pointCount - 1);
-        Com_SwapHullPoints(pointOrder, maxIndex, pointCount - 2);
-    }
-}
-
-void __cdecl Com_InitThreadData(int threadContext)
-{
-    Sys_SetValue(1, &va_info[threadContext]);
-    Sys_SetValue(2, g_com_error[threadContext]);
-    Sys_SetValue(3, &g_traceThreadInfo[threadContext]);
 }
 
 void __cdecl Com_FreeEvent(char* ptr)

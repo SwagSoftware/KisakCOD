@@ -8,7 +8,6 @@
 #include <gfx_d3d/rb_drawprofile.h>
 #include <gfx_d3d/r_init.h>
 
-void Com_InitThreadData(int threadContext);
 unsigned int Win_InitThreads();
 
 static DWORD threadId[7];

@@ -218,7 +218,7 @@
  const dvar_t *r_reflectionProbeGenerate;
  const dvar_t *r_reflectionProbeRegenerateAll;
  const dvar_t *r_reflectionProbeGenerateExit;
- const dvar_t *r_warningRepeatDelay;
+ //const dvar_t *r_warningRepeatDelay;
  const dvar_t *vid_xpos;
  const dvar_t *vid_ypos;
  const dvar_t *r_gpuSync;

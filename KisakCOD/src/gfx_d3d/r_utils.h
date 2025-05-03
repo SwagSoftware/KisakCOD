@@ -97,7 +97,6 @@ static _DWORD s_codeConstUpdateFreq[90] =
 }; // weak
 
 
-void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to);
 unsigned int __cdecl R_HashAssetName(const char *name);
 unsigned int __cdecl R_HashString(const char *string);
 char *__cdecl R_AllocGlobalVariable(unsigned int bytes, const char *name);
@@ -126,7 +125,6 @@ void __cdecl Byte4UnpackBgra(const unsigned __int8 *from, float *to);
 
 // r_state_utils
 void __cdecl R_BeginView(GfxCmdBufSourceState *source, const GfxSceneDef *sceneDef, const GfxViewParms *viewParms);
-void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to);
 unsigned int __cdecl R_HashAssetName(const char *name);
 unsigned int __cdecl R_HashString(const char *string);
 char *__cdecl R_AllocGlobalVariable(unsigned int bytes, const char *name);

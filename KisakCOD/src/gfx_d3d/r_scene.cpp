@@ -30,6 +30,7 @@
 #include "r_cinematic.h"
 #include <win32/win_net.h>
 #include <universal/profile.h>
+#include "rb_state.h"
 
 
 //struct GfxScene scene      859c8280     gfx_d3d : r_scene.obj

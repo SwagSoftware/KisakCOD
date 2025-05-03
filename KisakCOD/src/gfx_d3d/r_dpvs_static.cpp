@@ -194,10 +194,7 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
     }
 }
 
-void __cdecl R_CopyClipPlane(const DpvsPlane *in, DpvsPlane *out)
-{
-    *out = *in;
-}
+void __cdecl R_CopyClipPlane(const DpvsPlane *in, DpvsPlane *out);
 
 void __cdecl R_AddCellStaticSurfacesInFrustum(DpvsStaticCellCmd *dpvsCell)
 {

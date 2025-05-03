@@ -131,7 +131,7 @@ char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int 
 void __cdecl Com_LoadBsp(char *filename);
 void __cdecl Com_UnloadBsp();
 BOOL __cdecl Com_IsBspLoaded();
-const char *__cdecl Com_GetBspLumpCountForVersion(int version);
+unsigned int __cdecl Com_GetBspLumpCountForVersion(int version);
 void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname);
 void __cdecl Com_CleanupBsp();
 BOOL __cdecl Com_BspHasLump(LumpType type);

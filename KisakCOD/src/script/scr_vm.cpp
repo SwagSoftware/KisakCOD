@@ -70,6 +70,30 @@ void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char* assetName)
     }
 }
 
+void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t)
+{
+    void(__cdecl * method)(scr_entref_t); // [esp+0h] [ebp-4h]
+    void(__cdecl * methoda)(scr_entref_t); // [esp+0h] [ebp-4h]
+    void(__cdecl * methodb)(scr_entref_t); // [esp+0h] [ebp-4h]
+    void(__cdecl * methodc)(scr_entref_t); // [esp+0h] [ebp-4h]
+
+    *type = 0;
+    method = Player_GetMethod(pName);
+    if (method)
+        return method;
+    methoda = ScriptEnt_GetMethod(pName);
+    if (methoda)
+        return methoda;
+    methodb = HudElem_GetMethod(pName);
+    if (methodb)
+        return methodb;
+    methodc = Helicopter_GetMethod(pName);
+    if (methodc)
+        return methodc;
+    else
+        return BuiltIn_GetMethod(pName, type);
+}
+
 void(__cdecl* __cdecl Scr_GetFunction(const char** pName, int* type))()
 {
     unsigned int i; // [esp+18h] [ebp-4h]
@@ -237,34 +261,6 @@ Scr_StringNode_s* __cdecl Scr_GetStringList(const char* filename, char** pBuf)
     }
 }
 
-void __cdecl Scr_InitEvaluate()
-{
-    scrEvaluateGlob.archivedCanonicalStringsBuf = 0;
-    scrEvaluateGlob.archivedCanonicalStrings = 0;
-    scrEvaluateGlob.canonicalStringLookup = 0;
-    CL_ResetStats_f();
-}
-
-void __cdecl Scr_ShutdownEvaluate()
-{
-    if (scrEvaluateGlob.archivedCanonicalStringsBuf)
-    {
-        Hunk_FreeDebugMem(scrEvaluateGlob.archivedCanonicalStringsBuf);
-        scrEvaluateGlob.archivedCanonicalStringsBuf = 0;
-    }
-    if (scrEvaluateGlob.archivedCanonicalStrings)
-    {
-        Hunk_FreeDebugMem(scrEvaluateGlob.archivedCanonicalStrings);
-        scrEvaluateGlob.archivedCanonicalStrings = 0;
-    }
-    if (scrEvaluateGlob.canonicalStringLookup)
-    {
-        Hunk_FreeDebugMem(scrEvaluateGlob.canonicalStringLookup);
-        scrEvaluateGlob.canonicalStringLookup = 0;
-    }
-    CL_ResetStats_f();
-}
-
 int __cdecl Scr_GetFunctionHandle(const char* filename, const char* name)
 {
     VariableValue v3; // [esp+10h] [ebp-34h]
@@ -324,253 +320,9 @@ int __cdecl Scr_GetStringUsage()
     return scrMemTreeGlob.totalAllocBuckets;
 }
 
-void __cdecl Scr_InitOpcodeLookup()
-{
-    if (scrParserGlob.opcodeLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 75, 0, "%s", "!scrParserGlob.opcodeLookup");
-    if (scrParserGlob.sourcePosLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 76, 0, "%s", "!scrParserGlob.sourcePosLookup");
-    if (scrParserPub.sourceBufferLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 77, 0, "%s", "!scrParserPub.sourceBufferLookup");
-    if (scrVarPub.developer)
-    {
-        scrParserGlob.delayedSourceIndex = -1;
-        scrParserGlob.opcodeLookupMaxLen = 0x40000;
-        scrParserGlob.opcodeLookupLen = 0;
-        scrParserGlob.opcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(6291456);// , "Scr_InitOpcodeLookup");
-        memset((unsigned __int8*)scrParserGlob.opcodeLookup, 0, 24 * scrParserGlob.opcodeLookupMaxLen);
-        scrParserGlob.sourcePosLookupMaxLen = 0x40000;
-        scrParserGlob.sourcePosLookupLen = 0;
-        scrParserGlob.sourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(0x200000);// , "Scr_InitOpcodeLookup");
-        scrParserGlob.currentCodePos = 0;
-        scrParserGlob.currentSourcePosCount = 0;
-        scrParserGlob.sourceBufferLookupMaxLen = 256;
-        scrParserPub.sourceBufferLookupLen = 0;
-        scrParserPub.sourceBufferLookup = (SourceBufferInfo *)Hunk_AllocDebugMem(11264);// , "Scr_InitOpcodeLookup");
-    }
-}
-
-void __cdecl Scr_ShutdownOpcodeLookup()
-{
-    unsigned int i; // [esp+0h] [ebp-4h]
-    unsigned int ia; // [esp+0h] [ebp-4h]
-
-    if (scrParserGlob.opcodeLookup)
-    {
-        Hunk_FreeDebugMem(scrParserGlob.opcodeLookup);
-        scrParserGlob.opcodeLookup = 0;
-    }
-    if (scrParserGlob.sourcePosLookup)
-    {
-        Hunk_FreeDebugMem(scrParserGlob.sourcePosLookup);
-        scrParserGlob.sourcePosLookup = 0;
-    }
-    if (scrParserPub.sourceBufferLookup)
-    {
-        for (i = 0; i < scrParserPub.sourceBufferLookupLen; ++i)
-            Hunk_FreeDebugMem(scrParserPub.sourceBufferLookup[i].buf);
-        Hunk_FreeDebugMem(scrParserPub.sourceBufferLookup);
-        scrParserPub.sourceBufferLookup = 0;
-    }
-    if (scrParserGlob.saveSourceBufferLookup)
-    {
-        for (ia = 0; ia < scrParserGlob.saveSourceBufferLookupLen; ++ia)
-        {
-            if (scrParserGlob.saveSourceBufferLookup[ia].sourceBuf)
-                Hunk_FreeDebugMem(scrParserGlob.saveSourceBufferLookup[ia].sourceBuf);
-        }
-        Hunk_FreeDebugMem(scrParserGlob.saveSourceBufferLookup);
-        scrParserGlob.saveSourceBufferLookup = 0;
-    }
-}
-
-unsigned int __cdecl Scr_GetFunctionLineNumInternal(const char* buf, unsigned int sourcePos, const char** startLine)
-{
-    unsigned int lineNum; // [esp+0h] [ebp-Ch]
-    unsigned int functionLine; // [esp+4h] [ebp-8h]
-    const char* functionStartLine; // [esp+8h] [ebp-4h]
-
-    if (!buf)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 497, 0, "%s", "buf");
-    *startLine = buf;
-    lineNum = 0;
-    functionLine = 0;
-    functionStartLine = buf;
-    while (sourcePos)
-    {
-        if (!*buf)
-        {
-            if (buf[1] == 123)
-            {
-                functionLine = lineNum;
-                functionStartLine = *startLine;
-            }
-            *startLine = buf + 1;
-            ++lineNum;
-        }
-        ++buf;
-        --sourcePos;
-    }
-    *startLine = functionStartLine;
-    return functionLine;
-}
-
-unsigned int __cdecl Scr_GetFunctionInfo(const char* buf, unsigned int sourcePos, char* line)
-{
-    const char* startLine; // [esp+0h] [ebp-8h] BYREF
-    unsigned int lineNum; // [esp+4h] [ebp-4h]
-
-    lineNum = Scr_GetFunctionLineNumInternal(buf, sourcePos, &startLine);
-    Scr_CopyFormattedLine(line, startLine);
-    return lineNum;
-}
-
-void __cdecl Scr_InitAllocNode()
-{
-    if (g_allocNodeUser)
-        MyAssertHandler(".\\script\\scr_parsetree.cpp", 66, 0, "%s", "!g_allocNodeUser");
-    g_allocNodeUser = Hunk_UserCreate(0x10000, "Scr_InitAllocNode", 0, 1, 7);
-}
-
-void __cdecl Scr_ShutdownAllocNode()
-{
-    if (g_allocNodeUser)
-    {
-        Hunk_UserDestroy(g_allocNodeUser);
-        g_allocNodeUser = 0;
-    }
-}
-
 void __cdecl Scr_ShutdownGameStrings()
 {
     SL_ShutdownSystem(1u);
-}
-
-void __cdecl Scr_InitVariables()
-{
-    if (!scrVarDebugPub)
-        scrVarDebugPub = &scrVarDebugPubBuf;
-    memset((unsigned __int8*)scrVarDebugPub->leakCount, 0, sizeof(scrVarDebugPub->leakCount));
-    scrVarPub.totalObjectRefCount = 0;
-    scrVarPub.totalVectorRefCount = 0;
-    if (scrVarDebugPub)
-        memset((unsigned __int8*)scrVarDebugPub->extRefCount, 0, sizeof(scrVarDebugPub->extRefCount));
-    scrVarPub.numScriptValues = 0;
-    scrVarPub.numScriptObjects = 0;
-    if (scrVarDebugPub)
-        memset((unsigned __int8*)scrVarDebugPub, 0, 0x60000u);
-    Scr_InitVariableRange(1u, 0x8001u);
-    Scr_InitVariableRange(0x8002u, 0x18000u);
-}
-
-void __cdecl Scr_InitVariableRange(unsigned int begin, unsigned int end)
-{
-    unsigned int index; // [esp+4h] [ebp-8h]
-    VariableValueInternal* value; // [esp+8h] [ebp-4h]
-    VariableValueInternal* valuea; // [esp+8h] [ebp-4h]
-
-    for (index = begin + 1; index < end; ++index)
-    {
-        value = &scrVarGlob.variableList[index];
-        value->w.status = 0;
-        if ((value->w.status & 0x1F) != 0)
-            MyAssertHandler(".\\script\\scr_variable.cpp", 801, 0, "%s", "!(value->w.type & VAR_MASK)");
-        value->hash.id = index - begin;
-        value->v.next = index - begin;
-        value->u.next = index - begin + 1;
-        value->hash.u.prev = index - begin - 1;
-    }
-    valuea = &scrVarGlob.variableList[begin];
-    valuea->w.status = 0;
-    if ((valuea->w.status & 0x1F) != 0)
-        MyAssertHandler(".\\script\\scr_variable.cpp", 810, 0, "%s", "!(value->w.type & VAR_MASK)");
-    valuea->w.status = valuea->w.status;
-    valuea->hash.id = 0;
-    valuea->v.next = 0;
-    valuea->u.next = 1;
-    scrVarGlob.variableList[begin + 1].hash.u.prev = 0;
-    valuea->hash.u.prev = end - begin - 1;
-    scrVarGlob.variableList[end - 1].u.next = 0;
-}
-
-void __cdecl Scr_InitClassMap()
-{
-    int classnum; // [esp+0h] [ebp-4h]
-
-    for (classnum = 0; classnum < 4; ++classnum)
-    {
-        g_classMap[classnum].entArrayId = 0;
-        g_classMap[classnum].id = 0;
-    }
-}
-
-void __cdecl Scr_ShutdownVariables()
-{
-    if (scrVarPub.gameId)
-    {
-        FreeValue(scrVarPub.gameId);
-        scrVarPub.gameId = 0;
-    }
-    if (!scrStringDebugGlob || !scrStringDebugGlob->ignoreLeaks)
-    {
-        if (scrVarPub.numScriptValues)
-            MyAssertHandler(
-                ".\\script\\scr_variable.cpp",
-                884,
-                0,
-                "%s\n\t(scrVarPub.numScriptValues) = %i",
-                "(!scrVarPub.numScriptValues)",
-                scrVarPub.numScriptValues);
-        if (scrVarPub.numScriptObjects)
-            MyAssertHandler(
-                ".\\script\\scr_variable.cpp",
-                885,
-                0,
-                "%s\n\t(scrVarPub.numScriptObjects) = %i",
-                "(!scrVarPub.numScriptObjects)",
-                scrVarPub.numScriptObjects);
-    }
-    Scr_CheckLeaks();
-}
-
-void __cdecl Scr_AddArrayKeys(unsigned int parentId)
-{
-    VariableValue ArrayIndexValue; // rax
-    VariableValueInternal* entryValue; // [esp+18h] [ebp-8h]
-    unsigned int id; // [esp+1Ch] [ebp-4h]
-
-    if (!parentId)
-        MyAssertHandler(".\\script\\scr_variable.cpp", 4796, 0, "%s", "parentId");
-    if (GetObjectType(parentId) != 21)
-        MyAssertHandler(".\\script\\scr_variable.cpp", 4797, 0, "%s", "GetObjectType( parentId ) == VAR_ARRAY");
-    Scr_MakeArray();
-    for (id = FindFirstSibling(parentId); id; id = FindNextSibling(id))
-    {
-        entryValue = &scrVarGlob.variableList[id + 32770];
-        if ((entryValue->w.status & 0x60) == 0 || (entryValue->w.status & 0x60) == 0x60)
-            MyAssertHandler(
-                ".\\script\\scr_variable.cpp",
-                4805,
-                0,
-                "%s",
-                "(entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL");
-        if (IsObject(entryValue))
-            MyAssertHandler(".\\script\\scr_variable.cpp", 4806, 0, "%s", "!IsObject( entryValue )");
-        ArrayIndexValue = Scr_GetArrayIndexValue(entryValue->w.status >> 8);
-        if (ArrayIndexValue.type == 2)
-        {
-            Scr_AddConstString(ArrayIndexValue.u.stringValue);
-        }
-        else if (ArrayIndexValue.type == 6)
-        {
-            Scr_AddInt(ArrayIndexValue.u.intValue);
-        }
-        else if (!alwaysfails)
-        {
-            MyAssertHandler(".\\script\\scr_variable.cpp", 4822, 1, "bad case");
-        }
-        Scr_AddArray();
-    }
 }
 
 void __cdecl TRACK_scr_vm()

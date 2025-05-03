@@ -742,17 +742,6 @@ int __cdecl CG_CompareEntityAnalysisSamples(unsigned int *a, unsigned int *b)
     return s_entitySamples[s_sampleNum][*b] - s_entitySamples[s_sampleNum][*a];
 }
 
-int __cdecl SV_GetClientSnapshotPing(int clientNum, char snapshotNum)
-{
-    int start; // [esp+8h] [ebp-4h]
-
-    start = (snapshotNum + svs.clients[clientNum].header.netchan.outgoingSequence) & 0x1F;
-    if (svs.clients[clientNum].frames[start].messageAcked < 0)
-        return -1;
-    else
-        return svs.clients[clientNum].frames[start].messageAcked - svs.clients[clientNum].frames[start].messageSent;
-}
-
 void __cdecl CG_DrawPingAnalysis(int localClientNum)
 {
     float v1; // [esp+30h] [ebp-60h]

@@ -697,3 +697,5 @@ extern unsigned int g_streamPosStackIndex;
 extern XAsset *varXAsset;
 
 extern FastCriticalSection db_hashCritSect;
+
+extern ScriptStringList *varScriptStringList;

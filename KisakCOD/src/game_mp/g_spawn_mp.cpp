@@ -352,28 +352,6 @@ void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
     }
 }
 
-void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset)
-{
-    const char *v3; // eax
-
-    if (classnum)
-    {
-        if (classnum == 1)
-        {
-            Scr_GetHudElemField(entnum, offset);
-        }
-        else if (!alwaysfails)
-        {
-            v3 = va("bad class num %u", classnum);
-            MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 760, 0, v3);
-        }
-    }
-    else
-    {
-        Scr_GetEntityField(entnum, offset);
-    }
-}
-
 void __cdecl Scr_FreeEntityConstStrings(gentity_s *pEnt)
 {
     const ent_field_t *f; // [esp+4h] [ebp-8h]
@@ -646,11 +624,6 @@ void __cdecl Scr_GetEntArray()
             ++ent;
         }
     }
-}
-
-void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index)
-{
-    Scr_SetDynamicEntityField(ent->s.number, 0, index);
 }
 
 void __cdecl SP_worldspawn()

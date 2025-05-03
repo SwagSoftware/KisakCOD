@@ -1196,3 +1196,5 @@ void __cdecl CL_ClearMutedList();
 
 
 extern voiceCommunication_t cl_voiceCommunication;
+extern serverStatus_s cl_serverStatusList[16];
+extern int serverStatusCount;

@@ -972,11 +972,9 @@ void __cdecl SeatTransformForSlot(
 void __cdecl CG_VehSeatOriginForLocalClient(int localClientNum, float *result);
 double __cdecl Veh_GetTurretBarrelRoll(int localClientNum, centity_s *cent);
 int __cdecl CG_GetEntityIndex(int localClientNum, const centity_s *cent);
-vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum);
 void __cdecl Veh_IncTurretBarrelRoll(int localClientNum, int entityNum, float rotation);
 void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent);
 void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *cent, vehfx_t *fxInfo);
-unsigned __int16 __cdecl CompressUnit(float unit);
 void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cent, vehfx_t *fxInfo);
 double __cdecl GetSpeed(int localClientNum, centity_s *cent);
 void __cdecl CG_VehSphereCoordsToPos(float sphereDistance, float sphereYaw, float sphereAltitude, float *result);

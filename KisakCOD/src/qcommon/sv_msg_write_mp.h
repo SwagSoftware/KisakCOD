@@ -3,6 +3,43 @@
 #include "net_chan_mp.h"
 #include "huffman.h"
 
+static const unsigned int kbitmask[33] =
+{
+    0,
+    1,
+    3,
+    7,
+    0x0F,
+    0x1F,
+    0x3F,
+    0x7F,
+    0x0FF,
+    0x1FF,
+    0x3FF,
+    0x7FF,
+    0x0FFF,
+    0x1FFF,
+    0x3FFF,
+    0x7FFF,
+    0x0FFFF,
+    0x1FFFF,
+    0x3FFFF,
+    0x7FFFF,
+    0x0FFFFF,
+    0x1FFFFF,
+    0x3FFFFF,
+    0x7FFFFF,
+    0x0FFFFFF,
+    0x1FFFFFF,
+    0x3FFFFFF,
+    0x7FFFFFF,
+    0x0FFFFFFF,
+    0x1FFFFFFF,
+    0x3FFFFFFF,
+    0x7FFFFFFF,
+    0x0FFFFFFFF,
+};
+
 enum PacketEntityType : __int32
 {                                       // ...
     ANALYZE_DATATYPE_ENTITYTYPE_GENERALENTITY = 0x0,

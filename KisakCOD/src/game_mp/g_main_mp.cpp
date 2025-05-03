@@ -83,7 +83,7 @@ const dvar_t *g_voiceChatTalkingDuration;
 const dvar_t *g_ScoresColor_Spectator;
 const dvar_t *g_useholdtime;
 const dvar_t *g_ScoresColor_EnemyTeam;
-const dvar_t *g_compassShowEnemies;
+//const dvar_t *g_compassShowEnemies;
 const dvar_t *g_speed   ;
 const dvar_t *g_friendlyNameDist;
 const dvar_t *g_log     ;
@@ -198,11 +198,6 @@ void __cdecl G_FreeEntities()
     level.num_entities = 0;
     level.firstFreeEnt = 0;
     level.lastFreeEnt = 0;
-}
-
-unsigned __int8 *__cdecl Hunk_AllocXAnimServer(unsigned int size)
-{
-    return Hunk_AllocLow(size, "Hunk_AllocXAnimServer", 11);
 }
 
 bool __cdecl G_ExitAfterConnectPaths()
@@ -767,19 +762,6 @@ DObj_s *__cdecl G_GetDObj(unsigned int handle, int unusedLocalClientNum)
             unusedLocalClientNum,
             -1);
     return Com_GetServerDObj(handle);
-}
-
-void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
-{
-    if (unusedLocalClientNum != -1)
-        MyAssertHandler(
-            ".\\game_mp\\g_main_mp.cpp",
-            850,
-            0,
-            "unusedLocalClientNum == UNUSED_LOCAL_CLIENT_NUM\n\t%i, %i",
-            unusedLocalClientNum,
-            -1);
-    Com_SafeServerDObjFree(handle);
 }
 
 XAnimTree_s *G_LoadAnimTreeInstances()
@@ -1724,11 +1706,6 @@ void __cdecl G_SightTrace(int *hitNum, float *start, float *end, int passEntityN
 void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int duration)
 {
     CL_AddDebugString(xyz, color, scale, text, 1, duration);
-}
-
-void __cdecl G_SafeDObjFree(gentity_s *ent)
-{
-    Com_SafeServerDObjFree(ent->s.number);
 }
 
 BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2)

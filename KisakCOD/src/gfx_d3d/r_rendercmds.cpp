@@ -22,6 +22,7 @@
 #include <database/database.h>
 #include <cgame/cg_local.h>
 #include "r_drawsurf.h"
+#include "rb_state.h"
 
 //  struct GfxBackEndData *frontEndDataOut 85827c80     gfx_d3d : r_rendercmds.obj
 GfxBackEndData *frontEndDataOut;

@@ -514,7 +514,6 @@ void Scr_GetWeaponModel();
 void __cdecl GScr_GetAmmoCount(scr_entref_t entref);
 gentity_s *__cdecl GetPlayerEntity(scr_entref_t entref);
 gentity_s *__cdecl GetEntity(scr_entref_t entref);
-void GScr_GetAnimLength();
 void GScr_AnimHasNotetrack();
 void GScr_GetNotetrackTimes();
 void GScr_GetBrushModelCenter();
@@ -657,7 +656,6 @@ void Scr_MusicPlay();
 void Scr_MusicStop();
 void Scr_SoundFade();
 int Scr_PrecacheModel();
-void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char *assetName);
 void Scr_PrecacheShellShock();
 void Scr_PrecacheItem();
 int Scr_PrecacheShader();
@@ -766,13 +764,9 @@ void __cdecl GScr_StartRagdoll(scr_entref_t entref);
 void __cdecl GScr_IsRagdoll(scr_entref_t entref);
 void __cdecl GScr_GetCorpseAnim(scr_entref_t entref);
 void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref);
-void(__cdecl *__cdecl Scr_GetFunction(const char **pName, int *type))();
-void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t);
-void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t);
 void __cdecl Scr_SetOrigin(gentity_s *ent, int i);
 void __cdecl Scr_SetAngles(gentity_s *ent, int i);
 void __cdecl Scr_SetHealth(gentity_s *ent, int i);
-void __cdecl GScr_AddVector(const float *vVec);
 void __cdecl GScr_AddEntity(gentity_s *pEnt);
 void __cdecl Scr_ParseGameTypeList();
 XAssetHeader Scr_ParseGameTypeList_FastFile();
@@ -817,7 +811,6 @@ void __cdecl Scr_PlayerLastStand(
     int psTimeOffset);
 void __cdecl Scr_VoteCalled(gentity_s *self, char *command, char *param1, char *param2);
 void __cdecl Scr_PlayerVote(gentity_s *self, char *option);
-void __cdecl GScr_Shutdown();
 
 
 
@@ -846,7 +839,6 @@ int __cdecl Scr_SetObjectField(unsigned int classnum, unsigned int entnum, unsig
 int __cdecl Scr_SetEntityField(unsigned int entnum, unsigned int offset);
 void __cdecl Scr_GetEntityField(unsigned int entnum, unsigned int offset);
 void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs);
-void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset);
 void __cdecl Scr_FreeEntityConstStrings(gentity_s *pEnt);
 void __cdecl Scr_FreeEntity(gentity_s *ent);
 void __cdecl Scr_AddEntity(gentity_s *ent);
@@ -858,7 +850,6 @@ unsigned __int16 __cdecl Scr_ExecEntThread(gentity_s *ent, int handle, unsigned 
 void __cdecl Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned int paramcount);
 void __cdecl Scr_GetEnt();
 void __cdecl Scr_GetEntArray();
-void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index);
 void __cdecl SP_worldspawn();
 void __cdecl G_SpawnEntitiesFromString();
 void G_CallSpawn();
@@ -1090,3 +1081,4 @@ void __cdecl Scr_ResetTimeout();
 
 extern BuiltinFunctionDef functions[];
 extern BuiltinMethodDef methods_2[];
+extern unsigned __int16 *controller_names[5];

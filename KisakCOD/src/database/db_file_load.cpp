@@ -35,7 +35,6 @@ volatile int g_totalExternalBytes;
 int g_trackLoadProgress;
 
 XAssetList g_varXAssetList;
-ScriptStringList *varScriptStringList;
 
 void __cdecl DB_CancelLoadXFile()
 {

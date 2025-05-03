@@ -17,6 +17,10 @@ int __cdecl DL_VPrintf(const char *fmt, char *argptr)
     return &msg[strlen(msg) + 1] - &msg[1];
 }
 
+void DL_CancelDownload()
+{
+    // STUB
+}
 //int dl_running;
 //_HTRequest *dl_request;
 //void __cdecl DL_CancelDownload()

@@ -12,6 +12,37 @@ unsigned int __cdecl Com_GetBspVersion()
     return comBspGlob.header->version;
 }
 
+char __cdecl Com_CheckVersionLumpCountError(int version)
+{
+    if (version < 6 || version > 22)
+        MyAssertHandler(
+            ".\\qcommon\\com_bsp_load_obj.cpp",
+            269,
+            0,
+            "version not in [OLDEST_BSP_VERSION, BSP_VERSION]\n\t%i not in [%i, %i]",
+            version,
+            6,
+            22);
+    if (comBspGlob.header->version > 0x12)
+    {
+        if (comBspGlob.fileSize < 8 * comBspGlob.header->chunkCount + 12)
+            return 1;
+    }
+    else if (comBspGlob.fileSize < 8 * Com_GetBspLumpCountForVersion(version) + 8)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+bool __cdecl Com_BspError()
+{
+    return comBspGlob.header->ident != 'PSBI'
+        || comBspGlob.header->version < 6
+        || comBspGlob.header->version > 0x16
+        || Com_CheckVersionLumpCountError(comBspGlob.header->version) != 0;
+}
+
 char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count)
 {
     unsigned int chunkIter; // [esp+0h] [ebp-10h]
@@ -126,7 +157,11 @@ void __cdecl Com_UnloadBsp()
         MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 357, 0, "%s", "!Com_IsBspLoaded()");
 }
 
-const char *__cdecl Com_GetBspLumpCountForVersion(int version)
+unsigned int lumpsForVersion[13] =
+{ 41u, 41u, 42u, 43u, 43u, 43u, 43u, 44u, 44u, 44u, 46u, 46u, 47u };
+
+
+unsigned int __cdecl Com_GetBspLumpCountForVersion(int version)
 {
     if (version < 6 || version > 18)
         MyAssertHandler(
@@ -137,7 +172,8 @@ const char *__cdecl Com_GetBspLumpCountForVersion(int version)
             version,
             6,
             18);
-    return WeaponStateNames[version + 21];
+    //return WeaponStateNames[version + 21];
+    return lumpsForVersion[version - 6];
 }
 
 char *__cdecl Com_ValidateBspLumpData(

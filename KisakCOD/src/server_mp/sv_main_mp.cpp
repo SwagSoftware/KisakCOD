@@ -61,7 +61,6 @@ serverStatic_t svs;
 server_t sv;
 
 int com_inServerFrame;
-unsigned char *tempServerMsgBuf;
 int com_time;
 
 void __cdecl TRACK_sv_main()

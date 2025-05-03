@@ -4409,58 +4409,6 @@ void __cdecl Material_SetTechniqueSet(const char *name, MaterialTechniqueSet *te
     materialGlobals.techniqueSetHashTable[hashIndex] = techniqueSet;
 }
 
-unsigned int __cdecl Material_ExtendTechniqueSetName(
-    char *nameSoFar,
-    unsigned int nameLen,
-    char *token,
-    unsigned int tokenLen,
-    bool prependUnderscore)
-{
-    if (prependUnderscore)
-        nameSoFar[nameLen++] = '_';
-    if (tokenLen + nameLen >= 0x40)
-        Com_Error(ERR_DROP, "Can't extend techset name '%s' with '%s'; would exceed %i chars", nameSoFar, token, 63);
-    memcpy(&nameSoFar[nameLen], token, tokenLen + 1);
-    return tokenLen + nameLen;
-}
-
-unsigned int __cdecl Material_NextTechniqueSetNameToken(const char **parse, char *token)
-{
-    unsigned int tokenLen; // [esp+0h] [ebp-4h]
-
-    tokenLen = 0;
-    while (**parse)
-    {
-        token[tokenLen] = **parse;
-        if (token[tokenLen] == '_')
-        {
-            ++*parse;
-            break;
-        }
-        if (tokenLen && isdigit(token[tokenLen - 1]) && !isdigit(token[tokenLen]))
-            break;
-        ++tokenLen;
-        ++*parse;
-    }
-    token[tokenLen] = 0;
-    return tokenLen;
-}
-
-const GfxMtlFeatureMap *__cdecl Material_FindFeature(
-    const char *featureName,
-    const GfxMtlFeatureMap *featureMap,
-    unsigned int featureCount)
-{
-    unsigned int featureIndex; // [esp+14h] [ebp-4h]
-
-    for (featureIndex = 0; featureIndex < featureCount; ++featureIndex)
-    {
-        if (!strcmp(featureName, featureMap[featureIndex].name))
-            return &featureMap[featureIndex];
-    }
-    return 0;
-}
-
 const GfxMtlFeatureMap s_materialFeatures[20] =
 {
   { "s0", 4u, 0u, false },
@@ -4650,27 +4598,6 @@ void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo)
     if (!matInfo)
         MyAssertHandler(".\\r_material_load_obj.cpp", 6908, 0, "%s", "matInfo");
     *matInfo = Material_FromHandle(handle)->info;
-}
-
-void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex)
-{
-    unsigned __int64 v2; // rax
-    unsigned int v3; // ecx
-
-    if (!material)
-        MyAssertHandler(".\\r_material.cpp", 1084, 0, "%s", "material");
-    rgp.needSortMaterials = 1;
-    if (rg.materialHashTable[hashIndex])
-        MyAssertHandler(".\\r_material.cpp", 1088, 1, "%s", "rg.materialHashTable[hashIndex] == NULL");
-    material->info.hashIndex = hashIndex;
-    v2 = (unsigned __int64)(rgp.materialCount & 0x7FF) << 29;
-    v3 = HIDWORD(v2) | HIDWORD(material->info.drawSurf.packed) & 0xFFFFFF00;
-    *(_DWORD *)&material->info.drawSurf.fields = v2 | *(_DWORD *)&material->info.drawSurf.fields & 0x1FFFFFFF;
-    HIDWORD(material->info.drawSurf.packed) = v3;
-    rgp.sortedMaterials[rgp.materialCount] = material;
-    rg.materialHashTable[hashIndex] = material;
-    if (++rgp.materialCount == 2048)
-        Com_Error(ERR_FATAL, "Too many unique materials (%i or more)\n", 2048);
 }
 
 Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name)

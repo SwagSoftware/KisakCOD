@@ -220,3 +220,5 @@ void __cdecl Voice_IncomingVoiceData(unsigned __int8 talker, unsigned __int8 *da
 bool __cdecl Voice_IsClientTalking(unsigned int clientNum);
 char __cdecl Voice_StartRecording();
 char __cdecl Voice_StopRecording();
+
+extern SysInfo sys_info;

@@ -786,7 +786,6 @@ void __cdecl subtract_FloatFromInt(Operand *leftSide, Operand *rightSide, Operan
 void __cdecl subtract_IntFromFloat(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl subtract_FloatFromFloat(Operand *leftSide, Operand *rightSide, Operand *result);
 
-void __cdecl BitwiseNot(int localClientNum, Operand *source, Operand *result);
 void __cdecl multiply_IntByInt(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl multiply_IntByFloat(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl multiply_FloatByInt(Operand *leftSide, Operand *rightSide, Operand *result);

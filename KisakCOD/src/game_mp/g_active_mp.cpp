@@ -17,6 +17,15 @@
 
 hudelem_s g_dummyHudCurrent;
 
+unsigned __int16 *controller_names[5] =
+{
+    &scr_const.back_mid,
+    &scr_const.back_up,
+    &scr_const.neck,
+    &scr_const.head,
+    &scr_const.pelvis
+};
+
 int __cdecl GetFollowPlayerState(int clientNum, playerState_s *ps)
 {
     gclient_s *client; // [esp+8h] [ebp-8h]
@@ -1074,15 +1083,6 @@ int __cdecl StuckInClient(gentity_s *self)
     self->client->ps.pm_flags |= 0x80u;
     return 1;
 }
-
-unsigned __int16 *controller_names[] =
-{
-    &scr_const.back_mid,
-    &scr_const.back_up,
-    &scr_const.neck,
-    &scr_const.head,
-    &scr_const.pelvis
-};
 
 void __cdecl G_PlayerController(const gentity_s *self, int *partBits)
 {

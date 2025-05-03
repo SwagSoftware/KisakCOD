@@ -6,6 +6,7 @@
 #include "r_cmdbuf.h"
 #include <universal/surfaceflags.h>
 #include "rb_logfile.h"
+#include "rb_state.h"
 
 void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
 {

@@ -1106,20 +1106,6 @@ gentity_s *__cdecl GetEntity(scr_entref_t entref)
     }
 }
 
-void GScr_GetAnimLength()
-{
-    float value; // [esp+0h] [ebp-10h]
-    scr_anim_s anim; // [esp+8h] [ebp-8h]
-    XAnim_s *anims; // [esp+Ch] [ebp-4h]
-
-    anim = Scr_GetAnim(0, 0);
-    anims = Scr_GetAnims(anim.tree);
-    if (!XAnimIsPrimitive(anims, anim.index))
-        Scr_ParamError(0, "non-primitive animation has no concept of length");
-    value = XAnimGetLength(anims, anim.index);
-    Scr_AddFloat(value);
-}
-
 void GScr_AnimHasNotetrack()
 {
     const XAnim_s *Anims; // eax
@@ -3980,20 +3966,6 @@ int Scr_PrecacheModel()
     return G_ModelIndex(modelName);
 }
 
-void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char *assetName)
-{
-    const char *XAssetTypeName; // eax
-    const char *v3; // eax
-
-    DB_FindXAssetHeader(type, assetName);
-    if (DB_IsXAssetDefault(type, assetName))
-    {
-        XAssetTypeName = DB_GetXAssetTypeName(type);
-        v3 = va("precache %s '%s' failed", XAssetTypeName, assetName);
-        Scr_NeverTerminalError(v3);
-    }
-}
-
 void Scr_PrecacheShellShock()
 {
     shellshock_parms_t *ShellshockParms; // eax
@@ -6596,62 +6568,6 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref)
     }
 }
 
-void(__cdecl *__cdecl Scr_GetFunction(const char **pName, int *type))()
-{
-    unsigned int i; // [esp+18h] [ebp-4h]
-
-    for (i = 0; i < 0xCD; ++i)
-    {
-        if (!strcmp(*pName, functions[i].actionString))
-        {
-            *pName = functions[i].actionString;
-            *type = functions[i].type;
-            return functions[i].actionFunc;
-        }
-    }
-    return 0;
-}
-
-void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t)
-{
-    void(__cdecl * method)(scr_entref_t); // [esp+0h] [ebp-4h]
-    void(__cdecl * methoda)(scr_entref_t); // [esp+0h] [ebp-4h]
-    void(__cdecl * methodb)(scr_entref_t); // [esp+0h] [ebp-4h]
-    void(__cdecl * methodc)(scr_entref_t); // [esp+0h] [ebp-4h]
-
-    *type = 0;
-    method = Player_GetMethod(pName);
-    if (method)
-        return method;
-    methoda = ScriptEnt_GetMethod(pName);
-    if (methoda)
-        return methoda;
-    methodb = HudElem_GetMethod(pName);
-    if (methodb)
-        return methodb;
-    methodc = Helicopter_GetMethod(pName);
-    if (methodc)
-        return methodc;
-    else
-        return BuiltIn_GetMethod(pName, type);
-}
-
-void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t)
-{
-    unsigned int i; // [esp+18h] [ebp-4h]
-
-    for (i = 0; i < 0x52; ++i)
-    {
-        if (!strcmp(*pName, methods_2[i].actionString))
-        {
-            *pName = methods_2[i].actionString;
-            *type = methods_2[i].type;
-            return methods_2[i].actionFunc;
-        }
-    }
-    return 0;
-}
-
 void __cdecl Scr_SetOrigin(gentity_s *ent, int i)
 {
     float org[3]; // [esp+0h] [ebp-Ch] BYREF
@@ -6685,14 +6601,6 @@ void __cdecl Scr_SetHealth(gentity_s *ent, int i)
         ent->maxHealth = health;
         ent->health = health;
     }
-}
-
-void __cdecl GScr_AddVector(const float *vVec)
-{
-    if (vVec)
-        Scr_AddVector(vVec);
-    else
-        Scr_AddUndefined();
 }
 
 void __cdecl GScr_AddEntity(gentity_s *pEnt)
@@ -7038,11 +6946,5 @@ void __cdecl Scr_PlayerVote(gentity_s *self, char *option)
 {
     Scr_AddString(option);
     Scr_Notify(self, scr_const.vote, 1u);
-}
-
-void __cdecl GScr_Shutdown()
-{
-    if (level.cachedTagMat.name)
-        Scr_SetString(&level.cachedTagMat.name, 0);
 }
 

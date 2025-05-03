@@ -7,7 +7,6 @@
 #include <cgame_mp/cg_local_mp.h>
 
 bool s_playerMute[64];
-serverStatus_s cl_serverStatusList[16];
 
 int __cdecl CL_ServerStatus(char *serverAddress, char *serverStatusString, int maxLen)
 {

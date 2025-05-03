@@ -71,11 +71,6 @@ FILE *__cdecl FS_FileOpenWriteText(const char *filename)
     return file;
 }
 
-void __cdecl FS_FileClose(FILE *stream)
-{
-    fclose(stream);
-}
-
 int __cdecl FS_FileSeek(FILE *file, int offset, int whence)
 {
     int seek; // [esp+4h] [ebp-4h]

@@ -716,44 +716,6 @@ void __cdecl add_StringWithFloat(Operand *leftSide, Operand *rightSide, Operand 
     result->internals.intVal = (int)resultStr_3;
 }
 
-void __cdecl BitwiseNot(int localClientNum, Operand *source, Operand *result)
-{
-    const char *NameForValueType; // eax
-    char *SourceString; // [esp-4h] [ebp-Ch]
-    int val; // [esp+4h] [ebp-4h]
-
-    result->dataType = VAL_INT;
-    if (source->dataType == VAL_STRING)
-    {
-        SourceString = GetSourceString(*source);
-        NameForValueType = GetNameForValueType(source->dataType);
-        Com_PrintError(13, "Error: You cannot ~ a '%s' (%s)\n", NameForValueType, SourceString);
-        result->internals.intVal = 0;
-    }
-    else
-    {
-        if (source->dataType)
-        {
-            if (source->dataType == VAL_FLOAT)
-            {
-                val = (int)source->internals.floatVal;
-            }
-            else
-            {
-                val = 0;
-                Com_PrintError(16, "Unknown datatype %i in LogicalNot()\n", source->dataType);
-            }
-        }
-        else
-        {
-            val = source->internals.intVal;
-        }
-        result->internals.intVal = ~val;
-        if (uiscript_debug->current.integer)
-            Com_Printf(13, "~%i = %i\n", val, result->internals.intVal);
-    }
-}
-
 void __cdecl multiply_IntByInt(Operand *leftSide, Operand *rightSide, Operand *result)
 {
     if (leftSide->dataType)

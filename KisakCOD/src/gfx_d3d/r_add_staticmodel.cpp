@@ -575,19 +575,6 @@ void __cdecl R_DumpStaticModelLodInfo(const GfxStaticModelDrawInst *smodelDrawIn
     }
 }
 
-void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
-{
-    char dest; // [esp+10h] [ebp-1008h] BYREF
-    _BYTE v2[4103]; // [esp+11h] [ebp-1007h] BYREF
-
-    *(unsigned int *)&v2[4099] = 4096;
-    Com_sprintf(
-        &dest,
-        0x1000u,
-        "index,name,radius,numLods,lodDist,lodPixels720p,1PixelDist720p,scaledDist,posx,posy,posz,pixels\n");
-    FS_Write(&dest, &v2[strlen(&dest)] - v2, fileHandle);
-}
-
 unsigned int _S1_0; 
 float radius2pixels;
 void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst *smodelDrawInst, const float dist)

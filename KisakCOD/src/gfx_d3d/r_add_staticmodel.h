@@ -38,7 +38,6 @@ void __cdecl R_SkinStaticModelsCameraForSurface(
     GfxSModelDrawSurfLightingData *surfData);
 void __cdecl R_ShowCountsStaticModel(int smodelIndex, int lod);
 void __cdecl R_DumpStaticModelLodInfo(const GfxStaticModelDrawInst *smodelDrawInst, float dist);
-void __cdecl R_StaticModelWriteInfoHeader(int fileHandle);
 void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst *smodelDrawInst, const float dist);
 void __cdecl R_SortAllStaticModelSurfacesCamera();
 void __cdecl R_SortAllStaticModelSurfacesSunShadow();

@@ -796,11 +796,6 @@ bool __cdecl FX_ParseDecal(const char **parse, FxEditorElemDef *edElemDef)
         FX_RegisterAsset_DecalMaterials);
 }
 
-XModel *__cdecl FX_RegisterModel(const char *modelName)
-{
-    return R_RegisterModel(modelName);
-}
-
 BOOL __cdecl FX_RegisterAsset_Model(const char *name, FxElemVisuals *visuals)
 {
     visuals->anonymous = FX_RegisterModel(name);
@@ -1090,68 +1085,6 @@ PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name)
     if (!name)
         MyAssertHandler(".\\EffectsCore\\fx_load_obj.cpp", 246, 0, "%s", "name");
     return PhysPresetPrecache(name, (void *(__cdecl *)(int))Hunk_AllocPhysPresetPrecache);
-}
-
-void __cdecl FX_GetVisualSampleRouting(const FxEditorElemDef *edElem, FxSampleChannel *routing)
-{
-    int v2; // [esp+0h] [ebp-8h]
-
-    switch (edElem->elemType)
-    {
-    case 0u:
-    case 1u:
-    case 2u:
-    case 3u:
-        *routing = FX_CHAN_RGBA;
-        *((_DWORD *)routing + 1) = 1;
-        if (edElem->elemType == 2 || (edElem->flags & 0x10000000) != 0)
-            v2 = 2;
-        else
-            v2 = 1;
-        *((_DWORD *)routing + 2) = v2;
-        *((_DWORD *)routing + 4) = 4;
-        *((_DWORD *)routing + 3) = 6;
-        break;
-    case 4u:
-        *routing = FX_CHAN_RGBA;
-        *((_DWORD *)routing + 1) = 1;
-        *((_DWORD *)routing + 2) = 2;
-        *((_DWORD *)routing + 4) = 6;
-        *((_DWORD *)routing + 3) = 3;
-        break;
-    case 5u:
-    case 8u:
-        *routing = FX_CHAN_NONE;
-        *((_DWORD *)routing + 1) = 6;
-        *((_DWORD *)routing + 2) = 6;
-        *((_DWORD *)routing + 4) = 6;
-        *((_DWORD *)routing + 3) = 3;
-        break;
-    case 6u:
-        *routing = FX_CHAN_RGBA;
-        *((_DWORD *)routing + 1) = 1;
-        *((_DWORD *)routing + 2) = 6;
-        *((_DWORD *)routing + 4) = 6;
-        *((_DWORD *)routing + 3) = 6;
-        break;
-    case 7u:
-    case 9u:
-        *routing = FX_CHAN_RGBA;
-        *((_DWORD *)routing + 1) = 1;
-        *((_DWORD *)routing + 2) = 6;
-        *((_DWORD *)routing + 4) = 4;
-        *((_DWORD *)routing + 3) = 6;
-        break;
-    case 0xAu:
-        *routing = FX_CHAN_NONE;
-        *((_DWORD *)routing + 1) = 6;
-        *((_DWORD *)routing + 2) = 6;
-        *((_DWORD *)routing + 4) = 6;
-        *((_DWORD *)routing + 3) = 6;
-        break;
-    default:
-        return;
-    }
 }
 
 const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
