@@ -453,11 +453,6 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     return num - v28;
 }
 
-int __cdecl compare_use(float *pe1, float *pe2)
-{
-    return (int)(pe1[1] - pe2[1]);
-}
-
 int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *traceEnt)
 {
     WeaponDef *weapDefItem; // [esp+0h] [ebp-14h]

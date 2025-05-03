@@ -1768,17 +1768,6 @@ void __cdecl CopyInUseHudElems(hudelem_s **elems, int *elemCount, hudelem_s *ele
         elems[(*elemCount)++] = &elemSrcArray[i];
 }
 
-int __cdecl compare_hudelems(const void *pe0, const void *pe1)
-{
-    float delta; // [esp+0h] [ebp-Ch]
-
-    delta = *(float *)(*(unsigned int *)pe0 + 128) - *(float *)(*(unsigned int *)pe1 + 128);
-    if (delta >= 0.0)
-        return delta > 0.0;
-    else
-        return -1;
-}
-
 void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum)
 {
     int i; // [esp+0h] [ebp-104h]

@@ -912,12 +912,6 @@ void __cdecl track_PrintAllInfo()
     }
 }
 
-void __cdecl SV_track_shutdown()
-{
-    track_shutdown(2);
-}
-
-
 void __cdecl UI_track_init()
 {
     g_mem_track_filename = "ui_main";

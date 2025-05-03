@@ -771,7 +771,6 @@ void __cdecl compare_isIntGreaterThanEqualToFloat(Operand *leftSide, Operand *ri
 void __cdecl compare_isFloatGreaterThanEqualToFloat(Operand *leftSide, Operand *rightSide, Operand *result);
 int __cdecl compare_floats(float *e0, float *e1);
 
-void __cdecl add_bit(char bit, unsigned __int8 *fout);
 void __cdecl add_IntWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl add_IntWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl add_FloatWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
@@ -1124,3 +1123,5 @@ struct UI_VerticalDivider : UI_Component // sizeof=0x1C
 };
 
 void __cdecl UI_Component_Init();
+
+extern const char *g_expOperatorNames[81];

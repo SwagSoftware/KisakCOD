@@ -598,7 +598,7 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_FastFile(
 void __cdecl Material_DirtySort();
 bool __cdecl Material_IsDefault(const Material *material);
 Material *__cdecl Material_Register_FastFile(const char *name);
-Material *__cdecl Material_Register(char *name, int imageTrack);
+Material *__cdecl Material_Register(const char *name, int imageTrack);
 Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack);
 
 void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists);

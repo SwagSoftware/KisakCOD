@@ -407,12 +407,12 @@ void __cdecl FS_ReplaceSeparators(char *path)
     *dst = 0;
 }
 
-void __cdecl FS_BuildOSPath(char *base, char *game, char *qpath, char *ospath)
+void __cdecl FS_BuildOSPath(const char *base, const char *game, const char *qpath, char *ospath)
 {
     FS_BuildOSPathForThread(base, game, qpath, ospath, FS_THREAD_MAIN);
 }
 
-void __cdecl FS_BuildOSPathForThread(char *base, char *game, char *qpath, char *ospath, FsThread thread)
+void __cdecl FS_BuildOSPathForThread(const char *base, const char *game, const char *qpath, char *ospath, FsThread thread)
 {
     unsigned int v5; // [esp+0h] [ebp-3Ch]
     unsigned int v6; // [esp+10h] [ebp-2Ch]
@@ -512,7 +512,7 @@ void __cdecl FS_FCloseLogFile(int h)
     FS_FCloseFile(h);
 }
 
-int __cdecl FS_FOpenFileWrite(char *filename)
+int __cdecl FS_FOpenFileWrite(const char *filename)
 {
     return FS_FOpenFileWriteToDirForThread(filename, fs_gamedir, FS_THREAD_MAIN);
 }
@@ -576,7 +576,7 @@ int __cdecl FS_HandleForFile(FsThread thread)
     return 0;
 }
 
-int __cdecl FS_FOpenTextFileWrite(char *filename)
+int __cdecl FS_FOpenTextFileWrite(const char *filename)
 {
     char ospath[260]; // [esp+0h] [ebp-110h] BYREF
     FILE *f; // [esp+108h] [ebp-8h]
@@ -599,7 +599,7 @@ int __cdecl FS_FOpenTextFileWrite(char *filename)
     return h;
 }
 
-int __cdecl FS_FOpenFileAppend(char *filename)
+int __cdecl FS_FOpenFileAppend(const char *filename)
 {
     bool IsMainThread; // al
     char ospath[260]; // [esp+0h] [ebp-110h] BYREF
@@ -944,7 +944,7 @@ unsigned int __cdecl FS_FOpenFileRead(const char *filename, int *file)
     return FS_FOpenFileReadForThread(filename, file, FS_THREAD_MAIN);
 }
 
-bool __cdecl FS_Delete(char *filename)
+bool __cdecl FS_Delete(const char *filename)
 {
     char ospath[260]; // [esp+0h] [ebp-108h] BYREF
 
@@ -995,7 +995,7 @@ unsigned int __cdecl FS_Read(unsigned __int8 *buffer, unsigned int len, int h)
     return len;
 }
 
-unsigned int __cdecl FS_Write(char *buffer, unsigned int len, int h)
+unsigned int __cdecl FS_Write(const char *buffer, unsigned int len, int h)
 {
     int tries; // [esp+4h] [ebp-14h]
     unsigned int remaining; // [esp+8h] [ebp-10h]
@@ -1027,7 +1027,7 @@ unsigned int __cdecl FS_Write(char *buffer, unsigned int len, int h)
     return len;
 }
 
-unsigned int __cdecl FS_WriteLog(char *buffer, unsigned int len, int h)
+unsigned int __cdecl FS_WriteLog(const char *buffer, unsigned int len, int h)
 {
     return FS_Write(buffer, len, h);
 }
@@ -2767,12 +2767,12 @@ bool __cdecl FS_NeedRestart(int checksumFeed)
     return checksumFeed != fs_checksumFeed;
 }
 
-int __cdecl FS_FOpenFileWriteToDir(char *filename, char *dir)
+int __cdecl FS_FOpenFileWriteToDir(const char *filename, const  char *dir)
 {
     return FS_FOpenFileWriteToDirForThread(filename, dir, FS_THREAD_MAIN);
 }
 
-int __cdecl FS_GetHandleAndOpenFile(char *filename, const char *ospath, FsThread thread)
+int __cdecl FS_GetHandleAndOpenFile(const char *filename, const char *ospath, FsThread thread)
 {
     int f; // [esp+0h] [ebp-8h]
     FILE *fp; // [esp+4h] [ebp-4h]
@@ -2788,7 +2788,7 @@ int __cdecl FS_GetHandleAndOpenFile(char *filename, const char *ospath, FsThread
     return f;
 }
 
-int __cdecl FS_FOpenFileWriteToDirForThread(char *filename, char *dir, FsThread thread)
+int __cdecl FS_FOpenFileWriteToDirForThread(const char *filename, const char *dir, FsThread thread)
 {
     char ospath[260]; // [esp+0h] [ebp-108h] BYREF
 
@@ -2802,7 +2802,7 @@ int __cdecl FS_FOpenFileWriteToDirForThread(char *filename, char *dir, FsThread 
         return FS_GetHandleAndOpenFile(filename, ospath, thread);
 }
 
-int __cdecl FS_WriteFileToDir(char *filename, char *path, char *buffer, unsigned int size)
+int __cdecl FS_WriteFileToDir(const char *filename, const char *path, char *buffer, unsigned int size)
 {
     int f; // [esp+0h] [ebp-8h]
     unsigned int actualSize; // [esp+4h] [ebp-4h]

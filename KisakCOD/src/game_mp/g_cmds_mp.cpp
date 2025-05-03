@@ -154,19 +154,6 @@ char *__cdecl ConcatArgs(int start)
     return line;
 }
 
-int __cdecl SV_Cmd_Argc()
-{
-    if (sv_cmd_args.nesting >= 8u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\../qcommon/cmd.h",
-            167,
-            0,
-            "sv_cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            sv_cmd_args.nesting,
-            8);
-    return sv_cmd_args.argc[sv_cmd_args.nesting];
-}
-
 void __cdecl G_setfog(const char *fogstring)
 {
     float fDensity; // [esp+0h] [ebp-1Ch] BYREF
@@ -1419,30 +1406,6 @@ void Cmd_VisionSetNaked_f()
         return;
     }
     Com_Printf(0, "USAGE: visionSetNaked <name> <duration>\n");
-}
-
-const char *__cdecl SV_Cmd_Argv(int argIndex)
-{
-    if (sv_cmd_args.nesting >= 8u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\../qcommon/cmd.h",
-            182,
-            0,
-            "sv_cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            sv_cmd_args.nesting,
-            8);
-    if (argIndex < 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\../qcommon/cmd.h",
-            183,
-            0,
-            "%s\n\t(argIndex) = %i",
-            "(argIndex >= 0)",
-            argIndex);
-    if (argIndex >= sv_cmd_args.argc[sv_cmd_args.nesting])
-        return "";
-    else
-        return sv_cmd_args.argv[sv_cmd_args.nesting][argIndex];
 }
 
 void Cmd_VisionSetNight_f()

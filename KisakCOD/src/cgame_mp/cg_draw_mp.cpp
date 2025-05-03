@@ -901,14 +901,14 @@ void __cdecl DrawIntermission(int localClientNum)
         if (ui_showEndOfGame->current.enabled)
         {
             if (UI_GetActiveMenu(localClientNum) != 11)
-                UI_SetActiveMenu(localClientNum, 11);
+                UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)11);
         }
         else
         {
             cgArray[0].showScores = 1;
             cgArray[0].scoreFadeTime = cgArray[0].time;
             if (UI_GetActiveMenu(localClientNum) != 10 && !ui_showEndOfGame->current.enabled)
-                UI_SetActiveMenu(localClientNum, 10);
+                UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)10);
             if (UI_GetActiveMenu(localClientNum) == 10)
                 CG_DrawScoreboard(localClientNum);
         }

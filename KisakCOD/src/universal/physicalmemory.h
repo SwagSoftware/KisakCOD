@@ -36,4 +36,3 @@ unsigned __int8 *__cdecl PMem_Alloc(
     unsigned int allocType);
 unsigned int __cdecl PMem_GetFreeAmount();
 void __cdecl PMem_DumpMemStats();
-double __cdecl ConvertToMB(int bytes);

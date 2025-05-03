@@ -543,7 +543,6 @@ int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars,
 
 // dvar_cmds
 void __cdecl TRACK_dvar_cmds();
-int __cdecl Dvar_Command();
 void __cdecl Dvar_GetCombinedString(char *combined, int first);
 void __cdecl Dvar_Toggle_f();
 bool __cdecl Dvar_ToggleInternal();

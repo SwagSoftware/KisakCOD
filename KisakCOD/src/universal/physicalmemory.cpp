@@ -237,8 +237,3 @@ unsigned int __cdecl PMem_GetFreeAmount()
     return g_mem.prim[1].pos - g_mem.prim[0].pos;
 }
 
-double __cdecl ConvertToMB(int bytes)
-{
-    return (float)((double)bytes / 1048576.0);
-}
-

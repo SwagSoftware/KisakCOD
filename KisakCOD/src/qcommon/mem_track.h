@@ -53,7 +53,6 @@ void __cdecl track_addbasicmeminfo(meminfo_t* sum, meminfo_t* in);
 void __cdecl track_PrintInfo();
 int __cdecl mem_track_compare(unsigned int* elem1, unsigned int* elem2);
 void __cdecl track_PrintAllInfo();
-void __cdecl SV_track_shutdown();
 void __cdecl UI_track_init();
 double __cdecl ConvertToMB(int bytes);
 void __cdecl R_Track_Init();

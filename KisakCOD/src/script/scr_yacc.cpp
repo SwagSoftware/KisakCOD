@@ -31,6 +31,12 @@
 #include <client_mp/client_mp.h>
 #include "scr_compiler.h"
 
+// KISAKTODO ICF'd function that just returns first arg. 
+XAssetHeader __cdecl node1_(unsigned int pool)
+{
+    return (XAssetHeader)((void *)pool);
+}
+
 #pragma region YY_GLOBALS
 const __int16 yydefact[262] =
 {

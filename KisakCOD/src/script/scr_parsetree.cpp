@@ -9,11 +9,6 @@
 
 HunkUser *g_allocNodeUser;
 
-XAssetHeader __cdecl node1_(void *pool)
-{
-    return (XAssetHeader)pool;
-}
-
 void __cdecl Scr_InitAllocNode()
 {
     if (g_allocNodeUser)

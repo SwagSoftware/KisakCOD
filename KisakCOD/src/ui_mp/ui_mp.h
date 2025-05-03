@@ -504,7 +504,7 @@ Font_s *UI_AssetCache();
 void __cdecl UI_KeyEvent(int localClientNum, int key, int down);
 uiMenuCommand_t __cdecl UI_GetActiveMenu(int localClientNum);
 const char *__cdecl UI_GetTopActiveMenuName(int localClientNum);
-int __cdecl UI_SetActiveMenu(int localClientNum, int menu);
+int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu);
 int __cdecl UI_IsFullscreen(int localClientNum);
 void __cdecl UI_DrawConnectScreen(int localClientNum);
 void __cdecl Text_PaintCenter(

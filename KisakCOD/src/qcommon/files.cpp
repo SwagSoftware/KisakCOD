@@ -11,7 +11,9 @@ int fs_numServerReferencedIwds;
 char basename[64];
 const char *fs_serverReferencedIwdNames[1024];
 int fs_serverReferencedIwds[1024];
-int fs_fakeChkSum;
+
+// KISAKTODO header-ify
+extern int fs_fakeChkSum;
 
 char *__cdecl FS_GetMapBaseName(char *mapname)
 {

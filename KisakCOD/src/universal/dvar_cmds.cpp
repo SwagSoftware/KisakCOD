@@ -32,42 +32,6 @@ void __cdecl TRACK_dvar_cmds()
     track_static_alloc_internal(info2, sizeof(info2), "info2", 10);
 }
 
-int __cdecl Dvar_Command()
-{
-    const char *v0; // eax
-    const char *v2; // eax
-    const char *v3; // eax
-    const char *v4; // eax
-    const char *v5; // [esp-4h] [ebp-100Ch]
-    char combined[4096]; // [esp+0h] [ebp-1008h] BYREF
-    dvar_s *dvar; // [esp+1004h] [ebp-4h]
-
-    v0 = Cmd_Argv(0);
-    dvar = (dvar_s *)Dvar_FindVar(v0);
-    if (!dvar)
-        return 0;
-    if (Cmd_Argc() == 1)
-    {
-        v5 = Dvar_DisplayableResetValue(dvar);
-        v2 = Dvar_DisplayableValue(dvar);
-        Com_Printf(0, "\"%s\" is: \"%s^7\" default: \"%s^7\"\n", dvar->name, v2, v5);
-        if (Dvar_HasLatchedValue(dvar))
-        {
-            v3 = Dvar_DisplayableLatchedValue(dvar);
-            Com_Printf(0, "latched: \"%s\"\n", v3);
-        }
-        Dvar_PrintDomain(dvar->type, dvar->domain);
-        return 1;
-    }
-    else
-    {
-        Dvar_GetCombinedString(combined, 1);
-        v4 = Cmd_Argv(0);
-        Dvar_SetCommand(v4, combined);
-        return 1;
-    }
-}
-
 void __cdecl Dvar_GetCombinedString(char *combined, int first)
 {
     char *v2; // eax
@@ -405,48 +369,6 @@ void __cdecl Dvar_Reset_f()
     }
 }
 
-void __cdecl Dvar_WriteVariables(int f)
-{
-    Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))Dvar_WriteSingleVariable, &f);
-}
-
-void __cdecl Dvar_WriteSingleVariable(const dvar_s *dvar, int *userData)
-{
-    const char *v2; // eax
-    int f; // [esp+0h] [ebp-4h]
-
-    if (I_stricmp(dvar->name, "cl_cdkey"))
-    {
-        if ((dvar->flags & 1) != 0)
-        {
-            f = *userData;
-            v2 = Dvar_DisplayableLatchedValue(dvar);
-            FS_Printf(f, "seta %s \"%s\"\n", dvar->name, v2);
-        }
-    }
-}
-
-void __cdecl Dvar_WriteDefaults(int f)
-{
-    Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))Dvar_WriteSingleDefault, &f);
-}
-
-void __cdecl Dvar_WriteSingleDefault(const dvar_s *dvar, int *userData)
-{
-    const char *v2; // eax
-    int f; // [esp+0h] [ebp-4h]
-
-    if (I_stricmp(dvar->name, "cl_cdkey"))
-    {
-        if ((dvar->flags & 0x40C0) == 0)
-        {
-            f = *userData;
-            v2 = Dvar_DisplayableResetValue(dvar);
-            FS_Printf(f, "set %s \"%s\"\n", dvar->name, v2);
-        }
-    }
-}
-
 void __cdecl Dvar_List_f()
 {
     char *match; // [esp+0h] [ebp-4h]
@@ -581,49 +503,6 @@ void __cdecl SV_SetConfigDvar(const dvar_s *dvar, int *userData)
     {
         v2 = (char *)Dvar_DisplayableValue(dvar);
         SV_SetConfigValueForKey(*userData, userData[1], (char *)dvar->name, v2);
-    }
-}
-
-char *__cdecl Dvar_InfoString(int localClientNum, char bit)
-{
-    const char *UsernameForLocalClient; // eax
-
-    info1[0] = 0;
-    Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))Dvar_InfoStringSingle, &bit);
-    if ((bit & 2) != 0)
-    {
-        UsernameForLocalClient = CL_GetUsernameForLocalClient();
-        Info_SetValueForKey(info1, "name", UsernameForLocalClient);
-    }
-    return info1;
-}
-
-void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, unsigned int *userData)
-{
-    const char *v2; // eax
-
-    if ((*userData & dvar->flags) != 0)
-    {
-        v2 = Dvar_DisplayableValue(dvar);
-        Info_SetValueForKey(info1, (char *)dvar->name, v2);
-    }
-}
-
-char *__cdecl Dvar_InfoString_Big(int bit)
-{
-    info2[0] = 0;
-    Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))Dvar_InfoStringSingle_Big, &bit);
-    return info2;
-}
-
-void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userData)
-{
-    const char *v2; // eax
-
-    if ((*userData & dvar->flags) != 0)
-    {
-        v2 = Dvar_DisplayableValue(dvar);
-        Info_SetValueForKey_Big(info2, (char *)dvar->name, v2);
     }
 }
 

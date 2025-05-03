@@ -92,25 +92,6 @@ int __cdecl SEH_VerifyLanguageSelection(int iLanguageSelection)
     return 0;
 }
 
-const char *__cdecl SE_GetString(const char *psPackageAndStringReference)
-{
-    if (useFastFile->current.enabled)
-        return SE_GetString_FastFile(psPackageAndStringReference);
-    else
-        return (const char *)SE_GetString_LoadObj(psPackageAndStringReference);
-}
-
-const char *__cdecl SE_GetString_FastFile(const char *psPackageAndStringReference)
-{
-    LocalizeEntry *localize; // [esp+8h] [ebp-4h]
-
-    localize = DB_FindXAssetHeader(ASSET_TYPE_LOCALIZE_ENTRY, psPackageAndStringReference).localize;
-    if (localize)
-        return localize->value;
-    else
-        return 0;
-}
-
 const char *__cdecl SEH_StringEd_GetString(const char *pszReference)
 {
     if (!loc_translate || !loc_translate->current.enabled)

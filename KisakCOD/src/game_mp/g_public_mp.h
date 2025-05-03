@@ -941,8 +941,6 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
 unsigned __int16 __cdecl CompressUnit(float unit);
 void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cent, vehfx_t *fxInfo);
 double __cdecl GetSpeed(int localClientNum, centity_s *cent);
-void __cdecl CG_VehSphereCoordsToPos(float sphereDistance, float sphereYaw, float sphereAltitude, float *result);
-void __cdecl CG_Veh_Init();
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *vel, const float *angles);
 void __cdecl VEH_InitPhysics(gentity_s *ent);
 bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity);

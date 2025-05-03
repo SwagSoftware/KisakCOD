@@ -508,26 +508,6 @@ void __cdecl compare_isFloatGreaterThanEqualToFloat(Operand *leftSide, Operand *
     result->internals.intVal = rightSide->internals.floatVal <= (double)leftSide->internals.floatVal;
 }
 
-int __cdecl compare_floats(float *e0, float *e1)
-{
-    float diff; // [esp+4h] [ebp-4h]
-
-    diff = *e0 - *e1;
-    if (diff >= 0.0)
-        return diff > 0.0;
-    else
-        return -1;
-}
-
-int bloc;
-void __cdecl add_bit(char bit, unsigned __int8 *fout)
-{
-    if ((bloc & 7) == 0)
-        fout[bloc >> 3] = 0;
-    fout[bloc >> 3] |= bit << (bloc & 7);
-    ++bloc;
-}
-
 void __cdecl add_IntWithInt(Operand *leftSide, Operand *rightSide, Operand *result)
 {
     if (leftSide->dataType)

@@ -1092,14 +1092,6 @@ PhysPreset *__cdecl FX_RegisterPhysPreset(const char *name)
     return PhysPresetPrecache(name, (void *(__cdecl *)(int))Hunk_AllocPhysPresetPrecache);
 }
 
-bool __cdecl FX_ElemUsesMaterial(const FxEditorElemDef *edElemDef)
-{
-    unsigned __int8 elemType; // [esp+0h] [ebp-4h]
-
-    elemType = edElemDef->elemType;
-    return elemType < 5u || elemType > 8u && elemType != 10;
-}
-
 void __cdecl FX_GetVisualSampleRouting(const FxEditorElemDef *edElem, FxSampleChannel *routing)
 {
     int v2; // [esp+0h] [ebp-8h]

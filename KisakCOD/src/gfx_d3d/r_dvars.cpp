@@ -243,7 +243,6 @@
  const dvar_t *r_modelVertColor;
  const dvar_t *r_glow_allowed_script_forced;
  const dvar_t *r_outdoor;
- const dvar_t *sv_cheats; // KISAKTODO: Move out of gfx code...
  const dvar_t *r_sse_skinning;
  const dvar_t *r_monitor;
  const dvar_t *r_rendererPreference;

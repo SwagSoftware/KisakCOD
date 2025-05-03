@@ -159,19 +159,6 @@ clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
     return &cgArray[0].bgs.clientinfo[cgArray[0].predictedPlayerState.clientNum];
 }
 
-int __cdecl CG_GetEntityIndex(int localClientNum, const centity_s *cent)
-{
-    if (cent->nextState.number != (cent - cg_entitiesArray[localClientNum]) % 1024)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1125,
-            0,
-            "cent->nextState.number == (cent - &cg_entitiesArray[localClientNum][0]) % MAX_GENTITIES\n\t%i, %i",
-            cent->nextState.number,
-            (cent - cg_entitiesArray[localClientNum]) % 1024);
-    return cent->nextState.number;
-}
-
 vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
 {
     vehicleEffects *v3; // edx
@@ -705,31 +692,6 @@ double __cdecl GetSpeed(int localClientNum, centity_s *cent)
     return (len / serverTimeDelta);
 }
 
-void __cdecl CG_VehSphereCoordsToPos(float sphereDistance, float sphereYaw, float sphereAltitude, float *result)
-{
-    float v4; // [esp+8h] [ebp-20h]
-    float v5; // [esp+14h] [ebp-14h]
-    float altitudeSin; // [esp+18h] [ebp-10h]
-    float altitudeCos; // [esp+1Ch] [ebp-Ch]
-    float yawSin; // [esp+20h] [ebp-8h]
-    float yawCos; // [esp+24h] [ebp-4h]
-
-    v5 = (90.0 - sphereAltitude) * 0.01745329238474369;
-    altitudeCos = cos(v5);
-    altitudeSin = sin(v5);
-    v4 = (sphereYaw - 90.0) * 0.01745329238474369;
-    yawCos = cos(v4);
-    yawSin = sin(v4);
-    *result = sphereDistance * yawCos * altitudeSin;
-    result[1] = sphereDistance * yawSin * altitudeSin;
-    result[2] = sphereDistance * altitudeCos;
-}
-
-void __cdecl CG_Veh_Init()
-{
-    memset((unsigned __int8 *)vehEffects, 0, sizeof(vehEffects));
-}
-
 void __cdecl G_VehRegisterDvars()
 {
     DvarLimits min; // [esp+4h] [ebp-10h]
@@ -795,6 +757,45 @@ void __cdecl VEH_DebugCapsule(float *pos, float rad, float height, float r, floa
     top[2] = pos[2] + height;
     G_DebugCircle(pos, rad, color, 1, 1, 1);
     G_DebugCircle(top, rad, color, 1, 1, 1);
+}
+
+
+void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *vel, const float *angles)
+{
+    int v4; // [esp+0h] [ebp-20h]
+    int v5; // [esp+4h] [ebp-1Ch]
+    int v6; // [esp+8h] [ebp-18h]
+    bool v7; // [esp+Ch] [ebp-14h]
+
+    v7 = *origin == ent->r.currentOrigin[0]
+        && origin[1] == ent->r.currentOrigin[1]
+        && origin[2] == ent->r.currentOrigin[2];
+    if (!v7
+        || (*origin != ent->s.lerp.pos.trBase[0]
+            || origin[1] != ent->s.lerp.pos.trBase[1]
+            || origin[2] != ent->s.lerp.pos.trBase[2]
+            ? (v6 = 0)
+            : (v6 = 1),
+            !v6
+            || (*angles != ent->r.currentAngles[0]
+                || angles[1] != ent->r.currentAngles[1]
+                || angles[2] != ent->r.currentAngles[2]
+                ? (v5 = 0)
+                : (v5 = 1),
+                !v5
+                || (*angles != ent->s.lerp.apos.trBase[0]
+                    || angles[1] != ent->s.lerp.apos.trBase[1]
+                    || angles[2] != ent->s.lerp.apos.trBase[2]
+                    ? (v4 = 0)
+                    : (v4 = 1),
+                    !v4))))
+    {
+        G_SetOrigin(ent, origin);
+        G_SetAngle(ent, angles);
+        ent->s.lerp.pos.trType = TR_INTERPOLATE;
+        ent->s.lerp.apos.trType = TR_INTERPOLATE;
+        SV_LinkEntity(ent);
+    }
 }
 
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *angles)

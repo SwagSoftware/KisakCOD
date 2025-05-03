@@ -139,13 +139,6 @@ const char *noticeErrors[10] =
   ""
 }; // idb
 
-int objFreeCount;
-int com_lastDObjIndex;
-int g_bDObjInited;
-bool objAlloced[2048];
-__int16 clientObjMap[1152];
-__int16 serverObjMap[1024];
-
 void QDECL Com_PrintMessage(int channel, char* msg, int error)
 {
 	// LWSS: Punkbuster stuff
@@ -850,7 +843,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         {
             Com_SetErrorMessage(com_errorMessage);
             if (Sys_IsMainThread())
-                UI_SetActiveMenu(0, 1);
+                UI_SetActiveMenu(0, (uiMenuCommand_t)1);
         }
         if (cls.uiStarted)
         {
@@ -884,7 +877,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     if (cls.uiStarted && Sys_IsMainThread())
     {
         Com_SetErrorMessage(com_errorMessage);
-        UI_SetActiveMenu(0, 5);
+        UI_SetActiveMenu(0, (uiMenuCommand_t)5);
         com_errorEntered = 0;
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
     }
@@ -1298,7 +1291,7 @@ void Com_ErrorCleanup()
         if (cls.uiStarted && errorcode != ERR_DROP)
         {
             MenuScreenForError = UI_GetMenuScreenForError();
-            UI_SetActiveMenu(0, MenuScreenForError);
+            UI_SetActiveMenu(0, (uiMenuCommand_t)MenuScreenForError);
         }
         Com_SetErrorMessage(com_errorMessage);
     }
@@ -2096,7 +2089,7 @@ void Com_StartHunkUsers()
 
     Com_AssetLoadUI();
     MenuScreen = UI_GetMenuScreen();
-    UI_SetActiveMenu(0, MenuScreen);
+    UI_SetActiveMenu(0, (uiMenuCommand_t)MenuScreen);
     IN_Frame();
     Com_EventLoop();
 }

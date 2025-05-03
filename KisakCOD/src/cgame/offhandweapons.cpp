@@ -486,7 +486,7 @@ void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned i
     }
 }
 
-void __cdecl CG_SetEquippedOffHand(int localClientNum, int offHandIndex)
+void __cdecl CG_SetEquippedOffHand(int localClientNum, unsigned int offHandIndex)
 {
     WeaponDef *WeaponDef; // eax
     const char *v3; // eax

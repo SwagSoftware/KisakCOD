@@ -8,7 +8,6 @@
 #include "q_parse.h"
 
 SoundAliasGlobals g_sa;
-const char ***varXStringPtr;
 
 char __cdecl Com_LoadVolumeFalloffCurve(const char *name, SndCurve *curve)
 {
@@ -335,7 +334,8 @@ snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors_FastFile(const char *name)
     return !DB_IsXAssetDefault(ASSET_TYPE_SOUND, name) ? aliasList : 0;
 }
 
-
+// KISAK: Why is this in com_sndalias when every single other load function is in db_load.cpp? no clue!
+extern char const ***varXStringPtr;
 void __cdecl Load_SndAliasCustom(snd_alias_list_t **var)
 {
     if (*var)

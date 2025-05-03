@@ -151,6 +151,18 @@ static int Sys_GetSemaphoreFileName()
 	return sprintf_s(sys_processSemaphoreFile, "__%s", moduleName);
 }
 
+void __cdecl Sys_QuitAndStartProcess(const char *exeName, const char *parameters)
+{
+	char pathOrig[268]; // [esp+0h] [ebp-110h] BYREF
+
+	GetCurrentDirectoryA(0x104u, pathOrig);
+	if (parameters)
+		Com_sprintf(sys_exitCmdLine, 0x400u, "\"%s\\%s\" %s", pathOrig, exeName, parameters);
+	else
+		Com_sprintf(sys_exitCmdLine, 0x400u, "\"%s\\%s\"", pathOrig, exeName);
+	Cbuf_AddText(0, "quit\n");
+}
+
 void __cdecl Sys_NormalExit()
 {
 	DeleteFileA(sys_processSemaphoreFile);
@@ -311,11 +323,6 @@ void Sys_Error(const char *error, ...)
 
 	Sys_SetErrorText(string);
 	exit(0);
-}
-
-double __cdecl ConvertToMB(int bytes)
-{
-	return (float)((double)bytes / 1048576.0);
 }
 
 void __cdecl Sys_OpenURL(const char *url, int doexit)

@@ -671,6 +671,8 @@ void __cdecl Mark_XAsset();
 void __cdecl Mark_SndAliasCustom(snd_alias_list_t **var);
 void __cdecl DB_LoadDObjs();
 
+extern const char *g_assetNames[33];
+
 extern XAssetEntry *g_copyInfo[2048];
 extern unsigned int g_copyInfoCount;
 

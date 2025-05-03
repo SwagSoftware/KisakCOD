@@ -84,9 +84,6 @@ const dvar_t *cl_allowDownload;
 const dvar_t *cl_wwwDownload;
 const dvar_t *cl_talking;
 const dvar_t *cl_bypassMouseInput;
-const dvar_t *cl_anglespeedkey;
-const dvar_t *cl_pitchspeed;
-const dvar_t *cl_yawspeed;
 const dvar_t *cl_hudDrawsBehindUI;
 const dvar_t *cl_voice;
 const dvar_t *name;
@@ -792,19 +789,6 @@ void __cdecl CL_Vid_Restart_f()
             Z_VirtualFree(clientStateBuf);
         }
     }
-}
-
-char sys_exitCmdLine[1024];
-void __cdecl Sys_QuitAndStartProcess(const char *exeName, const char *parameters)
-{
-    char pathOrig[268]; // [esp+0h] [ebp-110h] BYREF
-
-    GetCurrentDirectoryA(0x104u, pathOrig);
-    if (parameters)
-        Com_sprintf(sys_exitCmdLine, 0x400u, "\"%s\\%s\" %s", pathOrig, exeName, parameters);
-    else
-        Com_sprintf(sys_exitCmdLine, 0x400u, "\"%s\\%s\"", pathOrig, exeName);
-    Cbuf_AddText(0, "quit\n");
 }
 
 void __cdecl CL_Snd_Restart_f()
@@ -2634,7 +2618,7 @@ void __cdecl CL_PlayLogo_f()
     }
     clientUIActives[0].connectionState = CA_LOGO;
     if (cls.uiStarted)
-        UI_SetActiveMenu(0, 0);
+        UI_SetActiveMenu(0, (uiMenuCommand_t)0);
     SND_StopSounds(SND_STOP_ALL);
     SND_FadeAllSounds(1.0, 0);
     name = Cmd_Argv(1);
@@ -2683,9 +2667,9 @@ void __cdecl CL_StopLogoOrCinematic(int localClientNum)
     }
     SND_StopSounds(SND_STOP_ALL);
     if (clcState)
-        UI_SetActiveMenu(localClientNum, 0);
+        UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)0);
     else
-        UI_SetActiveMenu(localClientNum, 1);
+        UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)1);
 }
 
 void __cdecl CL_ToggleMenu_f()

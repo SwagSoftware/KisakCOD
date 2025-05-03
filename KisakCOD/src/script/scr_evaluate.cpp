@@ -1,4 +1,5 @@
 #include "scr_evaluate.h"
+#include "scr_animtree.h"
 #include "scr_variable.h"
 #include "scr_main.h"
 #include "scr_vm.h"

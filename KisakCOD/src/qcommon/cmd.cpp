@@ -324,7 +324,7 @@ int __cdecl strlen_noncrt(const char *str)
     return count;
 }
 
-void __cdecl Cbuf_InsertText(int localClientNum, char *text)
+void __cdecl Cbuf_InsertText(int localClientNum, const char *text)
 {
     unsigned int v2; // [esp+4h] [ebp-1Ch]
     CmdText *cmd_text; // [esp+14h] [ebp-Ch]

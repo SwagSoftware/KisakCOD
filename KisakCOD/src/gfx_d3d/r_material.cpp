@@ -622,8 +622,7 @@ void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable *mtlTable, int mtlT
 
     for (builtInMtlIndex = 0; builtInMtlIndex < mtlTableCount; ++builtInMtlIndex)
     {
-        if (*mtlTable[builtInMtlIndex].material)
-            MyAssertHandler(".\\r_material.cpp", 1512, 0, "%s", "!*mtlTable[builtInMtlIndex].material");
+        iassert(!*mtlTable[builtInMtlIndex].material);
         *mtlTable[builtInMtlIndex].material = Material_Register((char *)mtlTable[builtInMtlIndex].name, 0);
         if (!*mtlTable[builtInMtlIndex].material)
             Com_Error(ERR_FATAL, "Could not find material '%s'", mtlTable[builtInMtlIndex].name);

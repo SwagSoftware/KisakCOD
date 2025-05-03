@@ -171,7 +171,7 @@ float __cdecl DiffTrackAngle(float tgt, float cur, float rate, float deltaTime)
     return ((v8 - v6) * 360.0);
 }
 
-float __cdecl GraphGetValueFromFraction(int knotCount, const float *knots, float fraction)
+float __cdecl GraphGetValueFromFraction(int knotCount, const float (*knots)[2], float fraction)
 {
     float result; // [esp+8h] [ebp-Ch]
     float adjustedFrac; // [esp+Ch] [ebp-8h]
@@ -190,19 +190,19 @@ float __cdecl GraphGetValueFromFraction(int knotCount, const float *knots, float
             "%s\n\t(fraction) = %g",
             "(fraction >= 0.0f && fraction <= 1.0f)",
             fraction);
-    if (knots[2 * knotCount - 2] != 1.0)
+    if (knots[knotCount - 1][0] != 1.0)
         MyAssertHandler(
             ".\\universal\\com_math.cpp",
             463,
             0,
             "%s\n\t(knots[knotCount - 1][0]) = %g",
             "(knots[knotCount - 1][0] == 1.0f)",
-            knots[2 * knotCount - 2]);
+            knots[knotCount - 1][0]);
     for (knotIndex = 1; knotIndex < knotCount; ++knotIndex)
     {
-        if (knots[2 * knotIndex] >= fraction)
+        if (knots[knotIndex][0] >= fraction)
         {
-            adjustedFrac = (fraction - knots[2 * knotIndex - 2]) / (knots[2 * knotIndex] - knots[2 * knotIndex - 2]);
+            adjustedFrac = (fraction - knots[knotIndex - 1][0]) / (knots[knotIndex][0] - knots[knotIndex - 1][0]);
             if (adjustedFrac < 0.0 || adjustedFrac > 1.0)
                 MyAssertHandler(
                     ".\\universal\\com_math.cpp",
@@ -211,23 +211,23 @@ float __cdecl GraphGetValueFromFraction(int knotCount, const float *knots, float
                     "%s\n\t(adjustedFrac) = %g",
                     "(adjustedFrac >= 0.0f && adjustedFrac <= 1.0f)",
                     adjustedFrac);
-            if (knots[2 * knotIndex - 1] < 0.0 || knots[2 * knotIndex - 1] > 1.0)
+            if (knots[knotIndex - 1][1] < 0.0 || knots[knotIndex - 1][1] > 1.0)
                 MyAssertHandler(
                     ".\\universal\\com_math.cpp",
                     472,
                     0,
                     "%s\n\t(knots[knotIndex - 1][1]) = %g",
                     "(knots[knotIndex - 1][1] >= 0.0f && knots[knotIndex - 1][1] <= 1.0f)",
-                    knots[2 * knotIndex - 1]);
-            if (knots[2 * knotIndex + 1] < 0.0 || knots[2 * knotIndex + 1] > 1.0)
+                    knots[knotIndex - 1][1]);
+            if (knots[knotIndex][1] < 0.0 || knots[knotIndex][1] > 1.0)
                 MyAssertHandler(
                     ".\\universal\\com_math.cpp",
                     473,
                     0,
                     "%s\n\t(knots[knotIndex][1]) = %g",
                     "(knots[knotIndex][1] >= 0.0f && knots[knotIndex][1] <= 1.0f)",
-                    knots[2 * knotIndex + 1]);
-            result = (knots[2 * knotIndex + 1] - knots[2 * knotIndex - 1]) * adjustedFrac + knots[2 * knotIndex - 1];
+                    knots[knotIndex][1]);
+            result = (knots[knotIndex][1] - knots[knotIndex - 1][1]) * adjustedFrac + knots[knotIndex - 1][1];
             break;
         }
     }

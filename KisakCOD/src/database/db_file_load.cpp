@@ -303,6 +303,11 @@ void __cdecl DB_LoadXFileInternal()
     DB_CancelLoadXFile();
 }
 
+bool __cdecl DB_IsMinimumFastFileLoaded()
+{
+    return g_minimumFastFileLoaded;
+}
+
 void Load_XAssetListCustom()
 {
     varXAssetList = &g_varXAssetList;

@@ -2,7 +2,6 @@
 
 //int marker_db_assetnames 828ddeec     db_assetnames.obj
 
-const char **g_assetNames;
 const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
 {
     DB_StringTableGetName,

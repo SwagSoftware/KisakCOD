@@ -178,7 +178,6 @@ void Sys_Error(const char *error, ...);
 void __cdecl Sys_OutOfMemErrorInternal(const char* filename, int line);
 void __cdecl Sys_NormalExit();
 
-double __cdecl ConvertToMB(int bytes);
 void __cdecl Sys_OpenURL(const char *url, int doexit);
 void  Sys_Error(char *error, ...);
 void __cdecl  Sys_Quit();
@@ -207,7 +206,7 @@ char **__cdecl Sys_ListFiles(
 char *__cdecl Sys_Cwd();
 const char *__cdecl Sys_DefaultCDPath();
 char *__cdecl Sys_DefaultInstallPath();
-
+void __cdecl Sys_QuitAndStartProcess(const char *exeName, const char *parameters);
 
 
 // win_voice

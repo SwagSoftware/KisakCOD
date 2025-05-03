@@ -70,12 +70,12 @@ int g_poolSize[33] =
 
 bool g_archiveBuf;
 
-XAssetHeader __cdecl node1_(void *pool)
+static XAssetHeader __cdecl node1_(void *pool)
 {
     return (XAssetHeader)pool;
 }
 
-XAssetHeader __cdecl DB_AllocXAsset_StringTable_(XAssetHeader *pool)
+static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(XAssetHeader *pool)
 {
     XAssetHeader header; // [esp+4h] [ebp-8h]
 
@@ -313,8 +313,6 @@ FastCriticalSection db_hashCritSect;
 
 bool g_zoneInited;
 int g_zoneCount;
-
-bool g_minimumFastFileLoaded;
 
 bool g_isRecoveringLostDevice;
 bool g_mayRecoverLostAssets;
@@ -1226,11 +1224,6 @@ void __cdecl DB_EnumXAssetsFor(
             func(fileData->data, inData);
         fileData = fileData->next;
     }
-}
-
-bool __cdecl DB_IsMinimumFastFileLoaded()
-{
-    return g_minimumFastFileLoaded;
 }
 
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)

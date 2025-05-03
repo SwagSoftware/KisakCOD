@@ -104,7 +104,7 @@ enum keyNum_t : int
      K_AUX15 = 0xDD,
      K_AUX16 = 0xDE,
      K_LAST_KEY = 0xDF,
- } keyNum_t;
+ };
 
 // The menu code needs to get both key and char events, but
 // to avoid duplicating the paths, the char events are just

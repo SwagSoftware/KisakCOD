@@ -16,6 +16,15 @@ const dvar_t *heli_barrelMaxVelocity;
 const dvar_t *vehDriverViewDist;
 const dvar_t *heli_barrelRotation;
 
+// KISAK: what's the difference between this and s_wheelTags? no idea!
+unsigned __int16 *wheelTags[4] =
+{
+    &scr_const.tag_wheel_front_left,
+    &scr_const.tag_wheel_front_right,
+    &scr_const.tag_wheel_back_left,
+    &scr_const.tag_wheel_back_right
+};
+
 void __cdecl CG_VehRegisterDvars()
 {
     DvarLimits min; // [esp+4h] [ebp-10h]
