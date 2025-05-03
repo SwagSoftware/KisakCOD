@@ -441,7 +441,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
     float lerp,
     float volumeScale,
     SndEntHandle sndEnt,
-    float *org,
+    const float *org,
     int *pChannel,
     int timeshift,
     bool treatAsMaster,
