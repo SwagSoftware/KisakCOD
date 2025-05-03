@@ -2190,15 +2190,15 @@ bool __cdecl SND_IsNullSoundFile(const SoundFile *soundFile)
 
 int __cdecl SND_PlaySoundAliasAsMaster(
     const snd_alias_t *alias,
-    SndEntHandle *sndEnt,
-    SndEntHandle *org,
+    SndEntHandle sndEnt,
+    const float *org,
     int timeshift,
     snd_alias_system_t system)
 {
     if (!org)
         MyAssertHandler(".\\snd.cpp", 1829, 0, "%s", "org");
     if (alias)
-        return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, NULL, timeshift, 1, 1, system);
+        return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, 0, timeshift, 1, 1, system);
     else
         return -1;
 }
@@ -2209,7 +2209,7 @@ int __cdecl SND_PlayBlendedSoundAliases(
     float lerp,
     float volumeScale,
     SndEntHandle sndEnt,
-    SndEntHandle *org,
+    float *org,
     int timeshift,
     snd_alias_system_t system)
 {
@@ -2218,18 +2218,7 @@ int __cdecl SND_PlayBlendedSoundAliases(
     if (!alias0 || !alias1)
         return -1;
     SND_ValidateSoundAliasBlend(alias0, alias1, 1);
-    return SND_PlaySoundAlias_Internal(
-        alias0,
-        alias1,
-        lerp,
-        volumeScale,
-        &sndEnt,
-        org,
-        NULL,
-        timeshift,
-        0,
-        1,
-        system);
+    return SND_PlaySoundAlias_Internal(alias0, alias1, lerp, volumeScale, sndEnt, org, 0, timeshift, 0, 1, system);
 }
 
 char __cdecl SND_ValidateSoundAliasBlend(const snd_alias_t *alias0, const snd_alias_t *alias1, bool bReport)
@@ -2402,9 +2391,9 @@ int __cdecl SND_PlayLocalSoundAlias(unsigned int localClientNum, const snd_alias
         alias,
         0.0,
         1.0,
-        NULL,
-        (SndEntHandle *)(((4 * g_snd.listeners[localClientNum].clientNum) | localClientNum & 3) << 20),
+        0,
         g_snd.listeners[localClientNum].orient.origin,
+        0,
         0,
         0,
         1,
@@ -3733,7 +3722,7 @@ void __cdecl SND_PlayLocal_f()
     snd_alias_t *v6; // eax
     const char *v7; // eax
     const char *v8; // eax
-    char *v9; // eax
+    const char *v9; // eax
     double v10; // [esp+Ch] [ebp-50h]
     double v11; // [esp+14h] [ebp-48h]
     double v12; // [esp+1Ch] [ebp-40h]
@@ -3773,7 +3762,7 @@ void __cdecl SND_PlayLocal_f()
         if (v6)
         {
             RelativeToListener(g_snd.listeners, yaw, pitch, dist, soundPos);
-            SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, NULL, (SndEntHandle *)(g_snd.listeners[0].clientNum << 22), soundPos, 0, 0, 1, SASYS_CGAME);
+            SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, 0, soundPos, 0, 0, 0, 1, SASYS_CGAME);
             v12 = soundPos[2];
             v11 = soundPos[1];
             v10 = soundPos[0];
@@ -3784,7 +3773,9 @@ void __cdecl SND_PlayLocal_f()
             else
                 v13 = 0.5;
             soundPos[3] = v13;
-            v9 = (char *)Cmd_Argv(1);
+            v9 = Cmd_Argv(1);
+
+            // KISAKTODO: lmao
             CL_AddDebugStarWithText(soundPos, (const float *)"333?333?", (const float *)"333?333?", v9, v13, 200, 0);
         }
         else
