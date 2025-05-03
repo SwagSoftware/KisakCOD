@@ -436,13 +436,13 @@ int __cdecl SND_PlaySoundAlias(
     int timeshift,
     snd_alias_system_t system);
 int __cdecl SND_PlaySoundAlias_Internal(
-    const snd_alias_t * alias0,
-    const snd_alias_t * alias1,
+    const snd_alias_t *alias0,
+    const snd_alias_t *alias1,
     float lerp,
     float volumeScale,
-    SndEntHandle * sndEnt,
-    SndEntHandle * org,
-    float *pChannel,
+    SndEntHandle sndEnt,
+    float *org,
+    int *pChannel,
     int timeshift,
     bool treatAsMaster,
     bool useTimescale,

@@ -456,7 +456,7 @@ void __cdecl Cmd_AddServerCommandInternal(const char *cmdName, void(__cdecl *fun
         Com_Printf(16, "Cmd_AddServerCommand: %s already defined\n", cmdName);
 }
 
-void __cdecl Cbuf_ExecuteBuffer(int localClientNum, int controllerIndex, char *buffer)
+void __cdecl Cbuf_ExecuteBuffer(int localClientNum, int controllerIndex, const char *buffer)
 {
     char v3; // [esp+10h] [ebp-1018h]
     signed int v4; // [esp+14h] [ebp-1014h]

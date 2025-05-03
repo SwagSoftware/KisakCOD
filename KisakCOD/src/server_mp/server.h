@@ -489,7 +489,7 @@ struct client_t // sizeof=0xA5638
 };
 
 //sv_init_mp
-void __cdecl SV_SetConfigstring(int index, char *val);
+void __cdecl SV_SetConfigstring(int index, const char *val);
 void __cdecl SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize);
 unsigned int __cdecl SV_GetConfigstringConst(unsigned int index);
 void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value);

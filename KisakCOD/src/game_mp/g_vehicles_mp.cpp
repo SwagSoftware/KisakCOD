@@ -31,7 +31,7 @@
 //    struct dvar_s const *const vehTextureScrollScale 82e97278     g_vehicles_mp.obj
 //    short s_numVehicleInfos    82e9727c     g_vehicles_mp.obj
 
-static unsigned __int16 *s_wheelTags[4] =
+unsigned __int16 *s_wheelTags[4] =
 {
     &scr_const.tag_wheel_front_left,
     &scr_const.tag_wheel_front_right,
@@ -39,7 +39,7 @@ static unsigned __int16 *s_wheelTags[4] =
     &scr_const.tag_wheel_back_right
 };
 
-static unsigned __int16 *s_flashTags[] =
+unsigned __int16 *s_flashTags[] =
 {
     &scr_const.tag_flash,
     &scr_const.tag_flash_11,

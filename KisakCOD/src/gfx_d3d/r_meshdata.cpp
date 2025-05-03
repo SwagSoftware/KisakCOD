@@ -65,6 +65,17 @@ void __cdecl R_ResetMesh(GfxMeshData *mesh)
     mesh->indexCount = 0;
 }
 
+void __cdecl R_BeginMeshVerts(GfxMeshData *mesh)
+{
+    if (mesh->vb.verts)
+        MyAssertHandler(".\\r_meshdata.cpp", 24, 0, "%s", "mesh->vb.verts == NULL");
+    mesh->vb.verts = (unsigned __int8 *)R_LockVertexBuffer(
+        mesh->vb.buffer,
+        0,
+        mesh->vb.total,
+        mesh->vb.used != 0 ? 4096 : 0x2000);
+}
+
 void __cdecl R_SetQuadMeshData(
     GfxMeshData *mesh,
     float x,

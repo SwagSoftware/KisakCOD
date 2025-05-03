@@ -39,7 +39,7 @@ int __cdecl R_FinishedWorkerCmds();
 void __cdecl R_WaitWorkerCmds();
 void __cdecl R_ProcessWorkerCmdsWithTimeout(int(__cdecl *timeout)(), int forever);
 
-int(__cdecl *g_cmdOutputBusy[17])(void *) =
+static int(__cdecl *g_cmdOutputBusy[17])(void *) =
 {
   NULL,
   NULL,

@@ -1462,6 +1462,7 @@ extern UiContext cgDC[1];
 extern vehicleEffects vehEffects[1][8];
 
 extern const unsigned __int16 *wheelTags[4];
+extern unsigned __int16 *s_flashTags[];
 
 inline centity_s *__cdecl CG_GetEntity(int localClientNum, unsigned int entityIndex)
 {

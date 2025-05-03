@@ -2373,15 +2373,6 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     veh->turret.fireBarrel = veh->turret.fireBarrel == 0;
 }
 
-static unsigned __int16 *s_flashTags[] =
-{
-    &scr_const.tag_flash,
-    &scr_const.tag_flash_11,
-    &scr_const.tag_flash_2,
-    &scr_const.tag_flash_22,
-    &scr_const.tag_flash_3
-};
-
 int __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int barrel)
 {
     VariableUnion v2; // eax

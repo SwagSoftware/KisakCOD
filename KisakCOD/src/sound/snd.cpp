@@ -1539,13 +1539,13 @@ void __cdecl SND_PlayFXSounds()
 
 int __cdecl SND_PlaySoundAlias(
     const snd_alias_t *alias,
-    SndEntHandle *sndEnt,
-    SndEntHandle *org,
+    SndEntHandle sndEnt,
+    const float *org,
     int timeshift,
     snd_alias_system_t system)
 {
-    if (!org)
-        MyAssertHandler(".\\snd.cpp", 1819, 0, "%s", "org");
+    iassert(org);
+
     if (alias)
         return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, 0, timeshift, 0, 1, system);
     else
@@ -1557,19 +1557,19 @@ int __cdecl SND_PlaySoundAlias_Internal(
     const snd_alias_t *alias1,
     float lerp,
     float volumeScale,
-    SndEntHandle *sndEnt,
-    SndEntHandle *org,
-    float *pChannel,
+    SndEntHandle sndEnt,
+    const float *org,
+    int *pChannel,
     int timeshift,
     bool treatAsMaster,
     bool useTimescale,
     snd_alias_system_t system)
 {
-    const char *v11; // eax
     const char *v12; // eax
-    int v13; // [esp+24h] [ebp-7Ch]
-    bool v14; // [esp+28h] [ebp-78h]
-    float v15; // [esp+2Ch] [ebp-74h]
+    const char *v13; // eax
+    int v14; // [esp+24h] [ebp-7Ch]
+    bool v15; // [esp+28h] [ebp-78h]
+    float v16; // [esp+2Ch] [ebp-74h]
     snd_listener *a; // [esp+38h] [ebp-68h]
     float diff[3]; // [esp+3Ch] [ebp-64h] BYREF
     snd_alias_t *tertiaryAlias; // [esp+48h] [ebp-58h]
@@ -1586,32 +1586,32 @@ int __cdecl SND_PlaySoundAlias_Internal(
         MyAssertHandler(".\\snd.cpp", 1542, 0, "%s", "alias0");
     if (!alias1)
         MyAssertHandler(".\\snd.cpp", 1543, 0, "%s", "alias1");
-    if (!(unsigned int)org)
+    if (!org)
         MyAssertHandler(".\\snd.cpp", 1544, 0, "%s", "org");
     playbackId = -1;
     outOfRange = 0;
     if (!g_snd.Initialized2d)
         return playbackId;
-    if (HIDWORD(org))
-        *(unsigned int *)HIDWORD(org) = -1;
+    if (pChannel)
+        *pChannel = -1;
     alias0Channel = (alias0->flags & 0x3F00) >> 8;
     if (SND_IsAliasChannel3D(alias0Channel))
     {
         distMax = (1.0 - lerp) * alias0->distMax + alias1->distMax * lerp;
-        a = &g_snd.listeners[SND_GetListenerIndexNearestToOrigin(pChannel)];
-        Vec3Sub(a->orient.origin, (const float *)org, diff);
+        a = &g_snd.listeners[SND_GetListenerIndexNearestToOrigin(org)];
+        Vec3Sub(a->orient.origin, org, diff);
         distListenerSq = Vec3LengthSq(diff);
         outOfRange = distListenerSq > distMax * distMax;
         if (*(_BYTE *)snd_debugAlias->current.integer)
         {
-            v15 = sqrt(distListenerSq);
-            v11 = va("Not playing, out of range: %.1f > %.1f", v15, distMax);
-            SND_DebugAliasPrint(outOfRange, alias0, v11);
+            v16 = sqrt(distListenerSq);
+            v12 = va("Not playing, out of range: %.1f > %.1f", v16, distMax);
+            SND_DebugAliasPrint(outOfRange, alias0, v12);
         }
     }
     if (!outOfRange)
     {
-        if (SND_ContinueLoopingSound(alias0, alias1, lerp, volumeScale, *sndEnt, (const float *)org, (int *)HIDWORD(org)))
+        if (SND_ContinueLoopingSound(alias0, alias1, lerp, volumeScale, sndEnt, org, pChannel))
         {
             if (alias0->secondaryAliasName)
             {
@@ -1619,59 +1619,56 @@ int __cdecl SND_PlaySoundAlias_Internal(
                 if (secondaryAlias)
                 {
                     if ((secondaryAlias->flags & 1) != 0)
-                    {
-                            SND_PlaySoundAlias_Internal(
-                                secondaryAlias,
-                                secondaryAlias,
-                                lerp,
-                                volumeScale,
-                                sndEnt,
-                                org,
-                                pChannel,
-                                timeshift,
-                                treatAsMaster,
-                                useTimescale,
-                                system);
-                    }
-
+                        SND_PlaySoundAlias_Internal(
+                            secondaryAlias,
+                            secondaryAlias,
+                            lerp,
+                            volumeScale,
+                            sndEnt,
+                            org,
+                            0,
+                            timeshift,
+                            treatAsMaster,
+                            useTimescale,
+                            system);
                 }
             }
             return 0;
         }
         if (SND_IsRestricted(alias0Channel))
-            SND_StopEntityChannel(*sndEnt, alias0Channel);
+            SND_StopEntityChannel(sndEnt, alias0Channel);
         if (SND_IsNullSoundFile(alias0->soundFile))
             return -1;
         SND_ChoosePitchAndVolume(alias0, alias1, lerp, volumeScale, &startAliasInfo.volume, &startAliasInfo.pitch);
         startAliasInfo.alias0 = alias0;
         startAliasInfo.alias1 = alias1;
         startAliasInfo.lerp = lerp;
-        startAliasInfo.sndEnt = *sndEnt;
-        startAliasInfo.org[0] = *(float *)org;
-        startAliasInfo.org[1] = *(float *)(org + 4);
-        startAliasInfo.org[2] = *(float *)(org + 8);
+        startAliasInfo.sndEnt = sndEnt;
+        startAliasInfo.org[0] = *org;
+        startAliasInfo.org[1] = org[1];
+        startAliasInfo.org[2] = org[2];
         startAliasInfo.timeshift = timeshift;
         startAliasInfo.fraction = 0.0;
         startAliasInfo.startDelay = alias0->startDelay;
-        v14 = treatAsMaster || (alias0->flags & 2) != 0;
-        startAliasInfo.master = v14;
+        v15 = treatAsMaster || (alias0->flags & 2) != 0;
+        startAliasInfo.master = v15;
         startAliasInfo.timescale = useTimescale;
         startAliasInfo.system = system;
-        v13 = (alias0->flags & 0xC0) >> 6;
-        if (v13 == 1)
+        v14 = (alias0->flags & 0xC0) >> 6;
+        if (v14 == 1)
         {
-            playbackId = SND_StartAliasSample(&startAliasInfo, (int *)HIDWORD(org));
+            playbackId = SND_StartAliasSample(&startAliasInfo, pChannel);
         }
-        else if (v13 == 2)
+        else if (v14 == 2)
         {
-            playbackId = SND_StartAliasStream(&startAliasInfo, (int *)HIDWORD(org));
+            playbackId = SND_StartAliasStream(&startAliasInfo, pChannel);
         }
         else
         {
             if (!alwaysfails)
             {
-                v12 = va("unhandled sound alias type %i", (alias0->flags & 0xC0) >> 6);
-                MyAssertHandler(".\\snd.cpp", 1609, 0, v12);
+                v13 = va("unhandled sound alias type %i", (alias0->flags & 0xC0) >> 6);
+                MyAssertHandler(".\\snd.cpp", 1609, 0, v13);
             }
             playbackId = -1;
         }

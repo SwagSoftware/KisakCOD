@@ -939,6 +939,31 @@ double __cdecl ConvertToMB(int bytes)
     return (float)((double)bytes / 1048576.0);
 }
 
+// str8 from the linker error
+void __cdecl TRACK_r_bsp_load_obj() { /* THUNK */ }
+void __cdecl TRACK_rb_debug() { /* THUNK */ }
+void __cdecl TRACK_ui_shared_obj() { /* THUNK */ }
+void __cdecl TRACK_scr_memorytree() { /* THUNK */ }
+void __cdecl TRACK_scr_stringlist() { /* THUNK */ }
+void __cdecl TRACK_scr_variable() { /* THUNK */ }
+void __cdecl TRACK_scr_compiler() { /* THUNK */ }
+void __cdecl TRACK_com_files() { /* THUNK */ }
+void __cdecl TRACK_com_sndalias() { /* THUNK */ }
+void __cdecl TRACK_dvar() { /* THUNK */ }
+void __cdecl TRACK_profile() { /* THUNK */ }
+void __cdecl TRACK_profile_display() { /* THUNK */ }
+void __cdecl TRACK_win_common() { /* THUNK */ }
+void __cdecl TRACK_win_syscon() { /* THUNK */ }
+void __cdecl TRACK_common() { /* THUNK */ }
+void __cdecl TRACK_files() { /* THUNK */ }
+void __cdecl TRACK_com_memory() { /* THUNK */ }
+void __cdecl TRACK_memfile() { /* THUNK */ }
+void __cdecl TRACK_win_input() { /* THUNK */ }
+void __cdecl TRACK_assertive() { /* THUNK */ }
+void __cdecl TRACK_record_dsound() { /* THUNK */ }
+void __cdecl TRACK_phys_ode() { /* THUNK */ }
+void __cdecl TRACK_profileMem() { /* THUNK */ }
+
 void __cdecl R_Track_Init()
 {
     g_mem_track_filename = "r_bsp_load_obj";
