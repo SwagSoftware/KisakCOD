@@ -23,10 +23,6 @@ There are also a few platform specific functions:
     waits for the GPU to finish using the given texture set. Call
     before BinkOpen.
 
-  Sync_Bink_textures:  On Wii, Xbox 360, and PS3, this function stores the 
-    CPU L2 cache entries for the texture memory, so that the GPU can see it.
-    Call this function after BinkDoFrame.
-    
 
   Create_Bink_shaders:  On PS3, Xbox 360 and Windows, this function creates
     the pixel shaders we use to do the color conversion. Call this function
@@ -60,10 +56,7 @@ So, basically, playback works like this:
 
   7) Call BinkDoFrame to decompress a video frame.
 
-  8) Call Sync_Bink_textures to flush the cache for the GPU (or 
-     Unlock_Bink_textures on Windows).
-
-  9) Draw the frame using Draw_Bink_textures.
+  8) Draw the frame using Draw_Bink_textures.
 
 
 And that's it! (Skipping over a few details - see the examples for all 
@@ -72,9 +65,6 @@ the details...)
 Should drop in really quickly and it hides a ton of platform specific ugliness!
 
 */
-
-//#ifdef _ACCLAIM_IGAADSYSTEM
-#if 1
 
 #include "bink.h"
 
@@ -91,11 +81,11 @@ typedef struct BINKFRAMETEXTURES
 {
 #ifdef __RADPS3__
 
-  GLuint Ytexture;
-  GLuint cRtexture;
-  GLuint cBtexture;
-  GLuint Atexture;
-  GLuint fence;
+  UINTa Ytexture;
+  UINTa cRtexture;
+  UINTa cBtexture;
+  UINTa Atexture;
+  UINTa fence;
 
 #elif defined( __RADWII__ ) || defined( __RADNGC__ )
 
@@ -134,11 +124,11 @@ typedef struct BINKFRAMETEXTURES
 
 typedef struct BINKTEXTURESET
 {
-  // this is the GPU info for the textures
-  BINKFRAMETEXTURES textures[ BINKMAXFRAMEBUFFERS ];
-
   // this is the Bink info on the textures
   BINKFRAMEBUFFERS bink_buffers;
+
+  // this is the GPU info for the textures
+  BINKFRAMETEXTURES textures[ BINKMAXFRAMEBUFFERS ];
 
   // this is specialized global data for each platform
 
@@ -149,7 +139,7 @@ typedef struct BINKTEXTURESET
 
   #elif defined( __RADPS3__ )
 
-    GLuint pbo;
+    UINTa pbo;
     U32 framesize;
 
   #elif defined( __RADWII__ ) || defined( __RADNGC__ )
@@ -191,7 +181,8 @@ RADDEFFUNC void Draw_Bink_textures( if_used_3d_device
                                     F32 y_offset,
                                     F32 x_scale,
                                     F32 y_scale,
-                                    F32 alpha_level );
+                                    F32 alpha_level,
+                                    S32 is_premultiplied_alpha );
 
 //=============================================================================
 
@@ -224,15 +215,6 @@ RADDEFFUNC void Draw_Bink_textures( if_used_3d_device
     // sync the textures out to main memory (so that the GPU can see them)
     RADDEFFUNC void Sync_all_Bink_textures( void );
 
-  #else
-
-    //
-    // on Wii, NGC, Xenon and PS3, we can flush specific textures
-    //
-  
-    // sync the textures out to main memory (so that the GPU can see them)
-    RADDEFFUNC void Sync_Bink_textures( BINKTEXTURESET * set_textures );
-
   #endif
 
 #endif
@@ -248,9 +230,17 @@ RADDEFFUNC void Draw_Bink_textures( if_used_3d_device
 
   // creates the couple of shaders that we use
 #ifdef __RADPS3__
-  RADDEFFUNC S32 Create_Bink_shaders( );
+
+  // for GCM, local_mem should be a pointer that is BINK_TEXTURES_LOCAL_MEM bytes long
+  // for PSGL, local mem should be zero
+  RADDEFFUNC S32 Create_Bink_shaders( U32 width, U32 height, void * local_mem );
+
+  #define BINK_TEXTURES_LOCAL_MEM 768
+
 #else
+
   RADDEFFUNC S32 Create_Bink_shaders( LPDIRECT3DDEVICE9 d3d_device );
+
 #endif
 
   // free our shaders
@@ -260,4 +250,4 @@ RADDEFFUNC void Draw_Bink_textures( if_used_3d_device
 
 //=============================================================================
 
-#endif //_ACCLAIM_IGAADSYSTEM
+

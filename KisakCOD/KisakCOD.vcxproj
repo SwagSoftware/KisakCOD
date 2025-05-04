@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(LocalDebuggerWorkingDirectory)src\libwww\src;$(LocalDebuggerWorkingDirectory)src;F:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(LocalDebuggerWorkingDirectory)src\msslib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +89,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dxguid.lib; dsound.lib; ddraw.lib;d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(LocalDebuggerWorkingDirectory)src\binklib\binkw32.lib;$(LocalDebuggerWorkingDirectory)src\msslib\mss32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mss32.lib;dsound.lib;ddraw.lib;d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(LocalDebuggerWorkingDirectory)src\binklib\binkw32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -159,6 +159,7 @@
     <ClCompile Include="src\bgame\bg_vehicles_mp.cpp" />
     <ClCompile Include="src\bgame\bg_weapons.cpp" />
     <ClCompile Include="src\bgame\bg_weapons_load_obj.cpp" />
+    <ClCompile Include="src\binklib\binktextures.cpp" />
     <ClCompile Include="src\buildnumber_mp.cpp" />
     <ClCompile Include="src\cgame\cg_ammocounter.cpp" />
     <ClCompile Include="src\cgame\cg_camerashake.cpp" />
@@ -860,9 +861,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\physics\ode\placeholder.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="src\msslib\mss32.lib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\groupvoice\speex\Makefile.am" />

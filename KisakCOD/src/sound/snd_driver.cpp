@@ -303,6 +303,23 @@ void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int 
     float v4; // [esp+4h] [ebp-5Ch]
     float v5; // [esp+8h] [ebp-58h]
     float v6; // [esp+Ch] [ebp-54h]
+    MSS_SPEAKER src_list[18] = {
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER
+    };
+    MSS_SPEAKER dst_list[18] = { 
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, 
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, 
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, 
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, 
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER 
+    };
+
     float outVolumes[18]; // [esp+10h] [ebp-50h] BYREF
     MSSChannelMap *channelMap; // [esp+58h] [ebp-8h]
     int i; // [esp+5Ch] [ebp-4h]
@@ -326,7 +343,8 @@ void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int 
                 v3 = v5;
             outVolumes[i] = v3;
         }
-        AIL_set_sample_channel_levels(handle, outVolumes, channelMap->speakerCount);
+        //AIL_set_sample_channel_levels(handle, outVolumes, channelMap->speakerCount);
+        AIL_set_sample_channel_levels(handle, src_list, dst_list, outVolumes, channelMap->speakerCount);
     }
 }
 
@@ -471,10 +489,26 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
 
 void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t *alias)
 {
+    MSS_SPEAKER src_list[18] = {
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER
+    };
+    MSS_SPEAKER dst_list[18] = {
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER,
+        MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER, MSS_SPEAKER_FRONT_CENTER
+    };
     float outVolumes[19]; // [esp+0h] [ebp-58h] BYREF
     int index; // [esp+4Ch] [ebp-Ch]
     float notCenterPercentage; // [esp+50h] [ebp-8h]
-    int numChannels; // [esp+54h] [ebp-4h] BYREF
+    DWORD numChannels; // [esp+54h] [ebp-4h] BYREF
 
     if (!handle)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 797, 0, "%s", "handle");
@@ -482,7 +516,12 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t 
         MyAssertHandler(".\\win32\\snd_driver.cpp", 798, 0, "%s", "alias");
     if (SND_IsMultiChannel())
     {
-        AIL_sample_channel_levels(handle, &numChannels);
+        // LWSS ADD - get channel count
+        numChannels = AIL_sample_channel_count(handle, NULL);
+        // LWSS END
+        //AIL_sample_channel_levels(handle, &numChannels);
+        AIL_sample_channel_levels(handle, src_list, dst_list, outVolumes, numChannels);
+
         for (index = 0; index < numChannels; ++index)
             outVolumes[index] = 1.0;
         if (alias->centerPercentage != 0.0 && SND_IsMultiChannel())
@@ -493,7 +532,8 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t 
         }
         outVolumes[2] = alias->centerPercentage;
         outVolumes[3] = alias->lfePercentage;
-        AIL_set_sample_channel_levels(handle, outVolumes, numChannels);
+        //AIL_set_sample_channel_levels(handle, outVolumes, numChannels);
+        AIL_set_sample_channel_levels(handle, src_list, dst_list, outVolumes, numChannels);
     }
 }
 

@@ -7,3 +7,5 @@ KisakCOD/Release
 *.tlog
 *.log
 IDA/*
+/Debug
+*.exe
