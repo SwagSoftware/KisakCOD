@@ -951,14 +951,14 @@ void __cdecl FX_SpawnAllFutureLooping(
     long double mescUpdateBegin,
     long double msecUpdateEnd);
 void __cdecl FX_SpawnLoopingElems(
-    FxSystem* system,
-    FxEffect* effect,
+    FxSystem *system,
+    FxEffect *effect,
     int elemDefIndex,
-    FxSpatialFrame* frameBegin,
-    FxSpatialFrame* frameEnd,
-    int msecWhenPlayed,
-    int msecUpdateBegin,
-    int msecUpdateEnd);
+    const FxSpatialFrame *frameBegin,
+    const FxSpatialFrame *frameEnd,
+    long double msecWhenPlayed,
+    long double msecUpdateBegin,
+    long double msecUpdateEnd);
 int __cdecl FX_LimitStabilizeTimeForElemDef_Recurse(
     const FxElemDef *elemDef,
     bool needToSpawnSystem,

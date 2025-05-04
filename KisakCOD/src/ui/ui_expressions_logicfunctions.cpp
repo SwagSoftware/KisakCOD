@@ -1291,31 +1291,6 @@ void __cdecl bitwiseOr(Operand *leftSide, Operand *rightSide, Operand *result)
     result->internals.intVal = GetSourceInt(rightSide).intVal | v3.intVal;
 }
 
-void __cdecl multiply_J(int constraintRowCount, ConstraintRowData *rows, float *in)
-{
-    float suma; // [esp+0h] [ebp-18h]
-    float sum; // [esp+0h] [ebp-18h]
-    float sumb; // [esp+0h] [ebp-18h]
-    int i; // [esp+8h] [ebp-10h]
-    int body2; // [esp+Ch] [ebp-Ch]
-    float *in_ptr; // [esp+10h] [ebp-8h]
-
-    for (i = 0; i < constraintRowCount; ++i)
-    {
-        body2 = rows->body2;
-        in_ptr = &in[6 * rows->body1];
-        suma = Vec3Dot(rows->J_body1Linear, in_ptr) + (float)0.0;
-        sum = Vec3Dot(rows->J_body1Angular, in_ptr + 3) + suma;
-        if (body2 >= 0)
-        {
-            sumb = Vec3Dot(rows->J_body2Linear, &in[6 * body2]) + sum;
-            sum = Vec3Dot(rows->J_body2Angular, &in[6 * body2 + 3]) + sumb;
-        }
-        rows->rhs = sum;
-        ++rows;
-    }
-}
-
 
 void __cdecl subtract_IntFromInt(Operand *leftSide, Operand *rightSide, Operand *result)
 {

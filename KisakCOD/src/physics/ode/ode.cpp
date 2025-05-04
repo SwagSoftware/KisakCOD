@@ -1203,7 +1203,8 @@ void dWorldQuickStep (dWorldID w, dReal stepsize)
 {
   dUASSERT (w,"bad world argument");
   dUASSERT (stepsize > 0,"stepsize must be > 0");
-  dxProcessIslands (w,stepsize,&dxQuickStepper);
+  //dxProcessIslands (w,stepsize,&dxQuickStepper);
+  dxProcessIslands(w, stepsize);
 }
 
 

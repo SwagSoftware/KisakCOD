@@ -2036,7 +2036,7 @@ float __cdecl PitchForYawOnNormal(float fYaw, const float *normal)
     return (v4 * 180.0 / 3.141592741012573);
 }
 
-void __cdecl NearestPitchAndYawOnPlane(const float* angles, float* normal, float* result)
+void __cdecl NearestPitchAndYawOnPlane(const float* angles, const float* normal, float* result)
 {
     float projected[3]; // [esp+0h] [ebp-18h] BYREF
     float forward[3]; // [esp+Ch] [ebp-Ch] BYREF

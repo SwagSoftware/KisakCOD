@@ -31,6 +31,9 @@
 #include <ode/misc.h>
 // #include "lcp.h"
 #include "util.h"
+#include <universal/profile.h>
+#include <universal/com_math.h>
+#include <qcommon/qcommon.h>
 
 #define ALLOCA dALLOCA16
 
@@ -80,72 +83,124 @@ typedef dReal *dRealMutablePtr;
 
 // compute iMJ = inv(M)*J'
 
-static void compute_invM_JT (int m, dRealMutablePtr J, dRealMutablePtr iMJ, int *jb,
-	dxBody * const *body, dRealPtr invI)
+static void compute_invM_JT (int constraintRowCount,
+	unsigned int bodyCount,
+	ConstraintRowData *rows,
+	dxBody *const *body,
+	const float *invI)
 {
-	int i,j;
-	dRealMutablePtr iMJ_ptr = iMJ;
-	dRealMutablePtr J_ptr = J;
-	for (i=0; i<m; i++) {
-		int b1 = jb[i*2];	
-		int b2 = jb[i*2+1];
-		dReal k = body[b1]->invMass;
-		for (j=0; j<3; j++) iMJ_ptr[j] = k*J_ptr[j];
-		dMULTIPLY0_331 (iMJ_ptr + 3, invI + 12*b1, J_ptr + 3);
-		if (b2 >= 0) {
-			k = body[b2]->invMass;
-			for (j=0; j<3; j++) iMJ_ptr[j+6] = k*J_ptr[j+6];
-			dMULTIPLY0_331 (iMJ_ptr + 9, invI + 12*b2, J_ptr + 9);
+	unsigned int body1; // [esp+Ch] [ebp-10h]
+	int body2; // [esp+10h] [ebp-Ch]
+	int rowIndex; // [esp+14h] [ebp-8h]
+	ConstraintRowData *row_ptr; // [esp+18h] [ebp-4h]
+
+	if (!rows)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 151, 0, "%s", "rows");
+	if (!body)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 152, 0, "%s", "body");
+	if (!invI)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 153, 0, "%s", "invI");
+	row_ptr = rows;
+	for (rowIndex = 0; rowIndex < constraintRowCount; ++rowIndex)
+	{
+		body1 = row_ptr->body1;
+		body2 = row_ptr->body2;
+		if (body1 >= bodyCount)
+			MyAssertHandler(
+				".\\physics\\ode\\src\\quickstep.cpp",
+				161,
+				0,
+				"body1 doesn't index bodyCount\n\t%i not in [0, %i)",
+				body1,
+				bodyCount);
+		Vec3Scale(row_ptr->J_body1Linear, body[body1]->invMass, row_ptr->iMJ_body1Linear);
+		dMULTIPLY0_331<float, float, float>(row_ptr->iMJ_body1Angular, &invI[12 * body1], row_ptr->J_body1Angular);
+		if (body2 >= 0)
+		{
+			if (body2 >= bodyCount)
+				MyAssertHandler(
+					".\\physics\\ode\\src\\quickstep.cpp",
+					181,
+					0,
+					"body2 doesn't index bodyCount\n\t%i not in [0, %i)",
+					body2,
+					bodyCount);
+			Vec3Scale(row_ptr->J_body2Linear, body[body2]->invMass, row_ptr->iMJ_body2Linear);
+			dMULTIPLY0_331<float, float, float>(row_ptr->iMJ_body2Angular, &invI[12 * body2], row_ptr->J_body2Angular);
 		}
-		J_ptr += 12;
-		iMJ_ptr += 12;
+		++row_ptr;
 	}
 }
 
 
 // compute out = inv(M)*J'*in.
 
-static void multiply_invM_JT (int m, int nb, dRealMutablePtr iMJ, int *jb,
-	dRealMutablePtr in, dRealMutablePtr out)
-{
-	int i,j;
-	dSetZero (out,6*nb);
-	dRealPtr iMJ_ptr = iMJ;
-	for (i=0; i<m; i++) {
-		int b1 = jb[i*2];	
-		int b2 = jb[i*2+1];
-		dRealMutablePtr out_ptr = out + b1*6;
-		for (j=0; j<6; j++) out_ptr[j] += iMJ_ptr[j] * in[i];
-		iMJ_ptr += 6;
-		if (b2 >= 0) {
-			out_ptr = out + b2*6;
-			for (j=0; j<6; j++) out_ptr[j] += iMJ_ptr[j] * in[i];
-		}
-		iMJ_ptr += 6;
-	}
-}
+//static void multiply_invM_JT (int m, int nb, dRealMutablePtr iMJ, int *jb,
+//	dRealMutablePtr in, dRealMutablePtr out)
+//{
+//	int i,j;
+//	dSetZero (out,6*nb);
+//	dRealPtr iMJ_ptr = iMJ;
+//	for (i=0; i<m; i++) {
+//		int b1 = jb[i*2];	
+//		int b2 = jb[i*2+1];
+//		dRealMutablePtr out_ptr = out + b1*6;
+//		for (j=0; j<6; j++) out_ptr[j] += iMJ_ptr[j] * in[i];
+//		iMJ_ptr += 6;
+//		if (b2 >= 0) {
+//			out_ptr = out + b2*6;
+//			for (j=0; j<6; j++) out_ptr[j] += iMJ_ptr[j] * in[i];
+//		}
+//		iMJ_ptr += 6;
+//	}
+//}
 
 
 // compute out = J*in.
 
-static void multiply_J (int m, dRealMutablePtr J, int *jb,
-	dRealMutablePtr in, dRealMutablePtr out)
+//static void multiply_J (int m, dRealMutablePtr J, int *jb,
+//	dRealMutablePtr in, dRealMutablePtr out)
+//{
+//	int i,j;
+//	dRealPtr J_ptr = J;
+//	for (i=0; i<m; i++) {
+//		int b1 = jb[i*2];	
+//		int b2 = jb[i*2+1];
+//		dReal sum = 0;
+//		dRealMutablePtr in_ptr = in + b1*6;
+//		for (j=0; j<6; j++) sum += J_ptr[j] * in_ptr[j];				
+//		J_ptr += 6;
+//		if (b2 >= 0) {
+//			in_ptr = in + b2*6;
+//			for (j=0; j<6; j++) sum += J_ptr[j] * in_ptr[j];				
+//		}
+//		J_ptr += 6;
+//		out[i] = sum;
+//	}
+//}
+
+static void __cdecl multiply_J(int constraintRowCount, ConstraintRowData *rows, float *in)
 {
-	int i,j;
-	dRealPtr J_ptr = J;
-	for (i=0; i<m; i++) {
-		int b1 = jb[i*2];	
-		int b2 = jb[i*2+1];
-		dReal sum = 0;
-		dRealMutablePtr in_ptr = in + b1*6;
-		for (j=0; j<6; j++) sum += J_ptr[j] * in_ptr[j];				
-		J_ptr += 6;
-		if (b2 >= 0) {
-			in_ptr = in + b2*6;
-			for (j=0; j<6; j++) sum += J_ptr[j] * in_ptr[j];				
+	float suma; // [esp+0h] [ebp-18h]
+	float sum; // [esp+0h] [ebp-18h]
+	float sumb; // [esp+0h] [ebp-18h]
+	int i; // [esp+8h] [ebp-10h]
+	int body2; // [esp+Ch] [ebp-Ch]
+	float *in_ptr; // [esp+10h] [ebp-8h]
+
+	for (i = 0; i < constraintRowCount; ++i)
+	{
+		body2 = rows->body2;
+		in_ptr = &in[6 * rows->body1];
+		suma = Vec3Dot(rows->J_body1Linear, in_ptr) + 0.0;
+		sum = Vec3Dot(rows->J_body1Angular, in_ptr + 3) + suma;
+		if (body2 >= 0)
+		{
+			sumb = Vec3Dot(rows->J_body2Linear, &in[6 * body2]) + sum;
+			sum = Vec3Dot(rows->J_body2Angular, &in[6 * body2 + 3]) + sumb;
 		}
-		J_ptr += 6;
-		out[i] = sum;
+		rows->rhs = sum;
+		++rows;
 	}
 }
 
@@ -153,15 +208,15 @@ static void multiply_J (int m, dRealMutablePtr J, int *jb,
 // compute out = (J*inv(M)*J' + cfm)*in.
 // use z as an nb*6 temporary.
 
-static void multiply_J_invM_JT (int m, int nb, dRealMutablePtr J, dRealMutablePtr iMJ, int *jb,
-	dRealPtr cfm, dRealMutablePtr z, dRealMutablePtr in, dRealMutablePtr out)
-{
-	multiply_invM_JT (m,nb,iMJ,jb,in,z);
-	multiply_J (m,J,jb,z,out);
-
-	// add cfm
-	for (int i=0; i<m; i++) out[i] += cfm[i] * in[i];
-}
+//static void multiply_J_invM_JT (int m, int nb, dRealMutablePtr J, dRealMutablePtr iMJ, int *jb,
+//	dRealPtr cfm, dRealMutablePtr z, dRealMutablePtr in, dRealMutablePtr out)
+//{
+//	multiply_invM_JT (m,nb,iMJ,jb,in,z);
+//	multiply_J (m,J,jb,z,out);
+//
+//	// add cfm
+//	for (int i=0; i<m; i++) out[i] += cfm[i] * in[i];
+//}
 
 //***************************************************************************
 // conjugate gradient method with jacobi preconditioner
@@ -307,221 +362,648 @@ static int compare_index_error (const void *a, const void *b)
 
 #endif
 
-// KISAKTODO they fuck with this somehow
-static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *body,
-	dRealPtr invI, dRealMutablePtr lambda, dRealMutablePtr fc, dRealMutablePtr b,
-	dRealMutablePtr lo, dRealMutablePtr hi, dRealPtr cfm, int *findex,
-	dxQuickStepParameters *qs)
+unsigned int *g_holdrand;
+__int64 __cdecl SOR_LCP_irand(int max)
 {
-	const int num_iterations = qs->num_iterations;
-	const dReal sor_w = qs->w;		// SOR over-relaxation parameter
+	unsigned int holdrand; // [esp+0h] [ebp-Ch]
 
-	int i,j;
+	if (!g_holdrand)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 626, 0, "%s", "g_holdrand");
+	holdrand = 214013 * *g_holdrand + 2531011;
+	*g_holdrand = holdrand;
+	return ((holdrand >> 17) * max) >> 15;
+}
 
-#ifdef WARM_STARTING
-	// for warm starting, this seems to be necessary to prevent
-	// jerkiness in motor-driven joints. i have no idea why this works.
-	for (i=0; i<m; i++) lambda[i] *= 0.9;
-#else
-	dSetZero (lambda,m);
-#endif
+void __cdecl SOR_LCP_MainLoop(
+	unsigned int constraintRowCount,
+	ConstraintRowData *rows,
+	int *findex,
+	ConstraintForce *fc,
+	dxQuickStepParameters *qs,
+	SorLcpData *sd)
+{
+	int v6; // eax
+	float v7; // [esp+10h] [ebp-6Ch]
+	float v8; // [esp+14h] [ebp-68h]
+	float v9; // [esp+18h] [ebp-64h]
+	double v10; // [esp+1Ch] [ebp-60h]
+	double v11; // [esp+24h] [ebp-58h]
+	float v12; // [esp+2Ch] [ebp-50h]
+	int v13; // [esp+30h] [ebp-4Ch]
+	float v14; // [esp+34h] [ebp-48h]
+	float v15; // [esp+38h] [ebp-44h]
+	float v16; // [esp+3Ch] [ebp-40h]
+	float v17; // [esp+3Ch] [ebp-40h]
+	float scale; // [esp+3Ch] [ebp-40h]
+	float v19; // [esp+40h] [ebp-3Ch]
+	ConstraintForce *a; // [esp+48h] [ebp-34h]
+	float lo; // [esp+4Ch] [ebp-30h]
+	float hi; // [esp+50h] [ebp-2Ch]
+	ConstraintForce *start; // [esp+54h] [ebp-28h]
+	int body2; // [esp+58h] [ebp-24h]
+	ConstraintRowData *b; // [esp+5Ch] [ebp-20h]
+	int index; // [esp+60h] [ebp-1Ch]
+	int tmp; // [esp+68h] [ebp-14h]
+	int swapi; // [esp+6Ch] [ebp-10h]
+	unsigned int iteration; // [esp+70h] [ebp-Ch]
+	unsigned int num_iterations; // [esp+74h] [ebp-8h]
+	unsigned int i; // [esp+78h] [ebp-4h]
+	unsigned int ia; // [esp+78h] [ebp-4h]
 
-	// the lambda computed at the previous iteration.
-	// this is used to measure error for when we are reordering the indexes.
-	dRealAllocaArray (last_lambda,m);
-
-	// a copy of the 'hi' vector in case findex[] is being used
-	dRealAllocaArray (hicopy,m);
-	memcpy (hicopy,hi,m*sizeof(dReal));
-
-	// precompute iMJ = inv(M)*J'
-	dRealAllocaArray (iMJ,m*12);
-	compute_invM_JT (m,J,iMJ,jb,body,invI);
-
-	// compute fc=(inv(M)*J')*lambda. we will incrementally maintain fc
-	// as we change lambda.
-#ifdef WARM_STARTING
-	multiply_invM_JT (m,nb,iMJ,jb,lambda,fc);
-#else
-	dSetZero (fc,nb*6);
-#endif
-
-	// precompute 1 / diagonals of A
-	dRealAllocaArray (Ad,m);
-	dRealPtr iMJ_ptr = iMJ;
-	dRealMutablePtr J_ptr = J;
-	for (i=0; i<m; i++) {
-		dReal sum = 0;
-		for (j=0; j<6; j++) sum += iMJ_ptr[j] * J_ptr[j];
-		if (jb[i*2+1] >= 0) {
-			for (j=6; j<12; j++) sum += iMJ_ptr[j] * J_ptr[j];
-		}
-		iMJ_ptr += 12;
-		J_ptr += 12;
-		Ad[i] = sor_w / (sum + cfm[i]);
-	}
-
-	// scale J and b by Ad
-	J_ptr = J;
-	for (i=0; i<m; i++) {
-		for (j=0; j<12; j++) {
-			J_ptr[0] *= Ad[i];
-			J_ptr++;
-		}
-		b[i] *= Ad[i];
-	}
-
-	// scale Ad by CFM
-	for (i=0; i<m; i++) Ad[i] *= cfm[i];
-
-	// order to solve constraint rows in
-	IndexError *order = (IndexError*) alloca (m*sizeof(IndexError));
-
-#ifndef REORDER_CONSTRAINTS
-	// make sure constraints with findex < 0 come first.
-	j=0;
-	for (i=0; i<m; i++) if (findex[i] < 0) order[j++].index = i;
-	for (i=0; i<m; i++) if (findex[i] >= 0) order[j++].index = i;
-	dIASSERT (j==m);
-#endif
-
-	for (int iteration=0; iteration < num_iterations; iteration++) {
-
-#ifdef REORDER_CONSTRAINTS
-		// constraints with findex < 0 always come first.
-		if (iteration < 2) {
-			// for the first two iterations, solve the constraints in
-			// the given order
-			for (i=0; i<m; i++) {
-				order[i].error = i;
-				order[i].findex = findex[i];
-				order[i].index = i;
+	num_iterations = qs->num_iterations;
+	for (iteration = 0; iteration < num_iterations; ++iteration)
+	{
+		if ((iteration & 7) == 7)
+		{
+			for (i = 0; i < constraintRowCount; ++i)
+			{
+				swapi = SOR_LCP_irand(constraintRowCount);
+				v6 = SOR_LCP_irand(constraintRowCount);
+				tmp = sd->order[swapi];
+				sd->order[swapi] = sd->order[v6];
+				sd->order[v6] = tmp;
 			}
 		}
-		else {
-			// sort the constraints so that the ones converging slowest
-			// get solved last. use the absolute (not relative) error.
-			for (i=0; i<m; i++) {
-				dReal v1 = dFabs (lambda[i]);
-				dReal v2 = dFabs (last_lambda[i]);
-				dReal max = (v1 > v2) ? v1 : v2;
-				if (max > 0) {
-					//@@@ relative error: order[i].error = dFabs(lambda[i]-last_lambda[i])/max;
-					order[i].error = dFabs(lambda[i]-last_lambda[i]);
-				}
-				else {
-					order[i].error = dInfinity;
-				}
-				order[i].findex = findex[i];
-				order[i].index = i;
+		for (ia = 0; ia < constraintRowCount; ++ia)
+		{
+			index = sd->order[ia];
+			v13 = findex[index];
+			b = &rows[index];
+			if (v13 < 0)
+			{
+				hi = b->hi;
+				lo = b->lo;
 			}
-		}
-		qsort (order,m,sizeof(IndexError),&compare_index_error);
-#endif
-#ifdef RANDOMLY_REORDER_CONSTRAINTS
-                if ((iteration & 7) == 0) {
-			for (i=1; i<m; ++i) {
-				IndexError tmp = order[i];
-				int swapi = dRandInt(i+1);
-				order[i] = order[swapi];
-				order[swapi] = tmp;
+			else
+			{
+				v15 = rows[v13].lambda * b->hi;
+				v12 = fabs(v15);
+				hi = v12;
+				lo = -v12;
 			}
-                }
-#endif
-
-		//@@@ potential optimization: swap lambda and last_lambda pointers rather
-		//    than copying the data. we must make sure lambda is properly
-		//    returned to the caller
-		memcpy (last_lambda,lambda,m*sizeof(dReal));
-
-		for (int i=0; i<m; i++) {
-			// @@@ potential optimization: we could pre-sort J and iMJ, thereby
-			//     linearizing access to those arrays. hmmm, this does not seem
-			//     like a win, but we should think carefully about our memory
-			//     access pattern.
-		
-			int index = order[i].index;
-			J_ptr = J + index*12;
-			iMJ_ptr = iMJ + index*12;
-		
-			// set the limits for this constraint. note that 'hicopy' is used.
-			// this is the place where the QuickStep method differs from the
-			// direct LCP solving method, since that method only performs this
-			// limit adjustment once per time step, whereas this method performs
-			// once per iteration per constraint row.
-			// the constraints are ordered so that all lambda[] values needed have
-			// already been computed.
-			if (findex[index] >= 0) {
-				hi[index] = dFabs (hicopy[index] * lambda[findex[index]]);
-				lo[index] = -hi[index];
+			body2 = b->body2;
+			a = &fc[b->body1];
+			v16 = b->rhs - rows[index].lambda * b->Ad;
+			v11 = Vec3Dot(a->linear, b->J_body1Linear);
+			v17 = v16 - (Vec3Dot(a->angular, b->J_body1Angular) + v11);
+			start = 0;
+			if (body2 >= 0)
+			{
+				start = &fc[body2];
+				v10 = Vec3Dot(start->linear, b->J_body2Linear);
+				v17 = v17 - (Vec3Dot(start->angular, b->J_body2Angular) + v10);
 			}
-
-			int b1 = jb[index*2];
-			int b2 = jb[index*2+1];
-			dReal delta = b[index] - lambda[index]*Ad[index];
-			dRealMutablePtr fc_ptr = fc + 6*b1;
-			
-			// @@@ potential optimization: SIMD-ize this and the b2 >= 0 case
-			delta -=fc_ptr[0] * J_ptr[0] + fc_ptr[1] * J_ptr[1] +
-				fc_ptr[2] * J_ptr[2] + fc_ptr[3] * J_ptr[3] +
-				fc_ptr[4] * J_ptr[4] + fc_ptr[5] * J_ptr[5];
-			// @@@ potential optimization: handle 1-body constraints in a separate
-			//     loop to avoid the cost of test & jump?
-			if (b2 >= 0) {
-				fc_ptr = fc + 6*b2;
-				delta -=fc_ptr[0] * J_ptr[6] + fc_ptr[1] * J_ptr[7] +
-					fc_ptr[2] * J_ptr[8] + fc_ptr[3] * J_ptr[9] +
-					fc_ptr[4] * J_ptr[10] + fc_ptr[5] * J_ptr[11];
-			}
-
-			// compute lambda and clamp it to [lo,hi].
-			// @@@ potential optimization: does SSE have clamping instructions
-			//     to save test+jump penalties here?
-			dReal new_lambda = lambda[index] + delta;
-			if (new_lambda < lo[index]) {
-				delta = lo[index]-lambda[index];
-				lambda[index] = lo[index];
-			}
-			else if (new_lambda > hi[index]) {
-				delta = hi[index]-lambda[index];
-				lambda[index] = hi[index];
-			}
-			else {
-				lambda[index] = new_lambda;
-			}
-
-			//@@@ a trick that may or may not help
-			//dReal ramp = (1-((dReal)(iteration+1)/(dReal)num_iterations));
-			//delta *= ramp;
-		
-			// update fc.
-			// @@@ potential optimization: SIMD for this and the b2 >= 0 case
-			fc_ptr = fc + 6*b1;
-			fc_ptr[0] += delta * iMJ_ptr[0];
-			fc_ptr[1] += delta * iMJ_ptr[1];
-			fc_ptr[2] += delta * iMJ_ptr[2];
-			fc_ptr[3] += delta * iMJ_ptr[3];
-			fc_ptr[4] += delta * iMJ_ptr[4];
-			fc_ptr[5] += delta * iMJ_ptr[5];
-			// @@@ potential optimization: handle 1-body constraints in a separate
-			//     loop to avoid the cost of test & jump?
-			if (b2 >= 0) {
-				fc_ptr = fc + 6*b2;
-				fc_ptr[0] += delta * iMJ_ptr[6];
-				fc_ptr[1] += delta * iMJ_ptr[7];
-				fc_ptr[2] += delta * iMJ_ptr[8];
-				fc_ptr[3] += delta * iMJ_ptr[9];
-				fc_ptr[4] += delta * iMJ_ptr[10];
-				fc_ptr[5] += delta * iMJ_ptr[11];
+			v19 = rows[index].lambda + v17;
+			v9 = v19 - hi;
+			if (v9 < 0.0)
+				v14 = rows[index].lambda + v17;
+			else
+				v14 = hi;
+			v8 = lo - v19;
+			if (v8 < 0.0)
+				v7 = v14;
+			else
+				v7 = lo;
+			scale = v7 - rows[index].lambda;
+			rows[index].lambda = v7;
+			Vec3Mad(a->linear, scale, b->iMJ_body1Linear, a->linear);
+			Vec3Mad(a->angular, scale, b->iMJ_body1Angular, a->angular);
+			if (body2 >= 0)
+			{
+				Vec3Mad(start->linear, scale, b->iMJ_body2Linear, start->linear);
+				Vec3Mad(start->angular, scale, b->iMJ_body2Angular, start->angular);
 			}
 		}
 	}
 }
 
-
-void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
-		     dxJoint * const *_joint, int nj, dReal stepsize)
+void __cdecl SOR_LCP_MainLoop_OneBody(
+	unsigned int constraintRowCount,
+	ConstraintRowData *rows,
+	int *findex,
+	ConstraintForce *fc,
+	dxQuickStepParameters *qs,
+	SorLcpData *sd)
 {
+	float v6; // [esp+10h] [ebp-64h]
+	float v7; // [esp+14h] [ebp-60h]
+	float v8; // [esp+18h] [ebp-5Ch]
+	double v9; // [esp+1Ch] [ebp-58h]
+	float v10; // [esp+24h] [ebp-50h]
+	int v11; // [esp+28h] [ebp-4Ch]
+	float v12; // [esp+2Ch] [ebp-48h]
+	float v13; // [esp+30h] [ebp-44h]
+	float v14; // [esp+34h] [ebp-40h]
+	float v15; // [esp+34h] [ebp-40h]
+	float scale; // [esp+34h] [ebp-40h]
+	float v17; // [esp+38h] [ebp-3Ch]
+	float lo; // [esp+3Ch] [ebp-38h]
+	float hi; // [esp+40h] [ebp-34h]
+	ConstraintRowData *b; // [esp+44h] [ebp-30h]
+	int index; // [esp+48h] [ebp-2Ch]
+	int swapj; // [esp+4Ch] [ebp-28h]
+	int tmp; // [esp+50h] [ebp-24h]
+	int swapi; // [esp+54h] [ebp-20h]
+	ConstraintForce *fc_ptr_linear; // [esp+58h] [ebp-1Ch]
+	int body; // [esp+5Ch] [ebp-18h]
+	unsigned int iteration; // [esp+60h] [ebp-14h]
+	unsigned int num_iterations; // [esp+68h] [ebp-Ch]
+	float *fc_ptr_angular; // [esp+6Ch] [ebp-8h]
+	unsigned int i; // [esp+70h] [ebp-4h]
+	unsigned int ia; // [esp+70h] [ebp-4h]
+
+	num_iterations = qs->num_iterations;
+	body = rows->body1;
+	fc_ptr_linear = &fc[body];
+	fc_ptr_angular = fc_ptr_linear->angular;
+	for (iteration = 0; iteration < num_iterations; ++iteration)
+	{
+		if ((iteration & 7) == 7)
+		{
+			for (i = 0; i < constraintRowCount; ++i)
+			{
+				swapi = SOR_LCP_irand(constraintRowCount);
+				swapj = SOR_LCP_irand(constraintRowCount);
+				tmp = sd->order[swapi];
+				sd->order[swapi] = sd->order[swapj];
+				sd->order[swapj] = tmp;
+			}
+		}
+		for (ia = 0; ia < constraintRowCount; ++ia)
+		{
+			index = sd->order[ia];
+			if (body != rows[index].body1)
+				MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 727, 0, "%s", "body == rows[index].body1");
+			if (rows[index].body2 >= 0)
+				MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 728, 0, "%s", "rows[index].body2 < 0");
+			v11 = findex[index];
+			b = &rows[index];
+			if (v11 < 0)
+			{
+				hi = b->hi;
+				lo = b->lo;
+			}
+			else
+			{
+				v13 = rows[v11].lambda * b->hi;
+				v10 = fabs(v13);
+				hi = v10;
+				lo = -v10;
+			}
+			v14 = b->rhs - rows[index].lambda * b->Ad;
+			v9 = Vec3Dot(fc_ptr_linear->linear, b->J_body1Linear);
+			v15 = v14 - (Vec3Dot(fc_ptr_angular, b->J_body1Angular) + v9);
+			v17 = rows[index].lambda + v15;
+			v8 = v17 - hi;
+			if (v8 < 0.0)
+				v12 = rows[index].lambda + v15;
+			else
+				v12 = hi;
+			v7 = lo - v17;
+			if (v7 < 0.0)
+				v6 = v12;
+			else
+				v6 = lo;
+			scale = v6 - rows[index].lambda;
+			rows[index].lambda = v6;
+			Vec3Mad(fc_ptr_linear->linear, scale, b->iMJ_body1Linear, fc_ptr_linear->linear);
+			Vec3Mad(fc_ptr_angular, scale, b->iMJ_body1Angular, fc_ptr_angular);
+		}
+	}
+}
+
+// KISAKTODO they fuck with this somehow
+static void SOR_LCP (int constraintRowCount,
+	unsigned int bodyCount,
+	ConstraintRowData *rows,
+	dxBody *const *body,
+	const float *invI,
+	ConstraintForce *fc,
+	const float *cfm,
+	int *findex,
+	dxQuickStepParameters *qs,
+	SorLcpData *sd)
+{
+	float suma; // [esp+38h] [ebp-18h]
+	float sum; // [esp+38h] [ebp-18h]
+	float sumb; // [esp+38h] [ebp-18h]
+	int j; // [esp+3Ch] [ebp-14h]
+	float sor_w; // [esp+40h] [ebp-10h]
+	int k; // [esp+44h] [ebp-Ch]
+	int i; // [esp+48h] [ebp-8h]
+	int ia; // [esp+48h] [ebp-8h]
+	int ib; // [esp+48h] [ebp-8h]
+	ConstraintRowData *row_ptr; // [esp+4Ch] [ebp-4h]
+	ConstraintRowData *row_ptra; // [esp+4Ch] [ebp-4h]
+
+	sor_w = qs->w;
+	if (constraintRowCount > 444)
+		MyAssertHandler(
+			".\\physics\\ode\\src\\quickstep.cpp",
+			769,
+			0,
+			"%s\n\t(constraintRowCount) = %i",
+			"(constraintRowCount <= ( 74 * 6 ))",
+			constraintRowCount);
+	if (!rows)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 770, 0, "%s", "rows");
+	if (!body)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 771, 0, "%s", "body");
+	if (!qs)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 772, 0, "%s", "qs");
+	if (!sd)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 773, 0, "%s", "sd");
+	Profile_Begin(385);
+	compute_invM_JT(constraintRowCount, bodyCount, rows, body, invI);
+	memset(fc, 0, 24 * bodyCount);
+	row_ptr = rows;
+	for (i = 0; i < constraintRowCount; ++i)
+	{
+		suma = Vec3Dot(row_ptr->J_body1Linear, row_ptr->iMJ_body1Linear) + 0.0;
+		sum = Vec3Dot(row_ptr->J_body1Angular, row_ptr->iMJ_body1Angular) + suma;
+		if (row_ptr->body2 >= 0)
+		{
+			sumb = Vec3Dot(row_ptr->J_body2Linear, row_ptr->iMJ_body2Linear) + sum;
+			sum = Vec3Dot(row_ptr->J_body2Angular, row_ptr->iMJ_body2Angular) + sumb;
+		}
+		if (sum + cfm[i] == 0.0)
+			MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 825, 0, "%s", "sum + cfm[i] != 0");
+		row_ptr->Ad = sor_w / (sum + cfm[i]);
+		++row_ptr;
+	}
+	row_ptra = rows;
+	for (ia = 0; ia < constraintRowCount; ++ia)
+	{
+		Vec3Scale(row_ptra->J_body1Linear, row_ptra->Ad, row_ptra->J_body1Linear);
+		Vec3Scale(row_ptra->J_body1Angular, row_ptra->Ad, row_ptra->J_body1Angular);
+		Vec3Scale(row_ptra->J_body2Linear, row_ptra->Ad, row_ptra->J_body2Linear);
+		Vec3Scale(row_ptra->J_body2Angular, row_ptra->Ad, row_ptra->J_body2Angular);
+		row_ptra->rhs = row_ptra->rhs * row_ptra->Ad;
+		row_ptra->Ad = row_ptra->Ad * cfm[ia];
+		++row_ptra;
+	}
+	j = 0;
+	k = 1;
+	for (ib = 0; ib < constraintRowCount; ++ib)
+	{
+		if (findex[ib] >= 0)
+			sd->order[constraintRowCount - k++] = ib;
+		else
+			sd->order[j++] = ib;
+	}
+	if (j + k - 1 != constraintRowCount)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 861, 0, "%s", "(j + k - 1) == constraintRowCount");
+	if (bodyCount == 1)
+		SOR_LCP_MainLoop_OneBody(constraintRowCount, rows, findex, fc, qs, sd);
+	else
+		SOR_LCP_MainLoop(constraintRowCount, rows, findex, fc, qs, sd);
+	Profile_EndInternal(0);
+}
+
+const char *spaces =
+"                                        ";
+
+void __cdecl pr_0(const char *msg, int indent)
+{
+	int v2; // [esp+0h] [ebp-8h]
+	int v3; // [esp+4h] [ebp-4h]
+
+	if (indent < 40)
+		v3 = indent;
+	else
+		v3 = 40;
+	if (v3 > 0)
+		v2 = v3;
+	else
+		v2 = 0;
+	Com_Printf(20, "%s%s", &spaces[40 - v2], msg);
+}
+
+const char *__cdecl jointKind(const dxJoint *joint)
+{
+	switch (joint->typenum)
+	{
+	case 4:
+		return "Contact";
+	case 8:
+		return "AMotor";
+	case 2:
+		return "Hinge";
+	case 1:
+		return "Ball";
+	}
+	return "Unknown";
+}
+
+int __cdecl ptrIdx(void **ptrs, void *ptr, int numPtrs)
+{
+	int i; // [esp+0h] [ebp-4h]
+
+	for (i = 0; i < numPtrs; ++i)
+	{
+		if (ptrs[i] == ptr)
+			return i;
+	}
+	return -1;
+}
+
+void __cdecl dumpBodyJoints(dxWorld *world, dxBody **bodies, int bodyCount, dxJoint *const *joints, int jointCount)
+{
+	// KISAKTODOLATER: Physics debug dumping
+#if 0
+	const char *v5; // eax
+	const char *v6; // eax
+	int v7; // eax
+	const char *v8; // eax
+	const char *v9; // eax
+	int v10; // [esp+30h] [ebp-34h]
+	const char *v11; // [esp+34h] [ebp-30h]
+	int bodyIdx; // [esp+3Ch] [ebp-28h]
+	float normal; // [esp+40h] [ebp-24h]
+	float normal_4; // [esp+44h] [ebp-20h]
+	float normal_8; // [esp+48h] [ebp-1Ch]
+	int jointIdx; // [esp+50h] [ebp-14h]
+	const dxJoint *joint; // [esp+54h] [ebp-10h]
+	const dxBody *body; // [esp+58h] [ebp-Ch]
+	dxJointNode *jointNode; // [esp+5Ch] [ebp-8h]
+
+	v5 = va("Dumping island - %d bodies, %d joints\n", bodyCount, jointCount);
+	pr_0(v5, 0);
+	for (bodyIdx = 0; bodyIdx < bodyCount; ++bodyIdx)
+	{
+		body = bodies[bodyIdx];
+		v6 = va(
+			"\n%d: %0x8p  Mass: %f  Vel: %f %f %f  AVel: %f %f %f\n",
+			bodyIdx,
+			body,
+			body->mass.mass,
+			body->info.lvel[0],
+			body->info.lvel[1],
+			body->info.lvel[2],
+			body->info.avel[0],
+			body->info.avel[1],
+			body->info.avel[2]);
+		pr_0(v6, 0);
+		jointNode = body->firstjoint;
+		jointIdx = 0;
+		while (jointNode)
+		{
+			joint = jointNode->joint;
+			v11 = jointKind(jointNode->joint);
+			v10 = ptrIdx((void**)bodies, joint->node[1].body, bodyCount);
+			v7 = ptrIdx((void **)bodies, joint->node[0].body, bodyCount);
+			v8 = va("%d: %0x8p  Bodies: %d %d  Kind: %s  ", jointIdx, joint, v7, v10, v11);
+			pr_0(v8, 4);
+			if (joint->typenum == 4)
+			{
+				if ((joint->flags & 2) != 0)
+				{
+					normal = -*&joint[2].world;
+					normal_4 = -*&joint[2].next;
+					normal_8 = -*&joint[2].tome;
+				}
+				else
+				{
+					normal = *&joint[2].world;
+					normal_4 = *&joint[2].next;
+					normal_8 = *&joint[2].tome;
+				}
+				v9 = va(
+					"Pos: %f %f %f  Normal: %f %f %f  Depth: %f\n",
+					*&joint[1].node[1].body,
+					*&joint[1].node[1].bodyTag,
+					*&joint[1].node[1].next,
+					normal,
+					normal_4,
+					normal_8,
+					*&joint[2].tag);
+				pr_0(v9, 0);
+			}
+			else
+			{
+				pr_0("\n", 0);
+			}
+			jointNode = jointNode->next;
+			++jointIdx;
+		}
+	}
+#endif
+}
+
+void dxQuickStepper (dxWorld *world,
+	dxBody **body,
+	int bodyCount,
+	dxJoint **joint,
+	int jointCount,
+	float stepsize)
+{
+	float A[6]; // [esp+Ch] [ebp-20CCh] BYREF
+	unsigned __int8 *dst; // [esp+48h] [ebp-2090h]
+	int j; // [esp+4Ch] [ebp-208Ch]
+	float invI[240]; // [esp+50h] [ebp-2088h] BYREF
+	ConstraintForce fc[14]; // [esp+418h] [ebp-1CC0h] BYREF
+	int m; // [esp+568h] [ebp-1B70h]
+	int n; // [esp+56Ch] [ebp-1B6Ch]
+	float B[168]; // [esp+570h] [ebp-1B68h] BYREF
+	dxJoint::Info1 info[74]; // [esp+810h] [ebp-18C8h] BYREF
+	float a[444]; // [esp+A60h] [ebp-1678h] BYREF
+	float cfm[444]; // [esp+1150h] [ebp-F88h] BYREF
+	int findex[444]; // [esp+1840h] [ebp-898h] BYREF
+	float in[84]; // [esp+1F30h] [ebp-1A8h] BYREF
+	int bodyTag; // [esp+2080h] [ebp-58h]
+	dxJoint::Info2 v20; // [esp+2084h] [ebp-54h] BYREF
+	float v21; // [esp+20B4h] [ebp-24h]
+	float v22; // [esp+20B8h] [ebp-20h]
+	float invMass; // [esp+20BCh] [ebp-1Ch]
+	unsigned __int8 *v24; // [esp+20C0h] [ebp-18h]
+	SorLcpData *sd; // [esp+20C4h] [ebp-14h]
+	int i; // [esp+20C8h] [ebp-10h]
+	float v27; // [esp+20CCh] [ebp-Ch]
+	dxWorldStepInfo *stepInfo; // [esp+20D0h] [ebp-8h]
+	int v29; // [esp+20D4h] [ebp-4h]
+
+	if (!world)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1104, 0, "%s", "world");
+	if (!body)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1105, 0, "%s", "body");
+	if (!joint)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1106, 0, "%s", "joint");
+	if (jointCount >= 74 || bodyCount >= 14)
+		dumpBodyJoints(world, body, bodyCount, joint, jointCount);
+	if (jointCount >= 0x4A)
+		MyAssertHandler(
+			".\\physics\\ode\\src\\quickstep.cpp",
+			1113,
+			0,
+			"jointCount doesn't index ISLAND_MAX_JOINT_COUNT\n\t%i not in [0, %i)",
+			jointCount,
+			74);
+	if (bodyCount >= 0xE)
+		MyAssertHandler(
+			".\\physics\\ode\\src\\quickstep.cpp",
+			1114,
+			0,
+			"bodyCount doesn't index ISLAND_MAX_BODY_COUNT\n\t%i not in [0, %i)",
+			bodyCount,
+			14);
+	A[2] = 1.0 / stepsize;
+	v22 = A[2];
+	stepInfo = &world->stepInfo;
+	if (!stepInfo)
+		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1144, 0, "%s", "stepInfo");
+	g_holdrand = &stepInfo->holdrand;
+	dst = (unsigned char*)&world->qd;
+	sd = &world->sd;
+	for (i = 0; i < bodyCount; ++i)
+	{
+		dMULTIPLY2_333<float, float, float>(&A[3], body[i]->mass.I, body[i]->info.R);
+		dMULTIPLY0_333<float, float, float>(&B[12 * i], body[i]->info.R, &A[3]);
+		dMULTIPLY2_333<float, float, float>(&A[3], body[i]->invI, body[i]->info.R);
+		dMULTIPLY0_333<float, float, float>(&invI[12 * i], body[i]->info.R, &A[3]);
+		dMULTIPLY0_331<float, float, float>(&A[3], &B[12 * i], body[i]->info.avel);
+		body[i]->tacc[0] = body[i]->tacc[0] - (body[i]->info.avel[1] * A[5] - body[i]->info.avel[2] * A[4]);
+		body[i]->tacc[1] = body[i]->tacc[1] - (body[i]->info.avel[2] * A[3] - body[i]->info.avel[0] * A[5]);
+		body[i]->tacc[2] = body[i]->tacc[2] - (body[i]->info.avel[0] * A[4] - body[i]->info.avel[1] * A[3]);
+	}
+	for (i = 0; i < bodyCount; ++i)
+	{
+		if ((body[i]->flags & 8) == 0)
+		{
+			body[i]->facc[0] = body[i]->mass.mass * stepInfo->gravity[0] + body[i]->facc[0];
+			body[i]->facc[1] = body[i]->mass.mass * stepInfo->gravity[1] + body[i]->facc[1];
+			body[i]->facc[2] = body[i]->mass.mass * stepInfo->gravity[2] + body[i]->facc[2];
+		}
+	}
+	n = 0;
+	for (i = 0; i < jointCount; ++i)
+	{
+		jointGetInfo1(joint[i], &info[i]);
+		if (info[i].m > 6u || info[i].nub < 0 || info[i].nub > info[i].m)
+			MyAssertHandler(
+				".\\physics\\ode\\src\\quickstep.cpp",
+				1228,
+				0,
+				"%s",
+				"info[i].m >= 0 && info[i].m <= 6 && info[i].nub >= 0 && info[i].nub <= info[i].m");
+		LODWORD(invI[i + 168]) = n;
+		n += info[i].m;
+	}
+	if (n > 444)
+		MyAssertHandler(
+			".\\physics\\ode\\src\\quickstep.cpp",
+			1233,
+			0,
+			"%s\n\t(constraintRowCount) = %i",
+			"(constraintRowCount <= ( 74 * 6 ))",
+			n);
+	if (n > 0)
+	{
+		dSetZero(a, n);
+		dSetValue(cfm, n, stepInfo->global_cfm);
+		memset(dst, 0, 144 * n);
+		for (i = 0; i < n; ++i)
+		{
+			*&dst[144 * i + 128] = -3.4028235e38;
+			*&dst[144 * i + 132] = 3.4028235e38;
+			findex[i] = -1;
+		}
+		v20.rowskip = 36;
+		v20.fps = v22;
+		v20.erp = stepInfo->global_erp;
+		for (i = 0; i < jointCount; ++i)
+		{
+			m = info[i].m;
+			if (m)
+			{
+				v21 = invI[i + 168];
+				v24 = &dst[144 * LODWORD(v21)];
+				v20.J1l = (dReal*)v24;
+				v20.J1a = (dReal*)(v24 + 16);
+				v20.J2l = (dReal*)(v24 + 32);
+				v20.J2a = (dReal*)(v24 + 48);
+				v20.c = &a[LODWORD(v21)];
+				v20.cfm = &cfm[LODWORD(v21)];
+				v20.lo = (dReal*)(v24 + 128);
+				v20.hi = (dReal*)(v24 + 132);
+				v20.findex = &findex[LODWORD(v21)];
+				jointGetInfo2(joint[i], stepInfo, &v20);
+				for (j = 0; j < m; ++j)
+				{
+					if (findex[j + LODWORD(v21)] >= 0)
+						findex[j + LODWORD(v21)] += LODWORD(v21);
+				}
+			}
+		}
+		v24 = dst;
+		for (i = 0; i < jointCount; ++i)
+		{
+			bodyTag = joint[i]->node[0].bodyTag;
+			v29 = joint[i]->node[1].bodyTag;
+			for (j = 0; j < info[i].m; ++j)
+			{
+				*(v24 + 7) = bodyTag;
+				*(v24 + 11) = v29;
+				v24 += 144;
+			}
+		}
+		if (v24 != &dst[144 * n])
+			MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1310, 0, "%s", "row == qd->rowData + constraintRowCount");
+		for (i = 0; i < bodyCount; ++i)
+		{
+			invMass = body[i]->invMass;
+			for (j = 0; j < 3; ++j)
+				in[6 * i + j] = body[i]->facc[j] * invMass + body[i]->info.lvel[j] * v22;
+			dMULTIPLY0_331<float, float, float>(&in[6 * i + 3], &invI[12 * i], body[i]->tacc);
+			for (j = 0; j < 3; ++j)
+				in[6 * i + 3 + j] = body[i]->info.avel[j] * v22 + in[6 * i + 3 + j];
+		}
+		multiply_J(n, (ConstraintRowData *)dst, in);
+		for (i = 0; i < n; ++i)
+		{
+			*&dst[144 * i + 136] = a[i] * v22 - *&dst[144 * i + 136];
+			cfm[i] = cfm[i] * v22;
+		}
+		SOR_LCP(n, bodyCount, (ConstraintRowData*)dst, body, invI, fc, cfm, findex, &stepInfo->qs, sd);
+		for (i = 0; i < bodyCount; ++i)
+		{
+			Vec3Mad(body[i]->info.lvel, stepsize, fc[i].linear, body[i]->info.lvel);
+			Vec3Mad(body[i]->info.avel, stepsize, fc[i].angular, body[i]->info.avel);
+		}
+	}
+	for (i = 0; i < bodyCount; ++i)
+	{
+		invMass = body[i]->invMass;
+		for (j = 0; j < 3; ++j)
+			body[i]->info.lvel[j] = stepsize * invMass * body[i]->facc[j] + body[i]->info.lvel[j];
+		for (j = 0; j < 3; ++j)
+			body[i]->tacc[j] = body[i]->tacc[j] * stepsize;
+		dMULTIPLYADD0_331<float, float, float>(body[i]->info.avel, &invI[12 * i], body[i]->tacc);
+	}
+	for (i = 0; i < bodyCount; ++i)
+	{
+		v27 = Vec3LengthSq(body[i]->info.avel);
+		if (v27 > 1600.0)
+		{
+			A[1] = sqrt(v27);
+			v27 = 39.0 / A[1];
+			Vec3Scale(body[i]->info.avel, v27, body[i]->info.avel);
+		}
+		v27 = Vec3LengthSq(body[i]->info.lvel);
+		if (v27 > 9.99999995904e11)
+		{
+			A[0] = sqrt(v27);
+			v27 = 999900.0 / A[0];
+			Vec3Scale(body[i]->info.lvel, v27, body[i]->info.lvel);
+		}
+	}
+	for (i = 0; i < bodyCount; ++i)
+	{
+		dxStepBody(body[i], stepsize);
+		body[i]->flags &= ~4u;
+	}
+	for (j = 0; j < jointCount; ++j)
+		joint[j]->tag = 1;
+#if 0
 	int i,j;
 	IFTIMING(dTimerStart("preprocessing");)
 
@@ -786,4 +1268,5 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 
 	IFTIMING (dTimerEnd();)
 	IFTIMING (if (m > 0) dTimerReport (stdout,1);)
+#endif
 }

@@ -2556,14 +2556,14 @@ dxJointHinge *__cdecl Phys_CreateHinge(
     float lowStop,
     float highStop)
 {
-    dxJointBall *joint; // [esp+10h] [ebp-10h]
+    dxJointHinge *joint; // [esp+10h] [ebp-10h]
     dxJointHinge *jointa; // [esp+10h] [ebp-10h]
 
     //joint = (dxJointBall *)PhysStaticArray<dxJointHinge, 192>::allocate(&physGlob.hingeArray);
-    joint = (dxJointBall *)physGlob.hingeArray.allocate();
+    joint = physGlob.hingeArray.allocate();
     if (joint)
     {
-        jointa = (dxJointHinge*)dJointCreateHinge(physGlob.world[worldIndex], (dxJointGroup*)joint);
+        jointa = (dxJointHinge*)dJointCreateHinge(physGlob.world[worldIndex], joint);
         if (jointa)
         {
             dJointAttach(jointa, obj1, obj2);
@@ -2593,7 +2593,7 @@ dxJointBall *__cdecl Phys_CreateBallAndSocket(PhysWorld worldIndex, dxBody *obj1
     joint = physGlob.ballArray.allocate();
     if (joint)
     {
-        jointa = (dxJointBall*)dJointCreateBall(physGlob.world[worldIndex], (dxJointGroup*)joint);
+        jointa = (dxJointBall*)dJointCreateBall(physGlob.world[worldIndex], joint);
         dJointAttach(jointa, obj1, obj2);
         dJointSetBallAnchor(jointa, *anchor, anchor[1], anchor[2]);
         return jointa;
@@ -2657,7 +2657,7 @@ dxJointAMotor *__cdecl Phys_CreateAngularMotor(
     joint = physGlob.aMotorArray.allocate();
     if (joint)
     {
-        jointa = (dxJointAMotor *)dJointCreateAMotor(physGlob.world[worldIndex], (dxJointGroup*)joint);
+        jointa = (dxJointAMotor *)dJointCreateAMotor(physGlob.world[worldIndex], (dxJointAMotor *)joint);
         if (jointa)
         {
             dJointAttach(jointa, obj1, obj2);

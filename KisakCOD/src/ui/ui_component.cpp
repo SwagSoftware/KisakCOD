@@ -2496,6 +2496,25 @@ void UI_ScrollPane::CheckMouseScroll(int index, float *thumbPos, float *thumbSiz
     }
 }
 
+void UI_Component::Shutdown()
+{
+    __debugbreak();
+}
+
+UI_Component::~UI_Component()
+{
+}
+
+void UI_Component::Draw(float one, float two, float three, float four, float five, float six)
+{
+    __debugbreak();
+}
+
+bool UI_Component::KeyEvent(float *pos, int key)
+{
+    __debugbreak();
+    return false;
+}
 
 void UI_Component::DrawPicRotate(
     float x,
@@ -2522,7 +2541,7 @@ void UI_Component::DrawPicRotate(
     R_AddCmdDrawQuadPic(verts, color, material);
 }
 
-void DrawPic(float x, float y, float width, float height, const float *color, Material *material)
+void UI_Component::DrawPic(float x, float y, float width, float height, const float *color, Material *material)
 {
     float v6; // [esp+2Ch] [ebp-Ch]
     float v7; // [esp+30h] [ebp-8h]
@@ -2703,6 +2722,30 @@ void Scr_ScriptWindow::Draw(float x,
             ++s;
             currentY = currentY + UI_Component::g.charHeight;
         }
+    }
+}
+
+UI_Component *UI_VerticalDivider::GetCompAtLocation(float *point)
+{
+    if (this->topComp)
+    {
+        if (this->bottomComp && this->posY <= point[1])
+        {
+            point[1] = point[1] - this->posY;
+            return this->bottomComp->GetCompAtLocation(point);
+        }
+        else
+        {
+            return this->topComp->GetCompAtLocation(point);
+        }
+    }
+    else if (this->bottomComp)
+    {
+        return this->bottomComp->GetCompAtLocation(point);
+    }
+    else
+    {
+        return this;
     }
 }
 

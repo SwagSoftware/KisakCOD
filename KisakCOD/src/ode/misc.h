@@ -49,6 +49,10 @@ void dRandSetSeed (unsigned long s);
  * as n approaches 2^32.
  */
 int dRandInt (int n);
+inline int _dRandInt(int n)
+{
+	return dRandInt(n);
+}
 
 /* return a random real number between 0..1 */
 dReal dRandReal();

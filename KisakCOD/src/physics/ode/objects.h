@@ -123,6 +123,12 @@ struct dxWorldStepInfo // sizeof=0x2C
     dxContactParameters contactp;
 };
 
+struct ConstraintForce // sizeof=0x18
+{                                       // ...
+    float linear[3];
+    float angular[3];                   // ...
+};
+
 struct SorLcpData // sizeof=0x6F0
 {                                       // ...
     int order[444];

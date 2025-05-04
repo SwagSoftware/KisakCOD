@@ -818,7 +818,6 @@ void __cdecl or_FloatWithString(Operand *leftSide, Operand *rightSide, Operand *
 void __cdecl or_FloatWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl bitwiseAnd(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl bitwiseOr(Operand *leftSide, Operand *rightSide, Operand *result);
-void __cdecl multiply_J(int constraintRowCount, ConstraintRowData *rows, float *in);
 
 
 // ui_shared_obj
@@ -906,10 +905,10 @@ struct UI_Component // sizeof=0x10
         this->size[1] = 0.0f;
         this->selectionParent = NULL;
     }
-    virtual void Shutdown() {}
-    virtual ~UI_Component() {}
-    virtual void Draw(float one, float two, float three, float four, float five, float six) = 0;
-    virtual bool KeyEvent(float *, int) = 0;
+    virtual void Shutdown();
+    virtual ~UI_Component();
+    virtual void Draw(float one, float two, float three, float four, float five, float six);
+    virtual bool KeyEvent(float *, int);
     virtual UI_Component *GetCompAtLocation(float *point)
     {
         if (*point < 0.0 || this->size[0] <= *point || point[1] < 0.0 || this->size[1] <= point[1])

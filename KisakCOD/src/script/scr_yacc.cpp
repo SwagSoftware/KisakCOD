@@ -7074,25 +7074,25 @@ int __cdecl yyparse()
                 yyval.val = v85;
                 break;
             case 109:
-                v83.type = append_node(yyvsp[-1].val, yyvsp->val).type;
+                v83.type = append_node(&yyvsp[-1].val, &yyvsp->val)->type;
                 yyval.val = v83;
                 break;
             case 110:
                 val.type = node0(0).type;
-                v82.type = linked_list_end(val)->type;
+                v82.type = linked_list_end(&val)->type;
                 yyval.val = v82;
                 break;
             case 111:
                 v78.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v79.type = (int)node1(yyvsp->val.type, v78).type;
-                v80.type = prepend_node(v79, yyvsp[-2].val).type;
+                v80.type = prepend_node(&v79, &yyvsp[-2].val)->type;
                 yyval.val = v80;
                 break;
             case 112:
                 v76.type = node0(0).type;
                 v74.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v75.type = (int)node1(yyvsp->val.type, v74).type;
-                v77.type = prepend_node(v75, v76).type;
+                v77.type = prepend_node(&v75, &v76)->type;
                 yyval.val = v77;
                 break;
             case 114:
@@ -7104,7 +7104,7 @@ int __cdecl yyparse()
                 yyvsp->val.stringValue = v13.prev;
                 v70.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v71.type = (int)node1(yyvsp->val.type, v70).type;
-                v72.type = append_node(yyvsp[-2].val, v71).type;
+                v72.type = append_node(&yyvsp[-2].val, &v71)->type;
                 yyval.val = v72;
                 break;
             case 116:
@@ -7113,13 +7113,13 @@ int __cdecl yyparse()
                 v67.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v68.type = (int)node1(yyvsp->val.type, v67).type;
                 v65.type = node0(0).type;
-                v66.type = linked_list_end(v65)->type;
-                v69.type = append_node(v66, v68).type;
+                v66.type = linked_list_end(&v65)->type;
+                v69.type = append_node(&v66, &v68)->type;
                 yyval.val = v69;
                 break;
             case 118:
                 v63.type = node0(0).type;
-                v64.type = linked_list_end(v63)->type;
+                v64.type = linked_list_end(&v63)->type;
                 yyval.val = v64;
                 break;
             case 119:
@@ -7127,42 +7127,42 @@ int __cdecl yyparse()
                 yyvsp->val.stringValue = v15.prev;
                 v60.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v61.type = (int)node1(yyvsp->val.type, v60).type;
-                v62.type = append_node(yyvsp[-2].val, v61).type;
+                v62.type = append_node(&yyvsp[-2].val, &v61)->type;
                 yyval.val = v62;
                 break;
             case 120:
                 v57.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v58.type = (int)node1(yyvsp->val.type, v57).type;
                 v55.type = node0(0).type;
-                v56.type = linked_list_end(v55)->type;
-                v59.type = append_node(v56, v58).type;
+                v56.type = linked_list_end(&v55)->type;
+                v59.type = append_node(&v56, &v58)->type;
                 yyval.val = v59;
                 break;
             case 121:
                 v52.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v53.type = (int)node1(yyvsp->val.type, v52).type;
-                v54.type = append_node(yyvsp[-2].val, v53).type;
+                v54.type = append_node(&yyvsp[-2].val, &v53)->type;
                 yyval.val = v54;
                 break;
             case 122:
                 v49.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v50.type = (int)node1(yyvsp->val.type, v49).type;
                 v47.type = node0(0).type;
-                v48.type = linked_list_end(v47)->type;
-                v51.type = append_node(v48, v50).type;
+                v48.type = linked_list_end(&v47)->type;
+                v51.type = append_node(&v48, &v50)->type;
                 yyval.val = v51;
                 break;
             case 123:
                 v44.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v45.type = (int)node1(yyvsp->val.type, v44).type;
-                v46.type = prepend_node(v45, yyvsp[-2].val).type;
+                v46.type = prepend_node(&v45, &yyvsp[-2].val)->type;
                 yyval.val = v46;
                 break;
             case 124:
                 v42.type = node0(0).type;
                 v40.type = (int)node1_(yyvsp->pos).xmodelPieces;
                 v41.type = (int)node1(yyvsp->val.type, v40).type;
-                v43.type = prepend_node(v41, v42).type;
+                v43.type = prepend_node(&v41, &v42)->type;
                 yyval.val = v43;
                 break;
             case 125:
@@ -7190,12 +7190,12 @@ int __cdecl yyparse()
                 yyval.val = v31;
                 break;
             case 129:
-                v29.type = append_node(yyvsp[-1].val, yyvsp->val).type;
+                v29.type = append_node(&yyvsp[-1].val, &yyvsp->val)->type;
                 yyval.val = v29;
                 break;
             case 130:
                 v27.type = node0(0).type;
-                v28.type = linked_list_end(v27)->type;
+                v28.type = linked_list_end(&v27)->type;
                 yyval.val = v28;
                 break;
             case 131:
@@ -7205,12 +7205,12 @@ int __cdecl yyparse()
                 ++scrCompilePub.far_function_count;
                 break;
             case 132:
-                v24.type = append_node(yyvsp[-2].val, yyvsp[-1].val).type;
+                v24.type = append_node(&yyvsp[-2].val, &yyvsp[-1].val)->type;
                 yyval.val = v24;
                 break;
             case 133:
                 v22.type = node0(0).type;
-                v23.type = linked_list_end(v22)->type;
+                v23.type = linked_list_end(&v22)->type;
                 yyval.val = v23;
                 break;
             default:

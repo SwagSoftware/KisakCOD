@@ -24,6 +24,11 @@
 #include "objects.h"
 #include "joint.h"
 #include "util.h"
+#include <universal/assertive.h>
+#include "quickstep.h"
+#include <universal/q_shared.h>
+
+#include <algorithm>
 
 #define ALLOCA dALLOCA16
 
@@ -177,8 +182,262 @@ void dxStepBody (dxBody *b, dReal h)
 // bodies will not be included in the simulation. disabled bodies are
 // re-enabled if they are found to be part of an active island.
 
-void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
+struct ShouldNotRemoveJoint // sizeof=0x8
+{                                       // ...
+    const dxBody *const *body;          // ...
+    int bodyCount;                      // ...
+
+    bool operator()(dxJoint *joint)
+    {
+        int bodyIndex; // [esp+4h] [ebp-Ch]
+        bool removeThisJoint; // [esp+Bh] [ebp-5h]
+        int removedBodyCount; // [esp+Ch] [ebp-4h]
+
+        removedBodyCount = 0;
+        removeThisJoint = 0;
+        for (bodyIndex = 0; bodyIndex < this->bodyCount; ++bodyIndex)
+        {
+            if (joint->node[0].body == this->body[bodyIndex])
+            {
+                ++removedBodyCount;
+            }
+            else if (joint->node[1].body == this->body[bodyIndex])
+            {
+                ++removedBodyCount;
+            }
+        }
+        if (removedBodyCount >= 3)
+            MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 119, 0, "%s", "removedBodyCount < 3");
+        if (removedBodyCount == 2)
+        {
+            joint->tag = 0;
+            removeThisJoint = 1;
+        }
+        else if (removedBodyCount == 1 && (!joint->tag || !joint->node[1].body || !joint->node[0].body))
+        {
+            joint->tag = 0;
+            removeThisJoint = 1;
+        }
+        return !removeThisJoint;
+    }
+};
+
+
+void __cdecl ODE_BreakupIslandIfTooBig(
+    dxBody *const *body,
+    int *const bodyCount,
+    dxJoint **joint,
+    int *const jointCount)
 {
+    ShouldNotRemoveJoint v4; // [esp+3Ch] [ebp-Ch]
+    int oldBodyCount; // [esp+44h] [ebp-4h]
+
+    if (!body)
+        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 142, 0, "%s", "body");
+    if (!joint)
+        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 143, 0, "%s", "joint");
+    if (*bodyCount >= 14 || *jointCount >= 74)
+    {
+        oldBodyCount = *bodyCount;
+        while (*bodyCount > 14)
+            body[--*bodyCount]->tag = 0;
+        while (1)
+        {
+            if (oldBodyCount - *bodyCount > 0)
+            {
+                v4.body = &body[*bodyCount];
+                v4.bodyCount = oldBodyCount - *bodyCount;
+                //*jointCount = std::_Partition<dxJoint **, ShouldNotRemoveJoint>(joint, &joint[*jointCount], v4) - joint;
+                std::partition(&joint[0], &joint[*jointCount], v4);
+            }
+            if (*jointCount < 74)
+                break;
+            oldBodyCount = (*bodyCount)--;
+            body[*bodyCount]->tag = 0;
+        }
+        if (*bodyCount <= 0)
+            MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 168, 1, "%s", "*bodyCount > 0");
+    }
+}
+
+//void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
+void __cdecl dxProcessIslands(dxWorld *world, float stepsize)
+{
+    int v2; // [esp+4h] [ebp-502Ch]
+    int tag; // [esp+8h] [ebp-5028h]
+    dxJointNode *m; // [esp+Ch] [ebp-5024h]
+    dxJoint *j; // [esp+10h] [ebp-5020h]
+    int v6; // [esp+14h] [ebp-501Ch]
+    dxJoint *v7[512]; // [esp+18h] [ebp-5018h]
+    dxJoint *joint[4097]; // [esp+818h] [ebp-4818h] BYREF
+    dxBody *i; // [esp+481Ch] [ebp-814h]
+    dxBody *body[512]; // [esp+4820h] [ebp-810h] BYREF
+    int jointCount; // [esp+5020h] [ebp-10h] BYREF
+    dxBody *k; // [esp+5024h] [ebp-Ch]
+    int n; // [esp+5028h] [ebp-8h]
+    int bodyCount; // [esp+502Ch] [ebp-4h] BYREF
+
+    if (world->nb > 512)
+        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 217, 0, "%s\n\t(world->nb) = %i", "(world->nb <= 512)", world->nb);
+    if (world->nj > 4096)
+        MyAssertHandler(
+            ".\\physics\\ode\\src\\util.cpp",
+            218,
+            0,
+            "%s\n\t(world->nj) = %i",
+            "(world->nj <= 4096)",
+            world->nj);
+    if (world->nb > 0)
+    {
+        dInternalHandleAutoDisabling(world, stepsize);
+        bodyCount = 0;
+        jointCount = 0;
+        for (i = world->firstbody; i; i = (dxBody*)i->next)
+            i->tag = 0;
+        for (j = world->firstjoint; j; j = (dxJoint*)j->next)
+            j->tag = 0;
+        for (k = world->firstbody; k; k = (dxBody *)k->next)
+        {
+            if (!k->tag && (k->flags & 4) == 0)
+            {
+                k->tag = 1;
+                v6 = 0;
+                i = k;
+                body[0] = k;
+                bodyCount = 1;
+                jointCount = 0;
+                while (1)
+                {
+                    for (m = i->firstjoint; m; m = m->next)
+                    {
+                        if (!m->joint->tag)
+                        {
+                            m->joint->tag = 1;
+                            joint[jointCount++] = m->joint;
+                            i = m->body;
+                            if (i)
+                            {
+                                if (!i->tag)
+                                {
+                                    i->tag = 1;
+                                    i->flags &= ~4u;
+                                    v7[v6++] = (dxJoint*)i;
+                                }
+                            }
+                        }
+                    }
+                    if (v6 > world->nb)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            281,
+                            0,
+                            "%s\n\t(stacksize) = %i",
+                            "(stacksize <= world->nb)",
+                            v6);
+                    if (v6 > world->nj)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            282,
+                            0,
+                            "%s\n\t(stacksize) = %i",
+                            "(stacksize <= world->nj)",
+                            v6);
+                    if (bodyCount > world->nb)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            283,
+                            0,
+                            "%s\n\t(bodyCount) = %i",
+                            "(bodyCount <= world->nb)",
+                            bodyCount);
+                    if (jointCount > world->nj)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            284,
+                            0,
+                            "%s\n\t(jointCount) = %i",
+                            "(jointCount <= world->nj)",
+                            jointCount);
+                    if (!v6)
+                        break;
+                    i = (dxBody *)v7[--v6];
+                    body[bodyCount++] = i;
+                    if (i->tag != 1)
+                        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 292, 0, "%s\n\t(b->tag) = %i", "(b->tag == 1)", i->tag);
+                    if ((i->flags & 4) != 0)
+                        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 293, 0, "%s", "!(b->flags & dxBodyDisabled)");
+                }
+                ODE_BreakupIslandIfTooBig(body, &bodyCount, joint, &jointCount);
+                for (n = 0; n < bodyCount; ++n)
+                {
+                    if (body[n]->tag != 1)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            301,
+                            0,
+                            "%s\n\t(body[i]->tag) = %i",
+                            "(body[i]->tag == 1)",
+                            body[n]->tag);
+                    if ((body[n]->flags & 4) != 0)
+                        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 302, 0, "%s", "!(body[i]->flags & dxBodyDisabled)");
+                }
+                for (n = 0; n < jointCount; ++n)
+                {
+                    if (joint[n]->tag != 1)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            306,
+                            0,
+                            "%s\n\t(joint[i]->tag) = %i",
+                            "(joint[i]->tag == 1)",
+                            joint[n]->tag);
+                }
+                for (n = 0; n < bodyCount; ++n)
+                    body[n]->tag = n;
+                for (n = 0; n < jointCount; ++n)
+                {
+                    if (joint[n]->node[0].body)
+                        tag = joint[n]->node[0].body->tag;
+                    else
+                        tag = -1;
+                    joint[n]->node[0].bodyTag = tag;
+                    if (joint[n]->node[1].body)
+                        v2 = joint[n]->node[1].body->tag;
+                    else
+                        v2 = -1;
+                    joint[n]->node[1].bodyTag = v2;
+                }
+                for (n = 0; n < bodyCount; ++n)
+                    body[n]->tag = 1;
+                dxQuickStepper(world, body, bodyCount, joint, jointCount, stepsize);
+                for (n = 0; n < bodyCount; ++n)
+                {
+                    if (body[n]->tag != 1)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            365,
+                            0,
+                            "%s\n\t(body[i]->tag) = %i",
+                            "(body[i]->tag == 1)",
+                            body[n]->tag);
+                    if ((body[n]->flags & 4) != 0)
+                        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 366, 0, "%s", "!(body[i]->flags & dxBodyDisabled)");
+                }
+                for (n = 0; n < jointCount; ++n)
+                {
+                    if (joint[n]->tag != 1)
+                        MyAssertHandler(
+                            ".\\physics\\ode\\src\\util.cpp",
+                            370,
+                            0,
+                            "%s\n\t(joint[i]->tag) = %i",
+                            "(joint[i]->tag == 1)",
+                            joint[n]->tag);
+                }
+            }
+        }
+    }
+#if 0
   dxBody *b,*bb,**body;
   dxJoint *j,**joint;
 
@@ -274,4 +533,5 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
     }
   }
 # endif
+#endif
 }

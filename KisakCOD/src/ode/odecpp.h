@@ -327,11 +327,11 @@ private:
 public:
   dBallJoint() { }
   dBallJoint (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateBall (world, group); }
+    { _id = dJointCreateBall (world, (dxJointBall*)group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
-    _id = dJointCreateBall (world, group);
+    _id = dJointCreateBall (world, (dxJointBall*)group);
   }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -351,11 +351,11 @@ class dHingeJoint : public dJoint {
 public:
   dHingeJoint() { }
   dHingeJoint (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateHinge (world, group); }
+    { _id = dJointCreateHinge (world, (dxJointHinge*)group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
-    _id = dJointCreateHinge (world, group);
+    _id = dJointCreateHinge (world, (dxJointHinge*)group);
   }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -578,11 +578,11 @@ class dAMotorJoint : public dJoint {
 public:
   dAMotorJoint() { }
   dAMotorJoint (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateAMotor (world, group); }
+    { _id = dJointCreateAMotor (world, (dxJointAMotor*)group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
-    _id = dJointCreateAMotor (world, group);
+    _id = dJointCreateAMotor (world, (dxJointAMotor*)group);
   }
 
   void setMode (int mode)

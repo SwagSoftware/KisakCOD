@@ -89,7 +89,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(LocalDebuggerWorkingDirectory)src\binklib\binkw32.lib;$(LocalDebuggerWorkingDirectory)src\msslib\mss32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxguid.lib; dsound.lib; ddraw.lib;d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(LocalDebuggerWorkingDirectory)src\binklib\binkw32.lib;$(LocalDebuggerWorkingDirectory)src\msslib\mss32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

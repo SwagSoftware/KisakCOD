@@ -55,6 +55,7 @@ enum {
 struct dxJointNode {
   dxJoint *joint;		// pointer to enclosing dxJoint object
   dxBody *body;			// *other* body this joint is connected to
+  int bodyTag;
   dxJointNode *next;		// next node in body's list of connected joints
 };
 

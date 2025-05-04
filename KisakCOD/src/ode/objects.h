@@ -187,8 +187,10 @@ int dBodyGetGravityMode (dBodyID b);
 
 /* joints */
 
-dJointID dJointCreateBall (dWorldID, dJointGroupID);
-dJointID dJointCreateHinge (dWorldID, dJointGroupID);
+//dJointID dJointCreateBall (dWorldID, dJointGroupID);
+dxJoint *dJointCreateBall(dWorldID w, struct dxJointBall *joint);
+//dJointID dJointCreateHinge (dWorldID, dJointGroupID);
+dxJoint *dJointCreateHinge(dWorldID w, struct dxJointHinge *joint);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 //dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
 dxJoint *dJointCreateContact(dWorldID w, dJointGroupID group,
@@ -198,7 +200,8 @@ dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
 dJointID dJointCreateFixed (dWorldID, dJointGroupID);
 dJointID dJointCreateNull (dWorldID, dJointGroupID);
-dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
+//dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
+dxJoint *dJointCreateAMotor(dWorldID w, struct dxJointAMotor *joint);
 
 void dJointDestroy (dJointID);
 

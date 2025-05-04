@@ -38,7 +38,7 @@ double MemFile_ReadFloat(MemoryFile* memFile);
 
 void __cdecl MemFile_StartSegment(MemoryFile* memFile, int index);
 void __cdecl MemFile_deflateInit(unsigned __int8* next_out, unsigned int avail_out, bool compress);
-void __cdecl MemFile_EndSegment(MemoryFile* memFile);
+void __cdecl MemFile_EndSegment(MemoryFile *memFile);
 unsigned int __cdecl MemFile_deflateEnd(bool compress);
 void __cdecl MemFile_MoveToSegment(MemoryFile* memFile, int index);
 void __cdecl MemFile_inflateInit(unsigned __int8* next_in, unsigned int len, bool compress);
