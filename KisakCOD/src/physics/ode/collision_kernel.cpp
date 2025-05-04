@@ -230,13 +230,13 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable, dxBody *new_body)
 }
 
 
-dxGeom::~dxGeom()
-{
-    dUASSERT(false, "unsupported operation");
-  // if (parent_space) dSpaceRemove (parent_space,this);
-  // if ((gflags & GEOM_PLACEABLE) && !body) dFree (pos,sizeof(dxPosR));
-  // bodyRemove();
-}
+//dxGeom::~dxGeom()
+//{
+//    dUASSERT(false, "unsupported operation");
+//  // if (parent_space) dSpaceRemove (parent_space,this);
+//  // if ((gflags & GEOM_PLACEABLE) && !body) dFree (pos,sizeof(dxPosR));
+//  // bodyRemove();
+//}
 
 
 int dxGeom::AABBTest (dxGeom *o, dReal aabb[6])
@@ -505,12 +505,12 @@ dxUserGeom::dxUserGeom(int class_num, dxSpace* space, dxBody* body) : dxGeom (sp
 }
 
 
-dxUserGeom::~dxUserGeom()
-{
-    dAASSERT(false);
-  // dGeomClass *c = &user_classes[type-dFirstUserClass];
-  // if (c->dtor) c->dtor (this);
-}
+//dxUserGeom::~dxUserGeom()
+//{
+//    //dAASSERT(false);
+//   //dGeomClass *c = &user_classes[type-dFirstUserClass];
+//   //if (c->dtor) c->dtor (this);
+//}
 
 
 void dxUserGeom::computeAABB()

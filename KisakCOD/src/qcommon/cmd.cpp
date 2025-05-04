@@ -39,7 +39,7 @@ unsigned __int8 sv_cmd_text_buf[65536];
 
 int marker_cmd;
 int cmd_wait;
-BOOL *cmd_insideCBufExecute;
+bool cmd_insideCBufExecute[1];
 
 
 cmd_function_s *__cdecl _Cmd_FindCommand(const char *cmdName)
@@ -76,7 +76,7 @@ Cmd_Argc
 ============
 */
 int	Cmd_Argc(void) {
-	iassert(cmd_args.nesting > 0 && cmd_args.nesting < 8);
+	iassert(cmd_args.nesting >= 0 && cmd_args.nesting < 8);
 	return cmd_args.argc[cmd_args.nesting];
 }
 
@@ -86,7 +86,7 @@ Cmd_Argv
 ============
 */
 const char* Cmd_Argv(int arg) {
-	iassert(cmd_args.nesting > 0 && cmd_args.nesting < 8);
+	iassert(cmd_args.nesting < 8);
 	iassert(arg >= 0);
 
 	if ((unsigned)arg >= cmd_args.argc[cmd_args.nesting])

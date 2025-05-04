@@ -54,13 +54,6 @@ void Sys_UnlockWrite(FastCriticalSection* critSect)
     InterlockedDecrement(&critSect->writeCount);
 }
 
-static int threadId[7];
-static HANDLE threadHandle[7];
-
-static unsigned int s_affinityMaskForProcess;
-static unsigned int s_cpuCount;
-static unsigned int s_affinityMaskForCpu[4];
-
 unsigned int Win_InitThreads()
 {
     HANDLE CurrentProcess;
@@ -125,7 +118,6 @@ unsigned int Win_InitThreads()
 }
 
 // *(_DWORD *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4)
-static void* g_threadValues[7][4];
 
 static void Sys_SetValue(int valueIndex, void* data)
 {

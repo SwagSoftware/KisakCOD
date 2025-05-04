@@ -31,6 +31,7 @@
 #include <universal/timing.h>
 
 #include <gfx_d3d/r_init.h>
+#include <universal/profile.h>
 
 //#include "../qcommon/stringed_ingame.h"
 
@@ -769,8 +770,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Win_RegisterClass();
 			SetErrorMode(1);
 			Sys_Milliseconds();
-			// Profile_Init();
-			// Profile_InitContext(0);
+			Profile_Init();
+			Profile_InitContext(0);
 			CL_ResetStats_f();
 			Com_Init(sys_cmdline);
 

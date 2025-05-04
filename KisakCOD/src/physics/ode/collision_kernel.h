@@ -103,7 +103,7 @@ struct dxGeom : public dBase {
   unsigned long category_bits,collide_bits;
 
   dxGeom (dSpaceID _space, int is_placeable, dxBody *new_body); // MOD
-  virtual ~dxGeom();
+  virtual ~dxGeom() = default; // LWSS: make default
 
   virtual void computeAABB()=0;
   // compute the AABB for this object and put it in aabb. this function
@@ -233,9 +233,9 @@ struct dxUserGeom : public dxGeom {
 
     dxUserGeom() : dxUserGeom(0, nullptr, nullptr) { } // ADD
 
-    ~dxUserGeom();
-    void computeAABB();
-    int AABBTest(dxGeom* o, dReal aabb[6]);
+    virtual ~dxUserGeom() = default; // LWSS: Make default
+    virtual void computeAABB();
+    virtual int AABBTest(dxGeom* o, dReal aabb[6]);
 };
 // END
 

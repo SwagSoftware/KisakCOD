@@ -10,19 +10,24 @@
 
 unsigned int Win_InitThreads();
 
-static DWORD threadId[7];
-static HANDLE threadHandle[7];
-
-static void* g_threadValues[7][4];
 
 static thread_local void *g_threadLocals[4];
+
+//static int threadId[7];
+//static HANDLE threadHandle[7];
+//static unsigned int s_affinityMaskForProcess;
+//static unsigned int s_cpuCount;
+//static unsigned int s_affinityMaskForCpu[4];
 
 typedef void (*ThreadFuncFn)(unsigned int);
 static ThreadFuncFn threadFunc[7];
 
-static unsigned int s_affinityMaskForProcess;
-static unsigned int s_cpuCount;
-static unsigned int s_affinityMaskForCpu[4];
+void *g_threadValues[7][4];
+DWORD threadId[7];
+HANDLE threadHandle[7];
+unsigned int s_affinityMaskForProcess;
+unsigned int s_cpuCount;
+unsigned int s_affinityMaskForCpu[4];
 
 static int g_databaseThreadOwner;
 

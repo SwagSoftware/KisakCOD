@@ -11,10 +11,10 @@
 #include "scr_memorytree.h"
 #include <universal/profile.h>
 #include <universal/com_constantconfigstrings.h>
+#include "scr_variable.h"
 
 scrStringDebugGlob_t* scrStringDebugGlob;
 static scrStringDebugGlob_t scrStringDebugGlobBuf;
-static scrMemTreePub_t scrMemTreePub;
 static scrStringGlob_t scrStringGlob; // 0x244E300
 
 HashEntry_unnamed_type_u __cdecl Scr_AllocString(char *s, int sys)

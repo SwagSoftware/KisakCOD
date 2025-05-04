@@ -14,7 +14,7 @@ struct scrMemTreeDebugGlob_t // sizeof=0x20000
     unsigned __int8 mt_usage[MEMORY_NODE_COUNT];    // ...
     unsigned __int8 mt_usage_size[MEMORY_NODE_COUNT]; // ...
 };
-static scrMemTreeDebugGlob_t scrMemTreeDebugGlob;
+scrMemTreeDebugGlob_t scrMemTreeDebugGlob;
 
 void MT_Init()
 {

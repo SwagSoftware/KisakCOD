@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Windows.h> // literally just for some of the extern types at the bottom
+
 enum ThreadOwner : __int32
 {                                       // ...
     THREAD_OWNER_NONE = 0x0,
@@ -86,3 +88,11 @@ enum WinThreadLock : __int32
 void __cdecl Win_SetThreadLock(WinThreadLock threadLock);
 WinThreadLock __cdecl Win_GetThreadLock();
 void Win_UpdateThreadLock();
+
+
+extern void *g_threadValues[7][4];
+extern DWORD threadId[7];
+extern HANDLE threadHandle[7];
+extern unsigned int s_affinityMaskForProcess;
+extern unsigned int s_cpuCount;
+extern unsigned int s_affinityMaskForCpu[4];
