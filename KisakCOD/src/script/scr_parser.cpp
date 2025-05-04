@@ -21,6 +21,7 @@ scrParserGlob_t scrParserGlob;
 scrParserPub_t scrParserPub;
 
 char g_EndPos;
+bool g_loadedImpureScript;
 
 void __cdecl TRACK_scr_parser()
 {
@@ -751,7 +752,6 @@ char *__cdecl Scr_AddSourceBuffer(const char *filename, char *extFilename, const
     return sourceBuf;
 }
 
-bool g_loadedImpureScript;
 char *__cdecl Scr_ReadFile_LoadObj(const char *filename, char *extFilename, const char *codePos, bool archive)
 {
     int len; // [esp+0h] [ebp-Ch]
@@ -1527,7 +1527,7 @@ scrStringDebugGlob_t *Scr_IgnoreLeaks()
     return result;
 }
 
-void CompileError2(char *codePos, char *msg, ...)
+void CompileError2(char *codePos, const char *msg, ...)
 {
     char line[1024]; // [esp+4h] [ebp-808h] BYREF
     char text[1028]; // [esp+404h] [ebp-408h] BYREF

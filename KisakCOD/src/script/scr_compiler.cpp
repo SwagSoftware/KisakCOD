@@ -7,6 +7,7 @@
 #include <game_mp/g_public_mp.h>
 #include "scr_animtree.h"
 #include <universal/profile.h>
+#include "scr_parsetree.h"
 
 #undef GetObject 
 
@@ -3396,4 +3397,1032 @@ void __cdecl Scr_CompileStatement(sval_u parseData)
 {
     EmitStatement(parseData, 0, 0, 0);
     EmitOpcode(0x80u, 0, 0);
+}
+
+void __cdecl EmitInclude(sval_u val)
+{
+    char *v1; // eax
+    HashEntry_unnamed_type_u filename; // [esp+0h] [ebp-4h]
+
+    if (val.node[0].type != 86)
+        MyAssertHandler(".\\script\\scr_compiler.cpp", 4931, 0, "%s", "val.node[0].type == ENUM_include");
+    v1 = SL_ConvertToString(*(val.codePosValue + 4));
+    filename.prev = Scr_CreateCanonicalFilename(v1).prev;
+    Scr_CompileRemoveRefToString(*(val.codePosValue + 4));
+    AddFilePrecache(filename.prev, *(val.codePosValue + 8), 1);
+}
+
+void __cdecl EmitIncludeList(sval_u val)
+{
+    sval_u *node; // [esp+0h] [ebp-4h]
+
+    for (node = *(sval_u**)(_DWORD **)(val.type + 4); node; node = node[1].node)
+        EmitInclude(node->type);
+}
+
+unsigned int __cdecl SpecifyThreadPosition(unsigned int threadId, unsigned int name, unsigned int sourcePos, int type)
+{
+    char *v4; // eax
+    char *v5; // eax
+    char *buf; // [esp-4h] [ebp-1Ch]
+    VariableValue pos; // [esp+8h] [ebp-10h] BYREF
+    unsigned int posId; // [esp+14h] [ebp-4h]
+
+    posId = GetVariable(threadId, 1u);
+    pos = Scr_EvalVariable(posId);
+    if (pos.type)
+    {
+        if (pos.u.intValue)
+        {
+            buf = scrParserPub.sourceBufferLookup[Scr_GetSourceBuffer(pos.u.codePosValue)].buf;
+            v4 = SL_ConvertToString(name);
+            CompileError(sourcePos, "function '%s' already defined in '%s'", v4, buf);
+        }
+        else
+        {
+            v5 = SL_ConvertToString(name);
+            CompileError(sourcePos, "function '%s' already defined", v5);
+        }
+        return 0;
+    }
+    else
+    {
+        pos.type = type;
+        pos.u.intValue = 0;
+        SetNewVariableValue(posId, &pos);
+        return posId;
+    }
+}
+
+void __cdecl SpecifyThread(sval_u val)
+{
+    unsigned int Variable_DONE; // eax
+    VariableValueInternal_u Object_DONE; // eax
+    unsigned int v3; // [esp-Ch] [ebp-10h]
+    unsigned int v4; // [esp-8h] [ebp-Ch]
+    int v5; // [esp-4h] [ebp-8h]
+    int v6; // [esp+0h] [ebp-4h]
+
+    v6 = *(DWORD *)val.type;
+    if (*(DWORD *)val.type == 68)
+    {
+        if (!scrCompileGlob.in_developer_thread || scrVarPub.developer_script)
+        {
+            v5 = scrCompileGlob.in_developer_thread ? 12 : 7;
+            v4 = *(DWORD *)(val.type + 16);
+            v3 = *(DWORD *)(val.type + 4);
+            Variable_DONE = GetVariable(scrCompileGlob.fileId, v3);
+            Object_DONE = GetObject(Variable_DONE);
+            SpecifyThreadPosition(Object_DONE.u.stringValue, v3, v4, v5);
+        }
+    }
+    else if (v6 == 69)
+    {
+        if (scrCompileGlob.in_developer_thread)
+        {
+            CompileError(*(DWORD *)(val.type + 4), "cannot recurse /#");
+        }
+        else
+        {
+            scrCompileGlob.in_developer_thread = 1;
+            scrCompileGlob.developer_thread_sourcePos = *(DWORD *)(val.type + 4);
+        }
+    }
+    else if (v6 == 70)
+    {
+        if (scrCompileGlob.in_developer_thread)
+            scrCompileGlob.in_developer_thread = 0;
+        else
+            CompileError(*(DWORD *)(val.type + 4), "#/ has no matching /#");
+    }
+}
+
+void __cdecl Scr_RegisterLocalVar(unsigned int name, sval_u sourcePos, scr_block_s *block)
+{
+    int i; // [esp+0h] [ebp-4h]
+
+    if (!block->abortLevel)
+    {
+        for (i = 0; i < block->localVarsCount; ++i)
+        {
+            if (block->localVars[i].name == name)
+                return;
+        }
+        Scr_CheckLocalVarsCount(block->localVarsCount);
+        block->localVars[block->localVarsCount].name = name;
+        block->localVars[block->localVarsCount++].sourcePos = sourcePos.stringValue;
+    }
+}
+
+void __cdecl Scr_CalcLocalVarsSafeSetVariableField(sval_u expr, sval_u sourcePos, scr_block_s *block)
+{
+    Scr_RegisterLocalVar(expr.stringValue, sourcePos, block);
+}
+
+void __cdecl Scr_CalcLocalVarsFormalParameterListInternal(sval_u *node, scr_block_s *block)
+{
+    while (1)
+    {
+        node = node[1].node;
+        if (!node)
+            break;
+        Scr_CalcLocalVarsSafeSetVariableField(node->node->type, *(DWORD*)(node->type + 4), block);
+    }
+}
+
+void __cdecl Scr_CalcLocalVarsArrayPrimitiveExpressionRef(sval_u expr, scr_block_s *block);
+void __cdecl Scr_CalcLocalVarsArrayVariableRef(sval_u expr, scr_block_s *block)
+{
+    Scr_CalcLocalVarsArrayPrimitiveExpressionRef(expr, block);
+}
+
+void __cdecl Scr_CalcLocalVarsVariableExpressionRef(sval_u expr, scr_block_s *block)
+{
+    if (*(DWORD *)expr.type == 4)
+    {
+        Scr_CalcLocalVarsSafeSetVariableField(*(DWORD *)(expr.type + 4), *(DWORD *)(expr.type + 8), block);
+    }
+    else if (*(DWORD *)expr.type == 13)
+    {
+        Scr_CalcLocalVarsArrayVariableRef(*(DWORD *)(expr.type + 4), block);
+    }
+}
+
+void __cdecl Scr_CalcLocalVarsFormalParameterList(sval_u exprlist, scr_block_s *block)
+{
+    Scr_CalcLocalVarsFormalParameterListInternal(exprlist.node, block);
+}
+
+void __cdecl Scr_CalcLocalVarsArrayPrimitiveExpressionRef(sval_u expr, scr_block_s *block)
+{
+    if (*(DWORD*)expr.type == 17)
+        Scr_CalcLocalVarsVariableExpressionRef(*(DWORD *)(expr.type + 4), block);
+}
+
+void __cdecl Scr_CalcLocalVarsAssignmentStatement(sval_u lhs, sval_u rhs, scr_block_s *block)
+{
+    Scr_CalcLocalVarsVariableExpressionRef(lhs, block);
+}
+
+void __cdecl Scr_CopyBlock(scr_block_s *from, scr_block_s **to)
+{
+    if (!*to)
+        *to = (scr_block_s*)Hunk_AllocateTempMemoryHigh(536, "Scr_CopyBlock");
+    qmemcpy(*to, from, sizeof(scr_block_s));
+    (*to)->localVarsPublicCount = 0;
+
+}
+
+void __cdecl Scr_MergeChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s *block)
+{
+    unsigned int v3; // ecx
+    int j; // [esp+4h] [ebp-18h]
+    unsigned int localVar; // [esp+8h] [ebp-14h]
+    unsigned int localVar_4; // [esp+Ch] [ebp-10h]
+    scr_block_s *childBlock; // [esp+10h] [ebp-Ch]
+    int childIndex; // [esp+14h] [ebp-8h]
+    int i; // [esp+18h] [ebp-4h]
+
+    if (childCount && !block->abortLevel)
+    {
+        for (childIndex = 0; childIndex < childCount; ++childIndex)
+        {
+            childBlock = childBlocks[childIndex];
+            if (childBlock->localVarsPublicCount)
+                MyAssertHandler(".\\script\\scr_compiler.cpp", 1006, 0, "%s", "!childBlock->localVarsPublicCount");
+            childBlock->localVarsPublicCount = block->localVarsCount;
+            for (i = 0; i < block->localVarsCount; ++i)
+            {
+                localVar = block->localVars[i].name;
+                localVar_4 = block->localVars[i].sourcePos;
+                j = Scr_FindLocalVar(childBlock, i, localVar);
+                if (j < 0)
+                {
+                    j = childBlock->localVarsCount;
+                    Scr_CheckLocalVarsCount(j);
+                    ++childBlock->localVarsCount;
+                }
+                while (j > i)
+                {
+                    v3 = *&childBlock->localVarsInitBits[8 * j + 4];
+                    childBlock->localVars[j].name = *&childBlock->localVarsInitBits[8 * j];
+                    childBlock->localVars[j--].sourcePos = v3;
+                }
+                childBlock->localVars[i].name = localVar;
+                childBlock->localVars[i].sourcePos = localVar_4;
+            }
+        }
+    }
+}
+
+void __cdecl Scr_CalcLocalVarsStatement(sval_u val, scr_block_s *block);
+
+void __cdecl Scr_CalcLocalVarsIfStatement(sval_u stmt, scr_block_s *block, sval_u *ifStatBlock)
+{
+    Scr_CopyBlock(block, (scr_block_s**)&ifStatBlock);
+    Scr_CalcLocalVarsStatement(stmt, ifStatBlock->block);
+    Scr_MergeChildBlocks((scr_block_s**)ifStatBlock, 1, block);
+}
+
+void __cdecl Scr_AppendChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s *block)
+{
+    int localVarsCount; // ecx
+    unsigned int localVar; // [esp+0h] [ebp-14h]
+    unsigned int localVar_4; // [esp+4h] [ebp-10h]
+    int childIndex; // [esp+Ch] [ebp-8h]
+    int childIndexa; // [esp+Ch] [ebp-8h]
+    int i; // [esp+10h] [ebp-4h]
+
+    if (childCount && !block->abortLevel)
+    {
+        for (childIndex = 0; childIndex < childCount; ++childIndex)
+            childBlocks[childIndex]->abortLevel = 0;
+        for (i = 0; i < (*childBlocks)->localVarsCount; ++i)
+        {
+            localVar = (*childBlocks)->localVars[i].name;
+            localVar_4 = (*childBlocks)->localVars[i].sourcePos;
+            if (Scr_FindLocalVar(block, 0, localVar) < 0)
+            {
+                for (childIndexa = 1; childIndexa < childCount; ++childIndexa)
+                {
+                    if (Scr_FindLocalVar(childBlocks[childIndexa], 0, localVar) < 0)
+                        goto LABEL_8;
+                }
+                localVarsCount = block->localVarsCount;
+                block->localVars[localVarsCount].name = localVar;
+                block->localVars[localVarsCount].sourcePos = localVar_4;
+                ++block->localVarsCount;
+            }
+        LABEL_8:
+            ;
+        }
+    }
+}
+
+void __cdecl Scr_CalcLocalVarsIfElseStatement(
+    sval_u stmt1,
+    sval_u stmt2,
+    scr_block_s *block,
+    sval_u *ifStatBlock,
+    sval_u *elseStatBlock)
+{
+    scr_block_s *childBlocks[2]; // [esp+0h] [ebp-10h] BYREF
+    int childCount; // [esp+8h] [ebp-8h]
+    int abortLevel; // [esp+Ch] [ebp-4h]
+
+    childCount = 0;
+    abortLevel = 3;
+    Scr_CopyBlock(block, (scr_block_s**)ifStatBlock);
+    Scr_CalcLocalVarsStatement(stmt1, ifStatBlock->block);
+    if (*(int*)ifStatBlock->type <= 3)
+    {
+        abortLevel = *(int *)ifStatBlock->type;
+        if (!abortLevel)
+            childBlocks[childCount++] = (scr_block_s*)ifStatBlock->type;
+    }
+    Scr_CopyBlock(block, (scr_block_s**)elseStatBlock);
+    Scr_CalcLocalVarsStatement(stmt2, elseStatBlock->block);
+    if (*(DWORD *)elseStatBlock->type <= abortLevel)
+    {
+        abortLevel = *(int*)elseStatBlock->type;
+        if (!abortLevel)
+            childBlocks[childCount++] = (scr_block_s *)elseStatBlock->type;
+    }
+    if (!block->abortLevel)
+        block->abortLevel = abortLevel;
+    Scr_AppendChildBlocks(childBlocks, childCount, block);
+    Scr_MergeChildBlocks(childBlocks, childCount, block);
+}
+
+void __cdecl Scr_CalcLocalVarsWhileStatement(sval_u expr, sval_u stmt, scr_block_s *block, sval_u *whileStatBlock)
+{
+    int breakChildCount; // [esp+0h] [ebp-38h] BYREF
+    int *oldBreakChildCount; // [esp+4h] [ebp-34h]
+    scr_block_s **breakChildBlocks; // [esp+8h] [ebp-30h]
+    bool constConditional; // [esp+Fh] [ebp-29h]
+    int continueChildCount; // [esp+10h] [ebp-28h] BYREF
+    int *oldContinueChildCount; // [esp+14h] [ebp-24h]
+    VariableCompileValue constValue; // [esp+18h] [ebp-20h] BYREF
+    int i; // [esp+24h] [ebp-14h]
+    scr_block_s **continueChildBlocks; // [esp+28h] [ebp-10h]
+    scr_block_s **oldBreakChildBlocks; // [esp+2Ch] [ebp-Ch]
+    int abortLevel; // [esp+30h] [ebp-8h]
+    scr_block_s **oldContinueChildBlocks; // [esp+34h] [ebp-4h]
+
+    constConditional = 0;
+    if (EvalExpression(expr, &constValue))
+    {
+        if (constValue.value.type == 6 || constValue.value.type == 5)
+        {
+            Scr_CastBool(&constValue.value);
+            if (constValue.value.u.intValue)
+                constConditional = 1;
+        }
+        RemoveRefToValue(constValue.value.type, constValue.value.u);
+    }
+    oldBreakChildBlocks = scrCompileGlob.breakChildBlocks;
+    oldBreakChildCount = scrCompileGlob.breakChildCount;
+    oldContinueChildBlocks = scrCompileGlob.continueChildBlocks;
+    oldContinueChildCount = scrCompileGlob.continueChildCount;
+    breakChildCount = 0;
+    continueChildCount = 0;
+    continueChildBlocks = (scr_block_s**)Hunk_AllocateTempMemoryHigh(4096, "Scr_CalcLocalVarsWhileStatement");
+    scrCompileGlob.continueChildBlocks = continueChildBlocks;
+    scrCompileGlob.continueChildCount = &continueChildCount;
+    abortLevel = block->abortLevel;
+    if (constConditional)
+    {
+        breakChildBlocks = (scr_block_s **)Hunk_AllocateTempMemoryHigh(4096, "Scr_CalcLocalVarsWhileStatement");
+        scrCompileGlob.breakChildCount = &breakChildCount;
+    }
+    else
+    {
+        breakChildBlocks = 0;
+    }
+    scrCompileGlob.breakChildBlocks = breakChildBlocks;
+    Scr_CopyBlock(block, (scr_block_s **)whileStatBlock);
+    Scr_CalcLocalVarsStatement(stmt, whileStatBlock->block);
+    Scr_AddContinueBlock(whileStatBlock->block);
+    for (i = 0; i < continueChildCount; ++i)
+        Scr_AppendChildBlocks(&continueChildBlocks[i], 1, block);
+    if (constConditional)
+        Scr_AppendChildBlocks(breakChildBlocks, breakChildCount, block);
+    Scr_MergeChildBlocks((scr_block_s **)whileStatBlock, 1, block);
+    scrCompileGlob.breakChildBlocks = oldBreakChildBlocks;
+    scrCompileGlob.breakChildCount = oldBreakChildCount;
+    scrCompileGlob.continueChildBlocks = oldContinueChildBlocks;
+    scrCompileGlob.continueChildCount = oldContinueChildCount;
+}
+
+void __cdecl Scr_CalcLocalVarsForStatement(
+    sval_u stmt1,
+    sval_u expr,
+    sval_u stmt2,
+    sval_u stmt,
+    scr_block_s *block,
+    sval_u *forStatBlock,
+    sval_u *forStatPostBlock)
+{
+    int breakChildCount; // [esp+0h] [ebp-38h] BYREF
+    int *oldBreakChildCount; // [esp+4h] [ebp-34h]
+    scr_block_s **breakChildBlocks; // [esp+8h] [ebp-30h]
+    bool constConditional; // [esp+Fh] [ebp-29h]
+    int continueChildCount; // [esp+10h] [ebp-28h] BYREF
+    int *oldContinueChildCount; // [esp+14h] [ebp-24h]
+    VariableCompileValue constValue; // [esp+18h] [ebp-20h] BYREF
+    int i; // [esp+24h] [ebp-14h]
+    scr_block_s **continueChildBlocks; // [esp+28h] [ebp-10h]
+    scr_block_s **oldBreakChildBlocks; // [esp+2Ch] [ebp-Ch]
+    int abortLevel; // [esp+30h] [ebp-8h]
+    scr_block_s **oldContinueChildBlocks; // [esp+34h] [ebp-4h]
+
+    Scr_CalcLocalVarsStatement(stmt1, block);
+    if (*(int*)expr.type == 65)
+    {
+        constConditional = 0;
+        if (EvalExpression(*(DWORD*)(expr.type + 4), &constValue))
+        {
+            if (constValue.value.type == 6 || constValue.value.type == 5)
+            {
+                Scr_CastBool(&constValue.value);
+                if (constValue.value.u.intValue)
+                    constConditional = 1;
+            }
+            RemoveRefToValue(constValue.value.type, constValue.value.u);
+        }
+    }
+    else
+    {
+        constConditional = 1;
+    }
+    oldBreakChildBlocks = scrCompileGlob.breakChildBlocks;
+    oldBreakChildCount = scrCompileGlob.breakChildCount;
+    oldContinueChildBlocks = scrCompileGlob.continueChildBlocks;
+    oldContinueChildCount = scrCompileGlob.continueChildCount;
+    breakChildCount = 0;
+    continueChildCount = 0;
+    continueChildBlocks = (scr_block_s **)Hunk_AllocateTempMemoryHigh(4096, "Scr_CalcLocalVarsForStatement");
+    scrCompileGlob.continueChildBlocks = continueChildBlocks;
+    scrCompileGlob.continueChildCount = &continueChildCount;
+    abortLevel = block->abortLevel;
+    if (constConditional)
+    {
+        breakChildBlocks = (scr_block_s **)Hunk_AllocateTempMemoryHigh(4096, "Scr_CalcLocalVarsForStatement");
+        scrCompileGlob.breakChildCount = &breakChildCount;
+    }
+    else
+    {
+        breakChildBlocks = 0;
+    }
+    scrCompileGlob.breakChildBlocks = breakChildBlocks;
+    Scr_CopyBlock(block, (scr_block_s **)forStatBlock);
+    Scr_CopyBlock(block, (scr_block_s **)forStatPostBlock);
+    Scr_CalcLocalVarsStatement(stmt, forStatBlock->block);
+    Scr_AddContinueBlock(forStatBlock->block);
+    for (i = 0; i < continueChildCount; ++i)
+        Scr_AppendChildBlocks(&continueChildBlocks[i], 1, block);
+    Scr_CalcLocalVarsStatement(stmt2, forStatPostBlock->block);
+    Scr_AppendChildBlocks((scr_block_s **)forStatPostBlock, 1, block);
+    Scr_MergeChildBlocks((scr_block_s **)forStatPostBlock, 1, block);
+    if (constConditional)
+        Scr_AppendChildBlocks(breakChildBlocks, breakChildCount, block);
+    Scr_MergeChildBlocks((scr_block_s **)forStatBlock, 1, block);
+    scrCompileGlob.breakChildBlocks = oldBreakChildBlocks;
+    scrCompileGlob.breakChildCount = oldBreakChildCount;
+    scrCompileGlob.continueChildBlocks = oldContinueChildBlocks;
+    scrCompileGlob.continueChildCount = oldContinueChildCount;
+}
+
+void __cdecl Scr_CalcLocalVarsIncStatement(sval_u expr, scr_block_s *block)
+{
+    Scr_CalcLocalVarsVariableExpressionRef(expr, block);
+}
+
+void __cdecl Scr_CalcLocalVarsStatementList(sval_u val, scr_block_s *block);
+void __cdecl Scr_CalcLocalVarsDeveloperStatementList(sval_u val, scr_block_s *block, sval_u *devStatBlock)
+{
+    Scr_CopyBlock(block, (scr_block_s**)devStatBlock);
+    Scr_CalcLocalVarsStatementList(val, devStatBlock->block);
+    Scr_MergeChildBlocks((scr_block_s **)devStatBlock, 1, block);
+}
+
+void __cdecl Scr_CalcLocalVarsWaittillStatement(sval_u exprlist, scr_block_s *block)
+{
+    sval_u *node; // [esp+0h] [ebp-4h]
+
+    node = *(sval_u**)(*(DWORD*)exprlist.type + 4);
+    if (!node)
+        MyAssertHandler(".\\script\\scr_compiler.cpp", 3870, 0, "%s", "node");
+    Scr_CalcLocalVarsFormalParameterListInternal(node, block);
+}
+
+void __cdecl Scr_CalcLocalVarsSwitchStatement(sval_u stmtlist, scr_block_s *block)
+{
+    sval_u *node; // [esp+0h] [ebp-28h]
+    int breakChildCount; // [esp+4h] [ebp-24h] BYREF
+    scr_block_s **breakChildBlocks; // [esp+8h] [ebp-20h]
+    int *oldBreakChildCount; // [esp+Ch] [ebp-1Ch]
+    bool hasDefault; // [esp+13h] [ebp-15h]
+    scr_block_s *currentBlock; // [esp+14h] [ebp-14h] BYREF
+    scr_block_s **childBlocks; // [esp+18h] [ebp-10h]
+    scr_block_s **oldBreakChildBlocks; // [esp+1Ch] [ebp-Ch]
+    int childCount; // [esp+20h] [ebp-8h]
+    int abortLevel; // [esp+24h] [ebp-4h]
+
+    abortLevel = 3;
+    oldBreakChildBlocks = scrCompileGlob.breakChildBlocks;
+    oldBreakChildCount = scrCompileGlob.breakChildCount;
+    breakChildCount = 0;
+    breakChildBlocks = (scr_block_s **)Hunk_AllocateTempMemoryHigh(4096, "Scr_CalcLocalVarsSwitchStatement");
+    scrCompileGlob.breakChildBlocks = breakChildBlocks;
+    scrCompileGlob.breakChildCount = &breakChildCount;
+    childCount = 0;
+    currentBlock = 0;
+    hasDefault = 0;
+    childBlocks = (scr_block_s **)Hunk_AllocateTempMemoryHigh(4096, "Scr_CalcLocalVarsSwitchStatement");
+    for (node = *(sval_u**)(*(DWORD*)stmtlist.type + 4); node; node = node[1].node)
+    {
+        if (*(DWORD *)node->type == 61 || *(DWORD *)node->type == 62)
+        {
+            currentBlock = 0;
+            Scr_CopyBlock(block, &currentBlock);
+            if (*(DWORD *)node->type == 61)
+            {
+                *(DWORD *)(node->type + 12) = (DWORD)currentBlock;
+            }
+            else
+            {
+                *(DWORD *)(node->type + 8) = (DWORD)currentBlock;
+                hasDefault = 1;
+            }
+        }
+        else if (currentBlock)
+        {
+            Scr_CalcLocalVarsStatement(node->type, currentBlock);
+            if (currentBlock->abortLevel)
+            {
+                if (currentBlock->abortLevel == 2)
+                {
+                    currentBlock->abortLevel = 0;
+                    abortLevel = 0;
+                    Scr_CheckMaxSwitchCases(childCount);
+                    childBlocks[childCount++] = currentBlock;
+                }
+                else if (currentBlock->abortLevel <= abortLevel)
+                {
+                    abortLevel = currentBlock->abortLevel;
+                }
+                currentBlock = 0;
+            }
+        }
+    }
+    if (hasDefault)
+    {
+        if (currentBlock)
+        {
+            Scr_AddBreakBlock(currentBlock);
+            Scr_CheckMaxSwitchCases(childCount);
+            childBlocks[childCount++] = currentBlock;
+        }
+        if (!block->abortLevel)
+            block->abortLevel = abortLevel;
+        Scr_AppendChildBlocks(breakChildBlocks, breakChildCount, block);
+        Scr_MergeChildBlocks(childBlocks, childCount, block);
+    }
+    scrCompileGlob.breakChildBlocks = oldBreakChildBlocks;
+    scrCompileGlob.breakChildCount = oldBreakChildCount;
+}
+
+void __cdecl Scr_CalcLocalVarsStatement(sval_u val, scr_block_s *block)
+{
+    switch (*(DWORD *)val.type)
+    {
+    case 2:
+        Scr_CalcLocalVarsAssignmentStatement(*(DWORD *)(val.type + 4), *(DWORD *)(val.type + 8), block);
+        break;
+    case 0x1B:
+    case 0x1C:
+        if (!block->abortLevel)
+            block->abortLevel = 3;
+        break;
+    case 0x25:
+        Scr_CalcLocalVarsIfStatement(*(DWORD *)(val.type + 8), block, (sval_u *)(val.type + 16));
+        break;
+    case 0x26:
+        Scr_CalcLocalVarsIfElseStatement(*(DWORD *)(val.type + 8), *(DWORD *)(val.type + 12), block, (sval_u*)(val.type + 24), (sval_u*)(val.type + 28));
+        break;
+    case 0x27:
+        Scr_CalcLocalVarsWhileStatement(*(DWORD *)(val.type + 4), *(DWORD *)(val.type + 8), block, (sval_u*)(val.type + 20));
+        break;
+    case 0x28:
+        Scr_CalcLocalVarsForStatement(
+            *(DWORD*)(val.type + 4),
+            *(DWORD*)(val.type + 8),
+            *(DWORD*)(val.type + 12),
+            *(DWORD*)(val.type + 16),
+            block,
+            (sval_u*)(val.type + 28),
+            (sval_u*)(val.type + 32));
+        break;
+    case 0x29:
+    case 0x2A:
+    case 0x2B:
+        Scr_CalcLocalVarsIncStatement(*(DWORD*)(val.type + 4), block);
+        break;
+    case 0x2C:
+        Scr_CalcLocalVarsStatementList(*(DWORD *)(val.type + 4), block);
+        break;
+    case 0x2D:
+        Scr_CalcLocalVarsDeveloperStatementList(*(DWORD *)(val.type + 4), block, (sval_u*)(val.type + 12));
+        break;
+    case 0x37:
+        Scr_CalcLocalVarsWaittillStatement(*(DWORD *)(val.type + 8), block);
+        break;
+    case 0x3C:
+        Scr_CalcLocalVarsSwitchStatement(*(DWORD *)(val.type + 8), block);
+        break;
+    case 0x3F:
+        Scr_AddBreakBlock(block);
+        if (!block->abortLevel)
+            block->abortLevel = 2;
+        break;
+    case 0x40:
+        Scr_AddContinueBlock(block);
+        if (!block->abortLevel)
+            block->abortLevel = 1;
+        break;
+    default:
+        return;
+    }
+}
+
+void __cdecl Scr_CalcLocalVarsStatementList(sval_u val, scr_block_s *block)
+{
+    sval_u *node; // [esp+0h] [ebp-4h]
+
+    for (node = *(sval_u**)(*(DWORD*)val.type + 4); node; node = node[1].node)
+        Scr_CalcLocalVarsStatement(node->type, block);
+}
+
+void __cdecl Scr_CalcLocalVarsThread(sval_u exprlist, sval_u stmtlist, sval_u *stmttblock)
+{
+    _DWORD *v3; // eax
+
+    scrCompileGlob.forceNotCreate = 0;
+    stmttblock->type = Hunk_AllocateTempMemoryHigh(536, "Scr_CalcLocalVarsThread");
+    *(DWORD*)stmttblock->type = 0;
+    *(DWORD *)(stmttblock->type + 4) = 0;
+    *(DWORD *)(stmttblock->type + 12) = 0;
+    *(DWORD *)(stmttblock->type + 8) = 0;
+    v3 = (DWORD *)(stmttblock->type + 16);
+    *v3 = 0;
+    v3[1] = 0;
+    Scr_CalcLocalVarsFormalParameterList(exprlist, stmttblock->block);
+    Scr_CalcLocalVarsStatementList(stmtlist, stmttblock->block);
+}
+
+void __cdecl SetThreadPosition(unsigned int threadId)
+{
+    char *v1; // esi
+    unsigned int Variable; // eax
+
+    v1 = TempMalloc(0);
+    Variable = FindVariable(threadId, 1u);
+    GetVariableValueAddress(Variable)->u.intValue = (int)v1;
+}
+
+void __cdecl InitThread(int type)
+{
+    scrCompileGlob.currentCaseStatement = 0;
+    scrCompileGlob.bCanBreak = 0;
+    scrCompileGlob.currentBreakStatement = 0;
+    scrCompileGlob.bCanContinue = 0;
+    scrCompileGlob.currentContinueStatement = 0;
+    scrCompileGlob.breakChildBlocks = 0;
+    scrCompileGlob.continueChildBlocks = 0;
+    if (scrCompileGlob.firstThread[type])
+    {
+        scrCompileGlob.firstThread[type] = 0;
+        EmitEnd();
+        AddOpcodePos(0, 0);
+        AddOpcodePos(0xFFFFFFFE, 0);
+    }
+}
+
+void __cdecl EmitSafeSetVariableField(sval_u expr, sval_u sourcePos, scr_block_s *block)
+{
+    int index; // [esp+0h] [ebp-4h]
+
+    index = Scr_FindLocalVarIndex(expr.stringValue, sourcePos, 1, block);
+    EmitOpcode((index != 0) + 49, 0, 0);
+    EmitPreAssignmentPos();
+    if (index)
+        EmitByte(index);
+    AddOpcodePos(sourcePos.stringValue, 0);
+    EmitAssignmentPos();
+}
+
+void __cdecl EmitFormalParameterListInternal(sval_u *node, scr_block_s *block)
+{
+    while (1)
+    {
+        node = node[1].node;
+        if (!node)
+            break;
+        EmitSafeSetVariableField(node->node->type, *(DWORD*)(node->type + 4), block);
+    }
+}
+
+void __cdecl EmitFormalParameterList(sval_u exprlist, sval_u sourcePos, scr_block_s *block)
+{
+    EmitFormalParameterListInternal(*(sval_u**)exprlist.type, block);
+    EmitOpcode(0x35u, 0, 0);
+    AddOpcodePos(sourcePos.stringValue, 0);
+}
+
+void __cdecl EmitThreadInternal(
+    unsigned int threadId,
+    sval_u val,
+    sval_u sourcePos,
+    sval_u endSourcePos,
+    scr_block_s *block)
+{
+    scrCompileGlob.threadId = threadId;
+    AddThreadStartOpcodePos(sourcePos.stringValue);
+    scrCompileGlob.cumulOffset = 0;
+    scrCompileGlob.maxOffset = 0;
+    scrCompileGlob.maxCallOffset = 0;
+    CompileTransferRefToString(*(DWORD*)(val.type + 4), 2u);
+    EmitFormalParameterList(*(sval_u*)(val.type + 8), sourcePos, block);
+    EmitStatementList(*(sval_u*)(val.type + 12), 1, endSourcePos.stringValue, block);
+    EmitEnd();
+    AddOpcodePos(endSourcePos.stringValue, 1);
+    AddOpcodePos(0xFFFFFFFE, 0);
+    if (scrCompileGlob.cumulOffset)
+        MyAssertHandler(".\\script\\scr_compiler.cpp", 4778, 0, "%s", "!scrCompileGlob.cumulOffset");
+    if (scrCompileGlob.maxOffset + 32 * scrCompileGlob.maxCallOffset >= 2048)
+        CompileError(sourcePos.stringValue, "function exceeds operand stack size");
+}
+
+void __cdecl EmitDeveloperThread(sval_u val, sval_u *stmttblock)
+{
+    unsigned int Variable; // eax
+    VariableValueInternal_u threadId; // [esp+0h] [ebp-Ch]
+    unsigned int savedChecksum; // [esp+4h] [ebp-8h]
+    char *begin_pos; // [esp+8h] [ebp-4h]
+
+    if (scrCompilePub.developer_statement)
+        MyAssertHandler(".\\script\\scr_compiler.cpp", 4840, 0, "%s", "scrCompilePub.developer_statement == SCR_DEV_NO");
+    if (scrVarPub.developer_script)
+    {
+        scrCompilePub.developer_statement = 1;
+        InitThread(1);
+        Variable = FindVariable(scrCompileGlob.fileId, *(DWORD*)(val.type + 4));
+        threadId = FindObject(Variable);
+        SetThreadPosition(threadId.u.stringValue);
+        EmitThreadInternal(threadId.u.stringValue, val, *(DWORD *)(val.type + 16), *(DWORD *)(val.type + 20), stmttblock->block);
+    }
+    else
+    {
+        begin_pos = TempMalloc(0);
+        savedChecksum = scrVarPub.checksum;
+        scrCompilePub.developer_statement = 2;
+        InitThread(1);
+        EmitThreadInternal(0, val, *(sval_u*)(val.type + 16), *(sval_u*)(val.type + 20), stmttblock->block);
+        TempMemorySetPos(begin_pos);
+        scrVarPub.checksum = savedChecksum;
+    }
+    scrCompilePub.developer_statement = 0;
+}
+
+void __cdecl EmitNormalThread(sval_u val, sval_u *stmttblock)
+{
+    unsigned int Variable; // eax
+    VariableValueInternal_u threadId; // [esp+0h] [ebp-4h]
+
+    InitThread(0);
+    Variable = FindVariable(scrCompileGlob.fileId, *(DWORD*)(val.type + 4));
+    threadId = FindObject(Variable);
+    SetThreadPosition(threadId.u.stringValue);
+    EmitThreadInternal(threadId.u.stringValue, val, *(DWORD *)(val.type + 16), *(DWORD *)(val.type + 20), stmttblock->block);
+}
+
+void __cdecl EmitThread(sval_u val)
+{
+    char *v1; // eax
+    unsigned int v2; // [esp-4h] [ebp-8h]
+
+    switch (*(DWORD*)val.type)
+    {
+    case 'D':
+        Scr_CalcLocalVarsThread(*(DWORD *)(val.type + 8), *(DWORD *)(val.type + 12), (sval_u*)(val.type + 24));
+        if (scrCompileGlob.in_developer_thread)
+            EmitDeveloperThread(val, (sval_u *)(val.type + 24));
+        else
+            EmitNormalThread(val, (sval_u*)(val.type + 24));
+        break;
+    case 'E':
+        if (scrCompileGlob.in_developer_thread)
+            MyAssertHandler(".\\script\\scr_compiler.cpp", 4874, 0, "%s", "!scrCompileGlob.in_developer_thread");
+        scrCompileGlob.in_developer_thread = 1;
+        break;
+    case 'F':
+        if (!scrCompileGlob.in_developer_thread)
+            MyAssertHandler(".\\script\\scr_compiler.cpp", 4879, 0, "%s", "scrCompileGlob.in_developer_thread");
+        scrCompileGlob.in_developer_thread = 0;
+        break;
+    case 'G':
+        if (scrCompileGlob.in_developer_thread)
+        {
+            CompileError(*(DWORD *)(val.type + 8), "cannot put #using_animtree inside /# ... #/ comment");
+        }
+        else
+        {
+            v2 = *(DWORD *)(val.type + 12);
+            v1 = SL_ConvertToString(*(DWORD *)(val.type + 4));
+            Scr_UsingTree(v1, v2);
+            Scr_CompileRemoveRefToString(*(DWORD *)(val.type + 4));
+        }
+        break;
+    default:
+        return;
+    }
+}
+
+void __cdecl EmitThreadList(sval_u val)
+{
+    sval_u *node; // [esp+0h] [ebp-4h]
+    sval_u *nodea; // [esp+0h] [ebp-4h]
+
+    scrCompileGlob.in_developer_thread = 0;
+    for (node = *(sval_u**)(*(DWORD *)val.type + 4); node; node = node[1].node)
+        SpecifyThread(node->type);
+    if (scrCompileGlob.in_developer_thread)
+        CompileError(scrCompileGlob.developer_thread_sourcePos, "/# has no matching #/");
+    scrCompileGlob.firstThread[0] = 1;
+    scrCompileGlob.firstThread[1] = 1;
+    if (scrCompileGlob.in_developer_thread)
+        MyAssertHandler(".\\script\\scr_compiler.cpp", 4918, 0, "%s", "!scrCompileGlob.in_developer_thread");
+    for (nodea = *(sval_u**)(*(DWORD *)val.type + 4); nodea; nodea = nodea[1].node)
+        EmitThread(nodea->type);
+    if (scrCompileGlob.in_developer_thread)
+        MyAssertHandler(".\\script\\scr_compiler.cpp", 4923, 0, "%s", "!scrCompileGlob.in_developer_thread");
+}
+
+void __cdecl LinkThread(unsigned int threadId, VariableValue *pos, bool allowFarCall)
+{
+    VariableValue v3; // [esp+0h] [ebp-28h]
+    unsigned int valueId; // [esp+Ch] [ebp-1Ch]
+    unsigned int countId; // [esp+10h] [ebp-18h]
+    unsigned int type; // [esp+14h] [ebp-14h]
+    int i; // [esp+18h] [ebp-10h]
+    VariableValueInternal_u *value; // [esp+24h] [ebp-4h]
+
+    countId = FindVariable(threadId, 0);
+    if (countId)
+    {
+        v3 = Scr_EvalVariable(countId);
+        if (v3.type != 6)
+            MyAssertHandler(".\\script\\scr_compiler.cpp", 2307, 0, "%s", "count.type == VAR_INTEGER");
+        for (i = 0; i < v3.u.intValue; ++i)
+        {
+            valueId = FindVariable(threadId, i + 2);
+            if (!valueId)
+                MyAssertHandler(".\\script\\scr_compiler.cpp", 2312, 0, "%s", "valueId");
+            value = GetVariableValueAddress(valueId);
+            type = GetValueType(valueId);
+            if (type != 7 && type != 12)
+                MyAssertHandler(
+                    ".\\script\\scr_compiler.cpp",
+                    2315,
+                    0,
+                    "%s",
+                    "type == VAR_CODEPOS || type == VAR_DEVELOPER_CODEPOS");
+            if (pos->type == 12)
+            {
+                if (!scrVarPub.developer_script)
+                    MyAssertHandler(".\\script\\scr_compiler.cpp", 2319, 0, "%s", "scrVarPub.developer_script");
+                if (type == 7)
+                {
+                    CompileError2((char*)value->u.intValue, "normal script cannot reference a function in a /# ... #/ comment");
+                    return;
+                }
+            }
+            if (!pos->type || !allowFarCall && *(DWORD*)value->u.intValue == 1)
+            {
+                CompileError2((char*)value->u.intValue, "unknown function");
+                return;
+            }
+            *(DWORD*)value->u.intValue = pos->u.intValue;
+            RemoveVariable(threadId, i + 2);
+        }
+        RemoveVariable(threadId, 0);
+    }
+}
+
+void __cdecl LinkFile(unsigned int fileId)
+{
+    VariableValue pos; // [esp+8h] [ebp-1Ch] BYREF
+    unsigned int posId; // [esp+10h] [ebp-14h]
+    unsigned int threadId; // [esp+14h] [ebp-10h]
+    VariableValue emptyValue; // [esp+18h] [ebp-Ch] BYREF
+    unsigned int threadPtr; // [esp+20h] [ebp-4h]
+
+    emptyValue.type = 0;
+    emptyValue.u.intValue = 0;
+    for (threadPtr = FindFirstSibling(fileId); threadPtr; threadPtr = FindNextSibling(threadPtr))
+    {
+        threadId = FindObject(threadPtr).u.stringValue;
+        if (!threadId)
+            MyAssertHandler(".\\script\\scr_compiler.cpp", 2364, 0, "%s", "threadId");
+        posId = FindVariable(threadId, 1u);
+        if (posId)
+        {
+            pos = Scr_EvalVariable(posId);
+            if (pos.type == 13)
+            {
+                SetVariableValue(threadPtr, &emptyValue);
+            }
+            else
+            {
+                if (pos.type != 7 && pos.type != 12)
+                    MyAssertHandler(
+                        ".\\script\\scr_compiler.cpp",
+                        2376,
+                        0,
+                        "%s",
+                        "pos.type == VAR_CODEPOS || pos.type == VAR_DEVELOPER_CODEPOS");
+                if (!pos.u.intValue)
+                    MyAssertHandler(".\\script\\scr_compiler.cpp", 2377, 0, "%s", "pos.u.codePosValue");
+                LinkThread(threadId, &pos, 1);
+            }
+        }
+        else
+        {
+            LinkThread(threadId, &emptyValue, 1);
+        }
+    }
+}
+
+void __cdecl ScriptCompile(
+    sval_u val,
+    unsigned int fileId,
+    unsigned int scriptId,
+    PrecacheEntry *entries,
+    int entriesCount)
+{
+    char *v5; // eax
+    char *v6; // eax
+    unsigned int Variable_DONE; // eax
+    VariableValueInternal_u *VariableValueAddress_DONE; // esi
+    PrecacheEntry *v9; // [esp+4h] [ebp-54h]
+    int j; // [esp+10h] [ebp-48h]
+    VariableValue pos; // [esp+14h] [ebp-44h] BYREF
+    unsigned __int16 filename; // [esp+1Ch] [ebp-3Ch]
+    PrecacheEntry *precachescript; // [esp+20h] [ebp-38h]
+    int far_function_count; // [esp+24h] [ebp-34h]
+    PrecacheEntry *precachescript2; // [esp+28h] [ebp-30h]
+    unsigned int toThreadId; // [esp+2Ch] [ebp-2Ch]
+    unsigned int toPosId; // [esp+30h] [ebp-28h]
+    unsigned int posId; // [esp+34h] [ebp-24h]
+    unsigned __int16 name; // [esp+38h] [ebp-20h]
+    unsigned int threadId; // [esp+3Ch] [ebp-1Ch]
+    PrecacheEntry *precachescriptList; // [esp+40h] [ebp-18h]
+    int i; // [esp+44h] [ebp-14h]
+    unsigned int includeFileId; // [esp+48h] [ebp-10h]
+    VariableValue value; // [esp+4Ch] [ebp-Ch] BYREF
+    unsigned int threadPtr; // [esp+54h] [ebp-4h]
+    int entriesCounta; // [esp+70h] [ebp+18h]
+
+    scrCompileGlob.fileId = fileId;
+    scrCompileGlob.bConstRefCount = 0;
+    scrAnimPub.animTreeIndex = 0;
+    scrCompilePub.developer_statement = 0;
+    if (scrCompilePub.far_function_count)
+        v9 = &entries[entriesCount];
+    else
+        v9 = 0;
+    precachescriptList = v9;
+    entriesCounta = scrCompilePub.far_function_count + entriesCount;
+    if (entriesCounta > 1024)
+        Com_Error(ERR_DROP, "MAX_PRECACHE_ENTRIES exceeded");
+    scrCompileGlob.precachescriptList = precachescriptList;
+    EmitIncludeList(val.node->type);
+    EmitThreadList(*(sval_u*)(val.type + 4));
+    scrCompilePub.programLen = TempMalloc(0) - scrVarPub.programBuffer;
+    Scr_ShutdownAllocNode();
+    Hunk_ClearTempMemoryHigh();
+    if (scrCompilePub.far_function_count != scrCompileGlob.precachescriptList - precachescriptList)
+        MyAssertHandler(
+            ".\\script\\scr_compiler.cpp",
+            4990,
+            0,
+            "%s",
+            "scrCompilePub.far_function_count == scrCompileGlob.precachescriptList - precachescriptList");
+    far_function_count = scrCompilePub.far_function_count;
+    for (i = 0; i < far_function_count; ++i)
+    {
+        precachescript = &precachescriptList[i];
+        filename = precachescript->filename;
+        ProfLoad_End();
+        v5 = SL_ConvertToString(filename);
+        includeFileId = Scr_LoadScriptInternal(v5, entries, entriesCounta);
+        ProfLoad_Begin("ScriptCompile");
+        if (!includeFileId)
+        {
+            v6 = SL_ConvertToString(filename);
+            CompileError(precachescript->sourcePos, "Could not find script '%s'", v6);
+            return;
+        }
+        SL_RemoveRefToString(filename);
+        if (precachescript->include)
+        {
+            for (j = i + 1; j < far_function_count; ++j)
+            {
+                precachescript2 = &precachescriptList[j];
+                if (!precachescript2->include)
+                    break;
+                if (precachescript2->filename == filename)
+                {
+                    CompileError(precachescript2->sourcePos, "Duplicate #include");
+                    return;
+                }
+            }
+            precachescript->include = 0;
+            for (threadPtr = FindFirstSibling(includeFileId); threadPtr; threadPtr = FindNextSibling(threadPtr))
+            {
+                if (GetValueType(threadPtr) == 1)
+                {
+                    threadId = FindObject(threadPtr).u.stringValue;
+                    if (!threadId)
+                        MyAssertHandler(".\\script\\scr_compiler.cpp", 5026, 0, "%s", "threadId");
+                    posId = FindVariable(threadId, 1u);
+                    if (posId)
+                    {
+                        pos = Scr_EvalVariable(posId);
+                        if (pos.type != 13)
+                        {
+                            if (pos.type != 7 && pos.type != 12)
+                                MyAssertHandler(
+                                    ".\\script\\scr_compiler.cpp",
+                                    5035,
+                                    0,
+                                    "%s",
+                                    "(pos.type == VAR_CODEPOS) || (pos.type == VAR_DEVELOPER_CODEPOS)");
+                            name = GetVariableName(threadPtr);
+                            Variable_DONE = GetVariable(fileId, name);
+                            toThreadId = GetObject(Variable_DONE).u.stringValue;
+                            toPosId = SpecifyThreadPosition(toThreadId, name, precachescript->sourcePos, 13);
+                            VariableValueAddress_DONE = GetVariableValueAddress(posId);
+                            *GetVariableValueAddress(toPosId) = *VariableValueAddress_DONE;
+                            LinkThread(toThreadId, &pos, 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    LinkFile(fileId);
+    value.type = 6;
+    SetVariableValue(scriptId, &value);
 }

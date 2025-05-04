@@ -88,6 +88,12 @@ struct scrCompilePub_t
 };
 
 void __cdecl Scr_CompileStatement(sval_u parseData);
+void __cdecl ScriptCompile(
+    sval_u val,
+    unsigned int fileId,
+    unsigned int scriptId,
+    PrecacheEntry *entries,
+    int entriesCount);
 
 extern scrCompilePub_t scrCompilePub;
 extern scrCompileGlob_t scrCompileGlob;

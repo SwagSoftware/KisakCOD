@@ -3583,7 +3583,7 @@ int __cdecl XAnimSetGoalWeightKnob(
     }
     else
     {
-        infoIndex = XAnimAllocInfoIndex((unsigned int)&savedregs, obj, animIndex, 0);
+        infoIndex = XAnimAllocInfoIndex(obj, animIndex, 0);
         XAnimInitInfo(&g_xAnimInfo[infoIndex]);
     }
     XAnimClearGoalWeightKnobInternal(tree, infoIndex, goalWeight, goalTime);
@@ -4040,7 +4040,7 @@ int __cdecl XAnimSetGoalWeight(
             Profile_EndInternal(0);
             return 0;
         }
-        infoIndex = XAnimAllocInfoIndex((unsigned int)&savedregs, obj, animIndex, 0);
+        infoIndex = XAnimAllocInfoIndex(obj, animIndex, 0);
         XAnimInitInfo(&g_xAnimInfo[infoIndex]);
     }
     error = XAnimSetGoalWeightNode(tree, infoIndex, goalWeight, goalTime, rate, notifyName, notifyType);
@@ -4159,7 +4159,7 @@ int __cdecl XAnimSetCompleteGoalWeight(
     }
     else
     {
-        infoIndex = XAnimAllocInfoIndex((unsigned int)&savedregs, obj, animIndex, 0);
+        infoIndex = XAnimAllocInfoIndex(obj, animIndex, 0);
         XAnimInitInfo(&g_xAnimInfo[infoIndex]);
     }
     error = XAnimSetCompleteGoalWeightNode(tree, infoIndex, goalWeight, goalTime, rate, notifyName, notifyType);

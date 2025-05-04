@@ -2554,6 +2554,14 @@ void __cdecl Vec4Scale(const float* v, float scale, float* result)
     result[3] = scale * v[3];
 }
 
+void __cdecl Vec4Sub(const float *a, const float *b, float *diff)
+{
+    *diff = *a - *b;
+    diff[1] = a[1] - b[1];
+    diff[2] = a[2] - b[2];
+    diff[3] = a[3] - b[3];
+}
+
 void __cdecl Vec4Mad(const float *start, float scale, const float *dir, float *result)
 {
     *result = scale * *dir + *start;

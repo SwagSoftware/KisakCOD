@@ -1005,7 +1005,7 @@ void __cdecl Ragdoll_GetTorsoPosition(RagdollBody *body, float *center)
     center[2] = boneOrientation->origin[2];
 }
 
-char __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body)
+bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState curState, BodyState newState)
 {
     BoneOrientation *v2; // eax
     BoneOrientation *v3; // eax

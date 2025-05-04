@@ -43,6 +43,23 @@ bool __cdecl Com_BspError()
         || Com_CheckVersionLumpCountError(comBspGlob.header->version) != 0;
 }
 
+void __cdecl Com_CleanupBsp()
+{
+    comBspGlob.loadedLumpData = 0;
+    if (Com_IsBspLoaded())
+        Com_UnloadBsp();
+    if (Com_IsBspLoaded())
+        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 368, 0, "%s", "!Com_IsBspLoaded()");
+}
+
+BOOL __cdecl Com_BspHasLump(LumpType type)
+{
+    unsigned int count; // [esp+0h] [ebp-4h] BYREF
+
+    Com_GetBspLump(type, 1u, &count);
+    return count != 0;
+}
+
 char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count)
 {
     unsigned int chunkIter; // [esp+0h] [ebp-10h]

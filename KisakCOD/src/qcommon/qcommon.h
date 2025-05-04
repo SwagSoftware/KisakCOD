@@ -299,11 +299,11 @@ const char *__cdecl Dvar_DisplayableResetValue(const dvar_s *dvar);
 const char *__cdecl Dvar_DisplayableLatchedValue(const dvar_s *dvar);
 char __cdecl Dvar_ValueInDomain(unsigned __int8 type, DvarValue value, DvarLimits domain);
 char __cdecl Dvar_VectorInDomain(const float *vector, int components, float min, float max);
-const char *__cdecl Dvar_DomainToString_GetLines(
+const char *Dvar_DomainToString_GetLines(
     unsigned __int8 type,
-    DvarLimits domain,
+    DvarLimits *domain,
     char *outBuffer,
-    int outBufferLen,
+    unsigned int outBufferLen,
     int *outLineCount);
 void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen);
 

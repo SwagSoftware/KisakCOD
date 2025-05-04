@@ -233,6 +233,11 @@ void Sys_SetAutoConfigureGHz(SysInfo* sysInfo)
     sysInfo->configureGHz = Sys_BenchmarkGHz() * multiCpuFactor;
 }
 
+void __cdecl Sys_DetectCpuVendorAndName(char *vendor, char *name)
+{
+    strcpy(vendor, "KisakTech");
+    strcpy(name, "KSK-2900x 5.0khz (No AMD PSP or Intel ME)");
+}
 #if 0 // KISAKTODO gotta do this ourselves
 void __cdecl Sys_DetectCpuVendorAndName(char* vendor, char* name)
 {

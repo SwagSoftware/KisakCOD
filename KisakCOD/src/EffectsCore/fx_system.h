@@ -280,7 +280,7 @@ void __cdecl FX_ImpactMark(
     int localClientNum,
     Material *worldMaterial,
     Material *modelMaterial,
-    const float *origin,
+    float *origin,
     const float *quat,
     float orientation,
     const unsigned __int8 *nativeColor,
@@ -764,7 +764,7 @@ void __cdecl FX_GetElemAxis(
     const orientation_t *orient,
     float msecElapsed,
     mat3x3& axis);
-void __cdecl FX_AnglesToOrientedAxis(const float *anglesInRad, const orientation_t *orient, mat3x3 &axisOut);
+void __cdecl FX_AnglesToOrientedAxis(const float *anglesInRad, const orientation_t *orient, float (*axisOut)[3][3]);
 
 
 // fx_random

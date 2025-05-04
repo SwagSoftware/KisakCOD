@@ -572,9 +572,6 @@
     <ClCompile Include="src\xanim\xmodel_load_obj.cpp" />
     <ClCompile Include="src\xanim\xmodel_load_phys_collmap.cpp" />
     <ClCompile Include="src\xanim\xmodel_utils.cpp" />
-    <ClCompile Include="src\zlib32\deflate.cpp" />
-    <ClCompile Include="src\zlib32\inflate.cpp" />
-    <ClCompile Include="src\zlib32\zipcommon.cpp" />
     <ClCompile Include="src\zlib\adler32.c" />
     <ClCompile Include="src\zlib\compress.c" />
     <ClCompile Include="src\zlib\crc32.c" />
@@ -849,9 +846,6 @@
     <ClInclude Include="src\xanim\xanim_load_db.h" />
     <ClInclude Include="src\xanim\xanim_public.h" />
     <ClInclude Include="src\xanim\xmodel.h" />
-    <ClInclude Include="src\zlib32\deflate.h" />
-    <ClInclude Include="src\zlib32\inflate.h" />
-    <ClInclude Include="src\zlib32\zip.h" />
     <ClInclude Include="src\zlib\deflate.h" />
     <ClInclude Include="src\zlib\infblock.h" />
     <ClInclude Include="src\zlib\infcodes.h" />

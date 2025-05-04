@@ -117,7 +117,7 @@ void __cdecl FX_CreateImpactMark(
         localClientNum,
         markVisuals->materials[1],
         markVisuals->materials[0],
-        spatialFrame->origin,
+        (float*)spatialFrame->origin,
         spatialFrame->quat,
         visState.rotationTotal,
         visState.color,

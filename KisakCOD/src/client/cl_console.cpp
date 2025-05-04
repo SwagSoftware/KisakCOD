@@ -3079,7 +3079,7 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
         conDrawInputGlob.y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
         conDrawInputGlob.y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
         conDrawInputGlob.x = conDrawInputGlob.leftX;
-        Dvar_DomainToString_GetLines(dvar->type, dvar->domain, dvarInfo, 1024, &infoLineCount);
+        Dvar_DomainToString_GetLines(dvar->type, (DvarLimits*)&dvar->domain, dvarInfo, 1024, &infoLineCount);
         if (dvar->description)
             descriptionLineCount = ConDrawInput_GetDvarDescriptionLines(dvar);
         else

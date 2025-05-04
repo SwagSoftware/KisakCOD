@@ -2428,8 +2428,11 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     }
 }
 
-void __fastcall PlayerCmd_DeactivateReverb(scr_entref_t *entref)
+//void __fastcall PlayerCmd_DeactivateReverb(scr_entref_t *entref)
+void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t e)
 {
+    scr_entref_t *entref = &e; // HACK
+
     unsigned __int16 v1; // r30
     const char *v2; // r3
     double Float; // fp31

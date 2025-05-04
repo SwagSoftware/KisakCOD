@@ -275,13 +275,13 @@ void __cdecl R_XModelDebugAxes(const DObj_s *obj, int *partBits)
     }
 }
 
-int R_SkinXModel(
-    const GfxPlacement *modelInfo,
+int __cdecl R_SkinXModel(
+    XModelDrawInfo *modelInfo,
     const XModel *model,
     const DObj_s *obj,
     const GfxPlacement *placement,
     float scale,
-    unsigned __int16 gfxEntIndex)
+    __int16 gfxEntIndex)
 {
     unsigned int v8; // [esp+20h] [ebp-E64h]
     unsigned int startSurfPos; // [esp+2Ch] [ebp-E58h]
@@ -360,9 +360,9 @@ int R_SkinXModel(
     {
         if ((v8 & 3) != 0)
             MyAssertHandler(".\\r_model.cpp", 480, 0, "%s", "!(startSurfPos & 3)");
-        HIWORD(modelInfo->quat[0]) = v8 >> 2;
+        modelInfo->surfId = v8 >> 2;
         memcpy(&frontEndDataOut->surfsBuffer[v8], surfBuf, surfPos - surfBuf);
-        LOWORD(modelInfo->quat[0]) = lod;
+        modelInfo->lod = lod;
         Profile_EndInternal(0);
         return 1;
     }

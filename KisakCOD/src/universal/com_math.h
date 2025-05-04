@@ -241,6 +241,7 @@ void __cdecl Vec4Mul(const float* a, const float* b, float* product);
 float __cdecl Vec4LengthSq(const float* v);
 void __cdecl Vec4Scale(const float* v, float scale, float* result);
 void __cdecl Vec4Mad(const float *start, float scale, const float *dir, float *result);
+void __cdecl Vec4Sub(const float *a, const float *b, float *diff);
 void __cdecl Vec4MadMad(
     const float *start,
     float scale0,

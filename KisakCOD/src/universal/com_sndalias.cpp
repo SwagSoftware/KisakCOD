@@ -112,12 +112,12 @@ void __cdecl Com_InitSoundDevGuiGraphs()
         ((void(__cdecl *)(void (*)()))Com_InitSoundDevGuiGraphs_LoadObj)(Com_InitSoundDevGuiGraphs_LoadObj);
 }
 
-void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, DevEventType event)
+void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, DevEventType event, int i)
 {
     char string[8196]; // [esp+14h] [ebp-2030h] BYREF
     int data; // [esp+2018h] [ebp-2Ch]
     char dest[32]; // [esp+201Ch] [ebp-28h] BYREF
-    int i; // [esp+2040h] [ebp-4h]
+    //int i; // [esp+2040h] [ebp-4h]
 
     if (!graph)
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 213, 0, "%s", "graph");
@@ -148,36 +148,6 @@ void Com_InitSoundDevGuiGraphs_FastFile()
 
     counter = 0;
     DB_EnumXAssets(ASSET_TYPE_SOUND_CURVE, (void(__cdecl *)(XAssetHeader, void *))Com_GetGraphList, &counter, 0);
-}
-
-void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, DevEventType event, int i)
-{
-    char string[8196]; // [esp+14h] [ebp-2030h] BYREF
-    int data; // [esp+2018h] [ebp-2Ch]
-    char dest[32]; // [esp+201Ch] [ebp-28h] BYREF
-    //int i; // [esp+2040h] [ebp-4h]
-
-    if (!graph)
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 213, 0, "%s", "graph");
-    data = (int)graph->data;
-    if (data <= 0 || data >= 16)
-        MyAssertHandler(
-            ".\\universal\\com_sndalias.cpp",
-            215,
-            0,
-            "%s\n\t(curveIndex) = %i",
-            "(curveIndex > 0 && curveIndex < 16)",
-            data);
-    if (event == EVENT_ACCEPT)
-    {
-        sprintf(string, "Volume Falloff Curve #%02d\nKnot Count: %d\n", data, *graph->knotCount);
-        for (i = 0; i < *graph->knotCount; ++i)
-        {
-            Com_sprintf(dest, 0x20u, "%.4f %.4f\n", graph->knots[i][0], graph->knots[i][1]);
-            I_strncat(string, 0x2000, dest);
-        }
-        Com_Printf(9, "^6%s", string);
-    }
 }
 
 void __cdecl Com_GetGraphList(XAssetHeader header, int *data)
@@ -829,15 +799,6 @@ void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve *sndCurve)
     sndCurve->knotCount = 2;
 }
 
-void __cdecl Com_PreLoadSpkrMapFile(SpeakerMapInfo *info)
-{
-    info->speakerMap.channelMaps[0][0].speakerCount = 2;
-    info->speakerMap.channelMaps[1][0].speakerCount = 2;
-    info->speakerMap.channelMaps[0][1].speakerCount = 6;
-    info->speakerMap.channelMaps[1][1].speakerCount = 6;
-    info->speakerMap.name = info->name;
-}
-
 void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo *info)
 {
     Com_PreLoadSpkrMapFile(info);
@@ -1330,4 +1291,55 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
         FS_CopyFile(fromOSPath, toOSPath);
     FS_Remove(fromOSPath);
     Com_Printf(9, "Localized %i sound alias subtitles\n", v37);
+}
+
+void __cdecl Com_InitSoundAliasHash(unsigned int aliasCount)
+{
+    g_sa.hashUsed = 0;
+    g_sa.hashSize = (3 * aliasCount + 1) >> 1;
+    g_sa.hash = (snd_alias_list_t**)CM_Hunk_Alloc(4 * ((3 * aliasCount + 1) >> 1), "Com_InitSoundAliasHash", 15);
+    memset(g_sa.hash, 0, 4 * ((3 * aliasCount + 1) >> 1));
+}
+
+cmd_function_s Com_RefreshSpeakerMaps_f_VAR;
+void __cdecl Com_RefreshSpeakerMaps_f()
+{
+    int speakerMapIndex; // [esp+0h] [ebp-4h]
+
+    if (!g_sa.speakerMapsInitialized)
+        MyAssertHandler(".\\universal\\com_sndalias.cpp", 334, 0, "%s", "g_sa.speakerMapsInitialized");
+    for (speakerMapIndex = 1; *g_sa.speakerMaps[speakerMapIndex].speakerMap.name; ++speakerMapIndex)
+    {
+        if (!Com_LoadSpkrMapFile((char*)g_sa.speakerMaps[speakerMapIndex].speakerMap.name, &g_sa.speakerMaps[speakerMapIndex]))
+            Com_Error(ERR_DROP, "Failed to load speaker map %s", g_sa.speakerMaps[speakerMapIndex].speakerMap.name);
+    }
+}
+
+void Com_InitSpeakerMaps()
+{
+    int fileIndex; // [esp+10h] [ebp-58h]
+    const char **fileNames; // [esp+14h] [ebp-54h]
+    char name[68]; // [esp+18h] [ebp-50h] BYREF
+    int len; // [esp+60h] [ebp-8h]
+    int fileCount; // [esp+64h] [ebp-4h] BYREF
+
+    if (g_sa.speakerMapsInitialized)
+        MyAssertHandler(".\\universal\\com_sndalias.cpp", 360, 0, "%s", "!g_sa.speakerMapsInitialized");
+    Com_InitDefaultSpeakerMap();
+    fileNames = FS_ListFiles("soundaliases", "spkrmap", FS_LIST_PURE_ONLY, &fileCount);
+    if (fileCount > 15)
+        Com_Error(ERR_DROP, "Snd_Alias Curve initialization: .vfcurve file count (%d) exceeds maximum (%d) ", fileCount, 15);
+    for (fileIndex = 0; fileIndex < fileCount; ++fileIndex)
+    {
+        len = strlen(fileNames[fileIndex]) - 8;
+        if (len >= 64)
+            Com_Error(ERR_DROP, "Speaker map %s name too long", fileNames[fileIndex]);
+        strncpy(name, fileNames[fileIndex], len);
+        name[len] = 0;
+        if (!Com_LoadSpkrMapFile(name, &g_sa.speakerMaps[fileIndex + 1]))
+            Com_Error(ERR_DROP, "Failed to load speaker map %s", fileNames[fileIndex]);
+    }
+    FS_FreeFileList(fileNames);
+    Cmd_AddCommandInternal("snd_refreshSpeakerMaps", Com_RefreshSpeakerMaps_f, &Com_RefreshSpeakerMaps_f_VAR);
+    g_sa.speakerMapsInitialized = 1;
 }

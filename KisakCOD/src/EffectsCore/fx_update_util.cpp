@@ -506,7 +506,7 @@ void __cdecl FX_GetElemAxis(
     angles[1] = msecElapsed * v6 + angles[1];
     v5 = elemDef->angularVelocity[2].amplitude * fx_randomTable[randomSeed + 5] + elemDef->angularVelocity[2].base;
     angles[2] = msecElapsed * v5 + angles[2];
-    FX_AnglesToOrientedAxis(angles, orient, axis);
+    FX_AnglesToOrientedAxis(angles, orient, (float(*)[3][3])&axis);
 }
 
 void __cdecl FX_AnglesToOrientedAxis(const float* anglesInRad, const orientation_t* orient, float (*axisOut)[3][3])

@@ -2209,7 +2209,7 @@ int __cdecl SND_PlayBlendedSoundAliases(
     float lerp,
     float volumeScale,
     SndEntHandle sndEnt,
-    float *org,
+    const float *org,
     int timeshift,
     snd_alias_system_t system)
 {

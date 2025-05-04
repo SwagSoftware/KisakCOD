@@ -47,6 +47,7 @@ int eventTail;
 SysInfo sys_info;
 
 bool shouldQuitOnError;
+int client_state;
 
 cmd_function_s Sys_In_Restart_f_VAR;
 cmd_function_s Sys_Net_Restart_f_VAR;

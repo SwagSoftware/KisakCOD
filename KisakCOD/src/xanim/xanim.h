@@ -1583,11 +1583,7 @@ unsigned int __cdecl XAnimAllocInfoWithParent(
     unsigned int animIndex,
     unsigned int parentInfoIndex,
     int after);
-unsigned int XAnimAllocInfoIndex(
-    unsigned int a1,
-    DObj_s* obj,
-    unsigned int animIndex,
-    int after);
+unsigned int XAnimAllocInfoIndex(DObj_s *obj, unsigned int animIndex, int after);
 unsigned int __cdecl XAnimEnsureGoalWeightParent(DObj_s* obj, unsigned int animIndex);
 void __cdecl XAnimClearGoalWeightInternal(
     XAnimTree_s* tree,

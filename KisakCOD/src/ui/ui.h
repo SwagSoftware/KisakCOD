@@ -4,6 +4,8 @@
 #include <physics/ode/objects.h>
 #include <bgame/bg_local.h>
 
+#undef DrawText // Horrible OS
+
 struct Scr_WatchElement_s;
 
 enum parseSkip_t : __int32
@@ -885,6 +887,7 @@ struct UI_Component_data_t // sizeof=0xAC
     int consoleReason;                  // ...
     char findText[128];                 // ...
 };
+
 struct UI_Component // sizeof=0x10
 {                                       // ...
     //void(__thiscall *Init)(UI_Component *this);
@@ -897,13 +900,38 @@ struct UI_Component // sizeof=0x10
 
     //UI_Component_vtbl *__vftable;
 
-    virtual void Init();
-    virtual void Shutdown();
-    virtual ~UI_Component();
-    virtual void Draw(float one, float two, float three, float four, float five, float six);
-    virtual bool KeyEvent(float *, int);
-    virtual UI_Component *GetCompAtLocation(float *location);
-    virtual void AddText(const char *text);
+    virtual void Init()
+    {
+        this->size[0] = 0.0f;
+        this->size[1] = 0.0f;
+        this->selectionParent = NULL;
+    }
+    virtual void Shutdown() {}
+    virtual ~UI_Component() {}
+    virtual void Draw(float one, float two, float three, float four, float five, float six) = 0;
+    virtual bool KeyEvent(float *, int) = 0;
+    virtual UI_Component *GetCompAtLocation(float *point)
+    {
+        if (*point < 0.0 || this->size[0] <= *point || point[1] < 0.0 || this->size[1] <= point[1])
+            return 0;
+        else
+            return this;
+    }
+    virtual void AddText(const char *text)
+    {
+    }
+
+    void DrawText(float x, float y, float width, int fontEnum, const float *color, char *text);
+
+    void DrawPic(float x, float y, float width, float height, const float *color, Material *material);
+
+    void DrawPicRotate(
+        float x,
+        float y,
+        float width,
+        float height,
+        const float *color,
+        Material *material);
 
     float size[2];
     UI_Component *selectionParent;      // ...
@@ -919,6 +947,7 @@ struct UI_Component // sizeof=0x10
 struct UI_LinesComponent : UI_Component // sizeof=0x24
 {                                       // ...
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+    virtual bool KeyEvent(float *point, int key);
 
     int selectedLine;                   // ...
     bool focusOnSelectedLine;
@@ -936,6 +965,56 @@ struct UI_LinesComponent : UI_Component // sizeof=0x24
 
 struct UI_ScrollPane : UI_Component // sizeof=0x34
 {                                       // ...
+    virtual void Draw(
+        float x,
+        float y,
+        float width,
+        float height,
+        float compX,
+        float compY);
+    virtual bool KeyEvent(float *point, int key);
+
+    virtual UI_Component *GetCompAtLocation(float *point)
+    {
+        UI_LinesComponent *comp; // edx
+        float innerSize[2]; // [esp+8h] [ebp-8h] BYREF
+
+        if (!this->comp)
+            return UI_Component::GetCompAtLocation(point);
+        //UI_ScrollPane::GetInnerSize(this, innerSize);
+        this->GetInnerSize(innerSize);
+        
+        if (innerSize[0] <= *point || innerSize[1] <= point[1])
+            return UI_Component::GetCompAtLocation(point);
+        comp = this->comp;
+        *point = *point + comp->pos[0];
+        point[1] = point[1] + comp->pos[1];
+        return this->comp->GetCompAtLocation(point);
+    }
+    bool GetInnerSize(float *innerSize)
+    {
+        bool v3; // [esp+0h] [ebp-Ch]
+
+        if (!this->comp)
+            MyAssertHandler(".\\ui\\ui_component.cpp", 711, 0, "%s", "comp");
+        *innerSize = this->size[0] - UI_Component::g.scrollBarSize;
+        v3 = this->forceHorScoll || this->comp->pos[0] != 0.0 || *innerSize < this->comp->size[0];
+        if (*innerSize > this->comp->size[0])
+            this->comp->size[0] = *innerSize;
+        innerSize[1] = this->size[1];
+        if (v3)
+            innerSize[1] = innerSize[1] - UI_Component::g.scrollBarSize;
+        return v3;
+    }
+    int GetInnerLinesCount();
+    int GetFirstDisplayedLine();
+    int GetLastDisplayedLine();
+    void DisplaySelectedLine();
+
+    void CheckMouseScroll(int index, float *thumbPos, float *thumbSize, float thumbMaxSize);
+
+    void SetPos();
+
     UI_LinesComponent *comp;            // ...
     bool forceHorScoll;                 // ...
     // padding byte
@@ -951,6 +1030,15 @@ struct UI_ScrollPane : UI_Component // sizeof=0x34
 
 struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
 {
+    virtual void Draw(
+        float x,
+        float y,
+        float width,
+        float height,
+        float compX,
+        float compY);
+
+    virtual bool KeyEvent(float *point, int key);
 
     unsigned int bufferIndex;
     int currentTopLine;
@@ -959,6 +1047,19 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
     struct Scr_Breakpoint *builtinHead;
     int numCols;
 
+    void EnterCallInternal();
+    void EnterCall();
+    void CopySelectedText();
+
+    void ToggleBreakpoint(
+        Scr_WatchElement_s *element,
+        bool force,
+        bool overwrite,
+        unsigned __int8 breakpointType,
+        bool user);
+
+    void RunToCursor();
+    char *GetBreakpointCodePos();
 
     char *GetFilename();
 
@@ -993,6 +1094,15 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
 
 struct Scr_AbstractScriptList : UI_LinesComponent // sizeof=0x28
 {                                       // ...
+    virtual void Shutdown();
+    virtual void Draw(
+        float x,
+        float y,
+        float width,
+        float height,
+        float compX,
+        float compY);
+
     Scr_ScriptWindow **scriptWindows;   // ...
 
     bool AddEntryName(const char *filename, bool select);
@@ -1001,24 +1111,51 @@ struct Scr_AbstractScriptList : UI_LinesComponent // sizeof=0x28
 
 struct Scr_ScriptList : Scr_AbstractScriptList // sizeof=0x28
 {                                       // ...
+    virtual void Shutdown();
+
     void LoadScriptPos();
 };
 
 struct Scr_OpenScriptList : Scr_AbstractScriptList // sizeof=0x2C
 {                                       // ...
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+    virtual void Shutdown();
 
     struct Scr_StringNode_s *usedHead;
 };
 
 struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
 {                                       // ...
+    virtual void Shutdown();
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+
+    virtual void Draw(
+        float x,
+        float y,
+        float width,
+        float height,
+        float compX,
+        float compY);
+
+    void Draw_r(Scr_WatchElement_s *element,
+        float x,
+        float y,
+        float width,
+        float lastHeight,
+        int startLine,
+        unsigned int depth,
+        bool isArray,
+        int *currentLine,
+        float *currentY,
+        float compX,
+        float compY);
 
     Scr_WatchElement_s *elementHead;    // ...
     int elementId;                      // ...
     unsigned int localId;               // ...
     int dirty;                          // ...
+
+    Scr_WatchElement_s *GetSelectedNonConditionalElement();
 
     Scr_WatchElement_s *GetElementWithId_r(Scr_WatchElement_s *element, int id);
 
@@ -1109,6 +1246,14 @@ struct Scr_ScriptCallStack : UI_LinesComponent // sizeof=0x12C
 {                                       // ...
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
 
+    virtual void Draw(
+        float x,
+        float y,
+        float width,
+        float height,
+        float compX,
+        float compY);
+
     Scr_SourcePos2_t stack[33];         // ...
 
     void UpdateStack();
@@ -1116,6 +1261,19 @@ struct Scr_ScriptCallStack : UI_LinesComponent // sizeof=0x12C
 
 struct UI_VerticalDivider : UI_Component // sizeof=0x1C
 {                                       // ...
+    virtual UI_Component *GetCompAtLocation(float *point);
+    virtual void Draw(
+        float x,
+        float y,
+        float width,
+        float height,
+        float compX,
+        float compY);
+
+    virtual bool KeyEvent(float *point, int key);
+
+    void DrawTop(float x, float y, float width, float topHeight);
+
     UI_ScrollPane *topComp;             // ...
     UI_ScrollPane *bottomComp;          // ...
     float posY;                         // ...

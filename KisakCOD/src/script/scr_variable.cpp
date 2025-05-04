@@ -49,7 +49,7 @@ int  VariableInfoFunctionCompare(void *p_info1, void *p_info2)
 	return -1;
 }
 
-int __cdecl CompareThreadIndices(_DWORD *arg1, _DWORD *arg2)
+int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2)
 {
 	return *arg1 - *arg2;
 }
@@ -3348,7 +3348,7 @@ int __cdecl VariableInfoFileLineCompare(_DWORD* info1, _DWORD* info2)
 	if (fileCompare)
 		return fileCompare;
 	else
-		return CompareThreadIndices(info1, info2);
+		return CompareThreadIndices((unsigned int*)info1, (unsigned int*)info2);
 }
 
 unsigned int  FindVariableIndexInternal2(unsigned int name, unsigned int index)

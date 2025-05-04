@@ -335,6 +335,14 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
     return drawSurfIndex;
 }
 
+unsigned int __cdecl R_DrawXModelRigidSurfCamera(
+    const GfxDrawSurf *drawSurfList,
+    unsigned int drawSurfCount,
+    GfxCmdBufContext context)
+{
+    return R_DrawXModelRigidSurfCameraInternal(drawSurfList, drawSurfCount, context);
+}
+
 unsigned int __cdecl R_DrawXModelRigidSurfInternal(
     const GfxDrawSurf *drawSurfList,
     unsigned int drawSurfCount,

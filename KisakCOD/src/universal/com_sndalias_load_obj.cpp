@@ -3,6 +3,7 @@
 #include "com_files.h"
 #include <qcommon/cmd.h>
 #include "com_memory.h"
+#include <devgui/devgui.h>
 
 SoundAliasLoadGlobals saLoadObjGlob;
 
@@ -1779,4 +1780,312 @@ void __cdecl Com_SetChannelMapEntry(
         entry->speakers[outputChannel].numLevels = inputChannel + 1;
     speaker->levels[inputChannel] = volume;
     speaker->speaker = outputChannel;
+}
+
+void Com_InitSoundDevGuiGraphs_LoadObj()
+{
+    char devguiPath[256]; // [esp+0h] [ebp-108h] BYREF
+    int i; // [esp+104h] [ebp-4h]
+
+    if (!g_sa.curvesInitialized)
+        MyAssertHandler(".\\universal\\com_sndalias.cpp", 240, 0, "%s", "g_sa.curvesInitialized");
+    for (i = 1; i < 16; ++i)
+    {
+        if (*&g_sa.volumeFalloffCurveNames[-18][72 * i])
+        {
+            sprintf(devguiPath, "Main/Snd:6/Volume Falloff Curves/%s:%d", *&g_sa.volumeFalloffCurveNames[-18][72 * i], i);
+            g_sa.curveDevGraphs[i].knotCountMax = 8;
+            g_sa.curveDevGraphs[i].knots = g_sa.volumeFalloffCurves[i].knots;
+            g_sa.curveDevGraphs[i].knotCount = &g_sa.volumeFalloffCurves[i].knotCount;
+            g_sa.curveDevGraphs[i].eventCallback = Com_VolumeFalloffCurveGraphEventCallback;
+            g_sa.curveDevGraphs[i].data = (void*)i;
+            g_sa.curveDevGraphs[i].disableEditingEndPoints = 1;
+            DevGui_AddGraph(devguiPath, &g_sa.curveDevGraphs[i]);
+        }
+    }
+}
+
+void __cdecl Com_PreLoadSpkrMapFile(SpeakerMapInfo *info)
+{
+    info->speakerMap.channelMaps[0][0].speakerCount = 2;
+    info->speakerMap.channelMaps[1][0].speakerCount = 2;
+    info->speakerMap.channelMaps[0][1].speakerCount = 6;
+    info->speakerMap.channelMaps[1][1].speakerCount = 6;
+    info->speakerMap.name = info->name;
+}
+
+char __cdecl Com_LoadSpkrMapParseBuffer(char *fileName, char *buffer)
+{
+    signed int fileLength; // [esp+10h] [ebp-10h]
+    int fileHandle; // [esp+18h] [ebp-8h] BYREF
+    int identifierStrLength; // [esp+1Ch] [ebp-4h]
+
+    identifierStrLength = strlen("SPKRMAP");
+    fileLength = FS_FOpenFileByMode(fileName, &fileHandle, FS_READ);
+    if (fileLength > 0)
+    {
+        if (identifierStrLength >= 0x2000)
+            MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2620, 0, "%s", "identifierStrLength < BIG_INFO_STRING");
+        FS_Read((unsigned char *)buffer, identifierStrLength, fileHandle);
+        buffer[identifierStrLength] = 0;
+        if (!strncmp(buffer, "SPKRMAP", identifierStrLength))
+        {
+            if (fileLength - identifierStrLength < 0x2000)
+            {
+                FS_Read((unsigned char*)buffer, fileLength - identifierStrLength, fileHandle);
+                buffer[fileLength - identifierStrLength] = 0;
+                FS_FCloseFile(fileHandle);
+                return 1;
+            }
+            else
+            {
+                Com_PrintError(9, "ERROR: \"%s\" Is too long of a spkrmap file to parse\n", fileName);
+                return 0;
+            }
+        }
+        else
+        {
+            Com_PrintError(9, "ERROR: \"%s\" does not appear to be a spkrmap file\n", fileName);
+            return 0;
+        }
+    }
+    else
+    {
+        Com_PrintError(9, "ERROR: Could not load spkrmap file '%s'\n", fileName);
+        return 0;
+    }
+}
+
+const char *g_spkrMapParseBuffer;
+const char *sa_spkrMapIdentifierStrings[9] =
+{
+  "MONOSOURCE",
+  "LEFTSOURCE",
+  "RIGHTSOURCE",
+  "LEFTSPEAKER",
+  "RIGHTSPEAKER",
+  "CENTERSPEAKER",
+  "LFESPEAKER",
+  "LEFTSURROUNDSPEAKER",
+  "RIGHTSURROUNDSPEAKER"
+};
+int sa_spkrMapIdentifierValues[9] =
+{ 0, 0, 1, 0, 1, 2, 3, 4, 5 };
+
+
+char __cdecl Com_ParseChannelMapEntry(
+    const char *fileName,
+    MSSChannelMap *entry,
+    SA_SPKRMAPIDENTIFIERS inputChannel,
+    SA_SPKRMAPIDENTIFIERS outputChannel)
+{
+    float volume; // [esp+8h] [ebp-8h]
+    parseInfo_t *token; // [esp+Ch] [ebp-4h]
+    parseInfo_t *tokena; // [esp+Ch] [ebp-4h]
+    parseInfo_t *tokenb; // [esp+Ch] [ebp-4h]
+
+    if (!g_spkrMapParseBuffer)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2656, 0, "%s", "g_spkrMapParseBuffer");
+    if (!fileName)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2657, 0, "%s", "fileName");
+    if (!entry)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2658, 0, "%s", "entry");
+    token = Com_Parse(&g_spkrMapParseBuffer);
+    if (I_stricmp(token->token, sa_spkrMapIdentifierStrings[inputChannel]))
+    {
+        Com_PrintError(
+            9,
+            "ERROR: spkrMap parse failure on file \"%s\": got token '%s', expected '%s'.\n",
+            fileName,
+            token->token,
+            sa_spkrMapIdentifierStrings[inputChannel]);
+        return 0;
+    }
+    else
+    {
+        tokena = Com_Parse(&g_spkrMapParseBuffer);
+        if (I_stricmp(tokena->token, sa_spkrMapIdentifierStrings[outputChannel]))
+        {
+            Com_PrintError(
+                9,
+                "ERROR: spkrMap parse failure on file \"%s\": got token '%s', expected '%s'.\n",
+                fileName,
+                tokena->token,
+                sa_spkrMapIdentifierStrings[outputChannel]);
+            return 0;
+        }
+        else
+        {
+            tokenb = Com_Parse(&g_spkrMapParseBuffer);
+            if (tokenb->token[0])
+            {
+                volume = atof(tokenb->token);
+                if (volume >= 0.0 && volume <= 1.0)
+                {
+                    Com_SetChannelMapEntry(
+                        entry,
+                        sa_spkrMapIdentifierValues[inputChannel],
+                        sa_spkrMapIdentifierValues[outputChannel],
+                        volume);
+                    return 1;
+                }
+                else
+                {
+                    Com_PrintError(
+                        9,
+                        "ERROR: spkrMap parse failure on file \"%s\": volume '%f' is not in the range 0-1.",
+                        fileName,
+                        volume);
+                    return 0;
+                }
+            }
+            else
+            {
+                Com_PrintError(
+                    9,
+                    "ERROR: spkrMap parse failure on file \"%s\": token '%s' is not a float value in the range 0-1.\n",
+                    fileName,
+                    tokenb->token);
+                return 0;
+            }
+        }
+    }
+}
+
+bool __cdecl Com_ParseMonoSourceStereoOutput(const char *fileName, SpeakerMap *speakerMap)
+{
+    if (!g_spkrMapParseBuffer)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2702, 0, "%s", "g_spkrMapParseBuffer");
+    if (!fileName)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2703, 0, "%s", "fileName");
+    if (!speakerMap)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2704, 0, "%s", "speakerMap");
+    return Com_ParseChannelMapEntry(fileName, speakerMap->channelMaps[0], SA_MONOSOURCE, SA_LEFTSPEAKER)
+        && Com_ParseChannelMapEntry(fileName, speakerMap->channelMaps[0], SA_MONOSOURCE, SA_RIGHTSPEAKER) != 0;
+}
+
+bool __cdecl Com_ParseStereoSourceStereoOutput(const char *fileName, SpeakerMap *speakerMap)
+{
+    MSSChannelMap *entries; // [esp+0h] [ebp-4h]
+
+    if (!g_spkrMapParseBuffer)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2725, 0, "%s", "g_spkrMapParseBuffer");
+    if (!fileName)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2726, 0, "%s", "fileName");
+    if (!speakerMap)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2727, 0, "%s", "speakerMap");
+    entries = speakerMap->channelMaps[1];
+    if (!Com_ParseChannelMapEntry(fileName, speakerMap->channelMaps[1], SA_LEFTSOURCE, SA_LEFTSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_LEFTSPEAKER))
+        return 0;
+    if (Com_ParseChannelMapEntry(fileName, entries, SA_LEFTSOURCE, SA_RIGHTSPEAKER))
+        return Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_RIGHTSPEAKER) != 0;
+    return 0;
+}
+
+bool __cdecl Com_ParseMonoSource51Output(const char *fileName, SpeakerMap *speakerMap)
+{
+    MSSChannelMap *entries; // [esp+0h] [ebp-4h]
+
+    if (!g_spkrMapParseBuffer)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2752, 0, "%s", "g_spkrMapParseBuffer");
+    if (!fileName)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2753, 0, "%s", "fileName");
+    if (!speakerMap)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2754, 0, "%s", "speakerMap");
+    entries = &speakerMap->channelMaps[0][1];
+    if (!Com_ParseChannelMapEntry(fileName, &speakerMap->channelMaps[0][1], SA_MONOSOURCE, SA_LEFTSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_MONOSOURCE, SA_RIGHTSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_MONOSOURCE, SA_CENTERSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_MONOSOURCE, SA_LFESPEAKER))
+        return 0;
+    if (Com_ParseChannelMapEntry(fileName, entries, SA_MONOSOURCE, SA_LEFTSURROUNDSPEAKER))
+        return Com_ParseChannelMapEntry(fileName, entries, SA_MONOSOURCE, SA_RIGHTSURROUNDSPEAKER) != 0;
+    return 0;
+}
+
+bool __cdecl Com_ParseStereoSource51Output(const char *fileName, SpeakerMap *speakerMap)
+{
+    MSSChannelMap *entries; // [esp+0h] [ebp-4h]
+
+    if (!g_spkrMapParseBuffer)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2783, 0, "%s", "g_spkrMapParseBuffer");
+    if (!fileName)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2784, 0, "%s", "fileName");
+    if (!speakerMap)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2785, 0, "%s", "speakerMap");
+    entries = &speakerMap->channelMaps[1][1];
+    if (!Com_ParseChannelMapEntry(fileName, &speakerMap->channelMaps[1][1], SA_LEFTSOURCE, SA_LEFTSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_LEFTSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_LEFTSOURCE, SA_RIGHTSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_RIGHTSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_LEFTSOURCE, SA_CENTERSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_CENTERSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_LEFTSOURCE, SA_LFESPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_LFESPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_LEFTSOURCE, SA_LEFTSURROUNDSPEAKER))
+        return 0;
+    if (!Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_LEFTSURROUNDSPEAKER))
+        return 0;
+    if (Com_ParseChannelMapEntry(fileName, entries, SA_LEFTSOURCE, SA_RIGHTSURROUNDSPEAKER))
+        return Com_ParseChannelMapEntry(fileName, entries, SA_RIGHTSOURCE, SA_RIGHTSURROUNDSPEAKER) != 0;
+    return 0;
+}
+
+char __cdecl Com_ParseSpkrMapFile(const char *buffer, const char *fileName, SpeakerMap *speakerMap)
+{
+    if (!buffer)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2824, 0, "%s", "buffer");
+    if (!fileName)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2825, 0, "%s", "fileName");
+    if (!speakerMap)
+        MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2826, 0, "%s", "speakerMap");
+    g_spkrMapParseBuffer = buffer;
+    Com_BeginParseSession(fileName);
+    if (Com_ParseMonoSourceStereoOutput(fileName, speakerMap)
+        && Com_ParseStereoSourceStereoOutput(fileName, speakerMap)
+        && Com_ParseMonoSource51Output(fileName, speakerMap)
+        && Com_ParseStereoSource51Output(fileName, speakerMap))
+    {
+        Com_EndParseSession();
+        g_spkrMapParseBuffer = 0;
+        return 1;
+    }
+    else
+    {
+        Com_EndParseSession();
+        g_spkrMapParseBuffer = 0;
+        return 0;
+    }
+}
+
+char __cdecl Com_LoadSpkrMapFile(char *name, SpeakerMapInfo *info)
+{
+    char dest[64]; // [esp+0h] [ebp-2048h] BYREF
+    char buffer[8196]; // [esp+40h] [ebp-2008h] BYREF
+
+    Com_PreLoadSpkrMapFile(info);
+    Com_sprintf(dest, 0x40u, "soundaliases/%s.spkrmap", name);
+    if (Com_LoadSpkrMapParseBuffer(dest, buffer) && Com_ParseSpkrMapFile(buffer, dest, &info->speakerMap))
+    {
+        Com_sprintf(info->name, 0x40u, name);
+        return 1;
+    }
+    else
+    {
+        Com_InitDefaultSoundAliasSpeakerMap(info);
+        return 0;
+    }
 }

@@ -77,6 +77,19 @@ enum snd_alias_members_t : __int32
     SA_ENVELOPPERCENTAGE = 0x1C,
     SA_NUMFIELDS = 0x1D,
 };
+enum SA_SPKRMAPIDENTIFIERS : __int32
+{                                       // ...
+    SA_MONOSOURCE = 0x0,
+    SA_LEFTSOURCE = 0x1,
+    SA_RIGHTSOURCE = 0x2,
+    SA_LEFTSPEAKER = 0x3,
+    SA_RIGHTSPEAKER = 0x4,
+    SA_CENTERSPEAKER = 0x5,
+    SA_LFESPEAKER = 0x6,
+    SA_LEFTSURROUNDSPEAKER = 0x7,
+    SA_RIGHTSURROUNDSPEAKER = 0x8,
+    SA_SPKRMAPIDENTIFIERCOUNT = 0x9,
+};
 inline snd_alias_members_t &operator++(snd_alias_members_t &e) {
     static_cast<snd_alias_members_t>(static_cast<int>(e) + 1);
     return e;
@@ -181,7 +194,7 @@ struct SoundAliasLoadGlobals // sizeof=0x1894
 
 double __cdecl Com_GetVolumeFalloffCurveValue(SndCurve *volumeFalloffCurve, float fraction);
 void __cdecl Com_InitSoundDevGuiGraphs();
-void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, DevEventType event);
+void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, DevEventType event, int i);
 void Com_InitSoundDevGuiGraphs_FastFile();
 void __cdecl Com_GetGraphList(XAssetHeader header, int *data);
 MSSChannelMap *__cdecl Com_GetSpeakerMap(SpeakerMap *speakerMap, int sourceChannelCount);
@@ -237,5 +250,10 @@ void __cdecl Com_SetChannelMapEntry(
     unsigned int inputChannel,
     unsigned int outputChannel,
     float volume);
+
+
+void __cdecl Com_PreLoadSpkrMapFile(SpeakerMapInfo *info);
+char __cdecl Com_LoadSpkrMapFile(char *name, SpeakerMapInfo *info);
+
 
 extern SoundAliasGlobals g_sa;

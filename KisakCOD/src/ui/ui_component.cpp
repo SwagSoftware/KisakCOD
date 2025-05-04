@@ -7,6 +7,19 @@
 #include <script/scr_parsetree.h>
 #include <script/scr_compiler.h>
 #include <script/scr_vm.h>
+#include <universal/com_files.h>
+#include <client/client.h>
+
+UI_Component_data_t UI_Component::g;
+UI_Component* UI_Component::selectionComp = NULL;
+
+
+bool __cdecl Scr_ElementChildrenExist(Scr_WatchElement_s *element)
+{
+    if (element->threadList || element->endonList)
+        return 1;
+    return element->childHead && element->expand && element->objectType && element->objectType < 0x16u;
+}
 
 void __cdecl UI_Component::InitAssets()
 {
@@ -22,6 +35,22 @@ void __cdecl UI_Component::InitAssets()
         MyAssertHandler(".\\ui\\ui_component.cpp", 60, 0, "%s", "g.screenHeight");
     UI_Component::g.cursor = UI_Component::RegisterMaterialNoMip((char*)"ui_cursor", 1);
     UI_Component::g.filledCircle = UI_Component::RegisterMaterialNoMip((char*)"ui_sliderbutt_1", 1);
+}
+
+void UI_Component::DrawText(float x, float y, float width, int fontEnum, const float *color, char *text)
+{
+    float v6; // [esp+1Ch] [ebp-10h]
+    float v7; // [esp+20h] [ebp-Ch]
+    float v8; // [esp+24h] [ebp-8h]
+    int maxChars; // [esp+28h] [ebp-4h]
+
+    if (UI_Component::g.charWidth == 0.0)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 132, 0, "%s", "g.charWidth");
+    maxChars = (width / UI_Component::g.charWidth);
+    v7 = floor(x);
+    v8 = UI_Component::g.charHeight + y;
+    v6 = floor(v8);
+    R_AddCmdDrawText(text, maxChars, cls.consoleFont, v7, v6, 1.0, 1.0, 0.0, color, 0);
 }
 
 Material *__cdecl UI_Component::RegisterMaterialNoMip(char *name, int imageTrack)
@@ -48,6 +77,104 @@ void __cdecl UI_Component_Init()
 	UI_Component::InitAssets();
 }
 
+char *__cdecl Scr_GetElementArchiveText(Scr_WatchElement_s *element)
+{
+    char *result; // eax
+
+    switch (element->breakpointType)
+    {
+    case 1u:
+        result = va("%s%s", "@", element->refText);
+        break;
+    case 2u:
+        result = va("%s%s", "?", element->refText);
+        break;
+    case 3u:
+        result = va("%s%s", "#", element->refText);
+        break;
+    case 4u:
+        result = va("%s%s", "##", element->refText);
+        break;
+    case 5u:
+        result = va("%s%s", "#@", element->refText);
+        break;
+    case 6u:
+        result = va("%s%s", "+", element->refText);
+        break;
+    case 7u:
+        result = va("%s%s", "-", element->refText);
+        break;
+    default:
+        result = va("%s%s", "", element->refText);
+        break;
+    }
+    return result;
+}
+
+void Scr_ScriptWatch::Shutdown()
+{
+    Scr_WatchElement_s *next; // [esp+14h] [ebp-Ch]
+    int f; // [esp+18h] [ebp-8h]
+    char *text; // [esp+1Ch] [ebp-4h]
+
+    if (!Sys_IsRemoteDebugClient())
+    {
+        Scr_ScriptWatch::UpdateBreakpoints(0);
+        Scr_UnbreakAllAssignmentPos();
+    }
+    f = FS_FOpenTextFileWrite("watch_window.txt");
+    while (this->elementHead)
+    {
+        next = this->elementHead->next;
+        if (f)
+        {
+            text = Scr_GetElementArchiveText(this->elementHead);
+            FS_Write(text, strlen(text), f);
+            FS_Write("\n", 1u, f);
+        }
+        Scr_ScriptWatch::FreeWatchElement(this->elementHead);
+        this->elementHead = next;
+    }
+    if (f)
+        FS_FCloseFile(f);
+}
+
+void Scr_ScriptWatch::Draw(
+    float x,
+    float y,
+    float width,
+    float height,
+    float compX,
+    float compY)
+{
+    int currentLine; // [esp+30h] [ebp-14h] BYREF
+    int startLine; // [esp+34h] [ebp-10h]
+    float startLineFrac; // [esp+38h] [ebp-Ch]
+    float currentY; // [esp+3Ch] [ebp-8h] BYREF
+    float lastHeight; // [esp+40h] [ebp-4h]
+
+    UI_Component::DrawPic(x, y, width, height, 0, cls.consoleMaterial);
+    startLineFrac = compY / UI_Component::g.charHeight;
+    startLine = startLineFrac;
+    currentY = -startLineFrac;
+    currentY = currentY * UI_Component::g.charHeight;
+    currentLine = 0;
+    lastHeight = height - UI_Component::g.charHeight;
+    Scr_ScriptWatch::Draw_r(
+        this->elementHead,
+        x,
+        y,
+        width,
+        lastHeight,
+        startLine,
+        0,
+        0,
+        &currentLine,
+        &currentY,
+        compX,
+        compY);
+}
+
 Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CloneElement(Scr_WatchElement_s *element)
 {
     Scr_WatchElement_s *ElementRoot; // eax
@@ -60,6 +187,266 @@ Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CloneElement(Scr_WatchElement_s 
     if (!Sys_IsRemoteDebugClient())
         Scr_CompileText(element->refText, &newElement->expr);
     return newElement;
+}
+
+void __cdecl Scr_PrintElementText(Scr_WatchElement_s *element, int bufLen, int depth, char *buf)
+{
+    unsigned __int8 objectType; // [esp+30h] [ebp-10h]
+    int threadIdSize; // [esp+34h] [ebp-Ch]
+    int len; // [esp+38h] [ebp-8h]
+    int lena; // [esp+38h] [ebp-8h]
+    signed int lenb; // [esp+38h] [ebp-8h]
+    int entIdSize; // [esp+3Ch] [ebp-4h]
+
+    if (element->breakpoint)
+    {
+        if (depth)
+            MyAssertHandler(".\\script\\scr_debugger.cpp", 3331, 0, "%s", "!depth");
+        I_strncpyz(buf + 1, element->valueText, bufLen - 1);
+        return;
+    }
+    if (element->threadList || element->endonList)
+    {
+        I_strncpyz(&buf[depth + 1], element->refText, bufLen - (depth + 1));
+        return;
+    }
+    if (!element->directObject)
+    {
+    LABEL_19:
+        lenb = strlen(element->refText);
+        if (lenb >= 32 - depth)
+        {
+            Com_sprintf(&buf[depth + 1], bufLen - (depth + 1), "%s = %s", element->refText, element->valueText);
+        }
+        else
+        {
+            if (bufLen < 33)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 3377, 0, "%s", "1 + SCRIPT_WATCH_TEXT_MIN_DISPLAY_LEN <= bufLen");
+            if (depth + lenb + 1 > bufLen)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 3378, 0, "%s", "depth + 1 + len <= bufLen");
+            memset(&buf[depth + 1], 0x20u, 32 - depth);
+            memcpy(&buf[depth + 1], element->refText, lenb);
+            Com_sprintf(buf + 33, bufLen - 33, " = %s", element->valueText);
+        }
+        return;
+    }
+    objectType = element->objectType;
+    if (objectType == 14)
+        goto LABEL_12;
+    if (objectType != 20)
+    {
+        if (objectType == 22)
+        {
+        LABEL_12:
+            I_strncpyz(&buf[depth + 1], element->refText, bufLen - (depth + 1));
+            if (element->bufferIndex != -1)
+            {
+                threadIdSize = 8;
+                len = strlen(&buf[depth + 1]);
+                if (len >= 8)
+                    threadIdSize = len + 1;
+                memset(&buf[depth + 1 + len], 0x20u, threadIdSize - len);
+                Scr_GetSourcePos(
+                    element->bufferIndex,
+                    element->sourcePos,
+                    &buf[depth + 1 + threadIdSize],
+                    bufLen - (depth + threadIdSize + 1));
+                buf[bufLen - 1] = 0;
+            }
+            return;
+        }
+        goto LABEL_19;
+    }
+    I_strncpyz(&buf[depth + 1], element->refText, bufLen - (depth + 1));
+    entIdSize = 7;
+    lena = strlen(&buf[depth + 1]);
+    if (lena >= 7)
+        entIdSize = lena + 1;
+    memset(&buf[depth + 1 + lena], 0x20u, entIdSize - lena);
+    I_strncpyz(&buf[depth + 1 + entIdSize], element->valueText, bufLen - (depth + entIdSize + 1));
+    buf[bufLen - 1] = 0;
+}
+
+void Scr_ScriptWatch::Draw_r(Scr_WatchElement_s *element,
+    float x,
+    float y,
+    float width,
+    float lastHeight,
+    int startLine,
+    unsigned int depth,
+    bool isArray,
+    int *currentLine,
+    float *currentY,
+    float compX,
+    float compY)
+{
+    float v13; // [esp+2Ch] [ebp-280h]
+    float v14; // [esp+30h] [ebp-27Ch]
+    float v15; // [esp+44h] [ebp-268h]
+    float v16; // [esp+48h] [ebp-264h]
+    float v17; // [esp+4Ch] [ebp-260h]
+    float v18; // [esp+50h] [ebp-25Ch]
+    float v19; // [esp+54h] [ebp-258h]
+    float v20; // [esp+58h] [ebp-254h]
+    float v21; // [esp+5Ch] [ebp-250h]
+    float v22; // [esp+60h] [ebp-24Ch]
+    float v23; // [esp+64h] [ebp-248h]
+    float v24; // [esp+68h] [ebp-244h]
+    float v25; // [esp+6Ch] [ebp-240h]
+    float v26; // [esp+70h] [ebp-23Ch]
+    float v27; // [esp+74h] [ebp-238h]
+    float height; // [esp+78h] [ebp-234h]
+    float v29; // [esp+80h] [ebp-22Ch]
+    float v30; // [esp+84h] [ebp-228h]
+    float selectColor[4]; // [esp+9Ch] [ebp-210h] BYREF
+    float colorYellow[4]; // [esp+ACh] [ebp-200h] BYREF
+    float colorWhite[4]; // [esp+BCh] [ebp-1F0h] BYREF
+    float colorBlue[4]; // [esp+CCh] [ebp-1E0h] BYREF
+    float colorRed[4]; // [esp+DCh] [ebp-1D0h] BYREF
+    char buf[396]; // [esp+ECh] [ebp-1C0h] BYREF
+    float fraction; // [esp+27Ch] [ebp-30h]
+    float innerWidth; // [esp+280h] [ebp-2Ch]
+    float color[4]; // [esp+284h] [ebp-28h] BYREF
+    float colorDelta[4]; // [esp+294h] [ebp-18h] BYREF
+    int deltaTime; // [esp+2A4h] [ebp-8h]
+    unsigned int startCol; // [esp+2A8h] [ebp-4h]
+
+    CL_LookupColor(0, 0x37u, colorWhite);
+    colorRed[0] = 1.0;
+    colorRed[1] = 0.0;
+    colorRed[2] = 0.0;
+    colorRed[3] = 1.0;
+    CL_LookupColor(0, 0x33u, colorYellow);
+    CL_LookupColor(0, 0x34u, colorBlue);
+    selectColor[0] = 0.5;
+    selectColor[1] = 0.5;
+    selectColor[2] = 0.5;
+    selectColor[3] = 1.0;
+    innerWidth = width - UI_Component::g.charHeight;
+    startCol = (compX / UI_Component::g.charWidth);
+    while (element && lastHeight >= *currentY)
+    {
+        if (*currentLine >= startLine && *currentY >= 0.0)
+        {
+            if (depth >= 0x186)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 3433, 0, "%s", "depth < sizeof( buf )");
+            memset(buf, 0x20u, depth);
+            if (element->objectType)
+                buf[depth] = 2 * element->expand + 43;
+            else
+                buf[depth] = 32;
+            if (*currentLine == this->selectedLine)
+            {
+                v30 = y + *currentY;
+                v29 = x + UI_Component::g.charHeight;
+                UI_Component::DrawPic(
+                    v29,
+                    v30,
+                    innerWidth,
+                    UI_Component::g.charHeight,
+                    selectColor,
+                    sharedUiInfo.assets.whiteMaterial);
+            }
+            switch (element->breakpointType)
+            {
+            case 1u:
+            case 5u:
+                height = UI_Component::g.charHeight + UI_Component::g.charHeight;
+                v27 = y + *currentY - UI_Component::g.charHeight * 0.5;
+                UI_Component::DrawPic(x, v27, UI_Component::g.charHeight, height, colorRed, UI_Component::g.filledCircle);
+                if (element->hitBreakpoint)
+                {
+                    v26 = y + *currentY;
+                    v25 = UI_Component::g.charWidth * 0.5 + x;
+                    UI_Component::DrawText(v25, v26, UI_Component::g.charHeight, 5, colorYellow, (char*)">");
+                }
+                break;
+            case 2u:
+                v18 = y + *currentY;
+                v17 = UI_Component::g.charWidth * 0.5 + x;
+                UI_Component::DrawText(v17, v18, UI_Component::g.charHeight, 5, colorRed, (char *)"?");
+                break;
+            case 3u:
+            case 4u:
+                v16 = y + *currentY;
+                v15 = UI_Component::g.charWidth * 0.5 + x;
+                UI_Component::DrawText(v15, v16, UI_Component::g.charHeight, 5, colorRed, (char *)"O");
+                break;
+            case 6u:
+                v24 = UI_Component::g.charHeight + UI_Component::g.charHeight;
+                v23 = y + *currentY - UI_Component::g.charHeight * 0.5;
+                UI_Component::DrawPic(x, v23, UI_Component::g.charHeight, v24, colorBlue, UI_Component::g.filledCircle);
+                if (element->hitBreakpoint)
+                {
+                    v22 = y + *currentY;
+                    v21 = UI_Component::g.charWidth * 0.5 + x;
+                    UI_Component::DrawText(v21, v22, UI_Component::g.charHeight, 5, colorYellow, (char *)">");
+                }
+                break;
+            case 7u:
+                v20 = y + *currentY;
+                v19 = UI_Component::g.charWidth * 0.5 + x;
+                UI_Component::DrawText(v19, v20, UI_Component::g.charHeight, 5, colorBlue, (char *)"O");
+                break;
+            default:
+                break;
+            }
+            Scr_PrintElementText(element, 390, depth, buf);
+            if (&buf[strlen(buf) + 1] - &buf[1] > startCol)
+            {
+                color[0] = colorWhite[0];
+                color[1] = colorWhite[1];
+                color[2] = colorWhite[2];
+                color[3] = colorWhite[3];
+                if (element->changed)
+                {
+                    if (element->changedTime)
+                    {
+                        deltaTime = Sys_Milliseconds() - element->changedTime;
+                        if (deltaTime >= 1000)
+                        {
+                            element->changed = 0;
+                        }
+                        else
+                        {
+                            fraction = deltaTime / 1000.0;
+                            Vec4Sub(colorWhite, colorYellow, colorDelta);
+                            Vec4Mad(colorYellow, fraction, colorDelta, color);
+                        }
+                    }
+                    else
+                    {
+                        color[0] = colorYellow[0];
+                        color[1] = colorYellow[1];
+                        color[2] = colorYellow[2];
+                        color[3] = colorYellow[3];
+                    }
+                }
+                if (Sys_IsRemoteDebugClient() && !scrDebuggerGlob.atBreakpoint && !element->changedTime)
+                    element->changedTime = Sys_Milliseconds();
+                v14 = y + *currentY;
+                v13 = x + UI_Component::g.charHeight;
+                UI_Component::DrawText(v13, v14, innerWidth, 5, color, &buf[startCol]);
+            }
+        }
+        ++ * currentLine;
+        *currentY = *currentY + UI_Component::g.charHeight;
+        if (Scr_ElementChildrenExist(element))
+            Scr_ScriptWatch::Draw_r(
+                element->childHead,
+                x,
+                y,
+                width,
+                lastHeight,
+                startLine,
+                depth + 1,
+                element->objectType == 21,
+                currentLine,
+                currentY,
+                compX,
+                compY);
+        element = element->next;
+    }
 }
 
 Scr_WatchElement_s *Scr_ScriptWatch::GetElementWithId_r(Scr_WatchElement_s *element, int id)
@@ -162,13 +549,6 @@ void Scr_ScriptWatch::DeleteElement()
             Scr_ScriptWatch::DeleteElementInternal(element);
         }
     }
-}
-
-bool __cdecl Scr_ElementChildrenExist(Scr_WatchElement_s *element)
-{
-    if (element->threadList || element->endonList)
-        return 1;
-    return element->childHead && element->expand && element->objectType && element->objectType < 0x16u;
 }
 
 int __cdecl Scr_GetWatchElementSize(Scr_WatchElement_s *element)
@@ -334,6 +714,14 @@ Scr_WatchElement_s *Scr_ScriptWatch::GetSelectedElement_r(Scr_WatchElement_s *el
         element = element->next;
     }
     return 0;
+}
+
+Scr_WatchElement_s *Scr_ScriptWatch::GetSelectedElement()
+{
+    int currentLine; // [esp+4h] [ebp-4h] BYREF
+
+    currentLine = 0;
+    return Scr_ScriptWatch::GetSelectedElement_r(this->elementHead, &currentLine);
 }
 
 Scr_WatchElement_s **Scr_ScriptWatch::GetElementRef(Scr_WatchElement_s *element)
@@ -721,6 +1109,69 @@ bool __thiscall Scr_ScriptCallStack::SetSelectedLineFocus(int newSelectedLine, b
     return 1;
 }
 
+void Scr_ScriptCallStack::Draw(
+    float x,
+    float y,
+    float width,
+    float height,
+    float compX,
+    float compY)
+{
+    float v7; // [esp+18h] [ebp-F8h]
+    float v8; // [esp+2Ch] [ebp-E4h]
+    int currentLine; // [esp+44h] [ebp-CCh]
+    float selectColor[4]; // [esp+48h] [ebp-C8h] BYREF
+    unsigned int bufferIndex; // [esp+58h] [ebp-B8h]
+    int startLine; // [esp+5Ch] [ebp-B4h]
+    float startLineFrac; // [esp+60h] [ebp-B0h]
+    float currentY; // [esp+64h] [ebp-ACh]
+    int index; // [esp+68h] [ebp-A8h]
+    float lastHeight; // [esp+6Ch] [ebp-A4h]
+    float color[4]; // [esp+70h] [ebp-A0h] BYREF
+    char text[136]; // [esp+80h] [ebp-90h] BYREF
+    unsigned int startCol; // [esp+10Ch] [ebp-4h]
+
+    UI_Component::DrawPic(x, y, width, height, 0, cls.consoleMaterial);
+    CL_LookupColor(0, 0x37u, color);
+    lastHeight = height - UI_Component::g.charHeight;
+    startLineFrac = compY / UI_Component::g.charHeight;
+    startLine = startLineFrac;
+    currentY = startLine - startLineFrac;
+    if (currentY < 0.0)
+    {
+        currentY = currentY + 1.0;
+        ++startLine;
+    }
+    currentY = currentY * UI_Component::g.charHeight;
+    currentLine = startLine;
+    startCol = (compX / UI_Component::g.charWidth);
+    selectColor[0] = 0.5;
+    selectColor[1] = 0.5;
+    selectColor[2] = 0.5;
+    selectColor[3] = 1.0;
+    while (lastHeight >= currentY && currentLine < this->numLines)
+    {
+        if (currentLine == this->selectedLine)
+        {
+            v8 = y + currentY;
+            UI_Component::DrawPic(x, v8, width, UI_Component::g.charHeight, selectColor, sharedUiInfo.assets.whiteMaterial);
+        }
+        index = currentLine == scrVmPub.function_count;
+        bufferIndex = this->stack[currentLine].bufferIndex;
+        if (bufferIndex == -1)
+            I_strncpyz(text, "<removed thread>", 129);
+        else
+            Scr_GetSourcePos(this->stack[currentLine].bufferIndex, this->stack[currentLine].sourcePos, text, 0x81u);
+        ++currentLine;
+        if (&text[strlen(text) + 1] - &text[1] > startCol)
+        {
+            v7 = y + currentY;
+            UI_Component::DrawText(x, v7, width, 5, color, &text[startCol]);
+        }
+        currentY = currentY + UI_Component::g.charHeight;
+    }
+}
+
 void __thiscall Scr_ScriptCallStack::UpdateStack()
 {
     Scr_SourcePos2_t *pos; // [esp+4h] [ebp-14h]
@@ -764,6 +1215,48 @@ void __thiscall Scr_ScriptCallStack::UpdateStack()
     }
 }
 
+void Scr_OpenScriptList::Shutdown()
+{
+    Scr_StringNode_s *node; // [esp+34h] [ebp-10h]
+    char *filenamea; // [esp+38h] [ebp-Ch]
+    char *filename; // [esp+38h] [ebp-Ch]
+    int f; // [esp+3Ch] [ebp-8h]
+    int i; // [esp+40h] [ebp-4h]
+
+    f = FS_FOpenTextFileWrite("open_scripts.txt");
+    if (f)
+    {
+        if (scrDebuggerGlob.scriptList.selectedLine >= 0)
+        {
+            //filenamea = Scr_ScriptWindow::GetFilename(scrDebuggerGlob.scriptList.scriptWindows[scrDebuggerGlob.scriptList.selectedLine]);
+            filenamea = scrDebuggerGlob.scriptList.scriptWindows[scrDebuggerGlob.scriptList.selectedLine]->GetFilename();
+            FS_Write(filenamea, strlen(filenamea), f);
+        }
+        FS_Write("\n", 1u, f);
+        for (i = 0; i < this->numLines; ++i)
+        {
+            //filename = Scr_ScriptWindow::GetFilename(this->scriptWindows[i]);
+            filename = this->scriptWindows[i]->GetFilename();
+            if (*filename)
+            {
+                FS_Write(filename, strlen(filename), f);
+                FS_Write("\n", 1u, f);
+            }
+        }
+        while (this->usedHead)
+        {
+            FS_Write(this->usedHead->text, strlen(this->usedHead->text), f);
+            FS_Write("\n", 1u, f);
+            Hunk_FreeDebugMem();
+            node = this->usedHead->next;
+            Hunk_FreeDebugMem();
+            this->usedHead = node;
+        }
+        FS_FCloseFile(f);
+    }
+    Scr_AbstractScriptList::Shutdown();
+}
+
 bool Scr_OpenScriptList::SetSelectedLineFocus(
     int newSelectedLine,
     bool user)
@@ -804,7 +1297,8 @@ bool Scr_OpenScriptList::SetSelectedLineFocus(
             sortedIndex,
             scrParserPub.sourceBufferLookupLen);
     //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, sortedIndex, 1);
-   ((UI_LinesComponent)scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
+   //((UI_LinesComponent*)&scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
+    scrDebuggerGlob.scriptList.SetSelectedLineFocus(sortedIndex, 1);
     return 1;
 }
 
@@ -984,7 +1478,7 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
     Scr_WatchElement_s *childElement; // [esp+D0h] [ebp-60h]
     unsigned int newIndex; // [esp+D4h] [ebp-5Ch]
     unsigned int oldChildCount; // [esp+D8h] [ebp-58h]
-    int(__cdecl * compare)(unsigned int *, unsigned int *); // [esp+DCh] [ebp-54h]
+    int(__cdecl * compare)(unsigned int*, unsigned int*); // [esp+DCh] [ebp-54h]
     unsigned __int8 oldObjectType; // [esp+E2h] [ebp-4Eh]
     bool isArray; // [esp+E3h] [ebp-4Dh]
     Scr_WatchElement_s *newElements; // [esp+E4h] [ebp-4Ch]
@@ -1368,6 +1862,45 @@ bool __thiscall Scr_ScriptWatch::PostEvaluateWatchElement(
     }
 }
 
+void Scr_ScriptList::Shutdown()
+{
+    Scr_ScriptWindow *v2; // [esp+2Ch] [ebp-18h]
+    char *filename; // [esp+30h] [ebp-14h]
+    Scr_ScriptWindow *comp; // [esp+34h] [ebp-10h]
+    int f; // [esp+38h] [ebp-Ch]
+    char *lineString; // [esp+3Ch] [ebp-8h]
+    int i; // [esp+40h] [ebp-4h]
+    int ia; // [esp+40h] [ebp-4h]
+
+    f = FS_FOpenTextFileWrite("script_pos.txt");
+    if (f)
+    {
+        for (i = 0; i < this->numLines; ++i)
+        {
+            comp = this->scriptWindows[i];
+            //filename = Scr_ScriptWindow::GetFilename(comp);
+            filename = comp->GetFilename();
+            if (*filename)
+            {
+                lineString = va("%s %d %f %f\n", filename, comp->selectedLine, comp->pos[0], comp->pos[1]);
+                FS_Write(lineString, strlen(lineString), f);
+            }
+        }
+        FS_FCloseFile(f);
+    }
+    if (!scrDebuggerGlob.colBuf)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 2844, 0, "%s", "scrDebuggerGlob.colBuf");
+    Hunk_FreeDebugMem();
+    for (ia = 0; ia < this->numLines; ++ia)
+    {
+        v2 = this->scriptWindows[ia];
+        //if (v2)
+        //    (v2->~UI_Component)(v2, 1);
+        delete v2;
+    }
+    Scr_AbstractScriptList::Shutdown();
+}
+
 void Scr_ScriptList::LoadScriptPos()
 {
     Scr_StringNode_s *node; // [esp+1Ch] [ebp-7Ch]
@@ -1448,6 +1981,73 @@ void Scr_ScriptWatch::UpdateBreakpoints(bool add)
     }
 }
 
+void Scr_AbstractScriptList::Shutdown()
+{
+    if (this->scriptWindows)
+    {
+        Scr_FreeDebugMem(this->scriptWindows);
+        this->scriptWindows = 0;
+    }
+}
+
+void Scr_AbstractScriptList::Draw(
+    float x,
+    float y,
+    float width,
+    float height,
+    float compX,
+    float compY)
+{
+    float v7; // [esp+18h] [ebp-4Ch]
+    float v8; // [esp+1Ch] [ebp-48h]
+    int currentLine; // [esp+24h] [ebp-40h]
+    float selectColor[4]; // [esp+28h] [ebp-3Ch] BYREF
+    int startLine; // [esp+38h] [ebp-2Ch]
+    float startLineFrac; // [esp+3Ch] [ebp-28h]
+    float currentY; // [esp+40h] [ebp-24h]
+    const char *s; // [esp+44h] [ebp-20h]
+    float lastHeight; // [esp+48h] [ebp-1Ch]
+    float color[4]; // [esp+4Ch] [ebp-18h] BYREF
+    int startCol; // [esp+5Ch] [ebp-8h]
+    int col; // [esp+60h] [ebp-4h]
+
+    UI_Component::DrawPic(x, y, width, height, 0, cls.consoleMaterial);
+    CL_LookupColor(0, 0x37u, color);
+    lastHeight = height - UI_Component::g.charHeight;
+    startLineFrac = compY / UI_Component::g.charHeight;
+    startLine = startLineFrac;
+    currentY = startLine - startLineFrac;
+    if (currentY < 0.0)
+    {
+        currentY = currentY + 1.0;
+        ++startLine;
+    }
+    currentY = currentY * UI_Component::g.charHeight;
+    currentLine = startLine;
+    startCol = (compX / UI_Component::g.charWidth);
+    selectColor[0] = 0.5;
+    selectColor[1] = 0.5;
+    selectColor[2] = 0.5;
+    selectColor[3] = 1.0;
+    while (lastHeight >= currentY && currentLine < this->numLines)
+    {
+        if (currentLine == this->selectedLine)
+        {
+            v8 = y + currentY;
+            UI_Component::DrawPic(x, v8, width, UI_Component::g.charHeight, selectColor, sharedUiInfo.assets.whiteMaterial);
+        }
+        col = 0;
+        //for (s = Scr_ScriptWindow::GetFilename(this->scriptWindows[currentLine++]); *s && col < startCol; ++s)
+        for (s = this->scriptWindows[currentLine++]->GetFilename(); *s && col < startCol; ++s)
+            ++col;
+        if (*s)
+        {
+            v7 = y + currentY;
+            UI_Component::DrawText(x, v7, width, 5, color, (char *)s);
+        }
+        currentY = currentY + UI_Component::g.charHeight;
+    }
+}
 
 bool Scr_AbstractScriptList::AddEntryName(const char *filename, bool select)
 {
@@ -1468,4 +2068,1133 @@ bool Scr_AbstractScriptList::AddEntryName(const char *filename, bool select)
         }
     }
     return 0;
+}
+
+void UI_VerticalDivider::DrawTop(float x, float y, float width, float topHeight)
+{
+    if (!this->topComp)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 961, 0, "%s", "topComp");
+    //(this->topComp->Draw)(this->topComp, LODWORD(x), LODWORD(y), LODWORD(width), LODWORD(topHeight), 0.0, 0.0);
+    this->topComp->Draw(x, y, width, topHeight, 0.0f, 0.0f);
+    if (this->topComp->mouseHeldScale[0] != 0.0)
+        this->posY = UI_Component::g.cursorPos[1] + UI_Component::g.charHeight;
+}
+
+void UI_VerticalDivider::Draw(
+    float x,
+    float y,
+    float width,
+    float height,
+    float compX,
+    float compY)
+{
+    float v7; // [esp+28h] [ebp-14h]
+    float v8; // [esp+2Ch] [ebp-10h]
+    float topHeight; // [esp+38h] [ebp-4h]
+
+    if (compX != 0.0)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 982, 0, "%s", "!compX");
+    if (compY != 0.0)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 983, 0, "%s", "!compY");
+    this->size[0] = width;
+    this->size[1] = height;
+    this->posY = (this->posY / UI_Component::g.charHeight) * UI_Component::g.charHeight;
+    if (UI_Component::g.charHeight <= this->posY)
+    {
+        if (height < this->posY)
+            this->posY = height;
+    }
+    else
+    {
+        this->posY = UI_Component::g.charHeight;
+    }
+    R_AddCmdProjectionSet2D();
+    if (!this->topComp)
+    {
+        if (!this->bottomComp)
+            return;
+        goto LABEL_11;
+    }
+    if (!this->bottomComp)
+        goto LABEL_13;
+    if (compY >= this->posY)
+    {
+    LABEL_11:
+        //(this->bottomComp->Draw)(this->bottomComp, LODWORD(x), LODWORD(y), LODWORD(width), LODWORD(height), 0.0, 0.0);
+        this->bottomComp->Draw(x, y, width, height, 0.0f, 0.0f);
+        return;
+    }
+    topHeight = this->posY - compY;
+    if (height > topHeight)
+    {
+        v8 = height - topHeight;
+        v7 = y + this->posY;
+        //(this->bottomComp->Draw)(this->bottomComp, LODWORD(x), LODWORD(v7), LODWORD(width), LODWORD(v8), 0.0, 0.0);
+        this->bottomComp->Draw(x, v7, width, v8, 0.0f, 0.0f);
+        UI_VerticalDivider::DrawTop(x, y, width, topHeight);
+    }
+    else
+    {
+    LABEL_13:
+        UI_VerticalDivider::DrawTop(x, y, width, height);
+    }
+}
+
+void UI_ScrollPane::SetPos()
+{
+    float maxPos; // [esp+4h] [ebp-10h]
+    float innerSize[2]; // [esp+8h] [ebp-Ch] BYREF
+    int i; // [esp+10h] [ebp-4h]
+
+    if (!this->comp)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 496, 0, "%s", "comp");
+    for (i = 0; i < 2; ++i)
+    {
+        if (this->comp->pos[i] >= 0.0)
+        {
+            UI_ScrollPane::GetInnerSize(innerSize);
+            maxPos = this->comp->size[i] - innerSize[i];
+            if (maxPos < 0.0)
+                maxPos = 0.0;
+            if (maxPos < this->comp->pos[i])
+                this->comp->pos[i] = maxPos;
+        }
+        else
+        {
+            this->comp->pos[i] = 0.0;
+        }
+    }
+    //UI_LinesComponent::ClearFocus(this->comp);
+    this->comp->ClearFocus();
+}
+
+void UI_ScrollPane::Draw(
+    float x,
+    float y,
+    float width,
+    float height,
+    float compX,
+    float compY)
+{
+    double v7; // st7
+    float v8; // [esp+30h] [ebp-68h]
+    float v9; // [esp+34h] [ebp-64h]
+    int selectedLine; // [esp+38h] [ebp-60h]
+    float scrollbarY; // [esp+40h] [ebp-58h]
+    float scrollbarYb; // [esp+40h] [ebp-58h]
+    float scrollbarYa; // [esp+40h] [ebp-58h]
+    float focusRegionStart2; // [esp+44h] [ebp-54h]
+    float thumbColor[4]; // [esp+48h] [ebp-50h] BYREF
+    float thumbMaxSize; // [esp+58h] [ebp-40h]
+    float thumbSize[2]; // [esp+5Ch] [ebp-3Ch] BYREF
+    float thumbPos[2]; // [esp+64h] [ebp-34h] BYREF
+    float thumbEnd; // [esp+6Ch] [ebp-2Ch]
+    float focusRegionEnd; // [esp+70h] [ebp-28h]
+    float innerSize[3]; // [esp+74h] [ebp-24h] BYREF
+    float scrollbarX; // [esp+80h] [ebp-18h]
+    float scrollBarSize; // [esp+84h] [ebp-14h]
+    float thumbStart; // [esp+88h] [ebp-10h]
+    float focusRegionStart; // [esp+8Ch] [ebp-Ch]
+    float thumbFiller; // [esp+90h] [ebp-8h]
+    bool horScroll; // [esp+97h] [ebp-1h]
+
+    if (compX != 0.0)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 346, 0, "%s", "!compX");
+    if (compY != 0.0)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 347, 0, "%s", "!compY");
+    this->size[0] = width;
+    this->size[1] = height;
+    if (!this->comp || this->comp->size[0] == 0.0 || this->comp->size[1] == 0.0)
+    {
+        UI_Component::DrawPic(x, y, width, height, 0, cls.consoleMaterial);
+    }
+    else
+    {
+        if (this->comp->size[0] < 0.0)
+            MyAssertHandler(".\\ui\\ui_component.cpp", 358, 0, "%s", "comp->size[0] >= 0");
+        if (this->comp->size[1] < 0.0)
+            MyAssertHandler(".\\ui\\ui_component.cpp", 359, 0, "%s", "comp->size[1] >= 0");
+        horScroll = UI_ScrollPane::GetInnerSize(innerSize);
+        if (this->comp->focusOnSelectedLine)
+        {
+            this->comp->focusOnSelectedLine = 0;
+            if (this->comp->selectedLine < 0)
+                selectedLine = 0;
+            else
+                selectedLine = this->comp->selectedLine;
+            LODWORD(innerSize[2]) = selectedLine;
+            focusRegionStart2 = selectedLine * UI_Component::g.charHeight;
+            if (this->comp->focusOnSelectedLineUser)
+            {
+                focusRegionStart = selectedLine * UI_Component::g.charHeight;
+                v7 = focusRegionStart2 + UI_Component::g.charHeight;
+            }
+            else
+            {
+                focusRegionStart = focusRegionStart2 - UI_Component::g.charHeight * 4.0;
+                v7 = UI_Component::g.charHeight * 5.0 + focusRegionStart2;
+            }
+            focusRegionEnd = v7;
+            if (this->comp->pos[1] <= focusRegionStart)
+            {
+                if (focusRegionEnd > this->comp->pos[1] + innerSize[1])
+                {
+                    if (focusRegionStart > this->comp->pos[1] + innerSize[1])
+                    {
+                        this->comp->pos[1] = focusRegionStart2 - innerSize[1] / 2.0;
+                    }
+                    else
+                    {
+                        this->comp->pos[1] = focusRegionEnd - innerSize[1];
+                        if (this->comp->pos[1] > focusRegionStart2 - innerSize[1] / 2.0)
+                            this->comp->pos[1] = focusRegionStart2 - innerSize[1] / 2.0;
+                    }
+                }
+            }
+            else if (this->comp->pos[1] > focusRegionEnd)
+            {
+                this->comp->pos[1] = focusRegionStart2 - innerSize[1] / 2.0;
+            }
+            else
+            {
+                this->comp->pos[1] = focusRegionStart;
+                if (this->comp->pos[1] < focusRegionStart2 - innerSize[1] / 2.0)
+                    this->comp->pos[1] = focusRegionStart2 - innerSize[1] / 2.0;
+            }
+        }
+        UI_ScrollPane::SetPos();
+        thumbColor[0] = 0.5;
+        thumbColor[1] = 0.5;
+        thumbColor[2] = 0.5;
+        thumbColor[3] = 1.0;
+        //(this->comp->Draw)(
+        //    this->comp,
+        //    LODWORD(x),
+        //    LODWORD(y),
+        //    LODWORD(innerSize[0]),
+        //    LODWORD(innerSize[1]),
+        //    this->comp->pos[0],
+        //    this->comp->pos[1]);
+        this->comp->Draw(x, y, innerSize[0], innerSize[1], this->comp->pos[0], this->comp->pos[1]);
+        scrollbarX = x + innerSize[0];
+        UI_Component::DrawPic(scrollbarX, y, UI_Component::g.scrollBarSize, height, 0, cls.consoleMaterial);
+        UI_Component::DrawPic(
+            scrollbarX,
+            y,
+            UI_Component::g.scrollBarSize,
+            UI_Component::g.scrollBarSize,
+            0,
+            sharedUiInfo.assets.scrollBarArrowUp);
+        scrollbarY = y + UI_Component::g.scrollBarSize;
+        scrollBarSize = innerSize[1] - (UI_Component::g.scrollBarSize + UI_Component::g.scrollBarSize);
+        if (UI_Component::g.scrollBarSize >= scrollBarSize)
+            v9 = scrollBarSize;
+        else
+            v9 = UI_Component::g.scrollBarSize;
+        thumbFiller = v9;
+        UI_Component::DrawPic(
+            scrollbarX,
+            scrollbarY,
+            UI_Component::g.scrollBarSize,
+            scrollBarSize,
+            0,
+            sharedUiInfo.assets.scrollBar);
+        scrollbarYb = scrollbarY + scrollBarSize;
+        UI_Component::DrawPic(
+            scrollbarX,
+            scrollbarYb,
+            UI_Component::g.scrollBarSize,
+            UI_Component::g.scrollBarSize,
+            0,
+            sharedUiInfo.assets.scrollBarArrowDown);
+        thumbMaxSize = scrollBarSize - thumbFiller;
+        thumbStart = this->comp->pos[1] / this->comp->size[1] * thumbMaxSize;
+        thumbEnd = (this->comp->pos[1] + innerSize[1]) / this->comp->size[1] * thumbMaxSize + thumbFiller;
+        if (scrollBarSize < thumbEnd)
+            thumbEnd = scrollBarSize;
+        thumbPos[0] = scrollbarX;
+        thumbPos[1] = y + UI_Component::g.scrollBarSize + thumbStart;
+        thumbSize[0] = UI_Component::g.scrollBarSize;
+        thumbSize[1] = thumbEnd - thumbStart;
+        UI_Component::DrawPic(
+            scrollbarX,
+            thumbPos[1],
+            UI_Component::g.scrollBarSize,
+            thumbSize[1],
+            thumbColor,
+            sharedUiInfo.assets.whiteMaterial);
+        UI_ScrollPane::CheckMouseScroll(1, thumbPos, thumbSize, thumbMaxSize);
+        if (horScroll)
+        {
+            scrollbarYa = y + innerSize[1];
+            UI_Component::DrawPic(x, scrollbarYa, innerSize[0], UI_Component::g.scrollBarSize, 0, cls.consoleMaterial);
+            scrollbarX = x;
+            UI_Component::DrawPicRotate(
+                x,
+                scrollbarYa,
+                UI_Component::g.scrollBarSize,
+                UI_Component::g.scrollBarSize,
+                0,
+                sharedUiInfo.assets.scrollBarArrowUp);
+            scrollbarX = scrollbarX + UI_Component::g.scrollBarSize;
+            scrollBarSize = innerSize[0] - (UI_Component::g.scrollBarSize + UI_Component::g.scrollBarSize);
+            if (UI_Component::g.scrollBarSize >= scrollBarSize)
+                v8 = scrollBarSize;
+            else
+                v8 = UI_Component::g.scrollBarSize;
+            thumbFiller = v8;
+            UI_Component::DrawPicRotate(
+                scrollbarX,
+                scrollbarYa,
+                scrollBarSize,
+                UI_Component::g.scrollBarSize,
+                0,
+                sharedUiInfo.assets.scrollBar);
+            scrollbarX = scrollbarX + scrollBarSize;
+            UI_Component::DrawPicRotate(
+                scrollbarX,
+                scrollbarYa,
+                UI_Component::g.scrollBarSize,
+                UI_Component::g.scrollBarSize,
+                0,
+                sharedUiInfo.assets.scrollBarArrowDown);
+            thumbMaxSize = scrollBarSize - thumbFiller;
+            thumbStart = this->comp->pos[0] / this->comp->size[0] * thumbMaxSize;
+            thumbEnd = (this->comp->pos[0] + innerSize[0]) / this->comp->size[0] * thumbMaxSize + thumbFiller;
+            if (scrollBarSize < thumbEnd)
+                thumbEnd = scrollBarSize;
+            thumbPos[0] = x + UI_Component::g.scrollBarSize + thumbStart;
+            thumbPos[1] = scrollbarYa;
+            thumbSize[0] = thumbEnd - thumbStart;
+            thumbSize[1] = UI_Component::g.scrollBarSize;
+            UI_Component::DrawPicRotate(
+                thumbPos[0],
+                scrollbarYa,
+                thumbSize[0],
+                UI_Component::g.scrollBarSize,
+                thumbColor,
+                sharedUiInfo.assets.whiteMaterial);
+            UI_ScrollPane::CheckMouseScroll(0, thumbPos, thumbSize, thumbMaxSize);
+        }
+    }
+}
+
+char __cdecl InRect(float *point, float *pos, float *size)
+{
+    int i; // [esp+0h] [ebp-4h]
+
+    for (i = 0; i < 2; ++i)
+    {
+        if (pos[i] > point[i])
+            return 0;
+        if (point[i] >= pos[i] + size[i])
+            return 0;
+    }
+    return 1;
+}
+
+void UI_ScrollPane::CheckMouseScroll(int index, float *thumbPos, float *thumbSize, float thumbMaxSize)
+{
+    float *pos; // eax
+
+    if (Key_IsDown(0, 200))
+    {
+        if (this->mouseHeldScale[index] == 0.0)
+        {
+            if (!UI_Component::g.hideCursor && InRect(UI_Component::g.cursorPos, thumbPos, thumbSize))
+            {
+                if (!this->mouseWasDown[index])
+                {
+                    if (this->mouseHeldScale[0] != 0.0)
+                        MyAssertHandler(".\\ui\\ui_component.cpp", 310, 0, "%s", "!mouseHeldScale[0]");
+                    if (this->mouseHeldScale[1] != 0.0)
+                        MyAssertHandler(".\\ui\\ui_component.cpp", 311, 0, "%s", "!mouseHeldScale[1]");
+                    if (thumbMaxSize == 0.0)
+                        MyAssertHandler(".\\ui\\ui_component.cpp", 312, 0, "%s", "thumbMaxSize");
+                    this->mouseHeldScale[index] = this->comp->size[index] / thumbMaxSize;
+                    this->mouseHeldPos[0] = UI_Component::g.cursorPos[0];
+                    this->mouseHeldPos[1] = UI_Component::g.cursorPos[1];
+                    pos = this->comp->pos;
+                    this->mouseHeldCompPos[0] = *pos;
+                    this->mouseHeldCompPos[1] = pos[1];
+                }
+            }
+            else
+            {
+                this->mouseWasDown[index] = 1;
+            }
+        }
+        else
+        {
+            this->comp->pos[index] = (UI_Component::g.cursorPos[index] - this->mouseHeldPos[index])
+                * this->mouseHeldScale[index]
+                + this->mouseHeldCompPos[index];
+                UI_ScrollPane::SetPos();
+        }
+    }
+    else
+    {
+        this->mouseWasDown[index] = 0;
+        this->mouseHeldScale[0] = 0.0;
+        this->mouseHeldScale[1] = 0.0;
+    }
+}
+
+
+void UI_Component::DrawPicRotate(
+    float x,
+    float y,
+    float width,
+    float height,
+    const float *color,
+    Material *material)
+{
+    float v6; // [esp+8h] [ebp-28h]
+    float v7; // [esp+Ch] [ebp-24h]
+    float verts[4][2]; // [esp+10h] [ebp-20h] BYREF
+
+    v7 = floor(x);
+    verts[1][0] = v7;
+    v6 = floor(y);
+    verts[1][1] = v6;
+    verts[2][0] = v7 + width;
+    verts[2][1] = v6;
+    verts[3][0] = verts[2][0];
+    verts[3][1] = v6 + height;
+    verts[0][0] = v7;
+    verts[0][1] = verts[3][1];
+    R_AddCmdDrawQuadPic(verts, color, material);
+}
+
+void DrawPic(float x, float y, float width, float height, const float *color, Material *material)
+{
+    float v6; // [esp+2Ch] [ebp-Ch]
+    float v7; // [esp+30h] [ebp-8h]
+
+    v7 = floor(y);
+    v6 = floor(x);
+    R_AddCmdDrawStretchPic(v6, v7, width, height, 0.0, 0.0, 1.0, 1.0, color, material);
+}
+
+void Scr_ScriptWindow::Draw(float x,
+    float y,
+    float width,
+    float height,
+    float compX,
+    float compY)
+{
+    float v7; // [esp+18h] [ebp-BCh]
+    float v8; // [esp+1Ch] [ebp-B8h]
+    float v9; // [esp+20h] [ebp-B4h]
+    float v10; // [esp+24h] [ebp-B0h]
+    float v11; // [esp+28h] [ebp-ACh]
+    float v12; // [esp+2Ch] [ebp-A8h]
+    float v13; // [esp+30h] [ebp-A4h]
+    float v14; // [esp+34h] [ebp-A0h]
+    float v15; // [esp+38h] [ebp-9Ch]
+    float v16; // [esp+3Ch] [ebp-98h]
+    float colorYellow[4]; // [esp+44h] [ebp-90h] BYREF
+    float selectColor[4]; // [esp+54h] [ebp-80h] BYREF
+    int currentLine; // [esp+64h] [ebp-70h]
+    Scr_Breakpoint *breakpoint; // [esp+68h] [ebp-6Ch]
+    float colorWhite[4]; // [esp+6Ch] [ebp-68h] BYREF
+    int startLine; // [esp+7Ch] [ebp-58h]
+    const char *endPos; // [esp+80h] [ebp-54h]
+    float colorBlue[4]; // [esp+84h] [ebp-50h] BYREF
+    float colorRed[4]; // [esp+94h] [ebp-40h] BYREF
+    float startLineFrac; // [esp+A4h] [ebp-30h]
+    SourceBufferInfo *sourceBufData; // [esp+A8h] [ebp-2Ch]
+    float currentY; // [esp+ACh] [ebp-28h]
+    float innerWidth; // [esp+B0h] [ebp-24h]
+    const char *s; // [esp+B4h] [ebp-20h]
+    float lastHeight; // [esp+B8h] [ebp-1Ch]
+    char *to; // [esp+BCh] [ebp-18h]
+    int i; // [esp+C0h] [ebp-14h]
+    Scr_WatchElement_s *element; // [esp+C4h] [ebp-10h]
+    int startCol; // [esp+C8h] [ebp-Ch]
+    int col; // [esp+CCh] [ebp-8h]
+    bool existsBreakpoint; // [esp+D3h] [ebp-1h]
+
+    colorBlue[0] = 0.2;
+    colorBlue[1] = 0.2;
+    colorBlue[2] = 0.40000001;
+    colorBlue[3] = 1.0;
+    if (scrDebuggerGlob.atBreakpoint)
+        UI_Component::DrawPic(x, y, width, height, colorBlue, cls.whiteMaterial);
+    else
+        UI_Component::DrawPic(x, y, width, height, 0, cls.consoleMaterial);
+    if (this->bufferIndex != -1)
+    {
+        if (this->bufferIndex >= scrParserPub.sourceBufferLookupLen)
+            MyAssertHandler(".\\script\\scr_debugger.cpp", 828, 0, "%s", "bufferIndex < scrParserPub.sourceBufferLookupLen");
+        sourceBufData = &scrParserPub.sourceBufferLookup[this->bufferIndex];
+        CL_LookupColor(0, 0x37u, colorWhite);
+        colorRed[0] = 1.0;
+        colorRed[1] = 0.0;
+        colorRed[2] = 0.0;
+        colorRed[3] = 1.0;
+        CL_LookupColor(0, 0x33u, colorYellow);
+        innerWidth = width - UI_Component::g.charHeight;
+        lastHeight = height - UI_Component::g.charHeight;
+        startLineFrac = compY / UI_Component::g.charHeight;
+        startLine = startLineFrac;
+        currentY = startLine - startLineFrac;
+        if (currentY < 0.0)
+        {
+            currentY = currentY + 1.0;
+            ++startLine;
+        }
+        currentY = currentY * UI_Component::g.charHeight;
+        Scr_ScriptWindow::SetCurrentLine(startLine);
+        currentLine = this->currentTopLine;
+        s = this->currentBufPos;
+        endPos = &sourceBufData->sourceBuf[sourceBufData->len];
+        startCol = (compX / UI_Component::g.charWidth);
+        selectColor[0] = 0.5;
+        selectColor[1] = 0.5;
+        selectColor[2] = 0.5;
+        selectColor[3] = 1.0;
+        for (breakpoint = this->breakpointHead; breakpoint && breakpoint->line < currentLine; breakpoint = breakpoint->next)
+            ;
+        existsBreakpoint = this->bufferIndex == scrDebuggerGlob.breakpointPos.bufferIndex;
+        while (lastHeight >= currentY && s < endPos)
+        {
+            if (currentLine == this->selectedLine)
+            {
+                v16 = y + currentY;
+                v15 = x + UI_Component::g.charHeight;
+                UI_Component::DrawPic(
+                    v15,
+                    v16,
+                    innerWidth,
+                    UI_Component::g.charHeight,
+                    selectColor,
+                    sharedUiInfo.assets.whiteMaterial);
+            }
+            if (breakpoint && breakpoint->line == currentLine)
+            {
+                element = breakpoint->element;
+                if (!element)
+                    MyAssertHandler(".\\script\\scr_debugger.cpp", 872, 0, "%s", "element");
+                if (element->breakpointType == 5)
+                {
+                    v14 = UI_Component::g.charHeight + UI_Component::g.charHeight;
+                    v13 = y + currentY - UI_Component::g.charHeight * 0.5;
+                    UI_Component::DrawPic(x, v13, UI_Component::g.charHeight, v14, colorRed, UI_Component::g.filledCircle);
+                }
+                else
+                {
+                    if (element->breakpointType != 4)
+                        MyAssertHandler(
+                            ".\\script\\scr_debugger.cpp",
+                            879,
+                            0,
+                            "%s",
+                            "element->breakpointType == SCR_BREAKPOINT_LINE_DISABLED");
+                    v12 = y + currentY;
+                    v11 = UI_Component::g.charWidth * 0.5 + x;
+                    UI_Component::DrawText(v11, v12, UI_Component::g.charHeight, 5, colorRed, (char*)"O");
+                }
+                do
+                    breakpoint = breakpoint->next;
+                while (breakpoint && breakpoint->line == currentLine);
+            }
+            if (existsBreakpoint && currentLine == scrDebuggerGlob.breakpointPos.lineNum)
+            {
+                v10 = y + currentY;
+                v9 = UI_Component::g.charWidth * 0.5 + x;
+                UI_Component::DrawText(v9, v10, UI_Component::g.charHeight, 5, colorYellow, (char*)">");
+            }
+            ++currentLine;
+            col = 0;
+            while (*s && col < startCol)
+            {
+                if (*s == 9)
+                    col += 4 - col % 4;
+                else
+                    ++col;
+                ++s;
+            }
+            if (*s)
+            {
+                to = scrDebuggerGlob.colBuf;
+                i = col - startCol;
+                memset(scrDebuggerGlob.colBuf, 32, col - startCol);
+                to += i;
+                i = 0;
+                while (*s)
+                {
+                    if (*s == 9)
+                    {
+                        for (i = col % 4; i < 4; ++i)
+                        {
+                            *to++ = 32;
+                            ++col;
+                        }
+                    }
+                    else
+                    {
+                        *to++ = *s;
+                        ++col;
+                    }
+                    ++s;
+                }
+                *to = 0;
+                v8 = y + currentY;
+                v7 = x + UI_Component::g.charHeight;
+                UI_Component::DrawText(v7, v8, innerWidth, 5, colorWhite, scrDebuggerGlob.colBuf);
+            }
+            ++s;
+            currentY = currentY + UI_Component::g.charHeight;
+        }
+    }
+}
+
+bool UI_VerticalDivider::KeyEvent(float *point, int key)
+{
+    if (!Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        return 0;
+    if (key == 154)
+    {
+        this->posY = this->posY - UI_Component::g.charHeight;
+        return 1;
+    }
+    if (key != 155)
+        return 0;
+    this->posY = this->posY + UI_Component::g.charHeight;
+    return 1;
+}
+
+bool UI_ScrollPane::KeyEvent(float *point, int key)
+{
+    bool result; // al
+    UI_LinesComponent *comp; // eax
+    float innerSize[2]; // [esp+14h] [ebp-1Ch] BYREF
+    float innerPoint[2]; // [esp+1Ch] [ebp-14h] BYREF
+    int linesCount; // [esp+24h] [ebp-Ch]
+    float vec2_origin[2]; // [esp+28h] [ebp-8h] BYREF
+
+    if (!this->comp)
+        return 0;
+    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    {
+        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        {
+        LABEL_23:
+            if (key != 200
+                || (vec2_origin[0] = 0.0,
+                    vec2_origin[1] = 0.0,
+                    UI_ScrollPane::GetInnerSize(innerSize),
+                    InRect(point, vec2_origin, innerSize)))
+            {
+                comp = this->comp;
+                innerPoint[0] = *point + comp->pos[0];
+                innerPoint[1] = point[1] + comp->pos[1];
+                return this->comp->KeyEvent(innerPoint, key);
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            switch (key)
+            {
+            case 154:
+                this->comp->pos[1] = this->comp->pos[1] - UI_Component::g.charHeight;
+                UI_ScrollPane::SetPos();
+                result = 1;
+                break;
+            case 155:
+                this->comp->pos[1] = this->comp->pos[1] + UI_Component::g.charHeight;
+                UI_ScrollPane::SetPos();
+                result = 1;
+                break;
+            case 156:
+                this->comp->pos[0] = this->comp->pos[0] - UI_Component::g.charWidth;
+                UI_ScrollPane::SetPos();
+                result = 1;
+                break;
+            case 157:
+                this->comp->pos[0] = this->comp->pos[0] + UI_Component::g.charWidth;
+                UI_ScrollPane::SetPos();
+                result = 1;
+                break;
+            case 163:
+                this->comp->selectedLine = 0x7FFFFFFF;
+                UI_ScrollPane::DisplaySelectedLine();
+                result = 1;
+                break;
+            case 164:
+                this->comp->selectedLine = 0;
+                UI_ScrollPane::DisplaySelectedLine();
+                result = 1;
+                break;
+            case 165:
+                this->comp->pos[1] = 0.0;
+                this->comp->selectedLine = 0;
+                UI_ScrollPane::SetPos();
+                UI_ScrollPane::DisplaySelectedLine();
+                result = 1;
+                break;
+            case 166:
+                this->comp->pos[1] = 3.4028235e38;
+                this->comp->selectedLine = 0x7FFFFFFF;
+                UI_ScrollPane::SetPos();
+                UI_ScrollPane::DisplaySelectedLine();
+                result = 1;
+                break;
+            default:
+                goto LABEL_23;
+            }
+        }
+    }
+    else
+    {
+        switch (key)
+        {
+        case 163:
+            linesCount = UI_ScrollPane::GetInnerLinesCount();
+            this->comp->pos[1] = linesCount * UI_Component::g.charHeight + this->comp->pos[1];
+            this->comp->selectedLine += linesCount;
+            UI_ScrollPane::SetPos();
+            UI_ScrollPane::DisplaySelectedLine();
+            result = 1;
+            break;
+        case 164:
+            linesCount = UI_ScrollPane::GetInnerLinesCount();
+            this->comp->pos[1] = this->comp->pos[1] - linesCount * UI_Component::g.charHeight;
+            this->comp->selectedLine -= linesCount;
+            UI_ScrollPane::SetPos();
+            UI_ScrollPane::DisplaySelectedLine();
+            result = 1;
+            break;
+        case 205:
+            this->comp->pos[1] = UI_Component::g.charHeight * 3.0 + this->comp->pos[1];
+            UI_ScrollPane::SetPos();
+            result = 1;
+            break;
+        case 206:
+            this->comp->pos[1] = this->comp->pos[1] - UI_Component::g.charHeight * 3.0;
+            UI_ScrollPane::SetPos();
+            result = 1;
+            break;
+        default:
+            goto LABEL_23;
+        }
+    }
+    return result;
+}
+
+int UI_ScrollPane::GetInnerLinesCount()
+{
+    float innerSize[2]; // [esp+4h] [ebp-8h] BYREF
+
+    UI_ScrollPane::GetInnerSize(innerSize);
+    return (innerSize[1] / UI_Component::g.charHeight);
+}
+
+int UI_ScrollPane::GetFirstDisplayedLine()
+{
+    float startLineFrac; // [esp+Ch] [ebp-8h]
+    float startY; // [esp+10h] [ebp-4h]
+
+    startLineFrac = this->comp->pos[1] / UI_Component::g.charHeight;
+    startY = startLineFrac - startLineFrac;
+    if (startY >= 0.0)
+        return startLineFrac;
+    else
+        return startLineFrac + 1;
+}
+
+int UI_ScrollPane::GetLastDisplayedLine()
+{
+    int lastLine; // [esp+8h] [ebp-Ch]
+    float innerSize[2]; // [esp+Ch] [ebp-8h] BYREF
+
+    if (!this->comp)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 548, 0, "%s", "comp");
+    UI_ScrollPane::GetInnerSize(innerSize);
+    lastLine = ((this->comp->pos[1] + innerSize[1]) / UI_Component::g.charHeight);
+    if (innerSize[1] < (lastLine + 1) * UI_Component::g.charHeight)
+        --lastLine;
+    if (lastLine >= this->comp->numLines)
+        return this->comp->numLines - 1;
+    return lastLine;
+}
+
+void UI_ScrollPane::DisplaySelectedLine()
+{
+    int lastLine; // [esp+4h] [ebp-8h]
+    int firstLine; // [esp+8h] [ebp-4h]
+
+    if (!this->comp)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 571, 0, "%s", "comp");
+    firstLine = UI_ScrollPane::GetFirstDisplayedLine();
+    if (this->comp->selectedLine >= firstLine)
+    {
+        lastLine = UI_ScrollPane::GetLastDisplayedLine();
+        if (this->comp->selectedLine > lastLine)
+            this->comp->selectedLine = lastLine;
+    }
+    else
+    {
+        this->comp->selectedLine = firstLine;
+    }
+}
+
+bool UI_LinesComponent::KeyEvent(float *point, int key)
+{
+    bool result; // al
+
+    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    {
+        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+            return 0;
+        if (key == 103)
+        {
+            UI_Component::g.consoleReason = 0;
+            Con_ToggleConsole();
+            return 1;
+        }
+        if (key == 200)
+        {
+            if (this->selectedLine == (point[1] / UI_Component::g.charHeight))
+                this->selectedLine = -1;
+            return 0;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        switch (key)
+        {
+        case 45:
+            this->selectedLine = -1;
+            result = 1;
+            break;
+        case 154:
+            UI_LinesComponent::DecSelectedLineFocus(0);
+            result = 1;
+            break;
+        case 155:
+            UI_LinesComponent::IncSelectedLineFocus(0);
+            result = 1;
+            break;
+        case 200:
+            this->SetSelectedLineFocus((point[1] / UI_Component::g.charHeight), 1);
+            result = 0;
+            break;
+        default:
+            return 0;
+        }
+    }
+    return result;
+}
+
+void Scr_ScriptWindow::CopySelectedText()
+{
+    int currentLine; // [esp+4h] [ebp-10h]
+    const char *endPos; // [esp+8h] [ebp-Ch]
+    SourceBufferInfo *sourceBufData; // [esp+Ch] [ebp-8h]
+    const char *s; // [esp+10h] [ebp-4h]
+
+    if (this->bufferIndex != -1 && this->selectedLine >= 0)
+    {
+        if (this->bufferIndex >= scrParserPub.sourceBufferLookupLen)
+            MyAssertHandler(
+                ".\\script\\scr_debugger.cpp",
+                2032,
+                0,
+                "bufferIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
+                this->bufferIndex,
+                scrParserPub.sourceBufferLookupLen);
+        sourceBufData = &scrParserPub.sourceBufferLookup[this->bufferIndex];
+        s = sourceBufData->sourceBuf;
+        endPos = &s[sourceBufData->len];
+        currentLine = 0;
+        while (s < endPos)
+        {
+            if (currentLine == this->selectedLine)
+            {
+                while (*s == 9 || *s == 32)
+                    ++s;
+                Sys_SetClipboardData(s);
+                return;
+            }
+            ++currentLine;
+            while (*s)
+                ++s;
+            ++s;
+        }
+    }
+}
+
+void Scr_ScriptWindow::ToggleBreakpoint(
+    Scr_WatchElement_s *element,
+    bool force,
+    bool overwrite,
+    unsigned __int8 breakpointType,
+    bool user)
+{
+    SourceBufferInfo *sourceBufData; // [esp+4h] [ebp-4h]
+
+    if (this->selectedLine >= 0)
+    {
+        sourceBufData = &scrParserPub.sourceBufferLookup[this->bufferIndex];
+        if (Sys_IsRemoteDebugClient())
+        {
+            Sys_WriteDebugSocketMessageType(0x14u);
+            Sys_WriteDebugSocketInt(sourceBufData->sortedIndex);
+            Sys_WriteDebugSocketInt(this->selectedLine);
+            Scr_WriteElement(element);
+            Sys_WriteDebugSocketInt(force);
+            Sys_WriteDebugSocketInt(overwrite);
+            Sys_WriteDebugSocketInt(breakpointType);
+            Sys_WriteDebugSocketInt(user);
+            Sys_EndWriteDebugSocket();
+        }
+        else
+        {
+            Scr_ScriptWindow::ToggleBreakpointInternal(element, force, overwrite, breakpointType, user);
+        }
+    }
+}
+
+char *__thiscall Scr_ScriptWindow::GetBreakpointCodePos()
+{
+    unsigned int startSourcePos; // [esp+4h] [ebp-1Ch]
+    SourceBufferInfo *sourceBufData; // [esp+8h] [ebp-18h]
+    const char *s; // [esp+Ch] [ebp-14h]
+    int line; // [esp+10h] [ebp-10h]
+    char *codePos; // [esp+14h] [ebp-Ch]
+    unsigned int sourcePos; // [esp+18h] [ebp-8h] BYREF
+    unsigned int endSourcePos; // [esp+1Ch] [ebp-4h]
+
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 1355, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    if (this->selectedLine < 0)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 1358, 0, "%s", "selectedLine >= 0");
+    sourceBufData = &scrParserPub.sourceBufferLookup[this->bufferIndex];
+    s = sourceBufData->sourceBuf;
+    for (line = 0; ; ++line)
+    {
+        if (s - sourceBufData->sourceBuf > sourceBufData->len)
+            MyAssertHandler(
+                ".\\script\\scr_debugger.cpp",
+                1366,
+                0,
+                "%s",
+                "s - sourceBufData->sourceBuf <= sourceBufData->len");
+        if (line == this->selectedLine)
+            break;
+    LABEL_18:
+        while (*s)
+            ++s;
+        ++s;
+    }
+    startSourcePos = s - sourceBufData->sourceBuf;
+    while (*s)
+        ++s;
+    endSourcePos = s - sourceBufData->sourceBuf;
+    codePos = (char*)Scr_GetOpcodePosOfType(this->bufferIndex, startSourcePos, endSourcePos, 1, &sourcePos);
+    if (codePos)
+        return codePos;
+    if (this->selectedLine < this->numLines - 1)
+    {
+        ++this->selectedLine;
+        if (*s)
+            MyAssertHandler(".\\script\\scr_debugger.cpp", 1383, 0, "%s", "!(*s)");
+        goto LABEL_18;
+    }
+    return 0;
+}
+
+void Scr_ScriptWindow::RunToCursor()
+{
+    SourceBufferInfo *sourceBufData; // [esp+4h] [ebp-8h]
+    char *codePos; // [esp+8h] [ebp-4h]
+
+    if (Sys_IsRemoteDebugClient())
+    {
+        if (scrDebuggerGlob.atBreakpoint)
+        {
+            if (this->selectedLine < 0)
+                MyAssertHandler(".\\script\\scr_debugger.cpp", 1669, 0, "%s", "selectedLine >= 0");
+            sourceBufData = &scrParserPub.sourceBufferLookup[this->bufferIndex];
+            Sys_WriteDebugSocketMessageType(0x19u);
+            Sys_WriteDebugSocketInt(sourceBufData->sortedIndex);
+            Sys_WriteDebugSocketInt(this->selectedLine);
+            Sys_EndWriteDebugSocket();
+            Scr_ResumeBreakpoints();
+        }
+    }
+    else
+    {
+        clientUIActives[0].keyCatchers &= ~2u;
+        if (scrVmPub.function_count)
+        {
+            codePos = Scr_ScriptWindow::GetBreakpointCodePos();
+            Scr_SetTempBreakpoint(codePos, 0);
+        }
+    }
+}
+
+Scr_WatchElement_s *__thiscall Scr_ScriptWatch::GetSelectedNonConditionalElement()
+{
+    Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (element)
+    {
+        while (element->next && element->next->breakpointType == 2)
+            element = element->next;
+    }
+    return element;
+}
+
+void Scr_ScriptWindow::EnterCallInternal()
+{
+    const char *v2; // [esp+4h] [ebp-30h]
+    Scr_SourcePos_t pos; // [esp+Ch] [ebp-28h] BYREF
+    Scr_Breakpoint *breakpoint; // [esp+18h] [ebp-1Ch]
+    unsigned int startSourcePos; // [esp+1Ch] [ebp-18h] BYREF
+    const char *codePos; // [esp+20h] [ebp-14h]
+    unsigned int sourcePos; // [esp+24h] [ebp-10h] BYREF
+    Scr_Breakpoint **pBreakpoint; // [esp+28h] [ebp-Ch]
+    const char *destCodePos; // [esp+2Ch] [ebp-8h]
+    unsigned int endSourcePos; // [esp+30h] [ebp-4h] BYREF
+
+    if (this->selectedLine < 0)
+        MyAssertHandler(".\\script\\scr_debugger.cpp", 1774, 0, "%s", "selectedLine >= 0");
+    Scr_ScriptWindow::GetSourcePos(&startSourcePos, &endSourcePos);
+    codePos = Scr_GetOpcodePosOfType(this->bufferIndex, startSourcePos, endSourcePos, 2, &sourcePos);
+    if (codePos)
+    {
+        for (pBreakpoint = &this->breakpointHead; ; pBreakpoint = &breakpoint->next)
+        {
+            breakpoint = *pBreakpoint;
+            if (!breakpoint)
+                break;
+            if (breakpoint->line >= this->selectedLine)
+            {
+                if (breakpoint->line != this->selectedLine)
+                    breakpoint = 0;
+                break;
+            }
+        }
+        if (breakpoint)
+        {
+            //Scr_ScriptWatch::SetSelectedElement(&scrDebuggerGlob.scriptWatch, breakpoint->element, 0);
+            scrDebuggerGlob.scriptWatch.SetSelectedElement(breakpoint->element, 0);
+        }
+        else
+        {
+            //Scr_ScriptWindow::ToggleBreakpointInternal(this, 0, 0, 0, 4u, 1);
+            Scr_ScriptWindow::ToggleBreakpointInternal(0, 0, 0, 4u, 1);
+        }
+        v2 = (const char*)*++codePos;
+        codePos += 4;
+        destCodePos = v2;
+        Scr_GetSourcePosOfType(v2 - 1, 4, &pos);
+        Scr_SelectScriptLine(pos.bufferIndex, pos.lineNum);
+    }
+}
+
+void Scr_ScriptWindow::EnterCall()
+{
+    SourceBufferInfo *sourceBufData; // [esp+4h] [ebp-4h]
+
+    if (this->selectedLine >= 0)
+    {
+        sourceBufData = &scrParserPub.sourceBufferLookup[this->bufferIndex];
+        if (Sys_IsRemoteDebugClient())
+        {
+            Sys_WriteDebugSocketMessageType(0x2Du);
+            Sys_WriteDebugSocketInt(sourceBufData->sortedIndex);
+            Sys_WriteDebugSocketInt(this->selectedLine);
+            Sys_EndWriteDebugSocket();
+        }
+        else
+        {
+            Scr_ScriptWindow::EnterCallInternal();
+        }
+    }
+}
+
+bool Scr_ScriptWindow::KeyEvent(float *point, int key)
+{
+    bool result; // al
+    Scr_WatchElement_s *v4; // eax
+    Scr_WatchElement_s *v5; // eax
+    Scr_WatchElement_s *SelectedNonConditionalElement; // eax
+    Scr_WatchElement_s *v7; // eax
+
+    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    {
+        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        {
+            return UI_LinesComponent::KeyEvent(point, key);
+        }
+        else
+        {
+            switch (key)
+            {
+            case 99:
+            case 161:
+                Scr_ScriptWindow::CopySelectedText();
+                result = 1;
+                break;
+            case 173:
+                //SelectedNonConditionalElement = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
+                SelectedNonConditionalElement = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
+                Scr_ScriptWindow::ToggleBreakpoint(SelectedNonConditionalElement, 0, 0, 7u, 1);
+                result = 1;
+                break;
+            case 175:
+                //v7 = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
+                v7 = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
+                Scr_ScriptWindow::ToggleBreakpoint(v7, 0, 0, 4u, 1);
+                result = 1;
+                break;
+            case 176:
+                Scr_ScriptWindow::RunToCursor();
+                result = 1;
+                break;
+            default:
+                return UI_LinesComponent::KeyEvent(point, key);
+            }
+        }
+    }
+    else
+    {
+        switch (key)
+        {
+        case 13:
+        case 191:
+        case 223:
+            Scr_ScriptWindow::EnterCall();
+            result = 1;
+            break;
+        case 173:
+            //v4 = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
+            v4 = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
+            Scr_ScriptWindow::ToggleBreakpoint(v4, 0, 0, 6u, 1);
+            result = 1;
+            break;
+        case 175:
+            //v5 = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
+            v5 = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
+            Scr_ScriptWindow::ToggleBreakpoint(v5, 0, 0, 5u, 1);
+            result = 1;
+            break;
+        default:
+            return UI_LinesComponent::KeyEvent(point, key);
+        }
+    }
+    return result;
 }
