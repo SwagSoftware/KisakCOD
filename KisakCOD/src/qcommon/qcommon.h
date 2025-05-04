@@ -1020,6 +1020,45 @@ void __cdecl CM_LoadMapData_LoadObj(const char *name);
 struct cplane_s *__cdecl CM_GetPlanes();
 int __cdecl CM_GetPlaneCount();
 
+void __cdecl CMod_LoadPlanes();
+bool __cdecl CMod_HasSpawnString(const struct SpawnVar *userData, const char *key);
+int CMod_LoadMaterials();
+struct cNode_t *CMod_LoadNodes();
+void CMod_LoadLeafSurfaces();
+void CMod_LoadCollisionVerts();
+void CMod_LoadCollisionTriangles();
+void CMod_LoadCollisionEdgeWalkable();
+const struct DiskCollBorder *CMod_LoadCollisionBorders();
+char *CMod_LoadCollisionPartitions();
+struct MapEnts *CMod_LoadEntityString();
+void CMod_LoadVisibility();
+void __cdecl CMod_LoadBrushRelated(unsigned int version, bool usePvs);
+unsigned int CMod_LoadSubmodels();
+void CMod_LoadSubmodelBrushNodes();
+void __cdecl CMod_PartionLeafBrushes(unsigned __int16 *leafBrushes, int numLeafBrushes, cLeaf_t *leaf);
+cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
+    unsigned __int16 *leafBrushes,
+    int numLeafBrushes,
+    const float *mins,
+    const float *maxs);
+cLeafBrushNode_s *__cdecl CMod_AllocLeafBrushNode();
+double __cdecl CMod_GetPartitionScore(
+    unsigned __int16 *leafBrushes,
+    int numLeafBrushes,
+    int axis,
+    const float *mins,
+    const float *maxs,
+    float *dist);
+int __cdecl CMod_GetLeafTerrainContents(cLeaf_t *leaf);
+void CMod_LoadBrushes();
+void __cdecl CMod_LoadLeafs(bool usePvs);
+void __cdecl CMod_LoadLeafs_Version14(bool usePvs);
+const struct DiskLeaf *CMod_LoadLeafBrushNodes();
+char *CMod_LoadLeafBrushNodes_Version14();
+unsigned int CMod_LoadLeafBrushes();
+char *CMod_LoadCollisionAabbTrees();
+
+
 // cm_showcollision
 struct ShowCollisionBrushPt // sizeof=0x14
 {                                       // ...

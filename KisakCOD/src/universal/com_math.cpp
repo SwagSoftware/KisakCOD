@@ -1225,7 +1225,7 @@ void __cdecl MatrixTransformVector43(const vec3r in1, const mat4x3 &in2, vec3r o
     out[2] = in1[0] * (in2)[0][2] + in1[1] * (in2)[1][2] + in1[2] * (in2)[2][2] + (in2)[3][2];
 }
 
-void __cdecl MatrixTransposeTransformVector43(vec3r in1, const mat4x3 &in2, vec3r out)
+void __cdecl MatrixTransposeTransformVector43(const vec3r in1, const mat4x3 &in2, vec3r out)
 {
     iassert(in1 != out);
     float temp[3]; // [esp+0h] [ebp-Ch] BYREF

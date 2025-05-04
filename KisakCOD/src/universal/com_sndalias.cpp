@@ -1315,6 +1315,11 @@ void __cdecl Com_RefreshSpeakerMaps_f()
     }
 }
 
+void Com_InitDefaultSpeakerMap()
+{
+    Com_InitDefaultSoundAliasSpeakerMap(g_sa.speakerMaps);
+}
+
 void Com_InitSpeakerMaps()
 {
     int fileIndex; // [esp+10h] [ebp-58h]

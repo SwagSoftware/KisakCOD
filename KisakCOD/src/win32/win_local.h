@@ -24,8 +24,6 @@
 
 void	IN_MouseEvent (int mstate);
 
-void Sys_QueEvent( int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr );
-
 void	Sys_CreateConsole( void );
 void	Sys_DestroyConsole( void );
 void __cdecl Sys_ShowConsole();

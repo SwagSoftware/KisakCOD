@@ -3,6 +3,7 @@
 #include <universal/com_memory.h>
 #include <database/database.h>
 #include <win32/win_local.h>
+#include "com_bsp.h"
 
 //Line 53199 : 0006 : 006e75b8       struct clipMap_t cm        82e975b8     cm_load.obj
 clipMap_t cm;
@@ -69,6 +70,46 @@ void __cdecl CM_LoadMapData_FastFile(const char *name)
 {
     if (DB_FindXAssetHeader(ASSET_TYPE_CLIPMAP_PVS, name).clipMap != &cm)
         MyAssertHandler(".\\qcommon\\cm_load.cpp", 133, 0, "%s", "clipMap == &cm");
+}
+
+void __cdecl CM_LoadMapFromBsp(const char *name, bool usePvs)
+{
+    char v2; // [esp+3h] [ebp-21h]
+    char *v3; // [esp+8h] [ebp-1Ch]
+    const char *v4; // [esp+Ch] [ebp-18h]
+    unsigned int version; // [esp+20h] [ebp-4h]
+
+    Com_Memset(&cm, 0, 284);
+    cm.name = (const char*)CM_Hunk_Alloc(strlen(name) + 1, "CM_LoadMapFromBsp", 25);
+    v4 = name;
+    v3 = (char*)cm.name;
+    do
+    {
+        v2 = *v4;
+        *v3++ = *v4++;
+    } while (v2);
+    version = Com_GetBspVersion();
+    CMod_LoadMaterials();
+    CMod_LoadPlanes();
+    CMod_LoadBrushRelated(version, usePvs);
+    CMod_LoadNodes();
+    CMod_LoadLeafSurfaces();
+    CMod_LoadCollisionVerts();
+    CMod_LoadCollisionTriangles();
+    CMod_LoadCollisionEdgeWalkable();
+    CMod_LoadCollisionBorders();
+    CMod_LoadCollisionPartitions();
+    if (usePvs)
+    {
+        CMod_LoadVisibility();
+    }
+    else if (Com_BspHasLump(LUMP_VISIBILITY))
+    {
+        Com_Error(ERR_DROP, "In single player, do not compile the bsp with visibility");
+    }
+    ProfLoad_Begin("Load entity string");
+    CMod_LoadEntityString();
+    ProfLoad_End();
 }
 
 void __cdecl CM_Shutdown()

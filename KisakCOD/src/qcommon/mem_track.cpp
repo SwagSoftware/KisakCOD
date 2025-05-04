@@ -1090,7 +1090,7 @@ void __cdecl track_temp_high_clear(int permanent)
     LeaveCriticalSection(&g_crit);
 }
 
-void __cdecl track_temp_high_alloc_DONE(int size, int hunkSize, int permanent, const char* name)
+void __cdecl track_temp_high_alloc(int size, int hunkSize, int permanent, const char* name)
 {
     EnterCriticalSection(&g_crit);
     AddTempMemInfo(size, hunkSize, permanent, name, 10, 6, g_tempHighMemInfoArray, &g_tempHighMemInfoCount);

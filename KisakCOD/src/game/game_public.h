@@ -283,6 +283,7 @@ void __cdecl G_OrientItemToGround(gentity_s *ent, trace_t *trace);
 // g_load_utils
 void __cdecl G_ResetEntityParsePoint();
 const char *__cdecl G_GetEntityParsePoint();
+void __cdecl G_SetEntityParsePoint(const char *beginParsePoint);
 int __cdecl G_GetEntityToken(char *buffer, int bufferSize);
 int __cdecl G_ParseSpawnVars(SpawnVar *spawnVar);
 char *__cdecl G_AddSpawnVarToken(char *string, SpawnVar *spawnVar);

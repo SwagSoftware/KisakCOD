@@ -321,7 +321,7 @@ void __cdecl Conbuf_AppendText(const char *pMsg)
 /*
 ** Sys_SetErrorText
 */
-void __cdecl Sys_SetErrorText(char *buf)
+void __cdecl Sys_SetErrorText(const char *buf)
 {
 	HWND ActiveWindow; // eax
 
@@ -332,7 +332,7 @@ void __cdecl Sys_SetErrorText(char *buf)
 	MessageBoxA(ActiveWindow, buf, "Error", 0x10u);
 }
 
-void __cdecl Conbuf_AppendTextInMainThread(char* msg)
+void __cdecl Conbuf_AppendTextInMainThread(const char* msg)
 {
 	if (s_wcd.hwndBuffer)
 	{

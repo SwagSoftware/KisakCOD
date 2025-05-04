@@ -33,7 +33,7 @@ int __cdecl G_SpawnInt(const char *key, const char *defaultString, int *out)
     return present;
 }
 
-void __cdecl Scr_ReadOnlyField()
+void __cdecl Scr_ReadOnlyField(gentity_s *ent, int i)
 {
     Scr_Error("Tried to set a read only entity field");
 }

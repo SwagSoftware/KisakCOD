@@ -533,7 +533,7 @@ struct PhysPreset;
 bool __cdecl CG_IsRagdollTrajectory(const trajectory_t *trajectory);
 void __cdecl CG_RegisterDvars();
 void __cdecl TRACK_cg_main();
-void __cdecl CG_GetDObjOrientation(int localClientNum, unsigned int dobjHandle, float (*axis)[3], float *origin);
+void __cdecl CG_GetDObjOrientation(int localClientNum, signed int dobjHandle, mat3x3 &axis, float *origin);
 void __cdecl CG_GetSoundEntityOrientation(SndEntHandle sndEnt, float *origin_out, float (*axis_out)[3]);
 void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *origin_out, float (*axis_out)[3]);
 const playerState_s *__cdecl CG_GetPredictedPlayerState(int localClientNum);

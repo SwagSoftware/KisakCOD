@@ -70,6 +70,22 @@ void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char* assetName)
     }
 }
 
+void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t)
+{
+    unsigned int i; // [esp+18h] [ebp-4h]
+
+    for (i = 0; i < 0x52; ++i)
+    {
+        if (!strcmp(*pName, methods_2[i].actionString))
+        {
+            *pName = methods_2[i].actionString;
+            *type = methods_2[i].type;
+            return methods_2[i].actionFunc;
+        }
+    }
+    return 0;
+}
+
 void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t)
 {
     void(__cdecl * method)(scr_entref_t); // [esp+0h] [ebp-4h]

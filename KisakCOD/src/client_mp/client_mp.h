@@ -659,7 +659,7 @@ void __cdecl CL_DrawTextRotate(
     const float *color,
     int style);
 void __cdecl CL_DrawTextPhysicalWithCursor(
-    const char *text,
+    char *text,
     int maxChars,
     Font_s *font,
     float x,

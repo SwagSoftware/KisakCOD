@@ -45,7 +45,7 @@ unsigned int SL_TransferToCanonicalString(unsigned int stringValue)
 	return scrVarPub.canonicalStrCount;
 }
 
-unsigned int __cdecl SL_GetCanonicalString(char* str)
+unsigned int __cdecl SL_GetCanonicalString(const char* str)
 {
     unsigned int v1; // eax
     unsigned int v3; // eax

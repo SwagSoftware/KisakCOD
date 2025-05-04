@@ -2070,6 +2070,62 @@ bool Scr_AbstractScriptList::AddEntryName(const char *filename, bool select)
     return 0;
 }
 
+void Scr_AbstractScriptList::AddEntry(Scr_ScriptWindow *scriptWindow, bool select)
+{
+    int selectedLine; // [esp+1Ch] [ebp-1Ch]
+    int newNumLines; // [esp+24h] [ebp-14h]
+    int newIndex; // [esp+28h] [ebp-10h]
+    float newWidth; // [esp+2Ch] [ebp-Ch]
+    int i; // [esp+30h] [ebp-8h]
+    unsigned __int8 *newScriptWindows; // [esp+34h] [ebp-4h]
+
+    if (select && this->selectedLine >= 0)
+        selectedLine = this->selectedLine;
+    else
+        selectedLine = this->numLines;
+    newIndex = selectedLine;
+    for (i = 0; i < this->numLines; ++i)
+    {
+        if (this->scriptWindows[i] == scriptWindow)
+        {
+            if (selectedLine <= i)
+            {
+                memmove(&this->scriptWindows[selectedLine + 1], &this->scriptWindows[selectedLine], 4 * (i - selectedLine));
+            }
+            else
+            {
+                newIndex = selectedLine - 1;
+                memmove(&this->scriptWindows[i], &this->scriptWindows[i + 1], 4 * (selectedLine - 1 - i));
+            }
+            goto found_0;
+        }
+    }
+    newNumLines = this->numLines + 1;
+    newScriptWindows = (unsigned char*)Scr_AllocDebugMem(4 * newNumLines, "Scr_AbstractScriptList::AddEntry");
+    if (this->scriptWindows)
+    {
+        memcpy(newScriptWindows, this->scriptWindows, 4 * selectedLine);
+        memcpy(
+            &newScriptWindows[4 * selectedLine + 4],
+            &this->scriptWindows[selectedLine],
+            4 * (this->numLines - selectedLine));
+        Scr_FreeDebugMem(this->scriptWindows);
+    }
+    this->scriptWindows = (Scr_ScriptWindow**)newScriptWindows;
+    this->numLines = newNumLines;
+    //newWidth = strlen(Scr_ScriptWindow::GetFilename(scriptWindow)) * UI_Component::g.charWidth;
+    newWidth = strlen(scriptWindow->GetFilename()) * UI_Component::g.charWidth;
+    if (this->size[0] < newWidth)
+        this->size[0] = newWidth;
+    UI_LinesComponent::UpdateHeight();
+found_0:
+    this->scriptWindows[newIndex] = scriptWindow;
+    if (select)
+        this->SetSelectedLineFocus(newIndex, 1);
+    else
+        this->SetSelectedLineFocus(-1, 1);
+}
+
 void UI_VerticalDivider::DrawTop(float x, float y, float width, float topHeight)
 {
     if (!this->topComp)

@@ -374,3 +374,13 @@ void __cdecl Com_BlockChecksum128Cat(
     MD4Update(&ctx, buffer1, length1);
     MD4Final(outChecksum, &ctx);
 }
+
+void __cdecl Com_BlockChecksum128(unsigned __int8 *buffer, unsigned int length, int key, unsigned __int8 *outChecksum)
+{
+    MD4_CTX ctx; // [esp+0h] [ebp-60h] BYREF
+
+    MD4Init(&ctx);
+    MD4Update(&ctx, (unsigned char*)&key, 4u);
+    MD4Update(&ctx, buffer, length);
+    MD4Final(outChecksum, &ctx);
+}

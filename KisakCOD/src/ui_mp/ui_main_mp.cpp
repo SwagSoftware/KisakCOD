@@ -636,7 +636,7 @@ void __cdecl UI_DrawTextWithCursor(
     v15 = y + 0.5;
     v13 = floor(v15);
     y = v13;
-    CL_DrawTextPhysicalWithCursor(text, maxChars, font, x, v13, xScale, yScale, color, style, cursorPos, cursor);
+    CL_DrawTextPhysicalWithCursor((char*)text, maxChars, font, x, v13, xScale, yScale, color, style, cursorPos, cursor);
 }
 
 Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, float scale)

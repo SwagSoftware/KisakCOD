@@ -1113,7 +1113,8 @@ void __cdecl FX_RetriggerEffect(int localClientNum, FxEffect* effect, int msecBe
             &effect->framePrev,
             &effect->frameNow,
             effect->msecBegin,
-            effect->msecLastUpdate);
+            effect->msecLastUpdate,
+            0);
         FX_StopEffect(system, effect);
     }
     for (elemClass = 0; elemClass < 3; ++elemClass)

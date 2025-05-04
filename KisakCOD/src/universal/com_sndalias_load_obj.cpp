@@ -2089,3 +2089,9 @@ char __cdecl Com_LoadSpkrMapFile(char *name, SpeakerMapInfo *info)
         return 0;
     }
 }
+
+void __cdecl Com_InitSoundAlias()
+{
+    saLoadObjGlob.tempAliases = 0;
+    saLoadObjGlob.tempAliasCount = 0;
+}

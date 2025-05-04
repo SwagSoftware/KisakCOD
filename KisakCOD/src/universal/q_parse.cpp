@@ -141,7 +141,7 @@ void __cdecl Com_SetScriptWarningPrefix(const char *prefix)
     pi->warningPrefix = prefix;
 }
 
-void Com_ScriptErrorDrop(char *msg, ...)
+void Com_ScriptErrorDrop(const char *msg, ...)
 {
     char string[4096]; // [esp+0h] [ebp-1010h] BYREF
     char *ap; // [esp+1004h] [ebp-Ch]

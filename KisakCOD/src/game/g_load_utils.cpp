@@ -21,6 +21,12 @@ const char *__cdecl G_GetEntityParsePoint()
     return g_entityEndParsePoint;
 }
 
+void __cdecl G_SetEntityParsePoint(const char *beginParsePoint)
+{
+    g_entityBeginParsePoint = beginParsePoint;
+    g_entityEndParsePoint = beginParsePoint;
+}
+
 int __cdecl G_GetEntityToken(char *buffer, int bufferSize)
 {
     parseInfo_t *v2; // eax

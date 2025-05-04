@@ -819,7 +819,7 @@ void __cdecl CG_DrawFxMarkProfile(int localClientNum)
 
     profilePos[0] = 0.0;
     profilePos[1] = 12.0;
-    FX_DrawMarkProfile(localClientNum, (void(__cdecl *)(char *))CG_DrawFxText, profilePos);
+    FX_DrawMarkProfile(localClientNum, (void(*)(const char*, float*))CG_DrawFxText, profilePos);
 }
 
 void __cdecl Vec4Set(float *v, float x, float y, float z, float w)

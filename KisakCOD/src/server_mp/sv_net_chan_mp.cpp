@@ -62,6 +62,16 @@ void __cdecl SV_Netchan_Encode(client_t *client, unsigned __int8 *data, int size
     }
 }
 
+void __cdecl SV_Netchan_OutgoingSequenceIncremented(client_t *client, netchan_t *chan)
+{
+    clientSnapshot_t *frame; // [esp+0h] [ebp-4h]
+
+    frame = &client->frames[chan->outgoingSequence & 0x1F];
+    memset(frame, 0, sizeof(clientSnapshot_t));
+    frame->first_entity = svs.nextSnapshotEntities;
+    frame->first_client = svs.nextSnapshotClients;
+}
+
 bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan)
 {
     bool res; // [esp+3h] [ebp-1h]

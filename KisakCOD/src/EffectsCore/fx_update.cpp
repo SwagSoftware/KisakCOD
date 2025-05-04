@@ -142,6 +142,120 @@ void __cdecl FX_SpawnTrailLoopingElems(
     }
 }
 
+void __cdecl FX_SpawnLoopingElems(
+    FxSystem *system,
+    FxEffect *effect,
+    int elemDefIndex,
+    const FxSpatialFrame *frameBegin,
+    const FxSpatialFrame *frameEnd,
+    long double msecWhenPlayed,
+    long double msecUpdateBegin,
+    long double msecUpdateEnd)
+{
+    const FxEffectDef *effectDef; // [esp+40h] [ebp-3Ch]
+    const FxElemDef *elemDef; // [esp+44h] [ebp-38h]
+    int msecNextSpawn; // [esp+48h] [ebp-34h]
+    float lerp; // [esp+4Ch] [ebp-30h]
+    int spawnedCount; // [esp+54h] [ebp-28h]
+    FxSpatialFrame frameWhenPlayed; // [esp+58h] [ebp-24h] BYREF
+    int maxUpdateMsec; // [esp+74h] [ebp-8h]
+    int updateMsec; // [esp+78h] [ebp-4h]
+
+    if (!effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 350, 0, "%s", "effect");
+    effectDef = effect->def;
+    if (!effect->def)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 353, 0, "%s", "effectDef");
+    if (elemDefIndex >= (effectDef->elemDefCountEmission + effectDef->elemDefCountOneShot
+        + effectDef->elemDefCountLooping))
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            355,
+            0,
+            "elemDefIndex doesn't index effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDefCou"
+            "ntEmission\n"
+            "\t%i not in [0, %i)",
+            elemDefIndex,
+            effectDef->elemDefCountEmission + effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping);
+    if (elemDefIndex >= effectDef->elemDefCountLooping
+        && elemDefIndex < effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping)
+    {
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            356,
+            0,
+            "%s",
+            "elemDefIndex < effectDef->elemDefCountLooping || elemDefIndex >= effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot");
+    }
+    if (SLODWORD(msecWhenPlayed) > SHIDWORD(msecWhenPlayed) || SHIDWORD(msecWhenPlayed) > SLODWORD(msecUpdateBegin))
+        MyAssertHandler(
+            ".\\EffectsCore\\fx_update.cpp",
+            357,
+            0,
+            "msecUpdateBegin not in [msecWhenPlayed, msecUpdateEnd]\n\t%g not in [%g, %g]",
+            SHIDWORD(msecWhenPlayed),
+            SLODWORD(msecWhenPlayed),
+            SLODWORD(msecUpdateBegin));
+    elemDef = &effect->def->elemDefs[elemDefIndex];
+    if (elemDef->elemType != 3)
+    {
+        if (LODWORD(msecUpdateBegin) != 0x7FFFFFFF)
+        {
+            updateMsec = LODWORD(msecUpdateBegin) - HIDWORD(msecWhenPlayed);
+            if (LODWORD(msecUpdateBegin) - HIDWORD(msecWhenPlayed) > 128)
+            {
+                maxUpdateMsec = FX_LimitStabilizeTimeForElemDef_Recurse(elemDef, 0, updateMsec) + 1;
+                elemDef = &effect->def->elemDefs[elemDefIndex];
+                if (updateMsec > maxUpdateMsec)
+                    HIDWORD(msecWhenPlayed) += updateMsec - maxUpdateMsec;
+            }
+        }
+        spawnedCount = (HIDWORD(msecWhenPlayed) - LODWORD(msecWhenPlayed)) / elemDef->spawn.looping.intervalMsec + 1;
+        msecNextSpawn = LODWORD(msecWhenPlayed) + elemDef->spawn.looping.intervalMsec * spawnedCount;
+        qmemcpy(&frameWhenPlayed, frameBegin, sizeof(frameWhenPlayed));
+        while (msecNextSpawn <= SLODWORD(msecUpdateBegin) && spawnedCount < elemDef->spawn.looping.count)
+        {
+            lerp = (msecNextSpawn - HIDWORD(msecWhenPlayed)) / (LODWORD(msecUpdateBegin) - HIDWORD(msecWhenPlayed));
+            Vec3Lerp(frameBegin->origin, frameEnd->origin, lerp, frameWhenPlayed.origin);
+            Vec4Lerp(frameBegin->quat, frameEnd->quat, lerp, frameWhenPlayed.quat);
+            Vec4Normalize(frameWhenPlayed.quat);
+            FX_SpawnElem(system, effect, elemDefIndex, &frameWhenPlayed, msecNextSpawn, 0.0, spawnedCount);
+            elemDef = &effect->def->elemDefs[elemDefIndex];
+            ++spawnedCount;
+            msecNextSpawn += elemDef->spawn.looping.intervalMsec;
+        }
+    }
+}
+
+void __cdecl FX_SpawnAllFutureLooping(
+    FxSystem *system,
+    FxEffect *effect,
+    int elemDefFirst,
+    int elemDefCount,
+    const FxSpatialFrame *frameBegin,
+    const FxSpatialFrame *frameEnd,
+    long double msecWhenPlayed,
+    long double msecUpdateBegin,
+    long double msecUpdateEnd)
+{
+    long double v9; // [esp-4h] [ebp-6Ch]
+    long double v10; // [esp+4h] [ebp-64h]
+    int elemDefIndex; // [esp+64h] [ebp-4h]
+
+    if (!effect)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 465, 0, "%s", "effect");
+    if (!effect->def)
+        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 468, 0, "%s", "effectDef");
+    for (elemDefIndex = elemDefFirst; elemDefIndex != elemDefCount + elemDefFirst; ++elemDefIndex)
+    {
+        if (effect->def->elemDefs[elemDefIndex].spawn.looping.count != 0x7FFFFFFF)
+        {
+            LODWORD(v9) = 0x7FFFFFFF;
+            FX_SpawnLoopingElems(system, effect, elemDefIndex, frameBegin, frameEnd, msecWhenPlayed, msecUpdateBegin, msecUpdateEnd);
+        }
+    }
+}
+
 int __cdecl FX_LimitStabilizeTimeForElemDef_Recurse(
     const FxElemDef *elemDef,
     bool needToSpawnSystem,

@@ -861,7 +861,7 @@ FxProfileEntry *__cdecl FX_GetProfileEntry(const FxEffectDef *effectDef, FxProfi
 void __cdecl FX_ProfileSingleEffect(FxSystem *system, const FxEffect *effect, FxProfileEntry *entry);
 int __cdecl FX_CompareProfileEntries(const FxProfileEntry *e0, const FxProfileEntry *e1);
 double __cdecl FX_GetProfileEntryCost(const FxProfileEntry *entry);
-void __cdecl FX_DrawMarkProfile(int clientIndex, void(__cdecl *drawFunc)(char *), float *profilePos);
+void __cdecl FX_DrawMarkProfile(int clientIndex, void(__cdecl *drawFunc)(const char *, float *), float *profilePos);
 void __cdecl FX_DrawMarkProfile_MarkPrint(
     FxMarksSystem* marksSystem,
     unsigned __int16 head,
@@ -939,15 +939,17 @@ enum FxUpdateResult : __int32
     FX_UPDATE_REMOVE = 0x0,
     FX_UPDATE_KEEP = 0x1,
 };
+
 void __cdecl FX_SpawnAllFutureLooping(
-    FxSystem* system,
-    FxEffect* effect,
+    FxSystem *system,
+    FxEffect *effect,
     int elemDefFirst,
     int elemDefCount,
-    FxSpatialFrame* frameBegin,
-    FxSpatialFrame* frameEnd,
-    int msecWhenPlayed,
-    int msecUpdateBegin);
+    const FxSpatialFrame *frameBegin,
+    const FxSpatialFrame *frameEnd,
+    long double msecWhenPlayed,
+    long double mescUpdateBegin,
+    long double msecUpdateEnd);
 void __cdecl FX_SpawnLoopingElems(
     FxSystem* system,
     FxEffect* effect,
