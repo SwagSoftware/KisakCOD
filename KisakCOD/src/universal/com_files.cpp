@@ -1900,12 +1900,13 @@ void __cdecl FS_TouchFile_f()
 cmd_function_s FS_Path_f_VAR;
 cmd_function_s FS_FullPath_f_VAR;
 cmd_function_s FS_NewDir_f_VAR;
+cmd_function_s FS_Dir_f_VAR;
 cmd_function_s FS_TouchFile_f_VAR;
 void __cdecl FS_AddCommands()
 {
     Cmd_AddCommandInternal("path", FS_Path_f, &FS_Path_f_VAR);
     Cmd_AddCommandInternal("fullpath", FS_FullPath_f, &FS_FullPath_f_VAR);
-    Cmd_AddCommandInternal("dir", FS_Dir_f, &FS_FullPath_f_VAR);
+    Cmd_AddCommandInternal("dir", FS_Dir_f, &FS_Dir_f_VAR);
     Cmd_AddCommandInternal("fdir", FS_NewDir_f, &FS_NewDir_f_VAR);
     Cmd_AddCommandInternal("touchFile", FS_TouchFile_f, &FS_TouchFile_f_VAR);
 }

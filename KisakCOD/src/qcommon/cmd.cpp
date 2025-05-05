@@ -362,8 +362,6 @@ static cmd_function_s *sv_cmd_functions;
 void __cdecl Cmd_ExecuteServerString(char *text)
 {
     const char *arg0; // [esp+0h] [ebp-Ch]
-    cmd_function_s **prev; // [esp+4h] [ebp-8h]
-    cmd_function_s *cmd; // [esp+8h] [ebp-4h]
 
    // if (!PbTrapPreExecCmd(text)) // LWSS: Punk buster
     {
@@ -371,16 +369,15 @@ void __cdecl Cmd_ExecuteServerString(char *text)
         if (SV_Cmd_Argc())
         {
             arg0 = SV_Cmd_Argv(0);
-            for (prev = &sv_cmd_functions; *prev; prev = &cmd->next)
+            for (cmd_function_s *itr= sv_cmd_functions; itr->next; itr = itr->next)
             {
-                cmd = *prev;
-                if (!I_stricmp(arg0, (*prev)->name))
+                if (!I_stricmp(arg0, itr->name))
                 {
-                    *prev = cmd->next;
-                    cmd->next = sv_cmd_functions;
-                    sv_cmd_functions = cmd;
-                    if (cmd->function)
-                        cmd->function();
+                    //*prev = cmd->next;
+                    //cmd->next = sv_cmd_functions;
+                    //sv_cmd_functions = cmd;
+                    if (itr->function)
+                        itr->function();
                     break;
                 }
             }
@@ -951,8 +948,7 @@ void __cdecl Cmd_ComErrorCleanup()
 void __cdecl Cmd_ExecuteSingleCommand(int localClientNum, int controllerIndex, char *text)
 {
     const char *arg0; // [esp+20h] [ebp-Ch]
-    cmd_function_s **prev; // [esp+24h] [ebp-8h]
-    cmd_function_s *cmd; // [esp+28h] [ebp-4h]
+    cmd_function_s *itr; // [esp+28h] [ebp-4h]
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\qcommon\\cmd.cpp", 1331, 0, "%s", "Sys_IsMainThread()");
@@ -964,7 +960,7 @@ void __cdecl Cmd_ExecuteSingleCommand(int localClientNum, int controllerIndex, c
             "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
             localClientNum,
             1);
-    //if (!PbTrapPreExecCmd(text)) // LWSS: punkbuster
+    //if (!PbTrapPreExecCmd(text))
     {
         Cmd_TokenizeString(text);
         if (Cmd_Argc())
@@ -972,17 +968,16 @@ void __cdecl Cmd_ExecuteSingleCommand(int localClientNum, int controllerIndex, c
             cmd_args.localClientNum[cmd_args.nesting] = localClientNum;
             cmd_args.controllerIndex[cmd_args.nesting] = controllerIndex;
             arg0 = Cmd_Argv(0);
-            for (prev = &cmd_functions; *prev; prev = &cmd->next)
+            for (itr = cmd_functions; itr->next; itr = itr->next)
             {
-                cmd = *prev;
-                if (!I_stricmp(arg0, (*prev)->name))
+                if (!I_stricmp(arg0, itr->name))
                 {
-                    *prev = cmd->next;
-                    cmd->next = cmd_functions;
-                    cmd_functions = cmd;
-                    if (cmd->function)
+                    //prev->next = cmd->next;
+                    //cmd->next = cmd_functions;
+                    //cmd_functions = cmd;
+                    if (itr->function)
                     {
-                        if (cmd->function == Cbuf_AddServerText_f)
+                        if (itr->function == Cbuf_AddServerText_f)
                         {
                             SV_WaitServer();
                             if (com_inServerFrame)
@@ -991,7 +986,7 @@ void __cdecl Cmd_ExecuteSingleCommand(int localClientNum, int controllerIndex, c
                         }
                         else
                         {
-                            cmd->function();
+                            itr->function();
                         }
                         goto LABEL_26;
                     }
@@ -1009,11 +1004,11 @@ void __cdecl Cmd_ExecuteSingleCommand(int localClientNum, int controllerIndex, c
             }
             else if (I_strnicmp(text + 3, "sv_", 3))
             {
-                //PbClAddEvent(14, strlen(text) + 1, text); // LWSS: punkbuster
+                //PbClAddEvent(14, strlen(text) + 1, text);
             }
             else
             {
-                //PbSvAddEvent(14, -1, strlen(text) + 1, text); // LWSS: punkbuster
+                //PbSvAddEvent(14, -1, strlen(text) + 1, text);
             }
         }
     LABEL_26:

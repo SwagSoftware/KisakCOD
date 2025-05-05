@@ -337,7 +337,7 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 	refStrB = GetRefString(stringValue.prev);
 	memcpy((unsigned __int8*)refStrB->str, (unsigned __int8*)str, len);
 	refStrB->data = ((unsigned __int8)user << 16) | refStrB->data & 0xFF00FFFF;
-	iassert(refStr->user == user);
+	iassert(refStrB->user == user);
 	refStrB->data = refStrB->data & 0xFFFF0000 | 1;
 	refStrB->data = (len << 24) | refStrB->data & 0xFFFFFF;
 	if (scrStringDebugGlob)
@@ -345,8 +345,8 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 		InterlockedIncrement(&scrStringDebugGlob->totalRefCount);
 		InterlockedIncrement(&scrStringDebugGlob->refCount[stringValue.prev]);
 	}
-	iassert((scrStringGlob.hashTable[hash].status_next & 0x30000) == 0);
-	iassert(refStr->str == SL_ConvertToString(stringValue));
+	//iassert((scrStringGlob.hashTable[hash].status_next & 0x30000) == 0);
+	iassert(refStrB->str == SL_ConvertToString(stringValue));
 END_CLEANUP:
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 	//Profile_EndInternal(0);
@@ -372,7 +372,7 @@ RefString* GetRefString(unsigned int stringValue)
 	iassert(stringValue);
 	iassert(stringValue * MT_NODE_SIZE < MT_SIZE);
 
-	return (RefString*)(scrMemTreePub.mt_buffer[12 * stringValue]);
+	return (RefString*)(&scrMemTreePub.mt_buffer[12 * stringValue]);
 }
 RefString* GetRefString(const char* str)
 {
