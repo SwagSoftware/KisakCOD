@@ -34,7 +34,10 @@ int __cdecl Win_InitLocalization()
     fp = FS_FileOpenReadText("localization.txt");
 
     if (!fp)
+    {
+        iassert(0); // LWSS ADD: you probably need to change the working dir!
         return 0;
+    }
 
     size = FS_FileGetFileSize(fp);
 

@@ -294,8 +294,8 @@ void __cdecl Com_SetConfigureDvars(int dvarCount, const char (*dvarNames)[32], c
 
 char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char **text)
 {
-    char dvarValues[32]; // [esp+14h] [ebp-14D8h] BYREF
-    char dvarNames[32]; // [esp+814h] [ebp-CD8h] BYREF
+    char dvarValues[64][32]{ 0 }; // [esp+14h] [ebp-14D8h] BYREF
+    char dvarNames[64][32]{ 0 }; // [esp+814h] [ebp-CD8h] BYREF
     int dvarCount; // [esp+1018h] [ebp-4D4h]
     double v7[76]; // [esp+101Ch] [ebp-4D0h] BYREF
     char v8; // [esp+1282h] [ebp-26Ah]
@@ -312,7 +312,7 @@ char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char
         s0 = Com_Parse(text)->token;
         if (!text)
             break;
-        if (*s0 && *s0 != 35)
+        if (*s0 && *s0 != '#')
         {
             if (!I_stricmp(s0, "gpu"))
             {
@@ -337,7 +337,7 @@ char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char
                     qmemcpy(v7, v10, sizeof(v7));
                     v8 = 1;
                 }
-                Com_GetConfigureDvarValues(dvarCount, (const char**)text, (char(*)[32])(v9 != 0 ? dvarValues : 0));
+                Com_GetConfigureDvarValues(dvarCount, (const char**)text, v9 != 0 ? dvarValues : 0);
             }
             else
             {
@@ -346,7 +346,7 @@ char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char
                 s0 = Com_ParseOnLine(text)->token;
                 if (I_stricmp(s0, "sys mb"))
                     Com_Error(ERR_FATAL, "configure_mp.csv: \"sys mb\" should be the second column");
-                dvarCount = Com_GetConfigureDvarNames((const char **)text, (char(*)[32])dvarNames);
+                dvarCount = Com_GetConfigureDvarNames((const char **)text, dvarNames);
             }
         }
         else
@@ -359,7 +359,7 @@ char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char
     Com_Printf(16, "configure_mp.csv: using CPU configuration %.0f GHz %i MB\n", v7[0], LODWORD(v7[3]));
     Cbuf_AddText(localClientNum, "exec configure_mp.cfg");
     Cbuf_Execute(localClientNum, 0);
-    Com_SetConfigureDvars(dvarCount, (char(*)[32])dvarNames, (char(*)[32])dvarValues);
+    Com_SetConfigureDvars(dvarCount, dvarNames, dvarValues);
     return 1;
 }
 
@@ -438,8 +438,8 @@ BOOL __cdecl Com_DoesGpuStringMatch(const char *find, const char *ref)
 
 char __cdecl Com_SetRecommendedGpu(const SysInfo *info, char **text)
 {
-    char dvarValues[32]; // [esp+0h] [ebp-1010h] BYREF
-    char dvarNames[32]; // [esp+800h] [ebp-810h] BYREF
+    char dvarValues[64][32]; // [esp+0h] [ebp-1010h] BYREF
+    char dvarNames[64][32]; // [esp+800h] [ebp-810h] BYREF
     int dvarCount; // [esp+1004h] [ebp-Ch]
     char v6; // [esp+100Bh] [ebp-5h]
     char *s0; // [esp+100Ch] [ebp-4h]
@@ -452,7 +452,7 @@ char __cdecl Com_SetRecommendedGpu(const SysInfo *info, char **text)
     }
     else
     {
-        dvarCount = Com_GetConfigureDvarNames((const char **)text, (char(*)[32])dvarNames);
+        dvarCount = Com_GetConfigureDvarNames((const char **)text, dvarNames);
         v6 = 0;
         while (1)
         {
@@ -468,8 +468,8 @@ char __cdecl Com_SetRecommendedGpu(const SysInfo *info, char **text)
                 else
                 {
                     Com_Printf(16, "configure_mp.csv: using GPU configuration \"%s\"\n", s0);
-                    Com_GetConfigureDvarValues(dvarCount, (const char **)text, (char(*)[32])dvarValues);
-                    Com_SetConfigureDvars(dvarCount, (char(*)[32])dvarNames, (char(*)[32])dvarValues);
+                    Com_GetConfigureDvarValues(dvarCount, (const char **)text, dvarValues);
+                    Com_SetConfigureDvars(dvarCount, dvarNames, dvarValues);
                     v6 = 1;
                 }
             }

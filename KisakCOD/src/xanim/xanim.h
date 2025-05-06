@@ -1238,14 +1238,13 @@ enum XAssetType : __int32
     ASSET_TYPE_ASSETLIST = 0x22,
 };
 inline XAssetType &operator++(XAssetType &e) {
-    static_cast<XAssetType>(static_cast<int>(e) + 1);
+    e = static_cast<XAssetType>(static_cast<int>(e) + 1);
     return e;
 }
 inline XAssetType &operator++(XAssetType &e, int i)
 {
-    XAssetType temp = e;
     ++e;
-    return temp;
+    return e;
 }
 
 struct XAsset // sizeof=0x8

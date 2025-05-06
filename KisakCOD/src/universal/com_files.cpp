@@ -1308,7 +1308,7 @@ iwd_t *__cdecl FS_LoadZipFile(char *zipfile, char *basename)
     int hash; // [esp+7Ch] [ebp-178h]
     int fs_numHeaderLongs; // [esp+80h] [ebp-174h]
     int *fs_headerLongs; // [esp+84h] [ebp-170h]
-    unsigned int *iwd; // [esp+88h] [ebp-16Ch]
+    iwd_t *iwd; // [esp+88h] [ebp-16Ch]
     unsigned int len; // [esp+8Ch] [ebp-168h]
     fileInIwd_s *buildBuffer; // [esp+90h] [ebp-164h]
     unz_file_info_s file_info; // [esp+94h] [ebp-160h] BYREF
@@ -1317,7 +1317,7 @@ iwd_t *__cdecl FS_LoadZipFile(char *zipfile, char *basename)
     unz_global_info_s gi; // [esp+1ECh] [ebp-8h] BYREF
 
     fs_numHeaderLongs = 0;
-    uf = (unsigned __int8 *)unzOpen(zipfile);
+    uf = unzOpen(zipfile);
     if (unzGetGlobalInfo(uf, &gi))
         return 0;
     fs_iwdFileCount += gi.number_entry;
@@ -1328,33 +1328,34 @@ iwd_t *__cdecl FS_LoadZipFile(char *zipfile, char *basename)
         len += &filename_inzip[strlen(filename_inzip) + 1] - &filename_inzip[1] + 1;
         unzGoToNextFile(uf);
     }
-    buildBuffer = (fileInIwd_s *)Z_Malloc(len + 12 * gi.number_entry, "FS_LoadZipFile1", 3);
-    namePtr = (char *)&buildBuffer[gi.number_entry];
-    fs_headerLongs = (int *)Z_Malloc(4 * gi.number_entry, "FS_LoadZipFile2", 3);
+    //buildBuffer = (fileInIwd_s*)Z_Malloc(len + 12 * gi.number_entry, "FS_LoadZipFile1", 3);
+    buildBuffer = (fileInIwd_s*)Z_Malloc(gi.number_entry * sizeof(fileInIwd_s) + len, "FS_LoadZipFile1", 3);
+    namePtr = (char*)&buildBuffer[gi.number_entry];
+    //fs_headerLongs = (int*)Z_Malloc(4 * gi.number_entry, "FS_LoadZipFile2", 3);
+    fs_headerLongs = (int*)Z_Malloc(gi.number_entry * sizeof(int), "FS_LoadZipFile2", 3);
     for (i = 1; i <= 0x400 && i <= gi.number_entry; i *= 2)
         ;
-    iwd = (unsigned int*)Z_Malloc(4 * i + 804, "FS_LoadZipFile3", 3);
-    iwd[198] = i;
-    iwd[199] = (unsigned int)(iwd + 201);
-    for (i = 0; i < iwd[198]; ++i)
-        *(_DWORD *)(iwd[199] + 4 * i) = 0;
-    I_strncpyz((char *)iwd, zipfile, 256);
-    I_strncpyz((char *)iwd + 256, basename, 256);
-    if (strlen((const char *)iwd + 256) > 4
-        && !I_stricmp((const char *)iwd + strlen((const char *)iwd + 256) + 252, ".iwd"))
-    {
-        *((_BYTE *)iwd + strlen((const char *)iwd + 256) + 252) = 0;
-    }
-    iwd[192] = (unsigned int)uf;
-    iwd[196] = gi.number_entry;
-    iwd[195] = 0;
+    //iwd = (iwd_t*) Z_Malloc(4 * i + 0x324, "FS_LoadZipFile3", 3);
+    iwd = (iwd_t*) Z_Malloc(sizeof(iwd_t) + i * sizeof(fileInIwd_s *), "FS_LoadZipFile3", 3);
+    iwd->hashSize = i;
+    //iwd->hashTable = &iwd[1];
+    iwd->hashTable = (fileInIwd_s**)(((char *)iwd) + sizeof(iwd_t));
+    for (i = 0; i < iwd->hashSize; ++i)
+        iwd->hashTable[i] = 0;
+    I_strncpyz(iwd->iwdFilename, zipfile, 256);
+    I_strncpyz(iwd->iwdBasename, basename, 256);
+    if (strlen(iwd->iwdBasename) > 4 && !I_stricmp(&iwd->iwdFilename[strlen(iwd->iwdBasename) + 252], ".iwd"))
+        iwd->iwdFilename[strlen(iwd->iwdBasename) + 252] = 0;
+    iwd->handle = uf;
+    iwd->numfiles = gi.number_entry;
+    iwd->hasOpenFile = 0;
     unzGoToFirstFile(uf);
     for (i = 0; i < gi.number_entry && !unzGetCurrentFileInfo(uf, &file_info, filename_inzip, 0x100u, 0, 0, 0, 0); ++i)
     {
         if (file_info.uncompressed_size)
             fs_headerLongs[fs_numHeaderLongs++] = file_info.crc;
         I_strlwr(filename_inzip);
-        hash = FS_HashFileName(filename_inzip, iwd[198]);
+        hash = FS_HashFileName(filename_inzip, iwd->hashSize);
         buildBuffer[i].name = namePtr;
         v5 = filename_inzip;
         name = buildBuffer[i].name;
@@ -1365,24 +1366,24 @@ iwd_t *__cdecl FS_LoadZipFile(char *zipfile, char *basename)
         } while (v3);
         namePtr += &filename_inzip[strlen(filename_inzip) + 1] - &filename_inzip[1] + 1;
         unzGetCurrentFileInfoPosition(uf, (unsigned long*)&buildBuffer[i].pos);
-        buildBuffer[i].next = *(fileInIwd_s **)(iwd[199] + 4 * hash);
-        *(_DWORD *)(iwd[199] + 4 * hash) = (uint32)&buildBuffer[i];
+        buildBuffer[i].next = iwd->hashTable[hash];
+        iwd->hashTable[hash] = &buildBuffer[i];
         unzGoToNextFile(uf);
     }
-    iwd[193] = Com_BlockChecksumKey32((const unsigned __int8 *)fs_headerLongs, 4 * fs_numHeaderLongs, 0);
+    iwd->checksum = Com_BlockChecksumKey32((const unsigned char *)fs_headerLongs, 4 * fs_numHeaderLongs, 0);
     if (fs_checksumFeed)
-        iwd[194] = Com_BlockChecksumKey32((const unsigned __int8 *)fs_headerLongs, 4 * fs_numHeaderLongs, fs_checksumFeed);
+        iwd->pure_checksum = Com_BlockChecksumKey32((const unsigned char*)fs_headerLongs, 4 * fs_numHeaderLongs, fs_checksumFeed);
     else
-        iwd[194] = iwd[193];
-    iwd[193] = iwd[193];
-    iwd[194] = iwd[194];
-    Z_Free((char *)fs_headerLongs, 3);
-    iwd[200] = (unsigned int)buildBuffer;
-    return (iwd_t *)iwd;
+        iwd->pure_checksum = iwd->checksum;
+    iwd->checksum = iwd->checksum;
+    iwd->pure_checksum = iwd->pure_checksum;
+    Z_Free(fs_headerLongs, 3);
+    iwd->buildBuffer = buildBuffer;
+    return iwd;
 }
 
 char szIwdLanguageName[2][64];
-int iString;
+int iString = 0;
 char *__cdecl IwdFileLanguage(const char *pszIwdFileName)
 {
     int iCurrChar; // [esp+10h] [ebp-4h]
@@ -1394,7 +1395,8 @@ char *__cdecl IwdFileLanguage(const char *pszIwdFileName)
         memset((unsigned __int8 *)szIwdLanguageName[iString], 0, sizeof(char[64]));
         while (iCurrChar < 64 && pszIwdFileName[iCurrChar] && isalpha(pszIwdFileName[iCurrChar]))
         {
-            *(_BYTE *)((iString << 6) + iCurrChar + 230219974) = pszIwdFileName[iCurrChar];
+            //*(_BYTE *)((iString << 6) + iCurrChar + 230219974) = pszIwdFileName[iCurrChar];
+            szIwdLanguageName[iString][iCurrChar - 10] = pszIwdFileName[iCurrChar];
             ++iCurrChar;
         }
     }
@@ -2283,7 +2285,8 @@ int __cdecl FS_ReturnPath(const char *zname, char *zpath, int *depth)
         v3 = *v6;
         *v5++ = *v6++;
     } while (v3);
-    zpath[len] = 0;
+    //zpath[len] = 0;
+    *v5 = 0;
     if (len + 1 == at)
         --newdep;
     *depth = newdep;

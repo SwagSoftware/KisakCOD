@@ -36,14 +36,13 @@ enum PhysWorld : __int32
 	PHYS_WORLD_COUNT = 0x3,
 };
 inline PhysWorld &operator++(PhysWorld &e) {
-	static_cast<PhysWorld>(static_cast<int>(e) + 1);
+	e = static_cast<PhysWorld>(static_cast<int>(e) + 1);
 	return e;
 }
 inline PhysWorld &operator++(PhysWorld &e, int i)
 {
-	PhysWorld temp = e;
 	++e;
-	return temp;
+	return e;
 }
 
 #ifdef __cplusplus

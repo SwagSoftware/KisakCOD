@@ -123,7 +123,7 @@ const char *defaultGameWindowFilters[4] =
     "gamenotify obituary",
     "boldgame",
     "subtitle",
-    NULL
+    ""
 };
 void __cdecl Con_InitGameMsgChannels()
 {

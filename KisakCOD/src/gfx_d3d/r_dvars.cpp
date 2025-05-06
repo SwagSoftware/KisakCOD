@@ -5,8 +5,10 @@
 #include "r_material.h"
 #include "r_sky.h"
 
- const dvar_t **prof_probe;
- const dvar_t **r_smp_worker_thread;
+ //const dvar_t **prof_probe;
+ const dvar_t *prof_probe[5];
+ //const dvar_t **r_smp_worker_thread;
+ const dvar_t *r_smp_worker_thread[2];
  const dvar_t *r_envMapMaxIntensity;
  const dvar_t *r_portalMinRecurseDepth;
  const dvar_t *r_dof_nearEnd;

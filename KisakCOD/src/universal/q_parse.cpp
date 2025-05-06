@@ -56,11 +56,13 @@ void __cdecl Com_BeginParseSession(const char *filename)
 ParseThreadInfo *__cdecl Com_GetParseThreadInfo()
 {
     if (Sys_IsMainThread())
-        return g_parse;
+        return &g_parse[0];
     if (Sys_IsRenderThread())
-        return g_parse + 17932;
+        return &g_parse[1];
+        //return g_parse + 17932;
     if (Sys_IsDatabaseThread())
-        return g_parse + 35864;
+        return &g_parse[2];
+        //return g_parse + 35864;
     if (!alwaysfails)
         MyAssertHandler(".\\universal\\q_parse.cpp", 117, 0, "No parse context for current thread.");
     return 0;

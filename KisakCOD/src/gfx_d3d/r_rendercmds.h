@@ -113,14 +113,13 @@ enum MaterialTechniqueType : __int32
     TECHNIQUE_NONE = 0x24,
 };
 inline MaterialTechniqueType &operator++(MaterialTechniqueType &e) {
-    static_cast<MaterialTechniqueType>(static_cast<int>(e) + 1);
+    e = static_cast<MaterialTechniqueType>(static_cast<int>(e) + 1);
     return e;
 }
 inline MaterialTechniqueType &operator++(MaterialTechniqueType &e, int i)
 {
-    MaterialTechniqueType temp = e;
     ++e;
-    return temp;
+    return e;
 }
 
 enum FullscreenType : __int32

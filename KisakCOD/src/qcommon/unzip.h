@@ -10,7 +10,8 @@
 typedef struct TagunzFile__ { int unused; } unzFile__; 
 typedef unzFile__ *unzFile;
 #else
-typedef void* unzFile;
+//typedef void* unzFile;
+typedef unsigned char* unzFile;
 #endif
 
 /* tm_unz contain date/time info */
@@ -75,8 +76,8 @@ typedef struct
 	unsigned int  size_local_extrafield;/* size of the static extra field */
 	unsigned long pos_local_extrafield;   /* position in the static extra field in read*/
 
-	unsigned long crc32;                /* crc32 of all data uncompressed */
-	unsigned long crc32_wait;           /* crc32 we must obtain after decompress all */
+//	unsigned long crc32;                /* crc32 of all data uncompressed */
+//	unsigned long crc32_wait;           /* crc32 we must obtain after decompress all */
 	unsigned long rest_read_compressed; /* number of unsigned char to be decompressed */
 	unsigned long rest_read_uncompressed;/*number of unsigned char to be obtained after decomp*/
 	ZIP_FILE *file;                 /* io structore of the zipfile */
@@ -122,7 +123,7 @@ typedef struct
 #define UNZ_NOTCASESENSITIVE	2
 #define UNZ_OSDEFAULTCASE		0
 
-extern int unzStringFileNameCompare (const char* fileName1, const char* fileName2, int iCaseSensitivity);
+//extern int unzStringFileNameCompare (const char* fileName1, const char* fileName2, int iCaseSensitivity);
 
 /*
    Compare two filename (fileName1,fileName2).
@@ -162,7 +163,7 @@ extern int unzGetGlobalInfo (unzFile file, unz_global_info *pglobal_info);
   return UNZ_OK if there is no problem. */
 
 
-extern int unzGetGlobalComment (unzFile file, char *szComment, unsigned long uSizeBuf);
+//extern int unzGetGlobalComment (unzFile file, char *szComment, unsigned long uSizeBuf);
 
 /*
   Get the global comment string of the ZipFile, in the szComment buffer.
@@ -203,7 +204,7 @@ extern int unzSetCurrentFileInfoPosition (unzFile file, unsigned long pos );
   return UNZ_OK if there is no problem
 */
 
-extern int unzLocateFile (unzFile file, const char *szFileName, int iCaseSensitivity);
+//extern int unzLocateFile (unzFile file, const char *szFileName, int iCaseSensitivity);
 
 /*
   Try locate the file szFileName in the zipfile.
@@ -269,13 +270,13 @@ extern long unztell(unzFile file);
   Give the current position in uncompressed data
 */
 
-extern int unzeof (unzFile file);
+//extern int unzeof (unzFile file);
 
 /*
   return 1 if the end of file was reached, 0 elsewhere 
 */
 
-extern int unzGetLocalExtrafield (unzFile file, void* buf, unsigned len);
+//extern int unzGetLocalExtrafield (unzFile file, void* buf, unsigned len);
 
 /*
   Read extra field from the current file (opened by unzOpenCurrentFile)

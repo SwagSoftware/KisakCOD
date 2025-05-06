@@ -704,14 +704,13 @@ enum DynEntityDrawType : __int32
     DYNENT_DRAW_COUNT = 0x2,
 };
 inline DynEntityDrawType &operator++(DynEntityDrawType &e) {
-    static_cast<DynEntityDrawType>(static_cast<int>(e) + 1);
+    e = static_cast<DynEntityDrawType>(static_cast<int>(e) + 1);
     return e;
 }
 inline DynEntityDrawType& operator++(DynEntityDrawType &e, int i)
 {
-    DynEntityDrawType temp = e;
     ++e;
-    return temp;
+    return e;
 }
 unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace);
 unsigned __int16 __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *drawType);

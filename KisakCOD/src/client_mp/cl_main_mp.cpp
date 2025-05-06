@@ -43,7 +43,7 @@ const dvar_t *cl_sensitivity;
 const dvar_t *cl_forceavidemo;
 const dvar_t *cl_timeout;
 const dvar_t *m_yaw;
-const dvar_t **customclass;
+const dvar_t *customclass[5];
 const dvar_t *m_pitch;
 const dvar_t *cl_activeAction;
 const dvar_t *playlist;
@@ -91,14 +91,22 @@ const dvar_t *name;
 serverStatus_s cl_serverStatusList[16];
 int serverStatusCount;
 
-const char **customClassDvars;
+const char *customClassDvars[6] =
+{
+  "customclass1",
+  "customclass2",
+  "customclass3",
+  "customclass4",
+  "customclass5",
+  NULL
+};
 
 BOOL g_waitingForServer;
 BOOL cl_serverLoadingMap;
 
 ping_t *cl_pinglist;
 
-BOOL *cl_waitingOnServerToLoadMap;
+bool cl_waitingOnServerToLoadMap[1];
 
 int cl_maxLocalClients;
 int old_com_frameTime;
@@ -3807,14 +3815,15 @@ void __cdecl CL_Init(int localClientNum)
 
     Com_Printf(14, "----- Client Initialization -----\n");
     CL_ClearState(localClientNum);
-    if (CountBitsEnabled(0xFFFFFFFF) != 32)
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5206, 0, "%s", "CountBitsEnabled( 0xffffffff ) == 32");
-    if (CountBitsEnabled(0))
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5207, 0, "%s", "CountBitsEnabled( 0x00000000 ) == 0");
-    if (CountBitsEnabled(0x11111111u) != 8)
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5208, 0, "%s", "CountBitsEnabled( 0x11111111 ) == 8");
-    if (CountBitsEnabled(0x77777777u) != 24)
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5209, 0, "%s", "CountBitsEnabled( 0x77777777 ) == 24");
+    // LWSS: functionality unknown! 
+    //if (CountBitsEnabled(0xFFFFFFFF) != 32)
+    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5206, 0, "%s", "CountBitsEnabled( 0xffffffff ) == 32");
+    //if (CountBitsEnabled(0))
+    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5207, 0, "%s", "CountBitsEnabled( 0x00000000 ) == 0");
+    //if (CountBitsEnabled(0x11111111u) != 8)
+    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5208, 0, "%s", "CountBitsEnabled( 0x11111111 ) == 8");
+    //if (CountBitsEnabled(0x77777777u) != 24)
+    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5209, 0, "%s", "CountBitsEnabled( 0x77777777 ) == 24");
     CL_ClearMutedList();
     if (localClientNum)
         MyAssertHandler(
@@ -3836,17 +3845,18 @@ void __cdecl CL_Init(int localClientNum)
     Com_Printf(14, "----- Client Initialization Complete -----\n");
 }
 
-int __cdecl CountBitsEnabled(unsigned int num)
-{
-    unsigned int numa; // [esp+1Ch] [ebp+8h]
-    unsigned int numb; // [esp+1Ch] [ebp+8h]
-
-    numa = (((((num >> 1) & 0x55555555) + (num & 0x55555555)) >> 2) & 0x33333333)
-        + ((((num >> 1) & 0x55555555) + (num & 0x55555555)) & 0x33333333);
-    numb = (((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) >> 8) & 0xFF00FF)
-        + ((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) & 0xFF00FF);
-    return HIWORD(numb) + numb;
-}
+// LWSS: I dont see the point of this function?
+//int __cdecl CountBitsEnabled(unsigned int num)
+//{
+//    unsigned int numa; // [esp+1Ch] [ebp+8h]
+//    unsigned int numb; // [esp+1Ch] [ebp+8h]
+//
+//    numa = (((((num >> 1) & 0x55555555) + (num & 0x55555555)) >> 2) & 0x33333333)
+//        + ((((num >> 1) & 0x55555555) + (num & 0x55555555)) & 0x33333333);
+//    numb = (((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) >> 8) & 0xFF00FF)
+//        + ((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) & 0xFF00FF);
+//    return HIWORD(numb) + numb;
+//}
 
 int recursive;
 void __cdecl CL_Shutdown(int localClientNum)

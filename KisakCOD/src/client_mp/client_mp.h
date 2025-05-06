@@ -707,7 +707,7 @@ extern const dvar_t *cl_sensitivity;
 extern const dvar_t *cl_forceavidemo;
 extern const dvar_t *cl_timeout;
 extern const dvar_t *m_yaw;
-extern const dvar_t **customclass;
+extern const dvar_t *customclass[5];
 extern const dvar_t *m_pitch;
 extern const dvar_t *cl_activeAction;
 extern const dvar_t *playlist;
@@ -759,7 +759,7 @@ extern const dvar_t *name;
 extern ping_t *cl_pinglist;
 
 extern BOOL g_waitingForServer;
-extern BOOL *cl_waitingOnServerToLoadMap;
+extern bool cl_waitingOnServerToLoadMap[1];
 extern BOOL cl_serverLoadingMap;
 
 #define MAX_CLIENTS 1 // LWSS Add

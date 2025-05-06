@@ -654,38 +654,36 @@ void Com_DPrintf(int channel, const char* fmt, ...)
     }
 }
 
-void Com_PrintError(int channel, const char* fmt, ...)
+void Com_PrintError(int channel, const char *fmt, ...)
 {
-    char dest; // [esp+14h] [ebp-1008h] BYREF
-    char v3[4095]; // [esp+15h] [ebp-1007h] BYREF
-    int v4; // [esp+1018h] [ebp-4h]
+    char dest[4096]; // [esp+14h] [ebp-1008h] BYREF
+    int v3; // [esp+1018h] [ebp-4h]
     va_list va; // [esp+102Ch] [ebp+10h] BYREF
 
     va_start(va, fmt);
     if (I_stristr(fmt, "error"))
-        I_strncpyz(&dest, "^1", 4096);
+        I_strncpyz(dest, "^1", 4096);
     else
-        I_strncpyz(&dest, "^1Error: ", 4096);
-    v4 = &v3[strlen(&dest)] - v3;
-    _vsnprintf(&v3[v4 - 1], 4096 - v4, fmt, va);
-    v3[4094] = 0;
+        I_strncpyz(dest, "^1Error: ", 4096);
+    v3 = &dest[strlen(dest) + 1] - &dest[1];
+    _vsnprintf(&dest[v3], 4096 - v3, fmt, va);
+    dest[4095] = 0;
     ++com_errorPrintsCount;
-    Com_PrintMessage(channel, &dest, 3);
+    Com_PrintMessage(channel, dest, 3);
 }
 
-void Com_PrintWarning(int channel, const char* fmt, ...)
+void Com_PrintWarning(int channel, const char *fmt, ...)
 {
-    char dest; // [esp+14h] [ebp-1008h] BYREF
-    char v3[4095]; // [esp+15h] [ebp-1007h] BYREF
-    int v4; // [esp+1018h] [ebp-4h]
+    char dest[4096]; // [esp+14h] [ebp-1008h] BYREF
+    int v3; // [esp+1018h] [ebp-4h]
     va_list va; // [esp+102Ch] [ebp+10h] BYREF
 
     va_start(va, fmt);
-    I_strncpyz(&dest, "^3", 4096);
-    v4 = &v3[strlen(&dest)] - v3;
-    _vsnprintf(&v3[v4 - 1], 4096 - v4, fmt, va);
-    v3[4094] = 0;
-    Com_PrintMessage(channel, &dest, 2);
+    I_strncpyz(dest, "^3", 4096);
+    v3 = &dest[strlen(dest) + 1] - &dest[1];
+    _vsnprintf(&dest[v3], 4096 - v3, fmt, va);
+    dest[4095] = 0;
+    Com_PrintMessage(channel, dest, 2);
 }
 
 void __cdecl Com_Shutdown(const char* finalmsg)

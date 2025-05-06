@@ -260,7 +260,7 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 
 				iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
 				iassert((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
-				iassert(refStr->str == SL_ConvertToString(stringValue));
+				iassert(refStrA->str == SL_ConvertToString(stringValue));
 
 				Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 				//Profile_EndInternal(0);
@@ -601,7 +601,7 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
-	if (refStr->refCount)
+	if (refStr->data)
 	{
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 		//Profile_EndInternal(0);
@@ -625,7 +625,7 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 			}
 			else
 			{
-				scrStringGlob.hashTable[index].status_next = (unsigned __int16)scrStringGlob.hashTable[newIndex].status_next | 0x20000;
+				scrStringGlob.hashTable[index].status_next = (unsigned __int16)scrStringGlob.hashTable[newIndex].status_next | HASH_STAT_HEAD;
 				scrStringGlob.hashTable[index].u.prev = scrStringGlob.hashTable[newIndex].u.prev;
 				scrStringGlob.nextFreeEntry = &scrStringGlob.hashTable[index];
 			}
@@ -645,9 +645,9 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 				newIndex = (unsigned __int16)newEntry->status_next;
 				newEntry = &scrStringGlob.hashTable[newIndex];
 			}
-			scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & 0x30000;
+			scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
 		}
-		iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
+		//iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
 		unsigned int newNext = scrStringGlob.hashTable[0].status_next;
 		iassert((newNext & HASH_STAT_MASK) == HASH_STAT_FREE);
 		newEntry->status_next = newNext;

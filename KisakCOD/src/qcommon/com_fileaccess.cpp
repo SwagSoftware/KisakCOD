@@ -12,6 +12,16 @@ unsigned int __cdecl FS_FileRead(void *ptr, unsigned int len, FILE *stream)
 
     ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_READ);
     read_size = fread(ptr, 1u, len, stream);
+#ifdef _DEBUG
+    if (ferror(stream))
+    {
+        iassert(0);
+    }
+    if (feof(stream))
+    {
+        iassert(0);
+    }
+#endif
     ProfLoad_EndTrackedValue(MAP_PROFILE_FILE_READ);
     return read_size;
 }

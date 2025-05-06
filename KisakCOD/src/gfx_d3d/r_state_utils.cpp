@@ -335,7 +335,6 @@ void __cdecl R_Set3D(GfxCmdBufSourceState *source)
 void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdBufInput *input, int cameraView)
 {
     float *v3; // [esp+8h] [ebp-8h]
-    unsigned int constant; // [esp+Ch] [ebp-4h]
 
     if (!source)
         MyAssertHandler(".\\r_state_utils.cpp", 27, 0, "%s", "source");
@@ -343,7 +342,7 @@ void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdB
         MyAssertHandler(".\\r_state_utils.cpp", 28, 0, "%s", "input");
     memset((unsigned __int8 *)source, 0, sizeof(GfxCmdBufSourceState));
     qmemcpy(&source->input, input, sizeof(source->input));
-    for (constant = 0; constant < 0x3A; ++constant)
+    for (unsigned int constant = 0; constant < 0x3A; ++constant)
     {
         if (input == &gfxCmdBufInput || s_codeConstUpdateFreq[constant] != 2 || constant < 0x20)
         {

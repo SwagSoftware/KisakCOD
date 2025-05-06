@@ -31,14 +31,13 @@ enum netsrc_t : __int32
     NS_PACKET = 0x2,
 };
 inline netsrc_t &operator++(netsrc_t &e) {
-    static_cast<netsrc_t>(static_cast<int>(e) + 1);
+    e = static_cast<netsrc_t>(static_cast<int>(e) + 1);
     return e;
 }
 inline netsrc_t &operator++(netsrc_t &e, int i)
 {
-    netsrc_t temp = e;
     ++e;
-    return temp;
+    return e;
 }
 
 struct netadr_t {

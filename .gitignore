@@ -9,3 +9,4 @@ KisakCOD/Release
 IDA/*
 /Debug
 *.exe
+*.bak

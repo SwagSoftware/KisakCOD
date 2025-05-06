@@ -7,8 +7,10 @@ void __cdecl R_RegisterDvars();
 const dvar_t *R_RegisterWorkerThreadDvar(const char *name, unsigned int workerIndex);
 char __cdecl R_CheckDvarModified(const dvar_s *dvar);
 
-extern const dvar_t **prof_probe;
-extern const dvar_t **r_smp_worker_thread;
+//extern const dvar_t **prof_probe;
+extern const dvar_t *prof_probe[5];
+//extern const dvar_t **r_smp_worker_thread;
+extern const dvar_t *r_smp_worker_thread[2];
 extern const dvar_t *r_envMapMaxIntensity;
 extern const dvar_t *r_portalMinRecurseDepth;
 extern const dvar_t *r_dof_nearEnd;

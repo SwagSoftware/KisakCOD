@@ -74,8 +74,8 @@
     <IncludePath>$(LocalDebuggerWorkingDirectory)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(LocalDebuggerWorkingDirectory)src\libwww\src;$(LocalDebuggerWorkingDirectory)src;F:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(LocalDebuggerWorkingDirectory)src\msslib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)src\libwww\src;$(ProjectDir)src;F:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(ProjectDir)src\msslib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +89,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>mss32.lib;dsound.lib;ddraw.lib;d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(LocalDebuggerWorkingDirectory)src\binklib\binkw32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mss32.lib;dsound.lib;ddraw.lib;d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(ProjectDir)src\binklib\binkw32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -848,6 +848,7 @@
     <ClInclude Include="src\xanim\xanim_public.h" />
     <ClInclude Include="src\xanim\xmodel.h" />
     <ClInclude Include="src\zlib\deflate.h" />
+    <ClInclude Include="src\zlib\gzguts.h" />
     <ClInclude Include="src\zlib\infblock.h" />
     <ClInclude Include="src\zlib\infcodes.h" />
     <ClInclude Include="src\zlib\inffast.h" />
@@ -865,6 +866,8 @@
   <ItemGroup>
     <None Include="src\groupvoice\speex\Makefile.am" />
     <None Include="src\groupvoice\speex\Makefile.in" />
+    <None Include="src\zlib\README" />
+    <None Include="src\zlib\zlib.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

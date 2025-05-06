@@ -272,6 +272,8 @@ LRESULT WINAPI MainWndProc(
 	tagRECT r;
 	int style;
 
+	SetThreadExecutionState(2u);
+
 	if (uMsg == MSH_MOUSEWHEEL)
 	{
 		if (((int)wParam) > 0)
@@ -424,13 +426,9 @@ LRESULT WINAPI MainWndProc(
 			"Automatically set the priority of the windows process when the game is minimized");
 		MSH_MOUSEWHEEL = RegisterWindowMessageA("MSWHEEL_ROLLMSG");
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
-		break;
-
 	case WM_DESTROY:
 		g_wv.hWnd = NULL;
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
-		break;
-
 	case WM_MOVE:
 		if (r_fullscreen->current.enabled)
 		{
@@ -454,20 +452,19 @@ LRESULT WINAPI MainWndProc(
 				IN_Activate(1);
 		}
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
-		break;
 	case WM_ACTIVATE:
 		VID_AppActivate((unsigned __int16)wParam, HIWORD(wParam));
-		break;
+		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 	case WM_SETFOCUS:
 		if (!r_autopriority->current.enabled)
 			return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 		SetPriorityClass(GetCurrentProcess(), 0x20u);
-		break;
+		return 0;
 	case WM_KILLFOCUS:
 		if (!r_autopriority->current.enabled)
 			return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 		SetPriorityClass(GetCurrentProcess(), 0x40u);
-		break;
+		return 0;
 	default:
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 	}

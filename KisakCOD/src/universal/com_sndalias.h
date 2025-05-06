@@ -91,14 +91,13 @@ enum SA_SPKRMAPIDENTIFIERS : __int32
     SA_SPKRMAPIDENTIFIERCOUNT = 0x9,
 };
 inline snd_alias_members_t &operator++(snd_alias_members_t &e) {
-    static_cast<snd_alias_members_t>(static_cast<int>(e) + 1);
+    e = static_cast<snd_alias_members_t>(static_cast<int>(e) + 1);
     return e;
 }
 inline snd_alias_members_t &operator++(snd_alias_members_t &e, int i)
 {
-    snd_alias_members_t temp = e;
     ++e;
-    return temp;
+    return e;
 }
 
 struct SoundFileInfo // sizeof=0x8

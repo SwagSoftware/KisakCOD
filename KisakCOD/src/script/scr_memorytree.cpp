@@ -14,7 +14,7 @@ struct scrMemTreeDebugGlob_t // sizeof=0x20000
     unsigned __int8 mt_usage[MEMORY_NODE_COUNT];    // ...
     unsigned __int8 mt_usage_size[MEMORY_NODE_COUNT]; // ...
 };
-scrMemTreeDebugGlob_t scrMemTreeDebugGlob;
+scrMemTreeDebugGlob_t scrMemTreeDebugGlob = { 0 };
 
 void MT_Init()
 {
@@ -89,7 +89,7 @@ unsigned short MT_AllocIndex(int numBytes, int type)
     Sys_EnterCriticalSection(CRITSECT_MEMORY_TREE);
     for (newSize = size; ; ++newSize)
     {
-        if (newSize > 16)
+        if (newSize > MEMORY_NODE_BITS)
         {
             Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
             //Profile_EndInternal(0);
@@ -142,7 +142,9 @@ void MT_RemoveHeadMemoryNode(int size)
 
     iassert(size >= 0 && size <= MEMORY_NODE_BITS);
 
-    parentNode = (unsigned __int16*)(2 * size + 37937664);
+    //parentNode = (unsigned __int16*)(2 * size + 37937664);
+    parentNode = &scrMemTreeGlob.head[size];
+
     v1 = &scrMemTreeGlob.nodes[scrMemTreeGlob.head[size]];
     oldNodeValue = *(DWORD*)&v1->prev;
     oldNodeValue_4 = v1->padding[0];
@@ -160,7 +162,8 @@ void MT_RemoveHeadMemoryNode(int size)
         {
             oldNode = HIWORD(oldNodeValue);
             *parentNode = HIWORD(oldNodeValue);
-            parentNode = (unsigned __int16*)&scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 0xBFFFE];
+            //parentNode = (unsigned __int16*)&scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 0xBFFFE];
+            parentNode = &scrMemTreeGlob.nodes[HIWORD(oldNodeValue)].next;
         }
         else
         {
@@ -187,7 +190,8 @@ void MT_RemoveHeadMemoryNode(int size)
     *parentNode = HIWORD(oldNodeValue);
     if (HIWORD(oldNodeValue))
     {
-        parentNode = (unsigned __int16*)&scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 0xBFFFE];
+        //parentNode = (unsigned __int16*)&scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 0xBFFFE];
+        parentNode = &scrMemTreeGlob.nodes[HIWORD(oldNodeValue)].next;
         goto LABEL_13;
     }
 }
@@ -236,10 +240,10 @@ void MT_FreeIndex(unsigned int nodeNum, int numBytes)
     //Profile_EndInternal(0);
 }
 
-bool MT_RemoveMemoryNode(int oldNode, unsigned int size)
+bool __cdecl MT_RemoveMemoryNode(int oldNode, unsigned int size)
 {
-    MemoryNode* v2; // edx
-    MemoryNode* v4; // ecx
+    MemoryNode *v2; // edx
+    MemoryNode *v4; // ecx
     int node; // [esp+0h] [ebp-30h]
     int tempNodeValue; // [esp+4h] [ebp-2Ch]
     unsigned int tempNodeValue_4; // [esp+8h] [ebp-28h]
@@ -248,69 +252,71 @@ bool MT_RemoveMemoryNode(int oldNode, unsigned int size)
     unsigned int oldNodeValue_4; // [esp+14h] [ebp-1Ch]
     unsigned int oldNodeValue_8; // [esp+18h] [ebp-18h]
     int nodeNum; // [esp+1Ch] [ebp-14h]
-    unsigned __int8* parentNode; // [esp+20h] [ebp-10h]
+    unsigned __int16 *parentNode; // [esp+20h] [ebp-10h]
     int prevScore; // [esp+24h] [ebp-Ch]
     int nextScore; // [esp+28h] [ebp-8h]
     int level; // [esp+2Ch] [ebp-4h]
     int oldNodea; // [esp+38h] [ebp+8h]
 
-    iassert(size >= 0 && size <= MEMORY_NODE_BITS);
-
+    if (size > 0x10)
+        MyAssertHandler(".\\script\\scr_memorytree.cpp", 384, 0, "%s", "size >= 0 && size <= MEMORY_NODE_BITS");
     nodeNum = 0;
     level = 0x10000;
-    parentNode = (unsigned __int8*)&scrMemTreeGlob.head[size];
-    for (node = scrMemTreeGlob.head[size]; node; node = *(unsigned __int16*)parentNode)
+    //parentNode = (2 * size + 0x242E200);
+    parentNode = &scrMemTreeGlob.head[size];
+
+    for (node = scrMemTreeGlob.head[size]; node; node = *parentNode)
     {
         if (oldNode == node)
         {
             v2 = &scrMemTreeGlob.nodes[oldNode];
-            oldNodeValue = *(_DWORD*)&v2->prev;
+            oldNodeValue = *&v2->prev;
             oldNodeValue_4 = v2->padding[0];
             oldNodeValue_8 = v2->padding[1];
             while (1)
             {
-                if ((_WORD)oldNodeValue)
+                if (oldNodeValue)
                 {
                     if (!HIWORD(oldNodeValue))
                         goto LABEL_16;
-                    prevScore = MT_GetScore((unsigned __int16)oldNodeValue);
+                    prevScore = MT_GetScore(oldNodeValue);
                     nextScore = MT_GetScore(HIWORD(oldNodeValue));
-
-                    iassert(prevScore != nextScore);
-
+                    if (prevScore == nextScore)
+                        MyAssertHandler(".\\script\\scr_memorytree.cpp", 419, 0, "%s", "prevScore != nextScore");
                     if (prevScore < nextScore)
                     {
                         oldNodea = HIWORD(oldNodeValue);
-                        *(_WORD*)parentNode = HIWORD(oldNodeValue);
-                        parentNode = &scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 0xBFFFE];
+                        *parentNode = HIWORD(oldNodeValue);
+                        //parentNode = &scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 786430];
+                        parentNode = &scrMemTreeGlob.nodes[oldNodeValue].next;
                     }
                     else
                     {
                     LABEL_16:
-                        oldNodea = (unsigned __int16)oldNodeValue;
-                        *(_WORD*)parentNode = oldNodeValue;
-                        parentNode = (unsigned __int8*)&scrMemTreeGlob.nodes[(unsigned __int16)oldNodeValue];
+                        oldNodea = oldNodeValue;
+                        *parentNode = oldNodeValue;
+                        parentNode = &scrMemTreeGlob.nodes[oldNodeValue].prev;
                     }
                 }
                 else
                 {
                     oldNodea = HIWORD(oldNodeValue);
-                    *(_WORD*)parentNode = HIWORD(oldNodeValue);
+                    *parentNode = HIWORD(oldNodeValue);
                     if (!HIWORD(oldNodeValue))
                         return 1;
-                    parentNode = &scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 0xBFFFE];
+                    //parentNode = &scrMemTreeGlob.leftBits[12 * HIWORD(oldNodeValue) - 0xBFFFE];
+                    parentNode = &scrMemTreeGlob.nodes[oldNodeValue].next;
                 }
-
-                iassert(oldNode);
-
+                if (!oldNodea)
+                    MyAssertHandler(".\\script\\scr_memorytree.cpp", 434, 0, "%s", "oldNode");
                 tempNodeValue = oldNodeValue;
                 tempNodeValue_4 = oldNodeValue_4;
                 tempNodeValue_8 = oldNodeValue_8;
                 v4 = &scrMemTreeGlob.nodes[oldNodea];
-                oldNodeValue = *(_DWORD*)&v4->prev;
+                oldNodeValue = *&v4->prev;
                 oldNodeValue_4 = v4->padding[0];
                 oldNodeValue_8 = v4->padding[1];
-                *(_DWORD*)&v4->prev = tempNodeValue;
+                *&v4->prev = tempNodeValue;
                 v4->padding[0] = tempNodeValue_4;
                 v4->padding[1] = tempNodeValue_8;
             }
@@ -320,12 +326,13 @@ bool MT_RemoveMemoryNode(int oldNode, unsigned int size)
         level >>= 1;
         if (oldNode >= nodeNum)
         {
-            parentNode = &scrMemTreeGlob.leftBits[12 * node - 0xBFFFE];
+            //parentNode = &scrMemTreeGlob.leftBits[12 * node - 786430];
+            parentNode = &scrMemTreeGlob.nodes[node].next;
             nodeNum += level;
         }
         else
         {
-            parentNode = (unsigned __int8*)&scrMemTreeGlob.nodes[node];
+            parentNode = &scrMemTreeGlob.nodes[node].prev;
             nodeNum -= level;
         }
     }
@@ -385,7 +392,9 @@ int MT_GetSubTreeSize(int nodeNum)
         return 0;
 
     SubTreeSize = MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].prev);
-    return SubTreeSize + MT_GetSubTreeSize(*(unsigned __int16*)&scrMemTreeGlob.leftBits[0xC * nodeNum - 0xBFFFE]) + 1;
+    SubTreeSize += MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].next);
+    return SubTreeSize + 1;
+    //return SubTreeSize + MT_GetSubTreeSize(*(unsigned __int16*)&scrMemTreeGlob.leftBits[0xC * nodeNum - 0xBFFFE]) + 1;
 }
 
 void MT_AddMemoryNode(int newNode, int size)
@@ -417,12 +426,13 @@ void MT_AddMemoryNode(int newNode, int size)
 
             if (newNode >= nodeNum)
             {
-                parentNode = (word*)&scrMemTreeGlob.leftBits[12 * node - 0xBFFFE];
+                //parentNode = (word*)&scrMemTreeGlob.leftBits[12 * node - 0xBFFFE];
+                parentNode = &scrMemTreeGlob.nodes[node].next;
                 nodeNum += level;
             }
             else
             {
-                parentNode = (word*)&scrMemTreeGlob.nodes[node];
+                parentNode = &scrMemTreeGlob.nodes[node].prev;
                 nodeNum -= level;
             }
             node = *parentNode;
@@ -430,7 +440,8 @@ void MT_AddMemoryNode(int newNode, int size)
             {
                 *parentNode = newNode;
                 scrMemTreeGlob.nodes[newNode].prev = NULL;
-                *(word*)&scrMemTreeGlob.leftBits[12 * newNode - 0xBFFFE] = 0;
+                scrMemTreeGlob.nodes[newNode].next = NULL;
+                //*(word*)&scrMemTreeGlob.leftBits[12 * newNode - 0xBFFFE] = 0;
             }
         }
         while (1)
@@ -456,12 +467,13 @@ void MT_AddMemoryNode(int newNode, int size)
 
             if (node >= nodeNum)
             {
-                parentNode = (word*)&scrMemTreeGlob.leftBits[12 * newNode - 0xBFFFE];
+                //parentNode = (word*)&scrMemTreeGlob.leftBits[12 * newNode - 0xBFFFE];
+                parentNode = &scrMemTreeGlob.nodes[newNode].next;
                 nodeNum += level;
             }
             else
             {
-                parentNode = (word*)&scrMemTreeGlob.nodes[newNode];
+                parentNode = &scrMemTreeGlob.nodes[newNode].prev;
                 nodeNum -= level;
             }
             newNode = node;
@@ -472,7 +484,8 @@ void MT_AddMemoryNode(int newNode, int size)
     {
         *parentNode = newNode;
         scrMemTreeGlob.nodes[newNode].prev = NULL;
-        *(word*)&scrMemTreeGlob.leftBits[12 * newNode - 0xBFFFE] = 0;
+        scrMemTreeGlob.nodes[newNode].next = NULL;
+        //*(word*)&scrMemTreeGlob.leftBits[12 * newNode - 0xBFFFE] = 0;
     }
 }
 
