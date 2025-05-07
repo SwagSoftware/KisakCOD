@@ -51,35 +51,35 @@ dContactGeom::g1 and dContactGeom::g2.
 struct dxSphere : public dxGeom {
   dReal radius;		// sphere radius
   dxSphere (dSpaceID space, dxBody* body, dReal _radius);
-  void computeAABB();
+  void computeAABB() override;
 };
 
 
 struct dxBox : public dxGeom {
   dVector3 side;	// side lengths (x,y,z)
   dxBox (dSpaceID space, dxBody *body, dReal lx, dReal ly, dReal lz);
-  void computeAABB();
+  void computeAABB() override;
 };
 
 
 struct dxCCylinder : public dxGeom {
   dReal radius,lz;	// radius, length along z axis
   dxCCylinder (dSpaceID space, dxBody* body, dReal _radius, dReal _length);
-  void computeAABB();
+  void computeAABB() override;
 };
 
 
 struct dxPlane : public dxGeom {
   dReal p[4];
   dxPlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
-  void computeAABB();
+  void computeAABB() override;
 };
 
 
 struct dxRay : public dxGeom {
   dReal length;
   dxRay (dSpaceID space, dxBody* body, dReal _length);
-  void computeAABB();
+  void computeAABB() override;
 };
 
 //****************************************************************************

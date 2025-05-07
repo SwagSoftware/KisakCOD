@@ -35,6 +35,8 @@ internal data structures and functions for collision detection.
 #include "objects.h"
 #include <universal/assertive.h>
 
+#include <new>
+
 //****************************************************************************
 // constants and macros
 
@@ -181,7 +183,7 @@ struct dxSpace : public dxGeom {
   // ADD
   void clear();
 
-  void computeAABB();
+  void computeAABB() override;
 
   void setCleanup (int mode);
   int getCleanup();
@@ -209,7 +211,7 @@ struct dxSimpleSpace : public dxSpace {
     // LWSS ADD - HACK for re-construction
     inline void ReInit()
     {
-        dxSimpleSpace();
+        new (this) dxSimpleSpace();
     }
     // LWSS END
 
@@ -228,14 +230,14 @@ struct dxUserGeom : public dxGeom {
 
     void ReInit(int class_num, dxSpace *space, dxBody *body)
     {
-        this->dxUserGeom::dxUserGeom(class_num, space, body);
+        new (this) dxUserGeom(class_num, space, body);
     }
 
     dxUserGeom() : dxUserGeom(0, nullptr, nullptr) { } // ADD
 
     virtual ~dxUserGeom() = default; // LWSS: Make default
-    virtual void computeAABB();
-    virtual int AABBTest(dxGeom* o, dReal aabb[6]);
+    void computeAABB() override;
+    int AABBTest(dxGeom* o, dReal aabb[6]) override;
 };
 // END
 
@@ -267,7 +269,7 @@ struct dxGeomTransform : public dxGeom {
 
     dxGeomTransform(dSpaceID space, dxBody* body); // MOD
     ~dxGeomTransform();
-    void computeAABB();
+    void computeAABB() override;
     void computeFinalTx();
     void Destruct();
 };
