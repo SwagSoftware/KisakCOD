@@ -15,9 +15,9 @@
 
 MaterialGlobals materialGlobals;
 
-const stream_source_info_t s_streamSourceInfo[16][9];
-const stream_dest_info_t s_streamDestInfo[12];
-const BuiltInMaterialTable s_builtInMaterials[50];
+stream_source_info_t s_streamSourceInfo[16][9];
+stream_dest_info_t s_streamDestInfo[12];
+BuiltInMaterialTable s_builtInMaterials[50];
 
 bool g_generateOverrideTechniques;
 bool g_alwaysUseDefaultMaterial;

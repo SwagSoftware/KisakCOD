@@ -35,7 +35,7 @@ const FxFlagDef s_allFlagDefs[42] =
   { "playOnRun", 0, 32768, 32768 },
   { "boundingSphere", 0, 65536, 65536 },
   { "useItemClip", 0, 131072, 131072 },
-  { "disabled", 0, 2147483648, 2147483648 },
+  { "disabled", 0, INT_MIN, INT_MIN },
   { "spawnRelative", 1, 2, 2 },
   { "spawnFrustumCull", 1, 4, 4 },
   { "runnerUsesRandRot", 1, 8, 8 },

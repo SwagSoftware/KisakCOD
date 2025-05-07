@@ -402,7 +402,7 @@ void __cdecl  Sys_Quit()
 	exit(0);
 }
 
-void __cdecl Sys_Print(char *msg)
+void __cdecl Sys_Print(const char *msg)
 {
 	Conbuf_AppendTextInMainThread(msg);
 }
@@ -743,6 +743,25 @@ WinMain
 ==================
 */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+
+	// KISAK: make a pretty console in debug mode, redirect in/out/err stream
+#if 1 || defined(KISAK_DEBUG)
+	AllocConsole();
+
+	SetConsoleTitleA("KisakCOD");
+	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
+
+	SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE),
+		ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT |
+		ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN |
+		ENABLE_LVB_GRID_WORLDWIDE);
+
+	SetConsoleCtrlHandler(nullptr, true);
+
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+#endif
 
 	Sys_InitializeCriticalSections();
 	Sys_InitMainThread();

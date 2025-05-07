@@ -221,17 +221,8 @@ void __cdecl CL_WritePacket(int localClientNum)
             MSG_WriteLong(&buf, LODWORD(LocalClientGlobals->cgameOrigin[0]));
             MSG_WriteLong(&buf, LODWORD(LocalClientGlobals->cgameOrigin[1]));
             MSG_WriteLong(&buf, LODWORD(LocalClientGlobals->cgameOrigin[2]));
-            if ((unsigned int(LocalClientGlobals->cgameVelocity[0]) & 0x7F800000) == 0x7F800000
-                || (unsigned int(LocalClientGlobals->cgameVelocity[1]) & 0x7F800000) == 0x7F800000
-                || (unsigned int(LocalClientGlobals->cgameVelocity[2]) & 0x7F800000) == 0x7F800000)
-            {
-                MyAssertHandler(
-                    ".\\client_mp\\cl_input.cpp",
-                    2051,
-                    0,
-                    "%s",
-                    "!IS_NAN((cl->cgameVelocity)[0]) && !IS_NAN((cl->cgameVelocity)[1]) && !IS_NAN((cl->cgameVelocity)[2])");
-            }
+            iassert(!IS_NAN((LocalClientGlobals->cgameVelocity)[0]) && !IS_NAN((LocalClientGlobals->cgameVelocity)[1]) && !IS_NAN((LocalClientGlobals->cgameVelocity)[2]));
+
             MSG_WriteLong(&buf, LocalClientGlobals->cgamePredictedDataServerTime);
             CL_SavePredictedOriginForServerTime(
                 LocalClientGlobals,

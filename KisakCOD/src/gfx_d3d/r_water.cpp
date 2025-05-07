@@ -69,24 +69,16 @@ void __cdecl WaterFrequenciesAtTime(complex_s *H, const water_t *water, float t)
             v3 = (__int64)(*wTerm * ta);
             sinReal = waterGlobStatic.sinTable[((v3 & 0x3FF) + 255) & 0x3FF];
             sinImag = waterGlobStatic.sinTable[v3 & 0x3FF];
-            //if ((COERCE_UNSIGNED_INT(H0->real) & 0x7F800000) == 0x7F800000)
-            if ((unsigned int(H0->real) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\r_water.cpp", 177, 0, "%s", "!IS_NAN(H0->real)");
-            //if ((COERCE_UNSIGNED_INT(H0->imag) & 0x7F800000) == 0x7F800000)
-            if ((unsigned int(H0->imag) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\r_water.cpp", 178, 0, "%s", "!IS_NAN(H0->imag)");
-            if ((LODWORD(sinReal) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\r_water.cpp", 179, 0, "%s", "!IS_NAN(sinReal)");
-            if ((LODWORD(sinImag) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\r_water.cpp", 180, 0, "%s", "!IS_NAN(sinImag)");
+            iassert(!IS_NAN(H0->real));
+            iassert(!IS_NAN(H0->imag));
+            iassert(!IS_NAN(sinReal));
+            iassert(!IS_NAN(sinImag));
+
             H[vecKIndex].real = H0->real * sinReal;
             H[vecKIndex].imag = H0->imag * sinImag;
-            //if ((COERCE_UNSIGNED_INT(H[vecKIndex].real) & 0x7F800000) == 0x7F800000)
-            if ((unsigned int(H[vecKIndex].real) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\r_water.cpp", 184, 0, "%s", "!IS_NAN(H[vecKIndex].real)");
-            //if ((COERCE_UNSIGNED_INT(H[vecKIndex].imag) & 0x7F800000) == 0x7F800000)
-            if ((unsigned int(H[vecKIndex].imag) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\r_water.cpp", 185, 0, "%s", "!IS_NAN(H[vecKIndex].imag)");
+
+            iassert(!IS_NAN(H[vecKIndex].real));
+            iassert(!IS_NAN(H[vecKIndex].imag));
         }
         else
         {

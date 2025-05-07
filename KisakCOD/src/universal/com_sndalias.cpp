@@ -1068,7 +1068,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
     int v44; // [esp+8258h] [ebp-14h]
     char v45; // [esp+825Ch] [ebp-10h]
     snd_alias_members_t v46; // [esp+8264h] [ebp-8h]
-    void *v47; // [esp+8268h] [ebp-4h]
+    char *v47; // [esp+8268h] [ebp-4h]
 
     filename = "soundaliases/temp.csv";
     Com_sprintf(dest, 0x100u, "soundaliases/%s", sourceFile);

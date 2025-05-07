@@ -119,11 +119,6 @@ unsigned int Win_InitThreads()
 
 // *(_DWORD *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4)
 
-static void Sys_SetValue(int valueIndex, void* data)
-{
-    g_threadValues[valueIndex][0] = data;
-}
-
 void __cdecl Sys_Mkdir(const char *path)
 {
     _mkdir(path);

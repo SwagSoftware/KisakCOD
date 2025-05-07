@@ -23,6 +23,8 @@
 
 #include <algorithm>
 
+#include <setjmp.h>
+
 struct DBReorderAssetEntry // sizeof=0x10
 {                                       // ...
     unsigned int sequence;
@@ -2398,7 +2400,7 @@ void __cdecl DB_InitThread()
 
 void __cdecl  DB_Thread(unsigned int threadContext)
 {
-    void *Value; // eax
+    jmp_buf *Value; // eax
 
     if (threadContext != 6)
         MyAssertHandler(
@@ -2408,13 +2410,14 @@ void __cdecl  DB_Thread(unsigned int threadContext)
             "threadContext == THREAD_CONTEXT_DATABASE\n\t%i, %i",
             threadContext,
             6);
-    Value = Sys_GetValue(2);
+    Value = (jmp_buf *)Sys_GetValue(2);
     // KISAKTODO: try-catch
-    //if (_setjmp3(Value, 0))
-    //{
-    //    //Profile_Recover(1);
-    //    Com_ErrorAbort();
-    //}
+    if (_setjmp(*Value))
+    {
+        //Profile_Recover(1);
+        __builtin_debugtrap();
+        Com_ErrorAbort();
+    }
     //Profile_Guard(1);
     while (1)
     {
@@ -2676,9 +2679,10 @@ int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
     unsigned int i; // [esp+114h] [ebp-8h]
     void *zoneFile; // [esp+118h] [ebp-4h]
 
+    Com_Printf(0, "Trying to load file %s with flags %x\n", zoneName, zoneFlags);
+
     modZone = 0;
-    if (g_zoneInfoCount)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3568, 0, "%s", "!g_zoneInfoCount");
+    iassert(!g_zoneInfoCount);
     if (I_stricmp(zoneName, "mp_patch"))
     {
         if (*(_BYTE *)fs_gameDirVar->current.integer && DB_ShouldLoadFromModDir(zoneName))

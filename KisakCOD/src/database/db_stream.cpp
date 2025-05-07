@@ -36,9 +36,17 @@ void __cdecl DB_PushStreamPos(unsigned int index)
             0,
             "%s",
             "g_streamPosStackIndex < ARRAY_COUNT( g_streamPosStack )");
-    g_streamPosStack[g_streamPosStackIndex++].index = g_streamPosIndex;
+    g_streamPosStack[g_streamPosStackIndex].index = g_streamPosIndex;
     DB_SetStreamIndex(index);
-    *(&g_streamPosIndex + 2 * g_streamPosStackIndex) = (unsigned int)g_streamPos;
+
+    g_streamPosStack[g_streamPosStackIndex++].pos = g_streamPos;
+
+    // lmao compiler???
+    //*(&g_streamPosIndex + 2 * g_streamPosStackIndex) = (unsigned int)g_streamPos;
+    // == (char*)&g_streamPosIndex + 8 * g_streamPosStackIndex
+    // == (char*)&g_streamPosIndex + 8 + 8 * (g_streamPosStackIndex - 1)
+    // == (char*)&g_streamPosStack + 8 * (g_streamPosStackIndex - 1)
+    // == &g_streamPosStack[g_streamPosStackIndex - 1].pos
 }
 
 void __cdecl DB_CloneStreamData(unsigned __int8 *destStart)
@@ -62,6 +70,7 @@ void __cdecl DB_SetStreamIndex(unsigned int index)
         {
             DB_CloneStreamData(g_streamZoneMem->lockedIndexData);
         }
+        iassert(index < arr_cnt(g_streamPosArray));
         g_streamPosArray[g_streamPosIndex] = g_streamPos;
         g_streamPosIndex = index;
         g_streamPos = g_streamPosArray[index];
@@ -70,14 +79,7 @@ void __cdecl DB_SetStreamIndex(unsigned int index)
 
 void __cdecl DB_PopStreamPos()
 {
-    if (!g_streamPosStackIndex)
-        MyAssertHandler(
-            ".\\database\\db_stream.cpp",
-            99,
-            0,
-            "%s\n\t(g_streamPosStackIndex) = %i",
-            "(g_streamPosStackIndex > 0)",
-            0);
+    vassert(g_streamPosStackIndex > 0, "(g_streamPosStackIndex = %d)", g_streamPosStackIndex);
     --g_streamPosStackIndex;
     if (!g_streamPosIndex)
         g_streamPos = g_streamPosStack[g_streamPosStackIndex].pos;
@@ -97,8 +99,7 @@ unsigned __int8 *__cdecl DB_AllocStreamPos(int alignment)
 
 void __cdecl DB_IncStreamPos(int size)
 {
-    if (!g_streamPos)
-        MyAssertHandler(".\\database\\db_stream.cpp", 133, 0, "%s", "g_streamPos");
+    iassert(g_streamPos);
     if (&g_streamPos[size] > &g_streamZoneMem->blocks[g_streamPosIndex].data[g_streamZoneMem->blocks[g_streamPosIndex].size])
         MyAssertHandler(
             ".\\database\\db_stream.cpp",

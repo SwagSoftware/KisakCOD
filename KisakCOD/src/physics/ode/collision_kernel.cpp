@@ -219,11 +219,11 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable, dxBody *new_body)
 
   // ADD
   if (is_placeable) {
-      dUASSERT(new_body);
+      dUASSERT(new_body, "new_body");
       dGeomSetBody(this, new_body);
   }
   else {
-      dUASSERT(!new_body);
+      dUASSERT(!new_body, "!new_body");
       pos = 0;
       R = 0;
   }

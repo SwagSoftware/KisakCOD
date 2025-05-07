@@ -27,11 +27,13 @@
 #include <qcommon/threads.h>
 #include "scr_compiler.h"
 
+#include <setjmp.h>
+
 #undef GetObject
 
 scrVmPub_t scrVmPub;
 scrVmGlob_t scrVmGlob;
-int g_script_error[33][16];
+jmp_buf g_script_error[33];
 scrVmDebugPub_t scrVmDebugPub;
 
 function_stack_t pos;

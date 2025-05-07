@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <varargs.h>
+#include <stdarg.h>
 
 static dMessageFunction *error_function = 0;
 static dMessageFunction *debug_function = 0;

@@ -40,6 +40,8 @@
 #include <gfx_d3d/r_dvars.h>
 #include "mem_track.h"
 
+#include <setjmp.h>
+
 int marker_common;
 
 int com_skelTimeStamp;
@@ -139,10 +141,13 @@ const char *noticeErrors[10] =
   ""
 }; // idb
 
-void QDECL Com_PrintMessage(int channel, char* msg, int error)
+void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 {
 	// LWSS: Punkbuster stuff
 	//PbCaptureConsoleOutput(msg, 4096);
+
+    // always print to stdout console
+    fprintf(stderr, "[%d] (err: %d): %s\n", channel, error, msg);
 
 	if (rd_buffer)
 	{
@@ -560,46 +565,7 @@ void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type)
 	}
 }
 
-
-void __cdecl Com_PrintMessage(int channel, const char* msg, int error)
-{
-    //PbCaptureConsoleOutput(msg, 4096);
-    if (rd_buffer)
-    {
-        if (channel != 6)
-        {
-            Sys_EnterCriticalSection(CRITSECT_RD_BUFFER);
-            if (strlen(rd_buffer) + strlen(msg) > rd_buffersize - 1)
-            {
-                rd_flush(rd_buffer);
-                *rd_buffer = 0;
-            }
-            I_strncat(rd_buffer, rd_buffersize, msg);
-            Sys_LeaveCriticalSection(CRITSECT_RD_BUFFER);
-        }
-    }
-    else
-    {
-        if (channel != 6 && com_dedicated && !com_dedicated->current.integer)
-        {
-            if (channel == 2 || channel == 3 || channel == 4)
-                MyAssertHandler(".\\qcommon\\common.cpp", 625, 0, "%s", "!Con_IsNotifyChannel( channel )");
-            CL_ConsolePrint(0, channel, msg, 0, 0, 32 * error);
-        }
-        if (*msg == 94 && msg[1])
-            msg += 2;
-        if (channel != 6
-            && (!com_filter_output || !com_filter_output->current.enabled
-                || Con_IsChannelVisible(CON_DEST_CONSOLE, channel, 3)))
-        {
-            Sys_Print((char*)msg);
-        }
-        if (channel != 7 && com_logfile && com_logfile->current.integer)
-            Com_LogPrintMessage(channel, (char *)msg);
-    }
-}
-
-void __cdecl Com_LogPrintMessage(int channel, char* msg)
+void __cdecl Com_LogPrintMessage(int channel, const char* msg)
 {
     Sys_EnterCriticalSection(CRITSECT_CONSOLE);
     if (FS_Initialized())
@@ -790,7 +756,7 @@ void __cdecl  Com_ErrorAbort()
 
 void Com_Error(errorParm_t code, const char* fmt, ...)
 {
-    int* Value; // eax
+    jmp_buf * Value; // eax
     va_list va; // [esp+18h] [ebp+10h] BYREF
 
     va_start(va, fmt);
@@ -829,8 +795,8 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
             MyAssertHandler(".\\qcommon\\common.cpp", 1456, 0, "%s", "com_errorEntered");
         errorcode = code;
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
-        Value = (int*)Sys_GetValue(2);
-        //longjmp(Value, -1);
+        Value = (jmp_buf *)Sys_GetValue(2);
+        longjmp(*Value, -1);
     }
     if (code == ERR_SCRIPT_DROP)
     {

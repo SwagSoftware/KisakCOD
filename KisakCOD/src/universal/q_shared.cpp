@@ -10,6 +10,8 @@
 #include <gfx_d3d/r_model.h>
 #include "com_sndalias.h"
 
+#include <setjmp.h>
+
 //Line 53466:  0006 : 02bc009c       int marker_q_shared      8537009c     q_shared.obj
 //Line 53467 : 0006 : 02bc58d0       struct TraceThreadInfo *g_traceThreadInfo 853758d0     q_shared.obj
 //Line 14278 : 0001 : 0006fb0c       struct orientation_t const orIdentity 8207010c     q_shared.obj
@@ -143,17 +145,17 @@ char* QDECL va(const char* format, ...) {
 }
 
 va_info_t va_info[7];
-int g_com_error[7][16];
+jmp_buf g_com_error[7];
 TraceThreadInfo g_traceThreadInfo[7];
 
 static char value1[2][2][8192];
 
 void __cdecl TRACK_q_shared()
 {
-    track_static_alloc_internal(va_info, (sizeof(va_info_t) * 7) /*14364*/, "va_info", 10);
-    track_static_alloc_internal(g_com_error, 448, "g_com_error", 10);
-    track_static_alloc_internal(g_traceThreadInfo, 112, "g_traceThreadInfo", 10);
-    track_static_alloc_internal(value1, 0x8000, "value1", 10);
+    TRACK_STATIC_ARR(va_info, 10);
+    TRACK_STATIC_ARR(g_com_error, 10);
+    TRACK_STATIC_ARR(g_traceThreadInfo, 10);
+    TRACK_STATIC_ARR(value1, 10);
 }
 
 unsigned __int8 __cdecl ColorIndex(unsigned __int8 c)
@@ -550,7 +552,7 @@ bool __cdecl CanKeepStringPointer(const char *string)
 void __cdecl Com_InitThreadData(int threadContext)
 {
     Sys_SetValue(1, &va_info[threadContext]);
-    Sys_SetValue(2, g_com_error[threadContext]);
+    Sys_SetValue(2, &g_com_error[threadContext]);
     Sys_SetValue(3, &g_traceThreadInfo[threadContext]);
 }
 

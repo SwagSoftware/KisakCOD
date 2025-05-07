@@ -147,7 +147,7 @@ void __cdecl Debug_Frame(int localClientNum);
 
 void __cdecl Com_InitPlayerProfiles(int localClientNum);
 void __cdecl Com_PrintMessage(int channel, const char* msg, int error);
-void __cdecl Com_LogPrintMessage(int channel, char* msg);
+void __cdecl Com_LogPrintMessage(int channel, const char* msg);
 void Com_OpenLogFile();
 void Com_DPrintf(int channel, const char* fmt, ...);
 void Com_PrintError(int channel, const char* fmt, ...);

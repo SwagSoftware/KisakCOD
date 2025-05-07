@@ -6,9 +6,8 @@
 
 int __cdecl DB_AuthLoad_InflateInit(z_stream_s *stream, bool isSecure)
 {
-    if (isSecure)
-        MyAssertHandler(".\\database\\db_auth.cpp", 551, 0, "%s", "!isSecure");
-    return inflateInit_(stream, "1.1.4", 52);
+    iassert(!isSecure);
+    return inflateInit_(stream, "1.1.4", sizeof(z_stream));
 }
 
 void __cdecl DB_AuthLoad_InflateEnd(z_stream_s *stream)

@@ -8,7 +8,7 @@ void __cdecl RB_InitSceneViewport();
 void __cdecl RB_InitImages();
 
 
-extern GfxCmdBufContext gfxCmdBufContext;
+extern const GfxCmdBufContext gfxCmdBufContext;
 extern GfxCmdBufSourceState gfxCmdBufSourceState;
 extern GfxCmdBufState gfxCmdBufState;
 extern GfxCmdBufInput gfxCmdBufInput;

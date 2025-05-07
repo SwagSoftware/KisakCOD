@@ -177,9 +177,8 @@ void __cdecl Sys_OutOfMemErrorInternal(const char* filename, int line);
 void __cdecl Sys_NormalExit();
 
 void __cdecl Sys_OpenURL(const char *url, int doexit);
-void  Sys_Error(char *error, ...);
 void __cdecl  Sys_Quit();
-void __cdecl Sys_Print(char *msg);
+void __cdecl Sys_Print(const char *msg);
 char *__cdecl Sys_GetClipboardData();
 int __cdecl Sys_SetClipboardData(const char *text);
 void __cdecl Sys_QueEvent(unsigned int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr);

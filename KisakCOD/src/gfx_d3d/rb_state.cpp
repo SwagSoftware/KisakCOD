@@ -3,10 +3,14 @@
 #include "r_utils.h"
 #include "r_state.h"
 
-GfxCmdBufContext gfxCmdBufContext;
 GfxCmdBufSourceState gfxCmdBufSourceState;
 GfxCmdBufState gfxCmdBufState;
 GfxCmdBufInput gfxCmdBufInput;
+
+const GfxCmdBufContext gfxCmdBufContext = {
+    .source = &gfxCmdBufSourceState,
+    .state = &gfxCmdBufState
+};
 
 const unsigned int s_cullTable_21[4] = { 0u, 1u, 3u, 2u }; // idb
 const unsigned int s_blendTable_21[11] = { 0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 9u, 10u }; // idb
