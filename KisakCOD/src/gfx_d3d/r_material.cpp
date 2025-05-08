@@ -143,9 +143,9 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
     decl = 0;
     declEnd.Stream = 255;
     declEnd.Offset = 0;
-    declEnd.Type = 17;
-    declEnd.Method = 0;
-    declEnd.Usage = 0;
+    declEnd.Type = D3DDECLTYPE_UNUSED;
+    declEnd.Method = D3DDECLMETHOD_DEFAULT;
+    declEnd.Usage = D3DDECLUSAGE_POSITION;
     declEnd.UsageIndex = 0;
     AssertValidVertexDeclOffsets(sourceTable);
     elemIndex = 0;
@@ -162,14 +162,14 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
         sourceInfo = &sourceTable[routingData->source];
         if (sourceInfo->Stream == 255)
             return 0;
-        destInfo = (const stream_dest_info_t *)(2 * routingData->dest + 9358400);
-        for (elemIndexInsert = elemIndex;
-            elemIndexInsert > 0 && *(&declEnd.Stream + 4 * elemIndexInsert) > (int)sourceInfo->Stream;
-            --elemIndexInsert)
+        //destInfo = (const stream_dest_info_t *)(2 * routingData->dest + 9358400);
+        destInfo = &s_streamDestInfo[routingData->dest];
+        for (elemIndexInsert = elemIndex; elemIndexInsert > 0 && *(&declEnd.Stream + 4 * elemIndexInsert) > (int)sourceInfo->Stream; --elemIndexInsert)
         {
-            v4 = *((unsigned int *)&declEnd.Type + 2 * elemIndexInsert);
-            *(unsigned int *)&elemTable[elemIndexInsert].Stream = *((unsigned int *)&declEnd.Stream + 2 * elemIndexInsert);
-            *(unsigned int *)&elemTable[elemIndexInsert].Type = v4;
+            elemTable[elemIndexInsert] = declEnd;
+            // LWSS: The struct is 8 bytes, so this is an optimization to just set it
+            //*(unsigned int *)&elemTable[elemIndexInsert].Stream = *((unsigned int *)&declEnd.Stream + 2 * elemIndexInsert);
+            //*(unsigned int *)&elemTable[elemIndexInsert].Type = *((unsigned int *)&declEnd.Type + 2 * elemIndexInsert);
         }
         elemTable[elemIndexInsert].Stream = sourceInfo->Stream;
         elemTable[elemIndexInsert].Offset = sourceInfo->Offset;
@@ -588,12 +588,10 @@ void __cdecl Material_ReleaseAll()
 
 const Material *__cdecl Material_FromHandle(Material *handle)
 {
-    if (!handle)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_material.h", 285, 0, "%s", "handle");
-    if (!handle->info.name)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_material.h", 286, 0, "%s", "handle->info.name");
-    if (!*handle->info.name)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_material.h", 287, 0, "%s", "handle->info.name[0]");
+    iassert(handle);
+    iassert(handle->info.name);
+    iassert(handle->info.name[0]);
+
     return handle;
 }
 

@@ -3,8 +3,7 @@
 
 void __cdecl Load_Stream(bool atStreamStart, unsigned __int8 *ptr, int size)
 {
-    if (atStreamStart != (ptr == DB_GetStreamPos()))
-        MyAssertHandler(".\\database\\db_stream_load.cpp", 18, 0, "%s", "atStreamStart == (ptr == DB_GetStreamPos())");
+    iassert(atStreamStart == (ptr == DB_GetStreamPos()));
     if (atStreamStart && size)
     {
         if (g_streamPosIndex - 1 < 3)

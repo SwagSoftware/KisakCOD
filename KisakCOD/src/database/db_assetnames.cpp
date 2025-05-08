@@ -10,7 +10,7 @@ const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
     DB_StringTableGetName,
     DB_StringTableGetName,
     DB_StringTableGetName,
-    (const char* (*)(const XAssetHeader*))DB_ImageGetName,
+    DB_ImageGetName,
     DB_StringTableGetName,
     DB_StringTableGetName,
     DB_StringTableGetName,
@@ -47,7 +47,7 @@ void(__cdecl *DB_XAssetSetNameHandler[33])(XAssetHeader *, const char *) =
     DB_StringTableSetName,
     DB_StringTableSetName,
     DB_StringTableSetName,
-    (void(*)(XAssetHeader*, const char*))DB_ImageSetName,
+    DB_ImageSetName,
     DB_StringTableSetName,
     DB_StringTableSetName,
     DB_StringTableSetName,
@@ -79,67 +79,67 @@ void(__cdecl *DB_XAssetSetNameHandler[33])(XAssetHeader *, const char *) =
 // KISAKTODO: make these non-fixed
 int __cdecl DB_SizeofXAsset_RawFile_()
 {
-    return 12;
+    return sizeof(RawFile);
 }
 int __cdecl DB_SizeofXAsset_GameWorldSp_()
 {
-    return 44;
+    return sizeof(GameWorldSp);
 }
 int __cdecl DB_SizeofXAsset_XAnimParts_()
 {
-    return 88;
+    return sizeof(XAnimParts);
 }
 int __cdecl DB_SizeofXAsset_XModel_()
 {
-    return 220;
+    return sizeof(XModel);
 }
 int __cdecl DB_SizeofXAsset_Material_()
 {
-    return 80;
+    return sizeof(Material);
 }
 int __cdecl DB_SizeofXAsset_MaterialTechniqueSet_()
 {
-    return 148;
+    return sizeof(MaterialTechniqueSet);
 }
 int __cdecl DB_SizeofXAsset_GfxImage_()
 {
-    return 36;
+    return sizeof(GfxImage);
 }
 int __cdecl DB_SizeofXAsset_SndCurve_()
 {
-    return 72;
+    return sizeof(SndCurve);
 }
 int __cdecl DB_SizeofXAsset_menuDef_t_()
 {
-    return 284;
+    return sizeof(menuDef_t);
 }
 int __cdecl DB_SizeofXAsset_StringTable_()
 {
-    return 16;
+    return sizeof(StringTable);
 }
 int __cdecl DB_SizeofXAsset_GameWorldMp_()
 {
-    return 4;
+    return sizeof(GameWorldMp);
 }
 int __cdecl DB_SizeofXAsset_GfxWorld_()
 {
-    return 732;
+    return sizeof(GfxWorld);
 }
 int __cdecl DB_SizeofXAsset_Font_s_()
 {
-    return 24;
+    return sizeof(Font_s);
 }
 int __cdecl DB_SizeofXAsset_FxImpactTable_()
 {
-    return 8;
+    return sizeof(FxImpactTable);
 }
 int __cdecl DB_SizeofXAsset_WeaponDef_()
 {
-    return 2168;
+    return sizeof(WeaponDef);
 }
 int __cdecl DB_SizeofXAsset_FxEffectDef_()
 {
-    return 32;
+    return sizeof(FxEffectDef);
 }
 int(__cdecl *DB_GetXAssetSizeHandler[33])() =
 {
@@ -183,29 +183,33 @@ void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name)
     header->xmodelPieces->name = name;
 }
 
-XModelPiece *__cdecl DB_ImageGetName(const XAssetHeader *header)
+const char *__cdecl DB_ImageGetName(const XAssetHeader *header)
 {
-    return header->xmodelPieces[2].pieces;
+    //return header->xmodelPieces[2].pieces;
+    //return header->xmodelPieces->name; // KISAKTODO: this functionality is custom and probably different
+    return header->image->name;
 }
 
-void __cdecl DB_ImageSetName(XAssetHeader *header, XModelPiece *name)
+void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name)
 {
-    header->xmodelPieces[2].pieces = name;
+    //header->xmodelPieces[2].pieces = name;
+    //header->xmodelPieces[2].name = name;
+    header->image->name = name;
 }
 
 const char *__cdecl DB_StringTableGetName(const XAssetHeader *header)
 {
-    return header->xmodelPieces->name;
+    return header->stringTable->name;
 }
 
 const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header)
 {
-    return (const char *)header->xmodelPieces->numpieces;
+    return header->localize->name;
 }
 
 void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name)
 {
-    header->xmodelPieces->numpieces = (int)name;
+    header->localize->name = name;
 }
 
 const char *__cdecl DB_GetXAssetHeaderName(int type, const XAssetHeader *header)
@@ -217,7 +221,7 @@ const char *__cdecl DB_GetXAssetHeaderName(int type, const XAssetHeader *header)
         MyAssertHandler(".\\database\\db_assetnames.cpp", 590, 0, "%s", "header");
     if (!DB_XAssetGetNameHandler[type])
         MyAssertHandler(".\\database\\db_assetnames.cpp", 591, 0, "%s", "DB_XAssetGetNameHandler[type]");
-    if (!header->xmodelPieces)
+    if (!header->data)
         MyAssertHandler(".\\database\\db_assetnames.cpp", 592, 0, "%s", "header->data");
     name = DB_XAssetGetNameHandler[type](header);
     if (!name)

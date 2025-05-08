@@ -17,10 +17,10 @@ unsigned int __cdecl FS_FileRead(void *ptr, unsigned int len, FILE *stream)
     {
         iassert(0);
     }
-    if (feof(stream))
-    {
-        iassert(0);
-    }
+    //if (feof(stream))
+    //{
+    //    iassert(0);
+    //}
 #endif
     ProfLoad_EndTrackedValue(MAP_PROFILE_FILE_READ);
     return read_size;

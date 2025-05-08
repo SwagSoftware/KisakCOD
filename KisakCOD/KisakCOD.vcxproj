@@ -436,7 +436,6 @@
     <ClCompile Include="src\physics\ode\joint.cpp" />
     <ClCompile Include="src\physics\ode\mass.cpp" />
     <ClCompile Include="src\physics\ode\matrix.cpp" />
-    <ClCompile Include="src\physics\ode\misc.cpp" />
     <ClCompile Include="src\physics\ode\ode.cpp" />
     <ClCompile Include="src\physics\ode\odemath.cpp" />
     <ClCompile Include="src\physics\ode\quickstep.cpp" />

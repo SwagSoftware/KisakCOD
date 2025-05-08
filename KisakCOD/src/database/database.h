@@ -93,8 +93,8 @@ void __cdecl Load_RawFileAsset(XAssetHeader *rawfile);
 void __cdecl Mark_RawFileAsset(RawFile *rawfile);
 void __cdecl Load_StringTableAsset(XAssetHeader *stringTable);
 void __cdecl Mark_StringTableAsset(StringTable *stringTable);
-XAssetHeader __cdecl DB_AllocMaterial(XAssetHeader *pool);
-void __cdecl DB_FreeMaterial(XAssetPoolEntry<StringTable> **pool, XAssetHeader header);
+XAssetHeader __cdecl DB_AllocMaterial(void *arg);
+void __cdecl DB_FreeMaterial(void *pool, XAssetHeader header);
 void __cdecl DB_EnumXAssets_FastFile(
     XAssetType type,
     void(__cdecl *func)(XAssetHeader, void *),
@@ -192,8 +192,8 @@ void __cdecl Load_GetCurrentZoneHandle(unsigned __int8 *handle);
 
 // db_assetnames
 void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
-XModelPiece *__cdecl DB_ImageGetName(const XAssetHeader *header);
-void __cdecl DB_ImageSetName(XAssetHeader *header, XModelPiece *name);
+const char*__cdecl DB_ImageGetName(const XAssetHeader *header);
+void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name);
 const char *__cdecl DB_StringTableGetName(const XAssetHeader *header);
 const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header);
 void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name);

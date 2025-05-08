@@ -77,8 +77,9 @@ static XAssetHeader __cdecl node1_(void *pool)
     return (XAssetHeader)pool;
 }
 
-static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(XAssetHeader *pool)
+static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(void *arg)
 {
+    XAssetHeader *pool = (XAssetHeader*)arg;
     XAssetHeader header; // [esp+4h] [ebp-8h]
 
     if (pool->xmodelPieces)
@@ -96,43 +97,44 @@ static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(XAssetHeader *pool)
 
 XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[33])(void *) =
 {
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocMaterial,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocMaterial,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
   &node1_,
   &node1_,
   &node1_,
   &node1_,
   &node1_,
-  (XAssetHeader(*)(void *)) &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
   &node1_,
-  (XAssetHeader(*)(void *)) &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
   NULL,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
   NULL,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  NULL,
-  NULL,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_,
   NULL,
   NULL,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_,
-  (XAssetHeader(*)(void*))&DB_AllocXAsset_StringTable_
+  NULL,
+  NULL,
+  &DB_AllocXAsset_StringTable_,
+  &DB_AllocXAsset_StringTable_
 }; // idb
 
-void __cdecl DB_FreeXAssetHeader_StringTable_(XAssetPoolEntry<StringTable> **pool, XAssetHeader header)
+void __cdecl DB_FreeXAssetHeader_StringTable_(void *arg, XAssetHeader header)
 {
+    XAssetPoolEntry<StringTable> **pool = (XAssetPoolEntry<StringTable> **)arg;
     XAssetPoolEntry<StringTable> *oldFreeHead; // [esp+8h] [ebp-4h]
 
     oldFreeHead = *pool;
@@ -140,41 +142,45 @@ void __cdecl DB_FreeXAssetHeader_StringTable_(XAssetPoolEntry<StringTable> **poo
     header.xmodelPieces->name = (const char *)oldFreeHead;
 }
 
+void NULLSUB(void *crap, XAssetHeader head)
+{
+}
+
 void(__cdecl *DB_FreeXAssetHeaderHandler[33])(void *, XAssetHeader) =
 {
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeMaterial,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
-  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
-  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
-  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
-  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&CL_ResetStats_f,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeMaterial,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  NULLSUB,
+  NULLSUB,
+  NULLSUB,
+  NULLSUB,
+  NULLSUB,
+  DB_FreeXAssetHeader_StringTable_,
+  NULLSUB,
+  DB_FreeXAssetHeader_StringTable_,
   NULL,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
   NULL,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  NULL,
-  NULL,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_,
   NULL,
   NULL,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_,
-  (void(*)(void*, XAssetHeader))&DB_FreeXAssetHeader_StringTable_
+  NULL,
+  NULL,
+  DB_FreeXAssetHeader_StringTable_,
+  DB_FreeXAssetHeader_StringTable_
 }; // idb
 
 const char *g_defaultAssetName[33] =
@@ -282,7 +288,7 @@ XAssetEntryPoolEntry *g_freeAssetEntryHead;
 
 unsigned __int16 db_hashTable[32768];
 XAssetEntry *g_copyInfo[2048];
-XZone g_zones[33];
+XZone g_zones[33]{ 0 };
 unsigned __int8 g_zoneHandles[32];
 char g_zoneNameList[2080];
 XAssetPool<XModelPieces, 64> g_XModelPiecesPool;
@@ -397,6 +403,7 @@ void __cdecl Hunk_OverrideDataForFile(int type, const char *name, void *data)
         MyAssertHandler(".\\universal\\com_memory.cpp", 1554, 0, "Hunk_OverrideDataForFile: could not find data");
 }
 
+// KISAKTODO: incorp sizeof() (enjoy)
 void __cdecl DB_InitPool_RawFile_(void *pool, int size)
 {
     int i; // [esp+4h] [ebp-4h]
@@ -845,7 +852,8 @@ void __cdecl Mark_ClipMapAsset(clipMap_t *clipMap)
 
 void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
 {
-    Z_Free((char *)header.xmodelPieces[3].numpieces, 15);
+    //Z_Free((char *)header.xmodelPieces[3].numpieces, 15);
+    Z_Free(header.loadSnd->sound.data, 15);
 }
 
 void __cdecl DB_RemoveClipMap(XAssetHeader ass)
@@ -948,10 +956,13 @@ void __cdecl Load_MenuAsset(XAssetHeader *menu)
     XAssetHeader header; // [esp+4h] [ebp-8h]
     int i; // [esp+8h] [ebp-4h]
 
-    header.xmodelPieces = menu->xmodelPieces;
-    menu->xmodelPieces = DB_AddXAsset(ASSET_TYPE_MENU, (XAssetHeader)menu->xmodelPieces).xmodelPieces;
-    for (i = 0; i < (int)header.xmodelPieces[13].pieces; ++i)
-        *(XAssetHeader *)(*(unsigned int *)(header.xmodelPieces[23].numpieces + 4 * i) + 232) = (XAssetHeader)menu->xmodelPieces;
+    header.menu = menu->menu;
+    menu->menu = DB_AddXAsset(ASSET_TYPE_MENU, menu).menu;
+
+    for (i = 0; i < header.menu->itemCount; ++i)
+        header.menu->items[i]->parent = menu->menu;
+    //for (i = 0; i < (int)header.xmodelPieces[13].pieces; ++i)
+    //    *(XAssetHeader *)(*(unsigned int *)(header.xmodelPieces[23].numpieces + 4 * i) + 232) = (XAssetHeader)menu->xmodelPieces;
 }
 
 void __cdecl Mark_MenuAsset(menuDef_t *menu)
@@ -1060,14 +1071,16 @@ void __cdecl Mark_StringTableAsset(StringTable *stringTable)
     DB_GetXAsset(ASSET_TYPE_STRINGTABLE, (XAssetHeader)stringTable);
 }
 
-XAssetHeader __cdecl DB_AllocMaterial(XAssetHeader *pool)
+XAssetHeader __cdecl DB_AllocMaterial(void *arg)
 {
+    XAssetHeader *pool = (XAssetHeader*)arg;
     Material_DirtySort();
     return DB_AllocXAsset_StringTable_(pool);
 }
 
-void __cdecl DB_FreeMaterial(XAssetPoolEntry<StringTable> **pool, XAssetHeader header)
+void __cdecl DB_FreeMaterial(void* arg, XAssetHeader header)
 {
+    XAssetPoolEntry<StringTable> **pool = (XAssetPoolEntry<StringTable> **)arg;
     Material_DirtySort();
     DB_FreeXAssetHeader_StringTable_(pool, header);
 }
@@ -1667,7 +1680,7 @@ XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, unsigned __in
         Sys_UnlockWrite(&db_hashCritSect);
         Com_Error(ERR_DROP, "Could not allocate asset - increase XASSET_ENTRY_POOL_SIZE");
     }
-    g_freeAssetEntryHead = (XAssetEntryPoolEntry *)freeHead->entry.asset.type;
+    g_freeAssetEntryHead = freeHead->next;
     freeHead->entry.asset.type = type;
     freeHead->entry.asset.header = DB_AllocXAssetHeader(type);
     freeHead->entry.zoneIndex = zoneIndex;
@@ -1704,12 +1717,10 @@ void __cdecl DB_CloneXAssetInternal(const XAsset *from, XAsset *to)
 {
     unsigned int size; // [esp+0h] [ebp-4h]
 
-    if (from->type != to->type)
-        MyAssertHandler(".\\database\\db_registry.cpp", 2477, 0, "%s", "from->type == to->type");
+    iassert(from->type == to->type);
     size = DB_GetXAssetTypeSize(from->type);
-    if (size > 0x878)
-        MyAssertHandler(".\\database\\db_registry.cpp", 2480, 0, "%s", "size <= sizeof( XAssetSize )");
-    memcpy((unsigned __int8 *)to->header.xmodelPieces, (unsigned __int8 *)from->header.xmodelPieces, size);
+    iassert(size <= sizeof(XAssetSize));
+    memcpy(to->header.data, from->header.data, size);
 }
 
 XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
@@ -1739,11 +1750,8 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
 
 BOOL __cdecl IsConfigFile(const char *name)
 {
-    int v1; // eax
-
-    if (!name)
-        MyAssertHandler(".\\database\\db_registry.cpp", 2634, 0, "%s", "name");
-    return strstr(name, ".cfg") != 0;
+    iassert(name);
+    return (strstr(name, ".cfg") != NULL);
 }
 
 void __cdecl PrintWaitedError(XAssetType type, const char *name, int waitedMsec)
@@ -1906,7 +1914,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 {
     int v2; // edx
     const char *XAssetName; // eax
-    XAssetHeader v5; // edx
+    //XAssetHeader v5; // edx
     XAssetEntryPoolEntry *existingEntry; // [esp+0h] [ebp-8ACh]
     unsigned __int32 hash; // [esp+4h] [ebp-8A8h]
     unsigned int existingEntryIndex; // [esp+8h] [ebp-8A4h]
@@ -1921,12 +1929,12 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
 
     name = DB_GetXAssetName(&newEntry->entry.asset);
     v2 = *name;
-    isStubAsset = v2 == 44;
-    if (v2 == 44)
+    isStubAsset = v2 == ',';
+    if (v2 == ',')
         ++name;
     type = newEntry->entry.asset.type;
     hash = DB_HashForName(name, type);
-    existingEntry = 0;
+    existingEntry = NULL;
     for (existingEntryIndex = db_hashTable[hash]; existingEntryIndex; existingEntryIndex = existingEntry->entry.nextHash)
     {
         existingEntry = &g_assetEntryPool[existingEntryIndex];
@@ -1939,8 +1947,7 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
     }
     if (allowOverride)
     {
-        if (isStubAsset)
-            MyAssertHandler(".\\database\\db_registry.cpp", 3021, 0, "%s", "!isStubAsset");
+        iassert(!isStubAsset);
     }
     else
     {
@@ -1948,13 +1955,12 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         {
             if (!existingEntryIndex)
                 return (XAssetEntryPoolEntry *)DB_CreateDefaultEntry(type, (char *)name);
-            if (!existingEntry)
-                MyAssertHandler(".\\database\\db_registry.cpp", 3006, 0, "%s", "existingEntry");
+            iassert(existingEntry);
             return existingEntry;
         }
-        v5.xmodelPieces = newEntry->entry.asset.header.xmodelPieces;
+        //v5.xmodelPieces = newEntry->entry.asset.header.xmodelPieces;
         asset.type = newEntry->entry.asset.type;
-        asset.header = v5;
+        asset.header = newEntry->entry.asset.header;
         newEntry = DB_AllocXAssetEntry(asset.type, g_zoneIndex);
         DB_CloneXAssetInternal(&asset, &newEntry->entry.asset);
     }
@@ -1964,12 +1970,10 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         db_hashTable[hash] = newEntry - g_assetEntryPool;
         return newEntry;
     }
-    if (!existingEntry)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3031, 0, "%s", "existingEntry");
+    iassert(existingEntry);
     if (existingEntry->entry.zoneIndex)
     {
-        if (existingEntry->entry.zoneIndex == newEntry->entry.zoneIndex)
-            MyAssertHandler(".\\database\\db_registry.cpp", 3035, 0, "%s", "existingEntry->zoneIndex != newEntry->zoneIndex");
+        iassert(existingEntry->entry.zoneIndex != newEntry->entry.zoneIndex);
         if (!*g_defaultAssetName[type] && type != ASSET_TYPE_RAWFILE && type != ASSET_TYPE_MAP_ENTS)
         {
             Sys_UnlockWrite(&db_hashCritSect);
@@ -1996,12 +2000,9 @@ XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry,
         }
         goto LABEL_46;
     }
-    if (!*g_defaultAssetName[type])
-        MyAssertHandler(".\\database\\db_registry.cpp", 3073, 0, "%s", "g_defaultAssetName[type][0]");
-    if (existingEntry->entry.nextOverride)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3074, 0, "%s", "!existingEntry->nextOverride");
-    if (!g_defaultAssetCount)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3075, 0, "%s", "g_defaultAssetCount");
+    iassert(g_defaultAssetName[type][0]);
+    iassert(!existingEntry->entry.nextOverride);
+    iassert(g_defaultAssetCount);
     if (!allowOverride)
     {
     LABEL_46:
@@ -2048,8 +2049,7 @@ void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry)
     DB_FreeXAssetHeader(assetEntry->entry.asset.type, assetEntry->entry.asset.header);
     oldFreeHead = g_freeAssetEntryHead;
     g_freeAssetEntryHead = assetEntry;
-    //assetEntry->entry.asset.type = (XAssetType)oldFreeHead;
-    assetEntry->entry.asset.type = oldFreeHead->entry.asset.type;
+    assetEntry->next = oldFreeHead;
 }
 
 void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header)
@@ -2059,8 +2059,7 @@ void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header)
 
 void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to)
 {
-    if (from->asset.type != to->asset.type)
-        MyAssertHandler(".\\database\\db_registry.cpp", 2494, 0, "%s", "from->asset.type == to->asset.type");
+    iassert(from->asset.type == to->asset.type);
     DB_DynamicCloneXAsset(to->asset.header, from->asset.header, to->asset.type, to->zoneIndex == 0);
     DB_CloneXAssetInternal(&from->asset, &to->asset);
     to->zoneIndex = from->zoneIndex;
@@ -2108,10 +2107,7 @@ void(__cdecl *DB_DynamicCloneXAssetHandler[33])(XAssetHeader, XAssetHeader, int)
 void __cdecl DB_DynamicCloneXAsset(XAssetHeader from, XAssetHeader to, XAssetType type, int fromDefault)
 {
     if (DB_DynamicCloneXAssetHandler[type])
-        DB_DynamicCloneXAssetHandler[type](
-            from,
-            to,
-            fromDefault);
+        DB_DynamicCloneXAssetHandler[type](from, to, fromDefault);
 }
 
 int g_sync;
@@ -2123,7 +2119,7 @@ void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry)
 
     if (g_sync)
     {
-        DB_LinkXAssetEntry((XAssetEntryPoolEntry*)newEntry, 1);
+        DB_LinkXAssetEntry((XAssetEntryPoolEntry *)newEntry, 1);
     }
     else
     {
@@ -2335,8 +2331,7 @@ int DB_Init()
     for (i = 1; i < 0x7FFF; ++i)
     {
         result = 16 * i;
-        //g_assetEntryPool[i].entry.asset.type = (XAssetType)&g_assetEntryPool[i + 1];
-        g_assetEntryPool[i].entry.asset.type = g_assetEntryPool[i + 1].entry.asset.type;
+        g_assetEntryPool[i].next = &g_assetEntryPool[i + 1];
     }
     g_assetEntryPool[0x7FFF].entry.asset.type = ASSET_TYPE_XMODELPIECES;
     return result;
@@ -2400,7 +2395,7 @@ void __cdecl DB_InitThread()
 
 void __cdecl  DB_Thread(unsigned int threadContext)
 {
-    jmp_buf *Value; // eax
+    //jmp_buf *Value; // eax
 
     if (threadContext != 6)
         MyAssertHandler(
@@ -2410,14 +2405,18 @@ void __cdecl  DB_Thread(unsigned int threadContext)
             "threadContext == THREAD_CONTEXT_DATABASE\n\t%i, %i",
             threadContext,
             6);
-    Value = (jmp_buf *)Sys_GetValue(2);
+    //Value = (jmp_buf *)Sys_GetValue(2);
     // KISAKTODO: try-catch
-    if (_setjmp(*Value))
-    {
-        //Profile_Recover(1);
-        __builtin_debugtrap();
-        Com_ErrorAbort();
-    }
+//    if (_setjmp(*Value))
+//    {
+//        //Profile_Recover(1);
+//#ifdef __llvm__ 
+//        __builtin_debugtrap();
+//#else
+//        __debugbreak();
+//#endif
+//        Com_ErrorAbort();
+//    }
     //Profile_Guard(1);
     while (1)
     {
@@ -2669,9 +2668,9 @@ char __cdecl DB_ShouldLoadFromModDir(const char *zoneName)
 
 int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
 {
-    const char* v3; // eax
+    const char *v3; // eax
     unsigned int v4; // eax
-    unsigned __int8 v5; // [esp+0h] [ebp-11Ch]
+    //unsigned __int8 v5; // [esp+0h] [ebp-11Ch]
     unsigned int startWaitingTime; // [esp+4h] [ebp-118h]
     XZone *zone; // [esp+8h] [ebp-114h]
     char filename[256]; // [esp+Ch] [ebp-110h] BYREF
@@ -2746,8 +2745,8 @@ int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
         if (!*zoneName)
             MyAssertHandler(".\\database\\db_registry.cpp", 3668, 0, "%s", "zoneName[0]");
         zone = &g_zones[g_zoneIndex];
-        memset((unsigned __int8 *)zone, 0, sizeof(XZone));
-        v5 = g_zoneIndex;
+        memset(zone, 0, sizeof(XZone));
+        //v5 = g_zoneIndex;
         if (g_zoneIndex != (unsigned __int8)g_zoneIndex)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
@@ -2756,7 +2755,7 @@ int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
                 "i == static_cast< Type >( i )\n\t%i, %i",
                 g_zoneIndex,
                 (unsigned __int8)g_zoneIndex);
-        g_zoneHandles[g_zoneCount] = v5;
+        g_zoneHandles[g_zoneCount] = g_zoneIndex;
         if (zone->name[0])
             MyAssertHandler(".\\database\\db_registry.cpp", 3674, 0, "%s", "!zone->name[0]");
         I_strncpyz(zone->name, zoneName, 64);
@@ -2855,7 +2854,8 @@ void __cdecl DB_UnloadXZone(unsigned int zoneIndex, bool createDefault)
 LABEL_4:
     if (hash < 0x8000)
     {
-        pAssetEntryIndex = (unsigned __int16 *)(2 * hash + 17442712);
+        //pAssetEntryIndex = (unsigned __int16 *)(2 * hash + 17442712);
+        pAssetEntryIndex = &db_hashTable[hash];
         while (1)
         {
             while (1)
@@ -2944,8 +2944,8 @@ void(__cdecl *DB_RemoveXAssetHandler[33])(XAssetHeader) =
   NULL,
   NULL,
   NULL,
-  (void(*)(XAssetHeader))&Material_ReleaseTechniqueSet,
-  (void(*)(XAssetHeader))&Image_Free,
+  (void(*)(XAssetHeader)) & Material_ReleaseTechniqueSet,
+  (void(*)(XAssetHeader)) & Image_Free,
   NULL,
   NULL,
   &DB_RemoveLoadedSound,
@@ -3006,8 +3006,7 @@ void __cdecl DB_ShutdownXAssets()
 
     DB_SyncXAssets();
     DB_SyncExternalAssets();
-    if (db_hashCritSect.writeCount)
-        MyAssertHandler(".\\database\\db_registry.cpp", 4024, 0, "%s", "!db_hashCritSect.writeCount");
+    iassert(!db_hashCritSect.writeCount);
     Sys_LockWrite(&db_hashCritSect);
     for (i = g_zoneCount - 1; i >= 0; --i)
         DB_UnloadXZone(g_zoneHandles[i], 0);
@@ -3089,7 +3088,8 @@ void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int sortedIndex)
     --g_zoneCount;
     while (sortedIndex < g_zoneCount)
     {
-        g_zoneHandles[sortedIndex] = *(_BYTE *)(sortedIndex + 19939261);
+        //g_zoneHandles[sortedIndex] = *(_BYTE *)(sortedIndex + 19939261);
+        g_zoneHandles[sortedIndex] = g_zoneHandles[sortedIndex + 1];
         ++sortedIndex;
     }
 }
@@ -3171,7 +3171,8 @@ void DB_FreeUnusedResources()
     }
     for (hasha = 0; hasha < 0x8000; ++hasha)
     {
-        pAssetEntryIndex = (unsigned __int16 *)(2 * hasha + 17442712);
+        //pAssetEntryIndex = (unsigned __int16 *)(2 * hasha + 17442712);
+        pAssetEntryIndex = &db_hashTable[hasha];
         while (*pAssetEntryIndex)
         {
             assetEntry = &g_assetEntryPool[*pAssetEntryIndex];
@@ -3210,14 +3211,12 @@ void DB_ExternalInitAssets()
 
 void DB_UnarchiveAssets()
 {
-    if (!g_archiveBuf)
-        MyAssertHandler(".\\database\\db_registry.cpp", 4224, 0, "%s", "g_archiveBuf");
+    iassert(g_archiveBuf);
     g_archiveBuf = 0;
     DB_LoadSounds();
     DB_LoadDObjs();
     DB_ExternalInitAssets();
-    if (!Sys_IsMainThread() && !Sys_IsRenderThread())
-        MyAssertHandler(".\\database\\db_registry.cpp", 4244, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
+    iassert(Sys_IsMainThread() || Sys_IsRenderThread());
     if (Sys_IsMainThread())
         R_ReleaseThreadOwnership();
 }
@@ -3225,8 +3224,7 @@ void DB_UnarchiveAssets()
 void __cdecl DB_Cleanup()
 {
     Sys_SyncDatabase();
-    if (g_archiveBuf)
-        MyAssertHandler(".\\database\\db_registry.cpp", 4256, 0, "%s", "!g_archiveBuf");
+    iassert(!g_archiveBuf);
 }
 
 int __cdecl DB_FileSize(const char *zoneName, int isMod)
@@ -3249,18 +3247,17 @@ int __cdecl DB_FileSize(const char *zoneName, int isMod)
 
 void __cdecl Load_GetCurrentZoneHandle(unsigned __int8 *handle)
 {
-    unsigned __int8 v1; // [esp+0h] [ebp-4h]
+    //unsigned __int8 v1; // [esp+0h] [ebp-4h]
 
-    if (!g_loadingZone)
-        MyAssertHandler(".\\database\\db_registry.cpp", 4262, 0, "%s", "g_loadingZone");
-    v1 = g_zoneIndex;
-    if (g_zoneIndex != g_zoneIndex)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-            281,
-            0,
-            "i == static_cast< Type >( i )\n\t%i, %i",
-            g_zoneIndex,
-            g_zoneIndex);
-    *handle = v1;
+    iassert(g_loadingZone);
+    //v1 = g_zoneIndex;
+    //if (g_zoneIndex != g_zoneIndex)
+    //    MyAssertHandler(
+    //        "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+    //        281,
+    //        0,
+    //        "i == static_cast< Type >( i )\n\t%i, %i",
+    //        g_zoneIndex,
+    //        g_zoneIndex);
+    *handle = g_zoneIndex;
 }
