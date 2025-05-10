@@ -267,7 +267,7 @@ void __cdecl DB_LoadXFileInternal()
         DB_CancelLoadXFile();
         Com_Error(ERR_DROP, "Fastfile for zone '%s' could not be loaded (%s)", g_load.filename, failureReason);
     }
-    DB_LoadXFileData((unsigned __int8 *)&file, 0x2Cu);
+    DB_LoadXFileData((unsigned __int8 *)&file, sizeof(XFile));
     if (g_trackLoadProgress)
     {
         fileSize = GetFileSize(g_load.f, 0);
@@ -310,7 +310,7 @@ bool __cdecl DB_IsMinimumFastFileLoaded()
 void Load_XAssetListCustom()
 {
     varXAssetList = &g_varXAssetList;
-    DB_LoadXFileData((unsigned __int8 *)&g_varXAssetList, 0x10u);
+    DB_LoadXFileData((unsigned __int8 *)&g_varXAssetList, sizeof(XAssetList));
     DB_PushStreamPos(4u);
     varScriptStringList = &varXAssetList->stringList;
     Load_ScriptStringList(0);

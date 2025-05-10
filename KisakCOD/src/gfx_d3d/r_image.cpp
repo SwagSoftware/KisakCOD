@@ -238,28 +238,28 @@ void __cdecl Image_SetupRenderTarget(
 
 void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
 {
-    unsigned int v2; // [esp+0h] [ebp-60h]
-    unsigned int v3; // [esp+4h] [ebp-5Ch]
-    unsigned int v4; // [esp+8h] [ebp-58h]
+    unsigned int mipDepth; // [esp+0h] [ebp-60h]
+    unsigned int mipHeight; // [esp+4h] [ebp-5Ch]
+    unsigned int mipWidth; // [esp+8h] [ebp-58h]
     _D3DCUBEMAP_FACES v5; // [esp+Ch] [ebp-54h]
     unsigned __int16 v6; // [esp+14h] [ebp-4Ch]
-    int v7; // [esp+18h] [ebp-48h]
+    unsigned __int16 v7; // [esp+18h] [ebp-48h]
     GfxImageLoadDef *loadDef; // [esp+34h] [ebp-2Ch]
-    int externalDataSize; // [esp+38h] [ebp-28h]
+    LONG externalDataSize; // [esp+38h] [ebp-28h]
     signed int mipCount; // [esp+3Ch] [ebp-24h]
-    unsigned __int8 *data; // [esp+40h] [ebp-20h]
+    GfxImageLoadDef *data; // [esp+40h] [ebp-20h]
     int faceCount; // [esp+50h] [ebp-10h]
     signed int faceIndex; // [esp+54h] [ebp-Ch]
     _D3DFORMAT imageFormat; // [esp+58h] [ebp-8h]
     signed int mipLevel; // [esp+5Ch] [ebp-4h]
 
-    loadDef = (GfxImageLoadDef *)remoteLoadDef->basemap;
+    loadDef = remoteLoadDef->loadDef;
     if (remoteLoadDef->basemap != image->texture.basemap)
         MyAssertHandler(".\\r_image.cpp", 768, 0, "%s", "loadDef == image->texture.loadDef");
     image->texture.basemap = 0;
     if (r_loadForRenderer->current.enabled)
     {
-        imageFormat = (D3DFORMAT)loadDef->format;
+        imageFormat = loadDef->format;
         if (loadDef->resourceSize)
         {
             image->delayLoadPixels = 0;
@@ -299,33 +299,33 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                 Image_CreateCubeTexture_PC(image, loadDef->dimensions[0], loadDef->levelCount, imageFormat);
                 faceCount = 6;
             }
-            data = loadDef->data;
+            data = (GfxImageLoadDef*)&loadDef->data[0];
             mipCount = Image_CountMipmaps(loadDef->flags, image->width, image->height, image->depth);
             for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
             {
                 if (faceCount == 1)
                     v5 = D3DCUBEMAP_FACE_POSITIVE_X;
                 else
-                    v5 = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
+                    v5 = (D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
                 for (mipLevel = 0; mipLevel < mipCount; ++mipLevel)
                 {
-                    Image_UploadData(image, imageFormat, v5, mipLevel, data);
+                    Image_UploadData(image, imageFormat, v5, mipLevel, &data->levelCount);
                     if (image->width >> mipLevel > 1)
-                        v4 = image->width >> mipLevel;
+                        mipWidth = image->width >> mipLevel;
                     else
-                        v4 = 1;
+                        mipWidth = 1;
                     if (image->height >> mipLevel > 1)
-                        v3 = image->height >> mipLevel;
+                        mipHeight = image->height >> mipLevel;
                     else
-                        v3 = 1;
+                        mipHeight = 1;
                     if (image->depth >> mipLevel > 1)
-                        v2 = image->depth >> mipLevel;
+                        mipDepth = image->depth >> mipLevel;
                     else
-                        v2 = 1;
-                    data += Image_GetCardMemoryAmountForMipLevel(imageFormat, v4, v3, v2);
+                        mipDepth = 1;
+                    data = (data + Image_GetCardMemoryAmountForMipLevel(imageFormat, mipWidth, mipHeight, mipDepth));
                 }
             }
-            if (data != &loadDef->data[loadDef->resourceSize])
+            if (data != (GfxImageLoadDef*)&loadDef->data[loadDef->resourceSize])
                 MyAssertHandler(
                     ".\\r_image.cpp",
                     837,
@@ -338,9 +338,9 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
         {
             image->delayLoadPixels = 0;
             if (loadDef->dimensions[0] >> r_picmip_water->current.integer < 4)
-                LOWORD(v7) = 4;
+                v7 = 4;
             else
-                v7 = loadDef->dimensions[0] >> r_picmip_water->current.integer;
+                *&v7 = loadDef->dimensions[0] >> r_picmip_water->current.integer;
             if (loadDef->dimensions[1] >> r_picmip_water->current.integer < 4)
                 v6 = 4;
             else
@@ -353,7 +353,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
         {
             if (image->cardMemory.platform[0] != Image_GetCardMemoryAmount(
                 loadDef->flags,
-                (_D3DFORMAT)loadDef->format,
+                loadDef->format,
                 loadDef->dimensions[0],
                 loadDef->dimensions[1],
                 loadDef->dimensions[2]))

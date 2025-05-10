@@ -244,6 +244,7 @@ void Sys_NoFreeFilesError()
 
 int __cdecl Sys_CheckCrashOrRerun()
 {
+#ifdef KISAK_PURE
 	HWND ActiveWindow; // eax
 	char* v2; // [esp-Ch] [ebp-20h]
 	char* v3; // [esp-8h] [ebp-1Ch]
@@ -292,6 +293,9 @@ int __cdecl Sys_CheckCrashOrRerun()
 	}
 	CloseHandle(file);
 	return 1;
+#else
+	return 1; // LWSS: Disable the "Do you wanna startup in Safe Mode?!" Prompt. 
+#endif
 }
 
 void Sys_Error(const char *error, ...)

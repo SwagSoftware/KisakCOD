@@ -534,7 +534,8 @@
      r_ignore = Dvar_RegisterInt("r_ignore", 0, (DvarLimits)0x7FFFFFFF80000000LL, 0, "used for debugging anything");
      vid_xpos = Dvar_RegisterInt("vid_xpos", 3, (DvarLimits)0x1000FFFFF000LL, 1u, "Game window horizontal position");
      vid_ypos = Dvar_RegisterInt("vid_ypos", 22, (DvarLimits)0x1000FFFFF000LL, 1u, "game window vertical position");
-     r_fullscreen = Dvar_RegisterBool("r_fullscreen", 1, 0x21u, "Display game full screen");
+     //r_fullscreen = Dvar_RegisterBool("r_fullscreen", 1, 0x21u, "Display game full screen");
+     r_fullscreen = Dvar_RegisterBool("r_fullscreen", 0, 0x21u, "Display game full screen");
      min.value.max = 3.0;
      min.value.min = 0.5;
      r_gamma = Dvar_RegisterFloat("r_gamma", 0.80000001, min, 1u, "Gamma value");

@@ -4066,7 +4066,7 @@ HRESULT __cdecl R_CreateDeviceInternal(HWND__ *hwnd, unsigned int behavior, _D3D
         hr = dx.d3d9->CreateDevice(dx.adapterIndex, DeviceType, hwnd, behavior, d3dpp, &dx.device);
         if (hr >= 0)
             break;
-        Sleep(0x64u);
+        Sleep(100);
         if (++attempt == 20)
         {
             if (!dx.adapterIndex)

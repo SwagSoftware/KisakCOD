@@ -234,8 +234,7 @@ const char *__cdecl DB_GetXAssetHeaderName(int type, const XAssetHeader *header)
 
 const char *__cdecl DB_GetXAssetName(const XAsset *asset)
 {
-    if (!asset)
-        MyAssertHandler(".\\database\\db_assetnames.cpp", 601, 0, "%s", "asset");
+    iassert(asset);
     return DB_GetXAssetHeaderName(asset->type, &asset->header);
 }
 

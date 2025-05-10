@@ -188,12 +188,9 @@ struct GfxImageLoadDef // sizeof=0x14
     unsigned __int8 levelCount;
     unsigned __int8 flags;
     __int16 dimensions[3];
-    int format;
+    _D3DFORMAT format;
     int resourceSize;
-    unsigned __int8 data[1];
-    // padding byte
-    // padding byte
-    // padding byte
+    unsigned __int8 data[4]; // data extends beyond 4... '4' is to force alignment
 };
 
 union GfxTexture // sizeof=0x4

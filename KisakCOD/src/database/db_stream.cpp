@@ -5,9 +5,10 @@ XBlock * g_streamBlocks;
 unsigned __int8 *g_streamPosArray[9];
 StreamDelayInfo g_streamDelayArray[4096];
 unsigned int g_streamPosIndex;
-StreamPosInfo g_streamPosStack[64];
 XZoneMemory *g_streamZoneMem;
 unsigned __int8 *g_streamPos;
+
+StreamPosInfo g_streamPosStack[64];
 unsigned int g_streamPosStackIndex;
 
 void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
@@ -36,17 +37,12 @@ void __cdecl DB_PushStreamPos(unsigned int index)
             0,
             "%s",
             "g_streamPosStackIndex < ARRAY_COUNT( g_streamPosStack )");
+
+
     g_streamPosStack[g_streamPosStackIndex].index = g_streamPosIndex;
     DB_SetStreamIndex(index);
 
     g_streamPosStack[g_streamPosStackIndex++].pos = g_streamPos;
-
-    // lmao compiler???
-    //*(&g_streamPosIndex + 2 * g_streamPosStackIndex) = (unsigned int)g_streamPos;
-    // == (char*)&g_streamPosIndex + 8 * g_streamPosStackIndex
-    // == (char*)&g_streamPosIndex + 8 + 8 * (g_streamPosStackIndex - 1)
-    // == (char*)&g_streamPosStack + 8 * (g_streamPosStackIndex - 1)
-    // == &g_streamPosStack[g_streamPosStackIndex - 1].pos
 }
 
 void __cdecl DB_CloneStreamData(unsigned __int8 *destStart)
@@ -93,6 +89,7 @@ unsigned __int8 *__cdecl DB_GetStreamPos()
 
 unsigned __int8 *__cdecl DB_AllocStreamPos(int alignment)
 {
+    iassert(g_streamPos);
     g_streamPos = (unsigned __int8 *)(~alignment & (unsigned int)&g_streamPos[alignment]);
     return g_streamPos;
 }

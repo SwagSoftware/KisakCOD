@@ -1997,12 +1997,12 @@ void __cdecl Load_GfxStateBitsArray(bool atStreamStart, int count)
 
 void __cdecl Load_MaterialPass(bool atStreamStart)
 {
-    Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialPass, 20);
+    Load_Stream(atStreamStart, (unsigned char*)varMaterialPass, 20);
     if (varMaterialPass->vertexDecl)
     {
-        if (varMaterialPass->vertexDecl == (MaterialVertexDeclaration *)-1)
+        if (varMaterialPass->vertexDecl == (MaterialVertexDeclaration*)-1)
         {
-            varMaterialPass->vertexDecl = (MaterialVertexDeclaration *)AllocLoad_FxElemVisStateSample();
+            varMaterialPass->vertexDecl = (MaterialVertexDeclaration*)AllocLoad_FxElemVisStateSample();
             varMaterialVertexDeclaration = varMaterialPass->vertexDecl;
             Load_MaterialVertexDeclaration(1);
             Load_BuildVertexDecl(&varMaterialPass->vertexDecl);
@@ -2012,9 +2012,9 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
             DB_ConvertOffsetToPointer((unsigned int*)varMaterialPass);
         }
     }
-    varMaterialVertexShaderPtr = (MaterialVertexShader **)(varMaterialPass + 1);
+    varMaterialVertexShaderPtr = &varMaterialPass->vertexShader;
     Load_MaterialVertexShaderPtr(0);
-    varMaterialPixelShaderPtr = (MaterialPixelShader **)(varMaterialPass + 2);
+    varMaterialPixelShaderPtr = &varMaterialPass->pixelShader;
     Load_MaterialPixelShaderPtr(0);
     if (varMaterialPass->args)
     {
@@ -2045,7 +2045,7 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
 {
     if (!atStreamStart)
         MyAssertHandler("c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_material_load_db.h", 5470, 0, "%s", "atStreamStart");
-    Load_Stream(1, (unsigned __int8 *)varMaterialTechnique, 8);
+    Load_Stream(1, (unsigned __int8 *)varMaterialTechnique, 8); // 0x2668
     if (DB_GetStreamPos() != (unsigned __int8 *)varMaterialTechnique->passArray)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_material_load_db.h",
@@ -2054,9 +2054,9 @@ void __cdecl Load_MaterialTechnique(bool atStreamStart)
             "%s",
             "DB_GetStreamPos() == reinterpret_cast< byte * >( varMaterialTechnique->passArray )");
     varMaterialPass = (MaterialPass*)&varMaterialTechnique->passArray[0].vertexDecl;
-    Load_MaterialPassArray(1, varMaterialTechnique->passCount);
+    Load_MaterialPassArray(1, varMaterialTechnique->passCount); // 0x2990
     varXString = &varMaterialTechnique->name;
-    Load_XString(0);
+    Load_XString(0); // 0x29A1
 }
 
 void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
