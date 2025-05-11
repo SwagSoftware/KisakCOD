@@ -522,7 +522,7 @@ void __cdecl ScrPlace_ApplyRect(
     int horzAlign,
     int vertAlign);
 
-extern struct ScreenPlacement *scrPlaceView;
+extern struct ScreenPlacement scrPlaceView[1];
 extern struct ScreenPlacement scrPlaceFull;
 extern float cg_hudSplitscreenScale;
 extern ScreenPlacement scrPlaceFullUnsafe;

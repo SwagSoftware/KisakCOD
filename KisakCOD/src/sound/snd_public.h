@@ -66,15 +66,34 @@ struct snd_listener // sizeof=0x38
     // padding byte
     // padding byte
 };
-struct MssSound // sizeof=0x28
+// LWSS HACK: We use a slightly different version of MSS that has a +4 bigger struct.
+ struct _AILSOUNDINFO_COD4 // sizeof=0x24
 {                                       // ...
-    _AILSOUNDINFO info;
+    int format;
+    const void *data_ptr;               // ...
+    unsigned int data_len;              // ...
+    unsigned int rate;
+    int bits;
+    int channels;
+    unsigned int samples;
+    unsigned int block_size;
+    const void *initial_ptr;            // ...
+};
+struct MssSoundCOD4 // sizeof=0x28
+{
+    _AILSOUNDINFO_COD4 info;
     unsigned __int8 *data;
 };
+// LWSS END
+//struct MssSound // sizeof=0x2C
+//{                                       // ...
+//    _AILSOUNDINFO info;
+//    unsigned __int8 *data;
+//};
 struct LoadedSound // sizeof=0x2C
 {                                       // ...
     const char *name;
-    MssSound sound;
+    MssSoundCOD4 sound;
 };
 struct StreamFileNameRaw // sizeof=0x8
 {                                       // ...
@@ -588,7 +607,7 @@ void __cdecl StopChannel(int chanId);
 void __cdecl SND_AddPhysicsSound(snd_alias_list_t *aliasList, float *org);
 double __cdecl SND_GetVolumeNormalized();
 void __cdecl SND_SetHWND(HWND hwnd);
-void __cdecl SND_SetData(MssSound *mssSound, void *srcData);
+void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData);
 
 // snd_driver_load_obj
 struct LoadedSound *__cdecl SND_LoadSoundFile(const char *name);

@@ -183,6 +183,7 @@ struct CardMemory // sizeof=0x8
     int platform[2];                    // ...
 };
 
+#define OFFSET_TO_GfxImageLoadDef_DATA sizeof(unsigned __int8) + sizeof(unsigned __int8) + sizeof(__int16) + sizeof(__int16) + sizeof(__int16) + sizeof(_D3DFORMAT) + sizeof(int)
 struct GfxImageLoadDef // sizeof=0x14
 {
     unsigned __int8 levelCount;

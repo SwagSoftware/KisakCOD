@@ -17,7 +17,61 @@ MaterialGlobals materialGlobals;
 
 stream_source_info_t s_streamSourceInfo[16][9];
 stream_dest_info_t s_streamDestInfo[12];
-BuiltInMaterialTable s_builtInMaterials[50];
+const BuiltInMaterialTable s_builtInMaterials[50] =
+{
+  { "$default", &rgp.defaultMaterial },
+  { "white", &rgp.whiteMaterial },
+  { "$additive", &rgp.additiveMaterial },
+  { "$glare_blind", &rgp.glareBlindMaterial },
+  { "$point", &rgp.pointMaterial },
+  { "$line", &rgp.lineMaterial },
+  { "$line_nodepth", &rgp.lineMaterialNoDepth },
+  { "clear_alpha_stencil", &rgp.clearAlphaStencilMaterial },
+  { "depthprepass", &rgp.depthPrepassMaterial },
+  { "shadowclear", &rgp.shadowClearMaterial },
+  { "shadowcookieoverlay", &rgp.shadowCookieOverlayMaterial },
+  { "shadowcookieblur", &rgp.shadowCookieBlurMaterial },
+  { "shadowcaster", &rgp.shadowCasterMaterial },
+  { "shadowoverlay", &rgp.shadowOverlayMaterial },
+  { "stencilshadow", &rgp.stencilShadowMaterial },
+  { "stencildisplay", &rgp.stencilDisplayMaterial },
+  { "floatz_display", &rgp.floatZDisplayMaterial },
+  { "shellshock", &rgp.shellShockBlurredMaterial },
+  { "shellshock_flashed", &rgp.shellShockFlashedMaterial },
+  { "color_channel_mixer", &rgp.colorChannelMixerMaterial },
+  { "frame_color_debug", &rgp.frameColorDebugMaterial },
+  { "frame_alpha_debug", &rgp.frameAlphaDebugMaterial },
+  { "feedbackblend", &rgp.feedbackBlendMaterial },
+  { "feedbackfilmblend", &rgp.feedbackFilmBlendMaterial },
+  { "feedbackreplace", &rgp.feedbackReplaceMaterial },
+  { "cinematic", &rgp.cinematicMaterial },
+  { "dof_downsample", &rgp.dofDownsampleMaterial },
+  { "dof_near_coc", &rgp.dofNearCocMaterial },
+  { "small_blur", &rgp.smallBlurMaterial },
+  { "postfx_dof", &rgp.postFxDofMaterial },
+  { "postfx_dof_color", &rgp.postFxDofColorMaterial },
+  { "postfx_color", &rgp.postFxColorMaterial },
+  { "postfx", &rgp.postFxMaterial },
+  { "glow_consistent_setup", &rgp.glowConsistentSetupMaterial },
+  { "glow_apply_bloom", &rgp.glowApplyBloomMaterial },
+  { "filter_symmetric_1", &rgp.symmetricFilterMaterial[0] },
+  { "filter_symmetric_2", &rgp.symmetricFilterMaterial[1] },
+  { "filter_symmetric_3", &rgp.symmetricFilterMaterial[2] },
+  { "filter_symmetric_4", &rgp.symmetricFilterMaterial[3] },
+  { "filter_symmetric_5", &rgp.symmetricFilterMaterial[4] },
+  { "filter_symmetric_6", &rgp.symmetricFilterMaterial[5] },
+  { "filter_symmetric_7", &rgp.symmetricFilterMaterial[6] },
+  { "filter_symmetric_8", &rgp.symmetricFilterMaterial[7] },
+  { "pixel_cost_add_depth_always", &rgp.pixelCostAddDepthAlwaysMaterial },
+  { "pixel_cost_add_depth_disable", &rgp.pixelCostAddDepthDisableMaterial },
+  { "pixel_cost_add_depth_equal", &rgp.pixelCostAddDepthEqualMaterial },
+  { "pixel_cost_add_depth_less", &rgp.pixelCostAddDepthLessMaterial },
+  { "pixel_cost_add_depthwrite", &rgp.pixelCostAddDepthWriteMaterial },
+  { "pixel_cost_add_nodepthwrite", &rgp.pixelCostAddNoDepthWriteMaterial },
+  { "pixel_cost_color_code", &rgp.pixelCostColorCodeMaterial }
+};
+
+
 
 bool g_generateOverrideTechniques;
 bool g_alwaysUseDefaultMaterial;

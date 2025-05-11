@@ -362,7 +362,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     int start_msec; // [esp+98h] [ebp-18h]
     int playbackId; // [esp+9Ch] [ebp-14h]
     float realVolume; // [esp+A0h] [ebp-10h]
-    MssSound *sound; // [esp+A4h] [ebp-Ch]
+    MssSoundCOD4 *sound; // [esp+A4h] [ebp-Ch]
     int entchannel; // [esp+A8h] [ebp-8h]
     int index; // [esp+ACh] [ebp-4h]
 
@@ -419,7 +419,19 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     handle = milesGlob.handle_sample[index];
     sound = &startAliasInfo->alias0->soundFile->u.loadSnd->sound;
     //Profile_Begin(336);
-    AIL_set_sample_info(handle, &sound->info);
+    _AILSOUNDINFO info; // LWSS HACK: struct version conversion
+    info.format = sound->info.format;
+    info.data_ptr = sound->info.data_ptr;
+    info.rate = sound->info.rate;
+    info.bits = sound->info.bits;
+    info.channels = sound->info.channels;
+    info.samples = sound->info.samples;
+    info.block_size = sound->info.block_size;
+    info.initial_ptr = sound->info.initial_ptr;
+    info.channel_mask = ~0U; // NEW!
+
+    //AIL_set_sample_info(handle, &sound->info);
+    AIL_set_sample_info(handle, &info);
     //Profile_EndInternal(0);
     MSS_ApplyEqFilter(handle, entchannel);
     if (startAliasInfo->timescale)
@@ -558,7 +570,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     float attenuation; // [esp+E8h] [ebp-24h]
     int playbackId; // [esp+ECh] [ebp-20h]
     float realVolume; // [esp+F0h] [ebp-1Ch]
-    MssSound *sound; // [esp+F4h] [ebp-18h]
+    MssSoundCOD4 *sound; // [esp+F4h] [ebp-18h]
     float distance; // [esp+F8h] [ebp-14h]
     float distMin; // [esp+FCh] [ebp-10h]
     int entchannel; // [esp+100h] [ebp-Ch]
@@ -622,7 +634,19 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     distMax = (1.0 - startAliasInfo->lerp) * startAliasInfo->alias0->distMax
         + startAliasInfo->alias1->distMax * startAliasInfo->lerp;
     //Profile_Begin(337);
-    AIL_set_sample_info(handle, &sound->info);
+    _AILSOUNDINFO info; // LWSS HACK: struct version conversion
+    info.format = sound->info.format;
+    info.data_ptr = sound->info.data_ptr;
+    info.rate = sound->info.rate;
+    info.bits = sound->info.bits;
+    info.channels = sound->info.channels;
+    info.samples = sound->info.samples;
+    info.block_size = sound->info.block_size;
+    info.initial_ptr = sound->info.initial_ptr;
+    info.channel_mask = ~0U; // NEW!
+
+    //AIL_set_sample_info(handle, &sound->info);
+    AIL_set_sample_info(handle, &info);
     //Profile_EndInternal(0);
     MSS_ApplyEqFilter(handle, entchannel);
     listener = g_snd.listeners[SND_GetListenerIndexNearestToOrigin(startAliasInfo->org)].orient.origin;

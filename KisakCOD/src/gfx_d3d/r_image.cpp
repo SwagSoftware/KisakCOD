@@ -247,7 +247,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
     GfxImageLoadDef *loadDef; // [esp+34h] [ebp-2Ch]
     LONG externalDataSize; // [esp+38h] [ebp-28h]
     signed int mipCount; // [esp+3Ch] [ebp-24h]
-    GfxImageLoadDef *data; // [esp+40h] [ebp-20h]
+    unsigned char *data; // [esp+40h] [ebp-20h]
     int faceCount; // [esp+50h] [ebp-10h]
     signed int faceIndex; // [esp+54h] [ebp-Ch]
     _D3DFORMAT imageFormat; // [esp+58h] [ebp-8h]
@@ -299,7 +299,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                 Image_CreateCubeTexture_PC(image, loadDef->dimensions[0], loadDef->levelCount, imageFormat);
                 faceCount = 6;
             }
-            data = (GfxImageLoadDef*)&loadDef->data[0];
+            data = &loadDef->data[0];
             mipCount = Image_CountMipmaps(loadDef->flags, image->width, image->height, image->depth);
             for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
             {
@@ -309,7 +309,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                     v5 = (D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
                 for (mipLevel = 0; mipLevel < mipCount; ++mipLevel)
                 {
-                    Image_UploadData(image, imageFormat, v5, mipLevel, &data->levelCount);
+                    Image_UploadData(image, imageFormat, v5, mipLevel, data);
                     if (image->width >> mipLevel > 1)
                         mipWidth = image->width >> mipLevel;
                     else
@@ -322,10 +322,10 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                         mipDepth = image->depth >> mipLevel;
                     else
                         mipDepth = 1;
-                    data = (data + Image_GetCardMemoryAmountForMipLevel(imageFormat, mipWidth, mipHeight, mipDepth));
+                    data += Image_GetCardMemoryAmountForMipLevel(imageFormat, mipWidth, mipHeight, mipDepth);
                 }
             }
-            if (data != (GfxImageLoadDef*)&loadDef->data[loadDef->resourceSize])
+            if (data != &loadDef->data[loadDef->resourceSize])
                 MyAssertHandler(
                     ".\\r_image.cpp",
                     837,

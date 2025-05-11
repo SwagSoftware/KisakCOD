@@ -4842,8 +4842,10 @@ void __cdecl SND_SetHWND(HWND hwnd)
         AIL_set_DirectSound_HWND(milesGlob.driver, hwnd);
 }
 
-void __cdecl SND_SetData(MssSound *mssSound, void *srcData)
+void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
 {
+    // KISAKTODO: double check MssSound struct usage here. It looks 'okay' at first glance
+
     _AILMIXINFO mixinfo; // [esp+Ch] [ebp-80h] BYREF
     int digitalFormat; // [esp+88h] [ebp-4h]
 

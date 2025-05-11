@@ -1,8 +1,8 @@
 #include "client.h"
 #include <client_mp/client_mp.h>
 
-struct ScreenPlacement *scrPlaceView;
-struct ScreenPlacement scrPlaceFull;
+ScreenPlacement scrPlaceView[1];
+ScreenPlacement scrPlaceFull;
 float cg_hudSplitscreenScale;
 ScreenPlacement scrPlaceFullUnsafe;
 

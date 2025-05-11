@@ -323,7 +323,7 @@ void *varvoid                ;
 cNode_t *varcNode_t     ;
 GfxSurface *varGfxSurface     ;
 multiDef_s *varmultiDef_t     ;
-union GfxTexture *varGfxTextureLoad     ;
+union GfxTexture *varGfxTextureLoad;
 GameWorldMp **varGameWorldMpPtr     ;
 enum WeapStickinessType *varWeapStickinessType     ;
 GfxWorld **varGfxWorldPtr     ;
@@ -398,7 +398,8 @@ snd_alias_list_t *varsnd_alias_list_t     ;
 cLeafBrushNodeChildren_t *varcLeafBrushNodeChildren_t     ;
 LocalizeEntry **varLocalizeEntryPtr     ;
 unsigned __int8 (*varByteVec)[3];
-MssSound *varMssSound;
+//MssSound *varMssSound;
+MssSoundCOD4 *varMssSound;
 IDirect3DVertexBuffer9 **varGfxVertexBuffer;
 unsigned __int8 *varXZoneHandle;
 MaterialVertexShaderProgram *varMaterialVertexShaderProgram;
@@ -1111,7 +1112,7 @@ void __cdecl Load_StreamFileName(bool atStreamStart)
     Load_StreamFileInfo(0);
 }
 
-void __cdecl Load_SetSoundData(unsigned __int8 **data, MssSound *mssSound)
+void __cdecl Load_SetSoundData(unsigned __int8 **data, MssSoundCOD4 *mssSound)
 {
     SND_SetData(mssSound, *data);
 }
@@ -1347,27 +1348,27 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
     const void **inserted; // [esp+0h] [ebp-Ch]
     unsigned int value; // [esp+4h] [ebp-8h]
 
-    Load_Stream(atStreamStart, (unsigned __int8 *)varsnd_alias_list_ptr, 4);
+    Load_Stream(atStreamStart, (unsigned char*)varsnd_alias_list_ptr, 4);
     DB_PushStreamPos(0);
     if (*varsnd_alias_list_ptr)
     {
         value = (unsigned int)*varsnd_alias_list_ptr;
-        if (*varsnd_alias_list_ptr == (snd_alias_list_t *)-1 || value == -2)
+        if ((unsigned int)*varsnd_alias_list_ptr == -1 || value == -2)
         {
-            *varsnd_alias_list_ptr = (snd_alias_list_t *)AllocLoad_FxElemVisStateSample();
+            *varsnd_alias_list_ptr = (snd_alias_list_t*)AllocLoad_FxElemVisStateSample();
             varsnd_alias_list_t = *varsnd_alias_list_ptr;
             if (value == -2)
                 inserted = DB_InsertPointer();
             else
                 inserted = 0;
             Load_snd_alias_list_t(1);
-            Load_snd_alias_list_Asset((XAssetHeader *)varsnd_alias_list_ptr);
+            Load_snd_alias_list_Asset((XAssetHeader*)varsnd_alias_list_ptr);
             if (inserted)
                 *inserted = *varsnd_alias_list_ptr;
         }
         else
         {
-            DB_ConvertOffsetToAlias((unsigned int *)varsnd_alias_list_ptr);
+            DB_ConvertOffsetToAlias((unsigned int*)varsnd_alias_list_ptr);
         }
     }
     DB_PopStreamPos();
@@ -1697,28 +1698,31 @@ void __cdecl Load_XSurfaceArray(bool atStreamStart, int count)
 
 void __cdecl Load_GfxTextureLoad(bool atStreamStart)
 {
-    const void **inserted; // [esp+0h] [ebp-Ch]
+    GfxTexture *inserted; // [esp+0h] [ebp-Ch]
+    IDirect3DBaseTexture9 *value; // [esp+4h] [ebp-8h]
 
-    Load_Stream(atStreamStart, (unsigned __int8 *)varGfxTextureLoad, 4);
+    Load_Stream(atStreamStart, (unsigned char*)varGfxTextureLoad, 4);
     DB_PushStreamPos(0);
-    if (varGfxTextureLoad->map)
+    if (varGfxTextureLoad->basemap)
     {
-        if (varGfxTextureLoad->loadDef == (GfxImageLoadDef *)-1 || varGfxTextureLoad->loadDef == (GfxImageLoadDef *)-2)
+        // LWSS: union abuse here
+        value = varGfxTextureLoad->basemap;
+        if (varGfxTextureLoad->basemap == (IDirect3DBaseTexture9 *)-1 || value == (IDirect3DBaseTexture9*)-2)
         {
-            varGfxTextureLoad->loadDef = (GfxImageLoadDef *)AllocLoad_FxElemVisStateSample();
+            varGfxTextureLoad->basemap = (IDirect3DBaseTexture9*)AllocLoad_FxElemVisStateSample();
             varGfxImageLoadDef = varGfxTextureLoad->loadDef;
-            if (varGfxTextureLoad->loadDef == (GfxImageLoadDef *)-2)
-                inserted = DB_InsertPointer();
+            if (value == (IDirect3DBaseTexture9*)-2)
+                inserted = (GfxTexture*)DB_InsertPointer();
             else
                 inserted = 0;
             Load_GfxImageLoadDef(1);
-            Load_Texture((GfxTexture *)varGfxTextureLoad, varGfxImage);
+            Load_Texture(varGfxTextureLoad, varGfxImage);
             if (inserted)
-                *inserted = varGfxTextureLoad->loadDef;
+                inserted->basemap = varGfxTextureLoad->basemap;
         }
         else
         {
-            DB_ConvertOffsetToAlias((unsigned int *)varGfxTextureLoad);
+            DB_ConvertOffsetToAlias((unsigned int*)varGfxTextureLoad);
         }
     }
     DB_PopStreamPos();
@@ -1733,7 +1737,8 @@ void __cdecl Load_GfxImageLoadDef(bool atStreamStart)
 {
     if (!atStreamStart)
         MyAssertHandler("c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_image_load_db.h", 2614, 0, "%s", "atStreamStart");
-    Load_Stream(1, &varGfxImageLoadDef->levelCount, 16);
+    iassert(OFFSET_TO_GfxImageLoadDef_DATA == 16);
+    Load_Stream(1, (unsigned char*)varGfxImageLoadDef, 16);
     if (DB_GetStreamPos() != varGfxImageLoadDef->data)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\database\\../gfx_d3d/r_image_load_db.h",
@@ -1741,7 +1746,7 @@ void __cdecl Load_GfxImageLoadDef(bool atStreamStart)
             0,
             "%s",
             "DB_GetStreamPos() == reinterpret_cast< byte * >( varGfxImageLoadDef->data )");
-    varbyte = varGfxImageLoadDef->data;
+    varbyte = &varGfxImageLoadDef->data[0];
     Load_byteArray(1, varGfxImageLoadDef->resourceSize);
 }
 
