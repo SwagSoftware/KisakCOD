@@ -594,7 +594,7 @@ const char *__cdecl Info_ValueForKey(const char *s, const char *key)
         {
             if (!Sys_IsRenderThread())
                 MyAssertHandler(".\\universal\\q_shared.cpp", 1026, 0, "%s", "Sys_IsRenderThread()");
-            v5 = (char *)((valueindex << 13) + 231767416); // TODO: what
+            v5 = value1[1][valueindex];
         }
         v4 = v5;
         while (*v7 != 92 && *v7)

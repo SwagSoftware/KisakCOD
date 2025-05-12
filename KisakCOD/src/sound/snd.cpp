@@ -2692,7 +2692,7 @@ void __cdecl SND_PlayAmbientAlias(
                     v4 = aliases[i];
                     v5 = v4->volMax - v4->volMin;
                     volume = random() * v5 + v4->volMin;
-                    trackptr = (snd_background_info_t *)(8 * (i + g_snd.ambient_track) + 235289552);
+                    trackptr = &g_snd.background[i + g_snd.ambient_track];
                     if (fadetime)
                         g_snd.background[i + g_snd.ambient_track].goalrate = (volume
                             - g_snd.background[i + g_snd.ambient_track].goalvolume)

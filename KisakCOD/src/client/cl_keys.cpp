@@ -956,8 +956,9 @@ void __cdecl ReplaceConsoleInputArgument(int replaceCount, char *replacement)
         MyAssertHandler(".\\client\\cl_keys.cpp", 845, 0, "%s", "replacement");
     if (*replacement)
     {
-        for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(*(char *)(cmdLineLen + 11748111)); --cmdLineLen)
-            ;
+        //for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(*(char *)(cmdLineLen + 11748111)); --cmdLineLen);
+        for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(*(char *)(g_consoleField.buffer[cmdLineLen])); --cmdLineLen);
+
         if (replaceCount >= cmdLineLen)
         {
             v2 = va("%s: %i, %i", g_consoleField.buffer, replaceCount, cmdLineLen);

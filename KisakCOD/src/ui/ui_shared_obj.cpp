@@ -6146,14 +6146,10 @@ void __cdecl KeywordHash_Validate_itemDef_s_256_3855_(const KeywordHashEntry<ite
 
 void __cdecl Item_SetupKeywordHash()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
-
     KeywordHash_Validate_itemDef_s_256_3855_(itemParseKeywords, 71);
     memset((unsigned __int8 *)itemParseKeywordHash, 0, sizeof(itemParseKeywordHash));
-    for (i = 0; i < 0x47; ++i)
-        KeywordHash_Add_itemDef_s_256_3855_(
-            itemParseKeywordHash,
-            (const KeywordHashEntry<itemDef_s, 256, 3855> *)(8 * i + 9147016));
+    for (int i = 0; i < 71; ++i)
+        KeywordHash_Add_itemDef_s_256_3855_(itemParseKeywordHash, &itemParseKeywords[i]);
 }
 
 char __cdecl KeywordHash_IsValidSeed_menuDef_t_128_128_(
@@ -6230,14 +6226,10 @@ void __cdecl KeywordHash_Add_menuDef_t_128_128_(
 
 void __cdecl Menu_SetupKeywordHash()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
-
     KeywordHash_Validate_menuDef_t_128_128_(menuParseKeywords, 36);
     memset((unsigned __int8 *)menuParseKeywordHash, 0, sizeof(menuParseKeywordHash));
-    for (i = 0; i < 0x24; ++i)
-        KeywordHash_Add_menuDef_t_128_128_(
-            menuParseKeywordHash,
-            (const KeywordHashEntry<menuDef_t, 128, 128> *)(8 * i + 9146728));
+    for (int i = 0; i < 36; ++i)
+        KeywordHash_Add_menuDef_t_128_128_(menuParseKeywordHash, &menuParseKeywords[i]);
 }
 
 void __cdecl Menu_Init(menuDef_t *menu, int imageTrack)

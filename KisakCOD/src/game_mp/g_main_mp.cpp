@@ -192,7 +192,10 @@ void __cdecl G_FreeEntities()
     if (g_entities[1022].r.inuse)
         G_FreeEntity(&g_entities[1022]);
     for (ia = 0; ia < 32; ++ia)
-        EntHandle::setEnt((EntHandle *)(4 * ia + 23802164), 0);
+    {
+        //EntHandle::setEnt((EntHandle *)(4 * ia + 23802164), 0);
+        EntHandle::setEnt(&level.droppedWeaponCue[ia], 0);
+    }
     if (g_entities[1023].r.inuse)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 826, 0, "%s", "!g_entities[ENTITYNUM_NONE].r.inuse");
     level.num_entities = 0;

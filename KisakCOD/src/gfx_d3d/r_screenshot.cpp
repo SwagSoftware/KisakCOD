@@ -1759,9 +1759,9 @@ unsigned __int8 __cdecl R_CubemapShotCalcReflectionFactor(
     scale = (double)gfxMetrics.cubemapShotRes * 0.5;
     Vec3Scale(cubemapShotAxis[shotIndex][0], scale, dir);
     v7 = (double)colIndex - (double)gfxMetrics.cubemapShotRes * 0.5 + 0.5;
-    Vec3Mad(dir, v7, (const float *)(36 * shotIndex + 9391748), dir);
-    v6 = (double)rowIndex - (double)gfxMetrics.cubemapShotRes * 0.5 + 0.5;
-    Vec3Mad(dir, v6, (const float *)(36 * shotIndex + 9391760), dir);
+    Vec3Mad(dir, v7, cubemapShotAxis[shotIndex][1], dir);
+    v6 = rowIndex - gfxMetrics.cubemapShotRes * 0.5 + 0.5;
+    Vec3Mad(dir, v6, cubemapShotAxis[shotIndex][2], dir);
     Vec3Normalize(dir);
     refraction = FresnelTerm(n0, n1, dir[2]);
     v9 = refraction * 255.0;

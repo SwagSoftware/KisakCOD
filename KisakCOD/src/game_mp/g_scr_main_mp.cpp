@@ -5837,7 +5837,8 @@ void GScr_OpenFile()
         {
             if (!level.openScriptIOFileHandles[filenum])
             {
-                f = (int *)(4 * filenum + 23808484);
+                //f = (int *)(4 * filenum + 23808484);
+                f = &level.openScriptIOFileHandles[filenum];
                 break;
             }
         }

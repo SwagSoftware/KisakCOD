@@ -618,7 +618,8 @@ const DynEntityProps *__cdecl DynEnt_GetEntityProps(DynEntityType dynEntType)
             "dynEntType doesn't index DYNENT_TYPE_COUNT\n\t%i not in [0, %i)",
             dynEntType,
             3);
-    return (const DynEntityProps *)(8 * dynEntType + 8895660);
+    //return (const DynEntityProps *)(8 * dynEntType + 8895660);
+    return &dynEntProps[dynEntType];
 }
 
 unsigned __int16 __cdecl DynEnt_GetId(const DynEntityDef *dynEntDef, DynEntityDrawType drawType)

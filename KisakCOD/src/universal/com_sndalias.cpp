@@ -672,7 +672,7 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
             Com_LoadSoundAliasFile(trimspec, loadspecCurGame, fileNames[i]);
         ProfLoad_End();
         ProfLoad_Begin("Finish sound aliases");
-        Com_MakeSoundAliasesPermanent(&g_sa.aliasInfo[system], (SoundFileInfo *)(8 * system + 230749208));
+        Com_MakeSoundAliasesPermanent(&g_sa.aliasInfo[system], &g_sa.soundFileInfo[system]);
         ProfLoad_End();
         Hunk_ClearTempMemory();
         Hunk_ShowTempMemory(mark);

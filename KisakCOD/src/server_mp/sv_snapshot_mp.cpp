@@ -2049,10 +2049,10 @@ void __cdecl SV_SendClientMessages()
         }
         else
         {
-            if (&svs == (serverStatic_t *)-103040544)
+            if (!svs.archivedSnapshotFrames)
                 MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 2415, 0, "%s", "svs.archivedSnapshotFrames");
-            frame = (archivedSnapshot_s *)(8 * (svs.nextArchivedSnapshotFrames % 1200) + 145266720);
-            svs.archivedSnapshotFrames[svs.nextArchivedSnapshotFrames % 1200].start = svs.nextArchivedSnapshotBuffer;
+            frame = &svs.archivedSnapshotFrames[svs.nextArchivedSnapshotFrames % 1200];
+            frame->start = svs.nextArchivedSnapshotBuffer;
             frame->size = g_archiveMsg.cursize;
             startIndex = svs.nextArchivedSnapshotBuffer % 0x2000000;
             svs.nextArchivedSnapshotBuffer += g_archiveMsg.cursize;

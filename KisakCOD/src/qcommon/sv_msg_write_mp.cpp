@@ -261,6 +261,68 @@ const NetField itemEntityStateFields[59] =
   { "partBits[2]", 236, 32, 1u },
   { "partBits[3]", 240, 32, 1u }
 }; // idb
+const NetField soundBlendEntityStateFields[59] =
+{
+  { "eType", 4, 8, 1u },
+  { "lerp.pos.trTime", 16, -97, 0u },
+  { "lerp.pos.trBase[0]", 24, -92, 0u },
+  { "lerp.pos.trBase[1]", 28, -91, 0u },
+  { "lerp.pos.trDelta[0]", 36, 0, 0u },
+  { "lerp.pos.trDelta[1]", 40, 0, 0u },
+  { "lerp.apos.trBase[1]", 64, -100, 0u },
+  { "lerp.pos.trBase[2]", 32, -90, 0u },
+  { "lerp.pos.trDelta[2]", 44, 0, 0u },
+  { "lerp.apos.trBase[0]", 60, -100, 0u },
+  { "eventSequence", 160, 8, 0u },
+  { "legsAnim", 204, 10, 0u },
+  { "surfType", 132, 8, 0u },
+  { "otherEntityNum", 116, 10, 0u },
+  { "un1", 212, 8, 0u },
+  { "lerp.eFlags", 8, -98, 0u },
+  { "groundEntityNum", 124, -96, 0u },
+  { "clientNum", 140, 7, 0u },
+  { "events[0]", 164, -94, 0u },
+  { "events[1]", 168, -94, 0u },
+  { "events[2]", 172, -94, 0u },
+  { "weapon", 196, 7, 0u },
+  { "weaponModel", 200, 4, 0u },
+  { "eventParms[1]", 184, -93, 0u },
+  { "eventParms[0]", 180, -93, 0u },
+  { "eventParms[2]", 188, -93, 0u },
+  { "index", 136, 10, 0u },
+  { "lerp.pos.trType", 12, 8, 0u },
+  { "lerp.apos.trType", 48, 8, 0u },
+  { "events[3]", 176, -94, 0u },
+  { "lerp.apos.trBase[2]", 68, -100, 0u },
+  { "lerp.apos.trTime", 52, 32, 0u },
+  { "lerp.apos.trDelta[0]", 72, 0, 0u },
+  { "lerp.apos.trDelta[2]", 80, 0, 0u },
+  { "torsoAnim", 208, 10, 0u },
+  { "eventParms[3]", 192, -93, 0u },
+  { "solid", 152, 24, 0u },
+  { "lerp.pos.trDuration", 20, 32, 0u },
+  { "lerp.apos.trDelta[1]", 76, 0, 0u },
+  { "un2", 216, 32, 0u },
+  { "time2", 112, -97, 0u },
+  { "loopSound", 128, 8, 0u },
+  { "attackerEntityNum", 120, 10, 0u },
+  { "fWaistPitch", 224, 0, 0u },
+  { "fTorsoPitch", 220, 0, 0u },
+  { "iHeadIcon", 144, 4, 0u },
+  { "iHeadIconTeam", 148, 2, 0u },
+  { "eventParm", 156, -93, 0u },
+  { "lerp.u.soundBlend.lerp", 84, 0, 0u },
+  { "lerp.apos.trDuration", 56, 32, 0u },
+  { "lerp.u.anonymous.data[1]", 88, 32, 1u },
+  { "lerp.u.anonymous.data[2]", 92, 32, 1u },
+  { "lerp.u.anonymous.data[3]", 96, 32, 1u },
+  { "lerp.u.anonymous.data[4]", 100, 32, 1u },
+  { "lerp.u.anonymous.data[5]", 104, 32, 1u },
+  { "partBits[0]", 228, 32, 1u },
+  { "partBits[1]", 232, 32, 1u },
+  { "partBits[2]", 236, 32, 1u },
+  { "partBits[3]", 240, 32, 1u }
+};
 const NetField scriptMoverStateFields[59] =
 {
   { "eType", 4, 8, 0u },
@@ -323,6 +385,69 @@ const NetField scriptMoverStateFields[59] =
   { "partBits[2]", 236, 32, 0u },
   { "partBits[3]", 240, 32, 0u }
 }; // idb
+const NetField loopFxEntityStateFields[59] =
+{
+  { "eType", 4, 8, 1u },
+  { "lerp.pos.trTime", 16, -97, 0u },
+  { "lerp.pos.trBase[0]", 24, -92, 0u },
+  { "lerp.pos.trBase[1]", 28, -91, 0u },
+  { "lerp.pos.trDelta[0]", 36, 0, 0u },
+  { "lerp.pos.trDelta[1]", 40, 0, 0u },
+  { "lerp.apos.trBase[1]", 64, -100, 0u },
+  { "lerp.pos.trBase[2]", 32, -90, 0u },
+  { "lerp.pos.trDelta[2]", 44, 0, 0u },
+  { "lerp.apos.trBase[0]", 60, -100, 0u },
+  { "lerp.u.loopFx.cullDist", 84, 0, 0u },
+  { "lerp.u.loopFx.period", 88, 32, 0u },
+  { "eventSequence", 160, 8, 0u },
+  { "legsAnim", 204, 10, 0u },
+  { "surfType", 132, 8, 0u },
+  { "otherEntityNum", 116, 10, 0u },
+  { "un1", 212, 8, 0u },
+  { "lerp.eFlags", 8, -98, 0u },
+  { "groundEntityNum", 124, -96, 0u },
+  { "clientNum", 140, 7, 0u },
+  { "events[0]", 164, -94, 0u },
+  { "events[1]", 168, -94, 0u },
+  { "events[2]", 172, -94, 0u },
+  { "weapon", 196, 7, 0u },
+  { "weaponModel", 200, 4, 0u },
+  { "eventParms[1]", 184, -93, 0u },
+  { "eventParms[0]", 180, -93, 0u },
+  { "eventParms[2]", 188, -93, 0u },
+  { "index", 136, 10, 0u },
+  { "lerp.pos.trType", 12, 8, 0u },
+  { "lerp.apos.trType", 48, 8, 0u },
+  { "events[3]", 176, -94, 0u },
+  { "lerp.apos.trBase[2]", 68, -100, 0u },
+  { "lerp.apos.trTime", 52, 32, 0u },
+  { "lerp.apos.trDelta[0]", 72, 0, 0u },
+  { "lerp.apos.trDelta[2]", 80, 0, 0u },
+  { "torsoAnim", 208, 10, 0u },
+  { "eventParms[3]", 192, -93, 0u },
+  { "solid", 152, 24, 0u },
+  { "lerp.pos.trDuration", 20, 32, 0u },
+  { "lerp.apos.trDelta[1]", 76, 0, 0u },
+  { "un2", 216, 32, 0u },
+  { "time2", 112, -97, 0u },
+  { "loopSound", 128, 8, 0u },
+  { "attackerEntityNum", 120, 10, 0u },
+  { "fWaistPitch", 224, 0, 0u },
+  { "fTorsoPitch", 220, 0, 0u },
+  { "iHeadIcon", 144, 4, 0u },
+  { "iHeadIconTeam", 148, 2, 0u },
+  { "eventParm", 156, -93, 0u },
+  { "lerp.apos.trDuration", 56, 32, 0u },
+  { "lerp.u.anonymous.data[2]", 92, 32, 1u },
+  { "lerp.u.anonymous.data[3]", 96, 32, 1u },
+  { "lerp.u.anonymous.data[4]", 100, 32, 1u },
+  { "lerp.u.anonymous.data[5]", 104, 32, 1u },
+  { "partBits[0]", 228, 32, 1u },
+  { "partBits[1]", 232, 32, 1u },
+  { "partBits[2]", 236, 32, 1u },
+  { "partBits[3]", 240, 32, 1u }
+};
+
 const NetField fxStateFields[59] =
 {
   { "eType", 4, 8, 0u },
@@ -708,6 +833,28 @@ const int msg_hData[256] =
   32647
 }; // idb
 
+const NetFieldList s_netFieldList[18] =
+{
+  { &entityStateFields[0], 59u},
+  { &playerEntityStateFields[0], 59u },
+  { &corpseEntityStateFields[0], 59u },
+  { &itemEntityStateFields[0], 59u },
+  { &missileEntityStateFields[0], 59u },
+  { &entityStateFields[0], 59u },
+  { &scriptMoverStateFields[0], 59u },
+  { &soundBlendEntityStateFields[0], 59u },
+  { &fxStateFields[0], 59u },
+  { &loopFxEntityStateFields[0], 59u },
+  { &entityStateFields[0], 59u },
+  { &entityStateFields[0], 59u },
+  { &helicopterEntityStateFields[0], 58u },
+  { &planeStateFields[0], 60u },
+  { &vehicleEntityStateFields[0], 59u },
+  { &entityStateFields[0], 59u },
+  { &entityStateFields[0], 59u },
+  { &eventEntityStateFields[0], 59u }
+};
+
 void __cdecl TRACK_msg()
 {
     track_static_alloc_internal(&msgHuff, 19476, "msgHuff", 9);
@@ -732,7 +879,7 @@ const NetFieldList *__cdecl MSG_GetStateFieldListForEntityType(int eType)
         v2 = 17;
     else
         v2 = eType;
-    return (const NetFieldList *)(8 * v2 + 9044776);
+    return &s_netFieldList[v2];
 }
 
 void __cdecl MSG_WriteReliableCommandToBuffer(const char *pszCommand, char *pszBuffer, int iBufferSize)

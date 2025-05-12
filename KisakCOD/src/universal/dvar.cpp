@@ -24,7 +24,7 @@ static FastCriticalSection g_dvarCritSect;
 static dvar_s* dvarHashTable[0x100];
     
 static dvar_s dvarPool[0x1000];
-static const dvar_s* sortedDvars[0x1000];
+static dvar_s* sortedDvars[0x1000];
 static bool areDvarsSorted;
 static LONG isSortedDvars;
 static int dvarCount;
@@ -216,6 +216,11 @@ void __cdecl Dvar_ForEach(void(__cdecl *callback)(const dvar_s *, void *), void 
     InterlockedDecrement(&g_dvarCritSect.readCount);
 }
 
+bool __cdecl CompareDvars(const dvar_t *cached0, const dvar_t *cached1)
+{
+    return I_stricmp(cached0->name, cached1->name) < 0;
+}
+
 void Dvar_Sort()
 {
     if (InterlockedCompareExchange(&isSortingDvars, 1, 0))
@@ -225,12 +230,7 @@ void Dvar_Sort()
     }
     else
     {
-        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-        //    (const GfxStaticModelDrawInst **)sortedDvars,
-        //    (const GfxStaticModelDrawInst **)(4 * dvarCount + 230766384),
-        //    (4 * dvarCount + 230766384 - (int)sortedDvars) >> 2,
-        //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Material_CachedShaderTextLess);
-        std::sort((const GfxCachedShaderText **)&sortedDvars[0], (const GfxCachedShaderText **)&sortedDvars[0x1000 - 1], Material_CachedShaderTextLess);
+        std::sort(sortedDvars, sortedDvars + dvarCount, CompareDvars);
         areDvarsSorted = 1;
         isSortingDvars = 0;
     }

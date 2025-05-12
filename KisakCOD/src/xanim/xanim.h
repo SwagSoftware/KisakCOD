@@ -12,6 +12,7 @@
 #include "dobj.h"
 #include "xmodel.h"
 #include <gfx_d3d/r_material.h>
+#include <gfx_d3d/r_gfx.h>
 
 union XAnimIndices // sizeof=0x4
 {                                       // ...
@@ -1154,6 +1155,24 @@ struct RawFile // sizeof=0xC
     const char* buffer;
 };
 
+struct PhysPreset // sizeof=0x2C
+{                                       // ...
+    const char *name;                   // ...
+    int type;                           // ...
+    float mass;                         // ...
+    float bounce;                       // ...
+    float friction;                     // ...
+    float bulletForceScale;             // ...
+    float explosiveForceScale;          // ...
+    const char *sndAliasPrefix;         // ...
+    float piecesSpreadFraction;
+    float piecesUpwardVelocity;
+    bool tempDefaultToCylinder;
+    // padding byte
+    // padding byte
+    // padding byte
+};
+
 
 extern "C" {
     // win32
@@ -1288,7 +1307,11 @@ union XAssetSize // sizeof=0x878
 template <typename T>
 union XAssetPoolEntry // sizeof=0x10
 {                                       // ...
-    StringTable entry;
+    XAssetPoolEntry()
+    {
+        next = NULL;
+    }
+    T entry;
     XAssetPoolEntry<T> *next;
 };
 

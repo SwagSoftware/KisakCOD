@@ -132,7 +132,7 @@ void DB_PostLoadXZone();
 void __cdecl DB_UpdateDebugZone();
 void __cdecl DB_SyncXAssets();
 void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, unsigned int zoneCount, int sync);
-int DB_Init();
+void DB_Init();
 void __cdecl DB_InitPoolHeader(XAssetType type);
 void __cdecl DB_LoadXZone(XZoneInfo *zoneInfo, unsigned int zoneCount);
 void __cdecl DB_LoadZone_f();

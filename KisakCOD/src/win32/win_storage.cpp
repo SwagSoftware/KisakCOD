@@ -608,7 +608,7 @@ int __cdecl LiveStorage_GetStat(int __formal, int index)
     if (!statData.statsFetched)
         return 0;
     if (index < 2000)
-        return *(unsigned __int8 *)(index + 231835788);
+        return statData.playerStats[index + 4];
     if (index < 3498)
         return *(unsigned int *)&statData.playerStats[4 * index - 5996];
     if (!alwaysfails)

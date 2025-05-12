@@ -372,7 +372,7 @@ void Hunk_ClearData()
     low = &s_hunkData[hunk_low.permanent];
     high = &s_hunkData[s_hunkTotal - hunk_high.permanent];
     for (hash = 0; hash < 0x400; ++hash)
-        Hunk_ClearDataFor((fileData_s**)(4 * hash + 230744488), low, high);
+        Hunk_ClearDataFor(&com_fileDataHashTable[hash], low, high);
     Hunk_ClearDataFor(&com_hunkData, low, high);
 }
 

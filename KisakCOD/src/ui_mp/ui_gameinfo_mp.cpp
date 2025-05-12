@@ -157,7 +157,7 @@ const char *UI_LoadArenasFromFile_LoadObj()
                 FS_Read((unsigned __int8 *)buffer, len, f);
                 buffer[len] = 0;
                 FS_FCloseFile(f);
-                ui_numArenas += UI_ParseInfos(buffer, 64 - ui_numArenas, (char **)(4 * ui_numArenas + 229951336));
+                ui_numArenas += UI_ParseInfos(buffer, 64 - ui_numArenas, &ui_arenaInfos[ui_numArenas]);
             }
             else
             {
@@ -190,7 +190,7 @@ void UI_LoadArenasFromFile_FastFile()
 
     rawfile = DB_FindXAssetHeader(ASSET_TYPE_RAWFILE, "mp/cod2maps.arena").rawfile;
     if (rawfile)
-        ui_numArenas = UI_ParseInfos(rawfile->buffer, 64 - ui_numArenas, (char **)(4 * ui_numArenas + 229951336));
+        ui_numArenas = UI_ParseInfos(rawfile->buffer, 64 - ui_numArenas, &ui_arenaInfos[ui_numArenas]);
     else
         Com_PrintError(13, "file not found: %s\n", "mp/cod2maps.arena");
 }

@@ -1162,7 +1162,8 @@ char __cdecl CL_ConsolePrint_AddLine(
                             con.lineOffset,
                             511);
                     con.textTempLine[con.lineOffset] = 94;
-                    *(_BYTE *)(con.lineOffset + 11724761) = color;
+                    //*(_BYTE *)(con.lineOffset + 11724761) = color;
+                    con.consoleText[con.lineOffset + 1] = color;
                     con.lineOffset += 2;
                     if (con.lineOffset >= 0x201)
                         MyAssertHandler(

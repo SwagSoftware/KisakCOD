@@ -646,7 +646,8 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     itemIndex = ((char *)item - (char *)bg_itemlist) >> 2;
     dropped = G_Spawn();
     dropIdx = GetFreeDropCueIdx();
-    EntHandle::setEnt((EntHandle *)(4 * dropIdx + 23802164), dropped);
+    //EntHandle::setEnt((EntHandle *)(4 * dropIdx + 23802164), dropped);
+    EntHandle::setEnt(&level.droppedWeaponCue[dropIdx], dropped);
     dropped->s.eType = 3;
     dropped->s.index.brushmodel = itemIndex;
     G_GetItemClassname(item, &dropped->classname);
@@ -765,11 +766,13 @@ int __cdecl GetFreeDropCueIdx()
             maxDroppedWeapon);
         iBest = 0;
     }
-    ent = EntHandle::ent((EntHandle *)(4 * iBest + 23802164));
+    //ent = EntHandle::ent((EntHandle *)(4 * iBest + 23802164));
+    ent = EntHandle::ent(&level.droppedWeaponCue[iBest]);
     if (!ent)
         MyAssertHandler(".\\game\\g_items.cpp", 707, 0, "%s", "ent");
     G_FreeEntity(ent);
-    EntHandle::setEnt((EntHandle *)(4 * iBest + 23802164), 0);
+    //EntHandle::setEnt((EntHandle *)(4 * iBest + 23802164), 0);
+    EntHandle::setEnt(&level.droppedWeaponCue[iBest], 0);
     return iBest;
 }
 

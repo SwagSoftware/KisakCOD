@@ -32,7 +32,7 @@ static unsigned int __cdecl mixerGetRecordLevel(char *SrcName)
     tagMIXERLINECONTROLSA mxlc; // [esp+9Ch] [ebp-ECh] BYREF
     HMIXER__ *phmx; // [esp+B8h] [ebp-D0h] BYREF
     unsigned int ii; // [esp+BCh] [ebp-CCh]
-    tagMIXERLINEA mixerline; // [esp+C0h] [ebp-C8h] BYREF
+    tagMIXERLINEA mixerline{ 0 }; // [esp+C0h] [ebp-C8h] BYREF
     tMIXERCONTROLDETAILS_UNSIGNED newSetting; // [esp+16Ch] [ebp-1Ch] BYREF
     tMIXERCONTROLDETAILS mxcd; // [esp+170h] [ebp-18h] BYREF
 
@@ -44,7 +44,7 @@ static unsigned int __cdecl mixerGetRecordLevel(char *SrcName)
         return -1;
     mixerline.cbStruct = 168;
     mixerline.dwComponentType = 7;
-    mixerGetLineInfoA((HMIXEROBJ)phmx, &mixerline, 3u);
+    MMRESULT res = mixerGetLineInfoA((HMIXEROBJ)phmx, &mixerline, 3u); // KISAKTODO: this fails with ret: 0x400 - idk why
     jj = mixerline.cConnections;
     for (ii = 0; ii < jj; ++ii)
     {
@@ -513,7 +513,6 @@ int __cdecl Record_QueueAudioDataForEncoding(audioSample_t *sample)
                     if (sample->sampleOffset < sample->lengthInSamples)
                     {
                         memcpy(
-                            //(2 * samples_in_partial_audio_buffer + 23909864),
                             &partial_audio_buffer[samples_in_partial_audio_buffer],
                             &sample->buffer[sample->bytesPerSample * sample->sampleOffset],
                             sample->bytesPerSample * (sample->lengthInSamples - sample->sampleOffset));

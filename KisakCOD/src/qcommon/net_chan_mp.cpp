@@ -1197,7 +1197,7 @@ bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const unsigned __int
     tempNetchanPacketBuf[2] = -1;
     tempNetchanPacketBuf[3] = -1;
     for (i = 0; i < len; ++i)
-        *(_BYTE *)(i + 36877148) = format[i];
+        tempNetchanPacketBuf[i + 4] = format[i];
     mbuf_20 = len + 4;
     if (showpackets->current.integer && (showpackets->current.integer > 1 || adr.type != NA_LOOPBACK))
         Com_DPrintf(16, "OOB Data->%u.%u.%u.%u: %i bytes\n", adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3], mbuf_20);

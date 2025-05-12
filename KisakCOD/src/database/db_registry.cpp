@@ -403,145 +403,173 @@ void __cdecl Hunk_OverrideDataForFile(int type, const char *name, void *data)
         MyAssertHandler(".\\universal\\com_memory.cpp", 1554, 0, "Hunk_OverrideDataForFile: could not find data");
 }
 
-// KISAKTODO: incorp sizeof() (enjoy)
-void __cdecl DB_InitPool_RawFile_(void *pool, int size)
+void __cdecl DB_InitPool_RawFile_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 3 * i + 1) = (_DWORD)((char *)pool + 12 * i + 16);
-    *((_DWORD *)pool + 3 * size - 2) = 0;
+    static_assert(sizeof(RawFile) == 12);
+    XAssetPool<RawFile, 69> *pool = (XAssetPool<RawFile, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_LoadedSound_(void *pool, int size)
+void __cdecl DB_InitPool_LoadedSound_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 11 * i + 1) = (_DWORD)((char *)pool + 44 * i + 48);
-    *((_DWORD *)pool + 11 * size - 10) = 0;
+    static_assert(sizeof(LoadedSound) == 44);
+    XAssetPool<LoadedSound, 69> *pool = (XAssetPool<LoadedSound, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_XAnimParts_(void *pool, int size)
+void __cdecl DB_InitPool_XAnimParts_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 22 * i + 1) = (_DWORD)((char *)pool + 88 * i + 92);
-    *((_DWORD *)pool + 22 * size - 21) = 0;
+    static_assert(sizeof(XAnimParts) == 88);
+    XAssetPool<XAnimParts, 69> *pool = (XAssetPool<XAnimParts, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_XModel_(void *pool, int size)
+void __cdecl DB_InitPool_XModel_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 55 * i + 1) = (_DWORD)((char *)pool + 220 * i + 224);
-    *((_DWORD *)pool + 55 * size - 54) = 0;
+    static_assert(sizeof(XModel) == 220);
+    XAssetPool<XModel, 69> *pool = (XAssetPool<XModel, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_Material_(void *pool, int size)
+void __cdecl DB_InitPool_Material_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 8);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 20 * i + 2) = (_DWORD)((char *)pool + 80 * i + 88);
-    *((_DWORD *)pool + 20 * size - 18) = 0;
+    static_assert(sizeof(Material) == 80);
+    XAssetPool<Material, 69> *pool = (XAssetPool<Material, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_MaterialTechniqueSet_(void *pool, int size)
+void __cdecl DB_InitPool_MaterialTechniqueSet_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 37 * i + 1) = (_DWORD)((char *)pool + 148 * i + 152);
-    *((_DWORD *)pool + 37 * size - 36) = 0;
+    static_assert(sizeof(MaterialTechniqueSet) == 148);
+    XAssetPool<MaterialTechniqueSet, 69> *pool = (XAssetPool<MaterialTechniqueSet, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_GfxImage_(void *pool, int size)
+void __cdecl DB_InitPool_GfxImage_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 9 * i + 1) = (_DWORD)((char *)pool + 36 * i + 40);
-    *((_DWORD *)pool + 9 * size - 8) = 0;
+    static_assert(sizeof(GfxImage) == 36);
+    XAssetPool<GfxImage, 69> *pool = (XAssetPool<GfxImage, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_SndCurve_(void *pool, int size)
+void __cdecl DB_InitPool_SndCurve_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 18 * i + 1) = (_DWORD)((char *)pool + 72 * i + 76);
-    *((_DWORD *)pool + 18 * size - 17) = 0;
+    static_assert(sizeof(SndCurve) == 72);
+    XAssetPool<SndCurve, 69> *pool = (XAssetPool<SndCurve, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_StringTable_(void *pool, int size)
+void __cdecl DB_InitPool_StringTable_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 4 * i + 1) = (_DWORD)((char *)pool + 16 * i + 20);
-    *((_DWORD *)pool + 4 * size - 3) = 0;
+    static_assert(sizeof(StringTable) == 16);
+    XAssetPool<StringTable, 69> *pool = (XAssetPool<StringTable, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_Font_s_(void *pool, int size)
+void __cdecl DB_InitPool_Font_s_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 6 * i + 1) = (_DWORD)((char *)pool + 24 * i + 28);
-    *((_DWORD *)pool + 6 * size - 5) = 0;
+    static_assert(sizeof(Font_s) == 24);
+    XAssetPool<Font_s, 69> *pool = (XAssetPool<Font_s, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_menuDef_t_(void *pool, int size)
+void __cdecl DB_InitPool_menuDef_t_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
+    static_assert(sizeof(menuDef_t) == 284);
+    XAssetPool<menuDef_t, 640> *pool = (XAssetPool<menuDef_t, 640>*)arg;
 
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 71 * i + 1) = (_DWORD)((char *)pool + 284 * i + 288);
-    *((_DWORD *)pool + 71 * size - 70) = 0;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; ++i)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_FxImpactTable_(void *pool, int size)
+void __cdecl DB_InitPool_FxImpactTable_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 2 * i + 1) = (_DWORD)((char *)pool + 8 * i + 12);
-    *((_DWORD *)pool + 2 * size - 1) = 0;
+    static_assert(sizeof(FxImpactTable) == 8);
+    XAssetPool<FxImpactTable, 69> *pool = (XAssetPool<FxImpactTable, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_WeaponDef_(void *pool, int size)
+void __cdecl DB_InitPool_WeaponDef_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 542 * i + 1) = (_DWORD)((char *)pool + 2168 * i + 2172);
-    *((_DWORD *)pool + 542 * size - 541) = 0;
+    static_assert(sizeof(WeaponDef) == 2168);
+    XAssetPool<WeaponDef, 69> *pool = (XAssetPool<WeaponDef, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_FxEffectDef_(void *pool, int size)
+void __cdecl DB_InitPool_FxEffectDef_(void *arg, int size)
 {
-    int i; // [esp+4h] [ebp-4h]
-
-    *(_DWORD *)pool = (_DWORD)((char *)pool + 4);
-    for (i = 0; i < size - 1; ++i)
-        *((_DWORD *)pool + 8 * i + 1) = (_DWORD)((char *)pool + 32 * i + 36);
-    *((_DWORD *)pool + 8 * size - 7) = 0;
+    static_assert(sizeof(FxEffectDef) == 32);
+    XAssetPool<FxEffectDef, 69> *pool = (XAssetPool<FxEffectDef, 69>*)arg;
+    pool->freeHead = &pool->entries[0];
+    for (int i = 0; i < size - 1; i++)
+    {
+        pool->entries[i].next = &pool->entries[i + 1];
+    }
+    pool->entries[size - 1].next = NULL;
 }
 
 void(__cdecl *DB_InitPoolHeaderHandler[33])(void *, int) =
@@ -957,7 +985,7 @@ void __cdecl Load_MenuAsset(XAssetHeader *menu)
     int i; // [esp+8h] [ebp-4h]
 
     header.menu = menu->menu;
-    menu->menu = DB_AddXAsset(ASSET_TYPE_MENU, menu).menu;
+    menu->menu = DB_AddXAsset(ASSET_TYPE_MENU, *menu).menu;
 
     for (i = 0; i < header.menu->itemCount; ++i)
         header.menu->items[i]->parent = menu->menu;
@@ -1694,8 +1722,8 @@ XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
 {
     XAssetHeader header; // [esp+4h] [ebp-4h]
 
-    header.xmodelPieces = DB_AllocXAssetHeaderHandler[type](DB_XAssetPool[type]).xmodelPieces;
-    if (!header.xmodelPieces)
+    header.data = DB_AllocXAssetHeaderHandler[type](DB_XAssetPool[type]).data;
+    if (!header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
         Com_PrintError(1, "Exceeded limit of %d '%s' assets.\n", g_poolSize[type], g_assetNames[type]);
@@ -1899,12 +1927,12 @@ void DB_SyncLostDevice()
 XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header)
 {
     XAssetEntryPoolEntry *existingEntry; // [esp+0h] [ebp-14h]
-    XAssetEntry newEntry; // [esp+4h] [ebp-10h] BYREF
+    XAssetEntryPoolEntry newEntry; // [esp+4h] [ebp-10h] BYREF
 
-    newEntry.asset.type = type;
-    newEntry.asset.header = header;
+    newEntry.entry.asset.type = type;
+    newEntry.entry.asset.header = header;
     Sys_LockWrite(&db_hashCritSect);
-    existingEntry = DB_LinkXAssetEntry((XAssetEntryPoolEntry *)&newEntry, 0);
+    existingEntry = DB_LinkXAssetEntry(&newEntry, 0);
     Sys_UnlockWrite(&db_hashCritSect);
     DB_SyncLostDevice();
     return existingEntry->entry.asset.header;
@@ -2316,25 +2344,15 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, unsigned int zoneCount, int syn
     }
 }
 
-int DB_Init()
+void DB_Init()
 {
-    int result; // eax
-    XAssetType type; // [esp+0h] [ebp-8h]
-    unsigned int i; // [esp+4h] [ebp-4h]
-
-    for (type = ASSET_TYPE_XMODELPIECES; type < ASSET_TYPE_COUNT; ++type)
-    {
+    for (XAssetType type = ASSET_TYPE_XMODELPIECES; type < ASSET_TYPE_COUNT; ++type)
         DB_InitPoolHeader(type);
-        result = type + 1;
-    }
     g_freeAssetEntryHead = g_assetEntryPool + 16;
-    for (i = 1; i < 0x7FFF; ++i)
-    {
-        result = 16 * i;
+    for (int i = 1; i < 0x7FFF; ++i)
         g_assetEntryPool[i].next = &g_assetEntryPool[i + 1];
-    }
-    g_assetEntryPool[0x7FFF].entry.asset.type = ASSET_TYPE_XMODELPIECES;
-    return result;
+
+    g_assetEntryPool[0x7FFF].next = NULL;
 }
 
 void __cdecl DB_InitPoolHeader(XAssetType type)

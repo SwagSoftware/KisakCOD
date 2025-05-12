@@ -169,6 +169,8 @@ struct Picmip // sizeof=0x2
 {                                       // ...
     Picmip()
     {
+        platform[0] = 0;
+        platform[1] = 0;
     }
     Picmip(int i)
     {

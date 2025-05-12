@@ -737,13 +737,14 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, const void* d
     {
         if (memFile->compress)
         {
-            if (!*(_BYTE*)(cacheSize + 231103374) && !*(_BYTE*)(cacheSize + 231103375))
-                MyAssertHandler(
-                    ".\\universal\\memfile.cpp",
-                    765,
-                    0,
-                    "%s",
-                    "g_cacheBuffer[cacheSize - 2] != 0 || g_cacheBuffer[cacheSize - 1] != 0");
+            iassert(g_cacheBuffer[cacheSize - 2] != 0 || g_cacheBuffer[cacheSize - 1] != 0);
+           //if (!*(&g_cacheSize + cacheSize + 2) && !*(&g_cacheSize + cacheSize + 3))
+           //    MyAssertHandler(
+           //        ".\\universal\\memfile.cpp",
+           //        765,
+           //        0,
+           //        "%s",
+           //        "g_cacheBuffer[cacheSize - 2] != 0 || g_cacheBuffer[cacheSize - 1] != 0");
         }
         else if (!memFile->buffer[cacheSize - 2 + memFile->bytesUsed]
             && !memFile->buffer[cacheSize - 1 + memFile->bytesUsed])

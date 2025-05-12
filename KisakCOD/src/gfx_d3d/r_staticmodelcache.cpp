@@ -121,7 +121,7 @@ char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex)
     static_model_tree_t *treenode; // [esp+Ch] [ebp-4h]
 
     treenode = (static_model_tree_t *)s_cache.usedlist[smcIndex].prev;
-    if (treenode == (static_model_tree_t *)(8 * smcIndex + 245603296))
+    if (treenode == (static_model_tree_t *)&s_cache.usedlist[smcIndex])
         MyAssertHandler(".\\r_staticmodelcache.cpp", 201, 0, "%s", "treenode != &s_cache.usedlist[smcIndex]");
     if (rg.frontEndFrameCount - treenode->frameCount < 4)
         return 0;
@@ -150,7 +150,7 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
     static_model_node_list_t *blocka; // [esp+Ch] [ebp-1Ch]
     static_model_tree_t *tree; // [esp+10h] [ebp-18h]
     static_model_leaf_t *leafs; // [esp+14h] [ebp-14h]
-    static_model_node_list_t *freelist; // [esp+18h] [ebp-10h]
+    static_model_leaf_t *freelist; // [esp+18h] [ebp-10h]
     unsigned int index; // [esp+1Ch] [ebp-Ch]
     unsigned int treeIndex; // [esp+24h] [ebp-4h]
 
@@ -178,18 +178,15 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
             "s_cache.freelist[smcIndex][listIndex].prev == &s_cache.freelist[smcIndex][listIndex]");
     if (!listIndex)
         return SMC_ForceFreeBlock(smcIndex);
-    freelist = (static_model_node_list_t *)(48 * smcIndex + 8 * listIndex + 245603096);
-    if (s_cache.leafs[511][6 * smcIndex + 31 + listIndex].freenode.next == freelist
-        && !SMC_GetFreeBlockOfSize(smcIndex, listIndex - 1))
-    {
+    freelist = &s_cache.leafs[511][6 * smcIndex + 31 + listIndex];
+    if (freelist->freenode.next == (static_model_node_list_t*)freelist && !SMC_GetFreeBlockOfSize(smcIndex, listIndex - 1))
         return 0;
-    }
-    block = s_cache.leafs[511][6 * smcIndex + 31 + listIndex].freenode.next;
-    if (block == freelist)
+    block = freelist->freenode.next;
+    if (block == (static_model_node_list_t*)freelist)
         MyAssertHandler(".\\r_staticmodelcache.cpp", 248, 0, "%s", "block != freelist");
     block->next->prev = block->prev;
     block->prev->next = block->next;
-    treeIndex = ((char *)block - (char *)s_cache.leafs) / 256;
+    treeIndex = (block - (static_model_node_list_t*)s_cache.leafs) / 256;
     if (treeIndex >= 0x200)
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
@@ -201,13 +198,13 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
     tree = &s_cache.trees[treeIndex];
     if (listIndex == 1)
     {
-        tree->usedlist.prev = (static_model_tree_list_t *)(8 * smcIndex + 245603296);
+        tree->usedlist.prev = s_cache.usedlist[smcIndex].prev;
         tree->usedlist.next = s_cache.usedlist[smcIndex].next;
         tree->usedlist.prev->next = &tree->usedlist;
         tree->usedlist.next->prev = &tree->usedlist;
     }
     leafs = s_cache.leafs[treeIndex];
-    index = ((char *)block - (char *)leafs) / 8;
+    index = (block - (static_model_node_list_t *)leafs) / 8;
     if (index >= 0x20)
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
@@ -275,7 +272,7 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     tree = &s_cache.trees[treeIndex];
     if (!listIndex)
     {
-        tree->usedlist.prev = (static_model_tree_list_t *)(8 * smcIndex + 245603296);
+        tree->usedlist.prev = s_cache.usedlist[smcIndex].prev;
         tree->usedlist.next = s_cache.usedlist[smcIndex].next;
         tree->usedlist.prev->next = &tree->usedlist;
         tree->usedlist.next->prev = &tree->usedlist;
@@ -317,8 +314,10 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     }
     if (32 * (_WORD)treeIndex + (_WORD)index == 0xFFFF)
         MyAssertHandler(".\\r_staticmodelcache.cpp", 278, 0, "%s", "cacheIndex");
-    if (&leafs[index] != (static_model_leaf_t *)(8 * (unsigned __int16)(32 * treeIndex + index + 1) + 245472024))
+    //if (&leafs[index] != (static_model_leaf_t *)(8 * (unsigned __int16)(32 * treeIndex + index + 1) + 245472024))
+    if (&leafs[index] != (static_model_leaf_t*)&s_cache.trees[511].nodes[2 * (32 * treeIndex + index + 1) + 61])
         MyAssertHandler(".\\r_staticmodelcache.cpp", 339, 0, "%s", "&leafs[index] == SMC_GetLeaf( cacheIndex )");
+
     leafs[index].cachedSurf.baseVertIndex = 16 * index + (treeIndex << 9);
     return 32 * treeIndex + index + 1;
 }
@@ -331,6 +330,8 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
     unsigned int smcPatchVertsUsed; // [esp+4h] [ebp-2Ch]
     static_model_tree_t *tree; // [esp+18h] [ebp-18h]
     static_model_tree_t *treea; // [esp+18h] [ebp-18h]
+    GfxCachedSModelSurf *cachedSurf; // [esp+1Ch] [ebp-14h]
+    GfxCachedSModelSurf *cachedSurfa; // [esp+1Ch] [ebp-14h]
     unsigned __int16 cacheIndex; // [esp+24h] [ebp-Ch]
     unsigned __int16 cacheIndexa; // [esp+24h] [ebp-Ch]
     SkinCachedStaticModelCmd skinSmodelCmd; // [esp+28h] [ebp-8h] BYREF
@@ -356,18 +357,19 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
     cacheIndex = rgp.world->dpvs.smodelDrawInsts[smodelIndex].smodelCacheIndex[lodInfo->lod];
     if (cacheIndex)
     {
-        tree = &s_cache.trees[(8 * cacheIndex + 245472024 - (int)s_cache.leafs) / 256];
+        cachedSurf = (GfxCachedSModelSurf*)&s_cache.trees[511].nodes[2 * cacheIndex + 61]; // KISAKTODO: weird type to cast to
+        tree = &s_cache.trees[(cachedSurf - (GfxCachedSModelSurf*)s_cache.leafs) / 256];
         if (tree->frameCount != rg.frontEndFrameCount)
         {
             tree->frameCount = rg.frontEndFrameCount;
             tree->usedlist.next->prev = tree->usedlist.prev;
             tree->usedlist.prev->next = tree->usedlist.next;
-            tree->usedlist.prev = (static_model_tree_list_t *)(8 * smcIndex + 245603296);
+            tree->usedlist.prev = &s_cache.usedlist[smcIndex];
             tree->usedlist.next = s_cache.usedlist[smcIndex].next;
             tree->usedlist.prev->next = &tree->usedlist;
             tree->usedlist.next->prev = &tree->usedlist;
         }
-        if (*(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse == 0xFFFF)
+        if (cachedSurf->smodelIndex == 0xFFFF)
             MyAssertHandler(".\\r_staticmodelcache.cpp", 587, 0, "%s", "cachedSurf->smodelIndex != SMODEL_INDEX_NONE");
         return cacheIndex;
     }
@@ -384,39 +386,37 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
             if (cacheIndexa)
             {
                 frontEndDataOut->smcPatchList[frontEndDataOut->smcPatchCount++] = cacheIndexa;
+                cachedSurfa = (GfxCachedSModelSurf*) & s_cache.trees[511].nodes[2 * cacheIndexa + 61];
                 rgp.world->dpvs.smodelDrawInsts[smodelIndex].smodelCacheIndex[lodInfo->lod] = cacheIndexa;
-                if (smodelIndex != (unsigned __int16)smodelIndex)
+                if (smodelIndex != smodelIndex)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
                         281,
                         0,
                         "i == static_cast< Type >( i )\n\t%i, %i",
                         smodelIndex,
-                        (unsigned __int16)smodelIndex);
-                *(_WORD *)&s_cache.trees[511].nodes[2 * cacheIndexa + 62].inuse = smodelIndex;
-                s_cache.trees[511].nodes[2 * cacheIndexa + 62].usedVerts = lodInfo->lod;
+                        smodelIndex);
+                cachedSurfa->smodelIndex = smodelIndex;
+                cachedSurfa->lodIndex = lodInfo->lod;
                 skinSmodelCmd.cacheIndex = cacheIndexa;
                 smcPatchVertsUsed = frontEndDataOut->smcPatchVertsUsed;
-                if (smcPatchVertsUsed != (unsigned __int16)smcPatchVertsUsed)
+                if (smcPatchVertsUsed != smcPatchVertsUsed)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
                         281,
                         0,
                         "i == static_cast< Type >( i )\n\t%i, %i",
                         smcPatchVertsUsed,
-                        (unsigned __int16)smcPatchVertsUsed);
+                        smcPatchVertsUsed);
                 skinSmodelCmd.firstPatchVert = smcPatchVertsUsed;
                 frontEndDataOut->smcPatchVertsUsed += cachedVertsNeeded;
-                R_AddWorkerCmd(15, (unsigned __int8 *)&skinSmodelCmd);
-                R_CacheStaticModelIndices(
-                    *(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndexa + 62].inuse,
-                    (unsigned __int16)s_cache.trees[511].nodes[2 * cacheIndexa + 62].usedVerts,
-                    *(_DWORD *)&s_cache.trees[511].nodes[2 * cacheIndexa + 61]);
-                treea = &s_cache.trees[(8 * cacheIndexa + 245472024 - (int)s_cache.leafs) / 256];
+                R_AddWorkerCmd(15, (unsigned char*)&skinSmodelCmd);
+                R_CacheStaticModelIndices(cachedSurfa->smodelIndex, cachedSurfa->lodIndex, cachedSurfa->baseVertIndex);
+                treea = &s_cache.trees[(cachedSurfa - (GfxCachedSModelSurf*)s_cache.leafs) / 256];
                 treea->frameCount = rg.frontEndFrameCount;
                 treea->usedlist.next->prev = treea->usedlist.prev;
                 treea->usedlist.prev->next = treea->usedlist.next;
-                treea->usedlist.prev = (static_model_tree_list_t *)(8 * smcIndex + 245603296);
+                treea->usedlist.prev = &s_cache.usedlist[smcIndex];
                 treea->usedlist.next = s_cache.usedlist[smcIndex].next;
                 treea->usedlist.prev->next = &treea->usedlist;
                 treea->usedlist.next->prev = &treea->usedlist;
@@ -770,9 +770,9 @@ void __cdecl R_SkinCachedStaticModelCmd(SkinCachedStaticModelCmd *skinCmd)
     cacheIndex = skinCmd->cacheIndex;
     if (!skinCmd->cacheIndex)
         MyAssertHandler(".\\r_staticmodelcache.cpp", 278, 0, "%s", "cacheIndex");
-    leaf = (const static_model_leaf_t *)(8 * cacheIndex + 245472024);
+    leaf = (const static_model_leaf_t *)&s_cache.trees[511].nodes[2 * cacheIndex + 61];
     cachedSurf = &leaf->cachedSurf;
-    if (*(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse >= rgp.world->dpvs.smodelCount)
+    if (leaf->cachedSurf.smodelIndex >= rgp.world->dpvs.smodelCount)
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
             518,

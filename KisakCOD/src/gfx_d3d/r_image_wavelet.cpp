@@ -14460,8 +14460,7 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
     int v6; // eax
     int v7; // eax
     int v8; // eax
-    _BYTE v9[3]; // [esp+4h] [ebp-70h]
-    bool needsMipDelta; // [esp+7h] [ebp-6Dh]
+    int v9; // [esp+4h] [ebp-70h]
     int dstChanOffset[4]; // [esp+8h] [ebp-6Ch] BYREF
     unsigned __int8 *dstChan; // [esp+18h] [ebp-5Ch]
     int size; // [esp+1Ch] [ebp-58h]
@@ -14520,14 +14519,14 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
     {
         if (!decode->dataInitialized)
         {
-            decode->value = *(_WORD *)decode->data;
+            decode->value = *decode->data;
             decode->bit = 0;
             decode->data += 2;
             decode->dataInitialized = 1;
         }
-        needsMipDelta = (decode->value & 1) != 0;
+        HIBYTE(v9) = (decode->value & 1) != 0;
         Wavelet_ConsumeBits(1u, decode);
-        if (needsMipDelta)
+        if (HIBYTE(v9))
             Wavelet_AddDeltaToMipmap(src, h * w / 4, decode, dstChanOffset);
         stride = dstBpp * w;
         for (y = 0; y < h; y += 2)
@@ -14599,8 +14598,8 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
                     coeff[3][0] = Wavelet_DecodeValue(waveletDecodeAlpha, 9u, 255, decode);
                     coeff[3][1] = Wavelet_DecodeValue(waveletDecodeAlpha, 9u, 255, decode);
                     coeff[3][2] = Wavelet_DecodeValue(waveletDecodeAlpha, 9u, 255, decode);
-                    base = 2 * src[*(_DWORD *)&v9[4 * decode->channels]];
-                    dstChan = &dst[*(_DWORD *)&v9[4 * decode->channels]];
+                    base = 2 * src[dstChanOffset[decode->channels - 1]];
+                    dstChan = &dst[dstChanOffset[decode->channels - 1]];
                     *dstChan = evenOddParity + ((coeff[3][2] + coeff[3][1] + coeff[3][0] + base) >> 1);
                     dstChan[dstBpp] = (coeff[3][0] + base - (coeff[3][2] + coeff[3][1])) >> 1;
                     dstChan[stride] = (coeff[3][1] - coeff[3][2] + base - coeff[3][0]) >> 1;
@@ -14632,7 +14631,6 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
         } while (size);
     }
 }
-
 
 void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decode)
 {

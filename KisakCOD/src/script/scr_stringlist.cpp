@@ -430,7 +430,7 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 				scrStringGlob.hashTable[hash].u = stringValue;
 				iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
 				iassert((scrStringGlob.hashTable[hash].status_next & 0x30000) != HASH_STAT_FREE);
-				iassert(refStr->str == SL_ConvertToString(stringValue));
+				iassert(refStrA->str == SL_ConvertToString(stringValue.prev));
 		
 				Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 				//Profile_EndInternal(0);
