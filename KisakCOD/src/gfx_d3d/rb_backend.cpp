@@ -34,6 +34,8 @@
 #include "rb_uploadshaders.h"
 #include <universal/timing.h>
 
+#include <setjmp.h>
+
 void(__cdecl *const RB_RenderCommandTable[22])(GfxRenderCommandExecState *) =
 {
   NULL,
@@ -2999,9 +3001,9 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
         NET_Sleep(1u);
     while (1)
     {
-        //Value = Sys_GetValue(2);
-        //if (!_setjmp3(Value, 0))
-        //    break;
+        Value = Sys_GetValue(2);
+        if (!_setjmp((int*)Value))
+            break;
         //Profile_Recover(1);
         if (r_glob.isRenderingRemoteUpdate)
         {

@@ -1134,15 +1134,14 @@ void __cdecl DB_EnumXAssets_FastFile(
             assetEntry = &g_assetEntryPool[assetEntryIndex];
             if (assetEntry->entry.asset.type == type)
             {
-                func((XAssetHeader)assetEntry->entry.asset.header.xmodelPieces, inData);
+                func(assetEntry->entry.asset.header, inData);
                 if (includeOverride)
                 {
                     for (overrideAssetEntryIndex = assetEntry->entry.nextOverride;
                         overrideAssetEntryIndex;
                         overrideAssetEntryIndex = g_assetEntryPool[overrideAssetEntryIndex].entry.nextOverride)
                     {
-                        func((XAssetHeader)g_assetEntryPool[overrideAssetEntryIndex].entry.asset.header.xmodelPieces,
-                            inData);
+                        func(g_assetEntryPool[overrideAssetEntryIndex].entry.asset.header, inData);
                     }
                 }
             }
@@ -2413,7 +2412,7 @@ void __cdecl DB_InitThread()
 
 void __cdecl  DB_Thread(unsigned int threadContext)
 {
-    //jmp_buf *Value; // eax
+    jmp_buf *Value; // eax
 
     if (threadContext != 6)
         MyAssertHandler(
@@ -2423,18 +2422,17 @@ void __cdecl  DB_Thread(unsigned int threadContext)
             "threadContext == THREAD_CONTEXT_DATABASE\n\t%i, %i",
             threadContext,
             6);
-    //Value = (jmp_buf *)Sys_GetValue(2);
-    // KISAKTODO: try-catch
-//    if (_setjmp(*Value))
-//    {
-//        //Profile_Recover(1);
-//#ifdef __llvm__ 
-//        __builtin_debugtrap();
-//#else
-//        __debugbreak();
-//#endif
-//        Com_ErrorAbort();
-//    }
+    Value = (jmp_buf *)Sys_GetValue(2);
+    if (_setjmp(*Value))
+    {
+        //Profile_Recover(1);
+#ifdef __llvm__ 
+        __builtin_debugtrap();
+#else
+        __debugbreak();
+#endif
+        Com_ErrorAbort();
+    }
     //Profile_Guard(1);
     while (1)
     {

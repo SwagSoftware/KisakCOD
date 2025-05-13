@@ -11,6 +11,7 @@
 #include "scr_compiler.h"
 
 #include <qcommon/mem_track.h>
+#include <setjmp.h>
 
 
 //  unsigned int g_breakonObject      83043224     scr_evaluate.obj
@@ -1375,6 +1376,7 @@ void __cdecl Scr_EvalFunction(sval_u func_name, sval_u params, unsigned int loca
             g_script_error_level,
             33);
     //if (!_setjmp3(g_script_error[g_script_error_level], 0)) // KISAKTRYCATCH
+    if (!_setjmp(g_script_error[g_script_error_level])) // KISAKTRYCATCH
         ((void (*)(void))func_name.type)();
     if (g_script_error_level < 0)
         MyAssertHandler(
@@ -1466,6 +1468,7 @@ void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, unsign
             g_script_error_level,
             33);
     //if (!_setjmp3(g_script_error[g_script_error_level], 0)) // KISAKTRYCATCH
+    if (!_setjmp(g_script_error[g_script_error_level])) // KISAKTRYCATCH
     {
         if (objectValue.type != 1)
         {

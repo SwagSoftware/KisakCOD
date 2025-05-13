@@ -18,6 +18,8 @@
 #include "r_setstate_d3d.h"
 #include "r_model_pose.h"
 
+#include <setjmp.h>
+
 void(__cdecl *g_cmdExecFailed[17])();
 volatile int g_waitTypeMainThread;
 
@@ -561,9 +563,10 @@ void __cdecl  R_WorkerThread()
 {
     void *Value; // eax
 
-    //Value = Sys_GetValue(2);
+    Value = Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
-    //    Com_ErrorAbort();
+    if (_setjmp((int*)Value))
+        Com_ErrorAbort();
     //Profile_Guard(1);
     while (1)
     {

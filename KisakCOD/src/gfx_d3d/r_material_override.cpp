@@ -58,17 +58,12 @@ void __cdecl Material_GetRemappedFeatures_RunTime(unsigned int *mask, unsigned i
 
 void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl *callback)(MaterialTechniqueSet *))
 {
-    unsigned int inData[1024]; // [esp+0h] [ebp-1008h] BYREF
-    int v2; // [esp+1000h] [ebp-8h]
+    TechniqueSetList inData; // [esp+0h] [ebp-1008h] BYREF
 
-    v2 = 0;
-    DB_EnumXAssets(
-        ASSET_TYPE_TECHNIQUE_SET,
-        (void(__cdecl *)(XAssetHeader, void *))Material_CollateTechniqueSets,
-        inData,
-        0);
-    while (v2)
-        callback((MaterialTechniqueSet *)inData[--v2]);
+    inData.count = 0;
+    DB_EnumXAssets(ASSET_TYPE_TECHNIQUE_SET, (void(*)(XAssetHeader, void*))Material_CollateTechniqueSets, &inData, 0);
+    while (inData.count)
+        callback(inData.hashTable[--inData.count]); // Material_CollateTechniqueSets()
 }
 
 void __cdecl Material_ForEachTechniqueSet_LoadObj(void(__cdecl *callback)(MaterialTechniqueSet *))

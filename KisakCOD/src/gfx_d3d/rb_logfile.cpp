@@ -17,16 +17,13 @@ void __cdecl RB_UpdateLogging()
         RB_CloseLogFile();
 }
 
-int RB_CloseLogFile()
+void RB_CloseLogFile()
 {
-    int result; // eax
-
     if (r_logFileGlob.fp)
     {
-        result = fclose(r_logFileGlob.fp);
+        fclose(r_logFileGlob.fp);
         r_logFileGlob.fp = 0;
     }
-    return result;
 }
 
 void RB_OpenLogFile()

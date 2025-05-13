@@ -1,14 +1,11 @@
 #ifndef __BINKH__
 #define __BINKH__
 
-//#ifdef _ACCLAIM_IGAADSYSTEM
-#if 1
-
 #define BINKMAJORVERSION 1
-#define BINKMINORVERSION 8
-#define BINKSUBVERSION 18
-#define BINKVERSION "1.8r"
-#define BINKDATE    "2006-10-04"
+#define BINKMINORVERSION 9
+#define BINKSUBVERSION 9
+#define BINKVERSION "1.9i"
+#define BINKDATE    "2008-10-31"
 
 #ifndef __RADRES__
 
@@ -83,6 +80,41 @@ typedef void (RADLINK PTR4* BINKSNDCLOSE)      (struct BINKSND PTR4* BnkSnd);
 typedef BINKSNDOPEN  (RADLINK PTR4* BINKSNDSYSOPEN) (UINTa param);
 
 typedef struct BINKSND {
+  // for the spu, we *send* through sndreadpos, but we only return sndwritepos
+  U8 PTR4* sndwritepos;       // current write position
+
+  U32 audiodecompsize;
+
+  U32 sndbufsize;             // sound buffer size
+  U8 PTR4* sndbuf;            // sound buffer
+  U8 PTR4* sndend;            // end of the sound buffer
+  UINTa sndcomp;              // sound compression handle
+
+  U8 PTR4* sndreadpos;        // current read position
+
+#if defined( BINK_SPU_PROCESS )
+  struct binksnd_hide  // put variables that we don't want to accidentally
+  {                    //   use on the spu into a structure
+#endif
+  U32 orig_freq;
+  U32 freq;
+  S32 bits,chans;
+
+  S32 BestSizeIn16;
+  U32 BestSizeMask;
+  S32 OnOff;
+  U32 Latency;
+  U32 VideoScale;
+
+  U32 sndendframe;            // frame number that the sound ends on
+
+  U32 sndpad;                 // padded this much audio
+  S32 sndprime;               // amount of data to prime the playahead
+  S32 NoThreadService;
+  U32 SoundDroppedOut;
+  U32 sndconvert8;            // convert back to 8-bit sound at runtime
+  U8 snddata[256];
+
   BINKSNDREADY Ready;
   BINKSNDLOCK Lock;
   BINKSNDUNLOCK Unlock;
@@ -94,28 +126,10 @@ typedef struct BINKSND {
   BINKSNDMIXBINS MixBins;
   BINKSNDMIXBINVOLS MixBinVols;
 
-  U32 sndbufsize;             // sound buffer size
-  U8 PTR4* sndbuf;            // sound buffer
-  U8 PTR4* sndend;            // end of the sound buffer
-  U8 PTR4* sndwritepos;       // current write position
-  U8 PTR4* sndreadpos;        // current read position
-  UINTa sndcomp;              // sound compression handle
-  U32 sndamt;                 // amount of sound currently in the buffer
-  U32 sndconvert8;            // convert back to 8-bit sound at runtime
-  U32 sndendframe;            // frame number that the sound ends on
-  U32 sndprime;               // amount of data to prime the playahead
-  U32 sndpad;                 // padded this much audio
+#if defined( BINK_SPU_PROCESS )
+  } spu_hide;
+#endif
 
-  U32 BestSizeIn16;
-  U32 BestSizeMask;
-  U32 SoundDroppedOut;
-  S32 NoThreadService;
-  S32 OnOff;
-  U32 Latency;
-  U32 VideoScale;
-  U32 freq;
-  S32 bits,chans;
-  U8 snddata[256];
 } BINKSND;
 
 typedef struct BINKRECT {
@@ -183,6 +197,8 @@ typedef struct BINK {
   U32 FrameSize;         // The current frame's size in bytes
   U32 SndSize;           // The current frame sound tracks' size in bytes
 
+  U32 FrameChangePercent; // very rough percentage of the frame that changed
+
   BINKRECT FrameRects[BINKMAXDIRTYRECTS];// Dirty rects from BinkGetRects
   S32 NumRects;
 
@@ -191,6 +207,9 @@ typedef struct BINK {
   void PTR4* MaskPlane;  // pointer to the mask plane (Ywidth/16*Yheight/16)
   U32 MaskPitch;         // Mask Pitch
   U32 MaskLength;        // total length of the mask plane
+  void PTR4* AsyncMaskPlane;  // pointer to the mask plane for async data
+  void PTR4* InUseMaskPlane;  // pointer to the mask plane in use
+  void PTR4* LastMaskPlane;   // pointer to the last mask plane
 
   U32 LargestFrameSize;  // Largest frame size
   U32 InternalFrames;    // how many frames were potentially compressed
@@ -202,21 +221,42 @@ typedef struct BINK {
 
   S32 Paused;            // is the bink movie paused?
 
-  U32 BackgroundThread;  // handle to background thread
-
   // everything below is for internal Bink use
 
+  S32 async_in_progress[2];   // is an async decompression in progress
+
+  U32 soundon;                // sound turned on?
+  U32 videoon;                // video turned on?
+
   void PTR4* compframe;       // compressed frame data
+  U32 compframesize;          // compressed frame size
+  U32 compframeoffset;        // compressed frame offset
+  U32 compframekey;           // if this frame a key frame
+  
+  U32 skippedlastblit;        // skipped last frame?
+
+  U32 playingtracks;          // how many tracks are playing
+  BINKSND PTR4* bsnd;         // SND structures
+  S32 PTR4* trackindexes;     // track indexes
+
+  BUNDLEPOINTERS bunp;        // pointers to internal temporary memory
+
+  U32 changepercent;          // how much roughly did the current frame change?
+
+#if defined( BINK_SPU_PROCESS )
+  struct bink_hide  // put variables that we don't want to accidentally
+  {                 //   use on the spu into a structure
+#endif
+
   void PTR4* preloadptr;      // preloaded compressed frame data
   U32* frameoffsets;          // offsets of each of the frames
 
-  BINKIO bio;                 // IO structure
+  BINKIO bio;                 // IO structure (should be the last element)
   U8 PTR4* ioptr;             // io buffer ptr
   U32 iosize;                 // io buffer size
   U32 decompwidth;            // width not include scaling
   U32 decompheight;           // height not include scaling
 
-  S32 PTR4* trackindexes;     // track indexes
   U32 PTR4* tracksizes;       // largest single frame of track
   U32 PTR4* tracktypes;       // type of each sound track
   S32 PTR4* trackIDs;         // external track numbers
@@ -225,20 +265,15 @@ typedef struct BINK {
 
   U32 playedframes;           // how many frames have we played
   U32 firstframetime;         // very first frame start
-  U32 startframetime;         // start frame start
   U32 startblittime;          // start of blit period
   U32 startsynctime;          // start of synched time
   U32 startsyncframe;         // frame of startsynctime
   U32 twoframestime;          // two frames worth of time
-  U32 entireframetime;        // entire frame time
 
   U32 slowestframetime;       // slowest frame in ms
   U32 slowestframe;           // slowest frame number
   U32 slowest2frametime;      // second slowest frame in ms
   U32 slowest2frame;          // second slowest frame
-
-  U32 soundon;                // sound turned on?
-  U32 videoon;                // video turned on?
 
   U32 totalmem;               // total memory used
   U32 timevdecomp;            // total time decompressing video
@@ -261,24 +296,17 @@ typedef struct BINK {
 
   U32 lastblitflags;          // flags used on last blit
   U32 lastdecompframe;        // last frame number decompressed
+  U32 lastfinisheddoframe;    // time that the last do frame finished
 
   U32 lastresynctime;         // last loop point that we did a resync on
   U32 doresync;               // should we do a resync in the next doframe?
 
-  U32 skipcount;              // how many skipped blocks on last frame
-  U32 toofewskipstomask;      // fewer than this many skips shuold be full blitted
-
-  U32 playingtracks;          // how many tracks are playing
   U32 soundskips;             // number of sound stops
-  BINKSND PTR4* bsnd;         // SND structures
-  U32 skippedlastblit;        // skipped last frame?
-  U32 skipped_this_frame;     // skipped the current frame?
+  U32 skipped_status_this_frame;//0=not checked this frame, 1=no skip, 2=skip
+  U32 very_delayed;           // is this frame more than 725 ms late?
   U32 skippedblits;           // how many blits were skipped
 
-  BUNDLEPOINTERS bunp;        // pointers to internal temporary memory
   U32 skipped_in_a_row;       // how many frames have we skipped in a row
-  U32 big_sound_skip_adj;     // adjustment for large skips
-  U32 big_sound_skip_reduce;  // amount to reduce large skips by each frame
   U32 paused_sync_diff;       // sync delta at the time of a pause
   U32 last_time_almost_empty; // time of last almost empty IO buffer
   U32 last_read_count;        // counter to keep track of the last bink IO
@@ -286,6 +314,10 @@ typedef struct BINK {
   U32 snd_callback_buffer[16]; // buffer for background sound callback
   S32 allkeys;                // are all frames keyframes?
   BINKFRAMEBUFFERS * allocatedframebuffers; // pointer to internally allocated buffers
+
+#if defined( BINK_SPU_PROCESS )
+  } spu_hide;
+#endif
 } BINK;
 
 
@@ -382,6 +414,8 @@ typedef struct BINKHDR {
 #define BINKFROMMEMORY        0x04000000L // Use when passing in a pointer to the file
 #define BINKNOTHREADEDIO      0x08000000L // Don't use a background thread for IO
 #define BINKNOFRAMEBUFFERS    0x00000400L // Don't allocate internal frame buffers - application must call BinkRegisterFrameBuffers
+#define BINKNOYPLANE          0x00000200L // Don't decompress the Y plane (internal flag)
+#define BINKRUNNINGASYNC      0x00000100L // This frame is decompressing asynchronously
 
 #define BINKSURFACEFAST       0x00000000L
 #define BINKSURFACESLOW       0x08000000L
@@ -399,7 +433,7 @@ typedef struct BINKHDR {
 //#define BINKNOFILLIOBUF     0x00200000L  // Don't Fill the IO buffer (in BinkOpen and BinkCopyTo)
 //#define BINKALPHA           0x00100000L // Decompress alpha plane (if present)
 //#define BINKNOSKIP          0x00080000L // don't skip the blit if behind in sound
-//#define BINKNOMMX           0x00040000L // Don't skip frames if falling behind
+//#define BINKNOMMX           0x00040000L // No MMX
 //#define BINKGRAYSCALE       0x00020000L // force Bink to use grayscale
 //#define BINKRBINVERT        0x00010000L // use reversed R and B planes
 
@@ -448,6 +482,13 @@ RADEXPFUNC void RADEXPLINK BinkLoadUnloadConverter( U32 surfaces, S32 inout );
 #define BINKGETKEYCLOSEST      2
 #define BINKGETKEYNOTEQUAL   128
 
+#define BINKDOFRAMEY           1
+#define BINKDOFRAMEA           2
+#define BINKDOFRAMECRCB        4
+#define BINKDOFRAMESTART       256
+#define BINKDOFRAMEEND         512
+
+
 //=======================================================================
 
 #ifdef __RADMAC__
@@ -473,6 +514,7 @@ RADEXPFUNC HBINK RADEXPLINK BinkOpen(const char PTR4* name,U32 flags);
 RADEXPFUNC void RADEXPLINK BinkGetFrameBuffersInfo( HBINK bink, BINKFRAMEBUFFERS * fbset );
 RADEXPFUNC void RADEXPLINK BinkRegisterFrameBuffers( HBINK bink, BINKFRAMEBUFFERS * fbset );
 RADEXPFUNC S32  RADEXPLINK BinkDoFrame(HBINK bnk);
+RADEXPFUNC S32  RADEXPLINK BinkDoFramePlane(HBINK bnk,U32 which_planes);
 RADEXPFUNC void RADEXPLINK BinkNextFrame(HBINK bnk);
 RADEXPFUNC S32  RADEXPLINK BinkWait(HBINK bnk);
 RADEXPFUNC void RADEXPLINK BinkClose(HBINK bnk);
@@ -500,6 +542,17 @@ RADEXPFUNC void RADEXPLINK BinkGetPalette( void * out_pal );
 #define BINKBGIOWAIT    0x80000000
 
 RADEXPFUNC S32  RADEXPLINK BinkControlBackgroundIO(HBINK bink,U32 control);
+
+
+#if defined( __RADWIN__ ) || defined( __RADXENON__ ) || defined( __RADPS3__ )
+
+RADEXPFUNC S32 RADEXPLINK BinkStartAsyncThread( S32 thread_num, void const * param );
+RADEXPFUNC S32  RADEXPLINK BinkDoFrameAsync(HBINK bink, U32 yplane_thread_num, U32 other_work_thread_num );
+RADEXPFUNC S32  RADEXPLINK BinkDoFrameAsyncWait(HBINK bink, S32 us);
+RADEXPFUNC S32 RADEXPLINK BinkRequestStopAsyncThread( S32 thread_num );
+RADEXPFUNC S32 RADEXPLINK BinkWaitStopAsyncThread( S32 thread_num );
+
+#endif
 
 
 typedef struct BINKTRACK PTR4* HBINKTRACK;
@@ -561,6 +614,10 @@ RADEXPFUNC S32 RADEXPLINK BinkControlPlatformFeatures( S32 use, S32 dont_use );
 
   RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenXAudio(UINTa param); // don't call directly
   #define BinkSoundUseXAudio() BinkSetSoundSystem(BinkOpenXAudio,0)
+
+  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenXAudio2(UINTa param); // don't call directly
+  #define BinkSoundUseXAudio2(IXAudio2_ptr) BinkSetSoundSystem(BinkOpenXAudio2,(UINTa)IXAudio2_ptr)
+
 
 #endif
 
@@ -818,8 +875,6 @@ RADDEFEND
 #endif
 
 // @cdep pre $set(INCs,$INCs -I$clipfilename($file)) $ignore(TakeCPP)
-
-#endif //_ACCLAIM_IGAADSYSTEM
 
 #endif
 

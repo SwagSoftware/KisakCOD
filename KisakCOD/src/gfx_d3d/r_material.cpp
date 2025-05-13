@@ -681,17 +681,19 @@ void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable *mtlTable, int mtlT
     }
 }
 
-void __cdecl Material_CollateTechniqueSets(XAssetHeader header, XAssetHeader *userData)
+void __cdecl Material_CollateTechniqueSets(XAssetHeader header, TechniqueSetList *techSetList)
 {
-    if (userData[1024].xmodelPieces >= (XModelPieces *)0x400)
-        MyAssertHandler(
-            ".\\r_material.cpp",
-            1744,
-            0,
-            "techSetList->count doesn't index MAX_TECHNIQUE_SETS\n\t%i not in [0, %i)",
-            userData[1024].xmodelPieces,
-            1024);
-    userData[(int)userData[1024].xmodelPieces++] = header;
+    iassert(techSetList->count < 1024);
+    //if (userData[1024] >= 0x400)
+    //    MyAssertHandler(
+    //        ".\\r_material.cpp",
+    //        1744,
+    //        0,
+    //        "techSetList->count doesn't index MAX_TECHNIQUE_SETS\n\t%i not in [0, %i)",
+    //        userData[1024],
+    //        1024);
+    techSetList->hashTable[techSetList->count++] = header.techniqueSet;
+    //userData[userData[1024]++] = (DWORD)header.xmodelPieces;
 }
 
 bool __cdecl IsValidMaterialHandle(Material *const handle)

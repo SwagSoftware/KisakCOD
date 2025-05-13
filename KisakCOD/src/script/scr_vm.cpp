@@ -1989,7 +1989,8 @@ unsigned int __cdecl VM_Execute_0()
                 g_script_error_level,
                 33);
         //if (!_setjmp3(g_script_error[g_script_error_level], 0)) // KISAKTRYCATCH
-            //break;
+        if (!_setjmp(g_script_error[g_script_error_level])) // KISAKTRYCATCH
+            break;
     error_1:
         Com_PrintMessage(6, "caught script exception\n", 0);
         v46 = opcode - 33;

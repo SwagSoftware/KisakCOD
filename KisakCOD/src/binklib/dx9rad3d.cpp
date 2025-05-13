@@ -14,10 +14,6 @@
 //##                                                                        ##
 //############################################################################
 
-#include "stdafx.h"
-
-#ifdef _ACCLAIM_IGAADSYSTEM
-
 #define D3D_OVERLOADS
 #include <windows.h>
 #include <d3d9.h> // change to your 9.0 or up path
@@ -25,8 +21,36 @@
 #include "rad3d.h"
 
 //
+// define what type of sampling to use - usually use bilinear, but 
+//   if you are using a software renderer, point sampling is faster.
+//   
+
+#define SAMPLING_TYPE D3DTEXF_LINEAR
+//#define SAMPLING_TYPE D3DTEXF_POINT
+
+
+//
 // Direct3D RAD3D structure.
 //
+
+typedef struct RAD3D
+{
+  LPDIRECT3D9 direct_3d;
+  LPDIRECT3DDEVICE9 direct_3d_device;
+  HWND window;
+  D3DFORMAT d3d_alpha_surface;
+  D3DFORMAT d3d_surface;
+  U32 alpha_pixel_size;
+  U32 pixel_size;
+  S32 rad_alpha_surface;
+  S32 rad_surface;
+
+  // Device can use non-POW2 textures if:
+  //  1) D3DTEXTURE_ADDRESS is set to CLAMP for this texture's stage
+  //  2) D3DRS_WRAP(N) is zero for this texture's coordinates
+  //  3) mip mapping is not enabled (use magnification filter only)
+  U32 nonpow2_textures_supported;
+} RAD3D;
 
 //############################################################################
 //##                                                                        ##
@@ -35,7 +59,7 @@
 //##                                                                        ##
 //############################################################################
 
-inline u32 is_valid_texture_format(LPDIRECT3D9 direct_3d,
+inline U32 is_valid_texture_format(LPDIRECT3D9 direct_3d,
     D3DFORMAT TextureFormat, D3DFORMAT AdapterFormat )
 {
     return SUCCEEDED( direct_3d->CheckDeviceFormat( D3DADAPTER_DEFAULT,
@@ -49,14 +73,15 @@ inline u32 is_valid_texture_format(LPDIRECT3D9 direct_3d,
 //##                                                                        ##
 //############################################################################
 
-s32 get_texture_formats(LPDIRECT3D9 direct_3d, D3DFORMAT adapter_format, HRAD3D rad_3d )
+static S32 get_texture_formats(LPDIRECT3D9 direct_3d,
+    D3DFORMAT adapter_format, HRAD3D rad_3d )
 {
   struct
   {
     D3DFORMAT d3d_format;
-    s32 rad_surface;
-    u32 pixel_size;
-    u32 alpha_pixels;
+    S32 rad_surface;
+    U32 pixel_size;
+    U32 alpha_pixels;
   } format_list[] =
   {
     { D3DFMT_X8R8G8B8,  RAD3DSURFACE32,   4, 0 },
@@ -69,8 +94,8 @@ s32 get_texture_formats(LPDIRECT3D9 direct_3d, D3DFORMAT adapter_format, HRAD3D 
     { D3DFMT_A1R5G5B5,  RAD3DSURFACE5551, 2, 1 },
   };
 
-  u32 num_formats = sizeof(format_list) / sizeof(format_list[0]);
-  u32 format;
+  U32 num_formats = sizeof(format_list) / sizeof(format_list[0]);
+  U32 format;
   
   //
   // Go through the list of texture formats searching for
@@ -118,6 +143,8 @@ s32 get_texture_formats(LPDIRECT3D9 direct_3d, D3DFORMAT adapter_format, HRAD3D 
   return( 1 );
 }
 
+
+
 //############################################################################
 //##                                                                        ##
 //## Call this function to actually open Direct3D.                          ##
@@ -132,7 +159,9 @@ RADCFUNC HRAD3D Open_RAD_3D( HWND window )
   LPDIRECT3DDEVICE9 direct_3d_device;
   HRAD3D rad_3d;
 
-  if( !( direct_3d = Direct3DCreate9( D3D_SDK_VERSION ) ) )
+  direct_3d = Direct3DCreate9( D3D_SDK_VERSION );
+
+  if( !( direct_3d ) )
   {
     return( 0 );
   }
@@ -301,8 +330,8 @@ RADCFUNC void End_RAD_3D_frame( HRAD3D rad_3d )
 //############################################################################
 
 RADCFUNC void Resize_RAD_3D( HRAD3D rad_3d,
-                             u32 width,
-                             u32 height )
+                             U32 width,
+                             U32 height )
 {
   //
   // Make sure there is at least a pixel.
@@ -331,7 +360,7 @@ RADCFUNC void Resize_RAD_3D( HRAD3D rad_3d,
 //##                                                                        ##
 //############################################################################
 
-static u32 Round_up_to_next_2_power( u32 value )
+static U32 Round_up_to_next_2_power( U32 value )
 {
   if ( value > 16 )
     if ( value > 64 )
@@ -371,10 +400,10 @@ static u32 Round_up_to_next_2_power( u32 value )
 
 LPDIRECT3DTEXTURE9 Create_texture( LPDIRECT3DDEVICE9 d3d_device,
                                    D3DFORMAT d3d_surface_type,
-                                   u32 pitch,
-                                   u32 pixel_size,
-                                   u32 width,
-                                   u32 height )
+                                   U32 pitch,
+                                   U32 pixel_size,
+                                   U32 width,
+                                   U32 height )
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
 
@@ -382,7 +411,6 @@ LPDIRECT3DTEXTURE9 Create_texture( LPDIRECT3DDEVICE9 d3d_device,
   // try to create a dynamic texture first
   //
 
-  /*
   if ( SUCCEEDED( d3d_device->CreateTexture(width, height, 1,
                                             D3DUSAGE_DYNAMIC, d3d_surface_type,
                                             D3DPOOL_DEFAULT,
@@ -390,7 +418,6 @@ LPDIRECT3DTEXTURE9 Create_texture( LPDIRECT3DDEVICE9 d3d_device,
   {
     goto gotit;
   }
-  */
 
   //
   // if that fails, create a regular texture
@@ -403,7 +430,7 @@ LPDIRECT3DTEXTURE9 Create_texture( LPDIRECT3DDEVICE9 d3d_device,
   {
     D3DLOCKED_RECT locked_rect;
 
-//   gotit:
+   gotit:
 
     //
     // Clear the texture to black.
@@ -415,10 +442,10 @@ LPDIRECT3DTEXTURE9 Create_texture( LPDIRECT3DDEVICE9 d3d_device,
       // Clear the pixels.
       //
 
-      u8* dest = ( u8* ) locked_rect.pBits;
-      u32 bytes = width * pixel_size;
+      U8* dest = ( U8* ) locked_rect.pBits;
+      U32 bytes = width * pixel_size;
 
-      for ( u32 y = 0 ; y < height ; y++ )
+      for ( U32 y = 0 ; y < height ; y++ )
       {
         memset( dest, 0, bytes );
         dest += locked_rect.Pitch;
@@ -446,24 +473,24 @@ typedef struct RAD3DIMAGE
   // members used by linear and pow2 routines
   LPDIRECT3DDEVICE9 direct_3d_device;
   D3DFORMAT d3d_surface_type;
-  u32 rad_surface_type;
-  s32 alpha_pixels;
-  u32 pixel_size;
-  u32 width;
-  u32 height;
-  u32 texture_count;
-  s32 lin_texture;
+  U32 rad_surface_type;
+  S32 alpha_pixels;
+  U32 pixel_size;
+  U32 width;
+  U32 height;
+  U32 texture_count;
+  S32 lin_texture;
 
   // members used by pow2 routines only
-  u32 pitch;
-  u32 total_textures;
-  u32 textures_across;
-  u32 textures_down;
-  u32 remnant_width;
-  u32 remnant_height;
-  u32 remnant_input_width;
-  u32 remnant_input_height;
-  u32 maximum_texture_size;
+  U32 pitch;
+  U32 total_textures;
+  U32 textures_across;
+  U32 textures_down;
+  U32 remnant_width;
+  U32 remnant_height;
+  U32 remnant_input_width;
+  U32 remnant_input_height;
+  U32 maximum_texture_size;
   LPDIRECT3DTEXTURE9* d3d_textures;
 
   // member used by linear routines only
@@ -495,15 +522,20 @@ typedef struct _D3DTLVERTEX {
 //############################################################################
 
 static void Submit_vertices( LPDIRECT3DDEVICE9 d3d_device,
-                             f32 dest_x,
-                             f32 dest_y,
-                             f32 scale_x,
-                             f32 scale_y,
-                             s32 width,
-                             s32 height,
-                             f32 alpha_level )
+                             F32 dest_x,
+                             F32 dest_y,
+                             F32 scale_x,
+                             F32 scale_y,
+                             S32 width,
+                             S32 height,
+                             F32 alpha_level,
+                             S32 pre )
 {
   D3DTLVERTEX vertices[ 4 ];
+  U32 a;
+
+  a = (S32) ( alpha_level * 255.0F );
+  if ( a > 255 ) a = 255;
 
   //
   // Setup up the vertices.
@@ -513,19 +545,22 @@ static void Submit_vertices( LPDIRECT3DDEVICE9 d3d_device,
   vertices[ 0 ].sy = dest_y - 0.5f;
   vertices[ 0 ].sz = 0.0F;
   vertices[ 0 ].rhw = 1.0F;
-  vertices[ 0 ].color = ( ( s32 ) ( ( alpha_level * 255.0F ) ) << 24 ) | 0xffffff;
+  if ( pre )
+    vertices[ 0 ].color = ( a << 24 ) + ( a << 16 ) + ( a << 8 ) + a;
+  else
+    vertices[ 0 ].color = ( a << 24 ) + 0xffffff;
   vertices[ 0 ].specular = vertices[ 0 ].color;
   vertices[ 0 ].tu = 0.0F;
   vertices[ 0 ].tv = 0.0F;
 
   vertices[ 1 ] = vertices[ 0 ];
 
-  vertices[ 1 ].sx = dest_x + ( scale_x * ( f32 ) width ) - 0.5f;
+  vertices[ 1 ].sx = dest_x + ( scale_x * ( F32 ) width ) - 0.5f;
   vertices[ 1 ].tu = 1.0F;
 
   vertices[ 2 ] = vertices[0];
 
-  vertices[ 2 ].sy = dest_y + ( scale_y * ( f32 ) height ) - 0.5f;
+  vertices[ 2 ].sy = dest_y + ( scale_y * ( F32 ) height ) - 0.5f;
   vertices[ 2 ].tv = 1.0F;
 
   vertices[ 3 ] = vertices[ 1 ];
@@ -553,12 +588,12 @@ static void Submit_vertices( LPDIRECT3DDEVICE9 d3d_device,
 //############################################################################
 
 static void Submit_lines( LPDIRECT3DDEVICE9 d3d_device,
-                          f32 dest_x,
-                          f32 dest_y,
-                          f32 scale_x,
-                          f32 scale_y,
-                          s32 width,
-                          s32 height )
+                          F32 dest_x,
+                          F32 dest_y,
+                          F32 scale_x,
+                          F32 scale_y,
+                          S32 width,
+                          S32 height )
 {
   D3DTLVERTEX points[ 12 ];
 
@@ -577,13 +612,13 @@ static void Submit_lines( LPDIRECT3DDEVICE9 d3d_device,
 
   points[ 1 ] = points[ 0 ];
 
-  points[ 1 ].sx = dest_x + ( scale_x * ( f32 ) width );
+  points[ 1 ].sx = dest_x + ( scale_x * ( F32 ) width );
   points[ 1 ].sy = dest_y ;
 
   points[ 2 ] = points[ 1 ];
   points[ 3 ] = points[ 1 ];
 
-  points[ 3 ].sy = dest_y + ( scale_y * ( f32 ) height );
+  points[ 3 ].sy = dest_y + ( scale_y * ( F32 ) height );
 
   points[ 4 ] = points[ 3 ];
   points[ 5 ] = points[ 3 ];
@@ -634,7 +669,7 @@ static void Submit_lines( LPDIRECT3DDEVICE9 d3d_device,
 //##                                                                        ##
 //############################################################################
 
-static void Setup_Renderstate( HRAD3DIMAGE rad_image, f32 alpha_level )
+static void Setup_Renderstate( HRAD3DIMAGE rad_image, F32 alpha_level, S32 pre )
 {
 
   //
@@ -651,14 +686,18 @@ static void Setup_Renderstate( HRAD3DIMAGE rad_image, f32 alpha_level )
   else
   {
     rad_image->direct_3d_device->SetRenderState( D3DRS_ALPHABLENDENABLE, 1 );
-    rad_image->direct_3d_device->SetRenderState( D3DRS_SRCBLEND,D3DBLEND_SRCALPHA );
+    rad_image->direct_3d_device->SetRenderState( D3DRS_SRCBLEND, ( pre ) ? D3DBLEND_ONE : D3DBLEND_SRCALPHA );
     rad_image->direct_3d_device->SetRenderState( D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA );
     rad_image->direct_3d_device->SetTextureStageState( 0, D3DTSS_ALPHAOP, D3DTOP_MODULATE );
     rad_image->direct_3d_device->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
     rad_image->direct_3d_device->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
     rad_image->direct_3d_device->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
+    rad_image->direct_3d_device->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
   }
-  
+
+  rad_image->direct_3d_device->SetSamplerState( 0, D3DSAMP_MAGFILTER, SAMPLING_TYPE );
+  rad_image->direct_3d_device->SetSamplerState( 0, D3DSAMP_MINFILTER, SAMPLING_TYPE );
+
   rad_image->direct_3d_device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 }
 
@@ -673,18 +712,18 @@ static void Setup_Renderstate( HRAD3DIMAGE rad_image, f32 alpha_level )
 //############################################################################
 
 RADCFUNC HRAD3DIMAGE Open_RAD_3D_image_pow2( HRAD3D rad_3d,
-                                             u32 width,
-                                             u32 height,
-                                             s32 alpha_pixels,
-                                             u32 maximum_texture_size )
+                                             U32 width,
+                                             U32 height,
+                                             S32 alpha_pixels,
+                                             U32 maximum_texture_size )
 {
   HRAD3DIMAGE rad_image;
-  u32 remnant_width, remnant_height;
-  u32 buffer_pitch, buffer_height;
-  u32 pitch, pixel_size;
-  u32 total_textures;
+  U32 remnant_width, remnant_height;
+  U32 buffer_pitch, buffer_height;
+  U32 pitch, pixel_size;
+  U32 total_textures;
   LPDIRECT3DTEXTURE9 * textures;
-  u32 x, y, i;
+  U32 x, y, i;
 
   //
   // Calculate the pixel size and the pitch
@@ -892,7 +931,7 @@ RADCFUNC void Close_RAD_3D_image_pow2( HRAD3DIMAGE rad_image )
 {
   if ( rad_image->d3d_textures )
   {
-    u32 i;
+    U32 i;
 
     //
     // Hose all our textures.
@@ -922,15 +961,15 @@ RADCFUNC void Close_RAD_3D_image_pow2( HRAD3DIMAGE rad_image )
 //##                                                                        ##
 //############################################################################
 
-RADCFUNC s32 Lock_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
+RADCFUNC S32 Lock_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
                                      void* out_pixel_buffer,
-                                     u32* out_buffer_pitch,
-                                     u32* out_surface_type,
-                                     u32* src_x,
-                                     u32* src_y,
-                                     u32* src_w,
-                                     u32* src_h,
-                                     s32  discard_all_pixels )
+                                     U32* out_buffer_pitch,
+                                     U32* out_surface_type,
+                                     U32* src_x,
+                                     U32* src_y,
+                                     U32* src_w,
+                                     U32* src_h,
+                                     S32  discard_all_pixels )
 {
   //
   // Fill the variables that were requested.
@@ -1025,23 +1064,24 @@ RADCFUNC void Unlock_RAD_3D_image_pow2( HRAD3DIMAGE rad_image )
 //############################################################################
 
 RADCFUNC void Blit_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
-                                      f32 x_offset,
-                                      f32 y_offset,
-                                      f32 x_scale,
-                                      f32 y_scale,
-                                      f32 alpha_level )
+                                      F32 x_offset,
+                                      F32 y_offset,
+                                      F32 x_scale,
+                                      F32 y_scale,
+                                      F32 alpha_level,
+                                      S32 is_premultiplied_alpha )
 {
   LPDIRECT3DTEXTURE9* textures;
-  u32 x, y;
-  f32 dest_x, dest_y;
-  s32 x_skip, y_skip;
-  f32 adjust_x, adjust_y;
+  U32 x, y;
+  F32 dest_x, dest_y;
+  S32 x_skip, y_skip;
+  F32 adjust_x, adjust_y;
 
   //
   // Setup appropriate texture renderstates.
   //
 
-  Setup_Renderstate( rad_image, alpha_level );
+  Setup_Renderstate( rad_image, alpha_level, is_premultiplied_alpha );
 
   //
   // Now loop through all of our textures, submitting them.
@@ -1065,8 +1105,8 @@ RADCFUNC void Blit_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
              rad_image->maximum_texture_size *
              rad_image->pixel_size );
 
-  adjust_x = ( x_scale * ( f32 ) rad_image->maximum_texture_size );
-  adjust_y = ( y_scale * ( f32 ) rad_image->maximum_texture_size );
+  adjust_x = ( x_scale * ( F32 ) rad_image->maximum_texture_size );
+  adjust_y = ( y_scale * ( F32 ) rad_image->maximum_texture_size );
 
   dest_y = y_offset;
 
@@ -1096,7 +1136,8 @@ RADCFUNC void Blit_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
                        y_scale,
                        rad_image->maximum_texture_size,
                        rad_image->maximum_texture_size,
-                       alpha_level );
+                       alpha_level,
+                       is_premultiplied_alpha );
 
       dest_x += adjust_x;
     }
@@ -1126,7 +1167,8 @@ RADCFUNC void Blit_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
                        y_scale,
                        rad_image->remnant_width,
                        rad_image->maximum_texture_size,
-                       alpha_level );
+                       alpha_level,
+                       is_premultiplied_alpha );
 
 
     }
@@ -1163,7 +1205,8 @@ RADCFUNC void Blit_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
                        y_scale,
                        rad_image->maximum_texture_size,
                        rad_image->remnant_height,
-                       alpha_level );
+                       alpha_level,
+                       is_premultiplied_alpha );
 
       dest_x += adjust_x;
     }
@@ -1189,7 +1232,8 @@ RADCFUNC void Blit_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
                        y_scale,
                        rad_image->remnant_width,
                        rad_image->remnant_height,
-                       alpha_level );
+                       alpha_level,
+                       is_premultiplied_alpha );
     }
   }
 }
@@ -1202,17 +1246,17 @@ RADCFUNC void Blit_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
 //############################################################################
 
 RADCFUNC void Draw_lines_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
-                                            f32 x_offset,
-                                            f32 y_offset,
-                                            f32 x_scale,
-                                            f32 y_scale  )
+                                            F32 x_offset,
+                                            F32 y_offset,
+                                            F32 x_scale,
+                                            F32 y_scale  )
 {
-  u32 x, y;
-  f32 dest_x, dest_y;
-  f32 adjust_x, adjust_y;
+  U32 x, y;
+  F32 dest_x, dest_y;
+  F32 adjust_x, adjust_y;
 
-  adjust_x = ( x_scale * ( f32 ) rad_image->maximum_texture_size );
-  adjust_y = ( y_scale * ( f32 ) rad_image->maximum_texture_size );
+  adjust_x = ( x_scale * ( F32 ) rad_image->maximum_texture_size );
+  adjust_y = ( y_scale * ( F32 ) rad_image->maximum_texture_size );
 
   dest_y = y_offset;
 
@@ -1314,18 +1358,19 @@ RADCFUNC void Draw_lines_RAD_3D_image_pow2( HRAD3DIMAGE rad_image,
 //############################################################################
 
 RADCFUNC void Blit_RAD_3D_image_lin( HRAD3DIMAGE rad_image,
-                                     f32 x_offset,
-                                     f32 y_offset,
-                                     f32 x_scale,
-                                     f32 y_scale,
-                                     f32 alpha_level )
+                                     F32 x_offset,
+                                     F32 y_offset,
+                                     F32 x_scale,
+                                     F32 y_scale,
+                                     F32 alpha_level,
+                                     S32 is_premultiplied_alpha )
 {
 
   //
   // Setup appropriate texture renderstates.
   //
 
-  Setup_Renderstate( rad_image, alpha_level );
+  Setup_Renderstate( rad_image, alpha_level, is_premultiplied_alpha );
 
   //
   // Select our texture.
@@ -1343,7 +1388,8 @@ RADCFUNC void Blit_RAD_3D_image_lin( HRAD3DIMAGE rad_image,
                    y_scale,
                    rad_image->width,
                    rad_image->height,
-                   alpha_level );
+                   alpha_level,
+                   is_premultiplied_alpha );
 }
 
 //############################################################################
@@ -1353,10 +1399,10 @@ RADCFUNC void Blit_RAD_3D_image_lin( HRAD3DIMAGE rad_image,
 //############################################################################
 
 RADCFUNC void Draw_lines_RAD_3D_image_lin( HRAD3DIMAGE rad_image,
-                                           f32 x_offset,
-                                           f32 y_offset,
-                                           f32 x_scale,
-                                           f32 y_scale  )
+                                           F32 x_offset,
+                                           F32 y_offset,
+                                           F32 x_scale,
+                                           F32 y_scale  )
 {
   //
   // Submit the lines.
@@ -1377,14 +1423,14 @@ RADCFUNC void Draw_lines_RAD_3D_image_lin( HRAD3DIMAGE rad_image,
 //##                                                                        ##
 //############################################################################
 
-RADCFUNC s32 Lock_RAD_3D_image_lin( HRAD3DIMAGE rad_image,
+RADCFUNC S32 Lock_RAD_3D_image_lin( HRAD3DIMAGE rad_image,
                                     void * out_pixel_buffer,
-                                    u32 * out_buffer_pitch,
-                                    u32 * out_surface_type,
-                                    u32 * src_x,
-                                    u32 * src_y,
-                                    u32 * src_w,
-                                    u32 * src_h,
+                                    U32 * out_buffer_pitch,
+                                    U32 * out_surface_type,
+                                    U32 * src_x,
+                                    U32 * src_y,
+                                    U32 * src_w,
+                                    U32 * src_h,
                                     S32 discard_old_pixels )
 {
   //
@@ -1472,13 +1518,13 @@ RADCFUNC void Unlock_RAD_3D_image_lin( HRAD3DIMAGE rad_image )
 //############################################################################
 
 RADCFUNC HRAD3DIMAGE Open_RAD_3D_image_lin( HRAD3D rad_3d,
-                                            u32 width,
-                                            u32 height,
-                                            s32 alpha_pixels,
-                                            u32 maximum_texture_size )
+                                            U32 width,
+                                            U32 height,
+                                            S32 alpha_pixels,
+                                            U32 maximum_texture_size )
 {
   HRAD3DIMAGE rad_image;
-  u32 pixel_size;
+  U32 pixel_size;
 
   //
   // Allocate enough memory for a RAD image.
@@ -1568,11 +1614,12 @@ RADCFUNC void Close_RAD_3D_image_lin( HRAD3DIMAGE rad_image )
 //############################################################################
 
 RADCFUNC void Blit_RAD_3D_image( HRAD3DIMAGE rad_image,
-                                 f32 x_offset,
-                                 f32 y_offset,
-                                 f32 x_scale,
-                                 f32 y_scale,
-                                 f32 alpha_level )
+                                 F32 x_offset,
+                                 F32 y_offset,
+                                 F32 x_scale,
+                                 F32 y_scale,
+                                 F32 alpha_level,
+                                 S32 is_premultiplied_alpha )
 {
   if ( rad_image == 0 )
   {
@@ -1582,12 +1629,12 @@ RADCFUNC void Blit_RAD_3D_image( HRAD3DIMAGE rad_image,
   if ( rad_image->lin_texture )
   {
     Blit_RAD_3D_image_lin( rad_image, x_offset, y_offset, x_scale,
-      y_scale, alpha_level );
+      y_scale, alpha_level, is_premultiplied_alpha );
   }
   else
   {
     Blit_RAD_3D_image_pow2( rad_image, x_offset, y_offset, x_scale,
-      y_scale, alpha_level );
+      y_scale, alpha_level, is_premultiplied_alpha );
   }
 }
 
@@ -1598,10 +1645,10 @@ RADCFUNC void Blit_RAD_3D_image( HRAD3DIMAGE rad_image,
 //############################################################################
 
 RADCFUNC void Draw_lines_RAD_3D_image( HRAD3DIMAGE rad_image,
-                                       f32 x_offset,
-                                       f32 y_offset,
-                                       f32 x_scale,
-                                       f32 y_scale  )
+                                       F32 x_offset,
+                                       F32 y_offset,
+                                       F32 x_scale,
+                                       F32 y_scale  )
 {
   if ( rad_image == 0 )
   {
@@ -1626,15 +1673,15 @@ RADCFUNC void Draw_lines_RAD_3D_image( HRAD3DIMAGE rad_image,
 //##                                                                        ##
 //############################################################################
 
-RADCFUNC s32 Lock_RAD_3D_image( HRAD3DIMAGE rad_image,
+RADCFUNC S32 Lock_RAD_3D_image( HRAD3DIMAGE rad_image,
                                 void * out_pixel_buffer,
-                                u32 * out_buffer_pitch,
-                                u32 * out_surface_type,
-                                u32 * src_x,
-                                u32 * src_y,
-                                u32 * src_w,
-                                u32 * src_h,
-                                s32  discard_all_pixels )
+                                U32 * out_buffer_pitch,
+                                U32 * out_surface_type,
+                                U32 * src_x,
+                                U32 * src_y,
+                                U32 * src_w,
+                                U32 * src_h,
+                                S32  discard_all_pixels )
 {
   if ( rad_image == 0 )
   {
@@ -1685,10 +1732,10 @@ RADCFUNC void Unlock_RAD_3D_image( HRAD3DIMAGE rad_image )
 //############################################################################
 
 RADCFUNC HRAD3DIMAGE Open_RAD_3D_image( HRAD3D rad_3d,
-                                        u32 width,
-                                        u32 height,
-                                        s32 alpha_pixels,
-                                        u32 maximum_texture_size )
+                                        U32 width,
+                                        U32 height,
+                                        S32 alpha_pixels,
+                                        U32 maximum_texture_size )
 {
   if ( ( is_pow2( width ) && is_pow2( height ) ) || ( rad_3d->nonpow2_textures_supported ) )
   {
@@ -1726,5 +1773,3 @@ RADCFUNC void Close_RAD_3D_image( HRAD3DIMAGE rad_image )
 }
 
 // @cdep pre $requiresbinary(d3d9.lib)
-
-#endif //_ACCLAIM_IGAADSYSTEM

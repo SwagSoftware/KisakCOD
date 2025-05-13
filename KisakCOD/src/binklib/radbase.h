@@ -1,11 +1,9 @@
 //  __RAD16__ means 16 bit code (Win16)
 //  __RAD32__ means 32 bit code (DOS, Win386, Win32s, Mac AND Win64)
 //  __RAD64__ means 64 bit code (x64)
-// Note oddness - __RAD32__ essentially means "not 16-bit code". In future we'll
-// fix this, but right now so much code uses the __READ32__ define to turn off all
-// the 16-bit bizarreness.
-// So on 64-bit systems, both __RAD32__ and __RAD64__ will be defined.
-// Sorry for the strangeness.
+//
+// Note oddness - __RAD32__ essentially means "at *least* 32-bit code". 
+// So, on 64-bit systems, both __RAD32__ and __RAD64__ will be defined.
 
 //  __RADDOS__ means DOS code (16 or 32 bit)
 //  __RADWIN__ means Windows code (Win16, Win386, Win32s, Win64s)
@@ -35,15 +33,14 @@
 // __RADLITTLEENDIAN__ means processor is little-endian (x86)
 // __RADBIGENDIAN__ means processor is big-endian (680x0, PPC)
 
-#if 1
-//#ifdef _ACCLAIM_IGAADSYSTEM
-
 #ifndef __RADBASEH__
   #define __RADBASEH__
 
-  #define RADCOPYRIGHT "Copyright (C) 1994-2006, RAD Game Tools, Inc."
+  #define RADCOPYRIGHT "Copyright (C) 1994-2008, RAD Game Tools, Inc."
 
   #ifndef __RADRES__
+
+    #define RADSTRUCT struct
 
     #if defined(_WIN64)
 
@@ -66,6 +63,7 @@
       #define __RADPPC__
       #define __RADBIGENDIAN__
       #define RADINLINE inline
+      #define RADRESTRICT __restrict
 
     #elif defined(GEKKO)
 
@@ -74,7 +72,7 @@
       #define __RADPPC__
       #define __RADBIGENDIAN__
       #define RADINLINE inline
-      #define RADRESTRICT __restrict
+      #define RADRESTRICT // __restrict not supported on cw
 
     #elif defined(__arm) && defined(__MWERKS__)
 
@@ -84,6 +82,7 @@
       #define __RADLITTLEENDIAN__
       #define __RADFIXEDPOINT__
       #define RADINLINE inline
+      #define RADRESTRICT // __restrict not supported on cw
 
     #elif defined(R5900)
 
@@ -94,6 +93,11 @@
       #define RADINLINE inline
       #define RADRESTRICT __restrict
 
+      #if !defined(__MWERKS__)
+        #undef RADSTRUCT
+        #define RADSTRUCT struct __attribute__((__packed__))
+      #endif
+
     #elif defined(__psp__)
 
       #define __RADPSP__
@@ -103,15 +107,30 @@
       #define RADINLINE inline
       #define RADRESTRICT __restrict
 
+      #if !defined(__MWERKS__)
+        #undef RADSTRUCT
+        #define RADSTRUCT struct __attribute__((__packed__))
+      #endif
+
     #elif defined(__CELLOS_LV2__)
 
-      #define __RADPS3__
-      #define __RADPPC__
-      #define __RAD32__
-      #define __RADCELL__
-      #define __RADBIGENDIAN__
-      #define RADINLINE inline
-      #define RADRESTRICT __restrict
+      #ifdef __SPU__
+        #define __RADSPU__
+        #define __RAD32__
+        #define __RADCELL__
+        #define __RADBIGENDIAN__
+        #define RADINLINE inline
+        #define RADRESTRICT __restrict
+      #else
+        #define __RADPS3__
+        #define __RADPPC__
+        #define __RAD32__
+        #define __RADCELL__
+        #define __RADBIGENDIAN__
+        #define RADINLINE inline
+        #define RADRESTRICT __restrict
+        #define __RADALTIVEC__
+      #endif
 
       #ifndef __LP32__
       #error "PS3 32bit ABI support only"
@@ -120,10 +139,12 @@
     #elif (defined(__MWERKS__) && !defined(__INTEL__)) || defined(__MRC__) || defined(THINK_C) || defined(powerc) || defined(macintosh) || defined(__powerc) || defined(__APPLE__) || defined(__MACH__)
 
       #define __RADMAC__
+
       #if defined(powerc) || defined(__powerc) || defined(__ppc__)
         #define __RADPPC__
         #define __RADBIGENDIAN__
         #define __RADALTIVEC__
+        #define RADRESTRICT 
       #elif defined(__i386__)
         #define __RADX86__
         #define __RADMMX__
@@ -133,6 +154,7 @@
         #define __RAD68K__
         #define __RADBIGENDIAN__
         #define __RADALTIVEC__
+        #define RADRESTRICT 
       #endif
 
       #define __RAD32__
@@ -151,6 +173,8 @@
       #elif defined(__GNUC__) || defined(__GNUG__) || defined(__MACH__)
         #define RADINLINE inline
         #define __RADMACH__
+
+        #undef RADRESTRICT  /* could have been defined above... */
         #define RADRESTRICT __restrict
       #endif
 
@@ -176,13 +200,15 @@
       #define __RAD32__
       #define __RADLITTLEENDIAN__
       #define RADINLINE inline
+      #define RADRESTRICT __restrict
 
     #else
 
        #if _MSC_VER >= 1400
-         #ifndef RADRESTRICT 
+           #undef RADRESTRICT 
            #define RADRESTRICT __restrict
-         #endif
+       #else
+           #define RADRESTRICT
        #endif
 
       #if defined(_XENON) || (_XBOX_VER == 200)
@@ -282,7 +308,7 @@
     #if (!defined(__RADDOS__) && !defined(__RADWIN__) && !defined(__RADMAC__) &&      \
          !defined(__RADNGC__) && !defined(__RADNDS__) && !defined(__RADXBOX__) &&     \
          !defined(__RADXENON__) && !defined(__RADLINUX__) && !defined(__RADPS2__) &&  \
-         !defined(__RADPSP__) && !defined(__RADPS3__) && !defined(__RADWII__))
+         !defined(__RADPSP__) && !defined(__RADPS3__)  && !defined(__RADSPU__) && !defined(__RADWII__))
       #error "RAD.H did not detect your platform.  Define DOS, WINDOWS, WIN32, macintosh, powerpc, or appropriate console."
     #endif
 
@@ -293,7 +319,7 @@
     #endif
 
     #if (defined(__RADNGC__) || defined(__RADWII__) || defined( __RADPS2__) || \
-         defined(__RADPSP__) || defined(__RADPS3__) || defined(__RADNDS__))
+         defined(__RADPSP__) || defined(__RADPS3__) || defined(__RADSPU__) || defined(__RADNDS__))
 
       #define RADLINK
       #define RADEXPLINK
@@ -440,50 +466,19 @@
     #endif
 
    // probably s.b: RAD_DECLARE_ALIGNED(type, name, alignment)
-    #if (defined(__RADNGC__) || defined(__RADWII__) || defined(__RADPS2__)  || defined(__RADPSP__) || \
-         defined(__RADPS3__) || defined(__RADLINUX__) || defined(__RADMAC__))
-      #define RAD_ATTRIBUTE_ALIGN(num) __attribute__ ((aligned (num)))
-      #define RAD_ATTRIBUTE_ALIGN_SFX(num)
-    #elif defined(__RADNDS__)
-      #define RAD_ATTRIBUTE_ALIGN(num)
-      #define RAD_ATTRIBUTE_ALIGN_SFX(num) __attribute__ ((aligned(num)))
+    #if (defined(__RADWII__) || defined(__RADPSP__) || \
+         defined(__RADPS3__) || defined(__RADSPU__) || \
+         defined(__RADLINUX__) || defined(__RADMAC__)) || defined(__RADNDS__)
+      #define RAD_ALIGN(type,var,num) type __attribute__ ((aligned (num))) var
+    #elif (defined(__RADNGC__) || defined(__RADPS2__))
+      #define RAD_ALIGN(type,var,num) __attribute__ ((aligned (num))) type var
+    #elif (_MSC_VER >= 1300)
+      #define RAD_ALIGN(type,var,num) type __declspec(align(num)) var
     #else
-      #if defined(__RADX86__) || defined(__RADX64__)
-        #ifdef __WATCOMC__
-          #define RAD_ATTRIBUTE_ALIGN(num)
-          #define RAD_ATTRIBUTE_ALIGN_SFX(num)
-        #else
-          #define RAD_ATTRIBUTE_ALIGN(num) __declspec(align(num))
-          #define RAD_ATTRIBUTE_ALIGN_SFX(num)
-        #endif
-      #else
-        #define RAD_ATTRIBUTE_ALIGN(num)
-        #define RAD_ATTRIBUTE_ALIGN_SFX(num)
-      #endif
+      #define RAD_ALIGN(type,var,num) type var
     #endif
 
-    #if defined(__RADX86__) || defined(__RADX64__)
-      #ifdef __WATCOMC__
-        #define RAD_ALIGN_TYPE double
-        #define RAD_ALIGN_DEF 0.0
-      #else
-        #define RAD_ALIGN_TYPE double RAD_ATTRIBUTE_ALIGN(8)
-        #define RAD_ALIGN_DEF 0.0
-      #endif
-    #elif defined(__RADPS2__) || defined(__RADPSP__)
-        #define RAD_ALIGN_TYPE unsigned long
-        #define RAD_ALIGN_DEF 0
-    #elif defined(__RADPS3__)
-        #define RAD_ALIGN_TYPE double
-        #define RAD_ALIGN_DEF 0.0
-    #else
-      #define RAD_ALIGN_TYPE double
-      #define RAD_ALIGN_DEF 0.0
-    #endif
-
-    #define RAD_ALIGN_ADD_TYPE(var) RAD_ALIGN_TYPE var##align = RAD_ALIGN_DEF
-
-    // Note that __RAD16__/__RAD32__/__RAD64__ refers to the size of a pointer.
+     // Note that __RAD16__/__RAD32__/__RAD64__ refers to the size of a pointer.
     // The size of integers is specified explicitly in the code, i.e. u32 or whatever.
 
     #define S8 signed char
@@ -513,14 +508,10 @@
         #error Unknown 64-bit processor (see radbase.h)
       #endif
     #elif defined(__RAD32__)
-
-	  #ifndef U32
-		#define U32 unsigned int
-	  #endif
-
+      #define U32 unsigned int
       #define S32 signed int
       // Pointers are 32 bits.
-      #if (_MSC_VER >= 1300 && _Wp64)
+      #if ( ( defined(_MSC_VER) && (_MSC_VER >= 1300 ) ) && ( defined(_Wp64) && ( _Wp64 ) ) )
         #define INTADDR __w64 long
         #define UINTADDR __w64 unsigned long
 
@@ -553,7 +544,7 @@
     #endif
     #define F32 float
     #if defined(__RADPS2__) || defined(__RADPSP__)
-      typedef struct F64  // do this so that we don't accidentally use doubles
+      typedef RADSTRUCT F64  // do this so that we don't accidentally use doubles
       {                   //  while using the same space
         U32 vals[ 2 ];
       } F64;
@@ -561,7 +552,7 @@
       #define F64 double
     #endif
 
-    #if defined(__RADMAC__) || defined(__MRC__) || defined( __RADNGC__ ) || defined( __RADWII__ ) || defined(__RADNDS__) || defined(__RADPSP__) || defined(__RADPS3__)
+    #if defined(__RADMAC__) || defined(__MRC__) || defined( __RADNGC__ ) || defined( __RADWII__ ) || defined(__RADNDS__) || defined(__RADPSP__) || defined(__RADPS3__) || defined(__RADSPU__)
       #define U64 unsigned long long
       #define S64 signed long long
     #elif defined(__RADPS2__)
@@ -572,11 +563,11 @@
       #define S64 signed __int64
     #else
       // 16-bit
-      typedef struct U64  // do this so that we don't accidentally use U64s
+      typedef RADSTRUCT U64  // do this so that we don't accidentally use U64s
       {                   //  while using the same space
         U32 vals[ 2 ];
       } U64;
-      typedef struct S64  // do this so that we don't accidentally use S64s
+      typedef RADSTRUCT S64  // do this so that we don't accidentally use S64s
       {                   //  while using the same space
         S32 vals[ 2 ];
       } S64;
@@ -592,6 +583,13 @@
       #define S16 signed int
     #endif
 
+    #if defined( __RADXENON__ ) || defined( __RADPS3__ )  || defined( __RADSPU__ )|| defined( __RADWII__ )
+      // on next gen platforms always turn off lower case types 
+      //   (so we can eventually remove them)
+      #undef RAD_NO_LOWERCASE_TYPES  // prevents redef warning
+      #define RAD_NO_LOWERCASE_TYPES
+    #endif
+
     #ifndef RAD_NO_LOWERCASE_TYPES
 
       #ifdef __RADNGC__
@@ -599,7 +597,7 @@
         // same types that we use.
         // So we use the typedefs for this platform.
 
-        #include <dolphin\types.h>
+        #include <dolphin/types.h>
 
       #elif defined(__RADWII__)
 
@@ -607,12 +605,12 @@
         // same types that we use.
         // So we use the typedefs for this platform.
 
-        #include <revolution\types.h>
+        #include <revolution/types.h>
 
       #elif defined(__RADNDS__)
 
         // Ditto for Nitro/NDS
-        #include <nitro\types.h>
+        #include <nitro/types.h>
 
       #else
 
@@ -648,5 +646,3 @@
   #define RAD_UNUSED_VARIABLE(x) (void)(sizeof(x))
 
 #endif
-
-#endif //_ACCLAIM_IGAADSYSTEM

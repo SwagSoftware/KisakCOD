@@ -12,7 +12,7 @@ struct StencilLogBits // sizeof=0x18
 };
 
 void __cdecl RB_UpdateLogging();
-int RB_CloseLogFile();
+void RB_CloseLogFile();
 void RB_OpenLogFile();
 bool __cdecl RB_IsLogging();
 void __cdecl RB_LogPrint(const char *text);

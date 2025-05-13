@@ -1145,13 +1145,15 @@ void __cdecl Com_Init(char* commandLine)
 
     Value = Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
-    //{
-    //    v2 = va("Error during initialization:\n%s\n", com_errorMessage);
-    //    Sys_Error(v2);
-    //}
+    if (_setjmp((int*)Value))
+    {
+        v2 = va("Error during initialization:\n%s\n", com_errorMessage);
+        Sys_Error(v2);
+    }
     Com_Init_Try_Block_Function(commandLine);
     v3 = Sys_GetValue(2);
     //if (!_setjmp3(v3, 0))
+    if (!_setjmp((int*)v3))
         Com_AddStartupCommands();
     if (com_errorEntered)
         Com_ErrorCleanup();
@@ -1159,10 +1161,11 @@ void __cdecl Com_Init(char* commandLine)
     {
         v4 = Sys_GetValue(2);
         //if (_setjmp3(v4, 0))
-        //{
-        //    v5 = va("Error during initialization:\n%s\n", com_errorMessage);
-        //    Sys_Error(v5);
-        //}
+        if (_setjmp((int*)v4))
+        {
+            v5 = va("Error during initialization:\n%s\n", com_errorMessage);
+            Sys_Error(v5);
+        }
         if (!cls.rendererStarted)
             CL_InitRenderer();
         R_BeginRemoteScreenUpdate();
@@ -1985,10 +1988,11 @@ void __cdecl Com_Frame()
     CL_ResetStats_f();
     Value = Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
-    //{
-    //    //Profile_Recover(1);
-    //}
-    //else
+    if (_setjmp((int*)Value))
+    {
+        //Profile_Recover(1);
+    }
+    else
     {
         //Profile_Guard(1);
         Com_CheckSyncFrame();
@@ -2023,7 +2027,8 @@ void Com_StartHunkUsers()
     Value = Sys_GetValue(2);
 
     //if (_setjmp3(Value, 0))
-    //    Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
+    if (_setjmp((int*)Value))
+        Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
 
     Com_AssetLoadUI();
     MenuScreen = UI_GetMenuScreen();
