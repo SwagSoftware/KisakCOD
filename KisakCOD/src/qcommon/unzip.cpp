@@ -1061,15 +1061,16 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 	file_in_zip_read_info_s* pfile_in_zip_read_info;
 	if (file==NULL)
 		return UNZ_PARAMERROR;
+
 	s=(unz_s*)file;
     pfile_in_zip_read_info=s->pfile_in_zip_read;
 
 	if (pfile_in_zip_read_info==NULL)
 		return UNZ_PARAMERROR;
 
-
 	if ((pfile_in_zip_read_info->read_buffer == NULL))
 		return UNZ_END_OF_LIST_OF_FILE;
+
 	if (len==0)
 		return 0;
 
@@ -1078,13 +1079,11 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 	pfile_in_zip_read_info->stream.avail_out = (uInt)len;
 	
 	if (len>pfile_in_zip_read_info->rest_read_uncompressed)
-		pfile_in_zip_read_info->stream.avail_out = 
-		  (uInt)pfile_in_zip_read_info->rest_read_uncompressed;
+		pfile_in_zip_read_info->stream.avail_out = (uInt)pfile_in_zip_read_info->rest_read_uncompressed;
 
 	while (pfile_in_zip_read_info->stream.avail_out>0)
 	{
-		if ((pfile_in_zip_read_info->stream.avail_in==0) &&
-            (pfile_in_zip_read_info->rest_read_compressed>0))
+		if ((pfile_in_zip_read_info->stream.avail_in==0) && (pfile_in_zip_read_info->rest_read_compressed>0))
 		{
 			uInt uReadThis = UNZ_BUFSIZE;
 			if (pfile_in_zip_read_info->rest_read_compressed<uReadThis)
@@ -1102,8 +1101,7 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 
 			pfile_in_zip_read_info->rest_read_compressed-=uReadThis;
 			
-			pfile_in_zip_read_info->stream.next_in = 
-                (Byte*)pfile_in_zip_read_info->read_buffer;
+			pfile_in_zip_read_info->stream.next_in = (Byte*)pfile_in_zip_read_info->read_buffer;
 			pfile_in_zip_read_info->stream.avail_in = (uInt)uReadThis;
 		}
 
@@ -1129,31 +1127,17 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 		else
 		{
 			uLong uTotalOutBefore,uTotalOutAfter;
-			const Byte *bufBefore;
 			uLong uOutThis;
 
 			uTotalOutBefore = pfile_in_zip_read_info->stream.total_out;
-			bufBefore = pfile_in_zip_read_info->stream.next_out;
 
-			/*
-			if ((pfile_in_zip_read_info->rest_read_uncompressed ==
-			         pfile_in_zip_read_info->stream.avail_out) &&
-				(pfile_in_zip_read_info->rest_read_compressed == 0))
-				flush = Z_FINISH;
-			*/
 			err=inflate(&pfile_in_zip_read_info->stream, 2);
 
 			uTotalOutAfter = pfile_in_zip_read_info->stream.total_out;
+
 			uOutThis = uTotalOutAfter-uTotalOutBefore;
-			
-//			pfile_in_zip_read_info->crc32 = 
-//                crc32(pfile_in_zip_read_info->crc32,bufBefore,
-//                        (uInt)(uOutThis));
-
-			pfile_in_zip_read_info->rest_read_uncompressed -=
-                uOutThis;
-
-			iRead += (uInt)(uTotalOutAfter - uTotalOutBefore);
+			pfile_in_zip_read_info->rest_read_uncompressed -= uOutThis;
+			iRead += uOutThis;
             
 			if (err==Z_STREAM_END)
 				return (iRead==0) ? UNZ_EOF : iRead;

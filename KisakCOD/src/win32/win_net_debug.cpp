@@ -19,9 +19,6 @@ unsigned int ip_debugServerSocket[2];
 
 char *g_debugReadBytes;
 
-// KISAKTODO
-// track_static_alloc_internal(g_debugPacket, 0x2000, "g_debugPacket", 9);
-
 int __cdecl Sys_IsRemoteDebugClient()
 {
 	return g_debugClient;

@@ -28,15 +28,6 @@ void *__cdecl R_AllocDynamicVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeIn
         MyAssertHandler(".\\r_buffers.cpp", 163, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, unsigned int, unsigned int, IDirect3DVertexBuffer9 **, unsigned int))dx.device->CreateVertexBuffer)(
-    //    dx.device,
-    //    dx.device,
-    //    sizeInBytes,
-    //    520,
-    //    0,
-    //    0,
-    //    vb,
-    //    0);
     hr = dx.device->CreateVertexBuffer(sizeInBytes, 520, 0, D3DPOOL_DEFAULT, vb, 0);
     if (hr < 0)
     {
@@ -63,15 +54,6 @@ void *__cdecl R_AllocStaticVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInB
         MyAssertHandler(".\\r_buffers.cpp", 185, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, unsigned int, unsigned int, IDirect3DVertexBuffer9 **, unsigned int))dx.device->CreateVertexBuffer)(
-    //    dx.device,
-    //    dx.device,
-    //    sizeInBytes,
-    //    8,
-    //    0,
-    //    0,
-    //    vb,
-    //    0);
     hr = dx.device->CreateVertexBuffer(sizeInBytes, 8, 0, D3DPOOL_DEFAULT, vb, 0);
     if (hr < 0)
     {

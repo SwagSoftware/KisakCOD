@@ -15,8 +15,202 @@
 
 MaterialGlobals materialGlobals;
 
-stream_source_info_t s_streamSourceInfo[16][9];
-stream_dest_info_t s_streamDestInfo[12];
+const stream_source_info_t s_streamSourceInfo[16][9] =
+{
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 1u },
+    { 0u, 28u, 5u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 5u },
+    { 0u, 24u, 5u },
+    { 0u, 28u, 5u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 1u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 1u },
+    { 255u, 0u, 0u },
+    { 1u, 8u, 8u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 255u, 0u, 0u },
+    { 1u, 16u, 8u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 255u, 0u, 0u },
+    { 1u, 16u, 8u },
+    { 1u, 20u, 8u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 1u, 16u, 1u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 1u, 16u, 1u },
+    { 1u, 24u, 8u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 1u, 16u, 1u },
+    { 1u, 24u, 8u },
+    { 1u, 28u, 8u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 1u, 16u, 3u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 1u, 16u, 3u },
+    { 1u, 32u, 8u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 3u },
+    { 0u, 16u, 4u },
+    { 0u, 20u, 3u },
+    { 0u, 36u, 5u },
+    { 0u, 40u, 5u },
+    { 1u, 0u, 3u },
+    { 1u, 16u, 3u },
+    { 1u, 32u, 8u },
+    { 1u, 36u, 8u }
+  },
+  {
+    { 0u, 0u, 2u },
+    { 255u, 0u, 0u },
+    { 0u, 12u, 1u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  },
+  {
+    { 0u, 0u, 2u },
+    { 0u, 12u, 4u },
+    { 0u, 16u, 5u },
+    { 0u, 20u, 5u },
+    { 0u, 24u, 5u },
+    { 0u, 28u, 5u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u },
+    { 255u, 0u, 0u }
+  }
+};
+
+const stream_dest_info_t s_streamDestInfo[12] =
+{
+  { 0u, 0u },
+  { 3u, 0u },
+  { 10u, 0u },
+  { 10u, 1u },
+  { 5u, 0u },
+  { 5u, 1u },
+  { 5u, 2u },
+  { 5u, 3u },
+  { 5u, 4u },
+  { 5u, 5u },
+  { 5u, 6u },
+  { 5u, 7u }
+};
+
 const BuiltInMaterialTable s_builtInMaterials[50] =
 {
   { "$default", &rgp.defaultMaterial },
@@ -188,19 +382,18 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
     int hr; // [esp+0h] [ebp-824h]
     int elemIndexInsert; // [esp+4h] [ebp-820h]
     const stream_source_info_t *sourceInfo; // [esp+8h] [ebp-81Ch]
-    _D3DVERTEXELEMENT9 declEnd; // [esp+Ch] [ebp-818h]
-    _D3DVERTEXELEMENT9 elemTable[256]; // [esp+14h] [ebp-810h] BYREF
+    _D3DVERTEXELEMENT9 declEnd[257]; // [esp+Ch] [ebp-818h] BYREF
     IDirect3DVertexDeclaration9 *decl; // [esp+818h] [ebp-Ch] BYREF
     const stream_dest_info_t *destInfo; // [esp+81Ch] [ebp-8h]
     int elemIndex; // [esp+820h] [ebp-4h]
 
     decl = 0;
-    declEnd.Stream = 255;
-    declEnd.Offset = 0;
-    declEnd.Type = D3DDECLTYPE_UNUSED;
-    declEnd.Method = D3DDECLMETHOD_DEFAULT;
-    declEnd.Usage = D3DDECLUSAGE_POSITION;
-    declEnd.UsageIndex = 0;
+    declEnd[0].Stream = 255;
+    declEnd[0].Offset = 0;
+    declEnd[0].Type = 17;
+    declEnd[0].Method = 0;
+    declEnd[0].Usage = 0;
+    declEnd[0].UsageIndex = 0;
     AssertValidVertexDeclOffsets(sourceTable);
     elemIndex = 0;
     while (streamCount)
@@ -216,33 +409,35 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
         sourceInfo = &sourceTable[routingData->source];
         if (sourceInfo->Stream == 255)
             return 0;
-        //destInfo = (const stream_dest_info_t *)(2 * routingData->dest + 9358400);
         destInfo = &s_streamDestInfo[routingData->dest];
-        for (elemIndexInsert = elemIndex; elemIndexInsert > 0 && *(&declEnd.Stream + 4 * elemIndexInsert) > (int)sourceInfo->Stream; --elemIndexInsert)
+        for (elemIndexInsert = elemIndex;
+            elemIndexInsert > 0 && declEnd[elemIndexInsert].Stream > sourceInfo->Stream;
+            --elemIndexInsert)
         {
-            elemTable[elemIndexInsert] = declEnd;
-            // LWSS: The struct is 8 bytes, so this is an optimization to just set it
-            //*(unsigned int *)&elemTable[elemIndexInsert].Stream = *((unsigned int *)&declEnd.Stream + 2 * elemIndexInsert);
-            //*(unsigned int *)&elemTable[elemIndexInsert].Type = *((unsigned int *)&declEnd.Type + 2 * elemIndexInsert);
+            //v4 = *&declEnd[elemIndexInsert].Type;
+            //*&declEnd[elemIndexInsert + 1].Stream = *&declEnd[elemIndexInsert].Stream;
+            //*&declEnd[elemIndexInsert + 1].Type = v4;
+            declEnd[elemIndexInsert + 1] = declEnd[elemIndexInsert];
         }
-        elemTable[elemIndexInsert].Stream = sourceInfo->Stream;
-        elemTable[elemIndexInsert].Offset = sourceInfo->Offset;
-        elemTable[elemIndexInsert].Type = sourceInfo->Type;
-        elemTable[elemIndexInsert].Method = 0;
-        elemTable[elemIndexInsert].Usage = destInfo->Usage;
-        elemTable[elemIndexInsert].UsageIndex = destInfo->UsageIndex;
+        declEnd[elemIndexInsert + 1].Stream = sourceInfo->Stream;
+        declEnd[elemIndexInsert + 1].Offset = sourceInfo->Offset;
+        declEnd[elemIndexInsert + 1].Type = sourceInfo->Type;
+        declEnd[elemIndexInsert + 1].Method = 0;
+        declEnd[elemIndexInsert + 1].Usage = destInfo->Usage;
+        declEnd[elemIndexInsert + 1].UsageIndex = destInfo->UsageIndex;
         ++elemIndex;
         ++routingData;
         --streamCount;
     }
     v5 = elemIndex;
-    *(unsigned int *)&elemTable[elemIndex].Stream = *(unsigned int *)&declEnd.Stream;
-    *(unsigned int *)&elemTable[v5].Type = *(unsigned int *)&declEnd.Type;
+    declEnd[elemIndex + 1] = declEnd[0];
+    //*&declEnd[elemIndex + 1].Stream = *&declEnd[0].Stream;
+    //*&declEnd[v5 + 1].Type = *&declEnd[0].Type;
     do
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("dx.device->CreateVertexDeclaration( elemTable, &decl )\n");
-        hr = dx.device->CreateVertexDeclaration(elemTable, &decl);
+        hr = dx.device->CreateVertexDeclaration(&declEnd[1], &decl);
         if (hr < 0)
         {
             do

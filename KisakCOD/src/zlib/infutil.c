@@ -47,8 +47,13 @@ int r;
     z->adler = s->check = (*s->checkfn)(s->check, q, n);
 
   /* copy as far as end of window */
-  zmemcpy(p, q, n);
-  p += n;
+  // LWSS ADD :) - Accurate to cod4
+  if (p)
+  {
+    zmemcpy(p, q, n);
+    p += n;
+  }
+
   q += n;
 
   /* see if more to copy at beginning of window */
@@ -73,8 +78,12 @@ int r;
       z->adler = s->check = (*s->checkfn)(s->check, q, n);
 
     /* copy */
-    zmemcpy(p, q, n);
-    p += n;
+    // LWSS ADD :) - Accurate to cod4
+    if (p)
+    {
+        zmemcpy(p, q, n);
+        p += n;
+    }
     q += n;
   }
 

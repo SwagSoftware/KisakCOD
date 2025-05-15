@@ -756,6 +756,8 @@ void __cdecl  Com_ErrorAbort()
 
 void Com_Error(errorParm_t code, const char* fmt, ...)
 {
+    __debugbreak();
+
     jmp_buf * Value; // eax
     va_list va; // [esp+18h] [ebp+10h] BYREF
 

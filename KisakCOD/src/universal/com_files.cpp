@@ -368,11 +368,11 @@ int __cdecl FS_filelength(int f)
         MyAssertHandler(".\\universal\\com_files.cpp", 968, 0, "%s", "f");
     FS_CheckFileSystemStarted();
 
-    // LWSS: Might be a KISAKTODO, seems like a weird shortcut? This part of the CRT was removed in like 2013 or so
-    //if (fsh[f].zipFile)
-    //{
-    //    return fsh[f].handleFiles.file.o[2]._cnt;
-    //}
+    if (fsh[f].zipFile)
+    {
+        unz_s *zfi = (unz_s *)fsh[f].handleFiles.file.o;
+        return zfi->cur_file_info.uncompressed_size;
+    }
 
     h = FS_FileForHandle(f);
     return FS_FileGetFileSize(h);
@@ -1034,13 +1034,12 @@ unsigned int __cdecl FS_WriteLog(const char *buffer, unsigned int len, int h)
 
 void FS_Printf(int h, const char *fmt, ...)
 {
-    char string; // [esp+14h] [ebp-1008h] BYREF
-    _BYTE v3[3]; // [esp+15h] [ebp-1007h] BYREF
+    char string[4100]; // [esp+14h] [ebp-1008h] BYREF
     va_list va; // [esp+102Ch] [ebp+10h] BYREF
 
     va_start(va, fmt);
-    _vsnprintf((char*)"", 0x1000u, fmt, va);
-    FS_Write((char*)"", &v3[strlen("")] - v3, h);
+    _vsnprintf(string, 0x1000u, fmt, va);
+    FS_Write(string, &string[strlen(string) + 1] - &string[1], h);
 }
 
 int __cdecl FS_Seek(int f, int offset, int origin)

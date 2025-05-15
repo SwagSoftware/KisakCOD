@@ -64,7 +64,7 @@ struct searchpath_s // sizeof=0x1C
 union qfile_gus // sizeof=0x4
 {                                       // ...
     FILE *o;
-    unsigned __int8 *z;
+    unsigned char *z;
 };
 struct qfile_us // sizeof=0x8
 {                                       // ...
