@@ -54,7 +54,7 @@ struct __declspec(align(128)) scrStringGlob_t
  };
 
 #define MT_NODE_SIZE 12
-#define MT_SIZE 0xC000
+#define MT_SIZE 0xC0000
 
 struct scrMemTreePub_t
 {                     

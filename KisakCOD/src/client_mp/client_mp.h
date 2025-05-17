@@ -756,7 +756,8 @@ extern const dvar_t *cl_hudDrawsBehindUI;
 extern const dvar_t *cl_voice;
 extern const dvar_t *name;
 
-extern ping_t *cl_pinglist;
+//extern ping_t *cl_pinglist;
+extern ping_t cl_pinglist[16];
 
 extern BOOL g_waitingForServer;
 extern bool cl_waitingOnServerToLoadMap[1];

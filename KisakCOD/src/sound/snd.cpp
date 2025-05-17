@@ -4852,13 +4852,26 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
     if (mssSound->info.rate > g_snd.playback_rate && mssSound->info.format != 17)
     {
         memset(&mixinfo, 0, sizeof(mixinfo));
-        qmemcpy(&mixinfo, mssSound, 0x24u);
+        // LWSS Add: sound struct conversion
+        mixinfo.Info.format = mssSound->info.format;
+        mixinfo.Info.data_ptr = mssSound->info.data_ptr;
+        mixinfo.Info.data_len = mssSound->info.data_len;
+        mixinfo.Info.rate = mssSound->info.rate;
+        mixinfo.Info.bits = mssSound->info.bits;
+        mixinfo.Info.channels = mssSound->info.channels;
+        mixinfo.Info.channel_mask = ~0U; // NEW!
+        mixinfo.Info.samples = mssSound->info.samples;
+        mixinfo.Info.block_size = mssSound->info.block_size;
+        mixinfo.Info.initial_ptr = mssSound->info.initial_ptr;
+
         mixinfo.Info.data_ptr = srcData;
         mixinfo.Info.initial_ptr = srcData;
         while (mssSound->info.rate > g_snd.playback_rate)
         {
-            mssSound->info.rate >>= 1;
-            mssSound->info.samples >>= 1;
+            //mssSound->info.rate >>= 1;
+            mssSound->info.rate /= 2;
+            //mssSound->info.samples >>= 1;
+            mssSound->info.samples /= 2;
         }
         digitalFormat = MSS_DigitalFormatType(mssSound->info.format, mssSound->info.bits, mssSound->info.channels);
         mssSound->info.data_len = AIL_size_processed_digital_audio(mssSound->info.rate, digitalFormat, 1, &mixinfo);

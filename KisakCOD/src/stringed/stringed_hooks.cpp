@@ -61,7 +61,8 @@ void __cdecl SEH_InitLanguage()
     loc_forceEnglish = Dvar_RegisterBool("loc_forceEnglish", 0, 0x21u, "Force english localized strings");
     loc_translate = Dvar_RegisterBool("loc_translate", 1, 0x20u, "Enable translations");
     loc_warnings = Dvar_RegisterBool("loc_warnings", 1, 0, "Enable localization warnings");
-    loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 1, 0, "Throw an error for any unlocalized string");
+    //loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 1, 0, "Throw an error for any unlocalized string");
+    loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 0, 0, "Throw an error for any unlocalized string");
     SEH_UpdateCurrentLanguage();
 }
 

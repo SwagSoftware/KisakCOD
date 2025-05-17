@@ -2792,7 +2792,7 @@ void __cdecl XAnimCalcRelDeltaParts(
                 }
                 else
                 {
-                    v7 = (unsigned __int16*)trans->u.frames.frames._1;
+                    v7 = (unsigned __int16*)trans->u.frames.frames._2;
                     fromVec = (float)*v7;
                     fromVec_4 = (float)v7[1];
                     fromVec_8 = (float)v7[2];
@@ -2858,7 +2858,7 @@ void __cdecl TransformToQuatRefFrame(const float* rot, float* trans)
 
 void __cdecl XAnim_CalcPosDeltaEntire(const XAnimDeltaPart *animDelta, float4 *posDelta)
 {
-    unsigned __int8 *v2; // [esp+20h] [ebp-44h]
+    unsigned __int16 *v2; // [esp+20h] [ebp-44h]
     unsigned __int8 *v3; // [esp+24h] [ebp-40h]
     float sizeVec_4; // [esp+30h] [ebp-34h]
     float sizeVec_8; // [esp+34h] [ebp-30h]
@@ -2883,10 +2883,10 @@ void __cdecl XAnim_CalcPosDeltaEntire(const XAnimDeltaPart *animDelta, float4 *p
             }
             else
             {
-                v2 = posFrameDeltas->u.frames.frames._1[2 * posFrameDeltas->size];
-                lerp = *v2;
-                lerp_4 = *(v2 + 1);
-                lerp_8 = *(v2 + 2);
+                v2 = posFrameDeltas->u.frames.frames._2[posFrameDeltas->size];
+                lerp = (float)(int)*v2;
+                lerp_4 = (float)(int)*(v2 + 1);
+                lerp_8 = (float)(int)*(v2 + 2);
             }
             minsVec_4 = posFrameDeltas->u.frames.mins[1];
             minsVec_8 = posFrameDeltas->u.frames.mins[2];

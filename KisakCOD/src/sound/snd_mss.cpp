@@ -177,6 +177,18 @@ void MSS_InitEq()
       }
     }
   }
+  // LWSS ADD
+  HPROENUM itr = HPROENUM_FIRST;
+  HPROVIDER provider;
+  char *filterName = NULL;
+  int filterCount = 0;
+  while (AIL_enumerate_filters(&itr, &provider, &filterName))
+  {
+      Com_Printf(19, "[%d]Found filter (%s)\n", filterCount, filterName);
+      filterCount++;
+  }
+  // LWSS END
+
   if ( AIL_find_filter("3 Band Parm Eq", &milesGlob.eqFilter) )
   {
     AIL_open_filter(milesGlob.eqFilter, milesGlob.driver);

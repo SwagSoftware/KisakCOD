@@ -2060,8 +2060,8 @@ void __cdecl XAnim_CalcPosDeltaDuring_unsigned_short_(
     float v5; // [esp+6Ch] [ebp-94h]
     float v6; // [esp+70h] [ebp-90h]
     float v7; // [esp+74h] [ebp-8Ch]
-    unsigned __int8 *v8; // [esp+7Ch] [ebp-84h]
-    unsigned __int8 *v9; // [esp+80h] [ebp-80h]
+    unsigned __int16 *v8; // [esp+7Ch] [ebp-84h]
+    unsigned __int16 *v9; // [esp+80h] [ebp-80h]
     unsigned __int8 *v10; // [esp+84h] [ebp-7Ch]
     unsigned __int8 *v11; // [esp+88h] [ebp-78h]
     XAnimPartTransData *p_u; // [esp+8Ch] [ebp-74h]
@@ -2082,7 +2082,7 @@ void __cdecl XAnim_CalcPosDeltaDuring_unsigned_short_(
     {
         posFrameDeltas = animDelta->trans;
         if (posFrameDeltas->size)
-        {
+        { 
             XAnim_SetTime(time, frameCount, &animTime);
             XAnim_GetTimeIndex_unsigned_short_(
                 &animTime,
@@ -2105,12 +2105,12 @@ void __cdecl XAnim_CalcPosDeltaDuring_unsigned_short_(
             }
             else
             {
-                v9 = posFrameDeltas->u.frames.frames._1[2 * keyFrameIndex];
+                v9 = posFrameDeltas->u.frames.frames._2[keyFrameIndex];
                 fromVec.v[0] = *v9;
                 fromVec.v[1] = *(v9 + 1);
                 fromVec.v[2] = *(v9 + 2);
                 fromVec.v[3] = 0.0;
-                v8 = posFrameDeltas->u.frames.frames._1[2 * nextKeyFrameIndex];
+                v8 = posFrameDeltas->u.frames.frames._2[nextKeyFrameIndex];
                 toVec.v[0] = *v8;
                 toVec.v[1] = *(v8 + 1);
                 toVec.v[2] = *(v8 + 2);
@@ -2418,8 +2418,8 @@ void __cdecl XAnim_CalcPosDeltaDuring_unsigned_char_(
     float v5; // [esp+6Ch] [ebp-94h]
     float v6; // [esp+70h] [ebp-90h]
     float v7; // [esp+74h] [ebp-8Ch]
-    unsigned __int8 *v8; // [esp+7Ch] [ebp-84h]
-    unsigned __int8 *v9; // [esp+80h] [ebp-80h]
+    unsigned __int16 *v8; // [esp+7Ch] [ebp-84h]
+    unsigned __int16 *v9; // [esp+80h] [ebp-80h]
     unsigned __int8 *v10; // [esp+84h] [ebp-7Ch]
     unsigned __int8 *v11; // [esp+88h] [ebp-78h]
     XAnimPartTransData *p_u; // [esp+8Ch] [ebp-74h]
@@ -2463,12 +2463,12 @@ void __cdecl XAnim_CalcPosDeltaDuring_unsigned_char_(
             }
             else
             {
-                v9 = posFrameDeltas->u.frames.frames._1[2 * keyFrameIndex];
+                v9 = posFrameDeltas->u.frames.frames._2[keyFrameIndex];
                 fromVec.v[0] = *v9;
                 fromVec.v[1] = *(v9 + 1);
                 fromVec.v[2] = *(v9 + 2);
                 fromVec.v[3] = 0.0;
-                v8 = posFrameDeltas->u.frames.frames._1[2 * nextKeyFrameIndex];
+                v8 = posFrameDeltas->u.frames.frames._2[nextKeyFrameIndex];
                 toVec.v[0] = *v8;
                 toVec.v[1] = *(v8 + 1);
                 toVec.v[2] = *(v8 + 2);

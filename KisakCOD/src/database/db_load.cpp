@@ -196,7 +196,8 @@ XModelPieces *varXModelPieces     ;
 float (*varvec3_t)[3];
 Font_s **varFontHandle     ;
 GfxImage *varGfxImage     ;
-union MaterialTextureDefInfo *varMaterialTextureDefInfo     ;
+//union MaterialTextureDefInfo *varMaterialTextureDefInfo     ;
+water_t **varMaterialTextureDefInfo; // KISAKTODO: this is really the above union
 MaterialInfo *varMaterialInfo     ;
 union FxSpawnDef *varFxSpawnDef     ;
 union FxElemVisuals *varFxElemVisuals     ;
@@ -2068,14 +2069,14 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
 {
     if (varMaterialTextureDef->semantic == 11)
     {
-        if (varMaterialTextureDefInfo->water)
+        if (*varMaterialTextureDefInfo)
         {
-            if (varMaterialTextureDefInfo->water == (water_t *)-1)
+            if (*varMaterialTextureDefInfo == (water_t*)-1)
             {
-                varMaterialTextureDefInfo->image = ((MaterialTextureDefInfo *)AllocLoad_FxElemVisStateSample())->image;
-                varwater_t = *(water_t**)varMaterialTextureDefInfo;
+                *varMaterialTextureDefInfo = (water_t*)AllocLoad_FxElemVisStateSample();
+                varwater_t = *varMaterialTextureDefInfo;
                 Load_water_t(1);
-                Load_PicmipWater((water_t**)varMaterialTextureDefInfo);
+                Load_PicmipWater(varMaterialTextureDefInfo);
             }
             else
             {
@@ -2093,7 +2094,7 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
 void __cdecl Load_MaterialTextureDef(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialTextureDef, 12);
-    varMaterialTextureDefInfo = &varMaterialTextureDef->u;
+    varMaterialTextureDefInfo = (water_t**)&varMaterialTextureDef->u;
     Load_MaterialTextureDefInfo(0);
 }
 
@@ -2307,7 +2308,7 @@ void __cdecl Mark_MaterialTextureDefInfo()
 
 void __cdecl Mark_MaterialTextureDef()
 {
-    varMaterialTextureDefInfo = &varMaterialTextureDef->u;
+    varMaterialTextureDefInfo = (water_t**)&varMaterialTextureDef->u;
     Mark_MaterialTextureDefInfo();
 }
 

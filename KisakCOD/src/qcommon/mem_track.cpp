@@ -613,31 +613,31 @@ void track_init()
 
 void __cdecl track_shutdown(int project)
 {
-    const char* v1; // eax
-    mem_track_node_s* node; // [esp+0h] [ebp-8h]
-    int leak_size; // [esp+4h] [ebp-4h]
-
-    EnterCriticalSection(&g_crit);
-    leak_size = 0;
-    for (node = g_head; node; node = node->next)
-    {
-        if (node->project == project)
-        {
-            if (project || I_stricmp(node->data.name, "MSS_MallocCallback"))
-            {
-                if (!alwaysfails)
-                {
-                    v1 = va("memory leak of '%s' in %s", node->data.name, projName[project]);
-                    MyAssertHandler(".\\qcommon\\mem_track.cpp", 1211, 0, v1);
-                }
-            }
-            else
-            {
-                leak_size += node->data.size;
-            }
-        }
-    }
-    LeaveCriticalSection(&g_crit);
+    //const char* v1; // eax
+    //mem_track_node_s* node; // [esp+0h] [ebp-8h]
+    //int leak_size; // [esp+4h] [ebp-4h]
+    //
+    //EnterCriticalSection(&g_crit);
+    //leak_size = 0;
+    //for (node = g_head; node; node = node->next)
+    //{
+    //    if (node->project == project)
+    //    {
+    //        if (project || I_stricmp(node->data.name, "MSS_MallocCallback"))
+    //        {
+    //            if (!alwaysfails)
+    //            {
+    //                v1 = va("memory leak of '%s' in %s", node->data.name, projName[project]);
+    //                MyAssertHandler(".\\qcommon\\mem_track.cpp", 1211, 0, v1);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            leak_size += node->data.size;
+    //        }
+    //    }
+    //}
+    //LeaveCriticalSection(&g_crit);
 }
 
 void __cdecl track_getbasicinfo(meminfo_t* info)
@@ -1028,34 +1028,34 @@ void __cdecl R_Track_Init()
 
 void __cdecl track_z_alloc(int size, const char* name, int type, char* pos, int project, int overhead)
 {
-    mem_track_node_s* node; // [esp+8h] [ebp-4h]
-
-    EnterCriticalSection(&g_crit);
-    g_mem_track[0].size += overhead;
-    track_addbasicinfo(&g_info, 0, overhead);
-    if (type != 14 && type != 16 && type != 35)
-    {
-        AddTempMemInfo(size, 0, 0, name, type, 2, g_mallocMemInfoArray, &g_mallocMemInfoCount);
-        g_malloc_mem_size += size;
-        if (g_malloc_mem_high < g_malloc_mem_size)
-            g_malloc_mem_high = g_malloc_mem_size;
-    }
-    node = (mem_track_node_s*)(pos - 32);
-    if (!*name)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 411, 0, "%s", "name[0]");
-    node->data.name = name;
-    node->data.filename = "";
-    node->data.size = size;
-    node->data.type = type;
-    node->data.usageType = 2;
-    node->next = g_head;
-    node->prev = 0;
-    node->project = project;
-    if (g_head)
-        g_head->prev = node;
-    g_head = (mem_track_node_s*)(pos - 32);
-    track_addbasicinfo(&g_info, type, size);
-    LeaveCriticalSection(&g_crit);
+    //mem_track_node_s* node; // [esp+8h] [ebp-4h]
+    //
+    //EnterCriticalSection(&g_crit);
+    //g_mem_track[0].size += overhead;
+    //track_addbasicinfo(&g_info, 0, overhead);
+    //if (type != 14 && type != 16 && type != 35)
+    //{
+    //    AddTempMemInfo(size, 0, 0, name, type, 2, g_mallocMemInfoArray, &g_mallocMemInfoCount);
+    //    g_malloc_mem_size += size;
+    //    if (g_malloc_mem_high < g_malloc_mem_size)
+    //        g_malloc_mem_high = g_malloc_mem_size;
+    //}
+    //node = (mem_track_node_s*)(pos - 32);
+    //if (!*name)
+    //    MyAssertHandler(".\\qcommon\\mem_track.cpp", 411, 0, "%s", "name[0]");
+    //node->data.name = name;
+    //node->data.filename = "";
+    //node->data.size = size;
+    //node->data.type = type;
+    //node->data.usageType = 2;
+    //node->next = g_head;
+    //node->prev = 0;
+    //node->project = project;
+    //if (g_head)
+    //    g_head->prev = node;
+    //g_head = (mem_track_node_s*)(pos - 32);
+    //track_addbasicinfo(&g_info, type, size);
+    //LeaveCriticalSection(&g_crit);
 }
 
 void __cdecl track_temp_free(int size, int permanent, const char* name)

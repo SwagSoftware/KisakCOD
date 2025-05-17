@@ -291,7 +291,7 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 	{
 		if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != 0)
 		{
-			iassert((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != HASH_STAT_MOVABLE);
+			iassert((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) == HASH_STAT_MOVABLE);
 			unsigned int next = (unsigned __int16)scrStringGlob.hashTable[hash].status_next;
 
 			unsigned int preva;

@@ -104,7 +104,8 @@ const char *customClassDvars[6] =
 BOOL g_waitingForServer;
 BOOL cl_serverLoadingMap;
 
-ping_t *cl_pinglist;
+//ping_t *cl_pinglist;
+ping_t cl_pinglist[16];
 
 bool cl_waitingOnServerToLoadMap[1];
 
@@ -974,17 +975,17 @@ void __cdecl CL_DownloadsComplete(int localClientNum)
 unsigned __int8 msgBuffer[2048];
 void __cdecl CL_CheckForResend(netsrc_t localClientNum)
 {
-    const char *v1; // eax
-    char *v2; // eax
-    const char *v3; // eax
+    int v1; // eax
+    const char *v2; // eax
+    char *v3; // eax
     const char *v4; // eax
     const char *v5; // eax
-    int v6; // [esp+0h] [ebp-1188h]
-    char md5Str[36]; // [esp+2Ch] [ebp-115Ch] BYREF
-    unsigned __int8 v8[1244]; // [esp+50h] [ebp-1138h] BYREF
+    const char *v6; // eax
+    int v7; // [esp+0h] [ebp-1188h]
+    char md5Str[36] = "WE LOVE ACTIVISION, WE LOVE MS"; // [esp+2Ch] [ebp-115Ch] BYREF
+    unsigned __int8 v9[1244]; // [esp+50h] [ebp-1138h] BYREF
     connstate_t connectionState; // [esp+52Ch] [ebp-C5Ch]
-    char dest; // [esp+530h] [ebp-C58h] BYREF
-    _BYTE v11[3]; // [esp+531h] [ebp-C57h] BYREF
+    char dest[1028]; // [esp+530h] [ebp-C58h] BYREF
     int pktlen; // [esp+934h] [ebp-854h] BYREF
     unsigned __int8 src[9]; // [esp+938h] [ebp-850h] BYREF
     unsigned __int8 dst[1019]; // [esp+941h] [ebp-847h] BYREF
@@ -1031,29 +1032,29 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 strcpy(pkt, "getchallenge");
                 pktlen = &pkt[strlen(pkt) + 1] - &pkt[1];
                 //PbClientConnecting(1, pkt, &pktlen);
-                //CL_BuildMd5StrFromCDKey(md5Str); // KISAKKEY
-                v1 = va("getchallenge 0 \"%s\"", md5Str);
-                NET_OutOfBandPrint(localClientNum, clc->serverAddress, v1);
+                //CL_BuildMd5StrFromCDKey(md5Str);
+                v2 = va("getchallenge 0 \"%s\"", md5Str);
+                NET_OutOfBandPrint(localClientNum, clc->serverAddress, v2);
                 break;
             case CA_CHALLENGING:
-                v2 = Dvar_InfoString(localClientNum, 2);
-                I_strncpyz(&dest, v2, 1024);
-                v3 = va("%i", 1);
-                Info_SetValueForKey(&dest, "protocol", v3);
-                v4 = va("%i", clc->challenge);
-                Info_SetValueForKey(&dest, "challenge", v4);
+                v3 = Dvar_InfoString(localClientNum, 2);
+                I_strncpyz(dest, v3, 1024);
+                v4 = va("%i", 1);
+                Info_SetValueForKey(dest, "protocol", v4);
+                v5 = va("%i", clc->challenge);
+                Info_SetValueForKey(dest, "challenge", v5);
                 if (!clc->qport)
                     MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2980, 0, "%s", "clc->qport != 0");
-                v5 = va("%i", clc->qport);
-                Info_SetValueForKey(&dest, "qport", v5);
+                v6 = va("%i", clc->qport);
+                Info_SetValueForKey(dest, "qport", v6);
                 qmemcpy(src, "connect \"", sizeof(src));
-                count = &v11[strlen(&dest)] - v11;
-                memcpy(dst, (unsigned __int8 *)&dest, count);
+                count = &dest[strlen(dest) + 1] - &dest[1];
+                memcpy(dst, dest, count);
                 dst[count] = 34;
                 dst[count + 1] = 0;
                 pktlen = count + 10;
-                memcpy((unsigned __int8 *)pkt, src, count + 10);
-                //PbClientConnecting(2, pkt, &pktlen); // 
+                memcpy(pkt, src, count + 10);
+                //PbClientConnecting(2, pkt, &pktlen);
                 NET_OutOfBandData(localClientNum, clc->serverAddress, src, count + 10);
                 dvar_modifiedFlags &= ~2u;
                 break;
@@ -1061,7 +1062,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 MSG_Init(&buf, msgBuffer, 2048);
                 MSG_WriteString(&buf, "stats");
                 c = CL_HighestPriorityStatPacket(clc);
-                if ((unsigned int)c > 6)
+                if (c > 6)
                     MyAssertHandler(
                         ".\\client_mp\\cl_main_mp.cpp",
                         3017,
@@ -1073,23 +1074,23 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 if (LiveStorage_DoWeHaveStats())
                 {
                     CL_ControllerIndexFromClientNum(localClientNum);
-                    data = (char *)LiveStorage_GetStatBuffer() + 1240 * c;
+                    data = LiveStorage_GetStatBuffer() + 1240 * c;
                 }
                 else
                 {
                     if (onlinegame->current.enabled)
                         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 3029, 0, "%s", "!onlinegame->current.enabled");
-                    memset(v8, 0, 0x4D8u);
-                    data = v8;
+                    memset(v9, 0, 1240u);
+                    data = v9;
                 }
                 MSG_WriteShort(&buf, clc->qport);
                 MSG_WriteByte(&buf, c);
                 if (0x2000 - 1240 * c > 1240)
-                    v6 = 1240;
+                    v7 = 1240;
                 else
-                    v6 = 0x2000 - 1240 * c;
-                length = v6;
-                MSG_WriteData(&buf, (unsigned __int8 *)data, v6);
+                    v7 = 0x2000 - 1240 * c;
+                length = v7;
+                MSG_WriteData(&buf, (unsigned char*)data, v7);
                 clc->statPacketSendTime[c] = cls.realtime;
                 clc->lastPacketSentTime = cls.realtime;
                 NET_OutOfBandData(localClientNum, clc->serverAddress, buf.data, buf.cursize);
@@ -1101,7 +1102,6 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
         }
     }
 }
-
 int __cdecl CL_HighestPriorityStatPacket(clientConnection_t *clc)
 {
     int packet; // [esp+0h] [ebp-Ch]
