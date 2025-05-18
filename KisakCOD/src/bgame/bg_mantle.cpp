@@ -24,7 +24,8 @@ const char *s_mantleAnimNames[11] =
     "mp_mantle_up_21",
     "mp_mantle_over_high",
     "mp_mantle_over_mid",
-    "mp_mantle_over_low"
+    //"mp_mantle_over_low" // LWSS: WOW! This was a horrible typo!!!! !!! ! ! !! ! !! ! ! ! ! mp_mantle_over_low lacks bDelta which throws off the results and is wrong. This is likely a hack the devs did
+    "player_mantle_over_low"
 };
 
 const MantleAnimTransition s_mantleTrans[7] =

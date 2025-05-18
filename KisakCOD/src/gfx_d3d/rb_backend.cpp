@@ -112,10 +112,11 @@ void __cdecl R_InsertGpuFence()
     const char *v0; // eax
     int hr; // [esp+0h] [ebp-4h]
 
-    if (dx.flushGpuQueryCount)
-        MyAssertHandler(".\\rb_backend.cpp", 2602, 0, "%s", "!dx.flushGpuQueryCount");
-    if (!dx.flushGpuQuery)
-        MyAssertHandler(".\\rb_backend.cpp", 2604, 0, "%s", "dx.flushGpuQuery");
+	// KISAKGPUFENCE: Comment asserts out for now. Sometimes goes off when alt-tabbing.
+    //if (dx.flushGpuQueryCount)
+    //    MyAssertHandler(".\\rb_backend.cpp", 2602, 0, "%s", "!dx.flushGpuQueryCount");
+    //if (!dx.flushGpuQuery)
+    //    MyAssertHandler(".\\rb_backend.cpp", 2604, 0, "%s", "dx.flushGpuQuery");
     do
     {
         if (r_logFile && r_logFile->current.integer)

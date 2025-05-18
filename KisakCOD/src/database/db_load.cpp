@@ -943,6 +943,7 @@ void __cdecl Load_XAnimNotifyInfoArray(bool atStreamStart, int count)
 
 void __cdecl Load_XAnimParts(bool atStreamStart)
 {
+    static_assert(sizeof(XAnimParts) == 88);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXAnimParts, 88);
     DB_PushStreamPos(4u);
     varXString = &varXAnimParts->name;

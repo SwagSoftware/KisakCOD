@@ -42,7 +42,7 @@
 #define FIRST_NONFIELD_OBJECT 0x15
 #define FIRST_DEAD_OBJECT 0x16
 
-#define VAR_NAME_LOW_MASK 0xFF000000
+//#define VAR_NAME_LOW_MASK 0xFF000000
 
 struct VariableStackBuffer // sizeof=0xC
 {

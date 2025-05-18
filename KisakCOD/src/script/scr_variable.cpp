@@ -3359,7 +3359,8 @@ unsigned int  FindVariableIndexInternal2(unsigned int name, unsigned int index)
 	VariableValueInternal* newEntryValue; // [esp+Ch] [ebp-8h]
 	VariableValueInternal* newEntry; // [esp+10h] [ebp-4h]
 
-	iassert(!(name & ~VAR_NAME_LOW_MASK));
+	if ((name & 0xFF000000) != 0)
+		MyAssertHandler(".\\script\\scr_variable.cpp", 929, 0, "%s", "!(name & ~VAR_NAME_LOW_MASK)");
 	if (index >= 0xFFFE)
 		MyAssertHandler(
 			".\\script\\scr_variable.cpp",
