@@ -82,7 +82,6 @@ struct PrecacheEntry // sizeof=0x8
 
 extern scrVarPub_t scrVarPub;
 extern scrVarDebugPub_t scrVarDebugPubBuf;
-extern scrVarGlob_t scrVarGlob;
 
 bool Scr_IsInOpcodeMemory(char const* pos);
 bool Scr_IsIdentifier(char const* token);

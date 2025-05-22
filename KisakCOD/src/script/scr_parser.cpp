@@ -31,27 +31,29 @@ void __cdecl TRACK_scr_parser()
 
 void __cdecl Scr_InitOpcodeLookup()
 {
-    if (scrParserGlob.opcodeLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 75, 0, "%s", "!scrParserGlob.opcodeLookup");
-    if (scrParserGlob.sourcePosLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 76, 0, "%s", "!scrParserGlob.sourcePosLookup");
-    if (scrParserPub.sourceBufferLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 77, 0, "%s", "!scrParserPub.sourceBufferLookup");
+    iassert(!scrParserGlob.opcodeLookup);
+    iassert(!scrParserGlob.sourcePosLookup);
+    iassert(!scrParserPub.sourceBufferLookup);
+
     if (scrVarPub.developer)
     {
+        static_assert(sizeof(OpcodeLookup) == 24);
+        static_assert(sizeof(SourceLookup) == 8);
+        static_assert(sizeof(SourceBufferInfo) == 44);
+
         scrParserGlob.delayedSourceIndex = -1;
         scrParserGlob.opcodeLookupMaxLen = 0x40000;
         scrParserGlob.opcodeLookupLen = 0;
-        scrParserGlob.opcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(6291456);// , "Scr_InitOpcodeLookup");
-        memset((unsigned __int8 *)scrParserGlob.opcodeLookup, 0, 24 * scrParserGlob.opcodeLookupMaxLen);
+        scrParserGlob.opcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(sizeof(OpcodeLookup) * 0x40000, "Scr_InitOpcodeLookup");
+        memset(scrParserGlob.opcodeLookup, 0, sizeof(OpcodeLookup) * scrParserGlob.opcodeLookupMaxLen);
         scrParserGlob.sourcePosLookupMaxLen = 0x40000;
         scrParserGlob.sourcePosLookupLen = 0;
-        scrParserGlob.sourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(0x200000);// , "Scr_InitOpcodeLookup");
+        scrParserGlob.sourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(sizeof(SourceLookup) * 0x40000, "Scr_InitOpcodeLookup");
         scrParserGlob.currentCodePos = 0;
         scrParserGlob.currentSourcePosCount = 0;
         scrParserGlob.sourceBufferLookupMaxLen = 256;
         scrParserPub.sourceBufferLookupLen = 0;
-        scrParserPub.sourceBufferLookup = (SourceBufferInfo *)Hunk_AllocDebugMem(11264);// , "Scr_InitOpcodeLookup");
+        scrParserPub.sourceBufferLookup = (SourceBufferInfo *)Hunk_AllocDebugMem(sizeof(SourceBufferInfo) * 256, "Scr_InitOpcodeLookup");
     }
 }
 
@@ -94,80 +96,56 @@ void __cdecl AddOpcodePos(unsigned int sourcePos, int type)
     unsigned int sourcePosLookupIndex; // [esp+0h] [ebp-14h]
     OpcodeLookup *opcodeLookup; // [esp+4h] [ebp-10h]
     SourceLookup *sourcePosLookup; // [esp+8h] [ebp-Ch]
-    unsigned __int8 *newSourcePosLookup; // [esp+Ch] [ebp-8h]
-    unsigned __int8 *newOpcodeLookup; // [esp+10h] [ebp-4h]
+    SourceLookup *newSourcePosLookup; // [esp+Ch] [ebp-8h]
+    OpcodeLookup *newOpcodeLookup; // [esp+10h] [ebp-4h]
 
     if (scrVarPub.developer)
     {
         if (scrCompilePub.developer_statement == 2)
         {
-            if (scrVarPub.developer_script)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 152, 0, "%s", "!scrVarPub.developer_script");
+            iassert(!scrVarPub.developer_script);
         }
         else if (scrCompilePub.developer_statement != 3)
         {
             if (!scrCompilePub.allowedBreakpoint)
                 type &= ~1u;
-            if (!scrParserGlob.opcodeLookup)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 164, 0, "%s", "scrParserGlob.opcodeLookup");
-            if (!scrParserGlob.opcodeLookupMaxLen)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 165, 0, "%s", "scrParserGlob.opcodeLookupMaxLen");
-            if (!scrParserGlob.sourcePosLookup)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 166, 0, "%s", "scrParserGlob.sourcePosLookup");
-            if (!scrCompilePub.opcodePos)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 167, 0, "%s", "scrCompilePub.opcodePos");
+
+            iassert(scrParserGlob.opcodeLookup);
+            iassert(scrParserGlob.opcodeLookupMaxLen);
+            iassert(scrParserGlob.sourcePosLookup);
+            iassert(scrCompilePub.opcodePos);
+
             if (scrParserGlob.opcodeLookupLen >= scrParserGlob.opcodeLookupMaxLen)
             {
                 scrParserGlob.opcodeLookupMaxLen *= 2;
-                if (scrParserGlob.opcodeLookupLen >= scrParserGlob.opcodeLookupMaxLen)
-                    MyAssertHandler(
-                        ".\\script\\scr_parser.cpp",
-                        172,
-                        0,
-                        "%s",
-                        "scrParserGlob.opcodeLookupLen < scrParserGlob.opcodeLookupMaxLen");
-                newOpcodeLookup = (unsigned __int8 *)Hunk_AllocDebugMem(24 * scrParserGlob.opcodeLookupMaxLen);
-                memcpy(newOpcodeLookup, (unsigned __int8 *)scrParserGlob.opcodeLookup, 24 * scrParserGlob.opcodeLookupLen);
+
+                iassert(scrParserGlob.opcodeLookupLen < scrParserGlob.opcodeLookupMaxLen);
+
+                newOpcodeLookup = (OpcodeLookup *)Hunk_AllocDebugMem(sizeof(OpcodeLookup) * scrParserGlob.opcodeLookupMaxLen);
+                memcpy(newOpcodeLookup, scrParserGlob.opcodeLookup, sizeof(OpcodeLookup) * scrParserGlob.opcodeLookupLen);
                 Hunk_FreeDebugMem();
-                scrParserGlob.opcodeLookup = (OpcodeLookup *)newOpcodeLookup;
+                scrParserGlob.opcodeLookup = newOpcodeLookup;
             }
+
             if (scrParserGlob.sourcePosLookupLen >= scrParserGlob.sourcePosLookupMaxLen)
             {
                 scrParserGlob.sourcePosLookupMaxLen *= 2;
-                if (scrParserGlob.sourcePosLookupLen >= scrParserGlob.sourcePosLookupMaxLen)
-                    MyAssertHandler(
-                        ".\\script\\scr_parser.cpp",
-                        182,
-                        0,
-                        "%s",
-                        "scrParserGlob.sourcePosLookupLen < scrParserGlob.sourcePosLookupMaxLen");
-                newSourcePosLookup = (unsigned __int8 *)Hunk_AllocDebugMem(8 * scrParserGlob.sourcePosLookupMaxLen);
-                memcpy(
-                    newSourcePosLookup,
-                    (unsigned __int8 *)scrParserGlob.sourcePosLookup,
-                    8 * scrParserGlob.sourcePosLookupLen);
+
+                iassert(scrParserGlob.sourcePosLookupLen < scrParserGlob.sourcePosLookupMaxLen);
+
+                newSourcePosLookup = (SourceLookup *)Hunk_AllocDebugMem(sizeof(SourceLookup) * scrParserGlob.sourcePosLookupMaxLen);
+                memcpy(newSourcePosLookup, scrParserGlob.sourcePosLookup, sizeof(SourceLookup) * scrParserGlob.sourcePosLookupLen);
                 Hunk_FreeDebugMem();
                 scrParserGlob.sourcePosLookup = (SourceLookup *)newSourcePosLookup;
             }
             if (scrParserGlob.currentCodePos == scrCompilePub.opcodePos)
             {
-                if (!scrParserGlob.currentSourcePosCount)
-                    MyAssertHandler(".\\script\\scr_parser.cpp", 191, 0, "%s", "scrParserGlob.currentSourcePosCount");
+                iassert(scrParserGlob.currentSourcePosCount);
+
                 opcodeLookup = &scrParserGlob.opcodeLookup[--scrParserGlob.opcodeLookupLen];
-                if (scrParserGlob.currentSourcePosCount + opcodeLookup->sourcePosIndex != scrParserGlob.sourcePosLookupLen)
-                    MyAssertHandler(
-                        ".\\script\\scr_parser.cpp",
-                        197,
-                        0,
-                        "%s",
-                        "opcodeLookup->sourcePosIndex + scrParserGlob.currentSourcePosCount == scrParserGlob.sourcePosLookupLen");
-                if (opcodeLookup->codePos != (const char *)scrParserGlob.currentCodePos)
-                    MyAssertHandler(
-                        ".\\script\\scr_parser.cpp",
-                        198,
-                        0,
-                        "%s",
-                        "opcodeLookup->codePos == (char *)scrParserGlob.currentCodePos");
+
+                iassert(opcodeLookup->sourcePosIndex + scrParserGlob.currentSourcePosCount == scrParserGlob.sourcePosLookupLen);
+                iassert(opcodeLookup->codePos == (char *)scrParserGlob.currentCodePos);
             }
             else
             {
@@ -182,10 +160,8 @@ void __cdecl AddOpcodePos(unsigned int sourcePos, int type)
             sourcePosLookup->sourcePos = sourcePos;
             if (sourcePos == -1)
             {
-                if (scrParserGlob.delayedSourceIndex != -1)
-                    MyAssertHandler(".\\script\\scr_parser.cpp", 217, 0, "%s", "scrParserGlob.delayedSourceIndex == -1");
-                if ((type & 1) == 0)
-                    MyAssertHandler(".\\script\\scr_parser.cpp", 218, 0, "%s", "type & SOURCE_TYPE_BREAKPOINT");
+                iassert(scrParserGlob.delayedSourceIndex == -1);
+                iassert(type & SOURCE_TYPE_BREAKPOINT);
                 scrParserGlob.delayedSourceIndex = sourcePosLookupIndex;
             }
             else if (sourcePos == -2)
@@ -213,52 +189,32 @@ void __cdecl RemoveOpcodePos()
     {
         if (scrCompilePub.developer_statement == 2)
         {
-            if (scrVarPub.developer_script)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 252, 0, "%s", "!scrVarPub.developer_script");
+            iassert(!scrVarPub.developer_script);
         }
         else
         {
-            if (!scrParserGlob.opcodeLookup)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 256, 0, "%s", "scrParserGlob.opcodeLookup");
-            if (!scrParserGlob.opcodeLookupMaxLen)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 257, 0, "%s", "scrParserGlob.opcodeLookupMaxLen");
-            if (!scrParserGlob.sourcePosLookup)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 258, 0, "%s", "scrParserGlob.sourcePosLookup");
-            if (!scrCompilePub.opcodePos)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 259, 0, "%s", "scrCompilePub.opcodePos");
-            if (!scrParserGlob.sourcePosLookupLen)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 261, 0, "%s", "scrParserGlob.sourcePosLookupLen");
+            iassert(scrParserGlob.opcodeLookup);
+            iassert(scrParserGlob.opcodeLookupMaxLen);
+            iassert(scrParserGlob.sourcePosLookup);
+            iassert(scrCompilePub.opcodePos);
+            iassert(scrParserGlob.sourcePosLookupLen);
+
             --scrParserGlob.sourcePosLookupLen;
-            if (!scrParserGlob.opcodeLookupLen)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 264, 0, "%s", "scrParserGlob.opcodeLookupLen");
+
+            iassert(scrParserGlob.opcodeLookupLen);
             --scrParserGlob.opcodeLookupLen;
-            if (!scrParserGlob.currentSourcePosCount)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 267, 0, "%s", "scrParserGlob.currentSourcePosCount");
+
+            iassert(scrParserGlob.currentSourcePosCount);
             --scrParserGlob.currentSourcePosCount;
+
             opcodeLookup = &scrParserGlob.opcodeLookup[scrParserGlob.opcodeLookupLen];
-            if (scrParserGlob.currentCodePos != scrCompilePub.opcodePos)
-                MyAssertHandler(
-                    ".\\script\\scr_parser.cpp",
-                    272,
-                    0,
-                    "%s",
-                    "scrParserGlob.currentCodePos == scrCompilePub.opcodePos");
-            if (scrParserGlob.currentSourcePosCount + opcodeLookup->sourcePosIndex != scrParserGlob.sourcePosLookupLen)
-                MyAssertHandler(
-                    ".\\script\\scr_parser.cpp",
-                    273,
-                    0,
-                    "%s",
-                    "opcodeLookup->sourcePosIndex + scrParserGlob.currentSourcePosCount == scrParserGlob.sourcePosLookupLen");
-            if (opcodeLookup->codePos != (const char *)scrParserGlob.currentCodePos)
-                MyAssertHandler(
-                    ".\\script\\scr_parser.cpp",
-                    274,
-                    0,
-                    "%s",
-                    "opcodeLookup->codePos == (char *)scrParserGlob.currentCodePos");
+            iassert(scrParserGlob.currentCodePos == scrCompilePub.opcodePos);
+            iassert(opcodeLookup->sourcePosIndex + scrParserGlob.currentSourcePosCount == scrParserGlob.sourcePosLookupLen);
+            iassert(opcodeLookup->codePos == (char *)scrParserGlob.currentCodePos);
+
             if (!scrParserGlob.currentSourcePosCount)
                 scrParserGlob.currentCodePos = 0;
+
             opcodeLookup->sourcePosCount = scrParserGlob.currentSourcePosCount;
         }
     }
@@ -272,17 +228,14 @@ void __cdecl AddThreadStartOpcodePos(unsigned int sourcePos)
     {
         if (scrCompilePub.developer_statement == 2)
         {
-            if (scrVarPub.developer_script)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 292, 0, "%s", "!scrVarPub.developer_script");
+            iassert(!scrVarPub.developer_script);
         }
         else
         {
-            if (scrParserGlob.threadStartSourceIndex < 0)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 296, 0, "%s", "scrParserGlob.threadStartSourceIndex >= 0");
+            iassert(scrParserGlob.threadStartSourceIndex >= 0);
             sourcePosLookup = &scrParserGlob.sourcePosLookup[scrParserGlob.threadStartSourceIndex];
             sourcePosLookup->sourcePos = sourcePos;
-            if (sourcePosLookup->type)
-                MyAssertHandler(".\\script\\scr_parser.cpp", 299, 0, "%s", "!sourcePosLookup->type");
+            iassert(!sourcePosLookup->type);
             sourcePosLookup->type = 4;
             scrParserGlob.threadStartSourceIndex = -1;
         }
@@ -308,8 +261,8 @@ const char *__cdecl Scr_GetOpcodePosOfType(
     const char *firstOpcodePos; // [esp+28h] [ebp-Ch]
     const char *opcodePos; // [esp+2Ch] [ebp-8h]
 
-    if (Sys_IsRemoteDebugClient())
-        MyAssertHandler(".\\script\\scr_parser.cpp", 320, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    iassert(!Sys_IsRemoteDebugClient());
+
     sourceBufData = &scrParserPub.sourceBufferLookup[bufferIndex];
     if (bufferIndex + 1 >= scrParserPub.sourceBufferLookupLen)
         v7 = 0;
@@ -374,8 +327,8 @@ unsigned int __cdecl Scr_GetClosestSourcePosOfType(unsigned int bufferIndex, uns
     unsigned int bestSourcePos; // [esp+24h] [ebp-Ch]
     const char *opcodePos; // [esp+28h] [ebp-8h]
 
-    if (Sys_IsRemoteDebugClient())
-        MyAssertHandler(".\\script\\scr_parser.cpp", 385, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    iassert(!Sys_IsRemoteDebugClient());
+
     bestSourcePos = 0;
     sourceBufData = &scrParserPub.sourceBufferLookup[bufferIndex];
     if (bufferIndex + 1 >= scrParserPub.sourceBufferLookupLen)
@@ -428,15 +381,16 @@ OpcodeLookup *__cdecl Scr_GetPrevSourcePosOpcodeLookup(const char *codePos)
     unsigned int middle; // [esp+4h] [ebp-8h]
     unsigned int high; // [esp+8h] [ebp-4h]
 
-    if (!Scr_IsInOpcodeMemory(codePos))
-        MyAssertHandler(".\\script\\scr_parser.cpp", 430, 0, "%s", "Scr_IsInOpcodeMemory( codePos )");
-    if (!scrParserGlob.opcodeLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 431, 0, "%s", "scrParserGlob.opcodeLookup");
+    iassert(Scr_IsInOpcodeMemory(codePos));
+    iassert(scrParserGlob.opcodeLookup);
+
     low = 0;
     high = scrParserGlob.opcodeLookupLen - 1;
+
     while (low <= high)
     {
-        middle = (high + low) >> 1;
+        middle = (high + low) / 2;
+
         if (codePos < scrParserGlob.opcodeLookup[middle].codePos)
         {
             high = middle - 1;
@@ -444,6 +398,7 @@ OpcodeLookup *__cdecl Scr_GetPrevSourcePosOpcodeLookup(const char *codePos)
         else
         {
             low = middle + 1;
+
             if (middle + 1 == scrParserGlob.opcodeLookupLen || codePos < scrParserGlob.opcodeLookup[low].codePos)
                 return &scrParserGlob.opcodeLookup[middle];
         }
@@ -457,29 +412,16 @@ void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum)
 {
     unsigned int sortedIndex; // [esp+0h] [ebp-8h]
 
-    if (bufferIndex >= scrParserPub.sourceBufferLookupLen)
-        MyAssertHandler(
-            ".\\script\\scr_debugger.cpp",
-            1742,
-            0,
-            "bufferIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
-            bufferIndex,
-            scrParserPub.sourceBufferLookupLen);
+    iassert(bufferIndex < scrParserPub.sourceBufferLookupLen);
+
     sortedIndex = scrParserPub.sourceBufferLookup[bufferIndex].sortedIndex;
-    if (sortedIndex >= scrParserPub.sourceBufferLookupLen)
-        MyAssertHandler(
-            ".\\script\\scr_debugger.cpp",
-            1747,
-            0,
-            "sortedIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
-            sortedIndex,
-            scrParserPub.sourceBufferLookupLen);
+
+    iassert(sortedIndex < scrParserPub.sourceBufferLookupLen);
+
     //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, sortedIndex, 1);
     ((UI_LinesComponent)scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
 
-    scrDebuggerGlob.scriptList.scriptWindows[sortedIndex]->SetSelectedLineFocus(
-        lineNum,
-        0);
+    scrDebuggerGlob.scriptList.scriptWindows[sortedIndex]->SetSelectedLineFocus(lineNum, 0);
 
     //Scr_AbstractScriptList::AddEntry(&scrDebuggerGlob.openScriptList, scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
     scrDebuggerGlob.openScriptList.AddEntry(scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
@@ -490,8 +432,8 @@ unsigned int __cdecl Scr_GetLineNum(unsigned int bufferIndex, unsigned int sourc
     const char *startLine; // [esp+0h] [ebp-8h] BYREF
     int col; // [esp+4h] [ebp-4h] BYREF
 
-    if (!scrVarPub.developer)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 557, 0, "%s", "scrVarPub.developer");
+    iassert(scrVarPub.developer);
+
     return Scr_GetLineNumInternal(scrParserPub.sourceBufferLookup[bufferIndex].sourceBuf, sourcePos, &startLine, &col);
 }
 
@@ -499,8 +441,8 @@ unsigned int __cdecl Scr_GetLineNumInternal(const char *buf, unsigned int source
 {
     unsigned int lineNum; // [esp+0h] [ebp-4h]
 
-    if (!buf)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 530, 0, "%s", "buf");
+    iassert(buf);
+
     *startLine = buf;
     lineNum = 0;
     while (sourcePos)
@@ -523,8 +465,8 @@ unsigned int __cdecl Scr_GetFunctionLineNumInternal(const char *buf, unsigned in
     unsigned int functionLine; // [esp+4h] [ebp-8h]
     const char *functionStartLine; // [esp+8h] [ebp-4h]
 
-    if (!buf)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 497, 0, "%s", "buf");
+    iassert(buf);
+
     *startLine = buf;
     lineNum = 0;
     functionLine = 0;
@@ -582,10 +524,9 @@ OpcodeLookup *__cdecl Scr_GetSourcePosOpcodeLookup(const char *codePos)
     int middle; // [esp+4h] [ebp-8h]
     int high; // [esp+8h] [ebp-4h]
 
-    if (!Scr_IsInOpcodeMemory(codePos))
-        MyAssertHandler(".\\script\\scr_parser.cpp", 461, 0, "%s", "Scr_IsInOpcodeMemory( codePos )");
-    if (!scrParserGlob.opcodeLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 462, 0, "%s", "scrParserGlob.opcodeLookup");
+    iassert(Scr_IsInOpcodeMemory(codePos));
+    iassert(scrParserGlob.opcodeLookup);
+
     low = 0;
     high = scrParserGlob.opcodeLookupLen - 1;
     while (low <= high)
@@ -613,66 +554,64 @@ void __cdecl Scr_AddSourceBufferInternal(
     bool doEolFixup,
     bool archive)
 {
-    SourceBufferInfo *NewSourceBuffer; // eax
-    const char *v7; // [esp+0h] [ebp-48h]
-    char v8; // [esp+7h] [ebp-41h]
-    char *v9; // [esp+Ch] [ebp-3Ch]
-    const char *v10; // [esp+10h] [ebp-38h]
-    unsigned int v11; // [esp+14h] [ebp-34h]
-    const char *source; // [esp+2Ch] [ebp-1Ch]
-    char c; // [esp+33h] [ebp-15h]
-    char ca; // [esp+33h] [ebp-15h]
-    char *buf; // [esp+34h] [ebp-14h]
-    char *dest; // [esp+40h] [ebp-8h]
-    int i; // [esp+44h] [ebp-4h]
-    int ia; // [esp+44h] [ebp-4h]
+    SourceBufferInfo *newBuffer;
+    const char *source;
+    char *buf;
+    char c;
+    char count;
+    int i;
+    int j;
+    char *tmp;
+    size_t size;
+    char *dest;
 
     if (scrParserPub.sourceBufferLookup)
     {
-        v11 = strlen(extFilename);
-        buf = (char *)Hunk_AllocDebugMem(v11 + 1 + len + 2);
-        v10 = extFilename;
-        v9 = buf;
-        do
-        {
-            v8 = *v10;
-            *v9++ = *v10++;
-        } while (v8);
+        size = strlen(extFilename) + 1;
+        dest = (char *)Hunk_AllocDebugMem(size + len + 2);
+        strcpy(dest, extFilename);
+
         if (sourceBuf)
-            v7 = &buf[v11 + 1];
+            source = &dest[size];
         else
-            v7 = 0;
-        source = sourceBuf;
-        dest = (char *)v7;
+            source = 0;
+
+        buf = sourceBuf;
+        tmp = (char *)source;
+
         if (doEolFixup)
         {
             for (i = 0; i <= len; ++i)
             {
-                c = *source++;
-                if (c == 10 || c == 13 && *source != 10)
-                    *dest = 0;
+                c = *buf++;
+
+                if (c == 10 || c == 13 && *buf != 10)
+                    *tmp = 0;
                 else
-                    *dest = c;
-                ++dest;
+                    *tmp = c;
+
+                ++tmp;
             }
         }
         else
         {
-            for (ia = 0; ia <= len; ++ia)
+            for (j = 0; j <= len; ++j)
             {
-                ca = *source++;
-                *dest++ = ca;
+                count = *buf++;
+                *tmp++ = count;
             }
         }
-        NewSourceBuffer = Scr_GetNewSourceBuffer();
-        NewSourceBuffer->codePos = codePos;
-        NewSourceBuffer->buf = buf;
-        NewSourceBuffer->sourceBuf = v7;
-        NewSourceBuffer->len = len;
-        NewSourceBuffer->sortedIndex = -1;
-        NewSourceBuffer->archive = archive;
-        if (v7)
-            scrParserPub.sourceBuf = v7;
+
+        newBuffer = Scr_GetNewSourceBuffer();
+        newBuffer->codePos = codePos;
+        newBuffer->buf = dest;
+        newBuffer->sourceBuf = source;
+        newBuffer->len = len;
+        newBuffer->sortedIndex = -1;
+        newBuffer->archive = archive;
+
+        if (source)
+            scrParserPub.sourceBuf = source;
     }
     else
     {
@@ -684,21 +623,16 @@ SourceBufferInfo *__cdecl Scr_GetNewSourceBuffer()
 {
     char *newSourceBufferInfo; // [esp+4h] [ebp-4h]
 
-    if (!scrParserPub.sourceBufferLookup)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 611, 0, "%s", "scrParserPub.sourceBufferLookup");
-    if (!scrParserGlob.sourceBufferLookupMaxLen)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 612, 0, "%s", "scrParserGlob.sourceBufferLookupMaxLen");
+    iassert(scrParserPub.sourceBufferLookup);
+    iassert(scrParserGlob.sourceBufferLookupMaxLen);
+
     if (scrParserPub.sourceBufferLookupLen >= scrParserGlob.sourceBufferLookupMaxLen)
     {
         scrParserGlob.sourceBufferLookupMaxLen *= 2;
-        if (scrParserPub.sourceBufferLookupLen >= scrParserGlob.sourceBufferLookupMaxLen)
-            MyAssertHandler(
-                ".\\script\\scr_parser.cpp",
-                617,
-                0,
-                "%s",
-                "scrParserPub.sourceBufferLookupLen < scrParserGlob.sourceBufferLookupMaxLen");
-        newSourceBufferInfo = (char *)Hunk_AllocDebugMem(44 * scrParserGlob.sourceBufferLookupMaxLen);
+
+        iassert(scrParserPub.sourceBufferLookupLen < scrParserGlob.sourceBufferLookupMaxLen);
+
+        newSourceBufferInfo = (char *)Hunk_AllocDebugMem(sizeof(SourceBufferInfo) * scrParserGlob.sourceBufferLookupMaxLen);
         Com_Memcpy(newSourceBufferInfo, (char *)scrParserPub.sourceBufferLookup, 44 * scrParserPub.sourceBufferLookupLen);
         Hunk_FreeDebugMem();
         scrParserPub.sourceBufferLookup = (SourceBufferInfo *)newSourceBufferInfo;
@@ -719,12 +653,12 @@ char *__cdecl Scr_AddSourceBuffer(const char *filename, char *extFilename, const
 
     if (!archive || !scrParserGlob.saveSourceBufferLookup)
         return Scr_ReadFile(filename, extFilename, codePos, archive);
-    if (!scrParserGlob.saveSourceBufferLookupLen)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 861, 0, "%s", "scrParserGlob.saveSourceBufferLookupLen > 0");
+
+    iassert(scrParserGlob.saveSourceBufferLookupLen > 0);
+
     saveSourceBuffer = &scrParserGlob.saveSourceBufferLookup[--scrParserGlob.saveSourceBufferLookupLen];
     len = saveSourceBuffer->len;
-    if (len < -1)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 865, 0, "%s", "len >= -1");
+    iassert(len >= -1);
     if (len >= 0)
     {
         sourceBuf = (char *)Hunk_AllocateTempMemoryHigh(len + 1, "Scr_AddSourceBuffer1");
@@ -831,9 +765,10 @@ unsigned int __cdecl Scr_GetSourcePos(
     char line[1024]; // [esp+8h] [ebp-408h] BYREF
     int col; // [esp+40Ch] [ebp-4h] BYREF
 
-    if (!scrVarPub.developer)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 1010, 0, "%s", "scrVarPub.developer");
+    iassert(scrVarPub.developer);
+
     lineNum = Scr_GetLineInfo(scrParserPub.sourceBufferLookup[bufferIndex].sourceBuf, sourcePos, &col, line);
+
     if (scrParserGlob.saveSourceBufferLookup)
         Com_sprintf(
             outBuf,
@@ -852,6 +787,7 @@ unsigned int __cdecl Scr_GetSourcePos(
             scrParserPub.sourceBufferLookup[bufferIndex].buf,
             "",
             lineNum + 1);
+
     return lineNum;
 }
 
@@ -891,10 +827,9 @@ unsigned int __cdecl Scr_GetSourceBuffer(const char *codePos)
 {
     unsigned int bufferIndex; // [esp+0h] [ebp-4h]
 
-    if (!Scr_IsInOpcodeMemory(codePos))
-        MyAssertHandler(".\\script\\scr_parser.cpp", 1022, 0, "%s", "Scr_IsInOpcodeMemory( codePos )");
-    if (!scrParserPub.sourceBufferLookupLen)
-        MyAssertHandler(".\\script\\scr_parser.cpp", 1023, 0, "%s", "scrParserPub.sourceBufferLookupLen > 0");
+    iassert(Scr_IsInOpcodeMemory(codePos));
+    iassert(scrParserPub.sourceBufferLookupLen > 0);
+
     for (bufferIndex = scrParserPub.sourceBufferLookupLen - 1;
         bufferIndex
         && (!scrParserPub.sourceBufferLookup[bufferIndex].codePos

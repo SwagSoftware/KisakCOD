@@ -1332,10 +1332,10 @@
     <ClCompile Include="src\universal\assertive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\script\scr_compiler2.cpp">
+    <ClCompile Include="src\script\scr_yacc2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\script\scr_yacc2.cpp">
+    <ClCompile Include="src\script\scr_compiler2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

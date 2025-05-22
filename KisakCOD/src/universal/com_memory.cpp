@@ -826,10 +826,8 @@ int __cdecl Hunk_AllocDebugMem(unsigned int size)
 
 void __cdecl Hunk_FreeDebugMem(void* ptr)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2804, 0, "%s", "Sys_IsMainThread()");
-    if (!g_debugUser)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2805, 0, "%s", "g_debugUser");
+    iassert(Sys_IsMainThread());
+    iassert(g_debugUser);
 }
 
 HunkUser* __cdecl Hunk_UserCreate(int maxSize, const char* name, bool fixed, bool tempMem, int type)

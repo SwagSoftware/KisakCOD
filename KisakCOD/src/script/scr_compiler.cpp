@@ -30,6 +30,88 @@ void __cdecl EmitStatement(sval_u val, bool lastStatement, unsigned int endSourc
 char __cdecl EvalPrimitiveExpression(sval_u expr, VariableCompileValue *constValue);
 void __cdecl EmitArrayPrimitiveExpressionRef(sval_u expr, sval_u sourcePos, scr_block_s *block);
 
+
+/*
+============
+Scr_InitFromChildBlocks
+============
+*/
+void Scr_InitFromChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s *block)
+{
+    int localVarsCreateCount, childIndex, i;
+    scr_block_s *childBlock;
+    unsigned int name;
+
+    if (!childCount)
+    {
+        return;
+    }
+
+    localVarsCreateCount = childBlocks[0]->localVarsPublicCount;
+
+    for (childIndex = 1; childIndex < childCount; childIndex++)
+    {
+        childBlock = childBlocks[childIndex];
+
+        if (childBlock->localVarsPublicCount < localVarsCreateCount)
+        {
+            localVarsCreateCount = childBlock->localVarsPublicCount;
+        }
+    }
+
+    iassert(block->localVarsCreateCount <= localVarsCreateCount);
+    iassert(localVarsCreateCount <= block->localVarsCount);
+
+    block->localVarsCreateCount = localVarsCreateCount;
+
+    for (i = 0; i < localVarsCreateCount; i++)
+    {
+        iassert(i < block->localVarsCount);
+
+        if (!((1 << (i & 7)) & block->localVarsInitBits[i >> 3]))
+        {
+            name = block->localVars[i].name;
+
+            for (childIndex = 0; childIndex < childCount; childIndex++)
+            {
+                childBlock = childBlocks[childIndex];
+
+                iassert(localVarsCreateCount <= childBlock->localVarsPublicCount);
+                iassert(i < childBlock->localVarsPublicCount);
+                iassert(childBlock->localVars[i].name == name);
+
+                if (!((1 << (i & 7)) & childBlock->localVarsInitBits[i >> 3]))
+                {
+                    goto out;
+                }
+            }
+
+            block->localVarsInitBits[i >> 3] |= 1 << (i & 7);
+        }
+
+    out:
+        ;
+    }
+}
+
+/*
+============
+GetExpressionCount
+============
+*/
+int GetExpressionCount(sval_u exprlist)
+{
+    sval_u *node;
+    int expr_count = 0;
+
+    for (node = exprlist.node[0].node; node; node = node[1].node)
+    {
+        expr_count++;
+    }
+
+    return expr_count;
+}
+
 bool __cdecl IsUndefinedPrimitiveExpression(sval_u expr)
 {
     return expr.node[0].type == ENUM_undefined;

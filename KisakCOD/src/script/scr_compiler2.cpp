@@ -3351,7 +3351,7 @@ void LinkFile(unsigned int fileId)
 	emptyValue.type = VAR_UNDEFINED;
 	emptyValue.u.intValue = 0;
 
-	for (threadCountPtr = FindNextSibling(fileId); threadCountPtr; threadCountPtr = FindNextSibling(threadCountPtr))
+	for (threadCountPtr = FindFirstSibling(fileId); threadCountPtr; threadCountPtr = FindNextSibling(threadCountPtr))
 	{
 		threadCountId = FindObject(threadCountPtr);
 		iassert(threadCountId);
@@ -5617,8 +5617,10 @@ void __cdecl ScriptCompile(
 		v9 = 0;
 	precachescriptList = v9;
 	entriesCounta = scrCompilePub.far_function_count + entriesCount;
+
 	if (entriesCounta > 1024)
 		Com_Error(ERR_DROP, "MAX_PRECACHE_ENTRIES exceeded");
+
 	scrCompileGlob.precachescriptList = precachescriptList;
 	EmitIncludeList(val.node[0]);
 	EmitThreadList(val.node[1]);
