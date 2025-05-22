@@ -57,9 +57,6 @@
     <ClCompile Include="src\script\scr_animtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\script\scr_compiler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\script\scr_debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -186,9 +183,6 @@
     <ClCompile Include="src\zlib\deflate.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\zlib\example.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\zlib\gzio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -211,9 +205,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\zlib\maketree.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\zlib\minigzip.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\zlib\trees.c">
@@ -445,9 +436,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\ode\matrix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\ode\misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\phys_world_collision.cpp">
@@ -1107,9 +1095,6 @@
     <ClCompile Include="src\universal\profile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\win_remote.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\win32\win_storage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1179,15 +1164,6 @@
     <ClCompile Include="src\qcommon\unzip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\zlib32\zipcommon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\zlib32\deflate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\zlib32\inflate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gfx_d3d\r_light_load_obj.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1210,9 +1186,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\sound\snd_driver_load_obj.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\script\scr_yacc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\groupvoice\play_dsound.cpp">
@@ -1317,21 +1290,6 @@
     <ClCompile Include="src\groupvoice\speex\stereo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\groupvoice\speex\testdenoise.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\groupvoice\speex\testecho.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\groupvoice\speex\testenc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\groupvoice\speex\testenc_uwb.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\groupvoice\speex\testenc_wb.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\groupvoice\speex\vbr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1366,6 +1324,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\physics\phys_coll_capsulebrush.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\binklib\binktextures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universal\assertive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\script\scr_compiler2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\script\scr_yacc2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1994,9 +1964,6 @@
     <ClInclude Include="src\server\sv_world.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\win32\win_remote.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\win32\win_storage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2022,15 +1989,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\qcommon\unzip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\zlib32\deflate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\zlib32\inflate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\zlib32\zip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\qcommon\com_pack.h">
@@ -2186,9 +2144,9 @@
     <ClInclude Include="src\physics\phys_coll_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="src\msslib\mss32.lib" />
+    <ClInclude Include="src\zlib\gzguts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\physics\ode\placeholder.txt" />
@@ -2196,5 +2154,7 @@
   <ItemGroup>
     <None Include="src\groupvoice\speex\Makefile.am" />
     <None Include="src\groupvoice\speex\Makefile.in" />
+    <None Include="src\zlib\README" />
+    <None Include="src\zlib\zlib.html" />
   </ItemGroup>
 </Project>

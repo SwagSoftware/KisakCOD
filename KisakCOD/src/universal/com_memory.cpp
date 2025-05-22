@@ -694,12 +694,9 @@ void Hunk_CheckTempMemoryClear()
 
 void Hunk_CheckTempMemoryHighClear()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2443, 0, "%s", "Sys_IsMainThread()");
-    if (!s_hunkData)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2444, 0, "%s", "s_hunkData");
-    if (hunk_high.temp != hunk_high.permanent)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2445, 0, "%s", "hunk_high.temp == hunk_high.permanent");
+    iassert(Sys_IsMainThread());
+    iassert(s_hunkData);
+    iassert(hunk_high.temp == hunk_high.permanent);
 }
 
 int __cdecl Hunk_HideTempMemory()

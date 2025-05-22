@@ -11,18 +11,19 @@ struct MemoryNode // sizeof=0xC
 
 #define MEMORY_NODE_BITS 16
 #define MEMORY_NODE_COUNT 0x10000
+#define NUM_BUCKETS 256
 
 struct __declspec(align(128)) scrMemTreeGlob_t // sizeof=0xC0380
 {                                       // XREF: .data:scrMemTreeGlob/r
-    MemoryNode nodes[65536];            // XREF: MT_Init(void)+46/w
+    MemoryNode nodes[MEMORY_NODE_COUNT];            // XREF: MT_Init(void)+46/w
                                         // MT_Init(void)+4E/w ...
-    unsigned __int8 leftBits[256];      // XREF: MT_InitBits+89/w
+    unsigned __int8 leftBits[NUM_BUCKETS];      // XREF: MT_InitBits+89/w
                                         // MT_GetScore+88/r ...
-    unsigned __int8 numBits[256];       // XREF: MT_InitBits+59/w
+    unsigned __int8 numBits[NUM_BUCKETS];       // XREF: MT_InitBits+59/w
                                         // MT_GetScore+6A/r ...
-    unsigned __int8 logBits[256];       // XREF: MT_InitBits+BB/w
+    unsigned __int8 logBits[NUM_BUCKETS];       // XREF: MT_InitBits+BB/w
                                         // MT_GetSize+55/r ...
-    unsigned __int16 head[17];// 0x242E200          // XREF: MT_DumpTree(void)+14B/r
+    unsigned __int16 head[MEMORY_NODE_BITS + 1];// 0x242E200          // XREF: MT_DumpTree(void)+14B/r
                                         // MT_Init(void)+3A/w ...
     // padding byte
     // padding byte

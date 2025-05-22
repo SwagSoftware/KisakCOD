@@ -2989,7 +2989,7 @@ retry_14:
 
 char __cdecl Scr_WatchElementHasSameValue(Scr_WatchElement_s *element, VariableValue *newValue)
 {
-    int type; // edx
+    Vartype_t type; // edx
     VariableValue oldValue; // [esp+0h] [ebp-8h] BYREF
 
     if (!element->valueDefined)

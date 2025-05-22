@@ -219,10 +219,7 @@ void __cdecl Scr_BeginLoadAnimTrees(int user)
 
 unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry *entries, int entriesCount)
 {
-    char *v4; // eax
-    char *v5; // eax
     unsigned int Variable; // eax
-    char *v7; // [esp-8h] [ebp-84h]
     VariableValueInternal_u Object; // [esp+0h] [ebp-7Ch]
     char extFilename[64]; // [esp+14h] [ebp-68h] BYREF
     unsigned int filePtr; // [esp+58h] [ebp-24h]
@@ -235,12 +232,13 @@ unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry 
     sval_u parseData; // [esp+74h] [ebp-8h] BYREF
     unsigned int fileId; // [esp+78h] [ebp-4h]
 
-    if (!scrCompilePub.script_loading)
-        MyAssertHandler(".\\script\\scr_main.cpp", 322, 0, "%s", "scrCompilePub.script_loading");
-    if (strlen(filename) >= 0x40)
-        MyAssertHandler(".\\script\\scr_main.cpp", 323, 0, "%s", "strlen( filename ) < MAX_QPATH");
+    iassert(scrCompilePub.script_loading);
+    iassert(strlen(filename) < MAX_QPATH);
+
     Hunk_CheckTempMemoryHighClear();
+
     name = Scr_CreateCanonicalFilename(filename).prev;
+
     if (FindVariable(scrCompilePub.loadedscripts, name))
     {
         SL_RemoveRefToString(name);
@@ -254,13 +252,10 @@ unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry 
     {
         scriptId = GetNewVariable(scrCompilePub.loadedscripts, name);
         SL_RemoveRefToString(name);
-        v4 = SL_ConvertToString(name);
-        Com_sprintf(extFilename, 0x40u, "%s.gsc", v4);
+        Com_sprintf(extFilename, 0x40u, "%s.gsc", SL_ConvertToString(name));
         oldSourceBuf = scrParserPub.sourceBuf;
         ProfLoad_Begin("Scr_AddSourceBuffer");
-        v7 = TempMalloc(0);
-        v5 = SL_ConvertToString(name);
-        sourceBuffer = Scr_AddSourceBuffer(v5, extFilename, v7, 1);
+        sourceBuffer = Scr_AddSourceBuffer(SL_ConvertToString(name), extFilename, TempMalloc(0), 1);
         ProfLoad_End();
         if (sourceBuffer)
         {
@@ -274,7 +269,7 @@ unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry 
             scrCompilePub.parseBuf = sourceBuffer;
             ScriptParse(&parseData, 0);
             Variable = GetVariable(scrCompilePub.scripts, name);
-            fileId = GetObject(Variable).u.stringValue;
+            fileId = GetObject(Variable);
             ProfLoad_Begin("ScriptCompile");
             ScriptCompile(parseData, fileId, scriptId, entries, entriesCount);
             ProfLoad_End();

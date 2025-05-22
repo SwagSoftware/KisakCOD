@@ -2,6 +2,32 @@
 
 #include "scr_debugger.h"
 
+enum : __int32
+{
+    SOURCE_TYPE_NONE = 0,
+    SOURCE_TYPE_BREAKPOINT = 0x1,
+    SOURCE_TYPE_CALL = 0x2,
+    SOURCE_TYPE_THREAD_START = 0x4,
+    SOURCE_TYPE_BUILTIN_CALL = 0x8,
+    SOURCE_TYPE_NOTIFY = 0x10,
+};
+enum : __int32
+{
+    SCR_DEV_NO = 0x0,
+    SCR_DEV_YES = 0x1,
+    SCR_DEV_IGNORE = 0x2,
+    SCR_DEV_EVALUATE = 0x3,
+};
+
+enum : __int32
+{
+    SCR_ABORT_NONE = 0x0,
+    SCR_ABORT_CONTINUE = 0x1,
+    SCR_ABORT_BREAK = 0x2,
+    SCR_ABORT_RETURN = 0x3,
+    SCR_ABORT_MAX = 0x3,
+};
+
 struct CaseStatementInfo // sizeof=0x10
 {
     unsigned int name;
@@ -26,6 +52,9 @@ struct VariableCompileValue // sizeof=0xC
     VariableValue value;                // ...
     sval_u sourcePos;
 };
+
+#define VALUE_STACK_SIZE 32
+
 struct scrCompileGlob_t // sizeof=0x1D8
 {                                       // ...
     unsigned __int8 *codePos;           // ...
@@ -64,8 +93,10 @@ struct scrCompileGlob_t // sizeof=0x1D8
     // padding byte
     // padding byte
     struct PrecacheEntry *precachescriptList;  // ...
-    VariableCompileValue value_start[32]; // ...
+    VariableCompileValue value_start[VALUE_STACK_SIZE]; // ...
 };
+
+#define SCR_FUNC_TABLE_SIZE 1024
 
 struct scrCompilePub_t
 {
@@ -84,7 +115,7 @@ struct scrCompilePub_t
     unsigned char *opcodePos;
     unsigned int programLen;
     int func_table_size;
-    int func_table[1024];
+    int func_table[SCR_FUNC_TABLE_SIZE];
 };
 
 void __cdecl Scr_CompileStatement(sval_u parseData);
@@ -92,7 +123,7 @@ void __cdecl ScriptCompile(
     sval_u val,
     unsigned int fileId,
     unsigned int scriptId,
-    PrecacheEntry *entries,
+    struct PrecacheEntry *entries,
     int entriesCount);
 
 extern scrCompilePub_t scrCompilePub;

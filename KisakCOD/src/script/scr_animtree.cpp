@@ -52,7 +52,7 @@ void __cdecl Scr_EmitAnimationInternal(char *pos, unsigned int animName, unsigne
     {
         NewVariable = GetNewVariable(names, animName);
         *(unsigned int *)pos = 0;
-        tempValue.type = 7;
+        tempValue.type = VAR_CODEPOS;
         tempValue.u.intValue = (int)pos;
         SetVariableValue(NewVariable, &tempValue);
     }
@@ -123,7 +123,7 @@ unsigned int __cdecl Scr_UsingTreeInternal(const char *filename, unsigned int *i
     else
     {
         ida = GetNewVariable(scrAnimPub.animtrees, name);
-        fileId = GetObject(ida).u.stringValue;
+        fileId = GetObject(ida);
         if (++scrAnimPub.xanim_num[user] >= 0x80)
             MyAssertHandler(".\\script\\scr_animtree.cpp", 562, 0, "%s", "scrAnimPub.xanim_num[user] < MAX_XANIMTREE_NUM");
         scrAnimGlob.using_xanim_lookup[user][scrAnimPub.xanim_num[user]] = ida;
@@ -238,7 +238,7 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
             RemoveVariable(fileId, 0);
             RemoveRefToObject(scrAnimPub.animtree_node);
             scrAnimPub.animtree_node = 0;
-            tempValue.type = 7;
+            tempValue.type = VAR_CODEPOS;
             tempValue.u.intValue = (int)animtree;
             Variable = GetVariable(fileId, 1u);
             SetVariableValue(Variable, &tempValue);
@@ -514,7 +514,7 @@ bool __cdecl AnimTreeParseInternal(
     bool bIgnore; // [esp+27h] [ebp-9h]
     VariableValue tempValue; // [esp+28h] [ebp-8h] BYREF
 
-    tempValue.type = 6;
+    tempValue.type = VAR_INTEGER;
     animName = 0;
     currentAnim = 0;
     flags = 0;

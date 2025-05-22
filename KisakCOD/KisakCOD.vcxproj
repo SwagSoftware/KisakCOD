@@ -484,7 +484,7 @@
     <ClCompile Include="src\ragdoll\ragdoll_quat.cpp" />
     <ClCompile Include="src\ragdoll\ragdoll_update.cpp" />
     <ClCompile Include="src\script\scr_animtree.cpp" />
-    <ClCompile Include="src\script\scr_compiler.cpp" />
+    <ClCompile Include="src\script\scr_compiler2.cpp" />
     <ClCompile Include="src\script\scr_const.cpp" />
     <ClCompile Include="src\script\scr_debugger.cpp" />
     <ClCompile Include="src\script\scr_evaluate.cpp" />
@@ -495,7 +495,7 @@
     <ClCompile Include="src\script\scr_stringlist.cpp" />
     <ClCompile Include="src\script\scr_variable.cpp" />
     <ClCompile Include="src\script\scr_vm.cpp" />
-    <ClCompile Include="src\script\scr_yacc.cpp" />
+    <ClCompile Include="src\script\scr_yacc2.cpp" />
     <ClCompile Include="src\server\sv_game.cpp" />
     <ClCompile Include="src\server\sv_world.cpp" />
     <ClCompile Include="src\server_mp\sv_archive_mp.cpp" />

@@ -49,7 +49,7 @@ BuiltinFunctionDef functions[] =
   { "spawn", &GScr_Spawn, 0 },
   { "spawnplane", &GScr_SpawnPlane, 0 },
   { "spawnturret", &GScr_SpawnTurret, 0 },
-  { "precacheturret", (void(__cdecl *)()) & GScr_PrecacheTurret, 0},
+  { "precacheturret", (void(__cdecl *)())&GScr_PrecacheTurret, 0},
   { "spawnstruct", &Scr_AddStruct, 0 },
   { "spawnhelicopter", &GScr_SpawnHelicopter, 0 },
   { "assert", &assertCmd, 1 },
@@ -242,6 +242,11 @@ BuiltinFunctionDef functions[] =
   { "endlobby", &CL_ResetStats_f, 0 }
 }; // idb
 
+void __cdecl ScrCmd_NULLSUB(scr_entref_t entref)
+{
+
+}
+
 BuiltinMethodDef methods_2[] =
 {
   { "attach", &ScrCmd_attach, 0 },
@@ -271,9 +276,9 @@ BuiltinMethodDef methods_2[] =
   { "playsoundtoplayer", &ScrCmd_PlaySoundToPlayer, 0 },
   { "playloopsound", &ScrCmd_PlayLoopSound, 0 },
   { "stoploopsound", &ScrCmd_StopLoopSound, 0 },
-  { "playrumbleonentity", (void(__cdecl *)(scr_entref_t)) & CL_ResetStats_f, 0},
-  { "playrumblelooponentity", (void(__cdecl *)(scr_entref_t)) & CL_ResetStats_f, 0 },
-  { "stoprumble", (void(__cdecl *)(scr_entref_t)) & CL_ResetStats_f, 0 },
+  { "playrumbleonentity", ScrCmd_NULLSUB, 0},
+  { "playrumblelooponentity", ScrCmd_NULLSUB, 0 },
+  { "stoprumble", ScrCmd_NULLSUB, 0 },
   { "delete", &ScrCmd_Delete, 0 },
   { "setmodel", &ScrCmd_SetModel, 0 },
   { "getnormalhealth", &ScrCmd_GetNormalHealth, 0 },
@@ -316,9 +321,9 @@ BuiltinMethodDef methods_2[] =
   { "releaseclaimedtrigger", &GScr_ReleaseClaimedTrigger, 0 },
   { "getstat", &GScr_GetStat, 0 },
   { "setstat", &GScr_SetStat, 0 },
-  { "sendleaderboards", (void(__cdecl *)(scr_entref_t)) & CL_ResetStats_f, 0 },
+  { "sendleaderboards",ScrCmd_NULLSUB, 0 },
   { "setmovespeedscale", &ScrCmd_SetMoveSpeedScale, 0 },
-  { "logstring", (void(__cdecl *)(scr_entref_t)) & CL_ResetStats_f, 0 },
+  { "logstring", ScrCmd_NULLSUB, 0 },
   { "missile_settarget", &GScr_MissileSetTarget, 0 },
   { "isonladder", &GScr_IsOnLadder, 0 },
   { "ismantling", &GScr_IsMantling, 0 },

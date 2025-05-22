@@ -31,10 +31,29 @@
 #include <client_mp/client_mp.h>
 #include "scr_compiler.h"
 
+struct stype_t // sizeof=0x8
+{                                       // ...
+    sval_u val;                         // ...
+    unsigned int pos;                   // ...
+};
+
 // KISAKTODO ICF'd function that just returns first arg. 
-XAssetHeader __cdecl node1_(unsigned int pool)
+sval_u __cdecl node1_(unsigned int pool)
 {
-    return (XAssetHeader)((void *)pool);
+    return pool;
+}
+
+void __cdecl _yy_memcpy(char *to, char *from, unsigned int count)
+{
+    int v3; // eax
+
+    while (1)
+    {
+        v3 = count--;
+        if (v3 <= 0)
+            break;
+        *to++ = *from++;
+    }
 }
 
 #pragma region YY_GLOBALS
@@ -6020,7 +6039,7 @@ FILE *yyout;
 sval_u yaccResult;
 
 int yy_start;
-yy_buffer_state *yy_current_buffer;
+yy_buffer_state *yy_current_buffer = NULL;
 char *yy_c_buf_p;
 char yy_hold_char;
 
@@ -6034,6 +6053,16 @@ int yy_did_buffer_switch_on_eof;
 sval_u g_dummyVal;
 unsigned __int8 g_parse_user;
 char ch_buf[16386];
+
+void *RETURN_ARG1(void *crap)
+{
+    return crap;
+}
+
+HashEntry_unnamed_type_u __cdecl LowerCase(unsigned int stringValue)
+{
+    return SL_ConvertToLowercase(stringValue, g_parse_user, 14);
+}
 
 int __cdecl yyparse()
 {
@@ -6054,310 +6083,26 @@ int __cdecl yyparse()
     HashEntry_unnamed_type_u v15; // eax
     HashEntry_unnamed_type_u v16; // eax
     const char *v17; // [esp-4h] [ebp-CD8h]
-    int v18; // [esp+0h] [ebp-CD4h] BYREF
+    //int v18; // [esp+0h] [ebp-CD4h] BYREF
     int v19; // [esp+4h] [ebp-CD0h]
     int *v20; // [esp+8h] [ebp-CCCh]
-    int *v21; // [esp+Ch] [ebp-CC8h]
-    sval_u v22; // [esp+10h] [ebp-CC4h]
-    sval_u v23; // [esp+14h] [ebp-CC0h]
-    sval_u v24; // [esp+18h] [ebp-CBCh]
-    sval_u v25; // [esp+1Ch] [ebp-CB8h]
-    sval_u v26; // [esp+20h] [ebp-CB4h]
-    sval_u v27; // [esp+24h] [ebp-CB0h]
-    sval_u v28; // [esp+28h] [ebp-CACh]
-    sval_u v29; // [esp+2Ch] [ebp-CA8h]
-    sval_u v30; // [esp+30h] [ebp-CA4h]
-    sval_u v31; // [esp+34h] [ebp-CA0h]
-    sval_u v32; // [esp+38h] [ebp-C9Ch]
-    sval_u v33; // [esp+3Ch] [ebp-C98h]
-    sval_u v34; // [esp+40h] [ebp-C94h]
-    sval_u v35; // [esp+44h] [ebp-C90h]
-    sval_u v36; // [esp+48h] [ebp-C8Ch]
-    sval_u v37; // [esp+4Ch] [ebp-C88h]
-    sval_u v38; // [esp+50h] [ebp-C84h]
-    sval_u v39; // [esp+54h] [ebp-C80h]
-    sval_u v40; // [esp+58h] [ebp-C7Ch]
-    sval_u v41; // [esp+5Ch] [ebp-C78h]
-    sval_u v42; // [esp+60h] [ebp-C74h]
-    sval_u v43; // [esp+64h] [ebp-C70h]
-    sval_u v44; // [esp+68h] [ebp-C6Ch]
-    sval_u v45; // [esp+6Ch] [ebp-C68h]
-    sval_u v46; // [esp+70h] [ebp-C64h]
-    sval_u v47; // [esp+74h] [ebp-C60h]
-    sval_u v48; // [esp+78h] [ebp-C5Ch]
-    sval_u v49; // [esp+7Ch] [ebp-C58h]
-    sval_u v50; // [esp+80h] [ebp-C54h]
-    sval_u v51; // [esp+84h] [ebp-C50h]
-    sval_u v52; // [esp+88h] [ebp-C4Ch]
-    sval_u v53; // [esp+8Ch] [ebp-C48h]
-    sval_u v54; // [esp+90h] [ebp-C44h]
-    sval_u v55; // [esp+94h] [ebp-C40h]
-    sval_u v56; // [esp+98h] [ebp-C3Ch]
-    sval_u v57; // [esp+9Ch] [ebp-C38h]
-    sval_u v58; // [esp+A0h] [ebp-C34h]
-    sval_u v59; // [esp+A4h] [ebp-C30h]
-    sval_u v60; // [esp+A8h] [ebp-C2Ch]
-    sval_u v61; // [esp+ACh] [ebp-C28h]
-    sval_u v62; // [esp+B0h] [ebp-C24h]
-    sval_u v63; // [esp+B4h] [ebp-C20h]
-    sval_u v64; // [esp+B8h] [ebp-C1Ch]
-    sval_u v65; // [esp+BCh] [ebp-C18h]
-    sval_u v66; // [esp+C0h] [ebp-C14h]
-    sval_u v67; // [esp+C4h] [ebp-C10h]
-    sval_u v68; // [esp+C8h] [ebp-C0Ch]
-    sval_u v69; // [esp+CCh] [ebp-C08h]
-    sval_u v70; // [esp+D0h] [ebp-C04h]
-    sval_u v71; // [esp+D4h] [ebp-C00h]
-    sval_u v72; // [esp+D8h] [ebp-BFCh]
-    sval_u v73; // [esp+DCh] [ebp-BF8h]
-    sval_u v74; // [esp+E0h] [ebp-BF4h]
-    sval_u v75; // [esp+E4h] [ebp-BF0h]
-    sval_u v76; // [esp+E8h] [ebp-BECh]
-    sval_u v77; // [esp+ECh] [ebp-BE8h]
-    sval_u v78; // [esp+F0h] [ebp-BE4h]
-    sval_u v79; // [esp+F4h] [ebp-BE0h]
-    sval_u v80; // [esp+F8h] [ebp-BDCh]
-    sval_u val; // [esp+FCh] [ebp-BD8h]
-    sval_u v82; // [esp+100h] [ebp-BD4h]
-    sval_u v83; // [esp+104h] [ebp-BD0h]
-    sval_u val1; // [esp+108h] [ebp-BCCh]
-    sval_u v85; // [esp+10Ch] [ebp-BC8h]
-    sval_u v86; // [esp+110h] [ebp-BC4h]
-    sval_u v87; // [esp+114h] [ebp-BC0h]
-    sval_u v88; // [esp+118h] [ebp-BBCh]
-    sval_u v89; // [esp+11Ch] [ebp-BB8h]
-    sval_u v90; // [esp+120h] [ebp-BB4h]
-    sval_u v91; // [esp+124h] [ebp-BB0h]
-    sval_u v92; // [esp+128h] [ebp-BACh]
-    sval_u v93; // [esp+12Ch] [ebp-BA8h]
-    sval_u val6; // [esp+130h] [ebp-BA4h]
-    sval_u v95; // [esp+134h] [ebp-BA0h]
-    sval_u v96; // [esp+138h] [ebp-B9Ch]
-    sval_u v97; // [esp+13Ch] [ebp-B98h]
-    sval_u v98; // [esp+140h] [ebp-B94h]
-    sval_u v99; // [esp+144h] [ebp-B90h]
-    sval_u v100; // [esp+148h] [ebp-B8Ch]
-    sval_u v101; // [esp+14Ch] [ebp-B88h]
-    sval_u v102; // [esp+150h] [ebp-B84h]
-    sval_u v103; // [esp+154h] [ebp-B80h]
-    sval_u v104; // [esp+158h] [ebp-B7Ch]
-    sval_u v105; // [esp+15Ch] [ebp-B78h]
-    sval_u v106; // [esp+160h] [ebp-B74h]
-    sval_u v107; // [esp+164h] [ebp-B70h]
-    sval_u v108; // [esp+168h] [ebp-B6Ch]
-    sval_u v109; // [esp+16Ch] [ebp-B68h]
-    sval_u v110; // [esp+170h] [ebp-B64h]
-    sval_u v111; // [esp+174h] [ebp-B60h]
-    sval_u v112; // [esp+178h] [ebp-B5Ch]
-    sval_u v113; // [esp+17Ch] [ebp-B58h]
-    sval_u v114; // [esp+180h] [ebp-B54h]
-    sval_u v115; // [esp+184h] [ebp-B50h]
-    sval_u v116; // [esp+188h] [ebp-B4Ch]
-    sval_u v117; // [esp+18Ch] [ebp-B48h]
-    sval_u v118; // [esp+190h] [ebp-B44h]
-    sval_u v119; // [esp+194h] [ebp-B40h]
-    sval_u v120; // [esp+198h] [ebp-B3Ch]
-    sval_u v121; // [esp+19Ch] [ebp-B38h]
-    sval_u v122; // [esp+1A0h] [ebp-B34h]
-    sval_u v123; // [esp+1A4h] [ebp-B30h]
-    sval_u v124; // [esp+1A8h] [ebp-B2Ch]
-    sval_u v125; // [esp+1ACh] [ebp-B28h]
-    sval_u v126; // [esp+1B0h] [ebp-B24h]
-    sval_u v127; // [esp+1B4h] [ebp-B20h]
-    sval_u v128; // [esp+1B8h] [ebp-B1Ch]
-    sval_u v129; // [esp+1BCh] [ebp-B18h]
-    sval_u v130; // [esp+1C0h] [ebp-B14h]
-    sval_u v131; // [esp+1C4h] [ebp-B10h]
-    sval_u v132; // [esp+1C8h] [ebp-B0Ch]
-    sval_u v133; // [esp+1CCh] [ebp-B08h]
-    sval_u v134; // [esp+1D0h] [ebp-B04h]
-    sval_u v135; // [esp+1D4h] [ebp-B00h]
-    sval_u v136; // [esp+1D8h] [ebp-AFCh]
-    sval_u v137; // [esp+1DCh] [ebp-AF8h]
-    sval_u v138; // [esp+1E0h] [ebp-AF4h]
-    sval_u v139; // [esp+1E4h] [ebp-AF0h]
-    sval_u v140; // [esp+1E8h] [ebp-AECh]
-    sval_u v141; // [esp+1ECh] [ebp-AE8h]
-    sval_u v142; // [esp+1F0h] [ebp-AE4h]
-    sval_u v143; // [esp+1F4h] [ebp-AE0h]
-    sval_u v144; // [esp+1F8h] [ebp-ADCh]
-    sval_u v145; // [esp+1FCh] [ebp-AD8h]
-    sval_u v146; // [esp+200h] [ebp-AD4h]
-    sval_u v147; // [esp+204h] [ebp-AD0h]
-    sval_u v148; // [esp+208h] [ebp-ACCh]
-    sval_u v149; // [esp+20Ch] [ebp-AC8h]
-    sval_u v150; // [esp+210h] [ebp-AC4h]
-    sval_u v151; // [esp+214h] [ebp-AC0h]
-    sval_u v152; // [esp+218h] [ebp-ABCh]
-    sval_u v153; // [esp+21Ch] [ebp-AB8h]
-    sval_u v154; // [esp+220h] [ebp-AB4h]
-    sval_u v155; // [esp+224h] [ebp-AB0h]
-    sval_u v156; // [esp+228h] [ebp-AACh]
-    sval_u v157; // [esp+22Ch] [ebp-AA8h]
-    sval_u v158; // [esp+230h] [ebp-AA4h]
-    sval_u v159; // [esp+234h] [ebp-AA0h]
-    sval_u v160; // [esp+238h] [ebp-A9Ch]
-    sval_u v161; // [esp+23Ch] [ebp-A98h]
-    sval_u v162; // [esp+240h] [ebp-A94h]
-    sval_u v163; // [esp+244h] [ebp-A90h]
-    sval_u v164; // [esp+248h] [ebp-A8Ch]
-    sval_u v165; // [esp+24Ch] [ebp-A88h]
-    sval_u v166; // [esp+250h] [ebp-A84h]
-    sval_u v167; // [esp+254h] [ebp-A80h]
-    sval_u v168; // [esp+258h] [ebp-A7Ch]
-    sval_u v169; // [esp+25Ch] [ebp-A78h]
-    sval_u v170; // [esp+260h] [ebp-A74h]
-    sval_u v171; // [esp+264h] [ebp-A70h]
-    sval_u v172; // [esp+268h] [ebp-A6Ch]
-    sval_u v173; // [esp+26Ch] [ebp-A68h]
-    sval_u v174; // [esp+270h] [ebp-A64h]
-    sval_u v175; // [esp+274h] [ebp-A60h]
-    sval_u v176; // [esp+278h] [ebp-A5Ch]
-    sval_u v177; // [esp+27Ch] [ebp-A58h]
-    sval_u v178; // [esp+280h] [ebp-A54h]
-    sval_u v179; // [esp+284h] [ebp-A50h]
-    sval_u v180; // [esp+288h] [ebp-A4Ch]
-    sval_u v181; // [esp+28Ch] [ebp-A48h]
-    sval_u v182; // [esp+290h] [ebp-A44h]
-    sval_u v183; // [esp+294h] [ebp-A40h]
-    sval_u v184; // [esp+298h] [ebp-A3Ch]
-    sval_u v185; // [esp+29Ch] [ebp-A38h]
-    sval_u v186; // [esp+2A0h] [ebp-A34h]
-    sval_u v187; // [esp+2A4h] [ebp-A30h]
-    sval_u v188; // [esp+2A8h] [ebp-A2Ch]
-    sval_u v189; // [esp+2ACh] [ebp-A28h]
-    sval_u v190; // [esp+2B0h] [ebp-A24h]
-    sval_u v191; // [esp+2B4h] [ebp-A20h]
-    sval_u v192; // [esp+2B8h] [ebp-A1Ch]
-    sval_u v193; // [esp+2BCh] [ebp-A18h]
-    sval_u v194; // [esp+2C0h] [ebp-A14h]
-    sval_u v195; // [esp+2C4h] [ebp-A10h]
-    sval_u v196; // [esp+2C8h] [ebp-A0Ch]
-    sval_u v197; // [esp+2CCh] [ebp-A08h]
-    sval_u v198; // [esp+2D0h] [ebp-A04h]
-    sval_u v199; // [esp+2D4h] [ebp-A00h]
-    sval_u v200; // [esp+2D8h] [ebp-9FCh]
-    sval_u v201; // [esp+2DCh] [ebp-9F8h]
-    sval_u v202; // [esp+2E0h] [ebp-9F4h]
-    sval_u v203; // [esp+2E4h] [ebp-9F0h]
-    sval_u v204; // [esp+2E8h] [ebp-9ECh]
-    sval_u v205; // [esp+2ECh] [ebp-9E8h]
-    sval_u v206; // [esp+2F0h] [ebp-9E4h]
-    sval_u v207; // [esp+2F4h] [ebp-9E0h]
-    sval_u v208; // [esp+2F8h] [ebp-9DCh]
-    sval_u v209; // [esp+2FCh] [ebp-9D8h]
-    sval_u v210; // [esp+300h] [ebp-9D4h]
-    sval_u v211; // [esp+304h] [ebp-9D0h]
-    sval_u v212; // [esp+308h] [ebp-9CCh]
-    sval_u v213; // [esp+30Ch] [ebp-9C8h]
-    sval_u v214; // [esp+310h] [ebp-9C4h]
-    sval_u v215; // [esp+314h] [ebp-9C0h]
-    sval_u v216; // [esp+318h] [ebp-9BCh]
-    sval_u v217; // [esp+31Ch] [ebp-9B8h]
-    sval_u v218; // [esp+320h] [ebp-9B4h]
-    sval_u v219; // [esp+324h] [ebp-9B0h]
-    sval_u v220; // [esp+328h] [ebp-9ACh]
-    sval_u v221; // [esp+32Ch] [ebp-9A8h]
-    sval_u v222; // [esp+330h] [ebp-9A4h]
-    sval_u v223; // [esp+334h] [ebp-9A0h]
-    sval_u v224; // [esp+338h] [ebp-99Ch]
-    sval_u v225; // [esp+33Ch] [ebp-998h]
-    sval_u v226; // [esp+340h] [ebp-994h]
-    sval_u v227; // [esp+344h] [ebp-990h]
-    sval_u v228; // [esp+348h] [ebp-98Ch]
-    sval_u v229; // [esp+34Ch] [ebp-988h]
-    sval_u v230; // [esp+350h] [ebp-984h]
-    sval_u v231; // [esp+354h] [ebp-980h]
-    sval_u v232; // [esp+358h] [ebp-97Ch]
-    sval_u v233; // [esp+35Ch] [ebp-978h]
-    sval_u v234; // [esp+360h] [ebp-974h]
-    sval_u v235; // [esp+364h] [ebp-970h]
-    sval_u v236; // [esp+368h] [ebp-96Ch]
-    sval_u v237; // [esp+36Ch] [ebp-968h]
-    sval_u v238; // [esp+370h] [ebp-964h]
-    sval_u v239; // [esp+374h] [ebp-960h]
-    sval_u v240; // [esp+378h] [ebp-95Ch]
-    sval_u v241; // [esp+37Ch] [ebp-958h]
-    sval_u v242; // [esp+380h] [ebp-954h]
-    sval_u v243; // [esp+384h] [ebp-950h]
-    sval_u v244; // [esp+388h] [ebp-94Ch]
-    sval_u v245; // [esp+38Ch] [ebp-948h]
-    sval_u v246; // [esp+390h] [ebp-944h]
-    sval_u v247; // [esp+394h] [ebp-940h]
-    sval_u v248; // [esp+398h] [ebp-93Ch]
-    sval_u v249; // [esp+39Ch] [ebp-938h]
-    sval_u v250; // [esp+3A0h] [ebp-934h]
-    sval_u v251; // [esp+3A4h] [ebp-930h]
-    sval_u v252; // [esp+3A8h] [ebp-92Ch]
-    sval_u v253; // [esp+3ACh] [ebp-928h]
-    sval_u v254; // [esp+3B0h] [ebp-924h]
-    sval_u v255; // [esp+3B4h] [ebp-920h]
-    sval_u v256; // [esp+3B8h] [ebp-91Ch]
-    sval_u v257; // [esp+3BCh] [ebp-918h]
-    sval_u v258; // [esp+3C0h] [ebp-914h]
-    sval_u v259; // [esp+3C4h] [ebp-910h]
-    sval_u v260; // [esp+3C8h] [ebp-90Ch]
-    sval_u v261; // [esp+3CCh] [ebp-908h]
-    sval_u v262; // [esp+3D0h] [ebp-904h]
-    sval_u v263; // [esp+3D4h] [ebp-900h]
-    sval_u v264; // [esp+3D8h] [ebp-8FCh]
-    sval_u v265; // [esp+3DCh] [ebp-8F8h]
-    sval_u v266; // [esp+3E0h] [ebp-8F4h]
-    sval_u v267; // [esp+3E4h] [ebp-8F0h]
-    sval_u v268; // [esp+3E8h] [ebp-8ECh]
-    sval_u v269; // [esp+3ECh] [ebp-8E8h]
-    sval_u v270; // [esp+3F0h] [ebp-8E4h]
-    sval_u v271; // [esp+3F4h] [ebp-8E0h]
-    sval_u v272; // [esp+3F8h] [ebp-8DCh]
-    sval_u v273; // [esp+3FCh] [ebp-8D8h]
-    sval_u v274; // [esp+400h] [ebp-8D4h]
-    sval_u v275; // [esp+404h] [ebp-8D0h]
-    sval_u v276; // [esp+408h] [ebp-8CCh]
-    sval_u v277; // [esp+40Ch] [ebp-8C8h]
-    sval_u v278; // [esp+410h] [ebp-8C4h]
-    sval_u v279; // [esp+414h] [ebp-8C0h]
-    sval_u v280; // [esp+418h] [ebp-8BCh]
-    sval_u v281; // [esp+41Ch] [ebp-8B8h]
-    sval_u v282; // [esp+420h] [ebp-8B4h]
-    sval_u v283; // [esp+424h] [ebp-8B0h]
-    sval_u v284; // [esp+428h] [ebp-8ACh]
-    sval_u v285; // [esp+42Ch] [ebp-8A8h]
-    sval_u v286; // [esp+430h] [ebp-8A4h]
-    sval_u v287; // [esp+434h] [ebp-8A0h]
-    sval_u v288; // [esp+438h] [ebp-89Ch]
-    sval_u v289; // [esp+43Ch] [ebp-898h]
-    sval_u v290; // [esp+440h] [ebp-894h]
-    sval_u v291; // [esp+444h] [ebp-890h]
-    sval_u v292; // [esp+448h] [ebp-88Ch]
-    sval_u v293; // [esp+44Ch] [ebp-888h]
-    sval_u v294; // [esp+450h] [ebp-884h]
-    sval_u v295; // [esp+454h] [ebp-880h]
-    sval_u v296; // [esp+458h] [ebp-87Ch]
-    sval_u v297; // [esp+45Ch] [ebp-878h]
-    sval_u v298; // [esp+460h] [ebp-874h]
-    sval_u v299; // [esp+464h] [ebp-870h]
-    sval_u v300; // [esp+468h] [ebp-86Ch]
-    sval_u v301; // [esp+46Ch] [ebp-868h]
-    sval_u v302; // [esp+470h] [ebp-864h]
-    sval_u v303; // [esp+474h] [ebp-860h]
-    sval_u v304; // [esp+478h] [ebp-85Ch]
-    sval_u v305; // [esp+47Ch] [ebp-858h]
-    sval_u v306; // [esp+480h] [ebp-854h]
-    sval_u v307; // [esp+484h] [ebp-850h]
-    sval_u v308; // [esp+488h] [ebp-84Ch]
-    sval_u v309; // [esp+48Ch] [ebp-848h]
-    sval_u v310; // [esp+490h] [ebp-844h]
-    sval_u val3; // [esp+494h] [ebp-840h]
-    sval_u val4; // [esp+498h] [ebp-83Ch]
-    sval_u val5; // [esp+49Ch] [ebp-838h]
-    sval_u v314; // [esp+4A0h] [ebp-834h]
+    //int *v21; // [esp+Ch] [ebp-CC8h]
+    sval_u val6[280]; // [esp+10h] [ebp-CC4h]
+    sval_u v23; // [esp+470h] [ebp-864h]
+    sval_u v24; // [esp+474h] [ebp-860h]
+    sval_u v25; // [esp+478h] [ebp-85Ch]
+    sval_u val4; // [esp+47Ch] [ebp-858h]
+    sval_u v27; // [esp+480h] [ebp-854h]
+    sval_u val3; // [esp+484h] [ebp-850h]
+    sval_u valstack[6]; // [esp+488h] [ebp-84Ch]
+    sval_u v30; // [esp+4A0h] [ebp-834h]
     sval_u val2; // [esp+4A4h] [ebp-830h]
-    sval_u v316; // [esp+4A8h] [ebp-82Ch]
-    sval_u v317; // [esp+4ACh] [ebp-828h]
-    sval_u v318; // [esp+4B0h] [ebp-824h]
-    sval_u v319; // [esp+4B4h] [ebp-820h]
-    sval_u v320; // [esp+4B8h] [ebp-81Ch]
-    int size; // [esp+4BCh] [ebp-818h]
+    sval_u v32; // [esp+4A8h] [ebp-82Ch]
+    sval_u v33; // [esp+4ACh] [ebp-828h]
+    sval_u v34; // [esp+4B0h] [ebp-824h]
+    sval_u v35; // [esp+4B4h] [ebp-820h]
+    sval_u v36; // [esp+4B8h] [ebp-81Ch]
+    int v37; // [esp+4BCh] [ebp-818h]
     stype_t *yyvs1; // [esp+4C0h] [ebp-814h]
     __int16 *yyss1; // [esp+4C4h] [ebp-810h]
     int yyerrstatus; // [esp+4C8h] [ebp-80Ch]
@@ -6385,17 +6130,19 @@ int __cdecl yyparse()
     yynerrs = 0;
     yyval.pos = 0;
     yychar = -2;
-    yyssp = (short*)&yyssp + 1;
-    yyvsp = yyvsa;
+    //yyssp = &yyssp + 1;
+    //yyvsp = yyvsa;
+    yyssp = yyss;
+    yyvsp = yyvs;
     while (1)
     {
     yynewstate:
-        *++yyssp = yystate;
+        *++yyssp = (short)yystate;
         if (yyssp >= &yyss[yystacksize - 1])
         {
             yyvs1 = yyvs;
             yyss1 = yyss;
-            size = yyssp - yyss + 1;
+            v37 = yyssp - yyss + 1;
             if (yystacksize >= 10000)
             {
                 v17 = "parser stack overflow";
@@ -6410,16 +6157,23 @@ int __cdecl yyparse()
             yystacksize *= 2;
             if (yystacksize > 10000)
                 yystacksize = 10000;
-            v1 = alloca(2 * yystacksize);
-            v21 = &v18;
-            yyss = (short*)&v18;
-            _yy_memcpy((char*)&v18, (char*)yyss1, 2 * size);
-            v2 = alloca(8 * yystacksize);
-            v20 = &v18;
-            yyvs = (stype_t*)&v18;
-            _yy_memcpy((char*)&v18, (char*)yyvs1, 8 * size);
-            yyssp = &yyss[size - 1];
-            yyvsp = &yyvs[size - 1];
+
+            //v1 = alloca(2 * yystacksize);
+            //v21 = &v18;
+            //yyss = &v18;
+            //_yy_memcpy(&v18, yyss1, 2 * v37);
+            yyss = (short *)alloca(sizeof(short) *yystacksize);
+            memcpy(yyss, yyss1, sizeof(short) * yystacksize);
+
+            yyvs = (stype_t *)alloca(sizeof(stype_t) * yystacksize);
+            memcpy(yyvs, yyvs1, sizeof(stype_t) * yystacksize);
+            //v2 = alloca(8 * yystacksize);
+            //v20 = &v18;
+            //yyvs = &v18;
+            //_yy_memcpy(&v18, yyvs1, 8 * v37);
+
+            yyssp = &yyss[v37 - 1];
+            yyvsp = &yyvs[v37 - 1];
             if (yyssp >= &yyss[yystacksize - 1])
                 goto yyabortlab;
         }
@@ -6430,7 +6184,7 @@ int __cdecl yyparse()
             yychar = yylex();
         if (yychar > 0)
         {
-            v19 = yychar > 0x158 ? 119 : yytranslate[yychar];
+            v19 = yychar > '\x01X' ? 'w' : yytranslate[yychar];
             yychar1 = v19;
         }
         else
@@ -6468,175 +6222,176 @@ int __cdecl yyparse()
                 yyval.val.type = yyvsp[1 - yylen].val.type;
                 yyval.pos = pos;
             }
-            v18 = yyn - 1;
-            switch (yyn)
+            //v18 = yyn - 1;
+            //switch (yyn)
+            switch(yyn - 1)
             {
             case 1:
-                v320.type = (int)node1(yyvsp[-1].val.type, yyvsp->val).type;
-                yaccResult.type = v320.type;
+                v36.type = node1(yyvsp[-1].val.type, yyvsp->val).type;
+                yaccResult.type = v36.type;
                 break;
             case 2:
-                v319.type = (int)node1(65, yyvsp->val).type;
-                yaccResult.type = v319.type;
+                v35.type = node1(ENUM_expression, yyvsp->val).type;
+                yaccResult.type = v35.type;
                 break;
             case 3:
-                v318.type = (int)node1(83, yyvsp->val).type;
-                yaccResult.type = v318.type;
+                v34.type = node1(ENUM_statement, yyvsp->val).type;
+                yaccResult.type = v34.type;
                 break;
             case 4:
-                v317.type = (int)node1(83, yyvsp->val).type;
-                yaccResult.type = v317.type;
+                v33.type = node1(ENUM_statement, yyvsp->val).type;
+                yaccResult.type = v33.type;
                 break;
             case 5:
-                val2.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v316.type = node2(6, yyvsp->val, val2).type;
-                yyval.val = v316;
+                val2.sourcePosValue = yyvsp->pos;
+                v32.type = node2(ENUM_primitive_expression, yyvsp->val, val2).type;
+                yyval.val = v32;
                 break;
             case 6:
-                val5.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                val4.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                val3.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v314.type = node5(47, yyvsp[-2].val, yyvsp->val, val3, val4, val5).type;
-                yyval.val = v314;
+                valstack[5].sourcePosValue = yyvsp[-1].pos;
+                valstack[4].sourcePosValue = yyvsp->pos;
+                valstack[3].sourcePosValue = yyvsp[-2].pos;
+                v30.type = node5(ENUM_bool_or, yyvsp[-2].val, yyvsp->val, valstack[3], valstack[4], valstack[5]).type;
+                yyval.val = v30;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 7:
-                v309.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v308.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v307.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v310.type = node5(48, yyvsp[-2].val, yyvsp->val, v307, v308, v309).type;
-                yyval.val = v310;
+                valstack[1].sourcePosValue = yyvsp[-1].pos;
+                valstack[0].sourcePosValue = yyvsp->pos;
+                val3.sourcePosValue = yyvsp[-2].pos;
+                valstack[2] = node5(ENUM_bool_and, yyvsp[-2].val, yyvsp->val, val3, valstack[0], valstack[1]);
+                yyval.val = valstack[2];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 8:
-                v305.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v304.type = (int)node1_(0x66).xmodelPieces;
-                v306.type = node4(49, yyvsp[-2].val, yyvsp->val, v304, v305).type;
-                yyval.val = v306;
+                val4.sourcePosValue = yyvsp[-1].pos;
+                v25.intValue = OP_bit_or;
+                v27.type = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, v25, val4).type;
+                yyval.val = v27;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 9:
-                v302.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v301.type = (int)node1_(0x67).xmodelPieces;
-                v303.type = node4(49, yyvsp[-2].val, yyvsp->val, v301, v302).type;
-                yyval.val = v303;
+                v23.type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[279].type = RETURN_ARG1(0x67);
+                v24.type = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[279], v23).type;
+                yyval.val = v24;
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 10:
-                v299.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v298.type = (int)node1_(0x68).xmodelPieces;
-                v300.type = node4(49, yyvsp[-2].val, yyvsp->val, v298, v299).type;
-                yyval.val = v300;
+                val6[277].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[276].type = RETURN_ARG1(0x68);
+                val6[278] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[276], val6[277]);
+                yyval.val = val6[278];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 11:
-                v296.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v295.type = (int)node1_(0x69).xmodelPieces;
-                v297.type = node4(49, yyvsp[-2].val, yyvsp->val, v295, v296).type;
-                yyval.val = v297;
+                val6[274].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[273].type = RETURN_ARG1(0x69);
+                val6[275] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[273], val6[274]);
+                yyval.val = val6[275];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 12:
-                v293.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v292.type = (int)node1_(0x6A).xmodelPieces;
-                v294.type = node4(49, yyvsp[-2].val, yyvsp->val, v292, v293).type;
-                yyval.val = v294;
+                val6[271].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[270].type = RETURN_ARG1(0x6A);
+                val6[272] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[270], val6[271]);
+                yyval.val = val6[272];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 13:
-                v290.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v289.type = (int)node1_(0x6B).xmodelPieces;
-                v291.type = node4(49, yyvsp[-2].val, yyvsp->val, v289, v290).type;
-                yyval.val = v291;
+                val6[268].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[267].type = RETURN_ARG1(0x6B);
+                val6[269] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[267], val6[268]);
+                yyval.val = val6[269];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 14:
-                v287.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v286.type = (int)node1_(0x6C).xmodelPieces;
-                v288.type = node4(49, yyvsp[-2].val, yyvsp->val, v286, v287).type;
-                yyval.val = v288;
+                val6[265].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[264].type = RETURN_ARG1(0x6C);
+                val6[266] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[264], val6[265]);
+                yyval.val = val6[266];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 15:
-                v284.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v283.type = (int)node1_(0x6D).xmodelPieces;
-                v285.type = node4(49, yyvsp[-2].val, yyvsp->val, v283, v284).type;
-                yyval.val = v285;
+                val6[262].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[261].type = RETURN_ARG1(0x6D);
+                val6[263] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[261], val6[262]);
+                yyval.val = val6[263];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 16:
-                v281.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v280.type = (int)node1_(0x6E).xmodelPieces;
-                v282.type = node4(49, yyvsp[-2].val, yyvsp->val, v280, v281).type;
-                yyval.val = v282;
+                val6[259].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[258].type = RETURN_ARG1(0x6E);
+                val6[260] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[258], val6[259]);
+                yyval.val = val6[260];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 17:
-                v278.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v277.type = (int)node1_(0x6F).xmodelPieces;
-                v279.type = node4(49, yyvsp[-2].val, yyvsp->val, v277, v278).type;
-                yyval.val = v279;
+                val6[256].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[255].type = RETURN_ARG1(0x6F);
+                val6[257] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[255], val6[256]);
+                yyval.val = val6[257];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 18:
-                v275.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v274.type = (int)node1_(0x70).xmodelPieces;
-                v276.type = node4(49, yyvsp[-2].val, yyvsp->val, v274, v275).type;
-                yyval.val = v276;
+                val6[253].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[252].type = RETURN_ARG1(0x70);
+                val6[254] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[252], val6[253]);
+                yyval.val = val6[254];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 19:
-                v272.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v271.type = (int)node1_(0x71).xmodelPieces;
-                v273.type = node4(49, yyvsp[-2].val, yyvsp->val, v271, v272).type;
-                yyval.val = v273;
+                val6[250].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[249].type = RETURN_ARG1(0x71);
+                val6[251] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[249], val6[250]);
+                yyval.val = val6[251];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 20:
-                v269.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v268.type = (int)node1_(0x72).xmodelPieces;
-                v270.type = node4(49, yyvsp[-2].val, yyvsp->val, v268, v269).type;
-                yyval.val = v270;
+                val6[247].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[246].type = RETURN_ARG1(0x72);
+                val6[248] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[246], val6[247]);
+                yyval.val = val6[248];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 21:
-                v266.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v265.type = (int)node1_(0x73).xmodelPieces;
-                v267.type = node4(49, yyvsp[-2].val, yyvsp->val, v265, v266).type;
-                yyval.val = v267;
+                val6[244].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[243].type = RETURN_ARG1(0x73);
+                val6[245] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[243], val6[244]);
+                yyval.val = val6[245];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 22:
-                v263.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v262.type = (int)node1_(0x74).xmodelPieces;
-                v264.type = node4(49, yyvsp[-2].val, yyvsp->val, v262, v263).type;
-                yyval.val = v264;
+                val6[241].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[240].type = RETURN_ARG1(0x74);
+                val6[242] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[240], val6[241]);
+                yyval.val = val6[242];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 23:
-                v260.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v259.type = (int)node1_(0x75).xmodelPieces;
-                v261.type = node4(49, yyvsp[-2].val, yyvsp->val, v259, v260).type;
-                yyval.val = v261;
+                val6[238].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[237].type = RETURN_ARG1(0x75);
+                val6[239] = node4(ENUM_binary, yyvsp[-2].val, yyvsp->val, val6[237], val6[238]);
+                yyval.val = val6[239];
                 yyval.pos = yyvsp[-1].pos;
                 break;
             case 24:
-                v257.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v258.type = node2(50, yyvsp->val, v257).type;
-                yyval.val = v258;
+                val6[235].type = RETURN_ARG1(yyvsp->pos);
+                val6[236] = node2(ENUM_bool_not, yyvsp->val, val6[235]);
+                yyval.val = val6[236];
                 break;
             case 25:
-                v255.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v256.type = node2(51, yyvsp->val, v255).type;
-                yyval.val = v256;
+                val6[233].type = RETURN_ARG1(yyvsp->pos);
+                val6[234] = node2(ENUM_bool_complement, yyvsp->val, val6[233]);
+                yyval.val = val6[234];
                 break;
             case 26:
-                v254.type = (int)node1(65, yyvsp->val).type;
-                yyval.val = v254;
+                val6[232] = node1(ENUM_expression, yyvsp->val);
+                yyval.val = val6[232];
                 break;
             case 27:
-                v253.type = node0(0).type;
-                yyval.val = v253;
+                val6[231] = node0(ENUM_NOP);
+                yyval.val = val6[231];
                 break;
             case 28:
             case 29:
@@ -6647,571 +6402,579 @@ int __cdecl yyparse()
             case 30:
                 v5.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v5.prev;
-                v251.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v252.type = node3(21, yyvsp[-2].val, yyvsp->val, v251).type;
-                yyval.val = v252;
+                val6[229].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[230] = node3(ENUM_far_function, yyvsp[-2].val, yyvsp->val, val6[229]);
+                yyval.val = val6[230];
                 ++scrCompilePub.far_function_count;
                 break;
             case 31:
                 v6.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v6.prev;
-                v249.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v250.type = node2(20, yyvsp->val, v249).type;
-                yyval.val = v250;
+                val6[227].type = RETURN_ARG1(yyvsp->pos);
+                val6[228] = node2(ENUM_local_function, yyvsp->val, val6[227]);
+                yyval.val = val6[228];
                 break;
             case 32:
                 v7.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v7.prev;
-                v247.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v248.type = node3(21, yyvsp[-2].val, yyvsp->val, v247).type;
-                yyval.val = v248;
+                val6[225].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[226] = node3(ENUM_far_function, yyvsp[-2].val, yyvsp->val, val6[225]);
+                yyval.val = val6[226];
                 yyval.pos = yyvsp[-1].pos;
                 ++scrCompilePub.far_function_count;
                 break;
             case 33:
                 v8.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v8.prev;
-                v245.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v246.type = node2(20, yyvsp->val, v245).type;
-                yyval.val = v246;
+                val6[223].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[224] = node2(ENUM_local_function, yyvsp->val, val6[223]);
+                yyval.val = val6[224];
                 break;
             case 34:
-                v243.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v244.type = node2(18, yyvsp->val, v243).type;
-                yyval.val = v244;
+                val6[221].type = RETURN_ARG1(yyvsp->pos);
+                val6[222] = node2(ENUM_function, yyvsp->val, val6[221]);
+                yyval.val = val6[222];
                 break;
             case 35:
-                v241.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v242.type = node2(22, yyvsp[-2].val, v241).type;
-                yyval.val = v242;
+                val6[219].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[220] = node2(ENUM_function_pointer, yyvsp[-2].val, val6[219]);
+                yyval.val = val6[220];
                 break;
             case 36:
-                v239.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v240.type = node2(26, yyvsp->val, v239).type;
-                yyval.val = v240;
+                val6[217].type = RETURN_ARG1(yyvsp->pos);
+                val6[218] = node2(ENUM_script_call, yyvsp->val, val6[217]);
+                yyval.val = val6[218];
                 break;
             case 37:
-                v237.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v236.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v238.type = node3(30, yyvsp->val, v236, v237).type;
-                yyval.val = v238;
+                val6[215].type = RETURN_ARG1(yyvsp->pos);
+                val6[214].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[216] = node3(ENUM_script_thread_call, yyvsp->val, val6[214], val6[215]);
+                yyval.val = val6[216];
                 yyval.pos = yyvsp->pos;
                 break;
             case 38:
-                v234.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v235.type = node3(23, yyvsp[-3].val, yyvsp[-1].val, v234).type;
-                yyval.val = v235;
+                val6[212].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[213] = node3(ENUM_call, yyvsp[-3].val, yyvsp[-1].val, val6[212]);
+                yyval.val = val6[213];
                 yyval.pos = yyvsp[-2].pos;
                 break;
             case 39:
-                v232.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v231.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v233.type = node5(24, yyvsp[-4].val, yyvsp[-3].val, yyvsp[-1].val, v231, v232).type;
-                yyval.val = v233;
+                val6[210].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[209].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[211] = node5(ENUM_method, yyvsp[-4].val, yyvsp[-3].val, yyvsp[-1].val, val6[209], val6[210]);
+                yyval.val = val6[211];
                 yyval.pos = yyvsp[-2].pos;
                 break;
             case 40:
-                v229.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v230.type = node2(46, yyvsp[-1].val, v229).type;
-                yyval.val = v230;
+                val6[207].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[208] = node2(ENUM_expression_list, yyvsp[-1].val, val6[207]);
+                yyval.val = val6[208];
                 break;
             case 41:
-                v227.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v228.type = node2(7, yyvsp->val, v227).type;
-                yyval.val = v228;
+                val6[205].type = RETURN_ARG1(yyvsp->pos);
+                val6[206] = node2(ENUM_integer, yyvsp->val, val6[205]);
+                yyval.val = val6[206];
                 break;
             case 42:
-                v225.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v226.type = node2(8, yyvsp->val, v225).type;
-                yyval.val = v226;
+                val6[203].type = RETURN_ARG1(yyvsp->pos);
+                val6[204] = node2(ENUM_float, yyvsp->val, val6[203]);
+                yyval.val = val6[204];
                 break;
             case 43:
-                v223.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v224.type = node2(9, yyvsp->val, v223).type;
-                yyval.val = v224;
+                val6[201].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[202] = node2(ENUM_minus_integer, yyvsp->val, val6[201]);
+                yyval.val = val6[202];
                 break;
             case 44:
-                v221.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v222.type = node2(10, yyvsp->val, v221).type;
-                yyval.val = v222;
+                val6[199].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[200] = node2(ENUM_minus_float, yyvsp->val, val6[199]);
+                yyval.val = val6[200];
                 break;
             case 45:
-                v219.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v220.type = node2(11, yyvsp->val, v219).type;
-                yyval.val = v220;
+                val6[197].type = RETURN_ARG1(yyvsp->pos);
+                val6[198] = node2(ENUM_string, yyvsp->val, val6[197]);
+                yyval.val = val6[198];
                 break;
             case 46:
-                v217.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v218.type = node2(12, yyvsp->val, v217).type;
-                yyval.val = v218;
+                val6[195].type = RETURN_ARG1(yyvsp->pos);
+                val6[196] = node2(ENUM_istring, yyvsp->val, val6[195]);
+                yyval.val = val6[196];
                 break;
             case 47:
-                v216.type = (int)node1(19, yyvsp->val).type;
-                yyval.val = v216;
+                val6[194] = node1(ENUM_call_expression, yyvsp->val);
+                yyval.val = val6[194];
                 break;
             case 48:
-                v214.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v215.type = node2(17, yyvsp->val, v214).type;
-                yyval.val = v215;
+                val6[192].type = RETURN_ARG1(yyvsp->pos);
+                val6[193] = node2(ENUM_variable, yyvsp->val, val6[192]);
+                yyval.val = val6[193];
                 break;
             case 49:
-                v212.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v213.type = (int)node1(31, v212).type;
-                yyval.val = v213;
+                val6[190].type = RETURN_ARG1(yyvsp->pos);
+                val6[191] = node1(ENUM_undefined, val6[190]);
+                yyval.val = val6[191];
                 break;
             case 50:
-                v210.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v211.type = (int)node1(32, v210).type;
-                yyval.val = v211;
+                val6[188].type = RETURN_ARG1(yyvsp->pos);
+                val6[189] = node1(ENUM_self, val6[188]);
+                yyval.val = val6[189];
                 break;
             case 51:
-                v208.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v209.type = (int)node1(34, v208).type;
-                yyval.val = v209;
+                val6[186].type = RETURN_ARG1(yyvsp->pos);
+                val6[187] = node1(ENUM_level, val6[186]);
+                yyval.val = val6[187];
                 break;
             case 52:
-                v206.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v207.type = (int)node1(35, v206).type;
-                yyval.val = v207;
+                val6[184].type = RETURN_ARG1(yyvsp->pos);
+                val6[185] = node1(ENUM_game, val6[184]);
+                yyval.val = val6[185];
                 break;
             case 53:
-                v204.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v205.type = (int)node1(36, v204).type;
-                yyval.val = v205;
+                val6[182].type = RETURN_ARG1(yyvsp->pos);
+                val6[183] = node1(ENUM_anim, val6[182]);
+                yyval.val = val6[183];
                 break;
             case 54:
-                v202.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v203.type = node2(52, yyvsp[-1].val, v202).type;
-                yyval.val = v203;
+                val6[180].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[181] = node2(ENUM_size_field, yyvsp[-1].val, val6[180]);
+                yyval.val = val6[181];
                 yyval.pos = yyvsp->pos;
                 break;
             case 55:
-                v200.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v201.type = node2(18, yyvsp->val, v200).type;
-                yyval.val = v201;
+                val6[178].type = RETURN_ARG1(yyvsp->pos);
+                val6[179] = node2(ENUM_function, yyvsp->val, val6[178]);
+                yyval.val = val6[179];
                 break;
             case 56:
-                v198.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v199.type = (int)node1(66, v198).type;
-                yyval.val = v199;
+                val6[176].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[177] = node1(ENUM_empty_array, val6[176]);
+                yyval.val = val6[177];
                 break;
             case 57:
                 v9.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v9.prev;
-                v196.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v197.type = node2(67, yyvsp->val, v196).type;
-                yyval.val = v197;
+                val6[174].type = RETURN_ARG1(yyvsp->pos);
+                val6[175] = node2(ENUM_animation, yyvsp->val, val6[174]);
+                yyval.val = val6[175];
                 break;
             case 58:
-                v194.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v195.type = (int)node1(72, v194).type;
-                yyval.val = v195;
+                val6[172].type = RETURN_ARG1(yyvsp->pos);
+                val6[173] = node1(ENUM_false, val6[172]);
+                yyval.val = val6[173];
                 break;
             case 59:
-                v192.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v193.type = (int)node1(73, v192).type;
-                yyval.val = v193;
+                val6[170].type = RETURN_ARG1(yyvsp->pos);
+                val6[171] = node1(ENUM_true, val6[170]);
+                yyval.val = val6[171];
                 break;
             case 60:
-                v190.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v191.type = (int)node1(74, v190).type;
-                yyval.val = v191;
+                val6[168].type = RETURN_ARG1(yyvsp->pos);
+                val6[169] = node1(ENUM_animtree, val6[168]);
+                yyval.val = val6[169];
                 break;
             case 61:
-                v188.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
-                v189.type = node3(75, yyvsp[-4].val, yyvsp[-1].val, v188).type;
-                yyval.val = v189;
+                val6[166].type = RETURN_ARG1(yyvsp[-3].pos);
+                val6[167] = node3(ENUM_breakon, yyvsp[-4].val, yyvsp[-1].val, val6[166]);
+                yyval.val = val6[167];
                 break;
             case 62:
                 v10.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v10.prev;
-                v186.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v187.type = node3(15, yyvsp[-2].val, yyvsp->val, v186).type;
-                yyval.val = v187;
+                val6[164].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[165] = node3(ENUM_field_variable, yyvsp[-2].val, yyvsp->val, val6[164]);
+                yyval.val = val6[165];
                 yyval.pos = yyvsp->pos;
                 break;
             case 63:
-                v184.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v183.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
-                v185.type = node4(13, yyvsp[-3].val, yyvsp[-1].val, v183, v184).type;
-                yyval.val = v185;
+                val6[162].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[161].type = RETURN_ARG1(yyvsp[-3].pos);
+                val6[163] = node4(ENUM_array_variable, yyvsp[-3].val, yyvsp[-1].val, val6[161], val6[162]);
+                yyval.val = val6[163];
                 yyval.pos = yyvsp[-2].pos;
                 break;
             case 64:
                 v11.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v11.prev;
-                v181.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v182.type = node2(4, yyvsp->val, v181).type;
-                yyval.val = v182;
+                val6[159].type = RETURN_ARG1(yyvsp->pos);
+                val6[160] = node2(ENUM_local_variable, yyvsp->val, val6[159]);
+                yyval.val = val6[160];
                 break;
             case 65:
                 v12.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v12.prev;
-                v179.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v180.type = node2(80, yyvsp->val, v179).type;
-                yyval.val = v180;
+                val6[157].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[158] = node2(ENUM_object, yyvsp->val, val6[157]);
+                yyval.val = val6[158];
                 break;
             case 66:
-                v177.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v178.type = node2(53, yyvsp[-2].val, v177).type;
-                yyval.val = v178;
+                val6[155].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[156] = node2(ENUM_self_field, yyvsp[-2].val, val6[155]);
+                yyval.val = val6[156];
                 yyval.pos = yyvsp->pos;
                 break;
             case 67:
-                v175.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v174.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v176.type = node4(2, yyvsp[-2].val, yyvsp->val, v174, v175).type;
-                yyval.val = v176;
+                val6[153].type = RETURN_ARG1(yyvsp->pos);
+                val6[152].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[154] = node4(ENUM_assignment, yyvsp[-2].val, yyvsp->val, val6[152], val6[153]);
+                yyval.val = val6[154];
                 break;
             case 68:
-                v172.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v173.type = node2(27, yyvsp->val, v172).type;
-                yyval.val = v173;
+                val6[150].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[151] = node2(ENUM_return, yyvsp->val, val6[150]);
+                yyval.val = val6[151];
                 break;
             case 69:
-                v170.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v171.type = (int)node1(28, v170).type;
-                yyval.val = v171;
+                val6[148].type = RETURN_ARG1(yyvsp->pos);
+                val6[149] = node1(ENUM_return2, val6[148]);
+                yyval.val = val6[149];
                 break;
             case 70:
-                v168.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v167.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v169.type = node3(29, yyvsp->val, v167, v168).type;
-                yyval.val = v169;
+                val6[146].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[145].type = RETURN_ARG1(yyvsp->pos);
+                val6[147] = node3(ENUM_wait, yyvsp->val, val6[145], val6[146]);
+                yyval.val = val6[147];
                 break;
             case 71:
-                v165.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v166.type = node2(41, yyvsp[-1].val, v165).type;
-                yyval.val = v166;
+                val6[143].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[144] = node2(ENUM_inc, yyvsp[-1].val, val6[143]);
+                yyval.val = val6[144];
                 break;
             case 72:
-                v163.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v164.type = node2(42, yyvsp[-1].val, v163).type;
-                yyval.val = v164;
+                val6[141].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[142] = node2(ENUM_dec, yyvsp[-1].val, val6[141]);
+                yyval.val = val6[142];
                 break;
             case 73:
-                v161.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v160.type = (int)node1_(0x66).xmodelPieces;
-                v162.type = node4(43, yyvsp[-2].val, yyvsp->val, v160, v161).type;
-                yyval.val = v162;
+                val6[139].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[138].type = RETURN_ARG1(0x66);
+                val6[140] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[138], val6[139]);
+                yyval.val = val6[140];
                 break;
             case 74:
-                v158.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v157.type = (int)node1_(0x67).xmodelPieces;
-                v159.type = node4(43, yyvsp[-2].val, yyvsp->val, v157, v158).type;
-                yyval.val = v159;
+                val6[136].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[135].type = RETURN_ARG1(0x67);
+                val6[137] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[135], val6[136]);
+                yyval.val = val6[137];
                 break;
             case 75:
-                v155.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v154.type = (int)node1_(0x68).xmodelPieces;
-                v156.type = node4(43, yyvsp[-2].val, yyvsp->val, v154, v155).type;
-                yyval.val = v156;
+                val6[133].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[132].type = RETURN_ARG1(0x68);
+                val6[134] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[132], val6[133]);
+                yyval.val = val6[134];
                 break;
             case 76:
-                v152.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v151.type = (int)node1_(0x6F).xmodelPieces;
-                v153.type = node4(43, yyvsp[-2].val, yyvsp->val, v151, v152).type;
-                yyval.val = v153;
+                val6[130].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[129].type = RETURN_ARG1(0x6F);
+                val6[131] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[129], val6[130]);
+                yyval.val = val6[131];
                 break;
             case 77:
-                v149.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v148.type = (int)node1_(0x70).xmodelPieces;
-                v150.type = node4(43, yyvsp[-2].val, yyvsp->val, v148, v149).type;
-                yyval.val = v150;
+                val6[127].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[126].type = RETURN_ARG1(0x70);
+                val6[128] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[126], val6[127]);
+                yyval.val = val6[128];
                 break;
             case 78:
-                v146.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v145.type = (int)node1_(0x71).xmodelPieces;
-                v147.type = node4(43, yyvsp[-2].val, yyvsp->val, v145, v146).type;
-                yyval.val = v147;
+                val6[124].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[123].type = RETURN_ARG1(0x71);
+                val6[125] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[123], val6[124]);
+                yyval.val = val6[125];
                 break;
             case 79:
-                v143.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v142.type = (int)node1_(0x72).xmodelPieces;
-                v144.type = node4(43, yyvsp[-2].val, yyvsp->val, v142, v143).type;
-                yyval.val = v144;
+                val6[121].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[120].type = RETURN_ARG1(0x72);
+                val6[122] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[120], val6[121]);
+                yyval.val = val6[122];
                 break;
             case 80:
-                v140.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v139.type = (int)node1_(0x73).xmodelPieces;
-                v141.type = node4(43, yyvsp[-2].val, yyvsp->val, v139, v140).type;
-                yyval.val = v141;
+                val6[118].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[117].type = RETURN_ARG1(0x73);
+                val6[119] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[117], val6[118]);
+                yyval.val = val6[119];
                 break;
             case 81:
-                v137.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v136.type = (int)node1_(0x74).xmodelPieces;
-                v138.type = node4(43, yyvsp[-2].val, yyvsp->val, v136, v137).type;
-                yyval.val = v138;
+                val6[115].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[114].type = RETURN_ARG1(0x74);
+                val6[116] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[114], val6[115]);
+                yyval.val = val6[116];
                 break;
             case 82:
-                v134.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v133.type = (int)node1_(0x75).xmodelPieces;
-                v135.type = node4(43, yyvsp[-2].val, yyvsp->val, v133, v134).type;
-                yyval.val = v135;
+                val6[112].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[111].type = RETURN_ARG1(0x75);
+                val6[113] = node4(ENUM_binary_equals, yyvsp[-2].val, yyvsp->val, val6[111], val6[112]);
+                yyval.val = val6[113];
                 break;
             case 83:
-                v131.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
-                v130.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v132.type = node4(55, yyvsp[-4].val, yyvsp[-1].val, v130, v131).type;
-                yyval.val = v132;
+                val6[109].type = RETURN_ARG1(yyvsp[-3].pos);
+                val6[108].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[110] = node4(ENUM_waittill, yyvsp[-4].val, yyvsp[-1].val, val6[108], val6[109]);
+                yyval.val = val6[110];
                 break;
             case 84:
-                v128.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
-                v127.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v129.type = node4(56, yyvsp[-4].val, yyvsp[-1].val, v127, v128).type;
-                yyval.val = v129;
+                val6[106].type = RETURN_ARG1(yyvsp[-3].pos);
+                val6[105].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[107] = node4(ENUM_waittillmatch, yyvsp[-4].val, yyvsp[-1].val, val6[105], val6[106]);
+                yyval.val = val6[107];
                 break;
             case 85:
-                v125.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v126.type = (int)node1(57, v125).type;
-                yyval.val = v126;
+                val6[103].type = RETURN_ARG1(yyvsp->pos);
+                val6[104] = node1(ENUM_waittillFrameEnd, val6[103]);
+                yyval.val = val6[104];
                 break;
             case 86:
-                v123.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
-                v122.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v124.type = node4(58, yyvsp[-4].val, yyvsp[-1].val, v122, v123).type;
-                yyval.val = v124;
+                val6[101].type = RETURN_ARG1(yyvsp[-3].pos);
+                val6[100].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[102] = node4(ENUM_notify, yyvsp[-4].val, yyvsp[-1].val, val6[100], val6[101]);
+                yyval.val = val6[102];
                 break;
             case 87:
-                v120.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v119.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v121.type = node4(59, yyvsp[-4].val, yyvsp[-1].val, v119, v120).type;
-                yyval.val = v121;
+                val6[98].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[97].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[99] = node4(ENUM_endon, yyvsp[-4].val, yyvsp[-1].val, val6[97], val6[98]);
+                yyval.val = val6[99];
                 break;
             case 88:
-                v117.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v118.type = (int)node1(63, v117).type;
-                yyval.val = v118;
+                val6[95].type = RETURN_ARG1(yyvsp->pos);
+                val6[96] = node1(ENUM_break, val6[95]);
+                yyval.val = val6[96];
                 break;
             case 89:
-                v115.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v116.type = (int)node1(64, v115).type;
-                yyval.val = v116;
+                val6[93].type = RETURN_ARG1(yyvsp->pos);
+                val6[94] = node1(ENUM_continue, val6[93]);
+                yyval.val = val6[94];
                 break;
             case 90:
-                v113.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v114.type = (int)node1(76, v113).type;
-                yyval.val = v114;
+                val6[91].type = RETURN_ARG1(yyvsp->pos);
+                val6[92] = node1(ENUM_breakpoint, val6[91]);
+                yyval.val = val6[92];
                 break;
             case 91:
-                v111.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
-                v112.type = node2(77, yyvsp[-1].val, v111).type;
-                yyval.val = v112;
+                val6[89].type = RETURN_ARG1(yyvsp[-3].pos);
+                val6[90] = node2(ENUM_prof_begin, yyvsp[-1].val, val6[89]);
+                yyval.val = val6[90];
                 break;
             case 92:
-                v109.type = (int)node1_(yyvsp[-3].pos).xmodelPieces;
-                v110.type = node2(78, yyvsp[-1].val, v109).type;
-                yyval.val = v110;
+                val6[87].type = RETURN_ARG1(yyvsp[-3].pos);
+                val6[88] = node2(ENUM_prof_end, yyvsp[-1].val, val6[87]);
+                yyval.val = val6[88];
                 break;
             case 93:
-                v108.type = (int)node1(25, yyvsp->val).type;
-                yyval.val = v108;
+                val6[86] = node1(ENUM_call_expression_statement, yyvsp->val);
+                yyval.val = val6[86];
                 break;
             case 95:
-                v107.type = node0(0).type;
-                yyval.val = v107;
+                val6[85] = node0(ENUM_NOP);
+                yyval.val = val6[85];
                 break;
             case 98:
-                v105.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v104.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v106.type = node3(44, yyvsp[-1].val, v104, v105).type;
-                yyval.val = v106;
+                val6[83].type = RETURN_ARG1(yyvsp->pos);
+                val6[82].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[84] = node3(ENUM_statement_list, yyvsp[-1].val, val6[82], val6[83]);
+                yyval.val = val6[84];
                 break;
             case 99:
-                v102.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v103.type = node4(37, yyvsp[-2].val, yyvsp->val, v102, g_dummyVal).type;
-                yyval.val = v103;
+                val6[80].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[81] = node4(ENUM_if, yyvsp[-2].val, yyvsp->val, val6[80], g_dummyVal);
+                yyval.val = val6[81];
                 break;
             case 100:
-                v100.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v99.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v101.type = node7(38, yyvsp[-4].val, yyvsp[-2].val, yyvsp->val, v99, v100, g_dummyVal, g_dummyVal).type;
-                yyval.val = v101;
+                val6[78].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[77].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[79] = node7(
+                    ENUM_if_else,
+                    yyvsp[-4].val,
+                    yyvsp[-2].val,
+                    yyvsp->val,
+                    val6[77],
+                    val6[78],
+                    g_dummyVal,
+                    g_dummyVal);
+                yyval.val = val6[79];
                 break;
             case 101:
-                v97.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v96.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v98.type = node5(39, yyvsp[-2].val, yyvsp->val, v96, v97, g_dummyVal).type;
-                yyval.val = v98;
+                val6[75].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[74].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[76] = node5(ENUM_while, yyvsp[-2].val, yyvsp->val, val6[74], val6[75], g_dummyVal);
+                yyval.val = val6[76];
                 break;
             case 102:
-                val6.type = (int)node1_(yyvsp[-7].pos).xmodelPieces;
-                v93.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v95.type = node8(
-                    40,
+                val6[72].type = RETURN_ARG1(yyvsp[-7].pos);
+                val6[71].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[73] = node8(
+                    ENUM_for,
                     yyvsp[-5].val,
                     yyvsp[-4].val,
                     yyvsp[-2].val,
                     yyvsp->val,
-                    v93,
-                    val6,
+                    val6[71],
+                    val6[72],
                     g_dummyVal,
-                    g_dummyVal).type;
-                yyval.val = v95;
+                    g_dummyVal);
+                yyval.val = val6[73];
                 break;
             case 103:
-                v91.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v92.type = node3(60, yyvsp[-4].val, yyvsp[-1].val, v91).type;
-                yyval.val = v92;
+                val6[69].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[70] = node3(ENUM_switch, yyvsp[-4].val, yyvsp[-1].val, val6[69]);
+                yyval.val = val6[70];
                 break;
             case 104:
-                v89.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v90.type = node3(45, yyvsp[-1].val, v89, g_dummyVal).type;
-                yyval.val = v90;
+                val6[67].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[68] = node3(ENUM_developer_statement_list, yyvsp[-1].val, val6[67], g_dummyVal);
+                yyval.val = val6[68];
                 break;
             case 105:
-                v88.type = node0(0).type;
-                yyval.val = v88;
+                val6[66] = node0(ENUM_NOP);
+                yyval.val = val6[66];
                 break;
             case 106:
-                v86.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v87.type = node3(61, yyvsp[-1].val, v86, g_dummyVal).type;
-                yyval.val = v87;
+                val6[64].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[65] = node3(ENUM_case, yyvsp[-1].val, val6[64], g_dummyVal);
+                yyval.val = val6[65];
                 break;
             case 107:
-                val1.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v85.type = node2(62, val1, g_dummyVal).type;
-                yyval.val = v85;
+                val6[62].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[63] = node2(ENUM_default, val6[62], g_dummyVal);
+                yyval.val = val6[63];
                 break;
             case 109:
-                v83.type = append_node(&yyvsp[-1].val, &yyvsp->val)->type;
-                yyval.val = v83;
+                val6[61] = append_node(yyvsp[-1].val, yyvsp->val);
+                yyval.val = val6[61];
                 break;
             case 110:
-                val.type = node0(0).type;
-                v82.type = linked_list_end(&val)->type;
-                yyval.val = v82;
+                val6[59] = node0(0);
+                val6[60] = linked_list_end(val6[59]);
+                yyval.val = val6[60];
                 break;
             case 111:
-                v78.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v79.type = (int)node1(yyvsp->val.type, v78).type;
-                v80.type = prepend_node(&v79, &yyvsp[-2].val)->type;
-                yyval.val = v80;
+                val6[56].type = RETURN_ARG1(yyvsp->pos);
+                val6[57] = node1(yyvsp->val.type, val6[56]);
+                val6[58] = prepend_node(val6[57], yyvsp[-2].val);
+                yyval.val = val6[58];
                 break;
             case 112:
-                v76.type = node0(0).type;
-                v74.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v75.type = (int)node1(yyvsp->val.type, v74).type;
-                v77.type = prepend_node(&v75, &v76)->type;
-                yyval.val = v77;
+                val6[54] = node0(ENUM_NOP);
+                val6[52].type = RETURN_ARG1(yyvsp->pos);
+                val6[53] = node1(yyvsp->val.type, val6[52]);
+                val6[55] = prepend_node(val6[53], val6[54]);
+                yyval.val = val6[55];
                 break;
             case 114:
-                v73.type = node0(0).type;
-                yyval.val = v73;
+                val6[51] = node0(ENUM_NOP);
+                yyval.val = val6[51];
                 break;
             case 115:
                 v13.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v13.prev;
-                v70.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v71.type = (int)node1(yyvsp->val.type, v70).type;
-                v72.type = append_node(&yyvsp[-2].val, &v71)->type;
-                yyval.val = v72;
+                val6[48].type = RETURN_ARG1(yyvsp->pos);
+                val6[49] = node1(yyvsp->val.type, val6[48]);
+                val6[50] = append_node(yyvsp[-2].val, val6[49]);
+                yyval.val = val6[50];
                 break;
             case 116:
                 v14.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v14.prev;
-                v67.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v68.type = (int)node1(yyvsp->val.type, v67).type;
-                v65.type = node0(0).type;
-                v66.type = linked_list_end(&v65)->type;
-                v69.type = append_node(&v66, &v68)->type;
-                yyval.val = v69;
+                val6[45].sourcePosValue = yyvsp->pos;
+                val6[46] = node1(yyvsp->val.type, val6[45]);
+                val6[43] = node0(ENUM_NOP);
+                val6[44] = linked_list_end(val6[43]);
+                val6[47] = append_node(val6[44], val6[46]);
+                yyval.val = val6[47];
                 break;
             case 118:
-                v63.type = node0(0).type;
-                v64.type = linked_list_end(&v63)->type;
-                yyval.val = v64;
+                val6[41] = node0(ENUM_NOP);
+                val6[42] = linked_list_end(val6[41]);
+                yyval.val = val6[42];
                 break;
             case 119:
                 v15.prev = LowerCase(yyvsp->val.type).prev;
                 yyvsp->val.stringValue = v15.prev;
-                v60.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v61.type = (int)node1(yyvsp->val.type, v60).type;
-                v62.type = append_node(&yyvsp[-2].val, &v61)->type;
-                yyval.val = v62;
+                val6[38].type = RETURN_ARG1(yyvsp->pos);
+                val6[39] = node1(yyvsp->val.type, val6[38]);
+                val6[40] = append_node(yyvsp[-2].val, val6[39]);
+                yyval.val = val6[40];
                 break;
             case 120:
-                v57.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v58.type = (int)node1(yyvsp->val.type, v57).type;
-                v55.type = node0(0).type;
-                v56.type = linked_list_end(&v55)->type;
-                v59.type = append_node(&v56, &v58)->type;
-                yyval.val = v59;
+                val6[35].sourcePosValue = yyvsp->pos;
+                val6[36] = node1(yyvsp->val.type, val6[35]);
+                val6[33] = node0(ENUM_NOP);
+                val6[34] = linked_list_end(val6[33]);
+                val6[37] = append_node(val6[34], val6[36]);
+                yyval.val = val6[37];
                 break;
             case 121:
-                v52.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v53.type = (int)node1(yyvsp->val.type, v52).type;
-                v54.type = append_node(&yyvsp[-2].val, &v53)->type;
-                yyval.val = v54;
+                val6[30].type = RETURN_ARG1(yyvsp->pos);
+                val6[31] = node1(yyvsp->val.type, val6[30]);
+                val6[32] = append_node(yyvsp[-2].val, val6[31]);
+                yyval.val = val6[32];
                 break;
             case 122:
-                v49.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v50.type = (int)node1(yyvsp->val.type, v49).type;
-                v47.type = node0(0).type;
-                v48.type = linked_list_end(&v47)->type;
-                v51.type = append_node(&v48, &v50)->type;
-                yyval.val = v51;
+                val6[27].type = RETURN_ARG1(yyvsp->pos);
+                val6[28] = node1(yyvsp->val.type, val6[27]);
+                val6[25] = node0(ENUM_NOP);
+                val6[26] = linked_list_end(val6[25]);
+                val6[29] = append_node(val6[26], val6[28]);
+                yyval.val = val6[29];
                 break;
             case 123:
-                v44.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v45.type = (int)node1(yyvsp->val.type, v44).type;
-                v46.type = prepend_node(&v45, &yyvsp[-2].val)->type;
-                yyval.val = v46;
+                val6[22].type = RETURN_ARG1(yyvsp->pos);
+                val6[23] = node1(yyvsp->val.type, val6[22]);
+                val6[24] = prepend_node(val6[23], yyvsp[-2].val);
+                yyval.val = val6[24];
                 break;
             case 124:
-                v42.type = node0(0).type;
-                v40.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v41.type = (int)node1(yyvsp->val.type, v40).type;
-                v43.type = prepend_node(&v41, &v42)->type;
-                yyval.val = v43;
+                val6[20] = node0(0);
+                val6[18].type = RETURN_ARG1(yyvsp->pos);
+                val6[19] = node1(yyvsp->val.type, val6[18]);
+                val6[21] = prepend_node(val6[19], val6[20]);
+                yyval.val = val6[21];
                 break;
             case 125:
                 v16.prev = LowerCase(yyvsp[-6].val.stringValue).prev;
                 yyvsp[-6].val.stringValue = v16.prev;
-                v38.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v37.type = (int)node1_(yyvsp[-6].pos).xmodelPieces;
-                v39.type = node6(68, yyvsp[-6].val, yyvsp[-4].val, yyvsp[-1].val, v37, v38, g_dummyVal).type;
-                yyval.val = v39;
+                val6[16].type = RETURN_ARG1(yyvsp->pos);
+                val6[15].type = RETURN_ARG1(yyvsp[-6].pos);
+                val6[17] = node6(ENUM_thread, yyvsp[-6].val, yyvsp[-4].val, yyvsp[-1].val, val6[15], val6[16], g_dummyVal);
+                yyval.val = val6[17];
                 break;
             case 126:
-                v35.type = (int)node1_(yyvsp[-2].pos).xmodelPieces;
-                v34.type = (int)node1_(yyvsp[-4].pos).xmodelPieces;
-                v36.type = node3(71, yyvsp[-2].val, v34, v35).type;
-                yyval.val = v36;
+                val6[13].type = RETURN_ARG1(yyvsp[-2].pos);
+                val6[12].type = RETURN_ARG1(yyvsp[-4].pos);
+                val6[14] = node3(ENUM_usingtree, yyvsp[-2].val, val6[12], val6[13]);
+                yyval.val = val6[14];
                 break;
             case 127:
-                v32.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v33.type = (int)node1(69, v32).type;
-                yyval.val = v33;
+                val6[10].type = RETURN_ARG1(yyvsp->pos);
+                val6[11] = node1(ENUM_begin_developer_thread, val6[10]);
+                yyval.val = val6[11];
                 break;
             case 128:
-                v30.type = (int)node1_(yyvsp->pos).xmodelPieces;
-                v31.type = (int)node1(70, v30).type;
-                yyval.val = v31;
+                val6[8].type = RETURN_ARG1(yyvsp->pos);
+                val6[9] = node1(ENUM_end_developer_thread, val6[8]);
+                yyval.val = val6[9];
                 break;
             case 129:
-                v29.type = append_node(&yyvsp[-1].val, &yyvsp->val)->type;
-                yyval.val = v29;
+                val6[7] = append_node(yyvsp[-1].val, yyvsp->val);
+                yyval.val = val6[7];
                 break;
             case 130:
-                v27.type = node0(0).type;
-                v28.type = linked_list_end(&v27)->type;
-                yyval.val = v28;
+                val6[5] = node0(ENUM_NOP);
+                val6[6] = linked_list_end(val6[5]);
+                yyval.val = val6[6];
                 break;
             case 131:
-                v25.type = (int)node1_(yyvsp[-1].pos).xmodelPieces;
-                v26.type = node2(86, yyvsp->val, v25).type;
-                yyval.val = v26;
+                val6[3].type = RETURN_ARG1(yyvsp[-1].pos);
+                val6[4] = node2(86, yyvsp->val, val6[3]);
+                yyval.val = val6[4];
                 ++scrCompilePub.far_function_count;
                 break;
             case 132:
-                v24.type = append_node(&yyvsp[-2].val, &yyvsp[-1].val)->type;
-                yyval.val = v24;
+                val6[2] = append_node(yyvsp[-2].val, yyvsp[-1].val);
+                yyval.val = val6[2];
                 break;
             case 133:
-                v22.type = node0(0).type;
-                v23.type = linked_list_end(&v22)->type;
-                yyval.val = v23;
+                val6[0] = node0(0);
+                val6[1] = linked_list_end(val6[0]);
+                yyval.val = val6[1];
                 break;
             default:
                 break;
@@ -7295,24 +7058,6 @@ yyacceptlab:
     return 0;
 }
 
-HashEntry_unnamed_type_u __cdecl LowerCase(unsigned int stringValue)
-{
-    return SL_ConvertToLowercase(stringValue, g_parse_user, 14);
-}
-
-void __cdecl _yy_memcpy(char *to, char *from, unsigned int count)
-{
-    int v3; // eax
-
-    while (1)
-    {
-        v3 = count--;
-        if (v3 <= 0)
-            break;
-        *to++ = *from++;
-    }
-}
-
 int __cdecl yylex()
 {
     int next_buffer; // [esp+0h] [ebp-24h]
@@ -7331,12 +7076,10 @@ int __cdecl yylex()
             yy_start = 1;
         if (!yyin)
         {
-            //yyin = __iob_func(); // KISAK HACK
-            yyin = stdout;
+            yyin = stdin;
         }
         if (!yyout)
         {
-            //yyout = __iob_func() + 1; // KISAK HACK
             yyout = stdout;
         }
         if (!yy_current_buffer)
@@ -8236,7 +7979,7 @@ void __cdecl ScriptParse(sval_u *parseData, unsigned __int8 user)
     g_out_pos = -1;
     g_sourcePos = 0;
     g_parse_user = user;
-    g_dummyVal.type = 0;
+    g_dummyVal.node = NULL;
     yy_init = 1;
     buffer_state.yy_buf_size = 0x4000;
     buffer_state.yy_ch_buf = ch_buf;

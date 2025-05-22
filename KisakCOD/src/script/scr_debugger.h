@@ -1,6 +1,8 @@
 #pragma once
 #include "scr_variable.h"
 #include "scr_parser.h"
+#include "scr_yacc.h"
+
 #include <ui/ui.h>
 
 struct debugger_sval_s // sizeof=0x4
@@ -12,6 +14,10 @@ struct scr_localVar_t // sizeof=0x8
     unsigned int name;                  // ...
     unsigned int sourcePos;             // ...
 };
+
+#define LOCAL_VAR_STACK_SIZE 64
+#define MAX_SWITCH_CASES 1024
+
 struct scr_block_s // sizeof=0x218
 {
     int abortLevel;
@@ -19,7 +25,7 @@ struct scr_block_s // sizeof=0x218
     int localVarsPublicCount;
     int localVarsCount;
     unsigned __int8 localVarsInitBits[8];
-    scr_localVar_t localVars[64];
+    scr_localVar_t localVars[LOCAL_VAR_STACK_SIZE];
 };
 union sval_u // sizeof=0x4
 {                                       // ...
@@ -41,9 +47,9 @@ union sval_u // sizeof=0x4
     }
     sval_u(int i)
     {
-        type = i;
+        type = (Enum_t)i;
     }
-    int type;
+    Enum_t type;
     unsigned int stringValue;
     unsigned int idValue;
     float floatValue;

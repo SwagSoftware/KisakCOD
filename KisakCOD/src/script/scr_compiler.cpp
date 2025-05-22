@@ -1,3 +1,6 @@
+// Some functions adapted from: https://github.com/voron00/CoD2rev_Server/blob/41e33ed97d0339ac631772f25eee3910ddef87e5/src/script/scr_compiler.cpp
+// (GPL v3.0) (Thanks)
+
 #include "scr_compiler.h"
 #include "scr_main.h"
 #include "scr_debugger.h"
@@ -8,13 +11,14 @@
 #include "scr_animtree.h"
 #include <universal/profile.h>
 #include "scr_parsetree.h"
+#include "scr_yacc.h"
 
 #undef GetObject 
 
 scrCompilePub_t scrCompilePub;
 scrCompileGlob_t scrCompileGlob;
 
-void __cdecl EmitOpcode(unsigned int op, int offset, int callType);
+void __cdecl EmitOpcode(Opcode_t op, int offset, int callType);
 char __cdecl EmitOrEvalPrimitiveExpression(sval_u expr, VariableCompileValue *constValue, scr_block_s *block);
 void __cdecl EmitExpression(sval_u expr, scr_block_s *block);
 void __cdecl EmitExpressionFieldObject(sval_u expr, sval_u sourcePos, scr_block_s *block);
@@ -28,12 +32,20 @@ void __cdecl EmitArrayPrimitiveExpressionRef(sval_u expr, sval_u sourcePos, scr_
 
 bool __cdecl IsUndefinedPrimitiveExpression(sval_u expr)
 {
-    return *expr.codePosValue == 31;
+    return expr.node[0].type == ENUM_undefined;
 }
 
 bool __cdecl IsUndefinedExpression(sval_u expr)
 {
-    return *expr.codePosValue == 6 && IsUndefinedPrimitiveExpression(*(expr.codePosValue + 4));
+    if (expr.node[0].type == ENUM_primitive_expression)
+    {
+        if (IsUndefinedPrimitiveExpression(expr.node[1]))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void __cdecl Scr_CompileRemoveRefToString(unsigned int stringValue)
@@ -100,7 +112,7 @@ int __cdecl Scr_FindLocalVarIndex(unsigned int name, sval_u sourcePos, bool crea
             if (i == block->localVarsCreateCount)
             {
                 ++block->localVarsCreateCount;
-                EmitOpcode(0x16u, 0, 0);
+                EmitOpcode(OP_CreateLocalVariable, 0, 0);
                 EmitCanonicalStringConst(block->localVars[i].name);
                 AddOpcodePos(block->localVars[i].sourcePos, 0);
             }
@@ -140,12 +152,12 @@ void __cdecl EmitByte(unsigned __int8 value)
 
 void __cdecl EmitLocalVariable(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-    int index; // [esp+0h] [ebp-8h]
-    unsigned int opcode; // [esp+4h] [ebp-4h]
+    int index;
+    Opcode_t opcode;
 
     if (scrCompilePub.developer_statement == 3)
     {
-        EmitOpcode(0x83u, 1, 0);
+        EmitOpcode(OP_EvalLocalVariable, 1, 0);
         EmitCanonicalString(expr.stringValue);
     }
     else
@@ -153,15 +165,14 @@ void __cdecl EmitLocalVariable(sval_u expr, sval_u sourcePos, scr_block_s *block
         index = Scr_FindLocalVarIndex(expr.stringValue, sourcePos, 0, block);
         if (index > 5)
         {
-            opcode = 30;
-            EmitOpcode(0x1Eu, 1, 0);
+            opcode = OP_EvalLocalVariableCached;
         }
         else
         {
-            opcode = index + 24;
-            EmitOpcode(index + 24, 1, 0);
+            opcode = (Opcode_t)((int)OP_EvalLocalVariableCached0 + index);
         }
-        if (opcode == 30)
+        EmitOpcode(opcode, 1, 0);
+        if (opcode == OP_EvalLocalVariableCached)
             EmitByte(index);
         AddOpcodePos(sourcePos.stringValue, 1);
     }
@@ -169,7 +180,7 @@ void __cdecl EmitLocalVariable(sval_u expr, sval_u sourcePos, scr_block_s *block
 
 void __cdecl EmitGetUndefined(sval_u sourcePos)
 {
-    EmitOpcode(2u, 1, 0);
+    EmitOpcode(OP_GetUndefined, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
@@ -181,23 +192,25 @@ void __cdecl EmitShort(__int16 value)
 
 void __cdecl CompileTransferRefToString(unsigned int stringValue, unsigned int user)
 {
-    if (!stringValue)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 233, 0, "%s", "stringValue");
-    if (scrCompilePub.developer_statement == 2)
+    iassert(stringValue);
+
+    if (scrCompilePub.developer_statement == SCR_DEV_IGNORE)
     {
         Scr_CompileRemoveRefToString(stringValue);
+        return;
     }
-    else if (scrCompilePub.developer_statement != 3)
+
+    if (scrCompileGlob.bConstRefCount)
     {
-        if (scrCompileGlob.bConstRefCount)
-            SL_AddRefToString(stringValue);
-        SL_TransferRefToUser(stringValue, user);
+        SL_AddRefToString(stringValue);
     }
+
+    SL_TransferRefToUser(stringValue, user);
 }
 
 void __cdecl EmitGetString(unsigned int value, sval_u sourcePos)
 {
-    EmitOpcode(0xAu, 1, 0);
+    EmitOpcode(OP_GetString, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
     EmitShort(value);
     CompileTransferRefToString(value, 1u);
@@ -205,7 +218,7 @@ void __cdecl EmitGetString(unsigned int value, sval_u sourcePos)
 
 void __cdecl EmitGetIString(unsigned int value, sval_u sourcePos)
 {
-    EmitOpcode(0xBu, 1, 0);
+    EmitOpcode(OP_GetIString, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
     EmitShort(value);
     CompileTransferRefToString(value, 1u);
@@ -221,7 +234,7 @@ void __cdecl EmitGetVector(const float *value, sval_u sourcePos)
 {
     int i; // [esp+4h] [ebp-4h]
 
-    EmitOpcode(0xCu, 1, 0);
+    EmitOpcode(OP_GetVector, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
     for (i = 0; i < 3; ++i)
         EmitFloat(value[i]);
@@ -230,7 +243,7 @@ void __cdecl EmitGetVector(const float *value, sval_u sourcePos)
 
 void __cdecl EmitGetFloat(float value, sval_u sourcePos)
 {
-    EmitOpcode(9u, 1, 0);
+    EmitOpcode(OP_GetFloat, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
     EmitFloat(value);
 }
@@ -247,14 +260,14 @@ void __cdecl EmitGetInteger(int value, sval_u sourcePos)
     {
         if (value > -256)
         {
-            EmitOpcode(5u, 1, 0);
+            EmitOpcode(OP_GetNegByte, 1, 0);
             AddOpcodePos(sourcePos.stringValue, 1);
             EmitByte(-value);
             return;
         }
         if (value > -65536)
         {
-            EmitOpcode(7u, 1, 0);
+            EmitOpcode(OP_GetNegUnsignedShort, 1, 0);
             AddOpcodePos(sourcePos.stringValue, 1);
             EmitShort(-value);
             return;
@@ -264,26 +277,26 @@ void __cdecl EmitGetInteger(int value, sval_u sourcePos)
     {
         if (!value)
         {
-            EmitOpcode(3u, 1, 0);
+            EmitOpcode(OP_GetZero, 1, 0);
             AddOpcodePos(sourcePos.stringValue, 1);
             return;
         }
         if (value < 256)
         {
-            EmitOpcode(4u, 1, 0);
+            EmitOpcode(OP_GetByte, 1, 0);
             AddOpcodePos(sourcePos.stringValue, 1);
             EmitByte(value);
             return;
         }
         if (value < 0x10000)
         {
-            EmitOpcode(6u, 1, 0);
+            EmitOpcode(OP_GetUnsignedShort, 1, 0);
             AddOpcodePos(sourcePos.stringValue, 1);
             EmitShort(value);
             return;
         }
     }
-    EmitOpcode(8u, 1, 0);
+    EmitOpcode(OP_GetInteger, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
     EmitCodepos((const char*)value);
 }
@@ -325,7 +338,7 @@ void __cdecl EmitPrimitiveExpression(sval_u expr, scr_block_s *block)
 
 void __cdecl EmitEvalArray(sval_u sourcePos, sval_u indexSourcePos)
 {
-    EmitOpcode(0x20u, -1, 0);
+    EmitOpcode(OP_EvalArray, -1, 0);
     AddOpcodePos(indexSourcePos.stringValue, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
@@ -345,7 +358,7 @@ void EmitPreAssignmentPos()
 
 void __cdecl EmitCastFieldObject(sval_u sourcePos)
 {
-    EmitOpcode(0x59u, -1, 0);
+    EmitOpcode(OP_CastFieldObject, -1, 0);
     EmitPreAssignmentPos();
     AddOpcodePos(sourcePos.stringValue, 0);
 }
@@ -359,13 +372,13 @@ int __cdecl Scr_GetUncacheType(int type)
     return 1;
 }
 
-int __cdecl Scr_GetCacheType(int type)
+Vartype_t __cdecl Scr_GetCacheType(int type)
 {
     if (!type)
-        return 7;
+        return VAR_CODEPOS;
     if (type != 1)
         MyAssertHandler(".\\script\\scr_compiler.cpp", 2018, 0, "%s", "type == BUILTIN_DEVELOPER_ONLY");
-    return 12;
+    return VAR_DEVELOPER_CODEPOS;
 
 }
 
@@ -396,9 +409,9 @@ int __cdecl EmitExpressionList(sval_u exprlist, scr_block_s *block)
     int expr_count; // [esp+4h] [ebp-4h]
 
     expr_count = 0;
-    for (node = *(sval_u**)exprlist.type; node; node = node[1].node)
+    for (node = exprlist.node[0].node; node; node = node[1].node)
     {
-        EmitExpression(node->node->type, block);
+        EmitExpression(node[0].node[0], block);
         ++expr_count;
     }
     return expr_count;
@@ -406,20 +419,19 @@ int __cdecl EmitExpressionList(sval_u exprlist, scr_block_s *block)
 
 void __cdecl EmitCallBuiltinOpcode(int param_count, sval_u sourcePos)
 {
-    unsigned int opcode; // [esp+0h] [ebp-4h]
+    Opcode_t opcode; // [esp+0h] [ebp-4h]
 
     if (param_count > 5)
     {
-        opcode = 68;
-        EmitOpcode(0x44u, 1 - param_count, 1);
+        opcode = OP_CallBuiltin;
     }
     else
     {
-        opcode = param_count + '>';
-        EmitOpcode(param_count + '>', 1 - param_count, 1);
+        opcode = (Opcode_t)((int)OP_CallBuiltin0 + param_count);
     }
+    EmitOpcode(opcode, 1 - param_count, 1);
     AddOpcodePos(sourcePos.stringValue, 9);
-    if (opcode == 'D')
+    if (opcode == OP_CallBuiltin)
         EmitByte(param_count);
 }
 
@@ -448,14 +460,14 @@ void __cdecl AddExpressionListOpcodePos(sval_u exprlist)
 
     if (scrVarPub.developer)
     {
-        for (node = *(sval_u**)exprlist.type; node; node = node[1].node)
-            AddOpcodePos(*(unsigned int*)(node->type + 4), 0);
+        for (sval_u *node = exprlist.node[0].node; node; node = node[1].node)
+            AddOpcodePos(node[0].node[1].sourcePosValue, 0);
     }
 }
 
 void EmitDecTop()
 {
-    EmitOpcode(0x58u, -1, 0);
+    EmitOpcode(OP_DecTop, -1, 0);
 }
 
 void __cdecl Scr_EndDevScript(int type, char **savedPos)
@@ -470,10 +482,10 @@ void __cdecl Scr_EndDevScript(int type, char **savedPos)
 void __cdecl EmitPreFunctionCall(sval_u func_name)
 {
     if (*func_name.codePosValue == 26)
-        EmitOpcode(0x4Eu, 1, 0);
+        EmitOpcode(OP_PreScriptCall, 1, 0);
 }
 
-VariableValueInternal_u __cdecl AddFilePrecache(unsigned int filename, unsigned int sourcePos, bool include)
+unsigned int  __cdecl AddFilePrecache(unsigned int filename, unsigned int sourcePos, bool include)
 {
     unsigned int Variable_DONE; // eax
 
@@ -512,20 +524,20 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
     }
     if (scrCompilePub.developer_statement == 2)
     {
-        Scr_CompileRemoveRefToString(*(func.codePosValue + 4));
-        if (*func.codePosValue == 21)
+        Scr_CompileRemoveRefToString(func.node[1].stringValue);
+        if (func.node[0].type == ENUM_far_function)
         {
-            Scr_CompileRemoveRefToString(*(func.codePosValue + 8));
+            Scr_CompileRemoveRefToString(func.node[2].stringValue);
             --scrCompilePub.far_function_count;
         }
         return;
     }
-    if (*func.codePosValue == 20)
+    if (func.node[0].type == ENUM_local_function)
     {
         scope = 0;
-        threadPtr = GetVariable(scrCompileGlob.fileId, *(func.codePosValue + 4));
-        CompileTransferRefToString(*(func.codePosValue + 4), 2u);
-        threadId = GetObject(threadPtr).u.stringValue;
+        threadPtr = GetVariable(scrCompileGlob.fileId, func.node[1].idValue);
+		CompileTransferRefToString(func.node[1].stringValue, 2);
+        threadId = GetObject(threadPtr);
         if (!threadId)
             MyAssertHandler(".\\script\\scr_compiler.cpp", 1708, 0, "%s", "threadId");
         goto LABEL_39;
@@ -533,15 +545,15 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
     if (func.node[0].type != 21)
         MyAssertHandler(".\\script\\scr_compiler.cpp", 1712, 0, "%s", "func.node[0].type == ENUM_far_function");
     scope = 1;
-    v2 = SL_ConvertToString(*(func.codePosValue + 4));
+    v2 = SL_ConvertToString(func.node[1].stringValue);
     filename.prev = Scr_CreateCanonicalFilename(v2).prev;
-    Scr_CompileRemoveRefToString(*(func.codePosValue + 4));
+    Scr_CompileRemoveRefToString(func.node[1].stringValue);
     Variable = FindVariable(scrCompilePub.loadedscripts, filename.prev);
     value = Scr_EvalVariable(Variable);
-    fileId = AddFilePrecache(filename.prev, sourcePos.stringValue, 0).u.stringValue;
+    fileId = AddFilePrecache(filename.prev, sourcePos.stringValue, 0);
     if (value.type)
     {
-        threadPtr = FindVariable(fileId, *(func.codePosValue + 8));
+        threadPtr = FindVariable(fileId, func.node[2].idValue);
         if (!threadPtr || GetValueType(threadPtr) != 1)
         {
         LABEL_26:
@@ -551,10 +563,10 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
     }
     else
     {
-        threadPtr = GetVariable(fileId, *(func.codePosValue + 8));
+        threadPtr = GetVariable(fileId, func.node[2].idValue);
     }
-    CompileTransferRefToString(*(func.codePosValue + 8), 2u);
-    threadId = GetObject(threadPtr).u.stringValue;
+    CompileTransferRefToString(func.node[2].stringValue, 2);
+    threadId = GetObject(threadPtr);
     posId = FindVariable(threadId, 1u);
     if (!posId)
         goto LABEL_39;
@@ -586,7 +598,7 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
                 "(count.type == VAR_UNDEFINED) || (count.type == VAR_INTEGER)");
         if (!count.type)
         {
-            count.type = 6;
+            count.type = VAR_INTEGER;
             count.u.intValue = 0;
         }
         valueId = GetNewVariable(threadId, count.u.intValue + 2);
@@ -595,11 +607,11 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
         {
             if (!scrVarPub.developer_script)
                 MyAssertHandler(".\\script\\scr_compiler.cpp", 1800, 0, "%s", "scrVarPub.developer_script");
-            value.type = 12;
+            value.type = VAR_DEVELOPER_CODEPOS;
         }
         else
         {
-            value.type = 7;
+            value.type = VAR_CODEPOS;
         }
         SetNewVariableValue(valueId, &value);
         ++count.u.intValue;
@@ -625,9 +637,9 @@ void __cdecl EmitFunction(sval_u func, sval_u sourcePos)
 void __cdecl EmitPostScriptFunction(sval_u func, int param_count, bool bMethod, sval_u nameSourcePos)
 {
     if (bMethod)
-        EmitOpcode(0x52u, -param_count - 1, 3);
+        EmitOpcode(OP_ScriptMethodCall, -param_count - 1, 3);
     else
-        EmitOpcode(0x50u, -param_count, 3);
+        EmitOpcode(OP_ScriptFunctionCall, -param_count, 3);
     AddOpcodePos(nameSourcePos.stringValue, 3);
     EmitFunction(func, nameSourcePos);
 }
@@ -642,9 +654,9 @@ void __cdecl EmitPostScriptFunctionPointer(
 {
     EmitExpression(expr, block);
     if (bMethod)
-        EmitOpcode(0x53u, -param_count - 2, 3);
+        EmitOpcode(OP_ScriptMethodCallPointer, -param_count - 2, 3);
     else
-        EmitOpcode(0x51u, -param_count - 1, 3);
+        EmitOpcode(OP_ScriptFunctionCallPointer, -param_count - 1, 3);
     AddOpcodePos(sourcePos.stringValue, 0);
     AddOpcodePos(nameSourcePos.stringValue, 1);
 }
@@ -656,28 +668,22 @@ void __cdecl EmitPostScriptFunctionCall(
     sval_u nameSourcePos,
     scr_block_s *block)
 {
-    if (*func_name.codePosValue == 18)
+    if (func_name.node[0].type == ENUM_function)
     {
-        EmitPostScriptFunction(*(func_name.codePosValue + 4), param_count, bMethod, nameSourcePos);
+        EmitPostScriptFunction(func_name.node[1], param_count, bMethod, nameSourcePos);
     }
-    else if (*func_name.codePosValue == 22)
+    else if (func_name.node[0].type == ENUM_function_pointer)
     {
-        EmitPostScriptFunctionPointer(
-            *(func_name.codePosValue + 4),
-            param_count,
-            bMethod,
-            nameSourcePos,
-            *(func_name.codePosValue + 8),
-            block);
+        EmitPostScriptFunctionPointer(func_name.node[1], param_count, bMethod, nameSourcePos, func_name.node[2], block);
     }
 }
 
 void __cdecl EmitPostScriptThread(sval_u func, int param_count, bool bMethod, sval_u sourcePos)
 {
     if (bMethod)
-        EmitOpcode(0x56u, -param_count, 2);
+        EmitOpcode(OP_ScriptMethodThreadCall, -param_count, 2);
     else
-        EmitOpcode(0x54u, 1 - param_count, 2);
+        EmitOpcode(OP_ScriptThreadCall, 1 - param_count, 2);
     AddOpcodePos(sourcePos.stringValue, 3);
     EmitFunction(func, sourcePos);
     EmitCodepos((const char*)param_count);
@@ -692,9 +698,9 @@ void __cdecl EmitPostScriptThreadPointer(
 {
     EmitExpression(expr, block);
     if (bMethod)
-        EmitOpcode(0x57u, -param_count - 1, 2);
+        EmitOpcode(OP_ScriptMethodThreadCallPointer, -param_count - 1, 2);
     else
-        EmitOpcode(0x55u, -param_count, 2);
+        EmitOpcode(OP_ScriptThreadCallPointer, -param_count, 2);
     AddOpcodePos(sourcePos.stringValue, 1);
     EmitCodepos((const char*)param_count);
 }
@@ -707,32 +713,27 @@ void __cdecl EmitPostScriptThreadCall(
     sval_u nameSourcePos,
     scr_block_s *block)
 {
-    if (*func_name.codePosValue == 18)
+    if (func_name.node[0].type == ENUM_function)
     {
-        EmitPostScriptThread(*(func_name.codePosValue + 4), param_count, bMethod, nameSourcePos);
+        EmitPostScriptThread(func_name.node[1], param_count, bMethod, nameSourcePos);
     }
-    else if (*func_name.codePosValue == 22)
+    else if (func_name.node[0].type == ENUM_function_pointer)
     {
-        EmitPostScriptThreadPointer(*(func_name.codePosValue + 4), param_count, bMethod, *(func_name.codePosValue + 8), block);
+        EmitPostScriptThreadPointer(func_name.node[1], param_count, bMethod, func_name.node[2], block);
     }
-    AddOpcodePos(sourcePos.stringValue, 0);
+
+    AddOpcodePos(sourcePos.sourcePosValue, 0);
 }
 
 void __cdecl EmitPostFunctionCall(sval_u func_name, int param_count, bool bMethod, scr_block_s *block)
 {
-    if (*func_name.codePosValue == 26)
+    if (func_name.node[0].type == ENUM_script_call)
     {
-        EmitPostScriptFunctionCall(*(func_name.codePosValue + 4), param_count, bMethod, *(func_name.codePosValue + 8), block);
+        EmitPostScriptFunctionCall(func_name.node[1], param_count, bMethod, func_name.node[2], block);
     }
-    else if (*func_name.codePosValue == 30)
+    else if (func_name.node[0].type == ENUM_script_thread_call)
     {
-        EmitPostScriptThreadCall(
-            *(func_name.codePosValue + 4),
-            param_count,
-            bMethod,
-            *(func_name.codePosValue + 8),
-            *(func_name.codePosValue + 12),
-            block);
+        EmitPostScriptThreadCall(func_name.node[1], param_count, bMethod, func_name.node[2], func_name.node[3], block);
     }
 }
 
@@ -755,7 +756,9 @@ void __cdecl EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_bloc
     if (!name)
         goto script_function;
     pName = SL_ConvertToString(name);
-    sourcePos.type = *(func_name.codePosValue + 8);
+
+    sourcePos = func_name.node[2];
+
     if (scrCompilePub.developer_statement == 3)
     {
         type = 0;
@@ -830,21 +833,22 @@ void __cdecl EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_bloc
 
 void __cdecl EmitCallBuiltinMethodOpcode(int param_count, sval_u sourcePos)
 {
-    unsigned int opcode; // [esp+0h] [ebp-4h]
+    Opcode_t opcode; // [esp+0h] [ebp-4h]
 
     if (param_count > 5)
     {
-        opcode = 75;
-        EmitOpcode(0x4Bu, -param_count, 1);
+        opcode = OP_CallBuiltinMethod;
     }
     else
     {
-        opcode = param_count + 69;
-        EmitOpcode(param_count + 69, -param_count, 1);
+        opcode = (Opcode_t)((int)OP_CallBuiltinMethod0 + param_count);
     }
+
+    EmitOpcode(opcode, -param_count, 1);
+
     EmitPreAssignmentPos();
     AddOpcodePos(sourcePos.stringValue, 9);
-    if (opcode == 75)
+    if (opcode == OP_CallBuiltinMethod)
         EmitByte(param_count);
 }
 
@@ -883,7 +887,7 @@ void __cdecl EmitMethod(
     if (!name)
         goto script_method;
     pName = SL_ConvertToString(name);
-    sourcePos.type = *(func_name.codePosValue + 8);
+    sourcePos = func_name.node[2];
     if (scrCompilePub.developer_statement == 3)
     {
         type = 0;
@@ -945,7 +949,7 @@ void __cdecl EmitMethod(
     script_method:
         if (scrCompilePub.developer_statement == 3)
         {
-            CompileError(*(func_name.codePosValue + 8), "unknown builtin method");
+            CompileError(*(unsigned int*)(func_name.type + 8), "unknown builtin method");
         }
         else
         {
@@ -963,92 +967,109 @@ void __cdecl EmitMethod(
 
 void __cdecl EmitCallExpressionFieldObject(sval_u expr, scr_block_s *block)
 {
-    if (*expr.codePosValue == 23)
+    if (expr.node[0].type == ENUM_call)
     {
-        EmitCall(*(expr.codePosValue + 4), *(expr.codePosValue + 8), 0, block);
-        EmitCastFieldObject(*(expr.codePosValue + 12));
+        EmitCall(expr.node[1], expr.node[2], false, block);
+        EmitCastFieldObject(expr.node[3]);
     }
-    else if (*expr.codePosValue == 24)
+    else if (expr.node[0].type == ENUM_method)
     {
-        EmitMethod(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), *(expr.codePosValue + 16), 0, block);
-        EmitCastFieldObject(*(expr.codePosValue + 20));
+        EmitMethod(expr.node[1], expr.node[2], expr.node[3], expr.node[4], false, block);
+        EmitCastFieldObject(expr.node[5]);
     }
 }
 
 void __cdecl EmitSelfObject(sval_u sourcePos)
 {
-    EmitOpcode(0x26u, 0, 0);
+    EmitOpcode(OP_GetSelfObject, 0, 0);
     EmitPreAssignmentPos();
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 void __cdecl EmitLevelObject(sval_u sourcePos)
 {
-    EmitOpcode(0xDu, 0, 0);
+    EmitOpcode(OP_GetLevelObject, 0, 0);
     EmitPreAssignmentPos();
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 void __cdecl EmitAnimObject(sval_u sourcePos)
 {
-    EmitOpcode(0xEu, 0, 0);
+    EmitOpcode(OP_GetAnimObject, 0, 0);
     EmitPreAssignmentPos();
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 sval_u *__cdecl GetSingleParameter(sval_u exprlist)
 {
-    if (!*exprlist.codePosValue)
-        return 0;
-    if (*(sval_u **)(*exprlist.codePosValue + 4))
-        return 0;
-    return *(sval_u**)exprlist.codePosValue;
+    if (exprlist.node[0].node == NULL)
+    {
+        return NULL;
+    }
+
+    if (exprlist.node[0].node[1].node != NULL)
+    {
+        return NULL;
+    }
+
+    return exprlist.node[0].node;
 }
 
 void __cdecl EmitExpressionFieldObject(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-    if (*expr.codePosValue == 6)
-        EmitPrimitiveExpressionFieldObject(*(expr.codePosValue + 4), *(expr.codePosValue + 8), block);
-    else
-        CompileError(sourcePos.stringValue, "not an object");
+    if (expr.node[0].type == ENUM_primitive_expression)
+    {
+        EmitPrimitiveExpressionFieldObject(expr.node[1], expr.node[2], block);
+        return;
+    }
+
+    CompileError(sourcePos.sourcePosValue, "not an object");
 }
 
 void __cdecl EmitExpressionListFieldObject(sval_u exprlist, sval_u sourcePos, scr_block_s *block)
 {
-    sval_u *node; // [esp+0h] [ebp-4h]
+    sval_u *node = GetSingleParameter(exprlist);
 
-    node = GetSingleParameter(exprlist);
     if (node)
-        EmitExpressionFieldObject(node->node->type, *(node->codePosValue + 4), block);
-    else
-        CompileError(sourcePos.stringValue, "not an object");
+    {
+        EmitExpressionFieldObject(node[0].node[0], node[0].node[1], block);
+        return;
+    }
+
+    CompileError(sourcePos.sourcePosValue, "not an object");
 }
 
 void __cdecl EmitPrimitiveExpressionFieldObject(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-    switch (*expr.codePosValue)
+    switch (expr.node[0].type)
     {
-    case 0x11:
-        EmitVariableExpression(*(expr.codePosValue + 4), block);
-        EmitCastFieldObject(*(expr.codePosValue + 8));
+    case ENUM_variable:
+        EmitVariableExpression(expr.node[1], block);
+        EmitCastFieldObject(expr.node[2]);
         break;
-    case 0x13:
-        EmitCallExpressionFieldObject(*(expr.codePosValue + 4), block);
+
+    case ENUM_call_expression:
+        EmitCallExpressionFieldObject(expr.node[1], block);
         break;
-    case 0x20:
-        EmitSelfObject(*(expr.codePosValue + 4));
+
+    case ENUM_self:
+        EmitSelfObject(expr.node[1]);
         break;
-    case 0x22:
-        EmitLevelObject(*(expr.codePosValue + 4));
+
+    case ENUM_level:
+        EmitLevelObject(expr.node[1]);
         break;
-    case 0x24:
-        EmitAnimObject(*(expr.codePosValue + 4));
+
+    case ENUM_anim:
+        EmitAnimObject(expr.node[1]);
         break;
-    case 0x2E:
-        EmitExpressionListFieldObject(*(expr.codePosValue + 4), sourcePos, block);
+
+    case ENUM_expression_list:
+        EmitExpressionListFieldObject(expr.node[1], sourcePos, block);
         break;
+
     default:
-        CompileError(sourcePos.stringValue, "not an object");
+        CompileError(sourcePos.sourcePosValue, "not an object");
         break;
     }
 }
@@ -1056,7 +1077,7 @@ void __cdecl EmitPrimitiveExpressionFieldObject(sval_u expr, sval_u sourcePos, s
 void __cdecl EmitFieldVariable(sval_u expr, sval_u field, sval_u sourcePos, scr_block_s *block)
 {
     EmitPrimitiveExpressionFieldObject(expr, sourcePos, block);
-    EmitOpcode(0x2Au, 1, 0);
+    EmitOpcode(OP_EvalFieldVariable, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitCanonicalString(field.stringValue);
 }
@@ -1085,7 +1106,7 @@ void __cdecl EmitObject(sval_u expr, sval_u sourcePos)
                 ObjectType = GetObjectType(idValue);
                 if (ObjectType >= 14 && (ObjectType <= 17 || ObjectType == 22))
                 {
-                    EmitOpcode(0x82u, 1, 0);
+                    EmitOpcode(OP_thread_object, 1, 0);
                     EmitShort(idValue);
                     return;
                 }
@@ -1106,78 +1127,80 @@ void __cdecl EmitObject(sval_u expr, sval_u sourcePos)
     entnum = (const char*)atoi(s + 1); // KISAKTODO: seems wrong
     if (!entnum && s[1] != 48)
         goto LABEL_17;
-    EmitOpcode(0x81u, 1, 0);
+    EmitOpcode(OP_object, 1, 0);
     EmitCodepos(classnum);
     EmitCodepos(entnum);
 }
 
 void __cdecl EmitVariableExpression(sval_u expr, scr_block_s *block)
 {
-    switch (*expr.codePosValue)
+    switch (expr.node[0].type)
     {
-    case 4:
-        EmitLocalVariable(*(expr.codePosValue + 4), *(expr.codePosValue + 8), block);
+    case ENUM_local_variable:
+        EmitLocalVariable(expr.node[1], expr.node[2], block);
         break;
-    case 0xD:
-        EmitArrayVariable(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), *(expr.codePosValue + 16), block);
+
+    case ENUM_array_variable:
+        EmitArrayVariable(expr.node[1], expr.node[2], expr.node[3], expr.node[4], block);
         break;
-    case 0xF:
-        EmitFieldVariable(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), block);
+
+    case ENUM_field_variable:
+        EmitFieldVariable(expr.node[1], expr.node[2], expr.node[3], block);
         break;
-    case 0x35:
+
+    case ENUM_self_field:
         if (scrCompilePub.script_loading)
-            CompileError(*(expr.codePosValue + 8), "self field can only be used in the script debugger");
+            CompileError(expr.node[2].sourcePosValue, "self field can only be used in the script debugger");
         else
-            CompileError(*(expr.codePosValue + 8), "self field in assignment expression not currently supported");
+            CompileError(expr.node[2].sourcePosValue, "self field in assignment expression not currently supported");
         break;
-    case 0x50:
-        EmitObject(*(expr.codePosValue + 4), *(expr.codePosValue + 8));
+
+    case ENUM_object:
+        EmitObject(expr.node[1], expr.node[2]);
         break;
-    default:
-        return;
     }
 }
 
 void __cdecl EmitGetFunction(sval_u func, sval_u sourcePos)
 {
-    EmitOpcode(0x15u, 1, 0);
+    EmitOpcode(OP_GetFunction, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 3);
     EmitFunction(func, sourcePos);
 }
 
 void __cdecl EmitCallExpression(sval_u expr, bool bStatement, scr_block_s *block)
 {
-    if (*expr.codePosValue == 23)
+    if (expr.node[0].type == ENUM_call)
     {
-        EmitCall(*(expr.codePosValue + 4), *(expr.codePosValue + 8), bStatement, block);
+        EmitCall(expr.node[1], expr.node[2], bStatement, block);
     }
-    else if (*expr.codePosValue == 24)
+    else if (expr.node[0].type == ENUM_method)
     {
-        EmitMethod(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), *(expr.codePosValue + 16), bStatement, block);
+        EmitMethod(expr.node[1], expr.node[2], expr.node[3], expr.node[4], bStatement, block);
     }
 }
 
 void __cdecl EmitSelf(sval_u sourcePos)
 {
-    EmitOpcode(0xFu, 1, 0);
+    EmitOpcode(OP_GetSelf, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 void __cdecl EmitLevel(sval_u sourcePos)
 {
-    EmitOpcode(0x10u, 1, 0);
+    EmitOpcode(OP_GetLevel, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 void __cdecl EmitGame(sval_u sourcePos)
 {
-    EmitOpcode(0x11u, 1, 0);
+    EmitOpcode(OP_GetGame, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 void __cdecl EmitAnim(sval_u sourcePos)
 {
-    EmitOpcode(0x12u, 1, 0);
+    EmitOpcode(OP_GetAnim, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
@@ -1204,7 +1227,7 @@ void __cdecl Scr_CreateVector(VariableCompileValue *constValue, VariableValue *v
             vec[2 - i] = constValue[i].value.u.intValue;
         }
     }
-    value->type = 4;
+    value->type = VAR_VECTOR;
     value->u.intValue = (int)Scr_AllocVector(vec);
 }
 
@@ -1234,8 +1257,8 @@ bool __cdecl EmitOrEvalPrimitiveExpressionList(
         return EmitOrEvalExpression(exprlist.node[0].node[0].type, constValue, block); // KISAKTODO: might be wrong 
     if (expr_count == 3)
     {
-        success = 1;
-        for (node = *(sval_u**)exprlist.type; node; node = node[1].node)
+        success = true;
+        for (node = exprlist.node[0].node; node; node = node[1].node)
         {
             if (success)
             {
@@ -1259,7 +1282,7 @@ bool __cdecl EmitOrEvalPrimitiveExpressionList(
         }
         else
         {
-            EmitOpcode(0x7Eu, -2, 0);
+            EmitOpcode(OP_vector, -2, 0);
             AddOpcodePos(sourcePos.stringValue, 1);
             AddExpressionListOpcodePos(exprlist);
             return 0;
@@ -1275,20 +1298,20 @@ bool __cdecl EmitOrEvalPrimitiveExpressionList(
 void __cdecl EmitSize(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
     EmitPrimitiveExpression(expr, block);
-    EmitOpcode(0x76u, 0, 0);
+    EmitOpcode(OP_size, 0, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
 
 void __cdecl EmitEmptyArray(sval_u sourcePos)
 {
-    EmitOpcode(0x25u, 1, 0);
+    EmitOpcode(OP_EmptyArray, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 
 void __cdecl EmitAnimation(sval_u anim, sval_u sourcePos)
 {
-    EmitOpcode(0x13u, 1, 0);
+    EmitOpcode(OP_GetAnimation, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
     EmitCodepos((const char*)0xFFFFFFFF);
     if (scrCompilePub.developer_statement != 2)
@@ -1311,45 +1334,45 @@ void __cdecl EmitBreakOn(sval_u expr, sval_u param, sval_u sourcePos)
 
 void __cdecl EvalInteger(int value, sval_u sourcePos, VariableCompileValue *constValue)
 {
-    if (!constValue)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 640, 0, "%s", "constValue");
-    constValue->value.type = 6;
+    iassert(constValue);
+
+    constValue->value.type = VAR_INTEGER;
     constValue->value.u.intValue = value;
     constValue->sourcePos = sourcePos;
 }
 
 void __cdecl EvalFloat(float value, sval_u sourcePos, VariableCompileValue *constValue)
 {
-    if (!constValue)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 702, 0, "%s", "constValue");
-    constValue->value.type = 5;
+    iassert(constValue);
+
+    constValue->value.type = VAR_FLOAT;
     constValue->value.u.floatValue = value;
     constValue->sourcePos = sourcePos;
 }
 
 void __cdecl EvalString(unsigned int value, sval_u sourcePos, VariableCompileValue *constValue)
 {
-    if (!constValue)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 1110, 0, "%s", "constValue");
-    constValue->value.type = 2;
+    iassert(constValue);
+
+    constValue->value.type = VAR_STRING;
     constValue->value.u.intValue = value;
     constValue->sourcePos = sourcePos;
 }
 
 void __cdecl EvalIString(unsigned int value, sval_u sourcePos, VariableCompileValue *constValue)
 {
-    if (!constValue)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 1129, 0, "%s", "constValue");
-    constValue->value.type = 3;
+    iassert(constValue);
+
+    constValue->value.type = VAR_ISTRING;
     constValue->value.u.intValue = value;
     constValue->sourcePos = sourcePos;
 }
 
 void __cdecl EvalUndefined(sval_u sourcePos, VariableCompileValue *constValue)
 {
-    if (!constValue)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 624, 0, "%s", "constValue");
-    constValue->value.type = 0;
+    iassert(constValue);
+
+    constValue->value.type = VAR_UNDEFINED;
     constValue->sourcePos = sourcePos;
 }
 
@@ -1386,103 +1409,100 @@ char __cdecl EvalBinaryOperatorExpression(
 
 char __cdecl EvalExpression(sval_u expr, VariableCompileValue *constValue)
 {
-    if (*expr.codePosValue == 6)
-        return EvalPrimitiveExpression(*(expr.codePosValue + 4), constValue);
-    if (*expr.codePosValue == 49)
-        return EvalBinaryOperatorExpression(
-            *(expr.codePosValue + 4),
-            *(expr.codePosValue + 8),
-            *(expr.codePosValue + 12),
-            *(expr.codePosValue + 16),
-            constValue);
-    return 0;
+    if (expr.node[0].type == ENUM_primitive_expression)
+    {
+        return EvalPrimitiveExpression(expr.node[1], constValue);
+    }
+
+    if (expr.node[0].type == ENUM_binary)
+    {
+        return EvalBinaryOperatorExpression(expr.node[1], expr.node[2], expr.node[3], expr.node[4], constValue);
+    }
+
+    return false;
 }
 
-char __cdecl EvalPrimitiveExpressionList(sval_u exprlist, sval_u sourcePos, VariableCompileValue *constValue)
+bool __cdecl EvalPrimitiveExpressionList(sval_u exprlist, sval_u sourcePos, VariableCompileValue *constValue)
 {
     sval_u *node; // [esp+0h] [ebp-30h]
     VariableCompileValue constValue2[3]; // [esp+4h] [ebp-2Ch] BYREF
     int expr_count; // [esp+28h] [ebp-8h]
     int i; // [esp+2Ch] [ebp-4h]
 
-    if (!constValue)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 2500, 0, "%s", "constValue");
+    iassert(constValue);
+
     expr_count = GetExpressionCount(exprlist);
+
     if (expr_count == 1)
-        return EvalExpression(exprlist.node[0].node[0].type, constValue); // KISAKTODO: might be wrong
+        return EvalExpression(exprlist.node[0].node[0].node[0], constValue);
 
     if (expr_count != 3)
-        return 0;
+        return false;
+
     i = 0;
-    for (node = *(sval_u**)exprlist.type; node; node = node[1].node)
+    for (node = exprlist.node[0].node; node; node = node[1].node, i++)
     {
-        if (!EvalExpression(node->node->type, &constValue2[i]))
-            return 0;
+        if (!EvalExpression(node[0].node[0], &constValue2[i]))
+            return false;
         ++i;
     }
     Scr_CreateVector(constValue2, &constValue->value);
     constValue->sourcePos = sourcePos;
-    return 1;
+    return true;
 }
 
 char __cdecl EvalPrimitiveExpression(sval_u expr, VariableCompileValue *constValue)
 {
-    char result; // al
-    float value; // [esp+0h] [ebp-10h]
-
-    switch (*expr.codePosValue)
+    switch (expr.node[0].type)
     {
-    case 7:
-        EvalInteger(*(expr.codePosValue + 4), *(expr.codePosValue + 8), constValue);
-        result = 1;
-        break;
-    case 8:
-        EvalFloat(*(expr.codePosValue + 4), *(expr.codePosValue + 8), constValue);
-        result = 1;
-        break;
-    case 9:
-        EvalInteger(-*(expr.codePosValue + 4), *(expr.codePosValue + 8), constValue);
-        result = 1;
-        break;
-    case 0xA:
-        value = -*(expr.codePosValue + 4);
-        EvalFloat(value, *(expr.codePosValue + 8), constValue);
-        result = 1;
-        break;
-    case 0xB:
-        EvalString(*(expr.codePosValue + 4), *(expr.codePosValue + 8), constValue);
-        result = 1;
-        break;
-    case 0xC:
-        EvalIString(*(expr.codePosValue + 4), *(expr.codePosValue + 8), constValue);
-        result = 1;
-        break;
-    case 0x1F:
-        EvalUndefined(*(expr.codePosValue + 4), constValue);
-        result = 1;
-        break;
-    case 0x2E:
-        result = EvalPrimitiveExpressionList(*(expr.codePosValue + 4), *(expr.codePosValue + 8), constValue);
-        break;
-    case 0x48:
-        EvalInteger(0, *(expr.codePosValue + 4), constValue);
-        result = 1;
-        break;
-    case 0x49:
-        EvalInteger(1, *(expr.codePosValue + 4), constValue);
-        result = 1;
-        break;
+    case ENUM_integer:
+        EvalInteger(expr.node[1].intValue, expr.node[2], constValue);
+        return true;
+
+    case ENUM_float:
+        EvalFloat(expr.node[1].floatValue, expr.node[2], constValue);
+        return true;
+
+    case ENUM_minus_integer:
+        EvalInteger(-expr.node[1].intValue, expr.node[2], constValue);
+        return true;
+
+    case ENUM_minus_float:
+        EvalFloat(-expr.node[1].floatValue, expr.node[2], constValue);
+        return true;
+
+    case ENUM_string:
+        EvalString(expr.node[1].stringValue, expr.node[2], constValue);
+        return true;
+
+    case ENUM_istring:
+        EvalIString(expr.node[1].stringValue, expr.node[2], constValue);
+        return true;
+
+    case ENUM_undefined:
+        EvalUndefined(expr.node[1], constValue);
+        return true;
+
+    case ENUM_expression_list:
+        return EvalPrimitiveExpressionList(expr.node[1], expr.node[2], constValue);
+
+    case ENUM_false:
+        EvalInteger(false, expr.node[1], constValue);
+        return true;
+
+    case ENUM_true:
+        EvalInteger(true, expr.node[1], constValue);
+        return true;
+
     default:
-        result = 0;
-        break;
+        return false;
     }
-    return result;
 
 }
 
 void __cdecl EmitCastBool(sval_u sourcePos)
 {
-    EmitOpcode(0x5Bu, 0, 0);
+    EmitOpcode(OP_CastBool, 0, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
 
@@ -1498,7 +1518,7 @@ void __cdecl EmitBoolOrExpression(
     char *nextPos; // [esp+8h] [ebp-4h]
 
     EmitExpression(expr1, block);
-    EmitOpcode(0x61u, -1, 0);
+    EmitOpcode(OP_JumpOnTrueExpr, -1, 0);
     AddOpcodePos(expr1sourcePos.stringValue, 0);
     EmitShort(0);
     pos = scrCompileGlob.codePos;
@@ -1513,66 +1533,62 @@ void __cdecl EmitBoolOrExpression(
 
 char __cdecl EmitOrEvalPrimitiveExpression(sval_u expr, VariableCompileValue *constValue, scr_block_s *block)
 {
-    char result; // al
-
-    switch (*expr.codePosValue)
+    switch (expr.node[0].type)
     {
-    case 0x11:
-        EmitVariableExpression(*(expr.codePosValue + 4), block);
-        result = 0;
-        break;
-    case 0x12:
-        EmitGetFunction(*(expr.codePosValue + 4), *(expr.codePosValue + 8));
-        result = 0;
-        break;
-    case 0x13:
-        EmitCallExpression(*(expr.codePosValue + 4), 0, block);
-        result = 0;
-        break;
-    case 0x20:
-        EmitSelf(*(expr.codePosValue + 4));
-        result = 0;
-        break;
-    case 0x22:
-        EmitLevel(*(expr.codePosValue + 4));
-        result = 0;
-        break;
-    case 0x23:
-        EmitGame(*(expr.codePosValue + 4));
-        result = 0;
-        break;
-    case 0x24:
-        EmitAnim(*(expr.codePosValue + 4));
-        result = 0;
-        break;
-    case 0x2E:
-        result = EmitOrEvalPrimitiveExpressionList(*(expr.codePosValue + 4), *(expr.codePosValue + 8), constValue, block);
-        break;
-    case 0x34:
-        EmitSize(*(expr.codePosValue + 4), *(expr.codePosValue + 8), block);
-        result = 0;
-        break;
-    case 0x42:
-        EmitEmptyArray(*(expr.codePosValue + 4));
-        result = 0;
-        break;
-    case 0x43:
-        EmitAnimation(*(expr.codePosValue + 4), *(expr.codePosValue + 8));
-        result = 0;
-        break;
-    case 0x4A:
-        EmitAnimTree(*(expr.codePosValue + 4));
-        result = 0;
-        break;
-    case 0x4B:
-        EmitBreakOn(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12));
-        result = 0;
-        break;
+    case ENUM_variable:
+        EmitVariableExpression(expr.node[1], block);
+        return false;
+
+    case ENUM_function:
+        EmitGetFunction(expr.node[1], expr.node[2]);
+        return false;
+
+    case ENUM_call_expression:
+        EmitCallExpression(expr.node[1], false, block);
+        return false;
+
+    case ENUM_self:
+        EmitSelf(expr.node[1]);
+        return false;
+
+    case ENUM_level:
+        EmitLevel(expr.node[1]);
+        return false;
+
+    case ENUM_game:
+        EmitGame(expr.node[1]);
+        return false;
+
+    case ENUM_anim:
+        EmitAnim(expr.node[1]);
+        return false;
+
+    case ENUM_expression_list:
+        return EmitOrEvalPrimitiveExpressionList(expr.node[1], expr.node[2], constValue, block);
+
+    case ENUM_size_field:
+        EmitSize(expr.node[1], expr.node[2], block);
+        return false;
+
+    case ENUM_empty_array:
+        EmitEmptyArray(expr.node[1]);
+        return false;
+
+    case ENUM_animation:
+        EmitAnimation(expr.node[1], expr.node[2]);
+        return false;
+
+    case ENUM_animtree:
+        EmitAnimTree(expr.node[1]);
+        return false;
+
+    case ENUM_breakon:
+        EmitBreakOn(expr.node[1], expr.node[2], expr.node[3]);
+        return false;
+
     default:
-        result = EvalPrimitiveExpression(expr, constValue);
-        break;
+        return EvalPrimitiveExpression(expr, constValue);
     }
-    return result;
 }
 
 void __cdecl EmitBoolAndExpression(
@@ -1587,7 +1603,7 @@ void __cdecl EmitBoolAndExpression(
     char *nextPos; // [esp+8h] [ebp-4h]
 
     EmitExpression(expr1, block);
-    EmitOpcode(0x60u, -1, 0);
+    EmitOpcode(OP_JumpOnFalseExpr, -1, 0);
     AddOpcodePos(expr1sourcePos.stringValue, 0);
     EmitShort(0);
     pos = scrCompileGlob.codePos;
@@ -1622,7 +1638,7 @@ char __cdecl EmitOrEvalBinaryOperatorExpression(
     {
         EmitExpression(expr2, block);
     emitOpcode:
-        EmitOpcode(SLOBYTE(opcode.type), -1, 0);
+        EmitOpcode((Opcode_t)opcode.type, -1, 0);
         AddOpcodePos(sourcePos.stringValue, 0);
         return 0;
     }
@@ -1647,57 +1663,47 @@ char __cdecl EmitOrEvalBinaryOperatorExpression(
 
 void __cdecl EmitBoolNot(sval_u sourcePos)
 {
-    EmitOpcode(0x5Cu, 0, 0);
+    EmitOpcode(OP_BoolNot, 0, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
 
 void __cdecl EmitBoolComplement(sval_u sourcePos)
 {
-    EmitOpcode(0x5Du, 0, 0);
+    EmitOpcode(OP_BoolComplement, 0, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
 
 char __cdecl EmitOrEvalExpression(sval_u expr, VariableCompileValue *constValue, scr_block_s *block)
 {
-    char result; // al
-
-    switch (*expr.codePosValue)
+    switch (expr.node[0].type)
     {
-    case 6:
-        result = EmitOrEvalPrimitiveExpression(*(expr.codePosValue + 4), constValue, block);
-        break;
-    case 0x2F:
-        EmitBoolOrExpression(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), *(expr.codePosValue + 16), block);
-        result = 0;
-        break;
-    case 0x30:
-        EmitBoolAndExpression(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), *(expr.codePosValue + 16), block);
-        result = 0;
-        break;
-    case 0x31:
-        result = EmitOrEvalBinaryOperatorExpression(
-            *(expr.codePosValue + 4),
-            *(expr.codePosValue + 8),
-            *(expr.codePosValue + 12),
-            *(expr.codePosValue + 16),
-            constValue,
-            block);
-        break;
-    case 0x32:
-        EmitExpression(*(expr.codePosValue + 4), block);
-        EmitBoolNot(*(expr.codePosValue + 8));
-        result = 0;
-        break;
-    case 0x33:
-        EmitExpression(*(expr.codePosValue + 4), block);
-        EmitBoolComplement(*(expr.codePosValue + 8));
-        result = 0;
-        break;
+    case ENUM_primitive_expression:
+        return EmitOrEvalPrimitiveExpression(expr.node[1], constValue, block);
+
+    case ENUM_bool_or:
+        EmitBoolOrExpression(expr.node[1], expr.node[2], expr.node[3], expr.node[4], block);
+        return false;
+
+    case ENUM_bool_and:
+        EmitBoolAndExpression(expr.node[1], expr.node[2], expr.node[3], expr.node[4], block);
+        return false;
+
+    case ENUM_binary:
+        return EmitOrEvalBinaryOperatorExpression(expr.node[1], expr.node[2], expr.node[3], expr.node[4], constValue, block);
+
+    case ENUM_bool_not:
+        EmitExpression(expr.node[1], block);
+        EmitBoolNot(expr.node[2]);
+        return false;
+
+    case ENUM_bool_complement:
+        EmitExpression(expr.node[1], block);
+        EmitBoolComplement(expr.node[2]);
+        return false;
+
     default:
-        result = 0;
-        break;
+        return false;
     }
-    return result;
 }
 
 void __cdecl EmitExpression(sval_u expr, scr_block_s *block)
@@ -1715,13 +1721,20 @@ void __cdecl EmitLocalVariableRef(sval_u expr, sval_u sourcePos, scr_block_s *bl
 
     if (scrCompilePub.developer_statement == 3)
     {
-        EmitOpcode(0x84u, 0, 0);
+        EmitOpcode(OP_EvalLocalVariableRef, 0, 0);
         EmitCanonicalString(expr.stringValue);
     }
     else
     {
         index = Scr_FindLocalVarIndex(expr.stringValue, sourcePos, 1, block);
-        EmitOpcode((index != 0) + 54, 0, 0);
+        if (index)
+        {
+            EmitOpcode(OP_EvalLocalVariableRefCached, 0, 0);
+        }
+        else
+        {
+            EmitOpcode(OP_EvalLocalVariableRefCached0, 0, 0);
+        }
         EmitPreAssignmentPos();
         if (index)
             EmitByte(index);
@@ -1731,7 +1744,7 @@ void __cdecl EmitLocalVariableRef(sval_u expr, sval_u sourcePos, scr_block_s *bl
 
 void __cdecl EmitEvalArrayRef(sval_u sourcePos, sval_u indexSourcePos)
 {
-    EmitOpcode(0x23u, -1, 0);
+    EmitOpcode(OP_EvalArrayRef, -1, 0);
     AddOpcodePos(indexSourcePos.stringValue, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
 }
@@ -1751,45 +1764,46 @@ void __cdecl EmitArrayVariableRef(
 void __cdecl EmitFieldVariableRef(sval_u expr, sval_u field, sval_u sourcePos, scr_block_s *block)
 {
     EmitPrimitiveExpressionFieldObject(expr, sourcePos, block);
-    EmitOpcode(0x2Eu, 0, 0);
+    EmitOpcode(OP_EvalFieldVariableRef, 0, 0);
     EmitCanonicalString(field.stringValue);
 }
 
 void __cdecl EmitVariableExpressionRef(sval_u expr, scr_block_s *block)
 {
-    switch (*expr.codePosValue)
+    switch (expr.node[0].type)
     {
-    case 4:
-        EmitLocalVariableRef(*(expr.codePosValue + 4), *(expr.codePosValue + 8), block);
+    case ENUM_local_variable:
+        EmitLocalVariableRef(expr.node[1], expr.node[2], block);
         break;
-    case 0xD:
-        EmitArrayVariableRef(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), *(expr.codePosValue + 16), block);
+
+    case ENUM_array_variable:
+        EmitArrayVariableRef(expr.node[1], expr.node[2], expr.node[3], expr.node[4], block);
         break;
-    case 0xF:
-        EmitFieldVariableRef(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), block);
+
+    case ENUM_field_variable:
+        EmitFieldVariableRef(expr.node[1], expr.node[2], expr.node[3], block);
         break;
-    case 0x35:
-    case 0x50:
+
+    case ENUM_self_field:
+    case ENUM_object:
         if (scrCompilePub.script_loading)
-            CompileError(*(expr.codePosValue + 8), "$ and self field can only be used in the script debugger");
+            CompileError(expr.node[2].sourcePosValue, "$ and self field can only be used in the script debugger");
         else
-            CompileError(*(expr.codePosValue + 8), "not an lvalue");
+            CompileError(expr.node[2].sourcePosValue, "not an lvalue");
         break;
-    default:
-        return;
     }
 }
 
 void __cdecl EmitGameRef(sval_u sourcePos)
 {
-    EmitOpcode(0x14u, 0, 0);
+    EmitOpcode(OP_GetGameRef, 0, 0);
     EmitPreAssignmentPos();
     AddOpcodePos(sourcePos.stringValue, 1);
 }
 
 void __cdecl EmitClearArray(sval_u sourcePos, sval_u indexSourcePos)
 {
-    EmitOpcode(0x24u, -1, 0);
+    EmitOpcode(OP_ClearArray, -1, 0);
     AddOpcodePos(indexSourcePos.stringValue, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitAssignmentPos();
@@ -1797,18 +1811,19 @@ void __cdecl EmitClearArray(sval_u sourcePos, sval_u indexSourcePos)
 
 void __cdecl EmitArrayPrimitiveExpressionRef(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-    if (*expr.codePosValue == 17)
+    if (expr.node[0].type == ENUM_variable)
     {
-        EmitVariableExpressionRef(*(expr.codePosValue + 4), block);
+        EmitVariableExpressionRef(expr.node[1], block);
+        return;
     }
-    else if (*expr.codePosValue == 35)
+
+    if (expr.node[0].type == ENUM_game)
     {
-        EmitGameRef(*(expr.codePosValue + 4));
+        EmitGameRef(expr.node[1]);
+        return;
     }
-    else
-    {
-        CompileError(sourcePos.stringValue, "not an lvalue");
-    }
+
+    CompileError(sourcePos.sourcePosValue, "not an lvalue");
 }
 
 void __cdecl EmitClearArrayVariable(
@@ -1831,7 +1846,7 @@ void __cdecl EmitClearFieldVariable(
     scr_block_s *block)
 {
     EmitPrimitiveExpressionFieldObject(expr, sourcePos, block);
-    EmitOpcode(0x2Fu, 0, 0);
+    EmitOpcode(OP_ClearFieldVariable, 0, 0);
     AddOpcodePos(rhsSourcePos.stringValue, 0);
     EmitCanonicalString(field.stringValue);
     EmitAssignmentPos();
@@ -1839,31 +1854,35 @@ void __cdecl EmitClearFieldVariable(
 
 char __cdecl EmitClearVariableExpression(sval_u expr, sval_u rhsSourcePos, scr_block_s *block)
 {
-    switch (*expr.codePosValue)
+    switch (expr.node[0].type)
     {
-    case 4:
-        return 0;
-    case 0xD:
-        EmitClearArrayVariable(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), *(expr.codePosValue + 16), block);
-        return 1;
-    case 0xF:
-        EmitClearFieldVariable(*(expr.codePosValue + 4), *(expr.codePosValue + 8), *(expr.codePosValue + 12), rhsSourcePos, block);
-        return 1;
-    case 0x35:
-    case 0x50:
+    case ENUM_local_variable:
+        return false;
+
+    case ENUM_array_variable:
+        EmitClearArrayVariable(expr.node[1], expr.node[2], expr.node[3], expr.node[4], block);
+        return true;
+
+    case ENUM_field_variable:
+        EmitClearFieldVariable(expr.node[1], expr.node[2], expr.node[3], rhsSourcePos, block);
+        return true;
+
+    case ENUM_self_field:
+    case ENUM_object:
         if (scrCompilePub.script_loading)
-            CompileError(*(expr.codePosValue + 8), "$ and self field can only be used in the script debugger");
+            CompileError(expr.node[2].sourcePosValue, "$ and self field can only be used in the script debugger");
         else
-            CompileError(*(expr.codePosValue + 8), "not an lvalue");
-        return 1;
+            CompileError(expr.node[2].sourcePosValue, "not an lvalue");
+        return true;
+
     default:
-        return 1;
+        return true;
     }
 }
 
 void __cdecl EmitSetVariableField(sval_u sourcePos)
 {
-    EmitOpcode(0x39u, -1, 0);
+    EmitOpcode(OP_SetVariableField, -1, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitAssignmentPos();
 }
@@ -1885,7 +1904,7 @@ void __cdecl EmitCallExpressionStatement(sval_u expr, scr_block_s *block)
 
 void EmitReturn()
 {
-    EmitOpcode(1u, -1, 0);
+    EmitOpcode(OP_Return, -1, 0);
     EmitPreAssignmentPos();
 }
 
@@ -1900,7 +1919,7 @@ void __cdecl EmitReturnStatement(sval_u expr, sval_u sourcePos, scr_block_s *blo
 
 void EmitEnd()
 {
-    EmitOpcode(0, 0, 0);
+    EmitOpcode(OP_End, 0, 0);
     EmitPreAssignmentPos();
 }
 
@@ -1915,7 +1934,7 @@ void __cdecl EmitEndStatement(sval_u sourcePos, scr_block_s *block)
 void __cdecl EmitWaitStatement(sval_u expr, sval_u sourcePos, sval_u waitSourcePos, scr_block_s *block)
 {
     EmitExpression(expr, block);
-    EmitOpcode(0x4Cu, -1, 0);
+    EmitOpcode(OP_wait, -1, 0);
     AddOpcodePos(waitSourcePos.stringValue, 0);
     AddOpcodePos(waitSourcePos.stringValue, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
@@ -1940,47 +1959,49 @@ void __cdecl Scr_CheckLocalVarsCount(int localVarsCount)
 
 void __cdecl Scr_TransferBlock(scr_block_s *from, scr_block_s *to)
 {
-    unsigned int v2; // ecx
-    int j; // [esp+4h] [ebp-10h]
-    unsigned int localVar; // [esp+8h] [ebp-Ch]
-    unsigned int localVar_4; // [esp+Ch] [ebp-8h]
-    int i; // [esp+10h] [ebp-4h]
+    unsigned int name;
+    int i, j;
 
-    if (to->localVarsPublicCount > from->localVarsCount)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 1034, 0, "%s", "to->localVarsPublicCount <= from->localVarsCount");
-    for (i = 0; i < to->localVarsPublicCount || i < from->localVarsCreateCount; ++i)
+    assert(to->localVarsPublicCount <= from->localVarsCount);
+
+    for (i = 0; i < to->localVarsPublicCount || i < from->localVarsCreateCount; i++)
     {
-        localVar = from->localVars[i].name;
-        localVar_4 = from->localVars[i].sourcePos;
-        j = Scr_FindLocalVar(to, i, localVar);
+        name = from->localVars[i].name;
+        j = Scr_FindLocalVar(to, i, name);
+
         if (j < 0)
         {
             j = to->localVarsCount;
+
             Scr_CheckLocalVarsCount(j);
-            ++to->localVarsCount;
+            to->localVarsCount++;
         }
-        if (j >= to->localVarsPublicCount && ++to->localVarsPublicCount > from->localVarsCount)
-            MyAssertHandler(".\\script\\scr_compiler.cpp", 1049, 0, "%s", "to->localVarsPublicCount <= from->localVarsCount");
+
+        assert(to->localVarsPublicCount <= from->localVarsCount);
+
+        if (j >= to->localVarsPublicCount)
+        {
+            to->localVarsPublicCount++;
+        }
+
         while (j > i)
         {
-            v2 = *&to->localVarsInitBits[8 * j + 4];
-            to->localVars[j].name = *&to->localVarsInitBits[8 * j];
-            to->localVars[j--].sourcePos = v2;
+            to->localVars[j] = *(scr_localVar_t *)&to->localVarsInitBits[sizeof(scr_localVar_t) * j + sizeof(unsigned int)];
+            j--;
         }
-        to->localVars[i].name = localVar;
-        to->localVars[i].sourcePos = localVar_4;
-        if (((1 << (i & 7)) & from->localVarsInitBits[i >> 3]) != 0)
+
+        to->localVars[i].name = name;
+
+        if ((1 << (i & 7)) & from->localVarsInitBits[i >> 3])
+        {
             to->localVarsInitBits[i >> 3] |= 1 << (i & 7);
+        }
     }
-    if (from->localVarsCreateCount > to->localVarsPublicCount)
-        MyAssertHandler(
-            ".\\script\\scr_compiler.cpp",
-            1061,
-            0,
-            "%s",
-            "from->localVarsCreateCount <= to->localVarsPublicCount");
+
+    assert(from->localVarsCreateCount <= to->localVarsPublicCount);
+
     to->localVarsCreateCount = from->localVarsCreateCount;
-    to->abortLevel = 0;
+    to->abortLevel = SCR_ABORT_NONE;
 }
 
 void __cdecl EmitRemoveLocalVars(scr_block_s *block, scr_block_s *outerBlock)
@@ -2008,7 +2029,7 @@ void __cdecl EmitRemoveLocalVars(scr_block_s *block, scr_block_s *outerBlock)
             MyAssertHandler(".\\script\\scr_compiler.cpp", 835, 0, "%s", "removeCount >= 0");
         if (removeCount)
         {
-            EmitOpcode(0x17u, 0, 0);
+            EmitOpcode(OP_RemoveLocalVariables, 0, 0);
             EmitByte(removeCount);
             block->localVarsCreateCount = block->localVarsPublicCount;
         }
@@ -2046,20 +2067,14 @@ void __cdecl EmitIfStatement(
     char *nextPos; // [esp+8h] [ebp-4h]
 
     EmitExpression(expr, block);
-    EmitOpcode(0x5Eu, -1, 0);
+    EmitOpcode(OP_JumpOnFalse, -1, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitShort(0);
     pos = scrCompileGlob.codePos;
     nextPos = TempMalloc(0);
     Scr_TransferBlock(block, ifStatBlock->block);
     EmitStatement(stmt, lastStatement, endSourcePos, ifStatBlock->block);
-    if (*(ifStatBlock->codePosValue + 8) != block->localVarsCreateCount)
-        MyAssertHandler(
-            ".\\script\\scr_compiler.cpp",
-            3166,
-            0,
-            "%s",
-            "ifStatBlock->block->localVarsPublicCount == block->localVarsCreateCount");
+    iassert(ifStatBlock->block->localVarsPublicCount == block->localVarsCreateCount);
     EmitNOP2(lastStatement, endSourcePos, ifStatBlock->block);
     offset = (char*)(TempMalloc(0) - nextPos);
     if (offset >= (char*)0x10000)
@@ -2090,7 +2105,7 @@ void __cdecl EmitIfElseStatement(
 
     childCount = 0;
     EmitExpression(expr, block);
-    EmitOpcode(0x5Eu, -1, 0);
+    EmitOpcode(OP_JumpOnFalse, -1, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitShort(0);
     pos1 = scrCompileGlob.codePos;
@@ -2111,7 +2126,7 @@ void __cdecl EmitIfElseStatement(
     }
     else
     {
-        EmitOpcode(0x62u, 0, 0);
+        EmitOpcode(OP_jump, 0, 0);
         AddOpcodePos(elseSourcePos.stringValue, 1);
         EmitCodepos(0);
         pos2 = (char*)scrCompileGlob.codePos;
@@ -2147,7 +2162,7 @@ void __cdecl EmitCreateLocalVars(scr_block_s *block)
     {
         for (i = block->localVarsCreateCount; i < block->localVarsPublicCount; ++i)
         {
-            EmitOpcode(0x16u, 0, 0);
+            EmitOpcode(OP_CreateLocalVariable, 0, 0);
             EmitCanonicalStringConst(block->localVars[i].name);
             AddOpcodePos(block->localVars[i].sourcePos, 0);
         }
@@ -2244,20 +2259,14 @@ void __cdecl EmitForStatement(
     EmitStatement(stmt1, 0, 0, block);
     Scr_TransferBlock(block, forStatBlock->block);
     EmitCreateLocalVars(forStatBlock->block);
-    if (*(int*)(forStatBlock->type + 4) > block->localVarsCount)
-        MyAssertHandler(
-            ".\\script\\scr_compiler.cpp",
-            3566,
-            0,
-            "%s",
-            "forStatBlock->block->localVarsCreateCount <= block->localVarsCount");
-    block->localVarsCreateCount = *(int*)(forStatBlock->type + 4);
+    iassert(forStatBlock->block->localVarsCreateCount <= block->localVarsCount);
+    block->localVarsCreateCount = forStatBlock->block->localVarsCreateCount;
     Scr_TransferBlock(block, forStatPostBlock->block);
     pos1 = TempMalloc(0);
-    if (*expr.codePosValue == 65)
+    if (expr.node[0].type == ENUM_expression)
     {
         constConditional = 0;
-        if (EmitOrEvalExpression(*(expr.codePosValue + 4), &constValue, block))
+        if (EmitOrEvalExpression(expr.node[1], &constValue, block))
         {
             if (constValue.value.type == 6 || constValue.value.type == 5)
             {
@@ -2296,7 +2305,7 @@ void __cdecl EmitForStatement(
     }
     else
     {
-        EmitOpcode(0x5Eu, -1, 0);
+        EmitOpcode(OP_JumpOnFalse, -1, 0);
         AddOpcodePos(sourcePos.stringValue, 0);
         EmitShort(0);
         pos2 = (char*)scrCompileGlob.codePos;
@@ -2315,20 +2324,22 @@ void __cdecl EmitForStatement(
     ConnectContinueStatements();
     Scr_InitFromChildBlocks(continueChildBlocks, continueChildCount, forStatPostBlock->block);
     EmitStatement(stmt2, 0, 0, forStatPostBlock->block);
-    EmitOpcode(0x63u, 0, 0);
+    EmitOpcode(OP_jumpback, 0, 0);
     AddOpcodePos(forSourcePos.stringValue, 0);
-    if (*stmt.codePosValue == 44)
-        AddOpcodePos(*(stmt.codePosValue + 12), 1);
+
+    if (stmt.node[0].type == ENUM_statement_list)
+    {
+        AddOpcodePos(stmt.node[3].sourcePosValue, SOURCE_TYPE_BREAKPOINT);
+    }
+
     EmitShort(0);
     offset = TempMalloc(0) - pos1;
-    if (offset >= 0x10000)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3658, 0, "%s", "offset < 65536");
+    iassert(offset < 65536);
     *scrCompileGlob.codePos = offset;
     if (pos2)
     {
         offset = TempMalloc(0) - nextPos2;
-        if (offset >= 0x10000)
-            MyAssertHandler(".\\script\\scr_compiler.cpp", 3663, 0, "%s", "offset < 65536");
+        iassert(offset < 65536);
         *pos2 = offset;
     }
     ConnectBreakStatements();
@@ -2379,14 +2390,8 @@ void __cdecl EmitWhileStatement(
     scrCompileGlob.bCanContinue = 0;
     Scr_TransferBlock(block, whileStatBlock->block);
     EmitCreateLocalVars(whileStatBlock->block);
-    if (*(int*)(whileStatBlock->type + 4) > block->localVarsCount)
-        MyAssertHandler(
-            ".\\script\\scr_compiler.cpp",
-            3350,
-            0,
-            "%s",
-            "whileStatBlock->block->localVarsCreateCount <= block->localVarsCount");
-    block->localVarsCreateCount = *(int*)(whileStatBlock->type + 4);
+    iassert(whileStatBlock->block->localVarsCreateCount <= block->localVarsCount);
+    block->localVarsCreateCount = whileStatBlock->block->localVarsCreateCount;
     pos1 = TempMalloc(0);
     constConditional = 0;
     if (EmitOrEvalExpression(expr, &constValue, block))
@@ -2420,7 +2425,7 @@ void __cdecl EmitWhileStatement(
     }
     else
     {
-        EmitOpcode(0x5Eu, -1, 0);
+        EmitOpcode(OP_JumpOnFalse, -1, 0);
         AddOpcodePos(sourcePos.stringValue, 0);
         EmitShort(0);
         pos2 = (char*)scrCompileGlob.codePos;
@@ -2438,20 +2443,22 @@ void __cdecl EmitWhileStatement(
     scrCompileGlob.bCanBreak = 0;
     scrCompileGlob.bCanContinue = 0;
     ConnectContinueStatements();
-    EmitOpcode(0x63u, 0, 0);
+    EmitOpcode(OP_jumpback, 0, 0);
     AddOpcodePos(whileSourcePos.stringValue, 0);
-    if (*(int*)stmt.type == 44)
-        AddOpcodePos(*(stmt.codePosValue + 12), 1);
+
+    if (stmt.node[0].type == ENUM_statement_list)
+    {
+        AddOpcodePos(stmt.node[3].sourcePosValue, SOURCE_TYPE_BREAKPOINT);
+    }
+
     EmitShort(0);
     offset = TempMalloc(0) - pos1;
-    if (offset >= 0x10000)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3429, 0, "%s", "offset < 65536");
+    iassert(65536);
     *scrCompileGlob.codePos = offset;
     if (pos2)
     {
         offset = TempMalloc(0) - nextPos2;
-        if (offset >= 0x10000)
-            MyAssertHandler(".\\script\\scr_compiler.cpp", 3434, 0, "%s", "offset < 65536");
+        iassert(offset < 65536);
         *pos2 = offset;
     }
     ConnectBreakStatements();
@@ -2470,28 +2477,26 @@ void __cdecl EmitWhileStatement(
 
 void __cdecl EmitIncStatement(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-    if (scrCompileGlob.forceNotCreate)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3778, 0, "%s", "!scrCompileGlob.forceNotCreate");
+    iassert(!scrCompileGlob.forceNotCreate);
     scrCompileGlob.forceNotCreate = 1;
     EmitVariableExpressionRef(expr, block);
-    if (!scrCompileGlob.forceNotCreate)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3781, 0, "%s", "scrCompileGlob.forceNotCreate");
+    iassert(scrCompileGlob.forceNotCreate);
+
     scrCompileGlob.forceNotCreate = 0;
-    EmitOpcode(0x64u, 1, 0);
+    EmitOpcode(OP_inc, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitSetVariableField(sourcePos);
 }
 
 void __cdecl EmitDecStatement(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-    if (scrCompileGlob.forceNotCreate)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3797, 0, "%s", "!scrCompileGlob.forceNotCreate");
+    iassert(!scrCompileGlob.forceNotCreate);
     scrCompileGlob.forceNotCreate = 1;
     EmitVariableExpressionRef(expr, block);
-    if (!scrCompileGlob.forceNotCreate)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3800, 0, "%s", "scrCompileGlob.forceNotCreate");
+    iassert(scrCompileGlob.forceNotCreate);
+
     scrCompileGlob.forceNotCreate = 0;
-    EmitOpcode(0x65u, 1, 0);
+    EmitOpcode(OP_dec, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitSetVariableField(sourcePos);
 }
@@ -2503,15 +2508,14 @@ void __cdecl EmitBinaryEqualsOperatorExpression(
     sval_u sourcePos,
     scr_block_s *block)
 {
-    if (scrCompileGlob.bConstRefCount)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 2820, 0, "%s", "!scrCompileGlob.bConstRefCount");
+    iassert(!scrCompileGlob.bConstRefCount);
     scrCompileGlob.bConstRefCount = 1;
     EmitVariableExpression(lhs, block);
-    if (!scrCompileGlob.bConstRefCount)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 2823, 0, "%s", "scrCompileGlob.bConstRefCount");
+    iassert(scrCompileGlob.bConstRefCount);
+
     scrCompileGlob.bConstRefCount = 0;
     EmitExpression(rhs, block);
-    EmitOpcode(SLOBYTE(opcode.type), -1, 0);
+    EmitOpcode((Opcode_t)opcode.type, -1, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitVariableExpressionRef(lhs, block);
     EmitSetVariableField(sourcePos);
@@ -2525,7 +2529,7 @@ char __cdecl Scr_IsLastStatement(sval_u *node)
         return 0;
     while (node)
     {
-        if (*(int*)node->type != 45)
+        if (node[0].node[0].type != ENUM_developer_statement_list)
             return 0;
         node = node[1].node;
     }
@@ -2534,16 +2538,16 @@ char __cdecl Scr_IsLastStatement(sval_u *node)
 
 void __cdecl EmitStatementList(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block)
 {
-    sval_u *node; // [esp+4h] [ebp-8h]
-    sval_u *nextNode; // [esp+8h] [ebp-4h]
+    sval_u *node, *next_node;
 
-    for (node = *(*(sval_u***)(val.type + 4)); node; node = nextNode)
+    for (next_node = val.node[0].node[1].node; next_node; next_node = node)
     {
-        nextNode = node[1].node;
-        if (lastStatement && Scr_IsLastStatement(nextNode))
-            EmitStatement(node->type, 1, endSourcePos, block);
+        node = next_node[1].node;
+
+        if (lastStatement && Scr_IsLastStatement(node))
+            EmitStatement(next_node[0], true, endSourcePos, block);
         else
-            EmitStatement(node->type, 0, endSourcePos, block);
+            EmitStatement(next_node[0], false, endSourcePos, block);
     }
 }
 
@@ -2562,14 +2566,14 @@ void __cdecl EmitDeveloperStatementList(sval_u val, sval_u sourcePos, scr_block_
         Scr_TransferBlock(block, devStatBlock->block);
         if (scrVarPub.developer_script)
         {
-            scrCompilePub.developer_statement = 1;
+            scrCompilePub.developer_statement = SCR_DEV_YES;
             EmitStatementList(val, 0, 0, devStatBlock->block);
             EmitRemoveLocalVars(devStatBlock->block, devStatBlock->block);
         }
         else
         {
             savedPos = TempMalloc(0);
-            scrCompilePub.developer_statement = 2;
+            scrCompilePub.developer_statement = SCR_DEV_IGNORE;
             EmitStatementList(val, 0, 0, devStatBlock->block);
             TempMemorySetPos(savedPos);
         }
@@ -2583,7 +2587,7 @@ void __cdecl EmitSafeSetWaittillVariableField(sval_u expr, sval_u sourcePos, scr
     unsigned __int8 index; // [esp+0h] [ebp-4h]
 
     index = Scr_FindLocalVarIndex(expr.stringValue, sourcePos, 1, block);
-    EmitOpcode(0x33u, 0, 0);
+    EmitOpcode(OP_SafeSetWaittillVariableFieldCached, 0, 0);
     EmitPreAssignmentPos();
     EmitByte(index);
     AddOpcodePos(sourcePos.stringValue, 0);
@@ -2597,7 +2601,7 @@ void __cdecl EmitFormalWaittillParameterListRefInternal(sval_u *node, scr_block_
         node = node[1].node;
         if (!node)
             break;
-        EmitSafeSetWaittillVariableField(node->node->type, *(unsigned int*)(node->type + 4), block);
+        EmitSafeSetWaittillVariableField(node[0].node[0], node[0].node[1], block);
     }
 }
 
@@ -2608,20 +2612,22 @@ void __cdecl EmitWaittillStatement(
     sval_u waitSourcePos,
     scr_block_s *block)
 {
-    sval_u *node; // [esp+0h] [ebp-4h]
+    sval_u *node = exprlist.node[0].node[1].node;
 
-    node = *(*(sval_u***)(exprlist.type + 4));
-    if (!node)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3849, 0, "%s", "node");
-    EmitExpression(node->node->type, block);
+    iassert(node);
+
+    EmitExpression(node[0].node[0], block);
     EmitPrimitiveExpression(obj, block);
-    EmitOpcode(0x78u, -2, 0);
+
+    EmitOpcode(OP_waittill, -2, 0);
+
     AddOpcodePos(waitSourcePos.stringValue, 0);
     AddOpcodePos(waitSourcePos.stringValue, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
-    AddOpcodePos(*(unsigned int*)(node->type + 4), 0);
+    AddOpcodePos(node[0].node[1].sourcePosValue, 0);
+
     EmitFormalWaittillParameterListRefInternal(node, block);
-    EmitOpcode(0x34u, 0, 0);
+    EmitOpcode(OP_clearparams, 0, 0);
 }
 
 void __cdecl EmitWaittillmatchStatement(
@@ -2632,12 +2638,12 @@ void __cdecl EmitWaittillmatchStatement(
     scr_block_s *block)
 {
     sval_u *node; // [esp+0h] [ebp-8h]
-    sval_u *nodea; // [esp+0h] [ebp-8h]
     int exprCount; // [esp+4h] [ebp-4h]
 
-    node = *(sval_u**)(*exprlist.codePosValue + 4);
-    if (!node)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3881, 0, "%s", "node");
+    node = exprlist.node[0].node[1].node;
+
+    iassert(node);
+
     for (exprCount = 0; ; ++exprCount)
     {
         node = node[1].node;
@@ -2645,32 +2651,37 @@ void __cdecl EmitWaittillmatchStatement(
             break;
         EmitExpression(node->node->type, block);
     }
-    nodea = *(sval_u**)(*exprlist.codePosValue + 4);
-    if (!nodea)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3895, 0, "%s", "node");
-    EmitExpression(nodea->node->type, block);
+
+    node = exprlist.node[0].node[1].node;
+
+    iassert(node);
+    EmitExpression(node[0].node[0], block);
     EmitPrimitiveExpression(obj, block);
-    EmitOpcode(0x77u, -2 - exprCount, 0);
+    EmitOpcode(OP_waittillmatch, -2 - exprCount, 0);
     AddOpcodePos(waitSourcePos.stringValue, 0);
     AddOpcodePos(waitSourcePos.stringValue, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
-    AddOpcodePos(*(unsigned int*)(nodea->type + 4), 0);
+    AddOpcodePos(node[0].node[1].sourcePosValue, 0);
     while (1)
     {
-        nodea = nodea[1].node;
-        if (!nodea)
+        node = node[1].node;
+
+        if (!node)
+        {
             break;
-        AddOpcodePos(*(unsigned int*)(nodea->type + 4), 0);
+        }
+
+        AddOpcodePos(node[0].node[1].sourcePosValue, 0);
     }
-    if (exprCount >= 256)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3914, 0, "%s", "exprCount < 256");
+    iassert(exprCount < 256);
+
     EmitByte(exprCount);
-    EmitOpcode(0x34u, 0, 0);
+    EmitOpcode(OP_clearparams, 0, 0);
 }
 
 void __cdecl EmitWaittillFrameEnd(sval_u sourcePos)
 {
-    EmitOpcode(0x4Du, 0, 0);
+    EmitOpcode(OP_waittillFrameEnd, 0, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
@@ -2686,22 +2697,26 @@ void __cdecl EmitNotifyStatement(
     sval_u *start_node; // [esp+4h] [ebp-8h]
     int expr_count; // [esp+8h] [ebp-4h]
 
-    EmitOpcode(0x7Bu, 1, 0);
+    EmitOpcode(OP_voidCodepos, 1, 0);
     AddOpcodePos(sourcePos.stringValue, 1);
+
     expr_count = 0;
     start_node = 0;
-    for (node = *(sval_u**)exprlist.type; node; node = node[1].node)
+
+    for (node = exprlist.node[0].node; node; node = node[1].node)
     {
         start_node = node;
-        EmitExpression(node->node->type, block);
-        ++expr_count;
+        EmitExpression(node[0].node[0], block);
+        expr_count++;
     }
-    if (!start_node)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3940, 0, "%s", "start_node");
+
+    iassert(start_node);
+
     EmitPrimitiveExpression(obj, block);
-    EmitOpcode(0x79u, -expr_count - 2, 0);
+    EmitOpcode(OP_notify, -expr_count - 2, 0);
+
     AddOpcodePos(notifySourcePos.stringValue, 16);
-    AddOpcodePos(*(unsigned int*)(start_node->type + 4), 0);
+    AddOpcodePos(start_node[0].node[1].sourcePosValue, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
 
@@ -2709,7 +2724,7 @@ void __cdecl EmitEndOnStatement(sval_u obj, sval_u expr, sval_u sourcePos, sval_
 {
     EmitExpression(expr, block);
     EmitPrimitiveExpression(obj, block);
-    EmitOpcode(0x7Au, -2, 0);
+    EmitOpcode(OP_endon, -2, 0);
     AddOpcodePos(exprSourcePos.stringValue, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
@@ -2736,33 +2751,31 @@ void __cdecl EmitCaseStatementInfo(unsigned int name, sval_u sourcePos)
 
 void __cdecl EmitCaseStatement(sval_u expr, sval_u sourcePos)
 {
-    const char *v2; // eax
-    unsigned int name; // [esp+4h] [ebp-4h]
-    unsigned int namea; // [esp+4h] [ebp-4h]
+    unsigned int name;
 
-    if (*expr.codePosValue == 7)
+    if (expr.node[0].type == ENUM_integer)
     {
-        if (IsValidArrayIndex(*(expr.codePosValue + 4)))
+        if (!IsValidArrayIndex(expr.node[1].intValue))
         {
-            name = GetInternalVariableIndex(*(expr.codePosValue + 4));
-            EmitCaseStatementInfo(name, sourcePos);
+            CompileError(sourcePos.sourcePosValue, va("case index %d out of range", expr.node[1].intValue));
+            return;
         }
-        else
-        {
-            v2 = va("case index %d out of range", *(expr.codePosValue + 4));
-            CompileError(sourcePos.stringValue, v2);
-        }
-    }
-    else if (*expr.codePosValue == 11)
-    {
-        namea = *(expr.codePosValue + 4);
-        CompileTransferRefToString(namea, 1u);
-        EmitCaseStatementInfo(namea, sourcePos);
+
+        name = GetInternalVariableIndex(expr.node[1].intValue);
     }
     else
     {
-        CompileError(sourcePos.stringValue, "case expression must be an int or string");
+        if (expr.node[0].type != ENUM_string)
+        {
+            CompileError(sourcePos.sourcePosValue, "case expression must be an int or string");
+            return;
+        }
+
+        name = expr.node[1].stringValue;
+        CompileTransferRefToString(name, 1);
     }
+
+    EmitCaseStatementInfo(name, sourcePos);
 }
 
 void __cdecl EmitDefaultStatement(sval_u sourcePos)
@@ -2799,10 +2812,11 @@ void __cdecl EmitSwitchStatementList(sval_u val, bool lastStatement, unsigned in
     scrCompileGlob.breakChildCount = &breakChildCount;
     scrCompileGlob.breakBlock = 0;
     hasDefault = 0;
-    for (node = *(sval_u**)(*val.codePosValue + 4); node; node = nextNode)
+
+    for (node = val.node[0].node[1].node; node; node = nextNode)
     {
         nextNode = node[1].node;
-        if (*(int*)node->type == 61 || *(int *)node->type == 62)
+        if (node[0].node[0].type == ENUM_case || node[0].node[0].type == ENUM_default)
         {
             if (scrCompileGlob.breakBlock)
             {
@@ -2811,16 +2825,16 @@ void __cdecl EmitSwitchStatementList(sval_u val, bool lastStatement, unsigned in
                 scrCompileGlob.bCanBreak = 0;
                 EmitRemoveLocalVars(scrCompileGlob.breakBlock, scrCompileGlob.breakBlock);
             }
-            if (*(int *)node->type == 61)
+            if (node[0].node[0].type == ENUM_case)
             {
-                scrCompileGlob.breakBlock = *(scr_block_s**)(node->type + 12);
-                EmitCaseStatement(*(sval_u*)(node->type + 4), *(sval_u *)(node->type + 8));
+                scrCompileGlob.breakBlock = node[0].node[3].block;
+                EmitCaseStatement(node[0].node[1], node[0].node[2]);
             }
             else
             {
-                scrCompileGlob.breakBlock = *(scr_block_s**)(node->type + 8);
-                hasDefault = 1;
-                EmitDefaultStatement(*(sval_u*)(node->type + 4));
+                scrCompileGlob.breakBlock = node[0].node[2].block;
+                hasDefault = true;
+                EmitDefaultStatement(node[0].node[1]);
             }
             Scr_TransferBlock(block, scrCompileGlob.breakBlock);
             if (scrCompileGlob.bCanBreak)
@@ -2897,14 +2911,14 @@ void __cdecl EmitSwitchStatement(
     oldBreakStatement = scrCompileGlob.currentBreakStatement;
     scrCompileGlob.bCanBreak = 0;
     EmitExpression(expr, block);
-    EmitOpcode(0x7Cu, -1, 0);
+    EmitOpcode(OP_switch, -1, 0);
     EmitCodepos(0);
     pos1 = scrCompileGlob.codePos;
     nextPos1 = TempMalloc(0);
     scrCompileGlob.currentCaseStatement = 0;
     scrCompileGlob.currentBreakStatement = 0;
     EmitSwitchStatementList(stmtlist, lastStatement, endSourcePos, block);
-    EmitOpcode(0x7Du, 0, 0);
+    EmitOpcode(OP_endswitch, 0, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
     EmitShort(0);
     pos2 = scrCompileGlob.codePos;
@@ -2953,10 +2967,14 @@ void __cdecl EmitBreakStatement(sval_u sourcePos, scr_block_s *block)
         if (!scrCompileGlob.breakBlock)
             MyAssertHandler(".\\script\\scr_compiler.cpp", 4325, 0, "%s", "scrCompileGlob.breakBlock");
         EmitRemoveLocalVars(block, scrCompileGlob.breakBlock);
+
         block->abortLevel = 2;
-        EmitOpcode(0x62u, 0, 0);
+
+        EmitOpcode(OP_jump, 0, 0);
         AddOpcodePos(sourcePos.stringValue, 1);
+
         EmitCodepos(0);
+
         if (scrCompilePub.developer_statement != 2)
         {
             newBreakStatement = (BreakStatementInfo*)Hunk_AllocateTempMemoryHigh(12, "EmitBreakStatement");
@@ -2980,10 +2998,14 @@ void __cdecl EmitContinueStatement(sval_u sourcePos, scr_block_s *block)
     {
         Scr_AddContinueBlock(block);
         EmitRemoveLocalVars(block, block);
-        block->abortLevel = 1;
-        EmitOpcode(0x62u, 0, 0);
+
+        block->abortLevel = SCR_ABORT_CONTINUE;
+
+        EmitOpcode(OP_jump, 0, 0);
         AddOpcodePos(sourcePos.stringValue, 1);
+
         EmitCodepos(0);
+
         if (scrCompilePub.developer_statement != 2)
         {
             newContinueStatement = (ContinueStatementInfo*)Hunk_AllocateTempMemoryHigh(12, "EmitContinueStatement");
@@ -3003,12 +3025,12 @@ void __cdecl EmitBreakpointStatement(sval_u sourcePos)
 {
     if (scrVarPub.developer_script)
     {
-        EmitOpcode(0x87u, 0, 0);
+        EmitOpcode(OP_breakpoint, 0, 0);
         AddOpcodePos(sourcePos.stringValue, 1);
     }
 }
 
-void __cdecl EmitProfStatement(sval_u profileName, sval_u sourcePos, unsigned __int8 op)
+void __cdecl EmitProfStatement(sval_u profileName, sval_u sourcePos, Opcode_t op)
 {
     char *v3; // eax
     int profileIndex; // [esp+0h] [ebp-4h]
@@ -3046,27 +3068,27 @@ void __cdecl EmitProfStatement(sval_u profileName, sval_u sourcePos, unsigned __
 
 void __cdecl EmitProfBeginStatement(sval_u profileName, sval_u sourcePos)
 {
-    EmitProfStatement(profileName, sourcePos, 0x85u);
+    EmitProfStatement(profileName, sourcePos, OP_prof_begin);
 }
 
 void __cdecl EmitProfEndStatement(sval_u profileName, sval_u sourcePos)
 {
-    EmitProfStatement(profileName, sourcePos, 0x86u);
+    EmitProfStatement(profileName, sourcePos, OP_prof_end);
 }
 
 void __cdecl EmitStatement(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block)
 {
-    if (scrCompilePub.developer_statement == 3)
+    if (scrCompilePub.developer_statement == SCR_DEV_EVALUATE)
     {
-        switch (*val.codePosValue)
+        switch (val.node[0].type)
         {
-        case 2:
-        case 0x19:
-        case 0x29:
-        case 0x2A:
-        case 0x2B:
-        case 0x2C:
-        case 0x3A:
+        case ENUM_assignment:
+        case ENUM_call_expression_statement:
+        case ENUM_inc:
+        case ENUM_dec:
+        case ENUM_binary_equals:
+        case ENUM_statement_list:
+        case ENUM_notify:
             goto LABEL_3;
         default:
             CompileError(0, "illegal statement in debugger");
@@ -3076,122 +3098,124 @@ void __cdecl EmitStatement(sval_u val, bool lastStatement, unsigned int endSourc
     else
     {
     LABEL_3:
-        switch (*val.codePosValue)
+        switch (val.node[0].type)
         {
-        case 2:
-            EmitAssignmentStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), *(val.codePosValue + 16), block);
+        case ENUM_assignment:
+            EmitAssignmentStatement(val.node[1], val.node[2], val.node[3], val.node[4], block);
             break;
-        case 0x19:
-            EmitCallExpressionStatement(*(val.codePosValue + 4), block);
+
+        case ENUM_call_expression_statement:
+            EmitCallExpressionStatement(val.node[1], block);
             break;
-        case 0x1B:
-            EmitReturnStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), block);
+
+        case ENUM_return:
+            EmitReturnStatement(val.node[1], val.node[2], block);
             break;
-        case 0x1C:
-            EmitEndStatement(*(val.codePosValue + 4), block);
+
+        case ENUM_return2:
+            EmitEndStatement(val.node[1], block);
             break;
-        case 0x1D:
-            EmitWaitStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), block);
+
+        case ENUM_wait:
+            EmitWaitStatement(val.node[1], val.node[2], val.node[3], block);
             break;
-        case 0x25:
-            EmitIfStatement(
-                *(val.codePosValue + 4),
-                *(val.codePosValue + 8),
-                *(val.codePosValue + 12),
-                lastStatement,
-                endSourcePos,
-                block,
-                (sval_u*)(val.codePosValue + 16));
+
+        case ENUM_if:
+            EmitIfStatement(val.node[1], val.node[2], val.node[3], lastStatement, endSourcePos, block, &val.node[4]);
             break;
-        case 0x26:
-            EmitIfElseStatement(
-                *(val.codePosValue + 4),
-                *(val.codePosValue + 8),
-                *(val.codePosValue + 12),
-                *(val.codePosValue + 16),
-                *(val.codePosValue + 20),
-                lastStatement,
-                endSourcePos,
-                block,
-                (sval_u*)(val.codePosValue + 24),
-                (sval_u*)(val.codePosValue + 28));
+
+        case ENUM_if_else:
+            EmitIfElseStatement(val.node[1], val.node[2], val.node[3], val.node[4], val.node[5], lastStatement, endSourcePos, block, &val.node[6], &val.node[7]);
             break;
-        case 0x27:
-            EmitWhileStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), *(val.codePosValue + 16), block, (sval_u*)(val.codePosValue + 20));
+
+        case ENUM_while:
+            EmitWhileStatement(val.node[1], val.node[2], val.node[3], val.node[4], block, &val.node[5]);
             break;
-        case 0x28:
-            EmitForStatement(
-                *(val.codePosValue + 4),
-                *(val.codePosValue + 8),
-                *(val.codePosValue + 12),
-                *(val.codePosValue + 16),
-                *(val.codePosValue + 20),
-                *(val.codePosValue + 24),
-                block,
-                (sval_u*)(val.codePosValue + 28),
-                (sval_u*)(val.codePosValue + 32));
+
+        case ENUM_for:
+            EmitForStatement(val.node[1], val.node[2], val.node[3], val.node[4], val.node[5], val.node[6], block, &val.node[7], &val.node[8]);
             break;
-        case 0x29:
-            EmitIncStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), block);
+
+        case ENUM_inc:
+            EmitIncStatement(val.node[1], val.node[2], block);
             break;
-        case 0x2A:
-            EmitDecStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), block);
+
+        case ENUM_dec:
+            EmitDecStatement(val.node[1], val.node[2], block);
             break;
-        case 0x2B:
-            EmitBinaryEqualsOperatorExpression(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), *(val.codePosValue + 16), block);
+
+        case ENUM_binary_equals:
+            EmitBinaryEqualsOperatorExpression(val.node[1], val.node[2], val.node[3], val.node[4], block);
             break;
-        case 0x2C:
-            EmitStatementList(*(val.codePosValue + 4), lastStatement, endSourcePos, block);
+
+        case ENUM_statement_list:
+            EmitStatementList(val.node[1], lastStatement, endSourcePos, block);
             break;
-        case 0x2D:
-            EmitDeveloperStatementList(*(val.codePosValue + 4), *(val.codePosValue + 8), block, (sval_u*)(val.codePosValue + 12));
+
+        case ENUM_developer_statement_list:
+            EmitDeveloperStatementList(val.node[1], val.node[2], block, &val.node[3]);
             break;
-        case 0x37:
-            EmitWaittillStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), *(val.codePosValue + 16), block);
+
+        case ENUM_waittill:
+            EmitWaittillStatement(val.node[1], val.node[2], val.node[3], val.node[4], block);
             break;
-        case 0x38:
-            EmitWaittillmatchStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), *(val.codePosValue + 16), block);
+
+        case ENUM_waittillmatch:
+            EmitWaittillmatchStatement(val.node[1], val.node[2], val.node[3], val.node[4], block);
             break;
-        case 0x39:
-            EmitWaittillFrameEnd(*(val.codePosValue + 4));
+
+        case ENUM_waittillFrameEnd:
+            EmitWaittillFrameEnd(val.node[1]);
             break;
-        case 0x3A:
-            EmitNotifyStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), *(val.codePosValue + 16), block);
+
+        case ENUM_notify:
+            EmitNotifyStatement(val.node[1], val.node[2], val.node[3], val.node[4], block);
             break;
-        case 0x3B:
-            EmitEndOnStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), *(val.codePosValue + 16), block);
+
+        case ENUM_endon:
+            EmitEndOnStatement(val.node[1], val.node[2], val.node[3], val.node[4], block);
             break;
-        case 0x3C:
-            EmitSwitchStatement(*(val.codePosValue + 4), *(val.codePosValue + 8), *(val.codePosValue + 12), lastStatement, endSourcePos, block);
+
+        case ENUM_switch:
+            EmitSwitchStatement(val.node[1], val.node[2], val.node[3], lastStatement, endSourcePos, block);
             break;
-        case 0x3D:
-            CompileError(*(val.codePosValue + 8), "illegal case statement");
+
+        case ENUM_case:
+            CompileError(val.node[2].sourcePosValue, "illegal case statement");
             break;
-        case 0x3E:
-            CompileError(*(val.codePosValue + 4), "illegal default statement");
+
+        case ENUM_default:
+            CompileError(val.node[1].sourcePosValue, "illegal default statement");
             break;
-        case 0x3F:
-            EmitBreakStatement(*(val.codePosValue + 4), block);
+
+        case ENUM_break:
+            EmitBreakStatement(val.node[1], block);
             break;
-        case 0x40:
-            EmitContinueStatement(*(val.codePosValue + 4), block);
+
+        case ENUM_continue:
+            EmitContinueStatement(val.node[1], block);
             break;
-        case 0x4C:
-            EmitBreakpointStatement(*(val.codePosValue + 4));
+
+        case ENUM_breakpoint:
+            EmitBreakpointStatement(val.node[1]);
             break;
-        case 0x4D:
-            EmitProfBeginStatement(*(val.codePosValue + 4), *(val.codePosValue + 8));
+
+        case ENUM_prof_begin:
+            EmitProfBeginStatement(val.node[1], val.node[2]);
             break;
-        case 0x4E:
-            EmitProfEndStatement(*(val.codePosValue + 4), *(val.codePosValue + 8));
+
+        case ENUM_prof_end:
+            EmitProfEndStatement(val.node[1], val.node[2]);
             break;
+
         default:
             return;
+
         }
     }
 }
 
-void __cdecl EmitOpcode(unsigned int op, int offset, int callType)
+void __cdecl EmitOpcode(Opcode_t op, int offset, int callType)
 {
     bool v3; // [esp+4h] [ebp-10h]
     int valueIndex; // [esp+8h] [ebp-Ch]
@@ -3396,31 +3420,28 @@ void __cdecl EmitOpcode(unsigned int op, int offset, int callType)
 void __cdecl Scr_CompileStatement(sval_u parseData)
 {
     EmitStatement(parseData, 0, 0, 0);
-    EmitOpcode(0x80u, 0, 0);
+    EmitOpcode(OP_abort, 0, 0);
 }
 
 void __cdecl EmitInclude(sval_u val)
 {
-    char *v1; // eax
-    HashEntry_unnamed_type_u filename; // [esp+0h] [ebp-4h]
+    iassert(val.node[0].type == ENUM_include);
 
-    if (val.node[0].type != 86)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 4931, 0, "%s", "val.node[0].type == ENUM_include");
-    v1 = SL_ConvertToString(*(val.codePosValue + 4));
-    filename.prev = Scr_CreateCanonicalFilename(v1).prev;
-    Scr_CompileRemoveRefToString(*(val.codePosValue + 4));
-    AddFilePrecache(filename.prev, *(val.codePosValue + 8), 1);
+    unsigned int filename = Scr_CreateCanonicalFilename(SL_ConvertToString(val.node[1].stringValue));
+    Scr_CompileRemoveRefToString(val.node[1].stringValue);
+
+    AddFilePrecache(filename, val.node[2].sourcePosValue, true);
 }
 
 void __cdecl EmitIncludeList(sval_u val)
 {
-    sval_u *node; // [esp+0h] [ebp-4h]
-
-    for (node = *(sval_u**)(_DWORD **)(val.type + 4); node; node = node[1].node)
-        EmitInclude(node->type);
+    for (sval_u *node = val.node[0].node[1].node; node; node = node[1].node)
+    {
+        EmitInclude(node[0]);
+    }
 }
 
-unsigned int __cdecl SpecifyThreadPosition(unsigned int threadId, unsigned int name, unsigned int sourcePos, int type)
+unsigned int __cdecl SpecifyThreadPosition(unsigned int threadId, unsigned int name, unsigned int sourcePos, Vartype_t type)
 {
     char *v4; // eax
     char *v5; // eax
@@ -3456,44 +3477,38 @@ unsigned int __cdecl SpecifyThreadPosition(unsigned int threadId, unsigned int n
 
 void __cdecl SpecifyThread(sval_u val)
 {
-    unsigned int Variable_DONE; // eax
-    VariableValueInternal_u Object_DONE; // eax
-    unsigned int v3; // [esp-Ch] [ebp-10h]
-    unsigned int v4; // [esp-8h] [ebp-Ch]
-    int v5; // [esp-4h] [ebp-8h]
-    int v6; // [esp+0h] [ebp-4h]
+    unsigned int posId;
 
-    v6 = *(DWORD *)val.type;
-    if (*(DWORD *)val.type == 68)
+    switch (val.node[0].type)
     {
+    case ENUM_thread: // 68
         if (!scrCompileGlob.in_developer_thread || scrVarPub.developer_script)
         {
-            v5 = scrCompileGlob.in_developer_thread ? 12 : 7;
-            v4 = *(DWORD *)(val.type + 16);
-            v3 = *(DWORD *)(val.type + 4);
-            Variable_DONE = GetVariable(scrCompileGlob.fileId, v3);
-            Object_DONE = GetObject(Variable_DONE);
-            SpecifyThreadPosition(Object_DONE.u.stringValue, v3, v4, v5);
+            posId = GetObject(GetVariable(scrCompileGlob.fileId, val.node[1].idValue));
+            SpecifyThreadPosition(posId, val.node[1].sourcePosValue, val.node[4].sourcePosValue, scrCompileGlob.in_developer_thread ? VAR_DEVELOPER_CODEPOS : VAR_CODEPOS);
         }
-    }
-    else if (v6 == 69)
-    {
+        break;
+    case ENUM_begin_developer_thread: // 69
         if (scrCompileGlob.in_developer_thread)
         {
-            CompileError(*(DWORD *)(val.type + 4), "cannot recurse /#");
+            CompileError(val.node[1].sourcePosValue, "cannot recurse /#");
         }
         else
         {
-            scrCompileGlob.in_developer_thread = 1;
-            scrCompileGlob.developer_thread_sourcePos = *(DWORD *)(val.type + 4);
+            scrCompileGlob.in_developer_thread = true;
+            scrCompileGlob.developer_thread_sourcePos = val.node[1].sourcePosValue;
         }
-    }
-    else if (v6 == 70)
-    {
+        break;
+    case ENUM_end_developer_thread: // 70
         if (scrCompileGlob.in_developer_thread)
-            scrCompileGlob.in_developer_thread = 0;
+        {
+            scrCompileGlob.in_developer_thread = false;
+        }
         else
-            CompileError(*(DWORD *)(val.type + 4), "#/ has no matching /#");
+        {
+            CompileError(val.node[1].sourcePosValue, "#/ has no matching /#");
+        }
+        break;
     }
 }
 
@@ -3526,7 +3541,7 @@ void __cdecl Scr_CalcLocalVarsFormalParameterListInternal(sval_u *node, scr_bloc
         node = node[1].node;
         if (!node)
             break;
-        Scr_CalcLocalVarsSafeSetVariableField(node->node->type, *(DWORD*)(node->type + 4), block);
+        Scr_CalcLocalVarsSafeSetVariableField(node[0].node[0], node[0].node[1], block);
     }
 }
 
@@ -3538,13 +3553,13 @@ void __cdecl Scr_CalcLocalVarsArrayVariableRef(sval_u expr, scr_block_s *block)
 
 void __cdecl Scr_CalcLocalVarsVariableExpressionRef(sval_u expr, scr_block_s *block)
 {
-    if (*(DWORD *)expr.type == 4)
+    if (expr.node[0].type == ENUM_local_variable)
     {
-        Scr_CalcLocalVarsSafeSetVariableField(*(DWORD *)(expr.type + 4), *(DWORD *)(expr.type + 8), block);
+        Scr_CalcLocalVarsSafeSetVariableField(expr.node[1], expr.node[2], block);
     }
-    else if (*(DWORD *)expr.type == 13)
+    else if (expr.node[0].type == ENUM_array_variable)
     {
-        Scr_CalcLocalVarsArrayVariableRef(*(DWORD *)(expr.type + 4), block);
+        Scr_CalcLocalVarsArrayVariableRef(expr.node[1], block);
     }
 }
 
@@ -3555,8 +3570,12 @@ void __cdecl Scr_CalcLocalVarsFormalParameterList(sval_u exprlist, scr_block_s *
 
 void __cdecl Scr_CalcLocalVarsArrayPrimitiveExpressionRef(sval_u expr, scr_block_s *block)
 {
-    if (*(DWORD*)expr.type == 17)
-        Scr_CalcLocalVarsVariableExpressionRef(*(DWORD *)(expr.type + 4), block);
+    if (expr.node[0].type != ENUM_variable)
+    {
+        return;
+    }
+
+    Scr_CalcLocalVarsVariableExpressionRef(expr.node[1], block);
 }
 
 void __cdecl Scr_CalcLocalVarsAssignmentStatement(sval_u lhs, sval_u rhs, scr_block_s *block)
@@ -3568,7 +3587,9 @@ void __cdecl Scr_CopyBlock(scr_block_s *from, scr_block_s **to)
 {
     if (!*to)
         *to = (scr_block_s*)Hunk_AllocateTempMemoryHigh(536, "Scr_CopyBlock");
-    qmemcpy(*to, from, sizeof(scr_block_s));
+
+    //qmemcpy(*to, from, sizeof(scr_block_s));
+    **to = *from;
     (*to)->localVarsPublicCount = 0;
 
 }
@@ -3583,34 +3604,38 @@ void __cdecl Scr_MergeChildBlocks(scr_block_s **childBlocks, int childCount, scr
     int childIndex; // [esp+14h] [ebp-8h]
     int i; // [esp+18h] [ebp-4h]
 
-    if (childCount && !block->abortLevel)
+    if (!childCount || block->abortLevel != SCR_ABORT_NONE)
     {
-        for (childIndex = 0; childIndex < childCount; ++childIndex)
+        return;
+    }
+
+    for (childIndex = 0; childIndex < childCount; ++childIndex)
+    {
+        childBlock = childBlocks[childIndex];
+        if (childBlock->localVarsPublicCount)
+            MyAssertHandler(".\\script\\scr_compiler.cpp", 1006, 0, "%s", "!childBlock->localVarsPublicCount");
+        childBlock->localVarsPublicCount = block->localVarsCount;
+        for (i = 0; i < block->localVarsCount; ++i)
         {
-            childBlock = childBlocks[childIndex];
-            if (childBlock->localVarsPublicCount)
-                MyAssertHandler(".\\script\\scr_compiler.cpp", 1006, 0, "%s", "!childBlock->localVarsPublicCount");
-            childBlock->localVarsPublicCount = block->localVarsCount;
-            for (i = 0; i < block->localVarsCount; ++i)
+            localVar = block->localVars[i].name;
+            localVar_4 = block->localVars[i].sourcePos;
+            j = Scr_FindLocalVar(childBlock, i, localVar);
+            if (j < 0)
             {
-                localVar = block->localVars[i].name;
-                localVar_4 = block->localVars[i].sourcePos;
-                j = Scr_FindLocalVar(childBlock, i, localVar);
-                if (j < 0)
-                {
-                    j = childBlock->localVarsCount;
-                    Scr_CheckLocalVarsCount(j);
-                    ++childBlock->localVarsCount;
-                }
-                while (j > i)
-                {
-                    v3 = *&childBlock->localVarsInitBits[8 * j + 4];
-                    childBlock->localVars[j].name = *&childBlock->localVarsInitBits[8 * j];
-                    childBlock->localVars[j--].sourcePos = v3;
-                }
-                childBlock->localVars[i].name = localVar;
-                childBlock->localVars[i].sourcePos = localVar_4;
+                j = childBlock->localVarsCount;
+                Scr_CheckLocalVarsCount(j);
+                ++childBlock->localVarsCount;
             }
+            while (j > i)
+            {
+                v3 = *&childBlock->localVarsInitBits[8 * j + 4];
+                //childBlock->localVars[j] = *(scr_localVar_t *)&childBlock->localVarsInitBits[sizeof(scr_localVar_t) * j + sizeof(unsigned int)];
+                childBlock->localVars[j].name = *&childBlock->localVarsInitBits[8 * j];
+                childBlock->localVars[j].sourcePos = v3;
+                j--;
+            }
+            childBlock->localVars[i].name = localVar;
+            childBlock->localVars[i].sourcePos = localVar_4;
         }
     }
 }
@@ -3619,9 +3644,9 @@ void __cdecl Scr_CalcLocalVarsStatement(sval_u val, scr_block_s *block);
 
 void __cdecl Scr_CalcLocalVarsIfStatement(sval_u stmt, scr_block_s *block, sval_u *ifStatBlock)
 {
-    Scr_CopyBlock(block, (scr_block_s**)&ifStatBlock);
+    Scr_CopyBlock(block, &ifStatBlock->block);
     Scr_CalcLocalVarsStatement(stmt, ifStatBlock->block);
-    Scr_MergeChildBlocks((scr_block_s**)ifStatBlock, 1, block);
+    Scr_MergeChildBlocks(&ifStatBlock->block, 1, block);
 }
 
 void __cdecl Scr_AppendChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s *block)
@@ -3666,30 +3691,42 @@ void __cdecl Scr_CalcLocalVarsIfElseStatement(
     sval_u *ifStatBlock,
     sval_u *elseStatBlock)
 {
-    scr_block_s *childBlocks[2]; // [esp+0h] [ebp-10h] BYREF
-    int childCount; // [esp+8h] [ebp-8h]
-    int abortLevel; // [esp+Ch] [ebp-4h]
+    int childCount = 0, abortLevel = SCR_ABORT_RETURN;
+    scr_block_s *childBlocks[2];
 
-    childCount = 0;
-    abortLevel = 3;
-    Scr_CopyBlock(block, (scr_block_s**)ifStatBlock);
+    Scr_CopyBlock(block, &ifStatBlock->block);
     Scr_CalcLocalVarsStatement(stmt1, ifStatBlock->block);
-    if (*(int*)ifStatBlock->type <= 3)
+
+    if (ifStatBlock->node[0].intValue <= SCR_ABORT_MAX)
     {
-        abortLevel = *(int *)ifStatBlock->type;
-        if (!abortLevel)
-            childBlocks[childCount++] = (scr_block_s*)ifStatBlock->type;
+        abortLevel = ifStatBlock->node[0].intValue;
+
+        if (abortLevel == SCR_ABORT_NONE)
+        {
+            childBlocks[0] = ifStatBlock->block;
+            childCount = 1;
+        }
     }
-    Scr_CopyBlock(block, (scr_block_s**)elseStatBlock);
+
+    Scr_CopyBlock(block, &elseStatBlock->block);
     Scr_CalcLocalVarsStatement(stmt2, elseStatBlock->block);
-    if (*(DWORD *)elseStatBlock->type <= abortLevel)
+
+    if (elseStatBlock->node[0].intValue <= abortLevel)
     {
-        abortLevel = *(int*)elseStatBlock->type;
-        if (!abortLevel)
-            childBlocks[childCount++] = (scr_block_s *)elseStatBlock->type;
+        abortLevel = elseStatBlock->node[0].intValue;
+
+        if (abortLevel == SCR_ABORT_NONE)
+        {
+            childBlocks[childCount] = elseStatBlock->block;
+            childCount++;
+        }
     }
-    if (!block->abortLevel)
+
+    if (block->abortLevel == SCR_ABORT_NONE)
+    {
         block->abortLevel = abortLevel;
+    }
+
     Scr_AppendChildBlocks(childBlocks, childCount, block);
     Scr_MergeChildBlocks(childBlocks, childCount, block);
 }
@@ -3777,16 +3814,16 @@ void __cdecl Scr_CalcLocalVarsForStatement(
     scr_block_s **oldContinueChildBlocks; // [esp+34h] [ebp-4h]
 
     Scr_CalcLocalVarsStatement(stmt1, block);
-    if (*(int*)expr.type == 65)
+    if (expr.node[0].type == ENUM_expression)
     {
         constConditional = 0;
-        if (EvalExpression(*(DWORD*)(expr.type + 4), &constValue))
+        if (EvalExpression(expr.node[1], &constValue))
         {
-            if (constValue.value.type == 6 || constValue.value.type == 5)
+            if (constValue.value.type == VAR_INTEGER || constValue.value.type == VAR_FLOAT)
             {
                 Scr_CastBool(&constValue.value);
                 if (constValue.value.u.intValue)
-                    constConditional = 1;
+                    constConditional = true;
             }
             RemoveRefToValue(constValue.value.type, constValue.value.u);
         }
@@ -3841,18 +3878,18 @@ void __cdecl Scr_CalcLocalVarsIncStatement(sval_u expr, scr_block_s *block)
 void __cdecl Scr_CalcLocalVarsStatementList(sval_u val, scr_block_s *block);
 void __cdecl Scr_CalcLocalVarsDeveloperStatementList(sval_u val, scr_block_s *block, sval_u *devStatBlock)
 {
-    Scr_CopyBlock(block, (scr_block_s**)devStatBlock);
+    Scr_CopyBlock(block, &devStatBlock->block);
     Scr_CalcLocalVarsStatementList(val, devStatBlock->block);
-    Scr_MergeChildBlocks((scr_block_s **)devStatBlock, 1, block);
+    Scr_MergeChildBlocks(&devStatBlock->block, 1, block);
 }
 
 void __cdecl Scr_CalcLocalVarsWaittillStatement(sval_u exprlist, scr_block_s *block)
 {
-    sval_u *node; // [esp+0h] [ebp-4h]
+    sval_u *node;
 
-    node = *(sval_u**)(*(DWORD*)exprlist.type + 4);
-    if (!node)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 3870, 0, "%s", "node");
+    //node = *(sval_u**)(*(DWORD*)exprlist.type + 4);
+    node = exprlist.node[0].node[1].node;
+    iassert(node);
     Scr_CalcLocalVarsFormalParameterListInternal(node, block);
 }
 
@@ -3880,20 +3917,20 @@ void __cdecl Scr_CalcLocalVarsSwitchStatement(sval_u stmtlist, scr_block_s *bloc
     currentBlock = 0;
     hasDefault = 0;
     childBlocks = (scr_block_s **)Hunk_AllocateTempMemoryHigh(4096, "Scr_CalcLocalVarsSwitchStatement");
-    for (node = *(sval_u**)(*(DWORD*)stmtlist.type + 4); node; node = node[1].node)
+    for (node = stmtlist.node[0].node[1].node; node; node = node[1].node)
     {
-        if (*(DWORD *)node->type == 61 || *(DWORD *)node->type == 62)
+        if (node[0].node[0].type == ENUM_case || node[0].node[0].type == ENUM_default)
         {
             currentBlock = 0;
             Scr_CopyBlock(block, &currentBlock);
-            if (*(DWORD *)node->type == 61)
+            if (node[0].node[0].type == ENUM_case)
             {
-                *(DWORD *)(node->type + 12) = (DWORD)currentBlock;
+                node[0].node[3].block = currentBlock;
             }
             else
             {
-                *(DWORD *)(node->type + 8) = (DWORD)currentBlock;
-                hasDefault = 1;
+                node[0].node[2].block = currentBlock;
+                hasDefault = true;
             }
         }
         else if (currentBlock)
@@ -3935,61 +3972,54 @@ void __cdecl Scr_CalcLocalVarsSwitchStatement(sval_u stmtlist, scr_block_s *bloc
 
 void __cdecl Scr_CalcLocalVarsStatement(sval_u val, scr_block_s *block)
 {
-    switch (*(DWORD *)val.type)
+    switch (val.node[0].type)
     {
-    case 2:
-        Scr_CalcLocalVarsAssignmentStatement(*(DWORD *)(val.type + 4), *(DWORD *)(val.type + 8), block);
+    case ENUM_assignment:
+        Scr_CalcLocalVarsAssignmentStatement(val.node[1], val.node[2], block);
         break;
-    case 0x1B:
-    case 0x1C:
-        if (!block->abortLevel)
-            block->abortLevel = 3;
+    case ENUM_return:
+    case ENUM_return2:
+        if (block->abortLevel == SCR_ABORT_NONE)
+            block->abortLevel = SCR_ABORT_RETURN;
         break;
-    case 0x25:
-        Scr_CalcLocalVarsIfStatement(*(DWORD *)(val.type + 8), block, (sval_u *)(val.type + 16));
+    case ENUM_if:
+        Scr_CalcLocalVarsIfStatement(val.node[2], block, &val.node[4]);
         break;
-    case 0x26:
-        Scr_CalcLocalVarsIfElseStatement(*(DWORD *)(val.type + 8), *(DWORD *)(val.type + 12), block, (sval_u*)(val.type + 24), (sval_u*)(val.type + 28));
+    case ENUM_if_else:
+        Scr_CalcLocalVarsIfElseStatement(val.node[2], val.node[3], block, &val.node[6], &val.node[7]);
         break;
-    case 0x27:
-        Scr_CalcLocalVarsWhileStatement(*(DWORD *)(val.type + 4), *(DWORD *)(val.type + 8), block, (sval_u*)(val.type + 20));
+    case ENUM_while:
+        Scr_CalcLocalVarsWhileStatement(val.node[1], val.node[2], block, &val.node[5]);
         break;
-    case 0x28:
-        Scr_CalcLocalVarsForStatement(
-            *(DWORD*)(val.type + 4),
-            *(DWORD*)(val.type + 8),
-            *(DWORD*)(val.type + 12),
-            *(DWORD*)(val.type + 16),
-            block,
-            (sval_u*)(val.type + 28),
-            (sval_u*)(val.type + 32));
+    case ENUM_for:
+        Scr_CalcLocalVarsForStatement(val.node[1], val.node[2], val.node[3], val.node[4], block, &val.node[7], &val.node[8]);
         break;
-    case 0x29:
-    case 0x2A:
-    case 0x2B:
-        Scr_CalcLocalVarsIncStatement(*(DWORD*)(val.type + 4), block);
+    case ENUM_inc:
+    case ENUM_dec:
+    case ENUM_binary_equals:
+        Scr_CalcLocalVarsIncStatement(val.node[1], block);
         break;
-    case 0x2C:
-        Scr_CalcLocalVarsStatementList(*(DWORD *)(val.type + 4), block);
+    case ENUM_statement_list:
+        Scr_CalcLocalVarsStatementList(val.node[1], block);
         break;
-    case 0x2D:
-        Scr_CalcLocalVarsDeveloperStatementList(*(DWORD *)(val.type + 4), block, (sval_u*)(val.type + 12));
+    case ENUM_developer_statement_list:
+        Scr_CalcLocalVarsDeveloperStatementList(val.node[1], block, &val.node[3]);
         break;
-    case 0x37:
-        Scr_CalcLocalVarsWaittillStatement(*(DWORD *)(val.type + 8), block);
+    case ENUM_waittill:
+        Scr_CalcLocalVarsWaittillStatement(val.node[2], block);
         break;
-    case 0x3C:
-        Scr_CalcLocalVarsSwitchStatement(*(DWORD *)(val.type + 8), block);
+    case ENUM_switch:
+        Scr_CalcLocalVarsSwitchStatement(val.node[2], block);
         break;
-    case 0x3F:
+    case ENUM_break:
         Scr_AddBreakBlock(block);
-        if (!block->abortLevel)
-            block->abortLevel = 2;
+        if (block->abortLevel == SCR_ABORT_NONE)
+            block->abortLevel = SCR_ABORT_BREAK;
         break;
-    case 0x40:
+    case ENUM_continue:
         Scr_AddContinueBlock(block);
-        if (!block->abortLevel)
-            block->abortLevel = 1;
+        if (block->abortLevel == SCR_ABORT_NONE)
+            block->abortLevel = SCR_ABORT_CONTINUE;
         break;
     default:
         return;
@@ -3998,25 +4028,24 @@ void __cdecl Scr_CalcLocalVarsStatement(sval_u val, scr_block_s *block)
 
 void __cdecl Scr_CalcLocalVarsStatementList(sval_u val, scr_block_s *block)
 {
-    sval_u *node; // [esp+0h] [ebp-4h]
-
-    for (node = *(sval_u**)(*(DWORD*)val.type + 4); node; node = node[1].node)
-        Scr_CalcLocalVarsStatement(node->type, block);
+    for (sval_u *node = val.node[0].node[1].node; node; node = node[1].node)
+    {
+        Scr_CalcLocalVarsStatement(node[0], block);
+    }
 }
 
 void __cdecl Scr_CalcLocalVarsThread(sval_u exprlist, sval_u stmtlist, sval_u *stmttblock)
 {
-    _DWORD *v3; // eax
+    scrCompileGlob.forceNotCreate = false;
+    stmttblock->block = (scr_block_s*)Hunk_AllocateTempMemoryHigh(536, "Scr_CalcLocalVarsThread");
 
-    scrCompileGlob.forceNotCreate = 0;
-    stmttblock->type = Hunk_AllocateTempMemoryHigh(536, "Scr_CalcLocalVarsThread");
-    *(DWORD*)stmttblock->type = 0;
-    *(DWORD *)(stmttblock->type + 4) = 0;
-    *(DWORD *)(stmttblock->type + 12) = 0;
-    *(DWORD *)(stmttblock->type + 8) = 0;
-    v3 = (DWORD *)(stmttblock->type + 16);
-    *v3 = 0;
-    v3[1] = 0;
+    stmttblock->block->abortLevel = SCR_ABORT_NONE;
+    stmttblock->block->localVarsCreateCount = 0;
+    stmttblock->block->localVarsCount = 0;
+    stmttblock->block->localVarsPublicCount = 0;
+
+    memset(stmttblock->block->localVarsInitBits, 0, sizeof(stmttblock->block->localVarsInitBits));
+
     Scr_CalcLocalVarsFormalParameterList(exprlist, stmttblock->block);
     Scr_CalcLocalVarsStatementList(stmtlist, stmttblock->block);
 }
@@ -4054,7 +4083,14 @@ void __cdecl EmitSafeSetVariableField(sval_u expr, sval_u sourcePos, scr_block_s
     int index; // [esp+0h] [ebp-4h]
 
     index = Scr_FindLocalVarIndex(expr.stringValue, sourcePos, 1, block);
-    EmitOpcode((index != 0) + 49, 0, 0);
+    if (index)
+    {
+        EmitOpcode(OP_SafeSetVariableFieldCached, 0, 0);
+    }
+    else
+    {
+        EmitOpcode(OP_SafeSetVariableFieldCached0, 0, 0);
+    }
     EmitPreAssignmentPos();
     if (index)
         EmitByte(index);
@@ -4069,14 +4105,14 @@ void __cdecl EmitFormalParameterListInternal(sval_u *node, scr_block_s *block)
         node = node[1].node;
         if (!node)
             break;
-        EmitSafeSetVariableField(node->node->type, *(DWORD*)(node->type + 4), block);
+        EmitSafeSetVariableField(node[0].node[0], node[0].node[1], block);
     }
 }
 
 void __cdecl EmitFormalParameterList(sval_u exprlist, sval_u sourcePos, scr_block_s *block)
 {
-    EmitFormalParameterListInternal(*(sval_u**)exprlist.type, block);
-    EmitOpcode(0x35u, 0, 0);
+    EmitFormalParameterListInternal(exprlist.node[0].node, block);
+    EmitOpcode(OP_checkclearparams, 0, 0);
     AddOpcodePos(sourcePos.stringValue, 0);
 }
 
@@ -4089,17 +4125,20 @@ void __cdecl EmitThreadInternal(
 {
     scrCompileGlob.threadId = threadId;
     AddThreadStartOpcodePos(sourcePos.stringValue);
+
     scrCompileGlob.cumulOffset = 0;
     scrCompileGlob.maxOffset = 0;
     scrCompileGlob.maxCallOffset = 0;
-    CompileTransferRefToString(*(DWORD*)(val.type + 4), 2u);
-    EmitFormalParameterList(*(sval_u*)(val.type + 8), sourcePos, block);
-    EmitStatementList(*(sval_u*)(val.type + 12), 1, endSourcePos.stringValue, block);
+
+    CompileTransferRefToString(val.node[1].stringValue, 2u);
+    EmitFormalParameterList(val.node[2], sourcePos, block);
+    EmitStatementList(val.node[3], 1, endSourcePos.stringValue, block);
     EmitEnd();
     AddOpcodePos(endSourcePos.stringValue, 1);
     AddOpcodePos(0xFFFFFFFE, 0);
-    if (scrCompileGlob.cumulOffset)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 4778, 0, "%s", "!scrCompileGlob.cumulOffset");
+    
+    iassert(!scrCompileGlob.cumulOffset);
+    
     if (scrCompileGlob.maxOffset + 32 * scrCompileGlob.maxCallOffset >= 2048)
         CompileError(sourcePos.stringValue, "function exceeds operand stack size");
 }
@@ -4107,32 +4146,34 @@ void __cdecl EmitThreadInternal(
 void __cdecl EmitDeveloperThread(sval_u val, sval_u *stmttblock)
 {
     unsigned int Variable; // eax
-    VariableValueInternal_u threadId; // [esp+0h] [ebp-Ch]
     unsigned int savedChecksum; // [esp+4h] [ebp-8h]
     char *begin_pos; // [esp+8h] [ebp-4h]
 
-    if (scrCompilePub.developer_statement)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 4840, 0, "%s", "scrCompilePub.developer_statement == SCR_DEV_NO");
+    unsigned int posId;
+    unsigned int threadId;
+
+    iassert(scrCompilePub.developer_statement == SCR_DEV_NO);
+
     if (scrVarPub.developer_script)
     {
-        scrCompilePub.developer_statement = 1;
+        scrCompilePub.developer_statement = SCR_DEV_YES;
         InitThread(1);
-        Variable = FindVariable(scrCompileGlob.fileId, *(DWORD*)(val.type + 4));
-        threadId = FindObject(Variable);
-        SetThreadPosition(threadId.u.stringValue);
-        EmitThreadInternal(threadId.u.stringValue, val, *(DWORD *)(val.type + 16), *(DWORD *)(val.type + 20), stmttblock->block);
+        posId = FindVariable(scrCompileGlob.fileId, val.node[1].sourcePosValue);
+        threadId = FindObject(posId);
+        SetThreadPosition(threadId);
+        EmitThreadInternal(threadId, val, val.node[4], val.node[5], stmttblock->block);
     }
     else
     {
         begin_pos = TempMalloc(0);
         savedChecksum = scrVarPub.checksum;
-        scrCompilePub.developer_statement = 2;
+        scrCompilePub.developer_statement = SCR_DEV_IGNORE;
         InitThread(1);
-        EmitThreadInternal(0, val, *(sval_u*)(val.type + 16), *(sval_u*)(val.type + 20), stmttblock->block);
+        EmitThreadInternal(0, val, val.node[4], val.node[5], stmttblock->block);
         TempMemorySetPos(begin_pos);
         scrVarPub.checksum = savedChecksum;
     }
-    scrCompilePub.developer_statement = 0;
+    scrCompilePub.developer_statement = SCR_DEV_NO;
 }
 
 void __cdecl EmitNormalThread(sval_u val, sval_u *stmttblock)
@@ -4141,10 +4182,10 @@ void __cdecl EmitNormalThread(sval_u val, sval_u *stmttblock)
     VariableValueInternal_u threadId; // [esp+0h] [ebp-4h]
 
     InitThread(0);
-    Variable = FindVariable(scrCompileGlob.fileId, *(DWORD*)(val.type + 4));
+    Variable = FindVariable(scrCompileGlob.fileId, val.node[1].sourcePosValue);
     threadId = FindObject(Variable);
-    SetThreadPosition(threadId.u.stringValue);
-    EmitThreadInternal(threadId.u.stringValue, val, *(DWORD *)(val.type + 16), *(DWORD *)(val.type + 20), stmttblock->block);
+    SetThreadPosition(threadId);
+    EmitThreadInternal(threadId, val, val.node[4], val.node[5], stmttblock->block);
 }
 
 void __cdecl EmitThread(sval_u val)
@@ -4152,61 +4193,57 @@ void __cdecl EmitThread(sval_u val)
     char *v1; // eax
     unsigned int v2; // [esp-4h] [ebp-8h]
 
-    switch (*(DWORD*)val.type)
+    switch (val.node[0].type)
     {
-    case 'D':
-        Scr_CalcLocalVarsThread(*(DWORD *)(val.type + 8), *(DWORD *)(val.type + 12), (sval_u*)(val.type + 24));
+    case ENUM_thread:
+        Scr_CalcLocalVarsThread(val.node[2], val.node[3], &val.node[6]);
         if (scrCompileGlob.in_developer_thread)
-            EmitDeveloperThread(val, (sval_u *)(val.type + 24));
+            EmitDeveloperThread(val, &val.node[6]);
         else
-            EmitNormalThread(val, (sval_u*)(val.type + 24));
+            EmitNormalThread(val, &val.node[6]);
         break;
-    case 'E':
+    case ENUM_begin_developer_thread:
+        iassert(!scrCompileGlob.in_developer_thread);
+        scrCompileGlob.in_developer_thread = true;
+        break;
+        break;
+    case ENUM_end_developer_thread:
+        iassert(scrCompileGlob.in_developer_thread);
+        scrCompileGlob.in_developer_thread = false;
+        break;
+    case ENUM_usingtree:
         if (scrCompileGlob.in_developer_thread)
-            MyAssertHandler(".\\script\\scr_compiler.cpp", 4874, 0, "%s", "!scrCompileGlob.in_developer_thread");
-        scrCompileGlob.in_developer_thread = 1;
-        break;
-    case 'F':
-        if (!scrCompileGlob.in_developer_thread)
-            MyAssertHandler(".\\script\\scr_compiler.cpp", 4879, 0, "%s", "scrCompileGlob.in_developer_thread");
-        scrCompileGlob.in_developer_thread = 0;
-        break;
-    case 'G':
-        if (scrCompileGlob.in_developer_thread)
-        {
-            CompileError(*(DWORD *)(val.type + 8), "cannot put #using_animtree inside /# ... #/ comment");
-        }
+            CompileError(val.node[2].sourcePosValue, "cannot put #using_animtree inside /# ... #/ comment");
         else
         {
-            v2 = *(DWORD *)(val.type + 12);
-            v1 = SL_ConvertToString(*(DWORD *)(val.type + 4));
-            Scr_UsingTree(v1, v2);
-            Scr_CompileRemoveRefToString(*(DWORD *)(val.type + 4));
+            Scr_UsingTree(SL_ConvertToString(val.node[1].stringValue), val.node[3].sourcePosValue);
+            Scr_CompileRemoveRefToString(val.node[1].stringValue);
         }
         break;
-    default:
-        return;
     }
 }
 
 void __cdecl EmitThreadList(sval_u val)
 {
     sval_u *node; // [esp+0h] [ebp-4h]
-    sval_u *nodea; // [esp+0h] [ebp-4h]
 
-    scrCompileGlob.in_developer_thread = 0;
-    for (node = *(sval_u**)(*(DWORD *)val.type + 4); node; node = node[1].node)
-        SpecifyThread(node->type);
+    scrCompileGlob.in_developer_thread = false;
+
+    for (node = val.node[0].node[1].node; node; node = node[1].node)
+        SpecifyThread(node[0]);
+
     if (scrCompileGlob.in_developer_thread)
         CompileError(scrCompileGlob.developer_thread_sourcePos, "/# has no matching #/");
-    scrCompileGlob.firstThread[0] = 1;
-    scrCompileGlob.firstThread[1] = 1;
-    if (scrCompileGlob.in_developer_thread)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 4918, 0, "%s", "!scrCompileGlob.in_developer_thread");
-    for (nodea = *(sval_u**)(*(DWORD *)val.type + 4); nodea; nodea = nodea[1].node)
-        EmitThread(nodea->type);
-    if (scrCompileGlob.in_developer_thread)
-        MyAssertHandler(".\\script\\scr_compiler.cpp", 4923, 0, "%s", "!scrCompileGlob.in_developer_thread");
+
+    scrCompileGlob.firstThread[0] = true;
+    scrCompileGlob.firstThread[1] = true;
+
+    iassert(!scrCompileGlob.in_developer_thread);
+
+    for (node = val.node[0].node[1].node; node; node = node[1].node)
+        EmitThread(node[0]);
+
+    iassert(!scrCompileGlob.in_developer_thread);
 }
 
 void __cdecl LinkThread(unsigned int threadId, VariableValue *pos, bool allowFarCall)
@@ -4268,8 +4305,6 @@ void __cdecl LinkFile(unsigned int fileId)
     VariableValue emptyValue; // [esp+18h] [ebp-Ch] BYREF
     unsigned int threadPtr; // [esp+20h] [ebp-4h]
 
-    emptyValue.type = 0;
-    emptyValue.u.intValue = 0;
     for (threadPtr = FindFirstSibling(fileId); threadPtr; threadPtr = FindNextSibling(threadPtr))
     {
         threadId = FindObject(threadPtr).u.stringValue;
@@ -4292,7 +4327,7 @@ void __cdecl LinkFile(unsigned int fileId)
                         0,
                         "%s",
                         "pos.type == VAR_CODEPOS || pos.type == VAR_DEVELOPER_CODEPOS");
-                if (!pos.u.intValue)
+                if (!pos.u.codePosValue)
                     MyAssertHandler(".\\script\\scr_compiler.cpp", 2377, 0, "%s", "pos.u.codePosValue");
                 LinkThread(threadId, &pos, 1);
             }
@@ -4347,8 +4382,8 @@ void __cdecl ScriptCompile(
     if (entriesCounta > 1024)
         Com_Error(ERR_DROP, "MAX_PRECACHE_ENTRIES exceeded");
     scrCompileGlob.precachescriptList = precachescriptList;
-    EmitIncludeList(val.node->type);
-    EmitThreadList(*(sval_u*)(val.type + 4));
+    EmitIncludeList(val.node[0]);
+    EmitThreadList(val.node[1]);
     scrCompilePub.programLen = TempMalloc(0) - scrVarPub.programBuffer;
     Scr_ShutdownAllocNode();
     Hunk_ClearTempMemoryHigh();
@@ -4402,17 +4437,11 @@ void __cdecl ScriptCompile(
                         pos = Scr_EvalVariable(posId);
                         if (pos.type != 13)
                         {
-                            if (pos.type != 7 && pos.type != 12)
-                                MyAssertHandler(
-                                    ".\\script\\scr_compiler.cpp",
-                                    5035,
-                                    0,
-                                    "%s",
-                                    "(pos.type == VAR_CODEPOS) || (pos.type == VAR_DEVELOPER_CODEPOS)");
+                            iassert(pos.type == VAR_CODEPOS || pos.type == VAR_DEVELOPER_CODEPOS);
                             name = GetVariableName(threadPtr);
                             Variable_DONE = GetVariable(fileId, name);
-                            toThreadId = GetObject(Variable_DONE).u.stringValue;
-                            toPosId = SpecifyThreadPosition(toThreadId, name, precachescript->sourcePos, 13);
+                            toThreadId = GetObject(Variable_DONE);
+                            toPosId = SpecifyThreadPosition(toThreadId, name, precachescript->sourcePos, VAR_DEAD_ENTITY);
                             VariableValueAddress_DONE = GetVariableValueAddress(posId);
                             *GetVariableValueAddress(toPosId) = *VariableValueAddress_DONE;
                             LinkThread(toThreadId, &pos, 0);
@@ -4423,6 +4452,6 @@ void __cdecl ScriptCompile(
         }
     }
     LinkFile(fileId);
-    value.type = 6;
+    value.type = VAR_INTEGER;
     SetVariableValue(scriptId, &value);
 }

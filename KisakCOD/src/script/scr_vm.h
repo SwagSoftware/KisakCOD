@@ -26,7 +26,7 @@ struct function_stack_t // sizeof=0x14
 struct function_frame_t // sizeof=0x18
 {                                       // ...
     function_stack_t fs;                // ...
-    int topType;
+    Vartype_t topType;
 };
 
 struct scrVmPub_t // sizeof=0x4328
@@ -149,7 +149,7 @@ void __cdecl Scr_CancelWaittill(unsigned int startLocalId);
 unsigned __int16 __cdecl Scr_ExecThread(int handle, unsigned int paramcount);
 unsigned int __cdecl VM_Execute(unsigned int localId, const char* pos, unsigned int paramcount);
 unsigned int __cdecl VM_Execute_0();
-VariableValueInternal_u __cdecl GetDummyObject();
+unsigned int __cdecl GetDummyObject();
 unsigned int __cdecl GetDummyFieldValue();
 void VM_PrintJumpHistory();
 VariableStackBuffer* __cdecl VM_ArchiveStack();

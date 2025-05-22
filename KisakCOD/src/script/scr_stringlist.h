@@ -53,6 +53,21 @@ struct __declspec(align(128)) scrStringGlob_t
      char str[1];
  };
 
+ struct RefVector
+ {
+     union
+     {
+         struct
+         {
+             unsigned int refCount : 16;
+             unsigned int user : 8;
+             unsigned int byteLen : 8;
+         };
+         volatile int head;
+     };
+     float vec[3];
+ };
+
 #define MT_NODE_SIZE 12
 #define MT_SIZE 0xC0000
 

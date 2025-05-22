@@ -1404,7 +1404,7 @@ bool Scr_ScriptWatch::EvaluateWatchChildElement(
     childElement->fieldName = fieldName;
     if (hardcodedField)
     {
-        value.type = 1;
+        value.type = VAR_POINTER;
         value.u.intValue = element->objectId;
         switch (fieldName)
         {
@@ -1416,7 +1416,7 @@ bool Scr_ScriptWatch::EvaluateWatchChildElement(
             break;
         case 2u:
         case 4u:
-            value.type = 0;
+            value.type = VAR_UNDEFINED;
             break;
         case 3u:
             value.u.intValue = Scr_GetSelf(value.u.stringValue);
@@ -1441,12 +1441,12 @@ bool Scr_ScriptWatch::EvaluateWatchChildElement(
             break;
         case 0x18u:
             value.u.intValue = fieldName;
-            value.type = 1;
+            value.type = VAR_POINTER;
             AddRefToObject(fieldName);
             break;
         case 0x19u:
             value.u.intValue = fieldName;
-            value.type = 2;
+            value.type = VAR_STRING;
             SL_AddRefToString(fieldName);
             break;
         default:
@@ -1852,7 +1852,7 @@ bool __thiscall Scr_ScriptWatch::PostEvaluateWatchElement(
             element->valueDefined = 1;
             type = value->type;
             element->value.u.intValue = value->u.intValue;
-            element->value.type = type;
+            element->value.type = (Vartype_t)type;
         }
         else
         {

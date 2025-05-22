@@ -25,15 +25,6 @@ void __cdecl Scr_ShutdownAllocNode()
     }
 }
 
-sval_u __cdecl node0(int type)
-{
-    sval_u result; // eax
-
-    result.type = (int)Scr_AllocNode(1);
-    *(unsigned int *)result.type = type;
-    return result;
-}
-
 sval_u *__cdecl Scr_AllocNode(int size)
 {
     if (!g_allocNodeUser)
@@ -41,83 +32,92 @@ sval_u *__cdecl Scr_AllocNode(int size)
     return (sval_u *)Hunk_UserAlloc(g_allocNodeUser, 4 * size, 4);
 }
 
-sval_u __cdecl node2(int type, sval_u val1, sval_u val2)
+sval_u __cdecl node0(Enum_t type)
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(3);
-    *(unsigned int *)result.type = type;
-    *(sval_u *)(result.type + 4) = val1;
-    *(sval_u *)(result.type + 8) = val2;
+    result.node = Scr_AllocNode(1);
+    result.node[0].type = type;
     return result;
 }
 
-sval_u __cdecl node1(int val1, sval_u val2)
+sval_u __cdecl node1(Enum_t type, sval_u val1)
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(2);
-    *(unsigned int *)result.type = val1;
-    *(sval_u *)(result.type + 4) = val2;
+    result.node = Scr_AllocNode(2);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
     return result;
 }
 
-sval_u __cdecl node3(int type, sval_u val1, sval_u val2, sval_u val3)
+sval_u __cdecl node2(Enum_t type, sval_u val1, sval_u val2)
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(4);
-    *(unsigned int *)result.type = type;
-    *(sval_u *)(result.type + 4) = val1;
-    *(sval_u *)(result.type + 8) = val2;
-    *(sval_u *)(result.type + 12) = val3;
+    result.node = Scr_AllocNode(3);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
+    result.node[2].node = val2.node;
     return result;
 }
 
-sval_u __cdecl node4(int type, sval_u val1, sval_u val2, sval_u val3, sval_u val4)
+sval_u __cdecl node3(Enum_t type, sval_u val1, sval_u val2, sval_u val3)
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(5);
-    *(unsigned int *)result.type = type;
-    *(sval_u *)(result.type + 4) = val1;
-    *(sval_u *)(result.type + 8) = val2;
-    *(sval_u *)(result.type + 12) = val3;
-    *(sval_u *)(result.type + 16) = val4;
+    result.node = Scr_AllocNode(4);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
+    result.node[2].node = val2.node;
+    result.node[3].node = val3.node;
     return result;
 }
 
-sval_u __cdecl node5(int type, sval_u val1, sval_u val2, sval_u val3, sval_u val4, sval_u val5)
+sval_u __cdecl node4(Enum_t type, sval_u val1, sval_u val2, sval_u val3, sval_u val4)
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(6);
-    *(unsigned int *)result.type = type;
-    *(sval_u *)(result.type + 4) = val1;
-    *(sval_u *)(result.type + 8) = val2;
-    *(sval_u *)(result.type + 12) = val3;
-    *(sval_u *)(result.type + 16) = val4;
-    *(sval_u *)(result.type + 20) = val5;
+    result.node = Scr_AllocNode(5);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
+    result.node[2].node = val2.node;
+    result.node[3].node = val3.node;
+    result.node[4].node = val4.node;
     return result;
 }
 
-sval_u __cdecl node6(int type, sval_u val1, sval_u val2, sval_u val3, sval_u val4, sval_u val5, sval_u val6)
+sval_u __cdecl node5(Enum_t type, sval_u val1, sval_u val2, sval_u val3, sval_u val4, sval_u val5)
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(7);
-    *(unsigned int *)result.type = type;
-    *(sval_u *)(result.type + 4) = val1;
-    *(sval_u *)(result.type + 8) = val2;
-    *(sval_u *)(result.type + 12) = val3;
-    *(sval_u *)(result.type + 16) = val4;
-    *(sval_u *)(result.type + 20) = val5;
-    *(sval_u *)(result.type + 24) = val6;
+    result.node = Scr_AllocNode(6);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
+    result.node[2].node = val2.node;
+    result.node[3].node = val3.node;
+    result.node[4].node = val4.node;
+    result.node[5].node = val5.node;
+    return result;
+}
+
+sval_u __cdecl node6(Enum_t type, sval_u val1, sval_u val2, sval_u val3, sval_u val4, sval_u val5, sval_u val6)
+{
+    sval_u result; // eax
+
+    result.node = Scr_AllocNode(7);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
+    result.node[2].node = val2.node;
+    result.node[3].node = val3.node;
+    result.node[4].node = val4.node;
+    result.node[5].node = val5.node;
+    result.node[6].node = val6.node;
     return result;
 }
 
 sval_u __cdecl node7(
-    int type,
+    Enum_t type,
     sval_u val1,
     sval_u val2,
     sval_u val3,
@@ -128,20 +128,20 @@ sval_u __cdecl node7(
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(8);
-    *(unsigned int *)result.type = type;
-    *(sval_u *)(result.type + 4) = val1;
-    *(sval_u *)(result.type + 8) = val2;
-    *(sval_u *)(result.type + 12) = val3;
-    *(sval_u *)(result.type + 16) = val4;
-    *(sval_u *)(result.type + 20) = val5;
-    *(sval_u *)(result.type + 24) = val6;
-    *(sval_u *)(result.type + 28) = val7;
+    result.node = Scr_AllocNode(8);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
+    result.node[2].node = val2.node;
+    result.node[3].node = val3.node;
+    result.node[4].node = val4.node;
+    result.node[5].node = val5.node;
+    result.node[6].node = val6.node;
+    result.node[7].node = val7.node;
     return result;
 }
 
 sval_u __cdecl node8(
-    int type,
+    Enum_t type,
     sval_u val1,
     sval_u val2,
     sval_u val3,
@@ -153,54 +153,56 @@ sval_u __cdecl node8(
 {
     sval_u result; // eax
 
-    result.type = (int)Scr_AllocNode(9);
-    *(unsigned int *)result.type = type;
-    *(sval_u *)(result.type + 4) = val1;
-    *(sval_u *)(result.type + 8) = val2;
-    *(sval_u *)(result.type + 12) = val3;
-    *(sval_u *)(result.type + 16) = val4;
-    *(sval_u *)(result.type + 20) = val5;
-    *(sval_u *)(result.type + 24) = val6;
-    *(sval_u *)(result.type + 28) = val7;
-    *(sval_u *)(result.type + 32) = val8;
+    result.node = Scr_AllocNode(9);
+    result.node[0].type = type;
+    result.node[1].node = val1.node;
+    result.node[2].node = val2.node;
+    result.node[3].node = val3.node;
+    result.node[4].node = val4.node;
+    result.node[5].node = val5.node;
+    result.node[6].node = val6.node;
+    result.node[7].node = val7.node;
+    result.node[8].node = val8.node;
     return result;
 }
 
-// KISAKTODO: These linked_list functions are horrible
-sval_u *__cdecl linked_list_end(sval_u *val)
+// Decomp Status: Tested, Completed
+sval_u linked_list_end(sval_u val1)
 {
-    sval_u *result; // eax
-    sval_u *node; // [esp+0h] [ebp-8h]
+    sval_u *node;
+    sval_u result;
 
     node = Scr_AllocNode(2);
-    node[0] = *val;
-    node[1].type = 0;
-    result = Scr_AllocNode(2);
-    result[0] = node[0];
-    result[1] = node[0];
+    node[0].node = val1.node;
+    node[1].stringValue = 0;
+    result.node = Scr_AllocNode(2);
+    result.node[0].node = node;
+    result.node[1].node = node;
     return result;
 }
 
-sval_u *__cdecl prepend_node(sval_u *val1, sval_u *val2)
+// Decomp Status: Tested, Completed
+sval_u prepend_node(sval_u val1, sval_u val2)
 {
-    sval_u *v2; // eax
+    sval_u *node;
 
-    v2 = Scr_AllocNode(2);
-    v2[0] = *val1;
-    v2[1] = *val2;
-    *val2 = v2[0];
+    node = Scr_AllocNode(2);
+    node[0] = val1;
+    node[1] = *val2.node;
+    val2.node->node = node;
     return val2;
 }
 
-sval_u *__cdecl append_node(sval_u *val1, sval_u *val2)
+// Decomp Status: Tested, Completed
+sval_u append_node(sval_u val1, sval_u val2)
 {
-    sval_u *v2; // eax
+    sval_u *node;
 
-    v2 = Scr_AllocNode(2);
-    v2[0] = *val2;
-    v2[1].type = 0;
-    *(sval_u**)(val1[1].type + 4) = v2;
-    val1[1].type = (int)v2;
+    node = Scr_AllocNode(2);
+    node[0] = val2;
+    node[1].stringValue = 0;
+    val1.node[1].node[1].node = node;
+    val1.node[1].node = node;
     return val1;
 }
 

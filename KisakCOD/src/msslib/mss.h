@@ -14,7 +14,7 @@
 //##          1.05 of  1-Jan-98: Massive changes for version 4.0            ##
 //##          1.06 of 17-Sep-98: Massive changes for version 5.0            ##
 //##          1.07 of  2-Feb-99: Changes for new input API                  ##
-//##          1.08 of  8-Feb-99: Changes for new filter helper functions    ##
+//##          1.08 of  8-Feb-99: Changes for new filter helper functions    ## 
 //##          1.09 of  8-Feb-03: Changes for xbox and linux                 ##
 //##          1.10 of 15-May-05: Massive changes for version 7.0            ##
 //##                                                                        ##
