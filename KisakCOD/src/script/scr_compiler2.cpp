@@ -4802,7 +4802,6 @@ void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool la
 	bool bOldCanBreak; // [esp+Fh] [ebp-15h]
 	char *nextPos1; // [esp+10h] [ebp-14h]
 	CaseStatementInfo *caseStatement; // [esp+14h] [ebp-10h]
-	CaseStatementInfo *caseStatementa; // [esp+14h] [ebp-10h]
 	unsigned __int8 *pos1; // [esp+18h] [ebp-Ch]
 	signed int num; // [esp+1Ch] [ebp-8h]
 	unsigned __int8 *pos2; // [esp+20h] [ebp-4h]
@@ -4828,23 +4827,27 @@ void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool la
 	*(intptr_t *)pos1 = scrCompileGlob.codePos - (byte *)nextPos1;
 	pos3 = TempMallocAlignStrict(0);
 	num = 0;
+
 	caseStatement = scrCompileGlob.currentCaseStatement;
+
 	while (caseStatement)
 	{
 		EmitCodepos((const char*)caseStatement->name);
 		EmitCodepos(caseStatement->codePos);
 		caseStatement = caseStatement->next;
-		++num;
+		num++;
 	}
-	*pos2 = num;
+
+	*(unsigned short *)pos2 = num;
 	qsort(pos3, num, 8u, CompareCaseInfo);
+
 	while (num > 1)
 	{
-		if (*pos3 == *(pos3 + 2))
+		if (*(intptr_t *)pos3 == *((intptr_t *)pos3 + 2))
 		{
-			for (caseStatementa = scrCompileGlob.currentCaseStatement; caseStatementa; caseStatementa = caseStatementa->next)
+			for (CaseStatementInfo *caseStatementa = scrCompileGlob.currentCaseStatement; caseStatementa; caseStatementa = caseStatementa->next)
 			{
-				if (caseStatementa->name == *pos3)
+				if (caseStatementa->name == *(intptr_t *)pos3)
 				{
 					CompileError(caseStatementa->sourcePos, "duplicate case expression");
 					return;
@@ -4854,6 +4857,7 @@ void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool la
 		--num;
 		pos3 += 8;
 	}
+
 	ConnectBreakStatements();
 	scrCompileGlob.currentCaseStatement = oldCaseStatement;
 	scrCompileGlob.bCanBreak = bOldCanBreak;

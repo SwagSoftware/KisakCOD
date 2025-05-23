@@ -788,6 +788,7 @@
     <ClInclude Include="src\script\scr_parser.h" />
     <ClInclude Include="src\script\scr_parsetree.h" />
     <ClInclude Include="src\script\scr_yacc.h" />
+    <ClInclude Include="src\script\scr_yacc_structs.h" />
     <ClInclude Include="src\server\sv_game.h" />
     <ClInclude Include="src\server\sv_world.h" />
     <ClInclude Include="src\server_mp\server.h" />

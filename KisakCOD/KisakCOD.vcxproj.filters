@@ -2147,6 +2147,9 @@
     <ClInclude Include="src\zlib\gzguts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\script\scr_yacc_structs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\physics\ode\placeholder.txt" />
