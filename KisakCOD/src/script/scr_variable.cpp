@@ -3742,7 +3742,7 @@ void  Scr_AddFields_FastFile(char const* path, char const* extension)
 	char* targetPos; // [esp+44h] [ebp-4h]
 
 	scrVarPub.fieldBuffer = TempMalloc(0);
-	scrVarPub.fieldBuffer = NULL;
+	*scrVarPub.fieldBuffer = 0;
 	sprintf(filename, "%s/%s.%s", path, "keys", extension);
 	Scr_AddFieldsForFile(filename);
 	targetPos = TempMalloc(1);

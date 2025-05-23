@@ -496,8 +496,10 @@ static int num_user_classes = 0;
 static dGeomClass user_classes [dMaxUserClasses];
 
 
-dxUserGeom::dxUserGeom(int class_num, dxSpace* space, dxBody* body) : dxGeom (space, user_classes[class_num - dFirstUserClass].isPlaceable, body)
+dxUserGeom::dxUserGeom(int class_num, dxSpace* space, dxBody* body) : 
+    dxGeom (space, user_classes[class_num - dFirstUserClass].isPlaceable, body)
 {
+  iassert(class_num >= 11 && class_num <= 15);
   type = class_num;
   int size = user_classes[type-dFirstUserClass].bytes;
   dAASSERT(size < sizeof(user_data));

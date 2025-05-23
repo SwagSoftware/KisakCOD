@@ -226,14 +226,14 @@ struct dxSimpleSpace : public dxSpace {
 struct dxUserGeom : public dxGeom {
     char user_data[16]; // MOD
 
-    dxUserGeom(int class_num, dxSpace *space, dxBody *body); // MOD
+    dxUserGeom(int class_num = dFirstUserClass, dxSpace *space = nullptr, dxBody *body = nullptr); // MOD
 
     void ReInit(int class_num, dxSpace *space, dxBody *body)
     {
         new (this) dxUserGeom(class_num, space, body);
     }
 
-    dxUserGeom() : dxUserGeom(0, nullptr, nullptr) { } // ADD
+    //dxUserGeom() : dxUserGeom(0, nullptr, nullptr) { } // ADD
 
     virtual ~dxUserGeom() = default; // LWSS: Make default
     void computeAABB() override;

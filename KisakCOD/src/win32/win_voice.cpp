@@ -118,7 +118,11 @@ int __cdecl mixerSetRecordSource(char *SrcName)
     lpListBool = 0;
     mixerline.cbStruct = 168;
     mixerline.dwComponentType = 7;
-    mixerGetLineInfoA(phmx, &mixerline, 3u);
+    if (mixerGetLineInfoA(phmx, &mixerline, 3u) != MMSYSERR_NOERROR)
+    {
+        mixerClose(mixerHandle); // KISAKTODO: this fails always for some reason.
+        return 0;
+    }
     lpmxc = (tagMIXERCONTROLA*)calloc(148 * mixerline.cControls, 1u);
     mxlc.cbStruct = 24;
     mxlc.dwLineID = mixerline.dwLineID;
@@ -188,6 +192,9 @@ int __cdecl mixerSetRecordSource(char *SrcName)
     lpListText = 0;
     if (lpListBool)
         free(lpListBool);
+
+    mixerClose(mixerHandle); // LWSS ADD
+
     return 0;
 }
 
@@ -222,7 +229,11 @@ int __cdecl mixerGetRecordSource(char *srcName)
     lpListBool = 0;
     mixerline.cbStruct = 168;
     mixerline.dwComponentType = 7;
-    mixerGetLineInfoA(phmx, &mixerline, 3u);
+    if (mixerGetLineInfoA(phmx, &mixerline, 3u) != MMSYSERR_NOERROR)
+    {
+        mixerClose(mixerHandle); // KISAKTODO: this fails always for some reason.
+        return 0;
+    }
     lpmxc = (tagMIXERCONTROLA*)calloc(148 * mixerline.cControls, 1u);
     mxlc.cbStruct = 24;
     mxlc.dwLineID = mixerline.dwLineID;
@@ -288,6 +299,9 @@ int __cdecl mixerGetRecordSource(char *srcName)
     lpListText = 0;
     if (lpListBool)
         free(lpListBool);
+
+    mixerClose(mixerHandle); // LWSS ADD
+
     return 0;
 }
 

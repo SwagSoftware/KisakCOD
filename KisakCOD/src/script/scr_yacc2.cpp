@@ -1641,6 +1641,8 @@ int __cdecl yylex()
 		}                                           // while(2)
 	}
 }
+
+#define YYINITDEPTH 200 + sizeof(stype_t)
 int yyparse()
 {
 	/*-------------------------.
@@ -1652,7 +1654,7 @@ int yyparse()
 	int yyerrorstatus;
 
 	/* The semantic value stack.  */
-	stype_t yyvsa[200]; // YYINITDEPTH
+	stype_t yyvsa[YYINITDEPTH];
 	stype_t *yyvsp;
 	stype_t *yyvs;
 
@@ -1664,11 +1666,15 @@ int yyparse()
 	to reallocate them elsewhere.  */
 
 	/* The state stack.  */
-	short yyssa[200]; // YYINITDEPTH
+	short yyssa[YYINITDEPTH];
 	short *yyss;
 	short *yyssp;
 
 	int yystacksize;
+
+	bool needs_free = false;
+	void *free1addr = NULL;
+	void *free2addr = NULL;
 
 	int yyn;
 	/* Lookahead token as an internal (translated) token number.  */
@@ -1691,7 +1697,7 @@ int yyparse()
 	yytoken = 0;
 	yyss = yyssa;
 	yyvs = yyvsa;
-	yystacksize = 200; // YYINITDEPTH
+	yystacksize = YYINITDEPTH;
 
 	// YYDPRINTF ((stderr, "Starting parse\n"));
 
@@ -1743,6 +1749,12 @@ yynewstate:
 					CompileError(g_sourcePos, "bad syntax");
 				}
 
+				if (needs_free)
+				{
+					free(free1addr);
+					free(free2addr);
+				}
+
 				return 2;
 			}
 
@@ -1752,17 +1764,24 @@ yynewstate:
 				yystacksize = 10000; // YYMAXDEPTH
 			}
 
+			//iassert(needs_free == false);
+			//needs_free = true;
+
 			// YYSTACK_RELOCATE (yyss_alloc, yyss);
 			s = sizeof(short) * yystacksize;
 			yyss = (short *)alloca(s);
+			//yyss = (short *)malloc(s);
+			free1addr = yyss;
 			//memcpy(yyss, yyss1, s);
 			memcpy(yyss, yyss1, sizeof(short) * yysize); // LWSS CHANGE
 
 			// YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 			s = sizeof(stype_t) * yystacksize;
 			yyvs = (stype_t *)alloca(s);
+			//yyvs = (stype_t *)malloc(s);
+			free2addr = yyvs;
 			//memcpy(yyss, yyvs1, s);
-			memcpy(yyss, yyvs1, sizeof(stype_t) * yysize); // LWSS CHANGE
+			memcpy(yyvs, yyvs1, sizeof(stype_t) * yysize); // LWSS CHANGE
 
 			yyvsp = &yyvs[yysize - 1];
 			yyssp = &yyss[yysize - 1];
@@ -1771,7 +1790,8 @@ yynewstate:
 
 			if (yyssp >= &yyss[yystacksize - 1])
 			{
-				return 1;                               // yyabortlab  YYABORT
+				goto yyabortlab;
+				//return 1;                               // yyabortlab  YYABORT
 			}
 		}
 
@@ -1820,14 +1840,10 @@ yynewstate:
 
 		//printf("yyn %i | yytoken %i | yycheck[yyn] %i\n", yyn, yytoken, yycheck[yyn]);
 
-		//if (yyn < 0 || yyn > 0x543 || yycheck[yyn] != yytoken) // 0x59B on t5  YYLAST
-		//{
-		//	break; // yydefault
-		//}
-
-		// LWSS CHANGE
-		if (yyn >= 0x544 || yycheck[yyn] != yytoken)
-			break;
+		if (yyn < 0 || yyn >= 0x544 || yycheck[yyn] != yytoken) // 0x59B on t5  YYLAST
+		{
+			break; // yydefault
+		}
 
 		yyn = yytable[yyn];
 
@@ -2570,28 +2586,29 @@ yynewstate:
 			number reduced by.  */
 			yyn = yyr1[yyn];
 
-//#define YYNTOKENS 91
+#define YYNTOKENS 91
 			//yystate = *yyssp + yypgoto[yyn - YYNTOKENS]; // yystate = yypgoto[yyn - YYNTOKENS] + *yyssp; ?
 			yystate = *yyssp + yypact[yyn + 171]; // LWSS CHANGE
 
 			// LWSS CHANGE
-			if (yystate < 0x544 && yycheck[yystate] == *yyssp)
-			{
-				yystate = yytable[yystate];
-			}
-			else
-			{
-				yystate = yydefact[yyn + 171];
-			}
-			//if (yystate >= 0 && yystate <= 0x543 && yycheck[yystate] == *yyssp) // 0x59B on t5  YYLAST
+			//if (yystate < 0x544 && yycheck[yystate] == *yyssp)
 			//{
 			//	yystate = yytable[yystate];
 			//}
 			//else
 			//{
-			//	yystate = yydefgoto[yyn - YYNTOKENS]; // yystate = yydefgoto[yyn - YYNTOKENS]; ?
+			//	yystate = yydefact[yyn + 171];
 			//}
-			int stop = yydefgoto[0]; // LWSS: just to keep the array from being optimized out (dumb)
+			if (yystate >= 0 && yystate <= 0x543 && yycheck[yystate] == *yyssp) // 0x59B on t5  YYLAST
+			{
+				yystate = yytable[yystate];
+			}
+			else
+			{
+				yystate = yydefgoto[yyn - YYNTOKENS]; // yystate = yydefgoto[yyn - YYNTOKENS]; ?
+			}
+
+			int stop = yydefgoto[0]; // LWSS HACK: just to keep the array from being optimized out (dumb)
 
 			//continue; // yynewstate
 		}
@@ -2626,8 +2643,6 @@ yyerrlab:
 		{
 			CompileError(g_sourcePos, "bad syntax");
 		}
-
-		return 0;
 	}
 
 
@@ -2639,6 +2654,12 @@ yyerrlab:
 		/* Return failure if at end of input.  */
 		if (!yychar)
 		{
+yyabortlab:
+			if (needs_free)
+			{
+				free(free1addr);
+				free(free2addr);
+			}
 			return 1; // YYABORT
 		}
 
@@ -2685,7 +2706,8 @@ yyerrlab1:
 yyerrpop:
 			if (yyssp == yyss)
 			{
-				return 1;                               // yyabortlab
+				goto yyabortlab;
+				//return 1;                               // yyabortlab
 			}
 
 			--yyvsp;
@@ -2702,6 +2724,11 @@ yyerrpop:
 		goto yynewstate;
 	}
 yyacceptlab:
+	if (needs_free)
+	{
+		free(free1addr);
+		free(free2addr);
+	}
 	return 0;
 }
 

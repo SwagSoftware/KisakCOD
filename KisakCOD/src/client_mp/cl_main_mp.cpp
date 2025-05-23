@@ -982,13 +982,12 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
     const char *v5; // eax
     const char *v6; // eax
     int v7; // [esp+0h] [ebp-1188h]
-    char md5Str[36] = "WE LOVE ACTIVISION, WE LOVE MS"; // [esp+2Ch] [ebp-115Ch] BYREF
-    unsigned __int8 v9[1244]; // [esp+50h] [ebp-1138h] BYREF
+    char md5Str[36]; // [esp+2Ch] [ebp-115Ch] BYREF
+    unsigned __int8 dst[1244]; // [esp+50h] [ebp-1138h] BYREF
     connstate_t connectionState; // [esp+52Ch] [ebp-C5Ch]
     char dest[1028]; // [esp+530h] [ebp-C58h] BYREF
     int pktlen; // [esp+934h] [ebp-854h] BYREF
-    unsigned __int8 src[9]; // [esp+938h] [ebp-850h] BYREF
-    unsigned __int8 dst[1019]; // [esp+941h] [ebp-847h] BYREF
+    unsigned __int8 src[1028]; // [esp+938h] [ebp-850h] BYREF
     unsigned int count; // [esp+D3Ch] [ebp-44Ch]
     msg_t buf; // [esp+D40h] [ebp-448h] BYREF
     int length; // [esp+D68h] [ebp-420h]
@@ -1047,11 +1046,11 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                     MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2980, 0, "%s", "clc->qport != 0");
                 v6 = va("%i", clc->qport);
                 Info_SetValueForKey(dest, "qport", v6);
-                qmemcpy(src, "connect \"", sizeof(src));
+                qmemcpy(src, "connect \"", 9);
                 count = &dest[strlen(dest) + 1] - &dest[1];
-                memcpy(dst, dest, count);
-                dst[count] = 34;
-                dst[count + 1] = 0;
+                memcpy(&src[9], dest, count);
+                src[count + 9] = 34;
+                src[count + 10] = 0;
                 pktlen = count + 10;
                 memcpy(pkt, src, count + 10);
                 //PbClientConnecting(2, pkt, &pktlen);
@@ -1080,8 +1079,8 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 {
                     if (onlinegame->current.enabled)
                         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 3029, 0, "%s", "!onlinegame->current.enabled");
-                    memset(v9, 0, 1240u);
-                    data = v9;
+                    memset(dst, 0, 1240u);
+                    data = dst;
                 }
                 MSG_WriteShort(&buf, clc->qport);
                 MSG_WriteByte(&buf, c);
@@ -1102,6 +1101,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
         }
     }
 }
+
 int __cdecl CL_HighestPriorityStatPacket(clientConnection_t *clc)
 {
     int packet; // [esp+0h] [ebp-Ch]

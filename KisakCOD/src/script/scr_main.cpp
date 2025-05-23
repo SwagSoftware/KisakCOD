@@ -288,9 +288,9 @@ unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry 
 
 unsigned int __cdecl Scr_LoadScript(const char *filename)
 {
-    PrecacheEntry entries; // [esp+0h] [ebp-2000h] BYREF
+    PrecacheEntry entries[1024]; // [esp+0h] [ebp-2000h] BYREF
 
-    return Scr_LoadScriptInternal(filename, &entries, 0);
+    return Scr_LoadScriptInternal(filename, &entries[0], 0);
 }
 
 void __cdecl Scr_PostCompileScripts()

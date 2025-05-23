@@ -25,19 +25,151 @@ char defineStrings[10000];
 animStringItem_t defineStr[10][16];
 unsigned int defineBits[10][16][2];
 animStringItem_t weaponStrings[128];
-animStringItem_t animStateStr[2];
-animStringItem_t animMoveTypesStr[44];
-animStringItem_t animEventTypesStr[22];
-animStringItem_t animBodyPartsStr[5];
-animStringItem_t animConditionMountedStr[3];
-animStringItem_t animWeaponClassStr[11];
-animStringItem_t animWeaponPositionStr[3];
-animStringItem_t animStrafeStateStr[4];
-animStringItem_t animPerkStateStr[4];
-animStringItem_t animConditionsStr[11];
-animConditionTable_t animConditionsTable[10];
 
-char *globalFilename;
+animStringItem_t animStateStr[2] = { { "COMBAT", -1 }, { NULL, -1 } };
+
+animStringItem_t animMoveTypesStr[44] =
+{
+  { "** UNUSED **", -1 },
+  { "IDLE", -1 },
+  { "IDLECR", -1 },
+  { "IDLEPRONE", -1 },
+  { "WALK", -1 },
+  { "WALKBK", -1 },
+  { "WALKCR", -1 },
+  { "WALKCRBK", -1 },
+  { "WALKPRONE", -1 },
+  { "WALKPRONEBK", -1 },
+  { "RUN", -1 },
+  { "RUNBK", -1 },
+  { "RUNCR", -1 },
+  { "RUNCRBK", -1 },
+  { "TURNRIGHT", -1 },
+  { "TURNLEFT", -1 },
+  { "TURNRIGHTCR", -1 },
+  { "TURNLEFTCR", -1 },
+  { "CLIMBUP", -1 },
+  { "CLIMBDOWN", -1 },
+  { "SPRINT", -1 },
+  { "MANTLE_ROOT", -1 },
+  { "MANTLE_UP_57", -1 },
+  { "MANTLE_UP_51", -1 },
+  { "MANTLE_UP_45", -1 },
+  { "MANTLE_UP_39", -1 },
+  { "MANTLE_UP_33", -1 },
+  { "MANTLE_UP_27", -1 },
+  { "MANTLE_UP_21", -1 },
+  { "MANTLE_OVER_HIGH", -1 },
+  { "MANTLE_OVER_MID", -1 },
+  { "MANTLE_OVER_LOW", -1 },
+  { "FLINCH_FORWARD", -1 },
+  { "FLINCH_BACKWARD", -1 },
+  { "FLINCH_LEFT", -1 },
+  { "FLINCH_RIGHT", -1 },
+  { "STUMBLE_FORWARD", -1 },
+  { "STUMBLE_BACKWARD", -1 },
+  { "STUMBLE_WALK_FORWARD", -1 },
+  { "STUMBLE_WALK_BACKWARD", -1 },
+  { "STUMBLE_CROUCH_FORWARD", -1 },
+  { "STUMBLE_CROUCH_BACKWARD", -1 },
+  { "STUMBLE_SPRINT_FORWARD", -1 },
+  { NULL, -1 }
+};
+
+animStringItem_t animEventTypesStr[22] =
+{
+  { "PAIN", -1 },
+  { "DEATH", -1 },
+  { "FIREWEAPON", -1 },
+  { "JUMP", -1 },
+  { "JUMPBK", -1 },
+  { "LAND", -1 },
+  { "DROPWEAPON", -1 },
+  { "RAISEWEAPON", -1 },
+  { "CLIMBMOUNT", -1 },
+  { "CLIMBDISMOUNT", -1 },
+  { "RELOAD", -1 },
+  { "CROUCH_TO_PRONE", -1 },
+  { "PRONE_TO_CROUCH", -1 },
+  { "STAND_TO_CROUCH", -1 },
+  { "CROUCH_TO_STAND", -1 },
+  { "STAND_TO_PRONE", -1 },
+  { "PRONE_TO_STAND", -1 },
+  { "MELEEATTACK", -1 },
+  { "KNIFE_MELEE", -1 },
+  { "KNIFE_MELEE_CHARGE", -1 },
+  { "SHELLSHOCK", -1 },
+  { NULL, -1 }
+};
+
+animStringItem_t animBodyPartsStr[5] =
+{
+  { "** UNUSED **", -1 },
+  { "LEGS", -1 },
+  { "TORSO", -1 },
+  { "BOTH", -1 },
+  { NULL, -1 }
+};
+
+animStringItem_t animConditionMountedStr[3] = { { "** UNUSED **", -1 }, { "MG42", -1 }, { NULL, -1 } };
+
+animStringItem_t animWeaponClassStr[11] =
+{
+  { "RIFLE", -1 },
+  { "MG", -1 },
+  { "SMG", -1 },
+  { "SPREAD", -1 },
+  { "PISTOL", -1 },
+  { "GRENADE", -1 },
+  { "ROCKETLAUNCHER", -1 },
+  { "TURRET", -1 },
+  { "NON-PLAYER", -1 },
+  { "ITEM", -1 },
+  { NULL, -1 }
+};
+
+animStringItem_t animWeaponPositionStr[3] = { { "HIP", -1 }, { "ADS", -1 }, { NULL, -1 } };
+
+animStringItem_t animStrafeStateStr[4] = { { "NOT", -1 }, { "LEFT", -1 }, { "RIGHT", -1 }, { NULL, -1 } };
+
+animStringItem_t animPerkStateStr[4] =
+{
+  { "** UNUSED **", -1 },
+  { "LASTSTAND", -1 },
+  { "GRENADEDEATH", -1 },
+  { NULL, -1 }
+};
+animStringItem_t animConditionsStr[11] =
+{
+  { "PLAYERANIMTYPE", -1 },
+  { "WEAPONCLASS", -1 },
+  { "MOUNTED", -1 },
+  { "MOVETYPE", -1 },
+  { "UNDERHAND", -1 },
+  { "CROUCHING", -1 },
+  { "FIRING", -1 },
+  { "WEAPON_POSITION", -1 },
+  { "STRAFING", -1 },
+  { "PERK", -1 },
+  { NULL, -1 }
+};
+
+animConditionTable_t animConditionsTable[10] =
+{
+  { ANIM_CONDTYPE_BITFLAGS, weaponStrings },
+  { ANIM_CONDTYPE_BITFLAGS, animWeaponClassStr },
+  { ANIM_CONDTYPE_VALUE, animConditionMountedStr },
+  { ANIM_CONDTYPE_BITFLAGS, animMoveTypesStr },
+  { ANIM_CONDTYPE_VALUE, NULL },
+  { ANIM_CONDTYPE_VALUE, NULL },
+  { ANIM_CONDTYPE_VALUE, NULL },
+  { ANIM_CONDTYPE_VALUE, animWeaponPositionStr },
+  { ANIM_CONDTYPE_VALUE, animStrafeStateStr },
+  { ANIM_CONDTYPE_VALUE, animPerkStateStr }
+};
+
+
+const char *globalFilename = "mp/playeranim.script";
 
 bgs_t *bgs;
 
@@ -2230,8 +2362,10 @@ void __cdecl BG_LoadAnim()
     playerAnims = (loadAnim_t(*)[512])playerAnims_large_local.GetBuf();
 
     BG_CheckThread();
+
     if (!bgs)
         MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3675, 0, "%s", "bgs");
+
     iNumPlayerAnims = 0;
     BG_FindAnims();
     BG_AnimParseAnimScript(&bgs->animScriptData, (loadAnim_t *)playerAnims, &iNumPlayerAnims);
@@ -2491,8 +2625,8 @@ void __cdecl BG_AnimParseAnimScript(animScriptData_t *scriptData, loadAnim_t *pL
     g_piNumLoadAnims = piNumAnims;
     parseMode = PARSEMODE_DEFINES;
     BG_InitWeaponStrings();
-    memset((unsigned __int8 *)defineStr, 0, sizeof(defineStr));
-    memset((unsigned __int8 *)defineStrings, 0, sizeof(defineStrings));
+    memset(defineStr, 0, sizeof(defineStr));
+    memset(defineStrings, 0, sizeof(defineStrings));
     numDefines[0] = 0;
     numDefines[1] = 0;
     numDefines[2] = 0;
