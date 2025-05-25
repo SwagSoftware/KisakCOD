@@ -645,10 +645,10 @@ void __cdecl LiveStorage_SetStat(int __formal, int index, unsigned int value)
             if (!debugStats)
                 MyAssertHandler(".\\win32\\win_storage.cpp", 434, 0, "%s", "debugStats");
             if (debugStats->current.enabled)
-                Com_Printf(14, "Setting stat %i from %i to %i\n", index, *&g_debugPacket[0][4 * index + 0x1AE4], value);
-            if (*&g_debugPacket[0][4 * index + 0x1AE4] != value)
+                Com_Printf(14, "Setting stat %i from %i to %i\n", index, *(int*)&statData.playerStats[4 * index + 0x176C], value);
+            if (*(int*)&statData.playerStats[4 * index + 0x176C] != value)
             {
-                *&g_debugPacket[0][4 * index + 0x1AE4] = value;
+                *(int*)&statData.playerStats[4 * index + 0x176C] = value;
                 goto LABEL_24;
             }
         }
