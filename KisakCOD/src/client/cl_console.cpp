@@ -80,7 +80,7 @@ const dvar_s *con_gameMsgWindowNSplitscreenScale[4];
 
 ConDrawInputGlob conDrawInputGlob;
 bool con_ignoreMatchPrefixOnly;
-int con_inputMaxMatchesShown;
+int con_inputMaxMatchesShown = 24;
 
 const float con_versionColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
 const float con_screenPadding = 4.0f;
