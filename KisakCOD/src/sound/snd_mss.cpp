@@ -189,7 +189,7 @@ void MSS_InitEq()
   }
   // LWSS END
 
-  if ( AIL_find_filter("3 Band Parm Eq", &milesGlob.eqFilter) )
+  if ( AIL_find_filter("Parametric EQ Filter", &milesGlob.eqFilter) )
   {
     AIL_open_filter(milesGlob.eqFilter, milesGlob.driver);
   }

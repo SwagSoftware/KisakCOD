@@ -96,9 +96,9 @@ void __cdecl SND_Set3DPosition(int index, const float *org)
     v2 = -transformed[1];
     AIL_set_sample_3D_position(
         milesGlob.handle_sample[index],
-        LODWORD(v2),
-        LODWORD(transformed[2]),
-        LODWORD(transformed[0]));
+        v2,
+        transformed[2],
+        transformed[0]);
 }
 
 void __cdecl SND_Stop2DChannel(int index)
@@ -422,6 +422,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     _AILSOUNDINFO info; // LWSS HACK: struct version conversion
     info.format = sound->info.format;
     info.data_ptr = sound->info.data_ptr;
+    info.data_len = sound->info.data_len;
     info.rate = sound->info.rate;
     info.bits = sound->info.bits;
     info.channels = sound->info.channels;
@@ -455,7 +456,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     AIL_set_sample_loop_count(handle, (startAliasInfo->alias0->flags & 1) == 0);
     baseSlavePercentage = MSS_GetWetLevel(startAliasInfo->alias0);
     v3 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(handle, LODWORD(v3), LODWORD(baseSlavePercentage));
+    AIL_set_sample_reverb_levels(handle, v3, baseSlavePercentage);
     AIL_sample_ms_position(handle, &total_msec, 0);
     if (startAliasInfo->timeshift >= total_msec)
         return SND_SetPlaybackIdNotPlayed(index);
@@ -637,6 +638,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     _AILSOUNDINFO info; // LWSS HACK: struct version conversion
     info.format = sound->info.format;
     info.data_ptr = sound->info.data_ptr;
+    info.data_len = sound->info.data_len;
     info.rate = sound->info.rate;
     info.bits = sound->info.bits;
     info.channels = sound->info.channels;
@@ -686,7 +688,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     AIL_set_sample_loop_count(handle, (startAliasInfo->alias0->flags & 1) == 0);
     maxdist = MSS_GetWetLevel(startAliasInfo->alias0);
     mindist = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(handle, LODWORD(mindist), LODWORD(maxdist));
+    AIL_set_sample_reverb_levels(handle, mindist, maxdist);
     if (!rate)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1004, 0, "%s", "rate");
     if (startAliasInfo->timescale)
@@ -760,7 +762,7 @@ void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *
     MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
     handle_sample = AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     v3 = -transformed[1];
-    AIL_set_sample_3D_position(handle_sample, LODWORD(v3), LODWORD(transformed[2]), LODWORD(transformed[0]));
+    AIL_set_sample_3D_position(handle_sample, v3, transformed[2], transformed[0]);
 }
 
 double __cdecl SND_GetStream3DVolumeFallOff(int index, int listenerIndex)
@@ -898,7 +900,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
             AIL_set_stream_loop_count((HSTREAM)handle, (startAliasInfo->alias0->flags & 1) == 0);
             baseSlavePercentage = MSS_GetWetLevel(startAliasInfo->alias0);
             v6 = CG_BannerScoreboardScaleMultiplier();
-            AIL_set_sample_reverb_levels(handle_sample, LODWORD(v6), LODWORD(baseSlavePercentage));
+            AIL_set_sample_reverb_levels(handle_sample, v6, baseSlavePercentage);
             AIL_stream_ms_position((HSTREAM)handle, total_msec, 0);
             if (startAliasInfo->timeshift < total_msec[0])
             {
@@ -1013,7 +1015,7 @@ void __cdecl SND_SetRoomtype(int roomtype)
     AIL_set_room_type(milesGlob.driver, roomtype);
     WetLevel = MSS_GetWetLevel(0);
     v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_digital_master_reverb_levels(milesGlob.driver, LODWORD(v1), LODWORD(WetLevel));
+    AIL_set_digital_master_reverb_levels(milesGlob.driver, v1, WetLevel);
 }
 
 void __cdecl SND_UpdateEqs()
@@ -1252,7 +1254,7 @@ void __cdecl SND_Set2DChannelVolume(int index, float volume)
             "%s\n\t(index) = %i",
             "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
             index);
-    AIL_set_sample_volume_levels(milesGlob.handle_sample[index], LODWORD(volume), LODWORD(volume));
+    AIL_set_sample_volume_levels(milesGlob.handle_sample[index], volume, volume);
 }
 
 double __cdecl SND_Get3DChannelVolume(int index)
@@ -1288,12 +1290,12 @@ void __cdecl SND_Set3DChannelVolume(int index, float volume)
             index);
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2)
     {
-        AIL_set_sample_volume_levels(milesGlob.handle_sample[index], LODWORD(volume), LODWORD(volume));
+        AIL_set_sample_volume_levels(milesGlob.handle_sample[index], volume, volume);
     }
     else
     {
         v2 = volume * 0.5;
-        AIL_set_sample_volume_levels(milesGlob.handle_sample[index], LODWORD(v2), LODWORD(v2));
+        AIL_set_sample_volume_levels(milesGlob.handle_sample[index], v2, v2);
     }
 }
 
@@ -1338,12 +1340,12 @@ void __cdecl SND_SetStreamChannelVolume(int index, float volume)
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2
         || !SND_IsAliasChannel3D((g_snd.chaninfo[index].alias0->flags & 0x3F00) >> 8))
     {
-        AIL_set_sample_volume_levels(handle_sample, LODWORD(volume), LODWORD(volume));
+        AIL_set_sample_volume_levels(handle_sample, volume, volume);
     }
     else
     {
         v2 = volume * 0.5;
-        AIL_set_sample_volume_levels(handle_sample, LODWORD(v2), LODWORD(v2));
+        AIL_set_sample_volume_levels(handle_sample, v2, v2);
     }
 }
 
@@ -1446,7 +1448,7 @@ void __cdecl SND_Update2DChannelReverb(int index)
             index);
     WetLevel = MSS_GetWetLevel(g_snd.chaninfo[index].alias0);
     v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], LODWORD(v1), LODWORD(WetLevel));
+    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], v1, WetLevel);
 }
 
 void __cdecl SND_Update3DChannelReverb(int index)
@@ -1464,7 +1466,7 @@ void __cdecl SND_Update3DChannelReverb(int index)
             index);
     WetLevel = MSS_GetWetLevel(g_snd.chaninfo[index].alias0);
     v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], LODWORD(v1), LODWORD(WetLevel));
+    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], v1, WetLevel);
 }
 
 void __cdecl SND_UpdateStreamChannelReverb(int index)
@@ -1484,7 +1486,7 @@ void __cdecl SND_UpdateStreamChannelReverb(int index)
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     WetLevel = MSS_GetWetLevel(g_snd.chaninfo[index].alias0);
     v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(handle_sample, LODWORD(v1), LODWORD(WetLevel));
+    AIL_set_sample_reverb_levels(handle_sample, v1, WetLevel);
 }
 
 int __cdecl SND_Get2DChannelLength(int index)
