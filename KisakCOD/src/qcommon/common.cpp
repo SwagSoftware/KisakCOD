@@ -1323,6 +1323,7 @@ cmd_function_s Com_Quit_f_VAR;
 cmd_function_s Com_WriteConfig_f_VAR;
 cmd_function_s Com_WriteDefaults_f_VAR;
 
+static const char* comInitAllocName = "$init";
 void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 {
     int v1; // eax
@@ -1349,7 +1350,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         DB_SetInitializing(1);
         Com_Printf(7, "begin $init\n");
         initStartTime = Sys_Milliseconds();
-        PMem_BeginAlloc("$init", 1u);
+        PMem_BeginAlloc(comInitAllocName, 1u);
     }
     if (useFastFile->current.enabled)
         Com_InitXAssets();
@@ -1424,7 +1425,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     COM_PlayIntroMovies();
     if (useFastFile->current.enabled)
     {
-        PMem_EndAlloc("$init", 1u);
+        PMem_EndAlloc(comInitAllocName, 1u);
         DB_SetInitializing(0);
         v3 = Sys_Milliseconds();
         Com_Printf(16, "end $init %d ms\n", v3 - initStartTime);
