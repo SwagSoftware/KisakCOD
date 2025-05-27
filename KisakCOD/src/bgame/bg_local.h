@@ -351,6 +351,10 @@ struct animScript_t // sizeof=0x204
 struct XAnim_s;
 struct scr_animtree_t // sizeof=0x4
 {                                       // ...
+    scr_animtree_t()
+    {
+        anims = NULL;
+    }
     XAnim_s* anims;                     // ...
 };
 struct __declspec(align(8)) animScriptData_t // sizeof=0x9A9D0
@@ -1337,7 +1341,7 @@ void __cdecl BG_ParseConditionBits(
     unsigned int *result);
 int __cdecl BG_ParseConditions(const char **text_pp, animScriptItem_t *scriptItem);
 void BG_FindAnims();
-bgs_t *BG_FindAnimTrees();
+void BG_FindAnimTrees();
 scr_animtree_t __cdecl BG_FindAnimTree(const char *filename, int bEnforceExists);
 
 extern bgs_t *bgs;

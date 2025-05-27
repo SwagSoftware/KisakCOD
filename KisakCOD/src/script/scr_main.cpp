@@ -203,13 +203,11 @@ void __cdecl Scr_EndLoadScripts()
 void __cdecl Scr_BeginLoadAnimTrees(int user)
 {
     scrVarPub.varUsagePos = "<script compile variable>";
-    if (scrAnimPub.animtree_loading)
-        MyAssertHandler(".\\script\\scr_main.cpp", 261, 0, "%s", "!scrAnimPub.animtree_loading");
+    iassert(!scrAnimPub.animtree_loading);
     scrAnimPub.animtree_loading = 1;
     scrAnimPub.xanim_num[user] = 0;
     scrAnimPub.xanim_lookup[user][0].anims = 0;
-    if (scrAnimPub.animtrees)
-        MyAssertHandler(".\\script\\scr_main.cpp", 267, 0, "%s", "!scrAnimPub.animtrees");
+    iassert(!scrAnimPub.animtrees);
     scrAnimPub.animtrees = Scr_AllocArray();
     if (scrVarDebugPub)
         ++scrVarDebugPub->extRefCount[scrAnimPub.animtrees];
@@ -316,8 +314,7 @@ void __cdecl Scr_PrecacheAnimTrees(void *(__cdecl *Alloc)(int), int user)
 
 void __cdecl Scr_EndLoadAnimTrees()
 {
-    if (!scrAnimPub.animtrees)
-        MyAssertHandler(".\\script\\scr_main.cpp", 471, 0, "%s", "scrAnimPub.animtrees");
+    iassert(scrAnimPub.animtrees);
     ClearObject(scrAnimPub.animtrees);
     if (scrVarDebugPub)
         --scrVarDebugPub->extRefCount[scrAnimPub.animtrees];
@@ -325,7 +322,7 @@ void __cdecl Scr_EndLoadAnimTrees()
     scrAnimPub.animtrees = 0;
     if (scrAnimPub.animtree_node)
         RemoveRefToObject(scrAnimPub.animtree_node);
-    SL_ShutdownSystem(2u);
+    SL_ShutdownSystem(2);
     if (scrVarPub.programBuffer && !scrVarPub.endScriptBuffer)
         scrVarPub.endScriptBuffer = TempMalloc(0);
     scrAnimPub.animtree_loading = 0;

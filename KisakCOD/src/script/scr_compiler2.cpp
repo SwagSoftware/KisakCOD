@@ -737,7 +737,7 @@ int AddFunction(intptr_t func)
 
 	iassert(i == scrCompilePub.func_table_size);
 
-	if (scrCompilePub.func_table_size == SCR_FUNC_TABLE_SIZE)
+	if ((unsigned int)scrCompilePub.func_table_size >= SCR_FUNC_TABLE_SIZE)
 	{
 		Com_Error(ERR_DROP, "SCR_FUNC_TABLE_SIZE exceeded");
 	}

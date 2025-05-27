@@ -57,7 +57,7 @@ enum var_stat_t
 
 #define CLASS_NUM_COUNT 4
 #define VAR_NAME_BITS 8
-#define VAR_NAME_LOW_MASK 0xFFFFFF
+#define VAR_NAME_LOW_MASK 0x00FFFFFF
 
 #define MAX_ARRAYINDEX 0x800000
 
@@ -291,8 +291,8 @@ unsigned int  GetStartLocalId(unsigned int);
 unsigned int  AllocValue(void);
 unsigned int  AllocObject(void);
 unsigned int  Scr_AllocArray(void);
-unsigned int  AllocThread(ObjectInfo_u self);
-unsigned int  AllocChildThread(ObjectInfo_u self, unsigned int parentLocalId);
+unsigned int  AllocThread(unsigned int self);
+unsigned int  AllocChildThread(unsigned int self, unsigned int parentLocalId);
 unsigned int  Scr_GetSelf(unsigned int threadId);
 void  AddRefToObject(unsigned int id);
 void  RemoveRefToEmptyObject(unsigned int id);
@@ -320,16 +320,16 @@ unsigned int  FindLastSibling(unsigned int parentId);
 unsigned int  FindPrevSibling(unsigned int index);
 unsigned int  GetVariableName(unsigned int id);
 unsigned int GetObject(unsigned int id);
-VariableValueInternal_u GetArray(unsigned int id);
-VariableValueInternal_u FindObject(unsigned int id);
+unsigned int GetArray(unsigned int id);
+unsigned int FindObject(unsigned int id);
 bool  IsFieldObject(unsigned int id);
 int  Scr_IsThreadAlive(unsigned int);
 bool  IsObjectFree(unsigned int id);
-unsigned int GetValueType(unsigned int id);
+Vartype_t GetValueType(unsigned int id);
 unsigned int GetObjectType(unsigned int id);
 void  Scr_SetClassMap(unsigned int classnum);
 VariableValueInternal_u Scr_GetOffset(unsigned int classnum, const char* name);
-VariableValueInternal_u FindEntityId(unsigned int entnum, unsigned int classnum);
+unsigned int FindEntityId(unsigned int entnum, unsigned int classnum);
 void  SetEmptyArray(unsigned int parentId);
 void  Scr_AddArrayKeys(unsigned int parentId);
 scr_entref_t Scr_GetEntityIdRef(unsigned int entId);
@@ -379,7 +379,7 @@ void  RemoveVariableValue(unsigned int parentId, unsigned int index);
 void  SetVariableEntityFieldValue(unsigned int entId, unsigned int fieldName, VariableValue* value);
 void  SetVariableFieldValue(unsigned int id, VariableValue* value);
 VariableValue  Scr_EvalVariable(unsigned int id);
-void  Scr_EvalboolComplement(VariableValue* value);
+void  Scr_EvalBoolComplement(VariableValue* value);
 void  Scr_CastBool(VariableValue* value);
 bool  Scr_CastString(VariableValue* value);
 void  Scr_CastDebugString(VariableValue* value);
@@ -426,7 +426,7 @@ void  RemoveRefToObject(unsigned int id);
 void  ClearVariableField(unsigned int parentId, unsigned int name, VariableValue* value);
 VariableValue  Scr_EvalVariableField(unsigned int id);
 void  Scr_EvalSizeValue(VariableValue* value);
-void  Scr_EvalboolNot(VariableValue* value);
+void  Scr_EvalBoolNot(VariableValue* value);
 void  Scr_EvalEquality(VariableValue* value1, VariableValue* value2);
 void  Scr_EvalInequality(VariableValue* value1, VariableValue* value2);
 void  Scr_EvalBinaryOperator(int op, VariableValue* value1, VariableValue* value2);

@@ -877,11 +877,11 @@ void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue
         break;
     case 0x32:
         Scr_EvalExpression(*(sval_u *)(expr.type + 4), localId, value);
-        Scr_EvalboolNot(value);
+        Scr_EvalBoolNot(value);
         break;
     case 0x33:
         Scr_EvalExpression(*(sval_u *)(expr.type + 4), localId, value);
-        Scr_EvalboolComplement(value);
+        Scr_EvalBoolComplement(value);
         break;
     case 0x4F:
         Scr_EvalVector(
@@ -1225,7 +1225,7 @@ VariableValueInternal_u __cdecl Scr_EvalObject(sval_u classnum, sval_u entnum, V
 {
     unsigned int objectId; // [esp+0h] [ebp-4h]
 
-    objectId = FindEntityId(entnum.stringValue, classnum.stringValue).u.stringValue;
+    objectId = FindEntityId(entnum.stringValue, classnum.stringValue);
     if (objectId)
     {
         value->type = VAR_POINTER;

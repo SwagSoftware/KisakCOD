@@ -350,24 +350,26 @@ unsigned int  Scr_AllocArray(void)
 	return id;
 }
 
-unsigned int  AllocThread(ObjectInfo_u self)
+unsigned int  AllocThread(unsigned int self)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
 	unsigned int id; // [esp+4h] [ebp-4h]
 
 	id = AllocVariable();
+
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN];
 	entryValue->w.status = VAR_STAT_EXTERNAL;
 
 	iassert(!(entryValue->w.type & VAR_MASK));
-
 	entryValue->w.status |= VAR_THREAD;
+
 	entryValue->u.next = 0;
-	entryValue->u.o.u = self;
+	entryValue->u.o.u.self = self;
+
 	return id;
 }
 
-unsigned int  AllocChildThread(ObjectInfo_u self, unsigned int parentLocalId)
+unsigned int  AllocChildThread(unsigned int self, unsigned int parentLocalId)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
 	unsigned int id; // [esp+4h] [ebp-4h]
@@ -384,7 +386,7 @@ unsigned int  AllocChildThread(ObjectInfo_u self, unsigned int parentLocalId)
 
 	entryValue->w.status |= parentLocalId << 8;
 	entryValue->u.next = 0;
-	entryValue->u.o.u = self;
+	entryValue->u.o.u.self = self;
 
 	return id;
 }
@@ -795,7 +797,7 @@ unsigned int GetObject(unsigned int id)
 	return entryValue->u.u.pointerValue;
 }
 
-VariableValueInternal_u GetArray(unsigned int id)
+unsigned int GetArray(unsigned int id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -805,18 +807,18 @@ VariableValueInternal_u GetArray(unsigned int id)
 	iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 	iassert((entryValue->w.type & VAR_MASK) == VAR_UNDEFINED || (entryValue->w.type & VAR_MASK) == VAR_POINTER);
 
-	if ((entryValue->w.status & 0x1F) == 0)
+	if ((entryValue->w.type & VAR_MASK) == VAR_UNDEFINED)
 	{
-		entryValue->w.status |= 1u;
-		entryValue->u.u.intValue = Scr_AllocArray();
+		entryValue->w.type |= VAR_POINTER;
+		entryValue->u.u.pointerValue = Scr_AllocArray();
 	}
 
 	iassert((entryValue->w.type & VAR_MASK) == VAR_POINTER);
 
-	return entryValue->u;
+	return entryValue->u.u.pointerValue;
 }
 
-VariableValueInternal_u FindObject(unsigned int id)
+unsigned int FindObject(unsigned int id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -827,7 +829,7 @@ VariableValueInternal_u FindObject(unsigned int id)
 	iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 	iassert((entryValue->w.type & VAR_MASK) == VAR_POINTER);
 
-	return entryValue->u;
+	return entryValue->u.u.pointerValue;
 }
 
 bool  IsFieldObject(unsigned int id)
@@ -866,11 +868,11 @@ bool  IsObjectFree(unsigned int id)
 	return (scrVarGlob.variableList[id + 1].w.status & 0x60) == 0;
 }
 
-unsigned int GetValueType(unsigned int id)
+Vartype_t GetValueType(unsigned int id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + id].w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 
-	return scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].w.status & 0x1F;
+	return (Vartype_t)(scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].w.status & VAR_MASK);
 }
 
 unsigned int GetObjectType(unsigned int id)
@@ -915,7 +917,7 @@ VariableValueInternal_u Scr_GetOffset(unsigned int classnum, const char* name)
 	}
 }
 
-VariableValueInternal_u FindEntityId(unsigned int entnum, unsigned int classnum)
+unsigned int FindEntityId(unsigned int entnum, unsigned int classnum)
 {
 	unsigned int entArrayId; // [esp+0h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-8h]
@@ -928,6 +930,7 @@ VariableValueInternal_u FindEntityId(unsigned int entnum, unsigned int classnum)
 	iassert(entArrayId);
 
 	id = FindArrayVariable(entArrayId, entnum);
+
 	if (id)
 	{
 		entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
@@ -935,7 +938,7 @@ VariableValueInternal_u FindEntityId(unsigned int entnum, unsigned int classnum)
 		iassert((entryValue->w.type & VAR_MASK) == VAR_POINTER);
 		iassert(entryValue->u.u.pointerValue);
 
-		return entryValue->u;
+		return entryValue->u.u.pointerValue;
 	}
 	else
 	{
@@ -1135,7 +1138,7 @@ unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, uns
 			notifyListIda;
 			notifyListIda = FindNextSibling(notifyListIda))
 		{
-			timeId = FindObject(notifyListIda).u.stringValue;
+			timeId = FindObject(notifyListIda);
 			iassert(timeId);
 			for (stackId = FindFirstSibling(timeId); stackId; stackId = FindNextSibling(stackId))
 			{
@@ -1706,7 +1709,7 @@ VariableValue  Scr_EvalVariable(unsigned int id)
 	return value;
 }
 
-void  Scr_EvalboolComplement(VariableValue* value)
+void  Scr_EvalBoolComplement(VariableValue* value)
 {
 	int type;
 
@@ -2253,7 +2256,7 @@ void  Scr_FreeEntityNum(unsigned int entnum, unsigned int classnum)
 		entnumId = FindArrayVariable(entArrayId, entnum);
 		if (entnumId)
 		{
-			entId = FindObject(entnumId).u.stringValue;
+			entId = FindObject(entnumId);
 			iassert(entId);
 			entryValue = &scrVarGlob.variableList[entId + 1];
 			iassert((entryValue->w.type & VAR_MASK) == VAR_ENTITY);
@@ -2644,7 +2647,7 @@ void  Scr_EvalSizeValue(VariableValue* value)
 	}
 }
 
-void  Scr_EvalboolNot(VariableValue* value)
+void  Scr_EvalBoolNot(VariableValue* value)
 {
 	Scr_CastBool(value);
 	if (value->type == 6)
@@ -3187,7 +3190,7 @@ void  Scr_KillThread(unsigned int parentId)
 	id = FindObjectVariable(scrVarPub.pauseArrayId, parentId);
 	if (id)
 	{
-		for (selfNameId = FindObject(id).u.stringValue; ; RemoveObjectVariable(selfNameId, name))
+		for (selfNameId = FindObject(id); ; RemoveObjectVariable(selfNameId, name))
 		{
 			notifyListEntry = FindFirstSibling(selfNameId);
 			if (!notifyListEntry)

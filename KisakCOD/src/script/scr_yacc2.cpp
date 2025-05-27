@@ -12,6 +12,7 @@
 
 #include "scr_yacc_structs.h"
 #include <client_mp/client_mp.h>
+#include "scr_vm.h"
 
 #pragma GCC push_options
 #pragma GCC optimize ("O0")

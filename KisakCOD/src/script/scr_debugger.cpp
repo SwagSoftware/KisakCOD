@@ -1551,12 +1551,7 @@ void Scr_Step()
                         "%s\n\t(scrDebuggerGlob.breakpointOpcode) = %i",
                         "(scrDebuggerGlob.breakpointOpcode >= 0)",
                         scrDebuggerGlob.breakpointOpcode);
-                codePos = Scr_GetNextCodepos(
-                    scrDebuggerGlob.breakpointTop,
-                    scrDebuggerGlob.breakpointCodePos,
-                    scrDebuggerGlob.breakpointOpcode,
-                    scrDebuggerGlob.step_mode,
-                    &localId);
+                codePos = Scr_GetNextCodepos(scrDebuggerGlob.breakpointTop, scrDebuggerGlob.breakpointCodePos, scrDebuggerGlob.breakpointOpcode, scrDebuggerGlob.step_mode, &localId);
                 scrVarPub.evaluate = evaluate;
             }
             Scr_SetTempBreakpoint((char*)codePos, localId);

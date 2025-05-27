@@ -290,12 +290,11 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
         v4->backup_text = 0;
     }
     Mantle_CreateAnims((void *(__cdecl *)(int))Hunk_AllocXAnimServer);
-    if (bgs)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1067, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
+    iassert(bgs == NULL);
     bgs = &level_bgs;
     if (!restart)
     {
-        memset((unsigned __int8 *)bgs, 0, 0x9A9D0u);
+        memset(&bgs->animScriptData, 0, sizeof(animScriptData_t));
         bgs->animScriptData.soundAlias = Com_FindSoundAlias;
         bgs->animScriptData.playSoundAlias = G_AnimScriptSound;
         GScr_LoadScripts();
@@ -305,10 +304,10 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     SV_GetConfigstring(0x13u, buffer, 1024);
     Info_SetValueForKey(buffer, "winner", "0");
     SV_SetConfigstring(19, buffer);
-    memset((unsigned __int8 *)g_entities, 0, sizeof(g_entities));
+    memset(g_entities, 0, sizeof(g_entities));
     level.gentities = g_entities;
     level.maxclients = g_maxclients->current.integer;
-    memset((unsigned __int8 *)g_clients, 0, sizeof(g_clients));
+    memset(g_clients, 0, sizeof(g_clients));
     level.clients = g_clients;
     for (i = 0; i < level.maxclients; ++i)
         g_entities[i].client = &level.clients[i];
@@ -334,12 +333,15 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     Scr_LoadGameType();
     Scr_LoadLevel();
     Scr_StartupGameType();
+
     for (i = 0; i < 8; ++i)
         g_scr_data.playerCorpseInfo[i].entnum = -1;
+
     if (useFastFile->current.enabled)
         G_PrintAllFastFileErrors();
-    if (bgs != &level_bgs)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1167, 0, "%s\n\t(bgs) = %p", "(bgs == &level_bgs)", bgs);
+
+    iassert(bgs == &level_bgs);
+
     bgs = 0;
     level.initializing = 0;
     SaveRegisteredWeapons();

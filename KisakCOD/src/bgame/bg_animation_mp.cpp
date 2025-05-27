@@ -2353,13 +2353,15 @@ void __cdecl BG_UpdatePlayerDObj(
 
 void __cdecl BG_LoadAnim()
 {
-    LargeLocal playerAnims_large_local(36864); // [esp+0h] [ebp-10h] BYREF
+    static_assert((sizeof(loadAnim_t) * 512) == 36864);
+
+    LargeLocal playerAnims_large_local(sizeof(loadAnim_t) * 512); // [esp+0h] [ebp-10h] BYREF
     unsigned int iNumPlayerAnims; // [esp+8h] [ebp-8h] BYREF
-    loadAnim_t(*playerAnims)[512]; // [esp+Ch] [ebp-4h]
+    loadAnim_t *playerAnims; // [esp+Ch] [ebp-4h]
 
     //LargeLocal::LargeLocal(&playerAnims_large_local, 36864);
     //playerAnims = (loadAnim_t(*)[512])LargeLocal::GetBuf(&playerAnims_large_local);
-    playerAnims = (loadAnim_t(*)[512])playerAnims_large_local.GetBuf();
+    playerAnims = (loadAnim_t*)playerAnims_large_local.GetBuf();
 
     BG_CheckThread();
 
@@ -2368,7 +2370,7 @@ void __cdecl BG_LoadAnim()
 
     iNumPlayerAnims = 0;
     BG_FindAnims();
-    BG_AnimParseAnimScript(&bgs->animScriptData, (loadAnim_t *)playerAnims, &iNumPlayerAnims);
+    BG_AnimParseAnimScript(&bgs->animScriptData, playerAnims, &iNumPlayerAnims);
     Scr_PrecacheAnimTrees(bgs->AllocXAnim, bgs->anim_user);
     BG_FindAnimTrees();
     Scr_EndLoadAnimTrees();
@@ -2402,10 +2404,9 @@ void BG_FinalizePlayerAnims()
     animation_s *pAnims; // [esp+60h] [ebp-10h]
     float vDelta[3]; // [esp+64h] [ebp-Ch] BYREF
 
-    if (!g_pLoadAnims)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 683, 0, "%s", "g_pLoadAnims");
-    if (!g_piNumLoadAnims)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 684, 0, "%s", "g_piNumLoadAnims");
+    iassert(g_pLoadAnims);
+    iassert(g_piNumLoadAnims);
+
     pAnims = (animation_s *)globalScriptData;
     pXAnims = globalScriptData->animTree.anims;
     iNumAnims = XAnimGetAnimTreeSize(pXAnims);
@@ -3064,27 +3065,24 @@ void BG_FindAnims()
     Scr_FindAnim("multiplayer", "turning", &bgs->generic_human.turning, bgs->anim_user);
 }
 
-bgs_t *BG_FindAnimTrees()
+void BG_FindAnimTrees()
 {
-    bgs_t *result; // eax
-
     BG_CheckThread();
-    if (!bgs)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3649, 0, "%s", "bgs");
+
+    iassert(bgs);
+
     bgs->generic_human.tree = BG_FindAnimTree("multiplayer", 1);
     bgs->animScriptData.animTree.anims = bgs->generic_human.tree.anims;
     bgs->animScriptData.torsoAnim = bgs->generic_human.torso.index;
     bgs->animScriptData.legsAnim = bgs->generic_human.legs.index;
-    result = bgs;
     bgs->animScriptData.turningAnim = bgs->generic_human.turning.index;
-    return result;
 }
 
 scr_animtree_t __cdecl BG_FindAnimTree(const char *filename, int bEnforceExists)
 {
     scr_animtree_t tree; // [esp+4h] [ebp-4h]
 
-    tree.anims = Scr_FindAnimTree(filename)->anims;
+    tree = Scr_FindAnimTree(filename);
     if (!tree.anims && bEnforceExists)
         Com_Error(ERR_DROP, "Could not find animation tree %s", filename);
     return tree;

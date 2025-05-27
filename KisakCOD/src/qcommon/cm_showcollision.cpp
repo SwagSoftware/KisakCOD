@@ -677,16 +677,18 @@ BOOL __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane
         v3 = (p->normal[0] * emins[0]) + (emins[1] * p->normal[1]) + (emins[2] * p->normal[2]);
         v4 = (p->normal[0] * emaxs[0]) + (emaxs[1] * p->normal[1]) + (emaxs[2] * p->normal[2]);
         break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\universal\\com_math.cpp", 3473, 1, "BoxOnPlaneSide: invalid signbits for plane");
+
+        __debugbreak();
+        __debugbreak();
+        __debugbreak();
+        __debugbreak();
+        __debugbreak();
+        break;
     }
     
-    if (!alwaysfails)
-        MyAssertHandler(".\\universal\\com_math.cpp", 3473, 1, "BoxOnPlaneSide: invalid signbits for plane");
-
-    __debugbreak();
-    __debugbreak();
-    __debugbreak();
-    __debugbreak();
-    __debugbreak();
-    return false; // LWSS: Note it shouldn't reach this point(Therefore the below function is un-impl'd)
+    return (2 * (v4 < p->dist)) | (v3 > p->dist); // KISAKTODO: probably BoxDistSqrdExceeds()
     //return BoxDistSqrdExceeds(emins, emaxs, p->normal, *(float *)&pa);
 }

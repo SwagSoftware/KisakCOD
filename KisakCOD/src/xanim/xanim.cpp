@@ -745,10 +745,9 @@ unsigned int __cdecl XAnimGetChildAt(const XAnim_s* anims, unsigned int animInde
 
 const char* __cdecl XAnimGetAnimName(const XAnim_s* anims, unsigned int animIndex)
 {
-    if (!anims)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 2572, 0, "%s", "anims");
-    if (animIndex >= anims->size)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 2573, 0, "animIndex < anims->size\n\t%i, %i", animIndex, anims->size);
+    iassert(anims);
+    iassert(animIndex < anims->size);
+
     if (IsLeafNode(&anims->entries[animIndex]))
         return anims->entries[animIndex].parts->name;
     else
