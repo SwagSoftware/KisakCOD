@@ -2301,8 +2301,7 @@ unsigned int __cdecl VM_Execute_0()
             parentLocalId = GetSafeParentLocalId(fs.localId);
             Scr_KillThread(fs.localId);
             scrVmPub.localVars -= fs.localVarCount;
-            tempValue.u = fs.top->u;
-            tempValue.type = fs.top->type;
+            tempValue = *fs.top;
             --fs.top;
             if (fs.top->type == VAR_PRECODEPOS)
                 MyAssertHandler(
@@ -2626,8 +2625,8 @@ unsigned int __cdecl VM_Execute_0()
                     "(fs.top <= scrVmPub.maxstack)",
                     fs.top - scrVmPub.stack);
             fs.top->type = VAR_POINTER;
-            fs.top->u.intValue = Scr_GetSelf(fs.localId);
-            AddRefToObject(fs.top->u.stringValue);
+            fs.top->u.pointerValue = Scr_GetSelf(fs.localId);
+            AddRefToObject(fs.top->u.pointerValue);
             continue;
         case OP_GetLevel:
             if (fs.top < scrVmPub.stack)
@@ -2647,8 +2646,8 @@ unsigned int __cdecl VM_Execute_0()
                     "(fs.top <= scrVmPub.maxstack)",
                     fs.top - scrVmPub.stack);
             fs.top->type = VAR_POINTER;
-            fs.top->u.intValue = scrVarPub.levelId;
-            AddRefToObject(scrVarPub.levelId);
+            fs.top->u.pointerValue = scrVarPub.levelId;
+            AddRefToObject(fs.top->u.pointerValue);
             continue;
         case OP_GetGame:
             if (fs.top < scrVmPub.stack)
@@ -2688,7 +2687,7 @@ unsigned int __cdecl VM_Execute_0()
                     fs.top - scrVmPub.stack);
             fs.top->type = VAR_POINTER;
             fs.top->u.pointerValue = scrVarPub.animId;
-            AddRefToObject(scrVarPub.animId);
+            AddRefToObject(fs.top->u.pointerValue);
             continue;
         case OP_GetAnimation:
             if (fs.top < scrVmPub.stack)
