@@ -1881,111 +1881,14 @@ void Log(char const *format, ...)
 
 #define READ_SHORT() Scr_ReadUnsignedShort(&fs.pos)
 
-#define $4EB129B90C5D52AEC7E812C77CC65277 Vartype_t
 unsigned int __cdecl VM_Execute_0()
 {
-    $4EB129B90C5D52AEC7E812C77CC65277 v3; // edx
-    const char *v4; // eax
-    const char *v5; // eax
     unsigned int Variable; // eax
-    $4EB129B90C5D52AEC7E812C77CC65277 v7; // edx
-    //VariableValue *top; // edx
-    unsigned int v9; // eax
-    unsigned int v10; // eax
-    const char *v11; // eax
-    const char *v12; // eax
-    const char *v13; // eax
-    unsigned int v14; // eax
-    unsigned int v15; // eax
-    const char *v16; // eax
-    const char *v17; // eax
-    const char *v18; // eax
-    const char *v19; // eax
-    DWORD v20; // eax
-    const char *v21; // eax
-    const char *v22; // eax
-    unsigned int v23; // eax
     unsigned int Array; // eax
-    unsigned int v25; // eax
     unsigned int Self; // eax
     unsigned int ObjectVariable_DONE; // eax
-    unsigned int v28; // eax
     unsigned int NewObjectVariable_DONE; // eax
-    unsigned int v30; // eax
-    unsigned int v31; // eax
-    unsigned int v32; // eax
-    unsigned int v33; // eax
-    unsigned int v34; // eax
-    unsigned int v35; // eax
-    unsigned int v36; // eax
-    const char *v37; // eax
-    const char *v38; // eax
-    unsigned int v40; // eax
-    const char *v41; // eax
-    const char *v42; // eax
     unsigned int localId; // [esp-8h] [ebp-390h]
-    unsigned int v44; // [esp-8h] [ebp-390h]
-    unsigned int v45; // [esp-8h] [ebp-390h]
-    VariableValue *v46; // [esp-4h] [ebp-38Ch]
-    VariableValue *v47; // [esp-4h] [ebp-38Ch]
-    unsigned int v48; // [esp-4h] [ebp-38Ch]
-    unsigned int v49; // [esp-4h] [ebp-38Ch]
-    _EXCEPTION_REGISTRATION_RECORD *v50; // [esp+0h] [ebp-388h]
-    int v51; // [esp+4h] [ebp-384h]
-    $4EB129B90C5D52AEC7E812C77CC65277 v52; // [esp+8h] [ebp-380h]
-    const char *v53; // [esp+10h] [ebp-378h]
-    unsigned int v54; // [esp+18h] [ebp-370h]
-    unsigned int v55; // [esp+28h] [ebp-360h]
-    unsigned __int16 v56; // [esp+54h] [ebp-334h]
-    unsigned __int16 v57; // [esp+80h] [ebp-308h]
-    unsigned __int16 v58; // [esp+84h] [ebp-304h]
-    unsigned __int16 v59; // [esp+88h] [ebp-300h]
-    unsigned int v60; // [esp+8Ch] [ebp-2FCh]
-    unsigned int v61; // [esp+90h] [ebp-2F8h]
-    unsigned __int16 v62; // [esp+98h] [ebp-2F0h]
-    const char *v63; // [esp+9Ch] [ebp-2ECh]
-    unsigned int v64; // [esp+A4h] [ebp-2E4h]
-    unsigned __int16 v65; // [esp+A8h] [ebp-2E0h]
-    int v66; // [esp+ACh] [ebp-2DCh]
-    unsigned __int16 v67; // [esp+B4h] [ebp-2D4h]
-    unsigned __int16 v68; // [esp+B8h] [ebp-2D0h]
-    int v69; // [esp+BCh] [ebp-2CCh]
-    unsigned __int16 v70; // [esp+C0h] [ebp-2C8h]
-    unsigned __int16 v71; // [esp+C4h] [ebp-2C4h]
-    unsigned __int16 v72; // [esp+C8h] [ebp-2C0h]
-    unsigned __int16 v73; // [esp+CCh] [ebp-2BCh]
-    int v74; // [esp+E0h] [ebp-2A8h]
-    int v75; // [esp+E8h] [ebp-2A0h]
-    const char *v76; // [esp+F0h] [ebp-298h]
-    int v77; // [esp+FCh] [ebp-28Ch]
-    int v78; // [esp+104h] [ebp-284h]
-    const char *v79; // [esp+10Ch] [ebp-27Ch]
-    const char *v80; // [esp+11Ch] [ebp-26Ch]
-    const char *v81; // [esp+128h] [ebp-260h]
-    float v82; // [esp+130h] [ebp-258h]
-    unsigned __int16 v83; // [esp+154h] [ebp-234h]
-    unsigned __int16 v84; // [esp+16Ch] [ebp-21Ch]
-    unsigned __int16 v85; // [esp+174h] [ebp-214h]
-    unsigned __int16 v86; // [esp+178h] [ebp-210h]
-    unsigned __int16 v87; // [esp+17Ch] [ebp-20Ch]
-    unsigned __int16 v88; // [esp+194h] [ebp-1F4h]
-    unsigned __int16 v89; // [esp+198h] [ebp-1F0h]
-    unsigned __int16 v90; // [esp+19Ch] [ebp-1ECh]
-    unsigned __int16 v91; // [esp+1A0h] [ebp-1E8h]
-    unsigned __int16 v92; // [esp+1A8h] [ebp-1E0h]
-    unsigned __int16 v93; // [esp+1CCh] [ebp-1BCh]
-    VariableUnion v94; // [esp+1D0h] [ebp-1B8h]
-    VariableUnion v95; // [esp+1D8h] [ebp-1B0h]
-    const char *v96; // [esp+1DCh] [ebp-1ACh]
-    unsigned __int16 v97; // [esp+1E0h] [ebp-1A8h]
-    unsigned __int16 v98; // [esp+1E4h] [ebp-1A4h]
-    VariableUnion v99; // [esp+1E8h] [ebp-1A0h]
-    VariableUnion v100; // [esp+1ECh] [ebp-19Ch]
-    unsigned __int16 v101; // [esp+1F0h] [ebp-198h]
-    unsigned __int16 v102; // [esp+1F4h] [ebp-194h]
-    VariableUnion v103; // [esp+21Ch] [ebp-16Ch]
-    $4EB129B90C5D52AEC7E812C77CC65277 v104; // [esp+220h] [ebp-168h]
-    unsigned int v105; // [esp+274h] [ebp-114h]
     unsigned int outparamcount; // [esp+278h] [ebp-110h]
     scr_entref_t entref; // [esp+27Ch] [ebp-10Ch]
     VariableValue stackValue; // [esp+284h] [ebp-104h] BYREF
@@ -2246,7 +2149,7 @@ unsigned int __cdecl VM_Execute_0()
             goto error_dec_top;
         case OP_jumpback:
             jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-            fs.pos -= v56;
+            fs.pos -= jumpOffset;
             break;
         case OP_bit_or:
         case OP_bit_ex_or:
@@ -2398,9 +2301,8 @@ unsigned int __cdecl VM_Execute_0()
             parentLocalId = GetSafeParentLocalId(fs.localId);
             Scr_KillThread(fs.localId);
             scrVmPub.localVars -= fs.localVarCount;
-            v3 = fs.top->type;
             tempValue.u.intValue = fs.top->u.intValue;
-            tempValue.type = v3;
+            tempValue.type = fs.top->type;
             --fs.top;
             if (fs.top->type == VAR_PRECODEPOS)
                 MyAssertHandler(
@@ -3018,8 +2920,7 @@ unsigned int __cdecl VM_Execute_0()
             {
                 if (!IsValidArrayIndex(fs.top->u.stringValue))
                 {
-                    v4 = va("array index %d out of range", fs.top->u.intValue);
-                    Scr_Error(v4);
+                    Scr_Error(va("array index %d out of range", fs.top->u.intValue));
                 }
                 fieldValueIndex = GetArrayVariableIndex(objectId, fs.top->u.stringValue);
             }
@@ -3030,8 +2931,7 @@ unsigned int __cdecl VM_Execute_0()
             }
             else
             {
-                v5 = va("%s is not an array index", var_typename[fs.top->type]);
-                Scr_Error(v5);
+                Scr_Error(va("%s is not an array index", var_typename[fs.top->type]));
             }
             fieldValueId = Scr_GetVarId(fieldValueIndex);
             if (!fieldValueId)
@@ -3308,14 +3208,12 @@ unsigned int __cdecl VM_Execute_0()
                 type = GetObjectType(objectId);
                 RemoveRefToObject(objectId);
                 scrVarPub.error_index = -1;
-                v11 = va("%s is not an entity", var_typename[type]);
-                Scr_Error(v11);
+                Scr_Error(va("%s is not an entity", var_typename[type]));
             LABEL_308:
                 type = fs.top->type;
                 RemoveRefToValue(fs.top->type, fs.top->u);
                 scrVarPub.error_index = -1;
-                v12 = va("%s is not an entity", var_typename[type]);
-                Scr_Error(v12);
+                Scr_Error(va("%s is not an entity", var_typename[type]));
             $LN359:
                 if (!Scr_IsInOpcodeMemory(fs.pos))
                     MyAssertHandler(".\\script\\scr_vm.cpp", 1122, 0, "%s", "Scr_IsInOpcodeMemory( fs.pos )");
@@ -3323,8 +3221,7 @@ unsigned int __cdecl VM_Execute_0()
                 {
                     if (*&fs.top->u.intValue < 0.0)
                         goto negWait;
-                    v82 = *&fs.top->u.intValue * 20.0;
-                    waitTime = (v82 + 9.313225746154785e-10);
+                    waitTime = *&fs.top->u.intValue * 20.0; // (v82 + 9.313225746154785e-10);
                     if (!waitTime)
                         waitTime = *&fs.top->u.intValue != 0.0;
                 }
@@ -3335,8 +3232,7 @@ unsigned int __cdecl VM_Execute_0()
                 else
                 {
                     scrVarPub.error_index = 2;
-                    v13 = va("type %s is not a float", var_typename[fs.top->type]);
-                    Scr_Error(v13);
+                    Scr_Error(va("type %s is not a float", var_typename[fs.top->type]));
                 }
                 if (waitTime < 0xFFFFFF)
                 {
@@ -3347,8 +3243,7 @@ unsigned int __cdecl VM_Execute_0()
                     scrVmDebugPub.profileEnable[fs.localId] = *profileEnablePos;
                     stackValue.type = VAR_STACK;
                     stackValue.u.intValue = (int)VM_ArchiveStack();
-                    v14 = GetVariable(scrVarPub.timeArrayId, waitTime);
-                    id = GetArray(v14);
+                    id = GetArray(GetVariable(scrVarPub.timeArrayId, waitTime));
                     stackId = GetNewObjectVariable(id, fs.localId);
                     SetNewVariableValue(stackId, &stackValue);
                     Scr_SetThreadWaitTime(fs.localId, waitTime);
@@ -3367,8 +3262,7 @@ unsigned int __cdecl VM_Execute_0()
                 scrVmDebugPub.profileEnable[fs.localId] = *profileEnablePos;
                 stackValue.type = VAR_STACK;
                 stackValue.u.intValue = (int)VM_ArchiveStack();
-                v15 = GetVariable(scrVarPub.timeArrayId, scrVarPub.time);
-                id = GetArray(v15);
+                id = GetArray(GetVariable(scrVarPub.timeArrayId, scrVarPub.time));
                 stackId = GetNewObjectVariableReverse(id, fs.localId);
                 SetNewVariableValue(stackId, &stackValue);
                 Scr_SetThreadWaitTime(fs.localId, scrVarPub.time);
@@ -3383,9 +3277,9 @@ unsigned int __cdecl VM_Execute_0()
             {
                 if (scrVmPub.top != fs.top - 1)
                     MyAssertHandler(".\\script\\scr_vm.cpp", 1084, 0, "%s", "scrVmPub.top == fs.top - 1");
-                v105 = scrVmPub.outparamcount;
+                outparamcount = scrVmPub.outparamcount;
                 Scr_HitBuiltinBreakpoint(fs.top, fs.pos, fs.localId, opcode, builtinIndex, scrVmPub.outparamcount + 1);
-                scrVmPub.outparamcount = v105;
+                scrVmPub.outparamcount = outparamcount;
                 scrVmPub.top = fs.top - 1;
             }
             builtInTime = scrVmDebugPub.builtInTime;
@@ -3472,8 +3366,7 @@ unsigned int __cdecl VM_Execute_0()
             scrVarPub.error_index = 1;
             Scr_Error("script stack overflow (too many embedded function calls)");
         LABEL_348:
-            v16 = va("%s is not a function pointer", var_typename[fs.top->type]);
-            Scr_Error(v16);
+            Scr_Error(va("%s is not a function pointer", var_typename[fs.top->type]));
         $LN322:
             if (fs.top->type != VAR_BEGIN_REF)
                 goto not_an_object1;
@@ -3515,8 +3408,7 @@ unsigned int __cdecl VM_Execute_0()
             {
                 RemoveRefToValue(fs.top->type, fs.top->u);
                 --fs.top;
-                v17 = va("%s is not a function pointer", var_typename[fs.top[1].type]);
-                Scr_Error(v17);
+                Scr_Error(va("%s is not a function pointer", var_typename[fs.top[1].type]));
             $LN311:
                 if (scrVmPub.function_count < 31)
                 {
@@ -3554,8 +3446,7 @@ unsigned int __cdecl VM_Execute_0()
                     scrVarPub.error_index = 1;
                     Scr_Error("script stack overflow (too many embedded function calls)");
                 }
-                v18 = va("%s is not a function pointer", var_typename[fs.top->type]);
-                Scr_Error(v18);
+                Scr_Error(va("%s is not a function pointer", var_typename[fs.top->type]));
             $LN304:
                 if (fs.top->type == VAR_BEGIN_REF)
                 {
@@ -3587,8 +3478,7 @@ unsigned int __cdecl VM_Execute_0()
             {
                 RemoveRefToValue(fs.top->type, fs.top->u);
                 --fs.top;
-                v19 = va("%s is not a function pointer", var_typename[fs.top[1].type]);
-                Scr_Error(v19);
+                Scr_Error(va("%s is not a function pointer", var_typename[fs.top[1].type]));
             $LN293:
                 RemoveRefToValue(fs.top->type, fs.top->u);
                 goto loop_dec_top;
@@ -3702,8 +3592,7 @@ unsigned int __cdecl VM_Execute_0()
                     MyAssertHandler(".\\script\\scr_vm.cpp", 1465, 0, "%s", "logScriptTimes");
                 if (logScriptTimes->current.enabled)
                 {
-                    v20 = Sys_Milliseconds();
-                    Com_Printf(23, "EXCEED TIME: %d\n", v20);
+                    Com_Printf(23, "EXCEED TIME: %d\n", Sys_Milliseconds());
                 }
                 if (!scrVmGlob.loading)
                 {
@@ -3794,8 +3683,7 @@ unsigned int __cdecl VM_Execute_0()
                     }
                     else
                     {
-                        v21 = va("++ must be applied to an int (applied to %s)", var_typename[fs.top->type]);
-                        Scr_Error(v21);
+                        Scr_Error(va("++ must be applied to an int (applied to %s)", var_typename[fs.top->type]));
                     $LN247:
                         if (fs.top < scrVmPub.stack)
                             MyAssertHandler(".\\script\\scr_vm.cpp", 1533, 0, "%s", "fs.top >= scrVmPub.stack");
@@ -3804,8 +3692,7 @@ unsigned int __cdecl VM_Execute_0()
                         *fs.top = Scr_EvalVariableField(fieldValueId);
                         if (fs.top->type != VAR_INTEGER)
                         {
-                            v22 = va("-- must be applied to an int (applied to %s)", var_typename[fs.top->type]);
-                            Scr_Error(v22);
+                            Scr_Error(va("-- must be applied to an int (applied to %s)", var_typename[fs.top->type]));
                         $LN239:
                             Scr_EvalOr(fs.top - 1, fs.top);
                             goto loop_dec_top;
@@ -3910,8 +3797,7 @@ unsigned int __cdecl VM_Execute_0()
             not_an_object_error2:
                 scrVarPub.error_index = 2;
             not_an_object_error:
-                v42 = va("%s is not an object", var_typename[type]);
-                Scr_Error(v42);
+                Scr_Error(va("%s is not an object", var_typename[type]));
                 goto error_1;
             }
             stringValue = fs.top->u.stringValue;
@@ -3954,19 +3840,15 @@ unsigned int __cdecl VM_Execute_0()
             scrVmDebugPub.profileEnable[fs.localId] = *profileEnablePos;
             stackValue.type = VAR_STACK;
             stackValue.u.intValue = (int)VM_ArchiveStack();
-            v48 = stringValue;
-            v23 = GetVariable(tempValue.u.stringValue, 0x18000u);
-            Array = GetArray(v23);
-            v25 = GetVariable(Array, v48);
-            id = GetArray(v25);
+            Array = GetArray(GetVariable(tempValue.u.stringValue, 0x18000u));
+            id = GetArray(GetVariable(Array, stringValue));
             stackId = GetNewObjectVariable(id, fs.localId);
             SetNewVariableValue(stackId, &stackValue);
             tempValue.type = VAR_BEGIN_REF;
             localId = fs.localId;
             Self = Scr_GetSelf(fs.localId);
             ObjectVariable_DONE = GetObjectVariable(scrVarPub.pauseArrayId, Self);
-            v28 = GetArray(ObjectVariable_DONE);
-            NewObjectVariable_DONE = GetNewObjectVariable(v28, localId);
+            NewObjectVariable_DONE = GetNewObjectVariable(GetArray(ObjectVariable_DONE), localId);
             SetNewVariableValue(NewObjectVariable_DONE, &tempValue);
             Scr_SetThreadNotifyName(fs.localId, stringValue);
             goto thread_end;
@@ -4060,21 +3942,11 @@ unsigned int __cdecl VM_Execute_0()
                         0,
                         "%s",
                         "GetObjectType( fs.top->u.pointerValue ) != VAR_DEAD_THREAD");
-                v49 = threadId;
-                v44 = stringValue;
-                v30 = GetVariable(fs.top->u.stringValue, 0x18000u);
-                v31 = GetArray(v30);
-                v32 = GetVariable(v31, v44);
-                v33 = GetArray(v32);
-                GetObjectVariable(v33, v49);
+                GetObjectVariable(GetArray(GetVariable(GetArray(GetVariable(fs.top->u.stringValue, 0x18000u)), stringValue)), threadId);
                 RemoveRefToObject(threadId);
                 tempValue.type = VAR_BEGIN_REF;
                 tempValue.u.intValue = fs.top->u.intValue;
-                v45 = threadId;
-                v34 = GetObjectVariable(scrVarPub.pauseArrayId, fs.localId);
-                v35 = GetArray(v34);
-                v36 = GetNewObjectVariable(v35, v45);
-                SetNewVariableValue(v36, &tempValue);
+                SetNewVariableValue(GetNewObjectVariable(GetArray(GetObjectVariable(scrVarPub.pauseArrayId, fs.localId)), threadId), &tempValue);
                 Scr_SetThreadNotifyName(threadId, stringValue);
                 fs.top -= 2;
                 continue;
@@ -4097,10 +3969,9 @@ unsigned int __cdecl VM_Execute_0()
             fs.pos += jumpOffset;
             caseCount = Scr_ReadUnsignedShort(&fs.pos);
 
-            v52 = fs.top->type;
-            if (v52 == VAR_STRING)
+            if (fs.top->type == VAR_STRING)
                 goto LABEL_522;
-            if (v52 == VAR_INTEGER)
+            if (fs.top->type == VAR_INTEGER)
             {
                 if (IsValidArrayIndex(fs.top->u.stringValue))
                 {
@@ -4108,8 +3979,7 @@ unsigned int __cdecl VM_Execute_0()
                 }
                 else
                 {
-                    v37 = va("switch index %d out of range", fs.top->u.intValue);
-                    Scr_Error(v37);
+                    Scr_Error(va("switch index %d out of range", fs.top->u.intValue));
                 LABEL_522:
                     caseValue = fs.top->u.stringValue;
                     SL_RemoveRefToString(fs.top->u.stringValue);
@@ -4117,8 +3987,7 @@ unsigned int __cdecl VM_Execute_0()
             }
             else
             {
-                v38 = va("cannot switch on %s", var_typename[fs.top->type]);
-                Scr_Error(v38);
+                Scr_Error(va("cannot switch on %s", var_typename[fs.top->type]));
             }
             if (!caseCount)
                 goto loop_dec_top;
@@ -4128,7 +3997,7 @@ unsigned int __cdecl VM_Execute_0()
             {
                 currentCaseValue = Scr_ReadUnsigned(&fs.pos);
                 currentCodePos = Scr_ReadCodePos(&fs.pos);
-                if (v64 == caseValue)
+                if (currentCaseValue == caseValue)
                 {
                     fs.pos = currentCodePos;
                     if (!currentCodePos)
@@ -4172,7 +4041,7 @@ unsigned int __cdecl VM_Execute_0()
                 MyAssertHandler(".\\script\\scr_vm.cpp", 1839, 0, "%s", "fs.top <= scrVmPub.maxstack");
             classnum = Scr_ReadUnsigned(&fs.pos);
             entnum = Scr_ReadUnsigned(&fs.pos);
-            fs.top->u.intValue = FindEntityId(v60, v61);
+            fs.top->u.intValue = FindEntityId(entnum, classnum);
             if (!fs.top->u.intValue)
             {
                 fs.top->type = VAR_UNDEFINED;
@@ -4235,8 +4104,7 @@ unsigned int __cdecl VM_Execute_0()
             goto interrupt_return;
         default:
             scrVmPub.terminal_error = 1;
-            v41 = va("CODE ERROR: unknown opcode %d", opcode);
-            RuntimeError((char*)fs.pos, 0, v41, 0);
+            RuntimeError((char*)fs.pos, 0, va("CODE ERROR: unknown opcode %d", opcode), 0);
             continue;
         }
     }
