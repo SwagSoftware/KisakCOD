@@ -4729,7 +4729,7 @@ BOOL Scr_ErrorInternal()
                     "g_script_error_level doesn't index ARRAY_COUNT( g_script_error )\n\t%i not in [0, %i)",
                     g_script_error_level,
                     33);
-            //longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
+            longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
         }
     error_2:
         Sys_Error("%s", scrVarPub.error_message);
@@ -5226,7 +5226,7 @@ void __cdecl Scr_NeverTerminalError(const char* error)
     if (scrVmGlob.loading)
     {
         Scr_SetErrorMessage(error);
-        //longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
+        longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
     }
     Scr_Error(error);
 }
