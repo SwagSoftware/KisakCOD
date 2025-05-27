@@ -3493,7 +3493,7 @@ unsigned int __cdecl VM_Execute_0()
                 type = fs.top->type;
                 goto not_an_object_error2;
             }
-            fs.localId = AllocThread(fs.top->u.intValue);
+            fs.localId = AllocThread(fs.top->u.stringValue);
             --fs.top;
             scrVmPub.function_frame->fs.pos = fs.pos;
             scrVmPub.function_frame->fs.startTop = fs.startTop;
