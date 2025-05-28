@@ -61,7 +61,7 @@ enum var_stat_t
 
 #define MAX_ARRAYINDEX 0x800000
 
-#define VARIABLELIST_CHILD_SIZE 0xFFFEu
+#define VARIABLELIST_CHILD_SIZE 0xFFFE
 #define VARIABLELIST_CHILD_BEGIN 0x8002 // 32770 // XBOX(0x6000) // 
 #define VARIABLELIST_PARENT_BEGIN 1
 #define VARIABLELIST_PARENT_SIZE 0x8000
@@ -70,7 +70,7 @@ enum var_stat_t
 
 #define OBJECT_STACK 0x18001
 
-#define FIRST_OBJECT 0xE
+#define FIRST_OBJECT 15
 #define FIRST_CLEARABLE_OBJECT 0x12
 #define FIRST_NONFIELD_OBJECT 0x15
 #define FIRST_DEAD_OBJECT 0x16
@@ -316,7 +316,7 @@ void  SetVariableValue(unsigned int id, struct VariableValue* value);
 void  SetNewVariableValue(unsigned int id, struct VariableValue* value);
 VariableValueInternal_u*  GetVariableValueAddress(unsigned int id);
 void  ClearVariableValue(unsigned int id);
-VariableValueInternal_u Scr_EvalVariableObject(unsigned int id);
+unsigned int Scr_EvalVariableObject(unsigned int id);
 unsigned int  GetArraySize(unsigned int id);
 unsigned int  FindFirstSibling(unsigned int id);
 unsigned int  FindNextSibling(unsigned int id);
@@ -332,7 +332,7 @@ bool  IsObjectFree(unsigned int id);
 Vartype_t GetValueType(unsigned int id);
 unsigned int GetObjectType(unsigned int id);
 void  Scr_SetClassMap(unsigned int classnum);
-VariableValueInternal_u Scr_GetOffset(unsigned int classnum, const char* name);
+int Scr_GetOffset(unsigned int classnum, const char* name);
 unsigned int FindEntityId(unsigned int entnum, unsigned int classnum);
 void  SetEmptyArray(unsigned int parentId);
 void  Scr_AddArrayKeys(unsigned int parentId);
@@ -356,7 +356,7 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
     const char* functionName,
     int minCount);
 
-static void Scr_DumpScriptVariablesDefault(void)
+inline void Scr_DumpScriptVariablesDefault(void)
 {
     Scr_DumpScriptVariables(0, 0, 0, 0, 0, 0, 0, 0);
 }
@@ -391,7 +391,7 @@ char  Scr_GetEntClassId(unsigned int id);
 int  Scr_GetEntNum(unsigned int id);
 void  Scr_ClearVector(VariableValue* value);
 void  Scr_CastVector(VariableValue* value);
-VariableUnion  Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* value);
+unsigned int Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* value);
 void  Scr_UnmatchingTypesError(VariableValue* value1, VariableValue* value2);
 
 void  Scr_EvalOr(VariableValue* value1, VariableValue* value2);
@@ -437,7 +437,7 @@ void  Scr_EvalBinaryOperator(int op, VariableValue* value1, VariableValue* value
 void  Scr_FreeEntityList(void);
 void  Scr_RemoveClassMap(unsigned int classnum);
 void  Scr_EvalArray(VariableValue* value, VariableValue* index);
-VariableUnion Scr_EvalArrayRef(unsigned int parentId);
+unsigned int Scr_EvalArrayRef(unsigned int parentId);
 void  ClearArray(unsigned int parentId, VariableValue* value);
 void  Scr_FreeValue(unsigned int id);
 //void  Scr_ShutdownStringSet(unsigned int);

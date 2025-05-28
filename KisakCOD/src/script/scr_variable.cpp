@@ -65,12 +65,12 @@ bool IsObject(VariableValueInternal* entryValue)
 {
 	iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 	
-	return (entryValue->w.status & 0x1F) >= 14;
+	return (entryValue->w.type & VAR_MASK) >= VAR_THREAD;
 }
 
 bool IsObject(VariableValue* value)
 {
-	return value->type >= 14;
+	return value->type >= VAR_THREAD;
 }
 
 void Scr_InitVariables()
@@ -260,17 +260,14 @@ unsigned int  AllocValue(void)
 	index = scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next;
 
 	if (!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next)
-	{
-		Com_Error(ERR_DROP, "exceeded maximum number of script variables (KISAK)");
-		//Scr_TerminalError("exceeded maximum number of script variables");
-	}
+		Scr_TerminalError("exceeded maximum number of script variables");
 
 	entry = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
 	entryValue = &scrVarGlob.variableList[entry->hash.id + VARIABLELIST_CHILD_BEGIN];
 	iassert((entryValue->w.status & VAR_STAT_MASK) == VAR_STAT_FREE);
 
 	next = entryValue->u.next;
-	if (entry != entryValue && (entry->w.status & 0x60) == 0)
+	if (entry != entryValue && (entry->w.status & VAR_STAT_MASK) == 0)
 	{
 		newIndex = entry->v.next;
 		iassert(newIndex != index);
@@ -289,6 +286,7 @@ unsigned int  AllocValue(void)
 	iassert(entry->hash.id > 0 && entry->hash.id < VARIABLELIST_CHILD_SIZE);
 
 	++scrVarPub.totalObjectRefCount;
+
 	if (scrVarDebugPub)
 	{
 		iassert(!scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + entry->hash.id]);
@@ -463,12 +461,14 @@ int  Scr_GetRefCountToObject(unsigned int id)
 
 float const* Scr_AllocVector(float const* v)
 {
-	float* result; // eax
+	float* result;
 
 	result = Scr_AllocVector();
-	*result = *v;
+	
+	result[0] = v[0];
 	result[1] = v[1];
 	result[2] = v[2];
+
 	return result;
 }
 
@@ -535,31 +535,21 @@ void  AddRefToValue(int type, VariableUnion u)
 
 void  RemoveRefToValue(int type, VariableUnion u)
 {
-	unsigned int value; // [esp+0h] [ebp-4h]
-
-	value = type - 1;
-	if ((unsigned int)(type - 1) < 4)
+	switch (type)
 	{
-		if (type == 1)
-		{
-			RemoveRefToObject(u.stringValue);
-		}
-		else if (value > 2)
-		{
-			if (type != 4)
-				MyAssertHandler(
-					".\\script\\scr_variable.cpp",
-					2419,
-					0,
-					"%s\n\t(value) = %i",
-					"(value == VAR_VECTOR - VAR_BEGIN_REF)",
-					value);
-			RemoveRefToVector(u.vectorValue);
-		}
-		else
-		{
-			SL_RemoveRefToString(u.stringValue);
-		}
+	case VAR_POINTER:
+		RemoveRefToObject(u.pointerValue);
+		break;
+
+	case VAR_STRING:
+	case VAR_ISTRING:
+		SL_RemoveRefToString(u.stringValue);
+		break;
+
+	case VAR_VECTOR:
+		iassert(type - 1 == VAR_VECTOR - VAR_BEGIN_REF);
+		RemoveRefToVector(u.vectorValue);
+		break;
 	}
 }
 
@@ -681,7 +671,7 @@ void  ClearVariableValue(unsigned int id)
 	iassert((entryValue->w.type & VAR_MASK) == VAR_UNDEFINED);
 }
 
-VariableValueInternal_u Scr_EvalVariableObject(unsigned int id)
+unsigned int Scr_EvalVariableObject(unsigned int id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
 	unsigned int type; // [esp+4h] [ebp-4h]
@@ -690,18 +680,19 @@ VariableValueInternal_u Scr_EvalVariableObject(unsigned int id)
 
 	iassert(((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE) || !id);
 
-	type = entryValue->w.status & 0x1F;
+	type = entryValue->w.type & VAR_MASK;
 
-	if (type == VAR_POINTER && (type = scrVarGlob.variableList[entryValue->u.u.intValue + 1].w.status & 0x1F, type < VAR_ARRAY))
+	if (type == VAR_POINTER)
 	{
-		iassert(type >= FIRST_OBJECT);
-		return entryValue->u;
+		type = scrVarGlob.variableList[entryValue->u.u.intValue + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK;
+		if (type < VAR_ARRAY)
+		{
+			iassert(type >= FIRST_OBJECT);
+			return entryValue->u.u.pointerValue;
+		}
 	}
-	else
-	{
-		Scr_Error(va("%s is not a field object", var_typename[type]));
-		return 0;
-	}
+
+	Scr_Error(va("%s is not a field object", var_typename[type]));
 	return 0;
 }
 
@@ -749,11 +740,11 @@ unsigned int  FindLastSibling(unsigned int parentId)
 	unsigned int index; // [esp+8h] [ebp-8h]
 
 	iassert(parentId);
-	parentValue = &scrVarGlob.variableList[parentId + 1];
+	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
 	iassert(IsObject(parentValue));
 	iassert(((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL));
 
-	parent = &scrVarGlob.variableList[parentValue->v.next + 1];
+	parent = &scrVarGlob.variableList[parentValue->v.next + VARIABLELIST_PARENT_BEGIN];
 	if (!parent->hash.u.prev)
 		return 0;
 	index = FindVariableIndexInternal(parentId, scrVarGlob.variableList[parent->hash.u.prev + VARIABLELIST_CHILD_BEGIN].w.status >> 8);
@@ -835,9 +826,9 @@ unsigned int FindObject(unsigned int id)
 bool  IsFieldObject(unsigned int id)
 {
 	iassert(id);
-	iassert(IsObject(&scrVarGlob.variableList[id + 1]));
+	iassert(IsObject(&scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN]));
 
-	return (scrVarGlob.variableList[id + 1].w.status & 0x1F) < 0x15;
+	return (scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].w.status & VAR_MASK) < VAR_ARRAY;
 }
 
 int Scr_IsThreadAlive(unsigned int thread)
@@ -846,26 +837,17 @@ int Scr_IsThreadAlive(unsigned int thread)
 
 	iassert(scrVarPub.timeArrayId);
 
-	entryValue = &scrVarGlob.variableList[thread + 1];
+	entryValue = &scrVarGlob.variableList[thread + VARIABLELIST_PARENT_BEGIN];
 	
 	iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
-	if (((entryValue->w.status & 0x1F) < 0xE || (entryValue->w.status & 0x1F) > 0x11) && (entryValue->w.status & 0x1F) != 0x16)
-	{
-		MyAssertHandler(
-			".\\script\\scr_variable.cpp",
-			3276,
-			0,
-			"%s",
-			"((entryValue->w.type & VAR_MASK) >= VAR_THREAD && (entryValue->w.type & VAR_MASK) <= VAR_CHILD_THREAD) || (entryVa"
-			"lue->w.type & VAR_MASK) == VAR_DEAD_THREAD");
-	}
+	iassert(((entryValue->w.type & VAR_MASK) >= VAR_THREAD && (entryValue->w.type & VAR_MASK) <= VAR_CHILD_THREAD) || (entryValue->w.type & VAR_MASK) == VAR_DEAD_THREAD);
 
-	return (entryValue->w.status & 0x1F) != 22;
+	return (entryValue->w.status & VAR_MASK) != VAR_DEAD_THREAD;
 }
 
 bool  IsObjectFree(unsigned int id)
 {
-	return (scrVarGlob.variableList[id + 1].w.status & 0x60) == 0;
+	return (scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].w.status & VAR_STAT_MASK) == 0;
 }
 
 Vartype_t GetValueType(unsigned int id)
@@ -879,7 +861,7 @@ unsigned int GetObjectType(unsigned int id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id].w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 
-	return scrVarGlob.variableList[id + 1].w.status & 0x1F;
+	return scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK;
 }
 
 void  Scr_SetClassMap(unsigned int classnum)
@@ -898,23 +880,18 @@ void  Scr_SetClassMap(unsigned int classnum)
 		++scrVarDebugPub->extRefCount[g_classMap[classnum].id];
 }
 
-VariableValueInternal_u Scr_GetOffset(unsigned int classnum, const char* name)
+int Scr_GetOffset(unsigned int classnum, const char* name)
 {
-	unsigned int v2; // eax
-	unsigned int classId; // [esp+0h] [ebp-8h]
-	unsigned int fieldId; // [esp+4h] [ebp-4h]
+	unsigned int fieldId;
 
-	classId = g_classMap[classnum].id;
-	v2 = SL_ConvertFromString(name);
-	fieldId = FindVariable(classId, v2);
+	fieldId = FindVariable(g_classMap[classnum].id, SL_ConvertFromString(name));
+
 	if (fieldId)
 	{
-		return scrVarGlob.variableList[fieldId + VARIABLELIST_CHILD_BEGIN].u;
+		return scrVarGlob.variableList[fieldId + VARIABLELIST_CHILD_BEGIN].u.u.entityOffset;
 	}
-	else
-	{
-		return -1;
-	}
+
+	return -1;
 }
 
 unsigned int FindEntityId(unsigned int entnum, unsigned int classnum)
@@ -1530,7 +1507,7 @@ unsigned int  Scr_FindAllVariableField(unsigned int parentId, unsigned int* name
 			iassert(namea);
 			if (namea != 98304 && namea != 98305)
 			{
-				iassert(name <= scrVarPub.canonicalStrCount);
+				iassert(namea <= scrVarPub.canonicalStrCount);
 				if (names)
 					names[count] = namea;
 				++count;
@@ -1728,9 +1705,6 @@ void  Scr_EvalBoolComplement(VariableValue* value)
 
 void  Scr_CastBool(VariableValue* value)
 {
-	const char* v1; // eax
-	int type; // [esp+4h] [ebp-4h]
-
 	if (value->type == VAR_INTEGER)
 	{
 		value->u.intValue = value->u.intValue != 0;
@@ -1742,10 +1716,9 @@ void  Scr_CastBool(VariableValue* value)
 	}
 	else
 	{
-		type = value->type;
-		RemoveRefToValue(type, value->u);
-		value->type = VAR_UNDEFINED;
-		Scr_Error(va("cannot cast %s to bool", var_typename[type]));
+		//RemoveRefToValue(value->type, value->u);
+		//value->type = VAR_UNDEFINED;
+		Scr_Error(va("cannot cast %s to bool", var_typename[value->type]));
 	}
 }
 
@@ -1756,26 +1729,30 @@ bool  Scr_CastString(VariableValue* value)
 	switch (value->type)
 	{
 	case VAR_STRING:
-		return 1;
+		return true;
+
 	case VAR_INTEGER:
 		value->type = VAR_STRING;
 		value->u.stringValue = SL_GetStringForInt(value->u.intValue);
-		return 1;
+		return true;
+
 	case VAR_FLOAT:
 		value->type = VAR_STRING;
 		value->u.stringValue = SL_GetStringForFloat(value->u.floatValue);
-		return 1;
+		return true;
+
 	case VAR_VECTOR:
 		value->type = VAR_STRING;
-		constTempVector = (const float*)value->u.intValue;
+		constTempVector = value->u.vectorValue;
 		value->u.stringValue = SL_GetStringForVector(value->u.vectorValue);
 		RemoveRefToVector(constTempVector);
-		return 1;
+		return true;
+
 	default:
 		scrVarPub.error_message = va("cannot cast %s to string", var_typename[value->type]);
 		RemoveRefToValue(value->type, value->u);
 		value->type = VAR_UNDEFINED;
-		return 0;
+		return false;
 	}
 }
 
@@ -1842,56 +1819,59 @@ void  Scr_ClearVector(VariableValue* value)
 
 void  Scr_CastVector(VariableValue* value)
 {
-	const char* v1; // eax
-	int type; // [esp+0h] [ebp-14h]
-	int i; // [esp+4h] [ebp-10h]
-	float vec[3]; // [esp+8h] [ebp-Ch] BYREF
+	int type, i;
+	float vec[3];
 
-	for (i = 2; i >= 0; --i)
+	for (i = 2; i >= 0; i--)
 	{
 		type = value[i].type;
-		if (type == VAR_FLOAT)
+
+		switch (type)
 		{
+		case VAR_FLOAT:
 			vec[2 - i] = value[i].u.floatValue;
-		}
-		else
-		{
-			if (type != VAR_INTEGER)
-			{
-				scrVarPub.error_index = i + 1;
-				Scr_ClearVector(value);
-				Scr_Error(va("type %s is not a float", var_typename[type]));
-				return;
-			}
+			break;
+
+		case VAR_INTEGER:
 			vec[2 - i] = (float)value[i].u.intValue;
+			break;
+
+		default:
+			scrVarPub.error_index = i + 1;
+			Scr_ClearVector(value);
+			Scr_Error(va("type %s is not a float", var_typename[type]));
+			return;
 		}
 	}
 	value->type = VAR_VECTOR;
 	value->u.vectorValue = Scr_AllocVector(vec);
 }
 
-VariableUnion  Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* value)
+unsigned int  Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* value)
 {
-	const char* v3; // eax
 	unsigned int type; // [esp+0h] [ebp-Ch]
 	VariableValue tempValue; // [esp+4h] [ebp-8h] BYREF
 
 	type = value->type;
-	if (type == VAR_POINTER && (type = scrVarGlob.variableList[value->u.intValue + 1].w.type & VAR_MASK, type < 0x15))
+
+	if (type == VAR_POINTER)
 	{
-		iassert(type >= FIRST_OBJECT);
-		tempValue.type = VAR_POINTER;
-		tempValue.u.intValue = value->u.intValue;
-		SetVariableValue(tempVariable, &tempValue);
-		return tempValue.u;
+		type = scrVarGlob.variableList[value->u.intValue + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK;
+		if (type < VAR_ARRAY)
+		{
+			iassert(type >= FIRST_OBJECT);
+
+			tempValue.type = VAR_POINTER;
+			tempValue.u.intValue = value->u.intValue;
+
+			SetVariableValue(tempVariable, &tempValue);
+			return tempValue.u.pointerValue;
+		}
 	}
-	else
-	{
-		RemoveRefToValue(value->type, value->u);
-		v3 = va("%s is not a field object", var_typename[type]);
-		Scr_Error(v3);
-		return 0;
-	}
+
+	RemoveRefToValue(value->type, value->u);
+	Scr_Error(va("%s is not a field object", var_typename[type]));
+	return 0;
 }
 
 void  Scr_UnmatchingTypesError(VariableValue* value1, VariableValue* value2)
@@ -2833,101 +2813,82 @@ void  Scr_RemoveClassMap(unsigned int classnum)
 
 void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 {
-	const char* v2; // eax
-	const char* v3; // eax
-	const char* v4; // eax
-	const char* v5; // eax
-	const char* v6; // eax
-	unsigned int ArrayIndex; // eax
-	const char* v8; // eax
-	int type; // [esp+10h] [ebp-18h]
 	char c[4]; // [esp+1Ch] [ebp-Ch] BYREF
 	const char* s; // [esp+20h] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+24h] [ebp-4h]
 
 	iassert(value != index);
-	type = value->type;
-	switch (type)
+	switch (value->type)
 	{
-	case 1:
-		entryValue = &scrVarGlob.variableList[value->u.intValue + 1];
+	case VAR_POINTER:
+		entryValue = &scrVarGlob.variableList[value->u.pointerValue + 1];
+
 		iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 		iassert(IsObject(entryValue));
+
 		if ((entryValue->w.status & 0x1F) == 0x15)
 		{
-			ArrayIndex = Scr_FindArrayIndex(value->u.intValue, index);
-			*index = Scr_EvalVariable(ArrayIndex);
-			RemoveRefToObject(value->u.intValue);
+			*index = Scr_EvalVariable(Scr_FindArrayIndex(value->u.intValue, index));
+			RemoveRefToObject(value->u.pointerValue);
 		}
 		else
 		{
 			scrVarPub.error_index = 1;
-			v6 = va("%s is not an array", var_typename[entryValue->w.status & 0x1F]);
-			//Scr_Error(v6);
-			iassert(0);
+			Scr_Error(va("%s is not an array", var_typename[entryValue->w.type & VAR_MASK]));
 		}
 		break;
-	case 2:
-		if (index->type == 6)
+	case VAR_STRING:
+		if (index->type == VAR_INTEGER)
 		{
-			if (index->u.intValue < 0
-				|| (s = SL_ConvertToString(value->u.intValue), index->u.intValue >= (signed int)strlen(s)))
+			if (index->u.intValue < 0 || (s = SL_ConvertToString(value->u.intValue), index->u.intValue >= (signed int)strlen(s)))
 			{
-				v2 = va("string index %d out of range", index->u.intValue);
-				//Scr_Error(v2);
-				iassert(0);
+				Scr_Error(va("string index %d out of range", index->u.intValue));
 			}
 			else
 			{
 				index->type = VAR_STRING;
+
 				c[0] = s[index->u.intValue];
 				c[1] = 0;
-				index->u.stringValue = SL_GetStringOfSize(c, 0, 2u, 15).prev;
-				SL_RemoveRefToString(value->u.intValue);
+
+				index->u.stringValue = SL_GetStringOfSize(c, 0, 2, 15).prev;
+				SL_RemoveRefToString(value->u.stringValue);
 			}
 		}
 		else
 		{
-			v3 = va("%s is not a string index", var_typename[index->type]);
-			//Scr_Error(v3);
-			iassert(0);
+			Scr_Error(va("%s is not a string index", var_typename[index->type]));
 		}
 		break;
-	case 4:
-		if (index->type == 6)
+	case VAR_VECTOR:
+		if (index->type == VAR_INTEGER)
 		{
-			if (index->u.intValue >= 3u)
+			if (index->u.intValue >= 3)
 			{
-				v4 = va("vector index %d out of range", index->u.intValue);
-				//Scr_Error(v4);
-				iassert(0);
+				Scr_Error(va("vector index %d out of range", index->u.intValue));
 			}
 			else
 			{
 				index->type = VAR_FLOAT;
-				index->u.floatValue = *(float*)(value->u.intValue + 4 * index->u.intValue);
+				//index->u.floatValue = *(float*)(value->u.intValue + 4 * index->u.intValue);
+				index->u.floatValue = value->u.vectorValue[index->u.intValue];
 				RemoveRefToVector(value->u.vectorValue);
 			}
 		}
 		else
 		{
-			v5 = va("%s is not a vector index", var_typename[index->type]);
-			//Scr_Error(v5);
-			iassert(0);
+			Scr_Error(va("%s is not a vector index", var_typename[index->type]));
 		}
 		break;
 	default:
-		if (value->type == 10)
-			MyAssertHandler(".\\script\\scr_variable.cpp", 4557, 0, "%s", "value->type != VAR_STACK");
+		iassert(value->type != VAR_STACK);
 		scrVarPub.error_index = 1;
-		v8 = va("%s is not an array, string, or vector", var_typename[value->type]);
-		//Scr_Error(v8);
-		iassert(0);
+		Scr_Error(va("%s is not an array, string, or vector", var_typename[value->type]));
 		break;
 	}
 }
 
-VariableUnion Scr_EvalArrayRef(unsigned int parentId)
+unsigned int Scr_EvalArrayRef(unsigned int parentId)
 {
 	VariableValueInternal* parentValue; // [esp+Ch] [ebp-1Ch]
 	VariableValueInternal* entValue; // [esp+10h] [ebp-18h]
@@ -2961,13 +2922,12 @@ VariableUnion Scr_EvalArrayRef(unsigned int parentId)
 						iassert(parentValue);
 						parentValue->u.u.intValue = varValue.u.intValue;
 					}
-					return varValue.u;
+					return varValue.u.pointerValue;
 				}
 				else
 				{
 					scrVarPub.error_index = 1;
 					Scr_Error(va("%s is not an array", var_typename[entryValue->w.status & VAR_MASK]));
-					iassert(0);
 					return 0;
 				}
 			}
@@ -2975,14 +2935,14 @@ VariableUnion Scr_EvalArrayRef(unsigned int parentId)
 			{
 				iassert(varValue.type != VAR_STACK);
 				scrVarPub.error_index = 1;
-				if (varValue.type == 2)
+				if (varValue.type == VAR_STRING)
 				{
 					Scr_Error("string characters cannot be individually changed");
 					return 0;
 				}
 				else
 				{
-					if (varValue.type == 4)
+					if (varValue.type == VAR_VECTOR)
 					{
 						Scr_Error("vector components cannot be individually changed");
 					}
@@ -3007,13 +2967,12 @@ VariableUnion Scr_EvalArrayRef(unsigned int parentId)
 			varValue = GetEntityFieldValue(entValue->w.classnum >> VAR_NAME_BITS, entValue->u.o.u.entnum, scrVarGlob.variableList[fieldId + VARIABLELIST_CHILD_BEGIN].u.u.entityOffset);
 			if (varValue.type)
 			{
-				if (varValue.type == 1 && !scrVarGlob.variableList[varValue.u.intValue + 1].u.next)
+				if (varValue.type == VAR_POINTER && !scrVarGlob.variableList[varValue.u.intValue + 1].u.next)
 				{
 					RemoveRefToValue(1, varValue.u);
 					scrVarPub.error_index = 1;
-					iassert(0);
-					//Scr_Error("read-only array cannot be changed");
-					//return 0;
+					Scr_Error("read-only array cannot be changed");
+					return 0;
 				}
 				RemoveRefToValue(varValue.type, varValue.u);
 				iassert((varValue.type != VAR_POINTER) || !scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + varValue.u.pointerValue].u.o.refCount);
@@ -3024,11 +2983,11 @@ VariableUnion Scr_EvalArrayRef(unsigned int parentId)
 		parentValue = &scrVarGlob.variableList[GetNewVariable(scrVarPub.entId, scrVarPub.entFieldName) + VARIABLELIST_CHILD_BEGIN];
 	}
 
-	iassert(!(parentValue->w.type& VAR_MASK));
+	iassert(!(parentValue->w.type & VAR_MASK));
 
 	parentValue->w.type |= VAR_POINTER;
 	parentValue->u.u.pointerValue = Scr_AllocArray();
-	return parentValue->u.u;
+	return parentValue->u.u.pointerValue;
 }
 
 void  ClearArray(unsigned int parentId, VariableValue* value)
@@ -3154,7 +3113,6 @@ void  Scr_KillEndonThread(unsigned int threadId)
 
 VariableValue Scr_FindVariableField(unsigned int parentId, unsigned int name)
 {
-	unsigned int value; // [esp+14h] [ebp-Ch]
 	unsigned int id; // [esp+1Ch] [ebp-4h]
 
 	iassert(parentId);
@@ -3164,11 +3122,13 @@ VariableValue Scr_FindVariableField(unsigned int parentId, unsigned int name)
 		|| ((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.type & VAR_MASK) >= FIRST_DEAD_OBJECT));
 
 	id = FindVariable(parentId, name);
+
 	if (id)
-		return Scr_EvalVariable(id);
-	if ((scrVarGlob.variableList[parentId + 1].w.status & 0x1F) == 0x14)
+		return Scr_EvalVariable(id); // LWSS: this is NOT 'return Scr_EvalVariable(id).u.stringValue;'. The type is confirmed '2' for the 1st call
+
+	if ((scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK) == VAR_ENTITY)
 		return Scr_EvalVariableEntityField(parentId, name);
-	//return (VariableValue)value;
+
 	return (VariableValue)0;
 }
 
@@ -3399,7 +3359,7 @@ unsigned short  AllocVariable(void)
 	entryValue = &scrVarGlob.variableList[entry->hash.id + 1];
 	iassert((entryValue->w.status & VAR_STAT_MASK) == VAR_STAT_FREE);
 	next = entryValue->u.next;
-	if (entry != entryValue && (entry->w.status & 0x60) == 0)
+	if (entry != entryValue && (entry->w.status & VAR_STAT_MASK) == VAR_STAT_FREE)
 	{
 		newIndex = entry->v.next;
 		iassert(newIndex != index);
@@ -4107,83 +4067,49 @@ void  FreeChildValue(unsigned int parentId, unsigned int id)
 	unsigned int index; // [esp+14h] [ebp-Ch]
 
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
-	if ((entryValue->w.status & 0x60) != 0x60)
-		MyAssertHandler(
-			".\\script\\scr_variable.cpp",
-			1505,
-			0,
-			"%s\n\t(entryValue->w.status & VAR_STAT_MASK) = %i",
-			"((entryValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL)",
-			entryValue->w.status & 0x60);
-	if (IsObject(entryValue))
-		MyAssertHandler(".\\script\\scr_variable.cpp", 1506, 0, "%s", "!IsObject( entryValue )");
-	if (scrVarGlob.variableList[entryValue->v.next + VARIABLELIST_CHILD_BEGIN].hash.id != id)
-		MyAssertHandler(
-			".\\script\\scr_variable.cpp",
-			1507,
-			0,
-			"%s",
-			"scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + entryValue->v.index].hash.id == id");
+
+	iassert((entryValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
+	iassert(!IsObject(entryValue));
+	iassert(scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + entryValue->v.index].hash.id == id);
+
 	RemoveRefToValue(entryValue->w.status & 0x1F, entryValue->u.u);
-	if (!id || id >= 0xFFFE)
-		MyAssertHandler(".\\script\\scr_variable.cpp", 1513, 0, "%s", "id > 0 && id < VARIABLELIST_CHILD_SIZE");
+
+	iassert(id > 0 && id < VARIABLELIST_CHILD_SIZE);
+
 	--scrVarPub.totalObjectRefCount;
+
 	if (scrVarDebugPub)
 	{
-		if (!scrVarDebugPub->leakCount[id + VARIABLELIST_CHILD_BEGIN])
-			MyAssertHandler(
-				".\\script\\scr_variable.cpp",
-				1518,
-				0,
-				"%s",
-				"scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]");
-		if (--scrVarDebugPub->leakCount[id + VARIABLELIST_CHILD_BEGIN])
-			MyAssertHandler(
-				".\\script\\scr_variable.cpp",
-				1520,
-				0,
-				"%s",
-				"!scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]");
+		iassert(scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]);
+		scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]--;
+		iassert(!scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]);
 	}
+
 	--scrVarPub.numScriptValues;
+
 	if (scrVarDebugPub)
 	{
-		if (!scrVarDebugPub->varUsage[id + VARIABLELIST_CHILD_BEGIN])
-			MyAssertHandler(
-				".\\script\\scr_variable.cpp",
-				1528,
-				0,
-				"%s",
-				"scrVarDebugPub->varUsage[VARIABLELIST_CHILD_BEGIN + id]");
+		iassert(scrVarDebugPub->varUsage[VARIABLELIST_CHILD_BEGIN + id]);
 		scrVarDebugPub->varUsage[id + VARIABLELIST_CHILD_BEGIN] = 0;
 	}
-	if ((entryValue->w.status & 0x60) != 0x60)
-		MyAssertHandler(
-			".\\script\\scr_variable.cpp",
-			1533,
-			0,
-			"%s\n\t(entryValue->w.status & VAR_STAT_MASK) = %i",
-			"((entryValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL)",
-			entryValue->w.status & 0x60);
+
+	iassert((entryValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
+
 	index = entryValue->v.next;
 	entry = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
-	if (entry->hash.id != id)
-		MyAssertHandler(".\\script\\scr_variable.cpp", 1537, 0, "%s", "entry->id == id");
+
+	iassert(entry->hash.id == id);
+
 	nextSiblingIndex = entryValue->nextSibling;
 	prevSiblingIndex = entry->hash.u.prev;
+
 	if (entry->hash.u.prev)
 	{
 		scrVarGlob.variableList[scrVarGlob.variableList[prevSiblingIndex + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].nextSibling = nextSiblingIndex;
 	}
 	else
 	{
-		if (scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].hash.id)
-			MyAssertHandler(
-				".\\script\\scr_variable.cpp",
-				1549,
-				0,
-				"%s",
-				"!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].hash.id");
+		iassert(!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].hash.id);
 		scrVarGlob.variableList[parentId + 1].nextSibling = scrVarGlob.variableList[nextSiblingIndex + VARIABLELIST_CHILD_BEGIN].hash.id;
 	}
 	if (nextSiblingIndex)
@@ -4193,13 +4119,7 @@ void  FreeChildValue(unsigned int parentId, unsigned int id)
 	else
 	{
 		parentIndex = scrVarGlob.variableList[parentId + 1].v.next;
-		if (scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].hash.id)
-			MyAssertHandler(
-				".\\script\\scr_variable.cpp",
-				1561,
-				0,
-				"%s",
-				"!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].hash.id");
+		iassert(!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].hash.id);
 		scrVarGlob.variableList[parentIndex + 1].hash.u.prev = scrVarGlob.variableList[prevSiblingIndex + VARIABLELIST_CHILD_BEGIN].hash.id;
 	}
 	entryValue->w.status = 0;
@@ -4330,36 +4250,37 @@ void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2)
 
 	type1 = value1->type;
 	type2 = value2->type;
+
 	if (type1 != type2)
 	{
-		if (type1 == 5 && type2 == 6)
+		if (type1 == VAR_FLOAT && type2 == VAR_INTEGER)
 		{
 			value2->type = VAR_FLOAT;
 			value2->u.floatValue = (float)value2->u.intValue;
 			return;
 		}
-		if (type1 == 6 && type2 == 5)
+		if (type1 == VAR_INTEGER && type2 == VAR_FLOAT)
 		{
 			value1->type = VAR_FLOAT;
 			value1->u.floatValue = (float)value1->u.intValue;
 			return;
 		}
-		if (type1 == 4)
+		if (type1 == VAR_VECTOR)
 		{
-			if (type2 == 5)
+			if (type2 == VAR_FLOAT)
 			{
 				tempVector = Scr_AllocVector();
-				*tempVector = value2->u.floatValue;
+				tempVector[0] = value2->u.floatValue;
 				tempVector[1] = value2->u.floatValue;
 				tempVector[2] = value2->u.floatValue;
 				value2->u.intValue = (int)tempVector;
 				value2->type = VAR_VECTOR;
 				return;
 			}
-			if (type2 == 6)
+			if (type2 == VAR_INTEGER)
 			{
 				tempVectora = Scr_AllocVector();
-				*tempVectora = (float)value2->u.intValue;
+				tempVectora[0] = (float)value2->u.intValue;
 				tempVectora[1] = (float)value2->u.intValue;
 				tempVectora[2] = (float)value2->u.intValue;
 				value2->u.intValue = (int)tempVectora;
@@ -4367,22 +4288,22 @@ void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2)
 				return;
 			}
 		}
-		if (type2 != 4)
+		if (type2 != VAR_VECTOR)
 			goto LABEL_18;
-		if (type1 == 5)
+		if (type1 == VAR_FLOAT)
 		{
 			tempVectorb = Scr_AllocVector();
-			*tempVectorb = value1->u.floatValue;
+			tempVectorb[0] = value1->u.floatValue;
 			tempVectorb[1] = value1->u.floatValue;
 			tempVectorb[2] = value1->u.floatValue;
 			value1->u.intValue = (int)tempVectorb;
 			value1->type = VAR_VECTOR;
 			return;
 		}
-		if (type1 == 6)
+		if (type1 == VAR_INTEGER)
 		{
 			tempVectorc = Scr_AllocVector();
-			*tempVectorc = (float)value1->u.intValue;
+			tempVectorc[0] = (float)value1->u.intValue;
 			tempVectorc[1] = (float)value1->u.intValue;
 			tempVectorc[2] = (float)value1->u.intValue;
 			value1->u.intValue = (int)tempVectorc;
@@ -4398,8 +4319,8 @@ void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2)
 
 void  Scr_CastWeakerStringPair(VariableValue* value1, VariableValue* value2)
 {
-	int type1; // [esp+14h] [ebp-Ch]
-	int type2; // [esp+18h] [ebp-8h]
+	Vartype_t type1; // [esp+14h] [ebp-Ch]
+	Vartype_t type2; // [esp+18h] [ebp-8h]
 	const float* constTempVector; // [esp+1Ch] [ebp-4h]
 	const float* constTempVectora; // [esp+1Ch] [ebp-4h]
 
@@ -4410,33 +4331,33 @@ void  Scr_CastWeakerStringPair(VariableValue* value1, VariableValue* value2)
 	{
 		if (type1 < type2)
 		{
-			if (type1 == 2)
+			if (type1 == VAR_STRING)
 			{
 				switch (type2)
 				{
-				case 4:
+				case VAR_VECTOR:
 					value2->type = VAR_STRING;
 					constTempVector = (const float*)value2->u.intValue;
 					value2->u.stringValue = SL_GetStringForVector(value2->u.vectorValue);
 					RemoveRefToVector(constTempVector);
 					return;
-				case 5:
+				case VAR_FLOAT:
 					value2->type = VAR_STRING;
 					value2->u.stringValue = SL_GetStringForFloat(value2->u.floatValue);
 					return;
-				case 6:
+				case VAR_INTEGER:
 					value2->type = VAR_STRING;
 					value2->u.stringValue = SL_GetStringForInt(value2->u.intValue);
 					return;
 				}
 			}
-			else if (type1 != 5)
+			else if (type1 != VAR_FLOAT)
 			{
 			LABEL_28:
 				Scr_UnmatchingTypesError(value1, value2);
 				return;
 			}
-			if (type2 == 6)
+			if (type2 == VAR_INTEGER)
 			{
 				value2->type = VAR_FLOAT;
 				value2->u.floatValue = (float)value2->u.intValue;
@@ -4444,31 +4365,31 @@ void  Scr_CastWeakerStringPair(VariableValue* value1, VariableValue* value2)
 			}
 			goto LABEL_28;
 		}
-		if (type2 == 2)
+		if (type2 == VAR_STRING)
 		{
 			switch (type1)
 			{
-			case 4:
+			case VAR_VECTOR:
 				value1->type = VAR_STRING;
 				constTempVectora = (const float*)value1->u.intValue;
 				value1->u.stringValue = SL_GetStringForVector(value1->u.vectorValue);
 				RemoveRefToVector(constTempVectora);
 				return;
-			case 5:
+			case VAR_FLOAT:
 				value1->type = VAR_STRING;
 				value1->u.stringValue = SL_GetStringForFloat(value1->u.floatValue);
 				return;
-			case 6:
+			case VAR_INTEGER:
 				value1->type = VAR_STRING;
 				value1->u.stringValue = SL_GetStringForInt(value1->u.intValue);
 				return;
 			}
 		}
-		else if (type2 != 5)
+		else if (type2 != VAR_FLOAT)
 		{
 			goto LABEL_28;
 		}
-		if (type1 == 6)
+		if (type1 == VAR_INTEGER)
 		{
 			value1->type = VAR_FLOAT;
 			value1->u.floatValue = (float)value1->u.intValue;
@@ -4542,8 +4463,10 @@ int  Scr_MakeValuePrimitive(unsigned int parentId)
 	iassert((parentValue->w.type & VAR_MASK) != VAR_NOTIFY_THREAD);
 	iassert((parentValue->w.type & VAR_MASK) != VAR_TIME_THREAD);
 	iassert((parentValue->w.type & VAR_MASK) != VAR_CHILD_THREAD);
-	if ((parentValue->w.status & 0x1F) != 0x15)
+
+	if ((parentValue->w.type & VAR_MASK) != VAR_ARRAY)
 		return 0;
+
 	while (2)
 	{
 		id = FindFirstSibling(parentId);
@@ -4551,10 +4474,13 @@ int  Scr_MakeValuePrimitive(unsigned int parentId)
 		if (id)
 		{
 			entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
+
 			iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
 			iassert(!IsObject(entryValue));
+
 			name = entryValue->w.name >> VAR_NAME_BITS;
-			switch (entryValue->w.type & 0x1F)
+
+			switch (entryValue->w.type & VAR_MASK)
 			{
 			case VAR_UNDEFINED:
 			case VAR_STRING:
@@ -4563,7 +4489,7 @@ int  Scr_MakeValuePrimitive(unsigned int parentId)
 			case VAR_END_REF:
 			case VAR_INTEGER:
 				goto LABEL_16;
-			case VAR_BEGIN_REF:
+			case VAR_POINTER:
 				if (Scr_MakeValuePrimitive(entryValue->u.u.stringValue))
 					goto LABEL_16;
 				goto $LN6_69;
@@ -4618,7 +4544,7 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 				{
 					id.intValue = valuea.u;
 					RemoveRefToObject(valuea.u.stringValue);
-					valuea.u.intValue = Scr_AllocArray();
+					valuea.u.pointerValue = Scr_AllocArray();
 					CopyArray(id.stringValue, valuea.u.stringValue);
 				}
 				return valuea.u;

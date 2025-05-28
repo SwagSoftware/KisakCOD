@@ -124,5 +124,5 @@ void __cdecl yy_flush_buffer(yy_buffer_state *b);
 void __cdecl  yy_fatal_error(const char *msg);
 LPVOID __cdecl yy_flex_alloc(unsigned int size);
 void *__cdecl yy_flex_realloc(void *ptr, unsigned int size);
-int __cdecl yyerror();
-void __cdecl ScriptParse(union sval_u *parseData, unsigned __int8 user);
+//int __cdecl yyerror();
+void __cdecl ScriptParse(union sval_u *parseData, unsigned char user);

@@ -519,7 +519,7 @@ void __cdecl Scr_GetEnt()
 
     name = (unsigned __int16)Scr_GetConstString(0).floatValue;
     key = Scr_GetString(1u);
-    offset = Scr_GetOffset(0, key).u.intValue;
+    offset = Scr_GetOffset(0, key);
     if (offset >= 0)
     {
         if (offset >= 10)
@@ -573,7 +573,7 @@ void __cdecl Scr_GetEntArray()
     {
         name = (unsigned __int16)Scr_GetConstString(0).floatValue;
         key = Scr_GetString(1u);
-        offset = Scr_GetOffset(0, key).u.intValue;
+        offset = Scr_GetOffset(0, key);
         if (offset >= 0)
         {
             if (offset >= 10)

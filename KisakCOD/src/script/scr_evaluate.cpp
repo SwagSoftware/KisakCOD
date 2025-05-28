@@ -1078,7 +1078,8 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
             if (!scrVarPub.error_message)
             {
                 AddRefToValue(value->type, value->u);
-                objectId = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 16), value).stringValue;
+                //objectId = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 16), value).stringValue;
+                objectId = Scr_EvalFieldObject(*(unsigned int*)(expr.type + 16), value);
                 Scr_ClearErrorMessage();
             }
         }
@@ -1307,11 +1308,13 @@ unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigne
     {
     case 0x11:
         Scr_EvalVariableExpression(*(sval_u *)(expr.type + 4), localId, &value);
-        result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
+        //result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
+        result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value);
         break;
     case 0x13:
         Scr_EvalCallExpression(*(sval_u *)(expr.type + 4), localId, &value);
-        result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
+        //result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
+        result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value);
         break;
     case 0x20:
         if (scrEvaluateGlob.freezeScope)

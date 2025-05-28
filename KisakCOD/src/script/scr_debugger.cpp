@@ -3190,7 +3190,8 @@ retry_15:
             MyAssertHandler(".\\script\\scr_debugger.cpp", 9731, 0, "%s", "!scrVarPub.evaluate");
         scrVarPub.evaluate = 1;
         //scrDebuggerGlob.objectId = *(unsigned int *)&Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]) + 1;
-        scrDebuggerGlob.objectId = Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]).next + 1; // KISAKTODO: shitty
+        //scrDebuggerGlob.objectId = Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]).next + 1; // KISAKTODO: shitty
+        scrDebuggerGlob.objectId = Scr_EvalVariableObject(scrVmPub.localVars[-*pos]) + 1;
         if (!scrVarPub.evaluate)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 9734, 0, "%s", "scrVarPub.evaluate");
         scrVarPub.evaluate = 0;
