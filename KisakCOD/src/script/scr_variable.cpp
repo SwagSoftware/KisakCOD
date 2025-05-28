@@ -4528,41 +4528,44 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 	VariableValue valuea; // [esp+14h] [ebp-Ch]
 	VariableUnion id; // [esp+1Ch] [ebp-4h]
 
-	entValue = &scrVarGlob.variableList[entId + 1];
+	entValue = &scrVarGlob.variableList[entId + VARIABLELIST_PARENT_BEGIN];
 
 	iassert((entValue->w.type & VAR_MASK) == VAR_ENTITY);
 	iassert((entValue->w.classnum >> VAR_NAME_BITS) < CLASS_NUM_COUNT);
 
-	fieldId = FindArrayVariable(g_classMap[entValue->w.status >> 8].id, fieldName);
+	unsigned int classnum = entValue->w.classnum >> VAR_NAME_BITS;
+	fieldId = FindArrayVariable(g_classMap[classnum].id, fieldName);
 	if (fieldId)
 	{
-		valuea = GetEntityFieldValue(entValue->w.classnum >> VAR_NAME_BITS, entValue->u.o.u.entnum, scrVarGlob.variableList[fieldId + VARIABLELIST_CHILD_BEGIN].u.u.entityOffset);
+		valuea = GetEntityFieldValue(classnum, entValue->u.o.u.entnum, scrVarGlob.variableList[fieldId + VARIABLELIST_CHILD_BEGIN].u.u.entityOffset);
 		if (valuea.type == VAR_POINTER)
 		{
-			if ((scrVarGlob.variableList[valuea.u.intValue + 1].w.type & VAR_MASK) == VAR_ARRAY)
+			if ((scrVarGlob.variableList[valuea.u.pointerValue + 1].w.type & VAR_MASK) == VAR_ARRAY)
 			{
-				if (scrVarGlob.variableList[valuea.u.intValue + 1].u.next)
+				if (scrVarGlob.variableList[valuea.u.pointerValue + 1].u.next)
 				{
-					id.intValue = valuea.u;
-					RemoveRefToObject(valuea.u.stringValue);
+					id.pointerValue = valuea.u;
+					RemoveRefToObject(valuea.u.pointerValue);
 					valuea.u.pointerValue = Scr_AllocArray();
-					CopyArray(id.stringValue, valuea.u.stringValue);
+					CopyArray(id.pointerValue, valuea.u.pointerValue);
 				}
-				return valuea.u;
+				return valuea;
 			}
 			else
 			{
-				return valuea.u;
+				return valuea;
 			}
 		}
 		else
 		{
-			return valuea.u;
+			return valuea;
 		}
 	}
 	else
 	{
-		return (VariableValue)0;
+		valuea.type = VAR_UNDEFINED;
+		valuea.u.intValue = 0;
+		return valuea;
 	}
 }
 
