@@ -4728,7 +4728,7 @@ void EmitWhileStatement(sval_u expr, sval_u stmt, sval_u sourcePos, sval_u while
 	offset = TempMalloc(0) - pos1;
 	if (offset >= 0x10000)
 		MyAssertHandler(".\\script\\scr_compiler.cpp", 3429, 0, "%s", "offset < 65536");
-	*scrCompileGlob.codePos = offset;
+	*(unsigned short*)scrCompileGlob.codePos = offset;
 	if (pos2)
 	{
 		offset = TempMalloc(0) - nextPos2;
@@ -4824,7 +4824,7 @@ void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool la
 	AddOpcodePos(sourcePos.stringValue, 0);
 	EmitShort(0);
 	pos2 = scrCompileGlob.codePos;
-	*(intptr_t *)pos1 = scrCompileGlob.codePos - (byte *)nextPos1;
+	*(unsigned short *)pos1 = scrCompileGlob.codePos - (byte *)nextPos1;
 	pos3 = TempMallocAlignStrict(0);
 	num = 0;
 
