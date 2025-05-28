@@ -4604,7 +4604,7 @@ void EmitForStatement(sval_u stmt1, sval_u expr, sval_u stmt2, sval_u stmt, sval
 	offset = TempMalloc(0) - pos1;
 	if (offset >= 0x10000)
 		MyAssertHandler(".\\script\\scr_compiler.cpp", 3658, 0, "%s", "offset < 65536");
-	*scrCompileGlob.codePos = offset;
+	*(unsigned short*)scrCompileGlob.codePos = offset;
 	if (pos2)
 	{
 		offset = TempMalloc(0) - nextPos2;
