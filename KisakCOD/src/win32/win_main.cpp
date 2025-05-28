@@ -414,7 +414,6 @@ void __cdecl Sys_Print(const char *msg)
 char *__cdecl Sys_GetClipboardData()
 {
 	SIZE_T v0; // eax
-	SIZE_T v1; // eax
 	HANDLE hClipboardData; // [esp+0h] [ebp-Ch]
 	char *data; // [esp+4h] [ebp-8h]
 	char *cliptext; // [esp+8h] [ebp-4h]
@@ -430,18 +429,9 @@ char *__cdecl Sys_GetClipboardData()
 			{
 				v0 = GlobalSize(hClipboardData);
 				data = (char *)Z_Malloc(v0 + 1, "Sys_GetClipboardData", 10);
-				v1 = GlobalSize(hClipboardData);
-				I_strncpyz(data, cliptext, v1);
+				I_strncpyz(data, cliptext, v0);
 				GlobalUnlock(hClipboardData);
-
-				while (*data) {
-					if (*data == '\r' || *data == '\n' || *data == '\b') {
-						*data = '\0';
-						break;
-					}
-
-					data++;
-				}
+				strtok(data, "\n\r\b");
 			}
 		}
 		CloseClipboard();
