@@ -389,7 +389,7 @@ void __cdecl Con_Init()
 {
     int i; // [esp+0h] [ebp-4h]
 
-    con_restricted = Dvar_RegisterBool("monkeytoy", 0, 1u, "Restrict console access");
+    con_restricted = Dvar_RegisterBool("monkeytoy", 1, 1/*DVAR_FLAG_SAVED*/, "Restrict console access"); // KISAK: just enable console by default
     con_matchPrefixOnly = Dvar_RegisterBool(
         "con_matchPrefixOnly",
         1,

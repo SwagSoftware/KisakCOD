@@ -310,6 +310,7 @@ int g_disableRendering;
 
 const dvar_t *r_mode;
 const dvar_t *r_displayRefresh;
+const dvar_t* r_noborder;
 
 void __cdecl R_SyncGpu(int(__cdecl *WorkCallback)(unsigned __int64))
 {
@@ -3217,6 +3218,8 @@ void __cdecl R_EnumDisplayModes(unsigned int adapterIndex)
         defaultRefreshRateIndex,
         0x221u,
         "Refresh rate");
+
+    r_noborder = Dvar_RegisterBool("r_noborder", false, 0x1 /*DVAR_FLAG_SAVED*/, "Do not use a border in windowed mode");
 }
 
 char __cdecl R_PreCreateWindow()
@@ -3568,10 +3571,13 @@ unsigned int __cdecl R_ChooseAdapter()
     return foundAdapterIndex;
 }
 
+// #TODO: need header or some shit to shove all the includes in
+#define KISAK_EXTENDED 1
+
 char __cdecl R_CreateWindow(GfxWindowParms *wndParms)
 {
     DWORD exStyle; // [esp+0h] [ebp-1Ch]
-    char *style; // [esp+4h] [ebp-18h]
+    DWORD style; // [esp+4h] [ebp-18h]
     HINSTANCE__ *hinst; // [esp+8h] [ebp-14h]
     tagRECT rc; // [esp+Ch] [ebp-10h] BYREF
 
@@ -3587,8 +3593,8 @@ char __cdecl R_CreateWindow(GfxWindowParms *wndParms)
             wndParms->displayWidth,
             wndParms->displayHeight,
             wndParms->hz);
-        exStyle = 8;
-        style = (char *)0x80000000;
+        exStyle = WS_EX_TOPMOST;
+        style = WS_POPUP;
     }
     else
     {
@@ -3600,19 +3606,30 @@ char __cdecl R_CreateWindow(GfxWindowParms *wndParms)
             wndParms->x,
             wndParms->y);
         exStyle = 0;
-        style = &cls.globalServers[6253].mapName[14];
+#if KISAK_EXTENDED
+        if (r_noborder->current.enabled)
+        {
+            style = WS_VISIBLE | WS_POPUP;
+        }
+        else
+        {
+            style = WS_VISIBLE | WS_CAPTION | WS_SYSMENU;
+        }
+#else
+        style = WS_VISIBLE | WS_CAPTION | WS_SYSMENU;
+#endif
     }
     rc.left = 0;
     rc.right = wndParms->displayWidth;
     rc.top = 0;
     rc.bottom = wndParms->displayHeight;
-    AdjustWindowRectEx(&rc, (DWORD)style, 0, exStyle);
+    AdjustWindowRectEx(&rc, style, 0, exStyle);
     hinst = GetModuleHandleA(0);
     wndParms->hwnd = CreateWindowExA(
         exStyle,
         "CoD4",
         "Call of Duty 4",
-        (DWORD)style,
+        style,
         wndParms->x,
         wndParms->y,
         rc.right - rc.left,
