@@ -147,7 +147,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	//PbCaptureConsoleOutput(msg, 4096);
 
     // always print to stdout console
-    fprintf(stderr, "[%d] (err: %d): %s", channel, error, msg);
+    fprintf(stderr, "%s", msg);
 
 	if (rd_buffer)
 	{

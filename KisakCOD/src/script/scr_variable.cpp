@@ -1877,7 +1877,7 @@ VariableUnion  Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* val
 	VariableValue tempValue; // [esp+4h] [ebp-8h] BYREF
 
 	type = value->type;
-	if (type == 1 && (type = scrVarGlob.variableList[value->u.intValue + 1].w.status & 0x1F, type < 0x15))
+	if (type == VAR_POINTER && (type = scrVarGlob.variableList[value->u.intValue + 1].w.type & VAR_MASK, type < 0x15))
 	{
 		iassert(type >= FIRST_OBJECT);
 		tempValue.type = VAR_POINTER;

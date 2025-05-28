@@ -302,6 +302,10 @@ void  AddRefToVector(float const* vectorValue);
 void  RemoveRefToVector(float const* vectorValue);
 void  AddRefToValue(int type, VariableUnion u);
 void  RemoveRefToValue(int type, VariableUnion u);
+inline void RemoveRefToValue(VariableValue *value)
+{
+    RemoveRefToValue(value->type, value->u);
+}
 bool  IsValidArrayIndex(unsigned int unsignedValue);
 unsigned int  GetInternalVariableIndex(unsigned int unsignedValue);
 unsigned int  FindArrayVariable(unsigned int parentId, int intValue);
