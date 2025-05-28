@@ -1880,6 +1880,7 @@ void Log(char const *format, ...)
 }
 
 #define READ_SHORT() Scr_ReadUnsignedShort(&fs.pos)
+#define INC_TOP() iassert(fs.top >= scrVmPub.stack); fs.top++; iassert(fs.top <= scrVmPub.maxstack); 
 
 unsigned int __cdecl VM_Execute_0()
 {
@@ -2381,223 +2382,58 @@ unsigned int __cdecl VM_Execute_0()
             --g_script_error_level;
             return fs.localId;
         case OP_GetUndefined:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    488,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    490,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_UNDEFINED;
             continue;
         case OP_GetZero:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    495,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    497,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_INTEGER;
             fs.top->u.intValue = 0;
             continue;
         case OP_GetByte:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    503,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    505,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_INTEGER;
             fs.top->u.intValue = *fs.pos++;
             continue;
         case OP_GetNegByte:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    512,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    514,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_INTEGER;
             fs.top->u.intValue = -*fs.pos++;
             continue;
         case OP_GetUnsignedShort:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    521,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    523,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_INTEGER;
             fs.top->u.intValue = Scr_ReadUnsignedShort(&fs.pos);
             continue;
         case OP_GetNegUnsignedShort:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    529,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    531,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_INTEGER;
             fs.top->u.intValue = -Scr_ReadUnsignedShort(&fs.pos);
             continue;
         case OP_GetInteger:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    537,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    539,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_INTEGER;
             fs.top->u.intValue = Scr_ReadUnsigned(&fs.pos);
             continue;
         case OP_GetFloat:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    545,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    547,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_FLOAT;
             fs.top->u.floatValue = Scr_ReadFloat(&fs.pos);
             continue;
         case OP_GetString:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    553,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    555,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_STRING;
             fs.top->u.stringValue = Scr_ReadUnsignedShort(&fs.pos);
             SL_AddRefToString(fs.top->u.stringValue);
             continue;
         case OP_GetIString:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    562,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    564,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_ISTRING;
             fs.top->u.stringValue = Scr_ReadUnsignedShort(&fs.pos);
             SL_AddRefToString(fs.top->u.stringValue);
             continue;
         case OP_GetVector:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    571,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    573,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_VECTOR;
             fs.top->u.vectorValue = Scr_ReadVector(&fs.pos);
             continue;
@@ -2608,104 +2444,29 @@ unsigned int __cdecl VM_Execute_0()
             objectId = scrVarPub.animId;
             continue;
         case OP_GetSelf:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    587,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    589,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_POINTER;
             fs.top->u.pointerValue = Scr_GetSelf(fs.localId);
             AddRefToObject(fs.top->u.pointerValue);
             continue;
         case OP_GetLevel:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    596,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    598,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_POINTER;
             fs.top->u.pointerValue = scrVarPub.levelId;
             AddRefToObject(fs.top->u.pointerValue);
             continue;
         case OP_GetGame:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    605,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    607,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVarPub.gameId);
             continue;
         case OP_GetAnim:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    612,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    614,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_POINTER;
             fs.top->u.pointerValue = scrVarPub.animId;
             AddRefToObject(fs.top->u.pointerValue);
             continue;
         case OP_GetAnimation:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    621,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    623,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_ANIMATION;
             fs.top->u.pointerValue = Scr_ReadUnsigned(&fs.pos);
             continue;
@@ -2714,22 +2475,7 @@ unsigned int __cdecl VM_Execute_0()
             fieldValueId = scrVarPub.gameId;
             continue;
         case OP_GetFunction:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    634,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    636,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             fs.top->type = VAR_FUNCTION;
             fs.top->u.codePosValue = Scr_ReadCodePos(&fs.pos);
             continue;
@@ -2749,156 +2495,36 @@ unsigned int __cdecl VM_Execute_0()
             }
             continue;
         case OP_EvalLocalVariableCached0:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    660,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    662,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[0]);
             continue;
         case OP_EvalLocalVariableCached1:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    667,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    669,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[-1]);
             continue;
         case OP_EvalLocalVariableCached2:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    674,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    676,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[-2]);
             continue;
         case OP_EvalLocalVariableCached3:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    681,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    683,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[-3]);
             continue;
         case OP_EvalLocalVariableCached4:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    688,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    690,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[-4]);
             continue;
         case OP_EvalLocalVariableCached5:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    695,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    697,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[-5]);
             continue;
         case OP_EvalLocalVariableCached:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    702,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    704,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[-*fs.pos]);
             ++fs.pos;
             continue;
         case OP_EvalLocalArrayCached:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    710,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top >= scrVmPub.stack)",
-                    fs.top - scrVmPub.stack);
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    712,
-                    0,
-                    "%s\n\t(fs.top - scrVmPub.stack) = %i",
-                    "(fs.top <= scrVmPub.maxstack)",
-                    fs.top - scrVmPub.stack);
+            INC_TOP();
             *fs.top = Scr_EvalVariable(scrVmPub.localVars[-*fs.pos]);
             ++fs.pos;
             goto $LN476;
@@ -2955,10 +2581,7 @@ unsigned int __cdecl VM_Execute_0()
         case OP_EvalAnimFieldVariable:
             objectId = scrVarPub.animId;
         EvalFieldVariable:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 774, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 776, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             Variable = FindVariable(objectId, Scr_ReadUnsignedShort(&fs.pos));
             *fs.top = Scr_EvalVariable(Variable);
             continue;
@@ -2966,20 +2589,14 @@ unsigned int __cdecl VM_Execute_0()
             objectId = Scr_GetSelf(fs.localId);
             if (IsFieldObject(objectId))
                 goto $LN452;
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 788, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 790, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             Scr_ReadUnsignedShort(&fs.pos);
         not_an_object:
             type = GetObjectType(objectId);
             goto not_an_object_error;
         case OP_EvalFieldVariable:
         $LN452:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 797, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 799, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             tempValue = Scr_FindVariableField(objectId, Scr_ReadUnsignedShort(&fs.pos));
             *fs.top = tempValue;
             continue;
@@ -3323,17 +2940,11 @@ unsigned int __cdecl VM_Execute_0()
         case OP_waittillFrameEnd:
             goto $LN345;
         case OP_PreScriptCall:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1192, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1194, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             fs.top->type = VAR_PRECODEPOS;
             continue;
         case OP_ScriptFunctionCall2:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1199, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1201, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             fs.top->type = VAR_PRECODEPOS;
             goto $LN329;
         case OP_ScriptFunctionCall:
@@ -3668,10 +3279,7 @@ unsigned int __cdecl VM_Execute_0()
                     }
                     Scr_TerminalError("potential infinite loop in script");
                 $LN255:
-                    if (fs.top < scrVmPub.stack)
-                        MyAssertHandler(".\\script\\scr_vm.cpp", 1518, 0, "%s", "fs.top >= scrVmPub.stack");
-                    if (++fs.top > scrVmPub.maxstack)
-                        MyAssertHandler(".\\script\\scr_vm.cpp", 1520, 0, "%s", "fs.top <= scrVmPub.maxstack");
+                    INC_TOP();
                     *fs.top = Scr_EvalVariableField(fieldValueId);
                     if (fs.top->type == VAR_INTEGER)
                     {
@@ -3683,10 +3291,7 @@ unsigned int __cdecl VM_Execute_0()
                     {
                         Scr_Error(va("++ must be applied to an int (applied to %s)", var_typename[fs.top->type]));
                     $LN247:
-                        if (fs.top < scrVmPub.stack)
-                            MyAssertHandler(".\\script\\scr_vm.cpp", 1533, 0, "%s", "fs.top >= scrVmPub.stack");
-                        if (++fs.top > scrVmPub.maxstack)
-                            MyAssertHandler(".\\script\\scr_vm.cpp", 1535, 0, "%s", "fs.top <= scrVmPub.maxstack");
+                        INC_TOP();
                         *fs.top = Scr_EvalVariableField(fieldValueId);
                         if (fs.top->type != VAR_INTEGER)
                         {
@@ -3956,10 +3561,7 @@ unsigned int __cdecl VM_Execute_0()
             scrVarPub.error_index = 1;
             goto not_an_object_error;
         case OP_voidCodepos:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1760, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1762, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             fs.top->type = VAR_PRECODEPOS;
             continue;
         case OP_switch:
@@ -4033,10 +3635,7 @@ unsigned int __cdecl VM_Execute_0()
             --g_script_error_level;
             return 0;
         case OP_object:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1837, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1839, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             classnum = Scr_ReadUnsigned(&fs.pos);
             entnum = Scr_ReadUnsigned(&fs.pos);
             fs.top->u.pointerValue = FindEntityId(entnum, classnum);
@@ -4047,20 +3646,14 @@ unsigned int __cdecl VM_Execute_0()
             }
             goto object;
         case OP_thread_object:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1858, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1860, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             fs.top->u.pointerValue = Scr_ReadUnsignedShort(&fs.pos);
         object:
             fs.top->type = VAR_POINTER;
             AddRefToObject(fs.top->u.pointerValue);
             continue;
         case OP_EvalLocalVariable:
-            if (fs.top < scrVmPub.stack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1865, 0, "%s", "fs.top >= scrVmPub.stack");
-            if (++fs.top > scrVmPub.maxstack)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 1867, 0, "%s", "fs.top <= scrVmPub.maxstack");
+            INC_TOP();
             *fs.top = Scr_EvalVariable(FindVariable(fs.localId, Scr_ReadUnsignedShort(&fs.pos)));
             continue;
         case OP_EvalLocalVariableRef:
