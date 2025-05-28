@@ -3130,7 +3130,9 @@ VariableValue Scr_FindVariableField(unsigned int parentId, unsigned int name)
 	if ((scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK) == VAR_ENTITY)
 		return Scr_EvalVariableEntityField(parentId, name);
 
-	return (VariableValue)0;
+	VariableValue value;
+	value.type = VAR_UNDEFINED;
+	return value;
 }
 
 void  Scr_KillThread(unsigned int parentId)
