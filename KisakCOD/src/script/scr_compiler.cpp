@@ -4389,7 +4389,7 @@ void __cdecl LinkFile(unsigned int fileId)
 
     for (threadPtr = FindFirstSibling(fileId); threadPtr; threadPtr = FindNextSibling(threadPtr))
     {
-        threadId = FindObject(threadPtr).u.stringValue;
+        threadId = FindObject(threadPtr);
         if (!threadId)
             MyAssertHandler(".\\script\\scr_compiler.cpp", 2364, 0, "%s", "threadId");
         posId = FindVariable(threadId, 1u);
@@ -4510,7 +4510,7 @@ void __cdecl ScriptCompile(
             {
                 if (GetValueType(threadPtr) == 1)
                 {
-                    threadId = FindObject(threadPtr).u.stringValue;
+                    threadId = FindObject(threadPtr);
                     if (!threadId)
                         MyAssertHandler(".\\script\\scr_compiler.cpp", 5026, 0, "%s", "threadId");
                     posId = FindVariable(threadId, 1u);
