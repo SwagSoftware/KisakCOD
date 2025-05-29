@@ -66,6 +66,20 @@ enum : __int32
 	CALL_FUNCTION = 0x3,
 };
 
+void EmitPreAssignmentPos()
+{
+	if (scrVarPub.developer && scrCompilePub.developer_statement != 3)
+		Scr_AddAssignmentPos((char*)scrCompilePub.opcodePos);
+}
+
+void EmitAssignmentPos()
+{
+	if (scrVarPub.developer && scrCompilePub.developer_statement != 3)
+	{
+		Scr_AddAssignmentPos(TempMalloc(0));
+	}
+}
+
 /*
 ============
 CompareCaseInfo
@@ -718,14 +732,9 @@ void Scr_BeginDevScript(int *type, char **savedPos)
 	*type = BUILTIN_DEVELOPER_ONLY;
 }
 
-/*
-============
-AddFunction
-============
-*/
-int AddFunction(intptr_t func)
+int __cdecl AddFunction(int func, const char *name)
 {
-	int i;
+	int i; // [esp+0h] [ebp-4h]
 
 	for (i = 0; i < scrCompilePub.func_table_size; i++)
 	{
@@ -743,6 +752,10 @@ int AddFunction(intptr_t func)
 	}
 
 	scrCompilePub.func_table[scrCompilePub.func_table_size] = func;
+
+	scrVmDebugPub.func_table[scrCompilePub.func_table_size].breakpointCount = 0;
+	scrVmDebugPub.func_table[scrCompilePub.func_table_size].name = name;
+
 	scrCompilePub.func_table_size++;
 
 	return i;
@@ -1116,14 +1129,21 @@ void EmitCanonicalString(unsigned int stringValue)
 		Scr_CompileRemoveRefToString(stringValue);
 		return;
 	}
-
-	if (scrCompileGlob.bConstRefCount)
+	else if (scrCompilePub.developer_statement == SCR_DEV_EVALUATE)
 	{
-		SL_AddRefToString(stringValue);
+		*(unsigned short*)scrCompileGlob.codePos = Scr_CompileCanonicalString(stringValue);
+		if (!*scrCompileGlob.codePos)
+			CompileError(0, "unknown field");
 	}
+	else
+	{
+		if (scrCompileGlob.bConstRefCount)
+		{
+			SL_AddRefToString(stringValue);
+		}
 
-	//*(unsigned short *)scrCompileGlob.codePos = Scr_GetCanonicalStringIndex(stringValue);
-	*(unsigned short*)scrCompileGlob.codePos = SL_TransferToCanonicalString(stringValue);
+		*(unsigned short *)scrCompileGlob.codePos = SL_TransferToCanonicalString(stringValue);
+	}
 }
 
 /*
@@ -1336,7 +1356,8 @@ void EmitGetIString(unsigned int value, sval_u sourcePos)
 {
 	EmitOpcode(OP_GetIString, 1, CALL_NONE);
 	AddOpcodePos(sourcePos.stringValue, SOURCE_TYPE_BREAKPOINT);
-	EmitString(value);
+	//EmitString(value);
+	EmitShort(value);
 	CompileTransferRefToString(value, 1);
 }
 
@@ -1349,7 +1370,8 @@ void EmitGetString(unsigned int value, sval_u sourcePos)
 {
 	EmitOpcode(OP_GetString, 1, CALL_NONE);
 	AddOpcodePos(sourcePos.stringValue, 1);
-	EmitString(value);
+	//EmitString(value);
+	EmitShort(value);
 	CompileTransferRefToString(value, 1);
 }
 
@@ -1382,53 +1404,49 @@ EmitGetInteger
 */
 void EmitGetInteger(int value, sval_u sourcePos)
 {
-	if (value >= 0)
+	if (value < 0)
 	{
-		if (value == 0)
+		if (value > -256)
 		{
-			EmitOpcode(OP_GetZero, 1, CALL_NONE);
-			AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
+			EmitOpcode(OP_GetNegByte, 1, 0);
+			AddOpcodePos(sourcePos.stringValue, 1);
+			EmitByte(-value);
 			return;
 		}
-
-		if (value <= UCHAR_MAX)
+		if (value > -65536)
 		{
-			EmitOpcode(OP_GetByte, 1, CALL_NONE);
-			AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
-			EmitByte(value);
-			return;
-		}
-
-		if (value <= USHRT_MAX)
-		{
-			EmitOpcode(OP_GetUnsignedShort, 1, CALL_NONE);
-			AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
-			EmitUnsignedShort(value);
+			EmitOpcode(OP_GetNegUnsignedShort, 1, 0);
+			AddOpcodePos(sourcePos.stringValue, 1);
+			EmitShort(-value);
 			return;
 		}
 	}
 	else
 	{
-		if (value >= -UCHAR_MAX)
+		if (!value)
 		{
-			EmitOpcode(OP_GetNegByte, 1, CALL_NONE);
-			AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
-			EmitByte(-value);
+			EmitOpcode(OP_GetZero, 1, 0);
+			AddOpcodePos(sourcePos.stringValue, 1);
 			return;
 		}
-
-		if (value >= -USHRT_MAX)
+		if (value < 256)
 		{
-			EmitOpcode(OP_GetNegUnsignedShort, 1, CALL_NONE);
-			AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
-			EmitUnsignedShort(-value);
+			EmitOpcode(OP_GetByte, 1, 0);
+			AddOpcodePos(sourcePos.stringValue, 1);
+			EmitByte(value);
+			return;
+		}
+		if (value < 0x10000)
+		{
+			EmitOpcode(OP_GetUnsignedShort, 1, 0);
+			AddOpcodePos(sourcePos.stringValue, 1);
+			EmitShort(value);
 			return;
 		}
 	}
-
-	EmitOpcode(OP_GetInteger, 1, CALL_NONE);
-	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
-	EmitCodepos((const char *)value);
+	EmitOpcode(OP_GetInteger, 1, 0);
+	AddOpcodePos(sourcePos.stringValue, 1);
+	EmitCodepos((const char*)value);
 }
 
 /*
@@ -1539,6 +1557,13 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 {
 	unsigned int index;
 	int value_count, valueIndex;
+	
+	if (scrCompilePub.developer_statement == 3)
+	{
+		scrCompileGlob.codePos = (byte*)TempMalloc(sizeof(byte));
+		*scrCompileGlob.codePos = op;
+		return;
+	}
 
 	if (scrCompilePub.value_count)
 	{
@@ -1575,11 +1600,7 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 
 	if (!scrCompilePub.opcodePos)
 	{
-		scrCompileGlob.prevOpcodePos = scrCompilePub.opcodePos;
-		scrCompilePub.opcodePos = (byte *)TempMalloc(sizeof(byte));
-		scrCompileGlob.codePos = scrCompilePub.opcodePos;
-		*scrCompilePub.opcodePos = op;
-		return;
+		goto END;
 	}
 
 	scrCompileGlob.codePos = scrCompilePub.opcodePos;
@@ -1597,9 +1618,7 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 		index = *scrCompilePub.opcodePos - OP_EvalLocalVariableCached0;
 
 		if (index > OP_GetNegByte)
-		{
-			break;
-		}
+			goto END;
 
 		RemoveOpcodePos();
 		*scrCompilePub.opcodePos = OP_EvalLocalArrayCached;
@@ -1611,65 +1630,65 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 		{
 			RemoveOpcodePos();
 			*scrCompilePub.opcodePos = OP_EvalLocalArrayRefCached;
+			EmitPreAssignmentPos();
 			return;
 		}
 
 		if (*scrCompilePub.opcodePos != OP_EvalLocalVariableRefCached0)
-		{
-			break;
-		}
+			goto END;
 
 		RemoveOpcodePos();
 		*scrCompilePub.opcodePos = OP_EvalLocalArrayRefCached0;
+		EmitPreAssignmentPos();
 		return;
 
 	case OP_EvalFieldVariable:
 		if (*scrCompilePub.opcodePos == OP_GetSelfObject)
 		{
 			*scrCompilePub.opcodePos = OP_EvalSelfFieldVariable;
+			EmitPreAssignmentPos();
 			return;
 		}
 
 		if (*scrCompilePub.opcodePos == OP_GetLevelObject)
 		{
 			*scrCompilePub.opcodePos = OP_EvalLevelFieldVariable;
+			EmitPreAssignmentPos();
 			return;
 		}
 
 		if (*scrCompilePub.opcodePos != OP_GetAnimObject)
-		{
-			break;
-		}
+			goto END;
 
 		*scrCompilePub.opcodePos = OP_EvalAnimFieldVariable;
+		EmitPreAssignmentPos();
 		return;
 
 	case OP_EvalFieldVariableRef:
 		if (*scrCompilePub.opcodePos == OP_GetSelfObject)
 		{
 			*scrCompilePub.opcodePos = OP_EvalSelfFieldVariableRef;
+			EmitPreAssignmentPos();
 			return;
 		}
 
 		if (*scrCompilePub.opcodePos == OP_GetLevelObject)
 		{
 			*scrCompilePub.opcodePos = OP_EvalLevelFieldVariableRef;
+			EmitPreAssignmentPos();
 			return;
 		}
 
 		if (*scrCompilePub.opcodePos != OP_GetAnimObject)
-		{
-			break;
-		}
+			goto END;
 
 		*scrCompilePub.opcodePos = OP_EvalAnimFieldVariableRef;
+		EmitPreAssignmentPos();
 		return;
 
 	case OP_SafeSetVariableFieldCached0:
 		if (*scrCompilePub.opcodePos != OP_CreateLocalVariable)
-		{
-			break;
-		}
+			goto END;
 
 		*scrCompilePub.opcodePos = OP_SafeCreateVariableFieldCached;
 		return;
@@ -1680,47 +1699,46 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 		case OP_EvalLocalVariableRefCached:
 			RemoveOpcodePos();
 			*scrCompilePub.opcodePos = OP_SetLocalVariableFieldCached;
+			EmitPreAssignmentPos();
 			return;
 
 		case OP_EvalLocalVariableRefCached0:
 			RemoveOpcodePos();
 			*scrCompilePub.opcodePos = OP_SetLocalVariableFieldCached0;
+			EmitPreAssignmentPos();
 			return;
 
 		case OP_EvalSelfFieldVariableRef:
 			RemoveOpcodePos();
 			*scrCompilePub.opcodePos = OP_SetSelfFieldVariableField;
+			EmitPreAssignmentPos();
 			return;
 
 		case OP_EvalLevelFieldVariableRef:
 			RemoveOpcodePos();
 			*scrCompilePub.opcodePos = OP_SetLevelFieldVariableField;
+			EmitPreAssignmentPos();
 			return;
 		}
 
 		if (*scrCompilePub.opcodePos != OP_EvalAnimFieldVariableRef)
-		{
-			break;
-		}
+			goto END;
 
 		RemoveOpcodePos();
 		*scrCompilePub.opcodePos = OP_SetAnimFieldVariableField;
+		EmitPreAssignmentPos();
 		return;
 
 	case OP_ScriptFunctionCall:
 		if (*scrCompilePub.opcodePos != OP_PreScriptCall)
-		{
-			break;
-		}
+			goto END;
 
 		*scrCompilePub.opcodePos = OP_ScriptFunctionCall2;
 		return;
 
 	case OP_ScriptMethodCall:
 		if (*scrCompilePub.opcodePos != OP_GetSelf)
-		{
-			break;
-		}
+			goto END;
 
 		RemoveOpcodePos();
 		*scrCompilePub.opcodePos = OP_ScriptFunctionCall;
@@ -1731,7 +1749,15 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 			return;
 		}
 
-		iassert(scrCompilePub.opcodePos == (byte *)TempMalloc(0) - 1);
+		if (scrCompilePub.opcodePos != (unsigned char*)TempMalloc(0) - 1)
+			MyAssertHandler(
+				".\\script\\scr_compiler.cpp",
+				500,
+				0,
+				"%s",
+				"scrCompilePub.opcodePos == (byte *)TempMalloc( 0 ) - 1");
+
+		//iassert(scrCompilePub.opcodePos == (byte *)TempMalloc(0) - 1);
 		TempMemorySetPos((char *)scrCompilePub.opcodePos);
 		--scrCompilePub.opcodePos;
 		scrCompileGlob.prevOpcodePos = NULL;
@@ -1741,9 +1767,7 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 
 	case OP_ScriptMethodThreadCall:
 		if (*scrCompilePub.opcodePos != OP_GetSelf)
-		{
-			break;
-		}
+			goto END;
 
 		RemoveOpcodePos();
 		*scrCompilePub.opcodePos = OP_ScriptThreadCall;
@@ -1759,9 +1783,7 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 		index = *scrCompilePub.opcodePos - OP_EvalLocalVariableCached0;
 
 		if (index > OP_GetNegByte)
-		{
-			break;
-		}
+			goto END;
 
 		*scrCompilePub.opcodePos = OP_EvalLocalVariableObjectCached;
 		EmitByte(index);
@@ -1769,15 +1791,16 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 
 	case OP_JumpOnFalse:
 		if (*scrCompilePub.opcodePos != OP_BoolNot)
-		{
-			break;
-		}
+			goto END;
 
 		RemoveOpcodePos();
 		*scrCompilePub.opcodePos = OP_JumpOnTrue;
 		return;
+	default:
+		goto END;
 	}
 
+END:
 	scrCompileGlob.prevOpcodePos = scrCompilePub.opcodePos;
 	scrCompilePub.opcodePos = (byte *)TempMalloc(sizeof(byte));
 	scrCompileGlob.codePos = scrCompilePub.opcodePos;
@@ -1879,12 +1902,19 @@ void EmitCallBuiltinMethodOpcode(int param_count, sval_u sourcePos)
 	unsigned int opcode;
 
 	if (param_count > 5)
+	{
 		opcode = OP_CallBuiltinMethod;
+		EmitOpcode(opcode, -param_count, CALL_BUILTIN);
+	}
 	else
+	{
 		opcode = OP_CallBuiltinMethod0 + param_count;
+		EmitOpcode(opcode, -param_count, CALL_BUILTIN);
+	}
 
-	EmitOpcode(opcode, -param_count, CALL_BUILTIN);
-	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
+	EmitPreAssignmentPos();
+	//AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
+	AddOpcodePos(sourcePos.sourcePosValue, 9);
 
 	if (opcode == OP_CallBuiltinMethod)
 	{
@@ -1972,6 +2002,7 @@ EmitCastFieldObject
 void EmitCastFieldObject(sval_u sourcePos)
 {
 	EmitOpcode(OP_CastFieldObject, -1, CALL_NONE);
+	EmitPreAssignmentPos();
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_NONE);
 }
 
@@ -2006,6 +2037,7 @@ void EmitClearArray(sval_u sourcePos, sval_u indexSourcePos)
 	EmitOpcode(OP_ClearArray, -1, CALL_NONE);
 	AddOpcodePos(indexSourcePos.sourcePosValue, SOURCE_TYPE_NONE);
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_NONE);
+	EmitAssignmentPos();
 }
 
 /*
@@ -2040,6 +2072,7 @@ EmitGameRef
 void EmitGameRef(sval_u sourcePos)
 {
 	EmitOpcode(OP_GetGameRef, 0, CALL_NONE);
+	EmitPreAssignmentPos();
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
 }
 
@@ -2051,6 +2084,7 @@ EmitAnimObject
 void EmitAnimObject(sval_u sourcePos)
 {
 	EmitOpcode(OP_GetAnimObject, 0, CALL_NONE);
+	EmitPreAssignmentPos();
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
 }
 
@@ -2062,6 +2096,7 @@ EmitLevelObject
 void EmitLevelObject(sval_u sourcePos)
 {
 	EmitOpcode(OP_GetLevelObject, 0, CALL_NONE);
+	EmitPreAssignmentPos();
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
 }
 
@@ -2073,6 +2108,7 @@ EmitSelfObject
 void EmitSelfObject(sval_u sourcePos)
 {
 	EmitOpcode(OP_GetSelfObject, 0, CALL_NONE);
+	EmitPreAssignmentPos();
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
 }
 
@@ -2235,6 +2271,7 @@ EmitReturn
 void EmitReturn(void)
 {
 	EmitOpcode(OP_Return, -1, CALL_NONE);
+	EmitPreAssignmentPos();
 }
 
 /*
@@ -2245,6 +2282,7 @@ EmitEnd
 void EmitEnd()
 {
 	EmitOpcode(OP_End, 0, CALL_NONE);
+	EmitPreAssignmentPos();
 }
 
 /*
@@ -2325,15 +2363,19 @@ void EmitBoolAndExpression(sval_u expr1, sval_u expr2, sval_u expr1sourcePos, sv
 	EmitOpcode(OP_JumpOnFalseExpr, -1, CALL_NONE);
 	AddOpcodePos(expr1sourcePos.sourcePosValue, SOURCE_TYPE_NONE);
 
-	EmitUnsignedShort(0);
+	//EmitUnsignedShort(0);
+	EmitShort(0);
 
 	pos = (const char *)scrCompileGlob.codePos;
-	nextPos = TempMallocAlignStrict(0);
+	//nextPos = TempMallocAlignStrict(0);
+	nextPos = TempMalloc(0);
 
 	EmitExpression(expr2, block);
 	EmitCastBool(expr2sourcePos);
 
-	offset = TempMallocAlignStrict(0) - nextPos;
+	//offset = TempMallocAlignStrict(0) - nextPos;
+	offset = (TempMalloc(0) - nextPos);
+
 	iassert(offset < 65536);
 
 	*(unsigned short *)pos = offset;
@@ -2357,12 +2399,15 @@ void EmitBoolOrExpression(sval_u expr1, sval_u expr2, sval_u expr1sourcePos, sva
 	EmitUnsignedShort(0);
 
 	pos = (const char *)scrCompileGlob.codePos;
-	nextPos = TempMallocAlignStrict(0);
+	//nextPos = TempMallocAlignStrict(0);
+	nextPos = TempMalloc(0);
 
 	EmitExpression(expr2, block);
 	EmitCastBool(expr2sourcePos);
 
-	offset = TempMallocAlignStrict(0) - nextPos;
+	//offset = TempMallocAlignStrict(0) - nextPos;
+	offset = (TempMalloc(0) - nextPos);
+
 	iassert(offset < 65536);
 
 	*(unsigned short *)pos = offset;
@@ -3446,19 +3491,24 @@ EmitLocalVariableRef
 */
 void EmitLocalVariableRef(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-	int index = Scr_FindLocalVarIndex(expr.idValue, sourcePos, true, block);
+	int index;
 
-	if (index)
+	if (scrCompilePub.developer_statement == 3)
 	{
-		EmitOpcode(OP_EvalLocalVariableRefCached, 0, CALL_NONE);
-		EmitByte(index);
+		EmitOpcode(OP_EvalLocalVariableRef, 0, 0);
+		EmitCanonicalString(expr.stringValue);
 	}
 	else
 	{
-		EmitOpcode(OP_EvalLocalVariableRefCached0, 0, CALL_NONE);
+		index = Scr_FindLocalVarIndex(expr.stringValue, sourcePos, 1, block);
+		EmitOpcode((index != 0) + OP_EvalLocalVariableRefCached0, 0, 0);
+		EmitPreAssignmentPos();
+		if (index)
+		{
+			EmitByte(index);
+		}
+		AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
 	}
-
-	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
 }
 
 /*
@@ -3493,8 +3543,10 @@ void EmitSafeSetWaittillVariableField(sval_u expr, sval_u sourcePos, scr_block_s
 	byte index = Scr_FindLocalVarIndex(expr.idValue, sourcePos, true, block);
 
 	EmitOpcode(OP_SafeSetWaittillVariableFieldCached, 0, CALL_NONE);
+	EmitPreAssignmentPos();
 	EmitByte(index);
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_NONE);
+	EmitAssignmentPos();
 }
 
 /*
@@ -3504,19 +3556,15 @@ EmitSafeSetVariableField
 */
 void EmitSafeSetVariableField(sval_u expr, sval_u sourcePos, scr_block_s *block)
 {
-	int index = Scr_FindLocalVarIndex(expr.idValue, sourcePos, true, block);
+	int index; // [esp+0h] [ebp-4h]
 
+	index = Scr_FindLocalVarIndex(expr.stringValue, sourcePos, 1, block);
+	EmitOpcode((index != 0) + OP_SafeSetVariableFieldCached0, 0, 0);
+	EmitPreAssignmentPos();
 	if (index)
-	{
-		EmitOpcode(OP_SafeSetVariableFieldCached, 0, CALL_NONE);
 		EmitByte(index);
-	}
-	else
-	{
-		EmitOpcode(OP_SafeSetVariableFieldCached0, 0, CALL_NONE);
-	}
-
-	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_NONE);
+	AddOpcodePos(sourcePos.stringValue, 0);
+	EmitAssignmentPos();
 }
 
 /*
@@ -3902,6 +3950,12 @@ void EmitMethod(sval_u expr, sval_u func_name, sval_u params, sval_u methodSourc
 
 	if (!name)
 	{
+script_method:
+		if (scrCompilePub.developer_statement == 3)
+		{
+			CompileError(func_name.node[2].sourcePosValue, "unknown builtin method");
+			return;
+		}
 		EmitPreFunctionCall(func_name);
 
 		param_count = EmitExpressionList(params, block);
@@ -3923,46 +3977,39 @@ void EmitMethod(sval_u expr, sval_u func_name, sval_u params, sval_u methodSourc
 	pName = SL_ConvertToString(name);
 	sourcePos = func_name.node[2];
 
-	methId = FindVariable(scrCompilePub.builtinMeth, name);
-
-	if (methId)
-	{
-		value = Scr_EvalVariable(methId);
-		type = Scr_GetUncacheType(value.type);
-
-		meth = (void (*)(scr_entref_t))value.u.pointerValue;
-	}
-	else
+	if (scrCompilePub.developer_statement == 3)
 	{
 		type = BUILTIN_ANY;
 		meth = Scr_GetMethod(&pName, &type);
+	}
+	else
+	{
+		methId = FindVariable(scrCompilePub.builtinMeth, name);
 
-		methId = GetNewVariable(scrCompilePub.builtinMeth, name);
+		if (methId)
+		{
+			value = Scr_EvalVariable(methId);
+			type = Scr_GetUncacheType(value.type);
 
-		value.type = (Vartype_t)Scr_GetCacheType(type);
-		value.u.pointerValue = (intptr_t)meth;
+			meth = (void (*)(scr_entref_t))value.u.pointerValue;
+		}
+		else
+		{
+			type = BUILTIN_ANY;
+			meth = Scr_GetMethod(&pName, &type);
 
-		SetVariableValue(methId, &value);
+			methId = GetNewVariable(scrCompilePub.builtinMeth, name);
+
+			value.type = (Vartype_t)Scr_GetCacheType(type);
+			value.u.pointerValue = (intptr_t)meth;
+
+			SetVariableValue(methId, &value);
+		}
 	}
 
 	if (!meth)
 	{
-		EmitPreFunctionCall(func_name);
-
-		param_count = EmitExpressionList(params, block);
-
-		EmitPrimitiveExpression(expr, block);
-		EmitPostFunctionCall(func_name, param_count, true, block);
-
-		AddOpcodePos(methodSourcePos.sourcePosValue, SOURCE_TYPE_NONE);
-		AddExpressionListOpcodePos(params);
-
-		if (bStatement)
-		{
-			EmitDecTop();
-		}
-
-		return;
+		goto script_method;
 	}
 
 	if (type == BUILTIN_DEVELOPER_ONLY)
@@ -3979,7 +4026,7 @@ void EmitMethod(sval_u expr, sval_u func_name, sval_u params, sval_u methodSourc
 	param_count = EmitExpressionList(params, block);
 	EmitPrimitiveExpression(expr, block);
 
-	if (param_count > 256)
+	if (param_count >= 256)
 	{
 		CompileError(sourcePos.sourcePosValue, "parameter count exceeds 256");
 		return;
@@ -3988,7 +4035,8 @@ void EmitMethod(sval_u expr, sval_u func_name, sval_u params, sval_u methodSourc
 	Scr_CompileRemoveRefToString(name);
 	EmitCallBuiltinMethodOpcode(param_count, sourcePos);
 
-	EmitUnsignedShort(AddFunction((intptr_t)meth));
+	//EmitUnsignedShort(AddFunction(meth, pName));
+	EmitShort(AddFunction((int)meth, pName));
 
 	AddOpcodePos(methodSourcePos.sourcePosValue, SOURCE_TYPE_NONE);
 	AddExpressionListOpcodePos(params);
@@ -3998,7 +4046,12 @@ void EmitMethod(sval_u expr, sval_u func_name, sval_u params, sval_u methodSourc
 		EmitDecTop();
 	}
 
-	Scr_EndDevScript(type, &savedPos);
+	EmitAssignmentPos();
+
+	if (type == 1)
+	{
+		Scr_EndDevScript(type, &savedPos);
+	}
 }
 
 /*
@@ -4020,61 +4073,61 @@ void EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_block_s *blo
 
 	if (!name)
 	{
-		EmitPreFunctionCall(func_name);
-
-		param_count = EmitExpressionList(params, block);
-
-		EmitPostFunctionCall(func_name, param_count, 0, block);
-		AddExpressionListOpcodePos(params);
-
-		if (bStatement)
+script_function:
+		if (scrCompilePub.developer_statement == 3)
 		{
-			EmitDecTop();
+			CompileError(func_name.node[2].sourcePosValue, "unknown builtin function");
 		}
-
-		return;
+		else
+		{
+			EmitPreFunctionCall(func_name);
+			param_count = EmitExpressionList(params, block);
+			EmitPostFunctionCall(func_name, param_count, 0, block);
+			AddExpressionListOpcodePos(params);
+			if (bStatement)
+			{
+				EmitDecTop();
+			}
+			return;
+		}
 	}
 
 	pName = SL_ConvertToString(name);
 	sourcePos = func_name.node[2];
 
-	funcId = FindVariable(scrCompilePub.builtinFunc, name);
-
-	if (funcId)
-	{
-		value = Scr_EvalVariable(funcId);
-		type = Scr_GetUncacheType(value.type);
-
-		func = (void (*)())value.u.pointerValue;
-	}
-	else
+	if (scrCompilePub.developer_statement == 3)
 	{
 		type = BUILTIN_ANY;
 		func = Scr_GetFunction(&pName, &type);
+	}
+	else
+	{
+		funcId = FindVariable(scrCompilePub.builtinFunc, name);
 
-		funcId = GetNewVariable(scrCompilePub.builtinFunc, name);
+		if (funcId)
+		{
+			value = Scr_EvalVariable(funcId);
+			type = Scr_GetUncacheType(value.type);
 
-		value.type = (Vartype_t)Scr_GetCacheType(type);
-		value.u.pointerValue = (intptr_t)func;
+			func = (void (*)())value.u.pointerValue;
+		}
+		else
+		{
+			type = BUILTIN_ANY;
+			func = Scr_GetFunction(&pName, &type);
 
-		SetVariableValue(funcId, &value);
+			funcId = GetNewVariable(scrCompilePub.builtinFunc, name);
+
+			value.type = (Vartype_t)Scr_GetCacheType(type);
+			value.u.pointerValue = (intptr_t)func;
+
+			SetVariableValue(funcId, &value);
+		}
 	}
 
 	if (!func)
 	{
-		EmitPreFunctionCall(func_name);
-
-		param_count = EmitExpressionList(params, block);
-
-		EmitPostFunctionCall(func_name, param_count, false, block);
-		AddExpressionListOpcodePos(params);
-
-		if (bStatement)
-		{
-			EmitDecTop();
-		}
-
-		return;
+		goto script_function;
 	}
 
 	if (type == BUILTIN_DEVELOPER_ONLY)
@@ -4090,7 +4143,7 @@ void EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_block_s *blo
 
 	param_count = EmitExpressionList(params, block);
 
-	if (param_count > 256)
+	if (param_count >= 256)
 	{
 		CompileError(sourcePos.stringValue, "parameter count exceeds 256");
 		return;
@@ -4099,7 +4152,8 @@ void EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_block_s *blo
 	Scr_CompileRemoveRefToString(name);
 	EmitCallBuiltinOpcode(param_count, sourcePos);
 
-	EmitUnsignedShort(AddFunction((intptr_t)func));
+	//EmitUnsignedShort(AddFunction((intptr_t)func, pName));
+	EmitShort(AddFunction((intptr_t)func, pName));
 
 	AddExpressionListOpcodePos(params);
 
@@ -4108,7 +4162,10 @@ void EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_block_s *blo
 		EmitDecTop();
 	}
 
-	Scr_EndDevScript(type, &savedPos);
+	if (type == 1)
+	{
+		Scr_EndDevScript(type, &savedPos);
+	}
 }
 
 /*
@@ -4292,6 +4349,7 @@ void EmitClearFieldVariable(sval_u expr, sval_u field, sval_u sourcePos, sval_u 
 	EmitOpcode(OP_ClearFieldVariable, 0, CALL_NONE);
 	AddOpcodePos(rhsSourcePos.sourcePosValue, SOURCE_TYPE_NONE);
 	EmitCanonicalString(field.stringValue);
+	EmitAssignmentPos();
 }
 
 /*
@@ -4824,7 +4882,7 @@ void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool la
 	AddOpcodePos(sourcePos.stringValue, 0);
 	EmitShort(0);
 	pos2 = scrCompileGlob.codePos;
-	*(unsigned short *)pos1 = scrCompileGlob.codePos - (byte *)nextPos1;
+	*(uintptr_t *)pos1 = (scrCompileGlob.codePos - (byte *)nextPos1);
 	pos3 = TempMallocAlignStrict(0);
 	num = 0;
 
@@ -5085,10 +5143,12 @@ void EmitIfStatement(sval_u expr, sval_u stmt, sval_u sourcePos, bool lastStatem
 	EmitExpression(expr, block);
 	EmitOpcode(OP_JumpOnFalse, -1, CALL_NONE);
 	AddOpcodePos(sourcePos.stringValue, SOURCE_TYPE_NONE);
-	EmitUnsignedShort(0);
+	//EmitUnsignedShort(0);
+	EmitShort(0);
 
 	pos = (const char *)scrCompileGlob.codePos;
-	nextPos = TempMallocAlignStrict(0);
+	//nextPos = TempMallocAlignStrict(0);
+	nextPos = TempMalloc(0);
 
 	Scr_TransferBlock(block, ifStatBlock->block);
 
@@ -5096,7 +5156,8 @@ void EmitIfStatement(sval_u expr, sval_u stmt, sval_u sourcePos, bool lastStatem
 	iassert(ifStatBlock->block->localVarsPublicCount == block->localVarsCreateCount);
 	EmitNOP2(lastStatement, endSourcePos, ifStatBlock->block);
 
-	offset = TempMallocAlignStrict(0) - nextPos;
+	//offset = TempMallocAlignStrict(0) - nextPos;
+	offset = (TempMalloc(0) - nextPos);
 	iassert(offset < 65536);
 	*(unsigned short *)pos = offset;
 }
@@ -5631,13 +5692,7 @@ void __cdecl ScriptCompile(
 	scrCompilePub.programLen = TempMalloc(0) - scrVarPub.programBuffer;
 	Scr_ShutdownAllocNode();
 	Hunk_ClearTempMemoryHigh();
-	if (scrCompilePub.far_function_count != scrCompileGlob.precachescriptList - precachescriptList)
-		MyAssertHandler(
-			".\\script\\scr_compiler.cpp",
-			4990,
-			0,
-			"%s",
-			"scrCompilePub.far_function_count == scrCompileGlob.precachescriptList - precachescriptList");
+	iassert(scrCompilePub.far_function_count == scrCompileGlob.precachescriptList - precachescriptList);
 	far_function_count = scrCompilePub.far_function_count;
 	for (i = 0; i < far_function_count; ++i)
 	{

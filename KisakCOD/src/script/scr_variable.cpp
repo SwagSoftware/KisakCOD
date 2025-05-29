@@ -604,6 +604,10 @@ struct VariableValue  Scr_GetArrayIndexValue(unsigned int name)
 
 void  SetVariableValue(unsigned int id, struct VariableValue* value)
 {
+	if (id == scrVarPub.gameId)
+	{
+		__debugbreak();
+	}
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
 	iassert(id);
@@ -620,7 +624,7 @@ void  SetVariableValue(unsigned int id, struct VariableValue* value)
 	RemoveRefToValue(entryValue->w.status & 0x1F, entryValue->u.u);
 	entryValue->w.status &= 0xFFFFFFE0;
 	entryValue->w.status |= value->type;
-	entryValue->u.u.intValue = value->u.intValue;
+	entryValue->u.u = value->u;
 }
 
 void  SetNewVariableValue(unsigned int id, struct VariableValue* value)
@@ -947,23 +951,16 @@ void  Scr_AddArrayKeys(unsigned int parentId)
 	for (id = FindFirstSibling(parentId); id; id = FindNextSibling(id))
 	{
 		entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
-		if ((entryValue->w.status & 0x60) == 0 || (entryValue->w.status & 0x60) == 0x60)
-			MyAssertHandler(
-				".\\script\\scr_variable.cpp",
-				4805,
-				0,
-				"%s",
-				"(entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL");
-
+		iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
 		iassert(!IsObject(entryValue));
 
 		ArrayIndexValue_DONE = Scr_GetArrayIndexValue(entryValue->w.status >> 8);
 
-		if (ArrayIndexValue_DONE.type == 2)
+		if (ArrayIndexValue_DONE.type == VAR_STRING)
 		{
 			Scr_AddConstString(ArrayIndexValue_DONE.u.stringValue);
 		}
-		else if (ArrayIndexValue_DONE.type == 6)
+		else if (ArrayIndexValue_DONE.type == VAR_INTEGER)
 		{
 			Scr_AddInt(ArrayIndexValue_DONE.u.intValue);
 		}
@@ -2814,7 +2811,7 @@ void  Scr_RemoveClassMap(unsigned int classnum)
 
 void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 {
-	char c[4]; // [esp+1Ch] [ebp-Ch] BYREF
+	char c[4]{ 0 }; // [esp+1Ch] [ebp-Ch] BYREF
 	const char* s; // [esp+20h] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+24h] [ebp-4h]
 
@@ -2822,14 +2819,17 @@ void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 	switch (value->type)
 	{
 	case VAR_POINTER:
-		entryValue = &scrVarGlob.variableList[value->u.pointerValue + 1];
+		entryValue = &scrVarGlob.variableList[value->u.pointerValue + VARIABLELIST_PARENT_BEGIN];
 
 		iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 		iassert(IsObject(entryValue));
 
-		if ((entryValue->w.status & 0x1F) == 0x15)
+		if ((entryValue->w.type & VAR_MASK) == VAR_ARRAY)
 		{
-			*index = Scr_EvalVariable(Scr_FindArrayIndex(value->u.intValue, index));
+			//*index = Scr_EvalVariable(Scr_FindArrayIndex(value->u.intValue, index));
+			VariableValue tmp = Scr_EvalVariable(Scr_FindArrayIndex(value->u.intValue, index));
+			index->type = tmp.type;
+			index->u = tmp.u;
 			RemoveRefToObject(value->u.pointerValue);
 		}
 		else
@@ -2841,20 +2841,26 @@ void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 	case VAR_STRING:
 		if (index->type == VAR_INTEGER)
 		{
-			if (index->u.intValue < 0 || (s = SL_ConvertToString(value->u.intValue), index->u.intValue >= (signed int)strlen(s)))
+			if (index->u.intValue < 0)
 			{
 				Scr_Error(va("string index %d out of range", index->u.intValue));
+				return;
 			}
-			else
+			s = SL_ConvertToString(value->u.stringValue);
+			
+			if (index->u.intValue >= strlen(s))
 			{
-				index->type = VAR_STRING;
-
-				c[0] = s[index->u.intValue];
-				c[1] = 0;
-
-				index->u.stringValue = SL_GetStringOfSize(c, 0, 2, 15).prev;
-				SL_RemoveRefToString(value->u.stringValue);
+				Scr_Error(va("string index %d out of range", index->u.intValue));
+				return;
 			}
+
+			index->type = VAR_STRING;
+
+			c[0] = s[index->u.intValue];
+			c[1] = 0;
+
+			index->u.stringValue = SL_GetStringOfSize(c, 0, 2, 15).prev;
+			SL_RemoveRefToString(value->u.stringValue);
 		}
 		else
 		{
@@ -3485,11 +3491,9 @@ unsigned int  FindArrayVariableIndex(unsigned int parentId, unsigned int unsigne
 
 unsigned int  Scr_FindArrayIndex(unsigned int parentId, VariableValue* index)
 {
-	const char* v3; // eax
-	const char* v4; // eax
 	unsigned int id; // [esp+0h] [ebp-4h]
 
-	if (index->type == 6)
+	if (index->type == VAR_INTEGER)
 	{
 		if (IsValidArrayIndex(index->u.intValue))
 		{
@@ -3497,13 +3501,12 @@ unsigned int  Scr_FindArrayIndex(unsigned int parentId, VariableValue* index)
 		}
 		else
 		{
-			v3 = va("array index %d out of range", index->u.intValue);
-			Scr_Error(v3);
+			Scr_Error(va("array index %d out of range", index->u.intValue));
 			AddRefToObject(parentId);
 			return 0;
 		}
 	}
-	else if (index->type == 2)
+	else if (index->type == VAR_STRING)
 	{
 		id = FindVariable(parentId, index->u.intValue);
 		SL_RemoveRefToString(index->u.intValue);
@@ -3511,8 +3514,7 @@ unsigned int  Scr_FindArrayIndex(unsigned int parentId, VariableValue* index)
 	}
 	else
 	{
-		v4 = va("%s is not an array index", var_typename[index->type]);
-		Scr_Error(v4);
+		Scr_Error(va("%s is not an array index", var_typename[index->type]));
 		AddRefToObject(parentId);
 		return 0;
 	}

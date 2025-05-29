@@ -2520,8 +2520,10 @@ unsigned int VM_ExecuteInternal(const char *pos, unsigned int localId, unsigned 
             continue;
 
         case OP_EvalArray:
+            Log("PRE top(%x/%x) - top-1(%x/%x)\n", top->type, top->u.intValue, (top - 1)->type, (top - 1)->u.intValue);
             Scr_EvalArray(top, top - 1);
             --top;
+            Log("POST top(%x/%x)\n", top->type, top->u.intValue);
             continue;
 
         case OP_EvalLocalArrayRefCached0:
@@ -4108,6 +4110,7 @@ unsigned int VM_ExecuteInternal(const char *pos, unsigned int localId, unsigned 
 #define READ_SHORT() Scr_ReadUnsignedShort(&fs.pos)
 #define INC_TOP() iassert(fs.top >= scrVmPub.stack); fs.top++; iassert(fs.top <= scrVmPub.maxstack); 
 
+#if 0
 unsigned int __cdecl VM_Execute_0()
 {
     unsigned int Array; // eax
@@ -5700,6 +5703,7 @@ unsigned int __cdecl VM_Execute_0()
         }
     }
 }
+#endif
 
 unsigned int __cdecl VM_Execute(unsigned int localId, const char *pos, unsigned int paramcount)
 {
@@ -5761,7 +5765,8 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char *pos, unsigned 
         {
             scrVmDebugPub.builtInTime = 0;
             time = __rdtsc();
-            localIda = VM_Execute_0();
+            //localIda = VM_Execute_0();
+            localIda = VM_ExecuteInternal(pos, localId, 0, scrVmPub.top, startTop);
             if (!scrVmPub.function_count)
                 Scr_AddProfileTime(pos, __rdtsc() - time, scrVmDebugPub.builtInTime);
         }
@@ -6378,38 +6383,30 @@ void __cdecl Scr_GetVector(unsigned int index, float* vectorValue)
 scr_entref_t __cdecl Scr_GetEntityRef(unsigned int index)
 {
     unsigned int ObjectType; // eax
-    const char* v3; // eax
-    const char* v4; // eax
-    const char* v5; // eax
     VariableValue* value; // [esp+8h] [ebp-8h]
     unsigned int id; // [esp+Ch] [ebp-4h]
 
     if (index < scrVmPub.outparamcount)
     {
         value = &scrVmPub.top[-(int)index];
-        if (value->type == 1)
+        if (value->type == VAR_POINTER)
         {
             id = value->u.intValue;
-            if (GetObjectType(value->u.intValue) == 20)
+            if (GetObjectType(value->u.intValue) == VAR_ENTITY)
                 return Scr_GetEntityIdRef(id);
             scrVarPub.error_index = index + 1;
             ObjectType = GetObjectType(id);
-            v3 = va("type %s is not an entity", var_typename[ObjectType]);
-            Scr_Error(v3);
+            Scr_Error(va("type %s is not an entity", var_typename[ObjectType]));
         }
         scrVarPub.error_index = index + 1;
-        v4 = va("type %s is not an entity", var_typename[value->type]);
-        Scr_Error(v4);
+        Scr_Error(va("type %s is not an entity", var_typename[value->type]));
     }
-    v5 = va("parameter %d does not exist", index + 1);
-    Scr_Error(v5);
+    Scr_Error(va("parameter %d does not exist", index + 1));
     return 0;
 }
 
 VariableUnion __cdecl Scr_GetObject(unsigned int index)
 {
-    const char* v2; // eax
-    const char* v3; // eax
     VariableValue* value; // [esp+0h] [ebp-4h]
 
     if (index < scrVmPub.outparamcount)
@@ -6418,22 +6415,18 @@ VariableUnion __cdecl Scr_GetObject(unsigned int index)
         if (value->type == 1)
             return value->u;
         scrVarPub.error_index = index + 1;
-        v2 = va("type %s is not an object", var_typename[value->type]);
-        Scr_Error(v2);
+        Scr_Error(va("type %s is not an object", var_typename[value->type]));
     }
-    v3 = va("parameter %d does not exist", index + 1);
-    Scr_Error(v3);
+
+    Scr_Error(va("parameter %d does not exist", index + 1));
     return 0;
 }
 
 int __cdecl Scr_GetType(unsigned int index)
 {
-    const char* v2; // eax
-
     if (index < scrVmPub.outparamcount)
         return scrVmPub.top[-(int)index].type;
-    v2 = va("parameter %d does not exist", index + 1);
-    Scr_Error(v2);
+    Scr_Error(va("parameter %d does not exist", index + 1));
     return 0;
 }
 
@@ -6450,18 +6443,13 @@ const char* __cdecl Scr_GetTypeName(unsigned int index)
 
 unsigned int __cdecl Scr_GetPointerType(unsigned int index)
 {
-    const char* v2; // eax
-    const char* v3; // eax
-
     if (index < scrVmPub.outparamcount)
     {
-        if (scrVmPub.top[-(int)index].type == 1)
+        if (scrVmPub.top[-(int)index].type == VAR_POINTER)
             return GetObjectType(scrVmPub.top[-(int)index].u.stringValue);
-        v2 = va("type %s is not an object", var_typename[scrVmPub.top[-(int)index].type]);
-        Scr_Error(v2);
+        Scr_Error(va("type %s is not an object", var_typename[scrVmPub.top[-(int)index].type]));
     }
-    v3 = va("parameter %d does not exist", index + 1);
-    Scr_Error(v3);
+    Scr_Error(va("parameter %d does not exist", index + 1));
     return 0;
 }
 
@@ -6472,8 +6460,8 @@ unsigned int __cdecl Scr_GetNumParam()
 
 void __cdecl Scr_AddBool(unsigned int value)
 {
-    if (value > 1)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 4850, 0, "%s", "value == 0 || value == 1");
+    iassert(value == 0 || value == 1);
+
     IncInParam();
     scrVmPub.top->type = VAR_INTEGER;
     scrVmPub.top->u.intValue = value;
@@ -6630,12 +6618,10 @@ void __cdecl Scr_AddArray()
     varUsagePos = scrVarPub.varUsagePos;
     if (!scrVarPub.varUsagePos)
         scrVarPub.varUsagePos = "<script array variable>";
-    if (!scrVmPub.inparamcount)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5002, 0, "%s", "scrVmPub.inparamcount");
+    iassert(scrVmPub.inparamcount);
     --scrVmPub.top;
     --scrVmPub.inparamcount;
-    if (scrVmPub.top->type != 1)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5005, 0, "%s", "scrVmPub.top->type == VAR_POINTER");
+    iassert(scrVmPub.top->type == VAR_POINTER);
     ArraySize = GetArraySize(scrVmPub.top->u.stringValue);
     id = GetNewArrayVariable(scrVmPub.top->u.stringValue, ArraySize);
     SetNewVariableValue(id, scrVmPub.top + 1);
@@ -6919,14 +6905,16 @@ void __cdecl VM_Resume(unsigned int timeId)
             scrVmDebugPub.builtInTime = 0;
             time = __rdtsc();
             pos = fs.pos;
-            v2 = VM_Execute_0();
+            //v2 = VM_Execute_0();
+            v2 = VM_ExecuteInternal(fs.pos, fs.localId, 0, scrVmPub.top, fs.startTop);
             RemoveRefToObject(v2);
             RemoveRefToValue(scrVmPub.stack[1].type, scrVmPub.stack[1].u);
             Scr_AddProfileTime(pos, __rdtsc() - time, scrVmDebugPub.builtInTime);
         }
         else
         {
-            v1 = VM_Execute_0();
+            //v1 = VM_Execute_0();
+            v1 = VM_ExecuteInternal(fs.pos, fs.localId, 0, scrVmPub.top, fs.startTop);
             RemoveRefToObject(v1);
             RemoveRefToValue(scrVmPub.stack[1].type, scrVmPub.stack[1].u);
         }
