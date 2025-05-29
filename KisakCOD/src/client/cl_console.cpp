@@ -464,9 +464,6 @@ void __cdecl Con_InitClientAssets()
 
 void __cdecl Con_InitMessageBuffer()
 {
-    float v0; // [esp+0h] [ebp-4Ch]
-    float v1; // [esp+10h] [ebp-3Ch]
-    float v2; // [esp+20h] [ebp-2Ch]
     int localClientNum; // [esp+38h] [ebp-14h]
     MessageBuffer *msgBuf; // [esp+40h] [ebp-Ch]
     unsigned int gameWindowIndex; // [esp+48h] [ebp-4h]
@@ -476,9 +473,6 @@ void __cdecl Con_InitMessageBuffer()
         msgBuf = &con.messageBuffer[localClientNum];
         for (gameWindowIndex = 0; gameWindowIndex < 4; ++gameWindowIndex)
         {
-            v2 = con_gameMsgWindowNScrollTime[gameWindowIndex]->current.value * 1000.0;
-            v1 = con_gameMsgWindowNFadeInTime[gameWindowIndex]->current.value * 1000.0;
-            v0 = con_gameMsgWindowNFadeOutTime[gameWindowIndex]->current.value * 1000.0;
             Con_InitMessageWindow(
                 &msgBuf->gamemsgWindows[gameWindowIndex],
                 msgBuf->gamemsgMessages[gameWindowIndex],
@@ -487,9 +481,9 @@ void __cdecl Con_InitMessageBuffer()
                 con_gameMsgWindowNLineCount[gameWindowIndex]->current.integer + 3,
                 3,
                 2048,
-                (int)(v2 + 9.313225746154785e-10),
-                (int)(v1 + 9.313225746154785e-10),
-                (int)(v0 + 9.313225746154785e-10));
+                (int)((con_gameMsgWindowNScrollTime[gameWindowIndex]->current.value * 1000.0) + 9.313225746154785e-10),
+                (int)((con_gameMsgWindowNFadeInTime[gameWindowIndex]->current.value * 1000.0) + 9.313225746154785e-10),
+                (int)((con_gameMsgWindowNFadeOutTime[gameWindowIndex]->current.value * 1000.0) + 9.313225746154785e-10));
         }
         Con_InitMessageWindow(
             &msgBuf->miniconWindow,
