@@ -5020,10 +5020,10 @@ void GScr_SetTeamScore()
     char *v0; // eax
     const char *v1; // eax
     const char *v2; // eax
-    unsigned __int16 team; // [esp+0h] [ebp-8h]
+    unsigned short team; // [esp+0h] [ebp-8h]
     int teamScore; // [esp+4h] [ebp-4h]
 
-    team = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    team = Scr_GetConstString(0).intValue;
     if (team != scr_const.allies && team != scr_const.axis)
     {
         v0 = SL_ConvertToString(team);
@@ -5047,9 +5047,9 @@ void GScr_SetTeamScore()
 
 void GScr_SetClientNameMode()
 {
-    unsigned __int16 mode; // [esp+0h] [ebp-4h]
+    unsigned short mode; // [esp+0h] [ebp-4h]
 
-    mode = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    mode = Scr_GetConstString(0).intValue;
     if (mode == scr_const.auto_change)
     {
         level.manualNameChange = 0;
@@ -5097,12 +5097,12 @@ void GScr_GetTeamPlayersAlive()
     char *v0; // eax
     const char *v1; // eax
     int iLivePlayers; // [esp+0h] [ebp-14h]
-    unsigned __int16 team; // [esp+4h] [ebp-10h]
+    unsigned short team; // [esp+4h] [ebp-10h]
     int iTeamNum; // [esp+8h] [ebp-Ch]
     gentity_s *pEnt; // [esp+Ch] [ebp-8h]
     int i; // [esp+10h] [ebp-4h]
 
-    team = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    team = Scr_GetConstString(0).intValue;
     if (team != scr_const.allies && team != scr_const.axis)
     {
         v0 = SL_ConvertToString(team);

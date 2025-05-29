@@ -587,27 +587,29 @@ struct VariableValue  Scr_GetArrayIndexValue(unsigned int name)
 
 	iassert(name);
 
-	if (name < 0x10000)
-		return (name | 0x200000000LL);
-	if (name >= 0x18000)
+	if (name >= SL_MAX_STRING_INDEX)
 	{
-		value.type = VAR_INTEGER;
-		value.u.intValue = name - 0x800000;
+		if (name >= 98304)
+		{
+			value.type = VAR_INTEGER;
+			value.u.intValue = name - 0x800000;
+		}
+		else
+		{
+			value.type = VAR_POINTER;
+			value.u.intValue = name - SL_MAX_STRING_INDEX;
+		}
 	}
 	else
 	{
-		value.type = VAR_POINTER;
-		value.u.intValue = name - 0x10000;
+		value.type = VAR_STRING;
+		value.u.intValue = (uint16_t)name;
 	}
 	return value;
 }
 
 void  SetVariableValue(unsigned int id, struct VariableValue* value)
 {
-	if (id == scrVarPub.gameId)
-	{
-		__debugbreak();
-	}
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
 	iassert(id);

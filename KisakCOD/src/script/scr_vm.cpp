@@ -2520,10 +2520,8 @@ unsigned int VM_ExecuteInternal(const char *pos, unsigned int localId, unsigned 
             continue;
 
         case OP_EvalArray:
-            Log("PRE top(%x/%x) - top-1(%x/%x)\n", top->type, top->u.intValue, (top - 1)->type, (top - 1)->u.intValue);
             Scr_EvalArray(top, top - 1);
             --top;
-            Log("POST top(%x/%x)\n", top->type, top->u.intValue);
             continue;
 
         case OP_EvalLocalArrayRefCached0:
