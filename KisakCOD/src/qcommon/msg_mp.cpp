@@ -7,6 +7,18 @@
 #include <server_mp/server.h>
 #include <client_mp/client_mp.h>
 
+#define NETF_OBJ(x) NETF_BASE(objective_t, x)
+
+static const NetField objectiveFields[6] =
+{
+  { NETF_OBJ(origin[0]), 0, 0u },
+  { NETF_OBJ(origin[1]), 0, 0u },
+  { NETF_OBJ(origin[2]), 0, 0u },
+  { NETF_OBJ(icon), 12, 0u },
+  { NETF_OBJ(entNum), 10, 0u },
+  { NETF_OBJ(teamNum), 4, 0u }
+}; // idb
+
 //  struct netFieldOrderInfo_t orderInfo 82f87210     msg_mp.obj
 //  unsigned int *huffBytesSeen      82f878d0     msg_mp.obj
 //  struct huffman_t msgHuff   82f87cd8     msg_mp.obj
@@ -16,9 +28,9 @@ unsigned int huffBytesSeen[256];
 
 int __cdecl GetMinBitCountForNum(unsigned int num)
 {
-    DWORD v2; // eax
+    int v2; // eax
 
-    if (!_BitScanReverse(&v2, num))
+    if (!_BitScanReverse((unsigned long*)&v2, num))
     {
         //v2 = `CountLeadingZeros'::`2': : notFound;
         v2 = 63;

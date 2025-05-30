@@ -74,7 +74,7 @@ void dSpaceCollide2 (dGeomID o1, dGeomID o2, void *data,
 
 /* the maximum number of user classes that are supported */
 enum {
-  dMaxUserClasses = 4
+  dMaxUserClasses = 6
 };
 
 /* class numbers - each geometry object needs a unique number */

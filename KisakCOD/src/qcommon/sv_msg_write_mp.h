@@ -205,13 +205,3 @@ void __cdecl MSG_WriteDeltaHudElems(
 
 extern huffman_t msgHuff;
 extern netFieldOrderInfo_t orderInfo;
-
-static const NetField objectiveFields[6] =
-{
-  { "origin[0]", 4, 0, 0u },
-  { "origin[1]", 8, 0, 0u },
-  { "origin[2]", 12, 0, 0u },
-  { "icon", 24, 12, 0u },
-  { "entNum", 16, 10, 0u },
-  { "teamNum", 20, 4, 0u }
-}; // idb
