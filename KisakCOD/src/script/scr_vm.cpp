@@ -1196,14 +1196,16 @@ LABEL_30:
                                 goto next;
                             }
                             --size;
-                            tempValue3.type = (Vartype_t)(unsigned char)*buf;
+                            tempValue3.type = (Vartype_t)*(unsigned char*)buf;
+                            buf += 1;
                             iassert(tempValue3.type != VAR_CODEPOS);
 
                             if (tempValue3.type == VAR_PRECODEPOS)
                                 break;
 
-                            tempValue3.u.intValue = *(_DWORD*)++buf;
+                            tempValue3.u.codePosValue = *(const char**)buf;
                             buf += 4;
+
                             AddRefToValue(tempValue3.type, tempValue3.u);
                             type = currentValue->type;
                             tempValue2.u = currentValue->u;
@@ -1271,7 +1273,7 @@ LABEL_30:
 
                         len = 5 * size;
                         //bufLen = 5 * newSize + 11;
-                        bufLen = 5 * newSize + sizeof(VariableStackBuffer);
+                        bufLen = 5 * newSize + (sizeof(VariableStackBuffer)-1);
 
                         if (!MT_Realloc(stackValue->bufLen, bufLen))
                         {
@@ -1297,7 +1299,7 @@ LABEL_30:
                             AddRefToValue(currentValue->type, currentValue->u);
                             iassert((unsigned)currentValue->type < VAR_COUNT);
                             *buf++ = currentValue->type;
-                            *(_DWORD*)buf = currentValue->u.intValue;
+                            *(const char**)buf = currentValue->u.codePosValue;
                             buf += 4;
                             --newSize;
                         } while (newSize);
@@ -2278,7 +2280,7 @@ endon:
         iassert(!scrVmPub.inparamcount);
 
         opcode = *(unsigned char *)fs.pos++;
-        Log("0x%x\n", opcode);
+        // Log("0x%x\n", opcode);
 interrupt_return:
         scrVarPub.varUsagePos = fs.pos;
         switch (opcode)

@@ -1155,19 +1155,18 @@ void __cdecl SV_KillLocalServer()
 void __cdecl SV_SetSystemInfoConfig()
 {
     char *v0; // eax
-    char dest; // [esp+24h] [ebp-2008h] BYREF
-    _BYTE v2[3]; // [esp+25h] [ebp-2007h] BYREF
+    char dest[0x2000]; // [esp+24h] [ebp-2008h] BYREF
 
     v0 = Dvar_InfoString_Big(8);
-    I_strncpyz(&dest, v0, 0x2000);
+    I_strncpyz(dest, v0, 0x2000);
     if (!fs_gameDirVar->current.integer)
     {
-        if (&v2[strlen(&dest)] - v2 + strlen("\\fs_game\\\\") <= 0x400)
-            I_strncat(&dest, 1024, "\\fs_game\\\\");
+        if (strlen(dest) + strlen("\\fs_game\\\\") <= 0x400)
+            I_strncat(dest, 1024, "\\fs_game\\\\");
         else
-            Com_Printf(16, "Info string length exceeded key: fs_game Info string: %s", &dest);
+            Com_Printf(16, "Info string length exceeded key: fs_game Info string: %s", dest);
     }
-    SV_SetConfigstring(1, &dest);
+    SV_SetConfigstring(1, dest);
     dvar_modifiedFlags &= ~8u;
 }
 

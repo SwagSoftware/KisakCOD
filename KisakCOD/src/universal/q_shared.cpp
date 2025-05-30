@@ -707,7 +707,10 @@ void __cdecl Info_RemoveKey_Big(char *s, const char *key)
     char *v7; // [esp+34h] [ebp-4010h]
     char *v8; // [esp+38h] [ebp-400Ch]
     char v9[8192]; // [esp+3Ch] [ebp-4008h] BYREF
-    char v10; // [esp+203Ch] [ebp-2008h] BYREF
+    char v10[8192]; // [esp+203Ch] [ebp-2008h] BYREF
+
+    v9[0] = '\0';
+    v10[0] = '\0';
 
     if (strlen(s) >= 0x2000)
         Com_Error(ERR_DROP, "Info_RemoveKey_Big: oversize infostring");
@@ -730,7 +733,7 @@ void __cdecl Info_RemoveKey_Big(char *s, const char *key)
             }
             *v6 = 0;
             ++s;
-            v7 = &v10;
+            v7 = v10;
             while (*s != 92 && *s)
                 *v7++ = *s++;
             *v7 = 0;
@@ -852,8 +855,7 @@ void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value
     char v7; // [esp+5Bh] [ebp-4011h]
     char v8[8196]; // [esp+5Ch] [ebp-4010h] BYREF
     int v9; // [esp+2060h] [ebp-200Ch]
-    char dest; // [esp+2064h] [ebp-2008h] BYREF
-    _BYTE v11[3]; // [esp+2065h] [ebp-2007h] BYREF
+    char dest[0x400]; // [esp+2064h] [ebp-2008h] BYREF
     int i; // [esp+4068h] [ebp-4h]
 
     if (!value)
@@ -901,11 +903,11 @@ void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value
                     Info_RemoveKey_Big(s, key);
                     if (v8[0])
                     {
-                        v9 = Com_sprintf(&dest, 0x2000u, "\\%s\\%s", key, v8);
+                        v9 = Com_sprintf(dest, 0x2000u, "\\%s\\%s", key, v8);
                         if (v9 > 0)
                         {
-                            if (strlen(s) + &v11[strlen(&dest)] - v11 <= 0x400)
-                                memcpy(&s[strlen(s)], &dest, (char*)&v11[strlen(&dest)] - &dest);
+                            if (strlen(s) + strlen(dest) <= 0x400)
+                                strcat(s, dest);
                             else
                                 Com_Printf(16, "Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);
                         }
