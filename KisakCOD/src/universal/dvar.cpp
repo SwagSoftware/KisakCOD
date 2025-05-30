@@ -548,34 +548,35 @@ const char *__cdecl Dvar_DomainToString_Internal(
     int charsWrittena; // [esp+1Ch] [ebp-8h]
     int stringIndex; // [esp+20h] [ebp-4h]
 
-    if ((int)outBuffer <= 0)
-        MyAssertHandler(".\\universal\\dvar.cpp", 708, 0, "%s", "outBufferLen > 0");
+    iassert(outBuffer);
+    iassert(outBufferLen);
 
-    outBufferEnd = (char *)(HIDWORD(outBuffer) + outBuffer);
+    outBufferEnd = (char*)(outBuffer + outBufferLen);
     if (outLineCount)
         *outLineCount = 0;
+
     switch (type)
     {
     case 0u:
-        _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is 0 or 1");
+        _snprintf((char *)outBuffer, outBufferLen, "Domain is 0 or 1");
         break;
     case 1u:
         if (domain.value.min == -3.402823466385289e38)
         {
             if (domain.value.max == 3.402823466385289e38)
-                _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any number");
+                _snprintf((char *)outBuffer, outBufferLen, "Domain is any number");
             else
-                _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any number %g or smaller", domain.value.max);
+                _snprintf((char *)outBuffer, outBufferLen, "Domain is any number %g or smaller", domain.value.max);
         }
         else if (domain.value.max == 3.402823466385289e38)
         {
-            _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any number %g or bigger", domain.value.min);
+            _snprintf((char *)outBuffer, outBufferLen, "Domain is any number %g or bigger", domain.value.min);
         }
         else
         {
             _snprintf(
                 (char *)outBuffer,
-                HIDWORD(outBuffer),
+                outBufferLen,
                 "Domain is any number from %g to %g",
                 domain.value.min,
                 domain.value.max);
@@ -594,15 +595,15 @@ const char *__cdecl Dvar_DomainToString_Internal(
         if (domain.enumeration.stringCount == 0x80000000)
         {
             if (domain.integer.max == 0x7FFFFFFF)
-                _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any integer");
+                _snprintf((char *)outBuffer, outBufferLen, "Domain is any integer");
             else
-                _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any integer %i or smaller", domain.integer.max);
+                _snprintf((char *)outBuffer, outBufferLen, "Domain is any integer %i or smaller", domain.integer.max);
         }
         else if (domain.integer.max == 0x7FFFFFFF)
         {
             _snprintf(
                 (char *)outBuffer,
-                HIDWORD(outBuffer),
+                outBufferLen,
                 "Domain is any integer %i or bigger",
                 domain.enumeration.stringCount);
         }
@@ -610,14 +611,14 @@ const char *__cdecl Dvar_DomainToString_Internal(
         {
             _snprintf(
                 (char *)outBuffer,
-                HIDWORD(outBuffer),
+                outBufferLen,
                 "Domain is any integer from %i to %i",
                 domain.enumeration.stringCount,
                 domain.integer.max);
         }
         break;
     case 6u:
-        charsWritten = _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is one of the following:");
+        charsWritten = _snprintf((char *)outBuffer, outBufferLen, "Domain is one of the following:");
         if (charsWritten >= 0)
         {
             outBufferWalk = (char *)(charsWritten + outBuffer);
@@ -638,10 +639,10 @@ const char *__cdecl Dvar_DomainToString_Internal(
         }
         break;
     case 7u:
-        _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any text");
+        _snprintf((char *)outBuffer, outBufferLen, "Domain is any text");
         break;
     case 8u:
-        _snprintf((char *)outBuffer, HIDWORD(outBuffer), "Domain is any 4-component color, in RGBA format");
+        _snprintf((char *)outBuffer, outBufferLen, "Domain is any 4-component color, in RGBA format");
         break;
     default:
         if (!alwaysfails)
@@ -722,6 +723,8 @@ void __cdecl Dvar_PrintDomain(unsigned __int8 type, DvarLimits domain)
     //LODWORD(v3) = domainBuffer;
     //v2 = Dvar_DomainToString(type, domain, v3);
     //Com_Printf(16, "  %s\n", v2);
+    char domainBuffer[1024];
+    Com_Printf(16, "  %s\n", Dvar_DomainToString(type, &domain, domainBuffer, sizeof(domainBuffer)));
 }
 
 bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar)
