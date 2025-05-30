@@ -736,7 +736,7 @@ void __cdecl GScr_NewTeamHudElem()
     unsigned __int16 teamName; // [esp+0h] [ebp-Ch]
     game_hudelem_s *hud; // [esp+8h] [ebp-4h]
 
-    teamName = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    teamName = Scr_GetConstString(0).intValue;
     if (teamName == scr_const.allies)
     {
         v0 = HudElem_Alloc(1023, 2);

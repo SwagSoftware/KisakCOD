@@ -1156,10 +1156,10 @@ void GScr_Spawn()
     float *currentOrigin; // [esp+0h] [ebp-1Ch]
     float origin[3]; // [esp+4h] [ebp-18h] BYREF
     int iSpawnFlags; // [esp+10h] [ebp-Ch]
-    unsigned __int16 classname; // [esp+14h] [ebp-8h]
+    unsigned short classname; // [esp+14h] [ebp-8h]
     gentity_s *ent; // [esp+18h] [ebp-4h]
 
-    classname = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    classname = Scr_GetConstString(0).intValue;
     Scr_GetVector(1u, origin);
     if (Scr_GetNumParam() <= 2)
         iSpawnFlags = 0;
@@ -1247,7 +1247,7 @@ void GScr_SpawnTurret()
     gentity_s *ent; // [esp+14h] [ebp-8h]
     const char *weaponinfoname; // [esp+18h] [ebp-4h]
 
-    classname = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    classname = Scr_GetConstString(0).intValue;
     Scr_GetVector(1u, origin);
     weaponinfoname = Scr_GetString(2u);
     ent = G_Spawn();
@@ -4940,7 +4940,7 @@ void GScr_SetWinningTeam()
     int iWinner; // [esp+8h] [ebp-40Ch]
     char buffer[1028]; // [esp+Ch] [ebp-408h] BYREF
 
-    team = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    team = Scr_GetConstString(0).intValue;
     if (team == scr_const.allies)
     {
         iWinner = -2;
@@ -5002,7 +5002,7 @@ void GScr_GetTeamScore()
     const char *v1; // eax
     unsigned __int16 team; // [esp+4h] [ebp-4h]
 
-    team = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    team = Scr_GetConstString(0).intValue;
     if (team != scr_const.allies && team != scr_const.axis)
     {
         v0 = SL_ConvertToString(team);
@@ -6204,7 +6204,7 @@ void __cdecl GScr_SetTeamForTrigger(scr_entref_t entref)
         v2 = va("setteamfortrigger: trigger entity must be of type %s or %s", v1, v6);
         Scr_Error(v2);
     }
-    team = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    team = Scr_GetConstString(0).intValue;
     if (team == scr_const.allies)
     {
         ent->team = 2;
@@ -6358,7 +6358,7 @@ bool GScr_SetTeamRadar()
     bool radarAvailable; // [esp+3h] [ebp-5h]
     unsigned __int16 team; // [esp+4h] [ebp-4h]
 
-    team = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    team = Scr_GetConstString(0).intValue;
     if (team != scr_const.allies && team != scr_const.axis && team != scr_const.none)
     {
         v0 = SL_ConvertToString(team);
@@ -6393,7 +6393,7 @@ void GScr_GetTeamRadar()
     bool radarAvailable; // [esp+3h] [ebp-5h]
     unsigned __int16 team; // [esp+4h] [ebp-4h]
 
-    team = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    team = Scr_GetConstString(0).intValue;
     if (team == scr_const.allies)
     {
         radarAvailable = level.teamHasRadar[2];

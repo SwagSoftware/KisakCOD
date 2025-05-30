@@ -82,7 +82,7 @@ void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *p
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 34, 0, "%s", "pSelf");
-    newTeam = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    newTeam = Scr_GetConstString(0).intValue;
     if (newTeam == scr_const.axis)
     {
         pSelf->sess.cs.team = TEAM_AXIS;
@@ -152,7 +152,7 @@ void __cdecl ClientScr_SetSessionState(gclient_s *pSelf, const client_fields_s *
         MyAssertHandler(".\\game\\g_client_fields.cpp", 110, 0, "%s", "pSelf");
     if (pSelf->sess.connected == CON_DISCONNECTED)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 111, 0, "%s", "pSelf->sess.connected != CON_DISCONNECTED");
-    newState = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    newState = Scr_GetConstString(0).intValue;
     if (newState == scr_const.playing)
     {
         pSelf->sess.sessionState = SESS_STATE_PLAYING;
@@ -324,7 +324,7 @@ void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 343, 0, "%s", "pSelf");
     pEnt = &g_entities[pSelf - level.clients];
-    sTeam = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    sTeam = Scr_GetConstString(0).intValue;
     if (sTeam == scr_const.none)
     {
         pEnt->s.iHeadIconTeam = 0;

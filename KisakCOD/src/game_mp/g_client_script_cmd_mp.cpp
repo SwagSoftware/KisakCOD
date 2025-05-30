@@ -2401,7 +2401,7 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
         drylevel = Scr_GetFloat(2u);
     $LN6_34:
         pszReverb = Scr_GetString(1u);
-        prio_name = (unsigned __int16)Scr_GetConstString(0).floatValue;
+        prio_name = Scr_GetConstString(0).intValue;
         prio = 1;
         if (prio_name == scr_const.snd_enveffectsprio_level)
         {
@@ -2515,7 +2515,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
     }
     String = Scr_GetString(1u);
     shockIndex = G_FindConfigstringIndex(String, 1954, 16, 0, 0);
-    prio_name = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    prio_name = Scr_GetConstString(0).intValue;
     prio = 1;
     if (prio_name == scr_const.snd_channelvolprio_holdbreath)
     {
@@ -2896,7 +2896,7 @@ void __cdecl PlayerCmd_AllowSpectateTeam(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    teamString = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    teamString = Scr_GetConstString(0).intValue;
     teamBit = 0;
     if (teamString == scr_const.axis)
     {

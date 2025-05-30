@@ -302,7 +302,7 @@ void __cdecl VM_TrimStack(unsigned int startLocalId, VariableStackBuffer* stackV
 void __cdecl Scr_CancelWaittill(unsigned int startLocalId);
 unsigned __int16 __cdecl Scr_ExecThread(int handle, unsigned int paramcount);
 unsigned int __cdecl VM_Execute(unsigned int localId, const char* pos, unsigned int paramcount);
-unsigned int __cdecl VM_Execute_0();
+//unsigned int __cdecl VM_Execute_0();
 unsigned int __cdecl GetDummyObject();
 unsigned int __cdecl GetDummyFieldValue();
 void VM_PrintJumpHistory();

@@ -517,7 +517,7 @@ void __cdecl Scr_GetEnt()
     int i; // [esp+1Ch] [ebp-8h]
     unsigned __int16 value; // [esp+20h] [ebp-4h]
 
-    name = (unsigned __int16)Scr_GetConstString(0).floatValue;
+    name = Scr_GetConstString(0).intValue;
     key = Scr_GetString(1u);
     offset = Scr_GetOffset(0, key);
     if (offset >= 0)
@@ -571,7 +571,7 @@ void __cdecl Scr_GetEntArray()
 
     if (Scr_GetNumParam())
     {
-        name = (unsigned __int16)Scr_GetConstString(0).floatValue;
+        name = Scr_GetConstString(0).intValue;
         key = Scr_GetString(1u);
         offset = Scr_GetOffset(0, key);
         if (offset >= 0)

@@ -395,7 +395,7 @@ unsigned int  Scr_GetSelf(unsigned int threadId)
 	iassert(((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) >= VAR_THREAD) &&
 		((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) <= VAR_CHILD_THREAD));
 
-	return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].u.o.u.size;
+	return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].u.o.u.self;
 }
 
 void  AddRefToObject(unsigned int id)
@@ -413,13 +413,8 @@ void  AddRefToObject(unsigned int id)
 	iassert(IsObject(&scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id]));
 	//iassert(scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id].u.o.refCount);
 	//iassert(++scrVarGlob.variableList[id + 1].u.next);
-	if (!++scrVarGlob.variableList[id + 1].u.next)
-		MyAssertHandler(
-			".\\script\\scr_variable.cpp",
-			2201,
-			0,
-			"%s",
-			"scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id].u.o.refCount");
+	++scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id].u.o.refCount;
+	iassert(scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id].u.o.refCount);
 }
 
 void  RemoveRefToEmptyObject(unsigned int id)
@@ -456,7 +451,7 @@ int  Scr_GetRefCountToObject(unsigned int id)
 
 	iassert(((entryValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL));
 	iassert(IsObject(entryValue));
-	return entryValue->u.next;
+	return entryValue->u.o.refCount;
 }
 
 float const* Scr_AllocVector(float const* v)
@@ -1393,6 +1388,7 @@ void  FreeValue(unsigned int id)
 	if (scrVarDebugPub)
 	{
 		iassert(scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]);
+		scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]--;
 		iassert(!scrVarDebugPub->leakCount[VARIABLELIST_CHILD_BEGIN + id]);
 	}
 	--scrVarPub.numScriptValues;
@@ -3392,7 +3388,7 @@ unsigned short  AllocVariable(void)
 	if (scrVarDebugPub)
 	{
 		iassert(!scrVarDebugPub->leakCount[VARIABLELIST_PARENT_BEGIN + entry->hash.id]);
-		++scrVarDebugPub->leakCount[entry->hash.id + 1];
+		++scrVarDebugPub->leakCount[VARIABLELIST_PARENT_BEGIN + entry->hash.id];
 	}
 
 	++scrVarPub.numScriptObjects;
@@ -3402,7 +3398,7 @@ unsigned short  AllocVariable(void)
 	if (scrVarDebugPub)
 	{
 		iassert(!scrVarDebugPub->varUsage[VARIABLELIST_PARENT_BEGIN + entry->hash.id]);
-		scrVarDebugPub->varUsage[entry->hash.id + 1] = scrVarPub.varUsagePos;
+		scrVarDebugPub->varUsage[VARIABLELIST_PARENT_BEGIN + entry->hash.id] = scrVarPub.varUsagePos;
 	}
 	return entry->hash.id;
 }
@@ -3420,14 +3416,8 @@ void  FreeVariable(unsigned int id)
 	if (scrVarDebugPub)
 	{
 		iassert(scrVarDebugPub->leakCount[VARIABLELIST_PARENT_BEGIN + id]);
-		//iassert(!scrVarDebugPub->leakCount[VARIABLELIST_PARENT_BEGIN + id]);
-		if (--scrVarDebugPub->leakCount[id + 1])
-			MyAssertHandler(
-				".\\script\\scr_variable.cpp",
-				1921,
-				0,
-				"%s",
-				"!scrVarDebugPub->leakCount[VARIABLELIST_PARENT_BEGIN + id]");
+		scrVarDebugPub->leakCount[VARIABLELIST_PARENT_BEGIN + id]--;
+		iassert(!scrVarDebugPub->leakCount[VARIABLELIST_PARENT_BEGIN + id]);
 	}
 
 	--scrVarPub.numScriptObjects;
