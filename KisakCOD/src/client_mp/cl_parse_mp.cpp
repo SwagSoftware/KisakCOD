@@ -11,7 +11,16 @@
 #include <qcommon/files.h>
 #include <client/client.h>
 
-char *svc_strings[256];
+const char* svc_strings[256] = {
+    "svc_nop",
+    "svc_gamestate",
+    "svc_configstring",
+    "svc_baseline",
+    "svc_serverCommand",
+    "svc_download",
+    "svc_snapshot",
+    "svc_EOF"
+};
 int autoupdateStarted;
 char autoupdateFilename[64];
 int cl_connectedToPureServer;
@@ -21,7 +30,7 @@ void __cdecl TRACK_cl_parse()
     track_static_alloc_internal(svc_strings, 1024, "svc_strings", 9);
 }
 
-void __cdecl SHOWNET(msg_t *msg, char *s)
+void __cdecl SHOWNET(msg_t *msg, const char *s)
 {
     if (cl_shownet->current.integer >= 2)
         Com_Printf(14, "%3i:%s\n", msg->readcount - 1, s);

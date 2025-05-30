@@ -777,7 +777,7 @@ extern char cl_cdkey[34];
 
 extern BOOL updateScreenCalled;
 
-extern char *svc_strings[256];
+extern const char *svc_strings[256];
 extern int autoupdateStarted;
 extern char autoupdateFilename[64];
 extern int cl_connectedToPureServer;
@@ -945,7 +945,7 @@ void __cdecl CL_Netchan_Decode(unsigned __int8 *data, int size);
 
 // cl_parse_mp
 void __cdecl TRACK_cl_parse();
-void __cdecl SHOWNET(msg_t *msg, char *s);
+void __cdecl SHOWNET(msg_t *msg, const char *s);
 void __cdecl CL_SavePredictedOriginForServerTime(
     clientActive_t *cl,
     int serverTime,
