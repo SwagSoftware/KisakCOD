@@ -8,8 +8,7 @@
 #include "rb_tess.h"
 #include "r_pretess.h"
 
-//int *g_layerDataStride  827dc14c     gfx_d3d : r_draw_bsp.obj
-
+const int g_layerDataStride[16] = { 0, 0, 0, 8, 12, 16, 20, 24, 24, 28, 32, 32, 36, 40, 0, 0 }; // idb
 
 void __cdecl R_SetStreamSource(
     GfxCmdBufPrimState *primState,
@@ -62,7 +61,6 @@ void __cdecl R_HW_SetSamplerTexture(IDirect3DDevice9 *device, unsigned int sampl
     } while (alwaysfails);
 }
 
-const int g_layerDataStride[16] = { 0, 0, 0, 8, 12, 16, 20, 24, 24, 28, 32, 32, 36, 40, 0, 0 }; // idb
 void __cdecl R_SetStreamsForBspSurface(GfxCmdBufPrimState *state, const srfTriangles_t *tris)
 {
     int vertexLayerData; // [esp+0h] [ebp-2Ch]

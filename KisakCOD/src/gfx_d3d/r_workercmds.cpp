@@ -147,8 +147,7 @@ void __cdecl R_ProcessWorkerCmdsWithTimeout(int(__cdecl *timeout)(), int forever
 
 void __cdecl R_WaitWorkerCmdsOfType(int type)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_workercmds.cpp", 770, 0, "%s", "Sys_IsMainThread()");
+    iassert(Sys_IsMainThread());
     g_waitTypeMainThread = type;
     if (!R_WorkerCmdsFinished())
     {

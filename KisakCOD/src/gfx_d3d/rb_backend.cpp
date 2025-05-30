@@ -231,28 +231,24 @@ void __cdecl RB_DrawStretchPic(
     unsigned int color,
     GfxPrimStatsTarget statsTarget)
 {
-    float v11; // [esp+1Ch] [ebp-Ch]
-    float v12; // [esp+20h] [ebp-8h]
     unsigned __int16 vertCount; // [esp+24h] [ebp-4h]
 
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 243, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert(gfxCmdBufSourceState.viewMode == VIEW_MODE_2D);
+
     RB_SetTessTechnique(material, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, statsTarget);
     RB_CheckTessOverflow(4, 6);
     vertCount = tess.vertexCount;
-    tess.indices[tess.indexCount] = LOWORD(tess.vertexCount) + 3;
+    tess.indices[tess.indexCount] = vertCount + 3;
     tess.indices[tess.indexCount + 1] = vertCount;
     tess.indices[tess.indexCount + 2] = vertCount + 2;
     tess.indices[tess.indexCount + 3] = vertCount + 2;
     tess.indices[tess.indexCount + 4] = vertCount;
     tess.indices[tess.indexCount + 5] = vertCount + 1;
     R_SetVertex2d(&tess.verts[tess.vertexCount], x, y, s0, t0, color);
-    v12 = x + w;
-    R_SetVertex2d(&tess.verts[tess.vertexCount + 1], v12, y, s1, t0, color);
-    v11 = y + h;
-    R_SetVertex2d(&tess.verts[tess.vertexCount + 2], v12, v11, s1, t1, color);
-    R_SetVertex2d(&tess.verts[tess.vertexCount + 3], x, v11, s0, t1, color);
+    R_SetVertex2d(&tess.verts[tess.vertexCount + 1], x + w, y, s1, t0, color);
+    R_SetVertex2d(&tess.verts[tess.vertexCount + 2], x + w, y + h, s1, t1, color);
+    R_SetVertex2d(&tess.verts[tess.vertexCount + 3], x, y + h, s0, t1, color);
     tess.vertexCount += 4;
     tess.indexCount += 6;
 }
@@ -479,8 +475,7 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
             do
             {
                 ++g_disableRendering;
-                v5 = R_ErrorDescription(v6);
-                Com_Error(ERR_FATAL, ".\\rb_backend.cpp (%i) imageSurface->Release() failed: %s\n", 674, v5);
+                Com_Error(ERR_FATAL, ".\\rb_backend.cpp (%i) imageSurface->Release() failed: %s\n", 674, R_ErrorDescription(v6));
             } while (alwaysfails);
         }
     } while (alwaysfails);
@@ -2997,10 +2992,11 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
     signed int wait; // [esp+34h] [ebp-8h]
     unsigned int start; // [esp+38h] [ebp-4h]
 
-    if (threadContext != 1)
-        MyAssertHandler(".\\rb_backend.cpp", 3354, 0, "threadContext == THREAD_CONTEXT_BACKEND\n\t%i, %i", threadContext, 1);
+    iassert(threadContext == THREAD_CONTEXT_BACKEND);
+
     while (r_glob.haveThreadOwnership)
         NET_Sleep(1u);
+
     while (1)
     {
         Value = Sys_GetValue(2);
@@ -3010,8 +3006,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
         if (r_glob.isRenderingRemoteUpdate)
         {
             r_glob.isRenderingRemoteUpdate = 0;
-            if (r_glob.screenUpdateNotify)
-                MyAssertHandler(".\\rb_backend.cpp", 3373, 0, "%s", "!r_glob.screenUpdateNotify");
+            iassert(!r_glob.screenUpdateNotify);
             r_glob.screenUpdateNotify = 1;
             data = 0;
         }
@@ -3048,11 +3043,9 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
                     if (data)
                         RB_RenderCommandFrame((GfxBackEndData *)data);
                 }
-                if (r_glob.screenUpdateNotify)
-                    MyAssertHandler(".\\rb_backend.cpp", 3439, 0, "%s", "!r_glob.screenUpdateNotify");
+                iassert(!r_glob.screenUpdateNotify);
                 r_glob.screenUpdateNotify = 1;
-                if (r_glob.isRenderingRemoteUpdate)
-                    MyAssertHandler(".\\rb_backend.cpp", 3442, 0, "%s", "!r_glob.isRenderingRemoteUpdate");
+                iassert(!r_glob.isRenderingRemoteUpdate);
                 r_glob.isRenderingRemoteUpdate = 1;
                 do
                 {
@@ -3062,11 +3055,9 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
                     if (wait > 0)
                         NET_Sleep(wait);
                 } while (r_glob.remoteScreenUpdateNesting);
-                if (!r_glob.isRenderingRemoteUpdate)
-                    MyAssertHandler(".\\rb_backend.cpp", 3456, 0, "%s", "r_glob.isRenderingRemoteUpdate");
+                iassert(r_glob.isRenderingRemoteUpdate);
                 r_glob.isRenderingRemoteUpdate = 0;
-                if (r_glob.screenUpdateNotify)
-                    MyAssertHandler(".\\rb_backend.cpp", 3459, 0, "%s", "!r_glob.screenUpdateNotify");
+                iassert(!r_glob.screenUpdateNotify);
                 r_glob.screenUpdateNotify = 1;
             }
             if (!data)

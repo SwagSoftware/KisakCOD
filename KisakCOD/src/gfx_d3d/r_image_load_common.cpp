@@ -6,19 +6,17 @@
 
 unsigned int __cdecl Image_CubemapFace(unsigned int faceIndex)
 {
-    if (faceIndex >= 6)
-        MyAssertHandler(".\\r_image_load_common.cpp", 1224, 0, "%s\n\t(faceIndex) = %i", "(faceIndex < 6)", faceIndex);
+    iassert(faceIndex < 6);
     return faceIndex;
 }
 
 void __cdecl Image_GetPicmip(const GfxImage *image, Picmip *picmip)
 {
-    if (!image)
-        MyAssertHandler(".\\r_image_load_common.cpp", 1028, 0, "%s", "image");
-    if (!picmip)
-        MyAssertHandler(".\\r_image_load_common.cpp", 1029, 0, "%s", "picmip");
+    iassert(image);
+    iassert(picmip);
+
     if (image->noPicmip)
-        *picmip = 0;
+        *picmip = NULL;
     else
         Image_PicmipForSemantic(image->semantic, picmip);
 }
@@ -69,55 +67,37 @@ void __cdecl Image_PicmipForSemantic(unsigned __int8 semantic, Picmip *picmip)
 
 int __cdecl Image_SourceBytesPerSlice_PC(_D3DFORMAT format, int width, int height)
 {
-    int result; // eax
-    const char *v4; // eax
-
-    if (format > D3DFMT_D24S8)
-    {
-        if (format > D3DFMT_DXT1)
-        {
-            if (format == D3DFMT_DXT3 || format == D3DFMT_DXT5)
-                return 16 * ((height + 3) >> 2) * ((width + 3) >> 2);
-        }
-        else
-        {
-            switch (format)
-            {
-            case D3DFMT_DXT1:
-                return 8 * ((height + 3) >> 2) * ((width + 3) >> 2);
-            case D3DFMT_D16:
-                return 2 * height * width;
-            case D3DFMT_R32F:
-                return 4 * height * width;
-            }
-        }
-    LABEL_18:
-        if (!alwaysfails)
-        {
-            v4 = va("unhandled case: %d", format);
-            MyAssertHandler(".\\r_image_load_common.cpp", 295, 1, v4);
-        }
-        return 0;
-    }
-    if (format == D3DFMT_D24S8)
-        return 4 * height * width;
     switch (format)
     {
+    case D3DFMT_DXT3:
+    case D3DFMT_DXT5:
+        return 16 * ((height + 3) >> 2) * ((width + 3) >> 2);
+    case D3DFMT_DXT1:
+        return 8 * ((height + 3) >> 2) * ((width + 3) >> 2);
+    case D3DFMT_D16:
+         return 2 * height * width;
+    case D3DFMT_R32F:
+         return 4 * height * width;
+    case D3DFMT_D24S8:
     case D3DFMT_A8R8G8B8:
         return 4 * height * width;
     case D3DFMT_X8R8G8B8:
-        result = 3 * height * width;
+        return 3 * height * width;
         break;
     case D3DFMT_A8:
     case D3DFMT_L8:
-        result = height * width;
+        return height * width;
         break;
     case D3DFMT_A8L8:
         return 2 * height * width;
     default:
-        goto LABEL_18;
+        if (!alwaysfails)
+        {
+            MyAssertHandler(".\\r_image_load_common.cpp", 295, 1, va("unhandled case: %d", format));
+        }
     }
-    return result;
+
+    return 0;
 }
 
 
@@ -135,10 +115,9 @@ void __cdecl Image_Upload2D_CopyDataBlock_PC(
     int y; // [esp+4Ch] [ebp-8h]
     int dy; // [esp+50h] [ebp-4h]
 
-    if (!src)
-        MyAssertHandler(".\\r_image_load_common.cpp", 487, 0, "%s", "src");
-    if (!dst)
-        MyAssertHandler(".\\r_image_load_common.cpp", 488, 0, "%s", "dst");
+    iassert(src);
+    iassert(dst);
+
     if (format <= D3DFMT_A8L8)
     {
         if (format != D3DFMT_A8L8)
@@ -170,8 +149,7 @@ void __cdecl Image_Upload2D_CopyDataBlock_PC(
     LABEL_20:
         if (dstPitch < srcStride)
         {
-            v7 = va("%i x %i: %i < %i", width, height, dstPitch, srcStride);
-            MyAssertHandler(".\\r_image_load_common.cpp", 525, 0, "%s\n\t%s", "dstPitch >= srcStride", v7);
+            MyAssertHandler(".\\r_image_load_common.cpp", 525, 0, "%s\n\t%s", "dstPitch >= srcStride", va("%i x %i: %i < %i", width, height, dstPitch, srcStride));
         }
         if (dstPitch == srcStride)
         {
@@ -201,8 +179,7 @@ void __cdecl Image_Upload2D_CopyDataBlock_PC(
 LABEL_17:
     if (!alwaysfails)
     {
-        v6 = va("unhandled case: %d", format);
-        MyAssertHandler(".\\r_image_load_common.cpp", 521, 1, v6);
+        MyAssertHandler(".\\r_image_load_common.cpp", 521, 1, va("unhandled case: %d", format));
     }
 }
 
@@ -226,16 +203,9 @@ void __cdecl Image_Upload3D_CopyData_PC(
     int height; // [esp+3Ch] [ebp-8h]
     unsigned __int8 *dst; // [esp+40h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image_load_common.cpp", 700, 0, "%s", "image");
-    if (image->mapType != MAPTYPE_3D)
-        MyAssertHandler(
-            ".\\r_image_load_common.cpp",
-            701,
-            0,
-            "%s\n\t(image->mapType) = %i",
-            "(image->mapType == MAPTYPE_3D)",
-            image->mapType);
+    iassert(image);
+    iassert(image->mapType == MAPTYPE_3D);
+
     if (image->width >> mipLevel > 1)
         v8 = image->width >> mipLevel;
     else
@@ -251,33 +221,27 @@ void __cdecl Image_Upload3D_CopyData_PC(
     else
         v6 = 1;
     srcRowPitch = Image_SourceBytesPerSlice_PC(format, width, height);
-    if (!image->texture.basemap)
-        MyAssertHandler(".\\r_image_load_common.cpp", 708, 0, "%s", "image->texture.volmap");
+    iassert(image->texture.volmap);
     do
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("image->texture.volmap->LockBox( mipLevel, &lockedBox, 0, 0 )\n");
-        //hr = ((int(__stdcall *)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD))image->texture.basemap->__vftable[1].Release)(
-        //    (GfxTexture)image->texture.basemap,
-        //    mipLevel,
-        //    &lockedBox,
-        //    0,
-        //    0);
+
         hr = image->texture.volmap->LockBox(mipLevel, &lockedBox, NULL, NULL);
         if (hr < 0)
         {
             do
             {
                 ++g_disableRendering;
-                v4 = R_ErrorDescription(hr);
                 Com_Error(
                     ERR_FATAL,
                     ".\\r_image_load_common.cpp (%i) image->texture.volmap->LockBox( mipLevel, &lockedBox, 0, 0 ) failed: %s\n",
                     709,
-                    v4);
+                    R_ErrorDescription(hr));
             } while (alwaysfails);
         }
     } while (alwaysfails);
+
     dst = (unsigned __int8 *)lockedBox.pBits;
     for (sliceIndex = 0; sliceIndex < v6; ++sliceIndex)
     {
@@ -289,19 +253,18 @@ void __cdecl Image_Upload3D_CopyData_PC(
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("image->texture.volmap->UnlockBox( mipLevel )\n");
-        //v9 = image->texture.basemap->__vftable[1].GetDevice(image->texture.basemap, (IDirect3DDevice9 **)mipLevel);
+
         v9 = image->texture.volmap->UnlockBox(mipLevel);
         if (v9 < 0)
         {
             do
             {
                 ++g_disableRendering;
-                v5 = R_ErrorDescription(v9);
                 Com_Error(
                     ERR_FATAL,
                     ".\\r_image_load_common.cpp (%i) image->texture.volmap->UnlockBox( mipLevel ) failed: %s\n",
                     719,
-                    v5);
+                    R_ErrorDescription(v9));
             } while (alwaysfails);
         }
     } while (alwaysfails);
@@ -340,30 +303,23 @@ void __cdecl Image_Upload2D_CopyData_PC(
     height = v9;
     if (image->mapType == MAPTYPE_2D)
     {
-        if (!image->texture.basemap)
-            MyAssertHandler(".\\r_image_load_common.cpp", 560, 0, "%s", "image->texture.map");
+        iassert(image->texture.map);
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("image->texture.map->LockRect( mipLevel, &lockedRect, 0, 0 )\n");
-            //hr = ((int(__stdcall *)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD))image->texture.basemap->__vftable[1].Release)(
-            //    (GfxTexture)image->texture.basemap,
-            //    mipLevel,
-            //    &lockedRect,
-            //    0,
-            //    0);
+
             hr = image->texture.map->LockRect(mipLevel, &lockedRect, 0, 0);
             if (hr < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v5 = R_ErrorDescription(hr);
                     Com_Error(
                         ERR_FATAL,
                         ".\\r_image_load_common.cpp (%i) image->texture.map->LockRect( mipLevel, &lockedRect, 0, 0 ) failed: %s\n",
                         561,
-                        v5);
+                        R_ErrorDescription(hr));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
@@ -372,61 +328,43 @@ void __cdecl Image_Upload2D_CopyData_PC(
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("image->texture.map->UnlockRect( mipLevel )\n");
-            //v13 = image->texture.basemap->__vftable[1].GetDevice(image->texture.basemap, (IDirect3DDevice9 **)mipLevel);
+
             v13 = image->texture.map->UnlockRect(mipLevel);
             if (v13 < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v6 = R_ErrorDescription(v13);
                     Com_Error(
                         ERR_FATAL,
                         ".\\r_image_load_common.cpp (%i) image->texture.map->UnlockRect( mipLevel ) failed: %s\n",
                         563,
-                        v6);
+                        R_ErrorDescription(v13));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
     }
     else
     {
-        if (image->mapType != MAPTYPE_CUBE)
-            MyAssertHandler(".\\r_image_load_common.cpp", 567, 0, "%s", "image->mapType == MAPTYPE_CUBE");
-        if ((unsigned int)face > D3DCUBEMAP_FACE_NEGATIVE_Z)
-            MyAssertHandler(
-                ".\\r_image_load_common.cpp",
-                569,
-                0,
-                "%s\n\t(face) = %i",
-                "(face == D3DCUBEMAP_FACE_POSITIVE_X || face == D3DCUBEMAP_FACE_NEGATIVE_X || face == D3DCUBEMAP_FACE_POSITIVE_Y "
-                "|| face == D3DCUBEMAP_FACE_NEGATIVE_Y || face == D3DCUBEMAP_FACE_POSITIVE_Z || face == D3DCUBEMAP_FACE_NEGATIVE_Z)",
-                face);
-        if (!image->texture.basemap)
-            MyAssertHandler(".\\r_image_load_common.cpp", 570, 0, "%s", "image->texture.cubemap");
+        iassert(image->mapType == MAPTYPE_CUBE);
+        iassert((face == D3DCUBEMAP_FACE_POSITIVE_X || face == D3DCUBEMAP_FACE_NEGATIVE_X || face == D3DCUBEMAP_FACE_POSITIVE_Y || face == D3DCUBEMAP_FACE_NEGATIVE_Y || face == D3DCUBEMAP_FACE_POSITIVE_Z || face == D3DCUBEMAP_FACE_NEGATIVE_Z));
+        iassert(image->texture.cubemap);
+
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("image->texture.cubemap->LockRect( face, mipLevel, &lockedRect, 0, 0 )\n");
-            //v12 = ((int(__stdcall *)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD))image->texture.basemap->__vftable[1].Release)(
-            //    (GfxTexture)image->texture.basemap,
-            //    face,
-            //    mipLevel,
-            //    &lockedRect,
-            //    0,
-            //    0);
             v12 = image->texture.cubemap->LockRect(face, mipLevel, &lockedRect, 0, 0);
             if (v12 < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v7 = R_ErrorDescription(v12);
                     Com_Error(
                         ERR_FATAL,
                         ".\\r_image_load_common.cpp (%i) image->texture.cubemap->LockRect( face, mipLevel, &lockedRect, 0, 0 ) failed: %s\n",
                         571,
-                        v7);
+                        R_ErrorDescription(v12));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
@@ -435,22 +373,18 @@ void __cdecl Image_Upload2D_CopyData_PC(
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("image->texture.cubemap->UnlockRect( face, mipLevel )\n");
-            //v11 = ((int(__stdcall *)(_DWORD, _DWORD, _DWORD))image->texture.basemap->__vftable[1].GetDevice)(
-            //    (GfxTexture)image->texture.basemap,
-            //    face,
-            //    mipLevel);
+
             v11 = image->texture.cubemap->UnlockRect(face, mipLevel);
             if (v11 < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v8 = R_ErrorDescription(v11);
                     Com_Error(
                         ERR_FATAL,
                         ".\\r_image_load_common.cpp (%i) image->texture.cubemap->UnlockRect( face, mipLevel ) failed: %s\n",
                         573,
-                        v8);
+                        R_ErrorDescription(v11));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
@@ -462,14 +396,7 @@ int __cdecl Image_GetPlatformScreenWidth(int platform, int screenWidth)
 {
     if (platform == 1)
         return 640;
-    if (platform)
-        MyAssertHandler(
-            ".\\r_image_load_common.cpp",
-            58,
-            0,
-            "%s\n\t(platform) = %i",
-            "(platform == PICMIP_PLATFORM_USED)",
-            platform);
+    iassert(platform == PICMIP_PLATFORM_USED);
     return screenWidth;
 }
 
@@ -477,14 +404,7 @@ int __cdecl Image_GetPlatformScreenHeight(int platform, int screenHeight)
 {
     if (platform == 1)
         return 480;
-    if (platform)
-        MyAssertHandler(
-            ".\\r_image_load_common.cpp",
-            70,
-            0,
-            "%s\n\t(platform) = %i",
-            "(platform == PICMIP_PLATFORM_USED)",
-            platform);
+    iassert(platform == PICMIP_PLATFORM_USED);
     return screenHeight;
 }
 
@@ -498,30 +418,26 @@ void __cdecl Image_GetMipmapResolution(
     unsigned int v5; // [esp+0h] [ebp-10h]
     unsigned int v6; // [esp+4h] [ebp-Ch]
 
-    if (baseWidth <= 0)
-        MyAssertHandler(".\\r_image_load_common.cpp", 38, 0, "%s\n\t(baseWidth) = %i", "(baseWidth > 0)", baseWidth);
-    if (baseHeight <= 0)
-        MyAssertHandler(".\\r_image_load_common.cpp", 39, 0, "%s\n\t(baseHeight) = %i", "(baseHeight > 0)", baseHeight);
-    if (mipmap < 0)
-        MyAssertHandler(".\\r_image_load_common.cpp", 40, 0, "%s\n\t(mipmap) = %i", "(mipmap >= 0)", mipmap);
-    if (!mipWidth)
-        MyAssertHandler(".\\r_image_load_common.cpp", 41, 0, "%s", "mipWidth");
-    if (!mipHeight)
-        MyAssertHandler(".\\r_image_load_common.cpp", 42, 0, "%s", "mipHeight");
+    iassert(baseWidth > 0);
+    iassert(baseHeight > 0);
+    iassert(mipmap >= 0);
+    iassert(mipWidth);
+    iassert(mipHeight);
+
     if ((int)((unsigned int)baseWidth >> mipmap) > 1)
         v6 = (unsigned int)baseWidth >> mipmap;
     else
         LOWORD(v6) = 1;
+
     *mipWidth = v6;
     if ((int)((unsigned int)baseHeight >> mipmap) > 1)
         v5 = (unsigned int)baseHeight >> mipmap;
     else
         LOWORD(v5) = 1;
     *mipHeight = v5;
-    if (!*mipWidth)
-        MyAssertHandler(".\\r_image_load_common.cpp", 46, 1, "%s\n\t(*mipWidth) = %i", "(*mipWidth > 0)", *mipWidth);
-    if (!*mipHeight)
-        MyAssertHandler(".\\r_image_load_common.cpp", 47, 1, "%s\n\t(*mipHeight) = %i", "(*mipHeight > 0)", *mipHeight);
+
+    iassert(*mipWidth > 0);
+    iassert(*mipHeight > 0);
 }
 
 void __cdecl Image_TrackFullscreenTexture(

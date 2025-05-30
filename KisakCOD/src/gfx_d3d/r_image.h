@@ -42,6 +42,13 @@ static const char *g_platform_name[2] =
     "min_pc"
 };
 
+ enum $92364187413C9A0320C404614F91083D : __int32
+ {
+     PICMIP_PLATFORM_USED    = 0x0,
+     PICMIP_PLATFORM_MINSPEC = 0x1,
+     PICMIP_PLATFORM_COUNT   = 0x2,
+ };
+
 enum GfxRefBlendMode : __int32
 {                                       // ...
     BLENDMODE_OPAQUE = 0x0,
@@ -324,7 +331,7 @@ struct WaveletDecode // sizeof=0x20
 {                                       // ...
     unsigned __int16 value;             // ...
     unsigned __int16 bit;               // ...
-    char *data;                         // ...
+    const unsigned char *data;                         // ...
     int width;                          // ...
     int height;                         // ...
     int channels;                       // ...
@@ -338,7 +345,7 @@ struct WaveletDecode // sizeof=0x20
 void __cdecl Image_LoadWavelet(
     GfxImage *image,
     const GfxImageFileHeader *fileHeader,
-    char *data,
+    const unsigned char *data,
     _D3DFORMAT format,
     int bytesPerPixel);
 void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst, WaveletDecode *decode);

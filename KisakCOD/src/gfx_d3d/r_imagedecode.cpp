@@ -608,7 +608,7 @@ void __cdecl Image_DecodeWavelet(
         pixels[face] = TempMemory;
         to[face] = 0;
     }
-    decode.data = (char *)imageData;
+    decode.data = imageData;
     while (decode.mipLevel >= 0)
     {
         if (decode.width >> SLOBYTE(decode.mipLevel) > 1)

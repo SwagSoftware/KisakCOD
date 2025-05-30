@@ -11,7 +11,6 @@
 
 void __cdecl R_SetVertexDecl(GfxCmdBufPrimState *primState, const MaterialVertexDeclaration *vertexDecl)
 {
-    const char *v2; // eax
     IDirect3DVertexDeclaration9 *v3; // [esp+0h] [ebp-40h]
     int hr; // [esp+34h] [ebp-Ch]
     IDirect3DDevice9 *device; // [esp+3Ch] [ebp-4h]
@@ -20,32 +19,28 @@ void __cdecl R_SetVertexDecl(GfxCmdBufPrimState *primState, const MaterialVertex
         v3 = vertexDecl->routing.decl[primState->vertDeclType];
     else
         v3 = 0;
+
     if (primState->vertexDecl != v3)
     {
         //Profile_Begin(94);
         device = primState->device;
-        if (!primState->device)
-            MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 673, 0, "%s", "device");
+        iassert(device);
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetVertexDeclaration( decl )\n");
-            //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, IDirect3DVertexDeclaration9 *))device->SetVertexDeclaration)(
-            //    device,
-            //    device,
-            //    v3);
+
             hr = device->SetVertexDeclaration(v3);
             if (hr < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v2 = R_ErrorDescription(hr);
                     Com_Error(
                         ERR_FATAL,
                         "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h (%i) device->SetVertexDeclaration( decl ) failed: %s\n",
                         674,
-                        v2);
+                        R_ErrorDescription(hr));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
@@ -64,11 +59,10 @@ void __cdecl RB_ClearPixelShader()
 void __cdecl R_HW_SetPixelShader(IDirect3DDevice9 *device, const MaterialPixelShader *mtlShader)
 {
     int v2; // eax
-    const char *v3; // eax
     HRESULT hr; // [esp+4h] [ebp-4h]
 
-    if (!device)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h", 453, 0, "%s", "device");
+    iassert(device);
+
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -87,13 +81,12 @@ void __cdecl R_HW_SetPixelShader(IDirect3DDevice9 *device, const MaterialPixelSh
             do
             {
                 ++g_disableRendering;
-                v3 = R_ErrorDescription(hr);
                 Com_Error(
                     ERR_FATAL,
                     "c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h (%i) device->SetPixelShader( mtlShader ? mtlShader->prog.ps : "
                     "0 ) failed: %s\n",
                     454,
-                    v3);
+                    R_ErrorDescription(hr));
             } while (alwaysfails);
         }
     } while (alwaysfails);
@@ -109,11 +102,9 @@ void __cdecl RB_ClearVertexShader()
 void __cdecl R_HW_SetVertexShader(IDirect3DDevice9 *device, const MaterialVertexShader *mtlShader)
 {
     int v2; // eax
-    const char *v3; // eax
     HRESULT hr; // [esp+4h] [ebp-4h]
 
-    if (!device)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h", 460, 0, "%s", "device");
+    iassert(device);
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -132,13 +123,12 @@ void __cdecl R_HW_SetVertexShader(IDirect3DDevice9 *device, const MaterialVertex
             do
             {
                 ++g_disableRendering;
-                v3 = R_ErrorDescription(hr);
                 Com_Error(
                     ERR_FATAL,
                     "c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h (%i) device->SetVertexShader( mtlShader ? mtlShader->prog.vs :"
                     " 0 ) failed: %s\n",
                     461,
-                    v3);
+                    R_ErrorDescription(hr));
             } while (alwaysfails);
         }
     } while (alwaysfails);
@@ -148,14 +138,12 @@ void __cdecl RB_ClearVertexDecl()
 {
     if (gfxCmdBufState.prim.vertexDecl)
         R_SetVertexDecl(&gfxCmdBufState.prim, 0);
-    if (gfxCmdBufState.prim.vertexDecl)
-        MyAssertHandler(".\\rb_shade.cpp", 54, 1, "%s", "gfxCmdBufState.prim.vertexDecl == NULL");
+    iassert(gfxCmdBufState.prim.vertexDecl == NULL);
 }
 
 void __cdecl RB_SetTessTechnique(const Material *material, MaterialTechniqueType techType)
 {
-    if (!material)
-        MyAssertHandler(".\\rb_shade.cpp", 289, 0, "%s", "material");
+    iassert(material);
     if (gfxCmdBufState.origMaterial != material || gfxCmdBufState.origTechType != techType)
     {
         if (tess.indexCount)
@@ -166,34 +154,15 @@ void __cdecl RB_SetTessTechnique(const Material *material, MaterialTechniqueType
 
 void __cdecl RB_BeginSurface(const Material *material, MaterialTechniqueType techType)
 {
-    const char *v2; // eax
-    const char *v3; // eax
+    iassert(tess.indexCount == 0);
+    iassert(tess.vertexCount == 0);
 
-    if (tess.indexCount)
-        MyAssertHandler(
-            ".\\rb_shade.cpp",
-            306,
-            0,
-            "%s\n\t(tess.indexCount) = %i",
-            "(tess.indexCount == 0)",
-            tess.indexCount);
-    if (tess.vertexCount)
-        MyAssertHandler(
-            ".\\rb_shade.cpp",
-            307,
-            0,
-            "%s\n\t(tess.vertexCount) = %i",
-            "(tess.vertexCount == 0)",
-            tess.vertexCount);
-    if (!material)
-        MyAssertHandler(".\\rb_shade.cpp", 309, 0, "%s", "material");
-    if (g_primStats)
-        MyAssertHandler(".\\rb_shade.cpp", 311, 0, "%s", "!g_primStats");
+    iassert(material);
+    iassert(!g_primStats);
+
     if (r_logFile->current.integer)
     {
-        v2 = RB_LogTechniqueType(techType);
-        v3 = va("---------- RB_BeginSurface( %s, %s )\n", material->info.name, v2);
-        RB_LogPrint(v3);
+        RB_LogPrint(va("---------- RB_BeginSurface( %s, %s )\n", material->info.name, RB_LogTechniqueType(techType)));
     }
     tess.firstVertex = 0;
     tess.lastVertex = 0;
@@ -225,11 +194,9 @@ GfxPrimStats *RB_EndSurfacePrologue()
 {
     GfxPrimStats *result; // eax
 
-    if (!gfxCmdBufState.material)
-        MyAssertHandler(".\\rb_shade.cpp", 342, 0, "%s", "gfxCmdBufState.material");
+    iassert(gfxCmdBufState.material);
     tess.finishedFilling = 1;
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_shade.cpp", 349, 0, "%s", "g_primStats");
+    iassert(g_primStats);
     g_primStats->dynamicIndexCount += tess.indexCount;
     result = g_primStats;
     g_primStats->dynamicVertexCount += tess.vertexCount;
@@ -238,10 +205,9 @@ GfxPrimStats *RB_EndSurfacePrologue()
 
 void RB_EndSurfaceEpilogue()
 {
-    if (tess.vertexCount)
-        MyAssertHandler(".\\rb_shade.cpp", 358, 0, "%s", "tess.vertexCount == 0");
-    if (tess.indexCount)
-        MyAssertHandler(".\\rb_shade.cpp", 359, 0, "%s", "tess.indexCount == 0");
+    iassert(tess.vertexCount == 0);
+    iassert(tess.indexCount == 0);
+
     g_primStats = 0;
     tess.finishedFilling = 0;
 }
@@ -279,7 +245,6 @@ void RB_DrawTessSurface()
 
 void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs *args)
 {
-    const char *v2; // eax
     const MaterialTechnique *technique; // [esp+38h] [ebp-14h]
     IDirect3DVertexBuffer9 *vb; // [esp+3Ch] [ebp-10h]
     unsigned int vertexOffset; // [esp+40h] [ebp-Ch]
@@ -287,46 +252,39 @@ void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs
     unsigned int passIndex; // [esp+48h] [ebp-4h]
 
     //Profile_Begin(90);
-    if (!dx.d3d9 || !dx.device)
-        MyAssertHandler(".\\rb_shade.cpp", 218, 0, "%s", "dx.d3d9 && dx.device");
-    if (!context.state->material)
-        MyAssertHandler(".\\rb_shade.cpp", 219, 0, "%s", "context.state->material");
+    iassert(dx.d3d9 && dx.device);
+    iassert(context.state->material);
     technique = context.state->technique;
-    if (!technique)
-        MyAssertHandler(".\\rb_shade.cpp", 222, 0, "%s", "technique");
+    iassert(technique);
+
     if (r_logFile->current.integer)
     {
-        v2 = va("\n---------- R_DrawTechnique( %s ) ----------\n", technique->name);
-        RB_LogPrint(v2);
+        RB_LogPrint(va("\n---------- R_DrawTechnique( %s ) ----------\n", technique->name));
     }
     isPixelCostEnabled = pixelCostMode != GFX_PIXEL_COST_MODE_OFF;
+
     if (pixelCostMode)
         R_PixelCost_BeginSurface(context);
-    if (context.state->prim.vertDeclType)
-        MyAssertHandler(
-            ".\\rb_shade.cpp",
-            238,
-            1,
-            "%s\n\t(context.state->prim.vertDeclType) = %i",
-            "(context.state->prim.vertDeclType == VERTDECL_GENERIC)",
-            context.state->prim.vertDeclType);
+
+    iassert(context.state->prim.vertDeclType == VERTDECL_GENERIC);
     R_CheckVertexDataOverflow(32 * tess.vertexCount);
-    vertexOffset = R_SetVertexData(context.state, &tess, tess.vertexCount, 32);
+    vertexOffset = R_SetVertexData(context.state, &tess.verts, tess.vertexCount, 32);
     for (passIndex = 0; passIndex < technique->passCount; ++passIndex)
     {
         R_SetupPass(context, passIndex);
         R_UpdateVertexDecl(context.state);
         R_SetupPassCriticalPixelShaderArgs(context);
         vb = gfxBuf.dynamicVertexBuffer->buffer;
-        if (!vb)
-            MyAssertHandler(".\\rb_shade.cpp", 253, 0, "%s", "vb");
+        iassert(vb);
         R_SetStreamSource(&context.state->prim, vb, vertexOffset, 0x20u);
         R_SetupPassPerObjectArgs(context);
         R_SetupPassPerPrimArgs(context);
         R_DrawIndexedPrimitive(&context.state->prim, args);
     }
+
     if (isPixelCostEnabled)
         R_PixelCost_EndSurface(context);
+
     if (r_logFile->current.integer)
         RB_LogPrint("\n");
     //Profile_EndInternal(0);

@@ -14369,18 +14369,11 @@ void __cdecl TRACK_r_image_wavelet()
 	track_static_alloc_internal((void *)waveletEncodeAlpha, 1022, "waveletEncodeAlpha", 18);
 }
 
-void __cdecl Image_LoadWavelet(
-    GfxImage *image,
-    const GfxImageFileHeader *fileHeader,
-    char *data,
-    _D3DFORMAT format,
-    int bytesPerPixel)
+void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHeader, const unsigned char *data, _D3DFORMAT format, int bytesPerPixel)
 {
-    unsigned __int8 *v5; // eax
-    unsigned int v6; // [esp+0h] [ebp-9Ch]
-    unsigned int v7; // [esp+4h] [ebp-98h]
     unsigned __int8 *from[6]; // [esp+14h] [ebp-88h]
     unsigned __int8 *pixels[6]; // [esp+2Ch] [ebp-70h]
+    unsigned __int8 *to[6]; // [esp+7Ch] [ebp-20h]
     int sizeForLevel; // [esp+44h] [ebp-58h]
     int width; // [esp+48h] [ebp-54h]
     int height; // [esp+4Ch] [ebp-50h]
@@ -14388,16 +14381,13 @@ void __cdecl Image_LoadWavelet(
     unsigned int faceCount; // [esp+54h] [ebp-48h]
     unsigned int faceIndex; // [esp+58h] [ebp-44h]
     WaveletDecode decode; // [esp+5Ch] [ebp-40h] BYREF
-    unsigned __int8 *to[6]; // [esp+7Ch] [ebp-20h]
     int picmip; // [esp+94h] [ebp-8h]
     int totalSize; // [esp+98h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 249, 0, "%s", "image");
-    if (!fileHeader)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 250, 0, "%s", "fileHeader");
-    if (!data)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 251, 0, "%s", "data");
+    iassert(image);
+    iassert(fileHeader);
+    iassert(data);
+
     Image_SetupFromFile(image, fileHeader, format);
     decode.value = 0;
     decode.bit = 0;
@@ -14416,25 +14406,24 @@ void __cdecl Image_LoadWavelet(
     totalSize = decode.bpp * fileHeader->dimensions[1] * fileHeader->dimensions[0];
     for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
     {
-        v5 = Image_AllocTempMemory(totalSize);
-        pixels[faceIndex] = v5;
+        pixels[faceIndex] = Image_AllocTempMemory(totalSize);
         to[faceIndex] = 0;
     }
-    picmip = image->picmip.platform[0];
+    picmip = image->picmip.platform[0]; // image->picmip.platform[!useFastFile->current.enabled]; ?? (This was in blops)
     decode.data = data;
     while (decode.mipLevel >= picmip)
     {
-        if ((int)((unsigned int)decode.width >> SLOBYTE(decode.mipLevel)) > 1)
-            v7 = (unsigned int)decode.width >> SLOBYTE(decode.mipLevel);
+        if ((decode.width >> decode.mipLevel) > 1)
+            width = decode.width >> decode.mipLevel;
         else
-            v7 = 1;
-        width = v7;
-        if ((int)((unsigned int)decode.height >> SLOBYTE(decode.mipLevel)) > 1)
-            v6 = (unsigned int)decode.height >> SLOBYTE(decode.mipLevel);
+            width = 1;
+
+        if ((decode.height >> decode.mipLevel) > 1)
+            height = decode.height >> decode.mipLevel;
         else
-            v6 = 1;
-        height = v6;
-        sizeForLevel = decode.bpp * v6 * width;
+            height = 1;
+
+        sizeForLevel = decode.bpp * height * width;
         for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
         {
             from[faceIndex] = to[faceIndex];
@@ -14460,7 +14449,7 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
     int v6; // eax
     int v7; // eax
     int v8; // eax
-    int v9; // [esp+4h] [ebp-70h]
+    bool needsMipDelta;
     int dstChanOffset[4]; // [esp+8h] [ebp-6Ch] BYREF
     unsigned __int8 *dstChan; // [esp+18h] [ebp-5Ch]
     int size; // [esp+1Ch] [ebp-58h]
@@ -14475,24 +14464,10 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
     int h; // [esp+6Ch] [ebp-8h]
     int w; // [esp+70h] [ebp-4h]
 
-    if (decode->bpp < 1 || decode->bpp > 4)
-        MyAssertHandler(
-            ".\\r_image_wavelet.cpp",
-            100,
-            0,
-            "decode->bpp not in [1, 4]\n\t%i not in [%i, %i]",
-            decode->bpp,
-            1,
-            4);
-    if (decode->bpp != decode->channels && (decode->bpp != 4 || decode->channels != 3))
-        MyAssertHandler(
-            ".\\r_image_wavelet.cpp",
-            101,
-            0,
-            "%s",
-            "decode->bpp == decode->channels || (decode->bpp == 4 && decode->channels == 3)");
-    if (decode->mipLevel < 0)
-        MyAssertHandler(".\\r_image_wavelet.cpp", 102, 0, "%s", "decode->mipLevel >= 0");
+    iassert(decode->bpp >= 1 && decode->bpp <= 4);
+    iassert(decode->bpp == decode->channels || (decode->bpp == 4 && decode->channels == 3));
+    iassert(decode->mipLevel >= 0);
+
     dstBpp = decode->bpp;
     switch (dstBpp)
     {
@@ -14519,22 +14494,21 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
     {
         if (!decode->dataInitialized)
         {
-            decode->value = *decode->data;
+            decode->value = *(WORD*)decode->data;
             decode->bit = 0;
             decode->data += 2;
             decode->dataInitialized = 1;
         }
-        HIBYTE(v9) = (decode->value & 1) != 0;
+        needsMipDelta = (decode->value & 1) != 0;
         Wavelet_ConsumeBits(1u, decode);
-        if (HIBYTE(v9))
+        if (needsMipDelta)
             Wavelet_AddDeltaToMipmap(src, h * w / 4, decode, dstChanOffset);
         stride = dstBpp * w;
         for (y = 0; y < h; y += 2)
         {
             for (x = 0; x < w; x += 2)
             {
-                if (&dst[stride + dstBpp] > src && dst <= src)
-                    MyAssertHandler(".\\r_image_wavelet.cpp", 168, 0, "%s", "dst + stride + dstBpp <= src || dst > src");
+                iassert(dst + stride + dstBpp <= src || dst > src);
                 if (decode->channels != 1)
                 {
                     evenOddParity = decode->value & 1;
@@ -14552,11 +14526,11 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
                     {
                         evenOddParity = decode->value & 1;
                         Wavelet_ConsumeBits(1u, decode);
-                        v3 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10u, 510, decode);
+                        v3 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         coeff[1][0] = coeff[0][0] + v3;
-                        v4 = Wavelet_DecodeValue(waveletDecodeRedGreen, 0xAu, 510, decode);
+                        v4 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         coeff[1][1] = coeff[0][1] + v4;
-                        v5 = Wavelet_DecodeValue(waveletDecodeRedGreen, 0xAu, 510, decode);
+                        v5 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         coeff[1][2] = coeff[0][2] + v5;
                         base = 2 * src[dstChanOffset[1]];
                         dstChan = &dst[dstChanOffset[1]];
@@ -14566,11 +14540,11 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
                         dstChan[dstBpp + stride] = (base - coeff[1][0] - (coeff[1][1] - coeff[1][2])) >> 1;
                         evenOddParity = decode->value & 1;
                         Wavelet_ConsumeBits(1u, decode);
-                        v6 = Wavelet_DecodeValue(waveletDecodeRedGreen, 0xAu, 510, decode);
+                        v6 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         coeff[2][0] = coeff[0][0] + v6;
-                        v7 = Wavelet_DecodeValue(waveletDecodeRedGreen, 0xAu, 510, decode);
+                        v7 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         coeff[2][1] = coeff[0][1] + v7;
-                        v8 = Wavelet_DecodeValue(waveletDecodeRedGreen, 0xAu, 510, decode);
+                        v8 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         coeff[2][2] = coeff[0][2] + v8;
                         base = 2 * src[dstChanOffset[2]];
                         dstChan = &dst[dstChanOffset[2]];
@@ -14618,8 +14592,7 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
         if (h < 1)
             h = 1;
         size = h * w;
-        if (h * w < 1)
-            MyAssertHandler(".\\r_image_wavelet.cpp", 136, 0, "%s", "size >= 1");
+        iassert(size >= 1);
         do
         {
             for (chanIndex = 0; chanIndex < decode->channels; ++chanIndex)

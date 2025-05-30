@@ -78,24 +78,14 @@ void __cdecl R_ChangeStreamSource(
     int hr; // [esp+0h] [ebp-8h]
     IDirect3DDevice9 *device; // [esp+4h] [ebp-4h]
 
-    if (state->streams[streamIndex].vb == vb
-        && state->streams[streamIndex].offset == vertexOffset
-        && state->streams[streamIndex].stride == vertexStride)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            631,
-            0,
-            "%s",
-            "state->streams[streamIndex].vb != vb || state->streams[streamIndex].offset != vertexOffset || state->streams[strea"
-            "mIndex].stride != vertexStride");
-    }
+    iassert(state->streams[streamIndex].vb != vb || state->streams[streamIndex].offset != vertexOffset || state->streams[streamIndex].stride != vertexStride);
+
     state->streams[streamIndex].vb = vb;
     state->streams[streamIndex].offset = vertexOffset;
     state->streams[streamIndex].stride = vertexStride;
     device = state->device;
-    if (!state->device)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 637, 0, "%s", "device");
+
+    iassert(device);
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -106,13 +96,12 @@ void __cdecl R_ChangeStreamSource(
             do
             {
                 ++g_disableRendering;
-                v5 = R_ErrorDescription(hr);
                 Com_Error(
                     ERR_FATAL,
                     "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h (%i) device->SetStreamSource( streamIndex, vb, vertexOffset, vertexSt"
                     "ride ) failed: %s\n",
                     638,
-                    v5);
+                    R_ErrorDescription(hr));
             } while (alwaysfails);
         }
     } while (alwaysfails);

@@ -254,8 +254,8 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
     signed int mipLevel; // [esp+5Ch] [ebp-4h]
 
     loadDef = remoteLoadDef->loadDef;
-    if (remoteLoadDef->basemap != image->texture.basemap)
-        MyAssertHandler(".\\r_image.cpp", 768, 0, "%s", "loadDef == image->texture.loadDef");
+    iassert(loadDef == image->texture.loadDef);
+
     image->texture.basemap = 0;
     if (r_loadForRenderer->current.enabled)
     {
@@ -288,14 +288,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
             }
             else
             {
-                if (image->mapType != MAPTYPE_CUBE)
-                    MyAssertHandler(
-                        ".\\r_image.cpp",
-                        816,
-                        0,
-                        "%s\n\t(image->mapType) = %i",
-                        "(image->mapType == MAPTYPE_CUBE)",
-                        image->mapType);
+                iassert(image->mapType == MAPTYPE_CUBE);
                 Image_CreateCubeTexture_PC(image, loadDef->dimensions[0], loadDef->levelCount, imageFormat);
                 faceCount = 6;
             }
@@ -325,14 +318,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
                     data += Image_GetCardMemoryAmountForMipLevel(imageFormat, mipWidth, mipHeight, mipDepth);
                 }
             }
-            if (data != &loadDef->data[loadDef->resourceSize])
-                MyAssertHandler(
-                    ".\\r_image.cpp",
-                    837,
-                    0,
-                    "data == &loadDef->data[loadDef->resourceSize]\n\t%i, %i",
-                    data,
-                    &loadDef->data[loadDef->resourceSize]);
+            iassert(data == &loadDef->data[loadDef->resourceSize]);
         }
         else if (image->category == 5)
         {
@@ -475,7 +461,7 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
                     "%s\n\t(filepath) = %s",
                     "(fileSize >= sizeof( fileHeader ))",
                     filepath);
-            if (FS_Read((unsigned __int8 *)&fileHeader, sizeof(GfxImageFileHeader), fileHandle) == 28)
+            if (FS_Read((unsigned __int8 *)&fileHeader, sizeof(GfxImageFileHeader), fileHandle) == sizeof(GfxImageFileHeader))
             {
                 if (Image_ValidateHeader(&fileHeader, filepath))
                 {
@@ -499,8 +485,7 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
                             fileSize);
                     readSize = fileHeader.fileSizeForPicmip[picmip] - 28;
                     imageData = Image_AllocTempMemory(readSize);
-                    v3 = FS_Read(imageData, readSize, fileHandle);
-                    if (v3 == readSize)
+                    if (FS_Read(imageData, readSize, fileHandle) == readSize)
                     {
                         FS_FCloseFile(fileHandle);
                         Image_LoadFromData(image, &fileHeader, imageData);
@@ -564,19 +549,19 @@ void __cdecl Image_LoadFromData(GfxImage *image, GfxImageFileHeader *fileHeader,
         Image_LoadBitmap(image, fileHeader, srcData, D3DFMT_A8, 1);
         break;
     case 6u:
-        Image_LoadWavelet(image, fileHeader, (char *)srcData, D3DFMT_A8R8G8B8, 4);
+        Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_A8R8G8B8, 4);
         break;
     case 7u:
-        Image_LoadWavelet(image, fileHeader, (char *)srcData, D3DFMT_X8R8G8B8, 3);
+        Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_X8R8G8B8, 3);
         break;
     case 8u:
-        Image_LoadWavelet(image, fileHeader, (char *)srcData, D3DFMT_A8L8, 2);
+        Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_A8L8, 2);
         break;
     case 9u:
-        Image_LoadWavelet(image, fileHeader, (char *)srcData, D3DFMT_L8, 1);
+        Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_L8, 1);
         break;
     case 10u:
-        Image_LoadWavelet(image, fileHeader, (char *)srcData, D3DFMT_A8, 1);
+        Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_A8, 1);
         break;
     case 11u:
         Image_LoadDxtc(image, fileHeader, srcData, D3DFMT_DXT1, 8);

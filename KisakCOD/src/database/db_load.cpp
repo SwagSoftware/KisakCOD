@@ -1709,7 +1709,7 @@ void __cdecl Load_GfxTextureLoad(bool atStreamStart)
     {
         // LWSS: union abuse here
         value = varGfxTextureLoad->basemap;
-        if (varGfxTextureLoad->basemap == (IDirect3DBaseTexture9 *)-1 || value == (IDirect3DBaseTexture9*)-2)
+        if (value == (IDirect3DBaseTexture9 *)-1 || value == (IDirect3DBaseTexture9*)-2)
         {
             varGfxTextureLoad->basemap = (IDirect3DBaseTexture9*)AllocLoad_FxElemVisStateSample();
             varGfxImageLoadDef = varGfxTextureLoad->loadDef;

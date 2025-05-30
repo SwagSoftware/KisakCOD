@@ -26,6 +26,20 @@ enum MaterialVertexDeclType : __int32
     VERTDECL_COUNT = 0x10,
 };
 
+ enum $C15A5588E915B6036BD955C44CEC191A : __int32
+ {                                       // ...
+     THREAD_CONTEXT_MAIN         = 0x0,
+     THREAD_CONTEXT_BACKEND      = 0x1,
+     THREAD_CONTEXT_WORKER0      = 0x2,
+     THREAD_CONTEXT_WORKER1      = 0x3,
+     THREAD_CONTEXT_TRACE_COUNT  = 0x4,
+     THREAD_CONTEXT_TRACE_LAST   = 0x3,
+     THREAD_CONTEXT_CINEMATIC    = 0x4,
+     THREAD_CONTEXT_TITLE_SERVER = 0x5,
+     THREAD_CONTEXT_DATABASE     = 0x6,
+     THREAD_CONTEXT_COUNT        = 0x7,
+ };
+
 struct GfxCmdSetMaterialColor // sizeof=0x14
 {
     GfxCmdHeader header;
