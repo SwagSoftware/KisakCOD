@@ -5,61 +5,56 @@
 
 void __cdecl CL_Netchan_Decode(unsigned __int8 *data, int size)
 {
-    unsigned __int8 *string; // [esp+0h] [ebp-14h]
-    clientConnection_t *clc; // [esp+4h] [ebp-10h]
-    _BYTE key[5]; // [esp+Bh] [ebp-9h]
-    int i; // [esp+10h] [ebp-4h]
+    int i, index;
+    byte key, * string;
 
-    clc = CL_GetLocalClientConnection(0);
-    string = (unsigned __int8 *)clc->reliableCommands[clc->reliableAcknowledge & 0x7F];
-    key[4] = 0;
-    *(_DWORD *)key = (unsigned __int8)(LOBYTE(clc->serverMessageSequence) ^ LOBYTE(clc->challenge));
-    for (i = 0; i < size; ++i)
+    clientConnection_t* clc = CL_GetLocalClientConnection(0);
+
+    string = (byte*)clc->reliableCommands[clc->reliableAcknowledge & (MAX_RELIABLE_COMMANDS - 1)];
+    key = clc->challenge ^ clc->serverMessageSequence;
+
+    for (i = 0, index = 0; i < size; i++)
     {
-        if (!string[*(_DWORD *)&key[1]])
-            *(_DWORD *)&key[1] = 0;
-        if (string[*(_DWORD *)&key[1]] == 37)
-            MyAssertHandler(
-                ".\\client_mp\\cl_net_chan_mp.cpp",
-                83,
-                0,
-                "%s\n\t(clc->reliableCommands[clc->reliableAcknowledge & (128 - 1)]) = %s",
-                "(string[index] != '%')",
-                clc->reliableCommands[clc->reliableAcknowledge & 0x7F]);
-        key[0] ^= string[(*(_DWORD *)&key[1])++] << (i & 1);
-        *data++ ^= key[0];
+        if (!string[index])
+        {
+            index = 0;
+        }
+
+        iassert(string[index] != '%');
+
+        // modify the key with the last sent and acknowledged server command
+        key ^= string[index] << (i & 1);
+        data[i] ^= key;
+
+        index++;
     }
 }
 
 void __cdecl CL_Netchan_Encode(unsigned __int8 *data, int size)
 {
-    clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-18h]
-    unsigned __int8 *string; // [esp+4h] [ebp-14h]
-    clientConnection_t *clc; // [esp+8h] [ebp-10h]
-    _BYTE key[5]; // [esp+Fh] [ebp-9h]
-    int i; // [esp+14h] [ebp-4h]
+    int i, index;
+    byte key, * string;
+    
+    clientActive_t* gl = CL_GetLocalClientGlobals(0);
+    clientConnection_t* clc = CL_GetLocalClientConnection(0);
 
-    LocalClientGlobals = CL_GetLocalClientGlobals(0);
-    clc = CL_GetLocalClientConnection(0);
-    string = (unsigned __int8 *)clc->serverCommands[clc->serverCommandSequence & 0x7F];
-    key[4] = 0;
-    *(_DWORD *)key = (unsigned __int8)(LOBYTE(clc->serverMessageSequence)
-        ^ LOBYTE(LocalClientGlobals->serverId)
-        ^ LOBYTE(clc->challenge));
-    for (i = 0; i < size; ++i)
+    string = (byte*)clc->serverCommands[clc->serverCommandSequence & (MAX_RELIABLE_COMMANDS - 1)];
+    key = clc->challenge ^ (byte)gl->serverId ^ clc->serverMessageSequence;
+
+    for (i = 0, index = 0; i < size; i++)
     {
-        if (!string[*(_DWORD *)&key[1]])
-            *(_DWORD *)&key[1] = 0;
-        if (string[*(_DWORD *)&key[1]] == 37)
-            MyAssertHandler(
-                ".\\client_mp\\cl_net_chan_mp.cpp",
-                48,
-                0,
-                "%s\n\t(clc->serverCommands[clc->serverCommandSequence & (128 - 1)]) = %s",
-                "(string[index] != '%')",
-                clc->serverCommands[clc->serverCommandSequence & 0x7F]);
-        key[0] ^= string[(*(_DWORD *)&key[1])++] << (i & 1);
-        *data++ ^= key[0];
+        if (!string[index])
+        {
+            index = 0;
+        }
+
+        iassert(string[index] != '%');
+
+        // modify the key with the last sent and acknowledged server command
+        key ^= string[index] << (i & 1);
+        data[i] ^= key;
+
+        index++;
     }
 }
 

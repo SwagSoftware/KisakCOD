@@ -1012,7 +1012,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
     clientConnection_t *clc; // [esp+150h] [ebp-14h]
     entityState_s *to; // [esp+154h] [ebp-10h]
     int file; // [esp+158h] [ebp-Ch]
-    char *s; // [esp+15Ch] [ebp-8h]
+    const char *s; // [esp+15Ch] [ebp-8h]
     int cmd; // [esp+160h] [ebp-4h]
 
     Con_Close(localClientNum);

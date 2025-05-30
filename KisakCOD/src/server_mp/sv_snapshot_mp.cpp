@@ -1311,7 +1311,6 @@ void __cdecl SV_AddArchivedEntToSnapshot(int e, snapshotEntityNumbers_t *eNums)
 }
 
 unsigned __int8 svCompressedBuf[131072];
-unsigned __int8 to;
 void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
 {
     int v2; // [esp+Ch] [ebp-30h]
@@ -1326,7 +1325,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
     compressedSize = MSG_WriteBitsCompress(
         client->header.state == 4,
         (const unsigned __int8 *)msg->data + 4,
-        &to,
+        svCompressedBuf + 4,
         msg->cursize - 4)
         + 4;
     if (client->header.netchan.remoteAddress.type != NA_LOOPBACK)

@@ -1069,11 +1069,9 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                         "%s\n\t(packetToSend) = %i",
                         "(packetToSend >= 0 && packetToSend < 7)",
                         c);
-                CL_ControllerIndexFromClientNum(localClientNum);
                 if (LiveStorage_DoWeHaveStats())
                 {
-                    CL_ControllerIndexFromClientNum(localClientNum);
-                    data = LiveStorage_GetStatBuffer() + 1240 * c;
+                    data = (char*)LiveStorage_GetStatBuffer() + 1240 * c;
                 }
                 else
                 {

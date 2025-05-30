@@ -3,7 +3,7 @@
 struct constantConfigString // sizeof=0x10
 {
     int configStringNum;
-    char *configString;
+    const char *configString;
     int configStringHash;
     int lowercaseConfigStringHash;
 };
