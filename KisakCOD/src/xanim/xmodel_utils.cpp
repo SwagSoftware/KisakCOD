@@ -172,7 +172,7 @@ int __cdecl XModelGetStaticModelCacheVertCount(XModel *model, unsigned int lod)
         MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 124, 0, "%s", "model");
     if (lod >= 4)
         MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 125, 0, "lod doesn't index MAX_LODS\n\t%i not in [0, %i)", lod, 4);
-    //if (!model->lodInfo[lod].smcIndexPlusOne)
-    //    MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 126, 0, "%s", "model->lodInfo[lod].smcIndexPlusOne != 0");
+    if (!model->lodInfo[lod].smcIndexPlusOne)
+        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 126, 0, "%s", "model->lodInfo[lod].smcIndexPlusOne != 0");
     return 1 << model->lodInfo[lod].smcAllocBits;
 }
