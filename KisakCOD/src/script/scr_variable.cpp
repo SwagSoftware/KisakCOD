@@ -589,10 +589,10 @@ struct VariableValue  Scr_GetArrayIndexValue(unsigned int name)
 
 	if (name >= SL_MAX_STRING_INDEX)
 	{
-		if (name >= 98304)
+		if (name >= 0x18000)
 		{
 			value.type = VAR_INTEGER;
-			value.u.intValue = name - 0x800000;
+			value.u.intValue = name - MAX_ARRAYINDEX;
 		}
 		else
 		{

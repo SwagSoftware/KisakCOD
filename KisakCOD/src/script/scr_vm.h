@@ -368,6 +368,7 @@ void __cdecl Scr_RunCurrentThreads();
 void VM_SetTime();
 void __cdecl VM_Resume(unsigned int timeId);
 void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* stackValue);
+void VM_UnarchiveStack2(unsigned int startLocalId, function_stack_t *stack, VariableStackBuffer *stackValue);
 int __cdecl Scr_AddLocalVars(unsigned int localId);
 void __cdecl Scr_ResetTimeout();
 BOOL __cdecl Scr_IsStackClear();

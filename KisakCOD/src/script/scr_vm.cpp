@@ -62,8 +62,6 @@ scrVmGlob_t scrVmGlob;
 jmp_buf g_script_error[33];
 scrVmDebugPub_t scrVmDebugPub;
 
-function_stack_t fs;
-
 const dvar_s *logScriptTimes;
 
 int opcode;
@@ -1125,7 +1123,7 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
     unsigned int Variable; // eax
     VariableValueInternal_u Array; // eax
     unsigned int v7; // [esp-4h] [ebp-64h]
-    VariableUnion stackValue; // [esp+0h] [ebp-60h]
+    VariableStackBuffer *stackValue; // [esp+0h] [ebp-60h]
     unsigned int notifyListIndex; // [esp+4h] [ebp-5Ch]
     VariableValue tempValue2; // [esp+8h] [ebp-58h] BYREF
     VariableValue tempValue3; // [esp+10h] [ebp-50h] BYREF
@@ -1143,7 +1141,7 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
     int newSize; // [esp+48h] [ebp-18h]
     int bufLen; // [esp+4Ch] [ebp-14h]
     bool bNoStack; // [esp+53h] [ebp-Dh]
-    VariableUnion* tempValue; // [esp+54h] [ebp-Ch]
+    VariableValueInternal_u* tempValue; // [esp+54h] [ebp-Ch]
     unsigned int selfId; // [esp+58h] [ebp-8h]
     unsigned int notifyListEntry; // [esp+5Ch] [ebp-4h]
 
@@ -1151,19 +1149,17 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
     if (notifyListId)
     {
         notifyListId = FindObject(notifyListId);
-        if (!notifyListId)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3446, 0, "%s", "notifyListId");
+        iassert(notifyListId);
         notifyNameListId = FindVariable(notifyListId, stringValue);
         if (notifyNameListId)
         {
             notifyNameListId = FindObject(notifyNameListId);
-            if (!notifyNameListId)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 3453, 0, "%s", "notifyNameListId");
+            iassert(notifyNameListId);
             AddRefToObject(notifyNameListId);
-            if (scrVarPub.evaluate)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 3457, 0, "%s", "!scrVarPub.evaluate");
+            iassert(!scrVarPub.evaluate);
             scrVarPub.evaluate = 1;
             notifyListEntry = notifyNameListId;
+
             while (1)
             {
                 notifyListIndex = FindLastSibling(notifyListEntry);
@@ -1171,89 +1167,80 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
                 if (!notifyListIndex)
                     break;
                 notifyListEntry = Scr_GetVarId(notifyListIndex);
-                if (!notifyListEntry)
-                    MyAssertHandler(".\\script\\scr_vm.cpp", 3471, 0, "%s", "notifyListEntry");
+                iassert(notifyListEntry);
                 startLocalId = GetVariableKeyObject(notifyListEntry);
                 selfId = Scr_GetSelf(startLocalId);
                 ObjectVariable = FindObjectVariable(scrVarPub.pauseArrayId, selfId);
                 selfNameId = FindObject(ObjectVariable);
                 if (GetValueType(notifyListEntry))
                 {
-                    if (GetValueType(notifyListEntry) != 10)
-                        MyAssertHandler(".\\script\\scr_vm.cpp", 3496, 0, "%s", "GetValueType( notifyListEntry ) == VAR_STACK");
-                    tempValue = (VariableUnion*)GetVariableValueAddress(notifyListEntry);
-                    stackValue.intValue = tempValue->intValue;
-                    if (*(_BYTE*)(*(_DWORD*)tempValue->intValue - 1) == 119)
+                    iassert(GetValueType(notifyListEntry) == VAR_STACK);
+                    tempValue = GetVariableValueAddress(notifyListEntry);
+                    stackValue = tempValue->u.stackValue;
+                    if (*((byte *)stackValue->pos - 1) == OP_waittillmatch)
                     {
-                        size = **(char**)stackValue.intValue;
-                        if (size < 0)
-                            MyAssertHandler(".\\script\\scr_vm.cpp", 3504, 0, "%s", "size >= 0");
-                        if (size > *(unsigned __int16*)(stackValue.intValue + 4))
-                            MyAssertHandler(
-                                ".\\script\\scr_vm.cpp",
-                                3505,
-                                0,
-                                "size <= stackValue->size\n\t%i, %i",
-                                size,
-                                *(unsigned __int16*)(stackValue.intValue + 4));
-                        buf = (char*)(stackValue.intValue + 5 * (*(unsigned __int16*)(stackValue.intValue + 4) - size) + 11);
+                        size = *stackValue->pos;
+                        iassert(size >= 0);
+                        iassert(size < size <= stackValue->size);
+                        buf = &stackValue->buf[5 * (stackValue->size - size)];
+
                         for (currentValue = top; size; --currentValue)
                         {
-                            if (currentValue->type == 7)
-                                MyAssertHandler(".\\script\\scr_vm.cpp", 3512, 0, "%s", "currentValue->type != VAR_CODE::pos");
-                            if (currentValue->type == 8)
+                            iassert(currentValue->type != VAR_CODEPOS);
+                            if (currentValue->type == VAR_PRECODEPOS)
                             {
-                            LABEL_30:
+LABEL_30:
                                 notifyListIndex = FindPrevSibling(notifyListIndex);
                                 goto next;
                             }
                             --size;
-                            tempValue3.type = (Vartype_t)(unsigned __int8)*buf;
-                            if (tempValue3.type == 7)
-                                MyAssertHandler(".\\script\\scr_vm.cpp", 3521, 0, "%s", "tempValue3.type != VAR_CODE::pos");
-                            if (tempValue3.type == 8)
+                            tempValue3.type = (Vartype_t)(unsigned char)*buf;
+                            iassert(tempValue3.type != VAR_CODEPOS);
+
+                            if (tempValue3.type == VAR_PRECODEPOS)
                                 break;
+
                             tempValue3.u.intValue = *(_DWORD*)++buf;
                             buf += 4;
                             AddRefToValue(tempValue3.type, tempValue3.u);
                             type = currentValue->type;
-                            tempValue2.u.intValue = currentValue->u.intValue;
+                            tempValue2.u = currentValue->u;
                             tempValue2.type = type;
                             AddRefToValue(type, tempValue2.u);
                             Scr_EvalEquality(&tempValue3, &tempValue2);
+
                             if (scrVarPub.error_message)
                             {
                                 RuntimeError(
-                                    *(char**)stackValue.intValue,
-                                    **(char**)stackValue.intValue - size + 3,
+                                    (char*)stackValue->pos,
+                                    *stackValue->pos - size + 3,
                                     scrVarPub.error_message,
                                     scrVmGlob.dialog_error_message);
                                 Scr_ClearErrorMessage();
                                 notifyListIndex = FindPrevSibling(notifyListIndex);
                                 goto next;
                             }
-                            if (tempValue3.type != 6)
-                                MyAssertHandler(".\\script\\scr_vm.cpp", 3537, 0, "%s", "tempValue3.type == VAR_INTEGER");
+
+                            iassert(tempValue3.type == VAR_INTEGER);
                             if (!tempValue3.u.intValue)
                                 goto LABEL_30;
                         }
-                        ++ * (_DWORD*)stackValue.intValue;
+                        ++stackValue->pos;
                         bNoStack = 1;
                     }
                     else
                     {
-                        if (top->type == 7)
-                            MyAssertHandler(".\\script\\scr_vm.cpp", 3559, 0, "%s", "top->type != VAR_CODE::pos");
-                        bNoStack = top->type == 8;
+                        iassert(top->type != VAR_CODEPOS);
+                        bNoStack = top->type == VAR_PRECODEPOS;
                     }
                     tempValue5.type = VAR_STACK;
-                    tempValue5.u = stackValue;
+                    tempValue5.u.stackValue = stackValue;
                     v7 = startLocalId;
                     Variable = GetVariable(scrVarPub.timeArrayId, scrVarPub.time);
                     Array = GetArray(Variable);
-                    stackId = GetNewObjectVariable(Array.u.stringValue, v7);
+                    stackId = GetNewObjectVariable(Array, v7);
                     SetNewVariableValue(stackId, &tempValue5);
-                    tempValue = (VariableUnion*)GetVariableValueAddress(stackId);
+                    tempValue = GetVariableValueAddress(stackId);
                     VM_CancelNotifyInternal(notifyListOwnerId, startLocalId, notifyListId, notifyNameListId, stringValue);
                     RemoveObjectVariable(selfNameId, startLocalId);
                     if (!GetArraySize(selfNameId))
@@ -1265,71 +1252,55 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
                     }
                     else
                     {
-                        if (top->type == 8)
-                            MyAssertHandler(
-                                ".\\script\\scr_vm.cpp",
-                                3585,
-                                0,
-                                "%s\n\t(top - scrVmPub.stack) = %i",
-                                "(top->type != VAR_PRECODE::pos)",
-                                top - scrVmPub.stack);
-                        if (top->type == 7)
-                            MyAssertHandler(
-                                ".\\script\\scr_vm.cpp",
-                                3586,
-                                0,
-                                "%s\n\t(top - scrVmPub.stack) = %i",
-                                "(top->type != VAR_CODE::pos)",
-                                top - scrVmPub.stack);
-                        size = *(unsigned __int16*)(stackValue.intValue + 4);
+                        iassert(top->type != VAR_PRECODEPOS);
+                        iassert(top->type != VAR_CODEPOS);
+                        size = stackValue->size;
                         newSize = size;
                         currentValue = top;
+
                         do
                         {
                             ++newSize;
                             --currentValue;
-                            if (currentValue->type == 7)
-                                MyAssertHandler(
-                                    ".\\script\\scr_vm.cpp",
-                                    3596,
-                                    0,
-                                    "%s\n\t(currentValue - scrVmPub.stack) = %i",
-                                    "(currentValue->type != VAR_CODE::pos)",
-                                    currentValue - scrVmPub.stack);
-                        } while (currentValue->type != 8);
-                        if ((unsigned int)newSize >= 0x10000)
-                            MyAssertHandler(".\\script\\scr_vm.cpp", 3599, 0, "%s", "newSize >= 0 && newSize < (1 << 16)");
+                            iassert(currentValue->type != VAR_CODEPOS);
+                        } while (currentValue->type != VAR_PRECODEPOS);
+
+                        iassert(newSize >= 0 && newSize < (1 << 16));
+
                         len = 5 * size;
-                        bufLen = 5 * newSize + 11;
-                        if (!MT_Realloc(*(unsigned __int16*)(stackValue.intValue + 6), bufLen))
+                        //bufLen = 5 * newSize + 11;
+                        bufLen = 5 * newSize + sizeof(VariableStackBuffer);
+
+                        if (!MT_Realloc(stackValue->bufLen, bufLen))
                         {
                             newStackValue = (VariableStackBuffer*)MT_Alloc(bufLen, 1);
                             newStackValue->bufLen = bufLen;
-                            newStackValue->pos = *(const char**)stackValue.intValue;
-                            newStackValue->localId = *(_WORD*)(stackValue.intValue + 8);
-                            memcpy((unsigned __int8*)newStackValue->buf, (unsigned __int8*)(stackValue.intValue + 11), len);
-                            MT_Free((byte*)stackValue.intValue, *(unsigned __int16*)(stackValue.intValue + 6));
-                            stackValue.intValue = (int)newStackValue;
-                            tempValue->intValue = (int)newStackValue;
+                            newStackValue->pos = stackValue->pos;
+                            newStackValue->localId = stackValue->localId;
+                            memcpy(newStackValue->buf, stackValue->buf, len);
+                            MT_Free((unsigned char*)stackValue, stackValue->bufLen);
+                            stackValue = newStackValue;
+                            tempValue->u.stackValue = newStackValue;
                         }
-                        *(_WORD*)(stackValue.intValue + 4) = newSize;
-                        buf = (char*)(stackValue.intValue + len + 11);
+
+                        stackValue->size = newSize;
+                        buf = &stackValue->buf[len];
                         newSize -= size;
-                        if (!newSize)
-                            MyAssertHandler(".\\script\\scr_vm.cpp", 3624, 0, "%s", "newSize");
+
+                        iassert(newSize);
+
                         do
                         {
                             ++currentValue;
                             AddRefToValue(currentValue->type, currentValue->u);
-                            if (currentValue->type >= 0x17u)
-                                MyAssertHandler(".\\script\\scr_vm.cpp", 3630, 0, "%s", "(unsigned)currentValue->type < VAR_COUNT");
+                            iassert((unsigned)currentValue->type < VAR_COUNT);
                             *buf++ = currentValue->type;
                             *(_DWORD*)buf = currentValue->u.intValue;
                             buf += 4;
                             --newSize;
                         } while (newSize);
-                        if (&buf[-stackValue.intValue] != (char*)bufLen)
-                            MyAssertHandler(".\\script\\scr_vm.cpp", 3638, 0, "%s", "buf - (const char *)stackValue == bufLen");
+
+                        iassert(buf - (const char *)stackValue == bufLen);
                         notifyListEntry = notifyNameListId;
                     }
                 }
@@ -1345,8 +1316,7 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
                 }
             }
             RemoveRefToObject(notifyNameListId);
-            if (!scrVarPub.evaluate)
-                MyAssertHandler(".\\script\\scr_vm.cpp", 3644, 0, "%s", "scrVarPub.evaluate");
+            iassert(scrVarPub.evaluate);
             scrVarPub.evaluate = 0;
         }
     }
@@ -1726,6 +1696,7 @@ void VM_PrintJumpHistory()
     Com_Printf(23, "********************************\n");
 }
 
+#if 0 
 VariableStackBuffer *__cdecl VM_ArchiveStack()
 {
     VariableStackBuffer *stackValue; // [esp+0h] [ebp-18h]
@@ -1782,7 +1753,7 @@ VariableStackBuffer *__cdecl VM_ArchiveStack()
     fs.localId = localId;
     return stackValue;
 }
-
+#endif
 unsigned __int16 __cdecl Scr_ExecThread(int handle, unsigned int paramcount)
 {
     unsigned int v2; // eax
@@ -1891,12 +1862,20 @@ VariableStackBuffer *VM_ArchiveStack2(int size, const char *codePos, VariableVal
     char *buf;
     char *pos;
     VariableStackBuffer *stackBuf;
+    int bufLen;
 
-    stackBuf = (VariableStackBuffer *)MT_Alloc(5 * size + sizeof(VariableStackBuffer), 1);
+    //bufLen = 5 * size + 11;
+    bufLen = 5 * size + sizeof(VariableStackBuffer);
+
+    iassert(size == (unsigned short)size);
+    iassert(bufLen == (unsigned short)bufLen);
+
+    stackBuf = (VariableStackBuffer *)MT_Alloc(bufLen, 1);
+    ++scrVarPub.numScriptThreads;
     id = *localId;
     stackBuf->localId = *localId;
     stackBuf->size = size;
-    stackBuf->bufLen = 5 * size + sizeof(VariableStackBuffer);
+    stackBuf->bufLen = bufLen;
     stackBuf->pos = codePos;
     stackBuf->time = scrVarPub.time;
     scrVmPub.localVars -= localVarCount;
@@ -1920,6 +1899,7 @@ VariableStackBuffer *VM_ArchiveStack2(int size, const char *codePos, VariableVal
         }
 
         buf = pos - 1;
+        iassert(top->type >= 0 && top->type < (1 << 8));
         *buf = top->type;
         --top;
         --size;
@@ -2550,7 +2530,7 @@ unsigned int VM_ExecuteInternal(const char *pos, unsigned int localId, unsigned 
             continue;
 
         case OP_EvalLocalArrayRefCached:
-            fieldValueId = scrVmPub.localVars[-*fs.pos++];
+            fieldValueId = scrVmPub.localVars[-*(pos++)];
             objectId = Scr_EvalArrayRef(fieldValueId);
             if (top->type == VAR_INTEGER)
             {
@@ -3370,6 +3350,9 @@ unsigned int VM_ExecuteInternal(const char *pos, unsigned int localId, unsigned 
             return localId;
 
         case OP_waittillFrameEnd:
+            iassert(Scr_IsInOpcodeMemory(pos));
+            iassert(!(scrVarPub.time & ~VAR_NAME_LOW_MASK));
+            //scrVmDebugPub.profileEnable[fs.localId] = *profileEnablePos;
             stackValue.type = VAR_STACK;
             stackValue.u.stackValue = VM_ArchiveStack2(top - startTop, pos, top, localVarCount, &localId);
             id = GetArray(GetVariable(scrVarPub.timeArrayId, scrVarPub.time));
@@ -4105,1603 +4088,8 @@ unsigned int VM_ExecuteInternal(const char *pos, unsigned int localId, unsigned 
     }
 }
 
-#define READ_SHORT() Scr_ReadUnsignedShort(&fs.pos)
-#define INC_TOP() iassert(fs.top >= scrVmPub.stack); fs.top++; iassert(fs.top <= scrVmPub.maxstack); 
 
-#if 0
-unsigned int __cdecl VM_Execute_0()
-{
-    unsigned int Array; // eax
-    unsigned int Self; // eax
-    unsigned int ObjectVariable_DONE; // eax
-    unsigned int NewObjectVariable_DONE; // eax
-    unsigned int localId; // [esp-8h] [ebp-390h]
-    unsigned int outparamcount; // [esp+278h] [ebp-110h]
-    scr_entref_t entref; // [esp+27Ch] [ebp-10Ch]
-    VariableValue stackValue; // [esp+284h] [ebp-104h] BYREF
-    unsigned int builtinIndex; // [esp+28Ch] [ebp-FCh]
-    //const char *pos; // [esp+290h] [ebp-F8h]
-    int *profileEnablePos; // [esp+294h] [ebp-F4h]
-    unsigned int stringValue; // [esp+298h] [ebp-F0h]
-    const char *currentCodePos; // [esp+29Ch] [ebp-ECh]
-    unsigned int profileEnable[33]; // [esp+2A0h] [ebp-E8h] BYREF
-    const char *tempCodePos; // [esp+324h] [ebp-64h]
-    unsigned int stackId; // [esp+328h] [ebp-60h]
-    unsigned int fieldValueId; // [esp+32Ch] [ebp-5Ch]
-    int builtInTime; // [esp+330h] [ebp-58h]
-    int waitTime; // [esp+334h] [ebp-54h]
-    int jumpOffset; // [esp+338h] [ebp-50h]
-    unsigned int objectId; // [esp+33Ch] [ebp-4Ch]
-    unsigned int caseValue; // [esp+340h] [ebp-48h]
-    unsigned int threadId; // [esp+348h] [ebp-40h]
-    unsigned int currentCaseValue; // [esp+34Ch] [ebp-3Ch]
-    int profileBit; // [esp+350h] [ebp-38h]
-    int time; // [esp+354h] [ebp-34h]
-    unsigned int parentLocalId; // [esp+358h] [ebp-30h]
-    unsigned int paramcount; // [esp+35Ch] [ebp-2Ch]
-    int type; // [esp+360h] [ebp-28h]
-    int entnum; // [esp+364h] [ebp-24h]
-    unsigned int classnum;
-    int timeSpent; // [esp+368h] [ebp-20h]
-    unsigned int fieldValueIndex; // [esp+36Ch] [ebp-1Ch]
-    unsigned int selfId; // [esp+370h] [ebp-18h]
-    VariableValue tempValue; // [esp+374h] [ebp-14h] BYREF
-    unsigned int id; // [esp+37Ch] [ebp-Ch]
-    unsigned __int8 removeCount; // [esp+383h] [ebp-5h]
-    int profileIndex; // [esp+384h] [ebp-4h]
-
-    profileEnable[0] = scrVmDebugPub.profileEnable[fs.localId];
-    if (profileEnable[0])
-        Profile_BeginScripts(profileEnable[0]);
-    profileEnablePos = (int*)profileEnable;
-    ++g_script_error_level;
-#pragma region ERROR_CHECKER
-    while (1)
-    {
-        iassert(g_script_error_level <= 32);
-        //if (!_setjmp3(a1, &savedregs, a2, a3, g_script_error[g_script_error_level], 0, v50, v51))
-        if (!_setjmp(g_script_error[g_script_error_level])) // KISAKTRYCATCH
-            break;
-    error_1:
-        Com_PrintMessage(6, "caught script exception\n", 0);
-        switch (opcode)
-        {
-        case OP_EvalLocalArrayRefCached0:
-        case OP_EvalLocalArrayRefCached:
-        case OP_EvalArrayRef:
-        case OP_ClearArray:
-        case OP_EvalLocalVariableRef:
-            iassert(scrVarPub.error_index >= -1);
-            if (scrVarPub.error_index < 0)
-                scrVarPub.error_index = 1;
-            break;
-        case OP_EvalSelfFieldVariable:
-        case OP_EvalFieldVariable:
-        case OP_ClearFieldVariable:
-        case OP_SetVariableField:
-        case OP_SetSelfFieldVariableField:
-        case OP_inc:
-        case OP_dec:
-            scrVarPub.error_index = 0;
-            break;
-        case OP_CallBuiltin0:
-        case OP_CallBuiltin1:
-        case OP_CallBuiltin2:
-        case OP_CallBuiltin3:
-        case OP_CallBuiltin4:
-        case OP_CallBuiltin5:
-        case OP_CallBuiltin:
-            iassert(scrVarPub.error_index >= 0);
-            if (scrVarPub.error_index > 0)
-                scrVarPub.error_index = scrVmPub.outparamcount + 1 - scrVarPub.error_index;
-            break;
-        case OP_CallBuiltinMethod0:
-        case OP_CallBuiltinMethod1:
-        case OP_CallBuiltinMethod2:
-        case OP_CallBuiltinMethod3:
-        case OP_CallBuiltinMethod4:
-        case OP_CallBuiltinMethod5:
-        case OP_CallBuiltinMethod:
-            iassert(scrVarPub.error_index >= -1);
-            if (scrVarPub.error_index <= 0)
-            {
-                if (scrVarPub.error_index < 0)
-                    scrVarPub.error_index = 1;
-            }
-            else
-            {
-                scrVarPub.error_index = scrVmPub.outparamcount + 2 - scrVarPub.error_index;
-            }
-            break;
-        default:
-            break;
-        }
-        RuntimeError((char*)fs.pos, scrVarPub.error_index, scrVarPub.error_message, scrVmGlob.dialog_error_message);
-        Scr_ClearErrorMessage();
-        switch (opcode)
-        {
-        case OP_EvalLocalArrayCached:
-        case OP_EvalArray:
-            RemoveRefToValue(fs.top->type, fs.top->u);
-            --fs.top;
-            RemoveRefToValue(fs.top->type, fs.top->u);
-            fs.top->type = VAR_UNDEFINED;
-            break;
-        case OP_EvalLocalArrayRefCached0:
-        case OP_EvalLocalArrayRefCached:
-        case OP_EvalArrayRef:
-        case OP_EvalLocalVariableRef:
-            fieldValueIndex = 0;
-            fieldValueId = GetDummyFieldValue();
-            goto $LN43_3;
-        case OP_ClearArray:
-        case OP_wait:
-            goto $LN43_3;
-        case OP_GetSelfObject:
-            goto $LN64_0;
-        case OP_EvalSelfFieldVariable:
-        case OP_EvalFieldVariable:
-            fs.top->type = VAR_UNDEFINED;
-            break;
-        case OP_EvalSelfFieldVariableRef:
-        case OP_EvalFieldVariableRef:
-            fieldValueIndex = 0;
-            fieldValueId = GetDummyFieldValue();
-            break;
-        case OP_ClearFieldVariable:
-            if (scrVmPub.outparamcount)
-            {
-                iassert(scrVmPub.outparamcount == 1);
-                iassert(scrVmPub.top->type == VAR_UNDEFINED);
-                scrVmPub.outparamcount = 0;
-            }
-            break;
-        case OP_checkclearparams:
-            iassert(fs.top->type != VAR_CODEPOS);
-            while (fs.top->type != VAR_PRECODEPOS)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                iassert(fs.top->type != VAR_CODEPOS);
-            }
-            fs.top->type = VAR_CODEPOS;
-            break;
-        case OP_SetVariableField:
-            if (scrVmPub.outparamcount)
-            {
-                iassert(scrVmPub.outparamcount == 1);
-                iassert(scrVmPub.top == fs.top);
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                scrVmPub.outparamcount = 0;
-            }
-            goto error_dec_top;
-        case OP_SetSelfFieldVariableField:
-            RemoveRefToValue(fs.top->type, fs.top->u);
-            scrVmPub.outparamcount = 0;
-            goto error_dec_top;
-        case OP_CallBuiltin0:
-        case OP_CallBuiltin1:
-        case OP_CallBuiltin2:
-        case OP_CallBuiltin3:
-        case OP_CallBuiltin4:
-        case OP_CallBuiltin5:
-        case OP_CallBuiltin:
-        case OP_CallBuiltinMethod0:
-        case OP_CallBuiltinMethod1:
-        case OP_CallBuiltinMethod2:
-        case OP_CallBuiltinMethod3:
-        case OP_CallBuiltinMethod4:
-        case OP_CallBuiltinMethod5:
-        case OP_CallBuiltinMethod:
-            Scr_ClearOutParams();
-            fs.top = scrVmPub.top + 1;
-            scrVmPub.top[1].type = VAR_UNDEFINED;
-            break;
-        case OP_ScriptFunctionCall2:
-        case OP_ScriptFunctionCall:
-        case OP_ScriptMethodCall:
-            Scr_ReadCodePos(&fs.pos);
-            goto $LN931;
-        case OP_ScriptFunctionCallPointer:
-        case OP_ScriptMethodCallPointer:
-        $LN931:
-            iassert(fs.top->type != VAR_CODEPOS);
-            while (fs.top->type != VAR_PRECODEPOS)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                iassert(fs.top->type != VAR_CODEPOS);
-            }
-            fs.top->type = VAR_UNDEFINED;
-            break;
-        case OP_ScriptThreadCall:
-        case OP_ScriptMethodThreadCall:
-            Scr_ReadCodePos(&fs.pos);
-            goto $LN937;
-        case OP_ScriptThreadCallPointer:
-        case OP_ScriptMethodThreadCallPointer:
-        $LN937:
-            for (paramcount = Scr_ReadUnsigned(&fs.pos); paramcount; --paramcount)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-            }
-            ++fs.top;
-            fs.top->type = VAR_UNDEFINED;
-            break;
-        case OP_CastFieldObject:
-            objectId = GetDummyObject();
-            goto error_dec_top;
-        case OP_EvalLocalVariableObjectCached:
-            ++fs.pos;
-        $LN64_0:
-            objectId = GetDummyObject();
-            break;
-        case OP_JumpOnFalse:
-        case OP_JumpOnTrue:
-        case OP_JumpOnFalseExpr:
-        case OP_JumpOnTrueExpr:
-            Scr_ReadUnsignedShort(&fs.pos);
-            goto error_dec_top;
-        case OP_jumpback:
-            jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-            fs.pos -= jumpOffset;
-            break;
-        case OP_bit_or:
-        case OP_bit_ex_or:
-        case OP_bit_and:
-        case OP_equality:
-        case OP_inequality:
-        case OP_less:
-        case OP_greater:
-        case OP_less_equal:
-        case OP_greater_equal:
-        case OP_shift_left:
-        case OP_shift_right:
-        case OP_plus:
-        case OP_minus:
-        case OP_multiply:
-        case OP_divide:
-        case OP_mod:
-            goto error_dec_top;
-        case OP_waittillmatch:
-            ++fs.pos;
-            goto $LN44_2;
-        case OP_waittill:
-        case OP_endon:
-        $LN44_2:
-            RemoveRefToValue(fs.top->type, fs.top->u);
-            --fs.top;
-            goto $LN43_3;
-        case OP_notify:
-            iassert(fs.top->type != VAR_CODEPOS);
-            while (fs.top->type != VAR_PRECODEPOS)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                iassert(fs.top->type != VAR_CODEPOS);
-            }
-            goto $LN43_3;
-        case OP_switch:
-            if (caseCount)
-            {
-                do
-                {
-                    currentCaseValue = Scr_ReadUnsigned(&fs.pos);
-                    currentCodePos = Scr_ReadCodePos(&fs.pos);
-                    --caseCount;
-                } while (caseCount);
-
-                if (!currentCaseValue)
-                {
-                    fs.pos = currentCodePos;
-                    iassert(fs.pos);
-                }
-            }
-        $LN43_3:
-            RemoveRefToValue(fs.top->type, fs.top->u);
-        error_dec_top:
-            --fs.top;
-            break;
-        default:
-            break;
-        }
-        iassert(!scrVmPub.inparamcount);
-        iassert(!scrVmPub.outparamcount);
-
-        if (scrVmPub.showError && !scrVmPub.debugCode && !Scr_IgnoreErrors())
-        {
-            scrVmPub.showError = 0;
-            Scr_ShowConsole();
-            Scr_HitBreakpoint(fs.top, (char*)fs.pos, fs.localId, 0);
-        }
-    }
-#pragma endregion
-    while (2)
-    {
-        iassert(!scrVarPub.error_message);
-        iassert(!scrVarPub.error_index);
-        iassert(!scrVmPub.outparamcount);
-        iassert(!scrVmPub.inparamcount);
-
-        opcode = *fs.pos++;
-    interrupt_return:
-        scrVarPub.varUsagePos = fs.pos;
-        Log("Opcode (%x)\n", opcode);
-        switch (opcode)
-        {
-        case OP_End:
-            parentLocalId = GetSafeParentLocalId(fs.localId);
-            Scr_KillThread(fs.localId);
-            scrVmPub.localVars -= fs.localVarCount;
-            iassert(fs.top->type != VAR_PRECODEPOS);
-            while (fs.top->type != VAR_CODEPOS)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                iassert(fs.top->type != VAR_PRECODEPOS);
-            }
-            --scrVmPub.function_count;
-            --scrVmPub.function_frame;
-            if (!parentLocalId)
-            {
-                iassert(fs.top == fs.startTop);
-            thread_end:
-                fs.startTop[1].type = VAR_UNDEFINED;
-                goto thread_return;
-            }
-            iassert(fs.top->type == VAR_CODEPOS);
-            fs.top->type = VAR_UNDEFINED;
-            goto end_0;
-        case OP_Return:
-            parentLocalId = GetSafeParentLocalId(fs.localId);
-            Scr_KillThread(fs.localId);
-            scrVmPub.localVars -= fs.localVarCount;
-            tempValue = *fs.top;
-            --fs.top;
-            iassert(fs.top->type != VAR_PRECODEPOS);
-            while (fs.top->type != VAR_CODEPOS)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                iassert(fs.top->type != VAR_PRECODEPOS);
-            }
-            --scrVmPub.function_count;
-            --scrVmPub.function_frame;
-            if (parentLocalId)
-            {
-                iassert(fs.top->type == VAR_CODEPOS);
-                *fs.top = tempValue;
-            end_0:
-                iassert(fs.top != fs.startTop);
-                RemoveRefToObject(fs.localId);
-                fs.pos = scrVmPub.function_frame->fs.pos;
-                iassert(fs.pos);
-                fs.localVarCount = scrVmPub.function_frame->fs.localVarCount;
-                fs.localId = parentLocalId;
-                continue;
-            }
-            iassert(fs.top == fs.startTop);
-            fs.top[1] = tempValue;
-        thread_return:
-            if (*profileEnablePos)
-                Profile_EndScripts(*profileEnablePos);
-            if (thread_count)
-            {
-                --profileEnablePos;
-                --thread_count;
-                RemoveRefToObject(fs.localId);
-                fs = scrVmPub.function_frame->fs;
-                fs.top->type = scrVmPub.function_frame->topType;
-                ++fs.top;
-                continue;
-            }
-            iassert(g_script_error_level >= 0);
-            --g_script_error_level;
-            return fs.localId;
-        case OP_GetUndefined:
-            INC_TOP();
-            fs.top->type = VAR_UNDEFINED;
-            continue;
-        case OP_GetZero:
-            INC_TOP();
-            fs.top->type = VAR_INTEGER;
-            fs.top->u.intValue = 0;
-            continue;
-        case OP_GetByte:
-            INC_TOP();
-            fs.top->type = VAR_INTEGER;
-            fs.top->u.intValue = *(unsigned char*)fs.pos++;
-            continue;
-        case OP_GetNegByte:
-            INC_TOP();
-            fs.top->type = VAR_INTEGER;
-            fs.top->u.intValue = -*(unsigned char*)fs.pos++;
-            continue;
-        case OP_GetUnsignedShort:
-            INC_TOP();
-            fs.top->type = VAR_INTEGER;
-            fs.top->u.intValue = Scr_ReadUnsignedShort(&fs.pos);
-            continue;
-        case OP_GetNegUnsignedShort:
-            INC_TOP();
-            fs.top->type = VAR_INTEGER;
-            fs.top->u.intValue = -Scr_ReadUnsignedShort(&fs.pos);
-            continue;
-        case OP_GetInteger:
-            INC_TOP();
-            fs.top->type = VAR_INTEGER;
-            fs.top->u.intValue = Scr_ReadUnsigned(&fs.pos);
-            continue;
-        case OP_GetFloat:
-            INC_TOP();
-            fs.top->type = VAR_FLOAT;
-            fs.top->u.floatValue = Scr_ReadFloat(&fs.pos);
-            continue;
-        case OP_GetString:
-            INC_TOP();
-            fs.top->type = VAR_STRING;
-            fs.top->u.stringValue = Scr_ReadUnsignedShort(&fs.pos);
-            SL_AddRefToString(fs.top->u.stringValue);
-            continue;
-        case OP_GetIString:
-            INC_TOP();
-            fs.top->type = VAR_ISTRING;
-            fs.top->u.stringValue = Scr_ReadUnsignedShort(&fs.pos);
-            SL_AddRefToString(fs.top->u.stringValue);
-            continue;
-        case OP_GetVector:
-            INC_TOP();
-            fs.top->type = VAR_VECTOR;
-            fs.top->u.vectorValue = Scr_ReadVector(&fs.pos);
-            continue;
-        case OP_GetLevelObject:
-            objectId = scrVarPub.levelId;
-            continue;
-        case OP_GetAnimObject:
-            objectId = scrVarPub.animId;
-            continue;
-        case OP_GetSelf:
-            INC_TOP();
-            fs.top->type = VAR_POINTER;
-            fs.top->u.pointerValue = Scr_GetSelf(fs.localId);
-            AddRefToObject(fs.top->u.pointerValue);
-            continue;
-        case OP_GetLevel:
-            INC_TOP();
-            fs.top->type = VAR_POINTER;
-            fs.top->u.pointerValue = scrVarPub.levelId;
-            AddRefToObject(fs.top->u.pointerValue);
-            continue;
-        case OP_GetGame:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVarPub.gameId);
-            continue;
-        case OP_GetAnim:
-            INC_TOP();
-            fs.top->type = VAR_POINTER;
-            fs.top->u.pointerValue = scrVarPub.animId;
-            AddRefToObject(fs.top->u.pointerValue);
-            continue;
-        case OP_GetAnimation:
-            INC_TOP();
-            fs.top->type = VAR_ANIMATION;
-            fs.top->u.pointerValue = Scr_ReadUnsigned(&fs.pos);
-            continue;
-        case OP_GetGameRef:
-            fieldValueIndex = 0;
-            fieldValueId = scrVarPub.gameId;
-            continue;
-        case OP_GetFunction:
-            INC_TOP();
-            fs.top->type = VAR_FUNCTION;
-            fs.top->u.codePosValue = Scr_ReadCodePos(&fs.pos);
-            continue;
-        case OP_CreateLocalVariable:
-            ++scrVmPub.localVars;
-            ++fs.localVarCount;
-            scrVmPub.localVars[0] = GetNewVariable(fs.localId, Scr_ReadUnsignedShort(&fs.pos));
-            continue;
-        case OP_RemoveLocalVariables:
-            removeCount = *fs.pos++;
-            scrVmPub.localVars -= removeCount;
-            fs.localVarCount -= removeCount;
-            while (removeCount)
-            {
-                RemoveNextVariable(fs.localId);
-                --removeCount;
-            }
-            continue;
-        case OP_EvalLocalVariableCached0:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[0]);
-            continue;
-        case OP_EvalLocalVariableCached1:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-1]);
-            continue;
-        case OP_EvalLocalVariableCached2:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-2]);
-            continue;
-        case OP_EvalLocalVariableCached3:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-3]);
-            continue;
-        case OP_EvalLocalVariableCached4:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-4]);
-            continue;
-        case OP_EvalLocalVariableCached5:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-5]);
-            continue;
-        case OP_EvalLocalVariableCached:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-*fs.pos]);
-            ++fs.pos;
-            continue;
-        case OP_EvalLocalArrayCached:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-*fs.pos]);
-            ++fs.pos;
-            goto $LN476;
-        case OP_EvalArray:
-        $LN476:
-            Scr_EvalArray(fs.top, fs.top - 1);
-            --fs.top;
-            continue;
-        case OP_EvalLocalArrayRefCached0:
-            fieldValueId = scrVmPub.localVars[0];
-            goto $LN472;
-        case OP_EvalLocalArrayRefCached:
-            fieldValueId = Scr_GetLocalVar(fs.pos++);
-            goto $LN472;
-        case OP_EvalArrayRef:
-        $LN472:
-            objectId = Scr_EvalArrayRef(fieldValueId);
-            if (fs.top->type == VAR_INTEGER)
-            {
-                if (!IsValidArrayIndex(fs.top->u.intValue))
-                {
-                    Scr_Error(va("array index %d out of range", fs.top->u.intValue));
-                }
-                fieldValueIndex = GetArrayVariableIndex(objectId, fs.top->u.intValue);
-            }
-            else if (fs.top->type == VAR_STRING)
-            {
-                fieldValueIndex = GetVariableIndexInternal(objectId, fs.top->u.stringValue);
-                SL_RemoveRefToString(fs.top->u.stringValue);
-            }
-            else
-            {
-                Scr_Error(va("%s is not an array index", var_typename[fs.top->type]));
-            }
-            fieldValueId = Scr_GetVarId(fieldValueIndex);
-            iassert(fieldValueId);
-            --fs.top;
-            continue;
-        case OP_ClearArray:
-            ClearArray(fieldValueId, fs.top);
-            --fs.top;
-            continue;
-        case OP_EmptyArray:
-            ++fs.top;
-            fs.top->type = VAR_POINTER;
-            fs.top->u.pointerValue = Scr_AllocArray();
-            continue;
-        case OP_GetSelfObject:
-            objectId = Scr_GetSelf(fs.localId);
-            if (IsFieldObject(objectId))
-                continue;
-            goto not_an_object;
-        case OP_EvalLevelFieldVariable:
-            objectId = scrVarPub.levelId;
-            goto EvalFieldVariable;
-        case OP_EvalAnimFieldVariable:
-            objectId = scrVarPub.animId;
-        EvalFieldVariable:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(FindVariable(objectId, Scr_ReadUnsignedShort(&fs.pos)));
-            continue;
-        case OP_EvalSelfFieldVariable:
-            objectId = Scr_GetSelf(fs.localId);
-            if (IsFieldObject(objectId))
-                goto $LN452;
-            INC_TOP();
-            Scr_ReadUnsignedShort(&fs.pos);
-        not_an_object:
-            type = GetObjectType(objectId);
-            goto not_an_object_error;
-        case OP_EvalFieldVariable:
-        $LN452:
-            INC_TOP();
-            tempValue = Scr_FindVariableField(objectId, Scr_ReadUnsignedShort(&fs.pos));
-            *fs.top = tempValue;
-            continue;
-        case OP_EvalLevelFieldVariableRef:
-            objectId = scrVarPub.levelId;
-            goto EvalFieldVariableRef;
-        case OP_EvalAnimFieldVariableRef:
-            objectId = scrVarPub.animId;
-            goto EvalFieldVariableRef;
-        case OP_EvalSelfFieldVariableRef:
-            objectId = Scr_GetSelf(fs.localId);
-            goto EvalFieldVariableRef;
-        case OP_EvalFieldVariableRef:
-        EvalFieldVariableRef:
-            fieldValueIndex = Scr_GetVariableFieldIndex(objectId, Scr_ReadUnsignedShort(&fs.pos));
-            fieldValueId = Scr_GetVarId(fieldValueIndex);
-            continue;
-        case OP_ClearFieldVariable:
-            ClearVariableField(objectId, Scr_ReadUnsignedShort(&fs.pos), fs.top);
-            continue;
-        case OP_SafeCreateVariableFieldCached:
-            ++scrVmPub.localVars;
-            ++fs.localVarCount;
-            scrVmPub.localVars[0] = GetNewVariable(fs.localId, Scr_ReadUnsignedShort(&fs.pos));
-            goto $LN433;
-        case OP_SafeSetVariableFieldCached0:
-        $LN433:
-            iassert(fs.top->type != VAR_CODEPOS);
-            if (fs.top->type != VAR_PRECODEPOS)
-                goto LABEL_227;
-            continue;
-        case OP_SafeSetVariableFieldCached:
-            iassert(fs.top->type != VAR_CODEPOS);
-            if (fs.top->type != VAR_PRECODEPOS)
-                goto LABEL_236;
-            ++fs.pos;
-            continue;
-        case OP_SafeSetWaittillVariableFieldCached:
-            iassert(fs.top->type != VAR_PRECODEPOS);
-            if (fs.top->type != VAR_CODEPOS)
-                goto LABEL_236;
-            ClearVariableValue(Scr_GetLocalVar(fs.pos));
-            ++fs.pos;
-            continue;
-        case OP_clearparams:
-            iassert(fs.top->type != VAR_PRECODEPOS);
-            while (fs.top->type != VAR_CODEPOS)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                iassert(fs.top->type != VAR_PRECODEPOS);
-            }
-            continue;
-        case OP_checkclearparams:
-            iassert(fs.top->type != VAR_CODEPOS);
-            if (fs.top->type == VAR_PRECODEPOS)
-            {
-                if (scrVarPub.numScriptValues > 0xF37E || scrVarPub.numScriptObjects > 0x7380)
-                {
-                    if (scrVmPub.showError)
-                    {
-                        Scr_DumpScriptThreads();
-                        Scr_DumpScriptVariablesDefault();
-                        Scr_Error("exceeded maximum number of script variables");
-                    }
-                    Sys_Error("exceeded maximum number of script variables");
-                }
-                fs.top->type = VAR_CODEPOS;
-            }
-            else
-            {
-                Scr_Error("function called with too many parameters");
-            $LN407:
-                fieldValueIndex = 0;
-                fieldValueId = scrVmPub.localVars[0];
-            }
-            continue;
-        case OP_EvalLocalVariableRefCached0:
-            goto $LN407;
-        case OP_EvalLocalVariableRefCached:
-            fieldValueIndex = 0;
-            fieldValueId = Scr_GetLocalVar(fs.pos++);
-            continue;
-        case OP_SetLevelFieldVariableField:
-            SetVariableValue(GetVariable(scrVarPub.levelId, Scr_ReadUnsignedShort(&fs.pos)), fs.top);
-            --fs.top;
-            continue;
-        case OP_SetVariableField:
-            goto $LN403;
-        case OP_SetAnimFieldVariableField:
-            SetVariableValue(GetVariable(scrVarPub.animId, Scr_ReadUnsignedShort(&fs.pos)), fs.top);
-            --fs.top;
-            continue;
-        case OP_SetSelfFieldVariableField:
-            objectId = Scr_GetSelf(fs.localId);
-            fieldValueIndex = Scr_GetVariableFieldIndex(objectId, Scr_ReadUnsignedShort(&fs.pos));
-            fieldValueId = Scr_GetVarId(fieldValueIndex);
-        $LN403:
-            if (fieldValueIndex)
-            {
-                iassert(fieldValueId);
-                if (fs.top->type)
-                    SetVariableValue(fieldValueId, fs.top);
-                else
-                    RemoveVariableValue(objectId, fieldValueIndex);
-            }
-            else
-            {
-                SetVariableFieldValue(fieldValueId, fs.top);
-            }
-            --fs.top;
-            continue;
-        case OP_SetLocalVariableFieldCached0:
-        LABEL_227:
-            SetVariableValue(scrVmPub.localVars[0], fs.top);
-            --fs.top;
-            continue;
-        case OP_SetLocalVariableFieldCached:
-        LABEL_236:
-            SetVariableValue(Scr_GetLocalVar(fs.pos), fs.top);
-            ++fs.pos;
-            --fs.top;
-            continue;
-        case OP_CallBuiltin0:
-        case OP_CallBuiltin1:
-        case OP_CallBuiltin2:
-        case OP_CallBuiltin3:
-        case OP_CallBuiltin4:
-        case OP_CallBuiltin5:
-            iassert(!scrVmPub.outparamcount);
-            scrVmPub.outparamcount = opcode - 62;
-            goto CallBuiltin;
-        case OP_CallBuiltin:
-            iassert(!scrVmPub.outparamcount);
-            scrVmPub.outparamcount = *(unsigned char*)fs.pos++;
-        CallBuiltin:
-            iassert(!scrVmPub.inparamcount);
-            //pos = fs.pos;
-
-            builtinIndex = Scr_ReadUnsignedShort(&fs.pos);
-            scrVmPub.function_frame->fs.pos = fs.pos;
-            if (scrVmDebugPub.func_table[builtinIndex].breakpointCount)
-            {
-                outparamcount = scrVmPub.outparamcount;
-                Scr_HitBuiltinBreakpoint(fs.top, fs.pos, fs.localId, opcode, builtinIndex, scrVmPub.outparamcount);
-                scrVmPub.outparamcount = outparamcount;
-            }
-            scrVmPub.top = fs.top;
-            builtInTime = scrVmDebugPub.builtInTime;
-            time = __rdtsc();
-            ((void (*)(void))scrCompilePub.func_table[builtinIndex])();
-            timeSpent = __rdtsc() - time;
-            scrVmDebugPub.builtInTime = timeSpent + builtInTime;
-            scrVmDebugPub.func_table[builtinIndex].prof += timeSpent;
-            ++scrVmDebugPub.func_table[builtinIndex].usage;
-            goto post_builtin;
-        case OP_CallBuiltinMethod0:
-        case OP_CallBuiltinMethod1:
-        case OP_CallBuiltinMethod2:
-        case OP_CallBuiltinMethod3:
-        case OP_CallBuiltinMethod4:
-        case OP_CallBuiltinMethod5:
-            iassert(!scrVmPub.outparamcount);
-            scrVmPub.outparamcount = opcode - 69;
-            goto CallBuiltinMethod;
-        case OP_CallBuiltinMethod:
-            iassert(!scrVmPub.outparamcount);
-            scrVmPub.outparamcount = *fs.pos++;
-        CallBuiltinMethod:
-            iassert(!scrVmPub.inparamcount);
-            //pos = fs.pos;
-            scrVmPub.top = fs.top - 1;
-            builtinIndex = Scr_ReadUnsignedShort(&fs.pos);
-            if (fs.top->type != VAR_POINTER)
-                goto LABEL_308;
-            objectId = fs.top->u.pointerValue;
-            if (GetObjectType(objectId) != 20)
-            {
-                type = GetObjectType(objectId);
-                RemoveRefToObject(objectId);
-                scrVarPub.error_index = -1;
-                Scr_Error(va("%s is not an entity", var_typename[type]));
-            LABEL_308:
-                type = fs.top->type;
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                scrVarPub.error_index = -1;
-                Scr_Error(va("%s is not an entity", var_typename[type]));
-            $LN359:
-                iassert(Scr_IsInOpcodeMemory(fs.pos));
-                if (fs.top->type == VAR_FLOAT)
-                {
-                    if (fs.top->u.floatValue < 0.0)
-                        goto negWait;
-                    waitTime = fs.top->u.floatValue * 20.0; // (v82 + 9.313225746154785e-10);
-                    if (!waitTime)
-                        waitTime = fs.top->u.floatValue != 0.0;
-                }
-                else if (fs.top->type == VAR_INTEGER)
-                {
-                    waitTime = 20 * fs.top->u.intValue;
-                }
-                else
-                {
-                    scrVarPub.error_index = 2;
-                    Scr_Error(va("type %s is not a float", var_typename[fs.top->type]));
-                }
-                if (waitTime < 0xFFFFFF)
-                {
-                    if (waitTime)
-                        Scr_ResetTimeout();
-                    waitTime = (waitTime + scrVarPub.time) & 0xFFFFFF;
-                    --fs.top;
-                    scrVmDebugPub.profileEnable[fs.localId] = *profileEnablePos;
-                    stackValue.type = VAR_STACK;
-                    stackValue.u.intValue = (int)VM_ArchiveStack();
-                    id = GetArray(GetVariable(scrVarPub.timeArrayId, waitTime));
-                    stackId = GetNewObjectVariable(id, fs.localId);
-                    SetNewVariableValue(stackId, &stackValue);
-                    Scr_SetThreadWaitTime(fs.localId, waitTime);
-                    goto thread_end;
-                }
-                scrVarPub.error_index = 2;
-                if (waitTime >= 0)
-                    Scr_Error("wait is too long");
-            negWait:
-                Scr_Error("negative wait is not allowed");
-            $LN345:
-                iassert(Scr_IsInOpcodeMemory(fs.pos));
-                iassert(!(scrVarPub.time & ~VAR_NAME_LOW_MASK));
-                scrVmDebugPub.profileEnable[fs.localId] = *profileEnablePos;
-                stackValue.type = VAR_STACK;
-                stackValue.u.intValue = (int)VM_ArchiveStack();
-                id = GetArray(GetVariable(scrVarPub.timeArrayId, scrVarPub.time));
-                stackId = GetNewObjectVariableReverse(id, fs.localId);
-                SetNewVariableValue(stackId, &stackValue);
-                Scr_SetThreadWaitTime(fs.localId, scrVarPub.time);
-                goto thread_end;
-            }
-            entref = Scr_GetEntityIdRef(objectId);
-            RemoveRefToObject(objectId);
-            scrVmPub.function_frame->fs.pos = fs.pos;
-            if (scrVmGlob.recordPlace)
-                Scr_GetFileAndLine(fs.pos, &scrVmGlob.lastFileName, &scrVmGlob.lastLine);
-            if (scrVmDebugPub.func_table[builtinIndex].breakpointCount)
-            {
-                iassert(scrVmPub.top == fs.top - 1);
-                outparamcount = scrVmPub.outparamcount;
-                Scr_HitBuiltinBreakpoint(fs.top, fs.pos, fs.localId, opcode, builtinIndex, scrVmPub.outparamcount + 1);
-                scrVmPub.outparamcount = outparamcount;
-                scrVmPub.top = fs.top - 1;
-            }
-            builtInTime = scrVmDebugPub.builtInTime;
-            time = __rdtsc();
-            ((void (*)(scr_entref_t))scrCompilePub.func_table[builtinIndex])(entref);
-            timeSpent = __rdtsc() - time;
-            scrVmDebugPub.builtInTime = timeSpent + builtInTime;
-            scrVmDebugPub.func_table[builtinIndex].prof += timeSpent;
-            ++scrVmDebugPub.func_table[builtinIndex].usage;
-        post_builtin:
-            fs.top = scrVmPub.top;
-            fs.pos = scrVmPub.function_frame->fs.pos;
-            if (scrVmPub.outparamcount)
-            {
-                outparamcount = scrVmPub.outparamcount;
-                scrVmPub.outparamcount = 0;
-                scrVmPub.top -= outparamcount;
-                do
-                {
-                    RemoveRefToValue(fs.top->type, fs.top->u);
-                    --fs.top;
-                    --outparamcount;
-                } while (outparamcount);
-            }
-            if (scrVmPub.inparamcount)
-            {
-                iassert(scrVmPub.inparamcount == 1);
-                scrVmPub.inparamcount = 0;
-                iassert(fs.top == scrVmPub.top);
-            }
-            else
-            {
-                iassert(fs.top == scrVmPub.top);
-                ++fs.top;
-                fs.top->type = VAR_UNDEFINED;
-            }
-            continue;
-        case OP_wait:
-            goto $LN359;
-        case OP_waittillFrameEnd:
-            goto $LN345;
-        case OP_PreScriptCall:
-            INC_TOP();
-            fs.top->type = VAR_PRECODEPOS;
-            continue;
-        case OP_ScriptFunctionCall2:
-            INC_TOP();
-            fs.top->type = VAR_PRECODEPOS;
-            goto $LN329;
-        case OP_ScriptFunctionCall:
-        $LN329:
-            if (scrVmPub.function_count < 31)
-            {
-                selfId = Scr_GetSelf(fs.localId);
-                AddRefToObject(selfId);
-                fs.localId = AllocChildThread(selfId, fs.localId);
-                scrVmPub.function_frame->fs.pos = fs.pos;
-                fs.pos = Scr_ReadCodePos(&scrVmPub.function_frame->fs.pos);
-                goto function_call;
-            }
-            Scr_Error("script stack overflow (too many embedded function calls)");
-        $LN326:
-            if (fs.top->type != VAR_FUNCTION)
-                goto LABEL_348;
-            if (scrVmPub.function_count < 31)
-            {
-                selfId = Scr_GetSelf(fs.localId);
-                AddRefToObject(selfId);
-                fs.localId = AllocChildThread(selfId, fs.localId);
-                scrVmPub.function_frame->fs.pos = fs.pos;
-                fs.pos = fs.top->u.codePosValue;
-                --fs.top;
-                goto function_call;
-            }
-            scrVarPub.error_index = 1;
-            Scr_Error("script stack overflow (too many embedded function calls)");
-        LABEL_348:
-            Scr_Error(va("%s is not a function pointer", var_typename[fs.top->type]));
-        $LN322:
-            if (fs.top->type != VAR_POINTER)
-                goto not_an_object1;
-            if (scrVmPub.function_count < 31)
-            {
-                fs.localId = AllocChildThread(fs.top->u.intValue, fs.localId);
-                --fs.top;
-                scrVmPub.function_frame->fs.pos = fs.pos;
-                fs.pos = Scr_ReadCodePos(&scrVmPub.function_frame->fs.pos);
-                goto function_call;
-            }
-            Scr_Error("script stack overflow (too many embedded function calls)");
-        not_an_object1:
-            type = fs.top->type;
-            goto not_an_object_error1;
-        case OP_ScriptFunctionCallPointer:
-            goto $LN326;
-        case OP_ScriptMethodCall:
-            goto $LN322;
-        case OP_ScriptMethodCallPointer:
-            if (fs.top->type == VAR_FUNCTION)
-            {
-                tempCodePos = fs.top->u.codePosValue;
-                --fs.top;
-                if (fs.top->type != VAR_POINTER)
-                    goto not_an_object2;
-                if (scrVmPub.function_count < 31)
-                {
-                    fs.localId = AllocChildThread(fs.top->u.stringValue, fs.localId);
-                    --fs.top;
-                    scrVmPub.function_frame->fs.pos = fs.pos;
-                    fs.pos = tempCodePos;
-                    goto function_call;
-                }
-                scrVarPub.error_index = 1;
-                Scr_Error("script stack overflow (too many embedded function calls)");
-            }
-            else
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                Scr_Error(va("%s is not a function pointer", var_typename[fs.top[1].type]));
-            $LN311:
-                if (scrVmPub.function_count < 31)
-                {
-                    selfId = Scr_GetSelf(fs.localId);
-                    AddRefToObject(selfId);
-                    fs.localId = AllocThread(selfId);
-                    scrVmPub.function_frame->fs.pos = fs.pos;
-                    scrVmPub.function_frame->fs.startTop = fs.startTop;
-
-                    fs.pos = Scr_ReadCodePos(&scrVmPub.function_frame->fs.pos);
-                    fs.startTop = &fs.top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
-
-                    goto thread_call;
-                }
-                scrVarPub.error_index = 1;
-                Scr_Error("script stack overflow (too many embedded function calls)");
-            $LN308:
-                if (fs.top->type == VAR_FUNCTION)
-                {
-                    if (scrVmPub.function_count < 31)
-                    {
-                        tempCodePos = fs.top->u.codePosValue;
-                        --fs.top;
-                        selfId = Scr_GetSelf(fs.localId);
-                        AddRefToObject(selfId);
-                        fs.localId = AllocThread(selfId);
-                        scrVmPub.function_frame->fs.pos = fs.pos;
-                        scrVmPub.function_frame->fs.startTop = fs.startTop;
-                        fs.pos = tempCodePos;
-
-                        fs.startTop = &fs.top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
-
-                        goto thread_call;
-                    }
-                    scrVarPub.error_index = 1;
-                    Scr_Error("script stack overflow (too many embedded function calls)");
-                }
-                Scr_Error(va("%s is not a function pointer", var_typename[fs.top->type]));
-            $LN304:
-                if (fs.top->type == VAR_POINTER)
-                {
-                    if (scrVmPub.function_count < 31)
-                    {
-                        fs.localId = AllocThread(fs.top->u.intValue);
-                        --fs.top;
-                        scrVmPub.function_frame->fs.pos = fs.pos;
-                        scrVmPub.function_frame->fs.startTop = fs.startTop;
-
-                        fs.pos = Scr_ReadCodePos(&scrVmPub.function_frame->fs.pos);
-                        fs.startTop = &fs.top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
-
-                        goto thread_call;
-                    }
-                    scrVarPub.error_index = 1;
-                    Scr_Error("script stack overflow (too many embedded function calls)");
-                }
-            }
-            goto not_an_object2;
-        case OP_ScriptThreadCall:
-            goto $LN311;
-        case OP_ScriptThreadCallPointer:
-            goto $LN308;
-        case OP_ScriptMethodThreadCall:
-            goto $LN304;
-        case OP_ScriptMethodThreadCallPointer:
-            if (fs.top->type != VAR_FUNCTION)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                Scr_Error(va("%s is not a function pointer", var_typename[fs.top[1].type]));
-            $LN293:
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                continue;
-            }
-            tempCodePos = fs.top->u.codePosValue;
-            --fs.top;
-            if (fs.top->type != VAR_POINTER)
-                goto not_an_object2;
-            if (scrVmPub.function_count >= 31)
-            {
-                scrVarPub.error_index = 1;
-                Scr_Error("script stack overflow (too many embedded function calls)");
-            not_an_object2:
-                type = fs.top->type;
-                goto not_an_object_error2;
-            }
-            fs.localId = AllocThread(fs.top->u.stringValue);
-            --fs.top;
-            scrVmPub.function_frame->fs.pos = fs.pos;
-            scrVmPub.function_frame->fs.startTop = fs.startTop;
-            fs.pos = tempCodePos;
-
-            fs.startTop = &fs.top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
-
-        thread_call:
-            scrVmPub.function_frame->fs.top = fs.startTop;
-            scrVmPub.function_frame->topType = fs.startTop->type;
-            fs.startTop->type = VAR_PRECODEPOS;
-            ++thread_count;
-            *++profileEnablePos = 0;
-        function_call:
-            scrVmPub.function_frame->fs.localVarCount = fs.localVarCount;
-            fs.localVarCount = 0;
-            ++scrVmPub.function_count;
-            ++scrVmPub.function_frame;
-            scrVmPub.function_frame->fs.localId = fs.localId;
-            iassert(fs.pos);
-            continue;
-        case OP_DecTop:
-            goto $LN293;
-        case OP_CastFieldObject:
-            objectId = Scr_EvalFieldObject(scrVarPub.tempVariable, fs.top);
-            --fs.top;
-            continue;
-        case OP_EvalLocalVariableObjectCached:
-            objectId = Scr_EvalVariableObject(Scr_GetLocalVar(fs.pos));
-            ++fs.pos;
-            continue;
-        case OP_CastBool:
-            Scr_CastBool(fs.top);
-            continue;
-        case OP_BoolNot:
-            Scr_EvalBoolNot(fs.top);
-            continue;
-        case OP_BoolComplement:
-            Scr_EvalBoolComplement(fs.top);
-            continue;
-        case OP_JumpOnFalse:
-            Scr_CastBool(fs.top);
-            iassert(fs.top->type == VAR_INTEGER);
-            jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-            if (!fs.top->u.intValue)
-                fs.pos += jumpOffset;
-            --fs.top;
-            continue;
-        case OP_JumpOnTrue:
-            Scr_CastBool(fs.top);
-            iassert(fs.top->type == VAR_INTEGER);
-            jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-            if (fs.top->u.intValue)
-                fs.pos += jumpOffset;
-            --fs.top;
-            continue;
-        case OP_JumpOnFalseExpr:
-            Scr_CastBool(fs.top);
-            iassert(fs.top->type == VAR_INTEGER);
-            jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-            if (fs.top->u.intValue)
-                --fs.top;
-            continue;
-            fs.pos += jumpOffset;
-            continue;
-        case OP_JumpOnTrueExpr:
-            Scr_CastBool(fs.top);
-            iassert(fs.top->type == VAR_INTEGER);
-            jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-            if (!fs.top->u.intValue)
-                --fs.top;
-            continue;
-            fs.pos += jumpOffset;
-            continue;
-        case OP_jump:
-            jumpOffset = Scr_ReadUnsigned(&fs.pos);
-            fs.pos += jumpOffset;
-            continue;
-
-        case OP_jumpback:
-            if (scrVarPub.numScriptValues > 0xF37E || scrVarPub.numScriptObjects > 0x7380)
-            {
-                if (scrVmPub.showError)
-                {
-                    Scr_DumpScriptThreads();
-                    Scr_DumpScriptVariablesDefault();
-                    Scr_Error("exceeded maximum number of script variables");
-                }
-                Sys_Error("exceeded maximum number of script variables");
-            }
-            if ((Sys_Milliseconds() - scrVmGlob.starttime) >= 2500)
-            {
-                iassert(logScriptTimes);
-                if (logScriptTimes->current.enabled)
-                {
-                    Com_Printf(23, "EXCEED TIME: %d\n", Sys_Milliseconds());
-                }
-                if (!scrVmGlob.loading)
-                {
-                    VM_PrintJumpHistory();
-                    if (scrVmPub.showError)
-                    {
-                        iassert(!scrVmPub.debugCode);
-                        Scr_DumpScriptThreads();
-                        Scr_DumpScriptVariablesDefault();
-                        Scr_Error("potential infinite loop in script");
-                    }
-                    if (!scrVmPub.abort_on_error)
-                    {
-                        Com_PrintError(23, "script runtime error: potential infinite loop in script - killing thread.\n");
-                        Scr_PrintPrevCodePos(23, (char*)fs.pos, 0);
-                        Scr_ResetTimeout();
-                        while (1)
-                        {
-                            parentLocalId = GetSafeParentLocalId(fs.localId);
-                            Scr_KillThread(fs.localId);
-                            scrVmPub.localVars -= fs.localVarCount;
-                            iassert((fs.top->type != VAR_PRECODEPOS));
-                            while (fs.top->type != VAR_CODEPOS)
-                            {
-                                RemoveRefToValue(fs.top->type, fs.top->u);
-                                --fs.top;
-                                iassert((fs.top->type != VAR_PRECODEPOS));
-                            }
-                            --scrVmPub.function_count;
-                            --scrVmPub.function_frame;
-                            if (!parentLocalId)
-                                break;
-                            iassert(fs.top != fs.startTop);
-                            RemoveRefToObject(fs.localId);
-                            iassert(fs.top->type == VAR_CODEPOS);
-                            fs.pos = scrVmPub.function_frame->fs.pos;
-                            iassert(fs.pos);
-                            fs.localVarCount = scrVmPub.function_frame->fs.localVarCount;
-                            fs.localId = parentLocalId;
-                            --fs.top;
-                        }
-                        iassert(fs.top == fs.startTop);
-                        goto thread_end;
-                    }
-                    Scr_TerminalError("potential infinite loop in script");
-                    INC_TOP();
-                    *fs.top = Scr_EvalVariableField(fieldValueId);
-                    if (fs.top->type == VAR_INTEGER)
-                    {
-                        ++fs.top->u.intValue;
-                        iassert(*fs.pos == OP_SetVariableField);
-                    }
-                    else
-                    {
-                        Scr_Error(va("++ must be applied to an int (applied to %s)", var_typename[fs.top->type]));
-                        INC_TOP();
-                        *fs.top = Scr_EvalVariableField(fieldValueId);
-                        if (fs.top->type != VAR_INTEGER)
-                        {
-                            Scr_Error(va("-- must be applied to an int (applied to %s)", var_typename[fs.top->type]));
-                            Scr_EvalOr(fs.top - 1, fs.top);
-                            --fs.top;
-                            continue;
-                        }
-                        --fs.top->u.intValue;
-                        iassert(*fs.pos == OP_SetVariableField);
-                    }
-                    ++fs.pos;
-                    SetVariableFieldValue(fieldValueId, fs.top);
-                loop_dec_top:
-                    --fs.top;
-                    continue;
-                }
-                if (scrVmPub.abort_on_error)
-                    scrVmPub.showError = 1;
-                Com_PrintWarning(23, "script runtime warning: potential infinite loop in script.\n");
-                Scr_PrintPrevCodePos(23, (char*)fs.pos, 0);
-                jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-                fs.pos -= jumpOffset;
-                Scr_ResetTimeout();
-            }
-            else
-            {
-                scrVmDebugPub.jumpbackHistory[scrVmDebugPub.jumpbackHistoryIndex] = fs.pos;
-                scrVmDebugPub.jumpbackHistoryIndex = (scrVmDebugPub.jumpbackHistoryIndex + 1) % 0x80u;
-                jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-                fs.pos -= jumpOffset;
-            }
-            continue;
-        case OP_inc:
-            INC_TOP();
-            *fs.top = Scr_EvalVariableField(fieldValueId);
-            if (fs.top->type == VAR_INTEGER)
-            {
-                ++fs.top->u.intValue;
-                iassert(*fs.pos == OP_SetVariableField);
-            }
-            else
-            {
-                Scr_Error(va("++ must be applied to an int (applied to %s)", var_typename[fs.top->type]));
-            }
-            ++fs.pos;
-            SetVariableFieldValue(fieldValueId, fs.top);
-            --fs.top;
-            continue;
-        case OP_dec:
-            INC_TOP();
-            *fs.top = Scr_EvalVariableField(fieldValueId);
-            if (fs.top->type == VAR_INTEGER)
-            {
-                --fs.top->u.intValue;
-                iassert(*fs.pos == OP_SetVariableField);
-            }
-            else
-            {
-                Scr_Error(va("-- must be applied to an int (applied to %s)", var_typename[fs.top->type]));
-            }
-            iassert(*fs.pos == OP_SetVariableField);
-            ++fs.pos;
-            SetVariableFieldValue(fieldValueId, fs.top);
-            --fs.top;
-            continue;
-        case OP_bit_or:
-            Scr_EvalOr(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_bit_ex_or:
-            Scr_EvalExOr(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_bit_and:
-            Scr_EvalAnd(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_equality:
-            Scr_EvalEquality(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_inequality:
-            Scr_EvalInequality(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_less:
-            Scr_EvalLess(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_greater:
-            Scr_EvalGreater(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_less_equal:
-            Scr_EvalLessEqual(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_greater_equal:
-            Scr_EvalGreaterEqual(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_shift_left:
-            Scr_EvalShiftLeft(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_shift_right:
-            Scr_EvalShiftRight(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_plus:
-            Scr_EvalPlus(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_minus:
-            Scr_EvalMinus(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_multiply:
-            Scr_EvalMultiply(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_divide:
-            Scr_EvalDivide(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_mod:
-            Scr_EvalMod(fs.top - 1, fs.top);
-            --fs.top;
-            continue;
-        case OP_size:
-            Scr_EvalSizeValue(fs.top);
-            continue;
-        case OP_waittillmatch:
-        case OP_waittill:
-            iassert(Scr_IsInOpcodeMemory(fs.pos));
-            if (fs.top->type != VAR_BEGIN_REF)
-                goto not_an_object2;
-            if (!IsFieldObject(fs.top->u.stringValue))
-                goto not_an_object2a;
-            tempValue.u.intValue = fs.top->u.intValue;
-            --fs.top;
-            if (fs.top->type != VAR_STRING)
-            {
-                ++fs.top;
-                scrVarPub.error_index = 3;
-                Scr_Error("first parameter of waittill must evaluate to a string");
-            not_an_object2a:
-                type = GetObjectType(fs.top->u.stringValue);
-            not_an_object_error2:
-                scrVarPub.error_index = 2;
-            not_an_object_error:
-                Scr_Error(va("%s is not an object", var_typename[type]));
-                goto error_1;
-            }
-            stringValue = fs.top->u.stringValue;
-            --fs.top;
-
-            iassert(GetObjectType(tempValue.u.pointerValue) != VAR_THREAD);
-            iassert(GetObjectType(tempValue.u.pointerValue) != VAR_NOTIFY_THREAD);
-            iassert(GetObjectType(tempValue.u.pointerValue) != VAR_TIME_THREAD);
-            iassert(GetObjectType(tempValue.u.pointerValue) != VAR_CHILD_THREAD);
-            iassert(GetObjectType(tempValue.u.pointerValue) != VAR_DEAD_THREAD);
-
-            scrVmDebugPub.profileEnable[fs.localId] = *profileEnablePos;
-            stackValue.type = VAR_STACK;
-            stackValue.u.intValue = (int)VM_ArchiveStack();
-            Array = GetArray(GetVariable(tempValue.u.stringValue, 0x18000u));
-            id = GetArray(GetVariable(Array, stringValue));
-            stackId = GetNewObjectVariable(id, fs.localId);
-            SetNewVariableValue(stackId, &stackValue);
-            tempValue.type = VAR_BEGIN_REF;
-            localId = fs.localId;
-            Self = Scr_GetSelf(fs.localId);
-            ObjectVariable_DONE = GetObjectVariable(scrVarPub.pauseArrayId, Self);
-            NewObjectVariable_DONE = GetNewObjectVariable(GetArray(ObjectVariable_DONE), localId);
-            SetNewVariableValue(NewObjectVariable_DONE, &tempValue);
-            Scr_SetThreadNotifyName(fs.localId, stringValue);
-            goto thread_end;
-        case OP_notify:
-            if (fs.top->type != VAR_BEGIN_REF)
-                goto not_an_object2;
-            id = fs.top->u.stringValue;
-            if (!IsFieldObject(id))
-                goto not_an_object2a;
-            --fs.top;
-            if (fs.top->type != VAR_STRING)
-            {
-                ++fs.top;
-                scrVarPub.error_index = 1;
-                Scr_Error("first parameter of notify must evaluate to a string");
-                goto not_an_object2a;
-            }
-            stringValue = fs.top->u.stringValue;
-            --fs.top;
-            if (scrVmDebugPub.checkBreakon)
-                Scr_CheckBreakonNotify(id, stringValue, fs.top, (char *)fs.pos, fs.localId);
-            scrVmPub.function_frame->fs.pos = fs.pos;
-            VM_Notify(id, stringValue, fs.top);
-            fs.pos = scrVmPub.function_frame->fs.pos;
-            RemoveRefToObject(id);
-            SL_RemoveRefToString(stringValue);
-            iassert(fs.top->type != VAR_CODEPOS);
-            while (fs.top->type != VAR_PRECODEPOS)
-            {
-                RemoveRefToValue(fs.top->type, fs.top->u);
-                --fs.top;
-                iassert(fs.top->type != VAR_CODEPOS);
-            }
-            --fs.top;
-            continue;
-        case OP_endon:
-            if (fs.top->type != VAR_BEGIN_REF)
-                goto not_an_object1;
-            if (!IsFieldObject(fs.top->u.stringValue))
-                goto LABEL_510;
-            if (fs.top[-1].type == VAR_STRING)
-            {
-                stringValue = fs.top[-1].u.stringValue;
-                AddRefToObject(fs.localId);
-                threadId = AllocThread(fs.localId);
-                iassert(GetObjectType(fs.top->u.pointerValue) != VAR_THREAD);
-                iassert(GetObjectType(fs.top->u.pointerValue) != VAR_NOTIFY_THREAD);
-                iassert(GetObjectType(fs.top->u.pointerValue) != VAR_TIME_THREAD);
-                iassert(GetObjectType(fs.top->u.pointerValue) != VAR_CHILD_THREAD);
-                iassert(GetObjectType(fs.top->u.pointerValue) != VAR_DEAD_THREAD);
-
-                GetObjectVariable(GetArray(GetVariable(GetArray(GetVariable(fs.top->u.stringValue, 0x18000u)), stringValue)), threadId);
-                RemoveRefToObject(threadId);
-                tempValue.type = VAR_BEGIN_REF;
-                tempValue.u.intValue = fs.top->u.intValue;
-                SetNewVariableValue(GetNewObjectVariable(GetArray(GetObjectVariable(scrVarPub.pauseArrayId, fs.localId)), threadId), &tempValue);
-                Scr_SetThreadNotifyName(threadId, stringValue);
-                fs.top -= 2;
-                continue;
-            }
-            Scr_Error("first parameter of endon must evaluate to a string");
-        LABEL_510:
-            type = GetObjectType(fs.top->u.stringValue);
-        not_an_object_error1:
-            scrVarPub.error_index = 1;
-            goto not_an_object_error;
-        case OP_voidCodepos:
-            INC_TOP();
-            fs.top->type = VAR_PRECODEPOS;
-            continue;
-        case OP_switch:
-            jumpOffset = Scr_ReadUnsigned(&fs.pos);
-            fs.pos += jumpOffset;
-            caseCount = Scr_ReadUnsignedShort(&fs.pos);
-
-            if (fs.top->type == VAR_STRING)
-                goto LABEL_522;
-            if (fs.top->type == VAR_INTEGER)
-            {
-                if (IsValidArrayIndex(fs.top->u.stringValue))
-                {
-                    caseValue = GetInternalVariableIndex(fs.top->u.stringValue);
-                }
-                else
-                {
-                    Scr_Error(va("switch index %d out of range", fs.top->u.intValue));
-                LABEL_522:
-                    caseValue = fs.top->u.stringValue;
-                    SL_RemoveRefToString(fs.top->u.stringValue);
-                }
-            }
-            else
-            {
-                Scr_Error(va("cannot switch on %s", var_typename[fs.top->type]));
-            }
-            if (!caseCount)
-            {
-                --fs.top;
-                continue;
-            }
-            iassert(caseValue);
-            do
-            {
-                currentCaseValue = Scr_ReadUnsigned(&fs.pos);
-                currentCodePos = Scr_ReadCodePos(&fs.pos);
-                if (currentCaseValue == caseValue)
-                {
-                    fs.pos = currentCodePos;
-                    iassert(fs.pos);
-                    goto loop_dec_top;
-                }
-                --caseCount;
-            } while (caseCount);
-            if (!currentCaseValue)
-            {
-                fs.pos = currentCodePos;
-                iassert(fs.pos);
-            }
-            --fs.top;
-            continue;
-        case OP_endswitch:
-            caseCount = Scr_ReadUnsignedShort(&fs.pos);
-            Scr_ReadIntArray(&fs.pos, 2 * caseCount);
-            continue;
-        case OP_vector:
-            fs.top -= 2;
-            Scr_CastVector(fs.top);
-            continue;
-        case OP_NOP:
-            continue;
-        case OP_abort:
-            iassert(g_script_error_level >= 0);
-            --g_script_error_level;
-            return 0;
-        case OP_object:
-            INC_TOP();
-            classnum = Scr_ReadUnsigned(&fs.pos);
-            entnum = Scr_ReadUnsigned(&fs.pos);
-            fs.top->u.pointerValue = FindEntityId(entnum, classnum);
-            if (!fs.top->u.pointerValue)
-            {
-                fs.top->type = VAR_UNDEFINED;
-                Scr_Error("unknown object");
-            }
-            goto object;
-        case OP_thread_object:
-            INC_TOP();
-            fs.top->u.pointerValue = Scr_ReadUnsignedShort(&fs.pos);
-        object:
-            fs.top->type = VAR_POINTER;
-            AddRefToObject(fs.top->u.pointerValue);
-            continue;
-        case OP_EvalLocalVariable:
-            INC_TOP();
-            *fs.top = Scr_EvalVariable(FindVariable(fs.localId, Scr_ReadUnsignedShort(&fs.pos)));
-            continue;
-        case OP_EvalLocalVariableRef:
-            fieldValueIndex = 0;
-            fieldValueId = FindVariable(fs.localId, Scr_ReadUnsignedShort(&fs.pos));
-            if (fieldValueId)
-                continue;
-            Scr_Error("cannot create a new local variable in the debugger");
-            goto $LN125;
-        case OP_prof_begin:
-        $LN125:
-            profileIndex = *fs.pos++;
-            profileBit = 1 << profileIndex;
-            if (((1 << profileIndex) & *profileEnablePos) == 0)
-            {
-                *profileEnablePos |= profileBit;
-                Profile_BeginScript(profileIndex);
-            }
-            continue;
-        case OP_prof_end:
-            profileIndex = *fs.pos++;
-            profileBit = 1 << profileIndex;
-            if (((1 << profileIndex) & *profileEnablePos) != 0)
-            {
-                *profileEnablePos &= ~profileBit;
-                Profile_EndScript(profileIndex);
-            }
-            continue;
-        case OP_breakpoint:
-            if (!scrVarPub.developer)
-                continue;
-            opcode = Scr_HitBreakpoint(fs.top, (char *)fs.pos, fs.localId, 0);
-            goto interrupt_return;
-        case OP_assignmentBreakpoint:
-            opcode = Scr_HitAssignmentBreakpoint(fs.top, (char *)fs.pos, fs.localId, 0);
-            goto interrupt_return;
-        case OP_manualAndAssignmentBreakpoint:
-            opcode = Scr_HitAssignmentBreakpoint(fs.top, (char *)fs.pos, fs.localId, 1);
-            goto interrupt_return;
-        default:
-            scrVmPub.terminal_error = 1;
-            RuntimeError((char*)fs.pos, 0, va("CODE ERROR: unknown opcode %d", opcode), 0);
-            continue;
-        }
-    }
-}
-#endif
+function_stack_t fs;
 
 unsigned int __cdecl VM_Execute(unsigned int localId, const char *pos, unsigned int paramcount)
 {
@@ -6827,8 +5215,7 @@ void __cdecl Scr_RunCurrentThreads()
 
 void VM_SetTime()
 {
-    DWORD v0; // eax
-    VariableValueInternal_u Object; // eax
+    unsigned int Object; // eax
     unsigned int id; // [esp+0h] [ebp-4h]
 
     iassert(!(scrVarPub.time & ~VAR_NAME_LOW_MASK));
@@ -6841,11 +5228,10 @@ void VM_SetTime()
             iassert(logScriptTimes);
             if (logScriptTimes->current.enabled)
             {
-                v0 = Sys_Milliseconds();
-                Com_Printf(23, "SET TIME: %d\n", v0);
+                Com_Printf(23, "SET TIME: %d\n", Sys_Milliseconds());
             }
             Object = FindObject(id);
-            VM_Resume(Object.u.stringValue);
+            VM_Resume(Object);
             SafeRemoveVariable(scrVarPub.timeArrayId, scrVarPub.time);
         }
     }
@@ -6860,51 +5246,47 @@ void __cdecl VM_Resume(unsigned int timeId)
     VariableStackBuffer* stackValue; // [esp+20h] [ebp-Ch]
     unsigned int stackId; // [esp+24h] [ebp-8h]
     unsigned int startLocalId; // [esp+28h] [ebp-4h]
+    function_stack_t stack;
 
-    if (scrVmPub.top != scrVmPub.stack)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 3825, 0, "%s", "scrVmPub.top == scrVmPub.stack");
+    iassert(scrVmPub.top == scrVmPub.stack);
     Scr_ResetTimeout();
-    if (!timeId)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 3833, 0, "%s", "timeId");
+    iassert(timeId);
     AddRefToObject(timeId);
     fs.startTop = scrVmPub.stack;
     thread_count = 0;
+
     while (1)
     {
-        if (scrVarPub.error_message)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3841, 0, "%s", "!scrVarPub.error_message");
-        if (scrVarPub.error_index)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3842, 0, "%s", "!scrVarPub.error_index");
-        if (scrVmPub.outparamcount)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3843, 0, "%s", "!scrVmPub.outparamcount");
-        if (scrVmPub.inparamcount)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3844, 0, "%s", "!scrVmPub.inparamcount");
-        if (scrVmPub.function_count)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3845, 0, "%s", "!scrVmPub.function_count");
-        if ((int*)scrVmPub.localVars != &scrVmGlob.starttime)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3846, 0, "%s", "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
-        if (fs.startTop != scrVmPub.stack)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3847, 0, "%s", "fs.startTop == &scrVmPub.stack[0]");
-        if (thread_count)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3848, 0, "%s", "!thread_count");
+        iassert(!scrVarPub.error_message);
+        iassert(!scrVarPub.error_index);
+        iassert(!scrVmPub.outparamcount);
+        iassert(!scrVmPub.inparamcount);
+        iassert(!scrVmPub.function_count);
+        iassert(scrVmPub.localVars == scrVmGlob.localVarsStack - 1);
+        iassert(fs.startTop == &scrVmPub.stack[0]);
+        iassert(!thread_count);
+
         stackId = FindFirstSibling(timeId);
         if (!stackId)
             break;
+
+        stack.startTop = scrVmPub.stack;
+
         startLocalId = GetVariableKeyObject(stackId);
-        if (!startLocalId)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3855, 0, "%s", "startLocalId");
-        if (GetValueType(stackId) != 10)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3857, 0, "%s", "GetValueType( stackId ) == VAR_STACK");
-        stackValue = (VariableStackBuffer*)GetVariableValueAddress(stackId)->u.intValue;
+        iassert(startLocalId);
+        iassert(GetValueType(stackId) == VAR_STACK);
+        stackValue = GetVariableValueAddress(stackId)->u.stackValue;
         RemoveObjectVariable(timeId, startLocalId);
-        VM_UnarchiveStack(startLocalId, stackValue);
+        //VM_UnarchiveStack(startLocalId, stackValue);
+        VM_UnarchiveStack2(startLocalId, &stack, stackValue);
         if (scrVarPub.bScriptProfile)
         {
             scrVmDebugPub.builtInTime = 0;
             time = __rdtsc();
             pos = fs.pos;
             //v2 = VM_Execute_0();
-            v2 = VM_ExecuteInternal(fs.pos, fs.localId, 0, scrVmPub.top, fs.startTop);
+            //v2 = VM_ExecuteInternal(fs.pos, fs.localId, 0, scrVmPub.top, fs.startTop);
+            v2 = VM_ExecuteInternal(stack.pos, stack.localId, stack.localVarCount, stack.top, stack.startTop);
             RemoveRefToObject(v2);
             RemoveRefToValue(scrVmPub.stack[1].type, scrVmPub.stack[1].u);
             Scr_AddProfileTime(pos, __rdtsc() - time, scrVmDebugPub.builtInTime);
@@ -6912,7 +5294,7 @@ void __cdecl VM_Resume(unsigned int timeId)
         else
         {
             //v1 = VM_Execute_0();
-            v1 = VM_ExecuteInternal(fs.pos, fs.localId, 0, scrVmPub.top, fs.startTop);
+            v1 = VM_ExecuteInternal(stack.pos, stack.localId, stack.localVarCount, stack.top, stack.startTop);
             RemoveRefToObject(v1);
             RemoveRefToValue(scrVmPub.stack[1].type, scrVmPub.stack[1].u);
         }
@@ -6922,6 +5304,7 @@ void __cdecl VM_Resume(unsigned int timeId)
     scrVmPub.top = scrVmPub.stack;
 }
 
+#if 0
 void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* stackValue)
 {
     VariableValue* top; // [esp+0h] [ebp-14h]
@@ -6992,6 +5375,85 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
     MT_Free((byte*)stackValue, stackValue->bufLen);
 
     iassert(scrVmPub.stack[0].type == VAR_CODEPOS);
+}
+#endif
+
+void VM_UnarchiveStack2(unsigned int startLocalId, function_stack_t *stack, VariableStackBuffer *stackValue)
+{
+    int function_count;
+    unsigned int localId;
+    VariableValue *startTop;
+    int size;
+    const char *buf;
+    const char *pos;
+
+    iassert(!scrVmPub.function_count);
+    iassert(stackValue->pos);
+    iassert(fs.startTop == &scrVmPub.stack[0]);
+
+    scrVmPub.function_frame->fs.pos = stackValue->pos;
+    ++scrVmPub.function_count;
+    ++scrVmPub.function_frame;
+    size = stackValue->size;
+    buf = stackValue->buf;
+    startTop = stack->startTop;
+
+    while (size)
+    {
+        ++startTop;
+        --size;
+        startTop->type = (Vartype_t)*(unsigned char *)buf;
+        pos = buf + 1;
+
+        if (startTop->type == VAR_CODEPOS)
+        {
+            iassert(scrVmPub.function_count < 32/*MAX_VM_STACK_DEPTH*/);
+            scrVmPub.function_frame->fs.pos = *(const char **)pos;
+            ++scrVmPub.function_count;
+            ++scrVmPub.function_frame;
+        }
+        else
+        {
+            startTop->u.intValue = *(int *)pos;
+        }
+
+        buf = (pos + 4);
+    }
+
+    stack->pos = stackValue->pos;
+    stack->top = startTop;
+    localId = stackValue->localId;
+    stack->localId = localId;
+    Scr_ClearWaitTime(startLocalId);
+    iassert(scrVmPub.function_count < 32/*MAX_VM_STACK_DEPTH*/);
+    function_count = scrVmPub.function_count;
+
+    while (1)
+    {
+        scrVmPub.function_frame_start[function_count--].fs.localId = localId;
+
+        if (!function_count)
+            break;
+
+        localId = GetParentLocalId(localId);
+    }
+
+    while (++function_count != scrVmPub.function_count)
+    {
+        scrVmPub.function_frame_start[function_count].fs.localVarCount = Scr_AddLocalVars(scrVmPub.function_frame_start[function_count].fs.localId);
+    }
+
+    stack->localVarCount = Scr_AddLocalVars(stack->localId);
+
+    if (stackValue->time != LOBYTE(scrVarPub.time))
+        Scr_ResetTimeout();
+
+    --scrVarPub.numScriptThreads;
+
+    MT_Free((unsigned char*)stackValue, stackValue->bufLen);
+
+    //iassert(scrVmPub.stack[0].type == VAR_CODEPOS);
+    iassert(stack->startTop[0].type == VAR_CODEPOS);
 }
 
 int __cdecl Scr_AddLocalVars(unsigned int localId)
