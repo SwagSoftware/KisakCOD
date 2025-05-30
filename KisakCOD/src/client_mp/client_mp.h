@@ -12,6 +12,11 @@
 
 #include <ui_mp/ui_mp.h>
 
+#define MAX_PARSE_ENTITIES 2048
+#define MAX_PARSE_CLIENTS 2048
+static_assert(((MAX_PARSE_ENTITIES) & (MAX_PARSE_ENTITIES - 1)) == 0, "MAX_PARSE_ENTITIES must be power of 2");
+static_assert(((MAX_PARSE_CLIENTS) & (MAX_PARSE_CLIENTS - 1)) == 0, "MAX_PARSE_CLIENTS must be power of 2");
+
 struct serverAddress_t // sizeof=0x6
 {                                       // ...
     unsigned __int8 ip[4];              // ...

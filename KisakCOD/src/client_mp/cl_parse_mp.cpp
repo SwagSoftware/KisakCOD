@@ -25,6 +25,8 @@ int autoupdateStarted;
 char autoupdateFilename[64];
 int cl_connectedToPureServer;
 
+constexpr size_t CLIENT_ARCHIVE_SIZE = 256;
+
 void __cdecl TRACK_cl_parse()
 {
     track_static_alloc_internal(svc_strings, 1024, "svc_strings", 9);
@@ -50,15 +52,15 @@ void __cdecl CL_SavePredictedOriginForServerTime(
     float *origin; // [esp+8h] [ebp-8h]
     unsigned int lastIndex; // [esp+Ch] [ebp-4h]
 
-    lastIndex = (cl->clientArchiveIndex + 255) % 256;
-    if (lastIndex >= 0x100)
+    lastIndex = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - 1) % CLIENT_ARCHIVE_SIZE;
+    if (lastIndex >= CLIENT_ARCHIVE_SIZE)
         MyAssertHandler(
             ".\\client_mp\\cl_parse_mp.cpp",
             80,
             0,
             "lastIndex doesn't index CLIENT_ARCHIVE_SIZE\n\t%i not in [0, %i)",
             lastIndex,
-            256);
+            CLIENT_ARCHIVE_SIZE);
     if (cl->clientArchive[lastIndex].serverTime != serverTime)
     {
         cl->clientArchive[cl->clientArchiveIndex].serverTime = serverTime;
@@ -76,15 +78,15 @@ void __cdecl CL_SavePredictedOriginForServerTime(
         *v7 = *viewangles;
         v7[1] = viewangles[1];
         v7[2] = viewangles[2];
-        cl->clientArchiveIndex = (cl->clientArchiveIndex + 1) % 256;
-        if (cl->clientArchiveIndex >= 0x100u)
+        cl->clientArchiveIndex = (cl->clientArchiveIndex + 1) % CLIENT_ARCHIVE_SIZE;
+        if (cl->clientArchiveIndex >= CLIENT_ARCHIVE_SIZE)
             MyAssertHandler(
                 ".\\client_mp\\cl_parse_mp.cpp",
                 92,
                 0,
                 "cl->clientArchiveIndex doesn't index CLIENT_ARCHIVE_SIZE\n\t%i not in [0, %i)",
                 cl->clientArchiveIndex,
-                256);
+                CLIENT_ARCHIVE_SIZE);
     }
 }
 
@@ -104,18 +106,18 @@ char __cdecl CL_GetPredictedOriginForServerTime(
     int cmd; // [esp+28h] [ebp-4h]
     int cmda; // [esp+28h] [ebp-4h]
 
-    for (cmd = 0; cmd < 256; ++cmd)
+    for (cmd = 0; cmd < CLIENT_ARCHIVE_SIZE; ++cmd)
     {
-        v7 = (cl->clientArchiveIndex + 256 - cmd - 1) % 256;
+        v7 = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - cmd - 1) % CLIENT_ARCHIVE_SIZE;
         index = v7;
-        if (v7 >= 0x100)
+        if (v7 >= CLIENT_ARCHIVE_SIZE)
             MyAssertHandler(
                 ".\\client_mp\\cl_parse_mp.cpp",
                 108,
                 0,
                 "index doesn't index CLIENT_ARCHIVE_SIZE\n\t%i not in [0, %i)",
                 v7,
-                256);
+                CLIENT_ARCHIVE_SIZE);
         if (cl->clientArchive[index].serverTime <= serverTime)
         {
             if (cl->clientArchive[index].serverTime != serverTime)
@@ -135,35 +137,15 @@ char __cdecl CL_GetPredictedOriginForServerTime(
             viewangles[2] = cl->clientArchive[index].viewangles[2];
             *bobCycle = cl->clientArchive[index].bobCycle;
             *movementDir = cl->clientArchive[index].movementDir;
-            if ((COERCE_UNSIGNED_INT(*predictedOrigin) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(predictedOrigin[1]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(predictedOrigin[2]) & 0x7F800000) == 0x7F800000)
-            {
-                MyAssertHandler(
-                    ".\\client_mp\\cl_parse_mp.cpp",
-                    120,
-                    0,
-                    "%s",
-                    "!IS_NAN((predictedOrigin)[0]) && !IS_NAN((predictedOrigin)[1]) && !IS_NAN((predictedOrigin)[2])");
-            }
-            if ((COERCE_UNSIGNED_INT(*predictedVelocity) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(predictedVelocity[1]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(predictedVelocity[2]) & 0x7F800000) == 0x7F800000)
-            {
-                MyAssertHandler(
-                    ".\\client_mp\\cl_parse_mp.cpp",
-                    121,
-                    0,
-                    "%s",
-                    "!IS_NAN((predictedVelocity)[0]) && !IS_NAN((predictedVelocity)[1]) && !IS_NAN((predictedVelocity)[2])");
-            }
+            iassert(!IS_NAN((predictedOrigin)[0]) && !IS_NAN((predictedOrigin)[1]) && !IS_NAN((predictedOrigin)[2]));
+            iassert(!IS_NAN((predictedVelocity)[0]) && !IS_NAN((predictedVelocity)[1]) && !IS_NAN((predictedVelocity)[2]));
             return 1;
         }
     }
     Com_PrintError(14, "Unable to find predicted origin for server time %i.  Here's what we have:\n", serverTime);
-    for (cmda = 0; cmda < 256; ++cmda)
+    for (cmda = 0; cmda < CLIENT_ARCHIVE_SIZE; ++cmda)
     {
-        v9 = (cl->clientArchiveIndex + 256 - cmda - 1) % 256;
+        v9 = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - cmda - 1) % CLIENT_ARCHIVE_SIZE;
         indexa = v9;
         if (v9 >= 0x100)
             MyAssertHandler(
@@ -172,7 +154,7 @@ char __cdecl CL_GetPredictedOriginForServerTime(
                 0,
                 "index doesn't index CLIENT_ARCHIVE_SIZE\n\t%i not in [0, %i)",
                 v9,
-                256);
+                CLIENT_ARCHIVE_SIZE);
         Com_PrintError(14, "%i: %i\n", indexa, cl->clientArchive[indexa].serverTime);
     }
     return 0;
@@ -189,7 +171,7 @@ void __cdecl CL_DeltaClient(
 {
     clientState_s *state; // [esp+8h] [ebp-4h]
 
-    state = &cl->parseClients[cl->parseClientsNum & 0x7FF];
+    state = &cl->parseClients[cl->parseClientsNum & (MAX_PARSE_CLIENTS - 1)];
     if (unchanged)
     {
         memcpy(state, old, sizeof(clientState_s));
@@ -293,9 +275,9 @@ void __cdecl CL_ParseWWWDownload(int localClientNum, msg_t *msg)
     char toOSPath[260]; // [esp+14h] [ebp-108h] BYREF
 
     fs_homepath = (char *)Dvar_GetString("fs_homepath");
-    I_strncpyz(cls.originalDownloadName, cls.downloadName, 64);
+    I_strncpyz(cls.originalDownloadName, cls.downloadName, sizeof(cls.originalDownloadName));
     String = MSG_ReadString(msg);
-    I_strncpyz(cls.downloadName, String, 256);
+    I_strncpyz(cls.downloadName, String, sizeof(cls.downloadName));
     cls.downloadSize = MSG_ReadLong(msg);
     cls.downloadFlags = MSG_ReadLong(msg);
     if ((cls.downloadFlags & 2) != 0)
@@ -313,7 +295,7 @@ void __cdecl CL_ParseWWWDownload(int localClientNum, msg_t *msg)
         cls.wwwDlInProgress = 1;
         CL_AddReliableCommand(localClientNum, "wwwdl ack");
         FS_BuildOSPath(fs_homepath, cls.downloadTempName, (char *)"", toOSPath);
-        I_strncpyz(cls.downloadTempName, toOSPath, 256);
+        I_strncpyz(cls.downloadTempName, toOSPath, sizeof(cls.downloadTempName));
         cls.downloadTempName[strlen(cls.downloadTempName) - 1] = 0;
         if (!DL_BeginDownload(cls.downloadTempName, cls.downloadName))
         {
@@ -340,8 +322,8 @@ void __cdecl CL_BeginDownload(char *localName, char *remoteName)
         localName,
         remoteName);
     CL_GetLocalClientConnection(0);
-    I_strncpyz(cls.downloadName, localName, 256);
-    Com_sprintf(cls.downloadTempName, 0x100u, "%s.tmp", localName);
+    I_strncpyz(cls.downloadName, localName, sizeof(cls.downloadName));
+    Com_sprintf(cls.downloadTempName, sizeof(cls.downloadTempName), "%s.tmp", localName);
     I_strncpyz(legacyHacks.cl_downloadName, remoteName, 64);
     legacyHacks.cl_downloadSize = 0;
     legacyHacks.cl_downloadCount = 0;
@@ -495,7 +477,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
     }
 }
 
-unsigned __int8 msgCompressed_buf[131072];
+unsigned __int8 msgCompressed_buf[0x20000];
 void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
 {
     msg_t msgCompressed; // [esp+4h] [ebp-30h] BYREF
@@ -510,8 +492,8 @@ void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
     {
         Com_Printf(14, "------------------\n");
     }
-    MSG_Init(&msgCompressed, msgCompressed_buf, 0x20000);
-    if ((unsigned int)(msg->cursize - msg->readcount) > 0x20000)
+    MSG_Init(&msgCompressed, msgCompressed_buf, sizeof(msgCompressed_buf));
+    if ((unsigned int)(msg->cursize - msg->readcount) > sizeof(msgCompressed_buf))
         Com_Error(ERR_DROP, "Compressed msg overflow in CL_ParseServerMessage");
     msgCompressed.cursize = MSG_ReadBitsCompress(
         &msg->data[msg->readcount],
@@ -707,95 +689,113 @@ void __cdecl CL_ParsePacketEntities(
     newframe->numEntities = 0;
     oldindex = 0;
     oldstate = 0;
-    if (oldframe)
+    if (!oldframe)
     {
-        if (oldframe->numEntities > 0)
-        {
-            oldstate = &cl->parseEntities[oldframe->parseEntitiesNum & 0x7FF];
-            oldnum = oldstate->number;
-        }
-        else
-        {
-            oldnum = 99999;
-        }
+        oldnum = 99999;
     }
     else
     {
-        oldnum = 99999;
+        if (oldindex >= oldframe->numEntities)
+        {
+            oldnum = 99999;
+        }
+        else
+        {
+            oldstate = &cl->parseEntities[(oldframe->parseEntitiesNum + oldindex) & (MAX_PARSE_ENTITIES - 1)];
+            oldnum = oldstate->number;
+        }
     }
     while (!msg->overflowed)
     {
         newnum = MSG_ReadEntityIndex(msg, 0xAu);
-        if ((unsigned int)newnum >= 0x400)
-            MyAssertHandler(
-                ".\\client_mp\\cl_parse_mp.cpp",
-                313,
-                0,
-                "%s\n\t(newnum) = %i",
-                "(newnum >= 0 && newnum < (1<<10))",
-                newnum);
+        vassert(newnum >= 0 && newnum < (1 << 10), "(newnum) = %i", newnum);
+
         if (newnum == 1023)
             break;
         if (msg->readcount > msg->cursize)
             Com_Error(ERR_DROP, "CL_ParsePacketEntities: end of message");
         while (oldnum < newnum && !msg->overflowed)
         {
+            // one or more entities from the old packet are unchanged
             if (cl_shownet->current.integer == 3)
                 Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
             CL_CopyOldEntity(cl, newframe, oldstate);
-            if (++oldindex < oldframe->numEntities)
-            {
-                oldstate = &cl->parseEntities[((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF];
-                oldnum = oldstate->number;
-            }
-            else
+
+            oldindex++;
+
+            if (oldindex >= oldframe->numEntities)
             {
                 oldnum = 99999;
             }
+            else
+            {
+                oldstate = &cl->parseEntities[(oldframe->parseEntitiesNum + oldindex) & (MAX_PARSE_ENTITIES - 1)];
+                oldnum = oldstate->number;
+            }
+
             if (msg_dumpEnts->current.enabled)
             {
                 EntityTypeName = BG_GetEntityTypeName(oldstate->eType);
                 Com_Printf(14, "%3i: unchanged ent, eType %s\n", oldnum, EntityTypeName);
             }
         }
+
         if (oldnum == newnum)
         {
+            // delta from previous state
             if (cl_shownet->current.integer == 3)
                 Com_Printf(14, "%3i:  delta: %i\n", msg->readcount, newnum);
             CL_DeltaEntity(cl, msg, time, newframe, newnum, oldstate);
-            if (++oldindex < oldframe->numEntities)
-            {
-                oldstate = &cl->parseEntities[((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF];
-                oldnum = oldstate->number;
-            }
-            else
+
+            oldindex++;
+
+            if (oldindex >= oldframe->numEntities)
             {
                 oldnum = 99999;
             }
+            else
+            {
+                oldstate = &cl->parseEntities[(oldframe->parseEntitiesNum + oldindex) & (MAX_PARSE_ENTITIES - 1)];
+                oldnum = oldstate->number;
+            }
+
+            continue;
         }
-        else
+        
+        iassert(oldnum > newnum);
+
+        //if (oldnum > newnum)
         {
-            if (oldnum <= newnum)
-                MyAssertHandler(".\\client_mp\\cl_parse_mp.cpp", 374, 0, "%s", "oldnum > newnum");
+
+            // delta from baseline
             if (cl_shownet->current.integer == 3)
                 Com_Printf(14, "%3i:  baseline: %i\n", msg->readcount, newnum);
             CL_DeltaEntity(cl, msg, time, newframe, newnum, &cl->entityBaselines[newnum]);
+
+            continue;
         }
     }
+
+    // any remaining entities in the old frame are copied over
     while (oldnum != 99999 && !msg->overflowed)
     {
+        // one or more entities from the old packet are unchanged
         if (cl_shownet->current.integer == 3)
             Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
         CL_CopyOldEntity(cl, newframe, oldstate);
-        if (++oldindex < oldframe->numEntities)
-        {
-            oldstate = &cl->parseEntities[((_WORD)oldindex + (unsigned __int16)oldframe->parseEntitiesNum) & 0x7FF];
-            oldnum = oldstate->number;
-        }
-        else
+        
+        oldindex++;
+
+        if (oldindex >= oldframe->numEntities)
         {
             oldnum = 99999;
         }
+        else
+        {
+            oldstate = &cl->parseEntities[(oldframe->parseEntitiesNum + oldindex) & (MAX_PARSE_ENTITIES - 1)];
+            oldnum = oldstate->number;
+        }
+        
         if (msg_dumpEnts->current.enabled)
         {
             v9 = oldstate->lerp.pos.trBase[2];
@@ -850,22 +850,24 @@ void __cdecl CL_ParsePacketClients(
     newframe->numClients = 0;
     oldindex = 0;
     oldstate = 0;
-    if (oldframe)
-    {
-        if (oldindex < oldframe->numClients)
-        {
-            oldstate = &cl->parseClients[((_WORD)oldindex + (unsigned __int16)oldframe->parseClientsNum) & 0x7FF];
-            oldnum = oldstate->clientIndex;
-        }
-        else
-        {
-            oldnum = 99999;
-        }
-    }
-    else
+
+    if (!oldframe)
     {
         oldnum = 99999;
     }
+    else
+    {
+        if (oldindex >= oldframe->numClients)
+        {
+            oldnum = 99999;
+        }
+        else
+        {
+            oldstate = &cl->parseClients[(oldframe->parseClientsNum + oldindex) & (MAX_PARSE_CLIENTS - 1)];
+            oldnum = oldstate->clientIndex;
+        }
+    }
+
     while (!msg->overflowed && MSG_ReadBit(msg))
     {
         newnum = MSG_ReadEntityIndex(msg, 6u);
@@ -873,59 +875,76 @@ void __cdecl CL_ParsePacketClients(
             Com_Error(ERR_DROP, "CL_ParsePacketClients: end of message");
         while (oldnum < newnum)
         {
+            // one or more clients from the old packet are unchanged
             if (cl_shownet->current.integer == 3)
                 Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
             CL_DeltaClient(cl, msg, time, newframe, oldnum, oldstate, 1);
-            if (++oldindex < oldframe->numClients)
-            {
-                oldstate = &cl->parseClients[((_WORD)oldindex + (unsigned __int16)oldframe->parseClientsNum) & 0x7FF];
-                oldnum = oldstate->clientIndex;
-            }
-            else
+
+            oldindex++;
+
+            if (oldindex >= oldframe->numClients)
             {
                 oldnum = 99999;
             }
+            else
+            {
+                oldstate = &cl->parseClients[(oldframe->parseClientsNum + oldindex) & (MAX_PARSE_CLIENTS - 1)];
+                oldnum = oldstate->clientIndex;
+            }
         }
+        
         if (oldnum == newnum)
         {
+            // delta from previous state
             if (cl_shownet->current.integer == 3)
                 Com_Printf(14, "%3i:  delta: %i\n", msg->readcount, newnum);
             CL_DeltaClient(cl, msg, time, newframe, newnum, oldstate, 0);
-            if (++oldindex < oldframe->numClients)
-            {
-                oldstate = &cl->parseClients[((_WORD)oldindex + (unsigned __int16)oldframe->parseClientsNum) & 0x7FF];
-                oldnum = oldstate->clientIndex;
-            }
-            else
+
+            oldindex++;
+
+            if (oldindex >= oldframe->numClients)
             {
                 oldnum = 99999;
             }
+            else
+            {
+                oldstate = &cl->parseClients[(oldframe->parseClientsNum + oldindex) & (MAX_PARSE_CLIENTS - 1)];
+                oldnum = oldstate->clientIndex;
+            }
         }
-        else
+        
+        iassert(oldnum > newnum);
+
+        //if (old_num > newnum)
         {
-            if (oldnum <= newnum)
-                MyAssertHandler(".\\client_mp\\cl_parse_mp.cpp", 512, 0, "%s", "oldnum > newnum");
+            // delta from baseline
             if (cl_shownet->current.integer == 3)
                 Com_Printf(14, "%3i:  baseline: %i\n", msg->readcount, newnum);
-            memset((unsigned __int8 *)&dummy, 0, sizeof(dummy));
+            memset(&dummy, 0, sizeof(dummy));
             CL_DeltaClient(cl, msg, time, newframe, newnum, &dummy, 0);
         }
     }
+
+    // any remaining clients in the old frame are copied over
     while (oldnum != 99999 && !msg->overflowed)
     {
         if (cl_shownet->current.integer == 3)
             Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
         CL_DeltaClient(cl, msg, time, newframe, oldnum, oldstate, 1);
-        if (++oldindex < oldframe->numClients)
-        {
-            oldstate = &cl->parseClients[((_WORD)oldindex + (unsigned __int16)oldframe->parseClientsNum) & 0x7FF];
-            oldnum = oldstate->clientIndex;
-        }
-        else
+        
+        oldindex++;
+
+        if (oldindex >= oldframe->numClients)
         {
             oldnum = 99999;
         }
+        else
+        {
+            oldstate = &cl->parseClients[(oldframe->parseClientsNum + oldindex) & (MAX_PARSE_CLIENTS - 1)];
+            oldnum = oldstate->clientIndex;
+        }
     }
+
     if (cl_shownuments->current.enabled)
         Com_Printf(14, "Clients in packet: %i\n", newframe->numClients);
 }
