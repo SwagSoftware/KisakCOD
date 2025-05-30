@@ -1253,7 +1253,7 @@ int __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
                 0,
                 "%s",
                 "dest >= CON_DEST_GAME_FIRST && dest <= CON_DEST_GAME_LAST");
-        v2 = con_gameMsgWindowNLineCount[dest + 1]->current.value * 1000.0;
+        v2 = con_gameMsgWindowNLineCount[dest - 3]->current.value * 1000.0;
         return (int)(v2 + 9.313225746154785e-10);
     }
 }
