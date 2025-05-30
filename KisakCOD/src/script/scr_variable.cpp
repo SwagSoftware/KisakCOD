@@ -3166,6 +3166,7 @@ void  Scr_KillThread(unsigned int parentId)
 			iassert((scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + notifyListEntry].w.type & VAR_MASK) == VAR_POINTER);
 			name = scrVarGlob.variableList[notifyListEntry + VARIABLELIST_CHILD_BEGIN].w.status >> 8;
 			iassert((name - SL_MAX_STRING_INDEX) < (1 << 16));
+			name -= SL_MAX_STRING_INDEX;
 
 			ObjectVariable_DONE = FindObjectVariable(selfNameId, name);
 			VariableValueAddress_DONE = GetVariableValueAddress(ObjectVariable_DONE);
