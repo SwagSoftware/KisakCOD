@@ -48,8 +48,8 @@ struct FxElemDef;
 struct FxBoltAndSortOrder // sizeof=0x4
 {                                       // ...
     unsigned __int32 dobjHandle : 12;
-    unsigned __int32 temporalBits : 2;
-    unsigned __int32 boneIndex : 10;
+    unsigned __int32 temporalBits : 1;
+    unsigned __int32 boneIndex : 11;
     unsigned __int32 sortOrder : 8;
 };
 struct FxSpatialFrame // sizeof=0x1C

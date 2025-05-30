@@ -1043,7 +1043,7 @@
          0,
          0x80u,
          "Show float z buffer used to eliminate hard edges on particles near geometry");
-     r_lightTweakSunDirection = Dvar_RegisterEnum(
+     r_showCollision = Dvar_RegisterEnum(
          "r_showCollision",
          showCollisionNames,
          0,
@@ -1117,7 +1117,7 @@
      sc_showOverlay = Dvar_RegisterBool("sc_showOverlay", 0, 0x80u, "Show shadow overlay for shadow cookies");
      sc_showDebug = Dvar_RegisterBool("sc_showDebug", 0, 0x80u, "Show debug information for shadow cookies");
      sc_wantCount = Dvar_RegisterInt("sc_wantCount", 12, (DvarLimits)0x1800000000LL, 0x80u, "Number of desired shadows");
-     r_lightTweakSunDirection = Dvar_RegisterInt(
+     sc_wantCountMargin = Dvar_RegisterInt(
          "sc_wantCountMargin",
          1,
          (DvarLimits)0x1800000000LL,
@@ -1325,7 +1325,7 @@
          "Tweak dev var; film color dark tint color");
      minci.value.max = 2.0;
      minci.value.min = 0.0;
-     r_lightTweakSunDirection = Dvar_RegisterVec3(
+     r_filmTweakLightTint = Dvar_RegisterVec3(
          "r_filmTweakLightTint",
          1.1,
          1.05,

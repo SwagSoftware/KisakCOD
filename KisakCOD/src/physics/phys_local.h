@@ -176,7 +176,7 @@ struct PhysObjUserData // sizeof=0x70
      {
          memset(this->entries, 0, sizeof(this->entries));
          this->freeEntry = -1;
-         for (int i = N; i >= 0; --i)
+         for (int i = N-1; i >= 0; --i)
          {
              release(&this->entries[i]);
          }

@@ -1386,9 +1386,9 @@ bool R_UpdateFrameSun()
     if (sm_enable->current.enabled)
     {
         if (rg.useSunDirOverride
-            || (*(float *)(dvarVal.integer + 44) != *(float *)(dvarVal.integer + 12)
-                || *(float *)(dvarVal.integer + 48) != *(float *)(dvarVal.integer + 16)
-                || *(float *)(dvarVal.integer + 52) != *(float *)(dvarVal.integer + 20)
+            || ((r_lightTweakSunDirection->reset.vector[0] != r_lightTweakSunDirection->current.vector[0]
+                || r_lightTweakSunDirection->reset.vector[1] != r_lightTweakSunDirection->current.vector[1]
+                || r_lightTweakSunDirection->reset.vector[2] != r_lightTweakSunDirection->current.vector[2])
                 ? (v3 = 0)
                 : (v3 = 1),
                 !v3))
@@ -1398,8 +1398,8 @@ bool R_UpdateFrameSun()
     }
     frontEndDataOut->prim.hasSunDirChanged = v2;
     v1 = rg.useSunDirOverride
-        || AngleDelta(*(float *)(dvarVal.integer + 12), *(float *)(dvarVal.integer + 44)) > 5.0
-        || AngleDelta(*(float *)(dvarVal.integer + 16), *(float *)(dvarVal.integer + 48)) > 5.0;
+        || AngleDelta(r_lightTweakSunDirection->current.vector[0], r_lightTweakSunDirection->reset.vector[0]) > 5.0
+        || AngleDelta(r_lightTweakSunDirection->current.vector[1], r_lightTweakSunDirection->reset.vector[1]) > 5.0;
     result = v1;
     frontEndDataOut->hasApproxSunDirChanged = v1;
     return result;

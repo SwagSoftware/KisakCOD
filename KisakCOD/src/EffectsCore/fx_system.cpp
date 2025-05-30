@@ -699,18 +699,10 @@ FxEffect* __cdecl FX_SpawnEffect(
         if (dobjHandle < 0)
             MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1253, 0, "%s", "dobjHandle >= 0");
 
-        // KISAKTODO cleanup bitfield mess
-        remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((boneIndex & 0x7FF) << 13)
-            | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFF001FFF);
-        if (((*(_DWORD*)&remoteEffect->boltAndSortOrder >> 13) & 0x7FF) != boneIndex)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_system.cpp",
-                1256,
-                0,
-                "effect->boltAndSortOrder.boneIndex == static_cast<uint>( boneIndex )\n\t%i, %i",
-                (*(_DWORD*)&remoteEffect->boltAndSortOrder >> 13) & 0x7FF,
-                boneIndex);
-        *(_DWORD*)&remoteEffect->boltAndSortOrder &= ~0x1000u;
+        remoteEffect->boltAndSortOrder.boneIndex = boneIndex;
+        iassert(remoteEffect->boltAndSortOrder.boneIndex == static_cast<uint>(boneIndex));
+
+        remoteEffect->boltAndSortOrder.temporalBits = 0;
         if (markEntnum == 1023)
         {
             if (boneIndex == 2047 && dobjHandle != 4095)
@@ -723,18 +715,9 @@ FxEffect* __cdecl FX_SpawnEffect(
                     dobjHandle);
             if (boneIndex < 0)
                 MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1270, 0, "%s", "boneIndex >= 0");
-            remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(dobjHandle & 0xFFF
-                | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFF000);
-            if ((*(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFF) != dobjHandle)
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_system.cpp",
-                    1272,
-                    0,
-                    "effect->boltAndSortOrder.dobjHandle == static_cast<uint>( dobjHandle )\n\t%i, %i",
-                    *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFF,
-                    dobjHandle);
-            remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)((FX_GetBoltTemporalBits(system->localClientNum, dobjHandle) << 12)
-                | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFEFFF);
+            remoteEffect->boltAndSortOrder.dobjHandle = dobjHandle;
+            iassert(remoteEffect->boltAndSortOrder.dobjHandle == static_cast<uint>(dobjHandle));
+            remoteEffect->boltAndSortOrder.temporalBits = FX_GetBoltTemporalBits(system->localClientNum, dobjHandle);
         }
         else
         {
@@ -750,27 +733,13 @@ FxEffect* __cdecl FX_SpawnEffect(
                     "markEntnum doesn't index FX_DOBJ_HANDLE_NONE\n\t%i not in [0, %i)",
                     markEntnum,
                     4095);
-            remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(markEntnum & 0xFFF
-                | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFF000);
-            if ((*(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFF) != markEntnum)
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_system.cpp",
-                    1265,
-                    0,
-                    "%s\n\t(markEntnum) = %i",
-                    "(effect->boltAndSortOrder.dobjHandle == markEntnum)",
-                    markEntnum);
+            remoteEffect->boltAndSortOrder.dobjHandle = markEntnum;
+            iassert(remoteEffect->boltAndSortOrder.dobjHandle == markEntnum);
         }
-        remoteEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((unsigned __int8)runnerSortOrder << 24)
-            | *(_DWORD*)&remoteEffect->boltAndSortOrder & 0xFFFFFF);
-        if ((unsigned __int8)HIBYTE(*(_DWORD*)&remoteEffect->boltAndSortOrder) != runnerSortOrder)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_system.cpp",
-                1279,
-                0,
-                "effect->boltAndSortOrder.sortOrder == static_cast<uint>( runnerSortOrder )\n\t%i, %i",
-                HIBYTE(*(_DWORD*)&remoteEffect->boltAndSortOrder),
-                runnerSortOrder);
+
+        remoteEffect->boltAndSortOrder.sortOrder = runnerSortOrder;
+        iassert(remoteEffect->boltAndSortOrder.sortOrder == static_cast<uint>(runnerSortOrder));
+        
         remoteEffect->frameAtSpawn.origin[0] = *origin;
         remoteEffect->frameAtSpawn.origin[1] = origin[1];
         remoteEffect->frameAtSpawn.origin[2] = origin[2];
@@ -1668,8 +1637,8 @@ void __cdecl FX_SpawnElem(
             FX_SpawnRunner(system, effect, elemDef, effectFrameWhenPlayed, randomSeed, msecBegin);
             break;
         case 9u:
-            if (((*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF) != 0x7FF
-                || (*(unsigned int *)&effect->boltAndSortOrder & 0xFFF) == 0xFFF)
+            if (effect->boltAndSortOrder.boneIndex != 0x7FF
+                || effect->boltAndSortOrder.dobjHandle == 0xFFF)
             {
                 FX_CreateImpactMark(system->localClientNum, elemDef, effectFrameWhenPlayed, randomSeed, 0x3FFu);
             }
@@ -1680,7 +1649,7 @@ void __cdecl FX_SpawnElem(
                     elemDef,
                     effectFrameWhenPlayed,
                     randomSeed,
-                    *(unsigned int *)&effect->boltAndSortOrder & 0xFFF);
+                    effect->boltAndSortOrder.dobjHandle);
             }
             break;
         case 8u:
@@ -1824,9 +1793,9 @@ void __cdecl FX_SpawnRunner(
         v6 = sortOrder;
     else
         v6 = 0;
-    if (((*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF) == 0x7FF)
+    if (effect->boltAndSortOrder.boneIndex == 0x7FF)
     {
-        if ((*(unsigned int *)&effect->boltAndSortOrder & 0xFFF) == 0xFFF)
+        if (effect->boltAndSortOrder.dobjHandle == 0xFFF)
             spawnedEffect = FX_SpawnEffect(
                 system,
                 effectDef,
@@ -1849,7 +1818,7 @@ void __cdecl FX_SpawnRunner(
                 2047,
                 v6,
                 effect->owner,
-                *(unsigned int *)&effect->boltAndSortOrder & 0xFFF);
+                effect->boltAndSortOrder.dobjHandle);
     }
     else
     {
@@ -1859,8 +1828,8 @@ void __cdecl FX_SpawnRunner(
             msecWhenPlayed,
             spawnOrigin,
             (const float (*)[3])usedAxis,
-            *(unsigned int *)&effect->boltAndSortOrder & 0xFFF,
-            (*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF,
+            effect->boltAndSortOrder.dobjHandle,
+            effect->boltAndSortOrder.boneIndex,
             v6,
             effect->owner,
             0x3FFu);

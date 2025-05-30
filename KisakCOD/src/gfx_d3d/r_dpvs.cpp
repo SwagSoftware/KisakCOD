@@ -1982,7 +1982,7 @@ GfxPortal *__cdecl R_NextQueuedPortal()
 
 int R_AssertValidQueue()
 {
-    int result; // eax
+    int result = 0; // eax
     int queueIndex; // [esp+4h] [ebp-4h]
 
     for (queueIndex = 1; queueIndex < dpvsGlob.queuedCount; ++queueIndex)

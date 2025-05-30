@@ -65,18 +65,16 @@ void __cdecl FX_WaitBeginIteratingOverEffects_Exclusive(FxSystem *system)
 
 bool __cdecl FX_FirstEffectIsFurther(FxEffect *firstEffect, FxEffect *secondEffect)
 {
-    if ((unsigned __int8)HIBYTE(*(unsigned int *)&firstEffect->boltAndSortOrder) == 255
-        && (unsigned __int8)HIBYTE(*(unsigned int *)&secondEffect->boltAndSortOrder) == 255)
+    if (firstEffect->boltAndSortOrder.sortOrder == 255
+        && secondEffect->boltAndSortOrder.sortOrder == 255)
     {
         return 0;
     }
-    if ((unsigned __int8)HIBYTE(*(_DWORD *)&firstEffect->boltAndSortOrder) == 255)
-        firstEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((unsigned __int8)FX_CalcRunnerParentSortOrder(firstEffect) << 24)
-            | *(_DWORD *)&firstEffect->boltAndSortOrder & 0xFFFFFF);
-    if ((unsigned __int8)HIBYTE(*(_DWORD *)&secondEffect->boltAndSortOrder) == 255)
-        secondEffect->boltAndSortOrder = (FxBoltAndSortOrder)(((unsigned __int8)FX_CalcRunnerParentSortOrder(secondEffect) << 24)
-            | *(_DWORD *)&secondEffect->boltAndSortOrder & 0xFFFFFF);
-    return (unsigned __int8)HIBYTE(*(unsigned int *)&firstEffect->boltAndSortOrder) < (unsigned int)(unsigned __int8)HIBYTE(*(unsigned int *)&secondEffect->boltAndSortOrder);
+    if (firstEffect->boltAndSortOrder.sortOrder == 255)
+        firstEffect->boltAndSortOrder.sortOrder = FX_CalcRunnerParentSortOrder(firstEffect);
+    if (secondEffect->boltAndSortOrder.sortOrder == 255)
+        secondEffect->boltAndSortOrder.sortOrder = FX_CalcRunnerParentSortOrder(secondEffect);
+    return firstEffect->boltAndSortOrder.sortOrder < secondEffect->boltAndSortOrder.sortOrder;
 }
 
 int __cdecl FX_CalcRunnerParentSortOrder(FxEffect *effect)

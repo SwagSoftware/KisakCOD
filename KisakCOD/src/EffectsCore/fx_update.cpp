@@ -2188,7 +2188,7 @@ void __cdecl FX_UpdateSpotLightEffect(FxSystem* system, FxEffect* effect)
     if ((unsigned __int16)effect->status && effect->msecLastUpdate <= system->msecNow)
     {
         FX_UpdateEffectBolt(system, effect);
-        system->activeSpotLightBoltDobj = *(_DWORD*)&effect->boltAndSortOrder & 0xFFF;
+        system->activeSpotLightBoltDobj = effect->boltAndSortOrder.dobjHandle;
         Vec3Sub(effect->frameNow.origin, effect->framePrev.origin, diff);
         v2 = Vec3Length(diff);
         newDistanceTraveled = effect->distanceTraveled + v2;
@@ -2255,15 +2255,15 @@ void __cdecl FX_UpdateEffectBolt(FxSystem *system, FxEffect *effect)
     orientation_t orient; // [esp+8h] [ebp-34h] BYREF
     bool temporalBitsValid; // [esp+3Bh] [ebp-1h]
 
-    if (((*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF) != 0x7FF)
+    if (effect->boltAndSortOrder.boneIndex != 0x7FF)
     {
         localClientNum = system->localClientNum;
-        temporalBitsValid = FX_GetBoltTemporalBits(localClientNum, *(unsigned int *)&effect->boltAndSortOrder & 0xFFF) == ((*(unsigned int *)&effect->boltAndSortOrder >> 12) & 1);
+        temporalBitsValid = FX_GetBoltTemporalBits(localClientNum, effect->boltAndSortOrder.dobjHandle) == effect->boltAndSortOrder.temporalBits;
         if (temporalBitsValid
             && FX_GetBoneOrientation(
                 localClientNum,
-                *(unsigned int *)&effect->boltAndSortOrder & 0xFFF,
-                (*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF,
+                effect->boltAndSortOrder.dobjHandle,
+                effect->boltAndSortOrder.boneIndex,
                 &orient))
         {
             effect->frameNow.origin[0] = orient.origin[0];
@@ -2274,8 +2274,8 @@ void __cdecl FX_UpdateEffectBolt(FxSystem *system, FxEffect *effect)
         else
         {
             FX_StopEffect(system, effect);
-            *(unsigned int *)&effect->boltAndSortOrder |= 0xFFE000u;
-            *(unsigned int *)&effect->boltAndSortOrder |= 0xFFFu;
+            effect->boltAndSortOrder.boneIndex = 0x7FF;
+            effect->boltAndSortOrder.dobjHandle = 0xFFF;
         }
     }
 }
@@ -2346,7 +2346,7 @@ void __cdecl FX_UpdateEffect(FxSystem* system, FxEffect* effect)
 
 bool __cdecl FX_ShouldProcessEffect(FxSystem *system, FxEffect *effect, bool nonBoltedEffectsOnly)
 {
-    return (!nonBoltedEffectsOnly || ((*(unsigned int *)&effect->boltAndSortOrder >> 13) & 0x7FF) == 0x7FF)
+    return (!nonBoltedEffectsOnly || effect->boltAndSortOrder.boneIndex == 0x7FF)
         && InterlockedExchange(&effect->frameCount, system->frameCount) != system->frameCount;
 }
 

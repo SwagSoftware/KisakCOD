@@ -2237,7 +2237,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     float v13; // [esp+60h] [ebp-2FA4h]
     int lastChangedFieldNum; // [esp+64h] [ebp-2FA0h]
     int v15; // [esp+68h] [ebp-2F9Ch]
-    unsigned __int8 dst[12136]; // [esp+6Ch] [ebp-2F98h] BYREF
+    unsigned __int8 dst[sizeof(playerState_s)]; // [esp+6Ch] [ebp-2F98h] BYREF
     int value; // [esp+2FD8h] [ebp-2Ch]
     int c[4]; // [esp+2FDCh] [ebp-28h]
     int v19; // [esp+2FECh] [ebp-18h]
@@ -2257,7 +2257,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     if (!from)
     {
         from = (const playerState_s *)dst;
-        memset(dst, 0, 0x2F64u);
+        memset(dst, 0, sizeof(playerState_s));
     }
     if (snapInfo->archived)
     {
@@ -2493,7 +2493,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
     if (sv_debugPacketContents->current.enabled)
         Com_Printf(16, "sending objectives\n", i);
-    if (!memcmp(from->objective, to->objective, 0x1C0u))
+    if (!memcmp(from->objective, to->objective, sizeof(playerState_s::objective)))
     {
         MSG_WriteBit0(msg);
     }
@@ -2521,7 +2521,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     v15 = MSG_GetUsedBitCount(msg);
     SV_TrackPSObjectivesBits(v15 - v21);
     SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
-    if (!memcmp(&from->hud, &to->hud, 0x26C0u))
+    if (!memcmp(&from->hud, &to->hud, sizeof(playerState_s_hud)))
     {
         if (sv_debugPacketContents->current.enabled)
             Com_Printf(16, "no hudelems changed\n");
@@ -2544,7 +2544,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     }
     v22 = MSG_GetUsedBitCount(msg);
     SV_TrackPSHudelemBits(v22 - v15);
-    if (!memcmp(from->weaponmodels, to->weaponmodels, 0x80u))
+    if (!memcmp(from->weaponmodels, to->weaponmodels, sizeof(playerState_s::weaponmodels)))
     {
         MSG_WriteBit0(msg);
         if (sv_debugPacketContents->current.enabled)
