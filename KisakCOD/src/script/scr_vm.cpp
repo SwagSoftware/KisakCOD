@@ -3214,65 +3214,65 @@ function_call:
                 }
                 Sys_Error("exceeded maximum number of script variables");
             }
-            //if ((unsigned int)(Sys_Milliseconds() - scrVmGlob.starttime) >= INFINITE_LOOP_TIMEOUT)
-            //{
-            //    iassert(logScriptTimes);
-            //    if (logScriptTimes->current.enabled)
-            //    {
-            //        Com_Printf(23, "EXCEED TIME: %d\n", Sys_Milliseconds());
-            //    }
-            //    if (!scrVmGlob.loading)
-            //    {
-            //        VM_PrintJumpHistory();
-            //        if (scrVmPub.showError)
-            //        {
-            //            iassert(!scrVmPub.debugCode);
-            //            Scr_DumpScriptThreads();
-            //            Scr_DumpScriptVariablesDefault();
-            //            Scr_Error("potential infinite loop in script");
-            //        }
-            //        if (!scrVmPub.abort_on_error)
-            //        {
-            //            Com_Printf(1, "script runtime error: potential infinite loop in script - killing thread.\n");
-            //            Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char*)fs.pos, 0);
-            //            Scr_ResetTimeout();
-            //            while (1)
-            //            {
-            //                parentLocalId = GetSafeParentLocalId(fs.localId);
-            //                Scr_KillThread(fs.localId);
-            //                scrVmPub.localVars -= fs.localVarCount;
-            //                iassert(fs.top->type != VAR_PRECODEPOS);
-            //                while (fs.top->type != VAR_CODEPOS)
-            //                {
-            //                    RemoveRefToValue(fs.top);
-            //                    --fs.top;
-            //                    iassert(fs.top->type != VAR_PRECODEPOS);
-            //                }
-            //                --scrVmPub.function_count;
-            //                --scrVmPub.function_frame;
-            //                if (!parentLocalId)
-            //                    break;
-            //                iassert(fs.top != fs.startTop);
-            //                RemoveRefToObject(fs.localId);
-            //                iassert(fs.top->type == VAR_CODEPOS);
-            //                fs.pos = scrVmPub.function_frame->fs.pos;
-            //                iassert(fs.pos);
-            //                fs.localVarCount = scrVmPub.function_frame->fs.localVarCount;
-            //                fs.localId = parentLocalId;
-            //                --fs.top;
-            //            }
-            //            iassert(fs.top == fs.startTop);
-            //            goto thread_end;
-            //        }
-            //        Scr_TerminalError("potential infinite loop in script");
-            //    }
-            //    Com_Printf(1, "script runtime warning: potential infinite loop in script.\n");
-            //    Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char*)fs.pos, 0);
-            //    jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
-            //    fs.pos -= jumpOffset;
-            //    Scr_ResetTimeout();
-            //}
-            //else
+            if ((unsigned int)(Sys_Milliseconds() - scrVmGlob.starttime) >= INFINITE_LOOP_TIMEOUT)
+            {
+                iassert(logScriptTimes);
+                if (logScriptTimes->current.enabled)
+                {
+                    Com_Printf(23, "EXCEED TIME: %d\n", Sys_Milliseconds());
+                }
+                if (!scrVmGlob.loading)
+                {
+                    VM_PrintJumpHistory();
+                    if (scrVmPub.showError)
+                    {
+                        iassert(!scrVmPub.debugCode);
+                        Scr_DumpScriptThreads();
+                        Scr_DumpScriptVariablesDefault();
+                        Scr_Error("potential infinite loop in script");
+                    }
+                    if (!scrVmPub.abort_on_error)
+                    {
+                        Com_Printf(1, "script runtime error: potential infinite loop in script - killing thread.\n");
+                        Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char*)fs.pos, 0);
+                        Scr_ResetTimeout();
+                        while (1)
+                        {
+                            parentLocalId = GetSafeParentLocalId(fs.localId);
+                            Scr_KillThread(fs.localId);
+                            scrVmPub.localVars -= fs.localVarCount;
+                            iassert(fs.top->type != VAR_PRECODEPOS);
+                            while (fs.top->type != VAR_CODEPOS)
+                            {
+                                RemoveRefToValue(fs.top);
+                                --fs.top;
+                                iassert(fs.top->type != VAR_PRECODEPOS);
+                            }
+                            --scrVmPub.function_count;
+                            --scrVmPub.function_frame;
+                            if (!parentLocalId)
+                                break;
+                            iassert(fs.top != fs.startTop);
+                            RemoveRefToObject(fs.localId);
+                            iassert(fs.top->type == VAR_CODEPOS);
+                            fs.pos = scrVmPub.function_frame->fs.pos;
+                            iassert(fs.pos);
+                            fs.localVarCount = scrVmPub.function_frame->fs.localVarCount;
+                            fs.localId = parentLocalId;
+                            --fs.top;
+                        }
+                        iassert(fs.top == fs.startTop);
+                        goto thread_end;
+                    }
+                    Scr_TerminalError("potential infinite loop in script");
+                }
+                Com_Printf(1, "script runtime warning: potential infinite loop in script.\n");
+                Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char*)fs.pos, 0);
+                jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
+                fs.pos -= jumpOffset;
+                Scr_ResetTimeout();
+            }
+            else
             {
                 scrVmDebugPub.jumpbackHistory[scrVmDebugPub.jumpbackHistoryIndex] = fs.pos;
                 scrVmDebugPub.jumpbackHistoryIndex = (scrVmDebugPub.jumpbackHistoryIndex + 1) % 0x80u;
