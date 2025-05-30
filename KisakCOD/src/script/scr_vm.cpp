@@ -2697,7 +2697,7 @@ SafeSetVariableFieldCached0:
             continue;
 
         case OP_clearparams:
-            iassert(fs.top->type != VAR_CODEPOS);
+            iassert(fs.top->type != VAR_PRECODEPOS);
 
             while (fs.top->type != VAR_CODEPOS)
             {
@@ -4882,7 +4882,6 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
 {
     VariableValue* top; // [esp+0h] [ebp-14h]
     char* buf; // [esp+4h] [ebp-10h]
-    char* bufPos; // [esp+4h] [ebp-10h]
     unsigned int localId; // [esp+8h] [ebp-Ch]
     int function_count; // [esp+Ch] [ebp-8h]
     int size; // [esp+10h] [ebp-4h]
@@ -4902,20 +4901,20 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
         ++top;
         --size;
         top->type = (Vartype_t)*(unsigned char*)buf;
-        bufPos = (buf + 1);
-        if (top->type == 7)
+        buf += 1;
+        if (top->type == VAR_CODEPOS)
         {
             iassert(scrVmPub.function_count < 32 /*MAX_VM_STACK_DEPTH*/);
 
-            scrVmPub.function_frame->fs.pos = *(const char**)bufPos;
+            scrVmPub.function_frame->fs.pos = *(const char**)buf;
             ++scrVmPub.function_count;
             ++scrVmPub.function_frame;
         }
         else
         {
-            top->u.intValue = *(int*)bufPos;
+            top->u.codePosValue = *(const char**)buf;
         }
-        buf = (bufPos + 4);
+        buf += 4;
     }
     fs.pos = stackValue->pos;
     fs.top = top;
