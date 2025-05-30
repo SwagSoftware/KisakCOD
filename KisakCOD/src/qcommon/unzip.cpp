@@ -406,6 +406,8 @@ extern unzFile unzReOpen (const char* path, unzFile file)
 	Com_Memcpy(s, (unz_s*)file, sizeof(unz_s));
 
 	s->file = fin;
+	// NOTE(mrsteyk): fucking dogshit.
+	s->pfile_in_zip_read = 0;
 	return (unzFile)s;	
 }
 
@@ -976,6 +978,8 @@ extern int unzOpenCurrentFile (unzFile file)
 	uLong offset_local_extrafield;  /* offset of the static extra field */
 	uInt  size_local_extrafield;    /* size of the static extra field */
 
+	iassert(file);
+
 	if (file==NULL)
 		return UNZ_PARAMERROR;
 
@@ -990,6 +994,8 @@ extern int unzOpenCurrentFile (unzFile file)
 		return UNZ_BADZIPFILE;
 
 	pfile_in_zip_read_info = (file_in_zip_read_info_s*) ALLOC(sizeof(file_in_zip_read_info_s));
+	// NOTE(mrsteyk): @Hack
+	memset(pfile_in_zip_read_info, 0, sizeof(*pfile_in_zip_read_info));
 
 	pfile_in_zip_read_info->read_buffer=(char*)ALLOC(UNZ_BUFSIZE);
 	pfile_in_zip_read_info->offset_local_extrafield = offset_local_extrafield;

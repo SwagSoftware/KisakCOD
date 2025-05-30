@@ -334,7 +334,7 @@ void __cdecl LiveStorage_SetFromLocString(int controllerIndex, const char *dvarN
 
 void __cdecl LiveStorage_ReadStats()
 {
-    LiveStorage_ReadStatsFromDir((char *)fs_gameDirVar->current.integer);
+    LiveStorage_ReadStatsFromDir((char *)fs_gameDirVar->current.string);
 }
 
 void __cdecl LiveStorage_ReadStatsFromDir(char *directory)

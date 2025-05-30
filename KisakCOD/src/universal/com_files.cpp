@@ -900,8 +900,8 @@ unsigned int __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, 
     if (InterlockedCompareExchange(&iwd->hasOpenFile, 1, 0) == 1)
     {
         fsh[*file].handleFiles.iwdIsClone = 1;
-        fsh[*file].handleFiles.file.o = (FILE*)unzReOpen(iwd->iwdFilename, iwd->handle);
-        if (!fsh[*file].handleFiles.file.o)
+        fsh[*file].handleFiles.file.z = unzReOpen(iwd->iwdFilename, iwd->handle);
+        if (!fsh[*file].handleFiles.file.z)
         {
             if (thread)
             {
@@ -915,7 +915,7 @@ unsigned int __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, 
     else
     {
         fsh[*file].handleFiles.iwdIsClone = 0;
-        fsh[*file].handleFiles.file.o = (FILE*)iwd->handle;
+        fsh[*file].handleFiles.file.z = iwd->handle;
     }
     I_strncpyz(fsh[*file].name, sanitizedName, 256);
     fsh[*file].zipFile = iwd;
