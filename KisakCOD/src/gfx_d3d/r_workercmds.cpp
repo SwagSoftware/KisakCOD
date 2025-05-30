@@ -228,9 +228,9 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
     bufCount = workerCmds->bufCount;
     if (workerCmds->bufSize % dataSize)
         MyAssertHandler(".\\r_workercmds.cpp", 661, 0, "%s", "!(workerCmds->bufSize % dataSize)");
-    while (InterlockedExchangeAdd(&workerCmds->outSize, -1) <= 0)
+    while (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -1) <= 0)
     {
-        if (InterlockedExchangeAdd(&workerCmds->outSize, 1) < 0)
+        if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1) < 0)
             return 0;
     }
     if (g_cmdOutputBusy[type])
@@ -241,13 +241,13 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
             memcpy(data, &workerCmds->buf[dataSize * startPos], dataSize);
             if (g_cmdOutputBusy[type](data))
             {
-                InterlockedExchangeAdd(&workerCmds->outSize, 1);
+                InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1);
                 return 0;
             }
             newStartPos = startPos + 1;
             if (startPos + 1 == bufCount)
                 newStartPos = 0;
-            v2 = InterlockedCompareExchange(&workerCmds->startPos, newStartPos, startPos);
+            v2 = InterlockedCompareExchange((LONG*)&workerCmds->startPos, newStartPos, startPos);
             if (v2 == startPos)
                 break;
             if (g_cmdExecFailed[type])
@@ -255,7 +255,7 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
         }
         CL_ResetStats_f();
         R_ProcessWorkerCmdInternal(type, (FxCmd *)data);
-        InterlockedExchangeAdd(&workerCmds->inSize, -1);
+        InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -1);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
     }
@@ -263,9 +263,9 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
     {
         if (g_cmdExecFailed[type])
             MyAssertHandler(".\\r_workercmds.cpp", 711, 0, "%s", "!g_cmdExecFailed[type]");
-        if (InterlockedExchangeAdd(&workerCmds->outSize, -9) < 9)
+        if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -9) < 9)
         {
-            InterlockedExchangeAdd(&workerCmds->outSize, 9);
+            InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 9);
             count = 1;
         }
         else
@@ -287,13 +287,13 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
                 newStartPos = count - currentCount;
             }
             memcpy(data, &workerCmds->buf[dataSize * startPos], dataSize * currentCount);
-            v3 = InterlockedCompareExchange(&workerCmds->startPos, newStartPos, startPos);
+            v3 = InterlockedCompareExchange((LONG*)&workerCmds->startPos, newStartPos, startPos);
         } while (v3 != startPos);
         CL_ResetStats_f();
         for (i = 0; i < count; ++i)
             R_ProcessWorkerCmdInternal(type, (FxCmd *)&data[dataSize * i]);
         //InterlockedExchangeAdd(&workerCmds->inSize, -count);
-        InterlockedExchangeAdd(&workerCmds->inSize, -(int)count);
+        InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -(int)count);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
     }
@@ -319,9 +319,9 @@ int __cdecl R_ProcessWorkerCmd(int type)
     bufCount = workerCmds->bufCount;
     if (workerCmds->bufSize % dataSize)
         MyAssertHandler(".\\r_workercmds.cpp", 661, 0, "%s", "!(workerCmds->bufSize % dataSize)");
-    while (InterlockedExchangeAdd(&workerCmds->outSize, -1) <= 0)
+    while (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -1) <= 0)
     {
-        if (InterlockedExchangeAdd(&workerCmds->outSize, 1) < 0)
+        if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1) < 0)
             return 0;
     }
     if (g_cmdOutputBusy[type])
@@ -332,13 +332,13 @@ int __cdecl R_ProcessWorkerCmd(int type)
             memcpy(data, &workerCmds->buf[dataSize * startPos], dataSize);
             if (g_cmdOutputBusy[type](data))
             {
-                InterlockedExchangeAdd(&workerCmds->outSize, 1);
+                InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1);
                 return 0;
             }
             newStartPos = startPos + 1;
             if (startPos + 1 == bufCount)
                 newStartPos = 0;
-            v2 = InterlockedCompareExchange(&workerCmds->startPos, newStartPos, startPos);
+            v2 = InterlockedCompareExchange((LONG*)&workerCmds->startPos, newStartPos, startPos);
             if (v2 == startPos)
                 break;
             if (g_cmdExecFailed[type])
@@ -346,7 +346,7 @@ int __cdecl R_ProcessWorkerCmd(int type)
         }
         CL_ResetStats_f();
         R_ProcessWorkerCmdInternal(type, (FxCmd *)data);
-        InterlockedExchangeAdd(&workerCmds->inSize, -1);
+        InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -1);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
     }
@@ -354,9 +354,9 @@ int __cdecl R_ProcessWorkerCmd(int type)
     {
         if (g_cmdExecFailed[type])
             MyAssertHandler(".\\r_workercmds.cpp", 711, 0, "%s", "!g_cmdExecFailed[type]");
-        if (InterlockedExchangeAdd(&workerCmds->outSize, -9) < 9)
+        if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -9) < 9)
         {
-            InterlockedExchangeAdd(&workerCmds->outSize, 9);
+            InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 9);
             count = 1;
         }
         else
@@ -378,13 +378,13 @@ int __cdecl R_ProcessWorkerCmd(int type)
                 newStartPos = count - currentCount;
             }
             memcpy(data, &workerCmds->buf[dataSize * startPos], dataSize * currentCount);
-            v3 = InterlockedCompareExchange(&workerCmds->startPos, newStartPos, startPos);
+            v3 = InterlockedCompareExchange((LONG*)&workerCmds->startPos, newStartPos, startPos);
         } while (v3 != startPos);
         CL_ResetStats_f();
         for (i = 0; i < count; ++i)
             R_ProcessWorkerCmdInternal(type, (FxCmd *)&data[dataSize * i]);
         //InterlockedExchangeAdd(&workerCmds->inSize, -count);
-        InterlockedExchangeAdd(&workerCmds->inSize, -(int)count);
+        InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -(int)count);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
     }
@@ -583,7 +583,7 @@ void __cdecl  R_WorkerThread()
 
 void __cdecl R_AddWorkerCmd(int type, unsigned __int8 *data)
 {
-    volatile unsigned int *Destination; // [esp+30h] [ebp-20h]
+    LONG* Destination; // [esp+30h] [ebp-20h]
     int bufCount; // [esp+34h] [ebp-1Ch]
     int endPos; // [esp+38h] [ebp-18h]
     int bufSize; // [esp+40h] [ebp-10h]
@@ -598,27 +598,27 @@ void __cdecl R_AddWorkerCmd(int type, unsigned __int8 *data)
         bufCount = workerCmds->bufCount;
         if (bufSize % dataSize)
             MyAssertHandler(".\\r_workercmds.cpp", 1007, 0, "%s", "!(bufSize % dataSize )");
-        if (InterlockedExchangeAdd(&workerCmds->inSize, 1) < bufCount)
+        if (InterlockedExchangeAdd((LONG*)&workerCmds->inSize, 1) < bufCount)
         {
-            endPos = InterlockedExchangeAdd(&workerCmds->endPos, dataSize) % bufSize;
+            endPos = InterlockedExchangeAdd((LONG*)&workerCmds->endPos, dataSize) % bufSize;
             if (endPos < 0)
                 MyAssertHandler(".\\r_workercmds.cpp", 1014, 0, "%s\n\t(endPos) = %i", "(endPos >= 0)", endPos);
             if (!endPos)
-                InterlockedExchangeAdd(&workerCmds->endPos, -bufSize);
+                InterlockedExchangeAdd((LONG*)&workerCmds->endPos, -bufSize);
             memcpy(&workerCmds->buf[endPos], data, dataSize);
-            Destination = &workerCmds->syncedEndPos;
+            Destination = (LONG*)&workerCmds->syncedEndPos;
             do
             {
                 while (*Destination != endPos)
                     ;
             } while (InterlockedCompareExchange(Destination, (dataSize + endPos) % bufSize, endPos) != endPos);
-            InterlockedExchangeAdd(&workerCmds->outSize, 1);
+            InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1);
             R_NotifyWorkerCmdType(type);
             return;
         }
         if (type != 15)
             R_WarnOncePerFrame(R_WARN_WORKER_CMD_SIZE, type);
-        InterlockedExchangeAdd(&workerCmds->inSize, -1);
+        InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -1);
     }
     //Profile_Begin(176);
     if (g_cmdOutputBusy[type])

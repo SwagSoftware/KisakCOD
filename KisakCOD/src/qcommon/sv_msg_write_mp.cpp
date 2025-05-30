@@ -2735,8 +2735,8 @@ void __cdecl MSG_WriteDeltaHudElems(
         lc = 0;
         for (j = 0; j < 0x28; ++j)
         {
-            fromF = (int*)(&from[i] + hudElemFields[j].offset);
-            toF = (int*)(&to[i] + hudElemFields[j].offset);
+            fromF = (int*)((char*)&from[i] + hudElemFields[j].offset);
+            toF = (int*)((char*)&to[i] + hudElemFields[j].offset);
             if (!MSG_ValuesAreEqual(snapInfo, hudElemFields[j].bits, fromF, toF))
             {
                 if (*fromF == *toF)

@@ -187,35 +187,35 @@ void __cdecl FX_SpawnLoopingElems(
             "%s",
             "elemDefIndex < effectDef->elemDefCountLooping || elemDefIndex >= effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot");
     }
-    if (SLODWORD(msecWhenPlayed) > SHIDWORD(msecWhenPlayed) || SHIDWORD(msecWhenPlayed) > SLODWORD(msecUpdateBegin))
+    if (msecWhenPlayed > msecUpdateBegin || msecUpdateBegin > msecUpdateEnd)
         MyAssertHandler(
             ".\\EffectsCore\\fx_update.cpp",
             357,
             0,
             "msecUpdateBegin not in [msecWhenPlayed, msecUpdateEnd]\n\t%g not in [%g, %g]",
-            SHIDWORD(msecWhenPlayed),
-            SLODWORD(msecWhenPlayed),
-            SLODWORD(msecUpdateBegin));
+            msecUpdateBegin,
+            msecWhenPlayed,
+            msecUpdateEnd);
     elemDef = &effect->def->elemDefs[elemDefIndex];
     if (elemDef->elemType != 3)
     {
-        if (LODWORD(msecUpdateBegin) != 0x7FFFFFFF)
+        if (msecUpdateEnd != 0x7FFFFFFF)
         {
-            updateMsec = LODWORD(msecUpdateBegin) - HIDWORD(msecWhenPlayed);
-            if (LODWORD(msecUpdateBegin) - HIDWORD(msecWhenPlayed) > 128)
+            updateMsec = msecUpdateEnd - msecUpdateBegin;
+            if (msecUpdateEnd - msecUpdateBegin > 128)
             {
                 maxUpdateMsec = FX_LimitStabilizeTimeForElemDef_Recurse(elemDef, 0, updateMsec) + 1;
                 elemDef = &effect->def->elemDefs[elemDefIndex];
                 if (updateMsec > maxUpdateMsec)
-                    HIDWORD(msecWhenPlayed) += updateMsec - maxUpdateMsec;
+                    msecUpdateBegin += updateMsec - maxUpdateMsec;
             }
         }
-        spawnedCount = (HIDWORD(msecWhenPlayed) - LODWORD(msecWhenPlayed)) / elemDef->spawn.looping.intervalMsec + 1;
-        msecNextSpawn = LODWORD(msecWhenPlayed) + elemDef->spawn.looping.intervalMsec * spawnedCount;
+        spawnedCount = (msecUpdateBegin - msecWhenPlayed) / elemDef->spawn.looping.intervalMsec + 1;
+        msecNextSpawn = msecWhenPlayed + elemDef->spawn.looping.intervalMsec * spawnedCount;
         qmemcpy(&frameWhenPlayed, frameBegin, sizeof(frameWhenPlayed));
-        while (msecNextSpawn <= SLODWORD(msecUpdateBegin) && spawnedCount < elemDef->spawn.looping.count)
+        while (msecNextSpawn <= msecUpdateEnd && spawnedCount < elemDef->spawn.looping.count)
         {
-            lerp = (msecNextSpawn - HIDWORD(msecWhenPlayed)) / (LODWORD(msecUpdateBegin) - HIDWORD(msecWhenPlayed));
+            lerp = (msecNextSpawn - msecUpdateBegin) / (msecUpdateEnd - msecUpdateBegin);
             Vec3Lerp(frameBegin->origin, frameEnd->origin, lerp, frameWhenPlayed.origin);
             Vec4Lerp(frameBegin->quat, frameEnd->quat, lerp, frameWhenPlayed.quat);
             Vec4Normalize(frameWhenPlayed.quat);
