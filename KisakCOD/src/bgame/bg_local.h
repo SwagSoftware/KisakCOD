@@ -1968,4 +1968,4 @@ extern gitem_s bg_itemlist[2048];
 extern int itemRegistered[2048];
 
 const float playerMins[] = { -15.0, -15.0, 0.0 };
-const float playerMaxs[] = { 15.0, 15.0, 0.0 };
+const float playerMaxs[] = { 15.0, 15.0, 70.0 };
