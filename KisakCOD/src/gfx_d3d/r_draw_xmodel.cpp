@@ -72,7 +72,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
     float worldMat_36; // [esp+80h] [ebp-94h]
     float worldMat_40; // [esp+84h] [ebp-90h]
     unsigned int baseGfxEntIndex; // [esp+A0h] [ebp-74h]
-    unsigned __int64 drawSurf; // [esp+A4h] [ebp-70h]
+    GfxDrawSurf drawSurf; // [esp+A4h] [ebp-70h]
     const GfxBackEndData *data; // [esp+ACh] [ebp-68h]
     float4 quat; // [esp+B4h] [ebp-60h] BYREF
     unsigned int drawSurfIndex; // [esp+C4h] [ebp-50h]
@@ -87,9 +87,9 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
     unsigned __int64 drawSurfKey; // [esp+10Ch] [ebp-8h]
 
     data = context.source->input.data;
-    drawSurf = drawSurfList->packed;
-    drawSurfMask.packed = -16777216;
-    drawSurfKey = drawSurf & 0xFFFFFFFFFF000000uLL;
+    drawSurf.fields = drawSurfList->fields;
+    drawSurfMask.packed = 0xFFFFFFFFFF000000uLL;
+    drawSurfKey = drawSurf.packed & 0xFFFFFFFFFF000000uLL;
     drawSurfIndex = 0;
     eyeOffset.v[0] = context.source->eyeOffset[0];
     eyeOffset.v[1] = context.source->eyeOffset[1];
@@ -98,7 +98,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
     eyeOffset.v[1] = eyeOffset.v[1] - 0.0;
     eyeOffset.v[2] = eyeOffset.v[2] - 0.0;
     eyeOffset.v[3] = 0.0 - 1.0;
-    modelSurf = (const GfxModelRigidSurface*)(data + 4 * drawSurf);
+    modelSurf = (const GfxModelRigidSurface*)((char*)data + 4 * drawSurf.fields.objectId);
     baseGfxEntIndex = modelSurf->surf.info.gfxEntIndex;
     depthHackFlags = context.source->depthHackFlags;
     materialTime = context.source->materialTime;
@@ -163,14 +163,14 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
         *&matrix->matrices.matrix[0].m[3][0] = *&worldMata[12];
         *&matrix->matrices.matrix[0].m[3][2] = *&worldMata[14];
         R_SetModelLightingCoordsForSource(modelSurf->surf.info.lightingHandle, context.source);
-        R_SetReflectionProbe(context, BYTE2(drawSurf));
+        R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
         R_DrawXModelRigidModelSurf(context, modelSurf->surf.xsurf);
         if (++drawSurfIndex == drawSurfCount)
             break;
         LODWORD(drawSurf) = drawSurfList[drawSurfIndex].packed;
         if ((drawSurfMask.packed & drawSurfList[drawSurfIndex].packed) != drawSurfKey)
             break;
-        modelSurf = (const GfxModelRigidSurface *)(data + 4 * drawSurf);
+        modelSurf = (const GfxModelRigidSurface *)((char*)data + 4 * drawSurf.fields.objectId);
         gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
         if (gfxEntIndex != baseGfxEntIndex)
         {
@@ -217,7 +217,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
     GfxCmdBufSourceState *matrix; // [esp+58h] [ebp-BCh]
     float worldMat[16]; // [esp+5Ch] [ebp-B8h]
     unsigned int baseGfxEntIndex; // [esp+A0h] [ebp-74h]
-    unsigned __int64 drawSurf; // [esp+A4h] [ebp-70h]
+    GfxDrawSurf drawSurf; // [esp+A4h] [ebp-70h]
     const GfxBackEndData *data; // [esp+ACh] [ebp-68h]
     float4 quat; // [esp+B4h] [ebp-60h] BYREF
     unsigned int drawSurfIndex; // [esp+C4h] [ebp-50h]
@@ -232,9 +232,9 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
     unsigned __int64 drawSurfKey; // [esp+10Ch] [ebp-8h]
 
     data = context.source->input.data;
-    drawSurf = drawSurfList->packed;
-    drawSurfMask.packed = -536870912;
-    drawSurfKey = drawSurf & 0xFFFFFFFFE0000000uLL;
+    drawSurf.fields = drawSurfList->fields;
+    drawSurfMask.packed = 0xFFFFFFFFE0000000uLL;
+    drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
     drawSurfIndex = 0;
     eyeOffset.v[0] = context.source->eyeOffset[0];
     eyeOffset.v[1] = context.source->eyeOffset[1];
@@ -243,7 +243,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
     eyeOffset.v[1] = eyeOffset.v[1] - 0.0;
     eyeOffset.v[2] = eyeOffset.v[2] - 0.0;
     eyeOffset.v[3] = 0.0 - 1.0;
-    modelSurf = (const GfxModelRigidSurface*)(data + 4 * drawSurf);
+    modelSurf = (const GfxModelRigidSurface*)((char*)data + 4 * drawSurf.fields.objectId);
     baseGfxEntIndex = modelSurf->surf.info.gfxEntIndex;
     depthHackFlags = context.source->depthHackFlags;
     materialTime = context.source->materialTime;
@@ -316,7 +316,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
         R_DrawXModelRigidModelSurf(context, modelSurf->surf.xsurf);
         if (++drawSurfIndex == drawSurfCount || (drawSurfMask.packed & drawSurfList[drawSurfIndex].packed) != drawSurfKey)
             break;
-        modelSurf = (const GfxModelRigidSurface*)(data + 4 * *&drawSurfList[drawSurfIndex].packed);
+        modelSurf = (const GfxModelRigidSurface*)((char*)data + 4 * drawSurfList[drawSurfIndex].fields.objectId);
         gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
         if (gfxEntIndex != baseGfxEntIndex)
         {

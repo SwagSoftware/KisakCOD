@@ -586,7 +586,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     if (!model)
         MyAssertHandler(".\\r_scene.cpp", 681, 0, "%s", "model");
     surfId = modelInfo->surfId;
-    modelSurf = (GfxModelRigidSurface*)(frontEndDataOut + 4 * surfId);
+    modelSurf = (GfxModelRigidSurface*)((char*)frontEndDataOut + 4 * surfId);
     lod = modelInfo->lod;
     numsurfs = XModelGetSurfCount(model, lod);
     material = XModelGetSkins(model, lod);
@@ -614,13 +614,13 @@ void __cdecl R_AddXModelSurfacesCamera(
         if (modelSurf->surf.skinnedCachedOffset == -3)
         {
             ++surfId;
-            modelSurf = (modelSurf + 4);
+            modelSurf = (GfxModelRigidSurface*)((char*)modelSurf + 4);
         }
         else
         {
             if (!*material)
                 MyAssertHandler(".\\r_scene.cpp", 708, 0, "%s", "*material");
-            if (rgp.sortedMaterials[((*material)->info.drawSurf.packed >> 29) & 0x7FF] != *material)
+            if (rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] != *material)
                 MyAssertHandler(
                     ".\\r_scene.cpp",
                     709,

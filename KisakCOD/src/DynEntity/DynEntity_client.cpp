@@ -1576,7 +1576,7 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
     double CylindricalRadiusDistSqr; // st7
     DynEntityPose *dynEntPose; // [esp+12Ch] [ebp-8010h]
     unsigned int unsignedInt_low; // [esp+130h] [ebp-800Ch]
-    ShadowCandidate v10[4096]; // [esp+134h] [ebp-8008h] BYREF
+    DynEntSortStruct v10[4096]; // [esp+134h] [ebp-8008h] BYREF
     DynEntityClient *ClientEntity; // [esp+8134h] [ebp-8h]
     unsigned int i; // [esp+8138h] [ebp-4h]
 
@@ -1585,7 +1585,7 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
     {
         for (i = 0; i < unsignedInt_low; ++i)
         {
-            v10[i].weight = hitEnts[i];
+            v10[i].id = hitEnts[i];
             ClientEntity = DynEnt_GetClientEntity(hitEnts[i], drawType);
             if ((ClientEntity->flags & 1) == 0)
                 MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1201, 0, "%s", "dynEntClient->flags & DYNENT_CL_ACTIVE");
@@ -1594,14 +1594,14 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
                 CylindricalRadiusDistSqr = DynEnt_GetCylindricalRadiusDistSqr(dynEntPose, origin);
             else
                 CylindricalRadiusDistSqr = DynEnt_GetRadiusDistSqr(dynEntPose, origin);
-            *(float *)&v10[i].sceneEntIndex = CylindricalRadiusDistSqr;
+            v10[i].distSq = CylindricalRadiusDistSqr;
         }
         //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
         //    v10,
         //    &v10[unsignedInt_low],
         //    (int)(8 * unsignedInt_low) >> 3,
         //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
-        std::sort((const DynEntSortStruct **)&v10[0], (const DynEntSortStruct **)&v10[unsignedInt_low], DynEntCl_CompareDynEntsForExplosion);
+        std::sort(v10, v10 + unsignedInt_low, DynEntCl_CompareDynEntsForExplosion);
         unsignedInt_low = LOWORD(dynEnt_explodeMaxEnts->current.unsignedInt);
         if (unsignedInt_low != dynEnt_explodeMaxEnts->current.integer)
             MyAssertHandler(
@@ -1611,14 +1611,14 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
                 "%s",
                 "hitCount == (uint)dynEnt_explodeMaxEnts->current.integer");
         for (i = 0; i < unsignedInt_low; ++i)
-            hitEnts[i] = LOWORD(v10[i].weight);
+            hitEnts[i] = v10[i].id;
     }
     return unsignedInt_low;
 }
 
-bool __cdecl DynEntCl_CompareDynEntsForExplosion(const DynEntSortStruct *ent1, const DynEntSortStruct *ent2)
+bool __cdecl DynEntCl_CompareDynEntsForExplosion(const DynEntSortStruct& ent1, const DynEntSortStruct& ent2)
 {
-    return ent2->distSq > (double)ent1->distSq;
+    return ent2.distSq > ent1.distSq;
 }
 
 void __cdecl DynEntCl_JitterEvent(
@@ -1638,7 +1638,7 @@ void __cdecl DynEntCl_JitterEvent(
     unsigned __int16 unsignedInt; // [esp+14Ch] [ebp-A034h]
     float maxs[3]; // [esp+150h] [ebp-A030h] BYREF
     DynEntityDrawType drawType; // [esp+15Ch] [ebp-A024h]
-    ShadowCandidate v15[4096]; // [esp+160h] [ebp-A020h] BYREF
+    DynEntSortStruct v15[4096]; // [esp+160h] [ebp-A020h] BYREF
     DynEntityClient *ClientEntity; // [esp+8160h] [ebp-2020h]
     DynEntityDef *dynEntDef; // [esp+8164h] [ebp-201Ch]
     unsigned __int16 dynEntList[4098]; // [esp+8168h] [ebp-2018h] BYREF
@@ -1666,7 +1666,7 @@ void __cdecl DynEntCl_JitterEvent(
             {
                 for (i = 0; i < (int)unsignedInt; ++i)
                 {
-                    v15[i].weight = dynEntList[i];
+                    v15[i].id = dynEntList[i];
                     ClientEntity = DynEnt_GetClientEntity(dynEntList[i], drawType);
                     if ((ClientEntity->flags & 1) == 0)
                         MyAssertHandler(
@@ -1677,14 +1677,14 @@ void __cdecl DynEntCl_JitterEvent(
                             "dynEntClient->flags & DYNENT_CL_ACTIVE");
                     dynEntPose = DynEnt_GetClientPose(dynEntList[i], drawType);
                     CylindricalRadiusDistSqr = DynEnt_GetCylindricalRadiusDistSqr(dynEntPose, origin);
-                    *(float *)&v15[i].sceneEntIndex = CylindricalRadiusDistSqr;
+                    v15[i].distSq = CylindricalRadiusDistSqr;
                 }
                 //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
                 //    v15,
                 //    &v15[unsignedInt],
                 //    (8 * unsignedInt) >> 3,
                 //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))DynEntCl_CompareDynEntsForExplosion);
-                std::sort((const DynEntSortStruct **)&v15[0], (const DynEntSortStruct **)&v15[unsignedInt], DynEntCl_CompareDynEntsForExplosion);
+                std::sort(v15 + 0, v15 + unsignedInt, DynEntCl_CompareDynEntsForExplosion);
                 unsignedInt = dynEnt_explodeMaxEnts->current.unsignedInt;
                 if (unsignedInt != dynEnt_explodeMaxEnts->current.integer)
                     MyAssertHandler(
@@ -1694,7 +1694,7 @@ void __cdecl DynEntCl_JitterEvent(
                         "%s",
                         "hitCount == dynEnt_explodeMaxEnts->current.integer");
                 for (i = 0; i < (int)unsignedInt; ++i)
-                    dynEntList[i] = LOWORD(v15[i].weight);
+                    dynEntList[i] = v15[i].id;
             }
             for (i = 0; i < (int)unsignedInt; ++i)
             {

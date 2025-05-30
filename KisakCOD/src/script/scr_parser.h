@@ -135,7 +135,7 @@ void __cdecl Scr_CalcScriptFileProfile();
 bool __cdecl Scr_CompareScriptSourceProfileTimes(int index1, int index2);
 void __cdecl Scr_CalcAnimscriptProfile(int *total, int *totalNonBuiltIn);
 char __cdecl Scr_PrintProfileTimes(float minTime);
-bool __cdecl Scr_CompareProfileTimes(const OpcodeLookup *opcodeLookup1, const OpcodeLookup *opcodeLookup2);
+bool __cdecl Scr_CompareProfileTimes(const OpcodeLookup& opcodeLookup1, const OpcodeLookup& opcodeLookup2);
 void CompileError(unsigned int sourcePos, const char *msg, ...);
 scrStringDebugGlob_t *Scr_IgnoreLeaks();
 void CompileError2(char *codePos, const char *msg, ...);

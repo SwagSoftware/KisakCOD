@@ -1029,7 +1029,7 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
         MyAssertHandler(".\\rb_tess.cpp", 1179, 0, "%s", "g_primStats");
     if (info->cameraView)
     {
-        modelSurf = (const GfxModelRigidSurface *)((char *)data + 4 * LOWORD(drawSurf.packed));
+        modelSurf = (const GfxModelRigidSurface *)((char *)data + 4 * drawSurf.fields.objectId);
         gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
         if (modelSurf->surf.info.gfxEntIndex)
         {
@@ -1051,7 +1051,7 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
             R_ChangeDepthRange(context.state, depthHackFlags);
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
-            if (sc_enable->current.enabled && ((drawSurf.packed >> 24) & 0x1F) != 0)
+            if (sc_enable->current.enabled && drawSurf.fields.customIndex != 0)
                 R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
             else
                 R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
@@ -1128,7 +1128,7 @@ unsigned int __cdecl R_TessStaticModelCachedList(const GfxDrawSurfListArgs *list
     depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
     if (depthRangeType != context.state->depthRangeType)
         R_ChangeDepthRange(context.state, depthRangeType);
-    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     R_TrackPrims(context.state, GFX_PRIM_STATS_SMODELCACHED);
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
         R_DrawStaticModelCachedSurfLit(primDrawSurfPos, context);
@@ -1197,7 +1197,7 @@ unsigned int __cdecl R_TessStaticModelPreTessList(const GfxDrawSurfListArgs *lis
     depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
     if (depthRangeType != context.state->depthRangeType)
         R_ChangeDepthRange(context.state, depthRangeType);
-    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     R_TrackPrims(context.state, GFX_PRIM_STATS_SMODELCACHED);
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
         R_DrawStaticModelPreTessSurfLit(primDrawSurfPos, context);
@@ -1239,7 +1239,7 @@ unsigned int __cdecl R_TessStaticModelSkinnedDrawSurfList(
     depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
     if (depthRangeType != context.state->depthRangeType)
         R_ChangeDepthRange(context.state, depthRangeType);
-    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     RB_TrackImmediatePrims(GFX_PRIM_STATS_SMODELRIGID);
     if (!g_primStats)
         MyAssertHandler(".\\rb_tess.cpp", 1588, 0, "%s", "g_primStats");
@@ -1297,7 +1297,7 @@ unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
         if (v4 != prepassContext.state->depthRangeType)
             R_ChangeDepthRange(prepassContext.state, v4);
     }
-    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[(unsigned __int16)*(unsigned int *)&info->drawSurfs[listArgs->firstDrawSurfIndex].fields];
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     RB_TrackImmediatePrims(GFX_PRIM_STATS_SMODELRIGID);
     if (!g_primStats)
         MyAssertHandler(".\\rb_tess.cpp", 1517, 0, "%s", "g_primStats");
@@ -1521,7 +1521,7 @@ unsigned int __cdecl R_TessTrianglesPreTessList(const GfxDrawSurfListArgs *listA
     ib = data->preTessIb;
     if (context.state->prim.indexBuffer != ib)
         R_ChangeIndices(&context.state->prim, ib);
-    primDrawSurfPos = &data->primDrawSurfsBuf[*&info->drawSurfs[listArgs->firstDrawSurfIndex].packed];
+    primDrawSurfPos = &data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     R_TrackPrims(context.state, GFX_PRIM_STATS_WORLD);
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
         R_DrawBspDrawSurfsLitPreTess(primDrawSurfPos, context);
@@ -1570,7 +1570,7 @@ unsigned int __cdecl R_TessTrianglesList(const GfxDrawSurfListArgs *listArgs, Gf
         if (v3 != prepassContext.state->depthRangeType)
             R_ChangeDepthRange(prepassContext.state, v3);
     }
-    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[(unsigned __int16)*(unsigned int *)&info->drawSurfs[listArgs->firstDrawSurfIndex].fields];
+    primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     R_TrackPrims(context.state, GFX_PRIM_STATS_WORLD);
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
     {
@@ -1664,10 +1664,10 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
         R_SetupPassPerObjectArgs(prepassContext);
     }
     drawSurf.fields = drawSurfList->fields;
-    drawSurfSubMask.packed = -65536;
+    drawSurfSubMask.packed = 0xFFFFFFFFFFFF0000uLL;
     if (baseTechType != TECHNIQUE_LIT_BEGIN)
     {
-        *(unsigned int *)&drawSurfSubMask.fields = -536870912;
+        *(unsigned int *)&drawSurfSubMask.fields = 0xE0000000;
         R_SetupPassPerObjectArgs(context);
     }
     drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
@@ -1684,7 +1684,7 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
         drawSurfSubKey = drawSurfSubMask.packed & drawSurf.packed;
         do
         {
-            bmodelSurf = (const BModelSurface *)((char *)data + 4 * LOWORD(drawSurf.packed));
+            bmodelSurf = (const BModelSurface *)((char *)data + 4 * drawSurf.fields.objectId);
             if (commonSource->objectPlacement != bmodelSurf->placement)
                 R_ChangeObjectPlacement(commonSource, bmodelSurf->placement);
             tris = &bmodelSurf->surf->tris;

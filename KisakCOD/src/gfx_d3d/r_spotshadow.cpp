@@ -425,16 +425,16 @@ void __cdecl R_ShutdownSpotShadowMeshes()
 }
 
 void __cdecl R_DrawSpotShadowMapCallback(
-    char *userData,
-    GfxCmdBufContext *context,
-    GfxCmdBufContext *prepassContext)
+    const void *userData,
+    GfxCmdBufContext context,
+    GfxCmdBufContext prepassContext)
 {
-    R_SetRenderTarget(*context, (GfxRenderTargetId)*(userData + 114));
-    if (*(userData + 119))
-        R_ClearScreen(context->state->prim.device, 3u, shadowmapClearColor, 1.0, 0, 0);
+    R_SetRenderTarget(context, *((GfxRenderTargetId*)userData + 114));
+    if (*((_DWORD*)userData + 119))
+        R_ClearScreen(context.state->prim.device, 3u, shadowmapClearColor, 1.0, 0, 0);
     if (!gfxMetrics.hasHardwareShadowmap)
-        R_DrawQuadMesh(*context, rgp.shadowClearMaterial, (GfxMeshData*)*(userData + 120));
-    R_DrawSurfs(*context, 0, (const GfxDrawSurfListInfo*)(userData + 396));
+        R_DrawQuadMesh(context, rgp.shadowClearMaterial, *((GfxMeshData**)userData + 120));
+    R_DrawSurfs(context, 0, (const GfxDrawSurfListInfo*)((char*)userData + 396));
 }
 void __fastcall R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
 {
@@ -452,7 +452,7 @@ void __fastcall R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf 
         do
         {
             R_DrawCall(
-                (void(__cdecl*)(const void*, GfxCmdBufContext*, GfxCmdBufContext*))R_DrawSpotShadowMapCallback,
+                R_DrawSpotShadowMapCallback,
                 spotShadows,
                 &v6,
                 viewInfo,

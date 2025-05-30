@@ -290,8 +290,8 @@ void __cdecl R_AddCellStaticSurfacesInFrustumCmd(DpvsStaticCellCmd *data)
     unsigned int viewIndex; // [esp+4h] [ebp-4h]
 
     viewIndex = data->viewIndex;
-    g_smodelVisData[0] = *rgp.world->dpvs.smodelVisData[viewIndex];
-    g_surfaceVisData[0] = *rgp.world->dpvs.surfaceVisData[viewIndex];
+    g_smodelVisData = rgp.world->dpvs.smodelVisData[viewIndex];
+    g_surfaceVisData = rgp.world->dpvs.surfaceVisData[viewIndex];
 //    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) = rgp.world->dpvs.smodelVisData[viewIndex];
 //    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) = rgp.world->dpvs.surfaceVisData[viewIndex];
     R_AddCellStaticSurfacesInFrustum(data);

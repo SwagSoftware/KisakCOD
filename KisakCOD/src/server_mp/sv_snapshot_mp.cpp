@@ -1002,8 +1002,8 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
     clientState_s *v9; // [esp+1038h] [ebp-134h]
     cachedSnapshot_t *CachedSnapshot; // [esp+1040h] [ebp-12Ch]
     unsigned int v12[65]; // [esp+1044h] [ebp-128h] BYREF
-    float position[2]; // [esp+1148h] [ebp-24h] BYREF
-    float v14; // [esp+1150h] [ebp-1Ch]
+    float position[3]; // [esp+1148h] [ebp-24h] BYREF
+    //float v14; // [esp+1150h] [ebp-1Ch]
     gentity_s *v15; // [esp+1154h] [ebp-18h]
     int i; // [esp+1158h] [ebp-14h]
     int clientNum; // [esp+115Ch] [ebp-10h]
@@ -1041,8 +1041,8 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                     Com_Error(ERR_DROP, "SV_BuildClientSnapshot: bad gEnt");
                 position[0] = *((float *)dst + 7);
                 position[1] = *((float *)dst + 8);
-                v14 = *((float *)dst + 9);
-                v14 = v14 + *((float *)dst + 70);
+                position[2] = *((float *)dst + 9);
+                position[2] = position[2] + *((float *)dst + 70);
                 AddLeanToPosition(position, *((float *)dst + 67), *((float *)dst + 23), 16.0, 20.0);
                 memset((unsigned __int8 *)v12, 0, 0x100u);
                 if (CachedSnapshot)

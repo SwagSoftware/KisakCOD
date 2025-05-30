@@ -155,271 +155,277 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
 
 void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter)
 {
-    float *v4; // [esp-10h] [ebp-1F0h]
-    __int64 v5; // [esp-Ch] [ebp-1ECh] BYREF
-    float v6; // [esp-4h] [ebp-1E4h]
-    float maxs[12]; // [esp+0h] [ebp-1E0h] BYREF
-    float v8; // [esp+30h] [ebp-1B0h]
-    float v9; // [esp+34h] [ebp-1ACh]
-    float v10; // [esp+38h] [ebp-1A8h]
-    float4 rotatedBounds[2]; // [esp+3Ch] [ebp-1A4h] BYREF
-    int v12; // [esp+5Ch] [ebp-184h]
-    __int64 v13; // [esp+60h] [ebp-180h]
-    int v14; // [esp+68h] [ebp-178h]
-    int v15; // [esp+6Ch] [ebp-174h]
-    int v16; // [esp+70h] [ebp-170h]
-    int v17; // [esp+74h] [ebp-16Ch]
-    int v18; // [esp+78h] [ebp-168h]
-    __int64 v19; // [esp+7Ch] [ebp-164h]
-    int v20; // [esp+84h] [ebp-15Ch]
-    int v21; // [esp+88h] [ebp-158h]
-    int v22; // [esp+8Ch] [ebp-154h]
-    __int64 *v23; // [esp+90h] [ebp-150h]
-    __int64 v24; // [esp+94h] [ebp-14Ch]
-    int v25; // [esp+9Ch] [ebp-144h]
-    int v26; // [esp+A0h] [ebp-140h]
-    __int64 v27; // [esp+A4h] [ebp-13Ch]
-    int v28; // [esp+ACh] [ebp-134h]
-    int v29; // [esp+B0h] [ebp-130h]
-    int v30; // [esp+B4h] [ebp-12Ch]
-    int v31; // [esp+B8h] [ebp-128h]
-    int v32; // [esp+BCh] [ebp-124h]
-    __int64 v33; // [esp+C0h] [ebp-120h]
-    int v34; // [esp+C8h] [ebp-118h]
-    int v35; // [esp+CCh] [ebp-114h]
-    int v36; // [esp+D0h] [ebp-110h]
-    __int64 *v37; // [esp+D4h] [ebp-10Ch]
-    __int64 v38; // [esp+D8h] [ebp-108h]
-    int v39; // [esp+E0h] [ebp-100h]
-    int v40; // [esp+E4h] [ebp-FCh]
-    __int64 v41; // [esp+E8h] [ebp-F8h]
-    int v42; // [esp+F0h] [ebp-F0h]
-    int v43; // [esp+F4h] [ebp-ECh]
-    int v44; // [esp+F8h] [ebp-E8h]
-    int v45; // [esp+FCh] [ebp-E4h]
-    int v46; // [esp+100h] [ebp-E0h]
-    __int64 v47; // [esp+104h] [ebp-DCh]
-    int v48; // [esp+10Ch] [ebp-D4h]
-    int v49; // [esp+110h] [ebp-D0h]
-    int v50; // [esp+114h] [ebp-CCh]
-    __int64 v51; // [esp+118h] [ebp-C8h]
-    float v52; // [esp+120h] [ebp-C0h]
-    float v53; // [esp+124h] [ebp-BCh]
-    __int64 *p_bounds_4; // [esp+128h] [ebp-B8h]
-    __int64 v55; // [esp+12Ch] [ebp-B4h]
-    float v56; // [esp+134h] [ebp-ACh]
-    float v57; // [esp+138h] [ebp-A8h]
-    float v58; // [esp+13Ch] [ebp-A4h]
-    float v59; // [esp+140h] [ebp-A0h]
-    float v60; // [esp+144h] [ebp-9Ch]
-    float v61; // [esp+148h] [ebp-98h]
-    float v62; // [esp+14Ch] [ebp-94h]
-    float v63; // [esp+150h] [ebp-90h]
-    float v64; // [esp+154h] [ebp-8Ch]
-    float v65; // [esp+158h] [ebp-88h]
-    float *v66; // [esp+15Ch] [ebp-84h]
-    float v67; // [esp+160h] [ebp-80h]
-    float v68; // [esp+164h] [ebp-7Ch]
-    float v69; // [esp+168h] [ebp-78h]
-    float v70; // [esp+16Ch] [ebp-74h]
-    float *v71; // [esp+170h] [ebp-70h]
-    float v72; // [esp+174h] [ebp-6Ch]
-    float v73; // [esp+178h] [ebp-68h]
-    float v74; // [esp+17Ch] [ebp-64h]
-    float v75; // [esp+180h] [ebp-60h]
-    float *origin; // [esp+184h] [ebp-5Ch]
-    float v77[3]; // [esp+188h] [ebp-58h] BYREF
-    float axis[3]; // [esp+194h] [ebp-4Ch] BYREF
-    float axis_12[3]; // [esp+1A0h] [ebp-40h] BYREF
-    __int64 axis_24; // [esp+1ACh] [ebp-34h]
-    __int64 axis_32; // [esp+1B4h] [ebp-2Ch]
-    __int64 bounds_4; // [esp+1BCh] [ebp-24h] BYREF
-    __int64 bounds_12; // [esp+1C4h] [ebp-1Ch]
-    GfxBrushModel *bounds_20; // [esp+1CCh] [ebp-14h]
-    GfxBrushModel *bmodel; // [esp+1D8h] [ebp-8h]
-    GfxBrushModel *retaddr; // [esp+1E0h] [ebp+0h]
+    // TODO(mrsteyk): re-decompiled, check validity!
 
+    //float* v4; // [esp-10h] [ebp-1F0h]
+    float maxs[3]; // [esp-Ch] [ebp-1ECh] BYREF
+    float v6; // [esp+0h] [ebp-1E0h]
+    float mins[3]; // [esp+4h] [ebp-1DCh] BYREF
+    float v8[8]; // [esp+10h] [ebp-1D0h]
+    float v9; // [esp+30h] [ebp-1B0h]
+    float v10; // [esp+34h] [ebp-1ACh]
+    float v11; // [esp+38h] [ebp-1A8h]
+    float4 rotatedBounds[2]; // [esp+3Ch] [ebp-1A4h] BYREF
+    int v13; // [esp+5Ch] [ebp-184h]
+    __int64 v14; // [esp+60h] [ebp-180h]
+    int v15; // [esp+68h] [ebp-178h]
+    int v16; // [esp+6Ch] [ebp-174h]
+    int v17; // [esp+70h] [ebp-170h]
+    int v18; // [esp+74h] [ebp-16Ch]
+    int v19; // [esp+78h] [ebp-168h]
+    __int64 v20; // [esp+7Ch] [ebp-164h]
+    int v21; // [esp+84h] [ebp-15Ch]
+    int v22; // [esp+88h] [ebp-158h]
+    int v23; // [esp+8Ch] [ebp-154h]
+    float* v24; // [esp+90h] [ebp-150h]
+    __int64 v25; // [esp+94h] [ebp-14Ch]
+    int v26; // [esp+9Ch] [ebp-144h]
+    int v27; // [esp+A0h] [ebp-140h]
+    __int64 v28; // [esp+A4h] [ebp-13Ch]
+    int v29; // [esp+ACh] [ebp-134h]
+    int v30; // [esp+B0h] [ebp-130h]
+    int v31; // [esp+B4h] [ebp-12Ch]
+    int v32; // [esp+B8h] [ebp-128h]
+    int v33; // [esp+BCh] [ebp-124h]
+    __int64 v34; // [esp+C0h] [ebp-120h]
+    int v35; // [esp+C8h] [ebp-118h]
+    int v36; // [esp+CCh] [ebp-114h]
+    int v37; // [esp+D0h] [ebp-110h]
+    float* v38; // [esp+D4h] [ebp-10Ch]
+    __int64 v39; // [esp+D8h] [ebp-108h]
+    int v40; // [esp+E0h] [ebp-100h]
+    int v41; // [esp+E4h] [ebp-FCh]
+    __int64 v42; // [esp+E8h] [ebp-F8h]
+    int v43; // [esp+F0h] [ebp-F0h]
+    int v44; // [esp+F4h] [ebp-ECh]
+    int v45; // [esp+F8h] [ebp-E8h]
+    int v46; // [esp+FCh] [ebp-E4h]
+    int v47; // [esp+100h] [ebp-E0h]
+    __int64 v48; // [esp+104h] [ebp-DCh]
+    int v49; // [esp+10Ch] [ebp-D4h]
+    int v50; // [esp+110h] [ebp-D0h]
+    int v51; // [esp+114h] [ebp-CCh]
+    __int64 v52; // [esp+118h] [ebp-C8h]
+    float v53; // [esp+120h] [ebp-C0h]
+    float v54; // [esp+124h] [ebp-BCh]
+    float* v55; // [esp+128h] [ebp-B8h]
+    __int64 v56; // [esp+12Ch] [ebp-B4h]
+    float v57; // [esp+134h] [ebp-ACh]
+    float v58; // [esp+138h] [ebp-A8h]
+    float v59; // [esp+13Ch] [ebp-A4h]
+    float v60; // [esp+140h] [ebp-A0h]
+    float v61; // [esp+144h] [ebp-9Ch]
+    float v62; // [esp+148h] [ebp-98h]
+    float v63; // [esp+14Ch] [ebp-94h]
+    float v64; // [esp+150h] [ebp-90h]
+    float v65; // [esp+154h] [ebp-8Ch]
+    float v66; // [esp+158h] [ebp-88h]
+    float* v67; // [esp+15Ch] [ebp-84h]
+    float v68; // [esp+160h] [ebp-80h]
+    float v69; // [esp+164h] [ebp-7Ch]
+    float v70; // [esp+168h] [ebp-78h]
+    float v71; // [esp+16Ch] [ebp-74h]
+    float* v72; // [esp+170h] [ebp-70h]
+    float v73; // [esp+174h] [ebp-6Ch]
+    float v74; // [esp+178h] [ebp-68h]
+    float v75; // [esp+17Ch] [ebp-64h]
+    float v76; // [esp+180h] [ebp-60h]
+    float* origin; // [esp+184h] [ebp-5Ch]
+    float v78[3][3]; // [esp+188h] [ebp-58h] BYREF
+    float axis_24[4]; // [esp+1ACh] [ebp-34h]
+    float bounds_4[3]; // [esp+1BCh] [ebp-24h] BYREF
+    int v81; // [esp+1C8h] [ebp-18h]
+    GfxBrushModel* brush; // [esp+1CCh] [ebp-14h]
+    //int bounds_28; // [esp+1D4h] [ebp-Ch]
+    //GfxBrushModel* bmodel; // [esp+1D8h] [ebp-8h]
+    //GfxBrushModel* retaddr; // [esp+1E0h] [ebp+0h]
+
+    //bounds_28 = a1;
     //bmodel = retaddr;
-    bounds_20 = R_GetBrushModel(cent->nextState.index.brushmodel);
-    axis_24 = *(_QWORD *)&bounds_20->bounds[0][0];
-    axis_32 = *(_QWORD *)&bounds_20->bounds[0][2];
-    bounds_4 = *(_QWORD *)&bounds_20->bounds[1][0];
-    bounds_12 = *(_QWORD *)&bounds_20->bounds[1][2];
-    AnglesToAxis(cent->pose.angles, (float (*)[3])v77);
+    brush = R_GetBrushModel(cent->nextState.index.brushmodel);
+    axis_24[0] = brush->bounds[0][0];
+    axis_24[1] = brush->bounds[0][1];
+    axis_24[2] = brush->bounds[0][2];
+    axis_24[3] = brush->bounds[1][0];
+    bounds_4[0] = brush->bounds[1][0];
+    bounds_4[1] = brush->bounds[1][1];
+    bounds_4[2] = brush->bounds[1][2];
+    v81 = *(_DWORD*)&brush->surfaceCount;
+    AnglesToAxis(cent->pose.angles, v78);
     origin = cent->pose.origin;
-    v72 = v77[0];
-    v73 = v77[1];
-    v74 = v77[2];
-    v75 = 0.0;
-    v71 = axis;
-    v67 = axis[0];
-    v68 = axis[1];
-    v69 = axis[2];
-    v70 = 0.0;
-    v66 = axis_12;
-    v62 = axis_12[0];
-    v63 = axis_12[1];
-    v64 = axis_12[2];
-    v65 = 0.0;
-    v58 = cent->pose.origin[0];
-    v59 = cent->pose.origin[1];
-    v60 = cent->pose.origin[2];
-    v61 = 0.0;
-    *(float *)&v55 = *(float *)&axis_24;
-    *((float *)&v55 + 1) = *(float *)&axis_24;
-    v56 = *(float *)&axis_24;
-    v57 = *(float *)&axis_24;
-    p_bounds_4 = &bounds_4;
-    *(float *)&v51 = *(float *)&bounds_4;
-    *((float *)&v51 + 1) = *(float *)&bounds_4;
-    v52 = *(float *)&bounds_4;
-    v53 = *(float *)&bounds_4;
-    if (v77[0] >= 0.0)
-        v50 = 0;
+    v73 = v78[0][0];
+    v74 = v78[0][1];
+    v75 = v78[0][2];
+    v76 = 0.0;
+    v72 = v78[1];
+    v68 = v78[1][0];
+    v69 = v78[1][1];
+    v70 = v78[1][2];
+    v71 = 0.0;
+    v67 = v78[2];
+    v63 = v78[2][0];
+    v64 = v78[2][1];
+    v65 = v78[2][2];
+    v66 = 0.0;
+    v59 = cent->pose.origin[0];
+    v60 = cent->pose.origin[1];
+    v61 = cent->pose.origin[2];
+    v62 = 0.0;
+    *(float*)&v56 = axis_24[0];
+    *((float*)&v56 + 1) = axis_24[0];
+    v57 = axis_24[0];
+    v58 = axis_24[0];
+    v55 = bounds_4;
+    *(float*)&v52 = bounds_4[0];
+    *((float*)&v52 + 1) = bounds_4[0];
+    v53 = bounds_4[0];
+    v54 = bounds_4[0];
+    if (v78[0][0] >= 0.0)
+        v51 = 0;
     else
-        v50 = -1;
-    LODWORD(v47) = v50;
-    if (v73 >= 0.0)
+        v51 = -1;
+    LODWORD(v48) = v51;
+    if (v74 >= 0.0)
+        v47 = 0;
+    else
+        v47 = -1;
+    HIDWORD(v48) = v47;
+    if (v75 >= 0.0)
         v46 = 0;
     else
         v46 = -1;
-    HIDWORD(v47) = v46;
-    if (v74 >= 0.0)
+    v49 = v46;
+    if (v76 >= 0.0)
         v45 = 0;
     else
         v45 = -1;
-    v48 = v45;
-    if (v75 >= 0.0)
-        v44 = 0;
-    else
-        v44 = -1;
-    v49 = v44;
-    v41 = v51 & v47 | v55 & ~v47;
-    v42 = LODWORD(v52) & v48 | LODWORD(v56) & ~v48;
+    v50 = v45;
+    v42 = v52 & v48 | v56 & ~v48;
     v43 = LODWORD(v53) & v49 | LODWORD(v57) & ~v49;
-    v38 = v55 & v47 | v51 & ~v47;
-    v39 = LODWORD(v56) & v48 | LODWORD(v52) & ~v48;
+    v44 = LODWORD(v54) & v50 | LODWORD(v58) & ~v50;
+    v39 = v56 & v48 | v52 & ~v48;
     v40 = LODWORD(v57) & v49 | LODWORD(v53) & ~v49;
-    *(float *)&v55 = *((float *)&axis_24 + 1);
-    *((float *)&v55 + 1) = *((float *)&axis_24 + 1);
-    v56 = *((float *)&axis_24 + 1);
-    v57 = *((float *)&axis_24 + 1);
-    v37 = &bounds_4;
-    *(float *)&v51 = *((float *)&bounds_4 + 1);
-    *((float *)&v51 + 1) = *((float *)&bounds_4 + 1);
-    v52 = *((float *)&bounds_4 + 1);
-    v53 = *((float *)&bounds_4 + 1);
-    if (v67 >= 0.0)
-        v36 = 0;
-    else
-        v36 = -1;
-    LODWORD(v33) = v36;
+    v41 = LODWORD(v58) & v50 | LODWORD(v54) & ~v50;
+    *(float*)&v56 = axis_24[1];
+    *((float*)&v56 + 1) = axis_24[1];
+    v57 = axis_24[1];
+    v58 = axis_24[1];
+    v38 = bounds_4;
+    *(float*)&v52 = bounds_4[1];
+    *((float*)&v52 + 1) = bounds_4[1];
+    v53 = bounds_4[1];
+    v54 = bounds_4[1];
     if (v68 >= 0.0)
+        v37 = 0;
+    else
+        v37 = -1;
+    LODWORD(v34) = v37;
+    if (v69 >= 0.0)
+        v33 = 0;
+    else
+        v33 = -1;
+    HIDWORD(v34) = v33;
+    if (v70 >= 0.0)
         v32 = 0;
     else
         v32 = -1;
-    HIDWORD(v33) = v32;
-    if (v69 >= 0.0)
+    v35 = v32;
+    if (v71 >= 0.0)
         v31 = 0;
     else
         v31 = -1;
-    v34 = v31;
-    if (v70 >= 0.0)
-        v30 = 0;
-    else
-        v30 = -1;
-    v35 = v30;
-    v27 = v51 & v33 | v55 & ~v33;
-    v28 = LODWORD(v52) & v34 | LODWORD(v56) & ~v34;
+    v36 = v31;
+    v28 = v52 & v34 | v56 & ~v34;
     v29 = LODWORD(v53) & v35 | LODWORD(v57) & ~v35;
-    v24 = v55 & v33 | v51 & ~v33;
-    v25 = LODWORD(v56) & v34 | LODWORD(v52) & ~v34;
+    v30 = LODWORD(v54) & v36 | LODWORD(v58) & ~v36;
+    v25 = v56 & v34 | v52 & ~v34;
     v26 = LODWORD(v57) & v35 | LODWORD(v53) & ~v35;
-    *(float *)&v55 = *(float *)&axis_32;
-    *((float *)&v55 + 1) = *(float *)&axis_32;
-    v56 = *(float *)&axis_32;
-    v57 = *(float *)&axis_32;
-    v23 = &bounds_4;
-    *(float *)&v51 = *(float *)&bounds_12;
-    *((float *)&v51 + 1) = *(float *)&bounds_12;
-    v52 = *(float *)&bounds_12;
-    v53 = *(float *)&bounds_12;
-    if (v62 >= 0.0)
-        v22 = 0;
-    else
-        v22 = -1;
-    LODWORD(v19) = v22;
+    v27 = LODWORD(v58) & v36 | LODWORD(v54) & ~v36;
+    *(float*)&v56 = axis_24[2];
+    *((float*)&v56 + 1) = axis_24[2];
+    v57 = axis_24[2];
+    v58 = axis_24[2];
+    v24 = bounds_4;
+    *(float*)&v52 = bounds_4[2];
+    *((float*)&v52 + 1) = bounds_4[2];
+    v53 = bounds_4[2];
+    v54 = bounds_4[2];
     if (v63 >= 0.0)
+        v23 = 0;
+    else
+        v23 = -1;
+    LODWORD(v20) = v23;
+    if (v64 >= 0.0)
+        v19 = 0;
+    else
+        v19 = -1;
+    HIDWORD(v20) = v19;
+    if (v65 >= 0.0)
         v18 = 0;
     else
         v18 = -1;
-    HIDWORD(v19) = v18;
-    if (v64 >= 0.0)
+    v21 = v18;
+    if (v66 >= 0.0)
         v17 = 0;
     else
         v17 = -1;
-    v20 = v17;
-    if (v65 >= 0.0)
-        v16 = 0;
-    else
-        v16 = -1;
-    v21 = v16;
-    v13 = v51 & v19 | v55 & ~v19;
-    v14 = LODWORD(v52) & v20 | LODWORD(v56) & ~v20;
+    v22 = v17;
+    v14 = v52 & v20 | v56 & ~v20;
     v15 = LODWORD(v53) & v21 | LODWORD(v57) & ~v21;
-    *(_QWORD *)&rotatedBounds[1].unitVec[1].packed = v55 & v19 | v51 & ~v19;
-    rotatedBounds[1].u[3] = LODWORD(v56) & v20 | LODWORD(v52) & ~v20;
-    v12 = LODWORD(v57) & v21 | LODWORD(v53) & ~v21;
-    v8 = *(float *)&v41 * v72 + v58;
-    v9 = *((float *)&v41 + 1) * v73 + v59;
-    v10 = *(float *)&v42 * v74 + v60;
-    rotatedBounds[0].v[0] = *(float *)&v43 * v75 + v61;
-    v8 = *(float *)&v27 * v67 + v8;
-    v9 = *((float *)&v27 + 1) * v68 + v9;
-    v10 = *(float *)&v28 * v69 + v10;
-    rotatedBounds[0].v[0] = *(float *)&v29 * v70 + rotatedBounds[0].v[0];
-    v8 = *(float *)&v13 * v62 + v8;
-    v9 = *((float *)&v13 + 1) * v63 + v9;
-    v10 = *(float *)&v14 * v64 + v10;
-    rotatedBounds[0].v[0] = *(float *)&v15 * v65 + rotatedBounds[0].v[0];
-    LODWORD(maxs[11]) = (uint32) & rotatedBounds[0].v[1];
-    rotatedBounds[0].v[1] = *(float *)&v38 * v72 + v58;
-    rotatedBounds[0].v[2] = *((float *)&v38 + 1) * v73 + v59;
-    rotatedBounds[0].v[3] = *(float *)&v39 * v74 + v60;
-    rotatedBounds[1].v[0] = *(float *)&v40 * v75 + v61;
-    LODWORD(maxs[10]) = (uint32) & rotatedBounds[0].v[1];
-    LODWORD(maxs[9]) = (uint32) & rotatedBounds[0].v[1];
-    rotatedBounds[0].v[1] = *(float *)&v24 * v67 + rotatedBounds[0].v[1];
-    rotatedBounds[0].v[2] = *((float *)&v24 + 1) * v68 + rotatedBounds[0].v[2];
-    rotatedBounds[0].v[3] = *(float *)&v25 * v69 + rotatedBounds[0].v[3];
-    rotatedBounds[1].v[0] = *(float *)&v26 * v70 + rotatedBounds[1].v[0];
-    LODWORD(maxs[8]) = (uint32) & rotatedBounds[0].v[1];
-    LODWORD(maxs[7]) = (uint32) & rotatedBounds[0].v[1];
-    rotatedBounds[0].v[1] = rotatedBounds[1].v[1] * v62 + rotatedBounds[0].v[1];
-    rotatedBounds[0].v[2] = rotatedBounds[1].v[2] * v63 + rotatedBounds[0].v[2];
-    rotatedBounds[0].v[3] = rotatedBounds[1].v[3] * v64 + rotatedBounds[0].v[3];
-    rotatedBounds[1].v[0] = *(float *)&v12 * v65 + rotatedBounds[1].v[0];
-    maxs[1] = v8;
-    maxs[2] = v9;
-    maxs[3] = v10;
-    maxs[4] = rotatedBounds[0].v[0];
-    v5 = *(_QWORD *)&rotatedBounds[0].unitVec[1].packed;
-    v6 = rotatedBounds[0].v[3];
-    maxs[0] = rotatedBounds[1].v[0];
+    v16 = LODWORD(v54) & v22 | LODWORD(v58) & ~v22;
+    *(_QWORD*)&rotatedBounds[1].unitVec[1].packed = v56 & v20 | v52 & ~v20;
+    rotatedBounds[1].u[3] = LODWORD(v57) & v21 | LODWORD(v53) & ~v21;
+    v13 = LODWORD(v58) & v22 | LODWORD(v54) & ~v22;
+    v9 = *(float*)&v42 * v73 + v59;
+    v10 = *((float*)&v42 + 1) * v74 + v60;
+    v11 = *(float*)&v43 * v75 + v61;
+    rotatedBounds[0].v[0] = *(float*)&v44 * v76 + v62;
+    v9 = *(float*)&v28 * v68 + v9;
+    v10 = *((float*)&v28 + 1) * v69 + v10;
+    v11 = *(float*)&v29 * v70 + v11;
+    rotatedBounds[0].v[0] = *(float*)&v30 * v71 + rotatedBounds[0].v[0];
+    v9 = *(float*)&v14 * v63 + v9;
+    v10 = *((float*)&v14 + 1) * v64 + v10;
+    v11 = *(float*)&v15 * v65 + v11;
+    rotatedBounds[0].v[0] = *(float*)&v16 * v66 + rotatedBounds[0].v[0];
+    LODWORD(v8[7]) = (uintptr_t) &rotatedBounds[0].v[1];
+    rotatedBounds[0].v[1] = *(float*)&v39 * v73 + v59;
+    rotatedBounds[0].v[2] = *((float*)&v39 + 1) * v74 + v60;
+    rotatedBounds[0].v[3] = *(float*)&v40 * v75 + v61;
+    rotatedBounds[1].v[0] = *(float*)&v41 * v76 + v62;
+    LODWORD(v8[6]) = (uintptr_t) &rotatedBounds[0].v[1];
+    LODWORD(v8[5]) = (uintptr_t) &rotatedBounds[0].v[1];
+    rotatedBounds[0].v[1] = *(float*)&v25 * v68 + rotatedBounds[0].v[1];
+    rotatedBounds[0].v[2] = *((float*)&v25 + 1) * v69 + rotatedBounds[0].v[2];
+    rotatedBounds[0].v[3] = *(float*)&v26 * v70 + rotatedBounds[0].v[3];
+    rotatedBounds[1].v[0] = *(float*)&v27 * v71 + rotatedBounds[1].v[0];
+    LODWORD(v8[4]) = (uintptr_t) &rotatedBounds[0].v[1];
+    LODWORD(v8[3]) = (uintptr_t) &rotatedBounds[0].v[1];
+    rotatedBounds[0].v[1] = rotatedBounds[1].v[1] * v63 + rotatedBounds[0].v[1];
+    rotatedBounds[0].v[2] = rotatedBounds[1].v[2] * v64 + rotatedBounds[0].v[2];
+    rotatedBounds[0].v[3] = rotatedBounds[1].v[3] * v65 + rotatedBounds[0].v[3];
+    rotatedBounds[1].v[0] = *(float*)&v13 * v66 + rotatedBounds[1].v[0];
+    mins[0] = v9;
+    mins[1] = v10;
+    mins[2] = v11;
+    v8[0] = rotatedBounds[0].v[0];
+    *(_QWORD*)maxs = *(_QWORD*)&rotatedBounds[0].unitVec[1].packed;
+    maxs[2] = rotatedBounds[0].v[3];
+    v6 = rotatedBounds[1].v[0];
     if (forceFilter)
         goto LABEL_41;
-    if (!CG_VecLessThan(bounds_20->writable.mins, &maxs[1]) || !CG_VecLessThan((float *)&v5, bounds_20->writable.maxs))
+    if (!CG_VecLessThan(brush->writable.mins, mins) || !CG_VecLessThan(maxs, brush->writable.maxs))
     {
-        Vec3Sub(&maxs[1], g_entMoveTolVec, &maxs[1]);
-        Vec3Add((const float *)&v5, g_entMoveTolVec, (float *)&v5);
+        Vec3Sub(mins, g_entMoveTolVec, mins);
+        Vec3Add(maxs, g_entMoveTolVec, maxs);
     LABEL_41:
-        bounds_20->writable.mins[0] = maxs[1];
-        bounds_20->writable.mins[1] = maxs[2];
-        bounds_20->writable.mins[2] = maxs[3];
-        v4 = bounds_20->writable.maxs;
-        *(_QWORD *)bounds_20->writable.maxs = v5;
-        v4[2] = v6;
-        R_LinkBModelEntity(localClientNum, cent->nextState.number, bounds_20);
+        brush->writable.mins[0] = mins[0];
+        brush->writable.mins[1] = mins[1];
+        brush->writable.mins[2] = mins[2];
+        brush->writable.maxs[0] = maxs[0];
+        brush->writable.maxs[1] = maxs[1];
+        brush->writable.maxs[2] = maxs[2];
+        R_LinkBModelEntity(localClientNum, cent->nextState.number, brush);
     }
 }
 

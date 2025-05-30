@@ -1159,12 +1159,12 @@ void __cdecl Scr_CalcScriptFileProfile()
     SourceBufferInfo *v1; // [esp+10Ch] [ebp-101Ch]
     char *pos; // [esp+110h] [ebp-1018h]
     int profileTime; // [esp+114h] [ebp-1014h]
-    const GfxStaticModelDrawInst *v4[1025]; // [esp+118h] [ebp-1010h] BYREF
+    int v4[1025]; // [esp+118h] [ebp-1010h] BYREF
     ProfileScript *Script; // [esp+111Ch] [ebp-Ch]
     unsigned int i; // [esp+1120h] [ebp-8h]
     int profileBuiltInTime; // [esp+1124h] [ebp-4h]
 
-    v4[1024] = (const GfxStaticModelDrawInst *)1024;
+    v4[1024] = 1024;
     if (scrVarPub.developer)
     {
         Script = Profile_GetScript();
@@ -1214,20 +1214,20 @@ void __cdecl Scr_CalcScriptFileProfile()
                 "%s",
                 "scrParserPub.sourceBufferLookupLen < MAX_SCRIPT_FILES");
         for (i = 0; i < scrParserPub.sourceBufferLookupLen; ++i)
-            v4[i] = (const GfxStaticModelDrawInst *)i;
+            v4[i] = i;
         //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
         //    v4,
         //    &v4[scrParserPub.sourceBufferLookupLen],
         //    (signed int)(4 * scrParserPub.sourceBufferLookupLen) >> 2,
         //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))Scr_CompareScriptSourceProfileTimes);
-        std::sort((int*)&v4[0], (int*)&v4[scrParserPub.sourceBufferLookupLen], Scr_CompareScriptSourceProfileTimes);
+        std::sort(v4, v4 + scrParserPub.sourceBufferLookupLen, Scr_CompareScriptSourceProfileTimes);
         memcpy(Script->scriptSrcBufferIndex, v4, sizeof(Script->scriptSrcBufferIndex));
     }
 }
 
 bool __cdecl Scr_CompareScriptSourceProfileTimes(int index1, int index2)
 {
-    return scrParserPub.sourceBufferLookup[index2].totalTime < (double)scrParserPub.sourceBufferLookup[index1].totalTime;
+    return scrParserPub.sourceBufferLookup[index2].totalTime < scrParserPub.sourceBufferLookup[index1].totalTime;
 }
 
 void __cdecl Scr_CalcAnimscriptProfile(int *total, int *totalNonBuiltIn)
@@ -1280,8 +1280,8 @@ void __cdecl Scr_CalcAnimscriptProfile(int *total, int *totalNonBuiltIn)
 
 char __cdecl Scr_PrintProfileTimes(float minTime)
 {
-    OpcodeLookup *v2; // ecx
-    const char **v3; // edx
+    //OpcodeLookup *v2; // ecx
+    //const char **v3; // edx
     int v4; // [esp+34h] [ebp-A0h]
     unsigned int v5; // [esp+38h] [ebp-9Ch]
     float v6; // [esp+3Ch] [ebp-98h]
@@ -1297,7 +1297,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
     unsigned int ia; // [esp+C8h] [ebp-Ch]
     unsigned int ib; // [esp+C8h] [ebp-Ch]
     unsigned int ic; // [esp+C8h] [ebp-Ch]
-    char *sortedOpcodeLookup; // [esp+CCh] [ebp-8h]
+    OpcodeLookup *sortedOpcodeLookup; // [esp+CCh] [ebp-8h]
     int profileIndex; // [esp+D0h] [ebp-4h]
     int profileIndexa; // [esp+D0h] [ebp-4h]
     int profileIndexb; // [esp+D0h] [ebp-4h]
@@ -1323,20 +1323,13 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
                 MyAssertHandler(".\\script\\scr_parser.cpp", 1469, 0, "%s", "!scrParserGlob.opcodeLookup[i].profileTime");
             }
         }
-        sortedOpcodeLookup = Z_VirtualAlloc(24 * profileCount, "Scr_PrintProfileTimes", 0);
+        sortedOpcodeLookup = (OpcodeLookup*)Z_VirtualAlloc(sizeof(*sortedOpcodeLookup) * profileCount, "Scr_PrintProfileTimes", 0);
         profileIndex = 0;
         for (ic = 0; ic < scrParserGlob.opcodeLookupLen; ++ic)
         {
             if (scrParserGlob.opcodeLookup[ic].profileUsage)
             {
-                v2 = &scrParserGlob.opcodeLookup[ic];
-                v3 = (const char **)&sortedOpcodeLookup[24 * profileIndex];
-                *v3 = v2->codePos;
-                v3[1] = (const char *)v2->sourcePosIndex;
-                v3[2] = (const char *)v2->sourcePosCount;
-                v3[3] = (const char *)v2->profileTime;
-                v3[4] = (const char *)v2->profileBuiltInTime;
-                v3[5] = (const char *)v2->profileUsage;
+                sortedOpcodeLookup[profileIndex] = scrParserGlob.opcodeLookup[ic];
                 ++profileIndex;
                 scrParserGlob.opcodeLookup[ic].profileUsage = 0;
                 scrParserGlob.opcodeLookup[ic].profileTime = 0;
@@ -1354,7 +1347,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
         //    (MapProfileHotSpot *)&sortedOpcodeLookup[24 * profileCount],
         //    24 * profileCount / 24,
         //    (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))Scr_CompareProfileTimes);
-        std::sort((const OpcodeLookup**)&sortedOpcodeLookup[0], (const OpcodeLookup **)&sortedOpcodeLookup[24 * profileCount], Scr_CompareProfileTimes);
+        std::sort(sortedOpcodeLookup + 0, sortedOpcodeLookup + profileCount, Scr_CompareProfileTimes);
         Com_Printf(23, "\n");
         profile = Profile_GetScript();
             maxNameLength = 0;
@@ -1406,9 +1399,9 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
     }
 }
 
-bool __cdecl Scr_CompareProfileTimes(const OpcodeLookup *opcodeLookup1, const OpcodeLookup *opcodeLookup2)
+bool __cdecl Scr_CompareProfileTimes(const OpcodeLookup& opcodeLookup1, const OpcodeLookup& opcodeLookup2)
 {
-    return opcodeLookup1->profileTime < opcodeLookup2->profileTime;
+    return opcodeLookup1.profileTime < opcodeLookup2.profileTime;
 }
 
 void CompileError(unsigned int sourcePos, const char *msg, ...)

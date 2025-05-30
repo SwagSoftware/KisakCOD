@@ -103,7 +103,7 @@ void __cdecl R_AddCodeMeshDrawSurf(
         MyAssertHandler(".\\r_drawsurf.cpp", 422, 0, "%s", "indexCount");
     if (!g_processCodeMesh)
         MyAssertHandler(".\\r_drawsurf.cpp", 423, 0, "%s", "g_processCodeMesh");
-    if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
+    if (rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] != material)
         MyAssertHandler(
             ".\\r_drawsurf.cpp",
             426,
@@ -159,19 +159,21 @@ void __cdecl R_AddCodeMeshDrawSurf(
                 // LODWORD(drawSurf->packed) = (unsigned __int16)codeMeshIndex | *(_DWORD*)&drawSurf->fields & 0xFFFF0000;
                 // HIDWORD(drawSurf->packed) = packed_high;
                 
-                v7 = HIDWORD(drawSurf->packed) & 0xFFC3FFFF | 0x280000;
+                // v7 = HIDWORD(drawSurf->packed) & 0xFFC3FFFF | 0x280000;
                 
-                LODWORD(drawSurf->packed) = drawSurf->packed;
-                HIDWORD(drawSurf->packed) = v7;
+                // LODWORD(drawSurf->packed) = drawSurf->packed;
+                // HIDWORD(drawSurf->packed) = v7;
+
+                drawSurf->fields.surfType = 10;
                 
                 // LODWORD(drawSurf->packed) = drawSurf->packed;
                 // HIDWORD(drawSurf->packed) = HIDWORD(drawSurf->packed);
 
-                if (((drawSurf->packed >> 40) & 3) != 3)
+                if (drawSurf->fields.prepass != 3)
                     MyAssertHandler(".\\r_drawsurf.cpp", 491, 1, "%s", "localDrawSurf->fields.prepass == MTL_PREPASS_NONE");
                 if ((MaterialSortKey == 48) + (MaterialSortKey != 24 ? 0 : 2)
                     && drawSurf != scene.drawSurfs[region]
-                    && ((drawSurf->packed >> 54) & 0x3F) < ((drawSurf[-1].packed >> 54) & 0x3F))
+                    && (drawSurf->fields.primarySortKey < drawSurf[-1].fields.primarySortKey))
                 {
                     MyAssertHandler(
                         ".\\r_drawsurf.cpp",
@@ -557,16 +559,16 @@ GfxDrawSurf __cdecl R_GetWorldDrawSurf(GfxSurface *worldSurf)
     GfxDrawSurf drawSurf; // [esp+1Ch] [ebp-8h]
 
     drawSurf.fields = worldSurf->material->info.drawSurf.fields;
-    if ((drawSurf.packed >> 42))
+    if (drawSurf.fields.primaryLightIndex)
         MyAssertHandler(".\\r_drawsurf.cpp", 321, 1, "%s", "drawSurf.fields.primaryLightIndex == 0");
-    HIDWORD(drawSurf.packed) = (worldSurf->primaryLightIndex << 10) | HIDWORD(drawSurf.packed) & 0xFFFC03FF;
-    if ((drawSurf.packed >> 42) != worldSurf->primaryLightIndex)
+    drawSurf.fields.primaryLightIndex = worldSurf->primaryLightIndex;
+    if (drawSurf.fields.primaryLightIndex != worldSurf->primaryLightIndex)
         MyAssertHandler(
             ".\\r_drawsurf.cpp",
             323,
             1,
             "drawSurf.fields.primaryLightIndex == worldSurf->primaryLightIndex\n\t%i, %i",
-            (drawSurf.packed >> 42),
+            drawSurf.fields.primaryLightIndex,
             worldSurf->primaryLightIndex);
     return drawSurf;
 }

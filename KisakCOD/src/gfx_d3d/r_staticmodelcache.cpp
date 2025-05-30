@@ -186,7 +186,7 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
         MyAssertHandler(".\\r_staticmodelcache.cpp", 248, 0, "%s", "block != freelist");
     block->next->prev = block->prev;
     block->prev->next = block->next;
-    treeIndex = (block - (static_model_node_list_t*)s_cache.leafs) / 256;
+    treeIndex = ((char*)block - (char*)s_cache.leafs) / 256;
     if (treeIndex >= 0x200)
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
@@ -204,7 +204,7 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
         tree->usedlist.next->prev = &tree->usedlist;
     }
     leafs = s_cache.leafs[treeIndex];
-    index = (block - (static_model_node_list_t *)leafs) / 8;
+    index = ((char*)block - (char*)leafs) / 8;
     if (index >= 0x20)
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
@@ -358,7 +358,7 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
     if (cacheIndex)
     {
         cachedSurf = (GfxCachedSModelSurf*)&s_cache.trees[511].nodes[2 * cacheIndex + 61]; // KISAKTODO: weird type to cast to
-        tree = &s_cache.trees[(cachedSurf - (GfxCachedSModelSurf*)s_cache.leafs) / 256];
+        tree = &s_cache.trees[((char*)cachedSurf - (char*)s_cache.leafs) / 256];
         if (tree->frameCount != rg.frontEndFrameCount)
         {
             tree->frameCount = rg.frontEndFrameCount;
@@ -412,7 +412,7 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
                 frontEndDataOut->smcPatchVertsUsed += cachedVertsNeeded;
                 R_AddWorkerCmd(15, (unsigned char*)&skinSmodelCmd);
                 R_CacheStaticModelIndices(cachedSurfa->smodelIndex, cachedSurfa->lodIndex, cachedSurfa->baseVertIndex);
-                treea = &s_cache.trees[(cachedSurfa - (GfxCachedSModelSurf*)s_cache.leafs) / 256];
+                treea = &s_cache.trees[((char*)cachedSurfa - (char*)s_cache.leafs) / 256];
                 treea->frameCount = rg.frontEndFrameCount;
                 treea->usedlist.next->prev = treea->usedlist.prev;
                 treea->usedlist.prev->next = treea->usedlist.next;
@@ -544,15 +544,15 @@ GfxCachedSModelSurf *__cdecl R_GetCachedSModelSurf(unsigned int cacheIndex)
         MyAssertHandler(".\\r_staticmodelcache.cpp", 547, 0, "%s", "cacheIndex");
         MyAssertHandler(".\\r_staticmodelcache.cpp", 278, 0, "%s", "cacheIndex");
     }
-    if (*(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse >= rgp.world->dpvs.smodelCount)
+    if (s_cache.leafs[0][cacheIndex - 1].cachedSurf.smodelIndex >= rgp.world->dpvs.smodelCount)
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
             550,
             0,
             "leaf->cachedSurf.smodelIndex doesn't index rgp.world->dpvs.smodelCount\n\t%i not in [0, %i)",
-            *(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse,
+            s_cache.leafs[0][cacheIndex - 1].cachedSurf.smodelIndex,
             rgp.world->dpvs.smodelCount);
-    return (GfxCachedSModelSurf *)(8 * cacheIndex + (char*)&s_cache);
+    return &s_cache.leafs[0][cacheIndex - 1].cachedSurf;
 }
 
 const GfxBackEndData *RB_PatchStaticModelCache()
@@ -652,15 +652,17 @@ void __cdecl R_UncacheStaticModel(unsigned int smodelIndex)
         cacheIndex = smodelDrawInst->smodelCacheIndex[lod];
         if (smodelDrawInst->smodelCacheIndex[lod])
         {
-            if (*(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse != smodelIndex)
+            auto cachedSurf = &s_cache.leafs[0][cacheIndex - 1].cachedSurf;
+
+            if (cachedSurf->smodelIndex != smodelIndex)
                 MyAssertHandler(
                     ".\\r_staticmodelcache.cpp",
                     741,
                     0,
                     "cachedSurf->smodelIndex == smodelIndex\n\t%i, %i",
-                    *(unsigned __int16 *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse,
+                    cachedSurf->smodelIndex,
                     smodelIndex);
-            *(_WORD *)&s_cache.trees[511].nodes[2 * cacheIndex + 62].inuse = -1;
+            cachedSurf->smodelIndex = -1;
             smodelDrawInst->smodelCacheIndex[lod] = 0;
         }
     }
@@ -770,7 +772,8 @@ void __cdecl R_SkinCachedStaticModelCmd(SkinCachedStaticModelCmd *skinCmd)
     cacheIndex = skinCmd->cacheIndex;
     if (!skinCmd->cacheIndex)
         MyAssertHandler(".\\r_staticmodelcache.cpp", 278, 0, "%s", "cacheIndex");
-    leaf = (const static_model_leaf_t *)&s_cache.trees[511].nodes[2 * cacheIndex + 61];
+    //leaf = (const static_model_leaf_t*)&s_cache.trees[511].nodes[2 * cacheIndex + 61];
+    leaf = &s_cache.leafs[0][cacheIndex - 1];
     cachedSurf = &leaf->cachedSurf;
     if (leaf->cachedSurf.smodelIndex >= rgp.world->dpvs.smodelCount)
         MyAssertHandler(

@@ -560,7 +560,7 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
         MyAssertHandler(".\\r_shadowcookie.cpp", 586, 0, "%s", "cookieCount");
     shadowReceiverCallback.surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
     //Profile_Begin(153);
-    R_InitBspDrawSurf((GfxSModelDrawSurfLightingData *)&surfData);
+    R_InitBspDrawSurf(&surfData);
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
     for (cookieIndex = 0; cookieIndex < cookieCount; ++cookieIndex)
     {
@@ -592,7 +592,7 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
             //    (const GfxStaticModelDrawInst **)&surfaces[cookieDrawSurfCount],
             //    (int)(4 * cookieDrawSurfCount) >> 2,
             //    (bool(__cdecl *)(const GfxStaticModelDrawInst *, const GfxStaticModelDrawInst *))R_SortBspShadowReceiverSurfaces);
-            std::sort((GfxSurface **)&surfaces[0], (GfxSurface **)&surfaces[cookieDrawSurfCount], R_SortBspShadowReceiverSurfaces);
+            std::sort(surfaces, surfaces + cookieDrawSurfCount, R_SortBspShadowReceiverSurfaces);
             for (listSurfIndex = 0; listSurfIndex < cookieDrawSurfCount; ++listSurfIndex)
             {
                 if (listSurfIndex >= rgp.world->surfaceCount)

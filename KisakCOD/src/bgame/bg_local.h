@@ -123,12 +123,12 @@ union hudelem_color_t // sizeof=0x4
 {                                       // XREF: DrawSingleHudElem2d+114/r
     struct
     {
-        __int8 r;
-        __int8 g;
-        __int8 b;
-        __int8 a;
+        unsigned __int8 r;
+        unsigned __int8 g;
+        unsigned __int8 b;
+        unsigned __int8 a;
     };
-    int rgba;
+    unsigned int rgba;
 };
 
 enum ViewLockTypes : __int32

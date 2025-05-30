@@ -828,8 +828,9 @@ unsigned int(__cdecl *const rb_tessTable[13])(const GfxDrawSurfListArgs *, GfxCm
 
 unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
 {
-    GfxCmdBufSourceState *passPrepassContext; // [esp+4h] [ebp-28h]
-    GfxCmdBufState *passPrepassContext_4; // [esp+8h] [ebp-24h]
+    //GfxCmdBufSourceState *passPrepassContext; // [esp+4h] [ebp-28h]
+    //GfxCmdBufState *passPrepassContext_4; // [esp+8h] [ebp-24h]
+    GfxCmdBufContext passPrepassContext;
     GfxDrawSurf drawSurf; // [esp+Ch] [ebp-20h]
     unsigned int subListCount; // [esp+18h] [ebp-14h]
     const GfxDrawSurf *drawSurfList; // [esp+1Ch] [ebp-10h]
@@ -852,7 +853,7 @@ unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *lis
             0,
             "%s",
             "!prepassContext.state || (prepassContext.state->technique->passCount == 1)");
-    passPrepassContext = prepassContext.source;
+    passPrepassContext.source = prepassContext.source;
     subListCount = 0;
     for (passIndex = 0; passIndex < listArgs->context.state->technique->passCount; ++passIndex)
     {
@@ -860,25 +861,22 @@ unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *lis
         R_SetupPass(listArgs->context, passIndex);
         if (passIndex || !prepassContext.state)
         {
-            passPrepassContext_4 = 0;
+            passPrepassContext.state = 0;
         }
         else
         {
             R_SetupPass(prepassContext, 0);
-            passPrepassContext_4 = prepassContext.state;
+            passPrepassContext.state = prepassContext.state;
         }
-        if (((drawSurf.packed >> 50) & 0xF) >= 0xD)
+        if (drawSurf.fields.surfType >= 0xD)
             MyAssertHandler(
                 ".\\rb_backend.cpp",
                 1034,
                 0,
                 "drawSurf.fields.surfType doesn't index ARRAY_COUNT( rb_tessTable )\n\t%i not in [0, %i)",
-                (unsigned int)(drawSurf.packed >> 50) & 0xF,
+                drawSurf.fields.surfType,
                 13);
-        subListCount = ((int(__cdecl *)(const GfxDrawSurfListArgs *, GfxCmdBufSourceState *, GfxCmdBufState *))rb_tessTable[(drawSurf.packed >> 50) & 0xF])(
-            listArgs,
-            passPrepassContext,
-            passPrepassContext_4);
+        subListCount = rb_tessTable[drawSurf.fields.surfType](listArgs, passPrepassContext);
     }
     if (isPixelCostEnabled)
         R_PixelCost_EndSurface(listArgs->context);

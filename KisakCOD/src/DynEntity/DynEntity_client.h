@@ -179,7 +179,7 @@ unsigned int __cdecl DynEntCl_GetClosestEntities(
     float *origin,
     unsigned __int16 *hitEnts,
     bool isCylinder);
-bool __cdecl DynEntCl_CompareDynEntsForExplosion(const DynEntSortStruct *ent1, const DynEntSortStruct *ent2);
+bool __cdecl DynEntCl_CompareDynEntsForExplosion(const DynEntSortStruct& ent1, const DynEntSortStruct& ent2);
 void __cdecl DynEntCl_JitterEvent(
     int localClientNum,
     float *origin,

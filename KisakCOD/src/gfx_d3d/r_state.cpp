@@ -2777,9 +2777,10 @@ void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBit
     R_ForceSetStencilState(device, stateBits[1]);
 }
 
+#if 0
 // bad sp value at call has been detected, the output may be wrong!
 void  R_DrawCall(
-    void(__cdecl *callback)(const void *, GfxCmdBufContext*, GfxCmdBufContext*),
+    void(__cdecl* callback)(const void*, GfxCmdBufSourceState*, GfxCmdBufState*, GfxCmdBufSourceState*, GfxCmdBufState*),
     const void *userData,
     GfxCmdBufSourceState *source,
     const GfxViewInfo *viewInfo,
@@ -2788,46 +2789,83 @@ void  R_DrawCall(
     GfxCmdBuf *cmdBuf,
     GfxCmdBuf *prepassCmdBuf)
 {
-    void *v9; // esp
-    _BYTE v10[2576]; // [esp-1430h] [ebp-143Ch] BYREF
-    _BYTE v11[2580]; // [esp-A20h] [ebp-A2Ch] BYREF
-    const GfxSceneDef *p_sceneDef; // [esp-Ch] [ebp-18h]
-    const GfxCmdBufInput *p_input; // [esp-8h] [ebp-14h]
-    int v14; // [esp+0h] [ebp-Ch]
-    void *v15; // [esp+4h] [ebp-8h]
-    void *retaddr; // [esp+Ch] [ebp+0h]
+    //void* v9; // esp
+    GfxCmdBufState v10; // [esp-1430h] [ebp-143Ch] BYREF
+    GfxCmdBufState v11; // [esp-A20h] [ebp-A2Ch] BYREF
+    GfxSceneDef* p_sceneDef; // [esp-Ch] [ebp-18h]
+    GfxCmdBufInput* p_input; // [esp-8h] [ebp-14h]
+    //int v14; // [esp+0h] [ebp-Ch]
+    //void* v15; // [esp+4h] [ebp-8h]
+    //void* retaddr; // [esp+Ch] [ebp+0h]
 
-    //v14 = a1;
-    //v15 = retaddr;
-    v9 = alloca(5192);
-    p_input = &viewInfo->input;
-    p_sceneDef = &viewInfo->sceneDef;
+
+    //p_input = &viewInfo->input;
+    //p_sceneDef = &viewInfo->sceneDef;
     R_BeginView(source, &viewInfo->sceneDef, viewParms);
-    memcpy(v11, &gfxCmdBufState, 0xA10u);
-    memset(&v11[216], 0, 2304);
+    qmemcpy(&v11, &gfxCmdBufState, sizeof(v11));
+    //memset(v11.vertexShaderConstState, 0, 0x900);
+    memset(v11.vertexShaderConstState, 0, sizeof(v11.vertexShaderConstState));
+    memset(v11.pixelShaderConstState, 0, sizeof(v11.pixelShaderConstState));
     if (prepassCmdBuf)
     {
-        memcpy(v10, &gfxCmdBufState, sizeof(v10));
-        memset(&v10[216], 0, 2304);
-        ((void(__cdecl *)(const void *, GfxCmdBufSourceState *, _BYTE *, GfxCmdBufSourceState *, _BYTE *))callback)(
-            userData,
-            source,
-            v11,
-            source,
-            v10);
-        memcpy(&gfxCmdBufState, v10, sizeof(gfxCmdBufState));
+        qmemcpy(&v10, &gfxCmdBufState, sizeof(v10));
+        memset(v10.vertexShaderConstState, 0, sizeof(v10.vertexShaderConstState));
+        memset(v10.pixelShaderConstState, 0, sizeof(v10.pixelShaderConstState));
+        callback(userData, source, &v11, source, &v10);
+        qmemcpy(&gfxCmdBufState, &v10, sizeof(gfxCmdBufState));
     }
     else
     {
-        ((void(__cdecl *)(const void *, GfxCmdBufSourceState *, _BYTE *, unsigned int, unsigned int))callback)(
-            userData,
-            source,
-            v11,
-            0,
-            0);
+        callback(userData, source, &v11, 0, 0);
     }
-    memcpy(&gfxCmdBufState, v11, sizeof(gfxCmdBufState));
+    qmemcpy(&gfxCmdBufState, &v11, sizeof(gfxCmdBufState));
 }
+#else
+void R_DrawCall(
+    DrawCallCallback callback,
+    const void* userData,
+    GfxCmdBufSourceState* source,
+    const GfxViewInfo* viewInfo,
+    const GfxDrawSurfListInfo* info,
+    const GfxViewParms* viewParms,
+    GfxCmdBuf* cmdBufEA,
+    GfxCmdBuf* prepassCmdBufEA)
+{
+    GfxCmdBufState cmdBuf;
+    GfxCmdBufState prepassCmdBuf;
+    GfxCmdBufContext context;
+    GfxCmdBufContext prepassContext;
+
+    context.source = source;
+    context.state = &cmdBuf;
+
+    R_BeginView(source, &viewInfo->sceneDef, viewParms);
+    //R_InitLocalCmdBufState(&cmdBuf);
+    memcpy(&cmdBuf, &gfxCmdBufState, sizeof(cmdBuf));
+    memset(cmdBuf.vertexShaderConstState, 0, sizeof(cmdBuf.vertexShaderConstState));
+    memset(cmdBuf.pixelShaderConstState, 0, sizeof(cmdBuf.pixelShaderConstState));
+
+    if (prepassCmdBufEA)
+    {
+        prepassContext.source = source;
+        prepassContext.state = &prepassCmdBuf;
+        //R_InitLocalCmdBufState(&prepassCmdBuf);
+        memcpy(&prepassCmdBuf, &gfxCmdBufState, sizeof(prepassCmdBuf));
+        memset(prepassCmdBuf.vertexShaderConstState, 0, sizeof(prepassCmdBuf.vertexShaderConstState));
+        memset(prepassCmdBuf.pixelShaderConstState, 0, sizeof(prepassCmdBuf.pixelShaderConstState));
+
+        callback(userData, context, prepassContext);
+        memcpy(&gfxCmdBufState, &prepassCmdBuf, sizeof(gfxCmdBufState));
+    }
+    else
+    {
+        prepassContext.source = NULL;
+        prepassContext.state = NULL;
+        callback(userData, context, prepassContext);
+    }
+    memcpy(&gfxCmdBufState, &cmdBuf, sizeof(gfxCmdBufState));
+}
+#endif
 
 void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int constant, float x, float y, float z, float w)
 {

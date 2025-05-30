@@ -246,7 +246,7 @@ struct GfxSModelDrawSurfLightingData // sizeof=0x28
     GfxDelayedCmdBuf delayedCmdBuf;
     GfxDrawSurfList drawSurf[3];        // ...
 };
-void __cdecl R_InitBspDrawSurf(GfxSModelDrawSurfLightingData *surfData);
+void __cdecl R_InitBspDrawSurf(GfxBspDrawSurfData *surfData);
 void __cdecl R_AddBspDrawSurfs(
     GfxDrawSurf drawSurf,
     unsigned __int8 *list,

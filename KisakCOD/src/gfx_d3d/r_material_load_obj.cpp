@@ -6480,28 +6480,15 @@ void __cdecl Material_SortInternal(Material **sortedMaterials, unsigned int mate
     //    &sortedMaterials[materialCount],
     //    (4 * materialCount) >> 2,
     //    Material_Compare);
-    std::sort((const Material **)&sortedMaterials[0], (const Material **)&sortedMaterials[materialCount], Material_Compare);
+    std::sort(sortedMaterials, sortedMaterials + materialCount, Material_Compare);
     for (sortedIndex = 0; sortedIndex < materialCount; ++sortedIndex)
     {
         material = sortedMaterials[sortedIndex];
-        *&material->info.drawSurf.packed = 0;
-        HIDWORD(material->info.drawSurf.packed) = 0;
-        v2 = (R_DrawSurfPrimarySortKey(material) & 0x3F) << 54;
-        v3 = HIDWORD(v2) | HIDWORD(material->info.drawSurf.packed) & 0xF03FFFFF;
-        *&material->info.drawSurf.packed |= v2;
-        HIDWORD(material->info.drawSurf.packed) = v3;
-        v4 = (R_DrawSurfStandardPrepassSortKey(material) & 3) << 40;
-        v5 = HIDWORD(v4) | HIDWORD(material->info.drawSurf.packed) & 0xFFFFFCFF;
-        *&material->info.drawSurf.packed |= v4;
-        HIDWORD(material->info.drawSurf.packed) = v5;
-        v6 = ((material->info.gameFlags & 0x40) != 0) << 24;
-        v7 = HIDWORD(v6) | HIDWORD(material->info.drawSurf.packed);
-        *&material->info.drawSurf.packed = v6 | *&material->info.drawSurf.packed & 0xE0FFFFFF;
-        HIDWORD(material->info.drawSurf.packed) = v7;
-        v8 = (sortedIndex & 0x7FF) << 29;
-        v9 = HIDWORD(v8) | HIDWORD(material->info.drawSurf.packed) & 0xFFFFFF00;
-        *&material->info.drawSurf.packed = v8 | *&material->info.drawSurf.packed & 0x1FFFFFFF;
-        HIDWORD(material->info.drawSurf.packed) = v9;
+        material->info.drawSurf.packed = 0;
+        material->info.drawSurf.fields.primarySortKey = R_DrawSurfPrimarySortKey(material);
+        material->info.drawSurf.fields.prepass = R_DrawSurfStandardPrepassSortKey(material);
+        material->info.drawSurf.fields.customIndex = (material->info.gameFlags & 0x40) != 0;
+        material->info.drawSurf.fields.materialSortedIndex = sortedIndex;
     }
 }
 

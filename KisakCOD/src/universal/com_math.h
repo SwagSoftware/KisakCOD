@@ -230,7 +230,7 @@ void __cdecl RotatePointAroundVector(float* dst, const float* dir, const float* 
 void __cdecl YawVectors(float yaw, float* forward, float* right);
 
 void __cdecl AngleVectors(const float* angles, float* forward, float* right, float* up);
-void __cdecl AnglesToAxis(const float* angles, float (*axis)[3]);
+void __cdecl AnglesToAxis(const float* angles, float axis[3][3]);
 void __cdecl AxisToQuat(const float (*mat)[3], float* out);
 
 float __cdecl PointToBoxDistSq(const float* pt, const float* mins, const float* maxs);

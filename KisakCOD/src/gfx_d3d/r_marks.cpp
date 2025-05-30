@@ -19,10 +19,7 @@ void  R_BoxSurfaces(
 {
     unsigned int j; // [esp-Ch] [ebp-A4h]
     unsigned int i; // [esp-8h] [ebp-A0h]
-    unsigned int v11[2]; // [esp-4h] [ebp-9Ch] BYREF
-    int v12; // [esp+8Ch] [ebp-Ch]
-    void *v13; // [esp+90h] [ebp-8h]
-    void *retaddr; // [esp+98h] [ebp+0h]
+    unsigned __int8 v11[128]; // [esp-4h] [ebp-9Ch] BYREF
 
     //v12 = a1;
     //v13 = retaddr;
@@ -507,10 +504,7 @@ int  R_BoxStaticModels(
     int smodelListSize)
 {
     int v7; // [esp-Ch] [ebp-A0h] BYREF
-    unsigned int v8[2]; // [esp-8h] [ebp-9Ch] BYREF
-    int v9; // [esp+88h] [ebp-Ch]
-    void *v10; // [esp+8Ch] [ebp-8h]
-    void *retaddr; // [esp+94h] [ebp+0h]
+    unsigned __int8 v8[128]; // [esp-8h] [ebp-9Ch] BYREF
 
     //v9 = a1;
     //v10 = retaddr;
@@ -543,7 +537,7 @@ int  R_BoxStaticModels(
         smodelList,
         smodelListSize,
         &v7,
-        (unsigned __int8 *)v8);
+        v8);
     if (v7 > smodelListSize)
         MyAssertHandler(".\\r_marks.cpp", 975, 0, "smodelCount <= smodelListSize\n\t%i, %i", v7, smodelListSize);
     //Profile_EndInternal(0);
@@ -697,10 +691,7 @@ unsigned int  R_CylinderSurfaces(
     unsigned int surfListSize)
 {
     unsigned int v11; // [esp+30h] [ebp-A0h] BYREF
-    unsigned int v12[2]; // [esp+34h] [ebp-9Ch] BYREF
-    int v13; // [esp+C4h] [ebp-Ch]
-    void *v14; // [esp+C8h] [ebp-8h]
-    void *retaddr; // [esp+D0h] [ebp+0h]
+    unsigned __int8 v12[128]; // [esp+34h] [ebp-9Ch] BYREF
 
     //v13 = a1;
     //v14 = retaddr;
@@ -736,7 +727,7 @@ unsigned int  R_CylinderSurfaces(
         surfList,
         surfListSize,
         &v11,
-        (unsigned __int8 *)v12);
+        v12);
     if (v11 > surfListSize)
         MyAssertHandler(".\\r_marks.cpp", 994, 0, "surfCount <= surfListSize\n\t%i, %i", v11, surfListSize);
     return v11;

@@ -210,6 +210,8 @@ void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
         MyAssertHandler(".\\universal\\com_shared.cpp", 307, 0, "%s", "src || !count");
     if (!dest && count)
         MyAssertHandler(".\\universal\\com_shared.cpp", 308, 0, "%s", "dest || !count");
+
+#if 0
     Com_Prefetch(src, count);
     v3 = count;
     if (count)
@@ -281,6 +283,9 @@ void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
             }
         }
     }
+#else
+    memcpy(dest_p, src_p, count);
+#endif
 }
 
 

@@ -341,8 +341,8 @@ void __cdecl R_GetBspLightSurfs(const GfxLight **visibleLights, int visibleCount
         MyAssertHandler(".\\r_light.cpp", 611, 0, "%s", "visibleCount");
     if (!rgp.world)
         MyAssertHandler(".\\r_light.cpp", 612, 0, "%s", "rgp.world");
-    R_InitBspDrawSurf((GfxSModelDrawSurfLightingData *)surfData);
-    R_InitBspDrawSurf((GfxSModelDrawSurfLightingData *)&surfData[1]);
+    R_InitBspDrawSurf(surfData);
+    R_InitBspDrawSurf(&surfData[1]);
     for (lightIndex = 0; lightIndex < visibleCount; ++lightIndex)
     {
         light = visibleLights[lightIndex];
@@ -739,71 +739,66 @@ void __cdecl R_CalcPlaneFromCosSinPointDirs(
 
 void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visibleCount)
 {
-    const GfxStaticModelDrawInst *smodelDrawInst; // [esp+18h] [ebp-89Ch]
+    const GfxStaticModelDrawInst* smodelDrawInst; // [esp+18h] [ebp-89Ch]
     GfxDrawSurf drawSurf; // [esp+1Ch] [ebp-898h]
     float mins[3]; // [esp+28h] [ebp-88Ch] BYREF
     unsigned int surfaceIndex; // [esp+34h] [ebp-880h]
-    const Material *material; // [esp+38h] [ebp-87Ch]
-    GfxSModelDrawSurfLightingData shadowSurfData; // [esp+3Ch] [ebp-878h] BYREF
-    Material *const *pMaterial; // [esp+64h] [ebp-850h]
+    const Material* material; // [esp+38h] [ebp-87Ch]
+    GfxBspDrawSurfData shadowSurfData; // [esp+3Ch] [ebp-878h] BYREF
+    unsigned int surfaceCount; // [esp+58h] [ebp-85Ch]
+    const GfxLight* light; // [esp+5Ch] [ebp-858h]
+    GfxStaticModelId staticModelId; // [esp+60h] [ebp-854h]
+    Material* const* pMaterial; // [esp+64h] [ebp-850h]
     unsigned __int16 list[2]; // [esp+68h] [ebp-84Ch] BYREF
-    unsigned int *lodData; // [esp+6Ch] [ebp-848h]
+    unsigned int* lodData; // [esp+6Ch] [ebp-848h]
     int lod; // [esp+70h] [ebp-844h]
     unsigned __int16 smodels[1024]; // [esp+74h] [ebp-840h] BYREF
     float maxs[3]; // [esp+878h] [ebp-3Ch] BYREF
     int smodelCount; // [esp+884h] [ebp-30h]
-    XSurface *surfaces; // [esp+888h] [ebp-2Ch] BYREF
+    XSurface* surfaces; // [esp+888h] [ebp-2Ch] BYREF
     int index; // [esp+88Ch] [ebp-28h]
     int lightIndex; // [esp+890h] [ebp-24h]
-    GfxDelayedCmdBuf surfData; // [esp+894h] [ebp-20h] BYREF
-    GfxDrawSurfList surfData_16; // [esp+8A4h] [ebp-10h] BYREF
+    GfxBspDrawSurfData surfData; // [esp+894h] [ebp-20h] BYREF
     int smodelIndex; // [esp+8B0h] [ebp-4h]
     //int savedregs; // [esp+8B4h] [ebp+0h] BYREF
 
     if (!visibleCount)
         MyAssertHandler(".\\r_light.cpp", 708, 0, "%s", "visibleCount");
-    R_InitBspDrawSurf((GfxSModelDrawSurfLightingData *)&surfData);
+    R_InitBspDrawSurf(&surfData);
     R_InitBspDrawSurf(&shadowSurfData);
     g_staticModelLightCallback.smodelVisData = rgp.world->dpvs.smodelVisData[0];
     lodData = rgp.world->dpvs.lodData;
     for (lightIndex = 0; lightIndex < visibleCount; ++lightIndex)
     {
-        shadowSurfData.drawSurf[2].current = (GfxDrawSurf *)visibleLights[lightIndex];
-        if (shadowSurfData.drawSurf[2].current->packed != 3 && shadowSurfData.drawSurf[2].current->packed != 2)
+        light = visibleLights[lightIndex];
+        if (light->type != 3 && light->type != 2)
             MyAssertHandler(
                 ".\\r_light.cpp",
                 720,
                 1,
                 "%s",
                 "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
-        mins[0] = *((float *)&shadowSurfData.drawSurf[2].current[3].packed + 1)
-            - *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
-        mins[1] = *(float *)&shadowSurfData.drawSurf[2].current[4].fields
-            - *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
-        mins[2] = *((float *)&shadowSurfData.drawSurf[2].current[4].packed + 1)
-            - *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
-        maxs[0] = *((float *)&shadowSurfData.drawSurf[2].current[3].packed + 1)
-            + *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
-        maxs[1] = *(float *)&shadowSurfData.drawSurf[2].current[4].fields
-            + *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
-        maxs[2] = *((float *)&shadowSurfData.drawSurf[2].current[4].packed + 1)
-            + *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
-        surfData_16.current = &scene.visLight[lightIndex].drawSurfs[scene.visLightShadow[lightIndex - 4].drawSurfCount];
-        surfData_16.end = (GfxDrawSurf *)&scene.visLightShadow[lightIndex - 3];
-        if (shadowSurfData.drawSurf[2].current->packed == 3)
+        mins[0] = light->origin[0] - light->radius;
+        mins[1] = light->origin[1] - light->radius;
+        mins[2] = light->origin[2] - light->radius;
+        maxs[0] = light->origin[0] + light->radius;
+        maxs[1] = light->origin[1] + light->radius;
+        maxs[2] = light->origin[2] + light->radius;
+        surfData.drawSurfList.current = &scene.visLight[lightIndex].drawSurfs[scene.visLightShadow[lightIndex - 4].drawSurfCount];
+        surfData.drawSurfList.end = (GfxDrawSurf*)&scene.visLightShadow[lightIndex - 3];
+        if (light->type == 3)
         {
-            g_staticModelLightCallback.position[0] = *((float *)&shadowSurfData.drawSurf[2].current[3].packed + 1);
-            g_staticModelLightCallback.position[1] = *(float *)&shadowSurfData.drawSurf[2].current[4].fields;
-            g_staticModelLightCallback.position[2] = *((float *)&shadowSurfData.drawSurf[2].current[4].packed + 1);
-            g_staticModelLightCallback.radiusSq = *(float *)&shadowSurfData.drawSurf[2].current[5].fields
-                * *(float *)&shadowSurfData.drawSurf[2].current[5].fields;
+            g_staticModelLightCallback.position[0] = light->origin[0];
+            g_staticModelLightCallback.position[1] = light->origin[1];
+            g_staticModelLightCallback.position[2] = light->origin[2];
+            g_staticModelLightCallback.radiusSq = light->radius * light->radius;
             smodelCount = R_BoxStaticModels(mins, maxs, R_AllowStaticModelOmniLight, smodels, 1024);
         }
         else
         {
-            shadowSurfData.drawSurf[0].current = &scene.visLightShadow[lightIndex].drawSurfs[scene.visLightShadow[lightIndex].drawSurfCount];
-            shadowSurfData.drawSurf[0].end = (GfxDrawSurf *)((char *)scene.cookie + 8200 * lightIndex);
-            R_CalcSpotLightPlanes((const GfxLight *)shadowSurfData.drawSurf[2].current, g_staticModelLightCallback.planes);
+            shadowSurfData.drawSurfList.current = &scene.visLightShadow[lightIndex].drawSurfs[scene.visLightShadow[lightIndex].drawSurfCount];
+            shadowSurfData.drawSurfList.end = (GfxDrawSurf*)((char*)scene.cookie + 8200 * lightIndex);
+            R_CalcSpotLightPlanes(light, g_staticModelLightCallback.planes);
             smodelCount = R_BoxStaticModels(mins, maxs, R_AllowStaticModelSpotLight, smodels, 1024);
         }
         for (index = 0; index < smodelCount; ++index)
@@ -811,22 +806,21 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
             smodelIndex = smodels[index];
             smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[smodelIndex];
             lod = (lodData[smodelIndex >> 4] >> (2 * (smodelIndex & 0xF))) & 3;
-            shadowSurfData.drawSurf[1].end = (GfxDrawSurf *)XModelGetSurfaces(smodelDrawInst->model, &surfaces, lod);
-            if (!shadowSurfData.drawSurf[1].end)
+            surfaceCount = XModelGetSurfaces(smodelDrawInst->model, &surfaces, lod);
+            if (!surfaceCount)
                 MyAssertHandler(".\\r_light.cpp", 755, 0, "%s", "surfaceCount");
-            //shadowSurfData.drawSurf[2].end = (GfxDrawSurf *)R_GetStaticModelId(smodelIndex, lod);
-            shadowSurfData.drawSurf[2].end->fields.objectId = R_GetStaticModelId(smodelIndex, lod).objectId; // KISAK: Probably wrong!
+            staticModelId = R_GetStaticModelId(smodelIndex, lod);
             pMaterial = XModelGetSkins(smodelDrawInst->model, lod);
             if (!pMaterial)
                 MyAssertHandler(".\\r_light.cpp", 762, 0, "%s", "pMaterial");
-            list[0] = HIWORD(shadowSurfData.drawSurf[2].end);
+            list[0] = staticModelId.objectId;
             surfaceIndex = 0;
-            while ((GfxDrawSurf *)surfaceIndex < shadowSurfData.drawSurf[1].end)
+            while (surfaceIndex < surfaceCount)
             {
                 material = *pMaterial;
                 if (!material)
                     MyAssertHandler(".\\r_light.cpp", 775, 0, "%s", "material");
-                if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
+                if (rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] != material)
                     MyAssertHandler(
                         ".\\r_light.cpp",
                         776,
@@ -836,21 +830,19 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
                 if (Material_GetTechnique(material, TECHNIQUE_LIGHT_OMNI))
                 {
                     drawSurf.fields = material->info.drawSurf.fields;
-                    HIDWORD(drawSurf.packed) = (((int)shadowSurfData.drawSurf[2].end & 0xF) << 18)
-                        | HIDWORD(drawSurf.packed) & 0xFFC3FFFF;
-                    if (!R_AllocDrawSurf(&surfData, drawSurf, &surfData_16, 3u))
+                    //HIDWORD(drawSurf.packed) = ((staticModelId.surfType & 0xF) << 18) | HIDWORD(drawSurf.packed) & 0xFFC3FFFF;
+                    drawSurf.fields.surfType = staticModelId.surfType;
+                    if (!R_AllocDrawSurf(&surfData.delayedCmdBuf, drawSurf, &surfData.drawSurfList, 3u))
                         break;
-                    R_AddDelayedStaticModelDrawSurf(&surfData, &surfaces[surfaceIndex], (unsigned __int8 *)list, 1u);
-                    if (shadowSurfData.drawSurf[2].current->packed == 2
-                        && r_spotLightShadows->current.enabled
-                        && r_spotLightSModelShadows->current.enabled)
+                    R_AddDelayedStaticModelDrawSurf(&surfData.delayedCmdBuf, &surfaces[surfaceIndex], (unsigned __int8*)list, 1u);
+                    if (light->type == 2 && r_spotLightShadows->current.enabled && r_spotLightSModelShadows->current.enabled)
                     {
-                        if (!R_AllocDrawSurf(&shadowSurfData.delayedCmdBuf, drawSurf, shadowSurfData.drawSurf, 3u))
+                        if (!R_AllocDrawSurf(&shadowSurfData.delayedCmdBuf, drawSurf, &shadowSurfData.drawSurfList, 3u))
                             break;
                         R_AddDelayedStaticModelDrawSurf(
                             &shadowSurfData.delayedCmdBuf,
                             &surfaces[surfaceIndex],
-                            (unsigned __int8 *)list,
+                            (unsigned __int8*)list,
                             1u);
                     }
                 }
@@ -858,10 +850,11 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
                 ++pMaterial;
             }
         }
-        R_EndCmdBuf(&surfData);
-        scene.visLightShadow[lightIndex - 4].drawSurfCount = surfData_16.current - scene.visLight[lightIndex].drawSurfs;
+        R_EndCmdBuf(&surfData.delayedCmdBuf);
+        scene.visLightShadow[lightIndex - 4].drawSurfCount = surfData.drawSurfList.current
+            - scene.visLight[lightIndex].drawSurfs;
         R_EndCmdBuf(&shadowSurfData.delayedCmdBuf);
-        scene.visLightShadow[lightIndex].drawSurfCount = shadowSurfData.drawSurf[0].current
+        scene.visLightShadow[lightIndex].drawSurfCount = shadowSurfData.drawSurfList.current
             - scene.visLightShadow[lightIndex].drawSurfs;
     }
 }

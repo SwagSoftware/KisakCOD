@@ -1454,34 +1454,34 @@ void DB_SetReorderIncludeSequence()
     }
 }
 
-bool __cdecl DB_CompareReorderEntries(DBReorderAssetEntry *e0, DBReorderAssetEntry *e1)
+bool __cdecl DB_CompareReorderEntries(const DBReorderAssetEntry& e0, const DBReorderAssetEntry& e1)
 {
     int comparison; // [esp+0h] [ebp-4h]
 
-    if (e0->sequence != e1->sequence)
-        return e0->sequence < e1->sequence;
-    if (e0->type == 33)
+    if (e0.sequence != e1.sequence)
+        return e0.sequence < e1.sequence;
+    if (e0.type == 33)
     {
-        if (e1->type != 33)
+        if (e1.type != 33)
             return 1;
-        comparison = _stricmp(e0->typeString, e1->typeString);
+        comparison = _stricmp(e0.typeString, e1.typeString);
         if (comparison)
             return comparison < 0;
-        return _stricmp(e0->assetName, e1->assetName) < 0;
+        return _stricmp(e0.assetName, e1.assetName) < 0;
     }
-    if (e1->type == 33)
+    if (e1.type == 33)
         return 0;
-    if (e0->type == e1->type)
-        return _stricmp(e0->assetName, e1->assetName) < 0;
-    if (e0->sequence != -1)
-        return e0->type < e1->type;
-    if (e0->type == 7)
+    if (e0.type == e1.type)
+        return _stricmp(e0.assetName, e1.assetName) < 0;
+    if (e0.sequence != -1)
+        return e0.type < e1.type;
+    if (e0.type == 7)
         return 1;
-    if (e1->type == 7)
+    if (e1.type == 7)
         return 0;
-    if (e0->type == 22)
+    if (e0.type == 22)
         return 1;
-    return e1->type != 22 && e0->type < e1->type;
+    return e1.type != 22 && e0.type < e1.type;
 }
 
 void DB_EndReorderZone()
@@ -1514,7 +1514,7 @@ void DB_EndReorderZone()
             //    (GfxSModelSurfStats *)&s_dbReorder.entries[s_dbReorder.entryCount],
             //    (signed int)(16 * s_dbReorder.entryCount) >> 4,
             //    (bool(__cdecl *)(GfxSModelSurfStats *, GfxSModelSurfStats *))DB_CompareReorderEntries);
-            std::sort((DBReorderAssetEntry **)&s_dbReorder.entries[0], (DBReorderAssetEntry **)&s_dbReorder.entries[s_dbReorder.entryCount], DB_CompareReorderEntries); // KISAKTODO: sketchy double ptr cast
+            std::sort(s_dbReorder.entries + 0, s_dbReorder.entries + s_dbReorder.entryCount, DB_CompareReorderEntries);
             for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
             {
                 entry = &s_dbReorder.entries[entryIter];
