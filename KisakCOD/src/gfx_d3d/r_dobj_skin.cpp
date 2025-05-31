@@ -234,19 +234,20 @@ int  R_SkinSceneDObjModels(
             unsigned int* surfPos2 = (unsigned int*)surfsBuffer;
             for (unsigned int offset = 0; offset < totalSurfaceCount; ++offset)
             {
-                if (*surfPos2 == -2)
+                if (*(int*)surfPos2 == -2)
                 {
                     surfPos2 += 14;
                 }
-                else if (*surfPos2 == -3)
+                else if (*(int*)surfPos2 == -3)
                 {
                     ++surfPos2;
                 }
                 else
                 {
+                    surfPos2[5] = (unsigned int)&frontEndDataOut->tempSkinBuf[32 * *(int*)surfPos2 + firstSurf];
+                    *(int*)surfPos2 = -1;
+
                     surfPos2 += 6;
-                    surfPos2[5] = (unsigned int)&frontEndDataOut->tempSkinBuf[32 * *surfPos2 + firstSurf];
-                    *surfPos2 = -1;
                 }
             }
             iassert(surfPos == (byte*)surfPos2);
