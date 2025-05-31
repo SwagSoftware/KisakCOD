@@ -201,20 +201,20 @@ int  R_SkinSceneDObjModels(
             unsigned int* surfPos2 = (unsigned int*)surfsBuffer;
             for (unsigned int offset = 0; offset < totalSurfaceCount; ++offset)
             {
-                if (*surfPos2 == -2)
+                if (*(int*)surfPos2 == -2)
                 {
                     surfPos2 += 14;
                 }
-                else if (*surfPos2 == -3)
+                else if (*(int*)surfPos2 == -3)
                 {
                     ++surfPos2;
                 }
                 else
                 {
-                    surfPos2 += 6;
-                    int tempSkinPos = 32 * *surfPos2;
+                    int tempSkinPos = 32 * *(int*)surfPos2;
                     surfPos2[5] = tempSkinPos + totalSurfaceIndex;
-                    *surfPos2 = tempSkinPos + skinnedCachedOffset;
+                    *(int*)surfPos2 = tempSkinPos + skinnedCachedOffset;
+                    surfPos2 += 6;
                 }
             }
             iassert(surfPos == (byte*)surfPos2);
@@ -384,8 +384,8 @@ int  R_PreSkinXSurface(
         //baseBone[1].trans[1] = 1.0;
         //*surfPos = NAN;
 
-        surfPos[12] = 1.0f;
-        surfPos[0] = NAN;
+        ((GfxModelSkinnedSurface*)surfPos)->skinnedCachedOffset = -2;
+        surfPos[13] = 1.0f;
 
         RotTransArray = &DObjGetRotTransArray(obj)[surfaceInfo->boneIndex];
         v49 = surf->vertList->boneOffset >> 6;
