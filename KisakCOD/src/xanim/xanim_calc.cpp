@@ -1,6 +1,7 @@
 #include "xanim_calc.h"
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
+#include <universal/profile.h>
 
 void __cdecl Short2LerpAsVec2(const __int16 *from, const __int16 *to, float frac, float *out)
 {
@@ -2306,5 +2307,163 @@ void __cdecl XAnim_CalcPosDeltaDuring_unsigned_char_(
         posDelta->v[1] = 0.0;
         posDelta->v[2] = 0.0;
         posDelta->v[3] = 0.0;
+    }
+}
+
+void DObjCalcAnim(const DObj_s *obj, int *partBits)
+{
+    void *v3; // esp
+    const char *v4; // eax
+    const char *v5; // eax
+    float v6; // [esp+38h] [ebp-60FCh]
+    float v7; // [esp+38h] [ebp-60FCh]
+    float v8; // [esp+3Ch] [ebp-60F8h]
+    float v9; // [esp+3Ch] [ebp-60F8h]
+    float v10; // [esp+40h] [ebp-60F4h]
+    float v11; // [esp+40h] [ebp-60F4h]
+    float v12; // [esp+44h] [ebp-60F0h]
+    float v13; // [esp+44h] [ebp-60F0h]
+    __int16 *quats; // [esp+68h] [ebp-60CCh]
+    int mm; // [esp+90h] [ebp-60A4h]
+    int numNonRootBones; // [esp+90h] [ebp-60A4h]
+    XModel *model; // [esp+94h] [ebp-60A0h]
+    int kk; // [esp+98h] [ebp-609Ch]
+    XModel **models; // [esp+9Ch] [ebp-6098h]
+    unsigned int boneIndex; // [esp+A0h] [ebp-6094h]
+    XAnimInfo *AnimInfo; // [esp+A4h] [ebp-6090h]
+    XAnimTree_s *tree; // [esp+A8h] [ebp-608Ch]
+    int jj; // [esp+ACh] [ebp-6088h]
+    int ii; // [esp+B0h] [ebp-6084h]
+    unsigned int bone; // [esp+D0h] [ebp-6064h]
+    DObjAnimMat *mat; // [esp+D4h] [ebp-6060h]
+    //float *quat; // [esp+D4h] [ebp-6060h]
+    char endEarly; // [esp+DBh] [ebp-6059h]
+    int m; // [esp+DCh] [ebp-6058h]
+    int k; // [esp+E0h] [ebp-6054h]
+    int j; // [esp+E4h] [ebp-6050h]
+    XAnimCalcAnimInfo info; // [esp+E8h] [ebp-604Ch] BYREF
+    int i; // [esp+6114h] [ebp-20h]
+    DSkel *p_skel; // [esp+6120h] [ebp-14h]
+    int v37; // [esp+6128h] [ebp-Ch]
+    void *v38; // [esp+612Ch] [ebp-8h]
+    void *retaddr; // [esp+6134h] [ebp+0h]
+
+    //v38 = retaddr;
+    //v3 = alloca(24844); // LWSS: this was for `XAnimCalcAnimInfo`, which is a bigass struct
+    Profile_Begin(309);
+    iassert(obj);
+    p_skel = (DSkel *)&obj->skel;
+
+    for (i = 0; i < 4; ++i)
+        info.animPartBits.array[i] = partBits[i];
+    for (j = 0; j < 4; ++j)
+        info.animPartBits.array[j] = ~info.animPartBits.array[j];
+    for (k = 0; k < 4; ++k)
+        info.animPartBits.array[k] |= p_skel->partBits.anim[k];
+    for (m = 0; m < 4; ++m)
+    {
+        if (info.animPartBits.array[m] != -1)
+        {
+            endEarly = false;
+            goto LABEL_20;
+        }
+    }
+    endEarly = true;
+LABEL_20:
+    if (endEarly)
+    {
+        Profile_EndInternal(0);
+    }
+    else
+    {
+        mat = p_skel->mat;
+        for (bone = 0; bone < obj->numBones; ++bone)
+        {
+            if (p_skel->partBits.anim.testBit(bone))
+            {
+                iassert(!IS_NAN(mat[bone].quat[0]) && !IS_NAN(mat[bone].quat[1]) && !IS_NAN(mat[bone].quat[2]) && !IS_NAN(mat[bone].quat[3]));
+                iassert(!IS_NAN(mat[bone].trans[0]) && !IS_NAN(mat[bone].trans[1]) && !IS_NAN(mat[bone].trans[2]));
+            }
+        }
+        for (ii = 0; ii < 4; ++ii)
+            p_skel->partBits.anim[ii] |= partBits[ii];
+        for (jj = 0; jj < 4; ++jj)
+            info.ignorePartBits.array[jj] = info.animPartBits.array[jj];
+
+        tree = obj->tree;
+        if (obj->tree && tree->children)
+        {
+            InterlockedIncrement(&tree->calcRefCount);
+            iassert(!tree->modifyRefCount);
+            info.ignorePartBits.setBit(127);
+            AnimInfo = GetAnimInfo(tree->children);
+            XAnimCalc(obj, AnimInfo, 1.0, 1, 0, &info, 0, p_skel->mat);
+            iassert(!tree->modifyRefCount);
+            InterlockedDecrement(&tree->calcRefCount);
+        }
+        boneIndex = 0;
+        models = obj->models;
+        for (kk = 0; kk < obj->numModels; ++kk)
+        {
+            model = models[kk];
+            for (mm = model->numRootBones; mm; --mm)
+            {
+                if (info.animPartBits.testBit(boneIndex))
+                {
+                    if (p_skel->partBits.anim.testBit(boneIndex))
+                    {
+                        iassert(boneIndex < obj->numBones);
+                        iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
+                        iassert(!IS_NAN(mat->trans[0]) && !IS_NAN(mat->trans[1]) && !IS_NAN(mat->trans[2]));
+                    }
+                }
+                else
+                {
+                    mat->quat[0] = 0.0;
+                    mat->quat[1] = 0.0;
+                    mat->quat[2] = 0.0;
+                    mat->quat[3] = 1.0;
+
+                    mat->trans[0] = 0.0f;
+                    mat->trans[1] = 0.0f;
+                    mat->trans[2] = 0.0f;
+
+                    mat->transWeight = 0.0f;
+                }
+                mat++;
+                ++boneIndex;
+            }
+            quats = model->quats;
+            numNonRootBones = model->numBones - model->numRootBones;
+            while (numNonRootBones)
+            {
+                if (info.animPartBits.testBit(boneIndex))
+                {
+                    if (p_skel->partBits.anim.testBit(boneIndex))
+                    {
+                        iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
+                        iassert(!IS_NAN(mat->trans[0]) && !IS_NAN(mat->trans[1]) && !IS_NAN(mat->trans[2]));
+                    }
+                }
+                else
+                {
+                    mat->quat[0] = 0.000030518509 * (float)quats[0];
+                    mat->quat[1] = 0.000030518509 * (float)quats[1];
+                    mat->quat[2] = 0.000030518509 * (float)quats[2];
+                    mat->quat[3] = 0.000030518509 * (float)quats[3];
+
+                    mat->trans[0] = 0.0f;
+                    mat->trans[1] = 0.0f;
+                    mat->trans[2] = 0.0f;
+                    
+                    mat->transWeight = 0.0f;
+                }
+                --numNonRootBones;
+                mat++;
+                ++boneIndex;
+                quats += 4;
+            }
+        }
+        Profile_EndInternal(0);
     }
 }

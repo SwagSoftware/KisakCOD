@@ -632,6 +632,7 @@ void __cdecl FixWindowsDesktop()
 bool __cdecl QuitOnError();
 void MyAssertHandler(const char *filename, int line, int type, const char *fmt, ...)
 {
+    __debugbreak();
     char shouldBreak; // [esp+3h] [ebp-5h]
     va_list va; // [esp+20h] [ebp+18h] BYREF
     

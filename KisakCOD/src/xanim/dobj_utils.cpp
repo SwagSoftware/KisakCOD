@@ -152,7 +152,7 @@ int __cdecl DObjGetLodForDist(const DObj_s *obj, int modelIndex, float dist)
 
 void __cdecl DObjGetSetBones(const DObj_s *obj, int *setPartBits)
 {
-    *setPartBits = obj->skel.partBits.anim[0];
+    setPartBits[0] = obj->skel.partBits.anim[0];
     setPartBits[1] = obj->skel.partBits.anim[1];
     setPartBits[2] = obj->skel.partBits.anim[2];
     setPartBits[3] = obj->skel.partBits.anim[3];
@@ -534,12 +534,9 @@ void __cdecl DObjCreateSkel(DObj_s *obj, char *buf, int timeStamp)
     obj->skel.timeStamp = timeStamp;
     for (i = 0; i < 4; ++i)
     {
-        if (obj->skel.partBits.anim[i])
-            MyAssertHandler(".\\xanim\\dobj_utils.cpp", 717, 0, "%s", "!obj->skel.partBits.anim[i]");
-        if (obj->skel.partBits.control[i])
-            MyAssertHandler(".\\xanim\\dobj_utils.cpp", 718, 0, "%s", "!obj->skel.partBits.control[i]");
-        if (obj->skel.partBits.skel[i])
-            MyAssertHandler(".\\xanim\\dobj_utils.cpp", 719, 0, "%s", "!obj->skel.partBits.skel[i]");
+        iassert(!obj->skel.partBits.anim[i]);
+        iassert(!obj->skel.partBits.control[i]);
+        iassert(!obj->skel.partBits.skel[i]);
     }
     //Profile_EndInternal(0);
 }

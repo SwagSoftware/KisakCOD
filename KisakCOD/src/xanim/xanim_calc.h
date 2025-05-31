@@ -90,3 +90,5 @@ void __cdecl XAnim_CalcPosDeltaDuring_unsigned_char_(
     float time,
     int frameCount,
     float4 *posDelta);
+
+void DObjCalcAnim(const struct DObj_s *obj, int *partBits);

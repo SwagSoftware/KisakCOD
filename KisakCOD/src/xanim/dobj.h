@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ode/ode.h>
+#include <qcommon/bitarray.h>
 
 struct PhysPreset;
 
@@ -30,9 +31,12 @@ struct DObjAnimMat // sizeof=0x20
 
 struct DSkelPartBits // sizeof=0x30
 {                                       // ...
-    int anim[4];                        // ...
-    int control[4];                     // ...
-    int skel[4];                        // ...
+    //int anim[4];                        // ...
+    //int control[4];                     // ...
+    //int skel[4];                        // ...
+    bitarray<128> anim;
+    bitarray<128> control;
+    bitarray<128> skel;
 };
 
 struct DSkel // sizeof=0x38

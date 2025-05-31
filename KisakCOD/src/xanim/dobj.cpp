@@ -204,11 +204,9 @@ LABEL_14:
 
 bool __cdecl DObjSkelIsBoneUpToDate(DObj_s *obj, int boneIndex)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 458, 0, "%s", "obj");
-    if (obj == (DObj_s *)-20)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 461, 0, "%s", "skel");
-    return (obj->skel.partBits.skel[boneIndex >> 5] & (0x80000000 >> (boneIndex & 0x1F))) != 0;
+    iassert(obj);
+
+    return obj->skel.partBits.skel.testBit(boneIndex);
 }
 
 void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree)
