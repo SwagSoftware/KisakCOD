@@ -116,7 +116,7 @@ int  R_SkinSceneDObjModels(
         totalBones += bones;
 
         int cullLod = sceneEnt->cull.lods[lod];
-        if (!cullLod) continue;
+        if (cullLod < 0) continue;
 
         GfxModelSurfaceInfo targBoneIndexHigh;
         targBoneIndexHigh.boneIndex = totalBones;
@@ -155,10 +155,10 @@ int  R_SkinSceneDObjModels(
                 skinCmd.surfacePartBits[0] |= partbits[0];
 
                 int surfBufSize = R_PreSkinXSurface(obj, surface, &targBoneIndexHigh, &numSkinnedVerts, (float*)surfPos);
-
-                // ???
-                *(XSurface**)(surfPos + 4) = surface;
-                *(GfxModelSurfaceInfo*)(surfPos + 8) = targBoneIndexHigh;
+                
+                GfxModelSkinnedSurface* skinnedSurface = (GfxModelSkinnedSurface*)surfPos;
+                skinnedSurface->xsurf = surface;
+                skinnedSurface->info = targBoneIndexHigh;
 
                 iassert(surfBufSize);
                 surfPos += surfBufSize;
