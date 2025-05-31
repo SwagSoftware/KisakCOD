@@ -8,7 +8,6 @@ int aabbTreeCount;
 float *sortedMaxs;
 float *sortedMins;
 float *sortedCoplanar;
-char lineBuffer[256];
 
 int __cdecl compare_floats(float *e0, float *e1)
 {

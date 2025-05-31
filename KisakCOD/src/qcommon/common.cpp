@@ -706,7 +706,7 @@ void __cdecl Com_SetLocalizedErrorMessage(char* localizedErrorMessage, const cha
     else
         Dvar_SetString((dvar_s*)ui_errorTitle, (char*)"");
     Dvar_SetString((dvar_s*)ui_errorMessage, localizedErrorMessage);
-    I_strncpyz(com_errorMessage, localizedErrorMessage, 4096);
+    if (com_errorMessage != localizedErrorMessage) I_strncpyz(com_errorMessage, localizedErrorMessage, 4096);
 }
 
 void __cdecl Com_SetErrorMessage(char* errorMessage)
@@ -756,8 +756,6 @@ void __cdecl  Com_ErrorAbort()
 
 void Com_Error(errorParm_t code, const char* fmt, ...)
 {
-    __debugbreak();
-
     jmp_buf * Value; // eax
     va_list va; // [esp+18h] [ebp+10h] BYREF
 
@@ -1176,12 +1174,22 @@ void __cdecl Com_Init(char* commandLine)
     }
 }
 
+bool shouldQuitOnError;
+void __cdecl RefreshQuitOnErrorCondition()
+{
+    bool v0; // [esp+0h] [ebp-4h]
+
+    if (Dvar_IsSystemActive())
+    {
+        v0 = Dvar_GetBool("QuitOnError") || Dvar_GetInt("r_vc_compile") == 2;
+        shouldQuitOnError = v0;
+    }
+}
+
 bool __cdecl QuitOnError()
 {
-    // KISAKTODO
-    return true;
-    //RefreshQuitOnErrorCondition();
-    //return shouldQuitOnError;
+    RefreshQuitOnErrorCondition();
+    return shouldQuitOnError;
 }
 
 void Com_ErrorCleanup()

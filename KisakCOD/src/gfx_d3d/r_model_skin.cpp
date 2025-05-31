@@ -28,7 +28,7 @@ void R_SkinXModelCmd(_WORD *data)
     unsigned int* surfPos = (unsigned int*)cmd->modelSurfs;
 
     int boneIndex = -1;
-    DObjSkelMat boneSkelMats[128];
+    DObjSkelMat __declspec(align(16)) boneSkelMats[2048];
     memset(boneSkelMats, 0, sizeof(boneSkelMats));
 
     for (unsigned int i = 0; i < cmd->surfCount; i++)

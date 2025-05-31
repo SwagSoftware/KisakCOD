@@ -47,7 +47,6 @@ int eventTail;
 
 SysInfo sys_info;
 
-bool shouldQuitOnError;
 int client_state;
 
 cmd_function_s Sys_In_Restart_f_VAR;
@@ -369,17 +368,6 @@ void Sys_SpawnQuitProcess()
 			v0 = va("EXE_ERR_COULDNT_START_PROCESS", sys_exitCmdLine, msgBuf, error);
 			Com_Error(ERR_DROP, v0);
 		}
-	}
-}
-
-void __cdecl RefreshQuitOnErrorCondition()
-{
-	bool v0; // [esp+0h] [ebp-4h]
-
-	if (Dvar_IsSystemActive())
-	{
-		v0 = Dvar_GetBool("QuitOnError") || Dvar_GetInt("r_vc_compile") == 2;
-		shouldQuitOnError = v0;
 	}
 }
 

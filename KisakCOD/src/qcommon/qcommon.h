@@ -166,6 +166,8 @@ enum $6ABDC6367E3229B6421BFD1B2626A094 : __int32
 void QDECL Com_Printf(int channel, const char* fmt, ...);
 void QDECL Com_Error(errorParm_t code, const char* fmt, ...);
 
+void QDECL RefreshQuitOnErrorCondition();
+
 // commandLine should not include the executable name (argv[0])
 void Com_Init(char* commandLine);
 void Com_Frame(void);

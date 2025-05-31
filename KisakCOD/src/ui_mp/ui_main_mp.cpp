@@ -3139,23 +3139,23 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                                                                                                             //    *(_DWORD *)&sharedUiInfo.gap8EB4[4 * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128] - 7100]);
                                                                                                             //if (ServerPunkBuster != 1 || Dvar_GetBool("cl_punkbuster"))
                                                                                                             //{
-                                                                                                            //    if (*(int *)&sharedUiInfo.serverStatus.string[1128] >= 0
-                                                                                                            //        && *(int *)&sharedUiInfo.serverStatus.string[1128] < *(int *)&sharedUiInfo.gap8EB4[72900])
-                                                                                                            //    {
-                                                                                                            //        LAN_GetServerAddressString(
-                                                                                                            //            ui_netSource->current.integer,
-                                                                                                            //            *(_DWORD *)&sharedUiInfo.gap8EB4[4
-                                                                                                            //            * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128]
-                                                                                                            //            - 7100],
-                                                                                                            //            v44,
-                                                                                                            //            1024);
-                                                                                                            //        v16 = va("connect %s\n", v44);
-                                                                                                            //        Cbuf_AddText(localClientNum, v16);
-                                                                                                            //    }
+                                                                                                                if (*(int *)&sharedUiInfo.serverStatus.string[1128] >= 0
+                                                                                                                    && *(int *)&sharedUiInfo.serverStatus.string[1128] < *(int *)&sharedUiInfo.gap8EB4[72900])
+                                                                                                                {
+                                                                                                                    LAN_GetServerAddressString(
+                                                                                                                        ui_netSource->current.integer,
+                                                                                                                        *(_DWORD *)&sharedUiInfo.gap8EB4[4
+                                                                                                                        * *(_DWORD *)&sharedUiInfo.serverStatus.string[1128]
+                                                                                                                        - 7100],
+                                                                                                                        v44,
+                                                                                                                        1024);
+                                                                                                                    v16 = va("connect %s\n", v44);
+                                                                                                                    Cbuf_AddText(localClientNum, v16);
+                                                                                                                }
                                                                                                             //}
                                                                                                             //else
                                                                                                             //{
-                                                                                                                Menus_OpenByName(dc, "joinpb_popmenu");
+                                                                                                            //  Menus_OpenByName(dc, "joinpb_popmenu");
                                                                                                             //}
                                                                                                         }
                                                                                                     }
