@@ -912,12 +912,10 @@ void __cdecl CL_ParsePacketClients(
                 oldnum = oldstate->clientIndex;
             }
         }
-        
-        iassert(oldnum > newnum);
-
-        //if (old_num > newnum)
+        else
         {
             // delta from baseline
+            iassert(oldnum > newnum);
             if (cl_shownet->current.integer == 3)
                 Com_Printf(14, "%3i:  baseline: %i\n", msg->readcount, newnum);
             memset(&dummy, 0, sizeof(dummy));

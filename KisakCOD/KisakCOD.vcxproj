@@ -92,6 +92,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>mss32.lib;dsound.lib;ddraw.lib;d3dx9d.lib;d3d9.lib;ws2_32.lib;winmm.lib;$(CoreLibraryDependencies);$(ProjectDir)src\binklib\binkw32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

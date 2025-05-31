@@ -165,9 +165,9 @@ void  Scr_SetThreadNotifyName(unsigned int startLocalId, unsigned int stringValu
 	iassert(((entryValue->w.type & VAR_MASK) == VAR_THREAD));
 
 	entryValue->w.status &= 0xFFFFFFE0;
-	entryValue->w.status = entryValue->w.status;
+	entryValue->w.status = (unsigned char)entryValue->w.status;
 	entryValue->w.type |= VAR_NOTIFY_THREAD;
-	entryValue->w.name |= stringValue << VAR_NAME_BITS;
+	entryValue->w.notifyName |= stringValue << VAR_NAME_BITS;
 }
 
 unsigned short  Scr_GetThreadNotifyName(unsigned int startLocalId)
@@ -175,7 +175,7 @@ unsigned short  Scr_GetThreadNotifyName(unsigned int startLocalId)
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.type & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.type & VAR_MASK) == VAR_NOTIFY_THREAD);
 
-	return scrVarGlob.variableList[startLocalId + VARIABLELIST_PARENT_BEGIN].w.status >> 8;
+	return scrVarGlob.variableList[startLocalId + VARIABLELIST_PARENT_BEGIN].w.notifyName >> VAR_NAME_BITS;
 }
 
 void  Scr_SetThreadWaitTime(unsigned int startLocalId, unsigned int waitTime)
@@ -190,7 +190,7 @@ void  Scr_SetThreadWaitTime(unsigned int startLocalId, unsigned int waitTime)
 	entryValue->w.status = entryValue->w.status;
 	entryValue->w.status |= 0x10u;
 
-	scrVarGlob.variableList[startLocalId + VARIABLELIST_PARENT_BEGIN].w.status |= waitTime << 8;
+	entryValue->w.waitTime |= waitTime << VAR_NAME_BITS;
 }
 
 void  Scr_ClearWaitTime(unsigned int startLocalId)
@@ -210,7 +210,7 @@ unsigned int  Scr_GetThreadWaitTime(unsigned int startLocalId)
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.type & VAR_MASK) == VAR_TIME_THREAD);
 
-	return scrVarGlob.variableList[startLocalId + VARIABLELIST_PARENT_BEGIN].w.status >> 8;
+	return scrVarGlob.variableList[startLocalId + VARIABLELIST_PARENT_BEGIN].w.waitTime >> VAR_NAME_BITS;
 }
 
 unsigned int  GetParentLocalId(unsigned int threadId)
@@ -218,7 +218,7 @@ unsigned int  GetParentLocalId(unsigned int threadId)
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) == VAR_CHILD_THREAD);
 
-	return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.status >> 8;
+	return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.parentLocalId >> VAR_NAME_BITS;
 }
 
 unsigned int  GetSafeParentLocalId(unsigned int threadId)
@@ -228,7 +228,7 @@ unsigned int  GetSafeParentLocalId(unsigned int threadId)
 		&& (scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) <= VAR_CHILD_THREAD);
 
 	if ((scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK) == VAR_CHILD_THREAD)
-		return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.status >> 8;
+		return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.parentLocalId >> VAR_NAME_BITS;
 	else
 		return 0;
 }
@@ -239,8 +239,8 @@ unsigned int  GetStartLocalId(unsigned int threadId)
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) >= VAR_THREAD 
 		&& (scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) <= VAR_CHILD_THREAD);
 
-	while ((scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.status & VAR_MASK) == VAR_CHILD_THREAD)
-		threadId = scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.status >> 8;
+	while ((scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK) == VAR_CHILD_THREAD)
+		threadId = scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.parentLocalId >> VAR_NAME_BITS;
 
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) >= VAR_THREAD

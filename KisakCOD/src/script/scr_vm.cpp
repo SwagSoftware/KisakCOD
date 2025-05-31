@@ -844,7 +844,7 @@ void __cdecl VM_CancelNotifyInternal(
     unsigned int Variable; // eax
     unsigned int v6; // eax
 
-    if (stringValue != (unsigned __int16)Scr_GetThreadNotifyName(startLocalId))
+    if (stringValue != Scr_GetThreadNotifyName(startLocalId))
         MyAssertHandler(".\\script\\scr_vm.cpp", 2724, 0, "%s", "stringValue == Scr_GetThreadNotifyName( startLocalId )");
     Variable = FindVariable(notifyListOwnerId, 0x18000u);
     if (notifyListId != FindObject(Variable))
@@ -1183,7 +1183,7 @@ void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue,
                     {
                         size = *stackValue->pos;
                         iassert(size >= 0);
-                        iassert(size < size <= stackValue->size);
+                        iassert(size <= stackValue->size);
                         buf = &stackValue->buf[5 * (stackValue->size - size)];
 
                         for (currentValue = top; size; --currentValue)

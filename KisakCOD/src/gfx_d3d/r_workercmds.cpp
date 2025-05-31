@@ -93,7 +93,7 @@ int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
     restart_2:
         processed = 0;
         type = g_waitTypeMainThread;
-        if (g_waitTypeMainThread >= 0 && g_workerCmds[g_waitTypeMainThread].outSize > 0)
+        if (type >= 0 && g_workerCmds[type].outSize > 0)
         {
             while (R_ProcessWorkerCmd(type))
             {
@@ -184,7 +184,7 @@ void __cdecl R_ProcessWorkerCmds()
     restart_1:
         processed = 0;
         type = g_waitTypeMainThread;
-        if (g_waitTypeMainThread >= 0 && g_workerCmds[g_waitTypeMainThread].outSize > 0)
+        if (type >= 0 && g_workerCmds[type].outSize > 0)
         {
             while (R_ProcessWorkerCmd(type))
                 processed = 1;
