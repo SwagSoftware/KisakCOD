@@ -957,7 +957,7 @@ void __cdecl ReplaceConsoleInputArgument(int replaceCount, char *replacement)
     if (*replacement)
     {
         //for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(*(char *)(cmdLineLen + 11748111)); --cmdLineLen);
-        for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(*(char *)(g_consoleField.buffer[cmdLineLen])); --cmdLineLen);
+        for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(g_consoleField.buffer[cmdLineLen]); --cmdLineLen);
 
         if (replaceCount >= cmdLineLen)
         {
