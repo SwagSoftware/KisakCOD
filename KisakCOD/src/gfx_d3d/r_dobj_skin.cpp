@@ -109,13 +109,14 @@ int  R_SkinSceneDObjModels(
 
     while (lod < DObjGetNumModels(obj))
     {
-        const XModel* model = DObjGetModel(obj, lod++);
+        const XModel* model = DObjGetModel(obj, lod);
         iassert(model);
 
         int bones = XModelNumBones(model);
         totalBones += bones;
 
         int cullLod = sceneEnt->cull.lods[lod];
+        lod++;
         if (cullLod < 0) continue;
 
         GfxModelSurfaceInfo targBoneIndexHigh;
