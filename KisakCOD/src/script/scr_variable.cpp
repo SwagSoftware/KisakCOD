@@ -187,7 +187,7 @@ void  Scr_SetThreadWaitTime(unsigned int startLocalId, unsigned int waitTime)
 	iassert(((entryValue->w.type & VAR_MASK) == VAR_THREAD) || !Scr_GetThreadNotifyName(startLocalId));
 
 	entryValue->w.status &= 0xFFFFFFE0;
-	entryValue->w.status = entryValue->w.status;
+	entryValue->w.status = (unsigned char)entryValue->w.status;
 	entryValue->w.status |= 0x10u;
 
 	entryValue->w.waitTime |= waitTime << VAR_NAME_BITS;
@@ -305,7 +305,7 @@ unsigned int  AllocValue(void)
 
 	iassert(!(entryValue->w.type & VAR_MASK));
 
-	entryValue->w.status = entryValue->w.status;
+	entryValue->w.status = (unsigned char)entryValue->w.status;
 	return entry->hash.id;
 }
 
