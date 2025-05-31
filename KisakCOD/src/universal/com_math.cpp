@@ -2682,6 +2682,7 @@ void __cdecl LocalTransformVector(const float *in1, const float4 *in2, float *ou
     out[2] = *in1 * in2->v[2] + in1[1] * in2[1].v[2] + in1[2] * in2[2].v[2] + in2[3].v[2];
 }
 
+#if 1
 void __fastcall LocalConvertQuatToSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat)
 {
     double v2; // fp0
@@ -2736,6 +2737,7 @@ void __fastcall LocalConvertQuatToSkelMat(const DObjAnimMat *mat, DObjSkelMat *s
     skelMat->origin[2] = mat->trans[2];
     skelMat->origin[3] = 1.0;
 }
+#endif
 
 void __fastcall LocalQuatMultiplyInverse(const float *in1, const float *in2, float *out)
 {
@@ -2762,8 +2764,10 @@ void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, 
         + mat->origin[2];
 }
 
+#if 1
 void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat)
 {
+#if 1
     float transWeight; // xmm4_4
     float v3; // xmm2_4
     float v4; // xmm1_4
@@ -2882,7 +2886,61 @@ void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelM
     //    + (float)(mat->trans[2] * v24))
     //    ^ _mask__NegFloat_;
     //LODWORD(skelMat->origin.v[3]) = FLOAT_1_0;
+#else
+    float v44, v43, v42, v41;
+
+    v44 = mat->quat[0];
+    if ((LODWORD(v44) & 0x7F800000) == 0x7F800000
+        || (v43 = mat->quat[1], (LODWORD(v43) & 0x7F800000) == 0x7F800000)
+        || (v42 = mat->quat[2], (LODWORD(v42) & 0x7F800000) == 0x7F800000)
+        || (v41 = mat->quat[3], (LODWORD(v41) & 0x7F800000) == 0x7F800000))
+    {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
+            581,
+            0,
+            "%s",
+            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
+    }
+    float transWeight = mat->transWeight;
+    if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
+    MyAssertHandler(
+        "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
+        582,
+        0,
+        "%s",
+        "!IS_NAN(mat->transWeight)");
+    
+    float v39[3];
+    Vec3Scale(mat->quat, mat->transWeight, v39);
+    float v38 = v39[0] * mat->quat[0];
+    float v37 = v39[0] * mat->quat[1];
+    float v36 = v39[0] * mat->quat[2];
+    float v35 = v39[0] * mat->quat[3];
+    float v34 = v39[1] * mat->quat[1];
+    float v33 = v39[1] * mat->quat[2];
+    float v32 = v39[1] * mat->quat[3];
+    float v31 = v39[2] * mat->quat[2];
+    float v30 = v39[2] * mat->quat[3];
+    skelMat->axis[0][0] = 1.0 - (v34 + v31);
+    skelMat->axis[0][1] = v37 - v30;
+    skelMat->axis[0][2] = v36 + v32;
+    skelMat->axis[0][3] = 0.0;
+    skelMat->axis[1][0] = v37 + v30;
+    skelMat->axis[1][1] = 1.0 - (v38 + v31);
+    skelMat->axis[1][2] = v33 - v35;
+    skelMat->axis[1][3] = 0.0;
+    skelMat->axis[2][0] = v36 - v32;
+    skelMat->axis[2][1] = v33 + v35;
+    skelMat->axis[2][2] = 1.0 - (v38 + v34);
+    skelMat->axis[2][3] = 0.0;
+    skelMat->origin[0] = -(mat->trans[0] * skelMat->axis[0][0] + mat->trans[1] * skelMat->axis[1][0] + mat->trans[2] * skelMat->axis[2][0]);
+    skelMat->origin[1] = -(mat->trans[0] * skelMat->axis[0][1] + mat->trans[1] * skelMat->axis[1][1] + mat->trans[2] * skelMat->axis[2][1]);
+    skelMat->origin[2] = -(mat->trans[0] * skelMat->axis[0][2] + mat->trans[1] * skelMat->axis[1][2] + mat->trans[2] * skelMat->axis[2][2]);
+    skelMat->origin[3] = 1.0;
+#endif
 }
+#endif
 
 void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear, float zFar)
 {
