@@ -1309,13 +1309,13 @@ int __cdecl UI_OwnerDrawWidth(int ownerDraw, Font_s *font, float scale)
     case 220:
         if (ui_netSource->current.integer > sharedUiInfo.numJoinGameTypes)
             Dvar_SetInt((dvar_s*)ui_netSource, 0);
-        v3 = va("EXE_NETSOURCE_%s", netSources[ui_netSource->current.integer]);
+        v3 = va("EXE_NETSOURCE\x14%s", netSources[ui_netSource->current.integer]);
         s = SEH_LocalizeTextMessage(v3, "net source", LOCMSG_SAFE);
         break;
     case 222:
         if ((unsigned int)ui_serverFilterType >= 2)
             ui_serverFilterType = 0;
-        v4 = va("EXE_SERVERFILTER_%s", serverFilters[ui_serverFilterType].description);
+        v4 = va("EXE_SERVERFILTER\x14%s", serverFilters[ui_serverFilterType].description);
         s = SEH_LocalizeTextMessage(v4, "server filter", LOCMSG_SAFE);
         break;
     case 247:
@@ -1640,7 +1640,7 @@ void __cdecl UI_DrawNetFilter(
 
     if ((unsigned int)ui_serverFilterType >= 2)
         ui_serverFilterType = 0;
-    v6 = va("EXE_SERVERFILTER_%s", serverFilters[ui_serverFilterType].description);
+    v6 = va("EXE_SERVERFILTER\x14%s", serverFilters[ui_serverFilterType].description);
     pszTeanslation = SEH_LocalizeTextMessage(v6, "server filter", LOCMSG_SAFE);
     UI_DrawText(
         &scrPlaceView[localClientNum],
@@ -1667,7 +1667,7 @@ void __cdecl UI_DrawNetSource(
     const char *v6; // eax
     char *translation; // [esp+1Ch] [ebp-4h]
 
-    v6 = va("EXE_NETSOURCE_%s", netSources[ui_netSource->current.integer]);
+    v6 = va("EXE_NETSOURCE\x14%s", netSources[ui_netSource->current.integer]);
     translation = SEH_LocalizeTextMessage(v6, "net source", LOCMSG_SAFE);
     UI_DrawText(
         &scrPlaceView[localClientNum],
