@@ -2578,7 +2578,7 @@ void __cdecl Vec4MadMad(
     const float *dir1,
     float *result)
 {
-    *result = scale0 * *dir0 + *start + scale1 * *dir1;
+    result[0] = scale0 * dir0[0] + start[0] + scale1 * dir1[0];
     result[1] = scale0 * dir0[1] + start[1] + scale1 * dir1[1];
     result[2] = scale0 * dir0[2] + start[2] + scale1 * dir1[2];
     result[3] = scale0 * dir0[3] + start[3] + scale1 * dir1[3];

@@ -188,9 +188,7 @@ void __cdecl XAnimClearRotTransArray(const DObj_s *obj, DObjAnimMat *rotTransArr
 
     for (modelPartIndex = 0; (int)modelPartIndex < obj->numBones; ++modelPartIndex)
     {
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((info->ignorePartBits.array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        if (!info->ignorePartBits.testBit(modelPartIndex))
         {
             rotTransArray->quat[0] = 0.0;
             rotTransArray->quat[1] = 0.0;
@@ -215,10 +213,6 @@ void __cdecl XAnimCalcParts_unsigned_short_(
 {
     unsigned __int64 v6; // kr00_8
     unsigned __int64 v7; // rax
-    float4 v8; // [esp-1Ch] [ebp-30Ch]
-    float4 v9; // [esp-1Ch] [ebp-30Ch]
-    float4 v10; // [esp-Ch] [ebp-2FCh]
-    float4 v11; // [esp-Ch] [ebp-2FCh]
     int v12; // [esp+34h] [ebp-2BCh]
     int v13; // [esp+50h] [ebp-2A0h]
     float scale; // [esp+54h] [ebp-29Ch]
@@ -256,7 +250,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     float *v46; // [esp+154h] [ebp-19Ch]
     float v47[5]; // [esp+158h] [ebp-198h] BYREF
     float *quat; // [esp+16Ch] [ebp-184h]
-    float dir[2]; // [esp+170h] [ebp-180h] BYREF
+    float dir[4]{0.0f, 0.0f, 0.0f, 0.0f}; // [esp+170h] [ebp-180h] BYREF
     __int64 v50; // [esp+178h] [ebp-178h]
     float v51; // [esp+184h] [ebp-16Ch]
     float *result; // [esp+188h] [ebp-168h]
@@ -284,7 +278,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     __int16 v73[4];
     float v74; // [esp+1E4h] [ebp-10Ch]
     float v75; // [esp+1E8h] [ebp-108h]
-    float v76; // [esp+1ECh] [ebp-104h] BYREF
+    float lerpFrac2; // [esp+1ECh] [ebp-104h] BYREF
     //__int64 v77; // [esp+1F0h] [ebp-100h]
     __int16 v77[4];
     float v78; // [esp+1F8h] [ebp-F8h]
@@ -295,7 +289,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     __int16 v82[4];
     float v83; // [esp+210h] [ebp-E0h]
     float v84; // [esp+214h] [ebp-DCh]
-    float v85; // [esp+218h] [ebp-D8h] BYREF
+    float lerpFrac; // [esp+218h] [ebp-D8h] BYREF
     //__int64 v86; // [esp+21Ch] [ebp-D4h]
     __int16 v86[4];
     float v87; // [esp+224h] [ebp-CCh]
@@ -332,72 +326,44 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     unsigned __int16 *indices; // [esp+2E8h] [ebp-8h]
     int modelPartIndex; // [esp+2ECh] [ebp-4h]
 
-    if (!parts->numframes)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 741, 0, "%s", "parts->numframes");
-    if (time < 0.0)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 742, 0, "%s", "time >= 0");
-    if (time >= 1.0)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 743, 0, "%s", "time < 1.f");
-    if (parts->dataByte)
-        v20 = parts->dataByte;
-    else
-        v20 = 0;
-    dataByte = v20;
-    if (parts->dataShort)
-        v19 = parts->dataShort;
-    else
-        v19 = 0;
-    dataShort = v19;
-    if (parts->dataInt)
-        v18 = parts->dataInt;
-    else
-        v18 = 0;
-    dataInt = v18;
+    iassert(parts->numframes);
+    iassert(time >= 0);
+    iassert(time < 1.f);
+
+    dataByte = parts->dataByte;
+    dataShort = parts->dataShort;
+    dataInt = parts->dataInt;
     randomDataByte = parts->randomDataByte;
     randomDataShort = parts->randomDataShort;
     randomDataInt = parts->randomDataInt;
     indices = parts->indices._2;
     XAnim_SetTime(time, parts->numframes, &animTime);
     animPartIndex = 0;
+
     size = parts->boneCount[0];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                766,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
+        if (!ignorePartBits->testBit(modelPartIndex))
             rotTransArray[modelPartIndex].quat[3] = rotTransArray[modelPartIndex].quat[3] + weightScale;
+
         ++animPartIndex;
     }
+
     size += parts->boneCount[1];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                915,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
         if (tableSize >= 64)
         {
             v70 = (unsigned short*)dataShort;
             v68 = ((tableSize - 1) >> 8) + 1;
             dataShort += v68 + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 indices += tableSize + 1;
                 v65 = 0;
@@ -420,9 +386,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         {
             v70 = (unsigned short *)dataShort;
             dataShort += tableSize + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 v65 = 0;
                 goto LABEL_45;
@@ -434,14 +398,14 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         if (v65)
         {
             frame = &randomDataShort[2 * keyFrameIndex];
-            fromVec.v[0] = 0.0;
-            fromVec.v[1] = 0.0;
-            fromVec.v[2] = *frame * 0.00003051850944757462;
-            fromVec.v[3] = frame[1] * 0.00003051850944757462;
-            toVec.v[0] = 0.0;
-            toVec.v[1] = 0.0;
-            toVec.v[2] = frame[2] * 0.00003051850944757462;
-            toVec.v[3] = frame[3] * 0.00003051850944757462;
+            fromVec.v[0] = 0.0f;
+            fromVec.v[1] = 0.0f;
+            fromVec.v[2] = (float)frame[0] * 0.00003051850944757462;
+            fromVec.v[3] = (float)frame[1] * 0.00003051850944757462;
+            toVec.v[0] = 0.0f;
+            toVec.v[1] = 0.0f;
+            toVec.v[2] = (float)frame[2] * 0.00003051850944757462;
+            toVec.v[3] = (float)frame[3] * 0.00003051850944757462;
             v61 = keyFrameLerpFrac;
             start = rotTransArray[modelPartIndex].quat;
             scale1 = weightScale * keyFrameLerpFrac;
@@ -451,27 +415,21 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         ++animPartIndex;
         randomDataShort += 2 * tableSize + 2;
     }
+
     size += parts->boneCount[2];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                946,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
+
         if (tableSize >= 64)
         {
             v60 = (unsigned short *)dataShort;
             v58 = ((tableSize - 1) >> 8) + 1;
             dataShort += v58 + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 indices += tableSize + 1;
                 v55 = 0;
@@ -494,9 +452,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         {
             v60 = (unsigned short *)dataShort;
             dataShort += tableSize + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 v55 = 0;
                 goto LABEL_67;
@@ -508,14 +464,15 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         if (v55)
         {
             v99 = &randomDataShort[4 * v98];
-            dir0[0] = *v99 * 0.00003051850944757462;
-            dir0[1] = v99[1] * 0.00003051850944757462;
-            dir0[2] = v99[2] * 0.00003051850944757462;
-            dir0[3] = v99[3] * 0.00003051850944757462;
-            dir1[0] = v99[4] * 0.00003051850944757462;
-            dir1[1] = v99[5] * 0.00003051850944757462;
-            dir1[2] = v99[6] * 0.00003051850944757462;
-            dir1[3] = v99[7] * 0.00003051850944757462;
+
+            dir0[0] = (float)v99[0] * 0.00003051850944757462;
+            dir0[1] = (float)v99[1] * 0.00003051850944757462;
+            dir0[2] = (float)v99[2] * 0.00003051850944757462;
+            dir0[3] = (float)v99[3] * 0.00003051850944757462;
+            dir1[0] = (float)v99[4] * 0.00003051850944757462;
+            dir1[1] = (float)v99[5] * 0.00003051850944757462;
+            dir1[2] = (float)v99[6] * 0.00003051850944757462;
+            dir1[3] = (float)v99[7] * 0.00003051850944757462;
             v51 = v101;
             result = rotTransArray[modelPartIndex].quat;
             v53 = weightScale * v101;
@@ -525,145 +482,124 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         ++animPartIndex;
         randomDataShort += 4 * tableSize + 4;
     }
+
     size += parts->boneCount[3];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                973,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        if (ignorePartBits->testBit(modelPartIndex))
         {
             frameVec.v[0] = 0.0;
             frameVec.v[1] = 0.0;
-            frameVec.v[2] = *dataShort * 0.00003051850944757462;
+            frameVec.v[2] = dataShort[0] * 0.00003051850944757462;
             frameVec.v[3] = dataShort[1] * 0.00003051850944757462;
             quat = rotTransArray[modelPartIndex].quat;
             dir[0] = 0.0;
             dir[1] = 0.0;
-            v50 = *&frameVec.unitVec[2].packed;
+            //v50 = *&frameVec.unitVec[2].packed;
+            dir[2] = frameVec.v[2];
+            dir[3] = 0.0f;
             Vec4Mad(quat, weightScale, dir, quat);
         }
         ++animPartIndex;
         dataShort += 2;
     }
+
     size += parts->boneCount[4];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                992,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
-            v93 = *dataShort * 0.00003051850944757462;
-            v94 = dataShort[1] * 0.00003051850944757462;
-            v95 = dataShort[2] * 0.00003051850944757462;
-            v96 = dataShort[3] * 0.00003051850944757462;
             v46 = rotTransArray[modelPartIndex].quat;
-            v47[0] = v93;
-            v47[1] = v94;
-            v47[2] = v95;
-            v47[3] = v96;
+            v47[0] = dataShort[0] * 0.00003051850944757462;
+            v47[1] = dataShort[1] * 0.00003051850944757462;
+            v47[2] = dataShort[2] * 0.00003051850944757462;
+            v47[3] = dataShort[3] * 0.00003051850944757462;
             Vec4Mad(v46, weightScale, v47, v46);
         }
         ++animPartIndex;
         dataShort += 4;
     }
-    while (animPartIndex < size)
-    {
-        modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1010,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
-        {
-            LODWORD(v34[5]) = (uint32)dataShort;
-            v6 = *dataShort << 32;
-            v7 = dataShort[1] << 16;
-            LODWORD(v43) = dataShort[2] | v7;
-            HIDWORD(v43) = HIDWORD(v7) | HIDWORD(v6);
-            v39 = v43 & 0x7FFF;
-            LODWORD(v40) = -2 * (v43 & 0x4000);
-            v[0] = (v40 - 3.0) * 256.015625;
-            v37 = (v43 >> 15) & 0x7FFF;
-            LODWORD(v38) = v37 + 1077936128 - 2 * ((v43 >> 15) & 0x4000);
-            v[1] = (v38 - 3.0) * 256.015625;
-            v35 = (v43 >> 30) & 0x7FFF;
-            LODWORD(v36) = v35 + 1077936128 - 2 * ((v43 >> 30) & 0x4000);
-            v[2] = (v36 - 3.0) * 256.015625;
-            v[3] = 1.0;
-            v45 = Vec4Length(v);
-            if ((v43 & 0x800000000000LL) != 0)
-                v15 = -1.0;
-            else
-                v15 = 1.0;
-            v41 = v15;
-            scale = v15 / v45;
-            Vec4Scale(v, scale, v);
-            v42 = (v43 >> 45) & 3;
-            v89 = v[v42];
-            v90 = v[(((v43 >> 45) & 3) + 1) & 3];
-            v91 = v[(((v43 >> 45) & 3) + 2) & 3];
-            v92 = v[(((v43 >> 45) & 3) + 3) & 3];
-            v33 = rotTransArray[modelPartIndex].quat;
-            v34[0] = v89;
-            v34[1] = v90;
-            v34[2] = v91;
-            v34[3] = v92;
-            Vec4Mad(v33, weightScale, v34, v33);
-        }
-        ++animPartIndex;
-        dataShort += 3;
-    }
+
+    // LWSS: not possible for this loop to enter. (Removed in blops)
+    //while (animPartIndex < size)
+    //{
+    //    modelPartIndex = animToModel[animPartIndex];
+    //    if (modelPartIndex >= 0x80)
+    //        MyAssertHandler(
+    //            ".\\xanim\\xanim_calc.cpp",
+    //            1010,
+    //            0,
+    //            "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
+    //            modelPartIndex,
+    //            128);
+    //    if (modelPartIndex >= 0x80)
+    //        MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
+    //    if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+    //    {
+    //        LODWORD(v34[5]) = (uint32)dataShort;
+    //        v6 = *dataShort << 32;
+    //        v7 = dataShort[1] << 16;
+    //        LODWORD(v43) = dataShort[2] | v7;
+    //        HIDWORD(v43) = HIDWORD(v7) | HIDWORD(v6);
+    //        v39 = v43 & 0x7FFF;
+    //        LODWORD(v40) = -2 * (v43 & 0x4000);
+    //        v[0] = (v40 - 3.0) * 256.015625;
+    //        v37 = (v43 >> 15) & 0x7FFF;
+    //        LODWORD(v38) = v37 + 1077936128 - 2 * ((v43 >> 15) & 0x4000);
+    //        v[1] = (v38 - 3.0) * 256.015625;
+    //        v35 = (v43 >> 30) & 0x7FFF;
+    //        LODWORD(v36) = v35 + 1077936128 - 2 * ((v43 >> 30) & 0x4000);
+    //        v[2] = (v36 - 3.0) * 256.015625;
+    //        v[3] = 1.0;
+    //        v45 = Vec4Length(v);
+    //        if ((v43 & 0x800000000000LL) != 0)
+    //            v15 = -1.0;
+    //        else
+    //            v15 = 1.0;
+    //        v41 = v15;
+    //        scale = v15 / v45;
+    //        Vec4Scale(v, scale, v);
+    //        v42 = (v43 >> 45) & 3;
+    //        v89 = v[v42];
+    //        v90 = v[(((v43 >> 45) & 3) + 1) & 3];
+    //        v91 = v[(((v43 >> 45) & 3) + 2) & 3];
+    //        v92 = v[(((v43 >> 45) & 3) + 3) & 3];
+    //        v33 = rotTransArray[modelPartIndex].quat;
+    //        v34[0] = v89;
+    //        v34[1] = v90;
+    //        v34[2] = v91;
+    //        v34[3] = v92;
+    //        Vec4Mad(v33, weightScale, v34, v33);
+    //    }
+    //    ++animPartIndex;
+    //    dataShort += 3;
+    //}
+
     animPartIndex = 0;
     size = parts->boneCount[5];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte++];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1032,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
         if (tableSize >= 64)
         {
             v32 = (unsigned short*)dataShort;
             v30 = ((tableSize - 1) >> 8) + 1;
             dataShort += v30 + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 indices += tableSize + 1;
                 v27 = 0;
                 goto LABEL_119;
             }
+
             XAnim_GetTimeIndex_unsigned_short_(&animTime, v32, v30, &v29, &animTime.time);
             v29 <<= 8;
             v28 = tableSize - v29;
@@ -673,7 +609,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
                 v13 = v28;
             v31 = v13;
             v32 = &indices[v29];
-            XAnim_GetTimeIndex_unsigned_short_(&animTime, v32, v13, &v80, &v85);
+            XAnim_GetTimeIndex_unsigned_short_(&animTime, v32, v13, &v80, &lerpFrac);
             v80 += v29;
             indices += tableSize + 1;
         }
@@ -681,62 +617,67 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         {
             v32 = (unsigned short *)dataShort;
             dataShort += tableSize + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 v27 = 0;
                 goto LABEL_119;
             }
-            XAnim_GetTimeIndex_unsigned_short_(&animTime, v32, tableSize, &v80, &v85);
+            XAnim_GetTimeIndex_unsigned_short_(&animTime, v32, tableSize, &v80, &lerpFrac);
         }
         v27 = 1;
     LABEL_119:
         if (v27)
         {
             v81 = &randomDataByte[3 * v80];
-            *v86 = *v81;
-            *&v86[2] = v81[1];
-            v87 = v81[2];
-            v88 = 0.0;
-            v26 = v81 + 3;
-            *v82 = v81[3];
-            *&v82[2] = v81[4];
-            v83 = v81[5];
-            v84 = 0.0;
-            *v10.v = *v82;
-            v10.v[2] = v83;
-            v10.v[3] = 0.0;
-            *v8.v = *v86;
-            v8.v[2] = v87;
-            v8.v[3] = 0.0;
-            XAnimWeightedAccumLerpedTrans(v8, v10, v85, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
+            //*v86 = *v81;
+            //*&v86[2] = v81[1];
+            //v87 = v81[2];
+            //v88 = 0.0;
+            //v26 = v81 + 3;
+            //*v82 = v81[3];
+            //*&v82[2] = v81[4];
+            //v83 = v81[5];
+            //v84 = 0.0;
+            //*v10.v = *v82;
+            //v10.v[2] = v83;
+            //v10.v[3] = 0.0;
+            //*v8.v = *v86;
+            //v8.v[2] = v87;
+            //v8.v[3] = 0.0;
+
+            float4 from;
+            from.v[0] = (float)v81[0];
+            from.v[1] = (float)v81[1];
+            from.v[2] = (float)v81[2];
+            from.v[3] = 0.0f;
+
+            //v81 += 3;
+
+            float4 to;
+            to.v[0] = (float)v81[3];
+            to.v[1] = (float)v81[4];
+            to.v[2] = (float)v81[5];
+            to.v[3] = 0.0f;
+
+            XAnimWeightedAccumLerpedTrans(from, to, lerpFrac, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
         }
         ++animPartIndex;
         dataInt += 6;
         randomDataByte += 3 * tableSize + 3;
     }
+
     size += parts->boneCount[6];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte++];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1059,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
         if (tableSize >= 64)
         {
             v25 = (unsigned short *)dataShort;
             v23 = ((tableSize - 1) >> 8) + 1;
             dataShort += v23 + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 indices += tableSize + 1;
                 v21 = 0;
@@ -750,7 +691,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
                 v12 = tableSize - v22;
             v24 = v12;
             v25 = &indices[v22];
-            XAnim_GetTimeIndex_unsigned_short_(&animTime, v25, v12, &v71, &v76);
+            XAnim_GetTimeIndex_unsigned_short_(&animTime, v25, v12, &v71, &lerpFrac2);
             v71 += v22;
             indices += tableSize + 1;
         }
@@ -758,35 +699,46 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         {
             v25 = (unsigned short*)dataShort;
             dataShort += tableSize + 1;
-            if (modelPartIndex >= 0x80)
-                MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-            if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+            if (ignorePartBits->testBit(modelPartIndex))
             {
                 v21 = 0;
                 goto LABEL_141;
             }
-            XAnim_GetTimeIndex_unsigned_short_(&animTime, v25, tableSize, &v71, &v76);
+            XAnim_GetTimeIndex_unsigned_short_(&animTime, v25, tableSize, &v71, &lerpFrac2);
         }
         v21 = 1;
     LABEL_141:
         if (v21)
         {
             v72 = (unsigned short *)&randomDataShort[3 * v71];
-            *v77 = *v72;
-            *&v77[2] = v72[1];
-            v78 = v72[2];
-            v79 = 0.0;
-            *v73 = v72[3];
-            *&v73[2] = v72[4];
-            v74 = v72[5];
-            v75 = 0.0;
-            *v11.v = *v73;
-            v11.v[2] = v74;
-            v11.v[3] = 0.0;
-            *v9.v = *v77;
-            v9.v[2] = v78;
-            v9.v[3] = 0.0;
-            XAnimWeightedAccumLerpedTrans(v9, v11, v76, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
+            //*v77 = *v72;
+            //*&v77[2] = v72[1];
+            //v78 = v72[2];
+            //v79 = 0.0;
+            //*v73 = v72[3];
+            //*&v73[2] = v72[4];
+            //v74 = v72[5];
+            //v75 = 0.0;
+            //*v11.v = *v73;
+            //v11.v[2] = v74;
+            //v11.v[3] = 0.0;
+            //*v9.v = *v77;
+            //v9.v[2] = v78;
+            //v9.v[3] = 0.0;
+
+            float4 from;
+            from.v[0] = (float)v72[0];
+            from.v[1] = (float)v72[1];
+            from.v[2] = (float)v72[2];
+            from.v[3] = 0.0f;
+
+            float4 to;
+            to.v[0] = (float)v72[3];
+            to.v[1] = (float)v72[4];
+            to.v[2] = (float)v72[5];
+            to.v[3] = 0.0f;
+
+            XAnimWeightedAccumLerpedTrans(from, to, lerpFrac2, weightScale, (float*)dataInt, &rotTransArray[modelPartIndex]);
         }
         ++animPartIndex;
         dataInt += 6;
@@ -796,17 +748,8 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1079,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        if (!ignorePartBits->testBit(modelPartIndex))
             XAnimWeightedAccumTrans(weightScale, dataInt, &rotTransArray[modelPartIndex]);
         ++animPartIndex;
         ++dataByte;
@@ -816,11 +759,8 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte];
-        if (modelPartIndex >= 128)
-            MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1093, 0, "%s", "modelPartIndex < DOBJ_MAX_PARTS");
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        if (!ignorePartBits->testBit(modelPartIndex))
             rotTransArray[modelPartIndex].transWeight = rotTransArray[modelPartIndex].transWeight + weightScale;
         ++animPartIndex;
         ++dataByte;
@@ -837,10 +777,7 @@ void __cdecl XAnimCalcParts_unsigned_char_(
 {
     unsigned __int64 v6; // kr00_8
     unsigned __int64 v7; // rax
-    float4 v8; // [esp-1Ch] [ebp-2BCh]
-    float4 v9; // [esp-1Ch] [ebp-2BCh]
-    float4 v10; // [esp-Ch] [ebp-2ACh]
-    float4 v11; // [esp-Ch] [ebp-2ACh]
+
     float scale; // [esp+4Ch] [ebp-254h]
     float v13; // [esp+50h] [ebp-250h]
     int *v14; // [esp+A4h] [ebp-1FCh]
@@ -865,7 +802,7 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     float *v33; // [esp+124h] [ebp-17Ch]
     float v34[5]; // [esp+128h] [ebp-178h] BYREF
     float *quat; // [esp+13Ch] [ebp-164h]
-    float dir[2]; // [esp+140h] [ebp-160h] BYREF
+    float dir[4] = { 0.0f, 0.0f, 0.0f, 0.0f }; // [esp+140h] [ebp-160h] BYREF
     __int64 v37; // [esp+148h] [ebp-158h]
     float v38; // [esp+154h] [ebp-14Ch]
     float *result; // [esp+158h] [ebp-148h]
@@ -885,7 +822,7 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     __int16 v52[4];
     float v53; // [esp+194h] [ebp-10Ch]
     float v54; // [esp+198h] [ebp-108h]
-    float v55; // [esp+19Ch] [ebp-104h] BYREF
+    float lerpFrac2; // [esp+19Ch] [ebp-104h] BYREF
     //__int64 v56; // [esp+1A0h] [ebp-100h]
     __int16 v56[4];
     float v57; // [esp+1A8h] [ebp-F8h]
@@ -896,7 +833,7 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     __int16 v61[4];
     float v62; // [esp+1C0h] [ebp-E0h]
     float v63; // [esp+1C4h] [ebp-DCh]
-    float v64; // [esp+1C8h] [ebp-D8h] BYREF
+    float lerpFrac; // [esp+1C8h] [ebp-D8h] BYREF
     //__int64 v65; // [esp+1CCh] [ebp-D4h]
     __int16 v65[4];
     float v66; // [esp+1D4h] [ebp-CCh]
@@ -933,27 +870,13 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     unsigned __int8 *indices; // [esp+298h] [ebp-8h]
     int modelPartIndex; // [esp+29Ch] [ebp-4h]
 
-    if (!parts->numframes)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 741, 0, "%s", "parts->numframes");
-    if (time < 0.0)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 742, 0, "%s", "time >= 0");
-    if (time >= 1.0)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 743, 0, "%s", "time < 1.f");
-    if (parts->dataByte)
-        v16 = parts->dataByte;
-    else
-        v16 = 0;
-    dataByte = v16;
-    if (parts->dataShort)
-        v15 = parts->dataShort;
-    else
-        v15 = 0;
-    dataShort = v15;
-    if (parts->dataInt)
-        v14 = parts->dataInt;
-    else
-        v14 = 0;
-    dataInt = v14;
+    iassert(parts->numframes);
+    iassert(time >= 0);
+    iassert(time < 1.f);
+
+    dataByte = parts->dataByte;
+    dataShort = parts->dataShort;
+    dataInt = parts->dataInt;
     randomDataByte = parts->randomDataByte;
     randomDataShort = parts->randomDataShort;
     randomDataInt = parts->randomDataInt;
@@ -961,41 +884,29 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     XAnim_SetTime(time, parts->numframes, &animTime);
     animPartIndex = 0;
     size = parts->boneCount[0];
+
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                766,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
+        if (!ignorePartBits->testBit(modelPartIndex))
             rotTransArray[modelPartIndex].quat[3] = rotTransArray[modelPartIndex].quat[3] + weightScale;
+
         ++animPartIndex;
     }
+
     size += parts->boneCount[1];
+
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                915,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
         v49 = dataByte;
         dataByte += tableSize + 1;
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+
+        if (ignorePartBits->testBit(modelPartIndex))
         {
             v48 = 0;
         }
@@ -1011,10 +922,12 @@ void __cdecl XAnimCalcParts_unsigned_char_(
             fromVec.v[1] = 0.0;
             fromVec.v[2] = *frame * 0.00003051850944757462;
             fromVec.v[3] = frame[1] * 0.00003051850944757462;
+
             toVec.v[0] = 0.0;
             toVec.v[1] = 0.0;
             toVec.v[2] = frame[2] * 0.00003051850944757462;
             toVec.v[3] = frame[3] * 0.00003051850944757462;
+
             v44 = keyFrameLerpFrac;
             start = rotTransArray[modelPartIndex].quat;
             scale1 = weightScale * keyFrameLerpFrac;
@@ -1028,20 +941,11 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                946,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
         v43 = dataByte;
         dataByte += tableSize + 1;
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+        if (ignorePartBits->testBit(modelPartIndex))
         {
             v42 = 0;
         }
@@ -1053,14 +957,16 @@ void __cdecl XAnimCalcParts_unsigned_char_(
         if (v42)
         {
             v78 = &randomDataShort[4 * v77];
-            dir0[0] = *v78 * 0.00003051850944757462;
+            dir0[0] = v78[0] * 0.00003051850944757462;
             dir0[1] = v78[1] * 0.00003051850944757462;
             dir0[2] = v78[2] * 0.00003051850944757462;
             dir0[3] = v78[3] * 0.00003051850944757462;
+
             dir1[0] = v78[4] * 0.00003051850944757462;
             dir1[1] = v78[5] * 0.00003051850944757462;
             dir1[2] = v78[6] * 0.00003051850944757462;
             dir1[3] = v78[7] * 0.00003051850944757462;
+
             v38 = v80;
             result = rotTransArray[modelPartIndex].quat;
             v40 = weightScale * v80;
@@ -1070,52 +976,40 @@ void __cdecl XAnimCalcParts_unsigned_char_(
         ++animPartIndex;
         randomDataShort += 4 * tableSize + 4;
     }
+
     size += parts->boneCount[3];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                973,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             frameVec.v[0] = 0.0;
             frameVec.v[1] = 0.0;
-            frameVec.v[2] = *dataShort * 0.00003051850944757462;
+            frameVec.v[2] = dataShort[0] * 0.00003051850944757462;
             frameVec.v[3] = dataShort[1] * 0.00003051850944757462;
             quat = rotTransArray[modelPartIndex].quat;
             dir[0] = 0.0;
             dir[1] = 0.0;
-            v37 = *&frameVec.unitVec[2].packed;
+            dir[2] = frameVec.v[2];
+            dir[3] = 0.0f;
+            //v37 = *&frameVec.unitVec[2].packed;
             Vec4Mad(quat, weightScale, dir, quat);
         }
         ++animPartIndex;
         dataShort += 2;
     }
+
     size += parts->boneCount[4];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                992,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
-            v72 = *dataShort * 0.00003051850944757462;
+            v72 = dataShort[0] * 0.00003051850944757462;
             v73 = dataShort[1] * 0.00003051850944757462;
             v74 = dataShort[2] * 0.00003051850944757462;
             v75 = dataShort[3] * 0.00003051850944757462;
@@ -1129,103 +1023,112 @@ void __cdecl XAnimCalcParts_unsigned_char_(
         ++animPartIndex;
         dataShort += 4;
     }
-    while (animPartIndex < size)
-    {
-        modelPartIndex = animToModel[animPartIndex];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1010,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
-        {
-            LODWORD(v21[5]) = (uint32)dataShort;
-            v6 = *dataShort << 32;
-            v7 = dataShort[1] << 16;
-            LODWORD(v30) = dataShort[2] | v7;
-            HIDWORD(v30) = HIDWORD(v7) | HIDWORD(v6);
-            v26 = v30 & 0x7FFF;
-            LODWORD(v27) = -2 * (v30 & 0x4000);
-            v[0] = (v27 - 3.0) * 256.015625;
-            v24 = (v30 >> 15) & 0x7FFF;
-            LODWORD(v25) = v24 + 1077936128 - 2 * ((v30 >> 15) & 0x4000);
-            v[1] = (v25 - 3.0) * 256.015625;
-            v22 = (v30 >> 30) & 0x7FFF;
-            LODWORD(v23) = v22 + 1077936128 - 2 * ((v30 >> 30) & 0x4000);
-            v[2] = (v23 - 3.0) * 256.015625;
-            v[3] = 1.0;
-            v32 = Vec4Length(v);
-            if ((v30 & 0x800000000000LL) != 0)
-                v13 = -1.0;
-            else
-                v13 = 1.0;
-            v28 = v13;
-            scale = v13 / v32;
-            Vec4Scale(v, scale, v);
-            v29 = (v30 >> 45) & 3;
-            v68 = v[v29];
-            v69 = v[(((v30 >> 45) & 3) + 1) & 3];
-            v70 = v[(((v30 >> 45) & 3) + 2) & 3];
-            v71 = v[(((v30 >> 45) & 3) + 3) & 3];
-            v21[0] = v68;
-            v21[1] = v69;
-            v21[2] = v70;
-            v21[3] = v71;
-            Vec4Mad(rotTransArray[modelPartIndex].quat, weightScale, v21, rotTransArray[modelPartIndex].quat);
-        }
-        ++animPartIndex;
-        dataShort += 3;
-    }
+
+    // LWSS: it is not possible for this loop to go off (It's removed or optimized out in blops)
+    //while (animPartIndex < size)
+    //{
+    //    modelPartIndex = animToModel[animPartIndex];
+    //    if (modelPartIndex >= 0x80)
+    //        MyAssertHandler(
+    //            ".\\xanim\\xanim_calc.cpp",
+    //            1010,
+    //            0,
+    //            "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
+    //            modelPartIndex,
+    //            128);
+    //    if (modelPartIndex >= 0x80)
+    //        MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
+    //    if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+    //    {
+    //        LODWORD(v21[5]) = (uint32)dataShort;
+    //        v6 = *dataShort << 32;
+    //        v7 = dataShort[1] << 16;
+    //        LODWORD(v30) = dataShort[2] | v7;
+    //        HIDWORD(v30) = HIDWORD(v7) | HIDWORD(v6);
+    //        v26 = v30 & 0x7FFF;
+    //        LODWORD(v27) = -2 * (v30 & 0x4000);
+    //        v[0] = (v27 - 3.0) * 256.015625;
+    //        v24 = (v30 >> 15) & 0x7FFF;
+    //        LODWORD(v25) = v24 + 1077936128 - 2 * ((v30 >> 15) & 0x4000);
+    //        v[1] = (v25 - 3.0) * 256.015625;
+    //        v22 = (v30 >> 30) & 0x7FFF;
+    //        LODWORD(v23) = v22 + 1077936128 - 2 * ((v30 >> 30) & 0x4000);
+    //        v[2] = (v23 - 3.0) * 256.015625;
+    //        v[3] = 1.0;
+    //        v32 = Vec4Length(v);
+    //        if ((v30 & 0x800000000000LL) != 0)
+    //            v13 = -1.0;
+    //        else
+    //            v13 = 1.0;
+    //        v28 = v13;
+    //        scale = v13 / v32;
+    //        Vec4Scale(v, scale, v);
+    //        v29 = (v30 >> 45) & 3;
+    //        v68 = v[v29];
+    //        v69 = v[(((v30 >> 45) & 3) + 1) & 3];
+    //        v70 = v[(((v30 >> 45) & 3) + 2) & 3];
+    //        v71 = v[(((v30 >> 45) & 3) + 3) & 3];
+    //        v21[0] = v68;
+    //        v21[1] = v69;
+    //        v21[2] = v70;
+    //        v21[3] = v71;
+    //        Vec4Mad(rotTransArray[modelPartIndex].quat, weightScale, v21, rotTransArray[modelPartIndex].quat);
+    //    }
+    //    ++animPartIndex;
+    //    dataShort += 3;
+    //}
+
     animPartIndex = 0;
     size = parts->boneCount[5];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte++];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1032,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
         v20 = dataByte;
         dataByte += tableSize + 1;
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+
+        if (ignorePartBits->testBit(modelPartIndex))
         {
             v19 = 0;
         }
         else
         {
-            XAnim_GetTimeIndex_unsigned_char_(&animTime, v20, tableSize, &v59, &v64);
+            XAnim_GetTimeIndex_unsigned_char_(&animTime, v20, tableSize, &v59, &lerpFrac);
             v19 = 1;
         }
         if (v19)
         {
             v60 = &randomDataByte[3 * v59];
-            *v65 = *v60;
-            *&v65[2] = v60[1];
-            v66 = v60[2];
-            v67 = 0.0;
-            *v61 = v60[3];
-            *&v61[2] = v60[4];
-            v62 = v60[5];
-            v63 = 0.0;
-            *v10.v = *v61;
-            v10.v[2] = v62;
-            v10.v[3] = 0.0;
-            *v8.v = *v65;
-            v8.v[2] = v66;
-            v8.v[3] = 0.0;
-            XAnimWeightedAccumLerpedTrans(v8, v10, v64, weightScale, (const float*)dataInt, &rotTransArray[modelPartIndex]);
+            //*v65 = *v60;
+            //*&v65[2] = v60[1];
+            //v66 = v60[2];
+            //v67 = 0.0;
+            //*v61 = v60[3];
+            //*&v61[2] = v60[4];
+            //v62 = v60[5];
+            //v63 = 0.0;
+            //float4 to;
+            //to.v[0] = *v61;
+            //to.v[2] = v62;
+            //to.v[3] = 0.0;
+            //float4 from;
+            //from.v[0] = *v65;
+            //from.v[2] = v66;
+            //from.v[3] = 0.0;
+            float4 from;
+            from.v[0] = (float)v60[0];
+            from.v[1] = (float)v60[1];
+            from.v[2] = (float)v60[2];
+            from.v[3] = 0.0f;
+
+            float4 to;
+            to.v[0] = (float)v60[3];
+            to.v[1] = (float)v60[4];
+            to.v[2] = (float)v60[5];
+            to.v[3] = 0.0f;
+
+            XAnimWeightedAccumLerpedTrans(from, to, lerpFrac, weightScale, (const float*)dataInt, &rotTransArray[modelPartIndex]);
         }
         ++animPartIndex;
         dataInt += 6;
@@ -1235,48 +1138,53 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte++];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1059,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        tableSize = *dataShort++;
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        tableSize = (unsigned short)*dataShort++;
         v18 = dataByte;
         dataByte += tableSize + 1;
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) != 0)
+
+        if (ignorePartBits->testBit(modelPartIndex))
         {
             v17 = 0;
         }
         else
         {
-            XAnim_GetTimeIndex_unsigned_char_(&animTime, v18, tableSize, &v50, &v55);
+            XAnim_GetTimeIndex_unsigned_char_(&animTime, v18, tableSize, &v50, &lerpFrac2);
             v17 = 1;
         }
         if (v17)
         {
             v51 = (unsigned short*)&randomDataShort[3 * v50];
-            *v56 = *v51;
-            *&v56[2] = v51[1];
-            v57 = v51[2];
-            v58 = 0.0;
-            *v52 = v51[3];
-            *&v52[2] = v51[4];
-            v53 = v51[5];
-            v54 = 0.0;
-            //*v11.v = v52;
-            *v11.v = *v52;
-            v11.v[2] = v53;
-            v11.v[3] = 0.0;
-            //*v9.v = v56;
-            *v9.v = *v56;
-            v9.v[2] = v57;
-            v9.v[3] = 0.0;
-            XAnimWeightedAccumLerpedTrans(v9, v11, v55, weightScale, (const float*)dataInt, &rotTransArray[modelPartIndex]);
+            //*v56 = *v51;
+            //*&v56[2] = v51[1];
+            //v57 = v51[2];
+            //v58 = 0.0;
+            //*v52 = v51[3];
+            //*&v52[2] = v51[4];
+            //v53 = v51[5];
+            //v54 = 0.0;
+            ////*v11.v = v52;
+            //*v11.v = *v52;
+            //v11.v[2] = v53;
+            //v11.v[3] = 0.0;
+            ////*v9.v = v56;
+            //*v9.v = *v56;
+            //v9.v[2] = v57;
+            //v9.v[3] = 0.0;
+
+            float4 from;
+            from.v[0] = (float)v51[0];
+            from.v[1] = (float)v51[1];
+            from.v[2] = (float)v51[2];
+            from.v[3] = 0.0f;
+
+            float4 to;
+            to.v[0] = (float)v51[3];
+            to.v[1] = (float)v51[4];
+            to.v[2] = (float)v51[5];
+            to.v[3] = 0.0f;
+
+            XAnimWeightedAccumLerpedTrans(from, to, lerpFrac2, weightScale, (const float*)dataInt, &rotTransArray[modelPartIndex]);
         }
         ++animPartIndex;
         dataInt += 6;
@@ -1286,18 +1194,11 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte];
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                1079,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
+        if(!ignorePartBits->testBit(modelPartIndex))
             XAnimWeightedAccumTrans(weightScale, dataInt, &rotTransArray[modelPartIndex]);
+
         ++animPartIndex;
         ++dataByte;
         dataInt += 3;
@@ -1306,11 +1207,8 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte];
-        if (modelPartIndex >= 128)
-            MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1093, 0, "%s", "modelPartIndex < DOBJ_MAX_PARTS");
-        if (modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        if (!ignorePartBits->testBit(modelPartIndex))
             rotTransArray[modelPartIndex].transWeight = rotTransArray[modelPartIndex].transWeight + weightScale;
         ++animPartIndex;
         ++dataByte;
@@ -1319,34 +1217,34 @@ void __cdecl XAnimCalcParts_unsigned_char_(
 
 void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotTransArray, XAnimCalcAnimInfo *animInfo)
 {
-    const char *v4; // eax
     bool v5; // [esp+14h] [ebp-20h]
     float time; // [esp+24h] [ebp-10h]
     char *animToModel; // [esp+28h] [ebp-Ch]
     int i; // [esp+2Ch] [ebp-8h]
     XAnimParts *parts; // [esp+30h] [ebp-4h]
 
-    if (!info->inuse)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1112, 0, "%s", "info->inuse");
+    iassert(info->inuse);
     parts = info->parts;
-    if (!parts)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1116, 0, "%s", "parts");
-    if (!info->animToModel)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1118, 0, "%s", "info->animToModel");
+    iassert(parts);
+    iassert(info->animToModel);
+
     animToModel = SL_ConvertToString(info->animToModel);
+
     for (i = 0; i < 4; ++i)
-        animInfo->animPartBits.array[i] |= *(unsigned int *)&animToModel[4 * i] & ~animInfo->ignorePartBits.array[i];
+        animInfo->animPartBits.array[i] |= *(unsigned int *)&animToModel[4 * i] & ~animInfo->ignorePartBits.array[i]; // weird exception
+
     time = info->state.currentAnimTime;
-    if (time < 0.0)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1127, 0, "%s\n\t(time) = %g", "(time >= 0)", time);
+
+    iassert(time >= 0.0f);
+
     if (parts->bLoop)
         v5 = time < 1.0;
     else
         v5 = time <= 1.0;
+
     if (!v5)
     {
-        v4 = va("time: %f, parts->bLoop: %d", time, parts->bLoop);
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1129, 0, "%s\n\t%s", "parts->bLoop ? (time < 1.f) : (time <= 1.f)", v4);
+        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1129, 0, "%s\n\t%s", "parts->bLoop ? (time < 1.f) : (time <= 1.f)", va("time: %f, parts->bLoop: %d", time, parts->bLoop));
     }
     if (time != 1.0 && parts->numframes)
     {
@@ -1369,8 +1267,7 @@ void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotT
     }
     else
     {
-        if (parts->bLoop)
-            MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1133, 0, "%s", "!parts->bLoop");
+        iassert(!parts->bLoop);
         XAnimCalcNonLoopEnd(
             parts,
             (const unsigned __int8 *)animToModel + 17,
@@ -1468,63 +1365,39 @@ void __cdecl XAnimCalcNonLoopEnd(
     unsigned int tableSize; // [esp+214h] [ebp-8h]
     int modelPartIndex; // [esp+218h] [ebp-4h]
 
-    if (parts->bLoop)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 300, 0, "%s", "!parts->bLoop");
-    if (parts->dataByte)
-        v9 = parts->dataByte;
-    else
-        v9 = 0;
-    dataByte = v9;
-    if (parts->dataShort)
-        v8 = parts->dataShort;
-    else
-        v8 = 0;
-    dataShort = v8;
-    if (parts->dataInt)
-        v7 = parts->dataInt;
-    else
-        v7 = 0;
-    dataInt = v7;
+    iassert(!parts->bLoop);
+
+    dataByte = parts->dataByte;
+    dataShort = parts->dataShort;
+    dataInt = parts->dataInt;
     randomDataByte = parts->randomDataByte;
     randomDataShort = parts->randomDataShort;
     randomDataInt = parts->randomDataInt;
     useSmallIndices = parts->numframes < 0x100u;
     animPartIndex = 0;
+
     size = parts->boneCount[0];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if ((unsigned int)modelPartIndex >= 0x80)
-        {
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                322,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        }
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert((unsigned int)modelPartIndex < DOBJ_MAX_PARTS);
+
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             totalRotTrans = &rotTransArray[modelPartIndex];
             totalRotTrans->quat[3] = totalRotTrans->quat[3] + weightScale;
         }
         ++animPartIndex;
     }
+
     size += parts->boneCount[1];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                461,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
         tableSize = (unsigned __int16)*dataShort++;
+
         if (useSmallIndices)
         {
             dataByte += tableSize + 1;
@@ -1538,9 +1411,7 @@ void __cdecl XAnimCalcNonLoopEnd(
         {
             dataShort += tableSize + 1;
         }
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             rotLastFrame = &randomDataShort[2 * tableSize];
             frameVec.v[0] = 0.0;
@@ -1550,24 +1421,20 @@ void __cdecl XAnimCalcNonLoopEnd(
             start = rotTransArray[modelPartIndex].quat;
             dir[0] = 0.0;
             dir[1] = 0.0;
-            v18 = *(_QWORD *)&frameVec.unitVec[2].packed;
+            dir[2] = frameVec.v[2];
+            //v18 = *(_QWORD *)&frameVec.unitVec[2].packed;
+            dir[3] = 0.0f;
             Vec4Mad(start, weightScale, dir, start);
         }
         ++animPartIndex;
         randomDataShort += 2 * tableSize + 2;
     }
+
     size += parts->boneCount[2];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                487,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
         tableSize = (unsigned __int16)*dataShort++;
         if (useSmallIndices)
         {
@@ -1582,97 +1449,62 @@ void __cdecl XAnimCalcNonLoopEnd(
         {
             dataShort += tableSize + 1;
         }
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             v70 = &randomDataShort[4 * tableSize];
-            v66 = (double)*v70 * 0.00003051850944757462;
-            v67 = (double)v70[1] * 0.00003051850944757462;
-            v68 = (double)v70[2] * 0.00003051850944757462;
-            v69 = (double)v70[3] * 0.00003051850944757462;
             result = rotTransArray[modelPartIndex].quat;
-            v14[0] = v66;
-            v14[1] = v67;
-            v14[2] = v68;
-            v14[3] = v69;
+            v14[0] = (double)v70[0] * 0.00003051850944757462;
+            v14[1] = (double)v70[1] * 0.00003051850944757462;
+            v14[2] = (double)v70[2] * 0.00003051850944757462;
+            v14[3] = (double)v70[3] * 0.00003051850944757462;
             Vec4Mad(result, weightScale, v14, result);
         }
         ++animPartIndex;
         randomDataShort += 4 * tableSize + 4;
     }
+
     size += parts->boneCount[3];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                512,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
-            v62 = 0.0;
-            v63 = 0.0;
-            v64 = (double)*dataShort * 0.00003051850944757462;
-            v65 = (double)dataShort[1] * 0.00003051850944757462;
             quat = rotTransArray[modelPartIndex].quat;
             v12[0] = 0.0;
             v12[1] = 0.0;
-            v12[2] = v64;
-            v12[3] = v65;
+            v12[2] = (double)dataShort[0] * 0.00003051850944757462;
+            v12[3] = (double)dataShort[1] * 0.00003051850944757462;
             Vec4Mad(quat, weightScale, v12, quat);
         }
         ++animPartIndex;
         dataShort += 2;
     }
+
     size += parts->boneCount[4];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                531,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
-            v58 = (double)*dataShort * 0.00003051850944757462;
-            v59 = (double)dataShort[1] * 0.00003051850944757462;
-            v60 = (double)dataShort[2] * 0.00003051850944757462;
-            v61 = (double)dataShort[3] * 0.00003051850944757462;
-            v10[0] = v58;
-            v10[1] = v59;
-            v10[2] = v60;
-            v10[3] = v61;
+            v10[0] = (double)dataShort[0] * 0.00003051850944757462;
+            v10[1] = (double)dataShort[1] * 0.00003051850944757462;
+            v10[2] = (double)dataShort[2] * 0.00003051850944757462;
+            v10[3] = (double)dataShort[3] * 0.00003051850944757462;
             Vec4Mad(rotTransArray[modelPartIndex].quat, weightScale, v10, rotTransArray[modelPartIndex].quat);
         }
         ++animPartIndex;
         dataShort += 4;
     }
+
     animPartIndex = 0;
     size = parts->boneCount[5];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte++];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                558,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
         tableSize = (unsigned __int16)*dataShort++;
         if (useSmallIndices)
         {
@@ -1686,33 +1518,33 @@ void __cdecl XAnimCalcNonLoopEnd(
         {
             dataShort += tableSize + 1;
         }
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             totalRotTrans = &rotTransArray[modelPartIndex];
             posVec = *(float4 *)totalRotTrans->trans;
-            frame._1 = (unsigned __int8 (*)[3]) & randomDataByte[3 * tableSize];
-            lerp.v[0] = (float)*(unsigned __int8 *)frame._1;
-            lerp.v[1] = (float)(*frame._1)[1];
-            lerp.v[2] = (float)(*frame._1)[2];
+
+            float *data = (float*)&randomDataByte[3 * tableSize];
+
+            lerp.v[0] = data[0];
+            lerp.v[1] = data[1];
+            lerp.v[2] = data[2];
             lerp.v[3] = 0.0;
-            minsVec.v[0] = *(float *)dataInt;
+
+            minsVec.v[0] = *((float *)dataInt + 0);
             minsVec.v[1] = *((float *)dataInt + 1);
             minsVec.v[2] = *((float *)dataInt + 2);
             minsVec.v[3] = 0.0;
+
             sizeVec.v[0] = *((float *)dataInt + 3);
             sizeVec.v[1] = *((float *)dataInt + 4);
             sizeVec.v[2] = *((float *)dataInt + 5);
             sizeVec.v[3] = 0.0;
-            v51 = sizeVec.v[0] * lerp.v[0] + minsVec.v[0];
-            v52 = sizeVec.v[1] * lerp.v[1] + minsVec.v[1];
-            v53 = sizeVec.v[2] * lerp.v[2] + minsVec.v[2];
-            v54 = (float)0.0 * (float)0.0 + (float)0.0;
-            posVec.v[0] = weightScale * v51 + posVec.v[0];
-            posVec.v[1] = weightScale * v52 + posVec.v[1];
-            posVec.v[2] = weightScale * v53 + posVec.v[2];
-            posVec.v[3] = weightScale * v54 + posVec.v[3];
+
+            posVec.v[0] = weightScale * sizeVec.v[0] * lerp.v[0] + minsVec.v[0] + posVec.v[0];
+            posVec.v[1] = weightScale * sizeVec.v[1] * lerp.v[1] + minsVec.v[1] + posVec.v[1];
+            posVec.v[2] = weightScale * sizeVec.v[2] * lerp.v[2] + minsVec.v[2] + posVec.v[2];
+            posVec.v[3] = weightScale * (float)0.0f * (float)0.0f + (float)0.0f + posVec.v[3];
             *(float4 *)totalRotTrans->trans = posVec;
             totalRotTrans->transWeight = totalRotTrans->transWeight + weightScale;
         }
@@ -1720,19 +1552,14 @@ void __cdecl XAnimCalcNonLoopEnd(
         dataInt += 6;
         randomDataByte += 3 * tableSize + 3;
     }
+
     size += parts->boneCount[6];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte++];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                596,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
         tableSize = (unsigned __int16)*dataShort++;
+
         if (useSmallIndices)
         {
             dataByte += tableSize + 1;
@@ -1745,35 +1572,35 @@ void __cdecl XAnimCalcNonLoopEnd(
         {
             dataShort += tableSize + 1;
         }
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             totalRotTrans = &rotTransArray[modelPartIndex];
-            v37 = totalRotTrans->trans[0];
-            v38 = totalRotTrans->trans[1];
-            v39 = totalRotTrans->trans[2];
             transWeight = totalRotTrans->transWeight;
             v28 = &randomDataShort[3 * tableSize];
-            v41 = (float)(unsigned __int16)*v28;
+
+            v41 = (float)(unsigned __int16)v28[0];
             v42 = (float)(unsigned __int16)v28[1];
             v43 = (float)(unsigned __int16)v28[2];
             v44 = 0.0;
-            v45 = *(float *)dataInt;
+
+            v45 = *((float *)dataInt + 0);
             v46 = *((float *)dataInt + 1);
             v47 = *((float *)dataInt + 2);
             v48 = 0.0;
+
             v29 = *((float *)dataInt + 3);
             v30 = *((float *)dataInt + 4);
             v31 = *((float *)dataInt + 5);
             v32 = 0.0;
+
             v33 = v29 * v41 + v45;
             v34 = v30 * v42 + v46;
             v35 = v31 * v43 + v47;
             v36 = (float)0.0 * (float)0.0 + (float)0.0;
-            v37 = weightScale * v33 + v37;
-            v38 = weightScale * v34 + v38;
-            v39 = weightScale * v35 + v39;
+            v37 = weightScale * v33 + totalRotTrans->trans[0];
+            v38 = weightScale * v34 + totalRotTrans->trans[1];
+            v39 = weightScale * v35 + totalRotTrans->trans[2];
             transWeight = weightScale * v36 + transWeight;
             trans = totalRotTrans->trans;
             totalRotTrans->trans[0] = v37;
@@ -1786,35 +1613,31 @@ void __cdecl XAnimCalcNonLoopEnd(
         dataInt += 6;
         randomDataShort += 3 * tableSize + 3;
     }
+
     size += parts->boneCount[7];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                629,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             totalRotTrans = &rotTransArray[modelPartIndex];
+
             v24 = totalRotTrans->trans[0];
             v25 = totalRotTrans->trans[1];
             v26 = totalRotTrans->trans[2];
             v27 = totalRotTrans->transWeight;
-            v20 = *(float *)dataInt;
+
+            v20 = *((float *)dataInt + 0);
             v21 = *((float *)dataInt + 1);
             v22 = *((float *)dataInt + 2);
             v23 = 0.0;
+
             v24 = weightScale * v20 + v24;
             v25 = weightScale * v21 + v25;
             v26 = weightScale * v22 + v26;
             v27 = weightScale * (float)0.0 + v27;
+
             v6 = totalRotTrans->trans;
             totalRotTrans->trans[0] = v24;
             v6[1] = v25;
@@ -1826,21 +1649,13 @@ void __cdecl XAnimCalcNonLoopEnd(
         ++dataByte;
         dataInt += 3;
     }
+
     size += parts->boneCount[8];
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[*dataByte];
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler(
-                ".\\xanim\\xanim_calc.cpp",
-                649,
-                0,
-                "modelPartIndex doesn't index DOBJ_MAX_PARTS\n\t%i not in [0, %i)",
-                modelPartIndex,
-                128);
-        if ((unsigned int)modelPartIndex >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[(unsigned int)modelPartIndex >> 5] & (0x80000000 >> (modelPartIndex & 0x1F))) == 0)
+        iassert(modelPartIndex < DOBJ_MAX_PARTS);
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             totalRotTrans = &rotTransArray[modelPartIndex];
             totalRotTrans->transWeight = totalRotTrans->transWeight + weightScale;
@@ -1877,9 +1692,7 @@ void __cdecl XAnimScaleRotTransArray(int numBones, const XAnimCalcAnimInfo *info
 
     for (i = 0; (int)i < numBones; ++i)
     {
-        if (i >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((info->ignorePartBits.array[i >> 5] & (0x80000000 >> (i & 0x1F))) == 0 && rotTransArray->transWeight != 0.0)
+        if (!info->ignorePartBits.testBit(i) && rotTransArray->transWeight != 0.0)
         {
             r = 1.0 / rotTransArray->transWeight;
             Vec4Scale(rotTransArray->quat, r, rotTransArray->quat);
@@ -1895,27 +1708,20 @@ void __cdecl XAnimNormalizeRotScaleTransArray(
     float weightScale,
     DObjAnimMat *rotTransArray)
 {
-    float v4; // [esp+8h] [ebp-24h]
-    float v5; // [esp+Ch] [ebp-20h]
-    int r; // [esp+24h] [ebp-8h]
-    unsigned int i; // [esp+28h] [ebp-4h]
+    float r;
 
-    for (i = 0; (int)i < numBones; ++i)
+    for (unsigned int i = 0; (int)i < numBones; ++i)
     {
-        if (i >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((info->ignorePartBits.array[i >> 5] & (0x80000000 >> (i & 0x1F))) == 0)
+        if (!info->ignorePartBits.testBit(i))
         {
-            *(float *)&r = Vec4LengthSq(rotTransArray->quat);
-            if (*(float *)&r != 0.0)
+            r = Vec4LengthSq(rotTransArray->quat);
+            if (r != 0.0)
             {
-                v5 = I_rsqrt(r) * weightScale;
-                Vec4Scale(rotTransArray->quat, v5, rotTransArray->quat);
+                Vec4Scale(rotTransArray->quat, (I_rsqrt(r) * weightScale), rotTransArray->quat);
             }
             if (rotTransArray->transWeight != 0.0)
             {
-                v4 = weightScale / rotTransArray->transWeight;
-                Vec3Scale(rotTransArray->trans, v4, rotTransArray->trans);
+                Vec3Scale(rotTransArray->trans, (weightScale / rotTransArray->transWeight), rotTransArray->trans);
                 rotTransArray->transWeight = weightScale;
             }
         }
@@ -1930,27 +1736,20 @@ void __cdecl XAnimMadRotTransArray(
     const DObjAnimMat *rotTrans,
     DObjAnimMat *totalRotTrans)
 {
-    float v5; // [esp+Ch] [ebp-24h]
-    float v6; // [esp+10h] [ebp-20h]
-    int r; // [esp+28h] [ebp-8h]
-    unsigned int i; // [esp+2Ch] [ebp-4h]
+    float r;
 
-    for (i = 0; (int)i < numBones; ++i)
+    for (int i = 0; i < numBones; ++i)
     {
-        if (i >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((info->ignorePartBits.array[i >> 5] & (0x80000000 >> (i & 0x1F))) == 0)
+        if (!info->ignorePartBits.testBit(i));
         {
-            *(float *)&r = Vec4LengthSq(rotTrans->quat);
-            if (*(float *)&r != 0.0)
+            r = Vec4LengthSq(rotTrans->quat);
+            if (r != 0.0)
             {
-                v6 = I_rsqrt(r) * weightScale;
-                Vec4Mad(totalRotTrans->quat, v6, rotTrans->quat, totalRotTrans->quat);
+                Vec4Mad(totalRotTrans->quat, (I_rsqrt(r) * weightScale), rotTrans->quat, totalRotTrans->quat);
             }
             if (rotTrans->transWeight != 0.0)
             {
-                v5 = weightScale / rotTrans->transWeight;
-                Vec3Mad(totalRotTrans->trans, v5, rotTrans->trans, totalRotTrans->trans);
+                Vec3Mad(totalRotTrans->trans, (weightScale / rotTrans->transWeight), rotTrans->trans, totalRotTrans->trans);
                 totalRotTrans->transWeight = totalRotTrans->transWeight + weightScale;
             }
         }
@@ -1971,16 +1770,13 @@ void __cdecl XAnimApplyAdditives(
     DObjAnimMat *v7; // [esp+14h] [ebp-20h]
     float r; // [esp+18h] [ebp-1Ch]
     float ra; // [esp+18h] [ebp-1Ch]
-    unsigned int i; // [esp+1Ch] [ebp-18h]
     float rot[4]; // [esp+20h] [ebp-14h] BYREF
     const bitarray<128> *ignorePartBits; // [esp+30h] [ebp-4h]
 
     ignorePartBits = &info->ignorePartBits;
-    for (i = 0; (int)i < boneCount; ++i)
+    for (int i = 0; (int)i < boneCount; ++i)
     {
-        if (i >= 0x80)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\../qcommon/bitarray.h", 66, 0, "%s", "pos < BIT_COUNT");
-        if ((ignorePartBits->array[i >> 5] & (0x80000000 >> (i & 0x1F))) == 0)
+        if (!ignorePartBits->testBit(i))
         {
             r = Vec4LengthSq(additiveArray[i].quat);
             if (r != 0.0)
@@ -2037,7 +1833,7 @@ void __cdecl XAnimWeightedAccumLerpedTrans(
     float lerp[3]; // [esp+1Ch] [ebp-14h] BYREF
     const float *minsVec; // [esp+28h] [ebp-8h]
 
-    Vec3Lerp(fromVec.v, toVec.v, keyFrameLerpFrac, lerp);
+    Vec3Lerp(fromVec.v, toVec.v, keyFrameLerpFrac, lerp); // KISAKTODO: remove these shitty float4's
     minsVec = dataInt;
     Vec3Accum(dataInt, dataInt + 3, lerp, frameVec);
     Vec3Mad(totalRotTrans->trans, weightScale, frameVec, totalRotTrans->trans);

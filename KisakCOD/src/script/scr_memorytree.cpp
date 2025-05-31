@@ -248,7 +248,7 @@ bool __cdecl MT_RemoveMemoryNode(int oldNode, unsigned int size)
     int nextScore;
     int level;
 
-    assert(size >= 0 && size <= MEMORY_NODE_BITS);
+    iassert(size >= 0 && size <= MEMORY_NODE_BITS);
 
     nodeNum = 0;
     level = MEMORY_NODE_COUNT;
@@ -269,7 +269,7 @@ bool __cdecl MT_RemoveMemoryNode(int oldNode, unsigned int size)
                         prevScore = MT_GetScore(oldNodeValue.prev);
                         nextScore = MT_GetScore(oldNodeValue.next);
 
-                        assert(prevScore != nextScore);
+                        iassert(prevScore != nextScore);
 
                         if (prevScore >= nextScore)
                         {
@@ -304,7 +304,7 @@ bool __cdecl MT_RemoveMemoryNode(int oldNode, unsigned int size)
                     parentNode = &scrMemTreeGlob.nodes[oldNodeValue.next].next;
                 }
 
-                assert(oldNode != 0);
+                iassert(oldNode != 0);
 
                 tempNodeValue = oldNodeValue;
                 oldNodeValue = scrMemTreeGlob.nodes[oldNode];
@@ -366,7 +366,7 @@ int MT_GetScore(int num)
 {
     char bits;
 
-    assert(num != 0);
+    iassert(num != 0);
 
     union MTnum_t
     {
@@ -377,7 +377,7 @@ int MT_GetScore(int num)
     MTnum_t mtnum;
 
     mtnum.i = MEMORY_NODE_COUNT - num;
-    assert(mtnum.i != 0);
+    iassert(mtnum.i != 0);
 
     bits = scrMemTreeGlob.leftBits[mtnum.b[0]];
 
@@ -412,7 +412,7 @@ void MT_AddMemoryNode(int newNode, int size)
     int level;
     int score;
 
-    assert(size >= 0 && size <= MEMORY_NODE_BITS);
+    iassert(size >= 0 && size <= MEMORY_NODE_BITS);
 
     parentNode = &scrMemTreeGlob.head[size];
     node = scrMemTreeGlob.head[size];
@@ -424,17 +424,17 @@ void MT_AddMemoryNode(int newNode, int size)
         level = MEMORY_NODE_COUNT;
         do
         {
-            assert(newNode != node);
+            iassert(newNode != node);
             score = MT_GetScore(node);
 
-            assert(score != newScore);
+            iassert(score != newScore);
 
             if (score < newScore)
             {
                 while (1)
                 {
-                    assert(node == *parentNode);
-                    assert(node != newNode);
+                    iassert(node == *parentNode);
+                    iassert(node != newNode);
 
                     *parentNode = newNode;
                     scrMemTreeGlob.nodes[newNode] = scrMemTreeGlob.nodes[node];
@@ -444,7 +444,7 @@ void MT_AddMemoryNode(int newNode, int size)
                     }
                     level >>= 1;
 
-                    assert(node != nodeNum);
+                    iassert(node != nodeNum);
 
                     if (node >= nodeNum)
                     {
@@ -463,7 +463,7 @@ void MT_AddMemoryNode(int newNode, int size)
             }
             level >>= 1;
 
-            assert(newNode != nodeNum);
+            iassert(newNode != nodeNum);
 
             if (newNode >= nodeNum)
             {

@@ -7,6 +7,8 @@ struct PhysPreset;
 struct XAnimTree_s;
 struct XModel;
 
+#define DOBJ_MAX_PARTS 0x80
+
 struct DObjTrace_s // sizeof=0x1C
 {                                       // ...
     float fraction;                     // ...

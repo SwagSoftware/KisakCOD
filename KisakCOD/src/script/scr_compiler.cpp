@@ -2044,7 +2044,7 @@ void __cdecl Scr_TransferBlock(scr_block_s *from, scr_block_s *to)
     unsigned int name;
     int i, j;
 
-    assert(to->localVarsPublicCount <= from->localVarsCount);
+    iassert(to->localVarsPublicCount <= from->localVarsCount);
 
     for (i = 0; i < to->localVarsPublicCount || i < from->localVarsCreateCount; i++)
     {
@@ -2059,7 +2059,7 @@ void __cdecl Scr_TransferBlock(scr_block_s *from, scr_block_s *to)
             to->localVarsCount++;
         }
 
-        assert(to->localVarsPublicCount <= from->localVarsCount);
+        iassert(to->localVarsPublicCount <= from->localVarsCount);
 
         if (j >= to->localVarsPublicCount)
         {
@@ -2080,7 +2080,7 @@ void __cdecl Scr_TransferBlock(scr_block_s *from, scr_block_s *to)
         }
     }
 
-    assert(from->localVarsCreateCount <= to->localVarsPublicCount);
+    iassert(from->localVarsCreateCount <= to->localVarsPublicCount);
 
     to->localVarsCreateCount = from->localVarsCreateCount;
     to->abortLevel = SCR_ABORT_NONE;
