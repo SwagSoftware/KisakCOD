@@ -489,7 +489,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
     {
         modelPartIndex = animToModel[animPartIndex];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
-        if (ignorePartBits->testBit(modelPartIndex))
+        if (!ignorePartBits->testBit(modelPartIndex))
         {
             frameVec.v[0] = 0.0;
             frameVec.v[1] = 0.0;
@@ -500,7 +500,7 @@ void __cdecl XAnimCalcParts_unsigned_short_(
             dir[1] = 0.0;
             //v50 = *&frameVec.unitVec[2].packed;
             dir[2] = frameVec.v[2];
-            dir[3] = 0.0f;
+            dir[3] = frameVec.v[3];
             Vec4Mad(quat, weightScale, dir, quat);
         }
         ++animPartIndex;
@@ -526,6 +526,8 @@ void __cdecl XAnimCalcParts_unsigned_short_(
         dataShort += 4;
     }
 
+    // NOTE(mrsteyk): verfiy below claim
+    iassert(!(animPartIndex < size));
     // LWSS: not possible for this loop to enter. (Removed in blops)
     //while (animPartIndex < size)
     //{
@@ -994,7 +996,7 @@ void __cdecl XAnimCalcParts_unsigned_char_(
             dir[0] = 0.0;
             dir[1] = 0.0;
             dir[2] = frameVec.v[2];
-            dir[3] = 0.0f;
+            dir[3] = frameVec.v[3];
             //v37 = *&frameVec.unitVec[2].packed;
             Vec4Mad(quat, weightScale, dir, quat);
         }
@@ -1025,6 +1027,8 @@ void __cdecl XAnimCalcParts_unsigned_char_(
         dataShort += 4;
     }
 
+    // NOTE(mrsteyk): verify below claim
+    iassert(!(animPartIndex < size));
     // LWSS: it is not possible for this loop to go off (It's removed or optimized out in blops)
     //while (animPartIndex < size)
     //{
@@ -1297,7 +1301,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     float v14[5]; // [esp+A4h] [ebp-178h] BYREF
     unsigned int v15; // [esp+B8h] [ebp-164h]
     float *start; // [esp+BCh] [ebp-160h]
-    float dir[2]; // [esp+C0h] [ebp-15Ch] BYREF
+    float dir[4]; // [esp+C0h] [ebp-15Ch] BYREF
     __int64 v18; // [esp+C8h] [ebp-154h]
     unsigned int v19; // [esp+D4h] [ebp-148h]
     float v20; // [esp+D8h] [ebp-144h]
@@ -1424,7 +1428,7 @@ void __cdecl XAnimCalcNonLoopEnd(
             dir[1] = 0.0;
             dir[2] = frameVec.v[2];
             //v18 = *(_QWORD *)&frameVec.unitVec[2].packed;
-            dir[3] = 0.0f;
+            dir[3] = frameVec.v[3];
             Vec4Mad(start, weightScale, dir, start);
         }
         ++animPartIndex;
@@ -1525,7 +1529,7 @@ void __cdecl XAnimCalcNonLoopEnd(
             totalRotTrans = &rotTransArray[modelPartIndex];
             posVec = *(float4 *)totalRotTrans->trans;
 
-            float *data = (float*)&randomDataByte[3 * tableSize];
+            uint8 *data = &randomDataByte[3 * tableSize];
 
             lerp.v[0] = data[0];
             lerp.v[1] = data[1];
