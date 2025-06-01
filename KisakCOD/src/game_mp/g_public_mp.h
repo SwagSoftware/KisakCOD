@@ -1081,4 +1081,4 @@ void __cdecl Scr_ResetTimeout();
 
 extern BuiltinFunctionDef functions[];
 extern BuiltinMethodDef methods_2[];
-extern unsigned __int16 *controller_names[5];
+extern unsigned __int16 *controller_names[6];

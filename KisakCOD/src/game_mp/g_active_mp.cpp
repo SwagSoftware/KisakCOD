@@ -17,8 +17,9 @@
 
 hudelem_s g_dummyHudCurrent;
 
-unsigned __int16 *controller_names[5] =
+unsigned __int16 *controller_names[6] =
 {
+    &scr_const.back_low,
     &scr_const.back_mid,
     &scr_const.back_up,
     &scr_const.neck,
