@@ -5,8 +5,7 @@
 
 DObjAnimMat *__cdecl DObjGetRotTransArray(const DObj_s *obj)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 29, 0, "%s", "obj");
+    iassert(obj);
     return obj->skel.mat;
 }
 
@@ -33,8 +32,7 @@ int __cdecl DObjGetSurfaces(const DObj_s *obj, int *partBits, const char *lods)
     XModel **models; // [esp+48h] [ebp-4h]
 
     numModels = obj->numModels;
-    if (!obj->numModels)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 70, 0, "%s", "numModels");
+    iassert(numModels);
     models = obj->models;
     model = *models;
     numBones = XModelNumBones(*models);
@@ -42,7 +40,7 @@ int __cdecl DObjGetSurfaces(const DObj_s *obj, int *partBits, const char *lods)
     if (lod < 0)
     {
         surfaceCount = 0;
-        *partBits = 0;
+        partBits[0] = 0;
         partBits[1] = 0;
         partBits[2] = 0;
         partBits[3] = 0;
@@ -50,13 +48,13 @@ int __cdecl DObjGetSurfaces(const DObj_s *obj, int *partBits, const char *lods)
     else
     {
         surfaceCount = model->lodInfo[lod].numsurfs;
-        *partBits = model->lodInfo[lod].partBits[0];
+        partBits[0] = model->lodInfo[lod].partBits[0];
         partBits[1] = model->lodInfo[lod].partBits[1];
         partBits[2] = model->lodInfo[lod].partBits[2];
         partBits[3] = model->lodInfo[lod].partBits[3];
     }
     boneIndex = numBones;
-    memset(surfPartBits, 0, 12);
+    memset(surfPartBits, 0, sizeof(surfPartBits));
     for (j = 1; j < numModels; ++j)
     {
         modela = models[j];
@@ -65,12 +63,15 @@ int __cdecl DObjGetSurfaces(const DObj_s *obj, int *partBits, const char *lods)
         if (loda >= 0)
         {
             surfaceCount += modela->lodInfo[loda].numsurfs;
+
             surfPartBits[3] = modela->lodInfo[loda].partBits[0];
             surfPartBits[4] = modela->lodInfo[loda].partBits[1];
             surfPartBits[5] = modela->lodInfo[loda].partBits[2];
             surfPartBits[6] = modela->lodInfo[loda].partBits[3];
+
             targBoneIndexHigh = boneIndex >> 5;
             targBoneIndexLow = boneIndex & 0x1F;
+
             if ((boneIndex & 0x1F) != 0)
             {
                 *partBits |= (unsigned int)surfPartBits[3 - targBoneIndexHigh] >> targBoneIndexLow;
@@ -83,7 +84,7 @@ int __cdecl DObjGetSurfaces(const DObj_s *obj, int *partBits, const char *lods)
             }
             else
             {
-                *partBits |= surfPartBits[3 - targBoneIndexHigh];
+                partBits[0] |= surfPartBits[3 - targBoneIndexHigh];
                 partBits[1] |= surfPartBits[4 - targBoneIndexHigh];
                 partBits[2] |= surfPartBits[5 - targBoneIndexHigh];
                 partBits[3] |= surfPartBits[6 - targBoneIndexHigh];
@@ -96,7 +97,6 @@ int __cdecl DObjGetSurfaces(const DObj_s *obj, int *partBits, const char *lods)
 
 void __cdecl DObjGetSurfaceData(const DObj_s *obj, const float *origin, float scale, char *lods)
 {
-    float v4; // [esp+8h] [ebp-1Ch]
     XModelLodRampType lodRampType; // [esp+Ch] [ebp-18h]
     XModel *model; // [esp+10h] [ebp-14h]
     float adjustedDist; // [esp+14h] [ebp-10h]
@@ -104,15 +104,16 @@ void __cdecl DObjGetSurfaceData(const DObj_s *obj, const float *origin, float sc
     int modelCount; // [esp+1Ch] [ebp-8h]
     int modelIndex; // [esp+20h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 162, 0, "%s", "obj");
+    iassert(obj);
     modelCount = DObjGetNumModels(obj);
-    if (modelCount > 32)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 165, 1, "%s", "modelCount <= DOBJ_MAX_SUBMODELS");
-    if (scale == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 107, 0, "%s", "val");
-    v4 = 1.0 / scale;
-    baseDist = R_GetBaseLodDist(origin) * v4;
+    iassert(modelCount <= DOBJ_MAX_SUBMODELS);
+    iassert(scale != 0.0);
+
+    baseDist = R_GetBaseLodDist(origin) * (1.0 / scale);
+
+    iassert(!IS_NAN(scale));
+    iassert(!IS_NAN(baseDist));
+
     for (modelIndex = 0; modelIndex < modelCount; ++modelIndex)
     {
         model = DObjGetModel(obj, modelIndex);
@@ -160,11 +161,10 @@ void __cdecl DObjGetSetBones(const DObj_s *obj, int *setPartBits)
 
 unsigned int __cdecl DObjGetRootBoneCount(const DObj_s *obj)
 {
-    XModel *model; // [esp+0h] [ebp-4h]
+    XModel *model;
 
     model = DObjGetModel(obj, 0);
-    if (!model->numRootBones)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 255, 0, "%s", "model->numRootBones");
+    iassert(model->numRootBones);
     return model->numRootBones;
 }
 
@@ -174,29 +174,21 @@ int __cdecl DObjSetRotTransIndex(DObj_s *obj, const int *partBits, int boneIndex
     int boneIndexHigh; // [esp+4h] [ebp-8h]
     unsigned int boneIndexLow; // [esp+8h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 271, 0, "%s", "obj");
-    if (!obj->skel.mat)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 272, 0, "%s", "obj->skel.mat");
-    if (boneIndex < 0)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 273, 0, "%s\n\t(boneIndex) = %i", "(boneIndex >= 0)", boneIndex);
-    if (boneIndex >= obj->numBones)
-        MyAssertHandler(
-            ".\\xanim\\dobj_utils.cpp",
-            274,
-            0,
-            "%s\n\t(boneIndex) = %i",
-            "(boneIndex < obj->numBones)",
-            boneIndex);
+    iassert(obj);
+    iassert(obj->skel.mat);
+    iassert(boneIndex >= 0);
+    iassert(boneIndex < obj->numBones);
+
     boneIndexHigh = boneIndex >> 5;
     boneIndexLow = 0x80000000 >> (boneIndex & 0x1F);
     if ((boneIndexLow & partBits[boneIndex >> 5]) == 0)
         return 0;
     skel = &obj->skel;
+
     if ((boneIndexLow & obj->skel.partBits.anim[boneIndexHigh]) != 0)
         return 0;
-    if ((boneIndexLow & skel->partBits.skel[boneIndexHigh]) != 0)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 286, 0, "%s", "!(skel->partBits.skel[boneIndexHigh] & boneIndexLow)");
+
+    iassert(!(skel->partBits.skel[boneIndexHigh] & boneIndexLow));
     skel->partBits.anim[boneIndexHigh] |= boneIndexLow;
     return 1;
 }
@@ -207,65 +199,50 @@ char __cdecl DObjSetSkelRotTransIndex(DObj_s *obj, const int *partBits, int bone
     int boneIndexHigh; // [esp+4h] [ebp-8h]
     unsigned int boneIndexLow; // [esp+8h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 303, 0, "%s", "obj");
-    if (!obj->skel.mat)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 304, 0, "%s", "obj->skel.mat");
-    if (boneIndex < 0)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 305, 0, "%s\n\t(boneIndex) = %i", "(boneIndex >= 0)", boneIndex);
-    if (boneIndex >= obj->numBones)
-        MyAssertHandler(
-            ".\\xanim\\dobj_utils.cpp",
-            306,
-            0,
-            "%s\n\t(boneIndex) = %i",
-            "(boneIndex < obj->numBones)",
-            boneIndex);
+    iassert(obj);
+    iassert(obj->skel.mat);
+    iassert(boneIndex >= 0);
+    iassert(boneIndex < obj->numBones);
+
     boneIndexHigh = boneIndex >> 5;
     boneIndexLow = 0x80000000 >> (boneIndex & 0x1F);
+
     if ((boneIndexLow & partBits[boneIndex >> 5]) == 0)
-        return 1;
+        return true;
     skel = &obj->skel;
+
     if ((boneIndexLow & obj->skel.partBits.anim[boneIndexHigh]) != 0)
-        return 0;
-    if ((boneIndexLow & skel->partBits.skel[boneIndexHigh]) != 0)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 318, 0, "%s", "!(skel->partBits.skel[boneIndexHigh] & boneIndexLow)");
+        return false;
+
+    iassert(!(skel->partBits.skel[boneIndexHigh] & boneIndexLow));
     skel->partBits.anim[boneIndexHigh] |= boneIndexLow;
     skel->partBits.skel[boneIndexHigh] |= boneIndexLow;
-    return 1;
+
+    return true;
 }
 
 void __cdecl DObjSetControlTagAngles(DObj_s *obj, int *partBits, unsigned int boneIndex, float *angles)
 {
-    if (boneIndex < 0xFE)
+    if (boneIndex < 254)
     {
         if (DObjSetControlRotTransIndex(obj, partBits, boneIndex))
             DObjSetLocalTagInternal(obj, vec3_origin, angles, boneIndex);
+
+        return;
     }
-    else if (boneIndex != 254 && boneIndex != 255)
-    {
-        MyAssertHandler(
-            ".\\xanim\\dobj_utils.cpp",
-            336,
-            0,
-            "%s\n\t(boneIndex) = %i",
-            "((boneIndex == 254) || (boneIndex == 255))",
-            boneIndex);
-    }
+
+    iassert((boneIndex == 254) || (boneIndex == 255));
 }
 
 XModel *__cdecl DObjGetModel(const DObj_s *obj, int modelIndex)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 352, 0, "%s", "obj");
-    if (modelIndex >= obj->numModels)
-        MyAssertHandler(
-            ".\\xanim\\dobj_utils.cpp",
-            353,
-            0,
-            "%s\n\t(modelIndex) = %i",
-            "(modelIndex < obj->numModels)",
-            modelIndex);
+    iassert(obj);
+    iassert(modelIndex < obj->numModels);
+
+    // LWSS: blops has this for some reason, seems new
+    //if ( modelIndex < 0 || modelIndex >= obj->numModels )
+    //    return 0;
+
     return obj->models[modelIndex];
 }
 
@@ -276,21 +253,15 @@ void __cdecl DObjSetLocalTag(
     const float *trans,
     const float *angles)
 {
-    if (boneIndex < 0xFE)
+    if (boneIndex < 254)
     {
         if (DObjSetRotTransIndex(obj, partBits, boneIndex))
             DObjSetLocalTagInternal(obj, trans, angles, boneIndex);
+
+        return;
     }
-    else if (boneIndex != 254 && boneIndex != 255)
-    {
-        MyAssertHandler(
-            ".\\xanim\\dobj_utils.cpp",
-            369,
-            0,
-            "%s\n\t(boneIndex) = %i",
-            "((boneIndex == 254) || (boneIndex == 255))",
-            boneIndex);
-    }
+
+    iassert((boneIndex == 254) || (boneIndex == 255));
 }
 
 void __cdecl DObjSetLocalTagInternal(const DObj_s *obj, const float *trans, const float *angles, int boneIndex)
@@ -380,16 +351,13 @@ void __cdecl DObjCompleteHierarchyBits(const DObj_s *obj, int *partBits)
     XModel **models; // [esp+E8h] [ebp-4h]
 
     //Profile_Begin(330);
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 480, 0, "%s", "obj");
-    if (!obj->numBones)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 481, 0, "%s", "obj->numBones > 0");
+    iassert(obj);
+    iassert(obj->numBones > 0);
     objBoneIndex = obj->numBones - 1;
     numModels = obj->numModels;
-    if (!obj->numModels)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 486, 0, "%s", "numModels > 0");
-    if (!obj->duplicateParts)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 488, 0, "%s", "obj->duplicateParts");
+    iassert(numModels > 0);
+    iassert(obj->duplicateParts);
+
     duplicatePartBits = (const int *)SL_ConvertToString(obj->duplicateParts);
     duplicateParts = (const unsigned __int8 *)(duplicatePartBits + 4);
     newBoneIndex = 0;
@@ -404,8 +372,7 @@ void __cdecl DObjCompleteHierarchyBits(const DObj_s *obj, int *partBits)
         if (newBoneIndex > objBoneIndex)
             break;
     }
-    if (j == numModels)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 510, 0, "%s", "j != numModels");
+    iassert(j != numModels);
     *partBits |= 0x80000000;
     for (parentList = subModel->parentList; ; parentList = subModel->parentList)
     {
@@ -420,8 +387,7 @@ void __cdecl DObjCompleteHierarchyBits(const DObj_s *obj, int *partBits)
                 {
                     for (pos = duplicateParts; ; pos += 2)
                     {
-                        if (!*pos)
-                            MyAssertHandler(".\\xanim\\dobj_utils.cpp", 561, 0, "%s", "*pos");
+                        iassert(*pos);
                         if (objBoneIndex == *pos - 1)
                             break;
                     }
@@ -442,8 +408,7 @@ void __cdecl DObjCompleteHierarchyBits(const DObj_s *obj, int *partBits)
                 else
                 {
                 LABEL_34:
-                    if (newBoneIndexb >= (unsigned int)obj->numBones)
-                        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 571, 0, "%s", "(unsigned)newBoneIndex < obj->numBones");
+                    iassert((unsigned)newBoneIndexb < obj->numBones);
                     partBits[newBoneIndexb >> 5] |= 0x80000000 >> (newBoneIndexb & 0x1F);
                     --objBoneIndex;
                 }
@@ -466,23 +431,24 @@ int __cdecl DObjSetControlRotTransIndex(DObj_s *obj, const int *partBits, int bo
     int boneIndexHigh; // [esp+4h] [ebp-8h]
     unsigned int boneIndexLow; // [esp+8h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 589, 0, "%s", "obj");
-    if (!obj->skel.mat)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 590, 0, "%s", "obj->skel.mat");
-    if (boneIndex < 0)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 591, 0, "%s", "boneIndex >= 0");
-    if (boneIndex >= obj->numBones)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 592, 0, "%s", "boneIndex < obj->numBones");
+    iassert(obj);
+    iassert(obj->skel.mat);
+    iassert(boneIndex >= 0);
+    iassert(boneIndex < obj->numBones);
+
     boneIndexHigh = boneIndex >> 5;
     boneIndexLow = 0x80000000 >> (boneIndex & 0x1F);
+
     if ((boneIndexLow & partBits[boneIndex >> 5]) == 0)
         return 0;
+
     skel = &obj->skel;
+
     if ((boneIndexLow & obj->skel.partBits.anim[boneIndexHigh]) != 0)
         return 0;
-    if ((boneIndexLow & skel->partBits.skel[boneIndexHigh]) != 0)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 604, 0, "%s", "!(skel->partBits.skel[boneIndexHigh] & boneIndexLow)");
+    
+    iassert(!(skel->partBits.skel[boneIndexHigh] & boneIndexLow));
+
     skel->partBits.control[boneIndexHigh] |= boneIndexLow;
     skel->partBits.anim[boneIndexHigh] |= boneIndexLow;
     return 1;
@@ -498,17 +464,15 @@ bool __cdecl DObjSkelExists(const DObj_s *obj, int timeStamp)
 
 void __cdecl DObjClearSkel(const DObj_s *obj)
 {
-    memset((unsigned __int8 *)&obj->skel, 0, 0x30u);
+    memset((unsigned __int8 *)&obj->skel.partBits, 0, sizeof(DSkelPartBits));
 }
 
 int __cdecl DObjSkelAreBonesUpToDate(const DObj_s *obj, int *partBits)
 {
     int i; // [esp+4h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 646, 0, "%s", "obj");
-    if (obj == (const DObj_s *)-20)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 649, 0, "%s", "skel");
+    iassert(obj);
+
     for (i = 0; i < 4; ++i)
     {
         if ((partBits[i] & ~obj->skel.partBits.skel[i]) != 0)
@@ -529,9 +493,11 @@ void __cdecl DObjCreateSkel(DObj_s *obj, char *buf, int timeStamp)
 
     //Profile_Begin(310);
     AllocSkelSize = DObjGetAllocSkelSize(obj);
-    memset((unsigned __int8 *)buf, 0xFFu, AllocSkelSize);
+    memset((unsigned __int8 *)buf, 0xFFu, AllocSkelSize); // KISAKTODO: this memset is removed in blops, might not be needed
+
     obj->skel.mat = (DObjAnimMat *)buf;
     obj->skel.timeStamp = timeStamp;
+
     for (i = 0; i < 4; ++i)
     {
         iassert(!obj->skel.partBits.anim[i]);
@@ -543,8 +509,7 @@ void __cdecl DObjCreateSkel(DObj_s *obj, char *buf, int timeStamp)
 
 DObjAnimMat *__cdecl I_dmaGetDObjSkel(const DObj_s *obj)
 {
-    if (!obj->skel.mat)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 735, 0, "%s", "obj->skel.mat");
+    iassert(obj->skel.mat);
     return obj->skel.mat;
 }
 
@@ -570,8 +535,8 @@ void __cdecl DObjLock(DObj_s *obj)
 
 void __cdecl DObjUnlock(DObj_s *obj)
 {
-    if (!obj->locked)
-        MyAssertHandler(".\\xanim\\dobj_utils.cpp", 775, 0, "%s", "obj->locked");
+    iassert(obj->locked);
+
     obj->locked = 0;
 }
 

@@ -9,6 +9,7 @@ struct XAnimTree_s;
 struct XModel;
 
 #define DOBJ_MAX_PARTS 0x80
+#define DOBJ_MAX_SUBMODELS 32
 
 struct DObjTrace_s // sizeof=0x1C
 {                                       // ...

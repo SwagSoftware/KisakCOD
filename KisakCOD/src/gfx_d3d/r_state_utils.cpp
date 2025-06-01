@@ -280,8 +280,7 @@ GfxCmdBufSourceState *__cdecl R_GetActiveWorldMatrix(GfxCmdBufSourceState *sourc
 
 double __cdecl R_GetAdjustedLodDist(float dist, XModelLodRampType lodRampType)
 {
-    if (!rg.lodParms.valid)
-        MyAssertHandler(".\\r_model_lod.cpp", 34, 0, "%s", "model_lod_glob->valid");
+    iassert(rg.lodParms.valid);
     return (dist * rg.lodParms.ramp[lodRampType].scale + rg.lodParms.ramp[lodRampType].bias);
 }
 
