@@ -4061,24 +4061,25 @@ BOOL __cdecl Scr_IsSystemActive()
     return scrVarPub.timeArrayId && !scrVarPub.error_message;
 }
 
-VariableUnion __cdecl Scr_GetInt(unsigned int index)
+int __cdecl Scr_GetInt(unsigned int index)
 {
-    const char* v2; // eax
-    const char* v3; // eax
-    VariableValue* value; // [esp+0h] [ebp-4h]
+	VariableValue *entryValue;
 
-    if (index < scrVmPub.outparamcount)
-    {
-        value = &scrVmPub.top[-(int)index];
-        if (value->type == 6)
-            return value->u;
-        scrVarPub.error_index = index + 1;
-        v2 = va("type %s is not an int", var_typename[value->type]);
-        Scr_Error(v2);
-    }
-    v3 = va("parameter %d does not exist", index + 1);
-    Scr_Error(v3);
-    return 0;
+	if ( index >= scrVmPub.outparamcount )
+	{
+		Scr_Error(va("parameter %d does not exist", index + 1));
+		return 0;
+	}
+
+	entryValue = Scr_GetValue(index);
+
+	if ( entryValue->type != VAR_INTEGER )
+	{
+		scrVarPub.error_index = index + 1;
+		Scr_Error(va("type %s is not an int", var_typename[entryValue->type]));
+	}
+
+	return entryValue->u.intValue;
 }
 
 scr_anim_s __cdecl Scr_GetAnim(unsigned int index, XAnimTree_s* tree)
@@ -4185,82 +4186,87 @@ double __cdecl Scr_GetFloat(unsigned int index)
     return 0.0;
 }
 
-VariableUnion __cdecl Scr_GetConstString(unsigned int index)
+unsigned int __cdecl Scr_GetConstString(unsigned int index)
 {
     const char* v2; // eax
     VariableValue* value; // [esp+0h] [ebp-4h]
 
     if (index >= scrVmPub.outparamcount)
-        goto LABEL_7;
+    {
+        Scr_Error(va("parameter %d does not exist", index + 1));
+        return 0;
+    }
+
     value = &scrVmPub.top[-(int)index];
+
     if (!Scr_CastString(value))
     {
         scrVarPub.error_index = index + 1;
         Scr_ErrorInternal();
-    LABEL_7:
-        v2 = va("parameter %d does not exist", index + 1);
-        Scr_Error(v2);
-        return 0;
     }
-    if (value->type != 2)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 4605, 0, "%s", "value->type == VAR_STRING");
+
+    iassert(value->type == VAR_STRING);
     SL_CheckExists(value->u.intValue);
-    return value->u;
+    return value->u.stringValue;
 }
 
-VariableUnion __cdecl Scr_GetConstLowercaseString(unsigned int index)
+unsigned int __cdecl Scr_GetConstLowercaseString(unsigned int index)
 {
-    HashEntry_unnamed_type_u v1; // eax
-    const char* v3; // eax
-    char* v4; // [esp+0h] [ebp-2018h]
-    VariableUnion stringValue; // [esp+4h] [ebp-2014h]
+    const char* string; // [esp+0h] [ebp-2018h]
+    unsigned int stringValue; // [esp+4h] [ebp-2014h]
     char str[8196]; // [esp+8h] [ebp-2010h] BYREF
     int i; // [esp+2010h] [ebp-8h]
     VariableValue* value; // [esp+2014h] [ebp-4h]
 
     if (index >= scrVmPub.outparamcount)
-        goto LABEL_12;
+    {
+        Scr_Error(va("parameter %d does not exist", index + 1));
+        return 0;
+    }
+
     value = &scrVmPub.top[-(int)index];
+
     if (!Scr_CastString(value))
     {
         scrVarPub.error_index = index + 1;
         Scr_ErrorInternal();
-    LABEL_12:
-        v3 = va("parameter %d does not exist", index + 1);
-        Scr_Error(v3);
+        Scr_Error(va("parameter %d does not exist", index + 1));
         return 0;
     }
-    if (value->type != 2)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 4635, 0, "%s", "value->type == VAR_STRING");
-    stringValue.intValue = (int)value->u;
-    v4 = SL_ConvertToString(value->u.intValue);
+
+    iassert(value->type == VAR_STRING);
+    stringValue = value->u.stringValue;
+    string = SL_ConvertToString(value->u.stringValue);
+
     for (i = 0; ; ++i)
     {
-        str[i] = tolower(v4[i]);
-        if (!v4[i])
+        str[i] = tolower(string[i]);
+        if (!string[i])
             break;
     }
-    if (value->type != 2)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 4646, 0, "%s", "value->type == VAR_STRING");
-    v1.prev = SL_GetString(str, 0);
-    value->u.stringValue = v1.prev;
-    SL_RemoveRefToString(stringValue.stringValue);
+    
+    iassert(value->type == VAR_STRING);
+
+    value->u.stringValue = SL_GetString(str, 0);
+    SL_RemoveRefToString(stringValue);
     SL_CheckExists(value->u.intValue);
-    return value->u;
+    return value->u.stringValue;
+
 }
 
 char* __cdecl Scr_GetString(unsigned int index)
 {
     VariableUnion v1; // eax
 
-    v1.intValue = Scr_GetConstString(index).intValue;
+    v1.intValue = Scr_GetConstString(index);
     return SL_ConvertToString(v1.stringValue);
 }
 
-VariableUnion __cdecl Scr_GetConstStringIncludeNull(unsigned int index)
+unsigned int __cdecl Scr_GetConstStringIncludeNull(unsigned int index)
 {
     if (index >= scrVmPub.outparamcount || scrVmPub.top[-(int)index].type)
         return Scr_GetConstString(index);
+
     return 0;
 }
 
@@ -4285,32 +4291,30 @@ char* __cdecl Scr_GetDebugString(unsigned int index)
     }
 }
 
-VariableUnion __cdecl Scr_GetConstIString(unsigned int index)
+unsigned int __cdecl Scr_GetConstIString(unsigned int index)
 {
-    const char* v2; // eax
-    const char* v3; // eax
-    VariableValue* value; // [esp+0h] [ebp-4h]
+	VariableValue *entryValue;
 
-    if (index < scrVmPub.outparamcount)
-    {
-        value = &scrVmPub.top[-(int)index];
-        if (value->type == 3)
-            return value->u;
-        scrVarPub.error_index = index + 1;
-        v2 = va("type %s is not a localized string", var_typename[value->type]);
-        Scr_Error(v2);
-    }
-    v3 = va("parameter %d does not exist", index + 1);
-    Scr_Error(v3);
-    return 0;
+	if ( index >= scrVmPub.outparamcount )
+	{
+		Scr_Error(va("parameter %d does not exist", index + 1));
+		return 0;
+	}
+
+	entryValue = Scr_GetValue(index);
+
+	if ( entryValue->type != VAR_ISTRING )
+	{
+		scrVarPub.error_index = index + 1;
+		Scr_Error(va("type %s is not a localized string", var_typename[entryValue->type]));
+	}
+
+	return entryValue->u.stringValue;
 }
 
 char* __cdecl Scr_GetIString(unsigned int index)
 {
-    VariableUnion v1; // eax
-
-    v1.intValue = Scr_GetConstIString(index).intValue;
-    return SL_ConvertToString(v1.stringValue);
+    return SL_ConvertToString(Scr_GetConstIString(index));
 }
 
 void __cdecl Scr_GetVector(unsigned int index, float* vectorValue)
@@ -4364,21 +4368,26 @@ scr_entref_t __cdecl Scr_GetEntityRef(unsigned int index)
     return 0;
 }
 
-VariableUnion __cdecl Scr_GetObject(unsigned int index)
+unsigned int __cdecl Scr_GetObject(unsigned int paramnum)
 {
-    VariableValue* value; // [esp+0h] [ebp-4h]
+	VariableValue *var;
 
-    if (index < scrVmPub.outparamcount)
-    {
-        value = &scrVmPub.top[-(int)index];
-        if (value->type == 1)
-            return value->u;
-        scrVarPub.error_index = index + 1;
-        Scr_Error(va("type %s is not an object", var_typename[value->type]));
-    }
+	if (paramnum >= scrVmPub.outparamcount)
+	{
+		Scr_Error(va("parameter %d does not exist", paramnum + 1));
+		return 0;
+	}
 
-    Scr_Error(va("parameter %d does not exist", index + 1));
-    return 0;
+	var = Scr_GetValue(paramnum);
+
+	if (var->type == VAR_POINTER)
+	{
+		return var->u.pointerValue;
+	}
+
+	scrVarPub.error_index = paramnum + 1;
+	Scr_Error(va("type %s is not an object", var_typename[var->type]));
+	return 0;
 }
 
 int __cdecl Scr_GetType(unsigned int index)

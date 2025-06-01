@@ -227,7 +227,7 @@ void __cdecl HudElem_SetFlagForeground(game_hudelem_s *hud, int offset)
     int *flags; // [esp+4h] [ebp-8h]
 
     flags = (int *)((char *)hud + fields_0[offset].ofs);
-    if (Scr_GetInt(0).intValue)
+    if (Scr_GetInt(0))
         v2 = *flags | 1;
     else
         v2 = *flags & 0xFFFFFFFE;
@@ -250,7 +250,7 @@ void __cdecl HudElem_SetFlagHideWhenDead(game_hudelem_s *hud, int offset)
     int *flags; // [esp+4h] [ebp-8h]
 
     flags = (int *)((char *)hud + fields_0[offset].ofs);
-    if (Scr_GetInt(0).intValue)
+    if (Scr_GetInt(0))
         v2 = *flags | 2;
     else
         v2 = *flags & 0xFFFFFFFD;
@@ -273,7 +273,7 @@ void __cdecl HudElem_SetFlagHideWhenInMenu(game_hudelem_s *hud, int offset)
     int *flags; // [esp+4h] [ebp-8h]
 
     flags = (int *)((char *)hud + fields_0[offset].ofs);
-    if (Scr_GetInt(0).intValue)
+    if (Scr_GetInt(0))
         v2 = *flags | 4;
     else
         v2 = *flags & 0xFFFFFFFB;
@@ -736,7 +736,7 @@ void __cdecl GScr_NewTeamHudElem()
     unsigned __int16 teamName; // [esp+0h] [ebp-Ch]
     game_hudelem_s *hud; // [esp+8h] [ebp-4h]
 
-    teamName = Scr_GetConstString(0).intValue;
+    teamName = Scr_GetConstString(0);
     if (teamName == scr_const.allies)
     {
         v0 = HudElem_Alloc(1023, 2);
@@ -841,13 +841,13 @@ void __cdecl HECmd_SetMaterial(scr_entref_t entref)
     }
     else
     {
-        width = Scr_GetInt(1u).intValue;
+        width = Scr_GetInt(1);
         if (width < 0)
         {
             v2 = va("width %i < 0", width);
             Scr_ParamError(1u, v2);
         }
-        height = Scr_GetInt(2u).intValue;
+        height = Scr_GetInt(2);
         if (height < 0)
         {
             v3 = va("height %i < 0", height);
@@ -1000,13 +1000,13 @@ void __cdecl HECmd_SetClock_Internal(scr_entref_t entref, he_type_t type, const 
     }
     else
     {
-        width = Scr_GetInt(3u).intValue;
+        width = Scr_GetInt(3);
         if (width < 0)
         {
             v7 = va("width %i < 0", width);
             Scr_ParamError(3u, v7);
         }
-        height = Scr_GetInt(4u).intValue;
+        height = Scr_GetInt(4);
         if (height < 0)
         {
             v8 = va("height %i < 0", height);
@@ -1048,7 +1048,7 @@ void __cdecl HECmd_SetWaypoint(scr_entref_t entref)
 
     hud = HECmd_GetHudElem(entref);
     numParam = Scr_GetNumParam();
-    v1.intValue = Scr_GetInt(0).intValue;
+    v1.intValue = Scr_GetInt(0);
     hud->elem.type = HE_TYPE_WAYPOINT;
     hud->elem.value = (float)v1.intValue;
     if (numParam == 1)
@@ -1118,8 +1118,8 @@ void __cdecl HECmd_ScaleOverTime(scr_entref_t entref)
         v1 = va("scale time %g <= 0", scaleTime);
         Scr_ParamError(0, v1);
     }
-    width = Scr_GetInt(1u).intValue;
-    height = Scr_GetInt(2u).intValue;
+    width = Scr_GetInt(1);
+    height = Scr_GetInt(2);
     hud->elem.scaleStartTime = level.time;
     v3 = scaleTime * 1000.0;
     hud->elem.scaleTime = (int)(v3 + 9.313225746154785e-10);
@@ -1281,7 +1281,7 @@ VariableUnion __cdecl GetIntGTZero(unsigned int index)
     const char *v1; // eax
     int number; // [esp+0h] [ebp-4h]
 
-    number = Scr_GetInt(index).intValue;
+    number = Scr_GetInt(index);
     if (number < 0)
     {
         v1 = va("Time (%i) must be greater than zero.", number);

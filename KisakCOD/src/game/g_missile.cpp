@@ -585,7 +585,7 @@ void __cdecl Scr_MissileDeleteAttractor()
     AttractorRepulsor_t *v0; // ecx
     unsigned int attractorIndex; // [esp+0h] [ebp-4h]
 
-    attractorIndex = Scr_GetInt(0).stringValue;
+    attractorIndex = Scr_GetInt(0);
     if (attractorIndex >= 0x20)
         Scr_ParamError(0, "Invalid attractor or repulsor");
     v0 = &attrGlob.attractors[attractorIndex];

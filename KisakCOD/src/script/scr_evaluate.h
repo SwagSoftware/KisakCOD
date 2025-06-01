@@ -65,6 +65,7 @@ void __cdecl Scr_EvalLocalVariable(sval_u expr, unsigned int localId, VariableVa
 VariableValueInternal_u __cdecl Scr_EvalObject(sval_u classnum, sval_u entnum, VariableValue *value);
 void __cdecl Scr_EvalSelfValue(VariableValue *value);
 void __cdecl Scr_GetValue(unsigned int index, VariableValue *value);
+VariableValue *Scr_GetValue(unsigned int param);
 unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigned int localId);
 void __cdecl Scr_EvalCallExpression(sval_u expr, unsigned int localId, VariableValue *value);
 void __cdecl Scr_EvalFunction(sval_u func_name, sval_u params, unsigned int localId, VariableValue *value);

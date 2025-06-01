@@ -1951,7 +1951,7 @@ void __cdecl CMD_VEH_SetGoalPos(scr_entref_t entref)
     veh = GScr_GetVehicle(entref)->scr_vehicle;
     veh->manualMode = 1;
     Scr_GetVector(0, veh->goalPosition);
-    veh->stopAtGoal = Scr_GetNumParam() > 1 && Scr_GetInt(1u).intValue != 0;
+    veh->stopAtGoal = Scr_GetNumParam() > 1 && Scr_GetInt(1) != 0;
     if (veh->manualSpeed == 0.0 || veh->manualAccel == 0.0 || veh->manualDecel == 0.0)
         Scr_Error("Speed and acceleration must not be zero before setting goal pos");
     veh->flags |= 2u;
@@ -2337,12 +2337,6 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
 
 int __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int barrel)
 {
-    VariableUnion v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    char *v5; // eax
-    const char *v6; // eax
-    char *v8; // [esp-4h] [ebp-10h]
     char *boneName; // [esp+0h] [ebp-Ch]
     int boneIndex; // [esp+4h] [ebp-8h]
     scr_vehicle_s *veh; // [esp+8h] [ebp-4h]
@@ -2354,13 +2348,10 @@ int __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int barrel)
         boneName = Scr_GetString(0);
         if (*boneName)
         {
-            v2.intValue = Scr_GetConstLowercaseString(0).intValue;
-            boneIndex = SV_DObjGetBoneIndex(ent, v2.stringValue);
+            boneIndex = SV_DObjGetBoneIndex(ent, Scr_GetConstLowercaseString(0));
             if (boneIndex < 0)
             {
-                v3 = SL_ConvertToString(ent->targetname);
-                v4 = va("No tag %s for [%s]\n", boneName, v3);
-                Scr_Error(v4);
+                Scr_Error(va("No tag %s for [%s]\n", boneName, SL_ConvertToString(ent->targetname)));
             }
         }
         else
@@ -2372,10 +2363,7 @@ int __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int barrel)
     {
         if (veh->boneIndex.flash[barrel] < 0)
         {
-            v8 = SL_ConvertToString(ent->targetname);
-            v5 = SL_ConvertToString(*s_flashTags[barrel]);
-            v6 = va("No %s for [%s]\n", v5, v8);
-            Scr_Error(v6);
+            Scr_Error(va("No %s for [%s]\n", SL_ConvertToString(*s_flashTags[barrel]), SL_ConvertToString(ent->targetname)));
         }
         else
         {

@@ -75,7 +75,7 @@ void __cdecl CMD_Heli_SetDamageStage(scr_entref_t entref)
     gentity_s *ent; // [esp+0h] [ebp-4h]
 
     ent = GScr_GetVehicle(entref);
-    ent->s.un1.scale = Scr_GetInt(0).intValue;
+    ent->s.un1.scale = Scr_GetInt(0);
 }
 
 void(__cdecl *__cdecl Helicopter_GetMethod(const char **pName))(scr_entref_t)

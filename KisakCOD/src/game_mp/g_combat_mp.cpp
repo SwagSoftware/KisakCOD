@@ -104,7 +104,7 @@ int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam)
     unsigned __int16 modName; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    modName = (unsigned __int16)Scr_GetConstString(scrParam).floatValue;
+    modName = Scr_GetConstString(scrParam);
     for (i = 0; i < 16; ++i)
     {
         if (*modNames[i] == modName)

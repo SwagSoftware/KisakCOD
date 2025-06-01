@@ -494,7 +494,7 @@ void GScr_printChannelSet()
             return;
         }
     }
-    else if (Type != 6 || (channel = Scr_GetInt(0).intValue, !Con_IsChannelOpen(channel)))
+    else if (Type != 6 || (channel = Scr_GetInt(0), !Con_IsChannelOpen(channel)))
     {
         Scr_ParamError(0, "Invalid Print Channel");
         return;
@@ -748,7 +748,7 @@ void GScr_print3d()
     case 5u:
         goto $LN5_37;
     case 6u:
-        duration.intValue = Scr_GetInt(5u).intValue;
+        duration.intValue = Scr_GetInt(5);
     $LN5_37:
         scale = Scr_GetFloat(4u);
     $LN4_36:
@@ -795,9 +795,9 @@ void GScr_line()
     case 5u:
         goto $LN5_38;
     case 6u:
-        duration.intValue = Scr_GetInt(5u).intValue;
+        duration.intValue = Scr_GetInt(5);
     $LN5_38:
-        depthTest = Scr_GetInt(4u).intValue;
+        depthTest = Scr_GetInt(4);
     $LN4_37:
         color[3] = Scr_GetFloat(3u);
     $LN3_27:
@@ -962,7 +962,7 @@ void GScr_SetDvar()
     *pCh = 0;
     if (Dvar_IsValidName(dvarName))
     {
-        v3 = Scr_GetNumParam() >= 3 && Scr_GetInt(2u).intValue;
+        v3 = Scr_GetNumParam() >= 3 && Scr_GetInt(2);
         Dvar_SetFromStringByName(dvarName, (char *)dvarValue);
         if (v3)
         {
@@ -988,7 +988,7 @@ void Scr_GetEntByNum()
 {
     int entnum; // [esp+4h] [ebp-4h]
 
-    entnum = Scr_GetInt(0).intValue;
+    entnum = Scr_GetInt(0);
     if ((unsigned int)entnum < 0x400)
     {
         if (g_entities[entnum].r.inuse)
@@ -1012,7 +1012,7 @@ void Scr_GetWeaponModel()
     {
         if (Scr_GetNumParam() == 2)
         {
-            weaponModel = Scr_GetInt(1u).stringValue;
+            weaponModel = Scr_GetInt(1);
             if (weaponModel < 0x100)
             {
                 if (!BG_GetWeaponDef(iWeaponIndex)->worldModel[weaponModel])
@@ -1119,7 +1119,7 @@ void GScr_AnimHasNotetrack()
     const char *anim; // [esp+8h] [ebp-4h]
 
     anim = Scr_GetAnim(0, 0).linkPointer;
-    floatValue = (unsigned __int16)Scr_GetConstString(1u).floatValue;
+    floatValue = Scr_GetConstString(1);
     Anims = Scr_GetAnims(HIWORD(anim));
     v1 = XAnimNotetrackExists(Anims, (unsigned __int16)anim, floatValue);
     Scr_AddBool(v1);
@@ -1132,7 +1132,7 @@ void GScr_GetNotetrackTimes()
     const char *anim; // [esp+8h] [ebp-4h]
 
     anim = Scr_GetAnim(0, 0).linkPointer;
-    name.intValue = Scr_GetConstString(1u).intValue;
+    name.intValue = Scr_GetConstString(1);
     Scr_MakeArray();
     Anims = Scr_GetAnims(HIWORD(anim));
     XAnimAddNotetrackTimesToScriptArray(Anims, (unsigned __int16)anim, name.stringValue);
@@ -1159,12 +1159,12 @@ void GScr_Spawn()
     unsigned short classname; // [esp+14h] [ebp-8h]
     gentity_s *ent; // [esp+18h] [ebp-4h]
 
-    classname = Scr_GetConstString(0).intValue;
+    classname = Scr_GetConstString(0);
     Scr_GetVector(1u, origin);
     if (Scr_GetNumParam() <= 2)
         iSpawnFlags = 0;
     else
-        iSpawnFlags = Scr_GetInt(2u).intValue;
+        iSpawnFlags = Scr_GetInt(2);
     ent = G_Spawn();
     Scr_SetString(&ent->classname, classname);
     currentOrigin = ent->r.currentOrigin;
@@ -1200,12 +1200,12 @@ void GScr_SpawnPlane()
     owner = Scr_GetEntity(0);
     if (!owner->client)
         Scr_ParamError(0, "Owner entity is not a player");
-    classname = (unsigned __int16)Scr_GetConstString(1u).floatValue;
+    classname = Scr_GetConstString(1);
     Scr_GetVector(2u, origin);
     if (Scr_GetNumParam() <= 3)
         iSpawnFlags = 0;
     else
-        iSpawnFlags = Scr_GetInt(3u).intValue;
+        iSpawnFlags = Scr_GetInt(3);
     ent = G_Spawn();
     Scr_SetString(&ent->classname, classname);
     currentOrigin = ent->r.currentOrigin;
@@ -1247,7 +1247,7 @@ void GScr_SpawnTurret()
     gentity_s *ent; // [esp+14h] [ebp-8h]
     const char *weaponinfoname; // [esp+18h] [ebp-4h]
 
-    classname = Scr_GetConstString(0).intValue;
+    classname = Scr_GetConstString(0);
     Scr_GetVector(1u, origin);
     weaponinfoname = Scr_GetString(2u);
     ent = G_Spawn();
@@ -1316,47 +1316,37 @@ void __cdecl ScrCmd_SetMoveSpeedScale(scr_entref_t entref)
 
 void __cdecl ScrCmd_attach(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    VariableUnion v5; // [esp+0h] [ebp-18h]
-    VariableUnion v6; // [esp+4h] [ebp-14h]
+    unsigned int v5; // [esp+0h] [ebp-18h]
+    unsigned int v6; // [esp+4h] [ebp-14h]
     char *modelName; // [esp+Ch] [ebp-Ch]
     gentity_s *ent; // [esp+10h] [ebp-8h]
 
     ent = GetEntity(entref);
     modelName = Scr_GetString(0);
+
     if (Scr_GetNumParam() < 2)
-        v6.intValue = scr_const._;
+        v6 = scr_const._;
     else
-        v6.intValue = Scr_GetConstLowercaseString(1u).intValue;
+        v6 = Scr_GetConstLowercaseString(1);
+
     if (Scr_GetNumParam() < 3)
-        v5.intValue = 0;
+        v5 = 0;
     else
-        v5.intValue = Scr_GetInt(2u).intValue;
-    if (G_EntDetach(ent, modelName, v6.stringValue))
+        v5 = Scr_GetInt(2);
+
+    if (G_EntDetach(ent, modelName, v6))
     {
-        v1 = SL_ConvertToString(v6.stringValue);
-        v2 = va("model '%s' already attached to tag '%s'", modelName, v1);
-        Scr_Error(v2);
+        Scr_Error(va("model '%s' already attached to tag '%s'", modelName, SL_ConvertToString(v6)));
     }
-    if (!G_EntAttach(ent, modelName, v6.stringValue, v5.intValue))
+    if (!G_EntAttach(ent, modelName, v6, v5))
     {
-        v3 = SL_ConvertToString(v6.stringValue);
-        v4 = va("failed to attach model '%s' to tag '%s'", modelName, v3);
-        Scr_Error(v4);
+        Scr_Error(va("failed to attach model '%s' to tag '%s'", modelName, SL_ConvertToString(v6)));
     }
 }
 
 void __cdecl ScrCmd_detach(scr_entref_t entref)
 {
-    unsigned int v1; // eax
-    char *v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    char *v5; // [esp-4h] [ebp-18h]
-    VariableUnion v6; // [esp+0h] [ebp-14h]
+    unsigned int v6; // [esp+0h] [ebp-14h]
     char *modelName; // [esp+8h] [ebp-Ch]
     gentity_s *ent; // [esp+Ch] [ebp-8h]
     int i; // [esp+10h] [ebp-4h]
@@ -1364,10 +1354,10 @@ void __cdecl ScrCmd_detach(scr_entref_t entref)
     ent = GetEntity(entref);
     modelName = Scr_GetString(0);
     if (Scr_GetNumParam() < 2)
-        v6.intValue = scr_const._;
+        v6 = scr_const._;
     else
-        v6.intValue = Scr_GetConstLowercaseString(1u).intValue;
-    if (!G_EntDetach(ent, modelName, v6.stringValue))
+        v6 = Scr_GetConstLowercaseString(1);
+    if (!G_EntDetach(ent, modelName, v6))
     {
         Com_Printf(23, "Current attachments:\n");
         for (i = 0; i < 19; ++i)
@@ -1376,16 +1366,11 @@ void __cdecl ScrCmd_detach(scr_entref_t entref)
             {
                 if (ent->attachTagNames[i])
                 {
-                    v5 = SL_ConvertToString(ent->attachTagNames[i]);
-                    v1 = G_ModelName(ent->attachModelNames[i]);
-                    v2 = SL_ConvertToString(v1);
-                    Com_Printf(23, "model: '%s', tag: '%s'\n", v2, v5);
+                    Com_Printf(23, "model: '%s', tag: '%s'\n", SL_ConvertToString(G_ModelName(ent->attachModelNames[i])), SL_ConvertToString(ent->attachTagNames[i]));
                 }
             }
         }
-        v3 = SL_ConvertToString(v6.stringValue);
-        v4 = va("failed to detach model '%s' from tag '%s'", modelName, v3);
-        Scr_Error(v4);
+        Scr_Error(va("failed to detach model '%s' from tag '%s'", modelName, SL_ConvertToString(v6)));
     }
 }
 
@@ -1415,7 +1400,7 @@ void __cdecl ScrCmd_GetAttachModelName(scr_entref_t entref)
     int i; // [esp+4h] [ebp-4h]
 
     ent = GetEntity(entref);
-    i = Scr_GetInt(0).intValue;
+    i = Scr_GetInt(0);
     if ((unsigned int)i >= 0x13 || !ent->attachModelNames[i])
         Scr_ParamError(0, "bad index");
     v1 = G_ModelName(ent->attachModelNames[i]);
@@ -1428,7 +1413,7 @@ void __cdecl ScrCmd_GetAttachTagName(scr_entref_t entref)
     int i; // [esp+4h] [ebp-4h]
 
     ent = GetEntity(entref);
-    i = Scr_GetInt(0).intValue;
+    i = Scr_GetInt(0);
     if ((unsigned int)i >= 0x13 || !ent->attachModelNames[i])
         Scr_ParamError(0, "bad index");
     if (!ent->attachTagNames[i])
@@ -1442,7 +1427,7 @@ void __cdecl ScrCmd_GetAttachIgnoreCollision(scr_entref_t entref)
     int i; // [esp+4h] [ebp-4h]
 
     ent = GetEntity(entref);
-    i = Scr_GetInt(0).intValue;
+    i = Scr_GetInt(0);
     if ((unsigned int)i >= 0x13 || !ent->attachModelNames[i])
         Scr_ParamError(0, "bad index");
     Scr_AddBool((ent->attachIgnoreCollision & (1 << i)) != 0);
@@ -1487,7 +1472,7 @@ void __cdecl ScrCmd_hidepart(scr_entref_t entref)
     if (!obj)
         Scr_Error("entity has no model");
     boneIndex = -2;
-    tagName = Scr_GetConstLowercaseString(0).stringValue;
+    tagName = Scr_GetConstLowercaseString(0);
     if (Scr_GetNumParam() == 1)
     {
         if (!DObjGetBoneIndex(obj, tagName, &boneIndex))
@@ -1533,7 +1518,7 @@ void __cdecl ScrCmd_showpart(scr_entref_t entref)
     if (!obj)
         Scr_Error("entity has no model");
     boneIndex = -2;
-    tagName = Scr_GetConstLowercaseString(0).stringValue;
+    tagName = Scr_GetConstLowercaseString(0);
     if (Scr_GetNumParam() == 1)
     {
         if (!DObjGetBoneIndex(obj, tagName, &boneIndex))
@@ -1586,7 +1571,7 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
     char *v7; // eax
     const char *v8; // eax
     char *v9; // [esp-4h] [ebp-2Ch]
-    VariableUnion tagName; // [esp+0h] [ebp-28h]
+    unsigned int tagName; // [esp+0h] [ebp-28h]
     float originOffset[3]; // [esp+4h] [ebp-24h] BYREF
     float anglesOffset[3]; // [esp+10h] [ebp-18h] BYREF
     int numParam; // [esp+1Ch] [ebp-Ch]
@@ -1604,21 +1589,21 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
     }
     parent = Scr_GetEntity(0);
     numParam = Scr_GetNumParam();
-    tagName.intValue = 0;
+    tagName = 0;
     if (numParam >= 2)
     {
-        tagName.intValue = Scr_GetConstLowercaseString(1u).intValue;
-        if (tagName.intValue == scr_const._)
-            tagName.intValue = 0;
+        tagName = Scr_GetConstLowercaseString(1);
+        if (tagName == scr_const._)
+            tagName = 0;
     }
     if (numParam > 2)
     {
         Scr_GetVector(2u, originOffset);
         Scr_GetVector(3u, anglesOffset);
-        if (G_EntLinkToWithOffset(ent, parent, tagName.stringValue, originOffset, anglesOffset))
+        if (G_EntLinkToWithOffset(ent, parent, tagName, originOffset, anglesOffset))
             return;
     }
-    else if (G_EntLinkTo(ent, parent, tagName.stringValue))
+    else if (G_EntLinkTo(ent, parent, tagName))
     {
         return;
     }
@@ -1633,14 +1618,14 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
     }
     if (!parent->model)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 1384, 0, "%s", "parent->model");
-    if (tagName.intValue)
+    if (tagName)
     {
-        if (SV_DObjGetBoneIndex(parent, tagName.stringValue) < 0)
+        if (SV_DObjGetBoneIndex(parent, tagName) < 0)
         {
             SV_DObjDumpInfo(parent);
             v6 = G_ModelName(parent->model);
             v9 = SL_ConvertToString(v6);
-            v7 = SL_ConvertToString(tagName.stringValue);
+            v7 = SL_ConvertToString(tagName);
             v8 = va("failed to link entity since tag '%s' does not exist in parent model '%s'", v7, v9);
             Scr_Error(v8);
         }
@@ -1842,7 +1827,7 @@ void __cdecl ScrCmd_PlaySoundToTeam(scr_entref_t entref)
     gentity_s *clientEnt; // [esp+14h] [ebp-4h]
 
     tempEnt = StartScriptPlaySoundOnEnt(entref);
-    team = (unsigned __int16)Scr_GetConstString(1u).floatValue;
+    team = Scr_GetConstString(1);
     if (team != scr_const.allies && team != scr_const.axis)
     {
         v1 = SL_ConvertToString(team);
@@ -2089,7 +2074,7 @@ void __cdecl ScrCmd_SetContents(scr_entref_t entref)
     gentity_s *ent; // [esp+4h] [ebp-4h]
 
     ent = GetEntity(entref);
-    contents = Scr_GetInt(0).intValue;
+    contents = Scr_GetInt(0);
     Scr_AddInt(ent->r.contents);
     ent->r.contents = contents;
     SV_LinkEntity(ent);
@@ -2128,7 +2113,7 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
     gentity_s *ent; // [esp+4h] [ebp-4h]
 
     ent = GetEntity(entref);
-    stableMissile = Scr_GetInt(0).intValue;
+    stableMissile = Scr_GetInt(0);
     if (ent->s.eType != 1)
         Scr_Error("Type should be a player");
     if (stableMissile)
@@ -2378,7 +2363,7 @@ void Scr_Objective_Add()
     if (numParam < 2)
         Scr_Error(
             "objective_add needs at least the first two parameters out of its parameter list of: index state [string] [position]\n");
-    objNum = Scr_GetInt(0).intValue;
+    objNum = Scr_GetInt(0);
     if ((unsigned int)objNum >= 0x10)
     {
         v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
@@ -2386,7 +2371,7 @@ void Scr_Objective_Add()
     }
     obj = &level.objectives[objNum];
     ClearObjective_OnEntity(obj);
-    stateName = (unsigned __int16)Scr_GetConstString(1u).floatValue;
+    stateName = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(&state, stateName))
     {
         v1 = SL_ConvertToString(stateName);
@@ -2455,7 +2440,7 @@ void Scr_Objective_Delete()
     const char *v0; // eax
     int objNum; // [esp+0h] [ebp-4h]
 
-    objNum = Scr_GetInt(0).intValue;
+    objNum = Scr_GetInt(0);
     if ((unsigned int)objNum >= 0x10)
     {
         v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
@@ -2475,14 +2460,14 @@ void Scr_Objective_State()
     unsigned __int16 stateName; // [esp+8h] [ebp-8h]
     int objNum; // [esp+Ch] [ebp-4h]
 
-    objNum = Scr_GetInt(0).intValue;
+    objNum = Scr_GetInt(0);
     if ((unsigned int)objNum >= 0x10)
     {
         v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
         Scr_ParamError(0, v0);
     }
     obj = &level.objectives[objNum];
-    stateName = (unsigned __int16)Scr_GetConstString(1u).floatValue;
+    stateName = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(&state, stateName))
     {
         String = Scr_GetString(1u);
@@ -2501,7 +2486,7 @@ void Scr_Objective_Icon()
     const char *v0; // eax
     int objNum; // [esp+0h] [ebp-4h]
 
-    objNum = Scr_GetInt(0).intValue;
+    objNum = Scr_GetInt(0);
     if ((unsigned int)objNum >= 0x10)
     {
         v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
@@ -2517,7 +2502,7 @@ void Scr_Objective_Position()
     objective_t *obj; // [esp+Ch] [ebp-8h]
     int objNum; // [esp+10h] [ebp-4h]
 
-    objNum = Scr_GetInt(0).intValue;
+    objNum = Scr_GetInt(0);
     if ((unsigned int)objNum >= 0x10)
     {
         v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
@@ -2539,7 +2524,7 @@ objective_t *Scr_Objective_OnEntity()
     gentity_s *ent; // [esp+4h] [ebp-8h]
     int objNum; // [esp+8h] [ebp-4h]
 
-    objNum = Scr_GetInt(0).intValue;
+    objNum = Scr_GetInt(0);
     if ((unsigned int)objNum >= 0x10)
     {
         v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
@@ -2566,7 +2551,7 @@ void Scr_Objective_Current()
     memset((unsigned __int8 *)makeCurrent, 0, sizeof(makeCurrent));
     for (i = 0; i < numParam; ++i)
     {
-        objNum = Scr_GetInt(i).intValue;
+        objNum = Scr_GetInt(i);
         if ((unsigned int)objNum >= 0x10)
         {
             v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
@@ -2597,14 +2582,14 @@ void GScr_Objective_Team()
     unsigned __int16 team; // [esp+4h] [ebp-8h]
     int objNum; // [esp+8h] [ebp-4h]
 
-    objNum = Scr_GetInt(0).intValue;
+    objNum = Scr_GetInt(0);
     if ((unsigned int)objNum >= 0x10)
     {
         v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
         Scr_ParamError(0, v0);
     }
     obj = &level.objectives[objNum];
-    team = (unsigned __int16)Scr_GetConstString(1u).floatValue;
+    team = Scr_GetConstString(1);
     if (team == scr_const.allies)
     {
         obj->teamNum = 2;
@@ -3138,7 +3123,7 @@ void Scr_BulletTrace()
     iClipMask = 0x2806831;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
-    if (!Scr_GetInt(2u).intValue)
+    if (!Scr_GetInt(2))
         iClipMask &= ~0x2000000u;
     if (Scr_GetType(3u) == 1 && Scr_GetPointerType(3u) == 20)
     {
@@ -3192,7 +3177,7 @@ void Scr_BulletTracePassed()
     iClipMask = 0x2806831;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
-    if (!Scr_GetInt(2u).intValue)
+    if (!Scr_GetInt(2))
         iClipMask &= ~0x2000000u;
     if (Scr_GetType(3u) == 1 && Scr_GetPointerType(3u) == 20)
     {
@@ -3217,7 +3202,7 @@ void __cdecl Scr_SightTracePassed()
     iClipMask = (int)&sv.svEntities[288].baseline.s.lerp.apos.trBase[2] + 3;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
-    if (!Scr_GetInt(2u).intValue)
+    if (!Scr_GetInt(2))
         iClipMask &= ~0x2000000u;
     if (Scr_GetType(3u) == 1 && Scr_GetPointerType(3u) == 20)
     {
@@ -3261,7 +3246,7 @@ void Scr_RandomInt()
     int v0; // eax
     int iMax; // [esp+0h] [ebp-4h]
 
-    iMax = Scr_GetInt(0).intValue;
+    iMax = Scr_GetInt(0);
     if (iMax > 0)
     {
         v0 = irand(0, iMax);
@@ -3290,8 +3275,8 @@ void Scr_RandomIntRange()
     int iMax; // [esp+0h] [ebp-8h]
     int iMin; // [esp+4h] [ebp-4h]
 
-    iMin = Scr_GetInt(0).intValue;
-    iMax = Scr_GetInt(1u).intValue;
+    iMin = Scr_GetInt(0);
+    iMax = Scr_GetInt(1);
     if (iMax <= iMin)
     {
         Com_Printf(23, "RandomIntRange parms: %d %d ", iMin, iMax);
@@ -3505,7 +3490,7 @@ void GScr_CastInt()
         Scr_AddInt((int)Float);
         break;
     case 6:
-        v0.intValue = Scr_GetInt(0).intValue;
+        v0.intValue = Scr_GetInt(0);
         Scr_AddInt(v0.intValue);
         break;
     default:
@@ -3791,11 +3776,11 @@ void Scr_GetSubStr()
     const char *s; // [esp+420h] [ebp-4h]
 
     s = Scr_GetString(0);
-    start = Scr_GetInt(1u).intValue;
+    start = Scr_GetInt(1);
     if (Scr_GetNumParam() < 3)
         v0.intValue = 0x7FFFFFFF;
     else
-        v0.intValue = Scr_GetInt(2u).intValue;
+        v0.intValue = Scr_GetInt(2);
     end = v0.intValue;
     source = start;
     for (dest = 0; source < end; ++dest)
@@ -3849,8 +3834,8 @@ void Scr_StrTok()
     int delimLen; // [esp+434h] [ebp-8h]
     unsigned int sId; // [esp+438h] [ebp-4h]
 
-    sId = Scr_GetConstString(0).stringValue;
-    delimId = Scr_GetConstString(1u).stringValue;
+    sId = Scr_GetConstString(0);
+    delimId = Scr_GetConstString(1);
     s = SL_ConvertToString(sId);
     delim = SL_ConvertToString(delimId);
     SL_AddRefToString(sId);
@@ -4204,7 +4189,7 @@ VariableUnion GScr_SetPlayerIgnoreRadiusDamage()
 {
     VariableUnion result; // eax
 
-    result.intValue = Scr_GetInt(0).intValue;
+    result.intValue = Scr_GetInt(0);
     level.bPlayerIgnoreRadiusDamageLatched = result.intValue;
     return result;
 }
@@ -4347,7 +4332,7 @@ void Scr_PlayFX()
     numParams = Scr_GetNumParam();
     if (numParams < 2 || numParams > 4)
         Scr_Error("Incorrect number of parameters");
-    fxId = Scr_GetInt(0).intValue;
+    fxId = Scr_GetInt(0);
     Scr_GetVector(1u, pos);
     ent = G_TempEntity(pos, 55);
     if (ent->s.lerp.apos.trType)
@@ -4467,7 +4452,7 @@ void Scr_PlayFXOnTag()
 
     if (Scr_GetNumParam() != 3)
         Scr_Error("Incorrect number of parameters");
-    fxId = Scr_GetInt(0).intValue;
+    fxId = Scr_GetInt(0);
     if (fxId <= 0 || fxId >= 100)
     {
         v0 = va("effect id %i is invalid\n", fxId);
@@ -4476,7 +4461,7 @@ void Scr_PlayFXOnTag()
     ent = Scr_GetEntity(1u);
     if (!ent->model)
         Scr_ParamError(1u, "cannot play fx on entity with no model");
-    tag = Scr_GetConstLowercaseString(2u).stringValue;
+    tag = Scr_GetConstLowercaseString(2);
     v1 = SL_ConvertToString(tag);
     v2 = strchr(v1, '"');
     if (v2)
@@ -4514,7 +4499,7 @@ void Scr_PlayLoopedFX()
         Scr_Error("Incorrect number of parameters");
     givenAxisCount = 0;
     cullDist = 0.0;
-    fxId = Scr_GetInt(0).intValue;
+    fxId = Scr_GetInt(0);
     NumParam = Scr_GetNumParam();
     if (NumParam != 4)
     {
@@ -4565,7 +4550,7 @@ void Scr_SpawnFX()
     if (Scr_GetNumParam() < 2 || Scr_GetNumParam() > 4)
         Scr_Error("Incorrect number of parameters");
     givenAxisCount = 0;
-    fxId = Scr_GetInt(0).intValue;
+    fxId = Scr_GetInt(0);
     NumParam = Scr_GetNumParam();
     if (NumParam != 3)
     {
@@ -4645,7 +4630,7 @@ void Scr_PhysicsExplosionSphere()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 57);
-    ent->s.eventParm = Scr_GetInt(1u).stringValue;
+    ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2u);
     if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
         Scr_ParamError(2u, "Radius is negative");
@@ -4665,7 +4650,7 @@ void Scr_PhysicsRadiusJolt()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 59);
-    ent->s.eventParm = Scr_GetInt(1u).stringValue;
+    ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2u);
     if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
         Scr_ParamError(2u, "Radius is negative");
@@ -4689,7 +4674,7 @@ void Scr_PhysicsRadiusJitter()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 60);
-    ent->s.eventParm = Scr_GetInt(1u).stringValue;
+    ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2u);
     if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
         Scr_ParamError(2u, "Radius is negative");
@@ -4712,7 +4697,7 @@ void Scr_PhysicsExplosionCylinder()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 58);
-    ent->s.eventParm = Scr_GetInt(1u).stringValue;
+    ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2u);
     if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
         Scr_ParamError(2u, "Radius is negative");
@@ -4853,9 +4838,9 @@ void Scr_TableLookup()
             Scr_Error("USAGE: tableLookup( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
         filename = Scr_GetString(0);
         StringTable_GetAsset(filename, (XAssetHeader *)&table);
-        comparisonColumn = Scr_GetInt(1u).intValue;
+        comparisonColumn = Scr_GetInt(1);
         stringValue = Scr_GetString(2u);
-        returnValueColumn = Scr_GetInt(3u).intValue;
+        returnValueColumn = Scr_GetInt(3);
         returnValue = (char *)StringTable_Lookup(table, comparisonColumn, stringValue, returnValueColumn);
         Scr_AddString(returnValue);
     }
@@ -4881,9 +4866,9 @@ void Scr_TableLookupIString()
             Scr_Error("USAGE: tableLookupIString( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
         filename = Scr_GetString(0);
         StringTable_GetAsset(filename, (XAssetHeader *)&table);
-        comparisonColumn = Scr_GetInt(1u).intValue;
+        comparisonColumn = Scr_GetInt(1);
         stringValue = Scr_GetString(2u);
-        returnValueColumn = Scr_GetInt(3u).intValue;
+        returnValueColumn = Scr_GetInt(3);
         returnValue = (char *)StringTable_Lookup(table, comparisonColumn, stringValue, returnValueColumn);
         Scr_AddIString(returnValue);
     }
@@ -4904,7 +4889,7 @@ void GScr_IsPlayer()
 
 void GScr_IsPlayerNumber()
 {
-    if (Scr_GetInt(0).stringValue < 0x40)
+    if (Scr_GetInt(0) < 0x40)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -4940,7 +4925,7 @@ void GScr_SetWinningTeam()
     int iWinner; // [esp+8h] [ebp-40Ch]
     char buffer[1028]; // [esp+Ch] [ebp-408h] BYREF
 
-    team = Scr_GetConstString(0).intValue;
+    team = Scr_GetConstString(0);
     if (team == scr_const.allies)
     {
         iWinner = -2;
@@ -5002,7 +4987,7 @@ void GScr_GetTeamScore()
     const char *v1; // eax
     unsigned __int16 team; // [esp+4h] [ebp-4h]
 
-    team = Scr_GetConstString(0).intValue;
+    team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis)
     {
         v0 = SL_ConvertToString(team);
@@ -5023,14 +5008,14 @@ void GScr_SetTeamScore()
     unsigned short team; // [esp+0h] [ebp-8h]
     int teamScore; // [esp+4h] [ebp-4h]
 
-    team = Scr_GetConstString(0).intValue;
+    team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis)
     {
         v0 = SL_ConvertToString(team);
         v1 = va("Illegal team string '%s'. Must be allies, or axis.", v0);
         Scr_Error(v1);
     }
-    teamScore = Scr_GetInt(1u).intValue;
+    teamScore = Scr_GetInt(1);
     if (team == scr_const.allies)
     {
         level.teamScores[2] = teamScore;
@@ -5049,7 +5034,7 @@ void GScr_SetClientNameMode()
 {
     unsigned short mode; // [esp+0h] [ebp-4h]
 
-    mode = Scr_GetConstString(0).intValue;
+    mode = Scr_GetConstString(0);
     if (mode == scr_const.auto_change)
     {
         level.manualNameChange = 0;
@@ -5102,7 +5087,7 @@ void GScr_GetTeamPlayersAlive()
     gentity_s *pEnt; // [esp+Ch] [ebp-8h]
     int i; // [esp+10h] [ebp-4h]
 
-    team = Scr_GetConstString(0).intValue;
+    team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis)
     {
         v0 = SL_ConvertToString(team);
@@ -5146,7 +5131,7 @@ void __cdecl GScr_GetPartName()
 
     String = Scr_GetString(0);
     model = SV_XModelGet(String);
-    index = Scr_GetInt(1u).stringValue;
+    index = Scr_GetInt(1);
     numbones = XModelNumBones(model);
     if (index >= numbones)
     {
@@ -5251,12 +5236,12 @@ void __cdecl GScr_StopShellShock(scr_entref_t entref)
 
 void __cdecl GScr_GetTagOrigin(scr_entref_t entref)
 {
-    VariableUnion tagName; // [esp+0h] [ebp-8h]
+    unsigned int tagName; // [esp+0h] [ebp-8h]
     gentity_s *ent; // [esp+4h] [ebp-4h]
 
     ent = GetEntity(entref);
-    tagName.intValue = Scr_GetConstLowercaseString(0).intValue;
-    GScr_UpdateTagInternal(ent, tagName.stringValue, &level.cachedTagMat, 1);
+    tagName = Scr_GetConstLowercaseString(0);
+    GScr_UpdateTagInternal(ent, tagName, &level.cachedTagMat, 1);
     Scr_AddVector(level.cachedTagMat.tagMat[3]);
 }
 
@@ -5308,13 +5293,13 @@ int __cdecl GScr_UpdateTagInternal(
 
 void __cdecl GScr_GetTagAngles(scr_entref_t entref)
 {
-    VariableUnion tagName; // [esp+0h] [ebp-14h]
+    unsigned int tagName; // [esp+0h] [ebp-14h]
     float angles[3]; // [esp+4h] [ebp-10h] BYREF
     gentity_s *ent; // [esp+10h] [ebp-4h]
 
     ent = GetEntity(entref);
-    tagName.intValue = Scr_GetConstLowercaseString(0).intValue;
-    GScr_UpdateTagInternal(ent, tagName.stringValue, &level.cachedTagMat, 1);
+    tagName = Scr_GetConstLowercaseString(0);
+    GScr_UpdateTagInternal(ent, tagName, &level.cachedTagMat, 1);
     AxisToAngles(*(const mat3x3*)&level.cachedTagMat.tagMat, angles);
     Scr_AddVector(angles);
 }
@@ -5414,7 +5399,7 @@ void __cdecl GScr_ViewKick(scr_entref_t entref)
     ent = GetPlayerEntity(entref);
     if (Scr_GetNumParam() != 2)
         Scr_Error("USAGE: <player> viewkick <force 0-127> <source position>\n");
-    ent->client->damage_blood = (ent->maxHealth * Scr_GetInt(0).intValue + 50) / 100;
+    ent->client->damage_blood = (ent->maxHealth * Scr_GetInt(0) + 50) / 100;
     if (ent->client->damage_blood < 0)
     {
         Float = Scr_GetFloat(0);
@@ -5559,7 +5544,7 @@ void GScr_MapRestart()
     level.finished = 1;
     level.savepersist = 0;
     if (Scr_GetNumParam())
-        level.savepersist = Scr_GetInt(0).intValue;
+        level.savepersist = Scr_GetInt(0);
     Cbuf_AddText(0, "fast_restart\n");
 }
 
@@ -5583,7 +5568,7 @@ void GScr_LoadMap()
             level.finished = 2;
             level.savepersist = 0;
             if (Scr_GetNumParam() > 1)
-                level.savepersist = Scr_GetInt(1u).intValue;
+                level.savepersist = Scr_GetInt(1);
             v0 = va("map %s\n", mapname);
             Cbuf_AddText(0, v0);
         }
@@ -5602,7 +5587,7 @@ void GScr_ExitLevel()
     level.finished = 3;
     level.savepersist = 0;
     if (Scr_GetNumParam())
-        level.savepersist = Scr_GetInt(0).intValue;
+        level.savepersist = Scr_GetInt(0);
     CL_ResetStats_f();
     ExitLevel();
 }
@@ -5739,7 +5724,7 @@ void GScr_SetVoteTime()
 
     if (Scr_GetNumParam())
     {
-        time = Scr_GetInt(0).intValue;
+        time = Scr_GetInt(0);
         Int = Dvar_GetInt("sv_serverId");
         v1 = va("%i %i", time, Int);
         SV_SetConfigstring(13, v1);
@@ -5758,7 +5743,7 @@ void GScr_SetVoteYesCount()
 
     if (Scr_GetNumParam())
     {
-        yes = Scr_GetInt(0).intValue;
+        yes = Scr_GetInt(0);
         v0 = va("%i", yes);
         SV_SetConfigstring(15, v0);
         v1 = va("%i", level.voteNo);
@@ -5773,7 +5758,7 @@ void GScr_SetVoteNoCount()
 
     if (Scr_GetNumParam())
     {
-        no = Scr_GetInt(0).intValue;
+        no = Scr_GetInt(0);
         v0 = va("%i", no);
         SV_SetConfigstring(16, v0);
     }
@@ -5786,7 +5771,7 @@ void GScr_KickPlayer()
 
     if (Scr_GetNumParam())
     {
-        playernum = Scr_GetInt(0).intValue;
+        playernum = Scr_GetInt(0);
         v0 = va("tempBanClient %i\n", playernum);
         Cbuf_AddText(0, v0);
     }
@@ -5799,7 +5784,7 @@ void GScr_BanPlayer()
 
     if (Scr_GetNumParam())
     {
-        playernum = Scr_GetInt(0).intValue;
+        playernum = Scr_GetInt(0);
         v0 = va("banClient %i\n", playernum);
         Cbuf_AddText(0, v0);
     }
@@ -5908,7 +5893,7 @@ void GScr_CloseFile()
 
     if (Scr_GetNumParam())
     {
-        filenum = Scr_GetInt(0).intValue;
+        filenum = Scr_GetInt(0);
         if ((unsigned int)filenum >= 2)
         {
             Com_Printf(23, "CloseFile failed, invalid file number %i\n", filenum);
@@ -5960,7 +5945,7 @@ void __cdecl Scr_FPrint_internal(bool commaBetweenFields)
 
     if (Scr_GetNumParam() > 1)
     {
-        filenum = Scr_GetInt(0).intValue;
+        filenum = Scr_GetInt(0);
         if ((unsigned int)filenum < 2)
         {
             if (level.openScriptIOFileHandles[filenum])
@@ -6011,7 +5996,7 @@ void GScr_FReadLn()
 
     if (Scr_GetNumParam())
     {
-        filenum = Scr_GetInt(0).intValue;
+        filenum = Scr_GetInt(0);
         if ((unsigned int)filenum < 2)
         {
             if (level.openScriptIOFileBuffers[filenum])
@@ -6071,8 +6056,8 @@ void GScr_FGetArg()
 
     if (Scr_GetNumParam() > 1)
     {
-        filenum = Scr_GetInt(0).intValue;
-        arg = Scr_GetInt(1u).intValue;
+        filenum = Scr_GetInt(0);
+        arg = Scr_GetInt(1);
         if ((unsigned int)filenum < 2)
         {
             if (arg >= 0)
@@ -6131,7 +6116,7 @@ void __cdecl GScr_GetStat(scr_entref_t entref)
     int value; // [esp+8h] [ebp-4h]
 
     playerEnt = GetEntity(entref);
-    index = Scr_GetInt(0).intValue;
+    index = Scr_GetInt(0);
     if (!playerEnt->client)
         Scr_Error("getstat: entity must be a player entity");
     if ((unsigned int)index >= 0xDAC)
@@ -6163,13 +6148,13 @@ void __cdecl GScr_SetStat(scr_entref_t entref)
     value = 0;
     if (argc == 2)
     {
-        index.intValue = Scr_GetInt(0).intValue;
+        index.intValue = Scr_GetInt(0);
         if (index.intValue >= 0xDACu)
         {
             v1 = va("setstat: invalid index %i", index.intValue);
             Scr_ParamError(0, v1);
         }
-        value = Scr_GetInt(1u).stringValue;
+        value = Scr_GetInt(1);
         if (index.intValue < 2000 && value >= 0x100)
         {
             v2 = va("setstat: index %i is a byte value, and you're trying to set it to %i", index.intValue, value);
@@ -6204,7 +6189,7 @@ void __cdecl GScr_SetTeamForTrigger(scr_entref_t entref)
         v2 = va("setteamfortrigger: trigger entity must be of type %s or %s", v1, v6);
         Scr_Error(v2);
     }
-    team = Scr_GetConstString(0).intValue;
+    team = Scr_GetConstString(0);
     if (team == scr_const.allies)
     {
         ent->team = 2;
@@ -6307,7 +6292,7 @@ void GScr_SetGameEndTime()
 
     if (Scr_GetNumParam() != 1)
         Scr_Error("Expected 1 argument to setGameEndTime()");
-    v0.intValue = Scr_GetInt(0).intValue;
+    v0.intValue = Scr_GetInt(0);
     SV_SetGameEndTime(v0.intValue);
 }
 
@@ -6358,14 +6343,14 @@ bool GScr_SetTeamRadar()
     bool radarAvailable; // [esp+3h] [ebp-5h]
     unsigned __int16 team; // [esp+4h] [ebp-4h]
 
-    team = Scr_GetConstString(0).intValue;
+    team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis && team != scr_const.none)
     {
         v0 = SL_ConvertToString(team);
         v1 = va("Illegal team string '%s'. Must be allies, axis, or none.", v0);
         Scr_ParamError(0, v1);
     }
-    radarAvailable = Scr_GetInt(1u).intValue != 0;
+    radarAvailable = Scr_GetInt(1) != 0;
     if (team == scr_const.allies)
     {
         result = radarAvailable;
@@ -6393,7 +6378,7 @@ void GScr_GetTeamRadar()
     bool radarAvailable; // [esp+3h] [ebp-5h]
     unsigned __int16 team; // [esp+4h] [ebp-4h]
 
-    team = Scr_GetConstString(0).intValue;
+    team = Scr_GetConstString(0);
     if (team == scr_const.allies)
     {
         radarAvailable = level.teamHasRadar[2];
@@ -6418,18 +6403,11 @@ void GScr_GetTeamRadar()
 
 void GScr_GetArrayKeys()
 {
-    const char *TypeName; // eax
-    const char *v1; // eax
-    VariableUnion id; // [esp+0h] [ebp-4h]
-
-    if (Scr_GetPointerType(0) != 21)
+    if (Scr_GetPointerType(0) != VAR_ARRAY)
     {
-        TypeName = Scr_GetTypeName(0);
-        v1 = va("Parameter (%s) must be an array", TypeName);
-        Scr_ParamError(0, v1);
+        Scr_ParamError(0, va("Parameter (%s) must be an array", Scr_GetTypeName(0)));
     }
-    id.intValue = Scr_GetObject(0).intValue;
-    Scr_AddArrayKeys(id.stringValue);
+    Scr_AddArrayKeys(Scr_GetObject(0));
 }
 
 void __cdecl GScr_IsOnLadder(scr_entref_t entref)
@@ -6543,16 +6521,16 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref)
         Scr_Error("Entity is not an item.");
     if (bg_itemlist[itemEnt->s.index.brushmodel].giType != IT_WEAPON)
         Scr_Error("Item entity is not a weapon.");
-    clipAmmo = Scr_GetInt(0).intValue;
+    clipAmmo = Scr_GetInt(0);
     if (clipAmmo < 0)
         Scr_ParamError(0, "Ammo count must not be negative");
-    reserveAmmo = Scr_GetInt(1u).intValue;
+    reserveAmmo = Scr_GetInt(1);
     if (reserveAmmo < 0)
         Scr_ParamError(1u, "Ammo count must not be negative");
     altIndex = 0;
     if (Scr_GetNumParam() > 2)
     {
-        altIndex = Scr_GetInt(2u).stringValue;
+        altIndex = Scr_GetInt(2);
         if (altIndex >= 2)
         {
             v1 = va("Value out of range.  Allowed values: 0 to %i", 2);
@@ -6596,7 +6574,7 @@ void __cdecl Scr_SetHealth(gentity_s *ent, int i)
 {
     int health; // [esp+0h] [ebp-4h]
 
-    health = Scr_GetInt(0).intValue;
+    health = Scr_GetInt(0);
     if (ent->client)
     {
         ent->health = health;

@@ -46,7 +46,7 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
     if (Scr_GetNumParam() == 2)
     {
         weapDef = BG_GetWeaponDef(weaponIndex);
-        weaponModel = Scr_GetInt(1u).intValue;
+        weaponModel = Scr_GetInt(1);
         if ((unsigned int)weaponModel >= 0x100)
         {
             LOBYTE(weaponModel) = 0;
@@ -314,7 +314,7 @@ void __cdecl PlayerCmd_setOffhandSecondaryClass(scr_entref_t entref)
     }
     if (Scr_GetNumParam() == 1)
     {
-        sf_text = Scr_GetConstString(0).intValue;
+        sf_text = Scr_GetConstString(0);
         if (sf_text == scr_const.flash)
         {
             pSelf->client->ps.offhandSecondary = PLAYER_OFFHAND_SECONDARY_FLASH;
@@ -1162,7 +1162,7 @@ void __cdecl PlayerCmd_dropItem(scr_entref_t entref)
     gentity_s *pSelf; // [esp+8h] [ebp-18h]
     unsigned int iWeaponIndex; // [esp+Ch] [ebp-14h]
     const gitem_s *pItem; // [esp+10h] [ebp-10h]
-    VariableUnion dropTag; // [esp+14h] [ebp-Ch]
+    unsigned int dropTag; // [esp+14h] [ebp-Ch]
     gentity_s *pDroppedItem; // [esp+18h] [ebp-8h]
     char *pszItemName; // [esp+1Ch] [ebp-4h]
 
@@ -1192,8 +1192,8 @@ void __cdecl PlayerCmd_dropItem(scr_entref_t entref)
         }
         else
         {
-            dropTag.intValue = Scr_GetConstLowercaseString(1u).intValue;
-            v2 = Drop_Weapon(pSelf, iWeaponIndex, pSelf->client->ps.weaponmodels[iWeaponIndex], dropTag.stringValue);
+            dropTag = Scr_GetConstLowercaseString(1);
+            v2 = Drop_Weapon(pSelf, iWeaponIndex, pSelf->client->ps.weaponmodels[iWeaponIndex], dropTag);
         }
         GScr_AddEntity(v2);
     }
@@ -1274,14 +1274,14 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
     tempBulletHitEntity = 0;
     if (!pSelf->client->lastStand || pSelf->client->lastStandTime <= level.time)
     {
-        damage = Scr_GetInt(2u).intValue;
+        damage = Scr_GetInt(2);
         if (damage > 0)
         {
             if (Scr_GetType(0) && Scr_GetPointerType(0) == 20)
                 inflictor = Scr_GetEntity(0);
             if (Scr_GetType(1u) && Scr_GetPointerType(1u) == 20)
                 attacker = Scr_GetEntity(1u);
-            dflags = Scr_GetInt(3u).intValue;
+            dflags = Scr_GetInt(3);
             mod = (meansOfDeath_t)G_MeansOfDeathFromScriptParam(4);
             String = Scr_GetString(5u);
             iWeapon = G_GetWeaponIndexForName(String);
@@ -1295,9 +1295,9 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 Scr_GetVector(7u, vDir);
                 dir = vDir;
             }
-            floatValue = (unsigned __int16)Scr_GetConstString(8u).floatValue;
+            floatValue = Scr_GetConstString(8);
             hitLoc = (hitLocation_t)G_GetHitLocationIndexFromString(floatValue);
-            psTimeOffset = Scr_GetInt(9u).intValue;
+            psTimeOffset = Scr_GetInt(9);
             if (pSelf->client->ps.pm_type == 7)
             {
                 Scr_Error("Trying to do damage to a client that is already dead");
@@ -1687,7 +1687,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t entref)
         }
     }
     weapName = Scr_GetString(0);
-    ammoCount = Scr_GetInt(1u).intValue;
+    ammoCount = Scr_GetInt(1);
     weapIndex = G_GetWeaponIndexForName(weapName);
     if (weapIndex)
     {
@@ -1747,7 +1747,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t entref)
         }
     }
     weapName = Scr_GetString(0);
-    newAmmoCnt = Scr_GetInt(1u).intValue;
+    newAmmoCnt = Scr_GetInt(1);
     weapIdx = G_GetWeaponIndexForName(weapName);
     ps = &pSelf->client->ps;
     if (weapIdx)
@@ -2007,7 +2007,7 @@ void __cdecl PlayerCmd_setEnterTime(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    pSelf->client->sess.enterTime = Scr_GetInt(0).intValue;
+    pSelf->client->sess.enterTime = Scr_GetInt(0);
 }
 
 void __cdecl BodyEnd(gentity_s *ent)
@@ -2045,7 +2045,7 @@ void __cdecl PlayerCmd_ClonePlayer(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    deathAnimDuration = Scr_GetInt(0).intValue;
+    deathAnimDuration = Scr_GetInt(0);
     client = pSelf->client;
     if (!client)
         MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1515, 0, "%s", "client");
@@ -2306,7 +2306,7 @@ void __cdecl PlayerCmd_FreezeControls(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    pSelf->client->bFrozen = Scr_GetInt(0).intValue;
+    pSelf->client->bFrozen = Scr_GetInt(0);
 }
 
 void __cdecl PlayerCmd_DisableWeapons(scr_entref_t entref)
@@ -2401,7 +2401,7 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
         drylevel = Scr_GetFloat(2u);
     $LN6_34:
         pszReverb = Scr_GetString(1u);
-        prio_name = Scr_GetConstString(0).intValue;
+        prio_name = Scr_GetConstString(0);
         prio = 1;
         if (prio_name == scr_const.snd_enveffectsprio_level)
         {
@@ -2467,7 +2467,7 @@ LABEL_6:
         }
         Float = Scr_GetFloat(1u);
     }
-    ConstString = (unsigned __int16)Scr_GetConstString(0);
+    ConstString = Scr_GetConstString(0);
     if (ConstString != scr_const.snd_enveffectsprio_level && ConstString != scr_const.snd_enveffectsprio_shellshock)
         Scr_Error("priority must be 'snd_enveffectsprio_level' or 'snd_enveffectsprio_shellshock'\n");
     v6 = va("%c %i \"%s\" %g %g %g", 68, Float);
@@ -2515,7 +2515,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
     }
     String = Scr_GetString(1u);
     shockIndex = G_FindConfigstringIndex(String, 1954, 16, 0, 0);
-    prio_name = Scr_GetConstString(0).intValue;
+    prio_name = Scr_GetConstString(0);
     prio = 1;
     if (prio_name == scr_const.snd_channelvolprio_holdbreath)
     {
@@ -2577,7 +2577,7 @@ LABEL_6:
         }
         Float = Scr_GetFloat(1u);
     }
-    ConstString = (unsigned __int16)Scr_GetConstString(0);
+    ConstString = Scr_GetConstString(0);
     if (ConstString != scr_const.snd_channelvolprio_holdbreath
         && ConstString != scr_const.snd_channelvolprio_pain
         && ConstString != scr_const.snd_channelvolprio_shellshock)
@@ -2726,7 +2726,7 @@ void __cdecl PlayerCmd_AllowADS(scr_entref_t entref)
     }
     if (Scr_GetNumParam() == 1)
     {
-        if (Scr_GetInt(0).intValue)
+        if (Scr_GetInt(0))
         {
             pSelf->client->ps.weapFlags &= ~0x20u;
         }
@@ -2763,7 +2763,7 @@ void __cdecl PlayerCmd_AllowJump(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (Scr_GetInt(0).intValue)
+    if (Scr_GetInt(0))
         pSelf->client->ps.pm_flags &= ~0x80000u;
     else
         pSelf->client->ps.pm_flags |= 0x80000u;
@@ -2790,7 +2790,7 @@ void __cdecl PlayerCmd_AllowSprint(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (Scr_GetInt(0).intValue)
+    if (Scr_GetInt(0))
         pSelf->client->ps.pm_flags &= ~0x40000u;
     else
         pSelf->client->ps.pm_flags |= 0x40000u;
@@ -2821,7 +2821,7 @@ void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t entref)
     }
     if (Scr_GetNumParam() == 1)
     {
-        value = Scr_GetInt(0).intValue;
+        value = Scr_GetInt(0);
         if (value > 0)
         {
             if (value < 64)
@@ -2896,7 +2896,7 @@ void __cdecl PlayerCmd_AllowSpectateTeam(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    teamString = Scr_GetConstString(0).intValue;
+    teamString = Scr_GetConstString(0);
     teamBit = 0;
     if (teamString == scr_const.axis)
     {
@@ -2918,7 +2918,7 @@ void __cdecl PlayerCmd_AllowSpectateTeam(scr_entref_t entref)
     {
         Scr_ParamError(0, "team must be \"axis\", \"allies\", \"none\", or \"freelook\"");
     }
-    if (Scr_GetInt(1u).intValue)
+    if (Scr_GetInt(1))
         pSelf->client->sess.noSpectate &= ~teamBit;
     else
         pSelf->client->sess.noSpectate |= teamBit;
@@ -3118,7 +3118,7 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    slot = Scr_GetInt(0).intValue;
+    slot = Scr_GetInt(0);
     if (slot >= 1 && slot <= 4)
     {
         slota = slot - 1;
@@ -3536,13 +3536,13 @@ void __cdecl PlayerCmd_SetRank(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    rank = Scr_GetInt(0).intValue;
+    rank = Scr_GetInt(0);
     if ((unsigned int)rank < 0x100)
     {
         pSelf->client->sess.cs.rank = rank;
         if (Scr_GetNumParam() >= 2)
         {
-            prestige = Scr_GetInt(1u).intValue;
+            prestige = Scr_GetInt(1);
             if ((unsigned int)prestige < 0x100)
             {
                 pSelf->client->sess.cs.prestige = prestige;

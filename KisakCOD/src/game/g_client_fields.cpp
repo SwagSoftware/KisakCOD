@@ -82,7 +82,7 @@ void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *p
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 34, 0, "%s", "pSelf");
-    newTeam = Scr_GetConstString(0).intValue;
+    newTeam = Scr_GetConstString(0);
     if (newTeam == scr_const.axis)
     {
         pSelf->sess.cs.team = TEAM_AXIS;
@@ -152,7 +152,7 @@ void __cdecl ClientScr_SetSessionState(gclient_s *pSelf, const client_fields_s *
         MyAssertHandler(".\\game\\g_client_fields.cpp", 110, 0, "%s", "pSelf");
     if (pSelf->sess.connected == CON_DISCONNECTED)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 111, 0, "%s", "pSelf->sess.connected != CON_DISCONNECTED");
-    newState = Scr_GetConstString(0).intValue;
+    newState = Scr_GetConstString(0);
     if (newState == scr_const.playing)
     {
         pSelf->sess.sessionState = SESS_STATE_PLAYING;
@@ -207,7 +207,7 @@ void __cdecl ClientScr_SetMaxHealth(gclient_s *pSelf, const client_fields_s *pFi
 {
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 174, 0, "%s", "pSelf");
-    pSelf->sess.maxHealth = Scr_GetInt(0).intValue;
+    pSelf->sess.maxHealth = Scr_GetInt(0);
     if (pSelf->sess.maxHealth < 1)
         pSelf->sess.maxHealth = 1;
     if (pSelf->ps.stats[0] > pSelf->sess.maxHealth)
@@ -218,7 +218,7 @@ void __cdecl ClientScr_SetMaxHealth(gclient_s *pSelf, const client_fields_s *pFi
 
 void __cdecl ClientScr_SetScore(gclient_s *pSelf, const client_fields_s *pField)
 {
-    pSelf->sess.score = Scr_GetInt(0).intValue;
+    pSelf->sess.score = Scr_GetInt(0);
     CalculateRanks();
 }
 
@@ -228,7 +228,7 @@ void __cdecl ClientScr_SetSpectatorClient(gclient_s *pSelf, const client_fields_
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 215, 0, "%s", "pSelf");
-    iNewSpectatorClient = Scr_GetInt(0).intValue;
+    iNewSpectatorClient = Scr_GetInt(0);
     if (iNewSpectatorClient < -1 || iNewSpectatorClient >= 64)
         Scr_Error("spectatorclient can only be set to -1, or a valid client number");
     pSelf->sess.forceSpectatorClient = iNewSpectatorClient;
@@ -240,7 +240,7 @@ void __cdecl ClientScr_SetKillCamEntity(gclient_s *pSelf, const client_fields_s 
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 236, 0, "%s", "pSelf");
-    iNewKillCamEntity = Scr_GetInt(0).intValue;
+    iNewKillCamEntity = Scr_GetInt(0);
     if (iNewKillCamEntity < -1 || iNewKillCamEntity >= 1024)
         Scr_Error("killcamentity can only be set to -1, or a valid entity number");
     pSelf->sess.killCamEntity = iNewKillCamEntity;
@@ -324,7 +324,7 @@ void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 343, 0, "%s", "pSelf");
     pEnt = &g_entities[pSelf - level.clients];
-    sTeam = Scr_GetConstString(0).intValue;
+    sTeam = Scr_GetConstString(0);
     if (sTeam == scr_const.none)
     {
         pEnt->s.iHeadIconTeam = 0;
@@ -392,7 +392,7 @@ void __cdecl ClientScr_SetPSOffsetTime(gclient_s *pSelf, const client_fields_s *
 {
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 417, 0, "%s", "pSelf");
-    pSelf->sess.psOffsetTime = Scr_GetInt(0).intValue;
+    pSelf->sess.psOffsetTime = Scr_GetInt(0);
 }
 
 void __cdecl ClientScr_GetPSOffsetTime(gclient_s *pSelf, const client_fields_s *pField)

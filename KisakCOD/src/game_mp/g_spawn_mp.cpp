@@ -194,7 +194,7 @@ void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
         *(float *)&b[ofs] = Scr_GetFloat(0);
         break;
     case F_STRING:
-        v3.intValue = Scr_GetConstStringIncludeNull(0).intValue;
+        v3.intValue = Scr_GetConstStringIncludeNull(0);
         Scr_SetString((unsigned __int16 *)&b[ofs], v3.stringValue);
         break;
     case F_VECTOR:
@@ -517,7 +517,7 @@ void __cdecl Scr_GetEnt()
     int i; // [esp+1Ch] [ebp-8h]
     unsigned __int16 value; // [esp+20h] [ebp-4h]
 
-    name = Scr_GetConstString(0).intValue;
+    name = Scr_GetConstString(0);
     key = Scr_GetString(1u);
     offset = Scr_GetOffset(0, key);
     if (offset >= 0)
@@ -571,7 +571,7 @@ void __cdecl Scr_GetEntArray()
 
     if (Scr_GetNumParam())
     {
-        name = Scr_GetConstString(0).intValue;
+        name = Scr_GetConstString(0);
         key = Scr_GetString(1u);
         offset = Scr_GetOffset(0, key);
         if (offset >= 0)
@@ -885,7 +885,7 @@ int G_SpawnStruct()
     if (!g_scr_data.createstruct)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 317, 0, "%s", "g_scr_data.createstruct");
     Scr_AddExecThread(g_scr_data.createstruct, 0);
-    structId = Scr_GetObject(0).stringValue;
+    structId = Scr_GetObject(0);
     for (i = 0; ; ++i)
     {
         result = i;

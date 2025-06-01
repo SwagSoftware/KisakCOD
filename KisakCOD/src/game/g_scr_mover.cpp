@@ -1076,7 +1076,7 @@ void __cdecl ScriptEntCmd_SetCanDamage(scr_entref_t entref)
                 MyAssertHandler(".\\game\\g_scr_mover.cpp", 1021, 0, "%s", "entref.entnum < MAX_GENTITIES");
             pSelf = &g_entities[entref.entnum];
         }
-        pSelf->takedamage = (unsigned __int8)Scr_GetInt(0).floatValue;
+        pSelf->takedamage = Scr_GetInt(0);
     }
     else
     {

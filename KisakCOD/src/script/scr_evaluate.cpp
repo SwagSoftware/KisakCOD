@@ -1290,12 +1290,17 @@ void __cdecl Scr_GetValue(unsigned int index, VariableValue *value)
     }
     else
     {
-        v2 = &scrVmPub.top[-(int)index]; // KISAKTODO: int cast bad
+        v2 = &scrVmPub.top[-(int)index];
         type = v2->type;
         value->u.intValue = v2->u.intValue;
         value->type = type;
         AddRefToValue(value->type, value->u);
     }
+}
+
+VariableValue* Scr_GetValue(unsigned int param)
+{
+	return &scrVmPub.top[-int(param)];
 }
 
 unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigned int localId)
