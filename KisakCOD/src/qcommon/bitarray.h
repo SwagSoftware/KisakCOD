@@ -37,6 +37,7 @@ struct bitarray // sizeof=0x10
     }
 //private:
     int array[BIT_COUNT / 32];                       // ...
+    static_assert((BIT_COUNT % 32) == 0, "BIT_COUNT is not mul of 32!");
 };
 
-#define BIT_COUNT 0x80 // bitarray size for variables such as `ignorePartBits`
+//#define BIT_COUNT 0x80 // bitarray size for variables such as `ignorePartBits`
