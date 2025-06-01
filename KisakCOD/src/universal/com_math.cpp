@@ -2683,6 +2683,87 @@ void __cdecl LocalTransformVector(const float *in1, const float4 *in2, float *ou
 }
 
 #if 1
+void __fastcall LocalConvertQuatToInverseSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat)
+{
+    double v2; // fp0
+    double v3; // fp10
+    double transWeight; // fp13
+    double v5; // fp12
+    double v6; // fp8
+    double v7; // fp9
+    double v8; // fp11
+    double v9; // fp13
+    double v10; // fp7
+    double v11; // fp6
+    double v12; // fp5
+    double v13; // fp9
+    double v14; // fp4
+    double v15; // fp0
+    double v16; // fp12
+    double v17; // fp11
+    double v18; // fp13
+    double v19; // fp2
+    double v20; // fp1
+    double v21; // fp9
+    double v22; // fp8
+    double v23; // fp12
+    double v24; // fp10
+    double v25; // fp13
+    double v26; // fp7
+    double v27; // fp13
+    double v28; // fp12
+    double v29; // fp11
+
+    v2 = mat->quat[2];
+    v3 = mat->quat[3];
+    transWeight = mat->transWeight;
+    v5 = mat->quat[1];
+    v6 = (float)(mat->quat[2] * mat->transWeight);
+    v7 = mat->quat[0];
+    skelMat->axis[0][3] = 0.0;
+    skelMat->axis[1][3] = 0.0;
+    skelMat->axis[2][3] = 0.0;
+    v8 = (float)((float)v5 * (float)transWeight);
+    v10 = (float)((float)v2 * (float)v6);
+    v11 = (float)((float)v5 * (float)((float)v5 * (float)transWeight));
+    v9 = (float)((float)v7 * (float)transWeight);
+    v12 = (float)((float)v2 * (float)v9);
+    v13 = (float)((float)v7 * (float)v9);
+    v14 = (float)((float)v2 * (float)v8);
+    v16 = (float)((float)v5 * (float)v9);
+    v18 = (float)((float)v3 * (float)v9);
+    v19 = (float)((float)((float)v2 * (float)v6) + (float)v13);
+    v15 = (float)((float)v3 * (float)v8);
+    v20 = (float)((float)v11 + (float)v13);
+    v21 = (float)((float)((float)v3 * (float)v8) + (float)v12);
+    skelMat->axis[0][2] = (float)((float)v3 * (float)v8) + (float)v12;
+    v17 = (float)((float)v3 * (float)v6);
+    v22 = (float)((float)v16 - (float)((float)v3 * (float)v6));
+    skelMat->axis[0][1] = v22;
+    v23 = (float)((float)v17 + (float)v16);
+    skelMat->axis[1][0] = v23;
+    v24 = (float)((float)v14 - (float)v18);
+    skelMat->axis[2][0] = (float)v12 - (float)v15;
+    v25 = (float)((float)v14 + (float)v18);
+    skelMat->axis[2][1] = v25;
+    v26 = (float)((float)1.0 - (float)((float)v10 + (float)v11));
+    skelMat->axis[1][2] = v24;
+    skelMat->axis[0][0] = v26;
+    skelMat->axis[1][1] = (float)1.0 - (float)v19;
+    skelMat->axis[2][2] = (float)1.0 - (float)v20;
+    skelMat->origin[0] = -(float)((float)(mat->trans[0] * (float)v26)
+        + (float)((float)((float)v23 * mat->trans[1])
+            + (float)((float)((float)v12 - (float)v15) * mat->trans[2])));
+    skelMat->origin[1] = -(float)((float)(mat->trans[0] * (float)v22)
+        + (float)((float)((float)((float)1.0 - (float)v19) * mat->trans[1])
+            + (float)((float)v25 * mat->trans[2])));
+    v27 = (float)((float)((float)1.0 - (float)v20) * mat->trans[2]);
+    v28 = mat->trans[1];
+    v29 = mat->trans[0];
+    skelMat->origin[3] = 1.0;
+    skelMat->origin[2] = -(float)((float)((float)v29 * (float)v21) + (float)((float)((float)v24 * (float)v28) + (float)v27));
+}
+
 void __fastcall LocalConvertQuatToSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat)
 {
     double v2; // fp0

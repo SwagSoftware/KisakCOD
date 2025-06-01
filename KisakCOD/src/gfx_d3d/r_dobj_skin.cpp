@@ -33,12 +33,10 @@ void __cdecl R_SkinSceneDObj(
     volatile unsigned int state; // [esp+0h] [ebp-8h]
     int surfaceCount; // [esp+4h] [ebp-4h]
 
-    if (!localSceneEnt)
-        MyAssertHandler(".\\r_dobj_skin.cpp", 552, 0, "%s", "localSceneEnt");
-    if (!boneMatrix)
-        MyAssertHandler(".\\r_dobj_skin.cpp", 553, 0, "%s", "boneMatrix");
-    if (!obj)
-        MyAssertHandler(".\\r_dobj_skin.cpp", 554, 0, "%s", "obj");
+    iassert(localSceneEnt);
+    iassert(boneMatrix);
+    iassert(obj);
+
     if (localSceneEnt->cull.state < 4)
     {
         if (InterlockedCompareExchange((volatile unsigned int *)&sceneEnt->cull, 3, 2) == 2)
@@ -51,17 +49,10 @@ void __cdecl R_SkinSceneDObj(
             do
             {
                 state = sceneEnt->cull.state;
-                if (state < 3)
-                    MyAssertHandler(
-                        ".\\r_dobj_skin.cpp",
-                        578,
-                        0,
-                        "%s\n\t(state) = %i",
-                        "(state >= CULL_STATE_SKINNED_PENDING)",
-                        state);
-            } while (state == 3);
-            if (state < 4)
-                MyAssertHandler(".\\r_dobj_skin.cpp", 581, 0, "%s\n\t(state) = %i", "(state >= CULL_STATE)", state);
+                iassert(state >= CULL_STATE_SKINNED_PENDING);
+            } while (state == CULL_STATE_SKINNED_PENDING);
+
+            iassert(state >= CULL_STATE_DONE);
         }
     }
 }
@@ -104,6 +95,10 @@ int  R_SkinSceneDObjModels(
     uint32 surfPartBits[7] = {};
 
     unsigned int NumModels = DObjGetNumModels(obj);
+    if (!NumModels)
+    {
+        return 0;
+    }
     unsigned int lod = 0;
     unsigned int totalBones = 0;
 
@@ -366,28 +361,30 @@ int  R_PreSkinXSurface(
     float v36; // [esp+124h] [ebp-50h]
     float v37; // [esp+128h] [ebp-4Ch]
     float v38; // [esp+12Ch] [ebp-48h]
-    float v39[3]; // [esp+130h] [ebp-44h] BYREF
-    float transWeight; // [esp+13Ch] [ebp-38h]
-    float v41; // [esp+140h] [ebp-34h]
-    float v42; // [esp+144h] [ebp-30h]
-    float v43; // [esp+148h] [ebp-2Ch]
-    float v44; // [esp+14Ch] [ebp-28h]
+    float scaledQuat[3]; // [esp+130h] [ebp-44h] BYREF
+    //float transWeight; // [esp+13Ch] [ebp-38h]
+    //float v41; // [esp+140h] [ebp-34h]
+    //float v42; // [esp+144h] [ebp-30h]
+    //float v43; // [esp+148h] [ebp-2Ch]
+    //float v44; // [esp+14Ch] [ebp-28h]
     const DObjAnimMat* mat; // [esp+150h] [ebp-24h]
     int v46; // [esp+154h] [ebp-20h]
     DObjAnimMat* RotTransArray; // [esp+158h] [ebp-1Ch]
     GfxModelRigidSurface* rigidSurf; // [esp+15Ch] [ebp-18h]
     unsigned int v49; // [esp+160h] [ebp-14h]
-    bool enabled; // [esp+167h] [ebp-Dh]
+    //bool enabled; // [esp+167h] [ebp-Dh]
+    DObjSkelMat skelMat;
+    DObjSkelMat invBaseMat;
+    float origin[3];
+    float quat[4];
 
     GfxModelSkinnedSurface* surfPos = (GfxModelSkinnedSurface*)surfPos_;
 
-    if (!obj)
-        MyAssertHandler(".\\r_dobj_skin.cpp", 65, 0, "%s", "obj");
-    if (!surf)
-        MyAssertHandler(".\\r_dobj_skin.cpp", 66, 0, "%s", "surf");
-    if (!surfaceInfo)
-        MyAssertHandler(".\\r_dobj_skin.cpp", 67, 0, "%s", "surfaceInfo");
-    if (!surf->deformed && (enabled = useFastFile->current.enabled, (v49 = enabled) != 0) && surf->vertListCount == 1)
+    iassert(obj);
+    iassert(surf);
+    iassert(surfaceInfo);
+
+    if (!surf->deformed && useFastFile->current.enabled && surf->vertListCount == 1)
     {
         surf->vertList = surf->vertList;
         rigidSurf = (GfxModelRigidSurface*)surfPos;
@@ -401,173 +398,33 @@ int  R_PreSkinXSurface(
                 "&rigidSurf->surf == reinterpret_cast< GfxModelSkinnedSurface * >( surfPos )");
         rigidSurf->placement.scale = 1.0;
         RotTransArray = &DObjGetRotTransArray(obj)[surfaceInfo->boneIndex];
-        v46 = surf->vertList->boneOffset >> 6;
-        mat = &surfaceInfo->baseMat[v46];
+        //RotTransArray += (surf->vertList->boneOffset / 64);
+        mat = &surfaceInfo->baseMat[surf->vertList->boneOffset / 64];
 
-#if 1
-        v44 = mat->quat[0];
-        if ((LODWORD(v44) & 0x7F800000) == 0x7F800000
-            || (v43 = mat->quat[1], (LODWORD(v43) & 0x7F800000) == 0x7F800000)
-            || (v42 = mat->quat[2], (LODWORD(v42) & 0x7F800000) == 0x7F800000)
-            || (v41 = mat->quat[3], (LODWORD(v41) & 0x7F800000) == 0x7F800000))
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-                581,
-                0,
-                "%s",
-                "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-        }
-        transWeight = mat->transWeight;
-        if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-                582,
-                0,
-                "%s",
-                "!IS_NAN(mat->transWeight)");
-        Vec3Scale(mat->quat, mat->transWeight, v39);
-        v38 = v39[0] * mat->quat[0];
-        v37 = v39[0] * mat->quat[1];
-        v36 = v39[0] * mat->quat[2];
-        v35 = v39[0] * mat->quat[3];
-        v34 = v39[1] * mat->quat[1];
-        v33 = v39[1] * mat->quat[2];
-        v32 = v39[1] * mat->quat[3];
-        v31 = v39[2] * mat->quat[2];
-        v30 = v39[2] * mat->quat[3];
-        v29.axis[0][0] = 1.0 - (v34 + v31);
-        v29.axis[0][1] = v37 - v30;
-        v29.axis[0][2] = v36 + v32;
-        v29.axis[0][3] = 0.0;
-        v29.axis[1][0] = v37 + v30;
-        v29.axis[1][1] = 1.0 - (v38 + v31);
-        v29.axis[1][2] = v33 - v35;
-        v29.axis[1][3] = 0.0;
-        v29.axis[2][0] = v36 - v32;
-        v29.axis[2][1] = v33 + v35;
-        v29.axis[2][2] = 1.0 - (v38 + v34);
-        v29.axis[2][3] = 0.0;
-        v29.origin[0] = -(mat->trans[0] * v29.axis[0][0] + mat->trans[1] * v29.axis[1][0] + mat->trans[2] * v29.axis[2][0]);
-        v29.origin[1] = -(mat->trans[0] * v29.axis[0][1] + mat->trans[1] * v29.axis[1][1] + mat->trans[2] * v29.axis[2][1]);
-        v29.origin[2] = -(mat->trans[0] * v29.axis[0][2] + mat->trans[1] * v29.axis[1][2] + mat->trans[2] * v29.axis[2][2]);
-        v29.origin[3] = 1.0;
+        iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
+        iassert(!IS_NAN(mat->transWeight));
 
-        // TODO(mrsteyk): BROKEN!
-#if 0
-        {
-            DObjSkelMat test;
-            ConvertQuatToInverseSkelMat(mat, &test);
-            iassert(!memcmp(&test, &v29, sizeof(test)));
-        }
-#endif
-#else
-        // NOTE(mrsteyk): I was testing shit
-        ConvertQuatToInverseSkelMat(mat, &v29);
-#endif
+        Vec3Scale(mat->quat, mat->transWeight, scaledQuat);
 
-        mat_1 = &RotTransArray[v46];
+        LocalConvertQuatToInverseSkelMat(mat, &invBaseMat);
+        LocalConvertQuatToSkelMat(RotTransArray, &skelMat);
 
-#if 0
-        float v27;
-        float v26, v25, v24;
-        float v23;
-        float v22[3];
+        LocalQuatMultiplyInverse(mat->quat, RotTransArray->quat, quat);
+        Vec4Normalize(quat);
 
-        float v13, v14, v15, v16, v17, v18, v19, v20, v21;
+        rigidSurf->placement.base.quat[0] = quat[0];
+        rigidSurf->placement.base.quat[1] = quat[1];
+        rigidSurf->placement.base.quat[2] = quat[2];
+        rigidSurf->placement.base.quat[3] = quat[3];
 
-        v27 = mat_1->quat[0];
-        if ((LODWORD(v27) & 0x7F800000) == 0x7F800000
-            || (v26 = mat_1->quat[1], (LODWORD(v26) & 0x7F800000) == 0x7F800000)
-            || (v25 = mat_1->quat[2], (LODWORD(v25) & 0x7F800000) == 0x7F800000)
-            || (v24 = mat_1->quat[3], (LODWORD(v24) & 0x7F800000) == 0x7F800000))
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-                473,
-                0,
-                "%s",
-                "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-        }
-        v23 = mat_1->transWeight;
-        if ((LODWORD(v23) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-                474,
-                0,
-                "%s",
-                "!IS_NAN(mat->transWeight)");
-        Vec3Scale(mat_1->quat, mat_1->transWeight, v22);
-        v21 = v22[0] * mat_1->quat[0];
-        v20 = v22[0] * mat_1->quat[1];
-        v19 = v22[0] * mat_1->quat[2];
-        v18 = v22[0] * mat_1->quat[3];
-        v17 = v22[1] * mat_1->quat[1];
-        v16 = v22[1] * mat_1->quat[2];
-        v15 = v22[1] * mat_1->quat[3];
-        v14 = v22[2] * mat_1->quat[2];
-        v13 = v22[2] * mat_1->quat[3];
-        quat_12.axis[0][0] = 1.0 - (v17 + v14);
-        quat_12.axis[0][1] = v20 + v13;
-        quat_12.axis[0][2] = v19 - v15;
-        quat_12.axis[0][3] = 0.0;
-        quat_12.axis[1][0] = v20 - v13;
-        quat_12.axis[1][1] = 1.0 - (v21 + v14);
-        quat_12.axis[1][2] = v16 + v18;
-        quat_12.axis[1][3] = 0.0;
-        quat_12.axis[2][0] = v19 + v15;
-        quat_12.axis[2][1] = v16 - v18;
-        quat_12.axis[2][2] = 1.0 - (v21 + v17);
-        quat_12.axis[2][3] = 0.0;
-        quat_12.origin[0] = mat_1->trans[0];
-        quat_12.origin[1] = mat_1->trans[1];
-        quat_12.origin[2] = mat_1->trans[2];
-        quat_12.origin[3] = 1.0;
+        R_TransformSkelMat(invBaseMat.origin, &skelMat, origin);
 
-        {
-            DObjSkelMat test;
-            LocalConvertQuatToSkelMat(mat_1, &test);
-            iassert(!memcmp(&test, &quat_12, sizeof(test)));
-        }
-#else
-        LocalConvertQuatToSkelMat(mat_1, &quat_12);
-#endif
+        rigidSurf->placement.base.origin[0] = origin[0];
+        rigidSurf->placement.base.origin[1] = origin[1];
+        rigidSurf->placement.base.origin[2] = origin[2];
 
-#if 0
-        v9[0] = -mat->quat[0] * mat_1->quat[3]
-            + mat->quat[3] * mat_1->quat[0]
-            - mat->quat[2] * mat_1->quat[1]
-            + mat->quat[1] * mat_1->quat[2];
-        v9[1] = -mat->quat[1] * mat_1->quat[3]
-            + mat->quat[2] * mat_1->quat[0]
-            + mat->quat[3] * mat_1->quat[1]
-            - mat->quat[0] * mat_1->quat[2];
-        v9[2] = -mat->quat[2] * mat_1->quat[3]
-            - mat->quat[1] * mat_1->quat[0]
-            + mat->quat[0] * mat_1->quat[1]
-            + mat->quat[3] * mat_1->quat[2];
-        v9[3] = mat->quat[3] * mat_1->quat[3]
-            + mat->quat[0] * mat_1->quat[0]
-            + mat->quat[1] * mat_1->quat[1]
-            + mat->quat[2] * mat_1->quat[2];
+        Vec3Add(origin, scene.def.viewOffset, rigidSurf->placement.base.origin);
 
-        {
-            float test[4];
-            LocalQuatMultiplyInverse(mat->quat, mat_1->quat, test);
-            iassert(!memcmp(test, v9, sizeof(test)));
-        }
-#else
-        LocalQuatMultiplyInverse(mat->quat, mat_1->quat, v9);
-#endif
-        
-        Vec4Normalize(v9);
-
-        rigidSurf->placement.base.quat[0] = v9[0];
-        rigidSurf->placement.base.quat[1] = v9[1];
-        rigidSurf->placement.base.quat[2] = v9[2];
-        rigidSurf->placement.base.quat[3] = v9[3];
-        LocalTransformVector(v29.origin, (const float4*)&quat_12.axis, v7);
-        Vec3Add(v7, scene.def.viewOffset, rigidSurf->placement.base.origin);
         return 56;
     }
     else
