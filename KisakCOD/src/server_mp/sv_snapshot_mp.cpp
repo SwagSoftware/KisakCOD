@@ -512,103 +512,96 @@ void __cdecl SV_UpdateServerCommandsToClient_PreventOverflow(client_t *client, m
 
 char __cdecl SV_GetClientPositionAtTime(int client, int gametime, float *pos)
 {
-    float end; // [esp+10h] [ebp-301Ch] BYREF
-    float v5; // [esp+14h] [ebp-3018h]
-    float v6; // [esp+18h] [ebp-3014h]
-    int v7; // [esp+1Ch] [ebp-3010h]
-    int v8; // [esp+20h] [ebp-300Ch]
-    char v9; // [esp+27h] [ebp-3005h]
+    float end[3]; // [esp+10h] [ebp-301Ch] BYREF
+    int v5; // [esp+1Ch] [ebp-3010h]
+    int v6; // [esp+20h] [ebp-300Ch]
+    char v7; // [esp+27h] [ebp-3005h]
     int i; // [esp+28h] [ebp-3004h]
-    float fraction; // [esp+2Ch] [ebp-3000h]
-    float start; // [esp+30h] [ebp-2FFCh] BYREF
-    float v13; // [esp+34h] [ebp-2FF8h]
-    float v14; // [esp+38h] [ebp-2FF4h]
+    float progress; // [esp+2Ch] [ebp-3000h]
+    float start[3]; // [esp+30h] [ebp-2FFCh] BYREF
     int pArchiveTime[2]; // [esp+3Ch] [ebp-2FF0h] BYREF
-    clientState_s v16; // [esp+44h] [ebp-2FE8h] BYREF
-    char v17; // [esp+B3h] [ebp-2F79h]
+    clientState_s cs; // [esp+44h] [ebp-2FE8h] BYREF
+    bool foundEnd; // [esp+B3h] [ebp-2F79h]
     playerState_s ps; // [esp+B4h] [ebp-2F78h] BYREF
-    int v19; // [esp+3020h] [ebp-Ch]
-    int v20; // [esp+3024h] [ebp-8h]
-    int v21; // [esp+3028h] [ebp-4h]
+    int v15; // [esp+3020h] [ebp-Ch]
+    int steps; // [esp+3024h] [ebp-8h]
+    int v17; // [esp+3028h] [ebp-4h]
 
-    v8 = 1000 / sv_fps->current.integer;
-    pArchiveTime[1] = v8 * (svs.time / v8);
-    v7 = svs.time - gametime;
-    v20 = 400 / v8 + 1;
-    v9 = 0;
-    v17 = 0;
+    v6 = 1000 / sv_fps->current.integer;
+    pArchiveTime[1] = v6 * (svs.time / v6);
+    v5 = svs.time - gametime;
+    steps = 400 / v6 + 1;                         // LWSS: this is 500 on xbox...
+    v7 = 0;
+    foundEnd = 0;
     pArchiveTime[0] = 0;
-    v19 = 0;
-    v21 = 0;
-    for (i = 0; i < v20; ++i)
+    v15 = 0;
+    v17 = 0;
+    for (i = 0; i < steps; ++i)
     {
-        if (SV_GetArchivedClientInfo(client, pArchiveTime, &ps, &v16))
+        if (SV_GetArchivedClientInfo(client, pArchiveTime, &ps, &cs))
         {
             if (ps.stats[0] <= 0 || (ps.otherFlags & 4) == 0 || (ps.otherFlags & 2) != 0)
                 return 0;
-            if (v17)
+            if (foundEnd)
             {
-                start = ps.origin[0];
-                v13 = ps.origin[1];
-                v14 = ps.origin[2];
-                v19 = pArchiveTime[0];
-                v9 = 1;
+                start[0] = ps.origin[0];
+                start[1] = ps.origin[1];
+                start[2] = ps.origin[2];
+                v15 = pArchiveTime[0];
+                v7 = 1;
                 break;
             }
-            if (pArchiveTime[0] == v7)
+            if (pArchiveTime[0] == v5)
             {
-                end = ps.origin[0];
-                v5 = ps.origin[1];
-                v6 = ps.origin[2];
-                start = ps.origin[0];
-                v13 = ps.origin[1];
-                v14 = ps.origin[2];
-                v17 = 1;
-                v9 = 1;
-                v19 = pArchiveTime[0];
-                v21 = pArchiveTime[0];
+                end[0] = ps.origin[0];
+                end[1] = ps.origin[1];
+                end[2] = ps.origin[2];
+                start[0] = ps.origin[0];
+                start[1] = ps.origin[1];
+                start[2] = ps.origin[2];
+                foundEnd = 1;
+                v7 = 1;
+                v15 = pArchiveTime[0];
+                v17 = pArchiveTime[0];
                 break;
             }
-            if (pArchiveTime[0] >= v7)
+            if (pArchiveTime[0] >= v5)
             {
-                v17 = 1;
-                start = ps.origin[0];
-                v13 = ps.origin[1];
-                v14 = ps.origin[2];
-                v19 = pArchiveTime[0];
-                v9 = 1;
+                foundEnd = 1;
+                start[0] = ps.origin[0];
+                start[1] = ps.origin[1];
+                start[2] = ps.origin[2];
+                v15 = pArchiveTime[0];
+                v7 = 1;
                 break;
             }
-            end = ps.origin[0];
-            v5 = ps.origin[1];
-            v6 = ps.origin[2];
-            v21 = pArchiveTime[0];
+            end[0] = ps.origin[0];
+            end[1] = ps.origin[1];
+            end[2] = ps.origin[2];
+            v17 = pArchiveTime[0];
         }
-        pArchiveTime[0] += v8;
+        pArchiveTime[0] += v6;
     }
-    if (v9)
+    if (v7)
     {
-        if (!v17)
-            MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1545, 0, "%s", "foundEnd");
-        if (v21 == v19)
-            fraction = 1.0;
+        iassert(foundEnd);
+        if (v17 == v15)
+            progress = 1.0;
         else
-            fraction = (double)(v19 - v7) / (double)(v19 - v21);
-        if (fraction < 0.0)
-            MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1551, 0, "%s", "progress >= 0");
-        if (fraction > 1.0)
-            MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1552, 0, "%s", "progress <= 1");
+            progress = (v15 - v5) / (v15 - v17);
+        iassert(progress >= 0);
+        iassert(progress <= 1);
     }
     else
     {
-        if (!v17)
+        if (!foundEnd)
             return 0;
-        fraction = 0.0;
-        start = end;
-        v13 = v5;
-        v14 = v6;
+        progress = 0.0;
+        start[0] = end[0];
+        start[1] = end[1];
+        start[2] = end[2];
     }
-    Vec3Lerp(&start, &end, fraction, pos);
+    Vec3Lerp(start, end, progress, pos);
     return 1;
 }
 
