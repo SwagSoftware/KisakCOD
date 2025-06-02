@@ -1378,7 +1378,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     drawSurfSubMask.packed = -65536;
     if (baseTechType != TECHNIQUE_LIT_BEGIN)
         *&drawSurfSubMask.packed = -536870912;
-    drawSurf.fields = drawSurfList->fields;
+    drawSurf.packed = drawSurfList->packed;
     drawSurfKey = drawSurfList->packed & 0xFFFFFFFFE0000000uLL;
     RB_TrackImmediatePrims(GFX_PRIM_STATS_XMODELRIGID);
     if (!g_primStats)

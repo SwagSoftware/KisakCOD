@@ -403,27 +403,27 @@ void __cdecl R_DeriveCodeMatrix(GfxCmdBufSourceState *source, GfxCodeMatrices *a
 {
     const char *v3; // eax
 
-    switch (baseIndex)
+    switch (baseIndex) // LWSS: mystery enum of sorts
     {
-    case 4u:
+    case 4:
         R_DeriveViewMatrix(source);
         break;
-    case 8u:
+    case 8:
         R_DeriveProjectionMatrix(source);
         break;
-    case 0xCu:
+    case 12:
         R_DeriveWorldViewMatrix(source);
         break;
-    case 0x10u:
+    case 16:
         R_DeriveViewProjectionMatrix(source);
         break;
-    case 0x14u:
+    case 20:
         R_DeriveWorldViewProjectionMatrix(source);
         break;
-    case 0x18u:
+    case 24:
         R_DeriveShadowLookupMatrix(source);
         break;
-    case 0x1Cu:
+    case 28:
         R_GenerateWorldOutdoorLookupMatrix(source, activeMatrices->matrix[baseIndex].m);
         break;
     default:
@@ -445,20 +445,18 @@ void __cdecl R_DeriveViewMatrix(GfxCmdBufSourceState *source)
 
 void  R_DeriveWorldViewMatrix(GfxCmdBufSourceState *source)
 {
-    float v2[18]; // [esp-8h] [ebp-5Ch] BYREF
-    float *world_60; // [esp+40h] [ebp-14h]
+    GfxMatrix world;
     GfxViewParms *p_viewParms; // [esp+44h] [ebp-10h]
     GfxCodeMatrices *activeMatrices; // [esp+4Ch] [ebp-8h]
     GfxCodeMatrices *retaddr; // [esp+54h] [ebp+0h]
 
     //activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
-    world_60 = (float *)source;
     if (source->constVersions[58] != source->matrixVersions[0])
         MyAssertHandler(".\\r_state.cpp", 338, 0, "%s", "R_IsMatrixConstantUpToDate( source, CONST_SRC_CODE_WORLD_MATRIX )");
-    memcpy(v2, world_60, 0x40u);
-    Vec3Add(&v2[12], source->eyeOffset, &v2[12]);
-    MatrixMultiply44(*(const mat4x4*)&v2[0], p_viewParms->viewMatrix.m, *(mat4x4 *)(world_60 + 48));
+    memcpy(&world, (float *)source, sizeof(GfxMatrix));
+    Vec3Add(world.m[3], source->eyeOffset, world.m[3]);
+    MatrixMultiply44(world.m, p_viewParms->viewMatrix.m, source->matrices.matrix[12].m);
     source->constVersions[70] = source->matrixVersions[3];
 }
 
@@ -491,9 +489,8 @@ void __cdecl R_DeriveViewProjectionMatrix(GfxCmdBufSourceState *source)
 
 void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source)
 {
-    float *v2; // [esp-8h] [ebp-60h]
-    float v3[18]; // [esp-4h] [ebp-5Ch] BYREF
-    const float *world_60; // [esp+44h] [ebp-14h]
+    float *mat20; // [esp-8h] [ebp-60h]
+    GfxMatrix mat;
     GfxViewParms *p_viewParms; // [esp+48h] [ebp-10h]
     int v6; // [esp+4Ch] [ebp-Ch]
     GfxCodeMatrices *activeMatrices; // [esp+50h] [ebp-8h]
@@ -501,21 +498,22 @@ void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source)
 
     //activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
-    world_60 = (const float *)source;
-    if (source->constVersions[58] != source->matrixVersions[0])
-        MyAssertHandler(".\\r_state.cpp", 411, 0, "%s", "R_IsMatrixConstantUpToDate( source, CONST_SRC_CODE_WORLD_MATRIX )");
-    memcpy(v3, world_60, 0x40u);
-    v2 = (float *)(world_60 + 320);
+
+    //iassert(R_IsMatrixConstantUpToDate(source, CONST_SRC_CODE_WORLD_MATRIX));
+
+    memcpy(&mat, (float*)source, sizeof(GfxMatrix));
+    mat20 = (float *)&source->matrices.matrix[20];
+
     if (source->depthHackFlags == 2)
     {
         if (source->constVersions[74] != source->matrixVersions[4])
             R_DeriveViewProjectionMatrix(source);
-        MatrixMultiply44(*(const mat4x4 *)&v3[0], *(mat4x4 *)(world_60 + 64), *(mat4x4 *)v2);
+        MatrixMultiply44(mat.m, source->matrices.matrix[16].m, *(mat4x4*)mat20);
     }
     else
     {
-        Vec3Add(&v3[12], source->eyeOffset, &v3[12]);
-        MatrixMultiply44(*(const mat4x4 *)&v3[0], p_viewParms->viewProjectionMatrix.m, *(mat4x4 *)v2);
+        Vec3Add(mat.m[3], source->eyeOffset, mat.m[3]);
+        MatrixMultiply44(mat.m, p_viewParms->viewProjectionMatrix.m, *(mat4x4*)mat20);
     }
     source->constVersions[78] = source->matrixVersions[5];
 }
@@ -552,13 +550,11 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     zInTimesInvView_4[1] = 0.0;
     zInTimesInvView_4[2] = -awayBias;
     zInTimesInvView_4[3] = 0.0;
-    MatrixTransformVector44(zInTimesInvView_4, *(const mat4x4*)&R_GetCodeMatrix(source, 63u, 0)->matrices.matrix[0], zInTimesInvViewTimesOutdoorLookup_4);
+    MatrixTransformVector44(zInTimesInvView_4, *(const mat4x4*)R_GetCodeMatrix(source, 63u, 0), zInTimesInvViewTimesOutdoorLookup_4);
     zInTimesInvViewTimesOutdoorLookup_4[2] = zInTimesInvViewTimesOutdoorLookup_4[2] + zIn_12;
-    if (!rgp.world)
-        MyAssertHandler(".\\r_state.cpp", 495, 0, "%s", "rgp.world");
+    iassert(rgp.world);
     MatrixTransformVector44(zInTimesInvViewTimesOutdoorLookup_4, rgp.world->outdoorLookupMatrix, world_52);
-    if (source->constVersions[58] != source->matrixVersions[0])
-        MyAssertHandler(".\\r_state.cpp", 498, 0, "%s", "R_IsMatrixConstantUpToDate( source, CONST_SRC_CODE_WORLD_MATRIX )");
+    //iassert(R_IsMatrixConstantUpToDate(source, CONST_SRC_CODE_WORLD_MATRIX));
     qmemcpy(&v3, zIn_8, sizeof(v3));
     Vec3Add(v3.m[3], source->eyeOffset, v3.m[3]);
     MatrixMultiply44(v3.m, rgp.world->outdoorLookupMatrix, *(mat4x4*)outMatrix);
