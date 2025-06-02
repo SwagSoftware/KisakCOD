@@ -349,74 +349,51 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
     unsigned int inverseIndex; // [esp+FCh] [ebp-8h]
     unsigned int matrixVersion; // [esp+100h] [ebp-4h]
 
-    if (!source->matrixVersions[(sourceIndex - 58) >> 2])
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            559,
-            0,
-            "%s\n\t(sourceIndex) = %i",
-            "(source->matrixVersions[(((sourceIndex) - CONST_SRC_FIRST_CODE_MATRIX) >> 2)])",
-            sourceIndex);
-    if (firstRow > 3)
-        MyAssertHandler(".\\r_state.cpp", 560, 0, "firstRow not in [0, 3]\n\t%i not in [%i, %i]", firstRow, 0, 3);
-    matrixVersion = source->matrixVersions[(sourceIndex - 58) >> 2];
-    matrixIndex = sourceIndex - 58;
+    iassert((source->matrixVersions[(((sourceIndex)-CONST_SRC_FIRST_CODE_MATRIX) >> 2)]));
+    iassert(firstRow >= 0 && firstRow <= 3);
+
+    matrixVersion = source->matrixVersions[(sourceIndex - CONST_SRC_FIRST_CODE_MATRIX) >> 2];
+    matrixIndex = sourceIndex - CONST_SRC_FIRST_CODE_MATRIX;
+
     if (source->constVersions[sourceIndex] == matrixVersion)
         return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
+
     baseIndex = matrixIndex & 0xFFFFFFFC;
-    if (source->constVersions[(matrixIndex & 0xFFFFFFFC) + 58] != matrixVersion)
+    if (source->constVersions[(matrixIndex & 0xFFFFFFFC) + CONST_SRC_FIRST_CODE_MATRIX] != matrixVersion)
     {
         R_DeriveCodeMatrix(source, &source->matrices, baseIndex);
         if (matrixIndex == baseIndex)
             return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
-        if (source->constVersions[sourceIndex] == matrixVersion)
-            MyAssertHandler(
-                ".\\r_state.cpp",
-                574,
-                0,
-                "%s\n\t(sourceIndex) = %i",
-                "(source->constVersions[sourceIndex] != matrixVersion)",
-                sourceIndex);
+
+        iassert(source->constVersions[sourceIndex] != matrixVersion);
     }
     source->constVersions[sourceIndex] = matrixVersion;
     transposeIndex = matrixIndex ^ 2;
-    if (source->constVersions[(matrixIndex ^ 2) + 58] == matrixVersion)
+    if (source->constVersions[(matrixIndex ^ 2) + CONST_SRC_FIRST_CODE_MATRIX] == matrixVersion)
     {
-        MatrixTranspose44(
-            &source->matrices.matrix[transposeIndex],
-            &source->matrices.matrix[matrixIndex]);
+        MatrixTranspose44(&source->matrices.matrix[transposeIndex], &source->matrices.matrix[matrixIndex]);
+
         return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
     }
     else
     {
         inverseIndex = matrixIndex ^ 1;
-        if (source->constVersions[(matrixIndex ^ 1) + 58] == matrixVersion)
+        if (source->constVersions[(matrixIndex ^ 1) + CONST_SRC_FIRST_CODE_MATRIX] == matrixVersion)
         {
-            MatrixInverse44(
-                &source->matrices.matrix[inverseIndex],
-                &source->matrices.matrix[matrixIndex]);
+            MatrixInverse44(&source->matrices.matrix[inverseIndex], &source->matrices.matrix[matrixIndex]);
+
             return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
         }
         else
         {
-            if (matrixIndex != (baseIndex | 3))
-                MyAssertHandler(
-                    ".\\r_state.cpp",
-                    593,
-                    0,
-                    "%s",
-                    "matrixIndex == (baseIndex | CONST_SRC_MATRIX_INVERSE_BIT | CONST_SRC_MATRIX_TRANSPOSE_BIT)");
-            if (transposeIndex != (baseIndex | 1))
-                MyAssertHandler(".\\r_state.cpp", 594, 0, "%s", "transposeIndex == (baseIndex | CONST_SRC_MATRIX_INVERSE_BIT)");
-            if (inverseIndex != (baseIndex | 2))
-                MyAssertHandler(".\\r_state.cpp", 595, 0, "%s", "inverseIndex == (baseIndex | CONST_SRC_MATRIX_TRANSPOSE_BIT)");
-            MatrixTranspose44(
-                &source->matrices.matrix[baseIndex],
-                &source->matrices.matrix[inverseIndex]);
+            iassert(matrixIndex == (baseIndex | CONST_SRC_MATRIX_INVERSE_BIT | CONST_SRC_MATRIX_TRANSPOSE_BIT));
+            iassert(transposeIndex == (baseIndex | CONST_SRC_MATRIX_INVERSE_BIT));
+            iassert(inverseIndex == (baseIndex | CONST_SRC_MATRIX_TRANSPOSE_BIT));
+
+            MatrixTranspose44(&source->matrices.matrix[baseIndex], &source->matrices.matrix[inverseIndex]);
             source->constVersions[inverseIndex + 58] = matrixVersion;
-            MatrixInverse44(
-                &source->matrices.matrix[inverseIndex],
-                &source->matrices.matrix[matrixIndex]);
+            MatrixInverse44(&source->matrices.matrix[inverseIndex], &source->matrices.matrix[matrixIndex]);
+
             return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
         }
     }

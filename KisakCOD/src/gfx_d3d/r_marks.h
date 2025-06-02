@@ -190,7 +190,7 @@ void __cdecl R_MarkFragments_Go(
 char __cdecl R_MarkFragments_WorldBrushes(MarkInfo *markInfo);
 bool __cdecl R_AllowMarks(int surfIndex, const Material *markMaterialAsVoid);
 bool __cdecl R_Mark_MaterialAllowsMarks(const Material *markReceiverMaterialHandle, const Material *markMaterialHandle);
-char __cdecl R_MarkFragments_BrushSurface(
+bool __cdecl R_MarkFragments_BrushSurface(
     MarkInfo *markInfo,
     GfxMarkContext *markContext,
     const float (*clipPlanes)[4],

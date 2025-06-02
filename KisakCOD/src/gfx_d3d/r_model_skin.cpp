@@ -356,7 +356,7 @@ void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)
     float decodeScale; // [esp+10h] [ebp-4h]
 
     decodeScale = ((double)in.array[3] - -192.0) / 32385.0;
-    *out = ((double)in.array[0] - 127.0) * decodeScale;
+    out[0] = ((double)in.array[0] - 127.0) * decodeScale;
     out[1] = ((double)in.array[1] - 127.0) * decodeScale;
     out[2] = ((double)in.array[2] - 127.0) * decodeScale;
 }

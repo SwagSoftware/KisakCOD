@@ -17,33 +17,16 @@ void  R_BoxSurfaces(
     unsigned int *surfCounts,
     unsigned int listCount)
 {
-    unsigned int j; // [esp-Ch] [ebp-A4h]
-    unsigned int i; // [esp-8h] [ebp-A0h]
-    unsigned __int8 v11[128]; // [esp-4h] [ebp-9Ch] BYREF
+    unsigned __int8 cellBits[128]; // [esp-4h] [ebp-9Ch] BYREF
 
-    //v12 = a1;
-    //v13 = retaddr;
-    if (!rgp.world)
-        MyAssertHandler(".\\r_marks.cpp", 944, 0, "%s", "rgp.world");
-    if (rgp.world->dpvsPlanes.cellCount > 1024)
-        MyAssertHandler(
-            ".\\r_marks.cpp",
-            945,
-            0,
-            "%s\n\t(rgp.world->dpvsPlanes.cellCount) = %i",
-            "(rgp.world->dpvsPlanes.cellCount <= (1024))",
-            rgp.world->dpvsPlanes.cellCount);
-    if (rgp.world->cellBitsCount > 128)
-        MyAssertHandler(
-            ".\\r_marks.cpp",
-            946,
-            0,
-            "%s\n\t(rgp.world->cellBitsCount) = %i",
-            "(rgp.world->cellBitsCount <= ((1024) >> 3))",
-            rgp.world->cellBitsCount);
-    Com_Memset(v11, 0, rgp.world->cellBitsCount);
-    for (i = 0; i < listCount; ++i)
+    iassert(rgp.world);
+    iassert(rgp.world->dpvsPlanes.cellCount <= (1024));
+    iassert(rgp.world->cellBitsCount <= ((1024) >> 3));
+
+    Com_Memset(cellBits, 0, rgp.world->cellBitsCount);
+    for (unsigned int i = 0; i < listCount; ++i)
         surfCounts[i] = 0;
+
     R_BoxSurfaces_r(
         (mnode_t *)rgp.world->dpvsPlanes.nodes,
         mins,
@@ -54,11 +37,11 @@ void  R_BoxSurfaces(
         surfListSize,
         surfCounts,
         listCount,
-        (unsigned __int8 *)v11);
-    for (j = 0; j < listCount; ++j)
+        (unsigned __int8 *)cellBits);
+
+    for (unsigned int i = 0; i < listCount; ++i)
     {
-        if (surfCounts[j] > surfListSize)
-            MyAssertHandler(".\\r_marks.cpp", 956, 0, "surfCounts[i] <= surfListSize\n\t%i, %i", surfCounts[j], surfListSize);
+        iassert(surfCounts[i] <= surfListSize);
     }
 }
 
@@ -103,7 +86,7 @@ void __cdecl R_BoxSurfaces_r(
                     surfCounts,
                     listCount,
                     cellBits);
-            node = (node + 2 * node->rightChildOffset);
+            node = (mnode_t*)((char*)node + 2 * node->rightChildOffset);
         }
     }
     if (node->cellIndex)
@@ -137,71 +120,6 @@ void __cdecl R_BoxSurfaces_r(
                 cellBits);
         }
     }
-#if 0 
-    const cplane_s *side; // [esp+0h] [ebp-10h]
-    int cellIndex; // [esp+4h] [ebp-Ch]
-    int cellCount; // [esp+8h] [ebp-8h]
-
-    cellCount = rgp.world->dpvsPlanes.cellCount + 1;
-    while (1)
-    {
-        cellIndex = node->cellIndex;
-        if (cellIndex - cellCount < 0)
-            break;
-        side = (const cplane_s *)BoxOnPlaneSide(mins, maxs, &rgp.world->dpvsPlanes.planes[cellIndex - cellCount]);
-        if (side == (const cplane_s *)1)
-        {
-            ++node;
-        }
-        else
-        {
-            if (side != (const cplane_s *)2)
-                R_BoxSurfaces_r(
-                    node + 1,
-                    mins,
-                    maxs,
-                    allowSurf,
-                    callbackContext,
-                    surfLists,
-                    surfListSize,
-                    surfCounts,
-                    listCount,
-                    cellBits);
-            node = (mnode_t *)((char *)node + 2 * node->rightChildOffset);
-        }
-    }
-    if (node->cellIndex)
-    {
-        if (listCount == 1)
-        {
-            R_CellSurfaces(
-                cellIndex - 1,
-                mins,
-                maxs,
-                *allowSurf,
-                callbackContext,
-                *surfLists,
-                surfListSize,
-                surfCounts,
-                cellBits);
-        }
-        else
-        {
-            if (listCount != 2)
-                MyAssertHandler(".\\r_marks.cpp", 792, 0, "%s", "listCount == 2");
-            R_CellSurfacesTwoLists(
-                cellIndex - 1,
-                mins,
-                maxs,
-                allowSurf,
-                callbackContext,
-                surfLists,
-                surfListSize,
-                surfCounts,
-                cellBits);
-        }
-    }
-#endif
 }
 
 void __cdecl R_CellSurfaces(
@@ -1091,8 +1009,7 @@ void __cdecl R_MarkFragments_Begin(
     R_GetMarkFragmentClipPlanes(markInfo->origin, markInfo->axis, markInfo->radius, markInfo->planes);
     if (markAgainst)
     {
-        if (markAgainst != MARK_FRAGMENTS_AGAINST_MODELS)
-            MyAssertHandler(".\\r_marks.cpp", 1867, 0, "%s", "markAgainst == MARK_FRAGMENTS_AGAINST_MODELS");
+        iassert(markAgainst == MARK_FRAGMENTS_AGAINST_MODELS);
         markInfo->smodelCollidedCount = R_BoxStaticModels(
             markInfo->mins,
             markInfo->maxs,
@@ -1203,8 +1120,8 @@ void __cdecl R_MarkFragments_Go(
     bool v7; // [esp+B7h] [ebp-419h]
     bool error; // [esp+4CFh] [ebp-1h]
 
-    if (!markInfo->material)
-        MyAssertHandler(".\\r_marks.cpp", 1910, 0, "%s", "markInfo->material");
+    iassert(markInfo->material);
+
     markInfo->maxTris = maxTris;
     markInfo->tris = tris;
     markInfo->maxPoints = maxPoints;
@@ -1216,8 +1133,7 @@ void __cdecl R_MarkFragments_Go(
     error = 0;
     if (markInfo->markAgainst)
     {
-        if (markInfo->markAgainst != MARK_FRAGMENTS_AGAINST_MODELS)
-            MyAssertHandler(".\\r_marks.cpp", 1930, 0, "%s", "markInfo->markAgainst == MARK_FRAGMENTS_AGAINST_MODELS");
+        iassert(markInfo->markAgainst == MARK_FRAGMENTS_AGAINST_MODELS);
         if (!R_MarkFragments_Models(markInfo))
             error = 1;
     }
@@ -1252,8 +1168,8 @@ char __cdecl R_MarkFragments_WorldBrushes(MarkInfo *markInfo)
     bool anyMarks; // [esp+6B3h] [ebp-1h] BYREF
     int savedregs; // [esp+6B4h] [ebp+0h] BYREF
 
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1297, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
+    iassert(!markInfo->usedTriCount && !markInfo->usedPointCount);
+
     markContext.modelTypeAndSurf = 0;
     markContext.modelIndex = 0;
     surfacesArray[0] = surfaces;
@@ -1310,7 +1226,7 @@ bool __cdecl R_Mark_MaterialAllowsMarks(const Material *markReceiverMaterialHand
     return (markReceiverMaterialHandle->info.surfaceTypeBits & markMaterialHandle->info.surfaceTypeBits) == markMaterialHandle->info.surfaceTypeBits;
 }
 
-char __cdecl R_MarkFragments_BrushSurface(
+bool __cdecl R_MarkFragments_BrushSurface(
     MarkInfo *markInfo,
     GfxMarkContext *markContext,
     const float (*clipPlanes)[4],
@@ -1373,11 +1289,7 @@ char __cdecl R_MarkFragments_BrushSurface(
     triIndex = 0;
     while (triIndex < triSurf->triCount)
     {
-        if (!R_MarkFragment_IsTriangleRejected(
-            markDir,
-            triVerts0[*indices].xyz,
-            triVerts0[indices[1]].xyz,
-            triVerts0[indices[2]].xyz))
+        if (!R_MarkFragment_IsTriangleRejected(markDir, triVerts0[indices[0]].xyz, triVerts0[indices[1]].xyz, triVerts0[indices[2]].xyz))
         {
             R_MarkFragment_SetupWorldClipPoints(triVerts0, indices, clipPoints);
             pingPong = 0;
@@ -1389,22 +1301,16 @@ char __cdecl R_MarkFragments_BrushSurface(
                     clipPoints[pingPong],
                     clipPoints[pingPong == 0],
                     &(*clipPlanes)[4 * planeIndex]);
+
                 if (!fragmentPointCount)
                     goto LABEL_6;
-                if (fragmentPointCount > 9)
-                    MyAssertHandler(
-                        ".\\r_marks.cpp",
-                        1227,
-                        0,
-                        "%s\n\t(fragmentPointCount) = %i",
-                        "(fragmentPointCount <= 3 + 6)",
-                        fragmentPointCount);
+
+                iassert(fragmentPointCount <= 3 + 6);
                 pingPong ^= 1u;
             }
-            if (fragmentPointCount > markInfo->maxPoints - markInfo->usedPointCount
-                || 3 * (fragmentPointCount - 2) > markInfo->maxTris - markInfo->usedTriCount)
+            if (fragmentPointCount > markInfo->maxPoints - markInfo->usedPointCount || 3 * (fragmentPointCount - 2) > markInfo->maxTris - markInfo->usedTriCount)
             {
-                return 0;
+                return false;
             }
             tris = &markInfo->tris[markInfo->usedTriCount];
             baseIndex = markInfo->usedPointCount;
@@ -1416,80 +1322,54 @@ char __cdecl R_MarkFragments_BrushSurface(
                 tris->context = *markContext;
                 ++tris;
             }
-            triVert1[0] = (const GfxWorldVertex *)&triVerts1[triVerts1Stride * *indices];
+            triVert1[0] = (const GfxWorldVertex *)&triVerts1[triVerts1Stride * indices[0]];
             triVert1[1] = (const GfxWorldVertex *)&triVerts1[triVerts1Stride * indices[1]];
             triVert1[2] = (const GfxWorldVertex *)&triVerts1[triVerts1Stride * indices[2]];
-            v26 = (float*)triVert1[0]->lmapCoord;
+
             lmapCoord[0][0] = triVert1[0]->lmapCoord[0];
             lmapCoord[0][1] = triVert1[0]->lmapCoord[1];
-            v24 = lmapCoord[1];
-            v25 = (float*)triVert1[1]->lmapCoord;
-            *(_QWORD *)&lmapCoord[1][0] = *(_QWORD *)triVert1[1]->lmapCoord;
-            v22 = lmapCoord[2];
-            v23 = (float*)triVert1[2]->lmapCoord;
-            *(_QWORD *)&lmapCoord[2][0] = *(_QWORD *)triVert1[2]->lmapCoord;
-            v17.packed = triVert1[0]->normal.packed;
-            out.packed = v17.packed;
-            v19 = *(float *)&v17.packed;
-            v20 = *(float *)&v17.packed;
-            in.packed = v17.packed;
-            Vec3UnpackUnitVec(v17, (float *)&out.packed);
-            *(float *)&in.packed = 0.0;
-            normal[0][0] = *(float *)&out.packed;
-            normal[0][1] = v19;
-            normal[0][2] = v20;
-            v11 = normal[1];
-            v12.packed = (unsigned int)triVert1[1]->normal.packed;
-            v13.packed = v12.packed;
-            v14 = *(float *)&v12.packed;
-            v15 = *(float *)&v12.packed;
-            v16.packed = v12.packed;
-            Vec3UnpackUnitVec(v12, (float *)&v13.packed);
-            *(float *)&v16.packed = 0.0;
-            *v11 = *(float *)&v13.packed;
-            v11[1] = v14;
-            v11[2] = v15;
-            v7.packed = (unsigned int)triVert1[2]->normal.packed;
-            v8 = *(float *)&v7.packed;
-            v9 = *(float *)&v7.packed;
-            v10.packed = v7.packed;
-            Vec3UnpackUnitVec(v7, (float *)&v7.packed);
-            *(float *)&v10.packed = 0.0;
-            normal[2][0] = *(float *)&v7.packed;
-            normal[2][1] = v8;
-            normal[2][2] = v9;
+
+            lmapCoord[1][0] = triVert1[1]->lmapCoord[0];
+            lmapCoord[1][1] = triVert1[1]->lmapCoord[1];
+
+            lmapCoord[2][0] = triVert1[2]->lmapCoord[0];
+            lmapCoord[2][1] = triVert1[2]->lmapCoord[1];
+
+            float tmp[3];
+            Vec3UnpackUnitVec(triVert1[0]->normal, tmp);
+            normal[0][0] = tmp[0];
+            normal[0][1] = tmp[1];
+            normal[0][2] = tmp[2];
+
+            Vec3UnpackUnitVec(triVert1[1]->normal, tmp);
+            normal[1][0] = tmp[0];
+            normal[1][1] = tmp[1];
+            normal[1][2] = tmp[2];
+
+            Vec3UnpackUnitVec(triVert1[2]->normal, tmp);
+            normal[2][0] = tmp[0];
+            normal[2][1] = tmp[1];
+            normal[2][2] = tmp[2];
+
             points = &markInfo->points[markInfo->usedPointCount];
+
             for (pointIndex = 0; pointIndex < fragmentPointCount; ++pointIndex)
             {
                 point = &points[pointIndex];
                 clipPoint = &clipPoints[pingPong][pointIndex];
+
                 point->xyz[0] = clipPoint->xyz[0];
                 point->xyz[1] = clipPoint->xyz[1];
                 point->xyz[2] = clipPoint->xyz[2];
-                point->lmapCoord[0] = clipPoint->vertWeights[0] * lmapCoord[0][0]
-                    + clipPoint->vertWeights[1] * lmapCoord[1][0]
-                    + clipPoint->vertWeights[2] * lmapCoord[2][0];
-                point->lmapCoord[1] = clipPoint->vertWeights[0] * lmapCoord[0][1]
-                    + clipPoint->vertWeights[1] * lmapCoord[1][1]
-                    + clipPoint->vertWeights[2] * lmapCoord[2][1];
-                point->normal[0] = clipPoint->vertWeights[0] * normal[0][0]
-                    + clipPoint->vertWeights[1] * normal[1][0]
-                    + clipPoint->vertWeights[2] * normal[2][0];
-                point->normal[1] = clipPoint->vertWeights[0] * normal[0][1]
-                    + clipPoint->vertWeights[1] * normal[1][1]
-                    + clipPoint->vertWeights[2] * normal[2][1];
-                point->normal[2] = clipPoint->vertWeights[0] * normal[0][2]
-                    + clipPoint->vertWeights[1] * normal[1][2]
-                    + clipPoint->vertWeights[2] * normal[2][2];
+
+                point->lmapCoord[0] = (clipPoint->vertWeights[0] * lmapCoord[0][0]) + (clipPoint->vertWeights[1] * lmapCoord[1][0]) + (clipPoint->vertWeights[2] * lmapCoord[2][0]);
+                point->lmapCoord[1] = (clipPoint->vertWeights[0] * lmapCoord[0][1]) + (clipPoint->vertWeights[1] * lmapCoord[1][1]) + (clipPoint->vertWeights[2] * lmapCoord[2][1]);
+
+                point->normal[0] = (clipPoint->vertWeights[0] * normal[0][0]) + (clipPoint->vertWeights[1] * normal[1][0]) + (clipPoint->vertWeights[2] * normal[2][0]);
+                point->normal[1] = (clipPoint->vertWeights[0] * normal[0][1]) + (clipPoint->vertWeights[1] * normal[1][1]) + (clipPoint->vertWeights[2] * normal[2][1]);
+                point->normal[2] = (clipPoint->vertWeights[0] * normal[0][2]) + (clipPoint->vertWeights[1] * normal[1][2]) + (clipPoint->vertWeights[2] * normal[2][2]);
             }
-            if (fragmentPointCount < 3)
-                MyAssertHandler(
-                    ".\\r_marks.cpp",
-                    1277,
-                    0,
-                    "%s\n\t(fragmentPointCount) = %i",
-                    "(fragmentPointCount >= 3)",
-                    fragmentPointCount);
+            iassert(fragmentPointCount >= 3);
             markInfo->usedPointCount += fragmentPointCount;
             markInfo->usedTriCount = fragmentPointCount + markInfo->usedTriCount - 2;
             *anyMarks = 1;
@@ -1498,7 +1378,7 @@ char __cdecl R_MarkFragments_BrushSurface(
         ++triIndex;
         indices += 3;
     }
-    return 1;
+    return true;
 }
 
 int __cdecl R_ChopWorldPolyBehindPlane(

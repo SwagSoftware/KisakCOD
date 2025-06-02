@@ -205,7 +205,7 @@ void __cdecl FX_ImpactMark_Generate(
     float radius,
     unsigned int markEntnum)
 {
-    FxMarkTri tris; // [esp+230h] [ebp-1058h] BYREF
+    FxMarkTri tris[256]; // [esp+230h] [ebp-1058h] BYREF
     MarkInfo markInfo; // [esp+E28h] [ebp-460h] BYREF
     FxSystem *System; // [esp+1274h] [ebp-14h]
 
@@ -227,20 +227,14 @@ void __cdecl FX_ImpactMark_Generate(
         R_MarkFragments_Begin(&markInfo, markAgainst, origin, axis, radius, System->camera.viewOffset, material);
         if (fx_marks_ents->current.enabled)
         {
-            if ((unsigned int)markAgainst > MARK_FRAGMENTS_AGAINST_MODELS)
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_marks.cpp",
-                    752,
-                    0,
-                    "%s\n\t(markAgainst) = %i",
-                    "(markAgainst == MARK_FRAGMENTS_AGAINST_MODELS || markAgainst == MARK_FRAGMENTS_AGAINST_BRUSHES)",
-                    markAgainst);
+            iassert(markAgainst == MARK_FRAGMENTS_AGAINST_MODELS || markAgainst == MARK_FRAGMENTS_AGAINST_BRUSHES);
+
             if (markAgainst == MARK_FRAGMENTS_AGAINST_MODELS)
                 FX_ImpactMark_Generate_AddEntityModel(localClientNum, &markInfo, markEntnum, origin, radius);
             else
                 FX_ImpactMark_Generate_AddEntityBrush(localClientNum, &markInfo, markEntnum, origin, radius);
         }
-        R_MarkFragments_Go(&markInfo, FX_ImpactMark_Generate_Callback, &callbackContext, 255, &tris, 765, g_fxMarkPoints);
+        R_MarkFragments_Go(&markInfo, FX_ImpactMark_Generate_Callback, &callbackContext, 255, &tris[0], 765, g_fxMarkPoints);
     }
 }
 
@@ -251,7 +245,6 @@ void __cdecl FX_ImpactMark_Generate_AddEntityBrush(
     const float *origin,
     float radius)
 {
-    float s; // [esp+0h] [ebp-25Ch]
     int v6; // [esp+8h] [ebp-254h]
     int v7; // [esp+Ch] [ebp-250h]
     int v8; // [esp+10h] [ebp-24Ch]
@@ -281,170 +274,173 @@ void __cdecl FX_ImpactMark_Generate_AddEntityBrush(
     centity_s *ent; // [esp+240h] [ebp-1Ch]
     float worldModelBoundsVec3[2][3]; // [esp+244h] [ebp-18h] BYREF
 
-    if (entityIndex != 1023)
+    if (entityIndex == ENTITYNUM_NONE)
     {
-        //Profile_Begin(207);
-        s = -radius;
-        Vec3AddScalar(origin, s, markMins);
-        Vec3AddScalar(origin, radius, markMaxs);
-        ent = CG_GetEntity(localClientNum, entityIndex);
-        if (ent->nextValid && ent->nextState.solid == 0xFFFFFF)
-        {
-            brushModel = R_GetBrushModel(ent->nextState.index.brushmodel);
-            AnglesToAxis(ent->pose.angles, entAxis);
-            modelBounds[0].v[0] = brushModel->bounds[0][0];
-            modelBounds[0].v[1] = brushModel->bounds[0][1];
-            modelBounds[0].v[2] = brushModel->bounds[0][2];
-            modelBounds[0].v[3] = 0.0;
-            modelBounds[1].v[0] = brushModel->bounds[1][0];
-            modelBounds[1].v[1] = brushModel->bounds[1][1];
-            modelBounds[1].v[2] = brushModel->bounds[1][2];
-            modelBounds[1].v[3] = 0.0;
-            v19 = 0.0;
-            v18 = 0.0;
-            v20 = 0.0;
-            v21 = ent->pose.origin[0];
-            v22 = ent->pose.origin[1];
-            v23 = ent->pose.origin[2];
-            v24 = 0.0;
-            if (entAxis[0][0] >= 0.0)
-                v17 = 0;
-            else
-                v17 = -1;
-            if (entAxis[0][1] >= 0.0)
-                v16 = 0;
-            else
-                v16 = -1;
-            if (entAxis[0][2] >= 0.0)
-                v15 = 0;
-            else
-                v15 = -1;
-            if (v19 >= 0.0)
-                v14 = 0;
-            else
-                v14 = -1;
-            if (entAxis[1][0] >= 0.0)
-                v13 = 0;
-            else
-                v13 = -1;
-            if (entAxis[1][1] >= 0.0)
-                v12 = 0;
-            else
-                v12 = -1;
-            if (entAxis[1][2] >= 0.0)
-                v11 = 0;
-            else
-                v11 = -1;
-            if (v18 >= 0.0)
-                v10 = 0;
-            else
-                v10 = -1;
-            if (entAxis[2][0] >= 0.0)
-                v9 = 0;
-            else
-                v9 = -1;
-            if (entAxis[2][1] >= 0.0)
-                v8 = 0;
-            else
-                v8 = -1;
-            if (entAxis[2][2] >= 0.0)
-                v7 = 0;
-            else
-                v7 = -1;
-            if (v20 >= 0.0)
-                v6 = 0;
-            else
-                v6 = -1;
-            worldModelBoundsFloat4[0].v[0] = COERCE_FLOAT(modelBounds[1].u[0] & v17 | modelBounds[0].u[0] & ~v17)
-                * entAxis[0][0]
-                + v21;
-            worldModelBoundsFloat4[0].v[1] = COERCE_FLOAT(modelBounds[1].u[0] & v16 | modelBounds[0].u[0] & ~v16)
-                * entAxis[0][1]
-                + v22;
-            worldModelBoundsFloat4[0].v[2] = COERCE_FLOAT(modelBounds[1].u[0] & v15 | modelBounds[0].u[0] & ~v15)
-                * entAxis[0][2]
-                + v23;
-            worldModelBoundsFloat4[0].v[3] = COERCE_FLOAT(modelBounds[1].u[0] & v14 | modelBounds[0].u[0] & ~v14) * v19 + v24;
-            worldModelBoundsFloat4[0].v[0] = COERCE_FLOAT(modelBounds[1].u[1] & v13 | modelBounds[0].u[1] & ~v13)
-                * entAxis[1][0]
-                + worldModelBoundsFloat4[0].v[0];
-            worldModelBoundsFloat4[0].v[1] = COERCE_FLOAT(modelBounds[1].u[1] & v12 | modelBounds[0].u[1] & ~v12)
-                * entAxis[1][1]
-                + worldModelBoundsFloat4[0].v[1];
-            worldModelBoundsFloat4[0].v[2] = COERCE_FLOAT(modelBounds[1].u[1] & v11 | modelBounds[0].u[1] & ~v11)
-                * entAxis[1][2]
-                + worldModelBoundsFloat4[0].v[2];
-            worldModelBoundsFloat4[0].v[3] = COERCE_FLOAT(modelBounds[1].u[1] & v10 | modelBounds[0].u[1] & ~v10) * v18
-                + worldModelBoundsFloat4[0].v[3];
-            worldModelBoundsFloat4[0].v[0] = COERCE_FLOAT(modelBounds[1].u[2] & v9 | modelBounds[0].u[2] & ~v9)
-                * entAxis[2][0]
-                + worldModelBoundsFloat4[0].v[0];
-            worldModelBoundsFloat4[0].v[1] = COERCE_FLOAT(modelBounds[1].u[2] & v8 | modelBounds[0].u[2] & ~v8)
-                * entAxis[2][1]
-                + worldModelBoundsFloat4[0].v[1];
-            worldModelBoundsFloat4[0].v[2] = COERCE_FLOAT(modelBounds[1].u[2] & v7 | modelBounds[0].u[2] & ~v7)
-                * entAxis[2][2]
-                + worldModelBoundsFloat4[0].v[2];
-            worldModelBoundsFloat4[0].v[3] = COERCE_FLOAT(modelBounds[1].u[2] & v6 | modelBounds[0].u[2] & ~v6) * v20
-                + worldModelBoundsFloat4[0].v[3];
-            worldModelBoundsFloat4[1].v[0] = COERCE_FLOAT(modelBounds[0].u[0] & v17 | modelBounds[1].u[0] & ~v17)
-                * entAxis[0][0]
-                + v21;
-            worldModelBoundsFloat4[1].v[1] = COERCE_FLOAT(modelBounds[0].u[0] & v16 | modelBounds[1].u[0] & ~v16)
-                * entAxis[0][1]
-                + v22;
-            worldModelBoundsFloat4[1].v[2] = COERCE_FLOAT(modelBounds[0].u[0] & v15 | modelBounds[1].u[0] & ~v15)
-                * entAxis[0][2]
-                + v23;
-            worldModelBoundsFloat4[1].v[3] = COERCE_FLOAT(modelBounds[0].u[0] & v14 | modelBounds[1].u[0] & ~v14) * v19 + v24;
-            worldModelBoundsFloat4[1].v[0] = COERCE_FLOAT(modelBounds[0].u[1] & v13 | modelBounds[1].u[1] & ~v13)
-                * entAxis[1][0]
-                + worldModelBoundsFloat4[1].v[0];
-            worldModelBoundsFloat4[1].v[1] = COERCE_FLOAT(modelBounds[0].u[1] & v12 | modelBounds[1].u[1] & ~v12)
-                * entAxis[1][1]
-                + worldModelBoundsFloat4[1].v[1];
-            worldModelBoundsFloat4[1].v[2] = COERCE_FLOAT(modelBounds[0].u[1] & v11 | modelBounds[1].u[1] & ~v11)
-                * entAxis[1][2]
-                + worldModelBoundsFloat4[1].v[2];
-            worldModelBoundsFloat4[1].v[3] = COERCE_FLOAT(modelBounds[0].u[1] & v10 | modelBounds[1].u[1] & ~v10) * v18
-                + worldModelBoundsFloat4[1].v[3];
-            worldModelBoundsFloat4[1].v[0] = COERCE_FLOAT(modelBounds[0].u[2] & v9 | modelBounds[1].u[2] & ~v9)
-                * entAxis[2][0]
-                + worldModelBoundsFloat4[1].v[0];
-            worldModelBoundsFloat4[1].v[1] = COERCE_FLOAT(modelBounds[0].u[2] & v8 | modelBounds[1].u[2] & ~v8)
-                * entAxis[2][1]
-                + worldModelBoundsFloat4[1].v[1];
-            worldModelBoundsFloat4[1].v[2] = COERCE_FLOAT(modelBounds[0].u[2] & v7 | modelBounds[1].u[2] & ~v7)
-                * entAxis[2][2]
-                + worldModelBoundsFloat4[1].v[2];
-            worldModelBoundsFloat4[1].v[3] = COERCE_FLOAT(modelBounds[0].u[2] & v6 | modelBounds[1].u[2] & ~v6) * v20
-                + worldModelBoundsFloat4[1].v[3];
-            worldModelBoundsVec3[0][0] = worldModelBoundsFloat4[0].v[0];
-            worldModelBoundsVec3[0][1] = worldModelBoundsFloat4[0].v[1];
-            worldModelBoundsVec3[0][2] = worldModelBoundsFloat4[0].v[2];
-            worldModelBoundsVec3[1][0] = worldModelBoundsFloat4[1].v[0];
-            worldModelBoundsVec3[1][1] = worldModelBoundsFloat4[1].v[1];
-            worldModelBoundsVec3[1][2] = worldModelBoundsFloat4[1].v[2];
-            if (BoundsOverlap(markMins, markMaxs, worldModelBoundsVec3[0], worldModelBoundsVec3[1]))
-            {
-                entityIndexAsUnsignedShort = entityIndex;
-                if ((unsigned __int16)entityIndex != entityIndex)
-                    MyAssertHandler(
-                        ".\\EffectsCore\\fx_marks.cpp",
-                        653,
-                        0,
-                        "%s\n\t(entityIndex) = %i",
-                        "(entityIndexAsUnsignedShort == entityIndex)",
-                        entityIndex);
-                R_MarkFragments_AddBModel(markInfo, brushModel, &ent->pose, entityIndexAsUnsignedShort);
-            }
-            //Profile_EndInternal(0);
-        }
-        else
-        {
-            //Profile_EndInternal(0);
-        }
+        return;
     }
+
+    //Profile_Begin(207);
+    Vec3AddScalar(origin, -radius, markMins);
+    Vec3AddScalar(origin, radius, markMaxs);
+    ent = CG_GetEntity(localClientNum, entityIndex);
+
+    if (!ent->nextValid || ent->nextState.solid != 0xFFFFFF)
+    {
+        return;
+    }
+
+    brushModel = R_GetBrushModel(ent->nextState.index.brushmodel);
+    AnglesToAxis(ent->pose.angles, entAxis);
+
+    modelBounds[0].v[0] = brushModel->bounds[0][0];
+    modelBounds[0].v[1] = brushModel->bounds[0][1];
+    modelBounds[0].v[2] = brushModel->bounds[0][2];
+    modelBounds[0].v[3] = 0.0;
+
+    modelBounds[1].v[0] = brushModel->bounds[1][0];
+    modelBounds[1].v[1] = brushModel->bounds[1][1];
+    modelBounds[1].v[2] = brushModel->bounds[1][2];
+    modelBounds[1].v[3] = 0.0;
+
+    v19 = 0.0;
+    v18 = 0.0;
+    v20 = 0.0;
+    v21 = ent->pose.origin[0];
+    v22 = ent->pose.origin[1];
+    v23 = ent->pose.origin[2];
+    v24 = 0.0;
+    if (entAxis[0][0] >= 0.0)
+        v17 = 0;
+    else
+        v17 = -1;
+    if (entAxis[0][1] >= 0.0)
+        v16 = 0;
+    else
+        v16 = -1;
+    if (entAxis[0][2] >= 0.0)
+        v15 = 0;
+    else
+        v15 = -1;
+
+    if (v19 >= 0.0)
+        v14 = 0;
+    else
+        v14 = -1;
+
+    if (entAxis[1][0] >= 0.0)
+        v13 = 0;
+    else
+        v13 = -1;
+    if (entAxis[1][1] >= 0.0)
+        v12 = 0;
+    else
+        v12 = -1;
+    if (entAxis[1][2] >= 0.0)
+        v11 = 0;
+    else
+        v11 = -1;
+    if (v18 >= 0.0)
+        v10 = 0;
+    else
+        v10 = -1;
+
+    if (entAxis[2][0] >= 0.0)
+        v9 = 0;
+    else
+        v9 = -1;
+    if (entAxis[2][1] >= 0.0)
+        v8 = 0;
+    else
+        v8 = -1;
+    if (entAxis[2][2] >= 0.0)
+        v7 = 0;
+    else
+        v7 = -1;
+    if (v20 >= 0.0)
+        v6 = 0;
+    else
+        v6 = -1;
+
+
+    worldModelBoundsFloat4[0].v[0] = COERCE_FLOAT(modelBounds[1].u[0] & v17 | modelBounds[0].u[0] & ~v17)
+        * entAxis[0][0]
+        + v21;
+    worldModelBoundsFloat4[0].v[1] = COERCE_FLOAT(modelBounds[1].u[0] & v16 | modelBounds[0].u[0] & ~v16)
+        * entAxis[0][1]
+        + v22;
+    worldModelBoundsFloat4[0].v[2] = COERCE_FLOAT(modelBounds[1].u[0] & v15 | modelBounds[0].u[0] & ~v15)
+        * entAxis[0][2]
+        + v23;
+    worldModelBoundsFloat4[0].v[3] = COERCE_FLOAT(modelBounds[1].u[0] & v14 | modelBounds[0].u[0] & ~v14) * v19 + v24;
+    worldModelBoundsFloat4[0].v[0] = COERCE_FLOAT(modelBounds[1].u[1] & v13 | modelBounds[0].u[1] & ~v13)
+        * entAxis[1][0]
+        + worldModelBoundsFloat4[0].v[0];
+    worldModelBoundsFloat4[0].v[1] = COERCE_FLOAT(modelBounds[1].u[1] & v12 | modelBounds[0].u[1] & ~v12)
+        * entAxis[1][1]
+        + worldModelBoundsFloat4[0].v[1];
+    worldModelBoundsFloat4[0].v[2] = COERCE_FLOAT(modelBounds[1].u[1] & v11 | modelBounds[0].u[1] & ~v11)
+        * entAxis[1][2]
+        + worldModelBoundsFloat4[0].v[2];
+    worldModelBoundsFloat4[0].v[3] = COERCE_FLOAT(modelBounds[1].u[1] & v10 | modelBounds[0].u[1] & ~v10) * v18
+        + worldModelBoundsFloat4[0].v[3];
+    worldModelBoundsFloat4[0].v[0] = COERCE_FLOAT(modelBounds[1].u[2] & v9 | modelBounds[0].u[2] & ~v9)
+        * entAxis[2][0]
+        + worldModelBoundsFloat4[0].v[0];
+    worldModelBoundsFloat4[0].v[1] = COERCE_FLOAT(modelBounds[1].u[2] & v8 | modelBounds[0].u[2] & ~v8)
+        * entAxis[2][1]
+        + worldModelBoundsFloat4[0].v[1];
+    worldModelBoundsFloat4[0].v[2] = COERCE_FLOAT(modelBounds[1].u[2] & v7 | modelBounds[0].u[2] & ~v7)
+        * entAxis[2][2]
+        + worldModelBoundsFloat4[0].v[2];
+    worldModelBoundsFloat4[0].v[3] = COERCE_FLOAT(modelBounds[1].u[2] & v6 | modelBounds[0].u[2] & ~v6) * v20
+        + worldModelBoundsFloat4[0].v[3];
+    worldModelBoundsFloat4[1].v[0] = COERCE_FLOAT(modelBounds[0].u[0] & v17 | modelBounds[1].u[0] & ~v17)
+        * entAxis[0][0]
+        + v21;
+    worldModelBoundsFloat4[1].v[1] = COERCE_FLOAT(modelBounds[0].u[0] & v16 | modelBounds[1].u[0] & ~v16)
+        * entAxis[0][1]
+        + v22;
+    worldModelBoundsFloat4[1].v[2] = COERCE_FLOAT(modelBounds[0].u[0] & v15 | modelBounds[1].u[0] & ~v15)
+        * entAxis[0][2]
+        + v23;
+    worldModelBoundsFloat4[1].v[3] = COERCE_FLOAT(modelBounds[0].u[0] & v14 | modelBounds[1].u[0] & ~v14) * v19 + v24;
+    worldModelBoundsFloat4[1].v[0] = COERCE_FLOAT(modelBounds[0].u[1] & v13 | modelBounds[1].u[1] & ~v13)
+        * entAxis[1][0]
+        + worldModelBoundsFloat4[1].v[0];
+    worldModelBoundsFloat4[1].v[1] = COERCE_FLOAT(modelBounds[0].u[1] & v12 | modelBounds[1].u[1] & ~v12)
+        * entAxis[1][1]
+        + worldModelBoundsFloat4[1].v[1];
+    worldModelBoundsFloat4[1].v[2] = COERCE_FLOAT(modelBounds[0].u[1] & v11 | modelBounds[1].u[1] & ~v11)
+        * entAxis[1][2]
+        + worldModelBoundsFloat4[1].v[2];
+    worldModelBoundsFloat4[1].v[3] = COERCE_FLOAT(modelBounds[0].u[1] & v10 | modelBounds[1].u[1] & ~v10) * v18
+        + worldModelBoundsFloat4[1].v[3];
+    worldModelBoundsFloat4[1].v[0] = COERCE_FLOAT(modelBounds[0].u[2] & v9 | modelBounds[1].u[2] & ~v9)
+        * entAxis[2][0]
+        + worldModelBoundsFloat4[1].v[0];
+    worldModelBoundsFloat4[1].v[1] = COERCE_FLOAT(modelBounds[0].u[2] & v8 | modelBounds[1].u[2] & ~v8)
+        * entAxis[2][1]
+        + worldModelBoundsFloat4[1].v[1];
+    worldModelBoundsFloat4[1].v[2] = COERCE_FLOAT(modelBounds[0].u[2] & v7 | modelBounds[1].u[2] & ~v7)
+        * entAxis[2][2]
+        + worldModelBoundsFloat4[1].v[2];
+    worldModelBoundsFloat4[1].v[3] = COERCE_FLOAT(modelBounds[0].u[2] & v6 | modelBounds[1].u[2] & ~v6) * v20
+        + worldModelBoundsFloat4[1].v[3];
+    worldModelBoundsVec3[0][0] = worldModelBoundsFloat4[0].v[0];
+    worldModelBoundsVec3[0][1] = worldModelBoundsFloat4[0].v[1];
+    worldModelBoundsVec3[0][2] = worldModelBoundsFloat4[0].v[2];
+    worldModelBoundsVec3[1][0] = worldModelBoundsFloat4[1].v[0];
+    worldModelBoundsVec3[1][1] = worldModelBoundsFloat4[1].v[1];
+    worldModelBoundsVec3[1][2] = worldModelBoundsFloat4[1].v[2];
+
+    if (BoundsOverlap(markMins, markMaxs, worldModelBoundsVec3[0], worldModelBoundsVec3[1]))
+    {
+        entityIndexAsUnsignedShort = entityIndex;
+        iassert(entityIndexAsUnsignedShort == entityIndex);
+
+        R_MarkFragments_AddBModel(markInfo, brushModel, &ent->pose, entityIndexAsUnsignedShort);
+    }
+    //Profile_EndInternal(0);
 }
 
 void __cdecl FX_ImpactMark_Generate_AddEntityModel(
@@ -541,10 +537,10 @@ void __cdecl FX_AllocAndConstructMark(
     FxMark *newMark; // [esp+30h] [ebp-8h]
     int tris; // [esp+34h] [ebp-4h]
 
-    std::sort(
-        (const FxMarkTri **)markTris,
-        (const FxMarkTri **)&markTris[triCount],
-        FX_CompareMarkTris);
+    //std::sort((const FxMarkTri **)markTris, (const FxMarkTri **)&markTris[triCount], FX_CompareMarkTris);
+
+    qsort(markTris, triCount, sizeof(FxMarkTri *), FX_CompareMarkTris);
+
     Sys_EnterCriticalSection(CRITSECT_ALLOC_MARK);
     if (InterlockedIncrement(&g_markThread[localClientNum]) != 1)
         MyAssertHandler(
@@ -1056,8 +1052,11 @@ unsigned __int16 __cdecl FX_FindModelHead(FxMarksSystem *marksSystem, unsigned _
     return -1;
 }
 
-bool __cdecl FX_CompareMarkTris(const FxMarkTri *tri0, const FxMarkTri *tri1)
+int __cdecl FX_CompareMarkTris(const void *arg1, const void *arg2)
 {
+    const FxMarkTri *tri0 = (const FxMarkTri*)arg1;
+    const FxMarkTri *tri1 = (const FxMarkTri*)arg2;
+
     int contextCompareResult; // [esp+10h] [ebp-4h]
 
     contextCompareResult = FX_MarkContextsCompare(&tri0->context, &tri1->context);

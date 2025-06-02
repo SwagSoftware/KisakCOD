@@ -12,6 +12,16 @@ struct Font_s;
 struct Material;
 struct ScreenPlacement;
 
+#define ENTITYNUM_NONE 1023
+#define SURF_TYPECOUNT 29
+
+enum $53B7CF4E68BA96864516EAE91DEE3467 : __int32
+{
+    IMPACTEFFECT_HEADSHOT = 0x1,
+    IMPACTEFFECT_FATAL = 0x2,
+    IMPACTEFFECT_EXIT = 0x4,
+};
+
  enum entityType_t : __int32
  {                                       // ...
      ET_GENERAL         = 0x0,

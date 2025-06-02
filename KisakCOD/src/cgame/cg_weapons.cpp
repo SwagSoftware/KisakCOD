@@ -2232,7 +2232,6 @@ void __cdecl CG_FireWeapon(
     unsigned int weapon,
     const playerState_s *ps)
 {
-    bool v7; // [esp+8h] [ebp-40h]
     snapshot_s *nextSnap; // [esp+Ch] [ebp-3Ch]
     const weaponInfo_s *weapInfo; // [esp+14h] [ebp-34h]
     snd_alias_list_t *firesound; // [esp+18h] [ebp-30h]
@@ -2253,55 +2252,46 @@ void __cdecl CG_FireWeapon(
     {
         if (weapon < BG_GetNumWeapons())
         {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1095,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
+            iassert(localClientNum == 0);
             weapInfo = &cg_weaponsArray[0][weapon];
             weaponDef = BG_GetWeaponDef(weapon);
-            if (!weaponDef)
-                MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3831, 0, "%s", "weaponDef");
+            iassert(weaponDef);
             cent->bMuzzleFlash = 1;
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
+            iassert(localClientNum == 0);
             cgameGlob = cgArray;
             nextSnap = cgArray[0].nextSnap;
-            v7 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
-            isPlayer = v7;
+            isPlayer = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
+
             if (sv_clientSideBullets->current.enabled)
                 DrawBulletImpacts(localClientNum, cent, weaponDef, tagName, ps);
+
             if (isPlayer)
             {
                 CG_UpdateViewModelPose(weapInfo->viewModelDObj, localClientNum);
                 BG_WeaponFireRecoil(&cgameGlob->predictedPlayerState, cgameGlob->vGunSpeed, cgameGlob->kickAVel);
             }
+
             playerUsingTurret = 0;
             if (ent->eType == 11 && (ps->eFlags & 0x300) != 0 && ps->viewlocked_entNum == ent->number)
             {
                 playerUsingTurret = 1;
                 isPlayer = 1;
             }
+
             if (ent->eType == 11)
                 WeaponFlash(localClientNum, ent->number, weapon, playerUsingTurret, tagName);
+
             if (ent->eType == 12)
             {
                 WeaponFlash(localClientNum, ent->number, weapon, 0, tagName);
                 CG_EjectWeaponBrass(localClientNum, ent, event);
                 Veh_IncTurretBarrelRoll(localClientNum, ent->number, heli_barrelRotation->current.value);
             }
+
             firesound = weaponDef->fireSound;
             if (isPlayer && weaponDef->fireSoundPlayer)
                 firesound = weaponDef->fireSoundPlayer;
+
             if (event == 27)
             {
                 if (isPlayer && weaponDef->fireLastSoundPlayer)
@@ -2317,8 +2307,7 @@ void __cdecl CG_FireWeapon(
             {
                 if (isPlayer)
                 {
-                    if (!weapInfo->viewModelDObj
-                        || !CG_DObjGetWorldTagPos(&cgameGlob->viewModelPose, weapInfo->viewModelDObj, tagName, origin))
+                    if (!weapInfo->viewModelDObj || !CG_DObjGetWorldTagPos(&cgameGlob->viewModelPose, weapInfo->viewModelDObj, tagName, origin))
                     {
                         BG_EvaluateTrajectory(&ent->lerp.pos, cgameGlob->time, origin);
                     }
@@ -2614,22 +2603,23 @@ void __cdecl FireBulletPenetrate(
     float maxDepth; // [esp+1F4h] [ebp-8h]
     bool traceHit; // [esp+1FBh] [ebp-1h]
 
-    if (!bp)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2384, 0, "%s", "bp");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2385, 0, "%s", "weapDef");
-    if (!attacker)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2386, 0, "%s", "attacker");
+    iassert(bp);
+    iassert(weapDef);
+    iassert(attacker);
+
     weaponIndex = BG_GetWeaponIndex(weapDef);
     weapType = weapDef->weapType;
     if (weapType)
         drawTracer = 0;
+
     traceHit = BulletTrace(localClientNum, bp, weapDef, attacker, &br, 0);
     if (traceHit)
     {
         traceHitEntityId = Trace_GetEntityHitId(&br.trace);
+
         if (drawTracer)
             CG_SpawnTracer(localClientNum, tracerStart, br.hitPos);
+
         if (!weapType)
         {
             DynEntCl_EntityImpactEvent(&br.trace, localClientNum, attacker->nextState.number, bp->start, br.hitPos, 0);
@@ -2639,6 +2629,7 @@ void __cdecl FireBulletPenetrate(
             surfType = (br.trace.surfaceFlags & 0x1F00000) >> 20;
             entityNum = traceHitEntityId;
             sourceEntityNum = attacker->nextState.number;
+
             if (!sv_clientSideBullets->current.enabled || !IsEntityAPlayer(localClientNum, entityNum))
                 CG_BulletHitEvent(
                     localClientNum,
@@ -2656,14 +2647,7 @@ void __cdecl FireBulletPenetrate(
         }
         if (weapDef->penetrateType && !br.trace.startsolid)
         {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
+            iassert(localClientNum == 0);
             cgameGlob = cgArray;
             for (penetrateIndex = 0; penetrateIndex < 5; ++penetrateIndex)
             {
@@ -2683,7 +2667,7 @@ void __cdecl FireBulletPenetrate(
                     break;
                 traceHit = BulletTrace(localClientNum, bp, weapDef, attacker, &br, br.depthSurfaceType);
                 revBp = *bp; // Com_Memcpy((char *)&revBp, (char *)bp, 64);
-                // LODWORD(diff[4]) = bp->dir;
+                //LODWORD(diff[4]) = bp->dir;
                 revBp.dir[0] = -bp->dir[0];
                 revBp.dir[1] = -bp->dir[1];
                 revBp.dir[2] = -bp->dir[2];
@@ -2696,11 +2680,13 @@ void __cdecl FireBulletPenetrate(
                 revBr.trace.normal[0] = -revBr.trace.normal[0];
                 revBr.trace.normal[1] = -revBr.trace.normal[1];
                 revBr.trace.normal[2] = -revBr.trace.normal[2];
+
                 if (traceHit)
                     BG_AdvanceTrace(&revBp, &revBr, 0.0099999998);
+
                 revTraceHit = BulletTrace(localClientNum, &revBp, weapDef, attacker, &revBr, revBr.depthSurfaceType);
-                v14 = revTraceHit && revBr.trace.allsolid || br.trace.startsolid && revBr.trace.startsolid;
-                allSolid = v14;
+                allSolid = revTraceHit && revBr.trace.allsolid || br.trace.startsolid && revBr.trace.startsolid;
+
                 if (revTraceHit || allSolid)
                 {
                     traceHitEntityId = Trace_GetEntityHitId(&revBr.trace);
@@ -2717,6 +2703,7 @@ void __cdecl FireBulletPenetrate(
                     depth = v13;
                     if (v13 < 1.0)
                         depth = 1.0;
+
                     if (revTraceHit)
                     {
                         if (attacker->nextState.eType == 1
@@ -3457,31 +3444,25 @@ void __cdecl CG_BulletHitEvent(
     int damage,
     __int16 hitContents)
 {
-    char v12; // [esp+3h] [ebp-29h]
-    float muzzle[4]; // [esp+10h] [ebp-1Ch] BYREF
+    char hasMuzzlePoint; // [esp+3h] [ebp-29h]
+    float muzzle[3]; // [esp+10h] [ebp-1Ch] BYREF
     float exitDir[3]; // [esp+20h] [ebp-Ch] BYREF
 
     if (sv_clientSideBullets->current.enabled && IsEntityAPlayer(localClientNum, targetEntityNum))
     {
-        if ((eventParam & 4) != 0)
-            MyAssertHandler(
-                ".\\cgame\\cg_weapons.cpp",
-                4541,
-                0,
-                "%s\n\t(eventParam) = %i",
-                "(!(eventParam & IMPACTEFFECT_EXIT))",
-                eventParam);
+        iassert(!(eventParam & IMPACTEFFECT_EXIT));
+
         if (CalcMuzzlePoint(localClientNum, sourceEntityNum, muzzle, scr_const.tag_flash))
         {
             Vec3Sub(position, muzzle, exitDir);
             Vec3Normalize(exitDir);
-            v12 = 1;
+            hasMuzzlePoint = 1;
         }
         else
         {
-            v12 = 0;
+            hasMuzzlePoint = 0;
         }
-        if (v12)
+        if (hasMuzzlePoint)
             CG_BulletHitEvent_Internal(
                 localClientNum,
                 sourceEntityNum,
@@ -3590,54 +3571,34 @@ void __cdecl CG_BulletHitEvent_Internal(
     const FxEffectDef *fx; // [esp+18h] [ebp-28h] BYREF
     float axis[3][3]; // [esp+1Ch] [ebp-24h] BYREF
 
-    if (sourceEntityNum < 0)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4450, 0, "%s", "sourceEntityNum >= 0");
-    if (sourceEntityNum == 1023)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4451, 0, "%s", "sourceEntityNum != ENTITYNUM_NONE");
-    if (!position)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4452, 0, "%s", "position");
-    if (!normal)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4453, 0, "%s", "normal");
-    if (surfType >= 0x1D)
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            4454,
-            0,
-            "surfType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-            surfType,
-            29);
-    if (damage < 0)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4455, 0, "%s\n\t(damage) = %i", "(damage >= 0)", damage);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(sourceEntityNum >= 0);
+    iassert(sourceEntityNum != ENTITYNUM_NONE);
+    iassert(position);
+    iassert(normal);
+    iassert(surfType >= 0 && surfType < SURF_TYPECOUNT);
+    iassert(damage >= 0);
+    iassert(localClientNum == 0);
+
     cgameGlob = cgArray;
     CG_GetEntity(localClientNum, sourceEntityNum);
     fx = 0;
     hitSound = 0;
+
     if ((hitContents & 0x800) == 0)
         CG_ImpactEffectForWeapon(weaponIndex, surfType, eventParam, &fx, &hitSound);
+
     if (fx && !cg_blood->current.enabled && surfType == 7)
         fx = cgMedia.fxNoBloodFleshHit;
+
     if (hitSound)
         CG_PlaySoundAlias(localClientNum, 1022, position, hitSound);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+
+    iassert(localClientNum == 0);
+
     time = cgArray[0].time;
-    if (fx && (*normal != 0.0 || normal[1] != 0.0 || normal[2] != 0.0))
+    if (fx && (normal[0] != 0.0 || normal[1] != 0.0 || normal[2] != 0.0))
     {
-        axis[0][0] = *normal;
+        axis[0][0] = normal[0];
         axis[0][1] = normal[1];
         axis[0][2] = normal[2];
         CG_RandomEffectAxis(axis[0], axis[1], axis[2]);

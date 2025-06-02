@@ -7,6 +7,39 @@
 #include <gfx_d3d/fxprimitives.h>
 #include <gfx_d3d/r_gfx.h>
 
+enum $FFE723C3A54D7F6DDF86A219D7944B2F : __int32
+{
+    FX_STATUS_REF_COUNT_MASK = 0xFFFF,
+    FX_STATUS_HAS_PENDING_LOOP_ELEMS = 0x10000,
+    FX_STATUS_OWNED_EFFECTS_SHIFT = 0x11,
+    FX_STATUS_OWNED_EFFECTS_MASK = 0x7FE0000,
+    FX_STATUS_DEFER_UPDATE = 0x8000000,
+    FX_STATUS_SELF_OWNED = 0x10000000,
+    FX_STATUS_IS_LOCKED = 0x20000000,
+    FX_STATUS_IS_LOCKED_MASK = 0x60000000,
+};
+
+enum $390C8AB619C5D27F330E671BCD9D689E : __int32
+{
+    FX_ELEM_TYPE_SPRITE_BILLBOARD = 0x0,
+    FX_ELEM_TYPE_SPRITE_ORIENTED = 0x1,
+    FX_ELEM_TYPE_TAIL = 0x2,
+    FX_ELEM_TYPE_TRAIL = 0x3,
+    FX_ELEM_TYPE_CLOUD = 0x4,
+    FX_ELEM_TYPE_MODEL = 0x5,
+    FX_ELEM_TYPE_OMNI_LIGHT = 0x6,
+    FX_ELEM_TYPE_SPOT_LIGHT = 0x7,
+    FX_ELEM_TYPE_SOUND = 0x8,
+    FX_ELEM_TYPE_DECAL = 0x9,
+    FX_ELEM_TYPE_RUNNER = 0xA,
+    FX_ELEM_TYPE_COUNT = 0xB,
+    FX_ELEM_TYPE_LAST_SPRITE = 0x3,
+    FX_ELEM_TYPE_LAST_DRAWN = 0x7,
+};
+
+#define FX_BONE_INDEX_NONE 2047
+#define FX_DOBJ_HANDLE_NONE 4095
+
 void __cdecl TRACK_fx_system();
 XModel *__cdecl FX_RegisterModel(const char *modelName);
 FxSystem *__cdecl FX_GetSystem(int clientIndex);
@@ -351,7 +384,7 @@ void __cdecl FX_CopyMarkPoints(
     unsigned int dstGroupHandle,
     int pointCount);
 unsigned __int16 __cdecl FX_FindModelHead(FxMarksSystem *marksSystem, unsigned __int16 modelIndex, int type);
-bool __cdecl FX_CompareMarkTris(const FxMarkTri *tri0, const FxMarkTri *tri1);
+int __cdecl FX_CompareMarkTris(const void *tri0, const void *tri1);
 int __cdecl FX_MarkContextsCompare(const GfxMarkContext *context0, const GfxMarkContext *context1);
 void __cdecl FX_MarkEntDetachAll(int localClientNum, int entnum);
 void __cdecl FX_MarkEntUpdateHidePartBits(

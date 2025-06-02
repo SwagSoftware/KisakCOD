@@ -469,38 +469,27 @@ void __cdecl FX_TriggerOneShot(
     const FxEffectDef *effectDef; // [esp+14h] [ebp-Ch]
     int elemDefIndex; // [esp+1Ch] [ebp-4h]
 
-    if (!effect)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 542, 0, "%s", "effect");
+    iassert(effect);
     effectDef = effect->def;
-    if (!effect->def)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 545, 0, "%s", "effectDef");
+    iassert(effectDef);
+
     if (elemDefCount
         && (elemDefFirst < 0
             || elemDefFirst >= effectDef->elemDefCountEmission
             + effectDef->elemDefCountOneShot
             + effectDef->elemDefCountLooping))
     {
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_update.cpp",
-            547,
-            0,
-            "%s",
-            "elemDefCount == 0 || (elemDefFirst >= 0 && elemDefFirst < effectDef->elemDefCountLooping + effectDef->elemDefCount"
-            "OneShot + effectDef->elemDefCountEmission)");
+        iassert(elemDefCount == 0 || (elemDefFirst >= 0 && elemDefFirst < effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDefCountEmission));
     }
+
     if (elemDefCount < 0
         || elemDefCount + elemDefFirst > effectDef->elemDefCountEmission
         + effectDef->elemDefCountOneShot
         + effectDef->elemDefCountLooping)
     {
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_update.cpp",
-            548,
-            0,
-            "%s",
-            "elemDefCount >= 0 && elemDefFirst + elemDefCount <= effectDef->elemDefCountLooping + effectDef->elemDefCountOneSho"
-            "t + effectDef->elemDefCountEmission");
+        iassert(elemDefCount >= 0 && elemDefFirst + elemDefCount <= effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDefCountEmission);
     }
+
     for (elemDefIndex = elemDefFirst; elemDefIndex != elemDefCount + elemDefFirst; ++elemDefIndex)
         FX_SpawnOneShotElems(system, effect, elemDefIndex, frameWhenPlayed, msecWhenPlayed);
 }
@@ -536,8 +525,7 @@ void __cdecl FX_StartNewEffect(FxSystem* system, FxEffect* effect)
     const FxEffectDef* def; // [esp+0h] [ebp-4h]
 
     def = effect->def;
-    if (!effect->def)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 562, 0, "%s", "def");
+    iassert(def);
     FX_BeginLooping(
         system,
         effect,

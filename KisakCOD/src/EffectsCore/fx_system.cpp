@@ -619,18 +619,15 @@ FxEffect* __cdecl FX_SpawnEffect(
     char isSpotLightEffect; // [esp+3Bh] [ebp-5h]
     unsigned int elemClass; // [esp+3Ch] [ebp-4h]
 
-    if (!system)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1120, 0, "%s", "system");
-    if (system->isArchiving)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1121, 0, "%s", "!system->isArchiving");
-    if (!remoteDef)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1122, 0, "%s", "remoteDef");
-    if (!origin)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1123, 0, "%s", "origin");
-    if (!axis)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1124, 0, "%s", "axis");
+    iassert(system);
+    iassert(!system->isArchiving);
+    iassert(remoteDef);
+    iassert(origin);
+    iassert(axis);
+
     if (fx_cull_effect_spawn->current.enabled && FX_CullEffectForSpawn(&system->cameraPrev, remoteDef, origin))
         return 0;
+
     isSpotLightEffect = FX_IsSpotLightEffect(system, remoteDef);
     if (!isSpotLightEffect || FX_CanAllocSpotLightEffect(system))
     {
@@ -643,14 +640,18 @@ FxEffect* __cdecl FX_SpawnEffect(
         effectHandle = system->allEffectHandles[allocIndex & 0x3FF];
         remoteEffect = FX_EffectFromHandle(system, effectHandle);
         remoteEffect->def = remoteDef;
-        remoteEffect->status = remoteDef->msecLoopingLife != 0 ? 536936450 : 536870913;
+        remoteEffect->status = remoteDef->msecLoopingLife != 0 ? 0x20010002 : 0x20000001;
+
         for (elemClass = 0; elemClass < 3; ++elemClass)
             remoteEffect->firstElemHandle[elemClass] = -1;
+
         remoteEffect->firstSortedElemHandle = -1;
+
         if ((remoteDef->flags & 1) != 0)
             remoteEffect->packedLighting = FX_CalculatePackedLighting(origin);
         else
             remoteEffect->packedLighting = 255;
+
         remoteEffect->msecBegin = msecBegin;
         remoteEffect->msecLastUpdate = remoteEffect->msecBegin;
         remoteEffect->distanceTraveled = 0.0;
@@ -659,14 +660,9 @@ FxEffect* __cdecl FX_SpawnEffect(
         FX_SpawnEffect_AllocTrails(system, remoteEffect);
         if (isSpotLightEffect)
             FX_SpawnEffect_AllocSpotLightEffect(system, remoteEffect);
-        if ((remoteEffect->status & 0x7FE0000) != 0)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_system.cpp",
-                1216,
-                0,
-                "%s\n\t(effect->status) = %i",
-                "((effect->status & FX_STATUS_OWNED_EFFECTS_MASK) == 0)",
-                remoteEffect->status);
+
+        iassert((remoteEffect->status & FX_STATUS_OWNED_EFFECTS_MASK) == 0);
+
         if (owner == 0xFFFF)
         {
             remoteEffect->owner = effectHandle;
@@ -678,23 +674,8 @@ FxEffect* __cdecl FX_SpawnEffect(
             ownerEffect = FX_EffectFromHandle(system, owner);
             FX_AddRefToEffect(system, ownerEffect);
             oldStatusValue = InterlockedExchangeAdd(&ownerEffect->status, 0x20000);
-            if ((oldStatusValue & 0xF801FFFF) != ((oldStatusValue + 0x20000) & 0xF801FFFF))
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_system.cpp",
-                    1249,
-                    0,
-                    "%s\n\t(oldStatusValue) = %i",
-                    "((oldStatusValue & ~FX_STATUS_OWNED_EFFECTS_MASK) == ((oldStatusValue + (1 << FX_STATUS_OWNED_EFFECTS_SHIFT)) "
-                    "& ~FX_STATUS_OWNED_EFFECTS_MASK))",
-                    oldStatusValue);
-            if ((ownerEffect->status & 0x7FE0000) == 0)
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_system.cpp",
-                    1250,
-                    0,
-                    "%s\n\t(ownerEffect->status) = %i",
-                    "((ownerEffect->status & FX_STATUS_OWNED_EFFECTS_MASK) > 0)",
-                    ownerEffect->status);
+            iassert(((oldStatusValue & ~FX_STATUS_OWNED_EFFECTS_MASK) == ((oldStatusValue + (1 << FX_STATUS_OWNED_EFFECTS_SHIFT)) & ~FX_STATUS_OWNED_EFFECTS_MASK)));
+            iassert(((ownerEffect->status & FX_STATUS_OWNED_EFFECTS_MASK) > 0));
         }
         if (dobjHandle < 0)
             MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1253, 0, "%s", "dobjHandle >= 0");
@@ -703,36 +684,20 @@ FxEffect* __cdecl FX_SpawnEffect(
         iassert(remoteEffect->boltAndSortOrder.boneIndex == static_cast<uint>(boneIndex));
 
         remoteEffect->boltAndSortOrder.temporalBits = 0;
-        if (markEntnum == 1023)
+
+        if (markEntnum == ENTITYNUM_NONE)
         {
-            if (boneIndex == 2047 && dobjHandle != 4095)
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_system.cpp",
-                    1269,
-                    0,
-                    "%s\n\t(dobjHandle) = %i",
-                    "(!(boneIndex == ((1 << 11) - 1) && dobjHandle != ((1 << 12) - 1)))",
-                    dobjHandle);
-            if (boneIndex < 0)
-                MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1270, 0, "%s", "boneIndex >= 0");
+            iassert((!(boneIndex == ((1 << 11) - 1) && dobjHandle != ((1 << 12) - 1))));
+            iassert(boneIndex >= 0);
             remoteEffect->boltAndSortOrder.dobjHandle = dobjHandle;
             iassert(remoteEffect->boltAndSortOrder.dobjHandle == static_cast<uint>(dobjHandle));
             remoteEffect->boltAndSortOrder.temporalBits = FX_GetBoltTemporalBits(system->localClientNum, dobjHandle);
         }
         else
         {
-            if (boneIndex != 2047)
-                MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1261, 0, "%s", "boneIndex == FX_BONE_INDEX_NONE");
-            if (dobjHandle != 4095)
-                MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1262, 0, "%s", "dobjHandle == FX_DOBJ_HANDLE_NONE");
-            if (markEntnum >= 0xFFF)
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_system.cpp",
-                    1263,
-                    0,
-                    "markEntnum doesn't index FX_DOBJ_HANDLE_NONE\n\t%i not in [0, %i)",
-                    markEntnum,
-                    4095);
+            iassert(boneIndex == FX_BONE_INDEX_NONE);
+            iassert(dobjHandle == FX_DOBJ_HANDLE_NONE);
+            iassert(markEntnum >= 0 && markEntnum < FX_DOBJ_HANDLE_NONE);
             remoteEffect->boltAndSortOrder.dobjHandle = markEntnum;
             iassert(remoteEffect->boltAndSortOrder.dobjHandle == markEntnum);
         }
@@ -753,7 +718,7 @@ FxEffect* __cdecl FX_SpawnEffect(
                 ;
         } while (InterlockedCompareExchange(Destination, allocIndex + 1, allocIndex) != allocIndex);
         FX_StartNewEffect(system, remoteEffect);
-        InterlockedExchangeAdd(&remoteEffect->status, -536870912);
+        InterlockedExchangeAdd(&remoteEffect->status, 0xE0000000);
         return remoteEffect;
     }
     else
@@ -1614,17 +1579,15 @@ void __cdecl FX_SpawnElem(
     FxPool<FxElem> *elem; // [esp+78h] [ebp-8h]
     unsigned int elemClass; // [esp+7Ch] [ebp-4h]
 
-    if (!system)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 2062, 0, "%s", "system");
-    if (!effect)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 2063, 0, "%s", "effect");
-    if (!effect->def)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 2064, 0, "%s", "effect->def");
+    iassert(system);
+    iassert(effect);
+    iassert(effect->def);
+
     elemDef = &effect->def->elemDefs[elemDefIndex];
-    if (elemDef->elemType == 3)
-        MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 2066, 0, "%s", "elemDef->elemType != FX_ELEM_TYPE_TRAIL");
-    if (!fx_cull_elem_spawn->current.enabled
-        || !FX_CullElemForSpawn(&system->cameraPrev, elemDef, effectFrameWhenPlayed->origin))
+
+    iassert(elemDef->elemType != FX_ELEM_TYPE_TRAIL);
+
+    if (!fx_cull_elem_spawn->current.enabled || !FX_CullElemForSpawn(&system->cameraPrev, elemDef, effectFrameWhenPlayed->origin))
     {
         msecBegin = elemDef->spawnDelayMsec.base + msecWhenPlayed;
         if (elemDef->spawnDelayMsec.amplitude)
@@ -1637,8 +1600,7 @@ void __cdecl FX_SpawnElem(
             FX_SpawnRunner(system, effect, elemDef, effectFrameWhenPlayed, randomSeed, msecBegin);
             break;
         case 9u:
-            if (effect->boltAndSortOrder.boneIndex != 0x7FF
-                || effect->boltAndSortOrder.dobjHandle == 0xFFF)
+            if (effect->boltAndSortOrder.boneIndex != 0x7FF || effect->boltAndSortOrder.dobjHandle == 0xFFF)
             {
                 FX_CreateImpactMark(system->localClientNum, elemDef, effectFrameWhenPlayed, randomSeed, 0x3FFu);
             }

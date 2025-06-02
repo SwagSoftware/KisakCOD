@@ -127,10 +127,10 @@ void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const M
 
     if (!R_IsVertexShaderConstantUpToDate(context, routingData))
     {
-        if (routingData->u.codeConst.index < 0x3Au)
-            data = &R_GetCodeConstant(context, routingData->u.codeConst.index)->consts[0][0];
+        if (routingData->u.codeConst.index < 58)
+            data = (const float *)R_GetCodeConstant(context, routingData->u.codeConst.index);
         else
-            data = (float *)&R_GetCodeMatrix(context.source, routingData->u.codeConst.index, routingData->u.codeConst.firstRow)->matrices.matrix[0];
+            data = (const float *)R_GetCodeMatrix(context.source, routingData->u.codeConst.index, routingData->u.codeConst.firstRow);
         R_HW_SetVertexShaderConstant(context.state->prim.device, routingData->dest, data, routingData->u.codeConst.rowCount);
     }
 }
