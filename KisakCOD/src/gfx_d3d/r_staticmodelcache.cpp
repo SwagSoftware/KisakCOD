@@ -26,8 +26,7 @@ void __cdecl TRACK_r_staticmodelcache()
 
 void *R_AllocStaticModelCache()
 {
-    if (gfxBuf.smodelCacheVb)
-        MyAssertHandler(".\\r_staticmodelcache.cpp", 638, 0, "%s", "!gfxBuf.smodelCacheVb");
+    iassert(!gfxBuf.smodelCacheVb);
     return R_AllocDynamicVertexBuffer(&gfxBuf.smodelCacheVb, 0x800000);
 }
 
@@ -484,9 +483,9 @@ unsigned int SMC_ClearCache()
     }
     for (smcIter = 0; smcIter < 4; ++smcIter)
     {
-        s_cache.usedlist[smcIter].prev = (static_model_tree_list_t *)(8 * smcIter + 245603296);
+        s_cache.usedlist[smcIter].prev = &s_cache.usedlist[smcIter];
         result = smcIter;
-        s_cache.usedlist[smcIter].next = (static_model_tree_list_t *)(8 * smcIter + 245603296);
+        s_cache.usedlist[smcIter].next = &s_cache.usedlist[smcIter];
         for (listIter = 0; listIter < 6; ++listIter)
         {
             s_cache.freelist[smcIter][listIter].prev = &s_cache.freelist[smcIter][listIter];
@@ -517,7 +516,7 @@ void __cdecl R_FlushStaticModelCache()
     {
         for (smcIter = 0; smcIter < 4; ++smcIter)
         {
-            while (s_cache.usedlist[smcIter].next != (static_model_tree_list_t *)(8 * smcIter + 245603296))
+            while (s_cache.usedlist[smcIter].next != &s_cache.usedlist[smcIter]) 
             {
                 if (!s_cache.usedlist[smcIter].next)
                     MyAssertHandler(".\\r_staticmodelcache.cpp", 696, 0, "%s", "s_cache.usedlist[smcIter].next");
@@ -783,38 +782,47 @@ void __cdecl R_SkinCachedStaticModelCmd(SkinCachedStaticModelCmd *skinCmd)
             "cachedSurf->smodelIndex doesn't index rgp.world->dpvs.smodelCount\n\t%i not in [0, %i)",
             cachedSurf->smodelIndex,
             rgp.world->dpvs.smodelCount);
+
     smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[cachedSurf->smodelIndex];
     normAxis[0].v[0] = smodelDrawInst->placement.axis[0][0];
     normAxis[0].v[1] = smodelDrawInst->placement.axis[0][1];
     normAxis[0].v[2] = smodelDrawInst->placement.axis[0][2];
     normAxis[0].v[3] = 0.0;
+
     normAxis[1].v[0] = smodelDrawInst->placement.axis[1][0];
     normAxis[1].v[1] = smodelDrawInst->placement.axis[1][1];
     normAxis[1].v[2] = smodelDrawInst->placement.axis[1][2];
     normAxis[1].v[3] = 0.0;
+
     normAxis[2].v[0] = smodelDrawInst->placement.axis[2][0];
     normAxis[2].v[1] = smodelDrawInst->placement.axis[2][1];
     normAxis[2].v[2] = smodelDrawInst->placement.axis[2][2];
     normAxis[2].v[3] = 0.0;
+
     scale = smodelDrawInst->placement.scale;
+
     useAxis[0].v[0] = scale * normAxis[0].v[0];
     useAxis[0].v[1] = scale * normAxis[0].v[1];
     useAxis[0].v[2] = scale * normAxis[0].v[2];
     useAxis[0].v[3] = scale * (float)0.0;
+
     v2 = smodelDrawInst->placement.scale;
     useAxis[1].v[0] = v2 * normAxis[1].v[0];
     useAxis[1].v[1] = v2 * normAxis[1].v[1];
     useAxis[1].v[2] = v2 * normAxis[1].v[2];
     useAxis[1].v[3] = v2 * (float)0.0;
+
     v1 = smodelDrawInst->placement.scale;
     useAxis[2].v[0] = v1 * normAxis[2].v[0];
     useAxis[2].v[1] = v1 * normAxis[2].v[1];
     useAxis[2].v[2] = v1 * normAxis[2].v[2];
     useAxis[2].v[3] = v1 * (float)0.0;
+
     useAxis[3].v[0] = smodelDrawInst->placement.origin[0];
     useAxis[3].v[1] = smodelDrawInst->placement.origin[1];
     useAxis[3].v[2] = smodelDrawInst->placement.origin[2];
     useAxis[3].v[3] = 0.0;
+
     SetupTransformUnitVec(normAxis, fixedNormAxis);
     surfCount = XModelGetSurfCount(smodelDrawInst->model, cachedSurf->lodIndex);
     XModelGetSurfaces(smodelDrawInst->model, &surfs, cachedSurf->lodIndex);

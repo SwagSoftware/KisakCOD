@@ -18,22 +18,18 @@ void __cdecl TRACK_r_buffers()
 
 void *__cdecl R_AllocDynamicVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInBytes)
 {
-    const char *v3; // eax
-    const char *v4; // eax
     int hr; // [esp+0h] [ebp-4h]
 
-    if (!vb)
-        MyAssertHandler(".\\r_buffers.cpp", 162, 0, "%s", "vb");
-    if (sizeInBytes <= 0)
-        MyAssertHandler(".\\r_buffers.cpp", 163, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
+    iassert(vb);
+    iassert(sizeInBytes > 0);
+
     if (!r_loadForRenderer->current.enabled)
         return 0;
+
     hr = dx.device->CreateVertexBuffer(sizeInBytes, 520, 0, D3DPOOL_DEFAULT, vb, 0);
     if (hr < 0)
     {
-        v3 = R_ErrorDescription(hr);
-        v4 = va("DirectX didn't create a %i-byte dynamic vertex buffer: %s\n", sizeInBytes, v3);
-        R_FatalInitError(v4);
+        R_FatalInitError(va("DirectX didn't create a %i-byte dynamic vertex buffer: %s\n", sizeInBytes, R_ErrorDescription(hr)));
     }
     return 0;
 }
