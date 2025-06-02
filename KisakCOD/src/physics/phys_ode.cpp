@@ -413,56 +413,41 @@ dxBody *__cdecl Phys_ObjCreateAxis(
     float *velocity,
     const PhysPreset *physPreset)
 {
-    BodyState state[27]; // [esp+18h] [ebp-78h] BYREF
-    char v7; // [esp+84h] [ebp-Ch]
+    BodyState state; // [esp+18h] [ebp-78h] BYREF
 
-    if ((COERCE_UNSIGNED_INT(*position) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(position[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(position[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\physics\\phys_ode.cpp",
-            645,
-            0,
-            "%s",
-            "!IS_NAN((position)[0]) && !IS_NAN((position)[1]) && !IS_NAN((position)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*velocity) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(velocity[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(velocity[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\physics\\phys_ode.cpp",
-            646,
-            0,
-            "%s",
-            "!IS_NAN((velocity)[0]) && !IS_NAN((velocity)[1]) && !IS_NAN((velocity)[2])");
-    }
-    if (!physInited)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 648, 0, "%s", "physInited");
-    if (!physPreset)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 649, 0, "%s", "physPreset");
-    AxisCopy(*(const mat3x3*)axis,  *(mat3x3*)&state[3]);
-    state[0] = *(BodyState *)position;
-    state[1] = *((BodyState *)position + 1);
-    state[2] = *((BodyState *)position + 2);
-    state[12] = *(BodyState *)velocity;
-    state[13] = *((BodyState *)velocity + 1);
-    state[14] = *((BodyState *)velocity + 2);
-    *(float *)&state[15] = 0.0;
-    *(float *)&state[16] = 0.0;
-    *(float *)&state[17] = 0.0;
-    *(float *)&state[18] = 0.0;
-    *(float *)&state[19] = 0.0;
-    *(float *)&state[20] = 0.0;
-    state[21] = (BodyState)SLODWORD(physPreset->mass);
-    state[23] = (BodyState)SLODWORD(physPreset->bounce);
-    state[22] = (BodyState)SLODWORD(physPreset->friction);
-    state[24] = BS_DEAD;
-    state[25] = (BodyState)(int)(physGlob.space[51 * worldIndex - 152]);
-    state[26] = (BodyState)physPreset->type;
-    v7 = 1;
-    return Phys_CreateBodyFromState(worldIndex, state);
+    iassert(!IS_NAN(position[0]) && !IS_NAN(position[1]) && !IS_NAN(position[2]));
+    iassert(!IS_NAN(velocity[0]) && !IS_NAN(velocity[1]) && !IS_NAN(velocity[2]));
+
+    iassert(physInited);
+    iassert(physPreset);
+
+    AxisCopy(*(const mat3x3*)axis, state.rotation);
+
+    state.position[0] = position[0];
+    state.position[1] = position[1];
+    state.position[2] = position[2];
+
+    state.velocity[0] = velocity[0];
+    state.velocity[1] = velocity[1];
+    state.velocity[2] = velocity[2];
+
+    state.angVelocity[0] = 0.0;
+    state.angVelocity[1] = 0.0;
+    state.angVelocity[2] = 0.0;
+
+    state.centerOfMassOffset[0] = 0.0;
+    state.centerOfMassOffset[1] = 0.0;
+    state.centerOfMassOffset[2] = 0.0;
+
+    state.mass = physPreset->mass;
+    state.bounce = physPreset->bounce;
+    state.friction = physPreset->friction;
+    state.state = 0;
+    state.timeLastAsleep = physGlob.worldData[worldIndex].timeLastSnapshot; // LWSS: might wanna use timeLastUpdate instead here?
+    state.type = physPreset->type;
+    LOBYTE(state.underwater) = 1;
+
+    return Phys_CreateBodyFromState(worldIndex, &state);
 }
 
 dxBody *__cdecl Phys_CreateBodyFromState(PhysWorld worldIndex, const BodyState *state)
@@ -474,16 +459,15 @@ dxBody *__cdecl Phys_CreateBodyFromState(PhysWorld worldIndex, const BodyState *
     dxBody *body; // [esp+A8h] [ebp-10h]
     float centerOfMass[3]; // [esp+ACh] [ebp-Ch] BYREF
 
-    if (!state)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 578, 0, "%s", "state");
-    if (!physGlob.world[worldIndex])
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 579, 0, "%s", "physGlob.world[worldIndex]");
-    if (!physGlob.space[worldIndex])
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 580, 0, "%s", "physGlob.space[worldIndex]");
+    iassert(state);
+    iassert(physGlob.world[worldIndex]);
+    iassert(physGlob.space[worldIndex]);
+
     dWorldSetAutoDisableLinearThreshold(physGlob.world[worldIndex], phys_autoDisableLinear->current.value);
     dWorldSetAutoDisableAngularThreshold(physGlob.world[worldIndex], phys_autoDisableAngular->current.value);
     dWorldSetAutoDisableTime(physGlob.world[worldIndex], phys_autoDisableTime->current.value);
     body = dBodyCreate(physGlob.world[worldIndex]);
+
     if (body)
     {
         if (worldIndex == PHYS_WORLD_RAGDOLL)
@@ -491,37 +475,36 @@ dxBody *__cdecl Phys_CreateBodyFromState(PhysWorld worldIndex, const BodyState *
         Sys_EnterCriticalSection(CRITSECT_PHYSICS);
         userData = (PhysObjUserData *)Pool_Alloc(&physGlob.userDataPool);
         Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
-        if (!userData)
-            MyAssertHandler(".\\physics\\phys_ode.cpp", 604, 0, "%s", "userData");
+        iassert(userData);
         memset((unsigned __int8 *)userData, 0, sizeof(PhysObjUserData));
         dBodySetData(body, userData);
-        dBodySetPosition(body, *(float *)state, *((float *)state + 1), *((float *)state + 2));
-        dBodySetLinearVel(body, *((float *)state + 12), *((float *)state + 13), *((float *)state + 14));
-        dBodySetAngularVel(body, *((float *)state + 15), *((float *)state + 16), *((float *)state + 17));
-        Phys_AxisToOdeMatrix3((const float (*)[3])((const float *)state + 1), rotMatrix);
+        dBodySetPosition(body, state->position[0], state->position[1], state->position[2]);
+        dBodySetLinearVel(body, state->velocity[0], state->velocity[1], state->velocity[2]);
+        dBodySetAngularVel(body, state->angVelocity[0], state->angVelocity[1], state->angVelocity[2]);
+        Phys_AxisToOdeMatrix3(state->rotation, rotMatrix);
         dBodySetRotation(body, rotMatrix);
-        centerOfMass[0] = -*((float *)state + 18);
-        centerOfMass[1] = -*((float *)state + 19);
-        centerOfMass[2] = -*((float *)state + 20);
+        centerOfMass[0] = -state->centerOfMassOffset[0];
+        centerOfMass[1] = -state->centerOfMassOffset[1];
+        centerOfMass[2] = -state->centerOfMassOffset[2];
         geomState.isOriented = 0;
         geomState.type = PHYS_GEOM_NONE;
-        userData->translation[0] = *((float *)state + 18);
-        userData->translation[1] = *((float *)state + 19);
-        userData->translation[2] = *((float *)state + 20);
-        Phys_BodyAddGeomAndSetMass(worldIndex, body, *((float *)state + 21), &geomState, centerOfMass);
+        userData->translation[0] = state->centerOfMassOffset[0];
+        userData->translation[1] = state->centerOfMassOffset[1];
+        userData->translation[2] = state->centerOfMassOffset[2];
+        Phys_BodyAddGeomAndSetMass(worldIndex, body, state->mass, &geomState, centerOfMass);
         userData->body = body;
         savedPos = userData->savedPos;
-        userData->savedPos[0] = *(float *)state;
-        savedPos[1] = *((float *)state + 1);
-        savedPos[2] = *((float *)state + 2);
-        memcpy(userData->savedRot, state + 3, sizeof(userData->savedRot));
-        userData->bounce = *((float *)state + 23);
-        userData->friction = *((float *)state + 22);
-        userData->state = (physStuckState_t)state[24];
-        userData->timeLastAsleep = state[25];
+        userData->savedPos[0] = state->position[0];
+        savedPos[1] = state->position[1];
+        savedPos[2] = state->position[2];
+        qmemcpy(userData->savedRot, state->rotation, sizeof(userData->savedRot));
+        userData->bounce = state->bounce;
+        userData->friction = state->friction;
+        userData->state = (physStuckState_t)state->state;
+        userData->timeLastAsleep = state->timeLastAsleep;
         Phys_BodyGetCenterOfMass(body, userData->awakeTooLongLastPos);
-        userData->sndClass = state[26];
-        if (!*((_BYTE *)state + 108))
+        userData->sndClass = state->type;
+        if (!LOBYTE(state->underwater))
             dBodyDisable(body);
         return body;
     }
@@ -2448,70 +2431,72 @@ void __cdecl Phys_Shutdown()
 
 void __cdecl Phys_ObjSave(dxBody *id, MemoryFile *memFile)
 {
-    BodyState state[28]; // [esp+0h] [ebp-70h] BYREF
+    BodyState state; // [esp+0h] [ebp-70h] BYREF
 
     if (!physInited)
         MyAssertHandler(".\\physics\\phys_ode.cpp", 2439, 0, "%s", "physInited");
     if (!id)
         MyAssertHandler(".\\physics\\phys_ode.cpp", 2440, 0, "%s", "id");
-    Phys_GetStateFromBody(id, state);
-    MemFile_WriteData(memFile, 112, state);
+    Phys_GetStateFromBody(id, &state);
+    MemFile_WriteData(memFile, 112, &state);
 }
 
 void __cdecl Phys_GetStateFromBody(dxBody *body, BodyState *state)
 {
-    const float *Rotation; // eax
-    BodyState *AngularVel; // [esp+8h] [ebp-64h]
-    BodyState *LinearVel; // [esp+10h] [ebp-5Ch]
-    BodyState *Position; // [esp+1Ch] [ebp-50h]
-    BodyState *userData; // [esp+20h] [ebp-4Ch]
+    float *Rotation; // eax
+    float *AngularVel; // [esp+8h] [ebp-64h]
+    float *LinearVel; // [esp+10h] [ebp-5Ch]
+    const dReal *Position; // [esp+1Ch] [ebp-50h]
+    PhysObjUserData *userData; // [esp+20h] [ebp-4Ch]
     dMass mass; // [esp+24h] [ebp-48h] BYREF
 
     dMassSetZero(&mass);
-    if (!body)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 402, 0, "%s", "body");
-    if (!state)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 403, 0, "%s", "state");
-    userData = (BodyState *)dBodyGetData(body);
-    if (!userData)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 406, 0, "%s", "userData");
-    Position = (BodyState *)dBodyGetPosition(body);
-    *state = *Position;
-    state[1] = Position[1];
-    state[2] = Position[2];
-    Rotation = dBodyGetRotation(body);
-    Phys_OdeMatrix3ToAxis(Rotation, (float (*)[3])((float *)state + 1));
-    LinearVel = (BodyState *)dBodyGetLinearVel(body);
-    state[12] = *LinearVel;
-    state[13] = LinearVel[1];
-    state[14] = LinearVel[2];
-    AngularVel = (BodyState *)dBodyGetAngularVel(body);
-    state[15] = *AngularVel;
-    state[16] = AngularVel[1];
-    state[17] = AngularVel[2];
-    state[18] = *userData;
-    state[19] = userData[1];
-    state[20] = userData[2];
+    iassert(body);
+    iassert(state);
+    userData = (PhysObjUserData *)dBodyGetData(body);
+    iassert(userData);
+
+    Position = dBodyGetPosition(body);
+    state->position[0] = Position[0];
+    state->position[1] = Position[1];
+    state->position[2] = Position[2];
+
+    Rotation = (float*)dBodyGetRotation(body);
+    Phys_OdeMatrix3ToAxis(Rotation, state->rotation);
+
+    LinearVel = (float *)dBodyGetLinearVel(body);
+    state->velocity[0] = LinearVel[0];
+    state->velocity[1] = LinearVel[1];
+    state->velocity[2] = LinearVel[2];
+
+    AngularVel = (float *)dBodyGetAngularVel(body);
+    state->angVelocity[0] = AngularVel[0];
+    state->angVelocity[1] = AngularVel[1];
+    state->angVelocity[2] = AngularVel[2];
+
+    state->centerOfMassOffset[0] = userData->translation[0];
+    state->centerOfMassOffset[1] = userData->translation[1];
+    state->centerOfMassOffset[2] = userData->translation[2];
+
     dBodyGetMass(body, &mass);
-    if (mass.mass == 0.0)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 417, 0, "%s", "mass.mass");
-    state[21] = (BodyState)SLODWORD(mass.mass);
-    state[23] = userData[18];
-    state[22] = userData[17];
-    state[24] = userData[19];
-    state[25] = userData[23];
-    state[26] = userData[16];
-    *((_BYTE *)state + 108) = dBodyIsEnabled(body);
+    iassert(mass.mass != 0.0f);
+    state->mass = mass.mass;
+
+    state->bounce = userData->bounce;
+    state->friction = userData->friction;
+    state->state = userData->state;
+    state->timeLastAsleep = userData->timeLastAsleep;
+    state->type = userData->sndClass;
+    LOBYTE(state->underwater) = dBodyIsEnabled(body);
 }
 
 dxBody *__cdecl Phys_ObjLoad(PhysWorld worldIndex, MemoryFile *memFile)
 {
-    BodyState state[28]; // [esp+0h] [ebp-70h] BYREF
+    BodyState state;
 
-    if (!physInited)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 2451, 0, "%s", "physInited");
-    MemFile_ReadData(memFile, 112, (unsigned __int8 *)state);
-    return Phys_CreateBodyFromState(worldIndex, state);
+    iassert(physInited);
+    MemFile_ReadData(memFile, sizeof(BodyState), (unsigned __int8 *)&state);
+    return Phys_CreateBodyFromState(worldIndex, &state);
 }
 
 void __cdecl Phys_InitJoints()

@@ -1005,7 +1005,7 @@ void __cdecl Ragdoll_GetTorsoPosition(RagdollBody *body, float *center)
     center[2] = boneOrientation->origin[2];
 }
 
-bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState curState, BodyState newState)
+bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState_t curState, BodyState_t newState)
 {
     BoneOrientation *v2; // eax
     BoneOrientation *v3; // eax
@@ -1560,7 +1560,7 @@ void __cdecl Ragdoll_UpdateVelocityCapture(RagdollBody *body)
         body->curOrientationBuffer ^= 1u;
         snapshota = Ragdoll_BodyBoneOrientations(body);
         Ragdoll_SnapshotAnimOrientations(body, snapshota);
-        Ragdoll_BodyNewState(body, BodyState::BS_TUNNEL_TEST);
+        Ragdoll_BodyNewState(body, BodyState_t::BS_TUNNEL_TEST);
     }
     else
     {
@@ -1643,7 +1643,7 @@ char __cdecl Ragdoll_GetDObjWorldBoneOriginQuat(
     return 1;
 }
 
-bool __cdecl Ragdoll_EnterDead(RagdollBody *body, BodyState curState, BodyState newState)
+bool __cdecl Ragdoll_EnterDead(RagdollBody *body, BodyState_t curState, BodyState_t newState)
 {
     int references; // [esp+0h] [ebp-4h]
 
@@ -1656,7 +1656,7 @@ bool __cdecl Ragdoll_EnterDead(RagdollBody *body, BodyState curState, BodyState 
     return 1;
 }
 
-bool __cdecl Ragdoll_ExitDead(RagdollBody *body, BodyState curState, BodyState newState)
+bool __cdecl Ragdoll_ExitDead(RagdollBody *body, BodyState_t curState, BodyState_t newState)
 {
     RagdollDef *def; // [esp+0h] [ebp-4h]
 
@@ -1671,7 +1671,7 @@ bool __cdecl Ragdoll_ExitDead(RagdollBody *body, BodyState curState, BodyState n
     return 1;
 }
 
-bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState prevState, BodyState curState)
+bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState_t prevState, BodyState_t curState)
 {
     RagdollDef *def; // [esp+0h] [ebp-18h]
     DObj_s *obj; // [esp+4h] [ebp-14h]
@@ -1727,7 +1727,7 @@ bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState prevState, BodySt
     return 1;
 }
 
-bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState curState, BodyState newState)
+bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState_t curState, BodyState_t newState)
 {
     BoneOrientation *v4; // eax
 
@@ -1750,7 +1750,7 @@ bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState curState, BodyState n
     return 1;
 }
 
-bool __cdecl Ragdoll_EnterIdle(RagdollBody *body, BodyState curState, BodyState newState)
+bool __cdecl Ragdoll_EnterIdle(RagdollBody *body, BodyState_t curState, BodyState_t newState)
 {
     BoneOrientation *v1; // eax
 
@@ -1812,16 +1812,16 @@ void __cdecl Ragdoll_SnapshotBonePositions(RagdollBody *body, BoneOrientation *b
     }
 }
 
-bool __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState curState, BodyState newState)
+bool __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState_t curState, BodyState_t newState)
 {
     if (!body)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1677, 0, "%s", "body");
     if (Ragdoll_CountPhysicsBodies() < ragdoll_max_simulating->current.integer)
         return 1;
     if (curState == BS_IDLE)
-        Ragdoll_BodyNewState(body, BodyState::BS_IDLE);
+        Ragdoll_BodyNewState(body, BodyState_t::BS_IDLE);
     else
-        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
+        Ragdoll_BodyNewState(body, BodyState_t::BS_DEAD);
     return 0;
 }
 
@@ -1832,7 +1832,7 @@ void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body)
     if (body->stateFrames <= 3)
     {
         if (Ragdoll_ValidateBodyObj(body))
-            Ragdoll_BodyNewState(body, BodyState::BS_VELOCITY_CAPTURE);
+            Ragdoll_BodyNewState(body, BodyState_t::BS_VELOCITY_CAPTURE);
     }
     else
     {
@@ -1840,7 +1840,7 @@ void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body)
             Com_PrintWarning(20, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->dobj);
         else
             Com_PrintWarning(20, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->obj);
-        Ragdoll_BodyNewState(body, BodyState::BS_DEAD);
+        Ragdoll_BodyNewState(body, BodyState_t::BS_DEAD);
     }
 }
 
@@ -1850,7 +1850,7 @@ void __cdecl Ragdoll_UpdateRunning(RagdollBody *body)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1770, 0, "%s", "body");
     if (Ragdoll_CheckIdle(body))
     {
-        Ragdoll_BodyNewState(body, BodyState::BS_IDLE);
+        Ragdoll_BodyNewState(body, BodyState_t::BS_IDLE);
     }
     else
     {
@@ -1939,9 +1939,9 @@ void __cdecl Ragdoll_FilterBonePositions(RagdollBody *body)
     Ragdoll_SnapshotBonePositions(body, v1);
 }
 
-char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState state)
+char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState_t state)
 {
-    BodyState prevState; // [esp+4h] [ebp-4h]
+    BodyState_t prevState; // [esp+4h] [ebp-4h]
 
     if (!body)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1826, 0, "%s", "body");
@@ -1984,7 +1984,7 @@ char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState state)
 void __cdecl Ragdoll_BodyUpdate(int msec, RagdollBody *body)
 {
     StateEnt *entry; // [esp+0h] [ebp-8h]
-    BodyState prevState; // [esp+4h] [ebp-4h]
+    BodyState_t prevState; // [esp+4h] [ebp-4h]
 
     if (!body)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1870, 0, "%s", "body");

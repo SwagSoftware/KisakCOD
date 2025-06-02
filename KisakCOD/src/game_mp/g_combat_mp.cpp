@@ -501,18 +501,6 @@ double __cdecl CanDamage(
     float *coneDirection,
     int contentMask)
 {
-    float v7; // [esp+0h] [ebp-1A8h]
-    float v8; // [esp+0h] [ebp-1A8h]
-    float v9; // [esp+Ch] [ebp-19Ch]
-    float v10; // [esp+10h] [ebp-198h]
-    float v11; // [esp+14h] [ebp-194h]
-    float v12; // [esp+18h] [ebp-190h]
-    float v13; // [esp+1Ch] [ebp-18Ch]
-    float v15; // [esp+3Ch] [ebp-16Ch]
-    float v16; // [esp+44h] [ebp-164h]
-    float v17; // [esp+4Ch] [ebp-15Ch]
-    float v18; // [esp+50h] [ebp-158h]
-    float v19; // [esp+58h] [ebp-150h]
     float v20[3]; // [esp+A0h] [ebp-108h] BYREF
     float a[3]; // [esp+ACh] [ebp-FCh] BYREF
     char v22; // [esp+BBh] [ebp-EDh]
@@ -521,9 +509,7 @@ double __cdecl CanDamage(
     DObj_s *obj; // [esp+CCh] [ebp-DCh]
     float radiusUp; // [esp+D0h] [ebp-D8h]
     float absMaxs[3]; // [esp+D4h] [ebp-D4h] BYREF
-    float v1; // [esp+E0h] [ebp-C8h] BYREF
-    float v29; // [esp+E4h] [ebp-C4h]
-    float v30; // [esp+E8h] [ebp-C0h]
+    float v1[3]; // [esp+E0h] [ebp-C8h] BYREF
     float v[3]; // [esp+ECh] [ebp-BCh] BYREF
     float up[3]; // [esp+F8h] [ebp-B0h] BYREF
     float radiusRight; // [esp+104h] [ebp-A4h]
@@ -563,11 +549,9 @@ double __cdecl CanDamage(
         dest[1][2] = dest[1][2] + halfHeight;
         Vec3Mad(dest[0], 15.0, right, dest[2]);
         dest[2][2] = dest[2][2] - halfHeight;
-        v7 = -(float)15.0;
-        Vec3Mad(dest[0], v7, right, dest[3]);
+        Vec3Mad(dest[0], -15.0f, right, dest[3]);
         dest[3][2] = dest[3][2] + halfHeight;
-        v8 = -(float)15.0;
-        Vec3Mad(dest[0], v8, right, dest[4]);
+        Vec3Mad(dest[0], -15.0f, right, dest[4]);
         dest[4][2] = dest[4][2] - halfHeight;
         if (radius_damage_debug->current.enabled)
         {
@@ -635,6 +619,7 @@ double __cdecl CanDamage(
             absMins[0] = targ->r.absmin[0];
             absMins[1] = targ->r.absmin[1];
             absMins[2] = targ->r.absmin[2];
+
             absMaxs[0] = targ->r.absmax[0];
             absMaxs[1] = targ->r.absmax[1];
             absMaxs[2] = targ->r.absmax[2];
@@ -643,33 +628,23 @@ double __cdecl CanDamage(
         Vec3Scale(dest[0], 0.5, dest[0]);
         Vec3Sub(centerPos, dest[0], v);
         Vec3Normalize(v);
-        v1 = -v[1];
-        v29 = v[0];
-        v30 = 0.0;
-        Vec3Normalize(&v1);
-        Vec3Cross(v, &v1, up);
+        v1[0] = -v[1];
+        v1[1] = v[0];
+        v1[2] = 0.0;
+        Vec3Normalize(v1);
+        Vec3Cross(v, v1, up);
         Vec3Sub(absMaxs, dest[0], centerToCorner);
-        v19 = centerToCorner[0] * v1;
-        v13 = fabs(v19);
-        v18 = centerToCorner[1] * v29;
-        v12 = fabs(v18);
-        radiusRight = v13 + v12;
-        v17 = centerToCorner[0] * up[0];
-        v11 = fabs(v17);
-        v16 = centerToCorner[1] * up[1];
-        v10 = fabs(v16);
-        v15 = centerToCorner[2] * up[2];
-        v9 = fabs(v15);
-        radiusUp = v11 + v10 + v9;
-        Vec3Scale(&v1, radiusRight, &v1);
+        radiusRight = fabs((centerToCorner[0] * v1[0])) + fabs((centerToCorner[1] * v1[1]));
+        radiusUp = fabs((centerToCorner[0] * up[0])) + fabs((centerToCorner[1] * up[1])) + fabs((centerToCorner[2] * up[2]));
+        Vec3Scale(v1, radiusRight, v1);
         Vec3Scale(up, radiusUp, up);
-        Vec3Add(dest[0], &v1, dest[1]);
+        Vec3Add(dest[0], v1, dest[1]);
         Vec3Add(dest[1], up, dest[1]);
-        Vec3Mad(dest[0], -1.0, &v1, dest[2]);
+        Vec3Mad(dest[0], -1.0, v1, dest[2]);
         Vec3Add(dest[2], up, dest[2]);
-        Vec3Add(dest[0], &v1, dest[3]);
+        Vec3Add(dest[0], v1, dest[3]);
         Vec3Mad(dest[3], -1.0, up, dest[3]);
-        Vec3Mad(dest[0], -1.0, &v1, dest[4]);
+        Vec3Mad(dest[0], -1.0, v1, dest[4]);
         Vec3Mad(dest[4], -1.0, up, dest[4]);
         if (radius_damage_debug->current.enabled)
         {

@@ -9,6 +9,9 @@
 
 const float traceOffsets[5][2] = { { 0.0, 0.0 }, { 1.0, 1.0 }, { -1.0, 1.0 }, { 1.0, -1.0 }, { -1.0, -1.0 } }; // idb
 
+#define DYNENT_CL_ACTIVE 1
+
+
 enum DynEntityType : __int32
 {                                       // ...
     DYNENT_TYPE_INVALID = 0x0,

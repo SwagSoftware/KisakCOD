@@ -113,7 +113,7 @@ struct RagdollBody // sizeof=0x9D4
     const cpose_t *pose;
     float poseOffset[3];
     int localClientNum;
-    BodyState state;
+    BodyState_t state;
     int stateMsec;
     int stateFrames;
     int velCaptureMsec;
@@ -130,8 +130,8 @@ struct RagdollBody // sizeof=0x9D4
 
 struct StateEnt // sizeof=0xC
 {                                       // ...
-    bool(__cdecl *enterFunc)(RagdollBody *, BodyState, BodyState);
-    bool(__cdecl *exitFunc)(RagdollBody *, BodyState prevState, BodyState currState);
+    bool(__cdecl *enterFunc)(RagdollBody *, BodyState_t, BodyState_t);
+    bool(__cdecl *exitFunc)(RagdollBody *, BodyState_t prevState, BodyState_t currState);
     void(__cdecl *updateFunc)(RagdollBody *);
 };
 
@@ -228,7 +228,7 @@ void __cdecl Ragdoll_ExplosionEvent(
     const float *impulse,
     float inScale);
 void __cdecl Ragdoll_GetTorsoPosition(RagdollBody *body, float *center);
-bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState curState, BodyState newState);
+bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState_t curState, BodyState_t newState);
 void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *snapshot);
 DObjAnimMat *__cdecl Ragdoll_GetDObjLocalBoneMatrix(const cpose_t *pose, DObj_s *obj, unsigned __int8 boneIndex);
 void __cdecl Ragdoll_SetCurrentPoseFromSnapshot(RagdollBody *body, BoneOrientation *snapshot);
@@ -249,20 +249,20 @@ char __cdecl Ragdoll_GetDObjWorldBoneOriginQuat(
     float *origin,
     float *quat);
 
-bool __cdecl Ragdoll_EnterDead(RagdollBody *body, BodyState curState, BodyState newState);
-bool __cdecl Ragdoll_ExitDead(RagdollBody *body, BodyState curState, BodyState newState);
-bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState prevState, BodyState curState);
-bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState curState, BodyState newState);
-bool __cdecl Ragdoll_EnterIdle(RagdollBody *body, BodyState curState, BodyState newState);
+bool __cdecl Ragdoll_EnterDead(RagdollBody *body, BodyState_t curState, BodyState_t newState);
+bool __cdecl Ragdoll_ExitDead(RagdollBody *body, BodyState_t curState, BodyState_t newState);
+bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState_t prevState, BodyState_t curState);
+bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState_t curState, BodyState_t newState);
+bool __cdecl Ragdoll_EnterIdle(RagdollBody *body, BodyState_t curState, BodyState_t newState);
 
 void __cdecl Ragdoll_SnapshotBonePositions(RagdollBody *body, BoneOrientation *boneSnapshot);
-bool __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState curState, BodyState newState);
+bool __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState_t curState, BodyState_t newState);
 void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body);
 void __cdecl Ragdoll_UpdateRunning(RagdollBody *body);
 void __cdecl Ragdoll_UpdateFriction(RagdollBody *body);
 char __cdecl Ragdoll_CheckIdle(RagdollBody *body);
 void __cdecl Ragdoll_FilterBonePositions(RagdollBody *body);
-char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState state);
+char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState_t state);
 void __cdecl Ragdoll_BodyUpdate(int msec, RagdollBody *body);
 void __cdecl Ragdoll_Update(int msec);
 

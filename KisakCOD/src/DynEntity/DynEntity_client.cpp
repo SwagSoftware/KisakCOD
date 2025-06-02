@@ -1418,69 +1418,47 @@ void __cdecl DynEntCl_ExplosionEvent(
     double v10; // st7
     double v11; // st7
     double v12; // st7
-    float v14; // [esp+10h] [ebp-209Ch]
-    float v15; // [esp+14h] [ebp-2098h]
-    float s; // [esp+18h] [ebp-2094h]
     int damage; // [esp+34h] [ebp-2078h]
     DynEntityPose *dynEntPose; // [esp+38h] [ebp-2074h]
     float CylindricalRadiusDistSqr; // [esp+3Ch] [ebp-2070h]
     unsigned int ClosestEntities; // [esp+40h] [ebp-206Ch]
     float radiusMaxs[3]; // [esp+44h] [ebp-2068h] BYREF
-    float diff[2]; // [esp+50h] [ebp-205Ch] BYREF
-    float v23; // [esp+58h] [ebp-2054h]
+    float diff[3]; // [esp+50h] [ebp-205Ch] BYREF
     DynEntityDrawType drawType; // [esp+5Ch] [ebp-2050h]
-    DynEntityClient *ClientEntity; // [esp+60h] [ebp-204Ch]
+    DynEntityClient *dynEntClient; // [esp+60h] [ebp-204Ch]
     float result[3]; // [esp+64h] [ebp-2048h] BYREF
     DynEntityDef *dynEntDef; // [esp+70h] [ebp-203Ch]
-    float v28; // [esp+74h] [ebp-2038h]
-    float outPosition; // [esp+78h] [ebp-2034h] BYREF
-    float v30; // [esp+7Ch] [ebp-2030h]
-    float v31; // [esp+80h] [ebp-202Ch]
+    float v27; // [esp+74h] [ebp-2038h]
+    float outPosition[3]; // [esp+78h] [ebp-2034h] BYREF
     unsigned __int16 hitEnts[4098]; // [esp+84h] [ebp-2028h] BYREF
-    float v33; // [esp+208Ch] [ebp-20h]
+    float v30; // [esp+208Ch] [ebp-20h]
     unsigned int i; // [esp+2090h] [ebp-1Ch]
     float sum[3]; // [esp+2094h] [ebp-18h] BYREF
-    float v36; // [esp+20A0h] [ebp-Ch]
-    float v37; // [esp+20A4h] [ebp-8h]
-    float v38; // [esp+20A8h] [ebp-4h]
+    float outerRadiusSqr; // [esp+20A0h] [ebp-Ch]
+    float scale; // [esp+20A4h] [ebp-8h]
+    float innerRadiusSqr; // [esp+20A8h] [ebp-4h]
 
-    if (!origin)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1247, 0, "%s", "origin");
-    if (innerRadius < 0.0)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1248, 0, "%s", "innerRadius >= 0.0f");
-    if (innerRadius > (double)outerRadius)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1249, 0, "%s", "outerRadius >= innerRadius");
-    if (innerDamage < 0)
-        MyAssertHandler(
-            ".\\DynEntity\\DynEntity_client.cpp",
-            1250,
-            0,
-            "%s\n\t(innerDamage) = %i",
-            "((innerDamage >= 0))",
-            innerDamage);
-    if (outerDamage < 0)
-        MyAssertHandler(
-            ".\\DynEntity\\DynEntity_client.cpp",
-            1251,
-            0,
-            "%s\n\t(outerDamage) = %i",
-            "((outerDamage >= 0))",
-            outerDamage);
+    iassert(origin);
+    iassert(innerRadius >= 0.0f);
+    iassert(outerRadius >= innerRadius);
+    iassert(innerDamage >= 0);
+    iassert(outerDamage >= 0);
+
     if (DynEntCl_EventNeedsProcessed(localClientNum, 1023) && outerRadius != 0.0)
     {
-        v38 = outerRadius * outerRadius;
-        v36 = innerRadius * innerRadius;
-        v28 = 0.0;
-        if (v36 < (double)v38)
-            v28 = 1.0 / (innerRadius - outerRadius);
-        s = -(outerRadius * 1.414213538169861);
-        Vec3AddScalar(origin, s, sum);
-        v15 = outerRadius * 1.414213538169861;
-        Vec3AddScalar(origin, v15, radiusMaxs);
+        innerRadiusSqr = outerRadius * outerRadius;
+        outerRadiusSqr = innerRadius * innerRadius;
+
+        v27 = 0.0;
+        if (outerRadiusSqr < (double)innerRadiusSqr)
+            v27 = 1.0 / (innerRadius - outerRadius);
+
+        Vec3AddScalar(origin, -(outerRadius * 1.414213538169861), sum); // sqrt(2)
+        Vec3AddScalar(origin, outerRadius * 1.414213538169861, radiusMaxs); // sqrt(2)
         if (isCylinder)
         {
-            sum[2] = -3.4028235e38;
-            radiusMaxs[2] = 3.4028235e38;
+            sum[2] = -FLT_MAX;
+            radiusMaxs[2] = FLT_MAX;
         }
         drawType = DYNENT_DRAW_MODEL;
     LABEL_18:
@@ -1494,70 +1472,68 @@ void __cdecl DynEntCl_ExplosionEvent(
                     ++drawType;
                     goto LABEL_18;
                 }
-                ClientEntity = DynEnt_GetClientEntity(hitEnts[i], drawType);
-                if ((ClientEntity->flags & 1) == 0)
-                    MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1283, 0, "%s", "dynEntClient->flags & DYNENT_CL_ACTIVE");
+                dynEntClient = DynEnt_GetClientEntity(hitEnts[i], drawType);
+                iassert(dynEntClient->flags & DYNENT_CL_ACTIVE);
+
                 dynEntPose = DynEnt_GetClientPose(hitEnts[i], drawType);
                 if (isCylinder)
                     CylindricalRadiusDistSqr = DynEnt_GetCylindricalRadiusDistSqr(dynEntPose, origin);
                 else
                     CylindricalRadiusDistSqr = DynEnt_GetRadiusDistSqr(dynEntPose, origin);
-                if (v38 > (double)CylindricalRadiusDistSqr)
+                if (innerRadiusSqr > (double)CylindricalRadiusDistSqr)
                 {
-                    v37 = inScale;
-                    if (v36 < (double)CylindricalRadiusDistSqr)
+                    scale = inScale;
+                    if (outerRadiusSqr < (double)CylindricalRadiusDistSqr)
                     {
-                        if (v36 >= (double)v38)
-                            MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1298, 1, "%s", "outerRadiusSqr > innerRadiusSqr");
-                        v14 = sqrt(CylindricalRadiusDistSqr);
-                        v37 = (v14 - outerRadius) * v28 * v37;
+                        iassert(outerRadiusSqr > innerRadiusSqr);
+                        scale = (sqrt(CylindricalRadiusDistSqr) - outerRadius) * v27 * scale;
                     }
-                    if (v37 < 0.0)
-                        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1301, 1, "%s", "scale >= 0");
+                    iassert(scale >= 0.0f);
+
                     dynEntDef = (DynEntityDef *)DynEnt_GetEntityDef(hitEnts[i], drawType);
-                    v33 = v37 * dynEntDef->physPreset->explosiveForceScale * dynEnt_explodeForce->current.value;
+                    v30 = scale * dynEntDef->physPreset->explosiveForceScale * dynEnt_explodeForce->current.value;
                     if (*impulse == 0.0 && impulse[1] == 0.0 && impulse[2] == 0.0)
                     {
-                        if (dynEnt_explodeMinForce->current.value > (double)v33)
+                        if (dynEnt_explodeMinForce->current.value > (double)v30)
                             continue;
-                        Vec3Sub(dynEntPose->pose.origin, origin, diff);
+                        Vec3Sub(dynEntPose->pose.origin, origin,diff);
                         if (isCylinder)
-                            v23 = 0.0;
+                            diff[2] = 0.0;
                         Vec3Normalize(diff);
-                        v23 = v23 + dynEnt_explodeUpbias->current.value;
+                        diff[2] = diff[2] + dynEnt_explodeUpbias->current.value;
                         Vec3Normalize(diff);
                     }
                     else
                     {
                         diff[0] = *impulse;
                         diff[1] = impulse[1];
-                        v23 = impulse[2];
+                        diff[2] = impulse[2];
                     }
-                    Vec3Scale(diff, v33, result);
+                    Vec3Scale(diff, v30, result);
                     if (DynEnt_GetEntityProps(dynEntDef->type)->usePhysics)
                     {
-                        if (!ClientEntity->physObjId)
+                        if (!dynEntClient->physObjId)
                         {
                             PhysObj = DynEntCl_CreatePhysObj(dynEntDef, &dynEntPose->pose);
-                            ClientEntity->physObjId = (int)PhysObj;
+                            dynEntClient->physObjId = (int)PhysObj;
                         }
-                        if (ClientEntity->physObjId)
+                        if (dynEntClient->physObjId)
                         {
-                            Phys_ObjGetCenterOfMass((dxBody *)ClientEntity->physObjId, &outPosition);
+                            Phys_ObjGetCenterOfMass((dxBody *)dynEntClient->physObjId, outPosition);
                             v10 = flrand(-1.0, 1.0);
-                            outPosition = v10 * dynEnt_explodeSpinScale->current.value + outPosition;
+                            outPosition[0] = v10 * dynEnt_explodeSpinScale->current.value + outPosition[0];
                             v11 = flrand(-1.0, 1.0);
-                            v30 = v11 * dynEnt_explodeSpinScale->current.value;// +v30;
+                            outPosition[1] = v11 * dynEnt_explodeSpinScale->current.value + outPosition[1];
                             v12 = flrand(-1.0, 1.0);
-                            v31 = v12 * dynEnt_explodeSpinScale->current.value;// +v31;
-                            Phys_ObjAddForce(PHYS_WORLD_DYNENT, (dxBody *)ClientEntity->physObjId, &outPosition, result);
+                            outPosition[2] = v12 * dynEnt_explodeSpinScale->current.value + outPosition[2];
+                            Phys_ObjAddForce(PHYS_WORLD_DYNENT, (dxBody *)dynEntClient->physObjId, outPosition, result);
                         }
                     }
                     if (DynEnt_GetEntityProps(dynEntDef->type)->destroyable)
                     {
-                        damage = (int)((double)(innerDamage - outerDamage) * v37 + (double)outerDamage);
+                        damage = (int)((double)(innerDamage - outerDamage) * scale + (double)outerDamage);
                         if (damage)
-                            DynEntCl_Damage(localClientNum, hitEnts[i], (DynEntityCollType)drawType, &outPosition, diff, damage);
+                            DynEntCl_Damage(localClientNum, hitEnts[i], (DynEntityCollType)drawType, outPosition, diff, damage);
                     }
                 }
             }
