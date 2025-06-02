@@ -1446,11 +1446,11 @@ void __cdecl DynEntCl_ExplosionEvent(
 
     if (DynEntCl_EventNeedsProcessed(localClientNum, 1023) && outerRadius != 0.0)
     {
-        innerRadiusSqr = outerRadius * outerRadius;
-        outerRadiusSqr = innerRadius * innerRadius;
+         outerRadiusSqr = outerRadius * outerRadius;
+         innerRadiusSqr = innerRadius * innerRadius;
 
         v27 = 0.0;
-        if (outerRadiusSqr < (double)innerRadiusSqr)
+        if (innerRadiusSqr < (double)outerRadiusSqr)
             v27 = 1.0 / (innerRadius - outerRadius);
 
         Vec3AddScalar(origin, -(outerRadius * 1.414213538169861), sum); // sqrt(2)
@@ -1480,10 +1480,10 @@ void __cdecl DynEntCl_ExplosionEvent(
                     CylindricalRadiusDistSqr = DynEnt_GetCylindricalRadiusDistSqr(dynEntPose, origin);
                 else
                     CylindricalRadiusDistSqr = DynEnt_GetRadiusDistSqr(dynEntPose, origin);
-                if (innerRadiusSqr > (double)CylindricalRadiusDistSqr)
+                if (outerRadiusSqr > (double)CylindricalRadiusDistSqr)
                 {
                     scale = inScale;
-                    if (outerRadiusSqr < (double)CylindricalRadiusDistSqr)
+                    if (innerRadiusSqr < (double)CylindricalRadiusDistSqr)
                     {
                         iassert(outerRadiusSqr > innerRadiusSqr);
                         scale = (sqrt(CylindricalRadiusDistSqr) - outerRadius) * v27 * scale;

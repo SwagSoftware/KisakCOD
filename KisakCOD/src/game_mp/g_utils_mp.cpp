@@ -1009,7 +1009,7 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     axis[2][1] = v11 - v13;
     axis[2][2] = 1.0 - (v12 + v4);
     MatrixMultiply(axis, *(const mat3x3*)&ent_axis, *(mat3x3*)tagMat);
-    MatrixTransformVector43(mat->trans, ent_axis, &(*tagMat)[9]);
+    MatrixTransformVector43(mat->trans, *(const mat4x3*)&ent_axis, &(*tagMat)[9]);
     return 1;
 }
 
