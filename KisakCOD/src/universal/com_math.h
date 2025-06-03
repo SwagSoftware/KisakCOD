@@ -241,6 +241,7 @@ void __cdecl Vec4Mul(const float* a, const float* b, float* product);
 float __cdecl Vec4LengthSq(const float* v);
 void __cdecl Vec4Scale(const float* v, float scale, float* result);
 void __cdecl Vec4Mad(const float *start, float scale, const float *dir, float *result);
+void __cdecl Vec4Add(const float *a, const float *b, float *sum);
 void __cdecl Vec4Sub(const float *a, const float *b, float *diff);
 void __cdecl Vec4MadMad(
     const float *start,
@@ -284,17 +285,9 @@ void __cdecl MatrixMultiply44(const mat4x4& in1, const mat4x4& int2, mat4x4& out
 
 void __cdecl MatrixTranspose(const mat3x3& in, mat3x3& out);
 void __cdecl MatrixTranspose44(const mat4x4& in, mat4x4& out);
-inline void __cdecl MatrixTranspose44(const GfxMatrix* const in, GfxMatrix *out)
-{
-    MatrixTranspose44((const mat4x4 &)*in, (mat4x4 &)*out);
-}
 
 void __cdecl MatrixInverseOrthogonal43(const mat4x3& in, mat4x3& out);
 void __cdecl MatrixInverse44(const mat4x4& mat, mat4x4& dst);
-inline void __cdecl MatrixInverse44(const GfxMatrix *const in, GfxMatrix *out)
-{
-    MatrixInverse44((const mat4x4 &)*in, (mat4x4 &)*out);
-}
 
 void __cdecl MatrixTransformVector(const vec3r in1, const mat3x3& in2, vec3r out);
 void __cdecl MatrixTransformVector43(const vec3r in1, const mat4x3& in2, vec3r out);

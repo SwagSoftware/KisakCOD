@@ -151,7 +151,6 @@ void __cdecl R_DeriveShadowLookupMatrix(GfxCmdBufSourceState *source);
 void  R_GenerateWorldOutdoorLookupMatrix(
     GfxCmdBufSourceState *source,
     float (*outMatrix)[4]);
-void __cdecl Vec4Add(const float *a, const float *b, float *sum);
 const GfxImage *__cdecl R_GetTextureFromCode(
     GfxCmdBufSourceState *source,
     unsigned int codeTexture,

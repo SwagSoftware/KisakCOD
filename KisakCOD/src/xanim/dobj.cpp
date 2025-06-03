@@ -221,31 +221,29 @@ void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree)
     }
 }
 
-void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTree_s *tree, char *buf, __int16 entnum)
+void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTree_s *tree, DObj_s *obj, __int16 entnum)
 {
-    //Profile_Begin(326);
-    if (!dobjModels)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 518, 0, "%s", "dobjModels");
-    if (!numModels)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 519, 0, "%s", "numModels > 0");
-    if (numModels > 0x20)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 520, 0, "%s", "(unsigned)numModels <= DOBJ_MAX_SUBMODELS");
-    if (!buf)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 523, 0, "%s", "obj");
-    memset((unsigned __int8 *)buf + 20, 0, 0x38u);
-    buf[8] = 0;
-    *((_WORD *)buf + 2) = 0;
-    *((unsigned int *)buf + 3) = 0;
-    *((unsigned int *)buf + 4) = 0;
-    *((_WORD *)buf + 3) = entnum;
-    *((unsigned int *)buf + 20) = 0;
-    *((unsigned int *)buf + 21) = 0;
-    *((unsigned int *)buf + 22) = 0;
-    *((unsigned int *)buf + 23) = 0;
-    DObjCreateDuplicateParts((DObj_s *)buf, dobjModels, numModels);
-    DObjComputeBounds((DObj_s *)buf);
-    DObjSetTree((DObj_s *)buf, tree);
-    //Profile_EndInternal(0);
+    Profile_Begin(326);
+    iassert(dobjModels);
+    iassert(numModels > 0);
+    iassert((unsigned)numModels <= DOBJ_MAX_SUBMODELS);
+    iassert(obj);
+
+    memset((unsigned __int8 *)&obj->skel, 0, sizeof(obj->skel));
+    obj->duplicatePartsSize = 0;
+    obj->duplicateParts = 0;
+    obj->ignoreCollision = 0;
+    obj->locked = 0;
+    obj->entnum = entnum;
+    obj->hidePartBits[0] = 0;
+    obj->hidePartBits[1] = 0;
+    obj->hidePartBits[2] = 0;
+    obj->hidePartBits[3] = 0;
+    DObjCreateDuplicateParts(obj, dobjModels, numModels);
+    DObjComputeBounds(obj);
+    DObjSetTree(obj, tree);
+
+    Profile_EndInternal(0);
 }
 
 void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsigned int numModels)
@@ -615,7 +613,7 @@ void __cdecl DObjUnarchive(DObj_s *obj)
         model->ignoreCollision = (savedObj.ignoreCollision & (1 << modelIndex)) != 0;
     }
     MT_Free((_BYTE *)savedObj.models, 5 * savedObj.numModels);
-    DObjCreate(dobjModels, savedObj.numModels, savedObj.tree, (char *)obj, savedObj.entnum);
+    DObjCreate(dobjModels, savedObj.numModels, savedObj.tree, obj, savedObj.entnum);
     DObjSetHidePartBits(obj, savedObj.hidePartBits);
 }
 

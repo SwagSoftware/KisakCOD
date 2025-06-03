@@ -85,7 +85,7 @@ bool __cdecl DObjIgnoreCollision(const DObj_s *obj, char modelIndex);
 void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBits);
 bool __cdecl DObjSkelIsBoneUpToDate(DObj_s *obj, int boneIndex);
 void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree);
-void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTree_s *tree, char *buf, __int16 entnum);
+void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTree_s *tree, DObj_s *buf, __int16 entnum);
 void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsigned int numModels);
 void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, unsigned int numModels);
 void __cdecl DObjComputeBounds(DObj_s *obj);

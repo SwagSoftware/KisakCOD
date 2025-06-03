@@ -2719,6 +2719,14 @@ void __cdecl Vec4Scale(const float* v, float scale, float* result)
     result[3] = scale * v[3];
 }
 
+void __cdecl Vec4Add(const float *a, const float *b, float *sum)
+{
+    *sum = *a + *b;
+    sum[1] = a[1] + b[1];
+    sum[2] = a[2] + b[2];
+    sum[3] = a[3] + b[3];
+}
+
 void __cdecl Vec4Sub(const float *a, const float *b, float *diff)
 {
     *diff = *a - *b;

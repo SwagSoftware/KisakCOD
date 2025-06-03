@@ -371,7 +371,7 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
     transposeIndex = matrixIndex ^ 2;
     if (source->constVersions[(matrixIndex ^ 2) + CONST_SRC_FIRST_CODE_MATRIX] == matrixVersion)
     {
-        MatrixTranspose44(&source->matrices.matrix[transposeIndex], &source->matrices.matrix[matrixIndex]);
+        MatrixTranspose44(source->matrices.matrix[transposeIndex].m, source->matrices.matrix[matrixIndex].m);
 
         return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
     }
@@ -380,7 +380,7 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
         inverseIndex = matrixIndex ^ 1;
         if (source->constVersions[(matrixIndex ^ 1) + CONST_SRC_FIRST_CODE_MATRIX] == matrixVersion)
         {
-            MatrixInverse44(&source->matrices.matrix[inverseIndex], &source->matrices.matrix[matrixIndex]);
+            MatrixInverse44(source->matrices.matrix[inverseIndex].m, source->matrices.matrix[matrixIndex].m);
 
             return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
         }
@@ -390,9 +390,9 @@ GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
             iassert(transposeIndex == (baseIndex | CONST_SRC_MATRIX_INVERSE_BIT));
             iassert(inverseIndex == (baseIndex | CONST_SRC_MATRIX_TRANSPOSE_BIT));
 
-            MatrixTranspose44(&source->matrices.matrix[baseIndex], &source->matrices.matrix[inverseIndex]);
+            MatrixTranspose44(source->matrices.matrix[baseIndex].m, source->matrices.matrix[inverseIndex].m);
             source->constVersions[inverseIndex + 58] = matrixVersion;
-            MatrixInverse44(&source->matrices.matrix[inverseIndex], &source->matrices.matrix[matrixIndex]);
+            MatrixInverse44(source->matrices.matrix[inverseIndex].m, source->matrices.matrix[matrixIndex].m);
 
             return (GfxCmdBufSourceState *)((char *)source + 64 * matrixIndex + 16 * firstRow);
         }
@@ -560,14 +560,6 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     MatrixMultiply44(v3.m, rgp.world->outdoorLookupMatrix, *(mat4x4*)outMatrix);
     Vec4Add(&(*outMatrix)[12], world_52, &(*outMatrix)[12]);
     source->constVersions[86] = source->matrixVersions[7];
-}
-
-void __cdecl Vec4Add(const float *a, const float *b, float *sum)
-{
-    *sum = *a + *b;
-    sum[1] = a[1] + b[1];
-    sum[2] = a[2] + b[2];
-    sum[3] = a[3] + b[3];
 }
 
 const GfxImage *__cdecl R_GetTextureFromCode(

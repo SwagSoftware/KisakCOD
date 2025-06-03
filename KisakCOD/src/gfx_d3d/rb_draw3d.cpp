@@ -512,8 +512,8 @@ void __cdecl R_DrawPointLitSurfs(GfxCmdBufSourceState *source, const GfxViewInfo
     float w; // [esp+158h] [ebp-4h]
     int savedregs; // [esp+15Ch] [ebp+0h] BYREF
 
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_draw3d.cpp", 597, 0, "%s", "viewInfo");
+    iassert(viewInfo);
+
     pointLightCount = viewInfo->pointLightCount;
     if (pointLightCount)
     {
