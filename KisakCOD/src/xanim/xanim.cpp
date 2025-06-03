@@ -2456,7 +2456,7 @@ void __cdecl XAnimDisplay(
                 g_xAnimInfo[infoIndex].state.goalWeight);
         }
         for (infoIndexa = info->children; infoIndexa; infoIndexa = g_xAnimInfo[infoIndexa].next)
-            XAnimDisplay(tree, i, depth + 1, buffer, bufferSize, bufferPos);
+            XAnimDisplay(tree, infoIndexa, depth + 1, buffer, bufferSize, bufferPos);
     }
 }
 
