@@ -975,21 +975,12 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     ent_axis[3][0] = ent->r.currentOrigin[0];
     ent_axis[3][1] = ent->r.currentOrigin[1];
     ent_axis[3][2] = ent->r.currentOrigin[2];
-    if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[2]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[3]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h",
-            432,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
+    
+    iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
+    iassert(!IS_NAN(mat->transWeight));
+
     Vec3Scale(mat->quat, mat->transWeight, result);
+
     v12 = result[0] * mat->quat[0];
     v5 = result[0] * mat->quat[1];
     v10 = result[0] * mat->quat[2];
@@ -999,6 +990,7 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     v9 = result[1] * mat->quat[3];
     v6 = result[2] * mat->quat[2];
     v7 = result[2] * mat->quat[3];
+
     axis[0][0] = 1.0 - (v4 + v6);
     axis[0][1] = v5 + v7;
     axis[0][2] = v10 - v9;
@@ -1008,8 +1000,10 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     axis[2][0] = v10 + v9;
     axis[2][1] = v11 - v13;
     axis[2][2] = 1.0 - (v12 + v4);
+
     MatrixMultiply(axis, *(const mat3x3*)&ent_axis, *(mat3x3*)tagMat);
     MatrixTransformVector43(mat->trans, *(const mat4x3*)&ent_axis, &(*tagMat)[9]);
+
     return 1;
 }
 

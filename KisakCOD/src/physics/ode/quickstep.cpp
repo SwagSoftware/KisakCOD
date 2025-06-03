@@ -790,6 +790,9 @@ void __cdecl dumpBodyJoints(dxWorld *world, dxBody **bodies, int bodyCount, dxJo
 #endif
 }
 
+#define ISLAND_MAX_JOINT_COUNT 74
+#define ISLAND_MAX_BODY_COUNT 14
+
 void dxQuickStepper (dxWorld *world,
 	dxBody **body,
 	int bodyCount,
@@ -797,7 +800,7 @@ void dxQuickStepper (dxWorld *world,
 	int jointCount,
 	float stepsize)
 {
-	float A[6]; // [esp+Ch] [ebp-20CCh] BYREF
+	float A[15]; // [esp+Ch] [ebp-20CCh] BYREF
 	unsigned __int8 *dst; // [esp+48h] [ebp-2090h]
 	int j; // [esp+4Ch] [ebp-208Ch]
 	float invI[240]; // [esp+50h] [ebp-2088h] BYREF
@@ -822,35 +825,22 @@ void dxQuickStepper (dxWorld *world,
 	dxWorldStepInfo *stepInfo; // [esp+20D0h] [ebp-8h]
 	int v29; // [esp+20D4h] [ebp-4h]
 
-	if (!world)
-		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1104, 0, "%s", "world");
-	if (!body)
-		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1105, 0, "%s", "body");
-	if (!joint)
-		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1106, 0, "%s", "joint");
+	iassert(world);
+	iassert(body);
+	iassert(joint);
+
 	if (jointCount >= 74 || bodyCount >= 14)
 		dumpBodyJoints(world, body, bodyCount, joint, jointCount);
-	if (jointCount >= 0x4A)
-		MyAssertHandler(
-			".\\physics\\ode\\src\\quickstep.cpp",
-			1113,
-			0,
-			"jointCount doesn't index ISLAND_MAX_JOINT_COUNT\n\t%i not in [0, %i)",
-			jointCount,
-			74);
-	if (bodyCount >= 0xE)
-		MyAssertHandler(
-			".\\physics\\ode\\src\\quickstep.cpp",
-			1114,
-			0,
-			"bodyCount doesn't index ISLAND_MAX_BODY_COUNT\n\t%i not in [0, %i)",
-			bodyCount,
-			14);
+
+	iassert(jointCount < ISLAND_MAX_JOINT_COUNT);
+	iassert(bodyCount < ISLAND_MAX_BODY_COUNT);
+
 	A[2] = 1.0 / stepsize;
 	v22 = A[2];
 	stepInfo = &world->stepInfo;
-	if (!stepInfo)
-		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1144, 0, "%s", "stepInfo");
+
+	iassert(stepInfo);
+
 	g_holdrand = &stepInfo->holdrand;
 	dst = (unsigned char*)&world->qd;
 	sd = &world->sd;
@@ -903,8 +893,8 @@ void dxQuickStepper (dxWorld *world,
 		memset(dst, 0, 144 * n);
 		for (i = 0; i < n; ++i)
 		{
-			*&dst[144 * i + 128] = -3.4028235e38;
-			*&dst[144 * i + 132] = 3.4028235e38;
+			*&dst[144 * i + 128] = -FLT_MAX;
+			*&dst[144 * i + 132] = FLT_MAX;
 			findex[i] = -1;
 		}
 		v20.rowskip = 36;

@@ -435,7 +435,7 @@ void __cdecl SMC_FreeCachedSurface_r(
     int nodeIndex,
     int levelsToLeaf)
 {
-    static_model_leaf_t *cachedSurf; // [esp+0h] [ebp-Ch]
+    GfxCachedSModelSurf *cachedSurf; // [esp+0h] [ebp-Ch]
     static_model_leaf_t *freenode; // [esp+8h] [ebp-4h]
 
     if (tree->nodes[nodeIndex].usedVerts)
@@ -443,11 +443,11 @@ void __cdecl SMC_FreeCachedSurface_r(
         tree->nodes[nodeIndex].usedVerts = 0;
         if (tree->nodes[nodeIndex].inuse)
         {
-            cachedSurf = &leafs[((nodeIndex + 1) << levelsToLeaf) - 32];
-            if (cachedSurf->cachedSurf.smodelIndex != 0xFFFF)
+            cachedSurf = &leafs[((nodeIndex + 1) << levelsToLeaf) - 32].cachedSurf;
+            if (cachedSurf->smodelIndex != 0xFFFF)
             {
-                rgp.world->dpvs.smodelDrawInsts[cachedSurf->cachedSurf.smodelIndex].smodelCacheIndex[cachedSurf->cachedSurf.lodIndex] = 0;
-                cachedSurf->cachedSurf.smodelIndex = -1;
+                rgp.world->dpvs.smodelDrawInsts[cachedSurf->smodelIndex].smodelCacheIndex[cachedSurf->lodIndex] = 0;
+                cachedSurf->smodelIndex = -1;
             }
             tree->nodes[nodeIndex].inuse = 0;
         }
@@ -460,8 +460,10 @@ void __cdecl SMC_FreeCachedSurface_r(
     else
     {
         freenode = &leafs[((nodeIndex + 1) << levelsToLeaf) - 32];
-        freenode->freenode.next->prev = (static_model_node_list_t *)freenode->cachedSurf.baseVertIndex;
-        *(_DWORD *)(freenode->cachedSurf.baseVertIndex + 4) = (unsigned int)freenode->freenode.next;
+        //freenode->freenode.next->prev = (static_model_node_list_t *)freenode->cachedSurf.baseVertIndex;
+        freenode->freenode.next->prev = freenode->freenode.prev;
+        freenode->freenode.prev->next = freenode->freenode.next;
+        //*(_DWORD *)(freenode->cachedSurf.baseVertIndex + 4) = (unsigned int)freenode->freenode.next;
     }
 }
 
@@ -526,10 +528,10 @@ void __cdecl R_FlushStaticModelCache()
                 next = s_cache.usedlist[smcIter].next;
                 next->next->prev = next->prev;
                 next->prev->next = next->next;
-                leafs->cachedSurf.baseVertIndex = (unsigned int)s_cache.freelist[smcIter];
+                leafs->freenode.prev = s_cache.freelist[smcIter];
                 leafs->freenode.next = s_cache.freelist[smcIter][0].next;
-                *(_DWORD *)(leafs->cachedSurf.baseVertIndex + 4) = (unsigned int)leafs;
-                leafs->freenode.next->prev = (static_model_node_list_t *)leafs;
+                leafs->freenode.prev->next = &leafs->freenode;
+                leafs->freenode.next->prev = &leafs->freenode;
             }
         }
         SMC_ClearCache();

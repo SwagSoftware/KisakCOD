@@ -1494,8 +1494,10 @@ dxUserGeom *__cdecl Phys_GetWorldGeom()
 
 void __cdecl ODE_Init()
 {
-    INIT_STATIC_POOL(odeGlob.bodies, &odeGlob.bodyPool);
-    INIT_STATIC_POOL(odeGlob.geoms, &odeGlob.geomPool);
+    //INIT_STATIC_POOL(odeGlob.bodies, &odeGlob.bodyPool);
+    //INIT_STATIC_POOL(odeGlob.geoms, &odeGlob.geomPool);
+    Pool_Init((char *)odeGlob.bodies, &odeGlob.bodyPool, 336u, 512u);
+    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, 208u, 2048u);
 }
 
 // MOD
