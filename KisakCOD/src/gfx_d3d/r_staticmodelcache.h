@@ -2,6 +2,8 @@
 #include <xanim/xmodel.h>
 #include "r_rendercmds.h"
 
+#define SMODEL_INDEX_NONE 0xFFFF
+
 struct SkinCachedStaticModelCmd // sizeof=0x4
 {                                       // ...
     unsigned __int16 cacheIndex;        // ...
@@ -58,6 +60,8 @@ struct GfxStaticModelId // sizeof=0x4
 
 void __cdecl R_InitStaticModelCache();
 void __cdecl R_ShutdownStaticModelCache();
+
+static_model_leaf_t *SMC_GetLeaf(unsigned int cacheIndex);
 
 GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod);
 

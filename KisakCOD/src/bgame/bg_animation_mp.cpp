@@ -755,11 +755,11 @@ int __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, scrip
         {
             scriptItem = BG_FirstValidItem(ps->clientNum, &globalScriptData->scriptAnims[state][movetype]);
             if (!scriptItem)
-                state = (aistateEnum_t)((int)state - 1); // KISAKTODO: fkin ugly (should be state--;)
+                state = state--;
         }
         else
         {
-            state = (aistateEnum_t)((int)state - 1);
+            state = state--;
         }
     }
     if (scriptItem)

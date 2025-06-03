@@ -21,6 +21,15 @@ enum aistateEnum_t : __int32
     AISTATE_COMBAT = 0x0,
     MAX_AISTATES = 0x1,
 };
+inline aistateEnum_t &operator--(aistateEnum_t &e) {
+    e = static_cast<aistateEnum_t>(static_cast<int>(e) - 1);
+    return e;
+}
+inline aistateEnum_t &operator--(aistateEnum_t &e, int i)
+{
+    --e;
+    return e;
+}
 
 enum scriptAnimStrafeStates_t : __int32
 {                                       // ...
