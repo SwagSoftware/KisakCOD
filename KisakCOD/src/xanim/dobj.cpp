@@ -590,11 +590,13 @@ void __cdecl DObjArchive(DObj_s *obj)
         if (model->ignoreCollision)
             savedObj.ignoreCollision |= 1 << modelIndex;
     }
-    if (!obj->models)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 706, 0, "%s", "obj->models");
-    obj->models = 0;
+
+    iassert(obj->models);
+    obj->models = NULL;
     DObjFree(obj);
-    memcpy(obj, &savedObj, 0x60u);
+
+    static_assert((sizeof(DObj_s) - sizeof(obj->models)) == 96);
+    memcpy(obj, &savedObj, sizeof(DObj_s) - sizeof(obj->models));
 }
 
 void __cdecl DObjUnarchive(DObj_s *obj)
@@ -624,28 +626,22 @@ void __cdecl DObjSkelClear(const DObj_s *obj)
 
 void __cdecl DObjGetBounds(const DObj_s *obj, float *mins, float *maxs)
 {
-    float radius; // [esp+4h] [ebp-14h]
-    float v4; // [esp+Ch] [ebp-Ch]
+    iassert(obj);
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 772, 0, "%s", "obj");
-    v4 = -obj->radius;
-    *mins = v4;
-    mins[1] = v4;
-    mins[2] = v4;
-    radius = obj->radius;
-    *maxs = radius;
-    maxs[1] = radius;
-    maxs[2] = radius;
+    mins[0] = -obj->radius;
+    mins[1] = -obj->radius;
+    mins[2] = -obj->radius;
+
+    maxs[0] = obj->radius;
+    maxs[1] = obj->radius;
+    maxs[2] = obj->radius;
 }
 
 void __cdecl DObjPhysicsGetBounds(const DObj_s *obj, float *mins, float *maxs)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 781, 0, "%s", "obj");
-    if (!*obj->models)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 782, 0, "%s", "obj->models[0]");
-    XModelGetBounds(*(const XModel **)obj->models, mins, maxs);
+    iassert(obj);
+    iassert(obj->models[0]);
+    XModelGetBounds(obj->models[0], mins, maxs);
 }
 
 void __cdecl DObjPhysicsSetCollisionFromXModel(const DObj_s *obj, PhysWorld worldIndex, dxBody *physId)
@@ -655,31 +651,26 @@ void __cdecl DObjPhysicsSetCollisionFromXModel(const DObj_s *obj, PhysWorld worl
 
 double __cdecl DObjGetRadius(const DObj_s *obj)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 803, 0, "%s", "obj");
+    iassert(obj);
     return obj->radius;
 }
 
 PhysPreset *__cdecl DObjGetPhysPreset(const DObj_s *obj)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 811, 0, "%s", "obj");
-    if (!obj->numModels)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 812, 0, "%s", "obj->numModels > 0");
-    if (!*obj->models)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 813, 0, "%s", "obj->models[0]");
-    return (*obj->models)->physPreset;
+    iassert(obj);
+    iassert(obj->numModels > 0);
+    iassert(obj->models[0]);
+
+    return obj->models[0]->physPreset;
 }
 
 const char *__cdecl DObjGetName(const DObj_s *obj)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 821, 0, "%s", "obj");
-    if (!obj->numModels)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 822, 0, "%s", "obj->numModels > 0");
-    if (!*obj->models)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 823, 0, "%s", "obj->models[0]");
-    return **(const char ***)obj->models;
+    iassert(obj);
+    iassert(obj->numModels > 0);
+    iassert(obj->models[0]);
+
+    return obj->models[0]->name;
 }
 
 char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
@@ -693,8 +684,8 @@ char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
     XModel **models; // [esp+18h] [ebp-8h]
     unsigned __int16 *boneNames; // [esp+1Ch] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 952, 0, "%s", "obj");
+    iassert(obj);
+
     numModels = obj->numModels;
     baseBoneIndex = 0;
     models = obj->models;
@@ -704,10 +695,11 @@ char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
         boneNames = model->boneNames;
         numBones = model->numBones;
         index = boneIndex - baseBoneIndex;
-        if (boneIndex - baseBoneIndex < 0)
-            MyAssertHandler(".\\xanim\\dobj.cpp", 964, 0, "%s", "index >= 0");
+        iassert(index >= 0);
+
         if (index < numBones)
             return SL_ConvertToString(boneNames[index]);
+
         baseBoneIndex += numBones;
     }
     return 0;
@@ -715,23 +707,15 @@ char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
 
 char *__cdecl DObjGetModelParentBoneName(const DObj_s *obj, int modelIndex)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 984, 0, "%s", "obj");
-    if (modelIndex >= obj->numModels)
-        MyAssertHandler(
-            ".\\xanim\\dobj.cpp",
-            985,
-            0,
-            "%s\n\t(modelIndex) = %i",
-            "(modelIndex < obj->numModels)",
-            modelIndex);
+    iassert(obj);
+    iassert(modelIndex < obj->numModels);
+
     return DObjGetBoneName(obj, *((unsigned __int8 *)&obj->models[obj->numModels] + modelIndex));
 }
 
 XAnimTree_s *__cdecl DObjGetTree(const DObj_s *obj)
 {
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1001, 0, "%s", "obj");
+    iassert(obj);
     return obj->tree;
 }
 
@@ -1603,23 +1587,16 @@ int __cdecl DObjGetModelBoneIndex(const DObj_s *obj, const char *modelName, unsi
     return 0;
 }
 
+// LWSS: for ragdolls
 void __cdecl DObjGetBasePoseMatrix(const DObj_s *obj, unsigned __int8 boneIndex, DObjAnimMat *outMat)
 {
     DObjAnimMat mat[128]; // [esp+8h] [ebp-1010h] BYREF
     int partBits[4]; // [esp+1008h] [ebp-10h] BYREF
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1753, 0, "%s", "obj");
-    if (!outMat)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1754, 0, "%s", "outMat");
-    if (boneIndex >= (unsigned int)obj->numBones)
-        MyAssertHandler(
-            ".\\xanim\\dobj.cpp",
-            1755,
-            0,
-            "boneIndex doesn't index obj->numBones\n\t%i not in [0, %i)",
-            boneIndex,
-            obj->numBones);
+    iassert(obj);
+    iassert(outMat);
+    iassert(boneIndex >= obj->numBones); 
+
     if (boneIndex >= (int)(*obj->models)->numBones)
     {
         DObjGetHierarchyBits(obj, boneIndex, partBits);

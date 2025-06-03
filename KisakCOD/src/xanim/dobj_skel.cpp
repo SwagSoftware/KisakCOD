@@ -24,12 +24,10 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
     const int *savedDuplicatePartBits; // [esp+B4h] [ebp-4h]
     int savedregs; // [esp+B8h] [ebp+0h] BYREF
 
-    //Profile_Begin(310);
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj_skel.cpp", 382, 0, "%s", "obj");
+    Profile_Begin(310);
+    iassert(obj);
     skel = (DSkel *)&obj->skel;
-    if (obj == (const DObj_s *)-20)
-        MyAssertHandler(".\\xanim\\dobj_skel.cpp", 385, 0, "%s", "skel");
+    iassert(skel);
     bFinished = 1;
     for (i = 0; i < 4; ++i)
     {
@@ -39,7 +37,8 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
     }
     if (bFinished)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
+        return;
     }
     else
     {
@@ -66,40 +65,22 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
             CalcSkelNonRootBones(model, skel, boneIndex + model->numRootBones, calcPartBits, controlPartBits);
             boneIndex += model->numBones;
         }
-        if (*pos)
-            MyAssertHandler(".\\xanim\\dobj_skel.cpp", 433, 0, "%s", "!(*pos)");
+
+        iassert(!(*pos));
         for (boneIndexa = 0; boneIndexa < obj->numBones; ++boneIndexa)
         {
-            if ((skel->partBits.anim[boneIndexa >> 5] & (0x80000000 >> (boneIndexa & 0x1F))) != 0)
+            //if ((skel->partBits.anim[boneIndexa >> 5] & (0x80000000 >> (boneIndexa & 0x1F))) != 0)
+            if (skel->partBits.anim.testBit(boneIndexa))
             {
-                if ((COERCE_UNSIGNED_INT(skel->mat[boneIndexa].quat[0]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(skel->mat[boneIndexa].quat[1]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(skel->mat[boneIndexa].quat[2]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(skel->mat[boneIndexa].quat[3]) & 0x7F800000) == 0x7F800000)
-                {
-                    MyAssertHandler(
-                        ".\\xanim\\dobj_skel.cpp",
-                        440,
-                        0,
-                        "%s",
-                        "!IS_NAN((skel->mat[boneIndex].quat)[0]) && !IS_NAN((skel->mat[boneIndex].quat)[1]) && !IS_NAN((skel->mat[bon"
-                        "eIndex].quat)[2]) && !IS_NAN((skel->mat[boneIndex].quat)[3])");
-                }
-                if ((COERCE_UNSIGNED_INT(skel->mat[boneIndexa].trans[0]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(skel->mat[boneIndexa].trans[1]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(skel->mat[boneIndexa].trans[2]) & 0x7F800000) == 0x7F800000)
-                {
-                    MyAssertHandler(
-                        ".\\xanim\\dobj_skel.cpp",
-                        441,
-                        0,
-                        "%s",
-                        "!IS_NAN((skel->mat[boneIndex].trans)[0]) && !IS_NAN((skel->mat[boneIndex].trans)[1]) && !IS_NAN((skel->mat[b"
-                        "oneIndex].trans)[2])");
-                }
+                iassert(!IS_NAN(skel->mat[boneIndexa].quat[0]) 
+                    && !IS_NAN(skel->mat[boneIndexa].quat[1]) 
+                    && !IS_NAN(skel->mat[boneIndexa].quat[2]) 
+                    && !IS_NAN(skel->mat[boneIndexa].quat[3])
+                );
+                iassert(!IS_NAN(skel->mat[boneIndexa].trans[0]) && !IS_NAN(skel->mat[boneIndexa].trans[1]) && !IS_NAN(skel->mat[boneIndexa].trans[2]));
             }
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 

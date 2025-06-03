@@ -389,13 +389,7 @@ int  R_PreSkinXSurface(
         surf->vertList = surf->vertList;
         rigidSurf = (GfxModelRigidSurface*)surfPos;
         surfPos->skinnedCachedOffset = -2;
-        if (rigidSurf != (GfxModelRigidSurface*)surfPos)
-            MyAssertHandler(
-                ".\\r_dobj_skin.cpp",
-                82,
-                0,
-                "%s",
-                "&rigidSurf->surf == reinterpret_cast< GfxModelSkinnedSurface * >( surfPos )");
+        iassert(&rigidSurf->surf == reinterpret_cast<GfxModelSkinnedSurface *>(surfPos));
         rigidSurf->placement.scale = 1.0;
         RotTransArray = &DObjGetRotTransArray(obj)[surfaceInfo->boneIndex];
         //RotTransArray += (surf->vertList->boneOffset / 64);
