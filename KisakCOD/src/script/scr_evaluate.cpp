@@ -396,31 +396,31 @@ void __cdecl Scr_CompileExpression(sval_u *expr)
     switch (*(unsigned int *)expr->type)
     {
     case 6:
-        Scr_CompilePrimitiveExpression((sval_u *)(expr->type + 4));
-        expr->type = debugger_node1((debugger_sval_s *)6, *(sval_u *)(expr->type + 4)).type;
+        Scr_CompilePrimitiveExpression(&expr->node[1]);
+        expr->type = debugger_node1((debugger_sval_s *)6, expr->node[1]).type;
         break;
     case 0x2F:
     case 0x30:
-        Scr_CompileExpression((sval_u *)(expr->type + 4));
-        Scr_CompileExpression((sval_u *)(expr->type + 8));
+        Scr_CompileExpression(&expr->node[1]);
+        Scr_CompileExpression(&expr->node[2]);
         expr->type = debugger_node2(
             *(debugger_sval_s **)expr->type,
-            *(sval_u *)(expr->type + 4),
-            *(sval_u *)(expr->type + 8)).type;
+            expr->node[1],
+            expr->node[2]).type;
         break;
     case 0x31:
-        Scr_CompileExpression((sval_u *)(expr->type + 4));
-        Scr_CompileExpression((sval_u *)(expr->type + 8));
+        Scr_CompileExpression(&expr->node[1]);
+        Scr_CompileExpression(&expr->node[2]);
         expr->type = debugger_node3(
             *(debugger_sval_s **)expr->type,
-            *(sval_u *)(expr->type + 4),
-            *(sval_u *)(expr->type + 8),
-            *(sval_u *)(expr->type + 12)).type;
+            expr->node[1],
+            expr->node[2],
+            expr->node[3]).type;
         break;
     case 0x32:
     case 0x33:
-        Scr_CompileExpression((sval_u *)(expr->type + 4));
-        expr->type = debugger_node1(*(debugger_sval_s **)expr->type, *(sval_u *)(expr->type + 4)).type;
+        Scr_CompileExpression(&expr->node[1]);
+        expr->type = debugger_node1(*(debugger_sval_s **)expr->type, expr->node[1]).type;
         break;
     default:
         return;
@@ -433,13 +433,13 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
     sval_u tempVariableId; // [esp+2Ch] [ebp-8h]
     sval_u tempVariableIda; // [esp+2Ch] [ebp-8h]
 
-    switch (*(unsigned int *)expr->type)
+    switch (expr->node[0].idValue)
     {
     case 7:
     case 8:
     case 9:
     case 0xA:
-        expr->type = debugger_node1(*(debugger_sval_s **)expr->type, *(sval_u *)(expr->type + 4)).type;
+        expr->type = debugger_node1(*(debugger_sval_s **)expr->type, expr->node[1]).type;
         break;
     case 0xB:
     case 0xC:
@@ -447,15 +447,15 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
         expr->type = debugger_string(*(debugger_sval_s **)expr->type, v1).type;
         break;
     case 0x11:
-        Scr_CompileVariableExpression((sval_u *)(expr->type + 4));
+        Scr_CompileVariableExpression(&expr->node[1]);
         tempVariableId.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x11, *(sval_u *)(expr->type + 4), tempVariableId).type;
+        expr->type = debugger_node2((debugger_sval_s *)0x11, expr->node[1], tempVariableId).type;
         break;
     case 0x13:
-        if (!Scr_CompileCallExpression((sval_u *)(expr->type + 4)))
+        if (!Scr_CompileCallExpression(&expr->node[1]))
             goto LABEL_13;
         tempVariableIda.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x13, *(sval_u *)(expr->type + 4), tempVariableIda).type;
+        expr->type = debugger_node2((debugger_sval_s *)0x13, expr->node[1], tempVariableIda).type;
         break;
     case 0x1F:
     case 0x22:
@@ -470,22 +470,22 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
         expr->type = debugger_node2(*(debugger_sval_s **)expr->type, 0, 0).type;
         break;
     case 0x2E:
-        Scr_CompilePrimitiveExpressionList((sval_u *)(expr->type + 4));
-        expr->type = debugger_node1((debugger_sval_s *)0x2E, *(sval_u *)(expr->type + 4)).type;
+        Scr_CompilePrimitiveExpressionList(&expr->node[1]);
+        expr->type = debugger_node1((debugger_sval_s *)0x2E, expr->node[1]).type;
         break;
     case 0x34:
-        Scr_CompilePrimitiveExpression((sval_u *)(expr->type + 4));
-        expr->type = debugger_node1((debugger_sval_s *)0x34, *(sval_u *)(expr->type + 4)).type;
+        Scr_CompilePrimitiveExpression(&expr->node[1]);
+        expr->type = debugger_node1((debugger_sval_s *)0x34, expr->node[1]).type;
         break;
     case 0x4B:
         ++scrVmDebugPub.checkBreakon;
         g_breakonExpr = 1;
-        Scr_CompilePrimitiveExpression((sval_u *)(expr->type + 4));
-        Scr_CompileExpression((sval_u *)(expr->type + 8));
+        Scr_CompilePrimitiveExpression(&expr->node[1]);
+        Scr_CompileExpression(&expr->node[2]);
         expr->type = debugger_node3(
             *(debugger_sval_s **)expr->type,
-            *(sval_u *)(expr->type + 4),
-            *(sval_u *)(expr->type + 8),
+            expr->node[1],
+            expr->node[2],
             0).type;
         break;
     default:
@@ -512,7 +512,7 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
         if (*(unsigned int *)(expr->type + 4))
         {
             tempVariableId.block = (scr_block_s*)AllocValue();
-            expr->type = debugger_node4((debugger_sval_s *)4, *(sval_u *)(expr->type + 4), 0, 0, tempVariableId).type;
+            expr->type = debugger_node4((debugger_sval_s *)4, expr->node[1], 0, 0, tempVariableId).type;
         }
         else
         {
@@ -520,21 +520,21 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
         }
         break;
     case 0xD:
-        Scr_CompileExpression((sval_u *)(expr->type + 8));
-        Scr_CompilePrimitiveExpression((sval_u *)(expr->type + 4));
-        expr->type = debugger_node2((debugger_sval_s *)0xD, *(sval_u *)(expr->type + 4), *(sval_u *)(expr->type + 8)).type;
+        Scr_CompileExpression(&expr->node[2]);
+        Scr_CompilePrimitiveExpression(&expr->node[1]);
+        expr->type = debugger_node2((debugger_sval_s *)0xD, expr->node[1], expr->node[2]).type;
         break;
     case 0xF:
-        Scr_CompilePrimitiveExpressionFieldObject((sval_u *)(expr->type + 4));
+        Scr_CompilePrimitiveExpressionFieldObject(&expr->node[1]);
         *(unsigned int *)(expr->type + 8) = Scr_CompileCanonicalString(*(unsigned int *)(expr->type + 8));
         if (*(unsigned int *)(expr->type + 8))
-            expr->type = debugger_node3((debugger_sval_s *)0xF, *(sval_u *)(expr->type + 4), *(sval_u *)(expr->type + 8), 0).type;
+            expr->type = debugger_node3((debugger_sval_s *)0xF, expr->node[1], expr->node[2], 0).type;
         else
             expr->type = debugger_node0((debugger_sval_s *)0xE).type;
         break;
     case 0x35:
-        Scr_CompilePrimitiveExpression((sval_u *)(expr->type + 4));
-        expr->type = debugger_node1((debugger_sval_s *)0x35, *(sval_u *)(expr->type + 4)).type;
+        Scr_CompilePrimitiveExpression(&expr->node[1]);
+        expr->type = debugger_node1((debugger_sval_s *)0x35, expr->node[1]).type;
         break;
     case 0x50:
         s = SL_ConvertToString(*(unsigned int *)(expr->type + 4));
@@ -586,14 +586,14 @@ void __cdecl Scr_CompilePrimitiveExpressionFieldObject(sval_u *expr)
     switch (*(unsigned int *)expr->type)
     {
     case 0x11:
-        Scr_CompileVariableExpression((sval_u *)(expr->type + 4));
+        Scr_CompileVariableExpression(&expr->node[1]);
         tempVariableId.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x11, *(sval_u *)(expr->type + 4), tempVariableId).type;
+        expr->type = debugger_node2((debugger_sval_s *)0x11, expr->node[1], tempVariableId).type;
         break;
     case 0x13:
-        Scr_CompileCallExpression((sval_u *)(expr->type + 4));
+        Scr_CompileCallExpression(&expr->node[1]);
         tempVariableIda.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x13, *(sval_u *)(expr->type + 4), tempVariableIda).type;
+        expr->type = debugger_node2((debugger_sval_s *)0x13, expr->node[1], tempVariableIda).type;
         break;
     case 0x20:
         expr->type = debugger_node2(*(debugger_sval_s **)expr->type, 0, 0).type;
@@ -657,20 +657,20 @@ char __cdecl Scr_CompileCallExpression(sval_u *expr)
     v2 = *(unsigned int *)expr->type;
     if (v2 == 23)
     {
-        if (Scr_CompileFunction((sval_u *)(expr->type + 4), (sval_u *)(expr->type + 8)))
+        if (Scr_CompileFunction(&expr->node[1], &expr->node[2]))
         {
-            expr->type = debugger_node2((debugger_sval_s *)0x17, *(sval_u *)(expr->type + 4), *(sval_u *)(expr->type + 8)).type;
+            expr->type = debugger_node2((debugger_sval_s *)0x17, expr->node[1], expr->node[2]).type;
             return 1;
         }
     }
     else if (v2 == 24
-        && Scr_CompileMethod((sval_u *)(expr->type + 4), (sval_u *)(expr->type + 8), (sval_u *)(expr->type + 12)))
+        && Scr_CompileMethod(&expr->node[1], &expr->node[2], (sval_u *)(expr->type + 12)))
     {
         expr->type = debugger_node3(
             (debugger_sval_s *)0x18,
-            *(sval_u *)(expr->type + 4),
-            *(sval_u *)(expr->type + 8),
-            *(sval_u *)(expr->type + 12)).type;
+            expr->node[1],
+            expr->node[2],
+            expr->node[3]).type;
         return 1;
     }
     return 0;
@@ -845,8 +845,7 @@ bool __cdecl Scr_EvalScriptExpression(
     bool freezeScope,
     bool freezeObjects)
 {
-    if (!expr)
-        MyAssertHandler(".\\script\\scr_evaluate.cpp", 2205, 0, "%s", "expr");
+    iassert(expr);
     scrEvaluateGlob.freezeScope = freezeScope;
     scrEvaluateGlob.freezeObjects = freezeObjects;
     scrEvaluateGlob.objectChanged = 0;
@@ -856,44 +855,44 @@ bool __cdecl Scr_EvalScriptExpression(
 
 void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue *value)
 {
-    switch (*(unsigned int *)expr.type)
+    switch (expr.node[0].intValue)
     {
     case 6:
-        Scr_EvalPrimitiveExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalPrimitiveExpression(expr.node[1], localId, value);
         break;
     case 0x2F:
-        Scr_EvalBoolOrExpression(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8), localId, value);
+        Scr_EvalBoolOrExpression(expr.node[1], expr.node[2], localId, value);
         break;
     case 0x30:
-        Scr_EvalBoolAndExpression(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8), localId, value);
+        Scr_EvalBoolAndExpression(expr.node[1], expr.node[2], localId, value);
         break;
     case 0x31:
         Scr_EvalBinaryOperatorExpression(
-            *(sval_u *)(expr.type + 4),
-            *(sval_u *)(expr.type + 8),
-            *(sval_u *)(expr.type + 12),
+            expr.node[1],
+            expr.node[2],
+            expr.node[3],
             localId,
             value);
         break;
     case 0x32:
-        Scr_EvalExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalExpression(expr.node[1], localId, value);
         Scr_EvalBoolNot(value);
         break;
     case 0x33:
-        Scr_EvalExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalExpression(expr.node[1], localId, value);
         Scr_EvalBoolComplement(value);
         break;
     case 0x4F:
         Scr_EvalVector(
-            *(sval_u *)(expr.type + 4),
-            *(sval_u *)(expr.type + 8),
-            *(sval_u *)(expr.type + 12),
+            expr.node[1],
+            expr.node[2],
+            expr.node[3],
             localId,
             value);
         break;
     case 0x52:
         if (scrEvaluateGlob.freezeScope)
-            localId = *(unsigned int *)(expr.type + 4);
+            localId = expr.node[1].idValue;
         if (localId && Scr_IsThreadAlive(localId))
         {
             value->type = VAR_POINTER;
@@ -908,12 +907,12 @@ void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue
         }
         if (scrEvaluateGlob.freezeObjects)
         {
-            if (*(unsigned int *)(expr.type + 4) != localId)
+            if (expr.node[1].idValue != localId)
                 scrEvaluateGlob.objectChanged = 1;
         }
         else
         {
-            *(unsigned int *)(expr.type + 4) = localId;
+            expr.node[1].idValue = localId;
         }
         break;
     default:
@@ -933,40 +932,40 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
     {
     case 7:
         value->type = VAR_INTEGER;
-        value->u.intValue = *(unsigned int *)(expr.type + 4);
+        value->u.intValue = expr.node[1].intValue;
         break;
     case 8:
         value->type = VAR_FLOAT;
-        value->u.floatValue = *(float *)(expr.type + 4);
+        value->u.floatValue = expr.node[1].floatValue;
         break;
     case 9:
         value->type = VAR_INTEGER;
-        value->u.intValue = -(int)*(unsigned int *)(expr.type + 4); // KISAKTODO: int cast bad
+        value->u.intValue = -expr.node[1].intValue;
         break;
     case 0xA:
         value->type = VAR_FLOAT;
-        value->u.floatValue = -*(float *)(expr.type + 4);
+        value->u.floatValue = -expr.node[1].floatValue;
         break;
     case 0xB:
         value->type = VAR_STRING;
-        value->u.stringValue = SL_GetString_(*(char **)(expr.type + 4), 0, 20);
+        value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, 20); // KISAKTODO is debugString the right union field????
         break;
     case 0xC:
         value->type = VAR_ISTRING;
-        value->u.stringValue = SL_GetString_(*(char **)(expr.type + 4), 0, 20);
+        value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, 20);
         break;
     case 0x11:
-        Scr_EvalVariableExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalVariableExpression(expr.node[1], localId, value);
         break;
     case 0x13:
-        Scr_EvalCallExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalCallExpression(expr.node[1], localId, value);
         break;
     case 0x1F:
         value->type = VAR_UNDEFINED;
         break;
     case 0x20:
         if (scrEvaluateGlob.freezeScope)
-            localId = *(unsigned int *)(expr.type + 4);
+            localId = expr.node[1].idValue;
         if (localId && Scr_IsThreadAlive(localId))
         {
             selfId = Scr_GetSelf(localId);
@@ -983,20 +982,19 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
         }
         if (scrEvaluateGlob.freezeObjects)
         {
-            if (*(unsigned int *)(expr.type + 4) != localId || *(unsigned int *)(expr.type + 8) != selfId)
+            if (expr.node[1].idValue != localId || expr.node[2].idValue != selfId)
                 scrEvaluateGlob.objectChanged = 1;
         }
         else
         {
-            *(unsigned int *)(expr.type + 4) = localId;
-            *(unsigned int *)(expr.type + 8) = selfId;
+            expr.node[1].idValue = localId;
+            expr.node[2].idValue = selfId;
         }
         break;
     case 0x21:
-        if (!*(unsigned int *)(expr.type + 8))
-            MyAssertHandler(".\\script\\scr_evaluate.cpp", 1216, 0, "%s", "expr.node[2].idValue");
+        iassert(expr.node[2].idValue);
         value->type = VAR_POINTER;
-        value->u.intValue = *(unsigned int *)(expr.type + 8);
+        value->u.intValue = expr.node[2].idValue;
         AddRefToObject(value->u.intValue);
         break;
     case 0x22:
@@ -1013,10 +1011,10 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
         AddRefToObject(scrVarPub.animId);
         break;
     case 0x2E:
-        Scr_EvalExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalExpression(expr.node[1], localId, value);
         break;
     case 0x34:
-        Scr_EvalPrimitiveExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalPrimitiveExpression(expr.node[1], localId, value);
         Scr_EvalSizeValue(value);
         break;
     case 0x42:
@@ -1032,20 +1030,20 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
         value->u.intValue = 1;
         break;
     case 0x4B:
-        Scr_EvalPrimitiveExpression(*(sval_u *)(expr.type + 4), localId, &objectValue);
-        Scr_EvalExpression(*(sval_u *)(expr.type + 8), localId, &stringValue);
+        Scr_EvalPrimitiveExpression(expr.node[1], localId, &objectValue);
+        Scr_EvalExpression(expr.node[2], localId, &stringValue);
         if (objectValue.type == 1
             && stringValue.type == 2
             && g_breakonObject == objectValue.u.intValue
             && g_breakonString == stringValue.u.intValue)
         {
             g_breakonHit = 1;
-            ++*(unsigned int *)(expr.type + 12);
+            ++expr.node[3].intValue;
         }
         RemoveRefToValue(objectValue.type, objectValue.u);
         RemoveRefToValue(stringValue.type, stringValue.u);
         value->type = VAR_INTEGER;
-        value->u.intValue = *(unsigned int *)(expr.type + 12);
+        value->u.intValue = expr.node[3].intValue;
         break;
     case 0x54:
         value->type = VAR_UNDEFINED;
@@ -1070,16 +1068,16 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
         break;
     case 4:
         if (scrEvaluateGlob.freezeScope)
-            localId = *(unsigned int *)(expr.type + 8);
+            localId = expr.node[2].idValue;
         objectId = 0;
         if (localId && Scr_IsThreadAlive(localId))
         {
-            Scr_EvalLocalVariable(*(sval_u *)(expr.type + 4), localId, value);
+            Scr_EvalLocalVariable(expr.node[1], localId, value);
             if (!scrVarPub.error_message)
             {
                 AddRefToValue(value->type, value->u);
                 //objectId = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 16), value).stringValue;
-                objectId = Scr_EvalFieldObject(*(unsigned int*)(expr.type + 16), value);
+                objectId = Scr_EvalFieldObject(expr.node[4].idValue, value);
                 Scr_ClearErrorMessage();
             }
         }
@@ -1091,56 +1089,56 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
         }
         if (scrEvaluateGlob.freezeObjects)
         {
-            if (*(unsigned int *)(expr.type + 8) != localId)
+            if (expr.node[2].idValue != localId)
                 scrEvaluateGlob.objectChanged = 1;
         }
         else
         {
-            *(unsigned int *)(expr.type + 8) = localId;
+            expr.node[2].idValue = localId;
         }
         if (scrEvaluateGlob.freezeObjects)
         {
-            if (*(unsigned int *)(expr.type + 12) != objectId)
+            if (expr.node[3].idValue != objectId)
                 scrEvaluateGlob.objectChanged = 1;
         }
         else
         {
-            *(unsigned int *)(expr.type + 12) = objectId;
+            expr.node[3].idValue = objectId;
         }
         break;
     case 5:
-        if (!*(unsigned int *)(expr.type + 12))
+        if (!expr.node[3].idValue)
             goto LABEL_29;
         value->type = VAR_POINTER;
-        value->u.intValue = *(unsigned int *)(expr.type + 12);
+        value->u.intValue = expr.node[3].idValue;
         AddRefToObject(value->u.intValue);
         break;
     case 0xD:
-        Scr_EvalArrayVariableExpression(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8), localId, value);
+        Scr_EvalArrayVariableExpression(expr.node[1], expr.node[2], localId, value);
         break;
     case 0xE:
         value->type = VAR_UNDEFINED;
         Scr_Error("unknown field");
         break;
     case 0xF:
-        objectIda = Scr_EvalPrimitiveExpressionFieldObject(*(sval_u *)(expr.type + 4), localId);
+        objectIda = Scr_EvalPrimitiveExpressionFieldObject(expr.node[1], localId);
         if (scrEvaluateGlob.freezeObjects)
         {
-            if (*(unsigned int *)(expr.type + 12) != objectIda)
+            if (expr.node[3].idValue != objectIda)
                 scrEvaluateGlob.objectChanged = 1;
         }
         else
         {
-            *(unsigned int *)(expr.type + 12) = objectIda;
+            expr.node[3].idValue = objectIda;
         }
         if (!objectIda)
             goto LABEL_29;
-        Scr_EvalFieldVariableInternal(objectIda, *(unsigned int *)(expr.type + 8), value);
+        Scr_EvalFieldVariableInternal(objectIda, expr.node[2].idValue, value);
         break;
     case 0x10:
-        if (*(unsigned int *)(expr.type + 12))
+        if (expr.node[3].idValue)
         {
-            Scr_EvalFieldVariableInternal(*(unsigned int *)(expr.type + 12), *(unsigned int *)(expr.type + 8), value);
+            Scr_EvalFieldVariableInternal(expr.node[3].idValue, expr.node[2].idValue, value);
         }
         else
         {
@@ -1150,19 +1148,19 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
         }
         break;
     case 0x35:
-        Scr_EvalPrimitiveExpression(*(sval_u *)(expr.type + 4), localId, value);
+        Scr_EvalPrimitiveExpression(expr.node[1], localId, value);
         Scr_EvalSelfValue(value);
         break;
     case 0x50:
-        objectIdb = Scr_EvalObject(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8), value).u.stringValue;
+        objectIdb = Scr_EvalObject(expr.node[1], expr.node[2], value).u.stringValue;
         if (scrEvaluateGlob.freezeObjects)
         {
-            if (*(unsigned int *)(expr.type + 12) != objectIdb)
+            if (expr.node[3].idValue != objectIdb)
                 scrEvaluateGlob.objectChanged = 1;
         }
         else
         {
-            *(unsigned int *)(expr.type + 12) = objectIdb;
+            expr.node[3].idValue = objectIdb;
         }
         break;
     case 0x51:
@@ -1312,18 +1310,18 @@ unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigne
     switch (*(unsigned int *)expr.type)
     {
     case 0x11:
-        Scr_EvalVariableExpression(*(sval_u *)(expr.type + 4), localId, &value);
+        Scr_EvalVariableExpression(expr.node[1], localId, &value);
         //result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
-        result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value);
+        result = Scr_EvalFieldObject(expr.node[2].idValue, &value);
         break;
     case 0x13:
-        Scr_EvalCallExpression(*(sval_u *)(expr.type + 4), localId, &value);
+        Scr_EvalCallExpression(expr.node[1], localId, &value);
         //result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
-        result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value);
+        result = Scr_EvalFieldObject(expr.node[2].idValue, &value);
         break;
     case 0x20:
         if (scrEvaluateGlob.freezeScope)
-            localId = *(unsigned int *)(expr.type + 4);
+            localId = expr.node[1].idValue;
         if (localId && Scr_IsThreadAlive(localId))
         {
             selfId = Scr_GetSelf(localId);
@@ -1336,20 +1334,20 @@ unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigne
         }
         if (scrEvaluateGlob.freezeObjects)
         {
-            if (*(unsigned int *)(expr.type + 4) != localId || *(unsigned int *)(expr.type + 8) != selfId)
+            if (expr.node[1].idValue != localId || expr.node[2].idValue != selfId)
                 scrEvaluateGlob.objectChanged = 1;
         }
         else
         {
-            *(unsigned int *)(expr.type + 4) = localId;
-            *(unsigned int *)(expr.type + 8) = selfId;
+            expr.node[1].idValue = localId;
+            expr.node[2].idValue = selfId;
         }
         result = selfId;
         break;
     case 0x21:
-        if (!*(unsigned int *)(expr.type + 8))
+        if (!expr.node[2].idValue)
             MyAssertHandler(".\\script\\scr_evaluate.cpp", 1016, 0, "%s", "expr.node[2].idValue");
-        result = *(unsigned int *)(expr.type + 8);
+        result = expr.node[2].idValue;
         break;
     case 0x22:
         result = scrVarPub.levelId;
@@ -1369,11 +1367,11 @@ void __cdecl Scr_EvalCallExpression(sval_u expr, unsigned int localId, VariableV
 {
     if (*(unsigned int *)expr.type == 23)
     {
-        Scr_EvalFunction(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8), localId, value);
+        Scr_EvalFunction(expr.node[1], expr.node[2], localId, value);
     }
     else if (*(unsigned int *)expr.type == 24)
     {
-        Scr_EvalMethod(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8), *(sval_u *)(expr.type + 12), localId, value);
+        Scr_EvalMethod(expr.node[1], expr.node[2], expr.node[3], localId, value);
     }
 }
 
@@ -1614,22 +1612,22 @@ bool __cdecl Scr_RefExpression(sval_u expr)
     switch (*(unsigned int *)expr.type)
     {
     case 6:
-        result = Scr_RefPrimitiveExpression(*(sval_u *)(expr.type + 4));
+        result = Scr_RefPrimitiveExpression(expr.node[1]);
         break;
     case 0x2F:
     case 0x30:
     case 0x31:
-        result = Scr_RefBinaryOperatorExpression(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8));
+        result = Scr_RefBinaryOperatorExpression(expr.node[1], expr.node[2]);
         break;
     case 0x32:
     case 0x33:
-        result = Scr_RefExpression(*(sval_u *)(expr.type + 4));
+        result = Scr_RefExpression(expr.node[1]);
         break;
     case 0x4F:
-        result = Scr_RefVector(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8), *(sval_u *)(expr.type + 12));
+        result = Scr_RefVector(expr.node[1], expr.node[2], expr.node[3]);
         break;
     case 0x52:
-        result = Scr_RefToVariable(*(unsigned int *)(expr.type + 4), 1);
+        result = Scr_RefToVariable(expr.node[1].idValue, 1);
         break;
     default:
         result = 0;
@@ -1645,37 +1643,37 @@ bool __cdecl Scr_RefPrimitiveExpression(sval_u expr)
     switch (*(unsigned int *)expr.type)
     {
     case 0x11:
-        result = Scr_RefVariableExpression(*(sval_u *)(expr.type + 4));
+        result = Scr_RefVariableExpression(expr.node[1]);
         break;
     case 0x13:
-        result = Scr_RefCallExpression(*(sval_u *)(expr.type + 4));
+        result = Scr_RefCallExpression(expr.node[1]);
         break;
     case 0x20:
-        if (!Scr_RefToVariable(*(unsigned int *)(expr.type + 4), 1))
+        if (!Scr_RefToVariable(expr.node[1].idValue, 1))
             goto $LN4_67;
-        if (*(unsigned int *)(expr.type + 8))
+        if (expr.node[2].idValue)
         {
             *(unsigned int *)expr.type = 33;
             goto $LN4_67;
         }
-        *(unsigned int *)(expr.type + 4) = 0;
+        expr.node[1].idValue = 0;
         result = 1;
         break;
     case 0x21:
     $LN4_67:
-        result = Scr_RefToVariable(*(unsigned int *)(expr.type + 8), 1);
+        result = Scr_RefToVariable(expr.node[2].idValue, 1);
         break;
     case 0x23:
         result = Scr_RefToVariable(scrVarPub.gameId, 0);
         break;
     case 0x2E:
-        result = Scr_RefExpression(*(sval_u *)(expr.type + 4));
+        result = Scr_RefExpression(expr.node[1]);
         break;
     case 0x34:
-        result = Scr_RefPrimitiveExpression(*(sval_u *)(expr.type + 4));
+        result = Scr_RefPrimitiveExpression(expr.node[1]);
         break;
     case 0x4B:
-        result = Scr_RefBreakonExpression(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8));
+        result = Scr_RefBreakonExpression(expr.node[1], expr.node[2]);
         break;
     default:
         result = 0;
@@ -1691,21 +1689,21 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
     switch (*(unsigned int *)expr.type)
     {
     case 4:
-        if (!Scr_RefToVariable(*(unsigned int *)(expr.type + 8), 1))
+        if (!Scr_RefToVariable(expr.node[2].idValue, 1))
             goto $LN11_33;
-        if (*(unsigned int *)(expr.type + 12))
+        if (expr.node[3].idValue)
         {
             *(unsigned int *)expr.type = 5;
             goto $LN11_33;
         }
-        *(unsigned int *)(expr.type + 8) = 0;
+        expr.node[2].idValue = 0;
         result = 1;
         break;
     case 5:
     $LN11_33:
-        if (Scr_RefToVariable(*(unsigned int *)(expr.type + 12), 1))
+        if (Scr_RefToVariable(expr.node[3].idValue, 1))
         {
-            *(unsigned int *)(expr.type + 12) = 0;
+            expr.node[3].idValue = 0;
             result = 1;
         }
         else
@@ -1714,12 +1712,12 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
         }
         break;
     case 0xD:
-        result = Scr_RefArrayVariableExpression(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 8));
+        result = Scr_RefArrayVariableExpression(expr.node[1], expr.node[2]);
         break;
     case 0xF:
-        if (!Scr_RefPrimitiveExpression(*(sval_u *)(expr.type + 4)))
+        if (!Scr_RefPrimitiveExpression(expr.node[1]))
             goto $LN5_66;
-        if (*(unsigned int *)(expr.type + 12))
+        if (expr.node[3].idValue)
         {
             *(unsigned int *)expr.type = 16;
             goto $LN5_66;
@@ -1728,9 +1726,9 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
         break;
     case 0x10:
     $LN5_66:
-        if (Scr_RefToVariable(*(unsigned int *)(expr.type + 12), 1))
+        if (Scr_RefToVariable(expr.node[3].idValue, 1))
         {
-            *(unsigned int *)(expr.type + 12) = 0;
+            expr.node[3].idValue = 0;
             result = 1;
         }
         else
@@ -1739,13 +1737,13 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
         }
         break;
     case 0x35:
-        result = Scr_RefPrimitiveExpression(*(sval_u *)(expr.type + 4));
+        result = Scr_RefPrimitiveExpression(expr.node[1]);
         break;
     case 0x50:
-        result = Scr_RefToVariable(*(unsigned int *)(expr.type + 12), 1);
+        result = Scr_RefToVariable(expr.node[3].idValue, 1);
         break;
     case 0x51:
-        result = Scr_RefToVariable(*(unsigned int *)(expr.type + 4), 1);
+        result = Scr_RefToVariable(expr.node[1].idValue, 1);
         break;
     default:
         result = 0;
@@ -1777,9 +1775,9 @@ bool __cdecl Scr_RefBreakonExpression(sval_u expr, sval_u param)
 bool __cdecl Scr_RefCallExpression(sval_u expr)
 {
     if (*(unsigned int *)expr.type == 23)
-        return Scr_RefCall(*(sval_u *)(expr.type + 8));
+        return Scr_RefCall(expr.node[2]);
     if (*(unsigned int *)expr.type == 24)
-        return Scr_RefMethod(*(sval_u *)(expr.type + 4), *(sval_u *)(expr.type + 12));
+        return Scr_RefMethod(expr.node[1], expr.node[3]);
     return 0;
 }
 
@@ -1835,21 +1833,19 @@ void __cdecl Scr_FreeDebugExprValue(sval_u val)
     {
     case 4:
     case 5:
-        if (!*(unsigned int *)(val.type + 16))
-            MyAssertHandler(".\\script\\scr_evaluate.cpp", 2279, 0, "%s", "val.node[4].idValue");
-        FreeValue(*(unsigned int *)(val.type + 16));
+        iassert(val.node[4].idValue);
+        FreeValue(val.node[4].idValue);
         break;
     case 0x11:
     case 0x13:
-        if (!*(unsigned int *)(val.type + 8))
-            MyAssertHandler(".\\script\\scr_evaluate.cpp", 2285, 0, "%s", "val.node[2].idValue");
-        FreeValue(*(unsigned int *)(val.type + 8));
+        iassert(val.node[2].idValue);
+        FreeValue(val.node[2].idValue);
         break;
     case 0x51:
-        if (*(unsigned int *)(val.type + 4))
+        if (val.node[1].idValue)
         {
-            RemoveRefToObject(*(unsigned int *)(val.type + 4));
-            *(unsigned int *)(val.type + 4) = 0;
+            RemoveRefToObject(val.node[2].idValue);
+            val.node[2].idValue = 0;
         }
         break;
     default:
