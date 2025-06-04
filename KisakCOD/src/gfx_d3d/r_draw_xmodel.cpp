@@ -154,14 +154,26 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
         worldMata[14] = modelSurf->placement.base.origin[2] - eyeOffset.v[2];
         worldMata[15] = 0.0 - eyeOffset.v[3];
         matrix = R_GetActiveWorldMatrix(context.source);
-        *&matrix->matrices.matrix[0].m[0][0] = *worldMata;
-        *&matrix->matrices.matrix[0].m[0][2] = *&worldMata[2];
-        *&matrix->matrices.matrix[0].m[1][0] = *&worldMata[4];
-        *&matrix->matrices.matrix[0].m[1][2] = *&worldMata[6];
-        *&matrix->matrices.matrix[0].m[2][0] = *&worldMata[8];
-        *&matrix->matrices.matrix[0].m[2][2] = *&worldMata[10];
-        *&matrix->matrices.matrix[0].m[3][0] = *&worldMata[12];
-        *&matrix->matrices.matrix[0].m[3][2] = *&worldMata[14];
+#if 0
+        matrix->matrices.matrix[0].m[0][0] = worldMata[0];
+        matrix->matrices.matrix[0].m[0][1] = worldMata[1];
+        matrix->matrices.matrix[0].m[0][2] = worldMata[2];
+        matrix->matrices.matrix[0].m[0][3] = worldMata[3];
+        matrix->matrices.matrix[0].m[1][0] = worldMata[4];
+        matrix->matrices.matrix[0].m[1][1] = worldMata[5];
+        matrix->matrices.matrix[0].m[1][2] = worldMata[6];
+        matrix->matrices.matrix[0].m[1][3] = worldMata[7];
+        matrix->matrices.matrix[0].m[2][0] = worldMata[8];
+        matrix->matrices.matrix[0].m[2][1] = worldMata[9];
+        matrix->matrices.matrix[0].m[2][2] = worldMata[10];
+        matrix->matrices.matrix[0].m[2][3] = worldMata[11];
+        matrix->matrices.matrix[0].m[3][0] = worldMata[12];
+        matrix->matrices.matrix[0].m[3][1] = worldMata[13];
+        matrix->matrices.matrix[0].m[3][2] = worldMata[14];
+        matrix->matrices.matrix[0].m[3][3] = worldMata[15];
+#else
+        memcpy(matrix->matrices.matrix[0].m, worldMata, sizeof(matrix->matrices.matrix[0].m));
+#endif
         R_SetModelLightingCoordsForSource(modelSurf->surf.info.lightingHandle, context.source);
         R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
         R_DrawXModelRigidModelSurf(context, modelSurf->surf.xsurf);
