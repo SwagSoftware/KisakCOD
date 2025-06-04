@@ -564,7 +564,7 @@ void __cdecl  R_WorkerThread()
 
     Value = Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
-    if (_setjmp((int*)Value))
+    if (_setjmp(*(jmp_buf *)Value))
         Com_ErrorAbort();
     //Profile_Guard(1);
     while (1)

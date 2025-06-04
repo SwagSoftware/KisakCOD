@@ -31,7 +31,7 @@ unsigned int s_affinityMaskForCpu[4];
 
 static int g_databaseThreadOwner;
 
-static volatile unsigned int smpData;
+static volatile PVOID smpData;
 
 static volatile unsigned int renderPausedCount;
 
@@ -68,7 +68,7 @@ void __cdecl Sys_EndLoadThreadPriorities()
     SetThreadPriority(threadHandle[0], 0);
 }
 
-bool __cdecl Sys_IsRendererReady()
+int __cdecl Sys_IsRendererReady()
 {
     return Sys_WaitForSingleObjectTimeout(&renderCompletedEvent, 0);
 }
@@ -311,9 +311,9 @@ void __cdecl Sys_ResumeThread(unsigned int threadContext)
     ResumeThread(threadHandle[threadContext]);
 }
 
-int __cdecl Sys_RendererSleep()
+void *__cdecl Sys_RendererSleep()
 {
-    return InterlockedExchange(&smpData, 0);
+    return InterlockedExchangePointer(&smpData, nullptr);
 }
 
 int __cdecl Sys_RendererReady()
@@ -364,7 +364,8 @@ bool __cdecl Sys_WaitForSingleObjectTimeout(void** event, unsigned int msec)
 void __cdecl Sys_WakeRenderer(void* data)
 {
     Sys_ResetEvent(&renderCompletedEvent);
-    smpData = (int)data;
+    const void *old = InterlockedExchangePointer(&smpData, data);
+    vassert(!old, "old = %p", old);
     CL_ResetStats_f();
     Sys_SetEvent(&backendEvent[1]);
     Sys_SetWorkerCmdEvent();

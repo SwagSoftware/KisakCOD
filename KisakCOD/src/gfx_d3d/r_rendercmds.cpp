@@ -356,7 +356,7 @@ void __cdecl R_ToggleSmpFrameCmd(char type)
     R_ReleaseThreadOwnership();
     //Profile_Begin(133);
     CL_ResetStats_f();
-    R_ProcessWorkerCmdsWithTimeout((int(__cdecl*)())Sys_IsRendererReady, 1);
+    R_ProcessWorkerCmdsWithTimeout(Sys_IsRendererReady, 1);
     //Profile_EndInternal(0);
     if ((type & 2) != 0)
         R_PerformanceCounters();

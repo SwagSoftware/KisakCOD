@@ -21,7 +21,7 @@ struct msg_t // sizeof=0x28
 struct NetField // sizeof=0x10
 {                                       // ...
     const char* name;
-    int offset;
+    size_t offset;
     int bits;
     unsigned __int8 changeHints;
     // padding byte
@@ -35,7 +35,7 @@ struct NetFieldList // sizeof=0x8
     unsigned int count;
 };
 
-#define	NETF_BASE(s, x) #x,(int)&((s*)0)->x
+#define	NETF_BASE(s, x) #x,(size_t)&((s*)0)->x
 
 struct hudelem_s;
 struct usercmd_s;

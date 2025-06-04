@@ -29,7 +29,7 @@ void __cdecl Sys_WaitForSingleObject(void** event);
 bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(unsigned int), unsigned int threadIndex);
 void __cdecl Sys_SuspendThread(unsigned int threadContext);
 void __cdecl Sys_ResumeThread(unsigned int threadContext);
-int __cdecl Sys_RendererSleep();
+void *__cdecl Sys_RendererSleep();
 int __cdecl Sys_RendererReady();
 void __cdecl Sys_RenderCompleted();
 void __cdecl Sys_FrontEndSleep();
@@ -75,7 +75,7 @@ bool __cdecl Sys_WaitForCinematicsHostOutstandingRequestEventTimeout(unsigned in
 void __cdecl Sys_SetCinematicsHostOutstandingRequestEvent();
 void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent();
 
-bool __cdecl Sys_IsRendererReady();
+int __cdecl Sys_IsRendererReady();
 void __cdecl Sys_BeginLoadThreadPriorities();
 
 

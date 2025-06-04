@@ -841,7 +841,7 @@ unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *lis
     drawSurfCount = listArgs->info->drawSurfCount - listArgs->firstDrawSurfIndex;
     drawSurfList = &listArgs->info->drawSurfs[listArgs->firstDrawSurfIndex];
     drawSurf.fields = drawSurfList->fields;
-    if (!R_SetupMaterial(listArgs->context, &prepassContext, listArgs->info, (GfxDrawSurf)drawSurfList->fields))
+    if (!R_SetupMaterial(listArgs->context, &prepassContext, listArgs->info, drawSurf))
         return R_SkipDrawSurfListMaterial(drawSurfList, drawSurfCount);
     isPixelCostEnabled = pixelCostMode != GFX_PIXEL_COST_MODE_OFF;
     if (pixelCostMode)
@@ -2998,7 +2998,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
     while (1)
     {
         Value = Sys_GetValue(2);
-        if (!_setjmp((int*)Value))
+        if (!_setjmp(*(jmp_buf *)Value))
             break;
         //Profile_Recover(1);
         if (r_glob.isRenderingRemoteUpdate)
@@ -3025,7 +3025,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
             //Profile_EndInternal(0);
             if (Sys_FinishRenderer())
             {
-                data = (void*)Sys_RendererSleep();
+                data = Sys_RendererSleep();
                 if (data)
                     RB_RenderCommandFrame((GfxBackEndData*)data);
                 Sys_StopRenderer();
@@ -3037,7 +3037,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
             {
                 if (!data)
                 {
-                    data = (void*)Sys_RendererSleep();
+                    data = Sys_RendererSleep();
                     if (data)
                         RB_RenderCommandFrame((GfxBackEndData *)data);
                 }
@@ -3063,7 +3063,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
         LABEL_39:
             data = 0;
         }
-        data = (void*)Sys_RendererSleep();
+        data = Sys_RendererSleep();
         if (data)
         {
             RB_RenderCommandFrame((GfxBackEndData *)data);
@@ -3074,7 +3074,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
     }
 }
 
-BOOL __cdecl RB_BackendTimeout()
+int __cdecl RB_BackendTimeout()
 {
     BOOL v1; // [esp+0h] [ebp-Ch]
     _BYTE v2[4]; // [esp+8h] [ebp-4h] BYREF

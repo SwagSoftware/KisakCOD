@@ -1137,31 +1137,31 @@ void __cdecl Com_ExecStartupConfigs(int localClientNum, const char* configFile)
 
 void __cdecl Com_Init(char* commandLine)
 {
-    void* Value; // eax
+    jmp_buf* Value; // eax
     const char* v2; // eax
-    void* v3; // eax
-    void* v4; // eax
+    jmp_buf * v3; // eax
+    jmp_buf * v4; // eax
     const char* v5; // eax
 
-    Value = Sys_GetValue(2);
+    Value = (jmp_buf *)Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
-    if (_setjmp((int*)Value))
+    if (_setjmp(*Value))
     {
         v2 = va("Error during initialization:\n%s\n", com_errorMessage);
         Sys_Error(v2);
     }
     Com_Init_Try_Block_Function(commandLine);
-    v3 = Sys_GetValue(2);
+    v3 = (jmp_buf *)Sys_GetValue(2);
     //if (!_setjmp3(v3, 0))
-    if (!_setjmp((int*)v3))
+    if (!_setjmp(*v3))
         Com_AddStartupCommands();
     if (com_errorEntered)
         Com_ErrorCleanup();
     if (!com_sv_running->current.enabled && !com_dedicated->current.integer)
     {
-        v4 = Sys_GetValue(2);
+        v4 = (jmp_buf *)Sys_GetValue(2);
         //if (_setjmp3(v4, 0))
-        if (_setjmp((int*)v4))
+        if (_setjmp(*v4))
         {
             v5 = va("Error during initialization:\n%s\n", com_errorMessage);
             Sys_Error(v5);
@@ -1999,7 +1999,7 @@ void __cdecl Com_Frame()
     CL_ResetStats_f();
     Value = Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
-    if (_setjmp((int*)Value))
+    if (_setjmp(*(jmp_buf *)Value))
     {
         //Profile_Recover(1);
     }
@@ -2038,7 +2038,7 @@ void Com_StartHunkUsers()
     Value = Sys_GetValue(2);
 
     //if (_setjmp3(Value, 0))
-    if (_setjmp((int*)Value))
+    if (_setjmp(*(jmp_buf *)Value))
         Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
 
     Com_AssetLoadUI();
