@@ -36,6 +36,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
+#include <setjmp.h>
 #include <time.h>
 #include <ctype.h>
 
@@ -696,6 +697,6 @@ void __cdecl StringTable_GetAsset(const char *filename, XAssetHeader *tablePtr);
 
 extern TraceThreadInfo g_traceThreadInfo[7];
 
-extern int g_com_error[7][16];
+extern jmp_buf g_com_error[7];
 
 extern const dvar_t *useFastFile;

@@ -561,9 +561,9 @@ void __cdecl LiveStorage_UploadStats()
             else
                 Com_BuildPlayerProfilePath(path, 260, "mpdata");
             memcpy(statsFile.body.statsData.stats, statData.playerStats, sizeof(statsFile.body.statsData.stats));
-            I_strncpyz(statsFile.body.statsData.path, (char *)fs_gameDirVar->current.integer, 260);
+            I_strncpyz(statsFile.body.statsData.path, fs_gameDirVar->current.string, 260);
             LiveStorage_Encrypt(&statsFile);
-            v2 = FS_WriteFileToDir(path, (char *)"players", (char *)&statsFile, 0x211Cu);
+            v2 = FS_WriteFileToDir(path, "players", (char *)&statsFile, 0x211Cu);
             if (!LiveStorage_DecryptAndCheck(&statsFile, fs_gameDirVar->current.string))
                 MyAssertHandler(
                     ".\\win32\\win_storage.cpp",

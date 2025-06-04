@@ -1302,7 +1302,7 @@ char __cdecl SV_CheckOverflow()
                                 }
                                 else
                                 {
-                                    I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+                                    I_strncpyz(mapname, sv_mapname->current.string, 64);
                                     Com_Shutdown("EXE_SERVERRESTARTMISC numSnapshotClients");
                                     v8 = va("map %s\n", mapname);
                                     Cbuf_AddText(0, v8);
@@ -1311,7 +1311,7 @@ char __cdecl SV_CheckOverflow()
                             }
                             else
                             {
-                                I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+                                I_strncpyz(mapname, sv_mapname->current.string, 64);
                                 Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                                 v7 = va("map %s\n", mapname);
                                 Cbuf_AddText(0, v7);
@@ -1320,7 +1320,7 @@ char __cdecl SV_CheckOverflow()
                         }
                         else
                         {
-                            I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+                            I_strncpyz(mapname, sv_mapname->current.string, 64);
                             Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                             v6 = va("map %s\n", mapname);
                             Cbuf_AddText(0, v6);
@@ -1329,7 +1329,7 @@ char __cdecl SV_CheckOverflow()
                     }
                     else
                     {
-                        I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+                        I_strncpyz(mapname, sv_mapname->current.string, 64);
                         Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                         v5 = va("map %s\n", mapname);
                         Cbuf_AddText(0, v5);
@@ -1338,7 +1338,7 @@ char __cdecl SV_CheckOverflow()
                 }
                 else
                 {
-                    I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+                    I_strncpyz(mapname, sv_mapname->current.string, 64);
                     Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                     v4 = va("map %s\n", mapname);
                     Cbuf_AddText(0, v4);
@@ -1347,7 +1347,7 @@ char __cdecl SV_CheckOverflow()
             }
             else
             {
-                I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+                I_strncpyz(mapname, sv_mapname->current.string, 64);
                 Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
                 v3 = va("map %s\n", mapname);
                 Cbuf_AddText(0, v3);
@@ -1356,7 +1356,7 @@ char __cdecl SV_CheckOverflow()
         }
         else
         {
-            I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+            I_strncpyz(mapname, sv_mapname->current.string, 64);
             Com_Shutdown("EXE_SERVERRESTARTMISC #KISAKTODO");
             v2 = va("map %s\n", mapname);
             Cbuf_AddText(0, v2);
@@ -1365,7 +1365,7 @@ char __cdecl SV_CheckOverflow()
     }
     else
     {
-        I_strncpyz(mapname, (char *)sv_mapname->current.integer, 64);
+        I_strncpyz(mapname, sv_mapname->current.string, 64);
         Com_Shutdown("EXE_SERVERRESTARTTIMEWRAP");
         v0 = va("map %s\n", mapname);
         Cbuf_AddText(0, v0);

@@ -1904,7 +1904,8 @@ void Scr_ScriptList::Shutdown()
 void Scr_ScriptList::LoadScriptPos()
 {
     Scr_StringNode_s *node; // [esp+1Ch] [ebp-7Ch]
-    __int64 pos; // [esp+20h] [ebp-78h] BYREF
+    // __int64 pos; // [esp+20h] [ebp-78h] BYREF
+    float pos[2];
     char filename[88]; // [esp+28h] [ebp-70h] BYREF
     Scr_StringNode_s *head; // [esp+84h] [ebp-14h]
     char *buf; // [esp+88h] [ebp-10h] BYREF
@@ -1915,7 +1916,7 @@ void Scr_ScriptList::LoadScriptPos()
     for (head = Scr_GetStringList("script_pos.txt", &buf); head; head = node)
     {
         node = head->next;
-        sscanf(head->text, "%80s %d %f %f", filename, &selectedLine, &pos, &pos + 4);
+        sscanf(head->text, "%80s %d %f %f", filename, &selectedLine, &pos[0], &pos[1]);
         for (i = 0; i < this->numLines; ++i)
         {
             comp = this->scriptWindows[i];
@@ -1927,7 +1928,8 @@ void Scr_ScriptList::LoadScriptPos()
                 comp->selectedLine = selectedLine;
                 comp->focusOnSelectedLine = 0;
                 comp->focusOnSelectedLineUser = 0;
-                *comp->pos = pos;
+                comp->pos[0] = pos[0];
+                comp->pos[1] = pos[1];
             }
         }
         Hunk_FreeDebugMem();

@@ -1581,15 +1581,13 @@ void __cdecl Scr_ClearDebugExprValue(sval_u val)
     {
     case 4:
     case 5:
-        if (!*(unsigned int *)(val.type + 16))
-            MyAssertHandler(".\\script\\scr_evaluate.cpp", 2227, 0, "%s", "val.node[4].idValue");
-        ClearVariableValue(*(unsigned int *)(val.type + 16));
+        iassert(val.node[4].idValue);
+        ClearVariableValue(val.node[4].idValue);
         break;
     case 0x11:
     case 0x13:
-        if (!*(unsigned int *)(val.type + 8))
-            MyAssertHandler(".\\script\\scr_evaluate.cpp", 2233, 0, "%s", "val.node[2].idValue");
-        ClearVariableValue(*(unsigned int *)(val.type + 8));
+        iassert(val.node[2].idValue);
+        ClearVariableValue(val.node[2].idValue);
         break;
     default:
         return;

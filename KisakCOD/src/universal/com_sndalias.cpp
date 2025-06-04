@@ -925,11 +925,11 @@ char *__cdecl Com_GetSubtitleStringEdReference(const char *subtitle)
 
 void __cdecl Com_WriteStringEdReferenceToFile(char *pszReference, char *subtitle, int hOutFile)
 {
-    FS_Write((char*)"REFERENCE           ", strlen("REFERENCE           "), hOutFile);
+    FS_Write("REFERENCE           ", strlen("REFERENCE           "), hOutFile);
     FS_Write(pszReference, strlen(pszReference), hOutFile);
-    FS_Write((char *)"\r\nLANG_ENGLISH        \"", strlen("\r\nLANG_ENGLISH        \""), hOutFile);
+    FS_Write("\r\nLANG_ENGLISH        \"", strlen("\r\nLANG_ENGLISH        \""), hOutFile);
     FS_Write(subtitle, strlen(subtitle), hOutFile);
-    FS_Write((char *)"\"\r\n\r\n", strlen("\"\r\n\r\n"), hOutFile);
+    FS_Write("\"\r\n\r\n", strlen("\"\r\n\r\n"), hOutFile);
 
 }
 void __cdecl Com_SetStringEdReference(const char *pszReference, char *subtitle)

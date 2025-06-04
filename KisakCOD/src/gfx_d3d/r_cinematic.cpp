@@ -14,6 +14,10 @@
 #include <qcommon/com_fileaccess.h>
 #include <cgame/cg_local.h>
 
+// #define CINEMA
+
+#ifdef CINEMA
+
 CinematicGlob cinematicGlob;
 bool g_cinematicThreadInitialized;
 CinematicThreadState g_cinematicThreadState;
@@ -631,7 +635,7 @@ bool __cdecl CinematicHunk_IsEmpty(CinematicHunk *hunk)
 
 void __cdecl R_Cinematic_HunksOpen(int activeTexture, char playbackFlags)
 {
-    CinematicHunk_Open(&cinematicGlob.masterHunk, (char *)cinematicGlob.memPool, (int)&cls.globalServers[9796].adr.ipx[2]);
+    CinematicHunk_Open(&cinematicGlob.masterHunk, (char *)cinematicGlob.memPool, 0xD00000);
     R_Cinematic_HunksAllocate(activeTexture, playbackFlags);
 }
 
@@ -1364,3 +1368,19 @@ void __cdecl R_Cinematic_EndLostDevice()
     }
     Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
 }
+#else
+void __cdecl R_Cinematic_Init() { /* THUNK */ }
+void __cdecl R_Cinematic_Shutdown() { /* THUNK */ }
+void __cdecl R_Cinematic_StartPlayback(char *name, unsigned int playbackFlags, float volume) { /* THUNK */ }
+void __cdecl R_Cinematic_StartNextPlayback() { /* THUNK */ }
+void __cdecl R_Cinematic_StopPlayback() { /* THUNK */ }
+void __cdecl R_Cinematic_UpdateFrame() { /* THUNK */ }
+void __cdecl R_Cinematic_SyncNow() { /* THUNK */ }
+void __cdecl R_Cinematic_DrawStretchPic_Letterboxed() { /* THUNK */ }
+bool __cdecl R_Cinematic_IsFinished() { /* THUNK */ return true; }
+bool __cdecl R_Cinematic_IsStarted() { /* THUNK */ return false; }
+bool __cdecl R_Cinematic_IsNextReady() { /* THUNK */ return true; }
+bool __cdecl R_Cinematic_IsUnderrun() { /* THUNK */ return false; }
+void __cdecl R_Cinematic_BeginLostDevice() { /* THUNK */ }
+void __cdecl R_Cinematic_EndLostDevice() { /* THUNK */ }
+#endif

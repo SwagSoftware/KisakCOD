@@ -1405,7 +1405,7 @@ void __cdecl Scr_TerminateWaitThread(unsigned int localId, unsigned int startLoc
         MyAssertHandler(".\\script\\scr_vm.cpp", 3208, 0, "%s", "stackId");
     if (GetValueType(stackId) != 10)
         MyAssertHandler(".\\script\\scr_vm.cpp", 3209, 0, "%s", "GetValueType( stackId ) == VAR_STACK");
-    stackValue = (VariableStackBuffer*)GetVariableValueAddress(stackId)->u.intValue;
+    stackValue = GetVariableValueAddress(stackId)->u.stackValue;
     if (scrVarPub.developer)
         Scr_GetStackThreadPos(localId, stackValue, 1);
     RemoveObjectVariable(id, startLocalId);
@@ -1459,7 +1459,7 @@ void __cdecl VM_TerminateStack(unsigned int endLocalId, unsigned int startLocalI
                 stackValue->localId = parentLocalId;
                 stackValue->size = sizea;
                 tempValue.type = VAR_STACK;
-                tempValue.u.intValue = (int)stackValue;
+                tempValue.u.stackValue = stackValue;
                 Variable = GetVariable(scrVarPub.timeArrayId, scrVarPub.time);
                 Array = GetArray(Variable);
                 stackId = GetNewObjectVariable(Array.u.stringValue, startLocalId);
@@ -4321,7 +4321,7 @@ void __cdecl Scr_GetVector(unsigned int index, float* vectorValue)
 {
     const char* v2; // eax
     const char* v3; // eax
-    float* intValue; // [esp+0h] [ebp-8h]
+    const float* vecValue; // [esp+0h] [ebp-8h]
     VariableValue* value; // [esp+4h] [ebp-4h]
 
     if (index < scrVmPub.outparamcount)
@@ -4329,10 +4329,10 @@ void __cdecl Scr_GetVector(unsigned int index, float* vectorValue)
         value = &scrVmPub.top[-(int)index];
         if (value->type == 4)
         {
-            intValue = (float*)value->u.intValue;
-            *vectorValue = *(float*)value->u.intValue;
-            vectorValue[1] = intValue[1];
-            vectorValue[2] = intValue[2];
+            vecValue = value->u.vectorValue;
+            vectorValue[0] = vecValue[0];
+            vectorValue[1] = vecValue[1];
+            vectorValue[2] = vecValue[2];
             return;
         }
         scrVarPub.error_index = index + 1;
@@ -4484,7 +4484,7 @@ void __cdecl Scr_AddAnim(scr_anim_s value)
 {
     IncInParam();
     scrVmPub.top->type = VAR_ANIMATION;
-    scrVmPub.top->u.intValue = (int)value.linkPointer;
+    scrVmPub.top->u.intValue = (int)value.linkPointer; // KISAKX64: this technically works but is less than ideal
 }
 
 void __cdecl Scr_AddUndefined()

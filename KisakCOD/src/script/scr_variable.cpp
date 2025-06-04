@@ -4271,7 +4271,7 @@ void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2)
 				tempVector[0] = value2->u.floatValue;
 				tempVector[1] = value2->u.floatValue;
 				tempVector[2] = value2->u.floatValue;
-				value2->u.intValue = (int)tempVector;
+				value2->u.vectorValue = tempVector;
 				value2->type = VAR_VECTOR;
 				return;
 			}
@@ -4281,7 +4281,7 @@ void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2)
 				tempVectora[0] = (float)value2->u.intValue;
 				tempVectora[1] = (float)value2->u.intValue;
 				tempVectora[2] = (float)value2->u.intValue;
-				value2->u.intValue = (int)tempVectora;
+				value2->u.vectorValue = tempVectora;
 				value2->type = VAR_VECTOR;
 				return;
 			}
@@ -4294,7 +4294,7 @@ void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2)
 			tempVectorb[0] = value1->u.floatValue;
 			tempVectorb[1] = value1->u.floatValue;
 			tempVectorb[2] = value1->u.floatValue;
-			value1->u.intValue = (int)tempVectorb;
+			value1->u.vectorValue = tempVectorb;
 			value1->type = VAR_VECTOR;
 			return;
 		}
@@ -4304,7 +4304,7 @@ void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2)
 			tempVectorc[0] = (float)value1->u.intValue;
 			tempVectorc[1] = (float)value1->u.intValue;
 			tempVectorc[2] = (float)value1->u.intValue;
-			value1->u.intValue = (int)tempVectorc;
+			value1->u.vectorValue = tempVectorc;
 			value1->type = VAR_VECTOR;
 		}
 		else

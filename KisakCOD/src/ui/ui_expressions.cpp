@@ -1144,14 +1144,14 @@ void __cdecl GetLocalVarStringValue(
     if (var)
     {
         result->dataType = VAL_STRING;
-        result->internals.intVal = (int)UILocalVar_GetString(var->table, stringBuf, size);
+        result->internals.string = UILocalVar_GetString(var->table, stringBuf, size);
         if (uiscript_debug->current.integer)
             Com_Printf(13, "localVarString( %s ) = %s\n", source->internals.string, result->internals.string);
     }
     else
     {
         result->dataType = VAL_STRING;
-        result->internals.intVal = (int)"";
+        result->internals.string = "";
     }
 }
 

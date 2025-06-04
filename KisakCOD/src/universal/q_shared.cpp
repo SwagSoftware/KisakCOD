@@ -802,21 +802,21 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
         v3 = (int)strchr(key, 0x5Cu);
         if (v3)
         {
-            Com_Printf(16, (char *)"Can't use keys with a \\ key: %s value: %s", key, value);
+            Com_Printf(16, "Can't use keys with a \\ key: %s value: %s", key, value);
         }
         else
         {
             v4 = (int)strchr(key, 0x3Bu);
             if (v4)
             {
-                Com_Printf(16, (char *)"Can't use keys with a semicolon. key: %s value: %s", key, value);
+                Com_Printf(16, "Can't use keys with a semicolon. key: %s value: %s", key, value);
             }
             else
             {
                 v5 = (int)strchr(key, 0x22u);
                 if (v5)
                 {
-                    Com_Printf(16, (char *)"Can't use keys with a \". key: %s value: %s", key, value);
+                    Com_Printf(16, "Can't use keys with a \". key: %s value: %s", key, value);
                 }
                 else
                 {
@@ -829,11 +829,11 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
                             if (strlen(s) + &newi[strlen(newi) + 1] - &newi[1] <= 0x400)
                                 memcpy(&s[strlen(s)], newi, &newi[strlen(newi) + 1] - newi);
                             else
-                                Com_Printf(16, (char *)"Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);
+                                Com_Printf(16, "Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);
                         }
                         else
                         {
-                            Com_Printf(16, (char *)"Info buffer length exceeded, not including key/value pair in response.");
+                            Com_Printf(16, "Info buffer length exceeded, not including key/value pair in response.");
                         }
                     }
                 }
@@ -842,7 +842,7 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
     }
     else
     {
-        Com_Printf(16, (char *)"Info_SetValueForKey: oversize infostring");
+        Com_Printf(16, "Info_SetValueForKey: oversize infostring");
     }
 }
 

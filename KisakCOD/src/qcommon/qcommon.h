@@ -1397,8 +1397,8 @@ inline char * stristr(const char *haystack, const char *needle)
     char *pptr = (char *)needle;   /* Pattern to search for    */
     char *start = (char *)haystack; /* Start with a bowl of hay */
     char *sptr;                      /* Substring pointer        */
-    int   slen = strlen(haystack); /* Total size of haystack   */
-    int   plen = strlen(needle);   /* Length of our needle     */
+    size_t   slen = strlen(haystack); /* Total size of haystack   */
+    size_t   plen = strlen(needle);   /* Length of our needle     */
 
     /* while string length not shorter than pattern length */
     for (; slen >= plen; start++, slen--)
@@ -1434,7 +1434,7 @@ inline char * stristr(const char *haystack, const char *needle)
 
 inline void __cdecl strrchr(unsigned __int8 *string, unsigned __int8 chr)
 {
-    unsigned int v2; // ecx
+    size_t v2; // ecx
     unsigned __int8 *v3; // edi
     bool v4; // zf
 
