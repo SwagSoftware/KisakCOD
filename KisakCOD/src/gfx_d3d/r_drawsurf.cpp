@@ -313,7 +313,7 @@ void __cdecl R_AddMarkMeshDrawSurf(
             drawSurf = R_AllocFxDrawSurf(region);
             if (drawSurf)
             {
-                drawSurf->fields = (GfxDrawSurfFields)material->info.drawSurf;
+                drawSurf = &material->info.drawSurf;
 
                 // packed_high = HIDWORD(drawSurf->packed);
                 // *(_DWORD *)&drawSurf->fields = (unsigned __int16)markMeshIndex | *(_DWORD *)&drawSurf->fields & 0xFFFF0000;
@@ -342,29 +342,9 @@ void __cdecl R_AddMarkMeshDrawSurf(
                 // *(_DWORD *)&drawSurf->fields = drawSurf->fields;
                 // HIDWORD(drawSurf->packed) = v9;
 
-                if (((drawSurf->packed >> 40) & 3) != 3)
-                    MyAssertHandler(".\\r_drawsurf.cpp", 546, 1, "%s", "drawSurf->fields.prepass == MTL_PREPASS_NONE");
-                if ((unsigned __int8)BYTE2(*(_DWORD *)&drawSurf->fields) != (unsigned __int64)context->reflectionProbeIndex)
-                    MyAssertHandler(
-                        ".\\r_drawsurf.cpp",
-                        547,
-                        1,
-                        "drawSurf->fields.reflectionProbeIndex == context->reflectionProbeIndex\n\t%i, %i",
-                        (unsigned __int8)BYTE2(*(_DWORD *)&drawSurf->fields),
-                        context->reflectionProbeIndex);
-                if (region != 6
-                    && drawSurf != scene.drawSurfs[region]
-                    && ((drawSurf->packed >> 54) & 0x3F) < ((drawSurf[-1].packed >> 54) & 0x3F))
-                {
-                    MyAssertHandler(
-                        ".\\r_drawsurf.cpp",
-                        548,
-                        1,
-                        "%s\n\t(region) = %i",
-                        "((region == DRAW_SURF_FX_CAMERA_LIT) || (drawSurf == scene.drawSurfs[region]) || (drawSurf->fields.primarySo"
-                        "rtKey >= (drawSurf - 1)->fields.primarySortKey))",
-                        region);
-                }
+                iassert(drawSurf->fields.prepass == MTL_PREPASS_NONE);
+                iassert(drawSurf->fields.reflectionProbeIndex == context->reflectionProbeIndex);
+                iassert(((region == DRAW_SURF_FX_CAMERA_LIT) || (drawSurf == scene.drawSurfs[region]) || (drawSurf->fields.primarySortKey >= (drawSurf - 1)->fields.primarySortKey)));
             }
         }
         else
@@ -384,34 +364,33 @@ struct GfxSortDrawSurfsInterface // sizeof=0x0
 
 void __cdecl ShortSort /*ShortSortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>*/(GfxDrawSurf *lo, GfxDrawSurf *hi)
 {
-    int packed_high; // edx
-    unsigned __int64 v3; // [esp+4h] [ebp-34h]
-    unsigned __int64 packed; // [esp+Ch] [ebp-2Ch]
-    GfxDrawSurf *max; // [esp+1Ch] [ebp-1Ch]
-    unsigned __int64 maxKey; // [esp+20h] [ebp-18h]
-    GfxDrawSurf *walk; // [esp+34h] [ebp-4h]
+    int packed_high; // eax
+    unsigned __int64 packed; // [esp+0h] [ebp-24h]
+    GfxDrawSurf *maxx; // [esp+8h] [ebp-1Ch] // (max is a fkin macro!)
+    unsigned __int64 maxKey; // [esp+Ch] [ebp-18h]
+    unsigned __int64 walkKey; // [esp+14h] [ebp-10h]
+    GfxDrawSurf *walk; // [esp+20h] [ebp-4h]
 
     while (hi > lo)
     {
-        max = lo;
-        LODWORD(maxKey) = lo->packed;
-        HIDWORD(maxKey) = ((~((lo->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(lo->packed) & 0xF03FFFFF;
+        maxx = lo;
+        maxKey = lo->packed;
         for (walk = lo + 1; walk <= hi; ++walk)
         {
-            packed = walk->packed;
-            HIDWORD(packed) = ((~((walk->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(walk->packed) & 0xF03FFFFF;
-            if (maxKey < packed)
+            walkKey = walk->packed;
+            if (HIDWORD(maxKey) <= HIDWORD(walk->packed)
+                && (HIDWORD(maxKey) < HIDWORD(walkKey) || (unsigned int)maxKey < (unsigned int)walkKey))
             {
-                LODWORD(maxKey) = walk->packed;
-                HIDWORD(maxKey) = ((~((walk->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(walk->packed) & 0xF03FFFFF;
-                max = walk;
+                maxKey = walk->packed;
+                maxx = walk;
             }
         }
-        v3 = max->packed;
-        packed_high = HIDWORD(hi->packed);
-        *(_DWORD *)&max->fields = hi->packed;
-        HIDWORD(max->packed) = packed_high;
-        hi->packed = v3;
+        packed = maxx->packed;
+        //packed_high = HIDWORD(hi->packed);
+        //*(_DWORD *)&max->fields = hi->fields;
+        LODWORD(maxx->packed) = LODWORD(hi->packed);
+        HIDWORD(maxx->packed) = HIDWORD(hi->packed);
+        hi->packed = packed;
         --hi;
     }
 }
@@ -420,12 +399,12 @@ void __cdecl SortMyShit /*qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSu
 {
     int packed_high; // edx
     GfxDrawSurf *v3; // eax
-    int v4; // eax
-    int v5; // ecx
+    unsigned int v4; // eax
+    unsigned int v5; // ecx
     GfxDrawSurf *v6; // edx
     GfxDrawSurf v7; // [esp+4h] [ebp-180h]
-    int fields; // [esp+Ch] [ebp-178h]
-    int v9; // [esp+10h] [ebp-174h]
+    unsigned int fields; // [esp+Ch] [ebp-178h]
+    unsigned int v9; // [esp+10h] [ebp-174h]
     GfxDrawSurf v10; // [esp+14h] [ebp-170h]
     GfxDrawSurf v11; // [esp+1Ch] [ebp-168h]
     GfxDrawSurf v12; // [esp+2Ch] [ebp-158h]
@@ -440,96 +419,91 @@ void __cdecl SortMyShit /*qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSu
     GfxDrawSurf *loEnd; // [esp+17Ch] [ebp-8h]
     GfxDrawSurf *mid; // [esp+180h] [ebp-4h]
 
-    if (count >= 2)
+    if (count < 2)
     {
-        stackPos = 0;
-        loEnd = elems;
-        hiEnd = &elems[count - 1];
+        return;
+    }
+
+    stackPos = 0;
+    loEnd = elems;
+    hiEnd = &elems[count - 1];
+    while (1)
+    {
         while (1)
         {
+            sortCount = hiEnd - loEnd + 1;
+            if (sortCount <= 8)
+            {
+                ShortSort(loEnd, hiEnd);
+                goto LABEL_22;
+            }
+            mid = &loEnd[sortCount / 2];
+            v10.fields = mid->fields;
+            packed_high = HIDWORD(loEnd->packed);
+            v3 = mid;
+            //*(_DWORD *)&mid->fields = loEnd->fields;
+            LODWORD(mid->packed) = LODWORD(loEnd->packed);
+            HIDWORD(v3->packed) = packed_high;
+            loEnd->fields = v10.fields;
+            loWalk = loEnd;
+            hiWalk = hiEnd + 1;
+            pivotKey = loEnd->packed;
             while (1)
             {
-                sortCount = hiEnd - loEnd + 1;
-                if (sortCount <= 8)
-                {
-                    //ShortSortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>(loEnd, hiEnd);
-                    ShortSort(loEnd, hiEnd);
-                    goto LABEL_22;
-                }
-                mid = &loEnd[sortCount / 2];
-                v12.fields = mid->fields;
-                packed_high = HIDWORD(loEnd->packed);
-                v3 = mid;
-                *(_DWORD *)&mid->fields = loEnd->packed;
-                HIDWORD(v3->packed) = packed_high;
-                loEnd->fields = v12.fields;
-                loWalk = loEnd;
-                hiWalk = hiEnd + 1;
-                LODWORD(pivotKey) = loEnd->packed;
-                HIDWORD(pivotKey) = ((~((loEnd->packed >> 54) & 0x3F) & 0x3F) << 22) | HIDWORD(loEnd->packed) & 0xF03FFFFF;
-                while (1)
-                {
-                    do
-                    {
-                        if (++loWalk > hiEnd)
-                            break;
-                        v11.fields = loWalk->fields;
-                        HIDWORD(v11.packed) = ((~((loWalk->packed >> 54) & 0x3F) & 0x3F) << 22)
-                            | HIDWORD(loWalk->packed) & 0xF03FFFFF;
-                    } while (v11.packed <= pivotKey);
-                    do
-                    {
-                        if (loEnd >= --hiWalk)
-                            break;
-                        v10.fields = hiWalk->fields;
-                        HIDWORD(v10.packed) = ((~((hiWalk->packed >> 54) & 0x3F) & 0x3F) << 22)
-                            | HIDWORD(hiWalk->packed) & 0xF03FFFFF;
-                    } while (pivotKey <= v10.packed);
-                    if (hiWalk < loWalk)
-                        break;
-                    fields = (int)loWalk->packed;
-                    v9 = HIDWORD(loWalk->packed);
-                    v4 = HIDWORD(hiWalk->packed);
-                    *(_DWORD *)&loWalk->fields = hiWalk->packed;
-                    HIDWORD(loWalk->packed) = v4;
-                    *(_DWORD *)&hiWalk->fields = fields;
-                    HIDWORD(hiWalk->packed) = v9;
-                }
-                v7.fields = loEnd->fields;
-                v5 = HIDWORD(hiWalk->packed);
-                v6 = loEnd;
-                *(_DWORD *)&loEnd->fields = hiWalk->packed;
-                HIDWORD(v6->packed) = v5;
-                hiWalk->fields = v7.fields;
-                if (&hiWalk[-1] - loEnd >= hiEnd - loWalk)
+                do
+                    ++loWalk;
+                while (loWalk <= hiEnd && loWalk->packed <= pivotKey);
+                do
+                    --hiWalk;
+                while (loEnd < hiWalk && pivotKey <= hiWalk->packed);
+                if (hiWalk < loWalk)
                     break;
-                if (loWalk < hiEnd)
-                {
-                    loStack[stackPos] = loWalk;
-                    hiStack[stackPos++] = hiEnd;
-                }
-                if (loEnd >= &hiWalk[-1])
-                {
-                LABEL_22:
-                    if (--stackPos < 0)
-                        return;
-                    loEnd = loStack[stackPos];
-                    hiEnd = hiStack[stackPos];
-                }
-                else
-                {
-                    hiEnd = hiWalk - 1;
-                }
+                //fields = (int)loWalk->fields;
+                fields = LODWORD(loWalk->packed);
+                v9 = HIDWORD(loWalk->packed);
+                v4 = HIDWORD(hiWalk->packed);
+                //*(_DWORD *)&loWalk->fields = hiWalk->fields;
+                LODWORD(loWalk->packed) = LODWORD(hiWalk->packed);
+                HIDWORD(loWalk->packed) = v4;
+                //*(_DWORD *)&hiWalk->fields = fields;
+                LODWORD(hiWalk->packed) = fields;
+                HIDWORD(hiWalk->packed) = v9;
             }
-            if (loEnd <= hiWalk)
+            v7.fields = loEnd->fields;
+            v5 = HIDWORD(hiWalk->packed);
+            v6 = loEnd;
+            //*(_DWORD *)&loEnd->fields = hiWalk->fields;
+            LODWORD(loEnd->packed) = LODWORD(hiWalk->packed);
+            HIDWORD(v6->packed) = v5;
+            hiWalk->fields = v7.fields;
+            if (&hiWalk[-1] - loEnd >= hiEnd - loWalk)
+                break;
+            if (loWalk < hiEnd)
             {
-                loStack[stackPos] = loEnd;
-                hiStack[stackPos++] = hiWalk - 1;
+                loStack[stackPos] = loWalk;
+                hiStack[stackPos++] = hiEnd;
             }
-            if (loWalk >= hiEnd)
-                goto LABEL_22;
-            loEnd = loWalk;
+            if (loEnd >= &hiWalk[-1])
+            {
+            LABEL_22:
+                if (--stackPos < 0)
+                    return;
+                loEnd = loStack[stackPos];
+                hiEnd = hiStack[stackPos];
+            }
+            else
+            {
+                hiEnd = hiWalk - 1;
+            }
         }
+        if (loEnd <= hiWalk)
+        {
+            loStack[stackPos] = loEnd;
+            hiStack[stackPos++] = hiWalk - 1;
+        }
+        if (loWalk >= hiEnd)
+            goto LABEL_22;
+        loEnd = loWalk;
     }
 }
 
@@ -580,7 +554,7 @@ GfxWorld *R_SetPrimaryLightShadowSurfaces()
         result = rgp.world;
         if (surfIndex >= rgp.world->models->surfaceCount)
             break;
-        if (((rgp.world->dpvs.surfaceMaterials[surfIndex].packed >> 24) & 0x1F) != 0)
+        if (rgp.world->dpvs.surfaceMaterials[surfIndex].fields.customIndex != 0)
             R_ForEachPrimaryLightAffectingSurface(
                 rgp.world,
                 &rgp.world->dpvs.surfaces[surfIndex],
@@ -617,9 +591,9 @@ void __cdecl R_SortWorldSurfaces()
         MyAssertHandler(".\\r_drawsurf.cpp", 348, 1, "%s", "worldSurfCount == rgp.world->models[0].surfaceCount");
     for (surfIndex = 0; surfIndex < worldSurfCount; ++surfIndex)
     {
-        v0.fields = R_GetWorldDrawSurf(&worldSurfArray[surfIndex]).fields;
+        v0 = R_GetWorldDrawSurf(&worldSurfArray[surfIndex]);
         rgp.world->dpvs.surfaceMaterials[surfIndex] = v0;
-        if (((v0.packed >> 24) & 0x1F) != 0 && (worldSurfArray[surfIndex].flags & 1) != 0)
+        if (v0.fields.customIndex != 0 && (worldSurfArray[surfIndex].flags & 1) != 0)
             rgp.world->dpvs.surfaceCastsSunShadow[surfIndex >> 5] |= 1 << (surfIndex & 0x1F);
     }
     R_SetPrimaryLightShadowSurfaces();
@@ -660,21 +634,10 @@ char __cdecl R_AddParticleCloudDrawSurf(volatile unsigned int cloudIndex, Materi
             HIDWORD(drawSurf->packed) = v4;
             *&drawSurf->fields = drawSurf->fields;
             HIDWORD(drawSurf->packed) = HIDWORD(drawSurf->packed);
-            if (((drawSurf->packed >> 40) & 3) != 3)
-                MyAssertHandler(".\\r_drawsurf.cpp", 582, 1, "%s", "localDrawSurf->fields.prepass == MTL_PREPASS_NONE");
-            if ((MaterialSortKey == 48) + (MaterialSortKey != 24 ? 0 : 2)
-                && drawSurf != scene.drawSurfs[region]
-                && ((drawSurf->packed >> 54) & 0x3F) < ((drawSurf[-1].packed >> 54) & 0x3F))
-            {
-                MyAssertHandler(
-                    ".\\r_drawsurf.cpp",
-                    584,
-                    1,
-                    "%s\n\t(region) = %i",
-                    "((region == DRAW_SURF_FX_CAMERA_EMISSIVE) || (drawSurf == scene.drawSurfs[region]) || (drawSurf->fields.primar"
-                    "ySortKey >= (drawSurf - 1)->fields.primarySortKey))",
-                    region);
-            }
+
+            iassert(drawSurf->fields.prepass == MTL_PREPASS_NONE);
+            iassert(((region == DRAW_SURF_FX_CAMERA_EMISSIVE) || (drawSurf == scene.drawSurfs[region]) || (drawSurf->fields.primarySortKey >= (drawSurf - 1)->fields.primarySortKey)));
+
             return 1;
         }
         else

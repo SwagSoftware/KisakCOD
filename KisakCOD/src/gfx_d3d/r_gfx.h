@@ -313,31 +313,19 @@ struct GfxStaticModelDrawInst // sizeof=0x4C
 
 struct GfxDrawSurfFields // sizeof=0x8
 {                                       // ...
-    unsigned __int64 objectId : 16;
-    unsigned __int64 reflectionProbeIndex : 8;
-    unsigned __int64 customIndex : 5;
-    unsigned __int64 materialSortedIndex : 11;
-    unsigned __int64 prepass : 2;
-    unsigned __int64 primaryLightIndex : 8;
-    unsigned __int64 surfType : 4;
-    unsigned __int64 primarySortKey : 6;
-    unsigned __int64 unused : 4;
+    /* 0*/ unsigned __int64 objectId : 16;
+    /*16*/ unsigned __int64 reflectionProbeIndex : 8;
+    /*24*/ unsigned __int64 customIndex : 5;         
+    /*29*/ unsigned __int64 materialSortedIndex : 11;
+    /*40*/ unsigned __int64 prepass : 2;             
+    /*42*/ unsigned __int64 primaryLightIndex : 8;   
+    /*50*/ unsigned __int64 surfType : 4;            
+    /*54*/ unsigned __int64 primarySortKey : 6;      
+    /*60*/ unsigned __int64 unused : 4;              
 };
 
 union GfxDrawSurf // sizeof=0x8
 {                                       // ...
-    operator GfxDrawSurfFields()
-    {
-        return fields;
-    }
-    operator const GfxDrawSurfFields()
-    {
-        return fields;
-    }
-    operator __int64()
-    {
-        return packed;
-    }
     GfxDrawSurfFields fields;
     unsigned __int64 packed;
 };

@@ -970,7 +970,6 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
     GfxDrawSurf *lastDrawSurf)
 {
     unsigned int surfId; // [esp+10h] [ebp-50h]
-    unsigned int surfIda; // [esp+10h] [ebp-50h]
     const DObj_s *obj; // [esp+14h] [ebp-4Ch]
     Material **material; // [esp+18h] [ebp-48h]
     XModel *model; // [esp+1Ch] [ebp-44h]
@@ -1041,22 +1040,27 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
                     continue;
                 }
                 surfId = modelSurf - (char *)frontEndDataOut;
-                if ((((_BYTE)modelSurf - (_BYTE)frontEndDataOut) & 3) != 0)
-                    MyAssertHandler(".\\r_scene.cpp", 1101, 0, "%s", "!(surfId & 3)");
-                surfIda = surfId >> 2;
-                if (surfIda >= 0x10000)
-                    MyAssertHandler(
-                        ".\\r_scene.cpp",
-                        1103,
-                        0,
-                        "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
-                        surfIda,
-                        0x10000);
-                newDrawSurf.fields = (GfxDrawSurfFields)(*material)->info.drawSurf;
-                *(unsigned int *)&drawSurf->fields = (unsigned __int16)surfIda | *(unsigned int *)&newDrawSurf.fields & 0xFFFF0000;
-                HIDWORD(drawSurf->packed) = ((surfType & 0xF) << 18)
-                    | (((((newDrawSurf.packed >> 54) & 0x3F) - depthHack) & 0x3F) << 22)
-                    | HIDWORD(newDrawSurf.packed) & 0xF003FFFF;
+                iassert(!(surfId & 3));
+
+                surfId = surfId / 4;
+                iassert(surfId < MTL_SORT_OBJECT_ID_BITS);
+
+                newDrawSurf = (*material)->info.drawSurf;
+
+                drawSurf->packed = newDrawSurf.packed; // LWSS: see explanation below, it basically copies the whole thing and sets a few custom fields.
+
+                drawSurf->fields.objectId = (unsigned short)surfId;
+                //*(unsigned int *)&drawSurf->fields = (unsigned __int16)surfIda  // set lower 16 (objectId)
+                //    | *(unsigned int *)&newDrawSurf.fields & 0xFFFF0000; // Copy the higher 2 bytes (bits 16-32)
+                
+                drawSurf->fields.surfType = surfType;
+                drawSurf->fields.primarySortKey = (newDrawSurf.fields.primarySortKey - depthHack);
+
+                // HIDWORD(drawSurf->packed) = // Adds << 32 to all below
+                //     ((surfType & 0xF) << 18) // surfType
+                //     | (((((newDrawSurf.packed >> 54) & 0x3F) - depthHack) & 0x3F) << 22) // newDrawSurf.primarySortKey - depthhack
+                //     | HIDWORD(newDrawSurf.packed) & 0xF003FFFF; // Copy everything higher than 32 except for 10bits (Surftype and primarySortKey, we did those already)
+
                 ++drawSurf;
             }
             goto LABEL_17;

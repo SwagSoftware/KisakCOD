@@ -1348,7 +1348,8 @@ void __cdecl ShortSortArray_GfxReverseSortDrawSurfsInterface_GfxDrawSurf_(GfxDra
         }
         v3 = max->packed;
         packed_high = HIDWORD(hi->packed);
-        *&max->fields = hi->fields;
+        //*&max->fields = hi->fields;
+        LODWORD(max->packed) = LODWORD(hi->packed);
         HIDWORD(max->packed) = packed_high;
         hi->packed = v3;
         --hi;

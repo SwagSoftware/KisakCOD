@@ -2,6 +2,7 @@
 #include "rb_logfile.h"
 #include "r_draw_shadowable_light.h"
 #include "rb_pixelcost.h"
+#include "r_drawsurf.h"
 
 
 int __cdecl R_SetupMaterial(
@@ -15,26 +16,19 @@ int __cdecl R_SetupMaterial(
     MaterialTechniqueType baseTechType; // [esp+14h] [ebp-Ch]
     unsigned int surfType; // [esp+18h] [ebp-8h]
 
-    surfType = (drawSurf.packed >> 50) & 0xF;
+    surfType = drawSurf.fields.surfType;
     baseTechType = info->baseTechType;
     if (baseTechType > TECHNIQUE_BUILD_FLOAT_Z)
     {
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
-            if ((unsigned __int8)(drawSurf.packed >> 42) >= info->viewInfo->shadowableLightCount)
-                MyAssertHandler(
-                    ".\\r_draw_material.cpp",
-                    367,
-                    0,
-                    "drawSurf.fields.primaryLightIndex doesn't index info->viewInfo->shadowableLightCount\n\t%i not in [0, %i)",
-                    (unsigned __int8)(drawSurf.packed >> 42),
-                    info->viewInfo->shadowableLightCount);
+            iassert(drawSurf.fields.primaryLightIndex < info->viewInfo->shadowableLightCount);
             if (!R_SetMaterial(
                 context,
                 drawSurf,
-                (MaterialTechniqueType)context.source->input.data->primaryLightTechType[surfType][(unsigned __int8)(drawSurf.packed >> 42)]))
+                (MaterialTechniqueType)context.source->input.data->primaryLightTechType[surfType][drawSurf.fields.primaryLightIndex]))
                 return 0;
-            R_SetShadowableLight(context.source, (unsigned __int8)(drawSurf.packed >> 42), info->viewInfo);
+            R_SetShadowableLight(context.source, drawSurf.fields.primaryLightIndex, info->viewInfo);
         }
         else if (baseTechType == TECHNIQUE_DEBUG_BUMPMAP && (surfType == 4 || surfType == 3))
         {
@@ -70,27 +64,25 @@ int __cdecl R_SetPrepassMaterial(GfxCmdBufContext context, GfxDrawSurf drawSurf,
     const MaterialTechnique *technique; // [esp+8h] [ebp-Ch]
     Material *material; // [esp+Ch] [ebp-8h]
 
-    if (((drawSurf.packed >> 40) & 3) == 3)
+    if (drawSurf.fields.prepass == MTL_PREPASS_NONE)
         return 0;
+
     material = rgp.sortedMaterials[drawSurf.fields.materialSortedIndex];
-    if (((drawSurf.packed >> 40) & 3) == 0 && (material->stateFlags & 1) != 0)
+
+    if (drawSurf.fields.prepass == MTL_PREPASS_STANDARD && (material->stateFlags & 1) != 0)
         material = rgp.depthPrepassMaterial;
+
     context.state->material = material;
     technique = Material_GetTechnique(material, techType);
     context.state->technique = technique;
+
     if (!technique)
         return 0;
-    if ((technique->flags & 2) != 0)
-        MyAssertHandler(".\\r_draw_material.cpp", 187, 0, "%s", "!(technique->flags & MTL_TECHFLAG_NEEDS_RESOLVED_SCENE)");
-    if ((technique->flags & 1) != 0)
-        MyAssertHandler(
-            ".\\r_draw_material.cpp",
-            188,
-            0,
-            "%s",
-            "!(technique->flags & MTL_TECHFLAG_NEEDS_RESOLVED_POST_SUN)");
-    if (!material)
-        MyAssertHandler(".\\r_draw_material.cpp", 190, 0, "%s", "material");
+
+    iassert(!(technique->flags & MTL_TECHFLAG_NEEDS_RESOLVED_SCENE));
+    iassert(!(technique->flags & MTL_TECHFLAG_NEEDS_RESOLVED_POST_SUN));
+    iassert(material);
+
     context.state->techType = techType;
     return 1;
 }

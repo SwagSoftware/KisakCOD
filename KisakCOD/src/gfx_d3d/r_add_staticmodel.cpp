@@ -795,15 +795,8 @@ void __cdecl R_SkinStaticModelsShadowForLod(
     for (surfaceIndex = 0; surfaceIndex < surfaceCount; ++surfaceIndex)
     {
         material = *materialForSurf;
-        if (!*materialForSurf)
-            MyAssertHandler(".\\r_add_staticmodel.cpp", 271, 0, "%s", "material");
-        if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
-            MyAssertHandler(
-                ".\\r_add_staticmodel.cpp",
-                277,
-                0,
-                "%s",
-                "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+        iassert(material);
+        iassert(rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material);
         v6 = (material->info.gameFlags & 0x40) == 0;
         surfaces[1] = (XSurface *)((material->info.gameFlags & 0x40) != 0);
         if (!v6)

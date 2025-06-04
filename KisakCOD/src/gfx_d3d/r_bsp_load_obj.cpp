@@ -2032,7 +2032,7 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface *surf0, const GfxSurface *surf1)
         if (comparison)
             return comparison < 0;
     }
-    comparisona = ((material->info.drawSurf.packed >> 54) & 0x3F) - ((material_4->info.drawSurf.packed >> 54) & 0x3F);
+    comparisona = (material->info.drawSurf.fields.primarySortKey - material_4->info.drawSurf.fields.primarySortKey);
     if (comparisona)
         return comparisona < 0;
     Com_GetPrimaryLight(surf0->primaryLightIndex);

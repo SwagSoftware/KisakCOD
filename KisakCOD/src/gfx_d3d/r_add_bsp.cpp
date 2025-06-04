@@ -201,7 +201,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
             {
                 if (triSurfCount)
                     R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
-                Com_BitSetAssert(scene.shadowableLightIsUsed, (unsigned __int8)(drawSurf.packed >> 42), 128);
+                Com_BitSetAssert(scene.shadowableLightIsUsed, drawSurf.fields.primaryLightIndex, 128);
                 prevDrawSurf.fields = drawSurf.fields;
                 triSurfCount = 0;
             }
@@ -415,7 +415,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                         R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
                     }
                     prevDrawSurf.fields = drawSurf.fields;
-                    skipMaterial = ((drawSurf.packed >> 24) & 0x1F) == 0;
+                    skipMaterial = (drawSurf.fields.customIndex == 0);
                     triSurfCount = 0;
                 }
                 if (!skipMaterial)

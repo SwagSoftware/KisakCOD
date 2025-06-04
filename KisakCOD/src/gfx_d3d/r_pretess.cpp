@@ -105,13 +105,15 @@ void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int s
                 //Profile_EndInternal(0);
                 return;
             }
-            primarySortKey = (drawSurfs[0]->packed >> 54) & 0x3F;
+            primarySortKey = drawSurfs[0]->fields.primarySortKey;
             for (stageIndexa = 1; stageIndexa < dstStageIndex; ++stageIndexa)
             {
-                if ((int)((drawSurfs[stageIndexa]->packed >> 54) & 0x3F) < primarySortKey)
-                    v3 = (drawSurfs[stageIndexa]->packed >> 54) & 0x3F;
+                //if ((int)((drawSurfs[stageIndexa]->packed >> 54) & 0x3F) < primarySortKey)
+                if (drawSurfs[stageIndexa]->fields.primarySortKey < primarySortKey)
+                    v3 = drawSurfs[stageIndexa]->fields.primarySortKey;
                 else
                     v3 = primarySortKey;
+
                 primarySortKey = v3;
             }
             dstStageIndex = 0;
@@ -147,10 +149,11 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
     do
     {
         drawSurf = drawSurfs[usedCount];
-        if (((drawSurf.packed >> 54) & 0x3F) != primarySortKey)
+        if (drawSurf.fields.primarySortKey != primarySortKey)
             break;
         outDrawSurf[usedCount++] = drawSurf;
     } while (usedCount < drawSurfCount);
+
     frontEndDataOut->drawSurfCount += usedCount;
     //Profile_EndInternal(0);
     return usedCount;

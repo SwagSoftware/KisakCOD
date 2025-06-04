@@ -155,17 +155,12 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     drawSurfIndex = 0;
     do
     {
-        codeMesh = &data->codeMeshes[LOWORD(drawSurf.packed)];
-        if (!codeMesh->triCount)
-            MyAssertHandler(
-                ".\\rb_tess.cpp",
-                234,
-                0,
-                "%s\n\t(codeMesh->triCount) = %i",
-                "(codeMesh->triCount > 0)",
-                codeMesh->triCount);
-        if (data->codeMeshes[LOWORD(drawSurf.packed)].indices < data->codeMesh.indices
-            || &data->codeMeshes[LOWORD(drawSurf.packed)].indices[3 * data->codeMeshes[LOWORD(drawSurf.packed)].triCount] > data->codeMesh.indices + 24576)
+        codeMesh = &data->codeMeshes[drawSurf.fields.objectId];
+
+        iassert(codeMesh->triCount > 0);
+        
+        if (data->codeMeshes[drawSurf.fields.objectId].indices < data->codeMesh.indices
+            || &data->codeMeshes[drawSurf.fields.objectId].indices[3 * data->codeMeshes[drawSurf.fields.objectId].triCount] > data->codeMesh.indices + 24576)
         {
             v2 = va(
                 "0x%08x 0x%08x %i %i %s",
@@ -184,8 +179,8 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
                 v2);
         }
         if (argCount
-            || data->codeMeshes[LOWORD(drawSurf.packed)].argCount
-            || &indices[6 * args.triCount] != (unsigned __int8 *)data->codeMeshes[LOWORD(drawSurf.packed)].indices)
+            || data->codeMeshes[drawSurf.fields.objectId].argCount
+            || &indices[6 * args.triCount] != (unsigned __int8 *)data->codeMeshes[drawSurf.fields.objectId].indices)
         {
             if (args.triCount)
             {
@@ -193,12 +188,12 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
                 R_DrawIndexedPrimitive(&context.state->prim, &args);
                 args.triCount = 0;
             }
-            indices = (unsigned __int8 *)data->codeMeshes[LOWORD(drawSurf.packed)].indices;
+            indices = (unsigned __int8 *)data->codeMeshes[drawSurf.fields.objectId].indices;
             R_TessCodeMeshList_AddCodeMeshArgs(context.source, data, codeMesh);
             R_SetupPassPerObjectArgs(context);
             R_SetupPassPerPrimArgs(context);
         }
-        argCount = data->codeMeshes[LOWORD(drawSurf.packed)].argCount;
+        argCount = data->codeMeshes[drawSurf.fields.objectId].argCount;
         args.triCount += codeMesh->triCount;
         g_frameStatsCur.fxIndexCount += 3 * codeMesh->triCount;
         if (++drawSurfIndex == drawSurfCount)
@@ -282,7 +277,7 @@ void __cdecl R_TessCodeMeshList_AddCodeMeshArgs(
 
 unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
 {
-    int packed_low; // eax
+    int objId; // eax
     int v3; // eax
     bool v5; // [esp+10h] [ebp-B4h]
     bool v6; // [esp+18h] [ebp-ACh]
@@ -334,7 +329,7 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
         R_ChangeObjectPlacement(context.source, &rg.identityPlacement);
     R_ChangeDepthHackNearClip(context.source, 0);
     data = context.source->input.data;
-    markType = data->markMeshes[LOWORD(drawSurf.packed)].modelTypeAndSurf & 0xC0;
+    markType = data->markMeshes[drawSurf.fields.objectId].modelTypeAndSurf & 0xC0;
     v7 = markType == 64 || markType == 192;
     declType = (MaterialVertexDeclType)(2 - v7);
     R_SetVertexDeclTypeNormal(context.state, declType);
@@ -346,13 +341,14 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     args.baseIndex = 0;
     args.vertexCount = 6144;
     args.triCount = 0;
-    drawSurfSubMask.packed = -65536;
+    drawSurfSubMask.packed = 0xFFFFFFFF'FFFF0000;
     if (baseTechType != TECHNIQUE_LIT_BEGIN)
     {
-        *(unsigned int *)&drawSurfSubMask.fields = -536870912;
+        //*(unsigned int *)&drawSurfSubMask.fields = -536870912;
+        LODWORD(drawSurfSubMask.packed) = 0xE0000000;
         R_SetupPassPerObjectArgs(context);
     }
-    drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
+    drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000;
     R_TrackPrims(context.state, GFX_PRIM_STATS_FX);
     drawSurfIndex = 0;
     do
@@ -367,9 +363,9 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
                 indices = 0;
                 args.triCount = 0;
             }
-            packed_low = LOWORD(drawSurf.packed);
-            markMesh = &data->markMeshes[packed_low];
-            markTypea = data->markMeshes[packed_low].modelTypeAndSurf & 0xC0;
+            objId = drawSurf.fields.objectId;
+            markMesh = &data->markMeshes[objId];
+            markTypea = data->markMeshes[objId].modelTypeAndSurf & 0xC0;
             v6 = markTypea == 64 || markTypea == 192;
             if (declType != 2 - v6)
                 MyAssertHandler(
@@ -397,17 +393,16 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
                         "%s\n\t(markType) = %i",
                         "((markType == MARK_MODEL_TYPE_WORLD_BRUSH) || (markType == MARK_MODEL_TYPE_ENT_BRUSH))",
                         markTypea);
-                R_SetLightmap(context, (drawSurf.packed >> 24) & 0x1F);
+                R_SetLightmap(context, drawSurf.fields.customIndex);
             }
-            R_SetReflectionProbe(context, BYTE2(drawSurf.packed));
+            R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
             R_SetupPassPerObjectArgs(context);
         }
         drawSurfSubKey = drawSurfSubMask.packed & drawSurf.packed;
         do
         {
-            v3 = LOWORD(drawSurf.packed);
-            markMesha = &data->markMeshes[v3];
-            markTypeb = data->markMeshes[v3].modelTypeAndSurf & 0xC0;
+            markMesha = &data->markMeshes[drawSurf.fields.objectId];
+            markTypeb = data->markMeshes[drawSurf.fields.objectId].modelTypeAndSurf & 0xC0;
             v5 = markTypeb == 64 || markTypeb == 192;
             if (declType != 2 - v5)
                 MyAssertHandler(
@@ -501,9 +496,9 @@ unsigned int __cdecl R_TessParticleCloudList(const GfxDrawSurfListArgs *listArgs
             639,
             0,
             "drawSurf.fields.objectId doesn't index data->cloudCount\n\t%i not in [0, %i)",
-            (unsigned __int16)drawSurf,
+            (unsigned __int16)drawSurf.fields.objectId,
             data->cloudCount);
-    cloud = &data->clouds[(unsigned __int16)drawSurf];
+    cloud = &data->clouds[drawSurf.fields.objectId];
     //Profile_Begin(97);
     R_SetParticleCloudConstants(commonSource, cloud);
     //Profile_EndInternal(0);
@@ -718,7 +713,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
     drawSurfIndex = 0;
     if (info->cameraView)
     {
-        modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * LOWORD(drawSurf.packed));
+        modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
         baseGfxEntIndex = modelSurf->info.gfxEntIndex;
         if (modelSurf->info.gfxEntIndex)
         {
@@ -740,7 +735,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
             R_ChangeDepthRange(context.state, depthHackFlags);
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
-            if (sc_enable->current.enabled && ((drawSurf.packed >> 24) & 0x1F) != 0)
+            if (sc_enable->current.enabled && (drawSurf.fields.customIndex != 0))
                 R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
             else
                 R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
@@ -772,7 +767,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                     HIDWORD(drawSurf.packed),
                     drawSurfKey))
                     break;
-                modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * LOWORD(drawSurf.packed));
+                modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
                 gfxEntIndex = modelSurf->info.gfxEntIndex;
                 if (gfxEntIndex != baseGfxEntIndex)
                 {
@@ -808,7 +803,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                     HIDWORD(drawSurf.packed),
                     drawSurfKeya))
                     break;
-                modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * LOWORD(drawSurf.packed));
+                modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
                 gfxEntIndexa = modelSurf->info.gfxEntIndex;
                 if (gfxEntIndexa != baseGfxEntIndex)
                 {
@@ -834,7 +829,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
             MyAssertHandler(".\\rb_tess.cpp", 1046, 0, "%s", "prepassContext.state == NULL");
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
             MyAssertHandler(".\\rb_tess.cpp", 1047, 0, "%s", "baseTechType != TECHNIQUE_LIT");
-        modelSurfa = (const GfxModelSkinnedSurface *)((char *)data + 4 * LOWORD(drawSurf.packed));
+        modelSurfa = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
         baseGfxEntIndexa = modelSurfa->info.gfxEntIndex;
         if (modelSurfa->info.gfxEntIndex)
             materialTimea = data->gfxEnts[baseGfxEntIndexa].materialTime;
@@ -861,7 +856,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                 HIDWORD(drawSurf.packed),
                 drawSurfKeyb))
                 break;
-            modelSurfa = (const GfxModelSkinnedSurface *)((char *)data + 4 * LOWORD(drawSurf.packed));
+            modelSurfa = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
             gfxEntIndexb = modelSurfa->info.gfxEntIndex;
             if (gfxEntIndexb != baseGfxEntIndexa)
             {
@@ -1388,7 +1383,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     {
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
-            if (sc_enable->current.enabled && ((drawSurf.packed >> 24) & 0x1F) != 0)
+            if (sc_enable->current.enabled && (drawSurf.fields.customIndex != 0))
                 R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
             else
                 R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
@@ -1396,7 +1391,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
         drawSurfSubKey = drawSurfSubMask.packed & drawSurf.packed;
         do
         {
-            modelSurf = (const GfxModelRigidSurface *)(data + 4 * LOWORD(drawSurf.packed));
+            modelSurf = (const GfxModelRigidSurface *)((char*)data + 4 * LOWORD(drawSurf.packed));
             if (info->cameraView)
             {
                 gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
@@ -1677,7 +1672,7 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
     {
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
-            R_SetLightmap(context, (drawSurf.packed >> 24) & 0x1F);
+            R_SetLightmap(context, drawSurf.fields.customIndex);
             R_SetReflectionProbe(context, BYTE2(drawSurf.packed));
             R_SetupPassPerObjectArgs(context);
         }
