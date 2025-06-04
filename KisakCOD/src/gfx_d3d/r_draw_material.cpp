@@ -56,7 +56,8 @@ int __cdecl R_SetupMaterial(
     context.state->origTechType = context.state->techType;
     if (pixelCostMode > GFX_PIXEL_COST_MODE_MEASURE_MSEC)
     {
-        v5 = ((R_PixelCost_GetAccumulationMaterial(context.state->material)->info.drawSurf.packed >> 29) & 0x7FF) << 29;
+        //v5 = ((R_PixelCost_GetAccumulationMaterial(context.state->material)->info.drawSurf.packed >> 29) & 0x7FF) << 29;
+        v5 = R_PixelCost_GetAccumulationMaterial(context.state->material)->info.drawSurf.fields.materialSortedIndex << 29;
         *(unsigned int *)&overrideDrawSurf.fields = v5 | *(unsigned int *)&drawSurf.fields & 0x1FFFFFFF;
         HIDWORD(overrideDrawSurf.packed) = HIDWORD(v5) | HIDWORD(drawSurf.packed) & 0xFFFFFF00;
         R_SetMaterial(context, overrideDrawSurf, TECHNIQUE_UNLIT);
@@ -71,7 +72,7 @@ int __cdecl R_SetPrepassMaterial(GfxCmdBufContext context, GfxDrawSurf drawSurf,
 
     if (((drawSurf.packed >> 40) & 3) == 3)
         return 0;
-    material = rgp.sortedMaterials[(drawSurf.packed >> 29) & 0x7FF];
+    material = rgp.sortedMaterials[drawSurf.fields.materialSortedIndex];
     if (((drawSurf.packed >> 40) & 3) == 0 && (material->stateFlags & 1) != 0)
         material = rgp.depthPrepassMaterial;
     context.state->material = material;
@@ -101,7 +102,7 @@ int __cdecl R_SetMaterial(GfxCmdBufContext context, GfxDrawSurf drawSurf, Materi
     const MaterialTechnique *technique; // [esp+8h] [ebp-8h]
     Material *material; // [esp+Ch] [ebp-4h]
 
-    material = rgp.sortedMaterials[(drawSurf.packed >> 29) & 0x7FF];
+    material = rgp.sortedMaterials[drawSurf.fields.materialSortedIndex];
     technique = Material_GetTechnique(material, techType);
     context.state->material = material;
     context.state->technique = technique;

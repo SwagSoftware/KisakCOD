@@ -443,13 +443,7 @@ void __cdecl R_AddBModelSurfacesCamera(
     {
         bspSurf = modelSurf->surf;
         material = bspSurf->material;
-        if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
-            MyAssertHandler(
-                ".\\r_scene.cpp",
-                561,
-                0,
-                "%s",
-                "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+        iassert(rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material);
         region = material->cameraRegion;
         if (region != 3)
         {
@@ -511,13 +505,7 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
             return drawSurf;
         }
         material = modelSurf->surf->material;
-        if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
-            MyAssertHandler(
-                ".\\r_scene.cpp",
-                618,
-                0,
-                "%s",
-                "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+        iassert(rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material);
         if (Material_GetTechnique(material, techType))
         {
             if (surfId >= 0x10000)
@@ -751,15 +739,9 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
         }
         else
         {
-            if (!*material)
-                MyAssertHandler(".\\r_scene.cpp", 810, 0, "%s", "*material");
-            if (rgp.sortedMaterials[((*material)->info.drawSurf.packed >> 29) & 0x7FF] != *material)
-                MyAssertHandler(
-                    ".\\r_scene.cpp",
-                    811,
-                    0,
-                    "%s",
-                    "rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] == *material");
+            iassert(*material);
+            iassert(rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] == *material);
+
             if (Material_GetTechnique(*material, techType))
             {
                 if (drawSurf >= lastDrawSurf)
@@ -913,15 +895,8 @@ LABEL_15:
                 surfType = SF_XMODEL_SKINNED;
                 surfSize = 24;
             }
-            if (!*material)
-                MyAssertHandler(".\\r_scene.cpp", 954, 0, "%s", "*material");
-            if (rgp.sortedMaterials[((*material)->info.drawSurf.packed >> 29) & 0x7FF] != *material)
-                MyAssertHandler(
-                    ".\\r_scene.cpp",
-                    955,
-                    0,
-                    "%s",
-                    "rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] == *material");
+            iassert(*material);
+            iassert(rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] == *material);
             region = (*material)->cameraRegion;
             if (region != 3)
             {
@@ -1056,15 +1031,8 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
                 surfType = 9;
                 surfSize = 24;
             }
-            if (!*material)
-                MyAssertHandler(".\\r_scene.cpp", 1088, 0, "%s", "*material");
-            if (rgp.sortedMaterials[((*material)->info.drawSurf.packed >> 29) & 0x7FF] != *material)
-                MyAssertHandler(
-                    ".\\r_scene.cpp",
-                    1089,
-                    0,
-                    "%s",
-                    "rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] == *material");
+            iassert(*material);
+            iassert(rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] == *material);
             if (Material_GetTechnique(*material, techType))
             {
                 if (drawSurf >= lastDrawSurf)
@@ -1534,9 +1502,7 @@ char __cdecl R_DoesDrawSurfListInfoNeedFloatz(GfxDrawSurfListInfo *emissiveInfo)
             Profile_EndInternal(0);
             return 0;
         }
-        technique = Material_GetTechnique(
-            rgp.sortedMaterials[(emissiveInfo->drawSurfs[surfIndex].packed >> 29) & 0x7FF],
-            emissiveInfo->baseTechType);
+        technique = Material_GetTechnique(rgp.sortedMaterials[emissiveInfo->drawSurfs[surfIndex].fields.materialSortedIndex], emissiveInfo->baseTechType);
         if (technique)
         {
             if ((technique->flags & 0x20) != 0)

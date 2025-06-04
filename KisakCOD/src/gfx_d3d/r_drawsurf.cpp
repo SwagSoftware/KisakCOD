@@ -290,13 +290,7 @@ void __cdecl R_AddMarkMeshDrawSurf(
 
     if (!g_processMarkMesh)
         MyAssertHandler(".\\r_drawsurf.cpp", 507, 0, "%s", "g_processMarkMesh");
-    if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
-        MyAssertHandler(
-            ".\\r_drawsurf.cpp",
-            508,
-            0,
-            "%s",
-            "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+    iassert(rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material);
     if (Material_GetTechnique(material, (MaterialTechniqueType)gfxDrawMethod.litTechType[11][0]))
     {
         markMeshIndex = InterlockedExchangeAdd(&frontEndDataOut->markMeshCount, 1);
@@ -647,13 +641,9 @@ char __cdecl R_AddParticleCloudDrawSurf(volatile unsigned int cloudIndex, Materi
             "cloudIndex doesn't index frontEndDataOut->cloudCount\n\t%i not in [0, %i)",
             cloudIndex,
             frontEndDataOut->cloudCount);
-    if (rgp.sortedMaterials[(material->info.drawSurf.packed >> 29) & 0x7FF] != material)
-        MyAssertHandler(
-            ".\\r_drawsurf.cpp",
-            562,
-            0,
-            "%s",
-            "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+
+    iassert(rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material);
+
     if (Material_GetTechnique(material, gfxDrawMethod.emissiveTechType))
     {
         MaterialSortKey = R_GetMaterialSortKey(material);

@@ -5883,8 +5883,7 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, unsigned int mater
     memcpy(strDest, g_materialTypeInfo[materialType].prefix, prefixLen);
     memcpy(&strDest[prefixLen], name, v6 + 1);
     material->info.name = strDest;
-    if (((material->info.drawSurf.packed >> 29) & 0x7FF) != 0)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6677, 0, "%s", "!material->info.drawSurf.fields.materialSortedIndex");
+    iassert(!material->info.drawSurf.fields.materialSortedIndex);
     material->info.gameFlags = mtlRaw->info.gameFlags;
     v4 = (mtlRaw->info.surfaceFlags & 0x1F00000) >> 20;
     surfIndex = v4;

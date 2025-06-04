@@ -2040,7 +2040,7 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface *surf0, const GfxSurface *surf1)
     comparisonb = surf0->primaryLightIndex - surf1->primaryLightIndex;
     if (comparisonb)
         return comparisonb < 0;
-    comparisonc = ((material->info.drawSurf.packed >> 29) & 0x7FF) - ((material_4->info.drawSurf.packed >> 29) & 0x7FF);
+    comparisonc = (material->info.drawSurf.fields.materialSortedIndex - material_4->info.drawSurf.fields.materialSortedIndex);
     if (comparisonc)
     {
         if (surf0->tris.firstVertex == surf1->tris.firstVertex)
@@ -2308,7 +2308,7 @@ char __cdecl R_DoesTriCoverAnyOtherTri(
     for (surfIter = modelSurfIndexBegin; surfIter != modelSurfIndexEnd; ++surfIter)
     {
         surf = &s_world.dpvs.surfaces[surfIter];
-        if (materialSortedIndex > ((surf->material->info.drawSurf.packed >> 29) & 0x7FF)
+        if (materialSortedIndex > surf->material->info.drawSurf.fields.materialSortedIndex
             && BoundsOverlap(surf->bounds[0], surf->bounds[1], mins, maxs))
         {
             surfFirstVertex = surf->tris.firstVertex;
@@ -2336,7 +2336,7 @@ char __cdecl R_IsSurfaceDecalLayer(
     unsigned int triIter; // [esp+8h] [ebp-4h]
 
     surf = &s_world.dpvs.surfaces[surfIndex];
-    materialSortedIndex = (surf->material->info.drawSurf.packed >> 29) & 0x7FF;
+    materialSortedIndex = surf->material->info.drawSurf.fields.materialSortedIndex;
     for (triIter = 0; triIter < surf->tris.triCount; ++triIter)
     {
         if (!R_DoesTriCoverAnyOtherTri(
