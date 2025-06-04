@@ -1429,13 +1429,12 @@ char __cdecl FX_GenerateMarkVertsForMark_Begin(
 
     newIndexCount = *indexCount + 3 * mark->triCount;
     reserveIndexCount = ((newIndexCount + 1) & 0xFFFFFFFE) - ((*indexCount + 1) & 0xFFFFFFFE);
-    if (R_ReserveMarkMeshVerts(mark->pointCount, outBaseVertex)
-        && R_ReserveMarkMeshIndices(reserveIndexCount, &doubleIndices))
+
+    if (R_ReserveMarkMeshVerts(mark->pointCount, outBaseVertex) && R_ReserveMarkMeshIndices(reserveIndexCount, &doubleIndices))
     {
         indices = (unsigned __int16 *)doubleIndices - (*indexCount & 1);
         *indexCount = newIndexCount;
-        if (mark->frameCountDrawn == -1)
-            MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1348, 0, "%s", "mark->frameCountDrawn != FX_MARK_FREE");
+        iassert(mark->frameCountDrawn != FX_MARK_FREE);
         mark->frameCountDrawn = marksSystem->frameCount;
         FX_DrawMarkTris(marksSystem, mark, *outBaseVertex, indices, outDrawSurf);
         return 1;
@@ -1459,8 +1458,7 @@ void __cdecl FX_DrawMarkTris(
     FxTriGroupPool *group; // [esp+14h] [ebp-8h]
     int triIndex; // [esp+18h] [ebp-4h]
 
-    if (!mark)
-        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1291, 0, "%s", "mark");
+    iassert(mark);
     groupHandle = mark->tris;
     triCount = mark->triCount;
     outSurf->material = mark->material;
@@ -1471,26 +1469,13 @@ void __cdecl FX_DrawMarkTris(
     outSurf->context.modelIndex = mark->context.modelIndex;
     outSurf->indices = indices;
     outSurf->indexCount = 0;
+
     do
     {
         group = FX_TriGroupFromHandle(marksSystem, groupHandle);
         groupHandle = group->triGroup.next;
-        if (triCount < group->triGroup.triCount)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_marks.cpp",
-                1309,
-                0,
-                "triCount >= group->triCount\n\t%i, %i",
-                triCount,
-                group->triGroup.triCount);
-        if (!group->triGroup.triCount)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_marks.cpp",
-                1310,
-                0,
-                "%s\n\t(group->triCount) = %i",
-                "(group->triCount > 0)",
-                group->triGroup.triCount);
+        iassert(triCount >= group->triGroup.triCount);
+        iassert(group->triGroup.triCount > 0);
         triCount -= group->triGroup.triCount;
         triIndex = 0;
         do
@@ -1502,16 +1487,9 @@ void __cdecl FX_DrawMarkTris(
                 outSurf);
         while (triIndex != group->triGroup.triCount);
     } while (triCount);
-    if (groupHandle != 0xFFFF)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_marks.cpp",
-            1320,
-            0,
-            "%s\n\t(groupHandle) = %i",
-            "(groupHandle == 0xffff)",
-            groupHandle);
-    if (!outSurf->indexCount)
-        MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1322, 0, "%s", "outSurf->indexCount");
+
+    iassert(groupHandle == 0xFFFF);
+    iassert(outSurf->indexCount);
 }
 
 void __cdecl FX_EmitMarkTri(
@@ -1536,20 +1514,8 @@ void __cdecl FX_EmitMarkTri(
             outSurf->indices += outSurf->indexCount;
             outSurf->indexCount = 0;
         }
-        if (outSurf->context.modelIndex != markContext->modelIndex)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_marks.cpp",
-                1243,
-                0,
-                "%s",
-                "outSurf->context.modelIndex == markContext->modelIndex");
-        if ((outSurf->context.modelTypeAndSurf & 0xC0) != (markContext->modelTypeAndSurf & 0xC0))
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_marks.cpp",
-                1244,
-                0,
-                "%s",
-                "(outSurf->context.modelTypeAndSurf & MARK_MODEL_TYPE_MASK) == (markContext->modelTypeAndSurf & MARK_MODEL_TYPE_MASK)");
+        iassert(outSurf->context.modelIndex == markContext->modelIndex);
+        iassert((outSurf->context.modelTypeAndSurf & MARK_MODEL_TYPE_MASK) == (markContext->modelTypeAndSurf & MARK_MODEL_TYPE_MASK));
         outSurf->context = *markContext;
     }
     if (marksSystem->hasCarryIndex)

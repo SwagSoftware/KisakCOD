@@ -7,6 +7,9 @@
 #include <gfx_d3d/fxprimitives.h>
 #include <gfx_d3d/r_gfx.h>
 
+#define MARK_MODEL_TYPE_MASK 0xC0
+#define FX_MARK_FREE -1
+
 enum $FFE723C3A54D7F6DDF86A219D7944B2F : __int32
 {
     FX_STATUS_REF_COUNT_MASK = 0xFFFF,

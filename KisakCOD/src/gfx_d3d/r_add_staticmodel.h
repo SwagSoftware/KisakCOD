@@ -2,6 +2,8 @@
 #include "r_gfx.h"
 #include "r_bsp.h"
 
+#define R_MAX_PRETESS_INDICES 0x100000
+
 struct GfxSModelDrawSurfData // sizeof=0x18
 {                                       // ...
     GfxDelayedCmdBuf delayedCmdBuf;

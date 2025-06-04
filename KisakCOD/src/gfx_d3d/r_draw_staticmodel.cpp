@@ -309,24 +309,10 @@ void __cdecl R_DrawStaticModelsCachedDrawSurf(GfxStaticModelDrawStream *drawStre
     do
     {
         baseIndex = surfBaseIndex + 4 * R_GetCachedSModelSurf(list[index])->baseVertIndex;
-        if (baseIndex >= 0x100000)
-            MyAssertHandler(".\\r_draw_staticmodel.cpp", 2017, 0, "%s", "baseIndex < SMC_MAX_INDEX_IN_CACHE");
-        if (baseIndex + 3 * xsurf->triCount > 0x100000)
-            MyAssertHandler(
-                ".\\r_draw_staticmodel.cpp",
-                2018,
-                0,
-                "%s",
-                "baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE");
+        iassert(baseIndex < SMC_MAX_INDEX_IN_CACHE);
+        iassert(baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE);
         copyBaseIndex = R_SetIndexData(&context.state->prim, (unsigned char*)&gfxBuf.smodelCache.indices[baseIndex], xsurf->triCount);
-        if (copyBaseIndex != args.baseIndex + index * 3 * xsurf->triCount)
-            MyAssertHandler(
-                ".\\r_draw_staticmodel.cpp",
-                2021,
-                1,
-                "copyBaseIndex == args.baseIndex + xsurf->triCount * 3 * index\n\t%i, %i",
-                copyBaseIndex,
-                args.baseIndex + index * 3 * xsurf->triCount);
+        iassert(copyBaseIndex == args.baseIndex + xsurf->triCount * 3 * index);
         ++index;
     } while (index < smodelCount);
     R_DrawIndexedPrimitive(&context.state->prim, &args);

@@ -1343,47 +1343,68 @@ void __cdecl CG_DrawStanceHintPrints(
     standCmds[1][1] = "togglecrouch";
     standCmds[1][2] = "lowerstance";
     standCmds[1][3] = "+movedown";
-    *(_QWORD*)&standCmds[1][4] = 0;
+    standCmds[1][4] = NULL;
+    standCmds[1][5] = NULL;
+
     standCmds[2][0] = "goprone";
     standCmds[2][1] = "+prone";
-    *(_QWORD*)&standCmds[2][2] = 0;
-    *(_QWORD*)&standCmds[2][4] = 0;
+    standCmds[2][2] = NULL;
+    standCmds[2][3] = NULL;
+    standCmds[2][4] = NULL;
+    standCmds[2][5] = NULL;
+
     duckCmds[0][0] = "+gostand";
     duckCmds[0][1] = "raisestance";
     duckCmds[0][2] = "+moveup";
-    *(_QWORD*)&duckCmds[0][3] = 0;
-    duckCmds[0][5] = 0;
-    memset(duckCmds[1], 0, sizeof(const char *[6]));
+    duckCmds[0][3] = NULL;
+    duckCmds[0][4] = NULL;
+    duckCmds[0][5] = NULL;
+
+    duckCmds[1][0] = NULL;
+    duckCmds[1][1] = NULL;
+    duckCmds[1][2] = NULL;
+    duckCmds[1][3] = NULL;
+    duckCmds[1][4] = NULL;
+    duckCmds[1][5] = NULL;
+
     duckCmds[2][0] = "goprone";
     duckCmds[2][1] = "lowerstance";
     duckCmds[2][2] = "toggleprone";
     duckCmds[2][3] = "+prone";
-    *(_QWORD*)&duckCmds[2][4] = 0;
+    duckCmds[2][4] = NULL;
+    duckCmds[2][5] = NULL;
+
     proneCmds[0][0] = "+gostand";
     proneCmds[0][1] = "toggleprone";
-    *(_QWORD*)&proneCmds[0][2] = 0;
-    *(_QWORD*)&proneCmds[0][4] = 0;
+    proneCmds[0][2] = NULL;
+    proneCmds[0][3] = NULL;
+    proneCmds[0][4] = NULL;
+    proneCmds[0][5] = NULL;
+
     proneCmds[1][0] = "gocrouch";
     proneCmds[1][1] = "togglecrouch";
     proneCmds[1][2] = "raisestance";
     proneCmds[1][3] = "+movedown";
     proneCmds[1][4] = "+moveup";
     proneCmds[1][5] = 0;
-    memset(proneCmds[2], 0, sizeof(const char *[6]));
+
+    proneCmds[2][0] = NULL;
+    proneCmds[2][1] = NULL;
+    proneCmds[2][2] = NULL;
+    proneCmds[2][3] = NULL;
+    proneCmds[2][4] = NULL;
+    proneCmds[2][5] = NULL;
+
     hintTypeStrings[0] = "PLATFORM_STANCEHINT_STAND";
     hintTypeStrings[1] = "PLATFORM_STANCEHINT_CROUCH";
     hintTypeStrings[2] = "PLATFORM_STANCEHINT_PRONE";
-    drawColor[0] = *color;
+
+    drawColor[0] = color[0];
     drawColor[1] = color[1];
     drawColor[2] = color[2];
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    
+    iassert(localClientNum == 0);
+
     cgameGlob = cgArray;
     if (cgArray[0].lastStanceChangeTime + 3000 - cgArray[0].time <= 1000)
         drawColor[3] = (cgameGlob->lastStanceChangeTime + 3000 - cgameGlob->time) * 0.001000000047497451;

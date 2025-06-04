@@ -3,6 +3,7 @@
 #include "r_rendercmds.h"
 
 #define SMODEL_INDEX_NONE 0xFFFF
+#define SMC_MAX_INDEX_IN_CACHE 0x100000
 
 struct SkinCachedStaticModelCmd // sizeof=0x4
 {                                       // ...

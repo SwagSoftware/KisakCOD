@@ -868,14 +868,7 @@ unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *lis
             R_SetupPass(prepassContext, 0);
             passPrepassContext.state = prepassContext.state;
         }
-        if (drawSurf.fields.surfType >= 0xD)
-            MyAssertHandler(
-                ".\\rb_backend.cpp",
-                1034,
-                0,
-                "drawSurf.fields.surfType doesn't index ARRAY_COUNT( rb_tessTable )\n\t%i not in [0, %i)",
-                drawSurf.fields.surfType,
-                13);
+        iassert(drawSurf.fields.surfType < 13 /*ARRAY_COUNT(rb_tessTable)*/);
         subListCount = rb_tessTable[drawSurf.fields.surfType](listArgs, passPrepassContext);
     }
     if (isPixelCostEnabled)

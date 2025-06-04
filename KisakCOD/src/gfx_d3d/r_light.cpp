@@ -829,7 +829,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
                         "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
                 if (Material_GetTechnique(material, TECHNIQUE_LIGHT_OMNI))
                 {
-                    drawSurf.fields = material->info.drawSurf.fields;
+                    drawSurf = material->info.drawSurf;
                     //HIDWORD(drawSurf.packed) = ((staticModelId.surfType & 0xF) << 18) | HIDWORD(drawSurf.packed) & 0xFFC3FFFF;
                     drawSurf.fields.surfType = staticModelId.surfType;
                     if (!R_AllocDrawSurf(&surfData.delayedCmdBuf, drawSurf, &surfData.drawSurfList, 3u))

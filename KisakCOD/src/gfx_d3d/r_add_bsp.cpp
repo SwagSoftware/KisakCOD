@@ -115,14 +115,7 @@ void __cdecl R_AddBspDrawSurfs(
 {
     bool v4; // [esp+Bh] [ebp-1h]
 
-    if (drawSurf.fields.surfType != 0)
-        MyAssertHandler(
-            ".\\r_add_bsp.cpp",
-            162,
-            0,
-            "%s\n\t(drawSurf.fields.surfType) = %i",
-            "(drawSurf.fields.surfType == SF_TRIANGLES)",
-            drawSurf.fields.surfType);
+    iassert(drawSurf.fields.surfType == SF_TRIANGLES);
     v4 = !dx.deviceLost && r_pretess->current.enabled;
     if (!v4 || !R_PreTessBspDrawSurfs(drawSurf, (const unsigned __int16 *)list, count, surfData))
     {

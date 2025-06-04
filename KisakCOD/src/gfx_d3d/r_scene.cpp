@@ -474,9 +474,9 @@ void __cdecl R_AddBModelSurfacesCamera(
 
             //HIDWORD(drawSurf) = (bspSurf->primaryLightIndex << 10) // PrimaryLightIndex
             //    | HIDWORD(material->info.drawSurf.packed) & 0xFFC003FF // all other bits in HIDWORD
-            //    | 0x180000; // this sets surfType but idk the exact value in bits...
+            //    | 0x180000; // this sets surfType to b(0110)
 
-            HIDWORD(drawSurfs[region]->packed) |= 0x180000;// this sets surfType but idk the exact value in bits...
+            drawSurfs[region]->fields.surfType = SF_BMODEL;
 
             ++drawSurfs[region];
         }

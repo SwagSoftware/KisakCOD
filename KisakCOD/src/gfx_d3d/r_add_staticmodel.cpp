@@ -66,21 +66,16 @@ char __cdecl R_PreTessStaticModelCachedList(
         dstIndices += surfIndexCount;
     }
     Profile_EndInternal(0);
-    HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0xC0000;
+    //HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0xC0000;
+    drawSurf.fields.surfType = SF_STATICMODEL_PRETESS;
     if (R_AllocDrawSurf(delayedCmdBuf, drawSurf, drawSurfList, 3u))
     {
         BYTE1(preTessSurf) = lod;
         LOBYTE(preTessSurf) = surfaceIndex;
         HIWORD(preTessSurf) = *list;
         firstIndex = preTessIndices - gfxBuf.preTessIndexBuffer->indices;
-        if (firstIndex >= 0x100000)
-            MyAssertHandler(
-                ".\\r_add_staticmodel.cpp",
-                150,
-                0,
-                "firstIndex doesn't index R_MAX_PRETESS_INDICES\n\t%i not in [0, %i)",
-                firstIndex,
-                0x100000);
+        iassert(firstIndex < R_MAX_PRETESS_INDICES);
+
         R_WritePrimDrawSurfInt(delayedCmdBuf, count);
         R_WritePrimDrawSurfInt(delayedCmdBuf, preTessSurf);
         R_WritePrimDrawSurfInt(delayedCmdBuf, firstIndex);
@@ -118,13 +113,13 @@ GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod)
     staticModelId.objectId = R_CacheStaticModelSurface(lodInfo->smcIndexPlusOne - 1, smodelIndex, lodInfo);
     if (staticModelId.objectId)
     {
-        staticModelId.surfType = 4;
+        staticModelId.surfType = SF_STATICMODEL_CACHED;
         return staticModelId;
     }
     else
     {
     LABEL_9:
-        staticModelIda.surfType = 2;
+        staticModelIda.surfType = SF_STATICMODEL_RIGID;
         staticModelIda.objectId = smodelIndex;
         surfaceCount = XModelGetSurfaces(model, &surfaces, lod);
         if (!surfaceCount)
@@ -134,7 +129,7 @@ GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod)
             xsurf = &surfaces[surfaceIndex];
             if (xsurf->deformed || !useFastFile->current.enabled)
             {
-                staticModelIda.surfType = 5;
+                staticModelIda.surfType = SF_STATICMODEL_SKINNED;
                 return staticModelIda;
             }
         }
@@ -361,56 +356,29 @@ void __cdecl R_SkinStaticModelsCameraForLod(
     unsigned int region; // [esp+28h] [ebp-4h]
 
     surfaceCount = XModelGetSurfaces(model, &surfaces, lod);
-    if (!surfaceCount)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 178, 0, "%s", "surfaceCount");
+    iassert(surfaceCount);
     materialForSurf = XModelGetSkins(model, lod);
-    if (!materialForSurf)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 181, 0, "%s", "materialForSurf");
-    if (surfaceCount < 1 || surfaceCount > 48)
-        MyAssertHandler(
-            ".\\r_add_staticmodel.cpp",
-            184,
-            0,
-            "surfaceCount not in [1, XMODEL_MAX_SURFS]\n\t%i not in [%i, %i]",
-            surfaceCount,
-            1,
-            48);
-    if (gfxDrawMethod.emissiveTechType >= (unsigned int)TECHNIQUE_COUNT)
-        MyAssertHandler(
-            ".\\r_add_staticmodel.cpp",
-            187,
-            0,
-            "gfxDrawMethod.emissiveTechType doesn't index TECHNIQUE_COUNT\n\t%i not in [0, %i)",
-            gfxDrawMethod.emissiveTechType,
-            34);
+    iassert(materialForSurf);
+    iassert(surfaceCount >= 1 && surfaceCount <= 48);
+    iassert(gfxDrawMethod.emissiveTechType < TECHNIQUE_COUNT);
     for (surfaceIndex = 0; (int)surfaceIndex < surfaceCount; ++surfaceIndex)
     {
-        if (surfaceIndex >= 0xFF)
-            MyAssertHandler(
-                ".\\r_add_staticmodel.cpp",
-                192,
-                0,
-                "surfaceIndex doesn't index UCHAR_MAX\n\t%i not in [0, %i)",
-                surfaceIndex,
-                255);
+        iassert(surfaceIndex < UCHAR_MAX);
         material = *materialForSurf;
-        if (!*materialForSurf)
-            MyAssertHandler(".\\r_add_staticmodel.cpp", 195, 0, "%s", "material");
-        if (rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] != material)
-            MyAssertHandler(
-                ".\\r_add_staticmodel.cpp",
-                201,
-                0,
-                "%s",
-                "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+        iassert(material);
+        iassert(rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material);
         region = material->cameraRegion;
         if (region != 3)
         {
-            drawSurf.fields = (GfxDrawSurfFields)material->info.drawSurf.fields;
-            HIDWORD(drawSurf.packed) = (primaryLightIndex << 10)
-                | ((surfType & 0xF) << 18)
-                | HIDWORD(drawSurf.packed) & 0xFFC003FF;
-            if (surfType != 4
+            drawSurf.packed = material->info.drawSurf.packed;
+            
+            drawSurf.fields.primaryLightIndex = primaryLightIndex;
+            drawSurf.fields.surfType = surfType;
+
+            //HIDWORD(drawSurf.packed) = (primaryLightIndex << 10) // primaryLightIndex
+            //    | ((surfType & 0xF) << 18) // surfType
+            //    | HIDWORD(drawSurf.packed) & 0xFFC003FF; // other bits
+            if (surfType != SF_STATICMODEL_CACHED
                 || (!dx.deviceLost ? (enabled = r_pretess->current.enabled) : (enabled = 0),
                     !enabled
                     || !R_PreTessStaticModelCachedList(
@@ -808,9 +776,12 @@ void __cdecl R_SkinStaticModelsShadowForLod(
                     0,
                     "%s",
                     "Material_HasTechnique( material, shadowmapBuildTechType )");
-            drawSurf.fields = material->info.drawSurf.fields;
-            HIDWORD(drawSurf.packed) = ((surfType & 0xF) << 18) | HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF;
-            if (surfType != 4
+            drawSurf = material->info.drawSurf;
+
+            drawSurf.fields.surfType = surfType;
+            //HIDWORD(drawSurf.packed) = ((surfType & 0xF) << 18) | HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF;
+
+            if (surfType != SF_STATICMODEL_CACHED
                 || (!dx.deviceLost ? (enabled = r_pretess->current.enabled) : (enabled = 0),
                     !enabled
                     || !R_PreTessStaticModelCachedList(

@@ -52,7 +52,6 @@ void R_DepthPrepassCallback(const void *userData, GfxCmdBufContext context, GfxC
     qmemcpy(&info, &viewInfo->decalInfo, sizeof(info));
     info.baseTechType = baseTechType;
     R_DrawSurfs(context, 0, &info);
-    //(context.state->prim.device->SetRenderState)(context.state->prim.device, context.state->prim.device, 174, 0);
     context.state->prim.device->SetRenderState(D3DRS_SCISSORTESTENABLE, 0);
 }
 
