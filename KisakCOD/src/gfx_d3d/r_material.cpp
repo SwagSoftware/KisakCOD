@@ -546,16 +546,18 @@ void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex)
     unsigned __int64 v2; // rax
     unsigned int v3; // ecx
 
-    if (!material)
-        MyAssertHandler(".\\r_material.cpp", 1084, 0, "%s", "material");
+    iassert(material);
     rgp.needSortMaterials = 1;
-    if (rg.materialHashTable[hashIndex])
-        MyAssertHandler(".\\r_material.cpp", 1088, 1, "%s", "rg.materialHashTable[hashIndex] == NULL");
+    iassert(rg.materialHashTable[hashIndex] == NULL);
     material->info.hashIndex = hashIndex;
+#if 0
     v2 = (rgp.materialCount & 0x7FF) << 29;
     v3 = HIDWORD(v2) | HIDWORD(material->info.drawSurf.packed) & 0xFFFFFF00;
-    *&material->info.drawSurf.packed = v2 | *&material->info.drawSurf.packed & 0x1FFFFFFF;
+    *(_DWORD*)&material->info.drawSurf.packed = v2 | *(_DWORD*)&material->info.drawSurf.packed & 0x1FFFFFFF;
     HIDWORD(material->info.drawSurf.packed) = v3;
+#else
+    material->info.drawSurf.fields.materialSortedIndex = rgp.materialCount;
+#endif
     rgp.sortedMaterials[rgp.materialCount] = material;
     rg.materialHashTable[hashIndex] = material;
     if (++rgp.materialCount == 2048)

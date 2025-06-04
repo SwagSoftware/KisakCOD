@@ -149,16 +149,16 @@ vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
         veha = oldest;
     }
     v3 = &vehEffects[localClientNum][veha];
-    *&v3->active = 0;
+    *(_DWORD*)&v3->active = 0;
     v3->lastAccessed = 0;
     v3->entityNum = 0;
     v3->nextDustFx = 0;
     v3->nextSmokeFx = 0;
-    *&v3->soundPlaying = 0;
+    *(_DWORD*)&v3->soundPlaying = 0;
     v3->barrelVelocity = 0.0;
     v3->barrelPos = 0.0;
     v3->lastBarrelUpdateTime = 0;
-    *&v3->tag_engine_left = 0;
+    *(_DWORD*)&v3->tag_engine_left = 0;
     v3->active = 1;
     vehEffects[localClientNum][veha].lastAccessed = Sys_Milliseconds();
     vehEffects[localClientNum][veha].entityNum = entityNum;

@@ -340,19 +340,40 @@ void R_LoadLightGridHeader()
     header = Com_GetBspLump(LUMP_LIGHTGRIDHEADER, 1u, &len);
     if (len < 0x14)
         Com_Error(ERR_DROP, "light grid header is truncated");
-    rowCount = *&header[2 * *(header + 3) + 6] - *&header[2 * *(header + 3)] + 1;
+    
+    const uint16* header_u16 = (uint16*)header;
+    const uint32* header_u32 = (uint32*)header;
+
+    const uint32 header3 = header_u32[3];
+    const uint32 header_off = header3 * 2;
+
+#if 0
+    rowCount = *(uint16*)&header[header_off + 6]
+        - *(uint16*)&header[header_off]
+        + 1;
+
+    const uint32 rowCount_test = header_u16[header3 + 3] - header_u16[header3] + 1;
+    iassert(rowCount_test == rowCount);
+#else
+    rowCount = header_u16[header3 + 3] - header_u16[header3] + 1;
+#endif
+
     if (len != 2 * rowCount + 20)
         Com_Error(ERR_DROP, "light grid header has unexpected size");
     s_world.lightGrid.sunPrimaryLightIndex = s_world.sunPrimaryLightIndex;
-    s_world.lightGrid.mins[0] = *header;
-    s_world.lightGrid.mins[1] = *(header + 1);
-    s_world.lightGrid.mins[2] = *(header + 2);
-    s_world.lightGrid.maxs[0] = *(header + 3);
-    s_world.lightGrid.maxs[1] = *(header + 4);
-    s_world.lightGrid.maxs[2] = *(header + 5);
-    s_world.lightGrid.rowAxis = *(header + 3);
-    s_world.lightGrid.colAxis = *(header + 4);
+    
+    s_world.lightGrid.mins[0] = header_u16[0];
+    s_world.lightGrid.mins[1] = header_u16[1];
+    s_world.lightGrid.mins[2] = header_u16[2];
+    s_world.lightGrid.maxs[0] = header_u16[3];
+    s_world.lightGrid.maxs[1] = header_u16[4];
+    s_world.lightGrid.maxs[2] = header_u16[5];
+
+    s_world.lightGrid.rowAxis = header_u32[3];
+    s_world.lightGrid.colAxis = header_u32[4];
+    
     s_world.lightGrid.rowDataStart = (unsigned short *)Hunk_Alloc(2 * rowCount, "R_LoadLightGridHeader", 20);
+    
     Com_Memcpy(s_world.lightGrid.rowDataStart, header + 20, 2 * rowCount);
     if (s_world.lightGrid.entryCount)
         R_AssertLightGridValid(&s_world.lightGrid);
@@ -360,16 +381,16 @@ void R_LoadLightGridHeader()
         R_InitEmptyLightGrid();
 }
 
-bool __cdecl R_AnnotatedLightGridPointSortsBefore(const AnnotatedLightGridPoint *p0, const AnnotatedLightGridPoint *p1)
+bool __cdecl R_AnnotatedLightGridPointSortsBefore(const AnnotatedLightGridPoint& p0, const AnnotatedLightGridPoint& p1)
 {
-    if (p0->pos[s_world.lightGrid.rowAxis] < p1->pos[s_world.lightGrid.rowAxis])
+    if (p0.pos[s_world.lightGrid.rowAxis] < p1.pos[s_world.lightGrid.rowAxis])
         return 1;
-    if (p0->pos[s_world.lightGrid.rowAxis] > p1->pos[s_world.lightGrid.rowAxis])
+    if (p0.pos[s_world.lightGrid.rowAxis] > p1.pos[s_world.lightGrid.rowAxis])
         return 0;
-    if (p0->pos[s_world.lightGrid.colAxis] < p1->pos[s_world.lightGrid.colAxis])
+    if (p0.pos[s_world.lightGrid.colAxis] < p1.pos[s_world.lightGrid.colAxis])
         return 1;
-    if (p0->pos[s_world.lightGrid.colAxis] <= p1->pos[s_world.lightGrid.colAxis])
-        return p0->pos[2] < p1->pos[2];
+    if (p0.pos[s_world.lightGrid.colAxis] <= p1.pos[s_world.lightGrid.colAxis])
+        return p0.pos[2] < p1.pos[2];
     return 0;
 }
 
@@ -648,8 +669,8 @@ void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
     float worldMins[3]; // [esp+2D8h] [ebp-20h] BYREF
     unsigned __int8 needsTraceSwizzle[2][8]; // [esp+2E4h] [ebp-14h] BYREF
 
-    *&needsTraceSwizzle[0][0] = 0x703050106020400LL;
-    *&needsTraceSwizzle[1][0] = 0x705030106040200LL;
+    *(uint64*)&needsTraceSwizzle[0][0] = 0x703050106020400LL;
+    *(uint64*)&needsTraceSwizzle[1][0] = 0x705030106040200LL;
     diskEntries = (const GfxLightGridEntry_Version15*)Com_GetBspLump(LUMP_LIGHTGRIDENTRIES, 8u, &entryCount);
     if (entryCount)
     {
@@ -779,7 +800,7 @@ void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
             //    &points[entryCount],
             //    (10 * entryCount) / 10,
             //    R_AnnotatedLightGridPointSortsBefore);
-            std::sort((const AnnotatedLightGridPoint **)&points[0], (const AnnotatedLightGridPoint **)&points[entryCount], R_AnnotatedLightGridPointSortsBefore);
+            std::sort(&points[0], &points[entryCount], R_AnnotatedLightGridPointSortsBefore);
             for (entryIndex = 0; entryIndex < entryCount; ++entryIndex)
             {
                 if (points[entryIndex].entry.needsTrace)

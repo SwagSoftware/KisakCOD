@@ -280,8 +280,8 @@ int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 			{
 				if (net_socket == ip_socket)
 				{
-					*&from.sa_data[6] = 0;
-					*&from.sa_data[10] = 0;
+					*(_DWORD*)&from.sa_data[6] = 0;
+					*(_DWORD*)&from.sa_data[10] = 0;
 				}
 				if (usingSocks && net_socket == ip_socket && !memcmp(&from, &socksRelayAddr, fromlen))
 				{
@@ -294,7 +294,7 @@ int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 						continue;
 					}
 					net_from->type = NA_IP;
-					*net_from->ip = *(net_message->data + 1);
+					*(_DWORD*)net_from->ip = *((_DWORD*)net_message->data + 1);
 					net_from->port = *(net_message->data + 4);
 					net_message->readcount = 10;
 				}
@@ -557,11 +557,11 @@ unsigned int __cdecl NET_IPSocket(const char *net_interface, int port)
 		if (net_interface && *net_interface && I_stricmp(net_interface, "localhost"))
 			Sys_StringToSockaddr(net_interface, &address);
 		else
-			*&address.sa_data[2] = 0;
+			*(_DWORD*)&address.sa_data[2] = 0;
 		if (port == -1)
-			*address.sa_data = 0;
+			*(_WORD*)address.sa_data = 0;
 		else
-			*address.sa_data = htons(port);
+			*(_WORD*)address.sa_data = htons(port);
 		address.sa_family = 2;
 		if (bind(newsocket, &address, 16) == -1)
 		{
@@ -623,8 +623,8 @@ void __cdecl NET_OpenSocks(u_short port)
 		return;
 	}
 	address.sa_family = 2;
-	*&address.sa_data[2] = **h->h_addr_list;
-	*address.sa_data = htons(net_socksPort->current.unsignedInt);
+	*(_DWORD*)address.sa_data[2] = **(_DWORD**)h->h_addr_list;
+	*(_WORD*)address.sa_data = htons(net_socksPort->current.unsignedInt);
 	if (connect(socks_socket, &address, 16) == -1)
 	{
 		WSAGetLastError();
@@ -697,8 +697,8 @@ void __cdecl NET_OpenSocks(u_short port)
 	buf[1] = 3;
 	buf[2] = 0;
 	buf[3] = 1;
-	*&buf[4] = 0;
-	*&buf[8] = htons(port);
+	*(_DWORD*)&buf[4] = 0;
+	*(_WORD*)&buf[8] = htons(port);
 	if (send(socks_socket, (const char*)buf, 10, 0) == -1)
 	{
 		WSAGetLastError();
@@ -723,10 +723,10 @@ void __cdecl NET_OpenSocks(u_short port)
 	else if (buf[3] == 1)
 	{
 		socksRelayAddr.sa_family = 2;
-		*&socksRelayAddr.sa_data[2] = *&buf[4];
-		*socksRelayAddr.sa_data = *&buf[8];
-		*&socksRelayAddr.sa_data[6] = 0;
-		*&socksRelayAddr.sa_data[10] = 0;
+		*(_DWORD*)&socksRelayAddr.sa_data[2] = *(_DWORD*)&buf[4];
+		*(_WORD*)socksRelayAddr.sa_data = *(_WORD*)&buf[8];
+		*(_DWORD *)&socksRelayAddr.sa_data[6] = 0;
+		*(_DWORD *)&socksRelayAddr.sa_data[10] = 0;
 		usingSocks = 1;
 	}
 	else
@@ -856,6 +856,7 @@ void __cdecl NET_OpenIP()
 NET_IPXSocket
 ====================
 */
+// NOTE(mrsteyk): who the fuck has IPX in 21st century? @Cleanup
 unsigned int __cdecl NET_IPXSocket(int port)
 {
 	const char *v1; // eax
@@ -867,7 +868,7 @@ unsigned int __cdecl NET_IPXSocket(int port)
 	unsigned int newsocket; // [esp+1Ch] [ebp-4h]
 
 	_true = 1;
-	newsocket = socket(6, 2, 1000);
+	newsocket = socket(6, 2, NSPROTO_IPX);
 	if (newsocket == -1)
 	{
 		if (WSAGetLastError() != 10047)
@@ -894,9 +895,9 @@ unsigned int __cdecl NET_IPXSocket(int port)
 		address.sa_family = 6;
 		memset(address.sa_data, 0, 10);
 		if (port == -1)
-			*&address.sa_data[10] = 0;
+			*(_WORD*)&address.sa_data[10] = 0;
 		else
-			*&address.sa_data[10] = htons(port);
+			*(_WORD*)&address.sa_data[10] = htons(port);
 		if (bind(newsocket, &address, 14) == -1)
 		{
 			v5 = NET_ErrorString();

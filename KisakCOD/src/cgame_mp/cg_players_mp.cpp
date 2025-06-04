@@ -230,11 +230,11 @@ void  CG_AddPlayerSpriteDrawSurf(
         v8.pos[0] = sprite_28;
         v8.pos[1] = v11;
         v8.pos[2] = v12;
-        *v8.rgbaColor = -1;
+        *(_DWORD*)v8.rgbaColor = -1;
         v8.material = material;
         v8.radius = origin[1];
         v8.minScreenRadius = cg_headIconMinScreenRadius->current.value;
-        *&v8.flags = origin[2];
+        *(float*)&v8.flags = origin[2];
         if (!cg_headIconMinScreenRadius)
             MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 113, 0, "%s", "cg_headIconMinScreenRadius");
         FX_SpriteAdd(&v8);

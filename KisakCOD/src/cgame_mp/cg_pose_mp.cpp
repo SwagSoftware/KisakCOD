@@ -161,9 +161,9 @@ void CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBits
         {
             trans.u[2] = (unsigned int)&mtx[trans.u[3]];
             trans.u[1] = trans.u[2] + 16;
-            wheelPos.v[1] = *(unsigned int *)(trans.u[2] + 16);
-            wheelPos.v[2] = *(unsigned int *)(trans.u[2] + 20);
-            wheelPos.v[3] = *(unsigned int*)(trans.u[2] + 24);
+            wheelPos.v[1] = *(float*)(trans.u[2] + 16);
+            wheelPos.v[2] = *(float*)(trans.u[2] + 20);
+            wheelPos.v[3] = *(float*)(trans.u[2] + 24);
             trans.v[0] = 0.0;
             v17 = wheelPos.v[1] * axisZ.v[2] + wheelPos.v[2] * axis[1] + wheelPos.v[3] * axis[5] + axis[9];
             v18 = wheelPos.v[1] * axisZ.v[3] + wheelPos.v[2] * axis[2] + wheelPos.v[3] * axis[6] + axis[10];
@@ -193,9 +193,9 @@ void CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBits
             v21 = v21 - invAxis[13];
             v22 = v22 - invAxis[14];
             v23 = v23 - invAxis[15];
-            v5 = v21 * (unsigned int )*&boneMtxList + v22 * invAxis[1] + v23 * invAxis[5];
-            v6 = v21 * *&boneCount + v22 * invAxis[2] + v23 * invAxis[6];
-            v7 = v21 * (unsigned int )*&model + v22 * invAxis[3] + v23 * invAxis[7];
+            v5 = v21 * *(float*)&boneMtxList + v22 * invAxis[1] + v23 * invAxis[5];
+            v6 = v21 * *(float*)&boneCount + v22 * invAxis[2] + v23 * invAxis[6];
+            v7 = v21 * *(float*)&model + v22 * invAxis[3] + v23 * invAxis[7];
             v8 = v21 * invAxis[0] + v22 * invAxis[4] + v23 * invAxis[8];
             v21 = v5 - wheelPos.v[1];
             v22 = v6 - wheelPos.v[2];

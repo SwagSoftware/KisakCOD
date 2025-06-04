@@ -1369,9 +1369,9 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     }
     R_SetVertexDeclTypeNormal(context.state, VERTDECL_PACKED);
     setupPixelShader = 1;
-    drawSurfSubMask.packed = -65536;
+    drawSurfSubMask.packed = 0xFFFFFFFFFFFF0000uLL;
     if (baseTechType != TECHNIQUE_LIT_BEGIN)
-        *&drawSurfSubMask.packed = -536870912;
+        *(_DWORD*)&drawSurfSubMask.packed = 0xE0000000uL; // first 29 bits are zero.
     drawSurf.packed = drawSurfList->packed;
     drawSurfKey = drawSurfList->packed & 0xFFFFFFFFE0000000uLL;
     RB_TrackImmediatePrims(GFX_PRIM_STATS_XMODELRIGID);

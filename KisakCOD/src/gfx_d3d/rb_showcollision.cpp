@@ -139,11 +139,12 @@ void __cdecl RB_SetPolyVert(float *xyz, GfxColor color, int tessVertIndex)
     *xyzw = *xyz;
     xyzw[1] = xyz[1];
     xyzw[2] = xyz[2];
-    *&tess.indices[16 * tessVertIndex - 87194] = 1.0;
-    *&tess.indices[16 * tessVertIndex - 87186] = 1073643391;
-    *&tess.indices[16 * tessVertIndex - 87192] = color;
-    *&tess.indices[16 * tessVertIndex - 87190] = 0.0;
-    *&tess.indices[16 * tessVertIndex - 87188] = 0.0;
+    // TODO(mrsteyk): fix this abysmal minus offsetting into GfxVertex verts[5450]; @Correctness
+    *(float*)   &tess.indices[16 * tessVertIndex - 87194] = 1.0;
+    *(_DWORD*)  &tess.indices[16 * tessVertIndex - 87186] = 0x3FFE7F7F;
+    *(GfxColor*)&tess.indices[16 * tessVertIndex - 87192] = color;
+    *(float*)   &tess.indices[16 * tessVertIndex - 87190] = 0.0;
+    *(float*)   &tess.indices[16 * tessVertIndex - 87188] = 0.0;
 }
 
 void __cdecl RB_DrawCollisionPoly(int numPoints, float (*points)[3], const float *colorFloat)

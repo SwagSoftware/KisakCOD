@@ -1020,7 +1020,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "Y",
-                    *&value,
+                    value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1033,7 +1033,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "X",
-                    *&value,
+                    value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1072,7 +1072,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "Y",
-                    *&value,
+                    value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1085,7 +1085,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
                     "Entity with %s coordinate of %f is too far outside the playable area of the map.  The playable area goes from "
                     "( %f, %f, %f ) to ( %f, %f, %f )\n",
                     "X",
-                    *&value,
+                    value,
                     svsHeader.mapCenter[0] - 32768.0,
                     svsHeader.mapCenter[1] - 32768.0,
                     svsHeader.mapCenter[2] - 32768.0,
@@ -1126,7 +1126,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
                 ERR_DROP,
                 "Entity with Z coordinate of %f is too far outside the playable area of the map.  The playable area goes from ( %"
                 "f, %f, %f ) to ( %f, %f, %f )\n",
-                *&value,
+                value,
                 svsHeader.mapCenter[0] - 32768.0,
                 svsHeader.mapCenter[1] - 32768.0,
                 svsHeader.mapCenter[2] - 32768.0,
@@ -1149,7 +1149,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
                 ERR_DROP,
                 "Entity with Z coordinate of %f is too far outside the playable area of the map.  The playable area goes from ( %"
                 "f, %f, %f ) to ( %f, %f, %f )\n",
-                *&value,
+                value,
                 svsHeader.mapCenter[0] - 32768.0,
                 svsHeader.mapCenter[1] - 32768.0,
                 svsHeader.mapCenter[2] - 32768.0,
