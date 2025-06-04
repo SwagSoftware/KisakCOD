@@ -408,15 +408,14 @@ void __cdecl R_AddBModelSurfacesCamera(
 {
     unsigned __int16 surfaceCount; // [esp+4h] [ebp-28h]
     unsigned int surfId; // [esp+8h] [ebp-24h]
-    unsigned __int64 drawSurf; // [esp+Ch] [ebp-20h]
+    //unsigned __int64 drawSurf; // [esp+Ch] [ebp-20h]
     const Material *material; // [esp+14h] [ebp-18h]
     BModelSurface *modelSurf; // [esp+18h] [ebp-14h]
     const GfxSurface *bspSurf; // [esp+1Ch] [ebp-10h]
     unsigned int region; // [esp+20h] [ebp-Ch]
     unsigned int count; // [esp+28h] [ebp-4h]
 
-    if (!bmodel)
-        MyAssertHandler(".\\r_scene.cpp", 543, 0, "%s", "bmodel");
+    iassert(bmodel);
     surfId = bmodelInfo->surfId;
     modelSurf = (BModelSurface *)((char *)frontEndDataOut + 4 * surfId);
     if (reflectionProbeIndex >= 0x100)
@@ -460,14 +459,25 @@ void __cdecl R_AddBModelSurfacesCamera(
                     "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
                     surfId,
                     0x10000);
-            LODWORD(drawSurf) = ((unsigned __int8)reflectionProbeIndex << 16)
-                | ((bspSurf->lightmapIndex & 0x1F) << 24)
-                | (unsigned __int16)surfId
-                | *(unsigned int *)&material->info.drawSurf.fields & 0xE0000000;
-            HIDWORD(drawSurf) = (bspSurf->primaryLightIndex << 10)
-                | HIDWORD(material->info.drawSurf.packed) & 0xFFC003FF
-                | 0x180000;
-            drawSurfs[region]->packed = drawSurf;
+
+            drawSurfs[region]->packed = material->info.drawSurf.packed;
+
+            drawSurfs[region]->fields.reflectionProbeIndex = reflectionProbeIndex;
+            drawSurfs[region]->fields.customIndex = bspSurf->lightmapIndex;
+            drawSurfs[region]->fields.objectId = surfId;
+            drawSurfs[region]->fields.primaryLightIndex = bspSurf->primaryLightIndex;
+
+            //LODWORD(drawSurf) = ((unsigned __int8)reflectionProbeIndex << 16) // reflectionProbeIndex
+            //    | ((bspSurf->lightmapIndex & 0x1F) << 24) // customIndex
+            //    | (unsigned __int16)surfId // objectId
+            //    | *(unsigned int *)&material->info.drawSurf.fields & 0xE0000000; // copy upper 3 bits of LODWORD
+
+            //HIDWORD(drawSurf) = (bspSurf->primaryLightIndex << 10) // PrimaryLightIndex
+            //    | HIDWORD(material->info.drawSurf.packed) & 0xFFC003FF // all other bits in HIDWORD
+            //    | 0x180000; // this sets surfType but idk the exact value in bits...
+
+            HIDWORD(drawSurfs[region]->packed) |= 0x180000;// this sets surfType but idk the exact value in bits...
+
             ++drawSurfs[region];
         }
         ++modelSurf;
@@ -556,7 +566,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     char *v15; // eax
     unsigned int surfId; // [esp+8h] [ebp-38h]
     int totalVertCount; // [esp+Ch] [ebp-34h]
-    unsigned __int64 drawSurf; // [esp+10h] [ebp-30h]
+    //__int64 drawSurf; // [esp+10h] [ebp-30h]
     int totalTriCount; // [esp+1Ch] [ebp-24h]
     Material **material; // [esp+20h] [ebp-20h]
     unsigned int subMatIndex; // [esp+24h] [ebp-1Ch]
@@ -654,16 +664,31 @@ void __cdecl R_AddXModelSurfacesCamera(
                         "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
                         surfId,
                         0x10000);
-                drawSurf = (*material)->info.drawSurf.packed;
-                HIDWORD(drawSurf) = ((surfType & 0xF) << 18)
-                    | (((((drawSurf >> 54) & 0x3F) - depthHack) & 0x3F) << 22)
-                    | HIDWORD(drawSurf) & 0xF003FFFF;
-                LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24)
-                    | (reflectionProbeIndex << 16) & 0xE0FFFFFF
-                    | surfId
-                    | drawSurf & 0xE0000000;
-                HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF;
-                drawSurfs[region]->packed = drawSurf;
+
+                //drawSurf = (*material)->info.drawSurf.packed;
+
+                drawSurfs[region]->packed = (*material)->info.drawSurf.packed;
+
+                drawSurfs[region]->fields.surfType = surfType;
+                drawSurfs[region]->fields.primarySortKey -= depthHack;
+                
+                drawSurfs[region]->fields.customIndex = isShadowReceiver;
+                drawSurfs[region]->fields.reflectionProbeIndex = reflectionProbeIndex;
+                drawSurfs[region]->fields.objectId = surfId;
+                drawSurfs[region]->fields.primaryLightIndex = primaryLightIndex;
+
+                //HIDWORD(drawSurf) = ((surfType & 0xF) << 18) // surfType
+                //    | (((((drawSurf >> 54) & 0x3F) - depthHack) & 0x3F) << 22) // primarySortKey - depthHAck
+                //    | HIDWORD(drawSurf) & 0xF003FFFF; // all bits except the 10 above
+
+                //LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24) // customIndex
+                //    | (reflectionProbeIndex << 16) & 0xE0FFFFFF // reflectionProbIndex
+                //    | surfId // objectId
+                //    | drawSurf & 0xE0000000; // top 3 bits of LODWORD
+                //HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF; // primaryLightIndex and rest of bits
+
+                //drawSurfs[region]->packed = drawSurf;
+
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {
@@ -713,7 +738,7 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
     unsigned int surfId; // [esp+10h] [ebp-2Ch]
     Material **material; // [esp+14h] [ebp-28h]
     unsigned int subMatIndex; // [esp+18h] [ebp-24h]
-    unsigned __int64 newDrawSurf; // [esp+1Ch] [ebp-20h]
+    //unsigned __int64 newDrawSurf; // [esp+1Ch] [ebp-20h]
     int skinnedCachedOffset; // [esp+28h] [ebp-14h]
     int lod; // [esp+2Ch] [ebp-10h]
     GfxModelRigidSurface *modelSurf; // [esp+30h] [ebp-Ch]
@@ -773,9 +798,18 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
                         "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
                         surfId,
                         0x10000);
-                HIDWORD(newDrawSurf) = ((surfType & 0xF) << 18) | HIDWORD((*material)->info.drawSurf.packed) & 0xFFC3FFFF;
-                LODWORD(newDrawSurf) = (unsigned __int16)surfId | *(unsigned int *)&(*material)->info.drawSurf.fields & 0xFFFF0000;
-                drawSurf->packed = newDrawSurf;
+
+                drawSurf->packed = (*material)->info.drawSurf.packed; // copy all to start with
+
+                drawSurf->fields.surfType = surfType;
+                drawSurf->fields.objectId = surfId;
+                //HIDWORD(newDrawSurf) = ((surfType & 0xF) << 18)  // surfType
+                //    | HIDWORD((*material)->info.drawSurf.packed) & 0xFFC3FFFF; // rest of bits in HIDWORD
+                //LODWORD(newDrawSurf) = (unsigned __int16)surfId  // objectID
+                //    | *(unsigned int *)&(*material)->info.drawSurf.fields & 0xFFFF0000; // rest of bits in LODWORD
+
+                //drawSurf->packed = newDrawSurf;
+
                 ++drawSurf;
                 surfId += 14;
                 ++modelSurf;
@@ -808,7 +842,7 @@ void __cdecl R_AddDObjSurfacesCamera(
     unsigned int surfIda; // [esp+Ch] [ebp-64h]
     int totalVertCount; // [esp+10h] [ebp-60h]
     const DObj_s *obj; // [esp+14h] [ebp-5Ch]
-    unsigned __int64 drawSurf; // [esp+18h] [ebp-58h]
+    //unsigned __int64 drawSurf; // [esp+18h] [ebp-58h]
     int totalTriCount; // [esp+20h] [ebp-50h]
     Material **material; // [esp+24h] [ebp-4Ch]
     XModel *model; // [esp+28h] [ebp-48h]
@@ -919,16 +953,27 @@ LABEL_15:
                         "surfId doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
                         surfIda,
                         0x10000);
-                drawSurf = (*material)->info.drawSurf.packed;
-                HIDWORD(drawSurf) = ((surfType & 0xF) << 18)
-                    | (((((drawSurf >> 54) & 0x3F) - depthHack) & 0x3F) << 22)
-                    | HIDWORD(drawSurf) & 0xF003FFFF;
-                LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24)
-                    | (sceneEnt->reflectionProbeIndex << 16) & 0xE0FFFFFF
-                    | (unsigned __int16)surfIda
-                    | drawSurf & 0xE0000000;
-                HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF;
-                drawSurfs[region]->packed = drawSurf;
+                //drawSurf = (*material)->info.drawSurf.packed;
+
+                drawSurfs[region]->packed = (*material)->info.drawSurf.packed;
+
+                drawSurfs[region]->fields.surfType = surfType;
+                drawSurfs[region]->fields.primarySortKey -= depthHack;
+                drawSurfs[region]->fields.customIndex = isShadowReceiver;
+                drawSurfs[region]->fields.reflectionProbeIndex = sceneEnt->reflectionProbeIndex;
+                drawSurfs[region]->fields.objectId = surfIda;
+                drawSurfs[region]->fields.primaryLightIndex = primaryLightIndex;
+
+                //HIDWORD(drawSurf) = ((surfType & 0xF) << 18) // surftype
+                //    | (((((drawSurf >> 54) & 0x3F) - depthHack) & 0x3F) << 22) // primarySortKey
+                //    | HIDWORD(drawSurf) & 0xF003FFFF; // all bits except the 10 we just set
+                //LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24) // customIndex
+                    //| (sceneEnt->reflectionProbeIndex << 16) & 0xE0FFFFFF
+                    //| (unsigned __int16)surfIda
+                    //| drawSurf & 0xE0000000; // top 3 bits
+                //HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF;
+
+                //drawSurfs[region]->packed = drawSurf;
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {

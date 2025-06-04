@@ -491,7 +491,7 @@ void __cdecl R_BoxStaticModels_r(
         {
             if (side != 2)
                 R_BoxStaticModels_r(node + 1, mins, maxs, allowSModel, smodelList, smodelListSize, smodelCount, cellBits);
-            node = (node + 2 * node->rightChildOffset);
+            node = (mnode_t*)((char*)node + 2 * node->rightChildOffset);
         }
     }
     if (node->cellIndex)

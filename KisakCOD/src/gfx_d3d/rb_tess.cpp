@@ -344,7 +344,6 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     drawSurfSubMask.packed = 0xFFFFFFFF'FFFF0000;
     if (baseTechType != TECHNIQUE_LIT_BEGIN)
     {
-        //*(unsigned int *)&drawSurfSubMask.fields = -536870912;
         LODWORD(drawSurfSubMask.packed) = 0xE0000000;
         R_SetupPassPerObjectArgs(context);
     }
@@ -751,22 +750,24 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                 R_SetupPassPerObjectArgs(prepassContext);
                 R_SetupPassPerPrimArgs(prepassContext);
             }
-            drawSurfKey = *(unsigned int *)&drawSurf.fields & 0xFF000000;
+            drawSurfKey = drawSurf.packed & 0xFF000000;
             while (1)
             {
                 if (prepassContext.state)
                     R_DrawXModelSkinnedModelSurf(prepassContext, modelSurf);
                 R_SetModelLightingCoordsForSource(modelSurf->info.lightingHandle, commonSource);
-                R_SetReflectionProbe(context, BYTE2(drawSurf.packed));
+                R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
                 R_SetupPassPerPrimArgs(context);
                 R_DrawXModelSkinnedModelSurf(context, modelSurf);
+
                 if (++drawSurfIndex == drawSurfCount)
                     break;
-                drawSurf.fields = drawSurfList[drawSurfIndex].fields;
-                if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFFF000000uLL) != __PAIR64__(
-                    HIDWORD(drawSurf.packed),
-                    drawSurfKey))
+
+                drawSurf = drawSurfList[drawSurfIndex];
+
+                if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFFF000000uLL) != __PAIR64__(HIDWORD(drawSurf.packed),drawSurfKey))
                     break;
+
                 modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
                 gfxEntIndex = modelSurf->info.gfxEntIndex;
                 if (gfxEntIndex != baseGfxEntIndex)
@@ -792,16 +793,14 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                 MyAssertHandler(".\\rb_tess.cpp", 992, 0, "%s", "prepassContext.state == NULL");
             R_SetupPassPerObjectArgs(context);
             R_SetupPassPerPrimArgs(context);
-            drawSurfKeya = *(unsigned int *)&drawSurf.fields & 0xE0000000;
+            drawSurfKeya = drawSurf.packed & 0xE0000000;
             while (1)
             {
                 R_DrawXModelSkinnedModelSurf(context, modelSurf);
                 if (++drawSurfIndex == drawSurfCount)
                     break;
-                drawSurf.fields = drawSurfList[drawSurfIndex].fields;
-                if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFE0000000uLL) != __PAIR64__(
-                    HIDWORD(drawSurf.packed),
-                    drawSurfKeya))
+                drawSurf.packed = drawSurfList[drawSurfIndex].packed;
+                if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFE0000000uLL) != __PAIR64__( HIDWORD(drawSurf.packed),drawSurfKeya))
                     break;
                 modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
                 gfxEntIndexa = modelSurf->info.gfxEntIndex;
@@ -845,7 +844,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
             R_ChangeDepthRange(context.state, GFX_DEPTH_RANGE_FULL);
         R_SetupPassPerObjectArgs(context);
         R_SetupPassPerPrimArgs(context);
-        drawSurfKeyb = *(unsigned int *)&drawSurf.fields & 0xE0000000;
+        drawSurfKeyb = drawSurf.packed & 0xE0000000;
         while (1)
         {
             R_DrawXModelSkinnedModelSurf(context, modelSurfa);
@@ -1391,7 +1390,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
         drawSurfSubKey = drawSurfSubMask.packed & drawSurf.packed;
         do
         {
-            modelSurf = (const GfxModelRigidSurface *)((char*)data + 4 * LOWORD(drawSurf.packed));
+            modelSurf = (const GfxModelRigidSurface *)((char*)data + 4 * drawSurf.fields.objectId);
             if (info->cameraView)
             {
                 gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
@@ -1414,7 +1413,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
                 if (baseTechType == TECHNIQUE_LIT_BEGIN)
                 {
                     R_SetModelLightingCoordsForSource(modelSurf->surf.info.lightingHandle, commonSource);
-                    R_SetReflectionProbe(context, BYTE2(drawSurf.packed));
+                    R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
                 }
                 if (depthHackFlags != context.state->depthRangeType)
                     R_ChangeDepthRange(context.state, depthHackFlags);
@@ -1429,8 +1428,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
                 break;
             drawSurf = drawSurfList[drawSurfIndex];
         } while ((drawSurfSubMask.packed & drawSurf.packed) == drawSurfSubKey);
-    } while (drawSurfIndex != drawSurfCount
-        && __PAIR64__(HIDWORD(drawSurf.packed), *&drawSurf.packed & 0xE0000000) == drawSurfKey);
+    } while (drawSurfIndex != drawSurfCount&& __PAIR64__(HIDWORD(drawSurf.packed), LODWORD(drawSurf.packed) & 0xE0000000) == drawSurfKey);
     RB_EndTrackImmediatePrims();
     //Profile_EndInternal(0);
     return drawSurfIndex;
@@ -1662,7 +1660,7 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
     drawSurfSubMask.packed = 0xFFFFFFFFFFFF0000uLL;
     if (baseTechType != TECHNIQUE_LIT_BEGIN)
     {
-        *(unsigned int *)&drawSurfSubMask.fields = 0xE0000000;
+        LODWORD(drawSurfSubMask.packed) = 0xE0000000;
         R_SetupPassPerObjectArgs(context);
     }
     drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
@@ -1673,7 +1671,7 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
             R_SetLightmap(context, drawSurf.fields.customIndex);
-            R_SetReflectionProbe(context, BYTE2(drawSurf.packed));
+            R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
             R_SetupPassPerObjectArgs(context);
         }
         drawSurfSubKey = drawSurfSubMask.packed & drawSurf.packed;

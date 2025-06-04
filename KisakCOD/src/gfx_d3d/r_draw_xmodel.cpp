@@ -374,7 +374,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
 
     data = context.source->input.data;
     drawSurf = drawSurfList->packed;
-    drawSurfMask.packed = -536870912;
+    drawSurfMask.packed = 0xFFFFFFFFE0000000uLL;
     drawSurfKey = drawSurf & 0xFFFFFFFFE0000000uLL;
     drawSurfIndex = 0;
     eyeOffset.v[0] = context.source->eyeOffset[0];
@@ -383,10 +383,10 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
     eyeOffset.v[0] = eyeOffset.v[0] - 0.0;
     eyeOffset.v[1] = eyeOffset.v[1] - 0.0;
     eyeOffset.v[2] = eyeOffset.v[2] - 0.0;
-    eyeOffset.v[3] = 0.0 - 1.0;
+    eyeOffset.v[3] = 0.0f - 1.0f;
     do
     {
-        modelSurf = (const GfxModelRigidSurface*)(data + 4 * drawSurf);
+        modelSurf = (const GfxModelRigidSurface*)((char *)data + 4 * drawSurf);
         quat = *(float4*)modelSurf->placement.base.quat;
         if (!Vec4IsNormalized(quat.v))
             MyAssertHandler(
@@ -415,7 +415,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
         worldMat[6] = v13 + v15;
         worldMat[8] = v12 + v11;
         worldMat[9] = v13 - v15;
-        worldMat[10] = 1.0 - (v14 + v4);
+        worldMat[10] = 1.0f - (v14 + v4);
         scale.v[0] = modelSurf->placement.scale;
         scale.v[1] = scale.v[0];
         scale.v[2] = scale.v[0];
@@ -423,7 +423,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
         worldMat[0] = worldMat[0] * scale.v[0];
         worldMat[1] = worldMat[1] * scale.v[0];
         worldMat[2] = worldMat[2] * scale.v[0];
-        worldMat[3] = 0.0 * scale.v[0];
+        worldMat[3] = 0.0f * scale.v[0];
         worldMat[4] = worldMat[4] * scale.v[0];
         worldMat[5] = worldMat[5] * scale.v[0];
         worldMat[6] = worldMat[6] * scale.v[0];
@@ -433,7 +433,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
         worldMat[12] = modelSurf->placement.base.origin[0] - eyeOffset.v[0];
         worldMat[13] = modelSurf->placement.base.origin[1] - eyeOffset.v[1];
         worldMat[14] = modelSurf->placement.base.origin[2] - eyeOffset.v[2];
-        worldMat[15] = 0.0 - eyeOffset.v[3];
+        worldMat[15] = 0.0f - eyeOffset.v[3];
         matrix = R_GetActiveWorldMatrix(context.source);
         matrix->matrices.matrix[0].m[0][0] = worldMat[0];
         matrix->matrices.matrix[0].m[0][1] = worldMat[1];
