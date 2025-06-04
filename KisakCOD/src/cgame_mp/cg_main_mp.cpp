@@ -1385,17 +1385,16 @@ void CG_RegisterPhysicsSounds_LoadObj()
     }
 }
 
-int CG_RegisterPhysicsSounds()
+void CG_RegisterPhysicsSounds()
 {
     if (useFastFile->current.enabled)
-        return ((int(__cdecl *)(int (*)()))CG_RegisterPhysicsSounds_FastFile)(CG_RegisterPhysicsSounds_FastFile);
+        CG_RegisterPhysicsSounds_FastFile();
     else
-        return ((int(__cdecl *)(void (*)()))CG_RegisterPhysicsSounds_LoadObj)(CG_RegisterPhysicsSounds_LoadObj);
+        CG_RegisterPhysicsSounds_LoadObj();
 }
 
-int CG_RegisterPhysicsSounds_FastFile()
+void CG_RegisterPhysicsSounds_FastFile()
 {
-    int result; // eax
     char classes[50][64]; // [esp+0h] [ebp-D60h] BYREF
     PhysPreset *physPreset; // [esp+C88h] [ebp-D8h]
     int nclasses; // [esp+C8Ch] [ebp-D4h] BYREF
@@ -1404,14 +1403,12 @@ int CG_RegisterPhysicsSounds_FastFile()
     XAssetHeader assets[50]; // [esp+C98h] [ebp-C8h] BYREF
 
     nclasses = 0;
-    result = DB_GetAllXAssetOfType(ASSET_TYPE_PHYSPRESET, assets, 50);
-    physPresetCount = result;
+    physPresetCount = DB_GetAllXAssetOfType(ASSET_TYPE_PHYSPRESET, assets, 50);
     for (i = 0; i < physPresetCount; ++i)
     {
         physPreset = assets[i].physPreset;
         CG_AddAudioPhysicsClass(physPreset, classes, &nclasses);
     }
-    return result;
 }
 
 void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64], int *nclasses)

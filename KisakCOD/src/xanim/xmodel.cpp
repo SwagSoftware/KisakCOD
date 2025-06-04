@@ -46,10 +46,7 @@ void __cdecl TRACK_xmodel()
 XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
 {
     if (useFastFile->current.enabled)
-        return (XModel *)((int(__cdecl *)(char *, void *(__cdecl *)(int), void *(__cdecl *)(int)))XModelPrecache_FastFile)(
-            name,
-            Alloc,
-            AllocColl);
+        return XModelPrecache_FastFile(name);
     else
         return XModelPrecache_LoadObj(name, Alloc, AllocColl);
 }
@@ -1567,7 +1564,7 @@ int __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidate
     for (vertIter = 0; vertIter != 3; ++vertIter)
         verts0[vertIter] = &locals->inVertices0[locals->vertexQueue[locals->vertexQueueBegin][vertIter]];
     locals->vertexQueueBegin = ((unsigned __int8)locals->vertexQueueBegin + 1) & 3;
-    return ((int(__cdecl *)(void *, const GfxPackedVertex **, const GfxPackedVertex **))locals->visitorFunc)(
+    return locals->visitorFunc(
         locals->visitorContext,
         verts0,
         verts0);

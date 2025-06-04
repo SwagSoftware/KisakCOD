@@ -242,283 +242,6 @@ bool __cdecl CM_CullBox2(const objInfo *input, const float *origin, const float 
     return halfBoxSize[2] < (double)v4;
 }
 
-int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip)
-{
-    dxBody *Body; // eax
-    const float *Rotation; // eax
-    float v8; // [esp+Ch] [ebp-AE0h]
-    float v9; // [esp+10h] [ebp-ADCh]
-    float v10; // [esp+14h] [ebp-AD8h]
-    float v11; // [esp+1Ch] [ebp-AD0h]
-    float v12; // [esp+20h] [ebp-ACCh]
-    float v13; // [esp+28h] [ebp-AC4h]
-    float v14; // [esp+2Ch] [ebp-AC0h]
-    float v15; // [esp+30h] [ebp-ABCh]
-    float v16; // [esp+34h] [ebp-AB8h]
-    float v17; // [esp+38h] [ebp-AB4h]
-    float v18; // [esp+3Ch] [ebp-AB0h]
-    float v19; // [esp+40h] [ebp-AACh]
-    float v20; // [esp+44h] [ebp-AA8h]
-    float v21; // [esp+48h] [ebp-AA4h]
-    float v22; // [esp+4Ch] [ebp-AA0h]
-    float v23; // [esp+50h] [ebp-A9Ch]
-    float v24; // [esp+54h] [ebp-A98h]
-    bool v25; // [esp+5Ch] [ebp-A90h]
-    float v26; // [esp+60h] [ebp-A8Ch]
-    float v27; // [esp+F0h] [ebp-9FCh]
-    float v28; // [esp+F4h] [ebp-9F8h]
-    float v29; // [esp+FCh] [ebp-9F0h]
-    float halfHeight; // [esp+100h] [ebp-9ECh]
-    const float *v31; // [esp+140h] [ebp-9ACh]
-    const dReal *Position; // [esp+144h] [ebp-9A8h]
-    int k; // [esp+170h] [ebp-97Ch]
-    int j; // [esp+174h] [ebp-978h]
-    int c; // [esp+178h] [ebp-974h]
-    int r; // [esp+17Ch] [ebp-970h]
-    leafList_s ll; // [esp+180h] [ebp-96Ch] BYREF
-    const float *narrowLen; // [esp+1ACh] [ebp-940h]
-    BrushInfo *brushInfo; // [esp+1B0h] [ebp-93Ch]
-    float rotatedCenterOfMass[3]; // [esp+1B4h] [ebp-938h] BYREF
-    float radius; // [esp+1C0h] [ebp-92Ch]
-    unsigned __int16 leafs[1026]; // [esp+1C4h] [ebp-928h] BYREF
-    float bounds[2][3]; // [esp+9CCh] [ebp-120h] BYREF
-    objInfo input; // [esp+9E4h] [ebp-108h] BYREF
-    float maxs[3]; // [esp+A8Ch] [ebp-60h] BYREF
-    float absR[3][3]; // [esp+A98h] [ebp-54h] BYREF
-    GeomStateCylinder *cyl; // [esp+ABCh] [ebp-30h]
-    float lengths[5]; // [esp+AC0h] [ebp-2Ch] BYREF
-    int i; // [esp+AD4h] [ebp-18h]
-    Results results; // [esp+AD8h] [ebp-14h] BYREF
-    TraceThreadInfo *value; // [esp+AE8h] [ebp-4h]
-
-    LODWORD(lengths[4]) = 1024;
-    narrowLen = &phys_narrowObjMaxLength->current.value;
-    Profile_Begin(368);
-    Profile_Begin(369);
-    if (skip < 44)
-        MyAssertHandler(".\\physics\\phys_world_collision.cpp", 374, 0, "%s", "skip >= (int)sizeof(dContactGeom)");
-    if (dGeomGetClass(o1) != 15)
-        MyAssertHandler(".\\physics\\phys_world_collision.cpp", 375, 0, "%s", "dGeomGetClass( o1 ) == GEOM_CLASS_WORLD");
-    Body = dGeomGetBody(o2);
-    Position = dBodyGetPosition(Body);
-    input.bodyCenter[0] = *Position;
-    input.bodyCenter[1] = Position[1];
-    input.bodyCenter[2] = Position[2];
-    v31 = dGeomGetPosition(o2);
-    input.pos[0] = *v31;
-    input.pos[1] = v31[1];
-    input.pos[2] = v31[2];
-    Rotation = dGeomGetRotation(o2);
-    Phys_OdeMatrix3ToAxis(Rotation, input.R);
-    MatrixTranspose(input.R, input.RTransposed);
-    switch (dGeomGetClass(o2))
-    {
-    case 1:
-        input.type = PHYS_GEOM_BOX;
-        dGeomBoxGetLengths(o2, lengths);
-        input.u.sideExtents[0] = lengths[0];
-        input.u.sideExtents[1] = lengths[1];
-        input.u.sideExtents[2] = lengths[2];
-        Vec3Scale(input.u.sideExtents, 0.5, input.u.sideExtents);
-        for (r = 0; r < 3; ++r)
-        {
-            for (c = 0; c < 3; ++c)
-            {
-                v26 = fabs(input.R[r][c]);
-                absR[r][c] = v26;
-            }
-        }
-        MatrixTransformVector(input.u.sideExtents, absR, maxs);
-        v25 = *narrowLen > lengths[0] || *narrowLen > lengths[1] || *narrowLen > lengths[2];
-        input.isNarrow = v25;
-        break;
-    case 11:
-        input.type = PHYS_GEOM_BRUSHMODEL;
-        brushInfo = (BrushInfo*)dGeomGetClassData(o2);
-        if (!brushInfo->u.brushModel)
-            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 402, 0, "%s", "brushInfo->u.brushModel");
-        if (brushInfo->u.brushModel == 4095)
-            MyAssertHandler(
-                ".\\physics\\phys_world_collision.cpp",
-                403,
-                0,
-                "%s",
-                "brushInfo->u.brushModel != CAPSULE_MODEL_HANDLE");
-        input.u.brushModel = CM_ClipHandleToModel(brushInfo->u.brushModel);
-        MatrixTransformVector(brushInfo->centerOfMass, input.R, rotatedCenterOfMass);
-        Vec3Sub(input.pos, rotatedCenterOfMass, input.pos);
-        maxs[0] = input.u.brushModel->radius;
-        maxs[1] = maxs[0];
-        maxs[2] = maxs[0];
-        input.isNarrow = *narrowLen > input.u.brushModel->radius;
-        break;
-    case 12:
-        input.type = PHYS_GEOM_BRUSH;
-        brushInfo = (BrushInfo*)dGeomGetClassData(o2);
-        if (!brushInfo->u.brush)
-            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 419, 0, "%s", "brushInfo->u.brush");
-        input.u.brushModel = (cmodel_t*)brushInfo->u.brush;
-        MatrixTransformVector(brushInfo->centerOfMass, input.R, rotatedCenterOfMass);
-        Vec3Sub(input.pos, rotatedCenterOfMass, input.pos);
-        radius = 0.0;
-        v24 = fabs(input.u.brushModel->maxs[1]);
-        if (0.0 < v24)
-        {
-            v23 = fabs(input.u.brushModel->maxs[1]);
-            radius = v23;
-        }
-        v22 = fabs(input.u.brushModel->maxs[2]);
-        if (radius < v22)
-        {
-            v21 = fabs(input.u.brushModel->maxs[2]);
-            radius = v21;
-        }
-        v20 = fabs(input.u.brushModel->radius);
-        if (radius < v20)
-        {
-            v19 = fabs(input.u.brushModel->radius);
-            radius = v19;
-        }
-        v18 = fabs(input.u.brushModel->mins[0]);
-        if (radius < v18)
-        {
-            v17 = fabs(input.u.brushModel->mins[0]);
-            radius = v17;
-        }
-        v16 = fabs(input.u.brushModel->mins[1]);
-        if (radius < v16)
-        {
-            v15 = fabs(input.u.brushModel->mins[1]);
-            radius = v15;
-        }
-        v14 = fabs(input.u.brushModel->mins[2]);
-        if (radius < v14)
-        {
-            v13 = fabs(input.u.brushModel->mins[2]);
-            radius = v13;
-        }
-        maxs[0] = radius * 1.732050776481628;
-        maxs[1] = maxs[0];
-        maxs[2] = maxs[0];
-        input.isNarrow = *narrowLen > input.u.brushModel->radius;
-        break;
-    case 13:
-        input.type = PHYS_GEOM_CYLINDER;
-        cyl = (GeomStateCylinder *)dGeomGetClassData(o2);
-        input.cylDirection = cyl->direction;
-        input.u.sideExtents[0] = cyl->radius;
-        input.u.sideExtents[1] = cyl->radius;
-        input.u.sideExtents[2] = cyl->halfHeight;
-        v29 = cyl->radius;
-        halfHeight = cyl->halfHeight;
-        v12 = v29 - halfHeight;
-        if (v12 < 0.0)
-            v11 = halfHeight;
-        else
-            v11 = v29;
-        maxs[0] = v11 * 1.414214015007019;
-        maxs[1] = maxs[0];
-        maxs[2] = maxs[0];
-        input.isNarrow = *narrowLen > cyl->radius + cyl->radius;
-        break;
-    case 14:
-        input.type = PHYS_GEOM_CAPSULE;
-        cyl = (GeomStateCylinder*)dGeomGetClassData(o2);
-        input.cylDirection = cyl->direction;
-        input.u.sideExtents[0] = cyl->radius;
-        input.u.sideExtents[1] = cyl->radius;
-        input.u.sideExtents[2] = cyl->halfHeight;
-        for (j = 0; j < 3; ++j)
-        {
-            for (k = 0; k < 3; ++k)
-            {
-                v10 = fabs(input.R[j][k]);
-                absR[j][k] = v10;
-            }
-        }
-        v27 = cyl->radius;
-        v28 = v27 + v27 + cyl->halfHeight;
-        v9 = v27 - v28;
-        if (v9 < 0.0)
-            v8 = cyl->radius + cyl->radius + cyl->halfHeight;
-        else
-            v8 = v27;
-        maxs[0] = v8;
-        maxs[1] = v8;
-        maxs[2] = v8;
-        input.isNarrow = *narrowLen > cyl->radius + cyl->radius;
-        break;
-    default:
-        if (!alwaysfails)
-            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 484, 0, "invalid geometry type");
-        break;
-    }
-    ll.bounds[0][0] = input.pos[0];
-    ll.bounds[0][1] = input.pos[1];
-    ll.bounds[0][2] = input.pos[2];
-    ll.bounds[1][0] = input.pos[0];
-    ll.bounds[1][1] = input.pos[1];
-    ll.bounds[1][2] = input.pos[2];
-    for (i = 0; i < 3; ++i)
-    {
-        ll.bounds[0][i] = ll.bounds[0][i] - (maxs[i] + 1.0);
-        ll.bounds[1][i] = maxs[i] + 1.0 + ll.bounds[1][i];
-    }
-    *&input.bounds[0][0] = *&ll.bounds[0][0];
-    input.bounds[0][2] = ll.bounds[0][2];
-    *&input.bounds[1][0] = *&ll.bounds[1][0];
-    input.bounds[1][2] = ll.bounds[1][2];
-    ll.count = 0;
-    ll.maxcount = 1024;
-    ll.list = leafs;
-    ll.lastLeaf = 0;
-    ll.overflowed = 0;
-    CM_BoxLeafnums_r(&ll, 0);
-    if (ll.count)
-    {
-        input.clipMask = 0x2806C91;
-        results.contacts = contact;
-        results.contactCount = 0;
-        results.maxContacts = flags;
-        results.stride = skip;
-        value = (TraceThreadInfo*)Sys_GetValue(3);
-        if (!value)
-            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 524, 0, "%s", "value");
-        ++value->checkcount.global;
-        input.threadInfo = *value;
-        if (!input.threadInfo.checkcount.partitions && cm.partitionCount)
-            MyAssertHandler(
-                ".\\physics\\phys_world_collision.cpp",
-                527,
-                0,
-                "%s",
-                "input.threadInfo.checkcount.partitions || cm.partitionCount == 0");
-        Profile_EndInternal(0);
-        Profile_Begin(370);
-        Vec3Sub((const float*)input.bounds, input.pos, bounds[0]);
-        Vec3Sub(input.bounds[1], input.pos, bounds[1]);
-        input.radius = RadiusFromBounds(bounds[0], bounds[1]);
-        for (i = 0; i < ll.count; ++i)
-            CM_TestGeomInLeaf(&cm.leafs[leafs[i]], &input, &results);
-        if (phys_collUseEntities->current.enabled)
-            Phys_TestAgainstEntities(&input, &results);
-        for (i = 0; i < results.contactCount; ++i)
-        {
-            results.contacts[i].contact.g1 = o1;
-            results.contacts[i].contact.g2 = o2;
-        }
-        Profile_EndInternal(0);
-        Profile_EndInternal(0);
-        return results.contactCount;
-    }
-    else
-    {
-        Profile_EndInternal(0);
-        Profile_EndInternal(0);
-        return 0;
-    }
-}
-
 void __cdecl CM_TestGeomInLeaf(cLeaf_t *leaf, const objInfo *input, Results *results)
 {
     if ((input->clipMask & leaf->brushContents) != 0)
@@ -637,6 +360,296 @@ void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results)
     }
 }
 
+static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt *contact, int skip)
+{
+    dxBody *Body; // eax
+    const float *Rotation; // eax
+    float v8; // [esp+Ch] [ebp-AE0h]
+    float v9; // [esp+10h] [ebp-ADCh]
+    float v10; // [esp+14h] [ebp-AD8h]
+    float v11; // [esp+1Ch] [ebp-AD0h]
+    float v12; // [esp+20h] [ebp-ACCh]
+    float v13; // [esp+28h] [ebp-AC4h]
+    float v14; // [esp+2Ch] [ebp-AC0h]
+    float v15; // [esp+30h] [ebp-ABCh]
+    float v16; // [esp+34h] [ebp-AB8h]
+    float v17; // [esp+38h] [ebp-AB4h]
+    float v18; // [esp+3Ch] [ebp-AB0h]
+    float v19; // [esp+40h] [ebp-AACh]
+    float v20; // [esp+44h] [ebp-AA8h]
+    float v21; // [esp+48h] [ebp-AA4h]
+    float v22; // [esp+4Ch] [ebp-AA0h]
+    float v23; // [esp+50h] [ebp-A9Ch]
+    float v24; // [esp+54h] [ebp-A98h]
+    bool v25; // [esp+5Ch] [ebp-A90h]
+    float v26; // [esp+60h] [ebp-A8Ch]
+    float v27; // [esp+F0h] [ebp-9FCh]
+    float v28; // [esp+F4h] [ebp-9F8h]
+    float v29; // [esp+FCh] [ebp-9F0h]
+    float halfHeight; // [esp+100h] [ebp-9ECh]
+    const float *v31; // [esp+140h] [ebp-9ACh]
+    const dReal *Position; // [esp+144h] [ebp-9A8h]
+    int k; // [esp+170h] [ebp-97Ch]
+    int j; // [esp+174h] [ebp-978h]
+    int c; // [esp+178h] [ebp-974h]
+    int r; // [esp+17Ch] [ebp-970h]
+    leafList_s ll; // [esp+180h] [ebp-96Ch] BYREF
+    const float *narrowLen; // [esp+1ACh] [ebp-940h]
+    BrushInfo *brushInfo; // [esp+1B0h] [ebp-93Ch]
+    float rotatedCenterOfMass[3]; // [esp+1B4h] [ebp-938h] BYREF
+    float radius; // [esp+1C0h] [ebp-92Ch]
+    unsigned __int16 leafs[1026]; // [esp+1C4h] [ebp-928h] BYREF
+    float bounds[2][3]; // [esp+9CCh] [ebp-120h] BYREF
+    objInfo input; // [esp+9E4h] [ebp-108h] BYREF
+    float maxs[3]; // [esp+A8Ch] [ebp-60h] BYREF
+    float absR[3][3]; // [esp+A98h] [ebp-54h] BYREF
+    GeomStateCylinder *cyl; // [esp+ABCh] [ebp-30h]
+    float lengths[5]; // [esp+AC0h] [ebp-2Ch] BYREF
+    int i; // [esp+AD4h] [ebp-18h]
+    Results results; // [esp+AD8h] [ebp-14h] BYREF
+    TraceThreadInfo *value; // [esp+AE8h] [ebp-4h]
+
+    LODWORD(lengths[4]) = 1024;
+    narrowLen = &phys_narrowObjMaxLength->current.value;
+    Profile_Begin(368);
+    Profile_Begin(369);
+    if (skip < 44)
+        MyAssertHandler(".\\physics\\phys_world_collision.cpp", 374, 0, "%s", "skip >= (int)sizeof(dContactGeom)");
+    if (dGeomGetClass(o1) != 15)
+        MyAssertHandler(".\\physics\\phys_world_collision.cpp", 375, 0, "%s", "dGeomGetClass( o1 ) == GEOM_CLASS_WORLD");
+    Body = dGeomGetBody(o2);
+    Position = dBodyGetPosition(Body);
+    input.bodyCenter[0] = *Position;
+    input.bodyCenter[1] = Position[1];
+    input.bodyCenter[2] = Position[2];
+    v31 = dGeomGetPosition(o2);
+    input.pos[0] = *v31;
+    input.pos[1] = v31[1];
+    input.pos[2] = v31[2];
+    Rotation = dGeomGetRotation(o2);
+    Phys_OdeMatrix3ToAxis(Rotation, input.R);
+    MatrixTranspose(input.R, input.RTransposed);
+    switch (dGeomGetClass(o2))
+    {
+    case 1:
+        input.type = PHYS_GEOM_BOX;
+        dGeomBoxGetLengths(o2, lengths);
+        input.u.sideExtents[0] = lengths[0];
+        input.u.sideExtents[1] = lengths[1];
+        input.u.sideExtents[2] = lengths[2];
+        Vec3Scale(input.u.sideExtents, 0.5, input.u.sideExtents);
+        for (r = 0; r < 3; ++r)
+        {
+            for (c = 0; c < 3; ++c)
+            {
+                v26 = fabs(input.R[r][c]);
+                absR[r][c] = v26;
+            }
+        }
+        MatrixTransformVector(input.u.sideExtents, absR, maxs);
+        v25 = *narrowLen > lengths[0] || *narrowLen > lengths[1] || *narrowLen > lengths[2];
+        input.isNarrow = v25;
+        break;
+    case 11:
+        input.type = PHYS_GEOM_BRUSHMODEL;
+        brushInfo = (BrushInfo *)dGeomGetClassData(o2);
+        if (!brushInfo->u.brushModel)
+            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 402, 0, "%s", "brushInfo->u.brushModel");
+        if (brushInfo->u.brushModel == 4095)
+            MyAssertHandler(
+                ".\\physics\\phys_world_collision.cpp",
+                403,
+                0,
+                "%s",
+                "brushInfo->u.brushModel != CAPSULE_MODEL_HANDLE");
+        input.u.brushModel = CM_ClipHandleToModel(brushInfo->u.brushModel);
+        MatrixTransformVector(brushInfo->centerOfMass, input.R, rotatedCenterOfMass);
+        Vec3Sub(input.pos, rotatedCenterOfMass, input.pos);
+        maxs[0] = input.u.brushModel->radius;
+        maxs[1] = maxs[0];
+        maxs[2] = maxs[0];
+        input.isNarrow = *narrowLen > input.u.brushModel->radius;
+        break;
+    case 12:
+        input.type = PHYS_GEOM_BRUSH;
+        brushInfo = (BrushInfo *)dGeomGetClassData(o2);
+        if (!brushInfo->u.brush)
+            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 419, 0, "%s", "brushInfo->u.brush");
+        input.u.brushModel = (cmodel_t *)brushInfo->u.brush;
+        MatrixTransformVector(brushInfo->centerOfMass, input.R, rotatedCenterOfMass);
+        Vec3Sub(input.pos, rotatedCenterOfMass, input.pos);
+        radius = 0.0;
+        v24 = fabs(input.u.brushModel->maxs[1]);
+        if (0.0 < v24)
+        {
+            v23 = fabs(input.u.brushModel->maxs[1]);
+            radius = v23;
+        }
+        v22 = fabs(input.u.brushModel->maxs[2]);
+        if (radius < v22)
+        {
+            v21 = fabs(input.u.brushModel->maxs[2]);
+            radius = v21;
+        }
+        v20 = fabs(input.u.brushModel->radius);
+        if (radius < v20)
+        {
+            v19 = fabs(input.u.brushModel->radius);
+            radius = v19;
+        }
+        v18 = fabs(input.u.brushModel->mins[0]);
+        if (radius < v18)
+        {
+            v17 = fabs(input.u.brushModel->mins[0]);
+            radius = v17;
+        }
+        v16 = fabs(input.u.brushModel->mins[1]);
+        if (radius < v16)
+        {
+            v15 = fabs(input.u.brushModel->mins[1]);
+            radius = v15;
+        }
+        v14 = fabs(input.u.brushModel->mins[2]);
+        if (radius < v14)
+        {
+            v13 = fabs(input.u.brushModel->mins[2]);
+            radius = v13;
+        }
+        maxs[0] = radius * 1.732050776481628;
+        maxs[1] = maxs[0];
+        maxs[2] = maxs[0];
+        input.isNarrow = *narrowLen > input.u.brushModel->radius;
+        break;
+    case 13:
+        input.type = PHYS_GEOM_CYLINDER;
+        cyl = (GeomStateCylinder *)dGeomGetClassData(o2);
+        input.cylDirection = cyl->direction;
+        input.u.sideExtents[0] = cyl->radius;
+        input.u.sideExtents[1] = cyl->radius;
+        input.u.sideExtents[2] = cyl->halfHeight;
+        v29 = cyl->radius;
+        halfHeight = cyl->halfHeight;
+        v12 = v29 - halfHeight;
+        if (v12 < 0.0)
+            v11 = halfHeight;
+        else
+            v11 = v29;
+        maxs[0] = v11 * 1.414214015007019;
+        maxs[1] = maxs[0];
+        maxs[2] = maxs[0];
+        input.isNarrow = *narrowLen > cyl->radius + cyl->radius;
+        break;
+    case 14:
+        input.type = PHYS_GEOM_CAPSULE;
+        cyl = (GeomStateCylinder *)dGeomGetClassData(o2);
+        input.cylDirection = cyl->direction;
+        input.u.sideExtents[0] = cyl->radius;
+        input.u.sideExtents[1] = cyl->radius;
+        input.u.sideExtents[2] = cyl->halfHeight;
+        for (j = 0; j < 3; ++j)
+        {
+            for (k = 0; k < 3; ++k)
+            {
+                v10 = fabs(input.R[j][k]);
+                absR[j][k] = v10;
+            }
+        }
+        v27 = cyl->radius;
+        v28 = v27 + v27 + cyl->halfHeight;
+        v9 = v27 - v28;
+        if (v9 < 0.0)
+            v8 = cyl->radius + cyl->radius + cyl->halfHeight;
+        else
+            v8 = v27;
+        maxs[0] = v8;
+        maxs[1] = v8;
+        maxs[2] = v8;
+        input.isNarrow = *narrowLen > cyl->radius + cyl->radius;
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 484, 0, "invalid geometry type");
+        break;
+    }
+    ll.bounds[0][0] = input.pos[0];
+    ll.bounds[0][1] = input.pos[1];
+    ll.bounds[0][2] = input.pos[2];
+    ll.bounds[1][0] = input.pos[0];
+    ll.bounds[1][1] = input.pos[1];
+    ll.bounds[1][2] = input.pos[2];
+    for (i = 0; i < 3; ++i)
+    {
+        ll.bounds[0][i] = ll.bounds[0][i] - (maxs[i] + 1.0);
+        ll.bounds[1][i] = maxs[i] + 1.0 + ll.bounds[1][i];
+    }
+    *&input.bounds[0][0] = *&ll.bounds[0][0];
+    input.bounds[0][2] = ll.bounds[0][2];
+    *&input.bounds[1][0] = *&ll.bounds[1][0];
+    input.bounds[1][2] = ll.bounds[1][2];
+    ll.count = 0;
+    ll.maxcount = 1024;
+    ll.list = leafs;
+    ll.lastLeaf = 0;
+    ll.overflowed = 0;
+    CM_BoxLeafnums_r(&ll, 0);
+    if (ll.count)
+    {
+        input.clipMask = 0x2806C91;
+        results.contacts = contact;
+        results.contactCount = 0;
+        results.maxContacts = flags;
+        results.stride = skip;
+        value = (TraceThreadInfo *)Sys_GetValue(3);
+        if (!value)
+            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 524, 0, "%s", "value");
+        ++value->checkcount.global;
+        input.threadInfo = *value;
+        if (!input.threadInfo.checkcount.partitions && cm.partitionCount)
+            MyAssertHandler(
+                ".\\physics\\phys_world_collision.cpp",
+                527,
+                0,
+                "%s",
+                "input.threadInfo.checkcount.partitions || cm.partitionCount == 0");
+        Profile_EndInternal(0);
+        Profile_Begin(370);
+        Vec3Sub((const float *)input.bounds, input.pos, bounds[0]);
+        Vec3Sub(input.bounds[1], input.pos, bounds[1]);
+        input.radius = RadiusFromBounds(bounds[0], bounds[1]);
+        for (i = 0; i < ll.count; ++i)
+            CM_TestGeomInLeaf(&cm.leafs[leafs[i]], &input, &results);
+        if (phys_collUseEntities->current.enabled)
+            Phys_TestAgainstEntities(&input, &results);
+        for (i = 0; i < results.contactCount; ++i)
+        {
+            results.contacts[i].contact.g1 = o1;
+            results.contacts[i].contact.g2 = o2;
+        }
+        Profile_EndInternal(0);
+        Profile_EndInternal(0);
+        return results.contactCount;
+    }
+    else
+    {
+        Profile_EndInternal(0);
+        Profile_EndInternal(0);
+        return 0;
+    }
+}
+
+static dColliderFn *dGetColliderWorld(int classnum)
+{
+    if (classnum != 1 && classnum != 11 && classnum != 12 && classnum != 13 && classnum != 14)
+        MyAssertHandler(
+            ".\\physics\\phys_world_collision.cpp",
+            560,
+            0,
+            "%s",
+            "classnum == dBoxClass || classnum == GEOM_CLASS_BRUSHMODEL || classnum == GEOM_CLASS_BRUSH || classnum == GEOM_CLA"
+            "SS_CYLINDER || classnum == GEOM_CLASS_CAPSULE");
+    return (dColliderFn *)&dCollideWorldGeom;
+}
+
 void __cdecl Phys_InitWorldCollision()
 {
     dGeomClass gclass; // [esp+0h] [ebp-18h] BYREF
@@ -645,7 +658,7 @@ void __cdecl Phys_InitWorldCollision()
     gclass.bytes = 0;
     gclass.aabb_test = 0;
     gclass.isPlaceable = 0;
-    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))dGetColliderWorld;
+    gclass.collider = dGetColliderWorld;
     gclass.aabb = dInfiniteAABB;
     classID = dCreateGeomClass(&gclass);
     if (classID != 15)
@@ -658,20 +671,6 @@ void __cdecl Phys_InitWorldCollision()
             classID);
     physGlob.worldGeom = Phys_GetWorldGeom();
     dInitUserGeom((dxUserGeom *)physGlob.worldGeom, 15, 0, 0);
-}
-
-int(__cdecl *__cdecl dGetColliderWorld(
-    int classnum))(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip)
-{
-    if (classnum != 1 && classnum != 11 && classnum != 12 && classnum != 13 && classnum != 14)
-        MyAssertHandler(
-            ".\\physics\\phys_world_collision.cpp",
-            560,
-            0,
-            "%s",
-            "classnum == dBoxClass || classnum == GEOM_CLASS_BRUSHMODEL || classnum == GEOM_CLASS_BRUSH || classnum == GEOM_CLA"
-            "SS_CYLINDER || classnum == GEOM_CLASS_CAPSULE");
-    return dCollideWorldGeom;
 }
 
 void __cdecl Phys_InitBrushmodelGeomClass()

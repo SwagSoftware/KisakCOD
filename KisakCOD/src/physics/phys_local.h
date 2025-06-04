@@ -476,13 +476,11 @@ void __cdecl CM_ForEachBrushInLeafBrushNode_r(
 void __cdecl CM_MeshTestGeomInLeaf(cLeaf_t *leaf, const objInfo *input, Results *results);
 void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const objInfo *input, Results *results);
 bool __cdecl CM_CullBox2(const objInfo *input, const float *origin, const float *halfSize);
-int __cdecl dCollideWorldGeom(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip);
 void __cdecl CM_TestGeomInLeaf(cLeaf_t *leaf, const objInfo *input, Results *results);
 void __cdecl CM_TestGeomInLeafBrushNode(cLeaf_t *leaf, const objInfo *input, Results *results);
 void __cdecl Phys_TestGeomInBrush(const cbrush_t *brush, unsigned int *userData);
 void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results);
 void __cdecl Phys_InitWorldCollision();
-int(__cdecl *__cdecl dGetColliderWorld(int classnum))(dxGeom *o1, dxGeom *o2, unsigned __int16 flags, dContactGeomExt *contact, int skip);
 void __cdecl Phys_InitBrushmodelGeomClass();
 void __cdecl Phys_GetBrushmodelAABB(dxGeom *geom, float *aabb);
 void __cdecl Phys_InitBrushGeomClass();

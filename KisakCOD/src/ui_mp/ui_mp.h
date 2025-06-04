@@ -589,5 +589,5 @@ extern LegacyHacks legacyHacks;
 // ui_gameinfo_mp
 int __cdecl UI_ParseInfos(const char *buf, int max, char **infos);
 void __cdecl UI_LoadArenas();
-int UI_LoadArenasFromFile();
+void UI_LoadArenasFromFile();
 void UI_LoadArenasFromFile_FastFile();

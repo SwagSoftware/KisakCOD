@@ -58,7 +58,7 @@ void __cdecl TRACK_r_font()
 Font_s *__cdecl R_RegisterFont(const char *name, int imageTrack)
 {
     if (useFastFile->current.enabled)
-        return (Font_s *)((int(__cdecl *)(const char *, int))R_RegisterFont_FastFile)(name, imageTrack);
+        return R_RegisterFont_FastFile(name);
     else
         return R_RegisterFont_LoadObj(name, imageTrack);
 }

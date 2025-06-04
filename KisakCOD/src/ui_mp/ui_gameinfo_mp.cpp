@@ -176,12 +176,12 @@ const char *UI_LoadArenasFromFile_LoadObj()
     return result;
 }
 
-int UI_LoadArenasFromFile()
+void UI_LoadArenasFromFile()
 {
     if (useFastFile->current.enabled)
-        return ((int(__cdecl *)(void (*)()))UI_LoadArenasFromFile_FastFile)(UI_LoadArenasFromFile_FastFile);
+        UI_LoadArenasFromFile_FastFile();
     else
-        return ((int(__cdecl *)(const char *(*)()))UI_LoadArenasFromFile_LoadObj)(UI_LoadArenasFromFile_LoadObj);
+        UI_LoadArenasFromFile_LoadObj();
 }
 
 void UI_LoadArenasFromFile_FastFile()

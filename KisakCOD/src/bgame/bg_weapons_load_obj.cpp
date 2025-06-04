@@ -906,9 +906,9 @@ WeaponDef *__cdecl BG_LoadDefaultWeaponDef_LoadObj()
 WeaponDef *__cdecl BG_LoadDefaultWeaponDef()
 {
     if (useFastFile->current.enabled)
-        return (WeaponDef *)((int(__cdecl *)(WeaponDef * (__cdecl *)()))BG_LoadDefaultWeaponDef_FastFile)(BG_LoadDefaultWeaponDef_FastFile);
+        return BG_LoadDefaultWeaponDef_FastFile();
     else
-        return (WeaponDef *)((int(__cdecl *)(WeaponDef * (__cdecl *)()))BG_LoadDefaultWeaponDef_LoadObj)(BG_LoadDefaultWeaponDef_LoadObj);
+        return BG_LoadDefaultWeaponDef_LoadObj();
 }
 
 WeaponDef *__cdecl BG_LoadDefaultWeaponDef_FastFile()
@@ -1277,7 +1277,7 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
                         502,
                         buffer,
                         35,
-                        (int(__cdecl *)(unsigned __int8 *, const char *, const int))BG_ParseWeaponDefSpecificFieldType,
+                        BG_ParseWeaponDefSpecificFieldType,
                         SetConfigString2))
                     {
                         if (I_stricmp(two, "defaultweapon_mp"))
