@@ -537,9 +537,7 @@ void __cdecl FX_AllocAndConstructMark(
     FxMark *newMark; // [esp+30h] [ebp-8h]
     int tris; // [esp+34h] [ebp-4h]
 
-    //std::sort((const FxMarkTri **)markTris, (const FxMarkTri **)&markTris[triCount], FX_CompareMarkTris);
-
-    qsort(markTris, triCount, sizeof(FxMarkTri *), FX_CompareMarkTris);
+    std::sort(markTris, &markTris[triCount], FX_CompareMarkTris);
 
     Sys_EnterCriticalSection(CRITSECT_ALLOC_MARK);
     if (InterlockedIncrement(&g_markThread[localClientNum]) != 1)
@@ -1052,18 +1050,15 @@ unsigned __int16 __cdecl FX_FindModelHead(FxMarksSystem *marksSystem, unsigned _
     return -1;
 }
 
-int __cdecl FX_CompareMarkTris(const void *arg1, const void *arg2)
+int __cdecl FX_CompareMarkTris(const FxMarkTri &tri0, const FxMarkTri &tri1)
 {
-    const FxMarkTri *tri0 = (const FxMarkTri*)arg1;
-    const FxMarkTri *tri1 = (const FxMarkTri*)arg2;
-
     int contextCompareResult; // [esp+10h] [ebp-4h]
 
-    contextCompareResult = FX_MarkContextsCompare(&tri0->context, &tri1->context);
+    contextCompareResult = FX_MarkContextsCompare(&tri0.context, &tri1.context);
     if (contextCompareResult)
         return contextCompareResult > 0;
     else
-        return tri0->indices[0] < (int)tri1->indices[0];
+        return tri0.indices[0] < tri1.indices[0];
 }
 
 int __cdecl FX_MarkContextsCompare(const GfxMarkContext *context0, const GfxMarkContext *context1)
@@ -1474,17 +1469,19 @@ void __cdecl FX_DrawMarkTris(
     {
         group = FX_TriGroupFromHandle(marksSystem, groupHandle);
         groupHandle = group->triGroup.next;
-        iassert(triCount >= group->triGroup.triCount);
-        iassert(group->triGroup.triCount > 0);
+        vassert(triCount >= group->triGroup.triCount, "%i < %i", triCount, group->triGroup.triCount);
+        vassert(group->triGroup.triCount > 0, "(group->triCount) = %i", group->triGroup.triCount);
         triCount -= group->triGroup.triCount;
         triIndex = 0;
         do
+        {
             FX_EmitMarkTri(
                 marksSystem,
                 (const unsigned __int16 *)group + 3 * triIndex++,
                 &group->triGroup.context,
                 baseVertex,
                 outSurf);
+        }
         while (triIndex != group->triGroup.triCount);
     } while (triCount);
 
@@ -1514,8 +1511,8 @@ void __cdecl FX_EmitMarkTri(
             outSurf->indices += outSurf->indexCount;
             outSurf->indexCount = 0;
         }
-        iassert(outSurf->context.modelIndex == markContext->modelIndex);
-        iassert((outSurf->context.modelTypeAndSurf & MARK_MODEL_TYPE_MASK) == (markContext->modelTypeAndSurf & MARK_MODEL_TYPE_MASK));
+        vassert(outSurf->context.modelIndex == markContext->modelIndex, "outSurf->context.modelIndex = %hu, markContext->modelIndex = %hu", outSurf->context.modelIndex, markContext->modelIndex);
+        vassert((outSurf->context.modelTypeAndSurf & MARK_MODEL_TYPE_MASK) == (markContext->modelTypeAndSurf & MARK_MODEL_TYPE_MASK), "(outSurf->context.modelTypeAndSurf & MARK_MODEL_TYPE_MASK) = %x, (markContext->modelTypeAndSurf & MARK_MODEL_TYPE_MASK) = %x", outSurf->context.modelTypeAndSurf & MARK_MODEL_TYPE_MASK, markContext->modelTypeAndSurf & MARK_MODEL_TYPE_MASK);
         outSurf->context = *markContext;
     }
     if (marksSystem->hasCarryIndex)

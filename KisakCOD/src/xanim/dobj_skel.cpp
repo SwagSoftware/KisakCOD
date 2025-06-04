@@ -742,17 +742,7 @@ void __cdecl CalcSkelNonRootBones(
                     "!IS_NAN((childMat->quat)[0]) && !IS_NAN((childMat->quat)[1]) && !IS_NAN((childMat->quat)[2]) && !IS_NAN((childMat->quat)[3])");
             }
             v36 = childMat->trans[0];
-            if ((LODWORD(v36) & 0x7F800000) == 0x7F800000
-                || (v35 = childMat->trans[1], (LODWORD(v35) & 0x7F800000) == 0x7F800000)
-                || (v34 = childMat->trans[2], (LODWORD(v34) & 0x7F800000) == 0x7F800000))
-            {
-                MyAssertHandler(
-                    ".\\xanim\\dobj_skel.cpp",
-                    338,
-                    0,
-                    "%s",
-                    "!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2])");
-            }
+            iassert(!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2]));
             v33 = Vec4LengthSq(childMat->quat);
             if (v33 == 0.0)
             {

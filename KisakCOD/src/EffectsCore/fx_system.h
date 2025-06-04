@@ -387,7 +387,7 @@ void __cdecl FX_CopyMarkPoints(
     unsigned int dstGroupHandle,
     int pointCount);
 unsigned __int16 __cdecl FX_FindModelHead(FxMarksSystem *marksSystem, unsigned __int16 modelIndex, int type);
-int __cdecl FX_CompareMarkTris(const void *tri0, const void *tri1);
+int __cdecl FX_CompareMarkTris(const FxMarkTri &tri0, const FxMarkTri &tri1);
 int __cdecl FX_MarkContextsCompare(const GfxMarkContext *context0, const GfxMarkContext *context1);
 void __cdecl FX_MarkEntDetachAll(int localClientNum, int entnum);
 void __cdecl FX_MarkEntUpdateHidePartBits(
