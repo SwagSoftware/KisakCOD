@@ -42,7 +42,7 @@ int __cdecl G_DObjUpdateServerTime(gentity_s *ent, int bNotify);
 void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits);
 void __cdecl G_DObjCalcBone(const gentity_s *ent, int boneIndex);
 DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, unsigned int tagName);
-int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float (*tagMat)[3]);
+int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, mat4x3 &tagMat);
 int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, unsigned int tagName, float *pos);
 DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(gentity_s *ent, int boneIndex);
 void __cdecl G_DObjGetWorldBoneIndexPos(gentity_s *ent, int boneIndex, float *pos);

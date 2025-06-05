@@ -948,7 +948,7 @@ DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, unsigned int tagNam
     return &SV_DObjGetMatrixArray(ent)[boneIndex];
 }
 
-int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float (*tagMat)[3])
+int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, mat4x3 &tagMat)
 {
     float v4; // [esp+1Ch] [ebp-90h]
     float v5; // [esp+20h] [ebp-8Ch]
@@ -962,7 +962,7 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     float v13; // [esp+48h] [ebp-64h]
     float *v14; // [esp+4Ch] [ebp-60h]
     float *currentOrigin; // [esp+50h] [ebp-5Ch]
-    float ent_axis[4][3]; // [esp+54h] [ebp-58h] BYREF
+    mat4x3 ent_axis; // [esp+54h] [ebp-58h] BYREF
     DObjAnimMat *mat; // [esp+84h] [ebp-28h]
     float axis[3][3]; // [esp+88h] [ebp-24h] BYREF
 
@@ -1001,8 +1001,8 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, float 
     axis[2][1] = v11 - v13;
     axis[2][2] = 1.0 - (v12 + v4);
 
-    MatrixMultiply(axis, *(const mat3x3*)&ent_axis, *(mat3x3*)tagMat);
-    MatrixTransformVector43(mat->trans, *(const mat4x3*)&ent_axis, &(*tagMat)[9]);
+    MatrixMultiply(axis, *(const mat3x3*)&ent_axis, *(mat3x3*)&tagMat);
+    MatrixTransformVector43(mat->trans, ent_axis, tagMat[3]);
 
     return 1;
 }

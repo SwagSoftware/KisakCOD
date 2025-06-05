@@ -808,16 +808,16 @@ gentity_s *__cdecl Drop_Weapon(gentity_s *ent, int weapIdx, unsigned __int8 weap
     float *trBase; // [esp+10h] [ebp-7Ch]
     gclient_s *client; // [esp+14h] [ebp-78h]
     trace_t trace; // [esp+18h] [ebp-74h] BYREF
-    float vCenter[12]; // [esp+44h] [ebp-48h] BYREF
-    float tagMat_36[3]; // [esp+74h] [ebp-18h] BYREF
-    unsigned int altWeapIdx; // [esp+80h] [ebp-Ch]
+    float vCenter[3]; // [esp+44h] [ebp-48h] BYREF
+    mat4x3 tagMat; // [esp+50h] [ebp-3Ch] BYREF
+    unsigned int altWeaponIndex; // [esp+80h] [ebp-Ch]
     gentity_s *dropEnt; // [esp+84h] [ebp-8h]
     const gitem_s *weapItem; // [esp+88h] [ebp-4h]
 
     if (BG_GetWeaponDef(weapIdx)->inventoryType == WEAPINVENTORY_ALTMODE)
     {
-        altWeapIdx = BG_GetWeaponDef(weapIdx)->altWeaponIndex;
-        if (!altWeapIdx)
+        altWeaponIndex = BG_GetWeaponDef(weapIdx)->altWeaponIndex;
+        if (!altWeaponIndex)
         {
             WeaponDef = BG_GetWeaponDef(weapIdx);
             Com_PrintError(
@@ -826,13 +826,12 @@ gentity_s *__cdecl Drop_Weapon(gentity_s *ent, int weapIdx, unsigned __int8 weap
                 WeaponDef->szInternalName);
             return 0;
         }
-        weapIdx = altWeapIdx;
+        weapIdx = altWeaponIndex;
     }
     v6 = weapIdx + (weaponModel << 7);
     //weapItem = (const gitem_s *)(4 * v6 + 9917736);
     weapItem = &bg_itemlist[v6];
-    if (bg_itemlist[v6].giType != IT_WEAPON)
-        MyAssertHandler(".\\game\\g_items.cpp", 1038, 0, "%s", "weapItem->giType == IT_WEAPON");
+    iassert(bg_itemlist[v6].giType == IT_WEAPON);
     if (ent->client)
     {
         client = ent->client;
@@ -855,13 +854,13 @@ gentity_s *__cdecl Drop_Weapon(gentity_s *ent, int weapIdx, unsigned __int8 weap
         }
         if (tag)
         {
-            if (G_DObjGetWorldTagMatrix(ent, tag, (float (*)[3]) & vCenter[3]))
+            if (G_DObjGetWorldTagMatrix(ent, tag, tagMat))
             {
                 Vec3Avg(ent->r.mins, ent->r.maxs, vCenter);
                 Vec3Add(vCenter, ent->r.currentOrigin, vCenter);
                 v8 = G_ItemClipMask(dropEnt);
-                G_TraceCapsule(&trace, vCenter, dropEnt->r.mins, dropEnt->r.maxs, tagMat_36, ent->s.number, v8);
-                Vec3Lerp(vCenter, tagMat_36, trace.fraction, dropEnt->s.lerp.pos.trBase);
+                G_TraceCapsule(&trace, vCenter, dropEnt->r.mins, dropEnt->r.maxs, tagMat[3], ent->s.number, v8);
+                Vec3Lerp(vCenter, tagMat[3], trace.fraction, dropEnt->s.lerp.pos.trBase);
                 currentOrigin = dropEnt->r.currentOrigin;
                 trBase = dropEnt->s.lerp.pos.trBase;
                 dropEnt->r.currentOrigin[0] = dropEnt->s.lerp.pos.trBase[0];
