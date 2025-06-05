@@ -301,19 +301,19 @@ void *dGeomGetData (dxGeom *g)
 
 
 // MOD
-void dGeomSetBody (dxGeom *g, dxBody *b)
+void dGeomSetBody (dxGeom *g, dxBody *body)
 {
   dAASSERT (g);
-  dAASSERT (b);
+  dAASSERT (body);
   dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   CHECK_NOT_LOCKED (g->parent_space);
 
-  g->pos = b->info.pos;
-  g->R = b->info.R;
+  g->pos = body->info.pos;
+  g->R = body->info.R;
   dGeomMoved(g);
-  if (g->body != b) {
+  if (g->body != body) {
       g->bodyRemove();
-      g->bodyAdd(b);
+      g->bodyAdd(body);
   }
 }
 

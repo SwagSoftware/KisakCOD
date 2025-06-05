@@ -51,7 +51,7 @@ dContactGeom::g1 and dContactGeom::g2.
 struct dxSphere : public dxGeom {
   dReal radius;		// sphere radius
   dxSphere (dSpaceID space, dxBody* body, dReal _radius);
-  void computeAABB() override;
+//  void computeAABB() override;
 };
 
 
@@ -65,77 +65,67 @@ struct dxBox : public dxGeom {
 struct dxCCylinder : public dxGeom {
   dReal radius,lz;	// radius, length along z axis
   dxCCylinder (dSpaceID space, dxBody* body, dReal _radius, dReal _length);
-  void computeAABB() override;
+//  void computeAABB() override;
 };
 
 
 struct dxPlane : public dxGeom {
   dReal p[4];
   dxPlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
-  void computeAABB() override;
+  //void computeAABB() override;
 };
 
 
 struct dxRay : public dxGeom {
   dReal length;
   dxRay (dSpaceID space, dxBody* body, dReal _length);
-  void computeAABB() override;
+//  void computeAABB() override;
 };
 
 //****************************************************************************
 // sphere public API
 
-dxSphere::dxSphere (dSpaceID space, dxBody* body, dReal _radius) : dxGeom (space, 1, body)
-{
-  dAASSERT (_radius > 0);
-  type = dSphereClass;
-  radius = _radius;
-}
-
-
-void dxSphere::computeAABB()
-{
-  aabb[0] = pos[0] - radius;
-  aabb[1] = pos[0] + radius;
-  aabb[2] = pos[1] - radius;
-  aabb[3] = pos[1] + radius;
-  aabb[4] = pos[2] - radius;
-  aabb[5] = pos[2] + radius;
-}
-
-
-dGeomID dCreateSphere (dSpaceID space, dxBody* body, dReal radius)
-{
-  return new dxSphere (space,body, radius);
-}
-
-
-void dGeomSphereSetRadius (dGeomID g, dReal radius)
-{
-  dUASSERT (g && g->type == dSphereClass,"argument not a sphere");
-  dAASSERT (radius > 0);
-  dxSphere *s = (dxSphere*) g;
-  s->radius = radius;
-  dGeomMoved (g);
-}
-
-
-dReal dGeomSphereGetRadius (dGeomID g)
-{
-  dUASSERT (g && g->type == dSphereClass,"argument not a sphere");
-  dxSphere *s = (dxSphere*) g;
-  return s->radius;
-}
-
-
-dReal dGeomSpherePointDepth (dGeomID g, dReal x, dReal y, dReal z)
-{
-  dUASSERT (g && g->type == dSphereClass,"argument not a sphere");
-  dxSphere *s = (dxSphere*) g;
-  return s->radius - dSqrt ((x-s->pos[0])*(x-s->pos[0]) +
-			    (y-s->pos[1])*(y-s->pos[1]) +
-			    (z-s->pos[2])*(z-s->pos[2]));
-}
+//dxSphere::dxSphere (dSpaceID space, dxBody* body, dReal _radius) : dxGeom (space, 1, body)
+//{
+//  dAASSERT (_radius > 0);
+//  type = dSphereClass;
+//  radius = _radius;
+//}
+//void dxSphere::computeAABB()
+//{
+//  aabb[0] = pos[0] - radius;
+//  aabb[1] = pos[0] + radius;
+//  aabb[2] = pos[1] - radius;
+//  aabb[3] = pos[1] + radius;
+//  aabb[4] = pos[2] - radius;
+//  aabb[5] = pos[2] + radius;
+//}
+//dGeomID dCreateSphere (dSpaceID space, dxBody* body, dReal radius)
+//{
+//  return new dxSphere (space,body, radius);
+//}
+//void dGeomSphereSetRadius (dGeomID g, dReal radius)
+//{
+//  dUASSERT (g && g->type == dSphereClass,"argument not a sphere");
+//  dAASSERT (radius > 0);
+//  dxSphere *s = (dxSphere*) g;
+//  s->radius = radius;
+//  dGeomMoved (g);
+//}
+//dReal dGeomSphereGetRadius (dGeomID g)
+//{
+//  dUASSERT (g && g->type == dSphereClass,"argument not a sphere");
+//  dxSphere *s = (dxSphere*) g;
+//  return s->radius;
+//}
+//dReal dGeomSpherePointDepth (dGeomID g, dReal x, dReal y, dReal z)
+//{
+//  dUASSERT (g && g->type == dSphereClass,"argument not a sphere");
+//  dxSphere *s = (dxSphere*) g;
+//  return s->radius - dSqrt ((x-s->pos[0])*(x-s->pos[0]) +
+//			    (y-s->pos[1])*(y-s->pos[1]) +
+//			    (z-s->pos[2])*(z-s->pos[2]));
+//}
 
 //****************************************************************************
 // box public API
@@ -169,22 +159,32 @@ void dxBox::computeAABB()
 
 dGeomID dCreateBox (dSpaceID space, dxBody* body, dReal lx, dReal ly, dReal lz)
 {
-  return new dxBox (space,body,lx,ly,lz);
+    // LWSS: custom allocator
+    iassert(body);
+    iassert(lx > 0);
+    iassert(ly > 0);
+    iassert(lz > 0);
+
+    dxBox *newBox = (dxBox*)ODE_AllocateGeom();
+
+    if (!newBox)
+        return 0;
+
+    return new ((void *)newBox) dxBox(space, body, lx, ly, lz);
+  //return new dxBox (space,body,lx,ly,lz);
 }
 
 
-void dGeomBoxSetLengths (dGeomID g, dReal lx, dReal ly, dReal lz)
-{
-  dUASSERT (g && g->type == dBoxClass,"argument not a box");
-  dAASSERT (lx > 0 && ly > 0 && lz > 0);
-  dxBox *b = (dxBox*) g;
-  b->side[0] = lx;
-  b->side[1] = ly;
-  b->side[2] = lz;
-  dGeomMoved (g);
-}
-
-
+//void dGeomBoxSetLengths (dGeomID g, dReal lx, dReal ly, dReal lz)
+//{
+//  dUASSERT (g && g->type == dBoxClass,"argument not a box");
+//  dAASSERT (lx > 0 && ly > 0 && lz > 0);
+//  dxBox *b = (dxBox*) g;
+//  b->side[0] = lx;
+//  b->side[1] = ly;
+//  b->side[2] = lz;
+//  dGeomMoved (g);
+//}
 void dGeomBoxGetLengths (dGeomID g, dVector3 result)
 {
   dUASSERT (g && g->type == dBoxClass,"argument not a box");
@@ -195,321 +195,304 @@ void dGeomBoxGetLengths (dGeomID g, dVector3 result)
 }
 
 
-dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
-{
-  dUASSERT (g && g->type == dBoxClass,"argument not a box");
-  dxBox *b = (dxBox*) g;
-  dVector3 p,q;
-  p[0] = x - b->pos[0];
-  p[1] = y - b->pos[1];
-  p[2] = z - b->pos[2];
-  dMULTIPLY1_331 (q,b->R,p);
-  dReal dx = b->side[0]*REAL(0.5) - dFabs(q[0]);
-  dReal dy = b->side[1]*REAL(0.5) - dFabs(q[1]);
-  dReal dz = b->side[2]*REAL(0.5) - dFabs(q[2]);
-  if (dx < dy) {
-    if (dx < dz) return dx; else return dz;
-  }
-  else {
-    if (dy < dz) return dy; else return dz;
-  }
-}
+//dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
+//{
+//  dUASSERT (g && g->type == dBoxClass,"argument not a box");
+//  dxBox *b = (dxBox*) g;
+//  dVector3 p,q;
+//  p[0] = x - b->pos[0];
+//  p[1] = y - b->pos[1];
+//  p[2] = z - b->pos[2];
+//  dMULTIPLY1_331 (q,b->R,p);
+//  dReal dx = b->side[0]*REAL(0.5) - dFabs(q[0]);
+//  dReal dy = b->side[1]*REAL(0.5) - dFabs(q[1]);
+//  dReal dz = b->side[2]*REAL(0.5) - dFabs(q[2]);
+//  if (dx < dy) {
+//    if (dx < dz) return dx; else return dz;
+//  }
+//  else {
+//    if (dy < dz) return dy; else return dz;
+//  }
+//}
 
 //****************************************************************************
 // capped cylinder public API
 
-dxCCylinder::dxCCylinder (dSpaceID space, dxBody* body, dReal _radius, dReal _length) :
-  dxGeom (space,1,body)
-{
-  dAASSERT (_radius > 0 && _length > 0);
-  type = dCCylinderClass;
-  radius = _radius;
-  lz = _length;
-}
-
-
-void dxCCylinder::computeAABB()
-{
-  dReal xrange = dFabs(R[2]  * lz) * REAL(0.5) + radius;
-  dReal yrange = dFabs(R[6]  * lz) * REAL(0.5) + radius;
-  dReal zrange = dFabs(R[10] * lz) * REAL(0.5) + radius;
-  aabb[0] = pos[0] - xrange;
-  aabb[1] = pos[0] + xrange;
-  aabb[2] = pos[1] - yrange;
-  aabb[3] = pos[1] + yrange;
-  aabb[4] = pos[2] - zrange;
-  aabb[5] = pos[2] + zrange;
-}
-
-
-dGeomID dCreateCCylinder (dSpaceID space, dxBody* body, dReal radius, dReal length)
-{
-  return new dxCCylinder (space,body,radius,length);
-}
-
-
-void dGeomCCylinderSetParams (dGeomID g, dReal radius, dReal length)
-{
-  dUASSERT (g && g->type == dCCylinderClass,"argument not a ccylinder");
-  dAASSERT (radius > 0 && length > 0);
-  dxCCylinder *c = (dxCCylinder*) g;
-  c->radius = radius;
-  c->lz = length;
-  dGeomMoved (g);
-}
-
-
-void dGeomCCylinderGetParams (dGeomID g, dReal *radius, dReal *length)
-{
-  dUASSERT (g && g->type == dCCylinderClass,"argument not a ccylinder");
-  dxCCylinder *c = (dxCCylinder*) g;
-  *radius = c->radius;
-  *length = c->lz;
-}
-
-
-dReal dGeomCCylinderPointDepth (dGeomID g, dReal x, dReal y, dReal z)
-{
-  dUASSERT (g && g->type == dCCylinderClass,"argument not a ccylinder");
-  dxCCylinder *c = (dxCCylinder*) g;
-  dVector3 a;
-  a[0] = x - c->pos[0];
-  a[1] = y - c->pos[1];
-  a[2] = z - c->pos[2];
-  dReal beta = dDOT14(a,c->R+2);
-  dReal lz2 = c->lz*REAL(0.5);
-  if (beta < -lz2) beta = -lz2;
-  else if (beta > lz2) beta = lz2;
-  a[0] = c->pos[0] + beta*c->R[0*4+2];
-  a[1] = c->pos[1] + beta*c->R[1*4+2];
-  a[2] = c->pos[2] + beta*c->R[2*4+2];
-  return c->radius -
-    dSqrt ((x-a[0])*(x-a[0]) + (y-a[1])*(y-a[1]) + (z-a[2])*(z-a[2]));
-}
+//dxCCylinder::dxCCylinder (dSpaceID space, dxBody* body, dReal _radius, dReal _length) :
+//  dxGeom (space,1,body)
+//{
+//  dAASSERT (_radius > 0 && _length > 0);
+//  type = dCCylinderClass;
+//  radius = _radius;
+//  lz = _length;
+//}
+//void dxCCylinder::computeAABB()
+//{
+//  dReal xrange = dFabs(R[2]  * lz) * REAL(0.5) + radius;
+//  dReal yrange = dFabs(R[6]  * lz) * REAL(0.5) + radius;
+//  dReal zrange = dFabs(R[10] * lz) * REAL(0.5) + radius;
+//  aabb[0] = pos[0] - xrange;
+//  aabb[1] = pos[0] + xrange;
+//  aabb[2] = pos[1] - yrange;
+//  aabb[3] = pos[1] + yrange;
+//  aabb[4] = pos[2] - zrange;
+//  aabb[5] = pos[2] + zrange;
+//}
+//dGeomID dCreateCCylinder (dSpaceID space, dxBody* body, dReal radius, dReal length)
+//{
+//  return new dxCCylinder (space,body,radius,length);
+//}
+//void dGeomCCylinderSetParams (dGeomID g, dReal radius, dReal length)
+//{
+//  dUASSERT (g && g->type == dCCylinderClass,"argument not a ccylinder");
+//  dAASSERT (radius > 0 && length > 0);
+//  dxCCylinder *c = (dxCCylinder*) g;
+//  c->radius = radius;
+//  c->lz = length;
+//  dGeomMoved (g);
+//}
+//void dGeomCCylinderGetParams (dGeomID g, dReal *radius, dReal *length)
+//{
+//  dUASSERT (g && g->type == dCCylinderClass,"argument not a ccylinder");
+//  dxCCylinder *c = (dxCCylinder*) g;
+//  *radius = c->radius;
+//  *length = c->lz;
+//}
+//dReal dGeomCCylinderPointDepth (dGeomID g, dReal x, dReal y, dReal z)
+//{
+//  dUASSERT (g && g->type == dCCylinderClass,"argument not a ccylinder");
+//  dxCCylinder *c = (dxCCylinder*) g;
+//  dVector3 a;
+//  a[0] = x - c->pos[0];
+//  a[1] = y - c->pos[1];
+//  a[2] = z - c->pos[2];
+//  dReal beta = dDOT14(a,c->R+2);
+//  dReal lz2 = c->lz*REAL(0.5);
+//  if (beta < -lz2) beta = -lz2;
+//  else if (beta > lz2) beta = lz2;
+//  a[0] = c->pos[0] + beta*c->R[0*4+2];
+//  a[1] = c->pos[1] + beta*c->R[1*4+2];
+//  a[2] = c->pos[2] + beta*c->R[2*4+2];
+//  return c->radius -
+//    dSqrt ((x-a[0])*(x-a[0]) + (y-a[1])*(y-a[1]) + (z-a[2])*(z-a[2]));
+//}
 
 //****************************************************************************
 // plane public API
 
-static void make_sure_plane_normal_has_unit_length (dxPlane *g)
-{
-  dReal l = g->p[0]*g->p[0] + g->p[1]*g->p[1] + g->p[2]*g->p[2];
-  if (l > 0) {
-    l = dRecipSqrt(l);
-    g->p[0] *= l;
-    g->p[1] *= l;
-    g->p[2] *= l;
-    g->p[3] *= l;
-  }
-  else {
-    g->p[0] = 1;
-    g->p[1] = 0;
-    g->p[2] = 0;
-    g->p[3] = 0;
-  }
-}
+//static void make_sure_plane_normal_has_unit_length (dxPlane *g)
+//{
+//  dReal l = g->p[0]*g->p[0] + g->p[1]*g->p[1] + g->p[2]*g->p[2];
+//  if (l > 0) {
+//    l = dRecipSqrt(l);
+//    g->p[0] *= l;
+//    g->p[1] *= l;
+//    g->p[2] *= l;
+//    g->p[3] *= l;
+//  }
+//  else {
+//    g->p[0] = 1;
+//    g->p[1] = 0;
+//    g->p[2] = 0;
+//    g->p[3] = 0;
+//  }
+//}
 
 
-dxPlane::dxPlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d) :
-  dxGeom (space,0,nullptr)
-{
-  type = dPlaneClass;
-  p[0] = a;
-  p[1] = b;
-  p[2] = c;
-  p[3] = d;
-  make_sure_plane_normal_has_unit_length (this);
-}
+//dxPlane::dxPlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d) :
+//  dxGeom (space,0,nullptr)
+//{
+//  type = dPlaneClass;
+//  p[0] = a;
+//  p[1] = b;
+//  p[2] = c;
+//  p[3] = d;
+//  make_sure_plane_normal_has_unit_length (this);
+//}
+//void dxPlane::computeAABB()
+//{
+//  // @@@ planes that have normal vectors aligned along an axis can use a
+//  // @@@ less comprehensive (half space) bounding box.
+//  aabb[0] = -dInfinity;
+//  aabb[1] = dInfinity;
+//  aabb[2] = -dInfinity;
+//  aabb[3] = dInfinity;
+//  aabb[4] = -dInfinity;
+//  aabb[5] = dInfinity;
+//}
 
+//dGeomID dCreatePlane (dSpaceID space,
+//		      dReal a, dReal b, dReal c, dReal d)
+//{
+//  return new dxPlane (space,a,b,c,d);
+//}
 
-void dxPlane::computeAABB()
-{
-  // @@@ planes that have normal vectors aligned along an axis can use a
-  // @@@ less comprehensive (half space) bounding box.
-  aabb[0] = -dInfinity;
-  aabb[1] = dInfinity;
-  aabb[2] = -dInfinity;
-  aabb[3] = dInfinity;
-  aabb[4] = -dInfinity;
-  aabb[5] = dInfinity;
-}
+//void dGeomPlaneSetParams (dGeomID g, dReal a, dReal b, dReal c, dReal d)
+//{
+//  dUASSERT (g && g->type == dPlaneClass,"argument not a plane");
+//  dxPlane *p = (dxPlane*) g;
+//  p->p[0] = a;
+//  p->p[1] = b;
+//  p->p[2] = c;
+//  p->p[3] = d;
+//  make_sure_plane_normal_has_unit_length (p);
+//  dGeomMoved (g);
+//}
 
-
-dGeomID dCreatePlane (dSpaceID space,
-		      dReal a, dReal b, dReal c, dReal d)
-{
-  return new dxPlane (space,a,b,c,d);
-}
-
-
-void dGeomPlaneSetParams (dGeomID g, dReal a, dReal b, dReal c, dReal d)
-{
-  dUASSERT (g && g->type == dPlaneClass,"argument not a plane");
-  dxPlane *p = (dxPlane*) g;
-  p->p[0] = a;
-  p->p[1] = b;
-  p->p[2] = c;
-  p->p[3] = d;
-  make_sure_plane_normal_has_unit_length (p);
-  dGeomMoved (g);
-}
-
-
-void dGeomPlaneGetParams (dGeomID g, dVector4 result)
-{
-  dUASSERT (g && g->type == dPlaneClass,"argument not a plane");
-  dxPlane *p = (dxPlane*) g;
-  result[0] = p->p[0];
-  result[1] = p->p[1];
-  result[2] = p->p[2];
-  result[3] = p->p[3];
-}
-
-
-dReal dGeomPlanePointDepth (dGeomID g, dReal x, dReal y, dReal z)
-{
-  dUASSERT (g && g->type == dPlaneClass,"argument not a plane");
-  dxPlane *p = (dxPlane*) g;
-  return p->p[3] - p->p[0]*x - p->p[1]*y - p->p[2]*z;
-}
+//void dGeomPlaneGetParams (dGeomID g, dVector4 result)
+//{
+//  dUASSERT (g && g->type == dPlaneClass,"argument not a plane");
+//  dxPlane *p = (dxPlane*) g;
+//  result[0] = p->p[0];
+//  result[1] = p->p[1];
+//  result[2] = p->p[2];
+//  result[3] = p->p[3];
+//}
+//
+//dReal dGeomPlanePointDepth (dGeomID g, dReal x, dReal y, dReal z)
+//{
+//  dUASSERT (g && g->type == dPlaneClass,"argument not a plane");
+//  dxPlane *p = (dxPlane*) g;
+//  return p->p[3] - p->p[0]*x - p->p[1]*y - p->p[2]*z;
+//}
 
 //****************************************************************************
 // ray public API
 
-dxRay::dxRay (dSpaceID space, dxBody* body, dReal _length) : dxGeom (space,1,body)
-{
-  type = dRayClass;
-  length = _length;
-}
+//dxRay::dxRay (dSpaceID space, dxBody* body, dReal _length) : dxGeom (space,1,body)
+//{
+//  type = dRayClass;
+//  length = _length;
+//}
+//
+//void dxRay::computeAABB()
+//{
+//  dVector3 e;
+//  e[0] = pos[0] + R[0*4+2]*length;
+//  e[1] = pos[1] + R[1*4+2]*length;
+//  e[2] = pos[2] + R[2*4+2]*length;
+//
+//  if (pos[0] < e[0]){
+//    aabb[0] = pos[0];
+//    aabb[1] = e[0];
+//  }
+//  else{
+//    aabb[0] = e[0];
+//    aabb[1] = pos[0];
+//  }
+//  
+//  if (pos[1] < e[1]){
+//    aabb[2] = pos[1];
+//    aabb[3] = e[1];
+//  }
+//  else{
+//    aabb[2] = e[1];
+//    aabb[3] = pos[1];
+//  }
+//
+//  if (pos[2] < e[2]){
+//    aabb[4] = pos[2];
+//    aabb[5] = e[2];
+//  }
+//  else{
+//    aabb[4] = e[2];
+//    aabb[5] = pos[2];
+//  }
+//}
+//
+//
+//dGeomID dCreateRay (dSpaceID space, dxBody* body, dReal length)
+//{
+//  return new dxRay (space,body,length);
+//}
 
 
-void dxRay::computeAABB()
-{
-  dVector3 e;
-  e[0] = pos[0] + R[0*4+2]*length;
-  e[1] = pos[1] + R[1*4+2]*length;
-  e[2] = pos[2] + R[2*4+2]*length;
-
-  if (pos[0] < e[0]){
-    aabb[0] = pos[0];
-    aabb[1] = e[0];
-  }
-  else{
-    aabb[0] = e[0];
-    aabb[1] = pos[0];
-  }
-  
-  if (pos[1] < e[1]){
-    aabb[2] = pos[1];
-    aabb[3] = e[1];
-  }
-  else{
-    aabb[2] = e[1];
-    aabb[3] = pos[1];
-  }
-
-  if (pos[2] < e[2]){
-    aabb[4] = pos[2];
-    aabb[5] = e[2];
-  }
-  else{
-    aabb[4] = e[2];
-    aabb[5] = pos[2];
-  }
-}
+//void dGeomRaySetLength (dGeomID g, dReal length)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//  dxRay *r = (dxRay*) g;
+//  r->length = length;
+//  dGeomMoved (g);
+//}
+//
+//
+//dReal dGeomRayGetLength (dGeomID g)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//  dxRay *r = (dxRay*) g;
+//  return r->length;
+//}
 
 
-dGeomID dCreateRay (dSpaceID space, dxBody* body, dReal length)
-{
-  return new dxRay (space,body,length);
-}
+//void dGeomRaySet (dGeomID g, dReal px, dReal py, dReal pz,
+//		  dReal dx, dReal dy, dReal dz)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//  dReal* rot = g->R;
+//  dReal* pos = g->pos;
+//  pos[0] = px;
+//  pos[1] = py;
+//  pos[2] = pz;
+//
+//  rot[0*4+2] = dx;
+//  rot[1*4+2] = dy;
+//  rot[2*4+2] = dz;
+//  dGeomMoved (g);
+//}
+//
+//
+//void dGeomRayGet (dGeomID g, dVector3 start, dVector3 dir)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//  start[0] = g->pos[0];
+//  start[1] = g->pos[1];
+//  start[2] = g->pos[2];
+//  dir[0] = g->R[0*4+2];
+//  dir[1] = g->R[1*4+2];
+//  dir[2] = g->R[2*4+2];
+//}
 
 
-void dGeomRaySetLength (dGeomID g, dReal length)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  dxRay *r = (dxRay*) g;
-  r->length = length;
-  dGeomMoved (g);
-}
+//void dGeomRaySetParams (dxGeom *g, int FirstContact, int BackfaceCull)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//
+//  if (FirstContact){
+//    g->gflags |= RAY_FIRSTCONTACT;
+//  }
+//  else g->gflags &= ~RAY_FIRSTCONTACT;
+//
+//  if (BackfaceCull){
+//    g->gflags |= RAY_BACKFACECULL;
+//  }
+//  else g->gflags &= ~RAY_BACKFACECULL;
+//}
 
 
-dReal dGeomRayGetLength (dGeomID g)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  dxRay *r = (dxRay*) g;
-  return r->length;
-}
-
-
-void dGeomRaySet (dGeomID g, dReal px, dReal py, dReal pz,
-		  dReal dx, dReal dy, dReal dz)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  dReal* rot = g->R;
-  dReal* pos = g->pos;
-  pos[0] = px;
-  pos[1] = py;
-  pos[2] = pz;
-
-  rot[0*4+2] = dx;
-  rot[1*4+2] = dy;
-  rot[2*4+2] = dz;
-  dGeomMoved (g);
-}
-
-
-void dGeomRayGet (dGeomID g, dVector3 start, dVector3 dir)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  start[0] = g->pos[0];
-  start[1] = g->pos[1];
-  start[2] = g->pos[2];
-  dir[0] = g->R[0*4+2];
-  dir[1] = g->R[1*4+2];
-  dir[2] = g->R[2*4+2];
-}
-
-
-void dGeomRaySetParams (dxGeom *g, int FirstContact, int BackfaceCull)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-
-  if (FirstContact){
-    g->gflags |= RAY_FIRSTCONTACT;
-  }
-  else g->gflags &= ~RAY_FIRSTCONTACT;
-
-  if (BackfaceCull){
-    g->gflags |= RAY_BACKFACECULL;
-  }
-  else g->gflags &= ~RAY_BACKFACECULL;
-}
-
-
-void dGeomRayGetParams (dxGeom *g, int *FirstContact, int *BackfaceCull)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-
-  (*FirstContact) = ((g->gflags & RAY_FIRSTCONTACT) != 0);
-  (*BackfaceCull) = ((g->gflags & RAY_BACKFACECULL) != 0);
-}
-
-
-void dGeomRaySetClosestHit (dxGeom *g, int closestHit)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  if (closestHit){
-    g->gflags |= RAY_CLOSEST_HIT;
-  }
-  else g->gflags &= ~RAY_CLOSEST_HIT;
-}
-
-
-int dGeomRayGetClosestHit (dxGeom *g)
-{
-  dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  return ((g->gflags & RAY_CLOSEST_HIT) != 0);
-}
+//void dGeomRayGetParams (dxGeom *g, int *FirstContact, int *BackfaceCull)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//
+//  (*FirstContact) = ((g->gflags & RAY_FIRSTCONTACT) != 0);
+//  (*BackfaceCull) = ((g->gflags & RAY_BACKFACECULL) != 0);
+//}
+//
+//
+//void dGeomRaySetClosestHit (dxGeom *g, int closestHit)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//  if (closestHit){
+//    g->gflags |= RAY_CLOSEST_HIT;
+//  }
+//  else g->gflags &= ~RAY_CLOSEST_HIT;
+//}
+//
+//
+//int dGeomRayGetClosestHit (dxGeom *g)
+//{
+//  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+//  return ((g->gflags & RAY_CLOSEST_HIT) != 0);
+//}
 
 //****************************************************************************
 // box-box collision utility
@@ -1026,14 +1009,16 @@ int dCollideSphereSphere (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dSphereClass);
   dIASSERT (o2->type == dSphereClass);
+  iassert(o1->pos);
+  iassert(o2->pos);
+
   dxSphere *sphere1 = (dxSphere*) o1;
   dxSphere *sphere2 = (dxSphere*) o2;
 
   contact->g1 = o1;
   contact->g2 = o2;
 
-  return dCollideSpheres (o1->pos,sphere1->radius,
-			  o2->pos,sphere2->radius,contact);
+  return dCollideSpheres (o1->pos,sphere1->radius, o2->pos,sphere2->radius,contact);
 }
 
 
@@ -1053,6 +1038,7 @@ int dCollideSphereBox (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dSphereClass);
   dIASSERT (o2->type == dBoxClass);
+
   dxSphere *sphere = (dxSphere*) o1;
   dxBox *box = (dxBox*) o2;
 
@@ -1157,6 +1143,11 @@ int dCollideBoxBox (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dBoxClass);
   dIASSERT (o2->type == dBoxClass);
+  iassert(o1->pos);
+  iassert(o1->R);
+  iassert(o2->pos);
+  iassert(o2->R);
+
   dVector3 normal;
   dReal depth;
   int code;

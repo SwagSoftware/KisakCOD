@@ -177,7 +177,15 @@ int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
 
 dGeomID dCreateGeomTransform (dSpaceID space, dxBody *body)
 {
-  return new dxGeomTransform (space, body);
+  //return new dxGeomTransform (space, body);
+	// LWSS: custom allocator
+	dxGeomTransform *geom = (dxGeomTransform*)ODE_AllocateGeom();
+	if (!geom)
+	{
+		return 0;
+	}
+
+	return new ((void *)geom) dxGeomTransform(space, body);
 }
 
 
@@ -187,6 +195,10 @@ void dGeomTransformSetGeom (dGeomID g, dGeomID obj)
 	    "argument not a geom transform");
   dxGeomTransform *tr = (dxGeomTransform*) g;
   if (tr->obj && tr->cleanup) delete tr->obj;
+  // LWSS ADD
+  dSpaceRemove(obj->parent_space, obj);
+  obj->bodyRemove();
+  // LWSS END
   tr->obj = obj;
 }
 
@@ -200,40 +212,35 @@ dGeomID dGeomTransformGetGeom (dGeomID g)
 }
 
 
-void dGeomTransformSetCleanup (dGeomID g, int mode)
-{
-  dUASSERT (g && g->type == dGeomTransformClass,
-	    "argument not a geom transform");
-  dxGeomTransform *tr = (dxGeomTransform*) g;
-  tr->cleanup = mode;
-}
-
-
-int dGeomTransformGetCleanup (dGeomID g)
-{
-  dUASSERT (g && g->type == dGeomTransformClass,
-	    "argument not a geom transform");
-  dxGeomTransform *tr = (dxGeomTransform*) g;
-  return tr->cleanup;
-}
-
-
-void dGeomTransformSetInfo (dGeomID g, int mode)
-{
-  dUASSERT (g && g->type == dGeomTransformClass,
-	    "argument not a geom transform");
-  dxGeomTransform *tr = (dxGeomTransform*) g;
-  tr->infomode = mode;
-}
-
-
-int dGeomTransformGetInfo (dGeomID g)
-{
-  dUASSERT (g && g->type == dGeomTransformClass,
-	    "argument not a geom transform");
-  dxGeomTransform *tr = (dxGeomTransform*) g;
-  return tr->infomode;
-}
+// LWSS: removed for cod4
+//void dGeomTransformSetCleanup (dGeomID g, int mode)
+//{
+//  dUASSERT (g && g->type == dGeomTransformClass,
+//	    "argument not a geom transform");
+//  dxGeomTransform *tr = (dxGeomTransform*) g;
+//  tr->cleanup = mode;
+//}
+//int dGeomTransformGetCleanup (dGeomID g)
+//{
+//  dUASSERT (g && g->type == dGeomTransformClass,
+//	    "argument not a geom transform");
+//  dxGeomTransform *tr = (dxGeomTransform*) g;
+//  return tr->cleanup;
+//}
+//void dGeomTransformSetInfo (dGeomID g, int mode)
+//{
+//  dUASSERT (g && g->type == dGeomTransformClass,
+//	    "argument not a geom transform");
+//  dxGeomTransform *tr = (dxGeomTransform*) g;
+//  tr->infomode = mode;
+//}
+//int dGeomTransformGetInfo (dGeomID g)
+//{
+//  dUASSERT (g && g->type == dGeomTransformClass,
+//	    "argument not a geom transform");
+//  dxGeomTransform *tr = (dxGeomTransform*) g;
+//  return tr->infomode;
+//}
 
 // LWSS ADD
 void __cdecl ODE_GeomTransformSetRotation(dxGeom *g, const float *origin, const float (*rotation)[3])
