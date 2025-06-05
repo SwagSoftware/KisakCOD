@@ -57,8 +57,8 @@ void __cdecl CM_ShowSingleBrushCollision(
         MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 403, 0, "%s", "brush");
     if (!color)
         MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 404, 0, "%s", "color");
-    CM_BuildAxialPlanes(brush, (float (*)[4])axialPlanes);
-    ptCount = CM_ForEachBrushPlaneIntersection(brush, (const float (*)[4])axialPlanes, &brushPts);
+    CM_BuildAxialPlanes(brush, &axialPlanes);
+    ptCount = CM_ForEachBrushPlaneIntersection(brush, (float(*)[4])&axialPlanes, &brushPts);
     if (ptCount >= 4)
     {
         for (sideIndex = 0; (unsigned int)sideIndex < 6; ++sideIndex)
@@ -88,7 +88,7 @@ void __cdecl CM_ShowSingleBrushCollision(
     }
 }
 
-void __cdecl CM_BuildAxialPlanes(const cbrush_t *brush, float (*axialPlanes)[4])
+void __cdecl CM_BuildAxialPlanes(const cbrush_t *brush, float (*axialPlanes)[6][4])
 {
     float v2; // [esp+4h] [ebp-28h]
     float v3; // [esp+Ch] [ebp-20h]
@@ -98,35 +98,35 @@ void __cdecl CM_BuildAxialPlanes(const cbrush_t *brush, float (*axialPlanes)[4])
     float v7; // [esp+28h] [ebp-4h]
 
     v7 = -brush->mins[0];
-    (*axialPlanes)[0] = -1.0;
-    (*axialPlanes)[1] = 0.0;
-    (*axialPlanes)[2] = 0.0;
-    (*axialPlanes)[3] = v7;
+    (*axialPlanes)[0][0] = -1.0;
+    (*axialPlanes)[0][1] = 0.0;
+    (*axialPlanes)[0][2] = 0.0;
+    (*axialPlanes)[0][3] = v7;
     v6 = brush->maxs[0];
-    (*axialPlanes)[4] = 1.0;
-    (*axialPlanes)[5] = 0.0;
-    (*axialPlanes)[6] = 0.0;
-    (*axialPlanes)[7] = v6;
+    (*axialPlanes)[1][0] = 1.0;
+    (*axialPlanes)[1][1] = 0.0;
+    (*axialPlanes)[1][2] = 0.0;
+    (*axialPlanes)[1][3] = v6;
     v5 = -brush->mins[1];
-    (*axialPlanes)[8] = 0.0;
-    (*axialPlanes)[9] = -1.0;
-    (*axialPlanes)[10] = 0.0;
-    (*axialPlanes)[11] = v5;
+    (*axialPlanes)[2][0] = 0.0;
+    (*axialPlanes)[2][1] = -1.0;
+    (*axialPlanes)[2][2] = 0.0;
+    (*axialPlanes)[2][3] = v5;
     v4 = brush->maxs[1];
-    (*axialPlanes)[12] = 0.0;
-    (*axialPlanes)[13] = 1.0;
-    (*axialPlanes)[14] = 0.0;
-    (*axialPlanes)[15] = v4;
+    (*axialPlanes)[3][0] = 0.0;
+    (*axialPlanes)[3][1] = 1.0;
+    (*axialPlanes)[3][2] = 0.0;
+    (*axialPlanes)[3][3] = v4;
     v3 = -brush->mins[2];
-    (*axialPlanes)[16] = 0.0;
-    (*axialPlanes)[17] = 0.0;
-    (*axialPlanes)[18] = -1.0;
-    (*axialPlanes)[19] = v3;
+    (*axialPlanes)[4][0] = 0.0;
+    (*axialPlanes)[4][1] = 0.0;
+    (*axialPlanes)[4][2] = -1.0;
+    (*axialPlanes)[4][3] = v3;
     v2 = brush->maxs[2];
-    (*axialPlanes)[20] = 0.0;
-    (*axialPlanes)[21] = 0.0;
-    (*axialPlanes)[22] = 1.0;
-    (*axialPlanes)[23] = v2;
+    (*axialPlanes)[5][0] = 0.0;
+    (*axialPlanes)[5][1] = 0.0;
+    (*axialPlanes)[5][2] = 1.0;
+    (*axialPlanes)[5][3] = v2;
 }
 
 int __cdecl CM_ForEachBrushPlaneIntersection(

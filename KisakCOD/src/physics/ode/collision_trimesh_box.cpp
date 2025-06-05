@@ -1012,9 +1012,7 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     dVector4 plPlane; // [esp+204h] [ebp-388h] BYREF
     float v41[4]; // [esp+214h] [ebp-378h] BYREF
     int iB2; // [esp+224h] [ebp-368h]
-    float v43; // [esp+228h] [ebp-364h]
-    float v44; // [esp+22Ch] [ebp-360h]
-    float v45; // [esp+230h] [ebp-35Ch]
+    float v43[3]; // [esp+228h] [ebp-364h]
     float vNr[4]; // [esp+238h] [ebp-354h]
     int iTempCnt1; // [esp+248h] [ebp-344h] BYREF
     float vTemp2[4]; // [esp+24Ch] [ebp-340h] BYREF
@@ -1400,34 +1398,34 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
             iB2 = 2;
         }
     }
-    v43 = tbData->mHullBoxRot[iB0];
-    v44 = tbData->mHullBoxRot[iB0 + 4];
-    v45 = tbData->mHullBoxRot[iB0 + 8];
+    v43[0] = tbData->mHullBoxRot[iB0];
+    v43[1] = tbData->mHullBoxRot[iB0 + 4];
+    v43[2] = tbData->mHullBoxRot[iB0 + 8];
     if (vNr[iB0] <= 0.0)
     {
-        vCenter[0] = tbData->vHullBoxPos[0] - (*v0)[0] + tbData->vBoxHalfSize[iB0] * v43;
-        vCenter[1] = tbData->vHullBoxPos[1] - (*v0)[1] + tbData->vBoxHalfSize[iB0] * v44;
-        v8 = tbData->vHullBoxPos[2] - (*v0)[2] + tbData->vBoxHalfSize[iB0] * v45;
+        vCenter[0] = tbData->vHullBoxPos[0] - (*v0)[0] + tbData->vBoxHalfSize[iB0] * v43[0];
+        vCenter[1] = tbData->vHullBoxPos[1] - (*v0)[1] + tbData->vBoxHalfSize[iB0] * v43[1];
+        v8 = tbData->vHullBoxPos[2] - (*v0)[2] + tbData->vBoxHalfSize[iB0] * v43[2];
     }
     else
     {
-        vCenter[0] = tbData->vHullBoxPos[0] - (*v0)[0] - tbData->vBoxHalfSize[iB0] * v43;
-        vCenter[1] = tbData->vHullBoxPos[1] - (*v0)[1] - tbData->vBoxHalfSize[iB0] * v44;
-        v8 = tbData->vHullBoxPos[2] - (*v0)[2] - tbData->vBoxHalfSize[iB0] * v45;
+        vCenter[0] = tbData->vHullBoxPos[0] - (*v0)[0] - tbData->vBoxHalfSize[iB0] * v43[0];
+        vCenter[1] = tbData->vHullBoxPos[1] - (*v0)[1] - tbData->vBoxHalfSize[iB0] * v43[1];
+        v8 = tbData->vHullBoxPos[2] - (*v0)[2] - tbData->vBoxHalfSize[iB0] * v43[2];
     }
     vCenter[2] = v8;
-    v43 = tbData->mHullBoxRot[iB1];
-    v44 = tbData->mHullBoxRot[iB1 + 4];
-    v45 = tbData->mHullBoxRot[iB1 + 8];
+    v43[0] = tbData->mHullBoxRot[iB1];
+    v43[1] = tbData->mHullBoxRot[iB1 + 4];
+    v43[2] = tbData->mHullBoxRot[iB1 + 8];
     vRotCol2[0] = tbData->mHullBoxRot[iB2];
     vRotCol2[1] = tbData->mHullBoxRot[iB2 + 4];
     vRotCol2[2] = tbData->mHullBoxRot[iB2 + 8];
     for (x = 0; x < 3; ++x)
     {
-        avArrayIn[x] = tbData->vBoxHalfSize[iB1] * *(&v43 + x) + vCenter[x] - tbData->vBoxHalfSize[iB2] * vRotCol2[x];
-        avArrayIn[x + 4] = vCenter[x] - tbData->vBoxHalfSize[iB1] * *(&v43 + x) - tbData->vBoxHalfSize[iB2] * vRotCol2[x];
-        avArrayIn[x + 8] = vCenter[x] - tbData->vBoxHalfSize[iB1] * *(&v43 + x) + tbData->vBoxHalfSize[iB2] * vRotCol2[x];
-        avArrayIn[x + 12] = tbData->vBoxHalfSize[iB1] * *(&v43 + x) + vCenter[x] + tbData->vBoxHalfSize[iB2] * vRotCol2[x];
+        avArrayIn[x] = tbData->vBoxHalfSize[iB1] * v43[x] + vCenter[x] - tbData->vBoxHalfSize[iB2] * vRotCol2[x];
+        avArrayIn[x + 4] = vCenter[x] - tbData->vBoxHalfSize[iB1] * v43[x] - tbData->vBoxHalfSize[iB2] * vRotCol2[x];
+        avArrayIn[x + 8] = vCenter[x] - tbData->vBoxHalfSize[iB1] * v43[x] + tbData->vBoxHalfSize[iB2] * vRotCol2[x];
+        avArrayIn[x + 12] = tbData->vBoxHalfSize[iB1] * v43[x] + vCenter[x] + tbData->vBoxHalfSize[iB2] * vRotCol2[x];
     }
     iTempCnt1 = 0;
     iTempCnt2 = 0;

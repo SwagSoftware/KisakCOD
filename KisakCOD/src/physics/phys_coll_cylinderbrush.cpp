@@ -3,7 +3,6 @@
 #include <cgame/cg_local.h>
 #include <EffectsCore/fx_system.h>
 
-
 void __cdecl Phys_CollideCylinderWithBrush(const cbrush_t *brush, const objInfo *info, Results *results)
 {
     double v3; // st7
@@ -14,8 +13,8 @@ void __cdecl Phys_CollideCylinderWithBrush(const cbrush_t *brush, const objInfo 
     float v8; // [esp+4Ch] [ebp-D0Ch]
     unsigned int j; // [esp+50h] [ebp-D08h]
     float v10; // [esp+54h] [ebp-D04h]
-    float v11[12]; // [esp+58h] [ebp-D00h] BYREF
-    float tempBrushPlane[4]; // [esp+B8h] [ebp-CA0h] BYREF
+    float v11[6][4]; // [esp+58h] [ebp-D00h] BYREF
+    float polyPlane[4]; // [esp+B8h] [ebp-CA0h] BYREF
     unsigned int newBrushSideIndex; // [esp+C8h] [ebp-C90h]
     int surfaceFlags; // [esp+CCh] [ebp-C8Ch]
     float brushPlane[4]; // [esp+D0h] [ebp-C88h] BYREF
@@ -41,23 +40,23 @@ void __cdecl Phys_CollideCylinderWithBrush(const cbrush_t *brush, const objInfo 
     brushPlane[3] = 0.0;
     v10 = -3.4028235e38;
     brushSideIndex = -1;
-    CM_BuildAxialPlanes(brush, (float(*)[4])v11);
+    CM_BuildAxialPlanes(brush, &v11);
     for (j = 0; j < 6; ++j)
     {
-        v8 = Phys_DistanceOfCylinderFromPlane(&v11[4 * j], info);
+        v8 = Phys_DistanceOfCylinderFromPlane(v11[j], info);
         if (v8 >= 0.0)
         {
             v5 = 0;
             goto LABEL_24;
         }
-        if (brush->edgeCount[j & 1][j >> 1] && v10 < v8)
+        if (brush->edgeCount[j & 1][j >> 1] && v10 < (double)v8)
         {
             v10 = v8;
             brushSideIndex = j;
-            brushPlane[0] = v11[4 * j];
-            brushPlane[1] = v11[4 * j + 1];
-            brushPlane[2] = v11[4 * j + 2];
-            brushPlane[3] = v11[4 * j + 3];
+            brushPlane[0] = v11[j][0];
+            brushPlane[1] = v11[j][1];
+            brushPlane[2] = v11[j][2];
+            brushPlane[3] = v11[j][3];
         }
     }
     for (j = 0; j < brush->numsides; ++j)
@@ -73,7 +72,7 @@ void __cdecl Phys_CollideCylinderWithBrush(const cbrush_t *brush, const objInfo 
             v5 = 0;
             goto LABEL_24;
         }
-        if (brush->sides[j].edgeCount && v10 < v8)
+        if (brush->sides[j].edgeCount && v10 < (double)v8)
         {
             v10 = v8;
             brushSideIndex = j + 6;
@@ -85,7 +84,7 @@ void __cdecl Phys_CollideCylinderWithBrush(const cbrush_t *brush, const objInfo 
 LABEL_24:
     if (v5 && brushSideIndex >= 0)
     {
-        CM_BuildAxialPlanes(brush, axialPlanes);
+        CM_BuildAxialPlanes(brush, &axialPlanes);
         brushPoly.pts = brushVerts;
         Phys_GetWindingForBrushFace2(brush, brushSideIndex, &brushPoly, 256, axialPlanes);
         if (phys_drawCollisionWorld->current.enabled)
@@ -104,9 +103,9 @@ LABEL_24:
         {
             for (i = 0; i < 3; ++i)
             {
-                if (brush->mins[i] <= info->pos[i])
+                if (brush->mins[i] <= (double)info->pos[i])
                 {
-                    if (brush->maxs[i] < info->pos[i])
+                    if (brush->maxs[i] < (double)info->pos[i])
                     {
                         newBrushSideIndex = 2 * i + 1;
                         if (newBrushSideIndex != brushSideIndex)
@@ -152,12 +151,12 @@ LABEL_24:
                             if (phys_drawCollisionWorld->current.enabled)
                                 Phys_DrawPoly(&brushPoly, colorCyan);
                             v4 = brush->sides[i].plane;
-                            tempBrushPlane[0] = v4->normal[0];
-                            tempBrushPlane[1] = v4->normal[1];
-                            tempBrushPlane[2] = v4->normal[2];
-                            tempBrushPlane[3] = brush->sides[i].plane->dist;
+                            polyPlane[0] = v4->normal[0];
+                            polyPlane[1] = v4->normal[1];
+                            polyPlane[2] = v4->normal[2];
+                            polyPlane[3] = brush->sides[i].plane->dist;
                             surfaceFlags = Phys_GetSurfaceFlagsFromBrush(brush, newBrushSideIndex);
-                            Phys_CollideCylinderWithFace(tempBrushPlane, &brushPoly, info, surfaceFlags, results);
+                            Phys_CollideCylinderWithFace(polyPlane, &brushPoly, info, surfaceFlags, results);
                         }
                     }
                 }
@@ -165,6 +164,7 @@ LABEL_24:
         }
     }
 }
+
 void __cdecl Phys_CollideCylinderWithFace(
     const float *polyPlane,
     const Poly *poly,

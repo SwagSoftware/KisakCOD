@@ -146,8 +146,8 @@ void __cdecl Phys_CollideCapsuleWithBrush(const cbrush_t *brush, const objInfo *
     float v9; // [esp+4Ch] [ebp-D3Ch]
     unsigned int i; // [esp+50h] [ebp-D38h]
     float v11; // [esp+54h] [ebp-D34h]
-    float v12[12]; // [esp+58h] [ebp-D30h] BYREF
-    Poly winding; // [esp+B8h] [ebp-CD0h] BYREF
+    float v12[6][4]; // [esp+58h] [ebp-D30h] BYREF
+    Poly outWinding; // [esp+B8h] [ebp-CD0h] BYREF
     unsigned int tri; // [esp+C0h] [ebp-CC8h]
     int surfaceFlags; // [esp+C4h] [ebp-CC4h]
     float brushPlane[4]; // [esp+C8h] [ebp-CC0h] BYREF
@@ -176,23 +176,23 @@ void __cdecl Phys_CollideCapsuleWithBrush(const cbrush_t *brush, const objInfo *
     brushPlane[3] = 0.0;
     v11 = -3.4028235e38;
     brushSideIndex = -1;
-    CM_BuildAxialPlanes(brush, (float(*)[4])v12);
+    CM_BuildAxialPlanes(brush, &v12);
     for (i = 0; i < 6; ++i)
     {
-        v9 = Phys_DistanceOfCapsuleFromPlane(&v12[4 * i], &capsule);
+        v9 = Phys_DistanceOfCapsuleFromPlane(v12[i], &capsule);
         if (v9 >= 0.0)
         {
             v3 = 0;
             goto LABEL_24;
         }
-        if (brush->edgeCount[i & 1][i >> 1] && v11 < v9)
+        if (brush->edgeCount[i & 1][i >> 1] && v11 < (double)v9)
         {
             v11 = v9;
             brushSideIndex = i;
-            brushPlane[0] = v12[4 * i];
-            brushPlane[1] = v12[4 * i + 1];
-            brushPlane[2] = v12[4 * i + 2];
-            brushPlane[3] = v12[4 * i + 3];
+            brushPlane[0] = v12[i][0];
+            brushPlane[1] = v12[i][1];
+            brushPlane[2] = v12[i][2];
+            brushPlane[3] = v12[i][3];
         }
     }
     for (i = 0; i < brush->numsides; ++i)
@@ -208,7 +208,7 @@ void __cdecl Phys_CollideCapsuleWithBrush(const cbrush_t *brush, const objInfo *
             v3 = 0;
             goto LABEL_24;
         }
-        if (brush->sides[i].edgeCount && v11 < v9)
+        if (brush->sides[i].edgeCount && v11 < (double)v9)
         {
             v11 = v9;
             brushSideIndex = i + 6;
@@ -233,15 +233,15 @@ LABEL_24:
                 brush->numsides + 6);
         if (Phys_TestCapsulePlane(brushPlane, &capsule))
         {
-            winding.pts = brushVerts;
-            winding.ptCount = 0;
-            CM_BuildAxialPlanes(brush, axialPlanes);
-            Phys_GetWindingForBrushFace2(brush, brushSideIndex, &winding, 256, axialPlanes);
-            ptCount = winding.ptCount;
-            if (winding.ptCount)
+            outWinding.pts = brushVerts;
+            outWinding.ptCount = 0;
+            CM_BuildAxialPlanes(brush, &axialPlanes);
+            Phys_GetWindingForBrushFace2(brush, brushSideIndex, &outWinding, 256, axialPlanes);
+            ptCount = outWinding.ptCount;
+            if (outWinding.ptCount)
             {
                 if (phys_drawCollisionWorld->current.enabled)
-                    Phys_DrawPoly(&winding, colorCyan);
+                    Phys_DrawPoly(&outWinding, colorCyan);
                 if (ptCount < 3)
                     MyAssertHandler(
                         ".\\physics\\phys_coll_capsulebrush.cpp",
@@ -250,7 +250,7 @@ LABEL_24:
                         "%s\n\t(ptCount) = %i",
                         "(ptCount >= 3)",
                         ptCount);
-                pts = winding.pts;
+                pts = outWinding.pts;
                 ptCount -= 3;
                 surfaceFlags = Phys_GetSurfaceFlagsFromBrush(brush, brushSideIndex);
                 if (ptCount)
@@ -259,7 +259,7 @@ LABEL_24:
                         results,
                         brushPlane,
                         &capsule,
-                        (const float*)pts,
+                        (const float *)pts,
                         &(*pts)[6],
                         &(*pts)[3],
                         surfaceFlags);
@@ -283,7 +283,14 @@ LABEL_24:
                 }
                 else
                 {
-                    Phys_CapsuleBuildContactsForTri(results, brushPlane, &capsule, (const float*)pts, &(*pts)[6], &(*pts)[3], surfaceFlags);
+                    Phys_CapsuleBuildContactsForTri(
+                        results,
+                        brushPlane,
+                        &capsule,
+                        (const float *)pts,
+                        &(*pts)[6],
+                        &(*pts)[3],
+                        surfaceFlags);
                 }
                 Phys_CapsuleOptimizeLocalResults(results);
             }
