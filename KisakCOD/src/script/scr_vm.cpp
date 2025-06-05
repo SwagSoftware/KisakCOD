@@ -2687,7 +2687,7 @@ SafeSetVariableFieldCached0:
             continue;
 
         case OP_SafeSetWaittillVariableFieldCached:
-            iassert(fs.top->type != VAR_CODEPOS);
+            iassert(fs.top->type != VAR_PRECODEPOS);
             if (fs.top->type != VAR_CODEPOS)
             {
                 goto setlocalvariablefieldcached;
