@@ -2189,8 +2189,7 @@ void __cdecl Phys_DoBodyOncePerRun(dxBody *body)
 
 void __cdecl Phys_ObjTraceNewPos(dxBody *body)
 {
-    __int64 scale; // [esp+4h] [ebp-E4h]
-    int number; // [esp+8h] [ebp-E0h]
+    float number; // [esp+8h] [ebp-E0h]
     float fraction; // [esp+Ch] [ebp-DCh]
     float v4; // [esp+10h] [ebp-D8h]
     bool v5; // [esp+14h] [ebp-D4h]
@@ -2220,17 +2219,7 @@ void __cdecl Phys_ObjTraceNewPos(dxBody *body)
         userData = (PhysObjUserData *)dBodyGetData(body);
         if (!userData)
             MyAssertHandler(".\\physics\\phys_ode.cpp", 1890, 0, "%s", "userData");
-        if ((COERCE_UNSIGNED_INT(userData->savedPos[0]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(userData->savedPos[1]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(userData->savedPos[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                ".\\physics\\phys_ode.cpp",
-                1892,
-                0,
-                "%s",
-                "!IS_NAN((userData->savedPos)[0]) && !IS_NAN((userData->savedPos)[1]) && !IS_NAN((userData->savedPos)[2])");
-        }
+        iassert(!IS_NAN((userData->savedPos)[0]) && !IS_NAN((userData->savedPos)[1]) && !IS_NAN((userData->savedPos)[2]));
         geom = ODE_BodyGetFirstGeom(body);
         if (geom)
         {
@@ -2270,17 +2259,9 @@ void __cdecl Phys_ObjTraceNewPos(dxBody *body)
                 isTooNarrow = 1;
             }
             Phys_BodyGetCenterOfMass(body, newPos);
-            if ((LODWORD(newPos[0]) & 0x7F800000) == 0x7F800000
-                || (LODWORD(newPos[1]) & 0x7F800000) == 0x7F800000
-                || (LODWORD(newPos[2]) & 0x7F800000) == 0x7F800000)
-            {
-                MyAssertHandler(
-                    ".\\physics\\phys_ode.cpp",
-                    1922,
-                    0,
-                    "%s",
-                    "!IS_NAN((newPos)[0]) && !IS_NAN((newPos)[1]) && !IS_NAN((newPos)[2])");
-            }
+            
+            iassert(!IS_NAN((newPos)[0]) && !IS_NAN((newPos)[1]) && !IS_NAN((newPos)[2]));
+
             v5 = newPos[0] == userData->savedPos[0]
                 && newPos[1] == userData->savedPos[1]
                 && newPos[2] == userData->savedPos[2];
