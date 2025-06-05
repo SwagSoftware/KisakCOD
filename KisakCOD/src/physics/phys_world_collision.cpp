@@ -408,15 +408,16 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
     int i; // [esp+AD4h] [ebp-18h]
     Results results; // [esp+AD8h] [ebp-14h] BYREF
     TraceThreadInfo *value; // [esp+AE8h] [ebp-4h]
+    float tmp;
 
     LODWORD(lengths[4]) = 1024;
     narrowLen = &phys_narrowObjMaxLength->current.value;
     Profile_Begin(368);
     Profile_Begin(369);
-    if (skip < 44)
-        MyAssertHandler(".\\physics\\phys_world_collision.cpp", 374, 0, "%s", "skip >= (int)sizeof(dContactGeom)");
-    if (dGeomGetClass(o1) != 15)
-        MyAssertHandler(".\\physics\\phys_world_collision.cpp", 375, 0, "%s", "dGeomGetClass( o1 ) == GEOM_CLASS_WORLD");
+
+    iassert(skip >= (int)sizeof(dContactGeom));
+    iassert(dGeomGetClass(o1) == GEOM_CLASS_WORLD);
+
     Body = dGeomGetBody(o2);
     Position = dBodyGetPosition(Body);
     input.bodyCenter[0] = *Position;
@@ -450,7 +451,7 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
         v25 = *narrowLen > lengths[0] || *narrowLen > lengths[1] || *narrowLen > lengths[2];
         input.isNarrow = v25;
         break;
-    case 11:
+    case GEOM_CLASS_BRUSHMODEL:
         input.type = PHYS_GEOM_BRUSHMODEL;
         brushInfo = (BrushInfo *)dGeomGetClassData(o2);
         if (!brushInfo->u.brushModel)
@@ -470,57 +471,46 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
         maxs[2] = maxs[0];
         input.isNarrow = *narrowLen > input.u.brushModel->radius;
         break;
-    case 12:
+    case GEOM_CLASS_BRUSH:
         input.type = PHYS_GEOM_BRUSH;
         brushInfo = (BrushInfo *)dGeomGetClassData(o2);
-        if (!brushInfo->u.brush)
-            MyAssertHandler(".\\physics\\phys_world_collision.cpp", 419, 0, "%s", "brushInfo->u.brush");
+        iassert(brushInfo->u.brush);
         input.u.brushModel = (cmodel_t *)brushInfo->u.brush;
         MatrixTransformVector(brushInfo->centerOfMass, input.R, rotatedCenterOfMass);
         Vec3Sub(input.pos, rotatedCenterOfMass, input.pos);
         radius = 0.0;
-        v24 = fabs(input.u.brushModel->maxs[1]);
-        if (0.0 < v24)
-        {
-            v23 = fabs(input.u.brushModel->maxs[1]);
-            radius = v23;
-        }
-        v22 = fabs(input.u.brushModel->maxs[2]);
-        if (radius < v22)
-        {
-            v21 = fabs(input.u.brushModel->maxs[2]);
-            radius = v21;
-        }
-        v20 = fabs(input.u.brushModel->radius);
-        if (radius < v20)
-        {
-            v19 = fabs(input.u.brushModel->radius);
-            radius = v19;
-        }
-        v18 = fabs(input.u.brushModel->mins[0]);
-        if (radius < v18)
-        {
-            v17 = fabs(input.u.brushModel->mins[0]);
-            radius = v17;
-        }
-        v16 = fabs(input.u.brushModel->mins[1]);
-        if (radius < v16)
-        {
-            v15 = fabs(input.u.brushModel->mins[1]);
-            radius = v15;
-        }
-        v14 = fabs(input.u.brushModel->mins[2]);
-        if (radius < v14)
-        {
-            v13 = fabs(input.u.brushModel->mins[2]);
-            radius = v13;
-        }
+
+        tmp = fabs(input.u.brushModel->maxs[1]);
+
+        if (radius < tmp)
+            radius = tmp;
+
+        tmp = fabs(input.u.brushModel->maxs[2]);
+        if (radius < tmp)
+            radius = tmp;
+
+        tmp = fabs(input.u.brushModel->radius);
+        if (radius < tmp)
+            radius = tmp;
+
+        tmp = fabs(input.u.brushModel->mins[0]);
+        if (radius < tmp)
+            radius = tmp;
+
+        tmp = fabs(input.u.brushModel->mins[1]);
+        if (radius < tmp)
+            radius = tmp;
+
+        tmp = fabs(input.u.brushModel->mins[2]);
+        if (radius < tmp)
+            radius = tmp;
+
         maxs[0] = radius * 1.732050776481628;
         maxs[1] = maxs[0];
         maxs[2] = maxs[0];
         input.isNarrow = *narrowLen > input.u.brushModel->radius;
         break;
-    case 13:
+    case GEOM_CLASS_CYLINDER:
         input.type = PHYS_GEOM_CYLINDER;
         cyl = (GeomStateCylinder *)dGeomGetClassData(o2);
         input.cylDirection = cyl->direction;
@@ -539,7 +529,7 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
         maxs[2] = maxs[0];
         input.isNarrow = *narrowLen > cyl->radius + cyl->radius;
         break;
-    case 14:
+    case GEOM_CLASS_CAPSULE:
         input.type = PHYS_GEOM_CAPSULE;
         cyl = (GeomStateCylinder *)dGeomGetClassData(o2);
         input.cylDirection = cyl->direction;
@@ -582,9 +572,11 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
         ll.bounds[0][i] = ll.bounds[0][i] - (maxs[i] + 1.0);
         ll.bounds[1][i] = maxs[i] + 1.0 + ll.bounds[1][i];
     }
-    *&input.bounds[0][0] = *&ll.bounds[0][0];
+    input.bounds[0][0] = ll.bounds[0][0];
+    input.bounds[0][1] = ll.bounds[0][1];
     input.bounds[0][2] = ll.bounds[0][2];
-    *&input.bounds[1][0] = *&ll.bounds[1][0];
+    input.bounds[1][0] = ll.bounds[1][0];
+    input.bounds[1][1] = ll.bounds[1][1];
     input.bounds[1][2] = ll.bounds[1][2];
     ll.count = 0;
     ll.maxcount = 1024;

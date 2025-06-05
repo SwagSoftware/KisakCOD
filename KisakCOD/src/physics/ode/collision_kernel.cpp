@@ -153,10 +153,12 @@ static void initColliders()
 }
 
 
-int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
-	      int skip)
+int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contactArray, int skip)
 {
-  dAASSERT(o1 && o2 && contact);
+    dxGeom **p_g2; // [esp+0h] [ebp-24h]
+    dxGeom **p_g1; // [esp+4h] [ebp-20h]
+    dxGeom *v8;
+  dAASSERT(o1 && o2 && contactArray);
   dUASSERT(colliders_initialized,"colliders array not initialized");
   dUASSERT(o1->type >= 0 && o1->type < dGeomNumClasses,"bad o1 class number");
   dUASSERT(o2->type >= 0 && o2->type < dGeomNumClasses,"bad o2 class number");
@@ -171,19 +173,24 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
   int count = 0;
   if (ce->fn) {
     if (ce->reverse) {
-      count = (*ce->fn) (o2,o1,flags,contact,skip);
+      count = (*ce->fn) (o2,o1,flags,contactArray,skip);
       for (int i=0; i<count; i++) {
-	dContactGeom *c = CONTACT(contact,skip*i);
+	dContactGeom *c = CONTACT(contactArray,skip*i);
 	c->normal[0] = -c->normal[0];
 	c->normal[1] = -c->normal[1];
 	c->normal[2] = -c->normal[2];
-	dxGeom *tmp = c->g1;
-	c->g1 = c->g2;
-	c->g2 = tmp;
+    p_g2 = &c->g2;
+    p_g1 = &c->g1;
+    if (&c->g1 != &c->g2)
+    {
+        v8 = *p_g1;
+        *p_g1 = *p_g2;
+        *p_g2 = v8;
+    }
       }
     }
     else {
-      count = (*ce->fn) (o1,o2,flags,contact,skip);
+      count = (*ce->fn) (o1,o2,flags,contactArray,skip);
     }
   }
   return count;

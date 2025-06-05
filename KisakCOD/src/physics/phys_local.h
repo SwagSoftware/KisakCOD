@@ -10,6 +10,14 @@
 #include <universal/memfile.h>
 #include <universal/pool_allocator.h>
 
+enum $B7C75F5EC8C61F46B3FEFC285D8D85F1 : __int32
+{
+    GEOM_CLASS_BRUSHMODEL = 0xB,
+    GEOM_CLASS_BRUSH = 0xC,
+    GEOM_CLASS_CYLINDER = 0xD,
+    GEOM_CLASS_CAPSULE = 0xE,
+    GEOM_CLASS_WORLD = 0xF,
+};
 
 enum BodyState_t : __int32
 {                                       // ...
