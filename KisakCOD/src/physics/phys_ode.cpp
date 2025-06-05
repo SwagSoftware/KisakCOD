@@ -1918,7 +1918,7 @@ void __cdecl Phys_ObjDraw(dxBody *body)
     }
 }
 
-void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
+void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
 {
     float v3; // [esp+8h] [ebp-30B4h]
     float value; // [esp+Ch] [ebp-30B0h]
@@ -1928,9 +1928,9 @@ void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
     float v8; // [esp+1Ch] [ebp-30A0h]
     dxBody *v9; // [esp+20h] [ebp-309Ch]
     float v10; // [esp+40h] [ebp-307Ch]
-    float v11; // [esp+44h] [ebp-3078h]
-    DWORD *v12; // [esp+60h] [ebp-305Ch]
-    _DWORD *Data; // [esp+60h] [ebp-305Ch]
+    float bounce; // [esp+44h] [ebp-3078h]
+    PhysObjUserData *v12; // [esp+60h] [ebp-305Ch]
+    PhysObjUserData *Data; // [esp+60h] [ebp-305Ch]
     ContactList out; // [esp+64h] [ebp-3058h] BYREF
     float v15; // [esp+1870h] [ebp-184Ch]
     dxBody *b1; // [esp+1874h] [ebp-1848h]
@@ -1939,12 +1939,12 @@ void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
     PhysWorld worldIndex; // [esp+30ACh] [ebp-10h]
     float v20; // [esp+30B0h] [ebp-Ch]
     dxBody *b2; // [esp+30B4h] [ebp-8h]
-    int *v22; // [esp+30B8h] [ebp-4h]
+    FrameInfo *v22; // [esp+30B8h] [ebp-4h]
 
     Profile_Begin(367);
     v12 = 0;
-    v22 = userData;
-    worldIndex = (PhysWorld)userData[1];
+    v22 = (FrameInfo*)userData;
+    worldIndex = (PhysWorld)v22->worldIndex;
     b1 = dGeomGetBody(geom1);
     b2 = dGeomGetBody(geom2);
     if (b1 && b2 && dAreConnectedExcluding(b1, b2, 4))
@@ -1953,7 +1953,7 @@ void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
     }
     else
     {
-        contactArray.contactCount = dCollide(geom1, geom2, 128, (dContactGeom*)&contactArray, 48);
+        contactArray.contactCount = dCollide(geom1, geom2, 128, (dContactGeom *)&contactArray.contacts[0], sizeof(contactArray.contacts[0]));
         if (b1)
             v9 = b2 == 0 ? b1 : 0;
         else
@@ -1962,10 +1962,9 @@ void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
         {
             if (v9)
             {
-                Data = (DWORD*)dBodyGetData(v9);
-                if (!Data)
-                    MyAssertHandler(".\\physics\\phys_ode.cpp", 1386, 0, "%s", "bodyUserData");
-                Data[19] = 2;
+                Data = (PhysObjUserData *)dBodyGetData(v9);
+                iassert(Data);
+                Data->state = PHYS_OBJ_STATE_FREE;
             }
         }
         else
@@ -1974,66 +1973,61 @@ void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
             v15 = 1.0;
             if (b1)
             {
-                v12 = (DWORD*)dBodyGetData(b1);
-                v11 = *((float*)v12 + 18);
-                v8 = v15 - v11;
+                v12 = (PhysObjUserData *)dBodyGetData(b1);
+                bounce = v12->bounce;
+                v8 = v15 - bounce;
                 if (v8 < 0.0)
                     v7 = v15;
                 else
-                    v7 = v11;
+                    v7 = bounce;
                 v15 = v7;
-                v20 = v20 + *((float*)v12 + 17);
+                v20 = v20 + v12->friction;
             }
             if (b2)
             {
-                v12 = (DWORD *)dBodyGetData(b2);
-                v10 = *((float*)v12 + 18);
+                v12 = (PhysObjUserData *)dBodyGetData(b2);
+                v10 = v12->bounce;
                 v6 = v15 - v10;
                 if (v6 < 0.0)
                     v5 = v15;
                 else
                     v5 = v10;
                 v15 = v5;
-                v20 = v20 + *((float*)v12 + 17);
+                v20 = v20 + v12->friction;
             }
-            surfParms.mode = 12316;
+            surfParms.mode = 0x301C;
             iassert(phys_contact_cfm);
             iassert(phys_contact_erp);
-
             if (worldIndex == PHYS_WORLD_RAGDOLL)
                 value = phys_contact_cfm_ragdoll->current.value;
             else
                 value = phys_contact_cfm->current.value;
-
             surfParms.soft_cfm = value;
-
             if (worldIndex == PHYS_WORLD_RAGDOLL)
                 v3 = phys_contact_erp_ragdoll->current.value;
             else
                 v3 = phys_contact_erp->current.value;
-
             surfParms.soft_erp = v3;
             surfParms.mu = v20 * phys_frictionScale->current.value;
             surfParms.mu2 = 0.0;
             surfParms.bounce = v15;
             surfParms.bounce_vel = 0.1;
-
             if (contactArray.contactCount >= 5)
             {
                 Phys_ReduceContacts(v9, &contactArray, &out);
                 Phys_CreateJointForEachContact(&out, b1, b2, &surfParms, worldIndex);
                 if (v9)
-                    Phys_PlayCollisionSound(*v22, v9, *(v12 + 16), &out);
+                    Phys_PlayCollisionSound(v22->localClientNum, v9, v12->sndClass, &out);
                 else
-                    Phys_PlayCollisionSound(*v22, b1, *(v12 + 16), &out);
+                    Phys_PlayCollisionSound(v22->localClientNum, b1, v12->sndClass, &out);
             }
             else
             {
                 Phys_CreateJointForEachContact(&contactArray, b1, b2, &surfParms, worldIndex);
                 if (v9)
-                    Phys_PlayCollisionSound(*v22, v9, *(v12 + 16), &contactArray);
+                    Phys_PlayCollisionSound(v22->localClientNum, v9, v12->sndClass, &contactArray);
                 else
-                    Phys_PlayCollisionSound(*v22, b1, *(v12 + 16), &contactArray);
+                    Phys_PlayCollisionSound(v22->localClientNum, b1, v12->sndClass, &contactArray);
             }
         }
         Profile_EndInternal(0);
@@ -2093,9 +2087,9 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
     dWorldSetGravity(world, down[0], down[1], down[2]);
     //Profile_Begin(366);
     if (phys_interBodyCollision->current.enabled)
-        dSpaceCollide(physGlob.space[worldIndex], &worldIndex, (void(*)(void*, dGeomID, dGeomID))Phys_NearCallback);
-    if (physGlob.space[51 * worldIndex - 150])
-        ((void (*)(void))physGlob.space[51 * worldIndex - 150])();
+        dSpaceCollide(physGlob.space[worldIndex], &worldIndex, Phys_NearCallback);
+    if (physGlob.worldData[worldIndex].collisionCallback)
+        physGlob.worldData[worldIndex].collisionCallback();
     frameInfo.localClientNum = localClientNum;
     frameInfo.worldIndex = worldIndex;
     ODE_CollideSimpleSpaceWithGeomNoAABBTest(physGlob.space[worldIndex], physGlob.worldGeom, &frameInfo);

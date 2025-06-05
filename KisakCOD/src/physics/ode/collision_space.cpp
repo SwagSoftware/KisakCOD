@@ -805,7 +805,7 @@ void dxSpace::clear()
 }
 
 // LWSS ADD
-void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2); // phys_ode.cpp
+void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2); // phys_ode.cpp
 void __cdecl ODE_CollideSimpleSpaceWithGeomNoAABBTest(dxSpace *space, dxGeom *geom, void *data)
 {
     dxGeom *geom2; // [esp+0h] [ebp-8h]
@@ -827,7 +827,7 @@ void __cdecl ODE_CollideSimpleSpaceWithGeomNoAABBTest(dxSpace *space, dxGeom *ge
                 MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 337, 0, "%s", "geom != geom2");
             if (geom->body == geom2->body)
                 MyAssertHandler(".\\physics\\ode\\src\\collision_space.cpp", 338, 0, "%s", "geom->body != geom2->body");
-            Phys_NearCallback((int*)data, geom2, geom);
+            Phys_NearCallback(data, geom2, geom);
         }
     }
     --space->lock_count;

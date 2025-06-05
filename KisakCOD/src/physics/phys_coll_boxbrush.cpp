@@ -1328,38 +1328,30 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
     cplane_s *v7; // [esp+18h] [ebp-39B0h]
     int v8; // [esp+48h] [ebp-3980h]
     cplane_s *v9; // [esp+4Ch] [ebp-397Ch]
-    float plane; // [esp+58h] [ebp-3970h] BYREF
-    float v11; // [esp+5Ch] [ebp-396Ch]
-    float v12; // [esp+60h] [ebp-3968h]
-    float dist; // [esp+64h] [ebp-3964h]
-    float v14; // [esp+68h] [ebp-3960h]
+    float plane[4]; // [esp+58h] [ebp-3970h] BYREF
+    float v11; // [esp+68h] [ebp-3960h]
     unsigned int k; // [esp+6Ch] [ebp-395Ch]
-    float v16; // [esp+70h] [ebp-3958h]
-    float v17[6][4]; // [esp+74h] [ebp-3954h] BYREF
-    float v18[4]; // [esp+100h] [ebp-38C8h] BYREF
+    float v13; // [esp+70h] [ebp-3958h]
+    float axialPlanes2[6][4]; // [esp+74h] [ebp-3954h] BYREF
+    float v15[4]; // [esp+100h] [ebp-38C8h] BYREF
     Poly verts; // [esp+110h] [ebp-38B8h] BYREF
     int outSideIndex; // [esp+118h] [ebp-38B0h] BYREF
-    float bestFixedBrushPlane; // [esp+11Ch] [ebp-38ACh] BYREF
-    float v22; // [esp+120h] [ebp-38A8h]
-    float v23; // [esp+124h] [ebp-38A4h]
-    float v24; // [esp+128h] [ebp-38A0h]
-    bool v25; // [esp+12Fh] [ebp-3899h]
+    float bestFixedBrushPlane[4]; // [esp+11Ch] [ebp-38ACh] BYREF
+    bool v19; // [esp+12Fh] [ebp-3899h]
     unsigned int vertCount; // [esp+130h] [ebp-3898h]
-    float v27; // [esp+134h] [ebp-3894h]
+    float v21; // [esp+134h] [ebp-3894h]
     float referenceBrushPlane[4]; // [esp+138h] [ebp-3890h] BYREF
     float outPlane[256][4]; // [esp+148h] [ebp-3880h] BYREF
-    float v30[769]; // [esp+1148h] [ebp-2880h] BYREF
+    float v24[769]; // [esp+1148h] [ebp-2880h] BYREF
     unsigned int i; // [esp+1D4Ch] [ebp-1C7Ch]
     float outVerts[768]; // [esp+1D50h] [ebp-1C78h] BYREF
     unsigned int j; // [esp+2950h] [ebp-1078h]
-    bool v34; // [esp+2957h] [ebp-1071h]
-    unsigned int v35; // [esp+2958h] [ebp-1070h]
+    bool v28; // [esp+2957h] [ebp-1071h]
+    unsigned int v29; // [esp+2958h] [ebp-1070h]
     unsigned int m; // [esp+295Ch] [ebp-106Ch]
     float axialPlanes[6][4]; // [esp+2960h] [ebp-1068h] BYREF
-    Poly outPolys[256]; // [esp+29C0h] [ebp-1008h] BYREF
-    Poly poly; // [esp+31C0h] [ebp-808h] BYREF
-    Poly v40[5]; // [esp+31C8h] [ebp-800h] BYREF
-    Poly v41[250]; // [esp+31F0h] [ebp-7D8h] BYREF
+    Poly orientedPolys[256]; // [esp+29C0h] [ebp-1008h] BYREF
+    Poly fixedPolys[256]; // [esp+31C0h] [ebp-808h] BYREF
     float outMaxSeparation; // [esp+39C0h] [ebp-8h] BYREF
     int fixedBrushSideIndex; // [esp+39C4h] [ebp-4h]
 
@@ -1373,7 +1365,7 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
             "orientedBrush->numsides doesn't index ARRAY_COUNT( transformedPlanes )\n\t%i not in [0, %i)",
             orientedBrush->numsides,
             256);
-    CM_BuildAxialPlanes(orientedBrush, &axialPlanes);
+    CM_BuildAxialPlanes(orientedBrush, (float (*)[6][4])axialPlanes);
     for (i = 0; i < 6; ++i)
         Phys_TransformPlane(axialPlanes[i], axialPlanes[i][3], input->pos, input->R, outPlane[i]);
     for (i = 0; i < orientedBrush->numsides; ++i)
@@ -1383,81 +1375,81 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
             input->pos,
             input->R,
             outPlane[i + 6]);
-    v35 = Phys_BuildWindingsForBrush(orientedBrush, outPlane, outPolys, 0x100u, (float (*)[3])outVerts, 0x100u);
-    if (v35)
+    v29 = Phys_BuildWindingsForBrush(orientedBrush, outPlane, orientedPolys, 0x100u, (float (*)[3])outVerts, 0x100u);
+    if (v29)
     {
         if (phys_drawCollisionObj->current.enabled)
         {
             for (j = 0; j < orientedBrush->numsides + 6; ++j)
-                Phys_DrawPoly(&outPolys[j], colorLtGreen);
+                Phys_DrawPoly(&orientedPolys[j], colorLtGreen);
         }
         verts.pts = (float (*)[3])outVerts;
-        verts.ptCount = v35;
+        verts.ptCount = v29;
         if (!fixedBrush)
             MyAssertHandler("c:\\trees\\cod3\\src\\physics\\phys_coll_local.h", 175, 0, "%s", "brush");
-        bestFixedBrushPlane = 0.0;
-        v22 = 0.0;
-        v23 = 0.0;
-        v24 = 0.0;
-        v16 = -3.4028235e38;
+        bestFixedBrushPlane[0] = 0.0;
+        bestFixedBrushPlane[1] = 0.0;
+        bestFixedBrushPlane[2] = 0.0;
+        bestFixedBrushPlane[3] = 0.0;
+        v13 = -3.4028235e38;
         fixedBrushSideIndex = -1;
-        CM_BuildAxialPlanes(fixedBrush, &v17);
+        CM_BuildAxialPlanes(fixedBrush, (float (*)[6][4])axialPlanes2);
         for (k = 0; k < 6; ++k)
         {
-            v14 = Phys_TestVertsAgainstPlane_Wrapper(v17[k], &verts);
-            if (v14 >= 0.0)
+            v11 = Phys_TestVertsAgainstPlane_Wrapper(axialPlanes2[k], &verts);
+            if (v11 >= 0.0)
             {
                 v8 = 0;
                 goto LABEL_37;
             }
-            if (fixedBrush->edgeCount[k & 1][k >> 1] && v16 < (double)v14)
+            if (fixedBrush->edgeCount[k & 1][k >> 1] && v13 < (double)v11)
             {
-                v16 = v14;
+                v13 = v11;
                 fixedBrushSideIndex = k;
-                bestFixedBrushPlane = v17[k][0];
-                v22 = v17[k][1];
-                v23 = v17[k][2];
-                v24 = v17[k][3];
+                bestFixedBrushPlane[0] = axialPlanes2[k][0];
+                bestFixedBrushPlane[1] = axialPlanes2[k][1];
+                bestFixedBrushPlane[2] = axialPlanes2[k][2];
+                bestFixedBrushPlane[3] = axialPlanes2[k][3];
             }
         }
         for (k = 0; k < fixedBrush->numsides; ++k)
         {
             v9 = fixedBrush->sides[k].plane;
-            plane = v9->normal[0];
-            v11 = v9->normal[1];
-            v12 = v9->normal[2];
-            dist = fixedBrush->sides[k].plane->dist;
-            v14 = Phys_TestVertsAgainstPlane_Wrapper(&plane, &verts);
-            if (v14 >= 0.0)
+            plane[0] = v9->normal[0];
+            plane[1] = v9->normal[1];
+            plane[2] = v9->normal[2];
+            plane[3] = fixedBrush->sides[k].plane->dist;
+            v11 = Phys_TestVertsAgainstPlane_Wrapper(plane, &verts);
+            if (v11 >= 0.0)
             {
                 v8 = 0;
                 goto LABEL_37;
             }
-            if (fixedBrush->sides[k].edgeCount && v16 < (double)v14)
+            if (fixedBrush->sides[k].edgeCount && v13 < (double)v11)
             {
-                v16 = v14;
+                v13 = v11;
                 fixedBrushSideIndex = k + 6;
-                bestFixedBrushPlane = plane;
-                v22 = v11;
-                v23 = v12;
-                v24 = dist;
+                bestFixedBrushPlane[0] = plane[0];
+                bestFixedBrushPlane[1] = plane[1];
+                bestFixedBrushPlane[2] = plane[2];
+                bestFixedBrushPlane[3] = plane[3];
             }
         }
-        v27 = v16;
+        v21 = v13;
         v8 = 1;
     LABEL_37:
         if (v8)
         {
-            vertCount = Phys_BuildWindingsForBrush2(fixedBrush, &poly, 0x100u, (float (*)[3])v30, 0x100u);
+            vertCount = Phys_BuildWindingsForBrush2(fixedBrush, fixedPolys, 0x100u, (float (*)[3])v24, 0x100u);
             if (vertCount)
             {
                 if (phys_drawCollisionWorld->current.enabled)
                 {
                     for (j = 0; j < fixedBrush->numsides + 6; ++j)
-                        Phys_DrawPoly(&poly + j, colorCyan);
+                        Phys_DrawPoly(&fixedPolys[j], colorCyan);
                 }
                 if (Phys_TestVertsAgainstPlanes(
-                    (const float (*)[3])v30,
+                    (const float (*)[3])v24,
                     vertCount,
                     orientedBrush,
                     outPlane,
@@ -1465,17 +1457,17 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
                     &outSideIndex,
                     &outMaxSeparation))
                 {
-                    v6 = fixedBrushSideIndex != -1 && *(&poly.ptCount + 2 * fixedBrushSideIndex);
-                    v25 = v6;
-                    v5 = outSideIndex != -1 && outPolys[outSideIndex].ptCount;
-                    v34 = v5;
-                    if (v25 || v34)
+                    v6 = fixedBrushSideIndex != -1 && fixedPolys[fixedBrushSideIndex].ptCount;
+                    v19 = v6;
+                    v5 = outSideIndex != -1 && orientedPolys[outSideIndex].ptCount;
+                    v28 = v5;
+                    if (v19 || v28)
                     {
-                        if (!v25 || outMaxSeparation >= (double)v27 && v34)
+                        if (!v19 || outMaxSeparation >= (double)v21 && v28)
                         {
-                            if (!v34)
+                            if (!v28)
                                 MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 1616, 1, "%s", "isOrientedBrushPlaneValid");
-                            if (outMaxSeparation < (double)v27 && v25)
+                            if (outMaxSeparation < (double)v21 && v19)
                                 MyAssertHandler(
                                     ".\\physics\\phys_coll_boxbrush.cpp",
                                     1617,
@@ -1484,11 +1476,11 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
                                     "fixedBrushPlaneSeparation <= orientedBrushPlaneSeparation || !isFixedBrushPlaneValid");
                             fixedBrushSideIndex = Phys_CollideBrushAgainstBrushFace(
                                 fixedBrush,
-                                &poly,
+                                fixedPolys,
                                 orientedBrush,
                                 outSideIndex,
                                 referenceBrushPlane,
-                                outPolys,
+                                orientedPolys,
                                 results);
                         }
                         else
@@ -1496,10 +1488,10 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
                             Phys_CollideOrientedBrushAgainstFixedBrushFace(
                                 fixedBrush,
                                 fixedBrushSideIndex,
-                                &bestFixedBrushPlane,
-                                &poly,
+                                bestFixedBrushPlane,
+                                fixedPolys,
                                 orientedBrush,
-                                outPolys,
+                                orientedPolys,
                                 outPlane,
                                 results);
                         }
@@ -1508,34 +1500,37 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
                             CM_BuildAxialPlanes(fixedBrush, (float (*)[6][4])axialPlanes);
                             for (m = 0; m < 3; ++m)
                             {
-                                if (*(&poly.ptCount + 4 * m) && fixedBrush->mins[m] > (double)input->pos[m])
+                                if (fixedPolys[2 * m].ptCount && fixedBrush->mins[m] > (double)input->pos[m])
                                 {
                                     if (2 * m != fixedBrushSideIndex)
                                     {
-                                        if (Phys_DoesPolyIntersectOrientedBrush(&poly + 2 * m, outPlane, orientedBrush->numsides + 6))
+                                        if (Phys_DoesPolyIntersectOrientedBrush(&fixedPolys[2 * m], outPlane, orientedBrush->numsides + 6))
                                             Phys_CollideOrientedBrushAgainstFixedBrushFace(
                                                 fixedBrush,
                                                 2 * m,
                                                 axialPlanes[2 * m],
-                                                &poly,
+                                                fixedPolys,
                                                 orientedBrush,
-                                                outPolys,
+                                                orientedPolys,
                                                 outPlane,
                                                 results);
                                     }
                                 }
-                                else if (v40[2 * m].ptCount
+                                else if (fixedPolys[2 * m + 1].ptCount
                                     && fixedBrush->maxs[m] < (double)input->pos[m]
                                     && 2 * m + 1 != fixedBrushSideIndex
-                                        && Phys_DoesPolyIntersectOrientedBrush(&v40[2 * m], outPlane, orientedBrush->numsides + 6))
+                                        && Phys_DoesPolyIntersectOrientedBrush(
+                                            &fixedPolys[2 * m + 1],
+                                            outPlane,
+                                            orientedBrush->numsides + 6))
                                 {
                                     Phys_CollideOrientedBrushAgainstFixedBrushFace(
                                         fixedBrush,
                                         2 * m + 1,
                                         axialPlanes[2 * m + 1],
-                                        &poly,
+                                        fixedPolys,
                                         orientedBrush,
-                                        outPolys,
+                                        orientedPolys,
                                         outPlane,
                                         results);
                                 }
@@ -1544,25 +1539,28 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
                             {
                                 if (m + 6 != fixedBrushSideIndex)
                                 {
-                                    if (v41[m].ptCount)
+                                    if (fixedPolys[m + 6].ptCount)
                                     {
                                         v4 = Vec3Dot(input->pos, fixedBrush->sides[m].plane->normal);
                                         if (fixedBrush->sides[m].plane->dist < v4)
                                         {
-                                            if (Phys_DoesPolyIntersectOrientedBrush(&v41[m], outPlane, orientedBrush->numsides + 6))
+                                            if (Phys_DoesPolyIntersectOrientedBrush(
+                                                &fixedPolys[m + 6],
+                                                outPlane,
+                                                orientedBrush->numsides + 6))
                                             {
                                                 v7 = fixedBrush->sides[m].plane;
-                                                v18[0] = v7->normal[0];
-                                                v18[1] = v7->normal[1];
-                                                v18[2] = v7->normal[2];
-                                                v18[3] = fixedBrush->sides[m].plane->dist;
+                                                v15[0] = v7->normal[0];
+                                                v15[1] = v7->normal[1];
+                                                v15[2] = v7->normal[2];
+                                                v15[3] = fixedBrush->sides[m].plane->dist;
                                                 Phys_CollideOrientedBrushAgainstFixedBrushFace(
                                                     fixedBrush,
                                                     m + 6,
-                                                    v18,
-                                                    &poly,
+                                                    v15,
+                                                    fixedPolys,
                                                     orientedBrush,
-                                                    outPolys,
+                                                    orientedPolys,
                                                     outPlane,
                                                     results);
                                             }

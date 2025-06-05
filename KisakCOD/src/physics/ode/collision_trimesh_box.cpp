@@ -998,7 +998,6 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     unsigned int v26; // [esp+DCh] [ebp-4B0h]
     dContactGeom *v27; // [esp+E0h] [ebp-4ACh]
     int v28; // [esp+E4h] [ebp-4A8h]
-    float *v29; // [esp+F8h] [ebp-494h]
     float v30; // [esp+FCh] [ebp-490h]
     float sum[4]; // [esp+100h] [ebp-48Ch] BYREF
     int m; // [esp+110h] [ebp-47Ch]
@@ -1052,6 +1051,7 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     float fParam1; // [esp+564h] [ebp-28h] BYREF
     float vPb[8]; // [esp+568h] [ebp-24h] BYREF
     int col; // [esp+588h] [ebp-4h]
+    float *contactNorm;
 
     if (tbData->iBestAxis <= 4)
     {
@@ -1153,60 +1153,21 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
                         "Index doesn't index Flags & 0x0ffff\n\t%i not in [0, %i)",
                         ctContacts,
                         iFlags);
-                v55 = (ContactGeoms->pos + iStride * ctContacts);
-                v55[8] = -v56;
-                v19 = (char*)(v55 + 4);
-                v55[4] = tbData->vBestNormal[0];
-                *(v19 + 1) = tbData->vBestNormal[1];
-                *(v19 + 2) = tbData->vBestNormal[2];
-                *v55 = v57[0];
-                v55[1] = v57[1];
-                v55[2] = v57[2];
-                //v55[9] = *&tbData->Geom1;
-                v55[9] = (float)(tbData->Geom1->type);
-                //v55[10] = *&tbData->Geom2;
-                v55[10] = (float)(tbData->Geom2->type);
-                if ((COERCE_UNSIGNED_INT(v55[4]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(v55[5]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(v55[6]) & 0x7F800000) == 0x7F800000)
-                {
-                    MyAssertHandler(
-                        ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                        892,
-                        0,
-                        "%s",
-                        "!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2])");
-                }
-                if (!Vec3IsNormalized(v55 + 4))
-                {
-                    v6 = va("normal: (%f, %f, %f)", v55[4], v55[5], v55[6]);
-                    MyAssertHandler(
-                        ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                        893,
-                        0,
-                        "%s\n\t%s",
-                        "Vec3IsNormalized( Contact->normal )",
-                        v6);
-                }
-                if ((COERCE_UNSIGNED_INT(*v55) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(v55[1]) & 0x7F800000) == 0x7F800000
-                    || (COERCE_UNSIGNED_INT(v55[2]) & 0x7F800000) == 0x7F800000)
-                {
-                    MyAssertHandler(
-                        ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                        894,
-                        0,
-                        "%s",
-                        "!IS_NAN((Contact->pos)[0]) && !IS_NAN((Contact->pos)[1]) && !IS_NAN((Contact->pos)[2])");
-                }
-                if ((COERCE_UNSIGNED_INT(v55[8]) & 0x7F800000) == 0x7F800000)
-                    MyAssertHandler(".\\physics\\ode\\src\\collision_trimesh_box.cpp", 895, 0, "%s", "!IS_NAN(Contact->depth)");
-                if (Vec3Dot((v55 + 4), tbData->triangleNormal) > 0.0 && !alwaysfails)
-                    MyAssertHandler(
-                        ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                        897,
-                        0,
-                        "Contact normal must be against the triangle normal");
+                Contact = (dContactGeom *)((char *)ContactGeoms + iStride * ctContacts);
+                Contact->depth = -v56;
+                contactNorm = Contact->normal;
+                Contact->normal[0] = tbData->vBestNormal[0];
+                contactNorm[1] = tbData->vBestNormal[1];
+                contactNorm[2] = tbData->vBestNormal[2];
+                Contact->pos[0] = sum[0];
+                Contact->pos[1] = sum[1];
+                Contact->pos[2] = sum[2];
+                Contact->g1 = tbData->Geom1;
+                Contact->g2 = tbData->Geom2;
+                iassert(!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2]));
+                iassert(Vec3IsNormalized(Contact->normal));
+                iassert(!IS_NAN((Contact->pos)[0]) && !IS_NAN((Contact->pos)[1]) && !IS_NAN((Contact->pos)[2]));
+                iassert(!IS_NAN(Contact->depth));
                 ++tbData->ctContacts;
             }
         }
@@ -1300,41 +1261,10 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
         Contact->pos[2] = vPb[6];
         Contact->g1 = tbData->Geom1;
         Contact->g2 = tbData->Geom2;
-        if ((COERCE_UNSIGNED_INT(Contact->normal[0]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(Contact->normal[1]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(Contact->normal[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                761,
-                0,
-                "%s",
-                "!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2])");
-        }
-        if (!Vec3IsNormalized(Contact->normal))
-        {
-            v4 = va("normal: (%f, %f, %f)", Contact->normal[0], Contact->normal[1], Contact->normal[2]);
-            MyAssertHandler(
-                ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                762,
-                0,
-                "%s\n\t%s",
-                "Vec3IsNormalized( Contact->normal )",
-                v4);
-        }
-        if ((COERCE_UNSIGNED_INT(Contact->pos[0]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(Contact->pos[1]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(Contact->pos[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                763,
-                0,
-                "%s",
-                "!IS_NAN((Contact->pos)[0]) && !IS_NAN((Contact->pos)[1]) && !IS_NAN((Contact->pos)[2])");
-        }
-        if ((COERCE_UNSIGNED_INT(Contact->depth) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler(".\\physics\\ode\\src\\collision_trimesh_box.cpp", 764, 0, "%s", "!IS_NAN(Contact->depth)");
+        iassert(!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2]));
+        iassert(Vec3IsNormalized(Contact->normal));
+        iassert(!IS_NAN((Contact->pos)[0]) && !IS_NAN((Contact->pos)[1]) && !IS_NAN((Contact->pos)[2]));
+        iassert(!IS_NAN(Contact->depth));
         ++tbData->ctContacts;
     }
     if (!Vec3IsNormalized(tbData->triangleNormal))
@@ -1509,54 +1439,21 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
                 "Index doesn't index Flags & 0x0ffff\n\t%i not in [0, %i)",
                 v16,
                 v18);
-        v29 = (v17->pos + v15 * v16);
-        v29[8] = -v30;
-        v29[4] = -tbData->triangleNormal[0];
-        v29[5] = -tbData->triangleNormal[1];
-        v29[6] = -tbData->triangleNormal[2];
-        *v29 = sum[0];
-        v29[1] = sum[1];
-        v29[2] = sum[2];
-        //v29[9] = *&tbData->Geom1;
-        v29[9] = (float)(tbData->Geom1->type);
-        //v29[10] = *&tbData->Geom2;
-        v29[10] = (float)(tbData->Geom2->type);
-        if ((COERCE_UNSIGNED_INT(v29[4]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(v29[5]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(v29[6]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                1094,
-                0,
-                "%s",
-                "!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2])");
-        }
-        if (!Vec3IsNormalized(v29 + 4))
-        {
-            v10 = va("normal: (%f, %f, %f)", v29[4], v29[5], v29[6]);
-            MyAssertHandler(
-                ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                1095,
-                0,
-                "%s\n\t%s",
-                "Vec3IsNormalized( Contact->normal )",
-                v10);
-        }
-        if ((COERCE_UNSIGNED_INT(*v29) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(v29[1]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(v29[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
-                1096,
-                0,
-                "%s",
-                "!IS_NAN((Contact->pos)[0]) && !IS_NAN((Contact->pos)[1]) && !IS_NAN((Contact->pos)[2])");
-        }
-        if ((COERCE_UNSIGNED_INT(v29[8]) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler(".\\physics\\ode\\src\\collision_trimesh_box.cpp", 1097, 0, "%s", "!IS_NAN(Contact->depth)");
-        if (Vec3Dot((v29 + 4), tbData->triangleNormal) > 0.0 && !alwaysfails)
+        Contact = (dContactGeom *)((char *)v17 + v15 * v16);
+        Contact->depth = -v30;
+        Contact->normal[0] = -tbData->triangleNormal[0];
+        Contact->normal[1] = -tbData->triangleNormal[1];
+        Contact->normal[2] = -tbData->triangleNormal[2];
+        Contact->pos[0] = sum[0];
+        Contact->pos[1] = sum[1];
+        Contact->pos[2] = sum[2];
+        Contact->g1 = tbData->Geom1;
+        Contact->g2 = tbData->Geom2;
+        iassert(!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2]));
+        iassert(Vec3IsNormalized(Contact->normal));
+        iassert(!IS_NAN((Contact->pos)[0]) && !IS_NAN((Contact->pos)[1]) && !IS_NAN((Contact->pos)[2]));
+        iassert(!IS_NAN(Contact->depth));
+        if (Vec3Dot(Contact->normal, tbData->triangleNormal) > 0.0 && !alwaysfails)
             MyAssertHandler(
                 ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
                 1099,
