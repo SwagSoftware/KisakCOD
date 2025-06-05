@@ -23,6 +23,8 @@
 #ifndef _ODE_COMMON_H_
 #define _ODE_COMMON_H_
 
+#define USE_POOL_ALLOCATOR
+
 // make alloca happy
 #include <malloc.h>
 

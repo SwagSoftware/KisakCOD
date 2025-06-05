@@ -472,9 +472,13 @@ dxBody *__cdecl Phys_CreateBodyFromState(PhysWorld worldIndex, const BodyState *
     {
         if (worldIndex == PHYS_WORLD_RAGDOLL)
             dBodySetFiniteRotationMode(body, 1);
+#ifdef USE_POOL_ALLOCATOR
         Sys_EnterCriticalSection(CRITSECT_PHYSICS);
         userData = (PhysObjUserData *)Pool_Alloc(&physGlob.userDataPool);
         Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+#else
+        userData = (PhysObjUserData *)malloc(sizeof(PhysObjUserData));
+#endif
         iassert(userData);
         memset((unsigned __int8 *)userData, 0, sizeof(PhysObjUserData));
         dBodySetData(body, userData);
@@ -1171,9 +1175,13 @@ void __cdecl Phys_ObjDestroy(PhysWorld worldIndex, dxBody *id)
         MyAssertHandler(".\\physics\\phys_ode.cpp", 1048, 0, "%s", "body->world == physGlob.world[worldIndex]");
     userData = (PhysObjUserData *)dBodyGetData(id);
     dBodyDestroy(id);
+#ifdef USE_POOL_ALLOCATOR
     Sys_EnterCriticalSection(CRITSECT_PHYSICS);
     Pool_Free((freenode *)userData, &physGlob.userDataPool);
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+#else
+        free(userData);
+#endif;
 }
 
 void __cdecl Phys_ObjAddForce(PhysWorld worldIndex, dxBody *id, float *worldPos, const float *impulse)

@@ -225,40 +225,6 @@ void dWorldCheck (dxWorld *w)
 //****************************************************************************
 // body
 
-dxBody *dBodyCreate (dxWorld *w)
-{
-  dAASSERT (w);
-  dxBody *b = new dxBody;
-  initObject (b,w);
-  b->firstjoint = 0;
-  b->flags = 0;
-  b->geom = 0;
-  dMassSetParameters (&b->mass,1,0,0,0,1,1,1,0,0,0);
-  dSetZero (b->invI,4*3);
-  b->invI[0] = 1;
-  b->invI[5] = 1;
-  b->invI[10] = 1;
-  b->invMass = 1;
-  dSetZero (b->info.pos,4);
-  dSetZero (b->info.q,4);
-  b->info.q[0] = 1;
-  dRSetIdentity (b->info.R);
-  dSetZero (b->info.lvel,4);
-  dSetZero (b->info.avel,4);
-  dSetZero (b->facc,4);
-  dSetZero (b->tacc,4);
-  dSetZero (b->finite_rot_axis,4);
-  addObjectToList (b,(dObject **) &w->firstbody);
-  w->nb++;
-
-  // set auto-disable parameters
-  dBodySetAutoDisableDefaults (b);	// must do this after adding to world
-  b->adis_stepsleft = b->adis.idle_steps;
-  b->adis_timeleft = b->adis.idle_time;
-
-  return b;
-}
-
 
 void dBodySetData (dBodyID b, void *data)
 {
@@ -1497,11 +1463,52 @@ void __cdecl ODE_Init()
     //INIT_STATIC_POOL(odeGlob.bodies, &odeGlob.bodyPool);
     //INIT_STATIC_POOL(odeGlob.geoms, &odeGlob.geomPool);
     Pool_Init((char *)odeGlob.bodies, &odeGlob.bodyPool, 336u, 512u);
-    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, 208u, 2048u);
+    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, 216u, 2048u);
 }
 
 // MOD
 #include <xanim/dobj.h>
+
+dxBody *dBodyCreate(dxWorld *w)
+{
+    dAASSERT(w);
+#ifdef USE_POOL_ALLOCATOR
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    dxBody *b = (dxBody *)Pool_Alloc(&odeGlob.bodyPool);
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+#else
+    dxBody *b = new dxBody;
+#endif
+
+    initObject(b, w);
+    b->firstjoint = 0;
+    b->flags = 0;
+    b->geom = 0;
+    dMassSetParameters(&b->mass, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0);
+    dSetZero(b->invI, 4 * 3);
+    b->invI[0] = 1;
+    b->invI[5] = 1;
+    b->invI[10] = 1;
+    b->invMass = 1;
+    dSetZero(b->info.pos, 4);
+    dSetZero(b->info.q, 4);
+    b->info.q[0] = 1;
+    dRSetIdentity(b->info.R);
+    dSetZero(b->info.lvel, 4);
+    dSetZero(b->info.avel, 4);
+    dSetZero(b->facc, 4);
+    dSetZero(b->tacc, 4);
+    dSetZero(b->finite_rot_axis, 4);
+    addObjectToList(b, (dObject **)&w->firstbody);
+    w->nb++;
+
+    // set auto-disable parameters
+    dBodySetAutoDisableDefaults(b);	// must do this after adding to world
+    b->adis_stepsleft = b->adis.idle_steps;
+    b->adis_timeleft = b->adis.idle_time;
+
+    return b;
+}
 
 dxJointGroup *__cdecl dGetContactJointGroup(PhysWorld worldIndex)
 {
@@ -1592,7 +1599,11 @@ void dWorldDestroy(dxWorld* w)
     while (b)
     {
         nextb = (dxBody*)b->next;
+#ifdef USE_POOL_ALLOCATOR
         Pool_Free((freenode*)b, &odeGlob.bodyPool);
+#else
+        free(b);
+#endif
         b = nextb;
     }
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
@@ -1644,7 +1655,11 @@ void dBodyDestroy(dxBody* b)
 
     b->world->nb--;
 
+#ifdef USE_POOL_ALLOCATOR
     Sys_EnterCriticalSection(CRITSECT_PHYSICS);
     Pool_Free((freenode*)b, &odeGlob.bodyPool);
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+#else
+    free(b);
+#endif
 }

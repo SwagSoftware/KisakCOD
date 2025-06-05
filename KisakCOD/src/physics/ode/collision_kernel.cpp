@@ -736,16 +736,24 @@ void dGeomFree(dxGeom* g)
     case 0xE:
         if (g->type < dFirstUserClass || user_classes[g->type - dFirstUserClass].isPlaceable)
         {
+#ifdef USE_POOL_ALLOCATOR
             Sys_EnterCriticalSection(CRITSECT_PHYSICS);
             Pool_Free((freenode*)g, &odeGlob.geomPool);
             Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+#else
+            free(g);
+#endif
         }
         break;
     case dGeomTransformClass: {
         static_cast<dxGeomTransform*>(g)->Destruct();
+#ifdef USE_POOL_ALLOCATOR
         Sys_EnterCriticalSection(CRITSECT_PHYSICS);
         Pool_Free((freenode*)g, &odeGlob.geomPool);
         Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+#else
+        free(g);
+#endif
         break;
     }
     case dTriMeshClass:
@@ -762,11 +770,15 @@ void dGeomFree(dxGeom* g)
 
 dxGeom* ODE_AllocateGeom()
 {
+#ifdef USE_POOL_ALLOCATOR
     dxGeom* geom;
     Sys_EnterCriticalSection(CRITSECT_PHYSICS);
     geom = (dxGeom*)Pool_Alloc(&odeGlob.geomPool);
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
     return geom;
+#else
+    return (dxGeom *)malloc(sizeof(dxGeomTransform));
+#endif
 }
 
 void ODE_GeomDestruct(dxGeom* g)
