@@ -502,7 +502,7 @@ dxUserGeom::dxUserGeom(int class_num, dxSpace* space, dxBody* body) :
   iassert(class_num >= 11 && class_num <= 15);
   type = class_num;
   int size = user_classes[type-dFirstUserClass].bytes;
-  dAASSERT(size < sizeof(user_data));
+  dAASSERT(size <= sizeof(user_data));
   memset (user_data,0,size);
 }
 
