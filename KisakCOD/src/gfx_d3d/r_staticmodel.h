@@ -13,5 +13,5 @@ BOOL __cdecl R_StaticModelHasLighting(unsigned int smodelIndex);
 int __cdecl R_StaticModelGetMemoryUsageInst();
 int __cdecl R_StaticModelGetMemoryUsage(XModel *model, int *modelCount);
 BOOL __cdecl R_StaticModelCompare(
-    const GfxStaticModelCombinedInst *smodelInst0,
-    const GfxStaticModelCombinedInst *smodelInst1);
+    const GfxStaticModelCombinedInst &smodelInst0,
+    const GfxStaticModelCombinedInst &smodelInst1);

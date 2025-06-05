@@ -606,7 +606,6 @@ void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex);
 
 void __cdecl R_MaterialList_f();
 int __cdecl R_GetMaterialMemory(Material *material);
-bool __cdecl R_MaterialCompare(const MaterialMemory *material0, const MaterialMemory *material1);
 
 void __cdecl Material_PreventOverrideTechniqueGeneration();
 
@@ -636,7 +635,6 @@ extern MaterialGlobals materialGlobals;
 extern $4ABF24606230B73E4E420CE33A1F14B1 mtlOverrideGlob;
 
 // r_material_load_obj
-bool __cdecl Material_CachedShaderTextLess(const GfxCachedShaderText *cached0, const GfxCachedShaderText *cached1);
 Material *__cdecl R_GetBspMaterial(unsigned int materialIndex);
 void __cdecl Material_FreeAll();
 void __cdecl Material_PreLoadAllShaderText();

@@ -176,9 +176,9 @@ void __cdecl R_PopulateCandidates(const GfxViewParms *viewParmsDraw, ShadowCandi
     }
 }
 
-bool __cdecl R_ShadowCandidatePred(const ShadowCandidate *a, const ShadowCandidate *b)
+bool __cdecl R_ShadowCandidatePred(const ShadowCandidate &a, const ShadowCandidate &b)
 {
-    return b->weight > (double)a->weight;
+    return b.weight > a.weight;
 }
 
 const float shadowFrustumSidePlanes[5][4] =
@@ -204,13 +204,13 @@ void __cdecl R_GenerateShadowCookies(
     //Profile_Begin(150);
     R_PopulateCandidates(viewParmsDraw, &candidates[0]);
 
-    std::sort((const ShadowCandidate **)&candidates[0], (const ShadowCandidate **)&candidates[23], R_ShadowCandidatePred);
-
     //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
     //    candidates,
     //    &cookieIndex,
     //    24,
     //    R_ShadowCandidatePred);
+    std::sort(&candidates[0], &candidates[23], R_ShadowCandidatePred);
+
     R_AddCasters(localClientNum, viewParmsDraw, candidates, shadowCookieList);
     //Profile_EndInternal(0);
     LODWORD(cookieIndex.weight) = shadowCookieList->cookieCount;

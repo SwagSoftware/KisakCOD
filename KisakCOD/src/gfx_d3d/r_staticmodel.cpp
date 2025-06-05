@@ -58,23 +58,23 @@ int __cdecl R_StaticModelGetMemoryUsage(XModel *model, int *modelCount)
 }
 
 BOOL __cdecl R_StaticModelCompare(
-    const GfxStaticModelCombinedInst *smodelInst0,
-    const GfxStaticModelCombinedInst *smodelInst1)
+    const GfxStaticModelCombinedInst &smodelInst0,
+    const GfxStaticModelCombinedInst &smodelInst1)
 {
     const ComPrimaryLight *primaryLight; // [esp+0h] [ebp-Ch]
     int comparison; // [esp+8h] [ebp-4h]
     int comparisona; // [esp+8h] [ebp-4h]
     int comparisonb; // [esp+8h] [ebp-4h]
 
-    primaryLight = Com_GetPrimaryLight(smodelInst0->smodelDrawInst.primaryLightIndex);
-    comparison = primaryLight->type - Com_GetPrimaryLight(smodelInst1->smodelDrawInst.primaryLightIndex)->type;
+    primaryLight = Com_GetPrimaryLight(smodelInst0.smodelDrawInst.primaryLightIndex);
+    comparison = primaryLight->type - Com_GetPrimaryLight(smodelInst1.smodelDrawInst.primaryLightIndex)->type;
     if (comparison)
         return comparison < 0;
-    comparisona = smodelInst0->smodelDrawInst.primaryLightIndex - smodelInst1->smodelDrawInst.primaryLightIndex;
+    comparisona = smodelInst0.smodelDrawInst.primaryLightIndex - smodelInst1.smodelDrawInst.primaryLightIndex;
     if (comparisona)
         return comparisona < 0;
-    comparisonb = smodelInst0->smodelDrawInst.model - smodelInst1->smodelDrawInst.model;
+    comparisonb = smodelInst0.smodelDrawInst.model - smodelInst1.smodelDrawInst.model;
     if (!comparisonb)
-        comparisonb = smodelInst0->smodelDrawInst.reflectionProbeIndex - smodelInst1->smodelDrawInst.reflectionProbeIndex;
+        comparisonb = smodelInst0.smodelDrawInst.reflectionProbeIndex - smodelInst1.smodelDrawInst.reflectionProbeIndex;
     return comparisonb < 0;
 }

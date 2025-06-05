@@ -6066,9 +6066,9 @@ void __cdecl Material_PreLoadShaderTextList(
         Material_PreLoadSingleShaderText(fileList[fileIndex], subdir, &cached[fileIndex]);
 }
 
-bool __cdecl Material_CachedShaderTextLess(const GfxCachedShaderText *cached0, const GfxCachedShaderText *cached1)
+static bool __cdecl Material_CachedShaderTextLess(const GfxCachedShaderText &cached0, const GfxCachedShaderText &cached1)
 {
-    return I_stricmp(cached0->name, cached1->name) < 0;
+    return I_stricmp(cached0.name, cached1.name) < 0;
 }
 
 void __cdecl Material_PreLoadAllShaderText()
@@ -6085,7 +6085,7 @@ void __cdecl Material_PreLoadAllShaderText()
     //    &mtlLoadGlob.cachedShaderText[mtlLoadGlob.cachedShaderCount],
     //    (12 * mtlLoadGlob.cachedShaderCount) / 12,
     //    Material_CachedShaderTextLess);
-    std::sort((const GfxCachedShaderText **)&mtlLoadGlob.cachedShaderText[0], (const GfxCachedShaderText **)&mtlLoadGlob.cachedShaderText[mtlLoadGlob.cachedShaderCount], Material_CachedShaderTextLess);
+    std::sort(&mtlLoadGlob.cachedShaderText[0], &mtlLoadGlob.cachedShaderText[mtlLoadGlob.cachedShaderCount], Material_CachedShaderTextLess);
     FS_FreeFileList(shaderListLib);
 }
 
@@ -6482,7 +6482,7 @@ void __cdecl Material_SortInternal(Material **sortedMaterials, unsigned int mate
     //    &sortedMaterials[materialCount],
     //    (4 * materialCount) >> 2,
     //    Material_Compare);
-    qsort(&sortedMaterials[0], materialCount, sizeof(Material*), Material_Compare);
+    qsort(sortedMaterials, materialCount, sizeof(Material *), Material_Compare);
     //std::sort(sortedMaterials + 0, sortedMaterials + materialCount, Material_Compare);
     for (sortedIndex = 0; sortedIndex < materialCount; ++sortedIndex)
     {

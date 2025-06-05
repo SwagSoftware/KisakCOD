@@ -611,42 +611,46 @@ Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack)
         return rgp.defaultMaterial;
 }
 
+bool __cdecl R_MaterialCompare(const MaterialMemory &material0, const MaterialMemory &material1)
+{
+    return material0.memory < material1.memory;
+}
 void __cdecl R_MaterialList_f()
 {
     const char *fmt; // [esp+8h] [ebp-4150h]
     unsigned int i; // [esp+138h] [ebp-4020h]
-    const char **sceneEntIndex; // [esp+13Ch] [ebp-401Ch]
+    Material *material; // [esp+13Ch] [ebp-401Ch]
     int v3; // [esp+140h] [ebp-4018h]
-    ShadowCandidate *v4; // [esp+144h] [ebp-4014h]
+    MaterialMemory *v4; // [esp+144h] [ebp-4014h]
     unsigned int inData; // [esp+148h] [ebp-4010h] BYREF
-    ShadowCandidate v6[2049]; // [esp+14Ch] [ebp-400Ch] BYREF
+    MaterialMemory v6[2049]; // [esp+14Ch] [ebp-400Ch] BYREF
     float v7; // [esp+4154h] [ebp-4h]
 
     v3 = 0;
     Com_Printf(8, "-----------------------\n");
     inData = 0;
-    DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void *))R_GetMaterialList, &inData, 0);
-    //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
-    //    v6,
-    //    &v6[inData],
-    //    (int)(8 * inData) >> 3,
-    //    (bool(__cdecl *)(const ShadowCandidate *, const ShadowCandidate *))R_MaterialCompare);
-    std::sort((const MaterialMemory **)&v6[0], (const MaterialMemory **)&v6[inData], R_MaterialCompare);
+    DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void*))R_GetMaterialList, &inData, 0);
+    // std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
+    //     (ShadowCandidate *)v6,
+    //     (ShadowCandidate *)&v6[inData],
+    //     (int)(8 * inData) >> 3,
+    //     R_MaterialCompare);
+    std::sort(&v6[0], &v6[inData], R_MaterialCompare);
     Com_Printf(8, "geo KB   name\n");
     for (i = 0; i < inData; ++i)
     {
         v4 = &v6[i];
-        sceneEntIndex = (const char **)v4->sceneEntIndex;
-        if (!v4->sceneEntIndex)
+        material = v4->material;
+        if (!v4->material)
             MyAssertHandler(".\\r_material.cpp", 1431, 0, "%s", "material");
-        v3 += LODWORD(v4->weight);
-        v7 = (double)SLODWORD(v4->weight) / 1024.0;
+        v3 += v4->memory;
+        v7 = (double)v4->memory / 1024.0;
         if (v7 >= 10.0)
             fmt = "%6.0f";
         else
             fmt = "%6.1f";
         Com_Printf(8, fmt, v7);
-        Com_Printf(8, "   %s\n", *sceneEntIndex);
+        Com_Printf(8, "   %s\n", material->info.name);
     }
     Com_Printf(8, "-----------------------\n");
     Com_Printf(8, "current total  %5.1f MB\n", (double)v3 / 1048576.0);
@@ -683,11 +687,6 @@ int __cdecl R_GetMaterialMemory(Material *material)
             return rgp.world->materialMemory[i].memory;
     }
     return 0;
-}
-
-bool __cdecl R_MaterialCompare(const MaterialMemory *material0, const MaterialMemory *material1)
-{
-    return material0->memory < material1->memory;
 }
 
 const char *__cdecl Material_GetName(Material *handle)

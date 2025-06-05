@@ -1991,7 +1991,7 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
     Z_Free(rgl.nodes, 22);
 }
 
-BOOL __cdecl R_CompareSurfaces(const GfxSurface *surf0, const GfxSurface *surf1)
+BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
 {
     const MaterialTechnique *techniqueEmissive; // [esp+28h] [ebp-64h]
     int surfIndex; // [esp+30h] [ebp-5Ch]
@@ -2014,8 +2014,8 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface *surf0, const GfxSurface *surf1)
     int comparisonb; // [esp+88h] [ebp-4h]
     int comparisonc; // [esp+88h] [ebp-4h]
 
-    material = surf0->material;
-    material_4 = surf1->material;
+    material = surf0.material;
+    material_4 = surf1.material;
     techSet = Material_GetTechniqueSet(material);
     techSet_4 = Material_GetTechniqueSet(material_4);
     if (!techSet || !techSet_4)
@@ -2035,15 +2035,15 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface *surf0, const GfxSurface *surf1)
     comparisona = (material->info.drawSurf.fields.primarySortKey - material_4->info.drawSurf.fields.primarySortKey);
     if (comparisona)
         return comparisona < 0;
-    Com_GetPrimaryLight(surf0->primaryLightIndex);
-    Com_GetPrimaryLight(surf1->primaryLightIndex);
-    comparisonb = surf0->primaryLightIndex - surf1->primaryLightIndex;
+    Com_GetPrimaryLight(surf0.primaryLightIndex);
+    Com_GetPrimaryLight(surf1.primaryLightIndex);
+    comparisonb = surf0.primaryLightIndex - surf1.primaryLightIndex;
     if (comparisonb)
         return comparisonb < 0;
     comparisonc = (material->info.drawSurf.fields.materialSortedIndex - material_4->info.drawSurf.fields.materialSortedIndex);
     if (comparisonc)
     {
-        if (surf0->tris.firstVertex == surf1->tris.firstVertex)
+        if (surf0.tris.firstVertex == surf1.tris.firstVertex)
             MyAssertHandler(".\\r_bsp_load_obj.cpp", 2075, 0, "%s", "surf0.tris.firstVertex != surf1.tris.firstVertex");
         return comparisonc < 0;
     }
@@ -2051,20 +2051,20 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface *surf0, const GfxSurface *surf1)
     {
         if (material != material_4)
             MyAssertHandler(".\\r_bsp_load_obj.cpp", 2080, 0, "%s", "material[0] == material[1]");
-        reflectionProbeIndex = surf0->reflectionProbeIndex;
-        reflectionProbeIndex_4 = surf1->reflectionProbeIndex;
+        reflectionProbeIndex = surf0.reflectionProbeIndex;
+        reflectionProbeIndex_4 = surf1.reflectionProbeIndex;
         if (reflectionProbeIndex == reflectionProbeIndex_4)
         {
-            lightmapIndex = surf0->lightmapIndex;
-            lightmapIndex_4 = surf1->lightmapIndex;
+            lightmapIndex = surf0.lightmapIndex;
+            lightmapIndex_4 = surf1.lightmapIndex;
             if (lightmapIndex == lightmapIndex_4)
             {
-                firstVertex = surf0->tris.firstVertex;
-                firstVertex_4 = surf1->tris.firstVertex;
+                firstVertex = surf0.tris.firstVertex;
+                firstVertex_4 = surf1.tris.firstVertex;
                 if (firstVertex == firstVertex_4)
                 {
-                    surfIndex = surf0->tris.vertexCount;
-                    surfIndex_4 = surf1->tris.vertexCount;
+                    surfIndex = surf0.tris.vertexCount;
+                    surfIndex_4 = surf1.tris.vertexCount;
                     if (surfIndex == surfIndex_4)
                         MyAssertHandler(".\\r_bsp_load_obj.cpp", 2104, 0, "%s", "comparison");
                     return surfIndex - surfIndex_4 < 0;
@@ -2131,7 +2131,7 @@ unsigned int R_SortSurfaces()
     //    &s_world.dpvs.surfaces[surfaceCount],
     //    48 * surfaceCount / 48,
     //    R_CompareSurfaces);
-    std::sort((const GfxSurface **)&s_world.dpvs.surfaces[0], (const GfxSurface **)& s_world.dpvs.surfaces[surfaceCount], R_CompareSurfaces);
+    std::sort(&s_world.dpvs.surfaces[0], &s_world.dpvs.surfaces[surfaceCount], R_CompareSurfaces);
 
     for (surfIndexa = 0; surfIndexa < surfaceCount; ++surfIndexa)
     {
@@ -3440,7 +3440,7 @@ int R_PostLoadEntities()
     //    &smodelCombinedInsts[s_world.dpvs.smodelCount],
     //    (104 * s_world.dpvs.smodelCount) / 104,
     //    R_StaticModelCompare);
-    std::sort((const GfxStaticModelCombinedInst **)&smodelCombinedInsts[0], (const GfxStaticModelCombinedInst **)&smodelCombinedInsts[s_world.dpvs.smodelCount], R_StaticModelCompare);
+    std::sort(&smodelCombinedInsts[0], &smodelCombinedInsts[s_world.dpvs.smodelCount], R_StaticModelCompare);
     for (smodelIndexa = 0; smodelIndexa < s_world.dpvs.smodelCount; ++smodelIndexa)
     {
         qmemcpy(
@@ -3882,7 +3882,7 @@ unsigned int __cdecl R_OptimalSModelResourceStats(GfxWorld *world, GfxSModelSurf
     //    &drawInstArray[world->dpvs.smodelCount],
     //    (4 * world->dpvs.smodelCount) >> 2,
     //    R_CompareSModels_Model);
-    std::sort((const GfxStaticModelDrawInst **)&drawInstArray[0], (const GfxStaticModelDrawInst **)&drawInstArray[world->dpvs.smodelCount], R_CompareSModels_Model);
+    std::sort(&drawInstArray[0], &drawInstArray[world->dpvs.smodelCount], R_CompareSModels_Model);
     statCount = 0;
     for (smodelItera = 0; smodelItera != world->dpvs.smodelCount; smodelItera = smodelIterNext)
     {
@@ -3904,9 +3904,9 @@ unsigned int __cdecl R_OptimalSModelResourceStats(GfxWorld *world, GfxSModelSurf
     return statCount;
 }
 
-BOOL __cdecl R_CompareSModelStats_Score(GfxSModelSurfStats *s0, GfxSModelSurfStats *s1)
+static BOOL __cdecl R_CompareSModelStats_Score(const GfxSModelSurfStats &s0, const GfxSModelSurfStats &s1)
 {
-    return s1->useCount << s0->smcAllocBits < s0->useCount << s1->smcAllocBits;
+    return s1.useCount << s0.smcAllocBits < s0.useCount << s1.smcAllocBits;
 }
 
 unsigned int __cdecl R_GetEntryCount(GfxSModelSurfStats *stats)
@@ -3992,7 +3992,7 @@ void __cdecl R_AssignSModelCacheResources(GfxWorld *world)
     //    &stats[v7],
     //    (16 * v7) >> 4,
     //    R_CompareSModelStats_Score);
-    std::sort((GfxSModelSurfStats **)&stats[0], (GfxSModelSurfStats **)&stats[v7], R_CompareSModelStats_Score);
+    std::sort(&stats[0], &stats[v7], R_CompareSModelStats_Score);
     for (i = 0; i < v7; ++i)
     {
         model = stats[i].model;

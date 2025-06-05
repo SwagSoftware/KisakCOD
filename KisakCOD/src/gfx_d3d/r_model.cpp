@@ -65,6 +65,14 @@ void __cdecl R_UnlockSkinnedCache()
     }
 }
 
+static bool __cdecl R_ModelSort(XModel *model1, XModel *model2)
+{
+    int MemUsage; // esi
+
+    MemUsage = XModelGetMemUsage(model1);
+    return MemUsage < XModelGetMemUsage(model2);
+}
+
 void __cdecl R_ModelList_f()
 {
     const char *Name; // eax
@@ -87,7 +95,7 @@ void __cdecl R_ModelList_f()
     inData = 0;
     DB_EnumXAssets(ASSET_TYPE_XMODEL, (void(__cdecl *)(XAssetHeader, void *))R_GetModelList, &inData, 1);
     //std::_Sort<XModel **, int, bool(__cdecl *)(XModel *&, XModel *&)>(v4, &v4[inData], (4 * inData) >> 2, R_ModelSort);
-    std::sort((XModel ***)&v4[0], (XModel ***)&v4[inData], R_ModelSort);
+    std::sort(&v4[0], &v4[inData], R_ModelSort);
     Com_Printf(8, "---------------------------\n");
     Com_Printf(8, "SM# is the number of static model instances\n");
     Com_Printf(8, "instKB is static model instance usage\n");
@@ -133,14 +141,6 @@ void __cdecl R_ModelList_f()
     Com_Printf(8, "current geo total   %4.1f MB\n", (double)v7 / 1048576.0);
     Com_Printf(8, "current total       %4.1f MB\n", (double)(v7 + v6) / 1048576.0);
     Com_Printf(8, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
-}
-
-bool __cdecl R_ModelSort(XModel **model1, XModel **model2)
-{
-    int MemUsage; // esi
-
-    MemUsage = XModelGetMemUsage(*model1);
-    return MemUsage < XModelGetMemUsage(*model2);
 }
 
 void __cdecl R_GetModelList(XAssetHeader header, XAssetHeader *data)

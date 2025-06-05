@@ -17,7 +17,7 @@ void __cdecl R_GenerateShadowCookies(
     const GfxViewParms *viewParmsDpvs,
     const GfxViewParms *viewParmsDraw,
     ShadowCookieList *shadowCookieList);
-bool __cdecl R_ShadowCandidatePred(const ShadowCandidate *a, const ShadowCandidate *b);
+bool __cdecl R_ShadowCandidatePred(const ShadowCandidate &a, const ShadowCandidate &b);
 void __cdecl R_PopulateCandidates(const GfxViewParms *viewParmsDraw, ShadowCandidate *candidates);
 void __cdecl R_AddCasters(
     int localClientNum,

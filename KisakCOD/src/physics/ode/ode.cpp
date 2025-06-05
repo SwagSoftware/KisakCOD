@@ -1020,7 +1020,7 @@ void dJointGroupDestroy (dJointGroupID group)
 {
   dAASSERT (group);
   dJointGroupEmpty (group);
-  delete group;
+  // delete group;
 }
 
 
