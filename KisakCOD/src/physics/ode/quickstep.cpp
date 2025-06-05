@@ -615,7 +615,7 @@ static void SOR_LCP (int constraintRowCount,
 		MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 773, 0, "%s", "sd");
 	Profile_Begin(385);
 	compute_invM_JT(constraintRowCount, bodyCount, rows, body, invI);
-	memset(fc, 0, 24 * bodyCount);
+	memset(fc, 0, sizeof(ConstraintForce) * bodyCount);
 	row_ptr = rows;
 	for (i = 0; i < constraintRowCount; ++i)
 	{
@@ -800,10 +800,14 @@ void dxQuickStepper (dxWorld *world,
 	int jointCount,
 	float stepsize)
 {
-	float A[15]; // [esp+Ch] [ebp-20CCh] BYREF
-	unsigned __int8 *dst; // [esp+48h] [ebp-2090h]
+	float v6; // [esp+Ch] [ebp-20CCh]
+	float v7; // [esp+10h] [ebp-20C8h]
+	float v8; // [esp+14h] [ebp-20C4h]
+	dMatrix3 A; // [esp+18h] [ebp-20C0h] BYREF
+	QuickstepData *dst; // [esp+48h] [ebp-2090h]
 	int j; // [esp+4Ch] [ebp-208Ch]
-	float invI[240]; // [esp+50h] [ebp-2088h] BYREF
+	float invI[168]; // [esp+50h] [ebp-2088h] BYREF
+	int v15[74]; // [esp+2F0h] [ebp-1DE8h]
 	ConstraintForce fc[14]; // [esp+418h] [ebp-1CC0h] BYREF
 	int m; // [esp+568h] [ebp-1B70h]
 	int n; // [esp+56Ch] [ebp-1B6Ch]
@@ -814,16 +818,16 @@ void dxQuickStepper (dxWorld *world,
 	int findex[444]; // [esp+1840h] [ebp-898h] BYREF
 	float in[84]; // [esp+1F30h] [ebp-1A8h] BYREF
 	int bodyTag; // [esp+2080h] [ebp-58h]
-	dxJoint::Info2 v20; // [esp+2084h] [ebp-54h] BYREF
-	float v21; // [esp+20B4h] [ebp-24h]
-	float v22; // [esp+20B8h] [ebp-20h]
+	dxJoint::Info2 v26; // [esp+2084h] [ebp-54h] BYREF
+	int v27; // [esp+20B4h] [ebp-24h]
+	float v28; // [esp+20B8h] [ebp-20h]
 	float invMass; // [esp+20BCh] [ebp-1Ch]
-	unsigned __int8 *v24; // [esp+20C0h] [ebp-18h]
+	ConstraintRowData *v30; // [esp+20C0h] [ebp-18h]
 	SorLcpData *sd; // [esp+20C4h] [ebp-14h]
 	int i; // [esp+20C8h] [ebp-10h]
-	float v27; // [esp+20CCh] [ebp-Ch]
+	float v33; // [esp+20CCh] [ebp-Ch]
 	dxWorldStepInfo *stepInfo; // [esp+20D0h] [ebp-8h]
-	int v29; // [esp+20D4h] [ebp-4h]
+	int v35; // [esp+20D4h] [ebp-4h]
 
 	iassert(world);
 	iassert(body);
@@ -832,28 +836,26 @@ void dxQuickStepper (dxWorld *world,
 	if (jointCount >= 74 || bodyCount >= 14)
 		dumpBodyJoints(world, body, bodyCount, joint, jointCount);
 
-	iassert(jointCount < ISLAND_MAX_JOINT_COUNT);
-	iassert(bodyCount < ISLAND_MAX_BODY_COUNT);
+	vassert(jointCount < ISLAND_MAX_JOINT_COUNT, "%i not in [0, %i)", jointCount, ISLAND_MAX_JOINT_COUNT);
+	vassert(jointCount < ISLAND_MAX_BODY_COUNT, "%i not in [0, %i)", jointCount, ISLAND_MAX_BODY_COUNT);
 
-	A[2] = 1.0 / stepsize;
-	v22 = A[2];
+	v8 = 1.0 / stepsize;
+	v28 = v8;
 	stepInfo = &world->stepInfo;
-
 	iassert(stepInfo);
-
 	g_holdrand = &stepInfo->holdrand;
-	dst = (unsigned char*)&world->qd;
+	dst = &world->qd;
 	sd = &world->sd;
 	for (i = 0; i < bodyCount; ++i)
 	{
-		dMULTIPLY2_333<float, float, float>(&A[3], body[i]->mass.I, body[i]->info.R);
-		dMULTIPLY0_333<float, float, float>(&B[12 * i], body[i]->info.R, &A[3]);
-		dMULTIPLY2_333<float, float, float>(&A[3], body[i]->invI, body[i]->info.R);
-		dMULTIPLY0_333<float, float, float>(&invI[12 * i], body[i]->info.R, &A[3]);
-		dMULTIPLY0_331<float, float, float>(&A[3], &B[12 * i], body[i]->info.avel);
-		body[i]->tacc[0] = body[i]->tacc[0] - (body[i]->info.avel[1] * A[5] - body[i]->info.avel[2] * A[4]);
-		body[i]->tacc[1] = body[i]->tacc[1] - (body[i]->info.avel[2] * A[3] - body[i]->info.avel[0] * A[5]);
-		body[i]->tacc[2] = body[i]->tacc[2] - (body[i]->info.avel[0] * A[4] - body[i]->info.avel[1] * A[3]);
+		dMULTIPLY2_333(A, body[i]->mass.I, body[i]->info.R);
+		dMULTIPLY0_333(&B[12 * i], body[i]->info.R, A);
+		dMULTIPLY2_333(A, body[i]->invI, body[i]->info.R);
+		dMULTIPLY0_333(&invI[12 * i], body[i]->info.R, A);
+		dMULTIPLY0_331(A, &B[12 * i], body[i]->info.avel);
+		body[i]->tacc[0] = body[i]->tacc[0] - (body[i]->info.avel[1] * A[2] - body[i]->info.avel[2] * A[1]);
+		body[i]->tacc[1] = body[i]->tacc[1] - (body[i]->info.avel[2] * A[0] - body[i]->info.avel[0] * A[2]);
+		body[i]->tacc[2] = body[i]->tacc[2] - (body[i]->info.avel[0] * A[1] - body[i]->info.avel[1] * A[0]);
 	}
 	for (i = 0; i < bodyCount; ++i)
 	{
@@ -868,24 +870,11 @@ void dxQuickStepper (dxWorld *world,
 	for (i = 0; i < jointCount; ++i)
 	{
 		jointGetInfo1(joint[i], &info[i]);
-		if (info[i].m > 6u || info[i].nub < 0 || info[i].nub > info[i].m)
-			MyAssertHandler(
-				".\\physics\\ode\\src\\quickstep.cpp",
-				1228,
-				0,
-				"%s",
-				"info[i].m >= 0 && info[i].m <= 6 && info[i].nub >= 0 && info[i].nub <= info[i].m");
-		LODWORD(invI[i + 168]) = n;
+		iassert(info[i].m >= 0 && info[i].m <= 6 && info[i].nub >= 0 && info[i].nub <= info[i].m);
+		v15[i] = n;
 		n += info[i].m;
 	}
-	if (n > 444)
-		MyAssertHandler(
-			".\\physics\\ode\\src\\quickstep.cpp",
-			1233,
-			0,
-			"%s\n\t(constraintRowCount) = %i",
-			"(constraintRowCount <= ( 74 * 6 ))",
-			n);
+	iassert(n <= (74 * 6));
 	if (n > 0)
 	{
 		dSetZero(a, n);
@@ -893,67 +882,67 @@ void dxQuickStepper (dxWorld *world,
 		memset(dst, 0, 144 * n);
 		for (i = 0; i < n; ++i)
 		{
-			*&dst[144 * i + 128] = -FLT_MAX;
-			*&dst[144 * i + 132] = FLT_MAX;
+			dst->rowData[i].lo = FLT_MIN;
+			dst->rowData[i].hi = FLT_MAX;
 			findex[i] = -1;
 		}
-		v20.rowskip = 36;
-		v20.fps = v22;
-		v20.erp = stepInfo->global_erp;
+		v26.rowskip = 36;
+		v26.fps = v28;
+		v26.erp = stepInfo->global_erp;
 		for (i = 0; i < jointCount; ++i)
 		{
 			m = info[i].m;
 			if (m)
 			{
-				v21 = invI[i + 168];
-				v24 = &dst[144 * LODWORD(v21)];
-				v20.J1l = (dReal*)v24;
-				v20.J1a = (dReal*)(v24 + 16);
-				v20.J2l = (dReal*)(v24 + 32);
-				v20.J2a = (dReal*)(v24 + 48);
-				v20.c = &a[LODWORD(v21)];
-				v20.cfm = &cfm[LODWORD(v21)];
-				v20.lo = (dReal*)(v24 + 128);
-				v20.hi = (dReal*)(v24 + 132);
-				v20.findex = &findex[LODWORD(v21)];
-				jointGetInfo2(joint[i], stepInfo, &v20);
+				v27 = v15[i];
+				v30 = &dst->rowData[v27];
+				v26.J1l = v30->J_body1Linear;
+				v26.J1a = v30->J_body1Angular;
+				v26.J2l = v30->J_body2Linear;
+				v26.J2a = v30->J_body2Angular;
+				v26.c = &a[v27];
+				v26.cfm = &cfm[v27];
+				v26.lo = &v30->lo;
+				v26.hi = &v30->hi;
+				v26.findex = &findex[v27];
+				jointGetInfo2(joint[i], stepInfo, &v26);
 				for (j = 0; j < m; ++j)
 				{
-					if (findex[j + LODWORD(v21)] >= 0)
-						findex[j + LODWORD(v21)] += LODWORD(v21);
+					if (findex[j + v27] >= 0)
+						findex[j + v27] += v27;
 				}
 			}
 		}
-		v24 = dst;
+		v30 = dst->rowData;
 		for (i = 0; i < jointCount; ++i)
 		{
 			bodyTag = joint[i]->node[0].bodyTag;
-			v29 = joint[i]->node[1].bodyTag;
+			v35 = joint[i]->node[1].bodyTag;
 			for (j = 0; j < info[i].m; ++j)
 			{
-				*(v24 + 7) = bodyTag;
-				*(v24 + 11) = v29;
-				v24 += 144;
+				v30->body1 = bodyTag;
+				v30->body2 = v35;
+				++v30;
 			}
 		}
-		if (v24 != &dst[144 * n])
+		if (v30 != &dst->rowData[n])
 			MyAssertHandler(".\\physics\\ode\\src\\quickstep.cpp", 1310, 0, "%s", "row == qd->rowData + constraintRowCount");
 		for (i = 0; i < bodyCount; ++i)
 		{
 			invMass = body[i]->invMass;
 			for (j = 0; j < 3; ++j)
-				in[6 * i + j] = body[i]->facc[j] * invMass + body[i]->info.lvel[j] * v22;
-			dMULTIPLY0_331<float, float, float>(&in[6 * i + 3], &invI[12 * i], body[i]->tacc);
+				in[6 * i + j] = body[i]->facc[j] * invMass + body[i]->info.lvel[j] * v28;
+			dMULTIPLY0_331(&in[6 * i + 3], &invI[12 * i], body[i]->tacc);
 			for (j = 0; j < 3; ++j)
-				in[6 * i + 3 + j] = body[i]->info.avel[j] * v22 + in[6 * i + 3 + j];
+				in[6 * i + 3 + j] = body[i]->info.avel[j] * v28 + in[6 * i + 3 + j];
 		}
-		multiply_J(n, (ConstraintRowData *)dst, in);
+		multiply_J(n, dst->rowData, in);
 		for (i = 0; i < n; ++i)
 		{
-			*&dst[144 * i + 136] = a[i] * v22 - *&dst[144 * i + 136];
-			cfm[i] = cfm[i] * v22;
+			dst->rowData[i].rhs = a[i] * v28 - dst->rowData[i].rhs;
+			cfm[i] = cfm[i] * v28;
 		}
-		SOR_LCP(n, bodyCount, (ConstraintRowData*)dst, body, invI, fc, cfm, findex, &stepInfo->qs, sd);
+		SOR_LCP(n, bodyCount, dst->rowData, body, invI, fc, cfm, findex, &stepInfo->qs, sd);
 		for (i = 0; i < bodyCount; ++i)
 		{
 			Vec3Mad(body[i]->info.lvel, stepsize, fc[i].linear, body[i]->info.lvel);
@@ -967,23 +956,23 @@ void dxQuickStepper (dxWorld *world,
 			body[i]->info.lvel[j] = stepsize * invMass * body[i]->facc[j] + body[i]->info.lvel[j];
 		for (j = 0; j < 3; ++j)
 			body[i]->tacc[j] = body[i]->tacc[j] * stepsize;
-		dMULTIPLYADD0_331<float, float, float>(body[i]->info.avel, &invI[12 * i], body[i]->tacc);
+		dMULTIPLYADD0_331(body[i]->info.avel, &invI[12 * i], body[i]->tacc);
 	}
 	for (i = 0; i < bodyCount; ++i)
 	{
-		v27 = Vec3LengthSq(body[i]->info.avel);
-		if (v27 > 1600.0)
+		v33 = Vec3LengthSq(body[i]->info.avel);
+		if (v33 > 1600.0)
 		{
-			A[1] = sqrt(v27);
-			v27 = 39.0 / A[1];
-			Vec3Scale(body[i]->info.avel, v27, body[i]->info.avel);
+			v7 = sqrt(v33);
+			v33 = 39.0 / v7;
+			Vec3Scale(body[i]->info.avel, v33, body[i]->info.avel);
 		}
-		v27 = Vec3LengthSq(body[i]->info.lvel);
-		if (v27 > 9.99999995904e11)
+		v33 = Vec3LengthSq(body[i]->info.lvel);
+		if (v33 > 9.99999995904e11)
 		{
-			A[0] = sqrt(v27);
-			v27 = 999900.0 / A[0];
-			Vec3Scale(body[i]->info.lvel, v27, body[i]->info.lvel);
+			v6 = sqrt(v33);
+			v33 = 999900.0 / v6;
+			Vec3Scale(body[i]->info.lvel, v33, body[i]->info.lvel);
 		}
 	}
 	for (i = 0; i < bodyCount; ++i)

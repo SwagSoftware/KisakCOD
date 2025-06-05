@@ -2420,17 +2420,12 @@ void __cdecl Phys_CollideFixedBrushWithTriangle(const cbrush_t *brush, float (*t
     unsigned int vertCount; // [esp+A0h] [ebp-3854h]
     const objInfo *input; // [esp+A4h] [ebp-3850h]
     float result[4]; // [esp+A8h] [ebp-384Ch] BYREF
-    float to; // [esp+B8h] [ebp-383Ch] BYREF
-    float v14; // [esp+BCh] [ebp-3838h]
-    float v15; // [esp+C0h] [ebp-3834h]
-    float v16; // [esp+C4h] [ebp-3830h]
+    float to[4]; // [esp+B8h] [ebp-383Ch] BYREF
     unsigned int ClosestBrushFace; // [esp+C8h] [ebp-382Ch]
     float v18; // [esp+CCh] [ebp-3828h]
     float v19; // [esp+D0h] [ebp-3824h]
     float outVerts[3073]; // [esp+D4h] [ebp-3820h] BYREF
-    float collisionNormal; // [esp+30D8h] [ebp-81Ch] BYREF
-    float v22; // [esp+30DCh] [ebp-818h]
-    float v23; // [esp+30E0h] [ebp-814h]
+    float collisionNormal[3]; // [esp+30D8h] [ebp-81Ch] BYREF
     unsigned int i; // [esp+30E4h] [ebp-810h]
     Poly poly2; // [esp+30E8h] [ebp-80Ch] BYREF
     Results *results; // [esp+30F0h] [ebp-804h]
@@ -2444,16 +2439,16 @@ void __cdecl Phys_CollideFixedBrushWithTriangle(const cbrush_t *brush, float (*t
     results = data->results;
     if (!brush)
         MyAssertHandler("c:\\trees\\cod3\\src\\physics\\phys_coll_local.h", 175, 0, "%s", "brush");
-    to = 0.0;
-    v14 = 0.0;
-    v15 = 0.0;
-    v16 = 0.0;
+    to[0] = 0.0;
+    to[1] = 0.0;
+    to[2] = 0.0;
+    to[3] = 0.0;
     v8 = -3.4028235e38;
     ClosestBrushFace = -1;
     CM_BuildAxialPlanes(brush, &axialPlanes);
     for (axialSide = 0; axialSide < 6; ++axialSide)
     {
-        v6 = Phys_TestTriangleAgainstBrushPlane((const float *)&axialPlanes[axialSide], triangle);
+        v6 = Phys_TestTriangleAgainstBrushPlane(axialPlanes[axialSide], triangle);
         if (v6 >= 0.0)
         {
             v3 = 0;
@@ -2463,7 +2458,7 @@ void __cdecl Phys_CollideFixedBrushWithTriangle(const cbrush_t *brush, float (*t
         {
             v8 = v6;
             ClosestBrushFace = axialSide;
-            Vec4Copy((const float *)&axialPlanes[axialSide], &to);
+            Vec4Copy((const float *)&axialPlanes[axialSide], to);
         }
     }
     for (axialSide = 0; axialSide < brush->numsides; ++axialSide)
@@ -2483,7 +2478,7 @@ void __cdecl Phys_CollideFixedBrushWithTriangle(const cbrush_t *brush, float (*t
         {
             v8 = v6;
             ClosestBrushFace = axialSide + 6;
-            Vec4Copy(brushPlane, &to);
+            Vec4Copy(brushPlane, to);
         }
     }
     v19 = v8;
@@ -2507,10 +2502,10 @@ LABEL_26:
                 poly2.pts = triangle;
                 if (v18 >= (double)v19 || ClosestBrushFace == -1 || !outPolys[ClosestBrushFace].ptCount)
                 {
-                    collisionNormal = -result[0];
-                    v22 = -result[1];
-                    v23 = -result[2];
-                    ClosestBrushFace = GetClosestBrushFace(result, brush, outPolys, &to);
+                    collisionNormal[0] = -result[0];
+                    collisionNormal[1] = -result[1];
+                    collisionNormal[2] = -result[2];
+                    ClosestBrushFace = GetClosestBrushFace(result, brush, outPolys, to);
                     if ((ClosestBrushFace & 0x80000000) == 0)
                     {
                         if (ClosestBrushFace >= brush->numsides + 6)
@@ -2527,11 +2522,12 @@ LABEL_26:
                             &outPolys[ClosestBrushFace],
                             data->surfaceFlags,
                             results,
-                            &collisionNormal);
+                            collisionNormal);
                     }
                 }
                 else
                 {
+                    bcassert(ClosestBrushFace, brush->numsides + 6);
                     if (ClosestBrushFace >= brush->numsides + 6)
                         MyAssertHandler(
                             ".\\physics\\phys_coll_boxbrush.cpp",
@@ -2540,16 +2536,16 @@ LABEL_26:
                             "brushSideIndex doesn't index static_cast< int >( brush->numsides ) + 6\n\t%i not in [0, %i)",
                             ClosestBrushFace,
                             brush->numsides + 6);
-                    collisionNormal = to;
-                    v22 = v14;
-                    v23 = v15;
+                    collisionNormal[0] = to[0];
+                    collisionNormal[1] = to[1];
+                    collisionNormal[2] = to[2];
                     Phys_ProjectFaceOntoFaceAndClip(
-                        &to,
+                        to,
                         &outPolys[ClosestBrushFace],
                         &poly2,
                         data->surfaceFlags,
                         results,
-                        &collisionNormal);
+                        collisionNormal);
                 }
             }
         }

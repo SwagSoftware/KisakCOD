@@ -1697,23 +1697,23 @@ void __cdecl Phys_RewindCurrentTime(PhysWorld worldIndex, int timeNow)
 {
     float newFrac; // [esp+8h] [ebp-8h]
 
-    if ((int)physGlob.space[51 * worldIndex - 152] <= physGlob.worldData[worldIndex].timeLastSnapshot)
+    if (physGlob.worldData[worldIndex].timeLastUpdate <= physGlob.worldData[worldIndex].timeLastSnapshot)
         goto LABEL_6;
     newFrac = (double)((int)timeNow - physGlob.worldData[worldIndex].timeLastSnapshot)
-        / (double)((unsigned int)physGlob.space[51 * worldIndex - 152]
+        / (double)(physGlob.worldData[worldIndex].timeLastUpdate
             - physGlob.worldData[worldIndex].timeLastSnapshot);
-    if (*(float *)&physGlob.space[51 * worldIndex - 151] <= (double)newFrac)
+    if (physGlob.worldData[worldIndex].timeNowLerpFrac <= newFrac)
         return;
     if (newFrac < 0.0 || newFrac > 1.0)
     {
     LABEL_6:
-        physGlob.worldData[worldIndex].timeLastSnapshot = (int)timeNow;
-        physGlob.space[51 * worldIndex - 152] = (dxSpace*)timeNow;
-        *(float *)&physGlob.space[51 * worldIndex - 151] = 1.0;
+        physGlob.worldData[worldIndex].timeLastSnapshot = timeNow;
+        physGlob.worldData[worldIndex].timeLastUpdate = timeNow;
+        physGlob.worldData[worldIndex].timeNowLerpFrac = 1.0;
     }
     else
     {
-        *(float *)&physGlob.space[51 * worldIndex - 151] = newFrac;
+        physGlob.worldData[worldIndex].timeNowLerpFrac = newFrac;
     }
 }
 
@@ -2333,7 +2333,7 @@ void __cdecl Phys_ObjGetInterpolatedState(PhysWorld worldIndex, dxBody *id, floa
     float newQuat[4]; // [esp+6Ch] [ebp-20h] BYREF
     float oldQuat[4]; // [esp+7Ch] [ebp-10h] BYREF
 
-    frac = (const float *)&physGlob.space[51 * worldIndex - 151];
+    frac = &physGlob.worldData[worldIndex].timeNowLerpFrac;
     Phys_ObjGetSnapshot(worldIndex, id, oldPos, oldMat);
     Phys_ObjGetPosition(id, newPos, newMat);
     Vec3Lerp(oldPos, newPos, *frac, outPos);

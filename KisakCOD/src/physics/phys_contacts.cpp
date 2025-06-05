@@ -491,7 +491,7 @@ void __cdecl Phys_CreateJointForEachContact(
             worldIndex,
             3);
     Phys_CheckOpposingNormals(body1, body2, contactList);
-    useCentroids = (bool)physGlob.space[51 * worldIndex - 148];
+    useCentroids = physGlob.worldData[worldIndex].useContactCentroids;
     debug = 0;
     bodyIndex = 0;
     body = body1;
