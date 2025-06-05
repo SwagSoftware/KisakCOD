@@ -1026,15 +1026,10 @@ char *__cdecl BG_GetEntityTypeName(int eType)
 {
     if (eType < 17)
         return (char*)entityTypeNames[eType];
-    if ((unsigned int)(eType - 17) > 0x86)
-        MyAssertHandler(
-            ".\\bgame\\bg_misc.cpp",
-            720,
-            0,
-            "%s\n\t(eType) = %i",
-            "(eType - ET_EVENTS >= 0 && eType - ET_EVENTS < EV_MAX_EVENTS)",
-            eType);
-    return va("Event %s (%i)", entityTypeNames[eType + 1], eType - 17);
+
+    iassert((eType - ET_EVENTS >= 0 && eType - ET_EVENTS < EV_MAX_EVENTS));
+
+    return va("Event %s (%i)", eventnames[eType - ET_EVENTS], eType - ET_EVENTS);
 }
 
 const gitem_s *__cdecl BG_FindItemForWeapon(unsigned int weapon, int model)

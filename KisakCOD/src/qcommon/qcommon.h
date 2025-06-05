@@ -1188,7 +1188,7 @@ void __cdecl CM_ShowSingleBrushCollision(
     const cbrush_t *brush,
     const float *color,
     void(__cdecl *drawCollisionPoly)(int, float (*)[3], const float *));
-void __cdecl CM_BuildAxialPlanes(const cbrush_t *brush, float (*axialPlanes)[4]);
+void __cdecl CM_BuildAxialPlanes(const cbrush_t *brush, float (*axialPlanes)[6][4]);
 int __cdecl CM_ForEachBrushPlaneIntersection(
     const cbrush_t *brush,
     const float (*axialPlanes)[4],
