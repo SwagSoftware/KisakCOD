@@ -1975,46 +1975,49 @@ void __cdecl Phys_NearCallback(int *userData, dxGeom *geom1, dxGeom *geom2)
             if (b1)
             {
                 v12 = (DWORD*)dBodyGetData(b1);
-                v11 = *(v12 + 18);
+                v11 = *((float*)v12 + 18);
                 v8 = v15 - v11;
                 if (v8 < 0.0)
                     v7 = v15;
                 else
                     v7 = v11;
                 v15 = v7;
-                v20 = v20 + *(v12 + 17);
+                v20 = v20 + *((float*)v12 + 17);
             }
             if (b2)
             {
                 v12 = (DWORD *)dBodyGetData(b2);
-                v10 = *(v12 + 18);
+                v10 = *((float*)v12 + 18);
                 v6 = v15 - v10;
                 if (v6 < 0.0)
                     v5 = v15;
                 else
                     v5 = v10;
                 v15 = v5;
-                v20 = v20 + *(v12 + 17);
+                v20 = v20 + *((float*)v12 + 17);
             }
             surfParms.mode = 12316;
-            if (!phys_contact_cfm)
-                MyAssertHandler(".\\physics\\phys_ode.cpp", 1356, 0, "%s", "phys_contact_cfm");
-            if (!phys_contact_erp)
-                MyAssertHandler(".\\physics\\phys_ode.cpp", 1357, 0, "%s", "phys_contact_erp");
+            iassert(phys_contact_cfm);
+            iassert(phys_contact_erp);
+
             if (worldIndex == PHYS_WORLD_RAGDOLL)
                 value = phys_contact_cfm_ragdoll->current.value;
             else
                 value = phys_contact_cfm->current.value;
+
             surfParms.soft_cfm = value;
+
             if (worldIndex == PHYS_WORLD_RAGDOLL)
                 v3 = phys_contact_erp_ragdoll->current.value;
             else
                 v3 = phys_contact_erp->current.value;
+
             surfParms.soft_erp = v3;
             surfParms.mu = v20 * phys_frictionScale->current.value;
             surfParms.mu2 = 0.0;
             surfParms.bounce = v15;
             surfParms.bounce_vel = 0.1;
+
             if (contactArray.contactCount >= 5)
             {
                 Phys_ReduceContacts(v9, &contactArray, &out);

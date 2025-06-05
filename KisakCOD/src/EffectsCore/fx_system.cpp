@@ -376,7 +376,7 @@ void __cdecl FX_SpawnEffect_AllocTrails(FxSystem *system, FxEffect *effect)
     FxPool<FxTrail> *remoteTrail; // [esp+Ch] [ebp-14h]
     int elemDefCount; // [esp+10h] [ebp-10h]
     int elemDefIter; // [esp+14h] [ebp-Ch]
-    int localTrail; // [esp+18h] [ebp-8h]
+    FxTrail localTrail;
 
     def = effect->def;
     if (!effect->def)
@@ -390,25 +390,21 @@ void __cdecl FX_SpawnEffect_AllocTrails(FxSystem *system, FxEffect *effect)
             if (!remoteTrail)
                 return;
 
-            if ((char)elemDefIter != elemDefIter)
-                MyAssertHandler(
-                    ".\\EffectsCore\\fx_system.cpp",
-                    984,
-                    0,
-                    "%s\n\t(elemDefIter) = %i",
-                    "(localTrail.defIndex == elemDefIter)",
-                    elemDefIter);
+            localTrail.nextTrailHandle = effect->firstTrailHandle;
+            localTrail.defIndex = elemDefIter;
 
-            if (!system)
-                MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 355, 0, "%s", "system");
-            effect->firstTrailHandle = FX_PoolToHandle_Generic<FxTrail, 128>(system->trails, (FxTrail *)remoteTrail);
+            iassert(localTrail.defIndex == elemDefIter);
+
+            localTrail.firstElemHandle = 0xFFFF;
+            localTrail.lastElemHandle = 0xFFFF;
+
+            localTrail.sequence = 0;
+
+            iassert(system);
+
+            effect->firstTrailHandle = FX_PoolToHandle_Generic<FxTrail, 128>(system->trails, &remoteTrail->item);
             
-            // KISAKTODO verify this
-            
-            remoteTrail->nextFree = effect->firstTrailHandle | 0xFFFF0000;
-            remoteTrail->item.lastElemHandle = -1;
-            remoteTrail->item.defIndex = elemDefIter;
-            remoteTrail->item.sequence = 0;
+            remoteTrail->item = localTrail;
         }
     }
 }
