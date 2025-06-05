@@ -988,7 +988,6 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     unsigned int v16; // [esp+54h] [ebp-538h]
     dContactGeom *v17; // [esp+58h] [ebp-534h]
     int v18; // [esp+5Ch] [ebp-530h]
-    char *v19; // [esp+94h] [ebp-4F8h]
     int iStride; // [esp+9Ch] [ebp-4F0h]
     unsigned int ctContacts; // [esp+A0h] [ebp-4ECh]
     dContactGeom *ContactGeoms; // [esp+A4h] [ebp-4E8h]
@@ -999,48 +998,44 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     dContactGeom *v27; // [esp+E0h] [ebp-4ACh]
     int v28; // [esp+E4h] [ebp-4A8h]
     float v30; // [esp+FCh] [ebp-490h]
-    float sum[4]; // [esp+100h] [ebp-48Ch] BYREF
-    int m; // [esp+110h] [ebp-47Ch]
-    int i_1; // [esp+114h] [ebp-478h]
+    float v31[4]; // [esp+100h] [ebp-48Ch] BYREF
+    int n; // [esp+110h] [ebp-47Ch]
+    int m; // [esp+114h] [ebp-478h]
     int x; // [esp+118h] [ebp-474h]
     float mTransposed[12]; // [esp+11Ch] [ebp-470h]
     float vAbsNormal[4]; // [esp+14Ch] [ebp-440h]
     float a[4]; // [esp+15Ch] [ebp-430h] BYREF
-    dVector3 avArrayOut[9]; // [esp+16Ch] [ebp-420h] BYREF
-    int iTempCnt2; // [esp+200h] [ebp-38Ch] BYREF
-    dVector4 plPlane; // [esp+204h] [ebp-388h] BYREF
+    float v38[37]; // [esp+16Ch] [ebp-420h] BYREF
+    int ctIn; // [esp+200h] [ebp-38Ch] BYREF
+    float v40[4]; // [esp+204h] [ebp-388h] BYREF
     float v41[4]; // [esp+214h] [ebp-378h] BYREF
     int iB2; // [esp+224h] [ebp-368h]
-    float v43[3]; // [esp+228h] [ebp-364h]
+    float v43[4]; // [esp+228h] [ebp-364h]
     float vNr[4]; // [esp+238h] [ebp-354h]
-    int iTempCnt1; // [esp+248h] [ebp-344h] BYREF
+    int ctOut; // [esp+248h] [ebp-344h] BYREF
     float vTemp2[4]; // [esp+24Ch] [ebp-340h] BYREF
     float vRotCol2[4]; // [esp+25Ch] [ebp-330h]
     int iB0; // [esp+26Ch] [ebp-320h]
     int iB1; // [esp+270h] [ebp-31Ch]
     float vCenter[4]; // [esp+274h] [ebp-318h]
     float avArrayIn[16]; // [esp+284h] [ebp-308h] BYREF
-    dVector3 avTempArray1_1[9]; // [esp+2C4h] [ebp-2C8h] BYREF
-    float *v55; // [esp+358h] [ebp-234h]
-    float v56; // [esp+35Ch] [ebp-230h]
-    float v57[4]; // [esp+360h] [ebp-22Ch] BYREF
+    float avArrayOut[37]; // [esp+2C4h] [ebp-2C8h] BYREF
+    float fTempDepth; // [esp+35Ch] [ebp-230h]
+    float sum[4]; // [esp+360h] [ebp-22Ch] BYREF
     int k; // [esp+370h] [ebp-21Ch]
     int j; // [esp+374h] [ebp-218h]
-    int v60; // [esp+378h] [ebp-214h]
-    float v61; // [esp+37Ch] [ebp-210h]
-    float v62; // [esp+380h] [ebp-20Ch]
-    float v63; // [esp+384h] [ebp-208h]
-    dVector3 avTempArray2[9]; // [esp+38Ch] [ebp-200h] BYREF
-    int ctIn; // [esp+41Ch] [ebp-170h] BYREF
-    dVector4 plane = { 0.0f, 0.0f, 0.0f, 0.0f }; // [esp+420h] [ebp-16Ch] BYREF
-    float v67[4]; // [esp+430h] [ebp-15Ch] BYREF
-    int ctOut; // [esp+440h] [ebp-14Ch] BYREF
-    int sneed; // [esp+444h] [ebp-148h]
-    int v70; // [esp+448h] [ebp-144h]
+    int iA0; // [esp+378h] [ebp-214h]
+    float vTemp[4]; // [esp+37Ch] [ebp-210h]
+    float avTempArray2[9][4]; // [esp+38Ch] [ebp-200h] BYREF
+    int iTempCnt2; // [esp+41Ch] [ebp-170h] BYREF
+    float plPlane[4]; // [esp+420h] [ebp-16Ch] BYREF
+    float vNormal2[4]; // [esp+430h] [ebp-15Ch] BYREF
+    int iTempCnt1; // [esp+440h] [ebp-14Ch] BYREF
+    int iA1; // [esp+444h] [ebp-148h]
+    int iA2; // [esp+448h] [ebp-144h]
     float avPoints[3][4]; // [esp+44Ch] [ebp-140h] BYREF
-    dVector3 avTempArray1[9]; // [esp+47Ch] [ebp-110h] BYREF
-    float v73[4]; // [esp+510h] [ebp-7Ch] BYREF
-    float fSign; // [esp+520h] [ebp-6Ch]
+    float avTempArray1[9][4]; // [esp+47Ch] [ebp-110h] BYREF
+    float vRotCol[5]; // [esp+510h] [ebp-7Ch] BYREF
     int i; // [esp+524h] [ebp-68h]
     float vub[4]; // [esp+528h] [ebp-64h] BYREF
     float vPa[4]; // [esp+538h] [ebp-54h] BYREF
@@ -1049,34 +1044,34 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     dContactGeom *Contact; // [esp+550h] [ebp-3Ch]
     float vua[4]; // [esp+554h] [ebp-38h] BYREF
     float fParam1; // [esp+564h] [ebp-28h] BYREF
-    float vPb[8]; // [esp+568h] [ebp-24h] BYREF
+    float vPb[4]; // [esp+568h] [ebp-24h] BYREF
+    float vPntTmp[4]; // [esp+578h] [ebp-14h] BYREF
     int col; // [esp+588h] [ebp-4h]
-    float *contactNorm;
 
     if (tbData->iBestAxis <= 4)
     {
         if (tbData->iBestAxis >= 2 && tbData->iBestAxis <= 4)
         {
-            v67[0] = tbData->vBestNormal[0];
-            v67[1] = tbData->vBestNormal[1];
-            v67[2] = tbData->vBestNormal[2];
-            v60 = tbData->iBestAxis - 2;
-            if (v60)
+            vNormal2[0] = tbData->vBestNormal[0];
+            vNormal2[1] = tbData->vBestNormal[1];
+            vNormal2[2] = tbData->vBestNormal[2];
+            iA0 = tbData->iBestAxis - 2;
+            if (iA0)
             {
-                sneed = 0;
-                if (v60 == 1)
-                    v70 = 2;
+                iA1 = 0;
+                if (iA0 == 1)
+                    iA2 = 2;
                 else
-                    v70 = 1;
+                    iA2 = 1;
             }
             else
             {
-                sneed = 1;
-                v70 = 2;
+                iA1 = 1;
+                iA2 = 2;
             }
-            Vec3Sub((const float*)v0, tbData->vHullBoxPos, avPoints[0]);
-            Vec3Sub((const float*)v1, tbData->vHullBoxPos, avPoints[1]);
-            Vec3Sub((const float*)v2, tbData->vHullBoxPos, avPoints[2]);
+            Vec3Sub((const float *)v0, tbData->vHullBoxPos, avPoints[0]);
+            Vec3Sub((const float *)v1, tbData->vHullBoxPos, avPoints[1]);
+            Vec3Sub((const float *)v2, tbData->vHullBoxPos, avPoints[2]);
             for (j = 0; j < 9; ++j)
             {
                 avTempArray1[j][0] = 0.0;
@@ -1086,79 +1081,78 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
                 avTempArray2[j][1] = 0.0;
                 avTempArray2[j][2] = 0.0;
             }
-            v61 = -v67[0];
-            v62 = -v67[1];
-            v63 = -v67[2];
-            plane[0] = v61;
-            plane[1] = v62;
-            plane[2] = v63;
-            plane[3] = tbData->vBoxHalfSize[v60];
-            cldClipPolyToPlane(tbData, avPoints, 3, avTempArray1, &ctOut, &plane);
-            v61 = tbData->mHullBoxRot[sneed];
-            v62 = tbData->mHullBoxRot[sneed + 4];
-            v63 = tbData->mHullBoxRot[sneed + 8];
-            plane[0] = v61;
-            plane[1] = v62;
-            plane[2] = v63;
-            plane[3] = tbData->vBoxHalfSize[sneed];
-            cldClipPolyToPlane(tbData, avTempArray1, ctOut, avTempArray2, &ctIn, &plane);
-            v61 = tbData->mHullBoxRot[sneed];
-            v62 = tbData->mHullBoxRot[sneed + 4];
-            v63 = tbData->mHullBoxRot[sneed + 8];
-            v61 = -v61;
-            v62 = -v62;
-            v63 = -v63;
-            plane[0] = v61;
-            plane[1] = v62;
-            plane[2] = v63;
-            plane[3] = tbData->vBoxHalfSize[sneed];
-            cldClipPolyToPlane(tbData, avTempArray2, ctIn, avTempArray1, &ctOut, &plane);
-            v61 = tbData->mHullBoxRot[v70];
-            v62 = tbData->mHullBoxRot[v70 + 4];
-            v63 = tbData->mHullBoxRot[v70 + 8];
-            plane[0] = v61;
-            plane[1] = v62;
-            plane[2] = v63;
-            plane[3] = tbData->vBoxHalfSize[v70];
-            cldClipPolyToPlane(tbData, avTempArray1, ctOut, avTempArray2, &ctIn, &plane);
-            v61 = tbData->mHullBoxRot[v70];
-            v62 = tbData->mHullBoxRot[v70 + 4];
-            v63 = tbData->mHullBoxRot[v70 + 8];
-            v61 = -v61;
-            v62 = -v62;
-            v63 = -v63;
-            plane[0] = v61;
-            plane[1] = v62;
-            plane[2] = v63;
-            plane[3] = tbData->vBoxHalfSize[v70];
-            cldClipPolyToPlane(tbData, avTempArray2, ctIn, avTempArray1, &ctOut, &plane);
-            for (k = 0; k < ctOut; ++k)
+            vTemp[0] = -vNormal2[0];
+            vTemp[1] = -vNormal2[1];
+            vTemp[2] = -vNormal2[2];
+            plPlane[0] = vTemp[0];
+            plPlane[1] = vTemp[1];
+            plPlane[2] = vTemp[2];
+            plPlane[3] = tbData->vBoxHalfSize[iA0];
+            cldClipPolyToPlane(tbData, avPoints, 3, avTempArray1, &iTempCnt1, (const float (*)[4])plPlane);
+            vTemp[0] = tbData->mHullBoxRot[iA1];
+            vTemp[1] = tbData->mHullBoxRot[iA1 + 4];
+            vTemp[2] = tbData->mHullBoxRot[iA1 + 8];
+            plPlane[0] = vTemp[0];
+            plPlane[1] = vTemp[1];
+            plPlane[2] = vTemp[2];
+            plPlane[3] = tbData->vBoxHalfSize[iA1];
+            cldClipPolyToPlane(tbData, avTempArray1, iTempCnt1, avTempArray2, &iTempCnt2, (const float (*)[4])plPlane);
+            vTemp[0] = tbData->mHullBoxRot[iA1];
+            vTemp[1] = tbData->mHullBoxRot[iA1 + 4];
+            vTemp[2] = tbData->mHullBoxRot[iA1 + 8];
+            vTemp[0] = -vTemp[0];
+            vTemp[1] = -vTemp[1];
+            vTemp[2] = -vTemp[2];
+            plPlane[0] = vTemp[0];
+            plPlane[1] = vTemp[1];
+            plPlane[2] = vTemp[2];
+            plPlane[3] = tbData->vBoxHalfSize[iA1];
+            cldClipPolyToPlane(tbData, avTempArray2, iTempCnt2, avTempArray1, &iTempCnt1, (const float (*)[4])plPlane);
+            vTemp[0] = tbData->mHullBoxRot[iA2];
+            vTemp[1] = tbData->mHullBoxRot[iA2 + 4];
+            vTemp[2] = tbData->mHullBoxRot[iA2 + 8];
+            plPlane[0] = vTemp[0];
+            plPlane[1] = vTemp[1];
+            plPlane[2] = vTemp[2];
+            plPlane[3] = tbData->vBoxHalfSize[iA2];
+            cldClipPolyToPlane(tbData, avTempArray1, iTempCnt1, avTempArray2, &iTempCnt2, (const float (*)[4])plPlane);
+            vTemp[0] = tbData->mHullBoxRot[iA2];
+            vTemp[1] = tbData->mHullBoxRot[iA2 + 4];
+            vTemp[2] = tbData->mHullBoxRot[iA2 + 8];
+            vTemp[0] = -vTemp[0];
+            vTemp[1] = -vTemp[1];
+            vTemp[2] = -vTemp[2];
+            plPlane[0] = vTemp[0];
+            plPlane[1] = vTemp[1];
+            plPlane[2] = vTemp[2];
+            plPlane[3] = tbData->vBoxHalfSize[iA2];
+            cldClipPolyToPlane(tbData, avTempArray2, iTempCnt2, avTempArray1, &iTempCnt1, (const float (*)[4])plPlane);
+            for (k = 0; k < iTempCnt1; ++k)
             {
-                v5 = Vec3Dot(v67, avTempArray1[k]);
-                v56 = v5 - tbData->vBoxHalfSize[v60];
-                if (v56 > 0.0)
-                    v56 = 0.0;
-                Vec3Add(avTempArray1[k], tbData->vHullBoxPos, v57);
-                if (tbData->ctContacts >= tbData->iFlags)
+                v5 = Vec3Dot(vNormal2, avTempArray1[k]);
+                fTempDepth = v5 - tbData->vBoxHalfSize[iA0];
+                if (fTempDepth > 0.0)
+                    fTempDepth = 0.0;
+                Vec3Add(avTempArray1[k], tbData->vHullBoxPos, sum);
+                if (tbData->ctContacts >= (unsigned __int16)tbData->iFlags)
                     break;
                 iStride = tbData->iStride;
                 ctContacts = tbData->ctContacts;
                 ContactGeoms = tbData->ContactGeoms;
                 iFlags = tbData->iFlags;
-                if (ctContacts >= iFlags)
+                if (ctContacts >= (unsigned __int16)iFlags)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\src\\physics\\ode\\src\\collision_trimesh_internal.h",
                         47,
                         0,
                         "Index doesn't index Flags & 0x0ffff\n\t%i not in [0, %i)",
                         ctContacts,
-                        iFlags);
+                        (unsigned __int16)iFlags);
                 Contact = (dContactGeom *)((char *)ContactGeoms + iStride * ctContacts);
-                Contact->depth = -v56;
-                contactNorm = Contact->normal;
+                Contact->depth = -fTempDepth;
                 Contact->normal[0] = tbData->vBestNormal[0];
-                contactNorm[1] = tbData->vBestNormal[1];
-                contactNorm[2] = tbData->vBestNormal[2];
+                Contact->normal[1] = tbData->vBestNormal[1];
+                Contact->normal[2] = tbData->vBestNormal[2];
                 Contact->pos[0] = sum[0];
                 Contact->pos[1] = sum[1];
                 Contact->pos[2] = sum[2];
@@ -1168,6 +1162,12 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
                 iassert(Vec3IsNormalized(Contact->normal));
                 iassert(!IS_NAN((Contact->pos)[0]) && !IS_NAN((Contact->pos)[1]) && !IS_NAN((Contact->pos)[2]));
                 iassert(!IS_NAN(Contact->depth));
+                if (Vec3Dot(Contact->normal, tbData->triangleNormal) > 0.0 && !alwaysfails)
+                    MyAssertHandler(
+                        ".\\physics\\ode\\src\\collision_trimesh_box.cpp",
+                        897,
+                        0,
+                        "Contact normal must be against the triangle normal");
                 ++tbData->ctContacts;
             }
         }
@@ -1179,17 +1179,17 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
         vPa[2] = tbData->vHullBoxPos[2];
         for (i = 0; i < 3; ++i)
         {
-            v73[0] = tbData->mHullBoxRot[i];
-            v73[1] = tbData->mHullBoxRot[i + 4];
-            v73[2] = tbData->mHullBoxRot[i + 8];
-            if (Vec3Dot(tbData->vBestNormal, v73) <= 0.0)
+            vRotCol[0] = tbData->mHullBoxRot[i];
+            vRotCol[1] = tbData->mHullBoxRot[i + 4];
+            vRotCol[2] = tbData->mHullBoxRot[i + 8];
+            if (Vec3Dot(tbData->vBestNormal, vRotCol) <= 0.0)
                 v14 = -1.0;
             else
                 v14 = 1.0;
-            fSign = v14;
-            vPa[0] = v14 * tbData->vBoxHalfSize[i] * v73[0] + vPa[0];
-            vPa[1] = v14 * tbData->vBoxHalfSize[i] * v73[1] + vPa[1];
-            vPa[2] = v14 * tbData->vBoxHalfSize[i] * v73[2] + vPa[2];
+            vRotCol[4] = v14;
+            vPa[0] = v14 * tbData->vBoxHalfSize[i] * vRotCol[0] + vPa[0];
+            vPa[1] = v14 * tbData->vBoxHalfSize[i] * vRotCol[1] + vPa[1];
+            vPa[2] = v14 * tbData->vBoxHalfSize[i] * vRotCol[2] + vPa[2];
         }
         iEdge = (tbData->iBestAxis - 5) % 3;
         if (iEdge)
@@ -1234,31 +1234,30 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
         vPb[0] = vub[0] * fParam2 + vPb[0];
         vPb[1] = vub[1] * fParam2 + vPb[1];
         vPb[2] = vub[2] * fParam2 + vPb[2];
-        Vec3Add(vPa, vPb, &vPb[4]);
-        vPb[4] = vPb[4] * 0.5;
-        vPb[5] = vPb[5] * 0.5;
-        vPb[6] = vPb[6] * 0.5;
+        Vec3Add(vPa, vPb, vPntTmp);
+        vPntTmp[0] = vPntTmp[0] * 0.5;
+        vPntTmp[1] = vPntTmp[1] * 0.5;
+        vPntTmp[2] = vPntTmp[2] * 0.5;
         v25 = tbData->iStride;
         v26 = tbData->ctContacts;
         v27 = tbData->ContactGeoms;
         v28 = tbData->iFlags;
-        if (v26 >= v28)
+        if (v26 >= (unsigned __int16)v28)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\physics\\ode\\src\\collision_trimesh_internal.h",
                 47,
                 0,
                 "Index doesn't index Flags & 0x0ffff\n\t%i not in [0, %i)",
                 v26,
-                v28);
-        Contact = (v27 + v25 * v26);
+                (unsigned __int16)v28);
+        Contact = (dContactGeom *)((char *)v27 + v25 * v26);
         Contact->depth = tbData->fBestDepth;
-        normal = Contact->normal;
         Contact->normal[0] = tbData->vBestNormal[0];
-        normal[1] = tbData->vBestNormal[1];
-        normal[2] = tbData->vBestNormal[2];
-        Contact->pos[0] = vPb[4];
-        Contact->pos[1] = vPb[5];
-        Contact->pos[2] = vPb[6];
+        Contact->normal[1] = tbData->vBestNormal[1];
+        Contact->normal[2] = tbData->vBestNormal[2];
+        Contact->pos[0] = vPntTmp[0];
+        Contact->pos[1] = vPntTmp[1];
+        Contact->pos[2] = vPntTmp[2];
         Contact->g1 = tbData->Geom1;
         Contact->g2 = tbData->Geom2;
         iassert(!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2]));
@@ -1299,9 +1298,9 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     vAbsNormal[1] = v12;
     v11 = fabs(vNr[2]);
     vAbsNormal[2] = v11;
-    if (v13 >= v12)
+    if (v13 >= (double)v12)
     {
-        if (vAbsNormal[2] >= vAbsNormal[0])
+        if (vAbsNormal[2] >= (double)vAbsNormal[0])
         {
             iB1 = 0;
             iB2 = 1;
@@ -1317,7 +1316,7 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     else
     {
         iB1 = 0;
-        if (vAbsNormal[2] >= vAbsNormal[1])
+        if (vAbsNormal[2] >= (double)vAbsNormal[1])
         {
             iB2 = 1;
             iB0 = 2;
@@ -1334,14 +1333,14 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     if (vNr[iB0] <= 0.0)
     {
         vCenter[0] = tbData->vHullBoxPos[0] - (*v0)[0] + tbData->vBoxHalfSize[iB0] * v43[0];
-        vCenter[1] = tbData->vHullBoxPos[1] - (*v0)[1] + tbData->vBoxHalfSize[iB0] * v43[1];
-        v8 = tbData->vHullBoxPos[2] - (*v0)[2] + tbData->vBoxHalfSize[iB0] * v43[2];
+        vCenter[1] = tbData->vHullBoxPos[1] - (float)(*v0)[1] + tbData->vBoxHalfSize[iB0] * v43[1];
+        v8 = tbData->vHullBoxPos[2] - (float)(*v0)[2] + tbData->vBoxHalfSize[iB0] * v43[2];
     }
     else
     {
         vCenter[0] = tbData->vHullBoxPos[0] - (*v0)[0] - tbData->vBoxHalfSize[iB0] * v43[0];
-        vCenter[1] = tbData->vHullBoxPos[1] - (*v0)[1] - tbData->vBoxHalfSize[iB0] * v43[1];
-        v8 = tbData->vHullBoxPos[2] - (*v0)[2] - tbData->vBoxHalfSize[iB0] * v43[2];
+        vCenter[1] = tbData->vHullBoxPos[1] - (float)(*v0)[1] - tbData->vBoxHalfSize[iB0] * v43[1];
+        v8 = tbData->vHullBoxPos[2] - (float)(*v0)[2] - tbData->vBoxHalfSize[iB0] * v43[2];
     }
     vCenter[2] = v8;
     v43[0] = tbData->mHullBoxRot[iB1];
@@ -1357,16 +1356,16 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
         avArrayIn[x + 8] = vCenter[x] - tbData->vBoxHalfSize[iB1] * v43[x] + tbData->vBoxHalfSize[iB2] * vRotCol2[x];
         avArrayIn[x + 12] = tbData->vBoxHalfSize[iB1] * v43[x] + vCenter[x] + tbData->vBoxHalfSize[iB2] * vRotCol2[x];
     }
-    iTempCnt1 = 0;
-    iTempCnt2 = 0;
-    for (i_1 = 0; i_1 < 9; ++i_1)
+    ctOut = 0;
+    ctIn = 0;
+    for (m = 0; m < 9; ++m)
     {
-        avTempArray1_1[i_1][0] = 0.0;
-        avTempArray1_1[i_1][1] = 0.0;
-        avTempArray1_1[i_1][2] = 0.0;
-        avArrayOut[i_1][0] = 0.0;
-        avArrayOut[i_1][1] = 0.0;
-        avArrayOut[i_1][2] = 0.0;
+        avArrayOut[4 * m] = 0.0;
+        avArrayOut[4 * m + 1] = 0.0;
+        avArrayOut[4 * m + 2] = 0.0;
+        v38[4 * m] = 0.0;
+        v38[4 * m + 1] = 0.0;
+        v38[4 * m + 2] = 0.0;
     }
     a[0] = -tbData->triangleNormal[0];
     a[1] = -tbData->triangleNormal[1];
@@ -1383,70 +1382,70 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
             "Vec3IsNormalized( vTemp )",
             v9);
     }
-    plPlane[0] = a[0];
-    plPlane[1] = a[1];
-    plPlane[2] = a[2];
-    plPlane[3] = 0.0;
-    cldClipPolyToPlane(tbData, (dVector3*)avArrayIn, 4, avTempArray1_1, &iTempCnt1, &plPlane);
-    Vec3Sub((const float*)v1, (const float*)v0, vTemp2);
+    v40[0] = a[0];
+    v40[1] = a[1];
+    v40[2] = a[2];
+    v40[3] = 0.0;
+    cldClipPolyToPlane(tbData, (float (*)[4])avArrayIn, 4, (float (*)[4])avArrayOut, &ctOut, (const float (*)[4])v40);
+    Vec3Sub((const float *)v1, (const float *)v0, vTemp2);
     a[0] = tbData->triangleNormal[1] * vTemp2[2] - tbData->triangleNormal[2] * vTemp2[1];
     a[1] = tbData->triangleNormal[2] * vTemp2[0] - tbData->triangleNormal[0] * vTemp2[2];
     a[2] = tbData->triangleNormal[0] * vTemp2[1] - tbData->triangleNormal[1] * vTemp2[0];
     dNormalize3(a);
-    plPlane[0] = a[0];
-    plPlane[1] = a[1];
-    plPlane[2] = a[2];
-    plPlane[3] = 0.0;
-    cldClipPolyToPlane(tbData, avTempArray1_1, iTempCnt1, avArrayOut, &iTempCnt2, &plPlane);
+    v40[0] = a[0];
+    v40[1] = a[1];
+    v40[2] = a[2];
+    v40[3] = 0.0;
+    cldClipPolyToPlane(tbData, (float (*)[4])avArrayOut, ctOut, (float (*)[4])v38, &ctIn, (const float (*)[4])v40);
     Vec3Sub((const float *)v2, (const float *)v1, vTemp2);
     a[0] = tbData->triangleNormal[1] * vTemp2[2] - tbData->triangleNormal[2] * vTemp2[1];
     a[1] = tbData->triangleNormal[2] * vTemp2[0] - tbData->triangleNormal[0] * vTemp2[2];
     a[2] = tbData->triangleNormal[0] * vTemp2[1] - tbData->triangleNormal[1] * vTemp2[0];
     dNormalize3(a);
     Vec3Sub((const float *)v0, (const float *)v2, vTemp2);
-    plPlane[0] = a[0];
-    plPlane[1] = a[1];
-    plPlane[2] = a[2];
-    plPlane[3] = Vec3Dot(vTemp2, a);
-    cldClipPolyToPlane(tbData, avArrayOut, iTempCnt2, avTempArray1_1, &iTempCnt1, &plPlane);
+    v40[0] = a[0];
+    v40[1] = a[1];
+    v40[2] = a[2];
+    v40[3] = Vec3Dot(vTemp2, a);
+    cldClipPolyToPlane(tbData, (float (*)[4])v38, ctIn, (float (*)[4])avArrayOut, &ctOut, (const float (*)[4])v40);
     Vec3Sub((const float *)v0, (const float *)v2, vTemp2);
     a[0] = tbData->triangleNormal[1] * vTemp2[2] - tbData->triangleNormal[2] * vTemp2[1];
     a[1] = tbData->triangleNormal[2] * vTemp2[0] - tbData->triangleNormal[0] * vTemp2[2];
     a[2] = tbData->triangleNormal[0] * vTemp2[1] - tbData->triangleNormal[1] * vTemp2[0];
     dNormalize3(a);
-    plPlane[0] = a[0];
-    plPlane[1] = a[1];
-    plPlane[2] = a[2];
-    plPlane[3] = 0.0;
-    cldClipPolyToPlane(tbData, avTempArray1_1, iTempCnt1, avArrayOut, &iTempCnt2, &plPlane);
-    for (m = 0; m < iTempCnt2; ++m)
+    v40[0] = a[0];
+    v40[1] = a[1];
+    v40[2] = a[2];
+    v40[3] = 0.0;
+    cldClipPolyToPlane(tbData, (float (*)[4])avArrayOut, ctOut, (float (*)[4])v38, &ctIn, (const float (*)[4])v40);
+    for (n = 0; n < ctIn; ++n)
     {
-        v30 = Vec3Dot(v41, avArrayOut[m]);
+        v30 = Vec3Dot(v41, &v38[4 * n]);
         if (v30 > 0.0)
             v30 = 0.0;
-        Vec3Add(avArrayOut[m], (const float *)v0, sum);
-        if (tbData->ctContacts >= tbData->iFlags)
+        Vec3Add(&v38[4 * n], (const float *)v0, v31);
+        if (tbData->ctContacts >= (unsigned __int16)tbData->iFlags)
             break;
         v15 = tbData->iStride;
         v16 = tbData->ctContacts;
         v17 = tbData->ContactGeoms;
         v18 = tbData->iFlags;
-        if (v16 >= v18)
+        if (v16 >= (unsigned __int16)v18)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\physics\\ode\\src\\collision_trimesh_internal.h",
                 47,
                 0,
                 "Index doesn't index Flags & 0x0ffff\n\t%i not in [0, %i)",
                 v16,
-                v18);
+                (unsigned __int16)v18);
         Contact = (dContactGeom *)((char *)v17 + v15 * v16);
         Contact->depth = -v30;
         Contact->normal[0] = -tbData->triangleNormal[0];
         Contact->normal[1] = -tbData->triangleNormal[1];
         Contact->normal[2] = -tbData->triangleNormal[2];
-        Contact->pos[0] = sum[0];
-        Contact->pos[1] = sum[1];
-        Contact->pos[2] = sum[2];
+        Contact->pos[0] = v31[0];
+        Contact->pos[1] = v31[1];
+        Contact->pos[2] = v31[2];
         Contact->g1 = tbData->Geom1;
         Contact->g2 = tbData->Geom2;
         iassert(!IS_NAN((Contact->normal)[0]) && !IS_NAN((Contact->normal)[1]) && !IS_NAN((Contact->normal)[2]));
