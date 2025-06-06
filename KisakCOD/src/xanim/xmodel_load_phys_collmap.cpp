@@ -552,7 +552,7 @@ char __cdecl AddBrushBevels(
     {
         for (dir = -1; dir <= 1; dir += 2)
         {
-            for (i = 0; i < *sideCount && (*planes)[4 * i + axis] != dir; ++i)
+            for (i = 0; i < *sideCount && (*planes)[4 * i + axis] != (double)dir; ++i)
                 ;
             if (i == *sideCount)
             {
@@ -566,7 +566,7 @@ char __cdecl AddBrushBevels(
                 v9[1] = 0;
                 v9[2] = 0;
                 v9[3] = 0;
-                (*planes)[4 * *sideCount + axis] = dir;
+                (*planes)[4 * *sideCount + axis] = (float)dir;
                 if (dir == 1)
                     (*planes)[4 * *sideCount + 3] = maxs[axis];
                 else
@@ -773,7 +773,7 @@ int __cdecl AddSimplePoint(
     {
         if (sideIndex != *planeIndex && sideIndex != planeIndex[1] && sideIndex != planeIndex[2])
         {
-            dist = Vec3Dot(&(*planes)[4 * sideIndex], xyz) - (*planes)[4 * sideIndex + 3];
+            dist = Vec3Dot(&(*planes)[4 * sideIndex], xyz) - (float)(*planes)[4 * sideIndex + 3];
             if (dist > 0.009999999776482582)
                 return ptCount;
         }

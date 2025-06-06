@@ -1595,7 +1595,7 @@ void __cdecl DObjGetBasePoseMatrix(const DObj_s *obj, unsigned __int8 boneIndex,
 
     iassert(obj);
     iassert(outMat);
-    iassert(boneIndex >= obj->numBones); 
+    iassert(boneIndex < obj->numBones); 
 
     if (boneIndex >= (int)(*obj->models)->numBones)
     {

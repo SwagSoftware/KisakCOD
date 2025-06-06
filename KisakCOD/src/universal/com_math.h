@@ -6,6 +6,8 @@
 
 #define EQUAL_EPSILON 0.001f
 
+#define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x)))
+
 struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...

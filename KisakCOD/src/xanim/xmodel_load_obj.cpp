@@ -22,12 +22,15 @@ int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3& axis, float *mins
 
     if (model->numCollSurfs)
     {
-        *mins = 3.4028235e38;
-        mins[1] = 3.4028235e38;
-        mins[2] = 3.4028235e38;
-        *maxs = -3.4028235e38;
-        maxs[1] = -3.4028235e38;
-        maxs[2] = -3.4028235e38;
+        
+        mins[0] = FLT_MAX;
+        mins[1] = FLT_MAX;
+        mins[2] = FLT_MAX;
+
+        maxs[1] = -FLT_MAX;
+        maxs[2] = -FLT_MAX;
+        maxs[0] = -FLT_MAX;
+
         for (i = 0; i < model->numCollSurfs; ++i)
         {
             csurf = &model->collSurfs[i];
@@ -38,16 +41,19 @@ int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3& axis, float *mins
                 else
                     v7 = csurf->maxs[0];
                 corner[0] = v7;
+
                 if ((k & 2) != 0)
                     v6 = csurf->mins[1];
                 else
                     v6 = csurf->maxs[1];
                 corner[1] = v6;
+
                 if ((k & 4) != 0)
                     v5 = csurf->mins[2];
                 else
                     v5 = csurf->maxs[2];
                 corner[2] = v5;
+
                 MatrixTransformVector(corner, axis, rotated);
                 for (j = 0; j < 3; ++j)
                 {
@@ -62,8 +68,7 @@ int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3& axis, float *mins
     }
     else
     {
-        if (model->contents)
-            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 1218, 0, "%s", "!model->contents");
+        iassert(!model->contents);
         return 0;
     }
 }
@@ -87,9 +92,9 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
     int v9; // [esp+74h] [ebp-124h]
     int v10; // [esp+78h] [ebp-120h]
     int v11; // [esp+7Ch] [ebp-11Ch]
-    int v12; // [esp+80h] [ebp-118h]
+    short v12; // [esp+80h] [ebp-118h]
     int v13; // [esp+84h] [ebp-114h]
-    int v14; // [esp+88h] [ebp-110h]
+    short v14; // [esp+88h] [ebp-110h]
     int v15; // [esp+8Ch] [ebp-10Ch]
     float *v16; // [esp+90h] [ebp-108h]
     float *v17; // [esp+94h] [ebp-104h]
@@ -192,13 +197,15 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
                     if (leafCount - 1 >= allocedLeafCount)
                         MyAssertHandler(".\\r_xsurface_load_obj.cpp", 285, 0, "%s", "(leafCount - 1) < allocedLeafCount");
                     v19 = options.mins[leafCount - 1];
-                    *v19 = prevMins[0];
+                    v19[0] = prevMins[0];
                     v19[1] = prevMins[1];
                     v19[2] = prevMins[2];
+
                     v18 = options.maxs[leafCount - 1];
-                    *v18 = prevMaxs[0];
+                    v18[0] = prevMaxs[0];
                     v18[1] = prevMaxs[1];
                     v18[2] = prevMaxs[2];
+
                     if (tree->leafs[leafCount - 1].triangleBeginIndex >= 0x8000u)
                         MyAssertHandler(
                             ".\\r_xsurface_load_obj.cpp",
@@ -234,19 +241,22 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
                             "(tree->leafs[leafCount].triangleBeginIndex == triIndex)",
                             triIndex);
                     v17 = options.mins[leafCount];
-                    *v17 = triMins[0];
+                    v17[0] = triMins[0];
                     v17[1] = triMins[1];
                     v17[2] = triMins[2];
+
                     v16 = options.maxs[leafCount];
-                    *v16 = triMaxs[0];
+                    v16[0] = triMaxs[0];
                     v16[1] = triMaxs[1];
                     v16[2] = triMaxs[2];
                 }
                 ++leafCount;
                 lastMergeable = 1;
+
                 prevMins[0] = triMins[0];
                 prevMins[1] = triMins[1];
                 prevMins[2] = triMins[2];
+
                 prevMaxs[0] = triMaxs[0];
                 prevMaxs[1] = triMaxs[1];
                 prevMaxs[2] = triMaxs[2];
@@ -278,7 +288,7 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
     allocSize = 16 * nodeCount + 15;
     v3 = (unsigned char*)Alloc(allocSize);
     alloced = v3;
-    alignedAddr = ((uintptr_t)v3 + 15) & 0xFFFFFFF0;
+    alignedAddr = (uintptr_t)(v3 + 15) & 0xFFFFFFF0;
     tree->nodes = (XSurfaceCollisionNode*)alignedAddr;
     if (((uintptr_t)tree->nodes & 0xF) != 0)
         MyAssertHandler(".\\r_xsurface_load_obj.cpp", 352, 0, "%s", "!(reinterpret_cast< uint32_t >( tree->nodes ) & 0x0F)");
@@ -290,127 +300,99 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
         ClearBounds(nodeMins, nodeMaxs);
         for (leafIndex = builtNode->firstItem; leafIndex != leafEnd; ++leafIndex)
             ExpandBounds(options.mins[leafIndex], options.maxs[leafIndex], nodeMins, nodeMaxs);
+
         v15 = (tree->scale[0] * (tree->trans[0] + nodeMins[0]) - 0.5);
         if (v15 >= 0)
         {
             if (v15 <= 0xFFFF)
-                v14 = (tree->scale[0] * (tree->trans[0] + nodeMins[0]) - 0.5);
+                outNode->aabb.mins[0] = (unsigned short)v15;
             else
-                LOWORD(v14) = -1;
+                outNode->aabb.mins[0] = 0xFFFF;
         }
         else
         {
-            LOWORD(v14) = 0;
+            outNode->aabb.mins[0] = 0;
         }
-        outNode->aabb.mins[0] = v14;
+
         v13 = (tree->scale[1] * (tree->trans[1] + nodeMins[1]) - 0.5);
         if (v13 >= 0)
         {
             if (v13 <= 0xFFFF)
-                v12 = (tree->scale[1] * (tree->trans[1] + nodeMins[1]) - 0.5);
+                outNode->aabb.mins[1] = (unsigned short)v13;
             else
-                LOWORD(v12) = -1;
+                outNode->aabb.mins[1] = 0xFFFF;
         }
         else
         {
-            LOWORD(v12) = 0;
+            outNode->aabb.mins[1] = 0;
         }
-        outNode->aabb.mins[1] = v12;
+
         v11 = (tree->scale[2] * (tree->trans[2] + nodeMins[2]) - 0.5);
         if (v11 >= 0)
         {
             if (v11 <= 0xFFFF)
-                v10 = (tree->scale[2] * (tree->trans[2] + nodeMins[2]) - 0.5);
+                outNode->aabb.mins[2] = (unsigned short)v11;
             else
-                LOWORD(v10) = -1;
+                outNode->aabb.mins[2] = 0xFFFF;
         }
         else
         {
-            LOWORD(v10) = 0;
+            outNode->aabb.mins[2] = 0;
         }
-        outNode->aabb.mins[2] = v10;
+
         v9 = (tree->scale[0] * (tree->trans[0] + nodeMaxs[0]) + 0.5);
         if (v9 >= 0)
         {
             if (v9 <= 0xFFFF)
-                v8 = (tree->scale[0] * (tree->trans[0] + nodeMaxs[0]) + 0.5);
+                outNode->aabb.maxs[0] = (unsigned short)v9;
             else
-                LOWORD(v8) = -1;
+                outNode->aabb.maxs[0] = 0xFFFF;
         }
         else
         {
-            LOWORD(v8) = 0;
+            outNode->aabb.maxs[0] = 0;
         }
-        outNode->aabb.maxs[0] = v8;
+        
         v7 = (tree->scale[1] * (tree->trans[1] + nodeMaxs[1]) + 0.5);
         if (v7 >= 0)
         {
             if (v7 <= 0xFFFF)
-                v6 = (tree->scale[1] * (tree->trans[1] + nodeMaxs[1]) + 0.5);
+                outNode->aabb.maxs[1] = (unsigned short)v7;
             else
-                LOWORD(v6) = -1;
+                outNode->aabb.maxs[1] = 0xFFFF;
         }
         else
         {
-            LOWORD(v6) = 0;
+            outNode->aabb.maxs[1] = 0;
         }
-        outNode->aabb.maxs[1] = v6;
+
         v5 = (tree->scale[2] * (tree->trans[2] + nodeMaxs[2]) + 0.5);
         if (v5 >= 0)
         {
             if (v5 <= 0xFFFF)
-                v4 = (tree->scale[2] * (tree->trans[2] + nodeMaxs[2]) + 0.5);
+                outNode->aabb.maxs[2] = (unsigned short)v5;
             else
-                LOWORD(v4) = -1;
+                outNode->aabb.maxs[2] = 0xFFFF;
         }
         else
         {
-            LOWORD(v4) = 0;
+            outNode->aabb.maxs[2] = 0;
         }
-        outNode->aabb.maxs[2] = v4;
+
         if (builtNode->childCount)
         {
             outNode->childBeginIndex = builtNode->firstChild;
-            if (outNode->childBeginIndex != builtNode->firstChild)
-                MyAssertHandler(
-                    ".\\r_xsurface_load_obj.cpp",
-                    382,
-                    0,
-                    "%s\n\t(builtNode->firstChild) = %i",
-                    "(outNode->childBeginIndex == builtNode->firstChild)",
-                    builtNode->firstChild);
+            iassert(outNode->childBeginIndex == builtNode->firstChild);
             outNode->childCount = builtNode->childCount;
-            if (outNode->childCount != builtNode->childCount)
-                MyAssertHandler(
-                    ".\\r_xsurface_load_obj.cpp",
-                    384,
-                    0,
-                    "%s\n\t(outNode->childCount) = %i",
-                    "(outNode->childCount == builtNode->childCount)",
-                    outNode->childCount);
+            iassert(outNode->childCount == builtNode->childCount);
         }
         else
         {
-            if (!builtNode->itemCount)
-                MyAssertHandler(".\\r_xsurface_load_obj.cpp", 388, 0, "%s", "builtNode->itemCount");
+            iassert(builtNode->itemCount);
             outNode->childBeginIndex = builtNode->firstItem;
-            if (outNode->childBeginIndex != builtNode->firstItem)
-                MyAssertHandler(
-                    ".\\r_xsurface_load_obj.cpp",
-                    390,
-                    0,
-                    "%s\n\t(builtNode->firstItem) = %i",
-                    "(outNode->childBeginIndex == builtNode->firstItem)",
-                    builtNode->firstItem);
+            iassert(outNode->childBeginIndex == builtNode->firstItem);
             outNode->childCount = builtNode->itemCount + 0x8000;
-            if (outNode->childCount != builtNode->itemCount + 0x8000)
-                MyAssertHandler(
-                    ".\\r_xsurface_load_obj.cpp",
-                    392,
-                    0,
-                    "%s\n\t(builtNode->itemCount) = %i",
-                    "(outNode->childCount == builtNode->itemCount + 0x8000)",
-                    builtNode->itemCount);
+            iassert(outNode->childCount == builtNode->itemCount + 0x8000);
         }
     }
     free(options.mins);
@@ -428,7 +410,7 @@ void __cdecl XSurfaceTransfer(
     float v5; // [esp+Ch] [ebp-50h]
     float v6; // [esp+10h] [ebp-4Ch]
     GfxPackedVertex *v7; // [esp+14h] [ebp-48h]
-    float *offset; // [esp+18h] [ebp-44h]
+    const float *offset; // [esp+18h] [ebp-44h]
     float v9; // [esp+1Ch] [ebp-40h]
     float v10; // [esp+20h] [ebp-3Ch]
     float v11; // [esp+24h] [ebp-38h]
@@ -490,8 +472,8 @@ void __cdecl XSurfaceTransfer(
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
     {
         v7 = &verts0[vertIndex];
-        offset = (float*)v->offset;
-        v7->xyz[0] = v->offset[0];
+        offset = v->offset;
+        v7->xyz[0] = offset[0];
         v7->xyz[1] = offset[1];
         v7->xyz[2] = offset[2];
         Vec3Cross(v->normal, v->tangent, binormal);
@@ -509,7 +491,7 @@ void __cdecl XSurfaceTransfer(
         verts1[vertIndex].texCoord = v13;
         v12.packed = Vec3PackUnitVec(v->tangent).packed;
         verts1[vertIndex].tangent = v12;
-        v = (v + 4 * v->numWeights + 64);
+        v = (const XVertexInfo_s *)((char *)v + 4 * v->numWeights + 64);
     }
 }
 
@@ -597,9 +579,9 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     XVertexInfo3 *vert3Out; // [esp+73Ch] [ebp-4h]
 
     memset(weightCount, 0, sizeof(weightCount));
-    surface->tileMode = **pos;
-    *pos = (*pos + 1);
-    v31 = *++ * pos;
+    surface->tileMode = *(_BYTE *)*pos;
+    *pos = (unsigned __int16 *)((char *)*pos + 1);
+    v31 = *++*pos;
     ++*pos;
     surface->vertCount = v31;
     v30 = *(*pos)++;
@@ -650,42 +632,42 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     verts = &surfVerts->v;
     for (j = 0; j < surface->vertCount; ++j)
     {
-        v26 = **pos;
+        v26 = *(float *)*pos;
         *pos += 2;
         verts->normal[0] = v26;
-        v25 = **pos;
+        v25 = *(float *)*pos;
         *pos += 2;
         verts->normal[1] = v25;
-        v24 = **pos;
+        v24 = *(float *)*pos;
         *pos += 2;
         verts->normal[2] = v24;
         if (r_modelVertColor->current.enabled)
-            Byte4CopyBgraToVertexColor((const unsigned char*)*pos, verts->color);
+            Byte4CopyBgraToVertexColor((const unsigned __int8 *)*pos, verts->color);
         else
-            *verts->color = -1;
+            *(_DWORD *)verts->color = -1;
         *pos += 2;
-        v23 = **pos;
+        v23 = *(float *)*pos;
         *pos += 2;
         verts->texCoordX = v23;
-        v22 = **pos;
+        v22 = *(float *)*pos;
         *pos += 2;
         verts->texCoordY = v22;
-        v21 = **pos;
+        v21 = *(float *)*pos;
         *pos += 2;
         verts->binormal[0] = v21;
-        v20 = **pos;
+        v20 = *(float *)*pos;
         *pos += 2;
         verts->binormal[1] = v20;
-        v19 = **pos;
+        v19 = *(float *)*pos;
         *pos += 2;
         verts->binormal[2] = v19;
-        v18 = **pos;
+        v18 = *(float *)*pos;
         *pos += 2;
         verts->tangent[0] = v18;
-        v17 = **pos;
+        v17 = *(float *)*pos;
         *pos += 2;
         verts->tangent[1] = v17;
-        v16 = **pos;
+        v16 = *(float *)*pos;
         *pos += 2;
         verts->tangent[2] = v16;
         check[0] = Vec3Dot(verts->normal, verts->tangent);
@@ -704,21 +686,21 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
                 MyAssertHandler(".\\r_xsurface_load_obj.cpp", 571, 0, "%s", "!deformed");
             verts->numWeights = 0;
             verts->boneOffset = rigidVertListArray[0].boneOffset;
-            v11 = **pos;
+            v11 = *(float *)*pos;
             *pos += 2;
             verts->offset[0] = v11;
-            v10 = **pos;
+            v10 = *(float *)*pos;
             *pos += 2;
             verts->offset[1] = v10;
-            v9 = **pos;
+            v9 = *(float *)*pos;
             *pos += 2;
             verts->offset[2] = v9;
             ++verts;
         }
         else
         {
-            numWeights = **pos;
-            *pos = (*pos + 1);
+            numWeights = *(_BYTE *)*pos;
+            *pos = (unsigned __int16 *)((char *)*pos + 1);
             verts->numWeights = numWeights;
             if (numWeights >= 4u)
                 MyAssertHandler(".\\r_xsurface_load_obj.cpp", 543, 0, "%s\n\t(numWeights) = %i", "(numWeights < 4)", numWeights);
@@ -727,16 +709,16 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
             blendBoneIndex = v15;
             surface->partBits[v15 >> 5] |= 0x80000000 >> (v15 & 0x1F);
             blendBoneOffset = blendBoneIndex << 6;
-            verts->boneOffset = blendBoneIndex << 6;
+            verts->boneOffset = (_WORD)blendBoneIndex << 6;
             if (blendBoneOffset != verts->boneOffset)
                 MyAssertHandler(".\\r_xsurface_load_obj.cpp", 550, 0, "%s", "blendBoneOffset == verts->boneOffset");
-            v14 = **pos;
+            v14 = *(float *)*pos;
             *pos += 2;
             verts->offset[0] = v14;
-            v13 = **pos;
+            v13 = *(float *)*pos;
             *pos += 2;
             verts->offset[1] = v13;
-            v12 = **pos;
+            v12 = *(float *)*pos;
             *pos += 2;
             verts->offset[2] = v12;
             ++verts;
@@ -746,8 +728,8 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
                     MyAssertHandler(".\\r_xsurface_load_obj.cpp", 560, 0, "%s", "deformed");
                 for (i = 0; i < numWeights; ++i)
                 {
-                    ReadBlend(surface, surface->partBits, (XBlendLoadInfo*)verts, pos); // KISAKTODO: bad cast on verts?
-                    verts = (verts + 4);
+                    ReadBlend(surface, surface->partBits, (XBlendLoadInfo *)verts, pos);
+                    verts = (XVertexInfo_s *)((char *)verts + 4);
                 }
             }
         }
@@ -902,7 +884,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
                     blendOut->boneOffset = LOWORD(verts->normal[0]);
                     blendOut->boneWeight = HIWORD(verts->normal[0]);
                     ++blendOut;
-                    verts = (verts + 4);
+                    verts = (XVertexInfo_s *)((char *)verts + 4);
                 }
             }
         }
@@ -982,7 +964,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
                 ++vert3Out;
             }
         }
-        if (vertsBlendOut - surface->vertInfo.vertsBlend != size)
+        if ((char *)vertsBlendOut - (char *)surface->vertInfo.vertsBlend != size)
             MyAssertHandler(
                 ".\\r_xsurface_load_obj.cpp",
                 845,
@@ -1083,12 +1065,12 @@ XModelSurfs *__cdecl R_XModelSurfsLoadFile(
                 if (!buf)
                     MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 847, 0, "%s", "buf");
                 pos = buf;
-                v7 = *buf;
+                v7 = *(_WORD *)buf;
                 pos = buf + 2;
                 version = v7;
                 if (v7 == 25)
                 {
-                    v6 = *pos;
+                    v6 = *(_WORD *)pos;
                     pos += 2;
                     numsurfs = v6;
                     if (v6 == modelNumsurfs)

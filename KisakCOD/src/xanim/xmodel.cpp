@@ -485,12 +485,12 @@ PhysPreset *__cdecl XModel_PhysPresetPrecache(const char *name, void *(__cdecl *
     return PhysPresetPrecache(name, Alloc);
 }
 
-char __cdecl XModelLoadConfigFile(const char *name, float **pos, XModelConfig *config)
+char __cdecl XModelLoadConfigFile(const char *name, unsigned __int8 *pos, XModelConfig *config)
 {
     char v4; // al
     char v5; // al
     XModelConfigEntry *v6; // [esp+18h] [ebp-54h]
-    float *v7; // [esp+1Ch] [ebp-50h]
+    const char *v7; // [esp+1Ch] [ebp-50h]
     char *physicsPresetFilename; // [esp+38h] [ebp-34h]
     float *v9; // [esp+3Ch] [ebp-30h]
     int v10; // [esp+40h] [ebp-2Ch]
@@ -504,50 +504,56 @@ char __cdecl XModelLoadConfigFile(const char *name, float **pos, XModelConfig *c
     __int16 v18; // [esp+60h] [ebp-Ch]
     int i; // [esp+68h] [ebp-4h]
 
-    v18 = **pos;
-    *pos = (*pos + 2);
+    v18 = **(_WORD **)pos;
+    *(_DWORD *)pos += 2;
     if (v18 == 25)
     {
-        config->flags = **pos;
-        *pos = (*pos + 1);
-        v17 = *(*pos)++;
+        config->flags = *(_BYTE *)(*(_DWORD *)pos)++;
+        v17 = **(float **)pos;
+        *(_DWORD *)pos += 4;
         config->mins[0] = v17;
-        v16 = *(*pos)++;
+        v16 = **(float **)pos;
+        *(_DWORD *)pos += 4;
         config->mins[1] = v16;
-        v15 = *(*pos)++;
+        v15 = **(float **)pos;
+        *(_DWORD *)pos += 4;
         config->mins[2] = v15;
-        v14 = *(*pos)++;
+        v14 = **(float **)pos;
+        *(_DWORD *)pos += 4;
         config->maxs[0] = v14;
-        v13 = *(*pos)++;
+        v13 = **(float **)pos;
+        *(_DWORD *)pos += 4;
         config->maxs[1] = v13;
-        v12 = *(*pos)++;
+        v12 = **(float **)pos;
+        *(_DWORD *)pos += 4;
         config->maxs[2] = v12;
-        v9 = *pos;
+        v9 = *(float **)pos;
         physicsPresetFilename = config->physicsPresetFilename;
         do
         {
-            v4 = *v9;
-            *physicsPresetFilename = *v9;
-            v9 = (v9 + 1);
+            v4 = *(_BYTE *)v9;
+            *physicsPresetFilename = *(_BYTE *)v9;
+            v9 = (float *)((char *)v9 + 1);
             ++physicsPresetFilename;
         } while (v4);
-        *pos = (*pos + strlen((char*)*pos) + 1);
+        *(_DWORD *)pos += strlen(*(const char **)pos) + 1;
         for (i = 0; i < 4; ++i)
         {
-            v11 = *(*pos)++;
+            v11 = **(float **)pos;
+            *(_DWORD *)pos += 4;
             config->entries[i].dist = v11;
-            v7 = *pos;
+            v7 = *(const char **)pos;
             v6 = &config->entries[i];
             do
             {
                 v5 = *v7;
-                v6->filename[0] = *v7;
-                v7 = (v7 + 1);
-                v6 = (v6 + 1);
+                v6->filename[0] = *v7++;
+                v6 = (XModelConfigEntry *)((char *)v6 + 1);
             } while (v5);
-            *pos = (*pos + strlen((char*)*pos) + 1);
+            *(_DWORD *)pos += strlen(*(const char **)pos) + 1;
         }
-        v10 = *(*pos)++;
+        v10 = **(_DWORD **)pos;
+        *(_DWORD *)pos += 4;
         config->collLod = v10;
         return 1;
     }
@@ -601,34 +607,34 @@ void __cdecl XModelLoadCollData(
 
     if (model->contents)
         MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 319, 0, "%s", "!model->contents");
-    v30 = **pos;
+    v30 = *(_DWORD *)*pos;
     *pos += 4;
     model->numCollSurfs = v30;
     if (model->numCollSurfs)
     {
-        model->collSurfs = (XModelCollSurf_s*)AllocColl(44 * model->numCollSurfs);
+        model->collSurfs = (XModelCollSurf_s *)AllocColl(44 * model->numCollSurfs);
         for (i = 0; i < model->numCollSurfs; ++i)
         {
             surf = &model->collSurfs[i];
-            v29 = **pos;
+            v29 = *(_DWORD *)*pos;
             *pos += 4;
             numCollTris = v29;
             if (!v29)
                 MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 334, 0, "%s", "numCollTris");
             surf->numCollTris = numCollTris;
-            surf->collTris = (XModelCollTri_s*)AllocColl(48 * surf->numCollTris);
+            surf->collTris = (XModelCollTri_s *)AllocColl(48 * surf->numCollTris);
             for (j = 0; j < numCollTris; ++j)
             {
-                v28 = **pos;
+                v28 = *(float *)*pos;
                 *pos += 4;
                 plane[0] = v28;
-                v27 = **pos;
+                v27 = *(float *)*pos;
                 *pos += 4;
                 plane[1] = v27;
-                v26 = **pos;
+                v26 = *(float *)*pos;
                 *pos += 4;
                 plane[2] = v26;
-                v25 = **pos;
+                v25 = *(float *)*pos;
                 *pos += 4;
                 plane[3] = v25;
                 v24 = Vec3Length(plane) - 1.0;
@@ -641,24 +647,24 @@ void __cdecl XModelLoadCollData(
                         "%s\n\t(name) = %s",
                         "(I_fabs( Vec3Length( plane ) - 1.0f ) < 0.01f)",
                         name);
-                v23 = **pos;
+                v23 = *(float *)*pos;
                 *pos += 4;
-                v22 = **pos;
+                v22 = *(float *)*pos;
                 *pos += 4;
-                v21 = **pos;
+                v21 = *(float *)*pos;
                 *pos += 4;
-                v20 = **pos;
+                v20 = *(float *)*pos;
                 *pos += 4;
-                v19 = **pos;
+                v19 = *(float *)*pos;
                 *pos += 4;
                 tvec[0] = v19;
-                v18 = **pos;
+                v18 = *(float *)*pos;
                 *pos += 4;
                 tvec[1] = v18;
-                v17 = **pos;
+                v17 = *(float *)*pos;
                 *pos += 4;
                 tvec[2] = v17;
-                v16 = **pos;
+                v16 = *(float *)*pos;
                 *pos += 4;
                 tvec[3] = v16;
                 tri = &surf->collTris[j];
@@ -677,33 +683,33 @@ void __cdecl XModelLoadCollData(
                 v14[2] = tvec[2];
                 v14[3] = tvec[3];
             }
-            v13 = **pos;
+            v13 = *(float *)*pos;
             *pos += 4;
             surf->mins[0] = v13 - 0.001000000047497451;
-            v12 = **pos;
+            v12 = *(float *)*pos;
             *pos += 4;
             surf->mins[1] = v12 - 0.001000000047497451;
-            v11 = **pos;
+            v11 = *(float *)*pos;
             *pos += 4;
             surf->mins[2] = v11 - 0.001000000047497451;
-            v10 = **pos;
+            v10 = *(float *)*pos;
             *pos += 4;
             surf->maxs[0] = v10 + 0.001000000047497451;
-            v9 = **pos;
+            v9 = *(float *)*pos;
             *pos += 4;
             surf->maxs[1] = v9 + 0.001000000047497451;
-            v8 = **pos;
+            v8 = *(float *)*pos;
             *pos += 4;
             surf->maxs[2] = v8 + 0.001000000047497451;
-            v7 = **pos;
+            v7 = *(_DWORD *)*pos;
             *pos += 4;
             surf->boneIdx = v7;
-            v6 = **pos;
+            v6 = *(_DWORD *)*pos;
             *pos += 4;
             surf->contents = v6 & 0xDFFFFFFB;
             if (surf->contents && surf->boneIdx < 0)
                 MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 379, 0, "%s", "!surf->contents || (surf->boneIdx >= 0)");
-            v5 = **pos;
+            v5 = *(_DWORD *)*pos;
             *pos += 4;
             surf->surfFlags = v5;
             model->contents |= surf->contents;
@@ -773,7 +779,7 @@ XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(_
             if (v30)
             {
                 pos = (unsigned __int8 *)buffer;
-                if (!XModelLoadConfigFile(name, (float **)&pos, &config))
+                if (!XModelLoadConfigFile(name, (unsigned char*)&pos, &config))
                     goto LABEL_28;
                 v28 = 220;
                 model = (XModel *)Alloc(220);
@@ -1430,7 +1436,7 @@ char __cdecl XSurfaceVisitTrianglesInAabb(
     }
     while (locals.vertexQueueBegin != locals.vertexQueueEnd)
     {
-        if (!(unsigned __int8)XSurfaceVisitTrianglesInAabb_ProcessVertices(&locals))
+        if (!XSurfaceVisitTrianglesInAabb_ProcessVertices(&locals))
             return 0;
     }
     return 1;
@@ -1443,18 +1449,6 @@ void __cdecl XSurfaceVisitTrianglesInAabb_ConvertAabb(
     int *mins,
     int *maxs)
 {
-    float v5; // [esp+60h] [ebp-60h]
-    float v6; // [esp+64h] [ebp-5Ch]
-    float v7; // [esp+68h] [ebp-58h]
-    float v8; // [esp+6Ch] [ebp-54h]
-    float v9; // [esp+70h] [ebp-50h]
-    float v10; // [esp+74h] [ebp-4Ch]
-    float v11; // [esp+78h] [ebp-48h]
-    float v12; // [esp+7Ch] [ebp-44h]
-    float v13; // [esp+80h] [ebp-40h]
-    float v14; // [esp+84h] [ebp-3Ch]
-    float v15; // [esp+88h] [ebp-38h]
-    float v16; // [esp+8Ch] [ebp-34h]
     float translatedMaxs[3]; // [esp+90h] [ebp-30h] BYREF
     float translatedMins[3]; // [esp+9Ch] [ebp-24h] BYREF
     float transformedMins[3]; // [esp+A8h] [ebp-18h] BYREF
@@ -1464,99 +1458,20 @@ void __cdecl XSurfaceVisitTrianglesInAabb_ConvertAabb(
     Vec3Add(aabbMaxs, tree->trans, translatedMaxs);
     Vec3Mul(translatedMins, tree->scale, transformedMins);
     Vec3Mul(translatedMaxs, tree->scale, transformedMaxs);
-    v16 = transformedMins[0] - 0.5;
-    if (-1000000.0 >= 1000000.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
-    if (v16 >= -1000000.0)
-    {
-        if (v16 <= 1000000.0)
-            v15 = v16;
-        else
-            v15 = 1000000.0;
-    }
-    else
-    {
-        v15 = -1000000.0;
-    }
-    *mins = (__int64)v15;
-    v14 = transformedMins[1] - 0.5;
-    if (-1000000.0 >= 1000000.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
-    if (v14 >= -1000000.0)
-    {
-        if (v14 <= 1000000.0)
-            v13 = v14;
-        else
-            v13 = 1000000.0;
-    }
-    else
-    {
-        v13 = -1000000.0;
-    }
-    mins[1] = (__int64)v13;
-    v12 = transformedMins[2] - 0.5;
-    if (-1000000.0 >= 1000000.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
-    if (v12 >= -1000000.0)
-    {
-        if (v12 <= 1000000.0)
-            v11 = v12;
-        else
-            v11 = 1000000.0;
-    }
-    else
-    {
-        v11 = -1000000.0;
-    }
-    mins[2] = (__int64)v11;
-    v10 = transformedMaxs[0] + 0.5;
-    if (-1000000.0 >= 1000000.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
-    if (v10 >= -1000000.0)
-    {
-        if (v10 <= 1000000.0)
-            v9 = v10;
-        else
-            v9 = 1000000.0;
-    }
-    else
-    {
-        v9 = -1000000.0;
-    }
-    *maxs = (__int64)v9;
-    v8 = transformedMaxs[1] + 0.5;
-    if (-1000000.0 >= 1000000.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
-    if (v8 >= -1000000.0)
-    {
-        if (v8 <= 1000000.0)
-            v7 = v8;
-        else
-            v7 = 1000000.0;
-    }
-    else
-    {
-        v7 = -1000000.0;
-    }
-    maxs[1] = (__int64)v7;
-    v6 = transformedMaxs[2] + 0.5;
-    if (-1000000.0 >= 1000000.0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
-    if (v6 >= -1000000.0)
-    {
-        if (v6 <= 1000000.0)
-            v5 = v6;
-        else
-            v5 = 1000000.0;
-    }
-    else
-    {
-        v5 = -1000000.0;
-    }
-    maxs[2] = (__int64)v5;
+
+    static const float minfloat = -1000000.0f; // LWSS ADD
+    static const float maxfloat = 1000000.0f; // LWSS ADD
+
+    mins[0] = CLAMP((transformedMins[0] - 0.5), minfloat, maxfloat);
+    mins[1] = CLAMP((transformedMins[1] - 0.5), minfloat, maxfloat);
+    mins[2] = CLAMP((transformedMins[2] - 0.5), minfloat, maxfloat);
+
+    maxs[0] = CLAMP((transformedMaxs[0] + 0.5), minfloat, maxfloat);
+    maxs[1] = CLAMP((transformedMaxs[1] + 0.5), minfloat, maxfloat);
+    maxs[2] = CLAMP((transformedMaxs[2] + 0.5), minfloat, maxfloat);
 }
 
-int __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidatesLocals *locals)
+bool __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidatesLocals *locals)
 {
     const GfxPackedVertex *verts0[3]; // [esp+4h] [ebp-10h] BYREF
     unsigned int vertIter; // [esp+10h] [ebp-4h]
@@ -1564,10 +1479,8 @@ int __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidate
     for (vertIter = 0; vertIter != 3; ++vertIter)
         verts0[vertIter] = &locals->inVertices0[locals->vertexQueue[locals->vertexQueueBegin][vertIter]];
     locals->vertexQueueBegin = ((unsigned __int8)locals->vertexQueueBegin + 1) & 3;
-    return locals->visitorFunc(
-        locals->visitorContext,
-        verts0,
-        verts0);
+
+    return locals->visitorFunc(locals->visitorContext,verts0,verts0);
 }
 
 void __cdecl PrefetchArray_GfxPackedVertex_(const GfxPackedVertex *mem, unsigned int elementCount)
@@ -1603,8 +1516,7 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandida
             locals->vertexQueue[locals->vertexQueueEnd][vertIter] = index;
         }
         locals->vertexQueueEnd = ((unsigned __int8)locals->vertexQueueEnd + 1) & 3;
-        if (locals->vertexQueueBegin == locals->vertexQueueEnd
-            && !(unsigned __int8)XSurfaceVisitTrianglesInAabb_ProcessVertices(locals))
+        if (locals->vertexQueueBegin == locals->vertexQueueEnd && !XSurfaceVisitTrianglesInAabb_ProcessVertices(locals))
         {
             return 0;
         }
