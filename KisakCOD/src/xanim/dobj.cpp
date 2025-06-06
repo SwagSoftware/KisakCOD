@@ -1312,7 +1312,7 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
     XModel **models; // [esp+50h] [ebp-4h]
 
     //Profile_Begin(311);
-    *partBits = 0;
+    partBits[0] = 0;
     partBits[1] = 0;
     partBits[2] = 0;
     partBits[3] = 0;

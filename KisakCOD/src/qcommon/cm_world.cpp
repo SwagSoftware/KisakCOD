@@ -1094,15 +1094,15 @@ void __cdecl CM_PointTraceToEntities_r(
     svEntity_s *check; // [esp+38h] [ebp-14h]
     float p[4]; // [esp+3Ch] [ebp-10h] BYREF
 
-    p[0] = *p1;
+    p[0] = p1[0];
     p[1] = p1[1];
     p[2] = p1[2];
     p[3] = p1[3];
+
     while (1)
     {
         node = &cm_world.sectors[nodeIndex];
-        if ((clip->contentmask & node->contents.contentsEntities) == 0
-            || (clip->contentmask & node->contents.linkcontentsEntities) == 0)
+        if ((clip->contentmask & node->contents.contentsEntities) == 0 || (clip->contentmask & node->contents.linkcontentsEntities) == 0)
         {
             break;
         }
@@ -1118,11 +1118,11 @@ void __cdecl CM_PointTraceToEntities_r(
             if (p[3] >= (double)trace->fraction)
                 return;
             frac = t1 / (t1 - t2);
-            if (frac < 0.0)
-                MyAssertHandler(".\\qcommon\\cm_world.cpp", 1508, 0, "%s", "frac >= 0");
-            if (frac > 1.0)
-                MyAssertHandler(".\\qcommon\\cm_world.cpp", 1509, 0, "%s", "frac <= 1.f");
-            mid[0] = (*p2 - p[0]) * frac + p[0];
+
+            iassert(frac >= 0);
+            iassert(frac <= 1.f);
+
+            mid[0] = (p2[0] - p[0]) * frac + p[0];
             mid[1] = (p2[1] - p[1]) * frac + p[1];
             mid[2] = (p2[2] - p[2]) * frac + p[2];
             mid[3] = (p2[3] - p[3]) * frac + p[3];

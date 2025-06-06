@@ -19,58 +19,35 @@ void __cdecl Phys_DrawPoly(const Poly *poly, const float *color)
 
 dContactGeomExt *__cdecl AddContact(Results *results)
 {
-    if (results->contactCount >= results->maxContacts)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 74, 0, "%s", "results->contactCount < results->maxContacts");
+    iassert(results->contactCount < results->maxContacts);
     return (dContactGeomExt *)((char *)results->contacts + results->stride * results->contactCount++);
 }
 
 bool __cdecl Phys_AddContactData(Results *results, float depth, float *normal, float *pos, int surfaceFlags)
 {
     const char *v5; // eax
-    dContactGeomExt *v7; // eax
+    dContactGeomExt *contact; // eax
 
-    if ((COERCE_UNSIGNED_INT(*normal) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(normal[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(normal[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\physics\\phys_coll_boxbrush.cpp",
-            87,
-            0,
-            "%s",
-            "!IS_NAN((normal)[0]) && !IS_NAN((normal)[1]) && !IS_NAN((normal)[2])");
-    }
-    if (!Vec3IsNormalized(normal))
-    {
-        v5 = va("normal: (%f, %f, %f)", *normal, normal[1], normal[2]);
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 88, 0, "%s\n\t%s", "Vec3IsNormalized( normal )", v5);
-    }
-    if ((COERCE_UNSIGNED_INT(*pos) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(pos[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(pos[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\physics\\phys_coll_boxbrush.cpp",
-            89,
-            0,
-            "%s",
-            "!IS_NAN((pos)[0]) && !IS_NAN((pos)[1]) && !IS_NAN((pos)[2])");
-    }
-    if ((LODWORD(depth) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 90, 0, "%s", "!IS_NAN(depth)");
+    iassert(!IS_NAN(normal[0]) && !IS_NAN(normal[1]) && !IS_NAN(normal[2]));
+    iassert(Vec3IsNormalized(normal));
+    iassert(!IS_NAN(pos[0]) && !IS_NAN(pos[1]) && !IS_NAN(pos[2]));
+    iassert(!IS_NAN(depth));
+
     if (results->contactCount >= results->maxContacts)
         return 0;
-    v7 = AddContact(results);
-    v7->contact.depth = depth;
-    v7->contact.normal[0] = *normal;
-    v7->contact.normal[1] = normal[1];
-    v7->contact.normal[2] = normal[2];
-    v7->contact.normal[3] = 0.0;
-    v7->contact.pos[0] = *pos;
-    v7->contact.pos[1] = pos[1];
-    v7->contact.pos[2] = pos[2];
-    v7->contact.pos[3] = 0.0;
-    v7->surfFlags = surfaceFlags;
+
+    contact = AddContact(results);
+    contact->contact.depth = depth;
+    contact->contact.normal[0] = *normal;
+    contact->contact.normal[1] = normal[1];
+    contact->contact.normal[2] = normal[2];
+    contact->contact.normal[3] = 0.0;
+    contact->contact.pos[0] = pos[0];
+    contact->contact.pos[1] = pos[1];
+    contact->contact.pos[2] = pos[2];
+    contact->contact.pos[3] = 0.0;
+    contact->surfFlags = surfaceFlags;
+
     return results->contactCount < results->maxContacts;
 }
 
@@ -81,9 +58,10 @@ PolyOrientation __cdecl GetPolyOrientation(const float *polyNormal, const float 
     float v1[3]; // [esp+14h] [ebp-18h] BYREF
     float v3[3]; // [esp+20h] [ebp-Ch] BYREF
 
-    if (ptCount <= 2)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 149, 0, "%s", "ptCount > 2");
+    iassert(ptCount > 2);
+
     Vec3Sub(&(*poly)[3], (const float *)poly, v1);
+
     for (ptIndex = 1; ptIndex < ptCount - 1; ++ptIndex)
     {
         Vec3Sub(&(*poly)[3 * ptIndex + 3], &(*poly)[3 * ptIndex], v2);
@@ -91,10 +69,11 @@ PolyOrientation __cdecl GetPolyOrientation(const float *polyNormal, const float 
         if (Vec3LengthSq(v3) > 0.009999999776482582)
             return (PolyOrientation)(Vec3Dot(v3, polyNormal) < 0.0);
     }
-    return (PolyOrientation)2;
+
+    return POLY_ERROR;
 }
 
-char __cdecl Phys_GetChoppingPlaneForPolyEdge(
+bool __cdecl Phys_GetChoppingPlaneForPolyEdge(
     const float *polyNormal,
     const float *pt1,
     const float *pt2,
@@ -104,29 +83,24 @@ char __cdecl Phys_GetChoppingPlaneForPolyEdge(
     float edge[3]; // [esp+10h] [ebp-Ch] BYREF
 
     Vec3Sub(pt2, pt1, edge);
-    if (Vec3LengthSq(edge) < 0.1000000014901161)
-        return 0;
+
+    if (Vec3LengthSq(edge) < 0.1f)
+        return false;
+
     if (clockwise)
         Vec3Cross(polyNormal, edge, outPlane);
     else
         Vec3Cross(edge, polyNormal, outPlane);
-    if (Vec3LengthSq(outPlane) < 0.1000000014901161)
-        return 0;
+
+    if (Vec3LengthSq(outPlane) < 0.1f)
+        return false;
+
     outPlane[3] = Vec3Dot(pt1, outPlane);
-    if ((COERCE_UNSIGNED_INT(*outPlane) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(outPlane[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(outPlane[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\physics\\phys_coll_boxbrush.cpp",
-            192,
-            0,
-            "%s",
-            "!IS_NAN((outPlane)[0]) && !IS_NAN((outPlane)[1]) && !IS_NAN((outPlane)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(outPlane[3]) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 193, 0, "%s", "!IS_NAN(outPlane[3])");
-    return 1;
+
+    iassert(!IS_NAN(outPlane[0]) && !IS_NAN(outPlane[1]) && !IS_NAN(outPlane[2]));
+    iassert(!IS_NAN(outPlane[3]));
+
+    return true;
 }
 
 unsigned int __cdecl Phys_ClipLineSegmentAgainstPlane(float *pt1, float *pt2, const float *choppingPlane)
@@ -146,8 +120,7 @@ unsigned int __cdecl Phys_ClipLineSegmentAgainstPlane(float *pt1, float *pt2, co
         }
         else
         {
-            if (dist2 - dist1 >= 0.0)
-                MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 222, 1, "%s", "( dist2 - dist1 ) < 0");
+            iassert((dist2 - dist1) < 0);
             fraca = dist2 / (dist2 - dist1);
             Vec3Lerp(pt2, pt1, fraca, pt1);
             return 2;
@@ -155,8 +128,7 @@ unsigned int __cdecl Phys_ClipLineSegmentAgainstPlane(float *pt1, float *pt2, co
     }
     else if (dist2 > 0.0)
     {
-        if (dist1 - dist2 >= 0.0)
-            MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 213, 1, "%s", "( dist1 - dist2 ) < 0");
+        iassert((dist1 - dist2) < 0);
         frac = dist1 / (dist1 - dist2);
         Vec3Lerp(pt1, pt2, frac, pt2);
         return 2;
@@ -178,13 +150,13 @@ unsigned int __cdecl Phys_ClipLineSegmentAgainstPoly(
     unsigned int polyIndex; // [esp+8h] [ebp-14h]
     float choppingPlane[4]; // [esp+Ch] [ebp-10h] BYREF
 
-    if (polyCount <= 2)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 434, 0, "%s", "polyCount > 2");
-    if (!poly)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 435, 0, "%s", "poly");
+    iassert(polyCount > 2);
+    iassert(poly);
+
     orient = GetPolyOrientation(polyNormal, poly, polyCount);
     if (orient == POLY_ERROR)
         return 0;
+
     for (polyIndex = 0; polyIndex < polyCount; ++polyIndex)
     {
         if (Phys_GetChoppingPlaneForPolyEdge(
@@ -214,26 +186,14 @@ void __cdecl Phys_ProjectFaceOntoFaceAndClip(
     float clippedPoly[256][3]; // [esp+18h] [ebp-C08h] BYREF
     unsigned int ptIndex; // [esp+C1Ch] [ebp-4h]
 
-    if (!referencePlane)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 549, 0, "%s", "referencePlane");
-    if (!referencePoly)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 550, 0, "%s", "referencePoly");
-    if (!poly2)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 551, 0, "%s", "poly2");
-    if (referencePoly->ptCount <= 2)
-        MyAssertHandler(
-            ".\\physics\\phys_coll_boxbrush.cpp",
-            552,
-            0,
-            "referencePoly->ptCount > 2\n\t%i, %i",
-            referencePoly->ptCount,
-            2);
-    if (poly2->ptCount <= 2)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 553, 0, "poly2->ptCount > 2\n\t%i, %i", poly2->ptCount, 2);
-    if (!results)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 554, 0, "%s", "results");
-    if (!collisionNormal)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 555, 0, "%s", "collisionNormal");
+    iassert(referencePlane);
+    iassert(referencePoly);
+    iassert(poly2);
+    iassert(referencePoly->ptCount > 2);
+    iassert(poly2->ptCount > 2);
+    iassert(results);
+    iassert(collisionNormal);
+
     ptCount = ClipPolys(
         referencePlane,
         referencePoly->pts,
@@ -242,6 +202,7 @@ void __cdecl Phys_ProjectFaceOntoFaceAndClip(
         poly2->ptCount,
         clippedPoly,
         0x100u);
+
     for (ptIndex = 0; ptIndex < ptCount; ++ptIndex)
     {
         depth = referencePlane[3] - Vec3Dot(referencePlane, clippedPoly[ptIndex]);
@@ -264,26 +225,20 @@ unsigned int __cdecl ClipPolys(
     unsigned int lastPoly1Index; // [esp+Ch] [ebp-14h]
     float choppingPlane[4]; // [esp+10h] [ebp-10h] BYREF
 
-    if (poly1Count <= 2)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 397, 0, "%s", "poly1Count > 2");
-    if (poly2Count <= 2)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 398, 0, "%s", "poly2Count > 2");
-    if (maxCount < poly2Count + poly1Count)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 399, 0, "%s", "maxCount >= poly1Count + poly2Count");
-    if (!poly1)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 400, 0, "%s", "poly1");
-    if (!poly2)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 401, 0, "%s", "poly2");
-    if (!result)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 402, 0, "%s", "result");
-    if (poly1 == result)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 403, 0, "%s", "poly1 != result");
-    if (poly2 == result)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 404, 0, "%s", "poly2 != result");
-    memcpy((unsigned __int8 *)result, (unsigned __int8 *)poly2, 12 * poly2Count);
+    iassert(poly1Count > 2);
+    iassert(poly2Count > 2);
+    iassert(maxCount >= poly1Count + poly2Count);
+    iassert(poly1);
+    iassert(poly2);
+    iassert(result);
+    iassert(poly1 != result);
+    iassert(poly2 != result);
+
+    memcpy(result, poly2, 12 * poly2Count);
     orient = GetPolyOrientation(polyNormal, poly1, poly1Count);
     if (orient == POLY_ERROR)
         return 0;
+
     lastPoly1Index = poly1Count - 1;
     for (poly1Index = 0; poly1Index < poly1Count; ++poly1Index)
     {
@@ -348,18 +303,14 @@ void __cdecl Phys_GetWindingForBrushFace2(
     unsigned __int8 *edges; // [esp+108h] [ebp-8h]
     unsigned int nonAxialSideIndex; // [esp+10Ch] [ebp-4h]
 
-    if (!brush)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 824, 0, "%s", "brush");
-    if (brushSide >= brush->numsides + 6)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 825, 0, "%s", "brushSide < brush->numsides + 6");
-    if (!outWinding)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 826, 0, "%s", "outWinding");
-    if (!outWinding->pts)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 827, 0, "%s", "outWinding->pts");
+    iassert(brush);
+    iassert(brushSide < brush->numsides + 6);
+    iassert(outWinding);
+    iassert(outWinding->pts);
+
     if (brushSide >= 6)
     {
-        if (!brush->sides)
-            MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 837, 0, "%s", "brush->sides");
+        iassert(brush->sides);
         nonAxialSideIndex = brushSide - 6;
         offset = brush->sides[brushSide - 6].firstAdjacentSideOffset;
         edgeCount = brush->sides[brushSide - 6].edgeCount;
@@ -374,29 +325,21 @@ void __cdecl Phys_GetWindingForBrushFace2(
         offset = brush->firstAdjacentSideOffsets[brushSide & 1][brushSide >> 1];
         edgeCount = brush->edgeCount[brushSide & 1][brushSide >> 1];
         v32 = (float *)&(*axialPlanes)[4 * brushSide];
-        planes[0][0] = *v32;
+        planes[0][0] = v32[0];
         planes[0][1] = v32[1];
         planes[0][2] = v32[2];
         planes[0][3] = v32[3];
     }
     if (edgeCount >= 3 && edgeCount <= maxVerts)
     {
-        if (!brush->baseAdjacentSide)
-            MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 851, 0, "%s", "brush->baseAdjacentSide");
+        iassert(brush->baseAdjacentSide);
         edges = &brush->baseAdjacentSide[offset];
         side1 = edges[edgeCount - 1];
-        if (side1 >= brush->numsides + 6)
-            MyAssertHandler(
-                ".\\physics\\phys_coll_boxbrush.cpp",
-                855,
-                0,
-                "side1 doesn't index brush->numsides + 6\n\t%i not in [0, %i)",
-                side1,
-                brush->numsides + 6);
+        iassert(side1 < brush->numsides + 6);
+
         if (side1 >= 6)
         {
-            if (!brush->sides)
-                MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 862, 0, "%s", "brush->sides");
+            iassert(brush->sides);
             nonAxialSideIndex = side1 - 6;
             v27 = planes[1];
             v28 = brush->sides[side1 - 6].plane;
@@ -409,7 +352,7 @@ void __cdecl Phys_GetWindingForBrushFace2(
         {
             v29 = planes[1];
             v30 = (float *)&(*axialPlanes)[4 * side1];
-            planes[1][0] = *v30;
+            planes[1][0] = v30[0];
             planes[1][1] = v30[1];
             planes[1][2] = v30[2];
             planes[1][3] = v30[3];
@@ -480,10 +423,11 @@ void __cdecl Phys_GetWindingForBrushFace2(
             if (v13)
             {
                 pt = outWinding->pts[outWinding->ptCount];
-                v12 = *pt;
-                if ((LODWORD(v12) & 0x7F800000) == 0x7F800000
-                    || (v11 = pt[1], (LODWORD(v11) & 0x7F800000) == 0x7F800000)
-                    || (v10 = pt[2], (LODWORD(v10) & 0x7F800000) == 0x7F800000))
+                //v12 = *pt;
+                //if ((LODWORD(v12) & 0x7F800000) == 0x7F800000
+                //    || (v11 = pt[1], (LODWORD(v11) & 0x7F800000) == 0x7F800000)
+                //    || (v10 = pt[2], (LODWORD(v10) & 0x7F800000) == 0x7F800000))
+                if (IS_NAN(pt[0]) || IS_NAN(pt[1]) || IS_NAN(pt[2]))
                 {
                     Com_PrintError(20, "Bad intersection of three planes:\n");
                     Com_PrintError(20, "Resulting point: (%f, %f, %f)\n", *pt, pt[1], pt[2]);
@@ -518,9 +462,9 @@ void __cdecl Phys_GetWindingForBrushFace2(
                 }
             }
             //LODWORD(v[3]) = planes[1];
-            v[3] = *planes[1];
             //LODWORD(v[4]) = planes[2];
-            v[4] = *planes[2];
+            v[3] = planes[1][0];
+            v[4] = planes[2][0];
             planes[1][0] = planes[2][0];
             planes[1][1] = planes[2][1];
             planes[1][2] = planes[2][2];
@@ -2746,12 +2690,10 @@ int __cdecl CircularRemoveRange(float (*xyz)[3], int pointCount, int begin, int 
 
 void __cdecl InsertPoint(float (*xyz)[3], int pointCount, int maxPoints, int insertAfter)
 {
-    if (!xyz)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 130, 0, "%s", "xyz");
-    if (insertAfter >= pointCount)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 131, 0, "%s", "insertAfter < pointCount");
-    if (pointCount >= maxPoints)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 132, 0, "%s", "pointCount < maxPoints");
+    iassert(xyz);
+    iassert(insertAfter < pointCount);
+    iassert(pointCount < maxPoints);
+
     if (insertAfter + 1 != pointCount)
         memmove(
             (unsigned __int8 *)&(*xyz)[3 * insertAfter + 6],

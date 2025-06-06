@@ -539,7 +539,7 @@ void __cdecl Phys_DrawPoly(const Poly *poly, const float *color);
 dContactGeomExt *__cdecl AddContact(Results *results);
 bool __cdecl Phys_AddContactData(Results *results, float depth, float *normal, float *pos, int surfaceFlags);
 PolyOrientation __cdecl GetPolyOrientation(const float *polyNormal, const float (*poly)[3], unsigned int ptCount);
-char __cdecl Phys_GetChoppingPlaneForPolyEdge(
+bool __cdecl Phys_GetChoppingPlaneForPolyEdge(
     const float *polyNormal,
     const float *pt1,
     const float *pt2,

@@ -373,7 +373,7 @@ void __cdecl DObjCompleteHierarchyBits(const DObj_s *obj, int *partBits)
             break;
     }
     iassert(j != numModels);
-    *partBits |= 0x80000000;
+    partBits[0] |= 0x80000000;
     for (parentList = subModel->parentList; ; parentList = subModel->parentList)
     {
         while (1)

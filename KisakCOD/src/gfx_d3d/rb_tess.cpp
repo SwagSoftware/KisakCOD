@@ -535,9 +535,8 @@ void __cdecl R_SetParticleCloudConstants(GfxCmdBufSourceState *source, const Gfx
 {
     float v3; // [esp+34h] [ebp-60h]
     float scaledWorldUp[3]; // [esp+40h] [ebp-54h] BYREF
-    float viewUp[5]; // [esp+4Ch] [ebp-48h] BYREF
-    float viewAxis_8; // [esp+60h] [ebp-34h]
-    float viewAxis_12; // [esp+64h] [ebp-30h]
+    float viewUp[3]; // [esp+4Ch] [ebp-48h] BYREF
+    float viewAxis[2][2]; // [esp+58h] [ebp-3Ch] BYREF
     float particleCloudMatrix[4]; // [esp+68h] [ebp-2Ch] BYREF
     float particleColor[4]; // [esp+78h] [ebp-1Ch] BYREF
     float worldUp[3]; // [esp+88h] [ebp-Ch] BYREF
@@ -547,11 +546,11 @@ void __cdecl R_SetParticleCloudConstants(GfxCmdBufSourceState *source, const Gfx
     if (cloud->radius[1] == cloud->radius[0]
         || VecNCompareCustomEpsilon(cloud->placement.base.origin, cloud->endpos, 0.001, 3))
     {
-        viewUp[3] = cloud->radius[0];
-        viewUp[4] = 0.0;
+        viewAxis[0][0] = cloud->radius[0];
+        viewAxis[0][1] = 0.0;
         v3 = cloud->radius[1];
-        viewAxis_8 = 0.0;
-        viewAxis_12 = v3;
+        viewAxis[1][0] = 0.0;
+        viewAxis[1][1] = v3;
     }
     else
     {
@@ -559,12 +558,12 @@ void __cdecl R_SetParticleCloudConstants(GfxCmdBufSourceState *source, const Gfx
         Vec3Normalize(worldUp);
         Vec3Scale(worldUp, cloud->radius[1], scaledWorldUp);
         RB_Vec3DirWorldToView(source, scaledWorldUp, viewUp);
-        RB_CreateParticleCloud2dAxis(cloud, viewUp, (float (*)[2]) & viewUp[3]);
+        RB_CreateParticleCloud2dAxis(cloud, viewUp, &viewAxis);
     }
-    particleCloudMatrix[0] = viewUp[3];
-    particleCloudMatrix[1] = viewUp[4];
-    particleCloudMatrix[2] = viewAxis_8;
-    particleCloudMatrix[3] = viewAxis_12;
+    particleCloudMatrix[0] = viewAxis[0][0];
+    particleCloudMatrix[1] = viewAxis[0][1];
+    particleCloudMatrix[2] = viewAxis[1][0];
+    particleCloudMatrix[3] = viewAxis[1][1];
     R_SetCodeConstantFromVec4(source, 0x35u, particleCloudMatrix);
     Byte4UnpackBgra((const unsigned __int8 *)&cloud->color, particleColor);
     R_SetCodeConstantFromVec4(source, 0x11u, particleColor);
@@ -606,58 +605,39 @@ void __cdecl RB_Vec3DirWorldToView(const GfxCmdBufSourceState *source, const flo
     Vec3RotateTranspose(worldDir, viewAxis, viewDir);
 }
 
-void __cdecl RB_CreateParticleCloud2dAxis(const GfxParticleCloud *cloud, const float *viewUp, float (*viewAxis)[2])
+void __cdecl RB_CreateParticleCloud2dAxis(const GfxParticleCloud *cloud, const float *viewUp, float (*viewAxis)[2][2])
 {
-    float v3; // [esp+8h] [ebp-50h]
-    float v4; // [esp+10h] [ebp-48h]
-    float v5; // [esp+18h] [ebp-40h]
-    float v6; // [esp+1Ch] [ebp-3Ch]
-    float v7; // [esp+30h] [ebp-28h]
-    float v8; // [esp+38h] [ebp-20h]
     float viewAxisLength; // [esp+40h] [ebp-18h]
-    float viewRight; // [esp+44h] [ebp-14h]
-    float viewRight_4; // [esp+48h] [ebp-10h]
 
-    if (!cloud)
-        MyAssertHandler(".\\rb_tess.cpp", 545, 0, "%s", "cloud");
-    if (*viewUp >= 0.001000000047497451 || viewUp[1] >= 0.001000000047497451)
+    iassert(cloud);
+
+    if (viewUp[0] >= 0.001f || viewUp[1] >= 0.001f )
     {
-        viewRight = -(float)-1.0 * viewUp[1];
-        viewRight_4 = (float)-1.0 * *viewUp;
-        (*viewAxis)[0] = viewRight;
-        (*viewAxis)[1] = viewRight_4;
-        v7 = viewUp[1];
-        (*viewAxis)[2] = *viewUp;
-        (*viewAxis)[3] = v7;
+        (*viewAxis)[0][0] = -(float)-1.0 * viewUp[1];
+        (*viewAxis)[0][1] = (float)-1.0 * *viewUp;
+        (*viewAxis)[1][0] = viewUp[0];
+        (*viewAxis)[1][1] = viewUp[1];
+
         viewAxisLength = Vec2Length((const float *)viewAxis);
-        if (viewAxisLength <= 0.0)
-            MyAssertHandler(".\\rb_tess.cpp", 564, 0, "%s\n\t(viewAxisLength) = %g", "(viewAxisLength > 0)", viewAxisLength);
-        v6 = viewAxisLength - Vec2Length(&(*viewAxis)[2]);
-        v3 = fabs(v6);
-        if (v3 >= 0.001000000047497451)
-            MyAssertHandler(
-                ".\\rb_tess.cpp",
-                565,
-                0,
-                "%s",
-                "fabs( viewAxisLength - Vec2Length( viewAxis[1] ) ) < EQUAL_EPSILON");
-        v5 = cloud->radius[0] / viewAxisLength;
-        (*viewAxis)[0] = v5 * (*viewAxis)[0];
-        (*viewAxis)[1] = v5 * (*viewAxis)[1];
+
+        iassert(viewAxisLength > 0);
+        iassert(fabs(viewAxisLength - Vec2Length(&(*viewAxis)[1][0])) < EQUAL_EPSILON);
+
+        (*viewAxis)[0][0] *= (cloud->radius[0] / viewAxisLength);
+        (*viewAxis)[0][1] *= (cloud->radius[0] / viewAxisLength);
+
         if (cloud->radius[0] > (double)viewAxisLength)
         {
-            v4 = cloud->radius[0] / viewAxisLength;
-            (*viewAxis)[2] = v4 * (*viewAxis)[2];
-            (*viewAxis)[3] = v4 * (*viewAxis)[3];
+            (*viewAxis)[1][0] *= (cloud->radius[0] / viewAxisLength);
+            (*viewAxis)[1][1] *= (cloud->radius[0] / viewAxisLength);
         }
     }
     else
     {
-        (*viewAxis)[0] = cloud->radius[0];
-        (*viewAxis)[1] = 0.0;
-        v8 = cloud->radius[1];
-        (*viewAxis)[2] = 0.0;
-        (*viewAxis)[3] = v8;
+        (*viewAxis)[0][0] = cloud->radius[0];
+        (*viewAxis)[0][1] = 0.0;
+        (*viewAxis)[1][0] = 0.0;
+        (*viewAxis)[1][1] = cloud->radius[1];
     }
 }
 

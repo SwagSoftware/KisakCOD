@@ -4,6 +4,8 @@
 
 #include <math.h>
 
+#define EQUAL_EPSILON 0.001f
+
 struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...

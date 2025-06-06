@@ -905,8 +905,7 @@ void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits)
     DObj_s *obj; // [esp+4h] [ebp-4h]
 
     obj = Com_GetServerDObj(ent->s.number);
-    if (!obj)
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1080, 0, "%s", "obj");
+    iassert(obj);
     if (!SV_DObjCreateSkelForBones(obj, partBits))
     {
         controller = entityHandlers[ent->handler].controller;
