@@ -180,7 +180,7 @@ void __cdecl player_die(
             }
         }
         self->takedamage = 1;
-        self->r.contents = (int)&svs.clients[29].netchanOutgoingBuffer[109728];
+        self->r.contents = 0x4000000;
         self->r.currentAngles[2] = 0.0;
         LookAtKiller(self, inflictor, attacker);
         viewangles = self->client->ps.viewangles;

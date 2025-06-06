@@ -20,8 +20,9 @@ void __cdecl FX_SpriteGenerateVerts(FxGenerateVertsCmd *cmd)
     spriteInfo = cmd->spriteInfo;
     if (!spriteInfo)
         MyAssertHandler(".\\EffectsCore\\fx_sprite.cpp", 253, 0, "%s", "spriteInfo");
-    for (i = 0; i < (int)spriteInfo->indices; ++i)
-        FX_GenerateSpriteCodeMeshVerts((FxSprite *)&spriteInfo[2 * i + 1], cmd);
+    //for (i = 0; i < (int)spriteInfo->indices; ++i)
+    for (i = 0; i < spriteInfo->indexCount; ++i)
+        FX_GenerateSpriteCodeMeshVerts(&g_sprites[i], cmd); // LWSS: changed to `g_sprites`
 }
 
 void __cdecl FX_GenerateSpriteCodeMeshVerts(FxSprite* sprite, FxGenerateVertsCmd* cmd)
@@ -436,13 +437,14 @@ char __cdecl FX_HeightWorldToScreen(
 void __cdecl FX_SpriteBegin()
 {
     g_spriteInfo.indices = 0;
+    g_spriteInfo.indexCount = 0;
 }
 
 void __cdecl FX_SpriteAdd(FxSprite *sprite)
 {
-    // KISAKTODO ?????????
-    if ((int)g_spriteInfo.indices < arr_cnt(g_sprites))
-        memcpy(&g_sprites[(*(int *)&g_spriteInfo.indices)++], sprite, sizeof(*sprite));
+    if ((int)g_spriteInfo.indexCount < arr_cnt(g_sprites))
+        qmemcpy(&g_sprites[g_spriteInfo.indexCount++], sprite, sizeof(FxSprite));
+        //qmemcpy(&g_sprites[(int)g_spriteInfo.indices++], sprite, sizeof(FxSprite));
 }
 
 FxSpriteInfo *__cdecl FX_SpriteGetInfo()

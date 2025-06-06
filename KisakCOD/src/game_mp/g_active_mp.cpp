@@ -1021,7 +1021,7 @@ int __cdecl StuckInClient(gentity_s *self)
         return 0;
     if (self->client->sess.sessionState)
         return 0;
-    if (self->r.contents != 0x2000000 && (char *)self->r.contents != &svs.clients[29].netchanOutgoingBuffer[109728])
+    if (self->r.contents != 0x2000000 && self->r.contents != 0x4000000)
         return 0;
     hit = g_entities;
     for (i = 0; ; ++i)
@@ -1034,7 +1034,7 @@ int __cdecl StuckInClient(gentity_s *self)
             && hit != self
             && hit->client
             && hit->health > 0
-            && (hit->r.contents == 0x2000000 || (char *)hit->r.contents == &svs.clients[29].netchanOutgoingBuffer[109728])
+            && (hit->r.contents == 0x2000000 || hit->r.contents == 0x4000000)
             && self->r.absmax[0] >= (double)hit->r.absmin[0]
             && self->r.absmin[0] <= (double)hit->r.absmax[0]
             && self->r.absmax[1] >= (double)hit->r.absmin[1]

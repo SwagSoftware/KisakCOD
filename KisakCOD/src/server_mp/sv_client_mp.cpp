@@ -322,7 +322,7 @@ void __cdecl SV_SetClientStat(int clientNum, int index, unsigned int value)
     {
         if (index < 3498)
         {
-            if (*(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75] == value)
+            if (*(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75] == value) // KISAKTODO
                 return;
             *(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75] = value;
             goto LABEL_16;
@@ -367,7 +367,7 @@ int __cdecl SV_GetClientStat(int clientNum, int index)
     if (index < 2000)
         return svs.clients[clientNum].stats[index + 4];
     if (index < 3498)
-        return *(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75];
+        return *(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75]; // KISAKTODO
     if (!alwaysfails)
     {
         v3 = va("Unhandled stat index %i", index);

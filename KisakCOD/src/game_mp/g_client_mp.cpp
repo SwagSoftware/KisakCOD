@@ -366,7 +366,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
         SV_UnlinkEntity(ent);
     ent->s.groundEntityNum = 1023;
     Scr_SetString(&ent->classname, scr_const.player);
-    ent->clipmask = (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1;
+    ent->clipmask = 0x2810011;
     ent->r.svFlags |= 1u;
     ent->takedamage = 0;
     G_SetClientContents(ent);

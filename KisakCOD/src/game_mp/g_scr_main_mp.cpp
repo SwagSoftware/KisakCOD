@@ -3199,7 +3199,7 @@ void __cdecl Scr_SightTracePassed()
 
     pIgnoreEnt = 0;
     iIgnoreEntNum = 1023;
-    iClipMask = (int)&sv.svEntities[288].baseline.s.lerp.apos.trBase[2] + 3;
+    iClipMask = 0x2801803;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
     if (!Scr_GetInt(2))
@@ -5496,7 +5496,7 @@ void __cdecl GScr_PlaceSpawnPoint(scr_entref_t entref)
         (float *)playerMaxs,
         vEnd,
         pEnt->s.number,
-        (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1);
+        0x2810011);
     Vec3Lerp(vStart, vEnd, trace.fraction, vStart);
     vEnd[0] = vStart[0];
     vEnd[1] = vStart[1];
@@ -5508,7 +5508,7 @@ void __cdecl GScr_PlaceSpawnPoint(scr_entref_t entref)
         (float *)playerMaxs,
         vEnd,
         pEnt->s.number,
-        (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1);
+        0x2810011);
     EntityHitId = Trace_GetEntityHitId(&trace);
     pEnt->s.groundEntityNum = EntityHitId;
     g_entities[pEnt->s.groundEntityNum].flags |= 0x100000u;
@@ -5520,7 +5520,7 @@ void __cdecl GScr_PlaceSpawnPoint(scr_entref_t entref)
         (float *)playerMaxs,
         vStart,
         pEnt->s.number,
-        (int)&sv.svEntities[446].baseline.s.lerp.apos.trBase[2] + 1);
+        0x2810011);
     if (trace.allsolid)
         Com_PrintWarning(
             23,

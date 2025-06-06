@@ -2013,7 +2013,7 @@ void __cdecl PlayerCmd_setEnterTime(scr_entref_t entref)
 void __cdecl BodyEnd(gentity_s *ent)
 {
     ent->s.lerp.eFlags &= ~0x80000u;
-    ent->r.contents = (int)&svs.clients[29].netchanOutgoingBuffer[109728];
+    ent->r.contents = 0x4000000;
     ent->r.svFlags = 0;
 }
 
@@ -2132,7 +2132,7 @@ void __cdecl PlayerCmd_ClonePlayer(scr_entref_t entref)
     body->s.legsAnim = client->ps.legsAnim;
     body->s.torsoAnim = client->ps.torsoAnim;
     body->clipmask = 65537;
-    body->r.contents = (int)&svs.clients[29].netchanOutgoingBuffer[126112];
+    body->r.contents = 0x4004000;
     SV_LinkEntity(body);
     body->nextthink = deathAnimDuration + level.time;
     body->handler = 13;
