@@ -424,9 +424,9 @@ void __cdecl Image_FlipDiagonally(unsigned __int8 *pic, int size)
     {
         for (t = 0; t < s; ++t)
         {
-            cache = *&pic[4 * s + 4 * size * t];
-            *&pic[4 * s + 4 * size * t] = *&pic[4 * t + 4 * size * s];
-            *&pic[4 * t + 4 * size * s] = cache;
+            cache = *(_DWORD *)&pic[4 * s + 4 * size * t];
+            *(_DWORD *)&pic[4 * s + 4 * size * t] = *(_DWORD *)&pic[4 * t + 4 * size * s];
+            *(_DWORD *)&pic[4 * t + 4 * size * s] = cache;
         }
     }
 }

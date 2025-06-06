@@ -326,7 +326,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
             if (loadDef->dimensions[0] >> r_picmip_water->current.integer < 4)
                 v7 = 4;
             else
-                *&v7 = loadDef->dimensions[0] >> r_picmip_water->current.integer;
+                *(_DWORD *)&v7 = loadDef->dimensions[0] >> r_picmip_water->current.integer;
             if (loadDef->dimensions[1] >> r_picmip_water->current.integer < 4)
                 v6 = 4;
             else

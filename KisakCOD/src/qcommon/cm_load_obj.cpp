@@ -385,11 +385,11 @@ void __cdecl CMod_LoadPlanes()
         bits = 0;
         for (axisIter = 0; axisIter < 3; ++axisIter)
         {
-            out->normal[axisIter] = *&in[4 * axisIter];
+            out->normal[axisIter] = *(float *)&in[4 * axisIter];
             if (out->normal[axisIter] < 0.0)
                 bits |= 1 << axisIter;
         }
-        out->dist = *(in + 3);
+        out->dist = *((float *)in + 3);
         if (out->normal[0] == 1.0)
         {
             v2 = 0;
@@ -464,10 +464,10 @@ cNode_t *CMod_LoadNodes()
     out = cm.nodes;
     for (nodeIter = 0; nodeIter < count; ++nodeIter)
     {
-        out->plane = &cm.planes[*in];
+        out->plane = &cm.planes[*(_DWORD *)in];
         for (j = 0; j < 2; ++j)
         {
-            child = *&in[4 * j + 4];
+            child = *(_DWORD *)&in[4 * j + 4];
             out->children[j] = child;
             if (out->children[j] != child)
                 Com_Error(ERR_DROP, "CMod_LoadNodes: children exceeded");
@@ -806,8 +806,8 @@ unsigned int CMod_LoadSubmodels()
         out = &cm.cmodels[bmodelIndex];
         for (j = 0; j < 3; ++j)
         {
-            out->mins[j] = *&in[4 * j] - 1.0;
-            out->maxs[j] = *&in[4 * j + 12] + 1.0;
+            out->mins[j] = *(float *)&in[4 * j] - 1.0;
+            out->maxs[j] = *(float *)&in[4 * j + 12] + 1.0;
             v4 = fabs(out->maxs[j]);
             v3 = fabs(out->mins[j]);
             v2 = v3 - v4;
@@ -820,11 +820,11 @@ unsigned int CMod_LoadSubmodels()
         out->radius = Vec3Length(extent);
         if (bmodelIndex)
         {
-            collAabbCount = *(in + 9);
+            collAabbCount = *((_DWORD *)in + 9);
             out->leaf.collAabbCount = collAabbCount;
             if (out->leaf.collAabbCount != collAabbCount)
                 Com_Error(ERR_DROP, "CMod_LoadSubmodels: collAabbCount exceeded");
-            firstCollAabbIndex = *(in + 8);
+            firstCollAabbIndex = *((_DWORD *)in + 8);
             out->leaf.firstCollAabbIndex = firstCollAabbIndex;
             if (out->leaf.firstCollAabbIndex != firstCollAabbIndex)
                 Com_Error(ERR_DROP, "CMod_LoadSubmodels: firstCollAabbIndex exceeded");
@@ -1109,11 +1109,13 @@ cLeafBrushNode_s *__cdecl CMod_AllocLeafBrushNode()
     cLeafBrushNode_s *result; // eax
 
     result = (cLeafBrushNode_s*)TempMalloc(0x14u);
-    *&result->axis = 0;
+    result->axis = 0;
+    result->leafBrushCount = 0;
     result->contents = 0;
     result->data.leaf.brushes = 0;
     result->data.children.range = 0.0;
-    *result->data.children.childOffset = 0;
+    result->data.children.childOffset[0] = 0;
+    result->data.children.childOffset[1] = 0;
     result->data.children.dist = -3.4028235e38;
     return result;
 }

@@ -576,15 +576,18 @@ char __cdecl R_AddParticleCloudDrawSurf(volatile unsigned int cloudIndex, Materi
         drawSurf = R_AllocFxDrawSurf(region);
         if (drawSurf)
         {
-            drawSurf->fields = R_GetMaterialInfoPacked(material).fields;
-            packed_high = HIDWORD(drawSurf->packed);
-            *&drawSurf->packed = cloudIndex | *&drawSurf->packed & 0xFFFF0000;
-            HIDWORD(drawSurf->packed) = packed_high;
-            v4 = HIDWORD(drawSurf->packed) & 0xFFC3FFFF | 0x300000;
-            *&drawSurf->fields = drawSurf->fields;
-            HIDWORD(drawSurf->packed) = v4;
-            *&drawSurf->fields = drawSurf->fields;
-            HIDWORD(drawSurf->packed) = HIDWORD(drawSurf->packed);
+            drawSurf->packed = R_GetMaterialInfoPacked(material).packed;
+
+            drawSurf->fields.objectId = cloudIndex;
+            drawSurf->fields.surfType = SF_PARTICLE_CLOUD;
+            //packed_high = HIDWORD(drawSurf->packed);
+            //*&drawSurf->packed = cloudIndex | *&drawSurf->packed & 0xFFFF0000; // objectID
+            //HIDWORD(drawSurf->packed) = packed_high;
+            //v4 = HIDWORD(drawSurf->packed) & 0xFFC3FFFF | 0x300000; // surfType = 12
+            //*&drawSurf->fields = drawSurf->fields;
+            //HIDWORD(drawSurf->packed) = v4;
+            //*&drawSurf->fields = drawSurf->fields;
+            //HIDWORD(drawSurf->packed) = HIDWORD(drawSurf->packed);
 
             iassert(drawSurf->fields.prepass == MTL_PREPASS_NONE);
             iassert(((region == DRAW_SURF_FX_CAMERA_EMISSIVE) || (drawSurf == scene.drawSurfs[region]) || (drawSurf->fields.primarySortKey >= (drawSurf - 1)->fields.primarySortKey)));

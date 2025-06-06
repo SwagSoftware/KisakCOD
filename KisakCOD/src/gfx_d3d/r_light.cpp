@@ -1321,6 +1321,7 @@ bool __cdecl R_SpotLightIsAttachedToDobj(const DObj_s *obj)
     return attachedDobj && attachedDobj == obj;
 }
 
+// KISAKTODO: unfk
 void __cdecl ShortSortArray_GfxReverseSortDrawSurfsInterface_GfxDrawSurf_(GfxDrawSurf *lo, GfxDrawSurf *hi)
 {
     int packed_high; // edx
@@ -1356,6 +1357,7 @@ void __cdecl ShortSortArray_GfxReverseSortDrawSurfsInterface_GfxDrawSurf_(GfxDra
     }
 }
 
+// KISAKTODO: unfk
 void __cdecl qsortArray_GfxReverseSortDrawSurfsInterface_GfxDrawSurf_(GfxDrawSurf *elems, int count)
 {
     int packed_high; // edx

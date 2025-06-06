@@ -648,8 +648,7 @@ SndCurve *__cdecl Com_RegisterSoundAliasVolumeFalloffCurve(const char *filename,
     for (i = 0; i < 16; ++i)
     {
         // KISAKTODO: PSYCHO NEGA-ARRAY
-        if (*&g_sa.volumeFalloffCurveNames[-18][72 * i]
-            && !I_stricmp(filename, (char*)*&g_sa.volumeFalloffCurveNames[-18][72 * i]))
+        if (*(_DWORD *)&g_sa.volumeFalloffCurveNames[-18][72 * i] && !I_stricmp(filename, *(const char**)&g_sa.volumeFalloffCurveNames[-18][72 * i]))
         {
             return (SndCurve *)&g_sa.volumeFalloffCurveNames[-18][72 * i];
         }
@@ -1791,9 +1790,9 @@ void Com_InitSoundDevGuiGraphs_LoadObj()
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 240, 0, "%s", "g_sa.curvesInitialized");
     for (i = 1; i < 16; ++i)
     {
-        if (*&g_sa.volumeFalloffCurveNames[-18][72 * i])
+        if (*(_DWORD *)&g_sa.volumeFalloffCurveNames[-18][72 * i])
         {
-            sprintf(devguiPath, "Main/Snd:6/Volume Falloff Curves/%s:%d", *&g_sa.volumeFalloffCurveNames[-18][72 * i], i);
+            sprintf(devguiPath, "Main/Snd:6/Volume Falloff Curves/%s:%d", *(const char**)&g_sa.volumeFalloffCurveNames[-18][72 * i], i);
             g_sa.curveDevGraphs[i].knotCountMax = 8;
             g_sa.curveDevGraphs[i].knots = g_sa.volumeFalloffCurves[i].knots;
             g_sa.curveDevGraphs[i].knotCount = &g_sa.volumeFalloffCurves[i].knotCount;

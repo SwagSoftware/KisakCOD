@@ -1829,15 +1829,15 @@ void __cdecl FS_SortFileList(const char **filelist, int numfiles)
     char *sortedlist; // [esp+14h] [ebp-4h]
 
     sortedlist = (char*)Z_Malloc(4 * numfiles + 4, "FS_SortFileList", 3);
-    *sortedlist = 0;
+    *(_DWORD *)sortedlist = 0;
     numsortedfiles = 0;
     for (i = 0; i < numfiles; ++i)
     {
-        for (j = 0; j < numsortedfiles && FS_PathCmp(filelist[i], (const char*)*&sortedlist[4 * j]) >= 0; ++j)
+        for (j = 0; j < numsortedfiles && FS_PathCmp(filelist[i], *(const char **)&sortedlist[4 * j]) >= 0; ++j)
             ;
         for (k = numsortedfiles; k > j; --k)
-            *&sortedlist[4 * k] = *&sortedlist[4 * k - 4];
-        *&sortedlist[4 * j] = (char)filelist[i]; // KISAKTODO: probably cooked
+            *(_DWORD *)&sortedlist[4 * k] = *(_DWORD *)&sortedlist[4 * k - 4];
+        *(_DWORD *)&sortedlist[4 * j] = (char)filelist[i]; // KISAKTODO: probably cooked
         ++numsortedfiles;
     }
     Com_Memcpy(filelist, sortedlist, 4 * numfiles);

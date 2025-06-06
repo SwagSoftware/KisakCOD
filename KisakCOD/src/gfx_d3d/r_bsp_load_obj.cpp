@@ -404,7 +404,7 @@ void R_LoadLightRegions()
             else
                 v0 = 0;
             hulls[hullIter].axis = v0;
-            usedAxisCount += *&diskHulls[76 * hullIter + 72];
+            usedAxisCount += *(_DWORD *)&diskHulls[76 * hullIter + 72];
         }
         if (usedAxisCount != axisCount)
             MyAssertHandler(
@@ -956,19 +956,19 @@ void __cdecl R_LoadSubmodels(TrisType trisType)
     unsigned int modelCount; // [esp+18h] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_MODELS, 48u, &modelCount);
-    out = (GfxBrushModel*)Hunk_Alloc(56 * modelCount, "R_LoadSubmodels", 20);
+    out = (GfxBrushModel *)Hunk_Alloc(56 * modelCount, "R_LoadSubmodels", 20);
     s_world.models = out;
     s_world.modelCount = modelCount;
     for (modelIndex = 0; modelIndex < modelCount; ++modelIndex)
     {
         for (axis = 0; axis < 3; ++axis)
         {
-            out->bounds[0][axis] = *&in[4 * axis];
-            out->bounds[1][axis] = *&in[4 * axis + 12];
+            out->bounds[0][axis] = *(float *)&in[4 * axis];
+            out->bounds[1][axis] = *(float *)&in[4 * axis + 12];
         }
-        out->surfaceCount = *&in[2 * trisType + 28];
+        out->surfaceCount = *(_WORD *)&in[2 * trisType + 28];
         if (out->surfaceCount)
-            v1 = *&in[2 * trisType + 24];
+            v1 = *(_WORD *)&in[2 * trisType + 24];
         else
             v1 = -1;
         out->startSurfIndex = v1;
@@ -1746,24 +1746,24 @@ void __cdecl R_LoadCells(unsigned int bspVersion, TrisType trisType)
     {
         in = Com_GetBspLump(LUMP_CELLS, 0x34u, &cellCount);
     }
-    out = (GfxCell*)Hunk_Alloc(56 * cellCount, "R_LoadCells", 22);
+    out = (GfxCell *)Hunk_Alloc(56 * cellCount, "R_LoadCells", 22);
     s_world.cells = out;
     s_world.dpvsPlanes.cellCount = cellCount;
     s_world.cellBitsCount = 16 * ((cellCount + 127) >> 7);
     for (cellIndex = 0; cellIndex < cellCount; ++cellIndex)
     {
-        out->mins[0] = *in;
-        out->mins[1] = *(in + 1);
-        out->mins[2] = *(in + 2);
-        out->maxs[0] = *(in + 3);
-        out->maxs[1] = *(in + 4);
-        out->maxs[2] = *(in + 5);
-        out->aabbTree = &rgl.aabbTrees[*&in[2 * trisType + 24]];
-        out->portals = (GfxPortal*)(68 * *(in + 7));
-        out->portalCount = *(in + 8);
-        cullGroupCount = *(in + 10);
+        out->mins[0] = *(float *)in;
+        out->mins[1] = *((float *)in + 1);
+        out->mins[2] = *((float *)in + 2);
+        out->maxs[0] = *((float *)in + 3);
+        out->maxs[1] = *((float *)in + 4);
+        out->maxs[2] = *((float *)in + 5);
+        out->aabbTree = &rgl.aabbTrees[*(unsigned __int16 *)&in[2 * trisType + 24]];
+        out->portals = (GfxPortal *)(68 * *((_DWORD *)in + 7));
+        out->portalCount = *((_DWORD *)in + 8);
+        cullGroupCount = *((_DWORD *)in + 10);
         if (cullGroupCount)
-            v2 = &rgl.cullGroupIndices[*(in + 9)];
+            v2 = &rgl.cullGroupIndices[*((_DWORD *)in + 9)];
         else
             v2 = 0;
         out->cullGroups = v2;
@@ -1777,8 +1777,8 @@ void __cdecl R_LoadCells(unsigned int bspVersion, TrisType trisType)
                 out->reflectionProbeCount = in[44];
                 if (out->reflectionProbeCount)
                 {
-                    out->reflectionProbes = Hunk_Alloc(in[44], "R_LoadCells", 22);
-                    memcpy(out->reflectionProbes, in + 45, in[44]);
+                    out->reflectionProbes = Hunk_Alloc((unsigned __int8)in[44], "R_LoadCells", 22);
+                    memcpy(out->reflectionProbes, (unsigned __int8 *)in + 45, (unsigned __int8)in[44]);
                 }
                 else
                 {
@@ -1814,7 +1814,7 @@ unsigned int R_LoadPortals()
     unsigned int portalCount; // [esp+28h] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_PORTALS, 0x10u, &portalCount);
-    out = (GfxPortal*)Hunk_Alloc(68 * portalCount, "R_LoadPortals", 22);
+    out = (GfxPortal *)Hunk_Alloc(68 * portalCount, "R_LoadPortals", 22);
     if (!s_world.cells)
         MyAssertHandler(".\\r_bsp_load_obj.cpp", 3776, 0, "%s", "s_world.cells");
     if (!s_world.dpvsPlanes.planes)
@@ -1824,7 +1824,7 @@ unsigned int R_LoadPortals()
         result = portalIndex;
         if (portalIndex >= portalCount)
             break;
-        plane = &s_world.dpvsPlanes.planes[*&in[16 * portalIndex]];
+        plane = &s_world.dpvsPlanes.planes[*(_DWORD *)&in[16 * portalIndex]];
         p_plane = &out[portalIndex].plane;
         p_plane->coeffs[0] = plane->normal[0];
         p_plane->coeffs[1] = plane->normal[1];
@@ -1833,18 +1833,18 @@ unsigned int R_LoadPortals()
         out[portalIndex].plane.side[0] = COERCE_INT(p_plane->coeffs[0]) <= 0 ? 0 : 0xC;
         p_plane->side[1] = COERCE_INT(out[portalIndex].plane.coeffs[1]) <= 0 ? 4 : 16;
         p_plane->side[2] = COERCE_INT(out[portalIndex].plane.coeffs[2]) <= 0 ? 8 : 20;
-        if (*&in[16 * portalIndex + 4] >= s_world.dpvsPlanes.cellCount)
+        if (*(_DWORD *)&in[16 * portalIndex + 4] >= s_world.dpvsPlanes.cellCount)
             MyAssertHandler(
                 ".\\r_bsp_load_obj.cpp",
                 3785,
                 0,
                 "in[portalIndex].cellIndex doesn't index s_world.dpvsPlanes.cellCount\n\t%i not in [0, %i)",
-                *&in[16 * portalIndex + 4],
+                *(_DWORD *)&in[16 * portalIndex + 4],
                 s_world.dpvsPlanes.cellCount);
-        out[portalIndex].cell = &s_world.cells[*&in[16 * portalIndex + 4]];
+        out[portalIndex].cell = &s_world.cells[*(_DWORD *)&in[16 * portalIndex + 4]];
         if (!rgl.portalVerts)
             MyAssertHandler(".\\r_bsp_load_obj.cpp", 3787, 0, "%s", "rgl.portalVerts");
-        out[portalIndex].vertices = (float(*)[3])rgl.portalVerts[*&in[16 * portalIndex + 8]];
+        out[portalIndex].vertices = (float (*)[3])rgl.portalVerts[*(_DWORD *)&in[16 * portalIndex + 8]];
         out[portalIndex].vertexCount = in[16 * portalIndex + 12];
         PerpendicularVector(plane->normal, out[portalIndex].hullAxis[0]);
         Vec3Cross(plane->normal, out[portalIndex].hullAxis[0], out[portalIndex].hullAxis[1]);
@@ -1852,7 +1852,7 @@ unsigned int R_LoadPortals()
     for (cellIndex = 0; cellIndex < s_world.dpvsPlanes.cellCount; ++cellIndex)
     {
         if (s_world.cells[cellIndex].portalCount)
-            v1 = &out[(uintptr_t)s_world.cells[cellIndex].portals / 68];
+            v1 = &out[(int)s_world.cells[cellIndex].portals / 68];
         else
             v1 = 0;
         s_world.cells[cellIndex].portals = v1;
@@ -1930,7 +1930,7 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
     inNode = Com_GetBspLump(LUMP_NODES, 0x24u, &nodeCount);
     if (bspVersion > 0xE)
     {
-        inLeaf = (const DiskLeaf*)Com_GetBspLump(LUMP_LEAFS, 0x18u, &leafCount);
+        inLeaf = (const DiskLeaf *)Com_GetBspLump(LUMP_LEAFS, 0x18u, &leafCount);
         inLeaf_v14 = 0;
     }
     else
@@ -1939,15 +1939,15 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
         inLeaf = 0;
     }
     totalNodeCount = leafCount + nodeCount;
-    out = (mnode_load_t*)Z_Malloc(16 * (leafCount + nodeCount), "R_LoadNodesAndLeafs", 22);
+    out = (mnode_load_t *)Z_Malloc(16 * (leafCount + nodeCount), "R_LoadNodesAndLeafs", 22);
     rgl.nodes = out;
     rgl.nodeCount = nodeCount;
     for (nodeIndex = 0; nodeIndex < nodeCount; ++nodeIndex)
     {
-        out->planeIndex = *inNode;
+        out->planeIndex = *(_DWORD *)inNode;
         for (childIndex = 0; childIndex < 2; ++childIndex)
         {
-            nodeOrLeafIndex = *&inNode[4 * childIndex + 4];
+            nodeOrLeafIndex = *(_DWORD *)&inNode[4 * childIndex + 4];
             if (nodeOrLeafIndex < 0)
                 out->children[childIndex] = nodeCount + -1 - nodeOrLeafIndex;
             else
@@ -1971,8 +1971,8 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
     {
         for (leafIndex = 0; leafIndex < leafCount; ++leafIndex)
         {
-            out->cellIndex = *(inLeaf_v14 + 12);
-            if (out->cellIndex != *(inLeaf_v14 + 6))
+            out->cellIndex = *((__int16 *)inLeaf_v14 + 12);
+            if (out->cellIndex != *((_DWORD *)inLeaf_v14 + 6))
                 MyAssertHandler(".\\r_bsp_load_obj.cpp", 3967, 0, "%s", "out->cellIndex == inLeaf_v14->cellNum");
             inLeaf_v14 += 36;
             ++out;
@@ -1980,15 +1980,15 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
     }
     R_SetParentAndCell_r(rgl.nodes);
     s_world.nodeCount = R_CountNodes_r(rgl.nodes);
-    s_world.dpvsPlanes.nodes = (unsigned short*)Hunk_Alloc(16 * s_world.nodeCount, "R_LoadNodesAndLeafs", 22);
-    if ((R_SortNodes_r(rgl.nodes, (mnode_t*)s_world.dpvsPlanes.nodes) - (mnode_t*)s_world.dpvsPlanes.nodes) >> 1 != s_world.nodeCount)
+    s_world.dpvsPlanes.nodes = (unsigned __int16 *)Hunk_Alloc(16 * s_world.nodeCount, "R_LoadNodesAndLeafs", 22);
+    if (((char *)R_SortNodes_r(rgl.nodes, (mnode_t *)s_world.dpvsPlanes.nodes) - (char *)s_world.dpvsPlanes.nodes) >> 1 != s_world.nodeCount)
         MyAssertHandler(
             ".\\r_bsp_load_obj.cpp",
             3989,
             0,
             "%s",
             "reinterpret_cast< ushort * >( out2 ) - s_world.dpvsPlanes.nodes == s_world.nodeCount");
-    Z_Free(rgl.nodes, 22);
+    Z_Free((char *)rgl.nodes, 22);
 }
 
 BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
@@ -2967,8 +2967,8 @@ void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, in
         else
             v3 = 1;
         smodelIndexes = (unsigned __int8 *)Hunk_AllocateTempMemory(2 * v3, "R_AddModelToCell");
-        memcpy(smodelIndexes, tree->smodelIndexes, 2 * tree->smodelIndexCount);
-        tree->smodelIndexes = (unsigned short *)smodelIndexes;
+        memcpy(smodelIndexes, (unsigned __int8 *)tree->smodelIndexes, 2 * tree->smodelIndexCount);
+        tree->smodelIndexes = (unsigned __int16 *)smodelIndexes;
     }
     tree->smodelIndexes[tree->smodelIndexCount] = smodelIndex;
     if (tree->smodelIndexes[tree->smodelIndexCount] != smodelIndex)
@@ -2984,13 +2984,13 @@ void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, in
         smodelInst = &world->dpvs.smodelInsts[smodelIndex];
         for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
         {
-            childTree = (&tree[childIndex] + tree->childrenOffset);
-            if (smodelInst->mins[0] >= childTree->mins[0]
-                && smodelInst->mins[1] >= childTree->mins[1]
-                && smodelInst->mins[2] >= childTree->mins[2]
-                && smodelInst->maxs[0] <= childTree->maxs[0]
-                && smodelInst->maxs[1] <= childTree->maxs[1]
-                && smodelInst->maxs[2] <= childTree->maxs[2])
+            childTree = (GfxAabbTree *)((char *)&tree[childIndex] + tree->childrenOffset);
+            if (smodelInst->mins[0] >= (double)childTree->mins[0]
+                && smodelInst->mins[1] >= (double)childTree->mins[1]
+                && smodelInst->mins[2] >= (double)childTree->mins[2]
+                && smodelInst->maxs[0] <= (double)childTree->maxs[0]
+                && smodelInst->maxs[1] <= (double)childTree->maxs[1]
+                && smodelInst->maxs[2] <= (double)childTree->maxs[2])
             {
                 goto LABEL_18;
             }
@@ -3000,13 +3000,14 @@ void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, in
             if (childIndexa >= tree->childCount)
             {
                 newChildren = Hunk_AllocAlign(44 * (tree->childCount + 1), 4, "R_AddStaticModelToAabbTree_r", 21);
-                children = (unsigned char*)tree + tree->childrenOffset;
+                children = (unsigned __int8 *)tree + tree->childrenOffset;
                 memcpy(newChildren, children, 44 * tree->childCount);
-                tree->childrenOffset = newChildren - (unsigned char*)tree;
+                tree->childrenOffset = newChildren - (unsigned __int8 *)tree;
                 for (childIndexb = 0; childIndexb < tree->childCount; ++childIndexb)
-                    *&newChildren[44 * childIndexb + 40] = &children[44 * childIndexb + *&children[44 * childIndexb + 40]]
+                    *(_DWORD *)&newChildren[44 * childIndexb + 40] = &children[44 * childIndexb
+                    + *(_DWORD *)&children[44 * childIndexb + 40]]
                     - &newChildren[44 * childIndexb];
-                childTreea = (&tree[tree->childCount++] + tree->childrenOffset);
+                childTreea = (GfxAabbTree *)((char *)&tree[tree->childCount++] + tree->childrenOffset);
                 childTreea->mins[0] = smodelInst->mins[0];
                 childTreea->mins[1] = smodelInst->mins[1];
                 childTreea->mins[2] = smodelInst->mins[2];
@@ -3016,15 +3017,15 @@ void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, in
                 R_AddStaticModelToAabbTree_r(world, childTreea, smodelIndex);
                 return;
             }
-            childTree = (&tree[childIndexa] + tree->childrenOffset);
+            childTree = (GfxAabbTree *)((char *)&tree[childIndexa] + tree->childrenOffset);
             if (!childTree->surfaceCount)
                 break;
         }
         for (i = 0; i < 3; ++i)
         {
-            if (smodelInst->mins[i] < childTree->mins[i])
+            if (smodelInst->mins[i] < (double)childTree->mins[i])
                 childTree->mins[i] = smodelInst->mins[i];
-            if (smodelInst->maxs[i] > childTree->maxs[i])
+            if (smodelInst->maxs[i] > (double)childTree->maxs[i])
                 childTree->maxs[i] = smodelInst->maxs[i];
         }
     LABEL_18:

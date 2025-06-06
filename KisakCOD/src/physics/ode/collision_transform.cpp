@@ -252,11 +252,11 @@ void __cdecl ODE_GeomTransformSetRotation(dxGeom *g, const float *origin, const 
 		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 273, 0, "%s", "g");
 	if (g->type != 6)
 		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 274, 0, "%s", "g->type == dGeomTransformClass");
-	Phys_AxisToOdeMatrix3(rotation, (float*)&g[1].data);
-	g[1].aabb[4] = *origin;
+	Phys_AxisToOdeMatrix3(rotation, (float *)&g[1].data);
+	g[1].aabb[4] = origin[0];
 	g[1].aabb[5] = origin[1];
-	*&g[1].category_bits = origin[2];
-	*&g[1].collide_bits = 0.0;
+	*(float *)&g[1].category_bits = origin[2];
+	*(float *)&g[1].collide_bits = 0.0;
 }
 void __cdecl ODE_GeomTransformGetOffset(dxGeom *g, float *origin)
 {
@@ -266,7 +266,7 @@ void __cdecl ODE_GeomTransformGetOffset(dxGeom *g, float *origin)
 		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 299, 0, "%s", "g->type == dGeomTransformClass");
 	*origin = g[1].aabb[4];
 	origin[1] = g[1].aabb[5];
-	origin[2] = *&g[1].category_bits;
+	origin[2] = *(float *)&g[1].category_bits;
 }
 void __cdecl ODE_GeomTransformSetOffset(dxGeom *g, const float *origin)
 {
@@ -276,8 +276,8 @@ void __cdecl ODE_GeomTransformSetOffset(dxGeom *g, const float *origin)
 		MyAssertHandler(".\\physics\\ode\\src\\collision_transform.cpp", 287, 0, "%s", "g->type == dGeomTransformClass");
 	g[1].aabb[4] = *origin;
 	g[1].aabb[5] = origin[1];
-	*&g[1].category_bits = origin[2];
-	*&g[1].collide_bits = 0.0;
+	*(float *)&g[1].category_bits = origin[2];
+	*(float *)&g[1].collide_bits = 0.0;
 }
 dxWorld *__cdecl ODE_BodyGetWorld(dxBody *b)
 {

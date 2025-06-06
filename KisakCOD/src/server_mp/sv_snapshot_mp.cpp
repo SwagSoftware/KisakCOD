@@ -758,18 +758,18 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
     }
     v2 = svs.archivedSnapshotFrames[archivedFrame % 1200].start % 0x2000000;
     partSize = 0x2000000 - v2;
-    if (*&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596] > 0x2000000 - v2)
+    if (*(_DWORD *)&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596] > 0x2000000 - v2)
         MSG_InitReadOnlySplit(
             &msg,
             &svs.archivedSnapshotBuffer[v2],
             partSize,
             svs.archivedSnapshotBuffer,
-            *(unsigned int *)&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596] - partSize);
+            *(_DWORD *)&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596] - partSize);
     else
         MSG_InitReadOnly(
             &msg,
             &svs.archivedSnapshotBuffer[v2],
-            *(unsigned int *)&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596]);
+            *(_DWORD *)&svs.archivedSnapshotBuffer[8 * (archivedFrame % 1200) - 9596]);
     MSG_BeginReading(&msg);
     if (MSG_ReadBit(&msg))
     {

@@ -856,7 +856,10 @@ void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsig
             else
             {
                 for (sampleIndex = 0; sampleIndex < 0x40; ++sampleIndex)
-                    *&pixels[s_modelLightingSampleDelta[sampleIndex]] = *patch->groundLighting;
+                {
+                    *(_DWORD *)&pixels[s_modelLightingSampleDelta[sampleIndex]] = *(_DWORD *)patch->groundLighting;
+                    //*&pixels[s_modelLightingSampleDelta[sampleIndex]] = *patch->groundLighting;
+                }
             }
         }
         if (!modelLightGlob.lockedBox.pBits)

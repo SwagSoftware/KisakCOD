@@ -1060,14 +1060,14 @@ MaterialStateMapRuleSet *__cdecl Material_AssembleRuleSet(int ruleCount, Materia
     int ruleIndex; // [esp+8h] [ebp-4h]
 
     ruleSet = Material_Alloc(32 * ruleCount + 4);
-    *ruleSet = ruleCount;
-    Com_Memcpy(ruleSet + 4, rules, 32 * ruleCount);
+    *(_DWORD *)ruleSet = ruleCount;
+    Com_Memcpy((char *)ruleSet + 4, (char *)rules, 32 * ruleCount);
     for (ruleIndex = 0; ruleIndex < ruleCount; ++ruleIndex)
     {
         for (stateBitsIndex = 0; stateBitsIndex < 2; ++stateBitsIndex)
-            *&ruleSet[32 * ruleIndex + 28 + 4 * stateBitsIndex] = ~*&ruleSet[32 * ruleIndex + 28 + 4 * stateBitsIndex];
+            *(_DWORD *)&ruleSet[32 * ruleIndex + 28 + 4 * stateBitsIndex] = ~*(_DWORD *)&ruleSet[32 * ruleIndex + 28 + 4 * stateBitsIndex];
     }
-    return (MaterialStateMapRuleSet*)ruleSet;
+    return (MaterialStateMapRuleSet *)ruleSet;
 }
 
 char __cdecl Material_ParseRuleSet(
@@ -2363,7 +2363,9 @@ unsigned int __cdecl Material_CombineShaderArguments(unsigned int usedCount, Mat
         {
             ++dstIndex;
             v2.nameHash = localArgs[srcIndex].u.nameHash;
-            *&localArgs[dstIndex].type = *&localArgs[srcIndex].type;
+            //*&localArgs[dstIndex].type = *&localArgs[srcIndex].type;
+            localArgs[dstIndex].type = localArgs[srcIndex].type;
+            localArgs[dstIndex].dest = localArgs[srcIndex].dest;
             localArgs[dstIndex].u = v2;
         }
     }
@@ -4006,7 +4008,8 @@ char __cdecl Material_LoadPassVertexDecl(
             && (dest[2 * insertIndex] != source || dest[2 * insertIndex + 1] >= resourceDest);
             --insertIndex)
         {
-            routing[insertIndex] = (MaterialStreamRouting)*&dest[2 * insertIndex];
+            //routing[insertIndex] = (MaterialStreamRouting)*&dest[2 * insertIndex];
+            routing[insertIndex] = *(MaterialStreamRouting *)&dest[2 * insertIndex];
         }
         routing[insertIndex].source = source;
         routing[insertIndex].dest = resourceDest;
@@ -4051,7 +4054,10 @@ bool __cdecl Material_LoadPass(
     pass->vertexDecl = 0;
     pass->vertexShader = 0;
     pass->pixelShader = 0;
-    *&pass->perPrimArgCount = 0;
+    pass->perPrimArgCount = 0;
+    pass->perObjArgCount = 0;
+    pass->stableArgCount = 0;
+    pass->customSamplerFlags = 0;
     pass->args = 0;
     if (!Material_LoadPassStateMap(text, stateMap))
         return 0;
@@ -5101,7 +5107,7 @@ Material *__cdecl Material_CreateLayered(
     newMtl->constantCount = constantCount;
     v4 = newMtl->stateBitsEntry;
     qmemcpy(newMtl->stateBitsEntry, stateBitsEntry, 0x20u);
-    *(v4 + 16) = *&stateBitsEntry[32];
+    *((_WORD *)v4 + 16) = *(_WORD *)&stateBitsEntry[32];
     Material_SetStateBits(newMtl, stateBitsTable, stateBitsCount);
     newTexEntry = newMtl->textureTable;
     newConstEntry = newMtl->constantTable;
@@ -5117,7 +5123,10 @@ Material *__cdecl Material_CreateLayered(
         {
             v5 = &oldTexTable[texIndex];
             newTexEntry->nameHash = v5->nameHash;
-            *&newTexEntry->nameStart = *&v5->nameStart;
+            newTexEntry->nameStart = v5->nameStart;
+            newTexEntry->nameEnd = v5->nameEnd;
+            newTexEntry->samplerState= v5->samplerState;
+            newTexEntry->semantic= v5->semantic;
             newTexEntry->u.image = v5->u.image;
             if ((newTexEntry->samplerState & 0x18) == 8 && (newTexEntry->semantic == 2 || newTexEntry->semantic == 5))
             {

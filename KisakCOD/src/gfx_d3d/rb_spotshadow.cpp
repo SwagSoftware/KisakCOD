@@ -18,7 +18,7 @@ void __cdecl RB_SetSpotShadowOverlayScaleAndBias(const GfxSpotShadow *spotShadow
     RB_GetShadowOverlayDepthBounds(nearDepth, &farDepth);
     zNear = -spotShadow->shadowViewParms.projectionMatrix.m[3][2] / spotShadow->shadowViewParms.projectionMatrix.m[2][2];
     zFar = spotShadow->light->radius;
-    nearDepth[1] = *&gfxMetrics.shadowmapBuildTechType;
+    //nearDepth[1] = *&gfxMetrics.shadowmapBuildTechType; // KISAKTODO: wtf is this?
     if (gfxMetrics.shadowmapBuildTechType == TECHNIQUE_BUILD_SHADOWMAP_COLOR)
     {
         scale = 1.0 / ((zFar - zNear) * (farDepth - nearDepth[0]));
