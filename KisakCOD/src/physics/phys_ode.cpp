@@ -533,7 +533,7 @@ void __cdecl Phys_BodyAddGeomAndSetMass(
     PhysWorld worldIndex,
     dxBody *body,
     float totalMass,
-    const GeomState *geomState,
+    GeomState *geomState,
     const float *centerOfMass)
 {
     dxGeom *geom; // [esp+18h] [ebp-54h]
@@ -572,7 +572,7 @@ void __cdecl Phys_BodyAddGeomAndSetMass(
         Phys_MassSetBrushTotal(
             &mass,
             totalMass,
-            (float*)&geomState->u.cylinderState.radius,
+            geomState->u.brushState.momentsOfInertia,
             geomState->u.brushState.productsOfInertia);
         geom = Phys_CreateBrushmodelGeom(
             physGlob.space[worldIndex],
@@ -586,7 +586,7 @@ void __cdecl Phys_BodyAddGeomAndSetMass(
         Phys_MassSetBrushTotal(
             &mass,
             totalMass,
-            (float*)&geomState->u.cylinderState.radius,
+            geomState->u.brushState.momentsOfInertia,
             geomState->u.brushState.productsOfInertia);
         geom = Phys_CreateBrushGeom(physGlob.space[worldIndex], body, geomState->u.brushState.u.brush, centerOfMass);
         if (!geom)
@@ -664,7 +664,7 @@ void __cdecl Phys_AdjustForNewCenterOfMass(dxBody *body, const float *newRelCent
     dBodySetPosition(body, newAbsCenterOfMass[0], newAbsCenterOfMass[1], newAbsCenterOfMass[2]);
     for (geom = ODE_BodyGetFirstGeom(body); geom; geom = dGeomGetBodyNext(geom))
     {
-        if (dGeomGetClass(geom) == 6)
+        if (dGeomGetClass(geom) == dGeomTransformClass)
         {
             ODE_GeomTransformGetOffset(geom, geomOffset);
             Vec3Add(geomOffset, oldRelCenterOfMass, geomOffset);

@@ -360,6 +360,11 @@ void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results)
     }
 }
 
+dColliderFn *Phys_GetColliderNull(int num)
+{
+    return NULL;
+}
+
 static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt *contact, int skip)
 {
     dxBody *Body; // eax
@@ -671,8 +676,8 @@ void __cdecl Phys_InitBrushmodelGeomClass()
     int classID; // [esp+14h] [ebp-4h]
 
     gclass.aabb_test = 0;
-    *(unsigned int *)&gclass.isPlaceable = 1;
-    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))RETURN_ZERO32;
+    gclass.isPlaceable = true;
+    gclass.collider = Phys_GetColliderNull;
     gclass.aabb = Phys_GetBrushmodelAABB;
     gclass.bytes = 16;
     classID = dCreateGeomClass(&gclass);
@@ -723,18 +728,13 @@ void __cdecl Phys_GetBrushmodelAABB(dxGeom *geom, float *aabb)
     aabb[5] = radius;
 }
 
-dColliderFn* Phys_GetColliderNull(int num)
-{
-    return NULL;
-}
-
 void __cdecl Phys_InitBrushGeomClass()
 {
     dGeomClass gclass; // [esp+0h] [ebp-18h] BYREF
     int classID; // [esp+14h] [ebp-4h]
 
     gclass.aabb_test = 0;
-    gclass.isPlaceable = 1;
+    gclass.isPlaceable = true;
     gclass.collider = Phys_GetColliderNull;
     gclass.aabb = Phys_GetBrushAABB;
     gclass.bytes = 16;
@@ -769,8 +769,8 @@ void __cdecl Phys_InitCylinderGeomClass()
     int classID; // [esp+14h] [ebp-4h]
 
     gclass.aabb_test = 0;
-    *(unsigned int *)&gclass.isPlaceable = 1;
-    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))RETURN_ZERO32;
+    gclass.isPlaceable = true;
+    gclass.collider = Phys_GetColliderNull;
     gclass.aabb = Phys_GetCylinderAABB;
     gclass.bytes = 12;
     classID = dCreateGeomClass(&gclass);
@@ -952,7 +952,7 @@ dxGeom *__cdecl Phys_CreateBrushmodelGeom(
         return 0;
     ClassData = (GeomStateBrush *)dGeomGetClassData(geom);
     ClassData->u.brushModel = brushModel;
-    ClassData->momentsOfInertia[0] = *centerOfMass;
+    ClassData->momentsOfInertia[0] = centerOfMass[0];
     ClassData->momentsOfInertia[1] = centerOfMass[1];
     ClassData->momentsOfInertia[2] = centerOfMass[2];
     return geom;
@@ -982,7 +982,7 @@ dxGeom *__cdecl Phys_CreateBrushGeom(dxSpace *space, dxBody *body, const cbrush_
         return 0;
     ClassData = (GeomStateBrush *)dGeomGetClassData(geom);
     ClassData->u.brush = brush;
-    ClassData->momentsOfInertia[0] = *centerOfMass;
+    ClassData->momentsOfInertia[0] = centerOfMass[0];
     ClassData->momentsOfInertia[1] = centerOfMass[1];
     ClassData->momentsOfInertia[2] = centerOfMass[2];
     return geom;

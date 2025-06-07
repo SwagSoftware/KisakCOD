@@ -316,7 +316,7 @@ void __cdecl Phys_BodyAddGeomAndSetMass(
     PhysWorld worldIndex,
     dxBody *body,
     float totalMass,
-    const GeomState *geomState,
+    GeomState *geomState,
     const float *centerOfMass);
 void __cdecl Phys_AdjustForNewCenterOfMass(dxBody *body, const float *newRelCenterOfMass);
 void __cdecl Phys_BodyGetRotation(dxBody *body, float (*outRotation)[3]);
