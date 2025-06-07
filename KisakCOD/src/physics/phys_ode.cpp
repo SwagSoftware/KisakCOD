@@ -122,7 +122,7 @@ void __cdecl Phys_Init()
             if (!physGlob.world[worldIndex])
                 MyAssertHandler(".\\physics\\phys_ode.cpp", 316, 0, "%s", "physGlob.world[worldIndex]");
             physGlob.worldData[worldIndex].timeLastSnapshot = 0;
-            physGlob.space[51 * worldIndex - 152] = 0;
+            physGlob.worldData[worldIndex].timeLastUpdate = 0;
             physGlob.space[worldIndex] = dGetSimpleSpace(worldIndex);
             if (!physGlob.space[worldIndex])
                 MyAssertHandler(".\\physics\\phys_ode.cpp", 320, 0, "%s", "physGlob.space[worldIndex]");
@@ -131,7 +131,7 @@ void __cdecl Phys_Init()
                 MyAssertHandler(".\\physics\\phys_ode.cpp", 322, 0, "%s", "physGlob.contactgroup[worldIndex]");
             dWorldSetAutoDisableFlag(physGlob.world[worldIndex], 1);
             dWorldSetAutoDisableSteps(physGlob.world[worldIndex], 0);
-            physGlob.space[51 * worldIndex - 150] = 0;
+            physGlob.worldData[worldIndex].collisionCallback = nullptr;
         }
         physGlob.dumpContacts = 0;
         min.value.max = 1.0;
@@ -1180,8 +1180,8 @@ void __cdecl Phys_ObjDestroy(PhysWorld worldIndex, dxBody *id)
     Pool_Free((freenode *)userData, &physGlob.userDataPool);
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
 #else
-        free(userData);
-#endif;
+    free(userData);
+#endif
 }
 
 void __cdecl Phys_ObjAddForce(PhysWorld worldIndex, dxBody *id, float *worldPos, const float *impulse)
@@ -1487,7 +1487,7 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
         v1 = 0.0;
     g_phys_msecStep[worldIndex] = g_phys_minMsecStep[worldIndex]
         + (int)((double)(g_phys_maxMsecStep[worldIndex] - g_phys_minMsecStep[worldIndex]) * v1);
-        ODE_ForEachBody<void(__cdecl *)(dxBody *)>(world, Phys_CheckIfAliveTooLong);
+        ODE_ForEachBody(world, Phys_CheckIfAliveTooLong);
         //Profile_EndInternal(0);
 }
 
@@ -1512,7 +1512,7 @@ void __cdecl Phys_CheckIfAliveTooLong(dxBody *body)
     if (geom)
     {
         odeWorld = ODE_BodyGetWorld(body);
-        timeNow = (unsigned int)physGlob.space[51 * Phys_IndexFromODEWorld(odeWorld) - 152];
+        timeNow = physGlob.worldData[Phys_IndexFromODEWorld(odeWorld)].timeLastUpdate; //  (unsigned int)physGlob.space[51 * Phys_IndexFromODEWorld(odeWorld) - 152];
         if (dBodyIsEnabled(body))
         {
             Phys_BodyGetCenterOfMass(body, newPos);
@@ -1785,7 +1785,7 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
     if (data->timeLastUpdate < timeNow)
     {
         data->timeLastSnapshot = data->timeLastUpdate;
-        ODE_ForEachBody<void(__cdecl *)(dxBody *)>(world, Phys_BodyGrabSnapshot);
+        ODE_ForEachBody(world, Phys_BodyGrabSnapshot);
         maxIter = 2;
         do
         {
@@ -1801,10 +1801,10 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
             data->timeLastUpdate += v5;
             dxPostProcessIslands(worldIndex);
         } while (data->timeLastUpdate < timeNow);
-        ODE_ForEachBody<void(__cdecl *)(dxBody *)>(world, Phys_DoBodyOncePerRun);
+        ODE_ForEachBody(world, Phys_DoBodyOncePerRun);
     }
     if (phys_drawAwake->current.enabled || phys_drawCollisionObj->current.enabled)
-        ODE_ForEachBody<void(__cdecl *)(dxBody *)>(world, Phys_ObjDraw);
+        ODE_ForEachBody(world, Phys_ObjDraw);
     if (data->timeLastSnapshot > timeNow || timeNow > data->timeLastUpdate)
         MyAssertHandler(
             ".\\physics\\phys_ode.cpp",
@@ -2692,7 +2692,7 @@ void __cdecl Phys_SetCollisionCallback(PhysWorld worldIndex, void(__cdecl *callb
             "worldIndex doesn't index PHYS_WORLD_COUNT\n\t%i not in [0, %i)",
             worldIndex,
             3);
-    physGlob.space[51 * worldIndex - 150] = (dxSpace *)callback;
+    physGlob.worldData[worldIndex].collisionCallback = callback;
 }
 
 void __cdecl Phys_AddJitterRegion(

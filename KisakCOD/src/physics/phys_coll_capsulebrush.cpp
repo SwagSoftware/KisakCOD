@@ -154,7 +154,7 @@ void __cdecl Phys_CollideCapsuleWithBrush(const cbrush_t *brush, const objInfo *
     brushPlane[1] = 0.0;
     brushPlane[2] = 0.0;
     brushPlane[3] = 0.0;
-    v8 = FLT_MIN;
+    v8 = -3.4028235e38;
     brushSideIndex = -1;
     CM_BuildAxialPlanes(brush, &axialPlanes_1);
     for (i = 0; i < 6; ++i)

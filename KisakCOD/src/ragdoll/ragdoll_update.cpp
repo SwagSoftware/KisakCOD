@@ -354,8 +354,8 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
             anchor);
         joint->joint2 = Phys_CreateAngularMotor(
             PHYS_WORLD_RAGDOLL,
-            (dxBody *)bone->rigidBody,
-            (dxBody *)parentBone->rigidBody,
+            bone->rigidBody,
+            parentBone->rigidBody,
             jointDef->numLimitAxes,
             limitAxes,
             vec3_origin,

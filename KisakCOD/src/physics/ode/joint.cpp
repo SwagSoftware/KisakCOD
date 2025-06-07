@@ -524,8 +524,8 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
       info->cfm[row] = normal_cfm;
       if (! limit) {
 	info->c[row] = vel;
-	info->lo[row] = -fmax;
-	info->hi[row] = fmax;
+	info->lo[srow] = -fmax;
+	info->hi[srow] = fmax;
       }
       else {
 	// the joint is at a limit, AND is being powered. if the joint is
@@ -571,19 +571,19 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
 
       if (lostop == histop) {
 	// limited low and high simultaneously
-	info->lo[row] = -dInfinity;
-	info->hi[row] = dInfinity;
+	info->lo[srow] = -dInfinity;
+	info->hi[srow] = dInfinity;
       }
       else {
 	if (limit == 1) {
 	  // low limit
-	  info->lo[row] = 0;
-	  info->hi[row] = dInfinity;
+	  info->lo[srow] = 0;
+	  info->hi[srow] = dInfinity;
 	}
 	else {
 	  // high limit
-	  info->lo[row] = -dInfinity;
-	  info->hi[row] = 0;
+	  info->lo[srow] = -dInfinity;
+	  info->hi[srow] = 0;
 	}
 
 	// deal with bounce
@@ -1324,8 +1324,8 @@ static void contactGetInfo2 (dxJointContact *j, dxWorldStepInfo* stepInfo, dxJoi
     }
     // set LCP bounds and friction index. this depends on the approximation
     // mode
-    info->lo[1] = -j->contact.surface.mu;
-    info->hi[1] = j->contact.surface.mu;
+    info->lo[s] = -j->contact.surface.mu;
+    info->hi[s] = j->contact.surface.mu;
     if (j->contact.surface.mode & dContactApprox1_1) info->findex[1] = 0;
 
     // set slip (constraint force mixing)
@@ -1352,12 +1352,12 @@ static void contactGetInfo2 (dxJointContact *j, dxWorldStepInfo* stepInfo, dxJoi
     // set LCP bounds and friction index. this depends on the approximation
     // mode
     if (j->contact.surface.mode & dContactMu2) {
-      info->lo[2] = -j->contact.surface.mu2;
-      info->hi[2] = j->contact.surface.mu2;
+      info->lo[s2] = -j->contact.surface.mu2;
+      info->hi[s2] = j->contact.surface.mu2;
     }
     else {
-      info->lo[2] = -j->contact.surface.mu;
-      info->hi[2] = j->contact.surface.mu;
+      info->lo[s2] = -j->contact.surface.mu;
+      info->hi[s2] = j->contact.surface.mu;
     }
     if (j->contact.surface.mode & dContactApprox1_2) info->findex[2] = 0;
 

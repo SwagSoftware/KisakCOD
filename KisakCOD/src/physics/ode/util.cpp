@@ -99,7 +99,12 @@ void dxStepBody (dxBody *b, dReal h)
   int j;
 
   // handle linear velocity
-  for (j=0; j<3; j++) b->info.pos[j] += h * b->info.lvel[j];
+  for (j = 0; j < 3; j++) {
+      iassert(isfinite(b->info.lvel[j]));
+      iassert(isfinite(b->info.avel[j]));
+
+      b->info.pos[j] += h * b->info.lvel[j];
+  }
 
   if (b->flags & dxBodyFlagFiniteRotation) {
     dVector3 irv;	// infitesimal rotation vector

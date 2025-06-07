@@ -222,7 +222,7 @@ struct PhysObjUserData // sizeof=0x70
      void release(T *ptr)
      {
          iassert(ptr >= &entries[0] && ptr < &entries[N]);
-         memset(ptr, 0, sizeof(T));
+         memset(ptr, 0xAB, sizeof(T));
 
          *(int *)ptr = this->freeEntry;
          this->freeEntry = ptr - entries;

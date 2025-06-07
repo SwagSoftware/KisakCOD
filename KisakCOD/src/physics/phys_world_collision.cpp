@@ -851,8 +851,8 @@ void __cdecl Phys_InitCapsuleGeomClass()
     int classID; // [esp+14h] [ebp-4h]
 
     gclass.aabb_test = 0;
-    *(unsigned int *)&gclass.isPlaceable = 1;
-    gclass.collider = (int(__cdecl * (__cdecl *)(int))(dxGeom *, dxGeom *, int, dContactGeom *, int))RETURN_ZERO32;
+    gclass.isPlaceable = true;
+    gclass.collider = Phys_GetColliderNull;
     gclass.aabb = Phys_GetCapsuleAABB;
     gclass.bytes = 12;
     classID = dCreateGeomClass(&gclass);
