@@ -1913,7 +1913,7 @@ ID3DXBuffer *__cdecl Material_CompileShader(
     }
     shader[1] = 0;
     hr = D3DXCompileShader(shaderString, shaderTextLen, 0, 0, entryPoint, target, 0, shader, &fileName, &v16);
-    __asm { fnclex }
+    // __asm { fnclex }
     // KISAKTODO: cancerous error handle
     //if (fileName)
     //{

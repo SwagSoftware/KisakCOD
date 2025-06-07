@@ -286,11 +286,12 @@ dxGeom *dGeomGetBodyNext (dxGeom *geom)
 	    "invalid operation for geom in locked space");
 
 
-void dGeomDestroy (dxGeom *g)
+/* void dGeomDestroy(dxGeom *g)
 {
   dAASSERT (g);
   delete g;
 }
+*/
 
 
 void dGeomSetData (dxGeom *g, void *data)

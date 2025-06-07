@@ -92,7 +92,7 @@ dxSpace::~dxSpace()
     dxGeom *g,*n;
     for (g = first; g; g=n) {
       n = g->next;
-      dGeomDestroy (g);
+      ODE_GeomDestruct(g);
     }
   }
   else {
@@ -650,7 +650,7 @@ void dSpaceDestroy (dxSpace *space)
 {
   dAASSERT (space);
   dUASSERT (dGeomIsSpace(space),"argument not a space");
-  dGeomDestroy (space);
+  ODE_GeomDestruct (space);
 }
 
 

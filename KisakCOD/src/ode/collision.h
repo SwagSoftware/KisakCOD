@@ -37,7 +37,7 @@ extern "C" {
 /* ************************************************************************ */
 /* general functions */
 
-void dGeomDestroy (dGeomID);
+// NOPE void dGeomDestroy (dGeomID);
 void dGeomSetData (dGeomID, void *);
 void *dGeomGetData (dGeomID);
 void dGeomSetBody (dGeomID, dBodyID);

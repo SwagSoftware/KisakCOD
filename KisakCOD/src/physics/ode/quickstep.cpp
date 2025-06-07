@@ -837,7 +837,7 @@ void dxQuickStepper (dxWorld *world,
 		dumpBodyJoints(world, body, bodyCount, joint, jointCount);
 
 	vassert(jointCount < ISLAND_MAX_JOINT_COUNT, "%i not in [0, %i)", jointCount, ISLAND_MAX_JOINT_COUNT);
-	vassert(jointCount < ISLAND_MAX_BODY_COUNT, "%i not in [0, %i)", jointCount, ISLAND_MAX_BODY_COUNT);
+	vassert(bodyCount < ISLAND_MAX_BODY_COUNT, "%i not in [0, %i)", bodyCount, ISLAND_MAX_BODY_COUNT);
 
 	v8 = 1.0 / stepsize;
 	v28 = v8;
