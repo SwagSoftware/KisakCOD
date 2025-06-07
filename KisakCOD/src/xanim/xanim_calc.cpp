@@ -1745,7 +1745,7 @@ void __cdecl XAnimMadRotTransArray(
 
     for (int i = 0; i < numBones; ++i)
     {
-        if (!info->ignorePartBits.testBit(i));
+        if (!info->ignorePartBits.testBit(i))
         {
             r = Vec4LengthSq(rotTrans->quat);
             if (r != 0.0)

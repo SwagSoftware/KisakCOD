@@ -1082,16 +1082,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
     float currentOffset[3]; // [esp+100h] [ebp-B0h] BYREF
     float newLocalRot[4]; // [esp+10Ch] [ebp-A4h] BYREF
     float axis[3][3]; // [esp+11Ch] [ebp-94h] BYREF
-    float currentLocalRot[7]; // [esp+140h] [ebp-70h] BYREF
-    float invParentMat_12; // [esp+15Ch] [ebp-54h]
-    float invParentMat_16; // [esp+160h] [ebp-50h]
-    float invParentMat_20; // [esp+164h] [ebp-4Ch]
-    float invParentMat_24; // [esp+168h] [ebp-48h]
-    float invParentMat_28; // [esp+16Ch] [ebp-44h]
-    float invParentMat_32; // [esp+170h] [ebp-40h]
-    float invParentMat_36; // [esp+174h] [ebp-3Ch]
-    float invParentMat_40; // [esp+178h] [ebp-38h]
-    float invParentMat_44; // [esp+17Ch] [ebp-34h]
+    float currentLocalRot[16]; // [esp+140h] [ebp-70h] BYREF
     float relMat[4][3]; // [esp+180h] [ebp-30h] BYREF
     BoneOrientation *snapshota; // [esp+1BCh] [ebp+Ch]
 
@@ -1179,21 +1170,21 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                 currentLocalRot[4] = 1.0 - (v6 + v8);
                 currentLocalRot[5] = v7 - v9;
                 currentLocalRot[6] = v12 + v11;
-                invParentMat_12 = v7 + v9;
-                invParentMat_16 = 1.0 - (v14 + v8);
-                invParentMat_20 = v13 - v15;
-                invParentMat_24 = v12 - v11;
-                invParentMat_28 = v13 + v15;
-                invParentMat_32 = 1.0 - (v14 + v6);
-                invParentMat_36 = -(parentAnimMat->trans[0] * currentLocalRot[4]
-                    + parentAnimMat->trans[1] * invParentMat_12
-                    + parentAnimMat->trans[2] * invParentMat_24);
-                invParentMat_40 = -(parentAnimMat->trans[0] * currentLocalRot[5]
-                    + parentAnimMat->trans[1] * invParentMat_16
-                    + parentAnimMat->trans[2] * invParentMat_28);
-                invParentMat_44 = -(parentAnimMat->trans[0] * currentLocalRot[6]
-                    + parentAnimMat->trans[1] * invParentMat_20
-                    + parentAnimMat->trans[2] * invParentMat_32);
+                currentLocalRot[7] = v7 + v9;
+                currentLocalRot[8] = 1.0 - (v14 + v8);
+                currentLocalRot[9] = v13 - v15;
+                currentLocalRot[10] = v12 - v11;
+                currentLocalRot[11] = v13 + v15;
+                currentLocalRot[12] = 1.0 - (v14 + v6);
+                currentLocalRot[13] = -(parentAnimMat->trans[0] * currentLocalRot[4]
+                    + parentAnimMat->trans[1] * currentLocalRot[7]
+                    + parentAnimMat->trans[2] * currentLocalRot[10]);
+                currentLocalRot[14] = -(parentAnimMat->trans[0] * currentLocalRot[5]
+                    + parentAnimMat->trans[1] * currentLocalRot[8]
+                    + parentAnimMat->trans[2] * currentLocalRot[11]);
+                currentLocalRot[15] = -(parentAnimMat->trans[0] * currentLocalRot[6]
+                    + parentAnimMat->trans[1] * currentLocalRot[9]
+                    + parentAnimMat->trans[2] * currentLocalRot[12]);
                 Ragdoll_AnimMatToMat43(boneAnimMat, boneMat);
                 MatrixMultiply43(boneMat, *(const mat4x3*)&currentLocalRot[4], relMat);
                 AxisToQuat(relMat, currentLocalRot);
