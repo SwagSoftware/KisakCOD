@@ -2580,7 +2580,7 @@ int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
     f = FS_HandleForFile(FS_THREAD_MAIN);
     fsh[f].zipFile = 0;
     I_strncpyz(fsh[f].name, filename, 256);
-    FS_BuildOSPath((char *)fs_homepath->current.integer, (char*)filename, (char *)"", ospath);
+    FS_BuildOSPath(fs_homepath->current.string, filename, "", ospath);
     v6 = ospath;
     v6 += strlen(v6) + 1;
     ospath[v6 - &ospath[1] - 1] = 0;
@@ -2591,7 +2591,7 @@ int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
     fsh[f].handleSync = 0;
     if (!fsh[f].handleFiles.file.o && I_stricmp(fs_homepath->current.string, fs_basepath->current.string))
     {
-        FS_BuildOSPath((char *)fs_basepath->current.integer, (char*)filename, (char *)"", ospath);
+        FS_BuildOSPath(fs_basepath->current.string, filename, "", ospath);
         ospath[&ospath[strlen(ospath) + 1] - &ospath[1] - 1] = 0;
         if (fs_debug->current.integer)
             Com_Printf(10, "FS_SV_FOpenFileRead (fs_basepath): %s\n", ospath);
@@ -2603,7 +2603,7 @@ int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
     }
     if (!fsh[f].handleFiles.file.o)
     {
-        FS_BuildOSPath((char *)fs_cdpath->current.integer, (char*)filename, (char *)"", ospath);
+        FS_BuildOSPath(fs_cdpath->current.string, filename, "", ospath);
         ospath[&ospath[strlen(ospath) + 1] - &ospath[1] - 1] = 0;
         if (fs_debug->current.integer)
             Com_Printf(10, "FS_SV_FOpenFileRead (fs_cdpath) : %s\n", ospath);
@@ -2756,8 +2756,8 @@ void __cdecl FS_Restart(int localClientNum, int checksumFeed)
         v2 = va("exec %s\n", "config_mp.cfg");
         Cbuf_AddText(0, v2);
     }
-    I_strncpyz(lastValidBase, (char *)fs_basepath->current.integer, 256);
-    I_strncpyz(lastValidGame, (char *)fs_gameDirVar->current.integer, 256);
+    I_strncpyz(lastValidBase, fs_basepath->current.string, 256);
+    I_strncpyz(lastValidGame, fs_gameDirVar->current.string, 256);
     ProfLoad_End();
 }
 
@@ -2891,7 +2891,7 @@ bool __cdecl FS_DeleteInDir(char *filename, char *dir)
         MyAssertHandler(".\\universal\\com_files.cpp", 2231, 0, "%s", "filename");
     if (!*filename)
         return 0;
-    FS_BuildOSPath((char*)fs_homepath->current.integer, dir, filename, ospath);
+    FS_BuildOSPath(fs_homepath->current.string, dir, filename, ospath);
     return remove(ospath) != -1;
 }
 
@@ -2901,8 +2901,8 @@ void __cdecl FS_Rename(char *from, char *fromDir, char *to, char *toDir)
     char from_ospath[260]; // [esp+100h] [ebp-108h] BYREF
 
     FS_CheckFileSystemStarted();
-    FS_BuildOSPath((char*)fs_homepath->current.integer, fromDir, from, from_ospath);
-    FS_BuildOSPath((char*)fs_homepath->current.integer, toDir, to, to_ospath);
+    FS_BuildOSPath(fs_homepath->current.string, fromDir, from, from_ospath);
+    FS_BuildOSPath(fs_homepath->current.string, toDir, to, to_ospath);
     if (fs_debug->current.integer)
         Com_Printf(10, "FS_Rename: %s --> %s\n", from_ospath, to_ospath);
     if (rename(from_ospath, to_ospath))

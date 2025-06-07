@@ -430,7 +430,7 @@ int __cdecl BuildAabbTree(const GenericAabbTreeOptions *options)
     operator delete(itemCopies);
     if (options->maintainValidBounds)
     {
-        boundCopies = (unsigned char*)operator new(4 * ((3 * options->itemCount) >> 32 != 0 ? -1 : 3 * options->itemCount));
+        boundCopies = (unsigned char*)operator new(4 * ((3 * (unsigned __int64)options->itemCount) >> 32 != 0 ? -1 : 3 * options->itemCount));
         memcpy(boundCopies, options->mins, 12 * options->itemCount);
         for (itemIndexb = 0; itemIndexb < options->itemCount; ++itemIndexb)
         {

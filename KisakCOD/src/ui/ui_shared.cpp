@@ -6519,7 +6519,7 @@ int __cdecl UI_GetMenuScreenForError()
 MenuList *__cdecl UI_LoadMenu(char *menuFile, int imageTrack)
 {
     if (useFastFile->current.enabled)
-        return (MenuList *)((int(__cdecl *)(char *, int))UI_LoadMenus_FastFile)(menuFile, imageTrack);
+        return UI_LoadMenus_FastFile(menuFile);
     else
         return UI_LoadMenu_LoadObj(menuFile, imageTrack);
 }
@@ -6527,7 +6527,7 @@ MenuList *__cdecl UI_LoadMenu(char *menuFile, int imageTrack)
 MenuList *__cdecl UI_LoadMenus(char *menuFile, int imageTrack)
 {
     if (useFastFile->current.enabled)
-        return (MenuList *)((int(__cdecl *)(char *, int))UI_LoadMenus_FastFile)(menuFile, imageTrack);
+        return UI_LoadMenus_FastFile(menuFile);
     else
         return UI_LoadMenus_LoadObj(menuFile, imageTrack);
 }

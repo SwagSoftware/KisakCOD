@@ -3,7 +3,7 @@
 #include <DynEntity/DynEntity_client.h>
 
 
-void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsPlane **data)
+void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsDynamicCellCmd *data)
 {
     unsigned int planeCount; // [esp+0h] [ebp-28h]
     const DpvsPlane *planes; // [esp+4h] [ebp-24h]
@@ -16,19 +16,13 @@ void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsPlane **data)
     if (r_drawDynEnts->current.enabled)
     {
         worldDpvsDyn = &rgp.world->dpvsDyn;
-        if ((unsigned int)data[1] >= rgp.world->dpvsPlanes.cellCount)
-            MyAssertHandler(
-                ".\\r_dpvs_dynmodel.cpp",
-                118,
-                0,
-                "dpvsCell->cellIndex doesn't index rgp.world->dpvsPlanes.cellCount\n\t%i not in [0, %i)",
-                data[1],
-                rgp.world->dpvsPlanes.cellCount);
+        bcassert(data->cellIndex, rgp.world->dpvsPlanes.cellCount);
+
         dynEntClientWordCount = worldDpvsDyn->dynEntClientWordCount[0];
-        planeCount = *((unsigned __int8 *)data + 8);
-        dynEntCellBits = &worldDpvsDyn->dynEntCellBits[0][worldDpvsDyn->dynEntClientWordCount[0] * (unsigned int)data[1]];
-        dynEntVisData = worldDpvsDyn->dynEntVisData[0][*((unsigned __int16 *)data + 5)];
-        planes = *data;
+        planeCount = data->planeCount;
+        dynEntCellBits = &worldDpvsDyn->dynEntCellBits[0][worldDpvsDyn->dynEntClientWordCount[0] * data->cellIndex];
+        dynEntVisData = worldDpvsDyn->dynEntVisData[0][data->viewIndex];
+        planes = data->planes;
         dynModelList = DynEnt_GetClientModelPoseList();
         R_CullDynModelInCell(dynEntCellBits, dynEntClientWordCount, dynModelList, planes, planeCount, dynEntVisData);
     }

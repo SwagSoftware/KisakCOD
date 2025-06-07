@@ -1076,8 +1076,8 @@ void __cdecl MatrixSet44(mat4x4 &out, const vec3r origin, const mat3x3 &axis, fl
 
 void __cdecl MatrixMultiply(const mat3x3 &in1, const mat3x3 &in2, mat3x3 &out)
 {
-    iassert(in1 != out);
-    iassert(in2 != out);
+    iassert(&in1 != &out);
+    iassert(&in2 != &out);
 
     out[0][0] = (in1)[0][0] * (in2)[0][0]
         + (in1)[0][1] * (in2)[1][0]
@@ -1111,8 +1111,8 @@ void __cdecl MatrixMultiply(const mat3x3 &in1, const mat3x3 &in2, mat3x3 &out)
 // NOTE: this is not literally a 4x3 matrix multiplication since that does not work
 void __cdecl MatrixMultiply43(const mat4x3 &in1, const mat4x3 &in2, mat4x3 &out)
 {
-    iassert(in1 != out);
-    iassert(in2 != out);
+    iassert(&in1 != &out);
+    iassert(&in2 != &out);
 
     (out)[0][0] = (in1)[0][0] * (in2)[0][0]
         + (float)(in1)[0][1] * (float)(in2)[1][0]
@@ -1157,8 +1157,8 @@ void __cdecl MatrixMultiply43(const mat4x3 &in1, const mat4x3 &in2, mat4x3 &out)
 
 void __cdecl MatrixMultiply44(const mat4x4 &in1, const mat4x4 &in2, mat4x4 &out)
 {
-    iassert(in1 != out);
-    iassert(in2 != out);
+    iassert(&in1 != &out);
+    iassert(&in2 != &out);
 
     (out)[0][0] = (in1)[0][0] * (in2)[0][0]
         + (in1)[0][1] * (in2)[1][0]
@@ -1864,7 +1864,7 @@ void __cdecl AxisClear(mat3x3 &axis)
 
 void __cdecl AxisTranspose(const mat3x3& in, mat3x3& out)
 {
-    iassert(in != out);
+    iassert(&in != &out);
 
     (out)[0][0] = (in)[0][0];
     (out)[0][1] = (in)[1][0];

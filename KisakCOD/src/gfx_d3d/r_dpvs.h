@@ -150,7 +150,7 @@ void __cdecl R_FilterDynEntIntoCells_r(
 void __cdecl R_AddDynEntToCell(unsigned int cellIndex, unsigned int dynEntIndex, DynEntityDrawType drawType);
 void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex);
 unsigned int __cdecl R_SetVisData(unsigned int viewIndex);
-void __cdecl R_AddCellDynBrushSurfacesInFrustumCmd(const DpvsPlane **data);
+void __cdecl R_AddCellDynBrushSurfacesInFrustumCmd(const DpvsDynamicCellCmd *data);
 void __cdecl R_CullDynBrushInCell(unsigned int cellIndex, const DpvsPlane *planes, int planeCount);
 void __cdecl R_GenerateShadowMapCasterCells();
 void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell);
@@ -292,7 +292,7 @@ bool __cdecl R_BoundsInCell_r(mnode_t *node, int findCellIndex, const float *min
 
 
 // r_dvps_dynmodel
-void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsPlane **data);
+void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsDynamicCellCmd *data);
 void __cdecl R_CullDynModelInCell(
     const unsigned int *dynEntCellBits,
     unsigned int dynEntClientWordCount,

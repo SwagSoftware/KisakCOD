@@ -390,7 +390,6 @@ int __cdecl CG_ComparePacketAnalysisSamples(int *a, int *b)
 
 void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
 {
-    const dvar_s *v1; // eax
     const dvar_s *v2; // kr00_4
     const char *v3; // eax
     char *v4; // eax
@@ -486,12 +485,9 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                 (const float *)color,
                 3);
             x = graphx + width + 10.0;
-            v1 = cg_packetAnalysisEntTextY;
             y = (float)cg_packetAnalysisEntTextY->current.integer;
             for (eType = 0; eType <= 17; ++eType)
             {
-                v2 = v1;
-                v1 = (const dvar_s *)eType;
                 switch (eType)
                 {
                 case 0:
@@ -567,13 +563,12 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                     color = (const float (*)[4])colorYellow;
                     break;
                 default:
-                    v1 = v2;
                     if (!alwaysfails)
                     {
                         v3 = va("Missing handler for snapshot entity type %i", eType);
                         MyAssertHandler(".\\cgame_mp\\cg_draw_net_mp.cpp", 539, 0, v3);
                     }
-                    string = (char *)"";
+                    string = "";
                     break;
                 }
                 totalBitsUsed = 0;
@@ -596,11 +591,9 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                     }
                     if (cgameGlob->numEntsSent[sample][eType] > maxEntsSent)
                         maxEntsSent = cgameGlob->numEntsSent[sample][eType];
-                    v1 = (const dvar_s *)eType;
                     if (cgameGlob->numEntFields[sample][eType] > maxEntFields)
                     {
-                        v1 = (const dvar_s *)cgameGlob->numEntFields[sample][eType];
-                        maxEntFields = (int)v1;
+                        maxEntFields = cgameGlob->numEntFields[sample][eType];
                     }
                 }
                 if (totalEntsSent)
@@ -633,8 +626,7 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                         (double)maxBitsUsed * 1.0 / (double)(8 * entsSentWhenMax),
                         maxEntFields);
                     UI_DrawText(&scrPlaceView[localClientNum], v4, 80, smallDevFont, v13, y, 1, 1, scale, (const float *)color, 3);
-                    v1 = (const dvar_s *)UI_TextHeight(cgMedia.smallDevFont, cg_packetAnalysisEntTextScale->current.value);
-                    y = (double)(int)v1 + y;
+                    y = (double)UI_TextHeight(cgMedia.smallDevFont, cg_packetAnalysisEntTextScale->current.value) + y;
                 }
             }
             for (sample = 0; sample < 10; ++sample)

@@ -253,7 +253,7 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
                 g_cmdExecFailed[type]();
         }
         CL_ResetStats_f();
-        R_ProcessWorkerCmdInternal(type, (FxCmd *)data);
+        R_ProcessWorkerCmdInternal(type, data);
         InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -1);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
@@ -290,7 +290,7 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
         } while (v3 != startPos);
         CL_ResetStats_f();
         for (i = 0; i < count; ++i)
-            R_ProcessWorkerCmdInternal(type, (FxCmd *)&data[dataSize * i]);
+            R_ProcessWorkerCmdInternal(type, &data[dataSize * i]);
         //InterlockedExchangeAdd(&workerCmds->inSize, -count);
         InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -(int)count);
         if (g_workerCmdWaitCount)
@@ -344,7 +344,7 @@ int __cdecl R_ProcessWorkerCmd(int type)
                 g_cmdExecFailed[type]();
         }
         CL_ResetStats_f();
-        R_ProcessWorkerCmdInternal(type, (FxCmd *)data);
+        R_ProcessWorkerCmdInternal(type, data);
         InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -1);
         if (g_workerCmdWaitCount)
             Sys_SetWorkerCmdEvent();
@@ -381,7 +381,7 @@ int __cdecl R_ProcessWorkerCmd(int type)
         } while (v3 != startPos);
         CL_ResetStats_f();
         for (i = 0; i < count; ++i)
-            R_ProcessWorkerCmdInternal(type, (FxCmd *)&data[dataSize * i]);
+            R_ProcessWorkerCmdInternal(type, &data[dataSize * i]);
         //InterlockedExchangeAdd(&workerCmds->inSize, -count);
         InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -(int)count);
         if (g_workerCmdWaitCount)
@@ -390,19 +390,19 @@ int __cdecl R_ProcessWorkerCmd(int type)
     return 1;
 }
 
-void __cdecl R_ProcessWorkerCmdInternal(int type, FxCmd *data)
+void __cdecl R_ProcessWorkerCmdInternal(int type, void *data)
 {
     R_NotifyWorkerCmdType(type);
     switch (type)
     {
     case 0:
-        R_ProcessCmd_UpdateFxSpotLight(data);
+        R_ProcessCmd_UpdateFxSpotLight((FxCmd *)data);
         break;
     case 1:
-        R_ProcessCmd_UpdateFxNonDependent(data);
+        R_ProcessCmd_UpdateFxNonDependent((FxCmd *)data);
         break;
     case 2:
-        R_ProcessCmd_UpdateFxRemaining(data);
+        R_ProcessCmd_UpdateFxRemaining((FxCmd *)data);
         break;
     case 3:
         R_AddCellStaticSurfacesInFrustumCmd((DpvsStaticCellCmd *)data);
@@ -411,16 +411,16 @@ void __cdecl R_ProcessWorkerCmdInternal(int type, FxCmd *data)
         R_AddCellSceneEntSurfacesInFrustumCmd((GfxWorldDpvsPlanes *)data);
         break;
     case 5:
-        R_AddCellDynModelSurfacesInFrustumCmd((const DpvsPlane **)data);
+        R_AddCellDynModelSurfacesInFrustumCmd((const DpvsDynamicCellCmd *)data);
         break;
     case 6:
-        R_AddCellDynBrushSurfacesInFrustumCmd((const DpvsPlane **)data);
+        R_AddCellDynBrushSurfacesInFrustumCmd((const DpvsDynamicCellCmd *)data);
         break;
     case 7:
         R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)data);
         break;
     case 8:
-        R_AddAllSceneEntSurfacesCamera((const GfxViewInfo *)data->system);
+        R_AddAllSceneEntSurfacesCamera(*(const GfxViewInfo **)data);
         break;
     case 9:
         R_AddSpotShadowEntCmd((const GfxSpotShadowEntCmd *)data);
@@ -440,7 +440,7 @@ void __cdecl R_ProcessWorkerCmdInternal(int type, FxCmd *data)
         break;
     case 14:
         if (!dx.deviceLost)
-            FX_GenerateMarkVertsForWorld(data->localClientNum);
+            FX_GenerateMarkVertsForWorld(((FxCmd *)data)->localClientNum);
         break;
     case 15:
         R_SkinCachedStaticModelCmd((SkinCachedStaticModelCmd *)data);

@@ -1676,13 +1676,13 @@ unsigned int __cdecl R_SetVisData(unsigned int viewIndex)
     return oldViewIndex;
 }
 
-void __cdecl R_AddCellDynBrushSurfacesInFrustumCmd(const DpvsPlane **data)
+void __cdecl R_AddCellDynBrushSurfacesInFrustumCmd(const DpvsDynamicCellCmd *data)
 {
     unsigned int oldViewIndex; // [esp+0h] [ebp-8h]
 
-    oldViewIndex = R_SetVisData(*((unsigned __int16 *)data + 5));
+    oldViewIndex = R_SetVisData(data->viewIndex);
     if (r_drawDynEnts->current.enabled)
-        R_CullDynBrushInCell((unsigned int)data[1], *data, *((unsigned __int8 *)data + 8));
+        R_CullDynBrushInCell(data->cellIndex, data->planes, data->planeCount);
     R_SetVisData(oldViewIndex);
 }
 

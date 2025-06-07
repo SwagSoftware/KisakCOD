@@ -103,7 +103,7 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
     cent->pose.turret.playerUsing = v14;
     if (cent->pose.turret.playerUsing)
     {
-        cent->pose.fx.triggerTime = (int)cgArray[0].refdefViewAngles;
+        cent->pose.turret.viewAngles = cgArray[0].refdefViewAngles;
         cent->pose.cullIn = 0;
     }
     else

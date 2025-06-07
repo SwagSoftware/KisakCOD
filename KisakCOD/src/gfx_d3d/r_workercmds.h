@@ -27,7 +27,7 @@ void __cdecl R_NotifyWorkerCmdType(int type);
 int __cdecl R_WorkerCmdsFinished();
 void __cdecl R_ProcessWorkerCmds();
 int __cdecl R_ProcessWorkerCmd(int type);
-void __cdecl R_ProcessWorkerCmdInternal(int type, FxCmd *data);
+void __cdecl R_ProcessWorkerCmdInternal(int type, void *data);
 void R_InitWorkerThreads();
 int R_InitWorkerCmds();
 int R_InitWorkerCmdsPos();
