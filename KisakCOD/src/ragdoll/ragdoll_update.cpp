@@ -504,7 +504,7 @@ char __cdecl Ragdoll_CreatePhysObj(RagdollBody *body, BoneDef *boneDef, Bone *bo
             halfHeight = bone->length * 0.5;
             Phys_ObjAddGeomCylinderDirection(
                 PHYS_WORLD_RAGDOLL,
-                (dxBody *)bone->rigidBody,
+                bone->rigidBody,
                 0,
                 boneDef->radius,
                 halfHeight,

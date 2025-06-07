@@ -1438,7 +1438,22 @@ odeGlob_t odeGlob;
 void __cdecl ODE_LeakCheck()
 {
     iassert(Pool_FreeCount(&odeGlob.bodyPool) == ARRAY_COUNT(odeGlob.bodies));
-    iassert(Pool_FreeCount(&odeGlob.geomPool) == ODE_GEOM_POOL_COUNT);
+
+    if (Pool_FreeCount(&odeGlob.geomPool) != ODE_GEOM_POOL_COUNT)
+    {
+        bool is_free[ODE_GEOM_POOL_COUNT] = {};
+        for (void *ff = odeGlob.geomPool.firstFree; ff;  ff = *(void **)ff) {
+            is_free[(dxGeomTransform*)ff - (dxGeomTransform *)odeGlob.geoms] = true;
+        }
+
+        for (int i = 0; i < ODE_GEOM_POOL_COUNT; i++) {
+            if (is_free[i]) continue;
+
+            fprintf(stderr, "[%d] type = %d\n", i, ((dxGeomTransform *)odeGlob.geoms)[i].type);
+        }
+
+        failassert("Pool_FreeCount(&odeGlob.geomPool) == ODE_GEOM_POOL_COUNT");
+    }
 }
 
 dxUserGeom *__cdecl Phys_GetWorldGeom()
@@ -1448,10 +1463,8 @@ dxUserGeom *__cdecl Phys_GetWorldGeom()
 
 void __cdecl ODE_Init()
 {
-    //INIT_STATIC_POOL(odeGlob.bodies, &odeGlob.bodyPool);
-    //INIT_STATIC_POOL(odeGlob.geoms, &odeGlob.geomPool);
     Pool_Init((char *)odeGlob.bodies, &odeGlob.bodyPool, sizeof(dxBody), 512);
-    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, sizeof(dxGeomTransform), 2048);
+    Pool_Init(odeGlob.geoms, &odeGlob.geomPool, sizeof(dxGeomTransform), 2048);
 }
 
 // MOD

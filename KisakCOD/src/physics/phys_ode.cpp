@@ -2353,41 +2353,13 @@ void __cdecl Phys_Shutdown()
 
     if (physInited)
     {
-        if (physGlob.world[0]->nb)
-            MyAssertHandler(
-                ".\\physics\\phys_ode.cpp",
-                2358,
-                0,
-                "physGlob.world[PHYS_WORLD_DYNENT]->nb == 0\n\t%i, %i",
-                physGlob.world[0]->nb,
-                0);
-        if (physGlob.world[1]->nb)
-            MyAssertHandler(
-                ".\\physics\\phys_ode.cpp",
-                2359,
-                0,
-                "physGlob.world[PHYS_WORLD_FX]->nb == 0\n\t%i, %i",
-                physGlob.world[1]->nb,
-                0);
-        if (physGlob.world[2]->nb)
-            MyAssertHandler(
-                ".\\physics\\phys_ode.cpp",
-                2360,
-                0,
-                "physGlob.world[PHYS_WORLD_RAGDOLL]->nb == 0\n\t%i, %i",
-                physGlob.world[2]->nb,
-                0);
-        if (Pool_FreeCount(&physGlob.userDataPool) != 512)
-        {
-            v0 = Pool_FreeCount(&physGlob.userDataPool);
-            MyAssertHandler(
-                ".\\physics\\phys_ode.cpp",
-                2362,
-                0,
-                "Pool_FreeCount( &physGlob.userDataPool ) == ARRAY_COUNT( physGlob.userData )\n\t%i, %i",
-                v0,
-                512);
-        }
+        vassert(physGlob.world[PHYS_WORLD_DYNENT]->nb == 0, "physGlob.world[PHYS_WORLD_DYNENT]->nb = %d", physGlob.world[PHYS_WORLD_DYNENT]->nb);
+        vassert(physGlob.world[PHYS_WORLD_FX]->nb == 0, "physGlob.world[PHYS_WORLD_FX]->nb = %d", physGlob.world[PHYS_WORLD_FX]->nb);
+        vassert(physGlob.world[PHYS_WORLD_RAGDOLL]->nb == 0, "physGlob.world[PHYS_WORLD_RAGDOLL]->nb = %d", physGlob.world[PHYS_WORLD_RAGDOLL]->nb);
+
+        int freeCount = Pool_FreeCount(&physGlob.userDataPool);
+        vassert(freeCount == ARRAY_COUNT(physGlob.userData), "userdata physobj free count = %d", freeCount);
+
         ODE_LeakCheck();
         Cmd_RemoveCommand("phys_stop");
         Cmd_RemoveCommand("phys_go");

@@ -46,7 +46,7 @@ dxGeomTransform::dxGeomTransform (dSpaceID space, dxBody *body) : dxGeom (space,
 {
   type = dGeomTransformClass;
   obj = 0;
-  cleanup = 0;
+  cleanup = 1;
   infomode = 0;
   //dSetZero (final_pos,4);
   //dRSetIdentity (final_R);
