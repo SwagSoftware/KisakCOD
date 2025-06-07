@@ -212,19 +212,10 @@ struct PhysObjUserData // sizeof=0x70
 
          if (this->freeEntry == -1)
              return NULL;
-         if (this->freeEntry >= N)
-         {
-             MyAssertHandler(
-                 "c:\\trees\\cod3\\src\\physics\\phys_alloc.h",
-                 49,
-                 0,
-                 "freeEntry doesn't index numEntries\n\t%i not in [0, %i)",
-                 this->freeEntry,
-                 N);
-         }
 
+         bcassert(this->freeEntry, N);
          ptr = &this->entries[this->freeEntry];
-         this->freeEntry++;
+         this->freeEntry = *(int *)ptr;
          return ptr;
      }
 
@@ -232,8 +223,9 @@ struct PhysObjUserData // sizeof=0x70
      {
          iassert(ptr >= &entries[0] && ptr < &entries[N]);
          memset(ptr, 0, sizeof(T));
-         //*(int *)ptr = this->freeEntry;
-         this->freeEntry--;
+
+         *(int *)ptr = this->freeEntry;
+         this->freeEntry = ptr - entries;
      }
 
 

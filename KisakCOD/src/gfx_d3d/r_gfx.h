@@ -324,10 +324,13 @@ struct GfxDrawSurfFields // sizeof=0x8
     /*60*/ unsigned __int64 unused : 4;              
 };
 
+static constexpr unsigned __int64 DRAWSURF_KEY_MASK = 0xFFFFFFFFE0000000;
+
 union GfxDrawSurf // sizeof=0x8
 {                                       // ...
     GfxDrawSurfFields fields;
     unsigned __int64 packed;
+    unsigned __int32 packed_low;// KISAKTODO dumb hack
 };
 
 struct GfxDrawSurfList // sizeof=0x8

@@ -743,7 +743,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                 if (++drawSurfIndex == drawSurfCount)
                     break;
 
-                drawSurf = drawSurfList[drawSurfIndex];
+                drawSurf.packed_low = drawSurfList[drawSurfIndex].packed_low;
 
                 if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFFF000000uLL) != __PAIR64__(HIDWORD(drawSurf.packed),drawSurfKey))
                     break;
@@ -779,7 +779,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                 R_DrawXModelSkinnedModelSurf(context, modelSurf);
                 if (++drawSurfIndex == drawSurfCount)
                     break;
-                drawSurf.packed = drawSurfList[drawSurfIndex].packed;
+                drawSurf.packed_low = drawSurfList[drawSurfIndex].packed_low;
                 if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFE0000000uLL) != __PAIR64__( HIDWORD(drawSurf.packed),drawSurfKeya))
                     break;
                 modelSurf = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
@@ -830,7 +830,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
             R_DrawXModelSkinnedModelSurf(context, modelSurfa);
             if (++drawSurfIndex == drawSurfCount)
                 break;
-            drawSurf.packed = drawSurfList[drawSurfIndex].packed;
+            drawSurf.packed_low = drawSurfList[drawSurfIndex].packed_low; // KISAKTODO dumb hack
             if ((drawSurfList[drawSurfIndex].packed & 0xFFFFFFFFE0000000uLL) != __PAIR64__(
                 HIDWORD(drawSurf.packed),
                 drawSurfKeyb))
@@ -1353,7 +1353,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     if (baseTechType != TECHNIQUE_LIT_BEGIN)
         *(_DWORD*)&drawSurfSubMask.packed = 0xE0000000uL; // first 29 bits are zero.
     drawSurf.packed = drawSurfList->packed;
-    drawSurfKey = drawSurfList->packed & 0xFFFFFFFFE0000000uLL;
+    drawSurfKey = drawSurfList->packed & DRAWSURF_KEY_MASK;
     RB_TrackImmediatePrims(GFX_PRIM_STATS_XMODELRIGID);
     if (!g_primStats)
         MyAssertHandler(".\\rb_tess.cpp", 1369, 0, "%s", "g_primStats");
@@ -1408,7 +1408,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
                 break;
             drawSurf = drawSurfList[drawSurfIndex];
         } while ((drawSurfSubMask.packed & drawSurf.packed) == drawSurfSubKey);
-    } while (drawSurfIndex != drawSurfCount&& __PAIR64__(HIDWORD(drawSurf.packed), LODWORD(drawSurf.packed) & 0xE0000000) == drawSurfKey);
+    } while (drawSurfIndex != drawSurfCount && ((drawSurf.packed & DRAWSURF_KEY_MASK) == drawSurfKey));
     RB_EndTrackImmediatePrims();
     //Profile_EndInternal(0);
     return drawSurfIndex;
