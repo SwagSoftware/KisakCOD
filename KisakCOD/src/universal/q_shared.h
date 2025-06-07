@@ -602,7 +602,7 @@ unsigned int __cdecl LongNoSwap(unsigned int color);
 
 #define arr_esize(a) (sizeof((a)[0]))
 #define arr_cnt(a) (sizeof(a)/arr_esize(a))
-
+#define ARRAY_COUNT(a) arr_cnt(a)
 struct va_info_t
 {
 	char va_string[2][1024];

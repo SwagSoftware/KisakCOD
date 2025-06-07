@@ -2296,7 +2296,7 @@ void __cdecl Mark_MaterialTextureDefInfo()
     {
         if (varMaterialTextureDefInfo)
         {
-            varwater_t = (water_t*)varMaterialTextureDefInfo;
+            varwater_t = *(water_t**)varMaterialTextureDefInfo;
             Mark_water_t();
         }
     }

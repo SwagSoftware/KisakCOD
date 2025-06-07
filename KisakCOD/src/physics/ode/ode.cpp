@@ -1428,29 +1428,17 @@ extern "C" void dTestDataStructures()
 // LWSS ADD
 #include "odeext.h"
 
-
 #include <universal/pool_allocator.h>
 #include <win32/win_local.h>
 
 #include <string>
+
 odeGlob_t odeGlob;
 
 void __cdecl ODE_LeakCheck()
 {
-    if (Pool_FreeCount(&odeGlob.bodyPool) != 512)
-        MyAssertHandler(
-            ".\\physics\\ode\\src\\ode.cpp",
-            255,
-            0,
-            "%s",
-            "Pool_FreeCount( &odeGlob.bodyPool ) == ARRAY_COUNT( odeGlob.bodies )");
-    if (Pool_FreeCount(&odeGlob.geomPool) != 2048)
-        MyAssertHandler(
-            ".\\physics\\ode\\src\\ode.cpp",
-            256,
-            0,
-            "%s",
-            "Pool_FreeCount( &odeGlob.geomPool ) == ODE_GEOM_POOL_COUNT");
+    iassert(Pool_FreeCount(&odeGlob.bodyPool) == ARRAY_COUNT(odeGlob.bodies));
+    iassert(Pool_FreeCount(&odeGlob.geomPool) == ODE_GEOM_POOL_COUNT);
 }
 
 dxUserGeom *__cdecl Phys_GetWorldGeom()
@@ -1462,8 +1450,8 @@ void __cdecl ODE_Init()
 {
     //INIT_STATIC_POOL(odeGlob.bodies, &odeGlob.bodyPool);
     //INIT_STATIC_POOL(odeGlob.geoms, &odeGlob.geomPool);
-    Pool_Init((char *)odeGlob.bodies, &odeGlob.bodyPool, 336u, 512u);
-    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, 216u, 2048u);
+    Pool_Init((char *)odeGlob.bodies, &odeGlob.bodyPool, sizeof(dxBody), 512);
+    Pool_Init((char *)odeGlob.geoms, &odeGlob.geomPool, sizeof(dxGeomTransform), 2048);
 }
 
 // MOD
