@@ -46,3 +46,12 @@ void __cdecl R_SkinXSurfaceRigid(
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertices);
 void __cdecl R_MultiplySkelMat(const DObjSkelMat *mat0, const DObjSkelMat *mat1, DObjSkelMat *out);
+
+
+// r_model_skin_sse
+void __cdecl R_SkinXSurfaceSkinnedSse(
+    const XSurface *xsurf,
+    const DObjSkelMat *boneMatrix,
+    GfxPackedVertexNormal *skinVertNormalIn,
+    GfxPackedVertexNormal *skinVertNormalOut,
+    GfxPackedVertex *skinVerticesOut);

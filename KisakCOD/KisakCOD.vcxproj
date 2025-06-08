@@ -356,6 +356,7 @@
     <ClCompile Include="src\gfx_d3d\r_model_lighting.cpp" />
     <ClCompile Include="src\gfx_d3d\r_model_pose.cpp" />
     <ClCompile Include="src\gfx_d3d\r_model_skin.cpp" />
+    <ClCompile Include="src\gfx_d3d\r_model_skin_sse.cpp" />
     <ClCompile Include="src\gfx_d3d\r_outdoor.cpp" />
     <ClCompile Include="src\gfx_d3d\r_pixelcost_load_obj.cpp" />
     <ClCompile Include="src\gfx_d3d\r_pretess.cpp" />

@@ -181,30 +181,29 @@ void R_SkinXModelCmd(_WORD *data)
                     skinnedVert = (GfxPackedVertex*)&gfxBuf.skinnedCacheLockAddr[skinnedSurf->skinnedCachedOffset];
                 }
 
-                /* KISAKTODO sse
-                if (sseEnabled)
-                {
-                    if (!sseStateUsed)
-                    {
-                        sseStateUsed = true;
-                        _m_empty();
-                    }
-
-                    GfxPackedVertexNormal *skinVertNormalIn = 0, *skinVertNormalOut = 0;
-                    if (gfxBuf.fastSkin)
-                    {
-                        if (skinnedSurf->skinnedCachedOffset >= 0)
-                            skinVertNormalOut = &gfxBuf.skinnedCacheNormalsAddr[skinnedSurf->skinnedCachedOffset >> 5];
-                        if (skinnedSurf->skinnedVert)
-                            skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[(int)skinnedSurf->skinnedVert >> 5];
-                    }
-                    R_SkinXSurfaceSkinnedSse(skinnedSurf->xsurf, &boneSkelMats[boneIndex], skinVertNormalIn, skinVertNormalOut, skinnedVert);
-                }
-                else
-                */
-                {
+                // LWSS: this makes the viewmodels flicker. Decomp is not fully accurate (should just have templated functions)
+                //if (sseEnabled)
+                //{
+                //    if (!sseStateUsed)
+                //    {
+                //        sseStateUsed = true;
+                //        //_m_empty();
+                //    }
+                //
+                //    GfxPackedVertexNormal *skinVertNormalIn = 0, *skinVertNormalOut = 0;
+                //    if (gfxBuf.fastSkin)
+                //    {
+                //        if (skinnedSurf->skinnedCachedOffset >= 0)
+                //            skinVertNormalOut = &gfxBuf.skinnedCacheNormalsAddr[skinnedSurf->skinnedCachedOffset >> 5];
+                //        if (skinnedSurf->skinnedVert)
+                //            skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[(int)skinnedSurf->skinnedVert >> 5];
+                //    }
+                //    R_SkinXSurfaceSkinnedSse(skinnedSurf->xsurf, &boneSkelMats[boneIndex], skinVertNormalIn, skinVertNormalOut, skinnedVert);
+                //}
+                //else
+                //{
                     R_SkinXSurfaceSkinned(skinnedSurf->xsurf, &boneSkelMats[boneIndex], skinnedVert);
-                }
+                //}
 
                 surfPos += (sizeof(GfxModelSkinnedSurface) / 4);
             }
