@@ -82,7 +82,7 @@ void __cdecl Perks_RegisterDvars()
         minb,
         0x80u,
         "Percentage of weapon firing rate to use");
-    minc.value.max = 3.4028235e38;
+    minc.value.max = FLT_MAX;
     minc.value.min = 0.0;
     perk_extraBreath = Dvar_RegisterFloat(
         "perk_extraBreath",
@@ -103,7 +103,7 @@ void __cdecl Perks_RegisterDvars()
         "frag_grenade_short_mp",
         0x80u,
         "Name of the grenade weapon to drop");
-    mine.value.max = 3.4028235e38;
+    mine.value.max = FLT_MAX;
     mine.value.min = 0.0;
     perk_parabolicRadius = Dvar_RegisterFloat(
         "perk_parabolicRadius",
@@ -124,7 +124,7 @@ void __cdecl Perks_RegisterDvars()
         "specialty_parabolic",
         0x80u,
         "Eavesdrop icon to use when displaying eavesdropped voice chats");
-    ming.value.max = 3.4028235e38;
+    ming.value.max = FLT_MAX;
     ming.value.min = 0.0;
     perk_sprintMultiplier = Dvar_RegisterFloat(
         "perk_sprintMultiplier",

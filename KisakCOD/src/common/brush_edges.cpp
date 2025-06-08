@@ -121,7 +121,7 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
             1,
             "%s",
             "winding->sides[0] == ThirdPlane( cycle[0][cycleCount[0]-1], basePlaneIndex, winding->sides[winding->numsides-1] )");
-    if (RepresentativeTriangleFromWinding((const float(*)[3])v0, w->numsides, sideNormal, &i0, &i1, &i2) < 0.001000000047497451)
+    if (RepresentativeTriangleFromWinding((const float(*)[3])v0, w->numsides, sideNormal, &i0, &i1, &i2) < EQUAL_EPSILON)
         return 0;
     PlaneFromPoints(plane, &v0[3 * i0], &v0[3 * i1], &v0[3 * i2]);
     if (Vec3Dot(plane, sideNormal) < 0.0)

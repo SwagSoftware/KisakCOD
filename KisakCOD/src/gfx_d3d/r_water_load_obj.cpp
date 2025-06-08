@@ -36,7 +36,7 @@ BOOL __cdecl R_WatersEquivalent(const water_t *w0, const water_t *w1)
         return 0;
     v16 = w0->amplitude - w1->amplitude;
     v10 = fabs(v16);
-    if (v10 > 0.001000000047497451)
+    if (v10 > EQUAL_EPSILON)
         return 0;
     v15 = w0->gravity - w1->gravity;
     v9 = fabs(v15);
@@ -55,7 +55,7 @@ BOOL __cdecl R_WatersEquivalent(const water_t *w0, const water_t *w1)
     fDirAngleCos = v13 / v5;
     v4 = fDirAngleCos - 1.0;
     v3 = fabs(v4);
-    return v3 <= 0.001000000047497451;
+    return v3 <= EQUAL_EPSILON;
 }
 
 void __cdecl R_ShutdownLoadWater()

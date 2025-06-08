@@ -384,7 +384,7 @@ void __cdecl ClientScr_GetArchiveTime(gclient_s *pSelf, const client_fields_s *p
 {
     VariableUnion value; // [esp+4h] [ebp-4h]
 
-    value.floatValue = (double)pSelf->sess.archiveTime * 0.001000000047497451;
+    value.floatValue = (double)pSelf->sess.archiveTime * EQUAL_EPSILON;
     Scr_AddFloat(value);
 }
 

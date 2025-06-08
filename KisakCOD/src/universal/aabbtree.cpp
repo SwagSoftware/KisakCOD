@@ -106,7 +106,7 @@ BOOL __cdecl PickAabbSplitPlane(
         while (nextDist < 3.402823466385289e38)
         {
             dist = nextDist;
-            nextDist = 3.4028235e38;
+            nextDist = FLT_MAX;
             sideSplitCount += prevMinCount;
             sideBackCount -= prevMinCount;
             prevMinCount = 0;

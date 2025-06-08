@@ -1738,29 +1738,19 @@ void __cdecl R_SetSampler(
     unsigned __int8 samplerState,
     const GfxImage *image)
 {
-    const char *v4; // eax
     unsigned int decodedSamplerState; // [esp+Ch] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_state.cpp", 1031, 0, "%s", "image");
+    iassert(image);
     if (context.state->samplerTexture[samplerIndex] != &image->texture)
     {
         context.state->samplerTexture[samplerIndex] = &image->texture;
         if (r_logFile->current.integer)
         {
-            v4 = va("---------- texture %i: %s\n", samplerIndex, image->name);
-            RB_LogPrint(v4);
+            RB_LogPrint(va("---------- texture %i: %s\n", samplerIndex, image->name));
         }
         R_HW_SetSamplerTexture(context.state->prim.device, samplerIndex, &image->texture);
     }
-    if ((samplerState & 0x1F) == 0)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1041,
-            0,
-            "%s\n\t(samplerState) = %i",
-            "((samplerState & (SAMPLER_FILTER_MASK | SAMPLER_MIPMAP_MASK)) != 0)",
-            samplerState);
+    iassert((samplerState & (SAMPLER_FILTER_MASK | SAMPLER_MIPMAP_MASK)) != 0);
     if (context.state->refSamplerState[samplerIndex] != samplerState)
     {
         context.state->refSamplerState[samplerIndex] = samplerState;

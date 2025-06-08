@@ -2840,7 +2840,7 @@ bool UI_ScrollPane::KeyEvent(float *point, int key)
                 result = 1;
                 break;
             case 166:
-                this->comp->pos[1] = 3.4028235e38;
+                this->comp->pos[1] = FLT_MAX;
                 this->comp->selectedLine = 0x7FFFFFFF;
                 UI_ScrollPane::SetPos();
                 UI_ScrollPane::DisplaySelectedLine();

@@ -499,8 +499,8 @@ void Sys_RegisterInfoDvars()
     DvarLimits mina; // [esp+4h] [ebp-14h]
     float value; // [esp+14h] [ebp-4h]
 
-    min.value.max = 3.4028235e38;
-    min.value.min = -3.4028235e38;
+    min.value.max = FLT_MAX;
+    min.value.min = -FLT_MAX;
     sys_configureGHz = Dvar_RegisterFloat(
         "sys_configureGHz",
         0.0,
@@ -511,8 +511,8 @@ void Sys_RegisterInfoDvars()
     sys_gpu = Dvar_RegisterString("sys_gpu", "", 0x11u, "GPU description");
     sys_configSum = Dvar_RegisterInt("sys_configSum", 0, 0x7FFFFFFF80000000LL, 0x11u, "Configuration checksum");
     sys_SSE = Dvar_RegisterBool("sys_SSE", sys_info.SSE, 0x40u, "Operating system allows Streaming SIMD Extensions");
-    mina.value.max = 3.4028235e38;
-    mina.value.min = -3.4028235e38;
+    mina.value.max = FLT_MAX;
+    mina.value.min = -FLT_MAX;
     value = sys_info.cpuGHz;
     Dvar_RegisterFloat("sys_cpuGHz", value, mina, 0x40u, "Measured CPU speed");
     Dvar_RegisterString("sys_cpuName", sys_info.cpuName, 0x40u, "CPU name description");

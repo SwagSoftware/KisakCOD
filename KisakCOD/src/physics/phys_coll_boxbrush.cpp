@@ -399,7 +399,7 @@ void __cdecl Phys_GetWindingForBrushFace2(
             v22 = planes[2][0] * v19;
             v16 = v20 + v21 + v22;
             v5 = fabs(v16);
-            if (v5 >= 0.001000000047497451)
+            if (v5 >= EQUAL_EPSILON)
             {
                 v15 = 1.0 / v16;
                 v20 = planes[0][3] * v17;
@@ -1002,7 +1002,7 @@ char __cdecl Phys_TestBoxAgainstEachBrushPlane(
         }
     }
     MatrixTransformVector(info->u.sideExtents, absR, maxs);
-    maxSeparation = -3.4028235e38;
+    maxSeparation = -FLT_MAX;
     if (info->pos[0] - brush->maxs[0] > 0.0)
     {
         distg = info->pos[0] - brush->maxs[0] - maxs[0];
@@ -1335,7 +1335,7 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
         bestFixedBrushPlane[1] = 0.0;
         bestFixedBrushPlane[2] = 0.0;
         bestFixedBrushPlane[3] = 0.0;
-        v13 = -3.4028235e38;
+        v13 = -FLT_MAX;
         fixedBrushSideIndex = -1;
         CM_BuildAxialPlanes(fixedBrush, (float (*)[6][4])axialPlanes2);
         for (k = 0; k < 6; ++k)
@@ -1678,7 +1678,7 @@ void __cdecl Phys_GetWindingForBrushFace(
             v22 = planes[2][0] * v19;
             v16 = v20 + v21 + v22;
             v5 = fabs(v16);
-            if (v5 >= 0.001000000047497451)
+            if (v5 >= EQUAL_EPSILON)
             {
                 v15 = 1.0 / v16;
                 v20 = planes[0][3] * v17;
@@ -1811,7 +1811,7 @@ double __cdecl Phys_TestVertsAgainstPlane(const float (*verts)[3], unsigned int 
     float minDist; // [esp+10h] [ebp-8h]
     unsigned int vertIndex; // [esp+14h] [ebp-4h]
 
-    minDist = 3.4028235e38;
+    minDist = FLT_MAX;
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
     {
         v3 = Vec3Dot(&(*verts)[3 * vertIndex], plane);
@@ -1842,7 +1842,7 @@ char __cdecl Phys_TestVertsAgainstPlanes(
     unsigned int sideIndex; // [esp+8h] [ebp-8h]
     float maxSeparation; // [esp+Ch] [ebp-4h]
 
-    maxSeparation = -3.4028235e38;
+    maxSeparation = -FLT_MAX;
     *outSideIndex = -1;
     for (sideIndex = 0; sideIndex < brushContainingThePlanes->numsides + 6; ++sideIndex)
     {
@@ -2058,12 +2058,12 @@ void __cdecl Phys_CollideOrientedBrushModelWithBrush(const cbrush_t *fixedBrush,
 
     if (results->contactCount >= results->maxContacts)
         MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 1691, 0, "%s", "results->contactCount < results->maxContacts");
-    mins[0] = -3.4028235e38;
-    mins[1] = -3.4028235e38;
-    mins[2] = -3.4028235e38;
-    maxs[0] = 3.4028235e38;
-    maxs[1] = 3.4028235e38;
-    maxs[2] = 3.4028235e38;
+    mins[0] = -FLT_MAX;
+    mins[1] = -FLT_MAX;
+    mins[2] = -FLT_MAX;
+    maxs[0] = FLT_MAX;
+    maxs[1] = FLT_MAX;
+    maxs[2] = FLT_MAX;
     data.fixedBrush = fixedBrush;
     data.input = info;
     data.results = results;
@@ -2385,7 +2385,7 @@ void __cdecl Phys_CollideFixedBrushWithTriangle(const cbrush_t *brush, float (*t
     to[1] = 0.0;
     to[2] = 0.0;
     to[3] = 0.0;
-    v8 = -3.4028235e38;
+    v8 = -FLT_MAX;
     ClosestBrushFace = -1;
     CM_BuildAxialPlanes(brush, &axialPlanes);
     for (axialSide = 0; axialSide < 6; ++axialSide)
@@ -2552,7 +2552,7 @@ double __cdecl Phys_TestTriangleAgainstBrushPlane(const float *brushPlane, const
     if (Vec3LengthSq(triangleNormal) <= 0.009999999776482582 || Vec3Dot(brushPlane, triangleNormal) <= 0.0)
         return Phys_TestVertsAgainstPlane(triangle, 3u, brushPlane);
     else
-        return -3.4028235e38;
+        return -FLT_MAX;
 }
 
 void __cdecl Phys_CollideOrientedBrushModelWithTriangleList(
@@ -2569,12 +2569,12 @@ void __cdecl Phys_CollideOrientedBrushModelWithTriangleList(
 
     if (results->contactCount < results->maxContacts)
     {
-        mins[0] = -3.4028235e38;
-        mins[1] = -3.4028235e38;
-        mins[2] = -3.4028235e38;
-        maxs[0] = 3.4028235e38;
-        maxs[1] = 3.4028235e38;
-        maxs[2] = 3.4028235e38;
+        mins[0] = -FLT_MAX;
+        mins[1] = -FLT_MAX;
+        mins[2] = -FLT_MAX;
+        maxs[0] = FLT_MAX;
+        maxs[1] = FLT_MAX;
+        maxs[2] = FLT_MAX;
         data.input = info;
         data.results = results;
         data.indices = indices;

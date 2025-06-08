@@ -1857,7 +1857,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         if (!Sys_IsMainThread())
             MyAssertHandler(".\\qcommon\\common.cpp", 4079, 0, "%s", "Sys_IsMainThread()");
         CL_ResetStats_f();
-        deltaTime = (double)cls.frametime * 0.001000000047497451;
+        deltaTime = (double)cls.frametime * EQUAL_EPSILON;
         DevGui_Update(0, deltaTime);
         Com_Statmon();
         R_WaitEndTime();

@@ -1452,7 +1452,8 @@ void __cdecl ODE_LeakCheck()
             fprintf(stderr, "[%d] type = %d\n", i, ((dxGeomTransform *)odeGlob.geoms)[i].type);
         }
 
-        failassert("Pool_FreeCount(&odeGlob.geomPool) == ODE_GEOM_POOL_COUNT");
+        //failassert("Pool_FreeCount(&odeGlob.geomPool) == ODE_GEOM_POOL_COUNT");
+        iassert(0);
     }
 }
 

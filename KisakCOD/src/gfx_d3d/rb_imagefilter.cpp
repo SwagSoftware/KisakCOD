@@ -261,7 +261,7 @@ int __cdecl RB_GaussianFilterPoints1D(float pixels, __int64 srcRes, int tapLimit
         tapOffsets[tapIndex] = v6;
         totalWeight = totalWeight + tapWeights[tapIndex];
     }
-    if (totalWeight > 0.001000000047497451)
+    if (totalWeight > EQUAL_EPSILON)
     {
         if (totalWeight <= 0.0)
             MyAssertHandler(".\\rb_imagefilter.cpp", 131, 0, "%s\n\t(totalWeight) = %g", "(totalWeight > 0)", totalWeight);

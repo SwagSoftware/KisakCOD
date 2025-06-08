@@ -722,12 +722,12 @@ unsigned __int16 *CM_InitBoxHull()
     cm.box_brush->contents = -1;
     cm.box_model.leaf.brushContents = -1;
     cm.box_model.leaf.terrainContents = 0;
-    cm.box_model.leaf.mins[0] = 3.4028235e38;
-    cm.box_model.leaf.mins[1] = 3.4028235e38;
-    cm.box_model.leaf.mins[2] = 3.4028235e38;
-    cm.box_model.leaf.maxs[0] = -3.4028235e38;
-    cm.box_model.leaf.maxs[1] = -3.4028235e38;
-    cm.box_model.leaf.maxs[2] = -3.4028235e38;
+    cm.box_model.leaf.mins[0] = FLT_MAX;
+    cm.box_model.leaf.mins[1] = FLT_MAX;
+    cm.box_model.leaf.mins[2] = FLT_MAX;
+    cm.box_model.leaf.maxs[0] = -FLT_MAX;
+    cm.box_model.leaf.maxs[1] = -FLT_MAX;
+    cm.box_model.leaf.maxs[2] = -FLT_MAX;
     cm.box_brush->axialMaterialNum[0][0] = -1;
     cm.box_brush->axialMaterialNum[0][1] = -1;
     cm.box_brush->axialMaterialNum[0][2] = -1;
@@ -894,12 +894,12 @@ void __cdecl CMod_PartionLeafBrushes(unsigned __int16 *leafBrushes, int numLeafB
 
     if (numLeafBrushes)
     {
-        mins[0] = 3.4028235e38;
-        mins[1] = 3.4028235e38;
-        mins[2] = 3.4028235e38;
-        maxs[0] = -3.4028235e38;
-        maxs[1] = -3.4028235e38;
-        maxs[2] = -3.4028235e38;
+        mins[0] = FLT_MAX;
+        mins[1] = FLT_MAX;
+        mins[2] = FLT_MAX;
+        maxs[0] = -FLT_MAX;
+        maxs[1] = -FLT_MAX;
+        maxs[2] = -FLT_MAX;
         for (k = 0; k < numLeafBrushes; ++k)
         {
             brushnum = leafBrushes[k];
@@ -1023,7 +1023,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
             node->contents = returnNode->contents;
             leafBrushes += numLeafBrushesChild;
         }
-        range = 3.4028235e38;
+        range = FLT_MAX;
         node->axis = axis;
         node->data.children.dist = dist;
         side = 0;
@@ -1116,7 +1116,7 @@ cLeafBrushNode_s *__cdecl CMod_AllocLeafBrushNode()
     result->data.children.range = 0.0;
     result->data.children.childOffset[0] = 0;
     result->data.children.childOffset[1] = 0;
-    result->data.children.dist = -3.4028235e38;
+    result->data.children.dist = -FLT_MAX;
     return result;
 }
 
@@ -1142,8 +1142,8 @@ double __cdecl CMod_GetPartitionScore(
 
     rightBrushCount = -1;
     leftBrushCount = -1;
-    min = -3.4028235e38;
-    max = 3.4028235e38;
+    min = -FLT_MAX;
+    max = FLT_MAX;
     for (k = 0; k < numLeafBrushes; ++k)
     {
         b = &cm.brushes[leafBrushes[k]];

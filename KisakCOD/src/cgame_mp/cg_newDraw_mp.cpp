@@ -1407,7 +1407,7 @@ void __cdecl CG_DrawStanceHintPrints(
 
     cgameGlob = cgArray;
     if (cgArray[0].lastStanceChangeTime + 3000 - cgArray[0].time <= 1000)
-        drawColor[3] = (cgameGlob->lastStanceChangeTime + 3000 - cgameGlob->time) * 0.001000000047497451;
+        drawColor[3] = (cgameGlob->lastStanceChangeTime + 3000 - cgameGlob->time) * EQUAL_EPSILON;
     else
         drawColor[3] = 1.0;
     height = UI_TextHeight(font, scale);

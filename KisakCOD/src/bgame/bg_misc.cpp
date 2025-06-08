@@ -422,7 +422,7 @@ void __cdecl BG_RegisterDvars()
         mino,
         0x180u,
         "The maximum angle that a player can look around quickly while prone");
-    minp.value.max = 3.4028235e38;
+    minp.value.max = FLT_MAX;
     minp.value.min = 0.0;
     bg_foliagesnd_minspeed = Dvar_RegisterFloat(
         "bg_foliagesnd_minspeed",
@@ -430,7 +430,7 @@ void __cdecl BG_RegisterDvars()
         minp,
         0x180u,
         "The speed that a player must be going to make minimum noise while moving through foliage");
-    minq.value.max = 3.4028235e38;
+    minq.value.max = FLT_MAX;
     minq.value.min = 0.0;
     bg_foliagesnd_maxspeed = Dvar_RegisterFloat(
         "bg_foliagesnd_maxspeed",
@@ -456,7 +456,7 @@ void __cdecl BG_RegisterDvars()
         (DvarLimits)0x7FFFFFFF00000000LL,
         0x180u,
         "The time interval before foliage sounds are reset after the player has stopped moving");
-    minr.value.max = 3.4028235e38;
+    minr.value.max = FLT_MAX;
     minr.value.min = 1.0;
     bg_fallDamageMinHeight = Dvar_RegisterFloat(
         "bg_fallDamageMinHeight",
@@ -464,7 +464,7 @@ void __cdecl BG_RegisterDvars()
         minr,
         0x188u,
         "The height that a player will start to take minimum damage if they fall");
-    mins.value.max = 3.4028235e38;
+    mins.value.max = FLT_MAX;
     mins.value.min = 1.0;
     bg_fallDamageMaxHeight = Dvar_RegisterFloat(
         "bg_fallDamageMaxHeight",
@@ -757,7 +757,7 @@ void __cdecl BG_RegisterDvars()
     xanim_debug = Dvar_RegisterBool("xanim_debug", 0, 0, "Turn on Xanim Debugging information");
     animscript_debug = Dvar_RegisterBool("animscript_debug", 0, 0, "Turn on animscript debugging information");
     anim_debugSpeeds = Dvar_RegisterBool("anim_debugSpeeds", 0, 0, "Print out animation speed information");
-    mincb.value.max = 3.4028235e38;
+    mincb.value.max = FLT_MAX;
     mincb.value.min = 0.0;
     player_dmgtimer_timePerPoint = Dvar_RegisterFloat(
         "player_dmgtimer_timePerPoint",
@@ -765,7 +765,7 @@ void __cdecl BG_RegisterDvars()
         mincb,
         0x180u,
         "The time in milliseconds that the player is slowed down per point of damage");
-    mincc.value.max = 3.4028235e38;
+    mincc.value.max = FLT_MAX;
     mincc.value.min = 0.0;
     player_dmgtimer_maxTime = Dvar_RegisterFloat(
         "player_dmgtimer_maxTime",
@@ -932,7 +932,7 @@ void __cdecl BG_RegisterDvars()
         "The delay from the end of the shell shock to the end of the sound modification");
     BG_RegisterShockVolumeDvars();
     bg_shock_lookControl = Dvar_RegisterBool("bg_shock_lookControl", 1, 0x80u, "Alter player control during shellshock");
-    mincs.value.max = 3.4028235e38;
+    mincs.value.max = FLT_MAX;
     mincs.value.min = 0.0;
     bg_shock_lookControl_maxpitchspeed = Dvar_RegisterFloat(
         "bg_shock_lookControl_maxpitchspeed",
@@ -940,7 +940,7 @@ void __cdecl BG_RegisterDvars()
         mincs,
         0x80u,
         "Maximum pitch movement rate while shellshocked in degrees per second");
-    minct.value.max = 3.4028235e38;
+    minct.value.max = FLT_MAX;
     minct.value.min = 0.0;
     bg_shock_lookControl_maxyawspeed = Dvar_RegisterFloat(
         "bg_shock_lookControl_maxyawspeed",
@@ -1258,13 +1258,13 @@ void __cdecl BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, float *re
         break;
     case TR_LINEAR:
     case TR_FIRST_RAGDOLL:
-        deltaTimea = (double)(atTime - tr->trTime) * 0.001000000047497451;
+        deltaTimea = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
         Vec3Mad(tr->trBase, deltaTimea, tr->trDelta, result);
         break;
     case TR_LINEAR_STOP:
         if (atTime > tr->trDuration + tr->trTime)
             atTime = tr->trDuration + tr->trTime;
-        deltaTime = (double)(atTime - tr->trTime) * 0.001000000047497451;
+        deltaTime = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
         if (deltaTime < 0.0)
             deltaTime = 0.0;
         Vec3Mad(tr->trBase, deltaTime, tr->trDelta, result);
@@ -1277,15 +1277,15 @@ void __cdecl BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, float *re
         break;
     case TR_GRAVITY:
     case TR_RAGDOLL_GRAVITY:
-        deltaTimec = (double)(atTime - tr->trTime) * 0.001000000047497451;
+        deltaTimec = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
         Vec3Mad(tr->trBase, deltaTimec, tr->trDelta, result);
         result[2] = result[2] - deltaTimec * 400.0 * deltaTimec;
         break;
     case TR_ACCELERATE:
         if (atTime > tr->trDuration + tr->trTime)
             atTime = tr->trDuration + tr->trTime;
-        deltaTimed = (double)(atTime - tr->trTime) * 0.001000000047497451;
-        phase = Vec3Length(tr->trDelta) / ((double)tr->trDuration * 0.001000000047497451);
+        deltaTimed = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
+        phase = Vec3Length(tr->trDelta) / ((double)tr->trDuration * EQUAL_EPSILON);
         Vec3NormalizeTo(tr->trDelta, result);
         v4 = phase * 0.5 * deltaTimed * deltaTimed;
         Vec3Mad(tr->trBase, v4, result, result);
@@ -1293,8 +1293,8 @@ void __cdecl BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, float *re
     case TR_DECELERATE:
         if (atTime > tr->trDuration + tr->trTime)
             atTime = tr->trDuration + tr->trTime;
-        deltaTimee = (double)(atTime - tr->trTime) * 0.001000000047497451;
-        phasea = Vec3Length(tr->trDelta) / ((double)tr->trDuration * 0.001000000047497451);
+        deltaTimee = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
+        phasea = Vec3Length(tr->trDelta) / ((double)tr->trDuration * EQUAL_EPSILON);
         Vec3NormalizeTo(tr->trDelta, result);
         Vec3Mad(tr->trBase, deltaTimee, tr->trDelta, v);
         v3 = -phasea * 0.5 * deltaTimee * deltaTimee;
@@ -1389,7 +1389,7 @@ void __cdecl BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, floa
         Vec3Scale(tr->trDelta, phase, result);
         goto LABEL_22;
     case TR_GRAVITY:
-        deltaTimea = (double)(atTime - tr->trTime) * 0.001000000047497451;
+        deltaTimea = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
         *result = tr->trDelta[0];
         result[1] = tr->trDelta[1];
         result[2] = tr->trDelta[2];
@@ -1404,14 +1404,14 @@ void __cdecl BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, floa
             result[2] = 0.0;
             return;
         }
-        deltaTimeb = (double)(atTime - tr->trTime) * 0.001000000047497451;
+        deltaTimeb = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
         scale = deltaTimeb * deltaTimeb;
         Vec3Scale(tr->trDelta, scale, result);
         goto LABEL_22;
     case TR_DECELERATE:
         if (atTime <= tr->trDuration + tr->trTime)
         {
-            deltaTimec = (double)(atTime - tr->trTime) * 0.001000000047497451;
+            deltaTimec = (double)(atTime - tr->trTime) * EQUAL_EPSILON;
             Vec3Scale(tr->trDelta, deltaTimec, result);
         LABEL_22:
             if ((COERCE_UNSIGNED_INT(tr->trBase[0]) & 0x7F800000) == 0x7F800000
@@ -2107,7 +2107,7 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
         v5 = value;
     else
         v5 = 0.001;
-    parms->view.kickRate = 0.001000000047497451 / v5;
+    parms->view.kickRate = EQUAL_EPSILON / v5;
     parms->view.kickRadius = bg_shock_viewKickRadius->current.value;
     parms->sound.affect = bg_shock_sound->current.enabled;
     strncpy((unsigned __int8 *)parms->sound.loop, (unsigned __int8 *)bg_shock_soundLoop->current.integer, 0x40u);

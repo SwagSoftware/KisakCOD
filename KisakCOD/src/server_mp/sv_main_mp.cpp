@@ -1008,8 +1008,8 @@ void __cdecl SV_UpdatePerformanceFrame(float time)
     float minTime; // [esp+20h] [ebp-8h]
     int i; // [esp+24h] [ebp-4h]
 
-    minTime = 3.4028235e38;
-    maxTime = -3.4028235e38;
+    minTime = FLT_MAX;
+    maxTime = -FLT_MAX;
     wallClockEndTime = Sys_Milliseconds();
     //profile = (8 * (s_serverDebugFrame % 10) + 229164768);
     profile = &s_serverProfileTimes[s_serverDebugFrame % 10];

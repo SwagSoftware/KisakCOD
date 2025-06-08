@@ -99,7 +99,7 @@ void __cdecl Phys_AssignInitialGroups(const ContactList *contacts, int *group)
     ptPos[0][0] = contacts->contacts[initialPoint].contact.normal[0];
     ptPos[0][1] = contacts->contacts[initialPoint].contact.normal[1];
     ptPos[0][2] = contacts->contacts[initialPoint].contact.normal[2];
-    bestDot = 3.4028235e38;
+    bestDot = FLT_MAX;
     bestDotContact = -1;
     for (contactIter = 0; contactIter != contacts->contactCount; ++contactIter)
     {
@@ -118,7 +118,7 @@ void __cdecl Phys_AssignInitialGroups(const ContactList *contacts, int *group)
     ptPos[1][0] = contacts->contacts[bestDotContact].contact.normal[0];
     ptPos[1][1] = contacts->contacts[bestDotContact].contact.normal[1];
     ptPos[1][2] = contacts->contacts[bestDotContact].contact.normal[2];
-    bestDota = 3.4028235e38;
+    bestDota = FLT_MAX;
     bestDotContact = -1;
     for (contactItera = 0; contactItera != contacts->contactCount; ++contactItera)
     {
@@ -181,7 +181,7 @@ void __cdecl Phys_KMeans(const ContactList *contacts, float (*centroid)[3], int 
         for (contactItera = 0; contactItera != contacts->contactCount; ++contactItera)
         {
             bestGroup = -1;
-            bestDot = -3.4028235e38;
+            bestDot = -FLT_MAX;
             for (groupIterb = 0; groupIterb != 3; ++groupIterb)
             {
                 dot = Vec3Dot(&(*centroid)[3 * groupIterb], contacts->contacts[contactItera].contact.normal);
@@ -315,13 +315,13 @@ void __cdecl Phys_GenerateGroupContacts(
         Phys_CreateBasisFromNormal(normal, uvBasis[0], uvBasis[1]);
         for (dimIter = 0; dimIter != 2; ++dimIter)
         {
-            minProjDist[dimIter] = 3.4028235e38;
+            minProjDist[dimIter] = FLT_MAX;
             minContact[dimIter] = -1;
-            maxProjDist[dimIter] = -3.4028235e38;
+            maxProjDist[dimIter] = -FLT_MAX;
             maxContact[dimIter] = -1;
         }
         maxDContact = -1;
-        maxD = -3.4028235e38;
+        maxD = -FLT_MAX;
         pointCount = 0;
         for (contactIter = 0; contactIter != inContacts->contactCount; ++contactIter)
         {

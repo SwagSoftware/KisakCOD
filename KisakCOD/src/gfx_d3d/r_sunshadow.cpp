@@ -326,10 +326,10 @@ void __cdecl R_SetupSunShadowMapProjection(
 
     viewOrgInSunProj[0] = -Vec3Dot(viewParms->origin, &(*sunAxis)[3]);
     viewOrgInSunProj[1] = Vec3Dot(viewParms->origin, &(*sunAxis)[6]);
-    minsInSunProj[0][0] = 3.4028235e38;
-    minsInSunProj[0][1] = 3.4028235e38;
-    maxsInSunProj[0][0] = -3.4028235e38;
-    maxsInSunProj[0][1] = -3.4028235e38;
+    minsInSunProj[0][0] = FLT_MAX;
+    minsInSunProj[0][1] = FLT_MAX;
+    maxsInSunProj[0][0] = -FLT_MAX;
+    maxsInSunProj[0][1] = -FLT_MAX;
     R_GetFrustumNearClipPoints(&viewParms->inverseViewProjectionMatrix, frustumPoints);
     for (pointIndex = 0; pointIndex < 4; ++pointIndex)
     {
@@ -393,10 +393,10 @@ void __cdecl R_SetupSunShadowMapProjection(
     useShadowOffset = !v17;
     shadowOrgInSunProj[0] = -Vec3Dot(shadowOrg, &(*sunAxis)[3]);
     shadowOrgInSunProj[1] = Vec3Dot(shadowOrg, &(*sunAxis)[6]);
-    v30 = 1024.0 / maxSizeInSunProj * sizeInSunProj[0] - 0.001000000047497451;
+    v30 = 1024.0 / maxSizeInSunProj * sizeInSunProj[0] - EQUAL_EPSILON;
     v16 = ceil(v30);
     partitionNear->viewport.width = (unsigned __int16)(int)v16;
-    v29 = 1024.0 / maxSizeInSunProj * sizeInSunProj[1] - 0.001000000047497451;
+    v29 = 1024.0 / maxSizeInSunProj * sizeInSunProj[1] - EQUAL_EPSILON;
     v15 = ceil(v29);
     partitionNear->viewport.height = (unsigned __int16)(int)v15;
     if (viewOrgInSunProj[0] < (minsInSunProj[0][0] + maxsInSunProj[0][0]) * 0.5)

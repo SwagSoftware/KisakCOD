@@ -755,12 +755,12 @@ void __cdecl Phys_GetBrushAABB(dxGeom *geom, float *aabb)
         MyAssertHandler(".\\physics\\phys_world_collision.cpp", 605, 0, "%s", "geom");
     if (dGeomGetClass(geom) != 12)
         MyAssertHandler(".\\physics\\phys_world_collision.cpp", 606, 0, "%s", "dGeomGetClass( geom ) == GEOM_CLASS_BRUSH");
-    *aabb = -3.4028235e38;
-    aabb[1] = -3.4028235e38;
-    aabb[2] = -3.4028235e38;
-    aabb[3] = 3.4028235e38;
-    aabb[4] = 3.4028235e38;
-    aabb[5] = 3.4028235e38;
+    *aabb = -FLT_MAX;
+    aabb[1] = -FLT_MAX;
+    aabb[2] = -FLT_MAX;
+    aabb[3] = FLT_MAX;
+    aabb[4] = FLT_MAX;
+    aabb[5] = FLT_MAX;
 }
 
 void __cdecl Phys_InitCylinderGeomClass()

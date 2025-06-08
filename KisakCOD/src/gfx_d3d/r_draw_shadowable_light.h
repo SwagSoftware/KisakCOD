@@ -1,6 +1,8 @@
 #pragma once
 #include "rb_backend.h"
 
+#define GFX_MAX_EMISSIVE_SPOT_LIGHTS 1
+
 enum LightHasShadowMap : __int32
 {                                       // ...
     LIGHT_HAS_SHADOWMAP = 0x0,

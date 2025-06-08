@@ -109,31 +109,31 @@ void ProfLoad_Print()
         "^6Total Load Time: %5.4f\n",
         (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart)
             * msecPerRawTimerTick
-            * 0.001000000047497451));
+            * EQUAL_EPSILON));
     Com_Printf(
         12,
         "^6Profiled Time: %5.4f\n",
-        (double)((double)mapLoadProfile.ticksProfiled * msecPerRawTimerTick * 0.001000000047497451));
+        (double)((double)mapLoadProfile.ticksProfiled * msecPerRawTimerTick * EQUAL_EPSILON));
     Com_Printf(
         12,
         "^6Unprofiled Time: %5.4f\n",
         (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart - mapLoadProfile.ticksProfiled)
             * msecPerRawTimerTick
-            * 0.001000000047497451));
+            * EQUAL_EPSILON));
     Com_Printf(
         12,
         "^6File Open Time: %5.4f, Accessed %d times\n",
-        (double)((double)mapLoadProfile.elements[0].ticksTotal * msecPerRawTimerTick * 0.001000000047497451),
+        (double)((double)mapLoadProfile.elements[0].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
         fileOpenCount);
     Com_Printf(
         12,
         "^6File Seek Time: %5.4f, Accessed %d times\n",
-        (double)((double)mapLoadProfile.elements[1].ticksTotal * msecPerRawTimerTick * 0.001000000047497451),
+        (double)((double)mapLoadProfile.elements[1].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
         fileSeekCount);
     Com_Printf(
         12,
         "^6File Read Time: %5.4f, Accessed %d times\n",
-        (double)((double)mapLoadProfile.elements[2].ticksTotal * msecPerRawTimerTick * 0.001000000047497451),
+        (double)((double)mapLoadProfile.elements[2].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
         fileReadCount);
 }
 
@@ -197,11 +197,11 @@ void __cdecl ProfLoad_GetEntryRowText(const MapProfileEntry *entry, char *rowTex
         sizeofRowText,
         "%s - %5.3f total, %5.3f self, %5.3f file, %i hits",
         entry->label,
-        (double)((double)entry->ticksTotal * msecPerRawTimerTick * 0.001000000047497451),
-        (double)((double)entry->ticksSelf * msecPerRawTimerTick * 0.001000000047497451),
+        (double)((double)entry->ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
+        (double)((double)entry->ticksSelf * msecPerRawTimerTick * EQUAL_EPSILON),
         (double)((double)(entry->elements[1].ticksSelf + entry->elements[2].ticksSelf + entry->elements[0].ticksSelf)
             * msecPerRawTimerTick
-            * 0.001000000047497451),
+            * EQUAL_EPSILON),
         entry->accessCount);
 }
 
@@ -293,8 +293,8 @@ void ProfLoad_PrintHotSpots()
     v16 = 0.0;
     for (j = 0; j < v14; ++j)
     {
-        v18 = (double)__PAIR64__(HIDWORD(v11[j].ticksSelf), v11[j].ticksSelf) * msecPerRawTimerTick * 0.001000000047497451;
-        v17 = (double)__PAIR64__(HIDWORD(v11[j].ticksFile), v11[j].ticksFile) * msecPerRawTimerTick * 0.001000000047497451;
+        v18 = (double)__PAIR64__(HIDWORD(v11[j].ticksSelf), v11[j].ticksSelf) * msecPerRawTimerTick * EQUAL_EPSILON;
+        v17 = (double)__PAIR64__(HIDWORD(v11[j].ticksFile), v11[j].ticksFile) * msecPerRawTimerTick * EQUAL_EPSILON;
         v15 = v15 + v18;
         v16 = v16 + v17;
         Com_Printf(
@@ -425,7 +425,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             "Total Load Time: %5.4f",
             (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart)
                 * msecPerRawTimerTick
-                * 0.001000000047497451));
+                * EQUAL_EPSILON));
         UI_DrawText(
             &scrPlaceFull,
             line,
@@ -441,7 +441,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
         sprintf(
             line,
             "File Open Time: %5.4f, Accessed %d times",
-            (double)((double)fileOpenElement->ticksTotal * msecPerRawTimerTick * 0.001000000047497451),
+            (double)((double)fileOpenElement->ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
             fileOpenCount);
         UI_DrawText(
             &scrPlaceFull,
@@ -459,7 +459,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
         sprintf(
             line,
             "Profiled Time: %5.4f",
-            (double)((double)mapLoadProfile.ticksProfiled * msecPerRawTimerTick * 0.001000000047497451));
+            (double)((double)mapLoadProfile.ticksProfiled * msecPerRawTimerTick * EQUAL_EPSILON));
         UI_DrawText(
             &scrPlaceFull,
             line,
@@ -475,7 +475,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
         sprintf(
             line,
             "File Seek Time: %5.4f, Accessed %d times",
-            (double)((double)mapLoadProfile.elements[1].ticksTotal * msecPerRawTimerTick * 0.001000000047497451),
+            (double)((double)mapLoadProfile.elements[1].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
             fileSeekCount);
         UI_DrawText(
             &scrPlaceFull,
@@ -495,7 +495,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             "Unprofiled Time: %5.4f",
             (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart - mapLoadProfile.ticksProfiled)
                 * msecPerRawTimerTick
-                * 0.001000000047497451));
+                * EQUAL_EPSILON));
         UI_DrawText(
             &scrPlaceFull,
             line,
@@ -511,7 +511,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
         sprintf(
             line,
             "File Read Time: %5.4f, Accessed %d times",
-            (double)((double)mapLoadProfile.elements[2].ticksTotal * msecPerRawTimerTick * 0.001000000047497451),
+            (double)((double)mapLoadProfile.elements[2].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
             fileReadCount);
         UI_DrawText(
             &scrPlaceFull,

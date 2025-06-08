@@ -895,7 +895,7 @@ int __cdecl G_DObjUpdateServerTime(gentity_s *ent, int bNotify)
 {
     float dtime; // [esp+8h] [ebp-4h]
 
-    dtime = (double)level.frametime * 0.001000000047497451;
+    dtime = (double)level.frametime * EQUAL_EPSILON;
     return SV_DObjUpdateServerTime(ent, dtime, bNotify);
 }
 

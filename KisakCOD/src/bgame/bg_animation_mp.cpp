@@ -1721,7 +1721,7 @@ void __cdecl BG_RunLerpFrameRate(
                     Vec3Sub(es->lerp.pos.trBase, lf->oldFramePos, diff);
                     moveSpeed = Vec3Length(diff);
                 }
-                moveSpeed = moveSpeed / ((double)(bgs->latestSnapshotTime - lf->oldFrameSnapshotTime) * 0.001000000047497451);
+                moveSpeed = moveSpeed / ((double)(bgs->latestSnapshotTime - lf->oldFrameSnapshotTime) * EQUAL_EPSILON);
                 if (anim->moveSpeed == 0.0)
                     MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 2735, 0, "%s", "anim->moveSpeed");
                 lf->animSpeedScale = moveSpeed / anim->moveSpeed;
@@ -1896,7 +1896,7 @@ void __cdecl BG_SetNewAnimation(
         }
         if (oldanim)
         {
-            blendTime = (double)lf->animationTime * 0.001000000047497451;
+            blendTime = (double)lf->animationTime * EQUAL_EPSILON;
             XAnimClearTreeGoalWeights(pAnimTree, oldAnimNum & 0xFFFFFDFF, blendTime);
         }
         if (newAnimationa)
@@ -1912,7 +1912,7 @@ void __cdecl BG_SetNewAnimation(
                     Com_Error(ERR_DROP, "death animation '%s' is looping", anim->name);
                 if (bNew)
                 {
-                    goalTime = (double)lf->animationTime * 0.001000000047497451;
+                    goalTime = (double)lf->animationTime * EQUAL_EPSILON;
                     XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0, goalTime, 1.0, 0, 0, 0);
                 }
                 else
@@ -1924,24 +1924,24 @@ void __cdecl BG_SetNewAnimation(
             else
             {
                 v12 = anim->moveSpeed != 0.0 && XAnimGetWeight(pAnimTree, newAnimationa) == 0.0;
-                v11 = (double)lf->animationTime * 0.001000000047497451;
+                v11 = (double)lf->animationTime * EQUAL_EPSILON;
                 XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0, v11, 1.0, 0, anim->noteType, lf != &ci->legs);
                 if (v12)
                     XAnimSetTime(pAnimTree, newAnimationa, fStartTime);
             }
             if (lf != &ci->legs)
             {
-                v10 = (double)lf->animationTime * 0.001000000047497451;
+                v10 = (double)lf->animationTime * EQUAL_EPSILON;
                 XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.torsoAnim, 1.0, v10, 1.0, 0, anim->noteType, 0);
-                v9 = (double)lf->animationTime * 0.001000000047497451;
+                v9 = (double)lf->animationTime * EQUAL_EPSILON;
                 XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.legsAnim, 0.0099999998, v9, 1.0, 0, anim->noteType, 0);
             }
         }
         else if (lf != &ci->legs)
         {
-            v8 = (double)lf->animationTime * 0.001000000047497451;
+            v8 = (double)lf->animationTime * EQUAL_EPSILON;
             XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.torsoAnim, 0.0, v8, 1.0, 0, 0, 0);
-            v7 = (double)lf->animationTime * 0.001000000047497451;
+            v7 = (double)lf->animationTime * EQUAL_EPSILON;
             XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.legsAnim, 1.0, v7, 1.0, 0, 0, 0);
         }
     }

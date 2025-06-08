@@ -83,7 +83,7 @@ void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out)
     entryIndex = R_ModelLightingIndexFromHandle(handle);
     xCoord = ((double)(4 * (entryIndex & 0x3F)) + 2.0) * 0.00390625;
     yCoord = ((double)((entryIndex >> 4) & 0xFFFFFFFC) + 2.0) * modelLightGlob.invImageHeight;
-    *out = xCoord;
+    out[0] = xCoord;
     out[1] = yCoord;
     out[2] = 0.5;
     out[3] = 1.0;
@@ -134,41 +134,25 @@ void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, Pack
 
 unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle)
 {
-    if (!handle || handle > modelLightGlob.totalEntryLimit)
-        MyAssertHandler(
-            ".\\r_model_lighting.cpp",
-            168,
-            0,
-            "handle not in [1, modelLightGlob.totalEntryLimit]\n\t%i not in [%i, %i]",
-            handle,
-            1,
-            modelLightGlob.totalEntryLimit);
+    iassert(handle && handle < modelLightGlob.totalEntryLimit);
     return handle - 1;
 }
 
 char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex)
 {
     unsigned __int16 handle; // [esp+0h] [ebp-10h]
-    unsigned __int16 handlea; // [esp+0h] [ebp-10h]
     unsigned int smodelIndexPrev; // [esp+4h] [ebp-Ch]
     unsigned int entryIndex; // [esp+8h] [ebp-8h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_model_lighting.cpp", 233, 0, "%s", "rgp.world");
+    iassert(rgp.world);
     handle = smodelDrawInst->lightingHandle;
     if (handle)
     {
         entryIndex = R_ModelLightingIndexFromHandle(handle);
         if (!r_cacheSModelLighting->current.enabled)
         {
-            if (smodelIndex >> 5 >= 0x800)
-                MyAssertHandler(
-                    ".\\r_model_lighting.cpp",
-                    249,
-                    0,
-                    "smodelIndex >> 5 doesn't index ARRAY_COUNT( smodelLightGlob.lightingBits )\n\t%i not in [0, %i)",
-                    smodelIndex >> 5,
-                    2048);
+            bcassert(smodelIndex >> 5, ARRAY_COUNT(smodelLightGlob.lightingBits));
+
             smodelLightGlob.lightingBits[smodelIndex >> 5] |= 0x80000000 >> (smodelIndex & 0x1F);
             smodelLightGlob.local.anyNewLighting = 1;
         }
@@ -181,9 +165,10 @@ char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, 
             {
                 if (!smodelLightGlob.local.freeableCount)
                     return 0;
-                handlea = smodelLightGlob.freeableHandles[--smodelLightGlob.local.freeableCount];
-                entryIndex = R_ModelLightingIndexFromHandle(handlea);
+                handle = smodelLightGlob.freeableHandles[--smodelLightGlob.local.freeableCount];
+                entryIndex = R_ModelLightingIndexFromHandle(handle);
             } while (smodelLightGlob.local.frameCount == smodelLightGlob.local.usedFrameCount[entryIndex]);
+
             smodelIndexPrev = smodelLightGlob.local.smodelIndex[entryIndex];
             rgp.world->dpvs.smodelDrawInsts[smodelIndexPrev].lightingHandle = 0;
             R_UncacheStaticModel(smodelIndexPrev);
@@ -191,28 +176,13 @@ char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, 
         else
         {
             entryIndex = smodelLightGlob.local.assignedCount++;
-            handlea = entryIndex + 1;
+            handle = entryIndex + 1;
         }
-        if (!handlea)
-            MyAssertHandler(".\\r_model_lighting.cpp", 291, 0, "%s", "handle");
-        smodelDrawInst->lightingHandle = handlea;
-        if (smodelIndex != (unsigned __int16)smodelIndex)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                281,
-                0,
-                "i == static_cast< Type >( i )\n\t%i, %i",
-                smodelIndex,
-                (unsigned __int16)smodelIndex);
+        iassert(handle);
+        smodelDrawInst->lightingHandle = handle;
+        iassert(smodelIndex == static_cast<unsigned short>(smodelIndex));
         smodelLightGlob.local.smodelIndex[entryIndex] = smodelIndex;
-        if (smodelIndex >> 5 >= 0x800)
-            MyAssertHandler(
-                ".\\r_model_lighting.cpp",
-                300,
-                0,
-                "smodelIndex >> 5 doesn't index ARRAY_COUNT( smodelLightGlob.lightingBits )\n\t%i not in [0, %i)",
-                smodelIndex >> 5,
-                2048);
+        bcassert(smodelIndex >> 5, ARRAY_COUNT(smodelLightGlob.lightingBits));
         smodelLightGlob.lightingBits[smodelIndex >> 5] |= 0x80000000 >> (smodelIndex & 0x1F);
         smodelLightGlob.local.anyNewLighting = 1;
     }
@@ -229,7 +199,7 @@ unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
     return R_AllocModelLighting(
         lightingOrigin,
         cachedLightingHandle,
-        (unsigned int(__cdecl *)(const void *))R_DynEntPrimaryLightCallback,
+        R_DynEntPrimaryLightCallback,
         &dynEntId,
         lightingInfoOut);
 }
@@ -324,9 +294,10 @@ unsigned int __cdecl R_AllocModelLighting(
     }
 }
 
-unsigned int __cdecl R_DynEntPrimaryLightCallback(unsigned int *userData)
+unsigned int __cdecl R_DynEntPrimaryLightCallback(const void *userData)
 {
-    return rgp.world->nonSunPrimaryLightForModelDynEnt[*userData];
+    DWORD *data = (DWORD *)userData;
+    return rgp.world->nonSunPrimaryLightForModelDynEnt[*data];
 }
 
 unsigned int __cdecl R_AllocModelLighting_Box(
@@ -342,6 +313,7 @@ unsigned int __cdecl R_AllocModelLighting_Box(
     boxWork.viewInfo = viewInfo;
     Vec3Avg(boxMins, boxMaxs, boxWork.midPoint);
     Vec3Sub(boxWork.midPoint, boxMins, boxWork.halfSize);
+
     return R_AllocModelLighting(
         lightingOrigin,
         cachedLightingHandle,
@@ -352,10 +324,9 @@ unsigned int __cdecl R_AllocModelLighting_Box(
 
 unsigned int __cdecl R_GetPrimaryLightForBoxCallback(const void *userData)
 {
-    return R_GetNonSunPrimaryLightForBox(
-        *(const GfxViewInfo **)userData,
-        (const float *)userData + 1,
-        (const float *)userData + 4);
+    GfxFindLightForBox *boxWork = (GfxFindLightForBox *)userData;
+
+    return R_GetNonSunPrimaryLightForBox(boxWork->viewInfo, boxWork->midPoint, boxWork->halfSize);
 }
 
 unsigned int __cdecl R_AllocModelLighting_Sphere(
@@ -369,10 +340,11 @@ unsigned int __cdecl R_AllocModelLighting_Sphere(
     GfxFindLightForSphere sphereWork; // [esp+0h] [ebp-14h] BYREF
 
     sphereWork.viewInfo = viewInfo;
-    sphereWork.origin[0] = *origin;
+    sphereWork.origin[0] = origin[0];
     sphereWork.origin[1] = origin[1];
     sphereWork.origin[2] = origin[2];
     sphereWork.radius = radius;
+
     return R_AllocModelLighting(
         lightingOrigin,
         cachedLightingHandle,
@@ -383,10 +355,9 @@ unsigned int __cdecl R_AllocModelLighting_Sphere(
 
 unsigned int __cdecl R_GetPrimaryLightForSphereCallback(const void *userData)
 {
-    return R_GetNonSunPrimaryLightForSphere(
-        *(const GfxViewInfo **)userData,
-        (const float *)userData + 1,
-        *((float *)userData + 4));
+    GfxFindLightForSphere *sphereWork = (GfxFindLightForSphere *)userData;
+    
+    return R_GetNonSunPrimaryLightForSphere(sphereWork->viewInfo, sphereWork->origin, sphereWork->radius);
 }
 
 void __cdecl R_ToggleModelLightingFrame()
@@ -605,39 +576,31 @@ void __cdecl R_InitModelLightingGlobals()
     modelLightGlob.xmodelEntryLimit = gfxCfg.maxClientViews << 10;
     if (!_BitScanReverse(&v1, gfxCfg.maxClientViews << 10))
         v1 = 63;// `CountLeadingZeros'::`2': : notFound;
-    totalBitsNeeded = 32 - (v1 ^ 0x1F);
-    for (smodelLightGlob.local.entryLimit = (1 << (32 - (v1 ^ 0x1F))) - modelLightGlob.xmodelEntryLimit;
+    totalBitsNeeded = 32 - (v1 ^ 31);
+    for (smodelLightGlob.local.entryLimit = (1 << totalBitsNeeded) - modelLightGlob.xmodelEntryLimit;
         smodelLightGlob.local.entryLimit < 0x800;
         smodelLightGlob.local.entryLimit += 1 << totalBitsNeeded++)
     {
         ;
     }
-    if (smodelLightGlob.local.entryLimit > 0x1000)
-        MyAssertHandler(
-            ".\\r_model_lighting.cpp",
-            1029,
-            0,
-            "%s\n\t(smodelLightGlob.local.entryLimit) = %i",
-            "(smodelLightGlob.local.entryLimit <= 4096)",
-            smodelLightGlob.local.entryLimit);
+
+    iassert(smodelLightGlob.local.entryLimit <= 4096);
+
     modelLightGlob.totalEntryLimit = 1 << totalBitsNeeded;
     modelLightGlob.entryBitsY = totalBitsNeeded - 6;
     modelLightGlob.imageHeight = 1 << (totalBitsNeeded - 6 + 2);
     modelLightGlob.invImageHeight = 1.0 / (double)(unsigned int)(1 << (totalBitsNeeded - 6 + 2));
     modelLightGlob.xmodel.baseIndex = smodelLightGlob.local.entryLimit;
-    if ((modelLightGlob.xmodelEntryLimit & 0x1F) != 0)
-        MyAssertHandler(
-            ".\\r_model_lighting.cpp",
-            1046,
-            0,
-            "%s\n\t(modelLightGlob.xmodelEntryLimit) = %i",
-            "(!(modelLightGlob.xmodelEntryLimit & 31))",
-            modelLightGlob.xmodelEntryLimit);
+
+    iassert(!(modelLightGlob.xmodelEntryLimit & 31));
+
     modelLightGlob.pixelFreeBitsSize = modelLightGlob.xmodelEntryLimit >> 3;
     modelLightGlob.pixelFreeBitsWordCount = modelLightGlob.xmodelEntryLimit >> 5;
     modelLightGlob.lightingOrigins = (float (*)[3])R_AllocModelLightingGlobal(12 * modelLightGlob.xmodelEntryLimit);
+
     for (i = 0; i < 4; ++i)
         modelLightGlob.pixelFreeBits[i] = (unsigned int *)R_AllocModelLightingGlobal(modelLightGlob.pixelFreeBitsSize);
+
     modelLightGlob.lightingInfo = (GfxLightingInfo *)R_AllocModelLightingGlobal(2 * modelLightGlob.xmodelEntryLimit);
     modelLightGlob.image = modelLightGlob.lightImages[0];
 }
@@ -658,45 +621,25 @@ void __cdecl R_ResetModelLighting()
 
     for (i = 0; i < 4; ++i)
         Com_Memset(modelLightGlob.pixelFreeBits[i], 255, modelLightGlob.pixelFreeBitsSize);
+
     for (usedIndex = 0; usedIndex < modelLightGlob.xmodelEntryLimit; ++usedIndex)
     {
         v1 = modelLightGlob.lightingOrigins[usedIndex];
-        *v1 = 3.4028235e38;
-        v1[1] = 3.4028235e38;
-        v1[2] = 3.4028235e38;
+        v1[0] = FLT_MAX;
+        v1[1] = FLT_MAX;
+        v1[2] = FLT_MAX;
     }
-    if (smodelLightGlob.local.assignedCount && !rgp.world)
-        MyAssertHandler(
-            ".\\r_model_lighting.cpp",
-            1091,
-            0,
-            "%s",
-            "smodelLightGlob.local.assignedCount == 0 || rgp.world != NULL");
+
+    iassert(smodelLightGlob.local.assignedCount == 0 || rgp.world != NULL);
+
     for (entryIndex = 0; entryIndex < smodelLightGlob.local.assignedCount; ++entryIndex)
     {
         smodelIndex = smodelLightGlob.local.smodelIndex[entryIndex];
-        if (smodelIndex >= rgp.world->dpvs.smodelCount)
-            MyAssertHandler(
-                ".\\r_model_lighting.cpp",
-                1095,
-                0,
-                "smodelIndex doesn't index rgp.world->dpvs.smodelCount\n\t%i not in [0, %i)",
-                smodelIndex,
-                rgp.world->dpvs.smodelCount);
-        if (entryIndex != R_ModelLightingIndexFromHandle(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle))
-        {
-            v0 = R_ModelLightingIndexFromHandle(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle);
-            MyAssertHandler(
-                ".\\r_model_lighting.cpp",
-                1096,
-                0,
-                "entryIndex == R_ModelLightingIndexFromHandle( rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle )\n"
-                "\t%i, %i",
-                entryIndex,
-                v0);
-        }
+        iassert(smodelIndex < rgp.world->dpvs.smodelCount);
+        iassert(entryIndex == R_ModelLightingIndexFromHandle(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle));
         rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle = 0;
     }
+
     smodelLightGlob.local.assignedCount = 0;
 }
 
@@ -704,19 +647,19 @@ void __cdecl R_InitModelLightingImage()
 {
     bool useAltUpdate; // [esp+1h] [ebp-1h]
 
-    if (!modelLightGlob.totalEntryLimit)
-        MyAssertHandler(".\\r_model_lighting.cpp", 1109, 0, "%s", "modelLightGlob.totalEntryLimit");
+    iassert(modelLightGlob.totalEntryLimit);
+
     useAltUpdate = Dvar_GetBool("r_altModelLightingUpdate");
     modelLightGlob.lightImages[0] = Image_AllocProg(12, 4u, 1u);
     if (useAltUpdate)
     {
-        Image_SetupAndLoad(modelLightGlob.lightImages[0], 256, modelLightGlob.imageHeight, 4, 65546, D3DFMT_A8R8G8B8);
+        Image_SetupAndLoad(modelLightGlob.lightImages[0], 256, modelLightGlob.imageHeight, 4, 0x1000A, D3DFMT_A8R8G8B8);
         modelLightGlob.lightImages[1] = Image_AllocProg(13, 4u, 1u);
-        Image_SetupAndLoad(modelLightGlob.lightImages[1], 256, modelLightGlob.imageHeight, 4, 262154, D3DFMT_A8R8G8B8);
+        Image_SetupAndLoad(modelLightGlob.lightImages[1], 256, modelLightGlob.imageHeight, 4, 0x4000A, D3DFMT_A8R8G8B8);
     }
     else
     {
-        Image_SetupAndLoad(modelLightGlob.lightImages[0], 256, modelLightGlob.imageHeight, 4, 10, D3DFMT_A8R8G8B8);
+        Image_SetupAndLoad(modelLightGlob.lightImages[0], 256, modelLightGlob.imageHeight, 4, 0xA, D3DFMT_A8R8G8B8);
         modelLightGlob.lightImages[1] = 0;
     }
     modelLightGlob.image = modelLightGlob.lightImages[0];
@@ -726,8 +669,8 @@ void __cdecl R_ShutdownModelLightingImage()
 {
     int imgIndex; // [esp+0h] [ebp-4h]
 
-    if (!modelLightGlob.totalEntryLimit)
-        MyAssertHandler(".\\r_model_lighting.cpp", 1138, 0, "%s", "modelLightGlob.totalEntryLimit");
+    iassert(modelLightGlob.totalEntryLimit);
+
     for (imgIndex = 0; imgIndex < 2; ++imgIndex)
     {
         if (modelLightGlob.lightImages[imgIndex])

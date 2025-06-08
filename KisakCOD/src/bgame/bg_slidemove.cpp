@@ -174,7 +174,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int gravity)
         stepDelta_4 = ps->origin[1] - start_o[1];
         v12 = stepDelta * start_v[0] + stepDelta_4 * start_v[1];
         v5 = start_v[1] * flatDelta_4 + start_v[0] * flatDelta;
-        if (v12 <= v5 + 0.001000000047497451 || jumping && Jump_IsPlayerAboveMax(ps))
+        if (v12 <= v5 + EQUAL_EPSILON || jumping && Jump_IsPlayerAboveMax(ps))
         {
             v11 = ps->origin;
             ps->origin[0] = down_o[0];

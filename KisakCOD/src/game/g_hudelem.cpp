@@ -914,7 +914,7 @@ void __cdecl HECmd_SetTimer_Internal(scr_entref_t entref, he_type_t type, const 
     time = (int)(v5 + 0.4999999990686774);
     if (time <= 0 && type != HE_TYPE_TIMER_UP)
     {
-        v4 = va("time %g should be > 0", (double)time * 0.001000000047497451);
+        v4 = va("time %g should be > 0", (double)time * EQUAL_EPSILON);
         Scr_ParamError(0, v4);
     }
     HudElem_ClearTypeSettings(hud);
@@ -981,14 +981,14 @@ void __cdecl HECmd_SetClock_Internal(scr_entref_t entref, he_type_t type, const 
     time = (int)(v10 + 0.4999999990686774);
     if (time <= 0 && type != HE_TYPE_CLOCK_UP)
     {
-        v4 = va("time %g should be > 0", (double)time * 0.001000000047497451);
+        v4 = va("time %g should be > 0", (double)time * EQUAL_EPSILON);
         Scr_ParamError(0, v4);
     }
     v9 = Scr_GetFloat(1u) * 1000.0;
     duration = (int)(v9 + 0.4999999990686774);
     if (duration <= 0)
     {
-        v5 = va("duration %g should be > 0", (double)duration * 0.001000000047497451);
+        v5 = va("duration %g should be > 0", (double)duration * EQUAL_EPSILON);
         Scr_ParamError(1u, v5);
     }
     String = Scr_GetString(2u);

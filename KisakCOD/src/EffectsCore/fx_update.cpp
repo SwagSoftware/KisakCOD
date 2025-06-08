@@ -1136,7 +1136,7 @@ void __cdecl FX_NextElementPosition(FxUpdateElem* update, int msecUpdateBegin, i
     posLocal[1] = elemOrigin[1];
     posLocal[2] = elemOrigin[2];
     FX_NextElementPosition_NoExternalForces(update, msecUpdateBegin, msecUpdateEnd, posLocal, update->posWorld);
-    secDuration = (double)(msecUpdateEnd - msecUpdateBegin) * 0.001000000047497451;
+    secDuration = (double)(msecUpdateEnd - msecUpdateBegin) * EQUAL_EPSILON;
     Vec3Mad(update->posWorld, secDuration, update->elemBaseVel, update->posWorld);
     elemDef = FX_GetUpdateElemDef(update);
     gravityScale = elemDef->gravity.amplitude * fx_randomTable[update->randomSeed + 15] + elemDef->gravity.base;
@@ -1873,7 +1873,7 @@ unsigned __int8 __cdecl FX_ProcessEmitting(
         elemDef = FX_GetUpdateElemDef(update);
     }
     residual = distInUpdate - distLastEmit;
-    if (residual < -0.001000000047497451 || residual > maxDistPerEmit + 0.001000000047497451)
+    if (residual < -EQUAL_EPSILON || residual > maxDistPerEmit + EQUAL_EPSILON)
     {
         v6 = va("%g, %g", residual, maxDistPerEmit);
         MyAssertHandler(
@@ -2106,7 +2106,7 @@ FxUpdateResult __cdecl FX_UpdateTrailElement(
         {
             if (!FX_UpdateElement_TruncateToElemBegin(&update, &updateResult))
                 return updateResult;
-            v9 = (double)trailElem->baseVelZ * 0.001000000047497451;
+            v9 = (double)trailElem->baseVelZ * EQUAL_EPSILON;
             baseVel[0] = 0.0;
             baseVel[1] = 0.0;
             baseVel[2] = v9;
@@ -2116,11 +2116,11 @@ FxUpdateResult __cdecl FX_UpdateTrailElement(
             //Profile_Begin(194);
             updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update);
             //Profile_EndInternal(0);
-            v8 = (int)(baseVel[2] / 0.001000000047497451);
+            v8 = (int)(baseVel[2] / EQUAL_EPSILON);
             if (v8 >= -32768)
             {
                 if (v8 <= 0x7FFF)
-                    v7 = (int)(baseVel[2] / 0.001000000047497451);
+                    v7 = (int)(baseVel[2] / EQUAL_EPSILON);
                 else
                     v7 = 0x7FFF;
             }

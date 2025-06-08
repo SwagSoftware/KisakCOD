@@ -21,8 +21,8 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
 
     Vec3NormalizeTo(unitVec, normalized);
     out.packed = 0;
-    bestDirError = 3.4028235e38;
-    bestLenError = 3.4028235e38;
+    bestDirError = FLT_MAX;
+    bestLenError = FLT_MAX;
     testEncoding[3] = 0;
     do
     {
@@ -37,7 +37,7 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
         v5 = Vec3Normalize(decoded) - 1.0;
         v3 = fabs(v5);
         lenError = v3;
-        if (v3 < 0.001000000047497451)
+        if (v3 < EQUAL_EPSILON)
         {
             v4 = Vec3Dot(decoded, normalized) - 1.0;
             v2 = fabs(v4);

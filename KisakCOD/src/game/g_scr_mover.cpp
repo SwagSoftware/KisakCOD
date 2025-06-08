@@ -208,7 +208,7 @@ void __cdecl ScriptEntCmdGetCommandTimes(float *pfTotalTime, float *pfAccelTime,
     *pfTotalTime = Scr_GetFloat(1u);
     if (*pfTotalTime <= 0.0)
         Scr_ParamError(1u, "total time must be positive");
-    if (*pfTotalTime < 0.001000000047497451)
+    if (*pfTotalTime < EQUAL_EPSILON)
         *pfTotalTime = 0.001;
     iNumParms = Scr_GetNumParam();
     if (iNumParms <= 2)

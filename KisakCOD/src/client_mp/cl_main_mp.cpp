@@ -3626,13 +3626,13 @@ void __cdecl CL_InitOnceForAllClients()
     cl_activeAction = Dvar_RegisterString("activeAction", "", 0, "Action to execute in first frame");
     cl_avidemo = Dvar_RegisterInt("cl_avidemo", 0, (DvarLimits)0x7FFFFFFF00000000LL, 0, "AVI demo frames per second");
     cl_forceavidemo = Dvar_RegisterBool("cl_forceavidemo", 0, 0, "Record AVI demo even if client is not active");
-    minb.value.max = 3.4028235e38;
-    minb.value.min = -3.4028235e38;
+    minb.value.max = FLT_MAX;
+    minb.value.min = -FLT_MAX;
     cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, minb, 1u, "Max yaw speed in degrees for game pad and keyboard");
-    minc.value.max = 3.4028235e38;
-    minc.value.min = -3.4028235e38;
+    minc.value.max = FLT_MAX;
+    minc.value.min = -FLT_MAX;
     cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, minc, 1u, "Max pitch speed in degrees for game pad");
-    mind.value.max = 3.4028235e38;
+    mind.value.max = FLT_MAX;
     mind.value.min = 0.0;
     cl_anglespeedkey = Dvar_RegisterFloat(
         "cl_anglespeedkey",

@@ -143,8 +143,8 @@ unsigned int __cdecl R_FindNearestReflectionProbeInCell(
     if (world->reflectionProbeCount >= 0xFF)
         MyAssertHandler(".\\r_dpvs.cpp", 704, 0, "%s", "world->reflectionProbeCount < 0xff");
     bestProbe = 0;
-    bestProbeDist = 3.4028235e38;
-    testProbeDist = 3.4028235e38;
+    bestProbeDist = FLT_MAX;
+    testProbeDist = FLT_MAX;
     if (!cell->reflectionProbeCount)
         MyAssertHandler(".\\r_dpvs.cpp", 710, 0, "%s", "cell->reflectionProbeCount > 0");
     for (cellProbeIndex = 0; cellProbeIndex < cell->reflectionProbeCount; ++cellProbeIndex)
@@ -180,8 +180,8 @@ unsigned int __cdecl R_FindNearestReflectionProbe(const GfxWorld *world, const f
     if (world->reflectionProbeCount >= 0xFF)
         MyAssertHandler(".\\r_dpvs.cpp", 735, 0, "%s", "world->reflectionProbeCount < 0xff");
     bestProbe = 0;
-    bestProbeDist = 3.4028235e38;
-    testProbeDist = 3.4028235e38;
+    bestProbeDist = FLT_MAX;
+    testProbeDist = FLT_MAX;
     for (probeIndex = 1; probeIndex < world->reflectionProbeCount; ++probeIndex)
     {
         Vec3Sub(origin, world->reflectionProbes[probeIndex].origin, diff);
@@ -256,9 +256,8 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
         if (sceneEntVisData[sceneEntIndex] == 1)
         {
             sceneEnt = &scene.sceneDObj[sceneEntIndex];
-            if (sceneEnt->cull.state < 2)
-                MyAssertHandler(".\\r_dpvs.cpp", 819, 0, "%s", "sceneEnt->cull.state >= CULL_STATE_BOUNDED");
-            cachedLightingHandle = (unsigned __int16 *)LongNoSwap((unsigned int)sceneEnt->info.pose);
+            iassert(sceneEnt->cull.state >= CULL_STATE_BOUNDED);
+            cachedLightingHandle = (unsigned __int16 *)LongNoSwap((unsigned int)sceneEnt->info.cachedLightingHandle);
             lightingHandle = R_AllocModelLighting_Box(
                 viewInfo,
                 sceneEnt->lightingOrigin,
@@ -297,8 +296,7 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
                 if (gfxEntIndex)
                 {
                     gfxEnt = &frontEndDataOut->gfxEnts[gfxEntIndex];
-                    v1 = sc_enable->current.enabled && (gfxEnt->renderFxFlags & 0x100) != 0;
-                    isShadowReceiver = v1;
+                    isShadowReceiver = sc_enable->current.enabled && (gfxEnt->renderFxFlags & 0x100) != 0;
                     depthHack = (gfxEnt->renderFxFlags & 2) != 0;
                 }
                 else
@@ -372,14 +370,7 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
             sceneBrush = &scene.sceneBrush[sceneEntIndex];
             reflectionProbeIndex = R_CalcReflectionProbeIndex(sceneBrush->placement.origin);
             sceneBrush->reflectionProbeIndex = reflectionProbeIndex;
-            if (sceneBrush->reflectionProbeIndex != reflectionProbeIndex)
-                MyAssertHandler(
-                    ".\\r_dpvs.cpp",
-                    908,
-                    0,
-                    "%s\n\t(reflectionProbeIndex) = %i",
-                    "(sceneBrush->reflectionProbeIndex == reflectionProbeIndex)",
-                    reflectionProbeIndex);
+            iassert(sceneBrush->reflectionProbeIndex == reflectionProbeIndex);
             R_AddBModelSurfacesCamera(&sceneBrush->info, sceneBrush->bmodel, drawSurfs, lastDrawSurfs, reflectionProbeIndex);
         }
     }
@@ -2301,11 +2292,11 @@ const float (*__cdecl R_ChopPortalWinding(
     for (vertexIndex = 0; vertexIndex < *vertexCount; ++vertexIndex)
     {
         v12 = Vec3Dot(plane->coeffs, &(*vertsIn)[3 * vertexIndex]) + plane->coeffs[3];
-        distForVert[vertexIndex] = v12 - 0.001000000047497451;
+        distForVert[vertexIndex] = v12 - EQUAL_EPSILON;
         sideForVert[vertexIndex] = 2;
-        if (distForVert[vertexIndex] >= -0.001000000047497451)
+        if (distForVert[vertexIndex] >= -EQUAL_EPSILON)
         {
-            if (distForVert[vertexIndex] > 0.001000000047497451)
+            if (distForVert[vertexIndex] > EQUAL_EPSILON)
             {
                 sideForVert[vertexIndex] = 0;
                 ++frontCount;

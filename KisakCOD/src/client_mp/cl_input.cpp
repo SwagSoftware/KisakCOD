@@ -405,9 +405,9 @@ void __cdecl CL_AdjustAngles(int localClientNum)
     if ((LocalClientGlobals->snap.ps.pm_flags & 0x800) == 0)
     {
         if (kb[9].active)
-            v1 = (double)cls.frametime * 0.001000000047497451 * cl_anglespeedkey->current.value;
+            v1 = (double)cls.frametime * EQUAL_EPSILON * cl_anglespeedkey->current.value;
         else
-            v1 = (double)cls.frametime * 0.001000000047497451;
+            v1 = (double)cls.frametime * EQUAL_EPSILON;
         speed = v1;
         if (!kb[8].active)
         {
@@ -636,7 +636,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
                     delta = m_yaw->current.value * mx;
                     if (LocalClientGlobals->cgameMaxYawSpeed > 0.0)
                     {
-                        cap = (double)frame_msec * LocalClientGlobals->cgameMaxYawSpeed * 0.001000000047497451;
+                        cap = (double)frame_msec * LocalClientGlobals->cgameMaxYawSpeed * EQUAL_EPSILON;
                         v7 = delta - cap;
                         if (v7 < 0.0)
                             v13 = delta;
@@ -657,7 +657,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
                     deltaa = m_pitch->current.value * my;
                     if (LocalClientGlobals->cgameMaxPitchSpeed > 0.0)
                     {
-                        cap = (double)frame_msec * LocalClientGlobals->cgameMaxPitchSpeed * 0.001000000047497451;
+                        cap = (double)frame_msec * LocalClientGlobals->cgameMaxPitchSpeed * EQUAL_EPSILON;
                         v4 = deltaa - cap;
                         if (v4 < 0.0)
                             v11 = deltaa;
@@ -679,7 +679,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
                     cmd->forwardmove = ClampChar(cmd->forwardmove - (int)(v9 + 9.313225746154785e-10));
                 }
             }
-            aimInput.deltaTime = (double)cls.frametime * 0.001000000047497451;
+            aimInput.deltaTime = (double)cls.frametime * EQUAL_EPSILON;
             aimInput.pitch = LocalClientGlobals->viewangles[0];
             aimInput.pitchAxis = 0.0;
             aimInput.pitchMax = 0.0;
@@ -830,7 +830,7 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
     {
         CL_AddCurrentStanceToCmd(localClientNum, cmd);
         cmd->buttons |= 0x100000u;
-        frametime = (double)cgArray[0].frametime * 0.001000000047497451;
+        frametime = (double)cgArray[0].frametime * EQUAL_EPSILON;
         mapAspectRatio = cgArray[0].compassMapWorldSize[0] / cgArray[0].compassMapWorldSize[1];
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         CL_GetMouseMovement(LocalClientGlobals, &mx, &my);

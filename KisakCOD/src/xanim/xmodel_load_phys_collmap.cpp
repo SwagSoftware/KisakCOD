@@ -1228,12 +1228,12 @@ PhysGeomList *__cdecl Xmodel_ParsePhysicsCollMap(
                         "geomIndex == geomCount\n\t%i, %i",
                         geomIndex,
                         geomCount);
-                mins[0] = 3.4028235e38;
-                mins[1] = 3.4028235e38;
-                mins[2] = 3.4028235e38;
-                maxs[0] = -3.4028235e38;
-                maxs[1] = -3.4028235e38;
-                maxs[2] = -3.4028235e38;
+                mins[0] = FLT_MAX;
+                mins[1] = FLT_MAX;
+                mins[2] = FLT_MAX;
+                maxs[0] = -FLT_MAX;
+                maxs[1] = -FLT_MAX;
+                maxs[2] = -FLT_MAX;
                 for (geomIndex = 0; geomIndex < geomCount; ++geomIndex)
                 {
                     GetGeomAABB(&geomList->geoms[geomIndex], geomMins, geomMaxs);

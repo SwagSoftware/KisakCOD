@@ -778,7 +778,7 @@ void __cdecl CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify)
 {
     float dtime; // [esp+8h] [ebp-4h]
 
-    dtime = (double)cgameGlob->frametime * 0.001000000047497451;
+    dtime = (double)cgameGlob->frametime * EQUAL_EPSILON;
     DObjUpdateClientInfo(obj, dtime, notify);
 }
 
@@ -2227,7 +2227,7 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
         rotationLimit = refLight->rotationLimit;
         v8 = Vec3Dot(light->dir, refLight->dir) - rotationLimit;
         v5 = fabs(v8);
-        if (v5 > 0.001000000047497451)
+        if (v5 > EQUAL_EPSILON)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_ents_mp.cpp",
                 1117,

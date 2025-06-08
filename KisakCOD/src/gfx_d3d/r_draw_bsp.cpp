@@ -28,34 +28,27 @@ void __cdecl R_SetStreamSource(
 
 void __cdecl R_HW_SetSamplerTexture(IDirect3DDevice9 *device, unsigned int samplerIndex, const GfxTexture *texture)
 {
-    const char *v3; // eax
     int hr; // [esp+0h] [ebp-4h]
 
-    if (!texture)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h", 119, 0, "%s", "texture");
-    if (!texture->basemap)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h", 120, 0, "%s", "texture->basemap");
+    iassert(texture);
+    iassert(texture->basemap);
+
     do
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetTexture( samplerIndex, texture->basemap )\n");
-        //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, IDirect3DBaseTexture9 *))device->SetTexture)(
-        //    device,
-        //    device,
-        //    samplerIndex,
-        //    texture->basemap);
+
         hr = device->SetTexture(samplerIndex, texture->basemap);
         if (hr < 0)
         {
             do
             {
                 ++g_disableRendering;
-                v3 = R_ErrorDescription(hr);
                 Com_Error(
                     ERR_FATAL,
                     "c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h (%i) device->SetTexture( samplerIndex, texture->basemap ) failed: %s\n",
                     121,
-                    v3);
+                    R_ErrorDescription(hr));
             } while (alwaysfails);
         }
     } while (alwaysfails);

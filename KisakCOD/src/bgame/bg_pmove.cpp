@@ -196,7 +196,7 @@ void __cdecl PM_ClipVelocity(const float *in, const float *normal, float *out)
 
     parallel = Vec3Dot(in, normal);
     v4 = fabs(parallel);
-    parallela = parallel - v4 * 0.001000000047497451;
+    parallela = parallel - v4 * EQUAL_EPSILON;
     scale = -parallela;
     Vec3Mad(in, scale, normal, out);
 }
@@ -217,7 +217,7 @@ void __cdecl PM_ProjectVelocity(const float *velIn, const float *normal, float *
 
     lengthSq2D = velIn[1] * velIn[1] + *velIn * *velIn;
     v6 = fabs(normal[2]);
-    if (v6 < 0.001000000047497451 || lengthSq2D == 0.0)
+    if (v6 < EQUAL_EPSILON || lengthSq2D == 0.0)
     {
         *velOut = *velIn;
         velOut[1] = velIn[1];
@@ -813,7 +813,7 @@ void __cdecl PM_UpdateViewAngles_Prone(
     v16 = (cmd->forwardmove || cmd->rightmove) && delta != 0.0;
     if (v17 || v16)
     {
-        maxDeltaYaw = msec * 55.0 * 0.001000000047497451;
+        maxDeltaYaw = msec * 55.0 * EQUAL_EPSILON;
         v15 = fabs(delta);
         if (maxDeltaYaw <= (double)v15)
         {
@@ -1430,7 +1430,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     pml.previous_velocity[0] = ps->velocity[0];
     pml.previous_velocity[1] = ps->velocity[1];
     pml.previous_velocity[2] = ps->velocity[2];
-    pml.frametime = (double)pml.msec * 0.001000000047497451;
+    pml.frametime = (double)pml.msec * EQUAL_EPSILON;
     PM_AdjustAimSpreadScale(pm, &pml);
     msec = (float)pml.msec;
     PM_UpdateViewAngles(ps, msec, &pm->cmd, pm->handler);
@@ -2568,7 +2568,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
     {
         if (trace.startsolid)
         {
-            start[2] = ps->origin[2] - 0.001000000047497451;
+            start[2] = ps->origin[2] - EQUAL_EPSILON;
             PM_playerTrace(pm, &trace, start, pm->mins, pm->maxs, point, ps->clientNum, pm->tracemask);
             if (trace.startsolid)
             {

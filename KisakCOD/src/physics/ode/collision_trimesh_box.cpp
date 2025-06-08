@@ -413,7 +413,7 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
             "!IS_NAN((v2)[0]) && !IS_NAN((v2)[1]) && !IS_NAN((v2)[2])");
     }
     tbData->iBestAxis = 0;
-    tbData->fBestDepth = 3.4028235e38;
+    tbData->fBestDepth = FLT_MAX;
     tbData->vBestNormal[0] = 0.0;
     tbData->vBestNormal[1] = 0.0;
     tbData->vBestNormal[2] = 0.0;
@@ -1532,7 +1532,7 @@ int __cdecl dCollideBoxTriangleList(
     tbData.iStride = Stride;
     tbData.iFlags = Flags;
     tbData.ContactGeoms = Contacts;
-    tbData.fBestDepth = 3.4028235e38;
+    tbData.fBestDepth = FLT_MAX;
     tbData.vBestNormal[0] = 0.0;
     tbData.vBestNormal[1] = 0.0;
     tbData.vBestNormal[2] = 0.0;

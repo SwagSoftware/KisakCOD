@@ -163,8 +163,8 @@ void __cdecl G_setfog(const char *fogstring)
     int time; // [esp+18h] [ebp-4h] BYREF
 
     SV_SetConfigstring(9, (char*)fogstring);
-    level.fFogOpaqueDist = 3.4028235e38;
-    level.fFogOpaqueDistSqrd = 3.4028235e38;
+    level.fFogOpaqueDist = FLT_MAX;
+    level.fFogOpaqueDistSqrd = FLT_MAX;
     if (sscanf(fogstring, "%f %f %f %f %f %f %i", &fNear, &fFar, &fDensity, clr, &clr[1], &clr[2], &time) == 7
         && fDensity >= 1.0)
     {

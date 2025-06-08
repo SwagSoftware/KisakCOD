@@ -692,12 +692,12 @@ int __cdecl SND_GetListenerIndexNearestToOrigin(const float *origin)
         }
         else
         {
-            v2 = 3.4028235e38;
+            v2 = FLT_MAX;
         }
         dist[i] = v2;
     }
     if (g_snd.amplifier.listener->active && dist[1] > (double)(g_snd.amplifier.maxRadius * g_snd.amplifier.maxRadius))
-        dist[1] = 3.4028235e38;
+        dist[1] = FLT_MAX;
     i = 1;
     nearest = 0;
     while (i < 2)

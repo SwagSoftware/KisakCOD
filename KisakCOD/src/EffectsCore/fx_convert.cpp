@@ -191,7 +191,7 @@ char __cdecl FX_ValidatePhysics(const FxEditorEffectDef *editorEffect, const FxE
     else
         v3 = 0.0;
     elasticityMax = edElemDef->elasticity.base + v3;
-    if (elasticityMin >= -0.001000000047497451 && elasticityMax <= 1.001000046730042)
+    if (elasticityMin >= -EQUAL_EPSILON && elasticityMax <= 1.001000046730042)
         return 1;
     Com_PrintError(
         21,
@@ -428,7 +428,7 @@ int __cdecl FX_DecideSampleCount(int curveCount, const FxCurve **curves, int int
     int curveIndex; // [esp+14h] [ebp-8h]
     float errorCumulative; // [esp+18h] [ebp-4h]
 
-    errorBest = 3.4028235e38;
+    errorBest = FLT_MAX;
     intervalCountBest = 1;
     for (intervalCount = 1; intervalCount <= intervalLimit; ++intervalCount)
     {

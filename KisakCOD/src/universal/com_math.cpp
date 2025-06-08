@@ -271,7 +271,7 @@ float __cdecl LinearTrack(float tgt, float cur, float rate, float deltaTime)
         v4 = rate * deltaTime;
     step = v4;
     v9 = fabs(err);
-    if (v9 <= 0.001000000047497451)
+    if (v9 <= EQUAL_EPSILON)
         return tgt;
     v8 = fabs(err);
     v7 = fabs(step);
@@ -309,7 +309,7 @@ float __cdecl DiffTrack(float tgt, float cur, float rate, float deltaTime)
     err = tgt - cur;
     step = rate * err * deltaTime;
     v8 = fabs(err);
-    if (v8 <= 0.001000000047497451)
+    if (v8 <= EQUAL_EPSILON)
         return tgt;
     v7 = fabs(err);
     v6 = fabs(step);
@@ -1945,7 +1945,7 @@ int __cdecl IntersectPlanes(const float **plane, float *xyz)
     determinant = (plane[1][1] * plane[2][2] - plane[2][1] * plane[1][2]) * **plane
         + (plane[2][1] * (*plane)[2] - (*plane)[1] * plane[2][2]) * *plane[1]
         + ((*plane)[1] * plane[1][2] - plane[1][1] * (*plane)[2]) * *plane[2];
-    if (fabs(determinant) < 0.001000000047497451)
+    if (fabs(determinant) < EQUAL_EPSILON)
         return 0;
     invDeterminant = 1.0 / determinant;
     *xyz = ((plane[1][1] * plane[2][2] - plane[2][1] * plane[1][2]) * (*plane)[3]

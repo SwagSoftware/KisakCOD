@@ -66,7 +66,7 @@ void __cdecl G_RegisterMissileDvars()
     DvarLimits mino; // [esp+4h] [ebp-10h]
     DvarLimits minp; // [esp+4h] [ebp-10h]
 
-    min.value.max = 3.4028235e38;
+    min.value.max = FLT_MAX;
     min.value.min = 0.0;
     missileHellfireMaxSlope = Dvar_RegisterFloat(
         "missileHellfireMaxSlope",
@@ -74,7 +74,7 @@ void __cdecl G_RegisterMissileDvars()
         min,
         0x80u,
         "This limits how steeply the hellfire missile can turn upward when climbing");
-    mina.value.max = 3.4028235e38;
+    mina.value.max = FLT_MAX;
     mina.value.min = 0.1;
     missileHellfireUpAccel = Dvar_RegisterFloat(
         "missileHellfireUpAccel",
@@ -82,7 +82,7 @@ void __cdecl G_RegisterMissileDvars()
         mina,
         0x80u,
         "The rate at which the hellfire missile curves upward");
-    minb.value.max = 3.4028235e38;
+    minb.value.max = FLT_MAX;
     minb.value.min = 0.0;
     missileJavClimbHeightDirect = Dvar_RegisterFloat(
         "missileJavClimbHeightDirect",
@@ -90,7 +90,7 @@ void __cdecl G_RegisterMissileDvars()
         minb,
         0x80u,
         "In direct-fire mode, how far above the target the rocket will aim for when climbing.");
-    minc.value.max = 3.4028235e38;
+    minc.value.max = FLT_MAX;
     minc.value.min = 0.0;
     missileJavClimbHeightTop = Dvar_RegisterFloat(
         "missileJavClimbHeightTop",
@@ -98,7 +98,7 @@ void __cdecl G_RegisterMissileDvars()
         minc,
         0x80u,
         "In top-fire mode, how far above the target the rocket will aim for when climbing.");
-    mind.value.max = 3.4028235e38;
+    mind.value.max = FLT_MAX;
     mind.value.min = 0.0;
     missileJavClimbAngleDirect = Dvar_RegisterFloat(
         "missileJavClimbAngleDirect",
@@ -107,7 +107,7 @@ void __cdecl G_RegisterMissileDvars()
         0x80u,
         "In direct-fire mode, the minimum angle between the rocket and target until the rocket s"
         "tops climbing.  Smaller angles make for higher climbs.");
-    mine.value.max = 3.4028235e38;
+    mine.value.max = FLT_MAX;
     mine.value.min = 0.0;
     missileJavClimbAngleTop = Dvar_RegisterFloat(
         "missileJavClimbAngleTop",
@@ -116,7 +116,7 @@ void __cdecl G_RegisterMissileDvars()
         0x80u,
         "In top-fire mode, the minimum angle between the rocket and target until the rocket stops c"
         "limbing.  Smaller angles make for higher climbs.");
-    minf.value.max = 3.4028235e38;
+    minf.value.max = FLT_MAX;
     minf.value.min = 0.0;
     missileJavClimbCeilingDirect = Dvar_RegisterFloat(
         "missileJavClimbCeilingDirect",
@@ -124,7 +124,7 @@ void __cdecl G_RegisterMissileDvars()
         minf,
         0x80u,
         "In direct-fire mode, how high the missile needs to reach before it descends.");
-    ming.value.max = 3.4028235e38;
+    ming.value.max = FLT_MAX;
     ming.value.min = 0.0;
     missileJavClimbCeilingTop = Dvar_RegisterFloat(
         "missileJavClimbCeilingTop",
@@ -132,7 +132,7 @@ void __cdecl G_RegisterMissileDvars()
         ming,
         0x80u,
         "In top-fire mode, how high the missile needs to reach before it descends.");
-    minh.value.max = 3.4028235e38;
+    minh.value.max = FLT_MAX;
     minh.value.min = 0.0;
     missileJavTurnRateDirect = Dvar_RegisterFloat(
         "missileJavTurnRateDirect",
@@ -140,7 +140,7 @@ void __cdecl G_RegisterMissileDvars()
         minh,
         0x80u,
         "In direct-fire mode, how sharp the rocket can turn, in angles/sec.");
-    mini.value.max = 3.4028235e38;
+    mini.value.max = FLT_MAX;
     mini.value.min = 0.0;
     missileJavTurnRateTop = Dvar_RegisterFloat(
         "missileJavTurnRateTop",
@@ -148,7 +148,7 @@ void __cdecl G_RegisterMissileDvars()
         mini,
         0x80u,
         "In top-fire mode, how sharp the rocket can turn, in angles/sec.");
-    minj.value.max = 3.4028235e38;
+    minj.value.max = FLT_MAX;
     minj.value.min = 0.0;
     missileJavAccelClimb = Dvar_RegisterFloat(
         "missileJavAccelClimb",
@@ -156,7 +156,7 @@ void __cdecl G_RegisterMissileDvars()
         minj,
         0x80u,
         "Rocket acceleration when climbing.");
-    mink.value.max = 3.4028235e38;
+    mink.value.max = FLT_MAX;
     mink.value.min = 0.0;
     missileJavAccelDescend = Dvar_RegisterFloat(
         "missileJavAccelDescend",
@@ -164,7 +164,7 @@ void __cdecl G_RegisterMissileDvars()
         mink,
         0x80u,
         "Rocket acceleration when descending towards target.");
-    minl.value.max = 3.4028235e38;
+    minl.value.max = FLT_MAX;
     minl.value.min = 0.0;
     missileJavSpeedLimitClimb = Dvar_RegisterFloat(
         "missileJavSpeedLimitClimb",
@@ -172,7 +172,7 @@ void __cdecl G_RegisterMissileDvars()
         minl,
         0x80u,
         "Rocket's speed limit when climbing.");
-    minm.value.max = 3.4028235e38;
+    minm.value.max = FLT_MAX;
     minm.value.min = 0.0;
     missileJavSpeedLimitDescend = Dvar_RegisterFloat(
         "missileJavSpeedLimitDescend",
@@ -183,10 +183,10 @@ void __cdecl G_RegisterMissileDvars()
     minn.value.max = 1.0;
     minn.value.min = 0.0;
     missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001, minn, 0x80u, "");
-    mino.value.max = 3.4028235e38;
+    mino.value.max = FLT_MAX;
     mino.value.min = 0.0;
     missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0, mino, 0x80u, "");
-    minp.value.max = 3.4028235e38;
+    minp.value.max = FLT_MAX;
     minp.value.min = 0.0;
     missileWaterMaxDepth = Dvar_RegisterFloat(
         "missileWaterMaxDepth",
@@ -720,7 +720,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
     vOldOrigin[2] = ent->r.currentOrigin[2];
     MissileTrajectory(ent, origin);
     Vec3Sub(origin, ent->r.currentOrigin, dir);
-    if (Vec3Normalize(dir) < 0.001000000047497451)
+    if (Vec3Normalize(dir) < EQUAL_EPSILON)
     {
         G_RunThink(ent);
         return;
@@ -2019,7 +2019,7 @@ bool __cdecl MissileIsReadyForSteering(gentity_s *ent)
     float timeLeft; // [esp+8h] [ebp-8h]
 
     timeLeft = BG_GetWeaponDef(ent->s.weapon)->timeToAccelerate
-        - (double)(level.time - ent->s.lerp.pos.trTime) * 0.001000000047497451;
+        - (double)(level.time - ent->s.lerp.pos.trTime) * EQUAL_EPSILON;
     return timeLeft <= 0.0;
 }
 
@@ -2104,7 +2104,7 @@ void __cdecl MissileHorzSteerToTarget(
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (toTargetRelative[1] == 0.0)
     {
-        radius = 3.4028235e38;
+        radius = FLT_MAX;
     }
     else
     {

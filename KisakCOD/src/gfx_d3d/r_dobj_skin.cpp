@@ -9,6 +9,7 @@
 #include "r_workercmds.h"
 #include "r_buffers.h"
 #include "r_model_pose.h"
+#include "r_dpvs.h"
 
 void __cdecl R_FlagXModelAsSkinned(GfxSceneEntity *sceneEnt, unsigned int surfaceCount)
 {

@@ -421,7 +421,7 @@ bool __cdecl CanLocalPlayerHearActorFootsteps(int localClientNum, const float *a
         return 0;
     snap = cgameGlob->snap;
     nextSnap = cgameGlob->nextSnap;
-    deltaTime = (double)(nextSnap->serverTime - snap->serverTime) * 0.001000000047497451;
+    deltaTime = (double)(nextSnap->serverTime - snap->serverTime) * EQUAL_EPSILON;
     if (deltaTime <= 0.0)
         return 0;
     cent = CG_GetEntity(localClientNum, actorClientIndex);

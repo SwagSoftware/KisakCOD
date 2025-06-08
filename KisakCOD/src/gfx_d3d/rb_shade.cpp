@@ -177,8 +177,7 @@ void __cdecl RB_BeginSurface(const Material *material, MaterialTechniqueType tec
         gfxCmdBufState.techType = TECHNIQUE_UNLIT;
     }
     gfxCmdBufState.technique = Material_GetTechnique(gfxCmdBufState.material, gfxCmdBufState.techType);
-    if (!gfxCmdBufState.technique)
-        MyAssertHandler(".\\rb_shade.cpp", 336, 0, "%s", "gfxCmdBufState.technique");
+    iassert(gfxCmdBufState.technique);
 }
 
 void __cdecl RB_EndTessSurface()
@@ -217,8 +216,7 @@ void RB_DrawTessSurface()
     GfxViewport viewport; // [esp+30h] [ebp-1Ch] BYREF
     GfxDrawPrimArgs args; // [esp+40h] [ebp-Ch] BYREF
 
-    if (!tess.indexCount)
-        MyAssertHandler(".\\rb_shade.cpp", 437, 0, "%s", "tess.indexCount");
+    iassert(tess.indexCount);
     //Profile_Begin(114);
     if (gfxCmdBufSourceState.viewportIsDirty)
     {
@@ -228,14 +226,7 @@ void RB_DrawTessSurface()
     }
     args.vertexCount = tess.vertexCount;
     args.triCount = tess.indexCount / 3;
-    if (gfxCmdBufState.prim.vertDeclType)
-        MyAssertHandler(
-            ".\\rb_shade.cpp",
-            455,
-            1,
-            "%s\n\t(gfxCmdBufState.prim.vertDeclType) = %i",
-            "(gfxCmdBufState.prim.vertDeclType == VERTDECL_GENERIC)",
-            gfxCmdBufState.prim.vertDeclType);
+    iassert(gfxCmdBufState.prim.vertDeclType == VERTDECL_GENERIC);
     args.baseIndex = R_SetIndexData(&gfxCmdBufState.prim, (unsigned __int8 *)tess.indices, tess.indexCount / 3);
     R_DrawTessTechnique(gfxCmdBufContext, &args);
     tess.indexCount = 0;

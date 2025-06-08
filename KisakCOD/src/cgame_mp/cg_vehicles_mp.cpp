@@ -59,10 +59,10 @@ void __cdecl CG_VehRegisterDvars()
         minb,
         0,
         "How much to rotate the turret barrel when a helicopter fires");
-    minc.value.max = 3.4028235e38;
+    minc.value.max = FLT_MAX;
     minc.value.min = -360.0;
     heli_barrelMaxVelocity = Dvar_RegisterFloat("heli_barrelMaxVelocity", 1250.0, minc, 0, "");
-    mind.value.max = 3.4028235e38;
+    mind.value.max = FLT_MAX;
     mind.value.min = -360.0;
     heli_barrelSlowdown = Dvar_RegisterFloat("heli_barrelSlowdown", 360.0, mind, 0, "");
 }
@@ -382,7 +382,7 @@ void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent)
                 time = p_currentState->u.vehicle.materialTime
                     + (int)((double)(ns->lerp.u.vehicle.materialTime - p_currentState->u.vehicle.materialTime)
                         * cgArray[0].frameInterpolation);
-                materialTime = (double)(cgArray[0].time - time) * 0.001000000047497451;
+                materialTime = (double)(cgArray[0].time - time) * EQUAL_EPSILON;
             }
             R_AddDObjToScene(obj, &cent->pose, ns->number, 4u, lightingOrigin, materialTime);
         }
@@ -533,7 +533,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v8 = v42 * 182.0444488525391 + 0.5;
     v7 = floor(v8);
     cent->pose.vehicle.steerYaw = (int)v7;
-    cent->pose.vehicle.time = (double)ns->time2 * 0.001000000047497451;
+    cent->pose.vehicle.time = (double)ns->time2 * EQUAL_EPSILON;
     DObjGetBoneIndex(obj, scr_const.tag_body, &cent->pose.vehicle.tag_body);
     DObjGetBoneIndex(obj, scr_const.tag_turret, &cent->pose.vehicle.tag_turret);
     DObjGetBoneIndex(obj, scr_const.tag_barrel, &cent->pose.vehicle.tag_barrel);

@@ -615,7 +615,7 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 vs.v_dmg_pitch = client->v_dmg_pitch;
                 vs.v_dmg_roll = client->v_dmg_roll;
                 vs.xyspeed = BG_GetSpeed(&client->ps, level.time);
-                vs.frametime = (double)msec * 0.001000000047497451;
+                vs.frametime = (double)msec * EQUAL_EPSILON;
                 vs.fLastIdleFactor = client->fLastIdleFactor;
                 vs.weapIdleTime = &client->weapIdleTime;
                 client->ps.speed = g_speed->current.integer;
@@ -645,7 +645,7 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                     msec);
                 ws.ps = vs.ps;
                 ws.xyspeed = vs.xyspeed;
-                ws.frametime = (double)msec * 0.001000000047497451;
+                ws.frametime = (double)msec * EQUAL_EPSILON;
                 ws.vLastMoveAng[0] = client->vLastMoveAng[0];
                 ws.vLastMoveAng[1] = client->vLastMoveAng[1];
                 ws.vLastMoveAng[2] = client->vLastMoveAng[2];

@@ -1247,7 +1247,7 @@ void __cdecl R_SetLodOrigin(const refdef_s *refdef)
     scene.def.viewOffset[1] = refdef->viewOffset[1];
     scene.def.viewOffset[2] = refdef->viewOffset[2];
     scene.def.time = refdef->time;
-    scene.def.floatTime = (double)scene.def.time * 0.001000000047497451;
+    scene.def.floatTime = (double)scene.def.time * EQUAL_EPSILON;
     R_UpdateFrameFog();
     R_UpdateFrameSun();
 }

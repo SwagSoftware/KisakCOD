@@ -664,50 +664,50 @@ void __cdecl CG_RegisterDvars()
         0x81u,
         "The crosshair color when over an enemy");
     cg_brass = Dvar_RegisterBool("cg_brass", 1, 1u, "Weapons eject brass");
-    minbe.value.max = 3.4028235e38;
-    minbe.value.min = -3.4028235e38;
+    minbe.value.max = FLT_MAX;
+    minbe.value.min = -FLT_MAX;
     cg_gun_x = Dvar_RegisterFloat("cg_gun_x", 0.0, minbe, 0x80u, "x position of the viewmodel");
-    minbf.value.max = 3.4028235e38;
-    minbf.value.min = -3.4028235e38;
+    minbf.value.max = FLT_MAX;
+    minbf.value.min = -FLT_MAX;
     cg_gun_y = Dvar_RegisterFloat("cg_gun_y", 0.0, minbf, 0x80u, "y position of the viewmodel");
-    minbg.value.max = 3.4028235e38;
-    minbg.value.min = -3.4028235e38;
+    minbg.value.max = FLT_MAX;
+    minbg.value.min = -FLT_MAX;
     cg_gun_z = Dvar_RegisterFloat("cg_gun_z", 0.0, minbg, 0x80u, "z position of the viewmodel");
-    minbh.value.max = 3.4028235e38;
-    minbh.value.min = -3.4028235e38;
+    minbh.value.max = FLT_MAX;
+    minbh.value.min = -FLT_MAX;
     cg_gun_move_f = Dvar_RegisterFloat(
         "cg_gun_move_f",
         0.0,
         minbh,
         0x80u,
         "Weapon movement forward due to player movement");
-    minbi.value.max = 3.4028235e38;
-    minbi.value.min = -3.4028235e38;
+    minbi.value.max = FLT_MAX;
+    minbi.value.min = -FLT_MAX;
     cg_gun_move_r = Dvar_RegisterFloat("cg_gun_move_r", 0.0, minbi, 0x80u, "Weapon movement right due to player movement");
-    minbj.value.max = 3.4028235e38;
-    minbj.value.min = -3.4028235e38;
+    minbj.value.max = FLT_MAX;
+    minbj.value.min = -FLT_MAX;
     cg_gun_move_u = Dvar_RegisterFloat("cg_gun_move_u", 0.0, minbj, 0x80u, "Weapon movement up due to player movement");
-    minbk.value.max = 3.4028235e38;
-    minbk.value.min = -3.4028235e38;
+    minbk.value.max = FLT_MAX;
+    minbk.value.min = -FLT_MAX;
     cg_gun_ofs_f = Dvar_RegisterFloat("cg_gun_ofs_f", 0.0, minbk, 0x80u, "Forward weapon offset when prone/ducked");
-    minbl.value.max = 3.4028235e38;
-    minbl.value.min = -3.4028235e38;
+    minbl.value.max = FLT_MAX;
+    minbl.value.min = -FLT_MAX;
     cg_gun_ofs_r = Dvar_RegisterFloat("cg_gun_ofs_r", 0.0, minbl, 0x80u, "Right weapon offset when prone/ducked");
-    minbm.value.max = 3.4028235e38;
-    minbm.value.min = -3.4028235e38;
+    minbm.value.max = FLT_MAX;
+    minbm.value.min = -FLT_MAX;
     cg_gun_ofs_u = Dvar_RegisterFloat("cg_gun_ofs_u", 0.0, minbm, 0x80u, "Up weapon offset when prone/ducked");
-    minbn.value.max = 3.4028235e38;
-    minbn.value.min = -3.4028235e38;
+    minbn.value.max = FLT_MAX;
+    minbn.value.min = -FLT_MAX;
     cg_gun_move_rate = Dvar_RegisterFloat("cg_gun_move_rate", 0.0, minbn, 0x80u, "The base weapon movement rate");
-    minbo.value.max = 3.4028235e38;
-    minbo.value.min = -3.4028235e38;
+    minbo.value.max = FLT_MAX;
+    minbo.value.min = -FLT_MAX;
     cg_gun_move_minspeed = Dvar_RegisterFloat(
         "cg_gun_move_minspeed",
         0.0,
         minbo,
         0x80u,
         "The minimum weapon movement rate");
-    minbp.value.max = 3.4028235e38;
+    minbp.value.max = FLT_MAX;
     minbp.value.min = 0.0;
     cg_centertime = Dvar_RegisterFloat(
         "cg_centertime",
@@ -717,7 +717,7 @@ void __cdecl CG_RegisterDvars()
         "The time for a center printed message to fade");
     cg_debugPosition = Dvar_RegisterBool("cg_debugposition", 0, 0x80u, "Output position debugging information");
     cg_debugEvents = Dvar_RegisterBool("cg_debugevents", 0, 0x80u, "Output event debug information");
-    minbq.value.max = 3.4028235e38;
+    minbq.value.max = FLT_MAX;
     minbq.value.min = 0.0;
     cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0, minbq, 0, "Decay for predicted error");
     cg_nopredict = Dvar_RegisterBool("cg_nopredict", 0, 0, "Don't do client side prediction");
@@ -736,10 +736,10 @@ void __cdecl CG_RegisterDvars()
         0,
         0x80u,
         "Force laser sights on in all possible places (for debug purposes).");
-    minbs.value.max = 3.4028235e38;
+    minbs.value.max = FLT_MAX;
     minbs.value.min = 1.0;
     cg_laserRange = Dvar_RegisterFloat("cg_laserRange", 1500.0, minbs, 0x80u, "The maximum range of a laser beam");
-    minbt.value.max = 3.4028235e38;
+    minbt.value.max = FLT_MAX;
     minbt.value.min = 1.0;
     cg_laserRangePlayer = Dvar_RegisterFloat(
         "cg_laserRangePlayer",
@@ -747,7 +747,7 @@ void __cdecl CG_RegisterDvars()
         minbt,
         0x80u,
         "The maximum range of the player's laser beam");
-    minbu.value.max = 3.4028235e38;
+    minbu.value.max = FLT_MAX;
     minbu.value.min = 0.001;
     cg_laserRadius = Dvar_RegisterFloat("cg_laserRadius", 0.80000001, minbu, 0x80u, "The size (radius) of a laser beam");
     cg_laserLight = Dvar_RegisterBool(
@@ -755,15 +755,15 @@ void __cdecl CG_RegisterDvars()
         1,
         1u,
         "Whether to draw the light emitted from a laser (not the laser itself)");
-    minbv.value.max = 3.4028235e38;
-    minbv.value.min = -3.4028235e38;
+    minbv.value.max = FLT_MAX;
+    minbv.value.min = -FLT_MAX;
     cg_laserLightBodyTweak = Dvar_RegisterFloat(
         "cg_laserLightBodyTweak",
         15.0,
         minbv,
         0x80u,
         "Amount to add to length of beam for light when laser hits a body (for hitboxes).");
-    minbw.value.max = 3.4028235e38;
+    minbw.value.max = FLT_MAX;
     minbw.value.min = 0.001;
     cg_laserLightRadius = Dvar_RegisterFloat(
         "cg_laserLightRadius",
@@ -771,31 +771,31 @@ void __cdecl CG_RegisterDvars()
         minbw,
         0x80u,
         "The radius of the light at the far end of a laser beam");
-    minbx.value.max = 3.4028235e38;
-    minbx.value.min = -3.4028235e38;
+    minbx.value.max = FLT_MAX;
+    minbx.value.min = -FLT_MAX;
     cg_laserLightBeginOffset = Dvar_RegisterFloat(
         "cg_laserLightBeginOffset",
         13.0,
         minbx,
         0x80u,
         "How far from the true beginning of the beam the light at the beginning is.");
-    minby.value.max = 3.4028235e38;
-    minby.value.min = -3.4028235e38;
+    minby.value.max = FLT_MAX;
+    minby.value.min = -FLT_MAX;
     cg_laserLightEndOffset = Dvar_RegisterFloat(
         "cg_laserLightEndOffset",
         -3.0,
         minby,
         0x80u,
         "How far from the true end of the beam the light at the end is.");
-    minbz.value.max = 3.4028235e38;
-    minbz.value.min = -3.4028235e38;
+    minbz.value.max = FLT_MAX;
+    minbz.value.min = -FLT_MAX;
     cg_laserEndOffset = Dvar_RegisterFloat(
         "cg_laserEndOffset",
         0.5,
         minbz,
         0x80u,
         "How far from the point of collision the end of the beam is.");
-    minca.value.max = 3.4028235e38;
+    minca.value.max = FLT_MAX;
     minca.value.min = 0.0;
     cg_laserFlarePct = Dvar_RegisterFloat(
         "cg_laserFlarePct",
@@ -816,10 +816,10 @@ void __cdecl CG_RegisterDvars()
         mincb,
         0x80u,
         "The probability that a bullet is a tracer round");
-    mincc.value.max = 3.4028235e38;
+    mincc.value.max = FLT_MAX;
     mincc.value.min = 0.0;
     cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, mincc, 0x80u, "The width of the tracer round");
-    mincd.value.max = 3.4028235e38;
+    mincd.value.max = FLT_MAX;
     mincd.value.min = 0.0;
     cg_tracerSpeed = Dvar_RegisterFloat(
         "cg_tracerSpeed",
@@ -827,10 +827,10 @@ void __cdecl CG_RegisterDvars()
         mincd,
         0x80u,
         "The speed of a tracer round in units per second");
-    mince.value.max = 3.4028235e38;
+    mince.value.max = FLT_MAX;
     mince.value.min = 0.0;
     cg_tracerLength = Dvar_RegisterFloat("cg_tracerlength", 160.0, mince, 0x80u, "The length of a tracer round");
-    mincf.value.max = 3.4028235e38;
+    mincf.value.max = FLT_MAX;
     mincf.value.min = 1.0;
     cg_tracerScale = Dvar_RegisterFloat(
         "cg_tracerScale",
@@ -838,7 +838,7 @@ void __cdecl CG_RegisterDvars()
         mincf,
         0x80u,
         "Scale the tracer at a distance, so it's still visible");
-    mincg.value.max = 3.4028235e38;
+    mincg.value.max = FLT_MAX;
     mincg.value.min = 0.0;
     cg_tracerScaleMinDist = Dvar_RegisterFloat(
         "cg_tracerScaleMinDist",
@@ -846,7 +846,7 @@ void __cdecl CG_RegisterDvars()
         mincg,
         0x80u,
         "The minimum distance to scale a tracer");
-    minch.value.max = 3.4028235e38;
+    minch.value.max = FLT_MAX;
     minch.value.min = 0.0;
     cg_tracerScaleDistRange = Dvar_RegisterFloat(
         "cg_tracerScaleDistRange",
@@ -854,7 +854,7 @@ void __cdecl CG_RegisterDvars()
         minch,
         0x80u,
         "The range at which a tracer is scaled to its maximum amount");
-    minci.value.max = 3.4028235e38;
+    minci.value.max = FLT_MAX;
     minci.value.min = 0.0;
     cg_tracerScrewDist = Dvar_RegisterFloat(
         "cg_tracerScrewDist",
@@ -862,7 +862,7 @@ void __cdecl CG_RegisterDvars()
         minci,
         0x80u,
         "The length a tracer goes as it completes a full corkscrew revolution");
-    mincj.value.max = 3.4028235e38;
+    mincj.value.max = FLT_MAX;
     mincj.value.min = 0.0;
     cg_tracerScrewRadius = Dvar_RegisterFloat(
         "cg_tracerScrewRadius",
@@ -928,7 +928,7 @@ void __cdecl CG_RegisterDvars()
     cg_developer = Dvar_RegisterInt("developer", 0, (DvarLimits)0x200000000LL, 0, "Enable development options");
     cg_minicon = Dvar_RegisterBool("con_minicon", 0, 1u, "Display the mini console on screen");
     cg_subtitles = Dvar_RegisterBool("cg_subtitles", 1, 1u, "Show subtitles");
-    mincm.value.max = 3.4028235e38;
+    mincm.value.max = FLT_MAX;
     mincm.value.min = 0.0;
     cg_subtitleMinTime = Dvar_RegisterFloat(
         "cg_subtitleMinTime",
@@ -991,7 +991,7 @@ void __cdecl CG_RegisterDvars()
         mincr,
         1u,
         "The minumum radius of a head icon on the screen");
-    mincs.value.max = 3.4028235e38;
+    mincs.value.max = FLT_MAX;
     mincs.value.min = 0.0;
     cg_overheadNamesMaxDist = Dvar_RegisterFloat(
         "cg_overheadNamesMaxDist",
@@ -999,7 +999,7 @@ void __cdecl CG_RegisterDvars()
         mincs,
         0x80u,
         "The maximum distance for showing friendly player names");
-    minct.value.max = 3.4028235e38;
+    minct.value.max = FLT_MAX;
     minct.value.min = 0.0;
     cg_overheadNamesNearDist = Dvar_RegisterFloat(
         "cg_overheadNamesNearDist",
@@ -1007,7 +1007,7 @@ void __cdecl CG_RegisterDvars()
         minct,
         0x80u,
         "The near distance at which names are full size");
-    mincu.value.max = 3.4028235e38;
+    mincu.value.max = FLT_MAX;
     mincu.value.min = 0.0;
     cg_overheadNamesFarDist = Dvar_RegisterFloat(
         "cg_overheadNamesFarDist",
@@ -1015,7 +1015,7 @@ void __cdecl CG_RegisterDvars()
         mincu,
         0x80u,
         "The far distance at which name sizes are scaled by cg_overheadNamesFarScale");
-    mincv.value.max = 3.4028235e38;
+    mincv.value.max = FLT_MAX;
     mincv.value.min = 0.0;
     cg_overheadNamesFarScale = Dvar_RegisterFloat(
         "cg_overheadNamesFarScale",
@@ -1039,7 +1039,7 @@ void __cdecl CG_RegisterDvars()
         mincx,
         0x80u,
         "The maximum size to show overhead icons like 'rank'");
-    mincy.value.max = 3.4028235e38;
+    mincy.value.max = FLT_MAX;
     mincy.value.min = 0.0;
     cg_overheadRankSize = Dvar_RegisterFloat("cg_overheadRankSize", 0.5, mincy, 0x80u, "The size to show rank text");
     cg_overheadNamesGlow = Dvar_RegisterColor(
@@ -1101,7 +1101,7 @@ void __cdecl CG_RegisterDvars()
         (DvarLimits)0x7FFFFFFF00000001LL,
         1u,
         "Blink rate of an invalid command hint");
-    mincz.value.max = 3.4028235e38;
+    mincz.value.max = FLT_MAX;
     mincz.value.min = 0.0;
     cg_viewZSmoothingMin = Dvar_RegisterFloat(
         "cg_viewZSmoothingMin",
@@ -1109,7 +1109,7 @@ void __cdecl CG_RegisterDvars()
         mincz,
         1u,
         "Threshhold for the minimum smoothing distance it must move to smooth");
-    minda.value.max = 3.4028235e38;
+    minda.value.max = FLT_MAX;
     minda.value.min = 0.0;
     cg_viewZSmoothingMax = Dvar_RegisterFloat(
         "cg_viewZSmoothingMax",
@@ -1117,7 +1117,7 @@ void __cdecl CG_RegisterDvars()
         minda,
         1u,
         "Threshhold for the maximum smoothing distance we'll do");
-    mindb.value.max = 3.4028235e38;
+    mindb.value.max = FLT_MAX;
     mindb.value.min = 0.0;
     cg_viewZSmoothingTime = Dvar_RegisterFloat(
         "cg_viewZSmoothingTime",

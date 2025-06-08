@@ -550,7 +550,7 @@ void __cdecl CM_TraceSphereThroughVertex(
                 MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 359, 0, "%s\n\t(a) = %g", "(a > 0.0f)", a);
             bSquared = b * b;
             discriminant = bSquared - a * c;
-            if (discriminant >= bSquared * 0.001000000047497451)
+            if (discriminant >= bSquared * EQUAL_EPSILON)
             {
                 v10 = sqrt(discriminant);
                 frac = (-v10 - b) / a;

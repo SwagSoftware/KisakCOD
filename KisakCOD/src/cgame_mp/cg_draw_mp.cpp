@@ -1190,7 +1190,7 @@ void __cdecl CG_DrawOverheadNames(int localClientNum, const centity_s *cent, flo
     const char *text; // [esp+134h] [ebp-8h]
     float distanceSq; // [esp+138h] [ebp-4h]
 
-    if (alpha > 0.001000000047497451)
+    if (alpha > EQUAL_EPSILON)
     {
         if (localClientNum)
             MyAssertHandler(

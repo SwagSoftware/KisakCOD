@@ -754,7 +754,7 @@ void __cdecl HoldBreathUpdate(int localClientNum)
         cgArray[0].holdBreathDelay -= cgArray[0].frametime;
     if ((cgArray[0].predictedPlayerState.weapFlags & 4) != 0)
     {
-        deltaTime = (double)cgArray[0].frametime * 0.001000000047497451;
+        deltaTime = (double)cgArray[0].frametime * EQUAL_EPSILON;
         cgArray[0].holdBreathFrac = DiffTrack(
             1.0,
             cgArray[0].holdBreathFrac,
@@ -866,7 +866,7 @@ void __cdecl CG_UpdateViewWeaponAnim(int localClientNum)
                 MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3066, 0, "%s", "weapInfo->viewModelDObj");
             UpdateViewmodelAttachments(localClientNum, weaponIndex, ps->weaponmodels[weaponIndex], weapInfo);
             WeaponRunXModelAnims(localClientNum, ps, weapInfo);
-            dtime = (double)cgArray->frametime * 0.001000000047497451;
+            dtime = (double)cgArray->frametime * EQUAL_EPSILON;
             DObjUpdateClientInfo(weapInfo->viewModelDObj, dtime, 1);
             ProcessWeaponNoteTracks(localClientNum, ps);
         }
@@ -1403,7 +1403,7 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
                 pe = &cgameGlob->playerEntity;
                 ws.ps = ps;
                 ws.xyspeed = cgameGlob->xyspeed;
-                ws.frametime = (double)cgameGlob->frametime * 0.001000000047497451;
+                ws.frametime = (double)cgameGlob->frametime * EQUAL_EPSILON;
                 ws.vLastMoveAng[0] = cgameGlob->playerEntity.vLastMoveAng[0];
                 ws.vLastMoveAng[1] = cgameGlob->playerEntity.vLastMoveAng[1];
                 ws.vLastMoveAng[2] = cgameGlob->playerEntity.vLastMoveAng[2];
@@ -1683,19 +1683,19 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
                 v3 = weapDef->fPosProneMoveRate + cg_gun_move_rate->current.value;
             else
                 v3 = weapDef->fPosMoveRate + cg_gun_move_rate->current.value;
-            delta = (double)cgameGlob->frametime * 0.001000000047497451 * (targetPos[i] - pe->vLastMoveOrg[i]) * v3;
+            delta = (double)cgameGlob->frametime * EQUAL_EPSILON * (targetPos[i] - pe->vLastMoveOrg[i]) * v3;
             if (targetPos[i] <= (double)pe->vLastMoveOrg[i])
             {
-                if (delta > (double)cgameGlob->frametime * 0.001000000047497451 * -0.1000000014901161)
-                    delta = (double)cgameGlob->frametime * 0.001000000047497451 * -0.1000000014901161;
+                if (delta > (double)cgameGlob->frametime * EQUAL_EPSILON * -0.1000000014901161)
+                    delta = (double)cgameGlob->frametime * EQUAL_EPSILON * -0.1000000014901161;
                 pe->vLastMoveOrg[i] = pe->vLastMoveOrg[i] + delta;
                 if (targetPos[i] > (double)pe->vLastMoveOrg[i])
                     pe->vLastMoveOrg[i] = targetPos[i];
             }
             else
             {
-                if (delta < (double)cgameGlob->frametime * 0.001000000047497451 * 0.1000000014901161)
-                    delta = (double)cgameGlob->frametime * 0.001000000047497451 * 0.1000000014901161;
+                if (delta < (double)cgameGlob->frametime * EQUAL_EPSILON * 0.1000000014901161)
+                    delta = (double)cgameGlob->frametime * EQUAL_EPSILON * 0.1000000014901161;
                 pe->vLastMoveOrg[i] = pe->vLastMoveOrg[i] + delta;
                 if (targetPos[i] < (double)pe->vLastMoveOrg[i])
                     pe->vLastMoveOrg[i] = targetPos[i];

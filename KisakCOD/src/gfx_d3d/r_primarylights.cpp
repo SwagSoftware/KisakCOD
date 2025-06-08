@@ -69,7 +69,7 @@ void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
     if (timeDelta)
     {
         shadowHistory->lastUpdateTime = viewInfo->sceneDef.time;
-        fadeDelta = (double)timeDelta * (0.001000000047497451 / sm_spotShadowFadeTime->current.value);
+        fadeDelta = (double)timeDelta * (EQUAL_EPSILON / sm_spotShadowFadeTime->current.value);
         R_FadeOutShadowHistoryEntries(shadowHistory, fadeDelta);
         memcpy(shadowableLightIsUsed, scene.shadowableLightIsUsed, sizeof(shadowableLightIsUsed));
         candidateLightCount = 0;
@@ -564,7 +564,7 @@ void __cdecl R_LinkDynEntToPrimaryLights(
     Vec3Avg(mins, maxs, boxMidPoint);
     Vec3Sub(boxMidPoint, mins, boxHalfSize);
     bestPrimaryLightIndex = 0;
-    minDistSq = 3.4028235e38;
+    minDistSq = FLT_MAX;
     for (primaryLightIndex = rgp.world->sunPrimaryLightIndex + 1;
         primaryLightIndex < rgp.world->primaryLightCount;
         ++primaryLightIndex)

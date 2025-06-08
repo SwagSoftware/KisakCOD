@@ -308,7 +308,7 @@ LABEL_24:
     if (shadowCookieGlob.lastTime == -1)
         timeDeltaSeconds = 0.0;
     else
-        timeDeltaSeconds = (double)(scene.def.time - shadowCookieGlob.lastTime) * 0.001000000047497451;
+        timeDeltaSeconds = (double)(scene.def.time - shadowCookieGlob.lastTime) * EQUAL_EPSILON;
     if (timeDeltaSeconds < 0.0)
         timeDeltaSeconds = 0.0;
     shadowCookieGlob.lastTime = scene.def.time;

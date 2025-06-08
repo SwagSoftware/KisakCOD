@@ -614,7 +614,7 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
         BG_AnimScriptAnimation(ps, AISTATE_COMBAT, (scriptAnimMoveTypes_t)(animIndex + 21), 1);
         Vec3Sub(trans, prevTrans, trans);
         Vec3Add(trans, ps->origin, ps->origin);
-        scale = 1.0 / ((double)deltaTime * 0.001000000047497451);
+        scale = 1.0 / ((double)deltaTime * EQUAL_EPSILON);
         Vec3Scale(trans, scale, ps->velocity);
         if (mstate->timer == mantleLength)
         {

@@ -231,7 +231,7 @@ void __cdecl G_VehRegisterDvars()
     DvarLimits minc; // [esp+4h] [ebp-10h]
 
     vehDebugServer = Dvar_RegisterBool("vehDebugServer", 0, 0x80u, "Turn on debug information for vehicles");
-    min.value.max = 3.4028235e38;
+    min.value.max = FLT_MAX;
     min.value.min = 0.0;
     vehTextureScrollScale = Dvar_RegisterFloat(
         "vehTextureScrollScale",
@@ -239,13 +239,13 @@ void __cdecl G_VehRegisterDvars()
         min,
         0x80u,
         "Scale vehicle texture scroll scale by this amount (debug only)");
-    mina.value.max = 3.4028235e38;
+    mina.value.max = FLT_MAX;
     mina.value.min = 0.0;
     vehTestHorsepower = Dvar_RegisterFloat("vehTestHorsepower", 200.0, mina, 0x80u, "");
-    minb.value.max = 3.4028235e38;
+    minb.value.max = FLT_MAX;
     minb.value.min = 0.0;
     vehTestWeight = Dvar_RegisterFloat("vehTestWeight", 5200.0, minb, 0x80u, "lbs");
-    minc.value.max = 3.4028235e38;
+    minc.value.max = FLT_MAX;
     minc.value.min = 0.0;
     vehTestMaxMPH = Dvar_RegisterFloat("vehTestMaxMPH", 40.0, minc, 0x80u, "");
 }
@@ -1132,7 +1132,7 @@ void __cdecl VEH_PushEntity_0(
     if (!target)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1411, 0, "%s", "target");
     if (!target->tagInfo
-        && (Vec3LengthSq(deltaOrigin) >= 0.001000000047497451 || Vec3LengthSq(deltaAngles) >= 0.001000000047497451))
+        && (Vec3LengthSq(deltaOrigin) >= EQUAL_EPSILON || Vec3LengthSq(deltaAngles) >= EQUAL_EPSILON))
     {
         if (AttachedStickyMissile_0(ent, target))
         {
@@ -1321,7 +1321,7 @@ void __cdecl G_VehEntHandler_Think(gentity_s *pSelf)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3154, 0, "%s", "pSelf->scr_vehicle");
     veh = pSelf->scr_vehicle;
     info = &s_vehicleInfos[veh->infoIdx];
-    frameTime = (double)level.frametime * 0.001000000047497451;
+    frameTime = (double)level.frametime * EQUAL_EPSILON;
     if ((veh->flags & 8) != 0)
     {
         VEH_BackupPosition_0(pSelf);
@@ -1781,7 +1781,7 @@ void __cdecl IntegratePosAndRot(gentity_s *ent)
     if (!veh)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2332, 0, "%s", "veh");
     phys = &veh->phys;
-    frameTimea = (double)level.frametime * 0.001000000047497451;
+    frameTimea = (double)level.frametime * EQUAL_EPSILON;
     AdvanceVehicleRotation(ent, frameTimea);
     AdvanceVehiclePosition(ent, frameTimea);
     GetAccelerationForces(ent, frameTimea, accelPos);
@@ -2580,7 +2580,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTou
             if (!pOther->tagInfo && info->collisionDamage > 0.0)
             {
                 moveLen = Vec3NormalizeTo(veh->phys.vel, moveDir);
-                if (moveLen >= 0.001000000047497451)
+                if (moveLen >= EQUAL_EPSILON)
                 {
                     if (pOther->s.eType == 6)
                     {

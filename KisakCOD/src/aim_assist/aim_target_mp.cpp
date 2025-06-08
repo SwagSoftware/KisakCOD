@@ -352,7 +352,7 @@ void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetE
     AimTarget_GetTargetBounds(targetEnt, target->mins, target->maxs);
     snap = cgameGlob->snap;
     nextSnap = cgameGlob->nextSnap;
-    deltaTime = (double)(nextSnap->serverTime - snap->serverTime) * 0.001000000047497451;
+    deltaTime = (double)(nextSnap->serverTime - snap->serverTime) * EQUAL_EPSILON;
     if (deltaTime <= 0.0)
     {
         target->velocity[0] = 0.0;

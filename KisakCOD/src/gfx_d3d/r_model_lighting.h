@@ -31,7 +31,7 @@ unsigned int __cdecl R_AllocModelLighting(
     unsigned int(__cdecl *GetPrimaryLightCallback)(const void *),
     const void *userData,
     GfxLightingInfo *lightingInfoOut);
-unsigned int __cdecl R_DynEntPrimaryLightCallback(unsigned int *userData);
+unsigned int __cdecl R_DynEntPrimaryLightCallback(const void *userData);
 unsigned int __cdecl R_AllocModelLighting_Box(
     const GfxViewInfo *viewInfo,
     float *lightingOrigin,

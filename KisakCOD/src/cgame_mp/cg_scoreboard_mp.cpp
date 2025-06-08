@@ -1356,10 +1356,10 @@ void __cdecl CG_RegisterScoreboardDvars()
         ba,
         0,
         "Height of the ping graph as a % of the scoreboard row height");
-    bb.value.max = 3.4028235e38;
+    bb.value.max = FLT_MAX;
     bb.value.min = 0.0;
     cg_scoreboardWidth = Dvar_RegisterFloat("cg_scoreboardWidth", 500.0, bb, 0, "Width of the scoreboard");
-    bc.value.max = 3.4028235e38;
+    bc.value.max = FLT_MAX;
     bc.value.min = 0.0;
     cg_scoreboardHeight = Dvar_RegisterFloat("cg_scoreboardHeight", 435.0, bc, 0, "Height of the scoreboard");
     cg_scoreboardMyColor = Dvar_RegisterColor(
@@ -1370,7 +1370,7 @@ void __cdecl CG_RegisterScoreboardDvars()
         1.0,
         0,
         "The local player's font color when shown in scoreboard");
-    bd.value.max = 3.4028235e38;
+    bd.value.max = FLT_MAX;
     bd.value.min = 0.0;
     cg_scoreboardTextOffset = Dvar_RegisterFloat("cg_scoreboardTextOffset", 0.5, bd, 0, "Scoreboard text offset");
     cg_scoreboardFont = Dvar_RegisterInt(
@@ -1379,7 +1379,7 @@ void __cdecl CG_RegisterScoreboardDvars()
         (DvarLimits)0x600000000LL,
         0,
         "Scoreboard font enum ( see menudefinition.h )");
-    be.value.max = 3.4028235e38;
+    be.value.max = FLT_MAX;
     be.value.min = 0.0;
     cg_scoreboardHeaderFontScale = Dvar_RegisterFloat(
         "cg_scoreboardHeaderFontScale",
@@ -1389,7 +1389,7 @@ void __cdecl CG_RegisterScoreboardDvars()
         "Scoreboard header font scale");
     cg_scoreboardPingText = Dvar_RegisterBool("cg_scoreboardPingText", 1, 0, "Whether to show numeric ping value");
     cg_scoreboardPingGraph = Dvar_RegisterBool("cg_scoreboardPingGraph", 0, 0, "Whether to show graphical ping");
-    bf.value.max = 3.4028235e38;
+    bf.value.max = FLT_MAX;
     bf.value.min = 0.0;
     cg_scoreboardRankFontScale = Dvar_RegisterFloat("cg_scoreboardRankFontScale", 0.25, bf, 0, "Scale of rank font");
 }

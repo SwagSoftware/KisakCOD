@@ -264,7 +264,7 @@ char __cdecl CM_BuildBrushWindingForSide(
     winding->numpoints = 2;
     for (k = 2; k < XyzList; ++k)
         CM_AddExteriorPointToWindingProjected(winding, &xyz[3 * k], i, j);
-    if (CM_RepresentativeTriangleFromWinding(winding, planeNormal, &i0, &i1, &i2) < 0.001000000047497451)
+    if (CM_RepresentativeTriangleFromWinding(winding, planeNormal, &i0, &i1, &i2) < EQUAL_EPSILON)
         return 0;
     PlaneFromPoints(plane, winding->p[i0], winding->p[i1], winding->p[i2]);
     if (Vec3Dot(plane, planeNormal) > 0.0)
@@ -350,7 +350,7 @@ void __cdecl CM_AddExteriorPointToWindingProjected(winding_t *w, float *pt, int 
     float bestSignedArea; // [esp+14h] [ebp-4h]
 
     bestIndex = -1;
-    bestSignedArea = 3.4028235e38;
+    bestSignedArea = FLT_MAX;
     indexPrev = w->numpoints - 1;
     for (index = 0; index < w->numpoints; ++index)
     {
@@ -364,7 +364,7 @@ void __cdecl CM_AddExteriorPointToWindingProjected(winding_t *w, float *pt, int 
     }
     if (bestIndex < 0)
         MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 286, 0, "%s", "bestIndex >= 0");
-    if (bestSignedArea < -0.001000000047497451)
+    if (bestSignedArea < -EQUAL_EPSILON)
     {
         memmove((unsigned __int8 *)w->p[bestIndex + 1], (unsigned __int8 *)w->p[bestIndex], 12 * (w->numpoints - bestIndex));
         v4 = w->p[bestIndex];
@@ -373,7 +373,7 @@ void __cdecl CM_AddExteriorPointToWindingProjected(winding_t *w, float *pt, int 
         v4[2] = pt[2];
         ++w->numpoints;
     }
-    else if (bestSignedArea <= 0.001000000047497451)
+    else if (bestSignedArea <= EQUAL_EPSILON)
     {
         CM_AddColinearExteriorPointToWindingProjected(w, pt, i, j, (bestIndex + w->numpoints - 1) % w->numpoints, bestIndex);
     }

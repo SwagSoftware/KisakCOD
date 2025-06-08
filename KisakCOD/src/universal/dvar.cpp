@@ -2343,13 +2343,13 @@ const dvar_s *__cdecl Dvar_RegisterColor(
         v8 = v21;
     else
         v8 = 0.0;
-    v20 = v8 * 255.0 + 0.001000000047497451;
+    v20 = v8 * 255.0 + EQUAL_EPSILON;
     dvarValue.color[3] = (int)(v20 + 9.313225746154785e-10);
-    v26 = v17 * 255.0 + 0.001000000047497451;
+    v26 = v17 * 255.0 + EQUAL_EPSILON;
     dvarValue.enabled = (int)(v26 + 9.313225746154785e-10);
-    v24 = v14 * 255.0 + 0.001000000047497451;
+    v24 = v14 * 255.0 + EQUAL_EPSILON;
     dvarValue.color[1] = (int)(v24 + 9.313225746154785e-10);
-    v22 = v11 * 255.0 + 0.001000000047497451;
+    v22 = v11 * 255.0 + EQUAL_EPSILON;
     dvarValue.color[2] = (int)(v22 + 9.313225746154785e-10);
     return Dvar_RegisterVariant(dvarName, 8u, flags, dvarValue, 0, description);
 }

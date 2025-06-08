@@ -101,7 +101,7 @@ void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColor
                         + cornerWeight[0]
                         - 1.0;
                     v2 = fabs(v10);
-                    if (v2 >= 0.001000000047497451)
+                    if (v2 >= EQUAL_EPSILON)
                         MyAssertHandler(
                             ".\\r_bsp_load_obj.cpp",
                             830,

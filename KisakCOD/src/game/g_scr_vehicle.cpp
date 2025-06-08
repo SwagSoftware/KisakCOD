@@ -609,7 +609,7 @@ void __cdecl VEH_PushEntity(gentity_s *ent, gentity_s *target, float *pushDir, f
     if (!target)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 1864, 0, "%s", "target");
     if (!target->tagInfo
-        && (Vec3LengthSq(deltaOrigin) >= 0.001000000047497451 || Vec3LengthSq(deltaAngles) >= 0.001000000047497451)
+        && (Vec3LengthSq(deltaOrigin) >= EQUAL_EPSILON || Vec3LengthSq(deltaAngles) >= EQUAL_EPSILON)
         && AttachedStickyMissile(ent, target))
     {
         PushAttachedStickyMissile(ent, target);

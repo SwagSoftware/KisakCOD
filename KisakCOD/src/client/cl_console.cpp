@@ -666,7 +666,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNMsgTime_Descs[gameWindowIndex] ) - 1");
-        mine.value.max = 3.4028235e38;
+        mine.value.max = FLT_MAX;
         mine.value.min = 0.0;
         con_gameMsgWindowNMsgTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNMsgTime_Names[gameWindowIndex],
@@ -717,7 +717,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNScrollTime_Descs[gameWindowIndex] ) - 1");
-        minf.value.max = 3.4028235e38;
+        minf.value.max = FLT_MAX;
         minf.value.min = 0.0;
         con_gameMsgWindowNScrollTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNScrollTime_Names[gameWindowIndex],
@@ -746,7 +746,7 @@ void Con_OneTimeInit()
             v18 = 0.75;
         else
             v18 = 0.25;
-        ming.value.max = 3.4028235e38;
+        ming.value.max = FLT_MAX;
         ming.value.min = 0.0;
         con_gameMsgWindowNFadeInTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNFadeInTime_Names[gameWindowIndex],
@@ -775,7 +775,7 @@ void Con_OneTimeInit()
             v17 = 0.0099999998;
         else
             v17 = 0.5;
-        minh.value.max = 3.4028235e38;
+        minh.value.max = FLT_MAX;
         minh.value.min = 0.0099999998;
         con_gameMsgWindowNFadeOutTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex],
@@ -803,7 +803,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex] ) - 1");
-        mini.value.max = 3.4028235e38;
+        mini.value.max = FLT_MAX;
         mini.value.min = 0.0;
         con_gameMsgWindowNSplitscreenScale[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex],
@@ -812,7 +812,7 @@ void Con_OneTimeInit()
             1u,
             dvarDesce);
     }
-    minj.value.max = 3.4028235e38;
+    minj.value.max = FLT_MAX;
     minj.value.min = 0.0;
     con_errormessagetime = Dvar_RegisterFloat(
         "con_errormessagetime",
@@ -820,7 +820,7 @@ void Con_OneTimeInit()
         minj,
         1u,
         "Onscreen time for error messages in seconds");
-    mink.value.max = 3.4028235e38;
+    mink.value.max = FLT_MAX;
     mink.value.min = 0.0;
     con_minicontime = Dvar_RegisterFloat(
         "con_minicontime",

@@ -226,7 +226,7 @@ void __cdecl CG_ViewRegisterDvars()
     DvarLimits minq; // [esp+4h] [ebp-10h]
     DvarLimits minr; // [esp+4h] [ebp-10h]
 
-    min.value.max = 3.4028235e38;
+    min.value.max = FLT_MAX;
     min.value.min = 0.0;
     cg_heliKillCamDist = Dvar_RegisterFloat(
         "cg_heliKillCamDist",
@@ -242,7 +242,7 @@ void __cdecl CG_ViewRegisterDvars()
         mina,
         0x80u,
         "Helicopter kill camera field of view.");
-    minb.value.max = 3.4028235e38;
+    minb.value.max = FLT_MAX;
     minb.value.min = 0.0;
     cg_heliKillCamZDist = Dvar_RegisterFloat(
         "cg_heliKillCamZDist",
@@ -266,7 +266,7 @@ void __cdecl CG_ViewRegisterDvars()
         mind,
         0x80u,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
-    mine.value.max = 3.4028235e38;
+    mine.value.max = FLT_MAX;
     mine.value.min = 0.0;
     cg_heliKillCamFarBlurStart = Dvar_RegisterFloat(
         "cg_heliKillCamFarBlurStart",
@@ -274,7 +274,7 @@ void __cdecl CG_ViewRegisterDvars()
         mine,
         0x80u,
         "Helicopter kill camera distance above the helicopter.");
-    minf.value.max = 3.4028235e38;
+    minf.value.max = FLT_MAX;
     minf.value.min = 0.0;
     cg_heliKillCamFarBlurDist = Dvar_RegisterFloat(
         "cg_heliKillCamFarBlurDist",
@@ -282,7 +282,7 @@ void __cdecl CG_ViewRegisterDvars()
         minf,
         0x80u,
         "Helicopter kill camera distance above the helicopter.");
-    ming.value.max = 3.4028235e38;
+    ming.value.max = FLT_MAX;
     ming.value.min = 0.0;
     cg_heliKillCamNearBlurStart = Dvar_RegisterFloat(
         "cg_heliKillCamNearBlurStart",
@@ -306,7 +306,7 @@ void __cdecl CG_ViewRegisterDvars()
         mini,
         0x80u,
         "Airstrike kill camera field of view.");
-    minj.value.max = 3.4028235e38;
+    minj.value.max = FLT_MAX;
     minj.value.min = 0.0;
     cg_airstrikeKillCamDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamDist",
@@ -314,7 +314,7 @@ void __cdecl CG_ViewRegisterDvars()
         minj,
         0x80u,
         "Airstrike kill camera distance.");
-    mink.value.max = 3.4028235e38;
+    mink.value.max = FLT_MAX;
     mink.value.min = 0.0;
     cg_airstrikeKillCamCloseXYDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamCloseXYDist",
@@ -322,7 +322,7 @@ void __cdecl CG_ViewRegisterDvars()
         mink,
         0x80u,
         "Airstrike kill camera closest distance in front of the bomb.");
-    minl.value.max = 3.4028235e38;
+    minl.value.max = FLT_MAX;
     minl.value.min = 0.0;
     cg_airstrikeKillCamCloseZDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamCloseZDist",
@@ -346,7 +346,7 @@ void __cdecl CG_ViewRegisterDvars()
         minn,
         0x80u,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
-    mino.value.max = 3.4028235e38;
+    mino.value.max = FLT_MAX;
     mino.value.min = 0.0;
     cg_airstrikeKillCamFarBlurStart = Dvar_RegisterFloat(
         "cg_airstrikeKillCamFarBlurStart",
@@ -354,7 +354,7 @@ void __cdecl CG_ViewRegisterDvars()
         mino,
         0x80u,
         "Airstrike kill camera distance above the airplane.");
-    minp.value.max = 3.4028235e38;
+    minp.value.max = FLT_MAX;
     minp.value.min = 0.0;
     cg_airstrikeKillCamFarBlurDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamFarBlurDist",
@@ -362,7 +362,7 @@ void __cdecl CG_ViewRegisterDvars()
         minp,
         0x80u,
         "Airstrike kill camera distance above the airplane.");
-    minq.value.max = 3.4028235e38;
+    minq.value.max = FLT_MAX;
     minq.value.min = 0.0;
     cg_airstrikeKillCamNearBlurStart = Dvar_RegisterFloat(
         "cg_airstrikeKillCamNearBlurStart",
@@ -856,7 +856,7 @@ void __cdecl CG_OffsetFirstPersonView(cg_s *cgameGlob)
         vs.v_dmg_pitch = cgameGlob->v_dmg_pitch;
         vs.v_dmg_roll = cgameGlob->v_dmg_roll;
         vs.xyspeed = cgameGlob->xyspeed;
-        vs.frametime = (double)cgameGlob->frametime * 0.001000000047497451;
+        vs.frametime = (double)cgameGlob->frametime * EQUAL_EPSILON;
         vs.fLastIdleFactor = cgameGlob->playerEntity.fLastIdleFactor;
         vs.weapIdleTime = &cgameGlob->weapIdleTime;
         BG_CalculateViewAngles(&vs, angles);
@@ -1644,7 +1644,7 @@ void __cdecl CG_KickAngles(cg_s *cgameGlob)
             v5 = t;
         else
             v5 = 5;
-        ft = (double)v5 * 0.001000000047497451;
+        ft = (double)v5 * EQUAL_EPSILON;
         for (i = 0; i < 3; ++i)
         {
             if (cgameGlob->kickAVel[i] != 0.0 || cgameGlob->kickAngles[i] != 0.0)
@@ -1757,7 +1757,7 @@ void __cdecl GetCeilingHeight(cg_s *cgameGlob)
     }
     else
     {
-        cgameGlob->heightToCeiling = 3.4028235e38;
+        cgameGlob->heightToCeiling = FLT_MAX;
     }
 }
 
@@ -1969,7 +1969,7 @@ void __cdecl CG_UpdateAdsDof(int localClientNum, GfxDepthOfField *dof)
         farEnd = farStart * 4.0;
         nearBlur = 6.0;
         farBlur = 0.0;
-        dt = (double)cgameGlob->frametime * 0.001000000047497451;
+        dt = (double)cgameGlob->frametime * EQUAL_EPSILON;
         if (ps->fWeaponPosFrac == 1.0 || ps->pm_type >= 7)
         {
             dof->nearStart = CG_UpdateAdsDofValue(dof->nearStart, nearStart, 50.0, dt);

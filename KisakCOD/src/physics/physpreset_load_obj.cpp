@@ -104,7 +104,7 @@ PhysPreset *__cdecl PhysPresetLoadFile(const char *name, void *(__cdecl *Alloc)(
                             v16[2] = *(float *)pStruct;
                             v16[3] = v7;
                             if (v9)
-                                v3 = 3.4028235e38;
+                                v3 = FLT_MAX;
                             else
                                 v3 = v8;
                             v16[4] = v3;

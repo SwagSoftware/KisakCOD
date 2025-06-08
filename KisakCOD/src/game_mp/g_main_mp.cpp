@@ -402,11 +402,11 @@ const dvar_s *G_RegisterDvars()
     if (g_dedicated->current.integer)
         Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "Dedicated server");
     g_speed = Dvar_RegisterInt("g_speed", 190, (DvarLimits)0x7FFFFFFF80000000LL, 0, "Player speed");
-    mina.value.max = 3.4028235e38;
+    mina.value.max = FLT_MAX;
     mina.value.min = 1.0;
     g_gravity = Dvar_RegisterFloat("g_gravity", 800.0, mina, 0, "Game gravity in inches per second per second");
-    minb.value.max = 3.4028235e38;
-    minb.value.min = -3.4028235e38;
+    minb.value.max = FLT_MAX;
+    minb.value.min = -FLT_MAX;
     g_knockback = Dvar_RegisterFloat("g_knockback", 1000.0, minb, 0, "Maximum knockback");
     g_maxDroppedWeapons = Dvar_RegisterInt(
         "g_maxDroppedWeapons",
@@ -473,7 +473,7 @@ const dvar_s *G_RegisterDvars()
         minf,
         1u,
         "Random component of the initial horizontal speed of a dropped item");
-    ming.value.max = 3.4028235e38;
+    ming.value.max = FLT_MAX;
     ming.value.min = 0.0;
     g_clonePlayerMaxVelocity = Dvar_RegisterFloat(
         "g_clonePlayerMaxVelocity",
@@ -637,7 +637,7 @@ const dvar_s *G_RegisterDvars()
         0,
         0x80u,
         "Turn on debug lines for radius damage traces");
-    mink.value.max = 3.4028235e38;
+    mink.value.max = FLT_MAX;
     mink.value.min = 0.0;
     player_throwbackInnerRadius = Dvar_RegisterFloat(
         "player_throwbackInnerRadius",
@@ -645,7 +645,7 @@ const dvar_s *G_RegisterDvars()
         mink,
         0x80u,
         "The radius to a live grenade player must be within initially to do a throwback");
-    minl.value.max = 3.4028235e38;
+    minl.value.max = FLT_MAX;
     minl.value.min = 0.0;
     player_throwbackOuterRadius = Dvar_RegisterFloat(
         "player_throwbackOuterRadius",
@@ -653,7 +653,7 @@ const dvar_s *G_RegisterDvars()
         minl,
         0x80u,
         "The radius player is allow to throwback a grenade once the player has been in the inner radius");
-    minm.value.max = 3.4028235e38;
+    minm.value.max = FLT_MAX;
     minm.value.min = 0.0;
     player_MGUseRadius = Dvar_RegisterFloat(
         "player_MGUseRadius",
@@ -661,7 +661,7 @@ const dvar_s *G_RegisterDvars()
         minm,
         0x80u,
         "The radius within which a player can mount a machine gun");
-    minn.value.max = 3.4028235e38;
+    minn.value.max = FLT_MAX;
     minn.value.min = 0.0;
     g_minGrenadeDamageSpeed = Dvar_RegisterFloat(
         "g_minGrenadeDamageSpeed",
@@ -718,7 +718,7 @@ const dvar_s *G_RegisterDvars()
         1.0,
         0x10C0u,
         "Fog color that was set in the most recent call to \"setexpfog\"");
-    mino.value.max = 3.4028235e38;
+    mino.value.max = FLT_MAX;
     mino.value.min = 0.0;
     g_fogStartDistReadOnly = Dvar_RegisterFloat(
         "g_fogStartDistReadOnly",
@@ -726,7 +726,7 @@ const dvar_s *G_RegisterDvars()
         mino,
         0x10C0u,
         "Fog start distance that was set in the most recent call to \"setexpfog\"");
-    minp.value.max = 3.4028235e38;
+    minp.value.max = FLT_MAX;
     minp.value.min = 0.0;
     result = Dvar_RegisterFloat(
         "g_fogHalfDistReadOnly",
@@ -1206,7 +1206,7 @@ void __cdecl G_RunFrame(int levelTime)
     {
         if (ent->r.inuse)
         {
-            dtime = (double)level.frametime * 0.001000000047497451;
+            dtime = (double)level.frametime * EQUAL_EPSILON;
             SV_DObjInitServerTime(ent, dtime);
         }
         ++i;

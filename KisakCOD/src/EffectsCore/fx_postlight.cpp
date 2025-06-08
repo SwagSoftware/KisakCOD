@@ -56,7 +56,7 @@ void __cdecl FX_PostLight_GenerateVerts(FxPostLightInfo *postLightInfoAddr, FxSy
     for (postLightIter = 0; postLightIter != postLightInfo->postLightCount; ++postLightIter)
     {
         postLight = &postLightInfo->postLights[postLightIter];
-        if (postLight->radius < 0.001000000047497451)
+        if (postLight->radius < EQUAL_EPSILON)
             MyAssertHandler(
                 ".\\EffectsCore\\fx_postlight.cpp",
                 100,

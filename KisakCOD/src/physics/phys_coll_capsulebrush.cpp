@@ -45,7 +45,7 @@ double __cdecl Phys_DistanceOfCapsuleFromPlane(const float *plane, const Capsule
 
     centerDist = Vec3Dot(capsule->center, plane) - plane[3];
     if (centerDist < 0.0)
-        return -3.4028235e38;
+        return -FLT_MAX;
     p0Dist = Vec3Dot(capsule->p0, plane) - plane[3] - capsule->radius;
     v3 = Vec3Dot(capsule->p1, plane);
     p1Dist = v3 - plane[3] - capsule->radius;
@@ -154,7 +154,7 @@ void __cdecl Phys_CollideCapsuleWithBrush(const cbrush_t *brush, const objInfo *
     brushPlane[1] = 0.0;
     brushPlane[2] = 0.0;
     brushPlane[3] = 0.0;
-    v8 = -3.4028235e38;
+    v8 = -FLT_MAX;
     brushSideIndex = -1;
     CM_BuildAxialPlanes(brush, &axialPlanes_1);
     for (i = 0; i < 6; ++i)
@@ -457,7 +457,7 @@ bool __cdecl Phys_CapsuleSeparatingAxisTest(
     Vec3Mad(capsule->center, capsule->halfHeight, capsule->axis, cp0);
     scale = -capsule->halfHeight;
     Vec3Mad(capsule->center, scale, capsule->axis, cp1);
-    axisResults->bestDepth = -3.4028235e38;
+    axisResults->bestDepth = -FLT_MAX;
     axisResults->bestCenter = 0.0;
     axisResults->bestAxis = 0;
     axisResults->bestRt = 0.0;
@@ -719,7 +719,7 @@ bool __cdecl Phys_CapsuleSeparatingAxisTestEndEdges(
     Vec3Mad(capsule->center, capsule->halfHeight, capsule->axis, cp0);
     scale = -capsule->halfHeight;
     Vec3Mad(capsule->center, scale, capsule->axis, cp1);
-    axisResults->bestDepth = -3.4028235e38;
+    axisResults->bestDepth = -FLT_MAX;
     axisResults->bestCenter = 0.0;
     axisResults->bestAxis = 0;
     axisResults->bestRt = 0.0;
@@ -872,7 +872,7 @@ bool __cdecl Phys_CapsuleSeparatingAxisTestMiddleEdge(
     Vec3Mad(capsule->center, capsule->halfHeight, capsule->axis, cp0);
     scale = -capsule->halfHeight;
     Vec3Mad(capsule->center, scale, capsule->axis, cp1);
-    axisResults->bestDepth = -3.4028235e38;
+    axisResults->bestDepth = -FLT_MAX;
     axisResults->bestCenter = 0.0;
     axisResults->bestAxis = 0;
     axisResults->bestRt = 0.0;

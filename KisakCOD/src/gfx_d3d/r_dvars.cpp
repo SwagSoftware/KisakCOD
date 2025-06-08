@@ -579,7 +579,7 @@
      r_fastSkin = Dvar_RegisterBool("r_fastSkin", 0, 1u, "Enable fast model skinning");
      r_smc_enable = Dvar_RegisterBool("r_smc_enable", 1, 0, "Enable static model cache");
      r_pretess = Dvar_RegisterBool("r_pretess", 1, 0, "Batch surfaces to reduce primitive count");
-     minb.value.max = 3.4028235e38;
+     minb.value.max = FLT_MAX;
      minb.value.min = 0.0;
      r_lodScaleRigid = Dvar_RegisterFloat(
          "r_lodScaleRigid",
@@ -587,15 +587,15 @@
          minb,
          1u,
          "Scale the level of detail distance for rigid models (larger reduces detail)");
-     minc.value.max = 3.4028235e38;
-     minc.value.min = -3.4028235e38;
+     minc.value.max = FLT_MAX;
+     minc.value.min = -FLT_MAX;
      r_lodBiasRigid = Dvar_RegisterFloat(
          "r_lodBiasRigid",
          0.0,
          minc,
          1u,
          "Bias the level of detail distance for rigid models (negative increases detail)");
-     mind.value.max = 3.4028235e38;
+     mind.value.max = FLT_MAX;
      mind.value.min = 0.0;
      r_lodScaleSkinned = Dvar_RegisterFloat(
          "r_lodScaleSkinned",
@@ -603,8 +603,8 @@
          mind,
          1u,
          "Scale the level of detail distance for skinned models (larger reduces detail)");
-     mine.value.max = 3.4028235e38;
-     mine.value.min = -3.4028235e38;
+     mine.value.max = FLT_MAX;
+     mine.value.min = -FLT_MAX;
      r_lodBiasSkinned = Dvar_RegisterFloat(
          "r_lodBiasSkinned",
          0.0,
@@ -622,7 +622,7 @@
      ming.value.max = 16.0;
      ming.value.min = 0.001;
      r_znear_depthhack = Dvar_RegisterFloat("r_znear_depthhack", 0.1, ming, 0x80u, "Viewmodel near clip plane");
-     minh.value.max = 3.4028235e38;
+     minh.value.max = FLT_MAX;
      minh.value.min = 0.0;
      r_zfar = Dvar_RegisterFloat(
          "r_zfar",
@@ -1066,7 +1066,7 @@
          1,
          0x80u,
          "Select whether to use depth test in collision surfaces display");
-     minbc.value.max = 3.4028235e38;
+     minbc.value.max = FLT_MAX;
      minbc.value.min = 1.0;
      r_showCollisionDist = Dvar_RegisterFloat(
          "r_showCollisionDist",
@@ -1081,16 +1081,16 @@
          "Allocate a float z buffer (required for effects such as floatz, dof, and laser light)");
      r_zFeather = Dvar_RegisterBool("r_zFeather", 1, 1u, "Enable z feathering (fixes particles clipping into geometry)");
      r_depthPrepass = Dvar_RegisterBool("r_depthPrepass", 0, 1u, "Enable depth prepass (usually improves performance)");
-     minbd.value.max = 3.4028235e38;
+     minbd.value.max = FLT_MAX;
      minbd.value.min = -1.0;
      r_highLodDist = Dvar_RegisterFloat("r_highLodDist", -1.0, minbd, 0x80u, "Distance for high level of detail");
-     minbe.value.max = 3.4028235e38;
+     minbe.value.max = FLT_MAX;
      minbe.value.min = -1.0;
      r_mediumLodDist = Dvar_RegisterFloat("r_mediumLodDist", -1.0, minbe, 0x80u, "Distance for medium level of detail");
-     minbf.value.max = 3.4028235e38;
+     minbf.value.max = FLT_MAX;
      minbf.value.min = -1.0;
      r_lowLodDist = Dvar_RegisterFloat("r_lowLodDist", -1.0, minbf, 0x80u, "Distance for low level of detail");
-     minbg.value.max = 3.4028235e38;
+     minbg.value.max = FLT_MAX;
      minbg.value.min = -1.0;
      r_lowestLodDist = Dvar_RegisterFloat("r_lowestLodDist", -1.0, minbg, 0x80u, "Distance for lowest level of detail");
      r_forceLod = Dvar_RegisterEnum("r_forceLod", r_forceLodNames, 4, 0x80u, "Force all level of detail to this level");
@@ -1145,15 +1145,15 @@
      minbk.value.max = 2000.0;
      minbk.value.min = 1.0;
      sc_length = Dvar_RegisterFloat("sc_length", 400.0, minbk, 0x80u, "Shadow cookie length");
-     minbl.value.max = 3.4028235e38;
-     minbl.value.min = -3.4028235e38;
+     minbl.value.max = FLT_MAX;
+     minbl.value.min = -FLT_MAX;
      sc_offscreenCasterLodBias = Dvar_RegisterFloat(
          "sc_offscreenCasterLodBias",
          0.0,
          minbl,
          0x80u,
          "Shadow cookie off-screen caster level of detail bias");
-     minbm.value.max = 3.4028235e38;
+     minbm.value.max = FLT_MAX;
      minbm.value.min = 0.0;
      sc_offscreenCasterLodScale = Dvar_RegisterFloat(
          "sc_offscreenCasterLodScale",
@@ -1215,8 +1215,8 @@
      minbt.value.max = 32.0;
      minbt.value.min = 0.0625;
      sm_sunSampleSizeNear = Dvar_RegisterFloat("sm_sunSampleSizeNear", 0.25, minbt, 0x1080u, "Shadow sample size");
-     minbu.value.max = 3.4028235e38;
-     minbu.value.min = -3.4028235e38;
+     minbu.value.max = FLT_MAX;
+     minbu.value.min = -FLT_MAX;
      sm_sunShadowCenter = Dvar_RegisterVec3(
          "sm_sunShadowCenter",
          0.0,
@@ -1402,24 +1402,24 @@
          0x80u,
          "Depth of field bias as a power function (like gamma); less than 1 is sharper");
      r_outdoor = Dvar_RegisterBool("r_outdoor", 1, 0x1000u, "Prevents snow from going indoors");
-     mincs.value.max = 3.4028235e38;
-     mincs.value.min = -3.4028235e38;
+     mincs.value.max = FLT_MAX;
+     mincs.value.min = -FLT_MAX;
      r_outdoorAwayBias = Dvar_RegisterFloat(
          "r_outdoorAwayBias",
          32.0,
          mincs,
          0x1000u,
          "Affects the height map lookup for making sure snow doesn't go indoors");
-     minct.value.max = 3.4028235e38;
-     minct.value.min = -3.4028235e38;
+     minct.value.max = FLT_MAX;
+     minct.value.min = -FLT_MAX;
      r_outdoorDownBias = Dvar_RegisterFloat(
          "r_outdoorDownBias",
          0.0,
          minct,
          0x1000u,
          "Affects the height map lookup for making sure snow doesn't go indoors");
-     mincu.value.max = 3.4028235e38;
-     mincu.value.min = -3.4028235e38;
+     mincu.value.max = FLT_MAX;
+     mincu.value.min = -FLT_MAX;
      r_outdoorFeather = Dvar_RegisterFloat("r_outdoorFeather", 8.0, mincu, 0x1000u, "Outdoor z-feathering value");
      Dvar_SetModified((dvar_s*)r_outdoorFeather);
      r_sun_from_dvars = Dvar_RegisterBool(

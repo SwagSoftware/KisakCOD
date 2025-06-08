@@ -63,7 +63,7 @@ void __cdecl CG_Respawn(int localClientNum)
     CL_SetADS(localClientNum, 0);
     CG_SetEquippedOffHand(localClientNum, cgArray[0].predictedPlayerState.offHandIndex);
     CG_ResetLowHealthOverlay(cgArray);
-    cgArray[0].heightToCeiling = 3.4028235e38;
+    cgArray[0].heightToCeiling = FLT_MAX;
     CG_HoldBreathInit(cgArray);
 }
 

@@ -388,17 +388,12 @@ void __cdecl R_SetupPassVertexShaderArgs(GfxCmdBufContext context)
 
 void __cdecl R_OverrideImage(GfxImage **image, const MaterialTextureDef *texdef)
 {
-    const char *v2; // eax
-    unsigned __int8 semantic; // [esp+7h] [ebp-1h]
+    iassert(image);
+    iassert(texdef);
 
-    if (!image)
-        MyAssertHandler(".\\r_shade.cpp", 438, 0, "%s", "image");
-    if (!texdef)
-        MyAssertHandler(".\\r_shade.cpp", 439, 0, "%s", "texdef");
     if ((*image)->mapType == MAPTYPE_2D)
     {
-        semantic = texdef->semantic;
-        switch (semantic)
+        switch (texdef->semantic)
         {
         case 0u:
         case 1u:
@@ -411,14 +406,7 @@ void __cdecl R_OverrideImage(GfxImage **image, const MaterialTextureDef *texdef)
         case 5u:
             if (r_normalMap->current.integer)
             {
-                if (r_normalMap->current.integer != 1)
-                    MyAssertHandler(
-                        ".\\r_shade.cpp",
-                        464,
-                        0,
-                        "%s\n\t(r_normalMap->current.integer) = %i",
-                        "(r_normalMap->current.integer == R_NORMAL_OVERRIDE_NONE)",
-                        r_normalMap->current.integer);
+                iassert(r_normalMap->current.integer == R_NORMAL_OVERRIDE_NONE);
             }
             else
             {
@@ -432,8 +420,7 @@ void __cdecl R_OverrideImage(GfxImage **image, const MaterialTextureDef *texdef)
         default:
             if (!alwaysfails)
             {
-                v2 = va("unhandled case %i", semantic);
-                MyAssertHandler(".\\r_shade.cpp", 473, 1, v2);
+                MyAssertHandler(".\\r_shade.cpp", 473, 1, va("unhandled case %i", texdef->semantic));
             }
             break;
         }
@@ -442,22 +429,15 @@ void __cdecl R_OverrideImage(GfxImage **image, const MaterialTextureDef *texdef)
 
 void __cdecl R_SetPixelShader(GfxCmdBufState *state, const MaterialPixelShader *pixelShader)
 {
-    if (!pixelShader)
-        MyAssertHandler(".\\r_shade.cpp", 680, 0, "%s", "pixelShader");
-    if (!pixelShader->prog.ps)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            682,
-            0,
-            "%s\n\t(pixelShader->name) = %s",
-            "(pixelShader->prog.ps)",
-            pixelShader->name);
+    iassert(pixelShader);
+    iassert(pixelShader->prog.ps);
+
     if (state->pixelShader != pixelShader)
     {
-        //Profile_Begin(96);
+        Profile_Begin(96);
         R_HW_SetPixelShader(state->prim.device, pixelShader);
         state->pixelShader = pixelShader;
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -465,20 +445,13 @@ void __cdecl R_SetVertexShader(GfxCmdBufState *state, const MaterialVertexShader
 {
     if (state->vertexShader != vertexShader)
     {
-        if (!vertexShader)
-            MyAssertHandler(".\\r_shade.cpp", 702, 0, "%s", "vertexShader");
-        if (!vertexShader->prog.vs)
-            MyAssertHandler(
-                ".\\r_shade.cpp",
-                704,
-                0,
-                "%s\n\t(vertexShader->name) = %s",
-                "(vertexShader->prog.vs)",
-                vertexShader->name);
-        //Profile_Begin(95);
+        iassert(vertexShader);
+        iassert(vertexShader->prog.vs);
+
+        Profile_Begin(95);
         R_HW_SetVertexShader(state->prim.device, vertexShader);
         state->vertexShader = vertexShader;
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -594,7 +567,7 @@ const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
 {
     const char *v3; // eax
     float floatTime; // [esp+4h] [ebp-10h]
-    const GfxImage *image; // [esp+8h] [ebp-Ch] BYREF
+    GfxImage *image; // [esp+8h] [ebp-Ch] BYREF
     const Material *material; // [esp+Ch] [ebp-8h]
     unsigned __int8 samplerState; // [esp+13h] [ebp-1h]
 
@@ -603,19 +576,12 @@ const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
     {
         if (++texDef == &material->textureTable[material->textureCount])
         {
-            v3 = va("material '%s' is missing a required named texture", material->info.name);
-            MyAssertHandler(
-                ".\\r_shade.cpp",
-                489,
-                1,
-                "%s\n\t%s",
-                "texDef != &material->textureTable[material->textureCount]",
-                v3);
+            iassert(texDef != &material->textureTable[material->textureCount]); // material is missing a required named texture", 
         }
     }
     if (texDef->semantic == 11)
     {
-        image = *(const GfxImage **)&texDef->u.image[1].depth;
+        image = texDef->u.water->image;
         if (r_drawWater->current.enabled)
             floatTime = context.source->sceneDef.floatTime;
         else
@@ -628,7 +594,7 @@ const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
     }
     samplerState = texDef->samplerState;
     if (rg.hasAnyImageOverrides)
-        R_OverrideImage((GfxImage **)&image, texDef);
+        R_OverrideImage(&image, texDef);
     R_SetSampler(context, arg->dest, samplerState, image);
     return texDef;
 }

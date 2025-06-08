@@ -147,36 +147,21 @@ void __cdecl R_DrawStaticModelDrawSurfPlacement(
     const GfxStaticModelDrawInst *smodelDrawInst,
     GfxCmdBufSourceState *source)
 {
-    float v2; // [esp+2Ch] [ebp-68h]
-    float v3; // [esp+30h] [ebp-64h]
-    float v4; // [esp+38h] [ebp-5Ch]
-    float v5; // [esp+3Ch] [ebp-58h]
-    float v6; // [esp+40h] [ebp-54h]
-    float v7; // [esp+48h] [ebp-4Ch]
-    float v8; // [esp+4Ch] [ebp-48h]
-    float v9; // [esp+50h] [ebp-44h]
     GfxCmdBufSourceState *matrix; // [esp+5Ch] [ebp-38h]
     float origin[3]; // [esp+60h] [ebp-34h] BYREF
     float scale; // [esp+6Ch] [ebp-28h]
-    float axis[3][3]; // [esp+70h] [ebp-24h] BYREF
+    mat3x3 axis; // [esp+70h] [ebp-24h] BYREF
 
-    v2 = smodelDrawInst->placement.axis[0][1];
-    v3 = smodelDrawInst->placement.axis[0][2];
-    v4 = smodelDrawInst->placement.axis[1][0];
-    v5 = smodelDrawInst->placement.axis[1][1];
-    v6 = smodelDrawInst->placement.axis[1][2];
-    v7 = smodelDrawInst->placement.axis[2][0];
-    v8 = smodelDrawInst->placement.axis[2][1];
-    v9 = smodelDrawInst->placement.axis[2][2];
-    axis[0][0] = smodelDrawInst->placement.axis[0][0];
-    axis[0][1] = v2;
-    axis[0][2] = v3;
-    axis[1][0] = v4;
-    axis[1][1] = v5;
-    axis[1][2] = v6;
-    axis[2][0] = v7;
-    axis[2][1] = v8;
-    axis[2][2] = v9;
+    axis[0][0] = smodelDrawInst->placement.axis[0][0]; // LWSS: is it really necessary to copy this? prob not. remove later when working
+    axis[0][1] = smodelDrawInst->placement.axis[0][1];
+    axis[0][2] = smodelDrawInst->placement.axis[0][2];
+    axis[1][0] = smodelDrawInst->placement.axis[1][0];
+    axis[1][1] = smodelDrawInst->placement.axis[1][1];
+    axis[1][2] = smodelDrawInst->placement.axis[1][2];
+    axis[2][0] = smodelDrawInst->placement.axis[2][0];
+    axis[2][1] = smodelDrawInst->placement.axis[2][1];
+    axis[2][2] = smodelDrawInst->placement.axis[2][2];
+
     scale = smodelDrawInst->placement.scale;
     matrix = R_GetActiveWorldMatrix(source);
     Vec3Sub(smodelDrawInst->placement.origin, source->eyeOffset, origin);

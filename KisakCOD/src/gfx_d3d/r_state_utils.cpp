@@ -346,9 +346,9 @@ void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdB
         if (input == &gfxCmdBufInput || s_codeConstUpdateFreq[constant] != 2 || constant < 0x20)
         {
             v3 = source->input.consts[constant];
-            *v3 = 3.4028235e38;
-            v3[1] = 3.4028235e38;
-            v3[2] = 3.4028235e38;
+            v3[0] = FLT_MAX;
+            v3[1] = FLT_MAX;
+            v3[2] = FLT_MAX;
             v3[3] = 0.0;
         }
         else

@@ -685,22 +685,22 @@ void __cdecl XModelLoadCollData(
             }
             v13 = *(float *)*pos;
             *pos += 4;
-            surf->mins[0] = v13 - 0.001000000047497451;
+            surf->mins[0] = v13 - EQUAL_EPSILON;
             v12 = *(float *)*pos;
             *pos += 4;
-            surf->mins[1] = v12 - 0.001000000047497451;
+            surf->mins[1] = v12 - EQUAL_EPSILON;
             v11 = *(float *)*pos;
             *pos += 4;
-            surf->mins[2] = v11 - 0.001000000047497451;
+            surf->mins[2] = v11 - EQUAL_EPSILON;
             v10 = *(float *)*pos;
             *pos += 4;
-            surf->maxs[0] = v10 + 0.001000000047497451;
+            surf->maxs[0] = v10 + EQUAL_EPSILON;
             v9 = *(float *)*pos;
             *pos += 4;
-            surf->maxs[1] = v9 + 0.001000000047497451;
+            surf->maxs[1] = v9 + EQUAL_EPSILON;
             v8 = *(float *)*pos;
             *pos += 4;
-            surf->maxs[2] = v8 + 0.001000000047497451;
+            surf->maxs[2] = v8 + EQUAL_EPSILON;
             v7 = *(_DWORD *)*pos;
             *pos += 4;
             surf->boneIdx = v7;
@@ -1049,11 +1049,11 @@ int __cdecl XModelTraceLine(
                             Vec3Mad(boneExtents.start, hitFrac, delta, hit);
                             v8 = Vec3Dot(hit, ctri->svec);
                             s = v8 - ctri->svec[3];
-                            if (s >= -0.001000000047497451 && s <= 1.001000046730042)
+                            if (s >= -EQUAL_EPSILON && s <= 1.001000046730042)
                             {
                                 v9 = Vec3Dot(hit, ctri->tvec);
                                 t = v9 - ctri->tvec[3];
-                                if (t >= -0.001000000047497451 && s + t <= 1.001000046730042)
+                                if (t >= -EQUAL_EPSILON && s + t <= 1.001000046730042)
                                 {
                                     partIndex = csurf->boneIdx;
                                     results->startsolid = 0;
@@ -1299,11 +1299,11 @@ int __cdecl XModelTraceLineAnimated(
                                     Vec3Mad(boneExtents.start, hitFrac, delta, hit);
                                     v11 = Vec3Dot(hit, ctri->svec);
                                     s = v11 - ctri->svec[3];
-                                    if (s >= -0.001000000047497451 && s <= 1.001000046730042)
+                                    if (s >= -EQUAL_EPSILON && s <= 1.001000046730042)
                                     {
                                         v12 = Vec3Dot(hit, ctri->tvec);
                                         t = v12 - ctri->tvec[3];
-                                        if (t >= -0.001000000047497451 && s + t <= 1.001000046730042)
+                                        if (t >= -EQUAL_EPSILON && s + t <= 1.001000046730042)
                                         {
                                             partIndex = csurf->boneIdx;
                                             results->startsolid = 0;

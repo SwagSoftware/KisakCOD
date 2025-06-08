@@ -236,30 +236,30 @@ void __cdecl R_SetDrawSurfsShadowableLight(GfxCmdBufSourceState *source, const G
     }
 }
 
+unsigned int Com_GetPrimaryLightCount()
+{
+    return comWorld.primaryLightCount;
+}
+
 unsigned int __cdecl R_GetShadowableLightIndex(
     const GfxBackEndData *data,
     const GfxViewInfo *viewInfo,
     const GfxLight *light)
 {
-    if (!light)
-        MyAssertHandler(".\\r_draw_shadowablelight.cpp", 25, 0, "%s", "light");
+    iassert(light);
+
     if (!light->canUseShadowMap)
         return 0;
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+
+    iassert(comWorld.isInUse);
+
     if (!Com_BitCheckAssert(data->shadowableLightHasShadowMap, comWorld.primaryLightCount, 32))
         return 0;
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
-    if (viewInfo->shadowableLightCount != comWorld.primaryLightCount + 1)
-        MyAssertHandler(
-            ".\\r_draw_shadowablelight.cpp",
-            35,
-            0,
-            "%s",
-            "viewInfo->shadowableLightCount == Com_GetPrimaryLightCount() + GFX_MAX_EMISSIVE_SPOT_LIGHTS");
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+
+    iassert(comWorld.isInUse);
+    iassert(viewInfo->shadowableLightCount == Com_GetPrimaryLightCount() + GFX_MAX_EMISSIVE_SPOT_LIGHTS);
+    iassert(comWorld.isInUse);
+
     return comWorld.primaryLightCount;
 }
 

@@ -848,19 +848,19 @@ bool __cdecl Vec4HomogenousClipZW(float4 *pt0, float4 *pt1, float4 coeffZW)
         v8 = -1;
     HIDWORD(dist1Cmp_8) = v8;
     if (alpha == 0.0)
-        v7 = 3.4028235e38;
+        v7 = FLT_MAX;
     else
         v7 = 1.0 / alpha;
     if (alpha == 0.0)
-        v6 = 3.4028235e38;
+        v6 = FLT_MAX;
     else
         v6 = 1.0 / alpha;
     if (alpha == 0.0)
-        v5 = 3.4028235e38;
+        v5 = FLT_MAX;
     else
         v5 = I_fres(alpha);
     if (alpha == 0.0)
-        v4 = 3.4028235e38;
+        v4 = FLT_MAX;
     else
         v4 = I_fres(alpha);
     alphaa = v17 * v7;

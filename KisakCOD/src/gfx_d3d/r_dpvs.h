@@ -4,6 +4,15 @@
 #include "r_rendercmds.h"
 #include "r_scene.h"
 
+enum $72E71F3D9535328A1AA08FD8E568F55B : __int32
+{
+    CULL_STATE_OUT = 0x0,
+    CULL_STATE_BOUNDED_PENDING = 0x1,
+    CULL_STATE_BOUNDED = 0x2,
+    CULL_STATE_SKINNED_PENDING = 0x3,
+    CULL_STATE_DONE = 0x4,
+};
+
 enum DpvsClipChildren : __int32
 {                                       // ...
     DPVS_DONT_CLIP_CHILDREN = 0x0,

@@ -203,7 +203,7 @@ void __cdecl NetProf_UpdateStatistics(netProfileStream_t *pStream)
             if (iTimeSpan >= 1 && iNumPackets)
             {
                 if (iTotalBytes)
-                    pStream->iBytesPerSecond = (int)((double)iTotalBytes / ((double)iTimeSpan * 0.001000000047497451));
+                    pStream->iBytesPerSecond = (int)((double)iTotalBytes / ((double)iTimeSpan * EQUAL_EPSILON));
                 else
                     pStream->iBytesPerSecond = 0;
                 pStream->iLastBPSCalcTime = Sys_Milliseconds();

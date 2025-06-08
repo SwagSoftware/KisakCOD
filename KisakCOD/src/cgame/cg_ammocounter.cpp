@@ -73,7 +73,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         1.0,
         0,
         "Color 2 of 2 to oscilate between");
-    b.value.max = 3.4028235e38;
+    b.value.max = FLT_MAX;
     b.value.min = 0.0;
     lowAmmoWarningPulseFreq = Dvar_RegisterFloat(
         "lowAmmoWarningPulseFreq",
@@ -81,7 +81,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         b,
         0,
         "Frequency of the pulse (oscilation between the 2 colors)");
-    ba.value.max = 3.4028235e38;
+    ba.value.max = FLT_MAX;
     ba.value.min = 0.0;
     lowAmmoWarningPulseMax = Dvar_RegisterFloat(
         "lowAmmoWarningPulseMax",
@@ -90,7 +90,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         0,
         "Min of oscilation range: 0 is color1 and 1.0 is color2.  Can be < 0, and the wave will clip at 0.");
     bb.value.max = 1.0;
-    bb.value.min = -3.4028235e38;
+    bb.value.min = -FLT_MAX;
     lowAmmoWarningPulseMin = Dvar_RegisterFloat(
         "lowAmmoWarningPulseMin",
         0.0,

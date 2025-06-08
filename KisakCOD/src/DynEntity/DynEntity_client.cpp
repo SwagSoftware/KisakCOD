@@ -54,7 +54,7 @@ void __cdecl DynEntCl_RegisterDvars()
         minc,
         0x80u,
         "Scale of the random offset from the center of mass for explosion forces.");
-    mind.value.max = 3.4028235e38;
+    mind.value.max = FLT_MAX;
     mind.value.min = 0.0;
     dynEnt_explodeMinForce = Dvar_RegisterFloat(
         "dynEnt_explodeMinForce",
@@ -1633,8 +1633,8 @@ void __cdecl DynEntCl_JitterEvent(
         Vec3AddScalar(origin, s, sum);
         v8 = outerRadius * 1.414213538169861;
         Vec3AddScalar(origin, v8, maxs);
-        sum[2] = -3.4028235e38;
-        maxs[2] = 3.4028235e38;
+        sum[2] = -FLT_MAX;
+        maxs[2] = FLT_MAX;
         for (drawType = DYNENT_DRAW_MODEL; (unsigned int)drawType < DYNENT_DRAW_COUNT; ++drawType)
         {
             unsignedInt = DynEntCl_AreaEntities(drawType, sum, maxs, 0x802013, 0x1000u, dynEntList);

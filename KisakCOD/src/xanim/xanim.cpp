@@ -865,7 +865,7 @@ void __cdecl XAnimUpdateOldTime(
         info->state.weight = (info->state.goalWeight - info->state.weight) * dtime / info->state.goalTime
             + info->state.weight;
         if (info->state.weight < 0.00000100000011116208)
-            info->state.weight = info->state.goalWeight * 0.001000000047497451;
+            info->state.weight = info->state.goalWeight * EQUAL_EPSILON;
         info->state.goalTime = info->state.goalTime - dtime;
     }
     else
@@ -1980,7 +1980,7 @@ int __cdecl DObjUpdateServerInfo(DObj_s* obj, float dtime, int bNotify)
             frac = XAnimFindServerNoteTrack(obj, tree->children, dtime);
             if (frac < 0.0)
                 MyAssertHandler(".\\xanim\\xanim.cpp", 2776, 0, "%s", "frac >= 0");
-            if (frac == 1.0 || (fracDtime = dtime * frac + 0.001000000047497451, dtime < (double)fracDtime))
+            if (frac == 1.0 || (fracDtime = dtime * frac + EQUAL_EPSILON, dtime < (double)fracDtime))
             {
                 XAnimUpdateTimeAndNotetrack(obj, tree->children, dtime, 1);
                 Profile_EndInternal(0);
@@ -3571,7 +3571,7 @@ int __cdecl XAnimSetGoalWeightKnob(
     Profile_Begin(328);
     if (!obj)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3553, 0, "%s", "obj");
-    if (goalWeight < 0.001000000047497451)
+    if (goalWeight < EQUAL_EPSILON)
         goalWeight = 0.0;
     tree = obj->tree;
     infoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
@@ -3636,7 +3636,7 @@ int __cdecl XAnimSetGoalWeightNode(
         MyAssertHandler(".\\xanim\\xanim.cpp", 3660, 0, "%s", "tree");
     if (!tree->anims)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3661, 0, "%s", "tree->anims");
-    if (goalWeight != 0.0 && goalWeight < 0.001000000047497451)
+    if (goalWeight != 0.0 && goalWeight < EQUAL_EPSILON)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3662, 0, "%s", "!goalWeight || goalWeight >= WEIGHT_EPSILON");
     if (goalTime < 0.0)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3663, 0, "%s", "goalTime >= 0");
@@ -3674,7 +3674,7 @@ int __cdecl XAnimSetGoalWeightNode(
     else
     {
         if (info->state.weight == 0.0)
-            info->state.weight = goalWeight * 0.001000000047497451;
+            info->state.weight = goalWeight * EQUAL_EPSILON;
         weightDiff = info->state.weight - goalWeight;
         if (weightDiff == 0.0 || (info->state.goalWeight - goalWeight) * weightDiff > 0.0)
         {
@@ -4023,7 +4023,7 @@ int __cdecl XAnimSetGoalWeight(
     Profile_Begin(328);
     if (!obj)
         MyAssertHandler(".\\xanim\\xanim.cpp", 3971, 0, "%s", "obj");
-    if (goalWeight < 0.001000000047497451)
+    if (goalWeight < EQUAL_EPSILON)
         goalWeight = 0.0;
     tree = obj->tree;
     infoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
@@ -4147,7 +4147,7 @@ int __cdecl XAnimSetCompleteGoalWeight(
     Profile_Begin(328);
     if (!obj)
         MyAssertHandler(".\\xanim\\xanim.cpp", 4103, 0, "%s", "obj");
-    if (goalWeight < 0.001000000047497451)
+    if (goalWeight < EQUAL_EPSILON)
         goalWeight = 0.0;
     tree = obj->tree;
     infoIndex = XAnimGetInfoIndex(obj->tree, animIndex);

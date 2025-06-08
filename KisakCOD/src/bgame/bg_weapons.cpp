@@ -3752,7 +3752,7 @@ void __cdecl BG_CalculateWeaponPosition_IdleAngles(weaponState_t *ws, float *ang
     v6 = (double)*ws->weapIdleTime * 0.000699999975040555;
     v3 = sin(v6);
     angles[1] = fTargScalea * v3 * 0.009999999776482582 + angles[1];
-    v5 = (double)*ws->weapIdleTime * 0.001000000047497451;
+    v5 = (double)*ws->weapIdleTime * EQUAL_EPSILON;
     v2 = sin(v5);
     *angles = fTargScalea * v2 * 0.009999999776482582 + *angles;
 }
@@ -4143,7 +4143,7 @@ void __cdecl BG_CalculateView_IdleAngles(viewState_t *vs, float *angles)
         v5 = (double)*vs->weapIdleTime * 0.000699999975040555;
         v3 = sin(v5);
         angles[1] = fTargScalec * v3 * 0.009999999776482582 + angles[1];
-        v4 = (double)*vs->weapIdleTime * 0.001000000047497451;
+        v4 = (double)*vs->weapIdleTime * EQUAL_EPSILON;
         v2 = sin(v4);
         *angles = fTargScalec * v2 * 0.009999999776482582 + *angles;
     }
@@ -4266,7 +4266,7 @@ void __cdecl BG_CalculateWeaponPosition_Sway(
     {
         weapIndex = BG_GetViewmodelWeaponIndex(ps);
         weapDef = BG_GetWeaponDef(weapIndex);
-        dt = (double)frametime * 0.001000000047497451;
+        dt = (double)frametime * EQUAL_EPSILON;
         if (BG_IsAimDownSightWeapon(weapIndex))
         {
             if (f > 0.0 && weapDef->overlayReticle)

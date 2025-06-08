@@ -3004,7 +3004,7 @@ void GScr_WeaponFireTime()
     iWeaponIndex = G_GetWeaponIndexForName(pszWeaponName);
     if (iWeaponIndex)
     {
-        value.floatValue = (double)BG_GetWeaponDef(iWeaponIndex)->iFireTime * 0.001000000047497451;
+        value.floatValue = (double)BG_GetWeaponDef(iWeaponIndex)->iFireTime * EQUAL_EPSILON;
         Scr_AddFloat(value);
     }
     else
@@ -5205,7 +5205,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
     duration = (int)(v3 + 9.313225746154785e-10);
     if ((unsigned int)duration > 0xEA60)
     {
-        v1 = va("duration %g should be >= 0 and <= 60", (double)duration * 0.001000000047497451);
+        v1 = va("duration %g should be >= 0 and <= 60", (double)duration * EQUAL_EPSILON);
         Scr_ParamError(1u, v1);
     }
     ent->client->ps.shellshockIndex = id;

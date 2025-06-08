@@ -145,22 +145,22 @@ void __cdecl Phys_Init()
         mina.value.max = 1.0;
         mina.value.min = 0.0;
         phys_erp = Dvar_RegisterFloat("phys_erp", 0.80000001, mina, 0, "Physics error reduction magic parameter.");
-        minb.value.max = 3.4028235e38;
-        minb.value.min = -3.4028235e38;
+        minb.value.max = FLT_MAX;
+        minb.value.min = -FLT_MAX;
         phys_mcv = Dvar_RegisterFloat("phys_mcv", 20.0, minb, 0, "Physics maximum correcting velocity magic parameter.");
-        minc.value.max = 3.4028235e38;
-        minc.value.min = -3.4028235e38;
+        minc.value.max = FLT_MAX;
+        minc.value.min = -FLT_MAX;
         phys_mcv_ragdoll = Dvar_RegisterFloat(
             "phys_mcv_ragdoll",
             1000.0,
             minc,
             0,
             "Physics maximum correcting velocity magic parameter (for ragdoll).");
-        mind.value.max = 3.4028235e38;
-        mind.value.min = -3.4028235e38;
+        mind.value.max = FLT_MAX;
+        mind.value.min = -FLT_MAX;
         phys_csl = Dvar_RegisterFloat("phys_csl", 1.0, mind, 0, "Physics contact surface level magic parameter.");
-        mine.value.max = 3.4028235e38;
-        mine.value.min = -3.4028235e38;
+        mine.value.max = FLT_MAX;
+        mine.value.min = -FLT_MAX;
         phys_gravity = Dvar_RegisterFloat("phys_gravity", -800.0, mine, 0, "Physics gravity in units/sec^2.");
         minf.value.max = 2.0;
         minf.value.min = 0.0;
@@ -224,7 +224,7 @@ void __cdecl Phys_Init()
             0,
             0,
             "Disable to turn off testing for collision against entities");
-        minh.value.max = 3.4028235e38;
+        minh.value.max = FLT_MAX;
         minh.value.min = 0.0;
         phys_autoDisableLinear = Dvar_RegisterFloat(
             "phys_autoDisableLinear",
@@ -232,7 +232,7 @@ void __cdecl Phys_Init()
             minh,
             0,
             "A body must have linear velocity less than this to be considered idle.");
-        mini.value.max = 3.4028235e38;
+        mini.value.max = FLT_MAX;
         mini.value.min = 0.0;
         phys_autoDisableAngular = Dvar_RegisterFloat(
             "phys_autoDisableAngular",
@@ -240,7 +240,7 @@ void __cdecl Phys_Init()
             mini,
             0,
             "A body must have angular velocity less than this to be considered idle.");
-        minj.value.max = 3.4028235e38;
+        minj.value.max = FLT_MAX;
         minj.value.min = 0.0;
         phys_autoDisableTime = Dvar_RegisterFloat(
             "phys_autoDisableTime",
@@ -304,7 +304,7 @@ void __cdecl Phys_Init()
             minq,
             0,
             "Physics error reduction magic parameter for joints at their limits.");
-        minr.value.max = 3.4028235e38;
+        minr.value.max = FLT_MAX;
         minr.value.min = 0.0;
         phys_frictionScale = Dvar_RegisterFloat(
             "phys_frictionScale",
@@ -312,7 +312,7 @@ void __cdecl Phys_Init()
             minr,
             0,
             "Scales the amount of physics friction globally.");
-        mins.value.max = 3.4028235e38;
+        mins.value.max = FLT_MAX;
         mins.value.min = 0.0;
         phys_dragLinear = Dvar_RegisterFloat(
             "phys_dragLinear",
@@ -320,7 +320,7 @@ void __cdecl Phys_Init()
             mins,
             0,
             "The amount of linear drag, applied globally");
-        mint.value.max = 3.4028235e38;
+        mint.value.max = FLT_MAX;
         mint.value.min = 0.0;
         phys_dragAngular = Dvar_RegisterFloat(
             "phys_dragAngular",
@@ -328,7 +328,7 @@ void __cdecl Phys_Init()
             mint,
             0,
             "The amount of angular drag, applied globally");
-        minu.value.max = 3.4028235e38;
+        minu.value.max = FLT_MAX;
         minu.value.min = 0.0;
         phys_minImpactMomentum = Dvar_RegisterFloat(
             "phys_minImpactMomentum",
@@ -336,7 +336,7 @@ void __cdecl Phys_Init()
             minu,
             0,
             "The minimum momentum required to trigger impact sounds");
-        minv.value.max = 3.4028235e38;
+        minv.value.max = FLT_MAX;
         minv.value.min = 0.1;
         phys_jitterMaxMass = Dvar_RegisterFloat(
             "phys_jitterMaxMass",
@@ -344,7 +344,7 @@ void __cdecl Phys_Init()
             minv,
             0,
             "Maximum mass to jitter - jitter will fall off up to this mass");
-        minw.value.max = 3.4028235e38;
+        minw.value.max = FLT_MAX;
         minw.value.min = 0.0;
         phys_gravityChangeWakeupRadius = Dvar_RegisterFloat(
             "phys_gravityChangeWakeupRadius",
@@ -352,7 +352,7 @@ void __cdecl Phys_Init()
             minw,
             0x1000u,
             "The radius around the player within which objects get awakened when gravity changes");
-        minx.value.max = 3.4028235e38;
+        minx.value.max = FLT_MAX;
         minx.value.min = 0.0;
         phys_narrowObjMaxLength = Dvar_RegisterFloat(
             "phys_narrowObjMaxLength",
@@ -1796,7 +1796,7 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
             else
                 v5 = g_phys_msecStep[worldIndex];
             --maxIter;
-            seconds = v5 * 0.001000000047497451;
+            seconds = v5 * EQUAL_EPSILON;
             Phys_RunFrame(localClientNum, worldIndex, seconds);
             data->timeLastUpdate += v5;
             dxPostProcessIslands(worldIndex);
@@ -2288,7 +2288,7 @@ void __cdecl Phys_ObjTraceNewPos(dxBody *body)
                     }
                     Vec3Lerp(userData->savedPos, newPos, trace.fraction, newPos);
                     dBodySetPosition(body, newPos[0], newPos[1], newPos[2]);
-                    if (trace.fraction < 0.001000000047497451)
+                    if (trace.fraction < EQUAL_EPSILON)
                     {
                         dBodySetLinearVel(body, 0.0, 0.0, 0.0);
                         dBodySetAngularVel(body, 0.0, 0.0, 0.0);

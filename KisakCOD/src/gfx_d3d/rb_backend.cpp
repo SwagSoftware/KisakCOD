@@ -1233,7 +1233,7 @@ void __cdecl RB_DrawPoints3D(const GfxCmdDrawPoints *cmd)
         xyz_12 = v->xyz[0] * transform[3] + v->xyz[1] * transform[7] + v->xyz[2] * transform[11] + transform[15];
         offset = invWidth * xyz_12;
         offset_4 = invHeight * xyz_12;
-        xyz_8a = xyz_8 - xyz_12 * 0.001000000047497451;
+        xyz_8a = xyz_8 - xyz_12 * EQUAL_EPSILON;
         RB_CheckTessOverflow(4, 6);
         tess.indices[tess.indexCount] = LOWORD(tess.vertexCount) + 3;
         tess.indices[tess.indexCount + 1] = tess.vertexCount;

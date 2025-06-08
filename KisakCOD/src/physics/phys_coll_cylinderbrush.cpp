@@ -38,7 +38,7 @@ void __cdecl Phys_CollideCylinderWithBrush(const cbrush_t *brush, const objInfo 
     brushPlane[1] = 0.0;
     brushPlane[2] = 0.0;
     brushPlane[3] = 0.0;
-    v10 = -3.4028235e38;
+    v10 = -FLT_MAX;
     brushSideIndex = -1;
     CM_BuildAxialPlanes(brush, &v11);
     for (j = 0; j < 6; ++j)
@@ -435,7 +435,7 @@ unsigned int __cdecl Phys_ClipLineSegmentAgainstCylinderRadius(
     Vec3Cross(info->R[direction], pt1Rel, RCrossPt1);
     Vec3Cross(info->R[direction], edge, RCrossE);
     A = Vec3LengthSq(RCrossE);
-    if (A < 0.001000000047497451)
+    if (A < EQUAL_EPSILON)
         return 0;
     B = Vec3Dot(RCrossPt1, RCrossE) * 2.0;
     v6 = info->u.sideExtents[0] * info->u.sideExtents[0];
@@ -508,7 +508,7 @@ char __cdecl Phys_CylinderFaceTestSeparatingAxes(
             direction,
             3);
     axisInfo->bestAxis = 0;
-    axisInfo->bestDepth = 3.4028235e38;
+    axisInfo->bestDepth = FLT_MAX;
     testAxis[0] = -*polyPlane;
     testAxis[1] = -polyPlane[1];
     testAxis[2] = -polyPlane[2];
@@ -687,8 +687,8 @@ char __cdecl Phys_CylinderFaceTestAxis(
     v15 = 1.0 - v16;
     v14 = sqrt(v15);
     cylHalfLengthAlongAxis = info->u.sideExtents[0] * v14 + cylHalfLengthAlongAxisa;
-    polyMin = 3.4028235e38;
-    polyMax = -3.4028235e38;
+    polyMin = FLT_MAX;
+    polyMax = -FLT_MAX;
     cylCenterDist = Vec3Dot(info->pos, normalizedAxis);
     for (vertIndex = 0; vertIndex < poly->ptCount; ++vertIndex)
     {
@@ -858,7 +858,7 @@ void __cdecl Phys_PushEdgeAwayFromCylinderCircle(
     {
         Vec3Cross(edgeNormalized, contactNormal, choppingPlane);
         length = Vec3Normalize(choppingPlane);
-        if (length <= 0.001000000047497451)
+        if (length <= EQUAL_EPSILON)
             MyAssertHandler(".\\physics\\phys_coll_cylinderbrush.cpp", 573, 0, "%s", "length > 1e-3f");
         choppingPlane[3] = Vec3Dot(choppingPlane, ptOnEdge);
         dot = Vec3Dot(info->R[direction], contactNormal);
@@ -1107,7 +1107,7 @@ double __cdecl Phys_DistanceOfCylinderFromPlane(const float *plane, const objInf
     dist = Vec3Dot(info->pos, plane) - plane[3];
     centerDist = Vec3Dot(info->bodyCenter, plane) - plane[3];
     if (dist < 0.0 && centerDist < 0.0)
-        return -3.4028235e38;
+        return -FLT_MAX;
     v8 = Vec3Dot(info->R[direction], plane);
     v7 = fabs(v8);
     v6 = 1.0 - v7;
