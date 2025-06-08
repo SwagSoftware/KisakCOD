@@ -163,7 +163,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
         R_DrawXModelRigidModelSurf(context, modelSurf->surf.xsurf);
         if (++drawSurfIndex == drawSurfCount)
             break;
-        LODWORD(drawSurf) = drawSurfList[drawSurfIndex].packed;
+        drawSurf.packed = drawSurfList[drawSurfIndex].packed;
         if ((drawSurfMask.packed & drawSurfList[drawSurfIndex].packed) != drawSurfKey)
             break;
         modelSurf = (const GfxModelRigidSurface *)((char*)data + 4 * drawSurf.fields.objectId);
@@ -214,7 +214,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
     unsigned __int64 drawSurfKey; // [esp+10Ch] [ebp-8h]
 
     data = context.source->input.data;
-    drawSurf.fields = drawSurfList->fields;
+    drawSurf = *drawSurfList;
     drawSurfMask.packed = 0xFFFFFFFFE0000000uLL;
     drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
     drawSurfIndex = 0;
@@ -273,7 +273,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
     GfxCmdBufContext context)
 {
     GfxCmdBufSourceState *matrix; // [esp+58h] [ebp-A4h]
-    unsigned __int64 drawSurf; // [esp+9Ch] [ebp-60h]
+    GfxDrawSurf drawSurf; // [esp+A4h] [ebp-70h]
     const GfxBackEndData *data; // [esp+A8h] [ebp-54h]
     unsigned int drawSurfIndex; // [esp+C0h] [ebp-3Ch]
     float4 eyeOffset; // [esp+C4h] [ebp-38h]
@@ -283,9 +283,9 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
     vector4 worldMat;
 
     data = context.source->input.data;
-    drawSurf = drawSurfList->packed;
+    drawSurf.packed = drawSurfList->packed;
     drawSurfMask.packed = 0xFFFFFFFFE0000000uLL;
-    drawSurfKey = drawSurf & 0xFFFFFFFFE0000000uLL;
+    drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
     drawSurfIndex = 0;
 
     eyeOffset.v[0] = context.source->eyeOffset[0];
@@ -299,14 +299,14 @@ unsigned int __cdecl R_DrawXModelRigidSurfInternal(
 
     do
     {
-        modelSurf = (const GfxModelRigidSurface*)((char *)data + 4 * drawSurf);
+        modelSurf = (const GfxModelRigidSurface*)((char *)data + 4 * drawSurf.fields.objectId);
         R_GetWorldMatrixForModelSurf(modelSurf, eyeOffset, &worldMat);
         matrix = R_GetActiveWorldMatrix(context.source);
         memcpy(&matrix->matrices.matrix[0], &worldMat, sizeof(GfxMatrix));
         R_DrawXModelRigidModelSurf(context, modelSurf->surf.xsurf);
         if (++drawSurfIndex == drawSurfCount)
             break;
-        LODWORD(drawSurf) = drawSurfList[drawSurfIndex].packed;
+        drawSurf.packed = drawSurfList[drawSurfIndex].packed;
     } while ((drawSurfMask.packed & drawSurfList[drawSurfIndex].packed) == drawSurfKey);
 
     return drawSurfIndex;
