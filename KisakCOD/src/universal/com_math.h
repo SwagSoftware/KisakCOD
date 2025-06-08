@@ -137,6 +137,18 @@ constexpr float4 g_keepXYZ = {
 };
 
 
+struct vector3
+{
+    float4 x;
+    float4 y;
+    float4 z;
+};
+struct vector4 : vector3
+{
+    float4 w;
+};
+
+
 bool __cdecl Vec4IsNormalized(const vec4r v);
 
 void __cdecl TRACK_com_math();

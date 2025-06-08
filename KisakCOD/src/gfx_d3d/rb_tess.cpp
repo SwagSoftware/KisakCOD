@@ -960,7 +960,6 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
     const GfxDrawSurfListArgs *listArgs,
     GfxCmdBufContext prepassContext)
 {
-    const char *v2; // eax
     GfxCmdBufContext context; // [esp+40h] [ebp-44h]
     const GfxDrawSurfListInfo *info; // [esp+48h] [ebp-3Ch]
     GfxDrawSurf drawSurf; // [esp+4Ch] [ebp-38h]
@@ -979,28 +978,22 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
     //Profile_Begin(105);
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state && commonSource != prepassContext.source)
-        MyAssertHandler(
-            ".\\rb_tess.cpp",
-            1163,
-            0,
-            "%s",
-            "prepassContext.state == NULL || commonSource == prepassContext.source");
+    iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
     data = commonSource->input.data;
     info = listArgs->info;
     baseTechType = info->baseTechType;
     if (r_logFile->current.integer)
     {
-        v2 = va("--- RB_TessXModelRigid( %s ) ---\n", context.state->material->info.name);
-        RB_LogPrint(v2);
+        RB_LogPrint(va("--- RB_TessXModelRigid( %s ) ---\n", context.state->material->info.name));
     }
     drawSurfCount = info->drawSurfCount - listArgs->firstDrawSurfIndex;
     drawSurfList = &info->drawSurfs[listArgs->firstDrawSurfIndex];
     drawSurf.fields = drawSurfList->fields;
     commonSource->objectPlacement = &s_manualObjectPlacement;
     RB_TrackImmediatePrims(GFX_PRIM_STATS_XMODELRIGID);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 1179, 0, "%s", "g_primStats");
+
+    iassert(g_primStats);
+
     if (info->cameraView)
     {
         modelSurf = (const GfxModelRigidSurface *)((char *)data + 4 * drawSurf.fields.objectId);

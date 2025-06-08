@@ -177,8 +177,8 @@ unsigned int __cdecl R_FindNearestReflectionProbe(const GfxWorld *world, const f
     unsigned __int8 probeIndex; // [esp+17h] [ebp-5h]
     float testProbeDist; // [esp+18h] [ebp-4h]
 
-    if (world->reflectionProbeCount >= 0xFF)
-        MyAssertHandler(".\\r_dpvs.cpp", 735, 0, "%s", "world->reflectionProbeCount < 0xff");
+    iassert(world->reflectionProbeCount < 0xff);
+
     bestProbe = 0;
     bestProbeDist = FLT_MAX;
     testProbeDist = FLT_MAX;
@@ -200,16 +200,11 @@ unsigned int __cdecl R_CalcReflectionProbeIndex(const float *origin)
     unsigned int cellIndex; // [esp+0h] [ebp-4h]
 
     cellIndex = R_CellForPoint(origin);
+
     if (cellIndex == -1)
         return R_FindNearestReflectionProbe(rgp.world, origin);
-    if (cellIndex >= rgp.world->dpvsPlanes.cellCount)
-        MyAssertHandler(
-            ".\\r_dpvs.cpp",
-            765,
-            0,
-            "cellIndex doesn't index rgp.world->dpvsPlanes.cellCount\n\t%i not in [0, %i)",
-            cellIndex,
-            rgp.world->dpvsPlanes.cellCount);
+
+    bcassert(cellIndex, rgp.world->dpvsPlanes.cellCount);
     return R_FindNearestReflectionProbeInCell(rgp.world, &rgp.world->cells[cellIndex], origin);
 }
 
