@@ -84,7 +84,7 @@ void __cdecl SMC_FreeCachedSurface_r(
     int nodeIndex,
     int levelsToLeaf);
 
-unsigned int SMC_ClearCache();
+void SMC_ClearCache();
 void __cdecl R_FlushStaticModelCache();
 
 

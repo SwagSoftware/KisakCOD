@@ -21,7 +21,7 @@ static_model_cache_t s_cache;
 
 void __cdecl TRACK_r_staticmodelcache()
 {
-    track_static_alloc_internal(&s_cache, 266464, "s_cache", 18);
+    track_static_alloc_internal(&s_cache, sizeof(static_model_cache_t), "s_cache", 18);
 }
 
 void *R_AllocStaticModelCache()
@@ -138,13 +138,13 @@ char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex)
             "%s\n\t(tree->nodes[0].usedVerts) = %i",
             "(tree->nodes[0].usedVerts > 0)",
             treenode->nodes[0].usedVerts);
-    leafs = s_cache.leafs[((char *)treenode - (char *)&s_cache) / 264];
+    leafs = s_cache.leafs[((char *)treenode - (char *)&s_cache) / sizeof(static_model_tree_t)];
     SMC_FreeCachedSurface_r(treenode, leafs, 0, 5);
     treenode->usedlist.next->prev = treenode->usedlist.prev;
     treenode->usedlist.prev->next = treenode->usedlist.next;
-    leafs->cachedSurf.baseVertIndex = (unsigned int)s_cache.freelist[smcIndex];
+    leafs->freenode.prev = s_cache.freelist[smcIndex];
     leafs->freenode.next = s_cache.freelist[smcIndex][0].next;
-    *(_DWORD *)(leafs->cachedSurf.baseVertIndex + 4) = (unsigned int)leafs;
+    leafs->freenode.prev->next = (static_model_node_list_t *)leafs;
     leafs->freenode.next->prev = (static_model_node_list_t *)leafs;
     return 1;
 }
@@ -191,15 +191,8 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
         MyAssertHandler(".\\r_staticmodelcache.cpp", 248, 0, "%s", "block != freelist");
     block->next->prev = block->prev;
     block->prev->next = block->next;
-    treeIndex = ((char*)block - (char*)s_cache.leafs) / 256;
-    if (treeIndex >= 0x200)
-        MyAssertHandler(
-            ".\\r_staticmodelcache.cpp",
-            254,
-            0,
-            "treeIndex doesn't index ARRAY_COUNT( s_cache.trees )\n\t%i not in [0, %i)",
-            treeIndex,
-            512);
+    treeIndex = ((char*)block - (char*)s_cache.leafs) / sizeof(s_cache.leafs[0]);
+    bcassert(treeIndex, ARRAY_COUNT(s_cache.trees));
     tree = &s_cache.trees[treeIndex];
     if (listIndex == 1)
     {
@@ -210,14 +203,7 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
     }
     leafs = s_cache.leafs[treeIndex];
     index = ((char*)block - (char*)leafs) / 8;
-    if (index >= 0x20)
-        MyAssertHandler(
-            ".\\r_staticmodelcache.cpp",
-            264,
-            0,
-            "index doesn't index ARRAY_COUNT( s_cache.leafs[treeIndex] )\n\t%i not in [0, %i)",
-            index,
-            32);
+    bcassert(index, ARRAY_COUNT(s_cache.leafs[treeIndex]));
     if (block != (static_model_node_list_t *)&leafs[index])
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
@@ -256,9 +242,11 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     if (freelist->next == freelist && !SMC_GetFreeBlockOfSize(smcIndex, listIndex))
         return 0;
     block = freelist->next;
+    iassert(block->next->prev == block);
+    iassert(block->prev->next == block);
     block->next->prev = block->prev;
     block->prev->next = block->next;
-    treeIndex = ((char *)block - (char *)s_cache.leafs) / 256;
+    treeIndex = ((char *)block - (char *)s_cache.leafs) / sizeof(s_cache.leafs[0]);
     if (treeIndex >= 0x200)
         MyAssertHandler(
             ".\\r_staticmodelcache.cpp",
@@ -400,6 +388,13 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
                 R_CacheStaticModelIndices(cachedSurfa->smodelIndex, cachedSurfa->lodIndex, cachedSurfa->baseVertIndex);
                 treea = &s_cache.trees[((char*)cachedSurfa - (char*)s_cache.leafs) / 256];
                 treea->frameCount = rg.frontEndFrameCount;
+                
+                iassert(treea->usedlist.prev->prev->next = treea->usedlist.prev);
+                iassert(treea->usedlist.prev->next->prev = treea->usedlist.prev);
+
+                iassert(treea->usedlist.next->prev->next = treea->usedlist.next);
+                iassert(treea->usedlist.next->next->prev = treea->usedlist.next);
+
                 treea->usedlist.next->prev = treea->usedlist.prev;
                 treea->usedlist.prev->next = treea->usedlist.next;
                 treea->usedlist.prev = &s_cache.usedlist[smcIndex];
@@ -454,10 +449,9 @@ void __cdecl SMC_FreeCachedSurface_r(
     }
 }
 
-unsigned int SMC_ClearCache()
+void SMC_ClearCache()
 {
-    unsigned int result; // eax
-    static_model_leaf_t *v1; // [esp+4h] [ebp-14h]
+    static_model_leaf_t *v0; // [esp+4h] [ebp-14h]
     unsigned int treeIter; // [esp+8h] [ebp-10h]
     unsigned int treeItera; // [esp+8h] [ebp-10h]
     unsigned int leafIter; // [esp+Ch] [ebp-Ch]
@@ -468,30 +462,25 @@ unsigned int SMC_ClearCache()
     {
         for (leafIter = 0; leafIter < 0x20; ++leafIter)
             s_cache.leafs[treeIter][leafIter].cachedSurf.smodelIndex = -1;
-        result = treeIter + 1;
     }
     for (smcIter = 0; smcIter < 4; ++smcIter)
     {
         s_cache.usedlist[smcIter].prev = &s_cache.usedlist[smcIter];
-        result = smcIter;
         s_cache.usedlist[smcIter].next = &s_cache.usedlist[smcIter];
         for (listIter = 0; listIter < 6; ++listIter)
         {
             s_cache.freelist[smcIter][listIter].prev = &s_cache.freelist[smcIter][listIter];
             s_cache.freelist[smcIter][listIter].next = &s_cache.freelist[smcIter][listIter];
-            result = listIter + 1;
         }
         for (treeItera = 0; treeItera < 0x80; ++treeItera)
         {
-            v1 = s_cache.leafs[treeItera + (smcIter << 7)];
-            v1->cachedSurf.baseVertIndex = (unsigned int)s_cache.freelist[smcIter];
-            v1->freenode.next = s_cache.freelist[smcIter][0].next;
-            *(_DWORD *)(v1->cachedSurf.baseVertIndex + 4) = (unsigned int)v1;
-            result = (unsigned int)v1;
-            v1->freenode.next->prev = (static_model_node_list_t *)v1;
+            v0 = s_cache.leafs[treeItera + (smcIter << 7)];
+            v0->freenode.prev = s_cache.freelist[smcIter];
+            v0->freenode.next = s_cache.freelist[smcIter][0].next;
+            v0->freenode.prev->next = (static_model_node_list_t *)v0;
+            v0->freenode.next->prev = (static_model_node_list_t *)v0;
         }
     }
-    return result;
 }
 
 void __cdecl R_FlushStaticModelCache()
@@ -507,12 +496,13 @@ void __cdecl R_FlushStaticModelCache()
         {
             while (s_cache.usedlist[smcIter].next != &s_cache.usedlist[smcIter]) 
             {
-                if (!s_cache.usedlist[smcIter].next)
-                    MyAssertHandler(".\\r_staticmodelcache.cpp", 696, 0, "%s", "s_cache.usedlist[smcIter].next");
+                iassert(s_cache.usedlist[smcIter].next);
                 tree = (static_model_tree_t *)s_cache.usedlist[smcIter].next;
-                leafs = s_cache.leafs[((char *)tree - (char *)&s_cache) / 264];
+                leafs = s_cache.leafs[tree - s_cache.trees];
                 SMC_FreeCachedSurface_r(tree, leafs, 0, 5);
                 next = s_cache.usedlist[smcIter].next;
+                iassert(next->next->prev == next);
+                iassert(next->prev->next == next);
                 next->next->prev = next->prev;
                 next->prev->next = next->next;
                 leafs->freenode.prev = s_cache.freelist[smcIter];
