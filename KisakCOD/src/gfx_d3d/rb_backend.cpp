@@ -483,36 +483,18 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
 
 void __cdecl RB_StretchPicCmd(GfxRenderCommandExecState *execState)
 {
-    RB_DrawStretchPic(
-        *((const Material **)execState->cmd + 1),
-        *((float *)execState->cmd + 2),
-        *((float *)execState->cmd + 3),
-        *((float *)execState->cmd + 4),
-        *((float *)execState->cmd + 5),
-        *((float *)execState->cmd + 6),
-        *((float *)execState->cmd + 7),
-        *((float *)execState->cmd + 8),
-        *((float *)execState->cmd + 9),
-        *((unsigned int *)execState->cmd + 10),
-        GFX_PRIM_STATS_HUD);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    GfxCmdStretchPic *cmd = (GfxCmdStretchPic *)execState->cmd;
+
+    RB_DrawStretchPic(cmd->material, cmd->x, cmd->y, cmd->w, cmd->h, cmd->s0, cmd->t0, cmd->s1, cmd->t1, cmd->color, GFX_PRIM_STATS_HUD);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_StretchPicCmdFlipST(GfxRenderCommandExecState *execState)
 {
-    RB_DrawStretchPicFlipST(
-        *((const Material **)execState->cmd + 1),
-        *((float *)execState->cmd + 2),
-        *((float *)execState->cmd + 3),
-        *((float *)execState->cmd + 4),
-        *((float *)execState->cmd + 5),
-        *((float *)execState->cmd + 6),
-        *((float *)execState->cmd + 7),
-        *((float *)execState->cmd + 8),
-        *((float *)execState->cmd + 9),
-        *((unsigned int *)execState->cmd + 10),
-        GFX_PRIM_STATS_HUD);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    GfxCmdStretchPic *cmd = (GfxCmdStretchPic *)execState->cmd;
+
+    RB_DrawStretchPicFlipST(cmd->material, cmd->x, cmd->y, cmd->w, cmd->h, cmd->s0, cmd->t0, cmd->s1, cmd->t1, cmd->color, GFX_PRIM_STATS_HUD);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_StretchPicRotateXYCmd(GfxRenderCommandExecState *execState)
@@ -579,7 +561,7 @@ void __cdecl RB_StretchPicRotateXYCmd(GfxRenderCommandExecState *execState)
     v2 = midY - stepX_4 + stepY_4;
     v1 = midX - stepX + stepY;
     R_SetVertex2d(&tess.verts[vertCount + 3], v1, v2, cmd->s0, cmd->t1, cmd->color.packed);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState)
@@ -646,7 +628,7 @@ void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState)
     R_SetVertex2d(&tess.verts[vertCount + 2], v2, y, texS_8, texT_8, cmd->color.packed);
     v1 = cmd->y + cmd->h;
     R_SetVertex2d(&tess.verts[vertCount + 3], cmd->x, v1, texS_12, texT_12, cmd->color.packed);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_DrawQuadPicCmd(GfxRenderCommandExecState *execState)
@@ -675,32 +657,23 @@ void __cdecl RB_DrawQuadPicCmd(GfxRenderCommandExecState *execState)
     R_SetVertex2d(&tess.verts[vertCount + 1], cmd->verts[1][0], cmd->verts[1][1], 1.0, 0.0, cmd->color.packed);
     R_SetVertex2d(&tess.verts[vertCount + 2], cmd->verts[2][0], cmd->verts[2][1], 1.0, 1.0, cmd->color.packed);
     R_SetVertex2d(&tess.verts[vertCount + 3], cmd->verts[3][0], cmd->verts[3][1], 0.0, 1.0, cmd->color.packed);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_DrawFullScreenColoredQuadCmd(GfxRenderCommandExecState *execState)
 {
-    RB_DrawFullScreenColoredQuad(
-        *((const Material **)execState->cmd + 1),
-        *((float *)execState->cmd + 2),
-        *((float *)execState->cmd + 3),
-        *((float *)execState->cmd + 4),
-        *((float *)execState->cmd + 5),
-        *((unsigned int *)execState->cmd + 6));
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    GfxCmdDrawFullScreenColoredQuad *cmd = (GfxCmdDrawFullScreenColoredQuad *)execState->cmd;
+
+    RB_DrawFullScreenColoredQuad(cmd->material, cmd->s0, cmd->t0, cmd->s1, cmd->t1, cmd->color);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_StretchRawCmd(GfxRenderCommandExecState *execState)
 {
-    RB_StretchRaw(
-        *((unsigned int *)execState->cmd + 1),
-        *((unsigned int *)execState->cmd + 2),
-        *((unsigned int *)execState->cmd + 3),
-        *((unsigned int *)execState->cmd + 4),
-        *((unsigned int *)execState->cmd + 5),
-        *((unsigned int *)execState->cmd + 6),
-        *((const unsigned __int8 **)execState->cmd + 7));
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    GfxCmdStretchRaw *cmd = (GfxCmdStretchRaw *)execState->cmd;
+
+    RB_StretchRaw(cmd->x, cmd->y, cmd->w, cmd->h, cmd->cols, cmd->rows, cmd->data);
+    execState->cmd = (char*)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const unsigned __int8 *data)
@@ -776,8 +749,7 @@ void __cdecl R_DrawSurfs(GfxCmdBufContext context, GfxCmdBufState *prepassState,
     unsigned int drawSurfCount; // [esp+5Ch] [ebp-4h]
 
     //Profile_Begin(98);
-    if (context.source->cameraView != info->cameraView)
-        MyAssertHandler(".\\rb_backend.cpp", 1079, 0, "%s", "context.source->cameraView == info->cameraView");
+    iassert(context.source->cameraView == info->cameraView);
     context.state->origMaterial = 0;
     R_SetDrawSurfsShadowableLight(context.source, info);
     R_Set3D(context.source);
@@ -791,8 +763,7 @@ void __cdecl R_DrawSurfs(GfxCmdBufContext context, GfxCmdBufState *prepassState,
     }
     prepassContext.source = prepassState != 0 ? context.source : 0;
     prepassContext.state = prepassState;
-    if (!dx.d3d9 || !dx.device)
-        MyAssertHandler(".\\rb_backend.cpp", 1103, 0, "%s", "dx.d3d9 && dx.device");
+    iassert(dx.d3d9 && dx.device);
     drawSurfCount = info->drawSurfCount;
     listArgs.context = context;
     listArgs.firstDrawSurfIndex = 0;
@@ -912,16 +883,20 @@ void __cdecl R_TessEnd(GfxCmdBufContext context, GfxCmdBufContext prepassContext
 
 void __cdecl RB_ClearScreenCmd(GfxRenderCommandExecState *execState)
 {
+    const GfxCmdClearScreen *cmd = (const GfxCmdClearScreen *)execState->cmd;
+
     if (tess.indexCount)
         RB_EndTessSurface();
+
     R_ClearScreen(
         gfxCmdBufState.prim.device,
-        *((_BYTE *)execState->cmd + 4),
-        (const float *)execState->cmd + 3,
-        *((float *)execState->cmd + 2),
-        *((_BYTE *)execState->cmd + 5),
+        cmd->whichToClear,
+        cmd->color,
+        cmd->depth,
+        cmd->stencil,
         0);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_SetGammaRamp(const GfxGammaRamp *gammaTable)
@@ -949,19 +924,15 @@ void __cdecl RB_SaveScreenCmd(GfxRenderCommandExecState *execState)
     const GfxCmdSaveScreen *cmd; // [esp+4h] [ebp-4h]
 
     cmd = (const GfxCmdSaveScreen *)execState->cmd;
-    if (*((unsigned int *)execState->cmd + 1) >= 4u)
-        MyAssertHandler(
-            ".\\rb_backend.cpp",
-            1243,
-            0,
-            "cmd->screenTimerId doesn't index ARRAY_COUNT( rgp.savedScreenTimes )\n\t%i not in [0, %i)",
-            cmd->screenTimerId,
-            4);
+
+    bcassert(cmd->screenTimerId, ARRAY_COUNT(rgp.savedScreenTimes));
+
     if (tess.indexCount)
         RB_EndTessSurface();
     R_Resolve(gfxCmdBufContext, gfxRenderTargets[0].image);
     rgp.savedScreenTimes[cmd->screenTimerId] = gfxCmdBufSourceState.sceneDef.time;
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_SaveScreenSectionCmd(GfxRenderCommandExecState *execState)
@@ -969,19 +940,16 @@ void __cdecl RB_SaveScreenSectionCmd(GfxRenderCommandExecState *execState)
     const GfxCmdSaveScreenSection *cmd; // [esp+14h] [ebp-4h]
 
     cmd = (const GfxCmdSaveScreenSection *)execState->cmd;
-    if (*((unsigned int *)execState->cmd + 5) >= 4u)
-        MyAssertHandler(
-            ".\\rb_backend.cpp",
-            1258,
-            0,
-            "cmd->screenTimerId doesn't index ARRAY_COUNT( rgp.savedScreenTimes )\n\t%i not in [0, %i)",
-            cmd->screenTimerId,
-            4);
+
+    bcassert(cmd->screenTimerId, ARRAY_COUNT(rgp.savedScreenTimes));
+
     if (tess.indexCount)
         RB_EndTessSurface();
+
     R_ResolveSection(gfxCmdBufContext, gfxRenderTargets[0].image);
     rgp.savedScreenTimes[cmd->screenTimerId] = gfxCmdBufSourceState.sceneDef.time;
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl R_ResolveSection(GfxCmdBufContext context, GfxImage *image)
@@ -1046,7 +1014,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
             ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 24) | 0xFFFFFF,
             GFX_PRIM_STATS_CODE);
     }
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl R_SetCodeImageTexture(GfxCmdBufSourceState *source, unsigned int codeTexture, const GfxImage *image)
@@ -1094,7 +1062,7 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
         | ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 8)
         | ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 16),
         GFX_PRIM_STATS_CODE);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_DrawPointsCmd(GfxRenderCommandExecState *execState)
@@ -1102,23 +1070,17 @@ void __cdecl RB_DrawPointsCmd(GfxRenderCommandExecState *execState)
     const GfxCmdDrawPoints *cmd; // [esp+4h] [ebp-4h]
 
     cmd = (const GfxCmdDrawPoints *)execState->cmd;
-    if (*((_BYTE *)execState->cmd + 7) == 2)
+
+    if (cmd->dimensions == 2)
     {
         RB_DrawPoints2D(cmd);
     }
     else
     {
-        if (cmd->dimensions != 3)
-            MyAssertHandler(
-                ".\\rb_backend.cpp",
-                1431,
-                1,
-                "%s\n\t(cmd->dimensions) = %i",
-                "(cmd->dimensions == 3)",
-                cmd->dimensions);
+        iassert(cmd->dimensions == 3);
         RB_DrawPoints3D(cmd);
     }
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_DrawPoints2D(const GfxCmdDrawPoints *cmd)
@@ -1393,23 +1355,17 @@ void __cdecl RB_DrawLinesCmd(GfxRenderCommandExecState *execState)
     const GfxCmdDrawLines *cmd; // [esp+4h] [ebp-4h]
 
     cmd = (const GfxCmdDrawLines *)execState->cmd;
-    if (*((_BYTE *)execState->cmd + 7) == 2)
+
+    if (cmd->dimensions == 2)
     {
         RB_DrawLines2D(cmd->lineCount, cmd->width, cmd->verts);
     }
     else
     {
-        if (cmd->dimensions != 3)
-            MyAssertHandler(
-                ".\\rb_backend.cpp",
-                1560,
-                1,
-                "%s\n\t(cmd->dimensions) = %i",
-                "(cmd->dimensions == 3)",
-                cmd->dimensions);
+        iassert(cmd->dimensions == 3);
         RB_DrawLines3D(cmd->lineCount, cmd->width, cmd->verts, 1);
     }
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_DrawTrianglesCmd(GfxRenderCommandExecState *execState)
@@ -1417,21 +1373,42 @@ void __cdecl RB_DrawTrianglesCmd(GfxRenderCommandExecState *execState)
     int stOffset; // [esp+4h] [ebp-3Ch]
     int normalOffset; // [esp+2Ch] [ebp-14h]
     int normalSize; // [esp+30h] [ebp-10h]
+    int indexOffset;
+    int stSize;
+    int xyzwOffset;
+    int xyzwSize;
+    int colorOffset;
+    int colorSize;
 
-    normalOffset = 16 * *((__int16 *)execState->cmd + 7) + 16;
-    normalSize = 12 * *((__int16 *)execState->cmd + 7);
-    stOffset = 4 * *((__int16 *)execState->cmd + 7) + normalSize + normalOffset;
+    GfxCmdDrawTriangles *cmd = (GfxCmdDrawTriangles *)execState->cmd;
+
+    xyzwOffset = 16;
+    xyzwSize = 16 * cmd->vertexCount;
+
+    normalOffset = xyzwOffset + xyzwSize;
+    normalSize = 12 * cmd->vertexCount;
+
+    colorOffset = normalOffset + normalSize;
+    colorSize = 4 * cmd->vertexCount;
+
+    stOffset = colorOffset + colorSize;
+    stSize = cmd->vertexCount * 8;
+
+    indexOffset = stOffset + stSize;
+
     RB_DrawTriangles_Internal(
-        *((const Material **)execState->cmd + 1),
-        *((MaterialTechniqueType *)execState->cmd + 2),
-        *((_WORD *)execState->cmd + 6),
-        (const unsigned __int16 *)((char *)execState->cmd + 8 * *((__int16 *)execState->cmd + 7) + stOffset),
-        *((_WORD *)execState->cmd + 7),
-        (const float (*)[4])((const float *)execState->cmd + 1),
-        (const float (*)[3])((char *)execState->cmd + normalOffset),
-        (const GfxColor *)((char *)execState->cmd + normalSize + normalOffset),
-        (const float (*)[2])((char *)execState->cmd + stOffset));
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+        cmd->material,
+        cmd->techType,
+        cmd->indexCount,
+        (const unsigned short *)((char *)cmd + indexOffset),
+        cmd->vertexCount,
+        (const float (*)[4])((char *)cmd + xyzwOffset),
+        (const float(*)[3])((char *)cmd + normalOffset),
+        (const GfxColor *)((char *)cmd + colorOffset),
+        (const float (*)[2])((char *)cmd + stOffset)
+    );
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_DrawTriangles_Internal(
@@ -1476,11 +1453,12 @@ void __cdecl RB_DrawTriangles_Internal(
 
 void __cdecl RB_DrawProfileCmd(GfxRenderCommandExecState *execState)
 {
-    //Profile_Begin(140);
+    GfxCmdDrawProfile *cmd = (GfxCmdDrawProfile *)execState->cmd;
+    Profile_Begin(140);
     RB_DrawProfile();
     RB_DrawProfileScript();
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
-    //Profile_EndInternal(0);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
+    Profile_EndInternal(0);
 }
 
 void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState)
@@ -1491,7 +1469,8 @@ void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState)
     if (tess.indexCount)
         RB_EndTessSurface();
     R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0x28u, (float*)cmd->color);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl R_SetCodeConstantFromVec4(GfxCmdBufSourceState *source, unsigned int constant, float *value)
@@ -1517,10 +1496,14 @@ void __cdecl R_DirtyCodeConstant(GfxCmdBufSourceState *source, unsigned int cons
 
 void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState)
 {
+    const GfxCmdSetViewport *cmd = (const GfxCmdSetViewport *)execState->cmd;
+
     if (tess.indexCount)
         RB_EndTessSurface();
-    R_SetViewportStruct(&gfxCmdBufSourceState, (const GfxViewport *)((char *)execState->cmd + 4));
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+
+    R_SetViewportStruct(&gfxCmdBufSourceState, &cmd->viewport);
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 GfxColor color_table[8] =
@@ -2549,7 +2532,7 @@ void __cdecl RB_DrawText2DCmd(GfxRenderCommandExecState *execState)
     const GfxCmdDrawText2D *cmd; // [esp+68h] [ebp-4h]
 
     cmd = (const GfxCmdDrawText2D *)execState->cmd;
-    v1 = *((float *)execState->cmd + 3) * 0.01745329238474369;
+    v1 = cmd->rotation * 0.01745329238474369;
     cosAngle = cos(v1);
     sinAngle = sin(v1);
     DrawText2D(
@@ -2574,29 +2557,25 @@ void __cdecl RB_DrawText2DCmd(GfxRenderCommandExecState *execState)
         cmd->fxDecayDuration,
         cmd->fxMaterial,
         cmd->fxMaterialGlow);
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_DrawText3DCmd(GfxRenderCommandExecState *execState)
 {
-    RB_DrawTextInSpace(
-        (const char *)execState->cmd + 48,
-        *((Font_s **)execState->cmd + 4),
-        (const float *)execState->cmd + 1,
-        (const float *)execState->cmd + 5,
-        (const float *)execState->cmd + 8,
-        *((unsigned int *)execState->cmd + 11));
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+    GfxCmdDrawText3D *cmd = (GfxCmdDrawText3D *)execState->cmd;
+
+    RB_DrawTextInSpace(cmd->text, cmd->font, cmd->org, cmd->xPixelStep, cmd->yPixelStep, cmd->color);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_ProjectionSetCmd(GfxRenderCommandExecState *execState)
 {
-    int v1; // [esp+0h] [ebp-Ch]
+    GfxCmdProjectionSet *cmd = (GfxCmdProjectionSet *)execState->cmd;
 
-    v1 = *((unsigned int *)execState->cmd + 1);
-    if (v1)
+    if (cmd->projection)
     {
-        if (v1 == 1)
+        if (cmd->projection == GFX_PROJECTION_3D)
         {
             if (tess.indexCount)
                 RB_EndTessSurface();
@@ -2613,7 +2592,8 @@ void __cdecl RB_ProjectionSetCmd(GfxRenderCommandExecState *execState)
             RB_EndTessSurface();
         R_Set2D(&gfxCmdBufSourceState);
     }
-    execState->cmd = (char *)execState->cmd + *((unsigned __int16 *)execState->cmd + 1);
+
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
 void __cdecl RB_ResetStatTracking()

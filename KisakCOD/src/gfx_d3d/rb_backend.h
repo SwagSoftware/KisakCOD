@@ -118,6 +118,48 @@ struct GfxCmdStretchPicRotateXY // sizeof=0x30
     float rotation;
 };
 
+struct GfxCmdSetViewport // sizeof=0x14
+{
+    GfxCmdHeader header;
+    GfxViewport viewport;
+};
+
+struct GfxCmdDrawText3D // sizeof=0x34
+{
+    GfxCmdHeader header;
+    float org[3];
+    Font_s *font;
+    float xPixelStep[3];
+    float yPixelStep[3];
+    GfxColor color;
+    char text[4];
+};
+
+struct GfxCmdDrawFullScreenColoredQuad // sizeof=0x1C
+{
+    GfxCmdHeader header;
+    const Material *material;
+    float s0;
+    float t0;
+    float s1;
+    float t1;
+    GfxColor color;
+};
+
+struct GfxCmdStretchRaw // sizeof=0x28
+{
+    GfxCmdHeader header;
+    int x;
+    int y;
+    int w;
+    int h;
+    int cols;
+    int rows;
+    const unsigned __int8 *data;
+    int client;
+    int dirty;
+};
+
 struct __declspec(align(16)) GfxCmdBufSourceState // sizeof=0xF00
 {                                       // ...
     GfxCodeMatrices matrices;
@@ -217,6 +259,21 @@ struct GfxCmdDrawPoints // sizeof=0x18
     unsigned __int8 size;
     unsigned __int8 dimensions;
     GfxPointVertex verts[1];
+};
+
+struct GfxCmdDrawProfile
+{
+    GfxCmdHeader header;
+};
+
+
+struct GfxCmdDrawTriangles // sizeof=0x10
+{
+    GfxCmdHeader header;
+    const Material *material;
+    MaterialTechniqueType techType;
+    __int16 indexCount;
+    __int16 vertexCount;
 };
 
 struct GfxPrimStats // sizeof=0x18
