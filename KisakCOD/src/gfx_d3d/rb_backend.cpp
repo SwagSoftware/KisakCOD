@@ -868,7 +868,7 @@ unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *lis
             R_SetupPass(prepassContext, 0);
             passPrepassContext.state = prepassContext.state;
         }
-        iassert(drawSurf.fields.surfType < 13 /*ARRAY_COUNT(rb_tessTable)*/);
+        iassert(drawSurf.fields.surfType < ARRAY_COUNT(rb_tessTable));
         subListCount = rb_tessTable[drawSurf.fields.surfType](listArgs, passPrepassContext);
     }
     if (isPixelCostEnabled)
@@ -986,8 +986,7 @@ void __cdecl RB_SaveScreenSectionCmd(GfxRenderCommandExecState *execState)
 
 void __cdecl R_ResolveSection(GfxCmdBufContext context, GfxImage *image)
 {
-    if (!image)
-        MyAssertHandler(".\\rb_backend.cpp", 703, 0, "%s", "image");
+    iassert(image);
     if (!alwaysfails)
         MyAssertHandler(".\\rb_backend.cpp", 706, 0, "R_ResolveSection(): Not implemented on win32.");
 }
@@ -1052,16 +1051,9 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
 
 void __cdecl R_SetCodeImageTexture(GfxCmdBufSourceState *source, unsigned int codeTexture, const GfxImage *image)
 {
-    if (!source)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 582, 0, "%s", "source");
-    if (codeTexture >= 0x1B)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            583,
-            0,
-            "codeTexture doesn't index TEXTURE_SRC_CODE_COUNT\n\t%i not in [0, %i)",
-            codeTexture,
-            27);
+    iassert(source);
+    iassert(codeTexture < TEXTURE_SRC_CODE_COUNT);
+
     source->input.codeImages[codeTexture] = image;
 }
 
@@ -1316,7 +1308,7 @@ void __cdecl R_SetVertex3d(GfxVertex *vert, float x, float y, float z, float s, 
     vert->xyzw[1] = y;
     vert->xyzw[2] = z;
     vert->xyzw[3] = 1.0;
-    vert->normal.packed = 1073643391;
+    vert->normal.packed = 0x3FFE7F7F;
     vert->color.packed = *(unsigned int *)color;
     vert->texCoord[0] = s;
     vert->texCoord[1] = t;
@@ -1506,16 +1498,10 @@ void __cdecl R_SetCodeConstantFromVec4(GfxCmdBufSourceState *source, unsigned in
 {
     float *v3; // [esp+0h] [ebp-4h]
 
-    if (constant >= 0x3A)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            504,
-            0,
-            "constant doesn't index CONST_SRC_CODE_COUNT_FLOAT4\n\t%i not in [0, %i)",
-            constant,
-            58);
+    iassert(constant < CONST_SRC_CODE_COUNT_FLOAT4);
+
     v3 = source->input.consts[constant];
-    *v3 = *value;
+    v3[0] = value[0];
     v3[1] = value[1];
     v3[2] = value[2];
     v3[3] = value[3];
@@ -1524,14 +1510,8 @@ void __cdecl R_SetCodeConstantFromVec4(GfxCmdBufSourceState *source, unsigned in
 
 void __cdecl R_DirtyCodeConstant(GfxCmdBufSourceState *source, unsigned int constant)
 {
-    if (constant >= 0x5A)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            424,
-            0,
-            "constant doesn't index ARRAY_COUNT( source->constVersions )\n\t%i not in [0, %i)",
-            constant,
-            90);
+    iassert(constant < ARRAY_COUNT(source->constVersions));
+
     ++source->constVersions[constant];
 }
 
@@ -2645,7 +2625,6 @@ void __cdecl RB_ResetStatTracking()
 
 void __cdecl RB_BeginFrame(const GfxBackEndData *data)
 {
-    const char *v1; // eax
     int hr; // [esp+0h] [ebp-4h]
 
     backEndData = (GfxBackEndData*)data;
@@ -2655,11 +2634,12 @@ void __cdecl RB_BeginFrame(const GfxBackEndData *data)
         RB_UpdateBackEndDvarOptions();
         RB_PatchStaticModelCache();
         RB_PatchModelLighting(backEndData->modelLightingPatchList, backEndData->modelLightingPatchCount);
-        if (!dx.device)
-            MyAssertHandler(".\\rb_backend.cpp", 2727, 0, "%s", "dx.device");
-        if (dx.inScene)
-            MyAssertHandler(".\\rb_backend.cpp", 2728, 0, "%s", "!dx.inScene");
+
+        iassert(dx.device);
+        iassert(!dx.inScene);
+
         dx.inScene = 1;
+
         do
         {
             if (r_logFile && r_logFile->current.integer)
@@ -2670,11 +2650,11 @@ void __cdecl RB_BeginFrame(const GfxBackEndData *data)
                 do
                 {
                     ++g_disableRendering;
-                    v1 = R_ErrorDescription(hr);
-                    Com_Error(ERR_FATAL, ".\\rb_backend.cpp (%i) dx.device->BeginScene() failed: %s\n", 2730, v1);
+                    Com_Error(ERR_FATAL, ".\\rb_backend.cpp (%i) dx.device->BeginScene() failed: %s\n", 2730, R_ErrorDescription(hr));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
+
         RB_UploadShaderStep();
         RB_ResetStatTracking();
         R_Cinematic_UpdateFrame();

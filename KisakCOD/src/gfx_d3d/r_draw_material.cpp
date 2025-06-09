@@ -23,14 +23,13 @@ int __cdecl R_SetupMaterial(
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
             iassert(drawSurf.fields.primaryLightIndex < info->viewInfo->shadowableLightCount);
-            if (!R_SetMaterial(
-                context,
-                drawSurf,
-                (MaterialTechniqueType)context.source->input.data->primaryLightTechType[surfType][drawSurf.fields.primaryLightIndex]))
+            if (!R_SetMaterial(context, drawSurf, (MaterialTechniqueType)context.source->input.data->primaryLightTechType[surfType][drawSurf.fields.primaryLightIndex]))
+            {
                 return 0;
+            }
             R_SetShadowableLight(context.source, drawSurf.fields.primaryLightIndex, info->viewInfo);
         }
-        else if (baseTechType == TECHNIQUE_DEBUG_BUMPMAP && (surfType == 4 || surfType == 3))
+        else if (baseTechType == TECHNIQUE_DEBUG_BUMPMAP && (surfType == SF_STATICMODEL_CACHED || surfType == SF_STATICMODEL_PRETESS))
         {
             if (!R_SetMaterial(context, drawSurf, TECHNIQUE_DEBUG_BUMPMAP_INSTANCED))
                 return 0;
@@ -44,16 +43,20 @@ int __cdecl R_SetupMaterial(
     {
         return 0;
     }
+
     if (prepassContext->state && !R_SetPrepassMaterial(*prepassContext, drawSurf, TECHNIQUE_DEPTH_PREPASS))
         prepassContext->state = 0;
+
     context.state->origMaterial = context.state->material;
     context.state->origTechType = context.state->techType;
+
     if (pixelCostMode > GFX_PIXEL_COST_MODE_MEASURE_MSEC)
     {
         //v5 = ((R_PixelCost_GetAccumulationMaterial(context.state->material)->info.drawSurf.packed >> 29) & 0x7FF) << 29;
-        v5 = R_PixelCost_GetAccumulationMaterial(context.state->material)->info.drawSurf.fields.materialSortedIndex << 29;
-        *(unsigned int *)&overrideDrawSurf.fields = v5 | *(unsigned int *)&drawSurf.fields & 0x1FFFFFFF;
-        HIDWORD(overrideDrawSurf.packed) = HIDWORD(v5) | HIDWORD(drawSurf.packed) & 0xFFFFFF00;
+        //v5 = R_PixelCost_GetAccumulationMaterial(context.state->material)->info.drawSurf.fields.materialSortedIndex;
+        //*(unsigned int *)&overrideDrawSurf.fields = v5 | *(unsigned int *)&drawSurf.fields & 0x1FFFFFFF;
+        //HIDWORD(overrideDrawSurf.packed) = HIDWORD(v5) | HIDWORD(drawSurf.packed) & 0xFFFFFF00;
+        overrideDrawSurf.fields.materialSortedIndex = R_PixelCost_GetAccumulationMaterial(context.state->material)->info.drawSurf.fields.materialSortedIndex;
         R_SetMaterial(context, overrideDrawSurf, TECHNIQUE_UNLIT);
     }
     return 1;
@@ -89,8 +92,6 @@ int __cdecl R_SetPrepassMaterial(GfxCmdBufContext context, GfxDrawSurf drawSurf,
 
 int __cdecl R_SetMaterial(GfxCmdBufContext context, GfxDrawSurf drawSurf, MaterialTechniqueType techType)
 {
-    const char *v4; // eax
-    const char *v5; // eax
     const MaterialTechnique *technique; // [esp+8h] [ebp-8h]
     Material *material; // [esp+Ch] [ebp-4h]
 
@@ -98,25 +99,26 @@ int __cdecl R_SetMaterial(GfxCmdBufContext context, GfxDrawSurf drawSurf, Materi
     technique = Material_GetTechnique(material, techType);
     context.state->material = material;
     context.state->technique = technique;
+
     if (!technique)
         return 0;
-    if ((technique->flags & 2) != 0)
-        MyAssertHandler(".\\r_draw_material.cpp", 316, 0, "%s", "!(technique->flags & MTL_TECHFLAG_NEEDS_RESOLVED_SCENE)");
-    if ((technique->flags & 1) != 0 && !rg.distortion)
+
+    iassert(!(technique->flags & MTL_TECHFLAG_NEEDS_RESOLVED_SCENE));
+
+    if ((technique->flags & MTL_TECHFLAG_NEEDS_RESOLVED_POST_SUN) != 0 && !rg.distortion)
         return 0;
+
     if ((techType == TECHNIQUE_EMISSIVE || techType == TECHNIQUE_UNLIT)
         && (technique->flags & 0x10) != 0
         && !context.source->constVersions[4])
     {
         return 0;
     }
-    if (!material)
-        MyAssertHandler(".\\r_draw_material.cpp", 337, 0, "%s", "material");
+
+    iassert(material);
     if (r_logFile->current.integer)
     {
-        v4 = RB_LogTechniqueType(techType);
-        v5 = va("R_SetMaterial( %s, %s, %s )\n", material->info.name, technique->name, v4);
-        RB_LogPrint(v5);
+        RB_LogPrint(va("R_SetMaterial( %s, %s, %s )\n", material->info.name, technique->name, RB_LogTechniqueType(techType)));
     }
     context.state->techType = techType;
     return 1;

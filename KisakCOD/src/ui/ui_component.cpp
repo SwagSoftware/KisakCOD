@@ -1226,7 +1226,7 @@ void Scr_OpenScriptList::Shutdown()
     f = FS_FOpenTextFileWrite("open_scripts.txt");
     if (f)
     {
-        if (scrDebuggerGlob.scriptList.selectedLine >= 0)
+        if (scrDebuggerGlob.scriptList.scriptWindows && scrDebuggerGlob.scriptList.selectedLine >= 0)
         {
             //filenamea = Scr_ScriptWindow::GetFilename(scrDebuggerGlob.scriptList.scriptWindows[scrDebuggerGlob.scriptList.selectedLine]);
             filenamea = scrDebuggerGlob.scriptList.scriptWindows[scrDebuggerGlob.scriptList.selectedLine]->GetFilename();

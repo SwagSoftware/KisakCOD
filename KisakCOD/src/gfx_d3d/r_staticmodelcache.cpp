@@ -196,7 +196,7 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
     tree = &s_cache.trees[treeIndex];
     if (listIndex == 1)
     {
-        tree->usedlist.prev = s_cache.usedlist[smcIndex].prev;
+        tree->usedlist.prev = &s_cache.usedlist[smcIndex];
         tree->usedlist.next = s_cache.usedlist[smcIndex].next;
         tree->usedlist.prev->next = &tree->usedlist;
         tree->usedlist.next->prev = &tree->usedlist;
@@ -258,7 +258,7 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     tree = &s_cache.trees[treeIndex];
     if (!listIndex)
     {
-        tree->usedlist.prev = s_cache.usedlist[smcIndex].prev;
+        tree->usedlist.prev = &s_cache.usedlist[smcIndex];
         tree->usedlist.next = s_cache.usedlist[smcIndex].next;
         tree->usedlist.prev->next = &tree->usedlist;
         tree->usedlist.next->prev = &tree->usedlist;
@@ -374,14 +374,9 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
                 cachedSurfa->lodIndex = lodInfo->lod;
                 skinSmodelCmd.cacheIndex = cacheIndexa;
                 smcPatchVertsUsed = frontEndDataOut->smcPatchVertsUsed;
-                if (smcPatchVertsUsed != smcPatchVertsUsed)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                        281,
-                        0,
-                        "i == static_cast< Type >( i )\n\t%i, %i",
-                        smcPatchVertsUsed,
-                        smcPatchVertsUsed);
+
+                iassert(smcPatchVertsUsed == (unsigned short)smcPatchVertsUsed);
+
                 skinSmodelCmd.firstPatchVert = smcPatchVertsUsed;
                 frontEndDataOut->smcPatchVertsUsed += cachedVertsNeeded;
                 R_AddWorkerCmd(15, (unsigned char*)&skinSmodelCmd);
@@ -389,11 +384,10 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
                 treea = &s_cache.trees[((char*)cachedSurfa - (char*)s_cache.leafs) / 256];
                 treea->frameCount = rg.frontEndFrameCount;
                 
-                iassert(treea->usedlist.prev->prev->next = treea->usedlist.prev);
-                iassert(treea->usedlist.prev->next->prev = treea->usedlist.prev);
-
-                iassert(treea->usedlist.next->prev->next = treea->usedlist.next);
-                iassert(treea->usedlist.next->next->prev = treea->usedlist.next);
+                iassert(treea->usedlist.prev->prev->next == treea->usedlist.prev);
+                iassert(treea->usedlist.prev->next->prev == treea->usedlist.prev);
+                iassert(treea->usedlist.next->prev->next == treea->usedlist.next);
+                iassert(treea->usedlist.next->next->prev == treea->usedlist.next);
 
                 treea->usedlist.next->prev = treea->usedlist.prev;
                 treea->usedlist.prev->next = treea->usedlist.next;
@@ -401,6 +395,7 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
                 treea->usedlist.next = s_cache.usedlist[smcIndex].next;
                 treea->usedlist.prev->next = &treea->usedlist;
                 treea->usedlist.next->prev = &treea->usedlist;
+
                 return cacheIndexa;
             }
             else

@@ -2,15 +2,12 @@
 
 unsigned int __cdecl R_SkipDrawSurfListMaterial(const GfxDrawSurf *drawSurfList, unsigned int drawSurfCount)
 {
-    unsigned int subListCount; // [esp+14h] [ebp-Ch]
+    unsigned int subListCount = 0;
 
-    for (subListCount = 0;
-        subListCount < drawSurfCount
-        && (drawSurfList[subListCount].packed & 0xE0000000) == (drawSurfList->packed & 0xE0000000)
-        && HIDWORD(drawSurfList[subListCount].packed) == HIDWORD(drawSurfList->packed);
-        ++subListCount)
+    while (subListCount < drawSurfCount && drawSurfList[subListCount].fields.materialSortedIndex == drawSurfList[0].fields.materialSortedIndex)
     {
-        ;
+        subListCount++;
     }
+
     return subListCount;
 }

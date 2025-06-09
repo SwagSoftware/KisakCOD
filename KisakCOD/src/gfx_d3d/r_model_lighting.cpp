@@ -729,8 +729,7 @@ void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsig
 
     if (patchCount)
     {
-        if (modelLightGlob.lockedBox.pBits)
-            MyAssertHandler(".\\r_model_lighting.cpp", 893, 0, "%s", "modelLightGlob.lockedBox.pBits == NULL");
+        iassert(modelLightGlob.lockedBox.pBits == NULL);
         useAltUpdate = Dvar_GetBool("r_altModelLightingUpdate");
         if (useAltUpdate)
             lightImage = modelLightGlob.lightImages[1];
