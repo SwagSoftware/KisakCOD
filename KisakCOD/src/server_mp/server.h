@@ -12,7 +12,7 @@ enum svscmd_type : __int32
 
 #define NETF_HUD(x) NETF_BASE(hudelem_s, x)
 
-const NetField hudElemFields[] =
+const NetField hudElemFields[40] =
 {
   { NETF_HUD(color.rgba), -85, 0u },
   { NETF_HUD(fadeStartTime), -97, 0u },
@@ -248,7 +248,7 @@ const NetField helicopterEntityStateFields[58] =
   { NETF(partBits[3]), 32, 1u }
 };
 
-const NetField entityStateFields[] =
+const NetField entityStateFields[59] =
 {
   { NETF(eType), 8, 0u },
   { NETF(lerp.eFlags), -98, 0u },
@@ -312,7 +312,7 @@ const NetField entityStateFields[] =
 }; // idb
 
 #define NETF_CL(x) NETF_BASE(clientState_s, x)
-const NetField clientStateFields[] =
+const NetField clientStateFields[24] = // LWSS: edit SV_GetAnalyzeEntityFields() if you change this
 {
   { NETF_CL(modelindex), 9, 0u },
   { NETF_CL(name[0]), 32, 0u },
@@ -341,7 +341,7 @@ const NetField clientStateFields[] =
 }; // idb
 
 #define NETF_PL(x) NETF_BASE(playerState_s, x)
-const NetField playerStateFields[141] =
+const NetField playerStateFields[141] = // LWSS: edit SV_GetAnalyzeEntityFields() if you change this
 {
   { NETF_PL(commandTime), -97, 0u },
   { NETF_PL(viewangles[1]), -87, 0u },
@@ -488,7 +488,7 @@ const NetField playerStateFields[141] =
 
 #define NETF_ARC(x) NETF_BASE(archivedEntity_s, s.x)
 #define NETF_ARC_A(x) NETF_BASE(archivedEntity_s, r.x)
-const NetField archivedEntityFields[] =
+const NetField archivedEntityFields[69] = // LWSS: change SV_GetAnalyzeEntityFields() if you edit this
 {
   { NETF_ARC_A(absmin[1]), 0, 0u },
   { NETF_ARC_A(absmax[1]), 0, 0u },

@@ -847,6 +847,7 @@ const int msg_hData[256] =
   32647
 }; // idb
 
+// LWSS: check SV_GetAnalyzeEntityFields() if you change this (> 64)
 const NetFieldList s_netFieldList[18] =
 {
   { &entityStateFields[0], 59u},

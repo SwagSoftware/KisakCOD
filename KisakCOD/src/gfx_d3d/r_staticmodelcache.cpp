@@ -39,7 +39,9 @@ void __cdecl R_InitStaticModelCache()
 static_model_leaf_t *SMC_GetLeaf(unsigned int cacheIndex)
 {
     iassert(cacheIndex);
-    return &s_cache.leafs[0][cacheIndex - 1];
+    static_model_leaf_t *retval = &s_cache.leafs[0][cacheIndex - 1];
+    iassert((char *)retval == ((char *)&s_cache.leafs + (sizeof(static_model_leaf_t) * (cacheIndex - 1))));
+    return retval;
 }
 
 void __cdecl R_ShutdownStaticModelCache()
@@ -246,15 +248,9 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     iassert(block->prev->next == block);
     block->next->prev = block->prev;
     block->prev->next = block->next;
+    static_assert(sizeof(s_cache.leafs[0]) == 256);
     treeIndex = ((char *)block - (char *)s_cache.leafs) / sizeof(s_cache.leafs[0]);
-    if (treeIndex >= 0x200)
-        MyAssertHandler(
-            ".\\r_staticmodelcache.cpp",
-            314,
-            0,
-            "treeIndex doesn't index ARRAY_COUNT( s_cache.trees )\n\t%i not in [0, %i)",
-            treeIndex,
-            512);
+    bcassert(treeIndex, ARRAY_COUNT(s_cache.trees));
     tree = &s_cache.trees[treeIndex];
     if (!listIndex)
     {
@@ -265,24 +261,10 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     }
     leafs = s_cache.leafs[treeIndex];
     index = ((char *)block - (char *)leafs) / 8;
-    if (index >= 0x20)
-        MyAssertHandler(
-            ".\\r_staticmodelcache.cpp",
-            321,
-            0,
-            "index doesn't index ARRAY_COUNT( s_cache.leafs[treeIndex] )\n\t%i not in [0, %i)",
-            index,
-            32);
+    bcassert(index, ARRAY_COUNT(s_cache.leafs[treeIndex]));
     iassert(block == &leafs[index].freenode);
     nodeIndex = ((index + 32) >> (5 - listIndex)) - 1;
-    if (nodeIndex >= 0x3F)
-        MyAssertHandler(
-            ".\\r_staticmodelcache.cpp",
-            327,
-            0,
-            "nodeIndex doesn't index ARRAY_COUNT( tree->nodes )\n\t%i not in [0, %i)",
-            nodeIndex,
-            63);
+    bcassert(nodeIndex, ARRAY_COUNT(tree->nodes));
     tree->nodes[nodeIndex].inuse = 1;
 
     while (1)
@@ -296,11 +278,6 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     unsigned short cacheIndex = (32 * treeIndex + index + 1);
     iassert(cacheIndex);
     iassert(&leafs[index] == SMC_GetLeaf(cacheIndex));
-    //if (32 * (_WORD)treeIndex + (_WORD)index == 0xFFFF)
-    //    MyAssertHandler(".\\r_staticmodelcache.cpp", 278, 0, "%s", "cacheIndex");
-    //if (&leafs[index] != (static_model_leaf_t *)(8 * (unsigned __int16)(32 * treeIndex + index + 1) + 245472024))
-    //if (&leafs[index] != (static_model_leaf_t*)&s_cache.trees[511].nodes[2 * (32 * treeIndex + index + 1) + 61])
-    //    MyAssertHandler(".\\r_staticmodelcache.cpp", 339, 0, "%s", "&leafs[index] == SMC_GetLeaf( cacheIndex )");
 
     leafs[index].cachedSurf.baseVertIndex = 16 * index + (treeIndex << 9);
     return cacheIndex;

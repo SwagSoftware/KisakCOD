@@ -851,7 +851,7 @@ void __cdecl SV_Shutdown(const char *finalmsg)
             if (CL_IsLocalClientActive(client))
                 CL_Disconnect(client);
         }
-        memset((unsigned __int8 *)&svs, 0, (unsigned int)&svs.cachedSnapshotClients[651].ps.hud.archival[23].materialIndex);
+        memset(&svs, 0, sizeof(svs));
         bgs = 0;
         Com_Printf(15, "---------------------------\n");
     }

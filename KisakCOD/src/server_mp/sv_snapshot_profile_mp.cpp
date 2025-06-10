@@ -892,36 +892,38 @@ void __cdecl SV_GetAnalyzeEntityFields(int analyzeEntityType, NetFieldList *stat
         {
         case 18:
             stateFields->array = archivedEntityFields;
-            *numFields = 128;
+            //*numFields = 128; // LWSS Change these, they overflow
+            *numFields = 69;
             break;
         case 19:
             stateFields->array = clientStateFields;
-            *numFields = 32;
+            //*numFields = 32;
+            *numFields = 24;
             break;
         case 20:
             stateFields->array = playerStateFields;
-            *numFields = 160;
+            //*numFields = 160;
+            *numFields = 141;
             break;
         case 21:
             stateFields->array = hudElemFields;
             *numFields = 40;
             break;
         default:
-            if (analyzeEntityType != 22)
-                MyAssertHandler(
-                    ".\\server_mp\\sv_snapshot_profile_mp.cpp",
-                    774,
-                    0,
-                    "%s",
-                    "analyzeEntityType == ANALYZE_DATATYPE_ENTITYTYPE_BASELINE");
+            iassert(analyzeEntityType == ANALYZE_DATATYPE_ENTITYTYPE_BASELINE);
             stateFields->array = entityStateFields;
-            *numFields = 64;
+            //*numFields = 64;
+            *numFields = 59;
             break;
         }
     }
     else
     {
-        *stateFields = *MSG_GetStateFieldListForEntityType(analyzeEntityType);
+        //*stateFields = *MSG_GetStateFieldListForEntityType(analyzeEntityType);
+        // LWSS Change, this doesn't set numFields and it's like a zillion 
+        const NetFieldList *tmp = MSG_GetStateFieldListForEntityType(analyzeEntityType);
+        *stateFields = *tmp;
+        *numFields = tmp->count;
     }
 }
 

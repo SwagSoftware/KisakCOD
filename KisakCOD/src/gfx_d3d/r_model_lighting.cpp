@@ -134,7 +134,7 @@ void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, Pack
 
 unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle)
 {
-    iassert(handle && handle < modelLightGlob.totalEntryLimit);
+    iassert(handle && handle <= modelLightGlob.totalEntryLimit);
     return handle - 1;
 }
 
