@@ -921,13 +921,13 @@ void __cdecl XAnimCalcParts_unsigned_char_(
         if (v48)
         {
             frame = &randomDataShort[2 * keyFrameIndex];
-            fromVec.v[0] = 0.0;
-            fromVec.v[1] = 0.0;
-            fromVec.v[2] = *frame * 0.00003051850944757462;
+            fromVec.v[0] = 0.0f;
+            fromVec.v[1] = 0.0f;
+            fromVec.v[2] = frame[0] * 0.00003051850944757462;
             fromVec.v[3] = frame[1] * 0.00003051850944757462;
 
-            toVec.v[0] = 0.0;
-            toVec.v[1] = 0.0;
+            toVec.v[0] = 0.0f;
+            toVec.v[1] = 0.0f;
             toVec.v[2] = frame[2] * 0.00003051850944757462;
             toVec.v[3] = frame[3] * 0.00003051850944757462;
 
@@ -1028,7 +1028,7 @@ void __cdecl XAnimCalcParts_unsigned_char_(
     }
 
     // NOTE(mrsteyk): verify below claim
-    iassert(!(animPartIndex < size));
+    iassert(animPartIndex >= size);
     // LWSS: it is not possible for this loop to go off (It's removed or optimized out in blops)
     //while (animPartIndex < size)
     //{
@@ -1416,12 +1416,24 @@ void __cdecl XAnimCalcNonLoopEnd(
             frameVec.v[2] = (double)*rotLastFrame * 0.00003051850944757462;
             frameVec.v[3] = (double)rotLastFrame[1] * 0.00003051850944757462;
             start = rotTransArray[modelPartIndex].quat;
-            dir[0] = 0.0;
-            dir[1] = 0.0;
-            dir[2] = frameVec.v[2];
-            //v18 = *(_QWORD *)&frameVec.unitVec[2].packed;
-            dir[3] = frameVec.v[3];
-            Vec4Mad(start, weightScale, dir, start);
+            float scale = weightScale;
+            // LWSS: we can just use frameVec (blops backport)
+            //dir[0] = 0.0;
+            //dir[1] = 0.0;
+            //dir[2] = frameVec.v[2];
+            ////v18 = *(_QWORD *)&frameVec.unitVec[2].packed;
+            //dir[3] = frameVec.v[3];
+            
+            // LWSS: in blops, there's an if() here. Might as well add?
+            if (((0.0f * rotTransArray[modelPartIndex].quat[0])
+                + (0.0 * rotTransArray[modelPartIndex].quat[1])
+                + (frameVec.v[2] * rotTransArray[modelPartIndex].quat[2])
+                + (frameVec.v[3] * rotTransArray[modelPartIndex].quat[3])) < 0.0)
+            {
+                scale = -weightScale;
+            }
+
+            Vec4Mad(start, scale, frameVec.v, start);
         }
         ++animPartIndex;
         randomDataShort += 2 * tableSize + 2;
@@ -1454,7 +1466,17 @@ void __cdecl XAnimCalcNonLoopEnd(
             v14[1] = (double)v70[1] * 0.00003051850944757462;
             v14[2] = (double)v70[2] * 0.00003051850944757462;
             v14[3] = (double)v70[3] * 0.00003051850944757462;
-            Vec4Mad(result, weightScale, v14, result);
+
+            float scale2 = weightScale;
+            // LWSS: another if() from blops
+            if ((float)((float)((float)((float)(v14[0] * rotTransArray[modelPartIndex].quat[0])
+                + (float)(v14[1] * rotTransArray[modelPartIndex].quat[1]))
+                + (float)(v14[2] * rotTransArray[modelPartIndex].quat[2]))
+                + (float)(v14[3] * rotTransArray[modelPartIndex].quat[3])) < 0.0)
+            {
+                scale2 = -weightScale;
+            }
+            Vec4Mad(result, scale2, v14, result);
         }
         ++animPartIndex;
         randomDataShort += 4 * tableSize + 4;
@@ -1469,11 +1491,22 @@ void __cdecl XAnimCalcNonLoopEnd(
         if (!ignorePartBits->testBit(modelPartIndex))
         {
             quat = rotTransArray[modelPartIndex].quat;
-            v12[0] = 0.0;
-            v12[1] = 0.0;
+            v12[0] = 0.0f;
+            v12[1] = 0.0f;
             v12[2] = (double)dataShort[0] * 0.00003051850944757462;
             v12[3] = (double)dataShort[1] * 0.00003051850944757462;
-            Vec4Mad(quat, weightScale, v12, quat);
+
+            float scale3 = weightScale;
+            // LWSS: another if() from blops
+            if ((float)((float)((float)((float)(0.0 * rotTransArray[modelPartIndex].quat[0])
+                + (float)(0.0 * rotTransArray[modelPartIndex].quat[1]))
+                + (float)(v12[2] * rotTransArray[modelPartIndex].quat[2]))
+                + (float)(v12[3] * rotTransArray[modelPartIndex].quat[3])) < 0.0)
+            {
+                scale3 = -weightScale;
+            }
+
+            Vec4Mad(quat, scale3, v12, quat);
         }
         ++animPartIndex;
         dataShort += 2;
@@ -1490,7 +1523,17 @@ void __cdecl XAnimCalcNonLoopEnd(
             v10[1] = (double)dataShort[1] * 0.00003051850944757462;
             v10[2] = (double)dataShort[2] * 0.00003051850944757462;
             v10[3] = (double)dataShort[3] * 0.00003051850944757462;
-            Vec4Mad(rotTransArray[modelPartIndex].quat, weightScale, v10, rotTransArray[modelPartIndex].quat);
+
+            float scale4 = weightScale;
+            if ((float)((float)((float)((float)(v10[0] * rotTransArray[modelPartIndex].quat[0])
+                + (float)(v10[1] * rotTransArray[modelPartIndex].quat[1]))
+                + (float)(v10[2] * rotTransArray[modelPartIndex].quat[2]))
+                + (float)(v10[3] * rotTransArray[modelPartIndex].quat[3])) < 0.0)
+            {
+                scale4 = -weightScale;
+            }
+
+            Vec4Mad(rotTransArray[modelPartIndex].quat, scale4, v10, rotTransArray[modelPartIndex].quat);
         }
         ++animPartIndex;
         dataShort += 4;
@@ -2426,7 +2469,7 @@ LABEL_20:
 
                     mat->transWeight = 0.0f;
                 }
-                mat++;
+                ++mat;
                 ++boneIndex;
             }
             quats = model->quats;
@@ -2455,7 +2498,7 @@ LABEL_20:
                     mat->transWeight = 0.0f;
                 }
                 --numNonRootBones;
-                mat++;
+                ++mat;
                 ++boneIndex;
                 quats += 4;
             }

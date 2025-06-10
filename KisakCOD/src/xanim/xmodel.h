@@ -279,6 +279,7 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessLeaf(XSurfaceGetTriCandidatesLo
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessNode(XSurfaceGetTriCandidatesLocals *locals);
 int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned int offset, unsigned __int8 *index);
 unsigned __int16 *__cdecl XModelBoneNames(XModel *model);
+void __cdecl XModelCopyXModelParts(const XModelPartsLoad *modelParts, XModel *model);
 
 
 // xmodel_utils

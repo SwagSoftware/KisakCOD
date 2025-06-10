@@ -15,15 +15,13 @@ void __cdecl R_SetupStaticModelPrim(XSurface *xsurf, GfxDrawPrimArgs *args, GfxC
 {
     IDirect3DIndexBuffer9 *ib; // [esp+10h] [ebp-4h] BYREF
 
-    if (!xsurf)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 260, 0, "%s", "xsurf");
+    iassert(xsurf);
     args->vertexCount = xsurf->vertCount;
     args->triCount = xsurf->triCount;
-    if (!useFastFile->current.enabled)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 266, 0, "%s", "XSurfaceHasOptimizedIndices()");
+    //if (!useFastFile->current.enabled)
+    //    MyAssertHandler(".\\r_draw_staticmodel.cpp", 266, 0, "%s", "XSurfaceHasOptimizedIndices()");
     DB_GetIndexBufferAndBase(xsurf->zoneHandle, xsurf->triIndices, (void **)&ib, &args->baseIndex);
-    if (!ib)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 269, 0, "%s", "ib");
+    iassert(ib);
     if (primState->indexBuffer != ib)
         R_ChangeIndices(primState, ib);
 }
@@ -85,8 +83,8 @@ int __cdecl R_GetNextStaticModelSurf(GfxStaticModelDrawStream *drawStream, XSurf
     drawStream->smodelList = (const unsigned __int16 *)(primDrawSurfPos + 1);
     drawStream->localSurf = xsurf;
     g_frameStatsCur.geoIndexCount += 3 * drawStream->smodelCount * xsurf->triCount;
-    if (!g_primStats)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 226, 0, "%s", "g_primStats");
+
+    iassert(g_primStats);
     g_primStats->dynamicIndexCount += 3 * drawStream->smodelCount * xsurf->triCount;
     g_primStats->dynamicVertexCount += drawStream->smodelCount * xsurf->vertCount;
     *outSurf = xsurf;
@@ -133,13 +131,11 @@ void __cdecl R_SetStaticModelVertexBuffer(GfxCmdBufPrimState *primState, XSurfac
     IDirect3DVertexBuffer9 *vb; // [esp+18h] [ebp-8h] BYREF
     int vertexOffset; // [esp+1Ch] [ebp-4h] BYREF
 
-    if (!xsurf)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 245, 0, "%s", "xsurf");
-    if (xsurf->deformed || !useFastFile->current.enabled)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 246, 0, "%s", "XSurfaceHasOptimizedVertices( xsurf )");
+    iassert(xsurf);
+    //if (xsurf->deformed || !useFastFile->current.enabled)
+    //    MyAssertHandler(".\\r_draw_staticmodel.cpp", 246, 0, "%s", "XSurfaceHasOptimizedVertices( xsurf )");
     DB_GetVertexBufferAndOffset(xsurf->zoneHandle, (uint8*)xsurf->verts0, (void **)&vb, &vertexOffset);
-    if (!vb)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 248, 0, "%s", "vb");
+    iassert(vb);
     R_SetStreamSource(primState, vb, vertexOffset, 0x20u);
 }
 
@@ -174,7 +170,7 @@ void __cdecl R_SetupCachedStaticModelLighting(GfxCmdBufSourceState *source)
     source->input.consts[57][1] = 0.0;
     source->input.consts[57][2] = 0.5;
     source->input.consts[57][3] = 1.0;
-    R_DirtyCodeConstant(source, 0x39u);
+    R_DirtyCodeConstant(source, 57);
 }
 
 int __cdecl R_GetNextStaticModelCachedSurf(GfxStaticModelDrawStream *drawStream)
@@ -192,8 +188,8 @@ int __cdecl R_GetNextStaticModelCachedSurf(GfxStaticModelDrawStream *drawStream)
     drawStream->localSurf = xsurf;
     drawStream->reflectionProbeIndex = smodelDrawInst->reflectionProbeIndex;
     g_frameStatsCur.geoIndexCount += 3 * drawStream->smodelCount * xsurf->triCount;
-    if (!g_primStats)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1870, 0, "%s", "g_primStats");
+
+    iassert(g_primStats);
     g_primStats->dynamicIndexCount += 3 * drawStream->smodelCount * xsurf->triCount;
     g_primStats->dynamicVertexCount += drawStream->smodelCount * xsurf->vertCount;
     return 1;
@@ -210,15 +206,14 @@ XSurface *__cdecl R_GetCurrentStaticModelCachedSurf(
 
 void __cdecl R_SetStaticModelCachedPrimArgs(const XSurface *xsurf, GfxDrawPrimArgs *args)
 {
-    if (!xsurf)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1901, 0, "%s", "xsurf");
+    iassert(xsurf);
     args->vertexCount = 0x10000;
     args->triCount = xsurf->triCount;
 }
 
 void __cdecl R_SetStaticModelCachedBuffer(GfxCmdBufState *state, unsigned int cachedIndex)
 {
-    R_SetStreamSource(&state->prim, gfxBuf.smodelCacheVb, ((cachedIndex - 1) & 0xFFFFF000) << 9, 0x20u);
+    R_SetStreamSource(&state->prim, gfxBuf.smodelCacheVb, ((cachedIndex - 1) & 0xFFFFF000) << 9, 32);
 }
 
 void __cdecl R_DrawStaticModelsCachedDrawSurfLighting(GfxStaticModelDrawStream *drawStream, GfxCmdBufContext context)
@@ -247,24 +242,10 @@ void __cdecl R_DrawStaticModelsCachedDrawSurfLighting(GfxStaticModelDrawStream *
     do
     {
         baseIndex = surfBaseIndex + 4 * R_GetCachedSModelSurf(list[index])->baseVertIndex;
-        if (baseIndex >= 0x100000)
-            MyAssertHandler(".\\r_draw_staticmodel.cpp", 1952, 0, "%s", "baseIndex < SMC_MAX_INDEX_IN_CACHE");
-        if (baseIndex + 3 * xsurf->triCount > 0x100000)
-            MyAssertHandler(
-                ".\\r_draw_staticmodel.cpp",
-                1953,
-                0,
-                "%s",
-                "baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE");
+        iassert(baseIndex < SMC_MAX_INDEX_IN_CACHE);
+        iassert(baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE);
         copyBaseIndex = R_SetIndexData(&context.state->prim, (unsigned char*)&gfxBuf.smodelCache.indices[baseIndex], xsurf->triCount);
-        if (copyBaseIndex != args.baseIndex + index * 3 * xsurf->triCount)
-            MyAssertHandler(
-                ".\\r_draw_staticmodel.cpp",
-                1956,
-                1,
-                "copyBaseIndex == args.baseIndex + xsurf->triCount * 3 * index\n\t%i, %i",
-                copyBaseIndex,
-                args.baseIndex + index * 3 * xsurf->triCount);
+        iassert(copyBaseIndex == args.baseIndex + xsurf->triCount * 3 * index);
         ++index;
     } while (index < smodelCount);
     R_DrawIndexedPrimitive(&context.state->prim, &args);
@@ -307,7 +288,7 @@ void __cdecl R_DrawStaticModelCachedSurfLit(const unsigned int *primDrawSurfPos,
 {
     GfxStaticModelDrawStream drawStream; // [esp+0h] [ebp-1Ch] BYREF
 
-    R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    R_SetCodeImageTexture(context.source, 16, rgp.whiteImage);
     R_SetupCachedStaticModelLighting(context.source);
     R_SetupPassPerObjectArgs(context);
     drawStream.primDrawSurfPos = primDrawSurfPos;
@@ -393,10 +374,9 @@ const GfxStaticModelDrawInst *__cdecl R_SetupCachedSModelSurface(
         *baseIndex = 3 * xsurf->baseTriIndex;
     args->vertexCount = 0x10000;
     args->triCount = count * xsurf->triCount;
-    R_SetStreamSource(&state->prim, gfxBuf.smodelCacheVb, ((cachedIndex - 1) & 0xFFFFF000) << 9, 0x20u);
+    R_SetStreamSource(&state->prim, gfxBuf.smodelCacheVb, ((cachedIndex - 1) & 0xFFFFF000) << 9, 32);
     g_frameStatsCur.geoIndexCount += 3 * count * xsurf->triCount;
-    if (!g_primStats)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1837, 0, "%s", "g_primStats");
+    iassert(g_primStats);
     g_primStats->dynamicIndexCount += 3 * count * xsurf->triCount;
     g_primStats->dynamicVertexCount += count * xsurf->vertCount;
     return smodelDrawInst;
@@ -460,8 +440,7 @@ void __cdecl R_DrawStaticModelsPreTessDrawSurfLighting(
 
 void __cdecl R_SetStaticModelSkinnedPrimArgs(GfxCmdBufPrimState *state, const XSurface *xsurf, GfxDrawPrimArgs *args)
 {
-    if (!xsurf)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1685, 0, "%s", "xsurf");
+    iassert(xsurf);
     args->triCount = XSurfaceGetNumTris(xsurf);
     args->vertexCount = XSurfaceGetNumVerts(xsurf);
     args->baseIndex = R_SetIndexData(state, (unsigned char*)xsurf->triIndices, args->triCount);
@@ -500,7 +479,7 @@ void __cdecl R_DrawStaticModelsSkinnedDrawSurfLighting(GfxStaticModelDrawStream 
     vb = gfxBuf.dynamicVertexBuffer->buffer;
     if (!vb)
         MyAssertHandler(".\\r_draw_staticmodel.cpp", 1714, 0, "%s", "vb");
-    R_SetStreamSource(&context.state->prim, vb, vertexOffset, 0x20u);
+    R_SetStreamSource(&context.state->prim, vb, vertexOffset, 32);
     smodelCount = drawStream->smodelCount;
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
     list = drawStream->smodelList;

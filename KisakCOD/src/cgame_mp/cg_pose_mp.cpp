@@ -300,7 +300,7 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
     float v26; // [esp+80h] [ebp-8Ch]
     float *v27; // [esp+84h] [ebp-88h]
     float *v28; // [esp+88h] [ebp-84h]
-    unsigned int LocalClientNum; // [esp+8Ch] [ebp-80h]
+    unsigned int localClientNum; // [esp+8Ch] [ebp-80h]
     unsigned int rootBoneMask; // [esp+90h] [ebp-7Ch]
     float baseQuat[4]; // [esp+94h] [ebp-78h] BYREF
     float viewOffset[3]; // [esp+A4h] [ebp-68h] BYREF
@@ -314,8 +314,7 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
     int partBits[7]; // [esp+F0h] [ebp-1Ch] BYREF
 
     rootBoneCount = DObjGetRootBoneCount(obj);
-    if (!rootBoneCount)
-        MyAssertHandler(".\\cgame_mp\\cg_pose_mp.cpp", 198, 0, "%s", "rootBoneCount");
+    iassert(rootBoneCount);
     maxHighIndex = --rootBoneCount >> 5;
     for (highIndex = 0; highIndex < maxHighIndex; ++highIndex)
     {
@@ -333,16 +332,8 @@ notSet:
         memset(partBits, 0, 12);
         partBits[3] = 0x80000000;
         memset(&partBits[4], 0, 12);
-        LocalClientNum = R_GetLocalClientNum();
-        if (LocalClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                LocalClientNum);
-        v28 = cgArray[0].refdef.viewOffset;
+        localClientNum = R_GetLocalClientNum();
+        iassert(localClientNum == 0);
         viewOffset[0] = cgArray[0].refdef.viewOffset[0];
         viewOffset[1] = cgArray[0].refdef.viewOffset[1];
         viewOffset[2] = cgArray[0].refdef.viewOffset[2];
@@ -358,8 +349,7 @@ notSet:
                     mat->quat[1] = baseQuat[1];
                     mat->quat[2] = baseQuat[2];
                     mat->quat[3] = baseQuat[3];
-                    //v27 = pose->origin;
-                    v27 = (float*)pose->origin;
+
                     origin[0] = pose->origin[0];
                     origin[1] = pose->origin[1];
                     origin[2] = pose->origin[2];
@@ -372,76 +362,17 @@ notSet:
                     animMat.quat[3] = baseQuat[3];
                     DObjSetTrans(&animMat, pose->origin);
                     v26 = Vec4LengthSq(animMat.quat);
-                    if (v26 == 0.0)
+                    if (v26 == 0.0f)
                     {
-                        animMat.quat[3] = 1.0;
-                        animMat.transWeight = 2.0;
+                        animMat.quat[3] = 1.0f;
+                        animMat.transWeight = 2.0f;
                     }
                     else
                     {
-                        animMat.transWeight = 2.0 / v26;
+                        animMat.transWeight = 2.0f / v26;
                     }
-                    v23 = mat->quat[0] * baseQuat[3]
-                        + mat->quat[3] * baseQuat[0]
-                        + mat->quat[2] * baseQuat[1]
-                        - mat->quat[1] * baseQuat[2];
-                    v24 = mat->quat[1] * baseQuat[3]
-                        - mat->quat[2] * baseQuat[0]
-                        + mat->quat[3] * baseQuat[1]
-                        + mat->quat[0] * baseQuat[2];
-                    v25 = mat->quat[2] * baseQuat[3]
-                        + mat->quat[1] * baseQuat[0]
-                        - mat->quat[0] * baseQuat[1]
-                        + mat->quat[3] * baseQuat[2];
-                    mat->quat[3] = mat->quat[3] * baseQuat[3]
-                        - mat->quat[0] * baseQuat[0]
-                        - mat->quat[1] * baseQuat[1]
-                        - mat->quat[2] * baseQuat[2];
-                    mat->quat[0] = v23;
-                    mat->quat[1] = v24;
-                    mat->quat[2] = v25;
-                    trans = mat->trans;
-                    if ((LODWORD(animMat.quat[0]) & 0x7F800000) == 0x7F800000
-                        || (LODWORD(animMat.quat[1]) & 0x7F800000) == 0x7F800000
-                        || (LODWORD(animMat.quat[2]) & 0x7F800000) == 0x7F800000
-                        || (LODWORD(animMat.quat[3]) & 0x7F800000) == 0x7F800000)
-                    {
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h",
-                            432,
-                            0,
-                            "%s",
-                            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-                    }
-                    if ((LODWORD(animMat.transWeight) & 0x7F800000) == 0x7F800000)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\src\\bgame\\../xanim/xanim_public.h",
-                            433,
-                            0,
-                            "%s",
-                            "!IS_NAN(mat->transWeight)");
-                    Vec3Scale(animMat.quat, animMat.transWeight, result);
-                    v12 = result[0] * animMat.quat[0];
-                    v5 = result[0] * animMat.quat[1];
-                    v10 = result[0] * animMat.quat[2];
-                    v13 = result[0] * animMat.quat[3];
-                    v4 = result[1] * animMat.quat[1];
-                    v11 = result[1] * animMat.quat[2];
-                    v9 = result[1] * animMat.quat[3];
-                    v6 = result[2] * animMat.quat[2];
-                    v7 = result[2] * animMat.quat[3];
-                    v14 = 1.0 - (v4 + v6);
-                    v15 = v5 + v7;
-                    v16 = v10 - v9;
-                    v17 = v5 - v7;
-                    v18 = 1.0 - (v12 + v6);
-                    v19 = v11 + v13;
-                    v20 = v10 + v9;
-                    v21 = v11 - v13;
-                    v22 = 1.0 - (v12 + v4);
-                    origin[0] = *trans * v14 + trans[1] * v17 + trans[2] * v20 + animMat.trans[0];
-                    origin[1] = *trans * v15 + trans[1] * v18 + trans[2] * v21 + animMat.trans[1];
-                    origin[2] = *trans * v16 + trans[1] * v19 + trans[2] * v22 + animMat.trans[2];
+                    QuatMultiplyEquals(baseQuat, mat->quat);
+                    MatrixTransformVectorQuatTrans(mat->trans, &animMat, origin);
                 }
                 Vec3Sub(origin, viewOffset, origin);
                 DObjSetTrans(mat, origin);

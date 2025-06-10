@@ -2233,59 +2233,84 @@ int __cdecl irand(int min, int max)
     return (((holdrand >> 17) * (__int64)(max - min)) >> 15) + min;
 }
 
+void __cdecl MatrixTransformVectorQuatTransEquals(const DObjAnimMat *in, float *inout)
+{
+    float temp; // [esp+48h] [ebp-2Ch]
+    float temp_4; // [esp+4Ch] [ebp-28h]
+    float axis[3][3]; // [esp+50h] [ebp-24h] BYREF
+
+    ConvertQuatToMat(in, axis);
+    temp =     (inout[0] * axis[0][0]) + (inout[1] * axis[1][0]) + (inout[2] * axis[2][0]) + in->trans[0];
+    temp_4 =   (inout[0] * axis[0][1]) + (inout[1] * axis[1][1]) + (inout[2] * axis[2][1]) + in->trans[1];
+    inout[2] = (inout[0] * axis[0][2]) + (inout[1] * axis[1][2]) + (inout[2] * axis[2][2]) + in->trans[2];
+    inout[0] = temp;
+    inout[1] = temp_4;
+}
+
+void __cdecl QuatMultiplyEquals(const float *in, float *inout)
+{
+    float temp[3];
+
+    temp[0] = (float)((float)((float)(inout[1] * in[3]) - (float)(inout[2] * in[0])) + (float)(inout[3] * in[1])) + (float)(inout[0] * in[2]);
+    temp[1] = (float)((float)((float)(inout[2] * in[3]) + (float)(inout[1] * in[0])) - (float)(inout[0] * in[1])) + (float)(inout[3] * in[2]);
+    temp[2] = (float)((float)((float)(inout[3] * in[3]) - (float)(inout[0] * in[0])) - (float)(inout[1] * in[1])) - (float)(inout[2] * in[2]);
+    inout[0] = (float)((float)((float)(inout[0] * in[3]) + (float)(inout[3] * in[0])) + (float)(inout[2] * in[1])) - (float)(inout[1] * in[2]);
+    inout[1] = temp[0];
+    inout[2] = temp[1];
+    inout[3] = temp[2];
+}
+
+void __cdecl ConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
+{
+    float scaledQuat[3]; // [esp+28h] [ebp-20h]
+
+    float yy; // [esp+18h] [ebp-30h]
+    float xy; // [esp+1Ch] [ebp-2Ch]
+    float zz; // [esp+20h] [ebp-28h]
+    float zw; // [esp+24h] [ebp-24h]
+    float yw; // [esp+34h] [ebp-14h]
+    float xz; // [esp+38h] [ebp-10h]
+    float yz; // [esp+3Ch] [ebp-Ch]
+    float xx; // [esp+40h] [ebp-8h]
+    float xw; // [esp+44h] [ebp-4h]
+
+    iassert(!IS_NAN((mat->quat[0])));
+    iassert(!IS_NAN((mat->quat[1])));
+    iassert(!IS_NAN((mat->quat[2])));
+    iassert(!IS_NAN((mat->quat[3])));
+    iassert(!IS_NAN((mat->transWeight)));
+
+    Vec3Scale(mat->quat, mat->transWeight, scaledQuat);
+
+    xx = scaledQuat[0] * mat->quat[0];
+    xy = scaledQuat[0] * mat->quat[1];
+    xz = scaledQuat[0] * mat->quat[2];
+    xw = scaledQuat[0] * mat->quat[3];
+    yy = scaledQuat[1] * mat->quat[1];
+    yz = scaledQuat[1] * mat->quat[2];
+    yw = scaledQuat[1] * mat->quat[3];
+    zz = scaledQuat[2] * mat->quat[2];
+    zw = scaledQuat[2] * mat->quat[3];
+    (*axis)[0] = 1.0 - (float)(yy + zz);
+    (*axis)[1] = xy + zw;
+    (*axis)[2] = xz - yw;
+    (*axis)[3] = xy - zw;
+    (*axis)[4] = 1.0 - (float)(xx + zz);
+    (*axis)[5] = yz + xw;
+    (*axis)[6] = xz + yw;
+    (*axis)[7] = yz - xw;
+    (*axis)[8] = 1.0 - (float)(xx + yy);
+}
 
 void __cdecl MatrixTransformVectorQuatTrans(const vec3r in, const DObjAnimMat *mat, vec3r out)
 {
-    float v3; // [esp+1Ch] [ebp-54h]
-    float v4; // [esp+20h] [ebp-50h]
-    float v5; // [esp+24h] [ebp-4Ch]
-    float v6; // [esp+28h] [ebp-48h]
-    vec3 result;
-    float v8; // [esp+28h] [ebp-48h]
-    float v9; // [esp+28h] [ebp-48h]
-    float v10; // [esp+38h] [ebp-38h]
-    float v11; // [esp+3Ch] [ebp-34h]
-    float v12; // [esp+40h] [ebp-30h]
-    float v13; // [esp+44h] [ebp-2Ch]
-    float v14; // [esp+48h] [ebp-28h]
-    float v15; // [esp+4Ch] [ebp-24h]
-    float v16; // [esp+50h] [ebp-20h]
-    float v17; // [esp+54h] [ebp-1Ch]
-    float v18; // [esp+58h] [ebp-18h]
-    float v19; // [esp+5Ch] [ebp-14h]
-    float v20; // [esp+60h] [ebp-10h]
-    float v21; // [esp+64h] [ebp-Ch]
+    float axis[3][3];
 
-    iassert(!isnan((mat->quat[0])));
-    iassert(!isnan((mat->quat[1])));
-    iassert(!isnan((mat->quat[2])));
-    iassert(!isnan((mat->quat[3])));
-    iassert(!isnan((mat->transWeight)));
+    ConvertQuatToMat(mat, axis);
 
-    Vec3Scale(mat->quat, mat->transWeight, result);
-   
-    v11 = result[0] * mat->quat[0];
-    v4 = result[0] * mat->quat[1];
-    v9 = result[0] * mat->quat[2];
-    v12 = result[0] * mat->quat[3];
-    v3 = result[1] * mat->quat[1];
-    v10 = result[1] * mat->quat[2];
-    v8 = result[1] * mat->quat[3];
-    v5 = result[2] * mat->quat[2];
-    v6 = result[2] * mat->quat[3];
-    v13 = 1.0 - (v3 + v5);
-    v14 = v4 + v6;
-    v15 = v9 - v8;
-    v16 = v4 - v6;
-    v17 = 1.0 - (v11 + v5);
-    v18 = v10 + v12;
-    v19 = v9 + v8;
-    v20 = v10 - v12;
-    v21 = 1.0 - (v11 + v3);
-    
-    out[0] = in[0] * v13 + in[1] * v16 + in[2] * v19 + mat->trans[0];
-    out[1] = in[0] * v14 + in[1] * v17 + in[2] * v20 + mat->trans[1];
-    out[2] = in[0] * v15 + in[1] * v18 + in[2] * v21 + mat->trans[2];
+    out[0] = (in[0] * axis[0][0]) + (in[1] * axis[1][0]) + (in[2] * axis[2][0]) + mat->trans[0];
+    out[1] = (in[0] * axis[0][1]) + (in[1] * axis[1][1]) + (in[2] * axis[2][1]) + mat->trans[1];
+    out[2] = (in[0] * axis[0][2]) + (in[1] * axis[1][2]) + (in[2] * axis[2][2]) + mat->trans[2];
 }
 
 void __cdecl AxisToQuat(const float (*mat)[3], float *out)
@@ -2846,6 +2871,27 @@ void __cdecl ClearBounds(float *mins, float *maxs)
 float __cdecl Vec3LengthSq(const float* v)
 {
     return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+void __cdecl QuatMultiplyReverseInverse(const float *in1, const float *in2, float *out)
+{
+    out[0] = (in2[0] * in1[3]) - (in2[3] * *in1) - (in2[2] * in1[1]) + (in2[1] * in1[2]);
+    out[1] = (in2[1] * in1[3]) + (in2[2] * *in1) - (in2[3] * in1[1]) - (in2[0] * in1[2]);
+    out[2] = (in2[2] * in1[3]) - (in2[1] * *in1) + (in2[0] * in1[1]) - (in2[3] * in1[2]);
+    out[3] = (in2[3] * in1[3]) + (in2[0] * *in1) + (in2[1] * in1[1]) + (in2[2] * in1[2]);
+}
+
+void __cdecl QuatMultiplyReverseEquals(const float *in, float *inout)
+{
+    float temp[3]; // [esp+4h] [ebp-Ch]
+
+    temp[0] =  (in[1] * inout[3]) - (in[2] * *inout) + (in[3] * inout[1]) + (in[0] * inout[2]);
+    temp[1] =  (in[2] * inout[3]) + (in[1] * *inout) - (in[0] * inout[1]) + (in[3] * inout[2]);
+    temp[2] =  (in[3] * inout[3]) - (in[0] * *inout) - (in[1] * inout[1]) - (in[2] * inout[2]);
+    inout[0] = (in[0] * inout[3]) + (in[3] * *inout) + (in[2] * inout[1]) - (in[1] * inout[2]);
+    inout[1] = temp[0];
+    inout[2] = temp[1];
+    inout[3] = temp[2];
 }
 
 void __fastcall QuatMultiplyInverse(const float *in1, const float *in2, float *out)

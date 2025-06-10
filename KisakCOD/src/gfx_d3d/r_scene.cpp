@@ -1624,7 +1624,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
         bestDen = 1;
         bestNum = 1;
         bestError = 1.0;
-        for (den = 1; den <= 0xA; ++den)
+        for (den = 1; den <= 10; ++den)
         {
             v17 = (double)den * rg.sunShadowmapScale + 0.5;
             v9 = floor(v17);

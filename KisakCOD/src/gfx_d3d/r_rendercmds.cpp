@@ -544,12 +544,12 @@ DebugGlobals *R_ToggleSmpFrame()
             frontEndDataOut->cloudCount,
             0,
             256);
-    Com_Memset((unsigned int *)frontEndDataOut->drawSurfs, 176, 8 * frontEndDataOut->drawSurfCount);
-    Com_Memset((unsigned int *)frontEndDataOut->surfsBuffer, 176, frontEndDataOut->surfPos);
-    Com_Memset((unsigned int *)frontEndDataOut->clouds, 176, frontEndDataOut->cloudCount << 6);
+    Com_Memset(frontEndDataOut->drawSurfs, 176, 8 * frontEndDataOut->drawSurfCount);
+    Com_Memset(frontEndDataOut->surfsBuffer, 176, frontEndDataOut->surfPos);
+    Com_Memset(frontEndDataOut->clouds, 176, frontEndDataOut->cloudCount << 6);
     Com_Memset(&frontEndDataOut->codeMeshes[0].triCount, 176, 0x8000);
     Com_Memset(frontEndDataOut->primDrawSurfsBuf, 176, 4 * frontEndDataOut->primDrawSurfPos);
-    Com_Memset((unsigned int *)&frontEndDataOut->fogSettings, 176, 20);
+    Com_Memset(&frontEndDataOut->fogSettings, 176, 20);
     frontEndDataOut->drawSurfCount = 0;
     frontEndDataOut->primDrawSurfPos = 0;
     frontEndDataOut->surfPos = 0;
@@ -1364,16 +1364,8 @@ void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, unsigned int 
 
 void __cdecl R_SetInputCodeImageTexture(GfxCmdBufInput *input, unsigned int codeTexture, const GfxImage *image)
 {
-    if (!input)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 573, 0, "%s", "input");
-    if (codeTexture >= 0x1B)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            574,
-            0,
-            "codeTexture doesn't index TEXTURE_SRC_CODE_COUNT\n\t%i not in [0, %i)",
-            codeTexture,
-            27);
+    iassert(input);
+    bcassert(codeTexture, TEXTURE_SRC_CODE_COUNT);
     input->codeImages[codeTexture] = image;
 }
 

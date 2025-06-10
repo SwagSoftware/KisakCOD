@@ -11,6 +11,8 @@ struct XModel;
 #define DOBJ_MAX_PARTS 0x80
 #define DOBJ_MAX_SUBMODELS 32
 
+#define HIGH_BIT 0x80000000
+
 struct DObjTrace_s // sizeof=0x1C
 {                                       // ...
     float fraction;                     // ...
