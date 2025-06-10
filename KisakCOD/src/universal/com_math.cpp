@@ -2848,23 +2848,27 @@ float __cdecl Vec3LengthSq(const float* v)
     return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
-void __cdecl LocalTransformVector(const float *in1, const float4 *in2, float *out)
+void __fastcall QuatMultiplyInverse(const float *in1, const float *in2, float *out)
 {
-    *out = *in1 * in2->v[0] + in1[1] * in2[1].v[0] + in1[2] * in2[2].v[0] + in2[3].v[0];
-    out[1] = *in1 * in2->v[1] + in1[1] * in2[1].v[1] + in1[2] * in2[2].v[1] + in2[3].v[1];
-    out[2] = *in1 * in2->v[2] + in1[1] * in2[1].v[2] + in1[2] * in2[2].v[2] + in2[3].v[2];
-}
+    out[0] = -in1[0] * in2[3]
+        + in1[3] * in2[0]
+        - in1[2] * in2[1]
+        + in1[1] * in2[2];
 
-void __fastcall LocalQuatMultiplyInverse(const float *in1, const float *in2, float *out)
-{
-    *out = (float)(in2[2] * in1[1])
-        - (float)((float)(in2[1] * in1[2]) - (float)((float)(*in2 * in1[3]) - (float)(in2[3] * *in1)));
-    out[1] = -(float)((float)(in2[2] * *in1)
-        - (float)((float)(in1[2] * *in2) + (float)((float)(in2[1] * in1[3]) - (float)(in2[3] * in1[1]))));
-    out[2] = (float)(in2[1] * *in1)
-        + (float)((float)(in2[2] * in1[3]) - (float)((float)(in1[1] * *in2) + (float)(in2[3] * in1[2])));
-    out[3] = (float)(in2[1] * in1[1])
-        + (float)((float)(in2[2] * in1[2]) + (float)((float)(*in1 * *in2) + (float)(in2[3] * in1[3])));
+    out[1] = -in1[1] * in2[3]
+        + in1[2] * in2[0]
+        + in1[3] * in2[1]
+        - in1[0] * in2[2];
+
+    out[2] = -in1[2] * in2[3]
+        - in1[1] * in2[0]
+        + in1[0] * in2[1]
+        + in1[3] * in2[2];
+
+    out[3] = in1[3] * in2[3]
+        + in1[0] * in2[0]
+        + in1[1] * in2[1]
+        + in1[2] * in2[2];
 }
 
 void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out)

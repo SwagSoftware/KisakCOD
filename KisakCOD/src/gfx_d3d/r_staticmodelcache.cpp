@@ -691,7 +691,7 @@ void __cdecl R_SkinXSurfaceStaticVerts(
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
     {
         srcVert = &srcVertArray[vertIndex];
-        LocalTransformVector(srcVert->xyz, useAxis, verts[vertIndex].xyz);
+        R_TransformSkelMat(srcVert->xyz, (const DObjSkelMat *)useAxis, verts[vertIndex].xyz);
         v8.packed = LocalTransformUnitVec(srcVert->normal, normAxis).packed;
         verts[vertIndex].normal = v8;
         verts[vertIndex].color.packed = srcVert->color.packed;

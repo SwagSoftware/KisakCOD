@@ -404,7 +404,7 @@ int  R_PreSkinXSurface(
         ConvertQuatToInverseSkelMat(mat, &invBaseMat);
         ConvertQuatToSkelMat(RotTransArray, &skelMat);
 
-        LocalQuatMultiplyInverse(mat->quat, RotTransArray->quat, quat);
+        QuatMultiplyInverse(mat->quat, RotTransArray->quat, quat);
         Vec4Normalize(quat);
 
         rigidSurf->placement.base.quat[0] = quat[0];
