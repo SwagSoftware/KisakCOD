@@ -740,8 +740,8 @@ void __cdecl FlashbangBlastEnt(
     team_t team)
 {
     gclient_s *client; // eax
-    VariableUnion percent_distance; // [esp+40h] [ebp-34h]
-    VariableUnion percent_angle; // [esp+44h] [ebp-30h]
+    float percent_distance; // [esp+40h] [ebp-34h]
+    float percent_angle; // [esp+44h] [ebp-30h]
     float forward[3]; // [esp+48h] [ebp-2Ch] BYREF
     float viewOrigin[3]; // [esp+54h] [ebp-20h] BYREF
     float toBlast[3]; // [esp+60h] [ebp-14h] BYREF
@@ -759,9 +759,9 @@ void __cdecl FlashbangBlastEnt(
                 if (damageScale > 0.0)
                 {
                     if (radius_min < (double)dist)
-                        percent_distance.floatValue = 1.0 - (dist - radius_min) / (radius_max - radius_min);
+                        percent_distance = 1.0 - (dist - radius_min) / (radius_max - radius_min);
                     else
-                        percent_distance.floatValue = 1.0;
+                        percent_distance = 1.0;
                     AngleVectors(ent->client->ps.viewangles, forward, 0, 0);
                     client = ent->client;
                     viewOrigin[0] = client->ps.origin[0];
@@ -770,7 +770,7 @@ void __cdecl FlashbangBlastEnt(
                     viewOrigin[2] = viewOrigin[2] + ent->client->ps.viewHeightCurrent;
                     Vec3Sub(blastOrigin, viewOrigin, toBlast);
                     Vec3NormalizeFast(toBlast);
-                    percent_angle.floatValue = (Vec3Dot(forward, toBlast) + 1.0) * 0.5;
+                    percent_angle = (Vec3Dot(forward, toBlast) + 1.0) * 0.5;
                     AddScrTeamName(team);
                     if (attacker)
                         Scr_AddEntity(attacker);

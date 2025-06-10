@@ -1820,10 +1820,7 @@ void __cdecl CMD_VEH_GetSpeed(scr_entref_t entref)
 
 void __cdecl CMD_VEH_GetSpeedMPH(scr_entref_t entref)
 {
-    VariableUnion value; // [esp+4h] [ebp-Ch]
-
-    value.floatValue = GScr_GetVehicle(entref)->scr_vehicle->speed / 17.6;
-    Scr_AddFloat(value);
+    Scr_AddFloat(GScr_GetVehicle(entref)->scr_vehicle->speed / 17.6);
 }
 
 void __cdecl CMD_VEH_ResumeSpeed(scr_entref_t entref)

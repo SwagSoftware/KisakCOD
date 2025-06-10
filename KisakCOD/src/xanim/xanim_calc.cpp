@@ -1241,16 +1241,8 @@ void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotT
     time = info->state.currentAnimTime;
 
     iassert(time >= 0.0f);
+    iassert(parts->bLoop ? (time < 1.f) : (time <= 1.f));
 
-    if (parts->bLoop)
-        v5 = time < 1.0;
-    else
-        v5 = time <= 1.0;
-
-    if (!v5)
-    {
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1129, 0, "%s\n\t%s", "parts->bLoop ? (time < 1.f) : (time <= 1.f)", va("time: %f, parts->bLoop: %d", time, parts->bLoop));
-    }
     if (time != 1.0 && parts->numframes)
     {
         if (parts->numframes >= 0x100u)

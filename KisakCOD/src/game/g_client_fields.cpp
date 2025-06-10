@@ -382,10 +382,7 @@ void __cdecl ClientScr_SetArchiveTime(gclient_s *pSelf, const client_fields_s *p
 
 void __cdecl ClientScr_GetArchiveTime(gclient_s *pSelf, const client_fields_s *pField)
 {
-    VariableUnion value; // [esp+4h] [ebp-4h]
-
-    value.floatValue = (double)pSelf->sess.archiveTime * EQUAL_EPSILON;
-    Scr_AddFloat(value);
+    Scr_AddFloat(pSelf->sess.archiveTime * EQUAL_EPSILON);
 }
 
 void __cdecl ClientScr_SetPSOffsetTime(gclient_s *pSelf, const client_fields_s *pField)

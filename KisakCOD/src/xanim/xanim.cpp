@@ -4145,10 +4145,12 @@ int __cdecl XAnimSetCompleteGoalWeight(
     int savedregs; // [esp+50h] [ebp+0h] BYREF
 
     Profile_Begin(328);
-    if (!obj)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4103, 0, "%s", "obj");
+
+    iassert(obj);
+
     if (goalWeight < EQUAL_EPSILON)
         goalWeight = 0.0;
+
     tree = obj->tree;
     infoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
     if (infoIndex)
@@ -4168,13 +4170,13 @@ int __cdecl XAnimSetCompleteGoalWeight(
 
 void __cdecl XAnimCloneAnimInfo(const XAnimInfo* from, XAnimInfo* to)
 {
-    if (to->animIndex != from->animIndex)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4131, 0, "%s", "to->animIndex == from->animIndex");
+    iassert(to->animIndex == from->animIndex);
     qmemcpy(&to->state, &from->state, sizeof(to->state));
     to->notifyChild = from->notifyChild;
     to->notifyIndex = from->notifyIndex;
     to->notifyName = from->notifyName;
     to->notifyType = from->notifyType;
+
     if (to->notifyName)
         SL_AddRefToString(to->notifyName);
 }
@@ -4182,22 +4184,21 @@ void __cdecl XAnimCloneAnimInfo(const XAnimInfo* from, XAnimInfo* to)
 void __cdecl XAnimCloneAnimTree(const XAnimTree_s* from, XAnimTree_s* to)
 {
     Profile_Begin(308);
-    if (!from)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4184, 0, "%s", "from");
-    if (!from->anims)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4185, 0, "%s", "from->anims");
-    if (!from->anims->size)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4186, 0, "%s", "from->anims->size");
-    if (!to)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4187, 0, "%s", "to");
-    if (to->anims != from->anims)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4188, 0, "%s", "to->anims == from->anims");
+
+    iassert(from);
+    iassert(from->anims);
+    iassert(from->anims->size);
+    iassert(to);
+    iassert(to->anims == from->anims);
+
     if (to->children)
         XAnimFreeInfo(to, to->children);
-    if (to->children)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4192, 0, "%s", "!to->children");
+
+    iassert(!to->children);
+
     if (from->children)
         XAnimCloneAnimTree_r(from, to, from->children, 0);
+
     Profile_EndInternal(0);
 }
 
@@ -4212,32 +4213,24 @@ void __cdecl XAnimCloneAnimTree_r(
     XAnimInfo* fromInfo; // [esp+Ch] [ebp-8h]
     unsigned int animToModel; // [esp+10h] [ebp-4h]
 
-    if (!from)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4151, 0, "%s", "from");
-    if (!from->anims)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4152, 0, "%s", "from->anims");
-    if (!from->anims->size)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4153, 0, "%s", "from->anims->size");
-    if (!to)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4154, 0, "%s", "to");
-    if (to->anims != from->anims)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4155, 0, "%s", "to->anims == from->anims");
-    if (!fromInfoIndex || fromInfoIndex >= 0x1000)
-        MyAssertHandler(
-            ".\\xanim\\xanim.cpp",
-            4157,
-            0,
-            "%s\n\t(fromInfoIndex) = %i",
-            "(fromInfoIndex && (fromInfoIndex < 4096))",
-            fromInfoIndex);
+    iassert(from);
+    iassert(from->anims);
+    iassert(from->anims->size);
+    iassert(to);
+    iassert(to->anims == from->anims);
+    iassert(fromInfoIndex && (fromInfoIndex < 4096));
+
     fromInfo = &g_xAnimInfo[fromInfoIndex];
-    if (!fromInfo->inuse)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 4160, 0, "%s", "fromInfo->inuse");
+    iassert(fromInfo->inuse);
+
     animToModel = fromInfo->animToModel;
-    if (fromInfo->animToModel)
+
+    if (animToModel)
         SL_AddRefToString(animToModel);
+
     toInfoIndex = XAnimAllocInfoWithParent(to, animToModel, fromInfo->animIndex, toInfoParentIndex, 1);
     XAnimCloneAnimInfo(fromInfo, &g_xAnimInfo[toInfoIndex]);
+
     for (fromChildInfoIndex = fromInfo->children;
         fromChildInfoIndex;
         fromChildInfoIndex = g_xAnimInfo[fromChildInfoIndex].next)
@@ -4248,13 +4241,7 @@ void __cdecl XAnimCloneAnimTree_r(
 
 XAnimInfo* __cdecl GetAnimInfo(int infoIndex)
 {
-    if (infoIndex <= 0 || infoIndex >= 4096)
-        MyAssertHandler(
-            ".\\xanim\\xanim.cpp",
-            4277,
-            0,
-            "%s\n\t(infoIndex) = %i",
-            "(infoIndex > 0 && infoIndex < 4096)",
-            infoIndex);
+    iassert(infoIndex > 0 && infoIndex < 4096);
+
     return &g_xAnimInfo[infoIndex];
 }

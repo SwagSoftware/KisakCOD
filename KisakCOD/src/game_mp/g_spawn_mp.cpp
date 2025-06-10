@@ -814,9 +814,6 @@ void __cdecl G_SetEntityScriptVariable(const char *key, char *value, gentity_s *
 
 unsigned int __cdecl G_SetEntityScriptVariableInternal(const char *key, char *value)
 {
-    int v3; // eax
-    const char *v4; // eax
-    VariableUnion v5; // [esp+4h] [ebp-1Ch]
     unsigned int index; // [esp+Ch] [ebp-14h]
     int type; // [esp+10h] [ebp-10h] BYREF
     float vec[3]; // [esp+14h] [ebp-Ch] BYREF
@@ -837,18 +834,15 @@ unsigned int __cdecl G_SetEntityScriptVariableInternal(const char *key, char *va
         Scr_AddVector(vec);
         break;
     case 5:
-        v5.floatValue = atof(value);
-        Scr_AddFloat(v5);
+        Scr_AddFloat(atof(value));
         break;
     case 6:
-        v3 = atoi(value);
-        Scr_AddInt(v3);
+        Scr_AddInt(atoi(value));
         break;
     default:
         if (!alwaysfails)
         {
-            v4 = va("G_SetEntityScriptVariableInternal: bad case %d", type);
-            MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 191, 0, v4);
+            MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 191, 0, va("G_SetEntityScriptVariableInternal: bad case %d", type));
         }
         break;
     }

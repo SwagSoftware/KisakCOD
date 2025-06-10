@@ -88,10 +88,6 @@ struct VariableStackBuffer // sizeof=0xC
 };
 union VariableUnion // sizeof=0x4
 {                                       // ...
-    operator int()
-    {
-        return intValue;
-    }
     VariableUnion(float f)
     {
         floatValue = f;

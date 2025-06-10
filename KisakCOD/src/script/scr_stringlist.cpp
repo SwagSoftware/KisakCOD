@@ -355,7 +355,7 @@ END_CLEANUP:
 
 char* SL_ConvertToString(unsigned int stringValue)
 {
-	//iassert((!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]));
+	iassert((!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]));
 
 	if (stringValue)
 	{

@@ -3180,7 +3180,7 @@ retry_15:
     case 75:
     case 89:
         if (top->type == 1)
-            v5.intValue = (int)top->u;
+            v5.intValue = top->u.intValue;
         else
             v5.intValue = 0;
         scrDebuggerGlob.objectId = v5.intValue + 1;

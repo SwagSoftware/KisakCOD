@@ -3,6 +3,8 @@
 #include <gfx_d3d/r_material.h>
 //#include <physics/phys_local.h>
 
+#define MAX_LODS 4
+
 enum XModelLodRampType : __int32
 {                                       // ...
     XMODEL_LOD_RAMP_RIGID = 0x0,

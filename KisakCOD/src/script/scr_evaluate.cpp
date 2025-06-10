@@ -251,7 +251,7 @@ void __cdecl Scr_GetValueString(unsigned int localId, VariableValue *value, int 
         I_strncpyz(s, "undefined", len);
         break;
     case 1:
-        id.intValue = (int)value->u;
+        id.intValue = value->u.intValue;
         type = GetObjectType(value->u.intValue);
         if (type == 20)
         {
@@ -1248,7 +1248,7 @@ void __cdecl Scr_EvalSelfValue(VariableValue *value)
 
     if (value->type != 1)
         goto LABEL_8;
-    threadId.intValue = (int)value->u;
+    threadId.intValue = value->u.intValue;
     ObjectType = GetObjectType(value->u.intValue);
     if (ObjectType < 14)
         goto LABEL_8;
@@ -1489,7 +1489,7 @@ void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, unsign
             v5 = va("%s is not an entity", var_typename[type]);
             Scr_Error(v5);
         }
-        objectId.intValue = (int)objectValue.u;
+        objectId.intValue = objectValue.u.intValue;
         if (GetObjectType(objectValue.u.stringValue) != 20)
         {
             typea = GetObjectType(objectId.stringValue);

@@ -13,7 +13,7 @@ const char *g_he_horzalign[8] = { "subleft", "left", "center", "right", "fullscr
 const char *g_he_vertalign[8] = { "subtop", "top", "middle", "bottom", "fullscreen", "noscale", "alignto480", "center_safearea" };
 
 
-const game_hudelem_field_t fields_0[20] =
+const game_hudelem_field_t fields_0[20] = // LWSS: should be called "fields"
 {
   { "x", 4, F_FLOAT, 0, 0, NULL, NULL },
   { "y", 8, F_FLOAT, 0, 0, NULL, NULL },
@@ -395,12 +395,8 @@ void __cdecl HudElem_SetAlpha(game_hudelem_s *hud, int offset)
 
 void __cdecl HudElem_GetAlpha(game_hudelem_s *hud, int offset)
 {
-    VariableUnion value; // [esp+4h] [ebp-8h]
-
-    if (fields_0[offset].ofs != 36)
-        MyAssertHandler(".\\game\\g_hudelem.cpp", 530, 0, "%s", "fields[offset].ofs == HEOFS( elem.color )");
-    value.floatValue = (double)hud->elem.color.a * 0.003921568859368563;
-    Scr_AddFloat(value);
+    iassert(fields_0[offset].ofs == 36 /*HEOFS(elem.color)*/);
+    Scr_AddFloat(hud->elem.color.a * 0.003921568859368563);
 }
 
 void __cdecl HudElem_SetGlowColor(game_hudelem_s *hud, int offset)
@@ -503,12 +499,9 @@ void __cdecl HudElem_SetGlowAlpha(game_hudelem_s *hud, int offset)
 
 void __cdecl HudElem_GetGlowAlpha(game_hudelem_s *hud, int offset)
 {
-    VariableUnion value; // [esp+4h] [ebp-8h]
+    iassert(fields_0[offset].ofs == 36 /*HEOFS(elem.color)*/);
 
-    if (fields_0[offset].ofs != 132)
-        MyAssertHandler(".\\game\\g_hudelem.cpp", 575, 0, "%s", "fields[offset].ofs == HEOFS( elem.glowColor )");
-    value.floatValue = (double)hud->elem.glowColor.a * 0.003921568859368563;
-    Scr_AddFloat(value);
+    Scr_AddFloat(hud->elem.glowColor.a * 0.003921568859368563);
 }
 
 void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int offset)

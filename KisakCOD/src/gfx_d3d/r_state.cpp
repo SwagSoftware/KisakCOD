@@ -1982,14 +1982,8 @@ unsigned int __cdecl R_DecodeSamplerState(unsigned __int8 samplerState)
     unsigned int tableIndex; // [esp+0h] [ebp-8h]
 
     tableIndex = samplerState & 0x1F;
-    if (tableIndex >= (unsigned int)s_decodeSamplerFilterState)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            941,
-            0,
-            "tableIndex doesn't index s_decodeSamplerFilterState\n\t%i not in [0, %i)",
-            tableIndex,
-            s_decodeSamplerFilterState);
+    bcassert(tableIndex, ARRAY_COUNT(s_decodeSamplerFilterState));
+
     return s_decodeSamplerFilterState[tableIndex]
         | 0x1500000
             | ((samplerState & 0x20) << 16)
@@ -2716,15 +2710,13 @@ void __cdecl R_SetMeshStream(GfxCmdBufState *state, GfxMeshData *mesh)
 
 void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBits)
 {
-    if (!device)
-        MyAssertHandler(".\\r_state.cpp", 1561, 0, "%s", "device");
-    R_HW_SetColorMask(device, *stateBits);
-    R_HW_SetAlphaTestEnable(device, *stateBits);
-    if ((*stateBits & 0x800) == 0)
-        MyAssertHandler(".\\r_state.cpp", 1569, 0, "%s", "stateBits[0] & GFXS0_ATEST_DISABLE");
-    R_HW_SetCullFace(device, *stateBits);
-    R_HW_SetPolygonMode(device, *stateBits);
-    R_ForceSetBlendState(device, *stateBits);
+    iassert(device);
+    R_HW_SetColorMask(device, stateBits[0]);
+    R_HW_SetAlphaTestEnable(device, stateBits[0]);
+    iassert(stateBits[0] & GFXS0_ATEST_DISABLE);
+    R_HW_SetCullFace(device, stateBits[0]);
+    R_HW_SetPolygonMode(device, stateBits[0]);
+    R_ForceSetBlendState(device, stateBits[0]);
     R_HW_SetDepthWriteEnable(device, stateBits[1]);
     R_HW_SetDepthTestEnable(device, stateBits[1]);
     R_HW_SetDepthTestFunction(device, stateBits[1]);
@@ -2732,50 +2724,6 @@ void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBit
     R_ForceSetStencilState(device, stateBits[1]);
 }
 
-#if 0
-// bad sp value at call has been detected, the output may be wrong!
-void  R_DrawCall(
-    void(__cdecl* callback)(const void*, GfxCmdBufSourceState*, GfxCmdBufState*, GfxCmdBufSourceState*, GfxCmdBufState*),
-    const void *userData,
-    GfxCmdBufSourceState *source,
-    const GfxViewInfo *viewInfo,
-    const GfxDrawSurfListInfo *info,
-    const GfxViewParms *viewParms,
-    GfxCmdBuf *cmdBuf,
-    GfxCmdBuf *prepassCmdBuf)
-{
-    //void* v9; // esp
-    GfxCmdBufState v10; // [esp-1430h] [ebp-143Ch] BYREF
-    GfxCmdBufState v11; // [esp-A20h] [ebp-A2Ch] BYREF
-    GfxSceneDef* p_sceneDef; // [esp-Ch] [ebp-18h]
-    GfxCmdBufInput* p_input; // [esp-8h] [ebp-14h]
-    //int v14; // [esp+0h] [ebp-Ch]
-    //void* v15; // [esp+4h] [ebp-8h]
-    //void* retaddr; // [esp+Ch] [ebp+0h]
-
-
-    //p_input = &viewInfo->input;
-    //p_sceneDef = &viewInfo->sceneDef;
-    R_BeginView(source, &viewInfo->sceneDef, viewParms);
-    qmemcpy(&v11, &gfxCmdBufState, sizeof(v11));
-    //memset(v11.vertexShaderConstState, 0, 0x900);
-    memset(v11.vertexShaderConstState, 0, sizeof(v11.vertexShaderConstState));
-    memset(v11.pixelShaderConstState, 0, sizeof(v11.pixelShaderConstState));
-    if (prepassCmdBuf)
-    {
-        qmemcpy(&v10, &gfxCmdBufState, sizeof(v10));
-        memset(v10.vertexShaderConstState, 0, sizeof(v10.vertexShaderConstState));
-        memset(v10.pixelShaderConstState, 0, sizeof(v10.pixelShaderConstState));
-        callback(userData, source, &v11, source, &v10);
-        qmemcpy(&gfxCmdBufState, &v10, sizeof(gfxCmdBufState));
-    }
-    else
-    {
-        callback(userData, source, &v11, 0, 0);
-    }
-    qmemcpy(&gfxCmdBufState, &v11, sizeof(gfxCmdBufState));
-}
-#else
 void R_DrawCall(
     DrawCallCallback callback,
     const void* userData,
@@ -2820,7 +2768,6 @@ void R_DrawCall(
     }
     memcpy(&gfxCmdBufState, &cmdBuf, sizeof(gfxCmdBufState));
 }
-#endif
 
 void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int constant, float x, float y, float z, float w)
 {
@@ -2835,7 +2782,7 @@ void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int consta
             constant,
             58);
     v6 = source->input.consts[constant];
-    *v6 = x;
+    v6[0] = x;
     v6[1] = y;
     v6[2] = z;
     v6[3] = w;

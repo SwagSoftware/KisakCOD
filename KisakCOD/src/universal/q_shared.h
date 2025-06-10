@@ -109,6 +109,8 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
+#define ptype_int intptr_t // LWSS: this type is used in cod4
+
 
 #ifndef NULL
 #define NULL ((void *)0)

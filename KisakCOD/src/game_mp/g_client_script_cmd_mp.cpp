@@ -583,7 +583,7 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t entref)
     int iWeaponIndex; // [esp+Ch] [ebp-10h]
     char *pszWeaponName; // [esp+10h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+14h] [ebp-8h]
-    VariableUnion fAmmoFrac; // [esp+18h] [ebp-4h]
+    float fAmmoFrac; // [esp+18h] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -611,7 +611,7 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t entref)
     {
         if (pSelf->client->ps.ammo[weapDef->iAmmoIndex] >= 1)
         {
-            fAmmoFrac.floatValue = (double)pSelf->client->ps.ammo[weapDef->iAmmoIndex] / (double)weapDef->iStartAmmo;
+            fAmmoFrac = (double)pSelf->client->ps.ammo[weapDef->iAmmoIndex] / (double)weapDef->iStartAmmo;
             Scr_AddFloat(fAmmoFrac);
         }
         else
@@ -633,7 +633,7 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t entref)
     int iWeaponIndex; // [esp+Ch] [ebp-10h]
     char *pszWeaponName; // [esp+10h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+14h] [ebp-8h]
-    VariableUnion fAmmoFrac; // [esp+18h] [ebp-4h]
+    float fAmmoFrac; // [esp+18h] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -661,7 +661,7 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t entref)
     {
         if (pSelf->client->ps.ammo[weapDef->iAmmoIndex] >= 1)
         {
-            fAmmoFrac.floatValue = (double)pSelf->client->ps.ammo[weapDef->iAmmoIndex] / (double)weapDef->iMaxAmmo;
+            fAmmoFrac = (double)pSelf->client->ps.ammo[weapDef->iAmmoIndex] / (double)weapDef->iMaxAmmo;
             Scr_AddFloat(fAmmoFrac);
         }
         else

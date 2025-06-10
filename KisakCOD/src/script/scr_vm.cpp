@@ -1508,7 +1508,7 @@ void __cdecl Scr_TerminateWaittillThread(unsigned int localId, unsigned int star
         ObjectVariable = FindObjectVariable(scrVarPub.pauseArrayId, selfId);
         selfNameId = FindObject(ObjectVariable);
         v4 = FindObjectVariable(selfNameId, startLocalId);
-        notifyListOwnerId.intValue = (int)GetVariableValueAddress(v4)->u;
+        notifyListOwnerId.intValue = GetVariableValueAddress(v4)->u.intValue;
         Variable = FindVariable(notifyListOwnerId.stringValue, 0x18000u);
         notifyListId = FindObject(Variable);
         v6 = FindVariable(notifyListId, stringValue);
@@ -3968,7 +3968,7 @@ void __cdecl Scr_ShutdownSystem(unsigned __int8 sys, int bComplete)
             idb = FindFirstSibling(v3.u.stringValue);
             if (!idb)
                 MyAssertHandler(".\\script\\scr_vm.cpp", 4417, 0, "%s", "id");
-            parentId.intValue = (int)GetVariableValueAddress(idb)->u;
+            parentId.intValue = GetVariableValueAddress(idb)->u.intValue;
             AddRefToObject(parentId.stringValue);
             Scr_CancelNotifyList(parentId.stringValue);
             RemoveRefToObject(parentId.stringValue);
@@ -4473,18 +4473,18 @@ void __cdecl Scr_AddInt(int value)
     scrVmPub.top->u.intValue = value;
 }
 
-void __cdecl Scr_AddFloat(VariableUnion value)
+void __cdecl Scr_AddFloat(float value)
 {
     IncInParam();
     scrVmPub.top->type = VAR_FLOAT;
-    *(float*)&scrVmPub.top->u.intValue = value.floatValue;
+    scrVmPub.top->u.floatValue = value;
 }
 
 void __cdecl Scr_AddAnim(scr_anim_s value)
 {
     IncInParam();
     scrVmPub.top->type = VAR_ANIMATION;
-    scrVmPub.top->u.intValue = (int)value.linkPointer; // KISAKX64: this technically works but is less than ideal
+    scrVmPub.top->u.codePosValue = value.linkPointer;
 }
 
 void __cdecl Scr_AddUndefined()

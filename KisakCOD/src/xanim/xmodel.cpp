@@ -20,8 +20,8 @@ void __cdecl XModelPartsFree(XModelPartsLoad *modelParts)
     int i; // [esp+4h] [ebp-8h]
     unsigned __int16 *boneNames; // [esp+8h] [ebp-4h]
 
-    if (!modelParts)
-        MyAssertHandler(".\\xanim\\xmodel.cpp", 81, 0, "%s", "modelParts");
+    iassert(modelParts);
+
     boneNames = modelParts->boneNames;
     size = modelParts->numBones;
     for (i = 0; i < size; ++i)
@@ -30,8 +30,8 @@ void __cdecl XModelPartsFree(XModelPartsLoad *modelParts)
 
 bool __cdecl XModelBad(const XModel *model)
 {
-    if (!model)
-        MyAssertHandler(".\\xanim\\xmodel.cpp", 48, 0, "%s", "model");
+    iassert(model);
+
     if (useFastFile->current.enabled)
         return DB_IsXAssetDefault(ASSET_TYPE_XMODEL, model->name);
     else

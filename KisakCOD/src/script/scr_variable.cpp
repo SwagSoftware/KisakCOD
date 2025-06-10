@@ -2609,7 +2609,7 @@ void  Scr_EvalSizeValue(VariableValue* value)
 	else if (value->type == VAR_STRING)
 	{
 		value->type = VAR_INTEGER;
-		stringValue.intValue = value->u;
+		stringValue.intValue = value->u.intValue;
 		value->u.intValue = strlen(SL_ConvertToString(value->u.intValue));
 		SL_RemoveRefToString(stringValue.stringValue);
 	}
@@ -2900,7 +2900,7 @@ unsigned int Scr_EvalArrayRef(unsigned int parentId)
 	VariableValue varValue; // [esp+14h] [ebp-14h]
 	VariableValueInternal* entryValue; // [esp+1Ch] [ebp-Ch]
 	unsigned int fieldId; // [esp+20h] [ebp-8h]
-	VariableUnion id; // [esp+24h] [ebp-4h]
+	int id; // [esp+24h] [ebp-4h]
 
 	if (parentId)
 	{
@@ -2920,7 +2920,7 @@ unsigned int Scr_EvalArrayRef(unsigned int parentId)
 				{
 					if (entryValue->u.next)
 					{
-						id = varValue.u;
+						id = varValue.u.intValue;
 						RemoveRefToObject(varValue.u.stringValue);
 						varValue.u.pointerValue = Scr_AllocArray();
 						CopyArray(id, varValue.u.pointerValue);
@@ -3053,7 +3053,7 @@ void  ClearArray(unsigned int parentId, VariableValue* value)
 	{
 		if (entryValue->u.next)
 		{
-			id.intValue = varValue.u;
+			id.intValue = varValue.u.intValue;
 			RemoveRefToObject(varValue.u.stringValue);
 			varValue.u.intValue = Scr_AllocArray();
 			CopyArray(id.stringValue, varValue.u.stringValue);
@@ -4541,7 +4541,7 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 			{
 				if (scrVarGlob.variableList[valuea.u.pointerValue + 1].u.next)
 				{
-					id.pointerValue = valuea.u;
+					id.pointerValue = valuea.u.pointerValue;
 					RemoveRefToObject(valuea.u.pointerValue);
 					valuea.u.pointerValue = Scr_AllocArray();
 					CopyArray(id.pointerValue, valuea.u.pointerValue);

@@ -340,7 +340,7 @@ unsigned int __cdecl Scr_GetNumParam();
 void __cdecl Scr_AddBool(unsigned int value);
 void IncInParam();
 void __cdecl Scr_AddInt(int value);
-void __cdecl Scr_AddFloat(VariableUnion value);
+void __cdecl Scr_AddFloat(float value);
 void __cdecl Scr_AddAnim(scr_anim_s value);
 void __cdecl Scr_AddUndefined();
 void __cdecl Scr_AddObject(unsigned int id);

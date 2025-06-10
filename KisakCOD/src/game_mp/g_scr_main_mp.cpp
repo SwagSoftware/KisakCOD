@@ -909,14 +909,12 @@ void GScr_GetDvarInt()
 
 void GScr_GetDvarFloat()
 {
-    VariableUnion value; // [esp+4h] [ebp-Ch]
     char *dvarName; // [esp+8h] [ebp-8h]
     const char *dvarValue; // [esp+Ch] [ebp-4h]
 
     dvarName = Scr_GetString(0);
     dvarValue = Dvar_GetVariantString(dvarName);
-    value.floatValue = atof(dvarValue);
-    Scr_AddFloat(value);
+    Scr_AddFloat(atof(dvarValue));
 }
 
 void GScr_SetDvar()
@@ -1957,8 +1955,7 @@ void __cdecl ScrCmd_SetModel(scr_entref_t entref)
 
 void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
 {
-    VariableUnion value; // [esp+0h] [ebp-Ch]
-    VariableUnion v2; // [esp+4h] [ebp-8h]
+    float value; // [esp+0h] [ebp-Ch]
     gentity_s *pEnt; // [esp+8h] [ebp-4h]
 
     pEnt = GetEntity(entref);
@@ -1966,8 +1963,7 @@ void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
     {
         if (pEnt->health)
         {
-            v2.floatValue = (double)pEnt->health / (double)pEnt->client->sess.maxHealth;
-            Scr_AddFloat(v2);
+            Scr_AddFloat((double)pEnt->health / (double)pEnt->client->sess.maxHealth);
         }
         else
         {
@@ -1976,8 +1972,7 @@ void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
     }
     else
     {
-        value.floatValue = (float)pEnt->health;
-        Scr_AddFloat(value);
+        Scr_AddFloat((float)pEnt->health);
     }
 }
 
@@ -2996,7 +2991,7 @@ void GScr_WeaponAltWeaponName()
 
 void GScr_WeaponFireTime()
 {
-    VariableUnion value; // [esp+4h] [ebp-10h]
+    float value; // [esp+4h] [ebp-10h]
     int iWeaponIndex; // [esp+Ch] [ebp-8h]
     char *pszWeaponName; // [esp+10h] [ebp-4h]
 
@@ -3004,7 +2999,7 @@ void GScr_WeaponFireTime()
     iWeaponIndex = G_GetWeaponIndexForName(pszWeaponName);
     if (iWeaponIndex)
     {
-        value.floatValue = (double)BG_GetWeaponDef(iWeaponIndex)->iFireTime * EQUAL_EPSILON;
+        value = (double)BG_GetWeaponDef(iWeaponIndex)->iFireTime * EQUAL_EPSILON;
         Scr_AddFloat(value);
     }
     else
@@ -3261,12 +3256,10 @@ void Scr_RandomInt()
 
 void Scr_RandomFloat()
 {
-    VariableUnion max; // [esp+4h] [ebp-8h]
     float fMax; // [esp+8h] [ebp-4h]
 
     fMax = Scr_GetFloat(0);
-    max.floatValue = flrand(0.0, fMax);
-    Scr_AddFloat(max);
+    Scr_AddFloat(flrand(0.0, fMax));
 }
 
 void Scr_RandomIntRange()
@@ -3288,7 +3281,6 @@ void Scr_RandomIntRange()
 
 void Scr_RandomFloatRange()
 {
-    VariableUnion min_4; // [esp+Ch] [ebp-Ch]
     float fMin; // [esp+10h] [ebp-8h]
     float fMax; // [esp+14h] [ebp-4h]
 
@@ -3305,50 +3297,45 @@ void Scr_RandomFloatRange()
         );
         Scr_Error("Scr_RandomFloatRange range must be positive float.\n");
     }
-    min_4.floatValue = flrand(fMin, fMax);
-    Scr_AddFloat(min_4);
+    Scr_AddFloat(flrand(fMin, fMax));
 }
 
 void GScr_sin()
 {
-    VariableUnion value; // [esp+4h] [ebp-8h]
     float v1; // [esp+8h] [ebp-4h]
 
     v1 = Scr_GetFloat(0) * 0.01745329238474369;
-    value.floatValue = sin(v1);
-    Scr_AddFloat(value);
+    Scr_AddFloat(sin(v1));
 }
 
 void GScr_cos()
 {
-    VariableUnion value; // [esp+4h] [ebp-8h]
     float v1; // [esp+8h] [ebp-4h]
 
     v1 = Scr_GetFloat(0) * 0.01745329238474369;
-    value.floatValue = cos(v1);
-    Scr_AddFloat(value);
+    Scr_AddFloat(cos(v1));
 }
 
 void GScr_tan()
 {
-    VariableUnion value; // [esp+4h] [ebp-18h]
     float v1; // [esp+10h] [ebp-Ch]
     float sinT; // [esp+14h] [ebp-8h]
     float cosT; // [esp+18h] [ebp-4h]
 
     v1 = Scr_GetFloat(0) * 0.01745329238474369;
+
     cosT = cos(v1);
     sinT = sin(v1);
+
     if (cosT == 0.0)
         Scr_Error("divide by 0");
-    value.floatValue = sinT / cosT;
-    Scr_AddFloat(value);
+
+    Scr_AddFloat(sinT / cosT);
 }
 
 void GScr_asin()
 {
     const char *v0; // eax
-    VariableUnion value; // [esp+8h] [ebp-Ch]
     float v2; // [esp+Ch] [ebp-8h]
     float x; // [esp+10h] [ebp-4h]
 
@@ -3359,14 +3346,12 @@ void GScr_asin()
         Scr_Error(v0);
     }
     v2 = asin(x);
-    value.floatValue = v2 * 57.2957763671875;
-    Scr_AddFloat(value);
+    Scr_AddFloat(v2 * 57.2957763671875);
 }
 
 void GScr_acos()
 {
     const char *v0; // eax
-    VariableUnion value; // [esp+8h] [ebp-Ch]
     float v2; // [esp+Ch] [ebp-8h]
     float x; // [esp+10h] [ebp-4h]
 
@@ -3377,35 +3362,30 @@ void GScr_acos()
         Scr_Error(v0);
     }
     v2 = acos(x);
-    value.floatValue = v2 * 57.2957763671875;
-    Scr_AddFloat(value);
+    Scr_AddFloat(v2 * 57.2957763671875);
 }
 
 void GScr_atan()
 {
-    VariableUnion value; // [esp+4h] [ebp-Ch]
     float v1; // [esp+8h] [ebp-8h]
     float Float; // [esp+Ch] [ebp-4h]
 
     Float = Scr_GetFloat(0);
     v1 = atan(Float);
-    value.floatValue = v1 * 57.2957763671875;
-    Scr_AddFloat(value);
+    Scr_AddFloat(v1 * 57.2957763671875);
 }
 
 void GScr_abs()
 {
-    VariableUnion value; // [esp+4h] [ebp-8h]
     float Float; // [esp+8h] [ebp-4h]
 
     Float = Scr_GetFloat(0);
-    value.floatValue = fabs(Float);
-    Scr_AddFloat(value);
+    Scr_AddFloat(fabs(Float));
 }
 
 void GScr_min()
 {
-    VariableUnion value; // [esp+4h] [ebp-10h]
+    float value; // [esp+4h] [ebp-10h]
     float v1; // [esp+8h] [ebp-Ch]
     float Float; // [esp+Ch] [ebp-8h]
     float v3; // [esp+10h] [ebp-4h]
@@ -3413,16 +3393,18 @@ void GScr_min()
     Float = Scr_GetFloat(0);
     v3 = Scr_GetFloat(1u);
     v1 = v3 - Float;
+
     if (v1 < 0.0)
-        value.floatValue = v3;
+        value = v3;
     else
-        value.floatValue = Float;
+        value = Float;
+
     Scr_AddFloat(value);
 }
 
 void GScr_max()
 {
-    VariableUnion value; // [esp+4h] [ebp-10h]
+    float value; // [esp+4h] [ebp-10h]
     float v1; // [esp+8h] [ebp-Ch]
     float Float; // [esp+Ch] [ebp-8h]
     float v3; // [esp+10h] [ebp-4h]
@@ -3431,30 +3413,26 @@ void GScr_max()
     v3 = Scr_GetFloat(1u);
     v1 = Float - v3;
     if (v1 < 0.0)
-        value.floatValue = v3;
+        value = v3;
     else
-        value.floatValue = Float;
+        value = Float;
     Scr_AddFloat(value);
 }
 
 void GScr_floor()
 {
-    VariableUnion v0; // [esp+8h] [ebp-8h]
     float Float; // [esp+Ch] [ebp-4h]
 
     Float = Scr_GetFloat(0);
-    v0.floatValue = floor(Float);
-    Scr_AddFloat(v0);
+    Scr_AddFloat(floor(Float));
 }
 
 void GScr_ceil()
 {
-    VariableUnion v0; // [esp+8h] [ebp-8h]
     float Float; // [esp+Ch] [ebp-4h]
 
     Float = Scr_GetFloat(0);
-    v0.floatValue = ceil(Float);
-    Scr_AddFloat(v0);
+    Scr_AddFloat(ceil(Float));
 }
 
 void GScr_sqrt()
@@ -3463,8 +3441,7 @@ void GScr_sqrt()
     float Float; // [esp+8h] [ebp-4h]
 
     Float = Scr_GetFloat(0);
-    value.floatValue = sqrt(Float);
-    Scr_AddFloat(value);
+    Scr_AddFloat(sqrt(Float));
 }
 
 void GScr_CastInt()
@@ -3571,7 +3548,6 @@ void GScr_PointOnSegmentNearestToPoint()
 
 void Scr_Distance()
 {
-    VariableUnion value; // [esp+0h] [ebp-2Ch]
     float diff[3]; // [esp+8h] [ebp-24h] BYREF
     float v0[3]; // [esp+14h] [ebp-18h] BYREF
     float v1[3]; // [esp+20h] [ebp-Ch] BYREF
@@ -3579,25 +3555,21 @@ void Scr_Distance()
     Scr_GetVector(0, v0);
     Scr_GetVector(1u, v1);
     Vec3Sub(v1, v0, diff);
-    value.floatValue = Vec3Length(diff);
-    Scr_AddFloat(value);
+    Scr_AddFloat(Vec3Length(diff));
 }
 
 void Scr_Distance2D()
 {
-    VariableUnion value; // [esp+0h] [ebp-1Ch]
     float v0[3]; // [esp+4h] [ebp-18h] BYREF
     float v1[3]; // [esp+10h] [ebp-Ch] BYREF
 
     Scr_GetVector(0, v0);
     Scr_GetVector(1u, v1);
-    value.floatValue = Vec2Distance(v0, v1);
-    Scr_AddFloat(value);
+    Scr_AddFloat(Vec2Distance(v0, v1));
 }
 
 void Scr_DistanceSquared()
 {
-    VariableUnion value; // [esp+0h] [ebp-28h]
     float diff[3]; // [esp+4h] [ebp-24h] BYREF
     float v0[3]; // [esp+10h] [ebp-18h] BYREF
     float v1[3]; // [esp+1Ch] [ebp-Ch] BYREF
@@ -3605,28 +3577,23 @@ void Scr_DistanceSquared()
     Scr_GetVector(0, v0);
     Scr_GetVector(1u, v1);
     Vec3Sub(v1, v0, diff);
-    value.floatValue = Vec3LengthSq(diff);
-    Scr_AddFloat(value);
+    Scr_AddFloat(Vec3LengthSq(diff));
 }
 
 void Scr_Length()
 {
-    VariableUnion value; // [esp+0h] [ebp-14h]
     float v[3]; // [esp+8h] [ebp-Ch] BYREF
 
     Scr_GetVector(0, v);
-    value.floatValue = Vec3Length(v);
-    Scr_AddFloat(value);
+    Scr_AddFloat(Vec3Length(v));
 }
 
 void Scr_LengthSquared()
 {
-    VariableUnion value; // [esp+0h] [ebp-10h]
     float v[3]; // [esp+4h] [ebp-Ch] BYREF
 
     Scr_GetVector(0, v);
-    value.floatValue = Vec3LengthSq(v);
-    Scr_AddFloat(value);
+    Scr_AddFloat(Vec3LengthSq(v));
 }
 
 void Scr_Closer()
@@ -3651,14 +3618,12 @@ void Scr_Closer()
 
 void Scr_VectorDot()
 {
-    VariableUnion value; // [esp+0h] [ebp-1Ch]
     float b[3]; // [esp+4h] [ebp-18h] BYREF
     float a[3]; // [esp+10h] [ebp-Ch] BYREF
 
     Scr_GetVector(0, a);
     Scr_GetVector(1u, b);
-    value.floatValue = Vec3Dot(a, b);
-    Scr_AddFloat(value);
+    Scr_AddFloat(Vec3Dot(a, b));
 }
 
 void Scr_VectorNormalize()
@@ -4203,7 +4168,7 @@ void __cdecl GScr_DamageConeTraceInternal(scr_entref_t entref, int contentMask)
 {
     float damageOrigin[3]; // [esp+Ch] [ebp-18h] BYREF
     gentity_s *ignoreEnt; // [esp+18h] [ebp-Ch]
-    VariableUnion damageAmount; // [esp+1Ch] [ebp-8h]
+    float damageAmount; // [esp+1Ch] [ebp-8h]
     gentity_s *ent; // [esp+20h] [ebp-4h]
 
     ent = GetEntity(entref);
@@ -4211,7 +4176,7 @@ void __cdecl GScr_DamageConeTraceInternal(scr_entref_t entref, int contentMask)
     if (Scr_GetNumParam())
         ignoreEnt = Scr_GetEntity(1u);
     Scr_GetVector(0, damageOrigin);
-    damageAmount.floatValue = CanDamage(ent, ignoreEnt, damageOrigin, 1.0, 0, contentMask);
+    damageAmount = CanDamage(ent, ignoreEnt, damageOrigin, 1.0, 0, contentMask);
     Scr_AddFloat(damageAmount);
 }
 
@@ -4292,18 +4257,15 @@ void GScr_GetAngleDelta()
     index = anim.index;
     Anims = Scr_GetAnims(anim.tree);
     XAnimGetRelDelta(Anims, index, rot, trans, time1, time2);
-    time2a.floatValue = RotationToYaw(rot);
-    Scr_AddFloat(time2a);
+    Scr_AddFloat(RotationToYaw(rot));
 }
 
 void GScr_GetNorthYaw()
 {
-    VariableUnion value; // [esp+4h] [ebp-28h]
     char northYawString[32]; // [esp+8h] [ebp-24h] BYREF
 
     SV_GetConfigstring(0x336u, northYawString, 32);
-    value.floatValue = atof(northYawString);
-    Scr_AddFloat(value);
+    Scr_AddFloat(atof(northYawString));
 }
 
 void Scr_LoadFX()

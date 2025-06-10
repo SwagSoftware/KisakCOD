@@ -2722,43 +2722,24 @@ void __cdecl RB_ExecuteRenderCommandsLoop(const void *cmds)
     GfxRenderCommandExecState execState; // [esp+4h] [ebp-8h] BYREF
     const void *prevCmd; // [esp+8h] [ebp-4h]
 
-    if (tess.indexCount)
-        MyAssertHandler(".\\rb_backend.cpp", 2974, 0, "%s\n\t(tess.indexCount) = %i", "(!tess.indexCount)", tess.indexCount);
+    iassert(!tess.indexCount);
+
     execState.cmd = cmds;
     prevCmd = cmds;
     while (1)
     {
-        if (((int)execState.cmd & 3) != 0)
-            MyAssertHandler(".\\rb_backend.cpp", 2982, 0, "%s", "(reinterpret_cast< psize_int >( execState.cmd ) & 3) == 0");
+        iassert((reinterpret_cast<ptype_int>(execState.cmd) & 3) == 0);
         header = (const GfxCmdHeader *)execState.cmd;
-        if (!*(_WORD *)execState.cmd)
+
+        if (!header->id)
             break;
-        if (*(unsigned __int16 *)execState.cmd >= 0x16u)
-            MyAssertHandler(
-                ".\\rb_backend.cpp",
-                2987,
-                0,
-                "%s\n\t(header->id) = %i",
-                "(header->id < (sizeof( RB_RenderCommandTable ) / (sizeof( RB_RenderCommandTable[0] ) * (sizeof( RB_RenderCommand"
-                "Table ) != 4 || sizeof( RB_RenderCommandTable[0] ) <= 4))))",
-                *(unsigned __int16 *)execState.cmd);
-        if (!RB_RenderCommandTable[header->id])
-            MyAssertHandler(
-                ".\\rb_backend.cpp",
-                2988,
-                0,
-                "%s\n\t(header->id) = %i",
-                "(RB_RenderCommandTable[header->id])",
-                header->id);
+
+        iassert(header->id < (sizeof(RB_RenderCommandTable) / (sizeof(RB_RenderCommandTable[0]) * (sizeof(RB_RenderCommandTable) != 4 || sizeof(RB_RenderCommandTable[0]) <= 4))));
+        iassert(RB_RenderCommandTable[header->id]);
         RB_RenderCommandTable[header->id](&execState);
-        if (execState.cmd == prevCmd)
-            MyAssertHandler(".\\rb_backend.cpp", 2992, 0, "%s", "execState.cmd != prevCmd");
+        iassert(execState.cmd != prevCmd);
         prevCmd = execState.cmd;
-        if (g_primStats)
-        {
-            if (!tess.indexCount)
-                MyAssertHandler(".\\rb_backend.cpp", 2997, 0, "%s", "!g_primStats || tess.indexCount");
-        }
+        iassert(!g_primStats || tess.indexCount);
     }
     if (tess.indexCount)
         RB_EndTessSurface();
