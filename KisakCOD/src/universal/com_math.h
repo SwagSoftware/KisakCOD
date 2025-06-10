@@ -487,8 +487,6 @@ struct DObjSkelMat;
 
 void __cdecl ConvertQuatToSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat);
 void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat);
-void __fastcall LocalConvertQuatToSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat);
-void __fastcall LocalConvertQuatToInverseSkelMat(const DObjAnimMat *mat, DObjSkelMat *skelMat);
 void __fastcall LocalQuatMultiplyInverse(const float *in1, const float *in2, float *out);
 void __cdecl LocalTransformVector(const float *in1, const float4 *in2, float *out);
 void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out);

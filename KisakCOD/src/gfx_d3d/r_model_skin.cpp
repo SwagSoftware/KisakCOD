@@ -196,24 +196,29 @@ void __cdecl MatrixTransformVertexAndBasis(
     vert->xyz[2] = *offset * mat->axis[0][2] + offset[1] * mat->axis[1][2] + offset[2] * mat->axis[2][2] + mat->origin[2];
     vert->binormalSign = binormalSign;
 
-    Vec3UnpackUnitVec(normal, (float *)&unpacked);
+    Vec3UnpackUnitVec(normal, unpacked);
+
     rotated[0] = unpacked[0] * mat->axis[0][0] + unpacked[1] * mat->axis[1][0] + unpacked[2] * mat->axis[2][0];
     rotated[1] = unpacked[0] * mat->axis[0][1] + unpacked[1] * mat->axis[1][1] + unpacked[2] * mat->axis[2][1];
     rotated[2] = unpacked[0] * mat->axis[0][2] + unpacked[1] * mat->axis[1][2] + unpacked[2] * mat->axis[2][2];
-    normal.array[0] = (int)(rotated[0] * 127.0 + 127.5);
-    normal.array[1] = (int)(rotated[1] * 127.0 + 127.5);
-    normal.array[2] = (int)(rotated[2] * 127.0 + 127.5);
+
+    normal.array[0] = (int)(rotated[0] * 127.0f + 127.5f);
+    normal.array[1] = (int)(rotated[1] * 127.0f + 127.5f);
+    normal.array[2] = (int)(rotated[2] * 127.0f + 127.5f);
     normal.array[3] = 63;
     vert->normal = normal;
 
     Vec3UnpackUnitVec(tangent, unpacked);
+
     rotated[0] = unpacked[0] * mat->axis[0][0] + unpacked[1] * mat->axis[1][0] + unpacked[2] * mat->axis[2][0];
     rotated[1] = unpacked[0] * mat->axis[0][1] + unpacked[1] * mat->axis[1][1] + unpacked[2] * mat->axis[2][1];
     rotated[2] = unpacked[0] * mat->axis[0][2] + unpacked[1] * mat->axis[1][2] + unpacked[2] * mat->axis[2][2];
-    tangent.array[0] = (int)(rotated[0] * 127.0 + 127.5);
-    tangent.array[1] = (int)(rotated[1] * 127.0 + 127.5);
-    tangent.array[2] = (int)(rotated[2] * 127.0 + 127.5);
+
+    tangent.array[0] = (int)(rotated[0] * 127.0f + 127.5f);
+    tangent.array[1] = (int)(rotated[1] * 127.0f + 127.5f);
+    tangent.array[2] = (int)(rotated[2] * 127.0f + 127.5f);
     tangent.array[3] = 63;
+
     vert->tangent = tangent;
 }
 
@@ -270,10 +275,11 @@ void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)
 {
     float decodeScale; // [esp+10h] [ebp-4h]
 
-    decodeScale = ((double)in.array[3] - -192.0) / 32385.0;
-    out[0] = ((double)in.array[0] - 127.0) * decodeScale;
-    out[1] = ((double)in.array[1] - 127.0) * decodeScale;
-    out[2] = ((double)in.array[2] - 127.0) * decodeScale;
+    decodeScale = (in.array[3] - -192.0f) / 32385.0f;
+
+    out[0] = (in.array[0] - 127.0f) * decodeScale;
+    out[1] = (in.array[1] - 127.0f) * decodeScale;
+    out[2] = (in.array[2] - 127.0f) * decodeScale;
 }
 
 void __cdecl R_SkinXSurfaceWeight1(
@@ -429,13 +435,12 @@ void __cdecl R_SkinXSurfaceRigid(
     GfxPackedVertex *v; // [esp+58h] [ebp-8h]
     const DObjSkelMat *bone; // [esp+5Ch] [ebp-4h]
 
-    if (!vertices)
-        MyAssertHandler(".\\r_model_skin.cpp", 1940, 0, "%s", "vertices");
-    if (((unsigned __int8)vertices & 0xF) != 0)
-        MyAssertHandler(".\\r_model_skin.cpp", 1941, 0, "%s", "!(reinterpret_cast< unsigned >( vertices ) & 15)");
-    if (((unsigned __int8)boneMatrix & 0xF) != 0)
-        MyAssertHandler(".\\r_model_skin.cpp", 1942, 0, "%s", "!(reinterpret_cast< unsigned >( boneMatrix ) & 15)");
-    //Profile_Begin(111);
+    iassert(vertices);
+    iassert(!(reinterpret_cast<unsigned>(vertices) & 15));
+    iassert(!(reinterpret_cast<unsigned>(boneMatrix) & 15));
+
+    Profile_Begin(111);
+
     v = surf->verts0;
     vertex = vertices;
     for (i = 0; i < surf->vertListCount; ++i)
@@ -452,9 +457,9 @@ void __cdecl R_SkinXSurfaceRigid(
             ++vertex;
         }
     }
-    if (vertex - vertices != totalVertCount)
-        MyAssertHandler(".\\r_model_skin.cpp", 1963, 0, "%s", "vertex - vertices == totalVertCount");
-    //Profile_EndInternal(0);
+
+    iassert(vertex - vertices == totalVertCount);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_MultiplySkelMat(const DObjSkelMat *mat0, const DObjSkelMat *mat1, DObjSkelMat *out)

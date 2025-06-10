@@ -401,8 +401,8 @@ int  R_PreSkinXSurface(
 
         Vec3Scale(mat->quat, mat->transWeight, scaledQuat);
 
-        LocalConvertQuatToInverseSkelMat(mat, &invBaseMat);
-        LocalConvertQuatToSkelMat(RotTransArray, &skelMat);
+        ConvertQuatToInverseSkelMat(mat, &invBaseMat);
+        ConvertQuatToSkelMat(RotTransArray, &skelMat);
 
         LocalQuatMultiplyInverse(mat->quat, RotTransArray->quat, quat);
         Vec4Normalize(quat);

@@ -1880,7 +1880,7 @@ void FX_GenerateMarkVertsForMark_MatrixFromPlacement(
     v5.trans[0] = placement->origin[0];
     v5.trans[1] = placement->origin[1];
     v5.trans[2] = placement->origin[2];
-    LocalConvertQuatToSkelMat(&v5, &v6);
+    ConvertQuatToSkelMat(&v5, &v6);
     DObjSkelMatToMatrix43(&v6, outTransform);
     (*outTransform)[9] = (*outTransform)[9] + *viewOffset;
     (*outTransform)[10] = (*outTransform)[10] + viewOffset[1];
@@ -2003,7 +2003,7 @@ void __cdecl FX_GenerateMarkVertsForMark_MatrixFromAnim(
     v11 = 0;
     for (i = 0; i != v8; v11 += XModelNumBones(Model))
         Model = DObjGetModel(dobj, i++);
-    LocalConvertQuatToSkelMat(&boneMtxList[v11 + lmapIndex], (DObjSkelMat *)v26);
+    ConvertQuatToSkelMat(&boneMtxList[v11 + lmapIndex], (DObjSkelMat *)v26);
     v14 = (float *)&v26[1];
     v15 = (float *)&v26[30];
     v16 = 3;
@@ -2023,7 +2023,7 @@ void __cdecl FX_GenerateMarkVertsForMark_MatrixFromAnim(
     *(float *)&v26[39] = viewOffset[2] + *(float *)&v26[14];
     v19 = DObjGetModel(dobj, v8);
     BasePose = XModelGetBasePose(v19);
-    LocalConvertQuatToInverseSkelMat(&BasePose[lmapIndex], (DObjSkelMat *)v26);
+    ConvertQuatToInverseSkelMat(&BasePose[lmapIndex], (DObjSkelMat *)v26);
     v21 = (float *)&v26[1];
     v22 = (float *)&v26[18];
     v23 = 3;
