@@ -3,6 +3,7 @@
 #include <qcommon/mem_track.h>
 
 #include <gfx_d3d/r_drawsurf.h>
+#include <gfx_d3d/rb_tess.h>
 #include <gfx_d3d/r_scene.h>
 #include <gfx_d3d/r_marks.h>
 

@@ -1,6 +1,16 @@
 #pragma once
 #include "rb_backend.h"
 
+enum $7B978A8EAF4AE2627C6F063D7A9BDEE5 : __int32
+{
+    MARK_MODEL_TYPE_WORLD_BRUSH = 0x0,
+    MARK_MODEL_TYPE_WORLD_MODEL = 0x40,
+    MARK_MODEL_TYPE_ENT_BRUSH = 0x80,
+    MARK_MODEL_TYPE_ENT_MODEL = 0xC0,
+    MARK_MODEL_TYPE_MASK = 0xC0,
+    MARK_MODEL_SURF_MASK = 0x3F,
+};
+
 struct GfxReadCmdBuf // sizeof=0x4
 {                                       // ...
     const unsigned int *primDrawSurfPos; // ...

@@ -20,33 +20,36 @@ void R_SkinXModelCmd(_WORD *data)
     bool sseEnabled = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
     bool sseStateUsed = false;
 
-    SkinXModelCmd* cmd = (SkinXModelCmd*)data;
+    SkinXModelCmd* skinCmd = (SkinXModelCmd*)data;
 
-    iassert(cmd);
-    iassert(cmd->surfCount);
+    iassert(skinCmd);
+    iassert(skinCmd->surfCount);
 
-    unsigned int* surfPos = (unsigned int*)cmd->modelSurfs;
+    unsigned int* surfPos = (unsigned int*)skinCmd->modelSurfs;
 
     int boneIndex = -1;
+    GfxPackedVertex *skinnedVert = 0;
     DObjSkelMat __declspec(align(16)) boneSkelMats[128];
     memset(boneSkelMats, 0, sizeof(boneSkelMats));
 
-    for (unsigned int i = 0; i < cmd->surfCount; i++)
+    for (unsigned int i = 0; i < skinCmd->surfCount; i++)
     {
-        if (*(int*)surfPos == -3)
+        GfxModelSkinnedSurface *skinnedSurf = (GfxModelSkinnedSurface *)surfPos;
+        if (skinnedSurf->skinnedCachedOffset == -3)
         {
             ++surfPos;
         }
         else
         {
-            GfxModelSkinnedSurface* skinnedSurf = (GfxModelSkinnedSurface*)surfPos;
             if (boneIndex != skinnedSurf->info.boneIndex)
             {
                 boneIndex = skinnedSurf->info.boneIndex;
+                const int totalBones = boneIndex + skinnedSurf->info.boneCount;
                 const DObjAnimMat* baseMats = &skinnedSurf->info.baseMat[-boneIndex];
-                for (unsigned int j = boneIndex; j < boneIndex + skinnedSurf->info.boneCount; j++)
+                for (unsigned int j = boneIndex; j < totalBones; j++)
                 {
-                    if (!(cmd->surfacePartBits[j >> 5] & (0x80000000 >> (j & 0x1F)))) continue;
+                    if ((skinCmd->surfacePartBits[j >> 5] & (0x80000000 >> (j & 0x1F))) == 0)
+                        continue;
 
                     if (sseStateUsed)
                     {
@@ -55,110 +58,23 @@ void R_SkinXModelCmd(_WORD *data)
                     }
 
                     DObjSkelMat mat0, mat1;
-#if 0
+
                     ConvertQuatToInverseSkelMat(&baseMats[j], &mat0);
-                    ConvertQuatToInverseSkelMat(&cmd->mat[j], &mat1);
-#else
-                    //DObjSkelMat mat0_c, mat1_c;
-                    //ConvertQuatToInverseSkelMat(&baseMats[j], &mat0_c);
-                    //ConvertQuatToInverseSkelMat(&cmd->mat[j], &mat1_c);
+                    ConvertQuatToSkelMat(&skinCmd->mat[j], &mat1);
 
-                    // NOTE(mrsteyk): never let bro decompile again
-                    {
-                        auto baseMats_j = &baseMats[j];
-                        // Lines 581, 582
-                        iassert(!IS_NAN(baseMats_j->quat[0]) && !IS_NAN(baseMats_j->quat[1]) && !IS_NAN(baseMats_j->quat[2]) && !IS_NAN(baseMats_j->quat[3]));
-                        iassert(!IS_NAN(baseMats_j->transWeight));
+                    mat1.origin[0] = skinCmd->mat[j].trans[0];
+                    mat1.origin[1] = skinCmd->mat[j].trans[1];
+                    mat1.origin[2] = skinCmd->mat[j].trans[2];
+                    mat1.origin[3] = 1.0f;
 
-                        float quatScaled[3];
-                        Vec3Scale(baseMats_j->quat, baseMats_j->transWeight, quatScaled);
-
-                        float v37 = quatScaled[0] * baseMats_j->quat[0];
-                        float v36 = quatScaled[0] * baseMats_j->quat[1];
-                        float v35 = quatScaled[0] * baseMats_j->quat[2];
-                        float v34 = quatScaled[0] * baseMats_j->quat[3];
-                        
-                        float v33 = quatScaled[1] * baseMats_j->quat[1];
-                        float v32 = quatScaled[1] * baseMats_j->quat[2];
-                        float v31 = quatScaled[1] * baseMats_j->quat[3];
-                        
-                        float v30 = quatScaled[2] * baseMats_j->quat[2];
-                        float v29 = quatScaled[2] * baseMats_j->quat[3];
-
-                        mat0.axis[0][0] = 1.0 - (v33 + v30);
-                        mat0.axis[0][1] = v36 - v29;
-                        mat0.axis[0][2] = v35 + v31;
-                        mat0.axis[0][3] = 0.0;
-                        mat0.axis[1][0] = v36 + v29;
-                        mat0.axis[1][1] = 1.0 - (v37 + v30);
-                        mat0.axis[1][2] = v32 - v34;
-                        mat0.axis[1][3] = 0.0;
-                        mat0.axis[2][0] = v35 - v31;
-                        mat0.axis[2][1] = v32 + v34;
-                        mat0.axis[2][2] = 1.0 - (v37 + v33);
-                        mat0.axis[2][3] = 0.0;
-                        mat0.origin[0] = -(baseMats_j->trans[0] * mat0.axis[0][0]
-                            + baseMats_j->trans[1] * mat0.axis[1][0]
-                            + baseMats_j->trans[2] * mat0.axis[2][0]);
-                        mat0.origin[1] = -(baseMats_j->trans[0] * mat0.axis[0][1]
-                            + baseMats_j->trans[1] * mat0.axis[1][1]
-                            + baseMats_j->trans[2] * mat0.axis[2][1]);
-                        mat0.origin[2] = -(baseMats_j->trans[0] * mat0.axis[0][2]
-                            + baseMats_j->trans[1] * mat0.axis[1][2]
-                            + baseMats_j->trans[2] * mat0.axis[2][2]);
-                        mat0.origin[3] = 1.0;
-                    }
-                    {
-                        auto mat_j = &cmd->mat[j];
-                        // Lines 473, 474
-                        iassert(!IS_NAN(mat_j->quat[0]) && !IS_NAN(mat_j->quat[1]) && !IS_NAN(mat_j->quat[2]) && !IS_NAN(mat_j->quat[3]));
-                        iassert(!IS_NAN(mat_j->transWeight));
-
-                        float quatScaled[3];
-                        Vec3Scale(mat_j->quat, mat_j->transWeight, quatScaled);
-
-                        float v20 = quatScaled[0] * mat_j->quat[0];
-                        float v19 = quatScaled[0] * mat_j->quat[1];
-                        float v18 = quatScaled[0] * mat_j->quat[2];
-                        float v17 = quatScaled[0] * mat_j->quat[3];
-
-                        float v16 = quatScaled[1] * mat_j->quat[1];
-                        float v15 = quatScaled[1] * mat_j->quat[2];
-                        float v14 = quatScaled[1] * mat_j->quat[3];
-                        
-                        float v13 = quatScaled[2] * mat_j->quat[2];
-                        float v12 = quatScaled[2] * mat_j->quat[3];
-                        
-                        mat1.axis[0][0] = 1.0 - (v16 + v13);
-                        mat1.axis[0][1] = v19 + v12;
-                        mat1.axis[0][2] = v18 - v14;
-                        mat1.axis[0][3] = 0.0;
-                        mat1.axis[1][0] = v19 - v12;
-                        mat1.axis[1][1] = 1.0 - (v20 + v13);
-                        mat1.axis[1][2] = v15 + v17;
-                        mat1.axis[1][3] = 0.0;
-                        mat1.axis[2][0] = v18 + v14;
-                        mat1.axis[2][1] = v15 - v17;
-                        mat1.axis[2][2] = 1.0 - (v20 + v16);
-                        mat1.axis[2][3] = 0.0;
-                        mat1.origin[0] = mat_j->trans[0];
-                        mat1.origin[1] = mat_j->trans[1];
-                        mat1.origin[2] = mat_j->trans[2];
-                        mat1.origin[3] = 1.0;
-                    }
-
-                    //iassert(!memcmp(&mat0, &mat0_c, sizeof(mat0)));
-                    //iassert(!memcmp(&mat1, &mat1_c, sizeof(mat1)));
-#endif
                     R_MultiplySkelMat(&mat0, &mat1, &boneSkelMats[j]);
-                    boneSkelMats[j].axis[0][3] = 0.0;
-                    boneSkelMats[j].axis[1][3] = 0.0;
-                    boneSkelMats[j].axis[2][3] = 0.0;
-                    boneSkelMats[j].origin[3] = 1.0;
+                    boneSkelMats[j].axis[0][3] = 0.0f;
+                    boneSkelMats[j].axis[1][3] = 0.0f;
+                    boneSkelMats[j].axis[2][3] = 0.0f;
+                    boneSkelMats[j].origin[3] = 1.0f;
                 }
             }
 
-            GfxPackedVertex* skinnedVert = 0;
 
             if (skinnedSurf->skinnedCachedOffset == -2)
             {
@@ -166,11 +82,13 @@ void R_SkinXModelCmd(_WORD *data)
             }
             else
             {
-                iassert(skinnedSurf->xsurf);
+                surfPos = (unsigned int*)(skinnedSurf + 1);
+                XSurface *xsurf = skinnedSurf->xsurf;
+                iassert(xsurf);
 
                 if (skinnedSurf->skinnedCachedOffset < 0)
                 {
-                    iassert(((reinterpret_cast<uint>(skinnedSurf->skinnedVert) & 15) == 0));
+                    iassert((reinterpret_cast<uint>(skinnedSurf->skinnedVert) & 15) == 0);
                     skinnedVert = skinnedSurf->skinnedVert;
                 }
                 else
@@ -204,8 +122,6 @@ void R_SkinXModelCmd(_WORD *data)
                 //{
                     R_SkinXSurfaceSkinned(skinnedSurf->xsurf, &boneSkelMats[boneIndex], skinnedVert);
                 //}
-
-                surfPos += (sizeof(GfxModelSkinnedSurface) / 4);
             }
         }
     }

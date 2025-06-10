@@ -215,8 +215,8 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
 
     data = context.source->input.data;
     drawSurf = *drawSurfList;
-    drawSurfMask.packed = 0xFFFFFFFFE0000000uLL;
-    drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
+    drawSurfMask.packed = DRAWSURF_KEY_MASK;
+    drawSurfKey = drawSurf.packed & DRAWSURF_KEY_MASK;
     drawSurfIndex = 0;
 
     eyeOffset.v[0] = context.source->eyeOffset[0];
@@ -226,7 +226,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
     eyeOffset.v[0] = eyeOffset.v[0] - 0.0;
     eyeOffset.v[1] = eyeOffset.v[1] - 0.0;
     eyeOffset.v[2] = eyeOffset.v[2] - 0.0;
-    eyeOffset.v[3] = 0.0 - 1.0;
+    eyeOffset.v[3] = 0.0f - 1.0f;
 
     modelSurf = (const GfxModelRigidSurface*)((char*)data + 4 * drawSurf.fields.objectId);
     baseGfxEntIndex = modelSurf->surf.info.gfxEntIndex;
@@ -238,10 +238,13 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
         matrix = R_GetActiveWorldMatrix(context.source);
         memcpy(&matrix->matrices.matrix[0], &worldMat, sizeof(GfxMatrix));
         R_DrawXModelRigidModelSurf(context, modelSurf->surf.xsurf);
+
         if (++drawSurfIndex == drawSurfCount || (drawSurfMask.packed & drawSurfList[drawSurfIndex].packed) != drawSurfKey)
             break;
+
         modelSurf = (const GfxModelRigidSurface*)((char*)data + 4 * drawSurfList[drawSurfIndex].fields.objectId);
         gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
+
         if (gfxEntIndex != baseGfxEntIndex)
         {
             if (gfxEntIndex)
@@ -250,7 +253,7 @@ unsigned int __cdecl R_DrawXModelRigidSurfCameraInternal(
                 if ((gfxEnt->renderFxFlags & 2) != depthHackFlags || materialTime != gfxEnt->materialTime)
                     return drawSurfIndex;
             }
-            else if (depthHackFlags || materialTime != 0.0)
+            else if (depthHackFlags || materialTime != 0.0f)
             {
                 return drawSurfIndex;
             }

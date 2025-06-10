@@ -10,15 +10,14 @@
 
 void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
 {
-    char dest; // [esp+10h] [ebp-1008h] BYREF
-    _BYTE v2[4103]; // [esp+11h] [ebp-1007h] BYREF
+    char dest[4104]; // [esp+10h] [ebp-1008h] BYREF
 
-    *(_DWORD *)&v2[4099] = 4096;
+    *(DWORD*)&dest[4100] = 4096;
     Com_sprintf(
-        &dest,
+        dest,
         0x1000u,
         "index,name,radius,numLods,lodDist,lodPixels720p,1PixelDist720p,scaledDist,posx,posy,posz,pixels\n");
-    FS_Write(&dest, &v2[strlen(&dest)] - v2, fileHandle);
+    FS_Write(dest, &dest[strlen(dest) + 1] - &dest[1], fileHandle);
 }
 
 BOOL __cdecl R_StaticModelHasLighting(unsigned int smodelIndex)

@@ -324,7 +324,7 @@ struct GfxDrawSurfFields // sizeof=0x8
     /*60*/ unsigned __int64 unused : 4;              
 };
 
-static constexpr unsigned __int64 DRAWSURF_KEY_MASK = 0xFFFFFFFFE0000000;
+constexpr unsigned __int64 DRAWSURF_KEY_MASK = 0xFFFFFFFFE0000000;
 
 union GfxDrawSurf // sizeof=0x8
 {                                       // ...

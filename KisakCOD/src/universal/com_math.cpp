@@ -3018,183 +3018,109 @@ void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, 
         + mat->origin[2];
 }
 
-#if 1
-void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat)
+void __cdecl ConvertQuatToSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat)
 {
-#if 1
-    float transWeight; // xmm4_4
-    float v3; // xmm2_4
-    float v4; // xmm1_4
-    float v5; // xmm6_4
-    float v6; // xmm0_4
-    float v7; // xmm7_4
-    float v8; // xmm5_4
-    float v9; // xmm3_4
-    float v10; // xmm0_4
-    float v11; // xmm4_4
-    float v12; // xmm1_4
-    float v13; // xmm2_4
-    float v14; // xmm5_4
-    float v15; // xmm0_4
-    float v16; // xmm6_4
-    float v17; // xmm1_4
-    float v18; // xmm6_4
-    float v19; // xmm2_4
-    float v20; // xmm6_4
-    float v21; // xmm4_4
-    float v22; // xmm6_4
-    float v23; // xmm7_4
-    float v24; // xmm3_4
-    float v25; // [esp+4h] [ebp-1Ch]
-    float yy; // [esp+8h] [ebp-18h]
-    float xw; // [esp+Ch] [ebp-14h]
-    float yw; // [esp+10h] [ebp-10h]
-    float xy; // [esp+14h] [ebp-Ch]
-    float xx; // [esp+18h] [ebp-8h]
+    float scaledQuat[3];
+
+    float yy;
+    float xy;
+    float zz;
+    float zw;
+    float yw;
+    float xz;
+    float yz;
+    float xx;
+    float xw;
 
     iassert((!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])));
-    //if (((LODWORD(mat->quat.v[0]) & 0x7F800000) == 0x7F800000
-    //    || (LODWORD(mat->quat.v[1]) & 0x7F800000) == 0x7F800000
-    //    || (LODWORD(mat->quat.v[2]) & 0x7F800000) == 0x7F800000
-    //    || (LODWORD(mat->quat.v[3]) & 0x7F800000) == 0x7F800000)
-    //    && !Assert_MyHandler(
-    //        "c:\\t6\\code\\src_noserver\\universal\\com_math.h",
-    //        1934,
-    //        0,
-    //        "(!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3]))",
-    //        (const char *)&pBlock))
-    //{
-    //    __debugbreak();
-    //}
     iassert((!IS_NAN(mat->transWeight)));
-    //if ((LODWORD(mat->transWeight) & 0x7F800000) == 0x7F800000
-    //    && !Assert_MyHandler(
-    //        "c:\\t6\\code\\src_noserver\\universal\\com_math.h",
-    //        1935,
-    //        0,
-    //        "(!IS_NAN(mat->transWeight))",
-    //        (const char *)&pBlock))
-    //{
-    //    __debugbreak();
-    //}
-    transWeight = mat->transWeight;
-    v3 = mat->quat[1];
-    v4 = mat->quat[2];
-    v5 = mat->quat[3];
-    v6 = mat->quat[0] * transWeight;
-    xx = mat->quat[0] * v6;
-    v7 = v4 * transWeight;
-    xy = v3 * v6;
-    v8 = v3 * transWeight;
-    v9 = v4 * v6;
-    xw = v5 * v6;
-    v10 = v3 * (v3 * transWeight);
-    v11 = v4 * (v3 * transWeight);
-    v12 = v4 * v7;
-    v13 = v5 * v8;
-    yy = v10;
-    v14 = v12 + xx;
-    v15 = 1.0f - (v12 + v10);
-    v16 = v5 * v7;
-    v17 = xy - v16;
-    v18 = v16 + xy;
-    yw = v13;
-    v19 = v13 + v9;
-    v25 = v18;
-    v20 = v11;
-    v21 = v11 + xw;
-    v22 = v20 - xw;
-    v23 = v9 - yw;
-    v24 = 1.0f - (yy + xx);
 
-    skelMat->axis[0][0] = v15;
-    skelMat->axis[0][1] = v17;
-    skelMat->axis[0][2] = v19;
+    Vec3Scale(mat->quat, mat->transWeight, scaledQuat);
+
+    xx = scaledQuat[0] * mat->quat[0];
+    xy = scaledQuat[0] * mat->quat[1];
+    xz = scaledQuat[0] * mat->quat[2];
+    xw = scaledQuat[0] * mat->quat[3];
+
+    yy = scaledQuat[1] * mat->quat[1];
+    yz = scaledQuat[1] * mat->quat[2];
+    yw = scaledQuat[1] * mat->quat[3];
+
+    zz = scaledQuat[2] * mat->quat[2];
+    zw = scaledQuat[2] * mat->quat[3];
+
+    skelMat->axis[0][0] = 1.0 - (float)(yy + zz);
+    skelMat->axis[0][1] = xy + zw;
+    skelMat->axis[0][2] = xz - yw;
     skelMat->axis[0][3] = 0.0f;
 
-    skelMat->axis[1][0] = v18;
-    skelMat->axis[1][1] = 1.0 - v14;
-    skelMat->axis[1][2] = v22;
+    skelMat->axis[1][0] = xy - zw;
+    skelMat->axis[1][1] = 1.0 - (float)(xx + zz);
+    skelMat->axis[1][2] = yz + xw;
     skelMat->axis[1][3] = 0.0f;
 
-    skelMat->axis[2][0] = v23;
-    skelMat->axis[2][1] = v21;
-    skelMat->axis[2][2] = v24;
+    skelMat->axis[2][0] = xz + yw;
+    skelMat->axis[2][1] = yz - xw;
+    skelMat->axis[2][2] = 1.0 - (float)(xx + yy);
     skelMat->axis[2][3] = 0.0f;
 
-    skelMat->origin[0] = ((v15 * mat->trans[0]) + (v25 * mat->trans[1])) + (mat->trans[2] * v23) * -1.0f; // ^_mask__NegFloat_;
-    skelMat->origin[1] = ((v17 * mat->trans[0]) + ((1.0f - v14) * mat->trans[1])) + (mat->trans[2] * v21) * 1.0f; //  ^_mask__NegFloat_;
-    skelMat->origin[2] = ((v19 * mat->trans[0]) + (v22 * mat->trans[1])) + (mat->trans[2] * v24) * 1.0f; // ^_mask__NegFloat_;
+    skelMat->origin[0] = mat->trans[0];
+    skelMat->origin[1] = mat->trans[1];
+    skelMat->origin[2] = mat->trans[2];
     skelMat->origin[3] = 1.0f;
-
-    //LODWORD(skelMat->origin.v[0]) = COERCE_UNSIGNED_INT(
-    //    (float)((float)(v15 * mat->trans[0]) + (float)(v25 * mat->trans[1]))
-    //    + (float)(mat->trans[2] * v23))
-    //    ^ _mask__NegFloat_;
-    //LODWORD(skelMat->origin.v[1]) = COERCE_UNSIGNED_INT(
-    //    (float)((float)(v17 * mat->trans[0]) + (float)((float)(1.0 - v14) * mat->trans[1]))
-    //    + (float)(mat->trans[2] * v21))
-    //    ^ _mask__NegFloat_;
-    //LODWORD(skelMat->origin.v[2]) = COERCE_UNSIGNED_INT(
-    //    (float)((float)(v19 * mat->trans[0]) + (float)(v22 * mat->trans[1]))
-    //    + (float)(mat->trans[2] * v24))
-    //    ^ _mask__NegFloat_;
-    //LODWORD(skelMat->origin.v[3]) = FLOAT_1_0;
-#else
-    float v44, v43, v42, v41;
-
-    v44 = mat->quat[0];
-    if ((LODWORD(v44) & 0x7F800000) == 0x7F800000
-        || (v43 = mat->quat[1], (LODWORD(v43) & 0x7F800000) == 0x7F800000)
-        || (v42 = mat->quat[2], (LODWORD(v42) & 0x7F800000) == 0x7F800000)
-        || (v41 = mat->quat[3], (LODWORD(v41) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-            581,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    float transWeight = mat->transWeight;
-    if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
-    MyAssertHandler(
-        "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-        582,
-        0,
-        "%s",
-        "!IS_NAN(mat->transWeight)");
-    
-    float v39[3];
-    Vec3Scale(mat->quat, mat->transWeight, v39);
-    float v38 = v39[0] * mat->quat[0];
-    float v37 = v39[0] * mat->quat[1];
-    float v36 = v39[0] * mat->quat[2];
-    float v35 = v39[0] * mat->quat[3];
-    float v34 = v39[1] * mat->quat[1];
-    float v33 = v39[1] * mat->quat[2];
-    float v32 = v39[1] * mat->quat[3];
-    float v31 = v39[2] * mat->quat[2];
-    float v30 = v39[2] * mat->quat[3];
-    skelMat->axis[0][0] = 1.0 - (v34 + v31);
-    skelMat->axis[0][1] = v37 - v30;
-    skelMat->axis[0][2] = v36 + v32;
-    skelMat->axis[0][3] = 0.0;
-    skelMat->axis[1][0] = v37 + v30;
-    skelMat->axis[1][1] = 1.0 - (v38 + v31);
-    skelMat->axis[1][2] = v33 - v35;
-    skelMat->axis[1][3] = 0.0;
-    skelMat->axis[2][0] = v36 - v32;
-    skelMat->axis[2][1] = v33 + v35;
-    skelMat->axis[2][2] = 1.0 - (v38 + v34);
-    skelMat->axis[2][3] = 0.0;
-    skelMat->origin[0] = -(mat->trans[0] * skelMat->axis[0][0] + mat->trans[1] * skelMat->axis[1][0] + mat->trans[2] * skelMat->axis[2][0]);
-    skelMat->origin[1] = -(mat->trans[0] * skelMat->axis[0][1] + mat->trans[1] * skelMat->axis[1][1] + mat->trans[2] * skelMat->axis[2][1]);
-    skelMat->origin[2] = -(mat->trans[0] * skelMat->axis[0][2] + mat->trans[1] * skelMat->axis[1][2] + mat->trans[2] * skelMat->axis[2][2]);
-    skelMat->origin[3] = 1.0;
-#endif
 }
-#endif
+
+void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat)
+{
+    float scaledQuat[3];
+
+    float yy;
+    float xy;
+    float zz;
+    float zw;
+    float yw;
+    float xz;
+    float yz;
+    float xx;
+    float xw;
+
+    iassert((!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])));
+    iassert((!IS_NAN(mat->transWeight)));
+
+    Vec3Scale(mat->quat, mat->transWeight, scaledQuat);
+
+    xx = scaledQuat[0] * mat->quat[0];
+    xy = scaledQuat[0] * mat->quat[1];
+    xz = scaledQuat[0] * mat->quat[2];
+    xw = scaledQuat[0] * mat->quat[3];
+
+    yy = scaledQuat[1] * mat->quat[1];
+    yz = scaledQuat[1] * mat->quat[2];
+    yw = scaledQuat[1] * mat->quat[3];
+
+    zz = scaledQuat[2] * mat->quat[2];
+    zw = scaledQuat[2] * mat->quat[3];
+
+    skelMat->axis[0][0] = 1.0f - (yy + zz);
+    skelMat->axis[0][1] = xy - zw;
+    skelMat->axis[0][2] = xz + yw;
+    skelMat->axis[0][3] = 0.0f;
+
+    skelMat->axis[1][0] = xy + zw;
+    skelMat->axis[1][1] = 1.0f - (xx + zz);
+    skelMat->axis[1][2] = yz - xw;
+    skelMat->axis[1][3] = 0.0f;
+
+    skelMat->axis[2][0] = xz - yw;
+    skelMat->axis[2][1] = yz + xw;
+    skelMat->axis[2][2] = 1.0f - (xx + yy);
+    skelMat->axis[2][3] = 0.0f;
+
+    skelMat->origin[0] = -((mat->trans[0] * skelMat->axis[0][0]) + (mat->trans[1] * skelMat->axis[1][0]) + (mat->trans[2] * skelMat->axis[2][0]));// ^_mask__NegFloat_;
+    skelMat->origin[1] = -((mat->trans[0] * skelMat->axis[0][1]) + (mat->trans[1] * skelMat->axis[1][1]) + (mat->trans[2] * skelMat->axis[2][1]));// ^_mask__NegFloat_;
+    skelMat->origin[2] = -((mat->trans[0] * skelMat->axis[0][2]) + (mat->trans[1] * skelMat->axis[1][2]) + (mat->trans[2] * skelMat->axis[2][2]));// ^_mask__NegFloat_;
+    skelMat->origin[3] = 1.0f;
+}
 
 void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear, float zFar)
 {

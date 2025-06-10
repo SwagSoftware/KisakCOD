@@ -22,7 +22,6 @@ GfxScaledPlacement s_manualObjectPlacement;
 
 void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const char *tessName, const float *color)
 {
-    const char *v4; // eax
     const char *v5; // eax
     const GfxBackEndData *data; // [esp+14h] [ebp-2Ch]
     float TEXT_TECH_MEAN; // [esp+18h] [ebp-28h]
@@ -34,41 +33,40 @@ void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const ch
     float TEXT_SIZE; // [esp+38h] [ebp-8h]
     const char *infoString; // [esp+3Ch] [ebp-4h]
 
-    TEXT_SIZE = 0.60000002;
-    TEXT_TECH_VERTICAL_OFFSET = 0.30000001;
+    TEXT_SIZE = 0.6f;
+    TEXT_TECH_VERTICAL_OFFSET = 0.3f;
     TEXT_TECH_MEAN = 16.0;
-    if (!center)
-        MyAssertHandler(".\\rb_tess.cpp", 56, 0, "%s", "center");
-    if (!tessName)
-        MyAssertHandler(".\\rb_tess.cpp", 57, 0, "%s", "tessName");
-    offsetCenter[0] = *center;
+
+    iassert(center);
+    iassert(tessName);
+
+    offsetCenter[0] = center[0];
     offsetCenter[1] = center[1];
     offsetCenter[2] = center[2];
-    if (!context.state->material)
-        MyAssertHandler(".\\rb_tess.cpp", 61, 0, "%s", "context.state->material");
+
+    iassert(context.state->material);
     tech = Material_GetTechnique(context.state->material, context.state->techType);
-    if (!tech)
-        MyAssertHandler(".\\rb_tess.cpp", 64, 0, "%s", "tech");
+    iassert(tech);
+
     switch (r_showTess->current.integer)
     {
-    case 1:
+    case 1: // Tech
         infoString = tech->name;
-        offsetCenter[2] = ((double)(int)context.state->techType - TEXT_TECH_MEAN) * TEXT_TECH_VERTICAL_OFFSET
-            + offsetCenter[2];
+        offsetCenter[2] = ((double)(int)context.state->techType - TEXT_TECH_MEAN) * TEXT_TECH_VERTICAL_OFFSET + offsetCenter[2];
         infoIdString = "T";
         break;
-    case 2:
+    case 2: // Techset
         techSet = Material_GetTechniqueSet(context.state->material);
         if (!techSet)
             MyAssertHandler(".\\rb_tess.cpp", 96, 0, "%s", "techSet");
         infoString = techSet->name;
         infoIdString = "TS";
         break;
-    case 3:
+    case 3: // Material
         infoString = context.state->material->info.name;
         infoIdString = "M";
         break;
-    case 4:
+    case 4: // VertexShader
         if (!tech->passCount)
             MyAssertHandler(".\\rb_tess.cpp", 75, 0, "%s", "tech->passCount > 0");
         if (tech->passArray[0].vertexShader)
@@ -79,7 +77,7 @@ void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const ch
             + offsetCenter[2];
         infoIdString = "VS";
         break;
-    case 5:
+    case 5: // PixelShader
         if (!tech->passCount)
             MyAssertHandler(".\\rb_tess.cpp", 85, 0, "%s", "tech->passCount > 0");
         if (tech->passArray[0].pixelShader)
@@ -93,16 +91,14 @@ void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const ch
     default:
         if (!alwaysfails)
         {
-            v4 = va("Unknown value for r_showTess: %i", r_showTess);
-            MyAssertHandler(".\\rb_tess.cpp", 107, 0, v4);
+            MyAssertHandler(".\\rb_tess.cpp", 107, 0, va("Unknown value for r_showTess: %i", r_showTess));
         }
         infoString = "?";
         infoIdString = "?";
         break;
     }
     data = context.source->input.data;
-    v5 = va("%s:%s=%s", tessName, infoIdString, infoString);
-    R_AddDebugString((DebugGlobals*)&data->debugGlobals, offsetCenter, color, TEXT_SIZE, (char*)v5);
+    R_AddDebugString((DebugGlobals*)&data->debugGlobals, offsetCenter, color, TEXT_SIZE, (char*)va("%s:%s=%s", tessName, infoIdString, infoString));
 }
 
 unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
@@ -347,7 +343,7 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
         LODWORD(drawSurfSubMask.packed) = 0xE0000000;
         R_SetupPassPerObjectArgs(context);
     }
-    drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000;
+    drawSurfKey = drawSurf.packed & DRAWSURF_KEY_MASK;
     R_TrackPrims(context.state, GFX_PRIM_STATS_FX);
     drawSurfIndex = 0;
     do
@@ -384,14 +380,7 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
             }
             else
             {
-                if (markTypea && markTypea != 128)
-                    MyAssertHandler(
-                        ".\\rb_tess.cpp",
-                        434,
-                        0,
-                        "%s\n\t(markType) = %i",
-                        "((markType == MARK_MODEL_TYPE_WORLD_BRUSH) || (markType == MARK_MODEL_TYPE_ENT_BRUSH))",
-                        markTypea);
+                iassert(markTypea == MARK_MODEL_TYPE_WORLD_BRUSH || markTypea == MARK_MODEL_TYPE_ENT_BRUSH);
                 R_SetLightmap(context, drawSurf.fields.customIndex);
             }
             R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
@@ -673,13 +662,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
     //Profile_Begin(102);
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state && commonSource != prepassContext.source)
-        MyAssertHandler(
-            ".\\rb_tess.cpp",
-            856,
-            0,
-            "%s",
-            "prepassContext.state == NULL || commonSource == prepassContext.source");
+    iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
     data = commonSource->input.data;
     info = listArgs->info;
     baseTechType = info->baseTechType;
@@ -804,10 +787,8 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
     }
     else
     {
-        if (prepassContext.state)
-            MyAssertHandler(".\\rb_tess.cpp", 1046, 0, "%s", "prepassContext.state == NULL");
-        if (baseTechType == TECHNIQUE_LIT_BEGIN)
-            MyAssertHandler(".\\rb_tess.cpp", 1047, 0, "%s", "baseTechType != TECHNIQUE_LIT");
+        iassert(prepassContext.state == NULL);
+        iassert(baseTechType != TECHNIQUE_LIT);
         modelSurfa = (const GfxModelSkinnedSurface *)((char *)data + 4 * drawSurf.fields.objectId);
         baseGfxEntIndexa = modelSurfa->info.gfxEntIndex;
         if (modelSurfa->info.gfxEntIndex)
@@ -901,8 +882,8 @@ void __cdecl R_DrawXModelSkinnedUncached(GfxCmdBufContext context, XSurface *xsu
 
 void __cdecl R_DrawXModelSkinnedModelSurf(GfxCmdBufContext context, const GfxModelSkinnedSurface *modelSurf)
 {
-    if (!modelSurf)
-        MyAssertHandler(".\\rb_tess.cpp", 815, 0, "%s", "modelSurf");
+    iassert(modelSurf);
+
     if (modelSurf->skinnedCachedOffset < 0)
         R_DrawXModelSkinnedUncached(context, modelSurf->xsurf, modelSurf->skinnedVert);
     else
@@ -911,7 +892,6 @@ void __cdecl R_DrawXModelSkinnedModelSurf(GfxCmdBufContext context, const GfxMod
 
 void __cdecl R_DrawXModelSkinnedCached(GfxCmdBufContext context, const GfxModelSkinnedSurface *modelSurf)
 {
-    const char *v2; // eax
     GfxCmdBufSourceState *ActiveWorldMatrix; // eax
     const GfxBackEndData *data; // [esp+48h] [ebp-18h]
     XSurface *xsurf; // [esp+4Ch] [ebp-14h]
@@ -921,31 +901,24 @@ void __cdecl R_DrawXModelSkinnedCached(GfxCmdBufContext context, const GfxModelS
     //Profile_Begin(103);
     if (r_logFile->current.integer)
     {
-        v2 = va("--- R_DrawXModelSkinnedCached( %s ) ---\n", context.state->material->info.name);
-        RB_LogPrint(v2);
+        RB_LogPrint(va("--- R_DrawXModelSkinnedCached( %s ) ---\n", context.state->material->info.name));
     }
-    if (!modelSurf)
-        MyAssertHandler(".\\rb_tess.cpp", 715, 0, "%s", "modelSurf");
+    iassert(modelSurf);
     xsurf = modelSurf->xsurf;
-    if (!xsurf)
-        MyAssertHandler(".\\rb_tess.cpp", 718, 0, "%s", "xsurf");
-    if (!xsurf->vertCount)
-        MyAssertHandler(".\\rb_tess.cpp", 719, 0, "%s", "xsurf->vertCount");
-    if (modelSurf->skinnedCachedOffset < 0)
-        MyAssertHandler(".\\rb_tess.cpp", 721, 0, "%s", "modelSurf->skinnedCachedOffset >= 0");
+    iassert(xsurf);
+    iassert(xsurf->vertCount);
+    iassert(modelSurf->skinnedCachedOffset >= 0);
     args.vertexCount = xsurf->vertCount;
     args.triCount = xsurf->triCount;
     g_frameStatsCur.geoIndexCount += 3 * args.triCount;
     DB_GetIndexBufferAndBase(xsurf->zoneHandle, xsurf->triIndices, (void **)&ib, &args.baseIndex);
-    if (!ib)
-        MyAssertHandler(".\\rb_tess.cpp", 733, 0, "%s", "ib");
+    iassert(ib);
     data = context.source->input.data;
     if (context.state->prim.indexBuffer != ib)
         R_ChangeIndices(&context.state->prim, ib);
     R_SetStreamSource(&context.state->prim, data->skinnedCacheVb->buffer, modelSurf->skinnedCachedOffset, 0x20u);
     R_DrawIndexedPrimitive(&context.state->prim, &args);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 750, 0, "%s", "g_primStats");
+    iassert(g_primStats);
     g_primStats->staticIndexCount += 3 * args.triCount;
     g_primStats->staticVertexCount += args.vertexCount;
     if (r_showTess->current.integer)
@@ -1508,26 +1481,22 @@ unsigned int __cdecl R_TessTrianglesList(const GfxDrawSurfListArgs *listArgs, Gf
     MaterialTechniqueType baseTechType; // [esp+50h] [ebp-8h]
     const unsigned int *primDrawSurfPos; // [esp+54h] [ebp-4h]
 
-    //Profile_Begin(108);
+    Profile_Begin(108);
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state && commonSource != prepassContext.source)
-        MyAssertHandler(
-            ".\\rb_tess.cpp",
-            1729,
-            0,
-            "%s",
-            "prepassContext.state == NULL || commonSource == prepassContext.source");
+    iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
     info = listArgs->info;
     baseTechType = info->baseTechType;
     R_SetupPassCriticalPixelShaderArgs(context);
     if (commonSource->objectPlacement != &rg.identityPlacement)
         R_ChangeObjectPlacement(commonSource, &rg.identityPlacement);
+
     R_ChangeDepthHackNearClip(commonSource, 0);
     R_SetVertexDeclTypeWorld(context.state);
     depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
     if (depthRangeType != context.state->depthRangeType)
         R_ChangeDepthRange(context.state, depthRangeType);
+
     if (prepassContext.state)
     {
         R_SetupPassCriticalPixelShaderArgs(prepassContext);
@@ -1536,9 +1505,11 @@ unsigned int __cdecl R_TessTrianglesList(const GfxDrawSurfListArgs *listArgs, Gf
         if (v3 != prepassContext.state->depthRangeType)
             R_ChangeDepthRange(prepassContext.state, v3);
     }
+
     primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     R_TrackPrims(context.state, GFX_PRIM_STATS_WORLD);
-    if (baseTechType == TECHNIQUE_LIT_BEGIN)
+
+    if (baseTechType == TECHNIQUE_LIT)
     {
         if (sc_enable->current.enabled)
             R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
@@ -1559,8 +1530,9 @@ unsigned int __cdecl R_TessTrianglesList(const GfxDrawSurfListArgs *listArgs, Gf
         R_SetupPassPerPrimArgs(context);
         R_DrawBspDrawSurfs(primDrawSurfPos, context.state);
     }
+
     g_primStats = 0;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1592,34 +1564,31 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
     unsigned __int64 drawSurfKey; // [esp+ACh] [ebp-10h]
     unsigned int drawSurfCount; // [esp+B8h] [ebp-4h]
 
-    //Profile_Begin(109);
+    Profile_Begin(109);
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state && commonSource != prepassContext.source)
-        MyAssertHandler(
-            ".\\rb_tess.cpp",
-            1882,
-            0,
-            "%s",
-            "prepassContext.state == NULL || commonSource == prepassContext.source");
+    iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
     info = listArgs->info;
     drawSurfList = &info->drawSurfs[listArgs->firstDrawSurfIndex];
     drawSurfCount = info->drawSurfCount - listArgs->firstDrawSurfIndex;
     R_SetupPassCriticalPixelShaderArgs(context);
     data = commonSource->input.data;
     baseTechType = info->baseTechType;
-    if (baseTechType == TECHNIQUE_LIT_BEGIN)
+
+    if (baseTechType == TECHNIQUE_LIT)
     {
         if (sc_enable->current.enabled)
             R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
         else
             R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
     }
+
     R_ChangeDepthHackNearClip(commonSource, 0);
     R_SetVertexDeclTypeWorld(context.state);
     depthRangeType = (GfxDepthRangeType)((context.source->cameraView != 0) - 1);
     if (depthRangeType != context.state->depthRangeType)
         R_ChangeDepthRange(context.state, depthRangeType);
+
     if (prepassContext.state)
     {
         R_SetupPassCriticalPixelShaderArgs(prepassContext);
@@ -1629,19 +1598,20 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
             R_ChangeDepthRange(prepassContext.state, v3);
         R_SetupPassPerObjectArgs(prepassContext);
     }
-    drawSurf.fields = drawSurfList->fields;
+
+    drawSurf = *drawSurfList;
     drawSurfSubMask.packed = 0xFFFFFFFFFFFF0000uLL;
-    if (baseTechType != TECHNIQUE_LIT_BEGIN)
+    if (baseTechType != TECHNIQUE_LIT)
     {
         LODWORD(drawSurfSubMask.packed) = 0xE0000000;
         R_SetupPassPerObjectArgs(context);
     }
-    drawSurfKey = drawSurf.packed & 0xFFFFFFFFE0000000uLL;
+    drawSurfKey = drawSurf.packed & DRAWSURF_KEY_MASK;
     R_TrackPrims(context.state, GFX_PRIM_STATS_BMODEL);
     drawSurfIndex = 0;
     do
     {
-        if (baseTechType == TECHNIQUE_LIT_BEGIN)
+        if (baseTechType == TECHNIQUE_LIT)
         {
             R_SetLightmap(context, drawSurf.fields.customIndex);
             R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
@@ -1651,11 +1621,12 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
         do
         {
             bmodelSurf = (const BModelSurface *)((char *)data + 4 * drawSurf.fields.objectId);
+
             if (commonSource->objectPlacement != bmodelSurf->placement)
                 R_ChangeObjectPlacement(commonSource, bmodelSurf->placement);
+
             tris = &bmodelSurf->surf->tris;
-            if (!tris->triCount)
-                MyAssertHandler(".\\rb_tess.cpp", 1969, 0, "%s", "tris->triCount");
+            iassert(tris->triCount);
             args.vertexCount = tris->vertexCount;
             args.triCount = tris->triCount;
             g_frameStatsCur.geoIndexCount += 3 * args.triCount;
@@ -1676,18 +1647,19 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
                     args.triCount);
                 R_DrawIndexedPrimitive(&prepassContext.state->prim, &args);
             }
-            if (!g_primStats)
-                MyAssertHandler(".\\rb_tess.cpp", 2005, 0, "%s", "g_primStats");
+            iassert(g_primStats);
             g_primStats->dynamicIndexCount += 3 * args.triCount;
             g_primStats->dynamicVertexCount += args.vertexCount;
             args.triCount = 0;
+
             if (++drawSurfIndex == drawSurfCount)
                 break;
+
             drawSurf = drawSurfList[drawSurfIndex];
         } while ((drawSurfSubMask.packed & drawSurf.packed) == drawSurfSubKey);
-    } while (drawSurfIndex != drawSurfCount && (drawSurf.packed & 0xFFFFFFFFE0000000uLL) == drawSurfKey);
+    } while (drawSurfIndex != drawSurfCount && (drawSurf.packed & DRAWSURF_KEY_MASK) == drawSurfKey);
     g_primStats = 0;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return drawSurfIndex;
 }
 
