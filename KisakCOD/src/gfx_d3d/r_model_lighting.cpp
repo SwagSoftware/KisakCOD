@@ -710,9 +710,6 @@ void __cdecl R_ApplyLightGridColorsPatch(const GfxModelLightingPatch *patch, uns
 
 void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsigned int patchCount)
 {
-    const char *v2; // eax
-    const char *v3; // eax
-    const char *v4; // eax
     unsigned int modelLightingIndex; // [esp+4h] [ebp-4Ch]
     int v6; // [esp+8h] [ebp-48h]
     int v7; // [esp+Ch] [ebp-44h]
@@ -735,8 +732,9 @@ void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsig
             lightImage = modelLightGlob.lightImages[1];
         else
             lightImage = modelLightGlob.lightImages[0];
-        if (!lightImage)
-            MyAssertHandler(".\\r_model_lighting.cpp", 901, 0, "%s", "lightImage");
+
+        iassert(lightImage);
+
         if (useAltUpdate)
         {
             memset(&dirtyBox, 0, 20);
@@ -752,23 +750,16 @@ void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsig
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("lightImage->texture.volmap->LockBox( 0, &modelLightGlob.lockedBox, 0, lockValue )\n");
             hr = lightImage->texture.volmap->LockBox(0, &modelLightGlob.lockedBox, 0, lockValue);
-            //hr = (lightImage->texture.basemap->__vftable[1].Release)(
-            //    lightImage->texture.basemap,
-            //    0,
-            //    &modelLightGlob.lockedBox,
-            //    0,
-            //    lockValue);
             if (hr < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v2 = R_ErrorDescription(hr);
                     Com_Error(
                         ERR_FATAL,
                         ".\\r_model_lighting.cpp (%i) lightImage->texture.volmap->LockBox( 0, &modelLightGlob.lockedBox, 0, lockValue ) failed: %s\n",
                         916,
-                        v2);
+                        R_ErrorDescription(hr));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
@@ -785,8 +776,7 @@ void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsig
                 dirtyBox.Right = dirtyBox.Left + 4;
                 dirtyBox.Top = (modelLightingIndex >> 4) & 0xFFFFFFFC;
                 dirtyBox.Bottom = y0 + 4;
-                //(lightImage->texture.basemap->__vftable[1].SetPrivateData)(lightImage->texture.basemap, &dirtyBox);
-                
+                lightImage->texture.volmap->AddDirtyBox(&dirtyBox);
             }
             pixels = (unsigned char*)modelLightGlob.lockedBox.pBits
                 + 16 * (modelLightingIndex & 0x3F)
@@ -799,55 +789,56 @@ void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsig
             {
                 for (sampleIndex = 0; sampleIndex < 0x40; ++sampleIndex)
                 {
-                    *(_DWORD *)&pixels[s_modelLightingSampleDelta[sampleIndex]] = *(_DWORD *)patch->groundLighting;
-                    //*&pixels[s_modelLightingSampleDelta[sampleIndex]] = *patch->groundLighting;
+                    //*(_DWORD *)&pixels[s_modelLightingSampleDelta[sampleIndex]] = *(_DWORD *)patch->groundLighting;
+                    unsigned char *pPixels = (unsigned char*)&pixels[s_modelLightingSampleDelta[sampleIndex]];
+                    pPixels[0] = patch->groundLighting[0];
+                    pPixels[1] = patch->groundLighting[1];
+                    pPixels[2] = patch->groundLighting[2];
+                    pPixels[3] = patch->groundLighting[3];
                 }
             }
         }
-        if (!modelLightGlob.lockedBox.pBits)
-            MyAssertHandler(".\\r_model_lighting.cpp", 947, 0, "%s", "modelLightGlob.lockedBox.pBits");
+
+        iassert(modelLightGlob.lockedBox.pBits);
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("lightImage->texture.volmap->UnlockBox( 0 )\n");
-            //v7 = lightImage->texture.basemap->__vftable[1].GetDevice(lightImage->texture.basemap, 0);
             v7 = lightImage->texture.volmap->UnlockBox(0);
             if (v7 < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v3 = R_ErrorDescription(v7);
                     Com_Error(
                         ERR_FATAL,
                         ".\\r_model_lighting.cpp (%i) lightImage->texture.volmap->UnlockBox( 0 ) failed: %s\n",
                         949,
-                        v3);
+                        R_ErrorDescription(v7));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
+
         modelLightGlob.lockedBox.pBits = 0;
+
         if (useAltUpdate)
         {
             do
             {
                 if (r_logFile && r_logFile->current.integer)
                     RB_LogPrint("dx.device->UpdateTexture( lightImage->texture.volmap, modelLightGlob.lightImages[0]->texture.volmap )\n");
-                v6 = dx.device->UpdateTexture(
-                    lightImage->texture.volmap,
-                    modelLightGlob.lightImages[0]->texture.volmap);
+                v6 = dx.device->UpdateTexture(lightImage->texture.volmap, modelLightGlob.lightImages[0]->texture.volmap);
                 if (v6 < 0)
                 {
                     do
                     {
                         ++g_disableRendering;
-                        v4 = R_ErrorDescription(v6);
                         Com_Error(
                             ERR_FATAL,
                             ".\\r_model_lighting.cpp (%i) dx.device->UpdateTexture( lightImage->texture.volmap, modelLightGlob.lightIma"
                             "ges[0]->texture.volmap ) failed: %s\n",
                             953,
-                            v4);
+                            R_ErrorDescription(v6));
                     } while (alwaysfails);
                 }
             } while (alwaysfails);

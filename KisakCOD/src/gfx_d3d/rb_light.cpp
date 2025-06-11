@@ -272,15 +272,14 @@ void __cdecl R_FixedPointBlendLightGridColors(
     unsigned int colorsIter; // [esp+16Ch] [ebp-4h]
 
     R_ScaleLightGridColors(&lightGrid->colors[*colorsIndex], *fixedPointWeight, accumulated);
+
     colorsIter = 1;
     do
     {
-        R_WeightedAccumulateLightGridColors(
-            &lightGrid->colors[colorsIndex[colorsIter]],
-            fixedPointWeight[colorsIter],
-            accumulated);
+        R_WeightedAccumulateLightGridColors(&lightGrid->colors[colorsIndex[colorsIter]], fixedPointWeight[colorsIter], accumulated);
         ++colorsIter;
     } while (colorsIter < colorsCount);
+
     R_PackAccumulatedLightGridColors(accumulated, outPacked);
 }
 
@@ -293,14 +292,16 @@ void __cdecl R_ScaleLightGridColors(
 
     for (sampleIter = 0; sampleIter != 168; sampleIter += 8)
     {
-        scaled[sampleIter] = fixedPointWeight * colors->rgb[0][sampleIter];
-        scaled[sampleIter + 1] = fixedPointWeight * colors->rgb[0][sampleIter + 1];
-        scaled[sampleIter + 2] = fixedPointWeight * colors->rgb[0][sampleIter + 2];
-        scaled[sampleIter + 3] = fixedPointWeight * colors->rgb[1][sampleIter];
-        scaled[sampleIter + 4] = fixedPointWeight * colors->rgb[1][sampleIter + 1];
-        scaled[sampleIter + 5] = fixedPointWeight * colors->rgb[1][sampleIter + 2];
-        scaled[sampleIter + 6] = fixedPointWeight * colors->rgb[2][sampleIter];
-        scaled[sampleIter + 7] = fixedPointWeight * colors->rgb[2][sampleIter + 1];
+        unsigned char *rgb = ((unsigned char *)&colors->rgb + sampleIter);
+
+        scaled[sampleIter]     = (fixedPointWeight * rgb[0]);
+        scaled[sampleIter + 1] = (fixedPointWeight * rgb[1]);
+        scaled[sampleIter + 2] = (fixedPointWeight * rgb[2]);
+        scaled[sampleIter + 3] = (fixedPointWeight * rgb[3]);
+        scaled[sampleIter + 4] = (fixedPointWeight * rgb[4]);
+        scaled[sampleIter + 5] = (fixedPointWeight * rgb[5]);
+        scaled[sampleIter + 6] = (fixedPointWeight * rgb[6]);
+        scaled[sampleIter + 7] = (fixedPointWeight * rgb[7]);
     }
 }
 
@@ -313,14 +314,16 @@ void __cdecl R_WeightedAccumulateLightGridColors(
 
     for (sampleIter = 0; sampleIter != 168; sampleIter += 8)
     {
-        accumulated[sampleIter] += fixedPointWeight * colors->rgb[0][sampleIter];
-        accumulated[sampleIter + 1] += fixedPointWeight * colors->rgb[0][sampleIter + 1];
-        accumulated[sampleIter + 2] += fixedPointWeight * colors->rgb[0][sampleIter + 2];
-        accumulated[sampleIter + 3] += fixedPointWeight * colors->rgb[1][sampleIter];
-        accumulated[sampleIter + 4] += fixedPointWeight * colors->rgb[1][sampleIter + 1];
-        accumulated[sampleIter + 5] += fixedPointWeight * colors->rgb[1][sampleIter + 2];
-        accumulated[sampleIter + 6] += fixedPointWeight * colors->rgb[2][sampleIter];
-        accumulated[sampleIter + 7] += fixedPointWeight * colors->rgb[2][sampleIter + 1];
+        unsigned char *rgb = ((unsigned char *)&colors->rgb + sampleIter);
+
+        accumulated[sampleIter]     += fixedPointWeight * rgb[0];
+        accumulated[sampleIter + 1] += fixedPointWeight * rgb[1];
+        accumulated[sampleIter + 2] += fixedPointWeight * rgb[2];
+        accumulated[sampleIter + 3] += fixedPointWeight * rgb[3];
+        accumulated[sampleIter + 4] += fixedPointWeight * rgb[4];
+        accumulated[sampleIter + 5] += fixedPointWeight * rgb[5];
+        accumulated[sampleIter + 6] += fixedPointWeight * rgb[6];
+        accumulated[sampleIter + 7] += fixedPointWeight * rgb[7];
     }
 }
 
@@ -328,16 +331,18 @@ void __cdecl R_PackAccumulatedLightGridColors(const unsigned __int16 *accumulate
 {
     unsigned int sampleIter; // [esp+4h] [ebp-4h]
 
-    for (sampleIter = 0; sampleIter < 0xA8; sampleIter += 8)
+    for (sampleIter = 0; sampleIter < 168; sampleIter += 8)
     {
-        packed->rgb[0][sampleIter] = (unsigned __int16)(accumulated[sampleIter] + 127) >> 8;
-        packed->rgb[0][sampleIter + 1] = (unsigned __int16)(accumulated[sampleIter + 1] + 127) >> 8;
-        packed->rgb[0][sampleIter + 2] = (unsigned __int16)(accumulated[sampleIter + 2] + 127) >> 8;
-        packed->rgb[1][sampleIter] = (unsigned __int16)(accumulated[sampleIter + 3] + 127) >> 8;
-        packed->rgb[1][sampleIter + 1] = (unsigned __int16)(accumulated[sampleIter + 4] + 127) >> 8;
-        packed->rgb[1][sampleIter + 2] = (unsigned __int16)(accumulated[sampleIter + 5] + 127) >> 8;
-        packed->rgb[2][sampleIter] = (unsigned __int16)(accumulated[sampleIter + 6] + 127) >> 8;
-        packed->rgb[2][sampleIter + 1] = (unsigned __int16)(accumulated[sampleIter + 7] + 127) >> 8;
+        unsigned char *rgb = ((unsigned char *)&packed->rgb + sampleIter);
+
+        rgb[0] = (unsigned __int16)(accumulated[sampleIter] + 127) >> 8;
+        rgb[1] = (unsigned __int16)(accumulated[sampleIter + 1] + 127) >> 8;
+        rgb[2] = (unsigned __int16)(accumulated[sampleIter + 2] + 127) >> 8;
+        rgb[3] = (unsigned __int16)(accumulated[sampleIter + 3] + 127) >> 8;
+        rgb[4] = (unsigned __int16)(accumulated[sampleIter + 4] + 127) >> 8;
+        rgb[5] = (unsigned __int16)(accumulated[sampleIter + 5] + 127) >> 8;
+        rgb[6] = (unsigned __int16)(accumulated[sampleIter + 6] + 127) >> 8;
+        rgb[7] = (unsigned __int16)(accumulated[sampleIter + 7] + 127) >> 8;
     }
 }
 
