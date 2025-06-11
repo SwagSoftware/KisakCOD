@@ -171,91 +171,90 @@ void __cdecl R_SetLightGridColors(
     pixels[2] = (packedSunWeight << 24) | colors->rgb[2][2] | (colors->rgb[2][1] << 8) | (colors->rgb[2][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[3][2] | (colors->rgb[3][1] << 8) | (colors->rgb[3][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + s_lightGridRowDelta);
+    pixels = (unsigned int*)((char*)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[4][2] | (colors->rgb[4][1] << 8) | (colors->rgb[4][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[5][2] | (colors->rgb[5][1] << 8) | (colors->rgb[5][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[6][2] | (colors->rgb[6][1] << 8) | (colors->rgb[6][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[7][2] | (colors->rgb[7][1] << 8) | (colors->rgb[7][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 2));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[8][2] | (colors->rgb[8][1] << 8) | (colors->rgb[8][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[9][2] | (colors->rgb[9][1] << 8) | (colors->rgb[9][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[10][2] | (colors->rgb[10][1] << 8) | (colors->rgb[10][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[11][2] | (colors->rgb[11][1] << 8) | (colors->rgb[11][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 3));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[12][2] | (colors->rgb[12][1] << 8) | (colors->rgb[12][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[13][2] | (colors->rgb[13][1] << 8) | (colors->rgb[13][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[14][2] | (colors->rgb[14][1] << 8) | (colors->rgb[14][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[15][2] | (colors->rgb[15][1] << 8) | (colors->rgb[15][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 4));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridSliceDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[16][2] | (colors->rgb[16][1] << 8) | (colors->rgb[16][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[17][2] | (colors->rgb[17][1] << 8) | (colors->rgb[17][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[18][2] | (colors->rgb[18][1] << 8) | (colors->rgb[18][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[19][2] | (colors->rgb[19][1] << 8) | (colors->rgb[19][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 5));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[20][2] | (colors->rgb[20][1] << 8) | (colors->rgb[20][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[0][2] | (colors->rgb[0][1] << 8) | (colors->rgb[0][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[3][2] | (colors->rgb[3][1] << 8) | (colors->rgb[3][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[21][2] | (colors->rgb[21][1] << 8) | (colors->rgb[21][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 6));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[22][2] | (colors->rgb[22][1] << 8) | (colors->rgb[22][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[12][2] | (colors->rgb[12][1] << 8) | (colors->rgb[12][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[15][2] | (colors->rgb[15][1] << 8) | (colors->rgb[15][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[23][2] | (colors->rgb[23][1] << 8) | (colors->rgb[23][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 7));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[24][2] | (colors->rgb[24][1] << 8) | (colors->rgb[24][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[25][2] | (colors->rgb[25][1] << 8) | (colors->rgb[25][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[26][2] | (colors->rgb[26][1] << 8) | (colors->rgb[26][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[27][2] | (colors->rgb[27][1] << 8) | (colors->rgb[27][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 8));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridSliceDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[28][2] | (colors->rgb[28][1] << 8) | (colors->rgb[28][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[29][2] | (colors->rgb[29][1] << 8) | (colors->rgb[29][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[30][2] | (colors->rgb[30][1] << 8) | (colors->rgb[30][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[31][2] | (colors->rgb[31][1] << 8) | (colors->rgb[31][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 9));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[32][2] | (colors->rgb[32][1] << 8) | (colors->rgb[32][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[40][2] | (colors->rgb[40][1] << 8) | (colors->rgb[40][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[43][2] | (colors->rgb[43][1] << 8) | (colors->rgb[43][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[33][2] | (colors->rgb[33][1] << 8) | (colors->rgb[33][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 10));
-    pixels[0] = (packedSunWeight << 24) | colors->rgb[34][2] | (colors->rgb[34][1] << 8) | (colors->rgb[34][0] << 16);
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[52][2] | (colors->rgb[52][1] << 8) | (colors->rgb[52][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[55][2] | (colors->rgb[55][1] << 8) | (colors->rgb[55][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[35][2] | (colors->rgb[35][1] << 8) | (colors->rgb[35][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 11));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[36][2] | (colors->rgb[36][1] << 8) | (colors->rgb[36][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[37][2] | (colors->rgb[37][1] << 8) | (colors->rgb[37][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[38][2] | (colors->rgb[38][1] << 8) | (colors->rgb[38][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[39][2] | (colors->rgb[39][1] << 8) | (colors->rgb[39][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 12));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridSliceDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[40][2] | (colors->rgb[40][1] << 8) | (colors->rgb[40][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[41][2] | (colors->rgb[41][1] << 8) | (colors->rgb[41][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[42][2] | (colors->rgb[42][1] << 8) | (colors->rgb[42][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[43][2] | (colors->rgb[43][1] << 8) | (colors->rgb[43][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 13));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[44][2] | (colors->rgb[44][1] << 8) | (colors->rgb[44][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[45][2] | (colors->rgb[45][1] << 8) | (colors->rgb[45][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[46][2] | (colors->rgb[46][1] << 8) | (colors->rgb[46][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[47][2] | (colors->rgb[47][1] << 8) | (colors->rgb[47][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 14));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[48][2] | (colors->rgb[48][1] << 8) | (colors->rgb[48][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[49][2] | (colors->rgb[49][1] << 8) | (colors->rgb[49][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[50][2] | (colors->rgb[50][1] << 8) | (colors->rgb[50][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[51][2] | (colors->rgb[51][1] << 8) | (colors->rgb[51][0] << 16);
 
-    pixels = (unsigned int *)(pixels_arg + (s_lightGridRowDelta * 15));
+    pixels = (unsigned int *)((char *)pixels + s_lightGridRowDelta);
     pixels[0] = (packedSunWeight << 24) | colors->rgb[52][2] | (colors->rgb[52][1] << 8) | (colors->rgb[52][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[53][2] | (colors->rgb[53][1] << 8) | (colors->rgb[53][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[54][2] | (colors->rgb[54][1] << 8) | (colors->rgb[54][0] << 16);
