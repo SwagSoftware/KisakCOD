@@ -3,6 +3,7 @@
 
 #include <xanim/xanim.h>
 #include <game/game_public.h>
+#include <universal/profile.h>
 
 unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace)
 {
@@ -1746,84 +1747,68 @@ int __cdecl CM_BoxSightTrace(
     trace_t trace; // [esp+11Ch] [ebp-34h] BYREF
     int i; // [esp+148h] [ebp-8h]
     int hitNum; // [esp+14Ch] [ebp-4h]
-    int oldHitNuma; // [esp+158h] [ebp+8h]
 
-    if (!cm.numNodes)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2292, 0, "%s", "cm.numNodes");
-    if (!mins)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2293, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2294, 0, "%s", "maxs");
-    //Profile_Begin(40);
+    memset(&trace, 0, sizeof(trace_t));
+
+    iassert(cm.numNodes);
+    iassert(mins);
+    iassert(maxs);
+
+    Profile_Begin(40);
     cmod = CM_ClipHandleToModel(model);
     trace.fraction = 1.0;
     trace.startsolid = 0;
     trace.allsolid = 0;
     tw.contents = brushmask;
+
     for (i = 0; i < 3; ++i)
     {
-        if (mins[i] > (double)maxs[i])
-            MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2311, 0, "%s", "maxs[i] >= mins[i]");
-        offset[i] = (mins[i] + maxs[i]) * 0.5;
+        iassert(maxs[i] >= mins[i]);
+
+        offset[i] = (mins[i] + maxs[i]) * 0.5f;
         tw.size[i] = maxs[i] - offset[i];
         tw.extents.start[i] = start[i] + offset[i];
-        tw.delta[i - 6] = end[i] + offset[i];
-        tw.midpoint[i] = (tw.extents.start[i] + tw.delta[i - 6]) * 0.5;
-        tw.delta[i] = tw.delta[i - 6] - tw.extents.start[i];
-        tw.halfDelta[i] = tw.delta[i] * 0.5;
-        v14 = fabs(tw.halfDelta[i]);
-        tw.halfDeltaAbs[i] = v14;
+        tw.extents.end[i] = end[i] + offset[i];
+        tw.midpoint[i] = (tw.extents.start[i] + tw.extents.end[i]) * 0.5f;
+        tw.delta[i] = tw.extents.end[i] - tw.extents.start[i];
+        tw.halfDelta[i] = tw.delta[i] * 0.5f;
+        tw.halfDeltaAbs[i] = fabs(tw.halfDelta[i]);
     }
+
     CM_CalcTraceExtents(&tw.extents);
     tw.deltaLenSq = Vec3LengthSq(tw.delta);
-    v13 = sqrt(tw.deltaLenSq);
-    tw.deltaLen = v13;
-    if (tw.size[0] - tw.size[2] >= 0.009999999776482582)
-    {
-        v7 = va("tw.size[0]: %f, tw.size[2]: %f", tw.size[0], tw.size[2]);
-        MyAssertHandler(
-            ".\\qcommon\\cm_trace.cpp",
-            2325,
-            0,
-            "%s\n\t%s",
-            "(tw.size[0] - tw.size[2]) < CAPSULE_SIZE_EPSILON",
-            v7);
-    }
-    if (tw.size[1] - tw.size[2] >= 0.009999999776482582)
-    {
-        v8 = va("tw.size[1]: %f, tw.size[2]: %f", tw.size[1], tw.size[2]);
-        MyAssertHandler(
-            ".\\qcommon\\cm_trace.cpp",
-            2326,
-            0,
-            "%s\n\t%s",
-            "(tw.size[1] - tw.size[2]) < CAPSULE_SIZE_EPSILON",
-            v8);
-    }
-    if (tw.size[2] >= (double)tw.size[0])
+    tw.deltaLen = sqrt(tw.deltaLenSq);
+
+    iassert((tw.size[0] - tw.size[2]) < CAPSULE_SIZE_EPSILON);
+    iassert((tw.size[1] - tw.size[2]) < CAPSULE_SIZE_EPSILON);
+
+    if (tw.size[2] >= tw.size[0])
         v12 = tw.size[0];
     else
         v12 = tw.size[2];
+
     tw.radius = v12;
     tw.boundingRadius = Vec3Length(tw.size);
     tw.offsetZ = tw.size[2] - tw.radius;
+
     for (i = 0; i < 2; ++i)
     {
-        if (tw.delta[i - 6] <= (double)tw.extents.start[i])
+        if (tw.extents.end[i] <= tw.extents.start[i])
         {
-            tw.bounds[0][i] = tw.delta[i - 6] - tw.radius;
+            tw.bounds[0][i] = tw.extents.end[i] - tw.radius;
             v9 = tw.extents.start[i] + tw.radius;
         }
         else
         {
             tw.bounds[0][i] = tw.extents.start[i] - tw.radius;
-            v9 = tw.delta[i - 6] + tw.radius;
+            v9 = tw.extents.end[i] + tw.radius;
         }
         tw.bounds[1][i] = v9;
     }
-    if (tw.offsetZ < 0.0)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2350, 0, "%s", "tw.offsetZ >= 0");
-    if (tw.extents.end[2] <= (double)tw.extents.start[2])
+
+    iassert(tw.offsetZ >= 0);
+
+    if (tw.extents.end[2] <= tw.extents.start[2])
     {
         tw.bounds[0][2] = tw.extents.end[2] - tw.offsetZ - tw.radius;
         v10 = tw.extents.start[2] + tw.offsetZ + tw.radius;
@@ -1833,17 +1818,14 @@ int __cdecl CM_BoxSightTrace(
         tw.bounds[0][2] = tw.extents.start[2] - tw.offsetZ - tw.radius;
         v10 = tw.extents.end[2] + tw.offsetZ + tw.radius;
     }
+
     tw.bounds[1][2] = v10;
     CM_SetAxialCullOnly(&tw);
-    if (tw.size[0] < 0.0)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2368, 0, "%s", "tw.size[0] >= 0");
-    if (tw.size[1] < 0.0)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2369, 0, "%s", "tw.size[1] >= 0");
-    if (tw.size[2] < 0.0)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2370, 0, "%s", "tw.size[2] >= 0");
-    tw.isPoint = tw.size[0] + tw.size[1] + tw.size[2] == 0.0;
-    if (tw.offsetZ < 0.0)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2374, 0, "%s", "tw.offsetZ >= 0");
+    iassert(tw.size[0] >= 0);
+    iassert(tw.size[1] >= 0);
+    iassert(tw.size[2] >= 0);
+    tw.isPoint = (tw.size[0] + tw.size[1] + tw.size[2]) == 0.0f;
+    iassert(tw.offsetZ >= 0);
     tw.radiusOffset[0] = tw.radius;
     tw.radiusOffset[1] = tw.radius;
     tw.radiusOffset[2] = tw.radius + tw.offsetZ;
@@ -1867,14 +1849,13 @@ int __cdecl CM_BoxSightTrace(
         hitNum = 0;
         if (oldHitNum > 0)
         {
-            oldHitNuma = oldHitNum - 1;
-            if (oldHitNuma < cm.numBrushes)
-                hitNum = CM_SightTraceThroughBrush(&tw, &cm.brushes[oldHitNuma]);
+            if ((oldHitNum - 1) < cm.numBrushes)
+                hitNum = CM_SightTraceThroughBrush(&tw, &cm.brushes[oldHitNum - 1]);
         }
         if (!hitNum)
             hitNum = CM_SightTraceThroughTree(&tw, 0, tw.extents.start, tw.extents.end, &trace);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return hitNum;
 }
 
@@ -2306,6 +2287,7 @@ int __cdecl CM_SightTraceCapsuleThroughCapsule(const traceWork_t *tw, trace_t *t
     v4 = tw->threadInfo.box_model->mins[2] - 1.0;
     if (tw->bounds[1][2] < (double)v4)
         return 0;
+
     starttop[0] = tw->extents.start[0];
     starttop[1] = tw->extents.start[1];
     starttop[2] = tw->extents.start[2] + tw->offsetZ;
@@ -2326,7 +2308,7 @@ int __cdecl CM_SightTraceCapsuleThroughCapsule(const traceWork_t *tw, trace_t *t
     }
     halfwidth = symetricSize[1][0];
     halfheight = symetricSize[1][2];
-    if (symetricSize[1][2] >= (double)symetricSize[1][0])
+    if (symetricSize[1][0] <= symetricSize[1][2])
         v3 = halfwidth;
     else
         v3 = halfheight;
@@ -2338,9 +2320,10 @@ int __cdecl CM_SightTraceCapsuleThroughCapsule(const traceWork_t *tw, trace_t *t
     bottom[0] = offset[0];
     bottom[1] = offset[1];
     bottom[2] = offset[2] - offs;
-    if (top[2] >= (double)startbottom[2])
+
+    if (startbottom[2] <= top[2])
     {
-        if (bottom[2] > (double)starttop[2])
+        if (bottom[2] > starttop[2])
         {
             if (!CM_SightTraceSphereThroughSphere(tw, starttop, endtop, bottom, radius, trace))
                 return -1;
@@ -2357,16 +2340,16 @@ int __cdecl CM_SightTraceCapsuleThroughCapsule(const traceWork_t *tw, trace_t *t
     }
     if (!CM_SightTraceCylinderThroughCylinder(tw, offset, offs, radius, trace))
         return -1;
-    if (top[2] >= (double)endbottom[2])
+    if (endbottom[2] <= top[2]) 
     {
-        if (bottom[2] > (double)endtop[2]
-            && bottom[2] <= (double)starttop[2]
+        if (bottom[2] > endtop[2]
+            && starttop[2] >= bottom[2]
             && !CM_SightTraceSphereThroughSphere(tw, starttop, endtop, bottom, radius, trace))
         {
             return -1;
         }
     }
-    else if (top[2] >= (double)startbottom[2]
+    else if (top[2] >= startbottom[2]
         && !CM_SightTraceSphereThroughSphere(tw, startbottom, endbottom, top, radius, trace))
     {
         return -1;

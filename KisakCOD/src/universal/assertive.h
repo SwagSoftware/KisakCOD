@@ -1,6 +1,6 @@
 #pragma once
 
-[[noreturn]] void MyAssertHandler(const char* filename, int line, int type, const char* fmt, ...);
+void MyAssertHandler(const char* filename, int line, int type, const char* fmt, ...);
 
 #define iassert(expression) (void)(                                                       \
             (!!(expression)) ||                                                          \

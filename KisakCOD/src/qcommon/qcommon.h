@@ -663,6 +663,8 @@ TRACES
 ==============================================================
 */
 // cm_trace
+#define CAPSULE_SIZE_EPSILON 0.01f
+
 struct TraceExtents // sizeof=0x24
 {                                       // ...
     float start[3];                     // ...

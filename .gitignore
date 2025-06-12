@@ -11,3 +11,4 @@ IDA/*
 *.exe
 *.bak
 KisakCOD/KisakCOD.vcxproj.user
+/.idea

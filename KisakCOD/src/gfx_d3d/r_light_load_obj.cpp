@@ -193,9 +193,9 @@ void __cdecl R_LoadLightGridColors(unsigned int bspVersion)
     char *rawColorData; // [esp+0h] [ebp-Ch]
     unsigned int colorIndex; // [esp+8h] [ebp-4h]
 
-    rawColorData = Com_GetBspLump(LUMP_LIGHTGRIDCOLORS, bspVersion > 0xA ? 168 : 24, &s_world.lightGrid.colorCount);
+    rawColorData = Com_GetBspLump(LUMP_LIGHTGRIDCOLORS, bspVersion > 10 ? 168 : 24, &s_world.lightGrid.colorCount);
     s_world.lightGrid.colors = (GfxLightGridColors *)Hunk_Alloc(168 * (s_world.lightGrid.colorCount + 1), "R_LoadLightGridColors", 20);
-    if (bspVersion > 0xA)
+    if (bspVersion > 10)
     {
         Com_Memcpy(s_world.lightGrid.colors, rawColorData, 168 * s_world.lightGrid.colorCount);
     }

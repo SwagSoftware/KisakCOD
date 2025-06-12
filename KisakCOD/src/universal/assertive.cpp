@@ -630,8 +630,9 @@ void __cdecl FixWindowsDesktop()
 }
 
 bool __cdecl QuitOnError();
-[[noreturn]] void MyAssertHandler(const char *filename, int line, int type, const char *fmt, ...)
+void MyAssertHandler(const char *filename, int line, int type, const char *fmt, ...)
 {
+#ifdef KISAK_PURE
     char shouldBreak; // [esp+3h] [ebp-5h]
     va_list va; // [esp+20h] [ebp+18h] BYREF
     
@@ -641,7 +642,6 @@ bool __cdecl QuitOnError();
     message[1023] = 0;
 
     fprintf(stderr, "\x1b[31mASSERTION FAIL AT \x1b[33m%s:%d (TYPE: %d)\x1b[m:\n\t%s\n", filename, line, type, message);
-    __debugbreak();
 
     if (isHandlingAssert)
     {
@@ -672,4 +672,7 @@ bool __cdecl QuitOnError();
     Sys_LeaveCriticalSection(CRITSECT_ASSERT);
     if (shouldBreak)
         DebugBreak();
+#else
+        __debugbreak();
+#endif
 }

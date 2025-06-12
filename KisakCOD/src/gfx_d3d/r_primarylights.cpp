@@ -815,14 +815,7 @@ unsigned int __cdecl R_GetNonSunPrimaryLightForBox(
         ++primaryLightIndex)
     {
         light = Com_GetPrimaryLight(primaryLightIndex);
-        if (light->type != 2 && light->type != 3)
-            MyAssertHandler(
-                ".\\r_primarylights.cpp",
-                517,
-                0,
-                "%s\n\t(light->type) = %i",
-                "(light->type == GFX_LIGHT_TYPE_SPOT || light->type == GFX_LIGHT_TYPE_OMNI)",
-                light->type);
+        iassert((light->type == GFX_LIGHT_TYPE_SPOT || light->type == GFX_LIGHT_TYPE_OMNI));
         if (!Com_CullBoxFromPrimaryLight(light, boxMidPoint, boxHalfSize))
         {
             v5 = &rgp.world->lightRegion[primaryLightIndex];

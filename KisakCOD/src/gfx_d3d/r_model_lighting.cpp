@@ -284,11 +284,7 @@ unsigned int __cdecl R_AllocModelLighting(
         *cachedLightingHandle = lightingHandlea;
         lightingInfoOut->reflectionProbeIndex = R_CalcReflectionProbeIndex(lightingOrigin);
         nonSunPrimaryLightIndex = GetPrimaryLightCallback(userData);
-        lightingInfoOut->primaryLightIndex = R_CalcModelLighting(
-            entryIndex,
-            lightingOrigin,
-            nonSunPrimaryLightIndex,
-            GFX_MODELLIGHT_SHOW_MISSING);
+        lightingInfoOut->primaryLightIndex = R_CalcModelLighting(entryIndex, lightingOrigin, nonSunPrimaryLightIndex, GFX_MODELLIGHT_SHOW_MISSING);
         modelLightGlob.lightingInfo[usedIndexa] = *lightingInfoOut;
         return lightingHandlea;
     }
@@ -386,22 +382,9 @@ unsigned int __cdecl R_CalcModelLighting(
     GfxModelLightExtrapolation extrapolateBehavior)
 {
     CL_ResetStats_f();
-    if (entryIndex != (unsigned __int16)entryIndex)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-            281,
-            0,
-            "i == static_cast< Type >( i )\n\t%i, %i",
-            entryIndex,
-            (unsigned __int16)entryIndex);
-    if (nonSunPrimaryLightIndex >= rgp.world->primaryLightCount)
-        MyAssertHandler(
-            ".\\r_model_lighting.cpp",
-            680,
-            0,
-            "nonSunPrimaryLightIndex doesn't index rgp.world->primaryLightCount\n\t%i not in [0, %i)",
-            nonSunPrimaryLightIndex,
-            rgp.world->primaryLightCount);
+    iassert(entryIndex == (unsigned short)entryIndex);
+    bcassert(nonSunPrimaryLightIndex, rgp.world->primaryLightCount);
+
     return R_GetLightingAtPoint(
         &rgp.world->lightGrid,
         lightingOrigin,
