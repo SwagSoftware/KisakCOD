@@ -15,6 +15,7 @@
 #include <cgame/cg_local.h>
 #include <cgame_mp/cg_local_mp.h>
 #include "rb_light.h"
+#include <universal/profile.h>
 
 
 DpvsGlobals dpvsGlob;
@@ -237,7 +238,7 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
     const GfxBrushModel *bmodel; // [esp+D8h] [ebp-8h]
     int drawSurfCount; // [esp+DCh] [ebp-4h]
 
-    //Profile_Begin(413);
+    Profile_Begin(413);
     drawSurfs[0] = scene.drawSurfs[2];
     lastDrawSurfs[0] = &scene.drawSurfs[2][scene.maxDrawSurfCount[2]];
     drawSurfs[1] = scene.drawSurfs[5];
@@ -384,8 +385,8 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
             R_AddBModelSurfacesCamera((BModelDrawInfo *)sceneDynBrush, bmodel, drawSurfs, lastDrawSurfs, reflectionProbeIndex);
         }
     }
-    //Profile_EndInternal(0);
-    //Profile_Begin(414);
+    Profile_EndInternal(0);
+    Profile_Begin(414);
     drawSurfCount = drawSurfs[0] - scene.drawSurfs[2];
     scene.drawSurfCount[2] = drawSurfCount;
     CL_ResetStats_f();
@@ -398,7 +399,7 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
     scene.drawSurfCount[11] = drawSurfCount;
     CL_ResetStats_f();
     R_SortDrawSurfs(scene.drawSurfs[11], drawSurfCount);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddAllSceneEntSurfacesSunShadow()
@@ -436,7 +437,7 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
     signed int drawSurfCount; // [esp+68h] [ebp-8h]
     GfxDrawSurf *lastDrawSurf; // [esp+6Ch] [ebp-4h]
 
-    //Profile_Begin(415);
+    Profile_Begin(415);
     stage = 3 * partitionIndex + 17;
     drawSurf = scene.drawSurfs[stage];
     lastDrawSurf = &drawSurf[scene.maxDrawSurfCount[stage]];
@@ -503,7 +504,7 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
     scene.drawSurfCount[stage] = drawSurfCount;
     CL_ResetStats_f();
     R_SortDrawSurfs(scene.drawSurfs[stage], drawSurfCount);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddAllSceneEntSurfacesSpotShadow(
@@ -1018,7 +1019,7 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
     GfxBrushModel *bmodel; // [esp+6Ch] [ebp-4h]
     int savedregs; // [esp+70h] [ebp+0h] BYREF
 
-    //Profile_Begin(407);
+    Profile_Begin(407);
     for (viewIndex = 0; viewIndex < 3; ++viewIndex)
         dynEntVisData[viewIndex] = rgp.world->dpvsDyn.dynEntVisData[0][viewIndex];
     dynEntCount = rgp.world->dpvsDyn.dynEntClientCount[0];
@@ -1081,7 +1082,7 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
     }
     if (!rg.drawBModels)
         scene.sceneDynBrushCount = 0;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_UnfilterEntFromCells(unsigned int localClientNum, unsigned int entnum)
@@ -1795,7 +1796,7 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
     //LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
     //hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
     hullPointsPoolArray = (GfxHullPointsPool(*)[256])hullPointsPoolArray_large_local.GetBuf();
-    //Profile_Begin(188);
+    Profile_Begin(188);
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_dpvs.cpp", 2879, 0, "%s", "Sys_IsMainThread()");
     for (queueIndex = 0; queueIndex < 255; ++queueIndex)
@@ -1810,9 +1811,9 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
         portal = R_NextQueuedPortal();
         if (!portal)
             MyAssertHandler(".\\r_dpvs.cpp", 2892, 0, "%s", "portal");
-        //Profile_Begin(84);
+        Profile_Begin(84);
         hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         R_FreeHullPoints((GfxHullPointsPool *)portal->writable.hullPoints);
         portal->writable.hullPoints = 0;
         if (hullPointCount)
@@ -1837,7 +1838,7 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
                 portal->writable.recursionDepth + 1);
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     //LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
 }
 
@@ -2185,9 +2186,9 @@ void __cdecl R_AddVertToPortalHullPoints(GfxPortal *portal, const float *v)
     {
         if (portal->writable.hullPointCount == 64)
         {
-            //Profile_Begin(84);
+            Profile_Begin(84);
             hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             if (hullPointCount == 64)
                 Com_Error(ERR_DROP, "More than %i points on a clipped portal's convex hull\n", 64);
             portal->writable.hullPointCount = hullPointCount;
@@ -2999,7 +3000,7 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
     //LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
     //hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
     hullPointsPoolArray = (GfxHullPointsPool(*)[256])hullPointsPoolArray_large_local.GetBuf();
-    //Profile_Begin(188);
+    Profile_Begin(188);
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_dpvs.cpp", 2778, 0, "%s", "Sys_IsMainThread()");
     childPlanesCount = 0;
@@ -3016,9 +3017,9 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
         portal = R_NextQueuedPortal();
         if (!portal)
             MyAssertHandler(".\\r_dpvs.cpp", 2794, 0, "%s", "portal");
-        //Profile_Begin(84);
+        Profile_Begin(84);
         hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         R_FreeHullPoints((GfxHullPointsPool *)portal->writable.hullPoints);
         portal->writable.hullPoints = 0;
         if (hullPointCount)
@@ -3082,7 +3083,7 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
                 clipChildren);
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     //LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
 }
 

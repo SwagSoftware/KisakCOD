@@ -1449,7 +1449,7 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
     dxWorld *world; // [esp+6Ch] [ebp-8h]
     int bodyEnableCount; // [esp+70h] [ebp-4h]
 
-    //Profile_Begin(383);
+    Profile_Begin(383);
     world = physGlob.world[worldIndex];
     for (b = world->firstbody; b; b = (dxBody *)b->next)
     {
@@ -1488,7 +1488,7 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
     g_phys_msecStep[worldIndex] = g_phys_minMsecStep[worldIndex]
         + (int)((double)(g_phys_maxMsecStep[worldIndex] - g_phys_minMsecStep[worldIndex]) * v1);
         ODE_ForEachBody(world, Phys_CheckIfAliveTooLong);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
 }
 
 void __cdecl Phys_CheckIfAliveTooLong(dxBody *body)
@@ -2056,7 +2056,7 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
         MyAssertHandler(".\\physics\\phys_ode.cpp", 1653, 0, "%s", "physInited");
     world = physGlob.world[worldIndex];
     world->seconds = seconds;
-    //Profile_Begin(365);
+    Profile_Begin(365);
     if (phys_dumpcontacts->current.enabled)
     {
         physGlob.dumpContacts = 1;
@@ -2093,7 +2093,7 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
     scale = -phys_gravity->current.value;
     Vec3Scale(physGlob.gravityDirection, scale, down);
     dWorldSetGravity(world, down[0], down[1], down[2]);
-    //Profile_Begin(366);
+    Profile_Begin(366);
     if (phys_interBodyCollision->current.enabled)
         dSpaceCollide(physGlob.space[worldIndex], &worldIndex, Phys_NearCallback);
     if (physGlob.worldData[worldIndex].collisionCallback)
@@ -2101,12 +2101,12 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
     frameInfo.localClientNum = localClientNum;
     frameInfo.worldIndex = worldIndex;
     ODE_CollideSimpleSpaceWithGeomNoAABBTest(physGlob.space[worldIndex], physGlob.worldGeom, &frameInfo);
-    //Profile_EndInternal(0);
-    //Profile_Begin(382);
+    Profile_EndInternal(0);
+    Profile_Begin(382);
     dWorldQuickStep(world, seconds);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     physGlob.dumpContacts = 0;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl Phys_BodyGrabSnapshot(dxBody *body)
@@ -2174,9 +2174,9 @@ void __cdecl Phys_DoBodyOncePerRun(dxBody *body)
 
     if (dBodyIsEnabled(body))
     {
-        //Profile_Begin(364);
+        Profile_Begin(364);
         Phys_ObjTraceNewPos(body);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         for (dim = 0; dim != 3; ++dim)
         {
             CM_ModelBounds(0, mins, maxs);

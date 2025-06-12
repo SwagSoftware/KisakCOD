@@ -275,7 +275,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
     int modelIndex; // [esp+5D4h] [ebp-8h]
     unsigned __int16 *boneNames; // [esp+5D8h] [ebp-4h]
 
-    //Profile_Begin(325);
+    Profile_Begin(325);
     duplicateParts = (unsigned __int8 *)&duplicatePartBits[4];
     memset(duplicatePartBits, 0, 16);
     len = 0;
@@ -420,7 +420,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
         obj->duplicatePartsSize = 17;
         obj->duplicateParts = g_empty;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, unsigned int numModels)
@@ -473,7 +473,7 @@ void __cdecl DObjFree(DObj_s *obj)
 {
     XModel **models; // [esp+34h] [ebp-4h]
 
-    //Profile_Begin(327);
+    Profile_Begin(327);
     if (!obj)
         MyAssertHandler(".\\xanim\\dobj.cpp", 579, 0, "%s", "obj");
     models = obj->models;
@@ -497,7 +497,7 @@ void __cdecl DObjFree(DObj_s *obj)
         obj->duplicatePartsSize = 0;
         obj->duplicateParts = 0;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl DObjGetCreateParms(
@@ -1311,7 +1311,7 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
     unsigned int localBoneIndex; // [esp+44h] [ebp-10h]
     XModel **models; // [esp+50h] [ebp-4h]
 
-    //Profile_Begin(311);
+    Profile_Begin(311);
     partBits[0] = 0;
     partBits[1] = 0;
     partBits[2] = 0;
@@ -1341,7 +1341,7 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
         }
     }
     DObjCompleteHierarchyBits(obj, partBits);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl DObjGeomTraceline(

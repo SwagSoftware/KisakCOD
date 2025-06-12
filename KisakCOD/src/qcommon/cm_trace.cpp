@@ -182,7 +182,7 @@ void __cdecl CM_Trace(
             "%s",
             "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
     }
-    //Profile_Begin(39);
+    Profile_Begin(39);
     cmod = CM_ClipHandleToModel(model);
     tw.contents = brushmask;
     for (i = 0; i < 3; ++i)
@@ -348,7 +348,7 @@ void __cdecl CM_Trace(
                 "results->surfaceFlags == SURF_INVALID || results->fraction == oldFrac");
         results->surfaceFlags = oldSurfaceFlags;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CM_GetTraceThreadInfo(TraceThreadInfo *threadInfo)
@@ -660,18 +660,18 @@ void __cdecl CM_TraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *
     {
         if ((tw->contents & leaf->brushContents) != 0)
         {
-            //Profile_Begin(45);
+            Profile_Begin(45);
             if (CM_TraceThroughLeafBrushNode(tw, leaf, trace))
             {
             LABEL_11:
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 return;
             }
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
         if ((tw->contents & leaf->terrainContents) == 0)
             return;
-        //Profile_Begin(46);
+        Profile_Begin(46);
         for (k = 0; k < leaf->collAabbCount && trace->fraction != 0.0; ++k)
             CM_TraceThroughAabbTree(tw, &cm.aabbTrees[k + leaf->firstCollAabbIndex], trace);
         goto LABEL_11;
@@ -2058,9 +2058,9 @@ int __cdecl CM_SightTraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace
 
     if ((tw->contents & leaf->brushContents) != 0)
     {
-        //Profile_Begin(47);
+        Profile_Begin(47);
         hitnum = CM_SightTraceThroughLeafBrushNode(tw, leaf);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         if (hitnum)
             return hitnum;
     }
@@ -2068,17 +2068,17 @@ int __cdecl CM_SightTraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace
         MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1937, 0, "%s", "trace->fraction == 1.0f");
     if ((tw->contents & leaf->terrainContents) != 0)
     {
-        //Profile_Begin(48);
+        Profile_Begin(48);
         for (k = 0; k < leaf->collAabbCount; ++k)
         {
             CM_SightTraceThroughAabbTree(tw, &cm.aabbTrees[k + leaf->firstCollAabbIndex], trace);
             if (trace->fraction != 1.0)
             {
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 return leaf->firstCollAabbIndex + k + cm.numBrushes + 1;
             }
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     return 0;
 }

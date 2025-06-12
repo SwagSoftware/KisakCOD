@@ -68,7 +68,7 @@ void __cdecl RB_DrawSlowProfileOverlay(int(__cdecl *compare)(const void *, const
         drawProfGlob.lastSortTime = currTime;
         for (probeIndex = 0; probeIndex < 432; ++probeIndex)
             drawProfGlob.sortedProbeIndices[probeIndex] = probeIndex;
-        qsort(drawProfGlob.sortedProbeIndices, 0x1B0u, 4u, compare);
+        qsort(drawProfGlob.sortedProbeIndices, 432, sizeof(drawProfGlob.sortedProbeIndices[0]), compare);
     }
     RB_DrawAllProfileBackgrounds(0, profile_rowcount->current.integer);
     RB_DrawProfileHistory(0);

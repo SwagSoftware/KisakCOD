@@ -194,12 +194,12 @@ int __cdecl G_ModelIndex(char *name)
     signed int constIndex; // [esp+74h] [ebp-4h]
     signed int constIndexa; // [esp+74h] [ebp-4h]
 
-    //Profile_Begin(244);
+    Profile_Begin(244);
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 221, 0, "%s", "name");
     if (!*name)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 0;
     }
     nameString = SL_FindLowercaseString(name);
@@ -219,7 +219,7 @@ int __cdecl G_ModelIndex(char *name)
         }
         if (!level.initializing)
         {
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             v2 = va("model '%s' not precached", name);
             Scr_Error(v2);
         }
@@ -255,7 +255,7 @@ int __cdecl G_ModelIndex(char *name)
             Com_Error(ERR_DROP, "G_ModelIndex: overflow");
         cached_models[i] = SV_XModelGet(name);
         SV_SetConfigstring(i + 830, name);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return i;
     }
     i = constIndexa - 830;
@@ -264,7 +264,7 @@ int __cdecl G_ModelIndex(char *name)
     if (!cached_models[i])
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 244, 0, "%s", "cached_models[i]");
 LABEL_14:
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return i;
 }
 
@@ -941,9 +941,9 @@ DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, unsigned int tagNam
     boneIndex = SV_DObjGetBoneIndex(ent, tagName);
     if (boneIndex < 0)
         return 0;
-    //Profile_Begin(314);
+    Profile_Begin(314);
     G_DObjCalcBone(ent, boneIndex);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return &SV_DObjGetMatrixArray(ent)[boneIndex];
 }
 
@@ -1024,9 +1024,9 @@ int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, unsigned int tagName, float *po
 
 DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(gentity_s *ent, int boneIndex)
 {
-    //Profile_Begin(314);
+    Profile_Begin(314);
     G_DObjCalcBone(ent, boneIndex);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return &SV_DObjGetMatrixArray(ent)[boneIndex];
 }
 

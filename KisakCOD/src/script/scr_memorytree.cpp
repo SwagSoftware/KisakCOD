@@ -199,7 +199,7 @@ void MT_FreeIndex(unsigned int nodeNum, int numBytes)
     int size; // [esp+30h] [ebp-8h]
     int lowBit; // [esp+34h] [ebp-4h]
 
-    //Profile_Begin(335);
+    Profile_Begin(335);
     size = MT_GetSize(numBytes);
 
     iassert(size >= 0 && size <= MEMORY_NODE_BITS);
@@ -234,7 +234,7 @@ void MT_FreeIndex(unsigned int nodeNum, int numBytes)
     }
     MT_AddMemoryNode(nodeNum, size);
     Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 bool __cdecl MT_RemoveMemoryNode(int oldNode, unsigned int size)

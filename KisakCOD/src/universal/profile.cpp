@@ -567,7 +567,8 @@ void __cdecl Profile_Unguard(int id)
 
 void __cdecl Profile_SetTotal(int index, int total)
 {
-    *((_DWORD *)Sys_GetValue(0) + 10 * index + 16400) = total;
+    ProfileStack* prof_stack = (ProfileStack*)Sys_GetValue(0);
+    prof_stack->prof_array[index].write.total.value[0] = total;
 }
 
 void Profile_ResetScriptCounters()
@@ -810,117 +811,170 @@ void __cdecl Profile_EndScript(int profileIndex)
 int __cdecl Profile_EndInternal(long double *duration)
 {
     // KISAKTODO: Profiler
-    return 0;
-    //ProfileStack *prof_stack; // [esp+18h] [ebp-14h]
-    //ProfileAtom delta; // [esp+20h] [ebp-Ch]
-    //ProfileAtom deltaa; // [esp+20h] [ebp-Ch]
-    //profile_t *parent; // [esp+24h] [ebp-8h]
-    //profile_t *p; // [esp+28h] [ebp-4h]
-    //
-    //delta.value[0] = __rdtsc();
-    //prof_stack = (ProfileStack *)Sys_GetValue(0);
-    //p = *prof_stack->prof_ppStack;
-    //if (p->write.nesting >= 3u)
-    //    MyAssertHandler(
-    //        "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
-    //        244,
-    //        0,
-    //        "p->write.nesting doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
-    //        p->write.nesting,
-    //        3);
-    //deltaa.value[0] = delta.value[0]
-    //    - (prof_stack->prof_overhead_internal.value[0]
-    //        + p->write.start[p->write.nesting].value[0]);
-    //if ((deltaa.value[0] & 0x80000000) != 0)
-    //    deltaa.value[0] = 0;
-    //--p->write.nesting;
-    //p->write.total.value[0] += deltaa.value[0];
-    //++p->write.hits;
-    //parent = *--prof_stack->prof_ppStack;
-    //parent->write.child.value[0] += deltaa.value[0];
-    //if (parent->write.total.value[0] < prof_stack->prof_overhead_external.value[0])
-    //    parent->write.total.value[0] = 0;
-    //else
-    //    parent->write.total.value[0] -= prof_stack->prof_overhead_external.value[0];
-    //if (duration)
-    //    *duration = ((double)deltaa.value[0] - (double)0LL) * msecPerRawTimerTick;
-    //return p - prof_stack->prof_array;
+    //return 0;
+
+#if 1
+    ProfileAtom end;
+    end.value[0] = __rdtsc();
+
+    ProfileStack* prof_stack = (ProfileStack*)Sys_GetValue(0);
+    profile_t* p = *prof_stack->prof_ppStack;
+
+    iassert(p->write.nesting < 3);
+    iassert(p->write.nesting >= 0);
+
+    auto overhead = prof_stack->prof_overhead_internal.value[0];
+    auto start = p->write.start[p->write.nesting].value[0];
+    
+    // Self time.
+    ProfileAtom deltaa;
+    deltaa.value[0] = end.value[0] - overhead - start;
+    if ((deltaa.value[0] & 0x80000000) != 0)
+        deltaa.value[0] = 0;
+
+    --p->write.nesting;
+    p->write.total.value[0] += deltaa.value[0];
+    ++p->write.hits;
+
+    // Add self time to total parent's time?
+    profile_t* parent = *--prof_stack->prof_ppStack;
+    parent->write.child.value[0] += deltaa.value[0];
+    // Substract overhead because 2000's
+    if (parent->write.total.value[0] < prof_stack->prof_overhead_external.value[0])
+        parent->write.total.value[0] = 0;
+    else
+        parent->write.total.value[0] -= prof_stack->prof_overhead_external.value[0];
+
+    if (duration)
+        *duration = ((double)deltaa.value[0] - (double)0LL) * msecPerRawTimerTick;
+
+    return p - prof_stack->prof_array;
+#else
+    ProfileStack* prof_stack; // [esp+18h] [ebp-14h]
+    ProfileAtom delta; // [esp+20h] [ebp-Ch]
+    ProfileAtom deltaa; // [esp+20h] [ebp-Ch]
+    profile_t* parent; // [esp+24h] [ebp-8h]
+    profile_t* p; // [esp+28h] [ebp-4h]
+
+    delta.value[0] = __rdtsc();
+    prof_stack = (ProfileStack*)Sys_GetValue(0);
+    p = *prof_stack->prof_ppStack;
+    if (p->write.nesting >= 3u)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
+            244,
+            0,
+            "p->write.nesting doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
+            p->write.nesting,
+            3);
+    deltaa.value[0] = delta.value[0]
+        - (prof_stack->prof_overhead_internal.value[0]
+            + p->write.start[p->write.nesting].value[0]);
+    if ((deltaa.value[0] & 0x80000000) != 0)
+        deltaa.value[0] = 0;
+    --p->write.nesting;
+    p->write.total.value[0] += deltaa.value[0];
+    ++p->write.hits;
+    parent = *--prof_stack->prof_ppStack;
+    parent->write.child.value[0] += deltaa.value[0];
+    if (parent->write.total.value[0] < prof_stack->prof_overhead_external.value[0])
+        parent->write.total.value[0] = 0;
+    else
+        parent->write.total.value[0] -= prof_stack->prof_overhead_external.value[0];
+    if (duration)
+        *duration = ((double)deltaa.value[0] - (double)0LL) * msecPerRawTimerTick;
+    return p - prof_stack->prof_array;
+#endif
 }
 
 void __cdecl Profile_BeginScripts(unsigned int profileFlags)
 {
     // KISAKTODO: profiler
-    //int profileIndex; // [esp+Ch] [ebp-4h]
-    //
-    //if (!profileFlags)
-    //    MyAssertHandler(".\\universal\\profile.cpp", 557, 0, "%s", "profileFlags");
-    //profileIndex = 0;
-    //do
-    //{
-    //    if ((profileFlags & 1) != 0)
-    //    {
-    //        Profile_BeginScript(profileIndex);
-    //    LABEL_10:
-    //        profileFlags >>= 1;
-    //        ++profileIndex;
-    //        continue;
-    //    }
-    //    if ((profileFlags & 0xE) != 0)
-    //        goto LABEL_10;
-    //    profileFlags >>= 4;
-    //    profileIndex += 4;
-    //    if (!(_BYTE)profileFlags)
-    //    {
-    //        profileFlags >>= 8;
-    //        profileIndex += 8;
-    //    }
-    //} while (profileFlags);
+    int profileIndex; // [esp+Ch] [ebp-4h]
+
+    if (!profileFlags)
+        MyAssertHandler(".\\universal\\profile.cpp", 557, 0, "%s", "profileFlags");
+    profileIndex = 0;
+    do
+    {
+        if ((profileFlags & 1) != 0)
+        {
+            Profile_BeginScript(profileIndex);
+        LABEL_10:
+            profileFlags >>= 1;
+            ++profileIndex;
+            continue;
+        }
+        if ((profileFlags & 0xE) != 0)
+            goto LABEL_10;
+        profileFlags >>= 4;
+        profileIndex += 4;
+        if (!(_BYTE)profileFlags)
+        {
+            profileFlags >>= 8;
+            profileIndex += 8;
+        }
+    } while (profileFlags);
 }
 
 void __cdecl Profile_BeginScript(int profileIndex)
 {
     // KISAKTODO: profiler
-    //ProfileScriptWritable *write; // [esp+8h] [ebp-4h]
-    //
-    //if (profileIndex >= 40)
-    //    MyAssertHandler(
-    //        "c:\\trees\\cod3\\src\\script\\../universal/profile.h",
-    //        299,
-    //        0,
-    //        "%s",
-    //        "profileIndex < PROF_SCRIPT_COUNT");
-    //write = &profileScript.write[profileIndex];
-    //if (!write->refCount)
-    //    write->startTime = __rdtsc();
-    //++write->refCount;
+    ProfileScriptWritable* write; // [esp+8h] [ebp-4h]
+
+    if (profileIndex >= 40)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\script\\../universal/profile.h",
+            299,
+            0,
+            "%s",
+            "profileIndex < PROF_SCRIPT_COUNT");
+    write = &profileScript.write[profileIndex];
+    if (!write->refCount)
+        write->startTime = __rdtsc();
+    ++write->refCount;
 }
 
 void __cdecl Profile_Begin(int index)
 {
     // KISAKTODO: Profiler
-    //ProfileStack *prof_stack; // [esp+8h] [ebp-Ch]
-    //profile_t *p; // [esp+10h] [ebp-4h]
-    //
-    //prof_stack = (ProfileStack *)Sys_GetValue(0);
-    //p = &prof_stack->prof_array[index];
-    //if ((unsigned int)(p->write.nesting + 1) >= 3)
-    //    MyAssertHandler(
-    //        "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
-    //        218,
-    //        0,
-    //        "p->write.nesting + 1 doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
-    //        p->write.nesting + 1,
-    //        3);
-    //if (++p->write.nesting >= 3u)
-    //    MyAssertHandler(
-    //        "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
-    //        220,
-    //        0,
-    //        "p->write.nesting doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
-    //        p->write.nesting,
-    //        3);
-    //*++prof_stack->prof_ppStack = p;
-    //p->write.start[p->write.nesting].value[0] = __rdtsc();
+
+#if 1
+    ProfileStack* prof_stack = (ProfileStack*)Sys_GetValue(0);
+    profile_t* p = prof_stack->prof_array + index;
+
+    // NOTE(mrsteyk): this will assert when something bad happens either way
+    p->write.nesting++;
+    iassert(p->write.nesting < 3);
+
+    *++prof_stack->prof_ppStack = p;
+
+    p->write.start[p->write.nesting].value[0] = __rdtsc();
+#else
+    ProfileStack* prof_stack; // [esp+8h] [ebp-Ch]
+    profile_t* p; // [esp+10h] [ebp-4h]
+
+    prof_stack = (ProfileStack*)Sys_GetValue(0);
+    p = &prof_stack->prof_array[index];
+    if ((unsigned int)(p->write.nesting + 1) >= 3)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
+            218,
+            0,
+            "p->write.nesting + 1 doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
+            p->write.nesting + 1,
+            3);
+    if (++p->write.nesting >= 3u)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
+            220,
+            0,
+            "p->write.nesting doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
+            p->write.nesting,
+            3);
+    *++prof_stack->prof_ppStack = p;
+    p->write.start[p->write.nesting].value[0] = __rdtsc();
+#endif
 }
 
 int __cdecl Profile_AddScriptName(char *profileName)

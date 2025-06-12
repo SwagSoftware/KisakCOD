@@ -5,6 +5,7 @@
 #include "r_state.h"
 #include "rb_imagefilter.h"
 #include <devgui/devgui.h>
+#include <universal/profile.h>
 
 
 bool __cdecl R_UsingGlow(const GfxViewInfo *viewInfo)
@@ -111,7 +112,7 @@ void __cdecl RB_ProcessPostEffects(const GfxViewInfo *viewInfo)
         MyAssertHandler(".\\rb_postfx.cpp", 403, 0, "%s", "viewInfo");
     if (RB_UsingPostEffects(viewInfo))
     {
-        //Profile_Begin(115);
+        Profile_Begin(115);
         RB_GetResolvedScene();
         if (RB_UsingMergedPostEffects(viewInfo))
             RB_ApplyMergedPostEffects(viewInfo);
@@ -129,7 +130,7 @@ void __cdecl RB_ProcessPostEffects(const GfxViewInfo *viewInfo)
                 MyAssertHandler(".\\rb_postfx.cpp", 426, 1, "%s\n\t(blurRadius) = %g", "(blurRadius > 0.0f)", blurRadius);
             RB_BlurScreen(viewInfo, blurRadius);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 

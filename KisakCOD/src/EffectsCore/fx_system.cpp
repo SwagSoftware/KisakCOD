@@ -14,6 +14,7 @@
 #include <win32/win_local.h>
 #include <gfx_d3d/r_model.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 int fx_maxLocalClients;
 int fx_serverVisClient;
@@ -1177,7 +1178,7 @@ void __cdecl FX_StopEffect(FxSystem *system, FxEffect *effect)
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1569, 0, "%s", "effect");
     if ((unsigned __int16)effect->status)
     {
-        //Profile_Begin(213);
+        Profile_Begin(213);
         FX_AddRefToEffect(system, effect);
         FX_StopEffectNonRecursive(system, effect);
         if((effect->status & 0x7FE0000) != 0)
@@ -1198,7 +1199,7 @@ void __cdecl FX_StopEffect(FxSystem *system, FxEffect *effect)
                 FX_RunGarbageCollection(system);
         }
         FX_DelRefToEffect(system, effect);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else if ((effect->status & 0x10000) != 0)
     {
@@ -2069,7 +2070,7 @@ double __cdecl FX_GetClientVisibility(int localClientNum, const float *start, co
     visState = system->visStateBufferRead;
     if (!visState || !visState->blockerCount)
         return 1.0;
-    //Profile_Begin(212);
+    Profile_Begin(212);
     Vec3Sub(end, start, dir);
     len = Vec3Normalize(dir);
     if (fx_visMinTraceDist->current.value <= (double)len)
@@ -2101,12 +2102,12 @@ double __cdecl FX_GetClientVisibility(int localClientNum, const float *start, co
                     totalVis = (double)visBlocker->visibility * 0.0000152587890625 * totalVis;
             }
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return totalVis;
     }
     else
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 1.0;
     }
 }

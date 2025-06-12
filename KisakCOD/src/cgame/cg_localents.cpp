@@ -4,6 +4,7 @@
 #include <aim_assist/aim_assist.h>
 
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 //struct localEntity_s **cg_freeLocalEntities 82834808     cg_localents.obj
 //struct localEntity_s *cg_activeLocalEntities 82834818     cg_localents.obj
@@ -69,7 +70,7 @@ void __cdecl CG_AddLocalEntityTracerBeams(int localClientNum)
     localEntity_s *le; // [esp+40h] [ebp-8h]
     localEntity_s *activeLocalEntities; // [esp+44h] [ebp-4h]
 
-    //Profile_Begin(23);
+    Profile_Begin(23);
     if (InterlockedIncrement(&g_localEntThread) != 1)
         MyAssertHandler(".\\cgame\\cg_localents.cpp", 156, 0, "%s", "Sys_InterlockedIncrement( &g_localEntThread ) == 1");
     activeLocalEntities = &cg_activeLocalEntities[localClientNum];
@@ -108,7 +109,7 @@ void __cdecl CG_AddLocalEntityTracerBeams(int localClientNum)
     }
     if (InterlockedDecrement(&g_localEntThread))
         MyAssertHandler(".\\cgame\\cg_localents.cpp", 178, 0, "%s", "Sys_InterlockedDecrement( &g_localEntThread ) == 0");
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_AddMovingTracer(const cg_s *cgameGlob, localEntity_s *le, const refdef_s *refdef)

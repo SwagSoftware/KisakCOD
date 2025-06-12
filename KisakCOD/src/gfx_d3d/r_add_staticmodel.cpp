@@ -204,7 +204,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     unsigned int count; // [esp+1104h] [ebp-8h]
     int smodelIndex; // [esp+1108h] [ebp-4h]
 
-    //Profile_Begin(410);
+    Profile_Begin(410);
     smodelCount = rgp.world->dpvs.smodelCount;
     dest = rgp.world->dpvs.lodData;
     Com_Memset((unsigned int*)dest, 0, 32 * ((smodelCount + 127) >> 7));
@@ -334,7 +334,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     scene.drawSurfCount[1] = surfData.drawSurf[0].current - scene.drawSurfs[1];
     scene.drawSurfCount[4] = surfData.drawSurf[1].current - scene.drawSurfs[4];
     scene.drawSurfCount[10] = surfData.drawSurf[2].current - scene.drawSurfs[10];
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_SkinStaticModelsCameraForLod(

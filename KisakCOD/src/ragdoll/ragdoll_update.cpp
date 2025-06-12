@@ -4,6 +4,7 @@
 #include <qcommon/threads.h>
 #include <cgame_mp/cg_local_mp.h>
 #include <xanim/dobj_utils.h>
+#include <universal/profile.h>
 
 
 //Line 53622:  0006 : 03066908       int ragdollTime          85816908     ragdoll_update.obj
@@ -1226,9 +1227,9 @@ DObjAnimMat *__cdecl Ragdoll_GetDObjLocalBoneMatrix(const cpose_t *pose, DObj_s 
 
     if (!obj)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 43, 0, "%s", "obj");
-    //Profile_Begin(398);
+    Profile_Begin(398);
     CG_DObjCalcBone(pose, obj, boneIndex);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     mat = DObjGetRotTransArray(obj);
     if (mat)
         return &mat[boneIndex];
@@ -2007,7 +2008,7 @@ void __cdecl Ragdoll_Update(int msec)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1898, 0, "%s", "Sys_IsMainThread()");
     if (ragdollInited)
     {
-        //Profile_Begin(400);
+        Profile_Begin(400);
         if (ragdoll_enable->current.enabled && cg_paused && !cg_paused->current.integer)
         {
             ragdollTime += msec;
@@ -2022,7 +2023,7 @@ void __cdecl Ragdoll_Update(int msec)
             Phys_SetCollisionCallback(PHYS_WORLD_RAGDOLL, Ragdoll_GenerateAllSelfCollisionContacts);
             Phys_RunToTime(0, PHYS_WORLD_RAGDOLL, ragdollTime);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 

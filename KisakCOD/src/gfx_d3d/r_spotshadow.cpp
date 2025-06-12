@@ -15,6 +15,7 @@
 #include "r_utils.h"
 #include "r_state.h"
 #include "r_draw_sunshadow.h"
+#include <universal/profile.h>
 
 
 void __cdecl R_AddSpotShadowEntCmd(const GfxSpotShadowEntCmd *data)
@@ -324,7 +325,7 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
     CL_ResetStats_f();
     for (spotShadowIndex = 0; spotShadowIndex < viewInfo->spotShadowCount; ++spotShadowIndex)
     {
-        //Profile_Begin(74);
+        Profile_Begin(74);
         info = &viewInfo->spotShadows[spotShadowIndex].info;
         R_InitDrawSurfListInfo(info);
         info->baseTechType = gfxMetrics.shadowmapBuildTechType;
@@ -360,7 +361,7 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
                     viewInfo->emissiveSpotDrawSurfs,
                     info);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 

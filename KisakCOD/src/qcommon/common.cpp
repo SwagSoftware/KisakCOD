@@ -39,6 +39,7 @@
 #include <universal/com_convexhull.h>
 #include <gfx_d3d/r_dvars.h>
 #include "mem_track.h"
+#include <universal/profile.h>
 
 #include <setjmp.h>
 
@@ -998,7 +999,7 @@ void __cdecl Com_ClientPacketEvent()
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\qcommon\\common.cpp", 2010, 0, "%s", "Sys_IsMainThread()");
-    //Profile_Begin(29);
+    Profile_Begin(29);
     MSG_Init(&netmsg, clientCommonMsgBuf, 0x20000);
     Com_PacketEventLoop(NS_CLIENT1, &netmsg);
     if (!com_sv_running->current.enabled)
@@ -1006,7 +1007,7 @@ void __cdecl Com_ClientPacketEvent()
         while (NET_GetClientPacket(&adr, &netmsg))
             Com_DispatchClientPacketEvent(adr, &netmsg);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg)
@@ -1035,7 +1036,7 @@ void __cdecl Com_ServerPacketEvent()
     msg_t netmsg; // [esp+30h] [ebp-40h] BYREF
     netadr_t adr; // [esp+58h] [ebp-18h] BYREF
 
-    //Profile_Begin(30);
+    Profile_Begin(30);
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\qcommon\\common.cpp", 2072, 0, "%s", "Sys_IsMainThread()");
     MSG_Init(&netmsg, serverCommonMsgBuf, 0x20000);
@@ -1049,7 +1050,7 @@ void __cdecl Com_ServerPacketEvent()
         if (com_sv_running->current.enabled)
             SV_PacketEvent(adr, &netmsg);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl Com_EventLoop()
@@ -1786,7 +1787,7 @@ void __cdecl Com_Frame_Try_Block_Function()
     ++com_lastFrameIndex;
     if (com_dedicated->current.integer)
     {
-        //Profile_Begin(361);
+        Profile_Begin(361);
         while (1)
         {
             Com_EventLoop();
@@ -1798,13 +1799,13 @@ void __cdecl Com_Frame_Try_Block_Function()
                 break;
             NET_Sleep(1u);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         com_lastFrameTime[lastFrameIndex] = com_frameTime;
     }
     else
     {
         CL_ResetStats_f();
-        //Profile_Begin(361);
+        Profile_Begin(361);
         while (1)
         {
             Com_EventLoop();
@@ -1815,7 +1816,7 @@ void __cdecl Com_Frame_Try_Block_Function()
                 break;
             NET_Sleep(1u);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         if (com_frameTime - com_lastFrameTime[lastFrameIndex] < minMsec)
             v4 = minMsec;
         else
@@ -1846,10 +1847,10 @@ void __cdecl Com_Frame_Try_Block_Function()
             Cbuf_Execute(localClientNum, v2);
         }
         CL_ResetStats_f();
-        //Profile_Begin(16);
+        Profile_Begin(16);
         for (localClientNuma = NS_CLIENT1; localClientNuma < NS_SERVER; ++localClientNuma)
             CL_Frame(localClientNuma);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         dvar_modifiedFlags &= ~2u;
         Com_UpdateMenu();
         SCR_UpdateScreen();
@@ -2001,17 +2002,17 @@ void __cdecl Com_Frame()
     //if (_setjmp3(Value, 0))
     if (_setjmp(*(jmp_buf *)Value))
     {
-        //Profile_Recover(1);
+        Profile_Recover(1);
     }
     else
     {
-        //Profile_Guard(1);
+        Profile_Guard(1);
         Com_CheckSyncFrame();
-        //Profile_Begin(360);
+        Profile_Begin(360);
         Com_Frame_Try_Block_Function();
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         ++com_frameNumber;
-        //Profile_Unguard(1);
+        Profile_Unguard(1);
     }
     Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
     if (com_errorEntered)

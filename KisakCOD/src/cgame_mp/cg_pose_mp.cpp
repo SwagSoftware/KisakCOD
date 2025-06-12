@@ -3,6 +3,7 @@
 #include <xanim/dobj_utils.h>
 #include <ragdoll/ragdoll.h>
 #include <gfx_d3d/r_scene.h>
+#include <universal/profile.h>
 
 
 void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int *partBits)
@@ -217,7 +218,7 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
 {
     int setPartBits[4]; // [esp+34h] [ebp-10h] BYREF
 
-    //Profile_Begin(323);
+    Profile_Begin(323);
     DObjGetSetBones(obj, setPartBits);
     switch (pose->eType)
     {
@@ -237,7 +238,7 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
     CG_DoBaseOriginController(pose, obj, setPartBits);
     if (pose->isRagdoll && (pose->ragdollHandle || pose->killcamRagdollHandle))
         Ragdoll_DoControllers(pose, (DObj_s*)obj, partBits);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_Player_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)

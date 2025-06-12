@@ -12,6 +12,7 @@
 #include <script/scr_debugger.h>
 #include <server/sv_game.h>
 #include <server_mp/server.h>
+#include <universal/profile.h>
 
 static cmd_function_s* cmd_functions = NULL;
 
@@ -489,7 +490,7 @@ void __cdecl Cbuf_ExecuteBuffer(int localClientNum, int controllerIndex, const c
 
 void __cdecl Cbuf_Execute(int localClientNum, int controllerIndex)
 {
-    //Profile_Begin(28);
+    Profile_Begin(28);
     if (cmd_insideCBufExecute[localClientNum])
         MyAssertHandler(
             ".\\qcommon\\cmd.cpp",
@@ -502,7 +503,7 @@ void __cdecl Cbuf_Execute(int localClientNum, int controllerIndex)
     Cbuf_ExecuteInternal(localClientNum, controllerIndex);
     cmd_insideCBufExecute[localClientNum] = 0;
     Cbuf_SV_Execute();
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl Cbuf_ExecuteInternal(int localClientNum, int controllerIndex)

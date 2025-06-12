@@ -2,6 +2,7 @@
 #include <xanim/dobj_utils.h>
 #include "r_dobj_skin.h"
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 DObjAnimMat *R_UpdateSceneEntBounds(
     GfxSceneEntity *sceneEnt,
@@ -294,9 +295,9 @@ DObjAnimMat *__cdecl R_DObjCalcPose(const GfxSceneEntity *sceneEnt, const DObj_s
     completePartBits[2] = partBits[2];
     completePartBits[3] = partBits[3];
     DObjLock((DObj_s*)obj);
-    //Profile_Begin(318);
+    Profile_Begin(318);
     boneMatrix = CG_DObjCalcPose(sceneEnt->info.pose, obj, completePartBits);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     DObjUnlock((DObj_s *)obj);
     return boneMatrix;
 }

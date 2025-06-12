@@ -969,7 +969,7 @@ unsigned int __cdecl R_GetLightingAtPoint(
     {
         primaryLightIndex = R_ExtrapolateLightingAtPoint(lightGrid, dest, extrapolateBehavior, defaultGridEntry);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return primaryLightIndex;
 }
 
@@ -1268,9 +1268,9 @@ void __cdecl R_InitLightVisHistory(char *bspName)
                 {
                     if (count > 6291456)
                         count = 6291456;
-                    //Profile_Begin(166);
+                    Profile_Begin(166);
                     memcpy((unsigned __int8 *)s_vc_log.history, (unsigned __int8 *)buffer, count);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                     s_vc_log.count = count / 6u;
                 }
                 FS_FreeFile((char *)buffer);

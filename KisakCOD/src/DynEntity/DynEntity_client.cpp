@@ -7,6 +7,7 @@
 #include <EffectsCore/fx_system.h>
 #include <server_mp/server.h>
 #include <gfx_d3d/r_shadowcookie.h>
+#include <universal/profile.h>
 
 #include <algorithm>
 
@@ -435,7 +436,7 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
     if (localClientNum == RETURN_ZERO32())
     {
         CL_ResetStats_f();
-        //Profile_Begin(386);
+        Profile_Begin(386);
         if (localClientNum)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\dynentity\\../cgame_mp/cg_local_mp.h",
@@ -497,10 +498,10 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
                 }
             }
         }
-        //Profile_Begin(387);
+        Profile_Begin(387);
         Phys_RunToTime(localClientNum, PHYS_WORLD_DYNENT, cgameGlob->time);
-        //Profile_EndInternal(0);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -554,7 +555,7 @@ void __cdecl DynEntCl_PointTrace(const pointtrace_t *clip, trace_t *results)
     float start[4]; // [esp+3Ch] [ebp-20h] BYREF
     float end[4]; // [esp+4Ch] [ebp-10h] BYREF
 
-    //Profile_Begin(391);
+    Profile_Begin(391);
     if (!clip)
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 493, 0, "%s", "clip");
     if (!results)
@@ -569,7 +570,7 @@ void __cdecl DynEntCl_PointTrace(const pointtrace_t *clip, trace_t *results)
             results->fraction);
     if (results->fraction == 0.0)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
@@ -588,7 +589,7 @@ void __cdecl DynEntCl_PointTrace(const pointtrace_t *clip, trace_t *results)
             CL_ResetStats_f();
             DynEntCl_PointTrace_r(DYNENT_COLL_CLIENT_FIRST, clip, 1u, start, end, results);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -718,7 +719,7 @@ void __cdecl DynEntCl_ClipMoveTrace(const moveclip_t *clip, trace_t *results)
     float start[4]; // [esp+40h] [ebp-20h] BYREF
     float end[4]; // [esp+50h] [ebp-10h] BYREF
 
-    //Profile_Begin(392);
+    Profile_Begin(392);
     if (!clip)
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 660, 0, "%s", "clip");
     if (!results)
@@ -733,7 +734,7 @@ void __cdecl DynEntCl_ClipMoveTrace(const moveclip_t *clip, trace_t *results)
             results->fraction);
     if (results->fraction == 0.0)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
@@ -746,7 +747,7 @@ void __cdecl DynEntCl_ClipMoveTrace(const moveclip_t *clip, trace_t *results)
         start[3] = 0.0;
         end[3] = results->fraction;
         DynEntCl_ClipMoveTrace_r(clip, 1u, start, end, results);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -903,7 +904,7 @@ unsigned __int16 __cdecl DynEntCl_AreaEntities(
 {
     DynEntityAreaParms areaParms; // [esp+30h] [ebp-14h] BYREF
 
-    //Profile_Begin(393);
+    Profile_Begin(393);
     if (!mins)
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 764, 0, "%s", "mins");
     if (!maxs)
@@ -925,7 +926,7 @@ unsigned __int16 __cdecl DynEntCl_AreaEntities(
     areaParms.maxCount = dynEntMaxCount;
     areaParms.count = 0;
     DynEntCl_AreaEntities_r((DynEntityCollType)drawType, 1u, &areaParms);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return areaParms.count;
 }
 

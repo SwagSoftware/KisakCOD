@@ -8,6 +8,7 @@
 #include <xanim/dobj.h>
 #include <DynEntity/DynEntity_client.h>
 #include <xanim/dobj_utils.h>
+#include <universal/profile.h>
 
 bool __cdecl CG_IsEntityLinked(int localClientNum, unsigned int entIndex)
 {
@@ -82,9 +83,9 @@ DObj_s *__cdecl CG_LocationalTraceDObj(int localClientNum, unsigned int entIndex
 
 void __cdecl CG_UnlinkEntity(int localClientNum, unsigned int entIndex)
 {
-    //Profile_Begin(49);
+    Profile_Begin(49);
     CG_UnlinkEntityColl(localClientNum, entIndex);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_LinkEntity(int localClientNum, unsigned int entIndex)
@@ -113,7 +114,7 @@ void __cdecl CG_LinkEntity(int localClientNum, unsigned int entIndex)
             "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
             entIndex,
             1024);
-    //Profile_Begin(50);
+    Profile_Begin(50);
     cent = CG_GetEntity(localClientNum, entIndex);
     p_nextState = &cent->nextState;
     dobj = Com_GetClientDObj(entIndex, localClientNum);
@@ -121,18 +122,18 @@ void __cdecl CG_LinkEntity(int localClientNum, unsigned int entIndex)
     {
         CG_GetEntityDobjBounds(cent, dobj, absMins, absMaxs);
         CG_LinkEntityColl(localClientNum, entIndex, absMins, absMaxs);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else if (p_nextState->solid)
     {
         CG_GetEntityBModelBounds(cent, mins, maxs, absMins, absMaxs);
         CG_LinkEntityColl(localClientNum, entIndex, absMins, absMaxs);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
         CG_UnlinkEntity(localClientNum, entIndex);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -226,9 +227,9 @@ void __cdecl CG_LocationalTrace(trace_t *results, float *start, float *end, int 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\cgame\\cg_world.cpp", 846, 0, "%s", "Sys_IsMainThread()");
     CL_ResetStats_f();
-    //Profile_Begin(51);
+    Profile_Begin(51);
     CG_Trace(results, start, (float *)vec3_origin, (float *)vec3_origin, end, passEntityNum, contentMask, 1, 1);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_Trace(
@@ -309,7 +310,7 @@ void __cdecl CG_Trace(
             "%s",
             "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
     }
-    //Profile_Begin(53);
+    Profile_Begin(53);
     CM_BoxTrace(results, start, end, mins, maxs, 0, contentMask);
     if ((COERCE_UNSIGNED_INT(results->fraction) & 0x7F800000) == 0x7F800000)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 752, 0, "%s", "!IS_NAN(results->fraction)");
@@ -339,7 +340,7 @@ void __cdecl CG_Trace(
             if (results->fraction == 0.0)
             {
             LABEL_45:
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 return;
             }
         }
@@ -388,7 +389,7 @@ void __cdecl CG_Trace(
         CG_ClipMoveToEntities(&result, results);
         DynEntCl_ClipMoveTrace(&result, results);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_ClipMoveToEntities(const moveclip_t *clip, trace_t *results)
@@ -418,7 +419,7 @@ void __cdecl CG_ClipMoveToEntities(const moveclip_t *clip, trace_t *results)
             "%s\n\t(results->fraction) = %g",
             "(results->fraction <= 1.0f)",
             results->fraction);
-    //Profile_Begin(54);
+    Profile_Begin(54);
     start[0] = clip->extents.start[0];
     start[1] = clip->extents.start[1];
     start[2] = clip->extents.start[2];
@@ -428,7 +429,7 @@ void __cdecl CG_ClipMoveToEntities(const moveclip_t *clip, trace_t *results)
     start[3] = 0.0;
     end[3] = results->fraction;
     CG_ClipMoveToEntities_r(clip, 1u, start, end, results);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_ClipMoveToEntities_r(
@@ -492,9 +493,9 @@ void __cdecl CG_ClipMoveToEntities_r(
             node = CG_GetEntityCollNode(localClientNum, listIndex - 1);
             if (listIndex - 1 != clip->passEntityNum)
             {
-                //Profile_Begin(55);
+                Profile_Begin(55);
                 CG_ClipMoveToEntity(clip, listIndex - 1, results);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 if (results->allsolid || results->fraction == 0.0)
                     return;
             }
@@ -676,7 +677,7 @@ void __cdecl CG_PointTraceToEntities(const pointtrace_t *clip, trace_t *results)
     float start[4]; // [esp+3Ch] [ebp-20h] BYREF
     float end[4]; // [esp+4Ch] [ebp-10h] BYREF
 
-    //Profile_Begin(56);
+    Profile_Begin(56);
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\cgame\\cg_world.cpp", 707, 0, "%s", "Sys_IsMainThread()");
     if (!clip)
@@ -708,7 +709,7 @@ void __cdecl CG_PointTraceToEntities(const pointtrace_t *clip, trace_t *results)
     start[3] = 0.0;
     end[3] = results->fraction;
     CG_PointTraceToEntities_r(clip, 1u, start, end, results);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_PointTraceToEntities_r(
@@ -759,9 +760,9 @@ void __cdecl CG_PointTraceToEntities_r(
             node = CG_GetEntityCollNode(localClientNum, listIndex - 1);
             if (listIndex - 1 != clip->ignoreEntParams->baseEntity)
             {
-                //Profile_Begin(57);
+                Profile_Begin(57);
                 CG_PointTraceToEntity(clip, listIndex - 1, results);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 if (results->fraction == 0.0)
                     return;
             }
@@ -1004,7 +1005,7 @@ void __cdecl CG_LocationalTraceEntitiesOnly(
             "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
     }
     CL_ResetStats_f();
-    //Profile_Begin(51);
+    Profile_Begin(51);
     ignoreEntParams.baseEntity = passEntityNum;
     ignoreEntParams.parentEntity = -1;
     ignoreEntParams.ignoreSelf = 1;
@@ -1023,7 +1024,7 @@ void __cdecl CG_LocationalTraceEntitiesOnly(
     clip.bLocational = 1;
     clip.priorityMap = 0;
     CG_PointTraceToEntities(&clip, results);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl CG_TraceCapsule(
@@ -1047,8 +1048,8 @@ void __cdecl CG_TraceCapsule(
         MyAssertHandler(".\\cgame\\cg_world.cpp", 908, 0, "%s", "end");
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\cgame\\cg_world.cpp", 909, 0, "%s", "Sys_IsMainThread()");
-    //Profile_Begin(52);
+    Profile_Begin(52);
     CG_Trace(results, (float*)start, (float*)mins, (float*)maxs, (float*)end, passEntityNum, contentMask, 0, 0);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 

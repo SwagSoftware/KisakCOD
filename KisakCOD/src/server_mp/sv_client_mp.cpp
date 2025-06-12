@@ -7,6 +7,7 @@
 #include <stringed/stringed_hooks.h>
 #include <win32/win_local.h>
 #include <universal/com_constantconfigstrings.h>
+#include <universal/profile.h>
 
 struct ucmd_t // sizeof=0xC
 {                                       // ...
@@ -1546,9 +1547,9 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
                 cl->header.state = 4;
                 if (cl->header.state == 4 || cl->header.state == 1)
                 {
-                    //Profile_Begin(290);
+                    Profile_Begin(290);
                     SV_BuildClientSnapshot(cl);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                 }
                 SV_SetServerStaticHeader();
                 SV_BeginClientSnapshot(cl, &v2);
@@ -1560,7 +1561,7 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
             }
             if (bgs)
                 MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 3308, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
-            //Profile_Begin(282);
+            Profile_Begin(282);
             if (c)
             {
                 if (c == 1)
@@ -1576,7 +1577,7 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
             {
                 SV_UserMove(cl, &msgCompressed, 1);
             }
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             if (bgs)
                 MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 3320, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
         }

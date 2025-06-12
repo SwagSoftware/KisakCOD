@@ -552,15 +552,15 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 msec = 200;
             if (client->sess.sessionState == SESS_STATE_INTERMISSION)
             {
-                //Profile_Begin(268);
+                Profile_Begin(268);
                 ClientIntermissionThink(ent);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
             }
             else if (client->sess.sessionState == SESS_STATE_SPECTATOR)
             {
-                //Profile_Begin(269);
+                Profile_Begin(269);
                 SpectatorThink(ent, ucmd);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
             }
             else if (ClientInactivityTimer(client))
             {
@@ -702,9 +702,9 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 client->fGunYaw = viewangles[1];
                 if (pm.mantleStarted)
                     MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 899, 0, "%s", "!pm.mantleStarted");
-                //Profile_Begin(27);
+                Profile_Begin(27);
                 Pmove(&pm);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 if (pm.mantleStarted)
                 {
                     if ((client->ps.pm_flags & 4) == 0)
@@ -729,9 +729,9 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 ent->r.maxs[0] = pm.maxs[0];
                 ent->r.maxs[1] = pm.maxs[1];
                 ent->r.maxs[2] = pm.maxs[2];
-                //Profile_Begin(266);
+                Profile_Begin(266);
                 ClientEvents(ent, oldEventSequence);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 SV_LinkEntity(ent);
                 v2 = client->ps.origin;
                 ent->r.currentOrigin[0] = client->ps.origin[0];
@@ -741,9 +741,9 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 ent->r.currentAngles[1] = 0.0;
                 ent->r.currentAngles[2] = 0.0;
                 ent->r.currentAngles[1] = client->ps.viewangles[1];
-                //Profile_Begin(267);
+                Profile_Begin(267);
                 ClientImpacts(ent, &pm);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 if (client->ps.eventSequence != oldEventSequence)
                     ent->eventTime = level.time;
                 Player_UpdateActivate(ent);
@@ -1153,23 +1153,23 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     else
         v1 = client->ps.pm_flags & 0xFFFFF7FF;
     client->ps.pm_flags = v1;
-    //Profile_Begin(270);
+    Profile_Begin(270);
     bChanged = G_UpdateClientInfo(ent);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     if (client->sess.connected == CON_CONNECTED)
     {
         if (client->sess.sessionState == SESS_STATE_INTERMISSION)
         {
-            //Profile_Begin(273);
+            Profile_Begin(273);
             IntermissionClientEndFrame(ent);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             ent->client->buttonsSinceLastFrame = 0;
         }
         else if (client->sess.sessionState == SESS_STATE_SPECTATOR)
         {
-            //Profile_Begin(274);
+            Profile_Begin(274);
             SpectatorClientEndFrame(ent);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             ent->client->buttonsSinceLastFrame = 0;
         }
         else if (client->ps.clientNum == ent->s.number)
@@ -1208,9 +1208,9 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                 client->ps.pm_type = ent->tagInfo != 0;
             }
             client->currentAimSpreadScale = client->ps.aimSpreadScale / 255.0;
-            //Profile_Begin(276);
+            Profile_Begin(276);
             Player_UpdateCursorHints(ent);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             P_DamageFeedback(ent);
             if (level.time - client->lastCmdTime <= 1000)
                 v2 = ent->s.lerp.eFlags & 0xFFFFFF7F;
@@ -1223,21 +1223,21 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             client->ps.radarEnabled = v7;
             if (g_smoothClients->current.enabled)
             {
-                //Profile_Begin(277);
+                Profile_Begin(277);
                 G_PlayerStateToEntityStateExtrapolate(&client->ps, &ent->s, client->ps.commandTime, 1);
             }
             else
             {
-                //Profile_Begin(278);
+                Profile_Begin(278);
                 BG_PlayerStateToEntityState(&client->ps, &ent->s, 1, 1u);
             }
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             if (ent->health > 0)
                 StuckInClient(ent);
             G_GetPlayerViewOrigin(&ent->client->ps, vViewPos);
-            //Profile_Begin(279);
+            Profile_Begin(279);
             client->ps.iCompassPlayerInfo = G_GetNonPVSPlayerInfo(ent, vViewPos, client->iLastCompassPlayerInfoEnt);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             if (client->ps.iCompassPlayerInfo)
             {
                 client->iLastCompassPlayerInfoEnt = client->ps.iCompassPlayerInfo & 0x3F;
@@ -1276,12 +1276,12 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                 if (bChanged)
                     G_SafeDObjFree(ent);
                 obj = Com_GetServerDObj(ent->s.number);
-                //Profile_Begin(281);
+                Profile_Begin(281);
                 BG_UpdatePlayerDObj(-1, obj, &ent->s, ci, ent->attachIgnoreCollision);
-                //Profile_EndInternal(0);
-                //Profile_Begin(280);
+                Profile_EndInternal(0);
+                Profile_Begin(280);
                 BG_PlayerAnimation(-1, &ent->s, ci);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 if ((client->ps.otherFlags & 4) != 0 && (client->ps.eFlags & 0x300) != 0)
                 {
                     if (client->ps.clientNum != ent->s.number)
@@ -1353,9 +1353,9 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             spawn_angles[0] = 0.0;
             spawn_angles[1] = v10;
             spawn_angles[2] = 0.0;
-            //Profile_Begin(275);
+            Profile_Begin(275);
             ClientSpawn(ent, spawn_origin, spawn_angles);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             if (client->ps.clientNum != ent->s.number)
                 MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1544, 0, "%s", "client->ps.clientNum == ent->s.number");
             ent->client->buttonsSinceLastFrame = 0;

@@ -13,6 +13,7 @@
 #include <script/scr_vm.h>
 
 #include <stringed/stringed_hooks.h>
+#include <universal/profile.h>
 
 extern const dvar_t *ui_showEndOfGame;
 
@@ -221,9 +222,9 @@ void __cdecl CG_Draw2D(int localClientNum)
                     CG_DrawSnapshotAnalysis(localClientNum);
                     CG_DrawPingAnalysis(localClientNum);
                     CG_DrawSnapshotEntityAnalysis(localClientNum);
-                    //Profile_Begin(345);
+                    Profile_Begin(345);
                     CG_DrawDebugOverlays(localClientNum);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                     if (!isScoreboardVisible)
                     {
                         CG_DrawMiniConsole(localClientNum);

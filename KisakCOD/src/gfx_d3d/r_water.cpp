@@ -4,6 +4,7 @@
 #include <universal/fft.h>
 #include "r_dvars.h"
 #include <qcommon/qcommon.h>
+#include <universal/profile.h>
 
 WaterGlob waterGlob;
 WaterGlobStatic waterGlobStatic;
@@ -22,21 +23,21 @@ void __cdecl R_UploadWaterTextureInternal(water_t **data)
 {
     water_t *water; // [esp+68h] [ebp-4h]
 
-    //Profile_Begin(119);
+    Profile_Begin(119);
     water = *data;
-    //Profile_Begin(122);
+    Profile_Begin(122);
     WaterFrequenciesAtTime(waterGlob.H, water, water->writable.floatTime);
-    //Profile_EndInternal(0);
-    //Profile_Begin(123);
+    Profile_EndInternal(0);
+    Profile_Begin(123);
     WaterAmplitudesFromFrequencies(waterGlob.H, water);
-    //Profile_EndInternal(0);
-    //Profile_Begin(124);
+    Profile_EndInternal(0);
+    Profile_Begin(124);
     WaterPixelsFromAmplitudes((GfxColor *)waterGlob.pixels, waterGlob.H, water);
-    //Profile_EndInternal(0);
-    //Profile_Begin(127);
+    Profile_EndInternal(0);
+    Profile_Begin(127);
     GenerateMipMaps(D3DFMT_L8, waterGlob.pixels, water);
-    //Profile_EndInternal(0);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
+    Profile_EndInternal(0);
     InterlockedExchangeAdd(&g_waterLock, -1);
 }
 
@@ -252,17 +253,17 @@ void __cdecl GenerateMipMaps(_D3DFORMAT format, unsigned __int8 *pixels, water_t
         MyAssertHandler(".\\r_water.cpp", 593, 0, "%s", "water");
     if (water->M != water->N)
         MyAssertHandler(".\\r_water.cpp", 594, 0, "%s", "water->M == water->N");
-    //Profile_Begin(126);
+    Profile_Begin(126);
     Image_UploadData(water->image, D3DFMT_L8, D3DCUBEMAP_FACE_POSITIVE_X, 0, waterGlob.pixels);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     srcWidth = water->M;
     mipIndex = 1;
     while (srcWidth > 1)
     {
         R_DownsampleMipMapBilinear(pixels, srcWidth, srcWidth, 1, pixels);
-        //Profile_Begin(126);
+        Profile_Begin(126);
         Image_UploadData(water->image, format, D3DCUBEMAP_FACE_POSITIVE_X, mipIndex, pixels);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         srcWidth >>= 1;
         ++mipIndex;
     }

@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 void __cdecl SV_ArchiveSnapshot(msg_t *msg)
 {
@@ -54,7 +55,7 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
         MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 134, 0, "%s", "svsHeader.archivedSnapshotBuffer");
     if (!svsHeader.cachedSnapshotFrames)
         MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 135, 0, "%s", "svsHeader.cachedSnapshotFrames");
-    //Profile_Begin(258);
+    Profile_Begin(258);
     SV_ResetPacketData(clientNum, msg);
     SV_PacketDataIsNotNetworkData(clientNum, msg);
     v28 = svsHeader.nextCachedSnapshotFrames - 512;
@@ -302,7 +303,7 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
 skipDelta:
     MSG_WriteEntityIndex(&snapInfo, msg, 1023, 10);
     SV_PacketDataIsUnknown(clientNum, msg);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 gentity_s *__cdecl SV_GentityNumLocal(int num)

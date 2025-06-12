@@ -61,7 +61,7 @@ void __cdecl SCR_UpdateScreen()
 {
     if (!updateScreenCalled && !SCR_ShouldSkipUpdateScreen())
     {
-        //Profile_Begin(34);
+        Profile_Begin(34);
         if (clientUIActives[0].connectionState == CA_LOADING)
             Sys_LoadingKeepAlive();
         if (scr_initialized && !com_errorEntered)
@@ -69,11 +69,11 @@ void __cdecl SCR_UpdateScreen()
             updateScreenCalled = 1;
             SCR_UpdateFrame();
             updateScreenCalled = 0;
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
         else
         {
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
     }
 }

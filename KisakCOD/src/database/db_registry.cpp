@@ -20,6 +20,7 @@
 #include <gfx_d3d/rb_shade.h>
 #include <gfx_d3d/r_staticmodelcache.h>
 #include <win32/win_localize.h>
+#include <universal/profile.h>
 
 #include <algorithm>
 
@@ -2425,7 +2426,7 @@ void __cdecl  DB_Thread(unsigned int threadContext)
     Value = (jmp_buf *)Sys_GetValue(2);
     if (_setjmp(*Value))
     {
-        //Profile_Recover(1);
+        Profile_Recover(1);
 #ifdef __llvm__ 
         __builtin_debugtrap();
 #else
@@ -2433,7 +2434,7 @@ void __cdecl  DB_Thread(unsigned int threadContext)
 #endif
         Com_ErrorAbort();
     }
-    //Profile_Guard(1);
+    Profile_Guard(1);
     while (1)
     {
         Sys_WaitStartDatabase();

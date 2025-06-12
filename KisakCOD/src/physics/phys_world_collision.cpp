@@ -167,12 +167,12 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
                 switch (input->type)
                 {
                 case PHYS_GEOM_BOX:
-                    //Profile_Begin(372);
+                    Profile_Begin(372);
                     Phys_CollideBoxWithTriangleList(indices, cm.verts, partition->triCount, input, surfaceFlags, results);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                     break;
                 case PHYS_GEOM_BRUSHMODEL:
-                    //Profile_Begin(376);
+                    Profile_Begin(376);
                     Phys_CollideOrientedBrushModelWithTriangleList(
                         indices,
                         cm.verts,
@@ -180,10 +180,10 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
                         input,
                         surfaceFlags,
                         results);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                     break;
                 case PHYS_GEOM_BRUSH:
-                    //Profile_Begin(376);
+                    Profile_Begin(376);
                     Phys_CollideOrientedBrushWithTriangleList(
                         input->u.brush,
                         indices,
@@ -192,17 +192,17 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
                         input,
                         surfaceFlags,
                         results);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                     break;
                 case PHYS_GEOM_CYLINDER:
-                    //Profile_Begin(378);
+                    Profile_Begin(378);
                     Phys_CollideCylinderWithTriangleList(indices, cm.verts, partition->triCount, input, surfaceFlags, results);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                     break;
                 case PHYS_GEOM_CAPSULE:
-                    //Profile_Begin(380);
+                    Profile_Begin(380);
                     Phys_CollideCapsuleWithTriangleList(indices, cm.verts, partition->triCount, input, surfaceFlags, results);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                     break;
                 default:
                     break;
@@ -284,33 +284,33 @@ void __cdecl Phys_TestGeomInBrush(const cbrush_t *brush, unsigned int *userData)
         switch (*(unsigned int *)(*userData + 52))
         {
         case 1:
-            //Profile_Begin(374);
+            Profile_Begin(374);
             Phys_CollideBoxWithBrush(brush, (const objInfo *)*userData, results);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             break;
         case 2:
-            //Profile_Begin(375);
+            Profile_Begin(375);
             Phys_CollideOrientedBrushModelWithBrush(brush, (const objInfo *)*userData, results);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             break;
         case 3:
-            //Profile_Begin(375);
+            Profile_Begin(375);
             Phys_CollideOrientedBrushWithBrush(
                 *(const cbrush_t **)(*userData + 140),
                 brush,
                 (const objInfo *)*userData,
                 results);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             break;
         case 4:
-            //Profile_Begin(377);
+            Profile_Begin(377);
             Phys_CollideCylinderWithBrush(brush, (const objInfo *)*userData, results);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             break;
         case 5:
-            //Profile_Begin(379);
+            Profile_Begin(379);
             Phys_CollideCapsuleWithBrush(brush, (const objInfo *)*userData, results);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             break;
         default:
             return;

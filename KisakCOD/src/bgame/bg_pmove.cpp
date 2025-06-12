@@ -1,6 +1,7 @@
 #include "bg_public.h"
 #include "bg_local.h"
 #include <game_mp/g_main_mp.h>
+#include <universal/profile.h>
 
 const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
 {
@@ -1271,9 +1272,9 @@ void __cdecl Pmove(pmove_t *pm)
             if (msec > 66)
                 msec = 66;
             pm->cmd.serverTime = msec + ps->commandTime;
-            //Profile_Begin(283);
+            Profile_Begin(283);
             PmoveSingle(pm);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             memcpy(&pm->oldcmd, &pm->cmd, sizeof(pm->oldcmd));
         }
     }
@@ -1542,13 +1543,13 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 PM_UpdateSprint(pm, &pml);
                 PM_UpdatePlayerWalkingFlag(pm);
                 PM_CheckDuck(pm, &pml);
-                //Profile_Begin(286);
+                Profile_Begin(286);
                 PM_GroundTrace(pm, &pml);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
             }
-            //Profile_Begin(289);
+            Profile_Begin(289);
             Mantle_Check(pm, &pml);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             if ((ps->pm_flags & 4) != 0)
             {
                 PM_ClearLadderFlag(ps);
@@ -1560,9 +1561,9 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 PM_UpdatePlayerWalkingFlag(pm);
                 PM_CheckDuck(pm, &pml);
                 Mantle_Move(pm, ps, &pml);
-                //Profile_Begin(285);
+                Profile_Begin(285);
                 PM_Weapon(pm, &pml);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
             }
             else
             {
@@ -1571,7 +1572,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 if (ps->pm_type >= 6)
                     PM_DeadMove(ps, &pml);
                 PM_CheckLadderMove(pm, &pml);
-                //Profile_Begin(284);
+                Profile_Begin(284);
                 if ((ps->pm_flags & 8) != 0)
                 {
                     PM_LadderMove(pm, &pml);
@@ -1584,19 +1585,19 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 {
                     PM_AirMove(pm, &pml);
                 }
-                //Profile_EndInternal(0);
-                //Profile_Begin(286);
+                Profile_EndInternal(0);
+                Profile_Begin(286);
                 PM_GroundTrace(pm, &pml);
-                //Profile_EndInternal(0);
-                //Profile_Begin(287);
+                Profile_EndInternal(0);
+                Profile_Begin(287);
                 PM_Footsteps(pm, &pml);
-                //Profile_EndInternal(0);
-                //Profile_Begin(285);
+                Profile_EndInternal(0);
+                Profile_Begin(285);
                 PM_Weapon(pm, &pml);
-                //Profile_EndInternal(0);
-                //Profile_Begin(288);
+                Profile_EndInternal(0);
+                Profile_Begin(288);
                 PM_FoliageSounds(pm);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 Vec3Sub(ps->origin, pml.previous_origin, move);
                 v2 = Vec3LengthSq(move);
                 realVelSqrd = v2 / (pml.frametime * pml.frametime);

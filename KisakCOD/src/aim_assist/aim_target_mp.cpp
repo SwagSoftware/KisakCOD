@@ -5,6 +5,7 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <script/scr_const.h>
 #include <EffectsCore/fx_system.h>
+#include <universal/profile.h>
 
 AimTargetGlob atGlobArray[1];
 
@@ -49,7 +50,7 @@ void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent)
     AimTarget target; // [esp+50h] [ebp-30h] BYREF
     unsigned int visBone; // [esp+7Ch] [ebp-4h]
 
-    //Profile_Begin(58);
+    Profile_Begin(58);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
@@ -89,12 +90,12 @@ void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent)
     if (AimTarget_IsTargetValid(cgArray, ent) && AimTarget_IsTargetVisible(localClientNum, ent, visBone))
     {
         AimTarget_CreateTarget(localClientNum, ent, &target);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
     //LABEL_20:
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -108,7 +109,7 @@ char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *tar
     float playerDir[3]; // [esp+68h] [ebp-10h] BYREF
     float dot; // [esp+74h] [ebp-4h]
 
-    //Profile_Begin(59);
+    Profile_Begin(59);
     if (!targetEnt)
         MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 262, 0, "%s", "targetEnt");
     if (!targetEnt->nextValid)
@@ -155,7 +156,7 @@ char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *tar
                 goto LABEL_26;
         }
     LABEL_25:
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 0;
     }
     if ((targetEnt->nextState.lerp.eFlags & 0x800) == 0 || targetEnt->nextState.solid != 0xFFFFFF)
@@ -172,12 +173,12 @@ LABEL_26:
     dot = v3 + radius;
     if (dot >= 0.0)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 1;
     }
     else
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 0;
     }
 }
@@ -246,7 +247,7 @@ char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targ
     float targetEyePos[3]; // [esp+A0h] [ebp-10h] BYREF
     float visibility; // [esp+ACh] [ebp-4h]
 
-    //Profile_Begin(60);
+    Profile_Begin(60);
     if (!targetEnt)
         MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 337, 0, "%s", "targetEnt");
     if (visBone)
@@ -277,7 +278,7 @@ char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targ
     {
         if (targetEnt->nextState.solid != 0xFFFFFF)
         {
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             return 0;
         }
         Vec3Lerp(playerEyePos, targetEyePos, trace.fraction, endPos);
@@ -288,14 +289,14 @@ char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targ
             targetEnt->pose.angles))
         {
         LABEL_12:
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             return 0;
         }
     }
     visibility = FX_GetClientVisibility(localClientNum, playerEyePos, targetEyePos);
     if (visibility <= 0.00009999999747378752)
         goto LABEL_12;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return 1;
 }
 
@@ -332,7 +333,7 @@ void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetE
     float nextPos[3]; // [esp+68h] [ebp-10h] BYREF
     float deltaTime; // [esp+74h] [ebp-4h]
 
-    //Profile_Begin(61);
+    Profile_Begin(61);
     if (!targetEnt)
         MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 393, 0, "%s", "targetEnt");
     if (!target)
@@ -368,7 +369,7 @@ void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetE
         Vec3Scale(target->velocity, scale, target->velocity);
     }
     AimTarget_AddTargetToList(localClientNum, target);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl AimTarget_AddTargetToList(int localClientNum, const AimTarget *target)

@@ -11,6 +11,7 @@
 #include <win32/win_local.h>
 #include <aim_assist/aim_assist.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 void __cdecl FX_SpawnlAlFutureLooping(
     FxSystem *system,
@@ -986,9 +987,9 @@ FxUpdateResult __cdecl FX_UpdateElement(
             update.elemBaseVel = elem->baseVel;
             update.physObjId = physObjId;
             update.onGround = 0;
-            //Profile_Begin(194);
+            Profile_Begin(194);
             updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update); // KISAKTODO type safety
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             FX_UpdateElement_HandleEmitting(system, elem, &update, elemOriginPrev, &updateResult);
         }
         elemDef = FX_GetUpdateElemDef(&update);
@@ -1096,9 +1097,9 @@ int __cdecl FX_UpdateElementPosition_CollidingStep(
   {
     update->onGround = 0;
     FX_NextElementPosition(update, msecUpdateBegin, msecUpdateEnd);
-    // Profile_Begin(203);
+    Profile_Begin(203);
     CM_BoxTrace(&trace, xyzWorldOld, update->posWorld, elemDef->collMins, elemDef->collMaxs, 0, traceMask);
-    // Profile_EndInternal(0);
+    Profile_EndInternal(0);
     if ( !FX_TraceHitSomething(&trace) )
       break;
     if ( trace.normal[2] > 0.699999988079071 )
@@ -2113,9 +2114,9 @@ FxUpdateResult __cdecl FX_UpdateTrailElement(
             update.elemBaseVel = baseVel;
             update.physObjId = 0;
             update.onGround = 0;
-            //Profile_Begin(194);
+            Profile_Begin(194);
             updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             v8 = (int)(baseVel[2] / EQUAL_EPSILON);
             if (v8 >= -32768)
             {
@@ -2279,7 +2280,7 @@ void __cdecl FX_Update(FxSystem* system, int localClientNum, bool nonBoltedEffec
     FxEffect* localEffect; // [esp+48h] [ebp-Ch]
     volatile int activeIndex; // [esp+4Ch] [ebp-8h]
 
-    //Profile_Begin(193);
+    Profile_Begin(193);
     if (!system)
         MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1762, 0, "%s", "system");
     FX_BeginIteratingOverEffects_Cooperative(system);
@@ -2296,7 +2297,7 @@ void __cdecl FX_Update(FxSystem* system, int localClientNum, bool nonBoltedEffec
     }
     if (!InterlockedDecrement(&system->iteratorCount) && system->needsGarbageCollection)
         FX_RunGarbageCollection(system);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl FX_UpdateEffect(FxSystem* system, FxEffect* effect)
@@ -2370,14 +2371,14 @@ void __cdecl FX_EndUpdate(int localClientNum)
 
     if (fx_enable->current.enabled)
     {
-        //Profile_Begin(195);
+        Profile_Begin(195);
         system = FX_GetSystem(localClientNum);
         if (!system)
             MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1936, 0, "%s", "system");
         memcpy(&system->cameraPrev, system, sizeof(system->cameraPrev));
         if (!system->cameraPrev.isValid)
             MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1939, 0, "%s", "system->cameraPrev.isValid");
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -2385,7 +2386,7 @@ void __cdecl FX_AddNonSpriteDrawSurfs(FxCmd *cmd)
 {
     FxSystem *system; // [esp+30h] [ebp-4h]
 
-    //Profile_Begin(200);
+    Profile_Begin(200);
     system = cmd->system;
     if (!cmd->system)
         MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1952, 0, "%s", "system");
@@ -2394,7 +2395,7 @@ void __cdecl FX_AddNonSpriteDrawSurfs(FxCmd *cmd)
         FX_SortEffects(system);
         FX_DrawNonSpriteElems(system);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl FX_RewindTo(int localClientNum, int time)

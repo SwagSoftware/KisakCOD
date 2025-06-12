@@ -1129,10 +1129,10 @@ void __cdecl R_SetEndTime(int endTime)
 void __cdecl R_WaitEndTime()
 {
     CL_ResetStats_f();
-    //Profile_Begin(361);
+    Profile_Begin(361);
     while ((int)(Sys_Milliseconds() - rg.endTime) < 0)
         NET_Sleep(1u);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_InitScene()
@@ -1510,7 +1510,7 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
             gfxCfg.maxClientViews);
     if (rg.registered && !r_norefresh->current.enabled)
     {
-        //Profile_Begin(14);
+        Profile_Begin(14);
         if (r_logFile->current.integer)
             RB_LogPrint("====== R_RenderScene ======\n");
         if (!rgp.world)
@@ -1534,7 +1534,7 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
         else
             v1 = viewParmsDraw;
         R_GenerateSortedDrawSurfs(&sceneParms, v1, viewParmsDraw);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -1697,14 +1697,14 @@ void __cdecl R_GenerateSortedDrawSurfs(
     CL_ResetStats_f();
     R_FilterEntitiesIntoCells(cameraCellIndex);
     CL_ResetStats_f();
-    //Profile_Begin(71);
+    Profile_Begin(71);
     R_AddWorldSurfacesDpvs(viewParmsDpvs, cameraCellIndex);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     R_BeginAllStaticModelLighting();
     CL_ResetStats_f();
-    //Profile_Begin(134);
+    Profile_Begin(134);
     R_WaitWorkerCmdsOfType(0);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     R_AddEmissiveSpotLight(viewInfo);
     usePreTess = !dx.deviceLost && r_pretess->current.enabled;
     if (usePreTess)
@@ -1753,10 +1753,10 @@ void __cdecl R_GenerateSortedDrawSurfs(
         R_AddAllStaticModelSurfacesSunShadow();
     }
     CL_ResetStats_f();
-    //Profile_Begin(134);
+    Profile_Begin(134);
     R_WaitWorkerCmdsOfType(1);
     R_WaitWorkerCmdsOfType(2);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     R_WaitWorkerCmdsOfType(4);
     R_WaitWorkerCmdsOfType(7);
     R_WaitWorkerCmdsOfType(9);
@@ -2112,9 +2112,9 @@ void __cdecl R_SetFullSceneViewMesh(int viewInfoIndex, GfxViewInfo *viewInfo)
 
 void __cdecl R_GenerateSortedSunShadowDrawSurfs(GfxViewInfo *viewInfo)
 {
-    //Profile_Begin(73);
+    Profile_Begin(73);
     R_MergeAndEmitSunShadowMapsSurfs(viewInfo);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddEmissiveSpotLight(GfxViewInfo *viewInfo)
@@ -2223,14 +2223,14 @@ void __cdecl R_GetLightSurfs(int visibleLightCount, const GfxLight **visibleLigh
 {
     if (visibleLightCount)
     {
-        //Profile_Begin(416);
+        Profile_Begin(416);
         CL_ResetStats_f();
         R_GetBspLightSurfs(visibleLights, visibleLightCount);
         CL_ResetStats_f();
         R_GetStaticModelLightSurfs(visibleLights, visibleLightCount);
         CL_ResetStats_f();
         R_GetSceneEntLightSurfs(visibleLights, visibleLightCount);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 

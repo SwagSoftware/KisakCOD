@@ -6,6 +6,7 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <EffectsCore/fx_system.h>
 #include "r_model_skin.h"
+#include <universal/profile.h>
 
 void  R_BoxSurfaces(
     const float *mins,
@@ -444,7 +445,7 @@ int  R_BoxStaticModels(
             "%s\n\t(rgp.world->cellBitsCount) = %i",
             "(rgp.world->cellBitsCount <= ((1024) >> 3))",
             rgp.world->cellBitsCount);
-    //Profile_Begin(215);
+    Profile_Begin(215);
     Com_Memset(v8, 0, rgp.world->cellBitsCount);
     v7 = 0;
     R_BoxStaticModels_r(
@@ -458,7 +459,7 @@ int  R_BoxStaticModels(
         v8);
     if (v7 > smodelListSize)
         MyAssertHandler(".\\r_marks.cpp", 975, 0, "smodelCount <= smodelListSize\n\t%i, %i", v7, smodelListSize);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return v7;
 }
 
@@ -967,7 +968,7 @@ void __cdecl R_MarkUtil_GetDObjAnimMatAndHideParts(
     char zeroLods[32]; // [esp+30h] [ebp-38h] BYREF
     int partBits[4]; // [esp+58h] [ebp-10h] BYREF
 
-    //Profile_Begin(217);
+    Profile_Begin(217);
     memset(zeroLods, 0, sizeof(zeroLods));
     if (!DObjGetSurfaces(dobj, partBits, zeroLods))
         MyAssertHandler(".\\r_marks.cpp", 1715, 0, "%s", "surfaceCount");
@@ -979,7 +980,7 @@ void __cdecl R_MarkUtil_GetDObjAnimMatAndHideParts(
     if (!*outBoneMtxList)
         MyAssertHandler(".\\r_marks.cpp", 1728, 0, "%s", "*outBoneMtxList");
     DObjGetHidePartBits(dobj, outHidePartBits);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_MarkFragments_Begin(
@@ -1503,9 +1504,9 @@ int __cdecl R_ChopWorldPolyBehindPlane(
     }
     else
     {
-        //Profile_Begin(166);
+        Profile_Begin(166);
         memcpy((unsigned __int8 *)outPoints, (unsigned __int8 *)inPoints, 24 * inPointCount);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return inPointCount;
     }
 }
@@ -1670,7 +1671,7 @@ char __cdecl R_MarkFragments_SceneDObjs(MarkInfo *markInfo)
     unsigned __int16 entnum; // [esp+A0h] [ebp-8h]
     int sceneDObjCollidedIndex; // [esp+A4h] [ebp-4h]
 
-    //Profile_Begin(216);
+    Profile_Begin(216);
     for (sceneDObjCollidedIndex = 0; sceneDObjCollidedIndex != markInfo->sceneDObjCollidedCount; ++sceneDObjCollidedIndex)
     {
         dobj = markInfo->sceneDObjsCollided[sceneDObjCollidedIndex].dObj;
@@ -1700,14 +1701,14 @@ char __cdecl R_MarkFragments_SceneDObjs(MarkInfo *markInfo)
             v1 = DObjNumBones(dobj);
             if (!R_MarkFragments_AnimatedXModel(markInfo, model, hidePartBits, boneIndex, boneMtxList, v1, &markContext))
             {
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 return 0;
             }
             boneIndex += model->numBones;
             boneMtxList += model->numBones;
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1735,7 +1736,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     materials = XModelGetSkins(model, 0);
     if (markInfo->usedTriCount || markInfo->usedPointCount)
         MyAssertHandler(".\\r_marks.cpp", 1639, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
-    //Profile_Begin(218);
+    Profile_Begin(218);
     for (surfIndex = 0; surfIndex != surfCount; ++surfIndex)
     {
         if (R_Mark_MaterialAllowsMarks(materials[surfIndex], markInfo->material))
@@ -1769,7 +1770,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
                             markContext,
                             surface))
                         {
-                            //Profile_EndInternal(0);
+                            Profile_EndInternal(0);
                             return 0;
                         }
                         if (markInfo->usedTriCount || markInfo->usedPointCount)
@@ -1796,7 +1797,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     }
     if (markInfo->usedTriCount || markInfo->usedPointCount)
         MyAssertHandler(".\\r_marks.cpp", 1700, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return 1;
 }
 
@@ -2584,9 +2585,9 @@ int __cdecl R_ChopPolyBehindPlane(
     }
     else
     {
-        //Profile_Begin(166);
+        Profile_Begin(166);
         memcpy((unsigned __int8 *)outPoints, (unsigned __int8 *)inPoints, 24 * inPointCount);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return inPointCount;
     }
 }

@@ -4,6 +4,7 @@
 #include "r_dpvs.h"
 #include "r_pretess.h"
 #include <universal/com_convexhull.h>
+#include <universal/profile.h>
 
 struct ShadowGlobals // sizeof=0x4
 {                                       // ...
@@ -106,9 +107,9 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
     sunOrigin[1] = -sunShadow->sunProj.viewMatrix[3][1];
     sunOrigin[2] = -sunShadow->sunProj.viewMatrix[3][2];
     shadowSampleSize = sm_sunSampleSizeNear->current.value;
-    //Profile_Begin(67);
+    Profile_Begin(67);
     R_GetSceneExtentsAlongDir(sunOrigin, sunAxis[0], &nearClip, &farClip);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     sunProj = &sunShadow->sunProj;
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
@@ -807,7 +808,7 @@ void __cdecl R_SunShadowMaps()
     if (!rgp.world)
         MyAssertHandler(".\\r_sunshadow.cpp", 656, 0, "%s", "rgp.world");
     CL_ResetStats_f();
-    //Profile_Begin(76);
+    Profile_Begin(76);
     oldViewIndex = R_SetVisData(0);
     shadowGlob.defaultShadowCasterTechnique = Material_GetTechnique(
         rgp.depthPrepassMaterial,
@@ -824,12 +825,12 @@ void __cdecl R_SunShadowMaps()
                 "((viewIndex >= SCENE_VIEW_SUNSHADOW_0) && (viewIndex <= SCENE_VIEW_SUNSHADOW_1))",
                 viewIndex);
         R_SetVisData(viewIndex);
-        //Profile_Begin(72);
+        Profile_Begin(72);
         R_AddWorldSurfacesFrustumOnly();
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     R_SetVisData(oldViewIndex);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
@@ -841,7 +842,7 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
     GfxSunShadow *sunShadow; // [esp+44h] [ebp-8h]
 
     sunShadow = &viewInfo->sunShadow;
-    //Profile_Begin(75);
+    Profile_Begin(75);
     CL_ResetStats_f();
     if (frontEndDataOut->sunLight.type != 1)
         MyAssertHandler(".\\r_sunshadow.cpp", 703, 0, "%s", "frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR");
@@ -865,6 +866,6 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
         sunShadow->partition[partitionIndex].info.drawSurfCount = frontEndDataOut->drawSurfCount - firstDrawSurf;
         sunShadow->partition[partitionIndex].partitionIndex = partitionIndex;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 

@@ -7,6 +7,7 @@
 #include <server_mp/server.h>
 #include <win32/win_net.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 
 const dvar_t *showpackets;
@@ -752,7 +753,7 @@ bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan)
     unsigned __int8 send_buf[1400]; // [esp+5Ch] [ebp-580h] BYREF
     int res; // [esp+5D8h] [ebp-4h]
 
-    //Profile_Begin(299);
+    Profile_Begin(299);
     NetProf_PrepProfiling(&chan->prof);
     MSG_Init(&send, send_buf, 1400);
     MSG_WriteLong(&send, chan->outgoingSequence | 0x80000000);
@@ -781,7 +782,7 @@ bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan)
         ++chan->outgoingSequence;
         chan->unsentFragments = 0;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return res > 0;
 }
 
@@ -792,7 +793,7 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
     unsigned __int8 send_buf[1400]; // [esp+78h] [ebp-580h] BYREF
     int res; // [esp+5F4h] [ebp-4h]
 
-    //Profile_Begin(299);
+    Profile_Begin(299);
     if (length > 0x20000)
     {
         file = FS_FOpenFileWrite((char*)"badpacket.dat");
@@ -831,7 +832,7 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
                 send.cursize,
                 chan->outgoingSequence - 1,
                 chan->incomingSequence);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return res > 0;
     }
     else
@@ -848,7 +849,7 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
                 length);
         Com_Memcpy((char *)chan->unsentBuffer, data, length);
         Netchan_TransmitNextFragment(chan);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 1;
     }
 }

@@ -947,6 +947,7 @@ static const ProfileSettings s_profileArrays[29] =
 }; // idb
 
 void Profile_Init();
+void __cdecl Profile_Guard(int id);
 void __cdecl Profile_Unguard(int id);
 void __cdecl Profile_SetTotal(int index, int total);
 void Profile_ResetScriptCounters();

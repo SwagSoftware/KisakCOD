@@ -2,6 +2,7 @@
 #include <cgame/cg_local.h>
 
 #include <physics/ode/collision_kernel.h>
+#include <universal/profile.h>
 
 int g_phys_msecStep[3] = { 0x11, 0x11, 0x11 };
 int g_phys_maxMsecStep[3] = { 67, 67, 34 };
@@ -64,7 +65,7 @@ void __cdecl Phys_ReduceContacts(dxBody *body, const ContactList *in, ContactLis
                 in->contacts[i].contact.depth,
                 colorYellow);
     }
-    //Profile_Begin(384);
+    Profile_Begin(384);
     Phys_AssignInitialGroups(in, group);
     Phys_KMeans(in, centroid, group);
     if (physGlob.dumpContacts)
@@ -74,7 +75,7 @@ void __cdecl Phys_ReduceContacts(dxBody *body, const ContactList *in, ContactLis
     }
     Phys_MergeGroups(in, centroid, group);
     Phys_GenerateGroupContacts(body, in, centroid, group, out);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl Phys_AssignInitialGroups(const ContactList *contacts, int *group)

@@ -2,6 +2,7 @@
 #include "sv_game.h"
 #include <xanim/dobj.h>
 #include <game_mp/g_utils_mp.h>
+#include <universal/profile.h>
 
 
 entityState_s_type_index __cdecl SV_ClipHandleForEntity(const gentity_s *ent)
@@ -18,9 +19,9 @@ void __cdecl SV_UnlinkEntity(gentity_s *gEnt)
 
     ent = SV_SvEntityForGentity(gEnt);
     gEnt->r.linked = 0;
-    //Profile_Begin(42);
+    Profile_Begin(42);
     CM_UnlinkEntity(ent);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 float actorLocationalMins[3] = { -64.0f, -64.0f, -32.0f };
@@ -143,14 +144,14 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     ent->lastCluster = 0;
     if ((gEnt->r.svFlags & 0x19) == 0)
     {
-        //Profile_Begin(42);
+        Profile_Begin(42);
         num_leafs = CM_BoxLeafnums(gEnt->r.absmin, gEnt->r.absmax, leafs, 128, &lastLeaf);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         if (!num_leafs)
         {
-            //Profile_Begin(42);
+            Profile_Begin(42);
             CM_UnlinkEntity(ent);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             return;
         }
         for (i = 0; i < num_leafs; ++i)
@@ -170,7 +171,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
         }
     }
     gEnt->r.linked = 1;
-    //Profile_Begin(42);
+    Profile_Begin(42);
     if (gEnt->r.contents)
     {
         clipHandle = SV_ClipHandleForEntity(gEnt).brushmodel;
@@ -197,18 +198,18 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
                 absmax[1] = v3;
             }
             CM_LinkEntity(ent, absmin, absmax, clipHandle);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
         else
         {
             CM_LinkEntity(ent, gEnt->r.absmin, gEnt->r.absmax, clipHandle);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
     }
     else
     {
         CM_UnlinkEntity(ent);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -759,7 +760,7 @@ void __cdecl SV_Trace(
             "%s",
             "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
     }
-    //Profile_Begin(37);
+    Profile_Begin(37);
     CM_BoxTrace(results, start, end, mins, maxs, 0, contentmask);
     if ((COERCE_UNSIGNED_INT(results->fraction) & 0x7F800000) == 0x7F800000)
         MyAssertHandler(".\\server\\sv_world.cpp", 742, 0, "%s", "!IS_NAN(results->fraction)");
@@ -795,7 +796,7 @@ void __cdecl SV_Trace(
             if (results->fraction == 0.0)
             {
             LABEL_35:
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 return;
             }
         }
@@ -911,7 +912,7 @@ void __cdecl SV_Trace(
         CM_CalcTraceExtents(&result.extents);
         CM_ClipMoveToEntities(&result, results);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 int __cdecl SV_TracePassed(
@@ -982,11 +983,11 @@ int __cdecl SV_TracePassed(
             "%s",
             "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
     }
-    //Profile_Begin(38);
+    Profile_Begin(38);
     if (CM_BoxSightTrace(0, start, end, mins, maxs, 0, contentmask)
         || staticmodels && !CM_PointTraceStaticModelsComplete(start, end, contentmask))
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 0;
     }
     if (*mins > (double)*maxs)
@@ -1010,7 +1011,7 @@ int __cdecl SV_TracePassed(
         clip.priorityMap = priorityMap;
         if (CM_PointSightTraceToEntities(&clip))
         {
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             return 0;
         }
     }
@@ -1036,11 +1037,11 @@ int __cdecl SV_TracePassed(
         Vec3Add(end, delta, result.end);
         if (CM_ClipSightTraceToEntities(&result))
         {
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             return 0;
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1059,7 +1060,7 @@ void __cdecl SV_SightTrace(
     sightpointtrace_t clip; // [esp+B0h] [ebp-38h] BYREF
     float delta[3]; // [esp+DCh] [ebp-Ch] BYREF
 
-    //Profile_Begin(233);
+    Profile_Begin(233);
     if (!mins)
         MyAssertHandler(".\\server\\sv_world.cpp", 947, 0, "%s", "mins");
     if (!maxs)
@@ -1115,7 +1116,7 @@ void __cdecl SV_SightTrace(
     *hitNum = CM_BoxSightTrace(*hitNum, start, end, mins, maxs, 0, contentmask);
     if (*hitNum)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
@@ -1160,7 +1161,7 @@ void __cdecl SV_SightTrace(
             v8 = CM_ClipSightTraceToEntities(&result);
         }
         *hitNum = v8;
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 

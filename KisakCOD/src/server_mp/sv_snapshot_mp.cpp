@@ -4,6 +4,7 @@
 #include <win32/win_local.h>
 #include <universal/com_files.h>
 #include <qcommon/files.h>
+#include <universal/profile.h>
 
 serverStaticHeader_t svsHeader;
 //struct dvar_s const *const sv_clientArchive 84ff2600     sv_snapshot_mp.obj
@@ -189,7 +190,7 @@ void __cdecl SV_EmitPacketEntities(
         MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 99, 0, "%s", "svsHeaderValid");
     bitsStart = MSG_GetUsedBitCount(msg);
     bitsUsed = bitsStart;
-    //Profile_Begin(293);
+    Profile_Begin(293);
     MSG_ClearLastReferencedEntity(msg);
     memset((unsigned __int8 *)entityFound, 0, sizeof(entityFound));
     newent = 0;
@@ -321,7 +322,7 @@ void __cdecl SV_EmitPacketEntities(
     SV_PacketDataIsHeader(snapInfo->clientNum, msg);
     MSG_WriteEntityIndex(snapInfo, msg, 1023, 10);
     SV_TrackPacketData(snapInfo->clientNum, ANALYZE_SNAPSHOT_ALLENTITIES, 0, 0, bitsStart, msg);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl SV_EmitPacketClients(
@@ -367,7 +368,7 @@ void __cdecl SV_EmitPacketClients(
             MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 319, 0, "%s", "newclient->clientIndex > oldnum");
         oldnuma = newclienta->clientIndex;
     }
-    //Profile_Begin(294);
+    Profile_Begin(294);
     MSG_ClearLastReferencedEntity(msg);
     newindex = 0;
     oldindex = 0;
@@ -465,7 +466,7 @@ void __cdecl SV_EmitPacketClients(
     MSG_WriteBit0(msg);
     SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
     SV_TrackPacketData(snapInfo->clientNum, ANALYZE_SNAPSHOT_ALLCLIENTS, 0, 0, bitsStart, msg);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl SV_UpdateServerCommandsToClient(client_t *client, msg_t *msg)
@@ -613,7 +614,7 @@ int __cdecl SV_GetArchivedClientInfo(int clientNum, int *pArchiveTime, playerSta
     int deltaTime; // [esp+7Ch] [ebp-8h]
     cachedClient_s *cachedClient; // [esp+80h] [ebp-4h]
 
-    //Profile_Begin(254);
+    Profile_Begin(254);
     cachedFrame = SV_GetCachedSnapshot(pArchiveTime);
     if (cachedFrame)
     {
@@ -631,7 +632,7 @@ int __cdecl SV_GetArchivedClientInfo(int clientNum, int *pArchiveTime, playerSta
         if (!cachedClient->playerStateExists)
         {
         LABEL_14:
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             return 0;
         }
         if (!cachedClient)
@@ -666,12 +667,12 @@ int __cdecl SV_GetArchivedClientInfo(int clientNum, int *pArchiveTime, playerSta
                 ps->hud.archival[ia].moveStartTime += deltaTime;
         }
         ps->deltaTime += deltaTime;
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 1;
     }
     else
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         if (*pArchiveTime > 0)
             return 0;
         else
@@ -1656,9 +1657,9 @@ void __cdecl SV_EndClientSnapshot(client_t *client, msg_t *msg)
     SV_AnalyzePacketData(clientNum, msg);
     if (client->header.netchan.remoteAddress.type != NA_LOOPBACK)
         SV_TrackSnapshotSize(msg->cursize);
-    //Profile_Begin(295);
+    Profile_Begin(295);
     SV_SendMessageToClient(msg, client);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl SV_PrintServerCommandsForClient(client_t *client)
@@ -1936,7 +1937,7 @@ void __cdecl SV_SendClientMessages()
     int i; // [esp+150h] [ebp-4h]
 
     numclients = 0;
-    //Profile_Begin(257);
+    Profile_Begin(257);
     sv.bpsTotalBytes = 0;
     sv.ubpsTotalBytes = 0;
     memset((unsigned __int8 *)valid, 0, sizeof(valid));
@@ -1959,9 +1960,9 @@ void __cdecl SV_SendClientMessages()
                 valid[i] = 1;
                 if (c->header.state == 4 || c->header.state == 1)
                 {
-                    //Profile_Begin(290);
+                    Profile_Begin(290);
                     SV_BuildClientSnapshot(c);
-                    //Profile_EndInternal(0);
+                    Profile_EndInternal(0);
                 }
             }
         }
@@ -1975,12 +1976,12 @@ void __cdecl SV_SendClientMessages()
     {
         if (valid[i])
         {
-            //Profile_Begin(302);
+            Profile_Begin(302);
             SV_BeginClientSnapshot(ca, &msg);
             if (ca->header.state == 4 || ca->header.state == 1)
                 SV_WriteSnapshotToClient(ca, &msg);
             SV_EndClientSnapshot(ca, &msg);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             SV_SendClientVoiceData(ca);
         }
         ++i;
@@ -2024,7 +2025,7 @@ void __cdecl SV_SendClientMessages()
                 sv.ucompAve / (double)++sv.ucompNum);
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     SV_DisablePacketData();
     g_archivingSnapshot = 1;
     if (sv.state == SS_GAME)

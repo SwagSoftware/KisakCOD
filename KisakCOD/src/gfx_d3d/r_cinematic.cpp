@@ -328,7 +328,7 @@ char __cdecl R_Cinematic_Advance()
     unsigned int percentageFull; // [esp+DCh] [ebp-8h]
     int skipped; // [esp+E0h] [ebp-4h]
 
-    //Profile_Begin(145);
+    Profile_Begin(145);
     targetPaused = cinematicGlob.targetPaused;
     if (cinematicGlob.targetPaused > (unsigned int)CINEMATIC_PAUSED)
         MyAssertHandler(
@@ -362,18 +362,18 @@ char __cdecl R_Cinematic_Advance()
         R_Cinematic_CheckBinkError();
         cinematicGlob.currentPaused = targetPaused;
     }
-    //Profile_Begin(148);
+    Profile_Begin(148);
     if (BinkWait(cinematicGlob.bink) || cinematicGlob.underrun)
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         Lock_Bink_textures(&cinematicGlob.binkTextureSet);
-        //Profile_Begin(146);
+        Profile_Begin(146);
         skipped = BinkDoFrame(cinematicGlob.bink);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         if (!skipped)
         {
             if (cinematicGlob.binkTextureSet.bink_buffers.FrameNum > 1)
@@ -390,9 +390,9 @@ char __cdecl R_Cinematic_Advance()
         Unlock_Bink_textures(dx.device, &cinematicGlob.binkTextureSet, cinematicGlob.bink);
         if ((cinematicGlob.playbackFlags & 2) != 0 || cinematicGlob.bink->FrameNum != cinematicGlob.bink->Frames)
         {
-            //Profile_Begin(147);
+            Profile_Begin(147);
             BinkNextFrame(cinematicGlob.bink);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
     }
     R_Cinematic_CheckBinkError();
@@ -430,14 +430,14 @@ char __cdecl R_Cinematic_Advance()
                     "!(cinematicGlob.playbackFlags & CINEMATIC_PLAYBACKFLAGS_MEMORY_RESIDENT)");
             R_Cinematic_SeizeIO();
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 1;
     }
     else
     {
         if (cinematicGlob.hasFileIO)
             R_Cinematic_RelinquishIO();
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return 0;
     }
 }
@@ -1104,7 +1104,7 @@ void __cdecl R_Cinematic_UpdateFrame()
 {
     bool v0; // [esp+0h] [ebp-44h]
 
-    //Profile_Begin(144);
+    Profile_Begin(144);
     Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
     v0 = !cinematicGlob.fullSyncNextUpdate && (cinematicGlob.playbackFlags & 1) == 0;
     cinematicGlob.fullSyncNextUpdate = 0;
@@ -1124,7 +1124,7 @@ void __cdecl R_Cinematic_UpdateFrame()
     }
     R_Cinematic_UpdateRendererImages();
     Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void R_Cinematic_UpdateRendererImages()

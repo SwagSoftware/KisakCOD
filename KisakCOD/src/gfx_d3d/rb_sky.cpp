@@ -11,6 +11,7 @@
 #include "r_dvars.h"
 #include "rb_stats.h"
 #include "rb_pixelcost.h"
+#include <universal/profile.h>
 
 
 SunFlareDynamic sunFlareArray[4];
@@ -185,7 +186,7 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
             2);
     if (sunFlare->sunQuery[queryIndex])
     {
-        //Profile_Begin(120);
+        Profile_Begin(120);
         RB_SetTessTechnique(rgp.additiveMaterial, TECHNIQUE_UNLIT);
         R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_FX);
         RB_SetIdentity();
@@ -228,7 +229,7 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
             sunFlare->sunQuery[queryIndex]->Issue(1u);
             sunFlare->sunQueryIssued[queryIndex] = 1;
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {

@@ -4,6 +4,7 @@
 #include "r_scene.h"
 #include "r_pretess.h"
 #include "r_buffers.h"
+#include <universal/profile.h>
 
 void __cdecl R_InitBspDrawSurf(GfxBspDrawSurfData* surfData)
 {
@@ -47,7 +48,7 @@ char __cdecl R_PreTessBspDrawSurfs(
     preTessIndices = R_AllocPreTessIndices(3 * triCount);
     if (!preTessIndices)
         return 0;
-    //Profile_Begin(166);
+    Profile_Begin(166);
     copyIndex = 0;
     simplifiedCount = 0;
     baseVertex = 0x7FFFFFFF;
@@ -87,7 +88,7 @@ char __cdecl R_PreTessBspDrawSurfs(
                 (unsigned __int16)v5);
         simplifiedList[simplifiedCount - 1].totalTriCount = v5;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0x40000;
     if (R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurfList, simplifiedCount + 2))
     {
@@ -151,7 +152,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
     GfxDrawSurf* surfaceMaterials; // [esp+15Ch] [ebp-1Ch]
     GfxBspDrawSurfData surfData; // [esp+160h] [ebp-18h] BYREF
 
-    //Profile_Begin(408);
+    Profile_Begin(408);
     if (!rgp.world)
         MyAssertHandler(".\\r_add_bsp.cpp", 205, 0, "%s", "rgp.world");
     if (beginSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
@@ -218,7 +219,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
         R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     scene.drawSurfCount[stage] = surfData.drawSurfList.current - scene.drawSurfs[stage];
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
@@ -321,7 +322,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     GfxBspDrawSurfData surfData; // [esp+174h] [ebp-20h] BYREF
     int skipMaterial; // [esp+190h] [ebp-4h]
 
-    //Profile_Begin(409);
+    Profile_Begin(409);
     if (!rgp.world)
         MyAssertHandler(".\\r_add_bsp.cpp", 437, 0, "%s", "rgp.world");
     if (beginSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
@@ -439,7 +440,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     }
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     scene.drawSurfCount[stage] = surfData.drawSurfList.current - scene.drawSurfs[stage];
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddAllBspDrawSurfacesSpotShadow(unsigned int spotShadowIndex, unsigned int primaryLightIndex)

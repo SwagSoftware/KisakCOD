@@ -11,7 +11,8 @@
 unsigned int Win_InitThreads();
 
 
-static thread_local void *g_threadLocals[4];
+// NOTE(mrsteyk): keep in mind this is 4 elements long.
+static thread_local void **g_threadLocals;
 
 //static int threadId[7];
 //static HANDLE threadHandle[7];
@@ -84,7 +85,7 @@ void __cdecl Sys_InitMainThread()
     DuplicateHandle(process, pseudoHandle, process, threadHandle, 0, 0, 2u);
     Win_InitThreads();
     //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues;
-    g_threadLocals[0] = g_threadValues[0];
+    g_threadLocals = g_threadValues[0];
     Com_InitThreadData(0);
 }
 
@@ -96,9 +97,9 @@ unsigned int __cdecl Sys_GetCurrentThreadId()
 void __cdecl Sys_InitThread(int threadContext)
 {
     //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues[threadContext];
-    g_threadLocals[0] = g_threadValues[0];
+    g_threadLocals = g_threadValues[threadContext];
     Com_InitThreadData(threadContext);
-    //Profile_InitContext(threadContext);
+    Profile_InitContext(threadContext);
 }
 
 char __cdecl Sys_SpawnRenderThread(void(__cdecl* function)(unsigned int))

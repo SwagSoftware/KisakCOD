@@ -1,6 +1,7 @@
 #include "DynEntity_client.h"
 #include <win32/win_local.h>
 #include <gfx_d3d/r_dpvs.h>
+#include <universal/profile.h>
 
 const dvar_t *dynEntPieces_velocity;
 const dvar_t *dynEntPieces_angularVelocity;
@@ -50,7 +51,7 @@ void __cdecl DynEntPieces_AddDrawSurfs()
     GfxScaledPlacement placement; // [esp+30h] [ebp-24h] BYREF
     int i; // [esp+50h] [ebp-4h]
 
-    //Profile_Begin(394);
+    Profile_Begin(394);
     for (i = 0; i < numPieces; ++i)
     {
         if (g_breakablePieces[i].active)
@@ -66,7 +67,7 @@ void __cdecl DynEntPieces_AddDrawSurfs()
             R_FilterXModelIntoScene(g_breakablePieces[i].model, &placement, 0, &g_breakablePieces[i].lightingHandle);
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl DynEntPieces_SpawnPieces(

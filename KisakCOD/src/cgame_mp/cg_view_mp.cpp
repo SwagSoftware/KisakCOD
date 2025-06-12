@@ -1710,7 +1710,7 @@ void __cdecl CG_UpdateEntInfo(int localClientNum)
     unsigned int entnum; // [esp+3Ch] [ebp-4h]
 
     CL_ResetStats_f();
-    // Profile_Begin(12);
+    Profile_Begin(12);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -1729,7 +1729,7 @@ void __cdecl CG_UpdateEntInfo(int localClientNum)
             CG_ProcessClientNoteTracks(cgArray, entnum);
         }
     }
-    // Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl GetCeilingHeight(cg_s *cgameGlob)

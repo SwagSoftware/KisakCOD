@@ -24,6 +24,7 @@
 
 #include <universal/com_files.h>
 #include <universal/com_sndalias.h>
+#include <universal/profile.h>
 
 //struct bgs_t level_bgs     82d8f0f8     g_main_mp.obj
 //struct entityHandler_t *entityHandlers 827b5088     g_main_mp.obj
@@ -1171,7 +1172,7 @@ void __cdecl G_RunFrame(int levelTime)
     int i; // [esp+52Ch] [ebp-8h]
     int entnum; // [esp+530h] [ebp-4h]
 
-    //Profile_Begin(230);
+    Profile_Begin(230);
     SV_CheckThread();
     ++level.framenum;
     level.previousTime = level.time;
@@ -1199,7 +1200,7 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    //Profile_Begin(320);
+    Profile_Begin(320);
     ent = g_entities;
     i = 0;
     while (i < level.num_entities)
@@ -1212,10 +1213,10 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     memset(entIndex, 0, 0x400u);
     index = 0;
-    //Profile_Begin(271);
+    Profile_Begin(271);
     if (level.currentTriggerListSize)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1914, 0, "%s", "level.currentTriggerListSize == 0");
     Com_Memcpy((char *)level.currentTriggerList, (char *)level.pendingTriggerList, 12 * level.pendingTriggerListSize);
@@ -1256,13 +1257,13 @@ void __cdecl G_RunFrame(int levelTime)
             trigger_info->useCount = v1->useCount;
             trigger_info->otherUseCount = v1->otherUseCount;
         }
-        //Profile_Begin(272);
+        Profile_Begin(272);
         Scr_RunCurrentThreads();
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     } while (bMoreTriggered);
     if (level.currentTriggerListSize)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1956, 0, "%s", "level.currentTriggerListSize == 0");
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     ent = g_entities;
     i = 0;
     while (i < level.maxclients)
@@ -1272,7 +1273,7 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    //Profile_Begin(320);
+    Profile_Begin(320);
     ent = g_entities;
     i = 0;
     while (i < level.num_entities)
@@ -1281,10 +1282,10 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     Scr_IncTime();
     SV_ResetSkeletonCache();
-    //Profile_Begin(260);
+    Profile_Begin(260);
     if (level.currentEntityThink != -1)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1984, 0, "%s", "level.currentEntityThink == -1");
     ent = g_entities;
@@ -1297,14 +1298,14 @@ void __cdecl G_RunFrame(int levelTime)
         ++ent;
     }
     level.currentEntityThink = -1;
-    //Profile_EndInternal(0);
-    //Profile_Begin(263);
+    Profile_EndInternal(0);
+    Profile_Begin(263);
     G_UpdateObjectiveToClients();
-    //Profile_EndInternal(0);
-    //Profile_Begin(264);
+    Profile_EndInternal(0);
+    Profile_Begin(264);
     G_UpdateHudElemsToClients();
-    //Profile_EndInternal(0);
-    //Profile_Begin(265);
+    Profile_EndInternal(0);
+    Profile_Begin(265);
     ent = g_entities;
     i = 0;
     while (i < level.maxclients)
@@ -1328,7 +1329,7 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     CheckTeamStatus();
     if (g_oldVoting->current.enabled)
         CheckVote();
@@ -1351,7 +1352,7 @@ void __cdecl G_RunFrame(int levelTime)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2043, 0, "%s\n\t(bgs) = %p", "(bgs == &level_bgs)", bgs);
     bgs = 0;
     ShowEntityInfo();
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl G_ClientDoPerFrameNotifies(gentity_s *ent)

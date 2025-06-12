@@ -3,6 +3,7 @@
 #include "r_workercmds.h"
 #include <qcommon/mem_track.h>
 #include <EffectsCore/fx_system.h>
+#include <universal/profile.h>
 
 
 void __cdecl R_ProcessCmd_UpdateFxSpotLight(FxCmd *cmd)
@@ -24,9 +25,9 @@ void __cdecl R_ProcessCmd_UpdateFxRemaining(FxCmd *cmd)
     FX_UpdateRemaining(cmd);
     if (sys_smp_allowed->current.enabled)
     {
-        //Profile_Begin(136);
+        Profile_Begin(136);
         Sys_WaitUpdateNonDependentEffectsCompleted();
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     FX_EndUpdate(cmd->localClientNum);
     R_AddWorkerCmd(14, (unsigned __int8 *)cmd);

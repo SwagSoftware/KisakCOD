@@ -23,6 +23,7 @@
 #include <cgame/cg_local.h>
 #include "r_drawsurf.h"
 #include "rb_state.h"
+#include <universal/profile.h>
 
 //  struct GfxBackEndData *frontEndDataOut 85827c80     gfx_d3d : r_rendercmds.obj
 GfxBackEndData *frontEndDataOut;
@@ -228,9 +229,9 @@ void __cdecl R_SyncRenderThread()
                 MyAssertHandler(".\\r_rendercmds.cpp", 617, 0, "%s", "r_glob.remoteScreenUpdateNesting == 0");
             if (r_glob.startedRenderThread && !r_glob.haveThreadOwnership)
             {
-                //Profile_Begin(173);
+                Profile_Begin(173);
                 Sys_FrontEndSleep();
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 r_glob.haveThreadOwnership = 1;
             }
         }
@@ -274,7 +275,7 @@ void __cdecl R_IssueRenderCommands(unsigned int type)
         MyAssertHandler(".\\r_rendercmds.cpp", 795, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
     if (R_CheckLostDevice())
     {
-        //Profile_Begin(15);
+        Profile_Begin(15);
         frontEndDataOut->drawType = type;
         if (!R_HandOffToBackend(type))
         {
@@ -297,7 +298,7 @@ void __cdecl R_IssueRenderCommands(unsigned int type)
             R_UnlockSkinnedCache();
             R_ToggleSmpFrame();
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
@@ -312,7 +313,7 @@ void __cdecl R_IssueRenderCommands(unsigned int type)
 void R_PerformanceCounters()
 {
     CL_ResetStats_f();
-    //Profile_ResetCounters(0);
+    Profile_ResetCounters(0);
     if (rg.stats)
         RB_CopyBackendStats();
 }
@@ -354,10 +355,10 @@ void __cdecl R_ToggleSmpFrameCmd(char type)
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_rendercmds.cpp", 687, 0, "%s", "Sys_IsMainThread()");
     R_ReleaseThreadOwnership();
-    //Profile_Begin(133);
+    Profile_Begin(133);
     CL_ResetStats_f();
     R_ProcessWorkerCmdsWithTimeout(Sys_IsRendererReady, 1);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     if ((type & 2) != 0)
         R_PerformanceCounters();
     R_WaitFrontendWorkerCmds();
@@ -899,9 +900,9 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
         cmd->cursorPos = cursorPos;
         cmd->cursorLetter = cursor;
     }
-    //Profile_Begin(166);
+    Profile_Begin(166);
     memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)text, v13);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     cmd->text[v13] = 0;
     return cmd;
 }
@@ -1114,7 +1115,7 @@ void __cdecl CopyPoolTextToCmd(char *textPool, int poolSize, int firstChar, int 
 
     if (!cmd)
         MyAssertHandler(".\\r_rendercmds.cpp", 1477, 0, "%s", "cmd");
-    //Profile_Begin(166);
+    Profile_Begin(166);
     poolRemaining = poolSize - firstChar;
     if (charCount > poolSize - firstChar)
     {
@@ -1125,7 +1126,7 @@ void __cdecl CopyPoolTextToCmd(char *textPool, int poolSize, int firstChar, int 
     {
         memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)&textPool[firstChar], charCount);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     cmd->text[charCount] = 0;
 }
 

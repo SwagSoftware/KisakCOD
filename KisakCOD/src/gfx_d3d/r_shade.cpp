@@ -491,7 +491,7 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
     const GfxStateBits *refStateBits; // [esp+38h] [ebp-Ch]
     unsigned int stateBits[2]; // [esp+3Ch] [ebp-8h] BYREF
 
-    //Profile_Begin(142);
+    Profile_Begin(142);
     pass = &context.state->technique->passArray[passIndex];
     context.state->pass = pass;
     context.state->passIndex = passIndex;
@@ -528,7 +528,7 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
             context,
             pass->stableArgCount,
             &pass->args[pass->perPrimArgCount + pass->perObjArgCount]);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_SetState(GfxCmdBufState *state, unsigned int *stateBits)

@@ -65,7 +65,7 @@ void __cdecl R_ShowTris(GfxCmdBufContext context, const GfxDrawSurfListInfo *inf
 
 void __cdecl RB_Draw3DInternal(const GfxViewInfo *viewInfo)
 {
-    //Profile_Begin(141);
+    Profile_Begin(141);
     if (!rgp.world)
         MyAssertHandler(".\\rb_draw3d.cpp", 1452, 0, "%s", "rgp.world");
     if (gfxDrawMethod.drawScene)
@@ -100,7 +100,7 @@ void __cdecl RB_Draw3DInternal(const GfxViewInfo *viewInfo)
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl RB_FullbrightDrawCommands(const GfxViewInfo *viewInfo)
@@ -691,7 +691,7 @@ void R_DrawEmissive(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
 
 void __cdecl RB_Draw3DCommon()
 {
-    //Profile_Begin(141);
+    Profile_Begin(141);
     if (!rgp.world)
         MyAssertHandler(".\\rb_draw3d.cpp", 1485, 0, "%s", "rgp.world");
     if (gfxDrawMethod.drawScene)
@@ -713,7 +713,7 @@ void __cdecl RB_Draw3DCommon()
             RB_StandardDrawCommandsCommon();
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_SetResolvedScene(GfxCmdBufContext context)
@@ -841,12 +841,12 @@ void RB_StandardDrawCommandsCommon()
 
 void __cdecl RB_ApplyLatePostEffects(const GfxViewInfo *viewInfo)
 {
-    //Profile_Begin(116);
+    Profile_Begin(116);
     RB_ProcessPostEffects(viewInfo);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
     RB_DrawDebugPostEffects();
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void RB_DrawDebugPostEffects()

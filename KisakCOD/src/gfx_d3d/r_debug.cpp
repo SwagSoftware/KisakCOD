@@ -5,6 +5,7 @@
 
 #include <win32/win_local.h>
 #include <cgame/cg_public.h>
+#include <universal/profile.h>
 
 DebugGlobals debugGlobals;
 
@@ -44,12 +45,12 @@ void __cdecl R_AddDebugPolygon(DebugGlobals *debugGlobalsEntry, const float *col
                 v4->color[2] = color[2];
                 v4->color[3] = color[3];
                 ++debugGlobalsEntry->polyCount;
-                //Profile_Begin(166);
+                Profile_Begin(166);
                 memcpy(
                     (unsigned __int8 *)debugGlobalsEntry->verts[debugGlobalsEntry->vertCount],
                     (unsigned __int8 *)points,
                     12 * pointCount);
-                //Profile_EndInternal(0);
+                Profile_EndInternal(0);
                 debugGlobalsEntry->vertCount += pointCount;
                 Sys_LeaveCriticalSection(CRITSECT_DEBUG_LINE);
             }

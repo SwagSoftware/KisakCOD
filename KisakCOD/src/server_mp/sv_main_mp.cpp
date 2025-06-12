@@ -13,6 +13,7 @@
 #include <script/scr_vm.h>
 #include <universal/timing.h>
 #include <script/scr_debugger.h>
+#include <universal/profile.h>
 
 
 
@@ -967,7 +968,7 @@ void __cdecl SV_RunFrame()
     float time; // [esp+78h] [ebp-Ch]
     unsigned __int64 ticks; // [esp+7Ch] [ebp-8h]
 
-    //Profile_Begin(256);
+    Profile_Begin(256);
     if (Win_GetThreadLock() == THREAD_LOCK_ALL)
         start = __rdtsc();
     else
@@ -977,8 +978,8 @@ void __cdecl SV_RunFrame()
     G_RunFrame(svs.time);
     Scr_ProfileUpdate();
     Scr_ProfileBuiltinUpdate();
-    //Profile_ResetCounters(1);
-    //Profile_ResetScriptCounters();
+    Profile_ResetCounters(1);
+    Profile_ResetScriptCounters();
     CL_UpdateDebugServerData();
     if (Win_GetThreadLock() == THREAD_LOCK_ALL)
         v0 = __rdtsc();
@@ -990,7 +991,7 @@ void __cdecl SV_RunFrame()
     else
         time = (float)ticks;
     SV_UpdatePerformanceFrame(time);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 int s_lastWallClockEndTime;
@@ -1105,7 +1106,7 @@ void __cdecl SV_UpdateBots()
     client_t *clients; // [esp+30h] [ebp-8h]
     int i; // [esp+34h] [ebp-4h]
 
-    //Profile_Begin(303);
+    Profile_Begin(303);
     SV_ResetSkeletonCache();
     i = 0;
     clients = svs.clients;
@@ -1119,7 +1120,7 @@ void __cdecl SV_UpdateBots()
         ++i;
         ++clients;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl SV_WaitServer()
@@ -1174,7 +1175,7 @@ void __cdecl SV_PreFrame()
 {
     char *v0; // eax
 
-    //Profile_Begin(255);
+    Profile_Begin(255);
     CL_ResetStats_f();
     SV_UpdateBots();
     if ((dvar_modifiedFlags & 0x404) != 0)
@@ -1190,12 +1191,12 @@ void __cdecl SV_PreFrame()
         SV_SetConfig(20, 128, 256);
         dvar_modifiedFlags &= ~0x100u;
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 int __cdecl SV_Frame(int msec)
 {
-    //Profile_Begin(255);
+    Profile_Begin(255);
     Hunk_CheckTempMemoryClear();
     Hunk_CheckTempMemoryHighClear();
     if (sv.killServer)
@@ -1206,7 +1207,7 @@ int __cdecl SV_Frame(int msec)
             Com_Shutdown("EXE_SERVERKILLED");
         sv.killServer = 0;
         sv.killReason = 0;
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return msec;
     }
     else
@@ -1220,7 +1221,7 @@ int __cdecl SV_Frame(int msec)
             else
                 SV_FrameInternal(msec);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
         return msec;
     }
 }
@@ -1260,14 +1261,17 @@ void __cdecl SV_FrameInternal(int msec)
 void SV_PostFrame()
 {
     Scr_UpdateDebugger();
-    //Profile_Begin(305);
+    
+    Profile_Begin(305);
     SV_CheckTimeouts();
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
+    
     SV_SendClientMessages();
     SV_MasterHeartbeat("COD-4");
-    //Profile_Begin(306);
+    
+    Profile_Begin(306);
     FakeLag_Frame();
-    //return Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 char __cdecl SV_CheckOverflow()

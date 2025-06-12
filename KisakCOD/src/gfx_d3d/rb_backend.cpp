@@ -92,10 +92,10 @@ bool __cdecl R_GpuFenceTimeout()
 
 void __cdecl R_FinishGpuFence()
 {
-    //Profile_Begin(121);
+    Profile_Begin(121);
     while (!RB_IsGpuFenceFinished())
         ;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl R_AcquireGpuFenceLock()
@@ -748,7 +748,7 @@ void __cdecl R_DrawSurfs(GfxCmdBufContext context, GfxCmdBufState *prepassState,
     unsigned int processedDrawSurfCount; // [esp+58h] [ebp-8h]
     unsigned int drawSurfCount; // [esp+5Ch] [ebp-4h]
 
-    //Profile_Begin(98);
+    Profile_Begin(98);
     iassert(context.source->cameraView == info->cameraView);
     context.state->origMaterial = 0;
     R_SetDrawSurfsShadowableLight(context.source, info);
@@ -776,7 +776,7 @@ void __cdecl R_DrawSurfs(GfxCmdBufContext context, GfxCmdBufState *prepassState,
     g_viewStats->drawSurfCount += info->drawSurfCount;
     R_TessEnd(context, prepassContext);
     context.state->origMaterial = 0;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 
@@ -2679,10 +2679,10 @@ GfxIndexBufferState *RB_SwapBuffers()
             "%s\n\t(dx.targetWindowIndex) = %i",
             "(dx.targetWindowIndex >= 0 && dx.targetWindowIndex < dx.windowCount)",
             dx.targetWindowIndex);
-    //Profile_Begin(128);
+    Profile_Begin(128);
     //hr = dx.windows[dx.targetWindowIndex].swapChain->Present(dx.windows[dx.targetWindowIndex].swapChain, 0, 0, 0, 0, 0);
     hr = dx.windows[dx.targetWindowIndex].swapChain->Present(0, 0, 0, 0, 0);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     if (hr < 0 && hr != -2005530520)
     {
         v0 = R_ErrorDescription(hr);
@@ -2752,9 +2752,9 @@ void __cdecl RB_Draw3D()
     data = backEndData;
     if (backEndData->viewInfoCount)
     {
-        //Profile_Begin(189);
+        Profile_Begin(189);
         RB_Draw3DInternal(&data->viewInfo[data->viewInfoIndex]);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -2804,7 +2804,7 @@ void __cdecl RB_CallExecuteRenderCommands()
     const char *v0; // eax
     int hr; // [esp+40h] [ebp-4h]
 
-    //Profile_Begin(189);
+    Profile_Begin(189);
     if ((backEndData->drawType & 2) != 0)
     {
         if (g_primStats)
@@ -2905,7 +2905,7 @@ void __cdecl RB_CallExecuteRenderCommands()
             }
         }
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void RB_RenderThreadIdle()
@@ -2934,7 +2934,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
         Value = Sys_GetValue(2);
         if (!_setjmp(*(jmp_buf *)Value))
             break;
-        //Profile_Recover(1);
+        Profile_Recover(1);
         if (r_glob.isRenderingRemoteUpdate)
         {
             r_glob.isRenderingRemoteUpdate = 0;
@@ -2947,16 +2947,16 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
             Com_ErrorAbort();
         }
     }
-    //Profile_Guard(1);
-    //Profile_Begin(172);
+    Profile_Guard(1);
+    Profile_Begin(172);
     while (1)
     {
         while (1)
         {
-            //Profile_Begin(427);
+            Profile_Begin(427);
             CL_ResetStats_f();
             R_ProcessWorkerCmdsWithTimeout(Sys_WaitBackendEvent, 1);
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
             if (Sys_FinishRenderer())
             {
                 data = Sys_RendererSleep();
@@ -3028,7 +3028,7 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)
     unsigned int drawType; // [esp+28h] [ebp-8h]
     bool allowRendering; // [esp+2Fh] [ebp-1h]
 
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     LOBYTE(drawType) = 0;
     if (R_CheckLostDevice())
         allowRendering = g_disableRendering == 0;
@@ -3046,15 +3046,15 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)
         backEndData = 0;
     }
     Sys_RenderCompleted();
-    //Profile_Begin(137);
+    Profile_Begin(137);
     R_ProcessWorkerCmdsWithTimeout(RB_BackendTimeout, 1);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     if (allowRendering)
     {
         CL_ResetStats_f();
         RB_EndFrame(drawType);
     }
-    //Profile_Begin(172);
+    Profile_Begin(172);
 }
 
 void __cdecl RB_InitBackendGlobalStructs()

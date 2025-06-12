@@ -6,6 +6,7 @@
 #include <client_mp/client_mp.h>
 #include <script/scr_const.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 //float const *const vec2_origin        82000d78     aim_assist.obj
 //float const *const vec3_origin        82000d80     aim_assist.obj
@@ -350,7 +351,7 @@ void __cdecl AimAssist_UpdateScreenTargets(
     float clipBounds[2][3]; // [esp+ECh] [ebp-1Ch] BYREF
     AimAssistGlobals *aaGlob; // [esp+104h] [ebp-4h]
 
-    //Profile_Begin(64);
+    Profile_Begin(64);
     aaGlob = &aaGlobArray[localClientNum];
     if (aaGlob->initialized)
     {
@@ -402,11 +403,11 @@ void __cdecl AimAssist_UpdateScreenTargets(
                 }
             }
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -1103,7 +1104,7 @@ void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output
 
 void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output)
 {
-    //Profile_Begin(63);
+    Profile_Begin(63);
     if (!input)
         MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1563, 0, "%s", "input");
     if (!input->ps)
@@ -1119,7 +1120,7 @@ void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output
         AimAssist_ApplyAutoMelee(input, output);
         AimAssist_ApplyMeleeCharge(input, output);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 void __cdecl AimAssist_DrawDebugOverlay(unsigned int localClientNum)

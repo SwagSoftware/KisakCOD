@@ -1532,7 +1532,7 @@ unsigned int __cdecl Phys_BuildWindingsForBrush(
     unsigned int vertCount; // [esp+60h] [ebp-64h]
     float axialPlanes[6][4]; // [esp+64h] [ebp-60h] BYREF
 
-    //Profile_Begin(381);
+    Profile_Begin(381);
     if (!planes)
         MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 934, 0, "%s", "planes");
     CM_BuildAxialPlanes(brush, &axialPlanes);
@@ -1553,7 +1553,7 @@ unsigned int __cdecl Phys_BuildWindingsForBrush(
         if (vertCount > maxVerts)
             MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 945, 0, "%s", "vertCount <= maxVerts");
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return vertCount;
 }
 
@@ -1774,7 +1774,7 @@ unsigned int __cdecl Phys_BuildWindingsForBrush2(
     unsigned int vertCount; // [esp+60h] [ebp-64h]
     float axialPlanes[6][4]; // [esp+64h] [ebp-60h] BYREF
 
-    //Profile_Begin(381);
+    Profile_Begin(381);
     CM_BuildAxialPlanes(brush, &axialPlanes);
     if (brush->numsides + 6 > maxPolys)
         MyAssertHandler(
@@ -1793,7 +1793,7 @@ unsigned int __cdecl Phys_BuildWindingsForBrush2(
         if (vertCount > maxVerts)
             MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 970, 0, "%s", "vertCount <= maxVerts");
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return vertCount;
 }
 

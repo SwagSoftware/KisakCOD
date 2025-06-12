@@ -4,6 +4,7 @@
 #include <bgame/bg_public.h>
 #include <qcommon/mem_track.h>
 #include <qcommon/threads.h>
+#include <universal/profile.h>
 
 static pmove_t cg_pmove[1];
 static centity_s* cg_itemEntities[512];
@@ -145,7 +146,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     float oldVelocity[2]; // [esp+18Ch] [ebp-Ch]
     int current; // [esp+194h] [ebp-4h]
 
-    //Profile_Begin(322);
+    Profile_Begin(322);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -161,12 +162,12 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     if (cgameGlob->demoType || (ps->otherFlags & 2) != 0)
     {
         CG_InterpolatePlayerState(localClientNum, 0);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else if (cg_nopredict->current.enabled || cg_synchronousClients->current.enabled)
     {
         CG_InterpolatePlayerState(localClientNum, 1);
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {
@@ -275,9 +276,9 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                                 cgameGlob->predictedErrorTime = cgameGlob->oldTime;
                             }
                         }
-                        //Profile_Begin(26);
+                        Profile_Begin(26);
                         Pmove(&cg_pmove[localClientNum]);
-                        //Profile_EndInternal(0);
+                        Profile_EndInternal(0);
                         CG_TouchItemPrediction(localClientNum);
                         bPredictionRun = 1;
                     }
@@ -350,13 +351,13 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                     cgameGlob->stepViewStart = cg_pmove[localClientNum].viewChangeTime;
                 }
             }
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
         else
         {
             if (cg_showmiss->current.integer)
                 Com_Printf(17, "exceeded PACKET_BACKUP on commands\n");
-            //Profile_EndInternal(0);
+            Profile_EndInternal(0);
         }
     }
 }

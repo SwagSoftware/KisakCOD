@@ -153,7 +153,7 @@ void __cdecl R_SkinXSurfaceWeight(
     const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h]
 
-    //Profile_Begin(111);
+    Profile_Begin(111);
     vertIndex = 0;
     vertsBlend = vertexInfo->vertsBlend;
     if (vertexInfo->vertCount[0])
@@ -176,7 +176,7 @@ void __cdecl R_SkinXSurfaceWeight(
     }
     if (vertexInfo->vertCount[3])
         R_SkinXSurfaceWeight3(&inVerts[vertIndex], vertsBlend, vertexInfo->vertCount[3], boneMatrix, &outVerts[vertIndex]);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
 }
 
 

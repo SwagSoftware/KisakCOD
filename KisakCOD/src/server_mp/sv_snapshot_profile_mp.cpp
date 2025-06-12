@@ -1,6 +1,7 @@
 #include "server.h"
 #include <universal/com_files.h>
 #include <cgame_mp/cg_local_mp.h>
+#include <universal/profile.h>
 
 
 //   unsigned int *bitsUsedForPlayerstates 85032704     sv_snapshot_profile_mp.obj
@@ -211,7 +212,7 @@ void __cdecl SV_PacketDataIsType(int clientNum, const msg_t *msg, packetModeList
 
     if (s_packetDataEnabled)
     {
-        //Profile_Begin(291);
+        Profile_Begin(291);
         oldMode = s_packetMode[clientNum];
         if (oldMode != mode || mode == PACKETDATA_FIRST)
         {
@@ -239,7 +240,7 @@ void __cdecl SV_PacketDataIsType(int clientNum, const msg_t *msg, packetModeList
                 Com_Printf(15, "%i bits of %s\n", bitsUsed - bitsUsedPrev, PacketDataTypeName);
             }
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
 }
 
@@ -626,14 +627,14 @@ int __cdecl SV_TrackPacketData(
             "%s\n\t(datatype) = %i",
             "(datatype >= 0 && datatype < ANALYZE_SNAPSHOT_DATATYPE_COUNT)",
             datatype);
-    //Profile_Begin(297);
+    Profile_Begin(297);
     bitsUsedNow = MSG_GetUsedBitCount(msg);
     g_bitsSent[clientNum][datatype] += bitsUsedNow - bitsUsedPrev;
     g_currentSnapshotPerEntity[clientNum][entNum] += bitsUsedNow - bitsUsedPrev;
     newDataReady = 1;
     if (datatype == ANALYZE_SNAPSHOT_SERVERCMDS)
         bitsUsedForServerCommands += bitsUsedNow - bitsUsedPrev;
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return bitsUsedNow;
 }
 
@@ -670,7 +671,7 @@ void __cdecl SV_TrackFieldChange(int clientNum, int entityType, unsigned int fie
             entityType);
     if (s_packetDataEnabled)
     {
-        //Profile_Begin(296);
+        Profile_Begin(296);
         if (entityType >= 18)
         {
             if (entityType == 20)
@@ -702,7 +703,7 @@ void __cdecl SV_TrackFieldChange(int clientNum, int entityType, unsigned int fie
             if (*string)
                 Com_Printf(15, "%s - field %i changed\n", string, field);
         }
-        //Profile_EndInternal(0);
+        Profile_EndInternal(0);
     }
     else
     {

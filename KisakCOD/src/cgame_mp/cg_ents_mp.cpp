@@ -21,6 +21,7 @@
 #include <xanim/dobj_utils.h>
 #include <script/scr_memorytree.h>
 #include <game_mp/g_public_mp.h>
+#include <universal/profile.h>
 
 float g_entMoveTolVec[3] = { 16.0f, 16.0f, 16.0f };
 
@@ -716,7 +717,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
     unsigned int eType; // [esp+150h] [ebp-4h]
 
     CL_ResetStats_f();
-    //Profile_Begin(321);
+    Profile_Begin(321);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -770,7 +771,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
         CG_GetEntity(localClientNum, entnum);
         CG_AddPacketEntity(localClientNum, entnum);
     }
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     return lockedView;
 }
 
@@ -861,9 +862,9 @@ DObjAnimMat *__cdecl CG_DObjGetLocalBoneMatrix(const cpose_t *pose, DObj_s *obj,
 
     if (!obj)
         MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 843, 0, "%s", "obj");
-    //Profile_Begin(315);
+    Profile_Begin(315);
     CG_DObjCalcBone(pose, obj, boneIndex);
-    //Profile_EndInternal(0);
+    Profile_EndInternal(0);
     mat = DObjGetRotTransArray(obj);
     if (mat)
         return &mat[boneIndex];
