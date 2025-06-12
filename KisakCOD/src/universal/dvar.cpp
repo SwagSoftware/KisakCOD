@@ -1302,23 +1302,23 @@ void __cdecl Dvar_UpdateResetValue(dvar_s *dvar, DvarValue value)
     bool shouldFree; // [esp+23h] [ebp-15h]
     DvarValue resetString; // [esp+24h] [ebp-14h] BYREF
 
-    if (!dvar)
-        MyAssertHandler(".\\universal\\dvar.cpp", 1340, 0, "%s", "dvar");
+    iassert(dvar);
+
     switch (dvar->type)
     {
-    case 2u:
+    case DVAR_TYPE_FLOAT_2:
         dvar->reset.value = value.value;
         dvar->reset.vector[1] = value.vector[1];
         break;
-    case 3u:
+    case DVAR_TYPE_FLOAT_3:
         dvar->reset.value = value.value;
         dvar->reset.vector[1] = value.vector[1];
         dvar->reset.vector[2] = value.vector[2];
         break;
-    case 4u:
+    case DVAR_TYPE_FLOAT_4:
         dvar->reset = value;
         break;
-    case 7u:
+    case DVAR_TYPE_STRING:
         if (dvar->reset.integer != value.integer)
         {
             shouldFree = Dvar_ShouldFreeResetString(dvar);
@@ -2562,68 +2562,23 @@ void __cdecl Dvar_SetColorFromSource(dvar_s *dvar, float r, float g, float b, fl
     char string[132]; // [esp+B0h] [ebp-98h] BYREF
     DvarValue newValue; // [esp+134h] [ebp-14h]
 
-    if (!dvar)
-        MyAssertHandler(".\\universal\\dvar.cpp", 1956, 0, "%s", "dvar");
-    if (!dvar->name)
-        MyAssertHandler(".\\universal\\dvar.cpp", 1957, 0, "%s", "dvar->name");
-    if (dvar->type != 8 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
-        MyAssertHandler(
-            ".\\universal\\dvar.cpp",
-            1958,
-            0,
-            "%s\n\t(dvar->name) = %s",
-            "(dvar->type == DVAR_TYPE_COLOR || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
-            dvar->name);
-    if (dvar->type == 8)
+    iassert(dvar);
+    iassert(dvar->name);
+    iassert((dvar->type == DVAR_TYPE_COLOR || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14)))));
+
+    if (dvar->type == DVAR_TYPE_COLOR)
     {
-        v17 = r - 1.0;
-        if (v17 < 0.0)
-            v25 = r;
-        else
-            v25 = 1.0;
-        v16 = 0.0 - v25;
-        if (v16 < 0.0)
-            v15 = v25;
-        else
-            v15 = 0.0;
-        v24 = v15 * 255.0;
-        newValue.enabled = (int)(v24 + 9.313225746154785e-10);
-        v14 = g - 1.0;
-        if (v14 < 0.0)
-            v23 = g;
-        else
-            v23 = 1.0;
-        v13 = 0.0 - v23;
-        if (v13 < 0.0)
-            v12 = v23;
-        else
-            v12 = 0.0;
-        v22 = v12 * 255.0;
-        newValue.color[1] = (int)(v22 + 9.313225746154785e-10);
-        v11 = b - 1.0;
-        if (v11 < 0.0)
-            v21 = b;
-        else
-            v21 = 1.0;
-        v10 = 0.0 - v21;
-        if (v10 < 0.0)
-            v9 = v21;
-        else
-            v9 = 0.0;
-        v20 = v9 * 255.0;
-        newValue.color[2] = (int)(v20 + 9.313225746154785e-10);
-        v8 = a - 1.0;
-        if (v8 < 0.0)
-            v19 = a;
-        else
-            v19 = 1.0;
-        v7 = 0.0 - v19;
-        if (v7 < 0.0)
-            v6 = v19;
-        else
-            v6 = 0.0;
-        v18 = v6 * 255.0;
-        newValue.color[3] = (int)(v18 + 9.313225746154785e-10);
+        float clampedR = CLAMP(r, 0.0f, 1.0f);
+        newValue.color[0] = (byte)(clampedR * 255.0f);
+
+        float clampedG = CLAMP(g, 0.0f, 1.0f);
+        newValue.color[1] = (byte)(clampedG * 255.0f);
+
+        float clampedB = CLAMP(b, 0.0f, 1.0f);
+        newValue.color[2] = (byte)(clampedB * 255.0f);
+
+        float clampedA = CLAMP(a, 0.0f, 1.0f);
+        newValue.color[3] = (byte)(clampedA * 255.0f);
     }
     else
     {
