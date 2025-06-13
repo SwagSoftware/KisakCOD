@@ -663,6 +663,8 @@ void __cdecl Profile_InitContext(int profileContext)
     ProfileAtom uiTotal; // [esp+60h] [ebp-8h]
     int i; // [esp+64h] [ebp-4h]
 
+    LARGE_INTEGER qpc;
+
     prof_stack = Profile_GetStackForContext(profileContext);
     Sys_SetValue(0, prof_stack);
     prof_stack->prof_pStack[0] = &prof_stack->prof_root;
@@ -679,16 +681,20 @@ void __cdecl Profile_InitContext(int profileContext)
     uiTotal.value[0] = 0;
     for (i = 0; i < 1000; ++i)
     {
-        uiStart.value[0] = __rdtsc();
+        QueryPerformanceCounter(&qpc);
+        uiStart.value[0] = qpc.QuadPart;
         Profile_Begin(0);
         Profile_EndInternal(0);
-        uiStop.value[0] = __rdtsc();
+        QueryPerformanceCounter(&qpc);
+        uiStop.value[0] = qpc.QuadPart;
         for (atomType = 0; atomType < 1; ++atomType)
             uiTotal.value[atomType] += uiStop.value[atomType] - uiStart.value[atomType];
     }
     prof_stack->prof_overhead_internal.value[0] = prof_stack->prof_array[0].write.total.value[0] / 0x3E8;
     prof_stack->prof_overhead_external.value[0] = uiTotal.value[0] / 0x3E8;
-    prof_stack->prof_timescale = ((double)1LL - (double)0LL) * msecPerRawTimerTick;
+    // NOTE(mrsteyk): unused?
+    //prof_stack->prof_timescale = ((double)1LL - (double)0LL) * msecPerRawTimerTick;
+    prof_stack->prof_timescale = qpc2msec;
     for (i = 0; i < 432; ++i)
         prof_stack->prof_array[i].write.nesting = -1;
 }
@@ -813,9 +819,11 @@ int __cdecl Profile_EndInternal(long double *duration)
     // KISAKTODO: Profiler
     //return 0;
 
-#if 1
+    LARGE_INTEGER qpc;
+
     ProfileAtom end;
-    end.value[0] = __rdtsc();
+    QueryPerformanceCounter(&qpc);
+    end.value[0] = qpc.QuadPart;
 
     ProfileStack* prof_stack = (ProfileStack*)Sys_GetValue(0);
     profile_t* p = *prof_stack->prof_ppStack;
@@ -846,45 +854,9 @@ int __cdecl Profile_EndInternal(long double *duration)
         parent->write.total.value[0] -= prof_stack->prof_overhead_external.value[0];
 
     if (duration)
-        *duration = ((double)deltaa.value[0] - (double)0LL) * msecPerRawTimerTick;
+        *duration = deltaa.value[0] * qpc2msec;
 
     return p - prof_stack->prof_array;
-#else
-    ProfileStack* prof_stack; // [esp+18h] [ebp-14h]
-    ProfileAtom delta; // [esp+20h] [ebp-Ch]
-    ProfileAtom deltaa; // [esp+20h] [ebp-Ch]
-    profile_t* parent; // [esp+24h] [ebp-8h]
-    profile_t* p; // [esp+28h] [ebp-4h]
-
-    delta.value[0] = __rdtsc();
-    prof_stack = (ProfileStack*)Sys_GetValue(0);
-    p = *prof_stack->prof_ppStack;
-    if (p->write.nesting >= 3u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
-            244,
-            0,
-            "p->write.nesting doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
-            p->write.nesting,
-            3);
-    deltaa.value[0] = delta.value[0]
-        - (prof_stack->prof_overhead_internal.value[0]
-            + p->write.start[p->write.nesting].value[0]);
-    if ((deltaa.value[0] & 0x80000000) != 0)
-        deltaa.value[0] = 0;
-    --p->write.nesting;
-    p->write.total.value[0] += deltaa.value[0];
-    ++p->write.hits;
-    parent = *--prof_stack->prof_ppStack;
-    parent->write.child.value[0] += deltaa.value[0];
-    if (parent->write.total.value[0] < prof_stack->prof_overhead_external.value[0])
-        parent->write.total.value[0] = 0;
-    else
-        parent->write.total.value[0] -= prof_stack->prof_overhead_external.value[0];
-    if (duration)
-        *duration = ((double)deltaa.value[0] - (double)0LL) * msecPerRawTimerTick;
-    return p - prof_stack->prof_array;
-#endif
 }
 
 void __cdecl Profile_BeginScripts(unsigned int profileFlags)
@@ -939,7 +911,8 @@ void __cdecl Profile_Begin(int index)
 {
     // KISAKTODO: Profiler
 
-#if 1
+    LARGE_INTEGER qpc;
+
     ProfileStack* prof_stack = (ProfileStack*)Sys_GetValue(0);
     profile_t* p = prof_stack->prof_array + index;
 
@@ -949,32 +922,8 @@ void __cdecl Profile_Begin(int index)
 
     *++prof_stack->prof_ppStack = p;
 
-    p->write.start[p->write.nesting].value[0] = __rdtsc();
-#else
-    ProfileStack* prof_stack; // [esp+8h] [ebp-Ch]
-    profile_t* p; // [esp+10h] [ebp-4h]
-
-    prof_stack = (ProfileStack*)Sys_GetValue(0);
-    p = &prof_stack->prof_array[index];
-    if ((unsigned int)(p->write.nesting + 1) >= 3)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
-            218,
-            0,
-            "p->write.nesting + 1 doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
-            p->write.nesting + 1,
-            3);
-    if (++p->write.nesting >= 3u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\../universal/profile.h",
-            220,
-            0,
-            "p->write.nesting doesn't index ARRAY_COUNT( p->write.start )\n\t%i not in [0, %i)",
-            p->write.nesting,
-            3);
-    *++prof_stack->prof_ppStack = p;
-    p->write.start[p->write.nesting].value[0] = __rdtsc();
-#endif
+    QueryPerformanceCounter(&qpc);
+    p->write.start[p->write.nesting].value[0] = qpc.QuadPart;
 }
 
 int __cdecl Profile_AddScriptName(char *profileName)

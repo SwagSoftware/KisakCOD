@@ -1772,14 +1772,12 @@ void __cdecl Com_Frame_Try_Block_Function()
     if (maxFPS > 0 && !com_dedicated->current.integer)
     {
         minMsec = 1000 / maxFPS;
-        if (1000 / maxFPS < 0)
-            MyAssertHandler(".\\qcommon\\common.cpp", 3931, 0, "%s", "minMsec >= 0");
+        iassert(minMsec >= 0);
         if (!minMsec)
             minMsec = 1;
     }
     Win_UpdateThreadLock();
-    if (minMsec <= 0)
-        MyAssertHandler(".\\qcommon\\common.cpp", 3954, 0, "%s", "minMsec > 0");
+    iassert(minMsec > 0);
     v0 = com_lastFrameIndex & 0x80000000;
     if (com_lastFrameIndex < 0)
         v0 = 0;

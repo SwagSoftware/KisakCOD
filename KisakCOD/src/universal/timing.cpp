@@ -4,6 +4,7 @@
 #include <qcommon/threads.h>
 
 long double msecPerRawTimerTick;
+double qpc2msec;
 
 double __cdecl SecondsPerTick()
 {
@@ -20,6 +21,7 @@ double __cdecl SecondsPerTick()
     qpcStart.QuadPart = 0;
     qpcStop.QuadPart = 0;
     QueryPerformanceFrequency(&qpcFrequency);
+    qpc2msec = 1000.0 / qpcFrequency.QuadPart;
     QueryPerformanceCounter(&qpcStart);
     tscStart.QuadPart = __rdtsc();
     QueryPerformanceCounter(&qpcStart);
