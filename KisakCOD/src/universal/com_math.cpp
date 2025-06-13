@@ -1986,7 +1986,7 @@ void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, flo
     for (axis = 0; axis < 3; ++axis)
     {
         v13 = xyz[axis] / snapGrid;
-        rounded = (int)(v13 + 9.313225746154785e-10) * snapGrid;
+        rounded = (int)(v13) * snapGrid;
         v12 = rounded - xyz[axis];
         v9 = fabs(v12);
         if (snapEpsilon <= v9)

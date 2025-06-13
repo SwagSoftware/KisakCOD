@@ -439,13 +439,11 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     if (startAliasInfo->timescale)
     {
         timescale = g_snd.timescale;
-        v9 = (double)AIL_sample_playback_rate(handle) * startAliasInfo->pitch * timescale;
-        AIL_set_sample_playback_rate(handle, (int)(v9 + 9.313225746154785e-10));
+        AIL_set_sample_playback_rate(handle, (int)((float)AIL_sample_playback_rate(handle) * startAliasInfo->pitch * timescale));
     }
     else
     {
-        v8 = (double)AIL_sample_playback_rate(handle) * startAliasInfo->pitch;
-        AIL_set_sample_playback_rate(handle, (int)(v8 + 9.313225746154785e-10));
+        AIL_set_sample_playback_rate(handle, (int)((float)AIL_sample_playback_rate(handle) * startAliasInfo->pitch));
     }
     realVolume = startAliasInfo->volume
         * g_snd.volume
@@ -469,8 +467,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
         }
         else if ((startAliasInfo->alias0->flags & 0x20) != 0)
         {
-            v6 = random() * (double)total_msec;
-            start_msec = (int)(v6 + 9.313225746154785e-10) & 0xFFFFFF80;
+            start_msec = (int)(random() * (float)total_msec) & 0xFFFFFF80;
         }
         else
         {
@@ -479,8 +476,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     }
     else
     {
-        v7 = (double)total_msec * startAliasInfo->fraction;
-        start_msec = (int)(v7 + 9.313225746154785e-10);
+        start_msec = (int)((float)total_msec * startAliasInfo->fraction);
     }
     if (start_msec)
         startAliasInfo->startDelay = 0;
@@ -676,13 +672,11 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     if (startAliasInfo->timescale)
     {
         timescale = g_snd.timescale;
-        v12 = (double)AIL_sample_playback_rate(handle) * startAliasInfo->pitch * timescale;
-        rate = (int)(v12 + 9.313225746154785e-10);
+        rate = (int)((float)AIL_sample_playback_rate(handle) * startAliasInfo->pitch * timescale);
     }
     else
     {
-        v11 = (double)AIL_sample_playback_rate(handle) * startAliasInfo->pitch;
-        rate = (int)(v11 + 9.313225746154785e-10);
+        rate = (int)((float)AIL_sample_playback_rate(handle) * startAliasInfo->pitch);
     }
     AIL_set_sample_playback_rate(handle, rate);
     SND_Set3DPosition(index, startAliasInfo->org);
@@ -694,8 +688,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1004, 0, "%s", "rate");
     if (startAliasInfo->timescale)
     {
-        v10 = g_snd.timescale * (double)(1000 * sound->info.samples) / (double)rate;
-        total_msec = (int)(v10 + 9.313225746154785e-10);
+        total_msec = (int)(g_snd.timescale * (float)(1000 * sound->info.samples) / (float)rate);
     }
     else
     {
@@ -711,8 +704,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
         }
         else if ((startAliasInfo->alias0->flags & 0x20) != 0)
         {
-            v8 = random() * (double)total_msec;
-            start_msec = (int)(v8 + 9.313225746154785e-10) & 0xFFFFFF80;
+            start_msec = (int)(random() * (float)total_msec) & 0xFFFFFF80;
         }
         else
         {
@@ -721,13 +713,11 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     }
     else
     {
-        v9 = (double)total_msec * startAliasInfo->fraction;
-        start_msec = (int)(v9 + 9.313225746154785e-10);
+        start_msec = (int)((float)total_msec * startAliasInfo->fraction);
     }
     if (start_msec)
         startAliasInfo->startDelay = 0;
-    v7 = (double)start_msec / (double)total_msec * (double)sound->info.data_len;
-    AIL_set_sample_ms_position(handle, (int)(v7 + 9.313225746154785e-10));
+    AIL_set_sample_ms_position(handle, (int)((float)start_msec / (float)total_msec * (float)sound->info.data_len));
     if (!startAliasInfo->startDelay
         && (!g_snd.paused || !g_snd.pauseSettings[(startAliasInfo->alias0->flags & 0x3F00) >> 8]))
     {
@@ -882,13 +872,11 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
             baserate = AIL_sample_playback_rate(handle_sample);
             if (startAliasInfo->timescale)
             {
-                v12 = g_snd.timescale * ((double)baserate * startAliasInfo->pitch);
-                AIL_set_sample_playback_rate(handle_sample, (int)(v12 + 9.313225746154785e-10));
+                AIL_set_sample_playback_rate(handle_sample, (int)(g_snd.timescale * ((float)baserate * startAliasInfo->pitch)));
             }
             else
             {
-                v11 = (double)baserate * startAliasInfo->pitch;
-                AIL_set_sample_playback_rate(handle_sample, (int)(v11 + 9.313225746154785e-10));
+                AIL_set_sample_playback_rate(handle_sample, (int)((float)baserate * startAliasInfo->pitch));
             }
             realVolume = startAliasInfo->volume
                 * g_snd.volume
@@ -915,8 +903,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
                         }
                         else if ((startAliasInfo->alias0->flags & 0x20) != 0)
                         {
-                            v9 = random() * (double)total_msec[0];
-                            start_msec = (int)(v9 + 9.313225746154785e-10) & 0xFFFFFF80;
+                            start_msec = (int)(random() * (float)total_msec[0]) & 0xFFFFFF80;
                         }
                         else
                         {
@@ -925,8 +912,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
                     }
                     else
                     {
-                        v10 = (double)total_msec[0] * startAliasInfo->fraction;
-                        start_msec = (int)(v10 + 9.313225746154785e-10);
+                        start_msec = (int)((float)total_msec[0] * startAliasInfo->fraction);
                     }
                     if (start_msec)
                         startAliasInfo->startDelay = 0;
@@ -1637,8 +1623,7 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
     if (g_snd.chaninfo[index].timescale)
     {
         timescale = g_snd.timescale;
-        v5 = (double)AIL_sample_playback_rate(handle_sample) / timescale;
-        v2 = (int)(v5 + 9.313225746154785e-10);
+        v2 = (int)((float)AIL_sample_playback_rate(handle_sample) / timescale);
     }
     else
     {

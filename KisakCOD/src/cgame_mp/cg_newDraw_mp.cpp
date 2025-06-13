@@ -770,12 +770,11 @@ void __cdecl CG_DrawPlayerAmmoBackdrop(
             localClientNum);
     if (cgArray[0].predictedPlayerState.weapon)
     {
-        v4 = hud_fade_ammodisplay->current.value * 1000.0;
         drawColor[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_ammodisplay,
             cgArray[0].ammoFadeTime,
-            (v4 + 9.313225746154785e-10));
+            (int)(hud_fade_ammodisplay->current.value * 1000.0f));
         if (drawColor[3] != 0.0)
         {
             if (CG_CheckPlayerForLowAmmo(cgArray))
@@ -844,12 +843,11 @@ void __cdecl CG_DrawPlayerAmmoValue(
     cgameGlob = cgArray;
     if (cgArray[0].predictedPlayerState.weapon)
     {
-        v8 = hud_fade_ammodisplay->current.value * 1000.0;
         color[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_ammodisplay,
             cgameGlob->ammoFadeTime,
-            (v8 + 9.313225746154785e-10));
+            (int)(hud_fade_ammodisplay->current.value * 1000.0f));
         if (color[3] != 0.0)
         {
             if (!cgameGlob->nextSnap)
@@ -1181,8 +1179,7 @@ void __cdecl CG_DrawPlayerStance(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v10 = hud_fade_stance->current.value * 1000.0;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgArray[0].stanceFadeTime, (v10 + 9.313225746154785e-10));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgArray[0].stanceFadeTime, (int)(hud_fade_stance->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         if (cg_hudStanceHintPrints->current.enabled)
@@ -1501,8 +1498,7 @@ void __cdecl CG_DrawPlayerSprintBack(int localClientNum, const rectDef_s *rect, 
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v4 = hud_fade_sprint->current.value * 1000.0;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (v4 + 9.313225746154785e-10));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         drawColor[0] = *color;
@@ -1549,8 +1545,7 @@ void __cdecl CG_DrawPlayerSprintMeter(int localClientNum, const rectDef_s *rect,
             "(localClientNum == 0)",
             localClientNum);
     ps = &cgArray[0].predictedPlayerState;
-    v4 = hud_fade_sprint->current.value * 1000.0;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (v4 + 9.313225746154785e-10));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         sprintLeft = PM_GetSprintLeft(ps, cgArray[0].time);
@@ -1649,12 +1644,11 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
                 "(localClientNum == 0)",
                 localClientNum);
         health = CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps);
-        v8 = hud_fade_healthbar->current.value * 1000.0;
         color[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_healthbar,
             cgArray[0].healthFadeTime,
-            (v8 + 9.313225746154785e-10));
+            (int)(hud_fade_healthbar->current.value * 1000.0f));
         if (color[3] != 0.0)
         {
             ps = &cgArray[0].nextSnap->ps;
@@ -1779,12 +1773,11 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        v6 = hud_fade_healthbar->current.value * 1000.0;
         fadeAlpha = CG_FadeHudMenu(
             localClientNum,
             hud_fade_healthbar,
             cgArray[0].healthFadeTime,
-            (v6 + 9.313225746154785e-10));
+            (hud_fade_healthbar->current.value * 1000.0f));
         if (fadeAlpha != 0.0)
         {
             color[3] = fadeAlpha;
@@ -1817,14 +1810,12 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                     }
                     else
                     {
-                        v4 = hud_health_pulserate_injured->current.value * 1000.0;
-                        flashTime = (v4 + 9.313225746154785e-10);
+                        flashTime = (hud_health_pulserate_injured->current.value * 1000.0f);
                     }
                 }
                 else
                 {
-                    v5 = hud_health_pulserate_critical->current.value * 1000.0;
-                    flashTime = (v5 + 9.313225746154785e-10);
+                    flashTime = (hud_health_pulserate_critical->current.value * 1000.0f);
                 }
                 if (flashTime)
                 {
@@ -2474,8 +2465,7 @@ void __cdecl CG_DrawHoldBreathHint(
                     }
                     v6 = UI_SafeTranslateString("PLATFORM_HOLD_BREATH");
                     string = UI_ReplaceConversionString(v6, binding);
-                    v7 = UI_TextWidth(string, 0, font, fontscale) * 0.5;
-                    x = rect->x - (v7 + 9.313225746154785e-10);
+                    x = rect->x - (UI_TextWidth(string, 0, font, fontscale) * 0.5f);
                     UI_DrawText(
                         &scrPlaceView[localClientNum],
                         string,
@@ -2619,8 +2609,7 @@ void __cdecl CG_DrawInvalidCmdHint(
         if (blinkInterval <= 0)
             MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1667, 0, "%s", "blinkInterval > 0");
         color[3] = ((cgArray[0].time - cgArray[0].invalidCmdHintTime) % blinkInterval) / blinkInterval;
-        v6 = UI_TextWidth(string, 0, font, fontscale) * 0.5;
-        x = rect->x - (v6 + 9.313225746154785e-10);
+        x = rect->x - (UI_TextWidth(string, 0, font, fontscale) * 0.5f);
         UI_DrawText(
             &scrPlaceView[localClientNum],
             string,

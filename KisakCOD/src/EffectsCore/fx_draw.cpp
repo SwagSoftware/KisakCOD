@@ -37,7 +37,6 @@ unsigned __int8 __cdecl FX_InterpolateColor(
     float sampleLerpInv,
     int channel)
 {
-    float v7; // [esp+14h] [ebp-18h]
     float valueFrom; // [esp+24h] [ebp-8h]
     float valueTo; // [esp+28h] [ebp-4h]
 
@@ -45,8 +44,8 @@ unsigned __int8 __cdecl FX_InterpolateColor(
         + (double)refState->amplitude.color[channel] * valueLerp;
     valueTo = (double)refState[1].base.color[channel] * valueLerpInv
         + (double)refState[1].amplitude.color[channel] * valueLerp;
-    v7 = sampleLerp * valueTo + sampleLerpInv * valueFrom;
-    return (int)(v7 + 9.313225746154785e-10);
+
+    return (int)(sampleLerp * valueTo + sampleLerpInv * valueFrom);
 }
 
 void __cdecl FX_SetupVisualState(

@@ -1182,7 +1182,7 @@ bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s *snapInfo, int bits, const 
     case -92:
     case -91:
     case -90:
-        result = (int)(*(float *)fromF + 9.313225746154785e-10) == (int)(*(float *)toF + 9.313225746154785e-10);
+        result = (int)(*(float *)fromF) == (int)(*(float *)toF);
         break;
     default:
         result = 0;
@@ -1735,8 +1735,8 @@ void __cdecl MSG_WriteDeltaField(
             goto LABEL_103;
         case 0xFFFFFFAA:
             fullFloat = *(float *)toF;
-            v16 = (fullFloat - 1.399999976158142) * 10.0;
-            trunc = (int)(v16 + 9.313225746154785e-10);
+            v16 = (fullFloat - 1.399999976158142) * 10.0f;
+            trunc = (int)(v16);
             if (!MSG_CheckWritingEnoughBits(trunc, 5u))
             {
                 LODWORD(f) = *toF;

@@ -2201,8 +2201,7 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
         }
         else
         {
-            v10 = (double)pml->msec / perk_weapReloadMultiplier->current.value;
-            msec = (int)(v10 + 9.313225746154785e-10);
+            msec = (int)(pml->msec / perk_weapReloadMultiplier->current.value);
         }
     }
     else if ((ps->weaponstate == 5
@@ -2225,8 +2224,7 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
         }
         else
         {
-            v9 = (double)pml->msec / perk_weapRateMultiplier->current.value;
-            msec = (int)(v9 + 9.313225746154785e-10);
+            msec = (int)(pml->msec / perk_weapRateMultiplier->current.value);
         }
     }
     else
@@ -2246,8 +2244,7 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
                 }
                 else
                 {
-                    v8 = player_burstFireCooldown->current.value * 1000.0;
-                    ps->weaponTime = (int)(v8 + 9.313225746154785e-10);
+                    ps->weaponTime = (int)(player_burstFireCooldown->current.value * 1000.0f);
                 }
                 PM_ContinueWeaponAnim(ps, 0);
                 ps->weaponstate = 0;

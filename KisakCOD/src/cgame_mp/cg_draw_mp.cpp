@@ -93,8 +93,7 @@ void __cdecl CG_DrawCenterString(
         if (fadeColor)
         {
             Vec4Mul(color, fadeColor, color);
-            v6 = (double)UI_TextWidth(centerPrint->text, 0, font, fontscale) * 0.5;
-            x = rect->x - (double)(int)(v6 + 9.313225746154785e-10);
+            x = rect->x - (double)(int)(UI_TextWidth(centerPrint->text, 0, font, fontscale) * 0.5f);
             UI_DrawText(
                 &scrPlaceView[localClientNum],
                 centerPrint->text,

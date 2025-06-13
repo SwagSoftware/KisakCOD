@@ -609,7 +609,7 @@ void __cdecl GetHudElemInfo(int localClientNum, const hudelem_s *elem, cg_hudele
         Com_sprintf(cghe->hudElemText, 0x100u, "%g", elem->value);
         break;
     case HE_TYPE_PLAYERNAME:
-        namedClientIndex = (int)(elem->value + 9.313225746154785e-10);
+        namedClientIndex = (int)(elem->value);
         if (namedClientIndex < 0x40)
         {
             if (localClientNum)
@@ -936,8 +936,8 @@ void __cdecl SetHudElemPos(const ScreenPlacement *scrPlace, const hudelem_s *ele
             cghe->height,
             &cghe->x,
             &cghe->y);
-        cghe->x = (float)(int)(cghe->x + 9.313225746154785e-10);
-        cghe->y = (float)(int)(cghe->y + 9.313225746154785e-10);
+        cghe->x = (float)(int)(cghe->x);
+        cghe->y = (float)(int)(cghe->y);
     }
     else
     {

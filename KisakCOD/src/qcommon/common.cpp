@@ -1883,7 +1883,6 @@ void __cdecl Com_WriteConfiguration(int localClientNum)
 int __cdecl Com_ModifyMsec(int msec)
 {
     double v2; // [esp+0h] [ebp-24h]
-    float v3; // [esp+8h] [ebp-1Ch]
     int clampTime; // [esp+18h] [ebp-Ch]
     int originalMsec; // [esp+1Ch] [ebp-8h]
     bool useTimescale; // [esp+23h] [ebp-1h]
@@ -1900,8 +1899,7 @@ int __cdecl Com_ModifyMsec(int msec)
     }
     else
     {
-        v3 = dev_timescale->current.value * (com_codeTimeScale * (com_timescale->current.value * (double)msec));
-        msec = (int)(v3 + 9.313225746154785e-10);
+        msec = (int)(dev_timescale->current.value * (com_codeTimeScale * (com_timescale->current.value * (double)msec)));
         useTimescale = 1;
     }
     if (msec < 1)

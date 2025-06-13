@@ -159,15 +159,12 @@ int __cdecl RB_GenerateGaussianFilterChain(
 
 void __cdecl RB_GenerateGaussianFilter1D(float radius, int *res, int axis, GfxImageFilterPass *filterPass)
 {
-    __int64 v4; // [esp+4h] [ebp-5Ch]
     float tapWeights[8]; // [esp+18h] [ebp-48h] BYREF
     int tapHalfCount; // [esp+38h] [ebp-28h]
     int tapIndex; // [esp+3Ch] [ebp-24h]
     float tapOffsets[8]; // [esp+40h] [ebp-20h] BYREF
 
-    HIDWORD(v4) = res[axis];
-    LODWORD(v4) = HIDWORD(v4);
-    tapHalfCount = RB_GaussianFilterPoints1D(radius, v4, 8, tapOffsets, tapWeights);
+    tapHalfCount = RB_GaussianFilterPoints1D(radius, res[axis], res[axis], 8, tapOffsets, tapWeights);
     filterPass->tapHalfCount = RB_PickSymmetricFilterMaterial(tapHalfCount, &filterPass->material);
     for (tapIndex = 0; tapIndex < 8; ++tapIndex)
     {
@@ -196,16 +193,22 @@ int __cdecl RB_PickSymmetricFilterMaterial(int halfTapCount, const Material **ma
     return halfTapCount;
 }
 
-int __cdecl RB_GaussianFilterPoints1D(float pixels, __int64 srcRes, int tapLimit, float *tapOffsets, float *tapWeights)
+int __cdecl RB_GaussianFilterPoints1D(
+    float pixels,
+    int srcRes,
+    int dstRes,
+    int tapLimit,
+    float *tapOffsets,
+    float *tapWeights)
 {
-    const char *v5; // eax
-    double v6; // st7
-    float v8; // [esp+8h] [ebp-58h]
-    float v9; // [esp+Ch] [ebp-54h]
-    float v10; // [esp+10h] [ebp-50h]
-    float v11; // [esp+14h] [ebp-4Ch]
-    float v12; // [esp+20h] [ebp-40h]
-    float v13; // [esp+24h] [ebp-3Ch]
+    const char *v6; // eax
+    double v7; // st7
+    float v9; // [esp+8h] [ebp-58h]
+    float v10; // [esp+Ch] [ebp-54h]
+    float v11; // [esp+10h] [ebp-50h]
+    float v12; // [esp+14h] [ebp-4Ch]
+    float v13; // [esp+20h] [ebp-40h]
+    float v14; // [esp+24h] [ebp-3Ch]
     int tapHalfCount; // [esp+34h] [ebp-2Ch]
     int tapIndex; // [esp+38h] [ebp-28h]
     int tapIndexa; // [esp+38h] [ebp-28h]
@@ -218,53 +221,59 @@ int __cdecl RB_GaussianFilterPoints1D(float pixels, __int64 srcRes, int tapLimit
     float sample_4; // [esp+5Ch] [ebp-4h]
 
     if (pixels <= 0.0)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 94, 0, "%s\n\t(pixels) = %g", "(pixels > 0)", pixels);
-    if (SHIDWORD(srcRes) <= 0)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 95, 0, "%s\n\t(dstRes) = %i", "(dstRes > 0)", HIDWORD(srcRes));
-    if ((int)srcRes < SHIDWORD(srcRes))
-        MyAssertHandler(".\\rb_imagefilter.cpp", 96, 0, "srcRes >= dstRes\n\t%i, %i", (unsigned int)srcRes, HIDWORD(srcRes));
-    v13 = (double)(int)srcRes / (double)SHIDWORD(srcRes);
-    resolutionRatio = (int)(v13 + 9.313225746154785e-10);
-    if ((int)abs(srcRes - HIDWORD(srcRes) * resolutionRatio) >= resolutionRatio)
+        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 94, 0, "%s\n\t(pixels) = %g", "(pixels > 0)", pixels);
+    if (dstRes <= 0)
+        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 95, 0, "%s\n\t(dstRes) = %i", "(dstRes > 0)", dstRes);
+    if (srcRes < dstRes)
+        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 96, 0, "srcRes >= dstRes\n\t%i, %i", srcRes, dstRes);
+
+    resolutionRatio = (int)((float)srcRes / (float)dstRes);
+    if ((int)abs(srcRes - dstRes * resolutionRatio) >= resolutionRatio)
     {
-        v5 = va("%i %i", (unsigned int)srcRes, HIDWORD(srcRes));
+        v6 = va("%i %i", srcRes, dstRes);
         MyAssertHandler(
-            ".\\rb_imagefilter.cpp",
+            (char *)".\\rb_imagefilter.cpp",
             99,
             0,
             "%s\n\t%s",
             "abs( srcRes - resolutionRatio * dstRes ) < resolutionRatio",
-            v5);
+            v6);
     }
     if ((resolutionRatio & 1) != 0)
-        v12 = 0.0;
+        v13 = 0.0;
     else
-        v12 = 0.5;
+        v13 = 0.5;
     gaussianExponent = -0.5 / (pixels * pixels);
     totalWeight = 0.0;
     for (tapIndex = 0; tapIndex < tapLimit; ++tapIndex)
     {
-        sample = (double)(2 * tapIndex) + v12;
-        sample_4 = (double)(2 * tapIndex + 1) + v12;
-        v11 = sample * (sample * gaussianExponent);
-        v10 = exp(v11);
-        weight = v10;
-        v9 = sample_4 * (sample_4 * gaussianExponent);
-        v8 = exp(v9);
-        if (!tapIndex && v12 == 0.0)
-            weight = v10 * 0.5;
-        tapWeights[tapIndex] = weight + v8;
+        sample = (double)(2 * tapIndex) + v13;
+        sample_4 = (double)(2 * tapIndex + 1) + v13;
+        v12 = sample * (sample * gaussianExponent);
+        v11 = exp(v12);
+        weight = v11;
+        v10 = sample_4 * (sample_4 * gaussianExponent);
+        v9 = exp(v10);
+        if (!tapIndex && v13 == 0.0)
+            weight = v11 * 0.5;
+        tapWeights[tapIndex] = weight + v9;
         if (tapWeights[tapIndex] == 0.0)
-            v6 = (sample + sample_4) * 0.5 / (double)(int)srcRes;
+            v7 = (sample + sample_4) * 0.5 / (double)srcRes;
         else
-            v6 = (sample * weight + sample_4 * v8) / ((double)(int)srcRes * tapWeights[tapIndex]);
-        tapOffsets[tapIndex] = v6;
+            v7 = (sample * weight + sample_4 * v9) / ((double)srcRes * tapWeights[tapIndex]);
+        tapOffsets[tapIndex] = v7;
         totalWeight = totalWeight + tapWeights[tapIndex];
     }
-    if (totalWeight > EQUAL_EPSILON)
+    if (totalWeight > 0.001000000047497451)
     {
         if (totalWeight <= 0.0)
-            MyAssertHandler(".\\rb_imagefilter.cpp", 131, 0, "%s\n\t(totalWeight) = %g", "(totalWeight > 0)", totalWeight);
+            MyAssertHandler(
+                (char *)".\\rb_imagefilter.cpp",
+                131,
+                0,
+                "%s\n\t(totalWeight) = %g",
+                "(totalWeight > 0)",
+                totalWeight);
         tapHalfCount = tapLimit;
         for (tapIndexa = tapLimit - 1; tapIndexa >= 0; --tapIndexa)
         {
@@ -298,8 +307,8 @@ void __cdecl RB_GenerateGaussianFilter2D(
     int y; // [esp+38h] [ebp-Ch]
     float tapWeightsY[2]; // [esp+3Ch] [ebp-8h] BYREF
 
-    RB_GaussianFilterPoints1D(radius, __SPAIR64__(dstWidth, srcWidth), 2, tapOffsetsX, tapWeightsX);
-    RB_GaussianFilterPoints1D(radius, __SPAIR64__(dstHeight, srcHeight), 2, tapOffsetsY, tapWeightsY);
+    RB_GaussianFilterPoints1D(radius, srcWidth, dstWidth, 2, tapOffsetsX, tapWeightsX);
+    RB_GaussianFilterPoints1D(radius, srcHeight, dstHeight, 2, tapOffsetsY, tapWeightsY);
     tapIndex = 0;
     for (y = 0; y < 2; ++y)
     {
@@ -316,7 +325,7 @@ void __cdecl RB_GenerateGaussianFilter2D(
         }
     }
     if (2 * tapIndex != 8)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 203, 1, "%s\n\t(tapIndex) = %i", "(tapIndex * 2 == 8)", tapIndex);
+        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 203, 1, "%s\n\t(tapIndex) = %i", "(tapIndex * 2 == 8)", tapIndex);
     filterPass->tapHalfCount = RB_PickSymmetricFilterMaterial(2 * tapIndex, &filterPass->material);
     filterPass->srcWidth = 1.0;
     filterPass->srcHeight = 1.0;

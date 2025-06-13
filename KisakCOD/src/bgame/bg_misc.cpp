@@ -2075,14 +2075,10 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
 
     if (!parms)
         MyAssertHandler(".\\bgame\\bg_misc.cpp", 1943, 0, "%s", "parms");
-    v19 = bg_shock_screenBlurBlendTime->current.value * 1000.0;
-    parms->screenBlend.blurredEffectTime = (int)(v19 + 9.313225746154785e-10);
-    v18 = bg_shock_screenBlurBlendFadeTime->current.value * 1000.0;
-    parms->screenBlend.blurredFadeTime = (int)(v18 + 9.313225746154785e-10);
-    v17 = bg_shock_screenFlashShotFadeTime->current.value * 1000.0;
-    parms->screenBlend.flashShotFadeTime = (int)(v17 + 9.313225746154785e-10);
-    v16 = bg_shock_screenFlashWhiteFadeTime->current.value * 1000.0;
-    parms->screenBlend.flashWhiteFadeTime = (int)(v16 + 9.313225746154785e-10);
+    parms->screenBlend.blurredEffectTime = (int)(bg_shock_screenBlurBlendTime->current.value * 1000.0f);
+    parms->screenBlend.blurredFadeTime = (int)(bg_shock_screenBlurBlendFadeTime->current.value * 1000.0f);
+    parms->screenBlend.flashShotFadeTime = (int)(bg_shock_screenFlashShotFadeTime->current.value * 1000.0f);
+    parms->screenBlend.flashWhiteFadeTime = (int)(bg_shock_screenFlashWhiteFadeTime->current.value * 1000.0f);
     if (parms->screenBlend.blurredFadeTime <= 0)
         MyAssertHandler(
             ".\\bgame\\bg_misc.cpp",
@@ -2117,21 +2113,16 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
         0x40u);
     strncpy((unsigned __int8 *)parms->sound.end, (unsigned __int8 *)bg_shock_soundEnd->current.integer, 0x40u);
     strncpy((unsigned __int8 *)parms->sound.endAbort, (unsigned __int8 *)bg_shock_soundEndAbort->current.integer, 0x40u);
-    v14 = bg_shock_soundFadeInTime->current.value * 1000.0;
-    parms->sound.fadeInTime = (int)(v14 + 9.313225746154785e-10);
-    v13 = bg_shock_soundFadeOutTime->current.value * 1000.0;
-    parms->sound.fadeOutTime = (int)(v13 + 9.313225746154785e-10);
-    v12 = bg_shock_soundLoopFadeTime->current.value * 1000.0;
-    parms->sound.loopFadeTime = (int)(v12 + 9.313225746154785e-10);
-    v11 = bg_shock_soundLoopEndDelay->current.value * 1000.0;
-    parms->sound.loopEndDelay = (int)(v11 + 9.313225746154785e-10);
+    parms->sound.fadeInTime = (int)(bg_shock_soundFadeInTime->current.value * 1000.0f);
+    parms->sound.fadeOutTime = (int)(bg_shock_soundFadeOutTime->current.value * 1000.0f);
+    parms->sound.loopFadeTime = (int)(bg_shock_soundLoopFadeTime->current.value * 1000.0f);
+    parms->sound.loopEndDelay = (int)(bg_shock_soundLoopEndDelay->current.value * 1000.0f);
     v1 = (unsigned __int8 *)Dvar_EnumToString(bg_shock_soundRoomType);
     strncpy((unsigned __int8 *)parms->sound.roomtype, v1, 0xFu);
     parms->sound.roomtype[15] = 0;
     parms->sound.drylevel = bg_shock_soundDryLevel->current.value;
     parms->sound.wetlevel = bg_shock_soundWetLevel->current.value;
-    v10 = bg_shock_soundModEndDelay->current.value * 1000.0;
-    parms->sound.modEndDelay = (int)(v10 + 9.313225746154785e-10);
+    parms->sound.modEndDelay = (int)(bg_shock_soundModEndDelay->current.value * 1000.0f);
     for (i = 0; i < SND_GetEntChannelCount(); ++i)
     {
         v9 = bg_shock_volume[i]->current.value;
@@ -2196,8 +2187,7 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
             "(parms->sound.wetlevel >= 0 && parms->sound.wetlevel <= 1)",
             parms->sound.wetlevel);
     parms->lookControl.affect = bg_shock_lookControl->current.enabled;
-    v7 = bg_shock_lookControl_fadeTime->current.value * 1000.0;
-    parms->lookControl.fadeTime = (int)(v7 + 9.313225746154785e-10);
+    parms->lookControl.fadeTime = (int)(bg_shock_lookControl_fadeTime->current.value * 1000.0f);
     if (parms->lookControl.fadeTime <= 0)
         MyAssertHandler(
             ".\\bgame\\bg_misc.cpp",

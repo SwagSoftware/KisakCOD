@@ -1978,8 +1978,6 @@ void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
 
 void __cdecl ScrCmd_SetNormalHealth(scr_entref_t entref)
 {
-    const char *v1; // eax
-    float v2; // [esp+0h] [ebp-1Ch]
     int newHealth; // [esp+10h] [ebp-Ch]
     float normalHealth; // [esp+14h] [ebp-8h]
     gentity_s *ent; // [esp+18h] [ebp-4h]
@@ -1990,10 +1988,8 @@ void __cdecl ScrCmd_SetNormalHealth(scr_entref_t entref)
         normalHealth = 1.0;
     if (ent->client)
     {
-        v2 = (double)ent->client->sess.maxHealth * normalHealth;
-        newHealth = (int)(v2 + 9.313225746154785e-10);
-        v1 = va("%c \"%i\"", 74, 0);
-        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v1);
+        newHealth = (int)((float)ent->client->sess.maxHealth * normalHealth);
+        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"%i\"", 74, 0));
     }
     else if (ent->maxHealth)
     {
@@ -3860,11 +3856,7 @@ void Scr_MusicPlay()
 
 void Scr_MusicStop()
 {
-    const char *v0; // eax
-    const char *v1; // eax
-    const char *v2; // eax
     unsigned int NumParam; // [esp+0h] [ebp-18h]
-    float v4; // [esp+4h] [ebp-14h]
     int fadeTime; // [esp+14h] [ebp-4h]
 
     NumParam = Scr_GetNumParam();
@@ -3872,12 +3864,10 @@ void Scr_MusicStop()
     {
         if (NumParam != 1)
         {
-            v0 = va("USAGE: musicStop([fadetime]);\n");
-            Scr_Error(v0);
+            Scr_Error(va("USAGE: musicStop([fadetime]);\n"));
             return;
         }
-        v4 = Scr_GetFloat(0) * 1000.0;
-        fadeTime = (int)(v4 + 9.313225746154785e-10);
+        fadeTime = (int)(Scr_GetFloat(0) * 1000.0f);
     }
     else
     {
@@ -3885,11 +3875,9 @@ void Scr_MusicStop()
     }
     if (fadeTime < 0)
     {
-        v1 = va("musicStop: fade time must be >= 0\n");
-        Scr_Error(v1);
+        Scr_Error(va("musicStop: fade time must be >= 0\n"));
     }
-    v2 = va("%c %i", 112, fadeTime);
-    SV_GameSendServerCommand(-1, SV_CMD_RELIABLE, v2);
+    SV_GameSendServerCommand(-1, SV_CMD_RELIABLE, va("%c %i", 112, fadeTime));
 }
 
 void Scr_SoundFade()
@@ -3978,12 +3966,7 @@ char *Scr_PrecacheString()
 
 void Scr_AmbientPlay()
 {
-    const char *v0; // eax
-    const char *v1; // eax
-    const char *v2; // eax
-    char *v3; // eax
     unsigned int NumParam; // [esp+0h] [ebp-1Ch]
-    float v5; // [esp+4h] [ebp-18h]
     int iFadeTime; // [esp+14h] [ebp-8h]
     char *pszAliasName; // [esp+18h] [ebp-4h]
 
@@ -3993,26 +3976,21 @@ void Scr_AmbientPlay()
     {
         if (NumParam != 2)
         {
-            v0 = va("USAGE: ambientPlay(alias_name, <fadetime>);\n");
-            Scr_Error(v0);
+            Scr_Error(va("USAGE: ambientPlay(alias_name, <fadetime>);\n"));
             return;
         }
-        v5 = Scr_GetFloat(1u) * 1000.0;
-        iFadeTime = (int)(v5 + 9.313225746154785e-10);
+        iFadeTime = (int)(Scr_GetFloat(1) * 1000.0f);
     }
     pszAliasName = Scr_GetString(0);
     if (!*pszAliasName)
     {
-        v1 = va("ambientPlay: alias name cannot be the empty string... use stop or fade version\n");
-        Scr_Error(v1);
+        Scr_Error(va("ambientPlay: alias name cannot be the empty string... use stop or fade version\n"));
     }
     if (iFadeTime < 0)
     {
-        v2 = va("ambientPlay: fade time must be >= 0\n");
-        Scr_Error(v2);
+        Scr_Error(va("ambientPlay: fade time must be >= 0\n"));
     }
-    v3 = va("n\\%s\\t\\%i", pszAliasName, iFadeTime + level.time);
-    SV_SetConfigstring(821, v3);
+    SV_SetConfigstring(821, va("n\\%s\\t\\%i", pszAliasName, iFadeTime + level.time));
 }
 
 void Scr_AmbientStop()
@@ -4021,7 +3999,6 @@ void Scr_AmbientStop()
     const char *v1; // eax
     char *v2; // eax
     unsigned int NumParam; // [esp+0h] [ebp-18h]
-    float v4; // [esp+4h] [ebp-14h]
     int iFadeTime; // [esp+14h] [ebp-4h]
 
     NumParam = Scr_GetNumParam();
@@ -4033,8 +4010,7 @@ void Scr_AmbientStop()
             Scr_Error(v0);
             return;
         }
-        v4 = Scr_GetFloat(0) * 1000.0;
-        iFadeTime = (int)(v4 + 9.313225746154785e-10);
+        iFadeTime = (int)(Scr_GetFloat(0) * 1000.0f);
     }
     else
     {
@@ -4482,8 +4458,7 @@ void Scr_PlayLoopedFX()
     cullDist = Scr_GetFloat(3u);
 LABEL_13:
     Scr_GetVector(2u, pos);
-    v1 = Scr_GetFloat(1u) * 1000.0;
-    repeat = (int)(v1 + 9.313225746154785e-10);
+    repeat = (int)(Scr_GetFloat(1u) * 1000.0f);
     if (repeat <= 0)
         Scr_FxParamError(1u, "playLoopedFx called with repeat < 0.001 seconds", fxId);
     ent = G_Spawn();
@@ -4571,8 +4546,7 @@ void Scr_TriggerFX()
     result = Scr_GetNumParam();
     if (result == 2)
     {
-        v1 = Scr_GetFloat(1u) * 1000.0;
-        result = (int)(v1 + 9.313225746154785e-10);
+        result = (int)(Scr_GetFloat(1) * 1000.0f);
         ent->s.time2 = result;
     }
     else
@@ -4749,8 +4723,7 @@ void Scr_VisionSetNaked()
         goto LABEL_4;
     if (NumParam == 2)
     {
-        v2 = Scr_GetFloat(1u) * 1000.0;
-        duration = (int)(v2 + 9.313225746154785e-10);
+        duration = (int)(Scr_GetFloat(1) * 1000.0f);
     LABEL_4:
         name = Scr_GetString(0);
         v0 = va("\"%s\" %i", name, duration);
@@ -4774,8 +4747,7 @@ void Scr_VisionSetNight()
         goto LABEL_4;
     if (NumParam == 2)
     {
-        v2 = Scr_GetFloat(1u) * 1000.0;
-        duration = (int)(v2 + 9.313225746154785e-10);
+        duration = (int)(Scr_GetFloat(1) * 1000.0f);
     LABEL_4:
         name = Scr_GetString(0);
         v0 = va("\"%s\" %i", name, duration);
@@ -5117,8 +5089,7 @@ gentity_s *GScr_Earthquake()
     float scale; // [esp+28h] [ebp-4h]
 
     scale = Scr_GetFloat(0);
-    v1 = Scr_GetFloat(1u) * 1000.0;
-    duration = (int)(v1 + 9.313225746154785e-10);
+    duration = (int)(Scr_GetFloat(1) * 1000.0f);
     Scr_GetVector(2u, source);
     radius = Scr_GetFloat(3u);
     if (scale <= 0.0)
@@ -5163,8 +5134,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
         if (!I_stricmp(s, shock))
             break;
     }
-    v3 = Scr_GetFloat(1u) * 1000.0;
-    duration = (int)(v3 + 9.313225746154785e-10);
+    duration = (int)(Scr_GetFloat(1) * 1000.0f);
     if ((unsigned int)duration > 0xEA60)
     {
         v1 = va("duration %g should be >= 0 and <= 60", (double)duration * EQUAL_EPSILON);

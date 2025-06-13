@@ -297,62 +297,19 @@ void __cdecl HudElem_SetBoolean(game_hudelem_s *hud, int offset)
 
 void __cdecl HudElem_SetColor(game_hudelem_s *hud, int offset)
 {
-    float v2; // [esp+0h] [ebp-78h]
-    float v3; // [esp+4h] [ebp-74h]
-    float v4; // [esp+8h] [ebp-70h]
-    float v5; // [esp+Ch] [ebp-6Ch]
-    float v6; // [esp+10h] [ebp-68h]
-    float v7; // [esp+14h] [ebp-64h]
-    float v8; // [esp+18h] [ebp-60h]
-    float v9; // [esp+1Ch] [ebp-5Ch]
-    float v10; // [esp+20h] [ebp-58h]
-    float v11; // [esp+28h] [ebp-50h]
-    float v12; // [esp+38h] [ebp-40h]
-    float v13; // [esp+40h] [ebp-38h]
-    float v14; // [esp+50h] [ebp-28h]
-    float v15; // [esp+58h] [ebp-20h]
-    float v16; // [esp+68h] [ebp-10h]
     float color[3]; // [esp+6Ch] [ebp-Ch] BYREF
 
-    if (fields_0[offset].ofs != 36)
-        MyAssertHandler(".\\game\\g_hudelem.cpp", 495, 0, "%s", "fields[offset].ofs == HEOFS( elem.color )");
+    //iassert(fields[offset].ofs == HEOFS(elem.color));
     Scr_GetVector(0, color);
-    v10 = color[0] - 1.0;
-    if (v10 < 0.0)
-        v16 = color[0];
-    else
-        v16 = 1.0;
-    v9 = 0.0 - v16;
-    if (v9 < 0.0)
-        v8 = v16;
-    else
-        v8 = 0.0;
-    v15 = v8 * 255.0;
-    hud->elem.color.r = (int)(v15 + 9.313225746154785e-10);
-    v7 = color[1] - 1.0;
-    if (v7 < 0.0)
-        v14 = color[1];
-    else
-        v14 = 1.0;
-    v6 = 0.0 - v14;
-    if (v6 < 0.0)
-        v5 = v14;
-    else
-        v5 = 0.0;
-    v13 = v5 * 255.0;
-    hud->elem.color.g = (int)(v13 + 9.313225746154785e-10);
-    v4 = color[2] - 1.0;
-    if (v4 < 0.0)
-        v12 = color[2];
-    else
-        v12 = 1.0;
-    v3 = 0.0 - v12;
-    if (v3 < 0.0)
-        v2 = v12;
-    else
-        v2 = 0.0;
-    v11 = v2 * 255.0;
-    hud->elem.color.b = (int)(v11 + 9.313225746154785e-10);
+
+    float clampedR = CLAMP(color[0], 0.0f, 1.0f) * 255.0f;
+    hud->elem.color.r = (int)(clampedR);
+
+    float clampedG = CLAMP(color[1], 0.0f, 1.0f) * 255.0f;
+    hud->elem.color.g = (int)(clampedG);
+
+    float clampedB = CLAMP(color[2], 0.0f, 1.0f) * 255.0f;
+    hud->elem.color.b = (int)(clampedB);
 }
 
 void __cdecl HudElem_GetColor(game_hudelem_s *hud, int offset)
@@ -369,28 +326,15 @@ void __cdecl HudElem_GetColor(game_hudelem_s *hud, int offset)
 
 void __cdecl HudElem_SetAlpha(game_hudelem_s *hud, int offset)
 {
-    float v2; // [esp+0h] [ebp-28h]
-    float v3; // [esp+4h] [ebp-24h]
-    float v4; // [esp+8h] [ebp-20h]
-    float v5; // [esp+10h] [ebp-18h]
-    float v6; // [esp+20h] [ebp-8h]
     float alpha; // [esp+24h] [ebp-4h]
 
     if (fields_0[offset].ofs != 36)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 521, 0, "%s", "fields[offset].ofs == HEOFS( elem.color )");
+
     alpha = Scr_GetFloat(0);
-    v4 = alpha - 1.0;
-    if (v4 < 0.0)
-        v6 = alpha;
-    else
-        v6 = 1.0;
-    v3 = 0.0 - v6;
-    if (v3 < 0.0)
-        v2 = v6;
-    else
-        v2 = 0.0;
-    v5 = v2 * 255.0;
-    hud->elem.color.a = (int)(v5 + 9.313225746154785e-10);
+
+    float clampedAlpha = CLAMP(alpha, 0.0f, 1.0f) * 255.0f;
+    hud->elem.color.a = (int)(clampedAlpha);
 }
 
 void __cdecl HudElem_GetAlpha(game_hudelem_s *hud, int offset)
@@ -401,62 +345,20 @@ void __cdecl HudElem_GetAlpha(game_hudelem_s *hud, int offset)
 
 void __cdecl HudElem_SetGlowColor(game_hudelem_s *hud, int offset)
 {
-    float v2; // [esp+0h] [ebp-78h]
-    float v3; // [esp+4h] [ebp-74h]
-    float v4; // [esp+8h] [ebp-70h]
-    float v5; // [esp+Ch] [ebp-6Ch]
-    float v6; // [esp+10h] [ebp-68h]
-    float v7; // [esp+14h] [ebp-64h]
-    float v8; // [esp+18h] [ebp-60h]
-    float v9; // [esp+1Ch] [ebp-5Ch]
-    float v10; // [esp+20h] [ebp-58h]
-    float v11; // [esp+28h] [ebp-50h]
-    float v12; // [esp+38h] [ebp-40h]
-    float v13; // [esp+40h] [ebp-38h]
-    float v14; // [esp+50h] [ebp-28h]
-    float v15; // [esp+58h] [ebp-20h]
-    float v16; // [esp+68h] [ebp-10h]
     float glowColor[3]; // [esp+6Ch] [ebp-Ch] BYREF
 
     if (fields_0[offset].ofs != 132)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 540, 0, "%s", "fields[offset].ofs == HEOFS( elem.glowColor )");
     Scr_GetVector(0, glowColor);
-    v10 = glowColor[0] - 1.0;
-    if (v10 < 0.0)
-        v16 = glowColor[0];
-    else
-        v16 = 1.0;
-    v9 = 0.0 - v16;
-    if (v9 < 0.0)
-        v8 = v16;
-    else
-        v8 = 0.0;
-    v15 = v8 * 255.0;
-    hud->elem.glowColor.r = (int)(v15 + 9.313225746154785e-10);
-    v7 = glowColor[1] - 1.0;
-    if (v7 < 0.0)
-        v14 = glowColor[1];
-    else
-        v14 = 1.0;
-    v6 = 0.0 - v14;
-    if (v6 < 0.0)
-        v5 = v14;
-    else
-        v5 = 0.0;
-    v13 = v5 * 255.0;
-    hud->elem.glowColor.g = (int)(v13 + 9.313225746154785e-10);
-    v4 = glowColor[2] - 1.0;
-    if (v4 < 0.0)
-        v12 = glowColor[2];
-    else
-        v12 = 1.0;
-    v3 = 0.0 - v12;
-    if (v3 < 0.0)
-        v2 = v12;
-    else
-        v2 = 0.0;
-    v11 = v2 * 255.0;
-    hud->elem.glowColor.b = (int)(v11 + 9.313225746154785e-10);
+
+    float clampedR = CLAMP(glowColor[0], 0.0f, 1.0f);
+    hud->elem.glowColor.r = (int)(clampedR);
+
+    float clampedG = CLAMP(glowColor[1], 0.0f, 1.0f);
+    hud->elem.glowColor.g = (int)(clampedG);
+
+    float clampedB = CLAMP(glowColor[2], 0.0f, 1.0f);
+    hud->elem.glowColor.b = (int)(clampedB);
 }
 
 void __cdecl HudElem_GetGlowColor(game_hudelem_s *hud, int offset)
@@ -473,28 +375,15 @@ void __cdecl HudElem_GetGlowColor(game_hudelem_s *hud, int offset)
 
 void __cdecl HudElem_SetGlowAlpha(game_hudelem_s *hud, int offset)
 {
-    float v2; // [esp+0h] [ebp-28h]
-    float v3; // [esp+4h] [ebp-24h]
-    float v4; // [esp+8h] [ebp-20h]
-    float v5; // [esp+10h] [ebp-18h]
-    float v6; // [esp+20h] [ebp-8h]
     float glowAlpha; // [esp+24h] [ebp-4h]
 
     if (fields_0[offset].ofs != 132)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 566, 0, "%s", "fields[offset].ofs == HEOFS( elem.glowColor )");
+
     glowAlpha = Scr_GetFloat(0);
-    v4 = glowAlpha - 1.0;
-    if (v4 < 0.0)
-        v6 = glowAlpha;
-    else
-        v6 = 1.0;
-    v3 = 0.0 - v6;
-    if (v3 < 0.0)
-        v2 = v6;
-    else
-        v2 = 0.0;
-    v5 = v2 * 255.0;
-    hud->elem.glowColor.a = (int)(v5 + 9.313225746154785e-10);
+    
+    float clampedGlowAlpha = CLAMP(glowAlpha, 0.0f, 1.0f);
+    hud->elem.glowColor.a = (int)(clampedGlowAlpha);
 }
 
 void __cdecl HudElem_GetGlowAlpha(game_hudelem_s *hud, int offset)
@@ -1057,9 +946,6 @@ void __cdecl HECmd_SetWaypoint(scr_entref_t entref)
 
 void __cdecl HECmd_FadeOverTime(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    float v3; // [esp+Ch] [ebp-18h]
     float fadeTime; // [esp+1Ch] [ebp-8h]
     game_hudelem_s *hud; // [esp+20h] [ebp-4h]
 
@@ -1069,19 +955,16 @@ void __cdecl HECmd_FadeOverTime(scr_entref_t entref)
     {
         if (fadeTime > 60.0)
         {
-            v2 = va("fade time %g > 60", fadeTime);
-            Scr_ParamError(0, v2);
+            Scr_ParamError(0, va("fade time %g > 60", fadeTime));
         }
     }
     else
     {
-        v1 = va("fade time %g <= 0", fadeTime);
-        Scr_ParamError(0, v1);
+        Scr_ParamError(0, va("fade time %g <= 0", fadeTime));
     }
     BG_LerpHudColors(&hud->elem, level.time, &hud->elem.fromColor);
     hud->elem.fadeStartTime = level.time;
-    v3 = fadeTime * 1000.0;
-    hud->elem.fadeTime = (int)(v3 + 9.313225746154785e-10);
+    hud->elem.fadeTime = (int)(fadeTime * 1000.0f);
 }
 
 void __cdecl HECmd_ScaleOverTime(scr_entref_t entref)
@@ -1114,8 +997,7 @@ void __cdecl HECmd_ScaleOverTime(scr_entref_t entref)
     width = Scr_GetInt(1);
     height = Scr_GetInt(2);
     hud->elem.scaleStartTime = level.time;
-    v3 = scaleTime * 1000.0;
-    hud->elem.scaleTime = (int)(v3 + 9.313225746154785e-10);
+    hud->elem.scaleTime = (int)(scaleTime * 1000.0f);
     hud->elem.fromWidth = hud->elem.width;
     hud->elem.fromHeight = hud->elem.height;
     hud->elem.width = width;
@@ -1146,8 +1028,7 @@ void __cdecl HECmd_MoveOverTime(scr_entref_t entref)
         Scr_ParamError(0, v1);
     }
     hud->elem.moveStartTime = level.time;
-    v3 = moveTime * 1000.0;
-    hud->elem.moveTime = (int)(v3 + 9.313225746154785e-10);
+    hud->elem.moveTime = (int)(moveTime * 1000.0f);
     hud->elem.fromX = hud->elem.x;
     hud->elem.fromY = hud->elem.y;
     hud->elem.fromAlignOrg = hud->elem.alignOrg;

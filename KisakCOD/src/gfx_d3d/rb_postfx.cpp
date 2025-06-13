@@ -408,9 +408,8 @@ void __cdecl RB_BlurScreen(const GfxViewInfo *viewInfo, float blurRadius)
     color = -1;
     if (blurRadiusMin > blurRadius)
     {
-        v2 = blurRadius / blurRadiusMin * 255.0;
-        //HIBYTE(color) = (v2 + 9.313225746154785e-10);
-        color = (v2 + 9.313225746154785e-10);
+//        HIBYTE(color) = (int)(blurRadius / blurRadiusMin * 255.0f);
+        color = (int)(blurRadius / blurRadiusMin * 255.0f);
         blurRadius = 1440.0 / gfxCmdBufSourceState.sceneViewport.height;
     }
     RB_GaussianFilterImage(blurRadius, R_RENDERTARGET_RESOLVED_SCENE, R_RENDERTARGET_POST_EFFECT_0);

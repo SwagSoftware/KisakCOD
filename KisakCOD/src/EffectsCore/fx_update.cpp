@@ -1885,8 +1885,7 @@ unsigned __int8 __cdecl FX_ProcessEmitting(
             "residual >= -0.001f && residual <= maxDistPerEmit + 0.001f",
             v6);
     }
-    v13 = residual * 256.0 / maxDistPerEmit;
-    return (int)(v13 + 9.313225746154785e-10);
+    return (int)(residual * 256.0f / maxDistPerEmit);
 }
 
 void __cdecl FX_GetQuatForOrientation(

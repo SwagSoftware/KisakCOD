@@ -943,7 +943,6 @@ void __cdecl FX_BuildQuadStampCodeMeshVerts(
     int t0,
     int s1,
     int t1);
-void __cdecl Byte4CopyRgbaToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo);
 char __cdecl FX_HeightScreenToWorld(
     const float *worldOrigin,
     float screenHeight,

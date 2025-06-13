@@ -932,7 +932,7 @@ void __cdecl mod_FloatByInt(Operand *leftSide, Operand *rightSide, Operand *resu
             rightSide->dataType);
     result->dataType = VAL_INT;
     if (rightSide->internals.intVal)
-        result->internals.intVal = (int)(leftSide->internals.floatVal + 9.313225746154785e-10) % rightSide->internals.intVal;
+        result->internals.intVal = (int)(leftSide->internals.floatVal) % rightSide->internals.intVal;
     else
         result->internals.intVal = leftSide->internals.intVal;
 }
@@ -958,7 +958,7 @@ void __cdecl mod_IntByFloat(Operand *leftSide, Operand *rightSide, Operand *resu
             "(rightSide->dataType == VAL_FLOAT)",
             rightSide->dataType);
     result->dataType = VAL_INT;
-    right = (int)(rightSide->internals.floatVal + 9.313225746154785e-10);
+    right = (int)(rightSide->internals.floatVal);
     if (right)
         result->internals.intVal = leftSide->internals.intVal % right;
     else
@@ -986,11 +986,11 @@ void __cdecl mod_FloatByFloat(Operand *leftSide, Operand *rightSide, Operand *re
             "(rightSide->dataType == VAL_FLOAT)",
             rightSide->dataType);
     result->dataType = VAL_INT;
-    right = (int)(rightSide->internals.floatVal + 9.313225746154785e-10);
+    right = (int)(rightSide->internals.floatVal);
     if (right)
-        result->internals.intVal = (int)(leftSide->internals.floatVal + 9.313225746154785e-10) % right;
+        result->internals.intVal = (int)(leftSide->internals.floatVal) % right;
     else
-        result->internals.intVal = (int)(leftSide->internals.floatVal + 9.313225746154785e-10);
+        result->internals.intVal = (int)(leftSide->internals.floatVal);
 }
 
 void __cdecl and_IntWithInt(Operand *leftSide, Operand *rightSide, Operand *result)

@@ -993,9 +993,8 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
         v5 = (double)frameTime / (double)cmd->fadeMsec;
         v3 = pow(0.0099999998, v5);
         alpha = v3;
-        if (v3 > 0.9900000095367432)
-            alpha = 0.99000001;
-        v4 = alpha * 255.0;
+        if (v3 > 0.99f)
+            alpha = 0.99f;
         screenWidth = (double)gfxCmdBufSourceState.renderTargetWidth * cmd->ds;
         screenHeight = (double)gfxCmdBufSourceState.renderTargetHeight * cmd->dt;
         R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[0].image);
@@ -1011,7 +1010,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
             cmd->t0,
             s1,
             t1,
-            ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 24) | 0xFFFFFF,
+            ((unsigned __int8)(int)(alpha * 255.0f) << 24) | 0xFFFFFF,
             GFX_PRIM_STATS_CODE);
     }
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
@@ -1040,8 +1039,6 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
         RB_EndTessSurface();
     if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
         MyAssertHandler(".\\rb_backend.cpp", 1316, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
-    v4 = cmd->intensityWhiteout * 255.0;
-    v3 = cmd->intensityScreengrab * 255.0;
     screenWidth = (double)gfxCmdBufSourceState.renderTargetWidth * cmd->ds;
     screenHeight = (double)gfxCmdBufSourceState.renderTargetHeight * cmd->dt;
     R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[0].image);
@@ -1057,10 +1054,10 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
         cmd->t0,
         s1,
         t1,
-        ((unsigned __int8)(int)(v3 + 9.313225746154785e-10) << 24)
-        | (unsigned __int8)(int)(v4 + 9.313225746154785e-10)
-        | ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 8)
-        | ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 16),
+        ((unsigned __int8)(int)(cmd->intensityScreengrab * 255.0f) << 24)
+        | (unsigned __int8)(int)(cmd->intensityWhiteout * 255.0f)
+        | ((unsigned __int8)(int)(cmd->intensityWhiteout * 255.0f) << 8)
+        | ((unsigned __int8)(int)(cmd->intensityWhiteout * 255.0f) << 16),
         GFX_PRIM_STATS_CODE);
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
@@ -2373,16 +2370,7 @@ void __cdecl GetDecayingLetterInfo(
     }
     *resultSkipDrawing = skipDrawing;
     *resultLetter = letter;
-    v13 = fade * 255.0;
-    if ((int)(v13 + 9.313225746154785e-10) < 255)
-        v12 = (int)(v13 + 9.313225746154785e-10);
-    else
-        v12 = 255;
-    if (v12 > 0)
-        v11 = v12;
-    else
-        v11 = 0;
-    *resultAlpha = v11;
+    *resultAlpha = CLAMP((int)(fade * 255.0f), 0, 255);
     *resultDrawExtraFxChar = drawExtraFxChar;
 }
 

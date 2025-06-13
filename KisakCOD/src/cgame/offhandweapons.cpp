@@ -68,12 +68,11 @@ void __cdecl CG_DrawOffHandIcon(
     {
         if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
         {
-            v6 = hud_fade_offhand->current.value * 1000.0;
             drawColor[3] = CG_FadeHudMenu(
                 localClientNum,
                 hud_fade_offhand,
                 cgArray[0].offhandFadeTime,
-                (int)(v6 + 9.313225746154785e-10))
+                (int)(hud_fade_offhand->current.value * 1000.0f))
                 * color[3];
             if (drawColor[3] != 0.0)
             {
@@ -158,12 +157,11 @@ void __cdecl CG_DrawOffHandHighlight(
         {
             if (cgArray[0].equippedOffHand)
             {
-                v6 = hud_fade_offhand->current.value * 1000.0;
                 drawColor[3] = CG_FadeHudMenu(
                     localClientNum,
                     hud_fade_offhand,
                     cgArray[0].offhandFadeTime,
-                    (int)(v6 + 9.313225746154785e-10))
+                    (int)(hud_fade_offhand->current.value * 1000.0f))
                     * color[3];
                 if (drawColor[3] != 0.0)
                 {
@@ -290,12 +288,11 @@ void __cdecl CG_DrawOffHandAmmo(
     {
         if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
         {
-            v7 = hud_fade_offhand->current.value * 1000.0;
             drawColor[3] = CG_FadeHudMenu(
                 localClientNum,
                 hud_fade_offhand,
                 cgArray[0].offhandFadeTime,
-                (int)(v7 + 9.313225746154785e-10))
+                (int)(hud_fade_offhand->current.value * 1000.0f))
                 * color[3];
             if (drawColor[3] != 0.0)
             {
@@ -357,12 +354,11 @@ void __cdecl CG_DrawOffHandName(
             localClientNum);
     if (IsOffHandDisplayVisible(cgArray) && GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
     {
-        v7 = hud_fade_offhand->current.value * 1000.0;
         drawColor[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_offhand,
             cgArray[0].offhandFadeTime,
-            (int)(v7 + 9.313225746154785e-10))
+            (int)(hud_fade_offhand->current.value * 1000.0f))
             * color[3];
         if (drawColor[3] != 0.0)
         {

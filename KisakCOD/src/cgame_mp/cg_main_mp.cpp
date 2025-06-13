@@ -1567,8 +1567,7 @@ void __cdecl CG_SubtitlePrint(int msec, const snd_alias_t *alias)
             integer = cg_subtitleWidthStandard->current.integer;
         else
             integer = cg_subtitleWidthWidescreen->current.integer;
-        v4 = cg_subtitleMinTime->current.value * 1000.0;
-        v3 = (int)(v4 + 9.313225746154785e-10);
+        v3 = (int)(cg_subtitleMinTime->current.value * 1000.0f);
         if (v3 < msec)
             CL_SubtitlePrint(0, alias->subtitle, msec, integer);
         else

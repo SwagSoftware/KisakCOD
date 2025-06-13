@@ -397,7 +397,6 @@ int __cdecl G_GetHitLocationIndexFromString(unsigned __int16 sString);
 // g_misc_mp
 void __cdecl SP_info_notnull(gentity_s *self);
 void __cdecl SP_light(gentity_s *self);
-void __cdecl Byte4PackRgba(const float *from, unsigned __int8 *to);
 void __cdecl TeleportPlayer(gentity_s *player, float *origin, float *angles);
 void __cdecl G_InitTurrets();
 void __cdecl G_ClientStopUsingTurret(gentity_s *self);

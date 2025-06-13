@@ -15,15 +15,11 @@ struct PackedTexCoords // sizeof=0x4
     unsigned int packed;
 };
 
-// KISAKTODO: Move more stuff into here. The Bgra/4byte stuff probably belongs in here.
-
-inline void __cdecl Byte4CopyBgraToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo)
-{
-    *nativeTo = (rgbaFrom[3] << 24) | *rgbaFrom | (rgbaFrom[1] << 8) | (rgbaFrom[2] << 16);
-}
-
-
 
 PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec);
 PackedTexCoords __cdecl Vec2PackTexCoords(const float *in);
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to);
+void __cdecl Byte4PackRgba(const float *from, unsigned __int8 *to);
+void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to);
+void __cdecl Byte4CopyRgbaToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo);
+void __cdecl Byte4CopyBgraToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo);

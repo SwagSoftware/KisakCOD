@@ -250,12 +250,12 @@ int __cdecl DevGui_UpdateIntScroll(float deltaTime, int value, int min, int max,
             stepTime < (double)s_input.digitalSliderTime;
             s_input.digitalSliderTime = s_input.digitalSliderTime - stepTime)
         {
-            scroll += (int)(s_input.digitalAxis[axis] + 9.313225746154785e-10);
+            scroll += (int)(s_input.digitalAxis[axis]);
         }
     }
     else if (s_input.digitalStates[axis] == SCROLL_PRESSED)
     {
-        scroll = (int)(s_input.digitalAxis[axis] + 9.313225746154785e-10);
+        scroll = (int)(s_input.digitalAxis[axis]);
     }
     else
     {

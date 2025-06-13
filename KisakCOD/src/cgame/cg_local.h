@@ -1289,7 +1289,6 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
     float text_y,
     char textAlignMode,
     Material *material);
-void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to);
 unsigned int __cdecl GetWeaponIndex(const cg_s *cgameGlob);
 void __cdecl Vec4Copy(const float *from, float *to);
 

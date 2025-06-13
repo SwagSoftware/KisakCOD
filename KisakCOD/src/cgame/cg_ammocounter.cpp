@@ -251,12 +251,12 @@ double __cdecl AmmoCounterFadeAlpha(int localClientNum, cg_s *cgameGlob)
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 152, 0, "%s", "cgameGlob");
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0.0;
-    v3 = hud_fade_ammodisplay->current.value * 1000.0;
+
     return CG_FadeHudMenu(
         localClientNum,
         hud_fade_ammodisplay,
         cgameGlob->ammoFadeTime,
-        (int)(v3 + 9.313225746154785e-10));
+        (int)(hud_fade_ammodisplay->current.value * 1000.0f));
 }
 
 double __cdecl CG_GetHudAlphaDPad(int localClientNum)
@@ -1299,14 +1299,6 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
             }
         }
     }
-}
-
-void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to)
-{
-    *to = (double)*from * 0.003921568859368563;
-    to[1] = (double)from[1] * 0.003921568859368563;
-    to[2] = (double)from[2] * 0.003921568859368563;
-    to[3] = (double)from[3] * 0.003921568859368563;
 }
 
 unsigned int __cdecl GetWeaponIndex(const cg_s *cgameGlob)

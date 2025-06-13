@@ -2028,16 +2028,16 @@ void __cdecl GetWeapAttackDirect(int localClientNum, Operand *result)
 void __cdecl SecondsToTimeDisplay(int localClientNum, Operand *source, Operand *result)
 {
     static char resultString_0[128];
-    float v3; // [esp+4h] [ebp-14h]
+    int v3; // [esp+4h] [ebp-14h]
 
-    v3 = (double)GetSourceInt(source).intVal / 60.0;
+    v3 = (int)((float)GetSourceInt(source).intVal / 60.0f);
     _snprintf(
         resultString_0,
         0x80u,
         "%id %ih %im",
-        (int)(v3 + 9.313225746154785e-10) / 1440,
-        (int)(v3 + 9.313225746154785e-10) % 1440 / 60,
-        (int)(v3 + 9.313225746154785e-10) % 60);
+        v3 / 1440,
+        v3 % 1440 / 60,
+        v3 % 60);
     result->dataType = VAL_STRING;
     result->internals.intVal = (int)resultString_0;
     if (uiscript_debug->current.integer)

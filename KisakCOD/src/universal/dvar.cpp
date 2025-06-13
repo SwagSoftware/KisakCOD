@@ -1120,81 +1120,19 @@ void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor)
 
 void __cdecl Dvar_StringToColor(const char *string, unsigned __int8 *color)
 {
-    float v2; // [esp+0h] [ebp-A0h]
-    float v3; // [esp+4h] [ebp-9Ch]
-    float v4; // [esp+8h] [ebp-98h]
-    float v5; // [esp+Ch] [ebp-94h]
-    float v6; // [esp+10h] [ebp-90h]
-    float v7; // [esp+14h] [ebp-8Ch]
-    float v8; // [esp+18h] [ebp-88h]
-    float v9; // [esp+1Ch] [ebp-84h]
-    float v10; // [esp+20h] [ebp-80h]
-    float v11; // [esp+24h] [ebp-7Ch]
-    float v12; // [esp+28h] [ebp-78h]
-    float v13; // [esp+2Ch] [ebp-74h]
-    float v14; // [esp+34h] [ebp-6Ch]
-    float v15; // [esp+44h] [ebp-5Ch]
-    float v16; // [esp+4Ch] [ebp-54h]
-    float v17; // [esp+5Ch] [ebp-44h]
-    float v18; // [esp+64h] [ebp-3Ch]
-    float v19; // [esp+74h] [ebp-2Ch]
-    float v20; // [esp+7Ch] [ebp-24h]
-    float v21; // [esp+8Ch] [ebp-14h]
     float colorVec[4]; // [esp+90h] [ebp-10h] BYREF
 
     colorVec[0] = 0.0;
     colorVec[1] = 0.0;
     colorVec[2] = 0.0;
     colorVec[3] = 0.0;
-    sscanf(string, "%g %g %g %g", colorVec, &colorVec[1], &colorVec[2], &colorVec[3]);
-    v13 = colorVec[0] - 1.0;
-    if (v13 < 0.0)
-        v21 = colorVec[0];
-    else
-        v21 = 1.0;
-    v12 = 0.0 - v21;
-    if (v12 < 0.0)
-        v11 = v21;
-    else
-        v11 = 0.0;
-    v20 = v11 * 255.0;
-    *color = (int)(v20 + 9.313225746154785e-10);
-    v10 = colorVec[1] - 1.0;
-    if (v10 < 0.0)
-        v19 = colorVec[1];
-    else
-        v19 = 1.0;
-    v9 = 0.0 - v19;
-    if (v9 < 0.0)
-        v8 = v19;
-    else
-        v8 = 0.0;
-    v18 = v8 * 255.0;
-    color[1] = (int)(v18 + 9.313225746154785e-10);
-    v7 = colorVec[2] - 1.0;
-    if (v7 < 0.0)
-        v17 = colorVec[2];
-    else
-        v17 = 1.0;
-    v6 = 0.0 - v17;
-    if (v6 < 0.0)
-        v5 = v17;
-    else
-        v5 = 0.0;
-    v16 = v5 * 255.0;
-    color[2] = (int)(v16 + 9.313225746154785e-10);
-    v4 = colorVec[3] - 1.0;
-    if (v4 < 0.0)
-        v15 = colorVec[3];
-    else
-        v15 = 1.0;
-    v3 = 0.0 - v15;
-    if (v3 < 0.0)
-        v2 = v15;
-    else
-        v2 = 0.0;
-    v14 = v2 * 255.0;
-    color[3] = (int)(v14 + 9.313225746154785e-10);
+
+    sscanf(string, "%g %g %g %g", &colorVec[0], &colorVec[1], &colorVec[2], &colorVec[3]);
+
+    color[0] = CLAMP((int)(colorVec[0] * 255.0f), 0, 255);
+    color[1] = CLAMP((int)(colorVec[1] * 255.0f), 0, 255);
+    color[2] = CLAMP((int)(colorVec[2] * 255.0f), 0, 255);
+    color[3] = CLAMP((int)(colorVec[3] * 255.0f), 0, 255);
 }
 
 void __cdecl Dvar_GetUnpackedColorByName(const char *dvarName, float *expandedColor)
@@ -2343,14 +2281,14 @@ const dvar_s *__cdecl Dvar_RegisterColor(
         v8 = v21;
     else
         v8 = 0.0;
-    v20 = v8 * 255.0 + EQUAL_EPSILON;
-    dvarValue.color[3] = (int)(v20 + 9.313225746154785e-10);
-    v26 = v17 * 255.0 + EQUAL_EPSILON;
-    dvarValue.enabled = (int)(v26 + 9.313225746154785e-10);
-    v24 = v14 * 255.0 + EQUAL_EPSILON;
-    dvarValue.color[1] = (int)(v24 + 9.313225746154785e-10);
-    v22 = v11 * 255.0 + EQUAL_EPSILON;
-    dvarValue.color[2] = (int)(v22 + 9.313225746154785e-10);
+    v20 = v8 * 255.0f + EQUAL_EPSILON;
+    dvarValue.color[3] = (int)(v20);
+    v26 = v17 * 255.0f + EQUAL_EPSILON;
+    dvarValue.enabled = (int)(v26);
+    v24 = v14 * 255.0f + EQUAL_EPSILON;
+    dvarValue.color[1] = (int)(v24);
+    v22 = v11 * 255.0f + EQUAL_EPSILON;
+    dvarValue.color[2] = (int)(v22);
     return Dvar_RegisterVariant(dvarName, 8u, flags, dvarValue, 0, description);
 }
 

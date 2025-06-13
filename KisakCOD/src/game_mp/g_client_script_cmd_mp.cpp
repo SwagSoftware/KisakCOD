@@ -3044,8 +3044,7 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
             radiusa = 0.0;
         }
     }
-    v2 = radiusa * 63.0;
-    radiusBits = (int)(v2 + 9.313225746154785e-10);
+    radiusBits = (int)(radiusa * 63.0f);
     if (radiusBits >= 0x40)
         MyAssertHandler(
             ".\\game_mp\\g_client_script_cmd_mp.cpp",

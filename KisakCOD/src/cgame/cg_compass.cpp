@@ -699,8 +699,8 @@ double __cdecl CG_FadeCompass(int localClientNum, int displayStartTime, CompassT
 
     if (compassType)
         return 1.0;
-    v4 = hud_fade_compass->current.value * 1000.0;
-    return CG_FadeHudMenu(localClientNum, hud_fade_compass, displayStartTime, (int)(v4 + 9.313225746154785e-10));
+
+    return CG_FadeHudMenu(localClientNum, hud_fade_compass, displayStartTime, (int)(hud_fade_compass->current.value * 1000.0f));
 }
 
 void __cdecl CG_CompassDrawPlayerBack(

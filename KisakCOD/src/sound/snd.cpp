@@ -2160,15 +2160,12 @@ void __cdecl SND_ContinueLoopingSound_Internal(
     g_snd.chaninfo[chanIndex].pitch = v6;
     if (g_snd.chaninfo[chanIndex].timescale)
     {
-        v12 = g_snd.timescale * ((double)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch);
-        v5 = v12 + 9.313225746154785e-10;
+        setPlaybackRateFunc(chanIndex, (int)g_snd.timescale * ((float)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch));
     }
     else
     {
-        v11 = (double)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch;
-        v5 = v11 + 9.313225746154785e-10;
+        setPlaybackRateFunc(chanIndex, (int)((float)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch));
     }
-    setPlaybackRateFunc(chanIndex, (int)v5);
     g_snd.chaninfo[chanIndex].looptime = g_snd.looptime;
     g_snd.chaninfo[chanIndex].lerp = lerp;
     if (pChannel)
@@ -3333,24 +3330,21 @@ void SND_UpdateTimeScale()
         {
             if (!SND_Is3DChannelFree(i) && g_snd.chaninfo[i].timescale)
             {
-                v2 = (double)SND_Get3DChannelPlaybackRate(i) * factor;
-                SND_Set3DChannelPlaybackRate(i, (int)(v2 + 9.313225746154785e-10));
+                SND_Set3DChannelPlaybackRate(i, (int)((float)SND_Get3DChannelPlaybackRate(i) * factor));
             }
         }
         for (ia = 40; ia < g_snd.max_stream_channels + 40; ++ia)
         {
             if (!SND_IsStreamChannelFree(ia) && g_snd.chaninfo[ia].timescale)
             {
-                v1 = (double)SND_GetStreamChannelPlaybackRate(ia) * factor;
-                SND_SetStreamChannelPlaybackRate(ia, (int)(v1 + 9.313225746154785e-10));
+                SND_SetStreamChannelPlaybackRate(ia, (int)((float)SND_GetStreamChannelPlaybackRate(ia) * factor));
             }
         }
         for (ib = 0; ib < g_snd.max_2D_channels; ++ib)
         {
             if (!SND_Is2DChannelFree(ib) && g_snd.chaninfo[ib].timescale)
             {
-                v0 = (double)SND_Get2DChannelPlaybackRate(ib) * factor;
-                SND_Set2DChannelPlaybackRate(ib, (int)(v0 + 9.313225746154785e-10));
+                SND_Set2DChannelPlaybackRate(ib, (int)((float)SND_Get2DChannelPlaybackRate(ib) * factor));
             }
         }
     }
@@ -4559,13 +4553,11 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
             SND_SetStreamChannelFromSaveInfo(channel, &info);
             if (g_snd.chaninfo[channel].timescale)
             {
-                v7 = g_snd.timescale * ((double)info.rate * g_snd.chaninfo[channel].pitch);
-                SND_SetStreamChannelPlaybackRate(channel, (int)(v7 + 9.313225746154785e-10));
+                SND_SetStreamChannelPlaybackRate(channel, (int)(g_snd.timescale * ((float)info.rate * g_snd.chaninfo[channel].pitch)));
             }
             else
             {
-                v6 = (double)info.rate * g_snd.chaninfo[channel].pitch;
-                SND_SetStreamChannelPlaybackRate(channel, (int)(v6 + 9.313225746154785e-10));
+                SND_SetStreamChannelPlaybackRate(channel, (int)((float)info.rate * g_snd.chaninfo[channel].pitch));
             }
             offset = g_snd.chaninfo[channel].offset;
             *offset = chaninfo.offset[0];

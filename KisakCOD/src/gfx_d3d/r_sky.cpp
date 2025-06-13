@@ -217,65 +217,28 @@ void __cdecl R_RegisterSunDvars()
 
 void __cdecl R_SetSunFromDvars(sunflare_t *sun)
 {
-    float v1; // [esp+0h] [ebp-A8h]
-    float v2; // [esp+4h] [ebp-A4h]
-    float v3; // [esp+8h] [ebp-A0h]
-    float v4; // [esp+Ch] [ebp-9Ch]
-    float v5; // [esp+10h] [ebp-98h]
-    float v6; // [esp+14h] [ebp-94h]
-    float v7; // [esp+1Ch] [ebp-8Ch]
-    float v8; // [esp+30h] [ebp-78h]
-    float v9; // [esp+40h] [ebp-68h]
-    float v10; // [esp+44h] [ebp-64h]
-    float v11; // [esp+4Ch] [ebp-5Ch]
-    float v12; // [esp+60h] [ebp-48h]
-    float v13; // [esp+70h] [ebp-38h]
-    float v14; // [esp+74h] [ebp-34h]
-    float v15; // [esp+7Ch] [ebp-2Ch]
-    float v16; // [esp+90h] [ebp-18h]
-    float v17; // [esp+A0h] [ebp-8h]
-    float v18; // [esp+A4h] [ebp-4h]
+    iassert(sun);
 
-    if (!sun)
-        MyAssertHandler(".\\r_sky.cpp", 108, 0, "%s", "sun");
     sun->spriteMaterial = Material_RegisterHandle((char *)r_sunsprite_shader->current.integer, 6);
     sun->spriteSize = r_sunsprite_size->current.value;
     sun->flareMaterial = Material_RegisterHandle((char *)r_sunflare_shader->current.integer, 6);
-    sun->flareMinSize = r_sunflare_min_size->current.value * 0.5;
-    v18 = r_sunflare_min_angle->current.value * 0.01745329238474369;
-    v6 = cos(v18);
-    sun->flareMinDot = v6;
-    sun->flareMaxSize = r_sunflare_max_size->current.value * 0.5;
-    v17 = r_sunflare_max_angle->current.value * 0.01745329238474369;
-    v5 = cos(v17);
-    sun->flareMaxDot = v5;
+    sun->flareMinSize = r_sunflare_min_size->current.value * 0.5f;
+    sun->flareMinDot = cos(r_sunflare_min_angle->current.value * 0.01745329238474369);
+    sun->flareMaxSize = r_sunflare_max_size->current.value * 0.5f;
+    sun->flareMaxDot = cos(r_sunflare_max_angle->current.value * 0.01745329238474369);
     sun->flareMaxAlpha = r_sunflare_max_alpha->current.value;
-    v16 = r_sunflare_fadein->current.value * 1000.0;
-    sun->flareFadeInTime = (int)(v16 + 9.313225746154785e-10);
-    v15 = r_sunflare_fadeout->current.value * 1000.0;
-    sun->flareFadeOutTime = (int)(v15 + 9.313225746154785e-10);
-    v14 = r_sunblind_min_angle->current.value * 0.01745329238474369;
-    v4 = cos(v14);
-    sun->blindMinDot = v4;
-    v13 = r_sunblind_max_angle->current.value * 0.01745329238474369;
-    v3 = cos(v13);
-    sun->blindMaxDot = v3;
+    sun->flareFadeInTime = (int)(r_sunflare_fadein->current.value * 1000.0f);
+    sun->flareFadeOutTime = (int)(r_sunflare_fadeout->current.value * 1000.0f);
+    sun->blindMinDot = cos(r_sunblind_min_angle->current.value * 0.01745329238474369);
+    sun->blindMaxDot = cos(r_sunblind_max_angle->current.value * 0.01745329238474369);
     sun->blindMaxDarken = r_sunblind_max_darken->current.value;
-    v12 = r_sunblind_fadein->current.value * 1000.0;
-    sun->blindFadeInTime = (int)(v12 + 9.313225746154785e-10);
-    v11 = r_sunblind_fadeout->current.value * 1000.0;
-    sun->blindFadeOutTime = (int)(v11 + 9.313225746154785e-10);
-    v10 = r_sunglare_min_angle->current.value * 0.01745329238474369;
-    v2 = cos(v10);
-    sun->glareMinDot = v2;
-    v9 = r_sunglare_max_angle->current.value * 0.01745329238474369;
-    v1 = cos(v9);
-    sun->glareMaxDot = v1;
+    sun->blindFadeInTime = (int)(r_sunblind_fadein->current.value * 1000.0f);
+    sun->blindFadeOutTime = (int)(r_sunblind_fadeout->current.value * 1000.0f);
+    sun->glareMinDot = cos(r_sunglare_min_angle->current.value * 0.01745329238474369);
+    sun->glareMaxDot = cos(r_sunglare_max_angle->current.value * 0.01745329238474369);
     sun->glareMaxLighten = r_sunglare_max_lighten->current.value;
-    v8 = r_sunglare_fadein->current.value * 1000.0;
-    sun->glareFadeInTime = (int)(v8 + 9.313225746154785e-10);
-    v7 = r_sunglare_fadeout->current.value * 1000.0;
-    sun->glareFadeOutTime = (int)(v7 + 9.313225746154785e-10);
+    sun->glareFadeInTime = (int)(r_sunglare_fadein->current.value * 1000.0f);
+    sun->glareFadeOutTime = (int)(r_sunglare_fadeout->current.value * 1000.0f);
     AngleVectors(&r_sun_fx_position->current.value, sun->sunFxPosition, 0, 0);
     sun->hasValidData = 1;
 }

@@ -628,8 +628,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
                 kb = playersKb[localClientNum];
                 if (kb[8].active)
                 {
-                    v14 = mx * m_side->current.value;
-                    cmd->rightmove = ClampChar((int)(v14 + 9.313225746154785e-10) + cmd->rightmove);
+                    cmd->rightmove = ClampChar((int)(mx * m_side->current.value) + cmd->rightmove);
                 }
                 else
                 {
@@ -675,8 +674,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
                 }
                 else
                 {
-                    v9 = my * m_forward->current.value;
-                    cmd->forwardmove = ClampChar(cmd->forwardmove - (int)(v9 + 9.313225746154785e-10));
+                    cmd->forwardmove = ClampChar(cmd->forwardmove - (int)(my * m_forward->current.value));
                 }
             }
             aimInput.deltaTime = (double)cls.frametime * EQUAL_EPSILON;
@@ -876,10 +874,8 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         if (locSelInputState == LOC_SEL_INPUT_CONFIRM)
         {
             cmd->buttons |= 0x10000u;
-            v4 = cgArray[0].selectedLocation[0] * 255.0;
-            cmd->selectedLocation[0] = (int)(v4 + 9.313225746154785e-10) + 0x80;
-            v3 = cgArray[0].selectedLocation[1] * 255.0;
-            cmd->selectedLocation[1] = (int)(v3 + 9.313225746154785e-10) + 0x80;
+            cmd->selectedLocation[0] = (int)(cgArray[0].selectedLocation[0] * 255.0f) + 0x80;
+            cmd->selectedLocation[1] = (int)(cgArray[0].selectedLocation[1] * 255.0f) + 0x80;
         }
         else if (locSelInputState == LOC_SEL_INPUT_CANCEL)
         {

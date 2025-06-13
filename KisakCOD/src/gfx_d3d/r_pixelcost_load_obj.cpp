@@ -62,13 +62,13 @@ void __cdecl RB_PixelCost_BuildColorCodeMap(unsigned __int8 (*pixels)[4], int pi
                 / (double)(s_pixelCostColorCodeTable[codeIndex + 1].count - s_pixelCostColorCodeTable[codeIndex].count);
             v4 = (double)(s_pixelCostColorCodeTable[codeIndex + 1].b - s_pixelCostColorCodeTable[codeIndex].b) * lerp
                 + (double)s_pixelCostColorCodeTable[codeIndex].b;
-            (*pixels)[4 * pixelIndex] = (int)(v4 + 9.313225746154785e-10);
+            (*pixels)[4 * pixelIndex] = (int)(v4);
             v3 = (double)(s_pixelCostColorCodeTable[codeIndex + 1].g - s_pixelCostColorCodeTable[codeIndex].g) * lerp
                 + (double)s_pixelCostColorCodeTable[codeIndex].g;
-            (*pixels)[4 * pixelIndex + 1] = (int)(v3 + 9.313225746154785e-10);
+            (*pixels)[4 * pixelIndex + 1] = (int)(v3);
             v2 = (double)(s_pixelCostColorCodeTable[codeIndex + 1].r - s_pixelCostColorCodeTable[codeIndex].r) * lerp
                 + (double)s_pixelCostColorCodeTable[codeIndex].r;
-            (*pixels)[4 * pixelIndex + 2] = (int)(v2 + 9.313225746154785e-10);
+            (*pixels)[4 * pixelIndex + 2] = (int)(v2);
             (*pixels)[4 * pixelIndex + 3] = -1;
         }
     }

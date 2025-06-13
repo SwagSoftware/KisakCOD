@@ -2796,8 +2796,7 @@ void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
                     "%s\n\t(unitScaleValue) = %g",
                     "(unitScaleValue >= 0 && unitScaleValue < 1 + 0.5f / 65535)",
                     v1);
-            v3 = v1 * 65535.0;
-            adjustedColorValue = (int)(v3 + 9.313225746154785e-10);
+            adjustedColorValue = (int)(v1 * 65535.0f);
         }
         gammaRamp->entries[colorTableIndex] = adjustedColorValue;
     }
@@ -3807,12 +3806,11 @@ void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
             monitorWidth = vidConfig.displayWidth;
             monitorHeight = vidConfig.displayHeight;
         }
-        v2 = (double)monitorHeight * 16.0 / (double)monitorWidth;
-        if ((int)(v2 + 9.313225746154785e-10) == 10)
+        if ((int)((float)monitorHeight * 16.0f / (float)monitorWidth) == 10)
         {
             vidConfig.aspectRatioWindow = 1.6;
         }
-        else if ((int)(v2 + 9.313225746154785e-10) >= 10)
+        else if ((int)((float)monitorHeight * 16.0f / (float)monitorWidth) >= 10)
         {
             vidConfig.aspectRatioWindow = 1.3333334;
         }

@@ -977,13 +977,6 @@ void __cdecl R_UpsamplePixelData(
     unsigned __int8 *src,
     unsigned __int8 *dst)
 {
-    double v6; // st7
-    float v7; // [esp+1Ch] [ebp-8Ch]
-    float v8; // [esp+30h] [ebp-78h]
-    float v9; // [esp+44h] [ebp-64h]
-    float v10; // [esp+58h] [ebp-50h]
-    float v11; // [esp+6Ch] [ebp-3Ch]
-    float v12; // [esp+80h] [ebp-28h]
     int backwardWeight; // [esp+90h] [ebp-18h]
     int nextSample; // [esp+94h] [ebp-14h]
     float colorScale; // [esp+98h] [ebp-10h]
@@ -1007,23 +1000,16 @@ void __cdecl R_UpsamplePixelData(
     {
         if (currSrc < src)
         {
-            v9 = colorScale * (double)((forwardWeight + backwardWeight) * *src);
-            *dsta = (int)(v9 + 9.313225746154785e-10);
-            v8 = colorScale * (double)((forwardWeight + backwardWeight) * src[1]);
-            dsta[1] = (int)(v8 + 9.313225746154785e-10);
-            v7 = colorScale * (double)((forwardWeight + backwardWeight) * src[2]);
-            v6 = v7 + 9.313225746154785e-10;
+            dsta[0] = (int)(colorScale * (float)((forwardWeight + backwardWeight) * src[0]));
+            dsta[1] = (int)colorScale * (float)((forwardWeight + backwardWeight) * src[1]);
+            dsta[2] = (int)(colorScale * (float)((forwardWeight + backwardWeight) * src[2]));
         }
         else
         {
-            v12 = colorScale * (double)(forwardWeight * currSrc[nextSample] + backwardWeight * *currSrc);
-            *dsta = (int)(v12 + 9.313225746154785e-10);
-            v11 = colorScale * (double)(forwardWeight * currSrc[nextSample + 1] + backwardWeight * currSrc[1]);
-            dsta[1] = (int)(v11 + 9.313225746154785e-10);
-            v10 = colorScale * (double)(forwardWeight * currSrc[nextSample + 2] + backwardWeight * currSrc[2]);
-            v6 = v10 + 9.313225746154785e-10;
+            dsta[0] = (int)(colorScale * (float)(forwardWeight * currSrc[nextSample] + backwardWeight * currSrc[0]));
+            dsta[1] = (int)(colorScale * (float)(forwardWeight * currSrc[nextSample + 1] + backwardWeight * currSrc[1]));
+            dsta[2] = (int)(colorScale * (float)(forwardWeight * currSrc[nextSample + 2] + backwardWeight * currSrc[2]));
         }
-        dsta[2] = (int)v6;
         dsta -= nextSample;
         backwardWeight += 2 * oldSize;
         forwardWeight -= 2 * oldSize;
@@ -1081,12 +1067,9 @@ void __cdecl R_DownsamplePixelData(
         residual = newSize + residual - oldSize;
         color_4a = color_4 + src[1] * (newSize - residual);
         color_8a = color_8 + src[2] * (newSize - residual);
-        v8 = colorScale * (double)(color + *src * (newSize - residual));
-        *dst = (int)(v8 + 9.313225746154785e-10);
-        v7 = colorScale * (double)color_4a;
-        dst[1] = (int)(v7 + 9.313225746154785e-10);
-        v6 = colorScale * (double)color_8a;
-        dst[2] = (int)(v6 + 9.313225746154785e-10);
+        dst[0] = (int)(colorScale * (float)(color + *src * (newSize - residual)));
+        dst[1] = (int)(colorScale * (float)color_4a);
+        dst[2] = (int)(colorScale * (float)color_8a);
         dst += nextSample;
     }
 }
@@ -1764,8 +1747,7 @@ unsigned __int8 __cdecl R_CubemapShotCalcReflectionFactor(
     Vec3Mad(dir, v6, cubemapShotAxis[shotIndex][2], dir);
     Vec3Normalize(dir);
     refraction = FresnelTerm(n0, n1, dir[2]);
-    v9 = refraction * 255.0;
-    return (int)(v9 + 9.313225746154785e-10);
+    return (int)(refraction * 255.0f);
 }
 
 void __cdecl R_CubemapLightingForDir(
@@ -1829,28 +1811,12 @@ void __cdecl R_CubemapLightingForDir(
     color[1] = v13;
     v12 = pow(color[2], 0.45454544);
     color[2] = v12;
+
     Vec3Mul(color, baseColor, color);
-    v11 = color[0] - 1.0;
-    if (v11 < 0.0)
-        v10 = color[0];
-    else
-        v10 = 1.0;
-    v20 = v10 * 255.0;
-    pixel[2] = (int)(v20 + 9.313225746154785e-10);
-    v9 = color[1] - 1.0;
-    if (v9 < 0.0)
-        v8 = color[1];
-    else
-        v8 = 1.0;
-    v19 = v8 * 255.0;
-    pixel[1] = (int)(v19 + 9.313225746154785e-10);
-    v7 = color[2] - 1.0;
-    if (v7 < 0.0)
-        v6 = color[2];
-    else
-        v6 = 1.0;
-    v18 = v6 * 255.0;
-    *pixel = (int)(v18 + 9.313225746154785e-10);
+
+    pixel[2] = CLAMP(color[0] * 255.0f, 0.0f, 1.0f);
+    pixel[1] = CLAMP(color[1] * 255.0f, 0.0f, 1.0f);
+    pixel[0] = CLAMP(color[2] * 255.0f, 0.0f, 1.0f);
     pixel[3] = -1;
 }
 

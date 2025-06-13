@@ -131,16 +131,13 @@ void __cdecl CG_ParseFog(int localClientNum)
         density = atof(token);
         v1 = Com_Parse(&info);
         v7 = atof(v1->token);
-        v10 = v7 * 255.0;
-        r = (int)(v10 + 9.313225746154785e-10);
+        r = (int)(v7 * 255.0f);
         v2 = Com_Parse(&info);
         v6 = atof(v2->token);
-        v9 = v6 * 255.0;
-        g = (int)(v9 + 9.313225746154785e-10);
+        g = (int)(v6 * 255.0f);
         v3 = Com_Parse(&info);
         v5 = atof(v3->token);
-        v8 = v5 * 255.0;
-        b = (int)(v8 + 9.313225746154785e-10);
+        b = (int)(v5 * 255.0f);
         v4 = Com_Parse(&info);
         transitionTime = atoi(v4->token);
         R_SetFogFromServer(start, r, g, b, density);
@@ -1351,9 +1348,8 @@ void CG_ReverbCmd()
         v3 = Cmd_Argv(5);
         fadetime = atof(v3);
         roomstring = Cmd_Argv(2);
-        v5 = fadetime * 1000.0;
-        if ((int)(v5 + 9.313225746154785e-10) > 0)
-            fademsec = (int)(v5 + 9.313225746154785e-10);
+        if ((int)(fadetime * 1000.0f) > 0)
+            fademsec = (int)(fadetime * 1000.0f);
         else
             fademsec = 0;
         SND_SetEnvironmentEffects(prio, roomstring, drylevel, wetlevel, fademsec);
@@ -1381,8 +1377,7 @@ void CG_DeactivateReverbCmd()
         prio = atoi(v0);
         v1 = Cmd_Argv(2);
         fadetime = atof(v1);
-        v3 = fadetime * 1000.0;
-        v2 = (int)(v3 + 9.313225746154785e-10);
+        v2 = (int)(fadetime * 1000.0f);
         if (v2 > 0)
             SND_DeactivateEnvironmentEffects(prio, v2);
         else
@@ -1424,9 +1419,8 @@ void __cdecl CG_SetChannelVolCmd(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        v6 = fadetime * 1000.0;
-        if ((int)(v6 + 9.313225746154785e-10) > 0)
-            fademsec = (int)(v6 + 9.313225746154785e-10);
+        if ((int)(fadetime * 1000.0f) > 0)
+            fademsec = (int)(fadetime * 1000.0f);
         else
             fademsec = 0;
         ShellshockParms = BG_GetShellshockParms(shockIndex);
@@ -1455,8 +1449,7 @@ void CG_DeactivateChannelVolCmd()
         prio = atoi(v0);
         v1 = Cmd_Argv(2);
         fadetime = atof(v1);
-        v3 = fadetime * 1000.0;
-        v2 = (int)(v3 + 9.313225746154785e-10);
+        v2 = (int)(fadetime * 1000.0f);
         if (v2 > 0)
             SND_DeactivateChannelVolumes(prio, v2);
         else

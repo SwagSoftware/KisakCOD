@@ -413,12 +413,12 @@ double __cdecl RB_GetSunSampleRectRelativeArea(int widthInPixels, int heightInPi
         + rgp.world->sun.sunFxPosition[2] * transform->m[2][1];
     v5 = ((double)(int)vidConfig.displayWidth * (sunTransformedPosition / sunTransformedPosition_12 + 1.0)
         - (double)widthInPixels)
-        * 0.5;
-    left = (int)(v5 + 9.313225746154785e-10);
+        * 0.5f;
+    left = (int)(v5);
     v4 = ((double)(int)vidConfig.displayHeight * (sunTransformedPosition_4 / sunTransformedPosition_12 + 1.0)
         - (double)heightInPixels)
-        * 0.5;
-    top = (int)(v4 + 9.313225746154785e-10);
+        * 0.5f;
+    top = (int)(v4);
     right = widthInPixels + left;
     bottom = heightInPixels + top;
     if (left < 0)
@@ -663,18 +663,16 @@ void __cdecl RB_DrawSunFlareCore(float alpha, float sizeIn640x480)
 
     RB_SetTessTechnique(rgp.world->sun.flareMaterial, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_FX);
-    if (alpha < 0.0 || alpha > 1.0)
-        MyAssertHandler(".\\rb_sky.cpp", 454, 0, "%s\n\t(alpha) = %g", "(alpha >= 0 && alpha <= 1)", alpha);
-    v4 = alpha * 255.0;
+    iassert(alpha >= 0.0f && alpha <= 1.0f);
     RB_SetIdentity();
     heightInClipSpace = sizeIn640x480 / 480.0;
     widthInClipSpace = sizeIn640x480 / 640.0;
     RB_TessSunBillboard(
         widthInClipSpace,
         heightInClipSpace,
-        (GfxColor)((unsigned __int8)(int)(v4 + 9.313225746154785e-10)
-            | ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 8)
-            | ((unsigned __int8)(int)(v4 + 9.313225746154785e-10) << 16)
+        (GfxColor)((unsigned __int8)(int)(alpha * 255.0f)
+            | ((unsigned __int8)(int)(alpha * 255.0f) << 8)
+            | ((unsigned __int8)(int)(alpha * 255.0f) << 16)
             | 0xFF000000));
 }
 

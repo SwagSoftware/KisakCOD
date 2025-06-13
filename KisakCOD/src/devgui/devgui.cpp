@@ -598,7 +598,8 @@ void __cdecl DevGui_DrawMenuVertically(const DevMenuItem *menu, unsigned __int16
     unsigned __int8 textColor[4]; // [esp+1Ch] [ebp-28h] BYREF
     int subMenuStringPos; // [esp+20h] [ebp-24h]
     int visibleMenuCount; // [esp+24h] [ebp-20h]
-    __int64 x; // [esp+28h] [ebp-1Ch]
+    int x; // [esp+28h] [ebp-1Ch]
+    int y; // [esp+2Ch] [ebp-18h]
     int h; // [esp+30h] [ebp-14h]
     float shade; // [esp+34h] [ebp-10h]
     int childCount; // [esp+38h] [ebp-Ch]
@@ -606,8 +607,9 @@ void __cdecl DevGui_DrawMenuVertically(const DevMenuItem *menu, unsigned __int16
     int w; // [esp+40h] [ebp-4h]
 
     if (!menu)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 721, 0, "%s", "menu");
-    x = *(_QWORD *)origin;
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 721, 0, "%s", "menu");
+    x = *origin;
+    y = origin[1];
     w = DevGui_MaxChildMenuWidth(menu);
     h = R_TextHeight(cls.consoleFont) + 8;
     subMenuStringPos = x + w - 4 - DevGui_SubMenuTextWidth();
@@ -620,15 +622,15 @@ void __cdecl DevGui_DrawMenuVertically(const DevMenuItem *menu, unsigned __int16
             activeChildIndex = childCount;
         ++childCount;
     }
-    visibleMenuCount = (devguiGlob.bottom - 2 * h - HIDWORD(x)) / h;
+    visibleMenuCount = (devguiGlob.bottom - 2 * h - y) / h;
     if (visibleMenuCount < childCount && activeChildIndex > visibleMenuCount)
     {
-        *(unsigned int *)bgndColor = devgui_colorBgnd->current.integer;
-        *(unsigned int *)textColor = devgui_colorText->current.integer;
+        *(_DWORD *)bgndColor = devgui_colorBgnd->current.integer;
+        *(_DWORD *)textColor = devgui_colorText->current.integer;
         shade = devgui_bevelShade->current.value;
-        DevGui_DrawBevelBox(x, w, h, shade, bgndColor);
-        DevGui_DrawFont(x + 4, HIDWORD(x) + 4, textColor, (char*)"...");
-        HIDWORD(x) += h;
+        DevGui_DrawBevelBox(x, y, w, h, shade, bgndColor);
+        DevGui_DrawFont(x + 4, y + 4, textColor, (char *)"...");
+        y += h;
     }
     childCount = 0;
     for (childHandle = menu->child.menu; childHandle; childHandle = childMenua->menus[0].nextSibling)
@@ -639,16 +641,16 @@ void __cdecl DevGui_DrawMenuVertically(const DevMenuItem *menu, unsigned __int16
             if (childHandle == activeChild)
             {
                 *origin = w + x;
-                origin[1] = HIDWORD(x);
+                origin[1] = y;
                 if (DevGui_MenuItemDisabled(childMenua->menus))
                 {
-                    *(unsigned int *)bgndColor = devgui_colorBgndGraySel->current.integer;
-                    *(unsigned int *)textColor = devgui_colorTextGraySel->current.integer;
+                    *(_DWORD *)bgndColor = devgui_colorBgndGraySel->current.integer;
+                    *(_DWORD *)textColor = devgui_colorTextGraySel->current.integer;
                 }
                 else
                 {
-                    *(unsigned int *)bgndColor = devgui_colorBgndSel->current.integer;
-                    *(unsigned int *)textColor = devgui_colorTextSel->current.integer;
+                    *(_DWORD *)bgndColor = devgui_colorBgndSel->current.integer;
+                    *(_DWORD *)textColor = devgui_colorTextSel->current.integer;
                 }
                 if (childHandle == devguiGlob.selectedMenu && DevGui_IsButtonDown(INPUT_ACCEPT))
                     shade = 2.0 - devgui_bevelShade->current.value;
@@ -659,21 +661,21 @@ void __cdecl DevGui_DrawMenuVertically(const DevMenuItem *menu, unsigned __int16
             {
                 if (DevGui_MenuItemDisabled(childMenua->menus))
                 {
-                    *(unsigned int *)bgndColor = devgui_colorBgndGray->current.integer;
-                    *(unsigned int *)textColor = devgui_colorTextGray->current.integer;
+                    *(_DWORD *)bgndColor = devgui_colorBgndGray->current.integer;
+                    *(_DWORD *)textColor = devgui_colorTextGray->current.integer;
                 }
                 else
                 {
-                    *(unsigned int *)bgndColor = devgui_colorBgnd->current.integer;
-                    *(unsigned int *)textColor = devgui_colorText->current.integer;
+                    *(_DWORD *)bgndColor = devgui_colorBgnd->current.integer;
+                    *(_DWORD *)textColor = devgui_colorText->current.integer;
                 }
                 shade = devgui_bevelShade->current.value;
             }
-            DevGui_DrawBevelBox(x, w, h, shade, bgndColor);
-            DevGui_DrawFont(x + 4, HIDWORD(x) + 4, textColor, (char *)childMenua);
+            DevGui_DrawBevelBox(x, y, w, h, shade, bgndColor);
+            DevGui_DrawFont(x + 4, y + 4, textColor, (char *)childMenua);
             if (!childMenua->menus[0].childType && childMenua->menus[0].child.menu)
-                DevGui_DrawFont(subMenuStringPos, HIDWORD(x) + 4, textColor, (char*)" >");
-            HIDWORD(x) += h;
+                DevGui_DrawFont(subMenuStringPos, y + 4, textColor, (char *)" >");
+            y += h;
             ++childCount;
         }
         else
@@ -730,14 +732,16 @@ void __cdecl DevGui_DrawMenuHorizontally(const DevMenuItem *menu, unsigned __int
     devguiGlob_t *childMenu; // [esp+8h] [ebp-20h]
     unsigned __int8 bgndColor[4]; // [esp+Ch] [ebp-1Ch] BYREF
     unsigned __int8 textColor[4]; // [esp+10h] [ebp-18h] BYREF
-    __int64 x; // [esp+14h] [ebp-14h]
+    int x; // [esp+14h] [ebp-14h]
+    int y; // [esp+18h] [ebp-10h]
     int h; // [esp+1Ch] [ebp-Ch]
     unsigned __int16 childHandle; // [esp+20h] [ebp-8h]
     int w; // [esp+24h] [ebp-4h]
 
     if (!menu)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 825, 0, "%s", "menu");
-    x = *(_QWORD *)origin;
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 825, 0, "%s", "menu");
+    x = *origin;
+    y = origin[1];
     h = R_TextHeight(cls.consoleFont) + 8;
     for (childHandle = menu->child.menu; childHandle; childHandle = childMenu->menus[0].nextSibling)
     {
@@ -746,18 +750,18 @@ void __cdecl DevGui_DrawMenuHorizontally(const DevMenuItem *menu, unsigned __int
         if (childHandle == activeChild)
         {
             *origin = x;
-            origin[1] = h + HIDWORD(x);
-            *(unsigned int *)bgndColor = devgui_colorBgndSel->current.integer;
-            *(unsigned int *)textColor = devgui_colorTextSel->current.integer;
+            origin[1] = h + y;
+            *(_DWORD *)bgndColor = devgui_colorBgndSel->current.integer;
+            *(_DWORD *)textColor = devgui_colorTextSel->current.integer;
         }
         else
         {
-            *(unsigned int *)bgndColor = devgui_colorBgnd->current.integer;
-            *(unsigned int *)textColor = devgui_colorText->current.integer;
+            *(_DWORD *)bgndColor = devgui_colorBgnd->current.integer;
+            *(_DWORD *)textColor = devgui_colorText->current.integer;
         }
-        DevGui_DrawBevelBox(x, w, h, devgui_bevelShade->current.value, bgndColor);
-        DevGui_DrawFont(x + 4, HIDWORD(x) + 4, textColor, (char *)childMenu);
-        LODWORD(x) = w + x;
+        DevGui_DrawBevelBox(x, y, w, h, devgui_bevelShade->current.value, bgndColor);
+        DevGui_DrawFont(x + 4, y + 4, textColor, (char *)childMenu);
+        x += w;
     }
 }
 
@@ -797,10 +801,9 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
 {
     const char *v1; // eax
     const char *v2; // eax
-    __int64 v3; // [esp-10h] [ebp-60h]
-    float v4; // [esp+14h] [ebp-3Ch]
-    DvarValue *v5; // [esp+18h] [ebp-38h]
-    DvarValue *p_current; // [esp+1Ch] [ebp-34h]
+    float v3; // [esp+14h] [ebp-3Ch]
+    const DvarValue *v4; // [esp+18h] [ebp-38h]
+    const DvarValue *p_current; // [esp+1Ch] [ebp-34h]
     int rowHeight; // [esp+24h] [ebp-2Ch]
     int width; // [esp+2Ch] [ebp-24h]
     int height; // [esp+30h] [ebp-20h]
@@ -812,18 +815,19 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
     int rowa; // [esp+3Ch] [ebp-14h]
     const dvar_s *dvar; // [esp+40h] [ebp-10h]
     int xa; // [esp+44h] [ebp-Ch]
-    __int64 x; // [esp+44h] [ebp-Ch]
+    int x; // [esp+44h] [ebp-Ch]
+    int x_4a; // [esp+48h] [ebp-8h]
     int x_4; // [esp+48h] [ebp-8h]
     int rowWidth; // [esp+4Ch] [ebp-4h]
 
     if (menu->childType != 1)
     {
         v1 = va("menu %s type %i", menu->label, menu->childType);
-        MyAssertHandler(".\\devgui\\devgui.cpp", 998, 0, "%s\n\t%s", "menu->childType == DEV_CHILD_DVAR", v1);
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 998, 0, "%s\n\t%s", "menu->childType == DEV_CHILD_DVAR", v1);
     }
     dvar = menu->child.dvar;
     if (!dvar)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 1000, 0, "%s\n\t(menu->label) = %s", "(dvar)", menu->label);
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1000, 0, "%s\n\t(menu->label) = %s", "(dvar)", menu->label);
     rowWidth = devguiGlob.sliderWidth;
     rowHeight = DevGui_GetFontHeight();
     rowCount = DevGui_DvarRowCount(dvar);
@@ -832,50 +836,49 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
     if (dvar->type == 8)
         height += rowHeight + 2;
     xa = devguiGlob.left + (devguiGlob.right - devguiGlob.left - width) / 2;
-    x_4 = devguiGlob.bottom - height;
-    HIDWORD(v3) = devguiGlob.bottom - height;
-    LODWORD(v3) = xa;
+    x_4a = devguiGlob.bottom - height;
     DevGui_DrawBevelBox(
-        v3,
+        xa,
+        devguiGlob.bottom - height,
         width,
         height,
         devgui_bevelShade->current.value,
         (const unsigned __int8 *)&devgui_colorBgnd->current);
-    LODWORD(x) = xa + 4;
-    HIDWORD(x) = x_4 + 6;
-    DevGui_DrawSliderPath(x, SHIDWORD(x));
+    x = xa + 4;
+    x_4 = x_4a + 6;
+    DevGui_DrawSliderPath(x, x_4);
     if (dvar->type == 8)
     {
-        HIDWORD(x) += rowHeight + 2;
-        DevGui_DrawBox(x, SHIDWORD(x), rowWidth, rowHeight, (const unsigned __int8 *)&dvar->latched);
+        x_4 += rowHeight + 2;
+        DevGui_DrawBox(x, x_4, rowWidth, rowHeight, (const unsigned __int8 *)&dvar->latched);
         for (row = 0; row < rowCount; ++row)
         {
-            HIDWORD(x) += rowHeight + 2;
+            x_4 += rowHeight + 2;
             if (row == devguiGlob.selRow)
-                p_current = (DvarValue *)&devgui_colorSliderKnobSel->current;
+                p_current = &devgui_colorSliderKnobSel->current;
             else
-                p_current = (DvarValue *)&devgui_colorSliderKnob->current;
+                p_current = &devgui_colorSliderKnob->current;
             fractiona = (double)dvar->latched.color[row] * 1.0 / 255.0;
-            DevGui_DrawSingleSlider(x, rowWidth, rowHeight, fractiona, (const unsigned __int8 *)p_current);
+            DevGui_DrawSingleSlider(x, x_4, rowWidth, rowHeight, fractiona, (const unsigned __int8 *)p_current);
         }
     }
     else if (dvar->type == 2 || dvar->type == 3 || dvar->type == 4)
     {
         for (rowa = 0; rowa < rowCount; ++rowa)
         {
-            HIDWORD(x) += rowHeight + 2;
+            x_4 += rowHeight + 2;
             if (rowa == devguiGlob.selRow)
-                v5 = (DvarValue *)&devgui_colorSliderKnobSel->current;
+                v4 = &devgui_colorSliderKnobSel->current;
             else
-                v5 = (DvarValue *)&devgui_colorSliderKnob->current;
+                v4 = &devgui_colorSliderKnob->current;
             fractionb = (dvar->latched.vector[rowa] - dvar->domain.value.min)
                 / (dvar->domain.value.max - dvar->domain.value.min);
-            DevGui_DrawSingleSlider(x, rowWidth, rowHeight, fractionb, (const unsigned __int8 *)v5);
+            DevGui_DrawSingleSlider(x, x_4, rowWidth, rowHeight, fractionb, (const unsigned __int8 *)v4);
         }
     }
     else
     {
-        HIDWORD(x) += rowHeight + 2;
+        x_4 += rowHeight + 2;
         if (dvar->type)
         {
             switch (dvar->type)
@@ -900,7 +903,7 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
                 if (!alwaysfails)
                 {
                     v2 = va("unhandled dvar type %i", dvar->type);
-                    MyAssertHandler(".\\devgui\\devgui.cpp", 1073, 1, v2);
+                    MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1073, 1, v2);
                 }
                 fraction = 0.5;
                 break;
@@ -909,19 +912,20 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
         else
         {
             if (dvar->latched.enabled)
-                v4 = 1.0;
+                v3 = 1.0;
             else
-                v4 = 0.0;
-            fraction = v4;
+                v3 = 0.0;
+            fraction = v3;
         }
         DevGui_DrawSingleSlider(
             x,
+            x_4,
             rowWidth,
             rowHeight,
             fraction,
             (const unsigned __int8 *)&devgui_colorSliderKnobSel->current);
     }
-    DevGui_DrawDvarValue(x, HIDWORD(x) + rowHeight + 2, dvar);
+    DevGui_DrawDvarValue(x, x_4 + rowHeight + 2, dvar);
 }
 
 void __cdecl DevGui_DrawSliderPath(int x, int y)
@@ -961,25 +965,21 @@ int __cdecl DevGui_GetSliderPath(unsigned __int16 menuHandle, char *path, int pa
 }
 
 void __cdecl DevGui_DrawSingleSlider(
-    __int64 x,
+    int x,
+    int y,
     int rowWidth,
     int rowHeight,
     float fraction,
     const unsigned __int8 *knobColor)
 {
-    __int64 v5; // [esp-10h] [ebp-30h]
-    float v6; // [esp+Ch] [ebp-14h]
-
     DevGui_DrawBevelBox(
         x,
+        y,
         rowWidth,
         rowHeight,
         devgui_bevelShade->current.value,
         (const unsigned __int8 *)&devgui_colorSliderBgnd->current);
-    v6 = fraction * (double)(rowWidth - 8) + (double)(int)x;
-    HIDWORD(v5) = HIDWORD(x);
-    LODWORD(v5) = (int)(v6 + 9.313225746154785e-10);
-    DevGui_DrawBevelBox(v5, 8, rowHeight, devgui_bevelShade->current.value, knobColor);
+    DevGui_DrawBevelBox((int)(fraction * (float)(rowWidth - 8) + (float)x), y, 8, rowHeight, devgui_bevelShade->current.value, knobColor);
 }
 
 void __cdecl DevGui_DrawDvarValue(int x, int y, const dvar_s *dvar)
@@ -1077,7 +1077,8 @@ void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int localClientNum)
     int knotX; // [esp+48h] [ebp-138h]
     float endKnotPos[2]; // [esp+4Ch] [ebp-134h] BYREF
     int knotY; // [esp+54h] [ebp-12Ch]
-    __int64 x; // [esp+58h] [ebp-128h]
+    int x; // [esp+58h] [ebp-128h]
+    int x_4; // [esp+5Ch] [ebp-124h]
     int rowWidth; // [esp+60h] [ebp-120h]
     float startKnotPos[2]; // [esp+64h] [ebp-11Ch] BYREF
     float knot[2]; // [esp+6Ch] [ebp-114h]
@@ -1087,35 +1088,36 @@ void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int localClientNum)
     if (menu->childType != 3)
     {
         v2 = va("menu %s type %i", menu->label, menu->childType);
-        MyAssertHandler(".\\devgui\\devgui.cpp", 1129, 0, "%s\n\t%s", "menu->childType == DEV_CHILD_GRAPH", v2);
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1129, 0, "%s\n\t%s", "menu->childType == DEV_CHILD_GRAPH", v2);
     }
     graph = menu->child.graph;
     if (!graph)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph");
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph");
     if (!graph->knots)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph->knots");
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph->knots");
     if (!graph->knotCount)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph->knotCount");
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph->knotCount");
     if (graph->knotCountMax <= 0)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph->knotCountMax > 0");
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1132, 0, "%s", "graph->knotCountMax > 0");
     if (!graph)
-        MyAssertHandler(".\\devgui\\devgui.cpp", 1134, 0, "%s\n\t(menu->label) = %s", "(graph)", menu->label);
+        MyAssertHandler((char *)".\\devgui\\devgui.cpp", 1134, 0, "%s\n\t(menu->label) = %s", "(graph)", menu->label);
     rowWidth = devguiGlob.sliderWidth;
     rowHeight = DevGui_GetFontHeight();
     width = rowWidth + 8;
-    LODWORD(x) = devguiGlob.left + (devguiGlob.right - devguiGlob.left - (rowWidth + 8)) / 2;
-    HIDWORD(x) = devguiGlob.bottom - (3 * rowHeight + 16);
+    x = devguiGlob.left + (devguiGlob.right - devguiGlob.left - (rowWidth + 8)) / 2;
+    x_4 = devguiGlob.bottom - (3 * rowHeight + 16);
     DevGui_DrawBevelBox(
         x,
+        x_4,
         rowWidth + 8,
         3 * rowHeight + 16,
         devgui_bevelShade->current.value,
         (const unsigned __int8 *)&devgui_colorBgnd->current);
-    graphBottomY = (int)((double)SHIDWORD(x) * 0.949999988079071);
+    graphBottomY = (int)((double)x_4 * 0.949999988079071);
     DevGui_DrawBox(x, graphBottomY, rowWidth + 8, 2, (const unsigned __int8 *)&devgui_colorBgndSel->current);
-    LODWORD(x) = x + 4;
-    HIDWORD(x) += 6;
-    DevGui_DrawSliderPath(x, SHIDWORD(x));
+    x += 4;
+    x_4 += 6;
+    DevGui_DrawSliderPath(x, x_4);
     for (knotIndex = 0; knotIndex < *graph->knotCount; ++knotIndex)
     {
         v5 = graph->knots[knotIndex];
@@ -1142,18 +1144,18 @@ void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int localClientNum)
         knot[1] = v4[1];
         nextKnot = graph->knots[knotIndex + 1][0];
         nextKnot_4 = graph->knots[knotIndex + 1][1];
-        startKnotPos[0] = (double)width * knot[0] + (double)(int)x;
+        startKnotPos[0] = (double)width * knot[0] + (double)x;
         startKnotPos[1] = (double)graphBottomY - (double)(graphBottomY - 48) * knot[1];
-        endKnotPos[0] = (double)width * nextKnot + (double)(int)x;
+        endKnotPos[0] = (double)width * nextKnot + (double)x;
         endKnotPos[1] = (double)graphBottomY - (double)(graphBottomY - 48) * nextKnot_4;
         DevGui_DrawLine(startKnotPos, endKnotPos, 2, (const unsigned __int8 *)&devgui_colorGraphKnotNormal->current);
     }
-    HIDWORD(x) += rowHeight + 2;
+    x_4 += rowHeight + 2;
     v3 = graph->knots[graph->selectedKnot];
     knot[0] = *v3;
     knot[1] = v3[1];
     if (graph->textCallback)
-        ((void(__cdecl *)(DevGraph *, unsigned int, unsigned int, char *, int))graph->textCallback)(
+        ((void(__cdecl *)(DevGraph *, _DWORD, _DWORD, char *, int))graph->textCallback)(
             graph,
             LODWORD(knot[0]),
             LODWORD(knot[1]),
@@ -1161,9 +1163,9 @@ void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int localClientNum)
             256);
     else
         sprintf(text, "X: %.4f, Y: %.4f", knot[0], knot[1]);
-    DevGui_DrawFont(x, SHIDWORD(x), (const unsigned __int8 *)&devgui_colorText->current, text);
-    HIDWORD(x) += rowHeight + 2;
-    DevGui_DrawFont(x, SHIDWORD(x), (const unsigned __int8 *)&devgui_colorText->current, (char *)MYINSTRUCTIONS);
+    DevGui_DrawFont(x, x_4, (const unsigned __int8 *)&devgui_colorText->current, text);
+    x_4 += rowHeight + 2;
+    DevGui_DrawFont(x, x_4, (const unsigned __int8 *)&devgui_colorText->current, (char *)MYINSTRUCTIONS);
     if (graph->eventCallback)
         graph->eventCallback(graph, EVENT_DRAW, localClientNum);
 }
@@ -1927,7 +1929,7 @@ double __cdecl DevGui_PickFloatScrollStep(float min, float max)
     float roundedStep; // [esp+40h] [ebp-4h]
 
     range = max - min;
-    if (max == (double)(int)(max + 9.313225746154785e-10) && min == (double)(int)(min + 9.313225746154785e-10))
+    if (max == (double)(int)(max) && min == (double)(int)(min))
     {
         for (step = 1.0; range > step * 100.0; step = step + step)
             ;
@@ -1937,13 +1939,13 @@ double __cdecl DevGui_PickFloatScrollStep(float min, float max)
     else
     {
         step = range * 0.009999999776482582;
-        roundedStep = (float)(int)(step + 9.313225746154785e-10);
+        roundedStep = (float)(int)(step);
         if (roundedStep != 0.0)
         {
             v4 = roundedStep - step;
             v3 = fabs(v4);
-            if (v3 < 0.1000000014901161)
-                return (float)(int)(step + 9.313225746154785e-10);
+            if (v3 < 0.1f)
+                return (float)(int)(step);
         }
     }
     return step;

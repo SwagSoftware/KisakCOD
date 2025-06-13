@@ -195,8 +195,7 @@ void __cdecl CG_ShellShock_f()
             ShellshockParms = BG_GetShellshockParms(0);
             BG_SetShellShockParmsFromDvars(ShellshockParms);
             cgArray[0].testShock.time = cgArray[0].time;
-            v5 = v3 * 1000.0;
-            cgArray[0].testShock.duration = (int)(v5 + 9.313225746154785e-10);
+            cgArray[0].testShock.duration = (int)(v3 * 1000.0f);
             return;
         }
         if (v4 == 3)

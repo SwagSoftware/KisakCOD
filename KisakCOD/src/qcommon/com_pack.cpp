@@ -87,57 +87,34 @@ PackedTexCoords __cdecl Vec2PackTexCoords(const float *in)
 
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
 {
-    unsigned __int8 v2; // [esp+0h] [ebp-90h]
-    unsigned __int8 v3; // [esp+4h] [ebp-8Ch]
-    unsigned __int8 v4; // [esp+8h] [ebp-88h]
-    unsigned __int8 v5; // [esp+Ch] [ebp-84h]
-    int v6; // [esp+18h] [ebp-78h]
-    float v7; // [esp+20h] [ebp-70h]
-    int v8; // [esp+38h] [ebp-58h]
-    float v9; // [esp+40h] [ebp-50h]
-    int v10; // [esp+58h] [ebp-38h]
-    float v11; // [esp+60h] [ebp-30h]
-    int v12; // [esp+78h] [ebp-18h]
-    float v13; // [esp+80h] [ebp-10h]
+    to[2] = CLAMP((int)(from[0] * 255.0f), 0, 255);
+    to[1] = CLAMP((int)(from[1] * 255.0f), 0, 255);
+    to[0] = CLAMP((int)(from[2] * 255.0f), 0, 255);
+    to[3] = CLAMP((int)(from[3] * 255.0f), 0, 255);
+}
 
-    v13 = *from * 255.0;
-    if ((int)(v13 + 9.313225746154785e-10) < 255)
-        v12 = (int)(v13 + 9.313225746154785e-10);
-    else
-        v12 = 255;
-    if (v12 > 0)
-        v5 = v12;
-    else
-        v5 = 0;
-    to[2] = v5;
-    v11 = from[1] * 255.0;
-    if ((int)(v11 + 9.313225746154785e-10) < 255)
-        v10 = (int)(v11 + 9.313225746154785e-10);
-    else
-        v10 = 255;
-    if (v10 > 0)
-        v4 = v10;
-    else
-        v4 = 0;
-    to[1] = v4;
-    v9 = from[2] * 255.0;
-    if ((int)(v9 + 9.313225746154785e-10) < 255)
-        v8 = (int)(v9 + 9.313225746154785e-10);
-    else
-        v8 = 255;
-    if (v8 > 0)
-        v3 = v8;
-    else
-        v3 = 0;
-    *to = v3;
-    v7 = from[3] * 255.0;
-    if ((int)(v7 + 9.313225746154785e-10) < 255)
-        v6 = (int)(v7 + 9.313225746154785e-10);
-    else
-        v6 = 255;
-    if (v6 > 0)
-        v2 = v6;
-    else
-        v2 = 0;
-    to[3] = v2;
+void __cdecl Byte4PackRgba(const float *from, unsigned __int8 *to)
+{
+    to[0] = CLAMP((int)(from[0] * 255.0f), 0, 255);
+    to[1] = CLAMP((int)(from[1] * 255.0f), 0, 255);
+    to[2] = CLAMP((int)(from[2] * 255.0f), 0, 255);
+    to[3] = CLAMP((int)(from[3] * 255.0f), 0, 255);
+}
+
+void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to)
+{
+    to[0] = (float)((double)from[0] * 0.003921568859368563);
+    to[1] = (float)((double)from[1] * 0.003921568859368563);
+    to[2] = (float)((double)from[2] * 0.003921568859368563);
+    to[3] = (float)((double)from[3] * 0.003921568859368563);
+}
+
+void __cdecl Byte4CopyRgbaToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo)
+{
+    *(unsigned int *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[2] | (rgbaFrom[1] << 8) | (*rgbaFrom << 16);
+}
+
+void __cdecl Byte4CopyBgraToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo)
+{
+    *(unsigned int *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[0] | (rgbaFrom[1] << 8) | (rgbaFrom[2] << 16);
 }

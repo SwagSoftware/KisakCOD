@@ -94,7 +94,6 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
     float v9; // [esp+4Ch] [ebp-8Ch]
     float v10; // [esp+50h] [ebp-88h]
     float v11; // [esp+54h] [ebp-84h]
-    float v12; // [esp+64h] [ebp-74h]
     float v13; // [esp+74h] [ebp-64h]
     float v14; // [esp+84h] [ebp-54h]
     float freeMem; // [esp+8Ch] [ebp-4Ch]
@@ -151,11 +150,8 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
         total = 1;
     if (minTime <= 0)
         minTime = 1;
-    v13 = 1000.0 / (double)maxTime;
-    fpsMin = (int)(v13 + 9.313225746154785e-10);
-    v12 = 1000.0 / (double)minTime;
-    v11 = 32000.0 / (double)total;
-    fps = (int)(v11 + 9.313225746154785e-10);
+    fpsMin = (int)(1000.0f / maxTime);
+    fps = (int)(32000.0f / total);
     v10 = (double)R_TextWidth(" cg ms/frame", 0, cgMedia.smallDevFont) * 1.0;
     v8 = (double)(fps - 55) / 10.0;
     v6 = v8 - 1.0;
@@ -170,7 +166,7 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
         frac = 0.0;
     Vec4Lerp(colorRed, colorWhite, frac, varColor);
     color = varColor;
-    s = va("(%i-%i, %i) %i", fpsMin, (int)(v12 + 9.313225746154785e-10), (int)(variance + 9.313225746154785e-10), fps);
+    s = va("(%i-%i, %i) %i", fpsMin, (int)(1000.0f / minTime), (int)(variance), fps);
     yf = CG_CornerDebugPrint(scrPlace, farRight, y, v10, s, (char *)" FPS", color) + y;
     mspf = (double)total / 32.0;
     s = va("(%i-%i) %1.2f", minTime, maxTime, mspf);

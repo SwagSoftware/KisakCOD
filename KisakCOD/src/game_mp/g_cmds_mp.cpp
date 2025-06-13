@@ -1397,8 +1397,7 @@ void Cmd_VisionSetNaked_f()
     {
         v0 = SV_Cmd_Argv(2);
         v3 = atof(v0);
-        v5 = v3 * 1000.0;
-        duration = (int)(v5 + 9.313225746154785e-10);
+        duration = (int)(v3 * 1000.0f);
     LABEL_4:
         v1 = SV_Cmd_Argv(1);
         v2 = va("\"%s\" %i", v1, duration);
@@ -1426,8 +1425,7 @@ void Cmd_VisionSetNight_f()
     {
         v0 = SV_Cmd_Argv(2);
         v3 = atof(v0);
-        v5 = v3 * 1000.0;
-        duration = (int)(v5 + 9.313225746154785e-10);
+        duration = (int)(v3 * 1000.0f);
     LABEL_4:
         v1 = SV_Cmd_Argv(1);
         v2 = va("\"%s\" %i", v1, duration);

@@ -162,7 +162,7 @@ BOOL __cdecl PickAabbSplitPlane(
                 if (!sideOnCount && !sideSplitCount && !prevMinCount)
                 {
                     v9 = nextDist - dist;
-                    heuristic += (v9 + 9.313225746154785e-10);
+                    heuristic += (v9);
                 }
                 if (heuristic > bestHeuristic)
                 {

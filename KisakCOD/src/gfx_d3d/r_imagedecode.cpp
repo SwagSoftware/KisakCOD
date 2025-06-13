@@ -134,27 +134,6 @@ void __cdecl Image_DecompressDxt1_Internal(
     int y,
     bool nonTransparent)
 {
-    float v5; // [esp+1Ch] [ebp-1CCh]
-    float v6; // [esp+30h] [ebp-1B8h]
-    float v7; // [esp+44h] [ebp-1A4h]
-    float v8; // [esp+58h] [ebp-190h]
-    float v9; // [esp+6Ch] [ebp-17Ch]
-    float v10; // [esp+80h] [ebp-168h]
-    float v11; // [esp+94h] [ebp-154h]
-    float v12; // [esp+A8h] [ebp-140h]
-    float v13; // [esp+BCh] [ebp-12Ch]
-    float v14; // [esp+D0h] [ebp-118h]
-    float v15; // [esp+E4h] [ebp-104h]
-    float v16; // [esp+F8h] [ebp-F0h]
-    float v17; // [esp+10Ch] [ebp-DCh]
-    float v18; // [esp+120h] [ebp-C8h]
-    float v19; // [esp+134h] [ebp-B4h]
-    float v20; // [esp+148h] [ebp-A0h]
-    float v21; // [esp+15Ch] [ebp-8Ch]
-    float v22; // [esp+170h] [ebp-78h]
-    float v23; // [esp+184h] [ebp-64h]
-    float v24; // [esp+198h] [ebp-50h]
-    float v25; // [esp+1ACh] [ebp-3Ch]
     float r; // [esp+1BCh] [ebp-2Ch]
     float r_4; // [esp+1C0h] [ebp-28h]
     float g; // [esp+1C4h] [ebp-24h]
@@ -164,65 +143,44 @@ void __cdecl Image_DecompressDxt1_Internal(
     GfxRawPixel pixel[4]; // [esp+1D4h] [ebp-14h]
     int dy; // [esp+1E4h] [ebp-4h]
 
-    r = (HIBYTE(dxt1->color0.rgb) >> 3) * 0.03125;
-    g = ((dxt1->color0.rgb >> 5) & 0x3F) * 0.015625;
-    b = (dxt1->color0.rgb & 0x1F) * 0.03125;
-    r_4 = (HIBYTE(dxt1->color1.rgb) >> 3) * 0.03125;
-    g_4 = ((dxt1->color1.rgb >> 5) & 0x3F) * 0.015625;
-    b_4 = (dxt1->color1.rgb & 0x1F) * 0.03125;
+    r = (HIBYTE(dxt1->color0.rgb) >> 3) * 0.03125f;
+    g = ((dxt1->color0.rgb >> 5) & 0x3F) * 0.015625f;
+    b = (dxt1->color0.rgb & 0x1F) * 0.03125f;
+    r_4 = (HIBYTE(dxt1->color1.rgb) >> 3) * 0.03125f;
+    g_4 = ((dxt1->color1.rgb >> 5) & 0x3F) * 0.015625f;
+    b_4 = (dxt1->color1.rgb & 0x1F) * 0.03125f;
     if (nonTransparent || dxt1->color0.rgb > dxt1->color1.rgb)
     {
-        v25 = r * 255.0;
-        pixel[0].r = (v25 + 9.313225746154785e-10);
-        v24 = g * 255.0;
-        pixel[0].g = (v24 + 9.313225746154785e-10);
-        v23 = b * 255.0;
-        pixel[0].b = (v23 + 9.313225746154785e-10);
+        pixel[0].r = (r * 255.0f);
+        pixel[0].g = (g * 255.0f);
+        pixel[0].b = (b * 255.0f);
         pixel[0].a = -1;
-        v22 = r_4 * 255.0;
-        pixel[1].r = (v22 + 9.313225746154785e-10);
-        v21 = g_4 * 255.0;
-        pixel[1].g = (v21 + 9.313225746154785e-10);
-        v20 = b_4 * 255.0;
-        pixel[1].b = (v20 + 9.313225746154785e-10);
+        pixel[1].r = (r_4 * 255.0f);
+        pixel[1].g = (g_4 * 255.0f);
+        pixel[1].b = (b_4 * 255.0f);
         pixel[1].a = -1;
-        v19 = r_4 * 85.0 + r * 170.0;
-        pixel[2].r = (v19 + 9.313225746154785e-10);
-        v18 = g_4 * 85.0 + g * 170.0;
-        pixel[2].g = (v18 + 9.313225746154785e-10);
-        v17 = b_4 * 85.0 + b * 170.0;
-        pixel[2].b = (v17 + 9.313225746154785e-10);
+        pixel[2].r = (r_4 * 85.0f + r * 170.0f);
+        pixel[2].g = (g_4 * 85.0f + g * 170.0f);
+        pixel[2].b = (b_4 * 85.0f + b * 170.0f);
         pixel[2].a = -1;
-        v16 = r_4 * 170.0 + r * 85.0;
-        pixel[3].r = (v16 + 9.313225746154785e-10);
-        v15 = g_4 * 170.0 + g * 85.0;
-        pixel[3].g = (v15 + 9.313225746154785e-10);
-        v14 = b_4 * 170.0 + b * 85.0;
-        pixel[3].b = (v14 + 9.313225746154785e-10);
+        pixel[3].r = (r_4 * 170.0f + r * 85.0f);
+        pixel[3].g = (g_4 * 170.0f + g * 85.0f);
+        pixel[3].b = (b_4 * 170.0f + b * 85.0f);
         pixel[3].a = -1;
     }
     else
     {
-        v13 = r * 255.0;
-        pixel[0].r = (v13 + 9.313225746154785e-10);
-        v12 = g * 255.0;
-        pixel[0].g = (v12 + 9.313225746154785e-10);
-        v11 = b * 255.0;
-        pixel[0].b = (v11 + 9.313225746154785e-10);
+        pixel[0].r = (r * 255.0f);
+        pixel[0].g = (g * 255.0f);
+        pixel[0].b = (b * 255.0f);
         pixel[0].a = -1;
-        v10 = r_4 * 255.0;
-        pixel[1].r = (v10 + 9.313225746154785e-10);
-        v9 = g_4 * 255.0;
-        pixel[1].g = (v9 + 9.313225746154785e-10);
-        v8 = b_4 * 255.0;
-        pixel[1].b = (v8 + 9.313225746154785e-10);
+        pixel[1].r = (r_4 * 255.0f);
+        pixel[1].g = (g_4 * 255.0f);
+        pixel[1].b = (b_4 * 255.0f);
         pixel[1].a = -1;
-        v7 = r_4 * 127.5 + r * 127.5;
-        pixel[2].r = (v7 + 9.313225746154785e-10);
-        v6 = g_4 * 127.5 + g * 127.5;
-        pixel[2].g = (v6 + 9.313225746154785e-10);
-        v5 = b_4 * 127.5 + b * 127.5;
-        pixel[2].b = (v5 + 9.313225746154785e-10);
+        pixel[2].r = (r_4 * 127.5f + r * 127.5f);
+        pixel[2].g = (g_4 * 127.5f + g * 127.5f);
+        pixel[2].b = (b_4 * 127.5f + b * 127.5f);
         pixel[2].a = -1;
         pixel[3].r = 0;
         pixel[3].g = 0;
@@ -259,16 +217,6 @@ void __cdecl Image_DecompressDxt3(unsigned __int8 *block, GfxRawImage *image, in
 
 void __cdecl Image_DecompressDxt5(unsigned __int8 *block, GfxRawImage *image, int x, int y)
 {
-    float v4; // [esp+30h] [ebp-E8h]
-    float v5; // [esp+44h] [ebp-D4h]
-    float v6; // [esp+58h] [ebp-C0h]
-    float v7; // [esp+6Ch] [ebp-ACh]
-    float v8; // [esp+80h] [ebp-98h]
-    float v9; // [esp+94h] [ebp-84h]
-    float v10; // [esp+A8h] [ebp-70h]
-    float v11; // [esp+BCh] [ebp-5Ch]
-    float v12; // [esp+D0h] [ebp-48h]
-    float v13; // [esp+E4h] [ebp-34h]
     int i; // [esp+F4h] [ebp-24h]
     unsigned int used; // [esp+F8h] [ebp-20h]
     int bit; // [esp+FCh] [ebp-1Ch]
@@ -277,35 +225,27 @@ void __cdecl Image_DecompressDxt5(unsigned __int8 *block, GfxRawImage *image, in
     int sample; // [esp+114h] [ebp-4h]
 
     Image_DecompressDxt1_Internal((DdsBlock_Dxt1_t*)(block + 1), image, x, y, 1);
-    a[0] = *block;
+
+    a[0] = block[0];
     a[1] = block[1];
-    if (*block <= block[1])
+
+    if (block[0] <= block[1])
     {
-        v7 = (block[1] + 4 * *block) * 0.2000000029802322;
-        a[2] = (v7 + 9.313225746154785e-10);
-        v6 = (3 * *block + 2 * block[1]) * 0.2000000029802322;
-        a[3] = (v6 + 9.313225746154785e-10);
-        v5 = (3 * block[1] + 2 * *block) * 0.2000000029802322;
-        a[4] = (v5 + 9.313225746154785e-10);
-        v4 = (*block + 4 * block[1]) * 0.2000000029802322;
-        a[5] = (v4 + 9.313225746154785e-10);
+        a[2] = (unsigned char)((block[1] + 4 * block[0]) * 0.2f);
+        a[3] = (unsigned char)((3 * block[0] + 2 * block[1]) * 0.2f);
+        a[4] = (unsigned char)((3 * block[1] + 2 * *block) * 0.2f);
+        a[5] = (unsigned char)((block[0] + 4 * block[1]) * 0.2f);
         a[6] = 0;
         a[7] = -1;
     }
     else
     {
-        v13 = (block[1] + 6 * *block) * 0.1428571492433548;
-        a[2] = (v13 + 9.313225746154785e-10);
-        v12 = (5 * *block + 2 * block[1]) * 0.1428571492433548;
-        a[3] = (v12 + 9.313225746154785e-10);
-        v11 = (3 * block[1] + 4 * *block) * 0.1428571492433548;
-        a[4] = (v11 + 9.313225746154785e-10);
-        v10 = (3 * *block + 4 * block[1]) * 0.1428571492433548;
-        a[5] = (v10 + 9.313225746154785e-10);
-        v9 = (5 * block[1] + 2 * *block) * 0.1428571492433548;
-        a[6] = (v9 + 9.313225746154785e-10);
-        v8 = (6 * block[1] + *block) * 0.1428571492433548;
-        a[7] = (v8 + 9.313225746154785e-10);
+        a[2] = (unsigned char)((block[1] + 6 * block[0]) * 0.1428571492433548);
+        a[3] = (unsigned char)((5 * block[0] + 2 * block[1]) * 0.1428571492433548);
+        a[4] = (unsigned char)((3 * block[1] + 4 * block[0]) * 0.1428571492433548);
+        a[5] = (unsigned char)((3 * block[0] + 4 * block[1]) * 0.1428571492433548);
+        a[6] = (unsigned char)((5 * block[1] + 2 * block[0]) * 0.1428571492433548);
+        a[7] = (unsigned char)((6 * block[1] + block[0]) * 0.1428571492433548);
     }
     sample = *(block + 1);
     bit = 0;

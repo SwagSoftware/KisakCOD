@@ -481,9 +481,9 @@ void __cdecl Con_InitMessageBuffer()
                 con_gameMsgWindowNLineCount[gameWindowIndex]->current.integer + 3,
                 3,
                 2048,
-                (int)((con_gameMsgWindowNScrollTime[gameWindowIndex]->current.value * 1000.0) + 9.313225746154785e-10),
-                (int)((con_gameMsgWindowNFadeInTime[gameWindowIndex]->current.value * 1000.0) + 9.313225746154785e-10),
-                (int)((con_gameMsgWindowNFadeOutTime[gameWindowIndex]->current.value * 1000.0) + 9.313225746154785e-10));
+                (int)((con_gameMsgWindowNScrollTime[gameWindowIndex]->current.value * 1000.0f)),
+                (int)((con_gameMsgWindowNFadeInTime[gameWindowIndex]->current.value * 1000.0f)),
+                (int)((con_gameMsgWindowNFadeOutTime[gameWindowIndex]->current.value * 1000.0f)));
         }
         Con_InitMessageWindow(
             &msgBuf->miniconWindow,
@@ -1236,13 +1236,11 @@ int __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
 
     if (dest == CON_DEST_MINICON)
     {
-        v4 = con_minicontime->current.value * 1000.0;
-        return (int)(v4 + 9.313225746154785e-10);
+        return (int)(con_minicontime->current.value * 1000.0f);
     }
     else if (dest == CON_DEST_ERROR)
     {
-        v3 = con_errormessagetime->current.value * 1000.0;
-        return (int)(v3 + 9.313225746154785e-10);
+        return (int)(con_errormessagetime->current.value * 1000.0f);
     }
     else
     {
@@ -1253,8 +1251,7 @@ int __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
                 0,
                 "%s",
                 "dest >= CON_DEST_GAME_FIRST && dest <= CON_DEST_GAME_LAST");
-        v2 = con_gameMsgWindowNLineCount[dest - 3]->current.value * 1000.0;
-        return (int)(v2 + 9.313225746154785e-10);
+        return (int)(con_gameMsgWindowNLineCount[dest - 3]->current.value * 1000.0f);
     }
 }
 
@@ -1809,9 +1806,8 @@ int __cdecl CL_DeathMessageIconDimension(float size)
     int v3; // [esp+4h] [ebp-18h]
     float v4; // [esp+Ch] [ebp-10h]
 
-    v4 = size * 32.0;
-    if ((int)(v4 + 9.313225746154785e-10) < 127)
-        v3 = (int)(v4 + 9.313225746154785e-10);
+    if ((int)(size * 32.0f) < 127)
+        v3 = (int)(size * 32.0f);
     else
         v3 = 127;
     if (v3 > 16)
@@ -2040,13 +2036,12 @@ void __cdecl Con_DrawGameMessageWindow(
                 "windowIndex doesn't index GAMEMSG_WINDOW_COUNT\n\t%i not in [0, %i)",
                 windowIndex,
                 4);
-        v12 = fontScale * 48.0;
         Con_DrawMessageWindow(
             localClientNum,
             (MessageWindow *)&con.color[4630 * localClientNum - 2582 + 13 * windowIndex],
             xPos,
             yPos,
-            (int)(v12 + 9.313225746154785e-10),
+            (int)(fontScale * 48.0f),
             horzAlign,
             vertAlign,
             font,
@@ -2208,13 +2203,11 @@ void __cdecl Con_DrawMessageWindowNewToOld(
             lerpFactor = v13;
             if (up)
             {
-                v17 = (double)charHeight * lerpFactor;
-                y += (int)(v17 + 9.313225746154785e-10);
+                y += (int)(charHeight * lerpFactor);
             }
             else
             {
-                v16 = (double)charHeight * lerpFactor;
-                y -= (int)(v16 + 9.313225746154785e-10);
+                y -= (int)(charHeight * lerpFactor);
             }
         }
     }
@@ -2612,13 +2605,11 @@ void __cdecl Con_DrawMessageWindowOldToNew(
                             msgwnd->scrollTime);
                     if (up)
                     {
-                        v14 = (double)charHeight * ((double)time / (double)msgwnd->scrollTime);
-                        v += (int)(v14 + 9.313225746154785e-10);
+                        v += (int)(charHeight * (time / msgwnd->scrollTime));
                     }
                     else
                     {
-                        v13 = (double)charHeight * ((double)time / (double)msgwnd->scrollTime);
-                        v -= (int)(v13 + 9.313225746154785e-10);
+                        v -= (int)(charHeight * (time / msgwnd->scrollTime));
                     }
                 }
             }

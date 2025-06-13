@@ -298,10 +298,8 @@ void __cdecl RB_DrawProfileHistoryLabel(int profEnum, float x, float y)
     const char *name; // [esp+A0h] [ebp-4h]
 
     name = prof_enumNames[profEnum];
-    v3 = 120.0 / drawProfGlob.fontWidth;
-    charLimit = (int)(v3 + 9.313225746154785e-10) + 1;
-    if (charLimit > 0x78)
-        MyAssertHandler(".\\rb_drawprofile.cpp", 225, 0, "%s", "charLimit <= ARRAY_COUNT( label )");
+    charLimit = (int)(120.0f / drawProfGlob.fontWidth) + 1;
+    iassert(charLimit <= ARRAY_COUNT(label));
     I_strncpyz(label, (char *)name, charLimit);
     RB_DrawText(label, drawProfGlob.font, x, y, drawProfGlob.textColor);
 }

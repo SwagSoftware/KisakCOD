@@ -37,7 +37,7 @@ int __cdecl RB_GenerateGaussianFilterChain(
     GfxImageFilterPass *filterPass);
 void __cdecl RB_GenerateGaussianFilter1D(float radius, int *res, int axis, GfxImageFilterPass *filterPass);
 int __cdecl RB_PickSymmetricFilterMaterial(int halfTapCount, const Material **material);
-int __cdecl RB_GaussianFilterPoints1D(float pixels, __int64 srcRes, int tapLimit, float *tapOffsets, float *tapWeights);
+int __cdecl RB_GaussianFilterPoints1D(float pixels, int srcRes, int dstRes, int tapLimit, float *tapOffsets, float *tapWeights);
 void __cdecl RB_GenerateGaussianFilter2D(
     float radius,
     unsigned int srcWidth,
