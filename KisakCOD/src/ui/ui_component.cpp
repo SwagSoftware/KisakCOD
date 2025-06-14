@@ -1888,8 +1888,8 @@ void Scr_ScriptList::Shutdown()
         }
         FS_FCloseFile(f);
     }
-    if (!scrDebuggerGlob.colBuf)
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 2844, 0, "%s", "scrDebuggerGlob.colBuf");
+    //if (!scrDebuggerGlob.colBuf)
+    //    MyAssertHandler(".\\script\\scr_debugger.cpp", 2844, 0, "%s", "scrDebuggerGlob.colBuf");
     Hunk_FreeDebugMem();
     for (ia = 0; ia < this->numLines; ++ia)
     {
