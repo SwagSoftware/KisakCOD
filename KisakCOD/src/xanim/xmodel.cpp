@@ -1112,13 +1112,14 @@ int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned 
     unsigned int numBones; // [esp+0h] [ebp-Ch]
     unsigned int localBoneIndex; // [esp+4h] [ebp-8h]
     unsigned __int16 *boneNames; // [esp+8h] [ebp-4h]
+   
+    iassert(index);
 
-    if (!index)
-        MyAssertHandler(".\\xanim\\xmodel.cpp", 1184, 0, "%s", "index");
     boneNames = model->boneNames;
     numBones = model->numBones;
-    if (numBones >= 0x80)
-        MyAssertHandler(".\\xanim\\xmodel.cpp", 1189, 0, "%s", "numBones < DOBJ_MAX_PARTS");
+
+    iassert(numBones < DOBJ_MAX_PARTS);
+
     for (localBoneIndex = 0; ; ++localBoneIndex)
     {
         if (localBoneIndex >= numBones)
@@ -1126,9 +1127,9 @@ int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned 
         if (name == boneNames[localBoneIndex])
             break;
     }
+
     *index = localBoneIndex + offset;
-    if (*index != localBoneIndex + offset)
-        MyAssertHandler(".\\xanim\\xmodel.cpp", 1196, 0, "%s", "*index == offset + localBoneIndex");
+    iassert(*index == offset + localBoneIndex);
     return 1;
 }
 

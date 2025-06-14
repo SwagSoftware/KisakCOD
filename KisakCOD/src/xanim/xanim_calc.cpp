@@ -36,7 +36,6 @@ void __cdecl XAnimCalc(
 {
     XAnimInfo *firstInfo; // [esp+18h] [ebp-28h]
     XAnimInfo *secondInfo; // [esp+1Ch] [ebp-24h]
-    XAnimInfo *secondInfoa; // [esp+1Ch] [ebp-24h]
     const XAnimTree_s *tree; // [esp+20h] [ebp-20h]
     unsigned int secondInfoIndex; // [esp+24h] [ebp-1Ch]
     DObjAnimMat *calcBuffer; // [esp+28h] [ebp-18h]
@@ -45,18 +44,14 @@ void __cdecl XAnimCalc(
     bool additiveChildExists; // [esp+33h] [ebp-Dh]
     int allocedCalcBuffer; // [esp+34h] [ebp-Ch]
     float weight; // [esp+38h] [ebp-8h]
-    float weighta; // [esp+38h] [ebp-8h]
     float firstWeight; // [esp+3Ch] [ebp-4h]
 
     tree = obj->tree;
-    if (!obj->tree)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1293, 0, "%s", "tree");
-    if (!tree->anims)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1294, 0, "%s", "tree->anims");
-    if (info->tree != tree)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1298, 0, "%s", "info->tree == tree");
-    if (!info->inuse)
-        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1300, 0, "%s", "info->inuse");
+    iassert(tree);
+    iassert(tree->anims);
+    iassert(info->tree == tree);
+    iassert(info->inuse);
+
     if (info->animToModel)
     {
         if (bClear)
@@ -65,17 +60,15 @@ void __cdecl XAnimCalc(
     }
     else
     {
-        firstWeight = 0.0;
+        firstWeight = 0.0f;
         firstInfo = 0;
         for (firstInfoIndex = info->children; firstInfoIndex; firstInfoIndex = firstInfo->next)
         {
             firstInfo = GetAnimInfo(firstInfoIndex);
-            if (firstInfo->tree != tree)
-                MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1325, 0, "%s", "firstInfo->tree == tree");
-            if (!firstInfo->inuse)
-                MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1327, 0, "%s", "firstInfo->inuse");
+            iassert(firstInfo->tree == tree);
+            iassert(firstInfo->inuse);
             firstWeight = firstInfo->state.weight;
-            if (firstWeight != 0.0)
+            if (firstWeight != 0.0f)
             {
                 if (IsInfoAdditive(firstInfo))
                     firstInfoIndex = 0;
@@ -84,18 +77,15 @@ void __cdecl XAnimCalc(
         }
         if (firstInfoIndex)
         {
-            if (!firstInfo)
-                MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1352, 0, "%s", "firstInfo");
+            iassert(firstInfo);
             secondChildFound = 0;
             calcBuffer = 0;
             allocedCalcBuffer = 0;
             for (secondInfoIndex = firstInfo->next; secondInfoIndex; secondInfoIndex = secondInfo->next)
             {
                 secondInfo = GetAnimInfo(secondInfoIndex);
-                if (secondInfo->tree != tree)
-                    MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1363, 0, "%s", "secondInfo->tree == tree");
-                if (!secondInfo->inuse)
-                    MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1365, 0, "%s", "secondInfo->inuse");
+                iassert(secondInfo->tree == tree);
+                iassert(secondInfo->inuse);
                 weight = secondInfo->state.weight;
                 if (weight != 0.0)
                 {
@@ -117,15 +107,13 @@ void __cdecl XAnimCalc(
                         }
                         XAnimCalc(obj, firstInfo, firstWeight, 1, 1, animInfo, rotTransArrayIndex, calcBuffer);
                     }
-                    if (!calcBuffer)
-                        MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1403, 0, "%s", "calcBuffer");
+                    iassert(calcBuffer);
                     XAnimCalc(obj, secondInfo, weight, 0, 1, animInfo, rotTransArrayIndex, calcBuffer);
                 }
             }
             if (secondChildFound)
             {
-                if (!bNormQuat && !bClear)
-                    MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1410, 0, "%s", "bNormQuat || bClear");
+                iassert(bNormQuat || bClear);
                 if (bNormQuat)
                 {
                     if (bClear)
@@ -149,20 +137,17 @@ void __cdecl XAnimCalc(
                     additiveChildExists = 0;
                     while (secondInfoIndex)
                     {
-                        secondInfoa = GetAnimInfo(secondInfoIndex);
-                        if (secondInfoa->tree != tree)
-                            MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1452, 0, "%s", "secondInfo->tree == tree");
-                        if (!secondInfoa->inuse)
-                            MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1454, 0, "%s", "secondInfo->inuse");
-                        if (!IsInfoAdditive(secondInfoa))
-                            MyAssertHandler(".\\xanim\\xanim_calc.cpp", 1457, 0, "%s", "IsInfoAdditive( secondInfo )");
-                        weighta = secondInfoa->state.weight;
-                        if (weighta != 0.0)
+                        secondInfo = GetAnimInfo(secondInfoIndex);
+                        iassert(secondInfo->tree == tree);
+                        iassert(secondInfo->inuse);
+                        iassert(IsInfoAdditive(secondInfo));
+                        weight = secondInfo->state.weight;
+                        if (weight != 0.0f)
                         {
-                            XAnimCalc(obj, secondInfoa, weighta, !additiveChildExists, 1, animInfo, rotTransArrayIndex, calcBuffer);
+                            XAnimCalc(obj, secondInfo, weight, !additiveChildExists, 1, animInfo, rotTransArrayIndex, calcBuffer);
                             additiveChildExists = 1;
                         }
-                        secondInfoIndex = secondInfoa->next;
+                        secondInfoIndex = secondInfo->next;
                     }
                     if (additiveChildExists)
                         XAnimApplyAdditives(rotTransArray, calcBuffer, weightScale, obj->numBones, animInfo);
@@ -2412,97 +2397,96 @@ LABEL_20:
     if (endEarly)
     {
         Profile_EndInternal(0);
+        return;
     }
-    else
+
+    mat = p_skel->mat;
+    for (bone = 0; bone < obj->numBones; ++bone)
     {
-        mat = p_skel->mat;
-        for (bone = 0; bone < obj->numBones; ++bone)
+        if (p_skel->partBits.anim.testBit(bone))
         {
-            if (p_skel->partBits.anim.testBit(bone))
-            {
-                iassert(!IS_NAN(mat[bone].quat[0]) && !IS_NAN(mat[bone].quat[1]) && !IS_NAN(mat[bone].quat[2]) && !IS_NAN(mat[bone].quat[3]));
-                iassert(!IS_NAN(mat[bone].trans[0]) && !IS_NAN(mat[bone].trans[1]) && !IS_NAN(mat[bone].trans[2]));
-            }
+            iassert(!IS_NAN(mat[bone].quat[0]) && !IS_NAN(mat[bone].quat[1]) && !IS_NAN(mat[bone].quat[2]) && !IS_NAN(mat[bone].quat[3]));
+            iassert(!IS_NAN(mat[bone].trans[0]) && !IS_NAN(mat[bone].trans[1]) && !IS_NAN(mat[bone].trans[2]));
         }
-        for (ii = 0; ii < 4; ++ii)
-            p_skel->partBits.anim[ii] |= partBits[ii];
-        for (jj = 0; jj < 4; ++jj)
-            info.ignorePartBits.array[jj] = info.animPartBits.array[jj];
-
-        tree = obj->tree;
-        if (obj->tree && tree->children)
-        {
-            InterlockedIncrement(&tree->calcRefCount);
-            iassert(!tree->modifyRefCount);
-            info.ignorePartBits.setBit(127);
-            AnimInfo = GetAnimInfo(tree->children);
-            XAnimCalc(obj, AnimInfo, 1.0, 1, 0, &info, 0, p_skel->mat);
-            iassert(!tree->modifyRefCount);
-            InterlockedDecrement(&tree->calcRefCount);
-        }
-        boneIndex = 0;
-        models = obj->models;
-        for (kk = 0; kk < obj->numModels; ++kk)
-        {
-            model = models[kk];
-            for (mm = model->numRootBones; mm; --mm)
-            {
-                if (info.animPartBits.testBit(boneIndex))
-                {
-                    if (p_skel->partBits.anim.testBit(boneIndex))
-                    {
-                        iassert(boneIndex < obj->numBones);
-                        iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
-                        iassert(!IS_NAN(mat->trans[0]) && !IS_NAN(mat->trans[1]) && !IS_NAN(mat->trans[2]));
-                    }
-                }
-                else
-                {
-                    mat->quat[0] = 0.0;
-                    mat->quat[1] = 0.0;
-                    mat->quat[2] = 0.0;
-                    mat->quat[3] = 1.0;
-
-                    mat->trans[0] = 0.0f;
-                    mat->trans[1] = 0.0f;
-                    mat->trans[2] = 0.0f;
-
-                    mat->transWeight = 0.0f;
-                }
-                ++mat;
-                ++boneIndex;
-            }
-            quats = model->quats;
-            numNonRootBones = model->numBones - model->numRootBones;
-            while (numNonRootBones)
-            {
-                if (info.animPartBits.testBit(boneIndex))
-                {
-                    if (p_skel->partBits.anim.testBit(boneIndex))
-                    {
-                        iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
-                        iassert(!IS_NAN(mat->trans[0]) && !IS_NAN(mat->trans[1]) && !IS_NAN(mat->trans[2]));
-                    }
-                }
-                else
-                {
-                    mat->quat[0] = 0.000030518509 * (float)quats[0];
-                    mat->quat[1] = 0.000030518509 * (float)quats[1];
-                    mat->quat[2] = 0.000030518509 * (float)quats[2];
-                    mat->quat[3] = 0.000030518509 * (float)quats[3];
-
-                    mat->trans[0] = 0.0f;
-                    mat->trans[1] = 0.0f;
-                    mat->trans[2] = 0.0f;
-                    
-                    mat->transWeight = 0.0f;
-                }
-                --numNonRootBones;
-                ++mat;
-                ++boneIndex;
-                quats += 4;
-            }
-        }
-        Profile_EndInternal(0);
     }
+    for (ii = 0; ii < 4; ++ii)
+        p_skel->partBits.anim[ii] |= partBits[ii];
+    for (jj = 0; jj < 4; ++jj)
+        info.ignorePartBits.array[jj] = info.animPartBits.array[jj];
+
+    tree = obj->tree;
+    if (tree && tree->children)
+    {
+        InterlockedIncrement(&tree->calcRefCount);
+        iassert(!tree->modifyRefCount);
+        info.ignorePartBits.setBit(127);
+        AnimInfo = GetAnimInfo(tree->children);
+        XAnimCalc(obj, AnimInfo, 1.0, 1, 0, &info, 0, p_skel->mat);
+        iassert(!tree->modifyRefCount);
+        InterlockedDecrement(&tree->calcRefCount);
+    }
+    boneIndex = 0;
+    models = obj->models;
+    for (kk = 0; kk < obj->numModels; ++kk)
+    {
+        model = models[kk];
+        for (mm = model->numRootBones; mm; --mm)
+        {
+            if (info.animPartBits.testBit(boneIndex))
+            {
+                if (p_skel->partBits.anim.testBit(boneIndex))
+                {
+                    iassert(boneIndex < obj->numBones);
+                    iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
+                    iassert(!IS_NAN(mat->trans[0]) && !IS_NAN(mat->trans[1]) && !IS_NAN(mat->trans[2]));
+                }
+            }
+            else
+            {
+                mat->quat[0] = 0.0f;
+                mat->quat[1] = 0.0f;
+                mat->quat[2] = 0.0f;
+                mat->quat[3] = 1.0f;
+
+                mat->trans[0] = 0.0f;
+                mat->trans[1] = 0.0f;
+                mat->trans[2] = 0.0f;
+
+                mat->transWeight = 0.0f;
+            }
+            ++mat;
+            ++boneIndex;
+        }
+        quats = model->quats;
+        numNonRootBones = model->numBones - model->numRootBones;
+        while (numNonRootBones)
+        {
+            if (info.animPartBits.testBit(boneIndex))
+            {
+                if (p_skel->partBits.anim.testBit(boneIndex))
+                {
+                    iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
+                    iassert(!IS_NAN(mat->trans[0]) && !IS_NAN(mat->trans[1]) && !IS_NAN(mat->trans[2]));
+                }
+            }
+            else
+            {
+                mat->quat[0] = 0.000030518509 * (float)quats[0]; // LWSS: is this divide by (65536/2)?
+                mat->quat[1] = 0.000030518509 * (float)quats[1];
+                mat->quat[2] = 0.000030518509 * (float)quats[2];
+                mat->quat[3] = 0.000030518509 * (float)quats[3];
+
+                mat->trans[0] = 0.0f;
+                mat->trans[1] = 0.0f;
+                mat->trans[2] = 0.0f;
+                    
+                mat->transWeight = 0.0f;
+            }
+            --numNonRootBones;
+            ++mat;
+            ++boneIndex;
+            quats += 4;
+        }
+    }
+    Profile_EndInternal(0);
 }

@@ -36,5 +36,5 @@ int  R_PreSkinXSurface(
     XSurface *surf,
     const GfxModelSurfaceInfo *surfaceInfo,
     unsigned int *numSkinnedVerts,
-    float *surfPos);
+    struct GfxModelSkinnedSurface *surfPos);
 void __cdecl R_SkinGfxEntityCmd(GfxSceneEntity **data);

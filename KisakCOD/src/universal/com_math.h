@@ -5,6 +5,7 @@
 #include <math.h>
 
 #define EQUAL_EPSILON 0.001f
+#define WEIGHT_EPSILON EQUAL_EPSILON
 
 #define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x)))
 
@@ -308,6 +309,8 @@ void __cdecl MatrixInverse44(const mat4x4& mat, mat4x4& dst);
 void __cdecl MatrixTransformVector(const vec3r in1, const mat3x3& in2, vec3r out);
 void __cdecl MatrixTransformVector43(const vec3r in1, const mat4x3& in2, vec3r out);
 void __cdecl MatrixTransformVector44(const vec4r vec, const mat4x4& mat, vec4r out);
+
+void __cdecl InvMatrixTransformVectorQuatTrans(const float *in, const struct DObjAnimMat *mat, float *out);
 
 void __cdecl MatrixTransposeTransformVector(const vec3r in1, const mat3x3& in2, vec3r out);
 void __cdecl MatrixTransposeTransformVector43(const vec3r in1, const mat4x3&, vec3r out);

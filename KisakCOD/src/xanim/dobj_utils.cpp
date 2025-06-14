@@ -319,16 +319,16 @@ void __cdecl DObjSetAngles(DObjAnimMat *rotTrans, const float *angles)
 
 void __cdecl DObjClearAngles(DObjAnimMat *rotTrans)
 {
-    rotTrans->quat[0] = 0.0;
-    rotTrans->quat[1] = 0.0;
-    rotTrans->quat[2] = 0.0;
-    rotTrans->quat[3] = 1.0;
+    rotTrans->quat[0] = 0.0f;
+    rotTrans->quat[1] = 0.0f;
+    rotTrans->quat[2] = 0.0f;
+    rotTrans->quat[3] = 1.0f;
 }
 
 void __cdecl DObjSetTrans(DObjAnimMat *rotTrans, const float *trans)
 {
     rotTrans->transWeight = 0.0;
-    rotTrans->trans[0] = *trans;
+    rotTrans->trans[0] = trans[0];
     rotTrans->trans[1] = trans[1];
     rotTrans->trans[2] = trans[2];
 }

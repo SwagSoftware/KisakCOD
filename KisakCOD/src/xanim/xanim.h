@@ -1478,7 +1478,7 @@ void __cdecl XAnimBlend(
     unsigned int num,
     unsigned int flags);
 bool __cdecl IsNodeAdditive(const XAnimEntry* node);
-BOOL __cdecl IsLeafNode(const XAnimEntry* anim);
+bool __cdecl IsLeafNode(const XAnimEntry* anim);
 XAnim_s* __cdecl XAnimCreateAnims(const char* debugName, unsigned int size, void* (__cdecl* Alloc)(int));
 void __cdecl XAnimFreeList(XAnim_s* anims);
 void __cdecl XAnimFree(XAnimParts *parts);

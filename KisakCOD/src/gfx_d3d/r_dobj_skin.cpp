@@ -88,7 +88,8 @@ int  R_SkinSceneDObjModels(
     Profile_Begin(89);
 
     unsigned char surfsBuffer[131072];
-    unsigned char *surfPos = surfsBuffer;
+    GfxModelSkinnedSurface *surfPos = (GfxModelSkinnedSurface*)surfsBuffer;
+    GfxModelSurfaceInfo targBoneIndexHigh;
 
     SkinXModelCmd skinCmd;
     memset(&skinCmd, 0, sizeof(skinCmd));
@@ -101,42 +102,50 @@ int  R_SkinSceneDObjModels(
         return 0;
     }
     unsigned int lod = 0;
-    unsigned int totalBones = 0;
+    unsigned int boneIndex = 0;
 
     unsigned int totalSurfaceCount = 0;
     unsigned int numSkinnedVerts = 0;
+
+    unsigned int boneCount = 0;
+    int cullLod;
+    unsigned int surfaceCount;
+    unsigned int boneIndex_div32;
+    unsigned int boneIndex_mod32;
+    unsigned int boneIndex_rem32;
+
+    unsigned int partbits[4];
+    unsigned int partBitsCheck[4] = {};
+    GfxModelRigidSurface *rigidSurf;
 
     while (lod < NumModels)
     {
         const XModel* model = DObjGetModel(obj, lod);
         iassert(model);
 
-        int bones = XModelNumBones(model);
-
-        int cullLod = sceneEnt->cull.lods[lod];
+        boneCount = XModelNumBones(model);
+        cullLod = sceneEnt->cull.lods[lod];
         
         if (cullLod >= 0)
         {
-
-            GfxModelSurfaceInfo targBoneIndexHigh;
-            targBoneIndexHigh.boneIndex = totalBones;
+            targBoneIndexHigh.boneIndex = boneIndex;
             targBoneIndexHigh.baseMat = XModelGetBasePose(model);
-            targBoneIndexHigh.boneCount = bones;
+            targBoneIndexHigh.boneCount = boneCount;
             targBoneIndexHigh.gfxEntIndex = sceneEnt->gfxEntIndex;
             targBoneIndexHigh.lightingHandle = 0;
 
-            XSurface* surfaces = nullptr;
-            int surfaceCount = XModelGetSurfaces(model, &surfaces, cullLod);
+            XSurface* surfaces = NULL;
+            surfaceCount = XModelGetSurfaces(model, &surfaces, cullLod);
+
             iassert(surfaces);
             iassert(surfaceCount);
 
             totalSurfaceCount += surfaceCount;
 
-            unsigned int boneIndex_div32 = totalBones >> 5;
-            unsigned int boneIndex_mod32 = totalBones & 0x1F;
-            unsigned int boneIndex_rem32 = 32 - boneIndex_mod32;
+            boneIndex_div32 = boneIndex >> 5;
+            boneIndex_mod32 = boneIndex & 0x1F;
+            boneIndex_rem32 = 32 - boneIndex_mod32;
 
-            unsigned int partbits[4] = { 0,0,0,0 };
             DObjGetHidePartBits(obj, partbits);
 
             for (unsigned int i = 0; i < surfaceCount; i++)
@@ -148,7 +157,6 @@ int  R_SkinSceneDObjModels(
                 surfPartBits[5] = surface->partBits[2];
                 surfPartBits[6] = surface->partBits[3];
 
-                unsigned int partBitsCheck[4] = {};
                 if (!boneIndex_mod32)
                 {
                     partBitsCheck[0] = surfPartBits[3 - boneIndex_div32];
@@ -159,12 +167,9 @@ int  R_SkinSceneDObjModels(
                 else
                 {
                     partBitsCheck[0] = surfPartBits[3 - boneIndex_div32] >> boneIndex_mod32;
-                    partBitsCheck[1] = (surfPartBits[4 - boneIndex_div32] >> boneIndex_mod32)
-                        | (surfPartBits[3 - boneIndex_div32] << boneIndex_rem32);
-                    partBitsCheck[2] = (surfPartBits[5 - boneIndex_div32] >> boneIndex_mod32)
-                        | (surfPartBits[4 - boneIndex_div32] << boneIndex_rem32);
-                    partBitsCheck[3] = (surfPartBits[6 - boneIndex_div32] >> boneIndex_mod32)
-                        | (surfPartBits[5 - boneIndex_div32] << boneIndex_rem32);
+                    partBitsCheck[1] = (surfPartBits[4 - boneIndex_div32] >> boneIndex_mod32) | (surfPartBits[3 - boneIndex_div32] << boneIndex_rem32);
+                    partBitsCheck[2] = (surfPartBits[5 - boneIndex_div32] >> boneIndex_mod32) | (surfPartBits[4 - boneIndex_div32] << boneIndex_rem32);
+                    partBitsCheck[3] = (surfPartBits[6 - boneIndex_div32] >> boneIndex_mod32) | (surfPartBits[5 - boneIndex_div32] << boneIndex_rem32);
                 }
 
                 if (partBitsCheck[3] & partbits[3]
@@ -172,8 +177,8 @@ int  R_SkinSceneDObjModels(
                     | partBitsCheck[1] & partbits[1]
                     | partBitsCheck[0] & partbits[0])
                 {
-                    *(int*)surfPos = -3;
-                    surfPos += 4;
+                    surfPos->skinnedCachedOffset = -3;
+                    surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + 4);
                 }
                 else
                 {
@@ -182,20 +187,20 @@ int  R_SkinSceneDObjModels(
                     skinCmd.surfacePartBits[2] |= partBitsCheck[2];
                     skinCmd.surfacePartBits[3] |= partBitsCheck[3];
 
-                    int surfBufSize = R_PreSkinXSurface(obj, surface, &targBoneIndexHigh, &numSkinnedVerts, (float*)surfPos);
+                    int surfBufSize = R_PreSkinXSurface(obj, surface, &targBoneIndexHigh, &numSkinnedVerts, surfPos);
 
                     GfxModelSkinnedSurface* skinnedSurface = (GfxModelSkinnedSurface*)surfPos;
                     skinnedSurface->xsurf = surface;
                     skinnedSurface->info = targBoneIndexHigh;
 
                     iassert(surfBufSize);
-                    surfPos += surfBufSize;
+                    surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + surfBufSize);
                 }
             }
         }
 
         lod++;
-        totalBones += bones;
+        boneIndex += boneCount;
     }
 
     iassert(DObjSkelAreBonesUpToDate(obj, skinCmd.surfacePartBits));
@@ -233,11 +238,11 @@ int  R_SkinSceneDObjModels(
             GfxModelSkinnedSurface* surfPos2 = (GfxModelSkinnedSurface*)surfsBuffer;
             for (unsigned int offset = 0; offset < totalSurfaceCount; ++offset)
             {
-                //GfxModelSkinnedSurface* entry = (GfxModelSkinnedSurface*)surfPos2;
+                rigidSurf = (GfxModelRigidSurface *)surfPos2;
                 if (surfPos2->skinnedCachedOffset == -2)
                 {
-                    // NOTE(mrsteyk): Skip bigger struct. (GfxModelRigidSurface?)
-                    surfPos2 = (GfxModelSkinnedSurface*)((char*)surfPos2 + 56);
+                    static_assert(sizeof(GfxModelRigidSurface) == 56);
+                    surfPos2 = (GfxModelSkinnedSurface*)((char*)surfPos2 + sizeof(GfxModelRigidSurface));
                 }
                 else if (surfPos2->skinnedCachedOffset == -3)
                 {
@@ -246,17 +251,17 @@ int  R_SkinSceneDObjModels(
                 }
                 else
                 {
-                    // GfxModelSkinnedSurface!!!
-                    int tempSkinPos = 32 * surfPos2->skinnedCachedOffset;
-                    surfPos2->oldSkinnedCachedOffset = tempSkinPos + oldSkinnedCachedOffset;
-                    surfPos2->skinnedCachedOffset = tempSkinPos + skinnedCachedOffset;
-                    surfPos2++;
+                    ++surfPos2;
+                    int size = 32 * rigidSurf->surf.skinnedCachedOffset;
+                    rigidSurf->surf.oldSkinnedCachedOffset = size + oldSkinnedCachedOffset;
+                    rigidSurf->surf.skinnedCachedOffset = size + skinnedCachedOffset;
                 }
             }
-            iassert(surfPos == (byte*)surfPos2);
+            iassert((byte*)surfPos == (byte*)surfPos2);
         }
         else
         {
+            static_assert(sizeof(GfxPackedVertex) == 32);
             unsigned int vertsSize = sizeof(GfxPackedVertex) * numSkinnedVerts;
             iassert(frontEndDataOut->tempSkinBuf);
             unsigned long firstSurf = InterlockedExchangeAdd(&frontEndDataOut->tempSkinPos, vertsSize);
@@ -270,10 +275,11 @@ int  R_SkinSceneDObjModels(
             GfxModelSkinnedSurface* surfPos2 = (GfxModelSkinnedSurface*)surfsBuffer;
             for (unsigned int offset = 0; offset < totalSurfaceCount; ++offset)
             {
+                GfxModelRigidSurface *rigidSurf2_ = (GfxModelRigidSurface *)surfPos2;
                 if (surfPos2->skinnedCachedOffset == -2)
                 {
-                    // NOTE(mrsteyk): Skip bigger struct. (GfxModelRigidSurface?)
-                    surfPos2 = (GfxModelSkinnedSurface*)((char*)surfPos2 + 56);
+                    static_assert(sizeof(GfxModelRigidSurface) == 56);
+                    surfPos2 = (GfxModelSkinnedSurface*)((char*)surfPos2 + sizeof(GfxModelRigidSurface));
                 }
                 else if (surfPos2->skinnedCachedOffset == -3)
                 {
@@ -283,18 +289,19 @@ int  R_SkinSceneDObjModels(
                 else
                 {
                     // GfxModelSkinnedSurface!!!
-                    surfPos2->oldSkinnedCachedOffset = (int)&frontEndDataOut->tempSkinBuf[32 * surfPos2->skinnedCachedOffset + firstSurf];
-                    surfPos2->skinnedCachedOffset = -1;
+                    rigidSurf2_->surf.oldSkinnedCachedOffset = (int)&frontEndDataOut->tempSkinBuf[32 * surfPos2->skinnedCachedOffset + firstSurf];
+                    rigidSurf2_->surf.skinnedCachedOffset = -1;
                     ++surfPos2;
                 }
             }
-            iassert(surfPos == (byte*)surfPos2);
+            iassert((byte*)surfPos == (byte*)surfPos2);
         }
     }
 
-    unsigned int totalSurfSize = surfPos - surfsBuffer;
+    unsigned int totalSurfSize = ((char*)surfPos - (char*)surfsBuffer);
     unsigned int startSurfPos = InterlockedExchangeAdd(&frontEndDataOut->surfPos, totalSurfSize);
-    if (startSurfPos + totalSurfSize > 131072)
+
+    if (startSurfPos + totalSurfSize > 0x20000)
     {
         R_WarnOncePerFrame(R_WARN_MAX_SCENE_SURFS_SIZE);
         Profile_EndInternal(0);
@@ -345,7 +352,7 @@ int  R_PreSkinXSurface(
     XSurface *surf,
     const GfxModelSurfaceInfo *surfaceInfo,
     unsigned int *numSkinnedVerts,
-    float *surfPos_)
+    GfxModelSkinnedSurface *surfPos)
 {
     float v7[3]; // [esp+10h] [ebp-164h] BYREF
     float v9[4]; // [esp+20h] [ebp-154h] BYREF
@@ -378,8 +385,6 @@ int  R_PreSkinXSurface(
     DObjSkelMat invBaseMat;
     float origin[3];
     float quat[4];
-
-    GfxModelSkinnedSurface* surfPos = (GfxModelSkinnedSurface*)surfPos_;
 
     iassert(obj);
     iassert(surf);

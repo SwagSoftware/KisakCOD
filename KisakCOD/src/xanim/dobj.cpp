@@ -108,7 +108,7 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
     int j; // [esp+4Ch] [ebp-B8h]
     const unsigned __int8 *pos; // [esp+50h] [ebp-B4h]
     int newBoneIndex; // [esp+54h] [ebp-B0h]
-    int newBoneIndexa; // [esp+54h] [ebp-B0h]
+    int newBoneIndexa = 0; // [esp+54h] [ebp-B0h]
     const unsigned __int8 *modelParents; // [esp+58h] [ebp-ACh]
     const unsigned __int8 *duplicateParts; // [esp+5Ch] [ebp-A8h]
     unsigned int bit; // [esp+60h] [ebp-A4h]
@@ -122,25 +122,15 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
     int highBoneIndex; // [esp+100h] [ebp-4h]
 
     Profile_Begin(329);
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 344, 0, "%s", "obj");
-    if (boneIndex >= (unsigned int)obj->numBones)
-        MyAssertHandler(
-            ".\\xanim\\dobj.cpp",
-            346,
-            0,
-            "boneIndex doesn't index obj->numBones\n\t%i not in [0, %i)",
-            boneIndex,
-            obj->numBones);
-    *partBits = 0;
+    iassert(obj);
+    bcassert(boneIndex, obj->numBones);
+    partBits[0] = 0;
     partBits[1] = 0;
     partBits[2] = 0;
     partBits[3] = 0;
     numModels = obj->numModels;
-    if (!obj->numModels)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 354, 0, "%s", "numModels > 0");
-    if (!obj->duplicateParts)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 356, 0, "%s", "obj->duplicateParts");
+    iassert(numModels > 0);
+    iassert(obj->duplicateParts);
     duplicatePartBits = (const int *)SL_ConvertToString(obj->duplicateParts);
     duplicateParts = (const unsigned __int8 *)(duplicatePartBits + 4);
     newBoneIndex = 0;
@@ -157,14 +147,13 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
     }
     if (j != numModels)
     {
-        *partBits = 0x80000000;
+        partBits[0] = 0x80000000;
         for (parentList = subModel->parentList; ; boneIndex -= parentList[newBoneIndexa])
         {
             localBoneIndex = boneIndex - startIndex[j];
             while (1)
             {
-                if (localBoneIndex < 0)
-                    MyAssertHandler(".\\xanim\\dobj.cpp", 394, 0, "%s", "localBoneIndex >= 0");
+                iassert(localBoneIndex >= 0);
                 bit = 0x80000000 >> (boneIndex & 0x1F);
                 highBoneIndex = boneIndex >> 5;
                 partBits[boneIndex >> 5] |= bit;
@@ -172,9 +161,8 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
                 {
                     for (pos = duplicateParts; ; pos += 2)
                     {
-                        if (!*pos)
-                            MyAssertHandler(".\\xanim\\dobj.cpp", 422, 0, "%s", "*pos");
-                        if (boneIndex == *pos - 1)
+                        iassert(*pos);
+                        if (boneIndex == pos[0] - 1)
                             break;
                     }
                     boneIndex = pos[1] - 1;
@@ -185,20 +173,21 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
                     break;
                 boneIndex = modelParents[j];
                 if (boneIndex == 255)
-                    goto LABEL_14;
+                    goto END;
                 do
                 {
                 LABEL_30:
-                    if (--j < 0)
-                        MyAssertHandler(".\\xanim\\dobj.cpp", 435, 0, "%s", "j >= 0");
+                    j--;
+                    iassert(j >= 0);
                     localBoneIndex = boneIndex - startIndex[j];
                 } while (localBoneIndex < 0);
+
                 subModel = models[j];
                 parentList = subModel->parentList;
             }
         }
     }
-LABEL_14:
+END:
     Profile_EndInternal(0);
 }
 
@@ -858,30 +847,11 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
     invL2 = 1.0 / deltaLengthSq;
     lowestPriority = 2;
     skel = &obj->skel;
-    if ((int)obj == -20)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1132, 0, "%s", "skel");
-    if (!obj->duplicateParts)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1134, 0, "%s", "obj->duplicateParts");
+    iassert(skel);
+    iassert(obj->duplicateParts);
     pos = (const unsigned char*)(SL_ConvertToString(obj->duplicateParts) + 16);
-    v73 = *start;
-    if ((LODWORD(v73) & 0x7F800000) == 0x7F800000
-        || (v72 = start[1], (LODWORD(v72) & 0x7F800000) == 0x7F800000)
-        || (v71 = start[2], (LODWORD(v71) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            ".\\xanim\\dobj.cpp",
-            1138,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    v70 = *end;
-    if ((LODWORD(v70) & 0x7F800000) == 0x7F800000
-        || (v69 = end[1], (LODWORD(v69) & 0x7F800000) == 0x7F800000)
-        || (v68 = end[2], (LODWORD(v68) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1139, 0, "%s", "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
+    iassert(!IS_NAN(start[0]) && !IS_NAN(start[1]) && !IS_NAN(start[2]));
+    iassert(!IS_NAN(end[0]) && !IS_NAN(end[1]) && !IS_NAN(end[2]));
     globalBoneIndex = 0;
     hitT = -1;
     traceHitT = -1;
@@ -943,85 +913,15 @@ LABEL_17:
                 {
                     if ((obj->hidePartBits[globalBoneIndex >> 5] & (0x80000000 >> (globalBoneIndex & 0x1F))) == 0)
                     {
-                        if ((skel->partBits.skel[globalBoneIndex >> 5] & (0x80000000 >> (globalBoneIndex & 0x1F))) == 0)
-                            MyAssertHandler(
-                                ".\\xanim\\dobj.cpp",
-                                1201,
-                                0,
-                                "%s",
-                                "skel->partBits.skel[globalBoneIndex >> 5] & (HIGH_BIT >> (globalBoneIndex & 31))");
+                        iassert(skel->partBits.skel[globalBoneIndex >> 5] & (HIGH_BIT >> (globalBoneIndex & 31)));
                         if (lowestPriority <= currentPriority)
                         {
-                            v67 = boneMatrix->quat[0];
-                            if ((LODWORD(v67) & 0x7F800000) == 0x7F800000
-                                || (v66 = boneMatrix->quat[1], (LODWORD(v66) & 0x7F800000) == 0x7F800000)
-                                || (v65 = boneMatrix->quat[2], (LODWORD(v65) & 0x7F800000) == 0x7F800000)
-                                || (v64 = boneMatrix->quat[3], (LODWORD(v64) & 0x7F800000) == 0x7F800000))
-                            {
-                                MyAssertHandler(
-                                    ".\\xanim\\dobj.cpp",
-                                    1206,
-                                    0,
-                                    "%s",
-                                    "!IS_NAN((boneMatrix->quat)[0]) && !IS_NAN((boneMatrix->quat)[1]) && !IS_NAN((boneMatrix->quat)[2]) && "
-                                    "!IS_NAN((boneMatrix->quat)[3])");
-                            }
-                            v63 = boneMatrix->trans[0];
-                            if ((LODWORD(v63) & 0x7F800000) == 0x7F800000
-                                || (v62 = boneMatrix->trans[1], (LODWORD(v62) & 0x7F800000) == 0x7F800000)
-                                || (v61 = boneMatrix->trans[2], (LODWORD(v61) & 0x7F800000) == 0x7F800000))
-                            {
-                                MyAssertHandler(
-                                    ".\\xanim\\dobj.cpp",
-                                    1207,
-                                    0,
-                                    "%s",
-                                    "!IS_NAN((boneMatrix->trans)[0]) && !IS_NAN((boneMatrix->trans)[1]) && !IS_NAN((boneMatrix->trans)[2])");
-                            }
-                            v36 = boneInfo->offset;
-                            v41 = boneMatrix->quat[0];
-                            if ((LODWORD(v41) & 0x7F800000) == 0x7F800000
-                                || (v40 = boneMatrix->quat[1], (LODWORD(v40) & 0x7F800000) == 0x7F800000)
-                                || (v39 = boneMatrix->quat[2], (LODWORD(v39) & 0x7F800000) == 0x7F800000)
-                                || (v38 = boneMatrix->quat[3], (LODWORD(v38) & 0x7F800000) == 0x7F800000))
-                            {
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
-                                    432,
-                                    0,
-                                    "%s",
-                                    "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-                            }
-                            transWeight = boneMatrix->transWeight;
-                            if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
-                                    433,
-                                    0,
-                                    "%s",
-                                    "!IS_NAN(mat->transWeight)");
-                            Vec3Scale(boneMatrix->quat, boneMatrix->transWeight, result);
-                            v50 = result[0] * boneMatrix->quat[0];
-                            v43 = result[0] * boneMatrix->quat[1];
-                            v48 = result[0] * boneMatrix->quat[2];
-                            v51 = result[0] * boneMatrix->quat[3];
-                            v42 = result[1] * boneMatrix->quat[1];
-                            v49 = result[1] * boneMatrix->quat[2];
-                            v47 = result[1] * boneMatrix->quat[3];
-                            v44 = result[2] * boneMatrix->quat[2];
-                            v45 = result[2] * boneMatrix->quat[3];
-                            v52 = 1.0 - (v42 + v44);
-                            v53 = v43 + v45;
-                            v54 = v48 - v47;
-                            v55 = v43 - v45;
-                            v56 = 1.0 - (v50 + v44);
-                            v57 = v49 + v51;
-                            v58 = v48 + v47;
-                            v59 = v49 - v51;
-                            v60 = 1.0 - (v50 + v42);
-                            center[0] = *v36 * v52 + v36[1] * v55 + v36[2] * v58 + boneMatrix->trans[0];
-                            center[1] = *v36 * v53 + v36[1] * v56 + v36[2] * v59 + boneMatrix->trans[1];
-                            center[2] = *v36 * v54 + v36[1] * v57 + v36[2] * v60 + boneMatrix->trans[2];
+                            iassert(!IS_NAN(boneMatrix->quat[0]) && !IS_NAN(boneMatrix->quat[1]) && !IS_NAN(boneMatrix->quat[2]) && !IS_NAN(boneMatrix->quat[3]));
+                            iassert(!IS_NAN(boneMatrix->trans[0]) && !IS_NAN(boneMatrix->trans[1]) && !IS_NAN(boneMatrix->trans[2]) && !IS_NAN(boneMatrix->trans[3]));
+                            iassert(!IS_NAN(boneMatrix->transWeight));
+
+                            MatrixTransformVectorQuatTrans(boneInfo->offset, boneMatrix, center);
+
                             Vec3Sub(start, center, startOffset);
                             v5 = Vec3Dot(startOffset, delta);
                             sphereFraction = -v5 * invL2;
@@ -1036,34 +936,12 @@ LABEL_17:
                             if (diff2 > 0.0)
                             {
                                 if (lowestPriority != currentPriority
-                                    || (v10 = invL2 * diff2, v9 = sqrt(v10), v34 = v9, trace->fraction > sphereFraction - v9))
+                                    || (float)(sphereFraction - sqrtf(diff2 * invL2)) < trace->fraction)
                                 {
-                                    LocalInvMatrixTransformVectorQuatTrans(start, boneMatrix, localStart);
-                                    LocalInvMatrixTransformVectorQuatTrans(end, boneMatrix, localEnd);
-                                    v33 = localStart[0];
-                                    if ((LODWORD(localStart[0]) & 0x7F800000) == 0x7F800000
-                                        || (v32 = localStart[1], (LODWORD(localStart[1]) & 0x7F800000) == 0x7F800000)
-                                        || (v31 = localStart[2], (LODWORD(localStart[2]) & 0x7F800000) == 0x7F800000))
-                                    {
-                                        MyAssertHandler(
-                                            ".\\xanim\\dobj.cpp",
-                                            1231,
-                                            0,
-                                            "%s",
-                                            "!IS_NAN((localStart)[0]) && !IS_NAN((localStart)[1]) && !IS_NAN((localStart)[2])");
-                                    }
-                                    v30 = localEnd[0];
-                                    if ((LODWORD(localEnd[0]) & 0x7F800000) == 0x7F800000
-                                        || (v29 = localEnd[1], (LODWORD(localEnd[1]) & 0x7F800000) == 0x7F800000)
-                                        || (v28 = localEnd[2], (LODWORD(localEnd[2]) & 0x7F800000) == 0x7F800000))
-                                    {
-                                        MyAssertHandler(
-                                            ".\\xanim\\dobj.cpp",
-                                            1232,
-                                            0,
-                                            "%s",
-                                            "!IS_NAN((localEnd)[0]) && !IS_NAN((localEnd)[1]) && !IS_NAN((localEnd)[2])");
-                                    }
+                                    InvMatrixTransformVectorQuatTrans(start, boneMatrix, localStart);
+                                    InvMatrixTransformVectorQuatTrans(end, boneMatrix, localEnd);
+                                    iassert(!IS_NAN(localStart[0]) && !IS_NAN(localStart[1]) && !IS_NAN(localStart[2]));
+                                    iassert(!IS_NAN(localEnd[0]) && !IS_NAN(localEnd[1]) && !IS_NAN(localEnd[2]));
                                     enterFrac = 0.0;
                                     if (lowestPriority == currentPriority)
                                         leaveFrac = trace->fraction;
@@ -1074,18 +952,7 @@ LABEL_17:
                                     sign = -1.0;
                                     for (bounds = (float*)boneInfo; ; bounds += 3)
                                     {
-                                        v27 = *bounds;
-                                        if ((LODWORD(v27) & 0x7F800000) == 0x7F800000
-                                            || (v26 = bounds[1], (LODWORD(v26) & 0x7F800000) == 0x7F800000)
-                                            || (v25 = bounds[2], (LODWORD(v25) & 0x7F800000) == 0x7F800000))
-                                        {
-                                            MyAssertHandler(
-                                                ".\\xanim\\dobj.cpp",
-                                                1247,
-                                                0,
-                                                "%s",
-                                                "!IS_NAN((bounds)[0]) && !IS_NAN((bounds)[1]) && !IS_NAN((bounds)[2])");
-                                        }
+                                        iassert(!IS_NAN(bounds[0]) && !IS_NAN(bounds[1]) && !IS_NAN(bounds[2]));
                                         for (t = 0; t < 3; ++t)
                                         {
                                             dist1 = (localStart[t] - bounds[t]) * sign;
@@ -1096,8 +963,7 @@ LABEL_17:
                                                 {
                                                     bEndSolid = 0;
                                                     dist = dist1 - dist2;
-                                                    if (dist >= 0.0)
-                                                        MyAssertHandler(".\\xanim\\dobj.cpp", 1275, 0, "%s", "dist < 0");
+                                                    iassert(dist < 0.0f);
                                                     if (dist1 > leaveFrac * dist)
                                                     {
                                                         leaveFrac = dist1 / dist;
@@ -1112,8 +978,7 @@ LABEL_17:
                                                     goto LABEL_19;
                                                 bStartSolid = 0;
                                                 dist = dist1 - dist2;
-                                                if (dist <= 0.0)
-                                                    MyAssertHandler(".\\xanim\\dobj.cpp", 1261, 0, "%s", "dist > 0");
+                                                iassert(dist > 0.0f);
                                                 if (dist1 > enterFrac * dist)
                                                 {
                                                     enterFrac = dist1 / dist;
@@ -1124,9 +989,9 @@ LABEL_17:
                                                 }
                                             }
                                         }
-                                        if (sign == 1.0)
+                                        if (sign == 1.0f)
                                             break;
-                                        sign = 1.0;
+                                        sign = 1.0f;
                                     }
                                     if (bStartSolid)
                                     {
@@ -1137,23 +1002,11 @@ LABEL_17:
                                             {
                                                 trace->fraction = 0.0;
                                                 trace->modelIndex = j;
-                                                if (trace->modelIndex != j)
-                                                    MyAssertHandler(".\\xanim\\dobj.cpp", 1304, 1, "%s", "trace->modelIndex == j");
+                                                iassert(trace->modelIndex == j);
                                                 trace->partName = names[localBoneIndex];
                                                 trace->partGroup = classification;
                                                 Vec2NormalizeTo(start, trace->normal);
-                                                if (!Vec3IsNormalized(trace->normal))
-                                                {
-                                                    scale = Vec3Length(trace->normal);
-                                                    v6 = va("(%g %g %g) len %g", trace->normal[0], trace->normal[1], trace->normal[2], scale);
-                                                    MyAssertHandler(
-                                                        ".\\xanim\\dobj.cpp",
-                                                        1310,
-                                                        0,
-                                                        "%s\n\t%s",
-                                                        "Vec3IsNormalized( trace->normal )",
-                                                        v6);
-                                                }
+                                                iassert(Vec3IsNormalized(trace->normal));
                                                 Profile_EndInternal(0);
                                                 return;
                                             }
@@ -1171,23 +1024,13 @@ LABEL_17:
                                             lowestPriority = currentPriority;
                                         }
                                         trace->fraction = enterFrac;
-                                        if (trace->fraction < 0.0 || trace->fraction > 1.0)
-                                            MyAssertHandler(
-                                                ".\\xanim\\dobj.cpp",
-                                                1327,
-                                                1,
-                                                "%s\n\t(trace->fraction) = %g",
-                                                "(trace->fraction >= 0.0f && trace->fraction <= 1.0f)",
-                                                trace->fraction);
+                                        iassert(trace->fraction >= 0.0f && trace->fraction <= 1.0f);
                                         trace->modelIndex = j;
-                                        if (trace->modelIndex != j)
-                                            MyAssertHandler(".\\xanim\\dobj.cpp", 1329, 1, "%s", "trace->modelIndex == j");
+                                        iassert(trace->modelIndex == j);
                                         trace->partName = names[localBoneIndex];
                                         trace->partGroup = classification;
-                                        if (hitT < 0)
-                                            MyAssertHandler(".\\xanim\\dobj.cpp", 1332, 0, "%s", "hitT >= 0");
-                                        if (hitT >= 3)
-                                            MyAssertHandler(".\\xanim\\dobj.cpp", 1333, 0, "%s", "hitT < 3");
+                                        iassert(hitT >= 0);
+                                        iassert(hitT < 3);
                                         traceHitT = hitT;
                                         hitBoneMatrix = boneMatrix;
                                     }
@@ -1205,100 +1048,12 @@ LABEL_17:
     }
     if (hitBoneMatrix)
     {
-        if (traceHitT < 0)
-            MyAssertHandler(".\\xanim\\dobj.cpp", 1343, 0, "%s", "traceHitT >= 0");
-        if (traceHitT >= 3)
-            MyAssertHandler(".\\xanim\\dobj.cpp", 1344, 0, "%s", "traceHitT < 3");
-        if ((COERCE_UNSIGNED_INT(hitBoneMatrix->quat[0]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(hitBoneMatrix->quat[1]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(hitBoneMatrix->quat[2]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(hitBoneMatrix->quat[3]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
-                432,
-                0,
-                "%s",
-                "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-        }
-        if ((COERCE_UNSIGNED_INT(hitBoneMatrix->transWeight) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-        Vec3Scale(hitBoneMatrix->quat, hitBoneMatrix->transWeight, v19);
-        v23 = v19[0] * hitBoneMatrix->quat[0];
-        v16 = v19[0] * hitBoneMatrix->quat[1];
-        v21 = v19[0] * hitBoneMatrix->quat[2];
-        v24 = v19[0] * hitBoneMatrix->quat[3];
-        v15 = v19[1] * hitBoneMatrix->quat[1];
-        v22 = v19[1] * hitBoneMatrix->quat[2];
-        v20 = v19[1] * hitBoneMatrix->quat[3];
-        v17 = v19[2] * hitBoneMatrix->quat[2];
-        v18 = v19[2] * hitBoneMatrix->quat[3];
-        axis[0][0] = 1.0 - (v15 + v17);
-        axis[0][1] = v16 + v18;
-        axis[0][2] = v21 - v20;
-        axis[1][0] = v16 - v18;
-        axis[1][1] = 1.0 - (v23 + v17);
-        axis[1][2] = v22 + v24;
-        axis[2][0] = v21 + v20;
-        axis[2][1] = v22 - v24;
-        axis[2][2] = 1.0 - (v23 + v15);
+        iassert(traceHitT >= 0);
+        iassert(traceHitT < 3);
+        ConvertQuatToMat(hitBoneMatrix, axis);
         Vec3Scale(axis[traceHitT], hitSign, trace->normal);
     }
     Profile_EndInternal(0);
-}
-
-void __cdecl LocalInvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
-{
-    float v3; // [esp+1Ch] [ebp-60h]
-    float v4; // [esp+20h] [ebp-5Ch]
-    float v5; // [esp+24h] [ebp-58h]
-    float v6; // [esp+28h] [ebp-54h]
-    float result[3]; // [esp+2Ch] [ebp-50h] BYREF
-    float v8; // [esp+38h] [ebp-44h]
-    float v9; // [esp+3Ch] [ebp-40h]
-    float v10; // [esp+40h] [ebp-3Ch]
-    float v11; // [esp+44h] [ebp-38h]
-    float v12; // [esp+48h] [ebp-34h]
-    float temp[3]; // [esp+4Ch] [ebp-30h] BYREF
-    float axis[3][3]; // [esp+58h] [ebp-24h]
-
-    Vec3Sub(in, mat->trans, temp);
-    if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[2]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mat->quat[3]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
-            432,
-            0,
-            "%s",
-            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-    }
-    if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-    Vec3Scale(mat->quat, mat->transWeight, result);
-    v11 = result[0] * mat->quat[0];
-    v4 = result[0] * mat->quat[1];
-    v9 = result[0] * mat->quat[2];
-    v12 = result[0] * mat->quat[3];
-    v3 = result[1] * mat->quat[1];
-    v10 = result[1] * mat->quat[2];
-    v8 = result[1] * mat->quat[3];
-    v5 = result[2] * mat->quat[2];
-    v6 = result[2] * mat->quat[3];
-    axis[0][0] = 1.0 - (v3 + v5);
-    axis[0][1] = v4 + v6;
-    axis[0][2] = v9 - v8;
-    axis[1][0] = v4 - v6;
-    axis[1][1] = 1.0 - (v11 + v5);
-    axis[1][2] = v10 + v12;
-    axis[2][0] = v9 + v8;
-    axis[2][1] = v10 - v12;
-    axis[2][2] = 1.0 - (v11 + v3);
-    *out = temp[0] * axis[0][0] + temp[1] * axis[0][1] + temp[2] * axis[0][2];
-    out[1] = temp[0] * axis[1][0] + temp[1] * axis[1][1] + temp[2] * axis[1][2];
-    out[2] = temp[0] * axis[2][0] + temp[1] * axis[2][1] + temp[2] * axis[2][2];
 }
 
 void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
@@ -1473,7 +1228,6 @@ int __cdecl DObjSetLocalBoneIndex(DObj_s *obj, int *partBits, int boneIndex, con
 
 int __cdecl DObjGetBoneIndex(const DObj_s *obj, unsigned int name, unsigned __int8 *index)
 {
-    char *v3; // eax
     int j; // [esp+0h] [ebp-18h]
     int ja; // [esp+0h] [ebp-18h]
     unsigned int boneIndex; // [esp+4h] [ebp-14h]
@@ -1483,24 +1237,14 @@ int __cdecl DObjGetBoneIndex(const DObj_s *obj, unsigned int name, unsigned __in
     unsigned int localBoneIndex; // [esp+10h] [ebp-8h]
     XModel **models; // [esp+14h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1644, 0, "%s", "obj");
-    if (!name)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1645, 0, "%s", "name");
-    if (!SL_IsLowercaseString(name))
-    {
-        v3 = SL_ConvertToString(name);
-        MyAssertHandler(
-            ".\\xanim\\dobj.cpp",
-            1647,
-            0,
-            "%s\n\t(SL_ConvertToString( name )) = %s",
-            "(SL_IsLowercaseString( name ))",
-            v3);
-    }
+    iassert(obj);
+    iassert(name);
+    iassert(SL_IsLowercaseString(name));
+
     localBoneIndex = *index;
     if (localBoneIndex == 255)
         return 0;
+
     numModels = obj->numModels;
     models = obj->models;
     if (localBoneIndex < obj->numBones)

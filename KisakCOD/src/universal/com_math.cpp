@@ -1372,6 +1372,20 @@ void __cdecl MatrixTransformVector44(const vec4r vec, const mat4x4 &mat, vec4r o
     out[3] = vec[0] * (mat)[0][3] + vec[1] * (mat)[1][3] + vec[2] * (mat)[2][3] + vec[3] * (mat)[3][3];
 }
 
+void __cdecl InvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
+{
+    float temp[3]; // [esp+4Ch] [ebp-30h]
+    float axis[3][3]; // [esp+58h] [ebp-24h] BYREF
+
+    temp[0] = in[0] - mat->trans[0];
+    temp[1] = in[1] - mat->trans[1];
+    temp[2] = in[2] - mat->trans[2];
+    ConvertQuatToMat(mat, axis);
+    out[0] = (float)((float)(temp[0] * axis[0][0]) + (float)(temp[1] * axis[0][1])) + (float)(temp[2] * axis[0][2]);
+    out[1] = (float)((float)(temp[0] * axis[1][0]) + (float)(temp[1] * axis[1][1])) + (float)(temp[2] * axis[1][2]);
+    out[2] = (float)((float)(temp[0] * axis[2][0]) + (float)(temp[1] * axis[2][1])) + (float)(temp[2] * axis[2][2]);
+}
+
 void __cdecl MatrixTransposeTransformVector(const vec3r in1, const mat3x3& in2, vec3r out)
 {
     iassert(in1 != out);
@@ -2868,6 +2882,11 @@ void __cdecl ClearBounds(float *mins, float *maxs)
     maxs[2] = -131072.0;
 }
 
+float __cdecl Vec4LengthSq(const float *v)
+{
+    return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
+}
+
 float __cdecl Vec3LengthSq(const float* v)
 {
     return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -2961,19 +2980,19 @@ void __cdecl ConvertQuatToSkelMat(const DObjAnimMat *const mat, DObjSkelMat *ske
     zz = scaledQuat[2] * mat->quat[2];
     zw = scaledQuat[2] * mat->quat[3];
 
-    skelMat->axis[0][0] = 1.0 - (float)(yy + zz);
+    skelMat->axis[0][0] = 1.0f - (float)(yy + zz);
     skelMat->axis[0][1] = xy + zw;
     skelMat->axis[0][2] = xz - yw;
     skelMat->axis[0][3] = 0.0f;
 
     skelMat->axis[1][0] = xy - zw;
-    skelMat->axis[1][1] = 1.0 - (float)(xx + zz);
+    skelMat->axis[1][1] = 1.0f - (float)(xx + zz);
     skelMat->axis[1][2] = yz + xw;
     skelMat->axis[1][3] = 0.0f;
 
     skelMat->axis[2][0] = xz + yw;
     skelMat->axis[2][1] = yz - xw;
-    skelMat->axis[2][2] = 1.0 - (float)(xx + yy);
+    skelMat->axis[2][2] = 1.0f - (float)(xx + yy);
     skelMat->axis[2][3] = 0.0f;
 
     skelMat->origin[0] = mat->trans[0];

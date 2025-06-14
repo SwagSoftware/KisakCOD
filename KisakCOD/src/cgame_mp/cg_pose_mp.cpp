@@ -222,14 +222,14 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
     DObjGetSetBones(obj, setPartBits);
     switch (pose->eType)
     {
-    case 1u:
+    case 1:
         CG_Player_DoControllers(pose, obj, partBits);
         break;
-    case 0xBu:
+    case 11:
         CG_mg42_DoControllers(pose, obj, partBits);
         break;
-    case 0xCu:
-    case 0xEu:
+    case 12:
+    case 14:
         CG_VehPoseControllers(pose, obj, partBits);
         break;
     default:
@@ -255,7 +255,7 @@ void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *
     if (pose->turret.playerUsing)
     {
         viewAngles = pose->turret.viewAngles;
-        angles[0] = AngleDelta(*viewAngles, pose->angles[0]);
+        angles[0] = AngleDelta(viewAngles[0], pose->angles[0]);
         angles[1] = AngleDelta(viewAngles[1], pose->angles[1]);
     }
     else
@@ -276,31 +276,7 @@ void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *
 void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits)
 {
     float *trans; // [esp+8h] [ebp-104h]
-    float v4; // [esp+20h] [ebp-ECh]
-    float v5; // [esp+24h] [ebp-E8h]
-    float v6; // [esp+28h] [ebp-E4h]
-    float v7; // [esp+2Ch] [ebp-E0h]
     float result[3]; // [esp+30h] [ebp-DCh] BYREF
-    float v9; // [esp+3Ch] [ebp-D0h]
-    float v10; // [esp+40h] [ebp-CCh]
-    float v11; // [esp+44h] [ebp-C8h]
-    float v12; // [esp+48h] [ebp-C4h]
-    float v13; // [esp+4Ch] [ebp-C0h]
-    float v14; // [esp+50h] [ebp-BCh]
-    float v15; // [esp+54h] [ebp-B8h]
-    float v16; // [esp+58h] [ebp-B4h]
-    float v17; // [esp+5Ch] [ebp-B0h]
-    float v18; // [esp+60h] [ebp-ACh]
-    float v19; // [esp+64h] [ebp-A8h]
-    float v20; // [esp+68h] [ebp-A4h]
-    float v21; // [esp+6Ch] [ebp-A0h]
-    float v22; // [esp+70h] [ebp-9Ch]
-    float v23; // [esp+74h] [ebp-98h]
-    float v24; // [esp+78h] [ebp-94h]
-    float v25; // [esp+7Ch] [ebp-90h]
-    float v26; // [esp+80h] [ebp-8Ch]
-    float *v27; // [esp+84h] [ebp-88h]
-    float *v28; // [esp+88h] [ebp-84h]
     unsigned int localClientNum; // [esp+8Ch] [ebp-80h]
     unsigned int rootBoneMask; // [esp+90h] [ebp-7Ch]
     float baseQuat[4]; // [esp+94h] [ebp-78h] BYREF
@@ -312,7 +288,9 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
     unsigned int maxHighIndex; // [esp+E4h] [ebp-28h]
     DObjAnimMat *mat; // [esp+E8h] [ebp-24h]
     unsigned int highIndex; // [esp+ECh] [ebp-20h]
-    int partBits[7]; // [esp+F0h] [ebp-1Ch] BYREF
+    int partBits[3]; // [esp+F0h] [ebp-1Ch] BYREF
+    unsigned int mask; // [esp+FCh] [ebp-10h]
+    int partBits2[3]; // [esp+100h] [ebp-Ch] BYREF
 
     rootBoneCount = DObjGetRootBoneCount(obj);
     iassert(rootBoneCount);
@@ -330,9 +308,9 @@ notSet:
     if (mat)
     {
         AnglesToQuat(pose->angles, baseQuat);
-        memset(partBits, 0, 12);
-        partBits[3] = 0x80000000;
-        memset(&partBits[4], 0, 12);
+        memset(partBits, 0, sizeof(partBits));
+        mask = 0x80000000;
+        memset(partBits2, 0, sizeof(partBits2));
         localClientNum = R_GetLocalClientNum();
         iassert(localClientNum == 0);
         viewOffset[0] = cgArray[0].refdef.viewOffset[0];
@@ -342,7 +320,7 @@ notSet:
         while (partIndex <= rootBoneCount)
         {
             highIndex = partIndex >> 5;
-            if ((setPartBits[partIndex >> 5] & partBits[3]) == 0)
+            if ((setPartBits[partIndex >> 5] & mask) == 0) 
             {
                 if (DObjSetRotTransIndex((DObj_s*)obj, &partBits[3 - highIndex], partIndex))
                 {
@@ -362,15 +340,14 @@ notSet:
                     animMat.quat[2] = baseQuat[2];
                     animMat.quat[3] = baseQuat[3];
                     DObjSetTrans(&animMat, pose->origin);
-                    v26 = Vec4LengthSq(animMat.quat);
-                    if (v26 == 0.0f)
+                    if (Vec4LengthSq(animMat.quat) == 0.0f)
                     {
                         animMat.quat[3] = 1.0f;
                         animMat.transWeight = 2.0f;
                     }
                     else
                     {
-                        animMat.transWeight = 2.0f / v26;
+                        animMat.transWeight = 2.0f / Vec4LengthSq(animMat.quat);
                     }
                     QuatMultiplyEquals(baseQuat, mat->quat);
                     MatrixTransformVectorQuatTrans(mat->trans, &animMat, origin);
@@ -379,31 +356,26 @@ notSet:
                 DObjSetTrans(mat, origin);
             }
             ++partIndex;
-            partBits[3] = (partBits[3] << 31) | (partBits[3] >> 1);
+            mask = (mask << 31) | (mask >> 1);
             ++mat;
         }
     }
-}
-
-float __cdecl Vec4LengthSq(const float *v)
-{
-    return (float)(*v * *v + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
 }
 
 DObjAnimMat *__cdecl CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     DObjAnimMat *boneMatrix; // [esp+0h] [ebp-4h] BYREF
 
-    if (!obj)
-        MyAssertHandler(".\\cgame_mp\\cg_pose_mp.cpp", 307, 0, "%s", "obj");
-    if (!pose)
-        MyAssertHandler(".\\cgame_mp\\cg_pose_mp.cpp", 308, 0, "%s", "pose");
+    iassert(obj);
+    iassert(pose);
+
     if (!CL_DObjCreateSkelForBones(obj, partBits, &boneMatrix))
     {
         DObjCompleteHierarchyBits(obj, partBits);
         CG_DoControllers(pose, obj, partBits);
         DObjCalcSkel(obj, partBits);
     }
+
     return boneMatrix;
 }
 

@@ -35,53 +35,53 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
         if (ignorePartBits[i] != -1)
             bFinished = 0;
     }
+
     if (bFinished)
     {
         Profile_EndInternal(0);
         return;
     }
-    else
-    {
-        DObjCalcAnim(obj, partBits);
-        if (!obj->duplicateParts)
-            MyAssertHandler(".\\xanim\\dobj_skel.cpp", 404, 0, "%s", "obj->duplicateParts");
-        savedDuplicatePartBits = (const int *)SL_ConvertToString(obj->duplicateParts);
-        duplicateParts = (const unsigned __int8 *)(savedDuplicatePartBits + 4);
-        GetControlAndDuplicatePartBits(obj, partBits, ignorePartBits, savedDuplicatePartBits, calcPartBits, controlPartBits);
-        numModels = obj->numModels;
-        boneIndex = 0;
-        pos = duplicateParts;
-        models = obj->models;
-        modelParents = (const unsigned __int8 *)&models[numModels];
-        for (j = 0; j < numModels; ++j)
-        {
-            model = models[j];
-            modelParent = modelParents[j];
-            pos = CalcSkelDuplicateBones(model, skel, boneIndex, pos);
-            if (modelParent == 255)
-                CalcSkelRootBonesNoParentOrDuplicate(model, skel, boneIndex, calcPartBits);
-            else
-                CalcSkelRootBonesWithParent(model, skel, boneIndex, modelParent, calcPartBits, controlPartBits);
-            CalcSkelNonRootBones(model, skel, boneIndex + model->numRootBones, calcPartBits, controlPartBits);
-            boneIndex += model->numBones;
-        }
 
-        iassert(!(*pos));
-        for (boneIndexa = 0; boneIndexa < obj->numBones; ++boneIndexa)
-        {
-            //if ((skel->partBits.anim[boneIndexa >> 5] & (0x80000000 >> (boneIndexa & 0x1F))) != 0)
-            if (skel->partBits.anim.testBit(boneIndexa))
-            {
-                iassert(!IS_NAN(skel->mat[boneIndexa].quat[0]) 
-                    && !IS_NAN(skel->mat[boneIndexa].quat[1]) 
-                    && !IS_NAN(skel->mat[boneIndexa].quat[2]) 
-                    && !IS_NAN(skel->mat[boneIndexa].quat[3])
-                );
-                iassert(!IS_NAN(skel->mat[boneIndexa].trans[0]) && !IS_NAN(skel->mat[boneIndexa].trans[1]) && !IS_NAN(skel->mat[boneIndexa].trans[2]));
-            }
-        }
-        Profile_EndInternal(0);
+    DObjCalcAnim(obj, partBits);
+    iassert(obj->duplicateParts);
+    savedDuplicatePartBits = (const int *)SL_ConvertToString(obj->duplicateParts);
+    duplicateParts = (const unsigned __int8 *)(savedDuplicatePartBits + 4);
+    GetControlAndDuplicatePartBits(obj, partBits, ignorePartBits, savedDuplicatePartBits, calcPartBits, controlPartBits);
+    numModels = obj->numModels;
+    boneIndex = 0;
+    pos = duplicateParts;
+    models = obj->models;
+    modelParents = (const unsigned __int8 *)&models[numModels];
+    for (j = 0; j < numModels; ++j)
+    {
+        model = models[j];
+        modelParent = modelParents[j];
+        pos = CalcSkelDuplicateBones(model, skel, boneIndex, pos);
+
+        if (modelParent == 255)
+            CalcSkelRootBonesNoParentOrDuplicate(model, skel, boneIndex, calcPartBits);
+        else
+            CalcSkelRootBonesWithParent(model, skel, boneIndex, modelParent, calcPartBits, controlPartBits);
+
+        CalcSkelNonRootBones(model, skel, boneIndex + model->numRootBones, calcPartBits, controlPartBits);
+        boneIndex += model->numBones;
     }
+
+    iassert(!(*pos));
+    for (boneIndexa = 0; boneIndexa < obj->numBones; ++boneIndexa)
+    {
+        //if ((skel->partBits.anim[boneIndexa >> 5] & (0x80000000 >> (boneIndexa & 0x1F))) != 0)
+        if (skel->partBits.anim.testBit(boneIndexa))
+        {
+            iassert(!IS_NAN(skel->mat[boneIndexa].quat[0]) 
+                && !IS_NAN(skel->mat[boneIndexa].quat[1]) 
+                && !IS_NAN(skel->mat[boneIndexa].quat[2]) 
+                && !IS_NAN(skel->mat[boneIndexa].quat[3])
+            );
+            iassert(!IS_NAN(skel->mat[boneIndexa].trans[0]) && !IS_NAN(skel->mat[boneIndexa].trans[1]) && !IS_NAN(skel->mat[boneIndexa].trans[2]));
+        }
+    }
+    Profile_EndInternal(0);
 }
 
 void __cdecl GetControlAndDuplicatePartBits(
@@ -142,12 +142,11 @@ const unsigned __int8 *__cdecl CalcSkelDuplicateBones(
     maxBoneIndex = minBoneIndex + model->numBones;
     while (1)
     {
-        boneIndex = *pos - 1;
+        boneIndex = pos[0] - 1;
         if (boneIndex >= maxBoneIndex)
             break;
         parentIndex = pos[1] - 1;
-        if (parentIndex >= boneIndex)
-            MyAssertHandler(".\\xanim\\dobj_skel.cpp", 131, 0, "%s", "parentIndex < boneIndex");
+        iassert(parentIndex < boneIndex);
         memcpy(&mat[boneIndex], &mat[parentIndex], sizeof(DObjAnimMat));
         pos += 2;
     }
@@ -182,10 +181,12 @@ void __cdecl CalcSkelRootBonesNoParentOrDuplicate(
     while (boneIndexHigh <= maxBoneIndexHigh)
     {
         bits = calcPartBits[boneIndexHigh];
+
         if (maxBoneIndex > 32)
             v6 = 32;
         else
             v6 = maxBoneIndex;
+
         while (1)
         {
             if (!_BitScanReverse(&v5, bits))
@@ -226,46 +227,8 @@ void __cdecl CalcSkelRootBonesWithParent(
     const int *controlPartBits)
 {
     DWORD v7; // eax
-    unsigned int v8; // [esp+8h] [ebp-104h]
     float *trans; // [esp+18h] [ebp-F4h]
-    float v10; // [esp+30h] [ebp-DCh]
-    float v11; // [esp+34h] [ebp-D8h]
-    float v12; // [esp+38h] [ebp-D4h]
-    float v13; // [esp+3Ch] [ebp-D0h]
     float result[3]; // [esp+40h] [ebp-CCh] BYREF
-    float v15; // [esp+4Ch] [ebp-C0h]
-    float v16; // [esp+50h] [ebp-BCh]
-    float v17; // [esp+54h] [ebp-B8h]
-    float v18; // [esp+58h] [ebp-B4h]
-    float v19; // [esp+5Ch] [ebp-B0h]
-    float v20; // [esp+60h] [ebp-ACh]
-    float v21; // [esp+64h] [ebp-A8h]
-    float v22; // [esp+68h] [ebp-A4h]
-    float v23; // [esp+6Ch] [ebp-A0h]
-    float v24; // [esp+70h] [ebp-9Ch]
-    float v25; // [esp+74h] [ebp-98h]
-    float v26; // [esp+78h] [ebp-94h]
-    float v27; // [esp+7Ch] [ebp-90h]
-    float v28; // [esp+80h] [ebp-8Ch]
-    float v29; // [esp+84h] [ebp-88h]
-    float v30; // [esp+88h] [ebp-84h]
-    float v31; // [esp+8Ch] [ebp-80h]
-    float v32; // [esp+90h] [ebp-7Ch]
-    float v33; // [esp+94h] [ebp-78h]
-    float v34; // [esp+98h] [ebp-74h]
-    float v35; // [esp+9Ch] [ebp-70h]
-    float v36; // [esp+A0h] [ebp-6Ch]
-    float v37; // [esp+A4h] [ebp-68h]
-    float v38; // [esp+A8h] [ebp-64h]
-    float v39; // [esp+ACh] [ebp-60h]
-    float v40; // [esp+B0h] [ebp-5Ch]
-    float v41; // [esp+B4h] [ebp-58h]
-    float v42; // [esp+B8h] [ebp-54h]
-    float v43; // [esp+BCh] [ebp-50h]
-    float v44; // [esp+C0h] [ebp-4Ch]
-    float v45; // [esp+C4h] [ebp-48h]
-    float v46; // [esp+C8h] [ebp-44h]
-    float v47; // [esp+CCh] [ebp-40h]
     const DObjAnimMat *parentMat; // [esp+D0h] [ebp-3Ch]
     DObjAnimMat *childMat; // [esp+D4h] [ebp-38h]
     unsigned int boneIndex; // [esp+D8h] [ebp-34h]
@@ -289,10 +252,9 @@ void __cdecl CalcSkelRootBonesWithParent(
     {
         bits = calcPartBits[boneIndexHigh];
         if (maxBoneIndex > 32)
-            v8 = 32;
+            maxBoneIndexLow = 32;
         else
-            v8 = maxBoneIndex;
-        maxBoneIndexLow = v8;
+            maxBoneIndexLow = maxBoneIndex;
         while (1)
         {
             if (!_BitScanReverse(&v7, bits))
@@ -302,8 +264,7 @@ void __cdecl CalcSkelRootBonesWithParent(
                 break;
             boneIndex = boneIndexLow + 32 * boneIndexHigh;
             boneBit = 0x80000000 >> boneIndexLow;
-            if (((0x80000000 >> boneIndexLow) & bits) == 0)
-                MyAssertHandler(".\\xanim\\dobj_skel.cpp", 227, 0, "%s", "bits & boneBit");
+            iassert(bits & boneBit);
             bits &= ~boneBit;
             calcPartBits[boneIndexHigh] = bits;
             iassert(modelParent < boneIndex);
@@ -325,16 +286,17 @@ void __cdecl CalcSkelRootBonesWithParent(
             }
             iassert(!IS_NAN(childMat->quat[0]) && !IS_NAN(childMat->quat[1]) && !IS_NAN(childMat->quat[2]) && !IS_NAN(childMat->quat[3]));
             iassert(!IS_NAN(childMat->trans[0]) && !IS_NAN(childMat->trans[1]) && !IS_NAN(childMat->trans[2]));
-            v31 = Vec4LengthSq(childMat->quat);
-            if (v31 == 0.0f)
+
+            if (Vec4LengthSq(childMat->quat) == 0.0f)
             {
                 childMat->quat[3] = 1.0f;
                 childMat->transWeight = 2.0f;
             }
             else
             {
-                childMat->transWeight = 2.0f / v31;
+                childMat->transWeight = 2.0f / Vec4LengthSq(childMat->quat);
             }
+
             MatrixTransformVectorQuatTransEquals(parentMat, childMat->trans);
 
             iassert(!IS_NAN(childMat->trans[0]) && !IS_NAN(childMat->trans[1]) && !IS_NAN(childMat->trans[2]));
@@ -352,50 +314,7 @@ void __cdecl CalcSkelNonRootBones(
     const int *controlPartBits)
 {
     DWORD v6; // eax
-    int v7; // [esp+8h] [ebp-124h]
-    float *v8; // [esp+18h] [ebp-114h]
-    float v9; // [esp+30h] [ebp-FCh]
-    float v10; // [esp+34h] [ebp-F8h]
-    float v11; // [esp+38h] [ebp-F4h]
-    float v12; // [esp+3Ch] [ebp-F0h]
     float result[3]; // [esp+40h] [ebp-ECh] BYREF
-    float v14; // [esp+4Ch] [ebp-E0h]
-    float v15; // [esp+50h] [ebp-DCh]
-    float v16; // [esp+54h] [ebp-D8h]
-    float v17; // [esp+58h] [ebp-D4h]
-    float v18; // [esp+5Ch] [ebp-D0h]
-    float v19; // [esp+60h] [ebp-CCh]
-    float v20; // [esp+64h] [ebp-C8h]
-    float v21; // [esp+68h] [ebp-C4h]
-    float v22; // [esp+6Ch] [ebp-C0h]
-    float v23; // [esp+70h] [ebp-BCh]
-    float v24; // [esp+74h] [ebp-B8h]
-    float v25; // [esp+78h] [ebp-B4h]
-    float v26; // [esp+7Ch] [ebp-B0h]
-    float v27; // [esp+80h] [ebp-ACh]
-    float v28; // [esp+84h] [ebp-A8h]
-    float v29; // [esp+88h] [ebp-A4h]
-    float v30; // [esp+8Ch] [ebp-A0h]
-    float v31; // [esp+90h] [ebp-9Ch]
-    float v32; // [esp+94h] [ebp-98h]
-    float v33; // [esp+98h] [ebp-94h]
-    float v34; // [esp+9Ch] [ebp-90h]
-    float v35; // [esp+A0h] [ebp-8Ch]
-    float v36; // [esp+A4h] [ebp-88h]
-    float v37; // [esp+A8h] [ebp-84h]
-    float v38; // [esp+ACh] [ebp-80h]
-    float v39; // [esp+B0h] [ebp-7Ch]
-    float v40; // [esp+B4h] [ebp-78h]
-    float v41; // [esp+B8h] [ebp-74h]
-    float v42; // [esp+BCh] [ebp-70h]
-    float v43; // [esp+C0h] [ebp-6Ch]
-    float v44; // [esp+C4h] [ebp-68h]
-    float v45; // [esp+C8h] [ebp-64h]
-    float v46; // [esp+CCh] [ebp-60h]
-    float v47; // [esp+D0h] [ebp-5Ch]
-    float v48; // [esp+D4h] [ebp-58h]
-    float v49; // [esp+D8h] [ebp-54h]
-    int v50; // [esp+DCh] [ebp-50h]
     DObjAnimMat *childMat; // [esp+E0h] [ebp-4Ch]
     const DObjAnimMat *parentMat; // [esp+E4h] [ebp-48h]
     int boneIndex; // [esp+E8h] [ebp-44h]
@@ -416,21 +335,21 @@ void __cdecl CalcSkelNonRootBones(
     maxBoneIndex = minBoneIndex + model->numBones - model->numRootBones;
     boneIndexHigh = minBoneIndex >> 5;
     maxBoneIndexHigh = (maxBoneIndex - 1) >> 5;
-    maxBoneIndex -= 32 * (minBoneIndex >> 5);
+    maxBoneIndex -= (32 * (minBoneIndex >> 5));
     mat = skel->mat;
     while (boneIndexHigh <= maxBoneIndexHigh)
     {
         bits = calcPartBits[boneIndexHigh];
+
         if (maxBoneIndex > 32)
-            v7 = 32;
+            maxBoneIndexLow = 32;
         else
-            v7 = maxBoneIndex;
-        maxBoneIndexLow = v7;
+            maxBoneIndexLow = maxBoneIndex;
+
         while (1)
         {
             if (!_BitScanReverse(&v6, bits))
                 v6 = 63;
-            v50 = v6 ^ 0x1F;
             boneIndexLow = v6 ^ 0x1F;
             if ((v6 ^ 0x1F) >= maxBoneIndexLow)
                 break;
@@ -462,16 +381,17 @@ void __cdecl CalcSkelNonRootBones(
             }
             iassert(!IS_NAN(childMat->quat[0]) && !IS_NAN(childMat->quat[1]) && !IS_NAN(childMat->quat[2]) && !IS_NAN(childMat->quat[3]));
             iassert(!IS_NAN((childMat->trans)[0]) && !IS_NAN((childMat->trans)[1]) && !IS_NAN((childMat->trans)[2]));
-            v33 = Vec4LengthSq(childMat->quat);
-            if (v33 == 0.0f)
+
+            if (Vec4LengthSq(childMat->quat) == 0.0f)
             {
                 childMat->quat[3] = 1.0f;
                 childMat->transWeight = 2.0f;
             }
             else
             {
-                childMat->transWeight = 2.0f / v33;
+                childMat->transWeight = 2.0f / Vec4LengthSq(childMat->quat);
             }
+
             trans = &model->trans[3 * boneOffset];
             iassert(!IS_NAN(trans[0]) && !IS_NAN(trans[1]) && !IS_NAN(trans[2]));
             Vec3Add(childMat->trans, trans, childMat->trans);
@@ -580,7 +500,7 @@ void __cdecl DObjCalcBaseAnim(const DObj_s *obj, DObjAnimMat *mat, int *partBits
         {
             if ((partBits[boneIndex >> 5] & (0x80000000 >> (boneIndex & 0x1F))) != 0)
             {
-                mat->quat[0] = (double)*quats * 0.00003051850944757462;
+                mat->quat[0] = (double)quats[0] * 0.00003051850944757462;
                 mat->quat[1] = (double)quats[1] * 0.00003051850944757462;
                 mat->quat[2] = (double)quats[2] * 0.00003051850944757462;
                 mat->quat[3] = (double)quats[3] * 0.00003051850944757462;

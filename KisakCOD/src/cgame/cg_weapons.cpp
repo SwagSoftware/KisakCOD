@@ -1050,34 +1050,14 @@ void __cdecl StartWeaponAnim(
     signed int i; // [esp+30h] [ebp-Ch]
     WeaponDef* weapDef; // [esp+34h] [ebp-8h]
 
-    if (animIndex <= 0 || animIndex >= 31)
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            159,
-            0,
-            "%s",
-            "(animIndex > WEAP_ANIM_VIEWMODEL_START) && (animIndex < WEAP_ANIM_VIEWMODEL_END)");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1095,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert((animIndex > WEAP_ANIM_VIEWMODEL_START) && (animIndex < WEAP_ANIM_VIEWMODEL_END));
+    iassert(localClientNum == 0);
     anims = XAnimGetAnims(cg_weaponsArray[0][weaponNum].tree);
     if (!anims)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 163, 0, "%s", "anims");
     weapDef = BG_GetWeaponDef(weaponNum);
     rate = GetWeaponAnimRate(weapDef, anims, animIndex);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     if ((cgArray[0].predictedPlayerState.weaponstate == 7
         || cgArray[0].predictedPlayerState.weaponstate == 9
         || cgArray[0].predictedPlayerState.weaponstate == 11

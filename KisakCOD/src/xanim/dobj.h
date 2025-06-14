@@ -111,7 +111,6 @@ char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex);
 char *__cdecl DObjGetModelParentBoneName(const DObj_s *obj, int modelIndex);
 XAnimTree_s *__cdecl DObjGetTree(const DObj_s *obj);
 void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int8 *priorityMap, DObjTrace_s *trace);
-void __cdecl LocalInvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
 void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits);
 void __cdecl DObjGeomTraceline(
     DObj_s *obj,

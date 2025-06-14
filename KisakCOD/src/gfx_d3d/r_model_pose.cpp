@@ -4,6 +4,7 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
 
+// LWSS: this function basically determines the visibility (dormancy) of Entities in the worldspace. Bodies will disappear in the edges of your FOV if you fk it up. Mounted machine guns as well. Edit with care I reverted this file lol
 DObjAnimMat *R_UpdateSceneEntBounds(
     GfxSceneEntity *sceneEnt,
     GfxSceneEntity **pLocalSceneEnt,
