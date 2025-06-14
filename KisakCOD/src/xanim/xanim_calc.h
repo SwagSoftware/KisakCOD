@@ -67,28 +67,4 @@ void __cdecl XAnimWeightedAccumLerpedTrans(
     DObjAnimMat *totalRotTrans);
 void __cdecl XAnimWeightedAccumTrans(float weightScale, int *dataInt, DObjAnimMat *totalRotTrans);
 
-void __cdecl XAnim_CalcRotDeltaDuring_unsigned_short_(
-    const XAnimDeltaPart *animDelta,
-    float time,
-    int frameCount,
-    float *rotDelta);
-
-void __cdecl XAnim_CalcPosDeltaDuring_unsigned_short_(
-    const XAnimDeltaPart *animDelta,
-    float time,
-    int frameCount,
-    float4 *posDelta);
-
-void __cdecl XAnim_CalcRotDeltaDuring_unsigned_char_(
-    const XAnimDeltaPart *animDelta,
-    float time,
-    int frameCount,
-    float *rotDelta);
-
-void __cdecl XAnim_CalcPosDeltaDuring_unsigned_char_(
-    const XAnimDeltaPart *animDelta,
-    float time,
-    int frameCount,
-    float4 *posDelta);
-
 void DObjCalcAnim(const struct DObj_s *obj, int *partBits);
