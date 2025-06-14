@@ -13,6 +13,8 @@ struct XModel;
 
 #define HIGH_BIT 0x80000000
 
+#define NO_BONEINDEX 255
+
 struct DObjTrace_s // sizeof=0x1C
 {                                       // ...
     float fraction;                     // ...

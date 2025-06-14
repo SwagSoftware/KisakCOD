@@ -200,8 +200,6 @@ bool __cdecl DObjSkelIsBoneUpToDate(DObj_s *obj, int boneIndex)
 
 void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree)
 {
-    int savedregs; // [esp+0h] [ebp+0h] BYREF
-
     obj->tree = tree;
     if (tree)
     {
@@ -237,12 +235,6 @@ void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTr
 
 void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsigned int numModels)
 {
-    int v3; // eax
-    char *v4; // eax
-    char *v5; // eax
-    const char *v6; // [esp-8h] [ebp-5E4h]
-    const char *v7; // [esp-4h] [ebp-5E0h]
-    const char *v8; // [esp-4h] [ebp-5E0h]
     int numBones; // [esp+30h] [ebp-5ACh]
     unsigned __int8 modelParents[32]; // [esp+34h] [ebp-5A8h] BYREF
     int boneIndex; // [esp+58h] [ebp-584h]
@@ -275,14 +267,11 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
     {
         boneIndex = boneCount;
         model = dobjModel->model;
-        if (!model)
-            MyAssertHandler(".\\xanim\\dobj.cpp", 193, 0, "%s", "model");
-        v3 = XModelNumBones(model);
-        boneCount += v3;
+        iassert(model);
+        boneCount += XModelNumBones(model);
         if (boneCount > 128)
         {
-            if (!currNumModels)
-                MyAssertHandler(".\\xanim\\dobj.cpp", 198, 0, "%s", "currNumModels");
+            iassert(currNumModels);
             DObjDumpCreationInfo(dobjModels, numModels);
             Com_Error(ERR_DROP, "dobj for xmodel %s has more than %d bones (see console for details)", models[0]->name, 128);
         }
@@ -301,13 +290,9 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
                     if (XModelGetBoneIndex(models[modelIndex], name, matOffset[modelIndex], &modelParents[currNumModels]))
                         goto LABEL_2;
                 }
-                if (!currNumModels)
-                    MyAssertHandler(".\\xanim\\dobj.cpp", 222, 0, "%s", "currNumModels");
-                v7 = models[0]->name;
-                v4 = SL_ConvertToString(name);
-                Com_PrintWarning(19, "WARNING: Part '%s' not found in model '%s' or any of its descendants\n", v4, v7);
-                if (modelParents[currNumModels] != 255)
-                    MyAssertHandler(".\\xanim\\dobj.cpp", 224, 0, "%s", "modelParents[currNumModels] == NO_BONEINDEX");
+                iassert(currNumModels);
+                Com_PrintWarning(19, "WARNING: Part '%s' not found in model '%s' or any of its descendants\n", SL_ConvertToString(name), models[0]->name);
+                iassert(modelParents[currNumModels] == NO_BONEINDEX);
             }
             else
             {
@@ -321,40 +306,20 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
                     {
                         if (XModelGetBoneIndex(models[modelIndex], name, matOffset[modelIndex], &parentIndex))
                         {
-                            if (parentIndex == 255)
-                                MyAssertHandler(
-                                    ".\\xanim\\dobj.cpp",
-                                    247,
-                                    0,
-                                    "%s\n\t(parentIndex) = %i",
-                                    "(parentIndex != 255)",
-                                    parentIndex);
-                            if (parentIndex == 254)
-                                MyAssertHandler(
-                                    ".\\xanim\\dobj.cpp",
-                                    248,
-                                    0,
-                                    "%s\n\t(parentIndex) = %i",
-                                    "(parentIndex != 254)",
-                                    parentIndex);
-                            if (parentIndex == localBoneIndex + boneIndex)
-                                MyAssertHandler(".\\xanim\\dobj.cpp", 249, 0, "%s", "parentIndex != boneIndex + localBoneIndex");
+                            iassert(parentIndex != 255);
+                            iassert(parentIndex != 254);
+                            iassert(parentIndex != boneIndex + localBoneIndex);
                             if (!localBoneIndex)
                                 bRootMeld = 1;
-                            if (boneIndex + localBoneIndex + 1 >= 256)
-                                MyAssertHandler(".\\xanim\\dobj.cpp", 255, 0, "%s", "boneIndex + localBoneIndex + 1 < 256");
-                            if (parentIndex + 1 >= 256)
-                                MyAssertHandler(".\\xanim\\dobj.cpp", 256, 0, "%s", "parentIndex + 1 < 256");
-                            if (parentIndex >= localBoneIndex + boneIndex)
-                                MyAssertHandler(".\\xanim\\dobj.cpp", 257, 0, "%s", "parentIndex < boneIndex + localBoneIndex");
+                            iassert(boneIndex + localBoneIndex + 1 < 256);
+                            iassert(parentIndex + 1 < 256);
+                            iassert(parentIndex < boneIndex + localBoneIndex);
                             index = localBoneIndex + boneIndex;
                             duplicateParts[len] = localBoneIndex + boneIndex + 1;
                             duplicatePartBits[index >> 5] |= 0x80000000 >> (index & 0x1F);
-                            if (!duplicateParts[len])
-                                MyAssertHandler(".\\xanim\\dobj.cpp", 262, 0, "%s", "duplicateParts[len]");
+                            iassert(duplicateParts[len]);
                             duplicateParts[++len] = parentIndex + 1;
-                            if (!duplicateParts[len])
-                                MyAssertHandler(".\\xanim\\dobj.cpp", 265, 0, "%s", "duplicateParts[len]");
+                            iassert(duplicateParts[len]);
                             ++len;
                             break;
                         }
@@ -362,17 +327,13 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
                 }
                 if (!bRootMeld)
                 {
-                    if (!currNumModels)
-                        MyAssertHandler(".\\xanim\\dobj.cpp", 271, 0, "%s", "currNumModels");
-                    v8 = models[0]->name;
-                    v6 = model->name;
-                    v5 = SL_ConvertToString(*boneNames);
+                    iassert(currNumModels);
                     Com_PrintWarning(
                         19,
                         "WARNING: Attempting to meld model, but root part '%s' of model '%s' not found in model '%s' or any of its descendants\n",
-                        v5,
-                        v6,
-                        v8);
+                        SL_ConvertToString(*boneNames),
+                        model->name,
+                        models[0]->name);
                 }
             }
         }
@@ -380,28 +341,23 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
         ++currNumModels;
         ++dobjModel;
     }
-    if (numModels != (unsigned __int8)numModels)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 278, 0, "%s", "numModels == (byte)numModels");
+    iassert(numModels == (byte)numModels);
     obj->numModels = numModels;
-    if (boneCount != (unsigned __int8)boneCount)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 281, 0, "%s", "boneCount == (byte)boneCount");
+    iassert(boneCount == (byte)boneCount);
     obj->numBones = boneCount;
-    if (!numModels)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 284, 0, "%s", "numModels > 0");
+    iassert(numModels > 0);
     obj->models = (XModel **)MT_Alloc(5 * numModels, 13);
     memcpy((unsigned __int8 *)obj->models, (unsigned __int8 *)models, 4 * numModels);
     memcpy((unsigned __int8 *)&obj->models[numModels], modelParents, numModels);
-    if (!g_empty)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 295, 0, "%s", "g_empty");
-    if (obj->duplicateParts)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 296, 0, "%s", "!obj->duplicateParts");
+    iassert(g_empty);
+    iassert(!obj->duplicateParts);
+
     if (len)
     {
         duplicateParts[len] = 0;
         size = ++len + 16;
         obj->duplicatePartsSize = len + 16;
-        if (obj->duplicatePartsSize != size)
-            MyAssertHandler(".\\xanim\\dobj.cpp", 305, 0, "%s", "obj->duplicatePartsSize == size");
+        iassert(obj->duplicatePartsSize == size);
         obj->duplicateParts = SL_GetStringOfSize((char *)duplicatePartBits, 0, obj->duplicatePartsSize, 12).prev;
     }
     else

@@ -395,10 +395,14 @@ XAnim_s* __cdecl XAnimGetAnims(const XAnimTree_s* tree)
 
 void XAnimResetAnimMap(const DObj_s *obj, unsigned int infoIndex)
 {
-    XModelNameMap v3[256]; // [sp+50h] [-410h] BYREF
+    XModelNameMap modelMap[256]; // [sp+50h] [-410h] BYREF
 
-    XAnimInitModelMap(obj->models, obj->numModels, v3);
-    XAnimResetAnimMap_r(v3, infoIndex);
+    iassert(obj->numModels < 256); // lwss add
+
+    Profile_Begin(324);
+    XAnimInitModelMap(obj->models, obj->numModels, modelMap);
+    XAnimResetAnimMap_r(modelMap, infoIndex);
+    Profile_EndInternal(0);
 }
 
 void __cdecl XAnimInitModelMap(XModel* const* models, unsigned int numModels, XModelNameMap* modelMap)
@@ -412,22 +416,24 @@ void __cdecl XAnimInitModelMap(XModel* const* models, unsigned int numModels, XM
     unsigned int i; // [esp+18h] [ebp-8h]
     unsigned __int16* boneNames; // [esp+1Ch] [ebp-4h]
 
-    memset((unsigned __int8*)modelMap, 0, 0x400u);
+    memset((unsigned __int8*)modelMap, 0, 1024);
     boneIndex = 0;
+
     for (i = 0; i < numModels; ++i)
     {
         model = models[i];
         boneNames = model->boneNames;
         boneCount = model->numBones;
-        if (boneCount >= 0x80)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 548, 0, "%s", "boneCount < DOBJ_MAX_PARTS");
+
+        iassert(boneCount < DOBJ_MAX_PARTS);
+
         for (localBoneIndex = 0; localBoneIndex < boneCount; ++localBoneIndex)
         {
             boneName = boneNames[localBoneIndex];
-            if (!boneName)
-                MyAssertHandler(".\\xanim\\xanim.cpp", 553, 0, "%s", "boneName");
-            for (hash = (unsigned __int8)boneName; modelMap[hash].name; hash = (unsigned __int8)(hash + 1))
-                ;
+            iassert(boneName);
+
+            for (hash = (unsigned __int8)boneName; modelMap[hash].name; hash = (unsigned __int8)(hash + 1));
+
             modelMap[hash].index = boneIndex;
             modelMap[hash].name = boneName;
             ++boneIndex;
@@ -464,19 +470,10 @@ void __cdecl XAnimResetAnimMapLeaf(const XModelNameMap* modelMap, unsigned int i
     char* animToModel2; // [esp+4h] [ebp-8h]
     unsigned int animToModel; // [esp+8h] [ebp-4h]
 
-    if (!infoIndex || infoIndex >= 0x1000)
-        MyAssertHandler(
-            ".\\xanim\\xanim.cpp",
-            2084,
-            0,
-            "%s\n\t(infoIndex) = %i",
-            "(infoIndex && (infoIndex < 4096))",
-            infoIndex);
-    if (!g_xAnimInfo[infoIndex].inuse)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 2086, 0, "%s", "g_xAnimInfo[infoIndex].inuse");
+    iassert((infoIndex && (infoIndex < 4096)));
+    iassert(g_xAnimInfo[infoIndex].inuse);
     animToModel = g_xAnimInfo[infoIndex].animToModel;
-    if (!g_xAnimInfo[infoIndex].animToModel)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 2092, 0, "%s", "animToModel");
+    iassert(animToModel);
     animToModel2 = SL_ConvertToString(animToModel);
     g_xAnimInfo[infoIndex].animToModel = XAnimGetAnimMap(g_xAnimInfo[infoIndex].parts, modelMap);
     SL_RemoveRefToStringOfSize(animToModel, (unsigned __int8)animToModel2[16] + 17);
@@ -1301,7 +1298,7 @@ void __cdecl XAnimUpdateTimeAndNotetrackLeaf(
             {
                 v10 = g_xAnimInfo[infoIndex].state.oldTime - 0.9999998807907104;
                 if (v10 < 0.0)
-                    v9 = 0.99999988;
+                    v9 = 0.99999988f;
                 else
                     v9 = 1.0;
                 time = v9;
@@ -1611,7 +1608,7 @@ void __cdecl XAnimUpdateTimeAndNotetrackSyncSubTree(
                 MyAssertHandler(".\\xanim\\xanim.cpp", 1311, 0, "%s", "!(info->animParent.flags & XANIM_LOOP_SYNC_TIME)");
             v9 = g_xAnimInfo[infoIndex].state.oldTime - 0.9999998807907104;
             if (v9 < 0.0)
-                v8 = 0.99999988;
+                v8 = 0.99999988f;
             else
                 v8 = 1.0;
             time = v8;
@@ -2083,7 +2080,7 @@ double __cdecl XAnimFindServerNoteTrackLeafNode(const DObj_s* obj, XAnimInfo* in
     {
         v5 = info->state.oldTime - 0.9999998807907104;
         if (v5 < 0.0)
-            v4 = 0.99999988;
+            v4 = 0.99999988f;
         else
             v4 = 1.0;
         time = v4;
@@ -2149,7 +2146,7 @@ double __cdecl XAnimFindServerNoteTrackSyncSubTree(const DObj_s* obj, XAnimInfo*
         {
             v5 = info->state.oldTime - 0.9999998807907104;
             if (v5 < 0.0)
-                v4 = 0.99999988;
+                v4 = 0.99999988f;
             else
                 v4 = 1.0;
             time = v4;
@@ -3518,7 +3515,6 @@ int __cdecl XAnimSetGoalWeightKnob(
     XAnimTree_s* tree; // [esp+44h] [ebp-Ch]
     unsigned int infoIndex; // [esp+48h] [ebp-8h]
     int error; // [esp+4Ch] [ebp-4h]
-    int savedregs; // [esp+50h] [ebp+0h] BYREF
 
     Profile_Begin(328);
     iassert(obj);
@@ -3805,9 +3801,6 @@ BOOL __cdecl XAnimIsPrimitive(XAnim_s* anims, unsigned int animIndex)
 
 void __cdecl XAnimSetTime(XAnimTree_s *tree, unsigned int animIndex, float time)
 {
-    char *AnimDebugName; // eax
-    BOOL bLoop; // [esp+8h] [ebp-20h]
-    BOOL v8; // [esp+10h] [ebp-18h]
     XAnimState *state; // [esp+18h] [ebp-10h]
     unsigned int infoIndex; // [esp+20h] [ebp-8h]
     const XAnimEntry *anim; // [esp+24h] [ebp-4h]
@@ -3892,7 +3885,6 @@ int __cdecl XAnimSetGoalWeight(
     XAnimTree_s* tree; // [esp+60h] [ebp-Ch]
     int error; // [esp+64h] [ebp-8h]
     unsigned int infoIndex; // [esp+68h] [ebp-4h]
-    int savedregs; // [esp+6Ch] [ebp+0h] BYREF
 
     Profile_Begin(328);
     iassert(obj);
@@ -4008,7 +4000,6 @@ int __cdecl XAnimSetCompleteGoalWeight(
     XAnimTree_s* tree; // [esp+44h] [ebp-Ch]
     unsigned int infoIndex; // [esp+48h] [ebp-8h]
     int error; // [esp+4Ch] [ebp-4h]
-    int savedregs; // [esp+50h] [ebp+0h] BYREF
 
     Profile_Begin(328);
 
