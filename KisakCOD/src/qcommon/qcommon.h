@@ -667,6 +667,20 @@ TRACES
 
 struct TraceExtents // sizeof=0x24
 {                                       // ...
+    TraceExtents() // LWSS: backport from blops
+    {
+        start[0] = 0.0f;
+        start[1] = 0.0f;
+        start[2] = 0.0f;
+
+        end[0] = 0.0f;
+        end[1] = 0.0f;
+        end[2] = 0.0f;
+
+        invDelta[0] = 0.0f;
+        invDelta[1] = 0.0f;
+        invDelta[2] = 0.0f;
+    }
     float start[3];                     // ...
     float end[3];                       // ...
     float invDelta[3];

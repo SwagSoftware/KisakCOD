@@ -317,7 +317,7 @@ void __cdecl AimTarget_GetTargetCenter(const centity_s *targetEnt, float *center
 
 void __cdecl Vec3Scale(const float *v, float scale, float *result)
 {
-    *result = scale * *v;
+    result[0] = scale * v[0];
     result[1] = scale * v[1];
     result[2] = scale * v[2];
 }

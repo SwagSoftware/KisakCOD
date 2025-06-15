@@ -516,7 +516,7 @@ DObjAnimMat *__cdecl I_dmaGetDObjSkel(const DObj_s *obj)
 
 void __cdecl DObjGetHidePartBits(const DObj_s *obj, unsigned int *partBits)
 {
-    *partBits = obj->hidePartBits[0];
+    partBits[0] = obj->hidePartBits[0];
     partBits[1] = obj->hidePartBits[1];
     partBits[2] = obj->hidePartBits[2];
     partBits[3] = obj->hidePartBits[3];

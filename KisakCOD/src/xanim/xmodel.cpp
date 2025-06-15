@@ -11,9 +11,6 @@
 #include <devgui/devgui.h>
 #include <physics/phys_local.h>
 
-XModelDefault g_default;
-Material *g_materials[1];
-
 void __cdecl XModelPartsFree(XModelPartsLoad *modelParts)
 {
     int size; // [esp+0h] [ebp-Ch]
@@ -38,11 +35,6 @@ bool __cdecl XModelBad(const XModel *model)
         return model->bad;
 }
 
-void __cdecl TRACK_xmodel()
-{
-    track_static_alloc_internal(&g_default, sizeof(g_default), "g_default", 11);
-}
-
 XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
 {
     if (useFastFile->current.enabled)
@@ -51,376 +43,9 @@ XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(_
         return XModelPrecache_LoadObj(name, Alloc, AllocColl);
 }
 
-static XModelPartsLoad *__cdecl XModelCreateDefaultParts()
-{
-    g_default.modelParts.parentList = g_default.parentList;
-    g_default.modelParts.boneNames = (unsigned __int16 *)&g_default;
-    g_default.modelParts.quats = 0;
-    g_default.modelParts.trans = 0;
-    g_default.modelParts.numBones = 1;
-    g_default.modelParts.numRootBones = 1;
-    g_default.modelParts.partClassification = g_default.partClassification;
-    g_default.partClassification[0] = 0;
-    g_default.boneNames[0] = 0;
-    return &g_default.modelParts;
-}
-
-void __cdecl XModelCopyXModelParts(const XModelPartsLoad *modelParts, XModel *model)
-{
-    model->numBones = modelParts->numBones;
-    model->numRootBones = modelParts->numRootBones;
-    model->boneNames = modelParts->boneNames;
-    model->parentList = modelParts->parentList;
-    model->quats = modelParts->quats;
-    model->trans = modelParts->trans;
-    model->partClassification = modelParts->partClassification;
-    model->baseMat = modelParts->baseMat;
-}
-
-static void __cdecl XModelMakeDefault(XModel *model)
-{
-    const XModelPartsLoad *DefaultParts; // eax
-
-    model->bad = 1;
-    DefaultParts = XModelCreateDefaultParts();
-    XModelCopyXModelParts(DefaultParts, model);
-    memset((unsigned __int8 *)model->lodInfo, 0, sizeof(model->lodInfo));
-    model->numLods = 1;
-    model->collLod = 0;
-    model->name = "DEFAULT";
-    model->surfs = 0;
-    model->materialHandles = g_materials;
-    g_materials[0] = Material_RegisterHandle("mc/$default", 8);
-    g_default.boneInfo.bounds[0][0] = -16.0;
-    g_default.boneInfo.bounds[0][1] = -16.0;
-    g_default.boneInfo.bounds[0][2] = -16.0;
-    g_default.boneInfo.bounds[1][0] = 16.0;
-    g_default.boneInfo.bounds[1][1] = 16.0;
-    g_default.boneInfo.bounds[1][2] = 16.0;
-    model->boneInfo = &g_default.boneInfo;
-}
-
-static XModel *__cdecl XModelCreateDefault(void *(__cdecl *Alloc)(int))
-{
-    XModel *model; // [esp+0h] [ebp-4h]
-
-    model = (XModel *)Alloc(332);
-    XModelMakeDefault(model);
-    return model;
-}
-
-static XModel *__cdecl XModelDefaultModel(const char *name, void *(__cdecl *Alloc)(int))
-{
-    XModel *model; // [esp+0h] [ebp-4h]
-
-    model = XModelCreateDefault(Alloc);
-    Hunk_SetDataForFile(5, name, model, Alloc);
-    return model;
-}
-
-XModel *__cdecl XModelPrecache_LoadObj(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
-{
-    XModel *model; // [esp+0h] [ebp-4h]
-    XModel *modela; // [esp+0h] [ebp-4h]
-
-    model = (XModel *)Hunk_FindDataForFile(5, name);
-    if (model)
-        return model;
-    //ProfLoad_Begin("Load xmodel");
-    modela = XModelLoad(name, Alloc, AllocColl);
-    //ProfLoad_End();
-    if (modela)
-    {
-        modela->name = Hunk_SetDataForFile(5, name, modela, Alloc);
-        return modela;
-    }
-    else
-    {
-        Com_PrintError(19, "ERROR: Cannot find xmodel '%s'.\n", name);
-        return XModelDefaultModel(name, Alloc);
-    }
-}
-
 XModel *__cdecl XModelPrecache_FastFile(const char *name)
 {
     return DB_FindXAssetHeader(ASSET_TYPE_XMODEL, name).model;
-}
-
-XModel *__cdecl XModelLoad(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
-{
-    XModel *model; // [esp+0h] [ebp-4h]
-
-    model = XModelLoadFile(name, Alloc, AllocColl);
-    if (model)
-        return model;
-    else
-        return 0;
-}
-
-void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
-{
-    float result[3]; // [esp+44h] [ebp-74h] BYREF
-    float len; // [esp+88h] [ebp-30h]
-    int numBones; // [esp+90h] [ebp-28h]
-    float *trans; // [esp+94h] [ebp-24h]
-    __int16 *quats; // [esp+98h] [ebp-20h]
-    unsigned __int8 *parentList; // [esp+9Ch] [ebp-1Ch]
-    int i; // [esp+A0h] [ebp-18h]
-    float tempQuat[4]; // [esp+A4h] [ebp-14h] BYREF
-    DObjAnimMat *quatTrans; // [esp+B4h] [ebp-4h]
-
-    parentList = modelParts->parentList;
-    numBones = modelParts->numBones;
-    quats = modelParts->quats;
-    trans = modelParts->trans;
-    quatTrans = modelParts->baseMat;
-
-    for (i = modelParts->numRootBones; i; --i)
-    {
-        quatTrans->quat[0] = 0.0f;
-        quatTrans->quat[1] = 0.0f;
-        quatTrans->quat[2] = 0.0f;
-        quatTrans->quat[3] = 1.0f;
-
-        quatTrans->trans[0] = 0.0f;
-        quatTrans->trans[1] = 0.0f;
-        quatTrans->trans[2] = 0.0f;
-
-        quatTrans->transWeight = 2.0f;
-        --i;
-        ++quatTrans;
-    }
-
-    i = numBones - modelParts->numRootBones;
-
-    while (i)
-    {
-        tempQuat[0] = quats[0] * 0.00003051850944757462;
-        tempQuat[1] = quats[1] * 0.00003051850944757462;
-        tempQuat[2] = quats[2] * 0.00003051850944757462;
-        tempQuat[3] = quats[3] * 0.00003051850944757462;
-        QuatMultiply(tempQuat, quatTrans[-*parentList].quat, quatTrans->quat);
-        len = Vec4LengthSq(quatTrans->quat);
-        if (len == 0.0f)
-        {
-            quatTrans->quat[3] = 1.0f;
-            quatTrans->transWeight = 2.0f;
-        }
-        else
-        {
-            quatTrans->transWeight = 2.0f / len;
-        }
-        MatrixTransformVectorQuatTrans(trans, &quatTrans[-*parentList], quatTrans->trans);
-        --i;
-        quats += 4;
-        trans += 3;
-        ++quatTrans;
-        ++parentList;
-    }
-}
-
-static XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
-{
-    unsigned __int8 *v4; // eax
-    unsigned __int16 prev; // ax
-    unsigned __int8 *v6; // [esp+10h] [ebp-A8h]
-    float v7; // [esp+18h] [ebp-A0h]
-    float v8; // [esp+1Ch] [ebp-9Ch]
-    float v9; // [esp+20h] [ebp-98h]
-    __int16 v10; // [esp+24h] [ebp-94h]
-    __int16 v11; // [esp+28h] [ebp-90h]
-    __int16 v12; // [esp+2Ch] [ebp-8Ch]
-    const unsigned __int8 *pos; // [esp+30h] [ebp-88h] BYREF
-    int numBones; // [esp+34h] [ebp-84h]
-    char filename[64]; // [esp+38h] [ebp-80h] BYREF
-    int numRootBones; // [esp+7Ch] [ebp-3Ch]
-    __int16 numChildBones; // [esp+80h] [ebp-38h]
-    unsigned __int8 *buf; // [esp+84h] [ebp-34h] BYREF
-    float *trans; // [esp+88h] [ebp-30h]
-    __int16 version; // [esp+8Ch] [ebp-2Ch]
-    int len; // [esp+90h] [ebp-28h]
-    int size; // [esp+94h] [ebp-24h]
-    __int16 *quats; // [esp+98h] [ebp-20h]
-    int fileSize; // [esp+9Ch] [ebp-1Ch]
-    unsigned __int8 *parentList; // [esp+A0h] [ebp-18h]
-    int index; // [esp+A4h] [ebp-14h]
-    int i; // [esp+A8h] [ebp-10h]
-    XModelPartsLoad *modelParts; // [esp+ACh] [ebp-Ch]
-    bool useBones; // [esp+B3h] [ebp-5h]
-    unsigned __int16 *boneNames; // [esp+B4h] [ebp-4h]
-
-    if (Com_sprintf(filename, 0x40u, "xmodelparts/%s", name) >= 0)
-    {
-        fileSize = FS_ReadFile(filename, (void **)&buf);
-        if (fileSize >= 0)
-        {
-            if (fileSize)
-            {
-                if (!buf)
-                    MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 156, 0, "%s", "buf");
-                pos = buf;
-                v12 = *(_WORD *)buf;
-                pos = buf + 2;
-                version = v12;
-                if (v12 == 25)
-                {
-                    v11 = *(_WORD *)pos;
-                    pos += 2;
-                    numChildBones = v11;
-                    v10 = *(_WORD *)pos;
-                    pos += 2;
-                    numRootBones = v10;
-                    numBones = v10 + v11;
-                    size = 2 * numBones;
-                    boneNames = (unsigned __int16 *)Alloc(2 * numBones);
-                    model->memUsage += size;
-                    if (numBones < 128)
-                    {
-                        size = numChildBones;
-                        if (numChildBones)
-                            v6 = (unsigned __int8 *)Alloc(size);
-                        else
-                            v6 = 0;
-                        parentList = v6;
-                        model->memUsage += size;
-                        size = 28;
-                        modelParts = (XModelPartsLoad *)Alloc(28);
-                        model->memUsage += size;
-                        modelParts->parentList = parentList;
-                        modelParts->boneNames = boneNames;
-                        size = 32 * numBones;
-                        modelParts->baseMat = (DObjAnimMat *)Alloc(32 * numBones);
-                        model->memUsage += size;
-                        if (numChildBones)
-                        {
-                            size = 8 * numChildBones;
-                            modelParts->quats = (__int16 *)Alloc(size);
-                            model->memUsage += size;
-                            size = 16 * numChildBones;
-                            modelParts->trans = (float *)Alloc(size);
-                            model->memUsage += size;
-                        }
-                        else
-                        {
-                            modelParts->quats = 0;
-                            modelParts->trans = 0;
-                        }
-                        size = numBones;
-                        v4 = (unsigned __int8 *)Alloc(numBones);
-                        modelParts->partClassification = v4;
-                        model->memUsage += size;
-                        modelParts->numBones = numBones;
-                        if (modelParts->numBones != numBones)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 219, 0, "%s", "modelParts->numBones == numBones");
-                        modelParts->numRootBones = numRootBones;
-                        if (modelParts->numRootBones != numRootBones)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 222, 0, "%s", "modelParts->numRootBones == numRootBones");
-                        quats = modelParts->quats;
-                        trans = modelParts->trans;
-                        i = numRootBones;
-                        while (i < numBones)
-                        {
-                            index = *pos++;
-                            if (index >= i)
-                                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 233, 0, "%s", "index < i");
-                            *parentList = i - index;
-                            if (i - index != *parentList)
-                                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 235, 0, "%s", "i - index == *parentList");
-                            v9 = *(float *)pos;
-                            pos += 4;
-                            *trans = v9;
-                            v8 = *(float *)pos;
-                            pos += 4;
-                            trans[1] = v8;
-                            v7 = *(float *)pos;
-                            pos += 4;
-                            trans[2] = v7;
-                            ConsumeQuatNoSwap(&pos, quats);
-                            ++i;
-                            quats += 4;
-                            trans += 3;
-                            ++parentList;
-                        }
-                        for (i = 0; i < numBones; ++i)
-                        {
-                            len = strlen((const char *)pos) + 1;
-                            prev = SL_GetStringOfSize((char *)pos, 0, len, 10).prev;
-                            boneNames[i] = prev;
-                            pos += len;
-                        }
-                        memcpy(modelParts->partClassification, (unsigned __int8 *)pos, numBones);
-                        pos += numBones;
-                        useBones = *pos++ != 0;
-                        FS_FreeFile((char *)buf);
-                        XModelCalcBasePose(modelParts);
-                        if (!useBones)
-                            memset((unsigned __int8 *)modelParts->trans, 0, 16 * numChildBones);
-                        return modelParts;
-                    }
-                    else
-                    {
-                        FS_FreeFile((char *)buf);
-                        Com_PrintError(19, "ERROR: xmodel '%s' has more than %d bones\n", name, 127);
-                        return 0;
-                    }
-                }
-                else
-                {
-                    FS_FreeFile((char *)buf);
-                    Com_PrintError(19, "ERROR: xmodelparts '%s' out of date (version %d, expecting %d).\n", name, version, 25);
-                    return 0;
-                }
-            }
-            else
-            {
-                Com_PrintError(19, "ERROR: xmodelparts '%s' has 0 length\n", name);
-                FS_FreeFile((char *)buf);
-                return 0;
-            }
-        }
-        else
-        {
-            if (buf)
-                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 144, 0, "%s", "!buf");
-            Com_PrintError(19, "ERROR: xmodelparts '%s' not found\n", name);
-            return 0;
-        }
-    }
-    else
-    {
-        Com_PrintError(19, "ERROR: filename '%s' too long\n", filename);
-        return 0;
-    }
-}
-static XModelPartsLoad *__cdecl XModelPartsFindData(const char *name)
-{
-    return (XModelPartsLoad *)Hunk_FindDataForFile(4, name);
-}
-
-void __cdecl XModelPartsSetData(const char *name, XModelPartsLoad *modelParts, void *(__cdecl *Alloc)(int))
-{
-    Hunk_SetDataForFile(4, name, modelParts, Alloc);
-
-}
-XModelPartsLoad *__cdecl XModelPartsPrecache(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
-{
-    XModelPartsLoad *modelParts; // [esp+0h] [ebp-4h]
-    XModelPartsLoad *modelPartsa; // [esp+0h] [ebp-4h]
-
-    modelParts = XModelPartsFindData(name);
-    if (modelParts)
-        return modelParts;
-    modelPartsa = XModelPartsLoadFile(model, name, Alloc);
-    if (modelPartsa)
-    {
-        XModelPartsSetData(name, modelPartsa, Alloc);
-        return modelPartsa;
-    }
-    else
-    {
-        Com_PrintError(19, "ERROR: Cannot find xmodelparts '%s'.\n", name);
-        return 0;
-    }
 }
 
 double __cdecl XModelGetRadius(const XModel *model)
@@ -430,10 +55,11 @@ double __cdecl XModelGetRadius(const XModel *model)
 
 void __cdecl XModelGetBounds(const XModel *model, float *mins, float *maxs)
 {
-    *mins = model->mins[0];
+    mins[0] = model->mins[0];
     mins[1] = model->mins[1];
     mins[2] = model->mins[2];
-    *maxs = model->maxs[0];
+
+    maxs[0] = model->maxs[0];
     maxs[1] = model->maxs[1];
     maxs[2] = model->maxs[2];
 }
@@ -508,24 +134,17 @@ int __cdecl XModelTraceLine(
                             Vec3Mad(boneExtents.start, hitFrac, delta, hit);
                             v8 = Vec3Dot(hit, ctri->svec);
                             s = v8 - ctri->svec[3];
-                            if (s >= -EQUAL_EPSILON && s <= 1.001000046730042)
+                            if (s >= -EQUAL_EPSILON && s <= (1.0f + EQUAL_EPSILON))
                             {
                                 v9 = Vec3Dot(hit, ctri->tvec);
                                 t = v9 - ctri->tvec[3];
-                                if (t >= -EQUAL_EPSILON && s + t <= 1.001000046730042)
+                                if (t >= -EQUAL_EPSILON && s + t <= (1.0f + EQUAL_EPSILON))
                                 {
                                     partIndex = csurf->boneIdx;
                                     results->startsolid = 0;
                                     results->allsolid = 0;
                                     results->fraction = frac;
-                                    if (results->fraction < 0.0 || results->fraction > 1.0)
-                                        MyAssertHandler(
-                                            ".\\xanim\\xmodel.cpp",
-                                            499,
-                                            1,
-                                            "%s\n\t(results->fraction) = %g",
-                                            "(results->fraction >= 0 && results->fraction <= 1.0f)",
-                                            results->fraction);
+                                    iassert(results->fraction >= 0 && results->fraction <= 1.0f);
                                     results->surfaceFlags = csurf->surfFlags;
                                     results->contents = csurf->contents;
                                     results->normal[0] = ctri->plane[0];
@@ -552,38 +171,9 @@ int __cdecl XModelTraceLineAnimated(
     float *localEnd,
     int contentmask)
 {
-    double v9; // st7
-    double v10; // st7
-    double v11; // st7
-    double v12; // st7
     float v13; // [esp+Ch] [ebp-1E0h]
     float v14; // [esp+10h] [ebp-1DCh]
     int v15; // [esp+14h] [ebp-1D8h]
-    float v16; // [esp+38h] [ebp-1B4h]
-    float v17; // [esp+3Ch] [ebp-1B0h]
-    float v18; // [esp+40h] [ebp-1ACh]
-    float v19; // [esp+44h] [ebp-1A8h]
-    float v20[3]; // [esp+48h] [ebp-1A4h] BYREF
-    float v21; // [esp+54h] [ebp-198h]
-    float v22; // [esp+58h] [ebp-194h]
-    float v23; // [esp+5Ch] [ebp-190h]
-    float v24; // [esp+60h] [ebp-18Ch]
-    float v25; // [esp+64h] [ebp-188h]
-    float transWeight; // [esp+68h] [ebp-184h]
-    float v27; // [esp+6Ch] [ebp-180h]
-    float v28; // [esp+70h] [ebp-17Ch]
-    float v29; // [esp+74h] [ebp-178h]
-    float v30; // [esp+78h] [ebp-174h]
-    float v31; // [esp+7Ch] [ebp-170h]
-    float v32; // [esp+80h] [ebp-16Ch]
-    float v33; // [esp+84h] [ebp-168h]
-    float v34; // [esp+88h] [ebp-164h]
-    float result[3]; // [esp+8Ch] [ebp-160h] BYREF
-    float v36; // [esp+98h] [ebp-154h]
-    float v37; // [esp+9Ch] [ebp-150h]
-    float v38; // [esp+A0h] [ebp-14Ch]
-    float v39; // [esp+A4h] [ebp-148h]
-    float v40; // [esp+A8h] [ebp-144h]
     const float *trans; // [esp+ACh] [ebp-140h]
     const float *v42; // [esp+B0h] [ebp-13Ch]
     float endDist; // [esp+B4h] [ebp-138h]
@@ -604,7 +194,7 @@ int __cdecl XModelTraceLineAnimated(
     float localEnd2[3]; // [esp+14Ch] [ebp-A0h] BYREF
     int globalBoneIndex; // [esp+158h] [ebp-94h]
     float hit[3]; // [esp+15Ch] [ebp-90h] BYREF
-    float in2[12]; // [esp+168h] [ebp-84h] BYREF
+    float mat[4][3];
     unsigned int hidePartBits[4]; // [esp+198h] [ebp-54h] BYREF
     const DObjAnimMat *baseMat; // [esp+1A8h] [ebp-44h]
     float s; // [esp+1ACh] [ebp-40h]
@@ -638,114 +228,37 @@ int __cdecl XModelTraceLineAnimated(
                         : (v15 = 1),
                         v15))
                 {
-                    boneExtents.start[0] = *localStart;
+                    boneExtents.start[0] = localStart[0];
                     boneExtents.start[1] = localStart[1];
                     boneExtents.start[2] = localStart[2];
-                    boneExtents.end[0] = *localEnd;
+                    boneExtents.end[0] = localEnd[0];
                     boneExtents.end[1] = localEnd[1];
                     boneExtents.end[2] = localEnd[2];
                 }
                 else
                 {
-                    v30 = baseMat->quat[0];
-                    if ((LODWORD(v30) & 0x7F800000) == 0x7F800000
-                        || (v29 = baseMat->quat[1], (LODWORD(v29) & 0x7F800000) == 0x7F800000)
-                        || (v28 = baseMat->quat[2], (LODWORD(v28) & 0x7F800000) == 0x7F800000)
-                        || (v27 = baseMat->quat[3], (LODWORD(v27) & 0x7F800000) == 0x7F800000))
-                    {
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
-                            536,
-                            0,
-                            "%s",
-                            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-                    }
-                    transWeight = baseMat->transWeight;
-                    if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
-                        MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 537, 0, "%s", "!IS_NAN(mat->transWeight)");
-                    Vec3Scale(baseMat->quat, baseMat->transWeight, result);
-                    v39 = result[0] * baseMat->quat[0];
-                    v32 = result[0] * baseMat->quat[1];
-                    v37 = result[0] * baseMat->quat[2];
-                    v40 = result[0] * baseMat->quat[3];
-                    v31 = result[1] * baseMat->quat[1];
-                    v38 = result[1] * baseMat->quat[2];
-                    v36 = result[1] * baseMat->quat[3];
-                    v33 = result[2] * baseMat->quat[2];
-                    v34 = result[2] * baseMat->quat[3];
-                    invBaseMat[0][0] = 1.0 - (v31 + v33);
-                    invBaseMat[0][1] = v32 - v34;
-                    invBaseMat[0][2] = v37 + v36;
-                    invBaseMat[1][0] = v32 + v34;
-                    invBaseMat[1][1] = 1.0 - (v39 + v33);
-                    invBaseMat[1][2] = v38 - v40;
-                    invBaseMat[2][0] = v37 - v36;
-                    invBaseMat[2][1] = v38 + v40;
-                    invBaseMat[2][2] = 1.0 - (v39 + v31);
-                    invBaseMat[3][0] = -(baseMat->trans[0] * invBaseMat[0][0]
-                        + baseMat->trans[1] * invBaseMat[1][0]
-                        + baseMat->trans[2] * invBaseMat[2][0]);
-                    invBaseMat[3][1] = -(baseMat->trans[0] * invBaseMat[0][1]
-                        + baseMat->trans[1] * invBaseMat[1][1]
-                        + baseMat->trans[2] * invBaseMat[2][1]);
-                    invBaseMat[3][2] = -(baseMat->trans[0] * invBaseMat[0][2]
-                        + baseMat->trans[1] * invBaseMat[1][2]
-                        + baseMat->trans[2] * invBaseMat[2][2]);
-                    if ((COERCE_UNSIGNED_INT(boneMtx->quat[0]) & 0x7F800000) == 0x7F800000
-                        || (COERCE_UNSIGNED_INT(boneMtx->quat[1]) & 0x7F800000) == 0x7F800000
-                        || (COERCE_UNSIGNED_INT(boneMtx->quat[2]) & 0x7F800000) == 0x7F800000
-                        || (COERCE_UNSIGNED_INT(boneMtx->quat[3]) & 0x7F800000) == 0x7F800000)
-                    {
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\src\\xanim\\xanim_public.h",
-                            432,
-                            0,
-                            "%s",
-                            "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-                    }
-                    if ((COERCE_UNSIGNED_INT(boneMtx->transWeight) & 0x7F800000) == 0x7F800000)
-                        MyAssertHandler("c:\\trees\\cod3\\src\\xanim\\xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
-                    Vec3Scale(boneMtx->quat, boneMtx->transWeight, v20);
-                    v24 = v20[0] * boneMtx->quat[0];
-                    v17 = v20[0] * boneMtx->quat[1];
-                    v22 = v20[0] * boneMtx->quat[2];
-                    v25 = v20[0] * boneMtx->quat[3];
-                    v16 = v20[1] * boneMtx->quat[1];
-                    v23 = v20[1] * boneMtx->quat[2];
-                    v21 = v20[1] * boneMtx->quat[3];
-                    v18 = v20[2] * boneMtx->quat[2];
-                    v19 = v20[2] * boneMtx->quat[3];
-                    in2[0] = 1.0 - (v16 + v18);
-                    in2[1] = v17 + v19;
-                    in2[2] = v22 - v21;
-                    in2[3] = v17 - v19;
-                    in2[4] = 1.0 - (v24 + v18);
-                    in2[5] = v23 + v25;
-                    in2[6] = v22 + v21;
-                    in2[7] = v23 - v25;
-                    in2[8] = 1.0 - (v24 + v16);
-                    in2[9] = boneMtx->trans[0];
-                    in2[10] = boneMtx->trans[1];
-                    in2[11] = boneMtx->trans[2];
-                    MatrixMultiply43(invBaseMat, *(mat4x3*)&in2[0], axis);
+                    ConvertQuatToInverseMat(baseMat, invBaseMat);
+                    ConvertQuatToMat(boneMtx, mat);
+                    mat[3][0] = boneMtx->trans[0];
+                    mat[3][1] = boneMtx->trans[1];
+                    mat[3][2] = boneMtx->trans[2];
+                    MatrixMultiply43(invBaseMat, mat, axis);
                     Vec3Sub(localStart, axis[3], localStart2);
                     Vec3Sub(localEnd, axis[3], localEnd2);
-                    LocalMatrixTransposeTransformVector(localStart2, axis, boneExtents.start);
-                    LocalMatrixTransposeTransformVector(localEnd2, axis, boneExtents.end);
+                    MatrixTransposeTransformVector(localStart2, *(mat3x3 *)axis, boneExtents.start);
+                    MatrixTransposeTransformVector(localEnd2, *(mat3x3 *)axis, boneExtents.end);
                 }
                 CM_CalcTraceExtents(&boneExtents);
-                if (!CM_TraceBox(&boneExtents, (float*) csurf->mins, (float*) csurf->maxs, results->fraction))
+                if (!CM_TraceBox(&boneExtents, (float*)csurf->mins, (float*)csurf->maxs, results->fraction))
                 {
                     Vec3Sub(boneExtents.end, boneExtents.start, delta);
                     for (j = 0; j < csurf->numCollTris; ++j)
                     {
                         ctri = &csurf->collTris[j];
-                        v9 = Vec3Dot(boneExtents.end, ctri->plane);
-                        endDist = v9 - ctri->plane[3];
+                        endDist = Vec3Dot(boneExtents.end, ctri->plane) - ctri->plane[3];
                         if (endDist < 0.0)
                         {
-                            v10 = Vec3Dot(boneExtents.start, ctri->plane);
-                            startDist = v10 - ctri->plane[3];
+                            startDist = Vec3Dot(boneExtents.start, ctri->plane) - ctri->plane[3];
                             if (startDist > 0.0)
                             {
                                 frac = (startDist - 0.125) / (startDist - endDist);
@@ -756,31 +269,20 @@ int __cdecl XModelTraceLineAnimated(
                                 {
                                     hitFrac = startDist / (startDist - endDist);
                                     Vec3Mad(boneExtents.start, hitFrac, delta, hit);
-                                    v11 = Vec3Dot(hit, ctri->svec);
-                                    s = v11 - ctri->svec[3];
-                                    if (s >= -EQUAL_EPSILON && s <= 1.001000046730042)
+                                    s = Vec3Dot(hit, ctri->svec) - ctri->svec[3];
+                                    if (s >= -EQUAL_EPSILON && s <= (1.0f + EQUAL_EPSILON))
                                     {
-                                        v12 = Vec3Dot(hit, ctri->tvec);
-                                        t = v12 - ctri->tvec[3];
-                                        if (t >= -EQUAL_EPSILON && s + t <= 1.001000046730042)
+                                        t = Vec3Dot(hit, ctri->tvec) - ctri->tvec[3];
+                                        if (t >= -EQUAL_EPSILON && s + t <= (1.0f + EQUAL_EPSILON))
                                         {
                                             partIndex = csurf->boneIdx;
                                             results->startsolid = 0;
                                             results->allsolid = 0;
                                             results->fraction = frac;
-                                            if (results->fraction < 0.0 || results->fraction > 1.0)
-                                                MyAssertHandler(
-                                                    ".\\xanim\\xmodel.cpp",
-                                                    741,
-                                                    1,
-                                                    "%s\n\t(results->fraction) = %g",
-                                                    "(results->fraction >= 0 && results->fraction <= 1.0f)",
-                                                    results->fraction);
+                                            iassert(results->fraction >= 0 && results->fraction <= 1.0f);
                                             results->surfaceFlags = csurf->surfFlags;
                                             results->contents = csurf->contents;
-                                            results->normal[0] = ctri->plane[0];
-                                            results->normal[1] = ctri->plane[1];
-                                            results->normal[2] = ctri->plane[2];
+                                            Vec3Copy(ctri->plane, results->normal);
                                         }
                                     }
                                 }
@@ -792,13 +294,6 @@ int __cdecl XModelTraceLineAnimated(
         }
     }
     return partIndex;
-}
-
-void __cdecl LocalMatrixTransposeTransformVector(const float *in1, const float (*in2)[3], float *out)
-{
-    *out = *in1 * (*in2)[0] + in1[1] * (float)(*in2)[1] + in1[2] * (float)(*in2)[2];
-    out[1] = *in1 * (float)(*in2)[3] + in1[1] * (float)(*in2)[4] + in1[2] * (float)(*in2)[5];
-    out[2] = *in1 * (float)(*in2)[6] + in1[1] * (float)(*in2)[7] + in1[2] * (float)(*in2)[8];
 }
 
 void __cdecl XModelTraceLineAnimatedPartBits(

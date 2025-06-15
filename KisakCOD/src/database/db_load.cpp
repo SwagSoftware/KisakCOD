@@ -681,10 +681,10 @@ void __cdecl Load_XAnimIndices()
 {
     if (varXAnimParts->numframes >= 0x100u)
     {
-        if (varXAnimIndices->_1)
+        if (varXAnimIndices->_2)
         {
-            varXAnimIndices->_1 = AllocLoad_XBlendInfo();
-            varushort = (unsigned __int16 *)varXAnimIndices->_1;
+            varXAnimIndices->_2 = (unsigned short*)AllocLoad_XBlendInfo();
+            varushort = varXAnimIndices->_2;
             Load_ushortArray(1, varXAnimParts->indexCount);
         }
     }

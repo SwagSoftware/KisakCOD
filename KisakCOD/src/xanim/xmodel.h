@@ -232,8 +232,6 @@ XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(_
 XModel *__cdecl XModelPrecache_LoadObj(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int));
 XModel *__cdecl XModelPrecache_FastFile(const char *name);
 XModel *__cdecl XModelLoad(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int));
-XModelPartsLoad *__cdecl XModelPartsPrecache(XModel *model, const char *name, void *(__cdecl *Alloc)(int));
-XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int));
 
 double __cdecl XModelGetRadius(const XModel *model);
 void __cdecl XModelGetBounds(const XModel *model, float *mins, float *maxs);
@@ -253,7 +251,6 @@ int __cdecl XModelTraceLineAnimated(
     float *localStart,
     float *localEnd,
     int contentmask);
-void __cdecl LocalMatrixTransposeTransformVector(const float *in1, const float (*in2)[3], float *out);
 void __cdecl XModelTraceLineAnimatedPartBits(
     const struct DObj_s *obj,
     unsigned int modelIndex,
@@ -279,7 +276,6 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessLeaf(XSurfaceGetTriCandidatesLo
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessNode(XSurfaceGetTriCandidatesLocals *locals);
 int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned int offset, unsigned __int8 *index);
 unsigned __int16 *__cdecl XModelBoneNames(XModel *model);
-void __cdecl XModelCopyXModelParts(const XModelPartsLoad *modelParts, XModel *model);
 
 
 // xmodel_utils

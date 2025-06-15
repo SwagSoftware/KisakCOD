@@ -28,18 +28,6 @@ struct DiskLeaf_Version14 // sizeof=0x24
     int unused2;
 };
 
-struct DiskBrushModel // sizeof=0x30
-{
-    float mins[3];
-    float maxs[3];
-    unsigned __int16 firstTriSoup[2];
-    unsigned __int16 triSoupCount[2];
-    int firstSurface;
-    int numSurfaces;
-    int firstBrush;
-    int numBrushes;
-};
-
 struct dbrush_t // sizeof=0x4
 {
     __int16 numSides;

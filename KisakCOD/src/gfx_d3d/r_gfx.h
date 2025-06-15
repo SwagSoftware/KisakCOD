@@ -604,6 +604,18 @@ struct GfxBrushModel // sizeof=0x38
     // padding byte
 };
 
+struct DiskBrushModel // sizeof=0x30
+{
+    float mins[3];
+    float maxs[3];
+    unsigned __int16 firstTriSoup[2];
+    unsigned __int16 triSoupCount[2];
+    int firstSurface;
+    int numSurfaces;
+    int firstBrush;
+    int numBrushes;
+};
+
 struct GfxStateBits // sizeof=0x8
 {
     unsigned int loadBits[2];

@@ -2274,6 +2274,42 @@ void __cdecl QuatMultiplyEquals(const float *in, float *inout)
     inout[3] = temp[2];
 }
 
+void __cdecl ConvertQuatToInverseMat(const DObjAnimMat *mat, float (*axis)[3])
+{
+    float scaledQuat[3]; // [esp+28h] [ebp-20h]
+
+    iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
+    iassert(!IS_NAN(mat->transWeight));
+
+    float transWeight = mat->transWeight;
+
+    Vec3Scale(mat->quat, transWeight, scaledQuat);
+
+    float xx = scaledQuat[0] * mat->quat[0];
+    float xy = scaledQuat[0] * mat->quat[1];
+    float xz = scaledQuat[0] * mat->quat[2];
+    float xw = scaledQuat[0] * mat->quat[3];
+    float yy = scaledQuat[1] * mat->quat[1];
+    float yz = scaledQuat[1] * mat->quat[2];
+    float yw = scaledQuat[1] * mat->quat[3];
+    float zz = scaledQuat[2] * mat->quat[2];
+    float zw = scaledQuat[2] * mat->quat[3];
+
+    (*axis)[0] = 1.0 - (yy + zz);
+    (*axis)[1] = xy - zw;
+    (*axis)[2] = xz + yw;
+    (*axis)[3] = xy + zw;
+    (*axis)[4] = 1.0 - (xx + zz);
+    (*axis)[5] = yz - xw;
+    (*axis)[6] = xz - yw;
+    (*axis)[7] = yz + xw;
+    (*axis)[8] = 1.0 - (xx + yy);
+
+    (*axis)[9] =  -(mat->trans[0] * (*axis)[0] + mat->trans[1] * (*axis)[3] + mat->trans[2] * (*axis)[6]);
+    (*axis)[10] = -(mat->trans[0] * (*axis)[1] + mat->trans[1] * (*axis)[4] + mat->trans[2] * (*axis)[7]);
+    (*axis)[11] = -(mat->trans[0] * (*axis)[2] + mat->trans[1] * (*axis)[5] + mat->trans[2] * (*axis)[8]);
+}
+
 void __cdecl ConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
 {
     float scaledQuat[3]; // [esp+28h] [ebp-20h]
@@ -2809,7 +2845,7 @@ void __cdecl Vec3Cross(const vec3r v0, const vec3r v1, vec3r cross)
 
 void __cdecl Vec3Copy(const vec3r from, vec3r to)
 {
-    *to = *from;
+    to[0] = from[0];
     to[1] = from[1];
     to[2] = from[2];
 }

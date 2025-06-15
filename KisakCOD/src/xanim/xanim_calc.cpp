@@ -757,7 +757,7 @@ void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotT
 {
     bool v5; // [esp+14h] [ebp-20h]
     float time; // [esp+24h] [ebp-10h]
-    char *animToModel; // [esp+28h] [ebp-Ch]
+    XAnimToXModel *animToModel; // [esp+28h] [ebp-Ch]
     int i; // [esp+2Ch] [ebp-8h]
     XAnimParts *parts; // [esp+30h] [ebp-4h]
 
@@ -766,22 +766,27 @@ void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotT
     iassert(parts);
     iassert(info->animToModel);
 
-    animToModel = SL_ConvertToString(info->animToModel);
+    animToModel = (XAnimToXModel*)SL_ConvertToString(info->animToModel);
 
-    for (i = 0; i < 4; ++i)
-        animInfo->animPartBits.array[i] |= *(unsigned int *)&animToModel[4 * i] & ~animInfo->ignorePartBits.array[i]; // weird exception
+    //for (i = 0; i < 4; ++i)
+    //    animInfo->animPartBits.array[i] |= *(unsigned int *)&animToModel[4 * i] & ~animInfo->ignorePartBits.array[i]; // weird exception
+
+    for (i = 0; i < 4; i++)
+    {
+        animInfo->animPartBits.array[i] |= animToModel->partBits.array[i] & ~animInfo->ignorePartBits.array[i];
+    }
 
     time = info->state.currentAnimTime;
 
     iassert(time >= 0.0f);
     iassert(parts->bLoop ? (time < 1.f) : (time <= 1.f));
 
-    if (time != 1.0 && parts->numframes)
+    if (time != 1.0f && parts->numframes)
     {
         if (parts->numframes >= 256)
             XAnimCalcParts<unsigned short>(
                 parts,
-                (const unsigned __int8 *)animToModel + 17,
+                animToModel->boneIndex,
                 time,
                 weightScale,
                 rotTransArray,
@@ -789,7 +794,7 @@ void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotT
         else
             XAnimCalcParts<unsigned char>(
                 parts,
-                (const unsigned __int8 *)animToModel + 17,
+                animToModel->boneIndex,
                 time,
                 weightScale,
                 rotTransArray,
@@ -800,7 +805,7 @@ void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotT
         iassert(!parts->bLoop);
         XAnimCalcNonLoopEnd(
             parts,
-            (const unsigned __int8 *)animToModel + 17,
+            animToModel->boneIndex,
             weightScale,
             rotTransArray,
             &animInfo->ignorePartBits);

@@ -191,7 +191,7 @@ char __cdecl FX_ValidatePhysics(const FxEditorEffectDef *editorEffect, const FxE
     else
         v3 = 0.0;
     elasticityMax = edElemDef->elasticity.base + v3;
-    if (elasticityMin >= -EQUAL_EPSILON && elasticityMax <= 1.001000046730042)
+    if (elasticityMin >= -EQUAL_EPSILON && elasticityMax <= (1.0f + EQUAL_EPSILON))
         return 1;
     Com_PrintError(
         21,

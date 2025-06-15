@@ -948,14 +948,14 @@ GfxShadowGeometry *R_AllocShadowGeometryHeaderMemory()
 
 void __cdecl R_LoadSubmodels(TrisType trisType)
 {
-    __int16 v1; // [esp+4h] [ebp-18h]
+    unsigned __int16 v1; // [esp+4h] [ebp-18h]
     GfxBrushModel *out; // [esp+8h] [ebp-14h]
-    char *in; // [esp+Ch] [ebp-10h]
+    DiskBrushModel *in; // [esp+Ch] [ebp-10h]
     int axis; // [esp+10h] [ebp-Ch]
     unsigned int modelIndex; // [esp+14h] [ebp-8h]
     unsigned int modelCount; // [esp+18h] [ebp-4h] BYREF
 
-    in = Com_GetBspLump(LUMP_MODELS, 48u, &modelCount);
+    in = (DiskBrushModel *)Com_GetBspLump(LUMP_MODELS, 48u, &modelCount);
     out = (GfxBrushModel *)Hunk_Alloc(56 * modelCount, "R_LoadSubmodels", 20);
     s_world.models = out;
     s_world.modelCount = modelCount;
@@ -963,16 +963,16 @@ void __cdecl R_LoadSubmodels(TrisType trisType)
     {
         for (axis = 0; axis < 3; ++axis)
         {
-            out->bounds[0][axis] = *(float *)&in[4 * axis];
-            out->bounds[1][axis] = *(float *)&in[4 * axis + 12];
+            out->bounds[0][axis] = in->mins[axis];
+            out->bounds[1][axis] = in->maxs[axis];
         }
-        out->surfaceCount = *(_WORD *)&in[2 * trisType + 28];
+        out->surfaceCount = in->triSoupCount[trisType];
         if (out->surfaceCount)
-            v1 = *(_WORD *)&in[2 * trisType + 24];
+            v1 = in->firstTriSoup[trisType];
         else
             v1 = -1;
         out->startSurfIndex = v1;
-        in += 48;
+        ++in;
         ++out;
     }
 }

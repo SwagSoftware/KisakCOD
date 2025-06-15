@@ -9,6 +9,14 @@
 #include "xanim.h"
 #include <physics/phys_local.h>
 
+XModelDefault g_default;
+Material *g_materials[1];
+
+void __cdecl TRACK_xmodel()
+{
+    track_static_alloc_internal(&g_default, sizeof(g_default), "g_default", 11);
+}
+
 int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3& axis, float *mins, float *maxs)
 {
     float v5; // [esp+0h] [ebp-34h]
@@ -1415,6 +1423,51 @@ bool __cdecl XModelAllowLoadMesh()
     return com_dedicated->current.integer == 0;
 }
 
+static XModelPartsLoad *__cdecl XModelPartsFindData(const char *name)
+{
+    return (XModelPartsLoad *)Hunk_FindDataForFile(4, name);
+}
+
+void __cdecl XModelPartsSetData(const char *name, XModelPartsLoad *modelParts, void *(__cdecl *Alloc)(int))
+{
+    Hunk_SetDataForFile(4, name, modelParts, Alloc);
+}
+
+XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, void *(__cdecl *Alloc)(int));
+
+XModelPartsLoad *__cdecl XModelPartsPrecache(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
+{
+    XModelPartsLoad *modelParts; // [esp+0h] [ebp-4h]
+    XModelPartsLoad *modelPartsa; // [esp+0h] [ebp-4h]
+
+    modelParts = XModelPartsFindData(name);
+    if (modelParts)
+        return modelParts;
+    modelPartsa = XModelPartsLoadFile(model, name, Alloc);
+    if (modelPartsa)
+    {
+        XModelPartsSetData(name, modelPartsa, Alloc);
+        return modelPartsa;
+    }
+    else
+    {
+        Com_PrintError(19, "ERROR: Cannot find xmodelparts '%s'.\n", name);
+        return 0;
+    }
+}
+
+void __cdecl XModelCopyXModelParts(const XModelPartsLoad *modelParts, XModel *model)
+{
+    model->numBones = modelParts->numBones;
+    model->numRootBones = modelParts->numRootBones;
+    model->boneNames = modelParts->boneNames;
+    model->parentList = modelParts->parentList;
+    model->quats = modelParts->quats;
+    model->trans = modelParts->trans;
+    model->partClassification = modelParts->partClassification;
+    model->baseMat = modelParts->baseMat;
+}
+
 XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
 {
     double v4; // st7
@@ -1650,5 +1703,330 @@ XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(_
     {
         Com_PrintError(19, "ERROR: filename '%s' too long\n", dest);
         return 0;
+    }
+}
+
+void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
+{
+    float result[3]; // [esp+44h] [ebp-74h] BYREF
+    float len; // [esp+88h] [ebp-30h]
+    int numBones; // [esp+90h] [ebp-28h]
+    float *trans; // [esp+94h] [ebp-24h]
+    __int16 *quats; // [esp+98h] [ebp-20h]
+    unsigned __int8 *parentList; // [esp+9Ch] [ebp-1Ch]
+    int i; // [esp+A0h] [ebp-18h]
+    float tempQuat[4]; // [esp+A4h] [ebp-14h] BYREF
+    DObjAnimMat *quatTrans; // [esp+B4h] [ebp-4h]
+
+    parentList = modelParts->parentList;
+    numBones = modelParts->numBones;
+    quats = modelParts->quats;
+    trans = modelParts->trans;
+    quatTrans = modelParts->baseMat;
+
+    for (i = modelParts->numRootBones; i; --i)
+    {
+        quatTrans->quat[0] = 0.0f;
+        quatTrans->quat[1] = 0.0f;
+        quatTrans->quat[2] = 0.0f;
+        quatTrans->quat[3] = 1.0f;
+
+        quatTrans->trans[0] = 0.0f;
+        quatTrans->trans[1] = 0.0f;
+        quatTrans->trans[2] = 0.0f;
+
+        quatTrans->transWeight = 2.0f;
+        --i;
+        ++quatTrans;
+    }
+
+    i = numBones - modelParts->numRootBones;
+
+    while (i)
+    {
+        tempQuat[0] = quats[0] * 0.00003051850944757462;
+        tempQuat[1] = quats[1] * 0.00003051850944757462;
+        tempQuat[2] = quats[2] * 0.00003051850944757462;
+        tempQuat[3] = quats[3] * 0.00003051850944757462;
+        QuatMultiply(tempQuat, quatTrans[-*parentList].quat, quatTrans->quat);
+        len = Vec4LengthSq(quatTrans->quat);
+        if (len == 0.0f)
+        {
+            quatTrans->quat[3] = 1.0f;
+            quatTrans->transWeight = 2.0f;
+        }
+        else
+        {
+            quatTrans->transWeight = 2.0f / len;
+        }
+        MatrixTransformVectorQuatTrans(trans, &quatTrans[-*parentList], quatTrans->trans);
+        --i;
+        quats += 4;
+        trans += 3;
+        ++quatTrans;
+        ++parentList;
+    }
+}
+
+XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
+{
+    unsigned __int8 *v4; // eax
+    unsigned __int16 prev; // ax
+    unsigned __int8 *v6; // [esp+10h] [ebp-A8h]
+    float v7; // [esp+18h] [ebp-A0h]
+    float v8; // [esp+1Ch] [ebp-9Ch]
+    float v9; // [esp+20h] [ebp-98h]
+    __int16 v10; // [esp+24h] [ebp-94h]
+    __int16 v11; // [esp+28h] [ebp-90h]
+    __int16 v12; // [esp+2Ch] [ebp-8Ch]
+    const unsigned __int8 *pos; // [esp+30h] [ebp-88h] BYREF
+    int numBones; // [esp+34h] [ebp-84h]
+    char filename[64]; // [esp+38h] [ebp-80h] BYREF
+    int numRootBones; // [esp+7Ch] [ebp-3Ch]
+    __int16 numChildBones; // [esp+80h] [ebp-38h]
+    unsigned __int8 *buf; // [esp+84h] [ebp-34h] BYREF
+    float *trans; // [esp+88h] [ebp-30h]
+    __int16 version; // [esp+8Ch] [ebp-2Ch]
+    int len; // [esp+90h] [ebp-28h]
+    int size; // [esp+94h] [ebp-24h]
+    __int16 *quats; // [esp+98h] [ebp-20h]
+    int fileSize; // [esp+9Ch] [ebp-1Ch]
+    unsigned __int8 *parentList; // [esp+A0h] [ebp-18h]
+    int index; // [esp+A4h] [ebp-14h]
+    int i; // [esp+A8h] [ebp-10h]
+    XModelPartsLoad *modelParts; // [esp+ACh] [ebp-Ch]
+    bool useBones; // [esp+B3h] [ebp-5h]
+    unsigned __int16 *boneNames; // [esp+B4h] [ebp-4h]
+
+    if (Com_sprintf(filename, 0x40u, "xmodelparts/%s", name) >= 0)
+    {
+        fileSize = FS_ReadFile(filename, (void **)&buf);
+        if (fileSize >= 0)
+        {
+            if (fileSize)
+            {
+                if (!buf)
+                    MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 156, 0, "%s", "buf");
+                pos = buf;
+                v12 = *(_WORD *)buf;
+                pos = buf + 2;
+                version = v12;
+                if (v12 == 25)
+                {
+                    v11 = *(_WORD *)pos;
+                    pos += 2;
+                    numChildBones = v11;
+                    v10 = *(_WORD *)pos;
+                    pos += 2;
+                    numRootBones = v10;
+                    numBones = v10 + v11;
+                    size = 2 * numBones;
+                    boneNames = (unsigned __int16 *)Alloc(2 * numBones);
+                    model->memUsage += size;
+                    if (numBones < 128)
+                    {
+                        size = numChildBones;
+                        if (numChildBones)
+                            v6 = (unsigned __int8 *)Alloc(size);
+                        else
+                            v6 = 0;
+                        parentList = v6;
+                        model->memUsage += size;
+                        size = 28;
+                        modelParts = (XModelPartsLoad *)Alloc(28);
+                        model->memUsage += size;
+                        modelParts->parentList = parentList;
+                        modelParts->boneNames = boneNames;
+                        size = 32 * numBones;
+                        modelParts->baseMat = (DObjAnimMat *)Alloc(32 * numBones);
+                        model->memUsage += size;
+                        if (numChildBones)
+                        {
+                            size = 8 * numChildBones;
+                            modelParts->quats = (__int16 *)Alloc(size);
+                            model->memUsage += size;
+                            size = 16 * numChildBones;
+                            modelParts->trans = (float *)Alloc(size);
+                            model->memUsage += size;
+                        }
+                        else
+                        {
+                            modelParts->quats = 0;
+                            modelParts->trans = 0;
+                        }
+                        size = numBones;
+                        v4 = (unsigned __int8 *)Alloc(numBones);
+                        modelParts->partClassification = v4;
+                        model->memUsage += size;
+                        modelParts->numBones = numBones;
+                        if (modelParts->numBones != numBones)
+                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 219, 0, "%s", "modelParts->numBones == numBones");
+                        modelParts->numRootBones = numRootBones;
+                        if (modelParts->numRootBones != numRootBones)
+                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 222, 0, "%s", "modelParts->numRootBones == numRootBones");
+                        quats = modelParts->quats;
+                        trans = modelParts->trans;
+                        i = numRootBones;
+                        while (i < numBones)
+                        {
+                            index = *pos++;
+                            if (index >= i)
+                                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 233, 0, "%s", "index < i");
+                            *parentList = i - index;
+                            if (i - index != *parentList)
+                                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 235, 0, "%s", "i - index == *parentList");
+                            v9 = *(float *)pos;
+                            pos += 4;
+                            *trans = v9;
+                            v8 = *(float *)pos;
+                            pos += 4;
+                            trans[1] = v8;
+                            v7 = *(float *)pos;
+                            pos += 4;
+                            trans[2] = v7;
+                            ConsumeQuatNoSwap(&pos, quats);
+                            ++i;
+                            quats += 4;
+                            trans += 3;
+                            ++parentList;
+                        }
+                        for (i = 0; i < numBones; ++i)
+                        {
+                            len = strlen((const char *)pos) + 1;
+                            prev = SL_GetStringOfSize((char *)pos, 0, len, 10).prev;
+                            boneNames[i] = prev;
+                            pos += len;
+                        }
+                        memcpy(modelParts->partClassification, (unsigned __int8 *)pos, numBones);
+                        pos += numBones;
+                        useBones = *pos++ != 0;
+                        FS_FreeFile((char *)buf);
+                        XModelCalcBasePose(modelParts);
+                        if (!useBones)
+                            memset((unsigned __int8 *)modelParts->trans, 0, 16 * numChildBones);
+                        return modelParts;
+                    }
+                    else
+                    {
+                        FS_FreeFile((char *)buf);
+                        Com_PrintError(19, "ERROR: xmodel '%s' has more than %d bones\n", name, 127);
+                        return 0;
+                    }
+                }
+                else
+                {
+                    FS_FreeFile((char *)buf);
+                    Com_PrintError(19, "ERROR: xmodelparts '%s' out of date (version %d, expecting %d).\n", name, version, 25);
+                    return 0;
+                }
+            }
+            else
+            {
+                Com_PrintError(19, "ERROR: xmodelparts '%s' has 0 length\n", name);
+                FS_FreeFile((char *)buf);
+                return 0;
+            }
+        }
+        else
+        {
+            if (buf)
+                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 144, 0, "%s", "!buf");
+            Com_PrintError(19, "ERROR: xmodelparts '%s' not found\n", name);
+            return 0;
+        }
+    }
+    else
+    {
+        Com_PrintError(19, "ERROR: filename '%s' too long\n", filename);
+        return 0;
+    }
+}
+
+XModel *__cdecl XModelLoad(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
+{
+    XModel *model; // [esp+0h] [ebp-4h]
+
+    model = XModelLoadFile(name, Alloc, AllocColl);
+    if (model)
+        return model;
+    else
+        return 0;
+}
+
+static XModelPartsLoad *__cdecl XModelCreateDefaultParts()
+{
+    g_default.modelParts.parentList = g_default.parentList;
+    g_default.modelParts.boneNames = (unsigned __int16 *)&g_default;
+    g_default.modelParts.quats = 0;
+    g_default.modelParts.trans = 0;
+    g_default.modelParts.numBones = 1;
+    g_default.modelParts.numRootBones = 1;
+    g_default.modelParts.partClassification = g_default.partClassification;
+    g_default.partClassification[0] = 0;
+    g_default.boneNames[0] = 0;
+    return &g_default.modelParts;
+}
+
+static void __cdecl XModelMakeDefault(XModel *model)
+{
+    const XModelPartsLoad *DefaultParts; // eax
+
+    model->bad = 1;
+    DefaultParts = XModelCreateDefaultParts();
+    XModelCopyXModelParts(DefaultParts, model);
+    memset((unsigned __int8 *)model->lodInfo, 0, sizeof(model->lodInfo));
+    model->numLods = 1;
+    model->collLod = 0;
+    model->name = "DEFAULT";
+    model->surfs = 0;
+    model->materialHandles = g_materials;
+    g_materials[0] = Material_RegisterHandle("mc/$default", 8);
+    g_default.boneInfo.bounds[0][0] = -16.0;
+    g_default.boneInfo.bounds[0][1] = -16.0;
+    g_default.boneInfo.bounds[0][2] = -16.0;
+    g_default.boneInfo.bounds[1][0] = 16.0;
+    g_default.boneInfo.bounds[1][1] = 16.0;
+    g_default.boneInfo.bounds[1][2] = 16.0;
+    model->boneInfo = &g_default.boneInfo;
+}
+
+static XModel *__cdecl XModelCreateDefault(void *(__cdecl *Alloc)(int))
+{
+    XModel *model; // [esp+0h] [ebp-4h]
+
+    model = (XModel *)Alloc(332);
+    XModelMakeDefault(model);
+    return model;
+}
+
+static XModel *__cdecl XModelDefaultModel(const char *name, void *(__cdecl *Alloc)(int))
+{
+    XModel *model; // [esp+0h] [ebp-4h]
+
+    model = XModelCreateDefault(Alloc);
+    Hunk_SetDataForFile(5, name, model, Alloc);
+    return model;
+}
+
+XModel *__cdecl XModelPrecache_LoadObj(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
+{
+    XModel *model; // [esp+0h] [ebp-4h]
+    XModel *modela; // [esp+0h] [ebp-4h]
+
+    model = (XModel *)Hunk_FindDataForFile(5, name);
+    if (model)
+        return model;
+    ProfLoad_Begin("Load xmodel");
+    modela = XModelLoad(name, Alloc, AllocColl);
+    ProfLoad_End();
+    if (modela)
+    {
+        modela->name = Hunk_SetDataForFile(5, name, modela, Alloc);
+        return modela;
+    }
+    else
+    {
+        Com_PrintError(19, "ERROR: Cannot find xmodel '%s'.\n", name);
+        return XModelDefaultModel(name, Alloc);
     }
 }
