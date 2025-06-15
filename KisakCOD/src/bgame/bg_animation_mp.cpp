@@ -2300,21 +2300,19 @@ void __cdecl BG_UpdatePlayerDObj(
     clientInfo_t *ci,
     int attachIgnoreCollision)
 {
-    int iNumModels; // [esp+0h] [ebp-114h]
+    int iNumModels = 0; // [esp+0h] [ebp-114h]
     int iClientWeapon; // [esp+4h] [ebp-110h]
     int i; // [esp+8h] [ebp-10Ch]
     XAnimTree_s *pAnimTree; // [esp+Ch] [ebp-108h]
     DObjModel_s dobjModels[32]; // [esp+14h] [ebp-100h] BYREF
 
     BG_CheckThread();
-    if (!bgs)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3541, 0, "%s", "bgs");
+    iassert(bgs);
     iClientWeapon = es->weapon;
     if ((es->lerp.eFlags & 0x300) != 0)
         iClientWeapon = 0;
     pAnimTree = ci->pXAnimTree;
-    if (!pAnimTree)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3550, 0, "%s", "pAnimTree");
+    iassert(pAnimTree);
     if (!ci->infoValid || !ci->model[0])
     {
         XAnimClearTree(pAnimTree);
@@ -2328,8 +2326,7 @@ void __cdecl BG_UpdatePlayerDObj(
         bgs->SafeDObjFree(es->number, localClientNum);
     }
     dobjModels[0].model = bgs->GetXModel(ci->model);
-    if (!dobjModels[0].model)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3572, 0, "%s", "dobjModels[iNumModels].model");
+    iassert(dobjModels[iNumModels].model);
     dobjModels[0].boneName = 0;
     dobjModels[0].ignoreCollision = 0;
     iNumModels = 1;
@@ -2339,13 +2336,12 @@ void __cdecl BG_UpdatePlayerDObj(
         iNumModels = bgs->AttachWeapon(dobjModels, 1u, ci);
     for (i = 0; i < 6 && ci->attachModelNames[i][0]; ++i)
     {
-        if (iNumModels >= 32)
-            MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3588, 0, "%s", "iNumModels < DOBJ_MAX_SUBMODELS");
+        iassert(iNumModels < DOBJ_MAX_SUBMODELS);
         dobjModels[iNumModels].model = bgs->GetXModel(ci->attachModelNames[i]);
-        if (!dobjModels[iNumModels].model)
-            MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3590, 0, "%s", "dobjModels[iNumModels].model");
+        iassert(dobjModels[iNumModels].model);
         dobjModels[iNumModels].boneName = SL_FindString(ci->attachTagNames[i]);
-        dobjModels[iNumModels++].ignoreCollision = (attachIgnoreCollision & (1 << i)) != 0;
+        dobjModels[iNumModels].ignoreCollision = (attachIgnoreCollision & (1 << i)) != 0;
+        iNumModels++;
     }
     bgs->CreateDObj(dobjModels, iNumModels, pAnimTree, es->number, localClientNum, ci);
     ci->dobjDirty = 0;

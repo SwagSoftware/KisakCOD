@@ -2163,7 +2163,7 @@ void __cdecl CG_CreateDObj(
 
     Com_ClientDObjCreate(dobjModels, numModels, tree, handle, localClientNum);
     v6 = cg_entityOriginArray[localClientNum][ci->clientNum];
-    *v6 = 131072.0;
+    v6[0] = 131072.0;
     v6[1] = 131072.0;
     v6[2] = 131072.0;
 }

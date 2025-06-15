@@ -565,7 +565,7 @@ double __cdecl XAnimGetTime(const XAnimTree_s* tree, unsigned int animIndex)
     if (infoIndex)
         return g_xAnimInfo[infoIndex].state.currentAnimTime;
     else
-        return (float)0.0;
+        return 0.0f;
 }
 
 unsigned int __cdecl XAnimGetInfoIndex(const XAnimTree_s* tree, unsigned int animIndex)
@@ -2685,8 +2685,6 @@ void __cdecl XAnimCalcDeltaTree(
     }
 }
 
-void __cdecl XAnim_CalcDeltaForTime(const XAnimParts *anim, float time, float *rotDelta, float4 *posDelta);
-
 void __cdecl XAnimCalcRelDeltaParts(
     const XAnimParts* parts,
     float weightScale,
@@ -2726,14 +2724,14 @@ void __cdecl XAnimCalcRelDeltaParts(
                 if (trans->smallTrans)
                 {
                     pSmallTrans = (unsigned __int8*)trans->u.frames.frames._1;
-                    fromVec.v[0] = pSmallTrans[0];
-                    fromVec.v[1] = pSmallTrans[1];
-                    fromVec.v[2] = pSmallTrans[2];
+                    fromVec.v[0] = (float)pSmallTrans[0];
+                    fromVec.v[1] = (float)pSmallTrans[1];
+                    fromVec.v[2] = (float)pSmallTrans[2];
                     fromVec.v[3] = 0.0f;
                     v8 = &pSmallTrans[3 * trans->size];
-                    toVec.v[0] = v8[0];
-                    toVec.v[1] = v8[1];
-                    toVec.v[2] = v8[2];
+                    toVec.v[0] = (float)v8[0];
+                    toVec.v[1] = (float)v8[1];
+                    toVec.v[2] = (float)v8[2];
                 }
                 else
                 {
@@ -2794,16 +2792,16 @@ void __cdecl TransformToQuatRefFrame(const float* rot, float* trans)
     float zw; // [esp+8h] [ebp-8h]
     float temp; // [esp+Ch] [ebp-4h]
 
-    zz = *rot * *rot;
+    zz = rot[0] * rot[0];
     r = rot[1] * rot[1] + zz;
-    if (r != 0.0)
+    if (r != 0.0f)
     {
-        ra = 2.0 / r;
+        ra = 2.0f / r;
         zza = zz * ra;
-        zw = *rot * rot[1] * ra;
-        temp = (1.0 - zza) * *trans + zw * trans[1];
-        trans[1] = trans[1] - (zw * *trans + zza * trans[1]);
-        *trans = temp;
+        zw = rot[0] * rot[1] * ra;
+        temp = (1.0f - zza) * trans[0] + zw * trans[1];
+        trans[1] = trans[1] - (zw * trans[0] + zza * trans[1]);
+        trans[0] = temp;
     }
 }
 
@@ -2838,12 +2836,11 @@ void __cdecl XAnimCalcAbsDelta(DObj_s* obj, unsigned int animIndex, float* rot, 
 
     Profile_Begin(307);
     tree = obj->tree;
-    if (!tree)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 2909, 0, "%s", "tree");
-    if (!tree->anims)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 2910, 0, "%s", "tree->anims");
-    if (animIndex >= tree->anims->size)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 2911, 0, "%s", "animIndex < tree->anims->size");
+
+    iassert(tree);
+    iassert(tree->anims);
+    iassert(animIndex < tree->anims->size);
+
     infoIndex = XAnimGetInfoIndex(tree, animIndex);
     if (infoIndex)
     {

@@ -2241,8 +2241,7 @@ void __cdecl BG_CreateXAnim(XAnim_s *anims, unsigned int animIndex, const char *
 
 void __cdecl BG_CheckThread()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\bgame\\bg_misc.cpp", 2066, 0, "%s", "Sys_IsMainThread()");
+    iassert(Sys_IsMainThread());
 }
 
 int __cdecl BG_GetMaxSprintTime(const playerState_s *ps)

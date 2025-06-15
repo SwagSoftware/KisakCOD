@@ -92,6 +92,7 @@ void __cdecl XAnimCalc(
                         if (bClear)
                         {
                             calcBuffer = rotTransArray;
+                            XAnimCalc(obj, firstInfo, firstWeight, 1, 1, animInfo, rotTransArrayIndex, rotTransArray); // LWSS: add from blops.
                         }
                         else
                         {
@@ -99,6 +100,7 @@ void __cdecl XAnimCalc(
                             if (!calcBuffer)
                                 return;
                             allocedCalcBuffer = 1;
+                            XAnimCalc(obj, firstInfo, firstWeight, 1, 1, animInfo, rotTransArrayIndex, calcBuffer); // LWSS: add from blops.
                         }
                         XAnimCalc(obj, firstInfo, firstWeight, 1, 1, animInfo, rotTransArrayIndex, calcBuffer);
                     }
@@ -347,8 +349,16 @@ void __cdecl XAnimCalcParts(
         }
         else
         {
-            pIndices = (T *)dataByte;
-            dataByte += tableSize + 1;
+            if constexpr (sizeof(T) == sizeof(unsigned char))
+            {
+                pIndices = (T *)dataByte;
+                dataByte += tableSize + 1;
+            }
+            else
+            {
+                pIndices = (T *)dataShort;
+                dataShort += tableSize + 1;
+            }
             if (ignorePartBits->testBit(modelPartIndex))
             {
                 v48 = 0;
@@ -416,8 +426,17 @@ LABEL_45:
         }
         else
         {
-            pIndices = (T *)dataByte;
-            dataByte += tableSize + 1;
+            if constexpr (sizeof(T) == sizeof(unsigned char))
+            {
+                pIndices = (T *)dataByte;
+                dataByte += tableSize + 1;
+            }
+            else
+            {
+                pIndices = (T *)dataShort;
+                dataShort += tableSize + 1;
+            }
+            
             if (ignorePartBits->testBit(modelPartIndex))
             {
                 v42 = 0;
@@ -587,8 +606,16 @@ LABEL_67:
         }
         else
         {
-            pIndices = (T*)dataByte;
-            dataByte += tableSize + 1;
+            if constexpr (sizeof(T) == sizeof(unsigned char))
+            {
+                pIndices = (T *)dataByte;
+                dataByte += tableSize + 1;
+            }
+            else
+            {
+                pIndices = (T *)dataShort;
+                dataShort += tableSize + 1;
+            }
 
             if (ignorePartBits->testBit(modelPartIndex))
             {
@@ -654,8 +681,16 @@ LABEL_119:
         }
         else
         {
-            pIndices = (T*)dataByte;
-            dataByte += tableSize + 1;
+            if constexpr (sizeof(T) == sizeof(unsigned char))
+            {
+                pIndices = (T *)dataByte;
+                dataByte += tableSize + 1;
+            }
+            else
+            {
+                pIndices = (T *)dataShort;
+                dataShort += tableSize + 1;
+            }
 
             if (ignorePartBits->testBit(modelPartIndex))
             {
@@ -1755,7 +1790,7 @@ LABEL_20:
         iassert(!tree->modifyRefCount);
         info.ignorePartBits.setBit(127);
         AnimInfo = GetAnimInfo(tree->children);
-        XAnimCalc(obj, AnimInfo, 1.0, 1, 0, &info, 0, p_skel->mat);
+        XAnimCalc(obj, AnimInfo, 1.0f, 1, 0, &info, 0, p_skel->mat);
         iassert(!tree->modifyRefCount);
         InterlockedDecrement(&tree->calcRefCount);
     }

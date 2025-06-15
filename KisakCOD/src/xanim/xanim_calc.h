@@ -68,3 +68,4 @@ void __cdecl XAnimWeightedAccumLerpedTrans(
 void __cdecl XAnimWeightedAccumTrans(float weightScale, int *dataInt, DObjAnimMat *totalRotTrans);
 
 void DObjCalcAnim(const struct DObj_s *obj, int *partBits);
+void __cdecl XAnim_CalcDeltaForTime(const XAnimParts *anim, float time, float *rotDelta, float4 *posDelta);
