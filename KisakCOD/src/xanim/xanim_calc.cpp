@@ -375,13 +375,13 @@ LABEL_45:
             frame = &randomDataShort[2 * keyFrameIndex];
             fromVec.v[0] = 0.0f;
             fromVec.v[1] = 0.0f;
-            fromVec.v[2] = (float)frame[0] * 0.00003051850944757462;
-            fromVec.v[3] = (float)frame[1] * 0.00003051850944757462;
+            fromVec.v[2] = (float)frame[0] * (1.0f/32767.0f);
+            fromVec.v[3] = (float)frame[1] * (1.0f/32767.0f);
 
             toVec.v[0] = 0.0f;
             toVec.v[1] = 0.0f;
-            toVec.v[2] = (float)frame[2] * 0.00003051850944757462;
-            toVec.v[3] = (float)frame[3] * 0.00003051850944757462;
+            toVec.v[2] = (float)frame[2] * (1.0f/32767.0f);
+            toVec.v[3] = (float)frame[3] * (1.0f/32767.0f);
 
             v44 = keyFrameLerpFrac;
             start = rotTransArray[modelPartIndex].quat;
@@ -449,15 +449,15 @@ LABEL_67:
         if (v42)
         {
             v78 = &randomDataShort[4 * v77];
-            dir0[0] = v78[0] * 0.00003051850944757462;
-            dir0[1] = v78[1] * 0.00003051850944757462;
-            dir0[2] = v78[2] * 0.00003051850944757462;
-            dir0[3] = v78[3] * 0.00003051850944757462;
+            dir0[0] = v78[0] * (1.0f/32767.0f);
+            dir0[1] = v78[1] * (1.0f/32767.0f);
+            dir0[2] = v78[2] * (1.0f/32767.0f);
+            dir0[3] = v78[3] * (1.0f/32767.0f);
 
-            dir1[0] = v78[4] * 0.00003051850944757462;
-            dir1[1] = v78[5] * 0.00003051850944757462;
-            dir1[2] = v78[6] * 0.00003051850944757462;
-            dir1[3] = v78[7] * 0.00003051850944757462;
+            dir1[0] = v78[4] * (1.0f/32767.0f);
+            dir1[1] = v78[5] * (1.0f/32767.0f);
+            dir1[2] = v78[6] * (1.0f/32767.0f);
+            dir1[3] = v78[7] * (1.0f/32767.0f);
 
             v38 = v80;
             result = rotTransArray[modelPartIndex].quat;
@@ -479,8 +479,8 @@ LABEL_67:
         {
             frameVec.v[0] = 0.0;
             frameVec.v[1] = 0.0;
-            frameVec.v[2] = dataShort[0] * 0.00003051850944757462;
-            frameVec.v[3] = dataShort[1] * 0.00003051850944757462;
+            frameVec.v[2] = dataShort[0] * (1.0f/32767.0f);
+            frameVec.v[3] = dataShort[1] * (1.0f/32767.0f);
             quat = rotTransArray[modelPartIndex].quat;
             dir[0] = 0.0;
             dir[1] = 0.0;
@@ -501,10 +501,10 @@ LABEL_67:
 
         if (!ignorePartBits->testBit(modelPartIndex))
         {
-            v72 = dataShort[0] * 0.00003051850944757462;
-            v73 = dataShort[1] * 0.00003051850944757462;
-            v74 = dataShort[2] * 0.00003051850944757462;
-            v75 = dataShort[3] * 0.00003051850944757462;
+            v72 = dataShort[0] * (1.0f/32767.0f);
+            v73 = dataShort[1] * (1.0f/32767.0f);
+            v74 = dataShort[2] * (1.0f/32767.0f);
+            v75 = dataShort[3] * (1.0f/32767.0f);
             v33 = rotTransArray[modelPartIndex].quat;
             v34[0] = v72;
             v34[1] = v73;
@@ -951,8 +951,8 @@ void __cdecl XAnimCalcNonLoopEnd(
             rotLastFrame = &randomDataShort[2 * tableSize];
             frameVec.v[0] = 0.0;
             frameVec.v[1] = 0.0;
-            frameVec.v[2] = (double)*rotLastFrame * 0.00003051850944757462;
-            frameVec.v[3] = (double)rotLastFrame[1] * 0.00003051850944757462;
+            frameVec.v[2] = (double)*rotLastFrame * (1.0f/32767.0f);
+            frameVec.v[3] = (double)rotLastFrame[1] * (1.0f/32767.0f);
             start = rotTransArray[modelPartIndex].quat;
             float scale = weightScale;
             // LWSS: we can just use frameVec (blops backport)
@@ -1000,10 +1000,10 @@ void __cdecl XAnimCalcNonLoopEnd(
         {
             v70 = &randomDataShort[4 * tableSize];
             result = rotTransArray[modelPartIndex].quat;
-            v14[0] = (double)v70[0] * 0.00003051850944757462;
-            v14[1] = (double)v70[1] * 0.00003051850944757462;
-            v14[2] = (double)v70[2] * 0.00003051850944757462;
-            v14[3] = (double)v70[3] * 0.00003051850944757462;
+            v14[0] = (double)v70[0] * (1.0f/32767.0f);
+            v14[1] = (double)v70[1] * (1.0f/32767.0f);
+            v14[2] = (double)v70[2] * (1.0f/32767.0f);
+            v14[3] = (double)v70[3] * (1.0f/32767.0f);
 
             float scale2 = weightScale;
             // LWSS: another if() from blops
@@ -1031,8 +1031,8 @@ void __cdecl XAnimCalcNonLoopEnd(
             quat = rotTransArray[modelPartIndex].quat;
             v12[0] = 0.0f;
             v12[1] = 0.0f;
-            v12[2] = (double)dataShort[0] * 0.00003051850944757462;
-            v12[3] = (double)dataShort[1] * 0.00003051850944757462;
+            v12[2] = (double)dataShort[0] * (1.0f/32767.0f);
+            v12[3] = (double)dataShort[1] * (1.0f/32767.0f);
 
             float scale3 = weightScale;
             // LWSS: another if() from blops
@@ -1057,10 +1057,10 @@ void __cdecl XAnimCalcNonLoopEnd(
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
         if (!ignorePartBits->testBit(modelPartIndex))
         {
-            v10[0] = (double)dataShort[0] * 0.00003051850944757462;
-            v10[1] = (double)dataShort[1] * 0.00003051850944757462;
-            v10[2] = (double)dataShort[2] * 0.00003051850944757462;
-            v10[3] = (double)dataShort[3] * 0.00003051850944757462;
+            v10[0] = (double)dataShort[0] * (1.0f/32767.0f);
+            v10[1] = (double)dataShort[1] * (1.0f/32767.0f);
+            v10[2] = (double)dataShort[2] * (1.0f/32767.0f);
+            v10[3] = (double)dataShort[3] * (1.0f/32767.0f);
 
             float scale4 = weightScale;
             if ((float)((float)((float)((float)(v10[0] * rotTransArray[modelPartIndex].quat[0])
