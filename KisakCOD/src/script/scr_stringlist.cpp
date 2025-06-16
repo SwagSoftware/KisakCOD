@@ -372,7 +372,7 @@ RefString* GetRefString(unsigned int stringValue)
 	iassert(stringValue);
 	iassert(stringValue * MT_NODE_SIZE < MT_SIZE);
 
-	return (RefString*)(&scrMemTreePub.mt_buffer[12 * stringValue]);
+	return (RefString*)(&scrMemTreePub.mt_buffer[MT_NODE_SIZE * stringValue]);
 }
 RefString* GetRefString(const char* str)
 {

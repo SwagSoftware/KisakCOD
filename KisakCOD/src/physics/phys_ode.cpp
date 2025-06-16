@@ -1413,10 +1413,11 @@ int __cdecl Phys_DrawDebugTextForWorld(
 {
     char *v6; // eax
     char *text; // [esp+20h] [ebp-8h]
-    unsigned __int16 *bodyCount; // [esp+24h] [ebp-4h]
+    int bodyCount; // [esp+24h] [ebp-4h]
 
     physGlob.debugActiveObjCount = 0;
-    bodyCount = XModelBoneNames((XModel *)physGlob.world[worldIndex]);
+    //bodyCount = XModelBoneNames((XModel *)physGlob.world[worldIndex]);
+    bodyCount = physGlob.world[worldIndex]->nb;
     ODE_ForEachBody<void(__cdecl *)(dxBody *)>(physGlob.world[worldIndex], Phys_ObjCountIfActive);
     CG_DrawStringExt(scrPlace, *x, *y, worldText, colorGreen, 0, 1, charHeight);
     *y = *y + charHeight;

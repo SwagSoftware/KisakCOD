@@ -150,13 +150,11 @@ void __cdecl CG_RegisterWeapon(int localClientNum, unsigned int weaponNum)
                     }
                     else
                     {
-                        blendTime = weapDef->szInternalName;
-                        v3 = SL_ConvertToString(weapDef->hideTags[tagIndex]);
-                        Com_PrintError(14, "CG_RegisterWeapon: No such bone tag (%s) for weapon (%s)\n", v3, blendTime);
+                        Com_PrintError(14, "CG_RegisterWeapon: No such bone tag (%s) for weapon (%s)\n", SL_ConvertToString(weapDef->hideTags[tagIndex]), weapDef->szInternalName);
                     }
                 }
                 DObjSetHidePartBits(obj, weapInfo->partBits);
-                DObjUpdateClientInfo(weapInfo->viewModelDObj, 0.050000001, 0);
+                DObjUpdateClientInfo(weapInfo->viewModelDObj, 0.05f, 0);
             }
             if (weapDef->hudIcon)
                 cgMedia.stanceMaterials[weaponNum - 129] = weapDef->hudIcon;
@@ -233,23 +231,21 @@ XAnimTree_s *__cdecl CG_CreateWeaponViewModelXAnim(WeaponDef *weapDef)
     XAnimTree_s *pAnimTree; // [esp+Ch] [ebp-8h]
     XAnim_s *pAnims; // [esp+10h] [ebp-4h]
 
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 554, 0, "%s", "weapDef");
-    pAnims = XAnimCreateAnims("VIEWMODEL", 0x21u, (void *(__cdecl *)(int))Hunk_AllocXAnimClient);
-    if (!pAnims)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 558, 0, "%s", "pAnims");
-    XAnimBlend(pAnims, 0, "root", 1u, 0x20u, 0);
+    iassert(weapDef);
+    pAnims = XAnimCreateAnims("VIEWMODEL", 33, Hunk_AllocXAnimClient);
+    iassert(pAnims);
+    XAnimBlend(pAnims, 0, "root", 1, 32, 0);
     for (animIndex = 1; animIndex < 33; ++animIndex)
     {
         if (*weapDef->szXAnims[animIndex])
             v2 = animIndex;
         else
             v2 = 1;
+
         BG_CreateXAnim(pAnims, animIndex, (char *)weapDef->szXAnims[v2]);
     }
-    pAnimTree = XAnimCreateTree(pAnims, (void *(__cdecl *)(int))Hunk_AllocXAnimClient);
-    if (!pAnimTree)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 573, 0, "%s", "pAnimTree");
+    pAnimTree = XAnimCreateTree(pAnims, Hunk_AllocXAnimClient);
+    iassert(pAnimTree);
     if (!weapDef->szXAnims[1] || !*weapDef->szXAnims[1])
         Com_Error(ERR_DROP, "CG_RegisterWeapon: No idle anim specified for [%s]", weapDef->szDisplayName);
     if (*weapDef->szXAnims[31] && XAnimIsLooped(pAnims, 0x1Fu))

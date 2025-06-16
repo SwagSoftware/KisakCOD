@@ -1593,26 +1593,28 @@ void XAnim_CalcPosDeltaDuring(
             if (posFrameDeltas->smallTrans)
             {
                 v11 = posFrameDeltas->u.frames.frames._1[keyFrameIndex];
-                fromVec.v[0] = *v11;
+                fromVec.v[0] = v11[0];
                 fromVec.v[1] = v11[1];
                 fromVec.v[2] = v11[2];
-                fromVec.v[3] = 0.0;
+                fromVec.v[3] = 0.0f;
+
                 v10 = posFrameDeltas->u.frames.frames._1[nextKeyFrameIndex];
-                toVec.v[0] = *v10;
+                toVec.v[0] = v10[0];
                 toVec.v[1] = v10[1];
                 toVec.v[2] = v10[2];
             }
             else
             {
                 v9 = posFrameDeltas->u.frames.frames._2[keyFrameIndex];
-                fromVec.v[0] = *v9;
-                fromVec.v[1] = *(v9 + 1);
-                fromVec.v[2] = *(v9 + 2);
+                fromVec.v[0] = v9[0];
+                fromVec.v[1] = v9[1];
+                fromVec.v[2] = v9[2];
                 fromVec.v[3] = 0.0;
+
                 v8 = posFrameDeltas->u.frames.frames._2[nextKeyFrameIndex];
-                toVec.v[0] = *v8;
-                toVec.v[1] = *(v8 + 1);
-                toVec.v[2] = *(v8 + 2);
+                toVec.v[0] = v8[0];
+                toVec.v[1] = v8[1];
+                toVec.v[2] = v8[2];
             }
             toVec.v[3] = 0.0;
             v4 = toVec.v[0] - fromVec.v[0];

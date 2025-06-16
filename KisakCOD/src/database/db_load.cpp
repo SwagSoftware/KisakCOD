@@ -73,7 +73,8 @@ enum MapType *varMapType     ;
 sunflare_t *varsunflare_t     ;
 PhysPreset *varPhysPreset     ;
 //D3DCubeTexture *varIDirect3DCubeTexture9     ;
-unsigned __int8 *varXQuat2           ;
+//unsigned __int8 *varXQuat2           ;
+__int16 (*varXQuat2)[2];
 //unsigned short (*)[3] varedgeCount_t      ;
 Material **varMaterialHandle     ;
 //XAUDIOREVERBSETTINGS *varXAUDIOREVERBSETTINGS     ;
@@ -157,7 +158,8 @@ FxTrailVertex *varFxTrailVertex     ;
 char const **varTempString        ;
 StringTable **varStringTablePtr     ;
 //float (*)[4] varraw_vec4_t       ;
-unsigned __int8 *varUShortVec        ;
+//unsigned __int8 *varUShortVec        ;
+unsigned __int16 (*varUShortVec)[3];
 statement_s *varstatement     ;
 //D3DVolumeTexture *varIDirect3DVolumeTexture9     ;
 GfxLightGridColors *varGfxLightGridColors     ;
@@ -235,7 +237,7 @@ MaterialTechniqueSet *varMaterialTechniqueSet     ;
 enum OffhandClass *varOffhandClass     ;
 FxIntRange *varFxIntRange     ;
 unsigned int *varraw_uint            ;
-unsigned long *varDWORD               ;
+void *varDWORD               ;
 GameWorldSp *varGameWorldSp     ;
 XSurfaceVertexInfo *varXSurfaceVertexInfo     ;
 enum DynEntityType *varDynEntityType     ;
@@ -637,6 +639,7 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
 
 void __cdecl Load_ScriptStringList(bool atStreamStart)
 {
+    static_assert(sizeof(ScriptStringList) == 8);
     Load_Stream(atStreamStart, (unsigned __int8 *)varScriptStringList, 8);
     DB_PushStreamPos(4u);
     if (varScriptStringList->strings)
@@ -700,31 +703,17 @@ void __cdecl Load_XAnimDynamicIndicesDeltaQuat(bool atStreamStart)
 {
     if (varXAnimParts->numframes >= 0x100u)
     {
-        if (!atStreamStart)
-            MyAssertHandler("c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h", 1229, 0, "%s", "atStreamStart");
-        Load_Stream(1, varXAnimDynamicIndicesDeltaQuat->_1, 0);
-        if (DB_GetStreamPos() != (unsigned __int8 *)varXAnimDynamicIndicesDeltaQuat)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h",
-                1231,
-                0,
-                "%s",
-                "DB_GetStreamPos() == reinterpret_cast< byte * >( varXAnimDynamicIndicesDeltaQuat->_2 )");
+        iassert(atStreamStart);
+        Load_Stream(1, (byte*)varXAnimDynamicIndicesDeltaQuat->_2, 0);
+        iassert(DB_GetStreamPos() == reinterpret_cast<byte *>(varXAnimDynamicIndicesDeltaQuat->_2));
         varUnsignedShort = (unsigned __int16 *)varXAnimDynamicIndicesDeltaQuat;
         Load_UnsignedShortArray(1, varXAnimDeltaPartQuat->size + 1);
     }
     else
     {
-        if (!atStreamStart)
-            MyAssertHandler("c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h", 1221, 0, "%s", "atStreamStart");
+        iassert(atStreamStart);
         Load_Stream(1, varXAnimDynamicIndicesDeltaQuat->_1, 0);
-        if (DB_GetStreamPos() != (unsigned __int8 *)varXAnimDynamicIndicesDeltaQuat)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h",
-                1223,
-                0,
-                "%s",
-                "DB_GetStreamPos() == reinterpret_cast< byte * >( varXAnimDynamicIndicesDeltaQuat->_1 )");
+        iassert(DB_GetStreamPos() == reinterpret_cast<byte *>(varXAnimDynamicIndicesDeltaQuat->_1));
         varbyte = (unsigned __int8 *)varXAnimDynamicIndicesDeltaQuat;
         Load_byteArray(1, varXAnimDeltaPartQuat->size + 1);
     }
@@ -732,22 +721,15 @@ void __cdecl Load_XAnimDynamicIndicesDeltaQuat(bool atStreamStart)
 
 void __cdecl Load_XAnimDeltaPartQuatDataFrames(bool atStreamStart)
 {
-    if (!atStreamStart)
-        MyAssertHandler("c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h", 1284, 0, "%s", "atStreamStart");
+    iassert(atStreamStart);
     Load_Stream(1, (unsigned __int8 *)varXAnimDeltaPartQuatDataFrames, 4);
-    if (DB_GetStreamPos() != (unsigned __int8 *)&varXAnimDeltaPartQuatDataFrames->indices)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h",
-            1286,
-            0,
-            "%s",
-            "DB_GetStreamPos() == reinterpret_cast< byte * >( &varXAnimDeltaPartQuatDataFrames->indices )");
+    iassert(DB_GetStreamPos() == reinterpret_cast<byte *>(&varXAnimDeltaPartQuatDataFrames->indices));
     varXAnimDynamicIndicesDeltaQuat = &varXAnimDeltaPartQuatDataFrames->indices;
     Load_XAnimDynamicIndicesDeltaQuat(1);
     if (varXAnimDeltaPartQuatDataFrames->frames)
     {
         varXAnimDeltaPartQuatDataFrames->frames = (__int16 (*)[2])AllocLoad_FxElemVisStateSample();
-        varXQuat2 = (unsigned char*)varXAnimDeltaPartQuatDataFrames->frames;
+        varXQuat2 = varXAnimDeltaPartQuatDataFrames->frames;
         if (varXAnimDeltaPartQuat->size)
             Load_XQuat2Array(1, varXAnimDeltaPartQuat->size + 1);
         else
@@ -764,23 +746,16 @@ void __cdecl Load_XAnimDeltaPartQuatData(bool atStreamStart)
     }
     else if (atStreamStart)
     {
-        varXQuat2 = (unsigned char*)varXAnimDeltaPartQuatData;
+        varXQuat2 = (__int16 (*)[2])varXAnimDeltaPartQuatData;
         Load_XQuat2(atStreamStart);
     }
 }
 
 void __cdecl Load_XAnimDeltaPartQuat(bool atStreamStart)
 {
-    if (!atStreamStart)
-        MyAssertHandler("c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h", 1415, 0, "%s", "atStreamStart");
+    iassert(atStreamStart);
     Load_Stream(1, (unsigned __int8 *)varXAnimDeltaPartQuat, 4);
-    if (DB_GetStreamPos() != (unsigned __int8 *)&varXAnimDeltaPartQuat->u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\database\\../xanim/xanim_load_db.h",
-            1417,
-            0,
-            "%s",
-            "DB_GetStreamPos() == reinterpret_cast< byte * >( &varXAnimDeltaPartQuat->u )");
+    iassert(DB_GetStreamPos() == reinterpret_cast<byte *>(&varXAnimDeltaPartQuat->u));
     varXAnimDeltaPartQuatData = &varXAnimDeltaPartQuat->u;
     Load_XAnimDeltaPartQuatData(1);
 }
@@ -862,8 +837,8 @@ void __cdecl Load_XAnimDynamicFrames()
     }
     else if (varXAnimDynamicFrames->_1)
     {
-        varXAnimDynamicFrames->_1 = (unsigned __int8 (*)[3])AllocLoad_FxElemVisStateSample();
-        varUShortVec = (unsigned char*)varXAnimDynamicFrames->_1;
+        varXAnimDynamicFrames->_2 = (unsigned short(*)[3])AllocLoad_FxElemVisStateSample();
+        varUShortVec = varXAnimDynamicFrames->_2;
         if (varXAnimPartTrans->size)
             Load_UShortVecArray(1, varXAnimPartTrans->size + 1);
         else
@@ -1017,7 +992,7 @@ void __cdecl Load_XAnimPartsPtr(bool atStreamStart)
     if (*varXAnimPartsPtr)
     {
         value = (unsigned int)*varXAnimPartsPtr;
-        if (*varXAnimPartsPtr == (XAnimParts *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varXAnimPartsPtr = (XAnimParts *)AllocLoad_FxElemVisStateSample();
             varXAnimParts = *varXAnimPartsPtr;
@@ -1084,11 +1059,13 @@ void __cdecl Mark_XAnimPartsPtr()
 
 void __cdecl Load_XBoneInfoArray(bool atStreamStart, int count)
 {
+    static_assert(sizeof(XBoneInfo) == 40);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXBoneInfo, 40 * count);
 }
 
 void __cdecl Load_DObjAnimMatArray(bool atStreamStart, int count)
 {
+    static_assert(sizeof(DObjAnimMat) == 32);
     Load_Stream(atStreamStart, (unsigned __int8 *)varDObjAnimMat, 32 * count);
 }
 
@@ -1171,7 +1148,7 @@ void __cdecl Load_LoadedSoundPtr(bool atStreamStart)
     if (*varLoadedSoundPtr)
     {
         value = (unsigned int)*varLoadedSoundPtr;
-        if (*varLoadedSoundPtr == (LoadedSound *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varLoadedSoundPtr = (LoadedSound *)AllocLoad_FxElemVisStateSample();
             varLoadedSound = *varLoadedSoundPtr;
@@ -1239,7 +1216,7 @@ void __cdecl Load_SndCurvePtr(bool atStreamStart)
     if (*varSndCurvePtr)
     {
         value = (unsigned int)*varSndCurvePtr;
-        if (*varSndCurvePtr == (SndCurve *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varSndCurvePtr = (SndCurve *)AllocLoad_FxElemVisStateSample();
             varSndCurve = *varSndCurvePtr;
@@ -1269,6 +1246,7 @@ void __cdecl Load_SpeakerMap(bool atStreamStart)
 
 void __cdecl Load_snd_alias_t(bool atStreamStart)
 {
+    static_assert(sizeof(snd_alias_t) == 92);
     Load_Stream(atStreamStart, (unsigned __int8 *)varsnd_alias_t, 92);
     varXString = &varsnd_alias_t->aliasName;
     Load_XString(0);
@@ -1325,6 +1303,7 @@ void __cdecl Load_snd_alias_tArray(bool atStreamStart, int count)
 
 void __cdecl Load_snd_alias_list_t(bool atStreamStart)
 {
+    static_assert(sizeof(snd_alias_list_t) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varsnd_alias_list_t, 12);
     DB_PushStreamPos(4u);
     varXString = &varsnd_alias_list_t->aliasName;
@@ -1355,7 +1334,7 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
     if (*varsnd_alias_list_ptr)
     {
         value = (unsigned int)*varsnd_alias_list_ptr;
-        if ((unsigned int)*varsnd_alias_list_ptr == -1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varsnd_alias_list_ptr = (snd_alias_list_t*)AllocLoad_FxElemVisStateSample();
             varsnd_alias_list_t = *varsnd_alias_list_ptr;
@@ -1592,6 +1571,7 @@ void __cdecl Load_XBlendInfoArray(bool atStreamStart, int count)
 
 void __cdecl Load_XSurfaceVertexInfo(bool atStreamStart)
 {
+    static_assert(sizeof(XSurfaceVertexInfo) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXSurfaceVertexInfo, 12);
     if (varXSurfaceVertexInfo->vertsBlend)
     {
@@ -1633,7 +1613,8 @@ void __cdecl Load_XZoneHandle(bool atStreamStart)
 
 void __cdecl Load_XSurface(bool atStreamStart)
 {
-    Load_Stream(atStreamStart, &varXSurface->tileMode, 56);
+    static_assert(sizeof(XSurface) == 56);
+    Load_Stream(atStreamStart, (unsigned char*)varXSurface, 56);
     varXZoneHandle = &varXSurface->zoneHandle;
     Load_XZoneHandle(0);
     varXSurfaceVertexInfo = &varXSurface->vertInfo;
@@ -1773,7 +1754,7 @@ void __cdecl Load_GfxImagePtr(bool atStreamStart)
     if (*varGfxImagePtr)
     {
         value = (unsigned int)*varGfxImagePtr;
-        if (*varGfxImagePtr == (GfxImage *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varGfxImagePtr = (GfxImage *)AllocLoad_FxElemVisStateSample();
             varGfxImage = *varGfxImagePtr;
@@ -1828,25 +1809,31 @@ void __cdecl Mark_water_t()
     Mark_GfxImagePtr();
 }
 
+void __cdecl Load_DWORDArray(bool atStreamStart, int count)
+{
+    Load_Stream(atStreamStart, (unsigned __int8 *)varDWORD, 4 * count);
+}
+
 void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (unsigned __int8 *)varGfxVertexShaderLoadDef, 8);
     if (varGfxVertexShaderLoadDef->program)
     {
         varGfxVertexShaderLoadDef->program = (unsigned int *)AllocLoad_FxElemVisStateSample();
-        varuint = varGfxVertexShaderLoadDef->program;
-        Load_uintArray(1, varGfxVertexShaderLoadDef->programSize);
+        varDWORD = varGfxVertexShaderLoadDef->program;
+        Load_DWORDArray(1, varGfxVertexShaderLoadDef->programSize);
     }
 }
 
 void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
 {
+    static_assert(sizeof(GfxPixelShaderLoadDef) == 8); 
     Load_Stream(atStreamStart, (unsigned __int8 *)varGfxPixelShaderLoadDef, 8);
     if (varGfxPixelShaderLoadDef->program)
     {
         varGfxPixelShaderLoadDef->program = (unsigned int *)AllocLoad_FxElemVisStateSample();
-        varuint = varGfxPixelShaderLoadDef->program;
-        Load_uintArray(1, varGfxPixelShaderLoadDef->programSize);
+        varDWORD = varGfxPixelShaderLoadDef->program;
+        Load_DWORDArray(1, varGfxPixelShaderLoadDef->programSize);
     }
 }
 
@@ -1860,6 +1847,7 @@ void __cdecl Load_MaterialVertexShaderProgram(bool atStreamStart)
 
 void __cdecl Load_MaterialPixelShaderProgram(bool atStreamStart)
 {
+    static_assert(sizeof(MaterialPixelShaderProgram) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialPixelShaderProgram, 12);
     varGfxPixelShaderLoadDef = &varMaterialPixelShaderProgram->loadDef;
     Load_GfxPixelShaderLoadDef(0);
@@ -2173,7 +2161,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
     if (*varMaterialTechniqueSetPtr)
     {
         value = (unsigned int)*varMaterialTechniqueSetPtr;
-        if (*varMaterialTechniqueSetPtr == (MaterialTechniqueSet *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varMaterialTechniqueSetPtr = (MaterialTechniqueSet *)AllocLoad_FxElemVisStateSample();
             varMaterialTechniqueSet = *varMaterialTechniqueSetPtr;
@@ -2254,7 +2242,7 @@ void __cdecl Load_MaterialHandle(bool atStreamStart)
     if (*varMaterialHandle)
     {
         value = (unsigned int)*varMaterialHandle;
-        if (*varMaterialHandle == (Material *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varMaterialHandle = (Material *)AllocLoad_FxElemVisStateSample();
             varMaterial = *varMaterialHandle;
@@ -2399,7 +2387,7 @@ void __cdecl Load_GfxLightDefPtr(bool atStreamStart)
     if (*varGfxLightDefPtr)
     {
         value = (unsigned int)*varGfxLightDefPtr;
-        if (*varGfxLightDefPtr == (GfxLightDef *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varGfxLightDefPtr = (GfxLightDef *)AllocLoad_FxElemVisStateSample();
             varGfxLightDef = *varGfxLightDefPtr;
@@ -2564,7 +2552,7 @@ void __cdecl Load_PhysPresetPtr(bool atStreamStart)
     if (*varPhysPresetPtr)
     {
         value = (unsigned int)*varPhysPresetPtr;
-        if (*varPhysPresetPtr == (PhysPreset *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varPhysPresetPtr = (PhysPreset *)AllocLoad_FxElemVisStateSample();
             varPhysPreset = *varPhysPresetPtr;
@@ -2759,6 +2747,7 @@ void __cdecl Load_PhysGeomList(bool atStreamStart)
 
 void __cdecl Load_XModel(bool atStreamStart)
 {
+    static_assert(sizeof(XModel) == 220);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModel, 220);
     DB_PushStreamPos(4u);
     varXString = &varXModel->name;
@@ -2893,7 +2882,7 @@ void __cdecl Load_XModelPtr(bool atStreamStart)
     if (*varXModelPtr)
     {
         value = (unsigned int)*varXModelPtr;
-        if (*varXModelPtr == (XModel *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varXModelPtr = (XModel *)AllocLoad_FxElemVisStateSample();
             varXModel = *varXModelPtr;
@@ -2931,6 +2920,7 @@ void __cdecl Load_XModelPtrArray(bool atStreamStart, int count)
 
 void __cdecl Load_XModelPiece(bool atStreamStart)
 {
+    static_assert(sizeof(XModelPiece) == 16);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModelPiece, 16);
     varXModelPtr = &varXModelPiece->model;
     Load_XModelPtr(0);
@@ -2941,6 +2931,7 @@ void __cdecl Load_XModelPieceArray(bool atStreamStart, int count)
     XModelPiece *var; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
+    static_assert(sizeof(XModelPiece) == 16);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModelPiece, 16 * count);
     var = varXModelPiece;
     for (i = 0; i < count; ++i)
@@ -2953,6 +2944,7 @@ void __cdecl Load_XModelPieceArray(bool atStreamStart, int count)
 
 void __cdecl Load_XModelPieces(bool atStreamStart)
 {
+    static_assert(sizeof(XModelPieces) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModelPieces, 12);
     varXString = &varXModelPieces->name;
     Load_XString(0);
@@ -3062,11 +3054,13 @@ void __cdecl Mark_XModelPiecesPtr()
 
 void __cdecl Load_pathlink_tArray(bool atStreamStart, int count)
 {
+    static_assert(sizeof(pathlink_s) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathlink_t, 12 * count);
 }
 
 void __cdecl Load_pathnode_constant_t(bool atStreamStart)
 {
+    static_assert(sizeof(pathnode_constant_t) == 68);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_constant_t, 68);
     varScriptString = &varpathnode_constant_t->targetname;
     Load_ScriptString(0);
@@ -3088,6 +3082,7 @@ void __cdecl Load_pathnode_constant_t(bool atStreamStart)
 
 void __cdecl Load_pathnode_t(bool atStreamStart)
 {
+    static_assert(sizeof(pathnode_t) == 128);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_t, 128);
     varpathnode_constant_t = &varpathnode_t->constant;
     Load_pathnode_constant_t(0);
@@ -3098,7 +3093,8 @@ void __cdecl Load_pathnode_tArray(bool atStreamStart, int count)
     pathnode_t *var; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_t, count << 7);
+    static_assert(sizeof(pathnode_t) == 128);
+    Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_t, count * 128);
     var = varpathnode_t;
     for (i = 0; i < count; ++i)
     {
@@ -3110,11 +3106,13 @@ void __cdecl Load_pathnode_tArray(bool atStreamStart, int count)
 
 void __cdecl Load_pathbasenode_tArray(bool atStreamStart, int count)
 {
+    static_assert(sizeof(pathbasenode_t) == 16);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathbasenode_t, 16 * count);
 }
 
 void __cdecl Load_pathnode_tree_nodes_t(bool atStreamStart)
 {
+    static_assert(sizeof(pathnode_tree_nodes_t) == 8);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_tree_nodes_t, 8);
     if (varpathnode_tree_nodes_t->nodes)
     {
@@ -3300,7 +3298,7 @@ void __cdecl Load_GameWorldSpPtr(bool atStreamStart)
     if (*varGameWorldSpPtr)
     {
         value = (unsigned int)*varGameWorldSpPtr;
-        if (*varGameWorldSpPtr == (GameWorldSp *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varGameWorldSpPtr = (GameWorldSp *)AllocLoad_FxElemVisStateSample();
             varGameWorldSp = *varGameWorldSpPtr;
@@ -3331,7 +3329,7 @@ void __cdecl Load_GameWorldMpPtr(bool atStreamStart)
     if (*varGameWorldMpPtr)
     {
         value = (unsigned int)*varGameWorldMpPtr;
-        if (*varGameWorldMpPtr == (GameWorldMp *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varGameWorldMpPtr = (GameWorldMp *)AllocLoad_FxElemVisStateSample();
             varGameWorldMp = *varGameWorldMpPtr;
@@ -3396,7 +3394,7 @@ void __cdecl Load_FxEffectDefHandle(bool atStreamStart)
     if (*varFxEffectDefHandle)
     {
         value = (unsigned int)*varFxEffectDefHandle;
-        if (*varFxEffectDefHandle == (const FxEffectDef *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varFxEffectDefHandle = (const FxEffectDef *)AllocLoad_FxElemVisStateSample();
             varFxEffectDef = (FxEffectDef *)*varFxEffectDefHandle;
@@ -3848,7 +3846,7 @@ void __cdecl Load_MapEntsPtr(bool atStreamStart)
     if (*varMapEntsPtr)
     {
         value = (unsigned int)*varMapEntsPtr;
-        if (*varMapEntsPtr == (MapEnts *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varMapEntsPtr = (MapEnts *)AllocLoad_FxElemVisStateSample();
             varMapEnts = *varMapEntsPtr;
@@ -4319,7 +4317,7 @@ void __cdecl Load_clipMap_ptr(bool atStreamStart)
     if (*varclipMap_ptr)
     {
         value = (unsigned int)*varclipMap_ptr;
-        if (*varclipMap_ptr == (clipMap_t *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varclipMap_ptr = (clipMap_t *)AllocLoad_FxElemVisStateSample();
             varclipMap_t = *varclipMap_ptr;
@@ -4438,7 +4436,7 @@ void __cdecl Load_ComWorldPtr(bool atStreamStart)
     if (*varComWorldPtr)
     {
         value = (unsigned int)*varComWorldPtr;
-        if (*varComWorldPtr == (ComWorld *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varComWorldPtr = (ComWorld *)AllocLoad_FxElemVisStateSample();
             varComWorld = *varComWorldPtr;
@@ -4820,7 +4818,7 @@ void __cdecl Load_menuDef_ptr(bool atStreamStart)
     if (*varmenuDef_ptr)
     {
         value = (unsigned int)*varmenuDef_ptr;
-        if (*varmenuDef_ptr == (menuDef_t *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varmenuDef_ptr = (menuDef_t *)AllocLoad_FxElemVisStateSample();
             varmenuDef_t = *varmenuDef_ptr;
@@ -4881,7 +4879,7 @@ void __cdecl Load_MenuListPtr(bool atStreamStart)
     if (*varMenuListPtr)
     {
         value = (unsigned int)*varMenuListPtr;
-        if (*varMenuListPtr == (MenuList *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varMenuListPtr = (MenuList *)AllocLoad_FxElemVisStateSample();
             varMenuList = *varMenuListPtr;
@@ -5046,7 +5044,7 @@ void __cdecl Load_LocalizeEntryPtr(bool atStreamStart)
     if (*varLocalizeEntryPtr)
     {
         value = (unsigned int)*varLocalizeEntryPtr;
-        if (*varLocalizeEntryPtr == (LocalizeEntry *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varLocalizeEntryPtr = (LocalizeEntry *)AllocLoad_FxElemVisStateSample();
             varLocalizeEntry = *varLocalizeEntryPtr;
@@ -5125,7 +5123,7 @@ void __cdecl Load_FxImpactTablePtr(bool atStreamStart)
     if (*varFxImpactTablePtr)
     {
         value = (unsigned int)*varFxImpactTablePtr;
-        if (*varFxImpactTablePtr == (FxImpactTable *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varFxImpactTablePtr = (FxImpactTable *)AllocLoad_FxElemVisStateSample();
             varFxImpactTable = *varFxImpactTablePtr;
@@ -5455,7 +5453,7 @@ void __cdecl Load_WeaponDefPtr(bool atStreamStart)
     if (*varWeaponDefPtr)
     {
         value = (unsigned int)*varWeaponDefPtr;
-        if (*varWeaponDefPtr == (WeaponDef *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varWeaponDefPtr = (WeaponDef *)AllocLoad_FxElemVisStateSample();
             varWeaponDef = *varWeaponDefPtr;
@@ -5674,7 +5672,7 @@ void __cdecl Load_RawFilePtr(bool atStreamStart)
     if (*varRawFilePtr)
     {
         value = (unsigned int)*varRawFilePtr;
-        if (*varRawFilePtr == (RawFile *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varRawFilePtr = (RawFile *)AllocLoad_FxElemVisStateSample();
             varRawFile = *varRawFilePtr;
@@ -6575,7 +6573,7 @@ void __cdecl Load_GfxWorldPtr(bool atStreamStart)
     if (*varGfxWorldPtr)
     {
         value = (unsigned int)*varGfxWorldPtr;
-        if (*varGfxWorldPtr == (GfxWorld *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varGfxWorldPtr = (GfxWorld *)AllocLoad_FxElemVisStateSample();
             varGfxWorld = *varGfxWorldPtr;
@@ -6713,7 +6711,7 @@ void __cdecl Load_FontHandle(bool atStreamStart)
     if (*varFontHandle)
     {
         value = (unsigned int)*varFontHandle;
-        if (*varFontHandle == (Font_s *)-1 || value == -2)
+        if (value == -1 || value == -2)
         {
             *varFontHandle = (Font_s *)AllocLoad_FxElemVisStateSample();
             varFont = *varFontHandle;

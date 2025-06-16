@@ -254,7 +254,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
     int matOffset[32]; // [esp+4D4h] [ebp-108h]
     XModel *models[32]; // [esp+554h] [ebp-88h] BYREF
     int modelIndex; // [esp+5D4h] [ebp-8h]
-    unsigned __int16 *boneNames; // [esp+5D8h] [ebp-4h]
+    unsigned const __int16 *boneNames; // [esp+5D8h] [ebp-4h]
 
     Profile_Begin(325);
     duplicateParts = (unsigned __int8 *)&duplicatePartBits[4];
@@ -419,22 +419,20 @@ void __cdecl DObjFree(DObj_s *obj)
     XModel **models; // [esp+34h] [ebp-4h]
 
     Profile_Begin(327);
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 579, 0, "%s", "obj");
+    iassert(obj);
     models = obj->models;
     if (models)
     {
         MT_Free((byte*)models, 5 * obj->numModels);
         obj->models = 0;
     }
+    obj->numModels = 0; // LWSS: blops backport
     if (obj->tree)
     {
-        if (!obj->tree->anims)
-            MyAssertHandler(".\\xanim\\dobj.cpp", 591, 0, "%s", "tree->anims");
+        iassert(obj->tree->anims);
         obj->tree = 0;
     }
-    if (!g_empty)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 595, 0, "%s", "g_empty");
+    iassert(g_empty);
     if (obj->duplicateParts)
     {
         if (obj->duplicateParts != g_empty)
@@ -461,7 +459,7 @@ void __cdecl DObjGetCreateParms(
     int matOffset[33]; // [esp+18h] [ebp-90h]
     XModel **models; // [esp+9Ch] [ebp-Ch]
     int modelIndex; // [esp+A0h] [ebp-8h]
-    unsigned __int16 *boneNames; // [esp+A4h] [ebp-4h]
+    unsigned const __int16 *boneNames; // [esp+A4h] [ebp-4h]
 
     if (!obj)
         MyAssertHandler(".\\xanim\\dobj.cpp", 621, 0, "%s", "obj");
@@ -503,7 +501,7 @@ void __cdecl DObjGetCreateParms(
                             0,
                             "%s",
                             "boneIndex < XModelNumBones( models[parentModelIndex] )");
-                    boneNames = XModelBoneNames(models[parentModelIndex]);
+                    boneNames = models[parentModelIndex]->boneNames;
                     dobjModel->boneName = boneNames[boneIndex];
                     break;
                 }
@@ -627,7 +625,7 @@ char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
     XModel *model; // [esp+10h] [ebp-10h]
     int index; // [esp+14h] [ebp-Ch]
     XModel **models; // [esp+18h] [ebp-8h]
-    unsigned __int16 *boneNames; // [esp+1Ch] [ebp-4h]
+    unsigned const __int16 *boneNames; // [esp+1Ch] [ebp-4h]
 
     iassert(obj);
 

@@ -8,6 +8,13 @@
 #include <xanim/xmodel.h>
 #include <win32/win_local.h>
 
+enum $D93A52C218787A3ED865FD745137F4B3 : __int32
+{
+    DM_MEMORY_TEMP = 0x0,
+    DM_MEMORY_VIRTUAL = 0x1,
+    DM_MEMORY_PHYSICAL = 0x2,
+};
+
 struct StreamDelayInfo // sizeof=0x8
 {
     const void *ptr;

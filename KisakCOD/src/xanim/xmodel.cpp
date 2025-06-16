@@ -585,7 +585,7 @@ int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned 
 {
     unsigned int numBones; // [esp+0h] [ebp-Ch]
     unsigned int localBoneIndex; // [esp+4h] [ebp-8h]
-    unsigned __int16 *boneNames; // [esp+8h] [ebp-4h]
+    unsigned const __int16 *boneNames; // [esp+8h] [ebp-4h]
    
     iassert(index);
 
@@ -606,9 +606,3 @@ int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned 
     iassert(*index == offset + localBoneIndex);
     return 1;
 }
-
-unsigned __int16 *__cdecl XModelBoneNames(XModel *model)
-{
-    return model->boneNames;
-}
-

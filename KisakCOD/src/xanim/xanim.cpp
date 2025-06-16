@@ -89,7 +89,6 @@ XAnimParts* __cdecl XAnimFindData_FastFile(const char* name)
 
 void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* name)
 {
-    XAnimParts* Data_FastFile; // eax
     char v4; // [esp+3h] [ebp-31h]
     char* v5; // [esp+8h] [ebp-2Ch]
     const char* v6; // [esp+Ch] [ebp-28h]
@@ -97,20 +96,18 @@ void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* nam
     XAnimParts* parts; // [esp+30h] [ebp-4h]
 
     if (useFastFile->current.enabled)
-        Data_FastFile = XAnimFindData_FastFile(name);
+        parts = XAnimFindData_FastFile(name);
     else
-        Data_FastFile = XAnimFindData_LoadObj(name);
-    parts = Data_FastFile;
-    if (useFastFile->current.enabled || Data_FastFile)
+        parts = XAnimFindData_LoadObj(name);
+
+    if (useFastFile->current.enabled || parts)
     {
-        if (!Data_FastFile)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 283, 0, "%s", "parts");
+        iassert(parts);
         anims->entries[animIndex].numAnims = 0;
         anims->entries[animIndex].parts = parts;
         if (anims->debugAnimNames)
         {
-            if (anims->debugAnimNames[animIndex])
-                MyAssertHandler(".\\xanim\\xanim.cpp", 291, 0, "%s", "!anims->debugAnimNames[animIndex]");
+            iassert(!anims->debugAnimNames[animIndex]);
             debugName = (char*)Hunk_AllocDebugMem(strlen(name) + 1, "XAnimCreate");
             v6 = name;
             v5 = debugName;
@@ -339,22 +336,15 @@ void __cdecl XAnimFreeList(XAnim_s* anims)
     }
 }
 
-int __cdecl XAnimTreeSize()
-{
-    return 20;
-}
-
 XAnimTree_s* __cdecl XAnimCreateTree(XAnim_s* anims, void* (__cdecl* Alloc)(int))
 {
     XAnimTree_s* tree; // [esp+0h] [ebp-Ch]
-    unsigned int entrySize; // [esp+8h] [ebp-4h]
 
     iassert(anims);
     iassert(anims->size);
 
-    entrySize = XAnimTreeSize();
-    tree = (XAnimTree_s*)Alloc(entrySize);
-    memset((unsigned __int8*)tree, 0, entrySize);
+    tree = (XAnimTree_s*)Alloc(sizeof(XAnimTree_s));
+    memset(tree, 0, sizeof(XAnimTree_s));
     tree->anims = anims;
     iassert(!tree->info_usage);
     return tree;
@@ -362,8 +352,6 @@ XAnimTree_s* __cdecl XAnimCreateTree(XAnim_s* anims, void* (__cdecl* Alloc)(int)
 
 void __cdecl XAnimFreeTree(XAnimTree_s* tree, void(__cdecl* Free)(void*, int))
 {
-    int entrySize; // [esp+4h] [ebp-4h]
-
     iassert(tree);
     iassert(tree->anims);
     iassert(tree->anims->size);
@@ -372,8 +360,7 @@ void __cdecl XAnimFreeTree(XAnimTree_s* tree, void(__cdecl* Free)(void*, int))
     iassert(!tree->info_usage);
     if (Free)
     {
-        entrySize = XAnimTreeSize();
-        Free(tree, entrySize);
+        Free(tree, sizeof(XAnimTree_s));
     }
 }
 
@@ -414,7 +401,7 @@ void __cdecl XAnimInitModelMap(XModel* const* models, unsigned int numModels, XM
     unsigned int boneCount; // [esp+10h] [ebp-10h]
     unsigned int localBoneIndex; // [esp+14h] [ebp-Ch]
     unsigned int i; // [esp+18h] [ebp-8h]
-    unsigned __int16* boneNames; // [esp+1Ch] [ebp-4h]
+    unsigned const __int16* boneNames; // [esp+1Ch] [ebp-4h]
 
     memset((unsigned __int8*)modelMap, 0, 1024);
     boneIndex = 0;
@@ -2723,7 +2710,7 @@ void __cdecl XAnimCalcRelDeltaParts(
             {
                 if (trans->smallTrans)
                 {
-                    pSmallTrans = (unsigned __int8*)trans->u.frames.frames._1;
+                    pSmallTrans = *trans->u.frames.frames._1;
                     fromVec.v[0] = (float)pSmallTrans[0];
                     fromVec.v[1] = (float)pSmallTrans[1];
                     fromVec.v[2] = (float)pSmallTrans[2];
@@ -2735,7 +2722,7 @@ void __cdecl XAnimCalcRelDeltaParts(
                 }
                 else
                 {
-                    bigTrans = (unsigned __int16*)trans->u.frames.frames._2;
+                    bigTrans = *trans->u.frames.frames._2;
                     fromVec.v[0] = (float)bigTrans[0];
                     fromVec.v[1] = (float)bigTrans[1];
                     fromVec.v[2] = (float)bigTrans[2];

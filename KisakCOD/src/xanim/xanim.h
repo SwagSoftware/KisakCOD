@@ -1482,7 +1482,6 @@ bool __cdecl IsLeafNode(const XAnimEntry* anim);
 XAnim_s* __cdecl XAnimCreateAnims(const char* debugName, unsigned int size, void* (__cdecl* Alloc)(int));
 void __cdecl XAnimFreeList(XAnim_s* anims);
 void __cdecl XAnimFree(XAnimParts *parts);
-int __cdecl XAnimTreeSize();
 XAnimTree_s* __cdecl XAnimCreateTree(XAnim_s* anims, void* (__cdecl* Alloc)(int));
 void __cdecl XAnimFreeTree(XAnimTree_s* tree, void(__cdecl* Free)(void*, int));
 void XAnimCheckTreeLeak();

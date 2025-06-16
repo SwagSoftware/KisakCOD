@@ -214,8 +214,7 @@ void __cdecl DB_LoadXFileInternal()
     const char *failureReason; // [esp+44h] [ebp-10h]
     char magic[8]; // [esp+48h] [ebp-Ch] BYREF
 
-    if (!g_load.f)
-        MyAssertHandler(".\\database\\db_file_load.cpp", 586, 0, "%s", "g_load.f");
+    iassert(g_load.f);
     DB_ReadXFileStage();
     if (!g_load.outstandingReads)
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is empty.", g_load.filename);
@@ -232,8 +231,7 @@ void __cdecl DB_LoadXFileInternal()
         CL_ResetStats_f();
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is corrupt or unreadable.", g_load.filename);
     }
-    if (g_load.stream.avail_in < 4)
-        MyAssertHandler(".\\database\\db_file_load.cpp", 613, 0, "%s", "sizeof( version ) <= g_load.stream.avail_in");
+    iassert(sizeof(version) <= g_load.stream.avail_in);
     version = *(unsigned int *)g_load.stream.next_in;
     g_load.stream.next_in += 4;
     g_load.stream.avail_in -= 4;
@@ -267,6 +265,7 @@ void __cdecl DB_LoadXFileInternal()
         DB_CancelLoadXFile();
         Com_Error(ERR_DROP, "Fastfile for zone '%s' could not be loaded (%s)", g_load.filename, failureReason);
     }
+    static_assert(sizeof(XFile) == 44);
     DB_LoadXFileData((unsigned __int8 *)&file, sizeof(XFile));
     if (g_trackLoadProgress)
     {
@@ -282,7 +281,7 @@ void __cdecl DB_LoadXFileInternal()
     DB_AllocXZoneMemory(file.blockSize, g_load.filename, g_load.zoneMem, g_load.allocType);
     DB_InitStreams(g_load.zoneMem);
     Load_XAssetListCustom();
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     if (varXAssetList->assets)
     {
         varXAssetList->assets = AllocLoad_FxElemVisStateSample();
@@ -294,8 +293,7 @@ void __cdecl DB_LoadXFileInternal()
     --g_loadingAssets;
     Load_DelayStream();
     DB_LoadDelayedImages();
-    if (!g_load.compressBufferStart)
-        MyAssertHandler(".\\database\\db_file_load.cpp", 723, 0, "%s", "g_load.compressBufferStart");
+    iassert(g_load.compressBufferStart);
     Com_Printf(10, "Loaded zone '%s'\n", g_load.filename);
     if (!g_minimumFastFileLoaded)
         g_minimumFastFileLoaded = I_stricmp("localized_code_post_gfx_mp", g_load.filename) == 0;
@@ -310,6 +308,7 @@ bool __cdecl DB_IsMinimumFastFileLoaded()
 void Load_XAssetListCustom()
 {
     varXAssetList = &g_varXAssetList;
+    static_assert(sizeof(XAssetList) == 16);
     DB_LoadXFileData((unsigned __int8 *)&g_varXAssetList, sizeof(XAssetList));
     DB_PushStreamPos(4u);
     varScriptStringList = &varXAssetList->stringList;
@@ -322,6 +321,7 @@ void __cdecl Load_XAssetArrayCustom(int count)
     XAsset *var; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
+    static_assert(sizeof(XAsset) == 8);
     Load_Stream(1, (unsigned __int8 *)varXAsset, 8 * count);
     var = varXAsset;
     for (i = 0; i < count; ++i)

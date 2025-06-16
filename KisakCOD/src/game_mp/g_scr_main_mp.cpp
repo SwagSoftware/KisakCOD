@@ -5072,7 +5072,7 @@ void __cdecl GScr_GetPartName()
         v1 = va("index out of range (0 - %d)", numbones - 1);
         Scr_ParamError(1u, v1);
     }
-    name = XModelBoneNames(model)[index];
+    name = model->boneNames[index];
     if (!name)
         Scr_ParamError(0, "bad model");
     Scr_AddConstString(name);

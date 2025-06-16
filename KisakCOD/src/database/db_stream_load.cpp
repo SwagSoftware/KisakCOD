@@ -47,14 +47,7 @@ void __cdecl DB_ConvertOffsetToAlias(unsigned int *data)
     unsigned int offset; // [esp+0h] [ebp-8h]
 
     offset = *data;
-    if (!*data || offset >= 0xFFFFFFFE)
-        MyAssertHandler(
-            ".\\database\\db_stream_load.cpp",
-            64,
-            0,
-            "%s\n\t(offset) = %i",
-            "(offset && (offset != 0xFFFFFFFF) && (offset != 0xFFFFFFFE))",
-            offset);
+    iassert((offset && (offset != -1) && (offset != -2)));
     *data = *(unsigned int *)&g_streamZoneMem->blocks[(offset - 1) >> 28].data[(offset - 1) & 0xFFFFFFF];
 }
 
