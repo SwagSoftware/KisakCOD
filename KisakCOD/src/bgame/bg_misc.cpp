@@ -1036,19 +1036,8 @@ const gitem_s *__cdecl BG_FindItemForWeapon(unsigned int weapon, int model)
 {
     unsigned int NumWeapons; // eax
 
-    if (weapon >= BG_GetNumWeapons())
-    {
-        NumWeapons = BG_GetNumWeapons();
-        MyAssertHandler(
-            ".\\bgame\\bg_misc.cpp",
-            733,
-            0,
-            "weapon doesn't index BG_GetNumWeapons()\n\t%i not in [0, %i)",
-            weapon,
-            NumWeapons);
-    }
-    //return (const gitem_s *)(4 * (weapon + (model << 7)) + 9917736);
-    return &bg_itemlist[(weapon + (model << 7))];
+    bcassert(weapon, BG_GetNumWeapons());
+    return &bg_itemlist[(weapon + (model * 128))];
 }
 
 const gitem_s *__cdecl G_FindItem(const char *pickupName, int model)
@@ -1057,8 +1046,7 @@ const gitem_s *__cdecl G_FindItem(const char *pickupName, int model)
 
     iIndex = G_GetWeaponIndexForName(pickupName);
     if (iIndex)
-        return &bg_itemlist[(iIndex + (model << 7))];
-        //return (const gitem_s *)(4 * (iIndex + (model << 7)) + 9917736);
+        return &bg_itemlist[(iIndex + (model * 128))];
     else
         return 0;
 }

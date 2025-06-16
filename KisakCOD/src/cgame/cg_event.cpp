@@ -49,14 +49,7 @@ void __cdecl CG_PlayBoltedEffect(
     boneIndex = -2;
     if (CG_GetBoneIndex(localClientNum, dobjHandle, boneName, &boneIndex))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        iassert(localClientNum == 0);
         time = cgArray[0].time;
         FX_PlayBoltedEffect(localClientNum, fxDef, cgArray[0].time, dobjHandle, boneIndex);
     }

@@ -2361,8 +2361,7 @@ void __cdecl BG_LoadAnim()
 
     BG_CheckThread();
 
-    if (!bgs)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 3675, 0, "%s", "bgs");
+    iassert(bgs);
 
     iNumPlayerAnims = 0;
     BG_FindAnims();

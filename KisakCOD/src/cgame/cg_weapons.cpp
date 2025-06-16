@@ -114,7 +114,6 @@ void __cdecl CG_RegisterWeapon(int localClientNum, unsigned int weaponNum)
             SCR_UpdateLoadScreen();
             memset(weapInfo, 0, sizeof(weaponInfo_s));
             weapInfo->registered = 1;
-            //weapInfo->item = (const gitem_s *)(4 * weaponNum + 9917736);
             weapInfo->item = &bg_itemlist[weaponNum];
             weapInfo->iPrevAnim = -1;
             if (weapDef->gunXModel[0] && weapDef->handXModel)
@@ -315,28 +314,10 @@ void __cdecl ChangeViewmodelDobj(
 
     if (weaponNum)
     {
-        if (weaponNum >= BG_GetNumWeapons())
-        {
-            NumWeapons = BG_GetNumWeapons();
-            MyAssertHandler(
-                ".\\cgame\\cg_weapons.cpp",
-                760,
-                0,
-                "weaponNum doesn't index BG_GetNumWeapons()\n\t%i not in [0, %i)",
-                weaponNum,
-                NumWeapons);
-        }
-        if (!newHands)
-            MyAssertHandler(".\\cgame\\cg_weapons.cpp", 761, 0, "%s", "newHands");
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1095,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        weapInfo = &cg_weaponsArray[0][weaponNum];
+        bcassert(weaponNum, BG_GetNumWeapons());
+        iassert(newHands);
+        iassert(localClientNum == 0);
+        weapInfo = &cg_weaponsArray[0][weaponNum]; // KISAKTODO: refactor to CG_GetLocalClientWeaponInfo()
         weapDef = BG_GetWeaponDef(weaponNum);
         if (weapDef->gunXModel[weaponModel])
         {
@@ -353,16 +334,15 @@ void __cdecl ChangeViewmodelDobj(
             }
             else
             {
-                if (weapInfo->tree)
-                    MyAssertHandler(".\\cgame\\cg_weapons.cpp", 785, 0, "%s", "!weapInfo->tree");
+                iassert(!weapInfo->tree);
                 pAnimTree = CG_CreateWeaponViewModelXAnim(weapDef);
                 weapInfo->tree = pAnimTree;
             }
-            if (!pAnimTree)
-                MyAssertHandler(".\\cgame\\cg_weapons.cpp", 788, 0, "%s", "pAnimTree");
+            iassert(pAnimTree);
             dobjModels[0].boneName = 0;
             dobjModels[0].ignoreCollision = 0;
             dobjModels[0].model = weapInfo->handModel;
+
             dobjModels[1].boneName = scr_const.tag_weapon;
             dobjModels[1].ignoreCollision = 0;
             dobjModels[1].model = weapDef->gunXModel[weaponModel];
@@ -381,20 +361,21 @@ void __cdecl ChangeViewmodelDobj(
             {
                 dobjModels[mdlIdx].boneName = scr_const.tag_clip;
                 dobjModels[mdlIdx].ignoreCollision = 0;
-                dobjModels[mdlIdx++].model = weapInfo->rocketModel;
+                dobjModels[mdlIdx].model = weapInfo->rocketModel;
+                mdlIdx++;
             }
             if (weapInfo->knifeModel)
             {
                 dobjModels[mdlIdx].boneName = scr_const.tag_knife_attach;
                 dobjModels[mdlIdx].ignoreCollision = 0;
-                dobjModels[mdlIdx++].model = weapInfo->knifeModel;
+                dobjModels[mdlIdx].model = weapInfo->knifeModel;
+                mdlIdx++;
             }
-            if (mdlIdx > 4)
-                MyAssertHandler(".\\cgame\\cg_weapons.cpp", 830, 0, "%s", "mdlIdx <= MYMODELCOUNT");
+            iassert(mdlIdx <= MYMODELCOUNT);
             weapInfo->viewModelDObj = Com_ClientDObjCreate(dobjModels, mdlIdx, pAnimTree, dobjHandle, localClientNum);
             DObjSetHidePartBits(weapInfo->viewModelDObj, weapInfo->partBits);
             if (updateClientInfo)
-                DObjUpdateClientInfo(weapInfo->viewModelDObj, 0.050000001, 0);
+                DObjUpdateClientInfo(weapInfo->viewModelDObj, 0.05f, 0);
         }
     }
 }
@@ -403,26 +384,11 @@ void __cdecl CG_UpdateHandViewmodels(int localClientNum, XModel *handModel)
 {
     unsigned int weaponIndex; // [esp+Ch] [ebp-4h]
 
-    if (!handModel)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 967, 0, "%s", "handModel");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(handModel);
+    iassert(localClientNum == 0);
     for (weaponIndex = 1; weaponIndex < BG_GetNumWeapons(); ++weaponIndex)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1095,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        iassert(localClientNum == 0);
         if (cg_weaponsArray[0][weaponIndex].handModel != handModel)
             ChangeViewmodelDobj(
                 localClientNum,
@@ -440,14 +406,8 @@ void __cdecl CG_RegisterItemVisuals(int localClientNum, unsigned int weapIdx)
 {
     int modelIdx; // [esp+4h] [ebp-4h]
 
-    if (weapIdx >= 0x80)
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            1194,
-            0,
-            "weapIdx doesn't index MAX_WEAPONS\n\t%i not in [0, %i)",
-            weapIdx,
-            128);
+    bcassert(weapIdx, MAX_WEAPONS);
+
     for (modelIdx = 0; modelIdx < 16; ++modelIdx)
     {
         if (bg_itemlist[128 * modelIdx + weapIdx].giType != IT_WEAPON)

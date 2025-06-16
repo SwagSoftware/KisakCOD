@@ -127,7 +127,6 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int touched)
             if (other->health >= 1 && !level.clientIsSpawning)
             {
                 weapIndex = ent->s.index.brushmodel % 128;
-                //item = (gitem_s *)(4 * ent->s.index.brushmodel + 9917736);
                 item = &bg_itemlist[ent->s.index.brushmodel];
                 if (BG_CanItemBeGrabbed(&ent->s, &other->client->ps, touched))
                 {
@@ -801,7 +800,6 @@ int __cdecl GetNonClipAmmoToTransferToWeaponEntity(gentity_s *player, unsigned i
 gentity_s *__cdecl Drop_Weapon(gentity_s *ent, int weapIdx, unsigned __int8 weaponModel, unsigned int tag)
 {
     WeaponDef *WeaponDef; // eax
-    int v6; // eax
     gclient_s *v7; // esi
     int v8; // eax
     float *currentOrigin; // [esp+Ch] [ebp-80h]
@@ -828,10 +826,8 @@ gentity_s *__cdecl Drop_Weapon(gentity_s *ent, int weapIdx, unsigned __int8 weap
         }
         weapIdx = altWeaponIndex;
     }
-    v6 = weapIdx + (weaponModel << 7);
-    //weapItem = (const gitem_s *)(4 * v6 + 9917736);
-    weapItem = &bg_itemlist[v6];
-    iassert(bg_itemlist[v6].giType == IT_WEAPON);
+    weapItem = &bg_itemlist[128 * weaponModel + weapIdx];
+    iassert(weapItem->giType == IT_WEAPON);
     if (ent->client)
     {
         client = ent->client;
@@ -976,7 +972,6 @@ int __cdecl TransferRandomAmmoToWeaponEntity(gentity_s *weaponEnt, int transferW
 
 void __cdecl FinishSpawningItem(gentity_s *ent)
 {
-    entityState_s_type_index v1; // eax
     char *v2; // eax
     const char *v3; // [esp+4h] [ebp-C8h]
     float v4; // [esp+10h] [ebp-BCh]
@@ -1001,11 +996,8 @@ void __cdecl FinishSpawningItem(gentity_s *ent)
     }
     else
     {
-        v1.brushmodel = ent->s.index.brushmodel;
-        //item = (gitem_s *)(4 * v1.brushmodel + 9917736);
-        item = &bg_itemlist[v1.brushmodel];
-        if (bg_itemlist[v1.brushmodel].giType != IT_WEAPON)
-            MyAssertHandler(".\\game\\g_items.cpp", 1131, 0, "%s", "item->giType == IT_WEAPON");
+        item = &bg_itemlist[ent->s.index.brushmodel];
+        iassert(item->giType == IT_WEAPON);
         mins[0] = -1.0;
         mins[1] = -1.0;
         mins[2] = -1.0;

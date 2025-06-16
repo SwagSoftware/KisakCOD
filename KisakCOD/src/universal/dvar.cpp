@@ -1331,7 +1331,7 @@ void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source
     {
         v3 = Dvar_ValueToString(dvar, value);
         v4 = va("      dvar set %s %s\n", dvar->name, v3);
-        Com_PrintMessage(6, v4, 0);
+        //Com_PrintMessage(6, v4, 0);
     }
     if (!Dvar_ValueInDomain(dvar->type, value, dvar->domain))
     {

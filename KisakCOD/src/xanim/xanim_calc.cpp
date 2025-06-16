@@ -600,7 +600,7 @@ LABEL_67:
             tmpKeyframeIndex <<= 8;
             int tableDelta = CLAMP((tableSize - tmpKeyframeIndex), 0, 256);
             pIndices = &indices[tmpKeyframeIndex];
-            XAnim_GetTimeIndex<T>(&animTime, pIndices, tmpKeyframeIndex, &v59, &lerpFrac);
+            XAnim_GetTimeIndex<T>(&animTime, pIndices, tableDelta, &v59, &lerpFrac);
             v59 += tmpKeyframeIndex;
             indices += tableSize + 1;
         }
