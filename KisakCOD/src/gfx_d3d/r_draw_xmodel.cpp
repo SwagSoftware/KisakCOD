@@ -43,38 +43,93 @@ void __cdecl R_DrawXModelRigidModelSurf(GfxCmdBufContext context, XSurface *xsur
     }
 }
 
+struct vector3
+{
+    float4 x;
+    float4 y;
+    float4 z;
+};
+struct vector4 : vector3
+{
+    float4 w;
+};
+
+void __cdecl R_GetWorldMatrixForModelSurf(const GfxModelRigidSurface *modelSurf, float4 eyeOffset, vector4 *worldMat)
+{
+    float v3; // [esp+24h] [ebp-58h]
+    float v4; // [esp+28h] [ebp-54h]
+    float v5; // [esp+30h] [ebp-4Ch]
+    float v6; // [esp+34h] [ebp-48h]
+    float v7; // [esp+40h] [ebp-3Ch]
+    float v8; // [esp+44h] [ebp-38h]
+    float v9; // [esp+48h] [ebp-34h]
+    float v10; // [esp+4Ch] [ebp-30h]
+    float v11; // [esp+50h] [ebp-2Ch]
+    float4 quat; // [esp+54h] [ebp-28h] BYREF
+    float scale; // [esp+64h] [ebp-18h]
+    float4 scaleVec; // [esp+68h] [ebp-14h]
+
+    quat = *(float4 *)modelSurf->placement.base.quat;
+    iassert(Vec4IsNormalized(quat.v));
+
+    v10 = (float)(quat.v[0] + quat.v[0]) * quat.v[0];
+    v4 = (float)(quat.v[0] + quat.v[0]) * quat.v[1];
+    v8 = (float)(quat.v[0] + quat.v[0]) * quat.v[2];
+    v11 = (float)(quat.v[0] + quat.v[0]) * quat.v[3];
+    v3 = (float)(quat.v[1] + quat.v[1]) * quat.v[1];
+    v9 = (float)(quat.v[1] + quat.v[1]) * quat.v[2];
+    v7 = (float)(quat.v[1] + quat.v[1]) * quat.v[3];
+    v6 = (float)(quat.v[2] + quat.v[2]) * quat.v[3];
+    v5 = (float)(quat.v[2] + quat.v[2]) * quat.v[2];
+    worldMat->x.v[0] = 1.0 - (float)(v3 + v5);
+    worldMat->x.v[1] = v4 + v6;
+    worldMat->x.v[2] = v8 - v7;
+    worldMat->x.u[3] = 0.0f;
+    worldMat->y.v[0] = v4 - v6;
+    worldMat->y.v[1] = 1.0 - (float)(v10 + v5);
+    worldMat->y.v[2] = v9 + v11;
+    worldMat->y.u[3] = 0.0f;
+    worldMat->z.v[0] = v8 + v7;
+    worldMat->z.v[1] = v9 - v11;
+    worldMat->z.v[2] = 1.0 - (float)(v10 + v3);
+    worldMat->z.u[3] = 0.0f;
+    scale = modelSurf->placement.scale;
+    scaleVec.v[0] = scale;
+    scaleVec.v[1] = scale;
+    scaleVec.v[2] = scale;
+    scaleVec.v[3] = scale;
+    worldMat->w.v[0] = modelSurf->placement.base.origin[0];
+    worldMat->w.v[1] = modelSurf->placement.base.origin[1];
+    worldMat->w.v[2] = modelSurf->placement.base.origin[2];
+    worldMat->w.u[3] = 0.0f;
+    worldMat->x.v[0] = worldMat->x.v[0] * scaleVec.v[0];
+    worldMat->x.v[1] = worldMat->x.v[1] * scaleVec.v[1];
+    worldMat->x.v[2] = worldMat->x.v[2] * scaleVec.v[2];
+    worldMat->x.v[3] = worldMat->x.v[3] * scaleVec.v[3];
+    worldMat->y.v[0] = worldMat->y.v[0] * scaleVec.v[0];
+    worldMat->y.v[1] = worldMat->y.v[1] * scaleVec.v[1];
+    worldMat->y.v[2] = worldMat->y.v[2] * scaleVec.v[2];
+    worldMat->y.v[3] = worldMat->y.v[3] * scaleVec.v[3];
+    worldMat->z.v[0] = worldMat->z.v[0] * scaleVec.v[0];
+    worldMat->z.v[1] = worldMat->z.v[1] * scaleVec.v[1];
+    worldMat->z.v[2] = worldMat->z.v[2] * scaleVec.v[2];
+    worldMat->z.v[3] = worldMat->z.v[3] * scaleVec.v[3];
+    worldMat->w.v[0] = worldMat->w.v[0] - eyeOffset.v[0];
+    worldMat->w.v[1] = worldMat->w.v[1] - eyeOffset.v[1];
+    worldMat->w.v[2] = worldMat->w.v[2] - eyeOffset.v[2];
+    worldMat->w.v[3] = worldMat->w.v[3] - eyeOffset.v[3];
+}
+
 unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
     const GfxDrawSurf *drawSurfList,
     unsigned int drawSurfCount,
     GfxCmdBufContext context)
 {
-    float v4; // [esp+24h] [ebp-F0h]
-    float v5; // [esp+28h] [ebp-ECh]
-    float v6; // [esp+2Ch] [ebp-E8h]
-    float v7; // [esp+30h] [ebp-E4h]
-    float v8; // [esp+34h] [ebp-E0h]
-    float v9; // [esp+38h] [ebp-DCh]
-    float v10; // [esp+3Ch] [ebp-D8h]
-    float v11; // [esp+40h] [ebp-D4h]
-    float v12; // [esp+44h] [ebp-D0h]
-    float v13; // [esp+48h] [ebp-CCh]
-    float v14; // [esp+4Ch] [ebp-C8h]
-    float v15; // [esp+50h] [ebp-C4h]
     GfxCmdBufSourceState *matrix; // [esp+58h] [ebp-BCh]
-    float worldMat; // [esp+5Ch] [ebp-B8h]
-    float worldMata[16]; // [esp+5Ch] [ebp-B8h]
-    float worldMat_4; // [esp+60h] [ebp-B4h]
-    float worldMat_8; // [esp+64h] [ebp-B0h]
-    float worldMat_16; // [esp+6Ch] [ebp-A8h]
-    float worldMat_20; // [esp+70h] [ebp-A4h]
-    float worldMat_24; // [esp+74h] [ebp-A0h]
-    float worldMat_32; // [esp+7Ch] [ebp-98h]
-    float worldMat_36; // [esp+80h] [ebp-94h]
-    float worldMat_40; // [esp+84h] [ebp-90h]
+    vector4 worldMat;
     unsigned int baseGfxEntIndex; // [esp+A0h] [ebp-74h]
     GfxDrawSurf drawSurf; // [esp+A4h] [ebp-70h]
     const GfxBackEndData *data; // [esp+ACh] [ebp-68h]
-    float4 quat; // [esp+B4h] [ebp-60h] BYREF
     unsigned int drawSurfIndex; // [esp+C4h] [ebp-50h]
     float4 eyeOffset; // [esp+C8h] [ebp-4Ch]
     const GfxEntity *gfxEnt; // [esp+D8h] [ebp-3Ch]
@@ -82,7 +137,6 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
     const GfxModelRigidSurface *modelSurf; // [esp+E8h] [ebp-2Ch]
     unsigned int depthHackFlags; // [esp+ECh] [ebp-28h]
     unsigned int gfxEntIndex; // [esp+F0h] [ebp-24h]
-    float4 scale; // [esp+F4h] [ebp-20h]
     float materialTime; // [esp+108h] [ebp-Ch]
     unsigned __int64 drawSurfKey; // [esp+10Ch] [ebp-8h]
 
@@ -91,86 +145,36 @@ unsigned int __cdecl R_DrawXModelRigidSurfLitInternal(
     drawSurfMask.packed = 0xFFFFFFFFFF000000uLL;
     drawSurfKey = drawSurf.packed & 0xFFFFFFFFFF000000uLL;
     drawSurfIndex = 0;
+
     eyeOffset.v[0] = context.source->eyeOffset[0];
     eyeOffset.v[1] = context.source->eyeOffset[1];
     eyeOffset.v[2] = context.source->eyeOffset[2];
+
     eyeOffset.v[0] = eyeOffset.v[0] - 0.0;
     eyeOffset.v[1] = eyeOffset.v[1] - 0.0;
     eyeOffset.v[2] = eyeOffset.v[2] - 0.0;
-    eyeOffset.v[3] = 0.0 - 1.0;
-    modelSurf = (const GfxModelRigidSurface*)((char*)data + 4 * drawSurf.fields.objectId);
+    eyeOffset.v[3] = 0.0f - 1.0f;
+
+    modelSurf = (const GfxModelRigidSurface *)((char *)data + 4 * drawSurf.fields.objectId);
     baseGfxEntIndex = modelSurf->surf.info.gfxEntIndex;
     depthHackFlags = context.source->depthHackFlags;
     materialTime = context.source->materialTime;
+
     while (1)
     {
-        quat = *(float4*)modelSurf->placement.base.quat;
-        if (!Vec4IsNormalized(quat.v))
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h",
-                842,
-                0,
-                "%s",
-                "Vec4IsNormalized( quat.v )");
-        v9 = quat.v[0] + quat.v[0];
-        v14 = v9 * quat.v[0];
-        v5 = v9 * quat.v[1];
-        v12 = v9 * quat.v[2];
-        v15 = v9 * quat.v[3];
-        v10 = quat.v[1] + quat.v[1];
-        v4 = v10 * quat.v[1];
-        v13 = v10 * quat.v[2];
-        v11 = v10 * quat.v[3];
-        v6 = quat.v[2] + quat.v[2];
-        v8 = v6 * quat.v[3];
-        v7 = v6 * quat.v[2];
-        worldMat = 1.0 - (v4 + v7);
-        worldMat_4 = v5 + v8;
-        worldMat_8 = v12 - v11;
-        worldMat_16 = v5 - v8;
-        worldMat_20 = 1.0 - (v14 + v7);
-        worldMat_24 = v13 + v15;
-        worldMat_32 = v12 + v11;
-        worldMat_36 = v13 - v15;
-        worldMat_40 = 1.0 - (v14 + v4);
-        scale.v[0] = modelSurf->placement.scale;
-        scale.v[1] = scale.v[0];
-        scale.v[2] = scale.v[0];
-        scale.v[3] = scale.v[0];
-        worldMata[0] = worldMat * scale.v[0];
-        worldMata[1] = worldMat_4 * scale.v[0];
-        worldMata[2] = worldMat_8 * scale.v[0];
-        worldMata[3] = 0.0 * scale.v[0];
-        worldMata[4] = worldMat_16 * scale.v[0];
-        worldMata[5] = worldMat_20 * scale.v[0];
-        worldMata[6] = worldMat_24 * scale.v[0];
-        worldMata[7] = worldMata[3];
-        worldMata[8] = worldMat_32 * scale.v[0];
-        worldMata[9] = worldMat_36 * scale.v[0];
-        worldMata[10] = worldMat_40 * scale.v[0];
-        worldMata[11] = worldMata[3];
-        worldMata[12] = modelSurf->placement.base.origin[0] - eyeOffset.v[0];
-        worldMata[13] = modelSurf->placement.base.origin[1] - eyeOffset.v[1];
-        worldMata[14] = modelSurf->placement.base.origin[2] - eyeOffset.v[2];
-        worldMata[15] = 0.0 - eyeOffset.v[3];
+        R_GetWorldMatrixForModelSurf(modelSurf, eyeOffset, &worldMat);
         matrix = R_GetActiveWorldMatrix(context.source);
-        *&matrix->matrices.matrix[0].m[0][0] = *worldMata;
-        *&matrix->matrices.matrix[0].m[0][2] = *&worldMata[2];
-        *&matrix->matrices.matrix[0].m[1][0] = *&worldMata[4];
-        *&matrix->matrices.matrix[0].m[1][2] = *&worldMata[6];
-        *&matrix->matrices.matrix[0].m[2][0] = *&worldMata[8];
-        *&matrix->matrices.matrix[0].m[2][2] = *&worldMata[10];
-        *&matrix->matrices.matrix[0].m[3][0] = *&worldMata[12];
-        *&matrix->matrices.matrix[0].m[3][2] = *&worldMata[14];
+        memcpy(&matrix->matrices.matrix[0], &worldMat, sizeof(GfxMatrix));
+
         R_SetModelLightingCoordsForSource(modelSurf->surf.info.lightingHandle, context.source);
         R_SetReflectionProbe(context, drawSurf.fields.reflectionProbeIndex);
         R_DrawXModelRigidModelSurf(context, modelSurf->surf.xsurf);
         if (++drawSurfIndex == drawSurfCount)
             break;
-        LODWORD(drawSurf) = drawSurfList[drawSurfIndex].packed;
+        drawSurf.packed = drawSurfList[drawSurfIndex].packed;
         if ((drawSurfMask.packed & drawSurfList[drawSurfIndex].packed) != drawSurfKey)
             break;
-        modelSurf = (const GfxModelRigidSurface *)((char*)data + 4 * drawSurf.fields.objectId);
+        modelSurf = (const GfxModelRigidSurface *)((char *)data + 4 * drawSurf.fields.objectId);
         gfxEntIndex = modelSurf->surf.info.gfxEntIndex;
         if (gfxEntIndex != baseGfxEntIndex)
         {
