@@ -37,44 +37,21 @@ static int __cdecl R_AllocSkinnedCachedVerts(int vertCount)
     return -1;
 }
 
-static int  R_PreSkinXSurface(
+int  R_PreSkinXSurface(
     const DObj_s *obj,
     XSurface *surf,
     const GfxModelSurfaceInfo *surfaceInfo,
     unsigned int *numSkinnedVerts,
-    GfxModelSkinnedSurface *surfPos)
+    GfxModelSkinnedSurface *surfPos_)
 {
-    float v7[3]; // [esp+10h] [ebp-164h] BYREF
-    float v9[4]; // [esp+20h] [ebp-154h] BYREF
-    DObjSkelMat quat_12; // [esp+38h] [ebp-13Ch] BYREF
-
+    float origin[4]; // [esp+20h] [ebp-154h] BYREF
     DObjAnimMat *mat_1; // [esp+C4h] [ebp-B0h]
-    DObjSkelMat v29; // [esp+C8h] [ebp-ACh] BYREF
-    float v30; // [esp+10Ch] [ebp-68h]
-    float v31; // [esp+110h] [ebp-64h]
-    float v32; // [esp+114h] [ebp-60h]
-    float v33; // [esp+118h] [ebp-5Ch]
-    float v34; // [esp+11Ch] [ebp-58h]
-    float v35; // [esp+120h] [ebp-54h]
-    float v36; // [esp+124h] [ebp-50h]
-    float v37; // [esp+128h] [ebp-4Ch]
-    float v38; // [esp+12Ch] [ebp-48h]
-    float scaledQuat[3]; // [esp+130h] [ebp-44h] BYREF
-    //float transWeight; // [esp+13Ch] [ebp-38h]
-    //float v41; // [esp+140h] [ebp-34h]
-    //float v42; // [esp+144h] [ebp-30h]
-    //float v43; // [esp+148h] [ebp-2Ch]
-    //float v44; // [esp+14Ch] [ebp-28h]
     const DObjAnimMat *mat; // [esp+150h] [ebp-24h]
-    int v46; // [esp+154h] [ebp-20h]
+    int offset; // [esp+154h] [ebp-20h]
     DObjAnimMat *RotTransArray; // [esp+158h] [ebp-1Ch]
     GfxModelRigidSurface *rigidSurf; // [esp+15Ch] [ebp-18h]
-    unsigned int v49; // [esp+160h] [ebp-14h]
-    //bool enabled; // [esp+167h] [ebp-Dh]
-    DObjSkelMat skelMat;
-    DObjSkelMat invBaseMat;
-    float origin[3];
-    float quat[4];
+
+    GfxModelSkinnedSurface *surfPos = surfPos_;
 
     iassert(obj);
     iassert(surf);
@@ -88,33 +65,28 @@ static int  R_PreSkinXSurface(
         iassert(&rigidSurf->surf == reinterpret_cast<GfxModelSkinnedSurface *>(surfPos));
         rigidSurf->placement.scale = 1.0;
         RotTransArray = &DObjGetRotTransArray(obj)[surfaceInfo->boneIndex];
-        //RotTransArray += (surf->vertList->boneOffset / 64);
-        mat = &surfaceInfo->baseMat[surf->vertList->boneOffset / 64];
+        offset = surf->vertList->boneOffset >> 6;
+        mat = &surfaceInfo->baseMat[offset];
 
-        iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
-        iassert(!IS_NAN(mat->transWeight));
-
-        Vec3Scale(mat->quat, mat->transWeight, scaledQuat);
-
+        DObjSkelMat invBaseMat;
+        DObjSkelMat skelMat;
         ConvertQuatToInverseSkelMat(mat, &invBaseMat);
-        ConvertQuatToSkelMat(RotTransArray, &skelMat);
 
-        QuatMultiplyInverse(mat->quat, RotTransArray->quat, quat);
-        Vec4Normalize(quat);
+        mat_1 = &RotTransArray[offset];
 
-        rigidSurf->placement.base.quat[0] = quat[0];
-        rigidSurf->placement.base.quat[1] = quat[1];
-        rigidSurf->placement.base.quat[2] = quat[2];
-        rigidSurf->placement.base.quat[3] = quat[3];
+        ConvertQuatToSkelMat(mat_1, &skelMat);
+        QuatMultiplyInverse(mat->quat, mat_1->quat, origin);
 
-        R_TransformSkelMat(invBaseMat.origin, &skelMat, origin);
+        Vec4Normalize(origin);
 
-        rigidSurf->placement.base.origin[0] = origin[0];
-        rigidSurf->placement.base.origin[1] = origin[1];
-        rigidSurf->placement.base.origin[2] = origin[2];
+        rigidSurf->placement.base.quat[0] = origin[0];
+        rigidSurf->placement.base.quat[1] = origin[1];
+        rigidSurf->placement.base.quat[2] = origin[2];
+        rigidSurf->placement.base.quat[3] = origin[3];
 
-        Vec3Add(origin, scene.def.viewOffset, rigidSurf->placement.base.origin);
-
+        float tmp[3];
+        R_TransformSkelMat(invBaseMat.origin, &skelMat, tmp);
+        Vec3Add(tmp, scene.def.viewOffset, rigidSurf->placement.base.origin);
         return 56;
     }
     else
