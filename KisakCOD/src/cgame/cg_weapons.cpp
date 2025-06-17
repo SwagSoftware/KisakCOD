@@ -406,9 +406,10 @@ void __cdecl CG_RegisterItemVisuals(int localClientNum, unsigned int weapIdx)
 
     for (modelIdx = 0; modelIdx < 16; ++modelIdx)
     {
-        if (bg_itemlist[128 * modelIdx + weapIdx].giType != IT_WEAPON)
-            MyAssertHandler(".\\cgame\\cg_weapons.cpp", 1199, 0, "%s", "item->giType == IT_WEAPON");
+        gitem_s *item = &bg_itemlist[128 * modelIdx + weapIdx];
+        iassert(item->giType == IT_WEAPON);
     }
+
     CG_RegisterWeapon(localClientNum, weapIdx);
 }
 
@@ -451,15 +452,12 @@ void __cdecl CG_HoldBreathInit(cg_s *cgameGlob)
 void __cdecl CG_UpdateViewModelPose(const DObj_s* obj, int localClientNum)
 {
     if (obj)
+    {
+        DObjLock((DObj_s*)obj); // LWSS: backport locks from blops
         DObjClearSkel(obj);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+        DObjUnlock((DObj_s *)obj);
+    }
+    iassert(localClientNum == 0);
     AxisToAngles((mat3x3 &)cgArray[0].viewModelAxis, cgArray[0].viewModelPose.angles);
     cgArray[0].viewModelPose.origin[0] = cgArray[0].viewModelAxis[3][0];
     cgArray[0].viewModelPose.origin[1] = cgArray[0].viewModelAxis[3][1];
@@ -573,14 +571,7 @@ void __cdecl CG_AddPlayerWeapon(
     float lightingOrigin[3]; // [esp+44h] [ebp-10h] BYREF
     const WeaponDef* weapDef; // [esp+50h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     nextSnap = cgArray[0].nextSnap;
     v9 = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
     v8 = v9 && !cgArray[0].renderingThirdPerson;
@@ -590,17 +581,9 @@ void __cdecl CG_AddPlayerWeapon(
         weaponNum = cent->nextState.weapon;
     if (weaponNum > 0 && (cent->nextState.lerp.eFlags & 0x300) == 0)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1095,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        iassert(localClientNum == 0);
         weapInfo = &cg_weaponsArray[0][weaponNum];
-        if (!weapInfo->viewModelDObj)
-            MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2907, 0, "%s", "weapInfo->viewModelDObj");
+        iassert(weapInfo->viewModelDObj);
         if (ps)
         {
             UnitQuatToAxis(placement->base.quat, (mat3x3&)cgArray[0].viewModelAxis);
@@ -617,8 +600,7 @@ void __cdecl CG_AddPlayerWeapon(
                 AddLeanToPosition(lightingOrigin, ps->viewangles[1], ps->leanf, 16.0, 20.0);
                 R_AddDObjToScene(weapInfo->viewModelDObj, &cgArray[0].viewModelPose, 0x3FFu, 3u, lightingOrigin, 0.0);
                 weapDef = BG_GetWeaponDef(weaponNum);
-                if (!weapDef)
-                    MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2930, 0, "%s", "weapDef");
+                iassert(weapDef);
                 v7 = CG_LookingThroughNightVision(localClientNum) && weapDef->laserSightDuringNightvision;
                 if (cg_laserForceOn->current.enabled || v7)
                     CG_Laser_Add(
@@ -627,10 +609,8 @@ void __cdecl CG_AddPlayerWeapon(
                         &cgArray[0].viewModelPose,
                         cgArray[0].refdef.viewOffset,
                         LASER_OWNER_PLAYER);
-                cgArray[0].refdef.dof.viewModelStart = (weapDef->adsDofStart - ps->dofViewmodelStart) * ps->fWeaponPosFrac
-                    + ps->dofViewmodelStart;
-                cgArray[0].refdef.dof.viewModelEnd = (weapDef->adsDofEnd - ps->dofViewmodelEnd) * ps->fWeaponPosFrac
-                    + ps->dofViewmodelEnd;
+                cgArray[0].refdef.dof.viewModelStart = (weapDef->adsDofStart - ps->dofViewmodelStart) * ps->fWeaponPosFrac + ps->dofViewmodelStart;
+                cgArray[0].refdef.dof.viewModelEnd = (weapDef->adsDofEnd - ps->dofViewmodelEnd) * ps->fWeaponPosFrac + ps->dofViewmodelEnd;
             }
             HoldBreathUpdate(localClientNum);
         }
@@ -1281,14 +1261,7 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
     float vAxis[3][3]; // [esp+114h] [ebp-24h] BYREF
 
     drawgun = 1;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     cgameGlob = &cgArray[0];
     ps = &cgArray[0].predictedPlayerState;
     cgArray[0].refdef.dof.viewModelStart = 0.0;
@@ -1325,11 +1298,13 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
                 ws.vLastMoveAng[2] = cgameGlob->playerEntity.vLastMoveAng[2];
                 ws.fLastIdleFactor = cgameGlob->playerEntity.fLastIdleFactor;
                 ws.time = cgameGlob->time - ps->deltaTime;
+
                 if (cgameGlob->damageTime)
                     v3 = cgameGlob->damageTime - ps->deltaTime;
                 else
                     v3 = 0;
                 ws.damageTime = v3;
+
                 ws.v_dmg_pitch = cgameGlob->v_dmg_pitch;
                 ws.v_dmg_roll = cgameGlob->v_dmg_roll;
                 ws.vGunOffset[0] = cgameGlob->vGunOffset[0];
@@ -1356,10 +1331,8 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
                 else
                 {
                     UnitQuatToAngles(placement.base.quat, angles);
-                    v1 = AngleNormalize360(angles[0]);
-                    cgameGlob->gunPitch = v1;
-                    v2 = AngleNormalize360(angles[1]);
-                    cgameGlob->gunYaw = v2;
+                    cgameGlob->gunPitch = AngleNormalize360(angles[0]);
+                    cgameGlob->gunYaw = AngleNormalize360(angles[1]);
                 }
                 vLastMoveAng = cgameGlob->playerEntity.vLastMoveAng;
                 cgameGlob->playerEntity.vLastMoveAng[0] = ws.vLastMoveAng[0];
@@ -1395,17 +1368,18 @@ void __cdecl CalculateWeaponPosition_Sway(cg_s *cgameGlob)
     ssDT = cgameGlob->shellshock.duration + cgameGlob->shellshock.startTime - cgameGlob->time;
     if (ssDT <= 0)
     {
-        ssSwayScale = 1.0;
+        ssSwayScale = 1.0f;
     }
     else
     {
-        ssScale = 1.0;
-        if (!cgameGlob->shellshock.parms)
-            MyAssertHandler(".\\cgame\\cg_weapons.cpp", 1344, 0, "%s", "cgameGlob->shellshock.parms");
+        ssScale = 1.0f;
+        iassert(cgameGlob->shellshock.parms);
+
         if (ssDT < cgameGlob->shellshock.parms->view.fadeTime)
             ssScale = (double)ssDT / (double)cgameGlob->shellshock.parms->view.fadeTime;
-        ssScalea = (3.0 - ssScale * 2.0) * ssScale * ssScale;
-        ssSwayScale = (weapDef->swayShellShockScale - 1.0) * ssScalea + 1.0;
+
+        ssScalea = (3.0f - ssScale * 2.0f) * ssScale * ssScale;
+        ssSwayScale = (weapDef->swayShellShockScale - 1.0f) * ssScalea + 1.0f;
     }
     BG_CalculateWeaponPosition_Sway(
         &cgameGlob->predictedPlayerState,
@@ -1434,7 +1408,7 @@ void __cdecl CalculateWeaponPosition(cg_s *cgameGlob, float *origin)
         tempAngles[2] = 0.0;
         fLean = GetLeanFraction(cgameGlob->predictedPlayerState.leanf);
         tempAngles[2] = (float)0.0 - (fLean + fLean);
-        fDist = (1.0 - cgameGlob->predictedPlayerState.fWeaponPosFrac) * fLean * 1.600000023841858;
+        fDist = (1.0 - cgameGlob->predictedPlayerState.fWeaponPosFrac) * fLean * 1.6f;
         AngleVectors(tempAngles, 0, right, 0);
         Vec3Mad(origin, fDist, right, origin);
     }

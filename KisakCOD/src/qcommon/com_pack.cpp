@@ -118,3 +118,33 @@ void __cdecl Byte4CopyBgraToVertexColor(const unsigned __int8 *rgbaFrom, unsigne
 {
     *(unsigned int *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[0] | (rgbaFrom[1] << 8) | (rgbaFrom[2] << 16);
 }
+
+void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)
+{
+    float decodeScale; // [esp+10h] [ebp-4h]
+
+    decodeScale = (in.array[3] - -192.0f) / 32385.0f;
+
+    out[0] = (in.array[0] - 127.0f) * decodeScale;
+    out[1] = (in.array[1] - 127.0f) * decodeScale;
+    out[2] = (in.array[2] - 127.0f) * decodeScale;
+}
+
+void __cdecl Vec2UnpackTexCoords(PackedTexCoords in, float *out)
+{
+    float v2; // [esp+0h] [ebp-20h]
+    float v3; // [esp+10h] [ebp-10h]
+
+    if (HIWORD(in.packed))
+        LODWORD(v3) = (HIWORD(in.packed) << 16) & 0x80000000
+        | (((((HIWORD(in.packed) << 14) & 0xFFFC000) - (~(HIWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
+    else
+        v3 = 0.0;
+    *out = v3;
+    if (LOWORD(in.packed))
+        LODWORD(v2) = (LOWORD(in.packed) << 16) & 0x80000000
+        | (((((LOWORD(in.packed) << 14) & 0xFFFC000) - (~(LOWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
+    else
+        v2 = 0.0;
+    out[1] = v2;
+}

@@ -10,6 +10,48 @@
 //unsigned int const *const g_shortBoneWeightPerm__uint4 820f4950     gfx_d3d : r_model_skin.obj
 //struct __vector4 const g_shortBoneWeightPerm 85b981d0     gfx_d3d : r_model_skin.obj
 
+static void __cdecl R_MultiplySkelMat(const DObjSkelMat *mat0, const DObjSkelMat *mat1, DObjSkelMat *out)
+{
+    out->axis[0][0] = mat0->axis[0][0] * mat1->axis[0][0]
+        + mat0->axis[0][1] * mat1->axis[1][0]
+        + mat0->axis[0][2] * mat1->axis[2][0];
+    out->axis[0][1] = mat0->axis[0][0] * mat1->axis[0][1]
+        + mat0->axis[0][1] * mat1->axis[1][1]
+        + mat0->axis[0][2] * mat1->axis[2][1];
+    out->axis[0][2] = mat0->axis[0][0] * mat1->axis[0][2]
+        + mat0->axis[0][1] * mat1->axis[1][2]
+        + mat0->axis[0][2] * mat1->axis[2][2];
+    out->axis[1][0] = mat0->axis[1][0] * mat1->axis[0][0]
+        + mat0->axis[1][1] * mat1->axis[1][0]
+        + mat0->axis[1][2] * mat1->axis[2][0];
+    out->axis[1][1] = mat0->axis[1][0] * mat1->axis[0][1]
+        + mat0->axis[1][1] * mat1->axis[1][1]
+        + mat0->axis[1][2] * mat1->axis[2][1];
+    out->axis[1][2] = mat0->axis[1][0] * mat1->axis[0][2]
+        + mat0->axis[1][1] * mat1->axis[1][2]
+        + mat0->axis[1][2] * mat1->axis[2][2];
+    out->axis[2][0] = mat0->axis[2][0] * mat1->axis[0][0]
+        + mat0->axis[2][1] * mat1->axis[1][0]
+        + mat0->axis[2][2] * mat1->axis[2][0];
+    out->axis[2][1] = mat0->axis[2][0] * mat1->axis[0][1]
+        + mat0->axis[2][1] * mat1->axis[1][1]
+        + mat0->axis[2][2] * mat1->axis[2][1];
+    out->axis[2][2] = mat0->axis[2][0] * mat1->axis[0][2]
+        + mat0->axis[2][1] * mat1->axis[1][2]
+        + mat0->axis[2][2] * mat1->axis[2][2];
+    out->origin[0] = mat0->origin[0] * mat1->axis[0][0]
+        + mat0->origin[1] * mat1->axis[1][0]
+        + mat0->origin[2] * mat1->axis[2][0]
+        + mat1->origin[0];
+    out->origin[1] = mat0->origin[0] * mat1->axis[0][1]
+        + mat0->origin[1] * mat1->axis[1][1]
+        + mat0->origin[2] * mat1->axis[2][1]
+        + mat1->origin[1];
+    out->origin[2] = mat0->origin[0] * mat1->axis[0][2]
+        + mat0->origin[1] * mat1->axis[1][2]
+        + mat0->origin[2] * mat1->axis[2][2]
+        + mat1->origin[2];
+}
 
 void R_SkinXModelCmd(_WORD *data)
 {
@@ -17,27 +59,28 @@ void R_SkinXModelCmd(_WORD *data)
 
     Profile_Begin(89);
 
-    bool sseEnabled = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
-    bool sseStateUsed = false;
+    //bool sseEnabled = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
+    //bool sseStateUsed = false;
 
     SkinXModelCmd* skinCmd = (SkinXModelCmd*)data;
 
     iassert(skinCmd);
     iassert(skinCmd->surfCount);
 
-    unsigned int* surfPos = (unsigned int*)skinCmd->modelSurfs;
+    GfxModelSkinnedSurface * surfPos = (GfxModelSkinnedSurface*)skinCmd->modelSurfs;
 
     int boneIndex = -1;
-    GfxPackedVertex *skinnedVert = 0;
+    GfxPackedVertex *skinnedVert = NULL;
+
     DObjSkelMat __declspec(align(16)) boneSkelMats[128];
     memset(boneSkelMats, 0, sizeof(boneSkelMats));
 
     for (unsigned int i = 0; i < skinCmd->surfCount; i++)
     {
-        GfxModelSkinnedSurface *skinnedSurf = (GfxModelSkinnedSurface *)surfPos;
+        GfxModelSkinnedSurface *skinnedSurf = surfPos;
         if (skinnedSurf->skinnedCachedOffset == -3)
         {
-            ++surfPos;
+            surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + 4);
         }
         else
         {
@@ -51,23 +94,18 @@ void R_SkinXModelCmd(_WORD *data)
                     if ((skinCmd->surfacePartBits[j >> 5] & (0x80000000 >> (j & 0x1F))) == 0)
                         continue;
 
-                    if (sseStateUsed)
-                    {
-                        sseStateUsed = false;
-                        /*_m_empty()*/;
-                    }
+                    //if (sseStateUsed)
+                    //{
+                    //    sseStateUsed = false;
+                    //    /*_m_empty();*/
+                    //}
 
                     DObjSkelMat mat0, mat1;
 
                     ConvertQuatToInverseSkelMat(&baseMats[j], &mat0);
                     ConvertQuatToSkelMat(&skinCmd->mat[j], &mat1);
-
-                    mat1.origin[0] = skinCmd->mat[j].trans[0];
-                    mat1.origin[1] = skinCmd->mat[j].trans[1];
-                    mat1.origin[2] = skinCmd->mat[j].trans[2];
-                    mat1.origin[3] = 1.0f;
-
                     R_MultiplySkelMat(&mat0, &mat1, &boneSkelMats[j]);
+
                     boneSkelMats[j].axis[0][3] = 0.0f;
                     boneSkelMats[j].axis[1][3] = 0.0f;
                     boneSkelMats[j].axis[2][3] = 0.0f;
@@ -78,11 +116,11 @@ void R_SkinXModelCmd(_WORD *data)
 
             if (skinnedSurf->skinnedCachedOffset == -2)
             {
-                surfPos += 14;
+                surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + 56);
             }
             else
             {
-                surfPos = (unsigned int*)(skinnedSurf + 1);
+                surfPos = skinnedSurf + 1;
                 XSurface *xsurf = skinnedSurf->xsurf;
                 iassert(xsurf);
 
@@ -120,14 +158,16 @@ void R_SkinXModelCmd(_WORD *data)
                 //}
                 //else
                 //{
+
                     R_SkinXSurfaceSkinned(skinnedSurf->xsurf, &boneSkelMats[boneIndex], skinnedVert);
+
                 //}
             }
         }
     }
 
-    if (sseStateUsed)
-        /*_m_empty()*/;
+    //if (sseStateUsed)
+        /*_m_empty();*/
 
     Profile_EndInternal(0);
 }
@@ -180,7 +220,7 @@ void __cdecl R_SkinXSurfaceWeight(
 }
 
 
-void __cdecl MatrixTransformVertexAndBasis(
+static void __cdecl MatrixTransformVertexAndBasis(
     const float *offset,
     float binormalSign,
     PackedUnitVec normal,
@@ -250,36 +290,6 @@ void __cdecl R_SkinXSurfaceWeight0(
         ++vertexBlend;
         ++vertsOut;
     }
-}
-
-void __cdecl Vec2UnpackTexCoords(PackedTexCoords in, float *out)
-{
-    float v2; // [esp+0h] [ebp-20h]
-    float v3; // [esp+10h] [ebp-10h]
-
-    if (HIWORD(in.packed))
-        LODWORD(v3) = (HIWORD(in.packed) << 16) & 0x80000000
-        | (((((HIWORD(in.packed) << 14) & 0xFFFC000) - (~(HIWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
-    else
-        v3 = 0.0;
-    *out = v3;
-    if (LOWORD(in.packed))
-        LODWORD(v2) = (LOWORD(in.packed) << 16) & 0x80000000
-        | (((((LOWORD(in.packed) << 14) & 0xFFFC000) - (~(LOWORD(in.packed) << 14) & 0x10000000)) ^ 0x80000000) >> 1);
-    else
-        v2 = 0.0;
-    out[1] = v2;
-}
-
-void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)
-{
-    float decodeScale; // [esp+10h] [ebp-4h]
-
-    decodeScale = (in.array[3] - -192.0f) / 32385.0f;
-
-    out[0] = (in.array[0] - 127.0f) * decodeScale;
-    out[1] = (in.array[1] - 127.0f) * decodeScale;
-    out[2] = (in.array[2] - 127.0f) * decodeScale;
 }
 
 void __cdecl R_SkinXSurfaceWeight1(
@@ -447,6 +457,7 @@ void __cdecl R_SkinXSurfaceRigid(
     {
         vertList = &surf->vertList[i];
         vertCount = vertList->vertCount;
+        iassert((vertList->boneOffset % 64) == 0); // LWSS ADD
         bone = (const DObjSkelMat *)((char *)boneMatrix + vertList->boneOffset);
         for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
         {
@@ -460,48 +471,5 @@ void __cdecl R_SkinXSurfaceRigid(
 
     iassert(vertex - vertices == totalVertCount);
     Profile_EndInternal(0);
-}
-
-void __cdecl R_MultiplySkelMat(const DObjSkelMat *mat0, const DObjSkelMat *mat1, DObjSkelMat *out)
-{
-    out->axis[0][0] = mat0->axis[0][0] * mat1->axis[0][0]
-        + mat0->axis[0][1] * mat1->axis[1][0]
-        + mat0->axis[0][2] * mat1->axis[2][0];
-    out->axis[0][1] = mat0->axis[0][0] * mat1->axis[0][1]
-        + mat0->axis[0][1] * mat1->axis[1][1]
-        + mat0->axis[0][2] * mat1->axis[2][1];
-    out->axis[0][2] = mat0->axis[0][0] * mat1->axis[0][2]
-        + mat0->axis[0][1] * mat1->axis[1][2]
-        + mat0->axis[0][2] * mat1->axis[2][2];
-    out->axis[1][0] = mat0->axis[1][0] * mat1->axis[0][0]
-        + mat0->axis[1][1] * mat1->axis[1][0]
-        + mat0->axis[1][2] * mat1->axis[2][0];
-    out->axis[1][1] = mat0->axis[1][0] * mat1->axis[0][1]
-        + mat0->axis[1][1] * mat1->axis[1][1]
-        + mat0->axis[1][2] * mat1->axis[2][1];
-    out->axis[1][2] = mat0->axis[1][0] * mat1->axis[0][2]
-        + mat0->axis[1][1] * mat1->axis[1][2]
-        + mat0->axis[1][2] * mat1->axis[2][2];
-    out->axis[2][0] = mat0->axis[2][0] * mat1->axis[0][0]
-        + mat0->axis[2][1] * mat1->axis[1][0]
-        + mat0->axis[2][2] * mat1->axis[2][0];
-    out->axis[2][1] = mat0->axis[2][0] * mat1->axis[0][1]
-        + mat0->axis[2][1] * mat1->axis[1][1]
-        + mat0->axis[2][2] * mat1->axis[2][1];
-    out->axis[2][2] = mat0->axis[2][0] * mat1->axis[0][2]
-        + mat0->axis[2][1] * mat1->axis[1][2]
-        + mat0->axis[2][2] * mat1->axis[2][2];
-    out->origin[0] = mat0->origin[0] * mat1->axis[0][0]
-        + mat0->origin[1] * mat1->axis[1][0]
-        + mat0->origin[2] * mat1->axis[2][0]
-        + mat1->origin[0];
-    out->origin[1] = mat0->origin[0] * mat1->axis[0][1]
-        + mat0->origin[1] * mat1->axis[1][1]
-        + mat0->origin[2] * mat1->axis[2][1]
-        + mat1->origin[1];
-    out->origin[2] = mat0->origin[0] * mat1->axis[0][2]
-        + mat0->origin[1] * mat1->axis[1][2]
-        + mat0->origin[2] * mat1->axis[2][2]
-        + mat1->origin[2];
 }
 

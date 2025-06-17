@@ -288,9 +288,7 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
     unsigned int maxHighIndex; // [esp+E4h] [ebp-28h]
     DObjAnimMat *mat; // [esp+E8h] [ebp-24h]
     unsigned int highIndex; // [esp+ECh] [ebp-20h]
-    int partBits[3]; // [esp+F0h] [ebp-1Ch] BYREF
-    unsigned int mask; // [esp+FCh] [ebp-10h]
-    int partBits2[3]; // [esp+100h] [ebp-Ch] BYREF
+    int partBits[7];
 
     rootBoneCount = DObjGetRootBoneCount(obj);
     iassert(rootBoneCount);
@@ -308,9 +306,13 @@ notSet:
     if (mat)
     {
         AnglesToQuat(pose->angles, baseQuat);
-        memset(partBits, 0, sizeof(partBits));
-        mask = 0x80000000;
-        memset(partBits2, 0, sizeof(partBits2));
+        partBits[0] = 0;
+        partBits[1] = 0;
+        partBits[2] = 0;
+        partBits[3] = 0x80000000;
+        partBits[4] = 0;
+        partBits[5] = 0;
+        partBits[6] = 0;
         localClientNum = R_GetLocalClientNum();
         iassert(localClientNum == 0);
         viewOffset[0] = cgArray[0].refdef.viewOffset[0];
@@ -320,7 +322,7 @@ notSet:
         while (partIndex <= rootBoneCount)
         {
             highIndex = partIndex >> 5;
-            if ((setPartBits[partIndex >> 5] & mask) == 0) 
+            if ((setPartBits[partIndex >> 5] & partBits[3]) == 0)
             {
                 if (DObjSetRotTransIndex((DObj_s*)obj, &partBits[3 - highIndex], partIndex))
                 {
@@ -356,7 +358,7 @@ notSet:
                 DObjSetTrans(mat, origin);
             }
             ++partIndex;
-            mask = (mask << 31) | (mask >> 1);
+            partBits[3] = (partBits[3] << 31) | ((unsigned int)partBits[3] >> 1);
             ++mat;
         }
     }

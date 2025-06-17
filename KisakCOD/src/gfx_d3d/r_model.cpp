@@ -202,7 +202,7 @@ void __cdecl R_XModelDebugBoxes(const DObj_s *obj, int *partBits)
             {
                 boneInfo = boneInfoArray[boneIndex];
                 tempBoxVerts = boxVerts;
-                for (boxEdge = 0; boxEdge < 0xC; ++boxEdge)
+                for (boxEdge = 0; boxEdge < 12; ++boxEdge)
                 {
                     org[0] = boneInfo->bounds[(*tempBoxVerts)[0]][0];
                     org[1] = boneInfo->bounds[(*tempBoxVerts)[1]][1];

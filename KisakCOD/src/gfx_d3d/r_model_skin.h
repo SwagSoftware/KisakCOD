@@ -2,10 +2,6 @@
 #include "r_material.h"
 #include <universal/q_shared.h>
 
-void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out);
-void __cdecl Vec2UnpackTexCoords(PackedTexCoords in, float *out);
-
-
 void  R_SkinXModelCmd(_WORD *data);
 void __cdecl R_SkinXSurfaceSkinned(
     const struct XSurface *xsurf,
@@ -45,7 +41,6 @@ void __cdecl R_SkinXSurfaceRigid(
     int totalVertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertices);
-void __cdecl R_MultiplySkelMat(const DObjSkelMat *mat0, const DObjSkelMat *mat1, DObjSkelMat *out);
 
 
 // r_model_skin_sse

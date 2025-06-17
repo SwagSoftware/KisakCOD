@@ -20,6 +20,7 @@ union XAnimIndices // sizeof=0x4
     unsigned __int16 *_2;
     void *data;
 };
+static_assert(sizeof(XAnimIndices) == 4);
 struct XAnimNotifyInfo // sizeof=0x8
 {
     unsigned __int16 name;

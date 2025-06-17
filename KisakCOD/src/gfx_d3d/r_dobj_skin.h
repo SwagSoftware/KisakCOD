@@ -19,7 +19,6 @@ struct SkinXModelCmd // sizeof=0x1C
 };
 
 int __cdecl DObjBad(const DObj_s *obj);
-void __cdecl R_FlagXModelAsSkinned(GfxSceneEntity *sceneEnt, unsigned int surfaceCount);
 void __cdecl R_SkinSceneDObj(
     GfxSceneEntity *sceneEnt,
     GfxSceneEntity *localSceneEnt,
@@ -30,11 +29,4 @@ int  R_SkinSceneDObjModels(
     GfxSceneEntity *sceneEnt,
     const DObj_s *obj,
     DObjAnimMat *boneMatrix);
-int __cdecl R_AllocSkinnedCachedVerts(int vertCount);
-int  R_PreSkinXSurface(
-    const DObj_s *obj,
-    XSurface *surf,
-    const GfxModelSurfaceInfo *surfaceInfo,
-    unsigned int *numSkinnedVerts,
-    struct GfxModelSkinnedSurface *surfPos);
 void __cdecl R_SkinGfxEntityCmd(GfxSceneEntity **data);

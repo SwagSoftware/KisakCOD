@@ -154,31 +154,15 @@ void __cdecl R_AddDObjToScene(
     unsigned int sceneEntIndex; // [esp+30h] [ebp-8h]
     unsigned int gfxEntIndex; // [esp+34h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_scene.cpp", 225, 0, "%s", "Sys_IsMainThread()");
-    if (!obj)
-        MyAssertHandler(".\\r_scene.cpp", 226, 0, "%s", "obj");
-    if (!pose)
-        MyAssertHandler(".\\r_scene.cpp", 227, 0, "%s", "pose");
-    if (entnum >= gfxCfg.entCount)
-        MyAssertHandler(
-            ".\\r_scene.cpp",
-            228,
-            0,
-            "entnum doesn't index gfxCfg.entCount\n\t%i not in [0, %i)",
-            entnum,
-            gfxCfg.entCount);
+    iassert(Sys_IsMainThread());
+    iassert(obj);
+    iassert(pose);
+    bcassert(entnum, gfxCfg.entCount);
+
     if (r_drawEntities->current.enabled)
     {
-        if (scene.dpvs.sceneDObjIndex[entnum] != 0xFFFF)
-            MyAssertHandler(
-                ".\\r_scene.cpp",
-                235,
-                0,
-                "%s\n\t(scene.dpvs.sceneDObjIndex[entnum]) = %i",
-                "(scene.dpvs.sceneDObjIndex[entnum] == (65535))",
-                scene.dpvs.sceneDObjIndex[entnum]);
-        if (materialTime == 0.0 && !renderFxFlags)
+        iassert(scene.dpvs.sceneDObjIndex[entnum] == (65535));
+        if (materialTime == 0.0f && !renderFxFlags)
         {
             gfxEntIndex = 0;
         }
@@ -205,23 +189,16 @@ void __cdecl R_AddDObjToScene(
                 sceneEnt->entnum = entnum;
                 scene.dpvs.sceneDObjIndex[entnum] = sceneEntIndex;
                 sceneEnt->info.pose = (cpose_t*)pose;
-                if (sceneEnt->cull.state)
-                    MyAssertHandler(
-                        ".\\r_scene.cpp",
-                        296,
-                        1,
-                        "%s\n\t(sceneEnt->cull.state) = %i",
-                        "(sceneEnt->cull.state == CULL_STATE_OUT)",
-                        sceneEnt->cull.state);
+                iassert(sceneEnt->cull.state == CULL_STATE_OUT);
                 radiusa = DObjGetRadius(obj);
                 CG_GetPoseOrigin(pose, sceneEnt->placement.base.origin);
                 CG_GetPoseAngles(pose, angles);
                 AnglesToQuat(angles, sceneEnt->placement.base.quat);
-                sceneEnt->placement.scale = 1.0;
+                sceneEnt->placement.scale = 1.0f;
                 s = -radiusa;
                 Vec3AddScalar(sceneEnt->placement.base.origin, s, sceneEnt->cull.mins);
                 Vec3AddScalar(sceneEnt->placement.base.origin, radiusa, sceneEnt->cull.maxs);
-                sceneEnt->lightingOrigin[0] = *lightingOrigin;
+                sceneEnt->lightingOrigin[0] = lightingOrigin[0];
                 sceneEnt->lightingOrigin[1] = lightingOrigin[1];
                 sceneEnt->lightingOrigin[2] = lightingOrigin[2];
                 sceneEnt->gfxEntIndex = gfxEntIndex;

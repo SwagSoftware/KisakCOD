@@ -208,7 +208,7 @@ void __cdecl Vec3Mul(const vec3r a, const vec3r b, vec3r product);
 
 void __cdecl Vec3Negate(const vec3r from, vec3r to);
 
-void __cdecl Vec3Avg(const vec3r a, const vec3r b, vec3r sum);
+void __cdecl Vec3Avg(const vec3r a, const vec3r b, vec3r result);
 
 float __cdecl Vec3Dot(const vec3r a, const vec3r b);
 void __cdecl Vec3Cross(const vec3r v0, const vec3r v1, vec3r cross);
