@@ -21,7 +21,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 target_compile_definitions(KisakCOD PUBLIC _CONSOLE)
-target_compile_definitions(KisakCOD PUBLIC _CRT_SECURE_NO_WARNINGS)
 target_compile_definitions(KisakCOD PUBLIC _MBCS)
 
 target_include_directories(KisakCOD PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -34,13 +33,8 @@ target_link_directories(KisakCOD PUBLIC "${DXSDK_DIR}/Lib/x86")
 target_link_directories(KisakCOD PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_directories(KisakCOD PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/msslib")
 
-set(MSVC_WARNING_DISABLES
- "/wd\"4065\""
- ) #Switch statement with no cases (Used Legitimately)
-
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /MP /W3 ${MSVC_WARNING_DISABLES} /permissive-")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 ${MSVC_WARNING_DISABLES} /permissive-")
-
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /Ot /MP /W3 /Zi ${MSVC_WARNING_DISABLES} /permissive-")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_WARNING_DISABLES} /permissive-")
 
 set_property(TARGET KisakCOD PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
@@ -50,3 +44,8 @@ target_link_options(KisakCOD PRIVATE /machine:x86)
 set_target_properties(KisakCOD PROPERTIES WIN32_EXECUTABLE TRUE)
 
 set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT KisakCOD )
+
+#Enable PDB for "Release" Build. (There is also RelWithDebInfo, but it has different settings as well)
+target_link_options(KisakCOD PRIVATE "$<$<CONFIG:Release>:/DEBUG>")
+target_link_options(KisakCOD PRIVATE "$<$<CONFIG:Release>:/OPT:REF>")
+target_link_options(KisakCOD PRIVATE "$<$<CONFIG:Release>:/OPT:ICF>")

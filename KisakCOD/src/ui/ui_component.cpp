@@ -2500,7 +2500,6 @@ void UI_ScrollPane::CheckMouseScroll(int index, float *thumbPos, float *thumbSiz
 
 void UI_Component::Shutdown()
 {
-    __debugbreak();
 }
 
 UI_Component::~UI_Component()
@@ -2509,12 +2508,10 @@ UI_Component::~UI_Component()
 
 void UI_Component::Draw(float one, float two, float three, float four, float five, float six)
 {
-    __debugbreak();
 }
 
 bool UI_Component::KeyEvent(float *pos, int key)
 {
-    __debugbreak();
     return false;
 }
 
