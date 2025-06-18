@@ -10,7 +10,11 @@ set(CMAKE_GENERATOR_PLATFORM "WIN32")
 include(cmake_files.cmake)
 
 target_compile_definitions(KisakCOD PUBLIC WIN32)
-target_compile_definitions(KisakCOD PUBLIC _DEBUG)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_definitions(KisakCOD PUBLIC _DEBUG)
+endif()
+
 target_compile_definitions(KisakCOD PUBLIC _CONSOLE)
 target_compile_definitions(KisakCOD PUBLIC _CRT_SECURE_NO_WARNINGS)
 target_compile_definitions(KisakCOD PUBLIC _MBCS)
