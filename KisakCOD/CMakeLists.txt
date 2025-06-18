@@ -48,3 +48,5 @@ set_property(TARGET KisakCOD PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CON
 target_link_libraries(KisakCOD PUBLIC mss32.lib dsound.lib ddraw.lib d3dx9d.lib d3d9.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" dxguid.lib)
 target_link_options(KisakCOD PRIVATE /machine:x86)
 set_target_properties(KisakCOD PROPERTIES WIN32_EXECUTABLE TRUE)
+
+set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT KisakCOD )
