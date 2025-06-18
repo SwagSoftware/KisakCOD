@@ -2,6 +2,7 @@ x64/
 .vs/
 KisakCOD/Debug
 KisakCOD/Release
+KisakCOD/build
 *.pdb
 *.idb
 *.tlog
