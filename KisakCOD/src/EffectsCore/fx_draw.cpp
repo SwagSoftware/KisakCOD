@@ -1548,19 +1548,6 @@ void __cdecl FX_GenTrail_VertsForSegment(const FxTrailSegmentDrawState *segmentD
     }
 }
 
-void __cdecl Vec3MadMad(
-    const float *start,
-    float scale0,
-    const float *dir0,
-    float scale1,
-    const float *dir1,
-    float *result)
-{
-    *result = scale0 * *dir0 + *start + scale1 * *dir1;
-    result[1] = scale0 * dir0[1] + start[1] + scale1 * dir1[1];
-    result[2] = scale0 * dir0[2] + start[2] + scale1 * dir1[2];
-}
-
 void __cdecl FX_DrawSpriteEffect(FxSystem *system, FxEffect *effect, int drawTime)
 {
     unsigned __int16 elemHandle; // [esp+0h] [ebp-C0h]

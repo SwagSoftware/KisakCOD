@@ -322,7 +322,8 @@ void __cdecl CL_Connect_f()
                     clc->serverAddress.ip[2],
                     clc->serverAddress.ip[3],
                     v1);
-                if (NET_IsLocalAddress(clc->serverAddress))//  || CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
+                //if (NET_IsLocalAddress(clc->serverAddress) || CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
+                if (NET_IsLocalAddress(clc->serverAddress) || CL_CDKeyValidate(NULL, NULL))
                 {
                     if (Com_HasPlayerProfile())
                     {
@@ -373,28 +374,34 @@ void __cdecl CL_Connect_f()
 
 bool __cdecl CL_CDKeyValidate(const char *key, const char *checksum)
 {
-    char chs[8]; // [esp+4h] [ebp-1Ch] BYREF
-    unsigned int crcAcc; // [esp+10h] [ebp-10h]
-    int index; // [esp+14h] [ebp-Ch]
-    int i; // [esp+18h] [ebp-8h]
-    unsigned int crcAccInit; // [esp+1Ch] [ebp-4h]
-
-    crcAccInit = 0;
-    crcAcc = 0;
-    for (index = 0; index < 16; ++index)
-    {
-        crcAcc ^= key[index];
-        for (i = 8; i; --i)
-        {
-            if ((crcAcc & 1) != 0)
-                crcAcc = (crcAcc >> 1) ^ 0xA001;
-            else
-                crcAcc >>= 1;
-        }
-    }
-    sprintf(chs, "%04x", crcAcc);
-    return checksum && !I_strnicmp(chs, checksum, 4) || checksum == 0;
+    // LWSS: this is going to be replaced with a different form of Auth
+    return true;
 }
+
+//bool __cdecl CL_CDKeyValidate(const char *key, const char *checksum)
+//{
+//    char chs[8]; // [esp+4h] [ebp-1Ch] BYREF
+//    unsigned int crcAcc; // [esp+10h] [ebp-10h]
+//    int index; // [esp+14h] [ebp-Ch]
+//    int i; // [esp+18h] [ebp-8h]
+//    unsigned int crcAccInit; // [esp+1Ch] [ebp-4h]
+//
+//    crcAccInit = 0;
+//    crcAcc = 0;
+//    for (index = 0; index < 16; ++index)
+//    {
+//        crcAcc ^= key[index];
+//        for (i = 8; i; --i)
+//        {
+//            if ((crcAcc & 1) != 0)
+//                crcAcc = (crcAcc >> 1) ^ 0xA001;
+//            else
+//                crcAcc >>= 1;
+//        }
+//    }
+//    sprintf(chs, "%04x", crcAcc);
+//    return checksum && !I_strnicmp(chs, checksum, 4) || checksum == 0;
+//}
 
 void __cdecl CL_GlobalServers_f()
 {

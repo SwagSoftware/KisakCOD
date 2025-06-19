@@ -1915,11 +1915,6 @@ void __cdecl DevGui_UpdateDvar(float deltaTime)
     }
 }
 
-bool __cdecl Vec4Compare(const float *a, const float *b)
-{
-    return *b == *a && b[1] == a[1] && b[2] == a[2] && b[3] == a[3];
-}
-
 double __cdecl DevGui_PickFloatScrollStep(float min, float max)
 {
     float v3; // [esp+0h] [ebp-44h]

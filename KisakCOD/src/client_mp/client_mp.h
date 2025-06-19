@@ -1193,6 +1193,7 @@ void __cdecl CL_SetServerInfo(serverInfo_t *server, char *info, __int16 ping);
 void __cdecl CL_ServerInfoPacket(netadr_t from, msg_t *msg, int time);
 void __cdecl CL_Connect_f();
 bool __cdecl CL_CDKeyValidate(const char *key, const char *checksum);
+
 void __cdecl CL_GlobalServers_f();
 void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg);
 void __cdecl CL_ResetPlayerMuting(unsigned int muteClientIndex);

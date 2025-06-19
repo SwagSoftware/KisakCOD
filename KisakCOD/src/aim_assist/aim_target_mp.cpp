@@ -315,13 +315,6 @@ void __cdecl AimTarget_GetTargetCenter(const centity_s *targetEnt, float *center
     Vec3Add(targetEnt->pose.origin, center, center);
 }
 
-void __cdecl Vec3Scale(const float *v, float scale, float *result)
-{
-    result[0] = scale * v[0];
-    result[1] = scale * v[1];
-    result[2] = scale * v[2];
-}
-
 void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetEnt, AimTarget *target)
 {
     float scale; // [esp+8h] [ebp-70h]

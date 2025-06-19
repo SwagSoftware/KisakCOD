@@ -26,7 +26,6 @@
  const dvar_t *r_specular;
  const dvar_t *r_glow_allowed;
  const dvar_t *sc_offscreenCasterLodBias;
- const dvar_t *r_fullscreen;
  const dvar_t *sm_spotShadowFadeTime;
  const dvar_t *r_showCollisionGroups;
  const dvar_t *r_dof_farStart;
@@ -221,8 +220,7 @@
  const dvar_t *r_reflectionProbeRegenerateAll;
  const dvar_t *r_reflectionProbeGenerateExit;
  //const dvar_t *r_warningRepeatDelay;
- const dvar_t *vid_xpos;
- const dvar_t *vid_ypos;
+
  const dvar_t *r_gpuSync;
  const dvar_t *r_multiGpu;
  const dvar_t *r_skinCache;

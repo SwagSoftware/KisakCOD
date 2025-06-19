@@ -713,6 +713,13 @@ void __cdecl Vec3AddScalar(const float* a, float s, float* sum)
     sum[2] = a[2] + s;
 }
 
+void __cdecl Vec3Sub(const float *a, const float *b, float *diff)
+{
+    *diff = *a - *b;
+    diff[1] = a[1] - b[1];
+    diff[2] = a[2] - b[2];
+}
+
 float __cdecl vectoyaw(const float *vec)
 {
     float v2; // [esp+0h] [ebp-14h]
@@ -2733,7 +2740,33 @@ bool __cdecl Vec4IsNormalized(const float* v)
 
     v3 = Vec4LengthSq(v) - 1.0;
     v2 = fabs(v3);
-    return v2 < 0.002000000094994903;
+    return v2 < 0.002f;
+}
+
+void __cdecl Vec4Copy(const float *from, float *to)
+{
+    *to = *from;
+    to[1] = from[1];
+    to[2] = from[2];
+    to[3] = from[3];
+}
+
+bool __cdecl Vec4Compare(const float *a, const float *b)
+{
+    return *b == *a && b[1] == a[1] && b[2] == a[2] && b[3] == a[3];
+}
+
+void __cdecl Vec3MadMad(
+    const float *start,
+    float scale0,
+    const float *dir0,
+    float scale1,
+    const float *dir1,
+    float *result)
+{
+    *result = scale0 * *dir0 + *start + scale1 * *dir1;
+    result[1] = scale0 * dir0[1] + start[1] + scale1 * dir1[1];
+    result[2] = scale0 * dir0[2] + start[2] + scale1 * dir1[2];
 }
 
 float __cdecl Vec3Normalize(float* v)
@@ -2926,6 +2959,45 @@ float __cdecl Vec4LengthSq(const float *v)
 float __cdecl Vec3LengthSq(const float* v)
 {
     return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+void __cdecl Vec3Scale(const float *v, float scale, float *result)
+{
+    result[0] = scale * v[0];
+    result[1] = scale * v[1];
+    result[2] = scale * v[2];
+}
+
+void __cdecl Vec3Add(const float *a, const float *b, float *sum)
+{
+    sum[0] = a[0] + b[0];
+    sum[1] = a[1] + b[1];
+    sum[2] = a[2] + b[2];
+}
+
+void __cdecl Vec3Avg(const float *a, const float *b, float *sum)
+{
+    *sum = (*a + *b) * 0.5;
+    sum[1] = (a[1] + b[1]) * 0.5;
+    sum[2] = (a[2] + b[2]) * 0.5;
+}
+
+
+void __cdecl Vec3ScaleMad(float scale0, const float *dir0, float scale1, const float *dir1, float *result)
+{
+    *result = scale0 * *dir0 + scale1 * *dir1;
+    result[1] = scale0 * dir0[1] + scale1 * dir1[1];
+    result[2] = scale0 * dir0[2] + scale1 * dir1[2];
+}
+
+bool __cdecl Vec3IsNormalized(const float *v)
+{
+    float v2; // [esp+4h] [ebp-8h]
+    float v3; // [esp+8h] [ebp-4h]
+
+    v3 = Vec3LengthSq(v) - 1.0;
+    v2 = fabs(v3);
+    return v2 < 0.002f;
 }
 
 void __cdecl QuatMultiplyReverseInverse(const float *in1, const float *in2, float *out)

@@ -656,11 +656,13 @@ void Com_PrintWarning(int channel, const char *fmt, ...)
 void __cdecl Com_Shutdown(const char* finalmsg)
 {
     Com_ShutdownInternal(finalmsg);
+#ifndef DEDICATED
     if (!com_dedicated->current.integer)
     {
         CL_InitRenderer();
         Com_AssetLoadUI();
     }
+#endif
 }
 
 void __cdecl CL_ShutdownDemo()
@@ -679,6 +681,7 @@ void __cdecl CL_ShutdownDemo()
 
 void __cdecl Com_ShutdownInternal(const char* finalmsg)
 {
+#ifndef DEDICATED
     int localClientNum; // [esp+0h] [ebp-4h]
 
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
@@ -687,6 +690,7 @@ void __cdecl Com_ShutdownInternal(const char* finalmsg)
     CL_ShutdownAll();
     CL_ShutdownDemo();
     FakeLag_Shutdown();
+#endif
     SV_Shutdown(finalmsg);
     Com_Restart();
 }
@@ -837,7 +841,9 @@ void __cdecl  Com_Quit_f()
     int localClientNum; // [esp+0h] [ebp-4h]
 
     Com_Printf(0, "quitting...\n");
+#ifndef DEDICATED
     R_PopRemoteScreenUpdate();
+#endif
     Com_SyncThreads();
     Scr_Cleanup();
     Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
@@ -845,10 +851,12 @@ void __cdecl  Com_Quit_f()
     if (!com_errorEntered)
     {
         Com_ClearTempMemory();
+#ifndef DEDICATED
         Sys_DestroySplashWindow();
         for (localClientNum = 0; localClientNum < 1; ++localClientNum)
             CL_Shutdown(localClientNum);
         FakeLag_Shutdown();
+#endif
         SV_Shutdown("EXE_SERVERQUIT");
         CL_ShutdownRef();
         Com_Close();
@@ -1139,17 +1147,14 @@ void __cdecl Com_ExecStartupConfigs(int localClientNum, const char* configFile)
 void __cdecl Com_Init(char* commandLine)
 {
     jmp_buf* Value; // eax
-    const char* v2; // eax
     jmp_buf * v3; // eax
     jmp_buf * v4; // eax
-    const char* v5; // eax
 
     Value = (jmp_buf *)Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
     if (_setjmp(*Value))
     {
-        v2 = va("Error during initialization:\n%s\n", com_errorMessage);
-        Sys_Error(v2);
+        Sys_Error(va("Error during initialization:\n%s\n", com_errorMessage));
     }
     Com_Init_Try_Block_Function(commandLine);
     v3 = (jmp_buf *)Sys_GetValue(2);
@@ -1158,14 +1163,15 @@ void __cdecl Com_Init(char* commandLine)
         Com_AddStartupCommands();
     if (com_errorEntered)
         Com_ErrorCleanup();
+
+#ifndef DEDICATED
     if (!com_sv_running->current.enabled && !com_dedicated->current.integer)
     {
         v4 = (jmp_buf *)Sys_GetValue(2);
         //if (_setjmp3(v4, 0))
         if (_setjmp(*v4))
         {
-            v5 = va("Error during initialization:\n%s\n", com_errorMessage);
-            Sys_Error(v5);
+            Sys_Error(va("Error during initialization:\n%s\n", com_errorMessage));
         }
         if (!cls.rendererStarted)
             CL_InitRenderer();
@@ -1173,6 +1179,7 @@ void __cdecl Com_Init(char* commandLine)
         CL_StartHunkUsers();
         R_EndRemoteScreenUpdate();
     }
+#endif
 }
 
 bool shouldQuitOnError;
@@ -1343,7 +1350,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     char* s; // [esp+14h] [ebp-8h]
     unsigned int initStartTime; // [esp+18h] [ebp-4h]
 
-    Com_Printf(16, "%s %s build %s %s\n", "CoD4 MP", "1.0", "win-x86", "Aug 22 2011");
+    Com_Printf(16, "%s %s build %s %s\n", "KisakCoD4", "1.0", "win-x86", __DATE__);
     Com_ParseCommandLine(commandLine);
     SL_Init();
     Swap_Init();

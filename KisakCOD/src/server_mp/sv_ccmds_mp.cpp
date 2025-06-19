@@ -719,7 +719,7 @@ int __cdecl SV_KickClient(client_t *cl, char *playerName, int maxPlayerNameLen, 
             I_strncpyz(playerName, cl->name, maxPlayerNameLen);
             I_CleanStr(playerName);
         }
-        memcpy(cdkeyHash, cl->cdkeyHash, 0x21u);
+        memcpy(cdkeyHash, cl->cdkeyHash, 33);
         SV_DropClient(cl, "EXE_PLAYERKICKED", 1);
         cl->lastPacketTime = svs.time;
         return 1;

@@ -426,6 +426,7 @@ void __cdecl Phys_CreateBasisFromNormal(const float *normal, float *binormal, fl
 
 void __cdecl Phys_DebugDrawContactPoint(const float *pos, const float *normal, float depth, const float *color)
 {
+#ifndef DEDICATED
     float scale; // [esp+10h] [ebp-28h]
     float mins[3]; // [esp+14h] [ebp-24h] BYREF
     float endpos[3]; // [esp+20h] [ebp-18h] BYREF
@@ -441,6 +442,7 @@ void __cdecl Phys_DebugDrawContactPoint(const float *pos, const float *normal, f
     scale = depth * 10.0;
     Vec3Mad(pos, scale, normal, endpos);
     CG_DebugLine(pos, endpos, color, 0, 3);
+#endif
 }
 
 void __cdecl Phys_DumpContact(int contactNum, const dContactGeom *contact)

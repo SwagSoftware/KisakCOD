@@ -2135,23 +2135,6 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
     }
 }
 
-void __cdecl Vec3ScaleMad(float scale0, const float *dir0, float scale1, const float *dir1, float *result)
-{
-    *result = scale0 * *dir0 + scale1 * *dir1;
-    result[1] = scale0 * dir0[1] + scale1 * dir1[1];
-    result[2] = scale0 * dir0[2] + scale1 * dir1[2];
-}
-
-bool __cdecl Vec3IsNormalized(const float *v)
-{
-    float v2; // [esp+4h] [ebp-8h]
-    float v3; // [esp+8h] [ebp-4h]
-
-    v3 = Vec3LengthSq(v) - 1.0;
-    v2 = fabs(v3);
-    return v2 < 0.002000000094994903;
-}
-
 void __cdecl CG_GetPoseOrigin(const cpose_t *pose, float *origin)
 {
     if (!pose)

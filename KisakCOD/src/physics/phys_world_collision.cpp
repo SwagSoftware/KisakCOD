@@ -207,6 +207,7 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
                 default:
                     break;
                 }
+#ifndef DEDICATED
                 if (phys_drawCollisionWorld->current.enabled)
                 {
                     for (i = 0; i < partition->triCount; ++i)
@@ -215,6 +216,7 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
                             CG_DebugLine(cm.verts[indices[3 * i + j]], cm.verts[indices[3 * i + (j + 1) % 3]], colorGreen, 0, 2);
                     }
                 }
+#endif
             }
         }
     }

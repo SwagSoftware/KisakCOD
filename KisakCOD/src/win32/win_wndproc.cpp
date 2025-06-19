@@ -13,6 +13,10 @@
 #include <gfx_d3d/r_dvars.h>
 #include <qcommon/cmd.h>
 
+const dvar_t *vid_xpos;
+const dvar_t *vid_ypos;
+const dvar_t *r_fullscreen;
+
 static UINT MSH_MOUSEWHEEL;
 
 #define WM_BUTTON4DOWN	(WM_MOUSELAST+2)

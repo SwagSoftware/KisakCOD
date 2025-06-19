@@ -724,6 +724,7 @@ void iprintlnbold()
 
 void GScr_print3d()
 {
+#ifndef DEDICATED
     VariableUnion duration; // [esp+10h] [ebp-34h]
     float origin[3]; // [esp+14h] [ebp-30h] BYREF
     float rgb[3]; // [esp+20h] [ebp-24h] BYREF
@@ -767,6 +768,7 @@ void GScr_print3d()
         Scr_Error("illegal call to print3d()");
         break;
     }
+#endif
 }
 
 void GScr_line()

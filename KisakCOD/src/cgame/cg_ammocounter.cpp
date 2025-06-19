@@ -1316,11 +1316,3 @@ unsigned int __cdecl GetWeaponIndex(const cg_s *cgameGlob)
         return cgameGlob->predictedPlayerState.weapon;
 }
 
-void __cdecl Vec4Copy(const float *from, float *to)
-{
-    *to = *from;
-    to[1] = from[1];
-    to[2] = from[2];
-    to[3] = from[3];
-}
-

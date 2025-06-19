@@ -3,6 +3,7 @@ x64/
 KisakCOD/Debug
 KisakCOD/Release
 KisakCOD/build
+KisakCOD/build-dedi
 *.pdb
 *.idb
 *.tlog
@@ -13,3 +14,5 @@ IDA/*
 *.bak
 KisakCOD/KisakCOD.vcxproj.user
 /.idea
+KisakCOD/.idea
+/Release

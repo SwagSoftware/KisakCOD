@@ -704,20 +704,6 @@ int __cdecl AimAssist_CalcAimPos(
     return 1;
 }
 
-void __cdecl Vec3Add(const float *a, const float *b, float *sum)
-{
-    sum[0] = a[0] + b[0];
-    sum[1] = a[1] + b[1];
-    sum[2] = a[2] + b[2];
-}
-
-void __cdecl Vec3Avg(const float *a, const float *b, float *sum)
-{
-    *sum = (*a + *b) * 0.5;
-    sum[1] = (a[1] + b[1]) * 0.5;
-    sum[2] = (a[2] + b[2]) * 0.5;
-}
-
 int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsigned int tagName, float *pos)
 {
     char *v5; // eax
@@ -923,13 +909,6 @@ bool __cdecl AimAssist_DoBoundsIntersectCenterBox(
     v7 = clipHalfWidth >= (double)*clipMins && *clipMaxs >= -clipHalfWidth;
     v6 = clipHalfHeight >= (double)clipMins[1] && clipMaxs[1] >= -clipHalfHeight;
     return v7 && v6;
-}
-
-void __cdecl Vec3Sub(const float *a, const float *b, float *diff)
-{
-    *diff = *a - *b;
-    diff[1] = a[1] - b[1];
-    diff[2] = a[2] - b[2];
 }
 
 const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlobals *aaGlob, int entIndex)

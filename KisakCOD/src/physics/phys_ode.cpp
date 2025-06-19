@@ -1385,6 +1385,7 @@ void __cdecl Phys_BodyGetPointVelocity(dxBody *body, float *point, float *outVel
 
 void __cdecl Phys_DrawDebugText(const ScreenPlacement *scrPlace)
 {
+#ifndef DEDICATED
     int v1; // eax
     unsigned int totalBodiesAwake; // [esp+20h] [ebp-14h]
     unsigned int totalBodiesAwakea; // [esp+20h] [ebp-14h]
@@ -1401,6 +1402,7 @@ void __cdecl Phys_DrawDebugText(const ScreenPlacement *scrPlace)
     v1 = Phys_DrawDebugTextForWorld(2u, (char *)"Ragdoll Objects", &x, &y, charHeight, scrPlace);
     text = va("Total Objects Awake: %i", totalBodiesAwakea + v1);
     CG_DrawStringExt(scrPlace, x, y, (char *)text, colorGreen, 0, 1, charHeight);
+#endif
 }
 
 int __cdecl Phys_DrawDebugTextForWorld(
@@ -1411,6 +1413,7 @@ int __cdecl Phys_DrawDebugTextForWorld(
     float charHeight,
     const ScreenPlacement *scrPlace)
 {
+#ifndef DEDICATED
     char *v6; // eax
     char *text; // [esp+20h] [ebp-8h]
     int bodyCount; // [esp+24h] [ebp-4h]
@@ -1428,6 +1431,9 @@ int __cdecl Phys_DrawDebugTextForWorld(
     CG_DrawStringExt(scrPlace, *x, *y, text, colorGreen, 0, 1, charHeight);
     *y = *y + charHeight;
     return physGlob.debugActiveObjCount;
+#else
+    return 0;
+#endif
 }
 
 void __cdecl Phys_ObjCountIfActive(dxBody *body)
@@ -1517,6 +1523,7 @@ void __cdecl Phys_CheckIfAliveTooLong(dxBody *body)
         if (dBodyIsEnabled(body))
         {
             Phys_BodyGetCenterOfMass(body, newPos);
+#ifndef DEDICATED
             if (phys_drawAwakeTooLong->current.enabled && userData->hasDisplayedAwakeTooLongWarning)
             {
                 size = (double)(timeNow % 0x1F4) * 30.0 / 500.0 + 1.0;
@@ -1528,6 +1535,7 @@ void __cdecl Phys_CheckIfAliveTooLong(dxBody *body)
                 maxs[2] = size;
                 CG_DebugBox(newPos, mins, maxs, 0.0, colorRed, 0, 10);
             }
+#endif
             type = dGeomGetClass(geom);
             if (type == 6)
             {
@@ -1841,6 +1849,7 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
 
 void __cdecl Phys_ObjDraw(dxBody *body)
 {
+#ifndef DEDICATED
     const float *v1; // eax
     float v2; // [esp+8h] [ebp-A8h]
     const float *v3; // [esp+18h] [ebp-98h]
@@ -1872,6 +1881,7 @@ void __cdecl Phys_ObjDraw(dxBody *body)
         maxs[2] = 4.0;
         CG_DebugBox(pos, mins, maxs, 0.0, colorLtBlue, 0, 3);
     }
+
     if (phys_drawCollisionObj->current.enabled)
     {
         userData = (PhysObjUserData*)dBodyGetData(body);
@@ -1925,6 +1935,7 @@ void __cdecl Phys_ObjDraw(dxBody *body)
             MyAssertHandler(".\\physics\\phys_ode.cpp", 1448, 0, "%s", "cyl->direction >= 1 && cyl->direction <= 3");
         goto LABEL_22;
     }
+#endif
 }
 
 void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)

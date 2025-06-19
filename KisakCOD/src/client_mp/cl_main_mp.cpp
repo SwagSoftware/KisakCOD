@@ -4327,12 +4327,6 @@ float (*__cdecl CL_GetMapCenter())[3]
     return (float (*)[3])cls.mapCenter;
 }
 
-// LWSS: Note: Commonly used as a nullsub()
-void __cdecl CL_ResetStats_f()
-{
-    ;
-}
-
 int __cdecl CL_GetLocalClientActiveCount()
 {
     return 1;

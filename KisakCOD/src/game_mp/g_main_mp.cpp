@@ -232,8 +232,8 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 992, 0, "%s", "Sys_IsMainThread()");
     Com_Printf(15, "------- Game Initialization -------\n");
-    Com_Printf(15, "gamename: %s\n", "Call of Duty 4");
-    Com_Printf(15, "gamedate: %s\n", "Aug 22 2011");
+    Com_Printf(15, "gamename: %s\n", "KisakCoD4");
+    Com_Printf(15, "gamedate: %s\n", __DATE__);
     Swap_Init();
     EntHandle::Init();
     memset((unsigned __int8 *)&level, 0, sizeof(level));
@@ -373,8 +373,8 @@ const dvar_s *G_RegisterDvars()
     DvarLimits minp; // [esp+8h] [ebp-14h]
 
     g_cheats = Dvar_RegisterBool("sv_cheats", 1, 0, "Enable cheats");
-    Dvar_RegisterString("gamename", "Call of Duty 4", 0x44u, "The name of the game");
-    Dvar_RegisterString("gamedate", "Aug 22 2011", 0x40u, "The date compiled");
+    Dvar_RegisterString("gamename", "KisakCoD4", 0x44u, "The name of the game");
+    Dvar_RegisterString("gamedate", __DATE__, 0x40u, "The date compiled");
     Dvar_RegisterString("sv_mapname", (char *)"", 0x44u, "The current map name");
     g_gametype = Dvar_RegisterString("g_gametype", "war", 0x24u, "The current campaign");
     min.integer.max = Dvar_RegisterInt(
@@ -399,7 +399,11 @@ const dvar_s *G_RegisterDvars()
     g_logSync = Dvar_RegisterBool("g_logSync", 0, 1u, "Enable synchronous logging");
     g_password = Dvar_RegisterString("g_password", (char *)"", 0, "Password");
     g_banIPs = Dvar_RegisterString("g_banIPs", (char *)"", 1u, "IP addresses to ban from playing");
+#ifdef DEDICATED
+    g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, 0x20u, "Dedicated server");
+#else
     g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x20u, "Dedicated server");
+#endif
     if (g_dedicated->current.integer)
         Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "Dedicated server");
     g_speed = Dvar_RegisterInt("g_speed", 190, (DvarLimits)0x7FFFFFFF80000000LL, 0, "Player speed");
@@ -1415,6 +1419,7 @@ bool __cdecl DoPerFrameNotify(
 
 const dvar_s *ShowEntityInfo()
 {
+#ifndef DEDICATED
     const dvar_s *result; // eax
     const char *EntityTypeName; // eax
     float origin[3]; // [esp+14h] [ebp-18h] BYREF
@@ -1456,10 +1461,14 @@ const dvar_s *ShowEntityInfo()
         }
     }
     return result;
+#else
+    return NULL;
+#endif
 }
 
 void __cdecl ShowEntityInfo_Items(gentity_s *ent)
 {
+#ifndef DEDICATED
     WeaponDef *weapDef; // [esp+14h] [ebp-18h]
     char *text; // [esp+18h] [ebp-14h]
     float origin[3]; // [esp+1Ch] [ebp-10h] BYREF
@@ -1482,6 +1491,7 @@ void __cdecl ShowEntityInfo_Items(gentity_s *ent)
             origin[2] = origin[2] + -4.0;
         }
     }
+#endif
 }
 
 void __cdecl G_RunFrameForEntity(gentity_s *ent)

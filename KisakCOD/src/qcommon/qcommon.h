@@ -1470,4 +1470,9 @@ inline int __cdecl RETURN_ZERO32()
 {
     return 0;
 }
+// LWSS: Note: Commonly used as a nullsub()
+inline void __cdecl CL_ResetStats_f()
+{
+    ;
+}
 #define qmemcpy memcpy
