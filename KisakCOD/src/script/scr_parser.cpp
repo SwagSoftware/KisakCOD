@@ -408,25 +408,6 @@ OpcodeLookup *__cdecl Scr_GetPrevSourcePosOpcodeLookup(const char *codePos)
     return 0;
 }
 
-void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum)
-{
-    unsigned int sortedIndex; // [esp+0h] [ebp-8h]
-
-    iassert(bufferIndex < scrParserPub.sourceBufferLookupLen);
-
-    sortedIndex = scrParserPub.sourceBufferLookup[bufferIndex].sortedIndex;
-
-    iassert(sortedIndex < scrParserPub.sourceBufferLookupLen);
-
-    //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, sortedIndex, 1);
-    ((UI_LinesComponent)scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
-
-    scrDebuggerGlob.scriptList.scriptWindows[sortedIndex]->SetSelectedLineFocus(lineNum, 0);
-
-    //Scr_AbstractScriptList::AddEntry(&scrDebuggerGlob.openScriptList, scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
-    scrDebuggerGlob.openScriptList.AddEntry(scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
-}
-
 unsigned int __cdecl Scr_GetLineNum(unsigned int bufferIndex, unsigned int sourcePos)
 {
     const char *startLine; // [esp+0h] [ebp-8h] BYREF

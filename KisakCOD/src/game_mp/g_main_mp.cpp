@@ -84,7 +84,7 @@ const dvar_t *g_voiceChatTalkingDuration;
 const dvar_t *g_ScoresColor_Spectator;
 const dvar_t *g_useholdtime;
 const dvar_t *g_ScoresColor_EnemyTeam;
-//const dvar_t *g_compassShowEnemies;
+const dvar_t *g_compassShowEnemies;
 const dvar_t *g_speed   ;
 const dvar_t *g_friendlyNameDist;
 const dvar_t *g_log     ;

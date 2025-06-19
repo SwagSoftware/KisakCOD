@@ -415,6 +415,7 @@ LRESULT WINAPI MainWndProc(
 
 		SND_SetHWND(hWnd);
 
+#ifndef DEDICATED
 		iassert(r_reflectionProbeGenerate);
 		iassert(r_fullscreen);
 
@@ -429,6 +430,7 @@ LRESULT WINAPI MainWndProc(
 			1u,
 			"Automatically set the priority of the windows process when the game is minimized");
 		MSH_MOUSEWHEEL = RegisterWindowMessageA("MSWHEEL_ROLLMSG");
+#endif
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 	case WM_DESTROY:
 		g_wv.hWnd = NULL;

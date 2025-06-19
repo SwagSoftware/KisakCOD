@@ -33,7 +33,6 @@ Scr_Breakpoint *g_breakpointsHead;
 
 unsigned int g_breakonObject;
 unsigned int g_breakonString;
-int g_breakonHit;
 
 void __cdecl TRACK_scr_debugger()
 {
@@ -3209,4 +3208,23 @@ retry_15:
 bool __cdecl Scr_IgnoreErrors()
 {
     return scrDebuggerGlob.disableBreakpoints;
+}
+
+void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum)
+{
+    unsigned int sortedIndex; // [esp+0h] [ebp-8h]
+
+    iassert(bufferIndex < scrParserPub.sourceBufferLookupLen);
+
+    sortedIndex = scrParserPub.sourceBufferLookup[bufferIndex].sortedIndex;
+
+    iassert(sortedIndex < scrParserPub.sourceBufferLookupLen);
+
+    //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, sortedIndex, 1);
+    ((UI_LinesComponent)scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
+
+    scrDebuggerGlob.scriptList.scriptWindows[sortedIndex]->SetSelectedLineFocus(lineNum, 0);
+
+    //Scr_AbstractScriptList::AddEntry(&scrDebuggerGlob.openScriptList, scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
+    scrDebuggerGlob.openScriptList.AddEntry(scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
 }

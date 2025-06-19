@@ -376,8 +376,10 @@ void __cdecl  Sys_Quit()
 	Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
 	timeEndPeriod(1u);
 	Sys_SpawnQuitProcess();
+#ifndef DEDICATED
 	IN_Shutdown();
 	Key_Shutdown();
+#endif
 	Sys_DestroyConsole();
 	Sys_NormalExit();
 	Win_ShutdownLocalization();
@@ -390,7 +392,9 @@ void __cdecl  Sys_Quit()
 	SL_Shutdown();
 	if (!com_errorEntered)
 		track_shutdown(0);
+#ifndef DEDICATED
 	Con_ShutdownChannels();
+#endif
 	exit(0);
 }
 

@@ -992,6 +992,7 @@ int __cdecl SV_GetPacketCompressionForClient(int clientNum)
 
 void __cdecl SV_Netchan_PrintProfileStats(int bPrintToConsole)
 {
+#ifndef DEDICATED
     int iTotalMinRecieved; // [esp+4h] [ebp-49Ch]
     int packet; // [esp+8h] [ebp-498h]
     int packeta; // [esp+8h] [ebp-498h]
@@ -1274,10 +1275,12 @@ void __cdecl SV_Netchan_PrintProfileStats(int bPrintToConsole)
         ++i;
         ++pClient;
     }
+#endif
 }
 
 void __cdecl SV_ProfDraw(int y, char *string, bool showHighlight)
 {
+#ifndef DEDICATED
     float color[4]; // [esp+Ch] [ebp-10h] BYREF
 
     if (showHighlight)
@@ -1289,5 +1292,6 @@ void __cdecl SV_ProfDraw(int y, char *string, bool showHighlight)
         CL_DrawRect(12, y, 1024, cl_profileTextHeight->current.integer - 6, color);
     }
     CL_DrawString(12, y, string, 0, cl_profileTextHeight->current.integer);
+#endif
 }
 

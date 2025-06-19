@@ -22,6 +22,7 @@
 #include <gfx_d3d/r_primarylights.h>
 #include <gfx_d3d/r_model.h>
 #include <script/scr_vm.h>
+#include <game_mp/g_main_mp.h>
 
 bool g_mapLoaded;
 bool g_ambientStarted;
@@ -207,7 +208,7 @@ const dvar_t *cg_tracerLength;
 const dvar_t *cg_hudChatIntermissionPosition;
 const dvar_t *cg_hudVotePosition;
 const dvar_t *cg_fs_debug;
-const dvar_t *g_compassShowEnemies;
+//const dvar_t *g_compassShowEnemies;
 
 const char *debugOverlayNames[4] = { "Off", "ViewmodelInfo", "FontTest", NULL }; // idb
 

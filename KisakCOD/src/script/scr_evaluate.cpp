@@ -21,6 +21,7 @@
 
 debugger_sval_s *g_debugExprHead;
 int g_breakonExpr;
+int g_breakonHit;
 
 scrEvaluateGlob_t scrEvaluateGlob;
 int g_script_error_level;

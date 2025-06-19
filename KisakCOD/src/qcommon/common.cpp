@@ -166,12 +166,14 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	}
 	else
 	{
+#ifndef DEDICATED
 		if (channel != 6 && com_dedicated && !com_dedicated->current.integer)
 		{
 			if (channel == 2 || channel == 3 || channel == 4)
 				MyAssertHandler(".\\qcommon\\common.cpp", 625, 0, "%s", "!Con_IsNotifyChannel( channel )");
 			CL_ConsolePrint(0, channel, msg, 0, 0, 32 * error);
 		}
+#endif
 		if (*msg == 94 && msg[1])
 			msg += 2;
 		if (channel != 6
@@ -667,6 +669,7 @@ void __cdecl Com_Shutdown(const char* finalmsg)
 
 void __cdecl CL_ShutdownDemo()
 {
+#ifndef DEDICATED
     clientConnection_t *clc; // [esp+0h] [ebp-4h]
 
     clc = CL_GetLocalClientConnection(0);
@@ -677,6 +680,7 @@ void __cdecl CL_ShutdownDemo()
         clc->demoplaying = 0;
         clc->demorecording = 0;
     }
+#endif
 }
 
 void __cdecl Com_ShutdownInternal(const char* finalmsg)
@@ -782,6 +786,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
             com_fixedConsolePosition = 1;
             CL_ConsoleFixPosition();
         }
+#ifndef DEDICATED
         if (cls.uiStarted)
         {
             Com_SetErrorMessage(com_errorMessage);
@@ -794,6 +799,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
             Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
             return;
         }
+#endif
         code = ERR_DROP;
     LABEL_27:
         if (!com_errorEntered)
@@ -817,6 +823,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     }
     com_fixedConsolePosition = 1;
     CL_ConsoleFixPosition();
+#ifndef DEDICATED
     if (cls.uiStarted && Sys_IsMainThread())
     {
         Com_SetErrorMessage(com_errorMessage);
@@ -825,6 +832,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
     }
     else
+#endif
     {
         if (!com_dedicated->current.integer)
             goto LABEL_27;
@@ -1247,11 +1255,13 @@ void Com_ErrorCleanup()
     }
     else
     {
+#ifndef DEDICATED
         if (cls.uiStarted && errorcode != ERR_DROP)
         {
             MenuScreenForError = UI_GetMenuScreenForError();
             UI_SetActiveMenu(0, (uiMenuCommand_t)MenuScreenForError);
         }
+#endif
         Com_SetErrorMessage(com_errorMessage);
     }
     if (fs_debug && fs_debug->current.integer == 2)
@@ -1295,8 +1305,10 @@ void Com_ErrorCleanup()
         if (errorcode == ERR_DROP)
         {
             Com_PrintError(16, "********************\nERROR: %s\n********************\n", com_errorMessage);
+#ifndef DEDICATED
             if (cls.uiStarted && !com_fixedConsolePosition)
                 CL_ConsoleFixPosition();
+#endif
         }
         else
         {
@@ -1417,6 +1429,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     SV_Init();
     NET_Init();
     Dvar_ClearModified((dvar_s*)com_dedicated);
+#ifndef DEDICATED
     if (!com_dedicated->current.integer)
     {
         CL_ResetStats_f();
@@ -1424,8 +1437,10 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         for (localClientNuma = 0; localClientNuma < 1; ++localClientNuma)
             CL_Init(localClientNuma);
     }
+#endif
     com_frameTime = Sys_Milliseconds();
     Com_StartupVariable(0);
+#ifndef DEDICATED
     if (!com_dedicated->current.integer)
     {
         SND_InitDriver();
@@ -1438,6 +1453,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         cls.soundStarted = 1;
         SND_Init();
     }
+#endif
     COM_PlayIntroMovies();
     if (useFastFile->current.enabled)
     {
@@ -1521,12 +1537,14 @@ void __cdecl Com_Assert_f()
 
 void COM_PlayIntroMovies()
 {
+#ifndef DEDICATED
     if (!com_dedicated->current.integer && !com_introPlayed->current.enabled)
     {
         Cbuf_AddText(0, "cinematic IW_logo\n");
         Dvar_SetString((dvar_s*)nextmap, (char*)"cinematic atvi; set nextmap cinematic cod_intro");
         Dvar_SetBool((dvar_s*)com_introPlayed, 1);
     }
+#endif
 }
 
 const char *s_lockThreadNames[4] = { "none", "minimal", "all" };
@@ -1711,6 +1729,7 @@ void __cdecl Com_AdjustMaxFPS(int* maxFPS)
 
 void Com_DedicatedModified()
 {
+#ifndef DEDICATED
     int localClientNum; // [esp+0h] [ebp-4h]
 
     if ((com_dedicated->flags & 0x40) == 0)
@@ -1751,6 +1770,7 @@ void Com_DedicatedModified()
             SV_AddDedicatedCommands();
         }
     }
+#endif
 }
 
 void __cdecl Com_Frame_Try_Block_Function()
@@ -1807,6 +1827,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         Profile_EndInternal(0);
         com_lastFrameTime[lastFrameIndex] = com_frameTime;
     }
+#ifndef DEDICATED
     else
     {
         CL_ResetStats_f();
@@ -1831,6 +1852,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         if (!(lastFrameIndex + v4))
             msec = 1;
     }
+#endif
     v1 = CL_ControllerIndexFromClientNum(0);
     Cbuf_Execute(0, v1);
     if (msec <= 0)
@@ -1840,6 +1862,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         MyAssertHandler(".\\qcommon\\common.cpp", 4013, 0, "%s", "msec > 0");
     msecb = SV_Frame(mseca);
     Com_DedicatedModified();
+#ifndef DEDICATED
     if (!com_dedicated->current.integer)
     {
         R_SetEndTime(com_lastFrameTime[lastFrameIndex]);
@@ -1868,6 +1891,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         Com_Statmon();
         R_WaitEndTime();
     }
+#endif
 }
 
 void __cdecl Com_WriteConfiguration(int localClientNum)
@@ -1935,6 +1959,7 @@ int __cdecl Com_ModifyMsec(int msec)
 
 void Com_Statmon()
 {
+#ifndef DEDICATED
     int timePrevFrame; // [esp+0h] [ebp-4h]
 
     if (com_statmon->current.enabled)
@@ -1954,10 +1979,12 @@ void Com_Statmon()
                 StatMon_Warning(6, 3000, "code_warning_serverfps");
         }
     }
+#endif
 }
 
 int Com_UpdateMenu()
 {
+#ifndef DEDICATED
     int result; // eax
     uiMenuCommand_t MenuScreen; // eax
     connstate_t clcState; // [esp+4h] [ebp-4h]
@@ -1970,6 +1997,9 @@ int Com_UpdateMenu()
         return UI_SetActiveMenu(0, MenuScreen);
     }
     return result;
+#else
+    return 0;
+#endif
 }
 
 void __cdecl Com_AssetLoadUI()
@@ -2022,11 +2052,13 @@ void __cdecl Com_Frame()
     {
         Com_ErrorCleanup();
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
+#ifndef DEDICATED
         if (!com_dedicated->current.integer)
         {
             CL_InitRenderer();
             Com_StartHunkUsers();
         }
+#endif
     }
     else
     {
