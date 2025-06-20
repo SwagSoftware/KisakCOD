@@ -1,6 +1,8 @@
 #pragma once
 #include <universal/com_memory.h>
 
+#define WP_NONE 0
+
 enum weapType_t : __int32
 {                                       // ...
     WEAPTYPE_BULLET = 0x0,

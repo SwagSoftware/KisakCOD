@@ -375,8 +375,10 @@ void __cdecl Bullet_Process(
         hitLoc = (hitLocation_t)br->trace.partGroup;
         if (hitLoc == HITLOC_HEAD || hitLoc == HITLOC_HELMET)
             *outImpactFlags |= 1u;
+#ifndef DEDICATED
         if (g_debugLocDamage->current.enabled)
             CL_AddDebugStar(br->hitPos, colorRed, 100, 1);
+#endif
         G_Damage(
             br->hitEnt,
             attacker,

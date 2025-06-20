@@ -2536,8 +2536,12 @@ void __cdecl PM_Weapon_FireWeapon(playerState_s *ps, int delayedAction)
         {
             if (PM_WeaponAmmoAvailable(ps) != -1 && (ps->eFlags & 0x300) == 0)
             {
+#ifndef DEDICATED
                 LocalClientActiveCount = CL_GetLocalClientActiveCount();
                 PM_WeaponUseAmmo(ps, ps->weapon, LocalClientActiveCount);
+#else
+                PM_WeaponUseAmmo(ps, ps->weapon, 1);
+#endif
             }
             if (weapDef->weapType == WEAPTYPE_GRENADE)
                 ps->weaponTime = weapDef->iFireTime;
@@ -2579,7 +2583,11 @@ void __cdecl PM_WeaponUseAmmo(playerState_s *ps, unsigned int wp, int amount)
     int v3; // [esp+0h] [ebp-Ch]
     int idx; // [esp+8h] [ebp-4h]
 
+#ifndef DEDICATED
     if (!player_sustainAmmo->current.enabled || !CG_ShouldPlaySoundOnLocalClient())
+#else
+    if (!player_sustainAmmo->current.enabled)
+#endif
     {
         idx = BG_ClipForWeapon(wp);
         if (ps->ammoclip[idx] < amount)
@@ -2659,16 +2667,25 @@ int __cdecl PM_Weapon_CheckFiringAmmo(playerState_s *ps)
     int ammoNeeded; // [esp+8h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+Ch] [ebp-8h]
 
-    if (!ps->weapon)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2887, 0, "%s", "ps->weapon != WP_NONE");
+    iassert(ps->weapon != WP_NONE);
+
     weapDef = BG_GetWeaponDef(ps->weapon);
+
+#ifndef DEDICATED
     ammoNeeded = CL_GetLocalClientActiveCount();
+#else
+    ammoNeeded = 1;
+#endif
+
     if (ammoNeeded <= PM_WeaponAmmoAvailable(ps))
         return 1;
+
     v1 = BG_AmmoForWeapon(ps->weapon);
+
     reloadingW = ammoNeeded <= ps->ammo[v1];
     if (weapDef->weapType != WEAPTYPE_GRENADE && ammoNeeded > ps->ammo[v1])
         PM_AddEvent(ps, 0xBu);
+
     if (reloadingW)
     {
         PM_BeginWeaponReload(ps);
@@ -4396,10 +4413,14 @@ bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps)
 
 WeaponDef *__cdecl BG_LoadWeaponDef(const char *name)
 {
+#ifndef DEDICATED
     if (*(_BYTE *)fs_gameDirVar->current.integer || !useFastFile->current.enabled)
         return BG_LoadWeaponDef_LoadObj(name);
     else
         return BG_LoadWeaponDef_FastFile(name);
+#else
+    return BG_LoadWeaponDef_FastFile(name);
+#endif
 }
 
 WeaponDef *__cdecl BG_LoadWeaponDef_FastFile(const char *name)

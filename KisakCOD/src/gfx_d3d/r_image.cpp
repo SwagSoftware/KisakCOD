@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-ImgGlobals imageGlobals;
+//ImgGlobals imageGlobals; // LWSS: moved to db_registry for DEDICATED
 GfxImage g_imageProgs[14];
 
 struct BuiltinImageConstructorTable // sizeof=0x8

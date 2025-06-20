@@ -12,9 +12,8 @@
 #include <database/database.h>
 
 
-//struct GfxWorld s_world    85b28080     gfx_d3d : r_bsp.obj
+//struct GfxWorld s_world    85b28080     gfx_d3d : r_bsp.obj // LWSS: moved to db_registry for DEDICATED
 
-GfxWorld s_world;
 
 void __cdecl R_ReloadWorld()
 {

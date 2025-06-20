@@ -253,10 +253,14 @@ snd_alias_list_t *__cdecl Com_TryFindSoundAlias_FastFile(const char *name)
 
 snd_alias_list_t *__cdecl Com_FindSoundAlias(const char *name)
 {
+#ifndef DEDICATED
     if (useFastFile->current.enabled)
         return Com_FindSoundAlias_FastFile(name);
     else
         return Com_FindSoundAlias_LoadObj(name);
+#else
+    return Com_FindSoundAlias_FastFile(name);
+#endif
 }
 
 snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors_LoadObj(const char *name)
@@ -686,13 +690,11 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
         numMissing = Com_LoadSoundAliasSounds(&g_sa.soundFileInfo[system]);
         if (numMissing)
         {
-#ifndef DEDICATED
             if (snd_errorOnMissing->current.enabled)
             {
                 v4 = va("%i sound file(s) are missing or in a bad format", numMissing);
                 Com_Error((errorParm_t)(system != SASYS_UI), v4);
             }
-#endif
         }
     }
 }

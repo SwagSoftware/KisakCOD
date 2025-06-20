@@ -26,6 +26,11 @@
 
 #include <setjmp.h>
 
+GfxWorld s_world;
+MaterialGlobals materialGlobals;
+ImgGlobals imageGlobals;
+r_globals_t rg;
+
 struct DBReorderAssetEntry // sizeof=0x10
 {                                       // ...
     unsigned int sequence;
@@ -2201,12 +2206,10 @@ void DB_PostLoadXZone()
     unsigned int i; // [esp+0h] [ebp-8h]
     int remoteScreenUpdateNesting; // [esp+4h] [ebp-4h]
 
-    if (!Sys_IsMainThread() && !Sys_IsRenderThread())
-        MyAssertHandler(".\\database\\db_registry.cpp", 3280, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
-    if (g_loadingZone)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3287, 0, "%s", "!g_loadingZone");
-    if (g_zoneInfoCount)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3288, 0, "%s", "!g_zoneInfoCount");
+    iassert(Sys_IsMainThread() || Sys_IsRenderThread());
+    iassert(!g_loadingZone);
+    iassert(!g_zoneInfoCount);
+
     if (!Sys_IsDatabaseReady2())
     {
         if (g_copyInfoCount)
@@ -3141,12 +3144,14 @@ void __cdecl DB_CloneXAsset(const XAsset *from, XAsset *to)
 
 void DB_SyncExternalAssets()
 {
+#ifndef DEDICATED
     R_SyncRenderThread();
     RB_UnbindAllImages();
     R_ShutdownStreams();
     RB_ClearPixelShader();
     RB_ClearVertexShader();
     RB_ClearVertexDecl();
+#endif
 }
 
 void DB_ArchiveAssets()

@@ -1,5 +1,6 @@
 #pragma once
 #include <client_mp/client_mp.h>
+#include <server/sv_world.h>
 
 #define abs8(x) abs(x)
 #define abs32(x) abs(x)
@@ -302,7 +303,11 @@ void __cdecl CG_TraceCapsule(
     int passEntityNum,
     int contentMask);
 
-static const pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent}}; // idb
+#ifdef DEDICATED
+static const pmoveHandler_t pmoveHandlers[2] = { { G_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent} }; // idb
+#else
+static const pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent} }; // idb
+#endif
 
 // bg_jump
 extern const dvar_t *jump_height;

@@ -298,7 +298,9 @@ void __cdecl Cbuf_AddText(int localClientNum, const char *text)
     {
         memcpy_noncrt(&cmd_text->data[cmd_text->cmdsize], text, length + 1);
         cmd_text->cmdsize += length;
+#ifndef DEDICATED
         Scr_MonitorCommand(text);
+#endif
     }
     else
     {
@@ -998,7 +1000,9 @@ void __cdecl Cmd_ExecuteSingleCommand(int localClientNum, int controllerIndex, c
             {
                 if (!Dvar_Command() && (!com_sv_running || !com_sv_running->current.enabled || !SV_GameCommand()))
                 {
+#ifndef DEDICATED
                     CL_ForwardCommandToServer(localClientNum, text);
+#endif
                     Cmd_EndTokenizedString();
                     return;
                 }

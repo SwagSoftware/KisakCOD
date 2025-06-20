@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <universal/com_files.h>
 
-MaterialGlobals materialGlobals;
+//MaterialGlobals materialGlobals; // LWSS: moved to db_registry for DEDICATED
 
 const stream_source_info_t s_streamSourceInfo[16][9] =
 {

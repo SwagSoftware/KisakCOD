@@ -275,7 +275,7 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandida
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessLeaf(XSurfaceGetTriCandidatesLocals *locals);
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessNode(XSurfaceGetTriCandidatesLocals *locals);
 int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned int offset, unsigned __int8 *index);
-
+int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3 &axis, float *mins, float *maxs);
 
 // xmodel_utils
 const char *__cdecl XModelGetName(const XModel *model);
@@ -298,7 +298,6 @@ int __cdecl XModelGetStaticModelCacheVertCount(XModel *model, unsigned int lod);
 
 
 // xmodel_load_obj
-int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3 &axis, float *mins, float *maxs);
 void __cdecl ConsumeQuatNoSwap(const unsigned __int8 **pos, __int16 *out);
 int __cdecl XModelSurfsPrecache(
     XModel *model,

@@ -180,6 +180,7 @@ void __stdcall DB_FileReadCompletion(
 
 void __cdecl DB_LoadDelayedImages()
 {
+#ifndef DEDICATED
     unsigned int copyIter; // [esp+0h] [ebp-4h]
 
     DB_EnumXAssets(ASSET_TYPE_IMAGE, (void(__cdecl *)(XAssetHeader, void *))R_DelayLoadImage, 0, 0);
@@ -188,10 +189,12 @@ void __cdecl DB_LoadDelayedImages()
         if (g_copyInfo[copyIter]->asset.type == ASSET_TYPE_IMAGE)
             R_DelayLoadImage(g_copyInfo[copyIter]->asset.header);
     }
+#endif
 }
 
 void __cdecl DB_FinishGeometryBlocks(XZoneMemory *zoneMem)
 {
+#ifndef DEDICATED
     if (zoneMem->lockedVertexData)
     {
         R_FinishStaticVertexBuffer((IDirect3DVertexBuffer9*)zoneMem->vertexBuffer);
@@ -202,6 +205,7 @@ void __cdecl DB_FinishGeometryBlocks(XZoneMemory *zoneMem)
         R_FinishStaticIndexBuffer((IDirect3DIndexBuffer9*)zoneMem->indexBuffer);
         zoneMem->lockedIndexData = 0;
     }
+#endif
 }
 
 void __cdecl DB_LoadXFileInternal()

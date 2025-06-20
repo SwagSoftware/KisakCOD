@@ -8,12 +8,11 @@
 
 //struct vehicleEffects(*)[8] vehEffects 8284e650     cg_vehicles_mp.obj
 
-vehicleEffects vehEffects[1][8];
+//vehicleEffects vehEffects[1][8]; // LWSS: moved to g_vehicles_mp for DEDICATED
 
 const dvar_t *vehDebugClient;
 const dvar_t *heli_barrelSlowdown;
 const dvar_t *vehDriverViewFocusRange;
-const dvar_t *heli_barrelMaxVelocity;
 const dvar_t *vehDriverViewDist;
 const dvar_t *heli_barrelRotation;
 

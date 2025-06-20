@@ -297,7 +297,7 @@ vidConfig_t vidConfig;
 //struct GfxConfiguration gfxCfg 858278b8     gfx_d3d : r_init.obj
 //struct GfxGlobals r_glob   858278d0     gfx_d3d : r_init.obj
 //struct r_globals_t rg      858278e0     gfx_d3d :r_init.obj
-r_globals_t rg;
+//r_globals_t rg; // LWSS: moved to db_registry for DEDICATED
 //struct GfxMetrics gfxMetrics 85827c00     gfx_d3d : r_init.obj
 GfxMetrics gfxMetrics;
 //int marker_r_init        85827c18     gfx_d3d : r_init.obj
