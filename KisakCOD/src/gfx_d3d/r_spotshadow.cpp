@@ -307,11 +307,11 @@ void __cdecl R_GenerateSortedPrimarySpotShadowDrawSurfs(
             shadowableLightIndex,
             comWorld.primaryLightCount);
     }
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_AddAllBspDrawSurfacesSpotShadow(spotShadowIndex, shadowableLightIndex);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_AddAllStaticModelSurfacesSpotShadow(spotShadowIndex, shadowableLightIndex);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_AddAllSceneEntSurfacesSpotShadow(viewInfo, spotShadowIndex, shadowableLightIndex);
 }
 
@@ -322,7 +322,7 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
     GfxDrawSurfListInfo *info; // [esp+3Ch] [ebp-Ch]
     unsigned int spotShadowIndex; // [esp+44h] [ebp-4h]
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     for (spotShadowIndex = 0; spotShadowIndex < viewInfo->spotShadowCount; ++spotShadowIndex)
     {
         Profile_Begin(74);

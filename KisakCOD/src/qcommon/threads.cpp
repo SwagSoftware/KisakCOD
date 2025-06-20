@@ -332,7 +332,7 @@ void __cdecl Sys_FrontEndSleep()
 {
     int newCount; // [esp+0h] [ebp-4h]
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (!Sys_WaitForSingleObjectTimeout(&noThreadOwnershipEvent, 0))
         MyAssertHandler(
             ".\\qcommon\\threads.cpp",
@@ -367,7 +367,7 @@ void __cdecl Sys_WakeRenderer(void* data)
     Sys_ResetEvent(&renderCompletedEvent);
     const void *old = InterlockedExchangePointer(&smpData, data);
     vassert(!old, "old = %p", old);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Sys_SetEvent(&backendEvent[1]);
     Sys_SetWorkerCmdEvent();
 }
@@ -431,7 +431,7 @@ void __cdecl Sys_WakeDatabase2()
 
 bool __cdecl Sys_FinishRenderer()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     return !Sys_WaitForSingleObjectTimeout(&noThreadOwnershipEvent, 0);
 }
 
@@ -496,7 +496,7 @@ void* __cdecl Sys_GetValue(int valueIndex)
 
 void __cdecl Sys_WaitForWorkerCmd()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Sys_WaitForSingleObjectTimeout(backendEvent, 1u);
 }
 
@@ -527,7 +527,7 @@ void __cdecl Sys_ResetUpdateSpotLightEffectEvent()
 
 void __cdecl Sys_WaitUpdateNonDependentEffectsCompleted()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Sys_WaitForSingleObject(&updateEffectsEvent);
 }
 
@@ -658,6 +658,7 @@ WinThreadLock __cdecl Win_GetThreadLock()
 
 void Win_UpdateThreadLock()
 {
+#ifndef DEDICATED
     if (s_cpuCount == 1)
     {
         s_threadLock = THREAD_LOCK_ALL;
@@ -673,6 +674,7 @@ void Win_UpdateThreadLock()
             threadLock = THREAD_LOCK_MINIMAL;
         Win_SetThreadLock(threadLock);
     }
+#endif
 }
 
 void __cdecl Sys_BeginLoadThreadPriorities()

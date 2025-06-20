@@ -3756,7 +3756,7 @@ char __cdecl R_InitHardware(const GfxWindowParms *wndParms)
     R_UpdateGpuSyncType();
     R_StoreWindowSettings(wndParms);
     RB_InitSceneViewport();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (!R_CreateForInitOrReset())
         return 0;
     R_Cinematic_Init();
@@ -3765,7 +3765,7 @@ char __cdecl R_InitHardware(const GfxWindowParms *wndParms)
     R_InitGamma();
     R_InitScene();
     R_InitSystems();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_FinishAttachingToWindow(wndParms);
     for (workerIndex = 0; workerIndex < 2; ++workerIndex)
     {
@@ -4249,7 +4249,7 @@ void __cdecl R_EndRegistration()
 {
     if (!rg.registered)
         MyAssertHandler(".\\r_init.cpp", 2511, 0, "%s", "rg.registered");
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (!useFastFile->current.enabled)
     {
         R_SyncRenderThread();

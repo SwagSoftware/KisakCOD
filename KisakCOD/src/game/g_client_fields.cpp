@@ -107,7 +107,7 @@ void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *p
     }
     if (pSelf - level.clients >= 64)
         Scr_Error("client is not pointing to the level.clients array");
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     ClientUserinfoChanged(pSelf - level.clients);
     CalculateRanks();
 }

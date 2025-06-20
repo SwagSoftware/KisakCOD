@@ -16,11 +16,6 @@ int __cdecl compare_hudelems(const void *pe0, const void *pe1)
         return -1;
 }
 
-int __cdecl compare_use(float *pe1, float *pe2)
-{
-    return (int)(pe1[1] - pe2[1]);
-}
-
 void __cdecl compare_doesStringEqualString(Operand *leftSide, Operand *rightSide, Operand *result)
 {
     if (leftSide->dataType != VAL_STRING)

@@ -1829,7 +1829,7 @@ void __cdecl GetAccelerationForces(gentity_s *ent, float frameTime, float *resul
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2225, 0, "%s", "veh");
     driverAccel = veh->phys.driverPedal * vehTestHorsepower->current.value * 6600.0;
     PositionAccelForces(&veh->phys, driverAccel, resultPosition);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 void __cdecl PositionAccelForces(vehicle_physic_t *phys, float driverAccel, float *result)

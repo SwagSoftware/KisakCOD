@@ -37,10 +37,14 @@ bool __cdecl XModelBad(const XModel *model)
 
 XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
 {
+#ifdef DEDICATED
+    return XModelPrecache_FastFile(name);
+#else
     if (useFastFile->current.enabled)
         return XModelPrecache_FastFile(name);
     else
         return XModelPrecache_LoadObj(name, Alloc, AllocColl);
+#endif
 }
 
 XModel *__cdecl XModelPrecache_FastFile(const char *name)

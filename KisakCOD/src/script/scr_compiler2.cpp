@@ -68,16 +68,20 @@ enum : __int32
 
 void EmitPreAssignmentPos()
 {
+#ifndef DEDICATED
 	if (scrVarPub.developer && scrCompilePub.developer_statement != 3)
 		Scr_AddAssignmentPos((char*)scrCompilePub.opcodePos);
+#endif
 }
 
 void EmitAssignmentPos()
 {
+#ifndef DEDICATED
 	if (scrVarPub.developer && scrCompilePub.developer_statement != 3)
 	{
 		Scr_AddAssignmentPos(TempMalloc(0));
 	}
+#endif
 }
 
 /*

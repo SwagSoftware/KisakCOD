@@ -1015,16 +1015,20 @@ const char* __cdecl Scr_GetStackThreadPos(unsigned int endLocalId, VariableStack
                     MyAssertHandler(".\\script\\scr_vm.cpp", 3044, 0, "%s", "startLocalId != localId");
                 break;
             }
+#ifndef DEDICATED
             if (killThread)
                 Scr_DebugKillThread(localId, pos);
+#endif
             localId = parentLocalId;
             if (!u.codePosValue)
                 MyAssertHandler(".\\script\\scr_vm.cpp", 3039, 0, "%s", "u.codePosValue");
             pos = (const char*)u.intValue;
         }
     }
+#ifndef DEDICATED
     if (killThread)
         Scr_DebugKillThread(localId, pos);
+#endif
     return pos;
 }
 
@@ -1090,6 +1094,7 @@ void __cdecl Scr_NotifyNum(
     id = FindEntityId(entnum, classnum);
     if (id)
     {
+#ifndef DEDICATED
         if (scrVmDebugPub.checkBreakon)
         {
             top = scrVmPub.top;
@@ -1099,6 +1104,7 @@ void __cdecl Scr_NotifyNum(
             if (scrVmPub.outparamcount)
                 MyAssertHandler(".\\script\\scr_vm.cpp", 3690, 0, "%s", "!scrVmPub.outparamcount");
         }
+#endif
         type = startTop->type;
         startTop->type = VAR_PRECODEPOS;
         scrVmPub.inparamcount = 0;
@@ -1377,7 +1383,9 @@ void __cdecl Scr_TerminateRunningThread(unsigned int localId)
     {
         if (scrVarPub.developer)
         {
+#ifndef DEDICATED
             Scr_DebugTerminateThread(topThread);
+#endif
         }
         else
         {
@@ -2264,12 +2272,14 @@ endon:
         }
         iassert(!scrVmPub.inparamcount);
         iassert(!scrVmPub.outparamcount);
+#ifndef DEDICATED
         if (scrVmPub.showError && !scrVmPub.debugCode && !Scr_IgnoreErrors())
         {
             scrVmPub.showError = 0;
             Scr_ShowConsole();
             Scr_HitBreakpoint(fs.top, (char *)fs.pos, fs.localId, 0);
         }
+#endif
     }
 #pragma endregion
     while (2)
@@ -2804,12 +2814,14 @@ CallBuiltIn:
             iassert(!scrVmPub.inparamcount);
             builtinIndex = Scr_ReadUnsignedShort(&fs.pos);
             scrVmPub.function_frame->fs.pos = fs.pos;
+#ifndef DEDICATED
             if (scrVmDebugPub.func_table[builtinIndex].breakpointCount)
             {
                 outparamcount = scrVmPub.outparamcount;
                 Scr_HitBuiltinBreakpoint(fs.top, fs.pos, fs.localId, opcode, builtinIndex, scrVmPub.outparamcount);
                 scrVmPub.outparamcount = outparamcount;
             }
+#endif
             scrVmPub.top = fs.top;
             builtInTime = scrVmDebugPub.builtInTime;
             time = __rdtsc();
@@ -2850,6 +2862,7 @@ CallBuiltinMethod:
                 scrVmPub.function_frame->fs.pos = fs.pos;
                 if (scrVmGlob.recordPlace)
                     Scr_GetFileAndLine(fs.pos, &scrVmGlob.lastFileName, &scrVmGlob.lastLine);
+#ifndef DEDICATED
                 if (scrVmDebugPub.func_table[builtinIndex].breakpointCount)
                 {
                     if (scrVmPub.top != fs.top - 1)
@@ -2859,6 +2872,7 @@ CallBuiltinMethod:
                     scrVmPub.outparamcount = scrVmPub.outparamcount;
                     scrVmPub.top = fs.top - 1;
                 }
+#endif
                 builtInTime = scrVmDebugPub.builtInTime;
                 time = __rdtsc();
                 ((void (*)(scr_entref_t))scrCompilePub.func_table[builtinIndex])(entref);
@@ -3468,8 +3482,10 @@ function_call:
             }
             stringValue = fs.top->u.stringValue;
             --fs.top;
+#ifndef DEDICATED
             if (scrVmDebugPub.checkBreakon)
                 Scr_CheckBreakonNotify(id, stringValue, fs.top, (char*)fs.pos, fs.localId);
+#endif
             scrVmPub.function_frame->fs.pos = fs.pos;
             VM_Notify(id, stringValue, fs.top);
             fs.pos = scrVmPub.function_frame->fs.pos;
@@ -3626,6 +3642,7 @@ function_call:
                 continue;
             Scr_Error("cannot create a new local variable in the debugger");
 
+#ifndef DEDICATED
         case OP_prof_begin:
             profileIndex = *fs.pos++;
             profileBit = 1 << profileIndex;
@@ -3659,7 +3676,7 @@ function_call:
         case OP_manualAndAssignmentBreakpoint:
             opcode = Scr_HitAssignmentBreakpoint(fs.top, (char*)fs.pos, fs.localId, 1);
             goto interrupt_return;
-
+#endif
         default:
             scrVmPub.terminal_error = 1;
             RuntimeErrorInternal(CON_CHANNEL_DONT_FILTER, (char*)fs.pos, 0, va("CODE ERROR: unknown opcode %d", opcode));
@@ -3930,7 +3947,9 @@ void __cdecl Scr_InitSystem(int sys)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4361, 0, "%s", "!scrVarPub.freeEntList");
     scrVarPub.time = 0;
     g_script_error_level = -1;
+#ifndef DEDICATED
     Scr_InitDebuggerSystem();
+#endif
     scrVarPub.varUsagePos = 0;
 }
 
@@ -3944,10 +3963,11 @@ void __cdecl Scr_ShutdownSystem(unsigned __int8 sys, int bComplete)
     unsigned int ida; // [esp+8h] [ebp-4h]
     unsigned int idb; // [esp+8h] [ebp-4h]
 
-    if (sys != 1)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 4383, 0, "%s", "sys == SCR_SYS_GAME");
+    iassert(sys == SCR_SYS_GAME);
     scrVarPub.varUsagePos = "<script shutdown variable>";
+#ifndef DEDICATED
     Scr_ShutdownDebuggerSystem(0);
+#endif
     Scr_FreeEntityList();
     if (scrVarPub.timeArrayId)
     {
@@ -5078,6 +5098,7 @@ void __cdecl Scr_StackClear()
 
 void __cdecl Scr_ProfileUpdate()
 {
+#ifndef DEDICATED
     int total; // [esp+4h] [ebp-Ch] BYREF
     int totalNonBuiltIn; // [esp+8h] [ebp-8h] BYREF
     const char* profileString; // [esp+Ch] [ebp-4h]
@@ -5107,6 +5128,7 @@ void __cdecl Scr_ProfileUpdate()
     {
         scrVarPub.bScriptProfile = 1;
     }
+#endif
 }
 
 void __cdecl Scr_ProfileBuiltinUpdate()

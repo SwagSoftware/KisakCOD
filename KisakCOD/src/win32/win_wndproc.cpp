@@ -206,11 +206,15 @@ static bool IsNumLockAffectedVK(unsigned int wParam)
 
 static unsigned int AdustKeyForNumericKeypad(unsigned int key, unsigned int wParam, unsigned int extended)
 {
+#ifndef DEDICATED
 	if ((clientUIActives[0].keyCatchers & 0x11) == 0)
 		return key;
 	if (extended)
 		return key;
 	return !IsNumLockAffectedVK(wParam) ? key : 0;
+#else
+	return key;
+#endif
 }
 
 static unsigned char MapKey(int key, unsigned int wParam)
@@ -247,6 +251,7 @@ static unsigned char MapKey(int key, unsigned int wParam)
 
 void __cdecl VID_AppActivate(unsigned int activeState, int minimize)
 {
+#ifndef DEDICATED
 	BOOL v2; // [esp+0h] [ebp-8h]
 
 	g_wv.isMinimized = minimize;
@@ -256,6 +261,7 @@ void __cdecl VID_AppActivate(unsigned int activeState, int minimize)
 	if (v2)
 		Com_TouchMemory();
 	IN_Activate(g_wv.activeApp);
+#endif
 }
 
 const dvar_t *r_autopriority;
@@ -407,15 +413,17 @@ LRESULT WINAPI MainWndProc(
 		}
 		break;
 	case WM_CLOSE:
+#ifndef DEDICATED
 		Key_RemoveCatcher(0, -3);
+#endif
 		Com_Quit_f();
 		break;
 	case WM_CREATE:
 		g_wv.hWnd = hWnd;
 
+#ifndef DEDICATED
 		SND_SetHWND(hWnd);
 
-#ifndef DEDICATED
 		iassert(r_reflectionProbeGenerate);
 		iassert(r_fullscreen);
 

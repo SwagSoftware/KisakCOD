@@ -638,7 +638,7 @@ void __cdecl Image_LoadBitmap(
             else
             {
                 if (format == D3DFMT_A8R8G8B8)
-                    CL_ResetStats_f();
+                    KISAK_NULLSUB();
                 Image_UploadData(image, format, face, mipLevel - picmip, data);
             }
             data += bytesPerPixel * v5 * v6;

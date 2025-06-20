@@ -111,7 +111,7 @@ void __cdecl DB_LoadXFileData(unsigned __int8 *pos, unsigned int size)
         err = DB_AuthLoad_Inflate(&g_load.stream, 2);
         if (err >= 2)
         {
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             DB_CancelLoadXFile();
             Com_Error(ERR_DROP, "Fastfile for zone '%s' appears corrupt or unreadable (code %i.)", g_load.filename, err + 110);
         }
@@ -228,7 +228,7 @@ void __cdecl DB_LoadXFileInternal()
     g_load.stream.avail_in -= 8;
     if (memcmp(magic, "IWff0100", 8u) && memcmp(magic, "IWffu100", 8u))
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         Com_Error(ERR_DROP, "Fastfile for zone '%s' is corrupt or unreadable.", g_load.filename);
     }
     iassert(sizeof(version) <= g_load.stream.avail_in);
@@ -261,7 +261,7 @@ void __cdecl DB_LoadXFileInternal()
         failureReason = "init failed";
     if (failureReason)
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         DB_CancelLoadXFile();
         Com_Error(ERR_DROP, "Fastfile for zone '%s' could not be loaded (%s)", g_load.filename, failureReason);
     }

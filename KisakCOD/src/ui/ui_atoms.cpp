@@ -4,8 +4,6 @@
 #include <ui_mp/ui_mp.h>
 #include <database/database.h>
 
-int com_expectedHunkUsage;
-
 double __cdecl UI_LoadBarProgress_LoadObj()
 {
     float v2; // [esp+4h] [ebp-14h]

@@ -846,7 +846,7 @@ const entityHandler_t entityHandlers[] =
     0
   },
   { NULL, NULL, NULL, &Touch_Item_Auto, NULL, NULL, NULL, NULL, 0, 0 },
-  //{ NULL, NULL, NULL, NULL, &CL_ResetStats_f, NULL, NULL, NULL, 0, 0 },
+  //{ NULL, NULL, NULL, NULL, &KISAK_NULLSUB, NULL, NULL, NULL, 0, 0 },
   { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
   { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
   { &G_FreeEntity, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },

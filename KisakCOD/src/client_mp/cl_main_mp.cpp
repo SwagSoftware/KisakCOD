@@ -339,7 +339,7 @@ void __cdecl CL_MapLoading(const char *mapname)
                 if (CL_IsLocalClientActive(localClientNumb))
                 {
                     CL_Disconnect(localClientNumb);
-                    CL_ResetStats_f();
+                    KISAK_NULLSUB();
                     UI_CloseAll(localClientNumb);
                     clientUIActives[localClientNumb].connectionState = CA_CHALLENGING;
                     clca = CL_GetLocalClientConnection(localClientNumb);
@@ -481,7 +481,7 @@ void __cdecl CL_Disconnect(int localClientNum)
         SND_DisconnectListener(localClientNum);
         if (connstate >= CA_CONNECTING)
             clientUIActives[0].keyCatchers &= 1u;
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         if (CL_AllLocalClientsDisconnected())
         {
             autoupdateStarted = 0;
@@ -2313,7 +2313,7 @@ void __cdecl CL_ShutdownRenderer(int destroyWindow)
     cls.whiteMaterial = 0;
     cls.consoleMaterial = 0;
     cls.consoleFont = 0;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 void __cdecl CL_StartHunkUsers()
@@ -2706,7 +2706,7 @@ cmd_function_s UI_CloseMenu_f_VAR;
 cmd_function_s UI_ListMenus_f_VAR;
 cmd_function_s Com_WriteLocalizedSoundAliasFiles_VAR;
 cmd_function_s CL_SelectStringTableEntryInDvar_f_VAR;
-cmd_function_s CL_ResetStats_f_VAR;
+cmd_function_s KISAK_NULLSUB_VAR;
 
 void __cdecl CL_Record_f()
 {
@@ -2933,7 +2933,7 @@ void __cdecl CL_PlayDemo_f()
             v2 = Cmd_Argv(1);
             I_strncpyz(clc->demoName, v2, 64);
             Con_Close(localClientNum);
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             clientUIActives[localClientNum].connectionState = CA_CONNECTED;
             clc->demoplaying = 1;
             v3 = Cmd_Argv(0);
@@ -3788,7 +3788,7 @@ void __cdecl CL_InitOnceForAllClients()
         "selectStringTableEntryInDvar",
         CL_SelectStringTableEntryInDvar_f,
         &CL_SelectStringTableEntryInDvar_f_VAR);
-    Cmd_AddCommandInternal("resetStats", CL_ResetStats_f, &CL_ResetStats_f_VAR);
+    Cmd_AddCommandInternal("resetStats", KISAK_NULLSUB, &KISAK_NULLSUB_VAR);
     autoupdateChecked = 0;
     autoupdateStarted = 0;
     CL_CheckAutoUpdate();
@@ -4316,7 +4316,7 @@ Font_s *__cdecl CL_RegisterFont(const char *fontName, int imageTrack)
 
 void __cdecl CL_UpdateSound()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     SND_PlayFXSounds();
     SND_UpdateLoopingSounds();
     SND_Update();

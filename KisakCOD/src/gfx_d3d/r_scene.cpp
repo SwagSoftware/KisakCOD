@@ -1105,7 +1105,7 @@ void __cdecl R_SetEndTime(int endTime)
 
 void __cdecl R_WaitEndTime()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(361);
     while ((int)(Sys_Milliseconds() - rg.endTime) < 0)
         NET_Sleep(1u);
@@ -1671,14 +1671,14 @@ void __cdecl R_GenerateSortedDrawSurfs(
     R_SetupWorldSurfacesDpvs(viewParmsDpvs);
     R_SetViewFrustumPlanes(viewInfo);
     cameraCellIndex = R_CellForPoint(viewParmsDpvs->origin);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_FilterEntitiesIntoCells(cameraCellIndex);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(71);
     R_AddWorldSurfacesDpvs(viewParmsDpvs, cameraCellIndex);
     Profile_EndInternal(0);
     R_BeginAllStaticModelLighting();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(134);
     R_WaitWorkerCmdsOfType(0);
     Profile_EndInternal(0);
@@ -1687,7 +1687,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     if (usePreTess)
         R_BeginPreTess();
     R_WaitWorkerCmdsOfType(3);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD)
     {
         R_AddAllBspDrawSurfacesCamera();
@@ -1713,23 +1713,23 @@ void __cdecl R_GenerateSortedDrawSurfs(
     }
     R_AddAllBspDrawSurfacesCameraNonlit(rgp.world->dpvs.emissiveSurfsBegin, rgp.world->dpvs.emissiveSurfsEnd, 9u);
     R_AddAllStaticModelSurfacesCamera();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     DynEntPieces_AddDrawSurfs();
     R_WaitWorkerCmdsOfType(5);
     R_WaitWorkerCmdsOfType(6);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_DrawAllDynEnt(viewInfo);
     if (gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD
         && dynamicShadowType == SHADOW_MAP
         && Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32))
     {
         R_WaitWorkerCmdsOfType(3);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         R_AddAllBspDrawSurfacesSunShadow();
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         R_AddAllStaticModelSurfacesSunShadow();
     }
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(134);
     R_WaitWorkerCmdsOfType(1);
     R_WaitWorkerCmdsOfType(2);
@@ -1737,7 +1737,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     R_WaitWorkerCmdsOfType(4);
     R_WaitWorkerCmdsOfType(7);
     R_WaitWorkerCmdsOfType(9);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_DrawAllSceneEnt(viewInfo);
     R_WaitWorkerCmdsOfType(12);
     sceneEntCmd.viewInfo = viewInfo;
@@ -1753,7 +1753,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
         {
             if (Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32))
             {
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 R_AddAllSceneEntSurfacesSunShadow();
                 R_SortAllStaticModelSurfacesSunShadow();
                 R_GenerateSortedSunShadowDrawSurfs(viewInfo);
@@ -1772,7 +1772,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     R_SetAllStaticModelLighting();
     if (dynamicShadowType == SHADOW_COOKIE)
         R_WaitWorkerCmdsOfType(10);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_EmitShadowCookieSurfs(viewInfo);
     R_WaitWorkerCmdsOfType(8);
     if (usePreTess)
@@ -1794,7 +1794,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     pointLightCount = 0;
     if (r_dlightLimit->current.integer && gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD)
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         pointLightCount = R_EmitPointLightPartitionSurfs(viewInfo, visibleLights, visibleLightCount, viewParmsDpvs->origin);
     }
     viewInfo->pointLightCount = pointLightCount;
@@ -1813,7 +1813,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
         if (fx_marks_ents->current.enabled)
             R_GenerateMarkVertsForDynamicModels();
     }
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[6], scene.drawSurfCount[6]);
     decalInfo = &viewInfo->decalInfo;
     R_InitDrawSurfListInfo(&viewInfo->decalInfo);
@@ -1830,7 +1830,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     decalInfo->drawSurfs = &frontEndDataOut->drawSurfs[firstDrawSurfCount];
     decalInfo->drawSurfCount = frontEndDataOut->drawSurfCount - firstDrawSurfCount;
     R_WaitWorkerCmdsOfType(13);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[12], scene.drawSurfCount[12]);
     emissiveInfo = &viewInfo->emissiveInfo;
     R_InitDrawSurfListInfo(&viewInfo->emissiveInfo);
@@ -2185,12 +2185,12 @@ int __cdecl R_GetVisibleDLights(const GfxLight **visibleLights)
 {
     int visibleLightCount; // [esp+4h] [ebp-4h]
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     visibleLightCount = 0;
     if (r_dlightLimit->current.integer && gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD)
     {
         R_CullDynamicPointLightsInCameraView();
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         return R_GetPointLightPartitions(visibleLights);
     }
     return visibleLightCount;
@@ -2201,11 +2201,11 @@ void __cdecl R_GetLightSurfs(int visibleLightCount, const GfxLight **visibleLigh
     if (visibleLightCount)
     {
         Profile_Begin(416);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         R_GetBspLightSurfs(visibleLights, visibleLightCount);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         R_GetStaticModelLightSurfs(visibleLights, visibleLightCount);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         R_GetSceneEntLightSurfs(visibleLights, visibleLightCount);
         Profile_EndInternal(0);
     }

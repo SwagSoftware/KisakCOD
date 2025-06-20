@@ -1047,7 +1047,9 @@ void  Scr_AllocGameVariable(void)
 		scrVarPub.gameId = AllocValue();
 		SetEmptyArray(scrVarPub.gameId);
 		scrVarPub.varUsagePos = 0;
+#ifndef DEDICATED
 		Scr_UpdateDebugger();
+#endif
 	}
 }
 

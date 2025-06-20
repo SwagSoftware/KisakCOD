@@ -5970,7 +5970,7 @@ void __cdecl UI_ReplaceConversions(
                 outputString[outputStringCounter++] = sourceString[index++];
             }
         }
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
     }
     else
     {

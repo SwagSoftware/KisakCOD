@@ -8,6 +8,11 @@
 #include <server/sv_game.h>
 #include <server/sv_world.h>
 
+int __cdecl compare_use(float *pe1, float *pe2)
+{
+    return (int)(pe1[1] - pe2[1]);
+}
+
 void __cdecl Player_UpdateActivate(gentity_s *ent)
 {
     bool useSucceeded; // [esp+3h] [ebp-1h]

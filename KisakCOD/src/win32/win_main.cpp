@@ -386,8 +386,8 @@ void __cdecl  Sys_Quit()
 	RefreshQuitOnErrorCondition();
 	Dvar_Shutdown();
 	Cmd_Shutdown();
-	CL_ResetStats_f();
-	CL_ResetStats_f();
+	KISAK_NULLSUB();
+	KISAK_NULLSUB();
 	Sys_ShutdownEvents();
 	SL_Shutdown();
 	if (!com_errorEntered)
@@ -513,7 +513,9 @@ void __cdecl Sys_LoadingKeepAlive()
 		v1 = *Win_GetEvent(&result);
 		ev = v1;
 	} while (v1.evType);
+#ifndef DEDICATED
 	R_CheckLostDevice();
+#endif
 }
 
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
@@ -777,7 +779,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Sys_Milliseconds();
 			Profile_Init();
 			Profile_InitContext(0);
-			CL_ResetStats_f();
+			KISAK_NULLSUB();
 			Com_Init(sys_cmdline);
 
 			if (!com_dedicated->current.integer)

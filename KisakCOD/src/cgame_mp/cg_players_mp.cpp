@@ -294,7 +294,7 @@ void __cdecl CG_Player(int localClientNum, centity_s *cent)
                 if ((p_nextState->lerp.eFlags & 0x300) != 0)
                     CG_PlayerTurretPositionAndBlend(localClientNum, cent);
                 CG_Player_PreControllers(obj, cent);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 CG_UpdateWeaponVisibility(localClientNum, cent);
                 lightingOrigin[0] = cent->pose.origin[0];
                 lightingOrigin[1] = cent->pose.origin[1];

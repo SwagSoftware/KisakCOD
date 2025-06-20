@@ -1668,7 +1668,7 @@ int __cdecl SND_GetSoundFileSize(unsigned int *pSoundFile)
 void __cdecl SND_DriverPostUpdate()
 {
     SND_UpdateEqs();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 void __cdecl SND_Update2DChannel(int i, int frametime)

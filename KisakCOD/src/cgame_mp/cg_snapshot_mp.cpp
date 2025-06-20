@@ -642,7 +642,7 @@ void __cdecl CG_ProcessSnapshots(int localClientNum)
     snapshot_s *snapa; // [esp+34h] [ebp-8h]
     int n; // [esp+38h] [ebp-4h] BYREF
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(11);
     if (localClientNum)
         MyAssertHandler(

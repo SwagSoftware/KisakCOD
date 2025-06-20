@@ -974,13 +974,19 @@ void __cdecl SV_RunFrame()
     else
         start = (int)Sys_MillisecondsRaw();
     SV_ResetSkeletonCache();
+
+#ifndef DEDICATED
     CL_FlushDebugServerData();
+#endif
     G_RunFrame(svs.time);
     Scr_ProfileUpdate();
     Scr_ProfileBuiltinUpdate();
     Profile_ResetCounters(1);
     Profile_ResetScriptCounters();
+#ifndef DEDICATED
     CL_UpdateDebugServerData();
+#endif
+
     if (Win_GetThreadLock() == THREAD_LOCK_ALL)
         v0 = __rdtsc();
     else
@@ -1176,7 +1182,7 @@ void __cdecl SV_PreFrame()
     char *v0; // eax
 
     Profile_Begin(255);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     SV_UpdateBots();
     if ((dvar_modifiedFlags & 0x404) != 0)
     {
@@ -1260,7 +1266,9 @@ void __cdecl SV_FrameInternal(int msec)
 
 void SV_PostFrame()
 {
+#ifndef DEDICATED
     Scr_UpdateDebugger();
+#endif
     
     Profile_Begin(305);
     SV_CheckTimeouts();

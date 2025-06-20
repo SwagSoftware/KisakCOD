@@ -201,7 +201,7 @@ void __cdecl R_GenerateShadowCookies(
     ShadowCandidate candidates[24]; // [esp+7Ch] [ebp-C8h] BYREF
     ShadowCandidate cookieIndex; // [esp+13Ch] [ebp-8h] BYREF
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(150);
     R_PopulateCandidates(viewParmsDraw, &candidates[0]);
 
@@ -251,7 +251,7 @@ void __cdecl R_AddCasters(
     float fadeScale; // [esp+38h] [ebp-8h]
     float entityWeight; // [esp+3Ch] [ebp-4h]
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     shadowCookieList->cookieCount = 0;
     moveWeightCap = 0;
     fadePoint = (1.0 - sc_fadeRange->current.value) * shadowCookieGlob.weightCap;

@@ -164,7 +164,7 @@ void __cdecl R_SetAndClearSceneTarget(const GfxViewport *viewport)
     memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
     memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
     memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
     R_ClearForFrameBuffer(gfxCmdBufState.prim.device, viewport);
@@ -420,8 +420,8 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     R_DrawLit(viewInfo, &cmdBuf, 0);
     R_InitContext(data, &cmdBuf);
     R_DrawDecal(viewInfo, &cmdBuf, 0);
-    CL_ResetStats_f();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
+    KISAK_NULLSUB();
     if (viewInfo->isRenderingFullScreen != isRenderingFullScreen)
         MyAssertHandler(".\\rb_draw3d.cpp", 1170, 0, "%s", "viewInfo->isRenderingFullScreen == isRenderingFullScreen");
     R_InitCmdBufSourceState(&gfxCmdBufSourceState, &viewInfo->input, 0);
@@ -435,19 +435,19 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     RB_DrawSun(viewInfo->localClientNum);
     memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
     R_InitContext(data, &cmdBuf);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_DrawLights(viewInfo, &cmdBuf);
     if (rg.distortion)
     {
         Profile_Begin(116);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
         R_Resolve(gfxCmdBufContext, gfxRenderTargets[3].image);
         Profile_EndInternal(0);
     }
     R_InitContext(data, &cmdBuf);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_DrawEmissive(viewInfo, &cmdBuf);
     RB_EndSceneRendering(gfxCmdBufContext, &viewInfo->input, viewInfo);
 }
@@ -671,7 +671,7 @@ void __cdecl R_DrawEmissiveCallback(const void *userData, GfxCmdBufContext conte
     v6.bottom = height + y;
     device->SetRenderState(D3DRS_SCISSORTESTENABLE, 1u);
     device->SetScissorRect(&v6);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_DrawSurfs(context, 0, &viewInfo->emissiveInfo);
     R_ShowTris(context, &viewInfo->litInfo);
     R_ShowTris(context, &viewInfo->decalInfo);
@@ -768,7 +768,7 @@ void RB_StandardDrawCommandsCommon()
     data = backEndData;
     if (backEndData->viewInfoCount)
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         for (viewInfoIndex = 0; viewInfoIndex < data->viewInfoCount; ++viewInfoIndex)
         {
             viewInfo = &data->viewInfo[viewInfoIndex];

@@ -41,8 +41,10 @@ void __cdecl NET_ShutdownDebug()
 			ip_debugServerSocket[i] = 0;
 		}
 	}
+#ifndef DEDICATED
 	if (Sys_IsRemoteDebugClient())
 		Scr_ShutdownRemoteClient(0);
+#endif
 }
 
 int NET_InitDebugStreams()

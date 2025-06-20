@@ -43,7 +43,7 @@ BuiltinFunctionDef functions[] =
   { "iprintlnbold", &iprintlnbold, 0 },
   { "print3d", &GScr_print3d, 1 },
   { "line", &GScr_line, 1 },
-  { "logstring", &CL_ResetStats_f, 0 },
+  { "logstring", &KISAK_NULLSUB, 0 },
   { "getent", &Scr_GetEnt, 0 },
   { "getentarray", &Scr_GetEntArray, 0 },
   { "spawn", &GScr_Spawn, 0 },
@@ -136,7 +136,7 @@ BuiltinFunctionDef functions[] =
   { "precacheitem", &Scr_PrecacheItem, 0 },
   { "precacheshader", (void(__cdecl *)()) & Scr_PrecacheShader, 0 },
   { "precachestring", (void(__cdecl *)()) & Scr_PrecacheString, 0 },
-  { "precacherumble", &CL_ResetStats_f, 0 },
+  { "precacherumble", &KISAK_NULLSUB, 0 },
   { "loadfx", &Scr_LoadFX, 0 },
   { "playfx", &Scr_PlayFX, 0 },
   { "playfxontag", &Scr_PlayFXOnTag, 0 },
@@ -196,15 +196,15 @@ BuiltinFunctionDef functions[] =
   { "exitlevel", &GScr_ExitLevel, 0 },
   { "addtestclient", &GScr_AddTestClient, 0 },
   { "makedvarserverinfo", &GScr_MakeDvarServerInfo, 0 },
-  { "setarchive", &CL_ResetStats_f, 0 },
+  { "setarchive", &KISAK_NULLSUB, 0 },
   { "allclientsprint", &GScr_AllClientsPrint, 0 },
   { "clientprint", &GScr_ClientPrint, 0 },
   { "mapexists", &GScr_MapExists, 0 },
   { "isvalidgametype", &GScr_IsValidGameType, 0 },
-  { "matchend", &CL_ResetStats_f, 0 },
-  { "setplayerteamrank", &CL_ResetStats_f, 0 },
-  { "sendranks", &CL_ResetStats_f, 0 },
-  { "endparty", &CL_ResetStats_f, 0 },
+  { "matchend", &KISAK_NULLSUB, 0 },
+  { "setplayerteamrank", &KISAK_NULLSUB, 0 },
+  { "sendranks", &KISAK_NULLSUB, 0 },
+  { "endparty", &KISAK_NULLSUB, 0 },
   { "setteamradar",  (void(__cdecl *)()) & GScr_SetTeamRadar, 0 },
   { "getteamradar", &GScr_GetTeamRadar, 0 },
   { "getassignedteam", (void(__cdecl *)()) & PlayerCmd_buttonPressedDEVONLY, 0 },
@@ -221,25 +221,25 @@ BuiltinFunctionDef functions[] =
   { "kick", &GScr_KickPlayer, 0 },
   { "ban", &GScr_BanPlayer, 0 },
   { "map", &GScr_LoadMap, 0 },
-  { "playrumbleonposition", &CL_ResetStats_f, 0 },
-  { "playrumblelooponposition", &CL_ResetStats_f, 0 },
-  { "stopallrumbles", &CL_ResetStats_f, 0 },
+  { "playrumbleonposition", &KISAK_NULLSUB, 0 },
+  { "playrumblelooponposition", &KISAK_NULLSUB, 0 },
+  { "stopallrumbles", &KISAK_NULLSUB, 0 },
   { "soundexists", &ScrCmd_SoundExists, 0 },
   { "issplitscreen", (void(__cdecl *)()) & PlayerCmd_buttonPressedDEVONLY, 0 },
   { "setminimap", &GScr_SetMiniMap, 0 },
   { "setmapcenter", &GScr_SetMapCenter, 0 },
   { "setgameendtime", &GScr_SetGameEndTime, 0 },
   { "getarraykeys", &GScr_GetArrayKeys, 0 },
-  { "searchforonlinegames", &CL_ResetStats_f, 0 },
-  { "quitlobby", &CL_ResetStats_f, 0 },
-  { "quitparty", &CL_ResetStats_f, 0 },
-  { "startparty", &CL_ResetStats_f, 0 },
-  { "startprivatematch", &CL_ResetStats_f, 0 },
+  { "searchforonlinegames", &KISAK_NULLSUB, 0 },
+  { "quitlobby", &KISAK_NULLSUB, 0 },
+  { "quitparty", &KISAK_NULLSUB, 0 },
+  { "startparty", &KISAK_NULLSUB, 0 },
+  { "startprivatematch", &KISAK_NULLSUB, 0 },
   { "visionsetnaked", &Scr_VisionSetNaked, 0 },
   { "visionsetnight", &Scr_VisionSetNight, 0 },
   { "tablelookup", &Scr_TableLookup, 0 },
   { "tablelookupistring", &Scr_TableLookupIString, 0 },
-  { "endlobby", &CL_ResetStats_f, 0 }
+  { "endlobby", &KISAK_NULLSUB, 0 }
 }; // idb
 
 void __cdecl ScrCmd_NULLSUB(scr_entref_t entref)
@@ -773,6 +773,7 @@ void GScr_print3d()
 
 void GScr_line()
 {
+#ifndef DEDICATED
     VariableUnion duration; // [esp+4h] [ebp-3Ch]
     float rgb[3]; // [esp+8h] [ebp-38h] BYREF
     float start[3]; // [esp+14h] [ebp-2Ch] BYREF
@@ -816,6 +817,7 @@ void GScr_line()
         break;
     }
     CL_AddDebugLine(start, end, color, depthTest, duration.intValue, 1);
+#endif
 }
 
 void assertCmd()
@@ -5522,7 +5524,7 @@ void GScr_ExitLevel()
     level.savepersist = 0;
     if (Scr_GetNumParam())
         level.savepersist = Scr_GetInt(0);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     ExitLevel();
 }
 

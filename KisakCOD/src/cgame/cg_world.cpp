@@ -226,7 +226,7 @@ void __cdecl CG_LocationalTrace(trace_t *results, float *start, float *end, int 
         MyAssertHandler(".\\cgame\\cg_world.cpp", 845, 0, "%s", "end");
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\cgame\\cg_world.cpp", 846, 0, "%s", "Sys_IsMainThread()");
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(51);
     CG_Trace(results, start, (float *)vec3_origin, (float *)vec3_origin, end, passEntityNum, contentMask, 1, 1);
     Profile_EndInternal(0);
@@ -1004,7 +1004,7 @@ void __cdecl CG_LocationalTraceEntitiesOnly(
             "%s",
             "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
     }
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(51);
     ignoreEntParams.baseEntity = passEntityNum;
     ignoreEntParams.parentEntity = -1;

@@ -1030,25 +1030,31 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     *(unsigned int *)&pStruct[v20->iOffset] = (int)(v15 * 1000.0);
                     break;
                 case 8:
+#ifndef DEDICATED
                     if (!com_dedicated->current.integer)
                     {
                         v9 = FX_Register(src);
                         *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v9;
                     }
+#endif
                     break;
                 case 9:
+#ifndef DEDICATED
                     I_strncpyz(dest, src, 0x2000);
                     v22 = R_RegisterModel(dest);
                     *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v22;
                     if (!v22)
                         v18 = 1;
+#endif
                     break;
                 case 0xA:
+#ifndef DEDICATED
                     if (!com_dedicated->current.integer)
                     {
                         v10 = Material_RegisterHandle(src, 0);
                         *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v10;
                     }
+#endif
                     break;
                 case 0xB:
                     SoundAlias = Com_FindSoundAlias(src);

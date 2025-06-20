@@ -2942,7 +2942,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
         while (1)
         {
             Profile_Begin(427);
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             R_ProcessWorkerCmdsWithTimeout(Sys_WaitBackendEvent, 1);
             Profile_EndInternal(0);
             if (Sys_FinishRenderer())
@@ -2951,7 +2951,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
                 if (data)
                     RB_RenderCommandFrame((GfxBackEndData*)data);
                 Sys_StopRenderer();
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 RB_RenderThreadIdle();
                 Sys_StartRenderer();
             }
@@ -2991,7 +2991,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
             RB_RenderCommandFrame((GfxBackEndData *)data);
             goto LABEL_39;
         }
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         R_ProcessWorkerCmdsWithTimeout(Sys_RendererReady, 0);
     }
 }
@@ -3024,7 +3024,7 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)
         allowRendering = 0;
     if (allowRendering)
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         RB_BeginFrame(data);
         RB_Draw3D();
         RB_CallExecuteRenderCommands();
@@ -3039,7 +3039,7 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)
     Profile_EndInternal(0);
     if (allowRendering)
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         RB_EndFrame(drawType);
     }
     Profile_Begin(172);

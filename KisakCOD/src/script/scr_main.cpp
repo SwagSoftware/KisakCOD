@@ -164,7 +164,7 @@ void __cdecl Scr_EndLoadScripts()
     if (!Sys_IsRemoteDebugClient())
     {
         Scr_EndLoadEvaluate();
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         SL_ShutdownSystem(2u);
     }
 #ifndef DEDICATED

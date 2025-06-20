@@ -142,7 +142,7 @@ void __cdecl R_Cinematic_Init()
         g_cinematicThreadInitialized = 1;
         g_cinematicThreadState = CINEMATIC_THREAD_STATE_TO_HOST_BETWEEN_UPDATES;
         Sys_SpawnCinematicsThread((void(__cdecl *)(unsigned int))R_Cinematic_Thread);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         cinematicGlob.atHighPriority = 1;
     }
 }
@@ -543,13 +543,13 @@ char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, unsigned int pl
     {
         if ((playbackFlags & 4) == 0 && cinematicGlob.atHighPriority)
         {
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             cinematicGlob.atHighPriority = 0;
         }
     }
     else
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         cinematicGlob.atHighPriority = 1;
     }
     if (cinematicGlob.bink)

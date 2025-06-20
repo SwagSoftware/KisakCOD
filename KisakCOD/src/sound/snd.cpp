@@ -3074,7 +3074,7 @@ void __cdecl SND_Update()
         int v0 = Sys_Milliseconds();
         frametime = v0 - g_snd.time;
         g_snd.time = v0;
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         SND_UpdatePause();
         SND_UpdateMasterVolumes(frametime);
         if (!g_snd.paused)

@@ -1203,7 +1203,7 @@ void __cdecl CG_DrawPlayerStance(
         drawColor[4] = 1.4025731e-38;
         x = (compassSize->current.value - 1.0) * cgsArray[0].compassWidth * 0.699999988079071 + rect->x;
         y = rect->y;
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         drawColor[0] = *color;
         drawColor[1] = color[1];
         drawColor[2] = color[2];
@@ -1258,7 +1258,7 @@ void __cdecl CG_DrawStanceIcon(
         MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 601, 0, "%s", "rect");
     width = rect->w;
     height = rect->h;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",

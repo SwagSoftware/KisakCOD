@@ -435,7 +435,7 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
 
     if (localClientNum == RETURN_ZERO32())
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         Profile_Begin(386);
         if (localClientNum)
             MyAssertHandler(
@@ -582,11 +582,11 @@ void __cdecl DynEntCl_PointTrace(const pointtrace_t *clip, trace_t *results)
         end[2] = clip->extents.end[2];
         start[3] = 0.0;
         end[3] = results->fraction;
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         DynEntCl_PointTrace_r(DYNENT_COLL_CLIENT_BRUSH, clip, 1u, start, end, results);
         if (results->fraction != 0.0)
         {
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             DynEntCl_PointTrace_r(DYNENT_COLL_CLIENT_FIRST, clip, 1u, start, end, results);
         }
         Profile_EndInternal(0);

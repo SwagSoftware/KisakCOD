@@ -1507,13 +1507,13 @@ int __cdecl CG_DrawActiveFrame(
                 }
                 CL_SyncGpu(0);
                 CL_Input(localClientNum);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 CG_PredictPlayerState(localClientNum);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 CG_UpdateViewWeaponAnim(localClientNum);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 CG_CalcViewValues(localClientNum);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 zfara = R_GetFarPlaneDist();
                 FX_SetNextUpdateCamera(localClientNum, &cgArray[0].refdef, zfara);
                 R_UpdateSpotLightEffect(&fxUpdateCmd);
@@ -1542,9 +1542,9 @@ int __cdecl CG_DrawActiveFrame(
                 GetCeilingHeight(cgArray);
                 if (!localClientNum)
                     DumpAnims(0);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 R_UpdateRemainingEffects(&fxUpdateCmd);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 AimTarget_UpdateClientTargets(localClientNum);
                 AimAssist_UpdateScreenTargets(
                     localClientNum,
@@ -1553,7 +1553,7 @@ int __cdecl CG_DrawActiveFrame(
                     cgArray[0].refdef.tanHalfFovX,
                     cgArray[0].refdef.tanHalfFovY);
                 CG_UpdateSceneDepthOfField(localClientNum);
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
                 R_AddCmdProjectionSet2D();
                 DrawShellshockBlend(localClientNum);
                 CG_CompassIncreaseRadarTime(localClientNum);
@@ -1709,7 +1709,7 @@ void __cdecl CG_UpdateEntInfo(int localClientNum)
     int num; // [esp+38h] [ebp-8h]
     unsigned int entnum; // [esp+3Ch] [ebp-4h]
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(12);
     if (localClientNum)
         MyAssertHandler(

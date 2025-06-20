@@ -687,7 +687,7 @@ void __cdecl CG_CompassCalcDimensions(
         *y = rect->y;
         *w = rect->w * compassSize->current.value;
         *h = rect->h * compassSize->current.value;
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         if (*w <= 0.0 || *h <= 0.0)
             Com_Error(ERR_FATAL, "Compass ownerdraw had width or height of 0");
     }
@@ -1419,7 +1419,7 @@ void __cdecl CG_CompassDrawPlayer(
                 MyAssertHandler(".\\cgame\\cg_compass.cpp", 880, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
             w = compassPlayerWidth->current.value * compassSize->current.value;
             h = compassPlayerHeight->current.value * compassSize->current.value;
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             x = 0.0;
             y = 0.0;
         }
@@ -1823,7 +1823,7 @@ void __cdecl CG_CompassDrawTickertape(
                 }
             }
             if (compassObjectiveNearbyDist->current.value >= (double)nearestDist)
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
         }
     }
 }

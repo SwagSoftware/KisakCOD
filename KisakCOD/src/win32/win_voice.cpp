@@ -671,7 +671,7 @@ void __cdecl Sound_SampleFrame(dsound_sample_t *sample)
 
 void __cdecl Sound_Frame()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 void __cdecl Voice_Playback()

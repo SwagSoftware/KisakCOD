@@ -31,7 +31,7 @@ void __cdecl R_ProcessCmd_UpdateFxRemaining(FxCmd *cmd)
     }
     FX_EndUpdate(cmd->localClientNum);
     R_AddWorkerCmd(14, (unsigned __int8 *)cmd);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     FX_AddNonSpriteDrawSurfs(cmd);
     FX_FillGenerateVertsCmd(cmd->localClientNum, &genVertsCmd);
     R_AddWorkerCmd(13, (unsigned __int8 *)&genVertsCmd);

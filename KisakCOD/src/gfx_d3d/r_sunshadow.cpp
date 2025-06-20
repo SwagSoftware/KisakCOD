@@ -807,7 +807,7 @@ void __cdecl R_SunShadowMaps()
 
     if (!rgp.world)
         MyAssertHandler(".\\r_sunshadow.cpp", 656, 0, "%s", "rgp.world");
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(76);
     oldViewIndex = R_SetVisData(0);
     shadowGlob.defaultShadowCasterTechnique = Material_GetTechnique(
@@ -843,7 +843,7 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
 
     sunShadow = &viewInfo->sunShadow;
     Profile_Begin(75);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (frontEndDataOut->sunLight.type != 1)
         MyAssertHandler(".\\r_sunshadow.cpp", 703, 0, "%s", "frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR");
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)

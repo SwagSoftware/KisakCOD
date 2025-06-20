@@ -4580,7 +4580,7 @@ void __cdecl Window_Paint(
             }
             break;
         case 2:
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             break;
         case 3:
             v11 = dc->localClientNum;
@@ -4705,8 +4705,8 @@ void __cdecl Window_Paint(
                 w->borderColor);
             break;
         case 4:
-            CL_ResetStats_f();
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
+            KISAK_NULLSUB();
             break;
         case 5:
             Vec3Scale(w->borderColor, ui_borderLowLightScale->current.value, lowColor);
@@ -6399,7 +6399,7 @@ void __cdecl Menu_PaintAll(UiContext *dc)
     int drawStart; // [esp+444h] [ebp-4h]
 
     showVisibleList = ui_showList->current.enabled;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (showVisibleList)
         Menu_PaintAll_BeginVisibleList(visibleList, 0x400u);
     dc->blurRadiusOut = 0.0;

@@ -7,6 +7,10 @@
 #include "scr_debugger.h"
 #include <bgame/bg_local.h>
 
+enum $3FAD84344DD9017EDEA6C2E0F6A382A4 : __int32
+{
+    SCR_SYS_GAME = 0x1,
+};
 
 // LWSS: Custom named enum so I'm forced to use this on EmitOpcode()
 enum Opcode_t : __int32

@@ -574,19 +574,19 @@ void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst
 
 void __cdecl R_SortAllStaticModelSurfacesCamera()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[1], scene.drawSurfCount[1]);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[4], scene.drawSurfCount[4]);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[10], scene.drawSurfCount[10]);
 }
 
 void __cdecl R_SortAllStaticModelSurfacesSunShadow()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[16], scene.drawSurfCount[16]);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[19], scene.drawSurfCount[19]);
 }
 
@@ -947,7 +947,7 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     surfCount = surfData.drawSurfList.current - scene.drawSurfs[v18];
     scene.drawSurfCount[v18] = surfCount;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[v18], surfCount);
 }
 

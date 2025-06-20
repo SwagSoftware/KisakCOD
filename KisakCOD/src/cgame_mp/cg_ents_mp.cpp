@@ -716,7 +716,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
     int lockedViewEntNum; // [esp+14Ch] [ebp-8h]
     unsigned int eType; // [esp+150h] [ebp-4h]
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_Begin(321);
     if (localClientNum)
         MyAssertHandler(

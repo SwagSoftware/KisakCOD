@@ -86,7 +86,7 @@ void __cdecl FX_InitSystem(int localClientNum)
     memset((unsigned __int8 *)systemBuffers, 0, sizeof(FxSystemBuffers));
     FX_LinkSystemBuffers(system, systemBuffers);
     FX_RegisterDvars();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     FX_ResetSystem(system);
     system->msecNow = 0;
     system->msecDraw = -1;

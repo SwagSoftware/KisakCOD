@@ -22,6 +22,8 @@
 debugger_sval_s *g_debugExprHead;
 int g_breakonExpr;
 int g_breakonHit;
+unsigned int g_breakonObject;
+unsigned int g_breakonString;
 
 scrEvaluateGlob_t scrEvaluateGlob;
 int g_script_error_level;
@@ -138,7 +140,7 @@ void __cdecl Scr_InitEvaluate()
     scrEvaluateGlob.archivedCanonicalStringsBuf = 0;
     scrEvaluateGlob.archivedCanonicalStrings = 0;
     scrEvaluateGlob.canonicalStringLookup = 0;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 void __cdecl Scr_EndLoadEvaluate()
@@ -164,7 +166,7 @@ void __cdecl Scr_ShutdownEvaluate()
         Hunk_FreeDebugMem(scrEvaluateGlob.canonicalStringLookup);
         scrEvaluateGlob.canonicalStringLookup = 0;
     }
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 unsigned __int16 __cdecl Scr_CompileCanonicalString(unsigned int stringValue)
@@ -1627,9 +1629,11 @@ bool __cdecl Scr_RefExpression(sval_u expr)
     case 0x4F:
         result = Scr_RefVector(expr.node[1], expr.node[2], expr.node[3]);
         break;
+#ifndef DEDICATED
     case 0x52:
         result = Scr_RefToVariable(expr.node[1].idValue, 1);
         break;
+#endif
     default:
         result = 0;
         break;
@@ -1649,6 +1653,7 @@ bool __cdecl Scr_RefPrimitiveExpression(sval_u expr)
     case 0x13:
         result = Scr_RefCallExpression(expr.node[1]);
         break;
+#ifndef DEDICATED
     case 0x20:
         if (!Scr_RefToVariable(expr.node[1].idValue, 1))
             goto $LN4_67;
@@ -1660,13 +1665,18 @@ bool __cdecl Scr_RefPrimitiveExpression(sval_u expr)
         expr.node[1].idValue = 0;
         result = 1;
         break;
+#endif
+#ifndef DEDICATED
     case 0x21:
     $LN4_67:
         result = Scr_RefToVariable(expr.node[2].idValue, 1);
         break;
+#endif
+#ifndef DEDICATED
     case 0x23:
         result = Scr_RefToVariable(scrVarPub.gameId, 0);
         break;
+#endif
     case 0x2E:
         result = Scr_RefExpression(expr.node[1]);
         break;
@@ -1689,6 +1699,7 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
 
     switch (*(unsigned int *)expr.type)
     {
+#ifndef DEDICATED
     case 4:
         if (!Scr_RefToVariable(expr.node[2].idValue, 1))
             goto $LN11_33;
@@ -1700,6 +1711,8 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
         expr.node[2].idValue = 0;
         result = 1;
         break;
+#endif
+#ifndef DEDICATED
     case 5:
     $LN11_33:
         if (Scr_RefToVariable(expr.node[3].idValue, 1))
@@ -1712,9 +1725,11 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
             result = 0;
         }
         break;
+#endif
     case 0xD:
         result = Scr_RefArrayVariableExpression(expr.node[1], expr.node[2]);
         break;
+#ifndef DEDICATED
     case 0xF:
         if (!Scr_RefPrimitiveExpression(expr.node[1]))
             goto $LN5_66;
@@ -1737,15 +1752,18 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
             result = 0;
         }
         break;
+#endif
     case 0x35:
         result = Scr_RefPrimitiveExpression(expr.node[1]);
         break;
+#ifndef DEDICATED
     case 0x50:
         result = Scr_RefToVariable(expr.node[3].idValue, 1);
         break;
     case 0x51:
         result = Scr_RefToVariable(expr.node[1].idValue, 1);
         break;
+#endif
     default:
         result = 0;
         break;

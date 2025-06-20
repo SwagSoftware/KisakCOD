@@ -312,7 +312,7 @@ void __cdecl R_IssueRenderCommands(unsigned int type)
 
 void R_PerformanceCounters()
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Profile_ResetCounters(0);
     if (rg.stats)
         RB_CopyBackendStats();
@@ -356,7 +356,7 @@ void __cdecl R_ToggleSmpFrameCmd(char type)
         MyAssertHandler(".\\r_rendercmds.cpp", 687, 0, "%s", "Sys_IsMainThread()");
     R_ReleaseThreadOwnership();
     Profile_Begin(133);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_ProcessWorkerCmdsWithTimeout(Sys_IsRendererReady, 1);
     Profile_EndInternal(0);
     if ((type & 2) != 0)
@@ -365,7 +365,7 @@ void __cdecl R_ToggleSmpFrameCmd(char type)
     R_UpdateSkinCacheUsage();
     R_UpdateActiveWorkerThreads();
     R_UnlockSkinnedCache();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Sys_WakeRenderer((void *)frontEndDataOut);
     if (r_glob.haveThreadOwnership)
         MyAssertHandler(".\\r_rendercmds.cpp", 729, 0, "%s", "!r_glob.haveThreadOwnership");
@@ -512,7 +512,7 @@ DebugGlobals *R_ToggleSmpFrame()
     frontEndDataOut->modelLightingPatchCount = 0;
     frontEndDataOut->skinnedCacheVb->used = 0;
     s_cmdList = frontEndDataOut->commands;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     if (frontEndDataOut->drawSurfCount > 0x8000u)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",

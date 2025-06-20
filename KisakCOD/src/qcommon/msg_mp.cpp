@@ -1355,19 +1355,23 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
         MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1730, 0, "%s", "number < (1u << GENTITYNUM_BITS)");
     if (MSG_ReadBit(msg) == 1)
     {
+#ifndef DEDICATED
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
             Com_Printf(16, "%3i: #%-3i remove\n", msg->readcount, number);
+#endif
         return 1;
     }
     else if (MSG_ReadBit(msg))
     {
         lc = MSG_ReadLastChangedField(msg, 61);
+#ifndef DEDICATED
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
         {
             print = 1;
             Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(unsigned int *)to);
         }
         else
+#endif
         {
             print = 0;
         }
@@ -1491,8 +1495,10 @@ int __cdecl MSG_ReadDeltaStruct(
         MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1659, 0, "%s", "number < (1u << indexBits)");
     if (MSG_ReadBit(msg) == 1)
     {
+#ifndef DEDICATED
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
             Com_Printf(16, "%3i: #%-3i remove\n", msg->readcount, number);
+#endif
         return 1;
     }
     else if (MSG_ReadBit(msg))
@@ -1500,12 +1506,14 @@ int __cdecl MSG_ReadDeltaStruct(
         lc = MSG_ReadLastChangedField(msg, totalFields);
         if (lc <= numFields)
         {
+#ifndef DEDICATED
             if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
             {
                 print = 1;
                 Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(unsigned int *)to);
             }
             else
+#endif
             {
                 print = 0;
             }
@@ -1593,12 +1601,14 @@ void __cdecl MSG_ReadDeltaPlayerstate(
         memset(dst, 0, 0x2F64u);
     }
     memcpy((unsigned __int8 *)to, (unsigned __int8 *)from, sizeof(playerState_s));
+#ifndef DEDICATED
     if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -2))
     {
         print = 1;
         Com_Printf(16, "%3i: playerstate ", msg->readcount);
     }
     else
+#endif
     {
         print = 0;
     }
@@ -1656,8 +1666,10 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     }
     if (MSG_ReadBit(msg))
     {
+#ifndef DEDICATED
         if (cl_shownet && cl_shownet->current.integer == 4)
             Com_Printf(16, "%s ", "PS_STATS");
+#endif
         Bits = MSG_ReadBits(msg, 5u);
         if ((Bits & 1) != 0)
             to->stats[0] = MSG_ReadShort(msg);
@@ -1676,8 +1688,10 @@ void __cdecl MSG_ReadDeltaPlayerstate(
         {
             if (MSG_ReadBit(msg))
             {
+#ifndef DEDICATED
                 if (cl_shownet && cl_shownet->current.integer == 4)
                     Com_Printf(16, "%s ", "PS_AMMO");
+#endif
                 Bits = MSG_ReadShort(msg);
                 for (j = 0; j < 16; ++j)
                 {
@@ -1694,8 +1708,10 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     {
         if (MSG_ReadBit(msg))
         {
+#ifndef DEDICATED
             if (cl_shownet && cl_shownet->current.integer == 4)
                 Com_Printf(16, "%s ", "PS_AMMOCLIP");
+#endif
             Bits = MSG_ReadShort(msg);
             for (j = 0; j < 16; ++j)
             {

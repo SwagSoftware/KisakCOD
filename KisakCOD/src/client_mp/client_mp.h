@@ -695,7 +695,7 @@ bool __cdecl CL_IsUIActive(int localClientNum);
 struct Font_s *__cdecl CL_RegisterFont(const char *fontName, int imageTrack);
 void __cdecl CL_UpdateSound();
 float (*__cdecl CL_GetMapCenter())[3];
-void __cdecl CL_ResetStats_f();
+void __cdecl KISAK_NULLSUB();
 int __cdecl CL_GetLocalClientActiveCount();
 void __cdecl CL_InitDedicated();
 
@@ -790,16 +790,9 @@ extern int cl_connectedToPureServer;
 
 inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int localClientNum)
 {
-    if (!clients)
-        MyAssertHandler("c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h", 1081, 0, "%s", "clients");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
-            1087,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(clients);
+    iassert(localClientNum == 0);
+
     return clients;
 }
 

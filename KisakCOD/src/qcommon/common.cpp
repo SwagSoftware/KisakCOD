@@ -276,225 +276,9 @@ typedef enum
 
 void _copyDWord(unsigned int* dest, const unsigned int constant, const unsigned int count) 
 {
-	// __asm
-	// {
-	// 	mov		edx, dest
-	// 	mov		eax, constant
-	// 	mov		ecx, count
-	// 	and ecx, ~7
-	// 	jz		padding
-	// 	sub		ecx, 8
-	// 	jmp		loopu
-	// 	align	16
-	// 	loopu:
-	// 	test[edx + ecx * 4 + 28], ebx		// fetch next block destination to L1 cache
-	// 	mov[edx + ecx * 4 + 0], eax
-	// 	mov[edx + ecx * 4 + 4], eax
-	// 	mov[edx + ecx * 4 + 8], eax
-	// 	mov[edx + ecx * 4 + 12], eax
-	// 	mov[edx + ecx * 4 + 16], eax
-	// 	mov[edx + ecx * 4 + 20], eax
-	// 	mov[edx + ecx * 4 + 24], eax
-	// 	mov[edx + ecx * 4 + 28], eax
-	// 	sub		ecx, 8
-	// 	jge		loopu
-	// 	padding : mov		ecx, count
-	// 	mov		ebx, ecx
-	// 	and ecx, 7
-	// 	jz		outta
-	// 	and ebx, ~7
-	// 	lea		edx, [edx + ebx * 4]				// advance dest pointer
-	// 	test[edx + 0], eax					// fetch destination to L1 cache
-	// 	cmp		ecx, 4
-	// 	jl		skip4
-	// 	mov[edx + 0], eax
-	// 	mov[edx + 4], eax
-	// 	mov[edx + 8], eax
-	// 	mov[edx + 12], eax
-	// 	add		edx, 16
-	// 	sub		ecx, 4
-	// 	skip4:		cmp		ecx, 2
-	// 	jl		skip2
-	// 	mov[edx + 0], eax
-	// 	mov[edx + 4], eax
-	// 	add		edx, 8
-	// 	sub		ecx, 2
-	// 	skip2 : cmp		ecx, 1
-	// 	jl		outta
-	// 	mov[edx + 0], eax
-	// 	outta :
-	// }
     for (unsigned i = 0; i < count; i++)
         dest[i] = constant;
 }
-
-// optimized memory copy routine that handles all alignment
-// cases and block sizes efficiently
-//void Com_Memcpy(void* dest, const void* src, const size_t count) {
-//	Com_Prefetch(src, count, PRE_READ);
-//	__asm
-//	{
-//		push	edi
-//		push	esi
-//		mov		ecx, count
-//		cmp		ecx, 0						// count = 0 check (just to be on the safe side)
-//		je		outta
-//		mov		edx, dest
-//		mov		ebx, src
-//		cmp		ecx, 32						// padding only?
-//		jl		padding
-//
-//		mov		edi, ecx
-//		and edi, ~31					// edi = count&~31
-//		sub		edi, 32
-//
-//		align 16
-//		loopMisAligned:
-//		mov		eax, [ebx + edi + 0 + 0 * 8]
-//		mov		esi, [ebx + edi + 4 + 0 * 8]
-//		mov[edx + edi + 0 + 0 * 8], eax
-//		mov[edx + edi + 4 + 0 * 8], esi
-//		mov		eax, [ebx + edi + 0 + 1 * 8]
-//		mov		esi, [ebx + edi + 4 + 1 * 8]
-//		mov[edx + edi + 0 + 1 * 8], eax
-//		mov[edx + edi + 4 + 1 * 8], esi
-//		mov		eax, [ebx + edi + 0 + 2 * 8]
-//		mov		esi, [ebx + edi + 4 + 2 * 8]
-//		mov[edx + edi + 0 + 2 * 8], eax
-//		mov[edx + edi + 4 + 2 * 8], esi
-//		mov		eax, [ebx + edi + 0 + 3 * 8]
-//		mov		esi, [ebx + edi + 4 + 3 * 8]
-//		mov[edx + edi + 0 + 3 * 8], eax
-//		mov[edx + edi + 4 + 3 * 8], esi
-//		sub		edi, 32
-//		jge		loopMisAligned
-//
-//		mov		edi, ecx
-//		and edi, ~31
-//		add		ebx, edi					// increase src pointer
-//		add		edx, edi					// increase dst pointer
-//		and ecx, 31					// new count
-//		jz		outta					// if count = 0, get outta here
-//
-//		padding :
-//		cmp		ecx, 16
-//		jl		skip16
-//		mov		eax, dword ptr[ebx]
-//		mov		dword ptr[edx], eax
-//		mov		eax, dword ptr[ebx + 4]
-//		mov		dword ptr[edx + 4], eax
-//		mov		eax, dword ptr[ebx + 8]
-//		mov		dword ptr[edx + 8], eax
-//		mov		eax, dword ptr[ebx + 12]
-//		mov		dword ptr[edx + 12], eax
-//		sub		ecx, 16
-//		add		ebx, 16
-//		add		edx, 16
-//
-//		skip16:
-//		cmp		ecx, 8
-//		jl		skip8
-//		mov		eax, dword ptr[ebx]
-//		mov		dword ptr[edx], eax
-//		mov		eax, dword ptr[ebx + 4]
-//		sub		ecx, 8
-//		mov		dword ptr[edx + 4], eax
-//		add		ebx, 8
-//		add		edx, 8
-//		skip8:
-//		cmp		ecx, 4
-//		jl		skip4
-//		mov		eax, dword ptr[ebx]	// here 4-7 bytes
-//		add		ebx, 4
-//		sub		ecx, 4
-//		mov		dword ptr[edx], eax
-//		add		edx, 4
-//		skip4:							// 0-3 remaining bytes
-//		cmp		ecx, 2
-//		jl		skip2
-//		mov		ax, word ptr[ebx]	// two bytes
-//		cmp		ecx, 3				// less than 3?
-//		mov		word ptr[edx], ax
-//		jl		outta
-//		mov		al, byte ptr[ebx + 2]	// last byte
-//		mov		byte ptr[edx + 2], al
-//		jmp		outta
-//		skip2 :
-//		cmp		ecx, 1
-//		jl		outta
-//		mov		al, byte ptr[ebx]
-//		mov		byte ptr[edx], al
-//		outta :
-//		pop		esi
-//		pop		edi
-//	}
-//}
-
-//void Com_Memset(void* dest, const int val, const size_t count)
-//{
-//	unsigned int fillval;
-//
-//	if (count < 8)
-//	{
-//		__asm
-//		{
-//			mov		edx, dest
-//			mov		eax, val
-//			mov		ah, al
-//			mov		ebx, eax
-//			and ebx, 0xffff
-//			shl		eax, 16
-//			add		eax, ebx				// eax now contains pattern
-//			mov		ecx, count
-//			cmp		ecx, 4
-//			jl		skip4
-//			mov[edx], eax			// copy first dword
-//			add		edx, 4
-//			sub		ecx, 4
-//			skip4:	cmp		ecx, 2
-//			jl		skip2
-//			mov		word ptr[edx], ax	// copy 2 bytes
-//			add		edx, 2
-//			sub		ecx, 2
-//			skip2 : cmp		ecx, 0
-//			je		skip1
-//			mov		byte ptr[edx], al	// copy single byte
-//			skip1 :
-//		}
-//		return;
-//	}
-//
-//	fillval = val;
-//
-//	fillval = fillval | (fillval << 8);
-//	fillval = fillval | (fillval << 16);		// fill dword with 8-bit pattern
-//
-//	_copyDWord((unsigned int*)(dest), fillval, count / 4);
-//
-//	__asm									// padding of 0-3 bytes
-//	{
-//		mov		ecx, count
-//		mov		eax, ecx
-//		and ecx, 3
-//		jz		skipA
-//		and eax, ~3
-//		mov		ebx, dest
-//		add		ebx, eax
-//		mov		eax, fillval
-//		cmp		ecx, 2
-//		jl		skipB
-//		mov		word ptr[ebx], ax
-//		cmp		ecx, 2
-//		je		skipA
-//		mov		byte ptr[ebx + 2], al
-//		jmp		skipA
-//		skipB :
-//		cmp		ecx, 0
-//		je		skipA
-//		mov		byte ptr[ebx], al
-//		skipA :
-//	}
-//}
 
 qboolean Com_Memcmp(const void* src0, const void* src1, const unsigned int count)
 {
@@ -690,7 +474,7 @@ void __cdecl Com_ShutdownInternal(const char* finalmsg)
 
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         CL_Disconnect(localClientNum);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     CL_ShutdownAll();
     CL_ShutdownDemo();
     FakeLag_Shutdown();
@@ -1221,10 +1005,12 @@ void Com_ErrorCleanup()
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\qcommon\\common.cpp", 1010, 0, "%s", "Sys_IsMainThread()");
     LargeLocalReset();
+#ifndef DEDICATED
     R_PopRemoteScreenUpdate();
     Com_SyncThreads();
     if (!com_dedicated->current.enabled)
         R_ComErrorCleanup();
+#endif
     Cmd_ComErrorCleanup();
     Dvar_SetInAutoExec(0);
     if (useFastFile->current.enabled)
@@ -1268,7 +1054,7 @@ void Com_ErrorCleanup()
         Dvar_SetInt((dvar_s*)fs_debug, 0);
     SND_ErrorCleanup();
     Com_CleanupBsp();
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Com_ResetParseSessions();
     CL_FlushDebugServerData();
     CL_UpdateDebugServerData();
@@ -1287,7 +1073,9 @@ void Com_ErrorCleanup()
     lastErrorTime = v5;
     if (errorcode != ERR_SERVERDISCONNECT && errorcode != ERR_DROP && errorcode != ERR_DISCONNECT)
         Sys_Error("%s", com_errorMessage);
+#ifndef DEDICATED
     updateScreenCalled = 0;
+#endif
     if (errorcode == ERR_SERVERDISCONNECT)
     {
         Com_ShutdownInternal("EXE_DISCONNECTEDFROMOWNLISTENSERVER");
@@ -1382,6 +1170,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     }
     if (useFastFile->current.enabled)
         Com_InitXAssets();
+#ifndef DEDICATED
     CL_InitKeyCommands();
     FS_InitFilesystem();
     Con_InitChannels();
@@ -1390,6 +1179,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         Com_StartupConfigs(localClientNum);
     v1 = CL_ControllerIndexFromClientNum(0);
     Cbuf_Execute(0, v1);
+#endif
     if ((dvar_modifiedFlags & 0x20) != 0)
         Com_InitDvars();
     com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, 1u, "Use recommended settings");
@@ -1397,8 +1187,10 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Com_StartupVariable(0);
     if (!useFastFile->current.enabled)
         SEH_UpdateLanguageInfo();
+#ifndef DEDICATED
     if (com_dedicated->current.integer)
         CL_InitDedicated();
+#endif
     Com_InitHunkMemory();
     Hunk_InitDebugMemory();
     dvar_modifiedFlags &= ~1u;
@@ -1432,7 +1224,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 #ifndef DEDICATED
     if (!com_dedicated->current.integer)
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         CL_InitOnceForAllClients();
         for (localClientNuma = 0; localClientNuma < 1; ++localClientNuma)
             CL_Init(localClientNuma);
@@ -1445,9 +1237,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     {
         SND_InitDriver();
         R_InitThreads();
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         CL_InitRenderer();
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         if (cls.soundStarted)
             MyAssertHandler(".\\qcommon\\common.cpp", 3357, 0, "%s", "!cls.soundStarted");
         cls.soundStarted = 1;
@@ -1830,7 +1622,7 @@ void __cdecl Com_Frame_Try_Block_Function()
 #ifndef DEDICATED
     else
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         Profile_Begin(361);
         while (1)
         {
@@ -1866,7 +1658,7 @@ void __cdecl Com_Frame_Try_Block_Function()
     if (!com_dedicated->current.integer)
     {
         R_SetEndTime(com_lastFrameTime[lastFrameIndex]);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         CL_RunOncePerClientFrame(0, msecb);
         Com_EventLoop();
         for (localClientNum = 0; localClientNum < 1; ++localClientNum)
@@ -1874,7 +1666,7 @@ void __cdecl Com_Frame_Try_Block_Function()
             v2 = CL_ControllerIndexFromClientNum(localClientNum);
             Cbuf_Execute(localClientNum, v2);
         }
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         Profile_Begin(16);
         for (localClientNuma = NS_CLIENT1; localClientNuma < NS_SERVER; ++localClientNuma)
             CL_Frame(localClientNuma);
@@ -1885,7 +1677,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         Ragdoll_Update(msecb);
         if (!Sys_IsMainThread())
             MyAssertHandler(".\\qcommon\\common.cpp", 4079, 0, "%s", "Sys_IsMainThread()");
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         deltaTime = (double)cls.frametime * EQUAL_EPSILON;
         DevGui_Update(0, deltaTime);
         Com_Statmon();
@@ -2004,6 +1796,7 @@ int Com_UpdateMenu()
 
 void __cdecl Com_AssetLoadUI()
 {
+#ifndef DEDICATED
     XZoneInfo zoneInfo; // [esp+0h] [ebp-10h] BYREF
 
     if (useFastFile->current.enabled)
@@ -2017,6 +1810,7 @@ void __cdecl Com_AssetLoadUI()
     R_BeginRemoteScreenUpdate();
     CL_StartHunkUsers();
     R_EndRemoteScreenUpdate();
+#endif
 }
 
 void __cdecl Com_CheckSyncFrame()
@@ -2030,7 +1824,7 @@ void __cdecl Com_Frame()
 {
     void* Value; // eax
 
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     Value = Sys_GetValue(2);
     //if (_setjmp3(Value, 0))
     if (_setjmp(*(jmp_buf *)Value))
@@ -2244,10 +2038,12 @@ void __cdecl Com_LocalizedFloatToString(float f, char* buffer, unsigned int maxl
 
 void __cdecl Com_SyncThreads()
 {
+#ifndef DEDICATED
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\qcommon\\common.cpp", 4655, 0, "%s", "Sys_IsMainThread()");
     R_SyncRenderThread();
     R_WaitWorkerCmds();
+#endif
 }
 
 void __cdecl Com_FreeEvent(char* ptr)

@@ -374,7 +374,7 @@ void __cdecl RB_FilterImage(GfxImageFilter *filter)
             GFX_PRIM_STATS_CODE);
         RB_EndTessSurface();
     }
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 void __cdecl RB_SetupFilterPass(const GfxImageFilterPass *filterPass)

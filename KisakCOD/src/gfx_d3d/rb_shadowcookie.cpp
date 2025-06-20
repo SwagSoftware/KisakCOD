@@ -81,7 +81,7 @@ void __cdecl RB_DrawShadowCookies(const GfxViewInfo *viewInfo)
     int receiverSurfCount; // [esp+68h] [ebp-4h]
 
     Profile_Begin(154);
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_InitCmdBufSourceState(&gfxCmdBufSourceState, &viewInfo->input, 0);
     qmemcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
     memset(gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));

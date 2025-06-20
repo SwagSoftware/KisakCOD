@@ -153,6 +153,7 @@ XAnimParts *__cdecl XAnimClone(XAnimParts *fromParts, void *(__cdecl *Alloc)(int
 
 XAnimParts *__cdecl XAnimPrecache(const char *name, void *(__cdecl *Alloc)(int))
 {
+#ifndef DEDICATED
     XAnimParts *result; // eax
     XAnimParts *Data_FastFile; // eax
     XAnimParts *defaultParts; // [esp+Ch] [ebp-8h]
@@ -190,6 +191,9 @@ XAnimParts *__cdecl XAnimPrecache(const char *name, void *(__cdecl *Alloc)(int))
         return parts;
     }
     return result;
+#else
+    return XAnimFindData_FastFile(name);
+#endif
 }
 
 void __cdecl XAnimBlend(

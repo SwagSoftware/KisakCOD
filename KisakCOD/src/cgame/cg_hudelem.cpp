@@ -361,7 +361,7 @@ void __cdecl GetHudelemDirective(int localClientNum, char *directive, char *resu
 
     if (UI_GetKeyBindingLocalizedString(localClientNum, directive, result))
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
     }
     else
     {

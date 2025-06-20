@@ -31,9 +31,6 @@ Scr_Breakpoint g_breakpoints[128];
 
 Scr_Breakpoint *g_breakpointsHead;
 
-unsigned int g_breakonObject;
-unsigned int g_breakonString;
-
 void __cdecl TRACK_scr_debugger()
 {
     track_static_alloc_internal(&scrDebuggerGlob, 696, "scrDebuggerGlob", 0);

@@ -1348,7 +1348,7 @@ void __cdecl Material_AddShaderFile(GfxAssembledShaderText *prog, char *shaderFi
 {
     if (prog->fileCount < 0x80)
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         I_strncpyz(prog->files[prog->fileCount].fileName, shaderFileName, 256);
         prog->files[prog->fileCount].srcLine = srcLine;
         prog->files[prog->fileCount++].destLine = prog->currentDestLine;
@@ -4148,16 +4148,16 @@ bool __cdecl Material_LoadPass(
                     vertexParamSet.varyingInputs,
                     vertexParamSet.varyingInputCount,
                     pass);
-                CL_ResetStats_f();
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
+                KISAK_NULLSUB();
                 Material_LoadDeclTypes(text, pass);
                 return success;
             }
             else
             {
             LABEL_8:
-                CL_ResetStats_f();
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
+                KISAK_NULLSUB();
                 return 0;
             }
         }
@@ -4169,7 +4169,7 @@ bool __cdecl Material_LoadPass(
     }
     else
     {
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         return 0;
     }
 }

@@ -28,7 +28,7 @@ void __cdecl RB_SunShadowMaps(const GfxBackEndData *data, const GfxViewInfo *vie
         if (!data)
             MyAssertHandler(".\\rb_sunshadow.cpp", 44, 0, "%s", "data");
         R_InitContext(data, &cmdBuf);
-        CL_ResetStats_f();
+        KISAK_NULLSUB();
         for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
             R_DrawSunShadowMap(viewInfo, partitionIndex, &cmdBuf);
     }

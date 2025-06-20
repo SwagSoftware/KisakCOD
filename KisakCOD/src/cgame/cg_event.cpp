@@ -1337,7 +1337,7 @@ void __cdecl CG_CheckEvents(int localClientNum, centity_s *cent)
                     event = cent->nextState.events[i & 3];
                     cent->nextState.eventParm = cent->nextState.eventParms[i & 3];
                     BG_GetEntityTypeName(event + 17);
-                    CL_ResetStats_f();
+                    KISAK_NULLSUB();
                     CG_EntityEvent(localClientNum, cent, event);
                 }
                 cent->nextState.eventParm = oldEventParm;
@@ -1361,7 +1361,7 @@ void __cdecl CG_CheckEvents(int localClientNum, centity_s *cent)
         {
             cent->previousEventSequence = 1;
             BG_GetEntityTypeName(cent->nextState.eType);
-            CL_ResetStats_f();
+            KISAK_NULLSUB();
             CG_CalcEntityLerpPositions(localClientNum, cent);
             CG_EntityEvent(localClientNum, cent, cent->nextState.eType - 17);
         }

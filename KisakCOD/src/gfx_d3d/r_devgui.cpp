@@ -6,5 +6,5 @@ void __cdecl R_CreateDevGui()
 {
 	Cbuf_InsertText(0, "exec devgui_renderer");
 	Cbuf_InsertText(0, "exec devgui_visibility");
-	CL_ResetStats_f();
+	KISAK_NULLSUB();
 }

@@ -85,7 +85,7 @@ void __cdecl CG_track_init()
     g_mem_track_filename = "cg_localents";
     TRACK_cg_localents();
     g_mem_track_filename = "cg_players";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "aim_assist";
     TRACK_aim_assist();
     g_mem_track_filename = "aim_target";
@@ -105,7 +105,7 @@ void __cdecl G_track_init()
     g_mem_track_filename = "g_main";
     TRACK_g_main();
     g_mem_track_filename = "g_svcmds";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "g_utils";
     TRACK_g_utils();
     g_mem_track_filename = "bg_misctables";
@@ -512,7 +512,7 @@ void track_init()
     g_mem_track_filename = "com_sndalias";
     TRACK_com_sndalias();
     g_mem_track_filename = "fx_draw";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "fx_random";
     TRACK_fx_random();
     g_mem_track_filename = "fx_system";
@@ -554,9 +554,9 @@ void track_init()
     g_mem_track_filename = "sv_game";
     TRACK_sv_game();
     g_mem_track_filename = "sv_init";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "zutil";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "memfile";
     TRACK_memfile();
     g_mem_track_filename = "cl_main";
@@ -572,7 +572,7 @@ void track_init()
     g_mem_track_filename = "win_input";
     TRACK_win_input();
     g_mem_track_filename = "cl_srcn";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "cl_cgame";
     TRACK_cl_cgame();
     g_mem_track_filename = "statmonitor";
@@ -913,7 +913,7 @@ void __cdecl UI_track_init()
     g_mem_track_filename = "ui_utils";
     TRACK_ui_utils();
     g_mem_track_filename = "ui_atoms";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "ui_memtrack";
     TRACK_g_memtrack();
     g_mem_track_filename = "ui_shared_obj";
@@ -960,7 +960,7 @@ void __cdecl R_Track_Init()
     g_mem_track_filename = "r_dpvs";
     TRACK_r_dpvs();
     g_mem_track_filename = "r_fog";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "r_font";
     TRACK_r_font();
     g_mem_track_filename = "r_image";
@@ -970,7 +970,7 @@ void __cdecl R_Track_Init()
     g_mem_track_filename = "r_init";
     TRACK_r_init();
     g_mem_track_filename = "r_marks";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "r_material";
     TRACK_r_material();
     g_mem_track_filename = "r_model";
@@ -982,19 +982,19 @@ void __cdecl R_Track_Init()
     g_mem_track_filename = "r_screenshot";
     TRACK_r_screenshot();
     g_mem_track_filename = "r_staticmodel";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "r_staticmodelcache";
     TRACK_r_staticmodelcache();
     g_mem_track_filename = "r_utils";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "r_xsurface";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "r_water";
     TRACK_r_water();
     g_mem_track_filename = "r_workercmds";
     TRACK_r_workercmds();
     g_mem_track_filename = "r_light";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "rb_debug";
     TRACK_rb_debug();
     g_mem_track_filename = "rb_backend";
@@ -1002,7 +1002,7 @@ void __cdecl R_Track_Init()
     g_mem_track_filename = "rb_drawprofile";
     TRACK_rb_drawprofile();
     g_mem_track_filename = "rb_shade";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     g_mem_track_filename = "rb_showcollision";
     TRACK_rb_showcollision();
     g_mem_track_filename = "rb_state";
@@ -1012,7 +1012,7 @@ void __cdecl R_Track_Init()
     g_mem_track_filename = "rb_sunshadow";
     TRACK_rb_sunshadow();
     g_mem_track_filename = "rb_tess";
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
 }
 
 void __cdecl track_z_alloc(int size, const char* name, int type, char* pos, int project, int overhead)

@@ -1324,7 +1324,7 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
         else
         {
             if (Sys_IsMainThread())
-                CL_ResetStats_f();
+                KISAK_NULLSUB();
             suspendedThread = Sys_HaveSuspendedDatabaseThread(THREAD_OWNER_DATABASE);
             if (suspendedThread)
                 Sys_ResumeDatabaseThread(THREAD_OWNER_DATABASE);
@@ -2120,7 +2120,7 @@ void(__cdecl *DB_DynamicCloneXAssetHandler[33])(XAssetHeader, XAssetHeader, int)
     NULL, // 20
     DB_DynamicCloneMenu,
     NULL,
-    (void(*)(XAssetHeader, XAssetHeader, int))CL_ResetStats_f,
+    (void(*)(XAssetHeader, XAssetHeader, int))KISAK_NULLSUB,
     NULL,
     NULL,
     NULL,

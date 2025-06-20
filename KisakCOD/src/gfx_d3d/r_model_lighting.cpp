@@ -382,7 +382,7 @@ unsigned int __cdecl R_CalcModelLighting(
     unsigned int nonSunPrimaryLightIndex,
     GfxModelLightExtrapolation extrapolateBehavior)
 {
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     iassert(entryIndex == (unsigned short)entryIndex);
     bcassert(nonSunPrimaryLightIndex, rgp.world->primaryLightCount);
 

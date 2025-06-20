@@ -389,15 +389,15 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
     Profile_Begin(414);
     drawSurfCount = drawSurfs[0] - scene.drawSurfs[2];
     scene.drawSurfCount[2] = drawSurfCount;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[2], drawSurfCount);
     drawSurfCount = drawSurfs[1] - scene.drawSurfs[5];
     scene.drawSurfCount[5] = drawSurfCount;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[5], drawSurfCount);
     drawSurfCount = drawSurfs[2] - scene.drawSurfs[11];
     scene.drawSurfCount[11] = drawSurfCount;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[11], drawSurfCount);
     Profile_EndInternal(0);
 }
@@ -502,7 +502,7 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
     }
     drawSurfCount = drawSurf - scene.drawSurfs[stage];
     scene.drawSurfCount[stage] = drawSurfCount;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[stage], drawSurfCount);
     Profile_EndInternal(0);
 }
@@ -604,7 +604,7 @@ void __cdecl R_AddAllSceneEntSurfacesSpotShadow(
     }
     drawSurfCount = drawSurf - scene.drawSurfs[stage];
     scene.drawSurfCount[stage] = drawSurfCount;
-    CL_ResetStats_f();
+    KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[stage], drawSurfCount);
 }
 
