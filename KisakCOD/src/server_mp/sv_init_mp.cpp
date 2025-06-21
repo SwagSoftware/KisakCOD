@@ -558,11 +558,13 @@ void __cdecl SV_SpawnServer(char *server)
     Dvar_SetInt((dvar_s *)sv_serverid, sv_serverId_value);
     sv.start_frameTime = com_frameTime;
     sv.state = SS_LOADING;
+#ifndef DEDICATED
     if (!useFastFile->current.enabled)
     {
         Com_GetBspFilename(filename, 0x40u, server);
         Com_LoadSoundAliases(filename, "all_mp", SASYS_GAME);
     }
+#endif
     ProfLoad_Begin("Init game");
     SV_InitGameProgs(savepersist);
     ProfLoad_End();

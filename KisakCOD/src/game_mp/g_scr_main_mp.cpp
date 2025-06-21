@@ -461,6 +461,7 @@ void __cdecl ScrCmd_GetClanName(scr_entref_t entref)
 
 void GScr_CreatePrintChannel()
 {
+#ifndef DEDICATED
     char *name; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam() != 1)
@@ -468,10 +469,12 @@ void GScr_CreatePrintChannel()
     name = Scr_GetString(0);
     if (!Con_OpenChannel(name, 1))
         Scr_Error("Unable to create new channel.  Maximum number of channels exeeded.");
+#endif
 }
 
 void GScr_printChannelSet()
 {
+#ifndef DEDICATED
     int Type; // [esp+0h] [ebp-10h]
     int oldChannel; // [esp+4h] [ebp-Ch]
     int channel; // [esp+8h] [ebp-8h] BYREF
@@ -508,6 +511,7 @@ void GScr_printChannelSet()
     {
         Scr_ParamError(0, "Script does not have permission to print to this channel");
     }
+#endif
 }
 
 void print()
@@ -1782,7 +1786,11 @@ void ScrCmd_SoundExists()
     char *soundName; // [esp+0h] [ebp-4h]
 
     soundName = Scr_GetString(0);
+#ifndef DEDICATED
     SoundAlias = Com_TryFindSoundAlias(soundName);
+#else
+    SoundAlias = NULL;
+#endif
     Scr_AddBool(SoundAlias != 0);
 }
 

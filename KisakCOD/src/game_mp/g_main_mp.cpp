@@ -296,7 +296,11 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     if (!restart)
     {
         memset(&bgs->animScriptData, 0, sizeof(animScriptData_t));
+#ifndef DEDICATED
         bgs->animScriptData.soundAlias = Com_FindSoundAlias;
+#else
+        bgs->animScriptData.soundAlias = Com_FindSoundAlias_DEDICATED;
+#endif
         bgs->animScriptData.playSoundAlias = G_AnimScriptSound;
         GScr_LoadScripts();
         BG_LoadAnim();
@@ -1721,7 +1725,9 @@ void __cdecl G_SightTrace(int *hitNum, float *start, float *end, int passEntityN
 
 void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int duration)
 {
+#ifndef DEDICATED
     CL_AddDebugString(xyz, color, scale, text, 1, duration);
+#endif
 }
 
 BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2)

@@ -98,6 +98,7 @@ int __cdecl DObjGetSurfaces(const DObj_s *obj, int *partBits, const char *lods)
 
 void __cdecl DObjGetSurfaceData(const DObj_s *obj, const float *origin, float scale, char *lods)
 {
+#ifndef DEDICATED
     XModelLodRampType lodRampType; // [esp+Ch] [ebp-18h]
     XModel *model; // [esp+10h] [ebp-14h]
     float adjustedDist; // [esp+14h] [ebp-10h]
@@ -122,6 +123,9 @@ void __cdecl DObjGetSurfaceData(const DObj_s *obj, const float *origin, float sc
         adjustedDist = R_GetAdjustedLodDist(baseDist, lodRampType);
         lods[modelIndex] = DObjGetLodForDist(obj, modelIndex, adjustedDist);
     }
+#else
+    iassert(0);
+#endif 
 }
 
 void __cdecl DObjGetBoneInfo(const DObj_s *obj, XBoneInfo **boneInfo)

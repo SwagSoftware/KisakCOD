@@ -2,6 +2,7 @@
 #include "bg_local.h"
 #include <game_mp/g_main_mp.h>
 #include <universal/profile.h>
+#include <xanim/dobj_utils.h>
 
 const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
 {
@@ -4385,3 +4386,14 @@ double __cdecl BG_GetSpeed(const playerState_s *ps, int time)
     return 0.0;
 }
 
+// LWSS: might not be right file for this function
+void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int *partBits)
+{
+    clientControllers_t *control; // [esp+0h] [ebp-8h]
+    int i; // [esp+4h] [ebp-4h]
+
+    control = player->control;
+    for (i = 0; i < 6; ++i)
+        DObjSetControlTagAngles((DObj_s *)obj, partBits, player->tag[i], control->angles[i]);
+    DObjSetLocalTag((DObj_s *)obj, partBits, 0, control->tag_origin_offset, control->tag_origin_angles);
+}

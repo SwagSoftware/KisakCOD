@@ -651,7 +651,9 @@ void __cdecl SV_ShutdownGameProgs()
 {
     Com_SyncThreads();
     sv.state = SS_DEAD;
+#ifndef DEDICATED
     Com_UnloadSoundAliases(SASYS_GAME);
+#endif
     if (gameInitialized)
     {
         G_ShutdownGame(1);

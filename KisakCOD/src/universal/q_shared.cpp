@@ -1057,8 +1057,10 @@ bool __cdecl ParseConfigStringToStructCustomSize(
 #endif
                     break;
                 case 0xB:
+#ifndef DEDICATED
                     SoundAlias = Com_FindSoundAlias(src);
                     *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)SoundAlias;
+#endif
                     break;
                 default:
                     if (v20->iFieldType >= 0)

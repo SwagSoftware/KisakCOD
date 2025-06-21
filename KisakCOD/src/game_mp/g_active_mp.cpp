@@ -1324,6 +1324,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                     }
                     turret_think_client(&level.gentities[client->ps.viewlocked_entNum]);
                 }
+#ifndef DEDICATED
                 if (g_debugLocDamage->current.enabled && SV_DObjExists(ent))
                 {
                     memset(partBits, 255, sizeof(partBits));
@@ -1337,6 +1338,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                         level_bgs.clientinfo[clientNum].playerAngles[1]);
                     CL_AddDebugStarWithText(ent->r.currentOrigin, colorYellow, colorYellow, v5, 0.25, 1, 1);
                 }
+#endif
                 ent->client->buttonsSinceLastFrame = 0;
             }
             else

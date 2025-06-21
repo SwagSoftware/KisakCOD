@@ -173,7 +173,6 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 				MyAssertHandler(".\\qcommon\\common.cpp", 625, 0, "%s", "!Con_IsNotifyChannel( channel )");
 			CL_ConsolePrint(0, channel, msg, 0, 0, 32 * error);
 		}
-#endif
 		if (*msg == 94 && msg[1])
 			msg += 2;
 		if (channel != 6
@@ -182,6 +181,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 		{
 			Sys_Print(msg);
 		}
+#endif
 		if (channel != 7 && com_logfile && com_logfile->current.integer)
 			Com_LogPrintMessage(channel, msg);
 	}
@@ -565,12 +565,12 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         MyAssertHandler(".\\qcommon\\common.cpp", 1343, 0, "%s", "com_errorMessage[0]");
     if (code == ERR_SCRIPT || code == ERR_LOCALIZATION)
     {
+#ifndef DEDICATED
         if (!com_fixedConsolePosition)
         {
             com_fixedConsolePosition = 1;
             CL_ConsoleFixPosition();
         }
-#ifndef DEDICATED
         if (cls.uiStarted)
         {
             Com_SetErrorMessage(com_errorMessage);
@@ -593,6 +593,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         Value = (jmp_buf *)Sys_GetValue(2);
         longjmp(*Value, -1);
     }
+#ifndef DEDICATED
     if (code == ERR_SCRIPT_DROP)
     {
         com_fixedConsolePosition = 1;
@@ -607,7 +608,6 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     }
     com_fixedConsolePosition = 1;
     CL_ConsoleFixPosition();
-#ifndef DEDICATED
     if (cls.uiStarted && Sys_IsMainThread())
     {
         Com_SetErrorMessage(com_errorMessage);
@@ -650,7 +650,9 @@ void __cdecl  Com_Quit_f()
         FakeLag_Shutdown();
 #endif
         SV_Shutdown("EXE_SERVERQUIT");
+#ifndef DEDICATED
         CL_ShutdownRef();
+#endif
         Com_Close();
         Com_CloseLogfiles();
         FS_Shutdown();
@@ -797,42 +799,40 @@ void __cdecl Com_ClientPacketEvent()
     msg_t netmsg; // [esp+4Ch] [ebp-40h] BYREF
     netadr_t adr; // [esp+74h] [ebp-18h] BYREF
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\common.cpp", 2010, 0, "%s", "Sys_IsMainThread()");
+    iassert(Sys_IsMainThread());
+
     Profile_Begin(29);
     MSG_Init(&netmsg, clientCommonMsgBuf, 0x20000);
     Com_PacketEventLoop(NS_CLIENT1, &netmsg);
+
     if (!com_sv_running->current.enabled)
     {
         while (NET_GetClientPacket(&adr, &netmsg))
             Com_DispatchClientPacketEvent(adr, &netmsg);
     }
+
     Profile_EndInternal(0);
 }
 
 void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg)
 {
-    unsigned int v2; // eax
     netadr_t adr; // [esp+0h] [ebp-18h] BYREF
 
     while (NET_GetLoopPacket(client, &adr, netmsg))
     {
-        v2 = Sys_Milliseconds();
-        CL_PacketEvent(client, adr, netmsg, v2);
+        CL_PacketEvent(client, adr, netmsg, Sys_Milliseconds());
     }
 }
 
 void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg)
 {
-    unsigned int v2; // eax
-
-    v2 = Sys_Milliseconds();
-    CL_PacketEvent(NS_CLIENT1, adr, netmsg, v2);
+    CL_PacketEvent(NS_CLIENT1, adr, netmsg, Sys_Milliseconds());
 }
 
 unsigned __int8 serverCommonMsgBuf[131072];
 void __cdecl Com_ServerPacketEvent()
 {
+#ifndef DEDICATED
     msg_t netmsg; // [esp+30h] [ebp-40h] BYREF
     netadr_t adr; // [esp+58h] [ebp-18h] BYREF
 
@@ -851,6 +851,7 @@ void __cdecl Com_ServerPacketEvent()
             SV_PacketEvent(adr, &netmsg);
     }
     Profile_EndInternal(0);
+#endif
 }
 
 void __cdecl Com_EventLoop()
@@ -866,20 +867,29 @@ void __cdecl Com_EventLoop()
         switch (v1.evType)
         {
         case SE_NONE:
-            if (ev.evPtr)
-                MyAssertHandler(".\\qcommon\\common.cpp", 2151, 0, "%s", "!ev.evPtr");
+            iassert(!ev.evPtr);
             Com_ClientPacketEvent();
+#ifndef DEDICATED
             Com_ServerPacketEvent();
+#endif
             return;
         case SE_KEY:
+#ifndef DEDICATED
             if (ev.evPtr)
                 MyAssertHandler(".\\qcommon\\common.cpp", 2164, 0, "%s", "!ev.evPtr");
             CL_KeyEvent(0, ev.evValue, ev.evValue2, ev.evTime);
+#else
+            iassert(0);
+#endif
             break;
         case SE_CHAR:
+#ifndef DEDICATED
             if (ev.evPtr)
                 MyAssertHandler(".\\qcommon\\common.cpp", 2170, 0, "%s", "!ev.evPtr");
             CL_CharEvent(0, ev.evValue);
+#else
+            iassert(0);
+#endif
             break;
         case SE_CONSOLE:
             if (!ev.evPtr)
@@ -915,9 +925,6 @@ void __cdecl Com_RunAutoExec(int localClientNum, int controllerIndex)
 void __cdecl Com_ExecStartupConfigs(int localClientNum, const char* configFile)
 {
     const char* v2; // eax
-    int v3; // eax
-    int v4; // eax
-    int v5; // eax
 
     Cbuf_AddText(localClientNum, "exec default_mp.cfg\n");
     Cbuf_AddText(localClientNum, "exec language.cfg\n");
@@ -926,14 +933,19 @@ void __cdecl Com_ExecStartupConfigs(int localClientNum, const char* configFile)
         v2 = va("exec %s\n", configFile);
         Cbuf_AddText(localClientNum, v2);
     }
-    v3 = CL_ControllerIndexFromClientNum(localClientNum);
-    Cbuf_Execute(localClientNum, v3);
-    v4 = CL_ControllerIndexFromClientNum(localClientNum);
-    Com_RunAutoExec(localClientNum, v4);
+#ifndef DEDICATED
+    Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
+    Com_RunAutoExec(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
     if (Com_SafeMode())
         Cbuf_AddText(localClientNum, "exec safemode_mp.cfg\n");
-    v5 = CL_ControllerIndexFromClientNum(localClientNum);
-    Cbuf_Execute(localClientNum, v5);
+    Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
+#else
+    Cbuf_Execute(localClientNum, 0);
+    Com_RunAutoExec(localClientNum, 0);
+    if (Com_SafeMode())
+        Cbuf_AddText(localClientNum, "exec safemode_mp.cfg\n");
+    Cbuf_Execute(localClientNum, 0);
+#endif
 }
 
 void __cdecl Com_Init(char* commandLine)
@@ -1016,8 +1028,10 @@ void Com_ErrorCleanup()
     if (useFastFile->current.enabled)
         DB_Cleanup();
     Com_ClearTempMemory();
+#ifndef DEDICATED
     if (!useFastFile->current.enabled)
         FX_UnregisterAll();
+#endif
     if (ProfLoad_IsActive())
         ProfLoad_Deactivate();
     Dvar_SetIntByName("cl_paused", 0);
@@ -1052,12 +1066,16 @@ void Com_ErrorCleanup()
     }
     if (fs_debug && fs_debug->current.integer == 2)
         Dvar_SetInt((dvar_s*)fs_debug, 0);
+#ifndef DEDICATED
     SND_ErrorCleanup();
+#endif
     Com_CleanupBsp();
     KISAK_NULLSUB();
     Com_ResetParseSessions();
+#ifndef DEDICATED
     CL_FlushDebugServerData();
     CL_UpdateDebugServerData();
+#endif
     FS_ResetFiles();
     if (errorcode == ERR_DROP)
         Cbuf_Init();
@@ -1125,7 +1143,11 @@ void Com_AddStartupCommands()
         if (*com_consoleLines[i])
         {
             Com_sprintf(localBuffer, 0x401u, "%s\n", com_consoleLines[i]);
+#ifndef DEDICATED
             v0 = CL_ControllerIndexFromClientNum(0);
+#else
+            v0 = 0;
+#endif
             Cbuf_ExecuteBuffer(0, v0, localBuffer);
         }
     }
@@ -1183,7 +1205,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     if ((dvar_modifiedFlags & 0x20) != 0)
         Com_InitDvars();
     com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, 1u, "Use recommended settings");
+#ifndef DEDICATED
     Com_CheckSetRecommended(0);
+#endif
     Com_StartupVariable(0);
     if (!useFastFile->current.enabled)
         SEH_UpdateLanguageInfo();
@@ -1345,9 +1369,15 @@ void Com_InitDvars()
 {
     unsigned int CpuCount; // eax
 
+#ifndef DEDICATED
     com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x20u, "True if this is a dedicated server");
+#else
+    com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, 0x20u, "True if this is a dedicated server");
+#endif
+#ifndef DEDICATED
     if (com_dedicated->current.integer)
         Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "True if this is a dedicated server");
+#endif
     com_maxfps = Dvar_RegisterInt("com_maxfps", 85, 0, 1000, 1u, "Cap frames per second");
     useFastFile = Dvar_RegisterBool(
         "useFastFile",
@@ -1415,7 +1445,9 @@ void Com_InitDvars()
 
 void __cdecl Com_StartupConfigs(int localClientNum)
 {
+#ifndef DEDICATED
     Com_InitPlayerProfiles(localClientNum);
+#endif
 }
 
 void Com_InitXAssets()
@@ -1468,9 +1500,13 @@ void __cdecl Com_WriteConfigToFile(int localClientNum, char* filename)
     {
         FS_Printf(f, "// generated by Call of Duty, do not modify\n");
         FS_Printf(f, "unbindall\n");
+#ifndef DEDICATED
         Key_WriteBindings(localClientNum, f);
+#endif
         Dvar_WriteVariables(f);
+#ifndef DEDICATED
         Con_WriteFilterConfigString(f);
+#endif
         FS_FCloseFile(f);
     }
     else
@@ -1645,7 +1681,11 @@ void __cdecl Com_Frame_Try_Block_Function()
             msec = 1;
     }
 #endif
+#ifndef DEDICATED
     v1 = CL_ControllerIndexFromClientNum(0);
+#else
+    v1 = 0;
+#endif
     Cbuf_Execute(0, v1);
     if (msec <= 0)
         MyAssertHandler(".\\qcommon\\common.cpp", 4008, 0, "%s", "msec > 0");
@@ -1693,11 +1733,15 @@ void __cdecl Com_WriteConfiguration(int localClientNum)
     if (com_fullyInitialized && (dvar_modifiedFlags & 1) != 0)
     {
         dvar_modifiedFlags &= ~1u;
+#ifndef DEDICATED
         if (Com_HasPlayerProfile())
         {
             Com_BuildPlayerProfilePath(configFile, 64, "config_mp.cfg");
             Com_WriteConfigToFile(localClientNum, configFile);
         }
+#else
+        Com_WriteConfigToFile(localClientNum, configFile);
+#endif
     }
 }
 
@@ -1870,10 +1914,11 @@ void Com_StartHunkUsers()
     //if (_setjmp3(Value, 0))
     if (_setjmp(*(jmp_buf *)Value))
         Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
-
+#ifndef DEDICATED
     Com_AssetLoadUI();
     MenuScreen = UI_GetMenuScreen();
     UI_SetActiveMenu(0, (uiMenuCommand_t)MenuScreen);
+#endif
     IN_Frame();
     Com_EventLoop();
 }
@@ -1899,7 +1944,9 @@ void __cdecl Com_Close()
     XAnimShutdown();
     Com_ShutdownWorld();
     CM_Shutdown();
+#ifndef DEDICATED
     SND_ShutdownChannels();
+#endif
     Hunk_Clear();
     if (useFastFile->current.enabled)
         DB_ShutdownXAssets();
@@ -1918,14 +1965,18 @@ void __cdecl Field_Clear(field_t* edit)
 
 void __cdecl Com_Restart()
 {
+#ifndef DEDICATED
     CL_ShutdownHunkUsers();
+#endif
     SV_ShutdownGameProgs();
     Com_ShutdownDObj();
     DObjShutdown();
     XAnimShutdown();
     Com_ShutdownWorld();
     CM_Shutdown();
+#ifndef DEDICATED
     SND_ShutdownChannels();
+#endif
     Hunk_Clear();
     Hunk_ResetDebugMem();
     if (useFastFile->current.enabled)

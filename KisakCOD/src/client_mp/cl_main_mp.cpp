@@ -1826,7 +1826,7 @@ char __cdecl CL_PacketEvent(netsrc_t localClientNum, netadr_t from, msg_t *msg, 
             "(localClientNum == 0)",
             localClientNum);
     connstate = clientUIActives[0].connectionState;
-    if (clientUIActives[0].connectionState >= 5)
+    if (clientUIActives[0].connectionState >= CA_CONNECTED)
     {
         clc = CL_GetLocalClientConnection(localClientNum);
         if (msg->cursize >= 4)

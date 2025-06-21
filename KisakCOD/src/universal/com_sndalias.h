@@ -200,6 +200,10 @@ MSSChannelMap *__cdecl Com_GetSpeakerMap(SpeakerMap *speakerMap, int sourceChann
 snd_alias_list_t *__cdecl Com_TryFindSoundAlias(const char *name);
 snd_alias_list_t *__cdecl Com_TryFindSoundAlias_FastFile(const char *name);
 snd_alias_list_t *__cdecl Com_FindSoundAlias(const char *name);
+inline snd_alias_list_t *__cdecl Com_FindSoundAlias_DEDICATED(const char *name)
+{
+    return NULL;
+}
 snd_alias_list_t *__cdecl Com_FindSoundAlias_FastFile(const char *name);
 snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors(const char *name);
 snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors_FastFile(const char *name);

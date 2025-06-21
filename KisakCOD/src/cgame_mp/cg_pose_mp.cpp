@@ -6,17 +6,6 @@
 #include <universal/profile.h>
 
 
-void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int *partBits)
-{
-    clientControllers_t *control; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
-
-    control = player->control;
-    for (i = 0; i < 6; ++i)
-        DObjSetControlTagAngles((DObj_s*)obj, partBits, player->tag[i], control->angles[i]);
-    DObjSetLocalTag((DObj_s *)obj, partBits, 0, control->tag_origin_offset, control->tag_origin_angles);
-}
-
 // KISAKTODO: this function is real bad
 void CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {

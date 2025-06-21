@@ -1310,7 +1310,11 @@ double __cdecl MSG_ReadOriginFloat(int bits, msg_t *msg, float oldValue)
                 MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1223, 0, "%s", "bits == MSG_FIELD_ORIGINY");
             index = 1;
         }
+#ifndef DEDICATED
         roundedCenter = (int)((*CL_GetMapCenter())[index] + 0.5);
+#else
+        roundedCenter = (int)((svsHeader.mapCenter)[index] + 0.5);
+#endif
         return (float)(roundedCenter + (((int)oldValue + 0x8000 - roundedCenter) ^ MSG_ReadBits(msg, 0x10u)) - 0x8000);
     }
     else
@@ -1325,7 +1329,11 @@ double __cdecl MSG_ReadOriginZFloat(msg_t *msg, float oldValue)
 
     if (MSG_ReadBit(msg))
     {
+#ifndef DEDICATED
         roundedCenter = (int)((*CL_GetMapCenter())[2] + 0.5);
+#else
+        roundedCenter = (int)((svsHeader.mapCenter)[2] + 0.5);
+#endif
         return (float)(roundedCenter + (((int)oldValue + 0x8000 - roundedCenter) ^ MSG_ReadBits(msg, 0x10u)) - 0x8000);
     }
     else
@@ -1592,7 +1600,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     unsigned __int8 dst[12140]; // [esp+38h] [ebp-2F80h] BYREF
     int Bits; // [esp+2FA8h] [ebp-10h]
     int *v19; // [esp+2FACh] [ebp-Ch]
-    bool v20; // [esp+2FB3h] [ebp-5h]
+    bool lc; // [esp+2FB3h] [ebp-5h]
     int j; // [esp+2FB4h] [ebp-4h]
 
     if (!from)
@@ -1612,23 +1620,25 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     {
         print = 0;
     }
-    v20 = MSG_ReadBit(msg) > 0;
+    lc = MSG_ReadBit(msg) > 0;
     LastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
+
     j = 0;
     field = (NetField *)playerStateFields;
     while (j < LastChangedField)
     {
-        if (msg->overflowed)
-            MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1974, 0, "%s", "!msg->overflowed");
-        if (predictedFieldsIgnoreXor && v20 && field->changeHints == 3)
+        iassert(!msg->overflowed);
+
+        if (predictedFieldsIgnoreXor && lc && field->changeHints == 3)
             MSG_ReadDeltaField(msg, time, (char *)from, (char *)to, field, print, 1);
         else
             MSG_ReadDeltaField(msg, time, (char *)from, (char *)to, field, print, 0);
-        if (msg->overflowed)
-            MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1976, 0, "%s", "!msg->overflowed");
+
+        iassert(!msg->overflowed);
         ++j;
         ++field;
     }
+
     j = LastChangedField;
     fielda = (NetField *)&playerStateFields[LastChangedField];
     while (j < numPlayerStateFields)
@@ -1638,9 +1648,11 @@ void __cdecl MSG_ReadDeltaPlayerstate(
         ++j;
         ++fielda;
     }
-    if (!v20)
+    if (!lc)
     {
+#ifndef DEDICATED
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
+
         if (!CL_GetPredictedOriginForServerTime(
             LocalClientGlobals,
             to->commandTime,
@@ -1649,6 +1661,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
             to->viewangles,
             &to->bobCycle,
             &to->movementDir))
+#endif
         {
             Com_PrintError(14, "Unable to find the origin we sent, delta is not going to work");
             to->origin[0] = from->origin[0];
