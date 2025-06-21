@@ -772,9 +772,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Sys_FindInfo();
 			g_wv.hInstance = hInstance;
 			I_strncpyz(sys_cmdline, lpCmdLine, 1024);
+#ifndef DEDICATED
 			Sys_CreateSplashWindow();
 			Sys_ShowSplashWindow();
 			Win_RegisterClass();
+#endif
 			SetErrorMode(1);
 			Sys_Milliseconds();
 			Profile_Init();

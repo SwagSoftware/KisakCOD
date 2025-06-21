@@ -236,8 +236,8 @@ void __cdecl Sys_CreateConsole(HMODULE hInstance)
 #ifndef DEDICATED
 			Con_GetTextCopy(text, 0x4000);
 			Conbuf_CleanText(text, target, 0x4000);
-#endif
 			SetWindowTextA(s_wcd.hwndBuffer, target);
+#endif
 		}
 	}
 }

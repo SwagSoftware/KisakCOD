@@ -820,13 +820,21 @@ void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg)
 
     while (NET_GetLoopPacket(client, &adr, netmsg))
     {
+#ifndef DEDICATED
         CL_PacketEvent(client, adr, netmsg, Sys_Milliseconds());
+#else
+        SV_PacketEvent(adr, netmsg);
+#endif
     }
 }
 
 void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg)
 {
+#ifndef DEDICATED
     CL_PacketEvent(NS_CLIENT1, adr, netmsg, Sys_Milliseconds());
+#else
+    SV_PacketEvent(adr, netmsg);
+#endif
 }
 
 unsigned __int8 serverCommonMsgBuf[131072];
@@ -1194,8 +1202,12 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         Com_InitXAssets();
 #ifndef DEDICATED
     CL_InitKeyCommands();
+#endif
     FS_InitFilesystem();
+#ifndef DEDICATED
     Con_InitChannels();
+#endif
+#ifndef DEDICATED
     LiveStorage_Init();
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         Com_StartupConfigs(localClientNum);
@@ -1214,6 +1226,8 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 #ifndef DEDICATED
     if (com_dedicated->current.integer)
         CL_InitDedicated();
+#else
+    Sys_ShowConsole();
 #endif
     Com_InitHunkMemory();
     Hunk_InitDebugMemory();
