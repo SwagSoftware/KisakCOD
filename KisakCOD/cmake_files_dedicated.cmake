@@ -387,14 +387,4 @@ set(ZLIB
 )
 source_group("zlib" FILES ${ZLIB})
 
-set(ZLIB32
-    "${SRC_DIR}/zlib32/deflate.cpp"
-    "${SRC_DIR}/zlib32/deflate.h"
-    "${SRC_DIR}/zlib32/inflate.cpp"
-    "${SRC_DIR}/zlib32/inflate.h"
-    "${SRC_DIR}/zlib32/zip.h"
-    "${SRC_DIR}/zlib32/zipcommon.cpp"
-)
-source_group("zlib32" FILES ${ZLIB32})
-
-add_executable( ${BIN_NAME} ${SRCROOT} ${BGAME} ${COMMON} ${DATABASE} ${GAME} ${GAME_MP} ${ODE} ${PHYSICS} ${PHYSICS_ODE} ${QCOMMON} ${SCRIPT} ${SERVER} ${SERVER_MP} ${STRINGED} ${UNIVERSAL} ${WIN32} ${XANIM} ${ZLIB} ${ZLIB32})
+add_executable( ${BIN_NAME} ${SRCROOT} ${BGAME} ${COMMON} ${DATABASE} ${GAME} ${GAME_MP} ${ODE} ${PHYSICS} ${PHYSICS_ODE} ${QCOMMON} ${SCRIPT} ${SERVER} ${SERVER_MP} ${STRINGED} ${UNIVERSAL} ${WIN32} ${XANIM} ${ZLIB})

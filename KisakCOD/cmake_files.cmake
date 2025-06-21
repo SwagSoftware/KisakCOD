@@ -853,14 +853,4 @@ set(ZLIB
 )
 source_group("zlib" FILES ${ZLIB})
 
-set(ZLIB32
-    "${SRC_DIR}/zlib32/deflate.cpp"
-    "${SRC_DIR}/zlib32/deflate.h"
-    "${SRC_DIR}/zlib32/inflate.cpp"
-    "${SRC_DIR}/zlib32/inflate.h"
-    "${SRC_DIR}/zlib32/zip.h"
-    "${SRC_DIR}/zlib32/zipcommon.cpp"
-)
-source_group("zlib32" FILES ${ZLIB32})
-
-add_executable( ${BIN_NAME} ${SRCROOT} ${DYNENTITY} ${EFFECTSCORE} ${AIM_ASSIST} ${BGAME} ${BINKLIB} ${CGAME} ${CGAME_MP} ${CLIENT} ${CLIENT_MP} ${COMMON} ${DATABASE} ${DEVGUI} ${GAME} ${GAME_MP} ${GFX_D3D} ${GROUPVOICE} ${GROUPVOICE_SPEEX} ${MSSLIB} ${ODE} ${PHYSICS} ${PHYSICS_ODE} ${QCOMMON} ${RAGDOLL} ${SCRIPT} ${SERVER} ${SERVER_MP} ${SOUND} ${SPEEX} ${STRINGED} ${UI} ${UI_MP} ${UNIVERSAL} ${WIN32} ${XANIM} ${ZLIB} ${ZLIB32})
+add_executable( ${BIN_NAME} ${SRCROOT} ${DYNENTITY} ${EFFECTSCORE} ${AIM_ASSIST} ${BGAME} ${BINKLIB} ${CGAME} ${CGAME_MP} ${CLIENT} ${CLIENT_MP} ${COMMON} ${DATABASE} ${DEVGUI} ${GAME} ${GAME_MP} ${GFX_D3D} ${GROUPVOICE} ${GROUPVOICE_SPEEX} ${MSSLIB} ${ODE} ${PHYSICS} ${PHYSICS_ODE} ${QCOMMON} ${RAGDOLL} ${SCRIPT} ${SERVER} ${SERVER_MP} ${SOUND} ${SPEEX} ${STRINGED} ${UI} ${UI_MP} ${UNIVERSAL} ${WIN32} ${XANIM} ${ZLIB})
