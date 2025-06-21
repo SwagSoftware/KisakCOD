@@ -817,7 +817,7 @@ void __cdecl Profile_EndScript(int profileIndex)
 int __cdecl Profile_EndInternal(long double *duration)
 {
     // KISAKTODO: Profiler
-    //return 0;
+    return 0;
 
     LARGE_INTEGER qpc;
 
@@ -911,6 +911,7 @@ void __cdecl Profile_Begin(int index)
 {
     // KISAKTODO: Profiler
 
+    return;
     LARGE_INTEGER qpc;
 
     ProfileStack* prof_stack = (ProfileStack*)Sys_GetValue(0);

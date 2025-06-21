@@ -146,7 +146,6 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
     }
 }
 
-// KISAKTODO: this function is fubar'd and needs a manual redo
 void  CG_AddPlayerSpriteDrawSurf(
     int localClientNum,
     const centity_s *cent,
@@ -155,89 +154,62 @@ void  CG_AddPlayerSpriteDrawSurf(
     int height,
     bool fixedScreenSize)
 {
-    double v7; // st7
-    unsigned int v8[3]; // [esp+18h] [ebp-5Ch] BYREF
-    FxSprite sprite; // [esp+24h] [ebp-50h] BYREF
-    float v10; // [esp+44h] [ebp-30h]
-    float v11; // [esp+48h] [ebp-2Ch]
-    float origin[3]; // [esp+4Ch] [ebp-28h]
-    DObj_s *obj; // [esp+58h] [ebp-1Ch]
-    snapshot_s* radius; // [esp+5Ch] [ebp-18h]
-    int renderFxFlags; // [esp+60h] [ebp-14h]
-    int v16; // [esp+68h] [ebp-Ch]
-    const cg_s *cgameGlob; // [esp+6Ch] [ebp-8h]
-    const cg_s *retaddr; // [esp+74h] [ebp+0h]
+    int flags;
+    float radius;
+    float position[3];
 
-    const float *sprite_24; // [esp+3Ch] [ebp-38h]
-    float sprite_28; // [esp+40h] [ebp-34h] BYREF
-    float v12; // [esp+48h] [ebp-2Ch]
-    //v16 = a1;
-    //cgameGlob = retaddr;
-    if (additionalRadiusSize < 0.0)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_players_mp.cpp",
-            74,
-            0,
-            "%s\n\t(additionalRadiusSize) = %g",
-            "(additionalRadiusSize >= 0)",
-            additionalRadiusSize);
-    if (!cg_headIconMinScreenRadius)
-        MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 75, 0, "%s", "cg_headIconMinScreenRadius");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    //renderFxFlags = (int)cgArray;
-    radius = cgArray[0].nextSnap;
-    //obj = ;
-    //if (!(_BYTE)obj || *(unsigned int *)(renderFxFlags + 287032))
-    //if (!((radius->ps.otherFlags & 6) != 0 && cent->nextState.number == radius->ps.clientNum) || *(unsigned int *)(renderFxFlags + 287032))
-    if (!((radius->ps.otherFlags & 6) != 0 && cent->nextState.number == radius->ps.clientNum) || cgArray[0].renderingThirdPerson)
+    iassert(additionalRadiusSize >= 0);
+    iassert(cg_headIconMinScreenRadius);
+
+    iassert(localClientNum == 0);
+
+    snapshot_s *nextSnap = cgArray[0].nextSnap;
+
+    bool isNotVisible = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
+
+    if (!isNotVisible || cgArray[0].renderingThirdPerson)
     {
         if (fixedScreenSize)
         {
-            LODWORD(origin[2]) = 3;
-            v7 = (additionalRadiusSize + 10.0) * 0.00430000014603138;
+            flags = 3;
+            radius = (additionalRadiusSize + 10.0) * 0.0043f;
         }
         else
         {
-            origin[2] = 0.0;
-            v7 = additionalRadiusSize + 10.0;
+            flags = 0;
+            radius = additionalRadiusSize + 10.0;
         }
-        origin[1] = v7;
-        //LODWORD(origin[0]) = Com_GetClientDObj(cent->nextState.number, localClientNum);
-        DObj_s *swag = Com_GetClientDObj(cent->nextState.number, localClientNum);
-        if (swag  && CG_DObjGetWorldTagPos(&cent->pose, (DObj_s *)LODWORD(origin[0]), scr_const.j_head, &sprite_28))
-        // if ( LODWORD(origin[0]) && CG_DObjGetWorldTagPos(&cent->pose, LODWORD(origin[0]), scr_const.j_head, &sprite.flags) )
+
+        DObj_s *dobj = Com_GetClientDObj(cent->nextState.number, localClientNum);
+        if (dobj  && CG_DObjGetWorldTagPos(&cent->pose, dobj, scr_const.j_head, position))
         {
-            //v12 = height + 21.0 + v12;
-            v12 = height + 21.0;
+            position[2] = (float)height + 21.0f + position[2];
         }
         else
         {
-            sprite_24 = cent->pose.origin;
-            sprite_28 = cent->pose.origin[0];
-            v11 = cent->pose.origin[1];
-            v12 = cent->pose.origin[2];
-            //v12 = height + 82.0 + v12;
-            v12 = height + 82.0;
+            position[0] = cent->pose.origin[0];
+            position[1] = cent->pose.origin[1];
+            position[2] = cent->pose.origin[2];
+            position[2] = (float)height + 82.0f + position[2];
         }
-        FxSprite v8;
-        v8.pos[0] = sprite_28;
-        v8.pos[1] = v11;
-        v8.pos[2] = v12;
-        *(_DWORD*)v8.rgbaColor = -1;
-        v8.material = material;
-        v8.radius = origin[1];
-        v8.minScreenRadius = cg_headIconMinScreenRadius->current.value;
-        *(float*)&v8.flags = origin[2];
-        if (!cg_headIconMinScreenRadius)
-            MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 113, 0, "%s", "cg_headIconMinScreenRadius");
-        FX_SpriteAdd(&v8);
+
+        FxSprite sprite;
+        sprite.pos[0] = position[0];
+        sprite.pos[1] = position[1];
+        sprite.pos[2] = position[2];
+        sprite.rgbaColor[0] = 0xFF;
+        sprite.rgbaColor[1] = 0xFF;
+        sprite.rgbaColor[2] = 0xFF;
+        sprite.rgbaColor[3] = 0xFF;
+
+        sprite.material = material;
+        sprite.radius = radius;
+        sprite.minScreenRadius = cg_headIconMinScreenRadius->current.value;
+        sprite.flags = flags;
+
+        iassert(cg_headIconMinScreenRadius);
+
+        FX_SpriteAdd(&sprite);
     }
 }
 
