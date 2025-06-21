@@ -308,20 +308,6 @@ snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors_FastFile(const char *name)
     return !DB_IsXAssetDefault(ASSET_TYPE_SOUND, name) ? aliasList : 0;
 }
 
-// KISAK: Why is this in com_sndalias when every single other load function is in db_load.cpp? no clue!
-extern char const ***varXStringPtr;
-void __cdecl Load_SndAliasCustom(snd_alias_list_t **var)
-{
-    if (*var)
-    {
-        varXStringPtr = (const char ***)var;
-        Load_XStringPtr(0);
-        if (!*varXStringPtr)
-            MyAssertHandler(".\\universal\\com_sndalias.cpp", 696, 0, "%s", "*varXStringPtr");
-        *(XAssetHeader *)var = DB_FindXAssetHeader(ASSET_TYPE_SOUND, **varXStringPtr);
-    }
-}
-
 int __cdecl SND_GetAliasOffset(const snd_alias_t *alias)
 {
     snd_alias_t *checkAlias; // [esp+0h] [ebp-Ch]

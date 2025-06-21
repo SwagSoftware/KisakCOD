@@ -403,13 +403,14 @@ const dvar_s *G_RegisterDvars()
     g_logSync = Dvar_RegisterBool("g_logSync", 0, 1u, "Enable synchronous logging");
     g_password = Dvar_RegisterString("g_password", (char *)"", 0, "Password");
     g_banIPs = Dvar_RegisterString("g_banIPs", (char *)"", 1u, "IP addresses to ban from playing");
-#ifdef DEDICATED
+#if defined(DEDICATED) || defined(KISAK_DEDICATED)
     g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, 0x20u, "Dedicated server");
 #else
     g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x20u, "Dedicated server");
-#endif
     if (g_dedicated->current.integer)
         Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "Dedicated server");
+#endif
+
     g_speed = Dvar_RegisterInt("g_speed", 190, (DvarLimits)0x7FFFFFFF80000000LL, 0, "Player speed");
     mina.value.max = FLT_MAX;
     mina.value.min = 1.0;

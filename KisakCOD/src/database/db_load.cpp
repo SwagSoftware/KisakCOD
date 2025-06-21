@@ -1357,12 +1357,22 @@ void __cdecl Load_snd_alias_list_ptr(bool atStreamStart)
     DB_PopStreamPos();
 }
 
+void __cdecl Load_SndAliasCustom(snd_alias_list_t **var)
+{
+    if (*var)
+    {
+        varXStringPtr = (const char ***)var;
+        Load_XStringPtr(0);
+        if (!*varXStringPtr)
+            MyAssertHandler(".\\universal\\com_sndalias.cpp", 696, 0, "%s", "*varXStringPtr");
+        *(XAssetHeader *)var = DB_FindXAssetHeader(ASSET_TYPE_SOUND, **varXStringPtr);
+    }
+}
+
 void __cdecl Load_snd_alias_list_name(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (unsigned __int8 *)varsnd_alias_list_name, 4);
-#ifndef DEDICATED
     Load_SndAliasCustom(varsnd_alias_list_name);
-#endif
 }
 
 void __cdecl Load_snd_alias_list_nameArray(bool atStreamStart, int count)

@@ -680,7 +680,7 @@ void __cdecl DB_LoadDObjs();
 
 extern const char *g_assetNames[33];
 
-extern XAssetEntry *g_copyInfo[2048];
+extern XAssetEntry *g_copyInfo[0x800];
 extern unsigned int g_copyInfoCount;
 
 extern volatile unsigned int g_loadingAssets;

@@ -18,8 +18,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../${CMAKE_BUILD
 if (DEDICATED)
   message("===== KisakCOD Dedicated =====")
   set(BIN_NAME "KisakCOD-Dedi")
-  include(cmake_files_dedicated.cmake)
-  target_compile_definitions(${BIN_NAME} PUBLIC DEDICATED)
+  #include(cmake_files_dedicated.cmake)
+  #target_compile_definitions(${BIN_NAME} PUBLIC DEDICATED) # LWSS: true headless DEDICATED is disabled for now. It doesn't fully work.
+  include(cmake_files.cmake)
+  target_compile_definitions(${BIN_NAME} PUBLIC KISAK_DEDICATED) # this is a cope DEBUG mode that basically just does `+set dedicated 2`
 else()
   message("----- KisakCOD Client -----")
   set(BIN_NAME "KisakCOD")

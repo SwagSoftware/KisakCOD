@@ -293,7 +293,8 @@ unsigned int volatile g_mainThreadBlocked;
 XAssetEntryPoolEntry *g_freeAssetEntryHead;
 
 unsigned __int16 db_hashTable[32768];
-XAssetEntry *g_copyInfo[2048];
+XAssetEntry *g_copyInfo[0x800];
+unsigned int g_copyInfoCount;
 XZone g_zones[33]{ 0 };
 unsigned __int8 g_zoneHandles[32];
 char g_zoneNameList[2080];
@@ -335,7 +336,6 @@ volatile unsigned int g_zoneInfoCount;
 bool g_initializing;
 
 char g_debugZoneName[64];
-unsigned int g_copyInfoCount;
 unsigned int g_zoneAllocType;
 unsigned int g_zoneIndex;
 unsigned int _S1;
@@ -1116,8 +1116,9 @@ XAssetHeader __cdecl DB_AllocMaterial(void *arg)
     Material_DirtySort();
     return DB_AllocXAsset_StringTable_(pool);
 #else
-    iassert(0);
-    return 0;
+    XAssetHeader *pool = (XAssetHeader *)arg;
+    //Material_DirtySort();
+    return DB_AllocXAsset_StringTable_(pool);
 #endif
 }
 
@@ -1339,7 +1340,7 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 #ifndef DEDICATED
         if (Sys_IsDatabaseReady() && (Sys_IsMainThread() || Sys_IsRenderThread() && R_IsInRemoteScreenUpdate() && g_mainThreadBlocked))
 #else
-        if (Sys_IsDatabaseReady() && (Sys_IsMainThread() || Sys_IsRenderThread() && g_mainThreadBlocked))
+        if (Sys_IsDatabaseReady())
 #endif
         {
             DB_PostLoadXZone();
@@ -1844,11 +1845,18 @@ void __cdecl DB_Update()
 {
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\database\\db_registry.cpp", 2805, 0, "%s", "Sys_IsMainThread()");
+#ifndef DEDICATED
     if (!Sys_IsDatabaseReady2())
     {
         if (Sys_IsDatabaseReady())
             DB_PostLoadXZone();
     }
+#else
+    if (Sys_IsDatabaseReady())
+    {
+        DB_PostLoadXZone();
+    }
+#endif
 }
 
 void __cdecl DB_SetInitializing(bool inUse)
@@ -2180,7 +2188,7 @@ void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry)
     {
         if (g_copyInfoCount >= 0x800)
         {
-            Com_Printf(0, "g_copyInfo exceeded\n");
+            Com_Printf(0, "g_copyInfo exceeded\n"); // LWSS: if this hits, it means that PostLoadXZone isn't setting back to zero (prob not being called)
             for (i = 0; i < 0x800; ++i)
             {
                 XAssetName = DB_GetXAssetName(&g_copyInfo[i]->asset);
@@ -2234,15 +2242,19 @@ void DB_PostLoadXZone()
 
 #ifndef DEDICATED
     if (!Sys_IsDatabaseReady2())
+#endif
     {
         if (g_copyInfoCount)
         {
             remoteScreenUpdateNesting = 0;
             if (!Sys_IsMainThread()
                 || (++g_mainThreadBlocked,
+#ifndef DEDICATED
                     remoteScreenUpdateNesting = R_PopRemoteScreenUpdate(),
+#endif
                     --g_mainThreadBlocked,
                     g_copyInfoCount))
+
             {
                 DB_ArchiveAssets();
                 Sys_LockWrite(&db_hashCritSect);
@@ -2250,16 +2262,22 @@ void DB_PostLoadXZone()
                     DB_LinkXAssetEntry((XAssetEntryPoolEntry *)g_copyInfo[i], 1);
                 g_copyInfoCount = 0;
                 Sys_UnlockWrite(&db_hashCritSect);
+#ifndef DEDICATED
                 Material_DirtyTechniqueSetOverrides();
                 Material_OverrideTechniqueSets();
+#endif
                 DB_UnarchiveAssets();
+#ifndef DEDICATED
                 if (Sys_IsMainThread())
                     R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
+#endif
                 Sys_DatabaseCompleted2();
             }
             else
             {
+#ifndef DEDICATED
                 R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
+#endif
             }
         }
         else
@@ -2268,7 +2286,6 @@ void DB_PostLoadXZone()
             Sys_DatabaseCompleted2();
         }
     }
-#endif
 }
 
 void __cdecl DB_UpdateDebugZone()
@@ -2372,8 +2389,7 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, unsigned int zoneCount, int syn
     DB_LoadXZone(zoneInfo, zoneCount);
     if (sync)
     {
-        if (g_copyInfoCount)
-            MyAssertHandler(".\\database\\db_registry.cpp", 3496, 0, "%s", "!g_copyInfoCount");
+        iassert(!g_copyInfoCount);
         Sys_SyncDatabase();
         DB_UnarchiveAssets();
     }
@@ -2419,6 +2435,14 @@ void __cdecl DB_LoadXZone(XZoneInfo *zoneInfo, unsigned int zoneCount)
             I_strncpyz(g_zoneInfo[zoneInfoCount].name, zoneName, 64);
             Com_Printf(16, "Loading fastfile %s\n", g_zoneInfo[zoneInfoCount].name);
             g_zoneInfo[zoneInfoCount++].flags = zoneInfo[j].allocFlags;
+            if (zoneInfoCount)
+            {
+                //g_loadingAssets = zoneInfoCount;
+                Sys_WakeDatabase2();
+                Sys_WakeDatabase();
+                //g_zoneInfoCount = zoneInfoCount;
+                Sys_NotifyDatabase();
+            }
         }
     }
     if (zoneInfoCount)

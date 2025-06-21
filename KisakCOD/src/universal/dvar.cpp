@@ -165,7 +165,6 @@ char *__cdecl Dvar_InfoString(int localClientNum, char bit)
         Info_SetValueForKey(info1, "name", UsernameForLocalClient);
     }
 #else
-    iassert(0);
 #endif
     return info1;
 }

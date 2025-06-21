@@ -194,6 +194,9 @@ static void* wakeDatabaseEvent;
 static void* databaseCompletedEvent;
 static void* databaseCompletedEvent2;
 static void* resumedDatabaseEvent;
+
+bool dediRenderHack = false;
+
 char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(unsigned int))
 {
     Sys_CreateEvent(0, 0, &wakeDatabaseEvent);

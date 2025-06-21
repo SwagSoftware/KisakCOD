@@ -1169,6 +1169,51 @@ cmd_function_s Com_Quit_f_VAR;
 cmd_function_s Com_WriteConfig_f_VAR;
 cmd_function_s Com_WriteDefaults_f_VAR;
 
+void DEDICATED_RenderDBHack()
+{
+    XZoneInfo zoneInfo[6]; // [esp+0h] [ebp-50h] BYREF
+    unsigned int zoneCount; // [esp+4Ch] [ebp-4h]
+
+    //zoneInfo[0].name = gfxCfg.codeFastFileName;
+    zoneInfo[0].name = "code_post_gfx_mp";
+    zoneInfo[0].allocFlags = 2;
+    zoneInfo[0].freeFlags = 0;
+    zoneCount = 1;
+    //if (gfxCfg.localizedCodeFastFileName)
+    {
+        //zoneInfo[zoneCount].name = gfxCfg.localizedCodeFastFileName;
+        zoneInfo[zoneCount].name = "localized_code_post_gfx_mp";
+        zoneInfo[zoneCount].allocFlags = 0;
+        zoneInfo[zoneCount++].freeFlags = 0;
+    }
+    //if (gfxCfg.uiFastFileName)
+    //{
+    //    //zoneInfo[zoneCount].name = gfxCfg.uiFastFileName;
+    //    zoneInfo[zoneCount].name = 0; // LWSS: supposedly can be 0
+    //    zoneInfo[zoneCount].allocFlags = 8;
+    //    zoneInfo[zoneCount++].freeFlags = 0;
+    //}
+    //zoneInfo[zoneCount].name = gfxCfg.commonFastFileName;
+    zoneInfo[zoneCount].name = "common_mp";
+    zoneInfo[zoneCount].allocFlags = 4;
+    zoneInfo[zoneCount++].freeFlags = 0;
+    //if (gfxCfg.localizedCommonFastFileName)
+    //{
+    //    //zoneInfo[zoneCount].name = gfxCfg.localizedCommonFastFileName;
+    //    zoneInfo[zoneCount].name = "localized_code_post_gfx_mp";
+    //    zoneInfo[zoneCount].allocFlags = 1;
+    //    zoneInfo[zoneCount++].freeFlags = 0;
+    //}
+    //if (gfxCfg.modFastFileName)
+    //{
+    //    //zoneInfo[zoneCount].name = gfxCfg.modFastFileName;
+    //    zoneInfo[zoneCount].name = 0; // LWSS: supposedly can be 0
+    //    zoneInfo[zoneCount].allocFlags = 16;
+    //    zoneInfo[zoneCount++].freeFlags = 0;
+    //}
+    DB_LoadXAssets(zoneInfo, zoneCount, 0);
+}
+
 static const char* comInitAllocName = "$init";
 void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 {
@@ -1283,6 +1328,10 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         cls.soundStarted = 1;
         SND_Init();
     }
+#else
+    // LWSS OMEGA HACK
+    // Load the Graphics XFiles so that the database has the proper addresses
+    DEDICATED_RenderDBHack();
 #endif
     COM_PlayIntroMovies();
     if (useFastFile->current.enabled)
@@ -1383,15 +1432,17 @@ void Com_InitDvars()
 {
     unsigned int CpuCount; // eax
 
-#ifndef DEDICATED
+#if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
     com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x20u, "True if this is a dedicated server");
 #else
     com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, 0x20u, "True if this is a dedicated server");
 #endif
-#ifndef DEDICATED
+
+#if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
     if (com_dedicated->current.integer)
         Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "True if this is a dedicated server");
 #endif
+
     com_maxfps = Dvar_RegisterInt("com_maxfps", 85, 0, 1000, 1u, "Cap frames per second");
     useFastFile = Dvar_RegisterBool(
         "useFastFile",
