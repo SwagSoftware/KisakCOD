@@ -14,7 +14,6 @@ void __cdecl SP_info_notnull(gentity_s *self)
 
 void __cdecl SP_light(gentity_s *self)
 {
-#ifndef DEDICATED
     float radius; // [esp+8h] [ebp-C4h]
     float v2; // [esp+14h] [ebp-B8h]
     int primaryLightIndex; // [esp+A0h] [ebp-2Ch] BYREF
@@ -67,9 +66,6 @@ void __cdecl SP_light(gentity_s *self)
     {
         G_FreeEntity(self);
     }
-#else
-    G_FreeEntity(self);
-#endif
 }
 
 void __cdecl TeleportPlayer(gentity_s *player, float *origin, float *angles)

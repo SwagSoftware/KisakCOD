@@ -392,7 +392,6 @@ IN_MouseMove
 void __cdecl IN_RecenterMouse();
 int IN_MouseMove()
 {
-#ifndef DEDICATED
 	int result; // eax
 	int v1; // [esp+0h] [ebp-10h]
 	tagPOINT curPos; // [esp+4h] [ebp-Ch] BYREF
@@ -423,9 +422,6 @@ int IN_MouseMove()
 		}
 	}
 	return result;
-#else 
-	return 0;
-#endif
 }
 
 

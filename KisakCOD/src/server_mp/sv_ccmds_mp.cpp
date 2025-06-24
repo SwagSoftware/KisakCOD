@@ -270,7 +270,6 @@ cmd_function_s SV_SetPerk_f_VAR_SERVER;
 
 void __cdecl SV_ScriptDebugger_f()
 {
-#ifndef DEDICATED
     if (Sys_IsRemoteDebugClient())
     {
         Scr_RunDebuggerRemote();
@@ -279,7 +278,6 @@ void __cdecl SV_ScriptDebugger_f()
     {
         Scr_RunDebugger();
     }
-#endif
 }
 
 void __cdecl SV_AddOperatorCommands()
@@ -381,13 +379,11 @@ void __cdecl SV_Map_f()
     if (*map)
     {
         com_errorPrintsCount = 0;
-#ifndef DEDICATED
         if (!Com_HasPlayerProfile() && !com_dedicated->current.enabled)
         {
             Com_Error(ERR_DROP, "PLATFORM_NOTSIGNEDINTOPROFILE");
             return;
         }
-#endif
         Cbuf_ExecuteBuffer(0, 0, "selectStringTableEntryInDvar mp/didyouknow.csv 0 didyouknow");
         if (com_dedicated->latched.integer != com_dedicated->current.integer)
         {

@@ -80,11 +80,7 @@ void __cdecl NetProf_PrepProfiling(netProfileInfo_t *prof)
     {
         if (!net_iProfilingOn)
         {
-#ifndef DEDICATED
             if (!com_sv_running->current.enabled || CL_AnyLocalClientsRunning() && net_profile->current.integer == 2)
-#else
-            if (!com_sv_running->current.enabled && net_profile->current.integer == 2)
-#endif
                 net_iProfilingOn = 1;
             else
                 net_iProfilingOn = 2;
@@ -239,13 +235,11 @@ void __cdecl Net_DisplayProfile(int localClientNum)
         Dvar_SetInt((dvar_s *)net_profile, 2 - com_sv_running->current.enabled);
     if (net_iProfilingOn)
     {
-#ifndef DEDICATED
         if (net_iProfilingOn == 1)
         {
             CL_Netchan_PrintProfileStats(localClientNum, 0);
         }
         else
-#endif
         {
             SV_Netchan_PrintProfileStats(0);
         }
@@ -720,13 +714,11 @@ void __cdecl Net_DumpProfile_f()
 {
   if (net_iProfilingOn)
   {
-#ifndef DEDICATED
     if (net_iProfilingOn == 1)
     {
       CL_Netchan_PrintProfileStats(0, 1);
     }
     else
-#endif
     {
       SV_Netchan_PrintProfileStats(1);
     }
@@ -1186,14 +1178,10 @@ bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *data)
         v6 = strlen((const char *)tempNetchanPacketBuf);
         res = (int)FakeLag_SendPacket(sock, v6, tempNetchanPacketBuf, adr) >= -1;
 
-#ifndef DEDICATED
         if (sock == NS_SERVER)
             SV_Netchan_AddOOBProfilePacket(v6);
         else
             CL_Netchan_AddOOBProfilePacket(sock, v6);
-#else
-        SV_Netchan_AddOOBProfilePacket(v6);
-#endif
         return res > 0;
     }
     else
@@ -1225,14 +1213,10 @@ bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const unsigned __int
         Com_DPrintf(16, "OOB Data->%u.%u.%u.%u: %i bytes\n", adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3], mbuf_20);
     res = (int)FakeLag_SendPacket(sock, mbuf_20, tempNetchanPacketBuf, adr) >= -1;
 
-#ifndef DEDICATED
     if (sock == NS_SERVER)
         SV_Netchan_AddOOBProfilePacket(mbuf_20);
     else
         CL_Netchan_AddOOBProfilePacket(sock, mbuf_20);
-#else
-    SV_Netchan_AddOOBProfilePacket(mbuf_20);
-#endif
     return res > 0;
 }
 
@@ -1256,14 +1240,10 @@ bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, unsigned __int8
     mbuf_20 = len + 4;
     res = (int)FakeLag_SendPacket(sock, len + 4, tempNetchanPacketBuf, adr) >= -1;
 
-#ifndef DEDICATED
     if (sock == NS_SERVER)
         SV_Netchan_AddOOBProfilePacket(mbuf_20);
     else
         CL_Netchan_AddOOBProfilePacket(sock, mbuf_20);
-#else
-    SV_Netchan_AddOOBProfilePacket(mbuf_20);
-#endif
     return res > 0;
 }
 

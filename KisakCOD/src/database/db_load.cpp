@@ -1093,9 +1093,7 @@ void __cdecl Load_StreamFileName(bool atStreamStart)
 
 void __cdecl Load_SetSoundData(unsigned __int8 **data, MssSoundCOD4 *mssSound)
 {
-#ifndef DEDICATED
     SND_SetData(mssSound, *data);
-#endif
 }
 
 void __cdecl Load_MssSound(bool atStreamStart)
@@ -1713,9 +1711,7 @@ void __cdecl Load_GfxTextureLoad(bool atStreamStart)
             else
                 inserted = 0;
             Load_GfxImageLoadDef(1);
-#ifndef DEDICATED
             Load_Texture(varGfxTextureLoad, varGfxImage);
-#endif
             if (inserted)
                 inserted->basemap = varGfxTextureLoad->basemap;
         }
@@ -1858,9 +1854,7 @@ void __cdecl Load_MaterialVertexShaderProgram(bool atStreamStart)
     Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialVertexShaderProgram, 12);
     varGfxVertexShaderLoadDef = &varMaterialVertexShaderProgram->loadDef;
     Load_GfxVertexShaderLoadDef(0);
-#ifndef DEDICATED
     Load_CreateMaterialVertexShader(&varMaterialVertexShaderProgram->loadDef, varMaterialVertexShader);
-#endif
 }
 
 void __cdecl Load_MaterialPixelShaderProgram(bool atStreamStart)
@@ -1869,9 +1863,7 @@ void __cdecl Load_MaterialPixelShaderProgram(bool atStreamStart)
     Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialPixelShaderProgram, 12);
     varGfxPixelShaderLoadDef = &varMaterialPixelShaderProgram->loadDef;
     Load_GfxPixelShaderLoadDef(0);
-#ifndef DEDICATED
     Load_CreateMaterialPixelShader(&varMaterialPixelShaderProgram->loadDef, varMaterialPixelShader);
-#endif
 }
 
 void __cdecl Load_MaterialVertexShader(bool atStreamStart)
@@ -2020,9 +2012,7 @@ void __cdecl Load_MaterialPass(bool atStreamStart)
             varMaterialPass->vertexDecl = (MaterialVertexDeclaration*)AllocLoad_FxElemVisStateSample();
             varMaterialVertexDeclaration = varMaterialPass->vertexDecl;
             Load_MaterialVertexDeclaration(1);
-#ifndef DEDICATED
             Load_BuildVertexDecl(&varMaterialPass->vertexDecl);
-#endif
         }
         else
         {
@@ -2087,9 +2077,7 @@ void __cdecl Load_MaterialTextureDefInfo(bool atStreamStart)
                 *varMaterialTextureDefInfo = (water_t*)AllocLoad_FxElemVisStateSample();
                 varwater_t = *varMaterialTextureDefInfo;
                 Load_water_t(1);
-#ifndef DEDICATED
                 Load_PicmipWater(varMaterialTextureDefInfo);
-#endif
             }
             else
             {
@@ -6042,12 +6030,10 @@ void __cdecl Load_GfxWorldVertexData(bool atStreamStart)
     }
     varGfxVertexBuffer = &varGfxWorldVertexData->worldVb;
     Load_GfxVertexBuffer(0);
-#ifndef DEDICATED
     Load_VertexBuffer(
         &varGfxWorldVertexData->worldVb,
         (unsigned __int8 *)varGfxWorld->vd.vertices,
         44 * varGfxWorld->vertexCount);
-#endif
 }
 
 void __cdecl Load_GfxWorldVertexLayerData(bool atStreamStart)
@@ -6061,9 +6047,7 @@ void __cdecl Load_GfxWorldVertexLayerData(bool atStreamStart)
     }
     varGfxVertexBuffer = &varGfxWorldVertexLayerData->layerVb;
     Load_GfxVertexBuffer(0);
-#ifndef DEDICATED
     Load_VertexBuffer(&varGfxWorldVertexLayerData->layerVb, varGfxWorld->vld.data, varGfxWorld->vertexLayerDataSize);
-#endif
 }
 
 void __cdecl Load_GfxLightGrid(bool atStreamStart)

@@ -586,13 +586,11 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
         v24 = **pos;
         *pos += 2;
         verts->normal[2] = v24;
-#ifndef DEDICATED
         if (r_modelVertColor->current.enabled)
         {
             Byte4CopyBgraToVertexColor((unsigned char *)*pos, verts->color);
         }
         else
-#endif
         {
             *verts->color = -1;
         }

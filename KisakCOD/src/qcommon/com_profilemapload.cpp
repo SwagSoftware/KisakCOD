@@ -393,7 +393,6 @@ const float PROFLOAD_BACKGROUND_COLOR[4] = { 0.0f, 0.0f, 0.0f, 0.8f };
 
 void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
 {
-#ifndef DEDICATED
     MapProfileEntry *v1; // eax
     int fileReadCount; // [esp+7Ch] [ebp-128h]
     Font_s *profileFont; // [esp+88h] [ebp-11Ch]
@@ -527,12 +526,10 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             PROFLOAD_TEXT_COLOR,
             0);
     }
-#endif
 }
 
 int ProfLoad_DrawTree()
 {
-#ifndef DEDICATED
     int result; // eax
     int v1; // [esp+24h] [ebp-124h]
     float textx; // [esp+2Ch] [ebp-11Ch]
@@ -560,8 +557,5 @@ int ProfLoad_DrawTree()
         result = profileIndex + 1;
     }
     return result;
-#else
-    return 0;
-#endif
 }
 

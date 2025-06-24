@@ -985,11 +985,7 @@ int __cdecl yylex()
 					continue;
 				}
 				yy_did_buffer_switch_on_eof = 0;
-#ifndef DEDICATED
 				if (CL_GetLocalClientActiveCount())
-#else
-				if (1)
-#endif
 				{
 					yy_c_buf_p = yytext;
 					yy_act = (yy_start - 1) / 2 + 96;

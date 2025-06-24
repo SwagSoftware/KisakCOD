@@ -260,11 +260,9 @@ void Com_InitHunkMemory()
         s_hunkTotal = 0xA000000;
     if (useFastFile->current.enabled)
         s_hunkTotal = 0xA00000;
-#ifndef DEDICATED
     R_ReflectionProbeRegisterDvars();
     if (r_reflectionProbeGenerate->current.enabled)
         s_hunkTotal = 0x20000000;
-#endif
     s_hunkData = (unsigned char*)Z_VirtualReserve(s_hunkTotal);
     if (!s_hunkData)
         Sys_OutOfMemErrorInternal(".\\universal\\com_memory.cpp", 1318);

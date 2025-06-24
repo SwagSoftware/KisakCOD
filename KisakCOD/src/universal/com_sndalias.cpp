@@ -253,14 +253,10 @@ snd_alias_list_t *__cdecl Com_TryFindSoundAlias_FastFile(const char *name)
 
 snd_alias_list_t *__cdecl Com_FindSoundAlias(const char *name)
 {
-#ifndef DEDICATED
     if (useFastFile->current.enabled)
         return Com_FindSoundAlias_FastFile(name);
     else
         return Com_FindSoundAlias_LoadObj(name);
-#else
-    return Com_FindSoundAlias_FastFile(name);
-#endif
 }
 
 snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors_LoadObj(const char *name)

@@ -1,6 +1,5 @@
 #include "mem_track.h"
 
-#ifndef DEDICATED
 #include <universal/assertive.h>
 #include <qcommon/qcommon.h>
 
@@ -1085,38 +1084,6 @@ void __cdecl track_temp_high_alloc(int size, int hunkSize, int permanent, const 
     AddTempMemInfo(size, hunkSize, permanent, name, 10, 6, g_tempHighMemInfoArray, &g_tempHighMemInfoCount);
     LeaveCriticalSection(&g_crit);
 }
-#else
-
-void __cdecl track_static_alloc_internal(void *ptr, int size, const char *name, int type) {}
-void track_init() {}
-
-void __cdecl track_hunk_alloc(int size, int pos, const char *name, int type) {}
-void __cdecl track_hunk_allocLow(int size, int pos, const char *name, int type) {}
-void __cdecl CG_track_init() {}
-void __cdecl TRACK_g_memtrack() {}
-void __cdecl G_track_init() {}
-void __cdecl TRACK_memtrack() {}
-void __cdecl track_addbasicinfo(meminfo_t *info, int type, int size) {}
-void __cdecl track_z_commit(int size, int type) {}
-void __cdecl track_physical_alloc(int size, const char *name, int type) {}
-void __cdecl track_set_hunk_size(int size) {}
-void __cdecl track_hunk_ClearToMarkHigh(int mark) {}
-void __cdecl track_hunk_ClearToMarkLow(int mark) {}
-void __cdecl track_hunk_ClearToStart() {}
-void __cdecl track_shutdown(int project) {}
-void __cdecl track_getbasicinfo(meminfo_t *info) {}
-void __cdecl track_addbasicmeminfo(meminfo_t *sum, meminfo_t *in) {}
-void __cdecl track_PrintInfo() {}
-void __cdecl track_PrintAllInfo() {}
-void __cdecl UI_track_init() {}
-void __cdecl R_Track_Init() {}
-void __cdecl track_z_alloc(int size, const char *name, int type, char *pos, int project, int overhead) {}
-
-void __cdecl track_temp_alloc(int size, int hunkSize, int permanent, const char *name) {}
-void __cdecl track_temp_free(int size, int permanent, const char *name) {}
-void __cdecl track_temp_high_clear(int permanent) {}
-void __cdecl track_temp_high_alloc(int size, int hunkSize, int permanent, const char *name) {}
-#endif
 
 double __cdecl ConvertToMB(int bytes)
 {

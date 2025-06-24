@@ -233,11 +233,9 @@ void __cdecl Sys_CreateConsole(HMODULE hInstance)
 			s_wcd.SysInputLineWndProc = (WNDPROC)SetWindowLongA(s_wcd.hwndInputLine, -4, (LONG)InputLineWndProc);
 			SendMessageA(s_wcd.hwndInputLine, 0x30u, (WPARAM)s_wcd.hfBufferFont, 0);
 			SetFocus(s_wcd.hwndInputLine);
-#ifndef DEDICATED
 			Con_GetTextCopy(text, 0x4000);
 			Conbuf_CleanText(text, target, 0x4000);
 			SetWindowTextA(s_wcd.hwndBuffer, target);
-#endif
 		}
 	}
 }

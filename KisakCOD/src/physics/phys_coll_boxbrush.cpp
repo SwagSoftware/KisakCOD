@@ -6,7 +6,6 @@
 
 void __cdecl Phys_DrawPoly(const Poly *poly, const float *color)
 {
-#ifndef DEDICATED
     unsigned int edgeIndex; // [esp+0h] [ebp-8h]
     unsigned int lastEdgeIndex; // [esp+4h] [ebp-4h]
 
@@ -16,7 +15,6 @@ void __cdecl Phys_DrawPoly(const Poly *poly, const float *color)
         CG_DebugLine(poly->pts[lastEdgeIndex], poly->pts[edgeIndex], color, 0, 8);
         lastEdgeIndex = edgeIndex;
     }
-#endif
 }
 
 dContactGeomExt *__cdecl AddContact(Results *results)
@@ -2522,7 +2520,6 @@ unsigned int __cdecl Phys_AxialSideToJ(unsigned int axialSide)
 
 void __cdecl Phys_DrawPolyTransformed(const Poly *poly, const float *color, const float *pos, const float (*R)[3])
 {
-#ifndef DEDICATED
     float pt1[3]; // [esp+0h] [ebp-20h] BYREF
     unsigned int edgeIndex; // [esp+Ch] [ebp-14h]
     float pt2[3]; // [esp+10h] [ebp-10h] BYREF
@@ -2538,7 +2535,6 @@ void __cdecl Phys_DrawPolyTransformed(const Poly *poly, const float *color, cons
         CG_DebugLine(pt1, pt2, color, 0, 8);
         lastEdgeIndex = edgeIndex;
     }
-#endif
 }
 
 double __cdecl Phys_TestTriangleAgainstBrushPlane(const float *brushPlane, const float (*triangle)[3])

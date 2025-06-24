@@ -105,7 +105,6 @@ void __cdecl CG_VehRegisterDvars();
 
 clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
 {
-#ifndef DEDICATED
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -123,10 +122,6 @@ clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
             cgArray[0].predictedPlayerState.clientNum,
             64);
     return &cgArray[0].bgs.clientinfo[cgArray[0].predictedPlayerState.clientNum];
-#else
-    iassert(0);
-    return NULL;
-#endif
 }
 
 vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
@@ -208,7 +203,6 @@ unsigned __int16 __cdecl CompressUnit(float unit)
 
 double __cdecl GetSpeed(int localClientNum, centity_s *cent)
 {
-#ifndef DEDICATED
     int serverTimeDelta; // [esp+Ch] [ebp-1Ch]
     float posDelta[3]; // [esp+10h] [ebp-18h] BYREF
     float len; // [esp+1Ch] [ebp-Ch]
@@ -231,10 +225,6 @@ double __cdecl GetSpeed(int localClientNum, centity_s *cent)
     if (serverTimeDelta <= 0.0)
         return 0.0;
     return (len / serverTimeDelta);
-#else
-    iassert(0);
-    return 0.0;
-#endif;
 }
 
 void __cdecl G_VehRegisterDvars()

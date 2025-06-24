@@ -485,7 +485,6 @@ int boxVerts_0[24][3] =
 
 void __cdecl SV_XModelDebugBoxes(gentity_s *ent)
 {
-#ifndef DEDICATED
     const XModel *Model; // eax
     float v2; // [esp+24h] [ebp-2F0h]
     float v3; // [esp+28h] [ebp-2ECh]
@@ -604,7 +603,6 @@ void __cdecl SV_XModelDebugBoxes(gentity_s *ent)
             }
         }
     }
-#endif
 }
 
 bool __cdecl SV_MapExists(char *name)
@@ -651,9 +649,7 @@ void __cdecl SV_ShutdownGameProgs()
 {
     Com_SyncThreads();
     sv.state = SS_DEAD;
-#ifndef DEDICATED
     Com_UnloadSoundAliases(SASYS_GAME);
-#endif
     if (gameInitialized)
     {
         G_ShutdownGame(1);

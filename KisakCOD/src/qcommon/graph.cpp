@@ -66,7 +66,6 @@ void __cdecl GraphFloat_ParseBuffer(GraphFloat *graph, const char *buffer, char 
 
 void __cdecl GraphFloat_CreateDevGui(GraphFloat *graph, const char *devguiPath)
 {
-#ifndef DEDICATED
     if (!graph)
         MyAssertHandler(".\\qcommon\\graph.cpp", 202, 0, "%s", "graph");
     if (!devguiPath)
@@ -78,7 +77,6 @@ void __cdecl GraphFloat_CreateDevGui(GraphFloat *graph, const char *devguiPath)
     graph->devguiGraph.textCallback = (void(__cdecl *)(const DevGraph *, const float, const float, char *, const int))GraphFloat_DevGuiCB_Text;
     graph->devguiGraph.data = graph;
     DevGui_AddGraph(devguiPath, &graph->devguiGraph);
-#endif
 }
 
 void __cdecl GraphFloat_DevGuiCB_Event(const DevGraph *graph, DevEventType event)

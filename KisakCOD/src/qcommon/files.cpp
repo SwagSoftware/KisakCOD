@@ -430,9 +430,7 @@ void __cdecl FS_PureServerSetLoadedIwds(char *iwdSums, char *iwdNames)
             }
         }
     }
-#ifndef DEDICATED
     SND_StopSounds(SND_STOP_STREAMED);
-#endif
     FS_ShutdownServerIwdNames();
     fs_numServerIwds = v7;
     if (v7)

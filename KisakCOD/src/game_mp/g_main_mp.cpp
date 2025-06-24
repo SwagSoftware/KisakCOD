@@ -296,11 +296,7 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     if (!restart)
     {
         memset(&bgs->animScriptData, 0, sizeof(animScriptData_t));
-#ifndef DEDICATED
         bgs->animScriptData.soundAlias = Com_FindSoundAlias;
-#else
-        bgs->animScriptData.soundAlias = Com_FindSoundAlias_DEDICATED;
-#endif
         bgs->animScriptData.playSoundAlias = G_AnimScriptSound;
         GScr_LoadScripts();
         BG_LoadAnim();
@@ -1473,7 +1469,6 @@ const dvar_s *ShowEntityInfo()
 
 void __cdecl ShowEntityInfo_Items(gentity_s *ent)
 {
-#ifndef DEDICATED
     WeaponDef *weapDef; // [esp+14h] [ebp-18h]
     char *text; // [esp+18h] [ebp-14h]
     float origin[3]; // [esp+1Ch] [ebp-10h] BYREF
@@ -1496,7 +1491,6 @@ void __cdecl ShowEntityInfo_Items(gentity_s *ent)
             origin[2] = origin[2] + -4.0;
         }
     }
-#endif
 }
 
 void __cdecl G_RunFrameForEntity(gentity_s *ent)
@@ -1726,9 +1720,7 @@ void __cdecl G_SightTrace(int *hitNum, float *start, float *end, int passEntityN
 
 void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int duration)
 {
-#ifndef DEDICATED
     CL_AddDebugString(xyz, color, scale, text, 1, duration);
-#endif
 }
 
 BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2)

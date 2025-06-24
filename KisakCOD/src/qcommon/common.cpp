@@ -166,7 +166,6 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	}
 	else
 	{
-#ifndef DEDICATED
 		if (channel != 6 && com_dedicated && !com_dedicated->current.integer)
 		{
 			if (channel == 2 || channel == 3 || channel == 4)
@@ -181,7 +180,6 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 		{
 			Sys_Print(msg);
 		}
-#endif
 		if (channel != 7 && com_logfile && com_logfile->current.integer)
 			Com_LogPrintMessage(channel, msg);
 	}
@@ -442,18 +440,15 @@ void Com_PrintWarning(int channel, const char *fmt, ...)
 void __cdecl Com_Shutdown(const char* finalmsg)
 {
     Com_ShutdownInternal(finalmsg);
-#ifndef DEDICATED
     if (!com_dedicated->current.integer)
     {
         CL_InitRenderer();
         Com_AssetLoadUI();
     }
-#endif
 }
 
 void __cdecl CL_ShutdownDemo()
 {
-#ifndef DEDICATED
     clientConnection_t *clc; // [esp+0h] [ebp-4h]
 
     clc = CL_GetLocalClientConnection(0);
@@ -464,12 +459,10 @@ void __cdecl CL_ShutdownDemo()
         clc->demoplaying = 0;
         clc->demorecording = 0;
     }
-#endif
 }
 
 void __cdecl Com_ShutdownInternal(const char* finalmsg)
 {
-#ifndef DEDICATED
     int localClientNum; // [esp+0h] [ebp-4h]
 
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
@@ -478,7 +471,6 @@ void __cdecl Com_ShutdownInternal(const char* finalmsg)
     CL_ShutdownAll();
     CL_ShutdownDemo();
     FakeLag_Shutdown();
-#endif
     SV_Shutdown(finalmsg);
     Com_Restart();
 }
@@ -565,7 +557,6 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         MyAssertHandler(".\\qcommon\\common.cpp", 1343, 0, "%s", "com_errorMessage[0]");
     if (code == ERR_SCRIPT || code == ERR_LOCALIZATION)
     {
-#ifndef DEDICATED
         if (!com_fixedConsolePosition)
         {
             com_fixedConsolePosition = 1;
@@ -583,7 +574,6 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
             Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
             return;
         }
-#endif
         code = ERR_DROP;
     LABEL_27:
         if (!com_errorEntered)
@@ -593,7 +583,6 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         Value = (jmp_buf *)Sys_GetValue(2);
         longjmp(*Value, -1);
     }
-#ifndef DEDICATED
     if (code == ERR_SCRIPT_DROP)
     {
         com_fixedConsolePosition = 1;
@@ -616,7 +605,6 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
     }
     else
-#endif
     {
         if (!com_dedicated->current.integer)
             goto LABEL_27;
@@ -633,9 +621,7 @@ void __cdecl  Com_Quit_f()
     int localClientNum; // [esp+0h] [ebp-4h]
 
     Com_Printf(0, "quitting...\n");
-#ifndef DEDICATED
     R_PopRemoteScreenUpdate();
-#endif
     Com_SyncThreads();
     Scr_Cleanup();
     Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
@@ -643,16 +629,12 @@ void __cdecl  Com_Quit_f()
     if (!com_errorEntered)
     {
         Com_ClearTempMemory();
-#ifndef DEDICATED
         Sys_DestroySplashWindow();
         for (localClientNum = 0; localClientNum < 1; ++localClientNum)
             CL_Shutdown(localClientNum);
         FakeLag_Shutdown();
-#endif
         SV_Shutdown("EXE_SERVERQUIT");
-#ifndef DEDICATED
         CL_ShutdownRef();
-#endif
         Com_Close();
         Com_CloseLogfiles();
         FS_Shutdown();
@@ -820,34 +802,26 @@ void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg)
 
     while (NET_GetLoopPacket(client, &adr, netmsg))
     {
-#ifndef DEDICATED
         CL_PacketEvent(client, adr, netmsg, Sys_Milliseconds());
-#else
-        SV_PacketEvent(adr, netmsg);
-#endif
     }
 }
 
 void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg)
 {
-#ifndef DEDICATED
     CL_PacketEvent(NS_CLIENT1, adr, netmsg, Sys_Milliseconds());
-#else
-    SV_PacketEvent(adr, netmsg);
-#endif
 }
 
-unsigned __int8 serverCommonMsgBuf[131072];
+unsigned __int8 serverCommonMsgBuf[0x20000];
 void __cdecl Com_ServerPacketEvent()
 {
-#ifndef DEDICATED
     msg_t netmsg; // [esp+30h] [ebp-40h] BYREF
     netadr_t adr; // [esp+58h] [ebp-18h] BYREF
 
     Profile_Begin(30);
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\common.cpp", 2072, 0, "%s", "Sys_IsMainThread()");
+    iassert(Sys_IsMainThread());
+
     MSG_Init(&netmsg, serverCommonMsgBuf, 0x20000);
+
     if (com_sv_running->current.enabled)
     {
         while (NET_GetServerPacket(&adr, &netmsg))
@@ -858,8 +832,8 @@ void __cdecl Com_ServerPacketEvent()
         if (com_sv_running->current.enabled)
             SV_PacketEvent(adr, &netmsg);
     }
+
     Profile_EndInternal(0);
-#endif
 }
 
 void __cdecl Com_EventLoop()
@@ -877,27 +851,17 @@ void __cdecl Com_EventLoop()
         case SE_NONE:
             iassert(!ev.evPtr);
             Com_ClientPacketEvent();
-#ifndef DEDICATED
             Com_ServerPacketEvent();
-#endif
             return;
         case SE_KEY:
-#ifndef DEDICATED
             if (ev.evPtr)
                 MyAssertHandler(".\\qcommon\\common.cpp", 2164, 0, "%s", "!ev.evPtr");
             CL_KeyEvent(0, ev.evValue, ev.evValue2, ev.evTime);
-#else
-            iassert(0);
-#endif
             break;
         case SE_CHAR:
-#ifndef DEDICATED
             if (ev.evPtr)
                 MyAssertHandler(".\\qcommon\\common.cpp", 2170, 0, "%s", "!ev.evPtr");
             CL_CharEvent(0, ev.evValue);
-#else
-            iassert(0);
-#endif
             break;
         case SE_CONSOLE:
             if (!ev.evPtr)
@@ -941,19 +905,11 @@ void __cdecl Com_ExecStartupConfigs(int localClientNum, const char* configFile)
         v2 = va("exec %s\n", configFile);
         Cbuf_AddText(localClientNum, v2);
     }
-#ifndef DEDICATED
     Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
     Com_RunAutoExec(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
     if (Com_SafeMode())
         Cbuf_AddText(localClientNum, "exec safemode_mp.cfg\n");
     Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
-#else
-    Cbuf_Execute(localClientNum, 0);
-    Com_RunAutoExec(localClientNum, 0);
-    if (Com_SafeMode())
-        Cbuf_AddText(localClientNum, "exec safemode_mp.cfg\n");
-    Cbuf_Execute(localClientNum, 0);
-#endif
 }
 
 void __cdecl Com_Init(char* commandLine)
@@ -976,7 +932,6 @@ void __cdecl Com_Init(char* commandLine)
     if (com_errorEntered)
         Com_ErrorCleanup();
 
-#ifndef DEDICATED
     if (!com_sv_running->current.enabled && !com_dedicated->current.integer)
     {
         v4 = (jmp_buf *)Sys_GetValue(2);
@@ -991,7 +946,6 @@ void __cdecl Com_Init(char* commandLine)
         CL_StartHunkUsers();
         R_EndRemoteScreenUpdate();
     }
-#endif
 }
 
 bool shouldQuitOnError;
@@ -1025,21 +979,17 @@ void Com_ErrorCleanup()
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\qcommon\\common.cpp", 1010, 0, "%s", "Sys_IsMainThread()");
     LargeLocalReset();
-#ifndef DEDICATED
     R_PopRemoteScreenUpdate();
     Com_SyncThreads();
     if (!com_dedicated->current.enabled)
         R_ComErrorCleanup();
-#endif
     Cmd_ComErrorCleanup();
     Dvar_SetInAutoExec(0);
     if (useFastFile->current.enabled)
         DB_Cleanup();
     Com_ClearTempMemory();
-#ifndef DEDICATED
     if (!useFastFile->current.enabled)
         FX_UnregisterAll();
-#endif
     if (ProfLoad_IsActive())
         ProfLoad_Deactivate();
     Dvar_SetIntByName("cl_paused", 0);
@@ -1063,27 +1013,21 @@ void Com_ErrorCleanup()
     }
     else
     {
-#ifndef DEDICATED
         if (cls.uiStarted && errorcode != ERR_DROP)
         {
             MenuScreenForError = UI_GetMenuScreenForError();
             UI_SetActiveMenu(0, (uiMenuCommand_t)MenuScreenForError);
         }
-#endif
         Com_SetErrorMessage(com_errorMessage);
     }
     if (fs_debug && fs_debug->current.integer == 2)
         Dvar_SetInt((dvar_s*)fs_debug, 0);
-#ifndef DEDICATED
     SND_ErrorCleanup();
-#endif
     Com_CleanupBsp();
     KISAK_NULLSUB();
     Com_ResetParseSessions();
-#ifndef DEDICATED
     CL_FlushDebugServerData();
     CL_UpdateDebugServerData();
-#endif
     FS_ResetFiles();
     if (errorcode == ERR_DROP)
         Cbuf_Init();
@@ -1099,9 +1043,7 @@ void Com_ErrorCleanup()
     lastErrorTime = v5;
     if (errorcode != ERR_SERVERDISCONNECT && errorcode != ERR_DROP && errorcode != ERR_DISCONNECT)
         Sys_Error("%s", com_errorMessage);
-#ifndef DEDICATED
     updateScreenCalled = 0;
-#endif
     if (errorcode == ERR_SERVERDISCONNECT)
     {
         Com_ShutdownInternal("EXE_DISCONNECTEDFROMOWNLISTENSERVER");
@@ -1119,10 +1061,8 @@ void Com_ErrorCleanup()
         if (errorcode == ERR_DROP)
         {
             Com_PrintError(16, "********************\nERROR: %s\n********************\n", com_errorMessage);
-#ifndef DEDICATED
             if (cls.uiStarted && !com_fixedConsolePosition)
                 CL_ConsoleFixPosition();
-#endif
         }
         else
         {
@@ -1151,11 +1091,7 @@ void Com_AddStartupCommands()
         if (*com_consoleLines[i])
         {
             Com_sprintf(localBuffer, 0x401u, "%s\n", com_consoleLines[i]);
-#ifndef DEDICATED
             v0 = CL_ControllerIndexFromClientNum(0);
-#else
-            v0 = 0;
-#endif
             Cbuf_ExecuteBuffer(0, v0, localBuffer);
         }
     }
@@ -1168,51 +1104,6 @@ cmd_function_s Com_Assert_f_VAR;
 cmd_function_s Com_Quit_f_VAR;
 cmd_function_s Com_WriteConfig_f_VAR;
 cmd_function_s Com_WriteDefaults_f_VAR;
-
-void DEDICATED_RenderDBHack()
-{
-    XZoneInfo zoneInfo[6]; // [esp+0h] [ebp-50h] BYREF
-    unsigned int zoneCount; // [esp+4Ch] [ebp-4h]
-
-    //zoneInfo[0].name = gfxCfg.codeFastFileName;
-    zoneInfo[0].name = "code_post_gfx_mp";
-    zoneInfo[0].allocFlags = 2;
-    zoneInfo[0].freeFlags = 0;
-    zoneCount = 1;
-    //if (gfxCfg.localizedCodeFastFileName)
-    {
-        //zoneInfo[zoneCount].name = gfxCfg.localizedCodeFastFileName;
-        zoneInfo[zoneCount].name = "localized_code_post_gfx_mp";
-        zoneInfo[zoneCount].allocFlags = 0;
-        zoneInfo[zoneCount++].freeFlags = 0;
-    }
-    //if (gfxCfg.uiFastFileName)
-    //{
-    //    //zoneInfo[zoneCount].name = gfxCfg.uiFastFileName;
-    //    zoneInfo[zoneCount].name = 0; // LWSS: supposedly can be 0
-    //    zoneInfo[zoneCount].allocFlags = 8;
-    //    zoneInfo[zoneCount++].freeFlags = 0;
-    //}
-    //zoneInfo[zoneCount].name = gfxCfg.commonFastFileName;
-    zoneInfo[zoneCount].name = "common_mp";
-    zoneInfo[zoneCount].allocFlags = 4;
-    zoneInfo[zoneCount++].freeFlags = 0;
-    //if (gfxCfg.localizedCommonFastFileName)
-    //{
-    //    //zoneInfo[zoneCount].name = gfxCfg.localizedCommonFastFileName;
-    //    zoneInfo[zoneCount].name = "localized_code_post_gfx_mp";
-    //    zoneInfo[zoneCount].allocFlags = 1;
-    //    zoneInfo[zoneCount++].freeFlags = 0;
-    //}
-    //if (gfxCfg.modFastFileName)
-    //{
-    //    //zoneInfo[zoneCount].name = gfxCfg.modFastFileName;
-    //    zoneInfo[zoneCount].name = 0; // LWSS: supposedly can be 0
-    //    zoneInfo[zoneCount].allocFlags = 16;
-    //    zoneInfo[zoneCount++].freeFlags = 0;
-    //}
-    DB_LoadXAssets(zoneInfo, zoneCount, 0);
-}
 
 static const char* comInitAllocName = "$init";
 void __cdecl Com_Init_Try_Block_Function(char* commandLine)
@@ -1245,35 +1136,23 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     }
     if (useFastFile->current.enabled)
         Com_InitXAssets();
-#ifndef DEDICATED
     CL_InitKeyCommands();
-#endif
     FS_InitFilesystem();
-#ifndef DEDICATED
     Con_InitChannels();
-#endif
-#ifndef DEDICATED
     LiveStorage_Init();
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         Com_StartupConfigs(localClientNum);
     v1 = CL_ControllerIndexFromClientNum(0);
     Cbuf_Execute(0, v1);
-#endif
     if ((dvar_modifiedFlags & 0x20) != 0)
         Com_InitDvars();
     com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, 1u, "Use recommended settings");
-#ifndef DEDICATED
     Com_CheckSetRecommended(0);
-#endif
     Com_StartupVariable(0);
     if (!useFastFile->current.enabled)
         SEH_UpdateLanguageInfo();
-#ifndef DEDICATED
     if (com_dedicated->current.integer)
         CL_InitDedicated();
-#else
-    Sys_ShowConsole();
-#endif
     Com_InitHunkMemory();
     Hunk_InitDebugMemory();
     dvar_modifiedFlags &= ~1u;
@@ -1304,7 +1183,6 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     SV_Init();
     NET_Init();
     Dvar_ClearModified((dvar_s*)com_dedicated);
-#ifndef DEDICATED
     if (!com_dedicated->current.integer)
     {
         KISAK_NULLSUB();
@@ -1312,10 +1190,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         for (localClientNuma = 0; localClientNuma < 1; ++localClientNuma)
             CL_Init(localClientNuma);
     }
-#endif
     com_frameTime = Sys_Milliseconds();
     Com_StartupVariable(0);
-#ifndef DEDICATED
+
     if (!com_dedicated->current.integer)
     {
         SND_InitDriver();
@@ -1328,11 +1205,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         cls.soundStarted = 1;
         SND_Init();
     }
-#else
-    // LWSS OMEGA HACK
-    // Load the Graphics XFiles so that the database has the proper addresses
-    DEDICATED_RenderDBHack();
-#endif
+
     COM_PlayIntroMovies();
     if (useFastFile->current.enabled)
     {
@@ -1416,14 +1289,12 @@ void __cdecl Com_Assert_f()
 
 void COM_PlayIntroMovies()
 {
-#ifndef DEDICATED
     if (!com_dedicated->current.integer && !com_introPlayed->current.enabled)
     {
         Cbuf_AddText(0, "cinematic IW_logo\n");
         Dvar_SetString((dvar_s*)nextmap, (char*)"cinematic atvi; set nextmap cinematic cod_intro");
         Dvar_SetBool((dvar_s*)com_introPlayed, 1);
     }
-#endif
 }
 
 const char *s_lockThreadNames[4] = { "none", "minimal", "all" };
@@ -1510,9 +1381,7 @@ void Com_InitDvars()
 
 void __cdecl Com_StartupConfigs(int localClientNum)
 {
-#ifndef DEDICATED
     Com_InitPlayerProfiles(localClientNum);
-#endif
 }
 
 void Com_InitXAssets()
@@ -1565,13 +1434,9 @@ void __cdecl Com_WriteConfigToFile(int localClientNum, char* filename)
     {
         FS_Printf(f, "// generated by Call of Duty, do not modify\n");
         FS_Printf(f, "unbindall\n");
-#ifndef DEDICATED
         Key_WriteBindings(localClientNum, f);
-#endif
         Dvar_WriteVariables(f);
-#ifndef DEDICATED
         Con_WriteFilterConfigString(f);
-#endif
         FS_FCloseFile(f);
     }
     else
@@ -1622,7 +1487,6 @@ void __cdecl Com_AdjustMaxFPS(int* maxFPS)
 
 void Com_DedicatedModified()
 {
-#ifndef DEDICATED
     int localClientNum; // [esp+0h] [ebp-4h]
 
     if ((com_dedicated->flags & 0x40) == 0)
@@ -1663,7 +1527,6 @@ void Com_DedicatedModified()
             SV_AddDedicatedCommands();
         }
     }
-#endif
 }
 
 void __cdecl Com_Frame_Try_Block_Function()
@@ -1720,7 +1583,6 @@ void __cdecl Com_Frame_Try_Block_Function()
         Profile_EndInternal(0);
         com_lastFrameTime[lastFrameIndex] = com_frameTime;
     }
-#ifndef DEDICATED
     else
     {
         KISAK_NULLSUB();
@@ -1745,12 +1607,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         if (!(lastFrameIndex + v4))
             msec = 1;
     }
-#endif
-#ifndef DEDICATED
     v1 = CL_ControllerIndexFromClientNum(0);
-#else
-    v1 = 0;
-#endif
     Cbuf_Execute(0, v1);
     if (msec <= 0)
         MyAssertHandler(".\\qcommon\\common.cpp", 4008, 0, "%s", "msec > 0");
@@ -1759,7 +1616,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         MyAssertHandler(".\\qcommon\\common.cpp", 4013, 0, "%s", "msec > 0");
     msecb = SV_Frame(mseca);
     Com_DedicatedModified();
-#ifndef DEDICATED
+
     if (!com_dedicated->current.integer)
     {
         R_SetEndTime(com_lastFrameTime[lastFrameIndex]);
@@ -1788,7 +1645,6 @@ void __cdecl Com_Frame_Try_Block_Function()
         Com_Statmon();
         R_WaitEndTime();
     }
-#endif
 }
 
 void __cdecl Com_WriteConfiguration(int localClientNum)
@@ -1798,15 +1654,11 @@ void __cdecl Com_WriteConfiguration(int localClientNum)
     if (com_fullyInitialized && (dvar_modifiedFlags & 1) != 0)
     {
         dvar_modifiedFlags &= ~1u;
-#ifndef DEDICATED
         if (Com_HasPlayerProfile())
         {
             Com_BuildPlayerProfilePath(configFile, 64, "config_mp.cfg");
             Com_WriteConfigToFile(localClientNum, configFile);
         }
-#else
-        Com_WriteConfigToFile(localClientNum, configFile);
-#endif
     }
 }
 
@@ -1860,7 +1712,6 @@ int __cdecl Com_ModifyMsec(int msec)
 
 void Com_Statmon()
 {
-#ifndef DEDICATED
     int timePrevFrame; // [esp+0h] [ebp-4h]
 
     if (com_statmon->current.enabled)
@@ -1880,12 +1731,10 @@ void Com_Statmon()
                 StatMon_Warning(6, 3000, "code_warning_serverfps");
         }
     }
-#endif
 }
 
 int Com_UpdateMenu()
 {
-#ifndef DEDICATED
     int result; // eax
     uiMenuCommand_t MenuScreen; // eax
     connstate_t clcState; // [esp+4h] [ebp-4h]
@@ -1898,14 +1747,10 @@ int Com_UpdateMenu()
         return UI_SetActiveMenu(0, MenuScreen);
     }
     return result;
-#else
-    return 0;
-#endif
 }
 
 void __cdecl Com_AssetLoadUI()
 {
-#ifndef DEDICATED
     XZoneInfo zoneInfo; // [esp+0h] [ebp-10h] BYREF
 
     if (useFastFile->current.enabled)
@@ -1919,7 +1764,6 @@ void __cdecl Com_AssetLoadUI()
     R_BeginRemoteScreenUpdate();
     CL_StartHunkUsers();
     R_EndRemoteScreenUpdate();
-#endif
 }
 
 void __cdecl Com_CheckSyncFrame()
@@ -1955,13 +1799,11 @@ void __cdecl Com_Frame()
     {
         Com_ErrorCleanup();
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
-#ifndef DEDICATED
         if (!com_dedicated->current.integer)
         {
             CL_InitRenderer();
             Com_StartHunkUsers();
         }
-#endif
     }
     else
     {
@@ -1979,11 +1821,9 @@ void Com_StartHunkUsers()
     //if (_setjmp3(Value, 0))
     if (_setjmp(*(jmp_buf *)Value))
         Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
-#ifndef DEDICATED
     Com_AssetLoadUI();
     MenuScreen = UI_GetMenuScreen();
     UI_SetActiveMenu(0, (uiMenuCommand_t)MenuScreen);
-#endif
     IN_Frame();
     Com_EventLoop();
 }
@@ -2009,9 +1849,7 @@ void __cdecl Com_Close()
     XAnimShutdown();
     Com_ShutdownWorld();
     CM_Shutdown();
-#ifndef DEDICATED
     SND_ShutdownChannels();
-#endif
     Hunk_Clear();
     if (useFastFile->current.enabled)
         DB_ShutdownXAssets();
@@ -2030,18 +1868,14 @@ void __cdecl Field_Clear(field_t* edit)
 
 void __cdecl Com_Restart()
 {
-#ifndef DEDICATED
     CL_ShutdownHunkUsers();
-#endif
     SV_ShutdownGameProgs();
     Com_ShutdownDObj();
     DObjShutdown();
     XAnimShutdown();
     Com_ShutdownWorld();
     CM_Shutdown();
-#ifndef DEDICATED
     SND_ShutdownChannels();
-#endif
     Hunk_Clear();
     Hunk_ResetDebugMem();
     if (useFastFile->current.enabled)
@@ -2154,12 +1988,10 @@ void __cdecl Com_LocalizedFloatToString(float f, char* buffer, unsigned int maxl
 
 void __cdecl Com_SyncThreads()
 {
-#ifndef DEDICATED
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\qcommon\\common.cpp", 4655, 0, "%s", "Sys_IsMainThread()");
     R_SyncRenderThread();
     R_WaitWorkerCmds();
-#endif
 }
 
 void __cdecl Com_FreeEvent(char* ptr)

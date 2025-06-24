@@ -377,10 +377,8 @@ void __cdecl  Sys_Quit()
 	Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
 	timeEndPeriod(1u);
 	Sys_SpawnQuitProcess();
-#ifndef DEDICATED
 	IN_Shutdown();
 	Key_Shutdown();
-#endif
 	Sys_DestroyConsole();
 	Sys_NormalExit();
 	Win_ShutdownLocalization();
@@ -393,9 +391,7 @@ void __cdecl  Sys_Quit()
 	SL_Shutdown();
 	if (!com_errorEntered)
 		track_shutdown(0);
-#ifndef DEDICATED
 	Con_ShutdownChannels();
-#endif
 	exit(0);
 }
 
@@ -514,9 +510,7 @@ void __cdecl Sys_LoadingKeepAlive()
 		v1 = *Win_GetEvent(&result);
 		ev = v1;
 	} while (v1.evType);
-#ifndef DEDICATED
 	R_CheckLostDevice();
-#endif
 }
 
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
@@ -773,11 +767,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Sys_FindInfo();
 			g_wv.hInstance = hInstance;
 			I_strncpyz(sys_cmdline, lpCmdLine, 1024);
-#ifndef DEDICATED
 			Sys_CreateSplashWindow();
 			Sys_ShowSplashWindow();
 			Win_RegisterClass();
-#endif
 			SetErrorMode(1);
 			Sys_Milliseconds();
 			Profile_Init();

@@ -825,10 +825,8 @@ void __cdecl Mark_MaterialAsset(Material *material)
 void __cdecl Load_MaterialTechniqueSetAsset(XAssetHeader *techniqueSet)
 {
     techniqueSet->xmodelPieces = DB_AddXAsset(ASSET_TYPE_TECHNIQUE_SET, (XAssetHeader)techniqueSet->xmodelPieces).xmodelPieces;
-#ifndef DEDICATED
     Material_OriginalRemapTechniqueSet(techniqueSet->techniqueSet);
     Material_UploadShaders(techniqueSet->techniqueSet);
-#endif
 }
 
 void __cdecl Mark_MaterialTechniqueSetAsset(MaterialTechniqueSet *techniqueSet)
@@ -954,9 +952,7 @@ void __cdecl Mark_GfxWorldAsset(GfxWorld *gfxWorld)
 
 void __cdecl DB_RemoveGfxWorld(XAssetHeader ass)
 {
-#ifndef DEDICATED
     R_UnloadWorld();
-#endif
 }
 
 void __cdecl Load_LightDefAsset(XAssetHeader *lightDef)
@@ -1111,24 +1107,16 @@ void __cdecl Mark_StringTableAsset(StringTable *stringTable)
 
 XAssetHeader __cdecl DB_AllocMaterial(void *arg)
 {
-#ifndef DEDICATED
     XAssetHeader *pool = (XAssetHeader*)arg;
     Material_DirtySort();
     return DB_AllocXAsset_StringTable_(pool);
-#else
-    XAssetHeader *pool = (XAssetHeader *)arg;
-    //Material_DirtySort();
-    return DB_AllocXAsset_StringTable_(pool);
-#endif
 }
 
 void __cdecl DB_FreeMaterial(void* arg, XAssetHeader header)
 {
-#ifndef DEDICATED
     XAssetPoolEntry<StringTable> **pool = (XAssetPoolEntry<StringTable> **)arg;
     Material_DirtySort();
     DB_FreeXAssetHeader_StringTable_(pool, header);
-#endif
 }
 
 void __cdecl DB_EnumXAssets_FastFile(
@@ -1234,7 +1222,6 @@ void __cdecl R_EnumTechniqueSets(void(__cdecl *func)(MaterialTechniqueSet *, voi
 
 void __cdecl R_EnumImages(void(__cdecl *func)(GfxImage *, void *), void *data)
 {
-#ifndef DEDICATED
     GfxImage *header; // [esp+0h] [ebp-8h]
     unsigned int imageIndex; // [esp+4h] [ebp-4h]
 
@@ -1247,7 +1234,6 @@ void __cdecl R_EnumImages(void(__cdecl *func)(GfxImage *, void *), void *data)
                 func(header, data);
         }
     }
-#endif
 }
 
 void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(* func)(void*, void*), void* inData)
@@ -1328,20 +1314,14 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
             start = Sys_Milliseconds();
             if (!Sys_IsDatabaseReady2())
             {
-#ifndef DEDICATED
                 if (Sys_IsMainThread())
                     R_ReleaseThreadOwnership();
-#endif
                 break;
             }
         }
         if (Sys_IsDatabaseReady2() || DB_IsMinimumFastFileLoaded() && DB_GetInitializing())
             break;
-#ifndef DEDICATED
         if (Sys_IsDatabaseReady() && (Sys_IsMainThread() || Sys_IsRenderThread() && R_IsInRemoteScreenUpdate() && g_mainThreadBlocked))
-#else
-        if (Sys_IsDatabaseReady())
-#endif
         {
             DB_PostLoadXZone();
         }
@@ -1404,13 +1384,9 @@ LABEL_39:
 
 void __cdecl DB_Sleep(unsigned int msec)
 {
-#ifndef DEDICATED
     R_BeginRemoteScreenUpdate();
-#endif
     NET_Sleep(msec);
-#ifndef DEDICATED
     R_EndRemoteScreenUpdate();
-#endif
 }
 
 void __cdecl DB_LogMissingAsset(XAssetType type, const char *name)
@@ -1845,18 +1821,11 @@ void __cdecl DB_Update()
 {
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\database\\db_registry.cpp", 2805, 0, "%s", "Sys_IsMainThread()");
-#ifndef DEDICATED
     if (!Sys_IsDatabaseReady2())
     {
         if (Sys_IsDatabaseReady())
             DB_PostLoadXZone();
     }
-#else
-    if (Sys_IsDatabaseReady())
-    {
-        DB_PostLoadXZone();
-    }
-#endif
 }
 
 void __cdecl DB_SetInitializing(bool inUse)
@@ -2240,18 +2209,14 @@ void DB_PostLoadXZone()
     iassert(!g_loadingZone);
     iassert(!g_zoneInfoCount);
 
-#ifndef DEDICATED
     if (!Sys_IsDatabaseReady2())
-#endif
     {
         if (g_copyInfoCount)
         {
             remoteScreenUpdateNesting = 0;
             if (!Sys_IsMainThread()
                 || (++g_mainThreadBlocked,
-#ifndef DEDICATED
                     remoteScreenUpdateNesting = R_PopRemoteScreenUpdate(),
-#endif
                     --g_mainThreadBlocked,
                     g_copyInfoCount))
 
@@ -2262,22 +2227,16 @@ void DB_PostLoadXZone()
                     DB_LinkXAssetEntry((XAssetEntryPoolEntry *)g_copyInfo[i], 1);
                 g_copyInfoCount = 0;
                 Sys_UnlockWrite(&db_hashCritSect);
-#ifndef DEDICATED
                 Material_DirtyTechniqueSetOverrides();
                 Material_OverrideTechniqueSets();
-#endif
                 DB_UnarchiveAssets();
-#ifndef DEDICATED
                 if (Sys_IsMainThread())
                     R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
-#endif
                 Sys_DatabaseCompleted2();
             }
             else
             {
-#ifndef DEDICATED
                 R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
-#endif
             }
         }
         else
@@ -2302,9 +2261,7 @@ void __cdecl DB_UpdateDebugZone()
         zoneInfo[1].allocFlags = 64;
         zoneInfo[1].freeFlags = 64;
         DB_LoadXAssets(zoneInfo, 2u, 1);
-#ifndef DEDICATED
         CG_VisionSetMyChanges();
-#endif
     }
 }
 
@@ -2312,13 +2269,9 @@ void __cdecl DB_SyncXAssets()
 {
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\database\\db_registry.cpp", 3386, 0, "%s", "Sys_IsMainThread()");
-#ifndef DEDICATED
     R_BeginRemoteScreenUpdate();
-#endif
     Sys_SyncDatabase();
-#ifndef DEDICATED
     R_EndRemoteScreenUpdate();
-#endif
     DB_PostLoadXZone();
 }
 
@@ -2343,9 +2296,7 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, unsigned int zoneCount, int syn
         Cmd_AddCommandInternal("loadzone", DB_LoadZone_f, &DB_LoadZone_f_VAR);
     }
     unloadedZone = 0;
-#ifndef DEDICATED
     Material_ClearShaderUploadList();
-#endif
     DB_SyncXAssets();
     if (g_archiveBuf)
         MyAssertHandler(".\\database\\db_registry.cpp", 3439, 0, "%s", "!g_archiveBuf");
@@ -3020,16 +2971,8 @@ void(__cdecl *DB_RemoveXAssetHandler[33])(XAssetHeader) =
   NULL,
   NULL,
   NULL,
-#ifndef DEDICATED
   (void(*)(XAssetHeader)) & Material_ReleaseTechniqueSet,
-#else
-  NULL,
-#endif
-#ifndef DEDICATED
   (void(*)(XAssetHeader)) & Image_Free,
-#else
-  NULL,
-#endif
   NULL,
   NULL,
   &DB_RemoveLoadedSound,
@@ -3223,11 +3166,9 @@ void DB_ArchiveAssets()
     if (!g_archiveBuf)
     {
         g_archiveBuf = 1;
-#ifndef DEDICATED
         R_SyncRenderThread();
         R_ClearAllStaticModelCacheRefs();
         DB_SaveSounds();
-#endif
         DB_SaveDObjs();
     }
 }
@@ -3293,9 +3234,7 @@ void DB_FreeUnusedResources()
 
 void DB_ExternalInitAssets()
 {
-#ifndef DEDICATED
     Material_DirtyTechniqueSetOverrides();
-#endif
     BG_FillInAllWeaponItems();
 }
 
@@ -3303,17 +3242,13 @@ void DB_UnarchiveAssets()
 {
     iassert(g_archiveBuf);
     g_archiveBuf = 0;
-#ifndef DEDICATED
     DB_LoadSounds();
-#endif
     DB_LoadDObjs();
     DB_ExternalInitAssets();
     iassert(Sys_IsMainThread() || Sys_IsRenderThread());
 
-#ifndef DEDICATED
     if (Sys_IsMainThread())
         R_ReleaseThreadOwnership();
-#endif
 }
 
 void __cdecl DB_Cleanup()

@@ -303,11 +303,11 @@ void __cdecl CG_TraceCapsule(
     int passEntityNum,
     int contentMask);
 
-#ifdef DEDICATED
-static const pmoveHandler_t pmoveHandlers[2] = { { G_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent} }; // idb
-#else
+//#ifdef DEDICATED
+//static const pmoveHandler_t pmoveHandlers[2] = { { G_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent} }; // idb
+//#else
 static const pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent} }; // idb
-#endif
+//#endif
 
 // bg_jump
 extern const dvar_t *jump_height;

@@ -1502,10 +1502,8 @@ void __cdecl RuntimeError(char *codePos, unsigned int index, const char *msg, co
         }
         v5 = scrVmPub.abort_on_error || scrVmPub.terminal_error;
         abort_on_error = v5;
-#ifndef DEDICATED
         if (Scr_IgnoreErrors())
             abort_on_error = 0;
-#endif
         RuntimeErrorInternal(abort_on_error ? 23 : 6, codePos, index, msg);
         if (abort_on_error)
         {

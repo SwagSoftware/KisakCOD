@@ -202,7 +202,6 @@ char bgShockChannelNames[64][80];
 
 void __cdecl BG_RegisterShockVolumeDvars()
 {
-#ifndef DEDICATED
     DvarLimits min; // [esp+4h] [ebp-28h]
     snd_entchannel_info_t *channelName; // [esp+24h] [ebp-8h]
     int i; // [esp+28h] [ebp-4h]
@@ -219,7 +218,6 @@ void __cdecl BG_RegisterShockVolumeDvars()
         min.value.min = 0.0;
         bg_shock_volume[i] = Dvar_RegisterFloat(bgShockChannelNames[i], 0.5, min, 0x80u, "");
     }
-#endif
 }
 
 void __cdecl BG_RegisterDvars()
@@ -2011,7 +2009,6 @@ void __cdecl BG_LerpHudColors(const hudelem_s *elem, int time, hudelem_color_t *
 
 int __cdecl BG_LoadShellShockDvars(const char *name)
 {
-#ifndef DEDICATED
     int EntChannelCount; // eax
     char *filebuf; // [esp+0h] [ebp-1C4h]
     const char *bg_shock_dvar_names[91]; // [esp+4h] [ebp-1C0h] BYREF
@@ -2039,14 +2036,10 @@ int __cdecl BG_LoadShellShockDvars(const char *name)
         Com_PrintError(17, "couldn't open 'shock/default.shock'. This is a default shock file that you should have.\n");
         return 0;
     }
-#else
-    return 0;
-#endif
 }
 
 void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
 {
-#ifndef DEDICATED
     const char *v1; // eax
     float v2; // [esp+8h] [ebp-ECh]
     float v3; // [esp+Ch] [ebp-E8h]
@@ -2192,12 +2185,10 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
     parms->lookControl.maxYawSpeed = bg_shock_lookControl_maxyawspeed->current.value;
     parms->lookControl.mouseSensitivity = bg_shock_lookControl_mousesensitivityscale->current.value;
     parms->movement.affect = bg_shock_movement->current.enabled;
-#endif
 }
 
 int __cdecl BG_SaveShellShockDvars(const char *name)
 {
-#ifndef DEDICATED
     int EntChannelCount; // eax
     const char *bg_shock_dvar_names[91]; // [esp+10h] [ebp-180h] BYREF
     const char *fullpath; // [esp+184h] [ebp-Ch]
@@ -2217,9 +2208,6 @@ int __cdecl BG_SaveShellShockDvars(const char *name)
     FS_Write(filebuf, strlen(filebuf), fh);
     FS_FCloseFile(fh);
     return 1;
-#else
-    return 0;
-#endif
 }
 
 shellshock_parms_t *__cdecl BG_GetShellshockParms(unsigned int index)

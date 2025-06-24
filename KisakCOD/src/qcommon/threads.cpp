@@ -661,7 +661,6 @@ WinThreadLock __cdecl Win_GetThreadLock()
 
 void Win_UpdateThreadLock()
 {
-#ifndef DEDICATED
     if (s_cpuCount == 1)
     {
         s_threadLock = THREAD_LOCK_ALL;
@@ -677,7 +676,6 @@ void Win_UpdateThreadLock()
             threadLock = THREAD_LOCK_MINIMAL;
         Win_SetThreadLock(threadLock);
     }
-#endif
 }
 
 void __cdecl Sys_BeginLoadThreadPriorities()

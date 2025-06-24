@@ -1413,10 +1413,8 @@ void __cdecl MSG_WriteEntityRemoval(
         MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1557, 0, "%s", "from");
     if (msg->readOnly)
         MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1558, 0, "%s", "!msg->readOnly");
-#ifndef DEDICATED
     if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
         Com_Printf(16, "W|%3i: #%-3i remove\n", msg->cursize, *(unsigned int *)from);
-#endif
     if (sv_debugPacketContents->current.enabled)
         Com_Printf(16, "Entity was removed\n");
     SV_PacketDataIsOverhead(snapInfo->clientNum, msg);

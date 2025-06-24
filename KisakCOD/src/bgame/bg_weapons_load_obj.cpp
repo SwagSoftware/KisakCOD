@@ -934,7 +934,6 @@ int __cdecl Weapon_GetStringArrayIndex(const char *value, char **stringArray, in
 
 snd_alias_list_t **__cdecl BG_RegisterSurfaceTypeSounds(const char *surfaceSoundBase)
 {
-#ifndef DEDICATED
     char *v2; // eax
     snd_alias_list_t *SoundAlias; // eax
     char v4; // [esp+3h] [ebp-131h]
@@ -982,9 +981,6 @@ snd_alias_list_t **__cdecl BG_RegisterSurfaceTypeSounds(const char *surfaceSound
     } while (v4);
     surfaceTypeSoundLists[surfaceTypeSoundListCount++].soundAliasList = result;
     return result;
-#else
-    return NULL;
-#endif
 }
 
 int __cdecl BG_ParseWeaponDefSpecificFieldType(unsigned __int8 *pStruct, const char *pValue, int iFieldType)
@@ -1284,7 +1280,6 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
                         BG_ParseWeaponDefSpecificFieldType,
                         SetConfigString2))
                     {
-#ifndef DEDICATED
                         if (I_stricmp(two, "defaultweapon_mp"))
                         {
                             if (!weapDef->viewLastShotEjectEffect)
@@ -1317,7 +1312,6 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
                                 weapDef->emptyFireSound = v7;
                             }
                         }
-#endif
                         BG_SetupTransitionTimes(weapDef);
                         BG_CheckWeaponDamageRanges(weapDef);
                         if (weapDef->enemyCrosshairRange > 15000.0)

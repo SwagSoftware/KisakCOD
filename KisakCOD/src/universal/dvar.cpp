@@ -157,15 +157,12 @@ char *__cdecl Dvar_InfoString(int localClientNum, char bit)
     const char *UsernameForLocalClient; // eax
 
     info1[0] = 0;
-#ifndef DEDICATED
     Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))Dvar_InfoStringSingle, &bit);
     if ((bit & 2) != 0)
     {
         UsernameForLocalClient = CL_GetUsernameForLocalClient();
         Info_SetValueForKey(info1, "name", UsernameForLocalClient);
     }
-#else
-#endif
     return info1;
 }
 

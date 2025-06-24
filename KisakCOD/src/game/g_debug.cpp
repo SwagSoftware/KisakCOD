@@ -5,9 +5,7 @@
 
 void __cdecl G_DebugLine(const float *start, const float *end, const float *color, int depthTest)
 {
-#ifndef DEDICATED
     CL_AddDebugLine(start, end, color, depthTest, 0, 1);
-#endif
 }
 
 void __cdecl G_DebugLineWithDuration(
@@ -17,16 +15,12 @@ void __cdecl G_DebugLineWithDuration(
     int depthTest,
     int duration)
 {
-#ifndef DEDICATED
     CL_AddDebugLine(start, end, color, depthTest, duration, 1);
-#endif
 }
 
 void __cdecl G_DebugStar(const float *point, const float *color)
 {
-#ifndef DEDICATED
     CL_AddDebugStar(point, color, 0, 1);
-#endif
 }
 
 void __cdecl G_DebugStarWithText(
@@ -36,9 +30,7 @@ void __cdecl G_DebugStarWithText(
     char *string,
     float fontsize)
 {
-#ifndef DEDICATED
     CL_AddDebugStarWithText(point, starColor, textColor, string, fontsize, 0, 1);
-#endif
 }
 
 void __cdecl G_DebugBox(
@@ -50,7 +42,6 @@ void __cdecl G_DebugBox(
     int depthTest,
     int duration)
 {
-#ifndef DEDICATED
     float v7; // [esp+0h] [ebp-94h]
     float v8; // [esp+10h] [ebp-84h]
     unsigned int j; // [esp+14h] [ebp-80h]
@@ -83,7 +74,6 @@ void __cdecl G_DebugBox(
     }
     for (ia = 0; ia < 0xC; ++ia)
         G_DebugLineWithDuration(&v[3 * iEdgePairs[ia][0]], &v[3 * iEdgePairs[ia][1]], color, depthTest, duration);
-#endif
 }
 
 void __cdecl G_DebugCircle(
@@ -94,7 +84,6 @@ void __cdecl G_DebugCircle(
     int onGround,
     int duration)
 {
-#ifndef DEDICATED
     float eyepos[3]; // [esp+18h] [ebp-18h] BYREF
     float dir[3]; // [esp+24h] [ebp-Ch] BYREF
 
@@ -113,7 +102,6 @@ void __cdecl G_DebugCircle(
         Vec3Sub(center, eyepos, dir);
     }
     G_DebugCircleEx(center, radius, dir, color, depthTest, duration);
-#endif
 }
 
 void __cdecl G_DebugCircleEx(
@@ -124,7 +112,6 @@ void __cdecl G_DebugCircleEx(
     int depthTest,
     int duration)
 {
-#ifndef DEDICATED
     float fAngle; // [esp+1Ch] [ebp-F4h]
     float fCos; // [esp+20h] [ebp-F0h]
     float fCosa; // [esp+20h] [ebp-F0h]
@@ -151,6 +138,5 @@ void __cdecl G_DebugCircleEx(
     }
     for (i = 0; i < 0x10; ++i)
         G_DebugLineWithDuration(v[i], v[(i + 1) % 0x10], color, depthTest, duration);
-#endif
 }
 

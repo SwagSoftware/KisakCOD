@@ -60,14 +60,10 @@ void __cdecl CM_InitThreadData(unsigned int threadContext)
 
 void __cdecl CM_LoadMapData(const char *name)
 {
-#ifndef DEDICATED
     if (useFastFile->current.enabled)
         CM_LoadMapData_FastFile(name);
     else
         CM_LoadMapData_LoadObj(name);
-#else
-    CM_LoadMapData_FastFile(name);
-#endif
 }
 
 void __cdecl CM_LoadMapData_FastFile(const char *name)

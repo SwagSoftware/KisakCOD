@@ -107,9 +107,7 @@ void __cdecl Scr_BeginLoadScripts()
         MyAssertHandler(".\\script\\scr_main.cpp", 156, 0, "%s", "!scrCompilePub.script_loading");
     scrCompilePub.script_loading = 1;
     Scr_InitOpcodeLookup();
-#ifndef DEDICATED
     Scr_InitDebuggerMain();
-#endif
     if (scrCompilePub.loadedscripts)
         MyAssertHandler(".\\script\\scr_main.cpp", 164, 0, "%s", "!scrCompilePub.loadedscripts");
     scrCompilePub.loadedscripts = Scr_AllocArray();
@@ -167,9 +165,7 @@ void __cdecl Scr_EndLoadScripts()
         KISAK_NULLSUB();
         SL_ShutdownSystem(2u);
     }
-#ifndef DEDICATED
     Scr_InitDebugger();
-#endif
     scrCompilePub.script_loading = 0;
     if (!scrCompilePub.loadedscripts)
         MyAssertHandler(".\\script\\scr_main.cpp", 415, 0, "%s", "scrCompilePub.loadedscripts");
@@ -348,10 +344,8 @@ void __cdecl Scr_FreeScripts(unsigned __int8 sys)
         scrAnimPub.animtree_loading = 0;
         Scr_EndLoadAnimTrees();
     }
-#ifndef DEDICATED
     Scr_ShutdownDebugger();
     Scr_ShutdownDebuggerMain();
-#endif
     Scr_ShutdownEvaluate();
     SL_ShutdownSystem(1u);
     Scr_ShutdownOpcodeLookup();

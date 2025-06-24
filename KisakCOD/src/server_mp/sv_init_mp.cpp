@@ -429,18 +429,14 @@ void __cdecl SV_SpawnServer(char *server)
     }
     Scr_ParseGameTypeList();
     SV_SetGametype();
-#ifndef DEDICATED
     if (!mapIsPreloaded)
         CL_InitLoad(server, sv_gametype->current.string);
-#endif
     if (useFastFile->current.enabled && !mapIsPreloaded)
     {
         DB_SyncXAssets();
         DB_UpdateDebugZone();
     }
-#ifndef DEDICATED
     R_BeginRemoteScreenUpdate();
-#endif
     if (fs_debug->current.integer == 2)
         Dvar_SetInt((dvar_s *)fs_debug, 0);
     ProfLoad_Activate();
@@ -468,7 +464,6 @@ void __cdecl SV_SpawnServer(char *server)
 
     iassert(!strstr(server, "\\"));
     Dvar_SetStringByName("mapname", server);
-#ifndef DEDICATED
     R_EndRemoteScreenUpdate();
     if (!mapIsPreloaded)
     {
@@ -477,7 +472,6 @@ void __cdecl SV_SpawnServer(char *server)
         R_EndRemoteScreenUpdate();
         CL_ShutdownAll();
     }
-#endif
     SV_ShutdownGameProgs();
     Com_Printf(15, "------ Server Initialization ------\n");
     Com_Printf(15, "Server: %s\n", server);
@@ -508,9 +502,7 @@ void __cdecl SV_SpawnServer(char *server)
     if (!mapIsPreloaded)
     {
         ProfLoad_Begin("start loading client");
-#ifndef DEDICATED
         CL_StartLoading();
-#endif
         ProfLoad_End();
         if (useFastFile->current.enabled)
         {
@@ -519,17 +511,13 @@ void __cdecl SV_SpawnServer(char *server)
             zoneInfo[0].freeFlags = 8;
             DB_LoadXAssets(zoneInfo, 1u, 0);
             iassert(sv_loadMyChanges);
-#ifndef DEDICATED
             if (sv_loadMyChanges->current.enabled)
             {
                 Cbuf_ExecuteBuffer(0, CL_ControllerIndexFromClientNum(0), "loadzone mychanges\n");
             }
-#endif
         }
     }
-#ifndef DEDICATED
     R_BeginRemoteScreenUpdate();
-#endif
     sv.emptyConfigString = SL_GetString_((char *)"", 0, 19);
     for (i = 0; i < 2442; ++i)
     {
@@ -558,13 +546,11 @@ void __cdecl SV_SpawnServer(char *server)
     Dvar_SetInt((dvar_s *)sv_serverid, sv_serverId_value);
     sv.start_frameTime = com_frameTime;
     sv.state = SS_LOADING;
-#ifndef DEDICATED
     if (!useFastFile->current.enabled)
     {
         Com_GetBspFilename(filename, 0x40u, server);
         Com_LoadSoundAliases(filename, "all_mp", SASYS_GAME);
     }
-#endif
     ProfLoad_Begin("Init game");
     SV_InitGameProgs(savepersist);
     ProfLoad_End();
@@ -632,9 +618,7 @@ void __cdecl SV_SpawnServer(char *server)
     //    EnablePbSv();
     //else
     //    DisablePbSv();
-#ifndef DEDICATED
     R_EndRemoteScreenUpdate();
-#endif
     Sys_EndLoadThreadPriorities();
 }
 
@@ -860,13 +844,11 @@ void __cdecl SV_Shutdown(const char *finalmsg)
         SV_FreeClients();
         SV_ClearServer();
         Dvar_SetBool((dvar_s *)com_sv_running, 0);
-#ifndef DEDICATED
         for (client = 0; client < 1; ++client)
         {
             if (CL_IsLocalClientActive(client))
                 CL_Disconnect(client);
         }
-#endif
         memset(&svs, 0, sizeof(svs));
         bgs = 0;
         Com_Printf(15, "---------------------------\n");
