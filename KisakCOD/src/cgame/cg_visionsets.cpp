@@ -93,10 +93,7 @@ void __cdecl CG_AddVisionSetMenuItem(XAssetHeader header)
                 1,
                 "%s",
                 "visionSetNameEnd - visionSetNameBegin < static_cast<int>( sizeof( visionSetName ) )");
-        strncpy(
-            (unsigned __int8 *)visionSetName,
-            (unsigned __int8 *)visionSetNameBegin,
-            visionSetNameEnd - visionSetNameBegin);
+        strncpy(visionSetName, visionSetNameBegin, visionSetNameEnd - visionSetNameBegin);
         visionSetName[visionSetNameEnd - visionSetNameBegin] = 0;
         _snprintf(devguiPath, 0x100u, "Renderer/Vision Sets/%s", visionSetName);
         _snprintf(command, 0x100u, "VisionSetNaked %s", visionSetName);

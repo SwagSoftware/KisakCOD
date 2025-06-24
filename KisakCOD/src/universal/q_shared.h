@@ -279,14 +279,14 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
 
-typedef          char   int8;
+typedef   signed char   int8; // LWSS: slight changes here made to conform with steam api...
 typedef   signed char   sint8;
 typedef unsigned char   uint8;
 typedef          short  int16;
 typedef   signed short  sint16;
 typedef unsigned short  uint16;
-typedef long				int32;
-typedef unsigned long		uint32;
+typedef __int32				int32;
+typedef unsigned __int32 uint32;
 typedef signed long			sint32;
 typedef ll              int64;
 typedef ll              sint64;

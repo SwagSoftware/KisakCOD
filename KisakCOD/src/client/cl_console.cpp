@@ -3373,11 +3373,11 @@ int __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
     queryPos = (char *)I_stristr(query, matchToText);
     if (queryPos)
     {
-        strncpy((unsigned __int8 *)colorCoded, (unsigned __int8 *)query, queryPos - query);
+        strncpy(colorCoded, query, queryPos - query);
         strcpy(&colorCoded[queryPos - query], "^2");
         colorCodedPosb = queryPos - query + 2;
         v11 = strlen(matchToText);
-        strncpy((unsigned __int8 *)&colorCoded[colorCodedPosb], (unsigned __int8 *)queryPos, v11);
+        strncpy(&colorCoded[colorCodedPosb], queryPos, v11);
         colorCodedPosc = v11 + colorCodedPosb;
         strcpy(&colorCoded[colorCodedPosc], "^7");
         colorCodedPosa = colorCodedPosc + 2;

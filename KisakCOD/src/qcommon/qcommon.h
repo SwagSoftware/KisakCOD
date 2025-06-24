@@ -1383,12 +1383,6 @@ void CL_CubemapShotUsage();
 
 
 
-// RANDOM INLINE SHIT
-inline void __cdecl strncpy(unsigned __int8 *dest, unsigned __int8 *src, unsigned int count)
-{
-    strncpy((char *)dest, (char *)src, count);
-}
-
 /**
  * stristr - Case insensitive strstr()
  * @haystack: Where we will search for our @needle

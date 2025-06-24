@@ -3360,7 +3360,9 @@ void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actua
                     checksum[0] = 0;
                     v9 = (char *)Dvar_GetVariantString("cdkey5");
                     I_strncat(checksum, 1024, v9);
-                    if (CL_CDKeyValidate(key, checksum))
+
+                    //if (CL_CDKeyValidate(key, checksum)) // LWSS: this was just some settings UI Code that checks if your CD Key was valid.
+                    if (true)
                     {
                         v10 = UI_SafeTranslateString("EXE_CDKEYVALID");
                         Dvar_SetStringByName("ui_cdkeyvalid", v10);

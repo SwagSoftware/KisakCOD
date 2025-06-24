@@ -30,6 +30,13 @@
 #include <universal/profile.h>
 #include <qcommon/com_bsp.h>
 
+#ifdef WIN32
+#include <win32/win_steam.h>
+#include <universal/base64.h>
+#else
+#error Steam Auth for Arch
+#endif
+
 const dvar_t *cl_conXOffset;
 const dvar_t *cl_hudDrawsBehindsUI;
 const dvar_t *cl_showSend;
@@ -482,6 +489,9 @@ void __cdecl CL_Disconnect(int localClientNum)
         if (connstate >= CA_CONNECTING)
             clientUIActives[0].keyCatchers &= 1u;
         KISAK_NULLSUB();
+        // LWSS ADD
+        Steam_CancelClientTicket();
+        // LWSS END
         if (CL_AllLocalClientsDisconnected())
         {
             autoupdateStarted = 0;
@@ -526,70 +536,70 @@ void __cdecl CL_ForwardCommandToServer(int localClientNum, const char *string)
 
 void __cdecl CL_RequestAuthorization(netsrc_t localClientNum)
 {
-    __int16 v1; // ax
-    const char *v2; // eax
-    int j; // [esp+10h] [ebp-78h]
-    int l; // [esp+14h] [ebp-74h]
-    char md5Str[36]{ 0 }; // [esp+18h] [ebp-70h] BYREF
-    const dvar_s *v6; // [esp+3Ch] [ebp-4Ch]
-    char nums[64]; // [esp+40h] [ebp-48h] BYREF
-    int i; // [esp+84h] [ebp-4h]
-
-    lastUpdateKeyAuthTime = cls.realtime;
+    //__int16 v1; // ax
+    //const char *v2; // eax
+    //int j; // [esp+10h] [ebp-78h]
+    //int l; // [esp+14h] [ebp-74h]
+    //char md5Str[36]{ 0 }; // [esp+18h] [ebp-70h] BYREF
+    //const dvar_s *v6; // [esp+3Ch] [ebp-4Ch]
+    //char nums[64]; // [esp+40h] [ebp-48h] BYREF
+    //int i; // [esp+84h] [ebp-4h]
+    //
+    //lastUpdateKeyAuthTime = cls.realtime;
     // KISAKKEY
     //if (!CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
     //{
     //    Com_Error(ERR_DROP, "EXE_ERR_INVALID_CD_KEY");
     //    return;
     //}
-    if (!cls.authorizeServer.port)
-    {
-        Com_Printf(14, "Resolving %s\n", com_authServerName->current.string);
-        if (!NET_StringToAdr((char *)com_authServerName->current.integer, &cls.authorizeServer))
-        {
-            Com_Printf(14, "Couldn't resolve address\n");
-            return;
-        }
-        cls.authorizeServer.port = BigShort(com_authPort->current.integer);
-        v1 = BigShort(cls.authorizeServer.port);
-        Com_Printf(
-            14,
-            "%s resolved to %i.%i.%i.%i:%i\n",
-            com_authServerName->current.string,
-            cls.authorizeServer.ip[0],
-            cls.authorizeServer.ip[1],
-            cls.authorizeServer.ip[2],
-            cls.authorizeServer.ip[3],
-            v1);
-    }
-    if (cls.authorizeServer.type != NA_BAD)
-    {
-        if (Dvar_GetBool("fs_restrict"))
-        {
-            I_strncpyz(nums, "demo", 64);
-        }
-        else
-        {
-            j = 0;
-            l = strlen(cl_cdkey);
-            if (l > 32)
-                l = 32;
-            for (i = 0; i < l; ++i)
-            {
-                if (cl_cdkey[i] >= 48 && cl_cdkey[i] <= 57
-                    || cl_cdkey[i] >= 97 && cl_cdkey[i] <= 122
-                    || cl_cdkey[i] >= 65 && cl_cdkey[i] <= 90)
-                {
-                    nums[j++] = cl_cdkey[i];
-                }
-            }
-            nums[j] = 0;
-        }
-        v6 = Dvar_RegisterBool("cl_anonymous", 0, 0x1Bu, "Allow anonymous log in");
-        //CL_BuildMd5StrFromCDKey(md5Str);
-        v2 = va("getKeyAuthorize %i %s PB %s", v6->current.color[0], nums, md5Str);
-        NET_OutOfBandPrint(localClientNum, cls.authorizeServer, v2);
-    }
+    //if (!cls.authorizeServer.port)
+    //{
+    //    Com_Printf(14, "Resolving %s\n", com_authServerName->current.string);
+    //    if (!NET_StringToAdr((char *)com_authServerName->current.integer, &cls.authorizeServer))
+    //    {
+    //        Com_Printf(14, "Couldn't resolve address\n");
+    //        return;
+    //    }
+    //    cls.authorizeServer.port = BigShort(com_authPort->current.integer);
+    //    v1 = BigShort(cls.authorizeServer.port);
+    //    Com_Printf(
+    //        14,
+    //        "%s resolved to %i.%i.%i.%i:%i\n",
+    //        com_authServerName->current.string,
+    //        cls.authorizeServer.ip[0],
+    //        cls.authorizeServer.ip[1],
+    //        cls.authorizeServer.ip[2],
+    //        cls.authorizeServer.ip[3],
+    //        v1);
+    //}
+    //if (cls.authorizeServer.type != NA_BAD)
+    //{
+    //    if (Dvar_GetBool("fs_restrict"))
+    //    {
+    //        I_strncpyz(nums, "demo", 64);
+    //    }
+    //    else
+    //    {
+    //        j = 0;
+    //        l = strlen(cl_cdkey);
+    //        if (l > 32)
+    //            l = 32;
+    //        for (i = 0; i < l; ++i)
+    //        {
+    //            if (cl_cdkey[i] >= 48 && cl_cdkey[i] <= 57
+    //                || cl_cdkey[i] >= 97 && cl_cdkey[i] <= 122
+    //                || cl_cdkey[i] >= 65 && cl_cdkey[i] <= 90)
+    //            {
+    //                nums[j++] = cl_cdkey[i];
+    //            }
+    //        }
+    //        nums[j] = 0;
+    //    }
+    //    v6 = Dvar_RegisterBool("cl_anonymous", 0, 0x1Bu, "Allow anonymous log in");
+    //    //CL_BuildMd5StrFromCDKey(md5Str);
+    //    v2 = va("getKeyAuthorize %i %s PB %s", v6->current.color[0], nums, md5Str);
+    //    NET_OutOfBandPrint(localClientNum, cls.authorizeServer, v2);
+    //}
 }
 
 void __cdecl CL_ForwardToServer_f()
@@ -996,14 +1006,16 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
     int c; // [esp+D74h] [ebp-414h]
     char pkt[1036]; // [esp+D78h] [ebp-410h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    unsigned char *pSteamClientTicket = NULL;
+    uint32 steamClientTicketSize = 0;
+    char steamIDbuf[25];
+    unsigned char steamTicketBase64[2048]{ 0 };
+
+#ifdef _DEBUG
+    unsigned char steamTicketDecodeBuf[1024]{ 0 };
+#endif
+
+    iassert(localClientNum == 0);
     connectionState = clientUIActives[0].connectionState;
     if (clientUIActives[0].connectionState == CA_CONNECTING
         || connectionState == CA_CHALLENGING
@@ -1032,7 +1044,14 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 pktlen = &pkt[strlen(pkt) + 1] - &pkt[1];
                 //PbClientConnecting(1, pkt, &pktlen);
                 //CL_BuildMd5StrFromCDKey(md5Str);
-                v2 = va("getchallenge 0 \"%s\"", md5Str);
+                iassert(Steam_GetRawClientTicket(&pSteamClientTicket, &steamClientTicketSize));
+
+                b64_encode(pSteamClientTicket, steamClientTicketSize, steamTicketBase64);
+#ifdef _DEBUG
+                iassert(b64_decode(steamTicketBase64, strlen((char *)steamTicketBase64), steamTicketDecodeBuf) == steamClientTicketSize);
+#endif
+                //v2 = va("getchallenge 0 \"%s\"", md5Str);
+                v2 = va("getchallenge 0 \"%s\" \"%llu\"", steamTicketBase64, Steam_GetClientSteamID64());
                 NET_OutOfBandPrint(localClientNum, clc->serverAddress, v2);
                 break;
             case CA_CHALLENGING:
@@ -1404,14 +1423,8 @@ char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t f
     }
     if (!I_stricmp(c, "vt"))
         return 1;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+
+    iassert(localClientNum == 0);
     connstate = clientUIActives[0].connectionState;
     if (I_stricmp(c, "challengeResponse"))
     {

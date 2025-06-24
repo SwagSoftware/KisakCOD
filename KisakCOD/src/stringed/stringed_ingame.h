@@ -520,7 +520,7 @@ struct CStringEdPackage // sizeof=0x78
                             v13 = i - v11;
                             if (v13 > 0x3FF)
                                 v13 = 1023;
-                            strncpy((unsigned __int8 *)sThisLanguage, v11, v13);
+                            strncpy(sThisLanguage, (char*)v11, v13);
                             CStringEdPackage::InsideQuotes(&v19, (const char *)&v11[strlen(sThisLanguage)]);
                             CStringEdPackage::ConvertCRLiterals_Read(&sentence, v19);
                             //v14 = (std::string *)sentence._Bx._Ptr;
@@ -572,7 +572,7 @@ struct CStringEdPackage // sizeof=0x78
         if (v3)
         {
             iCharsToCopy = v3 - (_DWORD)*psParsePos;
-            strncpy((unsigned __int8 *)psDest, (unsigned __int8 *)*psParsePos, iCharsToCopy);
+            strncpy(psDest, *psParsePos, iCharsToCopy);
             psDest[iCharsToCopy] = 0;
             for (*psParsePos += iCharsToCopy; **psParsePos; ++*psParsePos)
             {

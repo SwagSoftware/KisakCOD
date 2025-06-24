@@ -29,8 +29,8 @@ $59835072FC2CD3936CE4A4C9F556010B cg_waitingScriptMenu[1];
 
 void __cdecl CG_ParseServerInfo(int localClientNum)
 {
-    unsigned __int8 *v1; // eax
-    unsigned __int8 *v2; // eax
+    const char *v1; // eax
+    const char *v2; // eax
     const char *v3; // eax
     char *info; // [esp+0h] [ebp-Ch]
     const char *mapname; // [esp+8h] [ebp-4h]
@@ -44,10 +44,10 @@ void __cdecl CG_ParseServerInfo(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v1 = (unsigned __int8 *)Info_ValueForKey(info, "sv_hostname");
-    strncpy((unsigned __int8 *)cgsArray[0].szHostName, v1, 0x100u);
-    v2 = (unsigned __int8 *)Info_ValueForKey(info, "g_gametype");
-    strncpy((unsigned __int8 *)cgsArray[0].gametype, v2, 0x20u);
+    v1 = Info_ValueForKey(info, "sv_hostname");
+    strncpy(cgsArray[0].szHostName, v1, 0x100u);
+    v2 = Info_ValueForKey(info, "g_gametype");
+    strncpy(cgsArray[0].gametype, v2, 0x20u);
     if (!cgsArray[0].localServer)
         Dvar_SetStringByName("g_gametype", cgsArray[0].gametype);
     v3 = Info_ValueForKey(info, "sv_maxclients");

@@ -148,16 +148,16 @@ int __cdecl R_PickMaterial(
     v8 = (trace.surfaceFlags & 0x1F00000) >> 20;
     index = (unsigned __int8)v8;
     if ((_BYTE)v8 && index < 29)
-        strncpy((unsigned __int8 *)surfaceFlags, (unsigned __int8 *)infoParms[index - 1].name, charLimit);
+        strncpy(surfaceFlags, infoParms[index - 1].name, charLimit);
     else
-        strncpy((unsigned __int8 *)surfaceFlags, (unsigned __int8 *)"^1default^7", charLimit);
+        strncpy(surfaceFlags, "^1default^7", charLimit);
     if (surfaceFlags[charLimit - 1])
         return 0;
     surfaceFlagsLen = strlen(surfaceFlags);
     if ((trace.contents & 1) != 0)
-        strncpy((unsigned __int8 *)contents, (unsigned __int8 *)"solid", charLimit);
+        strncpy(contents, "solid", charLimit);
     else
-        strncpy((unsigned __int8 *)contents, (unsigned __int8 *)"^3nonsolid^7", charLimit);
+        strncpy(contents, "^3nonsolid^7", charLimit);
     if (contents[charLimit - 1])
         return 0;
     contentsLen = strlen(contents);
@@ -167,8 +167,8 @@ int __cdecl R_PickMaterial(
         {
             surfaceFlags[surfaceFlagsLen++] = 32;
             strncpy(
-                (unsigned __int8 *)&surfaceFlags[surfaceFlagsLen],
-                (unsigned __int8 *)infoParms[i].name,
+                &surfaceFlags[surfaceFlagsLen],
+                infoParms[i].name,
                 charLimit - surfaceFlagsLen);
             if (surfaceFlags[charLimit - 1])
                 return 0;
@@ -177,7 +177,7 @@ int __cdecl R_PickMaterial(
         if ((trace.contents & infoParms[i].contents) != 0)
         {
             contents[contentsLen++] = 32;
-            strncpy((unsigned __int8 *)&contents[contentsLen], (unsigned __int8 *)infoParms[i].name, charLimit - contentsLen);
+            strncpy(&contents[contentsLen], infoParms[i].name, charLimit - contentsLen);
             if (contents[charLimit - 1])
                 return 0;
             contentsLen += strlen(&contents[contentsLen]);

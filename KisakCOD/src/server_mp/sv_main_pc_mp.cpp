@@ -70,22 +70,23 @@ void __cdecl SV_MasterGameCompleteStatus()
 
 void __cdecl SV_MasterHeartbeat(const char *hbname)
 {
-    const char *v1; // eax
-    netadr_t *adr; // [esp+0h] [ebp-4h]
-
-    if (com_dedicated && com_dedicated->current.integer == 2 && svs.time >= svs.nextHeartbeatTime)
-    {
-        svs.nextHeartbeatTime = svs.time + 180000;
-        adr = (netadr_t *)SV_MasterAddress();
-        if (!adr)
-            MyAssertHandler(".\\server_mp\\sv_main_pc_mp.cpp", 94, 0, "%s", "adr");
-        if (adr->type != NA_BAD)
-        {
-            Com_Printf(15, "Sending heartbeat to %s\n", com_masterServerName->current.string);
-            v1 = va("heartbeat %s\n", hbname);
-            NET_OutOfBandPrint(NS_SERVER, *adr, v1);
-        }
-    }
+    // LWSS: this was disabled because the master server sends responses back that end up in the Steam Auth code
+    //const char *v1; // eax
+    //netadr_t *adr; // [esp+0h] [ebp-4h]
+    //
+    //if (com_dedicated && com_dedicated->current.integer == 2 && svs.time >= svs.nextHeartbeatTime)
+    //{
+    //    svs.nextHeartbeatTime = svs.time + 180000;
+    //    adr = (netadr_t *)SV_MasterAddress();
+    //    if (!adr)
+    //        MyAssertHandler(".\\server_mp\\sv_main_pc_mp.cpp", 94, 0, "%s", "adr");
+    //    if (adr->type != NA_BAD)
+    //    {
+    //        Com_Printf(15, "Sending heartbeat to %s\n", com_masterServerName->current.string);
+    //        v1 = va("heartbeat %s\n", hbname);
+    //        NET_OutOfBandPrint(NS_SERVER, *adr, v1);
+    //    }
+    //}
 }
 
 void __cdecl SV_MasterShutdown()

@@ -83,7 +83,7 @@ void __cdecl AddDebugStringInternal(
         string->color[2] = color[2];
         string->color[3] = color[3];
         string->scale = scale;
-        strncpy((unsigned __int8 *)string->text, (unsigned __int8 *)text, 0x5Fu);
+        strncpy(string->text, text, 0x5Fu);
         string->text[95] = 0;
         info->durations[info->num++] = duration;
     }

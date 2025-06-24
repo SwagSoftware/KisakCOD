@@ -6,6 +6,7 @@
 #include "win_localize.h"
 #include "win_net.h"
 #include "win_net_debug.h"
+#include "win_steam.h"
 
 //#include "resource.h"
 #include <errno.h>
@@ -782,6 +783,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Profile_Init();
 			Profile_InitContext(0);
 			KISAK_NULLSUB();
+			// LWSS ADD: Steam Init
+			Steam_Init();
+			// LWSS END
 			Com_Init(sys_cmdline);
 
 			if (!com_dedicated->current.integer)

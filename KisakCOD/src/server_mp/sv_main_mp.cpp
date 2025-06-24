@@ -15,6 +15,11 @@
 #include <script/scr_debugger.h>
 #include <universal/profile.h>
 
+#ifdef WIN32
+#include <win32/win_steam.h>
+#else
+#error Steam auth for Arch(Server)
+#endif
 
 
 const dvar_t *sv_allowedClan2;
@@ -1276,6 +1281,12 @@ void SV_PostFrame()
     
     SV_SendClientMessages();
     SV_MasterHeartbeat("COD-4");
+    // LWSS ADD: Steam Periodic Auth Check
+    if (com_dedicated->current.integer)
+    {
+        Steam_CheckClients();
+    }
+    // LWSS END
     
     Profile_Begin(306);
     FakeLag_Frame();

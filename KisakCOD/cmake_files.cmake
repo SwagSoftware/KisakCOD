@@ -739,6 +739,8 @@ set(UNIVERSAL
     "${SRC_DIR}/universal/aabbtree.h"
     "${SRC_DIR}/universal/assertive.cpp"
     "${SRC_DIR}/universal/assertive.h"
+	"${SRC_DIR}/universal/base64.cpp"
+	"${SRC_DIR}/universal/base64.h"
     "${SRC_DIR}/universal/com_constantconfigstrings.cpp"
     "${SRC_DIR}/universal/com_constantconfigstrings.h"
     "${SRC_DIR}/universal/com_convexhull.cpp"
@@ -799,6 +801,9 @@ set(WIN32
     "${SRC_DIR}/win32/win_syscon.cpp"
     "${SRC_DIR}/win32/win_voice.cpp"
     "${SRC_DIR}/win32/win_wndproc.cpp"
+	
+    "${SRC_DIR}/win32/win_steam.cpp"
+    "${SRC_DIR}/win32/win_steam.h"
 )
 source_group("win32" FILES ${WIN32})
 
@@ -853,4 +858,54 @@ set(ZLIB
 )
 source_group("zlib" FILES ${ZLIB})
 
-add_executable( ${BIN_NAME} ${SRCROOT} ${DYNENTITY} ${EFFECTSCORE} ${AIM_ASSIST} ${BGAME} ${BINKLIB} ${CGAME} ${CGAME_MP} ${CLIENT} ${CLIENT_MP} ${COMMON} ${DATABASE} ${DEVGUI} ${GAME} ${GAME_MP} ${GFX_D3D} ${GROUPVOICE} ${GROUPVOICE_SPEEX} ${MSSLIB} ${ODE} ${PHYSICS} ${PHYSICS_ODE} ${QCOMMON} ${RAGDOLL} ${SCRIPT} ${SERVER} ${SERVER_MP} ${SOUND} ${SPEEX} ${STRINGED} ${UI} ${UI_MP} ${UNIVERSAL} ${WIN32} ${XANIM} ${ZLIB})
+set(STEAM_HEADERS
+"${SRC_DIR}/steamsdk/steam/isteamapps.h"
+"${SRC_DIR}/steamsdk/steam/isteamappticket.h"
+"${SRC_DIR}/steamsdk/steam/isteamclient.h"
+"${SRC_DIR}/steamsdk/steam/isteamcontroller.h"
+"${SRC_DIR}/steamsdk/steam/isteamdualsense.h"
+"${SRC_DIR}/steamsdk/steam/isteamfriends.h"
+"${SRC_DIR}/steamsdk/steam/isteamgamecoordinator.h"
+"${SRC_DIR}/steamsdk/steam/isteamgameserver.h"
+"${SRC_DIR}/steamsdk/steam/isteamgameserverstats.h"
+"${SRC_DIR}/steamsdk/steam/isteamhtmlsurface.h"
+"${SRC_DIR}/steamsdk/steam/isteamhttp.h"
+"${SRC_DIR}/steamsdk/steam/isteaminput.h"
+"${SRC_DIR}/steamsdk/steam/isteaminventory.h"
+"${SRC_DIR}/steamsdk/steam/isteammatchmaking.h"
+"${SRC_DIR}/steamsdk/steam/isteammusic.h"
+"${SRC_DIR}/steamsdk/steam/isteammusicremote.h"
+"${SRC_DIR}/steamsdk/steam/isteamnetworking.h"
+"${SRC_DIR}/steamsdk/steam/isteamnetworkingmessages.h"
+"${SRC_DIR}/steamsdk/steam/isteamnetworkingsockets.h"
+"${SRC_DIR}/steamsdk/steam/isteamnetworkingutils.h"
+"${SRC_DIR}/steamsdk/steam/isteamparentalsettings.h"
+"${SRC_DIR}/steamsdk/steam/isteamps3overlayrenderer.h"
+"${SRC_DIR}/steamsdk/steam/isteamremoteplay.h"
+"${SRC_DIR}/steamsdk/steam/isteamremotestorage.h"
+"${SRC_DIR}/steamsdk/steam/isteamscreenshots.h"
+"${SRC_DIR}/steamsdk/steam/isteamtimeline.h"
+"${SRC_DIR}/steamsdk/steam/isteamugc.h"
+"${SRC_DIR}/steamsdk/steam/isteamuser.h"
+"${SRC_DIR}/steamsdk/steam/isteamuserstats.h"
+"${SRC_DIR}/steamsdk/steam/isteamutils.h"
+"${SRC_DIR}/steamsdk/steam/isteamvideo.h"
+"${SRC_DIR}/steamsdk/steam/matchmakingtypes.h"
+"${SRC_DIR}/steamsdk/steam/steam_api.h"
+"${SRC_DIR}/steamsdk/steam/steam_api_common.h"
+"${SRC_DIR}/steamsdk/steam/steam_api_flat.h"
+"${SRC_DIR}/steamsdk/steam/steam_api_internal.h"
+"${SRC_DIR}/steamsdk/steam/steam_gameserver.h"
+"${SRC_DIR}/steamsdk/steam/steamclientpublic.h"
+"${SRC_DIR}/steamsdk/steam/steamencryptedappticket.h"
+"${SRC_DIR}/steamsdk/steam/steamhttpenums.h"
+"${SRC_DIR}/steamsdk/steam/steamnetworkingfakeip.h"
+"${SRC_DIR}/steamsdk/steam/steamnetworkingtypes.h"
+"${SRC_DIR}/steamsdk/steam/steamps3params.h"
+"${SRC_DIR}/steamsdk/steam/steamtypes.h"
+"${SRC_DIR}/steamsdk/steam/steamuniverse.h"
+)
+source_group("steamsdk/steam" FILES ${STEAM_HEADERS})
+
+
+add_executable( ${BIN_NAME} ${SRCROOT} ${DYNENTITY} ${EFFECTSCORE} ${AIM_ASSIST} ${BGAME} ${BINKLIB} ${CGAME} ${CGAME_MP} ${CLIENT} ${CLIENT_MP} ${COMMON} ${DATABASE} ${DEVGUI} ${GAME} ${GAME_MP} ${GFX_D3D} ${GROUPVOICE} ${GROUPVOICE_SPEEX} ${MSSLIB} ${ODE} ${PHYSICS} ${PHYSICS_ODE} ${QCOMMON} ${RAGDOLL} ${SCRIPT} ${SERVER} ${SERVER_MP} ${SOUND} ${SPEEX} ${STRINGED} ${UI} ${UI_MP} ${UNIVERSAL} ${WIN32} ${XANIM} ${ZLIB} ${STEAM_HEADERS})

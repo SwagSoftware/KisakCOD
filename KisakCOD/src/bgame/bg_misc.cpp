@@ -2047,7 +2047,7 @@ int __cdecl BG_LoadShellShockDvars(const char *name)
 void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
 {
 #ifndef DEDICATED
-    unsigned __int8 *v1; // eax
+    const char *v1; // eax
     float v2; // [esp+8h] [ebp-ECh]
     float v3; // [esp+Ch] [ebp-E8h]
     float v4; // [esp+10h] [ebp-E4h]
@@ -2101,19 +2101,16 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
     parms->view.kickRate = EQUAL_EPSILON / v5;
     parms->view.kickRadius = bg_shock_viewKickRadius->current.value;
     parms->sound.affect = bg_shock_sound->current.enabled;
-    strncpy((unsigned __int8 *)parms->sound.loop, (unsigned __int8 *)bg_shock_soundLoop->current.integer, 0x40u);
-    strncpy(
-        (unsigned __int8 *)parms->sound.loopSilent,
-        (unsigned __int8 *)bg_shock_soundLoopSilent->current.integer,
-        0x40u);
-    strncpy((unsigned __int8 *)parms->sound.end, (unsigned __int8 *)bg_shock_soundEnd->current.integer, 0x40u);
-    strncpy((unsigned __int8 *)parms->sound.endAbort, (unsigned __int8 *)bg_shock_soundEndAbort->current.integer, 0x40u);
+    strncpy(parms->sound.loop, bg_shock_soundLoop->current.string, 0x40u);
+    strncpy(parms->sound.loopSilent, bg_shock_soundLoopSilent->current.string, 0x40u);
+    strncpy(parms->sound.end, bg_shock_soundEnd->current.string, 0x40u);
+    strncpy(parms->sound.endAbort, bg_shock_soundEndAbort->current.string, 0x40u);
     parms->sound.fadeInTime = (int)(bg_shock_soundFadeInTime->current.value * 1000.0f);
     parms->sound.fadeOutTime = (int)(bg_shock_soundFadeOutTime->current.value * 1000.0f);
     parms->sound.loopFadeTime = (int)(bg_shock_soundLoopFadeTime->current.value * 1000.0f);
     parms->sound.loopEndDelay = (int)(bg_shock_soundLoopEndDelay->current.value * 1000.0f);
-    v1 = (unsigned __int8 *)Dvar_EnumToString(bg_shock_soundRoomType);
-    strncpy((unsigned __int8 *)parms->sound.roomtype, v1, 0xFu);
+    v1 = Dvar_EnumToString(bg_shock_soundRoomType);
+    strncpy(parms->sound.roomtype, v1, 0xFu);
     parms->sound.roomtype[15] = 0;
     parms->sound.drylevel = bg_shock_soundDryLevel->current.value;
     parms->sound.wetlevel = bg_shock_soundWetLevel->current.value;

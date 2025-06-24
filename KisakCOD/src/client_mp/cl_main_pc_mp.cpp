@@ -6,6 +6,12 @@
 #include <client/client.h>
 #include <cgame_mp/cg_local_mp.h>
 
+#ifdef WIN32
+#include <win32/win_steam.h>
+#else
+#error Steam Auth for Arch
+#endif
+
 bool s_playerMute[64];
 
 int __cdecl CL_ServerStatus(char *serverAddress, char *serverStatusString, int maxLen)
@@ -323,7 +329,7 @@ void __cdecl CL_Connect_f()
                     clc->serverAddress.ip[3],
                     v1);
                 //if (NET_IsLocalAddress(clc->serverAddress) || CL_CDKeyValidate(cl_cdkey, cl_cdkeychecksum))
-                if (NET_IsLocalAddress(clc->serverAddress) || CL_CDKeyValidate(NULL, NULL))
+                if (NET_IsLocalAddress(clc->serverAddress) || CL_CDKeyValidate(clc->serverAddress))
                 {
                     if (Com_HasPlayerProfile())
                     {
@@ -372,10 +378,15 @@ void __cdecl CL_Connect_f()
     }
 }
 
-bool __cdecl CL_CDKeyValidate(const char *key, const char *checksum)
+// This is called by the Client to see if the Auth is even valid before sending to the Server.
+bool __cdecl CL_CDKeyValidate(netadr_t addr)
 {
-    // LWSS: this is going to be replaced with a different form of Auth
-    return true;
+#ifdef WIN32
+    return Steam_UpdateClientAuthTicket(addr);
+#else
+#error Steam Auth for Arch
+    return false;
+#endif
 }
 
 //bool __cdecl CL_CDKeyValidate(const char *key, const char *checksum)

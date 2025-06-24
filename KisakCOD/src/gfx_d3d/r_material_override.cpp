@@ -321,7 +321,7 @@ void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet)
     else
     {
         *(_DWORD *)remapName = *(_DWORD *)"sm2/";
-        strncpy((unsigned __int8 *)&remapName[4], (unsigned __int8 *)techSet->name, 0x3Cu);
+        strncpy(&remapName[4], techSet->name, 0x3Cu);
         remapName[63] = 0;
         techSet->remappedTechniqueSet = Material_FindTechniqueSet(remapName, MTL_TECHSET_NOT_FOUND_RETURN_DEFAULT);
         AssertValidRemappedTechniqueSet(techSet);

@@ -722,7 +722,7 @@ int __cdecl PS_ReadPunctuation(script_s *script, token_s *token)
         len = strlen(punc->p);
         if (&script->script_p[len] <= script->end_p && !strncmp(script->script_p, p, len))
         {
-            strncpy((unsigned __int8 *)token, (unsigned __int8 *)p, 0x400u);
+            strncpy(token->string, p, 0x400u);
             script->script_p += len;
             token->type = 5;
             token->subtype = punc->n;
@@ -1778,7 +1778,7 @@ define_s *__cdecl PC_DefineFromString(char *string)
 
     script = LoadScriptMemory(string, strlen(string), "*extern");
     memset((unsigned __int8 *)&src, 0, sizeof(src));
-    strncpy((unsigned __int8 *)&src, (unsigned __int8 *)"*extern", 0x40u);
+    strncpy(src.filename, "*extern", 0x40u);
     src.scriptstack = script;
     src.definehash = (define_s **)GetClearedMemory(0x1000u);
     res = PC_Directive_define(&src);
@@ -3060,8 +3060,8 @@ source_s *__cdecl LoadSourceFile(char *filename)
         return 0;
     script->next = 0;
     source = (source_s *)GetMemory(0x4D0u);
-    memset((unsigned __int8 *)source, 0, sizeof(source_s));
-    strncpy((unsigned __int8 *)source, (unsigned __int8 *)filename, 0x40u);
+    memset(source, 0, sizeof(source_s));
+    strncpy(source->filename, filename, 0x40u);
     source->scriptstack = script;
     source->tokens = 0;
     source->defines = 0;

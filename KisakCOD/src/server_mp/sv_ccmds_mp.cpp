@@ -13,6 +13,12 @@
 #include <script/scr_memorytree.h>
 #include <database/database.h>
 
+#ifdef WIN32
+#include <win32/win_steam.h>
+#else
+#error Steam auth for Arch(Server)
+#endif
+
 int sv_serverId_value;
 
 // Jesus christ these are ugly, koutsie go fix this
@@ -325,7 +331,12 @@ void __cdecl SV_AddOperatorCommands()
         Cmd_AddCommandInternal("killserver", Cbuf_AddServerText_f, &SV_KillServer_f_VAR);
         Cmd_AddServerCommandInternal("killserver", SV_KillServer_f, &SV_KillServer_f_VAR_SERVER);
         if (com_dedicated->current.integer)
+        {
             SV_AddDedicatedCommands();
+            // LWSS ADD
+            Steam_SV_AddTestCommands();
+            // LWSS END
+        }
         Cmd_AddCommandInternal("scriptUsage", Cbuf_AddServerText_f, &SV_ScriptUsage_f_VAR);
         Cmd_AddServerCommandInternal("scriptUsage", SV_ScriptUsage_f, &SV_ScriptUsage_f_VAR_SERVER);
         Cmd_AddCommandInternal("scriptDebugger", Cbuf_AddServerText_f, &SV_ScriptDebugger_f_VAR);

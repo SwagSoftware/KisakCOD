@@ -9,6 +9,13 @@
 #include <universal/com_constantconfigstrings.h>
 #include <universal/profile.h>
 
+#ifdef WIN32
+#include <win32/win_steam.h>
+#include <universal/base64.h>
+#else
+#error Steam auth for Arch (Server)
+#endif
+
 struct ucmd_t // sizeof=0xC
 {                                       // ...
     const char *name;
@@ -123,7 +130,8 @@ void __cdecl SV_GetChallenge(netadr_t from)
     __int16 v3; // ax
     const char *v4; // eax
     netadr_t v5; // [esp-14h] [ebp-30h]
-    char *cdkeyHash; // [esp+4h] [ebp-18h]
+    //char *cdkeyHash; // [esp+4h] [ebp-18h]
+    char *clientSteamTicketBase64;
     challenge_t *challenge; // [esp+8h] [ebp-14h]
     int oldest; // [esp+Ch] [ebp-10h]
     int i; // [esp+10h] [ebp-Ch]
@@ -153,62 +161,94 @@ void __cdecl SV_GetChallenge(netadr_t from)
         challenge->connected = 0;
         i = oldest;
     }
-    cdkeyHash = (char *)SV_Cmd_Argv(2);
-    if (SV_IsBannedGuid(cdkeyHash))
+    //cdkeyHash = (char *)SV_Cmd_Argv(2);
+    clientSteamTicketBase64 = (char *)SV_Cmd_Argv(2);
+    char *clientSteamID64 = (char *)SV_Cmd_Argv(3);
+    unsigned char decodedSteamTicket[1024 + 128]{ 0 };
+
+    if (!clientSteamTicketBase64[0] || !clientSteamID64[0])
     {
-        Com_Printf(15, "rejected connection from permanently banned GUID \"%s\"\n", cdkeyHash);
-        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error #KISAKTODO");
+        iassert(0); // guy didn't send enough information
+        return;
+    }
+
+    if (strlen(clientSteamTicketBase64) > sizeof(decodedSteamTicket))
+    {
+        iassert(0);
+        return;
+    }
+
+    uint32 decodedLen = b64_decode((unsigned char*)clientSteamTicketBase64, strlen(clientSteamTicketBase64), decodedSteamTicket);
+
+
+
+
+    //if (SV_IsBannedGuid(cdkeyHash))
+    if (SV_IsBannedGuid(clientSteamID64))
+    {
+        Com_Printf(15, "rejected connection from permanently banned GUID \"%s\"\n", clientSteamID64);
+        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15You are permanently banned from this server");
         memset((unsigned __int8 *)&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
     }
-    if (SV_IsTempBannedGuid(cdkeyHash))
+    //if (SV_IsTempBannedGuid(cdkeyHash))
+    if (SV_IsTempBannedGuid(clientSteamID64))
     {
-        Com_Printf(15, "rejected connection from temporarily banned GUID \"%s\"\n", cdkeyHash);
-        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error #KISAKTODO");
+        Com_Printf(15, "rejected connection from temporarily banned GUID \"%s\"\n", clientSteamID64);
+        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15You are temporarily banned from this server");
         memset((unsigned __int8 *)&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
     }
-    I_strncpyz(svs.challenges[i].cdkeyHash, cdkeyHash, 33);
-    if (!SV_ShouldAuthorizeAddress(from))
+
+    //I_strncpyz(svs.challenges[i].cdkeyHash, cdkeyHash, 33);
+    I_strncpyz(svs.challenges[i].cdkeyHash, clientSteamID64, 33);
+    
+    char *endptr;
+    uint64_t steamID64 = strtoull(clientSteamID64, &endptr, 10);
+
+    //if (!SV_ShouldAuthorizeAddress(from))
+    if (Steam_CheckClientTicket(decodedSteamTicket, decodedLen, steamID64))
     {
         challenge->pingTime = svs.time;
         v2 = va("challengeResponse %i", challenge->challenge);
         NET_OutOfBandPrint(NS_SERVER, from, v2);
         return;
     }
-    if (!svs.authorizeAddress.ip[0] && svs.authorizeAddress.type != NA_BAD)
-    {
-        Com_Printf(15, "Resolving %s\n", com_authServerName->current.string);
-        if (!NET_StringToAdr((char *)com_authServerName->current.integer, &svs.authorizeAddress))
-        {
-            Com_Printf(15, "Couldn't resolve address\n");
-            return;
-        }
-        svs.authorizeAddress.port = BigShort(com_authPort->current.integer);
-        v3 = BigShort(svs.authorizeAddress.port);
-        Com_Printf(
-            15,
-            "%s resolved to %i.%i.%i.%i:%i\n",
-            com_authServerName->current.string,
-            svs.authorizeAddress.ip[0],
-            svs.authorizeAddress.ip[1],
-            svs.authorizeAddress.ip[2],
-            svs.authorizeAddress.ip[3],
-            v3);
-    }
-    if (svs.time - svs.sv_lastTimeMasterServerCommunicated <= 1200000
-        || svs.time - challenge->firstTime <= 7000
-        || (v5 = *SV_MasterAddress(), NET_CompareAdr(from, v5)))
-    {
-        SV_AuthorizeRequest(from, svs.challenges[i].challenge, cdkeyHash);
-    }
-    else
-    {
-        Com_DPrintf(15, "authorize server timed out\n");
-        challenge->pingTime = svs.time;
-        v4 = va("challengeResponse %i", challenge->challenge);
-        NET_OutOfBandPrint(NS_SERVER, challenge->adr, v4);
-    }
+
+    //if (!svs.authorizeAddress.ip[0] && svs.authorizeAddress.type != NA_BAD)
+    //{
+    //    Com_Printf(15, "Resolving %s\n", com_authServerName->current.string);
+    //    if (!NET_StringToAdr((char *)com_authServerName->current.integer, &svs.authorizeAddress))
+    //    {
+    //        Com_Printf(15, "Couldn't resolve address\n");
+    //        return;
+    //    }
+    //    svs.authorizeAddress.port = BigShort(com_authPort->current.integer);
+    //    v3 = BigShort(svs.authorizeAddress.port);
+    //    Com_Printf(
+    //        15,
+    //        "%s resolved to %i.%i.%i.%i:%i\n",
+    //        com_authServerName->current.string,
+    //        svs.authorizeAddress.ip[0],
+    //        svs.authorizeAddress.ip[1],
+    //        svs.authorizeAddress.ip[2],
+    //        svs.authorizeAddress.ip[3],
+    //        v3);
+    //}
+
+    //if (svs.time - svs.sv_lastTimeMasterServerCommunicated <= 1200000
+    //    || svs.time - challenge->firstTime <= 7000
+    //    || (v5 = *SV_MasterAddress(), NET_CompareAdr(from, v5)))
+    //{
+    //    SV_AuthorizeRequest(from, svs.challenges[i].challenge, cdkeyHash);
+    //}
+    //else
+    //{
+    //    Com_DPrintf(15, "authorize server timed out\n");
+    //    challenge->pingTime = svs.time;
+    //    v4 = va("challengeResponse %i", challenge->challenge);
+    //    NET_OutOfBandPrint(NS_SERVER, challenge->adr, v4);
+    //}
 }
 
 int __cdecl SV_IsBannedGuid(const char *cdkeyHash)
@@ -872,6 +912,15 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
     bool translationForReason; // [esp+33h] [ebp-9h]
     challenge_t *challenge; // [esp+34h] [ebp-8h]
     int i; // [esp+38h] [ebp-4h]
+
+    // LWSS ADD
+    if (com_dedicated->current.integer)
+    {
+        char *endptr;
+        uint64_t steamID64 = strtoull(drop->cdkeyHash, &endptr, 10);
+        Steam_OnClientDropped(steamID64);
+    }
+    // LWSS END
 
     if (!drop->header.state)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1267, 0, "%s", "drop->header.state != CS_FREE");

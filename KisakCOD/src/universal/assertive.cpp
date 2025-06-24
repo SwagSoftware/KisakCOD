@@ -368,7 +368,7 @@ LABEL_90:
             ParseError("Couldn't find ')' for the name of the source file in line number section");
             return 0;
         }
-        strncpy((unsigned __int8*)filenameBuffer, (unsigned __int8*)pszNameStart + 1, v12 - pszNameStart - 1);
+        strncpy(filenameBuffer, pszNameStart + 1, v12 - pszNameStart - 1);
         filenameBuffer[pszNameStop - pszNameStart - 1] = 0;
         filenameSubStr = filenameBuffer;
         if (!SkipLines(1, fp))
