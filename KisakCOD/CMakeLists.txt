@@ -15,6 +15,25 @@ endif()
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../${CMAKE_BUILD_TYPE}/")
 
+# === Increment Build ===
+message("${CMAKE_CURRENT_SOURCE_DIR}/scripts/")
+
+if (WIN32)
+# Handle Windows
+add_custom_target(
+  update_build_number
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/increment_build.cmd ${SRC_DIR}
+  COMMENT "Running Windows build number script..."
+)
+else()
+# Handle Linux
+add_custom_target(
+  update_build_number
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/increment_build.sh ${SRC_DIR}
+  COMMENT "Running Linux build number script..."
+)
+endif()
+
 if (DEDICATED)
   message("===== KisakCOD Dedicated =====")
   set(BIN_NAME "KisakCOD-Dedi")
@@ -28,7 +47,7 @@ else()
   include(cmake_files.cmake)
 endif()
 
-
+add_dependencies(${BIN_NAME} update_build_number)
 
 
 set_target_properties(${BIN_NAME} PROPERTIES

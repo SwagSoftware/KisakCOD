@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# Check if run from KaisakCOD root (which must contain src/)
-if [[ ! -d "src" ]]; then
-    echo "This must be ran from the KaisakCOD root which contains CMakeLists.txt"
+# Check if path is provided
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 <path-to-src-folder>"
     exit 1
 fi
 
-BUILD_FILE="src/buildnumber.txt"
-HEADER_FILE="src/buildnumber.h"
+BUILD_DIR="$1"
+BUILD_FILE="$BUILD_DIR/buildnumber.txt"
+HEADER_FILE="$BUILD_DIR/buildnumber.h"
 
 # Read existing build number or start at 0
 if [[ -f "$BUILD_FILE" ]]; then

@@ -1,14 +1,15 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-:: Check if run from KisakCOD root (which must contain src\)
-if not exist src\ (
-    echo This must be ran from the KisakCOD root which contains CMakeLists.txt
+:: Check if argument is provided
+if "%~1"=="" (
+    echo Usage: update_build_number.cmd path\to\src_folder
     exit /b 1
 )
 
-set "BUILD_FILE=src/buildnumber.txt"
-set "HEADER_FILE=src/buildnumber.h"
+set "BUILD_DIR=%~1"
+set "BUILD_FILE=%BUILD_DIR%/buildnumber.txt"
+set "HEADER_FILE=%BUILD_DIR%/buildnumber.h"
 set "BUILD_NUMBER=0"
 
 :: Check if file exists
