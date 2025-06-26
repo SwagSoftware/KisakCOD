@@ -1,4 +1,5 @@
 set(SRCROOT
+    "${SRC_DIR}/buildnumber.h"
     "${SRC_DIR}/buildnumber_mp.cpp"
     "${SRC_DIR}/buildnumber_mp.h"
 )
