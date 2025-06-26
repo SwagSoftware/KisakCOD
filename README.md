@@ -45,3 +45,7 @@ However, there is a non-zero chance of some type of binary exploitation when pla
 - https://github.com/shiversoftdev/BO3Enhanced - Viewed as reference code for some of the Steam API Auth
 - [RAD Game Tools](https://www.radgametools.com/) for their Bink and Miles Sound System libraries.
 - [ODE Physics](https://www.ode.org/) COD4 uses a modified version of this physics engine.
+
+
+#### Discord
+https://discord.gg/9uqntRWMA3
