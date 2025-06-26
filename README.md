@@ -5,6 +5,8 @@ Aimed towards mod developers and COD4 enthusiasts.
 
 ![licimg](./GPLv3_Logo.png)
 
+Learn about the Development of KisakCOD here: [https://lwss.github.io/Duty-Of-Kisak/](https://lwss.github.io/Duty-Of-Kisak/)
+
 ### Current Requirements
 - Windows OS
 - Visual Studio
