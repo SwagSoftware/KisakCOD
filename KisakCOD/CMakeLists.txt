@@ -15,6 +15,28 @@ endif()
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../${CMAKE_BUILD_TYPE}/")
 
+# === Increment Build ===
+
+if (WIN32)
+  set(SCRIPT_EXT .cmd)
+else()
+  set(SCRIPT_EXT .sh)
+endif()
+
+# Get the current git commit count and save it to GIT_COMMIT_COUNT
+execute_process(
+  COMMAND git rev-list --count HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_COUNT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+add_custom_target(
+  update_build_number
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/increment_build${SCRIPT_EXT} ${SRC_DIR} ${GIT_COMMIT_COUNT}
+  COMMENT "Running build number script..."
+)
+
 if (DEDICATED)
   message("===== KisakCOD Dedicated =====")
   set(BIN_NAME "KisakCOD-Dedi")
@@ -28,7 +50,8 @@ else()
   include(cmake_files.cmake)
 endif()
 
-
+# We want to update the build number before building
+add_dependencies(${BIN_NAME} update_build_number)
 
 
 set_target_properties(${BIN_NAME} PROPERTIES

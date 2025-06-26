@@ -3,13 +3,18 @@
 
 char buildnumbuf[128];
 
+/*
+* Original Date: "Thu Oct 04 00:43:04 2007"
+* Original Build: 13620
+*/
+
 char *__cdecl getBuildNumber()
 {
-	sprintf_s(buildnumbuf, "%d %s", 13620, "Thu Oct 04 00:43:04 2007");
+	sprintf_s(buildnumbuf, "%d %s %s", BUILD_NUMBER, __DATE__, __TIME__);
 	return buildnumbuf;
 }
 
 int getBuildNumberAsInt()
 {
-	return 13620;
+	return BUILD_NUMBER;
 }
