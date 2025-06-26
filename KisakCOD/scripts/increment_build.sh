@@ -10,15 +10,21 @@ BUILD_DIR="$1"
 BUILD_FILE="$BUILD_DIR/buildnumber.txt"
 HEADER_FILE="$BUILD_DIR/buildnumber.h"
 
-# Read existing build number or start at 0
-if [[ -f "$BUILD_FILE" ]]; then
-    BUILD_NUMBER=$(<"$BUILD_FILE")
+# Check if a build number was not provided
+if [[ -z "$2" ]]; then
+    # Read existing build number or start at 0
+    if [[ -f "$BUILD_FILE" ]]; then
+        BUILD_NUMBER=$(<"$BUILD_FILE")
+    else
+        BUILD_NUMBER=0
+    fi
+
+    # Increment
+    BUILD_NUMBER=$((BUILD_NUMBER + 1))
 else
-    BUILD_NUMBER=0
+    BUILD_NUMBER="$2"
 fi
 
-# Increment
-BUILD_NUMBER=$((BUILD_NUMBER + 1))
 
 # Write new number back
 echo "$BUILD_NUMBER" > "$BUILD_FILE"
