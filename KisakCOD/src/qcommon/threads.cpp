@@ -204,7 +204,7 @@ char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(unsigned int))
     Sys_CreateEvent(1, 1, &databaseCompletedEvent2);
     Sys_CreateEvent(1, 1, &resumedDatabaseEvent);
 
-    Sys_CreateThread(function, 6u);
+    Sys_CreateThread(function, 6);
 
     if (!threadHandle[6])
         return 0;
