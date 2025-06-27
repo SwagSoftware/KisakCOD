@@ -1,6 +1,6 @@
 @echo off
 (
 scripts\mksln.bat Debug
-cmake --build .\build\
+scripts\mksln_dedi.bat Debug
 echo %cd%
 )
