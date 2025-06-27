@@ -383,7 +383,7 @@ void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, cha
     int fakeSeconds; // [esp+4h] [ebp-4h] BYREF
 
     fakeSeconds = 0;
-    sscanf(arg0, "%d", &fakeSeconds);
+    fakeSeconds = (int)strtol(arg0, NULL, 10);
     if ((unsigned int)fakeSeconds > 0x28)
     {
         fakeSeconds = 0;
