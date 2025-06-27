@@ -2093,10 +2093,10 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
     parms->view.kickRate = EQUAL_EPSILON / v5;
     parms->view.kickRadius = bg_shock_viewKickRadius->current.value;
     parms->sound.affect = bg_shock_sound->current.enabled;
-    strncpy_s(parms->sound.loop, sizeof(parms->sound.loop), bg_shock_soundLoop->current.string, _TRUNCATE);
-    strncpy_s(parms->sound.loopSilent, sizeof(parms->sound.loopSilent), bg_shock_soundLoopSilent->current.string, _TRUNCATE);
-    strncpy_s(parms->sound.end, sizeof(parms->sound.end), bg_shock_soundEnd->current.string, _TRUNCATE);
-    strncpy_s(parms->sound.endAbort, sizeof(parms->sound.endAbort), bg_shock_soundEndAbort->current.string, _TRUNCATE);
+    I_strncpyz(parms->sound.loop, bg_shock_soundLoop->current.string, sizeof(parms->sound.loop));
+    I_strncpyz(parms->sound.loopSilent, bg_shock_soundLoopSilent->current.string, sizeof(parms->sound.loopSilent));
+    I_strncpyz(parms->sound.end, bg_shock_soundEnd->current.string, sizeof(parms->sound.end));
+    I_strncpyz(parms->sound.endAbort, bg_shock_soundEndAbort->current.string, sizeof(parms->sound.endAbort));
     parms->sound.fadeInTime = (int)(bg_shock_soundFadeInTime->current.value * 1000.0f);
     parms->sound.fadeOutTime = (int)(bg_shock_soundFadeOutTime->current.value * 1000.0f);
     parms->sound.loopFadeTime = (int)(bg_shock_soundLoopFadeTime->current.value * 1000.0f);
