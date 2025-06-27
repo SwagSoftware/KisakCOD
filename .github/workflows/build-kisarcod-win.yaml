@@ -1,0 +1,44 @@
+name: Windows CMake DirectX Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build with DirectX SDK
+    runs-on: windows-2022
+
+    strategy:
+      matrix:
+        config: [Debug, Release]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install DirectX SDK (June 2010)
+        run: |
+          Invoke-WebRequest -Uri "https://download.microsoft.com/download/1/6/C/16C8A8E0-4D26-4757-9D07-2F7D88C8A6D0/DXSDK_Jun10.exe" -OutFile "DXSDK_Jun10.exe"
+          Start-Process -Wait -FilePath .\DXSDK_Jun10.exe -ArgumentList "/Q"
+
+      - name: Install latest CMake
+        uses: lukka/get-cmake@v3
+
+      - name: Configure CMake
+        run: |
+          pushd
+          cd KisakCOD
+          mkdir build
+          cd build
+          cmake -G "Visual Studio 17 2022" -A Win32 ..
+          popd
+
+      - name: Build ${{ matrix.config }}
+        run: |
+          pushd
+          cd KisakCOD
+          cmake --build build --config ${{ matrix.config }}
+          popd
