@@ -87,6 +87,12 @@ else()
   include(cmake_files.cmake)
 endif()
 
+# Feature flag for gate more drastic changes to the code, or experimental
+if (DEFINED KISAK_EXTENDED)
+  message("Building KisakCOD with enhancement extensions!")
+  target_compile_definitions(${BIN_NAME} KISAK_EXTENDED)
+endif()
+
 # We want to update the build number before building
 add_dependencies(${BIN_NAME} update_build_number)
 
@@ -109,7 +115,7 @@ add_custom_command(
 )
 
 set_target_properties(${BIN_NAME} PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../$<CONFIG>"
+    VS_DEBUGGER_WORKING_DIRECTORY "${BIN_DIR}/$<CONFIG>"
 )
 
 target_compile_definitions(${BIN_NAME} PUBLIC WIN32)
