@@ -62,7 +62,7 @@ jobs:
           cd KisakCOD
           mkdir build
           cd build
-          cmake -G "Visual Studio 17 2022" -A Win32 ..
+          cmake -G "Visual Studio 17 2022" -A Win32 -DDXSDK_DIR="${{ env.sdkDir }}" ..
           popd
 
       - name: Build ${{ matrix.config }}

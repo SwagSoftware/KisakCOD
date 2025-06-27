@@ -15,27 +15,34 @@ if (WIN32)
 
   # Check to see if we are running a github action
   if (DEFINED "$ENV{GITHUB_SHA}")
+    message("===== BUILDING FOR GITHUB ACTIONS =====")
+
     # Check if this variable has been set
     if (NOT DEFINED DXSDK_DIR)
       message(FATAL_ERROR "DXSDK_DIR needs to be set to the nuget location, this can be done with -DDXSDK_DIR=")
     endif()
 
+    message("DXSDK_DIR: ${DXSDK_DIR}")
+
     # Example: C:\Users\USERNAME\.nuget\packages\microsoft.dxsdk.d3dx\9.29.952.8\build\native
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
     set(DXSDK_LIB_DIR ${DXSDK_DIR}/${CMAKE_BUILD_TYPE}/lib/x86)
+    message("DXSDK_LIB_DIR: ${DXSDK_LIB_DIR}")
   else()
+    message("===== BUILDING FOR LOCAL DXSDK =====")
     set(DXSDK_DIR $ENV{DXSDK_DIR})
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
     set(DXSDK_LIB_DIR ${DXSDK_DIR}/lib/x86)
-  endif()
+  endif() # DEFINED GITHUB_SHA
   
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(D3DX_LIB d3dx9d.lib)
-else()
-  set(D3DX_LIB d3dx9.lib)
-endif()
+  # Set the required library
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(D3DX_LIB d3dx9d.lib)
+  else()
+    set(D3DX_LIB d3dx9.lib)
+  endif() # CMAKE_BUILD_TYPE Debug
 
-endif()
+endif() # WIN32
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../${CMAKE_BUILD_TYPE}/")
@@ -108,6 +115,8 @@ set_property(TARGET ${BIN_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<
 
 # fixme: copied from sln, check whats not needed
 target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ${D3DX_LIB} d3d9.lib ddraw.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
+message("LIBS: ${LINK_LIBRARIES}")
+
 target_link_options(${BIN_NAME} PRIVATE /machine:x86)
 set_target_properties(${BIN_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 
