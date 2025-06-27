@@ -344,24 +344,24 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     float sum[3]; // [esp+10D0h] [ebp-Ch] BYREF
     gentity_s *enta; // [esp+10E4h] [ebp+8h]
 
-    v19 = 256.0;
-    v35 = 0.75999999;
+    v19 = 256.0f;
+    v35 = 0.75999999f;
     v31 = 0;
     value = player_throwbackOuterRadius->current.value;
-    v9 = 192.0 - value;
-    if (v9 < 0.0)
+    v9 = 192.0f - value;
+    if (v9 < 0.0f)
         v10 = value;
     else
-        v10 = 192.0;
+        v10 = 192.0f;
     v11 = player_MGUseRadius->current.value;
     v8 = v10 - v11;
-    if (v8 < 0.0)
+    if (v8 < 0.0f)
         v7 = v11;
     else
         v7 = v10;
     b[1] = v7;
     b[0] = v7;
-    b[2] = 96.0;
+    b[2] = 96.0f;
     ps = &ent->client->ps;
     G_GetPlayerViewOrigin(ps, origin);
     BG_GetPlayerViewDirection(ps, forward, 0, 0);
@@ -378,16 +378,16 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
         {
             if (gEnt->classname == scr_const.trigger_use_touch)
             {
-                if (v18[0] >= (double)gEnt->r.absmin[0]
-                    && sum[0] <= (double)gEnt->r.absmax[0]
-                    && v18[1] >= (double)gEnt->r.absmin[1]
-                    && sum[1] <= (double)gEnt->r.absmax[1]
-                    && v18[2] >= (double)gEnt->r.absmin[2]
-                    && sum[2] <= (double)gEnt->r.absmax[2])
+                if (v18[0] >= (float)gEnt->r.absmin[0]
+                    && sum[0] <= (float)gEnt->r.absmax[0]
+                    && v18[1] >= (float)gEnt->r.absmin[1]
+                    && sum[1] <= (float)gEnt->r.absmax[1]
+                    && v18[2] >= (float)gEnt->r.absmin[2]
+                    && sum[2] <= (float)gEnt->r.absmax[2])
                 {
                     if (SV_EntityContact(sum, v18, gEnt))
                     {
-                        useList[num].score = -256.0;
+                        useList[num].score = -256.0f;
                         useList[num++].ent = gEnt;
                     }
                 }
@@ -404,27 +404,27 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
                 if (eType == 4)
                     v23 = player_throwbackOuterRadius->current.value;
                 else
-                    v23 = eType == 11 ? player_MGUseRadius->current.value : 128.0;
+                    v23 = eType == 11 ? player_MGUseRadius->current.value : 128.0f;
                 Vec3Add(gEnt->r.absmin, gEnt->r.absmax, v);
-                Vec3Scale(v, 0.5, v);
+                Vec3Scale(v, 0.5f, v);
                 Vec3Sub(v, origin, a);
                 v21 = Vec3Normalize(a);
-                if (v23 >= (double)v21)
+                if (v23 >= v21)
                 {
                     v14 = Vec3Dot(a, forward);
-                    if (gEnt->classname != scr_const.trigger_use || !gEnt->trigger.requireLookAt || v35 <= (double)v14)
+                    if (gEnt->classname != scr_const.trigger_use || !gEnt->trigger.requireLookAt || v35 <= v14)
                     {
-                        v26 = 1.0 - (v14 + 1.0) * 0.5;
+                        v26 = 1.0f - (v14 + 1.0f) * 0.5f;
                         useList[num].score = v26 * v19;
                         if (gEnt->s.eType == 4)
                             useList[num].score = useList[num].score - (v19 + v19);
                         if (gEnt->classname == scr_const.trigger_use)
                             useList[num].score = useList[num].score - v19;
                         if (gEnt->s.eType == 11)
-                            useList[num].score = useList[num].score - v19 * 0.5;
+                            useList[num].score = useList[num].score - v19 * 0.5f;
                         if (gEnt->s.eType == 3 && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
                         {
-                            useList[num].score = useList[num].score + 10000.0;
+                            useList[num].score = useList[num].score + 10000.0f;
                             ++v31;
                         }
                         useList[num].ent = gEnt;
@@ -444,12 +444,12 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
         if (enta->classname != scr_const.trigger_use_touch && enta->classname != scr_const.script_vehicle)
         {
             Vec3Add(enta->r.absmin, enta->r.absmax, v);
-            Vec3Scale(v, 0.5, v);
+            Vec3Scale(v, 0.5f, v);
             if (enta->s.eType == 11)
                 G_DObjGetWorldTagPos(enta, scr_const.tag_aim, v);
             if (!G_TraceCapsuleComplete(origin, (float *)vec3_origin, (float *)vec3_origin, v, ps->clientNum, 17))
             {
-                useList[i].score = useList[i].score + 10000.0;
+                useList[i].score = useList[i].score + 10000.0f;
                 ++v28;
             }
         }

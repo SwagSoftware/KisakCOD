@@ -1350,8 +1350,8 @@ void Com_InitDvars()
         0,
         "Write to log file - 0 = disabled, 1 = async file write, 2 = Sync every write");
     com_statmon = Dvar_RegisterBool("com_statmon", 0, 0, "Draw stats monitor");
-    com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001, 1000.0, 0x10C8u, "Scale time of each frame");
-    dev_timescale = Dvar_RegisterFloat("timescale", 1.0, 0.001, 1000.0, 0x88u, "Scale time of each frame");
+    com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001f, 1000.0f, 0x10C8u, "Scale time of each frame");
+    dev_timescale = Dvar_RegisterFloat("timescale", 1.0, 0.001f, 1000.0f, 0x88u, "Scale time of each frame");
     com_fixedtime = Dvar_RegisterInt("fixedtime", 0, 0, 1000, 0x80u, "Use a fixed time rate for each frame");
     com_maxFrameTime = Dvar_RegisterInt(
         "com_maxFrameTime",

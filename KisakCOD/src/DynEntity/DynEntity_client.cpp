@@ -463,7 +463,7 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
                     Phys_ObjDestroy(PHYS_WORLD_DYNENT, (dxBody *)dynEntClient->physObjId);
                     dynEntClient->physObjId = 0;
                 }
-                if (!VecNCompareCustomEpsilon(origin, dynEntPose->pose.origin, 0.0099999998, 3))
+                if (!VecNCompareCustomEpsilon(origin, dynEntPose->pose.origin, 0.0099999998f, 3))
                 {
                     dynEntPose->pose.origin[0] = origin[0];
                     dynEntPose->pose.origin[1] = origin[1];
@@ -489,7 +489,7 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
                     Phys_ObjDestroy(PHYS_WORLD_DYNENT, (dxBody *)dynEntClient->physObjId);
                     dynEntClient->physObjId = 0;
                 }
-                if (!VecNCompareCustomEpsilon(origin, dynEntPosea->pose.origin, 0.0099999998, 3))
+                if (!VecNCompareCustomEpsilon(origin, dynEntPosea->pose.origin, 0.0099999998f, 3))
                 {
                     dynEntPosea->pose.origin[0] = origin[0];
                     dynEntPosea->pose.origin[1] = origin[1];

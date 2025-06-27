@@ -6358,9 +6358,8 @@ void __cdecl Menu_PaintAll_DrawVisibleList(char *stringBegin, UiContext *dc)
 {
     float color[4]; // [esp+28h] [ebp-18h] BYREF
     float y; // [esp+38h] [ebp-8h]
-    float MESSAGE_SCALE; // [esp+3Ch] [ebp-4h]
 
-    MESSAGE_SCALE = 0.2;
+    float MESSAGE_SCALE = 0.2f;
     color[0] = 0.75;
     color[1] = 1.0;
     color[2] = 0.5;

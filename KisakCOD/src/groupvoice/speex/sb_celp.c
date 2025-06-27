@@ -879,7 +879,7 @@ static void sb_decode_lost(SBDecState *st, spx_word16_t *out, int dtx, char *sta
       saved_modeid=st->submodeID;
       st->submodeID=1;
    } else {
-      bw_lpc(GAMMA_SCALING*0.99, st->interp_qlpc, st->interp_qlpc, st->lpcSize);
+      bw_lpc(GAMMA_SCALING*0.99f, st->interp_qlpc, st->interp_qlpc, st->lpcSize);
    }
 
    st->first=1;
@@ -897,8 +897,8 @@ static void sb_decode_lost(SBDecState *st, spx_word16_t *out, int dtx, char *sta
          k2=SUBMODE(lpc_enh_k2);
          k3=SUBMODE(lpc_enh_k3);
       } else {
-         k1=k2=.7*GAMMA_SCALING;
-         k3 = 0;
+         k1=k2=.7f*GAMMA_SCALING;
+         k3 = 0.0f;
       }
       bw_lpc(k1, st->interp_qlpc, awk1, st->lpcSize);
       bw_lpc(k2, st->interp_qlpc, awk2, st->lpcSize);

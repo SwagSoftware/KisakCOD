@@ -59,74 +59,74 @@ void __cdecl CG_AmmoCounterRegisterDvars()
     actionSlotsHide = Dvar_RegisterBool("actionSlotsHide", 0, 0x1000u, "Hide the actionslots.");
     lowAmmoWarningColor1 = Dvar_RegisterColor(
         "lowAmmoWarningColor1",
-        0.89999998,
-        0.89999998,
-        0.89999998,
-        0.80000001,
+        0.89999998f,
+        0.89999998f,
+        0.89999998f,
+        0.80000001f,
         0,
         "Color 1 of 2 to oscilate between");
     lowAmmoWarningColor2 = Dvar_RegisterColor(
         "lowAmmoWarningColor2",
-        1.0,
-        1.0,
-        1.0,
-        1.0,
+        1.0f,
+        1.0f,
+        1.0f,
+        1.0f,
         0,
         "Color 2 of 2 to oscilate between");
     b.value.max = FLT_MAX;
-    b.value.min = 0.0;
+    b.value.min = 0.0f;
     lowAmmoWarningPulseFreq = Dvar_RegisterFloat(
         "lowAmmoWarningPulseFreq",
-        1.7,
+        1.7f,
         b,
         0,
         "Frequency of the pulse (oscilation between the 2 colors)");
     ba.value.max = FLT_MAX;
-    ba.value.min = 0.0;
+    ba.value.min = 0.0f;
     lowAmmoWarningPulseMax = Dvar_RegisterFloat(
         "lowAmmoWarningPulseMax",
-        1.5,
+        1.5f,
         ba,
         0,
         "Min of oscilation range: 0 is color1 and 1.0 is color2.  Can be < 0, and the wave will clip at 0.");
-    bb.value.max = 1.0;
+    bb.value.max = 1.0f;
     bb.value.min = -FLT_MAX;
     lowAmmoWarningPulseMin = Dvar_RegisterFloat(
         "lowAmmoWarningPulseMin",
-        0.0,
+        0.0f,
         bb,
         0,
         "Max of oscilation range: 0 is color1 and 1.0 is color2.  Can be > 1.0, and the wave will clip at 1.0.");
     lowAmmoWarningNoReloadColor1 = Dvar_RegisterColor(
         "lowAmmoWarningNoReloadColor1",
-        0.69999999,
-        0.69999999,
-        0.0,
-        0.80000001,
+        0.69999999f,
+        0.69999999f,
+        0.0f,
+        0.80000001f,
         0,
         "Like lowAmmoWarningColor1, but when no ammo to reload with.");
     lowAmmoWarningNoReloadColor2 = Dvar_RegisterColor(
         "lowAmmoWarningNoReloadColor2",
-        1.0,
-        1.0,
-        0.0,
-        1.0,
+        1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
         0,
         "lowAmmoWarningColor2, but when no ammo to reload with.");
     lowAmmoWarningNoAmmoColor1 = Dvar_RegisterColor(
         "lowAmmoWarningNoAmmoColor1",
-        0.80000001,
-        0.0,
-        0.0,
-        0.80000001,
+        0.80000001f,
+        0.0f,
+        0.0f,
+        0.80000001f,
         0,
         "Like lowAmmoWarningColor1, but when no ammo.");
     lowAmmoWarningNoAmmoColor2 = Dvar_RegisterColor(
         "lowAmmoWarningNoAmmoColor2",
-        1.0,
-        0.0,
-        0.0,
-        1.0,
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
         0,
         "lowAmmoWarningColor2, but when no ammo.");
 }
@@ -174,9 +174,9 @@ void __cdecl CG_DrawPlayerWeaponAmmoStock(
                 ammoStock = BG_GetTotalAmmoReserve(ps, weapIndex);
                 if (CG_CheckPlayerForLowAmmoSpecific(cgameGlob, weapIndex))
                 {
-                    colorMod[0] = 1.0;
-                    colorMod[1] = 0.30000001;
-                    colorMod[2] = 0.30000001;
+                    colorMod[0] = 1.0f;
+                    colorMod[1] = 0.30000001f;
+                    colorMod[2] = 0.30000001f;
                 }
                 Com_sprintf(str, 0x40u, "%3i", ammoStock);
                 UI_DrawText(
@@ -444,15 +444,15 @@ void __cdecl CG_DrawPlayerActionSlotDpad(
                 rect->h,
                 rect->horzAlign,
                 rect->vertAlign,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
+                0.0f,
+                0.0f,
+                1.0f,
+                1.0f,
                 colorMod,
                 material);
-            colorMod[0] = 1.0;
-            colorMod[1] = 0.97000003;
-            colorMod[2] = 0.55000001;
+            colorMod[0] = 1.0f;
+            colorMod[1] = 0.97000003f;
+            colorMod[2] = 0.55000001f;
             for (idx = 0; idx < 4; ++idx)
             {
                 if (ActionSlotIsActive(localClientNum, idx))
@@ -548,11 +548,11 @@ void __cdecl CG_DrawPlayerActionSlot(
     if (ActionSlotIsActive(localClientNum, slotIdx))
     {
         Vec3Mul(colorMod, MY_ACTIVECOLOR, colorMod);
-        colorMod[3] = 1.0;
+        colorMod[3] = 1.0f;
     }
     v7 = DpadFadeAlpha(localClientNum, cgameGlob);
     colorMod[3] = v7 * colorMod[3];
-    if (colorMod[3] != 0.0)
+    if (colorMod[3] != 0.0f)
     {
         v9 = ps->actionSlotType[slotIdx];
         if (v9 != ACTIONSLOTTYPE_SPECIFYWEAPON)
@@ -570,10 +570,10 @@ void __cdecl CG_DrawPlayerActionSlot(
                             rect->h,
                             rect->horzAlign,
                             rect->vertAlign,
-                            0.0,
-                            0.0,
-                            1.0,
-                            1.0,
+                            0.0f,
+                            0.0f,
+                            1.0f,
+                            1.0f,
                             colorMod,
                             cgMedia.hudIconNVG);
                     else
@@ -608,18 +608,18 @@ void __cdecl CG_DrawPlayerActionSlot(
                 h,
                 rect->horzAlign,
                 rect->vertAlign,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
+                0.0f,
+                0.0f,
+                1.0f,
+                1.0f,
                 colorMod,
                 weapDef->dpadIcon);
             ammo = BG_WeaponAmmo(ps, weapIdx);
             if (!ammo)
             {
-                colorMod[0] = 1.0;
-                colorMod[1] = 0.30000001;
-                colorMod[2] = 0.30000001;
+                colorMod[0] = 1.0f;
+                colorMod[1] = 0.30000001f;
+                colorMod[2] = 0.30000001f;
             }
         LABEL_21:
             DpadTextPos(rect, slotIdx, weapDef, &x, &y);
@@ -656,18 +656,18 @@ void __cdecl CG_DrawPlayerActionSlot(
                     h,
                     rect->horzAlign,
                     rect->vertAlign,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
+                    0.0f,
+                    0.0f,
+                    1.0f,
+                    1.0f,
                     colorMod,
                     weapDef->dpadIcon);
                 ammo = BG_WeaponAmmo(ps, weapIdx);
                 if (!ammo)
                 {
-                    colorMod[0] = 1.0;
-                    colorMod[1] = 0.30000001;
-                    colorMod[2] = 0.30000001;
+                    colorMod[0] = 1.0f;
+                    colorMod[1] = 0.30000001f;
+                    colorMod[2] = 0.30000001f;
                 }
                 goto LABEL_21;
             }
@@ -700,8 +700,8 @@ void __cdecl DpadIconDims(
     {
         *x = rect->x;
         *w = rect->w + rect->w;
-        *y = rect->h * 0.25 + rect->y;
-        *h = rect->h * 0.5;
+        *y = rect->h * 0.25f + rect->y;
+        *h = rect->h * 0.5f;
     }
     else
     {
@@ -731,8 +731,8 @@ void __cdecl DpadTextPos(const rectDef_s *rect, unsigned int slotIdx, WeaponDef 
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 528, 0, "%s", "x");
     if (!y)
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 529, 0, "%s", "y");
-    *x = rect->x + rect->w + -13.0;
-    *y = rect->y + rect->h + 3.0;
+    *x = rect->x + rect->w + -13.0f;
+    *y = rect->y + rect->h + 3.0f;
     if (weapDef->dpadIconRatio == WEAPON_ICON_RATIO_2TO1 || weapDef->dpadIconRatio == WEAPON_ICON_RATIO_4TO1)
         *x = *x + rect->w;
 }
@@ -769,10 +769,10 @@ void __cdecl CG_DrawPlayerWeaponBackground(
             rect->h,
             rect->horzAlign,
             rect->vertAlign,
-            0.0,
-            0.0,
-            1.0,
-            1.0,
+            0.0f,
+            0.0f,
+            1.0f,
+            1.0f,
             colorMod,
             material);
 }
@@ -799,7 +799,7 @@ void __cdecl CG_DrawPlayerWeaponAmmoClipGraphic(int localClientNum, const rectDe
     colorMod[2] = color[2];
     colorMod[3] = color[3];
     colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgArray) * colorMod[3];
-    if (colorMod[3] != 0.0)
+    if (colorMod[3] != 0.0f)
     {
         weapIdx = GetWeaponIndex(cgArray);
         if (weapIdx)
@@ -885,20 +885,20 @@ void __cdecl DrawClipAmmoMagazine(
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 170, 0, "%s", "cgameGlob");
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 171, 0, "%s", "weapDef");
-    bulletX = *base - 4.0;
-    bulletY = base[1] - 8.0 * 0.5;
+    bulletX = *base - 4.0f;
+    bulletY = base[1] - 8.0f * 0.5f;
     clipCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
     AmmoColor(cgameGlob, color, weapIdx);
     for (clipIdx = 0; clipIdx < weapDef->iClipSize; ++clipIdx)
     {
         if (clipIdx == clipCnt)
         {
-            *color = 0.30000001;
-            color[1] = 0.30000001;
-            color[2] = 0.30000001;
+            *color = 0.30000001f;
+            color[1] = 0.30000001f;
+            color[2] = 0.30000001f;
         }
         CL_DrawStretchPicPhysical(bulletX, bulletY, 4.0, 8.0, 0.0, 0.0, 1.0, 1.0, color, cgMedia.ammoCounterBullet);
-        bulletX = bulletX - 4.0;
+        bulletX = bulletX - 4.0f;
     }
 }
 
@@ -913,11 +913,11 @@ void __cdecl AmmoColor(cg_s *cgameGlob, float *color, unsigned int weapIndex)
     if (CG_CheckPlayerForLowClipSpecific(cgameGlob, weapIndex))
     {
         delta = (float)(cgameGlob->time - cgameGlob->lastClipFlashTime);
-        deltaa = delta / (MYFLASHTERM * 3.141592741012573);
+        deltaa = delta / (MYFLASHTERM * 3.141592741012573f);
         v3 = sin(deltaa);
         for (idx = 0; idx < 3; ++idx)
         {
-            deltab = v3 * 0.5 + 0.5;
+            deltab = v3 * 0.5f + 0.5f;
             color[idx] = (colorLowAmmo[idx] - color[idx]) * deltab + color[idx];
         }
     }
@@ -943,20 +943,20 @@ void __cdecl DrawClipAmmoShortMagazine(
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 200, 0, "%s", "cgameGlob");
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 201, 0, "%s", "weapDef");
-    bulletX = *base - 32.0;
-    bulletY = base[1] - 8.0 * 0.5;
+    bulletX = *base - 32.0f;
+    bulletY = base[1] - 8.0f * 0.5f;
     clipCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
     AmmoColor(cgameGlob, color, weapIdx);
     for (clipIdx = 0; clipIdx < weapDef->iClipSize; ++clipIdx)
     {
         if (clipIdx == clipCnt)
         {
-            *color = 0.30000001;
-            color[1] = 0.30000001;
-            color[2] = 0.30000001;
+            *color = 0.30000001f;
+            color[1] = 0.30000001f;
+            color[2] = 0.30000001f;
         }
-        CL_DrawStretchPicPhysical(bulletX, bulletY, 32.0, 8.0, 0.0, 0.0, 1.0, 1.0, color, cgMedia.ammoCounterRifleBullet);
-        bulletX = bulletX - 40.0;
+        CL_DrawStretchPicPhysical(bulletX, bulletY, 32.0f, 8.0f, 0.0f, 0.0f, 1.0f, 1.0f, color, cgMedia.ammoCounterRifleBullet);
+        bulletX = bulletX - 40.0f;
     }
 }
 
@@ -977,26 +977,26 @@ void __cdecl DrawClipAmmoShotgunShells(
     if (!weapDef)
         MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 231, 0, "%s", "weapDef");
     bulletX = *base - TEST_bullet_wh_1[0];
-    bulletY = base[1] - TEST_bullet_wh_1[1] * 0.5;
+    bulletY = base[1] - TEST_bullet_wh_1[1] * 0.5f;
     magCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
     AmmoColor(cgameGlob, color, weapIdx);
     for (magIdx = 0; magIdx < weapDef->iClipSize; ++magIdx)
     {
         if (magIdx == magCnt)
         {
-            *color = 0.30000001;
-            color[1] = 0.30000001;
-            color[2] = 0.30000001;
+            *color = 0.30000001f;
+            color[1] = 0.30000001f;
+            color[2] = 0.30000001f;
         }
         CL_DrawStretchPicPhysical(
             bulletX,
             bulletY,
             TEST_bullet_wh_1[0],
             TEST_bullet_wh_1[1],
-            0.0,
-            0.0,
-            1.0,
-            1.0,
+            0.0f,
+            0.0f,
+            1.0f,
+            1.0f,
             color,
             cgMedia.ammoCounterShotgunShell);
         bulletX = bulletX - TEST_bullet_step_1[0];
@@ -1027,19 +1027,19 @@ void __cdecl DrawClipAmmoRockets(
     {
         if (magIdx == magCnt)
         {
-            *color = 0.30000001;
-            color[1] = 0.30000001;
-            color[2] = 0.30000001;
+            *color = 0.30000001f;
+            color[1] = 0.30000001f;
+            color[2] = 0.30000001f;
         }
         CL_DrawStretchPicPhysical(
             bulletX,
             bulletY,
             TEST_bullet_wh_2[0],
             TEST_bullet_wh_2[1],
-            0.0,
-            0.0,
-            1.0,
-            1.0,
+            0.0f,
+            0.0f,
+            1.0f,
+            1.0f,
             color,
             cgMedia.ammoCounterRocket);
         bulletX = bulletX - TEST_bullet_step_2[0];
@@ -1072,13 +1072,13 @@ void __cdecl DrawClipAmmoBeltfed(
     {
         if (clipIdx == clipCnt)
         {
-            *color = 0.30000001;
-            color[1] = 0.30000001;
-            color[2] = 0.30000001;
+            *color = 0.30000001f;
+            color[1] = 0.30000001f;
+            color[2] = 0.30000001f;
         }
         if (!(clipIdx % TEST_bullet_rowCnt))
         {
-            stepX = stepX * -1.0;
+            stepX = stepX * -1.0f;
             bulletY = bulletY + TEST_bullet_step_3[1];
             bulletX = bulletX + stepX;
         }
@@ -1087,10 +1087,10 @@ void __cdecl DrawClipAmmoBeltfed(
             bulletY,
             TEST_bullet_wh_3[0],
             TEST_bullet_wh_3[1],
-            0.0,
-            0.0,
-            1.0,
-            1.0,
+            0.0f,
+            0.0f,
+            1.0f,
+            1.0f,
             color,
             cgMedia.ammoCounterBeltBullet);
         bulletX = bulletX + stepX;
@@ -1170,11 +1170,11 @@ void __cdecl DrawStretchPicGun(
                     "%s\n\t(ratio) = %i",
                     "(ratio == WEAPON_ICON_RATIO_4TO1)",
                     ratio);
-            x = x - w * 3.0;
-            w = w * 4.0;
+            x = x - w * 3.0f;
+            w = w * 4.0f;
         }
     }
-    CL_DrawStretchPicPhysical(x, y, w, h, 0.0, 0.0, 1.0, 1.0, color, material);
+    CL_DrawStretchPicPhysical(x, y, w, h, 0.0f, 0.0f, 1.0f, 1.0f, color, material);
 }
 
 void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
@@ -1257,9 +1257,9 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
                             Byte4UnpackRgba((const unsigned __int8 *)&lowAmmoWarningNoReloadColor1->current, color1);
                             Byte4UnpackRgba((const unsigned __int8 *)&lowAmmoWarningNoReloadColor2->current, color2);
                         }
-                        amplitude = (lowAmmoWarningPulseMax->current.value - lowAmmoWarningPulseMin->current.value) * 0.5;
+                        amplitude = (lowAmmoWarningPulseMax->current.value - lowAmmoWarningPulseMin->current.value) * 0.5f;
                         bias = lowAmmoWarningPulseMin->current.value + amplitude;
-                        v12 = lowAmmoWarningPulseFreq->current.value * ((double)cgArray[0].time * 0.006283185444772243);
+                        v12 = lowAmmoWarningPulseFreq->current.value * ((float)cgArray[0].time * 0.006283185444772243f);
                         v11 = sin(v12);
                         frac = v11 * amplitude + bias;
                         Vec4Lerp(color1, color2, frac, colorMod);
@@ -1273,10 +1273,10 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
                                 rect->h,
                                 rect->horzAlign,
                                 rect->vertAlign,
-                                0.0,
-                                0.0,
-                                1.0,
-                                1.0,
+                                0.0f,
+                                0.0f,
+                                1.0f,
+                                1.0f,
                                 colorMod,
                                 material);
                         localizedString = SEH_LocalizeTextMessage(text, "low ammo warning", LOCMSG_SAFE);

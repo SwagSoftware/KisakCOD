@@ -592,58 +592,58 @@ void Con_OneTimeInit()
     char *dvarDescd; // [esp+F0h] [ebp-4h]
     char *dvarDesce; // [esp+F0h] [ebp-4h]
 
-    min.value.max = 1.0;
-    min.value.min = 0.0;
+    min.value.max = 1.0f;
+    min.value.min = 0.0f;
     con_inputBoxColor = Dvar_RegisterVec4(
         "con_inputBoxColor",
-        0.25,
-        0.25,
-        0.2,
-        1.0,
+        0.25f,
+        0.25f,
+        0.2f,
+        1.0f,
         min,
         1u,
         "Color of the console input box");
-    mina.value.max = 1.0;
-    mina.value.min = 0.0;
+    mina.value.max = 1.0f;
+    mina.value.min = 0.0f;
     con_inputHintBoxColor = Dvar_RegisterVec4(
         "con_inputHintBoxColor",
-        0.40000001,
-        0.40000001,
-        0.34999999,
-        1.0,
+        0.40000001f,
+        0.40000001f,
+        0.34999999f,
+        1.0f,
         mina,
         1u,
         "Color of the console input hint box");
-    minb.value.max = 1.0;
-    minb.value.min = 0.0;
+    minb.value.max = 1.0f;
+    minb.value.min = 0.0f;
     con_outputBarColor = Dvar_RegisterVec4(
         "con_outputBarColor",
-        1.0,
-        1.0,
-        0.94999999,
-        0.60000002,
+        1.0f,
+        1.0f,
+        0.94999999f,
+        0.60000002f,
         minb,
         1u,
         "Color of the console output slider bar");
-    minc.value.max = 1.0;
-    minc.value.min = 0.0;
+    minc.value.max = 1.0f;
+    minc.value.min = 0.0f;
     con_outputSliderColor = Dvar_RegisterVec4(
         "con_outputSliderColor",
-        0.15000001,
-        0.15000001,
-        0.1,
-        0.60000002,
+        0.15000001f,
+        0.15000001f,
+        0.1f,
+        0.60000002f,
         minc,
         1u,
         "Color of the console slider");
-    mind.value.max = 1.0;
-    mind.value.min = 0.0;
+    mind.value.max = 1.0f;
+    mind.value.min = 0.0f;
     con_outputWindowColor = Dvar_RegisterVec4(
         "con_outputWindowColor",
-        0.34999999,
-        0.34999999,
-        0.30000001,
-        0.75,
+        0.34999999f,
+        0.34999999f,
+        0.30000001f,
+        0.75f,
         mind,
         1u,
         "Color of the console output");
@@ -667,7 +667,7 @@ void Con_OneTimeInit()
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNMsgTime_Descs[gameWindowIndex] ) - 1");
         mine.value.max = FLT_MAX;
-        mine.value.min = 0.0;
+        mine.value.min = 0.0f;
         con_gameMsgWindowNMsgTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNMsgTime_Names[gameWindowIndex],
             defaultGameMessageTimes[gameWindowIndex],
@@ -718,10 +718,10 @@ void Con_OneTimeInit()
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNScrollTime_Descs[gameWindowIndex] ) - 1");
         minf.value.max = FLT_MAX;
-        minf.value.min = 0.0;
+        minf.value.min = 0.0f;
         con_gameMsgWindowNScrollTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNScrollTime_Names[gameWindowIndex],
-            0.25,
+            0.25f,
             minf,
             1u,
             dvarDescb);
@@ -743,11 +743,11 @@ void Con_OneTimeInit()
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex] ) - 1");
         if (gameWindowIndex == 2)
-            v18 = 0.75;
+            v18 = 0.75f;
         else
-            v18 = 0.25;
+            v18 = 0.25f;
         ming.value.max = FLT_MAX;
-        ming.value.min = 0.0;
+        ming.value.min = 0.0f;
         con_gameMsgWindowNFadeInTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNFadeInTime_Names[gameWindowIndex],
             v18,
@@ -772,11 +772,11 @@ void Con_OneTimeInit()
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex] ) - 1");
         if (gameWindowIndex == 1)
-            v17 = 0.0099999998;
+            v17 = 0.0099999998f;
         else
-            v17 = 0.5;
+            v17 = 0.5f;
         minh.value.max = FLT_MAX;
-        minh.value.min = 0.0099999998;
+        minh.value.min = 0.0099999998f;
         con_gameMsgWindowNFadeOutTime[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex],
             v17,
@@ -804,27 +804,27 @@ void Con_OneTimeInit()
                 "%s",
                 "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex] ) - 1");
         mini.value.max = FLT_MAX;
-        mini.value.min = 0.0;
+        mini.value.min = 0.0f;
         con_gameMsgWindowNSplitscreenScale[gameWindowIndex] = Dvar_RegisterFloat(
             con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex],
-            1.5,
+            1.5f,
             mini,
             1u,
             dvarDesce);
     }
     minj.value.max = FLT_MAX;
-    minj.value.min = 0.0;
+    minj.value.min = 0.0f;
     con_errormessagetime = Dvar_RegisterFloat(
         "con_errormessagetime",
-        8.0,
+        8.0f,
         minj,
         1u,
         "Onscreen time for error messages in seconds");
     mink.value.max = FLT_MAX;
-    mink.value.min = 0.0;
+    mink.value.min = 0.0f;
     con_minicontime = Dvar_RegisterFloat(
         "con_minicontime",
-        4.0,
+        4.0f,
         mink,
         1u,
         "Onscreen time for minicon messages in seconds");
@@ -852,57 +852,57 @@ void Con_OneTimeInit()
         (DvarLimits)0x7FFFFFFF00000000LL,
         1u,
         "Time (in milliseconds) to spend disolving the line away.");
-    minl.value.max = 1.0;
-    minl.value.min = 0.0;
+    minl.value.max = 1.0f;
+    minl.value.min = 0.0f;
     con_typewriterColorBase = Dvar_RegisterVec3(
         "con_typewriterColorBase",
-        1.0,
-        1.0,
-        1.0,
+        1.0f,
+        1.0f,
+        1.0f,
         minl,
         0x1000u,
         "Base color of typewritten objective text.");
-    minm.value.max = 1.0;
-    minm.value.min = 0.0;
+    minm.value.max = 1.0f;
+    minm.value.min = 0.0f;
     con_typewriterColorGlowUpdated = Dvar_RegisterVec4(
         "con_typewriterColorGlowUpdated",
-        0.0,
-        0.60000002,
-        0.18000001,
-        1.0,
+        0.0f,
+        0.60000002f,
+        0.18000001f,
+        1.0f,
         minm,
         1u,
         "Color of typewritten objective text.");
-    minn.value.max = 1.0;
-    minn.value.min = 0.0;
+    minn.value.max = 1.0f;
+    minn.value.min = 0.0f;
     con_typewriterColorGlowCompleted = Dvar_RegisterVec4(
         "con_typewriterColorGlowCompleted",
-        0.0,
-        0.30000001,
-        0.80000001,
-        1.0,
+        0.0f,
+        0.30000001f,
+        0.80000001f,
+        1.0f,
         minn,
         1u,
         "Color of typewritten objective text.");
-    mino.value.max = 1.0;
-    mino.value.min = 0.0;
+    mino.value.max = 1.0f;
+    mino.value.min = 0.0f;
     con_typewriterColorGlowFailed = Dvar_RegisterVec4(
         "con_typewriterColorGlowFailed",
-        0.80000001,
-        0.0,
-        0.0,
-        1.0,
+        0.80000001f,
+        0.0f,
+        0.0f,
+        1.0f,
         mino,
         1u,
         "Color of typewritten objective text.");
-    minp.value.max = 1.0;
-    minp.value.min = 0.0;
+    minp.value.max = 1.0f;
+    minp.value.min = 0.0f;
     con_typewriterColorGlowCheckpoint = Dvar_RegisterVec4(
         "con_typewriterColorGlowCheckpoint",
-        0.60000002,
-        0.5,
-        0.60000002,
-        1.0,
+        0.60000002f,
+        0.5f,
+        0.60000002f,
+        1.0f,
         minp,
         1u,
         "Color of typewritten objective text.");

@@ -86,56 +86,56 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
     veh->infoIdx = infoIdx;
     veh->moveState = VEH_MOVESTATE_STOP;
     veh->waitNode = -1;
-    veh->waitSpeed = -1.0;
+    veh->waitSpeed = -1.0f;
     veh->turret.fireTime = 0;
     veh->turret.fireBarrel = 0;
     veh->turret.turretState = VEH_TURRET_STOPPED;
-    veh->turret.barrelOffset = 0.0;
+    veh->turret.barrelOffset = 0.0f;
     veh->turret.barrelBlocked = 0;
     Com_Memset((unsigned int *)&veh->jitter, 0, 60);
     veh->drawOnCompass = 0;
     veh->lookAtText0 = 0;
     veh->lookAtText1 = 0;
     veh->manualMode = 0;
-    veh->manualSpeed = 0.0;
-    veh->manualAccel = 0.0;
-    veh->manualDecel = 0.0;
-    veh->manualTime = 0.0;
-    veh->speed = 0.0;
-    veh->maxDragSpeed = 17.6 * 60.0;
-    veh->turningAbility = 0.5;
+    veh->manualSpeed = 0.0f;
+    veh->manualAccel = 0.0f;
+    veh->manualDecel = 0.0f;
+    veh->manualTime = 0.0f;
+    veh->speed = 0.0f;
+    veh->maxDragSpeed = 17.6f * 60.0f;
+    veh->turningAbility = 0.5f;
     veh->hasTarget = 0;
     veh->targetEnt = 1023;
     if (EntHandle::isDefined(&veh->lookAtEnt))
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 910, 0, "%s", "!veh->lookAtEnt.isDefined()");
-    veh->targetOrigin[0] = 0.0;
-    veh->targetOrigin[1] = 0.0;
-    veh->targetOrigin[2] = 0.0;
-    veh->targetOffset[0] = 0.0;
-    veh->targetOffset[1] = 0.0;
-    veh->targetOffset[2] = 0.0;
-    veh->joltDir[0] = 0.0;
-    veh->joltDir[1] = 0.0;
-    veh->joltTime = 0.0;
-    veh->joltWave = 0.0;
-    veh->joltSpeed = 0.0;
-    veh->joltDecel = 0.0;
+    veh->targetOrigin[0] = 0.0f;
+    veh->targetOrigin[1] = 0.0f;
+    veh->targetOrigin[2] = 0.0f;
+    veh->targetOffset[0] = 0.0f;
+    veh->targetOffset[1] = 0.0f;
+    veh->targetOffset[2] = 0.0f;
+    veh->joltDir[0] = 0.0f;
+    veh->joltDir[1] = 0.0f;
+    veh->joltTime = 0.0f;
+    veh->joltWave = 0.0f;
+    veh->joltSpeed = 0.0f;
+    veh->joltDecel = 0.0f;
     veh->playEngineSound = 1;
     if (EntHandle::isDefined(&veh->idleSndEnt))
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 922, 0, "%s", "!veh->idleSndEnt.isDefined()");
     if (EntHandle::isDefined(&veh->engineSndEnt))
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 923, 0, "%s", "!veh->engineSndEnt.isDefined()");
-    veh->idleSndLerp = 0.0;
-    veh->engineSndLerp = 0.0;
+    veh->idleSndLerp = 0.0f;
+    veh->engineSndLerp = 0.0f;
     veh->turretHitNum = 0;
-    veh->hover.hoverRadius = 30.0;
-    veh->hover.hoverSpeed = 17.6 * 0.800000011920929;
-    veh->hover.hoverAccel = 17.6 * 0.5;
+    veh->hover.hoverRadius = 30.0f;
+    veh->hover.hoverSpeed = 17.6f * 0.800000011920929f;
+    veh->hover.hoverAccel = 17.6f * 0.5f;
     veh->hover.useHoverAccelForAngles = 0;
     veh->yawSlowDown = 0;
-    veh->yawOverShoot = 0.1;
-    veh->prevGoalYaw = -1.0;
-    veh->nearGoalNotifyDist = 0.0;
+    veh->yawOverShoot = 0.1f;
+    veh->prevGoalYaw = -1.0f;
+    veh->nearGoalNotifyDist = 0.0f;
     VEH_SetPosition(ent, ent->r.currentOrigin, vec3_origin, ent->r.currentAngles);
 }
 
@@ -157,70 +157,70 @@ void __cdecl VEH_InitPhysics(gentity_s *ent)
     phys->prevAngles[0] = ent->r.currentAngles[0];
     phys->prevAngles[1] = ent->r.currentAngles[1];
     phys->prevAngles[2] = ent->r.currentAngles[2];
-    phys->mins[0] = 0.0;
-    phys->mins[1] = 0.0;
-    phys->mins[2] = 0.0;
-    phys->maxs[0] = 0.0;
-    phys->maxs[1] = 0.0;
-    phys->maxs[2] = 0.0;
-    phys->vel[0] = 0.0;
-    phys->vel[1] = 0.0;
-    phys->vel[2] = 0.0;
-    phys->bodyVel[0] = 0.0;
-    phys->bodyVel[1] = 0.0;
-    phys->bodyVel[2] = 0.0;
-    phys->rotVel[0] = 0.0;
-    phys->rotVel[1] = 0.0;
-    phys->rotVel[2] = 0.0;
+    phys->mins[0] = 0.0f;
+    phys->mins[1] = 0.0f;
+    phys->mins[2] = 0.0f;
+    phys->maxs[0] = 0.0f;
+    phys->maxs[1] = 0.0f;
+    phys->maxs[2] = 0.0f;
+    phys->vel[0] = 0.0f;
+    phys->vel[1] = 0.0f;
+    phys->vel[2] = 0.0f;
+    phys->bodyVel[0] = 0.0f;
+    phys->bodyVel[1] = 0.0f;
+    phys->bodyVel[2] = 0.0f;
+    phys->rotVel[0] = 0.0f;
+    phys->rotVel[1] = 0.0f;
+    phys->rotVel[2] = 0.0f;
     for (i = 0; i < 4; ++i)
     {
-        phys->wheelZVel[i] = 0.0;
-        phys->wheelZPos[i] = 0.0;
+        phys->wheelZVel[i] = 0.0f;
+        phys->wheelZPos[i] = 0.0f;
         phys->wheelSurfType[i] = 0;
     }
-    phys->maxPitchAngle = 25.0;
-    phys->maxRollAngle = 25.0;
-    phys->maxAngleVel[1] = 90.0;
-    phys->maxAngleVel[0] = 45.0;
-    phys->maxAngleVel[2] = 45.0;
-    phys->yawAccel = 25.0;
-    phys->yawDecel = 15.0;
-    phys->worldTilt[0] = 0.0;
-    phys->worldTilt[1] = 0.0;
-    phys->worldTilt[2] = 0.0;
-    phys->worldTiltVel[0] = 0.0;
-    phys->worldTiltVel[1] = 0.0;
-    phys->worldTiltVel[2] = 0.0;
+    phys->maxPitchAngle = 25.0f;
+    phys->maxRollAngle = 25.0f;
+    phys->maxAngleVel[1] = 90.0f;
+    phys->maxAngleVel[0] = 45.0f;
+    phys->maxAngleVel[2] = 45.0f;
+    phys->yawAccel = 25.0f;
+    phys->yawDecel = 15.0f;
+    phys->worldTilt[0] = 0.0f;
+    phys->worldTilt[1] = 0.0f;
+    phys->worldTilt[2] = 0.0f;
+    phys->worldTiltVel[0] = 0.0f;
+    phys->worldTiltVel[1] = 0.0f;
+    phys->worldTiltVel[2] = 0.0f;
 }
 
 const float s_correctSolidDeltas[26][3] =
 {
-  { 0.0, 0.0, 1.0 },
-  { -1.0, 0.0, 1.0 },
-  { 0.0, -1.0, 1.0 },
-  { 1.0, 0.0, 1.0 },
-  { 0.0, 1.0, 1.0 },
-  { -1.0, 0.0, 0.0 },
-  { 0.0, -1.0, 0.0 },
-  { 1.0, 0.0, 0.0 },
-  { 0.0, 1.0, 0.0 },
-  { 0.0, 0.0, -1.0 },
-  { -1.0, 0.0, -1.0 },
-  { 0.0, -1.0, -1.0 },
-  { 1.0, 0.0, -1.0 },
-  { 0.0, 1.0, -1.0 },
-  { -1.0, -1.0, 1.0 },
-  { 1.0, -1.0, 1.0 },
-  { 1.0, 1.0, 1.0 },
-  { -1.0, 1.0, 1.0 },
-  { -1.0, -1.0, 0.0 },
-  { 1.0, -1.0, 0.0 },
-  { 1.0, 1.0, 0.0 },
-  { -1.0, 1.0, 0.0 },
-  { -1.0, -1.0, -1.0 },
-  { 1.0, -1.0, -1.0 },
-  { 1.0, 1.0, -1.0 },
-  { -1.0, 1.0, -1.0 }
+  { 0.0f, 0.0f, 1.0f },
+  { -1.0f, 0.0f, 1.0f },
+  { 0.0f, -1.0f, 1.0f },
+  { 1.0f, 0.0f, 1.0f },
+  { 0.0f, 1.0f, 1.0f },
+  { -1.0f, 0.0f, 0.0f },
+  { 0.0f, -1.0f, 0.0f },
+  { 1.0f, 0.0f, 0.0f },
+  { 0.0f, 1.0f, 0.0f },
+  { 0.0f, 0.0f, -1.0f },
+  { -1.0f, 0.0f, -1.0f },
+  { 0.0f, -1.0f, -1.0f },
+  { 1.0f, 0.0f, -1.0f },
+  { 0.0f, 1.0f, -1.0f },
+  { -1.0f, -1.0f, 1.0f },
+  { 1.0f, -1.0f, 1.0f },
+  { 1.0f, 1.0f, 1.0f },
+  { -1.0f, 1.0f, 1.0f },
+  { -1.0f, -1.0f, 0.0f },
+  { 1.0f, -1.0f, 0.0f },
+  { 1.0f, 1.0f, 0.0f },
+  { -1.0f, 1.0f, 0.0f },
+  { -1.0f, -1.0f, -1.0f },
+  { 1.0f, -1.0f, -1.0f },
+  { 1.0f, 1.0f, -1.0f },
+  { -1.0f, 1.0f, -1.0f }
 }; // idb
 int __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace)
 {
@@ -240,7 +240,7 @@ int __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace)
             phys->origin[2] = point[2];
             point[0] = phys->origin[0];
             point[1] = phys->origin[1];
-            point[2] = phys->origin[2] - 1.0;
+            point[2] = phys->origin[2] - 1.0f;
             G_TraceCapsule(trace, phys->origin, phys->mins, phys->maxs, point, ent->s.number, ent->clipmask);
             memcpy(&s_phys, trace, 0x2Cu);
             Vec3Lerp(phys->origin, point, trace->fraction, phys->origin);
@@ -277,14 +277,14 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity)
 
     veh = ent->scr_vehicle;
     phys = &veh->phys;
-    timeLeft = 0.050000001;
+    timeLeft = 0.050000001f;
     endVel[0] = veh->phys.vel[0];
     endVel[1] = veh->phys.vel[1];
     endVel[2] = veh->phys.vel[2];
     if (gravity)
     {
-        endVel[2] = endVel[2] - 40.0;
-        veh->phys.vel[2] = (veh->phys.vel[2] + endVel[2]) * 0.5;
+        endVel[2] = endVel[2] - 40.0f;
+        veh->phys.vel[2] = (veh->phys.vel[2] + endVel[2]) * 0.5f;
         if (s_phys.hasGround)
             VEH_ClipVelocity(phys->vel, s_phys.groundTrace.normal, phys->vel);
     }
@@ -306,24 +306,24 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity)
         G_TraceCapsule(&trace, phys->origin, phys->mins, phys->maxs, end, ent->s.number, ent->clipmask);
         if (trace.startsolid)
         {
-            phys->vel[2] = 0.0;
+            phys->vel[2] = 0.0f;
             return 1;
         }
-        if (trace.fraction > 0.0)
+        if (trace.fraction > 0.0f)
             Vec3Lerp(phys->origin, end, trace.fraction, phys->origin);
-        if (trace.fraction == 1.0)
+        if (trace.fraction == 1.0f)
             break;
         timeLeft = timeLeft - timeLeft * trace.fraction;
         if (numPlanes >= 5)
         {
-            phys->vel[0] = 0.0;
-            phys->vel[1] = 0.0;
-            phys->vel[2] = 0.0;
+            phys->vel[0] = 0.0f;
+            phys->vel[1] = 0.0f;
+            phys->vel[2] = 0.0f;
             return 1;
         }
         for (i = 0; i < numPlanes; ++i)
         {
-            if (Vec3Dot(trace.normal, planes[i]) > 0.9900000095367432)
+            if (Vec3Dot(trace.normal, planes[i]) > 0.9900000095367432f)
             {
                 Vec3Add(trace.normal, phys->vel, phys->vel);
                 break;
@@ -338,17 +338,17 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity)
             ++numPlanes;
             for (i = 0; i < numPlanes; ++i)
             {
-                if (Vec3Dot(phys->vel, planes[i]) < 0.1000000014901161)
+                if (Vec3Dot(phys->vel, planes[i]) < 0.1000000014901161f)
                 {
                     VEH_ClipVelocity(phys->vel, planes[i], clipVel);
                     VEH_ClipVelocity(endVel, planes[i], endClipVel);
                     for (j = 0; j < numPlanes; ++j)
                     {
-                        if (j != i && Vec3Dot(clipVel, planes[j]) < 0.1000000014901161)
+                        if (j != i && Vec3Dot(clipVel, planes[j]) < 0.1000000014901161f)
                         {
                             VEH_ClipVelocity(clipVel, planes[j], clipVel);
                             VEH_ClipVelocity(endClipVel, planes[j], endClipVel);
-                            if (Vec3Dot(clipVel, planes[i]) < 0.0)
+                            if (Vec3Dot(clipVel, planes[i]) < 0.0f)
                             {
                                 Vec3Cross(planes[i], planes[j], dir);
                                 Vec3Normalize(dir);
@@ -358,11 +358,11 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity)
                                 Vec3Scale(dir, dot, endClipVel);
                                 for (k = 0; k < numPlanes; ++k)
                                 {
-                                    if (k != i && k != j && Vec3Dot(clipVel, planes[k]) < 0.1000000014901161)
+                                    if (k != i && k != j && Vec3Dot(clipVel, planes[k]) < 0.1000000014901161f)
                                     {
-                                        phys->vel[0] = 0.0;
-                                        phys->vel[1] = 0.0;
-                                        phys->vel[2] = 0.0;
+                                        phys->vel[0] = 0.0f;
+                                        phys->vel[1] = 0.0f;
+                                        phys->vel[2] = 0.0f;
                                         return 1;
                                     }
                                 }
@@ -397,13 +397,13 @@ void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out)
     float backoff; // [esp+8h] [ebp-4h]
     float backoffa; // [esp+8h] [ebp-4h]
 
-    if (normal[2] < 0.699999988079071 || in[2] * in[2] > *in * *in + in[1] * in[1])
+    if (normal[2] < 0.699999988079071f || in[2] * in[2] > *in * *in + in[1] * in[1])
     {
         backoff = Vec3Dot(in, normal);
         if (backoff >= 0.0)
-            v3 = backoff / 1.009999990463257;
+            v3 = backoff / 1.009999990463257f;
         else
-            v3 = backoff * 1.009999990463257;
+            v3 = backoff * 1.009999990463257f;
         for (i = 0; i < 3; ++i)
         {
             backoffa = v3;
@@ -451,7 +451,7 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
     VEH_TouchEntities(pSelf);
     veh->turret.barrelBlocked = 0;
     VEH_UpdateAim(pSelf);
-    pSelf->s.time2 = (int)(info->suspensionTravel * 1000.0);
+    pSelf->s.time2 = (int)(info->suspensionTravel * 1000.0f);
     pSelf->nextthink = level.time + 50;
 }
 
@@ -476,11 +476,11 @@ void __cdecl VEH_MoveTrace(gentity_s *ent)
             maxs[1] = ent->r.maxs[1];
             maxs[2] = ent->r.maxs[2];
             Vec3Sub(maxs, ent->r.mins, size);
-            dimIndex = size[1] > (double)size[0];
-            if (size[dimIndex] > (double)size[2])
+            dimIndex = size[1] > (float)size[0];
+            if (size[dimIndex] > (float)size[2])
                 maxs[2] = size[dimIndex] - size[2] + maxs[2];
             G_TraceCapsule(&trace, phys->prevOrigin, ent->r.mins, maxs, phys->origin, ent->s.number, contents);
-            if (trace.fraction < 1.0 && Trace_GetEntityHitId(&trace) == 1022)
+            if (trace.fraction < 1.0f && Trace_GetEntityHitId(&trace) == 1022)
             {
                 Scr_AddVector(trace.normal);
                 Scr_Notify(ent, scr_const.script_vehicle_collision, 1u);
@@ -753,7 +753,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
                 Vec3Normalize(tgtDir);
                 vectoangles(tgtDir, tgtAngles);
                 tgtAngles[1] = player->client->ps.viewangles[1];
-                tgtAngles[2] = 0.0;
+                tgtAngles[2] = 0.0f;
             }
             else
             {
@@ -768,7 +768,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
             AxisToAngles(mtx, tgtAngles);
             prevAngles[0] = ent->s.lerp.u.primaryLight.cosHalfFovInner;
             prevAngles[1] = ent->s.lerp.u.vehicle.gunYaw;
-            prevAngles[2] = 0.0;
+            prevAngles[2] = 0.0f;
             AnglesSubtract(tgtAngles, prevAngles, deltaAngles);
             v8 = fabs(deltaAngles[0]);
             deltaAngles[0] = v8;
@@ -778,21 +778,21 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
                 tgtAngles[0],
                 prevAngles[0],
                 info->turretRotRate,
-                0.050000001);
-            ent->s.lerp.u.vehicle.gunYaw = LinearTrackAngle(tgtAngles[1], prevAngles[1], info->turretRotRate, 0.050000001);
+                0.050000001f);
+            ent->s.lerp.u.vehicle.gunYaw = LinearTrackAngle(tgtAngles[1], prevAngles[1], info->turretRotRate, 0.050000001f);
             stopAngles[0] = ent->s.lerp.u.primaryLight.cosHalfFovInner;
             stopAngles[1] = ent->s.lerp.u.vehicle.gunYaw;
-            stopAngles[2] = 0.0;
+            stopAngles[2] = 0.0f;
             cosHalfFovInner = ent->s.lerp.u.primaryLight.cosHalfFovInner;
             turretVertSpanDown = info->turretVertSpanDown;
             v6 = cosHalfFovInner - turretVertSpanDown;
-            if (v6 < 0.0)
+            if (v6 < 0.0f)
                 v16 = cosHalfFovInner;
             else
                 v16 = turretVertSpanDown;
             v14 = -info->turretVertSpanUp;
             v5 = v14 - cosHalfFovInner;
-            if (v5 < 0.0)
+            if (v5 < 0.0f)
                 v4 = v16;
             else
                 v4 = -info->turretVertSpanUp;
@@ -800,20 +800,20 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
             gunYaw = ent->s.lerp.u.vehicle.gunYaw;
             turretHorizSpanLeft = info->turretHorizSpanLeft;
             v3 = gunYaw - turretHorizSpanLeft;
-            if (v3 < 0.0)
+            if (v3 < 0.0f)
                 v12 = gunYaw;
             else
                 v12 = turretHorizSpanLeft;
             v10 = -info->turretHorizSpanRight;
             v2 = v10 - gunYaw;
-            if (v2 < 0.0)
+            if (v2 < 0.0f)
                 v1 = v12;
             else
                 v1 = -info->turretHorizSpanRight;
             ent->s.lerp.u.vehicle.gunYaw = v1;
             stopAngles[0] = AngleDelta(stopAngles[0], ent->s.lerp.u.primaryLight.cosHalfFovInner);
             stopAngles[1] = AngleDelta(stopAngles[1], ent->s.lerp.u.vehicle.gunYaw);
-            if (deltaAngles[0] >= 2.0 && stopAngles[0] == 0.0 || deltaAngles[1] >= 2.0 && stopAngles[1] == 0.0)
+            if (deltaAngles[0] >= 2.0f && stopAngles[0] == 0.0f || deltaAngles[1] >= 2.0f && stopAngles[1] == 0.0f)
             {
                 veh->turret.turretState = VEH_TURRET_MOVING;
             }
@@ -826,7 +826,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
                 Scr_Notify(ent, scr_const.turret_rotate_stopped, 0);
                 veh->turret.turretState = VEH_TURRET_STOPPED;
             }
-            if (deltaAngles[0] >= 1.0 || deltaAngles[1] >= 1.0)
+            if (deltaAngles[0] >= 1.0f || deltaAngles[1] >= 1.0f)
             {
                 Scr_Notify(ent, scr_const.turret_not_on_target, 0);
                 Scr_Notify(ent, scr_const.turret_no_vis, 0);
@@ -927,9 +927,9 @@ void __cdecl VEH_UpdateMoveToGoal(gentity_s *ent, const float *goalPos)
     hovering = VEH_IsHovering(veh);
     Vec3Sub(goalPos, veh->phys.origin, vecToGoal);
     distToGoal = Vec3Length(vecToGoal);
-    if (distToGoal > 0.0)
+    if (distToGoal > 0.0f)
     {
-        dt = 0.050000001;
+        dt = 0.050000001f;
         prevVel[0] = phys->vel[0];
         prevVel[1] = phys->vel[1];
         prevVel[2] = phys->vel[2];
@@ -940,13 +940,13 @@ void __cdecl VEH_UpdateMoveToGoal(gentity_s *ent, const float *goalPos)
         Vec3Scale(vecToGoal, scale, desiredDir);
         Vec3Scale(desiredDir, newSpeed, desiredVel);
         Vec3Sub(desiredVel, prevVel, accelVec);
-        if (!veh->stopping && veh->manualSpeed >= (double)veh->speed)
+        if (!veh->stopping && veh->manualSpeed >= (float)veh->speed)
         {
             v10 = desiredVel[1] * prevVel[1] + desiredVel[0] * prevVel[0];
-            if (v10 > 0.0)
+            if (v10 > 0.0f)
             {
                 v9 = accelVec[1] * prevVel[1] + accelVec[0] * prevVel[0];
-                if (v9 < 0.0)
+                if (v9 < 0.0f)
                 {
                     dotVec[0] = prevVel[0];
                     dotVec[1] = prevVel[1];
@@ -961,7 +961,7 @@ void __cdecl VEH_UpdateMoveToGoal(gentity_s *ent, const float *goalPos)
         }
         accelMagnitude = Vec3Length(accelVec);
         accelMaxDt = accelMax * dt;
-        if (accelMaxDt < (double)accelMagnitude)
+        if (accelMaxDt < (float)accelMagnitude)
         {
             if (accelMagnitude == 0.0)
                 MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3346, 0, "%s", "accelMagnitude");
@@ -971,44 +971,44 @@ void __cdecl VEH_UpdateMoveToGoal(gentity_s *ent, const float *goalPos)
         if (!hovering)
         {
             VEH_CheckHorizontalVelocityToGoal(veh, vecToGoal, accelMax, accelVec);
-            if (vecToGoal[2] != 0.0)
+            if (vecToGoal[2] != 0.0f)
                 VEH_CheckVerticalVelocityToGoal(veh, vecToGoal[2], accelVec);
         }
         Vec3Add(prevVel, accelVec, phys->vel);
         v2 = Vec3Length(phys->vel);
         veh->speed = v2;
-        Vec3Lerp(phys->accel, accelVec, 0.5, phys->accel);
+        Vec3Lerp(phys->accel, accelVec, 0.5f, phys->accel);
         accelMagnitude = Vec3Length(phys->accel);
-        if (accelMaxDt < (double)accelMagnitude && !veh->stopAtGoal)
+        if (accelMaxDt < (float)accelMagnitude && !veh->stopAtGoal)
         {
             v7 = accelMaxDt / accelMagnitude;
             Vec3Scale(phys->accel, v7, phys->accel);
         }
         Vec3Add(prevVel, phys->vel, averageVel);
-        Vec3Scale(averageVel, 0.5, averageVel);
-        if (dt < 0.05000000074505806)
+        Vec3Scale(averageVel, 0.5f, averageVel);
+        if (dt < 0.05000000074505806f)
         {
-            v6 = 0.05000000074505806 - dt;
+            v6 = 0.05000000074505806f - dt;
             Vec3Mad(phys->origin, v6, prevVel, phys->origin);
         }
         Vec3Mad(phys->origin, dt, averageVel, phys->origin);
         VEH_UpdateMoveOrientation(ent, desiredDir);
     }
-    if (s_vehicleInfos[veh->infoIdx].engineSndSpeed == 0.0)
+    if (s_vehicleInfos[veh->infoIdx].engineSndSpeed == 0.0f)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3386, 0, "%s", "s_vehicleInfos[veh->infoIdx].engineSndSpeed");
     v12 = veh->speed / s_vehicleInfos[veh->infoIdx].engineSndSpeed;
-    v5 = v12 - 1.0;
-    if (v5 < 0.0)
+    v5 = v12 - 1.0f;
+    if (v5 < 0.0f)
         v13 = veh->speed / s_vehicleInfos[veh->infoIdx].engineSndSpeed;
     else
-        v13 = 1.0;
-    v4 = 0.0 - v12;
-    if (v4 < 0.0)
+        v13 = 1.0f;
+    v4 = 0.0f - v12;
+    if (v4 < 0.0f)
         v3 = v13;
     else
-        v3 = 0.0;
+        v3 = 0.0f;
     veh->engineSndLerp = v3;
-    veh->idleSndLerp = 1.0 - veh->engineSndLerp;
+    veh->idleSndLerp = 1.0f - veh->engineSndLerp;
     if (!hovering)
     {
         VEH_UpdateMove_CheckNearGoal(ent, distToGoal);
@@ -1055,22 +1055,22 @@ void __cdecl VEH_UpdateMoveOrientation(gentity_s *ent, float *desiredDir)
     accelVec[1] = veh->phys.accel[1];
     accelVec[2] = veh->phys.accel[2];
     VEH_AddFakeDrag(veh->phys.vel, veh->maxDragSpeed, accelVec);
-    horizontalAccel = Vec2Length(accelVec) / 0.05000000074505806;
+    horizontalAccel = Vec2Length(accelVec) / 0.05000000074505806f;
     Vec3Normalize(accelVec);
-    angle = veh->phys.angles[1] * 0.01745329238474369;
+    angle = veh->phys.angles[1] * 0.01745329238474369f;
     bodyDir = cos(angle);
     bodyDir_4 = sin(angle);
     accelFraction = VEH_CalcAccelFraction(horizontalAccel, veh->infoIdx);
-    stoppingFactor = 1.0;
-    if (veh->stopping && horizontalAccel > 0.0)
+    stoppingFactor = 1.0f;
+    if (veh->stopping && horizontalAccel > 0.0f)
     {
-        if (horizontalAccel == 0.0)
+        if (horizontalAccel == 0.0f)
             MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2984, 0, "%s", "horizontalAccel");
         timeToGoal = Vec2Length(veh->phys.vel) / horizontalAccel;
         stoppingTime = VEH_CalcStoppingTime(horizontalAccel, accelFraction);
-        if (stoppingTime == 0.0)
+        if (stoppingTime == 0.0f)
             MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2988, 0, "%s", "stoppingTime");
-        if (stoppingTime > (double)timeToGoal)
+        if (stoppingTime > timeToGoal)
             stoppingFactor = timeToGoal / stoppingTime;
     }
     dot = accelVec[1] * bodyDir_4 + accelVec[0] * bodyDir;
@@ -1079,15 +1079,15 @@ void __cdecl VEH_UpdateMoveOrientation(gentity_s *ent, float *desiredDir)
     accel = VEH_GetAccelForAngles(veh);
     accelFractiona = VEH_CalcAccelFraction(accel, veh->infoIdx);
     angularAccel = VEH_CalcAngularAccel(accel, accelFractiona);
-    angularDecel = angularAccel * 0.4000000059604645;
+    angularDecel = angularAccel * 0.4000000059604645f;
     desiredAngle = veh->phys.maxPitchAngle * dot * accelFactor;
-    VEH_UpdateAngleAndAngularVel(0, desiredAngle, angularAccel, angularDecel, 0.0, phys);
+    VEH_UpdateAngleAndAngularVel(0, desiredAngle, angularAccel, angularDecel, 0.0f, phys);
     perpDir[0] = bodyDir_4;
     perpDir[1] = -bodyDir;
     dot = accelVec[1] * perpDir[1] + accelVec[0] * bodyDir_4;
     dot = dot * stoppingFactor;
     v2 = veh->phys.maxRollAngle * dot * accelFactor;
-    VEH_UpdateAngleAndAngularVel(2, v2, angularAccel, angularDecel, 0.0, phys);
+    VEH_UpdateAngleAndAngularVel(2, v2, angularAccel, angularDecel, 0.0f, phys);
 }
 
 void __cdecl VEH_UpdateAngleAndAngularVel(
@@ -1113,55 +1113,55 @@ void __cdecl VEH_UpdateAngleAndAngularVel(
     float angleDiff; // [esp+4Ch] [ebp-4h]
 
     angleDiff = AngleDelta(desiredAngle, phys->angles[index]);
-    if (angleDiff != 0.0 || phys->rotVel[index] != 0.0)
+    if (angleDiff != 0.0f || phys->rotVel[index] != 0.0f)
     {
         v11 = fabs(phys->rotVel[index]);
         targetAngleVel = phys->maxAngleVel[index];
-        if (angleDiff * phys->rotVel[index] < 0.0)
+        if (angleDiff * phys->rotVel[index] < 0.0f)
         {
             effectiveAccel = accel;
         }
         else
         {
-            if (decel == 0.0)
+            if (decel == 0.0f)
                 MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2662, 0, "%s", "decel");
-            if (overShoot < 0.0 || overShoot >= 1.0)
+            if (overShoot < 0.0f || overShoot >= 1.0f)
                 MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2666, 0, "%s", "overShoot >= 0.f && overShoot < 1.f");
             stopTime = v11 / decel;
-            stopAngle = v11 * 0.5 * stopTime;
-            stopAnglea = (1.0 - overShoot) * stopAngle;
+            stopAngle = v11 * 0.5f * stopTime;
+            stopAnglea = (1.0f - overShoot) * stopAngle;
             v10 = fabs(angleDiff);
-            if (stopAnglea < (double)v10)
+            if (stopAnglea < v10)
             {
                 effectiveAccel = accel;
             }
             else
             {
-                targetAngleVel = 0.0;
+                targetAngleVel = 0.0f;
                 effectiveAccel = decel;
             }
         }
-        if (angleDiff < 0.0)
+        if (angleDiff < 0.0f)
             targetAngleVel = -targetAngleVel;
-        if (v11 >= effectiveAccel * 0.05000000074505806
-            || (v9 = v11 * 0.05000000074505806, v8 = fabs(angleDiff), v8 >= (double)v9))
+        if (v11 >= effectiveAccel * 0.05000000074505806f
+            || (v9 = v11 * 0.05000000074505806f, v8 = fabs(angleDiff), v8 >= v9))
         {
-            phys->rotVel[index] = VEH_AccelerateSpeed(phys->rotVel[index], targetAngleVel, effectiveAccel, 0.050000001);
-            phys->angles[index] = phys->rotVel[index] * 0.05000000074505806 + phys->angles[index];
-            v12 = phys->angles[index] * 0.002777777845039964;
-            v7 = v12 + 0.5;
+            phys->rotVel[index] = VEH_AccelerateSpeed(phys->rotVel[index], targetAngleVel, effectiveAccel, 0.050000001f);
+            phys->angles[index] = phys->rotVel[index] * 0.05000000074505806f + phys->angles[index];
+            v12 = phys->angles[index] * 0.002777777845039964f;
+            v7 = v12 + 0.5f;
             v6 = floor(v7);
-            phys->angles[index] = (v12 - v6) * 360.0;
+            phys->angles[index] = (v12 - v6) * 360.0f;
         }
         else
         {
             phys->angles[index] = desiredAngle;
-            phys->rotVel[index] = 0.0;
+            phys->rotVel[index] = 0.0f;
         }
     }
 }
 
-double __cdecl VEH_AccelerateSpeed(float speed, float tgtSpeed, float accel, float dt)
+float __cdecl VEH_AccelerateSpeed(float speed, float tgtSpeed, float accel, float dt)
 {
     float speeda; // [esp+8h] [ebp+8h]
 
@@ -1180,7 +1180,7 @@ double __cdecl VEH_AccelerateSpeed(float speed, float tgtSpeed, float accel, flo
     return speeda;
 }
 
-double __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDir)
+float __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDir)
 {
     double v2; // st7
     float v4; // [esp+8h] [ebp-44h]
@@ -1218,14 +1218,14 @@ double __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDi
             timeToTurn = v2 + v2;
             stopAngle = phys->maxAngleVel[1] * 0.5 * timeToTurn;
             angleDiff = desiredYaw - phys->angles[1];
-            v8 = angleDiff * 0.002777777845039964;
-            v6 = v8 + 0.5;
+            v8 = angleDiff * 0.002777777845039964f;
+            v6 = v8 + 0.5f;
             v5 = floor(v6);
-            v7 = (v8 - v5) * 360.0;
+            v7 = (v8 - v5) * 360.0f;
             v4 = fabs(v7);
-            if (timeToStop > (double)timeToTurn && v4 > (double)stopAngle)
+            if (timeToStop > timeToTurn && v4 > stopAngle)
                 timeToTurn = (v4 - stopAngle) / phys->maxAngleVel[1] + timeToTurn;
-            if (timeToStop <= (double)timeToTurn)
+            if (timeToStop <= timeToTurn)
                 return desiredYaw;
         }
         if (veh->hasTargetYaw)
@@ -1238,12 +1238,12 @@ double __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDi
         }
         else
         {
-            return (float)vectoyaw(desiredDir);
+            return vectoyaw(desiredDir);
         }
     }
 }
 
-double __cdecl VEH_CalcAccelFraction(float accel, int infoIdx)
+float __cdecl VEH_CalcAccelFraction(float accel, int infoIdx)
 {
     float v4; // [esp+4h] [ebp-1Ch]
     float v5; // [esp+8h] [ebp-18h]
@@ -1252,39 +1252,39 @@ double __cdecl VEH_CalcAccelFraction(float accel, int infoIdx)
     float minAccel; // [esp+14h] [ebp-Ch]
     float maxAccel; // [esp+1Ch] [ebp-4h]
 
-    minAccel = 17.6 * 0.0;
+    minAccel = 17.6f * 0.0f;
     maxAccel = s_vehicleInfos[infoIdx].accel;
-    if (minAccel >= (double)maxAccel)
+    if (minAccel >= maxAccel)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2784, 0, "%s", "maxAccel > minAccel");
     v6 = accel - maxAccel;
-    if (v6 < 0.0)
+    if (v6 < 0.0f)
         v7 = accel;
     else
         v7 = maxAccel;
     v5 = minAccel - accel;
-    if (v5 < 0.0)
+    if (v5 < 0.0f)
         v4 = v7;
     else
-        v4 = 17.6 * 0.0;
-    return (float)((v4 - minAccel) / (maxAccel - minAccel));
+        v4 = 17.6f * 0.0f;
+    return (v4 - minAccel) / (maxAccel - minAccel);
 }
 
-double __cdecl VEH_CalcAngularAccel(float accel, float accelFraction)
+float __cdecl VEH_CalcAngularAccel(float accel, float accelFraction)
 {
-    return (float)(accelFraction * (float)45.0 + (1.0 - accelFraction) * (float)1.0);
+    return accelFraction * 45.0f + (1.0f - accelFraction) * 1.0f;
 }
 
-double __cdecl VEH_CalcAngleForAccel(float accel, float accelFraction)
+float __cdecl VEH_CalcAngleForAccel(float accel, float accelFraction)
 {
-    return (float)(accelFraction * (float)1.0 + (1.0 - accelFraction) * (float)0.1);
+    return accelFraction * 1.0f + (1.0f - accelFraction) * 0.1f;
 }
 
-double __cdecl VEH_CalcStoppingTime(float accel, float accelFraction)
+float __cdecl VEH_CalcStoppingTime(float accel, float accelFraction)
 {
     float v4; // [esp+4h] [ebp-Ch]
 
-    v4 = 1.0 - accelFraction;
-    return (float)(v4 * (float)3.5 + (1.0 - v4) * (float)2.5);
+    v4 = 1.0f - accelFraction;
+    return v4 * 3.5f + (1.0f - v4) * 2.5f;
 }
 
 void __cdecl VEH_UpdateYawAndNotify(gentity_s *ent, float desiredYaw)
@@ -1301,14 +1301,14 @@ void __cdecl VEH_UpdateYawAndNotify(gentity_s *ent, float desiredYaw)
     float initalVel; // [esp+40h] [ebp-Ch]
     float EPSILON; // [esp+48h] [ebp-4h]
 
-    EPSILON = 0.001;
+    EPSILON = 0.001f;
     veh = ent->scr_vehicle;
     initialYawDiff = veh->phys.angles[1] - veh->goalYaw;
     v3 = 0;
     if (veh->hasGoalYaw)
     {
         v4 = fabs(initialYawDiff);
-        if (EPSILON < (double)v4)
+        if (EPSILON < v4)
             v3 = 1;
     }
     initalVel = veh->phys.rotVel[1];
@@ -1321,25 +1321,25 @@ void __cdecl VEH_UpdateYawAndNotify(gentity_s *ent, float desiredYaw)
     }
     if (veh->yawSlowDown)
     {
-        yawAccel = yawAccel * (float)0.2;
-        yawDecel = yawDecel * (float)0.2;
+        yawAccel = yawAccel * 0.2f;
+        yawDecel = yawDecel * 0.2f;
     }
     if (veh->hasGoalYaw || veh->hasTargetYaw)
         overshoot = veh->yawOverShoot;
     else
-        overshoot = 0.0;
+        overshoot = 0.0f;
     VEH_UpdateAngleAndAngularVel(1, desiredYaw, yawAccel, yawDecel, overshoot, &veh->phys);
-    if (veh->hasGoalYaw && veh->phys.rotVel[1] * initalVel < 0.0)
+    if (veh->hasGoalYaw && veh->phys.rotVel[1] * initalVel < 0.0f)
         veh->yawSlowDown = 1;
     if (v3)
     {
         finalYawDiff = veh->phys.angles[1] - veh->goalYaw;
-        if (finalYawDiff * initialYawDiff < 0.0 || (v2 = fabs(finalYawDiff), EPSILON > (double)v2))
+        if (finalYawDiff * initialYawDiff < 0.0f || (v2 = fabs(finalYawDiff), EPSILON > v2))
             Scr_Notify(ent, scr_const.goal_yaw, 0);
     }
 }
 
-double __cdecl VEH_GetAccelForAngles(scr_vehicle_s *veh)
+float __cdecl VEH_GetAccelForAngles(scr_vehicle_s *veh)
 {
     float v2; // [esp+0h] [ebp-28h]
     float v3; // [esp+4h] [ebp-24h]
@@ -1352,8 +1352,8 @@ double __cdecl VEH_GetAccelForAngles(scr_vehicle_s *veh)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2878, 0, "%s", "veh");
     if (VEH_IsHovering(veh))
     {
-        MAX_HOVER_ANGLE = 5.0;
-        MAX_HOVER_ANGLE_VEL = 3.0;
+        MAX_HOVER_ANGLE = 5.0f;
+        MAX_HOVER_ANGLE_VEL = 3.0f;
         if (veh->hover.useHoverAccelForAngles)
         {
             return veh->hover.hoverAccel;
@@ -1361,10 +1361,10 @@ double __cdecl VEH_GetAccelForAngles(scr_vehicle_s *veh)
         else
         {
             v5 = fabs(veh->phys.angles[0]);
-            if (MAX_HOVER_ANGLE >= (double)v5 && (v4 = fabs(veh->phys.angles[2]), MAX_HOVER_ANGLE >= (double)v4))
+            if (MAX_HOVER_ANGLE >= v5 && (v4 = fabs(veh->phys.angles[2]), MAX_HOVER_ANGLE >= v4))
             {
                 v3 = fabs(veh->phys.rotVel[0]);
-                if (MAX_HOVER_ANGLE_VEL >= (double)v3 && (v2 = fabs(veh->phys.rotVel[2]), MAX_HOVER_ANGLE_VEL >= (double)v2))
+                if (MAX_HOVER_ANGLE_VEL >= v3 && (v2 = fabs(veh->phys.rotVel[2]), MAX_HOVER_ANGLE_VEL >= v2))
                 {
                     veh->hover.useHoverAccelForAngles = 1;
                     return veh->hover.hoverAccel;
@@ -1401,16 +1401,16 @@ void __cdecl VEH_AddFakeDrag(const float *velocity, float maxDragSpeed, float *a
     velocityVec[1] = velocity[1];
     horizontalVel = Vec2Length(velocityVec);
     v4 = maxDragSpeed - horizontalVel;
-    if (v4 < 0.0)
+    if (v4 < 0.0f)
         v3 = maxDragSpeed;
     else
         v3 = horizontalVel;
-    if (maxDragSpeed == 0.0)
+    if (maxDragSpeed == 0.0f)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2925, 0, "%s", "maxDragSpeed");
     fakeDrag = v3 / maxDragSpeed;
     fakeDraga = fakeDrag * fakeDrag;
     Vec2Normalize(velocityVec);
-    v5 = fakeDraga * (float)5.0;
+    v5 = fakeDraga * 5.0f;
     velocityVec[0] = v5 * velocityVec[0];
     velocityVec[1] = v5 * velocityVec[1];
     *accelVec = *accelVec + velocityVec[0];
@@ -1451,20 +1451,20 @@ void __cdecl VEH_CheckHorizontalVelocityToGoal(
 
     phys = &veh->phys;
     horizontalDist = Vec2Length(vecToGoal);
-    if (horizontalDist >= 1.0)
+    if (horizontalDist >= 1.0f)
     {
         horizontalSpeed = Vec2Length(phys->vel);
         if (veh->stopAtGoal
             && (newVel[0] = phys->vel[0] + *accelVec,
                 newVel[1] = phys->vel[1] + accelVec[1],
                 newSpeed = Vec2Length(newVel),
-                newSpeed > 0.0))
+                newSpeed > 0.0f))
         {
             oldSpeed = Vec2Length(phys->vel);
             v8 = newSpeed - oldSpeed;
             v7 = fabs(v8);
-            requiredDecel = horizontalSpeed * horizontalSpeed / (horizontalDist * 2.0) * 0.05000000074505806;
-            if (v7 < (double)requiredDecel)
+            requiredDecel = horizontalSpeed * horizontalSpeed / (horizontalDist * 2.0f) * 0.05000000074505806f;
+            if (v7 < requiredDecel)
             {
                 v14 = (oldSpeed - requiredDecel) / newSpeed;
                 newVel[0] = v14 * newVel[0];
@@ -1483,28 +1483,28 @@ void __cdecl VEH_CheckHorizontalVelocityToGoal(
             v12 = perpDir[0] * *vecToGoal + perpDir[1] * vecToGoal[1];
             v6 = fabs(v12);
             radiusVec[0] = v6;
-            if (horizontalDist < (double)v6)
+            if (horizontalDist < v6)
             {
                 radiusVec[1] = vecToGoal[1] * phys->vel[1] + *vecToGoal * phys->vel[0];
                 v11 = 1.0 / horizontalSpeed;
                 radiusVec[0] = v11 * radiusVec[0];
                 radiusVec[1] = v11 * radiusVec[1];
                 v5 = radiusVec[1] * radiusVec[1] + radiusVec[0] * radiusVec[0];
-                radius = v5 / (radiusVec[0] * 2.0);
-                if (radius <= 0.0)
+                radius = v5 / (radiusVec[0] * 2.0f);
+                if (radius <= 0.0f)
                     MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3073, 0, "%s", "radius > 0.f");
-                if (radius > 1.0 && accelMax * radius < horizontalSpeed * horizontalSpeed)
+                if (radius > 1.0f && accelMax * radius < horizontalSpeed * horizontalSpeed)
                 {
-                    if (radius == 0.0)
+                    if (radius == 0.0f)
                         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3083, 0, "%s", "radius");
                     breakingAccel = horizontalSpeed * horizontalSpeed / radius;
-                    if (horizontalSpeed < (double)breakingAccel)
+                    if (horizontalSpeed < breakingAccel)
                         breakingAccel = horizontalSpeed;
                     if (veh->stopAtGoal)
-                        turningAbility = 1.0;
+                        turningAbility = 1.0f;
                     else
                         turningAbility = veh->turningAbility;
-                    breakFactor = -turningAbility * breakingAccel / horizontalSpeed * 0.05000000074505806;
+                    breakFactor = -turningAbility * breakingAccel / horizontalSpeed * 0.05000000074505806f;
                     breakVec = breakFactor * phys->vel[0];
                     breakVec_4 = breakFactor * phys->vel[1];
                     v9 = phys->vel;
@@ -1536,29 +1536,29 @@ void __cdecl VEH_CheckVerticalVelocityToGoal(scr_vehicle_s *veh, float verticalD
 
     verticalSpeed = veh->phys.vel[2];
     v7 = fabs(accelVec[2]);
-    if ((float)0.001 <= (double)v7)
+    if (0.001f <= v7)
     {
         v6 = fabs(verticalSpeed);
-        if ((float)0.001 <= (double)v6 && verticalSpeed * accelVec[2] < 0.0 && verticalDist * verticalSpeed > 0.0)
+        if (0.001f <= v6 && verticalSpeed * accelVec[2] < 0.0 && verticalDist * verticalSpeed > 0.0f)
         {
-            currentStoppingTime = verticalSpeed * 0.05000000074505806 / -accelVec[2];
-            desiredStoppingTime = verticalDist / (verticalSpeed * 0.5);
-            if (desiredStoppingTime < (double)currentStoppingTime)
+            currentStoppingTime = verticalSpeed * 0.05000000074505806f / -accelVec[2];
+            desiredStoppingTime = verticalDist / (verticalSpeed * 0.5f);
+            if (desiredStoppingTime < currentStoppingTime)
             {
-                if (desiredStoppingTime == 0.0)
+                if (desiredStoppingTime == 0.0f)
                     MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3124, 0, "%s", "desiredStoppingTime");
-                breakingAccel = -verticalSpeed * 0.05000000074505806 / desiredStoppingTime;
+                breakingAccel = -verticalSpeed * 0.05000000074505806f / desiredStoppingTime;
                 if (accelVec[2] * accelVec[2] < breakingAccel * breakingAccel)
                 {
-                    accelerationCap = veh->manualAccel * 0.05000000074505806 * 3.0;
+                    accelerationCap = veh->manualAccel * 0.05000000074505806f * 3.0f;
                     v5 = breakingAccel - accelerationCap;
-                    if (v5 < 0.0)
-                        v9 = -verticalSpeed * 0.05000000074505806 / desiredStoppingTime;
+                    if (v5 < 0.0f)
+                        v9 = -verticalSpeed * 0.05000000074505806f / desiredStoppingTime;
                     else
-                        v9 = veh->manualAccel * 0.05000000074505806 * 3.0;
+                        v9 = veh->manualAccel * 0.05000000074505806f * 3.0f;
                     v8 = -accelerationCap;
                     v4 = v8 - breakingAccel;
-                    if (v4 < 0.0)
+                    if (v4 < 0.0f)
                         v3 = v9;
                     else
                         v3 = -accelerationCap;
@@ -1581,18 +1581,18 @@ int __cdecl VEH_UpdateMove_CheckGoalReached(gentity_s *ent, float distToGoal)
     veh = ent->scr_vehicle;
     if (veh->stopAtGoal)
     {
-        if (veh->hover.hoverRadius == 0.0)
+        if (veh->hover.hoverRadius == 0.0f)
         {
-            v3 = (veh->stopping || distToGoal == 0.0) && veh->speed == 0.0;
+            v3 = (veh->stopping || distToGoal == 0.0f) && veh->speed == 0.0f;
             goalReached = v3;
         }
         else
         {
             v4 = 0;
-            if (veh->hover.hoverRadius >= (double)distToGoal)
+            if (veh->hover.hoverRadius >= distToGoal)
             {
-                MAX_SPEED_FOR_HOVER = 17.6 * 2.0;
-                if (MAX_SPEED_FOR_HOVER > (double)veh->speed)
+                MAX_SPEED_FOR_HOVER = 17.6f * 2.0f;
+                if (MAX_SPEED_FOR_HOVER > veh->speed)
                     v4 = 1;
             }
             goalReached = v4;
@@ -1600,19 +1600,19 @@ int __cdecl VEH_UpdateMove_CheckGoalReached(gentity_s *ent, float distToGoal)
         if (goalReached)
         {
             veh->moveState = VEH_MOVESTATE_HOVER;
-            if (veh->hover.hoverRadius == 0.0)
+            if (veh->hover.hoverRadius == 0.0f)
             {
-                veh->phys.accel[0] = 0.0;
-                veh->phys.accel[1] = 0.0;
-                veh->phys.accel[2] = 0.0;
-                veh->phys.vel[0] = 0.0;
-                veh->phys.vel[1] = 0.0;
-                veh->phys.vel[2] = 0.0;
+                veh->phys.accel[0] = 0.0f;
+                veh->phys.accel[1] = 0.0f;
+                veh->phys.accel[2] = 0.0f;
+                veh->phys.vel[0] = 0.0f;
+                veh->phys.vel[1] = 0.0f;
+                veh->phys.vel[2] = 0.0f;
             }
             goto LABEL_20;
         }
     }
-    else if (distToGoal <= veh->speed * 0.05000000074505806)
+    else if (distToGoal <= veh->speed * 0.05000000074505806f)
     {
     LABEL_20:
         Scr_Notify(ent, scr_const.goal, 0);
@@ -1634,34 +1634,34 @@ double __cdecl VEH_UpdateMove_CheckStop(scr_vehicle_s *veh, float distToGoal)
     float time; // [esp+2Ch] [ebp-8h]
     float stopDist; // [esp+30h] [ebp-4h]
 
-    dt = 0.050000001;
-    newSpeed = VEH_AccelerateSpeed(veh->speed, veh->manualSpeed, veh->manualAccel, 0.050000001);
-    if (veh->manualDecel == 0.0)
+    dt = 0.050000001f;
+    newSpeed = VEH_AccelerateSpeed(veh->speed, veh->manualSpeed, veh->manualAccel, 0.050000001f);
+    if (veh->manualDecel == 0.0f)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3211, 0, "%s", "veh->manualDecel");
     time = newSpeed / veh->manualDecel;
-    stopDist = newSpeed * 0.5 * time;
-    checkDist = distToGoal - newSpeed * 0.05000000074505806;
-    if (stopDist < (double)checkDist || veh->speed <= 0.0)
+    stopDist = newSpeed * 0.5f * time;
+    checkDist = distToGoal - newSpeed * 0.05000000074505806f;
+    if (stopDist < checkDist || veh->speed <= 0.0f)
     {
         veh->stopping = 0;
     }
     else
     {
-        if (stopDist < (double)distToGoal)
+        if (stopDist < distToGoal)
         {
-            if (veh->speed == 0.0)
+            if (veh->speed == 0.0f)
                 MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3223, 0, "%s", "veh->speed");
-            dta = 0.05000000074505806 - (distToGoal - stopDist) / veh->speed;
-            v5 = dta - 0.050000001;
-            if (v5 < 0.0)
-                v6 = 0.05000000074505806 - (distToGoal - stopDist) / veh->speed;
+            dta = 0.05000000074505806f - (distToGoal - stopDist) / veh->speed;
+            v5 = dta - 0.050000001f;
+            if (v5 < 0.0f)
+                v6 = 0.05000000074505806f - (distToGoal - stopDist) / veh->speed;
             else
-                v6 = 0.050000001;
-            v4 = 0.0 - dta;
-            if (v4 < 0.0)
+                v6 = 0.050000001f;
+            v4 = 0.0f - dta;
+            if (v4 < 0.0f)
                 v3 = v6;
             else
-                v3 = 0.0;
+                v3 = 0.0f;
             dt = v3;
         }
         veh->stopping = 1;
@@ -1676,7 +1676,7 @@ void __cdecl VEH_UpdateMove_CheckNearGoal(gentity_s *ent, float distToGoal)
     if (!ent)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3241, 0, "%s", "ent");
     veh = ent->scr_vehicle;
-    if (veh->nearGoalNotifyDist != 0.0 && veh->nearGoalNotifyDist > (double)distToGoal)
+    if (veh->nearGoalNotifyDist != 0.0f && veh->nearGoalNotifyDist > (double)distToGoal)
         Scr_Notify(ent, scr_const.near_goal, 0);
 }
 
@@ -1692,7 +1692,7 @@ void __cdecl VEH_GetNewSpeedAndAccel(scr_vehicle_s *veh, float dt, int hovering,
     {
         speed = veh->hover.hoverSpeed;
         accel = veh->hover.hoverAccel;
-        decel = accel * 0.5;
+        decel = accel * 0.5f;
     }
     else
     {
@@ -1730,8 +1730,8 @@ void __cdecl VEH_UpdateHover(gentity_s *ent)
     veh = ent->scr_vehicle;
     Vec3Add(veh->goalPosition, veh->hover.hoverGoalPos, hoverPos);
     VEH_UpdateMoveToGoal(ent, hoverPos);
-    NEW_HOVER_DIST_FACTOR = 0.25;
-    newHoverDist = veh->hover.hoverRadius * (float)0.25;
+    NEW_HOVER_DIST_FACTOR = 0.25f;
+    newHoverDist = veh->hover.hoverRadius * 0.25f;
     Vec3Sub(hoverPos, veh->phys.origin, diff);
     v1 = newHoverDist * newHoverDist;
     if (Vec3LengthSq(diff) < v1)
@@ -1746,11 +1746,11 @@ void __cdecl VEH_SetHoverGoal(gentity_s *ent)
     float randomOffset[3]; // [esp+18h] [ebp-Ch] BYREF
 
     veh = ent->scr_vehicle;
-    if (veh->hover.hoverRadius == 0.0)
+    if (veh->hover.hoverRadius == 0.0f)
     {
-        veh->hover.hoverGoalPos[0] = 0.0;
-        veh->hover.hoverGoalPos[1] = 0.0;
-        veh->hover.hoverGoalPos[2] = 0.0;
+        veh->hover.hoverGoalPos[0] = 0.0f;
+        veh->hover.hoverGoalPos[1] = 0.0f;
+        veh->hover.hoverGoalPos[2] = 0.0f;
     }
     else
     {
@@ -1759,7 +1759,7 @@ void __cdecl VEH_SetHoverGoal(gentity_s *ent)
             min = -veh->hover.hoverRadius;
             randomOffset[i] = G_flrand(min, veh->hover.hoverRadius);
         }
-        Vec3Mad(randomOffset, -0.5, veh->hover.hoverGoalPos, veh->hover.hoverGoalPos);
+        Vec3Mad(randomOffset, -0.5f, veh->hover.hoverGoalPos, veh->hover.hoverGoalPos);
     }
 }
 
@@ -1785,28 +1785,28 @@ void __cdecl CMD_VEH_Script_SetSpeed(gentity_s *ent)
     if (!info)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 4874, 0, "%s", "info");
     veh->manualMode = 1;
-    veh->manualSpeed = Scr_GetFloat(0) * 17.6;
-    if (veh->manualSpeed < 0.0)
+    veh->manualSpeed = Scr_GetFloat(0) * 17.6f;
+    if (veh->manualSpeed < 0.0f)
     {
         Scr_ParamError(0, "Cannot set negative speed on vehicle");
-        veh->manualSpeed = 0.0;
+        veh->manualSpeed = 0.0f;
     }
     if (Scr_GetNumParam() > 1)
-        veh->manualAccel = Scr_GetFloat(1u) * 17.6;
-    if (info->type == 5 && veh->speed < (double)veh->manualSpeed && veh->manualAccel >(double)veh->manualSpeed)
+        veh->manualAccel = Scr_GetFloat(1u) * 17.6f;
+    if (info->type == 5 && veh->speed < veh->manualSpeed && veh->manualAccel > veh->manualSpeed)
     {
         Com_PrintWarning(15, "WARNING: capping acceleration to speed / sec for vehicle '%d'\n", ent->s.number);
         veh->manualAccel = veh->manualSpeed;
     }
     if (Scr_GetNumParam() <= 2)
-        veh->manualDecel = veh->manualAccel * 0.5;
+        veh->manualDecel = veh->manualAccel * 0.5f;
     else
-        veh->manualDecel = Scr_GetFloat(2u) * 17.6;
-    if (veh->manualAccel <= 0.0 || veh->manualDecel <= 0.0)
+        veh->manualDecel = Scr_GetFloat(2u) * 17.6f;
+    if (veh->manualAccel <= 0.0 || veh->manualDecel <= 0.0f)
     {
         Scr_ParamError(1u, "Acceleration/deceleration must be > 0");
-        veh->manualAccel = 17.6 * 1.0;
-        veh->manualDecel = 17.6 * 1.0;
+        veh->manualAccel = 17.6f * 1.0f;
+        veh->manualDecel = 17.6f * 1.0f;
     }
 }
 
@@ -1820,7 +1820,7 @@ void __cdecl CMD_VEH_GetSpeed(scr_entref_t entref)
 
 void __cdecl CMD_VEH_GetSpeedMPH(scr_entref_t entref)
 {
-    Scr_AddFloat(GScr_GetVehicle(entref)->scr_vehicle->speed / 17.6);
+    Scr_AddFloat(GScr_GetVehicle(entref)->scr_vehicle->speed / 17.6f);
 }
 
 void __cdecl CMD_VEH_ResumeSpeed(scr_entref_t entref)
@@ -1829,8 +1829,8 @@ void __cdecl CMD_VEH_ResumeSpeed(scr_entref_t entref)
 
     veh = GScr_GetVehicle(entref)->scr_vehicle;
     veh->manualMode = 2;
-    veh->manualAccel = Scr_GetFloat(0) * 17.6;
-    if (veh->manualAccel < 0.0)
+    veh->manualAccel = Scr_GetFloat(0) * 17.6f;
+    if (veh->manualAccel < 0.0f)
         Scr_ParamError(0, "Cannot set negative acceleration on vehicle");
 }
 
@@ -1848,12 +1848,12 @@ void __cdecl CMD_VEH_SetYawSpeed(scr_entref_t entref)
     if (Scr_GetNumParam() > 3)
     {
         veh->yawOverShoot = Scr_GetFloat(3u);
-        if (veh->yawOverShoot < 0.0 || veh->yawOverShoot > 1.0)
+        if (veh->yawOverShoot < 0.0f || veh->yawOverShoot > 1.0f)
             Scr_ParamError(3u, "Overshoot must be in 0 to 1 range");
     }
-    if (veh->phys.maxAngleVel[1] < 0.0)
+    if (veh->phys.maxAngleVel[1] < 0.0f)
         Scr_ParamError(0, "Cannot set negative yaw speed on vehicle");
-    if (veh->phys.yawAccel < 0.0)
+    if (veh->phys.yawAccel < 0.0f)
         Scr_ParamError(1u, "Cannot set negative yaw acceleration on vehicle");
 }
 
@@ -1866,9 +1866,9 @@ void __cdecl CMD_VEH_SetMaxPitchRoll(scr_entref_t entref)
         Scr_Error("Max Pitch Roll only valid for helicopters");
     veh->phys.maxPitchAngle = Scr_GetFloat(0);
     veh->phys.maxRollAngle = Scr_GetFloat(1u);
-    if (veh->phys.maxPitchAngle < 0.0)
+    if (veh->phys.maxPitchAngle < 0.0f)
         Scr_ParamError(0, "Cannot set negative max pitch");
-    if (veh->phys.maxRollAngle < 0.0)
+    if (veh->phys.maxRollAngle < 0.0f)
         Scr_ParamError(1u, "Cannot set negative max roll");
 }
 
@@ -1877,7 +1877,7 @@ void __cdecl CMD_VEH_SetAirResitance(scr_entref_t entref)
     scr_vehicle_s *veh; // [esp+0h] [ebp-8h]
 
     veh = GScr_GetVehicle(entref)->scr_vehicle;
-    veh->maxDragSpeed = Scr_GetFloat(0) * 17.6;
+    veh->maxDragSpeed = Scr_GetFloat(0) * 17.6f;
 }
 
 void __cdecl CMD_VEH_SetTurningAbility(scr_entref_t entref)
@@ -1949,7 +1949,7 @@ void __cdecl CMD_VEH_SetGoalPos(scr_entref_t entref)
     veh->manualMode = 1;
     Scr_GetVector(0, veh->goalPosition);
     veh->stopAtGoal = Scr_GetNumParam() > 1 && Scr_GetInt(1) != 0;
-    if (veh->manualSpeed == 0.0 || veh->manualAccel == 0.0 || veh->manualDecel == 0.0)
+    if (veh->manualSpeed == 0.0f || veh->manualAccel == 0.0f || veh->manualDecel == 0.0f)
         Scr_Error("Speed and acceleration must not be zero before setting goal pos");
     veh->flags |= 2u;
     veh->moveState = VEH_MOVESTATE_MOVE;
@@ -1970,7 +1970,7 @@ void __cdecl CMD_VEH_ClearGoalYaw(scr_entref_t entref)
     scr_vehicle_s *scr_vehicle; // eax
 
     scr_vehicle = GScr_GetVehicle(entref)->scr_vehicle;
-    scr_vehicle->goalYaw = 0.0;
+    scr_vehicle->goalYaw = 0.0f;
     scr_vehicle->hasGoalYaw = 0;
 }
 
@@ -2007,7 +2007,7 @@ void __cdecl CMD_VEH_SetTurretTargetVec(scr_entref_t entref)
         v1 = va("Can't set target position on player's vehicle");
         Scr_Error(v1);
     }
-    if ((double)ent->health <= 0.0)
+    if ((float)ent->health <= 0.0f)
     {
         v2 = va("Vehicle must have health to control the turret");
         Scr_Error(v2);
@@ -2018,9 +2018,9 @@ void __cdecl CMD_VEH_SetTurretTargetVec(scr_entref_t entref)
     veh->targetOrigin[0] = tgtPos[0];
     veh->targetOrigin[1] = tgtPos[1];
     veh->targetOrigin[2] = tgtPos[2];
-    veh->targetOffset[0] = 0.0;
-    veh->targetOffset[1] = 0.0;
-    veh->targetOffset[2] = 0.0;
+    veh->targetOffset[0] = 0.0f;
+    veh->targetOffset[1] = 0.0f;
+    veh->targetOffset[2] = 0.0f;
 }
 
 void __cdecl CMD_VEH_SetTurretTargetEnt(scr_entref_t entref)
@@ -2033,7 +2033,7 @@ void __cdecl CMD_VEH_SetTurretTargetEnt(scr_entref_t entref)
 
     Vehicle = GScr_GetVehicle(entref);
     veh = Vehicle->scr_vehicle;
-    if ((double)Vehicle->health <= 0.0)
+    if ((float)Vehicle->health <= 0.0f)
     {
         v2 = va("Vehicle must have health to control the turret");
         Scr_Error(v2);
@@ -2049,17 +2049,17 @@ void __cdecl CMD_VEH_SetTurretTargetEnt(scr_entref_t entref)
         tgtEnt->flags |= 0x80000u;
     if (Scr_GetNumParam() <= 1)
     {
-        veh->targetOffset[0] = 0.0;
-        veh->targetOffset[1] = 0.0;
-        veh->targetOffset[2] = 0.0;
+        veh->targetOffset[0] = 0.0f;
+        veh->targetOffset[1] = 0.0f;
+        veh->targetOffset[2] = 0.0f;
     }
     else
     {
         Scr_GetVector(1u, veh->targetOffset);
     }
-    veh->targetOrigin[0] = 0.0;
-    veh->targetOrigin[1] = 0.0;
-    veh->targetOrigin[2] = 0.0;
+    veh->targetOrigin[0] = 0.0f;
+    veh->targetOrigin[1] = 0.0f;
+    veh->targetOrigin[2] = 0.0f;
 }
 
 void __cdecl CMD_VEH_ClearTurretTargetEnt(scr_entref_t entref)
@@ -2070,12 +2070,12 @@ void __cdecl CMD_VEH_ClearTurretTargetEnt(scr_entref_t entref)
     if ((veh->flags & 1) == 0)
         veh->hasTarget = 0;
     veh->targetEnt = 1023;
-    veh->targetOrigin[0] = 0.0;
-    veh->targetOrigin[1] = 0.0;
-    veh->targetOrigin[2] = 0.0;
-    veh->targetOffset[0] = 0.0;
-    veh->targetOffset[1] = 0.0;
-    veh->targetOffset[2] = 0.0;
+    veh->targetOrigin[0] = 0.0f;
+    veh->targetOrigin[1] = 0.0f;
+    veh->targetOrigin[2] = 0.0f;
+    veh->targetOffset[0] = 0.0f;
+    veh->targetOffset[1] = 0.0f;
+    veh->targetOffset[2] = 0.0f;
 }
 
 void __cdecl CMD_VEH_SetLookAtEnt(scr_entref_t entref)
@@ -2094,7 +2094,7 @@ void __cdecl CMD_VEH_SetLookAtEnt(scr_entref_t entref)
         v1 = va("Can't set target on player's vehicle");
         Scr_Error(v1);
     }
-    if ((double)ent->health <= 0.0)
+    if ((float)ent->health <= 0.0f)
     {
         v2 = va("Vehicle must have health to control");
         Scr_Error(v2);
@@ -2173,7 +2173,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     ent = GScr_GetVehicle(entref);
     veh = ent->scr_vehicle;
     info = &s_vehicleInfos[veh->infoIdx];
-    if ((double)ent->health <= 0.0)
+    if ((float)ent->health <= 0.0f)
     {
         v1 = va("Vehicle must have health to control the turret");
         Scr_Error(v1);
@@ -2202,7 +2202,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
         joltDir[0] = -barrelMtx[0][0];
         joltDir[1] = -barrelMtx[0][1];
         joltDir[2] = -barrelMtx[0][2];
-        VEH_JoltBody(ent, joltDir, 1.0, 0.0, 0.0);
+        VEH_JoltBody(ent, joltDir, 1.0f, 0.0f, 0.0f);
     }
     if (!Scr_GetNumParam() && info->quadBarrel)
     {
@@ -2301,9 +2301,9 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
             target = Entity;
             if (Scr_GetNumParam() <= 2)
             {
-                targetOffset[0] = 0.0;
-                targetOffset[1] = 0.0;
-                targetOffset[2] = 0.0;
+                targetOffset[0] = 0.0f;
+                targetOffset[1] = 0.0f;
+                targetOffset[2] = 0.0f;
             }
             else
             {
@@ -2323,7 +2323,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
         }
         else
         {
-            Bullet_Fire(ent, 0.0, &wp, ent, level.time);
+            Bullet_Fire(ent, 0.0f, &wp, ent, level.time);
         }
     }
     G_AddEvent(ent, event, 0);

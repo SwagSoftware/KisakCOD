@@ -276,7 +276,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
                             &frontEndDataOut->debugGlobals,
                             smodelDrawInst->placement.origin,
                             colorWhite,
-                            0.30000001,
+                            0.30000001f,
                             Name);
                     }
                     R_ShowCountsStaticModel(smodelIndex, lod);

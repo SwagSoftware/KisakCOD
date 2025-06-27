@@ -1985,33 +1985,33 @@ void __cdecl R_UpdateColorManipulation(GfxViewInfo *viewInfo)
     if (viewInfo->film.enabled)
     {
         desaturation = viewInfo->film.desaturation;
-        v2 = 0.00024414062 - desaturation;
+        v2 = 0.00024414062f - desaturation;
         if (v2 < 0.0)
             v1 = desaturation;
         else
-            v1 = 0.00024414062;
-        desaturationScale = 1.0 / v1 - 1.0;
+            v1 = 0.00024414062f;
+        desaturationScale = 1.0f / v1 - 1.0f;
         tintScale = viewInfo->film.contrast * v1;
-        tintBias = viewInfo->film.brightness + 0.5 - viewInfo->film.contrast * 0.5;
+        tintBias = viewInfo->film.brightness + 0.5f - viewInfo->film.contrast * 0.5f;
         if (viewInfo->film.invert)
         {
             tintScale = -tintScale;
-            tintBias = tintBias + 1.0;
+            tintBias = tintBias + 1.0f;
         }
         Vec3Scale(viewInfo->film.tintDark, tintScale, colorTintBase);
-        colorTintBase[3] = 0.0;
+        colorTintBase[3] = 0.0f;
         Vec3Sub(viewInfo->film.tintLight, viewInfo->film.tintDark, colorTintDelta);
         Vec3Scale(colorTintDelta, tintScale, colorTintDelta);
-        colorTintDelta[3] = 0.0;
+        colorTintDelta[3] = 0.0f;
         R_SetInputCodeConstant(&viewInfo->input, 0x2Du, tintBias, tintBias, tintBias, desaturationScale);
         R_SetInputCodeConstantFromVec4(&viewInfo->input, 0x2Eu, colorTintBase);
         R_SetInputCodeConstantFromVec4(&viewInfo->input, 0x2Fu, colorTintDelta);
     }
     else
     {
-        R_SetInputCodeConstant(&viewInfo->input, 0x2Du, 0.0, 0.0, 0.0, 4095.0);
-        R_SetInputCodeConstant(&viewInfo->input, 0x2Eu, 0.00024414062, 0.00024414062, 0.00024414062, 0.0);
-        R_SetInputCodeConstant(&viewInfo->input, 0x2Fu, 0.0, 0.0, 0.0, 0.0);
+        R_SetInputCodeConstant(&viewInfo->input, 0x2Du, 0.0f, 0.0f, 0.0f, 4095.0f);
+        R_SetInputCodeConstant(&viewInfo->input, 0x2Eu, 0.00024414062f, 0.00024414062f, 0.00024414062f, 0.0f);
+        R_SetInputCodeConstant(&viewInfo->input, 0x2Fu, 0.0f, 0.0f, 0.0f, 0.0f);
     }
 }
 

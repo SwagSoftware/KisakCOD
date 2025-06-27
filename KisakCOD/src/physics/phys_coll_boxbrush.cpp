@@ -902,16 +902,16 @@ int __cdecl GetClosestBrushFace(
     float dot; // [esp+90h] [ebp-8h]
     float DOT_THRESHOLD; // [esp+94h] [ebp-4h]
 
-    DOT_THRESHOLD = -0.1;
+    DOT_THRESHOLD = -0.1f;
     CM_BuildAxialPlanes(brush, &axialPlanes);
-    minDot = 2.0;
+    minDot = 2.0f;
     outSideIndex = -1;
     for (sideIndex = 0; sideIndex < 6; ++sideIndex)
     {
         if (brushWindings[sideIndex].ptCount)
         {
             dot = Vec3Dot(normal, axialPlanes[sideIndex]);
-            if (minDot > (double)dot && DOT_THRESHOLD > (double)dot)
+            if (minDot > dot && DOT_THRESHOLD > dot)
             {
                 minDot = dot;
                 outSideIndex = sideIndex;
@@ -928,7 +928,7 @@ int __cdecl GetClosestBrushFace(
         if (brushWindings[sideIndexa + 6].ptCount)
         {
             dot = Vec3Dot(normal, brush->sides[sideIndexa].plane->normal);
-            if (minDot > (double)dot && DOT_THRESHOLD > (double)dot)
+            if (minDot > dot && DOT_THRESHOLD > dot)
             {
                 minDot = dot;
                 outSideIndex = sideIndexa + 6;

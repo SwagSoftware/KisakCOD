@@ -1002,22 +1002,22 @@ void __cdecl Phys_ClipCylinderEndcapToPoly(
     float circleCoords[8][2]; // [esp+ECh] [ebp-40h]
 
     radius = info->u.sideExtents;
-    circleCoords[0][0] = 1.0;
-    circleCoords[0][1] = 0.0;
-    circleCoords[1][0] = 0.70710677;
-    circleCoords[1][1] = 0.70710677;
-    circleCoords[2][0] = 0.0;
-    circleCoords[2][1] = 1.0;
-    circleCoords[3][0] = -0.70710677;
-    circleCoords[3][1] = 0.70710677;
-    circleCoords[4][0] = -1.0;
-    circleCoords[4][1] = 0.0;
-    circleCoords[5][0] = -0.70710677;
-    circleCoords[5][1] = -0.70710677;
-    circleCoords[6][0] = 0.0;
-    circleCoords[6][1] = -1.0;
-    circleCoords[7][0] = 0.70710677;
-    circleCoords[7][1] = -0.70710677;
+    circleCoords[0][0] = 1.0f;
+    circleCoords[0][1] = 0.0f;
+    circleCoords[1][0] = 0.70710677f;
+    circleCoords[1][1] = 0.70710677f;
+    circleCoords[2][0] = 0.0f;
+    circleCoords[2][1] = 1.0f;
+    circleCoords[3][0] = -0.70710677f;
+    circleCoords[3][1] = 0.70710677f;
+    circleCoords[4][0] = -1.0f;
+    circleCoords[4][1] = 0.0f;
+    circleCoords[5][0] = -0.70710677f;
+    circleCoords[5][1] = -0.70710677f;
+    circleCoords[6][0] = 0.0f;
+    circleCoords[6][1] = -1.0f;
+    circleCoords[7][0] = 0.70710677f;
+    circleCoords[7][1] = -0.70710677f;
     direction = info->cylDirection - 1;
     if (direction >= 3)
         MyAssertHandler(

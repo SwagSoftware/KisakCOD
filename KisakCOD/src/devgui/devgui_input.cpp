@@ -21,8 +21,8 @@ void __cdecl DevGui_InputShutdown()
 
 void DevGui_InputUpdateMouse()
 {
-    s_input.sliderScrollTime = 100.0;
-    s_input.sliderScrollMaxTimeStep = 0.30000001;
+    s_input.sliderScrollTime = 100.0f;
+    s_input.sliderScrollMaxTimeStep = 0.30000001f;
 }
 
 char __cdecl DevGui_InputUpdate(int localClientNum, float deltaTime)

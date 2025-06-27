@@ -1132,9 +1132,9 @@ void __cdecl FX_ConvertTrail_CompileVertices(
     int indBytes; // [esp+88h] [ebp-8h]
     FxTrailVertex *outVertPtrEnd; // [esp+8Ch] [ebp-4h]
 
-    SNAP_TOLERANCE_POS = 0.0099999998;
-    SNAP_TOLERANCE_TEXCOORD = 0.0099999998;
-    SNAP_TOLERANCE_NORM = 0.94999999;
+    SNAP_TOLERANCE_POS = 0.0099999998f;
+    SNAP_TOLERANCE_TEXCOORD = 0.0099999998f;
+    SNAP_TOLERANCE_NORM = 0.94999999f;
     SMOOTH_THRESHOLD = 0.0;
     trailDef = &edElemDef->trailDef;
     if (edElemDef == (const FxEditorElemDef *)-592)
@@ -1343,14 +1343,14 @@ void __cdecl FX_ConvertElemDef(
     FX_CopyCanonicalFloatRange(&elemDef->spawnOrigin[2], &edElemDef->spawnOrigin[2]);
     FX_CopyCanonicalFloatRange(&elemDef->spawnOffsetRadius, &edElemDef->spawnOffsetRadius);
     FX_CopyCanonicalFloatRange(&elemDef->spawnOffsetHeight, &edElemDef->spawnOffsetHeight);
-    FX_ScaleFloatRange(elemDef->spawnAngles, edElemDef->spawnAngles, 0.017453292);
-    FX_ScaleFloatRange(&elemDef->spawnAngles[1], &edElemDef->spawnAngles[1], 0.017453292);
-    FX_ScaleFloatRange(&elemDef->spawnAngles[2], &edElemDef->spawnAngles[2], 0.017453292);
-    FX_ScaleFloatRange(elemDef->angularVelocity, edElemDef->angularVelocity, 0.000017453292);
-    FX_ScaleFloatRange(&elemDef->angularVelocity[1], &edElemDef->angularVelocity[1], 0.000017453292);
-    FX_ScaleFloatRange(&elemDef->angularVelocity[2], &edElemDef->angularVelocity[2], 0.000017453292);
-    FX_ScaleFloatRange(&elemDef->initialRotation, &edElemDef->initialRotation, 0.017453292);
-    FX_ScaleFloatRange(&elemDef->gravity, &edElemDef->gravity, 0.0099999998);
+    FX_ScaleFloatRange(elemDef->spawnAngles, edElemDef->spawnAngles, 0.017453292f);
+    FX_ScaleFloatRange(&elemDef->spawnAngles[1], &edElemDef->spawnAngles[1], 0.017453292f);
+    FX_ScaleFloatRange(&elemDef->spawnAngles[2], &edElemDef->spawnAngles[2], 0.017453292f);
+    FX_ScaleFloatRange(elemDef->angularVelocity, edElemDef->angularVelocity, 0.000017453292f);
+    FX_ScaleFloatRange(&elemDef->angularVelocity[1], &edElemDef->angularVelocity[1], 0.000017453292f);
+    FX_ScaleFloatRange(&elemDef->angularVelocity[2], &edElemDef->angularVelocity[2], 0.000017453292f);
+    FX_ScaleFloatRange(&elemDef->initialRotation, &edElemDef->initialRotation, 0.017453292f);
+    FX_ScaleFloatRange(&elemDef->gravity, &edElemDef->gravity, 0.0099999998f);
     if (elemDef->gravity.base != 0.0 || elemDef->gravity.amplitude != 0.0)
         elemDef->flags |= 0x4000000u;
     FX_CopyCanonicalFloatRange(&elemDef->reflectionFactor, &edElemDef->elasticity);
@@ -1391,7 +1391,7 @@ void __cdecl FX_ConvertElemDef(
             elemDef->flags &= ~0x8000000u;
         }
     }
-    if (edElemDef->lightingFrac > 255.0)
+    if (edElemDef->lightingFrac > 255.0f)
         MyAssertHandler(
             ".\\EffectsCore\\fx_convert.cpp",
             1075,
@@ -1399,7 +1399,7 @@ void __cdecl FX_ConvertElemDef(
             "%s\n\t(edElemDef->lightingFrac) = %g",
             "(edElemDef->lightingFrac <= 255.0f)",
             edElemDef->lightingFrac);
-    if ((int)(edElemDef->lightingFrac * 255.0) >= 256)
+    if ((int)(edElemDef->lightingFrac * 255.0f) >= 256)
         MyAssertHandler(
             ".\\EffectsCore\\fx_convert.cpp",
             1076,
@@ -1407,7 +1407,7 @@ void __cdecl FX_ConvertElemDef(
             "%s\n\t(edElemDef->lightingFrac) = %g",
             "(static_cast< int >( edElemDef->lightingFrac * 255.0f ) < 256)",
             edElemDef->lightingFrac);
-    elemDef->lightingFrac = (int)(edElemDef->lightingFrac * 255.0);
+    elemDef->lightingFrac = (int)(edElemDef->lightingFrac * 255.0f);
     elemDef->useItemClip = (edElemDef->editorFlags & 0x20000) != 0;
     if ((edElemDef->editorFlags & 0x10000) != 0)
     {
@@ -1426,12 +1426,12 @@ void __cdecl FX_ConvertElemDef(
     }
     else
     {
-        elemDef->collMins[0] = 0.0;
-        elemDef->collMins[1] = 0.0;
-        elemDef->collMins[2] = 0.0;
-        elemDef->collMaxs[0] = 0.0;
-        elemDef->collMaxs[1] = 0.0;
-        elemDef->collMaxs[2] = 0.0;
+        elemDef->collMins[0] = 0.0f;
+        elemDef->collMins[1] = 0.0f;
+        elemDef->collMins[2] = 0.0f;
+        elemDef->collMaxs[0] = 0.0f;
+        elemDef->collMaxs[1] = 0.0f;
+        elemDef->collMaxs[2] = 0.0f;
     }
     if ((edElemDef->editorFlags & 0x2000) != 0)
         FX_ConvertEffectDefRef(&elemDef->effectOnImpact, edElemDef->effectOnImpact);

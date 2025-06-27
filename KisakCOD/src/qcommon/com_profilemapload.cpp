@@ -404,8 +404,8 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
 
     if (com_profileLoading->current.enabled)
     {
-        y = 395.0;
-        profileFont = UI_GetFontHandle(&scrPlaceFull, 0, 0.36000001);
+        y = 395.0f;
+        profileFont = UI_GetFontHandle(&scrPlaceFull, 0, 0.36000001f);
         UI_FillRect(
             &scrPlaceFull,
             rect->x,
@@ -431,11 +431,11 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             line,
             256,
             profileFont,
-            60.0,
+            60.0f,
             y,
             rect->horzAlign,
             rect->vertAlign,
-            0.36000001,
+            0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
         sprintf(
@@ -452,7 +452,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             y,
             rect->horzAlign,
             rect->vertAlign,
-            0.36000001,
+            0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
         y = (double)15 + y;
@@ -469,7 +469,7 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             y,
             rect->horzAlign,
             rect->vertAlign,
-            0.36000001,
+            0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
         sprintf(
@@ -482,11 +482,11 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             line,
             256,
             profileFont,
-            250.0,
+            250.0f,
             y,
             rect->horzAlign,
             rect->vertAlign,
-            0.36000001,
+            0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
         y = (double)15 + y;
@@ -501,11 +501,11 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             line,
             256,
             profileFont,
-            60.0,
+            60.0f,
             y,
             rect->horzAlign,
             rect->vertAlign,
-            0.36000001,
+            0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
         sprintf(
@@ -518,11 +518,11 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             line,
             256,
             profileFont,
-            250.0,
+            250.0f,
             y,
             rect->horzAlign,
             rect->vertAlign,
-            0.36000001,
+            0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
     }
@@ -541,7 +541,7 @@ int ProfLoad_DrawTree()
 
     ProfLoad_CalculateSelfTicks();
     textIndex = 0;
-    profileFont = UI_GetFontHandle(&scrPlaceFull, 0, 0.36000001);
+    profileFont = UI_GetFontHandle(&scrPlaceFull, 0, 0.36000001f);
     result = mapLoadProfile.profileEntryCount - 16;
     if (mapLoadProfile.profileEntryCount - 16 > 0)
         v1 = mapLoadProfile.profileEntryCount - 16;
@@ -552,7 +552,7 @@ int ProfLoad_DrawTree()
         textx = (float)(5 * mapLoadProfile.profileEntries[profileIndex].indent + 60);
         texty = (float)(16 * textIndex + 70);
         ProfLoad_GetEntryRowText(&mapLoadProfile.profileEntries[profileIndex], rowText, 256);
-        UI_DrawText(&scrPlaceFull, rowText, 256, profileFont, textx, texty, 0, 0, 0.36000001, PROFLOAD_TEXT_COLOR, 0);
+        UI_DrawText(&scrPlaceFull, rowText, 256, profileFont, textx, texty, 0, 0, 0.36000001f, PROFLOAD_TEXT_COLOR, 0);
         ++textIndex;
         result = profileIndex + 1;
     }

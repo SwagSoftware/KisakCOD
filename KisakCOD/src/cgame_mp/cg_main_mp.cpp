@@ -357,37 +357,37 @@ void __cdecl CG_RegisterDvars()
         (DvarLimits)0x7FFFFFFF00000000LL,
         1u,
         "Time in milliseconds for the cursor hint to fade");
-    min.value.max = 80.0;
-    min.value.min = 65.0;
-    cg_fov = Dvar_RegisterFloat("cg_fov", 65.0, min, 1u, "The field of view angle in degrees");
-    mina.value.max = 2.0;
-    mina.value.min = 0.2;
-    cg_fovScale = Dvar_RegisterFloat("cg_fovScale", 1.0, mina, 0x80u, "Scale applied to the field of view");
-    minb.value.max = 160.0;
-    minb.value.min = 1.0;
-    cg_fovMin = Dvar_RegisterFloat("cg_fovMin", 10.0, minb, 0x80u, "The minimum possible field of view");
+    min.value.max = 120.0f;
+    min.value.min = 65.0f;
+    cg_fov = Dvar_RegisterFloat("cg_fov", 65.0f, min, 1u, "The field of view angle in degrees");
+    mina.value.max = 2.0f;
+    mina.value.min = 0.2f;
+    cg_fovScale = Dvar_RegisterFloat("cg_fovScale", 1.0f, mina, 0x80u, "Scale applied to the field of view");
+    minb.value.max = 160.0f;
+    minb.value.min = 1.0f;
+    cg_fovMin = Dvar_RegisterFloat("cg_fovMin", 10.0f, minb, 0x80u, "The minimum possible field of view");
     cg_draw2D = Dvar_RegisterBool("cg_draw2D", 1, 0x80u, "Draw 2D screen elements");
     cg_drawHealth = Dvar_RegisterBool("cg_drawHealth", 0, 0x80u, "Draw health bar");
     cg_drawBreathHint = Dvar_RegisterBool("cg_drawBreathHint", 1, 1u, "Draw a 'hold breath to steady' hint");
     cg_drawMantleHint = Dvar_RegisterBool("cg_drawMantleHint", 1, 1u, "Draw a 'press key to mantle' hint");
     cg_drawFPS = Dvar_RegisterEnum("cg_drawFPS", cg_drawFpsNames, 1, 1u, "Draw frames per second");
     cg_drawFPSLabels = Dvar_RegisterBool("cg_drawFPSLabels", 1, 1u, "Draw FPS Info Labels");
-    minc.value.max = 640.0;
-    minc.value.min = -200.0;
+    minc.value.max = 640.0f;
+    minc.value.min = -200.0f;
     cg_debugInfoCornerOffset = Dvar_RegisterVec2(
         "cg_debugInfoCornerOffset",
-        0.0,
-        0.0,
+        0.0f,
+        0.0f,
         minc,
         1u,
         "Offset from top-right corner, for cg_drawFPS, etc");
     cg_drawVersion = Dvar_RegisterBool("cg_drawVersion", 1, 0, "Draw the game version");
-    mind.value.max = 512.0;
-    mind.value.min = 0.0;
-    cg_drawVersionX = Dvar_RegisterFloat("cg_drawVersionX", 50.0, mind, 0, "X offset for the version string");
-    mine.value.max = 512.0;
-    mine.value.min = 0.0;
-    cg_drawVersionY = Dvar_RegisterFloat("cg_drawVersionY", 18.0, mine, 0, "Y offset for the version string");
+    mind.value.max = 512.0f;
+    mind.value.min = 0.0f;
+    cg_drawVersionX = Dvar_RegisterFloat("cg_drawVersionX", 50.0f, mind, 0, "X offset for the version string");
+    mine.value.max = 512.0f;
+    mine.value.min = 0.0f;
+    cg_drawVersionY = Dvar_RegisterFloat("cg_drawVersionY", 18.0f, mine, 0, "Y offset for the version string");
     snd_drawInfo = Dvar_RegisterEnum("snd_drawInfo", snd_drawInfoStrings, 0, 0, "Draw debugging information for sounds");
     cg_drawScriptUsage = Dvar_RegisterBool("cg_drawScriptUsage", 0, 0, "Draw debugging information for scripts");
     cg_drawMaterial = Dvar_RegisterEnum(
@@ -424,10 +424,10 @@ void __cdecl CG_RegisterDvars()
         "Enables drawing of spectator HUD messages.");
     cg_hudStanceFlash = Dvar_RegisterColor(
         "cg_hudStanceFlash",
-        1.0,
-        1.0,
-        1.0,
-        1.0,
+        1.0f,
+        1.0f,
+        1.0f,
+        1.0f,
         0,
         "The background color of the flash when the stance changes");
     cg_hudStanceHintPrints = Dvar_RegisterBool(
@@ -435,17 +435,17 @@ void __cdecl CG_RegisterDvars()
         0,
         1u,
         "Draw helpful text to say how to change stances");
-    minf.value.max = 512.0;
-    minf.value.min = 0.0;
-    cg_hudDamageIconWidth = Dvar_RegisterFloat("cg_hudDamageIconWidth", 128.0, minf, 1u, "The width of the damage icon");
-    ming.value.max = 512.0;
-    ming.value.min = 0.0;
-    cg_hudDamageIconHeight = Dvar_RegisterFloat("cg_hudDamageIconHeight", 64.0, ming, 1u, "The height of the damage icon");
-    minh.value.max = 512.0;
-    minh.value.min = 0.0;
+    minf.value.max = 512.0f;
+    minf.value.min = 0.0f;
+    cg_hudDamageIconWidth = Dvar_RegisterFloat("cg_hudDamageIconWidth", 128.0f, minf, 1u, "The width of the damage icon");
+    ming.value.max = 512.0f;
+    ming.value.min = 0.0f;
+    cg_hudDamageIconHeight = Dvar_RegisterFloat("cg_hudDamageIconHeight", 64.0f, ming, 1u, "The height of the damage icon");
+    minh.value.max = 512.0f;
+    minh.value.min = 0.0f;
     cg_hudDamageIconOffset = Dvar_RegisterFloat(
         "cg_hudDamageIconOffset",
-        128.0,
+        128.0f,
         minh,
         1u,
         "The offset from the center of the damage icon");
@@ -460,29 +460,29 @@ void __cdecl CG_RegisterDvars()
         0,
         1u,
         "Draw damage icons when aiming down the sight of a scoped weapon");
-    mini.value.max = 1000.0;
-    mini.value.min = 0.0;
+    mini.value.max = 1000.0f;
+    mini.value.min = 0.0f;
     cg_hudGrenadeIconMaxRangeFrag = Dvar_RegisterFloat(
         "cg_hudGrenadeIconMaxRangeFrag",
-        250.0,
+        250.0f,
         mini,
         0x1080u,
         "The minimum distance that a grenade has to be from a player in order to be shown on "
         "the grenade indicator");
-    minj.value.max = 2000.0;
-    minj.value.min = 0.0;
+    minj.value.max = 2000.0f;
+    minj.value.min = 0.0f;
     cg_hudGrenadeIconMaxRangeFlash = Dvar_RegisterFloat(
         "cg_hudGrenadeIconMaxRangeFlash",
-        500.0,
+        500.0f,
         minj,
         0x1080u,
         "The minimum distance that a flashbang has to be from a player in order to be shown "
         "on the grenade indicator");
-    mink.value.max = 1000.0;
-    mink.value.min = 0.0;
+    mink.value.max = 1000.0f;
+    mink.value.min = 0.0f;
     cg_hudGrenadeIconMaxHeight = Dvar_RegisterFloat(
         "cg_hudGrenadeIconMaxHeight",
-        104.0,
+        104.0f,
         mink,
         1u,
         "The minimum height difference between a player and a grenade for the grenade to be show"
@@ -492,27 +492,27 @@ void __cdecl CG_RegisterDvars()
         0,
         1u,
         "Show the grenade indicator when aiming down the sight of a scoped weapon");
-    minl.value.max = 512.0;
-    minl.value.min = 0.0;
+    minl.value.max = 512.0f;
+    minl.value.min = 0.0f;
     cg_hudGrenadeIconOffset = Dvar_RegisterFloat(
         "cg_hudGrenadeIconOffset",
-        50.0,
+        50.0f,
         minl,
         1u,
         "The offset from the center of the screen for a grenade icon");
-    minm.value.max = 512.0;
-    minm.value.min = 0.0;
+    minm.value.max = 512.0f;
+    minm.value.min = 0.0f;
     cg_hudGrenadeIconHeight = Dvar_RegisterFloat(
         "cg_hudGrenadeIconHeight",
         25.0,
         minm,
         1u,
         "The height of the grenade indicator icon");
-    minn.value.max = 512.0;
-    minn.value.min = 0.0;
+    minn.value.max = 512.0f;
+    minn.value.min = 0.0f;
     cg_hudGrenadeIconWidth = Dvar_RegisterFloat(
         "cg_hudGrenadeIconWidth",
-        25.0,
+        25.0f,
         minn,
         1u,
         "The width of the grenade indicator icon");
@@ -521,89 +521,89 @@ void __cdecl CG_RegisterDvars()
         0,
         1u,
         "Show the grenade indicator for flash grenades");
-    mino.value.max = 512.0;
-    mino.value.min = 0.0;
+    mino.value.max = 512.0f;
+    mino.value.min = 0.0f;
     cg_hudGrenadePointerHeight = Dvar_RegisterFloat(
         "cg_hudGrenadePointerHeight",
-        12.0,
+        12.0f,
         mino,
         1u,
         "The height of the grenade indicator pointer");
-    minp.value.max = 512.0;
-    minp.value.min = 0.0;
+    minp.value.max = 512.0f;
+    minp.value.min = 0.0f;
     cg_hudGrenadePointerWidth = Dvar_RegisterFloat(
         "cg_hudGrenadePointerWidth",
-        25.0,
+        25.0f,
         minp,
         1u,
         "The width of the grenade indicator pointer");
-    minq.value.max = 512.0;
-    minq.value.min = 0.0;
+    minq.value.max = 512.0f;
+    minq.value.min = 0.0f;
     cg_hudGrenadePointerPivot = Dvar_RegisterVec2(
         "cg_hudGrenadePointerPivot",
-        12.0,
-        27.0,
+        12.0f,
+        27.0f,
         minq,
         1u,
         "The pivot point of th grenade indicator pointer");
-    minr.value.max = 50.0;
-    minr.value.min = 0.1;
+    minr.value.max = 50.0f;
+    minr.value.min = 0.1f;
     cg_hudGrenadePointerPulseFreq = Dvar_RegisterFloat(
         "cg_hudGrenadePointerPulseFreq",
-        1.7,
+        1.7f,
         minr,
         0,
         "The number of times per second that the grenade indicator flashes in Hertz");
-    mins.value.max = 3.0;
-    mins.value.min = 0.0;
+    mins.value.max = 3.0f;
+    mins.value.min = 0.0f;
     cg_hudGrenadePointerPulseMax = Dvar_RegisterFloat(
         "cg_hudGrenadePointerPulseMax",
-        1.85,
+        1.85f,
         mins,
         0,
         "The maximum alpha of the grenade indicator pulse. Values higher than 1 will cause the"
         " indicator to remain at full brightness for longer");
-    mint.value.max = 1.0;
-    mint.value.min = -3.0;
+    mint.value.max = 1.0f;
+    mint.value.min = -3.0f;
     cg_hudGrenadePointerPulseMin = Dvar_RegisterFloat(
         "cg_hudGrenadePointerPulseMin",
-        0.30000001,
+        0.30000001f,
         mint,
         0,
         "The minimum alpha of the grenade indicator pulse. Values lower than 0 will cause the "
         "indicator to remain at full transparency for longer");
-    minu.value.max = 640.0;
-    minu.value.min = 0.0;
-    cg_hudChatPosition = Dvar_RegisterVec2("cg_hudChatPosition", 5.0, 204.0, minu, 1u, "Position of the HUD chat box");
-    minv.value.max = 640.0;
-    minv.value.min = 0.0;
+    minu.value.max = 640.0f;
+    minu.value.min = 0.0f;
+    cg_hudChatPosition = Dvar_RegisterVec2("cg_hudChatPosition", 5.0f, 204.0f, minu, 1u, "Position of the HUD chat box");
+    minv.value.max = 640.0f;
+    minv.value.min = 0.0f;
     cg_hudChatIntermissionPosition = Dvar_RegisterVec2(
         "cg_hudChatIntermissionPosition",
-        5.0,
-        110.0,
+        5.0f,
+        110.0f,
         minv,
         1u,
         "Position of the HUD chat box during intermission");
-    minw.value.max = 640.0;
-    minw.value.min = 0.0;
-    cg_hudSayPosition = Dvar_RegisterVec2("cg_hudSayPosition", 5.0, 180.0, minw, 1u, "Position of the HUD say box");
-    minx.value.max = 640.0;
-    minx.value.min = 0.0;
-    cg_hudVotePosition = Dvar_RegisterVec2("cg_hudVotePosition", 5.0, 220.0, minx, 1u, "Position of the HUD vote box");
+    minw.value.max = 640.0f;
+    minw.value.min = 0.0f;
+    cg_hudSayPosition = Dvar_RegisterVec2("cg_hudSayPosition", 5.0f, 180.0f, minw, 1u, "Position of the HUD say box");
+    minx.value.max = 640.0f;
+    minx.value.min = 0.0f;
+    cg_hudVotePosition = Dvar_RegisterVec2("cg_hudVotePosition", 5.0f, 220.0f, minx, 1u, "Position of the HUD vote box");
     cg_drawLagometer = Dvar_RegisterBool("cg_drawLagometer", 0, 1u, "Enable the 'lagometer'");
-    miny.value.max = 10000.0;
-    miny.value.min = -10000.0;
+    miny.value.max = 10000.0f;
+    miny.value.min = -10000.0f;
     cg_hudProneY = Dvar_RegisterFloat(
         "cg_hudProneY",
-        -160.0,
+        -160.0f,
         miny,
         1u,
         "Virtual screen y coordinate of the prone blocked message");
-    minz.value.max = 1.0;
-    minz.value.min = 0.001;
+    minz.value.max = 1.0f;
+    minz.value.min = 0.001f;
     cg_mapLocationSelectionCursorSpeed = Dvar_RegisterFloat(
         "cg_mapLocationSelectionCursorSpeed",
-        0.60000002,
+        0.60000002f,
         minz,
         1u,
         "Speed of the cursor when selecting a location on the map");
@@ -613,19 +613,19 @@ void __cdecl CG_RegisterDvars()
         (DvarLimits)0x40FFFFFFFFLL,
         0,
         "The client num to get the packet analysis done");
-    minba.value.max = 1.0;
-    minba.value.min = 0.0;
+    minba.value.max = 1.0f;
+    minba.value.min = 0.0f;
     cg_packetAnalysisTextScale = Dvar_RegisterFloat(
         "cg_packetAnalysisTextScale",
-        0.2,
+        0.2f,
         minba,
         0,
         "The text scale of the packet analysis debug prints");
-    minbb.value.max = 1.0;
-    minbb.value.min = 0.0;
+    minbb.value.max = 1.0f;
+    minbb.value.min = 0.0f;
     cg_packetAnalysisEntTextScale = Dvar_RegisterFloat(
         "cg_packetAnalysisEntTextScale",
-        0.23,
+        0.23f,
         minbb,
         0,
         "The text scale of the packet analysis entity debug prints");
@@ -647,14 +647,14 @@ void __cdecl CG_RegisterDvars()
         (DvarLimits)0x7FFFFFFF00000000LL,
         1u,
         "The delay after cycling to a new weapon to prevent holding down the cycle weapon button from cycling too fast");
-    minbc.value.max = 1.0;
-    minbc.value.min = 0.0;
-    cg_crosshairAlpha = Dvar_RegisterFloat("cg_crosshairAlpha", 1.0, minbc, 0x81u, "The alpha value of the crosshair");
-    minbd.value.max = 1.0;
-    minbd.value.min = 0.0;
+    minbc.value.max = 1.0f;
+    minbc.value.min = 0.0f;
+    cg_crosshairAlpha = Dvar_RegisterFloat("cg_crosshairAlpha", 1.0f, minbc, 0x81u, "The alpha value of the crosshair");
+    minbd.value.max = 1.0f;
+    minbd.value.min = 0.0f;
     cg_crosshairAlphaMin = Dvar_RegisterFloat(
         "cg_crosshairAlphaMin",
-        0.5,
+        0.5f,
         minbd,
         0x81u,
         "The minimum alpha value of the crosshair when it fades in");
@@ -678,57 +678,57 @@ void __cdecl CG_RegisterDvars()
     minbh.value.min = -FLT_MAX;
     cg_gun_move_f = Dvar_RegisterFloat(
         "cg_gun_move_f",
-        0.0,
+        0.0f,
         minbh,
         0x80u,
         "Weapon movement forward due to player movement");
     minbi.value.max = FLT_MAX;
     minbi.value.min = -FLT_MAX;
-    cg_gun_move_r = Dvar_RegisterFloat("cg_gun_move_r", 0.0, minbi, 0x80u, "Weapon movement right due to player movement");
+    cg_gun_move_r = Dvar_RegisterFloat("cg_gun_move_r", 0.0f, minbi, 0x80u, "Weapon movement right due to player movement");
     minbj.value.max = FLT_MAX;
     minbj.value.min = -FLT_MAX;
-    cg_gun_move_u = Dvar_RegisterFloat("cg_gun_move_u", 0.0, minbj, 0x80u, "Weapon movement up due to player movement");
+    cg_gun_move_u = Dvar_RegisterFloat("cg_gun_move_u", 0.0f, minbj, 0x80u, "Weapon movement up due to player movement");
     minbk.value.max = FLT_MAX;
     minbk.value.min = -FLT_MAX;
-    cg_gun_ofs_f = Dvar_RegisterFloat("cg_gun_ofs_f", 0.0, minbk, 0x80u, "Forward weapon offset when prone/ducked");
+    cg_gun_ofs_f = Dvar_RegisterFloat("cg_gun_ofs_f", 0.0f, minbk, 0x80u, "Forward weapon offset when prone/ducked");
     minbl.value.max = FLT_MAX;
     minbl.value.min = -FLT_MAX;
-    cg_gun_ofs_r = Dvar_RegisterFloat("cg_gun_ofs_r", 0.0, minbl, 0x80u, "Right weapon offset when prone/ducked");
+    cg_gun_ofs_r = Dvar_RegisterFloat("cg_gun_ofs_r", 0.0f, minbl, 0x80u, "Right weapon offset when prone/ducked");
     minbm.value.max = FLT_MAX;
     minbm.value.min = -FLT_MAX;
-    cg_gun_ofs_u = Dvar_RegisterFloat("cg_gun_ofs_u", 0.0, minbm, 0x80u, "Up weapon offset when prone/ducked");
+    cg_gun_ofs_u = Dvar_RegisterFloat("cg_gun_ofs_u", 0.0f, minbm, 0x80u, "Up weapon offset when prone/ducked");
     minbn.value.max = FLT_MAX;
     minbn.value.min = -FLT_MAX;
-    cg_gun_move_rate = Dvar_RegisterFloat("cg_gun_move_rate", 0.0, minbn, 0x80u, "The base weapon movement rate");
+    cg_gun_move_rate = Dvar_RegisterFloat("cg_gun_move_rate", 0.0f, minbn, 0x80u, "The base weapon movement rate");
     minbo.value.max = FLT_MAX;
     minbo.value.min = -FLT_MAX;
     cg_gun_move_minspeed = Dvar_RegisterFloat(
         "cg_gun_move_minspeed",
-        0.0,
+        0.0f,
         minbo,
         0x80u,
         "The minimum weapon movement rate");
     minbp.value.max = FLT_MAX;
-    minbp.value.min = 0.0;
+    minbp.value.min = 0.0f;
     cg_centertime = Dvar_RegisterFloat(
         "cg_centertime",
-        5.0,
+        5.0f,
         minbp,
         0x80u,
         "The time for a center printed message to fade");
     cg_debugPosition = Dvar_RegisterBool("cg_debugposition", 0, 0x80u, "Output position debugging information");
     cg_debugEvents = Dvar_RegisterBool("cg_debugevents", 0, 0x80u, "Output event debug information");
     minbq.value.max = FLT_MAX;
-    minbq.value.min = 0.0;
-    cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0, minbq, 0, "Decay for predicted error");
+    minbq.value.min = 0.0f;
+    cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0f, minbq, 0, "Decay for predicted error");
     cg_nopredict = Dvar_RegisterBool("cg_nopredict", 0, 0, "Don't do client side prediction");
     cg_showmiss = Dvar_RegisterInt("cg_showmiss", 0, (DvarLimits)0x200000000LL, 0, "Show prediction errors");
     cg_footsteps = Dvar_RegisterBool("cg_footsteps", 1, 0x80u, "Play footstep sounds");
-    minbr.value.max = 1.0;
-    minbr.value.min = 0.0;
+    minbr.value.max = 1.0f;
+    minbr.value.min = 0.0f;
     cg_firstPersonTracerChance = Dvar_RegisterFloat(
         "cg_firstPersonTracerChance",
-        0.5,
+        0.5f,
         minbr,
         0x80u,
         "The probability that a bullet is a tracer round for your bullets");
@@ -738,19 +738,19 @@ void __cdecl CG_RegisterDvars()
         0x80u,
         "Force laser sights on in all possible places (for debug purposes).");
     minbs.value.max = FLT_MAX;
-    minbs.value.min = 1.0;
-    cg_laserRange = Dvar_RegisterFloat("cg_laserRange", 1500.0, minbs, 0x80u, "The maximum range of a laser beam");
+    minbs.value.min = 1.0f;
+    cg_laserRange = Dvar_RegisterFloat("cg_laserRange", 1500.0f, minbs, 0x80u, "The maximum range of a laser beam");
     minbt.value.max = FLT_MAX;
-    minbt.value.min = 1.0;
+    minbt.value.min = 1.0f;
     cg_laserRangePlayer = Dvar_RegisterFloat(
         "cg_laserRangePlayer",
-        1500.0,
+        1500.0f,
         minbt,
         0x80u,
         "The maximum range of the player's laser beam");
     minbu.value.max = FLT_MAX;
-    minbu.value.min = 0.001;
-    cg_laserRadius = Dvar_RegisterFloat("cg_laserRadius", 0.80000001, minbu, 0x80u, "The size (radius) of a laser beam");
+    minbu.value.min = 0.001f;
+    cg_laserRadius = Dvar_RegisterFloat("cg_laserRadius", 0.80000001f, minbu, 0x80u, "The size (radius) of a laser beam");
     cg_laserLight = Dvar_RegisterBool(
         "cg_laserLight",
         1,
@@ -760,15 +760,15 @@ void __cdecl CG_RegisterDvars()
     minbv.value.min = -FLT_MAX;
     cg_laserLightBodyTweak = Dvar_RegisterFloat(
         "cg_laserLightBodyTweak",
-        15.0,
+        15.0f,
         minbv,
         0x80u,
         "Amount to add to length of beam for light when laser hits a body (for hitboxes).");
     minbw.value.max = FLT_MAX;
-    minbw.value.min = 0.001;
+    minbw.value.min = 0.001f;
     cg_laserLightRadius = Dvar_RegisterFloat(
         "cg_laserLightRadius",
-        3.0,
+        3.0f,
         minbw,
         0x80u,
         "The radius of the light at the far end of a laser beam");
@@ -776,7 +776,7 @@ void __cdecl CG_RegisterDvars()
     minbx.value.min = -FLT_MAX;
     cg_laserLightBeginOffset = Dvar_RegisterFloat(
         "cg_laserLightBeginOffset",
-        13.0,
+        13.0f,
         minbx,
         0x80u,
         "How far from the true beginning of the beam the light at the beginning is.");
@@ -784,7 +784,7 @@ void __cdecl CG_RegisterDvars()
     minby.value.min = -FLT_MAX;
     cg_laserLightEndOffset = Dvar_RegisterFloat(
         "cg_laserLightEndOffset",
-        -3.0,
+        -3.0f,
         minby,
         0x80u,
         "How far from the true end of the beam the light at the end is.");
@@ -792,15 +792,15 @@ void __cdecl CG_RegisterDvars()
     minbz.value.min = -FLT_MAX;
     cg_laserEndOffset = Dvar_RegisterFloat(
         "cg_laserEndOffset",
-        0.5,
+        0.5f,
         minbz,
         0x80u,
         "How far from the point of collision the end of the beam is.");
     minca.value.max = FLT_MAX;
-    minca.value.min = 0.0;
+    minca.value.min = 0.0f;
     cg_laserFlarePct = Dvar_RegisterFloat(
         "cg_laserFlarePct",
-        0.2,
+        0.2f,
         minca,
         0x80u,
         "Percentage laser widens over distance from viewer.");
@@ -809,81 +809,81 @@ void __cdecl CG_RegisterDvars()
         0,
         1u,
         "Marks on entities from players' bullets only.");
-    mincb.value.max = 1.0;
-    mincb.value.min = 0.0;
+    mincb.value.max = 1.0f;
+    mincb.value.min = 0.0f;
     cg_tracerChance = Dvar_RegisterFloat(
         "cg_tracerchance",
-        0.2,
+        0.2f,
         mincb,
         0x80u,
         "The probability that a bullet is a tracer round");
     mincc.value.max = FLT_MAX;
-    mincc.value.min = 0.0;
+    mincc.value.min = 0.0f;
     cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, mincc, 0x80u, "The width of the tracer round");
     mincd.value.max = FLT_MAX;
-    mincd.value.min = 0.0;
+    mincd.value.min = 0.0f;
     cg_tracerSpeed = Dvar_RegisterFloat(
         "cg_tracerSpeed",
-        7500.0,
+        7500.0f,
         mincd,
         0x80u,
         "The speed of a tracer round in units per second");
     mince.value.max = FLT_MAX;
-    mince.value.min = 0.0;
+    mince.value.min = 0.0f;
     cg_tracerLength = Dvar_RegisterFloat("cg_tracerlength", 160.0, mince, 0x80u, "The length of a tracer round");
     mincf.value.max = FLT_MAX;
-    mincf.value.min = 1.0;
+    mincf.value.min = 1.0f;
     cg_tracerScale = Dvar_RegisterFloat(
         "cg_tracerScale",
-        1.0,
+        1.0f,
         mincf,
         0x80u,
         "Scale the tracer at a distance, so it's still visible");
     mincg.value.max = FLT_MAX;
-    mincg.value.min = 0.0;
+    mincg.value.min = 0.0f;
     cg_tracerScaleMinDist = Dvar_RegisterFloat(
         "cg_tracerScaleMinDist",
-        5000.0,
+        5000.0f,
         mincg,
         0x80u,
         "The minimum distance to scale a tracer");
     minch.value.max = FLT_MAX;
-    minch.value.min = 0.0;
+    minch.value.min = 0.0f;
     cg_tracerScaleDistRange = Dvar_RegisterFloat(
         "cg_tracerScaleDistRange",
-        25000.0,
+        25000.0f,
         minch,
         0x80u,
         "The range at which a tracer is scaled to its maximum amount");
     minci.value.max = FLT_MAX;
-    minci.value.min = 0.0;
+    minci.value.min = 0.0f;
     cg_tracerScrewDist = Dvar_RegisterFloat(
         "cg_tracerScrewDist",
-        100.0,
+        100.0f,
         minci,
         0x80u,
         "The length a tracer goes as it completes a full corkscrew revolution");
     mincj.value.max = FLT_MAX;
-    mincj.value.min = 0.0;
+    mincj.value.min = 0.0f;
     cg_tracerScrewRadius = Dvar_RegisterFloat(
         "cg_tracerScrewRadius",
-        0.5,
+        0.5f,
         mincj,
         0x80u,
         "The radius of a tracer's corkscrew motion");
-    minck.value.max = 1024.0;
-    minck.value.min = 0.0;
+    minck.value.max = 1024.0f;
+    minck.value.min = 0.0f;
     cg_thirdPersonRange = Dvar_RegisterFloat(
         "cg_thirdPersonRange",
-        120.0,
+        120.0f,
         minck,
         0x80u,
         "The range of the camera from the player in third person view");
-    mincl.value.max = 360.0;
-    mincl.value.min = -180.0;
+    mincl.value.max = 360.0f;
+    mincl.value.min = -180.0f;
     cg_thirdPersonAngle = Dvar_RegisterFloat(
         "cg_thirdPersonAngle",
-        0.0,
+        0.0f,
         mincl,
         0x80u,
         "The angle of the camera from the player in third person view");
@@ -930,10 +930,10 @@ void __cdecl CG_RegisterDvars()
     cg_minicon = Dvar_RegisterBool("con_minicon", 0, 1u, "Display the mini console on screen");
     cg_subtitles = Dvar_RegisterBool("cg_subtitles", 1, 1u, "Show subtitles");
     mincm.value.max = FLT_MAX;
-    mincm.value.min = 0.0;
+    mincm.value.min = 0.0f;
     cg_subtitleMinTime = Dvar_RegisterFloat(
         "cg_subtitleMinTime",
-        3.0,
+        3.0f,
         mincm,
         1u,
         "The minimum time that the subtitles are displayed on screen in seconds");
@@ -962,93 +962,93 @@ void __cdecl CG_RegisterDvars()
         1u,
         "The maximum character width of the bold game messages");
     cg_descriptiveText = Dvar_RegisterBool("cg_descriptiveText", 1, 1u, "Draw descriptive spectator messages");
-    mincn.value.max = 100.0;
-    mincn.value.min = 0.0;
+    mincn.value.max = 100.0f;
+    mincn.value.min = 0.0f;
     cg_youInKillCamSize = Dvar_RegisterFloat(
         "cg_youInKillCamSize",
-        6.0,
+        6.0f,
         mincn,
         1u,
         "Size of the 'you' Icon in the kill cam");
-    minco.value.max = 100.0;
-    minco.value.min = 0.0;
-    cg_scriptIconSize = Dvar_RegisterFloat("cg_scriptIconSize", 0.0, minco, 1u, "Size of Icons defined by script");
-    mincp.value.max = 100.0;
-    mincp.value.min = 0.0;
-    cg_connectionIconSize = Dvar_RegisterFloat("cg_connectionIconSize", 0.0, mincp, 1u, "Size of the connection icon");
-    mincq.value.max = 100.0;
-    mincq.value.min = 0.0;
-    cg_voiceIconSize = Dvar_RegisterFloat("cg_voiceIconSize", 0.0, mincq, 1u, "Size of the 'voice' icon");
+    minco.value.max = 100.0f;
+    minco.value.min = 0.0f;
+    cg_scriptIconSize = Dvar_RegisterFloat("cg_scriptIconSize", 0.0f, minco, 1u, "Size of Icons defined by script");
+    mincp.value.max = 100.0f;
+    mincp.value.min = 0.0f;
+    cg_connectionIconSize = Dvar_RegisterFloat("cg_connectionIconSize", 0.0f, mincp, 1u, "Size of the connection icon");
+    mincq.value.max = 100.0f;
+    mincq.value.min = 0.0f;
+    cg_voiceIconSize = Dvar_RegisterFloat("cg_voiceIconSize", 0.0f, mincq, 1u, "Size of the 'voice' icon");
     cg_constantSizeHeadIcons = Dvar_RegisterBool(
         "cg_constantSizeHeadIcons",
         0,
         0x80u,
         "Head icons are the same size regardless of distance from the player");
-    mincr.value.max = 1.0;
-    mincr.value.min = 0.0;
+    mincr.value.max = 1.0f;
+    mincr.value.min = 0.0f;
     cg_headIconMinScreenRadius = Dvar_RegisterFloat(
         "cg_headIconMinScreenRadius",
-        0.02,
+        0.02f,
         mincr,
         1u,
         "The minumum radius of a head icon on the screen");
     mincs.value.max = FLT_MAX;
-    mincs.value.min = 0.0;
+    mincs.value.min = 0.0f;
     cg_overheadNamesMaxDist = Dvar_RegisterFloat(
         "cg_overheadNamesMaxDist",
-        10000.0,
+        10000.0f,
         mincs,
         0x80u,
         "The maximum distance for showing friendly player names");
     minct.value.max = FLT_MAX;
-    minct.value.min = 0.0;
+    minct.value.min = 0.0f;
     cg_overheadNamesNearDist = Dvar_RegisterFloat(
         "cg_overheadNamesNearDist",
-        256.0,
+        256.0f,
         minct,
         0x80u,
         "The near distance at which names are full size");
     mincu.value.max = FLT_MAX;
-    mincu.value.min = 0.0;
+    mincu.value.min = 0.0f;
     cg_overheadNamesFarDist = Dvar_RegisterFloat(
         "cg_overheadNamesFarDist",
-        1024.0,
+        1024.0f,
         mincu,
         0x80u,
         "The far distance at which name sizes are scaled by cg_overheadNamesFarScale");
     mincv.value.max = FLT_MAX;
-    mincv.value.min = 0.0;
+    mincv.value.min = 0.0f;
     cg_overheadNamesFarScale = Dvar_RegisterFloat(
         "cg_overheadNamesFarScale",
-        0.60000002,
+        0.60000002f,
         mincv,
         0x80u,
         "The amount to scale overhead name sizes at cg_overheadNamesFarDist");
-    mincw.value.max = 100.0;
-    mincw.value.min = 0.0;
+    mincw.value.max = 100.0f;
+    mincw.value.min = 0.0f;
     cg_overheadNamesSize = Dvar_RegisterFloat(
         "cg_overheadNamesSize",
-        0.5,
+        0.5f,
         mincw,
         0x80u,
         "The maximum size to show overhead names");
-    mincx.value.max = 100.0;
-    mincx.value.min = 0.0;
+    mincx.value.max = 100.0f;
+    mincx.value.min = 0.0f;
     cg_overheadIconSize = Dvar_RegisterFloat(
         "cg_overheadIconSize",
-        0.69999999,
+        0.69999999f,
         mincx,
         0x80u,
         "The maximum size to show overhead icons like 'rank'");
     mincy.value.max = FLT_MAX;
-    mincy.value.min = 0.0;
+    mincy.value.min = 0.0f;
     cg_overheadRankSize = Dvar_RegisterFloat("cg_overheadRankSize", 0.5, mincy, 0x80u, "The size to show rank text");
     cg_overheadNamesGlow = Dvar_RegisterColor(
         "cg_overheadNamesGlow",
-        0.0,
-        0.0,
-        0.0,
-        1.0,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f,
         0x80u,
         "Glow color for overhead names");
     cg_overheadNamesFont = Dvar_RegisterInt(
@@ -1103,26 +1103,26 @@ void __cdecl CG_RegisterDvars()
         1u,
         "Blink rate of an invalid command hint");
     mincz.value.max = FLT_MAX;
-    mincz.value.min = 0.0;
+    mincz.value.min = 0.0f;
     cg_viewZSmoothingMin = Dvar_RegisterFloat(
         "cg_viewZSmoothingMin",
-        1.0,
+        1.0f,
         mincz,
         1u,
         "Threshhold for the minimum smoothing distance it must move to smooth");
     minda.value.max = FLT_MAX;
-    minda.value.min = 0.0;
+    minda.value.min = 0.0f;
     cg_viewZSmoothingMax = Dvar_RegisterFloat(
         "cg_viewZSmoothingMax",
-        16.0,
+        16.0f,
         minda,
         1u,
         "Threshhold for the maximum smoothing distance we'll do");
     mindb.value.max = FLT_MAX;
-    mindb.value.min = 0.0;
+    mindb.value.min = 0.0f;
     cg_viewZSmoothingTime = Dvar_RegisterFloat(
         "cg_viewZSmoothingTime",
-        0.1,
+        0.1f,
         mindb,
         1u,
         "Amount of time to spread the smoothing over");

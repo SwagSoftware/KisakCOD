@@ -1421,9 +1421,9 @@ void R_SetTestLods()
         for (i = 0; i < 4; ++i)
         {
             if (i == r_forceLod->current.integer)
-                dist = 0.0;
+                dist = 0.0f;
             else
-                dist = 0.001;
+                dist = 0.001f;
             XModelSetTestLods(i, dist);
         }
     }

@@ -1423,9 +1423,9 @@ void __cdecl G_SetOrigin(gentity_s *ent, const float *origin)
     ent->s.lerp.pos.trType = TR_STATIONARY;
     ent->s.lerp.pos.trTime = 0;
     ent->s.lerp.pos.trDuration = 0;
-    ent->s.lerp.pos.trDelta[0] = 0.0;
-    ent->s.lerp.pos.trDelta[1] = 0.0;
-    ent->s.lerp.pos.trDelta[2] = 0.0;
+    ent->s.lerp.pos.trDelta[0] = 0.0f;
+    ent->s.lerp.pos.trDelta[1] = 0.0f;
+    ent->s.lerp.pos.trDelta[2] = 0.0f;
     ent->r.currentOrigin[0] = *origin;
     ent->r.currentOrigin[1] = origin[1];
     ent->r.currentOrigin[2] = origin[2];
@@ -1439,9 +1439,9 @@ void __cdecl G_SetAngle(gentity_s *ent, const float *angle)
     ent->s.lerp.apos.trType = TR_STATIONARY;
     ent->s.lerp.apos.trTime = 0;
     ent->s.lerp.apos.trDuration = 0;
-    ent->s.lerp.apos.trDelta[0] = 0.0;
-    ent->s.lerp.apos.trDelta[1] = 0.0;
-    ent->s.lerp.apos.trDelta[2] = 0.0;
+    ent->s.lerp.apos.trDelta[0] = 0.0f;
+    ent->s.lerp.apos.trDelta[1] = 0.0f;
+    ent->s.lerp.apos.trDelta[2] = 0.0f;
     ent->r.currentAngles[0] = *angle;
     ent->r.currentAngles[1] = angle[1];
     ent->r.currentAngles[2] = angle[2];
@@ -1465,9 +1465,9 @@ int __cdecl G_rand()
     return rand();
 }
 
-double __cdecl G_flrand(float min, float max)
+float __cdecl G_flrand(float min, float max)
 {
-    return (float)((double)G_rand() * (max - min) / 32768.0 + min);
+    return (float)G_rand() * (max - min) / 32768.0f + min;
 }
 
 int __cdecl G_irand(int min, int max)
@@ -1475,13 +1475,13 @@ int __cdecl G_irand(int min, int max)
     return min + (max - min) * G_rand() / 0x8000;
 }
 
-double __cdecl G_random()
+float __cdecl G_random()
 {
-    return (float)((double)G_rand() / 32768.0);
+    return (float)G_rand() / 32768.0f;
 }
 
-double __cdecl G_crandom()
+float __cdecl G_crandom()
 {
-    return (float)(G_random() * 2.0 - 1.0);
+    return G_random() * 2.0f - 1.0f;
 }
 

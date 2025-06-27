@@ -1045,13 +1045,13 @@ void __cdecl PlayADSAnim(float weaponPosFrac, int weaponNum, DObj_s *obj, int an
             "(animIndex == WEAP_ANIM_ADS_UP) || (animIndex == WEAP_ANIM_ADS_DOWN)");
     if (animIndex == 31)
     {
-        XAnimSetGoalWeight(obj, 0x1Fu, 1.0, 0.1, 0.0, 0, 1u, 0);
-        XAnimSetGoalWeight(obj, 0x20u, 0.0, 0.1, 0.0, 0, 0, 0);
+        XAnimSetGoalWeight(obj, 0x1Fu, 1.0f, 0.1f, 0.0f, 0, 1u, 0);
+        XAnimSetGoalWeight(obj, 0x20u, 0.0f, 0.1f, 0.0f, 0, 0, 0);
     }
     else
     {
-        XAnimSetGoalWeight(obj, 0x1Fu, 0.0, 0.1, 0.0, 0, 0, 0);
-        XAnimSetGoalWeight(obj, 0x20u, 1.0, 0.1, 0.0, 0, 1u, 0);
+        XAnimSetGoalWeight(obj, 0x1Fu, 0.0f, 0.1f, 0.0f, 0, 0, 0);
+        XAnimSetGoalWeight(obj, 0x20u, 1.0f, 0.1f, 0.0f, 0, 1u, 0);
     }
     Tree = DObjGetTree(obj);
     XAnimSetTime(Tree, 0x1Fu, weaponPosFrac);
@@ -1082,12 +1082,12 @@ void __cdecl ResetWeaponAnimTrees(int localClientNum, const playerState_s *ps)
             animTree = DObjGetTree(obj);
             if (!animTree)
                 MyAssertHandler(".\\cgame\\cg_weapons.cpp", 525, 0, "%s", "animTree");
-            XAnimClearTreeGoalWeights(animTree, 0, 0.0);
-            XAnimSetGoalWeight(obj, 0, 1.0, 0.0, 1.0, 0, 1u, 0);
+            XAnimClearTreeGoalWeights(animTree, 0, 0.0f);
+            XAnimSetGoalWeight(obj, 0, 1.0f, 0.0f, 1.0f, 0, 1u, 0);
             if (ps->ammoclip[BG_ClipForWeapon(weapIndex)])
-                StartWeaponAnim(localClientNum, weapIndex, obj, 1, 0.0);
+                StartWeaponAnim(localClientNum, weapIndex, obj, 1, 0.0f);
             else
-                StartWeaponAnim(localClientNum, weapIndex, obj, 2, 0.0);
+                StartWeaponAnim(localClientNum, weapIndex, obj, 2, 0.0f);
         }
     }
 }
@@ -1264,8 +1264,8 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
     iassert(localClientNum == 0);
     cgameGlob = &cgArray[0];
     ps = &cgArray[0].predictedPlayerState;
-    cgArray[0].refdef.dof.viewModelStart = 0.0;
-    cgameGlob->refdef.dof.viewModelEnd = 0.0;
+    cgArray[0].refdef.dof.viewModelStart = 0.0f;
+    cgameGlob->refdef.dof.viewModelEnd = 0.0f;
     if (ps->pm_type != 4 && ps->pm_type != 5 && !cgameGlob->renderingThirdPerson)
     {
         if (cgameGlob->cubemapShot || !cg_drawGun->current.enabled || CG_GetWeapReticleZoom(cgameGlob, &fZoom))
@@ -1277,9 +1277,9 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
             {
                 cgameGlob->gunPitch = cgameGlob->refdefViewAngles[0];
                 cgameGlob->gunYaw = cgameGlob->refdefViewAngles[1];
-                cgameGlob->gunXOfs = 0.0;
-                cgameGlob->gunYOfs = 0.0;
-                cgameGlob->gunZOfs = 0.0;
+                cgameGlob->gunXOfs = 0.0f;
+                cgameGlob->gunYOfs = 0.0f;
+                cgameGlob->gunZOfs = 0.0f;
             }
             else
             {
@@ -1292,7 +1292,7 @@ void __cdecl CG_AddViewWeapon(int localClientNum)
                 pe = &cgameGlob->playerEntity;
                 ws.ps = ps;
                 ws.xyspeed = cgameGlob->xyspeed;
-                ws.frametime = (double)cgameGlob->frametime * EQUAL_EPSILON;
+                ws.frametime = (float)cgameGlob->frametime * EQUAL_EPSILON;
                 ws.vLastMoveAng[0] = cgameGlob->playerEntity.vLastMoveAng[0];
                 ws.vLastMoveAng[1] = cgameGlob->playerEntity.vLastMoveAng[1];
                 ws.vLastMoveAng[2] = cgameGlob->playerEntity.vLastMoveAng[2];
@@ -1376,7 +1376,7 @@ void __cdecl CalculateWeaponPosition_Sway(cg_s *cgameGlob)
         iassert(cgameGlob->shellshock.parms);
 
         if (ssDT < cgameGlob->shellshock.parms->view.fadeTime)
-            ssScale = (double)ssDT / (double)cgameGlob->shellshock.parms->view.fadeTime;
+            ssScale = (float)ssDT / (float)cgameGlob->shellshock.parms->view.fadeTime;
 
         ssScalea = (3.0f - ssScale * 2.0f) * ssScale * ssScale;
         ssSwayScale = (weapDef->swayShellShockScale - 1.0f) * ssScalea + 1.0f;
@@ -1398,17 +1398,17 @@ void __cdecl CalculateWeaponPosition(cg_s *cgameGlob, float *origin)
     float fDist; // [esp+24h] [ebp-10h]
     float tempAngles[3]; // [esp+28h] [ebp-Ch] BYREF
 
-    *origin = 0.0;
-    origin[1] = 0.0;
-    origin[2] = 0.0;
-    if (cgameGlob->predictedPlayerState.leanf != 0.0 && cgameGlob->predictedPlayerState.fWeaponPosFrac < 1.0)
+    *origin = 0.0f;
+    origin[1] = 0.0f;
+    origin[2] = 0.0f;
+    if (cgameGlob->predictedPlayerState.leanf != 0.0f && cgameGlob->predictedPlayerState.fWeaponPosFrac < 1.0f)
     {
-        tempAngles[0] = 0.0;
-        tempAngles[1] = 0.0;
-        tempAngles[2] = 0.0;
+        tempAngles[0] = 0.0f;
+        tempAngles[1] = 0.0f;
+        tempAngles[2] = 0.0f;
         fLean = GetLeanFraction(cgameGlob->predictedPlayerState.leanf);
-        tempAngles[2] = (float)0.0 - (fLean + fLean);
-        fDist = (1.0 - cgameGlob->predictedPlayerState.fWeaponPosFrac) * fLean * 1.6f;
+        tempAngles[2] = 0.0f - (fLean + fLean);
+        fDist = (1.0f - cgameGlob->predictedPlayerState.fWeaponPosFrac) * fLean * 1.6f;
         AngleVectors(tempAngles, 0, right, 0);
         Vec3Mad(origin, fDist, right, origin);
     }
@@ -1419,11 +1419,11 @@ void __cdecl CalculateWeaponPosition(cg_s *cgameGlob, float *origin)
     if (delta >= 150)
     {
         if (delta < 450)
-            origin[2] = cgameGlob->landChange * 0.25 * (double)(450 - delta) / 300.0 + origin[2];
+            origin[2] = cgameGlob->landChange * 0.25f * (float)(450 - delta) / 300.0f + origin[2];
     }
     else
     {
-        origin[2] = cgameGlob->landChange * 0.25 * (double)delta / 150.0 + origin[2];
+        origin[2] = cgameGlob->landChange * 0.25f * (float)delta / 150.0f + origin[2];
     }
     CalculateWeaponPosition_SaveOffsetMovement(cgameGlob, origin);
 }
@@ -1436,11 +1436,8 @@ void __cdecl CalculateWeaponPosition_SwayMovement(const cg_s *cgameGlob, float *
 
 void __cdecl CalculateWeaponPosition_BasePosition(cg_s *cgameGlob, float *origin)
 {
-    float vGunOfs[3]; // [esp+8h] [ebp-Ch] BYREF
+    float vGunOfs[3] = { 0.0f, 0.0f, 0.0f };
 
-    vGunOfs[0] = 0.0;
-    vGunOfs[1] = 0.0;
-    vGunOfs[2] = 0.0;
     CalculateWeaponPosition_BasePosition_movement(cgameGlob, vGunOfs);
     cgameGlob->playerEntity.vPositionLastOrg[0] = vGunOfs[0];
     cgameGlob->playerEntity.vPositionLastOrg[1] = vGunOfs[1];
@@ -1487,26 +1484,26 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
             v2 = weapDef->fStandMoveMinSpeed + cg_gun_move_minspeed->current.value;
         minSpeed = v2;
     }
-    moving = minSpeed < (double)cgameGlob->xyspeed;
+    moving = minSpeed < (float)cgameGlob->xyspeed;
     v6 = ps->weaponstate == 25 || ps->weaponstate == 26;
     prone = ps->viewHeightTarget == 11;
     crouched = ps->viewHeightTarget == 40;
-    if (minSpeed >= (double)cgameGlob->xyspeed || ps->weaponstate == 7 || v6)
+    if (minSpeed >= (float)cgameGlob->xyspeed || ps->weaponstate == 7 || v6)
     {
-        targetPos[0] = 0.0;
-        targetPos[1] = 0.0;
-        targetPos[2] = 0.0;
+        targetPos[0] = 0.0f;
+        targetPos[1] = 0.0f;
+        targetPos[2] = 0.0f;
     }
     else
     {
         frac = (cgameGlob->xyspeed - minSpeed) / ((double)ps->speed - minSpeed);
-        if (frac <= 0.0)
+        if (frac <= 0.0f)
             MyAssertHandler(".\\cgame\\cg_weapons.cpp", 1513, 0, "%s\n\t(frac) = %g", "(frac > 0)", frac);
-        v5 = frac - 1.0;
-        if (v5 < 0.0)
+        v5 = frac - 1.0f;
+        if (v5 < 0.0f)
             scale = frac;
         else
-            scale = 1.0;
+            scale = 1.0f;
         if ((cgameGlob->predictedPlayerEntity.nextState.lerp.eFlags & 8) != 0)
         {
             Vec3Scale(weapDef->vProneMove, scale, targetPos);
@@ -1530,24 +1527,24 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
         {
             if (ps->weaponstate == 25)
             {
-                lerpa = (double)ps->weaponTime / (double)weapDef->nightVisionWearTime;
+                lerpa = (float)ps->weaponTime / (float)weapDef->nightVisionWearTime;
             }
             else
             {
                 if (ps->weaponstate != 26)
                     MyAssertHandler(".\\cgame\\cg_weapons.cpp", 1549, 0, "%s", "ps->weaponstate == WEAPON_NIGHTVISION_REMOVE");
-                lerpa = (double)ps->weaponTime / (double)weapDef->nightVisionWearTime;
+                lerpa = (float)ps->weaponTime / (float)weapDef->nightVisionWearTime;
             }
-            if (MYLERP_END <= (double)lerpa)
+            if (MYLERP_END <= (float)lerpa)
             {
-                if (MYLERP_START <= (double)lerpa)
-                    lerp = 0.0;
+                if (MYLERP_START <= (float)lerpa)
+                    lerp = 0.0f;
                 else
-                    lerp = 1.0 - (lerpa - MYLERP_END) / (MYLERP_START - MYLERP_END);
+                    lerp = 1.0f - (lerpa - MYLERP_END) / (MYLERP_START - MYLERP_END);
             }
             else
             {
-                lerp = 1.0;
+                lerp = 1.0f;
             }
         }
         if (ps->viewHeightTarget == 40)
@@ -1573,32 +1570,32 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
                 v3 = weapDef->fPosProneMoveRate + cg_gun_move_rate->current.value;
             else
                 v3 = weapDef->fPosMoveRate + cg_gun_move_rate->current.value;
-            delta = (double)cgameGlob->frametime * EQUAL_EPSILON * (targetPos[i] - pe->vLastMoveOrg[i]) * v3;
-            if (targetPos[i] <= (double)pe->vLastMoveOrg[i])
+            delta = (float)cgameGlob->frametime * EQUAL_EPSILON * (targetPos[i] - pe->vLastMoveOrg[i]) * v3;
+            if (targetPos[i] <= (float)pe->vLastMoveOrg[i])
             {
-                if (delta > (double)cgameGlob->frametime * EQUAL_EPSILON * -0.1000000014901161)
-                    delta = (double)cgameGlob->frametime * EQUAL_EPSILON * -0.1000000014901161;
+                if (delta > (float)cgameGlob->frametime * EQUAL_EPSILON * -0.1000000014901161f)
+                    delta = (float)cgameGlob->frametime * EQUAL_EPSILON * -0.1000000014901161f;
                 pe->vLastMoveOrg[i] = pe->vLastMoveOrg[i] + delta;
-                if (targetPos[i] > (double)pe->vLastMoveOrg[i])
+                if (targetPos[i] > (float)pe->vLastMoveOrg[i])
                     pe->vLastMoveOrg[i] = targetPos[i];
             }
             else
             {
-                if (delta < (double)cgameGlob->frametime * EQUAL_EPSILON * 0.1000000014901161)
-                    delta = (double)cgameGlob->frametime * EQUAL_EPSILON * 0.1000000014901161;
+                if (delta < (float)cgameGlob->frametime * EQUAL_EPSILON * 0.1000000014901161f)
+                    delta = (float)cgameGlob->frametime * EQUAL_EPSILON * 0.1000000014901161f;
                 pe->vLastMoveOrg[i] = pe->vLastMoveOrg[i] + delta;
-                if (targetPos[i] < (double)pe->vLastMoveOrg[i])
+                if (targetPos[i] < (float)pe->vLastMoveOrg[i])
                     pe->vLastMoveOrg[i] = targetPos[i];
             }
         }
     }
-    if (ps->fWeaponPosFrac == 0.0)
+    if (ps->fWeaponPosFrac == 0.0f)
     {
         Vec3Add(origin, cgameGlob->playerEntity.vLastMoveOrg, origin);
     }
-    else if (ps->fWeaponPosFrac < 0.5)
+    else if (ps->fWeaponPosFrac < 0.5f)
     {
-        deltaa = 1.0 - (ps->fWeaponPosFrac + ps->fWeaponPosFrac);
+        deltaa = 1.0f - (ps->fWeaponPosFrac + ps->fWeaponPosFrac);
         Vec3Mad(origin, deltaa, cgameGlob->playerEntity.vLastMoveOrg, origin);
     }
 }
@@ -1620,11 +1617,11 @@ void __cdecl CalculateWeaponPosition_SaveOffsetMovement(cg_s *cgameGlob, float *
 
     weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
     if (!BG_IsAimDownSightWeapon(weapIndex)
-        || (fPosLerp = cgameGlob->predictedPlayerState.fWeaponPosFrac, fPosLerp == 0.0))
+        || (fPosLerp = cgameGlob->predictedPlayerState.fWeaponPosFrac, fPosLerp == 0.0f))
     {
-        cgameGlob->gunXOfs = 0.0;
-        cgameGlob->gunYOfs = 0.0;
-        cgameGlob->gunZOfs = 0.0;
+        cgameGlob->gunXOfs = 0.0f;
+        cgameGlob->gunYOfs = 0.0f;
+        cgameGlob->gunZOfs = 0.0f;
     }
     else
     {
@@ -1641,11 +1638,11 @@ void __cdecl CalculateWeaponPostion_PositionToADS(cg_s *cgameGlob, playerState_s
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     if (BG_IsAimDownSightWeapon(weapIndex))
     {
-        if (ps->fWeaponPosFrac == 1.0)
+        if (ps->fWeaponPosFrac == 1.0f)
         {
             cgameGlob->playerEntity.bPositionToADS = 0;
         }
-        else if (ps->fWeaponPosFrac == 0.0)
+        else if (ps->fWeaponPosFrac == 0.0f)
         {
             cgameGlob->playerEntity.bPositionToADS = 1;
         }
@@ -2553,7 +2550,7 @@ void __cdecl FireBulletPenetrate(
                 lastHitPos[0] = br.hitPos[0];
                 lastHitPos[1] = br.hitPos[1];
                 lastHitPos[2] = br.hitPos[2];
-                if (!BG_AdvanceTrace(bp, &br, 0.13500001))
+                if (!BG_AdvanceTrace(bp, &br, 0.13500001f))
                     break;
                 traceHit = BulletTrace(localClientNum, bp, weapDef, attacker, &br, br.depthSurfaceType);
                 revBp = *bp; // Com_Memcpy((char *)&revBp, (char *)bp, 64);
@@ -2565,14 +2562,14 @@ void __cdecl FireBulletPenetrate(
                 revBp.start[0] = bp->end[0];
                 revBp.start[1] = bp->end[1];
                 revBp.start[2] = bp->end[2];
-                Vec3Mad(lastHitPos, 0.0099999998, revBp.dir, revBp.end);
+                Vec3Mad(lastHitPos, 0.0099999998f, revBp.dir, revBp.end);
                 revBr = br; // Com_Memcpy((char *)&revBr, (char *)&br, 68);
                 revBr.trace.normal[0] = -revBr.trace.normal[0];
                 revBr.trace.normal[1] = -revBr.trace.normal[1];
                 revBr.trace.normal[2] = -revBr.trace.normal[2];
 
                 if (traceHit)
-                    BG_AdvanceTrace(&revBp, &revBr, 0.0099999998);
+                    BG_AdvanceTrace(&revBp, &revBr, 0.0099999998f);
 
                 revTraceHit = BulletTrace(localClientNum, &revBp, weapDef, attacker, &revBr, revBr.depthSurfaceType);
                 allSolid = revTraceHit && revBr.trace.allsolid || br.trace.startsolid && revBr.trace.startsolid;
@@ -2591,8 +2588,8 @@ void __cdecl FireBulletPenetrate(
                         v13 = Vec3Length(v);
                     }
                     depth = v13;
-                    if (v13 < 1.0)
-                        depth = 1.0;
+                    if (v13 < 1.0f)
+                        depth = 1.0f;
 
                     if (revTraceHit)
                     {
@@ -2609,14 +2606,14 @@ void __cdecl FireBulletPenetrate(
                         {
                             SurfacePenetrationDepth = BG_GetSurfacePenetrationDepth(weapDef, revBr.depthSurfaceType);
                             v9 = SurfacePenetrationDepth - maxDepth;
-                            v8 = v9 < 0.0 ? SurfacePenetrationDepth : maxDepth;
+                            v8 = v9 < 0.0f ? SurfacePenetrationDepth : maxDepth;
                             maxDepth = v8;
                         }
-                        if (maxDepth <= 0.0)
+                        if (maxDepth <= 0.0f)
                             return;
                     }
                     bp->damageMultiplier = bp->damageMultiplier - depth / maxDepth;
-                    if (bp->damageMultiplier <= 0.0)
+                    if (bp->damageMultiplier <= 0.0f)
                         return;
                     if (!allSolid && !weapType)
                     {
@@ -2624,7 +2621,7 @@ void __cdecl FireBulletPenetrate(
                         v33 = Vec3LengthSq(v34);
                         v32 = bullet_penetrationMinFxDist->current.value;
                         v7 = v32 * v32;
-                        if (v7 < (double)v33)
+                        if (v7 < (float)v33)
                         {
                             if (!traceHit || (br.trace.surfaceFlags & 4) == 0)
                             {
@@ -2685,7 +2682,7 @@ void __cdecl FireBulletPenetrate(
                     Vec3Sub(lastHitPos, br.hitPos, v21);
                     v20 = Vec3LengthSq(v21);
                     v6 = bullet_penetrationMinFxDist->current.value * bullet_penetrationMinFxDist->current.value;
-                    if (v6 < (double)v20)
+                    if (v6 < (float)v20)
                     {
                         traceHitEntityId = Trace_GetEntityHitId(&br.trace);
                         if (!weapType)

@@ -326,7 +326,7 @@ BOOL __cdecl Scr_IsSystemActive();
 int __cdecl Scr_GetInt(unsigned int index);
 scr_anim_s __cdecl Scr_GetAnim(unsigned int index, XAnimTree_s* tree);
 BOOL Scr_ErrorInternal();
-double __cdecl Scr_GetFloat(unsigned int index);
+float __cdecl Scr_GetFloat(unsigned int index);
 unsigned int __cdecl Scr_GetConstString(unsigned int index);
 unsigned int __cdecl Scr_GetConstLowercaseString(unsigned int index);
 char* __cdecl Scr_GetString(unsigned int index);

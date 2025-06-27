@@ -4850,7 +4850,7 @@ void __cdecl Window_Init(windowDef_t *w)
 void __cdecl Item_Init(itemDef_s *item, int imageTrack)
 {
     memset((unsigned __int8 *)item, 0, sizeof(itemDef_s));
-    item->textscale = 0.55000001;
+    item->textscale = 0.55000001f;
     item->imageTrack = imageTrack;
     Window_Init(&item->window);
 }

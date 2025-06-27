@@ -59,82 +59,82 @@ void __cdecl CG_AntiBurnInHUD_RegisterDvars()
     DvarLimits minp; // [esp+10h] [ebp-10h]
     DvarLimits minq; // [esp+10h] [ebp-10h]
 
-    min.value.max = 1.0;
-    min.value.min = 0.0;
-    hud_fadeout_speed = Dvar_RegisterFloat("hud_fadeout_speed", 0.1, min, 1u, "The speed that the HUD will fade at");
+    min.value.max = 1.0f;
+    min.value.min = 0.0f;
+    hud_fadeout_speed = Dvar_RegisterFloat("hud_fadeout_speed", 0.1f, min, 1u, "The speed that the HUD will fade at");
     hud_enable = Dvar_RegisterBool("hud_enable", 1, 1u, "Enable hud elements");
-    mina.value.max = 30.0;
-    mina.value.min = 0.0;
+    mina.value.max = 30.0f;
+    mina.value.min = 0.0f;
     hud_fade_ammodisplay = Dvar_RegisterFloat(
         "hud_fade_ammodisplay",
-        0.0,
+        0.0f,
         mina,
         1u,
         "The time for the ammo display to fade in seconds");
-    minb.value.max = 30.0;
-    minb.value.min = 0.0;
+    minb.value.max = 30.0f;
+    minb.value.min = 0.0f;
     hud_fade_healthbar = Dvar_RegisterFloat(
         "hud_fade_healthbar",
-        2.0,
+        2.0f,
         minb,
         1u,
         "The time for the health bar to fade in seconds");
-    minc.value.max = 30.0;
-    minc.value.min = 0.0;
+    minc.value.max = 30.0f;
+    minc.value.min = 0.0f;
     hud_fade_compass = Dvar_RegisterFloat(
         "hud_fade_compass",
-        0.0,
+        0.0f,
         minc,
         1u,
         "The time for the compass to fade in seconds");
-    mind.value.max = 30.0;
-    mind.value.min = 0.0;
-    hud_fade_stance = Dvar_RegisterFloat("hud_fade_stance", 1.7, mind, 1u, "The time for the stance to fade in seconds");
-    mine.value.max = 30.0;
-    mine.value.min = 0.0;
+    mind.value.max = 30.0f;
+    mind.value.min = 0.0f;
+    hud_fade_stance = Dvar_RegisterFloat("hud_fade_stance", 1.7f, mind, 1u, "The time for the stance to fade in seconds");
+    mine.value.max = 30.0f;
+    mine.value.min = 0.0f;
     hud_fade_offhand = Dvar_RegisterFloat(
         "hud_fade_offhand",
-        0.0,
+        0.0f,
         mine,
         1u,
         "The time for the offhand weapons to fade in seconds");
-    minf.value.max = 30.0;
-    minf.value.min = 0.0;
+    minf.value.max = 30.0f;
+    minf.value.min = 0.0f;
     hud_fade_sprint = Dvar_RegisterFloat(
         "hud_fade_sprint",
-        1.7,
+        1.7f,
         minf,
         1u,
         "The time for the sprint meter to fade in seconds");
-    ming.value.max = 1.1;
-    ming.value.min = 0.0;
+    ming.value.max = 1.1f;
+    ming.value.min = 0.0f;
     hud_health_startpulse_injured = Dvar_RegisterFloat(
         "hud_health_startpulse_injured",
-        1.0,
+        1.0f,
         ming,
         1u,
         "The health level at which to start the 'injured' pulse effect");
-    minh.value.max = 1.1;
-    minh.value.min = 0.0;
+    minh.value.max = 1.1f;
+    minh.value.min = 0.0f;
     hud_health_startpulse_critical = Dvar_RegisterFloat(
         "hud_health_startpulse_critical",
-        0.33000001,
+        0.33000001f,
         minh,
         1u,
         "The health level at which to start the 'critical' pulse effect");
-    mini.value.max = 3.0;
-    mini.value.min = 0.1;
+    mini.value.max = 3.0f;
+    mini.value.min = 0.1f;
     hud_health_pulserate_injured = Dvar_RegisterFloat(
         "hud_health_pulserate_injured",
-        1.0,
+        1.0f,
         mini,
         1u,
         "The pulse rate of the 'injured' pulse effect");
-    minj.value.max = 3.0;
-    minj.value.min = 0.1;
+    minj.value.max = 3.0f;
+    minj.value.min = 0.1f;
     hud_health_pulserate_critical = Dvar_RegisterFloat(
         "hud_health_pulserate_critical",
-        0.5,
+        0.5f,
         minj,
         1u,
         "The pulse rate of the 'critical' pulse effect");
@@ -150,11 +150,11 @@ void __cdecl CG_AntiBurnInHUD_RegisterDvars()
         (DvarLimits)0x271000000000LL,
         0x80u,
         "The time in milliseconds before the health regeneration kicks in");
-    mink.value.max = 1.0;
-    mink.value.min = 0.0;
+    mink.value.max = 1.0f;
+    mink.value.min = 0.0f;
     hud_healthOverlay_pulseStart = Dvar_RegisterFloat(
         "hud_healthOverlay_pulseStart",
-        0.55000001,
+        0.55000001f,
         mink,
         0x80u,
         "The percentage of full health at which the low-health warning overlay begins flashing");
@@ -164,11 +164,11 @@ void __cdecl CG_AntiBurnInHUD_RegisterDvars()
         (DvarLimits)0x3E800000000LL,
         0x80u,
         "Time in milliseconds to ramp up to the first alpha value (the peak of the pulse)");
-    minl.value.max = 1.0;
-    minl.value.min = 0.0;
+    minl.value.max = 1.0f;
+    minl.value.min = 0.0f;
     hud_healthOverlay_phaseTwo_toAlphaMultiplier = Dvar_RegisterFloat(
         "hud_healthOverlay_phaseTwo_toAlphaMultiplier",
-        0.69999999,
+        0.69999999f,
         minl,
         0x80u,
         "Alpha multiplier for the second health overlay phase (percentage of the pulse peak)");
@@ -178,11 +178,11 @@ void __cdecl CG_AntiBurnInHUD_RegisterDvars()
         (DvarLimits)0x3E800000000LL,
         0x80u,
         "Time in milliseconds to fade the alpha to hud_healthOverlay_phaseTwo_toAlphaMultiplier");
-    minm.value.max = 1.0;
-    minm.value.min = 0.0;
+    minm.value.max = 1.0f;
+    minm.value.min = 0.0f;
     hud_healthOverlay_phaseThree_toAlphaMultiplier = Dvar_RegisterFloat(
         "hud_healthOverlay_phaseThree_toAlphaMultiplier",
-        0.60000002,
+        0.60000002f,
         minm,
         0x80u,
         "Alpha multiplier for the third health overlay phase (percentage of the pulse peak)");
@@ -193,11 +193,11 @@ void __cdecl CG_AntiBurnInHUD_RegisterDvars()
         0x80u,
         "Time in milliseconds to fade the alpha to hud_healthOverlay_phaseThree_"
         "toAlphaMultiplier");
-    minn.value.max = 1.0;
-    minn.value.min = 0.0;
+    minn.value.max = 1.0f;
+    minn.value.min = 0.0f;
     hud_healthOverlay_phaseEnd_toAlpha = Dvar_RegisterFloat(
         "hud_healthOverlay_phaseEnd_toAlpha",
-        0.0,
+        0.0f,
         minn,
         0x80u,
         "Alpha multiplier to fade to before turning off the overlay (percentage of the pulse peak)");
@@ -207,36 +207,36 @@ void __cdecl CG_AntiBurnInHUD_RegisterDvars()
         (DvarLimits)0x3E800000000LL,
         0x80u,
         "Time in milliseconds to fade out the health overlay after it is done flashing");
-    mino.value.max = 1.0;
-    mino.value.min = 0.0;
+    mino.value.max = 1.0f;
+    mino.value.min = 0.0f;
     cg_sprintMeterFullColor = Dvar_RegisterVec4(
         "cg_sprintMeterFullColor",
-        0.80000001,
-        0.80000001,
-        0.80000001,
-        0.80000001,
+        0.80000001f,
+        0.80000001f,
+        0.80000001f,
+        0.80000001f,
         mino,
         1u,
         "The color of the sprint meter when the sprint meter is full");
-    minp.value.max = 1.0;
-    minp.value.min = 0.0;
+    minp.value.max = 1.0f;
+    minp.value.min = 0.0f;
     cg_sprintMeterEmptyColor = Dvar_RegisterVec4(
         "cg_sprintMeterEmptyColor",
-        0.69999999,
-        0.5,
-        0.2,
-        0.80000001,
+        0.69999999f,
+        0.5f,
+        0.2f,
+        0.80000001f,
         minp,
         1u,
         "The color of the sprint meter when the sprint meter is empty");
-    minq.value.max = 1.0;
-    minq.value.min = 0.0;
+    minq.value.max = 1.0f;
+    minq.value.min = 0.0f;
     cg_sprintMeterDisabledColor = Dvar_RegisterVec4(
         "cg_sprintMeterDisabledColor",
-        0.80000001,
-        0.1,
-        0.1,
-        0.2,
+        0.80000001f,
+        0.1f,
+        0.1f,
+        0.2f,
         minq,
         1u,
         "The color of the sprint meter when the sprint meter is disabled");
@@ -779,9 +779,9 @@ void __cdecl CG_DrawPlayerAmmoBackdrop(
         {
             if (CG_CheckPlayerForLowAmmo(cgArray))
             {
-                drawColor[0] = 0.88999999;
-                drawColor[1] = 0.18000001;
-                drawColor[2] = 0.0099999998;
+                drawColor[0] = 0.88999999f;
+                drawColor[1] = 0.18000001f;
+                drawColor[2] = 0.0099999998f;
             }
             else
             {
@@ -891,18 +891,18 @@ void __cdecl CG_DrawPlayerAmmoValue(
                 {
                     if (cgameGlob->lastClipFlashTime > cgameGlob->time || cgameGlob->lastClipFlashTime + 800 < cgameGlob->time)
                         cgameGlob->lastClipFlashTime = cgameGlob->time;
-                    flashColor[0] = 0.88999999;
-                    flashColor[1] = 0.18000001;
-                    flashColor[2] = 0.0099999998;
-                    flashColor[3] = (cgameGlob->lastClipFlashTime + 800 - cgameGlob->time) / 800.0;
+                    flashColor[0] = 0.88999999f;
+                    flashColor[1] = 0.18000001f;
+                    flashColor[2] = 0.0099999998f;
+                    flashColor[3] = (cgameGlob->lastClipFlashTime + 800 - cgameGlob->time) / 800.0f;
                     if (flashColor[3] > color[3])
                         flashColor[3] = color[3];
                 }
                 if (lowAmmo)
                 {
-                    ammoColor[0] = 0.88999999;
-                    ammoColor[1] = 0.18000001;
-                    ammoColor[2] = 0.0099999998;
+                    ammoColor[0] = 0.88999999f;
+                    ammoColor[1] = 0.18000001f;
+                    ammoColor[2] = 0.0099999998f;
                 }
                 else
                 {
@@ -1200,8 +1200,8 @@ void __cdecl CG_DrawPlayerStance(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        drawColor[4] = 1.4025731e-38;
-        x = (compassSize->current.value - 1.0) * cgsArray[0].compassWidth * 0.699999988079071 + rect->x;
+        drawColor[4] = 1.4025731e-38f;
+        x = (compassSize->current.value - 1.0f) * cgsArray[0].compassWidth * 0.699999988079071f + rect->x;
         y = rect->y;
         KISAK_NULLSUB();
         drawColor[0] = *color;
@@ -1217,7 +1217,7 @@ void __cdecl CG_DrawPlayerStance(
                 proneStr = UI_SafeTranslateString("CGAME_PRONE_BLOCKED");
             halfWidth = UI_TextWidth(proneStr, 0, font, scale) * 0.5;
             deltaTime = (cgArray[0].proneBlockedEndTime - cgArray[0].time);
-            v9 = deltaTime / 1500.0 * 540.0 * 0.01745329238474369;
+            v9 = deltaTime / 1500.0f * 540.0f * 0.01745329238474369f;
             v8 = sin(v9);
             v7 = fabs(v8);
             drawColor[3] = v7;
@@ -1824,9 +1824,9 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                     {
                         cgArray[0].lastHealthPulseTime = cgArray[0].time;
                     }
-                    *color = 0.88999999;
-                    color[1] = 0.18000001;
-                    color[2] = 0.0099999998;
+                    *color = 0.88999999f;
+                    color[1] = 0.18000001f;
+                    color[2] = 0.0099999998f;
                     color[3] = (flashTime + cgArray[0].lastHealthPulseTime - cgArray[0].time) / flashTime;
                     if (color[3] > fadeAlpha)
                         color[3] = fadeAlpha;
@@ -1838,10 +1838,10 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                         h,
                         rect->horzAlign,
                         rect->vertAlign,
-                        0.0,
-                        0.0,
-                        1.0,
-                        1.0,
+                        0.0f,
+                        0.0f,
+                        1.0f,
+                        1.0f,
                         color,
                         material);
                 }
@@ -1942,12 +1942,8 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
     float v16; // [esp+34h] [ebp-24h]
     float v17; // [esp+38h] [ebp-20h]
     float v18; // [esp+3Ch] [ebp-1Ch]
-    float pulseMags[4]; // [esp+48h] [ebp-10h]
+    float pulseMags[4] = { 1.0f, 0.80000001f, 0.60000002f, 0.30000001f };
 
-    pulseMags[0] = 1.0;
-    pulseMags[1] = 0.80000001;
-    pulseMags[2] = 0.60000002;
-    pulseMags[3] = 0.30000001;
     if (cgameGlob->healthOverlayOldHealth > (double)healthRatio
         && hud_healthOverlay_pulseStart->current.value > (double)healthRatio)
     {
@@ -1978,17 +1974,17 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
                 {
                     v15 = hud_healthOverlay_phaseTwo_toAlphaMultiplier->current.value
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
-                    v8 = v15 - 1.0;
-                    if (v8 < 0.0)
+                    v8 = v15 - 1.0f;
+                    if (v8 < 0.0f)
                         v16 = hud_healthOverlay_phaseTwo_toAlphaMultiplier->current.value
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
                     else
-                        v16 = 1.0;
-                    v7 = 0.0 - v15;
-                    if (v7 < 0.0)
+                        v16 = 1.0f;
+                    v7 = 0.0f - v15;
+                    if (v7 < 0.0f)
                         v6 = v16;
                     else
-                        v6 = 0.0;
+                        v6 = 0.0f;
                     cgameGlob->healthOverlayToAlpha = v6;
                     cgameGlob->healthOverlayPulseDuration = hud_healthOverlay_phaseTwo_pulseDuration->current.integer;
                     ++cgameGlob->healthOverlayPulsePhase;
@@ -1997,17 +1993,17 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
                 {
                     v13 = hud_healthOverlay_phaseThree_toAlphaMultiplier->current.value
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
-                    v5 = v13 - 1.0;
-                    if (v5 < 0.0)
+                    v5 = v13 - 1.0f;
+                    if (v5 < 0.0f)
                         v14 = hud_healthOverlay_phaseThree_toAlphaMultiplier->current.value
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
                     else
-                        v14 = 1.0;
-                    v4 = 0.0 - v13;
-                    if (v4 < 0.0)
+                        v14 = 1.0f;
+                    v4 = 0.0f - v13;
+                    if (v4 < 0.0f)
                         v3 = v14;
                     else
-                        v3 = 0.0;
+                        v3 = 0.0f;
                     cgameGlob->healthOverlayToAlpha = v3;
                     cgameGlob->healthOverlayPulseDuration = hud_healthOverlay_phaseThree_pulseDuration->current.integer;
                     cgameGlob->healthOverlayPulsePhase = 0;
@@ -2028,16 +2024,16 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
             else
             {
                 v17 = pulseMags[cgameGlob->healthOverlayPulseIndex];
-                v11 = v17 - 1.0;
-                if (v11 < 0.0)
+                v11 = v17 - 1.0f;
+                if (v11 < 0.0f)
                     v18 = v17;
                 else
-                    v18 = 1.0;
-                v10 = 0.0 - v17;
-                if (v10 < 0.0)
+                    v18 = 1.0f;
+                v10 = 0.0f - v17;
+                if (v10 < 0.0f)
                     v9 = v18;
                 else
-                    v9 = 0.0;
+                    v9 = 0.0f;
                 cgameGlob->healthOverlayToAlpha = v9;
                 cgameGlob->healthOverlayPulseDuration = hud_healthOverlay_phaseOne_pulseDuration->current.integer;
                 ++cgameGlob->healthOverlayPulsePhase;

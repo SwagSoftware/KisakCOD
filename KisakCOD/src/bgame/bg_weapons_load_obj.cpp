@@ -1216,10 +1216,10 @@ void __cdecl BG_SetupTransitionTimes(WeaponDef *weapDef)
 
 void __cdecl BG_CheckWeaponDamageRanges(WeaponDef *weapDef)
 {
-    if (weapDef->fMaxDamageRange <= 0.0)
-        weapDef->fMaxDamageRange = 999999.0;
-    if (weapDef->fMinDamageRange <= 0.0)
-        weapDef->fMinDamageRange = 999999.12;
+    if (weapDef->fMaxDamageRange <= 0.0f)
+        weapDef->fMaxDamageRange = 999999.0f;
+    if (weapDef->fMinDamageRange <= 0.0f)
+        weapDef->fMinDamageRange = 999999.12f;
 }
 
 void __cdecl BG_CheckProjectileValues(WeaponDef *weaponDef)
@@ -1228,7 +1228,7 @@ void __cdecl BG_CheckProjectileValues(WeaponDef *weaponDef)
         MyAssertHandler(".\\bgame\\bg_weapons_load_obj.cpp", 1277, 0, "%s", "weaponDef->weapType == WEAPTYPE_PROJECTILE");
     if ((double)weaponDef->iProjectileSpeed <= 0.0)
         Com_Error(ERR_DROP, "Projectile speed for WeapType %s must be greater than 0.0", weaponDef->szDisplayName);
-    if (weaponDef->destabilizationCurvatureMax >= 1000000000.0 || weaponDef->destabilizationCurvatureMax < 0.0)
+    if (weaponDef->destabilizationCurvatureMax >= 1000000000.0f || weaponDef->destabilizationCurvatureMax < 0.0)
         Com_Error(
             ERR_DROP,
             "Destabilization angle for for WeapType %s must be between 0 and 45 degrees",

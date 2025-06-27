@@ -108,14 +108,14 @@ void __cdecl Jump_ApplySlowdown(playerState_s *ps)
             else
             {
                 ps->pm_time = 1800;
-                scale = 0.64999998;
+                scale = 0.64999998f;
             }
         }
     }
     else
     {
         Jump_ClearState(ps);
-        scale = 0.64999998;
+        scale = 0.64999998f;
     }
     if (jump_slowdownEnable->current.enabled)
         Vec3Scale(ps->velocity, scale, ps->velocity);

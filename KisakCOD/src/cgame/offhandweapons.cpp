@@ -176,9 +176,9 @@ void __cdecl CG_DrawOffHandHighlight(
                         }
                         else
                         {
-                            drawColor[0] = 0.88999999;
-                            drawColor[1] = 0.18000001;
-                            drawColor[2] = 0.0099999998;
+                            drawColor[0] = 0.88999999f;
+                            drawColor[1] = 0.18000001f;
+                            drawColor[2] = 0.0099999998f;
                         }
                         OffHandFlash(cgArray, drawColor, flashColor);
                         UI_DrawHandlePic(
@@ -217,14 +217,14 @@ void __cdecl OffHandFlash(const cg_s *cgameGlob, const float *base_color, float 
     out_color[1] = base_color[1];
     out_color[2] = base_color[2];
     out_color[3] = base_color[3];
-    flashTime = (double)(cgameGlob->time - cgameGlob->offhandFlashTime) / 1000.0;
-    if (hud_flash_time_offhand->current.value > (double)flashTime)
+    flashTime = (float)(cgameGlob->time - cgameGlob->offhandFlashTime) / 1000.0f;
+    if (hud_flash_time_offhand->current.value > flashTime)
     {
-        if (hud_flash_period_offhand->current.value <= 0.0)
+        if (hud_flash_period_offhand->current.value <= 0.0f)
             MyAssertHandler(".\\cgame\\offhandweapons.cpp", 157, 0, "%s", "hud_flash_period_offhand->current.value > 0.0f");
-        phi = flashTime * 6.283185482025146 / hud_flash_period_offhand->current.value;
+        phi = flashTime * 6.283185482025146f / hud_flash_period_offhand->current.value;
         v3 = cos(phi);
-        fade = v3 * 0.5 + 0.5;
+        fade = v3 * 0.5f + 0.5f;
         out_color[3] = fade * base_color[3];
     }
 }
@@ -294,7 +294,7 @@ void __cdecl CG_DrawOffHandAmmo(
                 cgArray[0].offhandFadeTime,
                 (int)(hud_fade_offhand->current.value * 1000.0f))
                 * color[3];
-            if (drawColor[3] != 0.0)
+            if (drawColor[3] != 0.0f)
             {
                 ammoCount = CalcOffHandAmmo(&cgArray[0].predictedPlayerState, weaponType);
                 ammoCountString = va("%i", ammoCount);
@@ -306,9 +306,9 @@ void __cdecl CG_DrawOffHandAmmo(
                 }
                 else
                 {
-                    drawColor[0] = 0.88999999;
-                    drawColor[1] = 0.18000001;
-                    drawColor[2] = 0.0099999998;
+                    drawColor[0] = 0.88999999f;
+                    drawColor[1] = 0.18000001f;
+                    drawColor[2] = 0.0099999998f;
                 }
                 UI_DrawText(
                     &scrPlaceView[localClientNum],

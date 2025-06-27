@@ -4164,7 +4164,7 @@ BOOL Scr_ErrorInternal()
     return result;
 }
 
-double __cdecl Scr_GetFloat(unsigned int index)
+float __cdecl Scr_GetFloat(unsigned int index)
 {
     const char* v2; // eax
     const char* v3; // eax

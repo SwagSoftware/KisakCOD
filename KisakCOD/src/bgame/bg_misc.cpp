@@ -304,137 +304,137 @@ void __cdecl BG_RegisterDvars()
     DvarLimits minda; // [esp+8h] [ebp-18h]
     DvarLimits mindb; // [esp+8h] [ebp-18h]
 
-    min.value.max = 10.0;
-    min.value.min = 0.0;
+    min.value.max = 10.0f;
+    min.value.min = 0.0f;
     bg_viewKickScale = Dvar_RegisterFloat(
         "bg_viewKickScale",
-        0.2,
+        0.2f,
         min,
         0x80u,
         "The scale to apply to the damage done to caluclate damage view kick");
-    mina.value.max = 90.0;
-    mina.value.min = 0.0;
-    bg_viewKickMax = Dvar_RegisterFloat("bg_viewKickMax", 90.0, mina, 0x80u, "The maximum view kick");
-    minb.value.max = 90.0;
-    minb.value.min = 0.0;
-    bg_viewKickMin = Dvar_RegisterFloat("bg_viewKickMin", 5.0, minb, 0x80u, "The minimum view kick");
-    minc.value.max = 1.0;
-    minc.value.min = 0.0;
+    mina.value.max = 90.0f;
+    mina.value.min = 0.0f;
+    bg_viewKickMax = Dvar_RegisterFloat("bg_viewKickMax", 90.0f, mina, 0x80u, "The maximum view kick");
+    minb.value.max = 90.0f;
+    minb.value.min = 0.0f;
+    bg_viewKickMin = Dvar_RegisterFloat("bg_viewKickMin", 5.0f, minb, 0x80u, "The minimum view kick");
+    minc.value.max = 1.0f;
+    minc.value.min = 0.0f;
     bg_viewKickRandom = Dvar_RegisterFloat(
         "bg_viewKickRandom",
-        0.40000001,
+        0.40000001f,
         minc,
         0x80u,
         "The random direction scale view kick");
-    mind.value.max = 90.0;
-    mind.value.min = 0.0;
+    mind.value.max = 90.0f;
+    mind.value.min = 0.0f;
     player_view_pitch_up = Dvar_RegisterFloat(
         "player_view_pitch_up",
-        85.0,
+        85.0f,
         mind,
         0x180u,
         "Maximum angle that the player can look up");
-    mine.value.max = 90.0;
-    mine.value.min = 0.0;
+    mine.value.max = 90.0f;
+    mine.value.min = 0.0f;
     player_view_pitch_down = Dvar_RegisterFloat(
         "player_view_pitch_down",
-        85.0,
+        85.0f,
         mine,
         0x180u,
         "Maximum angle that the player can look down");
-    minf.value.max = 20.0;
-    minf.value.min = 0.0;
+    minf.value.max = 20.0f;
+    minf.value.min = 0.0f;
     player_lean_shift_left = Dvar_RegisterFloat(
         "player_lean_shift_left",
-        5.0,
+        5.0f,
         minf,
         0x180u,
         "Amount to shift the player 3rd person model when leaning left");
-    ming.value.max = 20.0;
-    ming.value.min = 0.0;
+    ming.value.max = 20.0f;
+    ming.value.min = 0.0f;
     player_lean_shift_right = Dvar_RegisterFloat(
         "player_lean_shift_right",
-        2.5,
+        2.5f,
         ming,
         0x180u,
         "Amount to shift the player 3rd person model when leaning right");
-    minh.value.max = 20.0;
-    minh.value.min = 0.0;
+    minh.value.max = 20.0f;
+    minh.value.min = 0.0f;
     player_lean_shift_crouch_left = Dvar_RegisterFloat(
         "player_lean_shift_crouch_left",
-        12.5,
+        12.5f,
         minh,
         0x180u,
         "Amount to shift the player 3rd person model when crouch leaning left");
-    mini.value.max = 20.0;
-    mini.value.min = 0.0;
+    mini.value.max = 20.0f;
+    mini.value.min = 0.0f;
     player_lean_shift_crouch_right = Dvar_RegisterFloat(
         "player_lean_shift_crouch_right",
-        13.0,
+        13.0f,
         mini,
         0x180u,
         "Amount to shift the player 3rd person model when crouch leaning right");
-    minj.value.max = 3.0;
-    minj.value.min = 0.0;
+    minj.value.max = 3.0f;
+    minj.value.min = 0.0f;
     player_lean_rotate_left = Dvar_RegisterFloat(
         "player_lean_rotate_left",
-        1.25,
+        1.25f,
         minj,
         0x180u,
         "Amount to rotate the player 3rd person model when leaning left");
-    mink.value.max = 3.0;
-    mink.value.min = 0.0;
+    mink.value.max = 3.0f;
+    mink.value.min = 0.0f;
     player_lean_rotate_right = Dvar_RegisterFloat(
         "player_lean_rotate_right",
-        1.25,
+        1.25f,
         mink,
         0x180u,
         "Amount to rotate the player 3rd person model when leaning right");
-    minl.value.max = 3.0;
-    minl.value.min = 0.0;
+    minl.value.max = 3.0f;
+    minl.value.min = 0.0f;
     player_lean_rotate_crouch_left = Dvar_RegisterFloat(
         "player_lean_rotate_crouch_left",
-        1.25,
+        1.25f,
         minl,
         0x180u,
         "Amount to rotate the player 3rd person model when crouch leaning left");
-    minm.value.max = 3.0;
-    minm.value.min = 0.0;
+    minm.value.max = 3.0f;
+    minm.value.min = 0.0f;
     player_lean_rotate_crouch_right = Dvar_RegisterFloat(
         "player_lean_rotate_crouch_right",
-        1.0,
+        1.0f,
         minm,
         0x180u,
         "Amount to rotate the player 3rd person model when crouch leaning right");
-    minn.value.max = 360.0;
-    minn.value.min = 0.0;
+    minn.value.max = 360.0f;
+    minn.value.min = 0.0f;
     bg_ladder_yawcap = Dvar_RegisterFloat(
         "bg_ladder_yawcap",
-        100.0,
+        100.0f,
         minn,
         0x180u,
         "The maximum angle that a player can look around while on a ladder");
-    mino.value.max = 360.0;
-    mino.value.min = 0.0;
+    mino.value.max = 360.0f;
+    mino.value.min = 0.0f;
     bg_prone_yawcap = Dvar_RegisterFloat(
         "bg_prone_yawcap",
-        85.0,
+        85.0f,
         mino,
         0x180u,
         "The maximum angle that a player can look around quickly while prone");
     minp.value.max = FLT_MAX;
-    minp.value.min = 0.0;
+    minp.value.min = 0.0f;
     bg_foliagesnd_minspeed = Dvar_RegisterFloat(
         "bg_foliagesnd_minspeed",
-        40.0,
+        40.0f,
         minp,
         0x180u,
         "The speed that a player must be going to make minimum noise while moving through foliage");
     minq.value.max = FLT_MAX;
-    minq.value.min = 0.0;
+    minq.value.min = 0.0f;
     bg_foliagesnd_maxspeed = Dvar_RegisterFloat(
         "bg_foliagesnd_maxspeed",
-        180.0,
+        180.0f,
         minq,
         0x180u,
         "The speed that a player must be going to make maximum noise while moving through foliage");
@@ -457,171 +457,171 @@ void __cdecl BG_RegisterDvars()
         0x180u,
         "The time interval before foliage sounds are reset after the player has stopped moving");
     minr.value.max = FLT_MAX;
-    minr.value.min = 1.0;
+    minr.value.min = 1.0f;
     bg_fallDamageMinHeight = Dvar_RegisterFloat(
         "bg_fallDamageMinHeight",
-        128.0,
+        128.0f,
         minr,
         0x188u,
         "The height that a player will start to take minimum damage if they fall");
     mins.value.max = FLT_MAX;
-    mins.value.min = 1.0;
+    mins.value.min = 1.0f;
     bg_fallDamageMaxHeight = Dvar_RegisterFloat(
         "bg_fallDamageMaxHeight",
-        300.0,
+        300.0f,
         mins,
         0x188u,
         "The height that a player will take maximum damage when falling");
-    mint.value.max = 1000.0;
-    mint.value.min = 0.0;
+    mint.value.max = 1000.0f;
+    mint.value.min = 0.0f;
     inertiaMax = Dvar_RegisterFloat("inertiaMax", 50.0, mint, 0x180u, "Maximum player inertia");
     inertiaDebug = Dvar_RegisterBool("inertiaDebug", 0, 0x180u, "Show inertia debug information");
-    minu.value.max = 1.0;
-    minu.value.min = -1.0;
+    minu.value.max = 1.0f;
+    minu.value.min = -1.0f;
     inertiaAngle = Dvar_RegisterFloat(
         "inertiaAngle",
-        0.0,
+        0.0f,
         minu,
         0x180u,
         "The cosine of the angle at which inertia occurs");
-    minv.value.max = 100.0;
-    minv.value.min = 0.0;
-    friction = Dvar_RegisterFloat("friction", 5.5, minv, 0x180u, "Player friction");
-    minw.value.max = 1000.0;
-    minw.value.min = 0.0;
-    stopspeed = Dvar_RegisterFloat("stopspeed", 100.0, minw, 0x180u, "The player deceleration");
-    minx.value.max = 1.0;
-    minx.value.min = 0.0;
+    minv.value.max = 100.0f;
+    minv.value.min = 0.0f;
+    friction = Dvar_RegisterFloat("friction", 5.5f, minv, 0x180u, "Player friction");
+    minw.value.max = 1000.0f;
+    minw.value.min = 0.0f;
+    stopspeed = Dvar_RegisterFloat("stopspeed", 100.0f, minw, 0x180u, "The player deceleration");
+    minx.value.max = 1.0f;
+    minx.value.min = 0.0f;
     bg_swingSpeed = Dvar_RegisterFloat(
         "bg_swingSpeed",
-        0.2,
+        0.2f,
         minx,
         0x80u,
         "The rate at which the player's legs swing around when strafing(multi-player only)");
-    miny.value.max = 180.0;
-    miny.value.min = 0.0;
+    miny.value.max = 180.0f;
+    miny.value.min = 0.0f;
     bg_legYawTolerance = Dvar_RegisterFloat(
         "bg_legYawTolerance",
-        20.0,
+        20.0f,
         miny,
         0x80u,
         "The amount the player's leg yaw can differ from his torso before moving ta match");
-    minz.value.max = 1.0;
-    minz.value.min = 0.0;
+    minz.value.max = 1.0f;
+    minz.value.min = 0.0f;
     bg_bobAmplitudeSprinting = Dvar_RegisterVec2(
         "bg_bobAmplitudeSprinting",
-        0.02,
-        0.014,
+        0.02f,
+        0.014f,
         minz,
         0x180u,
         "The multiplier to apply to the player's speed to get the bob amplitude while sprinting");
-    minba.value.max = 1.0;
-    minba.value.min = 0.0;
+    minba.value.max = 1.0f;
+    minba.value.min = 0.0f;
     bg_bobAmplitudeStanding = Dvar_RegisterVec2(
         "bg_bobAmplitudeStanding",
-        0.0070000002,
-        0.0070000002,
+        0.0070000002f,
+        0.0070000002f,
         minba,
         0x1180u,
         "The multiplier to apply to the player's speed to get the bob amplitude while standing");
-    minbb.value.max = 1.0;
-    minbb.value.min = 0.0;
+    minbb.value.max = 1.0f;
+    minbb.value.min = 0.0f;
     bg_bobAmplitudeDucked = Dvar_RegisterVec2(
         "bg_bobAmplitudeDucked",
-        0.0074999998,
-        0.0074999998,
+        0.0074999998f,
+        0.0074999998f,
         minbb,
         0x180u,
         "The multiplier to apply to the player's speed to get the bob amplitude while ducking");
-    minbc.value.max = 1.0;
-    minbc.value.min = 0.0;
+    minbc.value.max = 1.0f;
+    minbc.value.min = 0.0f;
     bg_bobAmplitudeProne = Dvar_RegisterVec2(
         "bg_bobAmplitudeProne",
-        0.02,
-        0.0049999999,
+        0.02f,
+        0.0049999999f,
         minbc,
         0x180u,
         "The multiplier to apply to the player's speed to get the bob amplitude while prone");
-    minbd.value.max = 36.0;
-    minbd.value.min = 0.0;
-    bg_bobMax = Dvar_RegisterFloat("bg_bobMax", 8.0, minbd, 0x180u, "The maximum allowed bob amplitude");
-    minbe.value.max = 300.0;
-    minbe.value.min = 0.0;
+    minbd.value.max = 36.0f;
+    minbd.value.min = 0.0f;
+    bg_bobMax = Dvar_RegisterFloat("bg_bobMax", 8.0f, minbd, 0x180u, "The maximum allowed bob amplitude");
+    minbe.value.max = 300.0f;
+    minbe.value.min = 0.0f;
     bg_aimSpreadMoveSpeedThreshold = Dvar_RegisterFloat(
         "bg_aimSpreadMoveSpeedThreshold",
-        11.0,
+        11.0f,
         minbe,
         0x180u,
         "When player is moving faster than this speed, the aim spread will increase");
-    minbf.value.max = 1000.0;
-    minbf.value.min = 0.0;
+    minbf.value.max = 1000.0f;
+    minbf.value.min = 0.0f;
     bg_maxGrenadeIndicatorSpeed = Dvar_RegisterFloat(
         "bg_maxGrenadeIndicatorSpeed",
-        20.0,
+        20.0f,
         minbf,
         0x180u,
         "Maximum speed of grenade that will show up in indicator and can be thrown back.");
-    minbg.value.max = 30.0;
-    minbg.value.min = 0.0;
+    minbg.value.max = 30.0f;
+    minbg.value.min = 0.0f;
     player_breath_hold_time = Dvar_RegisterFloat(
         "player_breath_hold_time",
-        4.5,
+        4.5f,
         minbg,
         0x180u,
         "The maximum time a player can hold his breath");
-    minbh.value.max = 30.0;
-    minbh.value.min = 0.0;
+    minbh.value.max = 30.0f;
+    minbh.value.min = 0.0f;
     player_breath_gasp_time = Dvar_RegisterFloat(
         "player_breath_gasp_time",
-        1.0,
+        1.0f,
         minbh,
         0x180u,
         "The amount of time a player will gasp once they can breath again");
-    minbi.value.max = 30.0;
-    minbi.value.min = 0.0;
+    minbi.value.max = 30.0f;
+    minbi.value.min = 0.0f;
     player_breath_fire_delay = Dvar_RegisterFloat(
         "player_breath_fire_delay",
-        0.0,
+        0.0f,
         minbi,
         0x180u,
         "The amount of time subtracted from the player remaining breath time when a weapon is fired");
-    minbj.value.max = 50.0;
-    minbj.value.min = 0.0;
+    minbj.value.max = 50.0f;
+    minbj.value.min = 0.0f;
     player_breath_gasp_scale = Dvar_RegisterFloat(
         "player_breath_gasp_scale",
-        4.5,
+        4.5f,
         minbj,
         0x180u,
         "Scale value to apply to the target waver during a gasp");
-    minbk.value.max = 50.0;
-    minbk.value.min = 0.0;
+    minbk.value.max = 50.0f;
+    minbk.value.min = 0.0f;
     player_breath_hold_lerp = Dvar_RegisterFloat(
         "player_breath_hold_lerp",
-        1.0,
+        1.0f,
         minbk,
         0x180u,
         "The interpolation rate for the target waver amplitude when holding breath");
-    minbl.value.max = 50.0;
-    minbl.value.min = 0.0;
+    minbl.value.max = 50.0f;
+    minbl.value.min = 0.0f;
     player_breath_gasp_lerp = Dvar_RegisterFloat(
         "player_breath_gasp_lerp",
-        6.0,
+        6.0f,
         minbl,
         0x180u,
         "The interpolation rate for the target waver amplitude when gasping");
-    minbm.value.max = 100.0;
-    minbm.value.min = 0.0;
+    minbm.value.max = 100.0f;
+    minbm.value.min = 0.0f;
     player_breath_snd_lerp = Dvar_RegisterFloat(
         "player_breath_snd_lerp",
-        2.0,
+        2.0f,
         minbm,
         0x180u,
         "The interpolation rate for the player hold breath sound");
-    minbn.value.max = 2.0;
-    minbn.value.min = 0.0;
+    minbn.value.max = 2.0f;
+    minbn.value.min = 0.0f;
     player_breath_snd_delay = Dvar_RegisterFloat(
         "player_breath_snd_delay",
-        1.0,
+        1.0f,
         minbn,
         0x180u,
         "The delay before playing the breathe in sound");
@@ -636,62 +636,62 @@ void __cdecl BG_RegisterDvars()
         (DvarLimits)0x3E800000000LL,
         0x180u,
         "Delay before exiting aim down sight");
-    minbo.value.max = 1.0;
-    minbo.value.min = 0.0;
+    minbo.value.max = 1.0f;
+    minbo.value.min = 0.0f;
     player_move_factor_on_torso = Dvar_RegisterFloat(
         "player_move_factor_on_torso",
-        0.0,
+        0.0f,
         minbo,
         0x80u,
         "The contribution movement direction has on player torso direction(multi-player only)");
     player_debugHealth = Dvar_RegisterBool("player_debugHealth", 0, 0x180u, "Turn on debugging info for player health");
     player_sustainAmmo = Dvar_RegisterBool("player_sustainAmmo", 0, 0x80u, "Firing weapon will not decrease clip ammo.");
-    minbp.value.max = 20.0;
-    minbp.value.min = 0.0000000099999999;
+    minbp.value.max = 20.0f;
+    minbp.value.min = 0.0000000099999999f;
     player_moveThreshhold = Dvar_RegisterFloat(
         "player_moveThreshhold",
-        10.0,
+        10.0f,
         minbp,
         0x1C0u,
         "The speed at which the player is considered to be moving for the purposes of \n"
         "view model bob and multiplayer model movement");
-    minbq.value.max = 50000.0;
-    minbq.value.min = 0.0;
+    minbq.value.max = 50000.0f;
+    minbq.value.min = 0.0f;
     player_footstepsThreshhold = Dvar_RegisterFloat(
         "player_footstepsThreshhold",
-        0.0,
+        0.0f,
         minbq,
         0x1C0u,
         "The minimum speed at which the player makes loud footstep noises");
-    minbr.value.max = 20.0;
-    minbr.value.min = 0.0;
+    minbr.value.max = 20.0f;
+    minbr.value.min = 0.0f;
     player_strafeSpeedScale = Dvar_RegisterFloat(
         "player_strafeSpeedScale",
-        0.80000001,
+        0.80000001f,
         minbr,
         0x180u,
         "The scale applied to the player speed when strafing");
-    minbs.value.max = 20.0;
-    minbs.value.min = 0.0;
+    minbs.value.max = 20.0f;
+    minbs.value.min = 0.0f;
     player_backSpeedScale = Dvar_RegisterFloat(
         "player_backSpeedScale",
-        0.69999999,
+        0.69999999f,
         minbs,
         0x180u,
         "The scale applied to the player speed when moving backwards");
-    minbt.value.max = 1.0;
-    minbt.value.min = 0.0;
+    minbt.value.max = 1.0f;
+    minbt.value.min = 0.0f;
     player_strafeAnimCosAngle = Dvar_RegisterFloat(
         "player_strafeAnimCosAngle",
-        0.5,
+        0.5f,
         minbt,
         0x180u,
         "Cosine of the angle which player starts using strafe animations");
-    minbu.value.max = 20.0;
-    minbu.value.min = 0.0;
+    minbu.value.max = 20.0f;
+    minbu.value.min = 0.0f;
     player_spectateSpeedScale = Dvar_RegisterFloat(
         "player_spectateSpeedScale",
-        1.0,
+        1.0f,
         minbu,
         0x180u,
         "The scale applied to the player speed when spectating");
@@ -701,51 +701,51 @@ void __cdecl BG_RegisterDvars()
         (DvarLimits)0xFF00000000LL,
         0x100u,
         "The minimum forward deflection required to maintain a sprint");
-    minbv.value.max = 5.0;
-    minbv.value.min = 0.0;
+    minbv.value.max = 5.0f;
+    minbv.value.min = 0.0f;
     player_sprintSpeedScale = Dvar_RegisterFloat(
         "player_sprintSpeedScale",
-        1.5,
+        1.5f,
         minbv,
         0x180u,
         "The scale applied to the player speed when sprinting");
-    minbw.value.max = 12.8;
-    minbw.value.min = 0.0;
+    minbw.value.max = 12.8f;
+    minbw.value.min = 0.0f;
     player_sprintTime = Dvar_RegisterFloat(
         "player_sprintTime",
-        4.0,
+        4.0f,
         minbw,
         0x180u,
         "The base length of time a player can sprint");
-    minbx.value.max = 12.8;
-    minbx.value.min = 0.0;
+    minbx.value.max = 12.8f;
+    minbx.value.min = 0.0f;
     player_sprintMinTime = Dvar_RegisterFloat(
         "player_sprintMinTime",
-        1.0,
+        1.0f,
         minbx,
         0x180u,
         "The minimum sprint time needed in order to start sprinting");
-    minby.value.max = 9000.0;
-    minby.value.min = 0.0;
+    minby.value.max = 9000.0f;
+    minby.value.min = 0.0f;
     player_sprintRechargePause = Dvar_RegisterFloat(
         "player_sprintRechargePause",
-        0.0,
+        0.0f,
         minby,
         0x180u,
         "The length of time the meter will pause before starting to recharge after a player sprints");
-    minbz.value.max = 5000.0;
-    minbz.value.min = 0.0;
+    minbz.value.max = 5000.0f;
+    minbz.value.min = 0.0f;
     player_sprintStrafeSpeedScale = Dvar_RegisterFloat(
         "player_sprintStrafeSpeedScale",
-        0.667,
+        0.667f,
         minbz,
         0x180u,
         "The speed at which you can strafe while sprinting");
-    minca.value.max = 2.0;
-    minca.value.min = 0.0;
+    minca.value.max = 2.0f;
+    minca.value.min = 0.0f;
     player_sprintCameraBob = Dvar_RegisterFloat(
         "player_sprintCameraBob",
-        0.5,
+        0.5f,
         minca,
         0x180u,
         "The speed the camera bobs while you sprint");
@@ -758,26 +758,26 @@ void __cdecl BG_RegisterDvars()
     animscript_debug = Dvar_RegisterBool("animscript_debug", 0, 0, "Turn on animscript debugging information");
     anim_debugSpeeds = Dvar_RegisterBool("anim_debugSpeeds", 0, 0, "Print out animation speed information");
     mincb.value.max = FLT_MAX;
-    mincb.value.min = 0.0;
+    mincb.value.min = 0.0f;
     player_dmgtimer_timePerPoint = Dvar_RegisterFloat(
         "player_dmgtimer_timePerPoint",
-        100.0,
+        100.0f,
         mincb,
         0x180u,
         "The time in milliseconds that the player is slowed down per point of damage");
     mincc.value.max = FLT_MAX;
-    mincc.value.min = 0.0;
+    mincc.value.min = 0.0f;
     player_dmgtimer_maxTime = Dvar_RegisterFloat(
         "player_dmgtimer_maxTime",
-        750.0,
+        750.0f,
         mincc,
         0x180u,
         "The maximum time that the player is slowed due to damage");
-    mincd.value.max = 1.0;
-    mincd.value.min = 0.0;
+    mincd.value.max = 1.0f;
+    mincd.value.min = 0.0f;
     player_dmgtimer_minScale = Dvar_RegisterFloat(
         "player_dmgtimer_minScale",
-        0.0,
+        0.0f,
         mincd,
         0x180u,
         "The minimum scale value to slow the player by when damaged");
@@ -811,92 +811,92 @@ void __cdecl BG_RegisterDvars()
         0,
         0x80u,
         "Shell shock screen effect type");
-    mince.value.max = 10.0;
-    mince.value.min = 0.001;
+    mince.value.max = 10.0f;
+    mince.value.min = 0.001f;
     bg_shock_screenBlurBlendTime = Dvar_RegisterFloat(
         "bg_shock_screenBlurBlendTime",
-        0.40000001,
+        0.40000001f,
         mince,
         0x80u,
         "The amount of time in seconds for the shellshock effect to blend");
-    mincf.value.max = 1000.0;
-    mincf.value.min = 0.001;
+    mincf.value.max = 1000.0f;
+    mincf.value.min = 0.001f;
     bg_shock_screenBlurBlendFadeTime = Dvar_RegisterFloat(
         "bg_shock_screenBlurBlendFadeTime",
-        1.0,
+        1.0f,
         mincf,
         0x80u,
         "The amount of time in seconds for the shellshock effect to fade");
-    mincg.value.max = 1000.0;
-    mincg.value.min = 0.0;
+    mincg.value.max = 1000.0f;
+    mincg.value.min = 0.0f;
     bg_shock_screenFlashWhiteFadeTime = Dvar_RegisterFloat(
         "bg_shock_screenFlashWhiteFadeTime",
-        1.0,
+        1.0f,
         mincg,
         0x80u,
         "In seconds, how soon from the end of the effect to start blending out the whiteout layer.");
-    minch.value.max = 1000.0;
-    minch.value.min = 0.0;
+    minch.value.max = 1000.0f;
+    minch.value.min = 0.0f;
     bg_shock_screenFlashShotFadeTime = Dvar_RegisterFloat(
         "bg_shock_screenFlashShotFadeTime",
-        1.0,
+        1.0f,
         minch,
         0x80u,
         "In seconds, how soon from the end of the effect to start blending out the screengrab layer.");
-    minci.value.max = 1000.0;
-    minci.value.min = 0.001;
+    minci.value.max = 1000.0f;
+    minci.value.min = 0.001f;
     bg_shock_viewKickPeriod = Dvar_RegisterFloat(
         "bg_shock_viewKickPeriod",
-        0.75,
+        0.75f,
         minci,
         0x80u,
         "The period of the shellshock view kick effect");
-    mincj.value.max = 1.0;
-    mincj.value.min = 0.0;
+    mincj.value.max = 1.0f;
+    mincj.value.min = 0.0f;
     bg_shock_viewKickRadius = Dvar_RegisterFloat(
         "bg_shock_viewKickRadius",
-        0.050000001,
+        0.050000001f,
         mincj,
         0x80u,
         "Shell shock kick radius");
-    minck.value.max = 1000.0;
-    minck.value.min = 0.001;
+    minck.value.max = 1000.0f;
+    minck.value.min = 0.001f;
     bg_shock_viewKickFadeTime = Dvar_RegisterFloat(
         "bg_shock_viewKickFadeTime",
-        3.0,
+        3.0f,
         minck,
         0x80u,
         "The time for the shellshock kick effect to fade");
     bg_shock_sound = Dvar_RegisterBool("bg_shock_sound", 1, 0x80u, "Play shell shock sound");
-    mincl.value.max = 1000.0;
-    mincl.value.min = 0.001;
+    mincl.value.max = 1000.0f;
+    mincl.value.min = 0.001f;
     bg_shock_soundFadeInTime = Dvar_RegisterFloat(
         "bg_shock_soundFadeInTime",
         0.25,
         mincl,
         0x80u,
         "Shell shock sound fade in time in seconds");
-    mincm.value.max = 1000.0;
-    mincm.value.min = 0.001;
+    mincm.value.max = 1000.0f;
+    mincm.value.min = 0.001f;
     bg_shock_soundFadeOutTime = Dvar_RegisterFloat(
         "bg_shock_soundFadeOutTime",
-        2.5,
+        2.5f,
         mincm,
         0x80u,
         "Shell shock sound fade out time in seconds");
-    mincn.value.max = 1000.0;
-    mincn.value.min = 0.001;
+    mincn.value.max = 1000.0f;
+    mincn.value.min = 0.001f;
     bg_shock_soundLoopFadeTime = Dvar_RegisterFloat(
         "bg_shock_soundLoopFadeTime",
-        1.5,
+        1.5f,
         mincn,
         0x80u,
         "Shell shock sound loop fade time in seconds");
-    minco.value.max = 1000.0;
-    minco.value.min = -10.0;
+    minco.value.max = 1000.0f;
+    minco.value.min = -10.0f;
     bg_shock_soundLoopEndDelay = Dvar_RegisterFloat(
         "bg_shock_soundLoopEndDelay",
-        -3.0,
+        -3.0f,
         minco,
         0x80u,
         "Sound loop end offset time from the end of the shellshock in seconds");
@@ -906,61 +906,61 @@ void __cdecl BG_RegisterDvars()
         0,
         0x80u,
         "Shell shock sound room type");
-    mincp.value.max = 1.0;
-    mincp.value.min = 0.0;
+    mincp.value.max = 1.0f;
+    mincp.value.min = 0.0f;
     bg_shock_soundDryLevel = Dvar_RegisterFloat(
         "bg_shock_soundDryLevel",
-        1.0,
+        1.0f,
         mincp,
         0x80u,
         "Shell shock sound dry level");
-    mincq.value.max = 1.0;
-    mincq.value.min = 0.0;
+    mincq.value.max = 1.0f;
+    mincq.value.min = 0.0f;
     bg_shock_soundWetLevel = Dvar_RegisterFloat(
         "bg_shock_soundWetLevel",
-        0.5,
+        0.5f,
         mincq,
         0x80u,
         "Shell shock sound wet level");
-    mincr.value.max = 1000.0;
-    mincr.value.min = -1000.0;
+    mincr.value.max = 1000.0f;
+    mincr.value.min = -1000.0f;
     bg_shock_soundModEndDelay = Dvar_RegisterFloat(
         "bg_shock_soundModEndDelay",
-        2.0,
+        2.0f,
         mincr,
         0x80u,
         "The delay from the end of the shell shock to the end of the sound modification");
     BG_RegisterShockVolumeDvars();
     bg_shock_lookControl = Dvar_RegisterBool("bg_shock_lookControl", 1, 0x80u, "Alter player control during shellshock");
     mincs.value.max = FLT_MAX;
-    mincs.value.min = 0.0;
+    mincs.value.min = 0.0f;
     bg_shock_lookControl_maxpitchspeed = Dvar_RegisterFloat(
         "bg_shock_lookControl_maxpitchspeed",
-        90.0,
+        90.0f,
         mincs,
         0x80u,
         "Maximum pitch movement rate while shellshocked in degrees per second");
     minct.value.max = FLT_MAX;
-    minct.value.min = 0.0;
+    minct.value.min = 0.0f;
     bg_shock_lookControl_maxyawspeed = Dvar_RegisterFloat(
         "bg_shock_lookControl_maxyawspeed",
-        90.0,
+        90.0f,
         minct,
         0x80u,
         "Maximum yaw movement rate while shell shocked in degrees per second");
-    mincu.value.max = 2.0;
-    mincu.value.min = 0.0;
+    mincu.value.max = 2.0f;
+    mincu.value.min = 0.0f;
     bg_shock_lookControl_mousesensitivityscale = Dvar_RegisterFloat(
         "bg_shock_lookControl_mousesensitivityscale",
-        0.5,
+        0.5f,
         mincu,
         0x80u,
         "Sensitivity scale to apply to a shellshocked player");
-    mincv.value.max = 1000.0;
-    mincv.value.min = 0.001;
+    mincv.value.max = 1000.0f;
+    mincv.value.min = 0.001f;
     bg_shock_lookControl_fadeTime = Dvar_RegisterFloat(
         "bg_shock_lookControl_fadeTime",
-        2.0,
+        2.0f,
         mincv,
         0x80u,
         "The time for the shellshock player control to fade in seconds");
@@ -969,51 +969,51 @@ void __cdecl BG_RegisterDvars()
         1,
         0x80u,
         "Affect player's movement speed duringi shellshock");
-    mincw.value.max = 1000.0;
-    mincw.value.min = 0.0;
+    mincw.value.max = 1000.0f;
+    mincw.value.min = 0.0f;
     player_meleeRange = Dvar_RegisterFloat(
         "player_meleeRange",
-        64.0,
+        64.0f,
         mincw,
         0x80u,
         "The maximum range of the player's mellee attack");
-    mincx.value.max = 1000.0;
-    mincx.value.min = 0.0;
+    mincx.value.max = 1000.0f;
+    mincx.value.min = 0.0f;
     player_meleeWidth = Dvar_RegisterFloat(
         "player_meleeWidth",
-        10.0,
+        10.0f,
         mincx,
         0x80u,
         "The width of the player's melee attack");
-    mincy.value.max = 1000.0;
-    mincy.value.min = 0.0;
+    mincy.value.max = 1000.0f;
+    mincy.value.min = 0.0f;
     player_meleeHeight = Dvar_RegisterFloat(
         "player_meleeHeight",
-        10.0,
+        10.0f,
         mincy,
         0x80u,
         "The height of the player's melee attack");
-    mincz.value.max = 5000.0;
-    mincz.value.min = 1.0;
+    mincz.value.max = 5000.0f;
+    mincz.value.min = 1.0f;
     player_meleeChargeFriction = Dvar_RegisterFloat(
         "player_meleeChargeFriction",
-        1200.0,
+        1200.0f,
         mincz,
         0x80u,
         "Friction used during melee charge");
-    minda.value.max = 60.0;
-    minda.value.min = 0.0;
+    minda.value.max = 60.0f;
+    minda.value.min = 0.0f;
     player_burstFireCooldown = Dvar_RegisterFloat(
         "player_burstFireCooldown",
-        0.2,
+        0.2f,
         minda,
         0x80u,
         "Seconds after a burst fire before weapons can be fired again.");
-    mindb.value.max = 1024.0;
-    mindb.value.min = 0.0;
+    mindb.value.max = 1024.0f;
+    mindb.value.min = 0.0f;
     bullet_penetrationMinFxDist = Dvar_RegisterFloat(
         "bullet_penetrationMinFxDist",
-        30.0,
+        30.0f,
         mindb,
         0x80u,
         "Min distance a penetrated bullet must travel before it'll trigger the effects");
@@ -2086,11 +2086,11 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
     parms->screenBlend.type = (ShockViewTypes)bg_shock_screenType->current.integer;
     parms->view.fadeTime = 3000;
     value = bg_shock_viewKickPeriod->current.value;
-    v6 = 0.001 - value;
-    if (v6 < 0.0)
+    v6 = 0.001f - value;
+    if (v6 < 0.0f)
         v5 = value;
     else
-        v5 = 0.001;
+        v5 = 0.001f;
     parms->view.kickRate = EQUAL_EPSILON / v5;
     parms->view.kickRadius = bg_shock_viewKickRadius->current.value;
     parms->sound.affect = bg_shock_sound->current.enabled;
