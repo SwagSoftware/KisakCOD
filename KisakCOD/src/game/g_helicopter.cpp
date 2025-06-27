@@ -87,17 +87,17 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
             "%s",
             "!IS_NAN((phys->angles)[0]) && !IS_NAN((phys->angles)[1]) && !IS_NAN((phys->angles)[2])");
     }
-    yawAngles[0] = 0.0;
+    yawAngles[0] = 0.0f;
     yawAngles[1] = veh->phys.angles[1];
-    yawAngles[2] = 0.0;
+    yawAngles[2] = 0.0f;
     AngleVectors(yawAngles, axis[0], axis[1], axis[2]);
-    axis[3][0] = 0.0;
-    axis[3][1] = 0.0;
-    axis[3][2] = 0.0;
+    axis[3][0] = 0.0f;
+    axis[3][1] = 0.0f;
+    axis[3][2] = 0.0f;
     MatrixTransformVector(bodyAccel, *(const mat3x3*)axis, worldAccel);
     if (vehHelicopterSoftCollisions->current.enabled)
         HELI_SoftenCollisions(ent, worldAccel);
-    Vec3Mad(veh->phys.vel, 0.050000001, worldAccel, veh->phys.vel);
+    Vec3Mad(veh->phys.vel, 0.050000001f, worldAccel, veh->phys.vel);
     if (0.0 != veh->phys.vel[0] || 0.0 != veh->phys.vel[1] || 0.0 != veh->phys.vel[2])
     {
         startVel[0] = veh->phys.vel[0];
@@ -111,7 +111,7 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
         bumped = v1;
         if (v1)
         {
-            Vec3Mad(startPos, 0.050000001, startVel, collision);
+            Vec3Mad(startPos, 0.050000001f, startVel, collision);
             Vec3Sub(phys->origin, collision, collision);
             if (Vec3Normalize(collision) > 0.0)
             {
@@ -124,17 +124,17 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
     VEH_CheckForPredictedCrash(ent);
     MatrixTransposeTransformVector43(veh->phys.vel, axis, veh->phys.bodyVel);
     veh->speed = Vec3Length(veh->phys.vel);
-    if (veh->speed < 0.0)
+    if (veh->speed < 0.0f)
         MyAssertHandler(".\\game\\g_helicopter.cpp", 622, 0, "%s", "veh->speed >= 0.0f");
     if (move[2] > 0)
     {
-        veh->idleSndLerp = DiffTrack(0.0, veh->idleSndLerp, 4.0, 0.050000001);
-        veh->engineSndLerp = DiffTrack(1.0, veh->engineSndLerp, 4.0, 0.050000001);
+        veh->idleSndLerp = DiffTrack(0.0, veh->idleSndLerp, 4.0f, 0.050000001f);
+        veh->engineSndLerp = DiffTrack(1.0, veh->engineSndLerp, 4.0f, 0.050000001f);
     }
     else
     {
-        veh->idleSndLerp = DiffTrack(1.0, veh->idleSndLerp, 4.0, 0.050000001);
-        veh->engineSndLerp = DiffTrack(0.0, veh->engineSndLerp, 4.0, 0.050000001);
+        veh->idleSndLerp = DiffTrack(1.0, veh->idleSndLerp, 4.0f, 0.050000001f);
+        veh->engineSndLerp = DiffTrack(0.0, veh->engineSndLerp, 4.0f, 0.050000001f);
     }
 }
 
@@ -295,18 +295,18 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
     for (axis = 0; axis < 2; ++axis)
     {
         rate = decel[axis] * track[axis];
-        nextState = DiffTrack(0.0, velOrthogonal[axis], rate, 0.050000001);
-        newDecel[axis] = (nextState - velOrthogonal[axis]) / 0.05000000074505806;
-        if (speedParallel >= (double)tgtSpeed)
+        nextState = DiffTrack(0.0, velOrthogonal[axis], rate, 0.050000001f);
+        newDecel[axis] = (nextState - velOrthogonal[axis]) / 0.05000000074505806f;
+        if (speedParallel >= tgtSpeed)
         {
             v32 = decel[axis] * track[axis];
-            nextState = DiffTrack(tgtVel[axis], velParallel[axis], v32, 0.050000001);
-            newDecel[axis] = (nextState - velParallel[axis]) / 0.05000000074505806 + newDecel[axis];
+            nextState = DiffTrack(tgtVel[axis], velParallel[axis], v32, 0.050000001f);
+            newDecel[axis] = (nextState - velParallel[axis]) / 0.05000000074505806f + newDecel[axis];
         }
         else
         {
-            nextState = DiffTrack(tgtVel[axis], velParallel[axis], track[axis], 0.050000001);
-            newAccel[axis] = (nextState - velParallel[axis]) / 0.05000000074505806 + newAccel[axis];
+            nextState = DiffTrack(tgtVel[axis], velParallel[axis], track[axis], 0.050000001f);
+            newAccel[axis] = (nextState - velParallel[axis]) / 0.05000000074505806f + newAccel[axis];
         }
         bodyAccel[axis] = newDecel[axis] + newAccel[axis];
         v60 = bodyAccel[axis];
@@ -352,8 +352,8 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
             v23 = -maxAccel[axis];
         newAccel[axis] = v23;
     }
-    nextState = DiffTrack(tgtVel[2], phys->bodyVel[2], track[2], 0.050000001);
-    bodyAccel[2] = (nextState - phys->bodyVel[2]) / 0.05000000074505806;
+    nextState = DiffTrack(tgtVel[2], phys->bodyVel[2], track[2], 0.050000001f);
+    bodyAccel[2] = (nextState - phys->bodyVel[2]) / 0.05000000074505806f;
     v49 = bodyAccel[2];
     v22 = v49 - maxAccel[2];
     if (v22 < 0.0)
@@ -362,81 +362,81 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
         v51 = maxAccel[2];
     v50 = -maxAccel[2];
     v21 = v50 - v49;
-    if (v21 < 0.0)
+    if (v21 < 0.0f)
         v20 = v51;
     else
         v20 = -maxAccel[2];
     bodyAccel[2] = v20;
-    if (vehHelicopterMaxYawRate->current.value <= 0.0)
+    if (vehHelicopterMaxYawRate->current.value <= 0.0f)
         MyAssertHandler(".\\game\\g_helicopter.cpp", 209, 0, "%s", "vehHelicopterMaxYawRate->current.value > 0.0f");
     track[3] = vehHelicopterMaxYawAccel->current.value / vehHelicopterMaxYawRate->current.value;
     tgtYawVel = vehHelicopterMaxYawRate->current.value * controllerFrac[3];
     tgtYawVel = tgtYawVel - controllerFrac[0] * controllerFrac[1] * vehHelicopterYawOnLeftStick->current.value;
     v47 = vehHelicopterMaxYawRate->current.value;
     v19 = tgtYawVel - v47;
-    if (v19 < 0.0)
+    if (v19 < 0.0f)
         v48 = tgtYawVel;
     else
         v48 = v47;
     v46 = -vehHelicopterMaxYawRate->current.value;
     v18 = v46 - tgtYawVel;
-    if (v18 < 0.0)
+    if (v18 < 0.0f)
         tgt = v48;
     else
         tgt = -vehHelicopterMaxYawRate->current.value;
     tgtYawVel = tgt;
-    nextState = DiffTrack(tgt, phys->rotVel[1], track[3], 0.050000001);
-    rotAccel[1] = (nextState - phys->rotVel[1]) / 0.05000000074505806;
+    nextState = DiffTrack(tgt, phys->rotVel[1], track[3], 0.050000001f);
+    rotAccel[1] = (nextState - phys->rotVel[1]) / 0.05000000074505806f;
     v42 = rotAccel[1];
     v44 = vehHelicopterMaxYawAccel->current.value;
     v16 = v42 - v44;
-    if (v16 < 0.0)
+    if (v16 < 0.0f)
         v45 = v42;
     else
         v45 = v44;
     v43 = -vehHelicopterMaxYawAccel->current.value;
     v15 = v43 - v42;
-    if (v15 < 0.0)
+    if (v15 < 0.0f)
         v14 = v45;
     else
         v14 = -vehHelicopterMaxYawAccel->current.value;
     rotAccel[1] = v14;
     for (axis = 0; axis < 2; ++axis)
     {
-        if (maxSpeed[axis] <= 0.0)
+        if (maxSpeed[axis] <= 0.0f)
         {
-            if (vehHelicopterMaxSpeed->current.value <= 0.0)
+            if (vehHelicopterMaxSpeed->current.value <= 0.0f)
                 MyAssertHandler(".\\game\\g_helicopter.cpp", 227, 0, "%s", "vehHelicopterMaxSpeed->current.value > 0.0f");
-            maxSpeed[axis] = 17.6 * vehHelicopterMaxSpeed->current.value;
+            maxSpeed[axis] = 17.6f * vehHelicopterMaxSpeed->current.value;
         }
-        if (maxAccel[axis] <= 0.0)
+        if (maxAccel[axis] <= 0.0f)
         {
-            if (vehHelicopterMaxAccel->current.value <= 0.0)
+            if (vehHelicopterMaxAccel->current.value <= 0.0f)
                 MyAssertHandler(".\\game\\g_helicopter.cpp", 232, 0, "%s", "vehHelicopterMaxAccel->current.value > 0.0f");
-            maxAccel[axis] = 17.6 * vehHelicopterMaxAccel->current.value;
+            maxAccel[axis] = 17.6f * vehHelicopterMaxAccel->current.value;
         }
     }
-    yawAngles[0] = 0.0;
+    yawAngles[0] = 0.0f;
     yawAngles[1] = phys->angles[1];
-    yawAngles[2] = 0.0;
+    yawAngles[2] = 0.0f;
     AngleVectors(yawAngles, bodyMat[0], bodyMat[1], bodyMat[2]);
-    bodyMat[3][0] = 0.0;
-    bodyMat[3][1] = 0.0;
-    bodyMat[3][2] = 0.0;
+    bodyMat[3][0] = 0.0f;
+    bodyMat[3][1] = 0.0f;
+    bodyMat[3][2] = 0.0f;
     targetTilt[0] = phys->bodyVel[0] / maxSpeed[0] * vehHelicopterTiltFromVelocity->current.value;
     targetTilt[0] = tgtVel[0] / maxSpeed[0] * vehHelicopterTiltFromControllerAxes->current.value + targetTilt[0];
     targetTilt[0] = newAccel[0] / maxAccel[0] * vehHelicopterTiltFromAcceleration->current.value + targetTilt[0];
     targetTilt[0] = newDecel[0] / maxAccel[0] * vehHelicopterTiltFromDeceleration->current.value + targetTilt[0];
-    v13 = targetTilt[0] - 1.0;
-    if (v13 < 0.0)
+    v13 = targetTilt[0] - 1.0f;
+    if (v13 < 0.0f)
         v41 = targetTilt[0];
     else
-        v41 = 1.0;
-    v12 = -1.0 - targetTilt[0];
-    if (v12 < 0.0)
+        v41 = 1.0f;
+    v12 = -1.0f - targetTilt[0];
+    if (v12 < 0.0f)
         v11 = v41;
     else
-        v11 = -1.0;
+        v11 = -1.0f;
     targetTilt[0] = v11;
     targetTilt[1] = phys->bodyVel[1] / maxSpeed[1] * vehHelicopterTiltFromVelocity->current.value;
     targetTilt[1] = tgtVel[1] / maxSpeed[1] * vehHelicopterTiltFromControllerAxes->current.value + targetTilt[1];
@@ -447,16 +447,16 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
         v10 = fabs(phys->rotVel[1]);
         if (v10 > 0.0)
         {
-            if (maxSpeed[0] <= 0.0)
+            if (maxSpeed[0] <= 0.0f)
                 MyAssertHandler(".\\game\\g_helicopter.cpp", 259, 0, "%s", "maxSpeed[0] > 0");
             velScale = phys->bodyVel[0] / maxSpeed[0];
             if (vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt->current.value <= (double)velScale)
             {
-                velScalea = 1.0;
+                velScalea = 1.0f;
             }
             else
             {
-                if (vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt->current.value <= 0.0)
+                if (vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt->current.value <= 0.0f)
                     MyAssertHandler(
                         ".\\game\\g_helicopter.cpp",
                         263,
@@ -471,57 +471,57 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
             targetTilt[1] = vehHelicopterTiltFromFwdAndYaw->current.value * velScalea * yawScale + targetTilt[1];
         }
     }
-    v9 = targetTilt[1] - 1.0;
-    if (v9 < 0.0)
+    v9 = targetTilt[1] - 1.0f;
+    if (v9 < 0.0f)
         v40 = targetTilt[1];
     else
-        v40 = 1.0;
-    v8 = -1.0 - targetTilt[1];
-    if (v8 < 0.0)
+        v40 = 1.0f;
+    v8 = -1.0f - targetTilt[1];
+    if (v8 < 0.0f)
         v7 = v40;
     else
-        v7 = -1.0;
+        v7 = -1.0f;
     targetTilt[1] = v7;
-    targetTilt[2] = 0.0;
+    targetTilt[2] = 0.0f;
     MatrixTransformVector(targetTilt, *(const mat3x3*)bodyMat, worldTargetTilt);
     deltaTilt[0] = worldTargetTilt[0] - phys->worldTilt[0];
     deltaTilt[1] = worldTargetTilt[1] - phys->worldTilt[1];
-    if (vehHelicopterTiltMomentum->current.value == 0.0)
+    if (vehHelicopterTiltMomentum->current.value == 0.0f)
         MyAssertHandler(".\\game\\g_helicopter.cpp", 281, 0, "%s", "vehHelicopterTiltMomentum->current.value");
     v39 = vehHelicopterTiltSpeed->current.value / vehHelicopterTiltMomentum->current.value;
     tiltAccel[0] = v39 * deltaTilt[0];
     tiltAccel[1] = v39 * deltaTilt[1];
-    v38 = -1.0 / vehHelicopterTiltMomentum->current.value;
+    v38 = -1.0f / vehHelicopterTiltMomentum->current.value;
     tiltAccel[0] = v38 * phys->worldTiltVel[0] + tiltAccel[0];
     tiltAccel[1] = v38 * phys->worldTiltVel[1] + tiltAccel[1];
     oldTiltVel[0] = phys->worldTiltVel[0];
     oldTiltVel[1] = phys->worldTiltVel[1];
     worldTiltVel = phys->worldTiltVel;
     v37 = phys->worldTiltVel;
-    phys->worldTiltVel[0] = 0.050000001 * tiltAccel[0] + phys->worldTiltVel[0];
-    worldTiltVel[1] = 0.050000001 * tiltAccel[1] + v37[1];
+    phys->worldTiltVel[0] = 0.050000001f * tiltAccel[0] + phys->worldTiltVel[0];
+    worldTiltVel[1] = 0.050000001f * tiltAccel[1] + v37[1];
     oldTiltVel[0] = (oldTiltVel[0] + phys->worldTiltVel[0]) * 0.5;
     oldTiltVel[1] = (oldTiltVel[1] + phys->worldTiltVel[1]) * 0.5;
     worldTilt = phys->worldTilt;
     v35 = phys->worldTilt;
-    phys->worldTilt[0] = 0.050000001 * oldTiltVel[0] + phys->worldTilt[0];
-    worldTilt[1] = 0.050000001 * oldTiltVel[1] + v35[1];
+    phys->worldTilt[0] = 0.050000001f * oldTiltVel[0] + phys->worldTilt[0];
+    worldTilt[1] = 0.050000001f * oldTiltVel[1] + v35[1];
     for (axis = 0; axis < 2; ++axis)
     {
-        if (phys->worldTilt[axis] <= 1.0)
+        if (phys->worldTilt[axis] <= 1.0f)
         {
-            if (phys->worldTilt[axis] < -1.0)
+            if (phys->worldTilt[axis] < -1.0f)
             {
-                phys->worldTilt[axis] = -1.0;
-                if (phys->worldTiltVel[axis] < 0.0)
-                    phys->worldTiltVel[axis] = 0.0;
+                phys->worldTilt[axis] = -1.0f;
+                if (phys->worldTiltVel[axis] < 0.0f)
+                    phys->worldTiltVel[axis] = 0.0f;
             }
         }
         else
         {
-            phys->worldTilt[axis] = 1.0;
-            if (phys->worldTiltVel[axis] > 0.0)
-                phys->worldTiltVel[axis] = 0.0;
+            phys->worldTilt[axis] = 1.0f;
+            if (phys->worldTiltVel[axis] > 0.0f)
+                phys->worldTiltVel[axis] = 0.0f;
         }
     }
     MatrixTransposeTransformVector43(phys->worldTilt, bodyMat, targetTilt);
@@ -529,7 +529,7 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
     rotAccel[2] = targetTilt[1] * vehHelicopterMaxRoll->current.value;
     speedSq = phys->bodyVel[1] * phys->bodyVel[1] + phys->bodyVel[0] * phys->bodyVel[0];
     v6 = vehHelicopterHoverSpeedThreshold->current.value * vehHelicopterHoverSpeedThreshold->current.value;
-    if (speedSq < (double)v6)
+    if (speedSq < (float)v6)
     {
         if (vehHelicopterHoverSpeedThreshold->current.value <= 0.0)
             MyAssertHandler(".\\game\\g_helicopter.cpp", 316, 0, "%s", "vehHelicopterHoverSpeedThreshold->current.value > 0");
@@ -583,7 +583,7 @@ void __cdecl HELI_CmdScale(char *move, float *outFracs)
     if (!outFracs)
         MyAssertHandler(".\\game\\g_helicopter.cpp", 20, 0, "%s", "outFracs");
     for (axis = 0; axis < 4; ++axis)
-        outFracs[axis] = (double)move[axis] / 127.0;
+        outFracs[axis] = (float)move[axis] / 127.0f;
     if (*move || move[1])
     {
         v8 = (float)(move[1] * move[1] + *move * *move);
@@ -593,12 +593,12 @@ void __cdecl HELI_CmdScale(char *move, float *outFracs)
             max = abs8(move[1]);
         if (max)
         {
-            scale = (double)max / v7;
+            scale = (float)max / v7;
             *outFracs = scale * *outFracs;
             outFracs[1] = scale * outFracs[1];
         }
         v6 = fabs(outFracs[1]);
-        if (vehHelicopterStrafeDeadzone->current.value > (double)v6)
+        if (vehHelicopterStrafeDeadzone->current.value > (float)v6)
             outFracs[1] = 0.0;
         if (vehHelicopterScaleMovement->current.enabled)
         {
@@ -608,24 +608,24 @@ void __cdecl HELI_CmdScale(char *move, float *outFracs)
                 MyAssertHandler(".\\game\\g_helicopter.cpp", 49, 0, "%s", "absAxis[0] <= 1.0f");
             if (v4 > 1.0)
                 MyAssertHandler(".\\game\\g_helicopter.cpp", 50, 0, "%s", "absAxis[1] <= 1.0f");
-            if (v4 >= (double)v5)
+            if (v4 >= (float)v5)
             {
-                scaleb = 1.0 - (v4 - v5);
+                scaleb = 1.0f - (v4 - v5);
                 *outFracs = *outFracs * scaleb;
             }
             else
             {
-                scalea = 1.0 - (v5 - v4);
+                scalea = 1.0f - (v5 - v4);
                 outFracs[1] = outFracs[1] * scalea;
             }
         }
     }
     v3 = fabs(outFracs[2]);
-    if (vehHelicopterRightStickDeadzone->current.value > (double)v3)
-        outFracs[2] = 0.0;
+    if (vehHelicopterRightStickDeadzone->current.value > (float)v3)
+        outFracs[2] = 0.0f;
     v2 = fabs(outFracs[3]);
-    if (vehHelicopterRightStickDeadzone->current.value > (double)v2)
-        outFracs[3] = 0.0;
+    if (vehHelicopterRightStickDeadzone->current.value > (float)v2)
+        outFracs[3] = 0.0f;
 }
 
 void __cdecl HELI_UpdateJitter(VehicleJitter *jitter)
@@ -668,7 +668,7 @@ void __cdecl HELI_UpdateJitter(VehicleJitter *jitter)
                 jitter->jitterAccel[i],
                 jitter->jitterPos[i],
                 vehHelicopterJitterJerkyness->current.value,
-                0.050000001);
+                0.050000001f);
             jitter->jitterPos[i] = v2;
         }
     }
@@ -696,14 +696,14 @@ void __cdecl HELI_SoftenCollisions(gentity_s *ent, float *worldAccel)
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game\\g_helicopter.cpp", 401, 0, "%s", "ent->scr_vehicle");
     veh = ent->scr_vehicle;
-    if (veh->phys.vel[0] != 0.0 || veh->phys.vel[1] != 0.0 || veh->phys.vel[2] != 0.0)
+    if (veh->phys.vel[0] != 0.0f || veh->phys.vel[1] != 0.0f || veh->phys.vel[2] != 0.0f)
     {
         oldVel[0] = veh->phys.vel[0];
         oldVel[1] = veh->phys.vel[1];
         oldVel[2] = veh->phys.vel[2];
-        scale = vehHelicopterLookaheadTime->current.value / 0.05000000074505806;
+        scale = vehHelicopterLookaheadTime->current.value / 0.05000000074505806f;
         Vec3Scale(veh->phys.vel, scale, veh->phys.vel);
-        Vec3Mad(veh->phys.origin, 0.050000001, veh->phys.vel, targetPos);
+        Vec3Mad(veh->phys.origin, 0.050000001f, veh->phys.vel, targetPos);
         clipped = VEH_TestSlideMove(ent, clippedPos);
         veh->phys.vel[0] = oldVel[0];
         veh->phys.vel[1] = oldVel[1];
@@ -712,22 +712,22 @@ void __cdecl HELI_SoftenCollisions(gentity_s *ent, float *worldAccel)
         {
             Vec3Sub(targetPos, clippedPos, error);
             errorMagSqr = Vec3LengthSq(error);
-            if (errorMagSqr >= 1.0)
+            if (errorMagSqr >= 1.0f)
             {
                 v2 = Vec3Dot(worldAccel, error);
                 errorAccel = v2 / errorMagSqr;
-                if (errorAccel > 0.0)
+                if (errorAccel > 0.0f)
                 {
                     v3 = -errorAccel;
                     Vec3Mad(worldAccel, v3, error, worldAccel);
                 }
                 Vec3Sub(clippedPos, veh->phys.origin, wishVel);
-                if (vehHelicopterLookaheadTime->current.value <= 0.0)
+                if (vehHelicopterLookaheadTime->current.value <= 0.0f)
                     MyAssertHandler(".\\game\\g_helicopter.cpp", 434, 0, "%s", "vehHelicopterLookaheadTime->current.value > 0");
                 v4 = 1.0 / vehHelicopterLookaheadTime->current.value;
                 Vec3Scale(wishVel, v4, wishVel);
                 Vec3Sub(wishVel, veh->phys.vel, velChange);
-                Vec3Mad(worldAccel, 20.0, velChange, worldAccel);
+                Vec3Mad(worldAccel, 20.0f, velChange, worldAccel);
             }
         }
     }

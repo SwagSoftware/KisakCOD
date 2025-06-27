@@ -234,147 +234,147 @@ void __cdecl CG_ViewRegisterDvars()
         min,
         0x80u,
         "Helicopter kill camera distance from helicopter.");
-    mina.value.max = 160.0;
-    mina.value.min = 0.1;
+    mina.value.max = 160.0f;
+    mina.value.min = 0.1f;
     cg_heliKillCamFov = Dvar_RegisterFloat(
         "cg_heliKillCamFov",
-        15.0,
+        15.0f,
         mina,
         0x80u,
         "Helicopter kill camera field of view.");
     minb.value.max = FLT_MAX;
-    minb.value.min = 0.0;
+    minb.value.min = 0.0f;
     cg_heliKillCamZDist = Dvar_RegisterFloat(
         "cg_heliKillCamZDist",
-        50.0,
+        50.0f,
         minb,
         0x80u,
         "Helicopter kill camera distance above the helicopter.");
-    minc.value.max = 10.0;
-    minc.value.min = 4.0;
+    minc.value.max = 10.0f;
+    minc.value.min = 4.0f;
     cg_heliKillCamNearBlur = Dvar_RegisterFloat(
         "cg_heliKillCamNearBlur",
-        4.0,
+        4.0f,
         minc,
         0x80u,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
-    mind.value.max = 10.0;
-    mind.value.min = 0.0;
+    mind.value.max = 10.0f;
+    mind.value.min = 0.0f;
     cg_heliKillCamFarBlur = Dvar_RegisterFloat(
         "cg_heliKillCamFarBlur",
-        2.0,
+        2.0f,
         mind,
         0x80u,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
     mine.value.max = FLT_MAX;
-    mine.value.min = 0.0;
+    mine.value.min = 0.0f;
     cg_heliKillCamFarBlurStart = Dvar_RegisterFloat(
         "cg_heliKillCamFarBlurStart",
-        100.0,
+        100.0f,
         mine,
         0x80u,
         "Helicopter kill camera distance above the helicopter.");
     minf.value.max = FLT_MAX;
-    minf.value.min = 0.0;
+    minf.value.min = 0.0f;
     cg_heliKillCamFarBlurDist = Dvar_RegisterFloat(
         "cg_heliKillCamFarBlurDist",
-        300.0,
+        300.0f,
         minf,
         0x80u,
         "Helicopter kill camera distance above the helicopter.");
     ming.value.max = FLT_MAX;
-    ming.value.min = 0.0;
+    ming.value.min = 0.0f;
     cg_heliKillCamNearBlurStart = Dvar_RegisterFloat(
         "cg_heliKillCamNearBlurStart",
-        0.0,
+        0.0f,
         ming,
         0x80u,
         "Helicopter kill camera distance above the helicopter.");
-    minh.value.max = 10000.0;
-    minh.value.min = 0.0;
+    minh.value.max = 10000.0f;
+    minh.value.min = 0.0f;
     cg_heliKillCamNearBlurEnd = Dvar_RegisterFloat(
         "cg_heliKillCamNearBlurEnd",
-        100.0,
+        100.0f,
         minh,
         0x80u,
         "Helicopter kill camera distance above the helicopter.");
-    mini.value.max = 160.0;
-    mini.value.min = 0.1;
+    mini.value.max = 160.0f;
+    mini.value.min = 0.1f;
     cg_airstrikeKillCamFov = Dvar_RegisterFloat(
         "cg_airstrikeKillCamFov",
-        80.0,
+        80.0f,
         mini,
         0x80u,
         "Airstrike kill camera field of view.");
     minj.value.max = FLT_MAX;
-    minj.value.min = 0.0;
+    minj.value.min = 0.0f;
     cg_airstrikeKillCamDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamDist",
-        200.0,
+        200.0f,
         minj,
         0x80u,
         "Airstrike kill camera distance.");
     mink.value.max = FLT_MAX;
-    mink.value.min = 0.0;
+    mink.value.min = 0.0f;
     cg_airstrikeKillCamCloseXYDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamCloseXYDist",
-        24.0,
+        24.0f,
         mink,
         0x80u,
         "Airstrike kill camera closest distance in front of the bomb.");
     minl.value.max = FLT_MAX;
-    minl.value.min = 0.0;
+    minl.value.min = 0.0f;
     cg_airstrikeKillCamCloseZDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamCloseZDist",
-        24.0,
+        24.0f,
         minl,
         0x80u,
         "Airstrike kill camera closest distance above the target.");
-    minm.value.max = 10.0;
-    minm.value.min = 4.0;
+    minm.value.max = 10.0f;
+    minm.value.min = 4.0f;
     cg_airstrikeKillCamNearBlur = Dvar_RegisterFloat(
         "cg_airstrikeKillCamNearBlur",
-        4.0,
+        4.0f,
         minm,
         0x80u,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
-    minn.value.max = 10.0;
-    minn.value.min = 0.0;
+    minn.value.max = 10.0f;
+    minn.value.min = 0.0f;
     cg_airstrikeKillCamFarBlur = Dvar_RegisterFloat(
         "cg_airstrikeKillCamFarBlur",
-        2.0,
+        2.0f,
         minn,
         0x80u,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
     mino.value.max = FLT_MAX;
-    mino.value.min = 0.0;
+    mino.value.min = 0.0f;
     cg_airstrikeKillCamFarBlurStart = Dvar_RegisterFloat(
         "cg_airstrikeKillCamFarBlurStart",
-        100.0,
+        100.0f,
         mino,
         0x80u,
         "Airstrike kill camera distance above the airplane.");
     minp.value.max = FLT_MAX;
-    minp.value.min = 0.0;
+    minp.value.min = 0.0f;
     cg_airstrikeKillCamFarBlurDist = Dvar_RegisterFloat(
         "cg_airstrikeKillCamFarBlurDist",
-        300.0,
+        300.0f,
         minp,
         0x80u,
         "Airstrike kill camera distance above the airplane.");
     minq.value.max = FLT_MAX;
-    minq.value.min = 0.0;
+    minq.value.min = 0.0f;
     cg_airstrikeKillCamNearBlurStart = Dvar_RegisterFloat(
         "cg_airstrikeKillCamNearBlurStart",
-        0.0,
+        0.0f,
         minq,
         0x80u,
         "Airstrike kill camera distance above the airplane.");
-    minr.value.max = 10000.0;
-    minr.value.min = 0.0;
+    minr.value.max = 10000.0f;
+    minr.value.min = 0.0f;
     cg_airstrikeKillCamNearBlurEnd = Dvar_RegisterFloat(
         "cg_airstrikeKillCamNearBlurEnd",
-        100.0,
+        100.0f,
         minr,
         0x80u,
         "Airstrike kill camera distance above the airplane.");
@@ -1896,19 +1896,19 @@ void __cdecl CG_UpdateAdsDof(int localClientNum, GfxDepthOfField *dof)
             localClientNum);
     cgameGlob = cgArray;
     ps = &cgArray[0].predictedPlayerState;
-    if (cgArray[0].predictedPlayerState.fWeaponPosFrac == 0.0 && ps->pm_type < 7)
+    if (cgArray[0].predictedPlayerState.fWeaponPosFrac == 0.0f && ps->pm_type < 7)
     {
-        dof->nearStart = 0.0;
-        dof->nearEnd = 0.0;
-        dof->farStart = 5000.0;
-        dof->farEnd = 5000.0;
-        dof->nearBlur = 6.0;
-        dof->farBlur = 0.0;
+        dof->nearStart = 0.0f;
+        dof->nearEnd = 0.0f;
+        dof->farStart = 5000.0f;
+        dof->farEnd = 5000.0f;
+        dof->nearBlur = 6.0f;
+        dof->farBlur = 0.0f;
     }
     else
     {
-        nearEnd = 10000.0;
-        farStart = -1.0;
+        nearEnd = 10000.0f;
+        farStart = -1.0f;
         targetCount = AimAssist_GetScreenTargetCount(localClientNum);
         for (targetIndex = 0; targetIndex < targetCount; ++targetIndex)
         {
@@ -1916,38 +1916,38 @@ void __cdecl CG_UpdateAdsDof(int localClientNum, GfxDepthOfField *dof)
             cent = CG_GetEntity(localClientNum, ScreenTargetEntity);
             Vec3Sub(ps->origin, cent->pose.origin, diff);
             targetDist = Vec3Length(diff);
-            if (nearEnd > targetDist - 30.0)
-                nearEnd = targetDist - 30.0;
-            if (farStart < targetDist + 30.0)
-                farStart = targetDist + 30.0;
+            if (nearEnd > targetDist - 30.0f)
+                nearEnd = targetDist - 30.0f;
+            if (farStart < targetDist + 30.0f)
+                farStart = targetDist + 30.0f;
         }
-        if (farStart >= (double)nearEnd)
+        if (farStart >= (float)nearEnd)
         {
-            if (nearEnd >= 50.0)
+            if (nearEnd >= 50.0f)
             {
-                if (nearEnd > 512.0)
-                    nearEnd = 512.0;
+                if (nearEnd > 512.0f)
+                    nearEnd = 512.0f;
             }
             else
             {
-                nearEnd = 50.0;
+                nearEnd = 50.0f;
             }
-            if (farStart <= 2500.0)
+            if (farStart <= 2500.0f)
             {
-                if (farStart < 1000.0)
-                    farStart = 1000.0;
+                if (farStart < 1000.0f)
+                    farStart = 1000.0f;
             }
             else
             {
-                farStart = 2500.0;
+                farStart = 2500.0f;
             }
         }
         else
         {
-            nearEnd = 256.0;
-            farStart = 2500.0;
+            nearEnd = 256.0f;
+            farStart = 2500.0f;
         }
-        Vec3Mad(cgameGlob->refdef.vieworg, 8192.0, cgameGlob->refdef.viewaxis[0], traceEnd);
+        Vec3Mad(cgameGlob->refdef.vieworg, 8192.0f, cgameGlob->refdef.viewaxis[0], traceEnd);
         CG_TraceCapsule(
             &trace,
             cgameGlob->refdef.vieworg,
@@ -1959,34 +1959,34 @@ void __cdecl CG_UpdateAdsDof(int localClientNum, GfxDepthOfField *dof)
         Vec3Lerp(cgameGlob->refdef.vieworg, traceEnd, trace.fraction, traceEnd);
         Vec3Sub(traceEnd, cgameGlob->refdef.vieworg, v);
         traceDist = Vec3Length(v);
-        if (traceDist < (double)nearEnd)
-            nearEnd = traceDist - 30.0;
-        if (nearEnd < 1.0)
-            nearEnd = 1.0;
-        if (traceDist > (double)farStart)
+        if (traceDist < (float)nearEnd)
+            nearEnd = traceDist - 30.0f;
+        if (nearEnd < 1.0f)
+            nearEnd = 1.0f;
+        if (traceDist > (float)farStart)
             farStart = traceDist;
-        nearStart = 1.0;
-        farEnd = farStart * 4.0;
-        nearBlur = 6.0;
-        farBlur = 0.0;
-        dt = (double)cgameGlob->frametime * EQUAL_EPSILON;
+        nearStart = 1.0f;
+        farEnd = farStart * 4.0f;
+        nearBlur = 6.0f;
+        farBlur = 0.0f;
+        dt = (float)cgameGlob->frametime * EQUAL_EPSILON;
         if (ps->fWeaponPosFrac == 1.0 || ps->pm_type >= 7)
         {
-            dof->nearStart = CG_UpdateAdsDofValue(dof->nearStart, nearStart, 50.0, dt);
-            dof->nearEnd = CG_UpdateAdsDofValue(dof->nearEnd, nearEnd, 50.0, dt);
-            dof->farStart = CG_UpdateAdsDofValue(dof->farStart, farStart, 400.0, dt);
-            dof->farEnd = CG_UpdateAdsDofValue(dof->farEnd, farEnd, 400.0, dt);
-            dof->nearBlur = CG_UpdateAdsDofValue(dof->nearBlur, nearBlur, 0.1, dt);
-            dof->farBlur = CG_UpdateAdsDofValue(dof->farBlur, farBlur, 0.1, dt);
+            dof->nearStart = CG_UpdateAdsDofValue(dof->nearStart, nearStart, 50.0f, dt);
+            dof->nearEnd = CG_UpdateAdsDofValue(dof->nearEnd, nearEnd, 50.0f, dt);
+            dof->farStart = CG_UpdateAdsDofValue(dof->farStart, farStart, 400.0f, dt);
+            dof->farEnd = CG_UpdateAdsDofValue(dof->farEnd, farEnd, 400.0f, dt);
+            dof->nearBlur = CG_UpdateAdsDofValue(dof->nearBlur, nearBlur, 0.1f, dt);
+            dof->farBlur = CG_UpdateAdsDofValue(dof->farBlur, farBlur, 0.1f, dt);
         }
         else
         {
-            dof->nearStart = ps->fWeaponPosFrac * nearStart + (1.0 - ps->fWeaponPosFrac) * 0.0;
-            dof->nearEnd = ps->fWeaponPosFrac * nearEnd + (1.0 - ps->fWeaponPosFrac) * 0.0;
-            dof->farStart = ps->fWeaponPosFrac * farStart + (1.0 - ps->fWeaponPosFrac) * 5000.0;
-            dof->farEnd = ps->fWeaponPosFrac * farEnd + (1.0 - ps->fWeaponPosFrac) * 5000.0;
-            dof->nearBlur = ps->fWeaponPosFrac * nearBlur + (1.0 - ps->fWeaponPosFrac) * 6.0;
-            dof->farBlur = ps->fWeaponPosFrac * farBlur + (1.0 - ps->fWeaponPosFrac) * 0.0;
+            dof->nearStart = ps->fWeaponPosFrac * nearStart + (1.0f - ps->fWeaponPosFrac) * 0.0f;
+            dof->nearEnd = ps->fWeaponPosFrac * nearEnd + (1.0f - ps->fWeaponPosFrac) * 0.0f;
+            dof->farStart = ps->fWeaponPosFrac * farStart + (1.0f - ps->fWeaponPosFrac) * 5000.0f;
+            dof->farEnd = ps->fWeaponPosFrac * farEnd + (1.0f - ps->fWeaponPosFrac) * 5000.0f;
+            dof->nearBlur = ps->fWeaponPosFrac * nearBlur + (1.0f - ps->fWeaponPosFrac) * 6.0f;
+            dof->farBlur = ps->fWeaponPosFrac * farBlur + (1.0f - ps->fWeaponPosFrac) * 0.0f;
         }
     }
 }

@@ -322,8 +322,8 @@ LABEL_24:
     {
         shadowCookieGlob.weightCap = sc_shadowOutRate->current.value * timeDeltaSeconds + shadowCookieGlob.weightCap;
     }
-    if (shadowCookieGlob.weightCap < 0.00009999999747378752)
-        shadowCookieGlob.weightCap = 0.000099999997;
+    if (shadowCookieGlob.weightCap < 0.00009999999747378752f)
+        shadowCookieGlob.weightCap = 0.000099999997f;
     if (sc_debugReceiverCount->current.integer < (signed int)shadowCookieList->cookieCount)
         unsignedInt = sc_debugReceiverCount->current.unsignedInt;
     else

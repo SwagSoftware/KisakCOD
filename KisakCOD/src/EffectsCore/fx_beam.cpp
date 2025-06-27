@@ -19,14 +19,14 @@ bool __cdecl Vec4HomogenousClipBothZ(float4* pt0, float4* pt1);
 bool __cdecl Vec4HomogenousClipZW(float4* pt0, float4* pt1, float4 coeffZW);
 
 static const float4 wiggle[] = {
-    {.v = { 0.0, 1.0, 0.0, 0.0, }},
-    {.v = { 0.70999998, 0.70999998, 0.0, 0.0, }},
-    {.v = { 1.0, 0.0, 0.0, 0.0, }},
-    {.v = { 0.70999998, -0.70999998, 0.0, 0.0, }},
-    {.v = { 0.0, -1.0, 0.0, 0.0, }},
-    {.v = { -0.70999998, -0.70999998, 0.0, 0.0, }},
-    {.v = { -1.0, 0.0, 0.0, 0.0, }},
-    {.v = { -0.70999998, 0.70999998, 0.0, 0.0, }}
+	{.v = { 0.0f, 1.0f, 0.0f, 0.0f, }},
+	{.v = { 0.70999998f, 0.70999998f, 0.0f, 0.0f, }},
+	{.v = { 1.0f, 0.0f, 0.0f, 0.0f, }},
+	{.v = { 0.70999998f, -0.70999998f, 0.0f, 0.0f, }},
+	{.v = { 0.0f, -1.0f, 0.0f, 0.0f, }},
+	{.v = { -0.70999998f, -0.70999998f, 0.0f, 0.0f, }},
+	{.v = { -1.0f, 0.0f, 0.0f, 0.0f, }},
+	{.v = { -0.70999998f, 0.70999998f, 0.0f, 0.0f, }}
 };
 
 void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
@@ -576,29 +576,29 @@ void __cdecl Float4x4InfinitePerspectiveMatrix(float4x4* mtx, float tanHalfFovX,
     float M3_8; // [esp+2Ch] [ebp-1Ch]
     float M0; // [esp+34h] [ebp-14h]
 
-    M3_8 = -zNear * (float)0.99951172;
-    M0 = (float)0.99951172 / tanHalfFovX;
-    M1_4 = (float)0.99951172 / tanHalfFovY;
+    M3_8 = -zNear * 0.99951172f;
+    M0 = 0.99951172f / tanHalfFovX;
+    M1_4 = 0.99951172f / tanHalfFovY;
     
     mtx->x.v[0] = M0;
-    mtx->x.v[1] = 0.0;
-    mtx->x.v[2] = 0.0;
-    mtx->x.v[3] = 0.0;
+    mtx->x.v[1] = 0.0f;
+    mtx->x.v[2] = 0.0f;
+    mtx->x.v[3] = 0.0f;
 
-    mtx->y.v[0] = 0.0;
+    mtx->y.v[0] = 0.0f;
     mtx->y.v[1] = M1_4;
-    mtx->y.v[2] = 0.0;
-    mtx->y.v[3] = 0.0;
+    mtx->y.v[2] = 0.0f;
+    mtx->y.v[3] = 0.0f;
 
-    mtx->z.v[0] = 0.0;
-    mtx->z.v[1] = 0.0;
-    mtx->z.v[2] = 0.99951172;
-    mtx->z.v[3] = 1.0;
+    mtx->z.v[0] = 0.0f;
+    mtx->z.v[1] = 0.0f;
+    mtx->z.v[2] = 0.99951172f;
+    mtx->z.v[3] = 1.0f;
 
-    mtx->w.v[0] = 0.0;
-    mtx->w.v[1] = 0.0;
+    mtx->w.v[0] = 0.0f;
+    mtx->w.v[1] = 0.0f;
     mtx->w.v[2] = M3_8;
-    mtx->w.v[3] = 0.0;
+    mtx->w.v[3] = 0.0f;
 }
 
 char  FX_GenerateBeam_GetFlatDelta(

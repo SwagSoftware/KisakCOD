@@ -538,18 +538,18 @@ void __cdecl R_ShowLightGrid(
                 if (suppressEntry[cornerIndex])
                 {
                     if (honorSuppression)
-                        R_ShowGridCorner(x, y, z, 1.1, colorRed);
+                        R_ShowGridCorner(x, y, z, 1.1f, colorRed);
                     else
-                        R_ShowGridCorner(x, y, z, 1.1, colorOrange);
+                        R_ShowGridCorner(x, y, z, 1.1f, colorOrange);
                 }
                 else
                 {
-                    R_ShowGridCorner(x, y, z, 1.0, colorYellow);
+                    R_ShowGridCorner(x, y, z, 1.0f, colorYellow);
                 }
             }
             else
             {
-                R_ShowGridCorner(x, y, z, 0.89999998, colorGreen);
+                R_ShowGridCorner(x, y, z, 0.89999998f, colorGreen);
             }
         }
     }

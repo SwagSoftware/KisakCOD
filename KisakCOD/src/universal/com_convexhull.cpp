@@ -126,9 +126,9 @@ unsigned int __cdecl Com_GrowInitialHull(
     edgeEq[2] = (float)(*points)[2 * *hullOrder + 1] * edgeEq[1] + (float)(*points)[2 * *hullOrder] * edgeEq[0];
     botIndex = 0;
     topIndex = pointCount - 1;
-    frontDist = 0.001;
+    frontDist = 0.001f;
     frontIndex = -1;
-    backDist = -0.001;
+    backDist = -0.001f;
     backIndex = -1;
     while (botIndex <= topIndex)
     {
@@ -137,7 +137,7 @@ unsigned int __cdecl Com_GrowInitialHull(
             v4 = (float *)&(*points)[2 * pointOrder[botIndex]];
             v8 = v4[1] * edgeEq[1] + *v4 * edgeEq[0];
             dist = v8 - edgeEq[2];
-            if (dist < 0.0)
+            if (dist < 0.0f)
                 break;
             if (dist > (double)frontDist)
             {
@@ -291,7 +291,7 @@ unsigned int __cdecl Com_RecursivelyGrowHull(
     edgeEq[2] = v13[1] * edgeEq[1] + *v13 * edgeEq[0];
     botIndex = 0;
     topIndex = pointCount - 1;
-    frontDist = 0.001;
+    frontDist = 0.001f;
     frontIndex = -1;
     while (botIndex <= topIndex)
     {

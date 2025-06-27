@@ -533,12 +533,12 @@ void __cdecl R_SetParticleCloudConstants(GfxCmdBufSourceState *source, const Gfx
     if (!cloud)
         MyAssertHandler(".\\rb_tess.cpp", 587, 0, "%s", "cloud");
     if (cloud->radius[1] == cloud->radius[0]
-        || VecNCompareCustomEpsilon(cloud->placement.base.origin, cloud->endpos, 0.001, 3))
+        || VecNCompareCustomEpsilon(cloud->placement.base.origin, cloud->endpos, 0.001f, 3))
     {
         viewAxis[0][0] = cloud->radius[0];
-        viewAxis[0][1] = 0.0;
+        viewAxis[0][1] = 0.0f;
         v3 = cloud->radius[1];
-        viewAxis[1][0] = 0.0;
+        viewAxis[1][0] = 0.0f;
         viewAxis[1][1] = v3;
     }
     else
@@ -602,8 +602,8 @@ void __cdecl RB_CreateParticleCloud2dAxis(const GfxParticleCloud *cloud, const f
 
     if (viewUp[0] >= 0.001f || viewUp[1] >= 0.001f )
     {
-        (*viewAxis)[0][0] = -(float)-1.0 * viewUp[1];
-        (*viewAxis)[0][1] = (float)-1.0 * *viewUp;
+        (*viewAxis)[0][0] = -1.0f * viewUp[1]; // double check this! it was -(float)-1.0 before lol
+        (*viewAxis)[0][1] = -1.0f * *viewUp;
         (*viewAxis)[1][0] = viewUp[0];
         (*viewAxis)[1][1] = viewUp[1];
 
@@ -624,8 +624,8 @@ void __cdecl RB_CreateParticleCloud2dAxis(const GfxParticleCloud *cloud, const f
     else
     {
         (*viewAxis)[0][0] = cloud->radius[0];
-        (*viewAxis)[0][1] = 0.0;
-        (*viewAxis)[1][0] = 0.0;
+        (*viewAxis)[0][1] = 0.0f;
+        (*viewAxis)[1][0] = 0.0f;
         (*viewAxis)[1][1] = cloud->radius[1];
     }
 }
@@ -743,7 +743,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                             break;
                         }
                     }
-                    else if (depthHackFlags || materialTime != 0.0)
+                    else if (depthHackFlags || materialTime != 0.0f)
                     {
                         break;
                     }
@@ -777,7 +777,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                             break;
                         }
                     }
-                    else if (depthHackFlags || materialTime != 0.0)
+                    else if (depthHackFlags || materialTime != 0.0f)
                     {
                         break;
                     }
@@ -794,7 +794,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
         if (modelSurfa->info.gfxEntIndex)
             materialTimea = data->gfxEnts[baseGfxEntIndexa].materialTime;
         else
-            materialTimea = 0.0;
+            materialTimea = 0.0f;
         setupVertexShadera = R_UpdateMaterialTime(commonSource, materialTimea);
         R_SetupPassCriticalPixelShaderArgs(context);
         if (setupVertexShadera)
@@ -825,7 +825,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
                     if (materialTimea != data->gfxEnts[gfxEntIndexb].materialTime)
                         break;
                 }
-                else if (materialTimea != 0.0)
+                else if (materialTimea != 0.0f)
                 {
                     break;
                 }
@@ -979,7 +979,7 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
         else
         {
             depthHackFlags = GFX_DEPTH_RANGE_SCENE;
-            materialTime = 0.0;
+            materialTime = 0.0f;
         }
         setupVertexShader = R_UpdateMaterialTime(commonSource, materialTime);
         R_SetupPassCriticalPixelShaderArgs(context);

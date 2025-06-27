@@ -112,27 +112,27 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
         v21 = cent->currentState.u.turret.gunAngles[0];
         frameInterpolation = cgArray[0].frameInterpolation;
         v13 = cent->nextState.lerp.u.turret.gunAngles[0] - v21;
-        v23 = v13 * 0.002777777845039964;
-        v12 = v23 + 0.5;
+        v23 = v13 * 0.002777777845039964f;
+        v12 = v23 + 0.5f;
         v11 = floor(v12);
-        v10 = (v23 - v11) * 360.0;
+        v10 = (v23 - v11) * 360.0f;
         cent->pose.turret.angles.pitch = v10 * frameInterpolation + v21;
         v18 = cent->currentState.u.turret.gunAngles[1];
         v19 = cgArray[0].frameInterpolation;
         v9 = cent->nextState.lerp.u.turret.gunAngles[1] - v18;
-        v20 = v9 * 0.002777777845039964;
-        v8 = v20 + 0.5;
+        v20 = v9 * 0.002777777845039964f;
+        v8 = v20 + 0.5f;
         v7 = floor(v8);
-        v6 = (v20 - v7) * 360.0;
+        v6 = (v20 - v7) * 360.0f;
         cent->pose.turret.angles.yaw = v6 * v19 + v18;
     }
     v15 = cent->currentState.u.turret.gunAngles[2];
     v16 = cgArray[0].frameInterpolation;
     v5 = cent->nextState.lerp.u.turret.gunAngles[2] - v15;
-    v17 = v5 * 0.002777777845039964;
-    v4 = v17 + 0.5;
+    v17 = v5 * 0.002777777845039964f;
+    v4 = v17 + 0.5f;
     v3 = floor(v4);
-    v2 = (v17 - v3) * 360.0;
+    v2 = (v17 - v3) * 360.0f;
     cent->pose.turret.barrelPitch = v2 * v16 + v15;
     DObjGetBoneIndex(obj, scr_const.tag_aim, &cent->pose.turret.tag_aim);
     DObjGetBoneIndex(obj, scr_const.tag_aim_animated, &cent->pose.turret.tag_aim_animated);
@@ -151,7 +151,7 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
     {
         playAnim = 1;
     }
-    XAnimSetGoalWeightKnobAll(obj, playAnim, 0, 1.0, 0.1, 1.0, 0, 0);
+    XAnimSetGoalWeightKnobAll(obj, playAnim, 0, 1.0f, 0.1f, 1.0f, 0, 0);
 }
 
 void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter)
@@ -257,21 +257,21 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
     v73 = v78[0][0];
     v74 = v78[0][1];
     v75 = v78[0][2];
-    v76 = 0.0;
+    v76 = 0.0f;
     v72 = v78[1];
     v68 = v78[1][0];
     v69 = v78[1][1];
     v70 = v78[1][2];
-    v71 = 0.0;
+    v71 = 0.0f;
     v67 = v78[2];
     v63 = v78[2][0];
     v64 = v78[2][1];
     v65 = v78[2][2];
-    v66 = 0.0;
+    v66 = 0.0f;
     v59 = cent->pose.origin[0];
     v60 = cent->pose.origin[1];
     v61 = cent->pose.origin[2];
-    v62 = 0.0;
+    v62 = 0.0f;
     *(float*)&v56 = axis_24[0];
     *((float*)&v56 + 1) = axis_24[0];
     v57 = axis_24[0];
@@ -316,22 +316,22 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
     *((float*)&v52 + 1) = bounds_4[1];
     v53 = bounds_4[1];
     v54 = bounds_4[1];
-    if (v68 >= 0.0)
+    if (v68 >= 0.0f)
         v37 = 0;
     else
         v37 = -1;
     LODWORD(v34) = v37;
-    if (v69 >= 0.0)
+    if (v69 >= 0.0f)
         v33 = 0;
     else
         v33 = -1;
     HIDWORD(v34) = v33;
-    if (v70 >= 0.0)
+    if (v70 >= 0.0f)
         v32 = 0;
     else
         v32 = -1;
     v35 = v32;
-    if (v71 >= 0.0)
+    if (v71 >= 0.0f)
         v31 = 0;
     else
         v31 = -1;
@@ -351,22 +351,22 @@ void  CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, i
     *((float*)&v52 + 1) = bounds_4[2];
     v53 = bounds_4[2];
     v54 = bounds_4[2];
-    if (v63 >= 0.0)
+    if (v63 >= 0.0f)
         v23 = 0;
     else
         v23 = -1;
     LODWORD(v20) = v23;
-    if (v64 >= 0.0)
+    if (v64 >= 0.0f)
         v19 = 0;
     else
         v19 = -1;
     HIDWORD(v20) = v19;
-    if (v65 >= 0.0)
+    if (v65 >= 0.0f)
         v18 = 0;
     else
         v18 = -1;
     v21 = v18;
-    if (v66 >= 0.0)
+    if (v66 >= 0.0f)
         v17 = 0;
     else
         v17 = -1;
@@ -1351,11 +1351,11 @@ DObj_s *__cdecl CG_PreProcess_GetDObj(int localClientNum, int entIndex, int entT
         obj = Com_ClientDObjCreate(&dobjModel, 1u, animTree, entIndex, localClientNum);
         CG_SetDObjInfo(localClientNum, entIndex, entType, model);
         v6 = cg_entityOriginArray[localClientNum][cent->nextState.number];
-        *v6 = 131072.0;
-        v6[1] = 131072.0;
-        v6[2] = 131072.0;
+        *v6 = 131072.0f;
+        v6[1] = 131072.0f;
+        v6[2] = 131072.0f;
         if (entType == 12)
-            XAnimSetCompleteGoalWeight(obj, 1u, 1.0, 0.2, 1.5, 0, 0, 1);
+            XAnimSetCompleteGoalWeight(obj, 1u, 1.0f, 0.2f, 1.5f, 0, 0, 1);
     }
     return obj;
 }

@@ -98,34 +98,34 @@ void __cdecl CM_BuildAxialPlanes(const cbrush_t *brush, float (*axialPlanes)[6][
     float v7; // [esp+28h] [ebp-4h]
 
     v7 = -brush->mins[0];
-    (*axialPlanes)[0][0] = -1.0;
-    (*axialPlanes)[0][1] = 0.0;
-    (*axialPlanes)[0][2] = 0.0;
+    (*axialPlanes)[0][0] = -1.0f;
+    (*axialPlanes)[0][1] = 0.0f;
+    (*axialPlanes)[0][2] = 0.0f;
     (*axialPlanes)[0][3] = v7;
     v6 = brush->maxs[0];
-    (*axialPlanes)[1][0] = 1.0;
-    (*axialPlanes)[1][1] = 0.0;
-    (*axialPlanes)[1][2] = 0.0;
+    (*axialPlanes)[1][0] = 1.0f;
+    (*axialPlanes)[1][1] = 0.0f;
+    (*axialPlanes)[1][2] = 0.0f;
     (*axialPlanes)[1][3] = v6;
     v5 = -brush->mins[1];
-    (*axialPlanes)[2][0] = 0.0;
-    (*axialPlanes)[2][1] = -1.0;
-    (*axialPlanes)[2][2] = 0.0;
+    (*axialPlanes)[2][0] = 0.0f;
+    (*axialPlanes)[2][1] = -1.0f;
+    (*axialPlanes)[2][2] = 0.0f;
     (*axialPlanes)[2][3] = v5;
     v4 = brush->maxs[1];
-    (*axialPlanes)[3][0] = 0.0;
-    (*axialPlanes)[3][1] = 1.0;
-    (*axialPlanes)[3][2] = 0.0;
+    (*axialPlanes)[3][0] = 0.0f;
+    (*axialPlanes)[3][1] = 1.0f;
+    (*axialPlanes)[3][2] = 0.0f;
     (*axialPlanes)[3][3] = v4;
     v3 = -brush->mins[2];
-    (*axialPlanes)[4][0] = 0.0;
-    (*axialPlanes)[4][1] = 0.0;
-    (*axialPlanes)[4][2] = -1.0;
+    (*axialPlanes)[4][0] = 0.0f;
+    (*axialPlanes)[4][1] = 0.0f;
+    (*axialPlanes)[4][2] = -1.0f;
     (*axialPlanes)[4][3] = v3;
     v2 = brush->maxs[2];
-    (*axialPlanes)[5][0] = 0.0;
-    (*axialPlanes)[5][1] = 0.0;
-    (*axialPlanes)[5][2] = 1.0;
+    (*axialPlanes)[5][0] = 0.0f;
+    (*axialPlanes)[5][1] = 0.0f;
+    (*axialPlanes)[5][2] = 1.0f;
     (*axialPlanes)[5][3] = v2;
 }
 
@@ -168,7 +168,7 @@ int __cdecl CM_ForEachBrushPlaneIntersection(
                         CM_GetPlaneVec4Form(sides, axialPlanes, sideIndex[2], expandedPlane[2]);
                         if (IntersectPlanes(plane, xyz))
                         {
-                            SnapPointToIntersectingPlanes(plane, xyz, 0.25, 0.0099999998);
+                            SnapPointToIntersectingPlanes(plane, xyz, 0.25f, 0.0099999998f);
                             ptCount = CM_AddSimpleBrushPoint(brush, axialPlanes, sideIndex, xyz, ptCount, brushPts);
                         }
                     }
@@ -310,7 +310,7 @@ int __cdecl CM_PointInList(const float *point, const float (*xyzList)[3], int xy
 
     for (xyzIndex = 0; xyzIndex < xyzCount; ++xyzIndex)
     {
-        if (VecNCompareCustomEpsilon(&(*xyzList)[3 * xyzIndex], point, 0.1, 3))
+        if (VecNCompareCustomEpsilon(&(*xyzList)[3 * xyzIndex], point, 0.1f, 3))
             return 1;
     }
     return 0;

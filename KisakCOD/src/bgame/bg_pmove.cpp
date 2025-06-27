@@ -34,12 +34,12 @@ const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
 
 const float bobFactorTable[6][2] =
 {
-  { 0.33500001, 0.30500001 },
-  { 0.25, 0.23999999 },
-  { 0.34, 0.315 },
-  { 0.36000001, 0.32499999 },
-  { 0.25, 0.23999999 },
-  { 0.34, 0.315 }
+  { 0.33500001f, 0.30500001f },
+  { 0.25f, 0.23999999f },
+  { 0.34f, 0.315f },
+  { 0.36000001f, 0.32499999f },
+  { 0.25f, 0.23999999f },
+  { 0.34f, 0.315f }
 }; // idb
 
 const scriptAnimMoveTypes_t notMovingAnims[3][3] =
@@ -51,82 +51,82 @@ const scriptAnimMoveTypes_t notMovingAnims[3][3] =
 
 const float CorrectSolidDeltas[26][3] =
 {
-  { 0.0, 0.0, 1.0 },
-  { -1.0, 0.0, 1.0 },
-  { 0.0, -1.0, 1.0 },
-  { 1.0, 0.0, 1.0 },
-  { 0.0, 1.0, 1.0 },
-  { -1.0, 0.0, 0.0 },
-  { 0.0, -1.0, 0.0 },
-  { 1.0, 0.0, 0.0 },
-  { 0.0, 1.0, 0.0 },
-  { 0.0, 0.0, -1.0 },
-  { -1.0, 0.0, -1.0 },
-  { 0.0, -1.0, -1.0 },
-  { 1.0, 0.0, -1.0 },
-  { 0.0, 1.0, -1.0 },
-  { -1.0, -1.0, 1.0 },
-  { 1.0, -1.0, 1.0 },
-  { 1.0, 1.0, 1.0 },
-  { -1.0, 1.0, 1.0 },
-  { -1.0, -1.0, 0.0 },
-  { 1.0, -1.0, 0.0 },
-  { 1.0, 1.0, 0.0 },
-  { -1.0, 1.0, 0.0 },
-  { -1.0, -1.0, -1.0 },
-  { 1.0, -1.0, -1.0 },
-  { 1.0, 1.0, -1.0 },
-  { -1.0, 1.0, -1.0 }
+  { 0.0f, 0.0f, 1.0f },
+  { -1.0f, 0.0f, 1.0f },
+  { 0.0f, -1.0f, 1.0f },
+  { 1.0f, 0.0f, 1.0f },
+  { 0.0f, 1.0f, 1.0f },
+  { -1.0f, 0.0f, 0.0f },
+  { 0.0f, -1.0f, 0.0f },
+  { 1.0f, 0.0f, 0.0f },
+  { 0.0f, 1.0f, 0.0f },
+  { 0.0f, 0.0f, -1.0f },
+  { -1.0f, 0.0f, -1.0f },
+  { 0.0f, -1.0f, -1.0f },
+  { 1.0f, 0.0f, -1.0f },
+  { 0.0f, 1.0f, -1.0f },
+  { -1.0f, -1.0f, 1.0f },
+  { 1.0f, -1.0f, 1.0f },
+  { 1.0f, 1.0f, 1.0f },
+  { -1.0f, 1.0f, 1.0f },
+  { -1.0f, -1.0f, 0.0f },
+  { 1.0f, -1.0f, 0.0f },
+  { 1.0f, 1.0f, 0.0f },
+  { -1.0f, 1.0f, 0.0f },
+  { -1.0f, -1.0f, -1.0f },
+  { 1.0f, -1.0f, -1.0f },
+  { 1.0f, 1.0f, -1.0f },
+  { -1.0f, 1.0f, -1.0f }
 }; // idb
 
 viewLerpWaypoint_s viewLerp_StandCrouch[9] =
 {
-  { 0, 60.0, 0 },
-  { 1, 59.5, 0 },
-  { 4, 58.5, 0 },
-  { 30, 56.0, 0 },
-  { 80, 44.0, 0 },
-  { 90, 41.5, 0 },
-  { 95, 40.5, 0 },
-  { 100, 40.0, 0 },
-  { -1, 0.0, 0 }
+  { 0, 60.0f, 0 },
+  { 1, 59.5f, 0 },
+  { 4, 58.5f, 0 },
+  { 30, 56.0f, 0 },
+  { 80, 44.0f, 0 },
+  { 90, 41.5f, 0 },
+  { 95, 40.5f, 0 },
+  { 100, 40.0f, 0 },
+  { -1, 0.0f, 0 }
 }; // idb
 viewLerpWaypoint_s viewLerp_CrouchStand[9] =
 {
-  { 0, 40.0, 0 },
-  { 5, 40.5, 0 },
-  { 10, 41.5, 0 },
-  { 20, 44.0, 0 },
-  { 70, 56.0, 0 },
-  { 96, 58.5, 0 },
-  { 99, 59.5, 0 },
-  { 100, 60.0, 0 },
-  { -1, 0.0, 0 }
+  { 0, 40.0f, 0 },
+  { 5, 40.5f, 0 },
+  { 10, 41.5f, 0 },
+  { 20, 44.0f, 0 },
+  { 70, 56.0f, 0 },
+  { 96, 58.5f, 0 },
+  { 99, 59.5f, 0 },
+  { 100, 60.0f, 0 },
+  { -1, 0.0f, 0 }
 }; // idb
 viewLerpWaypoint_s viewLerp_CrouchProne[11] =
 {
-  { 0, 40.0, 0 },
-  { 11, 38.0, 0 },
-  { 22, 33.0, 0 },
-  { 34, 25.0, 0 },
-  { 45, 16.0, 0 },
-  { 50, 15.0, 0 },
-  { 55, 16.0, 0 },
-  { 70, 18.0, 0 },
-  { 90, 17.0, 0 },
-  { 100, 11.0, 0 },
-  { -1, 0.0, 0 }
+  { 0, 40.0f, 0 },
+  { 11, 38.0f, 0 },
+  { 22, 33.0f, 0 },
+  { 34, 25.0f, 0 },
+  { 45, 16.0f, 0 },
+  { 50, 15.0f, 0 },
+  { 55, 16.0f, 0 },
+  { 70, 18.0f, 0 },
+  { 90, 17.0f, 0 },
+  { 100, 11.0f, 0 },
+  { -1, 0.0f, 0 }
 }; // idb
 viewLerpWaypoint_s viewLerp_ProneCrouch[8] =
 {
-  { 0, 11.0, 0 },
-  { 5, 10.0, 0 },
-  { 30, 21.0, 0 },
-  { 50, 25.0, 0 },
-  { 67, 31.0, 0 },
-  { 83, 34.0, 0 },
-  { 100, 40.0, 0 },
-  { -1, 0.0, 0 }
+  { 0, 11.0f, 0 },
+  { 5, 10.0f, 0 },
+  { 30, 21.0f, 0 },
+  { 50, 25.0f, 0 },
+  { 67, 31.0f, 0 },
+  { 83, 34.0f, 0 },
+  { 100, 40.0f, 0 },
+  { -1, 0.0f, 0 }
 }; // idb
 
 void __cdecl PM_trace(
@@ -2659,7 +2659,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1723, 0, "%s", "ps");
     dist = pml->previous_origin[2] - ps->origin[2];
     vel = pml->previous_velocity[2];
-    acc = -(double)ps->gravity;
+    acc = -(float)ps->gravity;
     a = acc * 0.5;
     den = vel * vel - a * 4.0 * dist;
     if (den >= 0.0)
@@ -2667,22 +2667,22 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
         v7 = sqrt(den);
         t = (-vel - v7) / (a * 2.0);
         landVel = (t * acc + vel) * -1.0;
-        fallHeight = landVel * landVel / ((double)ps->gravity * 2.0);
+        fallHeight = landVel * landVel / ((float)ps->gravity * 2.0);
         if (bg_fallDamageMinHeight->current.value <= 0.0)
             MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1743, 0, "%s", "bg_fallDamageMinHeight->current.value > 0");
-        if (bg_fallDamageMinHeight->current.value < (double)bg_fallDamageMaxHeight->current.value)
+        if (bg_fallDamageMinHeight->current.value < (float)bg_fallDamageMaxHeight->current.value)
         {
-            if (bg_fallDamageMinHeight->current.value >= (double)fallHeight
+            if (bg_fallDamageMinHeight->current.value >= (float)fallHeight
                 || (pml->groundTrace.surfaceFlags & 1) != 0
                 || ps->pm_type >= 7)
             {
                 damage = 0;
             }
-            else if (bg_fallDamageMaxHeight->current.value > (double)fallHeight)
+            else if (bg_fallDamageMaxHeight->current.value > (float)fallHeight)
             {
                 if ((int)((fallHeight - bg_fallDamageMinHeight->current.value)
                     / (bg_fallDamageMaxHeight->current.value - bg_fallDamageMinHeight->current.value)
-                    * 100.0) < 100)
+                    * 100.0f) < 100)
                     v8 = (int)((fallHeight - bg_fallDamageMinHeight->current.value)
                         / (bg_fallDamageMaxHeight->current.value - bg_fallDamageMinHeight->current.value)
                         * 100.0);
@@ -2704,9 +2704,9 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
             Com_Printf(17, "bg_fallDamageMaxHeight must be greater than bg_fallDamageMinHeight\n");
             damage = 0;
         }
-        if (fallHeight > 12.0)
+        if (fallHeight > 12.0f)
         {
-            viewDip = (int)((fallHeight - 12.0) / 26.0 * 4.0 + 4.0);
+            viewDip = (int)((fallHeight - 12.0f) / 26.0f * 4.0f + 4.0f);
             if (viewDip > 24)
                 viewDip = 24;
             BG_AnimScriptEvent(ps, ANIM_ET_LAND, 0, 1);
@@ -2720,7 +2720,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
         {
             if (damage >= 100 || (pml->groundTrace.surfaceFlags & 2) != 0)
             {
-                Vec3Scale(ps->velocity, 0.67000002, ps->velocity);
+                Vec3Scale(ps->velocity, 0.67000002f, ps->velocity);
             }
             else
             {
@@ -2730,13 +2730,13 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
                 if (stunTime > 500)
                 {
                     if (stunTime < 1500)
-                        fSpeedMult = 0.5 - ((double)stunTime - 500.0) / 1000.0 * 0.300000011920929;
+                        fSpeedMult = 0.5f - ((float)stunTime - 500.0f) / 1000.0f * 0.300000011920929f;
                     else
-                        fSpeedMult = 0.2;
+                        fSpeedMult = 0.2f;
                 }
                 else
                 {
-                    fSpeedMult = 0.5;
+                    fSpeedMult = 0.5f;
                 }
                 ps->pm_time = stunTime;
                 ps->pm_flags |= 0x80u;
@@ -2745,13 +2745,13 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
             v2 = PM_DamageLandingForSurface(pml);
             BG_AddPredictableEventToPlayerstate(v2, damage, ps);
         }
-        else if (fallHeight > 4.0)
+        else if (fallHeight > 4.0f)
         {
-            if (fallHeight >= 8.0)
+            if (fallHeight >= 8.0f)
             {
-                if (fallHeight >= 12.0)
+                if (fallHeight >= 12.0f)
                 {
-                    Vec3Scale(ps->velocity, 0.67000002, ps->velocity);
+                    Vec3Scale(ps->velocity, 0.67000002f, ps->velocity);
                     v5 = PM_HardLandingForSurface(pml);
                     BG_AddPredictableEventToPlayerstate(v5, viewDip, ps);
                 }

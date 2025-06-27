@@ -1309,30 +1309,30 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
             }
             else
             {
-                localdir[0] = 0.0;
-                localdir[1] = 0.0;
-                localdir[2] = 0.0;
+                localdir[0] = 0.0f;
+                localdir[1] = 0.0f;
+                localdir[2] = 0.0f;
             }
             if ((pSelf->flags & 8) == 0 && (dflags & 4) == 0)
             {
-                knockbackMod = 0.30000001;
+                knockbackMod = 0.30000001f;
                 if ((pSelf->client->ps.pm_flags & 1) != 0)
                 {
-                    knockbackMod = 0.02;
+                    knockbackMod = 0.02f;
                 }
                 else if ((pSelf->client->ps.pm_flags & 2) != 0)
                 {
-                    knockbackMod = 0.15000001;
+                    knockbackMod = 0.15000001f;
                 }
-                knockback = (int)((double)damage * knockbackMod);
+                knockback = (int)((float)damage * knockbackMod);
                 if (knockback > 60)
                     knockback = 60;
                 if (knockback)
                 {
                     if ((pSelf->client->ps.eFlags & 0x300) == 0)
                     {
-                        mass = 250.0;
-                        scale = (double)knockback * g_knockback->current.value / (float)250.0;
+                        mass = 250.0f;
+                        scale = (float)knockback * g_knockback->current.value / 250.0f;
                         Vec3Scale(localdir, scale, kvel);
                         Vec3Add(pSelf->client->ps.velocity, kvel, pSelf->client->ps.velocity);
                         if (!pSelf->client->ps.pm_time)
@@ -3021,27 +3021,27 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
             4);
     if (Scr_GetNumParam() < 2)
     {
-        radiusa = 0.15000001;
+        radiusa = 0.15000001f;
     }
     else
     {
         radius = Scr_GetFloat(1u);
-        if (radius <= 0.0)
+        if (radius <= 0.0f)
             Scr_ParamError(1u, "Radius of location selector must be greater than zero\n");
-        if (level.compassMapWorldSize[1] <= 0.0 || radius <= 0.0)
-            radiusa = radius / 1000.0;
+        if (level.compassMapWorldSize[1] <= 0.0f || radius <= 0.0f)
+            radiusa = radius / 1000.0f;
         else
             radiusa = radius / level.compassMapWorldSize[1];
-        if (0.0 >= 1.0)
+        if (0.0f >= 1.0f) // ?????
             MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
-        if (radiusa >= 0.0)
+        if (radiusa >= 0.0f)
         {
-            if (radiusa > 1.0)
-                radiusa = 1.0;
+            if (radiusa > 1.0f)
+                radiusa = 1.0f;
         }
         else
         {
-            radiusa = 0.0;
+            radiusa = 0.0f;
         }
     }
     radiusBits = (int)(radiusa * 63.0f);

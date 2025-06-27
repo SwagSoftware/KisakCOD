@@ -328,7 +328,7 @@ void __cdecl Phys_GenerateGroupContacts(
         {
             if (group[contactIter] == groupIter)
             {
-                MIN_DIST = 0.1;
+                MIN_DIST = 0.1f;
                 for (contactIter2 = contactIter + 1; contactIter2 != inContacts->contactCount; ++contactIter2)
                 {
                     if (group[contactIter2] == groupIter)
@@ -336,7 +336,7 @@ void __cdecl Phys_GenerateGroupContacts(
                         Vec3Sub(inContacts->contacts[contactIter2].contact.pos, inContacts->contacts[contactIter].contact.pos, diff);
                         dist = Vec3LengthSq(diff);
                         v6 = MIN_DIST * MIN_DIST;
-                        if (dist >= (double)v6)
+                        if (dist >= v6)
                             v5 = group[contactIter2];
                         else
                             v5 = -1;
@@ -348,18 +348,18 @@ void __cdecl Phys_GenerateGroupContacts(
                 for (dimIter = 0; dimIter != 2; ++dimIter)
                 {
                     dot = Vec3Dot(contact->contact.pos, uvBasis[dimIter]);
-                    if (minProjDist[dimIter] > (double)dot)
+                    if (minProjDist[dimIter] > dot)
                     {
                         minProjDist[dimIter] = dot;
                         minContact[dimIter] = contactIter;
                     }
-                    if (maxProjDist[dimIter] < (double)dot)
+                    if (maxProjDist[dimIter] < dot)
                     {
                         maxProjDist[dimIter] = dot;
                         maxContact[dimIter] = contactIter;
                     }
                 }
-                if (maxD < (double)contact->contact.depth)
+                if (maxD < (float)contact->contact.depth)
                 {
                     maxD = contact->contact.depth;
                     maxDContact = contactIter;
@@ -763,9 +763,9 @@ void __cdecl Phys_AddCollisionContact(PhysWorld worldId, const PhysContact *phys
     surfParms.soft_cfm = phys_contact_cfm->current.value;
     surfParms.soft_erp = phys_contact_erp->current.value;
     surfParms.mu = physContact->friction;
-    surfParms.mu2 = 0.0;
+    surfParms.mu2 = 0.0f;
     surfParms.bounce = physContact->bounce;
-    surfParms.bounce_vel = 0.1;
+    surfParms.bounce_vel = 0.1f;
     contactList.contactCount = 1;
     p_contactList = &contactList;
     contactList.contacts[0].contact.depth = physContact->depth;
@@ -775,7 +775,7 @@ void __cdecl Phys_AddCollisionContact(PhysWorld worldId, const PhysContact *phys
     p_contactList->contacts[0].contact.normal[0] = physContact->normal[0];
     normal[1] = physContact->normal[1];
     normal[2] = physContact->normal[2];
-    normal[3] = 0.0;
+    normal[3] = 0.0f;
     p_contactList->contacts[0].contact.pos[0] = physContact->pos[0];
     p_contactList->contacts[0].contact.pos[1] = physContact->pos[1];
     p_contactList->contacts[0].contact.pos[2] = physContact->pos[2];

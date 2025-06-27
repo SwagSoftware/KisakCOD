@@ -422,7 +422,7 @@ SphereEdgeTraceResult __cdecl CM_TraceSphereThroughEdge(
                 Vec3Mad(hitDelta, v8, v0_v1, scaledNormal);
                 v7 = 1.0 / radius;
                 Vec3Scale(scaledNormal, v7, trace->normal);
-                if (!Vec3IsNormalizedEpsilon(trace->normal, 0.003))
+                if (!Vec3IsNormalizedEpsilon(trace->normal, 0.003f))
                 {
                     v6 = va(
                         "(%g %g %g) from (%g %g %g) / %g;\n\t\tdelta (%g %g %g), scale %g / %g, edge (%g %g %g)",
@@ -465,9 +465,9 @@ SphereEdgeTraceResult __cdecl CM_TraceSphereThroughEdge(
     else
     {
         scaledProjectionDist = -Vec3Dot(startDelta, v0_v1);
-        if (scaledProjectionDist > 0.0)
+        if (scaledProjectionDist > 0.0f)
         {
-            if (edgeLenSq > (double)scaledProjectionDist)
+            if (edgeLenSq > scaledProjectionDist)
             {
                 scale = scaledProjectionDist / edgeLenSq;
                 Vec3Mad(startDelta, scale, v0_v1, scaledNormal);
@@ -554,19 +554,19 @@ void __cdecl CM_TraceSphereThroughVertex(
             {
                 v10 = sqrt(discriminant);
                 frac = (-v10 - b) / a;
-                if (trace->fraction > (double)frac)
+                if (trace->fraction > frac)
                 {
                     Vec3Mad(delta, frac, tw->delta, trace->normal);
-                    scale = 1.0 / (tw->radius + 0.125);
+                    scale = 1.0f / (tw->radius + 0.125f);
                     Vec3Scale(trace->normal, scale, trace->normal);
                     lenSq = Vec3LengthSq(trace->normal);
-                    approxRecipLen = (3.0 - lenSq) * 0.5;
+                    approxRecipLen = (3.0f - lenSq) * 0.5f;
                     Vec3Scale(trace->normal, approxRecipLen, trace->normal);
-                    if (!Vec3IsNormalizedEpsilon(trace->normal, 0.003) && !alwaysfails)
+                    if (!Vec3IsNormalizedEpsilon(trace->normal, 0.003f) && !alwaysfails)
                     {
-                        v13 = Vec3LengthSq(trace->normal) - 1.0;
+                        v13 = Vec3LengthSq(trace->normal) - 1.0f;
                         v8 = fabs(v13);
-                        v7 = tw->radius + 0.125;
+                        v7 = tw->radius + 0.125f;
                         v6 = Vec3Length(trace->normal);
                         v5 = va(
                             "Vec3IsNormalized (%g %g %g) %g, %g %g",
@@ -575,12 +575,12 @@ void __cdecl CM_TraceSphereThroughVertex(
                             trace->normal[2],
                             v6,
                             v7,
-                            v8 / 2.0);
+                            v8 / 2.0f);
                         MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 385, 0, v5);
                     }
                     trace->walkable = isWalkable;
                     trace->fraction = frac;
-                    if (trace->fraction < 0.0 || trace->fraction > 1.0)
+                    if (trace->fraction < 0.0f || trace->fraction > 1.0f)
                         MyAssertHandler(
                             ".\\qcommon\\cm_mesh.cpp",
                             390,
@@ -594,12 +594,12 @@ void __cdecl CM_TraceSphereThroughVertex(
         else
         {
             v12 = sqrt(deltaLenSq);
-            frac = 1.0 / v12;
+            frac = 1.0f / v12;
             Vec3Scale(delta, frac, trace->normal);
             trace->walkable = isWalkable;
-            trace->fraction = 0.0;
+            trace->fraction = 0.0f;
             v11 = tw->radius * tw->radius;
-            if (deltaLenSq < (double)v11)
+            if (deltaLenSq < v11)
                 trace->startsolid = 1;
         }
     }

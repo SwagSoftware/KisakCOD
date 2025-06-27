@@ -68,10 +68,10 @@ void __cdecl G_SetAngle(gentity_s *ent, const float *angle);
 void __cdecl G_SetConstString(unsigned __int16 *to, char *from);
 const char *__cdecl G_GetEntityTypeName(const gentity_s *ent);
 int __cdecl G_rand();
-double __cdecl G_flrand(float min, float max);
+float __cdecl G_flrand(float min, float max);
 int __cdecl G_irand(int min, int max);
-double __cdecl G_random();
-double __cdecl G_crandom();
+float __cdecl G_random();
+float __cdecl G_crandom();
 
 
 extern scr_data_t g_scr_data;

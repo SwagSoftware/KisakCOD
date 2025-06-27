@@ -414,7 +414,7 @@ void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event)
                 return;
             case EV_FIRE_WEAPON_MG42:
                 eType = ET_PLAYER;
-                CG_StartShakeCamera(localClientNum, 0.050000001, 100, cent->pose.origin, 100.0);
+                CG_StartShakeCamera(localClientNum, 0.050000001f, 100, cent->pose.origin, 100.0f);
                 CG_FireWeapon(localClientNum, cent, event, scr_const.tag_flash, 0, &cgameGlob->nextSnap->ps);
                 attackerCent = CG_GetEntity(localClientNum, eventParm);
                 if (attackerCent->nextValid
@@ -909,7 +909,7 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
     const playerState_s *ps; // [esp+A8h] [ebp-8h]
     Material *iconShader; // [esp+ACh] [ebp-4h]
 
-    baseIconSize = 1.4;
+    baseIconSize = 1.4f;
     target = ent->otherEntityNum;
     attacker = ent->attackerEntityNum;
     if (localClientNum)

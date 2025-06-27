@@ -342,7 +342,7 @@ void __cdecl R_ColorCorrectBGRAPixel(const ColorCorrectionData *ccd, const unsig
     intensity = Vec3Dot(color, colorIntensityScale);
     for (j = 0; j < 3; ++j)
         color[j] = ccd->saturation * color[j] + (1.0 - ccd->saturation) * intensity;
-    maxIntensity = 0.1;
+    maxIntensity = 0.1f;
     for (k = 0; k < 3; ++k)
     {
         v13 = color[k];

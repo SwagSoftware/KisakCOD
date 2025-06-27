@@ -61,8 +61,8 @@ bool __cdecl Phys_SimilarContacts(const LocalContactData *ca, const LocalContact
     int dirNear; // [esp+Ch] [ebp-8h]
     int posNear; // [esp+10h] [ebp-4h]
 
-    posNear = VecNCompareCustomEpsilon(ca->pos, cb->pos, 0.001, 3);
-    dirNear = VecNCompareCustomEpsilon(ca->normal, cb->normal, 0.001, 3);
+    posNear = VecNCompareCustomEpsilon(ca->pos, cb->pos, 0.001f, 3);
+    dirNear = VecNCompareCustomEpsilon(ca->normal, cb->normal, 0.001f, 3);
     return posNear && dirNear;
 }
 
@@ -367,22 +367,22 @@ void __cdecl Phys_CapsuleBuildContactsForTri(
         clipPlane[0] = -*plane;
         clipPlane[1] = -plane[1];
         clipPlane[2] = -plane[2];
-        clipPlane[3] = 0.0;
+        clipPlane[3] = 0.0f;
         if (Phys_CapsuleClipEdgeToPlane(capEdge0, capEdge1, clipPlane))
         {
             Vec3Sub(p1, p0, e0);
             Vec3Cross(plane, e0, clipPlane);
-            clipPlane[3] = 0.000001;
+            clipPlane[3] = 0.000001f;
             if (Phys_CapsuleClipEdgeToPlane(capEdge0, capEdge1, clipPlane))
             {
                 Vec3Sub(p2, p1, e1);
                 Vec3Cross(plane, e1, clipPlane);
-                clipPlane[3] = -(Vec3Dot(e0, clipPlane) - 0.000001);
+                clipPlane[3] = -(Vec3Dot(e0, clipPlane) - 0.000001f);
                 if (Phys_CapsuleClipEdgeToPlane(capEdge0, capEdge1, clipPlane))
                 {
                     Vec3Sub(p0, p2, e2);
                     Vec3Cross(plane, e2, clipPlane);
-                    clipPlane[3] = 0.000001;
+                    clipPlane[3] = 0.000001f;
                     if (Phys_CapsuleClipEdgeToPlane(capEdge0, capEdge1, clipPlane))
                     {
                         Vec3Add(capEdge0, p0, capEdge0);
@@ -393,15 +393,15 @@ void __cdecl Phys_CapsuleBuildContactsForTri(
                         Vec3Sub(capEdge1, capsule->center, delta);
                         v8 = Vec3Dot(delta, axisResults.normal);
                         depth1 = v8 - (axisResults.bestCenter - axisResults.bestRt);
-                        v12 = depth0 - 0.0;
-                        if (v12 < 0.0)
-                            v11 = 0.0;
+                        v12 = depth0 - 0.0f;
+                        if (v12 < 0.0f)
+                            v11 = 0.0f;
                         else
                             v11 = depth0;
                         depth0 = v11;
-                        v10 = depth1 - 0.0;
-                        if (v10 < 0.0)
-                            v9 = 0.0;
+                        v10 = depth1 - 0.0f;
+                        if (v10 < 0.0f)
+                            v9 = 0.0f;
                         else
                             v9 = depth1;
                         depth1 = v9;
@@ -655,12 +655,12 @@ void __cdecl Phys_CapsuleBuildContactsForTriEndEdges(
             Vec3Sub(p1, p0, e0);
             Vec3Sub(p2, p1, e1);
             Vec3Cross(plane, e1, clipPlane);
-            clipPlane[3] = -(Vec3Dot(e0, clipPlane) - 0.000001);
+            clipPlane[3] = -(Vec3Dot(e0, clipPlane) - 0.000001f);
             if (Phys_CapsuleClipEdgeToPlane(capEdge0, capEdge1, clipPlane))
             {
                 Vec3Sub(p0, p2, e2);
                 Vec3Cross(plane, e2, clipPlane);
-                clipPlane[3] = 0.000001;
+                clipPlane[3] = 0.000001f;
                 if (Phys_CapsuleClipEdgeToPlane(capEdge0, capEdge1, clipPlane))
                 {
                     Vec3Add(capEdge0, p0, capEdge0);
@@ -671,15 +671,15 @@ void __cdecl Phys_CapsuleBuildContactsForTriEndEdges(
                     Vec3Sub(capEdge1, capsule->center, delta);
                     v8 = Vec3Dot(delta, axisResults.normal);
                     depth1 = v8 - (axisResults.bestCenter - axisResults.bestRt);
-                    v12 = depth0 - 0.0;
-                    if (v12 < 0.0)
-                        v11 = 0.0;
+                    v12 = depth0 - 0.0f;
+                    if (v12 < 0.0f)
+                        v11 = 0.0f;
                     else
                         v11 = depth0;
                     depth0 = v11;
-                    v10 = depth1 - 0.0;
-                    if (v10 < 0.0)
-                        v9 = 0.0;
+                    v10 = depth1 - 0.0f;
+                    if (v10 < 0.0f)
+                        v9 = 0.0f;
                     else
                         v9 = depth1;
                     depth1 = v9;

@@ -267,8 +267,8 @@ double __cdecl CG_CornerDebugPrint(
     if (cg_drawFPSLabels->current.enabled)
     {
         x = posX - labelWidth;
-        textDelta = CG_DrawDevString(sP, x, posY, 1.0, 1.1, text, color, 6, cgMedia.smallDevFont);
-        labelDelta = CG_DrawDevString(sP, x, posY, 1.0, 1.1, label, colorWhiteFaded, 5, cgMedia.smallDevFont);
+        textDelta = CG_DrawDevString(sP, x, posY, 1.0f, 1.1f, text, color, 6, cgMedia.smallDevFont);
+        labelDelta = CG_DrawDevString(sP, x, posY, 1.0f, 1.1f, label, colorWhiteFaded, 5, cgMedia.smallDevFont);
         if (textDelta < labelDelta)
             v9 = labelDelta;
         else
@@ -277,9 +277,9 @@ double __cdecl CG_CornerDebugPrint(
     }
     else
     {
-        yDelta = CG_DrawDevString(sP, posX, posY, 1.0, 1.1, text, color, 6, cgMedia.smallDevFont);
+        yDelta = CG_DrawDevString(sP, posX, posY, 1.0f, 1.1f, text, color, 6, cgMedia.smallDevFont);
     }
-    return (float)((double)yDelta * 0.75);
+    return (float)((float)yDelta * 0.75f);
 }
 
 double __cdecl CG_CornerDebugPrintCaption(
@@ -296,13 +296,13 @@ double __cdecl CG_CornerDebugPrintCaption(
     if (cg_drawFPSLabels->current.enabled)
     {
         x = posX - labelWidth;
-        yDelta = CG_DrawDevString(sP, x, posY, 1.0, 1.1, text, color, 7, cgMedia.smallDevFont);
+        yDelta = CG_DrawDevString(sP, x, posY, 1.0f, 1.1f, text, color, 7, cgMedia.smallDevFont);
     }
     else
     {
-        yDelta = CG_DrawDevString(sP, posX, posY, 1.0, 1.1, text, color, 6, cgMedia.smallDevFont);
+        yDelta = CG_DrawDevString(sP, posX, posY, 1.0f, 1.1f, text, color, 6, cgMedia.smallDevFont);
     }
-    return (float)((double)yDelta * 0.75);
+    return (float)((float)yDelta * 0.75);
 }
 
 void __cdecl CG_DrawUpperRightDebugInfo(int localClientNum)
@@ -625,27 +625,19 @@ void CG_DrawVersion()
     float x; // [esp+24h] [ebp-40h]
     float y; // [esp+28h] [ebp-3Ch]
     Font_s *font; // [esp+34h] [ebp-30h]
-    float shadowColor[4]; // [esp+38h] [ebp-2Ch] BYREF
-    float color[4]; // [esp+48h] [ebp-1Ch] BYREF
-    float fontScale; // [esp+58h] [ebp-Ch]
     float h; // [esp+5Ch] [ebp-8h]
     float w; // [esp+60h] [ebp-4h]
 
-    fontScale = 0.25;
-    color[0] = 0.40000001;
-    color[1] = 0.69999999;
-    color[2] = 1.0;
-    color[3] = 0.69999999;
-    shadowColor[0] = 0.0;
-    shadowColor[1] = 0.0;
-    shadowColor[2] = 0.0;
-    shadowColor[3] = 0.69999999;
-    font = UI_GetFontHandle(&scrPlaceFullUnsafe, 0, 0.5);
-    w = (float)UI_TextWidth(version->current.string, 0, font, 0.25);
+    float fontScale = 0.25f;
+    float color[4] = { 0.40000001f, 0.69999999f, 1.0f, 0.69999999f };
+    float shadowColor[4] = { 0.0f, 0.0f, 0.0f, 0.69f};
+
+    font = UI_GetFontHandle(&scrPlaceFullUnsafe, 0, 0.5f);
+    w = (float)UI_TextWidth(version->current.string, 0, font, 0.25f);
     h = (float)UI_TextHeight(font, 0.25);
-    y = -h - cg_drawVersionY->current.value + 1.0;
-    x = -w - cg_drawVersionX->current.value + 1.0;
-    UI_DrawText(&scrPlaceFullUnsafe, (char *)version->current.integer, 0x7FFFFFFF, font, x, y, 3, 3, 0.25, shadowColor, 0);
+    y = -h - cg_drawVersionY->current.value + 1.0f;
+    x = -w - cg_drawVersionX->current.value + 1.0f;
+    UI_DrawText(&scrPlaceFullUnsafe, (char *)version->current.integer, 0x7FFFFFFF, font, x, y, 3, 3, 0.25f, shadowColor, 0);
     v1 = -h - cg_drawVersionY->current.value;
     v0 = -w - cg_drawVersionX->current.value;
     UI_DrawText(
@@ -684,20 +676,20 @@ void __cdecl CG_DrawSoundEqOverlay(int localClientNum)
     count = RETURN_ZERO32();
     if (count > 0)
     {
-        charHeight = 10.0;
-        x = 0.0;
-        CG_DrawStringExt(scrPlace, 0.0, 82.0, (char*)"Current EQ Settings", colorWhite, 0, 1, 10.0);
-        y = (float)82.0 + (float)10.0;
+        charHeight = 10.0f;
+        x = 0.0f;
+        CG_DrawStringExt(scrPlace, 0.0, 82.0f, (char*)"Current EQ Settings", colorWhite, 0, 1, 10.0f);
+        y = 82.0f + 10.0f;
         for (entchannel = 0; entchannel < count; ++entchannel)
         {
             EntChannelName = SND_GetEntChannelName(entchannel);
             line = va("%s", EntChannelName->name);
-            x = 0.0;
-            CG_DrawStringExt(scrPlace, 0.0, y, line, colorWhite, 0, 1, charHeight);
+            x = 0.0f;
+            CG_DrawStringExt(scrPlace, 0.0f, y, line, colorWhite, 0, 1, charHeight);
             y = y + charHeight;
             for (band = 0; band < 3; ++band)
             {
-                x = 24.0;
+                x = 24.0f;
                 nextLine = 0;
                 for (index = 0; index < 2; ++index)
                 {
@@ -714,14 +706,14 @@ void __cdecl CG_DrawSoundEqOverlay(int localClientNum)
                     nextLine = v3;
                     if (params->enabled)
                     {
-                        v2 = x + 24.0;
+                        v2 = x + 24.0f;
                         CG_DrawStringExt(scrPlace, v2, y, line, colorWhite, 0, 1, charHeight);
                     }
-                    x = x + 344.0;
+                    x = x + 344.0f;
                 }
                 if (nextLine)
                 {
-                    line = va("%.2f%%", info[entchannel].lerp * 100.0);
+                    line = va("%.2f%%", info[entchannel].lerp * 100.0f);
                     CG_DrawStringExt(scrPlace, 0.0, y, line, colorYellow, 0, 1, charHeight);
                     y = y + charHeight;
                 }
@@ -748,10 +740,10 @@ void __cdecl CG_DrawSoundOverlay(const ScreenPlacement *scrPlace)
     SoundOverlay = SND_GetSoundOverlay(type, info, 64, &cpu);
     if (SoundOverlay > 0)
     {
-        x = 2.0;
-        y = 82.0;
-        v2 = 8.0;
-        charHeight = 10.0;
+        x = 2.0f;
+        y = 82.0f;
+        v2 = 8.0f;
+        charHeight = 10.0f;
         Int = Dvar_GetInt("snd_khz");
         string = va("Listing Active Sounds of Type: %s", *(const char **)(snd_drawInfo->domain.integer.max + 4 * type));
         CG_DrawStringExt(scrPlace, x, y, string, colorWhite, 0, 1, charHeight);
@@ -784,8 +776,8 @@ void __cdecl CG_DrawFxProfile(int localClientNum)
 {
     float profilePos[2]; // [esp+0h] [ebp-8h] BYREF
 
-    profilePos[0] = 0.0;
-    profilePos[1] = 12.0;
+    profilePos[0] = 0.0f;
+    profilePos[1] = 12.0f;
     FX_DrawProfile(localClientNum, (void(__cdecl *)(char *))CG_DrawFxText, profilePos);
 }
 
@@ -802,19 +794,19 @@ void __cdecl CG_DrawFxText(char *text, float *profilePos)
         profilePos[1],
         1,
         1,
-        1.0,
-        1.0,
+        1.0f,
+        1.0f,
         colorWhiteFaded,
         128);
-    profilePos[1] = profilePos[1] + 12.0;
+    profilePos[1] = profilePos[1] + 12.0f;
 }
 
 void __cdecl CG_DrawFxMarkProfile(int localClientNum)
 {
     float profilePos[2]; // [esp+0h] [ebp-8h] BYREF
 
-    profilePos[0] = 0.0;
-    profilePos[1] = 12.0;
+    profilePos[0] = 0.0f;
+    profilePos[1] = 12.0f;
     FX_DrawMarkProfile(localClientNum, (void(*)(const char*, float*))CG_DrawFxText, profilePos);
 }
 

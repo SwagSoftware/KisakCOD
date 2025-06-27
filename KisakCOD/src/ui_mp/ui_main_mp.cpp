@@ -1820,10 +1820,10 @@ void __cdecl UI_DrawServerRefreshDate(
 
     if (*(_DWORD *)&sharedUiInfo.serverStatus.string[1124])
     {
-        lowLight[0] = *color * 0.800000011920929;
-        lowLight[1] = color[1] * 0.800000011920929;
-        lowLight[2] = color[2] * 0.800000011920929;
-        lowLight[3] = color[3] * 0.800000011920929;
+        lowLight[0] = *color * 0.800000011920929f;
+        lowLight[1] = color[1] * 0.800000011920929f;
+        lowLight[2] = color[2] * 0.800000011920929f;
+        lowLight[3] = color[3] * 0.800000011920929f;
         if (localClientNum)
             MyAssertHandler(
                 ".\\ui_mp\\ui_main_mp.cpp",
@@ -1832,7 +1832,7 @@ void __cdecl UI_DrawServerRefreshDate(
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        newColor[4] = 1.117259e-30;
+        newColor[4] = 1.117259e-30f;
         v10 = (float)(uiInfoArray.uiDC.realTime / 75);
         v9 = sin(v10);
         t = v9 * 0.5 + 0.5;
@@ -2356,9 +2356,9 @@ void __cdecl UI_Update(const char *name)
                 if (!I_stricmp(name, "ui_mousePitch"))
                 {
                     if (Dvar_GetBool(name))
-                        Dvar_SetFloatByName("m_pitch", -0.022);
+                        Dvar_SetFloatByName("m_pitch", -0.022f);
                     else
-                        Dvar_SetFloatByName("m_pitch", 0.022);
+                        Dvar_SetFloatByName("m_pitch", 0.022f);
                 }
             }
             else
@@ -4820,15 +4820,15 @@ const dvar_s *UI_RegisterDvars()
         (DvarLimits)0x200000000LL,
         1u,
         "The network source where:\n  0:Local\n  1:Internet\n  2:Favourites");
-    min.value.max = 1.0;
-    min.value.min = 0.0;
-    ui_smallFont = Dvar_RegisterFloat("ui_smallFont", 0.25, min, 1u, "Small font scale");
-    mina.value.max = 1.0;
-    mina.value.min = 0.0;
-    ui_bigFont = Dvar_RegisterFloat("ui_bigFont", 0.40000001, mina, 1u, "Big font scale");
-    minb.value.max = 1.0;
-    minb.value.min = 0.0;
-    ui_extraBigFont = Dvar_RegisterFloat("ui_extraBigFont", 0.55000001, minb, 1u, "Extra big font scale");
+    min.value.max = 1.0f;
+    min.value.min = 0.0f;
+    ui_smallFont = Dvar_RegisterFloat("ui_smallFont", 0.25f, min, 1u, "Small font scale");
+    mina.value.max = 1.0f;
+    mina.value.min = 0.0f;
+    ui_bigFont = Dvar_RegisterFloat("ui_bigFont", 0.40000001f, mina, 1u, "Big font scale");
+    minb.value.max = 1.0f;
+    minb.value.min = 0.0f;
+    ui_extraBigFont = Dvar_RegisterFloat("ui_extraBigFont", 0.55000001f, minb, 1u, "Extra big font scale");
     ui_currentMap = Dvar_RegisterInt("ui_currentMap", 0, (DvarLimits)0x7FFFFFFF00000000LL, 1u, "Current map index");
     ui_gametype = Dvar_RegisterInt("ui_gametype", 3, (DvarLimits)0x7FFFFFFF00000000LL, 1u, "Game type");
     ui_joinGameType = Dvar_RegisterInt("ui_joinGametype", 0, (DvarLimits)0x7FFFFFFF00000000LL, 1u, "Game join type");
@@ -4896,12 +4896,12 @@ const dvar_s *UI_RegisterDvars()
         (char *)"",
         0,
         "New player profile name");
-    minc.value.max = 10000.0;
-    minc.value.min = -10000.0;
-    ui_buildLocation = Dvar_RegisterVec2("ui_buildLocation", -100.0, 52.0, minc, 0, "Where to draw the build number");
-    mind.value.max = 1.0;
-    mind.value.min = 0.0;
-    ui_buildSize = Dvar_RegisterFloat("ui_buildSize", 0.30000001, mind, 0, "Font size to use for the build number");
+    minc.value.max = 10000.0f;
+    minc.value.min = -10000.0f;
+    ui_buildLocation = Dvar_RegisterVec2("ui_buildLocation", -100.0f, 52.0f, minc, 0, "Where to draw the build number");
+    mind.value.max = 1.0f;
+    mind.value.min = 0.0f;
+    ui_buildSize = Dvar_RegisterFloat("ui_buildSize", 0.30000001f, mind, 0, "Font size to use for the build number");
     ui_showList = Dvar_RegisterBool("ui_showList", 0, 0x80u, "Show onscreen list of currently visible menus");
     ui_showMenuOnly = Dvar_RegisterString(
         "ui_showMenuOnly",
@@ -4909,11 +4909,11 @@ const dvar_s *UI_RegisterDvars()
         0,
         "If set, only menus using this name will draw.");
     ui_showEndOfGame = Dvar_RegisterBool("ui_showEndOfGame", 0, 0, "Currently showing the end of game menu.");
-    mine.value.max = 1.0;
-    mine.value.min = 0.0;
+    mine.value.max = 1.0f;
+    mine.value.min = 0.0f;
     ui_borderLowLightScale = Dvar_RegisterFloat(
         "ui_borderLowLightScale",
-        0.60000002,
+        0.60000002f,
         mine,
         0,
         "Scales the border color for the lowlight color on certain UI borders");
@@ -4926,10 +4926,10 @@ const dvar_s *UI_RegisterDvars()
     minf.value.min = 0.0;
     ui_connectScreenTextGlowColor = Dvar_RegisterVec4(
         "ui_connectScreenTextGlowColor",
-        0.30000001,
-        0.60000002,
-        0.30000001,
-        1.0,
+        0.30000001f,
+        0.60000002f,
+        0.30000001f,
+        1.0f,
         minf,
         0,
         "Glow color applied to the mode and map name strings on the connect screen.");
@@ -5315,15 +5315,15 @@ void __cdecl UI_DisplayDownloadInfo(char *downloadName, float centerPoint, float
     int xferRate; // [esp+1C8h] [ebp-4h]
 
     firstColumn = 24;
-    secondColumn = 200.0;
-    maxSecondColumnWidth = 630.0 - (float)200.0;
+    secondColumn = 200.0f;
+    maxSecondColumnWidth = 630.0f - 200.0f;
     downloadSize = legacyHacks.cl_downloadSize;
     downloadCount = legacyHacks.cl_downloadCount;
     downloadTime = legacyHacks.cl_downloadTime;
-    color[0] = 0.0;
-    color[1] = 0.0;
-    color[2] = 0.0;
-    color[3] = 0.2;
+    color[0] = 0.0f;
+    color[1] = 0.0f;
+    color[2] = 0.0f;
+    color[3] = 0.2f;
     y = yStart + 184.0;
     UI_FillRect(&scrPlaceFull, 0.0, y, 640.0, 85.0, 0, 0, color);
     v41 = yStart + 185.0;
@@ -5332,10 +5332,10 @@ void __cdecl UI_DisplayDownloadInfo(char *downloadName, float centerPoint, float
     UI_FillRect(&scrPlaceFull, 0.0, v40, 640.0, 81.0, 0, 0, color);
     if (downloadSize > 0)
     {
-        color[0] = 0.0;
-        color[1] = 1.0;
-        color[2] = 0.0;
-        color[3] = 0.15000001;
+        color[0] = 0.0f;
+        color[1] = 1.0f;
+        color[2] = 0.0f;
+        color[3] = 0.15000001f;
         width = (int)((double)downloadCount / (double)downloadSize * 640.0);
         v17 = (float)(width + 2);
         v39 = yStart + 164.0;
@@ -5363,9 +5363,9 @@ void __cdecl UI_DisplayDownloadInfo(char *downloadName, float centerPoint, float
     }
     else
     {
-        fileNameScale = scale * maxSecondColumnWidth / (double)width;
-        if (fileNameScale <= 0.2000000029802322)
-            v33 = 0.2;
+        fileNameScale = scale * maxSecondColumnWidth / (float)width;
+        if (fileNameScale <= 0.2000000029802322f)
+            v33 = 0.2f;
         else
             v33 = fileNameScale;
         fileNameScale = v33;

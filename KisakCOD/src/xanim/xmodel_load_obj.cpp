@@ -622,7 +622,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
         check[0] = Vec3Dot(verts->normal, verts->tangent);
         check[1] = Vec3Dot(verts->tangent, verts->binormal);
         check[2] = Vec3Dot(verts->binormal, verts->normal);
-        if (!VecNCompareCustomEpsilon(check, vec3_origin, 0.0020000001, 3))
+        if (!VecNCompareCustomEpsilon(check, vec3_origin, 0.0020000001f, 3))
             MyAssertHandler(
                 ".\\r_xsurface_load_obj.cpp",
                 533,

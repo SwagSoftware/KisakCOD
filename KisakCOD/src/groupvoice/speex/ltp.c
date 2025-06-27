@@ -676,18 +676,18 @@ int cdbk_offset
    gain[1] = 32+(spx_word16_t)gain_cdbk[gain_index*3+1];
    gain[2] = 32+(spx_word16_t)gain_cdbk[gain_index*3+2];
 #else
-   gain[0] = 0.015625*gain_cdbk[gain_index*3]+.5;
-   gain[1] = 0.015625*gain_cdbk[gain_index*3+1]+.5;
-   gain[2] = 0.015625*gain_cdbk[gain_index*3+2]+.5;
+   gain[0] = 0.015625f*gain_cdbk[gain_index*3]+.5f;
+   gain[1] = 0.015625f*gain_cdbk[gain_index*3+1]+.5f;
+   gain[2] = 0.015625f*gain_cdbk[gain_index*3+2]+.5f;
 #endif
 
    if (count_lost && pitch > subframe_offset)
    {
       float gain_sum;
       if (1) {
-	 float tmp = count_lost < 4 ? GAIN_SCALING_1*last_pitch_gain : 0.4 * GAIN_SCALING_1 * last_pitch_gain;
-         if (tmp>.95)
-            tmp=.95;
+	 float tmp = count_lost < 4 ? GAIN_SCALING_1*last_pitch_gain : 0.4f * GAIN_SCALING_1 * last_pitch_gain;
+         if (tmp>.95f)
+            tmp=.95f;
          gain_sum = GAIN_SCALING_1*gain_3tap_to_1tap(gain);
 
 	 if (gain_sum > tmp) {
@@ -786,8 +786,8 @@ int plc_tuning
 {
    int i;
    float coef = GAIN_SCALING_1*pitch_coef;
-   if (coef>.99)
-      coef=.99;
+   if (coef>.99f)
+      coef=.99f;
    for (i=0;i<nsf;i++)
    {
       exc[i]=exc[i-start]*coef;
@@ -815,8 +815,8 @@ int cdbk_offset
 {
    int i;
    float coef = GAIN_SCALING_1*pitch_coef;
-   if (coef>.99)
-      coef=.99;
+   if (coef>.99f)
+      coef=.99f;
    for (i=0;i<nsf;i++)
    {
       exc[i]=exc[i-start]*coef;

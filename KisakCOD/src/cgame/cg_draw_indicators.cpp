@@ -26,16 +26,16 @@ void __cdecl CG_DrawFlashDamage(const cg_s *cgameGlob)
 
     if (cgameGlob->nextSnap && cgameGlob->v_dmg_time > cgameGlob->time)
     {
-        v5 = (double)(cgameGlob->v_dmg_time - cgameGlob->time) * cgameGlob->v_dmg_pitch / 500.0;
+        v5 = (float)(cgameGlob->v_dmg_time - cgameGlob->time) * cgameGlob->v_dmg_pitch / 500.0f;
         v4 = fabs(v5);
         redFlash = v4;
-        if (v4 > 5.0)
-            redFlash = 5.0;
-        col[0] = 0.2;
-        col[1] = 0.0;
-        col[2] = 0.0;
-        col[3] = redFlash / 5.0 * 0.699999988079071;
-        sidebuffer = 10.0;
+        if (v4 > 5.0f)
+            redFlash = 5.0f;
+        col[0] = 0.2f;
+        col[1] = 0.0f;
+        col[2] = 0.0f;
+        col[3] = redFlash / 5.0f * 0.699999988079071f;
+        sidebuffer = 10.0f;
         CL_GetScreenDimensions(&displayWidth, &displayHeight, &displayAspect);
         height = (double)displayHeight + sidebuffer;
         width = (double)displayWidth + sidebuffer;

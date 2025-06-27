@@ -1072,11 +1072,11 @@ void __cdecl CL_InitInput()
     Cmd_AddCommandInternal("-talk", IN_TalkUp, &IN_TalkUp_VAR);
     Cmd_AddCommandInternal("+sprint", IN_SprintDown, &IN_SprintDown_VAR);
     Cmd_AddCommandInternal("-sprint", IN_SprintUp, &IN_SprintUp_VAR);
-    min.value.max = 1.0;
-    min.value.min = 0.000099999997;
+    min.value.max = 1.0f;
+    min.value.min = 0.000099999997f;
     cl_analog_attack_threshold = Dvar_RegisterFloat(
         "cl_analog_attack_threshold",
-        0.80000001,
+        0.80000001f,
         min,
         0,
         "The threshold before firing");

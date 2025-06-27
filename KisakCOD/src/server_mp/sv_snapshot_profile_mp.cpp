@@ -1282,10 +1282,10 @@ void __cdecl SV_ProfDraw(int y, char *string, bool showHighlight)
 
     if (showHighlight)
     {
-        color[0] = 1.0;
-        color[1] = 1.0;
-        color[2] = 1.0;
-        color[3] = 0.2;
+        color[0] = 1.0f;
+        color[1] = 1.0f;
+        color[2] = 1.0f;
+        color[3] = 0.2f;
         CL_DrawRect(12, y, 1024, cl_profileTextHeight->current.integer - 6, color);
     }
     CL_DrawString(12, y, string, 0, cl_profileTextHeight->current.integer);

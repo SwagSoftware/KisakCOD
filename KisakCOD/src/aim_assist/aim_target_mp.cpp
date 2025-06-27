@@ -262,7 +262,7 @@ char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targ
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    endPos[3] = 1.4046605e-38;
+    endPos[3] = 1.4046605e-38f;
     playerEyePos[0] = cgArray[0].refdef.vieworg[0];
     playerEyePos[1] = cgArray[0].refdef.vieworg[1];
     playerEyePos[2] = cgArray[0].refdef.vieworg[2];

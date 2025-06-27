@@ -181,7 +181,7 @@ long double __cdecl Sys_BenchmarkGHz()
     float ya; // [esp+6Ch] [ebp-Ch]
     HANDLE thread; // [esp+70h] [ebp-8h]
 
-    k = 2.5999999;
+    k = 2.5999999f;
     thread = GetCurrentThread();
     priority = GetThreadPriority(thread);
     SetThreadPriority(thread, 15);
