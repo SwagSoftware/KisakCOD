@@ -3808,25 +3808,25 @@ void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
         }
         if ((int)((float)monitorHeight * 16.0f / (float)monitorWidth) == 10)
         {
-            vidConfig.aspectRatioWindow = 1.6;
+            vidConfig.aspectRatioWindow = 1.6f;
         }
         else if ((int)((float)monitorHeight * 16.0f / (float)monitorWidth) >= 10)
         {
-            vidConfig.aspectRatioWindow = 1.3333334;
+            vidConfig.aspectRatioWindow = 1.3333334f;
         }
         else
         {
-            vidConfig.aspectRatioWindow = 1.7777778;
+            vidConfig.aspectRatioWindow = 1.7777778f;
         }
         break;
     case 1:
-        vidConfig.aspectRatioWindow = 1.3333334;
+        vidConfig.aspectRatioWindow = 1.3333334f;
         break;
     case 2:
-        vidConfig.aspectRatioWindow = 1.6;
+        vidConfig.aspectRatioWindow = 1.6f;
         break;
     case 3:
-        vidConfig.aspectRatioWindow = 1.7777778;
+        vidConfig.aspectRatioWindow = 1.7777778f;
         break;
     default:
         if (!alwaysfails)
@@ -3838,16 +3838,16 @@ void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
     }
     if (!com_wideScreen)
         MyAssertHandler(".\\r_init.cpp", 485, 0, "%s", "com_wideScreen");
-    Dvar_SetBool((dvar_s *)com_wideScreen, vidConfig.aspectRatioWindow != 1.333333373069763);
-    vidConfig.aspectRatioScenePixel = (double)vidConfig.sceneHeight
+    Dvar_SetBool((dvar_s *)com_wideScreen, vidConfig.aspectRatioWindow != 1.333333373069763f);
+    vidConfig.aspectRatioScenePixel = (float)vidConfig.sceneHeight
         * vidConfig.aspectRatioWindow
-        / (double)vidConfig.sceneWidth;
+        / (float)vidConfig.sceneWidth;
     if (vidConfig.isFullscreen)
-        vidConfig.aspectRatioDisplayPixel = (double)dx.adapterFullscreenHeight
+        vidConfig.aspectRatioDisplayPixel = (float)dx.adapterFullscreenHeight
         * vidConfig.aspectRatioWindow
-        / (double)dx.adapterFullscreenWidth;
+        / (float)dx.adapterFullscreenWidth;
     else
-        vidConfig.aspectRatioDisplayPixel = 1.0;
+        vidConfig.aspectRatioDisplayPixel = 1.0f;
 }
 
 void R_InitGamma()

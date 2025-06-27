@@ -121,101 +121,101 @@ void __cdecl Helicopter_RegisterDvars()
     DvarLimits minw; // [esp+4h] [ebp-10h]
 
     min.value.max = FLT_MAX;
-    min.value.min = 0.0099999998;
+    min.value.min = 0.0099999998f;
     vehHelicopterMaxSpeed = Dvar_RegisterFloat(
         "vehHelicopterMaxSpeed",
-        150.0,
+        150.0f,
         min,
         0x80u,
         "Maximum horizontal speed of the player helicopter (in MPH)");
     mina.value.max = FLT_MAX;
-    mina.value.min = 0.0099999998;
+    mina.value.min = 0.0099999998f;
     vehHelicopterMaxSpeedVertical = Dvar_RegisterFloat(
         "vehHelicopterMaxSpeedVertical",
-        65.0,
+        65.0f,
         mina,
         0x80u,
         "Maximum vertical speed of the player helicopter (in MPH)");
     minb.value.max = FLT_MAX;
-    minb.value.min = 0.0099999998;
+    minb.value.min = 0.0099999998f;
     vehHelicopterMaxAccel = Dvar_RegisterFloat(
         "vehHelicopterMaxAccel",
-        45.0,
+        45.0f,
         minb,
         0x80u,
         "Maximum horizontal acceleration of the player helicopter (in MPH per second)");
     minc.value.max = FLT_MAX;
-    minc.value.min = 0.0099999998;
+    minc.value.min = 0.0099999998f;
     vehHelicopterMaxAccelVertical = Dvar_RegisterFloat(
         "vehHelicopterMaxAccelVertical",
-        30.0,
+        30.0f,
         minc,
         0x80u,
         "Maximum vertical acceleration of the player helicopter (in MPH per second)");
     mind.value.max = FLT_MAX;
-    mind.value.min = 0.0099999998;
+    mind.value.min = 0.0099999998f;
     vehHelicopterMaxYawRate = Dvar_RegisterFloat(
         "vehHelicopterMaxYawRate",
-        120.0,
+        120.0f,
         mind,
         0x80u,
         "Maximum yaw speed of the player helicopter");
     mine.value.max = FLT_MAX;
-    mine.value.min = 0.0099999998;
+    mine.value.min = 0.0099999998f;
     vehHelicopterMaxYawAccel = Dvar_RegisterFloat(
         "vehHelicopterMaxYawAccel",
-        90.0,
+        90.0f,
         mine,
         0x80u,
         "Maximum yaw acceleration of the player helicopter");
     minf.value.max = FLT_MAX;
-    minf.value.min = 0.0099999998;
+    minf.value.min = 0.0099999998f;
     vehHelicopterMaxPitch = Dvar_RegisterFloat(
         "vehHelicopterMaxPitch",
-        35.0,
+        35.0f,
         minf,
         0x80u,
         "Maximum pitch of the player helicopter");
     ming.value.max = FLT_MAX;
-    ming.value.min = 0.0099999998;
+    ming.value.min = 0.0099999998f;
     vehHelicopterMaxRoll = Dvar_RegisterFloat(
         "vehHelicopterMaxRoll",
-        35.0,
+        35.0f,
         ming,
         0x80u,
         "Maximum roll of the player helicopter");
     minh.value.max = FLT_MAX;
-    minh.value.min = 0.0099999998;
+    minh.value.min = 0.0099999998f;
     vehHelicopterLookaheadTime = Dvar_RegisterFloat(
         "vehHelicopterLookaheadTime",
-        1.0,
+        1.0f,
         minh,
         0x80u,
         "How far ahead (in seconds) the player helicopter looks ahead, to avoid hard collisions."
         "  (Like driving down the highway, you should keep 2 seconds distance between you and th"
         "e vehicle in front of you)");
     mini.value.max = FLT_MAX;
-    mini.value.min = 0.0099999998;
+    mini.value.min = 0.0099999998f;
     vehHelicopterHoverSpeedThreshold = Dvar_RegisterFloat(
         "vehHelicopterHoverSpeedThreshold",
-        400.0,
+        400.0f,
         mini,
         0x80u,
         "The speed below which the player helicopter begins to jitter the tilt, for hovering");
-    minj.value.max = 1.0;
-    minj.value.min = 0.0099999998;
+    minj.value.max = 1.0f;
+    minj.value.min = 0.0099999998f;
     vehHelicopterRightStickDeadzone = Dvar_RegisterFloat(
         "vehHelicopterRightStickDeadzone",
-        0.30000001,
+        0.30000001f,
         minj,
         0x80u,
         "Dead-zone for the axes of the right thumbstick.  This helps to better control the "
         "two axes separately.");
-    mink.value.max = 1.0;
-    mink.value.min = 0.0099999998;
+    mink.value.max = 1.0f;
+    mink.value.min = 0.0099999998f;
     vehHelicopterStrafeDeadzone = Dvar_RegisterFloat(
         "vehHelicopterStrafeDeadzone",
-        0.30000001,
+        0.30000001f,
         mink,
         0x80u,
         "Dead-zone so that you can fly straight forward easily without accidentally strafing (a"
@@ -231,19 +231,19 @@ void __cdecl Helicopter_RegisterDvars()
         0x80u,
         "Player helicopters have soft collisions (slow down before they collide).");
     minl.value.max = FLT_MAX;
-    minl.value.min = 0.0;
+    minl.value.min = 0.0f;
     vehHelicopterDecelerationFwd = Dvar_RegisterFloat(
         "vehHelicopterDecelerationFwd",
-        0.5,
+        0.5f,
         minl,
         0x80u,
         "Set the deceleration of the player helicopter (as a fraction of acceleration) in the "
         "direction the chopper is facing.  So 1.0 makes it equal to the acceleration.");
     minm.value.max = FLT_MAX;
-    minm.value.min = 0.0;
+    minm.value.min = 0.0f;
     vehHelicopterDecelerationSide = Dvar_RegisterFloat(
         "vehHelicopterDecelerationSide",
-        1.0,
+        1.0f,
         minm,
         0x80u,
         "Set the side-to-side deceleration of the player helicopter (as a fraction of acceler"
@@ -254,77 +254,77 @@ void __cdecl Helicopter_RegisterDvars()
         0x80u,
         "Invert the altitude control on the player helicopter.");
     minn.value.max = FLT_MAX;
-    minn.value.min = 0.0;
+    minn.value.min = 0.0f;
     vehHelicopterYawOnLeftStick = Dvar_RegisterFloat(
         "vehHelicopterYawOnLeftStick",
-        5.0,
+        5.0f,
         minn,
         0x80u,
         "The yaw speed created by the left stick when pushing the stick diagonally (e.g., movin"
         "g forward and strafing slightly).");
     mino.value.max = FLT_MAX;
-    mino.value.min = 0.0099999998;
+    mino.value.min = 0.0099999998f;
     vehHelicopterTiltSpeed = Dvar_RegisterFloat(
         "vehHelicopterTiltSpeed",
-        1.2,
+        1.2f,
         mino,
         0x80u,
         "The rate at which the player helicopter's tilt responds");
     minp.value.max = FLT_MAX;
-    minp.value.min = 0.0099999998;
+    minp.value.min = 0.0099999998f;
     vehHelicopterTiltFromAcceleration = Dvar_RegisterFloat(
         "vehHelicopterTiltFromAcceleration",
-        2.0,
+        2.0f,
         minp,
         0x80u,
         "The amount of tilt caused by acceleration");
     minq.value.max = FLT_MAX;
-    minq.value.min = 0.0;
+    minq.value.min = 0.0f;
     vehHelicopterTiltFromDeceleration = Dvar_RegisterFloat(
         "vehHelicopterTiltFromDeceleration",
-        2.0,
+        2.0f,
         minq,
         0x80u,
         "The amount of tilt caused by deceleration");
     minr.value.max = FLT_MAX;
-    minr.value.min = 0.0;
+    minr.value.min = 0.0f;
     vehHelicopterTiltFromVelocity = Dvar_RegisterFloat(
         "vehHelicopterTiltFromVelocity",
-        1.0,
+        1.0f,
         minr,
         0x80u,
         "The amount of tilt caused by the current velocity");
     mins.value.max = FLT_MAX;
-    mins.value.min = 0.0;
+    mins.value.min = 0.0f;
     vehHelicopterTiltFromControllerAxes = Dvar_RegisterFloat(
         "vehHelicopterTiltFromControllerAxes",
-        0.0,
+        0.0f,
         mins,
         0x80u,
         "The amount of tilt caused by the desired velocity (i.e., the amount of control"
         "ler stick deflection)");
     mint.value.max = FLT_MAX;
-    mint.value.min = 0.0;
+    mint.value.min = 0.0f;
     vehHelicopterTiltFromFwdAndYaw = Dvar_RegisterFloat(
         "vehHelicopterTiltFromFwdAndYaw",
-        0.0,
+        0.0f,
         mint,
         0x80u,
         "The amount of roll caused by yawing while moving forward.");
     minu.value.max = FLT_MAX;
-    minu.value.min = 0.0;
+    minu.value.min = 0.0f;
     vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt = Dvar_RegisterFloat(
         "vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt",
-        1.0,
+        1.0f,
         minu,
         0x80u,
         "The forward speed (as a fraction of top speed) at which the tilt due t"
         "o yaw reaches is maximum value.");
     minv.value.max = FLT_MAX;
-    minv.value.min = 0.000099999997;
+    minv.value.min = 0.000099999997f;
     vehHelicopterJitterJerkyness = Dvar_RegisterFloat(
         "vehHelicopterJitterJerkyness",
-        0.30000001,
+        0.30000001f,
         minv,
         0,
         "Specifies how jerky the tilt jitter should be");
@@ -335,10 +335,10 @@ void __cdecl Helicopter_RegisterDvars()
         "If set, the turret will not fire through the crosshairs, but straight ahead"
         " of the vehicle, when the player is not freelooking.");
     minw.value.max = FLT_MAX;
-    minw.value.min = 0.000099999997;
+    minw.value.min = 0.000099999997f;
     vehHelicopterTiltMomentum = Dvar_RegisterFloat(
         "vehHelicopterTiltMomentum",
-        0.40000001,
+        0.40000001f,
         minw,
         0x80u,
         "The amount of rotational momentum the helicopter has with regards to tilting.");
@@ -363,12 +363,12 @@ void __cdecl G_SpawnHelicopter(gentity_s *ent, gentity_s *owner, const char *veh
         MyAssertHandler(".\\game_mp\\g_scr_helicopter.cpp", 269, 0, "%s", "!veh->engineSndEnt.isDefined()");
     VEH_InitEntity(ent, veh, veh->infoIdx);
     VEH_InitVehicle(ent, veh, veh->infoIdx);
-    veh->phys.mins[0] = -(float)50.0;
-    veh->phys.mins[1] = -(float)50.0;
-    veh->phys.mins[2] = -(float)50.0;
-    veh->phys.maxs[0] = 50.0;
-    veh->phys.maxs[1] = 50.0;
-    veh->phys.maxs[2] = 50.0;
+    veh->phys.mins[0] = -50.0f;
+    veh->phys.mins[1] = -50.0f;
+    veh->phys.mins[2] = -50.0f;
+    veh->phys.maxs[0] = 50.0f;
+    veh->phys.maxs[1] = 50.0f;
+    veh->phys.maxs[2] = 50.0f;
     if (!owner->client)
         MyAssertHandler(".\\game_mp\\g_scr_helicopter.cpp", 282, 0, "%s", "owner->client");
     team = owner->client->sess.cs.team;
@@ -443,7 +443,7 @@ void __cdecl Helicopter_Pain(
         {
             weapDef = BG_GetWeaponDef(pAttacker->s.weapon);
             if (weapDef->weapType == WEAPTYPE_PROJECTILE || weapDef->weapType == WEAPTYPE_GRENADE)
-                VEH_JoltBody(pSelf, dir, 1.0, 0.0, 0.0);
+                VEH_JoltBody(pSelf, dir, 1.0f, 0.0f, 0.0f);
         }
     }
 }
@@ -467,7 +467,7 @@ void __cdecl Helicopter_Die(
         {
             weapDef = BG_GetWeaponDef(pAttacker->s.weapon);
             if (weapDef->weapType == WEAPTYPE_PROJECTILE || weapDef->weapType == WEAPTYPE_GRENADE)
-                VEH_JoltBody(pSelf, dir, 1.0, 0.0, 0.0);
+                VEH_JoltBody(pSelf, dir, 1.0f, 0.0f, 0.0f);
         }
     }
 }
@@ -492,17 +492,17 @@ void __cdecl Helicopter_Controller(const gentity_s *pSelf, int *partBits)
         MyAssertHandler(".\\game_mp\\g_scr_helicopter.cpp", 351, 0, "%s", "obj");
     v3 = pSelf->s.lerp.u.turret.gunAngles[1];
     bodyAngles[0] = pSelf->s.lerp.u.turret.gunAngles[0];
-    bodyAngles[1] = 0.0;
+    bodyAngles[1] = 0.0f;
     bodyAngles[2] = v3;
     if (veh->boneIndex.body >= 0)
         DObjSetLocalBoneIndex(obj, partBits, veh->boneIndex.body, vec3_origin, bodyAngles);
     gunYaw = pSelf->s.lerp.u.vehicle.gunYaw;
-    turretAngles[0] = 0.0;
+    turretAngles[0] = 0.0f;
     turretAngles[1] = gunYaw;
-    turretAngles[2] = 0.0;
+    turretAngles[2] = 0.0f;
     barrelAngles[0] = pSelf->s.lerp.u.primaryLight.cosHalfFovInner;
-    barrelAngles[1] = 0.0;
-    barrelAngles[2] = 0.0;
+    barrelAngles[1] = 0.0f;
+    barrelAngles[2] = 0.0f;
     if (veh->boneIndex.turret >= 0)
         DObjSetLocalBoneIndex(obj, partBits, veh->boneIndex.turret, vec3_origin, turretAngles);
     if (veh->boneIndex.barrel >= 0)

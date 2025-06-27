@@ -6,16 +6,16 @@
 
 const float s_lightGridRotAxis[3][3] =
 {
-  { 0.47140452, 0.0, 0.33333334 },
-  { -0.23570226, 0.40824828, 0.33333334 },
-  { -0.23570226, -0.40824828, 0.33333334 }
+  { 0.47140452f, 0.0f, 0.33333334f },
+  { -0.23570226f, 0.40824828f, 0.33333334f },
+  { -0.23570226f, -0.40824828f, 0.33333334f }
 }; // idb
 const float standardFrustumSidePlanes[4][4] =
 {
-  { -1.0, 0.0, 0.0, 1.0 },
-  { 1.0, 0.0, 0.0, 1.0 },
-  { 0.0, -1.0, 0.0, 1.0 },
-  { 0.0, 1.0, 0.0, 1.0 }
+  { -1.0f, 0.0f, 0.0f, 1.0f },
+  { 1.0f, 0.0f, 0.0f, 1.0f },
+  { 0.0f, -1.0f, 0.0f, 1.0f },
+  { 0.0f, 1.0f, 0.0f, 1.0f }
 }; // idb
 
 void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColors, GfxLightGridColors *modernColors)

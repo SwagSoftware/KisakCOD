@@ -91,17 +91,17 @@ typedef float spx_word16_t;
 typedef float spx_word32_t;
 typedef float spx_word64_t;
 
-#define LPC_SCALING  1.
-#define SIG_SCALING  1.
-#define LSP_SCALING  1.
-#define GAMMA_SCALING 1.
-#define GAIN_SCALING 1.
-#define GAIN_SCALING_1 1.
+#define LPC_SCALING  1.f
+#define SIG_SCALING  1.f
+#define LSP_SCALING  1.f
+#define GAMMA_SCALING 1.f
+#define GAIN_SCALING 1.f
+#define GAIN_SCALING_1 1.f
 
 #define LPC_SHIFT    0
 #define SIG_SHIFT    0
 
-#define VERY_SMALL 1e-15
+#define VERY_SMALL 1e-15f
 
 #define NEG16(x) (-(x))
 #define NEG32(x) (-(x))

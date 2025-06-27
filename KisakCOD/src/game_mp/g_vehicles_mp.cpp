@@ -1852,17 +1852,17 @@ void __cdecl PositionAccelForces(vehicle_physic_t *phys, float driverAccel, floa
     bool breaking; // [esp+6Fh] [ebp-5h]
     float speed; // [esp+70h] [ebp-4h]
 
-    *result = 0.0;
-    result[1] = 0.0;
-    result[2] = 0.0;
+    *result = 0.0f;
+    result[1] = 0.0f;
+    result[2] = 0.0f;
     speed = Vec3Length(phys->vel);
-    if (speed != 0.0)
+    if (speed != 0.0f)
     {
         AngleVectors(phys->angles, forward, 0, 0);
         if (!CarTravelingForward(phys))
             Vec3Scale(forward, -1.0, forward);
         Vec3NormalizeTo(phys->vel, oldVelDir);
-        Vec3Lerp(oldVelDir, forward, 0.60000002, phys->vel);
+        Vec3Lerp(oldVelDir, forward, 0.60000002f, phys->vel);
         Vec3Normalize(phys->vel);
         dot = Vec3Dot(oldVelDir, phys->vel);
         speed = dot * dot * speed;
@@ -1870,28 +1870,28 @@ void __cdecl PositionAccelForces(vehicle_physic_t *phys, float driverAccel, floa
     }
     speed = Vec3Length(phys->vel);
     breaking = DriverBreaking(phys, driverAccel);
-    if (speed != 0.0)
+    if (speed != 0.0f)
     {
-        mod = 0.1 * vehTestWeight->current.value;
+        mod = 0.1f * vehTestWeight->current.value;
         scale = -mod;
         Vec3Scale(phys->vel, scale, rollResist);
         Vec3Add(rollResist, result, result);
     }
     if (breaking)
     {
-        v7 = 1.0 * vehTestWeight->current.value;
+        v7 = 1.0f * vehTestWeight->current.value;
         scalea = -v7;
         Vec3Scale(phys->vel, scalea, breakAccel);
         Vec3Add(breakAccel, result, result);
     }
-    if (driverAccel != 0.0)
+    if (driverAccel != 0.0f)
     {
         AngleVectors(phys->angles, dir, 0, 0);
         Vec3Mad(result, driverAccel, dir, result);
     }
     if (!phys->onGround)
-        result[2] = result[2] - vehTestWeight->current.value * 800.0;
-    v5 = 1.0 / vehTestWeight->current.value;
+        result[2] = result[2] - vehTestWeight->current.value * 800.0f;
+    v5 = 1.0f / vehTestWeight->current.value;
     Vec3Scale(result, v5, result);
 }
 
@@ -1902,11 +1902,11 @@ bool __cdecl CarTravelingForward(vehicle_physic_t *phys)
     float speed; // [esp+1Ch] [ebp-4h]
 
     speed = Vec3Length(phys->vel);
-    if (speed < 0.0099999998)
+    if (speed < 0.0099999998f)
         return 1;
     AngleVectors(phys->angles, forwardDir, 0, 0);
     Vec3NormalizeTo(phys->vel, velDir);
-    return Vec3Dot(forwardDir, velDir) >= 0.0;
+    return Vec3Dot(forwardDir, velDir) >= 0.0f;
 }
 
 bool __cdecl DriverBreaking(vehicle_physic_t *phys, float driverAccel)
@@ -1914,7 +1914,7 @@ bool __cdecl DriverBreaking(vehicle_physic_t *phys, float driverAccel)
     float v3; // [esp+4h] [ebp-Ch]
 
     v3 = fabs(driverAccel);
-    return v3 < 0.0099999998 || CarTravelingForward(phys) != driverAccel >= 0.0;
+    return v3 < 0.0099999998f || CarTravelingForward(phys) != driverAccel >= 0.0f;
 }
 
 void __cdecl AdvanceVehiclePosition(gentity_s *ent, float frameTime)
@@ -1930,10 +1930,10 @@ void __cdecl AdvanceVehiclePosition(gentity_s *ent, float frameTime)
     VEH_GroundTrace(ent);
     veh->phys.onGround = s_phys_0.onGround;
     Vec3Add(veh->phys.vel, veh->phys.colVelDelta, veh->phys.vel);
-    veh->phys.colVelDelta[0] = 0.0;
-    veh->phys.colVelDelta[1] = 0.0;
-    veh->phys.colVelDelta[2] = 0.0;
-    if (0.0 == veh->phys.vel[0] && 0.0 == veh->phys.vel[1] && 0.0 == veh->phys.vel[2])
+    veh->phys.colVelDelta[0] = 0.0f;
+    veh->phys.colVelDelta[1] = 0.0f;
+    veh->phys.colVelDelta[2] = 0.0f;
+    if (0.0f == veh->phys.vel[0] && 0.0f == veh->phys.vel[1] && 0.0f == veh->phys.vel[2])
     {
         VEH_GroundPlant(ent, 1, frameTime);
     }
@@ -1946,7 +1946,7 @@ void __cdecl AdvanceVehiclePosition(gentity_s *ent, float frameTime)
         VEH_GroundPlant(ent, 1, frameTime);
         v2 = fabs(veh->phys.bodyVel[0]);
         ent->scr_vehicle->speed = v2;
-        if (veh->speed < 0.0)
+        if (veh->speed < 0.0f)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2269, 0, "%s", "veh->speed >= 0.0f");
     }
 }
@@ -1961,20 +1961,20 @@ void __cdecl VEH_GroundTrace(gentity_s *ent)
     veh = ent->scr_vehicle;
     start[0] = veh->phys.origin[0];
     start[1] = veh->phys.origin[1];
-    start[2] = veh->phys.origin[2] + 0.25;
+    start[2] = veh->phys.origin[2] + 0.25f;
     point[0] = veh->phys.origin[0];
     point[1] = veh->phys.origin[1];
-    point[2] = veh->phys.origin[2] - 0.25;
+    point[2] = veh->phys.origin[2] - 0.25f;
     G_TraceCapsule(&trace, start, veh->phys.mins, veh->phys.maxs, point, ent->s.number, ent->clipmask);
     memcpy(&s_phys_0, &trace, 0x2Cu);
     s_phys_0.hasGround = 0;
     s_phys_0.onGround = 0;
     if ((!trace.allsolid || VEH_CorrectAllSolid(ent, &trace))
-        && trace.fraction != 1.0
-        && (veh->phys.vel[2] <= 0.0 || Vec3Dot(veh->phys.vel, trace.normal) <= 10.0))
+        && trace.fraction != 1.0f
+        && (veh->phys.vel[2] <= 0.0f || Vec3Dot(veh->phys.vel, trace.normal) <= 10.0f))
     {
         s_phys_0.hasGround = 1;
-        if (trace.normal[2] >= 0.699999988079071)
+        if (trace.normal[2] >= 0.699999988079071f)
             s_phys_0.onGround = 1;
     }
 }
@@ -1991,12 +1991,12 @@ void __cdecl VEH_GroundMove(gentity_s *ent, float frameTime)
     oldvel[1] = veh->phys.vel[1];
     oldvel[2] = veh->phys.vel[2];
     VEH_ClipVelocity(veh->phys.vel, s_phys_0.groundTrace.normal, veh->phys.vel);
-    if (Vec3Dot(veh->phys.vel, oldvel) > 0.0)
+    if (Vec3Dot(veh->phys.vel, oldvel) > 0.0f)
     {
         Vec3Normalize(veh->phys.vel);
         Vec3Scale(veh->phys.vel, vel, veh->phys.vel);
     }
-    if (veh->phys.vel[0] != 0.0 || veh->phys.vel[1] != 0.0)
+    if (veh->phys.vel[0] != 0.0 || veh->phys.vel[1] != 0.0f)
         VEH_StepSlideMove(ent, 0, frameTime);
 }
 
@@ -2023,13 +2023,13 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int gravity, float frameTime)
     {
         down[0] = startOrigin[0];
         down[1] = startOrigin[1];
-        down[2] = startOrigin[2] - 18.0;
+        down[2] = startOrigin[2] - 18.0f;
         G_TraceCapsule(&trace, startOrigin, veh->phys.mins, veh->phys.maxs, down, ent->s.number, ent->clipmask);
-        if (veh->phys.vel[2] <= 0.0 || trace.fraction != 1.0 && trace.normal[2] >=0.699999988079071)
+        if (veh->phys.vel[2] <= 0.0f || trace.fraction != 1.0f && trace.normal[2] >=0.699999988079071f)
         {
             up[0] = startOrigin[0];
             up[1] = startOrigin[1];
-            up[2] = startOrigin[2] + 18.0;
+            up[2] = startOrigin[2] + 18.0f;
             G_TraceCapsule(&trace, startOrigin, veh->phys.mins, veh->phys.maxs, up, ent->s.number, ent->clipmask);
             if (!trace.startsolid)
             {
@@ -2048,7 +2048,7 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int gravity, float frameTime)
                 G_TraceCapsule(&trace, veh->phys.origin, veh->phys.mins, veh->phys.maxs, down, ent->s.number, ent->clipmask);
                 if (!trace.startsolid)
                     Vec3Lerp(phys->origin, down, trace.fraction, phys->origin);
-                if (trace.fraction < 1.0)
+                if (trace.fraction < 1.0f)
                     VEH_ClipVelocity(veh->phys.vel, trace.normal, veh->phys.vel);
             }
         }
@@ -2083,8 +2083,8 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity, float frameTime)
     endVel[2] = veh->phys.vel[2];
     if (gravity)
     {
-        endVel[2] = endVel[2] - frameTime * 800.0;
-        veh->phys.vel[2] = (veh->phys.vel[2] + endVel[2]) * 0.5;
+        endVel[2] = endVel[2] - frameTime * 800.0f;
+        veh->phys.vel[2] = (veh->phys.vel[2] + endVel[2]) * 0.5f;
         if (s_phys_0.hasGround)
             VEH_ClipVelocity(phys->vel, s_phys_0.groundTrace.normal, phys->vel);
     }
@@ -2106,24 +2106,24 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity, float frameTime)
         G_TraceCapsule(&trace, phys->origin, phys->mins, phys->maxs, end, ent->s.number, ent->clipmask);
         if (trace.startsolid)
         {
-            phys->vel[2] = 0.0;
+            phys->vel[2] = 0.0f;
             return 1;
         }
-        if (trace.fraction > 0.0)
+        if (trace.fraction > 0.0f)
             Vec3Lerp(phys->origin, end, trace.fraction, phys->origin);
-        if (trace.fraction == 1.0)
+        if (trace.fraction == 1.0f)
             break;
         timeLeft = timeLeft - timeLeft * trace.fraction;
         if (numPlanes >= 5)
         {
-            phys->vel[0] = 0.0;
-            phys->vel[1] = 0.0;
-            phys->vel[2] = 0.0;
+            phys->vel[0] = 0.0f;
+            phys->vel[1] = 0.0f;
+            phys->vel[2] = 0.0f;
             return 1;
         }
         for (i = 0; i < numPlanes; ++i)
         {
-            if (Vec3Dot(trace.normal, planes[i]) > 0.9900000095367432)
+            if (Vec3Dot(trace.normal, planes[i]) > 0.9900000095367432f)
             {
                 Vec3Add(trace.normal, phys->vel, phys->vel);
                 break;
@@ -2138,17 +2138,17 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity, float frameTime)
             ++numPlanes;
             for (i = 0; i < numPlanes; ++i)
             {
-                if (Vec3Dot(phys->vel, planes[i]) < 0.1000000014901161)
+                if (Vec3Dot(phys->vel, planes[i]) < 0.1000000014901161f)
                 {
                     VEH_ClipVelocity(phys->vel, planes[i], clipVel);
                     VEH_ClipVelocity(endVel, planes[i], endClipVel);
                     for (j = 0; j < numPlanes; ++j)
                     {
-                        if (j != i && Vec3Dot(clipVel, planes[j]) < 0.1000000014901161)
+                        if (j != i && Vec3Dot(clipVel, planes[j]) < 0.1000000014901161f)
                         {
                             VEH_ClipVelocity(clipVel, planes[j], clipVel);
                             VEH_ClipVelocity(endClipVel, planes[j], endClipVel);
-                            if (Vec3Dot(clipVel, planes[i]) < 0.0)
+                            if (Vec3Dot(clipVel, planes[i]) < 0.0f)
                             {
                                 Vec3Cross(planes[i], planes[j], dir);
                                 Vec3Normalize(dir);
@@ -2160,11 +2160,11 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity, float frameTime)
                                 Vec3Scale(dir, dot, endClipVel);
                                 for (k = 0; k < numPlanes; ++k)
                                 {
-                                    if (k != i && k != j && Vec3Dot(clipVel, planes[k]) < 0.1000000014901161)
+                                    if (k != i && k != j && Vec3Dot(clipVel, planes[k]) < 0.1000000014901161f)
                                     {
-                                        phys->vel[0] = 0.0;
-                                        phys->vel[1] = 0.0;
-                                        phys->vel[2] = 0.0;
+                                        phys->vel[0] = 0.0f;
+                                        phys->vel[1] = 0.0f;
+                                        phys->vel[2] = 0.0f;
                                         return 1;
                                     }
                                 }
@@ -2273,17 +2273,17 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
         VEH_GetWheelOrigin(ent, i, temp);
         MatrixTransformVector43(temp, axis, hitPos);
         if (vehDebugServer->current.enabled)
-            VEH_DebugBox(hitPos, 4.0, 1.0, 0.0, 0.0);
+            VEH_DebugBox(hitPos, 4.0f, 1.0f, 0.0f, 0.0f);
         traceStart[0] = hitPos[0];
         traceStart[1] = hitPos[1];
         traceEnd[0] = hitPos[0];
         traceEnd[1] = hitPos[1];
-        traceStart[2] = hitPos[2] + 64.0;
-        traceEnd[2] = hitPos[2] - 256.0;
+        traceStart[2] = hitPos[2] + 64.0f;
+        traceEnd[2] = hitPos[2] - 256.0f;
         if (vehDebugServer->current.enabled)
-            VEH_DebugLine(traceStart, traceEnd, 0.0, 0.0, 1.0);
+            VEH_DebugLine(traceStart, traceEnd, 0.0f, 0.0f, 1.0f);
         G_TraceCapsule(&trace, traceStart, (float *)vec3_origin, (float *)vec3_origin, traceEnd, ent->s.number, contents);
-        if (trace.fraction >= 1.0)
+        if (trace.fraction >= 1.0f)
         {
             hitPos[0] = traceEnd[0];
             hitPos[1] = traceEnd[1];
@@ -2299,33 +2299,33 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
         {
             phys->wheelZVel[i] = phys->wheelZVel[i] - frameTime * 800.0;
             phys->wheelZPos[i] = phys->wheelZVel[i] * frameTime + phys->wheelZPos[i];
-            if (hitPos[2] > (double)phys->wheelZPos[i])
+            if (hitPos[2] > (float)phys->wheelZPos[i])
             {
                 phys->wheelZPos[i] = hitPos[2];
-                phys->wheelZVel[i] = 0.0;
+                phys->wheelZVel[i] = 0.0f;
             }
         }
         else
         {
             phys->wheelZPos[i] = hitPos[2];
-            phys->wheelZVel[i] = 0.0;
+            phys->wheelZVel[i] = 0.0f;
         }
         wheelPos[i][0] = hitPos[0];
         wheelPos[i][1] = hitPos[1];
         wheelPos[i][2] = phys->wheelZPos[i];
         if (vehDebugServer->current.enabled)
-            VEH_DebugBox(wheelPos[i], 4.0, 0.0, 1.0, 0.0);
+            VEH_DebugBox(wheelPos[i], 4.0f, 0.0f, 1.0f, 0.0f);
     }
     Vec3Add(wheelPos[1], wheelPos[3], pt1);
     Vec3Add(wheelPos[0], wheelPos[2], pt2);
-    Vec3Scale(pt1, 0.5, pt1);
-    Vec3Scale(pt2, 0.5, pt2);
+    Vec3Scale(pt1, 0.5f, pt1);
+    Vec3Scale(pt2, 0.5f, pt2);
     Vec3Sub(pt1, pt2, right);
     Vec3Normalize(right);
     Vec3Add(wheelPos[0], wheelPos[1], pt1);
     Vec3Add(wheelPos[2], wheelPos[3], pt2);
-    Vec3Scale(pt1, 0.5, pt1);
-    Vec3Scale(pt2, 0.5, pt2);
+    Vec3Scale(pt1, 0.5f, pt1);
+    Vec3Scale(pt2, 0.5f, pt2);
     Vec3Sub(pt1, pt2, forward);
     Vec3Normalize(forward);
     Vec3Cross(right, forward, plane);
@@ -2345,35 +2345,35 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
     Vec3Cross(axis[1], plane, axis[0]);
     Vec3Normalize(axis[0]);
     AxisToAngles(*(const mat3x3*)&axis, angles);
-    v5 = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0, frameTime);
+    v5 = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0f, frameTime);
     phys->angles[0] = v5;
-    v6 = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0, frameTime);
+    v6 = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0f, frameTime);
     phys->angles[2] = v6;
     v18 = phys->angles[0];
-    v13 = v18 - 60.0;
-    if (v13 < 0.0)
+    v13 = v18 - 60.0f;
+    if (v13 < 0.0f)
         v19 = v18;
     else
-        v19 = 60.0;
-    v12 = -60.0 - v18;
-    if (v12 < 0.0)
+        v19 = 60.0f;
+    v12 = -60.0f - v18;
+    if (v12 < 0.0f)
         v11 = v19;
     else
-        v11 = -60.0;
+        v11 = -60.0f;
     phys->angles[0] = v11;
     v16 = phys->angles[2];
-    v10 = v16 - 60.0;
-    if (v10 < 0.0)
+    v10 = v16 - 60.0f;
+    if (v10 < 0.0f)
         v17 = v16;
     else
-        v17 = 60.0;
-    v9 = -60.0 - v16;
-    if (v9 < 0.0)
+        v17 = 60.0f;
+    v9 = -60.0f - v16;
+    if (v9 < 0.0f)
         v8 = v17;
     else
-        v8 = -60.0;
+        v8 = -60.0f;
     phys->angles[2] = v8;
-    if ((veh->flags & 1) == 0 && plane[2] != 0.0)
+    if ((veh->flags & 1) == 0 && plane[2] != 0.0f)
         phys->origin[2] = -(phys->origin[0] * plane[0] + phys->origin[1] * plane[1] - plane[3]) / plane[2];
     AnglesSubtract(phys->angles, phys->prevAngles, phys->rotVel);
     v7 = 1.0 / frameTime;
@@ -2389,10 +2389,10 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
             v14[2] = v15[2];
             proj[i][2] = -(proj[i][0] * plane[0] + proj[i][1] * plane[1] - plane[3]) / plane[2];
         }
-        VEH_DebugLine(proj[0], proj[1], 1.0, 1.0, 0.0);
-        VEH_DebugLine(proj[1], proj[3], 1.0, 1.0, 0.0);
-        VEH_DebugLine(proj[3], proj[2], 1.0, 1.0, 0.0);
-        VEH_DebugLine(proj[2], proj[0], 1.0, 1.0, 0.0);
+        VEH_DebugLine(proj[0], proj[1], 1.0f, 1.0f, 0.0f);
+        VEH_DebugLine(proj[1], proj[3], 1.0f, 1.0f, 0.0f);
+        VEH_DebugLine(proj[3], proj[2], 1.0f, 1.0f, 0.0f);
+        VEH_DebugLine(proj[2], proj[0], 1.0f, 1.0f, 0.0f);
     }
 }
 
@@ -2403,7 +2403,7 @@ void __cdecl VEH_DebugLine(float *start, float *end, float r, float g, float b)
     color[0] = r;
     color[1] = g;
     color[2] = b;
-    color[3] = 1.0;
+    color[3] = 1.0f;
     G_DebugLineWithDuration(start, end, color, 1, 1);
 }
 
@@ -2435,7 +2435,7 @@ void __cdecl VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
         if (sqrLen > veh->phys.maxs[0] * veh->phys.maxs[0])
         {
             Vec3Normalize(origin);
-            scale = veh->phys.maxs[0] - 2.0;
+            scale = veh->phys.maxs[0] - 2.0f;
             Vec3Scale(origin, scale, origin);
         }
     }
@@ -2456,26 +2456,26 @@ void __cdecl AdvanceVehicleRotation(gentity_s *ent, float frameTime)
     veh = ent->scr_vehicle;
     if (!veh)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2280, 0, "%s", "veh");
-    mph = Vec3Length(veh->phys.vel) * 0.056818184;
-    if (mph > 0.1)
+    mph = Vec3Length(veh->phys.vel) * 0.056818184f;
+    if (mph > 0.1f)
     {
-        if (mph < 30.0)
-            turningMod = (mph - 0.1) / (30.0 - 0.1);
+        if (mph < 30.0f)
+            turningMod = (mph - 0.1f) / (30.0f - 0.1f);
         else
-            turningMod = 1.0;
+            turningMod = 1.0f;
     }
     else
     {
-        turningMod = 0.0;
+        turningMod = 0.0f;
     }
-    veh->phys.rotVel[1] = -veh->phys.driverSteer * 90.0 * turningMod;
+    veh->phys.rotVel[1] = -veh->phys.driverSteer * 90.0f * turningMod;
     v4 = frameTime * veh->phys.rotVel[1] + veh->phys.prevAngles[1];
-    v5 = v4 * 0.002777777845039964;
-    v3 = v5 + 0.5;
+    v5 = v4 * 0.002777777845039964f;
+    v3 = v5 + 0.5f;
     v2 = floor(v3);
-    veh->phys.angles[1] = (v5 - v2) * 360.0;
-    veh->phys.angles[0] = 0.0;
-    veh->phys.angles[2] = 0.0;
+    veh->phys.angles[1] = (v5 - v2) * 360.0f;
+    veh->phys.angles[0] = 0.0f;
+    veh->phys.angles[2] = 0.0f;
 }
 
 void __cdecl CapMaxMPH(vehicle_physic_t *phys)
@@ -2484,8 +2484,8 @@ void __cdecl CapMaxMPH(vehicle_physic_t *phys)
     float speed; // [esp+1Ch] [ebp-4h]
 
     speed = Vec3Length(phys->vel);
-    maxIPS = vehTestMaxMPH->current.value * 17.6;
-    if (maxIPS < (double)speed)
+    maxIPS = vehTestMaxMPH->current.value * 17.6f;
+    if (maxIPS < speed)
     {
         Vec3Normalize(phys->vel);
         Vec3Scale(phys->vel, maxIPS, phys->vel);
@@ -2521,12 +2521,12 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
         VEH_GetWheelOrigin(pSelf, 0, wheelLeft);
         VEH_GetWheelOrigin(pSelf, 1, wheelRight);
         Vec3Sub(wheelRight, wheelLeft, diff);
-        radius = Vec3Length(diff) * 0.5;
-        radius = radius * 1.5;
+        radius = Vec3Length(diff) * 0.5f;
+        radius = radius * 1.5f;
         mins = phys->mins;
         phys->mins[0] = -radius;
         mins[1] = -radius;
-        mins[2] = 0.0;
+        mins[2] = 0.0f;
         maxs = phys->maxs;
         phys->maxs[0] = radius;
         maxs[1] = radius;
@@ -2540,7 +2540,7 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
             phys->wheelZPos[wheelIndex] = pos[2];
         }
     }
-    VEH_GroundPlant(pSelf, 0, 0.050000001);
+    VEH_GroundPlant(pSelf, 0, 0.050000001f);
     VEH_SetPosition(pSelf, phys->origin, phys->angles);
     prevOrigin = phys->prevOrigin;
     phys->prevOrigin[0] = phys->origin[0];
@@ -2552,7 +2552,7 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
     prevAngles[1] = angles[1];
     prevAngles[2] = angles[2];
     pSelf->health = 99999;
-    VEH_TouchEntities_0(pSelf, 0.050000001);
+    VEH_TouchEntities_0(pSelf, 0.050000001f);
     pSelf->handler = 22;
     pSelf->nextthink = level.time + 50;
     veh->flags |= 8u;
@@ -2581,7 +2581,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTou
     {
         if (pOther->takedamage)
         {
-            if (!pOther->tagInfo && info->collisionDamage > 0.0)
+            if (!pOther->tagInfo && info->collisionDamage > 0.0f)
             {
                 moveLen = Vec3NormalizeTo(veh->phys.vel, moveDir);
                 if (moveLen >= EQUAL_EPSILON)
@@ -2596,7 +2596,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTou
                         hitDir[1] = pOther->r.currentOrigin[1] - pSelf->r.currentOrigin[1];
                         Vec2Normalize(hitDir);
                         dot = hitDir[1] * moveDir[1] + hitDir[0] * moveDir[0];
-                        if (dot >= 0.800000011920929)
+                        if (dot >= 0.800000011920929f)
                         {
                             if (pOther->client && (pOther->client->ps.pm_flags & 1) != 0)
                             {
@@ -2605,9 +2605,9 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTou
                             else
                             {
                                 damageScale = veh->speed / info->collisionSpeed;
-                                if (damageScale > 1.0)
-                                    damageScale = 1.0;
-                                damageScale = (dot - 0.800000011920929) / 0.199999988079071 * damageScale;
+                                if (damageScale > 1.0f)
+                                    damageScale = 1.0f;
+                                damageScale = (dot - 0.800000011920929f) / 0.199999988079071f * damageScale;
                                 damage = (int)(damageScale * info->collisionDamage);
                                 if (damage > 0)
                                     InflictDamage(pSelf, pOther, moveDir, damage);
@@ -2660,7 +2660,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     if (!VehicleHasSeatFree(ent))
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Vehicle has all seats filled");
     bestRiderTag = 0;
-    bestRiderDist = 999999.0;
+    bestRiderDist = 999999.0f;
     for (i = 0; i < 3; ++i)
     {
         rideTag = &veh->boneIndex.riderSlots[i];
@@ -2669,7 +2669,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
             G_DObjGetWorldBoneIndexPos(ent, rideTag->boneIdx, pos);
             Vec3Sub(pos, player->r.currentOrigin, diff);
             dist = Vec3Length(diff);
-            if (bestRiderDist > (double)dist)
+            if (bestRiderDist > dist)
             {
                 bestRiderTag = rideTag;
                 bestRiderDist = dist;
@@ -2680,15 +2680,15 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Tried to mount player on a full vehicle.");
     G_DObjGetWorldBoneIndexMatrix(ent, bestRiderTag->boneIdx, playerMtx);
     AxisToAngles(*(const mat3x3*)&playerMtx, playerAngles);
-    playerAngles[2] = 0.0;
+    playerAngles[2] = 0.0f;
     player->r.currentOrigin[0] = playerMtx[3][0];
     player->r.currentOrigin[1] = playerMtx[3][1];
     player->r.currentOrigin[2] = playerMtx[3][2];
-    originOffset[0] = 0.0;
-    originOffset[1] = 0.0;
-    originOffset[2] = 0.0;
+    originOffset[0] = 0.0f;
+    originOffset[1] = 0.0f;
+    originOffset[2] = 0.0f;
     if (bestRiderTag->tagName == scr_const.tag_driver || bestRiderTag->tagName == scr_const.tag_passenger)
-        originOffset[2] = -35.0;
+        originOffset[2] = -35.0f;
     if (!G_EntLinkToWithOffset(player, ent, bestRiderTag->tagName, originOffset, vec3_origin))
     {
         v2 = SL_ConvertToString(bestRiderTag->tagName);
@@ -2728,7 +2728,7 @@ void __cdecl G_VehEntHandler_Die(
         {
             weapDef = BG_GetWeaponDef(pAttacker->s.weapon);
             if (weapDef->weapType == WEAPTYPE_PROJECTILE || weapDef->weapType == WEAPTYPE_GRENADE)
-                VEH_JoltBody(pSelf, dir, 1.0, 0.0, 0.0);
+                VEH_JoltBody(pSelf, dir, 1.0f, 0.0f, 0.0f);
         }
     }
 }
@@ -2753,17 +2753,17 @@ void __cdecl G_VehEntHandler_Controller(const gentity_s *pSelf, int *partBits)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3341, 0, "%s", "obj");
     v3 = pSelf->s.lerp.u.turret.gunAngles[1];
     bodyAngles[0] = pSelf->s.lerp.u.turret.gunAngles[0];
-    bodyAngles[1] = 0.0;
+    bodyAngles[1] = 0.0f;
     bodyAngles[2] = v3;
     if (veh->boneIndex.body >= 0)
         DObjSetLocalBoneIndex(obj, partBits, veh->boneIndex.body, vec3_origin, bodyAngles);
     gunYaw = pSelf->s.lerp.u.vehicle.gunYaw;
-    turretAngles[0] = 0.0;
+    turretAngles[0] = 0.0f;
     turretAngles[1] = gunYaw;
-    turretAngles[2] = 0.0;
+    turretAngles[2] = 0.0f;
     barrelAngles[0] = pSelf->s.lerp.u.primaryLight.cosHalfFovInner;
-    barrelAngles[1] = 0.0;
-    barrelAngles[2] = 0.0;
+    barrelAngles[1] = 0.0f;
+    barrelAngles[2] = 0.0f;
     if (veh->boneIndex.turret >= 0)
         DObjSetLocalBoneIndex(obj, partBits, veh->boneIndex.turret, vec3_origin, turretAngles);
     if (veh->boneIndex.barrel >= 0)

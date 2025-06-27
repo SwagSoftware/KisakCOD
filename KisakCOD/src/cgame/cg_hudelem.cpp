@@ -67,148 +67,148 @@ void __cdecl CG_HudElemRegisterDvars()
 
     waypointDebugDraw = Dvar_RegisterBool("waypointDebugDraw", 0, 0, "");
     min.value.max = FLT_MAX;
-    min.value.min = 1.1754944e-38;
-    waypointIconWidth = Dvar_RegisterFloat("waypointIconWidth", 36.0, min, 0, "Width of the offscreen pointer.");
+    min.value.min = 1.1754944e-38f;
+    waypointIconWidth = Dvar_RegisterFloat("waypointIconWidth", 36.0f, min, 0, "Width of the offscreen pointer.");
     mina.value.max = FLT_MAX;
-    mina.value.min = 1.1754944e-38;
-    waypointIconHeight = Dvar_RegisterFloat("waypointIconHeight", 36.0, mina, 0, "Height of the offscreen pointer.");
+    mina.value.min = 1.1754944e-38f;
+    waypointIconHeight = Dvar_RegisterFloat("waypointIconHeight", 36.0f, mina, 0, "Height of the offscreen pointer.");
     minb.value.max = FLT_MAX;
-    minb.value.min = 1.1754944e-38;
+    minb.value.min = 1.1754944e-38f;
     waypointOffscreenPointerWidth = Dvar_RegisterFloat(
         "waypointOffscreenPointerWidth",
-        25.0,
+        25.0f,
         minb,
         0,
         "Width of the offscreen pointer.");
     minc.value.max = FLT_MAX;
-    minc.value.min = 1.1754944e-38;
+    minc.value.min = 1.1754944e-38f;
     waypointOffscreenPointerHeight = Dvar_RegisterFloat(
         "waypointOffscreenPointerHeight",
-        12.0,
+        12.0f,
         minc,
         0,
         "Height of the offscreen pointer.");
     mind.value.max = FLT_MAX;
-    mind.value.min = 1.1754944e-38;
+    mind.value.min = 1.1754944e-38f;
     waypointOffscreenPointerDistance = Dvar_RegisterFloat(
         "waypointOffscreenPointerDistance",
-        30.0,
+        30.0f,
         mind,
         0,
         "Distance from the center of the offscreen objective icon to the center its arrow.");
     mine.value.max = FLT_MAX;
-    mine.value.min = 0.0;
+    mine.value.min = 0.0f;
     waypointOffscreenDistanceThresholdAlpha = Dvar_RegisterFloat(
         "waypointOffscreenDistanceThresholdAlpha",
-        30.0,
+        30.0f,
         mine,
         0,
         "Distance from the threshold over which offscreen objective icons lerp their alpha.");
     minf.value.max = FLT_MAX;
-    minf.value.min = 0.0;
-    waypointOffscreenPadLeft = Dvar_RegisterFloat("waypointOffscreenPadLeft", 103.0, minf, 0, "Offset from the edge.");
+    minf.value.min = 0.0f;
+    waypointOffscreenPadLeft = Dvar_RegisterFloat("waypointOffscreenPadLeft", 103.0f, minf, 0, "Offset from the edge.");
     ming.value.max = FLT_MAX;
-    ming.value.min = 0.0;
-    waypointOffscreenPadRight = Dvar_RegisterFloat("waypointOffscreenPadRight", 0.0, ming, 0, "Offset from the edge.");
+    ming.value.min = 0.0f;
+    waypointOffscreenPadRight = Dvar_RegisterFloat("waypointOffscreenPadRight", 0.0f, ming, 0, "Offset from the edge.");
     minh.value.max = FLT_MAX;
-    minh.value.min = 0.0;
-    waypointOffscreenPadTop = Dvar_RegisterFloat("waypointOffscreenPadTop", 0.0, minh, 0, "Offset from the edge.");
+    minh.value.min = 0.0f;
+    waypointOffscreenPadTop = Dvar_RegisterFloat("waypointOffscreenPadTop", 0.0f, minh, 0, "Offset from the edge.");
     mini.value.max = FLT_MAX;
-    mini.value.min = 0.0;
-    waypointOffscreenPadBottom = Dvar_RegisterFloat("waypointOffscreenPadBottom", 30.0, mini, 0, "Offset from the edge.");
+    mini.value.min = 0.0f;
+    waypointOffscreenPadBottom = Dvar_RegisterFloat("waypointOffscreenPadBottom", 30.0f, mini, 0, "Offset from the edge.");
     waypointOffscreenRoundedCorners = Dvar_RegisterBool(
         "waypointOffscreenRoundedCorners",
         1,
         0,
         "Off-screen icons take rounded corners when true.  90-degree corners when false.");
     minj.value.max = FLT_MAX;
-    minj.value.min = 0.0;
+    minj.value.min = 0.0f;
     waypointOffscreenCornerRadius = Dvar_RegisterFloat(
         "waypointOffscreenCornerRadius",
-        105.0,
+        105.0f,
         minj,
         0,
         "Size of the rounded corners.");
     mink.value.max = FLT_MAX;
-    mink.value.min = 1.1754944e-38;
+    mink.value.min = 1.1754944e-38f;
     waypointOffscreenScaleLength = Dvar_RegisterFloat(
         "waypointOffscreenScaleLength",
-        500.0,
+        500.0f,
         mink,
         0,
         "How far the offscreen icon scale travels from full to smallest scale.");
     minl.value.max = FLT_MAX;
-    minl.value.min = 0.0;
+    minl.value.min = 0.0f;
     waypointOffscreenScaleSmallest = Dvar_RegisterFloat(
         "waypointOffscreenScaleSmallest",
-        1.0,
+        1.0f,
         minl,
         0,
         "Smallest scale that the offscreen effect uses.");
     minm.value.max = FLT_MAX;
-    minm.value.min = 0.0;
+    minm.value.min = 0.0f;
     waypointDistScaleRangeMin = Dvar_RegisterFloat(
         "waypointDistScaleRangeMin",
-        1000.0,
+        1000.0f,
         minm,
         0,
         "Distance from player that icon distance scaling starts.");
     minn.value.max = FLT_MAX;
-    minn.value.min = 0.0;
+    minn.value.min = 0.0f;
     waypointDistScaleRangeMax = Dvar_RegisterFloat(
         "waypointDistScaleRangeMax",
-        3000.0,
+        3000.0f,
         minn,
         0,
         "Distance from player that icon distance scaling ends.");
     mino.value.max = FLT_MAX;
-    mino.value.min = 0.0;
+    mino.value.min = 0.0f;
     waypointDistScaleSmallest = Dvar_RegisterFloat(
         "waypointDistScaleSmallest",
-        0.80000001,
+        0.80000001f,
         mino,
         0,
         "Smallest scale that the distance effect uses.");
     minp.value.max = FLT_MAX;
-    minp.value.min = 0.1;
+    minp.value.min = 0.1f;
     waypointSplitscreenScale = Dvar_RegisterFloat(
         "waypointSplitscreenScale",
-        1.8,
+        1.8f,
         minp,
         0,
         "Scale applied to waypoint icons in splitscreen views.");
     minq.value.max = FLT_MAX;
     minq.value.min = -FLT_MAX;
-    waypointTweakY = Dvar_RegisterFloat("waypointTweakY", -17.0, minq, 0, "");
-    minr.value.max = 1.0;
-    minr.value.min = 0.0;
+    waypointTweakY = Dvar_RegisterFloat("waypointTweakY", -17.0f, minq, 0, "");
+    minr.value.max = 1.0f;
+    minr.value.min = 0.0f;
     hudElemPausedBrightness = Dvar_RegisterFloat(
         "hudElemPausedBrightness",
-        0.40000001,
+        0.40000001f,
         minr,
         0x80u,
         "Brightness of the hudelems when the game is paused.");
     mins.value.max = FLT_MAX;
-    mins.value.min = 0.0;
+    mins.value.min = 0.0f;
     waypointPlayerOffsetProne = Dvar_RegisterFloat(
         "waypointPlayerOffsetProne",
-        30.0,
+        30.0f,
         mins,
         0x80u,
         "For waypoints pointing to players, how high to offset off of their origin when they are prone.");
     mint.value.max = FLT_MAX;
-    mint.value.min = 0.0;
+    mint.value.min = 0.0f;
     waypointPlayerOffsetCrouch = Dvar_RegisterFloat(
         "waypointPlayerOffsetCrouch",
-        56.0,
+        56.0f,
         mint,
         0x80u,
         "For waypoints pointing to players, how high to offset off of their origin when they are crouching.");
     minu.value.max = FLT_MAX;
-    minu.value.min = 0.0;
+    minu.value.min = 0.0f;
     waypointPlayerOffsetStand = Dvar_RegisterFloat(
         "waypointPlayerOffsetStand",
-        74.0,
+        74.0f,
         minu,
         0x80u,
         "For waypoints pointing to players, how high to offset off of their origin when they are standing.");
@@ -568,26 +568,26 @@ void __cdecl GetHudElemInfo(int localClientNum, const hudelem_s *elem, cg_hudele
         fontEnum = 4;
         break;
     case 2:
-        baseFontScale = 0.33333334;
+        baseFontScale = 0.33333334f;
         fontEnum = 5;
         break;
     case 3:
-        baseFontScale = 0.25;
+        baseFontScale = 0.25f;
         fontEnum = 6;
         break;
     case 4:
-        baseFontScale = 0.25;
+        baseFontScale = 0.25f;
         fontEnum = 2;
         break;
     case 5:
-        baseFontScale = 0.25;
+        baseFontScale = 0.25f;
         fontEnum = 3;
         break;
     default:
         if (!alwaysfails)
             MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 752, 0, "invalid case");
     $LN27_2:
-        baseFontScale = 0.25;
+        baseFontScale = 0.25f;
         fontEnum = 0;
         break;
     }
@@ -649,11 +649,11 @@ void __cdecl GetHudElemInfo(int localClientNum, const hudelem_s *elem, cg_hudele
     if (cghe->hudElemLabel[0])
         cghe->labelWidth = HudElemStringWidth(cghe->hudElemLabel, cghe);
     else
-        cghe->labelWidth = 0.0;
+        cghe->labelWidth = 0.0f;
     if (cghe->hudElemText[0])
         cghe->textWidth = HudElemStringWidth(cghe->hudElemText, cghe);
     else
-        cghe->textWidth = 0.0;
+        cghe->textWidth = 0.0f;
     cghe->width = HudElemWidth(scrPlace, elem, cghe);
     cghe->height = HudElemHeight(scrPlace, elem, cghe);
     SetHudElemPos(&scrPlaceView[localClientNum], elem, cghe);
@@ -1361,9 +1361,9 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
             pointerHeight = waypointOffscreenPointerHeight->current.value * scrPlace->scaleVirtualToReal[1];
             pointerDistance = waypointOffscreenPointerDistance->current.value * scaleVirtualToRealAvg;
             distanceThresholdAlpha = waypointOffscreenDistanceThresholdAlpha->current.value * scaleVirtualToRealAvg;
-            if (distanceThresholdAlpha < 0.1)
-                distanceThresholdAlpha = 0.1;
-            padding = pointerHeight * 0.5 + pointerDistance;
+            if (distanceThresholdAlpha < 0.1f)
+                distanceThresholdAlpha = 0.1f;
+            padding = pointerHeight * 0.5f + pointerDistance;
             padLeft = waypointOffscreenPadLeft->current.value * scrPlace->scaleVirtualToReal[0] + padding;
             padRight = waypointOffscreenPadRight->current.value * scrPlace->scaleVirtualToReal[0] + padding;
             padTop = waypointOffscreenPadTop->current.value * scrPlace->scaleVirtualToReal[1] + padding;
@@ -1388,7 +1388,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
                     padBottom,
                     clampedDir,
                     &clampedDist);
-                if (didClamp && clampedDist > 0.0)
+                if (didClamp && clampedDist > 0.0f)
                 {
                     colorArrow[0] = color[0];
                     colorArrow[1] = color[1];
@@ -1410,20 +1410,20 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
                     iconHeight = iconHeight * scale;
                     v8 = -clampedDir[1];
                     v7 = atan2(clampedDir[0], v8);
-                    angle = v7 * 180.0 / 3.141592741012573;
+                    angle = v7 * 180.0f / 3.141592741012573f;
                     screenPosArrow[0] = pointerDistance * clampedDir[0] + screenPos[0];
                     screenPosArrow[1] = pointerDistance * clampedDir[1] + screenPos[1];
-                    y = screenPosArrow[1] - pointerHeight * 0.5;
-                    x = screenPosArrow[0] - pointerWidth * 0.5;
+                    y = screenPosArrow[1] - pointerHeight * 0.5f;
+                    x = screenPosArrow[0] - pointerWidth * 0.5f;
                     CL_DrawStretchPicPhysicalRotateXY(
                         x,
                         y,
                         pointerWidth,
                         pointerHeight,
-                        0.0,
-                        0.0,
-                        1.0,
-                        1.0,
+                        0.0f,
+                        0.0f,
+                        1.0f,
+                        1.0f,
                         angle,
                         colorArrow,
                         cgMedia.offscreenObjectivePointer);
@@ -1431,9 +1431,9 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
                 scale = GetScaleForDistance(localClientNum, worldPos);
                 iconWidth = iconWidth * scale;
                 iconHeight = iconHeight * scale;
-                v4 = screenPos[1] - iconHeight * 0.5;
-                v3 = screenPos[0] - iconWidth * 0.5;
-                CL_DrawStretchPicPhysical(v3, v4, iconWidth, iconHeight, 0.0, 0.0, 1.0, 1.0, color, material);
+                v4 = screenPos[1] - iconHeight * 0.5f;
+                v3 = screenPos[0] - iconWidth * 0.5f;
+                CL_DrawStretchPicPhysical(v3, v4, iconWidth, iconHeight, 0.0f, 0.0f, 1.0f, 1.0f, color, material);
                 return;
             }
             if (localClientNum)
@@ -1444,7 +1444,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
                     "%s\n\t(localClientNum) = %i",
                     "(localClientNum == 0)",
                     localClientNum);
-            screenPosArrow[2] = 1.4046605e-38;
+            screenPosArrow[2] = 1.4046605e-38f;
             if (elem->targetEntNum != cgArray[0].predictedPlayerEntity.nextState.number)
             {
                 cent = CG_GetEntity(localClientNum, elem->targetEntNum);
@@ -1509,12 +1509,12 @@ char __cdecl WorldPosToScreenPos(int localClientNum, const float *worldPos, floa
     scrPlace = &scrPlaceView[localClientNum];
     CG_GetViewAxisProjections(&cgArray[0].refdef, worldPos, projections);
     w = projections[0];
-    if (projections[0] >= 0.0)
+    if (projections[0] >= 0.0f)
     {
         x = projections[1] / refdef->tanHalfFovX;
-        *outScreenPos = scrPlace->realViewportSize[0] * 0.5 * (1.0 - x / w);
+        *outScreenPos = scrPlace->realViewportSize[0] * 0.5f * (1.0f - x / w);
         y = projections[2] / refdef->tanHalfFovY;
-        outScreenPos[1] = scrPlace->realViewportSize[1] * 0.5 * (1.0 - y / w);
+        outScreenPos[1] = scrPlace->realViewportSize[1] * 0.5f * (1.0f - y / w);
         return 1;
     }
     else
@@ -1526,10 +1526,10 @@ char __cdecl WorldPosToScreenPos(int localClientNum, const float *worldPos, floa
         {
             v7 = fabs(*outScreenPos);
             if (v7 < EQUAL_EPSILON)
-                *outScreenPos = 0.001;
+                *outScreenPos = 0.001f;
             v6 = fabs(outScreenPos[1]);
             if (v6 < EQUAL_EPSILON)
-                outScreenPos[1] = 0.001;
+                outScreenPos[1] = 0.001f;
             while (1)
             {
                 v5 = fabs(*outScreenPos);
@@ -1610,8 +1610,8 @@ bool __cdecl ClampScreenPosToEdges(
             "(localClientNum == 0)",
             localClientNum);
     cgameGlob = cgArray;
-    halfWidth = scrPlace->realViewportSize[0] * 0.5;
-    halfHeight = scrPlace->realViewportSize[1] * 0.5;
+    halfWidth = scrPlace->realViewportSize[0] * 0.5f;
+    halfHeight = scrPlace->realViewportSize[1] * 0.5f;
     pointOriginal[0] = *point;
     pointOriginal[1] = point[1];
     *point = *point - halfWidth;
@@ -1621,9 +1621,9 @@ bool __cdecl ClampScreenPosToEdges(
     borderTop = scrPlace->realViewableMin[1] + padTop - halfHeight;
     borderBottom = halfHeight - (scrPlace->realViewportSize[1] - scrPlace->realViewableMax[1] + padBottom);
     clamped = 0;
-    if (borderLeft <= (double)*point)
+    if (borderLeft <= (float)*point)
     {
-        if (borderRight < (double)*point)
+        if (borderRight < (float)*point)
         {
             v19 = borderRight / *point;
             *point = v19 * *point;
@@ -1638,9 +1638,9 @@ bool __cdecl ClampScreenPosToEdges(
         point[1] = v20 * point[1];
         clamped = 1;
     }
-    if (borderTop <= (double)point[1])
+    if (borderTop <= (float)point[1])
     {
-        if (borderBottom < (double)point[1])
+        if (borderBottom < (float)point[1])
         {
             v17 = borderBottom / point[1];
             *point = v17 * *point;
@@ -1659,9 +1659,9 @@ bool __cdecl ClampScreenPosToEdges(
     {
         radius = (scrPlace->scaleVirtualToReal[0] + scrPlace->scaleVirtualToReal[1])
             * waypointOffscreenCornerRadius->current.value
-            * 0.5;
-        left = *point < 0.0;
-        top = point[1] < 0.0;
+            * 0.5f;
+        left = *point < 0.0f;
+        top = point[1] < 0.0f;
         if (left)
             v8 = borderLeft + radius;
         else
@@ -1674,24 +1674,24 @@ bool __cdecl ClampScreenPosToEdges(
         focus[1] = v9;
         if (waypointDebugDraw->current.enabled)
         {
-            y = focus[1] + halfHeight - 1.0;
-            x = focus[0] + halfWidth - 1.0;
-            CL_DrawStretchPicPhysical(x, y, 3.0, 3.0, 0.0, 0.0, 1.0, 1.0, colorYellow, cgMedia.whiteMaterial);
-            v14 = point[1] + halfHeight - 1.0;
-            v13 = *point + halfWidth - 1.0;
-            CL_DrawStretchPicPhysical(v13, v14, 3.0, 3.0, 0.0, 0.0, 1.0, 1.0, colorGreen, cgMedia.whiteMaterial);
+            y = focus[1] + halfHeight - 1.0f;
+            x = focus[0] + halfWidth - 1.0f;
+            CL_DrawStretchPicPhysical(x, y, 3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 1.0f, colorYellow, cgMedia.whiteMaterial);
+            v14 = point[1] + halfHeight - 1.0f;
+            v13 = *point + halfWidth - 1.0f;
+            CL_DrawStretchPicPhysical(v13, v14, 3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 1.0f, colorGreen, cgMedia.whiteMaterial);
         }
         dir[0] = *point - focus[0];
         dir[1] = point[1] - focus[1];
         Vec2Normalize(dir);
-        v12 = left && dir[0] < 0.0 || !left && dir[0] > 0.0;
+        v12 = left && dir[0] < 0.0f || !left && dir[0] > 0.0f;
         horzQualify = v12;
-        v11 = top && dir[1] < 0.0 || !top && dir[1] > 0.0;
+        v11 = top && dir[1] < 0.0f || !top && dir[1] > 0.0f;
         vertQualify = v11;
         if (horzQualify && vertQualify)
         {
             dist = Vec2Distance(focus, point);
-            if (radius < (double)dist)
+            if (radius < (float)dist)
             {
                 *point = radius * dir[0] + focus[0];
                 point[1] = radius * dir[1] + focus[1];
@@ -1711,7 +1711,7 @@ bool __cdecl ClampScreenPosToEdges(
     return clamped;
 }
 
-double __cdecl GetScaleForDistance(int localClientNum, const float *worldPos)
+float __cdecl GetScaleForDistance(int localClientNum, const float *worldPos)
 {
     float diff[4]; // [esp+8h] [ebp-18h] BYREF
     float range; // [esp+18h] [ebp-8h]
@@ -1725,18 +1725,18 @@ double __cdecl GetScaleForDistance(int localClientNum, const float *worldPos)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    diff[3] = 1.4046605e-38;
+    diff[3] = 1.4046605e-38f;
     Vec3Sub(worldPos, cgArray[0].refdef.vieworg, diff);
     dist3D = Vec3Length(diff);
-    if (waypointDistScaleRangeMin->current.value >= (double)dist3D)
-        return 1.0;
-    if (waypointDistScaleRangeMax->current.value <= (double)dist3D)
+    if (waypointDistScaleRangeMin->current.value >= dist3D)
+        return 1.0f;
+    if (waypointDistScaleRangeMax->current.value <= dist3D)
         return waypointDistScaleSmallest->current.value;
     range = waypointDistScaleRangeMax->current.value - waypointDistScaleRangeMin->current.value;
-    if (range <= 0.0)
-        range = 1.0;
+    if (range <= 0.0f)
+        range = 1.0f;
     range = (dist3D - waypointDistScaleRangeMin->current.value) / range;
-    return (float)(range * waypointDistScaleSmallest->current.value + (1.0 - range) * 1.0);
+    return range * waypointDistScaleSmallest->current.value + (1.0f - range) * 1.0f;
 }
 
 int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems)
@@ -1836,7 +1836,7 @@ void AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
                     else
                     {
                         v7 = 3;
-                        v6 = v8 * 0.00430000014603138;
+                        v6 = v8 * 0.00430000014603138f;
                     }
                     x = elem->x;
                     y = elem->y;
@@ -1847,7 +1847,7 @@ void AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
                     *(hudelem_color_t *)sprite.rgbaColor = v11;
                     sprite.flags = v7;
                     sprite.radius = v6;
-                    sprite.minScreenRadius = 0.0;
+                    sprite.minScreenRadius = 0.0f;
                     sprite.material = v9;
                     FX_SpriteAdd(&sprite);
                 }
@@ -1856,7 +1856,7 @@ void AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
     }
 }
 
-double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem)
+float __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem)
 {
     float height; // [esp+20h] [ebp-10h]
     float lerp; // [esp+24h] [ebp-Ch]
@@ -1881,15 +1881,15 @@ double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem)
     if (deltaTime <= 0)
         return fromHeight;
     lerp = (double)deltaTime / (double)elem->scaleTime;
-    if (lerp < 0.0 || lerp > 1.0)
+    if (lerp < 0.0f || lerp > 1.0f)
         MyAssertHandler(
             ".\\cgame\\cg_hudelem.cpp",
             991,
             1,
             "lerp not in [0.0f, 1.0f]\n\t%g not in [%g, %g]",
             lerp,
-            0.0,
-            1.0);
-    return (float)((height - fromHeight) * lerp + fromHeight);
+            0.0f,
+            1.0f);
+    return (height - fromHeight) * lerp + fromHeight;
 }
 

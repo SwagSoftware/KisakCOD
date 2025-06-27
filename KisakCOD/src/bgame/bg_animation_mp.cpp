@@ -1443,12 +1443,12 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
     else
     {
         clientNum = es->clientNum;
-        tag_origin_angles[0] = 0.0;
-        tag_origin_angles[1] = 0.0;
-        tag_origin_angles[2] = 0.0;
-        vTorsoAngles[0] = 0.0;
-        vTorsoAngles[1] = 0.0;
-        vTorsoAngles[2] = 0.0;
+        tag_origin_angles[0] = 0.0f;
+        tag_origin_angles[1] = 0.0f;
+        tag_origin_angles[2] = 0.0f;
+        vTorsoAngles[0] = 0.0f;
+        vTorsoAngles[1] = 0.0f;
+        vTorsoAngles[2] = 0.0f;
         vHeadAngles[0] = ci->playerAngles[0];
         vHeadAngles[1] = ci->playerAngles[1];
         vHeadAngles[2] = ci->playerAngles[2];
@@ -1473,25 +1473,25 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
             vTorsoAngles[0] = ci->torso.pitchAngle;
             if ((es->lerp.eFlags & 8) != 0)
             {
-                v15 = vTorsoAngles[0] * 0.002777777845039964;
-                v11 = v15 + 0.5;
+                v15 = vTorsoAngles[0] * 0.002777777845039964f;
+                v11 = v15 + 0.5f;
                 v10 = floor(v11);
-                vTorsoAngles[0] = (v15 - v10) * 360.0;
-                if (vTorsoAngles[0] <= 0.0)
-                    v3 = vTorsoAngles[0] * 0.25;
+                vTorsoAngles[0] = (v15 - v10) * 360.0f;
+                if (vTorsoAngles[0] <= 0.0f)
+                    v3 = vTorsoAngles[0] * 0.25f;
                 else
-                    v3 = vTorsoAngles[0] * 0.5;
+                    v3 = vTorsoAngles[0] * 0.5f;
                 vTorsoAngles[0] = v3;
             }
         }
         AnglesSubtract(vHeadAngles, vTorsoAngles, vHeadAngles);
         AnglesSubtract(vTorsoAngles, tag_origin_angles, vTorsoAngles);
-        tag_origin_offset = 0.0;
-        tag_origin_offset_4 = 0.0;
+        tag_origin_offset = 0.0f;
+        tag_origin_offset_4 = 0.0f;
         fLeanFrac = GetLeanFraction(ci->lerpLean);
-        vTorsoAngles[2] = fLeanFrac * 50.0 * 0.925000011920929;
+        vTorsoAngles[2] = fLeanFrac * 50.0f * 0.925000011920929f;
         vHeadAngles[2] = vTorsoAngles[2];
-        if (fLeanFrac != 0.0)
+        if (fLeanFrac != 0.0f)
         {
             if ((es->lerp.eFlags & 4) != 0)
             {
@@ -1517,27 +1517,27 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
             if (fLeanFrac != 0.0)
                 vHeadAngles[2] = vHeadAngles[2] * 0.5;
             tag_origin_angles[0] = tag_origin_angles[0] + es->fTorsoPitch;
-            v14 = vTorsoAngles[1] * 0.01745329238474369;
+            v14 = vTorsoAngles[1] * 0.01745329238474369f;
             c = cos(v14);
             s = sin(v14);
-            tag_origin_offset = (1.0 - c) * -24.0 + tag_origin_offset;
-            tag_origin_offset_4 = s * -12.0 + tag_origin_offset_4;
-            if (fLeanFrac * s > 0.0)
-                tag_origin_offset_4 = -fLeanFrac * (1.0 - c) * 16.0 + tag_origin_offset_4;
-            angles[0][0] = 0.0;
-            angles[0][1] = vTorsoAngles[2] * -1.200000047683716;
-            angles[0][2] = vTorsoAngles[2] * 0.300000011920929;
+            tag_origin_offset = (1.0f - c) * -24.0f + tag_origin_offset;
+            tag_origin_offset_4 = s * -12.0f + tag_origin_offset_4;
+            if (fLeanFrac * s > 0.0f)
+                tag_origin_offset_4 = -fLeanFrac * (1.0f - c) * 16.0f + tag_origin_offset_4;
+            angles[0][0] = 0.0f;
+            angles[0][1] = vTorsoAngles[2] * -1.200000047683716f;
+            angles[0][2] = vTorsoAngles[2] * 0.300000011920929f;
             if (es->fTorsoPitch != 0.0 || es->fWaistPitch != 0.0)
             {
                 v6 = AngleDelta(es->fTorsoPitch, es->fWaistPitch);
                 angles[0][0] = v6 + angles[0][0];
             }
-            angles[1][0] = 0.0;
-            angles[1][1] = vTorsoAngles[1] * 0.1000000014901161 - vTorsoAngles[2] * 0.2000000029802322;
-            angles[1][2] = vTorsoAngles[2] * 0.2000000029802322;
+            angles[1][0] = 0.0f;
+            angles[1][1] = vTorsoAngles[1] * 0.1000000014901161f - vTorsoAngles[2] * 0.2000000029802322f;
+            angles[1][2] = vTorsoAngles[2] * 0.2000000029802322f;
             angles[2][0] = vTorsoAngles[0];
-            angles[2][1] = vTorsoAngles[1] * 0.800000011920929 - vTorsoAngles[2] * -1.0;
-            angles[2][2] = vTorsoAngles[2] * -0.2000000029802322;
+            angles[2][1] = vTorsoAngles[1] * 0.800000011920929f - vTorsoAngles[2] * -1.0;
+            angles[2][2] = vTorsoAngles[2] * -0.2000000029802322f;
         }
         else
         {
@@ -1572,31 +1572,31 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
                     vHeadAngles[2] = v8;
                 }
             }
-            tag_origin_angles[2] = fLeanFrac * 50.0 * 0.07500000298023224 + tag_origin_angles[2];
-            angles[0][0] = vTorsoAngles[0] * 0.2000000029802322;
-            angles[0][1] = vTorsoAngles[1] * 0.4000000059604645;
-            angles[0][2] = vTorsoAngles[2] * 0.5;
+            tag_origin_angles[2] = fLeanFrac * 50.0f * 0.07500000298023224f + tag_origin_angles[2];
+            angles[0][0] = vTorsoAngles[0] * 0.2000000029802322f;
+            angles[0][1] = vTorsoAngles[1] * 0.4000000059604645f;
+            angles[0][2] = vTorsoAngles[2] * 0.5f;
             if (es->fTorsoPitch != 0.0 || es->fWaistPitch != 0.0)
             {
                 v9 = AngleDelta(es->fTorsoPitch, es->fWaistPitch);
                 angles[0][0] = v9 + angles[0][0];
             }
-            angles[1][0] = vTorsoAngles[0] * 0.300000011920929;
-            angles[1][1] = vTorsoAngles[1] * 0.4000000059604645;
-            angles[1][2] = vTorsoAngles[2] * 0.5;
-            angles[2][0] = vTorsoAngles[0] * 0.5;
-            angles[2][1] = vTorsoAngles[1] * 0.2000000029802322;
-            angles[2][2] = vTorsoAngles[2] * -0.6000000238418579;
+            angles[1][0] = vTorsoAngles[0] * 0.300000011920929f;
+            angles[1][1] = vTorsoAngles[1] * 0.4000000059604645f;
+            angles[1][2] = vTorsoAngles[2] * 0.5f;
+            angles[2][0] = vTorsoAngles[0] * 0.5f;
+            angles[2][1] = vTorsoAngles[1] * 0.2000000029802322f;
+            angles[2][2] = vTorsoAngles[2] * -0.6000000238418579f;
         }
-        angles[3][0] = vHeadAngles[0] * 0.300000011920929;
-        angles[3][1] = vHeadAngles[1] * 0.300000011920929;
-        angles[3][2] = 0.0;
-        angles[4][0] = vHeadAngles[0] * 0.699999988079071;
-        angles[4][1] = vHeadAngles[1] * 0.699999988079071;
-        angles[4][2] = vHeadAngles[2] * -0.300000011920929;
-        angles[5][0] = 0.0;
-        angles[5][1] = 0.0;
-        angles[5][2] = 0.0;
+        angles[3][0] = vHeadAngles[0] * 0.300000011920929f;
+        angles[3][1] = vHeadAngles[1] * 0.300000011920929f;
+        angles[3][2] = 0.0f;
+        angles[4][0] = vHeadAngles[0] * 0.699999988079071f;
+        angles[4][1] = vHeadAngles[1] * 0.699999988079071f;
+        angles[4][2] = vHeadAngles[2] * -0.300000011920929f;
+        angles[5][0] = 0.0f;
+        angles[5][1] = 0.0f;
+        angles[5][2] = 0.0f;
         if (es->fWaistPitch != 0.0 || es->fTorsoPitch != 0.0)
             angles[5][0] = AngleDelta(es->fWaistPitch, es->fTorsoPitch);
         for (i = 0; i < 6; ++i)
@@ -1612,7 +1612,7 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
         info->tag_origin_angles[2] = tag_origin_angles[2];
         info->tag_origin_offset[0] = tag_origin_offset;
         info->tag_origin_offset[1] = tag_origin_offset_4;
-        info->tag_origin_offset[2] = 0.0;
+        info->tag_origin_offset[2] = 0.0f;
     }
 }
 
@@ -1706,7 +1706,7 @@ void __cdecl BG_RunLerpFrameRate(
     if ((newAnimation & 0xFFFFFDFF) != 0)
     {
         anim = lf->animation;
-        if (anim && anim->moveSpeed != 0.0 && lf->oldFrameSnapshotTime)
+        if (anim && anim->moveSpeed != 0.0f && lf->oldFrameSnapshotTime)
         {
             if (bgs->latestSnapshotTime != lf->oldFrameSnapshotTime)
             {
@@ -1729,47 +1729,47 @@ void __cdecl BG_RunLerpFrameRate(
                 lf->oldFramePos[0] = es->lerp.pos.trBase[0];
                 lf->oldFramePos[1] = es->lerp.pos.trBase[1];
                 lf->oldFramePos[2] = es->lerp.pos.trBase[2];
-                if (lf->animSpeedScale >= 0.1000000014901161)
+                if (lf->animSpeedScale >= 0.1000000014901161f)
                 {
-                    if (lf->animSpeedScale > 2.0)
+                    if (lf->animSpeedScale > 2.0f)
                     {
                         if ((anim->flags & 2) != 0)
                         {
-                            if (lf->animSpeedScale > 4.0)
-                                lf->animSpeedScale = 4.0;
+                            if (lf->animSpeedScale > 4.0f)
+                                lf->animSpeedScale = 4.0f;
                         }
-                        else if (anim->moveSpeed <= 150.0)
+                        else if (anim->moveSpeed <= 150.0f)
                         {
-                            if (anim->moveSpeed >= 20.0)
+                            if (anim->moveSpeed >= 20.0f)
                             {
-                                fScaleMax = 3.0 - (anim->moveSpeed - 20.0) * 1.0 / 130.0;
+                                fScaleMax = 3.0f - (anim->moveSpeed - 20.0f) * 1.0f / 130.0f;
                                 if (fScaleMax < (double)lf->animSpeedScale)
                                     lf->animSpeedScale = fScaleMax;
                             }
-                            else if (lf->animSpeedScale > 3.0)
+                            else if (lf->animSpeedScale > 3.0f)
                             {
-                                lf->animSpeedScale = 3.0;
+                                lf->animSpeedScale = 3.0f;
                             }
                         }
                         else
                         {
-                            lf->animSpeedScale = 2.0;
+                            lf->animSpeedScale = 2.0f;
                         }
                     }
                 }
-                else if (lf->animSpeedScale < 0.009999999776482582 && isLadderAnim)
+                else if (lf->animSpeedScale < 0.009999999776482582f && isLadderAnim)
                 {
-                    lf->animSpeedScale = 0.0;
+                    lf->animSpeedScale = 0.0f;
                 }
                 else
                 {
-                    lf->animSpeedScale = 0.1;
+                    lf->animSpeedScale = 0.1f;
                 }
             }
         }
         else
         {
-            lf->animSpeedScale = 1.0;
+            lf->animSpeedScale = 1.0f;
             lf->oldFrameSnapshotTime = bgs->latestSnapshotTime;
             lf->oldFramePos[0] = es->lerp.pos.trBase[0];
             lf->oldFramePos[1] = es->lerp.pos.trBase[1];
@@ -1860,9 +1860,9 @@ void __cdecl BG_SetNewAnimation(
         {
             if (!anim || lf->animationTime <= 0)
             {
-                if (!anim || anim->moveSpeed == 0.0)
+                if (!anim || anim->moveSpeed == 0.0f)
                 {
-                    if (!oldanim || oldanim->moveSpeed == 0.0)
+                    if (!oldanim || oldanim->moveSpeed == 0.0f)
                         transitionMin = 170;
                     else
                         transitionMin = 250;
@@ -1880,7 +1880,7 @@ void __cdecl BG_SetNewAnimation(
         if (anim && anim->moveSpeed != 0.0 && XAnimIsLooped(pXAnims, newAnimationa))
         {
             animIndex = oldAnimNum & 0xFFFFFDFF;
-            if (oldanim && oldanim->moveSpeed != 0.0 && XAnimIsLooped(pXAnims, animIndex))
+            if (oldanim && oldanim->moveSpeed != 0.0f && XAnimIsLooped(pXAnims, animIndex))
             {
                 fStartTime = XAnimGetTime(pAnimTree, animIndex);
             }
@@ -1890,13 +1890,13 @@ void __cdecl BG_SetNewAnimation(
                     cycleLen = XAnimGetLengthMsec(pXAnims, animIndex) + 200;
                 else
                     cycleLen = 1000;
-                fStartTimea = (double)(bgs->time % cycleLen) / (double)cycleLen + (double)ci->clientNum * 0.3600000143051147;
-                fStartTime = fStartTimea - (double)(int)fStartTimea;
+                fStartTimea = (float)(bgs->time % cycleLen) / (float)cycleLen + (float)ci->clientNum * 0.3600000143051147f;
+                fStartTime = fStartTimea - (float)(int)fStartTimea;
             }
         }
         if (oldanim)
         {
-            blendTime = (double)lf->animationTime * EQUAL_EPSILON;
+            blendTime = (float)lf->animationTime * EQUAL_EPSILON;
             XAnimClearTreeGoalWeights(pAnimTree, oldAnimNum & 0xFFFFFDFF, blendTime);
         }
         if (newAnimationa)
@@ -1912,37 +1912,37 @@ void __cdecl BG_SetNewAnimation(
                     Com_Error(ERR_DROP, "death animation '%s' is looping", anim->name);
                 if (bNew)
                 {
-                    goalTime = (double)lf->animationTime * EQUAL_EPSILON;
-                    XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0, goalTime, 1.0, 0, 0, 0);
+                    goalTime = (float)lf->animationTime * EQUAL_EPSILON;
+                    XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0f, goalTime, 1.0f, 0, 0, 0);
                 }
                 else
                 {
-                    XAnimSetGoalWeightKnobAll(obj, newAnimationa, 0, 1.0, 0.0, 1.0, 0, 0);
+                    XAnimSetGoalWeightKnobAll(obj, newAnimationa, 0, 1.0f, 0.0f, 1.0f, 0, 0);
                     XAnimSetTime(pAnimTree, newAnimationa, 1.0);
                 }
             }
             else
             {
-                v12 = anim->moveSpeed != 0.0 && XAnimGetWeight(pAnimTree, newAnimationa) == 0.0;
+                v12 = anim->moveSpeed != 0.0f && XAnimGetWeight(pAnimTree, newAnimationa) == 0.0f;
                 v11 = (double)lf->animationTime * EQUAL_EPSILON;
-                XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0, v11, 1.0, 0, anim->noteType, lf != &ci->legs);
+                XAnimSetCompleteGoalWeight(obj, newAnimationa, 1.0f, v11, 1.0f, 0, anim->noteType, lf != &ci->legs);
                 if (v12)
                     XAnimSetTime(pAnimTree, newAnimationa, fStartTime);
             }
             if (lf != &ci->legs)
             {
                 v10 = (double)lf->animationTime * EQUAL_EPSILON;
-                XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.torsoAnim, 1.0, v10, 1.0, 0, anim->noteType, 0);
+                XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.torsoAnim, 1.0f, v10, 1.0f, 0, anim->noteType, 0);
                 v9 = (double)lf->animationTime * EQUAL_EPSILON;
-                XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.legsAnim, 0.0099999998, v9, 1.0, 0, anim->noteType, 0);
+                XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.legsAnim, 0.0099999998f, v9, 1.0f, 0, anim->noteType, 0);
             }
         }
         else if (lf != &ci->legs)
         {
             v8 = (double)lf->animationTime * EQUAL_EPSILON;
-            XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.torsoAnim, 0.0, v8, 1.0, 0, 0, 0);
+            XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.torsoAnim, 0.0f, v8, 1.0f, 0, 0, 0);
             v7 = (double)lf->animationTime * EQUAL_EPSILON;
-            XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.legsAnim, 1.0, v7, 1.0, 0, 0, 0);
+            XAnimSetCompleteGoalWeight(obj, bgs->animScriptData.legsAnim, 1.0f, v7, 1.0f, 0, 0, 0);
         }
     }
 }
@@ -2113,22 +2113,22 @@ LABEL_38:
         ci->torso.yawAngle = vHeadAngles_4 + moveDir;
         ci->legs.yawAngle = vHeadAngles_4 + moveDir;
     }
-    MAX_PITCH_FRACTION = 2.0;
+    MAX_PITCH_FRACTION = 2.0f;
     if ((es->lerp.eFlags & 0x20000) != 0
         || (es->lerp.eFlags & 0x300) != 0
         || (BG_GetConditionValue(ci, 3u) & 0xC0000) != 0
         || es->lerp.eFlags == 0x8000)
     {
-        BG_SwingAngles(0.0, 0.0, 45.0, 0.15000001, &ci->torso.pitchAngle, &ci->torso.pitching);
+        BG_SwingAngles(0.0f, 0.0f, 45.0f, 0.15000001f, &ci->torso.pitchAngle, &ci->torso.pitching);
     }
     else
     {
-        if (vHeadAngles <= 180.0)
+        if (vHeadAngles <= 180.0f)
             v2 = vHeadAngles * MAX_PITCH_FRACTION;
         else
-            v2 = (vHeadAngles + -360.0) * MAX_PITCH_FRACTION;
+            v2 = (vHeadAngles + -360.0f) * MAX_PITCH_FRACTION;
         dest = v2;
-        BG_SwingAngles(dest, 0.0, 45.0, 0.15000001, &ci->torso.pitchAngle, &ci->torso.pitching);
+        BG_SwingAngles(dest, 0.0f, 45.0f, 0.15000001f, &ci->torso.pitchAngle, &ci->torso.pitching);
     }
 }
 

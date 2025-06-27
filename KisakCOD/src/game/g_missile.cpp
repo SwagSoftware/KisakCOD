@@ -75,122 +75,122 @@ void __cdecl G_RegisterMissileDvars()
         0x80u,
         "This limits how steeply the hellfire missile can turn upward when climbing");
     mina.value.max = FLT_MAX;
-    mina.value.min = 0.1;
+    mina.value.min = 0.1f;
     missileHellfireUpAccel = Dvar_RegisterFloat(
         "missileHellfireUpAccel",
-        1000.0,
+        1000.0f,
         mina,
         0x80u,
         "The rate at which the hellfire missile curves upward");
     minb.value.max = FLT_MAX;
-    minb.value.min = 0.0;
+    minb.value.min = 0.0f;
     missileJavClimbHeightDirect = Dvar_RegisterFloat(
         "missileJavClimbHeightDirect",
-        10000.0,
+        10000.0f,
         minb,
         0x80u,
         "In direct-fire mode, how far above the target the rocket will aim for when climbing.");
     minc.value.max = FLT_MAX;
-    minc.value.min = 0.0;
+    minc.value.min = 0.0f;
     missileJavClimbHeightTop = Dvar_RegisterFloat(
         "missileJavClimbHeightTop",
-        15000.0,
+        15000.0f,
         minc,
         0x80u,
         "In top-fire mode, how far above the target the rocket will aim for when climbing.");
     mind.value.max = FLT_MAX;
-    mind.value.min = 0.0;
+    mind.value.min = 0.0f;
     missileJavClimbAngleDirect = Dvar_RegisterFloat(
         "missileJavClimbAngleDirect",
-        85.0,
+        85.0f,
         mind,
         0x80u,
         "In direct-fire mode, the minimum angle between the rocket and target until the rocket s"
         "tops climbing.  Smaller angles make for higher climbs.");
     mine.value.max = FLT_MAX;
-    mine.value.min = 0.0;
+    mine.value.min = 0.0f;
     missileJavClimbAngleTop = Dvar_RegisterFloat(
         "missileJavClimbAngleTop",
-        50.0,
+        50.0f,
         mine,
         0x80u,
         "In top-fire mode, the minimum angle between the rocket and target until the rocket stops c"
         "limbing.  Smaller angles make for higher climbs.");
     minf.value.max = FLT_MAX;
-    minf.value.min = 0.0;
+    minf.value.min = 0.0f;
     missileJavClimbCeilingDirect = Dvar_RegisterFloat(
         "missileJavClimbCeilingDirect",
-        0.0,
+        0.0f,
         minf,
         0x80u,
         "In direct-fire mode, how high the missile needs to reach before it descends.");
     ming.value.max = FLT_MAX;
-    ming.value.min = 0.0;
+    ming.value.min = 0.0f;
     missileJavClimbCeilingTop = Dvar_RegisterFloat(
         "missileJavClimbCeilingTop",
-        3000.0,
+        3000.0f,
         ming,
         0x80u,
         "In top-fire mode, how high the missile needs to reach before it descends.");
     minh.value.max = FLT_MAX;
-    minh.value.min = 0.0;
+    minh.value.min = 0.0f;
     missileJavTurnRateDirect = Dvar_RegisterFloat(
         "missileJavTurnRateDirect",
-        60.0,
+        60.0f,
         minh,
         0x80u,
         "In direct-fire mode, how sharp the rocket can turn, in angles/sec.");
     mini.value.max = FLT_MAX;
-    mini.value.min = 0.0;
+    mini.value.min = 0.0f;
     missileJavTurnRateTop = Dvar_RegisterFloat(
         "missileJavTurnRateTop",
-        100.0,
+        100.0f,
         mini,
         0x80u,
         "In top-fire mode, how sharp the rocket can turn, in angles/sec.");
     minj.value.max = FLT_MAX;
-    minj.value.min = 0.0;
+    minj.value.min = 0.0f;
     missileJavAccelClimb = Dvar_RegisterFloat(
         "missileJavAccelClimb",
-        300.0,
+        300.0f,
         minj,
         0x80u,
         "Rocket acceleration when climbing.");
     mink.value.max = FLT_MAX;
-    mink.value.min = 0.0;
+    mink.value.min = 0.0f;
     missileJavAccelDescend = Dvar_RegisterFloat(
         "missileJavAccelDescend",
-        3000.0,
+        3000.0f,
         mink,
         0x80u,
         "Rocket acceleration when descending towards target.");
     minl.value.max = FLT_MAX;
-    minl.value.min = 0.0;
+    minl.value.min = 0.0f;
     missileJavSpeedLimitClimb = Dvar_RegisterFloat(
         "missileJavSpeedLimitClimb",
-        1000.0,
+        1000.0f,
         minl,
         0x80u,
         "Rocket's speed limit when climbing.");
     minm.value.max = FLT_MAX;
-    minm.value.min = 0.0;
+    minm.value.min = 0.0f;
     missileJavSpeedLimitDescend = Dvar_RegisterFloat(
         "missileJavSpeedLimitDescend",
-        6000.0,
+        6000.0f,
         minm,
         0x80u,
         "Rocket's speed limit when descending towards target.");
-    minn.value.max = 1.0;
-    minn.value.min = 0.0;
-    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001, minn, 0x80u, "");
+    minn.value.max = 1.0f;
+    minn.value.min = 0.0f;
+    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001f, minn, 0x80u, "");
     mino.value.max = FLT_MAX;
-    mino.value.min = 0.0;
-    missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0, mino, 0x80u, "");
+    mino.value.min = 0.0f;
+    missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0f, mino, 0x80u, "");
     minp.value.max = FLT_MAX;
-    minp.value.min = 0.0;
+    minp.value.min = 0.0f;
     missileWaterMaxDepth = Dvar_RegisterFloat(
         "missileWaterMaxDepth",
-        60.0,
+        60.0f,
         minp,
         0x80u,
         "If a missile explodes deeper under water than this, they explosion effect/sound will not play.");
@@ -688,7 +688,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         origin[0] = ent->r.currentOrigin[0];
         origin[1] = ent->r.currentOrigin[1];
         origin[2] = ent->r.currentOrigin[2];
-        Vec3Mad(origin, -1.635, &ent->mover.aSpeed, origin);
+        Vec3Mad(origin, -1.635f, &ent->mover.aSpeed, origin);
         if (EntHandle::isDefined(&ent->r.ownerNum))
         {
             passEntityNum = EntHandle::entnum(&ent->r.ownerNum);
@@ -698,7 +698,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         {
             G_MissileTrace(&tr, ent->r.currentOrigin, origin, 1023, ent->clipmask);
         }
-        if (tr.fraction == 1.0)
+        if (tr.fraction == 1.0f)
         {
             ent->s.lerp.pos.trType = TR_GRAVITY;
             ent->s.lerp.pos.trTime = level.time;
@@ -709,9 +709,9 @@ void __cdecl G_RunMissile(gentity_s *ent)
             trBase[1] = v19[1];
             trBase[2] = v19[2];
             trDelta = ent->s.lerp.pos.trDelta;
-            ent->s.lerp.pos.trDelta[0] = 0.0;
-            trDelta[1] = 0.0;
-            trDelta[2] = 0.0;
+            ent->s.lerp.pos.trDelta[0] = 0.0f;
+            trDelta[1] = 0.0f;
+            trDelta[2] = 0.0f;
         }
     }
     v16 = ent->r.currentOrigin;
@@ -773,12 +773,12 @@ void __cdecl G_RunMissile(gentity_s *ent)
     {
         if (weapDef->stickiness == WEAPSTICKINESS_ALL
             || (weapDef->stickiness == WEAPSTICKINESS_GROUND || weapDef->stickiness == WEAPSTICKINESS_GROUND_WITH_YAW)
-            && tr.normal[2] > 0.699999988079071)
+            && tr.normal[2] > 0.699999988079071f)
         {
-            if (tr.fraction < 1.0)
+            if (tr.fraction < 1.0f)
             {
-                Vec3Mad(ent->r.currentOrigin, 0.13500001, tr.normal, traceStart);
-                Vec3Mad(ent->r.currentOrigin, -1.5, tr.normal, origin);
+                Vec3Mad(ent->r.currentOrigin, 0.13500001f, tr.normal, traceStart);
+                Vec3Mad(ent->r.currentOrigin, -1.5f, tr.normal, origin);
                 if (EntHandle::isDefined(&ent->r.ownerNum))
                 {
                     v3 = EntHandle::entnum(&ent->r.ownerNum);
@@ -788,7 +788,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
                 {
                     G_MissileTrace(&trDown, traceStart, origin, 1023, ent->clipmask);
                 }
-                if (trDown.fraction != 1.0)
+                if (trDown.fraction != 1.0f)
                 {
                     memcpy(&tr, &trDown, sizeof(tr));
                     Vec3Lerp(traceStart, origin, tr.fraction, endpos);
@@ -798,7 +798,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
                 }
             }
         }
-        else if (tr.fraction == 1.0 || tr.fraction < 1.0 && tr.normal[2] > 0.699999988079071)
+        else if (tr.fraction == 1.0f || tr.fraction < 1.0f && tr.normal[2] > 0.699999988079071f)
         {
             v13 = ent->r.currentOrigin;
             traceStart[0] = ent->r.currentOrigin[0];
@@ -808,8 +808,8 @@ void __cdecl G_RunMissile(gentity_s *ent)
             origin[0] = ent->r.currentOrigin[0];
             origin[1] = ent->r.currentOrigin[1];
             origin[2] = ent->r.currentOrigin[2];
-            traceStart[2] = traceStart[2] + 0.135000005364418;
-            origin[2] = origin[2] - 1.5;
+            traceStart[2] = traceStart[2] + 0.135000005364418f;
+            origin[2] = origin[2] - 1.5f;
             if (EntHandle::isDefined(&ent->r.ownerNum))
             {
                 v2 = EntHandle::entnum(&ent->r.ownerNum);
@@ -863,16 +863,16 @@ void __cdecl G_RunMissile(gentity_s *ent)
         {
             for (attractorIndex = 0; attractorIndex < 0x20; ++attractorIndex)
             {
-                circleDir1[0] = 1.0;
-                circleDir1[1] = 0.0;
-                circleDir1[2] = 0.0;
-                circleDir2[0] = 0.0;
-                circleDir2[1] = 1.0;
-                circleDir2[2] = 0.0;
-                circleDir3[0] = 0.0;
-                circleDir3[1] = 0.0;
-                circleDir3[2] = 1.0;
-                radius = 10.0;
+                circleDir1[0] = 1.0f;
+                circleDir1[1] = 0.0f;
+                circleDir1[2] = 0.0f;
+                circleDir2[0] = 0.0f;
+                circleDir2[1] = 1.0f;
+                circleDir2[2] = 0.0f;
+                circleDir3[0] = 0.0f;
+                circleDir3[1] = 0.0f;
+                circleDir3[2] = 1.0f;
+                radius = 10.0f;
                 if (attrGlob.attractors[attractorIndex].inUse)
                 {
                     if (attrGlob.attractors[attractorIndex].entnum == 1023)
@@ -995,7 +995,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
     {
         explosionType = 4;
         explodeOnImpact = 0;
-        ent->mover.speed = -1.0e10;
+        ent->mover.speed = -1.0e10f;
         methodOfDeath = 15;
     }
     else if (explodeOnImpact)
@@ -1043,8 +1043,8 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
                 hitClient = 1;
             BG_EvaluateTrajectoryDelta(&ent->s.lerp.pos, level.time, velocity);
             speed = Vec3Length(velocity);
-            if (speed == 0.0)
-                velocity[2] = 1.0;
+            if (speed == 0.0f)
+                velocity[2] = 1.0f;
             if (weapDef->weapType != WEAPTYPE_GRENADE || g_minGrenadeDamageSpeed->current.value < (double)speed)
             {
                 if (EntHandle::isDefined(&ent->r.ownerNum))
@@ -1211,13 +1211,13 @@ LABEL_92:
             splashMethodOfDeath = GetSplashMethodOfDeath(ent);
             if (EntHandle::isDefined(&ent->parent))
             {
-                v34 = weapDef->damageConeAngle * 0.01745329238474369;
+                v34 = weapDef->damageConeAngle * 0.01745329238474369f;
                 v27 = cos(v34);
-                v26 = weapDef->damageConeAngle - 180.0;
-                if (v26 < 0.0)
+                v26 = weapDef->damageConeAngle - 180.0f;
+                if (v26 < 0.0f)
                     coneAngleCos = v27;
                 else
-                    coneAngleCos = -1.0;
+                    coneAngleCos = -1.0f;
                 fraction = splashMethodOfDeath;
                 radius_min = other;
                 radius = (float)weapDef->iExplosionRadius;
@@ -1281,12 +1281,12 @@ bool __cdecl CheckCrumpleMissile(gentity_s *ent, trace_t *trace)
     hitTime = level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction);
     BG_EvaluateTrajectoryDelta(&ent->s.lerp.pos, hitTime, velocity);
     speed = Vec3Length(velocity);
-    MIN_CRUMPLE_SPEED = 500.0;
-    if ((float)500.0 > (double)speed)
+    MIN_CRUMPLE_SPEED = 500.0f;
+    if ((float)500.0f > (double)speed)
         return 0;
-    scale = -1.0 / speed;
+    scale = -1.0f / speed;
     Vec3Scale(velocity, scale, velocity);
-    cos45 = 0.70700002;
+    cos45 = 0.70700002f;
     v3 = Vec3Dot(velocity, trace->normal);
     return cos45 < v3;
 }
@@ -1341,7 +1341,7 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
     if ((ent->s.lerp.eFlags & 0x1000000) == 0)
         goto LABEL_40;
     bounceFactor = Vec3Length(velocity);
-    if (bounceFactor > 0.0 && dot <= 0.0)
+    if (bounceFactor > 0.0f && dot <= 0.0f)
     {
         dot = dot / -bounceFactor;
         bounceFactor = (weapDef->perpendicularBounce[surfType] - weapDef->parallelBounce[surfType]) * dot
@@ -1361,10 +1361,10 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
     }
     if (mayStop
         && (weapDef->stickiness == WEAPSTICKINESS_ALL
-            || trace->normal[2] > 0.699999988079071
+            || trace->normal[2] > 0.699999988079071f
             && (weapDef->stickiness == WEAPSTICKINESS_GROUND
                 || weapDef->stickiness == WEAPSTICKINESS_GROUND_WITH_YAW
-                || Vec3Length(ent->s.lerp.pos.trDelta) < 20.0)))
+                || Vec3Length(ent->s.lerp.pos.trDelta) < 20.0f)))
     {
         G_SetOrigin(ent, ent->r.currentOrigin);
         if (weapDef->stickiness == WEAPSTICKINESS_GROUND_WITH_YAW)
@@ -1389,9 +1389,9 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
     else
     {
     LABEL_40:
-        Vec3Scale(trace->normal, 0.1, vDelta);
-        if (vDelta[2] > 0.0)
-            vDelta[2] = 0.0;
+        Vec3Scale(trace->normal, 0.1f, vDelta);
+        if (vDelta[2] > 0.0f)
+            vDelta[2] = 0.0f;
         Vec3Add(ent->r.currentOrigin, vDelta, ent->r.currentOrigin);
         ent->s.lerp.pos.trBase[0] = ent->r.currentOrigin[0];
         ent->s.lerp.pos.trBase[1] = ent->r.currentOrigin[1];
@@ -1410,7 +1410,7 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
         {
             Vec3Sub(ent->s.lerp.pos.trDelta, velocity, velocity);
             dot = Vec3Length(velocity);
-            return dot > 100.0;
+            return dot > 100.0f;
         }
     }
 }
@@ -1433,14 +1433,14 @@ void __cdecl MissileLandAngles(gentity_s *ent, trace_t *trace, float *vAngles, i
     float fAdjustPitchDiff; // [esp+50h] [ebp-14h]
     float fAngleDelta; // [esp+60h] [ebp-4h]
 
-    fAdjustPitchDiff = 80.0;
-    hitTime = level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction);
+    fAdjustPitchDiff = 80.0f;
+    hitTime = level.previousTime + (int)((float)(level.time - level.previousTime) * trace->fraction);
     BG_EvaluateTrajectory(&ent->s.lerp.apos, hitTime, vAngles);
-    if (trace->normal[2] <= 0.1000000014901161)
+    if (trace->normal[2] <= 0.1000000014901161f)
     {
         if (!bForceAlign)
         {
-            v7 = (double)((G_rand() & 0x7F) - 63) + ent->s.lerp.apos.trDelta[0];
+            v7 = ((G_rand() & 0x7F) - 63) + ent->s.lerp.apos.trDelta[0];
             ent->s.lerp.apos.trDelta[0] = AngleNormalize360(v7);
         }
     }
@@ -1456,38 +1456,38 @@ void __cdecl MissileLandAngles(gentity_s *ent, trace_t *trace, float *vAngles, i
             ent->s.lerp.apos.trBase[2] = vAngles[2];
             ent->s.lerp.apos.trTime = hitTime;
             v4 = G_random();
-            if (fAdjustPitchDiff <= (double)v13)
-                ent->s.lerp.apos.trDelta[0] = (v4 * 0.300000011920929 + 0.8500000238418579) * ent->s.lerp.apos.trDelta[0];
+            if (fAdjustPitchDiff <= v13)
+                ent->s.lerp.apos.trDelta[0] = (v4 * 0.300000011920929f + 0.8500000238418579f) * ent->s.lerp.apos.trDelta[0];
             else
-                ent->s.lerp.apos.trDelta[0] = (v4 * 0.300000011920929 + 0.8500000238418579) * ent->s.lerp.apos.trDelta[0] * -1.0;
+                ent->s.lerp.apos.trDelta[0] = (v4 * 0.300000011920929f + 0.8500000238418579f) * ent->s.lerp.apos.trDelta[0] * -1.0;
         }
-        v14 = *vAngles * 0.002777777845039964;
+        v14 = *vAngles * 0.002777777845039964f;
         v12 = v14 + 0.5;
         v11 = floor(v12);
-        *vAngles = (v14 - v11) * 360.0;
-        if (bForceAlign || (float)45.0 > (double)v13)
+        *vAngles = (v14 - v11) * 360.0f;
+        if (bForceAlign || 45.0f > v13)
         {
             v10 = fabs(*vAngles);
-            if (v10 <= 90.0)
+            if (v10 <= 90.0f)
             {
                 v5 = AngleNormalize360(fSurfacePitch);
             }
             else
             {
-                v9 = fSurfacePitch + 180.0;
+                v9 = fSurfacePitch + 180.0f;
                 v5 = AngleNormalize360(v9);
             }
             *vAngles = v5;
         }
         else
         {
-            if (fAdjustPitchDiff <= (double)v13)
+            if (fAdjustPitchDiff <= v13)
             {
                 v6 = AngleNormalize360(*vAngles);
             }
             else
             {
-                v8 = fAngleDelta * 0.25 + *vAngles;
+                v8 = fAngleDelta * 0.25f + *vAngles;
                 v6 = AngleNormalize360(v8);
             }
             *vAngles = v6;
@@ -1512,13 +1512,13 @@ void __cdecl MissileLandAnglesFlat(gentity_s *ent, trace_t *trace, float *angles
         level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction),
         angles);
     NearestPitchAndYawOnPlane(angles, trace->normal, angles);
-    if (angles[2] != 0.0)
+    if (angles[2] != 0.0f)
         MyAssertHandler(".\\game\\g_missile.cpp", 191, 0, "%s", "angles[ROLL] == 0.f");
     AngleVectors(angles, 0, right, up);
     normalRightComponent = Vec3Dot(right, trace->normal);
     normalUpComponent = Vec3Dot(up, trace->normal);
     v3 = atan2(normalRightComponent, normalUpComponent);
-    angles[2] = v3 * 180.0 / 3.141592741012573;
+    angles[2] = v3 * 180.0f / 3.141592741012573f;
 }
 
 void __cdecl MissileLandAnglesFlatMaintainingDirection(gentity_s *ent, trace_t *trace, float *angles)
@@ -1538,12 +1538,12 @@ void __cdecl MissileLandAnglesFlatMaintainingDirection(gentity_s *ent, trace_t *
         level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction),
         angles);
     *angles = PitchForYawOnNormal(angles[1], trace->normal);
-    angles[2] = 0.0;
+    angles[2] = 0.0f;
     AngleVectors(angles, 0, right, up);
     normalRightComponent = Vec3Dot(right, trace->normal);
     normalUpComponent = Vec3Dot(up, trace->normal);
     v3 = atan2(normalRightComponent, normalUpComponent);
-    angles[2] = v3 * 180.0 / 3.141592741012573;
+    angles[2] = v3 * 180.0f / 3.141592741012573f;
 }
 
 void __cdecl CheckGrenadeDanger(gentity_s *grenadeEnt)
@@ -1651,7 +1651,7 @@ void __cdecl Missile_PenetrateGlass(
             if (damage)
             {
                 BG_EvaluateTrajectoryDelta(&ent->s.lerp.pos, level.time, vel);
-                if (Vec3LengthSq(vel) >= 1.0)
+                if (Vec3LengthSq(vel) >= 1.0f)
                 {
                     if (!predicted)
                     {
@@ -1696,12 +1696,8 @@ void __cdecl Missile_PenetrateGlass(
 
 void __cdecl DrawMissileDebug(float *start, float *end)
 {
-    float color[4]; // [esp+0h] [ebp-10h] BYREF
+    float color[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 
-    color[0] = 1.0;
-    color[1] = 0.0;
-    color[2] = 0.0;
-    color[3] = 1.0;
     if (g_debugBullets->current.integer >= 5)
         G_DebugLineWithDuration(start, end, color, 1, 1000);
 }
@@ -1737,19 +1733,19 @@ void __cdecl RunMissile_Destabilize(gentity_s *missile)
         {
             for (axis = 0; axis < 3; ++axis)
             {
-                v1 = G_flrand(0.0, 1.0);
+                v1 = G_flrand(0.0f, 1.0f);
                 newAngleAccel[axis] = v1 * perturbationMax;
             }
-            if (missile->mover.pos1[2] < 0.0)
+            if (missile->mover.pos1[2] < 0.0f)
                 newAngleAccel[0] = -newAngleAccel[0];
-            if (missile->mover.pos1[1] > 0.0)
+            if (missile->mover.pos1[1] > 0.0f)
                 newAngleAccel[1] = -newAngleAccel[1];
         }
         else
         {
             for (axis = 0; axis < 3; ++axis)
             {
-                v2 = G_flrand(-1.0, 1.0);
+                v2 = G_flrand(-1.0f, 1.0f);
                 newAngleAccel[axis] = v2 * perturbationMax;
             }
         }
@@ -1757,10 +1753,10 @@ void __cdecl RunMissile_Destabilize(gentity_s *missile)
         missile->mover.pos1[2] = newAngleAccel[1];
         missile->mover.pos2[0] = newAngleAccel[2];
         missile->s.lerp.pos.trTime = level.time;
-        missile->mover.decelTime = weaponDef->destabilizationRateTime * 1000.0;
+        missile->mover.decelTime = weaponDef->destabilizationRateTime * 1000.0f;
         missile->flags |= 0x10000u;
     }
-    Vec3Mad(missile->s.lerp.apos.trBase, 0.050000001, &missile->mover.pos1[1], newAPos);
+    Vec3Mad(missile->s.lerp.apos.trBase, 0.050000001f, &missile->mover.pos1[1], newAPos);
     G_SetAngle(missile, newAPos);
     AngleVectors(newAPos, direction, 0, 0);
     min = (float)weaponDef->iProjectileSpeed;
@@ -1787,7 +1783,7 @@ void __cdecl RunMissile_Destabilize(gentity_s *missile)
 
 double __cdecl RunMissile_GetPerturbation(float destabilizationCurvatureMax)
 {
-    if (destabilizationCurvatureMax >= 1000000000.0 || destabilizationCurvatureMax < 0.0)
+    if (destabilizationCurvatureMax >= 1000000000.0f || destabilizationCurvatureMax < 0.0f)
         MyAssertHandler(
             ".\\game\\g_missile.cpp",
             997,
@@ -1826,11 +1822,11 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
     float perpDist; // [esp+A8h] [ebp-4h]
 
     weaponDef = BG_GetWeaponDef(missile->s.weapon);
-    if (Vec3NormalizeTo(missile->s.lerp.pos.trDelta, forwardDir) < 0.000009999999747378752)
+    if (Vec3NormalizeTo(missile->s.lerp.pos.trDelta, forwardDir) < 0.000009999999747378752f)
         return;
-    forceVector[0] = 0.0;
-    forceVector[1] = 0.0;
-    forceVector[2] = 0.0;
+    forceVector[0] = 0.0f;
+    forceVector[1] = 0.0f;
+    forceVector[2] = 0.0f;
     for (attractorIndex = 0; attractorIndex < 0x20; ++attractorIndex)
     {
         if (attrGlob.attractors[attractorIndex].inUse)
@@ -1857,25 +1853,25 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
             }
             Vec3Sub(attractorOrigin, missile->s.lerp.pos.trBase, delta);
             forwardDist = Vec3Dot(delta, forwardDir);
-            if (forwardDist > 0.0)
+            if (forwardDist > 0.0f)
             {
                 scale = -forwardDist;
                 Vec3Mad(delta, scale, forwardDir, perpDelta);
                 perpDist = Vec3NormalizeTo(perpDelta, perpDir);
-                if (perpDist < 0.000009999999747378752)
+                if (perpDist < 0.000009999999747378752f)
                 {
                     if (attrGlob.attractors[attractorIndex].isAttractor)
                         continue;
-                    perpDir[0] = 0.0;
-                    perpDir[1] = 0.0;
-                    perpDir[2] = -1.0;
+                    perpDir[0] = 0.0f;
+                    perpDir[1] = 0.0f;
+                    perpDir[2] = -1.0f;
                 }
-                if (!attrGlob.attractors[attractorIndex].isAttractor && perpDir[2] > 0.0)
+                if (!attrGlob.attractors[attractorIndex].isAttractor && perpDir[2] > 0.0f)
                 {
-                    perpDir[0] = 0.0;
-                    perpDir[1] = 0.0;
-                    perpDir[2] = -1.0;
-                    perpDist = 0.0;
+                    perpDir[0] = 0.0f;
+                    perpDir[1] = 0.0f;
+                    perpDir[2] = -1.0f;
+                    perpDist = 0.0f;
                 }
                 totalDist = Vec3Length(delta);
                 if (attrGlob.attractors[attractorIndex].maxDist >= (double)totalDist)
@@ -1887,21 +1883,21 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
                     v9 = fabs(perpDist);
                     v8 = v9 / forwardDist;
                     v7 = atan(v8);
-                    angleToAttractor = v7 * 0.6366202831268311;
+                    angleToAttractor = v7 * 0.6366202831268311f;
                     if (attrGlob.attractors[attractorIndex].isAttractor)
                         v6 = angleToAttractor;
                     else
-                        v6 = angleToAttractor - 1.0;
+                        v6 = angleToAttractor - 1.0f;
                     force = force * v6;
                     if (attrGlob.attractors[attractorIndex].isAttractor)
                     {
-                        maxCorrectingVel = (double)weaponDef->iProjectileSpeed * perpDist / forwardDist;
-                        maxCorrectingAccel = maxCorrectingVel * 20.0;
+                        maxCorrectingVel = (float)weaponDef->iProjectileSpeed * perpDist / forwardDist;
+                        maxCorrectingAccel = maxCorrectingVel * 20.0f;
                         v5 = force - maxCorrectingAccel;
-                        if (v5 < 0.0)
+                        if (v5 < 0.0f)
                             v4 = force;
                         else
-                            v4 = maxCorrectingVel * 20.0;
+                            v4 = maxCorrectingVel * 20.0f;
                         force = v4;
                     }
                     Vec3Mad(forceVector, force, perpDir, forceVector);
@@ -1909,9 +1905,9 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
             }
         }
     }
-    if (0.0 != forceVector[0] || 0.0 != forceVector[1] || 0.0 != forceVector[2])
+    if (0.0f != forceVector[0] || 0.0f != forceVector[1] || 0.0f != forceVector[2])
     {
-        Vec3Mad(missile->s.lerp.pos.trDelta, 0.050000001, forceVector, missile->s.lerp.pos.trDelta);
+        Vec3Mad(missile->s.lerp.pos.trDelta, 0.050000001f, forceVector, missile->s.lerp.pos.trDelta);
         Vec3NormalizeTo(missile->s.lerp.pos.trDelta, forwardDir);
         iProjectileSpeed = (float)weaponDef->iProjectileSpeed;
         Vec3Scale(forwardDir, iProjectileSpeed, missile->s.lerp.pos.trDelta);
@@ -1929,8 +1925,8 @@ void __cdecl RunMissile_CreateWaterSplash(const gentity_s *missile, const trace_
     if (!trace)
         MyAssertHandler(".\\game\\g_missile.cpp", 1394, 0, "%s", "trace");
     Vec3NormalizeTo(missile->s.lerp.pos.trDelta, reflect);
-    if (reflect[2] < 0.0)
-        reflect[2] = reflect[2] * -1.0;
+    if (reflect[2] < 0.0f)
+        reflect[2] = reflect[2] * -1.0f;
     tent = G_TempEntity(missile->r.currentOrigin, 44);
     tent->s.eventParm = DirToByte(trace->normal);
     tent->s.un1.scale = 0;
@@ -1962,20 +1958,20 @@ void __cdecl MissileTrajectory(gentity_s *ent, float *result)
         {
             AngleVectors(ent->r.currentAngles, dir, 0, 0);
             forwardSpeed = Vec3Dot(dir, ent->s.lerp.pos.trDelta);
-            if (forwardSpeed < (double)weapDef->iProjectileSpeed)
+            if (forwardSpeed < (float)weapDef->iProjectileSpeed)
             {
-                accel = (double)weapDef->iProjectileSpeed / weapDef->timeToAccelerate;
-                v2 = accel * 0.05000000074505806;
+                accel = (float)weapDef->iProjectileSpeed / weapDef->timeToAccelerate;
+                v2 = accel * 0.05000000074505806f;
                 Vec3Mad(ent->s.lerp.pos.trDelta, v2, dir, ent->s.lerp.pos.trDelta);
             }
             else
             {
-                scale = (double)weapDef->iProjectileSpeed - forwardSpeed;
+                scale = (float)weapDef->iProjectileSpeed - forwardSpeed;
                 Vec3Mad(ent->s.lerp.pos.trDelta, scale, dir, ent->s.lerp.pos.trDelta);
             }
         }
-        if (weapDef->projectileCurvature > 0.0)
-            Vec3Mad(ent->s.lerp.pos.trDelta, 0.050000001, &ent->mover.pos1[1], ent->s.lerp.pos.trDelta);
+        if (weapDef->projectileCurvature > 0.0f)
+            Vec3Mad(ent->s.lerp.pos.trDelta, 0.050000001f, &ent->mover.pos1[1], ent->s.lerp.pos.trDelta);
         if (missileDebugDraw->current.enabled)
         {
             dbgStart[0] = ent->r.currentOrigin[0];
@@ -1985,7 +1981,7 @@ void __cdecl MissileTrajectory(gentity_s *ent, float *result)
         GuidedMissileSteering(ent);
         if (weapDef->guidedMissileType != MISSILE_GUIDANCE_JAVELIN || ent->missile.stage)
         {
-            Vec3Mad(ent->s.lerp.pos.trBase, 0.050000001, ent->s.lerp.pos.trDelta, ent->s.lerp.pos.trBase);
+            Vec3Mad(ent->s.lerp.pos.trBase, 0.050000001f, ent->s.lerp.pos.trDelta, ent->s.lerp.pos.trBase);
             *result = ent->s.lerp.pos.trBase[0];
             result[1] = ent->s.lerp.pos.trBase[1];
             result[2] = ent->s.lerp.pos.trBase[2];
@@ -2019,8 +2015,8 @@ bool __cdecl MissileIsReadyForSteering(gentity_s *ent)
     float timeLeft; // [esp+8h] [ebp-8h]
 
     timeLeft = BG_GetWeaponDef(ent->s.weapon)->timeToAccelerate
-        - (double)(level.time - ent->s.lerp.pos.trTime) * EQUAL_EPSILON;
-    return timeLeft <= 0.0;
+        - (float)(level.time - ent->s.lerp.pos.trTime) * EQUAL_EPSILON;
+    return timeLeft <= 0.0f;
 }
 
 void __cdecl GuidedMissileSteering(gentity_s *ent)
@@ -2058,12 +2054,12 @@ void __cdecl GuidedMissileSteering(gentity_s *ent)
             toTargetRelative[0] = currentHorzDir[1] * toTarget[1] + currentHorzDir[0] * toTarget[0];
             toTargetRelative[1] = currentRight[1] * toTarget[1] + currentRight[0] * toTarget[0];
             toTargetRelative[2] = toTarget[2];
-            steer[0] = 0.0;
-            steer[1] = 0.0;
-            steer[2] = 0.0;
+            steer[0] = 0.0f;
+            steer[1] = 0.0f;
+            steer[2] = 0.0f;
             MissileHorzSteerToTarget(ent, currentRight, toTargetRelative, currentHorzSpeed, steer);
             MissileVerticalSteering(ent, toTargetRelative, currentHorzSpeed, steer);
-            Vec3Mad(ent->s.lerp.pos.trDelta, 0.050000001, steer, ent->s.lerp.pos.trDelta);
+            Vec3Mad(ent->s.lerp.pos.trDelta, 0.050000001f, steer, ent->s.lerp.pos.trDelta);
         }
     }
 }
@@ -2113,13 +2109,13 @@ void __cdecl MissileHorzSteerToTarget(
     }
     if (weapDef->maxSteeringAccel <= 0.0)
         MyAssertHandler(".\\game\\g_missile.cpp", 1471, 0, "%s", "weapDef->maxSteeringAccel > 0");
-    tightestRadius = (double)weapDef->iProjectileSpeed * (double)weapDef->iProjectileSpeed / weapDef->maxSteeringAccel;
-    if (*toTargetRelative <= 0.0)
+    tightestRadius = (float)weapDef->iProjectileSpeed * (float)weapDef->iProjectileSpeed / weapDef->maxSteeringAccel;
+    if (*toTargetRelative <= 0.0f)
     {
         v6 = fabs(radius);
-        if (v6 >= tightestRadius + 60.0)
+        if (v6 >= tightestRadius + 60.0f)
         {
-            if (toTargetRelative[1] <= 0.0)
+            if (toTargetRelative[1] <= 0.0f)
             {
                 v12 = -weapDef->maxSteeringAccel;
                 *steer = v12 * *currentRight;
@@ -2134,23 +2130,23 @@ void __cdecl MissileHorzSteerToTarget(
             steer[1] = v5;
         }
     }
-    else if (toTargetRelative[1] != 0.0)
+    else if (toTargetRelative[1] != 0.0f)
     {
         v10 = fabs(radius);
-        if (tightestRadius <= (double)v10)
+        if (tightestRadius <= v10)
         {
-            if (radius == 0.0)
+            if (radius == 0.0f)
                 MyAssertHandler(".\\game\\g_missile.cpp", 1482, 0, "%s", "radius != 0");
-            accel = currentHorzSpeed * 2.0 * currentHorzSpeed / radius;
+            accel = currentHorzSpeed * 2.0f * currentHorzSpeed / radius;
             v15 = weapDef->maxSteeringAccel;
             v9 = accel - v15;
-            if (v9 < 0.0)
-                v16 = currentHorzSpeed * 2.0 * currentHorzSpeed / radius;
+            if (v9 < 0.0f)
+                v16 = currentHorzSpeed * 2.0f * currentHorzSpeed / radius;
             else
                 v16 = v15;
             v14 = -weapDef->maxSteeringAccel;
             v8 = v14 - accel;
-            if (v8 < 0.0)
+            if (v8 < 0.0f)
                 v7 = v16;
             else
                 v7 = -weapDef->maxSteeringAccel;
@@ -2182,8 +2178,8 @@ void __cdecl MissileVerticalSteering(
 
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     horzDistToTarg = Vec2NormalizeTo(toTargetRelative, toTargetHorzRelativeDir);
-    steer[2] = 0.0;
-    if (horzDistToTarg != 0.0)
+    steer[2] = 0.0f;
+    if (horzDistToTarg != 0.0f)
     {
         guidedMissileType = weapDef->guidedMissileType;
         if (guidedMissileType == MISSILE_GUIDANCE_SIDEWINDER)
@@ -2202,40 +2198,40 @@ void __cdecl MissileVerticalSteering(
                 steer);
             return;
         }
-        if (*toTargetRelative <= 0.0 || currentHorzSpeed == 0.0)
+        if (*toTargetRelative <= 0.0f || currentHorzSpeed == 0.0f)
         {
             if (!weapDef->iProjectileSpeed)
                 MyAssertHandler(".\\game\\g_missile.cpp", 1552, 0, "%s", "weapDef->iProjectileSpeed != 0");
-            minTimeToTarg = horzDistToTarg / (double)weapDef->iProjectileSpeed;
+            minTimeToTarg = horzDistToTarg / (float)weapDef->iProjectileSpeed;
         }
         else
         {
-            minTimeToTarg = *toTargetRelative / (double)weapDef->iProjectileSpeed;
+            minTimeToTarg = *toTargetRelative / (float)weapDef->iProjectileSpeed;
         }
-        if (minTimeToTarg <= 0.0)
+        if (minTimeToTarg <= 0.0f)
             MyAssertHandler(".\\game\\g_missile.cpp", 1556, 0, "%s", "minTimeToTarg > 0");
         maxVertSpeedAtMaxAccel = toTargetRelative[2] / minTimeToTarg;
-        maxVertSpeedAtMaxAccel = weapDef->maxSteeringAccel * 0.5 * minTimeToTarg + maxVertSpeedAtMaxAccel;
-        maxVertSpeedAtMaxAccel = maxVertSpeedAtMaxAccel * 0.8999999761581421;
+        maxVertSpeedAtMaxAccel = weapDef->maxSteeringAccel * 0.5f * minTimeToTarg + maxVertSpeedAtMaxAccel;
+        maxVertSpeedAtMaxAccel = maxVertSpeedAtMaxAccel * 0.8999999761581421f;
         if (maxVertSpeedAtMaxAccel > currentHorzSpeed * missileHellfireMaxSlope->current.value)
             maxVertSpeedAtMaxAccel = currentHorzSpeed * missileHellfireMaxSlope->current.value;
-        if (ent->s.lerp.pos.trDelta[2] >= (double)maxVertSpeedAtMaxAccel)
+        if (ent->s.lerp.pos.trDelta[2] >= (float)maxVertSpeedAtMaxAccel)
         {
             ent->s.lerp.pos.trDuration = 1;
         }
         else
         {
-            steer[2] = (maxVertSpeedAtMaxAccel - ent->s.lerp.pos.trDelta[2]) * 20.0;
+            steer[2] = (maxVertSpeedAtMaxAccel - ent->s.lerp.pos.trDelta[2]) * 20.0f;
             v8 = steer[2];
             value = missileHellfireUpAccel->current.value;
             v6 = v8 - value;
-            if (v6 < 0.0)
+            if (v6 < 0.0f)
                 v11 = v8;
             else
                 v11 = value;
             v9 = -weapDef->maxSteeringAccel;
             v5 = v9 - v8;
-            if (v5 < 0.0)
+            if (v5 < 0.0f)
                 v4 = v11;
             else
                 v4 = -weapDef->maxSteeringAccel;
@@ -2264,23 +2260,23 @@ void __cdecl MissileVerticalSteerToTarget(
     float horzSpeedToTarg; // [esp+24h] [ebp-8h]
     WeaponDef *weapDef; // [esp+28h] [ebp-4h]
 
-    if (*toTargetHorzRelDir >= 0.0)
+    if (*toTargetHorzRelDir >= 0.0f)
     {
         weapDef = BG_GetWeaponDef(ent->s.weapon);
         horzSpeedToTarg = *toTargetHorzRelDir * currentHorzSpeed;
         v9 = fabs(horzSpeedToTarg);
         wishVertSpeed = v9 * vertDistToTarg / horzDistToTarg;
-        steer[2] = (wishVertSpeed - ent->s.lerp.pos.trDelta[2]) * 20.0;
+        steer[2] = (wishVertSpeed - ent->s.lerp.pos.trDelta[2]) * 20.0f;
         v10 = steer[2];
         maxSteeringAccel = weapDef->maxSteeringAccel;
         v8 = v10 - maxSteeringAccel;
-        if (v8 < 0.0)
+        if (v8 < 0.0f)
             v13 = v10;
         else
             v13 = maxSteeringAccel;
         v11 = -weapDef->maxSteeringAccel;
         v7 = v11 - v10;
-        if (v7 < 0.0)
+        if (v7 < 0.0f)
             v6 = v13;
         else
             v6 = -weapDef->maxSteeringAccel;
@@ -2408,20 +2404,20 @@ void __cdecl JavelinRotateVelocity(gentity_s *ent, const float *currentVel, cons
 
     len = Vec3NormalizeTo(currentVel, currentDir);
     turnDiff = JavelinRotateDir(ent, currentDir, targetDir, resultDir);
-    if (turnDiff < 30.0)
+    if (turnDiff < 30.0f)
     {
-        if (ent->missile.stage == MISSILESTAGE_ASCENT || currentVel[2] > 0.0)
+        if (ent->missile.stage == MISSILESTAGE_ASCENT || currentVel[2] > 0.0f)
         {
-            len = missileJavAccelClimb->current.value * 0.05000000074505806 + len;
-            if (missileJavSpeedLimitClimb->current.value < (double)len)
+            len = missileJavAccelClimb->current.value * 0.05000000074505806f + len;
+            if (missileJavSpeedLimitClimb->current.value < len)
                 len = missileJavSpeedLimitClimb->current.value;
         }
         else
         {
             if (ent->missile.stage != MISSILESTAGE_DESCENT)
                 MyAssertHandler(".\\game\\g_missile.cpp", 1804, 0, "%s", "ent->missile.stage == MISSILESTAGE_DESCENT");
-            len = missileJavAccelDescend->current.value * 0.05000000074505806 + len;
-            if (missileJavSpeedLimitDescend->current.value < (double)len)
+            len = missileJavAccelDescend->current.value * 0.05000000074505806f + len;
+            if (missileJavSpeedLimitDescend->current.value < len)
                 len = missileJavSpeedLimitDescend->current.value;
         }
     }
@@ -2447,8 +2443,8 @@ double __cdecl JavelinRotateDir(gentity_s *ent, const float *currentDir, const f
     dot = (1.0 - (dot + 1.0) * 0.5) * 180.0;
     if (dot > 0.1)
     {
-        targetDPS = dot / 0.05000000074505806;
-        if (maxDPS <= (double)targetDPS)
+        targetDPS = dot / 0.05000000074505806f;
+        if (maxDPS <= targetDPS)
         {
             frac = maxDPS / targetDPS;
             if (missileDebugText->current.enabled)
@@ -2460,11 +2456,11 @@ double __cdecl JavelinRotateDir(gentity_s *ent, const float *currentDir, const f
             UnitQuatToForward(resultQuat, resultDir);
             if (missileDebugDraw->current.enabled)
             {
-                Vec3Mad(ent->s.lerp.pos.trBase, 100.0, currentDir, end);
+                Vec3Mad(ent->s.lerp.pos.trBase, 100.0f, currentDir, end);
                 G_DebugLineWithDuration(ent->s.lerp.pos.trBase, end, colorBlue, 0, 200);
-                Vec3Mad(ent->s.lerp.pos.trBase, 100.0, targetDir, end);
+                Vec3Mad(ent->s.lerp.pos.trBase, 100.0f, targetDir, end);
                 G_DebugLineWithDuration(ent->s.lerp.pos.trBase, end, colorLtGrey, 0, 200);
-                Vec3Mad(ent->s.lerp.pos.trBase, 100.0, resultDir, end);
+                Vec3Mad(ent->s.lerp.pos.trBase, 100.0f, resultDir, end);
                 G_DebugLineWithDuration(ent->s.lerp.pos.trBase, end, colorGreen, 0, 200);
             }
             return dot;
@@ -2565,7 +2561,7 @@ char __cdecl JavelinClimbExceededAngle(gentity_s *ent, const float *targetPos)
     deltaHorz = currentHorzDir[1] * toTarget[1] + currentHorzDir[0] * toTarget[0];
     v5 = deltaHorz / toTarget[2];
     v4 = atan(v5);
-    deg = v4 * 57.2957763671875;
+    deg = v4 * 57.2957763671875f;
     v3 = fabs(deg);
     deg = v3;
     if (limit <= (double)v3)
@@ -2624,12 +2620,12 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
     grenade->s.lerp.u.missile.launchTime = level.time;
     grenade->r.contents = 256;
     grenade->r.contents |= 0x2000u;
-    grenade->r.mins[0] = -1.5;
-    grenade->r.mins[1] = -1.5;
-    grenade->r.mins[2] = -1.5;
-    grenade->r.maxs[0] = 1.5;
-    grenade->r.maxs[1] = 1.5;
-    grenade->r.maxs[2] = 1.5;
+    grenade->r.mins[0] = -1.5f;
+    grenade->r.mins[1] = -1.5f;
+    grenade->r.mins[2] = -1.5f;
+    grenade->r.maxs[0] = 1.5f;
+    grenade->r.maxs[1] = 1.5f;
+    grenade->r.maxs[2] = 1.5f;
     if (!parent->client || parent->client->ps.grenadeTimeLeft >= 0 || parent->client->ps.throwBackGrenadeOwner == 1023)
     {
         EntHandle::setEnt(&grenade->r.ownerNum, parent);
@@ -2704,13 +2700,13 @@ void __cdecl G_InitGrenadeMovement(gentity_s *grenade, const float *start, const
         grenade->s.lerp.apos.trBase[0] = grenade->r.currentAngles[0];
         grenade->s.lerp.apos.trBase[1] = grenade->r.currentAngles[1];
         grenade->s.lerp.apos.trBase[2] = grenade->r.currentAngles[2];
-        angle = grenade->s.lerp.apos.trBase[0] - 120.0;
+        angle = grenade->s.lerp.apos.trBase[0] - 120.0f;
         grenade->s.lerp.apos.trBase[0] = AngleNormalize360(angle);
-        v5 = G_flrand(320.0, 800.0);
-        grenade->s.lerp.apos.trDelta[0] = (double)(2 * G_irand(0, 2) - 1) * v5;
+        v5 = G_flrand(320.0f, 800.0f);
+        grenade->s.lerp.apos.trDelta[0] = (float)(2 * G_irand(0, 2) - 1) * v5;
         grenade->s.lerp.apos.trDelta[1] = 0.0;
-        v4 = G_flrand(180.0, 540.0);
-        grenade->s.lerp.apos.trDelta[2] = (double)(2 * G_irand(0, 2) - 1) * v4;
+        v4 = G_flrand(180.0f, 540.0f);
+        grenade->s.lerp.apos.trDelta[2] = (float)(2 * G_irand(0, 2) - 1) * v4;
         grenade->r.currentAngles[0] = grenade->s.lerp.apos.trBase[0];
         grenade->r.currentAngles[1] = grenade->s.lerp.apos.trBase[1];
         grenade->r.currentAngles[2] = grenade->s.lerp.apos.trBase[2];
@@ -2776,8 +2772,8 @@ int __cdecl CalcMissileNoDrawTime(float speed)
 {
     int v3; // [esp+4h] [ebp-8h]
 
-    if ((int)(speed * -35.0 / 600.0 + 85.0) < 50)
-        v3 = (int)(speed * -35.0 / 600.0 + 85.0);
+    if ((int)(speed * -35.0f / 600.0f + 85.0f) < 50)
+        v3 = (int)(speed * -35.0f / 600.0f + 85.0f);
     else
         v3 = 50;
     if (v3 > 20)

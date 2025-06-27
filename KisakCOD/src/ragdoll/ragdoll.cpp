@@ -393,32 +393,32 @@ void __cdecl Ragdoll_InitDvars()
         (DvarLimits)0x2000000000LL,
         1u,
         "Max number of simultaneous active ragdolls");
-    min.value.max = 60000.0;
-    min.value.min = 0.0;
+    min.value.max = 60000.0f;
+    min.value.min = 0.0f;
     ragdoll_explode_force = Dvar_RegisterFloat(
         "ragdoll_explode_force",
-        18000.0,
+        18000.0f,
         min,
         0x80u,
         "Explosive force applied to ragdolls");
-    mina.value.max = 2.0;
-    mina.value.min = 0.0;
+    mina.value.max = 2.0f;
+    mina.value.min = 0.0f;
     ragdoll_explode_upbias = Dvar_RegisterFloat(
         "ragdoll_explode_upbias",
-        0.80000001,
+        0.80000001f,
         mina,
         0x80u,
         "Upwards bias applied to ragdoll explosion effects");
-    minb.value.max = 10000.0;
-    minb.value.min = 0.0;
+    minb.value.max = 10000.0f;
+    minb.value.min = 0.0f;
     ragdoll_bullet_force = Dvar_RegisterFloat(
         "ragdoll_bullet_force",
-        500.0,
+        500.0f,
         minb,
         0x80u,
         "Bullet force applied to ragdolls");
-    minc.value.max = 10000.0;
-    minc.value.min = 0.0;
+    minc.value.max = 10000.0f;
+    minc.value.min = 0.0f;
     ragdoll_bullet_upbias = Dvar_RegisterFloat(
         "ragdoll_bullet_upbias",
         0.5,
@@ -437,27 +437,27 @@ void __cdecl Ragdoll_InitDvars()
         (DvarLimits)0x177000000064LL,
         0x80u,
         "Default time taken to lerp down ragdoll joint friction");
-    mind.value.max = 2000.0;
-    mind.value.min = 0.0;
+    mind.value.max = 2000.0f;
+    mind.value.min = 0.0f;
     ragdoll_rotvel_scale = Dvar_RegisterFloat(
         "ragdoll_rotvel_scale",
-        1.0,
+        1.0f,
         mind,
         0x80u,
         "Ragdoll rotational velocity estimate scale");
-    mine.value.max = 10.0;
-    mine.value.min = 0.0;
+    mine.value.max = 10.0f;
+    mine.value.min = 0.0f;
     ragdoll_jitter_scale = Dvar_RegisterFloat(
         "ragdoll_jitter_scale",
-        1.0,
+        1.0f,
         mine,
         0x80u,
         "Scale up or down the effect of physics jitter on ragdolls");
-    minf.value.max = 10.0;
-    minf.value.min = 0.1;
+    minf.value.max = 10.0f;
+    minf.value.min = 0.1f;
     ragdoll_self_collision_scale = Dvar_RegisterFloat(
         "ragdoll_self_collision_scale",
-        1.2,
+        1.2f,
         minf,
         0x80u,
         "Scale the size of the collision capsules used to prevent ragdoll limbs from interpenetrating");
@@ -890,33 +890,33 @@ void __cdecl Ragdoll_Limit_f()
                             def->jointDefs[jointNum].axisFriction[def->jointDefs[jointNum].numLimitAxes] = v13;
                             v3 = Cmd_Argv(5);
                             v12 = atof(v3);
-                            def->jointDefs[jointNum].minAngles[def->jointDefs[jointNum].numLimitAxes] = v12 * 0.01745329238474369;
+                            def->jointDefs[jointNum].minAngles[def->jointDefs[jointNum].numLimitAxes] = v12 * 0.01745329238474369f;
                             v4 = Cmd_Argv(6);
                             v11 = atof(v4);
-                            def->jointDefs[jointNum].maxAngles[def->jointDefs[jointNum].numLimitAxes] = v11 * 0.01745329238474369;
+                            def->jointDefs[jointNum].maxAngles[def->jointDefs[jointNum].numLimitAxes] = v11 * 0.01745329238474369f;
                             v16 = def->jointDefs[jointNum].minAngles[def->jointDefs[jointNum].numLimitAxes];
-                            v10 = v16 - 3.1415927;
+                            v10 = v16 - 3.1415927f;
                             if (v10 < 0.0)
                                 v17 = v16;
                             else
-                                v17 = 3.1415927;
-                            v9 = -3.1415927 - v16;
+                                v17 = 3.1415927f;
+                            v9 = -3.1415927f - v16;
                             if (v9 < 0.0)
                                 v8 = v17;
                             else
-                                v8 = -3.1415927;
+                                v8 = -3.1415927f;
                             def->jointDefs[jointNum].minAngles[def->jointDefs[jointNum].numLimitAxes] = v8;
                             v14 = def->jointDefs[jointNum].maxAngles[def->jointDefs[jointNum].numLimitAxes];
-                            v7 = v14 - 3.1415927;
+                            v7 = v14 - 3.1415927f;
                             if (v7 < 0.0)
                                 v15 = v14;
                             else
-                                v15 = 3.1415927;
-                            v6 = -3.1415927 - v14;
-                            if (v6 < 0.0)
+                                v15 = 3.1415927f;
+                            v6 = -3.1415927f - v14;
+                            if (v6 < 0.0f)
                                 v5 = v15;
                             else
-                                v5 = -3.1415927;
+                                v5 = -3.1415927f;
                             def->jointDefs[jointNum].maxAngles[def->jointDefs[jointNum].numLimitAxes++] = v5;
                             Ragdoll_ResetBodiesUsingDef();
                         }

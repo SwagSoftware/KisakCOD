@@ -46,7 +46,7 @@ void __cdecl FX_PostLight_GenerateVerts(FxPostLightInfo *postLightInfoAddr, FxSy
     int POINTS_AROUND; // [esp+F4h] [ebp-4h]
 
     POINTS_AROUND = 8;
-    POLYGON_RADIUS_GROW = 1.4142135;
+    POLYGON_RADIUS_GROW = 1.4142135f;
     VERT_COUNT = 16;
     LODWORD(eyeOffset[4]) = 84;
     postLightInfo = postLightInfoAddr;

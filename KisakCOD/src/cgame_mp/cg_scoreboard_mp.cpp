@@ -31,26 +31,26 @@ const dvar_t *cg_scoreboardBannerHeight;
 
 const listColumnInfo_t columnInfo[8] =
 {
-  { LCT_RANK_ICON, 0.07, "", 0 },
-  { LCT_STATUS_ICON, 0.050000001, "", 2 },
-  { LCT_NAME, 0.43000001, "", 0 },
-  { LCT_TALKING_ICON, 0.050000001, "", 0 },
-  { LCT_SCORE, 0.1, "CGAME_SB_SCORE", 2 },
-  { LCT_KILLS, 0.1, "CGAME_SB_KILLS", 2 },
-  { LCT_ASSISTS, 0.1, "CGAME_SB_ASSISTS", 2 },
-  { LCT_DEATHS, 0.1, "CGAME_SB_DEATHS", 2 }
+  { LCT_RANK_ICON, 0.07f, "", 0 },
+  { LCT_STATUS_ICON, 0.050000001f, "", 2 },
+  { LCT_NAME, 0.43000001f, "", 0 },
+  { LCT_TALKING_ICON, 0.050000001f, "", 0 },
+  { LCT_SCORE, 0.1f, "CGAME_SB_SCORE", 2 },
+  { LCT_KILLS, 0.1f, "CGAME_SB_KILLS", 2 },
+  { LCT_ASSISTS, 0.1f, "CGAME_SB_ASSISTS", 2 },
+  { LCT_DEATHS, 0.1f, "CGAME_SB_DEATHS", 2 }
 }; // idb
 const listColumnInfo_t columnInfoWithPing[9] =
 {
-  { LCT_RANK_ICON, 0.050000001, "", 0 },
-  { LCT_STATUS_ICON, 0.050000001, "", 2 },
-  { LCT_NAME, 0.34999999, "", 0 },
-  { LCT_TALKING_ICON, 0.050000001, "", 0 },
-  { LCT_SCORE, 0.1, "CGAME_SB_SCORE", 2 },
-  { LCT_KILLS, 0.1, "CGAME_SB_KILLS", 2 },
-  { LCT_ASSISTS, 0.1, "CGAME_SB_ASSISTS", 2 },
-  { LCT_DEATHS, 0.1, "CGAME_SB_DEATHS", 2 },
-  { LCT_PING, 0.1, "CGAME_SB_PING", 2 }
+  { LCT_RANK_ICON, 0.050000001f, "", 0 },
+  { LCT_STATUS_ICON, 0.050000001f, "", 2 },
+  { LCT_NAME, 0.34999999f, "", 0 },
+  { LCT_TALKING_ICON, 0.050000001f, "", 0 },
+  { LCT_SCORE, 0.1f, "CGAME_SB_SCORE", 2 },
+  { LCT_KILLS, 0.1f, "CGAME_SB_KILLS", 2 },
+  { LCT_ASSISTS, 0.1f, "CGAME_SB_ASSISTS", 2 },
+  { LCT_DEATHS, 0.1f, "CGAME_SB_DEATHS", 2 },
+  { LCT_PING, 0.1f, "CGAME_SB_PING", 2 }
 }; // idb
 
 void __cdecl UpdateScores(int localClientNum)
@@ -1299,27 +1299,27 @@ void __cdecl CG_RegisterScoreboardDvars()
         "Number of milliseconds each bar represents");
     cg_ScoresPing_HighColor = Dvar_RegisterColor(
         "cg_ScoresPing_HighColor",
-        0.80000001,
-        0.0,
-        0.0,
-        1.0,
+        0.80000001f,
+        0.0f,
+        0.0f,
+        1.0f,
         1u,
         "Color for high ping");
     cg_ScoresPing_MedColor = Dvar_RegisterColor(
         "cg_ScoresPing_MedColor",
-        0.80000001,
-        0.80000001,
-        0.0,
-        1.0,
+        0.80000001f,
+        0.80000001f,
+        0.0f,
+        1.0f,
         1u,
         "Color for medium ping");
     cg_ScoresPing_LowColor = Dvar_RegisterColor("cg_ScoresPing_LowColor", 0.0, 0.75, 0.0, 1.0, 1u, "Color for low ping");
     cg_ScoresPing_BgColor = Dvar_RegisterColor(
         "cg_ScoresPing_BgColor",
-        0.25,
-        0.25,
-        0.25,
-        0.5,
+        0.25f,
+        0.25f,
+        0.25f,
+        0.5f,
         1u,
         "Background color of ping");
     cg_scoreboardScrollStep = Dvar_RegisterInt(
@@ -1340,39 +1340,39 @@ void __cdecl CG_RegisterScoreboardDvars()
         (DvarLimits)0x3E800000001LL,
         0,
         "Item height of each item");
-    b.value.max = 1.0;
-    b.value.min = 0.0;
+    b.value.max = 1.0f;
+    b.value.min = 0.0f;
     cg_scoreboardPingWidth = Dvar_RegisterFloat(
         "cg_scoreboardPingWidth",
-        0.035999998,
+        0.035999998f,
         b,
         0,
         "Width of the ping graph as a % of the scoreboard");
-    ba.value.max = 1.0;
-    ba.value.min = 0.0;
+    ba.value.max = 1.0f;
+    ba.value.min = 0.0f;
     cg_scoreboardPingHeight = Dvar_RegisterFloat(
         "cg_scoreboardPingHeight",
-        0.69999999,
+        0.69999999f,
         ba,
         0,
         "Height of the ping graph as a % of the scoreboard row height");
     bb.value.max = FLT_MAX;
-    bb.value.min = 0.0;
-    cg_scoreboardWidth = Dvar_RegisterFloat("cg_scoreboardWidth", 500.0, bb, 0, "Width of the scoreboard");
+    bb.value.min = 0.0f;
+    cg_scoreboardWidth = Dvar_RegisterFloat("cg_scoreboardWidth", 500.0f, bb, 0, "Width of the scoreboard");
     bc.value.max = FLT_MAX;
-    bc.value.min = 0.0;
-    cg_scoreboardHeight = Dvar_RegisterFloat("cg_scoreboardHeight", 435.0, bc, 0, "Height of the scoreboard");
+    bc.value.min = 0.0f;
+    cg_scoreboardHeight = Dvar_RegisterFloat("cg_scoreboardHeight", 435.0f, bc, 0, "Height of the scoreboard");
     cg_scoreboardMyColor = Dvar_RegisterColor(
         "cg_scoreboardMyColor",
-        1.0,
-        0.80000001,
-        0.40000001,
-        1.0,
+        1.0f,
+        0.80000001f,
+        0.40000001f,
+        1.0f,
         0,
         "The local player's font color when shown in scoreboard");
     bd.value.max = FLT_MAX;
-    bd.value.min = 0.0;
-    cg_scoreboardTextOffset = Dvar_RegisterFloat("cg_scoreboardTextOffset", 0.5, bd, 0, "Scoreboard text offset");
+    bd.value.min = 0.0f;
+    cg_scoreboardTextOffset = Dvar_RegisterFloat("cg_scoreboardTextOffset", 0.5f, bd, 0, "Scoreboard text offset");
     cg_scoreboardFont = Dvar_RegisterInt(
         "cg_scoreboardFont",
         0,
@@ -1380,18 +1380,18 @@ void __cdecl CG_RegisterScoreboardDvars()
         0,
         "Scoreboard font enum ( see menudefinition.h )");
     be.value.max = FLT_MAX;
-    be.value.min = 0.0;
+    be.value.min = 0.0f;
     cg_scoreboardHeaderFontScale = Dvar_RegisterFloat(
         "cg_scoreboardHeaderFontScale",
-        0.34999999,
+        0.34999999f,
         be,
         0,
         "Scoreboard header font scale");
     cg_scoreboardPingText = Dvar_RegisterBool("cg_scoreboardPingText", 1, 0, "Whether to show numeric ping value");
     cg_scoreboardPingGraph = Dvar_RegisterBool("cg_scoreboardPingGraph", 0, 0, "Whether to show graphical ping");
     bf.value.max = FLT_MAX;
-    bf.value.min = 0.0;
-    cg_scoreboardRankFontScale = Dvar_RegisterFloat("cg_scoreboardRankFontScale", 0.25, bf, 0, "Scale of rank font");
+    bf.value.min = 0.0f;
+    cg_scoreboardRankFontScale = Dvar_RegisterFloat("cg_scoreboardRankFontScale", 0.25f, bf, 0, "Scale of rank font");
 }
 
 void __cdecl CG_RegisterScoreboardGraphics()

@@ -4588,16 +4588,16 @@ void Scr_PhysicsRadiusJolt()
     ent = G_TempEntity(pos, 59);
     ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2u);
-    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
+    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0f)
         Scr_ParamError(2u, "Radius is negative");
-    if (ent->s.lerp.u.turret.gunAngles[0] > (double)ent->s.eventParm)
+    if (ent->s.lerp.u.turret.gunAngles[0] > (float)ent->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     Scr_GetVector(3u, &ent->s.lerp.u.turret.gunAngles[1]);
-    if (ent->s.lerp.u.turret.gunAngles[1] == 0.0
-        && ent->s.lerp.u.turret.gunAngles[2] == 0.0
-        && ent->s.lerp.u.primaryLight.cosHalfFovOuter == 0.0)
+    if (ent->s.lerp.u.turret.gunAngles[1] == 0.0f
+        && ent->s.lerp.u.turret.gunAngles[2] == 0.0f
+        && ent->s.lerp.u.primaryLight.cosHalfFovOuter == 0.0f)
     {
-        ent->s.lerp.u.turret.gunAngles[1] = 1.1754944e-38;
+        ent->s.lerp.u.turret.gunAngles[1] = 1.1754944e-38f;
     }
 }
 
@@ -4612,13 +4612,13 @@ void Scr_PhysicsRadiusJitter()
     ent = G_TempEntity(pos, 60);
     ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2u);
-    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
+    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0f)
         Scr_ParamError(2u, "Radius is negative");
-    if (ent->s.lerp.u.turret.gunAngles[0] > (double)ent->s.eventParm)
+    if (ent->s.lerp.u.turret.gunAngles[0] > (float)ent->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     ent->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3u);
     ent->s.lerp.u.turret.gunAngles[2] = Scr_GetFloat(4u);
-    if (ent->s.lerp.u.turret.gunAngles[2] < (double)ent->s.lerp.u.turret.gunAngles[1])
+    if (ent->s.lerp.u.turret.gunAngles[2] < (float)ent->s.lerp.u.turret.gunAngles[1])
         Scr_Error("Maximum jitter is less than minimum jitter");
 }
 
@@ -4635,9 +4635,9 @@ void Scr_PhysicsExplosionCylinder()
     ent = G_TempEntity(pos, 58);
     ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2u);
-    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
+    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0f)
         Scr_ParamError(2u, "Radius is negative");
-    if (ent->s.lerp.u.turret.gunAngles[0] > (double)ent->s.eventParm)
+    if (ent->s.lerp.u.turret.gunAngles[0] > (float)ent->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     Float = Scr_GetFloat(3u);
     result = ent;
@@ -4664,15 +4664,15 @@ void Scr_SetExponentialFog()
     halfwayDist = Scr_GetFloat(1u);
     if (halfwayDist <= 0.0)
         Scr_Error("setExpFog: halfwayDist must be greater than 0");
-    density = (float)0.69314718 / halfwayDist;
+    density = 0.69314718f / halfwayDist;
     red = Scr_GetFloat(2u);
     green = Scr_GetFloat(3u);
     blue = Scr_GetFloat(4u);
     time = Scr_GetFloat(5u);
-    Dvar_SetColor((dvar_s *)g_fogColorReadOnly, red, green, blue, 1.0);
+    Dvar_SetColor((dvar_s *)g_fogColorReadOnly, red, green, blue, 1.0f);
     Dvar_SetFloat((dvar_s *)g_fogStartDistReadOnly, startDist);
     Dvar_SetFloat((dvar_s *)g_fogHalfDistReadOnly, halfwayDist);
-    if (density <= 0.0 || density >= 1.0)
+    if (density <= 0.0f || density >= 1.0f)
         MyAssertHandler(
             ".\\game_mp\\g_scr_main_mp.cpp",
             4704,
@@ -4690,22 +4690,22 @@ void __cdecl Scr_SetFog(const char *cmd, float start, float density, float r, fl
     const char *v9; // eax
     char *v10; // eax
 
-    if (start < 0.0)
+    if (start < 0.0f)
     {
         v7 = va("%s: near distance must be >= 0", cmd);
         Scr_Error(v7);
     }
-    if (r < 0.0 || r > 1.0 || g < 0.0 || g > 1.0 || b < 0.0 || b > 1.0)
+    if (r < 0.0f || r > 1.0f || g < 0.0f || g > 1.0f || b < 0.0f || b > 1.0f)
     {
         v8 = va("%s: red/green/blue color components must be in the range [0, 1]", cmd);
         Scr_Error(v8);
     }
-    if (time < 0.0)
+    if (time < 0.0f)
     {
         v9 = va("%s: transition time must be >= 0 seconds", cmd);
         Scr_Error(v9);
     }
-    v10 = va("%g %g %g %g %g %.0f", start, density, r, g, b, time * 1000.0);
+    v10 = va("%g %g %g %g %g %.0f", start, density, r, g, b, time * 1000.0f);
     G_setfog(v10);
 }
 

@@ -43,19 +43,19 @@ void __cdecl CG_RegisterVisionSetsDvars()
     DvarLimits min; // [esp+4h] [ebp-10h]
     DvarLimits mina; // [esp+4h] [ebp-10h]
 
-    min.value.max = 10000.0;
-    min.value.min = 0.0;
+    min.value.max = 10000.0f;
+    min.value.min = 0.0f;
     nightVisionFadeInOutTime = Dvar_RegisterFloat(
         "nightVisionFadeInOutTime",
-        0.1,
+        0.1f,
         min,
         0x1000u,
         "How long the fade to/from black lasts when putting on or removing night vision goggles.");
-    mina.value.max = 10000.0;
-    mina.value.min = 0.0;
+    mina.value.max = 10000.0f;
+    mina.value.min = 0.0f;
     nightVisionPowerOnTime = Dvar_RegisterFloat(
         "nightVisionPowerOnTime",
-        0.30000001,
+        0.30000001f,
         mina,
         0x1000u,
         "How long the black-to-nightvision fade lasts when turning on the goggles.");

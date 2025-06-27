@@ -320,17 +320,17 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
     AxisTranspose(tAxis, axis);
     if (!jointDef->numLimitAxes)
     {
-        jointDef->limitAxes[0][0] = 0.0;
-        jointDef->limitAxes[0][1] = 0.0;
-        jointDef->limitAxes[0][2] = 1.0;
-        jointDef->axisFriction[0] = 0.0;
-        jointDef->minAngles[0] = -1.5707964;
-        jointDef->maxAngles[0] = 1.5707964;
+        jointDef->limitAxes[0][0] = 0.0f;
+        jointDef->limitAxes[0][1] = 0.0f;
+        jointDef->limitAxes[0][2] = 1.0f;
+        jointDef->axisFriction[0] = 0.0f;
+        jointDef->minAngles[0] = -1.5707964f;
+        jointDef->maxAngles[0] = 1.5707964f;
         ++jointDef->numLimitAxes;
     }
     for (i = 0; i < jointDef->numLimitAxes; ++i)
         Vec3Rotate(jointDef->limitAxes[i], axis, limitAxes[i]);
-    Vec3Scale(jointDef->axisFriction, 15.0, fric);
+    Vec3Scale(jointDef->axisFriction, 15.0f, fric);
     type = jointDef->type;
     if (type == RAGDOLL_JOINT_HINGE)
     {
@@ -340,7 +340,7 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
             parentBone->rigidBody,
             anchor,
             limitAxes[0],
-            0.0,
+            0.0f,
             fric[0],
             jointDef->minAngles[0],
             jointDef->maxAngles[0]);
