@@ -22,19 +22,19 @@ if (WIN32)
 
     # Example: C:\Users\USERNAME\.nuget\packages\microsoft.dxsdk.d3dx\9.29.952.8\build\native
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
-    
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-      set(DXSDK_LIB_DIR ${DXSDK_DIR}/debug/lib/x86)
-    else()
-      set(DXSDK_LIB_DIR ${DXSDK_DIR}/release/lib/x86)
-    endif()
+    set(DXSDK_LIB_DIR ${DXSDK_DIR}/${CMAKE_BUILD_TYPE}/lib/x86)
   else()
     set(DXSDK_DIR $ENV{DXSDK_DIR})
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
     set(DXSDK_LIB_DIR ${DXSDK_DIR}/lib/x86)
   endif()
   
-  
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(D3DX_LIB d3dx9d.lib)
+else()
+  set(D3DX_LIB d3dx9.lib)
+endif()
+
 endif()
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -107,13 +107,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_
 set_property(TARGET ${BIN_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # fixme: copied from sln, check whats not needed
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-target_link_directories(${BIN_NAME} PUBLIC d3dx9d.lib)
-else()
-target_link_directories(${BIN_NAME} PUBLIC d3dx9.lib)
-endif()
-
-target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib d3d9.lib ddraw.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
+target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ${D3DX_LIB} d3d9.lib ddraw.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
 target_link_options(${BIN_NAME} PRIVATE /machine:x86)
 set_target_properties(${BIN_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 

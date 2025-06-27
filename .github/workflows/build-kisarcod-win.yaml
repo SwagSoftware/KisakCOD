@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        config: [Debug]
+        config: [Debug, Release]
 
     env:
       NUGET_PACKAGES: ${{ github.workspace }}\.nuget\packages
