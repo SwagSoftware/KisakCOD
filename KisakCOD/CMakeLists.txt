@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
+include(FetchContent)
 
 if (DEDICATED)
   project(KC-Dedicated)
@@ -92,9 +93,30 @@ set_target_properties(${BIN_NAME} PROPERTIES
 
 target_compile_definitions(${BIN_NAME} PUBLIC WIN32)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  target_compile_definitions(${BIN_NAME} PUBLIC _DEBUG)
-endif()
+#Set MSVC Runtime MDd/ MD
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+##### Tracy #####
+option ( TRACY_ENABLE "" ON )
+option ( TRACY_ON_DEMAND "" ON )
+option ( TRACY_ONLY_LOCALHOST "" ON )
+#option ( TRACY_FIBERS "" ON )
+
+FetchContent_Declare (
+	tracy
+	GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+	GIT_TAG v0.12.2
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable ( tracy )
+
+message( ${CMAKE_BINARY_DIR}/_deps/tracy-src/public)
+target_include_directories(${BIN_NAME} PUBLIC ${CMAKE_BINARY_DIR}/_deps/tracy-src/public)
+target_compile_definitions(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ENABLE>)
+target_compile_definitions(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ON_DEMAND>)
+target_link_libraries(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TracyClient>) # Enable Profiler in Debug
+#################
 
 target_compile_definitions(${BIN_NAME} PUBLIC _CONSOLE)
 target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)

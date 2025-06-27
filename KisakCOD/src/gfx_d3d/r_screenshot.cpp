@@ -926,17 +926,15 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
         }
         else if (lockedRect.Pitch == 4 * width)
         {
-            Profile_Begin(166);
+            PROF_SCOPED("R_memcpy");
             Com_Memcpy((char *)dstPixel, (char *)srcPixel, 4 * height * width);
-            Profile_EndInternal(0);
         }
         else
         {
             for (row = 0; row < height; ++row)
             {
-                Profile_Begin(166);
+                PROF_SCOPED("R_memcpy");
                 Com_Memcpy((char *)dstPixel, (char *)srcPixel, 4 * width);
-                Profile_EndInternal(0);
                 dstPixel += 4 * width;
                 srcPixel += lockedRect.Pitch;
             }
@@ -1447,17 +1445,15 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
                         }
                         else if (lockedRect.Pitch == 4 * width)
                         {
-                            Profile_Begin(166);
+                            PROF_SCOPED("R_memcpy");
                             Com_Memcpy((char *)dstPixel, (char *)srcPixel, 4 * height * width);
-                            Profile_EndInternal(0);
                         }
                         else
                         {
                             for (row = 0; row < height; ++row)
                             {
-                                Profile_Begin(166);
+                                PROF_SCOPED("R_memcpy");
                                 Com_Memcpy((char *)dstPixel, (char *)srcPixel, 4 * width);
-                                Profile_EndInternal(0);
                                 dstPixel += 4 * width;
                                 srcPixel += lockedRect.Pitch;
                             }

@@ -351,7 +351,8 @@ void __cdecl AimAssist_UpdateScreenTargets(
     float clipBounds[2][3]; // [esp+ECh] [ebp-1Ch] BYREF
     AimAssistGlobals *aaGlob; // [esp+104h] [ebp-4h]
 
-    Profile_Begin(64);
+    PROF_SCOPED("AimAssist_UpdateScreenTargets");
+
     aaGlob = &aaGlobArray[localClientNum];
     if (aaGlob->initialized)
     {
@@ -403,11 +404,6 @@ void __cdecl AimAssist_UpdateScreenTargets(
                 }
             }
         }
-        Profile_EndInternal(0);
-    }
-    else
-    {
-        Profile_EndInternal(0);
     }
 }
 
@@ -1083,15 +1079,15 @@ void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output
 
 void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output)
 {
-    Profile_Begin(63);
-    if (!input)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1563, 0, "%s", "input");
-    if (!input->ps)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1564, 0, "%s", "input->ps");
-    if (!output)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1565, 0, "%s", "output");
+    PROF_SCOPED("AimAssist_UpdateMouseInput");
+
+    iassert(input);
+    iassert(input->ps);
+    iassert(output);
+
     output->pitch = input->pitch;
     output->yaw = input->yaw;
+
     if (aaGlobArray[input->localClientNum].initialized)
     {
         AimAssist_UpdateTweakables(input);
@@ -1099,7 +1095,6 @@ void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output
         AimAssist_ApplyAutoMelee(input, output);
         AimAssist_ApplyMeleeCharge(input, output);
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl AimAssist_DrawDebugOverlay(unsigned int localClientNum)

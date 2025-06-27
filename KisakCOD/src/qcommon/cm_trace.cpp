@@ -165,24 +165,13 @@ void __cdecl CM_Trace(
     int i; // [esp+150h] [ebp-14h]
     float end_[4]; // [esp+154h] [ebp-10h] BYREF
 
-    if (!cm.numNodes)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1318, 0, "%s", "cm.numNodes");
-    if (!mins)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1319, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1320, 0, "%s", "maxs");
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\qcommon\\cm_trace.cpp",
-            1321,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
-    Profile_Begin(39);
+    iassert(cm.numNodes);
+    iassert(mins);
+    iassert(maxs);
+    iassert(!IS_NAN(end[0]) && !IS_NAN(end[1]) && !IS_NAN(end[2]));
+
+    PROF_SCOPED("CM_Trace");
+
     cmod = CM_ClipHandleToModel(model);
     tw.contents = brushmask;
     for (i = 0; i < 3; ++i)
@@ -348,7 +337,6 @@ void __cdecl CM_Trace(
                 "results->surfaceFlags == SURF_INVALID || results->fraction == oldFrac");
         results->surfaceFlags = oldSurfaceFlags;
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl CM_GetTraceThreadInfo(TraceThreadInfo *threadInfo)
@@ -660,21 +648,20 @@ void __cdecl CM_TraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *
     {
         if ((tw->contents & leaf->brushContents) != 0)
         {
-            Profile_Begin(45);
+            PROF_SCOPED("CM_TraceBrush"); 
             if (CM_TraceThroughLeafBrushNode(tw, leaf, trace))
             {
-            LABEL_11:
-                Profile_EndInternal(0);
                 return;
             }
-            Profile_EndInternal(0);
         }
+
         if ((tw->contents & leaf->terrainContents) == 0)
             return;
-        Profile_Begin(46);
+
+        PROF_SCOPED("CM_TraceTerrain");
         for (k = 0; k < leaf->collAabbCount && trace->fraction != 0.0; ++k)
             CM_TraceThroughAabbTree(tw, &cm.aabbTrees[k + leaf->firstCollAabbIndex], trace);
-        goto LABEL_11;
+        return;
     }
 }
 
@@ -1754,7 +1741,8 @@ int __cdecl CM_BoxSightTrace(
     iassert(mins);
     iassert(maxs);
 
-    Profile_Begin(40);
+    PROF_SCOPED("CM_SightTrace");
+
     cmod = CM_ClipHandleToModel(model);
     trace.fraction = 1.0;
     trace.startsolid = 0;
@@ -1855,7 +1843,7 @@ int __cdecl CM_BoxSightTrace(
         if (!hitNum)
             hitNum = CM_SightTraceThroughTree(&tw, 0, tw.extents.start, tw.extents.end, &trace);
     }
-    Profile_EndInternal(0);
+
     return hitNum;
 }
 
@@ -2058,28 +2046,28 @@ int __cdecl CM_SightTraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace
 
     if ((tw->contents & leaf->brushContents) != 0)
     {
-        Profile_Begin(47);
+        PROF_SCOPED("CM_SightBrush");
         hitnum = CM_SightTraceThroughLeafBrushNode(tw, leaf);
-        Profile_EndInternal(0);
+
         if (hitnum)
             return hitnum;
     }
-    if (trace->fraction != 1.0)
-        MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1937, 0, "%s", "trace->fraction == 1.0f");
+
+    iassert(trace->fraction == 1.0f);
+
     if ((tw->contents & leaf->terrainContents) != 0)
     {
-        Profile_Begin(48);
+        PROF_SCOPED("CM_SightTerrain");
         for (k = 0; k < leaf->collAabbCount; ++k)
         {
             CM_SightTraceThroughAabbTree(tw, &cm.aabbTrees[k + leaf->firstCollAabbIndex], trace);
             if (trace->fraction != 1.0)
             {
-                Profile_EndInternal(0);
                 return leaf->firstCollAabbIndex + k + cm.numBrushes + 1;
             }
         }
-        Profile_EndInternal(0);
     }
+
     return 0;
 }
 

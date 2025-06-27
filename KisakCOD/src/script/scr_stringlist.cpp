@@ -85,7 +85,7 @@ void SL_AddUserInternal(RefString* refStr, unsigned int user)
 
 void SL_AddRefToString(unsigned int stringValue)
 {
-	Profile_Begin(334);
+	PROF_SCOPED("SL_AddRefToString");
 	if (scrStringDebugGlob)
 	{
 		iassert(scrStringDebugGlob->refCount[stringValue]);
@@ -98,8 +98,6 @@ void SL_AddRefToString(unsigned int stringValue)
 	InterlockedIncrement((volatile LONG*)refStr);
 
 	iassert(refStr->refCount);
-
-	Profile_EndInternal(0);
 }
 
 void SL_CheckExists(unsigned int stringValue)
@@ -207,7 +205,7 @@ unsigned int SL_GetString_(const char* str, unsigned int user, int type)
 HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type)
 {
 	// KISAKFINISHFUNCTION
-	Profile_Begin(334); // KISAKPROFILER
+	PROF_SCOPED("SL_GetStringOfSize");
 	iassert(str);
 
 	unsigned int hash = GetHashCode(str, len);
@@ -235,7 +233,6 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 			iassert(refStr->str == SL_ConvertToString(stringValue));
 			
 			Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-			Profile_EndInternal(0);
 			return stringValue;
 		}
 
@@ -263,7 +260,6 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 				iassert(refStrA->str == SL_ConvertToString(stringValue));
 
 				Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-				Profile_EndInternal(0);
 				return stringValue;
 			}
 			prev = newIndex;
@@ -349,7 +345,6 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 	iassert(refStrB->str == SL_ConvertToString(stringValue));
 END_CLEANUP:
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-	Profile_EndInternal(0);
 	return stringValue;
 }
 
@@ -392,7 +387,8 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 {
 	HashEntry_unnamed_type_u stringValue = 0;
 
-	Profile_Begin(334);
+	PROF_SCOPED("FindStringOfSize");
+
 	iassert(str);
 	unsigned int hash = GetHashCode(str, len);
 
@@ -401,7 +397,6 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 	if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != HASH_STAT_HEAD)
 	{
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-		Profile_EndInternal(0);
 		return 0;
 	}
 
@@ -433,14 +428,12 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 				iassert(refStrA->str == SL_ConvertToString(stringValue.prev));
 		
 				Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-				Profile_EndInternal(0);
 				return stringValue;
 			}
 			prev = newIndex;
 			newIndex = (unsigned __int16)newEntry->status_next;
 		} // for()
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-		Profile_EndInternal(0);
 		return 0;
 	} //memcmp
 	iassert((scrStringGlob.hashTable[hash].status_next & 0x30000) != HASH_STAT_FREE);
@@ -450,7 +443,6 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 	iassert(refStr->str == SL_ConvertToString(stringValue));
 
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-	Profile_EndInternal(0);
 	return stringValue;
 }
 
@@ -466,7 +458,8 @@ void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user)
 	volatile LONG Comperand; // [esp+20h] [ebp-28h]
 	RefString *refStr; // [esp+44h] [ebp-4h]
 
-	Profile_Begin(334);
+	PROF_SCOPED("SL_TransferRefToUser");
+
 	refStr = GetRefString(stringValue);
 	if ((user & BYTE2(refStr->data)) != 0)
 	{
@@ -498,14 +491,12 @@ void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user)
 			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
 		}
 		InterlockedDecrement(&refStr->data);
-		Profile_EndInternal(0);
 	}
 	else
 	{
 		do
 			Comperand = refStr->data;
 		while (InterlockedCompareExchange(&refStr->data, Comperand | (user << 16), Comperand) != Comperand);
-		Profile_EndInternal(0);
 	}
 }
 
@@ -556,17 +547,15 @@ static HashEntry_unnamed_type_u  GetLowercaseStringOfSize(
 	char stra[8192]; // [esp+4Ch] [ebp-2008h] BYREF
 	unsigned int i; // [esp+2050h] [ebp-4h]
 
-	Profile_Begin(334);
+	PROF_SCOPED("GetLowercaseStringOfSize");
 	if (len <= 0x2000)
 	{
 		for (i = 0; i < len; ++i)
 			stra[i] = tolower(str[i]);
-		Profile_EndInternal(0);
 		return SL_GetStringOfSize(stra, user, len, type);
 	}
 	else
 	{
-		Profile_EndInternal(0);
 		Com_Error(ERR_DROP, "max string length exceeded: \"%s\"", str);
 		return 0;
 	}
@@ -586,16 +575,17 @@ void SL_RemoveRefToString(unsigned int stringValue)
 	RefString* refStr; // [esp+30h] [ebp-8h]
 	int len; // [esp+34h] [ebp-4h]
 
-	Profile_Begin(334); // KISAKPROFILER
+	PROF_SCOPED("SL_RemoveRefToString");
+
 	refStr = GetRefString(stringValue);
 	len = SL_GetRefStringLen(refStr) + 1;
-	Profile_EndInternal(0); // KISAKPROFILER
 	SL_RemoveRefToStringOfSize(stringValue, len);
 }
 
 static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned int len)
 {
-	Profile_Begin(334); // KISAKPROFILER
+	PROF_SCOPED("SL_FreeString");
+
 	unsigned int index = GetHashCode(refStr->str, len);
 	HashEntry* entry = &scrStringGlob.hashTable[index];
 
@@ -604,7 +594,6 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 	if (refStr->data)
 	{
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-		Profile_EndInternal(0);
 	}
 	else
 	{
@@ -655,7 +644,6 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 		scrStringGlob.hashTable[newNext].u.prev = newIndex;
 		scrStringGlob.hashTable[0].status_next = newIndex;
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
-		Profile_EndInternal(0);
 	}
 }
 
@@ -692,25 +680,24 @@ HashEntry_unnamed_type_u SL_FindLowercaseString(const char* str)
 	unsigned int len; // [esp+2064h] [ebp-8h]
 	signed int i; // [esp+2068h] [ebp-4h]
 
-	Profile_Begin(334);
+	PROF_SCOPED("SL_FindLowercaseString");
 	len = strlen(str) + 1;
 	if ((int)len <= 0x2000)
 	{
 		for (i = 0; i < (int)len; ++i)
 			stra[i] = tolower(str[i]);
-		Profile_EndInternal(0);
 		return FindStringOfSize(stra, len);
 	}
 	else
 	{
-		Profile_EndInternal(0);
 		return 0;
 	}
 }
 
 void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 {
-	Profile_Begin(334); // KISAKPROFILER
+	PROF_SCOPED("SL_RemoveRefToStringOfSize");
+
 	RefString* refStr = GetRefString(stringValue);
 
 	if (InterlockedDecrement((volatile LONG*)refStr) << 16)
@@ -723,11 +710,9 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
 			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
 		}
-		Profile_EndInternal(0);
 	}
 	else
 	{
-		Profile_EndInternal(0);
 		SL_FreeString(stringValue, refStr, len);
 		if (scrStringDebugGlob)
 		{
@@ -765,7 +750,8 @@ HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue,
 	unsigned int len; // [esp+2058h] [ebp-8h]
 	unsigned int i; // [esp+205Ch] [ebp-4h]
 
-	Profile_Begin(334);
+	PROF_SCOPED("SL_ConvertToLowercase");
+
 	len = SL_GetStringLen(stringValue) + 1;
 	if (len <= 0x2000)
 	{
@@ -774,12 +760,10 @@ HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue,
 			str[i] = tolower(v4[i]);
 		v6.prev = SL_GetStringOfSize(str, user, len, type).prev;
 		SL_RemoveRefToString(stringValue);
-		Profile_EndInternal(0);
 		return v6;
 	}
 	else
 	{
-		Profile_EndInternal(0);
 		return (HashEntry_unnamed_type_u)stringValue;
 	}
 }

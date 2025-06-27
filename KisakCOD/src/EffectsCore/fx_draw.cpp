@@ -327,9 +327,10 @@ void __cdecl FX_GenSpriteVerts(FxDrawState *draw, const float *tangent, const fl
             sprite->indices = baseIndices;
         }
         sprite->indexCount += 6;
-        Profile_Begin(198);
-        FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("FX_EvalVisState");
+            FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
+        }
         rotationTotal = draw->visState.rotationTotal;
         cosRot = cos(rotationTotal);
         sinRot = sin(rotationTotal);
@@ -722,9 +723,10 @@ void __cdecl FX_DrawElem_Cloud(FxDrawState *draw)
             cloud = R_AddParticleCloudToScene(visuals.material);
             if (cloud)
             {
-                Profile_Begin(198);
-                FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
-                Profile_EndInternal(0);
+                {
+                    PROF_SCOPED("FX_EvalVisState");
+                    FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
+                }
                 FX_SetPlacement(draw, &cloud->placement);
                 cloud->color.packed = *(unsigned int *)draw->visState.color;
                 *(double *)cloud->radius = *(double *)draw->visState.size;
@@ -851,9 +853,10 @@ void __cdecl FX_DrawElem_Light(FxDrawState *draw)
 
     if (!FX_CullElementForDraw_Light(draw))
     {
-        Profile_Begin(198);
-        FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("FX_EvalVisState");
+            FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
+        }
         red = (double)draw->visState.color[2] * 0.003921568859368563;
         green = (double)draw->visState.color[1] * 0.003921568859368563;
         blue = (double)draw->visState.color[0] * 0.003921568859368563;
@@ -884,9 +887,10 @@ void __cdecl FX_DrawElem_SpotLight(FxDrawState *draw)
 
     if (!FX_CullElementForDraw_Light(draw))
     {
-        Profile_Begin(198);
-        FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("FX_EvalVisState");
+            FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
+        }
         red = (double)draw->visState.color[2] * 0.003921568859368563;
         green = (double)draw->visState.color[1] * 0.003921568859368563;
         blue = (double)draw->visState.color[0] * 0.003921568859368563;
@@ -899,7 +903,7 @@ void __cdecl FX_DrawNonSpriteElems(FxSystem *system)
     FxEffect *effect; // [esp+3Ch] [ebp-8h]
     volatile int activeIndex; // [esp+40h] [ebp-4h]
 
-    Profile_Begin(201);
+    PROF_SCOPED("FX_DrawElems");
     if (!system)
         MyAssertHandler(".\\EffectsCore\\fx_draw.cpp", 1370, 0, "%s", "system");
     if (!system->camera.isValid)
@@ -912,7 +916,6 @@ void __cdecl FX_DrawNonSpriteElems(FxSystem *system)
     }
     if (!InterlockedDecrement(&system->iteratorCount) && system->needsGarbageCollection)
         FX_RunGarbageCollection(system);
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_BeginIteratingOverEffects_Cooperative(FxSystem *system)
@@ -1012,10 +1015,11 @@ void __cdecl FX_DrawElement_Setup_1_(
         draw->randomSeed,
         &draw->orient);
     FX_OrientationPosToWorldPos(&draw->orient, elemOrigin, draw->posWorld);
-    Profile_Begin(198);
-    FX_SetupVisualState(draw->elemDef, draw->effect, draw->randomSeed, draw->normTimeUpdateEnd, &draw->preVisState);
-    FX_EvaluateSize(&draw->preVisState, &draw->visState);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("FX_EvalVisState");
+        FX_SetupVisualState(draw->elemDef, draw->effect, draw->randomSeed, draw->normTimeUpdateEnd, &draw->preVisState);
+        FX_EvaluateSize(&draw->preVisState, &draw->visState);
+    }
     if ((draw->elemDef->flags & 0x1000) != 0)
         FX_EvaluateVisAlpha(&draw->preVisState, &draw->visState);
     draw->camera = &draw->system->camera;
@@ -1123,7 +1127,7 @@ void __cdecl FX_DrawSpriteElems(FxSystem *system, int drawTime)
     int i; // [esp+850h] [ebp-8h]
     int activeIndex; // [esp+854h] [ebp-4h]
 
-    Profile_Begin(201);
+    PROF_SCOPED("FX_DrawElems");
     if (!system)
         MyAssertHandler(".\\EffectsCore\\fx_draw.cpp", 1510, 0, "%s", "system");
     if (!system->camera.isValid)
@@ -1173,7 +1177,6 @@ void __cdecl FX_DrawSpriteElems(FxSystem *system, int drawTime)
         system->sprite.indexCount = 0;
         sprite->indices = 0;
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_DrawTrailsForEffect(FxSystem *system, FxEffect *effect, int drawTime)
@@ -1289,9 +1292,10 @@ void __cdecl FX_DrawTrail(FxSystem *system, FxDrawState *draw, FxTrail *trail)
                             trailElem->origin,
                             &segmentNormTime);
                         FX_TrailElem_UncompressBasis(trailElem->basis, basis);
-                        Profile_Begin(198);
-                        FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
-                        Profile_EndInternal(0);
+                        {
+                            PROF_SCOPED("FX_EvalVisState");
+                            FX_EvaluateVisualState(&draw->preVisState, draw->msecLifeSpan, &draw->visState);
+                        }
                         Fx_GenTrail_PopulateSegmentDrawState(draw, trailElem->spawnDist, uCoordOffset, basis, &segmentDrawState);
                         if (segmentNormTime < 1.0)
                         {
@@ -1589,8 +1593,9 @@ void __cdecl FX_GenerateVerts(FxGenerateVertsCmd *cmd)
     int drawTime; // [esp+50h] [ebp-8h]
     FxSystem *localSystem; // [esp+54h] [ebp-4h]
 
+    PROF_SCOPED("FX_GenerateVerts");
+
     localSystem = cmd->system;
-    Profile_Begin(196);
     R_BeginCodeMeshVerts();
     drawTime = localSystem->msecDraw;
     if (drawTime >= 0)
@@ -1602,12 +1607,10 @@ void __cdecl FX_GenerateVerts(FxGenerateVertsCmd *cmd)
             FX_DrawSpriteElems(localSystem, drawTime);
         R_EndCodeMeshVerts();
         FX_ToggleVisBlockerFrame(localSystem);
-        Profile_EndInternal(0);
     }
     else
     {
         R_EndCodeMeshVerts();
-        Profile_EndInternal(0);
     }
 }
 

@@ -882,7 +882,8 @@ unsigned int __cdecl R_GetLightingAtPoint(
     float sampleWeight[8]; // [esp+E0h] [ebp-20h] BYREF
 
     iassert(lightGrid);
-    Profile_Begin(85);
+
+    PROF_SCOPED("R_GetStaticLights");
 
     primaryLightIndex = R_LightGridLookup(lightGrid, samplePos, cornerWeight, cornerEntry, &defaultGridEntry);
 
@@ -966,7 +967,7 @@ unsigned int __cdecl R_GetLightingAtPoint(
     {
         primaryLightIndex = R_ExtrapolateLightingAtPoint(lightGrid, dest, extrapolateBehavior, defaultGridEntry);
     }
-    Profile_EndInternal(0);
+
     return primaryLightIndex;
 }
 
@@ -1265,9 +1266,10 @@ void __cdecl R_InitLightVisHistory(char *bspName)
                 {
                     if (count > 6291456)
                         count = 6291456;
-                    Profile_Begin(166);
-                    memcpy((unsigned __int8 *)s_vc_log.history, (unsigned __int8 *)buffer, count);
-                    Profile_EndInternal(0);
+                    {
+                        PROF_SCOPED("R_memcpy");
+                        memcpy((unsigned __int8 *)s_vc_log.history, (unsigned __int8 *)buffer, count);
+                    }
                     s_vc_log.count = count / 6u;
                 }
                 FS_FreeFile((char *)buffer);

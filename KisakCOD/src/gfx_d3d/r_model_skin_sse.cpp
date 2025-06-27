@@ -419,7 +419,8 @@ void __cdecl R_SkinXSurfaceWeightSseInOut(
     int vertIndex; // [esp+34h] [ebp-4h] BYREF
     int savedregs; // [esp+38h] [ebp+0h] BYREF
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
+
     vertIndex = 0;
     vertsBlend = vertexInfo->vertsBlend;
     if (vertexInfo->vertCount[0])
@@ -471,7 +472,6 @@ void __cdecl R_SkinXSurfaceWeightSseInOut(
             outVertNormals,
             outVerts,
             &vertIndex);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SkinXSurfaceRigidSseInOut(
@@ -504,7 +504,8 @@ void __cdecl R_SkinXSurfaceRigidSseInOut(
     iassert(!(reinterpret_cast<unsigned>(dstVertNormals) & 7));
     iassert(!(reinterpret_cast<unsigned>(boneMatrix) & 15));
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
+
     vertexNormal = (__m128 *)surf->verts0;
     vertList = (__m64 *)dstVerts;
     vertCount = (__m64 *)dstVertNormals;
@@ -544,7 +545,6 @@ void __cdecl R_SkinXSurfaceRigidSseInOut(
         MyAssertHandler(".\\r_model_skin.cpp", 2137, 0, "%s", "vertex - dstVerts == totalVertCount");
     if (((char *)vertCount - (char *)dstVertNormals) >> 3 != totalVertCount)
         MyAssertHandler(".\\r_model_skin.cpp", 2138, 0, "%s", "vertexNormal - dstVertNormals == totalVertCount");
-    Profile_EndInternal(0);
 }
 
 
@@ -1035,7 +1035,8 @@ void __cdecl R_SkinXSurfaceWeightSseOut(
     const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h] BYREF
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
+
     vertIndex = 0;
     vertsBlend = vertexInfo->vertsBlend;
     if (vertexInfo->vertCount[0])
@@ -1083,7 +1084,6 @@ void __cdecl R_SkinXSurfaceWeightSseOut(
             outVertNormals,
             outVerts,
             &vertIndex);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SkinXSurfaceRigidSseOut(
@@ -1125,7 +1125,8 @@ void __cdecl R_SkinXSurfaceRigidSseOut(
     iassert(!(reinterpret_cast<unsigned>(dstVertNormals) & 7));
     iassert(!(reinterpret_cast<unsigned>(boneMatrix) & 15));
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
+
     i = (__m128 *)surf->verts0;
     vertList = (__m64 *)dstVerts;
     vertCount = (__m64 *)dstVertNormals;
@@ -1187,7 +1188,6 @@ void __cdecl R_SkinXSurfaceRigidSseOut(
         MyAssertHandler(".\\r_model_skin.cpp", 2077, 0, "%s", "vertex - dstVerts == totalVertCount");
     if (((char *)vertCount - (char *)dstVertNormals) >> 3 != totalVertCount)
         MyAssertHandler(".\\r_model_skin.cpp", 2078, 0, "%s", "vertexNormal - dstVertNormals == totalVertCount");
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SkinXSurfaceWeightSseBlock_1_Sse_SkinVertex_0_(
@@ -1658,7 +1658,8 @@ void __cdecl R_SkinXSurfaceWeightSse(
     const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h] BYREF
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
+
     vertIndex = 0;
     vertsBlend = vertexInfo->vertsBlend;
     if (vertexInfo->vertCount[0])
@@ -1702,7 +1703,6 @@ void __cdecl R_SkinXSurfaceWeightSse(
             boneMatrix,
             outVerts,
             &vertIndex);
-    Profile_EndInternal(0);
 }
 
 
@@ -1740,7 +1740,8 @@ void __cdecl R_SkinXSurfaceRigidSse(
     iassert(!(reinterpret_cast<unsigned>(dstVerts) & 15));
     iassert(!(reinterpret_cast<unsigned>(boneMatrix) & 15));
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
+
     vertList = (__m128 *)surf->verts0;
     vertCount = (__m64 *)dstVerts;
     for (matrixAddress = 0; matrixAddress < surf->vertListCount; ++matrixAddress)
@@ -1796,7 +1797,6 @@ void __cdecl R_SkinXSurfaceRigidSse(
     }
     if (((char *)vertCount - (char *)dstVerts) >> 5 != totalVertCount)
         MyAssertHandler(".\\r_model_skin.cpp", 2019, 0, "%s", "vertex - dstVerts == totalVertCount");
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SkinXSurfaceSkinnedSse(

@@ -131,17 +131,15 @@ void __cdecl R_ProcessWorkerCmdsWithTimeout(int(__cdecl *timeout)(), int forever
 {
     while (!timeout() && !R_ProcessWorkerCmdsWithTimeoutInternal(timeout) && forever)
     {
-        Profile_Begin(175);
+        PROF_SCOPED("WaitForWorkerCmd");
         InterlockedIncrement(&g_workerCmdWaitCount);
         Sys_WaitForWorkerCmd();
         if (timeout())
         {
             InterlockedDecrement(&g_workerCmdWaitCount);
-            Profile_EndInternal(0);
             return;
         }
         InterlockedDecrement(&g_workerCmdWaitCount);
-        Profile_EndInternal(0);
     }
 }
 
@@ -584,16 +582,19 @@ void __cdecl  R_WorkerThread()
     if (_setjmp(*(jmp_buf *)Value))
         Com_ErrorAbort();
     Profile_Guard(1);
+
     while (1)
     {
-        Profile_Begin(175);
-        InterlockedIncrement(&g_workerCmdWaitCount);
-        Sys_WaitForWorkerCmd();
-        InterlockedDecrement(&g_workerCmdWaitCount);
-        Profile_EndInternal(0);
-        Profile_Begin(174);
-        R_ProcessWorkerCmds();
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("WaitForWorkerCmd");
+            InterlockedIncrement(&g_workerCmdWaitCount);
+            Sys_WaitForWorkerCmd();
+            InterlockedDecrement(&g_workerCmdWaitCount);
+        }
+        {
+            PROF_SCOPED("WorkerThread");
+            R_ProcessWorkerCmds();
+        }
     }
 }
 
@@ -636,13 +637,16 @@ void __cdecl R_AddWorkerCmd(int type, unsigned __int8 *data)
             R_WarnOncePerFrame(R_WARN_WORKER_CMD_SIZE, type);
         InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -1);
     }
-    Profile_Begin(176);
-    if (g_cmdOutputBusy[type])
+
     {
-        while (g_cmdOutputBusy[type](data))
-            NET_Sleep(1u);
+        PROF_SCOPED("WaitWorkerCmds");
+        if (g_cmdOutputBusy[type])
+        {
+            while (g_cmdOutputBusy[type](data))
+                NET_Sleep(1u);
+        }
     }
-    Profile_EndInternal(0);
+
     R_ProcessWorkerCmdInternal(type, (FxCmd*)data);
 }
 
@@ -684,12 +688,12 @@ LABEL_9:
 
 void __cdecl R_WaitFrontendWorkerCmds()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_workercmds.cpp", 1146, 0, "%s", "Sys_IsMainThread()");
-    Profile_Begin(176);
-    KISAK_NULLSUB();
+    iassert(Sys_IsMainThread());
+
+    PROF_SCOPED("R_WaitFrontendWorkerCmds");
+    //KISAK_NULLSUB();
+
     R_ProcessWorkerCmdsWithTimeout(R_FinishedWorkerCmds, 1);
-    Profile_EndInternal(0);
 }
 
 int __cdecl R_FinishedWorkerCmds()
@@ -706,11 +710,11 @@ int __cdecl R_FinishedWorkerCmds()
 
 void __cdecl R_WaitWorkerCmds()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_workercmds.cpp", 1162, 0, "%s", "Sys_IsMainThread()");
-    Profile_Begin(176);
-    KISAK_NULLSUB();
+    iassert(Sys_IsMainThread());
+
+    PROF_SCOPED("R_WaitWorkerCmds");
+    //KISAK_NULLSUB();
+
     R_ProcessWorkerCmdsWithTimeout(R_FinishedWorkerCmds, 1);
-    Profile_EndInternal(0);
 }
 

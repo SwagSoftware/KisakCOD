@@ -165,6 +165,10 @@ void __cdecl SetThreadName(unsigned int threadId, const char* threadName)
     info.dwThreadID = threadId;
     info.dwFlags = 0;
     
+#ifdef TRACY_ENABLE
+    TracyCSetThreadName(threadName);
+#endif
+
     __try {
         RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
     }

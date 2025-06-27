@@ -325,7 +325,7 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
     KISAK_NULLSUB();
     for (spotShadowIndex = 0; spotShadowIndex < viewInfo->spotShadowCount; ++spotShadowIndex)
     {
-        Profile_Begin(74);
+        PROF_SCOPED("EmitSpotShadow");
         info = &viewInfo->spotShadows[spotShadowIndex].info;
         R_InitDrawSurfListInfo(info);
         info->baseTechType = gfxMetrics.shadowmapBuildTechType;
@@ -361,7 +361,6 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
                     viewInfo->emissiveSpotDrawSurfs,
                     info);
         }
-        Profile_EndInternal(0);
     }
 }
 

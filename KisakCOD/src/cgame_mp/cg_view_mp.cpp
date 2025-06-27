@@ -1557,9 +1557,10 @@ int __cdecl CG_DrawActiveFrame(
                 R_AddCmdProjectionSet2D();
                 DrawShellshockBlend(localClientNum);
                 CG_CompassIncreaseRadarTime(localClientNum);
-                Profile_Begin(346);
-                CG_Draw2D(localClientNum);
-                Profile_EndInternal(0);
+                {
+                    PROF_SCOPED("CG_Draw2D");
+                    CG_Draw2D(localClientNum);
+                }
                 if (cgArray[0].weaponSelect >= BG_GetNumWeapons())
                 {
                     NumWeapons = BG_GetNumWeapons();
@@ -1710,7 +1711,7 @@ void __cdecl CG_UpdateEntInfo(int localClientNum)
     unsigned int entnum; // [esp+3Ch] [ebp-4h]
 
     KISAK_NULLSUB();
-    Profile_Begin(12);
+    PROF_SCOPED("CG_UpdateEntInfo");
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -1729,7 +1730,6 @@ void __cdecl CG_UpdateEntInfo(int localClientNum)
             CG_ProcessClientNoteTracks(cgArray, entnum);
         }
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl GetCeilingHeight(cg_s *cgameGlob)

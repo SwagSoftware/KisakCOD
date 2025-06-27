@@ -859,9 +859,10 @@ void __cdecl Image_Construct(
         MyAssertHandler(".\\r_image.cpp", 325, 0, "%s\n\t(nameSize) = %i", "(nameSize > 0)", nameSize);
     if (!image)
         MyAssertHandler(".\\r_image.cpp", 326, 0, "%s", "image");
-    Profile_Begin(166);
-    memcpy((unsigned __int8 *)image->name, (unsigned __int8 *)name, nameSize);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("R_memcpy");
+        memcpy((unsigned __int8 *)image->name, (unsigned __int8 *)name, nameSize);
+    }
     if (!category)
         MyAssertHandler(".\\r_image.cpp", 332, 0, "%s", "category != IMG_CATEGORY_UNKNOWN");
     image->category = category;

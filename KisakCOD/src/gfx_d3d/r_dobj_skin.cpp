@@ -107,7 +107,7 @@ int  R_SkinSceneDObjModels(
     iassert(boneMatrix);
     iassert(!useFastFile->current.enabled || !DObjBad(obj));
 
-    Profile_Begin(89);
+    PROF_SCOPED("R_SkinXModel");
 
     unsigned char surfsBuffer[131072];
     GfxModelSkinnedSurface *surfPos = (GfxModelSkinnedSurface *)surfsBuffer;
@@ -234,7 +234,6 @@ int  R_SkinSceneDObjModels(
             int skinnedCachedOffset = R_AllocSkinnedCachedVerts(numSkinnedVerts);
             if (skinnedCachedOffset < 0)
             {
-                Profile_EndInternal(0);
                 return 0;
             }
             unsigned int oldSkinnedCachedOffset = 0x80000001;
@@ -290,7 +289,6 @@ int  R_SkinSceneDObjModels(
             if ((firstSurf + vertsSize) > 0x480000)
             {
                 R_WarnOncePerFrame(R_WARN_TEMP_SKIN_BUF_SIZE);
-                Profile_EndInternal(0);
                 return 0;
             }
             Z_VirtualCommit(&frontEndDataOut->tempSkinBuf[firstSurf], vertsSize);
@@ -325,7 +323,6 @@ int  R_SkinSceneDObjModels(
     if (startSurfPos + totalSurfSize > 0x20000)
     {
         R_WarnOncePerFrame(R_WARN_MAX_SCENE_SURFS_SIZE);
-        Profile_EndInternal(0);
         return 0;
     }
 
@@ -333,8 +330,6 @@ int  R_SkinSceneDObjModels(
 
     sceneEnt->cull.skinnedSurfs.firstSurf = &frontEndDataOut->surfsBuffer[startSurfPos];
     memcpy(&frontEndDataOut->surfsBuffer[startSurfPos], surfsBuffer, totalSurfSize);
-
-    Profile_EndInternal(0);
 
     iassert(totalSurfaceCount);
 

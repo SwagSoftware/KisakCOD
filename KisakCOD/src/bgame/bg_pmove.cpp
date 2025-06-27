@@ -1273,9 +1273,10 @@ void __cdecl Pmove(pmove_t *pm)
             if (msec > 66)
                 msec = 66;
             pm->cmd.serverTime = msec + ps->commandTime;
-            Profile_Begin(283);
-            PmoveSingle(pm);
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("PmoveSingle");
+                PmoveSingle(pm);
+            }
             memcpy(&pm->oldcmd, &pm->cmd, sizeof(pm->oldcmd));
         }
     }
@@ -1544,13 +1545,15 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 PM_UpdateSprint(pm, &pml);
                 PM_UpdatePlayerWalkingFlag(pm);
                 PM_CheckDuck(pm, &pml);
-                Profile_Begin(286);
-                PM_GroundTrace(pm, &pml);
-                Profile_EndInternal(0);
+                {
+                    PROF_SCOPED("PM_GroundTrace");
+                    PM_GroundTrace(pm, &pml);
+                }
             }
-            Profile_Begin(289);
-            Mantle_Check(pm, &pml);
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("Mantle_Check");
+                Mantle_Check(pm, &pml);
+            }
             if ((ps->pm_flags & 4) != 0)
             {
                 PM_ClearLadderFlag(ps);
@@ -1562,9 +1565,10 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 PM_UpdatePlayerWalkingFlag(pm);
                 PM_CheckDuck(pm, &pml);
                 Mantle_Move(pm, ps, &pml);
-                Profile_Begin(285);
-                PM_Weapon(pm, &pml);
-                Profile_EndInternal(0);
+                {
+                    PROF_SCOPED("PM_Weapon");
+                    PM_Weapon(pm, &pml);
+                }
             }
             else
             {
@@ -1573,32 +1577,39 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 if (ps->pm_type >= 6)
                     PM_DeadMove(ps, &pml);
                 PM_CheckLadderMove(pm, &pml);
-                Profile_Begin(284);
-                if ((ps->pm_flags & 8) != 0)
+
                 {
-                    PM_LadderMove(pm, &pml);
+                    PROF_SCOPED("PM_Move");
+                    if ((ps->pm_flags & 8) != 0)
+                    {
+                        PM_LadderMove(pm, &pml);
+                    }
+                    else if (pml.walking)
+                    {
+                        PM_WalkMove(pm, &pml);
+                    }
+                    else
+                    {
+                        PM_AirMove(pm, &pml);
+                    }
                 }
-                else if (pml.walking)
+
                 {
-                    PM_WalkMove(pm, &pml);
+                    PROF_SCOPED("PM_GroundTrace");
+                    PM_GroundTrace(pm, &pml);
                 }
-                else
                 {
-                    PM_AirMove(pm, &pml);
+                    PROF_SCOPED("PM_Footsteps");
+                    PM_Footsteps(pm, &pml);
                 }
-                Profile_EndInternal(0);
-                Profile_Begin(286);
-                PM_GroundTrace(pm, &pml);
-                Profile_EndInternal(0);
-                Profile_Begin(287);
-                PM_Footsteps(pm, &pml);
-                Profile_EndInternal(0);
-                Profile_Begin(285);
-                PM_Weapon(pm, &pml);
-                Profile_EndInternal(0);
-                Profile_Begin(288);
-                PM_FoliageSounds(pm);
-                Profile_EndInternal(0);
+                {
+                    PROF_SCOPED("PM_Weapon");
+                    PM_Weapon(pm, &pml);
+                }
+                {
+                    PROF_SCOPED("PM_FoliageSounds");
+                    PM_FoliageSounds(pm);
+                }
                 Vec3Sub(ps->origin, pml.previous_origin, move);
                 v2 = Vec3LengthSq(move);
                 realVelSqrd = v2 / (pml.frametime * pml.frametime);

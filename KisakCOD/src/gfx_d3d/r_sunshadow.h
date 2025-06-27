@@ -1,6 +1,18 @@
 #pragma once
 #include "r_rendercmds.h"
 
+enum $A1218AF7D1C12B1D50BD9B9B70D78FD4 : __int32
+{
+    SCENE_VIEW_CAMERA = 0x0,
+    SCENE_VIEW_SUNSHADOW_0 = 0x1,
+    SCENE_VIEW_SUNSHADOW_1 = 0x2,
+    SCENE_VIEW_COUNT = 0x3,
+    SCENE_VIEW_SPOTSHADOW_0 = 0x3,
+    SCENE_VIEW_SPOTSHADOW_1 = 0x4,
+    SCENE_VIEW_SPOTSHADOW_2 = 0x5,
+    SCENE_VIEW_SPOTSHADOW_3 = 0x6,
+    SCENE_VIEW_COUNT_ENTVIS = 0x7,
+};
 
 void __cdecl R_GetSunAxes(float (*sunAxis)[3]);
 void __cdecl R_SunShadowMapBoundingPoly(

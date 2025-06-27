@@ -417,7 +417,9 @@ void __cdecl R_SetAllStaticModelLighting()
     if (smodelLightGlob.local.anyNewLighting)
     {
         smodelLightGlob.local.anyNewLighting = 0;
-        Profile_Begin(412);
+
+        PROF_SCOPED("SModelLighting");
+
         wordCount = (rgp.world->dpvs.smodelCount + 31) >> 5;
         if (wordCount >= 0x2000)
             MyAssertHandler(".\\r_model_lighting.cpp", 772, 0, "%s", "wordCount < sizeof( smodelLightGlob.lightingBits )");
@@ -440,7 +442,6 @@ void __cdecl R_SetAllStaticModelLighting()
                 }
             }
         }
-        Profile_EndInternal(0);
     }
 }
 

@@ -1177,7 +1177,7 @@ void __cdecl G_RunFrame(int levelTime)
     int i; // [esp+52Ch] [ebp-8h]
     int entnum; // [esp+530h] [ebp-4h]
 
-    Profile_Begin(230);
+    PROF_SCOPED("G_RunFrame");
     SV_CheckThread();
     ++level.framenum;
     level.previousTime = level.time;
@@ -1205,70 +1205,76 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    Profile_Begin(320);
-    ent = g_entities;
-    i = 0;
-    while (i < level.num_entities)
+
     {
-        if (ent->r.inuse)
+        PROF_SCOPED("G_XAnimUpdate");
+        ent = g_entities;
+        i = 0;
+        while (i < level.num_entities)
         {
-            dtime = (double)level.frametime * EQUAL_EPSILON;
-            SV_DObjInitServerTime(ent, dtime);
+            if (ent->r.inuse)
+            {
+                dtime = (double)level.frametime * EQUAL_EPSILON;
+                SV_DObjInitServerTime(ent, dtime);
+            }
+            ++i;
+            ++ent;
         }
-        ++i;
-        ++ent;
     }
-    Profile_EndInternal(0);
+
     memset(entIndex, 0, 0x400u);
     index = 0;
-    Profile_Begin(271);
-    if (level.currentTriggerListSize)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1914, 0, "%s", "level.currentTriggerListSize == 0");
-    Com_Memcpy((char *)level.currentTriggerList, (char *)level.pendingTriggerList, 12 * level.pendingTriggerListSize);
-    level.currentTriggerListSize = level.pendingTriggerListSize;
-    level.pendingTriggerListSize = 0;
-    do
     {
-        bMoreTriggered = 0;
-        ++index;
-        for (i = 0; i < level.currentTriggerListSize; ++i)
+        PROF_SCOPED("G_TriggerChecks");
+        iassert(level.currentTriggerListSize == 0);
+
+        Com_Memcpy((char *)level.currentTriggerList, (char *)level.pendingTriggerList, 12 * level.pendingTriggerListSize);
+        level.currentTriggerListSize = level.pendingTriggerListSize;
+        level.pendingTriggerListSize = 0;
+        do
         {
-            trigger_info = &level.currentTriggerList[i];
-            entnum = trigger_info->entnum;
-            ent = &g_entities[entnum];
-            if (ent->useCount == trigger_info->useCount)
+            bMoreTriggered = 0;
+            ++index;
+            for (i = 0; i < level.currentTriggerListSize; ++i)
             {
-                if (!ent->r.inuse)
-                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1930, 0, "%s", "ent->r.inuse");
-                other = &g_entities[trigger_info->otherEntnum];
-                if (other->useCount == trigger_info->otherUseCount)
+                trigger_info = &level.currentTriggerList[i];
+                entnum = trigger_info->entnum;
+                ent = &g_entities[entnum];
+                if (ent->useCount == trigger_info->useCount)
                 {
-                    if (!other->r.inuse)
-                        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1934, 0, "%s", "other->r.inuse");
-                    if (entIndex[entnum] == index)
+                    if (!ent->r.inuse)
+                        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1930, 0, "%s", "ent->r.inuse");
+                    other = &g_entities[trigger_info->otherEntnum];
+                    if (other->useCount == trigger_info->otherUseCount)
                     {
-                        bMoreTriggered = 1;
-                        continue;
+                        if (!other->r.inuse)
+                            MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1934, 0, "%s", "other->r.inuse");
+                        if (entIndex[entnum] == index)
+                        {
+                            bMoreTriggered = 1;
+                            continue;
+                        }
+                        entIndex[entnum] = index;
+                        Scr_AddEntity(other);
+                        Scr_Notify(ent, scr_const.trigger, 1u);
                     }
-                    entIndex[entnum] = index;
-                    Scr_AddEntity(other);
-                    Scr_Notify(ent, scr_const.trigger, 1u);
                 }
+                --level.currentTriggerListSize;
+                --i;
+                v1 = &level.currentTriggerList[level.currentTriggerListSize];
+                *(unsigned int *)&trigger_info->entnum = *(unsigned int *)&v1->entnum;
+                trigger_info->useCount = v1->useCount;
+                trigger_info->otherUseCount = v1->otherUseCount;
             }
-            --level.currentTriggerListSize;
-            --i;
-            v1 = &level.currentTriggerList[level.currentTriggerListSize];
-            *(unsigned int *)&trigger_info->entnum = *(unsigned int *)&v1->entnum;
-            trigger_info->useCount = v1->useCount;
-            trigger_info->otherUseCount = v1->otherUseCount;
-        }
-        Profile_Begin(272);
-        Scr_RunCurrentThreads();
-        Profile_EndInternal(0);
-    } while (bMoreTriggered);
-    if (level.currentTriggerListSize)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1956, 0, "%s", "level.currentTriggerListSize == 0");
-    Profile_EndInternal(0);
+            {
+                PROF_SCOPED("G_TriggerCheckScripts");
+                Scr_RunCurrentThreads();
+            }
+        } while (bMoreTriggered);
+
+        iassert(level.currentTriggerListSize == 0);
+    }
+
     ent = g_entities;
     i = 0;
     while (i < level.maxclients)
@@ -1278,63 +1284,70 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    Profile_Begin(320);
-    ent = g_entities;
-    i = 0;
-    while (i < level.num_entities)
+
     {
-        G_XAnimUpdateEnt(ent);
-        ++i;
-        ++ent;
+        PROF_SCOPED("G_XAnimUpdate");
+        ent = g_entities;
+        i = 0;
+        while (i < level.num_entities)
+        {
+            G_XAnimUpdateEnt(ent);
+            ++i;
+            ++ent;
+        }
     }
-    Profile_EndInternal(0);
+
     Scr_IncTime();
     SV_ResetSkeletonCache();
-    Profile_Begin(260);
-    if (level.currentEntityThink != -1)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1984, 0, "%s", "level.currentEntityThink == -1");
-    ent = g_entities;
-    level.currentEntityThink = 0;
-    while (level.currentEntityThink < level.num_entities)
     {
-        if (ent->r.inuse)
-            G_RunFrameForEntity(ent);
-        ++level.currentEntityThink;
-        ++ent;
-    }
-    level.currentEntityThink = -1;
-    Profile_EndInternal(0);
-    Profile_Begin(263);
-    G_UpdateObjectiveToClients();
-    Profile_EndInternal(0);
-    Profile_Begin(264);
-    G_UpdateHudElemsToClients();
-    Profile_EndInternal(0);
-    Profile_Begin(265);
-    ent = g_entities;
-    i = 0;
-    while (i < level.maxclients)
-    {
-        if (ent->r.inuse)
+        PROF_SCOPED("G_RunFrameForEntity");
+        if (level.currentEntityThink != -1)
+            MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1984, 0, "%s", "level.currentEntityThink == -1");
+        ent = g_entities;
+        level.currentEntityThink = 0;
+        while (level.currentEntityThink < level.num_entities)
         {
-            if ((unsigned int)i >= 0x40)
-                MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2012, 0, "i doesn't index MAX_CLIENTS\n\t%i not in [0, %i)", i, 64);
-            if (!level_bgs.clientinfo[i].infoValid)
-                MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2013, 0, "%s", "level_bgs.clientinfo[i].infoValid");
-            if (ent->client - level.clients != i)
-                MyAssertHandler(
-                    ".\\game_mp\\g_main_mp.cpp",
-                    2014,
-                    0,
-                    "ent->client - level.clients == i\n\t%i, %i",
-                    ent->client - level.clients,
-                    i);
-            ClientEndFrame(ent);
+            if (ent->r.inuse)
+                G_RunFrameForEntity(ent);
+            ++level.currentEntityThink;
+            ++ent;
         }
-        ++i;
-        ++ent;
+        level.currentEntityThink = -1;
     }
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("G_UpdateObjectiveToClients");
+        G_UpdateObjectiveToClients();
+    }
+    {
+        PROF_SCOPED("G_UpdateHudElemsToClients");
+        G_UpdateHudElemsToClients();
+    }
+    {
+        PROF_SCOPED("ClientEndFrame");
+        ent = g_entities;
+        i = 0;
+        while (i < level.maxclients)
+        {
+            if (ent->r.inuse)
+            {
+                if ((unsigned int)i >= 0x40)
+                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2012, 0, "i doesn't index MAX_CLIENTS\n\t%i not in [0, %i)", i, 64);
+                if (!level_bgs.clientinfo[i].infoValid)
+                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2013, 0, "%s", "level_bgs.clientinfo[i].infoValid");
+                if (ent->client - level.clients != i)
+                    MyAssertHandler(
+                        ".\\game_mp\\g_main_mp.cpp",
+                        2014,
+                        0,
+                        "ent->client - level.clients == i\n\t%i, %i",
+                        ent->client - level.clients,
+                        i);
+                ClientEndFrame(ent);
+            }
+            ++i;
+            ++ent;
+        }
+    }
     CheckTeamStatus();
     if (g_oldVoting->current.enabled)
         CheckVote();
@@ -1357,7 +1370,6 @@ void __cdecl G_RunFrame(int levelTime)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2043, 0, "%s\n\t(bgs) = %p", "(bgs == &level_bgs)", bgs);
     bgs = 0;
     ShowEntityInfo();
-    Profile_EndInternal(0);
 }
 
 void __cdecl G_ClientDoPerFrameNotifies(gentity_s *ent)

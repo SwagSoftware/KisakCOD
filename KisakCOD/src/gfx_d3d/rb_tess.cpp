@@ -118,7 +118,8 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     unsigned __int64 drawSurfKey; // [esp+80h] [ebp-10h]
     unsigned int drawSurfCount; // [esp+8Ch] [ebp-4h]
 
-    Profile_Begin(100);
+    PROF_SCOPED("TessCodeMesh");
+
     context = listArgs->context;
     info = listArgs->info;
     drawSurfCount = info->drawSurfCount - listArgs->firstDrawSurfIndex;
@@ -202,7 +203,6 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
         R_DrawIndexedPrimitive(&context.state->prim, &args);
     }
     g_primStats = 0;
-    Profile_EndInternal(0);
     return drawSurfIndex;
 }
 
@@ -299,7 +299,8 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     unsigned __int64 drawSurfKey; // [esp+B4h] [ebp-10h]
     unsigned int drawSurfCount; // [esp+C0h] [ebp-4h]
 
-    Profile_Begin(100);
+    PROF_SCOPED("TessCodeMesh");
+
     context = listArgs->context;
     info = listArgs->info;
     drawSurfCount = info->drawSurfCount - listArgs->firstDrawSurfIndex;
@@ -444,7 +445,6 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
         R_DrawIndexedPrimitive(&context.state->prim, &args);
     }
     g_primStats = 0;
-    Profile_EndInternal(0);
     return drawSurfIndex;
 }
 
@@ -460,7 +460,8 @@ unsigned int __cdecl R_TessParticleCloudList(const GfxDrawSurfListArgs *listArgs
     GfxCmdBufSourceState *commonSource; // [esp+70h] [ebp-10h]
     GfxDrawPrimArgs args; // [esp+74h] [ebp-Ch] BYREF
 
-    Profile_Begin(101);
+    PROF_SCOPED("TessCloud");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     if (prepassContext.state && commonSource != prepassContext.source)
@@ -487,9 +488,10 @@ unsigned int __cdecl R_TessParticleCloudList(const GfxDrawSurfListArgs *listArgs
             (unsigned __int16)drawSurf.fields.objectId,
             data->cloudCount);
     cloud = &data->clouds[drawSurf.fields.objectId];
-    Profile_Begin(97);
-    R_SetParticleCloudConstants(commonSource, cloud);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("RB_SetParticleCloudConstants");
+        R_SetParticleCloudConstants(commonSource, cloud);
+    }
     R_SetupPassCriticalPixelShaderArgs(context);
     R_ChangeDepthHackNearClip(commonSource, 0);
     R_SetVertexDeclTypeNormal(context.state, VERTDECL_POS_TEX);
@@ -516,7 +518,6 @@ unsigned int __cdecl R_TessParticleCloudList(const GfxDrawSurfListArgs *listArgs
     g_primStats->staticVertexCount += args.vertexCount;
     g_primStats->staticIndexCount += 3 * args.triCount;
     RB_EndTrackImmediatePrims();
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -659,7 +660,8 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
     unsigned int drawSurfKeyb; // [esp+ACh] [ebp-10h]
     unsigned int drawSurfCount; // [esp+B8h] [ebp-4h]
 
-    Profile_Begin(102);
+    PROF_SCOPED("TessXModSkin");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
@@ -833,7 +835,6 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
         }
     }
     RB_EndTrackImmediatePrims();
-    Profile_EndInternal(0);
     if (!drawSurfIndex)
         MyAssertHandler(".\\rb_tess.cpp", 1136, 0, "%s", "drawSurfIndex");
     return drawSurfIndex;
@@ -847,7 +848,7 @@ void __cdecl R_DrawXModelSkinnedUncached(GfxCmdBufContext context, XSurface *xsu
     unsigned int vertexOffset; // [esp+3Ch] [ebp-10h]
     GfxDrawPrimArgs args; // [esp+40h] [ebp-Ch] BYREF
 
-    Profile_Begin(104);
+    PROF_SCOPED("TessXModSkinUncached");
     if (r_logFile->current.integer)
     {
         v3 = va("--- R_DrawXModelSkinnedUncached( %s ) ---\n", context.state->material->info.name);
@@ -877,7 +878,6 @@ void __cdecl R_DrawXModelSkinnedUncached(GfxCmdBufContext context, XSurface *xsu
         ActiveWorldMatrix = R_GetActiveWorldMatrix(context.source);
         RB_ShowTess(context, ActiveWorldMatrix->matrices.matrix[0].m[3], "XMSkinUn$", colorWhite);
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_DrawXModelSkinnedModelSurf(GfxCmdBufContext context, const GfxModelSkinnedSurface *modelSurf)
@@ -898,7 +898,8 @@ void __cdecl R_DrawXModelSkinnedCached(GfxCmdBufContext context, const GfxModelS
     IDirect3DIndexBuffer9 *ib; // [esp+50h] [ebp-10h] BYREF
     GfxDrawPrimArgs args; // [esp+54h] [ebp-Ch] BYREF
 
-    Profile_Begin(103);
+    PROF_SCOPED("TessXModSkinCache");
+
     if (r_logFile->current.integer)
     {
         RB_LogPrint(va("--- R_DrawXModelSkinnedCached( %s ) ---\n", context.state->material->info.name));
@@ -926,7 +927,6 @@ void __cdecl R_DrawXModelSkinnedCached(GfxCmdBufContext context, const GfxModelS
         ActiveWorldMatrix = R_GetActiveWorldMatrix(context.source);
         RB_ShowTess(context, ActiveWorldMatrix->matrices.matrix[0].m[3], "XMSkin$", colorWhite);
     }
-    Profile_EndInternal(0);
 }
 
 unsigned int __cdecl R_TessXModelRigidDrawSurfList(
@@ -948,7 +948,8 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
     const GfxDrawSurf *drawSurfList; // [esp+7Ch] [ebp-8h]
     unsigned int drawSurfCount; // [esp+80h] [ebp-4h]
 
-    Profile_Begin(105);
+    PROF_SCOPED("TessXModRigid");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
@@ -1032,7 +1033,6 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
         drawSurfIndex = R_DrawXModelRigidSurf(drawSurfList, drawSurfCount, context);
     }
     RB_EndTrackImmediatePrims();
-    Profile_EndInternal(0);
     if (!drawSurfIndex)
         MyAssertHandler(".\\rb_tess.cpp", 1295, 0, "%s", "drawSurfIndex");
     return drawSurfIndex;
@@ -1048,7 +1048,8 @@ unsigned int __cdecl R_TessStaticModelCachedList(const GfxDrawSurfListArgs *list
     MaterialTechniqueType baseTechType; // [esp+48h] [ebp-8h]
     const unsigned int *primDrawSurfPos; // [esp+4Ch] [ebp-4h]
 
-    Profile_Begin(107);
+    PROF_SCOPED("TessStaticModelCached");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     if (prepassContext.state)
@@ -1075,7 +1076,6 @@ unsigned int __cdecl R_TessStaticModelCachedList(const GfxDrawSurfListArgs *list
     else
         R_DrawStaticModelCachedSurf(primDrawSurfPos, context);
     g_primStats = 0;
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1117,7 +1117,8 @@ unsigned int __cdecl R_TessStaticModelPreTessList(const GfxDrawSurfListArgs *lis
     MaterialTechniqueType baseTechType; // [esp+48h] [ebp-8h]
     const unsigned int *primDrawSurfPos; // [esp+4Ch] [ebp-4h]
 
-    Profile_Begin(107);
+    PROF_SCOPED("TessStaticModelCached");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     if (prepassContext.state)
@@ -1144,7 +1145,6 @@ unsigned int __cdecl R_TessStaticModelPreTessList(const GfxDrawSurfListArgs *lis
     else
         R_DrawStaticModelPreTessSurf(primDrawSurfPos, context);
     g_primStats = 0;
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1160,7 +1160,7 @@ unsigned int __cdecl R_TessStaticModelSkinnedDrawSurfList(
     MaterialTechniqueType baseTechType; // [esp+48h] [ebp-8h]
     const unsigned int *primDrawSurfPos; // [esp+4Ch] [ebp-4h]
 
-    Profile_Begin(105);
+    PROF_SCOPED("TessXModRigid");
     context = listArgs->context;
     commonSource = listArgs->context.source;
     if (prepassContext.state)
@@ -1188,7 +1188,6 @@ unsigned int __cdecl R_TessStaticModelSkinnedDrawSurfList(
     else
         R_DrawStaticModelSkinnedSurf(primDrawSurfPos, context);
     RB_EndTrackImmediatePrims();
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1205,7 +1204,8 @@ unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
     MaterialTechniqueType baseTechType; // [esp+4Ch] [ebp-8h]
     const unsigned int *primDrawSurfPos; // [esp+50h] [ebp-4h]
 
-    Profile_Begin(106);
+    PROF_SCOPED("TessStaticModel");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     if (prepassContext.state && commonSource != prepassContext.source)
@@ -1257,7 +1257,6 @@ unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
         R_DrawStaticModelSurf(primDrawSurfPos, context);
     }
     RB_EndTrackImmediatePrims();
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1286,7 +1285,8 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     unsigned __int64 drawSurfKey; // [esp+B8h] [ebp-10h]
     unsigned int drawSurfCount; // [esp+C4h] [ebp-4h]
 
-    Profile_Begin(105);
+    PROF_SCOPED("TessXModRigid");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     if (prepassContext.state && commonSource != prepassContext.source)
@@ -1376,7 +1376,6 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
         } while ((drawSurfSubMask.packed & drawSurf.packed) == drawSurfSubKey);
     } while (drawSurfIndex != drawSurfCount && ((drawSurf.packed & DRAWSURF_KEY_MASK) == drawSurfKey));
     RB_EndTrackImmediatePrims();
-    Profile_EndInternal(0);
     return drawSurfIndex;
 }
 
@@ -1441,7 +1440,8 @@ unsigned int __cdecl R_TessTrianglesPreTessList(const GfxDrawSurfListArgs *listA
     MaterialTechniqueType baseTechType; // [esp+58h] [ebp-8h]
     const unsigned int *primDrawSurfPos; // [esp+5Ch] [ebp-4h]
 
-    Profile_Begin(108);
+    PROF_SCOPED("TessTriangles");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     if (prepassContext.state)
@@ -1467,7 +1467,6 @@ unsigned int __cdecl R_TessTrianglesPreTessList(const GfxDrawSurfListArgs *listA
     else
         R_DrawBspDrawSurfsPreTess(primDrawSurfPos, context);
     g_primStats = 0;
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1481,7 +1480,8 @@ unsigned int __cdecl R_TessTrianglesList(const GfxDrawSurfListArgs *listArgs, Gf
     MaterialTechniqueType baseTechType; // [esp+50h] [ebp-8h]
     const unsigned int *primDrawSurfPos; // [esp+54h] [ebp-4h]
 
-    Profile_Begin(108);
+    PROF_SCOPED("TessTriangles");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
@@ -1532,7 +1532,6 @@ unsigned int __cdecl R_TessTrianglesList(const GfxDrawSurfListArgs *listArgs, Gf
     }
 
     g_primStats = 0;
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1564,7 +1563,8 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
     unsigned __int64 drawSurfKey; // [esp+ACh] [ebp-10h]
     unsigned int drawSurfCount; // [esp+B8h] [ebp-4h]
 
-    Profile_Begin(109);
+    PROF_SCOPED("TessBModel");
+
     context = listArgs->context;
     commonSource = listArgs->context.source;
     iassert(prepassContext.state == NULL || commonSource == prepassContext.source);
@@ -1659,7 +1659,6 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
         } while ((drawSurfSubMask.packed & drawSurf.packed) == drawSurfSubKey);
     } while (drawSurfIndex != drawSurfCount && (drawSurf.packed & DRAWSURF_KEY_MASK) == drawSurfKey);
     g_primStats = 0;
-    Profile_EndInternal(0);
     return drawSurfIndex;
 }
 

@@ -229,9 +229,8 @@ void __cdecl R_SyncRenderThread()
                 MyAssertHandler(".\\r_rendercmds.cpp", 617, 0, "%s", "r_glob.remoteScreenUpdateNesting == 0");
             if (r_glob.startedRenderThread && !r_glob.haveThreadOwnership)
             {
-                Profile_Begin(173);
+                PROF_SCOPED("FrontEndSleep");
                 Sys_FrontEndSleep();
-                Profile_EndInternal(0);
                 r_glob.haveThreadOwnership = 1;
             }
         }
@@ -275,7 +274,7 @@ void __cdecl R_IssueRenderCommands(unsigned int type)
         MyAssertHandler(".\\r_rendercmds.cpp", 795, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
     if (R_CheckLostDevice())
     {
-        Profile_Begin(15);
+        PROF_SCOPED("R_IssueRenderCommands");
         frontEndDataOut->drawType = type;
         if (!R_HandOffToBackend(type))
         {
@@ -298,7 +297,6 @@ void __cdecl R_IssueRenderCommands(unsigned int type)
             R_UnlockSkinnedCache();
             R_ToggleSmpFrame();
         }
-        Profile_EndInternal(0);
     }
     else
     {
@@ -355,10 +353,11 @@ void __cdecl R_ToggleSmpFrameCmd(char type)
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_rendercmds.cpp", 687, 0, "%s", "Sys_IsMainThread()");
     R_ReleaseThreadOwnership();
-    Profile_Begin(133);
-    KISAK_NULLSUB();
-    R_ProcessWorkerCmdsWithTimeout(Sys_IsRendererReady, 1);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("WaitRenderer");
+        //KISAK_NULLSUB();
+        R_ProcessWorkerCmdsWithTimeout(Sys_IsRendererReady, 1);
+    }
     if ((type & 2) != 0)
         R_PerformanceCounters();
     R_WaitFrontendWorkerCmds();
@@ -900,9 +899,10 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
         cmd->cursorPos = cursorPos;
         cmd->cursorLetter = cursor;
     }
-    Profile_Begin(166);
-    memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)text, v13);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("R_memcpy");
+        memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)text, v13);
+    }
     cmd->text[v13] = 0;
     return cmd;
 }
@@ -1113,10 +1113,11 @@ void __cdecl CopyPoolTextToCmd(char *textPool, int poolSize, int firstChar, int 
 {
     unsigned int poolRemaining; // [esp+30h] [ebp-4h]
 
-    if (!cmd)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1477, 0, "%s", "cmd");
-    Profile_Begin(166);
+    iassert(cmd);
+    
+    PROF_SCOPED("R_memcpy");
     poolRemaining = poolSize - firstChar;
+
     if (charCount > poolSize - firstChar)
     {
         memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)&textPool[firstChar], poolRemaining);
@@ -1126,7 +1127,7 @@ void __cdecl CopyPoolTextToCmd(char *textPool, int poolSize, int firstChar, int 
     {
         memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)&textPool[firstChar], charCount);
     }
-    Profile_EndInternal(0);
+
     cmd->text[charCount] = 0;
 }
 

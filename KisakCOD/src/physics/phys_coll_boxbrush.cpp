@@ -541,7 +541,8 @@ void __cdecl Phys_CollideBoxWithBrush(const cbrush_t *brush, const objInfo *info
         MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 1236, 0, "%s", "results->contactCount < results->maxContacts");
     if (Phys_TestBoxAgainstEachBrushPlane(brush, info, outBrushPlane, &outSideIndex, &outMaxSeparation))
     {
-        Profile_Begin(381);
+        PROF_SCOPED("BldWndingsForBrsh");
+
         v38[0][0] = 0.0;
         v38[0][1] = 0.0;
         v38[0][2] = 0.0;
@@ -615,7 +616,6 @@ void __cdecl Phys_CollideBoxWithBrush(const cbrush_t *brush, const objInfo *info
                 v38[1][2] = v4;
             }
         }
-        Profile_EndInternal(0);
         if (v40)
         {
             if (phys_drawCollisionWorld->current.enabled)
@@ -1532,9 +1532,10 @@ unsigned int __cdecl Phys_BuildWindingsForBrush(
     unsigned int vertCount; // [esp+60h] [ebp-64h]
     float axialPlanes[6][4]; // [esp+64h] [ebp-60h] BYREF
 
-    Profile_Begin(381);
-    if (!planes)
-        MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 934, 0, "%s", "planes");
+    PROF_SCOPED("BldWndingsForBrsh");
+
+    iassert(planes);
+
     CM_BuildAxialPlanes(brush, &axialPlanes);
     if (brush->numsides + 6 > maxPolys)
         MyAssertHandler(
@@ -1553,7 +1554,6 @@ unsigned int __cdecl Phys_BuildWindingsForBrush(
         if (vertCount > maxVerts)
             MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 945, 0, "%s", "vertCount <= maxVerts");
     }
-    Profile_EndInternal(0);
     return vertCount;
 }
 
@@ -1774,7 +1774,8 @@ unsigned int __cdecl Phys_BuildWindingsForBrush2(
     unsigned int vertCount; // [esp+60h] [ebp-64h]
     float axialPlanes[6][4]; // [esp+64h] [ebp-60h] BYREF
 
-    Profile_Begin(381);
+    PROF_SCOPED("BldWndingsForBrsh");
+
     CM_BuildAxialPlanes(brush, &axialPlanes);
     if (brush->numsides + 6 > maxPolys)
         MyAssertHandler(
@@ -1793,7 +1794,6 @@ unsigned int __cdecl Phys_BuildWindingsForBrush2(
         if (vertCount > maxVerts)
             MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 970, 0, "%s", "vertCount <= maxVerts");
     }
-    Profile_EndInternal(0);
     return vertCount;
 }
 

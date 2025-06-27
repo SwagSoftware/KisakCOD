@@ -559,9 +559,10 @@ void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData
             sizeInBytes = 4;
         }
         dstData = R_AllocStaticVertexBuffer(vb, sizeInBytes);
-        Profile_Begin(166);
-        Com_Memcpy(dstData, srcData, sizeInBytes);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("R_Memcpy");
+            Com_Memcpy(dstData, srcData, sizeInBytes);
+        }
         R_FinishStaticVertexBuffer(*vb);
     }
     else

@@ -2088,9 +2088,10 @@ void __cdecl CL_Frame(netsrc_t localClientNum)
     if (clientUIActives[0].isRunning)
     {
         CL_DevGuiFrame(localClientNum);
-        Profile_Begin(357);
-        CL_VoiceFrame(localClientNum);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("CL_VoiceFrame");
+            CL_VoiceFrame(localClientNum);
+        }
         CL_UpdateColor(localClientNum);
         CL_CheckUserinfo(localClientNum);
         CL_CheckForResend(localClientNum);

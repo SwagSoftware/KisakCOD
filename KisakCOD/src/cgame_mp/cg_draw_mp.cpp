@@ -221,9 +221,10 @@ void __cdecl CG_Draw2D(int localClientNum)
                     CG_DrawSnapshotAnalysis(localClientNum);
                     CG_DrawPingAnalysis(localClientNum);
                     CG_DrawSnapshotEntityAnalysis(localClientNum);
-                    Profile_Begin(345);
-                    CG_DrawDebugOverlays(localClientNum);
-                    Profile_EndInternal(0);
+                    {
+                        PROF_SCOPED("DebugOverlays");
+                        CG_DrawDebugOverlays(localClientNum);
+                    }
                     if (!isScoreboardVisible)
                     {
                         CG_DrawMiniConsole(localClientNum);
