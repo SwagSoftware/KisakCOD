@@ -14,7 +14,7 @@ if (WIN32)
   set(CMAKE_GENERATOR_PLATFORM "WIN32")
 
   # Check to see if we are running a github action
-  if (DEFINED "$ENV{GITHUB_SHA}")
+  if (DEFINED CICD)
     message("===== BUILDING FOR GITHUB ACTIONS =====")
 
     # Check if this variable has been set
@@ -115,7 +115,9 @@ set_property(TARGET ${BIN_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<
 
 # fixme: copied from sln, check whats not needed
 target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ${D3DX_LIB} d3d9.lib ddraw.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
-message("LIBS: ${LINK_LIBRARIES}")
+
+get_target_property(LIBS_OUT ${BIN_NAME} LINK_LIBRARIES)
+message("LIBS: ${LIBS_OUT}")
 
 target_link_options(${BIN_NAME} PRIVATE /machine:x86)
 set_target_properties(${BIN_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
