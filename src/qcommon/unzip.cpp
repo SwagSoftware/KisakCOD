@@ -20,7 +20,7 @@
 #define ZIP_ftell	FS_FileGetFileSize
 
 //#include "../zlib32/zip.h"
-#include "../zlib/zlib.h"
+#include <zlib/zlib.h>
 #include "unzip.h"
 #include "com_fileaccess.h"
 

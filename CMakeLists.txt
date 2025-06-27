@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 if (DEDICATED)
-  project(KC-Dedicated)
+  project(KisakCOD-Dedi)
 else()
   project(KisakCOD)
 endif()
@@ -13,6 +13,8 @@ if (WIN32)
 endif()
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../${CMAKE_BUILD_TYPE}/")
 
 # === Increment Build ===
@@ -68,14 +70,16 @@ target_compile_definitions(${BIN_NAME} PUBLIC _CONSOLE)
 target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)
 
 target_include_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(${BIN_NAME} PUBLIC ${DEPS_DIR})
 
 set(DXSDK_DIR $ENV{DXSDK_DIR})
 target_include_directories(${BIN_NAME} PUBLIC "${DXSDK_DIR}/Include")
 
 target_link_directories(${BIN_NAME} PUBLIC "${DXSDK_DIR}/Lib/x86")
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/msslib")
-target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk")
+target_link_directories(${BIN_NAME} PUBLIC "${DEPS_DIR}/msslib")
+target_link_directories(${BIN_NAME} PUBLIC "${DEPS_DIR}/steamsdk")
+target_link_directories(${BIN_NAME} PUBLIC "${DEPS_DIR}/binklib")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /Ot /MP /W3 /Zi ${MSVC_WARNING_DISABLES} /permissive-")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_WARNING_DISABLES} /permissive-")
@@ -83,7 +87,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_
 set_property(TARGET ${BIN_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # fixme: copied from sln, check whats not needed
-target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ddraw.lib d3dx9d.lib d3d9.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
+target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ddraw.lib d3dx9d.lib d3d9.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib binkw32.lib steam_api.lib dxguid.lib )
 target_link_options(${BIN_NAME} PRIVATE /machine:x86)
 set_target_properties(${BIN_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 
