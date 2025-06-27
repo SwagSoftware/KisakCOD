@@ -88,9 +88,9 @@ else()
 endif()
 
 # Feature flag for gate more drastic changes to the code, or experimental
-if (DEFINED KAISK_EXTENDED)
+if (DEFINED KISAK_EXTENDED)
   message("Building KisakCOD with enhancement extensions!")
-  target_compile_definitions(${BIN_NAME} KAISAK_EXTENDED)
+  target_compile_definitions(${BIN_NAME} KISAK_EXTENDED)
 endif()
 
 # We want to update the build number before building
