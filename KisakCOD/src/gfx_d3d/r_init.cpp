@@ -318,7 +318,7 @@ void __cdecl R_SyncGpu(int(__cdecl *WorkCallback)(unsigned __int64))
 
     if (dx.gpuSync)
     {
-        Profile_Begin(121);
+        PROF_SCOPED("R_SyncGpu");
         useWorkCallback = WorkCallback != 0;
         dx.gpuSyncStart = __rdtsc();
         R_AcquireGpuFenceLock();
@@ -336,7 +336,6 @@ void __cdecl R_SyncGpu(int(__cdecl *WorkCallback)(unsigned __int64))
             }
         }
         R_ReleaseGpuFenceLock();
-        Profile_EndInternal(0);
     }
 }
 

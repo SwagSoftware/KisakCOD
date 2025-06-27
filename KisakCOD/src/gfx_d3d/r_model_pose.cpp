@@ -284,22 +284,24 @@ DObjAnimMat *R_UpdateSceneEntBounds(
 
 DObjAnimMat *__cdecl R_DObjCalcPose(const GfxSceneEntity *sceneEnt, const DObj_s *obj, int *partBits)
 {
-    DObjAnimMat *boneMatrix; // [esp+30h] [ebp-14h]
-    int completePartBits[4]; // [esp+34h] [ebp-10h] BYREF
+    DObjAnimMat *boneMatrix;
+    int completePartBits[4];
 
-    if (!sceneEnt)
-        MyAssertHandler(".\\r_model_pose.cpp", 35, 0, "%s", "sceneEnt");
-    if (!obj)
-        MyAssertHandler(".\\r_model_pose.cpp", 36, 0, "%s", "obj");
-    completePartBits[0] = *partBits;
+    iassert(sceneEnt);
+    iassert(obj);
+
+    completePartBits[0] = partBits[0];
     completePartBits[1] = partBits[1];
     completePartBits[2] = partBits[2];
     completePartBits[3] = partBits[3];
+
     DObjLock((DObj_s*)obj);
-    Profile_Begin(318);
-    boneMatrix = CG_DObjCalcPose(sceneEnt->info.pose, obj, completePartBits);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("R_DObjCalcPose");
+        boneMatrix = CG_DObjCalcPose(sceneEnt->info.pose, obj, completePartBits);
+    }
     DObjUnlock((DObj_s *)obj);
+
     return boneMatrix;
 }
 

@@ -1450,7 +1450,8 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
     dxWorld *world; // [esp+6Ch] [ebp-8h]
     int bodyEnableCount; // [esp+70h] [ebp-4h]
 
-    Profile_Begin(383);
+    PROF_SCOPED("Phys_PostStep");
+
     world = physGlob.world[worldIndex];
     for (b = world->firstbody; b; b = (dxBody *)b->next)
     {
@@ -1489,7 +1490,6 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
     g_phys_msecStep[worldIndex] = g_phys_minMsecStep[worldIndex]
         + (int)((double)(g_phys_maxMsecStep[worldIndex] - g_phys_minMsecStep[worldIndex]) * v1);
         ODE_ForEachBody(world, Phys_CheckIfAliveTooLong);
-        Profile_EndInternal(0);
 }
 
 void __cdecl Phys_CheckIfAliveTooLong(dxBody *body)
@@ -1775,9 +1775,10 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
     unsigned int maxIter; // [esp+78h] [ebp-4h]
 
     data = &physGlob.worldData[worldIndex];
-    if (!physInited)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 2133, 0, "%s", "physInited");
-    Profile_Begin(363);
+
+    iassert(physInited);
+
+    PROF_SCOPED("Phys_RunToTime");
     KISAK_NULLSUB();
     time = Sys_Milliseconds();
     if (timeNow < data->timeLastSnapshot)
@@ -1836,7 +1837,6 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
     }
     v3 = Sys_Milliseconds();
     Phys_PerformanceAddTime(v3 - time);
-    Profile_EndInternal(0);
 }
 
 void __cdecl Phys_ObjDraw(dxBody *body)
@@ -1951,7 +1951,8 @@ void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
     dxBody *b2; // [esp+30B4h] [ebp-8h]
     FrameInfo *v22; // [esp+30B8h] [ebp-4h]
 
-    Profile_Begin(367);
+    PROF_SCOPED("Phys_NearCallback");
+
     v12 = 0;
     v22 = (FrameInfo*)userData;
     worldIndex = (PhysWorld)v22->worldIndex;
@@ -1959,7 +1960,7 @@ void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
     b2 = dGeomGetBody(geom2);
     if (b1 && b2 && dAreConnectedExcluding(b1, b2, 4))
     {
-        Profile_EndInternal(0);
+        return;
     }
     else
     {
@@ -2040,7 +2041,6 @@ void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
                     Phys_PlayCollisionSound(v22->localClientNum, b1, v12->sndClass, &contactArray);
             }
         }
-        Profile_EndInternal(0);
     }
 }
 
@@ -2058,7 +2058,9 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
         MyAssertHandler(".\\physics\\phys_ode.cpp", 1653, 0, "%s", "physInited");
     world = physGlob.world[worldIndex];
     world->seconds = seconds;
-    Profile_Begin(365);
+
+    PROF_SCOPED("Phys_RunServerFrame");
+
     if (phys_dumpcontacts->current.enabled)
     {
         physGlob.dumpContacts = 1;
@@ -2095,20 +2097,21 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
     scale = -phys_gravity->current.value;
     Vec3Scale(physGlob.gravityDirection, scale, down);
     dWorldSetGravity(world, down[0], down[1], down[2]);
-    Profile_Begin(366);
-    if (phys_interBodyCollision->current.enabled)
-        dSpaceCollide(physGlob.space[worldIndex], &worldIndex, Phys_NearCallback);
-    if (physGlob.worldData[worldIndex].collisionCallback)
-        physGlob.worldData[worldIndex].collisionCallback();
-    frameInfo.localClientNum = localClientNum;
-    frameInfo.worldIndex = worldIndex;
-    ODE_CollideSimpleSpaceWithGeomNoAABBTest(physGlob.space[worldIndex], physGlob.worldGeom, &frameInfo);
-    Profile_EndInternal(0);
-    Profile_Begin(382);
-    dWorldQuickStep(world, seconds);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("Phys_Collide");
+        if (phys_interBodyCollision->current.enabled)
+            dSpaceCollide(physGlob.space[worldIndex], &worldIndex, Phys_NearCallback);
+        if (physGlob.worldData[worldIndex].collisionCallback)
+            physGlob.worldData[worldIndex].collisionCallback();
+        frameInfo.localClientNum = localClientNum;
+        frameInfo.worldIndex = worldIndex;
+        ODE_CollideSimpleSpaceWithGeomNoAABBTest(physGlob.space[worldIndex], physGlob.worldGeom, &frameInfo);
+    }
+    {
+        PROF_SCOPED("Phys_Step");
+        dWorldQuickStep(world, seconds);
+    }
     physGlob.dumpContacts = 0;
-    Profile_EndInternal(0);
 }
 
 void __cdecl Phys_BodyGrabSnapshot(dxBody *body)
@@ -2176,9 +2179,10 @@ void __cdecl Phys_DoBodyOncePerRun(dxBody *body)
 
     if (dBodyIsEnabled(body))
     {
-        Profile_Begin(364);
-        Phys_ObjTraceNewPos(body);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("Phys_Traces");
+            Phys_ObjTraceNewPos(body);
+        }
         for (dim = 0; dim != 3; ++dim)
         {
             CM_ModelBounds(0, mins, maxs);

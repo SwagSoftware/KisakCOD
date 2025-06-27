@@ -167,23 +167,26 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
                 switch (input->type)
                 {
                 case PHYS_GEOM_BOX:
-                    Profile_Begin(372);
-                    Phys_CollideBoxWithTriangleList(indices, cm.verts, partition->triCount, input, surfaceFlags, results);
-                    Profile_EndInternal(0);
+                    {
+                        PROF_SCOPED("Phys_BoxTriColl");
+                        Phys_CollideBoxWithTriangleList(indices, cm.verts, partition->triCount, input, surfaceFlags, results);
+                    }
                     break;
                 case PHYS_GEOM_BRUSHMODEL:
-                    Profile_Begin(376);
-                    Phys_CollideOrientedBrushModelWithTriangleList(
-                        indices,
-                        cm.verts,
-                        partition->triCount,
-                        input,
-                        surfaceFlags,
-                        results);
-                    Profile_EndInternal(0);
+                    {
+                        PROF_SCOPED("Phys_BrushTriColl");
+                        Phys_CollideOrientedBrushModelWithTriangleList(
+                            indices,
+                            cm.verts,
+                            partition->triCount,
+                            input,
+                            surfaceFlags,
+                            results);
+                    }
                     break;
                 case PHYS_GEOM_BRUSH:
-                    Profile_Begin(376);
+                {
+                    PROF_SCOPED("Phys_BrushTriColl");
                     Phys_CollideOrientedBrushWithTriangleList(
                         input->u.brush,
                         indices,
@@ -192,18 +195,20 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
                         input,
                         surfaceFlags,
                         results);
-                    Profile_EndInternal(0);
                     break;
+                }
                 case PHYS_GEOM_CYLINDER:
-                    Profile_Begin(378);
+                {
+                    PROF_SCOPED("Phys_CylinderTriColl");
                     Phys_CollideCylinderWithTriangleList(indices, cm.verts, partition->triCount, input, surfaceFlags, results);
-                    Profile_EndInternal(0);
                     break;
+                }
                 case PHYS_GEOM_CAPSULE:
-                    Profile_Begin(380);
+                {
+                    PROF_SCOPED("Phys_CapsuleTriColl");
                     Phys_CollideCapsuleWithTriangleList(indices, cm.verts, partition->triCount, input, surfaceFlags, results);
-                    Profile_EndInternal(0);
                     break;
+                }
                 default:
                     break;
                 }
@@ -284,34 +289,39 @@ void __cdecl Phys_TestGeomInBrush(const cbrush_t *brush, unsigned int *userData)
         switch (*(unsigned int *)(*userData + 52))
         {
         case 1:
-            Profile_Begin(374);
+        {
+            PROF_SCOPED("Phys_BoxBrushColl");
             Phys_CollideBoxWithBrush(brush, (const objInfo *)*userData, results);
-            Profile_EndInternal(0);
             break;
+        }
         case 2:
-            Profile_Begin(375);
+        {
+            PROF_SCOPED("Phys_BrushBrushColl");
             Phys_CollideOrientedBrushModelWithBrush(brush, (const objInfo *)*userData, results);
-            Profile_EndInternal(0);
             break;
+        }
         case 3:
-            Profile_Begin(375);
+        {
+            PROF_SCOPED("Phys_BrushBrushColl");
             Phys_CollideOrientedBrushWithBrush(
                 *(const cbrush_t **)(*userData + 140),
                 brush,
                 (const objInfo *)*userData,
                 results);
-            Profile_EndInternal(0);
             break;
+        }
         case 4:
-            Profile_Begin(377);
+        {
+            PROF_SCOPED("Phys_CylinderBrushColl");
             Phys_CollideCylinderWithBrush(brush, (const objInfo *)*userData, results);
-            Profile_EndInternal(0);
             break;
+        }
         case 5:
-            Profile_Begin(379);
+        {
+            PROF_SCOPED("Phys_CapsuleBrushColl");
             Phys_CollideCapsuleWithBrush(brush, (const objInfo *)*userData, results);
-            Profile_EndInternal(0);
             break;
+        }
         default:
             return;
         }
@@ -417,8 +427,10 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
 
     LODWORD(lengths[4]) = 1024;
     narrowLen = &phys_narrowObjMaxLength->current.value;
-    Profile_Begin(368);
-    Profile_Begin(369);
+    //Profile_Begin(368);
+    //Profile_Begin(369);
+
+    PROF_SCOPED("Phys_WrldCollPt1");
 
     iassert(skip >= (int)sizeof(dContactGeom));
     iassert(dGeomGetClass(o1) == GEOM_CLASS_WORLD);
@@ -608,28 +620,31 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
                 0,
                 "%s",
                 "input.threadInfo.checkcount.partitions || cm.partitionCount == 0");
-        Profile_EndInternal(0);
-        Profile_Begin(370);
-        Vec3Sub((const float *)input.bounds, input.pos, bounds[0]);
-        Vec3Sub(input.bounds[1], input.pos, bounds[1]);
-        input.radius = RadiusFromBounds(bounds[0], bounds[1]);
-        for (i = 0; i < ll.count; ++i)
-            CM_TestGeomInLeaf(&cm.leafs[leafs[i]], &input, &results);
-        if (phys_collUseEntities->current.enabled)
-            Phys_TestAgainstEntities(&input, &results);
-        for (i = 0; i < results.contactCount; ++i)
+        //Profile_EndInternal(0);
+
         {
-            results.contacts[i].contact.g1 = o1;
-            results.contacts[i].contact.g2 = o2;
+            PROF_SCOPED("Phys_WrldCollPt2");
+            Vec3Sub((const float *)input.bounds, input.pos, bounds[0]);
+            Vec3Sub(input.bounds[1], input.pos, bounds[1]);
+            input.radius = RadiusFromBounds(bounds[0], bounds[1]);
+            for (i = 0; i < ll.count; ++i)
+                CM_TestGeomInLeaf(&cm.leafs[leafs[i]], &input, &results);
+            if (phys_collUseEntities->current.enabled)
+                Phys_TestAgainstEntities(&input, &results);
+            for (i = 0; i < results.contactCount; ++i)
+            {
+                results.contacts[i].contact.g1 = o1;
+                results.contacts[i].contact.g2 = o2;
+            }
         }
-        Profile_EndInternal(0);
-        Profile_EndInternal(0);
+
+        //Profile_EndInternal(0);
         return results.contactCount;
     }
     else
     {
-        Profile_EndInternal(0);
-        Profile_EndInternal(0);
+        //Profile_EndInternal(0);
+        //Profile_EndInternal(0);
         return 0;
     }
 }

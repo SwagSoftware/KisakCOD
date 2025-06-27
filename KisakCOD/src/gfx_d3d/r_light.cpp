@@ -1478,10 +1478,9 @@ void __cdecl qsortArray_GfxReverseSortDrawSurfsInterface_GfxDrawSurf_(GfxDrawSur
 
 void __cdecl R_ReverseSortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount)
 {
-    Profile_Begin(88);
+    PROF_SCOPED("R_SortDrawSurfs");
     //qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>(drawSurfList, surfCount);
     qsortArray_GfxReverseSortDrawSurfsInterface_GfxDrawSurf_(drawSurfList, surfCount);
-    Profile_EndInternal(0);
 }
 
 int __cdecl R_EmitPointLightPartitionSurfs(

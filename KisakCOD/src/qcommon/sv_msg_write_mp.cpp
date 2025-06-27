@@ -1369,23 +1369,15 @@ void __cdecl MSG_WriteEntity(
     char *EntityTypeName; // eax
     int eType; // [esp+4Ch] [ebp-4h]
 
-    Profile_Begin(298);
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1633, 0, "%s", "!msg->readOnly");
-    if (from->eventParm > 0xFF)
-        MyAssertHandler(
-            ".\\qcommon\\sv_msg_write_mp.cpp",
-            1634,
-            0,
-            "%s\n\t(from->eventParm) = %i",
-            "(from->eventParm <= 0xff)",
-            from->eventParm);
+    PROF_SCOPED("WriteEntity");
+    iassert(!msg->readOnly);
+    iassert(from->eventParm <= 0xff);
+
     if (to)
     {
         eType = to->eType;
         snapInfo->packetEntityType = MSG_GetPacketEntityTypeForEType(eType);
         MSG_WriteEntityDeltaForEType(snapInfo, msg, time, eType, from, to, force);
-        Profile_EndInternal(0);
     }
     else
     {
@@ -1398,7 +1390,6 @@ void __cdecl MSG_WriteEntity(
         }
         snapInfo->packetEntityType = MSG_GetPacketEntityTypeForEType(from->eType);
         MSG_WriteEntityRemoval(snapInfo, msg, (unsigned __int8 *)from, 10, 0);
-        Profile_EndInternal(0);
     }
 }
 
@@ -2249,9 +2240,10 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     bool v23; // [esp+2FFFh] [ebp-5h]
     int UsedBitCount; // [esp+3000h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1874, 0, "%s", "!msg->readOnly");
-    Profile_Begin(292);
+    iassert(!msg->readOnly);
+
+    PROF_SCOPED("WriteDeltaPlayerstate");
+
     UsedBitCount = MSG_GetUsedBitCount(msg);
     if (sv_debugPacketContents->current.enabled)
         Com_Printf(16, "Writing playerstate for client #%i\n", snapInfo->clientNum);
@@ -2566,7 +2558,6 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     SV_TrackFieldsChanged(lastChangedFieldNum);
     v6 = MSG_GetUsedBitCount(msg);
     SV_TrackPSBits(v6 - UsedBitCount);
-    Profile_EndInternal(0);
 }
 
 bool __cdecl MSG_ShouldSendPSField(

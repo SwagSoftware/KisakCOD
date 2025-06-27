@@ -121,7 +121,8 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
     XModel **models; // [esp+FCh] [ebp-8h]
     int highBoneIndex; // [esp+100h] [ebp-4h]
 
-    Profile_Begin(329);
+    PROF_SCOPED("DObjGetHierarchyBits");
+
     iassert(obj);
     bcassert(boneIndex, obj->numBones);
     partBits[0] = 0;
@@ -173,7 +174,7 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
                     break;
                 boneIndex = modelParents[j];
                 if (boneIndex == 255)
-                    goto END;
+                    return;
                 do
                 {
                 LABEL_30:
@@ -187,8 +188,6 @@ void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBit
             }
         }
     }
-END:
-    Profile_EndInternal(0);
 }
 
 bool __cdecl DObjSkelIsBoneUpToDate(DObj_s *obj, int boneIndex)
@@ -210,7 +209,8 @@ void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree)
 
 void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTree_s *tree, DObj_s *obj, __int16 entnum)
 {
-    Profile_Begin(326);
+    PROF_SCOPED("DObjCreate");
+
     iassert(dobjModels);
     iassert(numModels > 0);
     iassert((unsigned)numModels <= DOBJ_MAX_SUBMODELS);
@@ -229,8 +229,6 @@ void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTr
     DObjCreateDuplicateParts(obj, dobjModels, numModels);
     DObjComputeBounds(obj);
     DObjSetTree(obj, tree);
-
-    Profile_EndInternal(0);
 }
 
 void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsigned int numModels)
@@ -256,7 +254,8 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
     int modelIndex; // [esp+5D4h] [ebp-8h]
     unsigned const __int16 *boneNames; // [esp+5D8h] [ebp-4h]
 
-    Profile_Begin(325);
+    PROF_SCOPED("DObjCreateDuplicateParts");
+
     duplicateParts = (unsigned __int8 *)&duplicatePartBits[4];
     memset(duplicatePartBits, 0, 16);
     len = 0;
@@ -365,7 +364,6 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
         obj->duplicatePartsSize = 17;
         obj->duplicateParts = g_empty;
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, unsigned int numModels)
@@ -418,7 +416,7 @@ void __cdecl DObjFree(DObj_s *obj)
 {
     XModel **models; // [esp+34h] [ebp-4h]
 
-    Profile_Begin(327);
+    PROF_SCOPED("DObjFree");
     iassert(obj);
     models = obj->models;
     if (models)
@@ -440,7 +438,6 @@ void __cdecl DObjFree(DObj_s *obj)
         obj->duplicatePartsSize = 0;
         obj->duplicateParts = 0;
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl DObjGetCreateParms(
@@ -782,7 +779,8 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
     float hitSign; // [esp+3A8h] [ebp-8h]
     unsigned int currentPriority; // [esp+3ACh] [ebp-4h]
 
-    Profile_Begin(311);
+    PROF_SCOPED("DObjTraceline");
+
     trace->surfaceflags = 0;
     trace->modelIndex = 0;
     trace->partName = 0;
@@ -795,7 +793,6 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
     deltaLengthSq = Vec3LengthSq(delta);
     if (deltaLengthSq == 0.0 || (boneMatrix = DObjGetRotTransArray(obj)) == 0)
     {
-        Profile_EndInternal(0);
         return;
     }
     invL2 = 1.0 / deltaLengthSq;
@@ -961,7 +958,6 @@ LABEL_17:
                                                 trace->partGroup = classification;
                                                 Vec2NormalizeTo(start, trace->normal);
                                                 iassert(Vec3IsNormalized(trace->normal));
-                                                Profile_EndInternal(0);
                                                 return;
                                             }
                                         }
@@ -1007,7 +1003,6 @@ LABEL_17:
         ConvertQuatToMat(hitBoneMatrix, axis);
         Vec3Scale(axis[traceHitT], hitSign, trace->normal);
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
@@ -1020,7 +1015,8 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
     unsigned int localBoneIndex; // [esp+44h] [ebp-10h]
     XModel **models; // [esp+50h] [ebp-4h]
 
-    Profile_Begin(311);
+    PROF_SCOPED("DObjTracelinePartBits");
+
     partBits[0] = 0;
     partBits[1] = 0;
     partBits[2] = 0;
@@ -1050,7 +1046,6 @@ void __cdecl DObjTracelinePartBits(DObj_s *obj, int *partBits)
         }
     }
     DObjCompleteHierarchyBits(obj, partBits);
-    Profile_EndInternal(0);
 }
 
 void __cdecl DObjGeomTraceline(

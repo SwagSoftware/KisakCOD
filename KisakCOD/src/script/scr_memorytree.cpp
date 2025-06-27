@@ -87,7 +87,8 @@ unsigned short MT_AllocIndex(int numBytes, int type)
     unsigned int size; // [esp+50h] [ebp-8h]
     int newSize; // [esp+54h] [ebp-4h]
 
-    Profile_Begin(335);
+    PROF_SCOPED("scriptMemory");
+
     size = MT_GetSize(numBytes);
     iassert(size >= 0 && size <= MEMORY_NODE_BITS);
 
@@ -97,7 +98,6 @@ unsigned short MT_AllocIndex(int numBytes, int type)
         if (newSize > MEMORY_NODE_BITS)
         {
             Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
-            Profile_EndInternal(0);
             MT_Error("MT_AllocIndex", numBytes);
             return 0;
         }
@@ -121,7 +121,6 @@ unsigned short MT_AllocIndex(int numBytes, int type)
     scrMemTreeDebugGlob.mt_usage[nodeNum] = type;
     scrMemTreeDebugGlob.mt_usage_size[nodeNum] = size;
     Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
-    Profile_EndInternal(0);
     return nodeNum;
 }
 
@@ -199,7 +198,8 @@ void MT_FreeIndex(unsigned int nodeNum, int numBytes)
     int size; // [esp+30h] [ebp-8h]
     int lowBit; // [esp+34h] [ebp-4h]
 
-    Profile_Begin(335);
+    PROF_SCOPED("scriptMemory");
+
     size = MT_GetSize(numBytes);
 
     iassert(size >= 0 && size <= MEMORY_NODE_BITS);
@@ -234,7 +234,6 @@ void MT_FreeIndex(unsigned int nodeNum, int numBytes)
     }
     MT_AddMemoryNode(nodeNum, size);
     Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
-    Profile_EndInternal(0);
 }
 
 bool __cdecl MT_RemoveMemoryNode(int oldNode, unsigned int size)

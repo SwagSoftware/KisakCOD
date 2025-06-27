@@ -436,7 +436,7 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
     if (localClientNum == RETURN_ZERO32())
     {
         KISAK_NULLSUB();
-        Profile_Begin(386);
+        PROF_SCOPED("DynEntCl_ProcessEntities");
         if (localClientNum)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\dynentity\\../cgame_mp/cg_local_mp.h",
@@ -498,10 +498,10 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
                 }
             }
         }
-        Profile_Begin(387);
-        Phys_RunToTime(localClientNum, PHYS_WORLD_DYNENT, cgameGlob->time);
-        Profile_EndInternal(0);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("DynEntCl_PhysRunToTime");
+            Phys_RunToTime(localClientNum, PHYS_WORLD_DYNENT, cgameGlob->time);
+        }
     }
 }
 
@@ -552,44 +552,37 @@ void __cdecl DynEntCl_UnlinkEntity(unsigned __int16 dynEntId, DynEntityCollType 
 
 void __cdecl DynEntCl_PointTrace(const pointtrace_t *clip, trace_t *results)
 {
-    float start[4]; // [esp+3Ch] [ebp-20h] BYREF
-    float end[4]; // [esp+4Ch] [ebp-10h] BYREF
+    float start[4];
+    float end[4];
 
-    Profile_Begin(391);
-    if (!clip)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 493, 0, "%s", "clip");
-    if (!results)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 494, 0, "%s", "results");
-    if (results->fraction > 1.0)
-        MyAssertHandler(
-            ".\\DynEntity\\DynEntity_client.cpp",
-            495,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction <= 1.0f)",
-            results->fraction);
+    PROF_SCOPED("DynEntCl_PointTrace");
+
+    iassert(clip);
+    iassert(results);
+    iassert(results->fraction <= 1.0f);
+
     if (results->fraction == 0.0)
     {
-        Profile_EndInternal(0);
+        return;
     }
-    else
+
+    start[0] = clip->extents.start[0];
+    start[1] = clip->extents.start[1];
+    start[2] = clip->extents.start[2];
+    start[3] = 0.0;
+
+    end[0] = clip->extents.end[0];
+    end[1] = clip->extents.end[1];
+    end[2] = clip->extents.end[2];
+    end[3] = results->fraction;
+
+    //KISAK_NULLSUB();
+    DynEntCl_PointTrace_r(DYNENT_COLL_CLIENT_BRUSH, clip, 1u, start, end, results);
+
+    if (results->fraction != 0.0)
     {
-        start[0] = clip->extents.start[0];
-        start[1] = clip->extents.start[1];
-        start[2] = clip->extents.start[2];
-        end[0] = clip->extents.end[0];
-        end[1] = clip->extents.end[1];
-        end[2] = clip->extents.end[2];
-        start[3] = 0.0;
-        end[3] = results->fraction;
-        KISAK_NULLSUB();
-        DynEntCl_PointTrace_r(DYNENT_COLL_CLIENT_BRUSH, clip, 1u, start, end, results);
-        if (results->fraction != 0.0)
-        {
-            KISAK_NULLSUB();
-            DynEntCl_PointTrace_r(DYNENT_COLL_CLIENT_FIRST, clip, 1u, start, end, results);
-        }
-        Profile_EndInternal(0);
+        //KISAK_NULLSUB();
+        DynEntCl_PointTrace_r(DYNENT_COLL_CLIENT_FIRST, clip, 1u, start, end, results);
     }
 }
 
@@ -716,39 +709,31 @@ void __cdecl DynEntCl_PointTrace_r(
 
 void __cdecl DynEntCl_ClipMoveTrace(const moveclip_t *clip, trace_t *results)
 {
-    float start[4]; // [esp+40h] [ebp-20h] BYREF
-    float end[4]; // [esp+50h] [ebp-10h] BYREF
+    float start[4];
+    float end[4];
 
-    Profile_Begin(392);
-    if (!clip)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 660, 0, "%s", "clip");
-    if (!results)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 661, 0, "%s", "results");
-    if (results->fraction > 1.0)
-        MyAssertHandler(
-            ".\\DynEntity\\DynEntity_client.cpp",
-            662,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction <= 1.0f)",
-            results->fraction);
+    PROF_SCOPED("DynEntCl_ClipMoveTrace");
+
+    iassert(clip);
+    iassert(results);
+    iassert(results->fraction <= 1.0f);
+
     if (results->fraction == 0.0)
     {
-        Profile_EndInternal(0);
+        return;
     }
-    else
-    {
-        start[0] = clip->extents.start[0];
-        start[1] = clip->extents.start[1];
-        start[2] = clip->extents.start[2];
-        end[0] = clip->extents.end[0];
-        end[1] = clip->extents.end[1];
-        end[2] = clip->extents.end[2];
-        start[3] = 0.0;
-        end[3] = results->fraction;
-        DynEntCl_ClipMoveTrace_r(clip, 1u, start, end, results);
-        Profile_EndInternal(0);
-    }
+
+    start[0] = clip->extents.start[0];
+    start[1] = clip->extents.start[1];
+    start[2] = clip->extents.start[2];
+    start[3] = 0.0;
+
+    end[0] = clip->extents.end[0];
+    end[1] = clip->extents.end[1];
+    end[2] = clip->extents.end[2];
+    end[3] = results->fraction;
+
+    DynEntCl_ClipMoveTrace_r(clip, 1u, start, end, results);
 }
 
 void __cdecl DynEntCl_ClipMoveTrace_r(
@@ -902,31 +887,24 @@ unsigned __int16 __cdecl DynEntCl_AreaEntities(
     unsigned __int16 dynEntMaxCount,
     unsigned __int16 *dynEntList)
 {
-    DynEntityAreaParms areaParms; // [esp+30h] [ebp-14h] BYREF
+    DynEntityAreaParms areaParms;
 
-    Profile_Begin(393);
-    if (!mins)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 764, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 765, 0, "%s", "maxs");
-    if (!dynEntMaxCount)
-        MyAssertHandler(
-            ".\\DynEntity\\DynEntity_client.cpp",
-            766,
-            0,
-            "%s\n\t(dynEntMaxCount) = %i",
-            "(dynEntMaxCount > 0)",
-            0);
-    if (!dynEntList)
-        MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 767, 0, "%s", "dynEntList");
+    PROF_SCOPED("DynEntCl_AreaEntities");
+    
+    iassert(mins);
+    iassert(maxs);
+    iassert(dynEntMaxCount > 0);
+    iassert(dynEntList);
+
     areaParms.mins = mins;
     areaParms.maxs = maxs;
     areaParms.contentMask = contentMask;
     areaParms.list = dynEntList;
     areaParms.maxCount = dynEntMaxCount;
     areaParms.count = 0;
+
     DynEntCl_AreaEntities_r((DynEntityCollType)drawType, 1u, &areaParms);
-    Profile_EndInternal(0);
+
     return areaParms.count;
 }
 

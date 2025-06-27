@@ -2840,7 +2840,7 @@ void __cdecl SND_UpdateLoopingSounds()
 
     if (g_snd.Initialized2d && !g_snd.paused)
     {
-        Profile_Begin(339);
+        PROF_SCOPED("SND_UpdateLoopingSounds");
         for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
         {
             if (!SND_Is3DChannelFree(i))
@@ -2872,7 +2872,6 @@ void __cdecl SND_UpdateLoopingSounds()
             }
         }
         g_snd.looptime = g_snd.time;
-        Profile_EndInternal(0);
     }
 }
 
@@ -3067,7 +3066,7 @@ void __cdecl SND_Update()
 
     if (g_snd.Initialized2d)
     {
-        Profile_Begin(339);
+        PROF_SCOPED("SND_Update");
         g_snd.cpu = SND_GetDriverCPUPercentage();
         if (com_statmon->current.enabled && SND_ShouldGiveCpuWarning())
             StatMon_Warning(2, 3000, "code_warning_soundcpu");
@@ -3095,7 +3094,6 @@ void __cdecl SND_Update()
         SND_UpdatePhysics();
         SND_DriverPostUpdate();
         DebugDrawWorldSounds(snd_draw3D->current.integer);
-        Profile_EndInternal(0);
     }
 }
 

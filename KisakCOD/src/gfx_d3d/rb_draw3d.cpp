@@ -65,9 +65,10 @@ void __cdecl R_ShowTris(GfxCmdBufContext context, const GfxDrawSurfListInfo *inf
 
 void __cdecl RB_Draw3DInternal(const GfxViewInfo *viewInfo)
 {
-    Profile_Begin(141);
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_draw3d.cpp", 1452, 0, "%s", "rgp.world");
+    PROF_SCOPED("RB_Draw3D");
+
+    iassert(rgp.world);
+
     if (gfxDrawMethod.drawScene)
     {
         if (gfxDrawMethod.drawScene == GFX_DRAW_SCENE_FULLBRIGHT)
@@ -100,7 +101,6 @@ void __cdecl RB_Draw3DInternal(const GfxViewInfo *viewInfo)
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl RB_FullbrightDrawCommands(const GfxViewInfo *viewInfo)
@@ -439,12 +439,11 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     R_DrawLights(viewInfo, &cmdBuf);
     if (rg.distortion)
     {
-        Profile_Begin(116);
+        PROF_SCOPED("RB_ApplyPostEffects");
         KISAK_NULLSUB();
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
         R_Resolve(gfxCmdBufContext, gfxRenderTargets[3].image);
-        Profile_EndInternal(0);
     }
     R_InitContext(data, &cmdBuf);
     KISAK_NULLSUB();
@@ -691,9 +690,10 @@ void R_DrawEmissive(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
 
 void __cdecl RB_Draw3DCommon()
 {
-    Profile_Begin(141);
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_draw3d.cpp", 1485, 0, "%s", "rgp.world");
+    PROF_SCOPED("RB_Draw3D");
+
+    iassert(rgp.world);
+
     if (gfxDrawMethod.drawScene)
     {
         if (gfxDrawMethod.drawScene == GFX_DRAW_SCENE_FULLBRIGHT || gfxDrawMethod.drawScene == GFX_DRAW_SCENE_DEBUGSHADER)
@@ -713,7 +713,6 @@ void __cdecl RB_Draw3DCommon()
             RB_StandardDrawCommandsCommon();
         }
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SetResolvedScene(GfxCmdBufContext context)
@@ -786,10 +785,9 @@ void RB_StandardDrawCommandsCommon()
             }
             else
             {
-                Profile_Begin(116);
+                PROF_SCOPED("RB_ApplyPostEffects");
                 if (RB_UsingColorManipulation(viewInfo))
                     RB_ApplyColorManipulationSplitscreen(viewInfo);
-                Profile_EndInternal(0);
             }
             R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
             R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
@@ -841,12 +839,12 @@ void RB_StandardDrawCommandsCommon()
 
 void __cdecl RB_ApplyLatePostEffects(const GfxViewInfo *viewInfo)
 {
-    Profile_Begin(116);
+    PROF_SCOPED("RB_ApplyLatePostEffects");
+
     RB_ProcessPostEffects(viewInfo);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
     RB_DrawDebugPostEffects();
-    Profile_EndInternal(0);
 }
 
 void RB_DrawDebugPostEffects()

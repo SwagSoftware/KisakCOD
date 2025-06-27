@@ -25,9 +25,8 @@ void __cdecl R_ProcessCmd_UpdateFxRemaining(FxCmd *cmd)
     FX_UpdateRemaining(cmd);
     if (sys_smp_allowed->current.enabled)
     {
-        Profile_Begin(136);
+        PROF_SCOPED("WaitDepFX");
         Sys_WaitUpdateNonDependentEffectsCompleted();
-        Profile_EndInternal(0);
     }
     FX_EndUpdate(cmd->localClientNum);
     R_AddWorkerCmd(14, (unsigned __int8 *)cmd);

@@ -490,7 +490,7 @@ void __cdecl Cbuf_ExecuteBuffer(int localClientNum, int controllerIndex, const c
 
 void __cdecl Cbuf_Execute(int localClientNum, int controllerIndex)
 {
-    Profile_Begin(28);
+    PROF_SCOPED("Cbuf_Execute");
     if (cmd_insideCBufExecute[localClientNum])
         MyAssertHandler(
             ".\\qcommon\\cmd.cpp",
@@ -503,7 +503,6 @@ void __cdecl Cbuf_Execute(int localClientNum, int controllerIndex)
     Cbuf_ExecuteInternal(localClientNum, controllerIndex);
     cmd_insideCBufExecute[localClientNum] = 0;
     Cbuf_SV_Execute();
-    Profile_EndInternal(0);
 }
 
 void __cdecl Cbuf_ExecuteInternal(int localClientNum, int controllerIndex)

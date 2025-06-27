@@ -108,14 +108,17 @@ void __cdecl RB_ProcessPostEffects(const GfxViewInfo *viewInfo)
 {
     float blurRadius; // [esp+38h] [ebp-4h]
 
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 403, 0, "%s", "viewInfo");
+    iassert(viewInfo);
+
     if (RB_UsingPostEffects(viewInfo))
     {
-        Profile_Begin(115);
+        PROF_SCOPED("RB_ProcessPostEffects");
+
         RB_GetResolvedScene();
+
         if (RB_UsingMergedPostEffects(viewInfo))
             RB_ApplyMergedPostEffects(viewInfo);
+
         if (R_UsingGlow(viewInfo))
         {
             RB_CalcGlowEffect(viewInfo);
@@ -130,7 +133,6 @@ void __cdecl RB_ProcessPostEffects(const GfxViewInfo *viewInfo)
                 MyAssertHandler(".\\rb_postfx.cpp", 426, 1, "%s\n\t(blurRadius) = %g", "(blurRadius > 0.0f)", blurRadius);
             RB_BlurScreen(viewInfo, blurRadius);
         }
-        Profile_EndInternal(0);
     }
 }
 

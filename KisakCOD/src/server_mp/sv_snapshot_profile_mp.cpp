@@ -212,7 +212,8 @@ void __cdecl SV_PacketDataIsType(int clientNum, const msg_t *msg, packetModeList
 
     if (s_packetDataEnabled)
     {
-        Profile_Begin(291);
+        PROF_SCOPED("SV_PacketDataIsType");
+
         oldMode = s_packetMode[clientNum];
         if (oldMode != mode || mode == PACKETDATA_FIRST)
         {
@@ -240,7 +241,6 @@ void __cdecl SV_PacketDataIsType(int clientNum, const msg_t *msg, packetModeList
                 Com_Printf(15, "%i bits of %s\n", bitsUsed - bitsUsedPrev, PacketDataTypeName);
             }
         }
-        Profile_EndInternal(0);
     }
 }
 
@@ -611,30 +611,19 @@ int __cdecl SV_TrackPacketData(
 {
     int bitsUsedNow; // [esp+34h] [ebp-4h]
 
-    if (clientNum >= 0x40)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_profile_mp.cpp",
-            644,
-            0,
-            "%s\n\t(clientNum) = %i",
-            "(clientNum >= 0 && clientNum < 64)",
-            clientNum);
-    if (datatype > ANALYZE_SNAPSHOT_SERVERCMDS)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_profile_mp.cpp",
-            645,
-            0,
-            "%s\n\t(datatype) = %i",
-            "(datatype >= 0 && datatype < ANALYZE_SNAPSHOT_DATATYPE_COUNT)",
-            datatype);
-    Profile_Begin(297);
+    iassert(clientNum >= 0 && clientNum < 64);
+    iassert(datatype >= 0 && datatype < ANALYZE_SNAPSHOT_DATATYPE_COUNT);
+
+    PROF_SCOPED("SV_TrackPacketData");
+
     bitsUsedNow = MSG_GetUsedBitCount(msg);
     g_bitsSent[clientNum][datatype] += bitsUsedNow - bitsUsedPrev;
     g_currentSnapshotPerEntity[clientNum][entNum] += bitsUsedNow - bitsUsedPrev;
     newDataReady = 1;
+
     if (datatype == ANALYZE_SNAPSHOT_SERVERCMDS)
         bitsUsedForServerCommands += bitsUsedNow - bitsUsedPrev;
-    Profile_EndInternal(0);
+
     return bitsUsedNow;
 }
 
@@ -671,7 +660,7 @@ void __cdecl SV_TrackFieldChange(int clientNum, int entityType, unsigned int fie
             entityType);
     if (s_packetDataEnabled)
     {
-        Profile_Begin(296);
+        PROF_SCOPED("SV_TrackFieldChange");
         if (entityType >= 18)
         {
             if (entityType == 20)
@@ -703,7 +692,6 @@ void __cdecl SV_TrackFieldChange(int clientNum, int entityType, unsigned int fie
             if (*string)
                 Com_Printf(15, "%s - field %i changed\n", string, field);
         }
-        Profile_EndInternal(0);
     }
     else
     {

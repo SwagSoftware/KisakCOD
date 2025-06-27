@@ -643,7 +643,7 @@ void __cdecl CG_ProcessSnapshots(int localClientNum)
     int n; // [esp+38h] [ebp-4h] BYREF
 
     KISAK_NULLSUB();
-    Profile_Begin(11);
+    PROF_SCOPED("CG_ProcessSnapshots");
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -720,7 +720,6 @@ LABEL_28:
             0,
             "%s",
             "cgameGlob->nextSnap == cgameGlob->snap || cgameGlob->nextSnap->serverTime - cgameGlob->time > 0");
-    Profile_EndInternal(0);
 }
 
 void __cdecl CG_TransitionSnapshot(int localClientNum)

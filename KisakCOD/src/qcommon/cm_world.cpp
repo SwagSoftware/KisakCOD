@@ -529,7 +529,8 @@ int __cdecl CM_AreaEntities(const float *mins, const float *maxs, int *entityLis
 {
     areaParms_t ap; // [esp+30h] [ebp-18h] BYREF
 
-    Profile_Begin(41);
+    PROF_SCOPED("CM_AreaEntities");
+
     ap.mins = mins;
     ap.maxs = maxs;
     ap.list = entityList;
@@ -537,7 +538,7 @@ int __cdecl CM_AreaEntities(const float *mins, const float *maxs, int *entityLis
     ap.maxcount = maxcount;
     ap.contentmask = contentmask;
     CM_AreaEntities_r(1u, &ap);
-    Profile_EndInternal(0);
+
     return ap.count;
 }
 
@@ -597,7 +598,8 @@ void __cdecl CM_PointTraceStaticModels(trace_t *results, const float *start, con
     float start_[4]; // [esp+58h] [ebp-20h] BYREF
     float end_[4]; // [esp+68h] [ebp-10h] BYREF
 
-    Profile_Begin(312);
+    PROF_SCOPED("staticModelTrace");
+
     tw.contents = contentmask;
     tw.extents.start[0] = *start;
     tw.extents.start[1] = start[1];
@@ -606,6 +608,7 @@ void __cdecl CM_PointTraceStaticModels(trace_t *results, const float *start, con
     tw.extents.end[1] = end[1];
     tw.extents.end[2] = end[2];
     CM_CalcTraceExtents(&tw.extents);
+
     start_[0] = tw.extents.start[0];
     start_[1] = tw.extents.start[1];
     start_[2] = tw.extents.start[2];
@@ -615,7 +618,6 @@ void __cdecl CM_PointTraceStaticModels(trace_t *results, const float *start, con
     end_[2] = tw.extents.end[2];
     end_[3] = results->fraction;
     CM_PointTraceStaticModels_r(&tw, 1u, start_, end_, results);
-    Profile_EndInternal(0);
 }
 
 void __cdecl CM_PointTraceStaticModels_r(
@@ -697,7 +699,8 @@ int __cdecl CM_PointTraceStaticModelsComplete(const float *start, const float *e
     staticmodeltrace_t clip; // [esp+30h] [ebp-2Ch] BYREF
     int result; // [esp+58h] [ebp-4h]
 
-    Profile_Begin(312);
+    PROF_SCOPED("staticModelTrace");
+
     clip.contents = contentmask;
     clip.extents.start[0] = *start;
     clip.extents.start[1] = start[1];
@@ -707,7 +710,7 @@ int __cdecl CM_PointTraceStaticModelsComplete(const float *start, const float *e
     clip.extents.end[2] = end[2];
     CM_CalcTraceExtents(&clip.extents);
     result = CM_PointTraceStaticModelsComplete_r(&clip, 1u, clip.extents.start, clip.extents.end);
-    Profile_EndInternal(0);
+
     return result;
 }
 
@@ -784,7 +787,8 @@ void __cdecl CM_ClipMoveToEntities(moveclip_t *clip, trace_t *trace)
     float start[4]; // [esp+40h] [ebp-20h] BYREF
     float end[4]; // [esp+50h] [ebp-10h] BYREF
 
-    Profile_Begin(317);
+    PROF_SCOPED("CM_ClipMoveToEntities");
+
     if (trace->fraction > 1.0)
         MyAssertHandler(
             ".\\qcommon\\cm_world.cpp",
@@ -802,7 +806,6 @@ void __cdecl CM_ClipMoveToEntities(moveclip_t *clip, trace_t *trace)
     start[3] = 0.0;
     end[3] = trace->fraction;
     CM_ClipMoveToEntities_r(clip, 1u, start, end, trace);
-    Profile_EndInternal(0);
 }
 
 void __cdecl CM_ClipMoveToEntities_r(
@@ -933,9 +936,9 @@ int __cdecl CM_ClipSightTraceToEntities(sightclip_t *clip)
 {
     int hitNum; // [esp+30h] [ebp-4h]
 
-    Profile_Begin(44);
+    PROF_SCOPED("CM_ClipSightTraceToEntities");
+
     hitNum = CM_ClipSightTraceToEntities_r(clip, 1u, clip->start, clip->end);
-    Profile_EndInternal(0);
     return hitNum;
 }
 
@@ -1056,25 +1059,21 @@ void __cdecl CM_PointTraceToEntities(pointtrace_t *clip, trace_t *trace)
     float start[4]; // [esp+3Ch] [ebp-20h] BYREF
     float end[4]; // [esp+4Ch] [ebp-10h] BYREF
 
-    Profile_Begin(316);
-    if (trace->fraction > 1.0)
-        MyAssertHandler(
-            ".\\qcommon\\cm_world.cpp",
-            1538,
-            0,
-            "%s\n\t(trace->fraction) = %g",
-            "(trace->fraction <= 1.f)",
-            trace->fraction);
+    PROF_SCOPED("CM_PointTraceToEntities");
+
+    iassert(trace->fraction <= 1.f);
+
     start[0] = clip->extents.start[0];
     start[1] = clip->extents.start[1];
     start[2] = clip->extents.start[2];
+    start[3] = 0.0;
+
     end[0] = clip->extents.end[0];
     end[1] = clip->extents.end[1];
     end[2] = clip->extents.end[2];
-    start[3] = 0.0;
     end[3] = trace->fraction;
+
     CM_PointTraceToEntities_r(clip, 1u, start, end, trace);
-    Profile_EndInternal(0);
 }
 
 void __cdecl CM_PointTraceToEntities_r(
@@ -1150,9 +1149,9 @@ int __cdecl CM_PointSightTraceToEntities(sightpointtrace_t *clip)
 {
     int hitNum; // [esp+30h] [ebp-4h]
 
-    Profile_Begin(43);
+    PROF_SCOPED("CM_PointSightTraceToEntities");
+
     hitNum = CM_PointSightTraceToEntities_r(clip, 1u, clip->start, clip->end);
-    Profile_EndInternal(0);
     return hitNum;
 }
 

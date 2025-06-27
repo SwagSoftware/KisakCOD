@@ -46,26 +46,29 @@ char __cdecl R_PreTessStaticModelCachedList(
     preTessIndices = R_AllocPreTessIndices(surfIndexCount * count);
     if (!preTessIndices)
         return 0;
-    Profile_Begin(166);
-    dstIndices = preTessIndices;
-    for (listIter = 0; listIter < count; ++listIter)
+
     {
-        baseIndex = 3 * xsurf->baseTriIndex + 4 * R_GetCachedSModelSurf(list[listIter])->baseVertIndex;
-        if (baseIndex >= 0x100000 || surfIndexCount + baseIndex > 0x100000)
+        PROF_SCOPED("R_memcpy");
+        dstIndices = preTessIndices;
+        for (listIter = 0; listIter < count; ++listIter)
         {
-            v9 = va("%i, %i", baseIndex, surfIndexCount);
-            MyAssertHandler(
-                ".\\r_add_staticmodel.cpp",
-                135,
-                0,
-                "%s\n\t%s",
-                "baseIndex < SMC_MAX_INDEX_IN_CACHE && baseIndex + surfIndexCount <= SMC_MAX_INDEX_IN_CACHE",
-                v9);
+            baseIndex = 3 * xsurf->baseTriIndex + 4 * R_GetCachedSModelSurf(list[listIter])->baseVertIndex;
+            if (baseIndex >= 0x100000 || surfIndexCount + baseIndex > 0x100000)
+            {
+                v9 = va("%i, %i", baseIndex, surfIndexCount);
+                MyAssertHandler(
+                    ".\\r_add_staticmodel.cpp",
+                    135,
+                    0,
+                    "%s\n\t%s",
+                    "baseIndex < SMC_MAX_INDEX_IN_CACHE && baseIndex + surfIndexCount <= SMC_MAX_INDEX_IN_CACHE",
+                    v9);
+            }
+            Com_Memcpy((char *)dstIndices, (char *)&gfxBuf.smodelCache.indices[baseIndex], 2 * surfIndexCount);
+            dstIndices += surfIndexCount;
         }
-        Com_Memcpy((char *)dstIndices, (char *)&gfxBuf.smodelCache.indices[baseIndex], 2 * surfIndexCount);
-        dstIndices += surfIndexCount;
     }
-    Profile_EndInternal(0);
+
     //HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0xC0000;
     drawSurf.fields.surfType = SF_STATICMODEL_PRETESS;
     if (R_AllocDrawSurf(delayedCmdBuf, drawSurf, drawSurfList, 3u))
@@ -204,7 +207,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     unsigned int count; // [esp+1104h] [ebp-8h]
     int smodelIndex; // [esp+1108h] [ebp-4h]
 
-    Profile_Begin(410);
+    PROF_SCOPED("SModelSurfaces");
     smodelCount = rgp.world->dpvs.smodelCount;
     dest = rgp.world->dpvs.lodData;
     Com_Memset((unsigned int*)dest, 0, 32 * ((smodelCount + 127) >> 7));
@@ -334,7 +337,6 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     scene.drawSurfCount[1] = surfData.drawSurf[0].current - scene.drawSurfs[1];
     scene.drawSurfCount[4] = surfData.drawSurf[1].current - scene.drawSurfs[4];
     scene.drawSurfCount[10] = surfData.drawSurf[2].current - scene.drawSurfs[10];
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SkinStaticModelsCameraForLod(
@@ -626,7 +628,7 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
     unsigned int v27; // [esp+10E0h] [ebp-8h]
     unsigned int i; // [esp+10E4h] [ebp-4h]
 
-    Profile_Begin(411);
+    PROF_SCOPED("SModelSurfacesShadow");
     smodelCount = rgp.world->dpvs.smodelCount;
     v22 = rgp.world->dpvs.smodelVisData[partitionIndex + 1];
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
@@ -723,7 +725,6 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
         R_SkinStaticModelsShadow(model, staticModelLodList, staticModelLodCount, (GfxSModelDrawSurfData*)&surfData);
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     scene.drawSurfCount[v17] = surfData.drawSurfList.current - scene.drawSurfs[v17];
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SkinStaticModelsShadowForLod(

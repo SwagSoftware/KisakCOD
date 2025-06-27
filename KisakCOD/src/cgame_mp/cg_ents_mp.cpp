@@ -717,7 +717,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
     unsigned int eType; // [esp+150h] [ebp-4h]
 
     KISAK_NULLSUB();
-    Profile_Begin(321);
+    PROF_SCOPED("CG_AddPacketEntities");
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -771,7 +771,6 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
         CG_GetEntity(localClientNum, entnum);
         CG_AddPacketEntity(localClientNum, entnum);
     }
-    Profile_EndInternal(0);
     return lockedView;
 }
 
@@ -810,9 +809,10 @@ DObjAnimMat *__cdecl CG_DObjGetLocalBoneMatrix(const cpose_t *pose, DObj_s *obj,
     DObjAnimMat *mat; // [esp+34h] [ebp-4h]
 
     iassert(obj);
-    Profile_Begin(315);
-    CG_DObjCalcBone(pose, obj, boneIndex);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("CG_DObjGetLocalTagMatrix");
+        CG_DObjCalcBone(pose, obj, boneIndex);
+    }
     mat = DObjGetRotTransArray(obj);
     if (mat)
         return &mat[boneIndex];

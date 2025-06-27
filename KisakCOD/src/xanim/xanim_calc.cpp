@@ -1750,7 +1750,8 @@ void DObjCalcAnim(const DObj_s *obj, int *partBits)
 
     //v38 = retaddr;
     //v3 = alloca(24844); // LWSS: this was for `XAnimCalcAnimInfo`, which is a bigass struct
-    Profile_Begin(309);
+
+    PROF_SCOPED("DObjCalcAnim");
     iassert(obj);
     p_skel = (DSkel *)&obj->skel;
 
@@ -1772,7 +1773,6 @@ void DObjCalcAnim(const DObj_s *obj, int *partBits)
 LABEL_20:
     if (endEarly)
     {
-        Profile_EndInternal(0);
         return;
     }
 
@@ -1864,7 +1864,6 @@ LABEL_20:
             quats += 4;
         }
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl XAnim_CalcDeltaForTime(const XAnimParts *anim, float time, float *rotDelta, float4 *posDelta)
