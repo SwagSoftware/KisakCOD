@@ -1,27 +1,32 @@
-## Kisak COD
+# KisakCOD
+
+## About the project
 An open source fully-buildable reimplementation of Call of Duty 4's Multi-Player .exe
 
 Aimed towards mod developers and COD4 enthusiasts.
 
 ![licimg](./GPLv3_Logo.png)
 
+### Development Blog
 Learn about the Development of KisakCOD here: [https://lwss.github.io/Duty-Of-Kisak/](https://lwss.github.io/Duty-Of-Kisak/)
 
-### Current Requirements
+## Current Requirements
 - Windows OS
-- Visual Studio
+- Visual Studio 2022
 - CMake >= 3.16
 - [DirectX SDK 2010](https://www.microsoft.com/en-us/download/details.aspx?id=6812)
 - Steam with a copy of [Call of Duty 4](https://store.steampowered.com/app/7940/Call_of_Duty_4_Modern_Warfare_2007/)
 
 
-### How to build
+## How to build
 1) Install the above requirements and Clone repo
-2) run `KisakCOD/mksln.bat` and `KisakCOD/mksln_dedi.bat`(DEDICATED)
+2) Open a terminal and run `scripts/mksln.bat` or `scripts/mksln_dedi.bat` for the dedicated server
 3) Open .sln projects that are generated in `build/` and `build-dedi/` respectively ^^ 
-4) Copy COD4 Game files to `${GIT_ROOT}/Debug/*` or `${GIT_ROOT}/Release/*` (Don't try to cherry-pick them, small files like localization.txt are needed)
-5) Copy runtime DLL's to the same folder as above: `src/binklib/binkw32.dll` / `msslib/dlls/*`(Get the 'miles' folder containing .flt's as well) / `steam_api.dll`
-6) Run the game via Visual Studio play button or just the .exe
+4) Copy COD4 Game files to `bin/*` (Don't try to cherry-pick them, small files like localization.txt are needed)
+5) Copy `deps/binklib/binkw32.dll` to `/bin`
+6) Copy all files in `deps/msslib/dlls/*` to `/bin`
+7) Copy `deps/steamsdk/steam_api.dll` to `/bin`
+8) Run the game via Visual Studio play button or just the .exe
 
 
 ```angular2html
@@ -29,10 +34,10 @@ Keep in Mind: This is a ~20 year old game with some known exploits. We will try 
 However, there is a non-zero chance of some type of binary exploitation when playing online. Use a sandbox (Sandboxie?) for peace of mind. 
 ```
 
-### Known Issues
+## Known Issues
 (Use the **[issues](https://github.com/SwagSoftware/KisakCOD/issues)** section)
 
-### Troubleshooting
+## Troubleshooting
 - ***Can't Connect to Dedicated Server*** :
   -  Check `net_ip` and `net_port`, the server will increment the port if the preferred one isn't available but the client won't sweep upwards.
  - ***DLL Error upon launch*** :
@@ -47,5 +52,5 @@ However, there is a non-zero chance of some type of binary exploitation when pla
 - [ODE Physics](https://www.ode.org/) COD4 uses a modified version of this physics engine.
 
 
-#### Discord
-https://discord.gg/9uqntRWMA3
+## Discord
+[Join the KisakCOD Discord](https://discord.gg/9uqntRWMA3)
