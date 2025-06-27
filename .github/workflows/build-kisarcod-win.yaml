@@ -42,7 +42,7 @@ jobs:
         run: |
           $pkgPath = Join-Path "${env:NUGET_PACKAGES}" "$env:DXSDK_PKG\$env:DXSDK_VER"
           $libDir = Join-Path $pkgPath "build\native\release\lib\x86"
-          $incDir = Join-Path $pkgPath "build\native\release\include"
+          $incDir = Join-Path $pkgPath "build\native\include"
           $sdkDir = Join-Path $pkgPath "build\native"
           echo "libDir=$libDir" >> $env:GITHUB_ENV
           echo "incDir=$incDir" >> $env:GITHUB_ENV

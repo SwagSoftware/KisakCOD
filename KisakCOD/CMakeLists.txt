@@ -21,12 +21,17 @@ if (WIN32)
     endif()
 
     # Example: C:\Users\USERNAME\.nuget\packages\microsoft.dxsdk.d3dx\9.29.952.8\build\native
-    set(DXSDK_INC ${DXSDK_DIR}/include)
-    set(DXSDK_LIB ${DXSDK_DIR}/release/lib/x86)
+    set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
+    
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+      set(DXSDK_LIB_DIR ${DXSDK_DIR}/debug/lib/x86)
+    else()
+      set(DXSDK_LIB_DIR ${DXSDK_DIR}/release/lib/x86)
+    endif()
   else()
     set(DXSDK_DIR $ENV{DXSDK_DIR})
-    set(DXSDK_INC ${DXSDK_DIR}/include)
-    set(DXSDK_LIB ${DXSDK_DIR}/lib/x86)
+    set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
+    set(DXSDK_LIB_DIR ${DXSDK_DIR}/lib/x86)
   endif()
   
   
@@ -89,9 +94,9 @@ target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)
 
 target_include_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-target_include_directories(${BIN_NAME} PUBLIC ${DXSDK_INC})
+target_include_directories(${BIN_NAME} PUBLIC ${DXSDK_INC_DIR})
 
-target_link_directories(${BIN_NAME} PUBLIC ${DXSDK_LIB})
+target_link_directories(${BIN_NAME} PUBLIC ${DXSDK_LIB_DIR})
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/msslib")
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk")
@@ -102,7 +107,13 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_
 set_property(TARGET ${BIN_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # fixme: copied from sln, check whats not needed
-target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ddraw.lib d3dx9d.lib d3d9.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+target_link_directories(${BIN_NAME} PUBLIC d3dx9d.lib)
+else()
+target_link_directories(${BIN_NAME} PUBLIC d3dx9.lib)
+endif()
+
+target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib d3d9.lib ddraw.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
 target_link_options(${BIN_NAME} PRIVATE /machine:x86)
 set_target_properties(${BIN_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 
