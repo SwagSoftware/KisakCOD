@@ -1,7 +1,7 @@
 #pragma once
 #include "q_shared.h"
 
-static const char *prof_enumNames[433] =
+static constexpr const char *prof_enumNames[433] =
 {
   "",
   "Probe1",
@@ -437,6 +437,7 @@ static const char *prof_enumNames[433] =
   "PS3_VoiceMix",
   0
 }; // idb
+
 
 struct ProfileAtom // sizeof=0x4
 {                                       // ...
@@ -946,6 +947,51 @@ static const ProfileSettings s_profileArrays[29] =
   { NULL, NULL, 0, { 0, 0, 0, 0, 0 } }
 }; // idb
 
+#ifdef TRACY_ENABLE
+#ifndef TRACY_ON_DEMAND
+#error This should be left ON
+#endif
+
+#include <tracy/Tracy.hpp>
+#include <tracy/TracyC.h>
+
+#include <stack>
+#include <optional>
+//inline TracyCZoneCtx *g_tracyZones[433] = { 0 };
+//inline std::stack<int> g_tracyZoneStack;
+
+inline void __cdecl Profile_Guard(int id) {}
+inline void __cdecl Profile_Unguard(int id) {}
+inline void __cdecl Profile_SetTotal(int index, int total) {}
+inline void Profile_ResetScriptCounters() {}
+inline void __cdecl Profile_ResetCounters(int system) {}
+inline void __cdecl Profile_Recover(int id) {}
+inline void __cdecl Profile_InitContext(int profileContext) {}
+inline ProfileStack *__cdecl Profile_GetStackForContext(int profileContext) { return NULL;  }
+inline ProfileScript *__cdecl Profile_GetScript() { return NULL;  }
+inline int __cdecl Profile_GetEnumParity(unsigned int profEnum) { return 0; }
+inline int __cdecl Profile_GetDisplayThread() { return 0; }
+inline void __cdecl Profile_EndScripts(unsigned int profileFlags) {} 
+inline void __cdecl Profile_EndScript(int profileIndex) {}
+inline void __cdecl Profile_BeginScripts(unsigned int profileFlags) {}
+inline void __cdecl Profile_BeginScript(int profileIndex) {}
+inline int __cdecl Profile_AddScriptName(char *profileName) { return 0; }
+inline void __cdecl Profile_ResetCountersForContext(int profileContext, int system) {}
+inline const char *__cdecl Profile_MissingEnd() { return ""; }
+
+void Profile_Init();
+
+void Profile_Begin(int nameIndex);
+void Profile_EndInternal(double *duration);
+
+//#define Profile_Begin(nameIdx) { ZoneScopedN(prof_enumNames[nameIdx])
+//#define Profile_EndInternal(d) }
+
+//#define CONCAT_THREE(a, b, c) a##b##c
+//#define Profile_Begin(nameIndex) {CONCAT_THREE(zone, ##nameIndex, __LINE__)* = g_tracyZones[nameIndex]; if (!CONCAT_THREE(zone, ##nameIndex, __LINE__)) { CONCAT_THREE(zone, ##nameIndex, __LINE__) = new TracyCZoneCtx; g_tracyZones[nameIndex] = CONCAT_THREE(zone, ##nameIndex, __LINE__); } TracyCZoneN(*CONCAT_THREE(zone, ##nameIndex, __LINE__), prof_enumNames[nameIndex], true); g_tracyZones[nameIndex] = CONCAT_THREE(zone, ##nameIndex, __LINE__); g_tracyZoneStack.push(nameIndex);}
+//#define Profile_EndInternal(durationMostlyZero) TracyCZoneEnd(*g_tracyZones[g_tracyZoneStack.top()]); /*delete g_tracyZones[g_tracyZoneStack.top()]; g_tracyZones[g_tracyZoneStack.top()] = NULL;*/  g_tracyZoneStack.pop();
+
+#else
 void Profile_Init();
 void __cdecl Profile_Guard(int id);
 void __cdecl Profile_Unguard(int id);
@@ -968,6 +1014,8 @@ void __cdecl Profile_Begin(int index);
 int __cdecl Profile_AddScriptName(char *profileName);
 void __cdecl Profile_ResetCountersForContext(int profileContext, int system);
 const char *__cdecl Profile_MissingEnd();
+#endif
+
 
 extern const dvar_t *profile;
 extern const dvar_t *profile_thread;

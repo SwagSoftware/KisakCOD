@@ -537,6 +537,7 @@ void Profile_Init()
     profile_rowcount = Dvar_RegisterInt("profile_rowcount", 20, (DvarLimits)0x2800000000LL, 0, "Profile row count");
 }
 
+#ifndef TRACY_ENABLE
 void __cdecl Profile_Unguard(int id)
 {
     const char *v1; // eax
@@ -1000,3 +1001,49 @@ const char *__cdecl Profile_MissingEnd()
     else
         return "no probes missing PROF_END detected";
 }
+
+#else
+
+static thread_local TracyCZoneCtx g_tracyZones[433] = { 0 };
+static thread_local std::stack<int> g_tracyZoneStack;
+
+bool FindInStack(std::stack<int> source, int value)
+{
+    while (!source.empty() && source.top() != value)
+        source.pop();
+
+    if (!source.empty())
+        return true;
+
+    return false;
+}
+
+void Profile_Begin(int nameIndex)
+{
+    if (FindInStack(g_tracyZoneStack, nameIndex))
+    {
+        g_tracyZoneStack.push(-1);
+        return;
+    }
+
+    TracyCZoneN(ctx, prof_enumNames[nameIndex], true);
+    TracyCZoneName(ctx, prof_enumNames[nameIndex], strlen(prof_enumNames[nameIndex]));
+    g_tracyZones[nameIndex] = ctx;
+    g_tracyZoneStack.push(nameIndex);
+}
+
+void Profile_EndInternal(double *duration)
+{
+    iassert(g_tracyZoneStack.size() > 0);
+
+    if (g_tracyZoneStack.top() == -1)
+    {
+        g_tracyZoneStack.pop();
+        return;
+    }
+
+    TracyCZoneEnd(g_tracyZones[g_tracyZoneStack.top()]);
+    g_tracyZones[g_tracyZoneStack.top()] = { 0 };
+    g_tracyZoneStack.pop();
+}
+#endif

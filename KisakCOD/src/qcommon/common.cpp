@@ -1775,6 +1775,9 @@ void __cdecl Com_CheckSyncFrame()
 
 void __cdecl Com_Frame()
 {
+#ifdef TRACY_ENABLE
+    TracyCFrameMarkStart("Com_Frame");
+#endif
     void* Value; // eax
 
     KISAK_NULLSUB();
@@ -1809,6 +1812,10 @@ void __cdecl Com_Frame()
     {
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
     }
+
+#ifdef TRACY_ENABLE
+    TracyCFrameMarkEnd("Com_Frame");
+#endif
 }
 
 void Com_StartHunkUsers()
