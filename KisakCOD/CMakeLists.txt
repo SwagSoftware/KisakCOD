@@ -33,7 +33,7 @@ if (WIN32)
     set(DXSDK_DIR $ENV{DXSDK_DIR})
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
     set(DXSDK_LIB_DIR ${DXSDK_DIR}/lib/x86)
-  endif() # DEFINED GITHUB_SHA
+  endif() # DEFINED CICD
   
   # Set the required library
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -56,18 +56,18 @@ jobs:
       - name: Install latest CMake
         uses: lukka/get-cmake@latest
 
-      - name: Configure CMake
+      - name: Configure CMake ${{ matrix.config }}
         run: |
           pushd
           cd KisakCOD
-          mkdir build
-          cd build
-          cmake -G "Visual Studio 17 2022" -A Win32 -DDXSDK_DIR="${{ env.sdkDir }}" -DCICD=1 ..
+          mkdir build-${{ matrix.config }}
+          cd build-${{ matrix.config }}
+          cmake -G "Visual Studio 17 2022" -A Win32 -DDXSDK_DIR="${{ env.DXSDK_DIR }}" -DCICD=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} ..
           popd
 
       - name: Build ${{ matrix.config }}
         run: |
           pushd
           cd KisakCOD
-          cmake --build build --config ${{ matrix.config }}
+          cmake --build build-${{ matrix.config }} --config ${{ matrix.config }}
           popd
