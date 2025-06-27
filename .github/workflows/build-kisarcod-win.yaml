@@ -25,7 +25,7 @@ jobs:
           Start-Process -Wait -FilePath .\DXSDK_Jun10.exe -ArgumentList "/Q"
 
       - name: Install latest CMake
-        uses: lukka/get-cmake@v3
+        uses: lukka/get-cmake@latest
 
       - name: Configure CMake
         run: |
