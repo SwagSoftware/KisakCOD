@@ -2102,7 +2102,7 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
     parms->sound.loopFadeTime = (int)(bg_shock_soundLoopFadeTime->current.value * 1000.0f);
     parms->sound.loopEndDelay = (int)(bg_shock_soundLoopEndDelay->current.value * 1000.0f);
     v1 = Dvar_EnumToString(bg_shock_soundRoomType);
-    strncpy_s(parms->sound.roomtype, sizeof(parms->sound.roomtype), v1, _TRUNCATE);
+    I_strncpyz(parms->sound.roomtype, v1, sizeof(parms->sound.roomtype));
     parms->sound.drylevel = bg_shock_soundDryLevel->current.value;
     parms->sound.wetlevel = bg_shock_soundWetLevel->current.value;
     parms->sound.modEndDelay = (int)(bg_shock_soundModEndDelay->current.value * 1000.0f);
