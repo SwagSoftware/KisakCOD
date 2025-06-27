@@ -71,3 +71,10 @@ jobs:
           cd KisakCOD
           cmake --build build-${{ matrix.config }} --config ${{ matrix.config }}
           popd
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KisakCOD-${{ matrix.config }}
+          path: ${{ github.workspace }}/${{ matrix.config }}
+          compression-level: 9
+          retention-days: 1
