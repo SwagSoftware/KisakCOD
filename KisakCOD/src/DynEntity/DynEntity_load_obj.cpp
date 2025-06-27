@@ -436,31 +436,31 @@ void __cdecl DynEnt_LoadEntities()
                                                             if (I_stricmp(key, "momofinertia"))
                                                             {
                                                                 if (!I_stricmp(key, "prodofinertia"))
-                                                                    sscanf(
-                                                                        value,
-                                                                        "%f %f %f",
-                                                                        params.productsOfInertia,
-                                                                        &params.productsOfInertia[1],
-                                                                        &params.productsOfInertia[2]);
+                                                                    sscanf_s(value, "%f %f %f", 
+                                                                        &params.productsOfInertia[0], sizeof(float),
+                                                                        &params.productsOfInertia[1], sizeof(float), 
+                                                                        &params.productsOfInertia[2], sizeof(float));
                                                             }
                                                             else
                                                             {
-                                                                sscanf(
+                                                                sscanf_s(
                                                                     value,
                                                                     "%f %f %f",
-                                                                    params.momentsOfInertia,
-                                                                    &params.momentsOfInertia[1],
-                                                                    &params.momentsOfInertia[2]);
+                                                                    &params.momentsOfInertia[0], sizeof(float),
+                                                                    &params.momentsOfInertia[1], sizeof(float),
+                                                                    &params.momentsOfInertia[2], sizeof(float));
+
                                                             }
                                                         }
                                                         else
                                                         {
-                                                            sscanf(
+                                                            sscanf_s(
                                                                 value,
                                                                 "%f %f %f",
-                                                                params.centerOfMass,
-                                                                &params.centerOfMass[1],
-                                                                &params.centerOfMass[2]);
+                                                                &params.centerOfMass[0], sizeof(float),
+                                                                &params.centerOfMass[1], sizeof(float),
+                                                                &params.centerOfMass[2], sizeof(float));
+
                                                         }
                                                     }
                                                     else
@@ -481,12 +481,12 @@ void __cdecl DynEnt_LoadEntities()
                                             }
                                             else
                                             {
-                                                sscanf(value, "%f %f %f", params.angles, &params.angles[1], &params.angles[2]);
+                                                sscanf_s(value, "%f %f %f", &params.angles[0], sizeof(float), &params.angles[1], sizeof(float), &params.angles[2], sizeof(float));
                                             }
                                         }
                                         else
                                         {
-                                            sscanf(value, "%f %f %f", params.origin, &params.origin[1], &params.origin[2]);
+                                            sscanf_s(value, "%f %f %f", &params.origin[0], sizeof(float), &params.origin[1], sizeof(float), &params.origin[2], sizeof(float));
                                         }
                                     }
                                     else
