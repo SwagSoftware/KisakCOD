@@ -109,7 +109,7 @@ add_custom_command(
 )
 
 set_target_properties(${BIN_NAME} PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../$<CONFIG>"
+    VS_DEBUGGER_WORKING_DIRECTORY "${BIN_DIR}/$<CONFIG>"
 )
 
 target_compile_definitions(${BIN_NAME} PUBLIC WIN32)
