@@ -8,8 +8,28 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
+# If we are building on windows
 if (WIN32)
+  # Set the generator platform
   set(CMAKE_GENERATOR_PLATFORM "WIN32")
+
+  # Check to see if we are running a github action
+  if (DEFINED "$ENV{GITHUB_SHA}")
+    # Check if this variable has been set
+    if (NOT DEFINED DXSDK_DIR)
+      message(FATAL_ERROR "DXSDK_DIR needs to be set to the nuget location, this can be done with -DDXSDK_DIR=")
+    endif()
+
+    # Example: C:\Users\USERNAME\.nuget\packages\microsoft.dxsdk.d3dx\9.29.952.8\build\native
+    set(DXSDK_INC ${DXSDK_DIR}/include)
+    set(DXSDK_LIB ${DXSDK_DIR}/release/lib/x86)
+  else()
+    set(DXSDK_DIR $ENV{DXSDK_DIR})
+    set(DXSDK_INC ${DXSDK_DIR}/include)
+    set(DXSDK_LIB ${DXSDK_DIR}/lib/x86)
+  endif()
+  
+  
 endif()
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -69,10 +89,9 @@ target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)
 
 target_include_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-set(DXSDK_DIR $ENV{DXSDK_DIR})
-target_include_directories(${BIN_NAME} PUBLIC "${DXSDK_DIR}/Include")
+target_include_directories(${BIN_NAME} PUBLIC ${DXSDK_INC})
 
-target_link_directories(${BIN_NAME} PUBLIC "${DXSDK_DIR}/Lib/x86")
+target_link_directories(${BIN_NAME} PUBLIC ${DXSDK_LIB})
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/msslib")
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk")

@@ -19,7 +19,7 @@ jobs:
       NUGET_PACKAGES: ${{ github.workspace }}\.nuget\packages
       DXSDK_PKG: Microsoft.DXSDK.D3DX
       DXSDK_VER: 9.29.952.8
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,13 +41,17 @@ jobs:
         shell: powershell
         run: |
           $pkgPath = Join-Path "${env:NUGET_PACKAGES}" "$env:DXSDK_PKG\$env:DXSDK_VER"
-          $libDir = Join-Path $pkgPath "build\native\lib\x64"
-          $incDir = Join-Path $pkgPath "build\native\include"
+          $libDir = Join-Path $pkgPath "build\native\release\lib\x86"
+          $incDir = Join-Path $pkgPath "build\native\release\include"
           $sdkDir = Join-Path $pkgPath "build\native"
           echo "libDir=$libDir" >> $env:GITHUB_ENV
           echo "incDir=$incDir" >> $env:GITHUB_ENV
           echo "DXSDK_DIR_NUGET=$pkgPath" >> $env:GITHUB_ENV
           echo "DXSDK_DIR=$sdkDir" >> $env:GITHUB_ENV
+          Write-Host $pkgPath
+          Write-Host $libDir
+          Write-Host $incDir
+          Write-Host $sdkDir
 
       - name: Install latest CMake
         uses: lukka/get-cmake@latest
