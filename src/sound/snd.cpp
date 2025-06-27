@@ -2840,7 +2840,7 @@ void __cdecl SND_UpdateLoopingSounds()
 
     if (g_snd.Initialized2d && !g_snd.paused)
     {
-        Profile_Begin(339);
+        PROF_SCOPED("SND_UpdateLoopingSounds");
         for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
         {
             if (!SND_Is3DChannelFree(i))
@@ -2872,7 +2872,6 @@ void __cdecl SND_UpdateLoopingSounds()
             }
         }
         g_snd.looptime = g_snd.time;
-        Profile_EndInternal(0);
     }
 }
 
@@ -3067,7 +3066,7 @@ void __cdecl SND_Update()
 
     if (g_snd.Initialized2d)
     {
-        Profile_Begin(339);
+        PROF_SCOPED("SND_Update");
         g_snd.cpu = SND_GetDriverCPUPercentage();
         if (com_statmon->current.enabled && SND_ShouldGiveCpuWarning())
             StatMon_Warning(2, 3000, "code_warning_soundcpu");
@@ -3095,7 +3094,6 @@ void __cdecl SND_Update()
         SND_UpdatePhysics();
         SND_DriverPostUpdate();
         DebugDrawWorldSounds(snd_draw3D->current.integer);
-        Profile_EndInternal(0);
     }
 }
 
@@ -3605,9 +3603,9 @@ void __cdecl SND_Init()
 
     Com_Printf(9, "\n------- sound system initialization -------\n");
     snd_errorOnMissing = Dvar_RegisterBool("snd_errorOnMissing", 0, 1u, "Cause a Com_Error if a sound file is missing.");
-    min.value.max = 1.0;
-    min.value.min = 0.0;
-    snd_volume = Dvar_RegisterFloat("snd_volume", 0.80000001, min, 1u, "Game sound master volume");
+    min.value.max = 1.0f;
+    min.value.min = 0.0f;
+    snd_volume = Dvar_RegisterFloat("snd_volume", 0.80000001f, min, 1u, "Game sound master volume");
     snd_slaveFadeTime = Dvar_RegisterInt(
         "snd_slaveFadeTime",
         500,
@@ -3627,11 +3625,11 @@ void __cdecl SND_Init()
         (DvarLimits)0x138800000000LL,
         0x81u,
         "The amout of time in milliseconds for all audio to fade in at the start of a level");
-    mina.value.max = 1.0;
-    mina.value.min = 0.0;
+    mina.value.max = 1.0f;
+    mina.value.min = 0.0f;
     snd_cinematicVolumeScale = Dvar_RegisterFloat(
         "snd_cinematicVolumeScale",
-        0.85000002,
+        0.85000002f,
         mina,
         1u,
         "Scales the volume of Bink videos.");
@@ -3658,31 +3656,31 @@ void __cdecl SND_Init()
         "Check whether stream sound files exist while loading");
     g_snd.effect = g_snd.envEffects;
     g_snd.envEffects[0].roomtype = 0;
-    g_snd.envEffects[0].drylevel = 1.0;
-    g_snd.effect->drygoal = 1.0;
-    g_snd.effect->dryrate = 0.0;
-    g_snd.effect->wetlevel = 0.0;
-    g_snd.effect->wetgoal = 0.0;
-    g_snd.effect->wetrate = 0.0;
+    g_snd.envEffects[0].drylevel = 1.0f;
+    g_snd.effect->drygoal = 1.0f;
+    g_snd.effect->dryrate = 0.0f;
+    g_snd.effect->wetlevel = 0.0f;
+    g_snd.effect->wetgoal = 0.0f;
+    g_snd.effect->wetrate = 0.0f;
     g_snd.effect->active = 1;
     g_snd.amplifier.listener = &g_snd.listeners[1];
     SND_InitEntChannels();
     g_snd.playbackIdCounter = 1;
-    g_snd.mastervol.volume = 1.0;
-    g_snd.mastervol.goalvolume = 1.0;
-    g_snd.mastervol.goalrate = 0.0;
+    g_snd.mastervol.volume = 1.0f;
+    g_snd.mastervol.goalvolume = 1.0f;
+    g_snd.mastervol.goalrate = 0.0f;
     g_snd.channelvol = g_snd.channelVolGroups;
     for (i = 0; i < SND_GetEntChannelCount(); ++i)
     {
-        g_snd.channelvol->channelvol[i].volume = 1.0;
-        g_snd.channelvol->channelvol[i].goalvolume = 1.0;
-        g_snd.channelvol->channelvol[i].goalrate = 0.0;
+        g_snd.channelvol->channelvol[i].volume = 1.0f;
+        g_snd.channelvol->channelvol[i].goalvolume = 1.0f;
+        g_snd.channelvol->channelvol[i].goalrate = 0.0f;
     }
     g_snd.channelvol->active = 1;
     g_snd.time = Sys_Milliseconds();
     g_snd.looptime = g_snd.time;
-    g_snd.slaveLerp = 0.0;
-    g_snd.volume = snd_volume->current.value * 0.75;
+    g_snd.slaveLerp = 0.0f;
+    g_snd.volume = snd_volume->current.value * 0.75f;
     for (ia = 0; ia < SND_GetEntChannelCount(); ++ia)
         g_snd.defaultPauseSettings[ia] = SND_IsPausable(ia);
     SND_ResetPauseSettingsToDefaults();
@@ -3728,9 +3726,9 @@ void __cdecl SND_PlayLocal_f()
     const snd_alias_t *alias; // [esp+48h] [ebp-14h]
     float soundPos[4]; // [esp+4Ch] [ebp-10h] BYREF
 
-    dist = 100.0;
-    yaw = 0.0;
-    pitch = 0.0;
+    dist = 100.0f;
+    yaw = 0.0f;
+    pitch = 0.0f;
     switch (Cmd_Argc())
     {
     case 2:

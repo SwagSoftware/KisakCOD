@@ -56,12 +56,11 @@ void __cdecl R_UnlockSkinnedCache()
     if (gfxBuf.skinnedCacheLockAddr)
     {
         gfxBuf.skinnedCacheLockAddr = 0;
-        Profile_Begin(160);
+        PROF_SCOPED("UnlockSkinnedCache");
         vb = frontEndDataOut->skinnedCacheVb->buffer;
         if (!vb)
             MyAssertHandler(".\\r_model.cpp", 372, 0, "%s", "vb");
         R_UnlockVertexBuffer(vb);
-        Profile_EndInternal(0);
     }
 }
 
@@ -315,7 +314,8 @@ int __cdecl R_SkinXModel(
     if (lodRampType < XMODEL_LOD_RAMP_RIGID)
         return 0;
 
-    Profile_Begin(89);
+    PROF_SCOPED("R_SkinXModel");
+
     int surfaceCount = XModelGetSurfaces(model, &surfaces, lodRampType);
     iassert(surfaceCount);
 
@@ -358,13 +358,11 @@ int __cdecl R_SkinXModel(
         modelInfo->surfId = startSurfPos >> 2;
         memcpy(&frontEndDataOut->surfsBuffer[startSurfPos], surfBuf, (char*)surfPos - (char*)surfBuf);
         modelInfo->lod = lodRampType;
-        Profile_EndInternal(0);
         return 1;
     }
     else
     {
         R_WarnOncePerFrame(R_WARN_MAX_SCENE_SURFS_SIZE);
-        Profile_EndInternal(0);
         return 0;
     }
 }
@@ -416,16 +414,18 @@ void __cdecl R_LockSkinnedCache()
     if (!dx.deviceLost)
     {
         vb = frontEndDataOut->skinnedCacheVb->buffer;
+
         if (!vb)
             MyAssertHandler(".\\r_model.cpp", 342, 0, "%s", "vb");
-        Profile_Begin(159);
-        gfxBuf.skinnedCacheLockAddr = (unsigned char*)R_LockVertexBuffer(vb, 0, 0, 0x2000);
+
+        PROF_SCOPED("LockSkinnedCache");
+
+        gfxBuf.skinnedCacheLockAddr = (unsigned char *)R_LockVertexBuffer(vb, 0, 0, 0x2000);
         if (((unsigned int)gfxBuf.skinnedCacheLockAddr & 0xF) != 0)
         {
             R_UnlockVertexBuffer(vb);
             gfxBuf.skinnedCacheLockAddr = 0;
         }
-        Profile_EndInternal(0);
         gfxBuf.oldSkinnedCacheNormalsAddr = gfxBuf.skinnedCacheNormals[gfxBuf.skinnedCacheNormalsFrameCount & 1];
         ++gfxBuf.skinnedCacheNormalsFrameCount;
         gfxBuf.skinnedCacheNormalsAddr = gfxBuf.skinnedCacheNormals[gfxBuf.skinnedCacheNormalsFrameCount & 1];

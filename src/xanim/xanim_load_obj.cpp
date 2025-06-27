@@ -365,9 +365,9 @@ unsigned __int8 *__cdecl LoadTrans(
     posa = (posb + 4);
     trans->u.frames.size[2] = v5;
     if (trans->smallTrans)
-        Vec3Scale(trans->u.frames.size, 0.0039215689, trans->u.frames.size);
+        Vec3Scale(trans->u.frames.size, 0.0039215689f, trans->u.frames.size);
     else
-        Vec3Scale(trans->u.frames.size, 0.000015259022, trans->u.frames.size);
+        Vec3Scale(trans->u.frames.size, 0.000015259022f, trans->u.frames.size);
     trans->size = numTransIndices - 1;
     if (trans->smallTrans)
         size = 3 * numTransIndices;

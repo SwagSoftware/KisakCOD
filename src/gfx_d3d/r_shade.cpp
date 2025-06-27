@@ -43,7 +43,8 @@ int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, 
     IDirect3DIndexBuffer9 *ib; // [esp+70h] [ebp-8h]
     unsigned __int8 *bufferData; // [esp+74h] [ebp-4h]
 
-    Profile_Begin(156);
+    PROF_SCOPED("RB_SetIndexData");
+
     baseIndex = R_ReserveIndexData(state, triCount);
     indexDataSize = 6 * triCount;
     ib = gfxBuf.dynamicIndexBuffer->buffer;
@@ -51,22 +52,21 @@ int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, 
         MyAssertHandler(".\\r_shade.cpp", 633, 0, "%s", "ib");
     if (gfxBuf.dynamicIndexBuffer->used)
     {
+        PROF_SCOPED("LockIndexBufferNoOverwrite");
         lockFlags = 4096;
-        Profile_Begin(158);
+        bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
     else
     {
+        PROF_SCOPED("LockIndexBufferDiscard");
         lockFlags = 0x2000;
-        Profile_Begin(157);
+        bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
-    bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
-    Profile_EndInternal(0);
     memcpy(bufferData, indices, indexDataSize);
     R_UnlockIndexBuffer(ib);
     if (state->indexBuffer != ib)
         R_ChangeIndices(state, ib);
     gfxBuf.dynamicIndexBuffer->used += 3 * triCount;
-    Profile_EndInternal(0);
     return baseIndex;
 }
 
@@ -434,10 +434,10 @@ void __cdecl R_SetPixelShader(GfxCmdBufState *state, const MaterialPixelShader *
 
     if (state->pixelShader != pixelShader)
     {
-        Profile_Begin(96);
+        PROF_SCOPED("RB_SetPixelShader");
+
         R_HW_SetPixelShader(state->prim.device, pixelShader);
         state->pixelShader = pixelShader;
-        Profile_EndInternal(0);
     }
 }
 
@@ -448,10 +448,10 @@ void __cdecl R_SetVertexShader(GfxCmdBufState *state, const MaterialVertexShader
         iassert(vertexShader);
         iassert(vertexShader->prog.vs);
 
-        Profile_Begin(95);
+        PROF_SCOPED("RB_SetVertexShader");
+
         R_HW_SetVertexShader(state->prim.device, vertexShader);
         state->vertexShader = vertexShader;
-        Profile_EndInternal(0);
     }
 }
 
@@ -491,7 +491,8 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
     const GfxStateBits *refStateBits; // [esp+38h] [ebp-Ch]
     unsigned int stateBits[2]; // [esp+3Ch] [ebp-8h] BYREF
 
-    Profile_Begin(142);
+    PROF_SCOPED("R_SetupPass");
+
     pass = &context.state->technique->passArray[passIndex];
     context.state->pass = pass;
     context.state->passIndex = passIndex;
@@ -528,7 +529,6 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
             context,
             pass->stableArgCount,
             &pass->args[pass->perPrimArgCount + pass->perObjArgCount]);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_SetState(GfxCmdBufState *state, unsigned int *stateBits)
@@ -836,9 +836,10 @@ int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexC
     void *bufferData; // [esp+78h] [ebp-8h]
     int totalSize; // [esp+7Ch] [ebp-4h]
 
-    if (vertexCount <= 0)
-        MyAssertHandler(".\\r_shade.cpp", 875, 0, "%s", "vertexCount > 0");
-    Profile_Begin(161);
+    iassert(vertexCount > 0);
+
+    PROF_SCOPED("RB_SetVertexData");
+
     totalSize = stride * vertexCount;
     if (stride * vertexCount > gfxBuf.dynamicVertexBuffer->total)
         MyAssertHandler(
@@ -859,19 +860,23 @@ int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexC
     if (!vb)
         MyAssertHandler(".\\r_shade.cpp", 899, 0, "%s", "vb");
     lockFlags = gfxBuf.dynamicVertexBuffer->used != 0 ? 4096 : 0x2000;
-    Profile_Begin(163);
-    bufferData = R_LockVertexBuffer(vb, gfxBuf.dynamicVertexBuffer->used, totalSize, lockFlags);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("LockVertexBuffer");
+        bufferData = R_LockVertexBuffer(vb, gfxBuf.dynamicVertexBuffer->used, totalSize, lockFlags);
+    }
     if (!bufferData)
         MyAssertHandler(".\\r_shade.cpp", 910, 0, "%s", "bufferData");
-    Profile_Begin(167);
-    Profile_Begin(171);
-    Com_Memcpy(bufferData, data, totalSize);
-    Profile_EndInternal(0);
-    Profile_EndInternal(0);
+    //Profile_Begin(167);
+    //Profile_Begin(171);
+    {
+        // LWSS: seems like some weirdness in the original here re: profiler zones
+        PROF_SCOPED("RB_memcpy_vb");
+        Com_Memcpy(bufferData, data, totalSize);
+    }
+    //Profile_EndInternal(0);
+    //Profile_EndInternal(0);
     R_UnlockVertexBuffer(vb);
     vertexOffset = gfxBuf.dynamicVertexBuffer->used;
     gfxBuf.dynamicVertexBuffer->used += totalSize;
-    Profile_EndInternal(0);
     return vertexOffset;
 }

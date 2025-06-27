@@ -23,21 +23,27 @@ void __cdecl R_UploadWaterTextureInternal(water_t **data)
 {
     water_t *water; // [esp+68h] [ebp-4h]
 
-    Profile_Begin(119);
+    PROF_SCOPED("R_UploadWaterTextureInternal");
+
     water = *data;
-    Profile_Begin(122);
-    WaterFrequenciesAtTime(waterGlob.H, water, water->writable.floatTime);
-    Profile_EndInternal(0);
-    Profile_Begin(123);
-    WaterAmplitudesFromFrequencies(waterGlob.H, water);
-    Profile_EndInternal(0);
-    Profile_Begin(124);
-    WaterPixelsFromAmplitudes((GfxColor *)waterGlob.pixels, waterGlob.H, water);
-    Profile_EndInternal(0);
-    Profile_Begin(127);
-    GenerateMipMaps(D3DFMT_L8, waterGlob.pixels, water);
-    Profile_EndInternal(0);
-    Profile_EndInternal(0);
+
+    {
+        PROF_SCOPED("FrequenciesAtTime");
+        WaterFrequenciesAtTime(waterGlob.H, water, water->writable.floatTime);
+    }
+    {
+        PROF_SCOPED("AmplitudesFromFrequencies");
+        WaterAmplitudesFromFrequencies(waterGlob.H, water);
+    }
+    {
+        PROF_SCOPED("PixelsFromAmplitudes");
+        WaterPixelsFromAmplitudes((GfxColor *)waterGlob.pixels, waterGlob.H, water);
+    }
+    {
+        PROF_SCOPED("GenerateMipMaps");
+        GenerateMipMaps(D3DFMT_L8, waterGlob.pixels, water);
+    }
+
     InterlockedExchangeAdd(&g_waterLock, -1);
 }
 
@@ -244,26 +250,28 @@ void __cdecl WaterPixelsFromAmplitudes(GfxColor *pixels, complex_s *H, const wat
 
 void __cdecl GenerateMipMaps(_D3DFORMAT format, unsigned __int8 *pixels, water_t *water)
 {
-    int srcWidth; // [esp+44h] [ebp-8h]
-    unsigned int mipIndex; // [esp+48h] [ebp-4h]
+    int srcWidth;
+    unsigned int mipIndex;
 
-    if (!pixels)
-        MyAssertHandler(".\\r_water.cpp", 592, 0, "%s", "pixels");
-    if (!water)
-        MyAssertHandler(".\\r_water.cpp", 593, 0, "%s", "water");
-    if (water->M != water->N)
-        MyAssertHandler(".\\r_water.cpp", 594, 0, "%s", "water->M == water->N");
-    Profile_Begin(126);
-    Image_UploadData(water->image, D3DFMT_L8, D3DCUBEMAP_FACE_POSITIVE_X, 0, waterGlob.pixels);
-    Profile_EndInternal(0);
+    iassert(pixels);
+    iassert(water);
+    iassert(water->M == water->N);
+
+    {
+        PROF_SCOPED("UploadImage");
+        Image_UploadData(water->image, D3DFMT_L8, D3DCUBEMAP_FACE_POSITIVE_X, 0, waterGlob.pixels);
+    }
+
     srcWidth = water->M;
     mipIndex = 1;
+
     while (srcWidth > 1)
     {
         R_DownsampleMipMapBilinear(pixels, srcWidth, srcWidth, 1, pixels);
-        Profile_Begin(126);
-        Image_UploadData(water->image, format, D3DCUBEMAP_FACE_POSITIVE_X, mipIndex, pixels);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("UploadImage");
+            Image_UploadData(water->image, format, D3DCUBEMAP_FACE_POSITIVE_X, mipIndex, pixels);
+        }
         srcWidth >>= 1;
         ++mipIndex;
     }

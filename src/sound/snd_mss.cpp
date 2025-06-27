@@ -116,9 +116,9 @@ LABEL_8:
   milesGlob.driver = MSS_open_digital_driver(hertz, 16, mss_spec[snd_outputConfiguration->current.integer]);
   if ( milesGlob.driver )
   {
-    AIL_set_3D_distance_factor(milesGlob.driver, 0.0254);
-    AIL_set_3D_rolloff_factor(milesGlob.driver, 0.0);
-    AIL_set_speaker_configuration(milesGlob.driver, 0, 0, 3.0);
+    AIL_set_3D_distance_factor(milesGlob.driver, 0.0254f);
+    AIL_set_3D_rolloff_factor(milesGlob.driver, 0.0f);
+    AIL_set_speaker_configuration(milesGlob.driver, 0, 0, 3.0f);
     g_snd.Initialized2d = 1;
     g_snd.Initialized3d = 1;
     g_snd.max_2D_channels = 8;
@@ -170,9 +170,9 @@ void MSS_InitEq()
       {
         params = &milesGlob.eq[eqIndex].params[band][channelIndex];
         params->enabled = 0;
-        params->freq = 20000.0;
-        params->gain = 1.0;
-        params->q = 1.0;
+        params->freq = 20000.0f;
+        params->gain = 1.0f;
+        params->q = 1.0f;
         params->type = SND_EQTYPE_FIRST;
       }
     }

@@ -351,7 +351,8 @@ void __cdecl DObjCompleteHierarchyBits(const DObj_s *obj, int *partBits)
     const int *duplicatePartBits; // [esp+E4h] [ebp-8h]
     XModel **models; // [esp+E8h] [ebp-4h]
 
-    Profile_Begin(330);
+    PROF_SCOPED("DObjCompleteHierarchyBits");
+
     iassert(obj);
     iassert(obj->numBones > 0);
     objBoneIndex = obj->numBones - 1;
@@ -423,7 +424,6 @@ void __cdecl DObjCompleteHierarchyBits(const DObj_s *obj, int *partBits)
             break;
         subModel = models[j];
     }
-    Profile_EndInternal(0);
 }
 
 int __cdecl DObjSetControlRotTransIndex(DObj_s *obj, const int *partBits, int boneIndex)
@@ -492,7 +492,8 @@ void __cdecl DObjCreateSkel(DObj_s *obj, char *buf, int timeStamp)
     unsigned int AllocSkelSize; // eax
     int i; // [esp+30h] [ebp-4h]
 
-    Profile_Begin(310);
+    PROF_SCOPED("DObjCreateSkel");
+
     AllocSkelSize = DObjGetAllocSkelSize(obj);
     memset((unsigned __int8 *)buf, 0xFFu, AllocSkelSize); // KISAKTODO: this memset is removed in blops, might not be needed
 
@@ -505,7 +506,6 @@ void __cdecl DObjCreateSkel(DObj_s *obj, char *buf, int timeStamp)
         iassert(!obj->skel.partBits.control[i]);
         iassert(!obj->skel.partBits.skel[i]);
     }
-    Profile_EndInternal(0);
 }
 
 DObjAnimMat *__cdecl I_dmaGetDObjSkel(const DObj_s *obj)

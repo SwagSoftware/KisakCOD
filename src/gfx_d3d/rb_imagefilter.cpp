@@ -87,26 +87,26 @@ int __cdecl RB_GenerateGaussianFilterChain(
         else
             v19 = radiusX;
         passRadius = v19;
-        if (v19 > 1.389560461044312)
-            passRadius = 1.3895605;
+        if (v19 > 1.389560461044312f)
+            passRadius = 1.3895605f;
         v18 = radiusX * radiusX - passRadius * passRadius;
         v17 = sqrt(v18);
-        radiusX = v17 * (double)dstWidth / (double)(int)srcWidth;
+        radiusX = v17 * (float)dstWidth / (float)(int)srcWidth;
         v16 = radiusY * radiusY - passRadius * passRadius;
         v15 = sqrt(v16);
-        radiusY = v15 * (double)dstHeight / (double)(int)srcHeight;
+        radiusY = v15 * (float)dstHeight / (float)(int)srcHeight;
         if (passCount >= passLimit)
             MyAssertHandler(".\\rb_imagefilter.cpp", 237, 0, "%s", "passCount < passLimit");
         RB_GenerateGaussianFilter2D(passRadius, srcWidth, srcHeight, dstWidth, dstHeight, &filterPass[passCount++]);
     }
-    while (passCount < 32 && (radiusX >= 0.3295051157474518 || radiusY >= 0.3295051157474518))
+    while (passCount < 32 && (radiusX >= 0.3295051157474518f || radiusY >= 0.3295051157474518f))
     {
         v14 = radiusX - radiusY;
         v13 = fabs(v14);
-        if (v13 < 0.3295051157474518)
+        if (v13 < 0.3295051157474518f)
         {
-            passRadius = (radiusX + radiusY) * 0.5;
-            if (passRadius <= 1.389560461044312)
+            passRadius = (radiusX + radiusY) * 0.5f;
+            if (passRadius <= 1.389560461044312f)
             {
                 if (passCount >= passLimit)
                     MyAssertHandler(".\\rb_imagefilter.cpp", 249, 0, "%s", "passCount < passLimit");
@@ -114,36 +114,36 @@ int __cdecl RB_GenerateGaussianFilterChain(
                 break;
             }
         }
-        if (radiusY >= (double)radiusX)
+        if (radiusY >= radiusX)
         {
-            if (radiusY > 6.497750282287598)
+            if (radiusY > 6.497750282287598f)
             {
-                passRadius = 6.4977503;
-                v10 = radiusY * radiusY - 42.22076034545898;
+                passRadius = 6.4977503f;
+                v10 = radiusY * radiusY - 42.22076034545898f;
                 v9 = sqrt(v10);
                 radiusY = v9;
             }
             else
             {
                 passRadius = radiusY;
-                radiusY = 0.0;
+                radiusY = 0.0f;
             }
             passAxis = 1;
             passRes = dstHeight;
         }
         else
         {
-            if (radiusX >= 6.497750282287598)
+            if (radiusX >= 6.497750282287598f)
             {
-                passRadius = 6.4977503;
-                v12 = radiusX * radiusX - 42.22076034545898;
+                passRadius = 6.4977503f;
+                v12 = radiusX * radiusX - 42.22076034545898f;
                 v11 = sqrt(v12);
                 radiusX = v11;
             }
             else
             {
                 passRadius = radiusX;
-                radiusX = 0.0;
+                radiusX = 0.0f;
             }
             passAxis = 0;
             passRes = dstWidth;
@@ -169,12 +169,12 @@ void __cdecl RB_GenerateGaussianFilter1D(float radius, int *res, int axis, GfxIm
     for (tapIndex = 0; tapIndex < 8; ++tapIndex)
     {
         filterPass->tapOffsetsAndWeights[tapIndex][axis] = tapOffsets[tapIndex];
-        filterPass->tapOffsetsAndWeights[tapIndex][1 - axis] = 0.0;
-        filterPass->tapOffsetsAndWeights[tapIndex][2] = 0.0;
+        filterPass->tapOffsetsAndWeights[tapIndex][1 - axis] = 0.0f;
+        filterPass->tapOffsetsAndWeights[tapIndex][2] = 0.0f;
         filterPass->tapOffsetsAndWeights[tapIndex][3] = tapWeights[tapIndex];
     }
-    filterPass->srcWidth = 1.0;
-    filterPass->srcHeight = 1.0;
+    filterPass->srcWidth = 1.0f;
+    filterPass->srcHeight = 1.0f;
     filterPass->dstWidth = *res;
     filterPass->dstHeight = res[1];
 }
@@ -240,31 +240,31 @@ int __cdecl RB_GaussianFilterPoints1D(
             v6);
     }
     if ((resolutionRatio & 1) != 0)
-        v13 = 0.0;
+        v13 = 0.0f;
     else
-        v13 = 0.5;
-    gaussianExponent = -0.5 / (pixels * pixels);
-    totalWeight = 0.0;
+        v13 = 0.5f;
+    gaussianExponent = -0.5f / (pixels * pixels);
+    totalWeight = 0.0f;
     for (tapIndex = 0; tapIndex < tapLimit; ++tapIndex)
     {
-        sample = (double)(2 * tapIndex) + v13;
-        sample_4 = (double)(2 * tapIndex + 1) + v13;
+        sample = (float)(2 * tapIndex) + v13;
+        sample_4 = (float)(2 * tapIndex + 1) + v13;
         v12 = sample * (sample * gaussianExponent);
         v11 = exp(v12);
         weight = v11;
         v10 = sample_4 * (sample_4 * gaussianExponent);
         v9 = exp(v10);
-        if (!tapIndex && v13 == 0.0)
-            weight = v11 * 0.5;
+        if (!tapIndex && v13 == 0.0f)
+            weight = v11 * 0.5f;
         tapWeights[tapIndex] = weight + v9;
-        if (tapWeights[tapIndex] == 0.0)
-            v7 = (sample + sample_4) * 0.5 / (double)srcRes;
+        if (tapWeights[tapIndex] == 0.0f)
+            v7 = (sample + sample_4) * 0.5f / (float)srcRes;
         else
-            v7 = (sample * weight + sample_4 * v9) / ((double)srcRes * tapWeights[tapIndex]);
+            v7 = (sample * weight + sample_4 * v9) / ((float)srcRes * tapWeights[tapIndex]);
         tapOffsets[tapIndex] = v7;
         totalWeight = totalWeight + tapWeights[tapIndex];
     }
-    if (totalWeight > 0.001000000047497451)
+    if (totalWeight > 0.001000000047497451f)
     {
         if (totalWeight <= 0.0)
             MyAssertHandler(
@@ -277,15 +277,15 @@ int __cdecl RB_GaussianFilterPoints1D(
         tapHalfCount = tapLimit;
         for (tapIndexa = tapLimit - 1; tapIndexa >= 0; --tapIndexa)
         {
-            weightScale = 0.5 / totalWeight;
+            weightScale = 0.5f / totalWeight;
             tapWeights[tapIndexa] = tapWeights[tapIndexa] * weightScale;
-            if (tapWeights[tapIndexa] < 0.009999999776482582)
+            if (tapWeights[tapIndexa] < 0.009999999776482582f)
                 tapHalfCount = tapIndexa + 1;
         }
     }
     else
     {
-        *tapWeights = 0.5;
+        *tapWeights = 0.5f;
         return 1;
     }
     return tapHalfCount;
@@ -316,19 +316,19 @@ void __cdecl RB_GenerateGaussianFilter2D(
         {
             filterPass->tapOffsetsAndWeights[2 * tapIndex][0] = -tapOffsetsX[x];
             filterPass->tapOffsetsAndWeights[2 * tapIndex][1] = tapOffsetsY[y];
-            filterPass->tapOffsetsAndWeights[2 * tapIndex][2] = 0.0;
+            filterPass->tapOffsetsAndWeights[2 * tapIndex][2] = 0.0f;
             filterPass->tapOffsetsAndWeights[2 * tapIndex][3] = tapWeightsX[x] * tapWeightsY[y];
             filterPass->tapOffsetsAndWeights[2 * tapIndex + 1][0] = tapOffsetsX[x];
             filterPass->tapOffsetsAndWeights[2 * tapIndex + 1][1] = tapOffsetsY[y];
-            filterPass->tapOffsetsAndWeights[2 * tapIndex + 1][2] = 0.0;
+            filterPass->tapOffsetsAndWeights[2 * tapIndex + 1][2] = 0.0f;
             filterPass->tapOffsetsAndWeights[2 * tapIndex++ + 1][3] = tapWeightsX[x] * tapWeightsY[y];
         }
     }
     if (2 * tapIndex != 8)
         MyAssertHandler((char *)".\\rb_imagefilter.cpp", 203, 1, "%s\n\t(tapIndex) = %i", "(tapIndex * 2 == 8)", tapIndex);
     filterPass->tapHalfCount = RB_PickSymmetricFilterMaterial(2 * tapIndex, &filterPass->material);
-    filterPass->srcWidth = 1.0;
-    filterPass->srcHeight = 1.0;
+    filterPass->srcWidth = 1.0f;
+    filterPass->srcHeight = 1.0f;
     filterPass->dstWidth = dstWidth;
     filterPass->dstHeight = dstHeight;
 }
@@ -362,12 +362,12 @@ void __cdecl RB_FilterImage(GfxImageFilter *filter)
         R_Set2D(&gfxCmdBufSourceState);
         RB_DrawStretchPic(
             filter->passes[passIndex].material,
-            0.0,
-            0.0,
+            0.0f,
+            0.0f,
             w,
             h,
-            0.0,
-            0.0,
+            0.0f,
+            0.0f,
             filter->passes[passIndex].srcWidth,
             filter->passes[passIndex].srcHeight,
             0xFFFFFFFF,
@@ -426,9 +426,9 @@ void __cdecl RB_GlowFilterImage(float radius)
             "%s\n\t(backEnd.glowCount) = %i",
             "(backEnd.glowCount == 0)",
             backEnd.glowCount);
-    if (radius != 0.0)
+    if (radius != 0.0f)
     {
-        radiusScale = (double)gfxRenderTargets[11].width / (double)gfxRenderTargets[4].width;
+        radiusScale = (float)gfxRenderTargets[11].width / (float)gfxRenderTargets[4].width;
         radiusa = radius * radiusScale;
         backEnd.glowImage = gfxRenderTargets[RB_ApplyGlowFilter(
             radiusa,
@@ -495,8 +495,8 @@ GfxRenderTargetId __cdecl RB_ApplyGlowFilter(
     srcHeight = gfxRenderTargets[dstRenderTarget].height;
     filter.sourceImage = gfxRenderTargets[srcRenderTarget].image;
     filter.finalTarget = dstRenderTarget;
-    filter.passes[0].srcWidth = 1.0;
-    filter.passes[0].srcHeight = 1.0;
+    filter.passes[0].srcWidth = 1.0f;
+    filter.passes[0].srcHeight = 1.0f;
     filter.passes[0].dstWidth = srcWidth;
     filter.passes[0].dstHeight = srcHeight;
     filter.passes[0].tapHalfCount = 0;

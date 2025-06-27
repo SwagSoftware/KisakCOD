@@ -19,9 +19,9 @@ void __cdecl SV_UnlinkEntity(gentity_s *gEnt)
 
     ent = SV_SvEntityForGentity(gEnt);
     gEnt->r.linked = 0;
-    Profile_Begin(42);
+
+    PROF_SCOPED("SV_UnlinkEntity");
     CM_UnlinkEntity(ent);
-    Profile_EndInternal(0);
 }
 
 float actorLocationalMins[3] = { -64.0f, -64.0f, -32.0f };
@@ -144,14 +144,16 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     ent->lastCluster = 0;
     if ((gEnt->r.svFlags & 0x19) == 0)
     {
-        Profile_Begin(42);
-        num_leafs = CM_BoxLeafnums(gEnt->r.absmin, gEnt->r.absmax, leafs, 128, &lastLeaf);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("SV_LinkEntity_BoxLeafnums");
+            num_leafs = CM_BoxLeafnums(gEnt->r.absmin, gEnt->r.absmax, leafs, 128, &lastLeaf);
+        }
         if (!num_leafs)
         {
-            Profile_Begin(42);
-            CM_UnlinkEntity(ent);
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("SV_LinkEntity_UnlinkEntity");
+                CM_UnlinkEntity(ent);
+            }
             return;
         }
         for (i = 0; i < num_leafs; ++i)
@@ -171,7 +173,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
         }
     }
     gEnt->r.linked = 1;
-    Profile_Begin(42);
+    PROF_SCOPED("CM_LinkEntity_Part2");
     if (gEnt->r.contents)
     {
         clipHandle = SV_ClipHandleForEntity(gEnt).brushmodel;
@@ -198,18 +200,15 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
                 absmax[1] = v3;
             }
             CM_LinkEntity(ent, absmin, absmax, clipHandle);
-            Profile_EndInternal(0);
         }
         else
         {
             CM_LinkEntity(ent, gEnt->r.absmin, gEnt->r.absmax, clipHandle);
-            Profile_EndInternal(0);
         }
     }
     else
     {
         CM_UnlinkEntity(ent);
-        Profile_EndInternal(0);
     }
 }
 
@@ -708,62 +707,21 @@ void __cdecl SV_Trace(
     pointtrace_t clip; // [esp+D0h] [ebp-40h] BYREF
     float delta[3]; // [esp+104h] [ebp-Ch] BYREF
 
-    if (!mins)
-        MyAssertHandler(".\\server\\sv_world.cpp", 728, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\server\\sv_world.cpp", 729, 0, "%s", "maxs");
-    if (!start)
-        MyAssertHandler(".\\server\\sv_world.cpp", 730, 0, "%s", "start");
-    if (!end)
-        MyAssertHandler(".\\server\\sv_world.cpp", 731, 0, "%s", "end");
-    if ((COERCE_UNSIGNED_INT(*start) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            732,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*mins) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            733,
-            0,
-            "%s",
-            "!IS_NAN((mins)[0]) && !IS_NAN((mins)[1]) && !IS_NAN((mins)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*maxs) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            734,
-            0,
-            "%s",
-            "!IS_NAN((maxs)[0]) && !IS_NAN((maxs)[1]) && !IS_NAN((maxs)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            735,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
-    Profile_Begin(37);
+    iassert(mins);
+    iassert(maxs);
+    iassert(start);
+    iassert(end);
+    iassert(!IS_NAN(start[0]) && !IS_NAN(start[1]) && !IS_NAN(start[2]));
+    iassert(!IS_NAN(mins[0]) && !IS_NAN(mins[1]) && !IS_NAN(mins[2]));
+    iassert(!IS_NAN(maxs[0]) && !IS_NAN(maxs[1]) && !IS_NAN(maxs[2]));
+    iassert(!IS_NAN(end[0]) && !IS_NAN(end[1]) && !IS_NAN(end[2]));
+
+    PROF_SCOPED("SV_Trace");
+
     CM_BoxTrace(results, start, end, mins, maxs, 0, contentmask);
-    if ((COERCE_UNSIGNED_INT(results->fraction) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\server\\sv_world.cpp", 742, 0, "%s", "!IS_NAN(results->fraction)");
+
+    iassert(!IS_NAN(results->fraction));
+
     if (results->fraction == 1.0)
     {
         if (!results)
@@ -780,23 +738,20 @@ void __cdecl SV_Trace(
     }
     if (results->fraction == 0.0)
         goto LABEL_35;
-    if (*mins > (double)*maxs)
-        MyAssertHandler(".\\server\\sv_world.cpp", 755, 0, "%s", "maxs[0] >= mins[0]");
-    if (mins[1] > (double)maxs[1])
-        MyAssertHandler(".\\server\\sv_world.cpp", 756, 0, "%s", "maxs[1] >= mins[1]");
-    if (mins[2] > (double)maxs[2])
-        MyAssertHandler(".\\server\\sv_world.cpp", 757, 0, "%s", "maxs[2] >= mins[2]");
-    if (*maxs - *mins + maxs[1] - mins[1] + maxs[2] - mins[2] == 0.0)
+
+    iassert(maxs[0] >= mins[0]);
+    iassert(maxs[1] >= mins[1]);
+    iassert(maxs[2] >= mins[2]);
+
+    if (maxs[0] - mins[0] + maxs[1] - mins[1] + maxs[2] - mins[2] == 0.0)
     {
         if (staticmodels)
         {
             CM_PointTraceStaticModels(results, start, end, contentmask);
-            if ((COERCE_UNSIGNED_INT(results->fraction) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\server\\sv_world.cpp", 768, 0, "%s", "!IS_NAN(results->fraction)");
+            iassert(!IS_NAN(results->fraction));
             if (results->fraction == 0.0)
             {
             LABEL_35:
-                Profile_EndInternal(0);
                 return;
             }
         }
@@ -912,7 +867,6 @@ void __cdecl SV_Trace(
         CM_CalcTraceExtents(&result.extents);
         CM_ClipMoveToEntities(&result, results);
     }
-    Profile_EndInternal(0);
 }
 
 int __cdecl SV_TracePassed(
@@ -931,75 +885,31 @@ int __cdecl SV_TracePassed(
     sightpointtrace_t clip; // [esp+CCh] [ebp-38h] BYREF
     float delta[3]; // [esp+F8h] [ebp-Ch] BYREF
 
-    if (!mins)
-        MyAssertHandler(".\\server\\sv_world.cpp", 846, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\server\\sv_world.cpp", 847, 0, "%s", "maxs");
-    if (!start)
-        MyAssertHandler(".\\server\\sv_world.cpp", 848, 0, "%s", "start");
-    if (!end)
-        MyAssertHandler(".\\server\\sv_world.cpp", 849, 0, "%s", "end");
-    if ((COERCE_UNSIGNED_INT(*start) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            850,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*mins) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            851,
-            0,
-            "%s",
-            "!IS_NAN((mins)[0]) && !IS_NAN((mins)[1]) && !IS_NAN((mins)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*maxs) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            852,
-            0,
-            "%s",
-            "!IS_NAN((maxs)[0]) && !IS_NAN((maxs)[1]) && !IS_NAN((maxs)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            853,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
-    Profile_Begin(38);
+    iassert(mins);
+    iassert(maxs);
+    iassert(start);
+    iassert(end);
+    iassert(!IS_NAN(start[0]) && !IS_NAN(start[1]) && !IS_NAN(start[2]));
+    iassert(!IS_NAN(mins[0]) && !IS_NAN(mins[1]) && !IS_NAN(mins[2]));
+    iassert(!IS_NAN(maxs[0]) && !IS_NAN(maxs[1]) && !IS_NAN(maxs[2]));
+    iassert(!IS_NAN(end[0]) && !IS_NAN(end[1]) && !IS_NAN(end[2]));
+
+    PROF_SCOPED("SV_TracePassed");
+
     if (CM_BoxSightTrace(0, start, end, mins, maxs, 0, contentmask)
         || staticmodels && !CM_PointTraceStaticModelsComplete(start, end, contentmask))
     {
-        Profile_EndInternal(0);
         return 0;
     }
-    if (*mins > (double)*maxs)
-        MyAssertHandler(".\\server\\sv_world.cpp", 874, 0, "%s", "maxs[0] >= mins[0]");
-    if (mins[1] > (double)maxs[1])
-        MyAssertHandler(".\\server\\sv_world.cpp", 875, 0, "%s", "maxs[1] >= mins[1]");
-    if (mins[2] > (double)maxs[2])
-        MyAssertHandler(".\\server\\sv_world.cpp", 876, 0, "%s", "maxs[2] >= mins[2]");
-    if (*maxs - *mins + maxs[1] - mins[1] + maxs[2] - mins[2] == 0.0)
+
+    iassert(maxs[0] >= mins[0]);
+    iassert(maxs[1] >= mins[1]);
+    iassert(maxs[2] >= mins[2]);
+
+    if (maxs[0] - mins[0] + maxs[1] - mins[1] + maxs[2] - mins[2] == 0.0)
     {
         clip.contentmask = contentmask;
-        clip.start[0] = *start;
+        clip.start[0] = start[0];
         clip.start[1] = start[1];
         clip.start[2] = start[2];
         clip.end[0] = *end;
@@ -1011,7 +921,6 @@ int __cdecl SV_TracePassed(
         clip.priorityMap = priorityMap;
         if (CM_PointSightTraceToEntities(&clip))
         {
-            Profile_EndInternal(0);
             return 0;
         }
     }
@@ -1037,11 +946,9 @@ int __cdecl SV_TracePassed(
         Vec3Add(end, delta, result.end);
         if (CM_ClipSightTraceToEntities(&result))
         {
-            Profile_EndInternal(0);
             return 0;
         }
     }
-    Profile_EndInternal(0);
     return 1;
 }
 
@@ -1060,79 +967,37 @@ void __cdecl SV_SightTrace(
     sightpointtrace_t clip; // [esp+B0h] [ebp-38h] BYREF
     float delta[3]; // [esp+DCh] [ebp-Ch] BYREF
 
-    Profile_Begin(233);
-    if (!mins)
-        MyAssertHandler(".\\server\\sv_world.cpp", 947, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\server\\sv_world.cpp", 948, 0, "%s", "maxs");
-    if (!start)
-        MyAssertHandler(".\\server\\sv_world.cpp", 949, 0, "%s", "start");
-    if (!end)
-        MyAssertHandler(".\\server\\sv_world.cpp", 950, 0, "%s", "end");
-    if ((COERCE_UNSIGNED_INT(*start) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            951,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*mins) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            952,
-            0,
-            "%s",
-            "!IS_NAN((mins)[0]) && !IS_NAN((mins)[1]) && !IS_NAN((mins)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*maxs) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            953,
-            0,
-            "%s",
-            "!IS_NAN((maxs)[0]) && !IS_NAN((maxs)[1]) && !IS_NAN((maxs)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            954,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
+    PROF_SCOPED("SV_SightTrace");
+
+    iassert(mins);
+    iassert(maxs);
+    iassert(start);
+    iassert(end);
+    iassert(!IS_NAN(start[0]) && !IS_NAN(start[1]) && !IS_NAN(start[2]));
+    iassert(!IS_NAN(mins[0]) && !IS_NAN(mins[1]) && !IS_NAN(mins[2]));
+    iassert(!IS_NAN(maxs[0]) && !IS_NAN(maxs[1]) && !IS_NAN(maxs[2]));
+    iassert(!IS_NAN(end[0]) && !IS_NAN(end[1]) && !IS_NAN(end[2]));
+
+
     *hitNum = CM_BoxSightTrace(*hitNum, start, end, mins, maxs, 0, contentmask);
+
     if (*hitNum)
     {
-        Profile_EndInternal(0);
+        return;
     }
     else
     {
-        if (*mins > (double)*maxs)
-            MyAssertHandler(".\\server\\sv_world.cpp", 964, 0, "%s", "maxs[0] >= mins[0]");
-        if (mins[1] > (double)maxs[1])
-            MyAssertHandler(".\\server\\sv_world.cpp", 965, 0, "%s", "maxs[1] >= mins[1]");
-        if (mins[2] > (double)maxs[2])
-            MyAssertHandler(".\\server\\sv_world.cpp", 966, 0, "%s", "maxs[2] >= mins[2]");
-        if (*maxs - *mins + maxs[1] - mins[1] + maxs[2] - mins[2] == 0.0)
+        iassert(maxs[0] >= mins[0]);
+        iassert(maxs[1] >= mins[1]);
+        iassert(maxs[2] >= mins[2]);
+
+        if (maxs[0] - mins[0] + maxs[1] - mins[1] + maxs[2] - mins[2] == 0.0)
         {
             clip.contentmask = contentmask;
-            clip.start[0] = *start;
+            clip.start[0] = start[0];
             clip.start[1] = start[1];
             clip.start[2] = start[2];
-            clip.end[0] = *end;
+            clip.end[0] = end[0];
             clip.end[1] = end[1];
             clip.end[2] = end[2];
             clip.passEntityNum[0] = passEntityNum0;
@@ -1161,7 +1026,6 @@ void __cdecl SV_SightTrace(
             v8 = CM_ClipSightTraceToEntities(&result);
         }
         *hitNum = v8;
-        Profile_EndInternal(0);
     }
 }
 

@@ -221,9 +221,10 @@ void __cdecl CG_Draw2D(int localClientNum)
                     CG_DrawSnapshotAnalysis(localClientNum);
                     CG_DrawPingAnalysis(localClientNum);
                     CG_DrawSnapshotEntityAnalysis(localClientNum);
-                    Profile_Begin(345);
-                    CG_DrawDebugOverlays(localClientNum);
-                    Profile_EndInternal(0);
+                    {
+                        PROF_SCOPED("DebugOverlays");
+                        CG_DrawDebugOverlays(localClientNum);
+                    }
                     if (!isScoreboardVisible)
                     {
                         CG_DrawMiniConsole(localClientNum);
@@ -979,12 +980,12 @@ void __cdecl CG_DrawSpectatorMessage(int localClientNum)
         ps = &cgameGlob->nextSnap->ps;
         if ((ps->otherFlags & 0x18) != 0)
         {
-            fontScale = 0.20833333;
-            font = UI_GetFontHandle(&scrPlaceView[localClientNum], 0, 0.20833333);
+            fontScale = 0.20833333f;
+            font = UI_GetFontHandle(&scrPlaceView[localClientNum], 0, 0.20833333f);
             lineNum = 0;
-            lineHeight = (float)UI_TextHeight(font, 0.20833333);
-            x = 240.0;
-            y = 436.0 - (lineHeight + lineHeight);
+            lineHeight = (float)UI_TextHeight(font, 0.20833333f);
+            x = 240.0f;
+            y = 436.0f - (lineHeight + lineHeight);
             horzAlign = 0;
             vertAlign = 0;
             if ((ps->otherFlags & 8) != 0)
@@ -1065,17 +1066,17 @@ int __cdecl CG_DrawFollow(int localClientNum)
     if (!CL_GetClientName(localClientNum, ps->clientNum, clientName, 38))
         Com_sprintf(clientName, 0x26u, "?");
     followingString = SEH_LocalizeTextMessage("CGAME_FOLLOWING", "spectator follow string", LOCMSG_SAFE);
-    scale = 0.33333334;
+    scale = 0.33333334f;
     if (G_ExitAfterConnectPaths())
         scale = scale * 1.5;
     scrPlace = &scrPlaceView[localClientNum];
-    font = UI_GetFontHandle(scrPlace, 6, 0.33333334);
-    x = (double)-UI_TextWidth(followingString, 0, font, scale) * 0.5;
-    y = 20.0;
-    UI_DrawText(scrPlace, followingString, 0x7FFFFFFF, font, x, 20.0, 7, 1, scale, colorWhite, 3);
-    x = (double)-UI_TextWidth(clientName, 0, font, scale) * 0.5;
-    y = 36.0;
-    UI_DrawText(scrPlace, clientName, 0x7FFFFFFF, font, x, 36.0, 7, 1, scale, colorWhite, 3);
+    font = UI_GetFontHandle(scrPlace, 6, 0.33333334f);
+    x = (float)-UI_TextWidth(followingString, 0, font, scale) * 0.5f;
+    y = 20.0f;
+    UI_DrawText(scrPlace, followingString, 0x7FFFFFFF, font, x, 20.0f, 7, 1, scale, colorWhite, 3);
+    x = (float)-UI_TextWidth(clientName, 0, font, scale) * 0.5f;
+    y = 36.0f;
+    UI_DrawText(scrPlace, clientName, 0x7FFFFFFF, font, x, 36.0f, 7, 1, scale, colorWhite, 3);
     return 1;
 }
 

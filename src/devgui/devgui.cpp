@@ -1208,110 +1208,110 @@ const dvar_s *DevGui_RegisterDvars()
 
     devgui_colorBgnd = Dvar_RegisterColor(
         "devgui_colorBgnd",
-        0.0,
-        0.40000001,
-        0.0,
-        0.75,
+        0.0f,
+        0.40000001f,
+        0.0f,
+        0.75f,
         0,
         "Color background for the devgui");
-    devgui_colorText = Dvar_RegisterColor("devgui_colorText", 1.0, 1.0, 1.0, 1.0, 0, "Text color for the devgui");
+    devgui_colorText = Dvar_RegisterColor("devgui_colorText", 1.0f, 1.0f, 1.0f, 1.0f, 0, "Text color for the devgui");
     devgui_colorBgndSel = Dvar_RegisterColor(
         "devgui_colorBgndSel",
-        0.0,
-        0.69999999,
-        0.0,
-        0.75,
+        0.0f,
+        0.69999999f,
+        0.0f,
+        0.75f,
         0,
         "Selection background color for the devgui");
     devgui_colorTextSel = Dvar_RegisterColor(
         "devgui_colorTextSel",
-        1.0,
-        1.0,
-        0.0,
-        1.0,
+        1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
         0,
         "Selection text color for the devgui");
     devgui_colorBgndGray = Dvar_RegisterColor(
         "devgui_colorBgndGray",
-        0.2,
-        0.2,
-        0.2,
-        0.89999998,
+        0.2f,
+        0.2f,
+        0.2f,
+        0.89999998f,
         0,
         "Grayed out background color for the devgui");
     devgui_colorTextGray = Dvar_RegisterColor(
         "devgui_colorTextGray",
-        0.69999999,
-        0.69999999,
-        0.69999999,
-        1.0,
+        0.69999999f,
+        0.69999999f,
+        0.69999999f,
+        1.0f,
         0,
         "Greyed out text color for the devgui");
     devgui_colorBgndGraySel = Dvar_RegisterColor(
         "devgui_colorBgndGraySel",
-        0.40000001,
-        0.40000001,
-        0.40000001,
-        0.89999998,
+        0.40000001f,
+        0.40000001f,
+        0.40000001f,
+        0.89999998f,
         0,
         "Greyed out, selected background color for the devgui");
     devgui_colorTextGraySel = Dvar_RegisterColor(
         "devgui_colorTextGraySel",
-        1.0,
-        1.0,
-        0.0,
-        1.0,
+        1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
         0,
         "Greyed out, selected text color for the devgui");
     devgui_colorSliderBgnd = Dvar_RegisterColor(
         "devgui_colorSliderBgnd",
-        1.0,
-        1.0,
-        1.0,
-        0.75,
+        1.0f,
+        1.0f,
+        1.0f,
+        0.75f,
         0,
         "Color slider background for the devgui");
     devgui_colorSliderKnob = Dvar_RegisterColor(
         "devgui_colorSliderKnob",
-        1.0,
-        1.0,
-        1.0,
-        1.0,
+        1.0f,
+        1.0f,
+        1.0f,
+        1.0f,
         0,
         "Knob color for the devgui");
     devgui_colorSliderKnobSel = Dvar_RegisterColor(
         "devgui_colorSliderKnobSel",
-        1.0,
-        1.0,
-        0.0,
-        1.0,
+        1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
         0,
         "Selected knob color for the devgui");
-    b.value.max = 1.0;
-    b.value.min = 0.0;
-    devgui_bevelShade = Dvar_RegisterFloat("devgui_bevelShade", 0.69999999, b, 0, "Bevel shade for the devgui");
+    b.value.max = 1.0f;
+    b.value.min = 0.0f;
+    devgui_bevelShade = Dvar_RegisterFloat("devgui_bevelShade", 0.69999999f, b, 0, "Bevel shade for the devgui");
     devgui_colorGraphKnotNormal = Dvar_RegisterColor(
         "devgui_colorGraphKnotNormal",
-        0.0,
-        1.0,
-        1.0,
-        0.69999999,
+        0.0f,
+        1.0f,
+        1.0f,
+        0.69999999f,
         0,
         "Devgiu Color graph knot normal color");
     devgui_colorGraphKnotSelected = Dvar_RegisterColor(
         "devgui_colorGraphKnotSelected",
-        1.0,
-        0.0,
-        0.0,
-        0.69999999,
+        1.0f,
+        0.0f,
+        0.0f,
+        0.69999999f,
         0,
         "Devgui color graph knot selected color");
     result = Dvar_RegisterColor(
         "devgui_colorGraphKnotEditing",
-        1.0,
-        0.0,
-        1.0,
-        1.0,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
         0,
         "Devgui color graph knot editing color");
     devgui_colorGraphKnotEditing = result;
@@ -1901,7 +1901,7 @@ void __cdecl DevGui_UpdateDvar(float deltaTime)
     case 8u:
         Byte4UnpackRgba((const unsigned __int8 *)&dvar->latched, color);
         floatValuea = color[devguiGlob.selRow];
-        color[devguiGlob.selRow] = DevGui_UpdateFloatScroll(deltaTime, floatValuea, 0.0, 1.0, 0.019607844, SCROLL_XAXIS);
+        color[devguiGlob.selRow] = DevGui_UpdateFloatScroll(deltaTime, floatValuea, 0.0f, 1.0f, 0.019607844f, SCROLL_XAXIS);
         if (color[devguiGlob.selRow] != floatValuea)
             Dvar_SetColorFromSource((dvar_s *)dvar, color[0], color[1], color[2], color[3], DVAR_SOURCE_DEVGUI);
         break;
@@ -1915,7 +1915,7 @@ void __cdecl DevGui_UpdateDvar(float deltaTime)
     }
 }
 
-double __cdecl DevGui_PickFloatScrollStep(float min, float max)
+float __cdecl DevGui_PickFloatScrollStep(float min, float max)
 {
     float v3; // [esp+0h] [ebp-44h]
     float v4; // [esp+4h] [ebp-40h]
@@ -1924,18 +1924,18 @@ double __cdecl DevGui_PickFloatScrollStep(float min, float max)
     float roundedStep; // [esp+40h] [ebp-4h]
 
     range = max - min;
-    if (max == (double)(int)(max) && min == (double)(int)(min))
+    if (max == (float)(int)(max) && min == (float)(int)(min))
     {
-        for (step = 1.0; range > step * 100.0; step = step + step)
+        for (step = 1.0f; range > step * 100.0f; step = step + step)
             ;
-        while (range < step * 100.0)
-            step = step * 0.5;
+        while (range < step * 100.0f)
+            step = step * 0.5f;
     }
     else
     {
-        step = range * 0.009999999776482582;
+        step = range * 0.009999999776482582f;
         roundedStep = (float)(int)(step);
-        if (roundedStep != 0.0)
+        if (roundedStep != 0.0f)
         {
             v4 = roundedStep - step;
             v3 = fabs(v4);
@@ -2043,8 +2043,8 @@ void __cdecl DevGui_UpdateGraph(int localClientNum, float deltaTime)
         v24 = graph->knots[graph->selectedKnot];
         knot = *v24;
         knot_4 = v24[1];
-        updatedX = DevGui_UpdateFloatScroll(deltaTime, knot, 0.0, 1.0, 0.029999999, SCROLL_XAXIS);
-        updatedY = DevGui_UpdateFloatScroll(deltaTime, knot_4, 0.0, 1.0, 0.029999999, SCROLL_YAXIS);
+        updatedX = DevGui_UpdateFloatScroll(deltaTime, knot, 0.0f, 1.0f, 0.029999999f, SCROLL_XAXIS);
+        updatedY = DevGui_UpdateFloatScroll(deltaTime, knot_4, 0.0f, 1.0f, 0.029999999f, SCROLL_YAXIS);
         if (graph->selectedKnot <= 0 || graph->selectedKnot + 1 >= currentKnotCount)
         {
             if (graph->disableEditingEndPoints)
@@ -2055,7 +2055,7 @@ void __cdecl DevGui_UpdateGraph(int localClientNum, float deltaTime)
             {
                 deltaYa = updatedY - knot_4;
                 v5 = fabs(deltaYa);
-                graphUpdated = v5 > 0.0000009999999974752427;
+                graphUpdated = v5 > 0.0000009999999974752427f;
                 graph->knots[graph->selectedKnot][1] = deltaYa * 4.0 + graph->knots[graph->selectedKnot][1];
                 v15 = graph->knots[graph->selectedKnot][1];
                 v4 = v15 - 1.0;
@@ -2077,10 +2077,10 @@ void __cdecl DevGui_UpdateGraph(int localClientNum, float deltaTime)
             deltaY = updatedY - knot_4;
             v14 = fabs(deltaX);
             v12 = 1;
-            if (v14 <= 0.0000009999999974752427)
+            if (v14 <= 0.0000009999999974752427f)
             {
                 v13 = fabs(deltaY);
-                if (v13 <= 0.0000009999999974752427)
+                if (v13 <= 0.0000009999999974752427f)
                     v12 = 0;
             }
             graphUpdated = v12;
@@ -2088,30 +2088,30 @@ void __cdecl DevGui_UpdateGraph(int localClientNum, float deltaTime)
             graph->knots[graph->selectedKnot][1] = deltaY * 4.0 + graph->knots[graph->selectedKnot][1];
             v23 = graph->knots[graph->selectedKnot - 1];
             v19 = graph->knots[graph->selectedKnot][0];
-            v21 = graph->knots[graph->selectedKnot + 1][0] - 0.004999999888241291;
+            v21 = graph->knots[graph->selectedKnot + 1][0] - 0.004999999888241291f;
             v11 = v19 - v21;
-            if (v11 < 0.0)
+            if (v11 < 0.0f)
                 v22 = v19;
             else
-                v22 = graph->knots[graph->selectedKnot + 1][0] - 0.004999999888241291;
-            v20 = *v23 + 0.004999999888241291;
+                v22 = graph->knots[graph->selectedKnot + 1][0] - 0.004999999888241291f;
+            v20 = *v23 + 0.004999999888241291f;
             v10 = v20 - v19;
-            if (v10 < 0.0)
+            if (v10 < 0.0f)
                 v9 = v22;
             else
-                v9 = *v23 + 0.004999999888241291;
+                v9 = *v23 + 0.004999999888241291f;
             graph->knots[graph->selectedKnot][0] = v9;
             v17 = graph->knots[graph->selectedKnot][1];
-            v8 = v17 - 1.0;
-            if (v8 < 0.0)
+            v8 = v17 - 1.0f;
+            if (v8 < 0.0f)
                 v18 = v17;
             else
-                v18 = 1.0;
-            v7 = 0.0 - v17;
-            if (v7 < 0.0)
+                v18 = 1.0f;
+            v7 = 0.0f - v17;
+            if (v7 < 0.0f)
                 v6 = v18;
             else
-                v6 = 0.0;
+                v6 = 0.0f;
             graph->knots[graph->selectedKnot][1] = v6;
         }
         if (graphUpdated && graph->eventCallback)
@@ -2222,8 +2222,8 @@ void __cdecl DevGui_RemoveGraphKnot(DevGraph *graph, int localClientNum)
             *v2 = v2[2];
             v2[1] = v2[3];
         }
-        graph->knots[currentKnotCount - 1][0] = -1.0;
-        graph->knots[currentKnotCount - 1][1] = -1.0;
+        graph->knots[currentKnotCount - 1][0] = -1.0f;
+        graph->knots[currentKnotCount - 1][1] = -1.0f;
         --*graph->knotCount;
         if (graph->eventCallback)
             graph->eventCallback(graph, EVENT_UPDATE, localClientNum);

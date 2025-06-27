@@ -1105,11 +1105,11 @@ void __cdecl R_SetEndTime(int endTime)
 
 void __cdecl R_WaitEndTime()
 {
-    KISAK_NULLSUB();
-    Profile_Begin(361);
+    //KISAK_NULLSUB();
+    PROF_SCOPED("MaxFPSSpin");
+
     while ((int)(Sys_Milliseconds() - rg.endTime) < 0)
         NET_Sleep(1u);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_InitScene()
@@ -1487,7 +1487,8 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
             gfxCfg.maxClientViews);
     if (rg.registered && !r_norefresh->current.enabled)
     {
-        Profile_Begin(14);
+        PROF_SCOPED("R_RenderScene");
+
         if (r_logFile->current.integer)
             RB_LogPrint("====== R_RenderScene ======\n");
         if (!rgp.world)
@@ -1511,7 +1512,6 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
         else
             v1 = viewParmsDraw;
         R_GenerateSortedDrawSurfs(&sceneParms, v1, viewParmsDraw);
-        Profile_EndInternal(0);
     }
 }
 
@@ -1520,12 +1520,12 @@ char __cdecl R_DoesDrawSurfListInfoNeedFloatz(GfxDrawSurfListInfo *emissiveInfo)
     const MaterialTechnique *technique; // [esp+38h] [ebp-Ch]
     unsigned int surfIndex; // [esp+3Ch] [ebp-8h]
 
-    Profile_Begin(70);
+    PROF_SCOPED("R_DoesDrawSurfListInfoNeedFloatz");
+
     for (surfIndex = 0; ; ++surfIndex)
     {
         if (surfIndex == emissiveInfo->drawSurfCount)
         {
-            Profile_EndInternal(0);
             return 0;
         }
         technique = Material_GetTechnique(rgp.sortedMaterials[emissiveInfo->drawSurfs[surfIndex].fields.materialSortedIndex], emissiveInfo->baseTechType);
@@ -1535,9 +1535,10 @@ char __cdecl R_DoesDrawSurfListInfoNeedFloatz(GfxDrawSurfListInfo *emissiveInfo)
                 break;
         }
     }
-    Profile_EndInternal(0);
+
     if (!gfxRenderTargets[5].surface.color)
         Com_Error(ERR_FATAL, "Renderer attempted to use technique that uses floatz buffer, but it wasn't created.\n");
+
     return 1;
 }
 
@@ -1674,14 +1675,16 @@ void __cdecl R_GenerateSortedDrawSurfs(
     KISAK_NULLSUB();
     R_FilterEntitiesIntoCells(cameraCellIndex);
     KISAK_NULLSUB();
-    Profile_Begin(71);
-    R_AddWorldSurfacesDpvs(viewParmsDpvs, cameraCellIndex);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("R_AddWorldSurfacesDpvs");
+        R_AddWorldSurfacesDpvs(viewParmsDpvs, cameraCellIndex);
+    }
     R_BeginAllStaticModelLighting();
     KISAK_NULLSUB();
-    Profile_Begin(134);
-    R_WaitWorkerCmdsOfType(0);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("WaitFX");
+        R_WaitWorkerCmdsOfType(0);
+    }
     R_AddEmissiveSpotLight(viewInfo);
     usePreTess = !dx.deviceLost && r_pretess->current.enabled;
     if (usePreTess)
@@ -1730,10 +1733,11 @@ void __cdecl R_GenerateSortedDrawSurfs(
         R_AddAllStaticModelSurfacesSunShadow();
     }
     KISAK_NULLSUB();
-    Profile_Begin(134);
-    R_WaitWorkerCmdsOfType(1);
-    R_WaitWorkerCmdsOfType(2);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("WaitFX");
+        R_WaitWorkerCmdsOfType(1);
+        R_WaitWorkerCmdsOfType(2);
+    }
     R_WaitWorkerCmdsOfType(4);
     R_WaitWorkerCmdsOfType(7);
     R_WaitWorkerCmdsOfType(9);
@@ -1985,33 +1989,33 @@ void __cdecl R_UpdateColorManipulation(GfxViewInfo *viewInfo)
     if (viewInfo->film.enabled)
     {
         desaturation = viewInfo->film.desaturation;
-        v2 = 0.00024414062 - desaturation;
+        v2 = 0.00024414062f - desaturation;
         if (v2 < 0.0)
             v1 = desaturation;
         else
-            v1 = 0.00024414062;
-        desaturationScale = 1.0 / v1 - 1.0;
+            v1 = 0.00024414062f;
+        desaturationScale = 1.0f / v1 - 1.0f;
         tintScale = viewInfo->film.contrast * v1;
-        tintBias = viewInfo->film.brightness + 0.5 - viewInfo->film.contrast * 0.5;
+        tintBias = viewInfo->film.brightness + 0.5f - viewInfo->film.contrast * 0.5f;
         if (viewInfo->film.invert)
         {
             tintScale = -tintScale;
-            tintBias = tintBias + 1.0;
+            tintBias = tintBias + 1.0f;
         }
         Vec3Scale(viewInfo->film.tintDark, tintScale, colorTintBase);
-        colorTintBase[3] = 0.0;
+        colorTintBase[3] = 0.0f;
         Vec3Sub(viewInfo->film.tintLight, viewInfo->film.tintDark, colorTintDelta);
         Vec3Scale(colorTintDelta, tintScale, colorTintDelta);
-        colorTintDelta[3] = 0.0;
+        colorTintDelta[3] = 0.0f;
         R_SetInputCodeConstant(&viewInfo->input, 0x2Du, tintBias, tintBias, tintBias, desaturationScale);
         R_SetInputCodeConstantFromVec4(&viewInfo->input, 0x2Eu, colorTintBase);
         R_SetInputCodeConstantFromVec4(&viewInfo->input, 0x2Fu, colorTintDelta);
     }
     else
     {
-        R_SetInputCodeConstant(&viewInfo->input, 0x2Du, 0.0, 0.0, 0.0, 4095.0);
-        R_SetInputCodeConstant(&viewInfo->input, 0x2Eu, 0.00024414062, 0.00024414062, 0.00024414062, 0.0);
-        R_SetInputCodeConstant(&viewInfo->input, 0x2Fu, 0.0, 0.0, 0.0, 0.0);
+        R_SetInputCodeConstant(&viewInfo->input, 0x2Du, 0.0f, 0.0f, 0.0f, 4095.0f);
+        R_SetInputCodeConstant(&viewInfo->input, 0x2Eu, 0.00024414062f, 0.00024414062f, 0.00024414062f, 0.0f);
+        R_SetInputCodeConstant(&viewInfo->input, 0x2Fu, 0.0f, 0.0f, 0.0f, 0.0f);
     }
 }
 
@@ -2089,9 +2093,8 @@ void __cdecl R_SetFullSceneViewMesh(int viewInfoIndex, GfxViewInfo *viewInfo)
 
 void __cdecl R_GenerateSortedSunShadowDrawSurfs(GfxViewInfo *viewInfo)
 {
-    Profile_Begin(73);
+    PROF_SCOPED("GenerateSunShadow");
     R_MergeAndEmitSunShadowMapsSurfs(viewInfo);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddEmissiveSpotLight(GfxViewInfo *viewInfo)
@@ -2200,14 +2203,13 @@ void __cdecl R_GetLightSurfs(int visibleLightCount, const GfxLight **visibleLigh
 {
     if (visibleLightCount)
     {
-        Profile_Begin(416);
+        PROF_SCOPED("R_GetLightSurfs");
         KISAK_NULLSUB();
         R_GetBspLightSurfs(visibleLights, visibleLightCount);
         KISAK_NULLSUB();
         R_GetStaticModelLightSurfs(visibleLights, visibleLightCount);
         KISAK_NULLSUB();
         R_GetSceneEntLightSurfs(visibleLights, visibleLightCount);
-        Profile_EndInternal(0);
     }
 }
 

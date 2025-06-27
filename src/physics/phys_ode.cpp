@@ -134,47 +134,47 @@ void __cdecl Phys_Init()
             physGlob.worldData[worldIndex].collisionCallback = nullptr;
         }
         physGlob.dumpContacts = 0;
-        min.value.max = 1.0;
-        min.value.min = 0.0;
+        min.value.max = 1.0f;
+        min.value.min = 0.0f;
         phys_cfm = Dvar_RegisterFloat(
             "phys_cfm",
-            0.000099999997,
+            0.000099999997f,
             min,
             0,
             "Physics constraint force mixing magic parameter.");
-        mina.value.max = 1.0;
-        mina.value.min = 0.0;
-        phys_erp = Dvar_RegisterFloat("phys_erp", 0.80000001, mina, 0, "Physics error reduction magic parameter.");
+        mina.value.max = 1.0f;
+        mina.value.min = 0.0f;
+        phys_erp = Dvar_RegisterFloat("phys_erp", 0.80000001f, mina, 0, "Physics error reduction magic parameter.");
         minb.value.max = FLT_MAX;
         minb.value.min = -FLT_MAX;
-        phys_mcv = Dvar_RegisterFloat("phys_mcv", 20.0, minb, 0, "Physics maximum correcting velocity magic parameter.");
+        phys_mcv = Dvar_RegisterFloat("phys_mcv", 20.0f, minb, 0, "Physics maximum correcting velocity magic parameter.");
         minc.value.max = FLT_MAX;
         minc.value.min = -FLT_MAX;
         phys_mcv_ragdoll = Dvar_RegisterFloat(
             "phys_mcv_ragdoll",
-            1000.0,
+            1000.0f,
             minc,
             0,
             "Physics maximum correcting velocity magic parameter (for ragdoll).");
         mind.value.max = FLT_MAX;
         mind.value.min = -FLT_MAX;
-        phys_csl = Dvar_RegisterFloat("phys_csl", 1.0, mind, 0, "Physics contact surface level magic parameter.");
+        phys_csl = Dvar_RegisterFloat("phys_csl", 1.0f, mind, 0, "Physics contact surface level magic parameter.");
         mine.value.max = FLT_MAX;
         mine.value.min = -FLT_MAX;
-        phys_gravity = Dvar_RegisterFloat("phys_gravity", -800.0, mine, 0, "Physics gravity in units/sec^2.");
-        minf.value.max = 2.0;
-        minf.value.min = 0.0;
+        phys_gravity = Dvar_RegisterFloat("phys_gravity", -800.0f, mine, 0, "Physics gravity in units/sec^2.");
+        minf.value.max = 2.0f;
+        minf.value.min = 0.0f;
         phys_bulletUpBias = Dvar_RegisterFloat(
             "phys_bulletUpBias",
-            0.5,
+            0.5f,
             minf,
             0,
             "Up Bias for the direction of the bullet impact.");
-        ming.value.max = 100.0;
-        ming.value.min = -1.0;
+        ming.value.max = 100.0f;
+        ming.value.min = -1.0f;
         phys_bulletSpinScale = Dvar_RegisterFloat(
             "phys_bulletSpinScale",
-            3.0,
+            3.0f,
             ming,
             0x1000u,
             "Scale of the effective offset from the center of mass for the bullet impacts.");
@@ -225,138 +225,138 @@ void __cdecl Phys_Init()
             0,
             "Disable to turn off testing for collision against entities");
         minh.value.max = FLT_MAX;
-        minh.value.min = 0.0;
+        minh.value.min = 0.0f;
         phys_autoDisableLinear = Dvar_RegisterFloat(
             "phys_autoDisableLinear",
-            20.0,
+            20.0f,
             minh,
             0,
             "A body must have linear velocity less than this to be considered idle.");
         mini.value.max = FLT_MAX;
-        mini.value.min = 0.0;
+        mini.value.min = 0.0f;
         phys_autoDisableAngular = Dvar_RegisterFloat(
             "phys_autoDisableAngular",
-            1.0,
+            1.0f,
             mini,
             0,
             "A body must have angular velocity less than this to be considered idle.");
         minj.value.max = FLT_MAX;
-        minj.value.min = 0.0;
+        minj.value.min = 0.0f;
         phys_autoDisableTime = Dvar_RegisterFloat(
             "phys_autoDisableTime",
-            0.89999998,
+            0.89999998f,
             minj,
             0,
             "The amount of time a body must be idle for it to go to sleep.");
-        mink.value.max = 1.0;
-        mink.value.min = 0.0;
+        mink.value.max = 1.0f;
+        mink.value.min = 0.0f;
         phys_contact_cfm = Dvar_RegisterFloat(
             "phys_contact_cfm",
-            0.0000099999997,
+            0.0000099999997f,
             mink,
             0,
             "Physics constraint force mixing magic parameter for contacts.");
-        minl.value.max = 1.0;
-        minl.value.min = 0.0;
+        minl.value.max = 1.0f;
+        minl.value.min = 0.0f;
         phys_contact_erp = Dvar_RegisterFloat(
             "phys_contact_erp",
-            0.80000001,
+            0.80000001f,
             minl,
             0,
             "Physics error reduction magic parameter for contacts.");
-        minm.value.max = 1.0;
-        minm.value.min = 0.0;
+        minm.value.max = 1.0f;
+        minm.value.min = 0.0f;
         phys_contact_cfm_ragdoll = Dvar_RegisterFloat(
             "phys_contact_cfm_ragdoll",
-            0.001,
+            0.001f,
             minm,
             0,
             "Physics constraint force mixing magic parameter for contacts.");
-        minn.value.max = 1.0;
-        minn.value.min = 0.0;
+        minn.value.max = 1.0f;
+        minn.value.min = 0.0f;
         phys_contact_erp_ragdoll = Dvar_RegisterFloat(
             "phys_contact_erp_ragdoll",
-            0.30000001,
+            0.30000001f,
             minn,
             0,
             "Physics error reduction magic parameter for contacts.");
-        mino.value.max = 1.0;
-        mino.value.min = 0.0;
+        mino.value.max = 1.0f;
+        mino.value.min = 0.0f;
         phys_joint_cfm = Dvar_RegisterFloat(
             "phys_joint_cfm",
-            0.000099999997,
+            0.000099999997f,
             mino,
             0,
             "Physics constraint force mixing magic parameter for joints.");
-        minp.value.max = 1.0;
-        minp.value.min = 0.0;
+        minp.value.max = 1.0f;
+        minp.value.min = 0.0f;
         phys_joint_stop_cfm = Dvar_RegisterFloat(
             "phys_joint_stop_cfm",
-            0.000099999997,
+            0.000099999997f,
             minp,
             0,
             "Physics constraint force mixing magic parameter for joints at their limits.");
-        minq.value.max = 1.0;
-        minq.value.min = 0.0;
+        minq.value.max = 1.0f;
+        minq.value.min = 0.0f;
         phys_joint_stop_erp = Dvar_RegisterFloat(
             "phys_joint_stop_erp",
-            0.80000001,
+            0.80000001f,
             minq,
             0,
             "Physics error reduction magic parameter for joints at their limits.");
         minr.value.max = FLT_MAX;
-        minr.value.min = 0.0;
+        minr.value.min = 0.0f;
         phys_frictionScale = Dvar_RegisterFloat(
             "phys_frictionScale",
-            1.0,
+            1.0f,
             minr,
             0,
             "Scales the amount of physics friction globally.");
         mins.value.max = FLT_MAX;
-        mins.value.min = 0.0;
+        mins.value.min = 0.0f;
         phys_dragLinear = Dvar_RegisterFloat(
             "phys_dragLinear",
-            0.029999999,
+            0.029999999f,
             mins,
             0,
             "The amount of linear drag, applied globally");
         mint.value.max = FLT_MAX;
-        mint.value.min = 0.0;
+        mint.value.min = 0.0f;
         phys_dragAngular = Dvar_RegisterFloat(
             "phys_dragAngular",
-            0.5,
+            0.5f,
             mint,
             0,
             "The amount of angular drag, applied globally");
         minu.value.max = FLT_MAX;
-        minu.value.min = 0.0;
+        minu.value.min = 0.0f;
         phys_minImpactMomentum = Dvar_RegisterFloat(
             "phys_minImpactMomentum",
-            250.0,
+            250.0f,
             minu,
             0,
             "The minimum momentum required to trigger impact sounds");
         minv.value.max = FLT_MAX;
-        minv.value.min = 0.1;
+        minv.value.min = 0.1f;
         phys_jitterMaxMass = Dvar_RegisterFloat(
             "phys_jitterMaxMass",
-            200.0,
+            200.0f,
             minv,
             0,
             "Maximum mass to jitter - jitter will fall off up to this mass");
         minw.value.max = FLT_MAX;
-        minw.value.min = 0.0;
+        minw.value.min = 0.0f;
         phys_gravityChangeWakeupRadius = Dvar_RegisterFloat(
             "phys_gravityChangeWakeupRadius",
-            120.0,
+            120.0f,
             minw,
             0x1000u,
             "The radius around the player within which objects get awakened when gravity changes");
         minx.value.max = FLT_MAX;
-        minx.value.min = 0.0;
+        minx.value.min = 0.0f;
         phys_narrowObjMaxLength = Dvar_RegisterFloat(
             "phys_narrowObjMaxLength",
-            4.0,
+            4.0f,
             minx,
             0,
             "If a geom has a dimension less than this, then extra work will be done to prevent it fro"
@@ -369,9 +369,9 @@ void __cdecl Phys_Init()
         Phys_InitCapsuleGeomClass();
         Phys_InitWorldCollision();
         Phys_InitJoints();
-        physGlob.gravityDirection[0] = 0.0;
-        physGlob.gravityDirection[1] = 0.0;
-        physGlob.gravityDirection[2] = -1.0;
+        physGlob.gravityDirection[0] = 0.0f;
+        physGlob.gravityDirection[1] = 0.0f;
+        physGlob.gravityDirection[2] = -1.0f;
         physInited = 1;
     }
 }
@@ -1450,7 +1450,8 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
     dxWorld *world; // [esp+6Ch] [ebp-8h]
     int bodyEnableCount; // [esp+70h] [ebp-4h]
 
-    Profile_Begin(383);
+    PROF_SCOPED("Phys_PostStep");
+
     world = physGlob.world[worldIndex];
     for (b = world->firstbody; b; b = (dxBody *)b->next)
     {
@@ -1489,7 +1490,6 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
     g_phys_msecStep[worldIndex] = g_phys_minMsecStep[worldIndex]
         + (int)((double)(g_phys_maxMsecStep[worldIndex] - g_phys_minMsecStep[worldIndex]) * v1);
         ODE_ForEachBody(world, Phys_CheckIfAliveTooLong);
-        Profile_EndInternal(0);
 }
 
 void __cdecl Phys_CheckIfAliveTooLong(dxBody *body)
@@ -1571,23 +1571,23 @@ int __cdecl Phys_DoBodyOncePerFrame(unsigned int worldIndex, dxBody *body, float
         return 0;
     if (worldIndex == 2)
     {
-        Vec3Scale(body->info.avel, -0.0099999998, angDamp);
+        Vec3Scale(body->info.avel, -0.0099999998f, angDamp);
         Vec3Add(angDamp, body->info.avel, body->info.avel);
     }
     else
     {
-        drag = 1.0 - phys_dragLinear->current.value * deltaT;
-        v7 = drag - 0.0;
-        if (v7 < 0.0)
-            scale = 0.0;
+        drag = 1.0f - phys_dragLinear->current.value * deltaT;
+        v7 = drag - 0.0f;
+        if (v7 < 0.0f)
+            scale = 0.0f;
         else
             scale = drag;
         drag = scale;
         Vec3Scale(body->info.lvel, scale, body->info.lvel);
-        drag = 1.0 - phys_dragAngular->current.value * deltaT;
-        v5 = drag - 0.0;
-        if (v5 < 0.0)
-            v4 = 0.0;
+        drag = 1.0f - phys_dragAngular->current.value * deltaT;
+        v5 = drag - 0.0f;
+        if (v5 < 0.0f)
+            v4 = 0.0f;
         else
             v4 = drag;
         drag = v4;
@@ -1621,15 +1621,15 @@ void __cdecl Phys_GeomUserGetAAContainedBox(dxGeom *geom, float *mins, float *ma
     case 11:
         ClassData = (unsigned __int16 *)dGeomGetClassData(geom);
         cmod = CM_ClipHandleToModel(*ClassData);
-        Vec3Scale(cmod->mins, 0.0099999998, mins);
-        Vec3Scale(cmod->maxs, 0.0099999998, maxs);
+        Vec3Scale(cmod->mins, 0.0099999998f, mins);
+        Vec3Scale(cmod->maxs, 0.0099999998f, maxs);
         ShrinkBoundsToHeight(mins, maxs);
         break;
     case 12:
         brush = *(const cbrush_t **)dGeomGetClassData(geom);
-        Vec3Scale(brush->mins, 0.0099999998, mins);
-        Vec3Scale(brush->maxs, 0.0099999998, maxs);
-        if (*mins > (double)*maxs || mins[1] > (double)maxs[1] || mins[2] > (double)maxs[2])
+        Vec3Scale(brush->mins, 0.0099999998f, mins);
+        Vec3Scale(brush->maxs, 0.0099999998f, maxs);
+        if (*mins > *maxs || mins[1] > maxs[1] || mins[2] > maxs[2])
         {
             Com_PrintError(20, "Assert Info\n");
             v4 = va("brush: 0x%x, %i, 0x%x, 0x%x\n", brush, brush->numsides, brush->sides, brush->baseAdjacentSide);
@@ -1775,9 +1775,10 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
     unsigned int maxIter; // [esp+78h] [ebp-4h]
 
     data = &physGlob.worldData[worldIndex];
-    if (!physInited)
-        MyAssertHandler(".\\physics\\phys_ode.cpp", 2133, 0, "%s", "physInited");
-    Profile_Begin(363);
+
+    iassert(physInited);
+
+    PROF_SCOPED("Phys_RunToTime");
     KISAK_NULLSUB();
     time = Sys_Milliseconds();
     if (timeNow < data->timeLastSnapshot)
@@ -1836,7 +1837,6 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
     }
     v3 = Sys_Milliseconds();
     Phys_PerformanceAddTime(v3 - time);
-    Profile_EndInternal(0);
 }
 
 void __cdecl Phys_ObjDraw(dxBody *body)
@@ -1951,7 +1951,8 @@ void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
     dxBody *b2; // [esp+30B4h] [ebp-8h]
     FrameInfo *v22; // [esp+30B8h] [ebp-4h]
 
-    Profile_Begin(367);
+    PROF_SCOPED("Phys_NearCallback");
+
     v12 = 0;
     v22 = (FrameInfo*)userData;
     worldIndex = (PhysWorld)v22->worldIndex;
@@ -1959,7 +1960,7 @@ void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
     b2 = dGeomGetBody(geom2);
     if (b1 && b2 && dAreConnectedExcluding(b1, b2, 4))
     {
-        Profile_EndInternal(0);
+        return;
     }
     else
     {
@@ -2019,9 +2020,9 @@ void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
                 v3 = phys_contact_erp->current.value;
             surfParms.soft_erp = v3;
             surfParms.mu = v20 * phys_frictionScale->current.value;
-            surfParms.mu2 = 0.0;
+            surfParms.mu2 = 0.0f;
             surfParms.bounce = v15;
-            surfParms.bounce_vel = 0.1;
+            surfParms.bounce_vel = 0.1f;
             if (contactArray.contactCount >= 5)
             {
                 Phys_ReduceContacts(v9, &contactArray, &out);
@@ -2040,7 +2041,6 @@ void __cdecl Phys_NearCallback(void *userData, dxGeom *geom1, dxGeom *geom2)
                     Phys_PlayCollisionSound(v22->localClientNum, b1, v12->sndClass, &contactArray);
             }
         }
-        Profile_EndInternal(0);
     }
 }
 
@@ -2058,7 +2058,9 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
         MyAssertHandler(".\\physics\\phys_ode.cpp", 1653, 0, "%s", "physInited");
     world = physGlob.world[worldIndex];
     world->seconds = seconds;
-    Profile_Begin(365);
+
+    PROF_SCOPED("Phys_RunServerFrame");
+
     if (phys_dumpcontacts->current.enabled)
     {
         physGlob.dumpContacts = 1;
@@ -2095,20 +2097,21 @@ void __cdecl Phys_RunFrame(int localClientNum, PhysWorld worldIndex, float secon
     scale = -phys_gravity->current.value;
     Vec3Scale(physGlob.gravityDirection, scale, down);
     dWorldSetGravity(world, down[0], down[1], down[2]);
-    Profile_Begin(366);
-    if (phys_interBodyCollision->current.enabled)
-        dSpaceCollide(physGlob.space[worldIndex], &worldIndex, Phys_NearCallback);
-    if (physGlob.worldData[worldIndex].collisionCallback)
-        physGlob.worldData[worldIndex].collisionCallback();
-    frameInfo.localClientNum = localClientNum;
-    frameInfo.worldIndex = worldIndex;
-    ODE_CollideSimpleSpaceWithGeomNoAABBTest(physGlob.space[worldIndex], physGlob.worldGeom, &frameInfo);
-    Profile_EndInternal(0);
-    Profile_Begin(382);
-    dWorldQuickStep(world, seconds);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("Phys_Collide");
+        if (phys_interBodyCollision->current.enabled)
+            dSpaceCollide(physGlob.space[worldIndex], &worldIndex, Phys_NearCallback);
+        if (physGlob.worldData[worldIndex].collisionCallback)
+            physGlob.worldData[worldIndex].collisionCallback();
+        frameInfo.localClientNum = localClientNum;
+        frameInfo.worldIndex = worldIndex;
+        ODE_CollideSimpleSpaceWithGeomNoAABBTest(physGlob.space[worldIndex], physGlob.worldGeom, &frameInfo);
+    }
+    {
+        PROF_SCOPED("Phys_Step");
+        dWorldQuickStep(world, seconds);
+    }
     physGlob.dumpContacts = 0;
-    Profile_EndInternal(0);
 }
 
 void __cdecl Phys_BodyGrabSnapshot(dxBody *body)
@@ -2176,9 +2179,10 @@ void __cdecl Phys_DoBodyOncePerRun(dxBody *body)
 
     if (dBodyIsEnabled(body))
     {
-        Profile_Begin(364);
-        Phys_ObjTraceNewPos(body);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("Phys_Traces");
+            Phys_ObjTraceNewPos(body);
+        }
         for (dim = 0; dim != 3; ++dim)
         {
             CM_ModelBounds(0, mins, maxs);
@@ -2216,8 +2220,8 @@ void __cdecl Phys_ObjTraceNewPos(dxBody *body)
     trace_t trace; // [esp+B8h] [ebp-30h] BYREF
     bool isTooNarrow; // [esp+E7h] [ebp-1h]
 
-    PHYS_TRACE_BOX_SCALE = 0.2;
-    PHYS_TRACE_BOX_MIN = 0.001;
+    PHYS_TRACE_BOX_SCALE = 0.2f;
+    PHYS_TRACE_BOX_MIN = 0.001f;
     if (dBodyIsEnabled(body))
     {
         userData = (PhysObjUserData *)dBodyGetData(body);
@@ -2482,7 +2486,7 @@ void __cdecl Phys_SetHingeParams(
 
     dJointSetHingeParam(id, 2, motorSpeed);
     dJointSetHingeParam(id, 3, motorMaxForce);
-    dJointSetHingeParam(id, 4, 0.89999998);
+    dJointSetHingeParam(id, 4, 0.89999998f);
     dJointSetHingeParam(id, 6, phys_joint_cfm->current.value);
     dJointSetHingeParam(id, 8, phys_joint_stop_cfm->current.value);
     dJointSetHingeParam(id, 7, phys_joint_stop_erp->current.value);
@@ -2573,7 +2577,7 @@ void __cdecl Phys_SetAngularMotorParams(
         dJointSetAMotorParam(id, group + 1, highStops[i]);
         dJointSetAMotorParam(id, group + 2, motorSpeeds[i]);
         dJointSetAMotorParam(id, group + 3, motorFMaxs[i]);
-        dJointSetAMotorParam(id, group + 4, 0.89999998);
+        dJointSetAMotorParam(id, group + 4, 0.89999998f);
         dJointSetAMotorParam(id, group + 6, phys_joint_cfm->current.value);
         dJointSetAMotorParam(id, group + 8, phys_joint_stop_cfm->current.value);
         dJointSetAMotorParam(id, group + 7, phys_joint_stop_erp->current.value);

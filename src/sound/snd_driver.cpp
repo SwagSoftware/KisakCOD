@@ -419,22 +419,25 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
             index);
     handle = milesGlob.handle_sample[index];
     sound = &startAliasInfo->alias0->soundFile->u.loadSnd->sound;
-    Profile_Begin(336);
-    _AILSOUNDINFO info; // LWSS HACK: struct version conversion
-    info.format = sound->info.format;
-    info.data_ptr = sound->info.data_ptr;
-    info.data_len = sound->info.data_len;
-    info.rate = sound->info.rate;
-    info.bits = sound->info.bits;
-    info.channels = sound->info.channels;
-    info.samples = sound->info.samples;
-    info.block_size = sound->info.block_size;
-    info.initial_ptr = sound->info.initial_ptr;
-    info.channel_mask = ~0U; // NEW!
 
-    //AIL_set_sample_info(handle, &sound->info);
-    AIL_set_sample_info(handle, &info);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("SND_init_sample");
+        _AILSOUNDINFO info; // LWSS HACK: struct version conversion
+        info.format = sound->info.format;
+        info.data_ptr = sound->info.data_ptr;
+        info.data_len = sound->info.data_len;
+        info.rate = sound->info.rate;
+        info.bits = sound->info.bits;
+        info.channels = sound->info.channels;
+        info.samples = sound->info.samples;
+        info.block_size = sound->info.block_size;
+        info.initial_ptr = sound->info.initial_ptr;
+        info.channel_mask = ~0U; // NEW!
+
+        //AIL_set_sample_info(handle, &sound->info);
+        AIL_set_sample_info(handle, &info);
+    }
+
     MSS_ApplyEqFilter(handle, entchannel);
     if (startAliasInfo->timescale)
     {
@@ -631,22 +634,24 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
         + startAliasInfo->alias1->distMin * startAliasInfo->lerp;
     distMax = (1.0 - startAliasInfo->lerp) * startAliasInfo->alias0->distMax
         + startAliasInfo->alias1->distMax * startAliasInfo->lerp;
-    Profile_Begin(337);
-    _AILSOUNDINFO info; // LWSS HACK: struct version conversion
-    info.format = sound->info.format;
-    info.data_ptr = sound->info.data_ptr;
-    info.data_len = sound->info.data_len;
-    info.rate = sound->info.rate;
-    info.bits = sound->info.bits;
-    info.channels = sound->info.channels;
-    info.samples = sound->info.samples;
-    info.block_size = sound->info.block_size;
-    info.initial_ptr = sound->info.initial_ptr;
-    info.channel_mask = ~0U; // NEW!
+    {
+        PROF_SCOPED("SND_set_3d_sample_info");
+        _AILSOUNDINFO info; // LWSS HACK: struct version conversion
+        info.format = sound->info.format;
+        info.data_ptr = sound->info.data_ptr;
+        info.data_len = sound->info.data_len;
+        info.rate = sound->info.rate;
+        info.bits = sound->info.bits;
+        info.channels = sound->info.channels;
+        info.samples = sound->info.samples;
+        info.block_size = sound->info.block_size;
+        info.initial_ptr = sound->info.initial_ptr;
+        info.channel_mask = ~0U; // NEW!
 
-    //AIL_set_sample_info(handle, &sound->info);
-    AIL_set_sample_info(handle, &info);
-    Profile_EndInternal(0);
+        //AIL_set_sample_info(handle, &sound->info);
+        AIL_set_sample_info(handle, &info);
+    }
+
     MSS_ApplyEqFilter(handle, entchannel);
     listener = g_snd.listeners[SND_GetListenerIndexNearestToOrigin(startAliasInfo->org)].orient.origin;
     Vec3Sub(listener, startAliasInfo->org, diff);
@@ -859,9 +864,10 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
         Com_GetSoundFileName(startAliasInfo->alias0, filename, 128);
         Com_sprintf(realname, 0x100u, "sound/%s", filename);
         total_msec[1] = (int)realname;
-        Profile_Begin(338);
-        handle = (_SAMPLE *)AIL_open_stream(milesGlob.driver, realname, 0);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("SND_open_stream");
+            handle = (_SAMPLE *)AIL_open_stream(milesGlob.driver, realname, 0);
+        }
         if (handle)
         {
             milesGlob.handle_sample[index] = handle;

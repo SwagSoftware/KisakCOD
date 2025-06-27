@@ -388,9 +388,9 @@ void speex_echo_cancel(SpeexEchoState *st, short *ref, short *echo, short *out, 
    if (st->Sey/(1+st->Syy) < -.1 && (ESR > .3))
    {
       for (i=0;i<M*N;i++)
-         st->W[i] *= .95;
-      st->Sey *= .5;
-      st->sum_adapt*= .95;
+         st->W[i] *= .95f;
+      st->Sey *= .5f;
+      st->sum_adapt*= .95f;
       /*fprintf (stderr, "corrected down\n");*/
    }
 #endif

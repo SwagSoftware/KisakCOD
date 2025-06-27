@@ -104,7 +104,8 @@ void __cdecl FX_CreateImpactMark(
     FxElemPreVisualState preVisState; // [esp+6Ch] [ebp-20h] BYREF
     FxElemMarkVisuals *markVisuals; // [esp+88h] [ebp-4h]
 
-    Profile_Begin(204);
+    PROF_SCOPED("FX_CreateImpactMark");
+
     FX_SetupVisualState(elemDef, 0, randomSeed, 0.0, &preVisState);
     visState.size[0] = FX_InterpolateSize(
         preVisState.refState,
@@ -125,7 +126,6 @@ void __cdecl FX_CreateImpactMark(
         visState.color,
         visState.size[0],
         markEntnum);
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_ImpactMark(
@@ -158,32 +158,35 @@ void __cdecl FX_ImpactMark(
         degrees = orientation * 57.2957763671875;
         RotatePointAroundVector(axis[2], axis[0], axis[1], degrees);
         Vec3Cross(axis[0], axis[2], axis[1]);
-        Profile_Begin(205);
-        FX_ImpactMark_Generate(
-            localClientNum,
-            MARK_FRAGMENTS_AGAINST_BRUSHES,
-            worldMaterial,
-            origin,
-            axis,
-            orientation,
-            nativeColor,
-            radius,
-            markEntnum);
-        Profile_EndInternal(0);
-        if (fx_marks_smodels->current.enabled || fx_marks_ents->current.enabled)
         {
-            Profile_Begin(206);
+            PROF_SCOPED("FX_ImpactMark_World");
             FX_ImpactMark_Generate(
                 localClientNum,
-                MARK_FRAGMENTS_AGAINST_MODELS,
-                modelMaterial,
+                MARK_FRAGMENTS_AGAINST_BRUSHES,
+                worldMaterial,
                 origin,
                 axis,
                 orientation,
                 nativeColor,
                 radius,
                 markEntnum);
-            Profile_EndInternal(0);
+        }
+        
+        if (fx_marks_smodels->current.enabled || fx_marks_ents->current.enabled)
+        {
+            {
+                PROF_SCOPED("FX_ImpactMark_Models");
+                FX_ImpactMark_Generate(
+                    localClientNum,
+                    MARK_FRAGMENTS_AGAINST_MODELS,
+                    modelMaterial,
+                    origin,
+                    axis,
+                    orientation,
+                    nativeColor,
+                    radius,
+                    markEntnum);
+            }
         }
     }
 }
@@ -281,7 +284,8 @@ void __cdecl FX_ImpactMark_Generate_AddEntityBrush(
         return;
     }
 
-    Profile_Begin(207);
+    PROF_SCOPED("FX_ImpactMark_Generate_AddEntityModels");
+
     Vec3AddScalar(origin, -radius, markMins);
     Vec3AddScalar(origin, radius, markMaxs);
     ent = CG_GetEntity(localClientNum, entityIndex);
@@ -440,8 +444,6 @@ void __cdecl FX_ImpactMark_Generate_AddEntityBrush(
             R_MarkFragments_AddBModel(markInfo, brushModel, &ent->pose, entityIndexAsUnsignedShort);
         }
     }
-
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_ImpactMark_Generate_AddEntityModel(
@@ -462,7 +464,8 @@ void __cdecl FX_ImpactMark_Generate_AddEntityModel(
 
     if (entityIndex != 1023)
     {
-        Profile_Begin(207);
+        PROF_SCOPED("FX_ImpactMark_Generate_AddEntityModels");
+
         ent = CG_GetEntity(localClientNum, entityIndex);
         if (ent->nextValid && (dObj = Com_GetClientDObj(ent->nextState.number, localClientNum)) != 0)
         {
@@ -484,11 +487,6 @@ void __cdecl FX_ImpactMark_Generate_AddEntityModel(
                         entityIndex);
                 R_MarkFragments_AddDObj(markInfo, dObj, &ent->pose, entityIndexAsUnsignedShort);
             }
-            Profile_EndInternal(0);
-        }
-        else
-        {
-            Profile_EndInternal(0);
         }
     }
 }
@@ -676,7 +674,7 @@ void __cdecl FX_FreeLruMark(FxMarksSystem *marksSystem)
     FxMark *lruMark; // [esp+34h] [ebp-Ch]
     FxMark *mark; // [esp+38h] [ebp-8h]
 
-    Profile_Begin(208);
+    PROF_SCOPED("FX_FreeLruMark");
     if (!marksSystem)
         MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 241, 0, "%s", "marksSystem");
     lruMark = 0;
@@ -691,7 +689,6 @@ void __cdecl FX_FreeLruMark(FxMarksSystem *marksSystem)
         }
     }
     FX_FreeMark(marksSystem, lruMark);
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_FreeMark(FxMarksSystem *marksSystem, FxMark *mark)
@@ -1321,7 +1318,7 @@ void __cdecl FX_BeginGeneratingMarkVertsForEntModels(int localClientNum, unsigne
             0,
             "%s",
             "fx_marks->current.enabled && fx_marks_ents->current.enabled");
-    Profile_Begin(210);
+    PROF_SCOPED("FX_GenMarkVertsEnt");
     R_BeginMarkMeshVerts();
     if (InterlockedIncrement(&g_markThread[localClientNum]) != 1)
         MyAssertHandler(
@@ -1340,7 +1337,6 @@ void __cdecl FX_BeginGeneratingMarkVertsForEntModels(int localClientNum, unsigne
             localClientNum);
     fx_marksSystemPool[0].hasCarryIndex = 0;
     *indexCount = 0;
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_GenerateMarkVertsForEntXModel(
@@ -1365,7 +1361,7 @@ void __cdecl FX_GenerateMarkVertsForEntXModel(
     entMarkListHead = fx_marksSystemPool[0].entFirstMarkHandles[entId];
     if (entMarkListHead != 0xFFFF)
     {
-        Profile_Begin(210);
+        PROF_SCOPED("FX_GenMarkVertsEnt");
         camera = FX_GetSystem(localClientNum);
         FX_GenerateMarkVertsForList_EntXModel(
             fx_marksSystemPool,
@@ -1375,7 +1371,6 @@ void __cdecl FX_GenerateMarkVertsForEntXModel(
             lightHandle,
             reflectionProbeIndex,
             placement);
-        Profile_EndInternal(0);
     }
 }
 
@@ -1917,7 +1912,7 @@ void __cdecl FX_GenerateMarkVertsForEntDObj(
     entMarkListHead = fx_marksSystemPool[0].entFirstMarkHandles[entId];
     if (entMarkListHead != 0xFFFF)
     {
-        Profile_Begin(210);
+        PROF_SCOPED("FX_GenMarkVertsEnt");
         system = FX_GetSystem(localClientNum);
         camera = system;
         R_MarkUtil_GetDObjAnimMatAndHideParts(dobj, pose, &boneMtxList, hidePartBits);
@@ -1930,7 +1925,6 @@ void __cdecl FX_GenerateMarkVertsForEntDObj(
             reflectionProbeIndex,
             dobj,
             boneMtxList);
-        Profile_EndInternal(0);
     }
 }
 
@@ -2067,7 +2061,7 @@ void __cdecl FX_GenerateMarkVertsForEntBrush(
     entMarkListHead = fx_marksSystemPool[0].entFirstMarkHandles[entId];
     if (entMarkListHead != 0xFFFF)
     {
-        Profile_Begin(210);
+        PROF_SCOPED("FX_GenMarkVertsEnt");
         camera = FX_GetSystem(localClientNum);
         FX_GenerateMarkVertsForList_EntBrush(
             fx_marksSystemPool,
@@ -2076,7 +2070,6 @@ void __cdecl FX_GenerateMarkVertsForEntBrush(
             indexCount,
             placement,
             reflectionProbeIndex);
-        Profile_EndInternal(0);
     }
 }
 
@@ -2112,7 +2105,7 @@ char __cdecl FX_GenerateMarkVertsForList_EntBrush(
 
 void __cdecl FX_EndGeneratingMarkVertsForEntModels(int localClientNum)
 {
-    Profile_Begin(210);
+    PROF_SCOPED("FX_GenMarkVertsEnt");
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\effectscore\\fx_marks.h",
@@ -2130,7 +2123,6 @@ void __cdecl FX_EndGeneratingMarkVertsForEntModels(int localClientNum)
             "%s",
             "Sys_InterlockedDecrement( &g_markThread[localClientNum] ) == 0");
     R_EndMarkMeshVerts();
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_FinishGeneratingMarkVerts(FxMarksSystem *marksSystem)
@@ -2164,7 +2156,7 @@ void __cdecl FX_GenerateMarkVertsForStaticModels(
             0,
             "%s",
             "fx_marks->current.enabled && fx_marks_smodels->current.enabled");
-    Profile_Begin(209);
+    PROF_SCOPED("FX_GenMarkVertsStaticModel");
     R_BeginMarkMeshVerts();
     if (InterlockedIncrement(&g_markThread[localClientNum]) != 1)
         MyAssertHandler(
@@ -2206,7 +2198,6 @@ void __cdecl FX_GenerateMarkVertsForStaticModels(
             "%s",
             "Sys_InterlockedDecrement( &g_markThread[localClientNum] ) == 0");
     R_EndMarkMeshVerts();
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_ExpandMarkVerts_NoTransform_GfxPackedVertex_(
@@ -2450,7 +2441,7 @@ void __cdecl FX_GenerateMarkVertsForWorld(int localClientNum)
 
     if (fx_marks->current.enabled)
     {
-        Profile_Begin(211);
+        PROF_SCOPED("FX_GenMarkVertsWorld");
         R_BeginMarkMeshVerts();
         if (InterlockedIncrement(&g_markThread[localClientNum]) != 1)
             MyAssertHandler(
@@ -2485,7 +2476,6 @@ void __cdecl FX_GenerateMarkVertsForWorld(int localClientNum)
                 "%s",
                 "Sys_InterlockedDecrement( &g_markThread[localClientNum] ) == 0");
         R_EndMarkMeshVerts();
-        Profile_EndInternal(0);
     }
 }
 

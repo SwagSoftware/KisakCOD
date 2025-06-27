@@ -522,96 +522,96 @@ const dvar_s *G_RegisterDvars()
         "Shader name for the scores of players who are spectators");
     g_ScoresColor_MyTeam = Dvar_RegisterColor(
         "g_ScoresColor_MyTeam",
-        0.25,
-        0.72000003,
-        0.25,
-        1.0,
+        0.25f,
+        0.72000003f,
+        0.25f,
+        1.0f,
         0x100u,
         "Player team color on scoreboard");
     g_ScoresColor_EnemyTeam = Dvar_RegisterColor(
         "g_ScoresColor_EnemyTeam",
-        0.69,
-        0.07,
-        0.050000001,
-        1.0,
+        0.69f,
+        0.07f,
+        0.050000001f,
+        1.0f,
         0x100u,
         "Enemy team color on scoreboard");
     g_ScoresColor_Spectator = Dvar_RegisterColor(
         "g_ScoresColor_Spectator",
-        0.25,
-        0.25,
-        0.25,
-        1.0,
+        0.25f,
+        0.25f,
+        0.25f,
+        1.0f,
         0x100u,
         "Spectator team color on scoreboard");
     g_ScoresColor_Free = Dvar_RegisterColor(
         "g_ScoresColor_Free",
-        0.75999999,
-        0.77999997,
-        0.1,
-        1.0,
+        0.75999999f,
+        0.77999997f,
+        0.1f,
+        1.0f,
         0x100u,
         "Free Team color on scoreboard");
     g_ScoresColor_Allies = Dvar_RegisterColor(
         "g_ScoresColor_Allies",
-        0.090000004,
-        0.46000001,
-        0.07,
-        1.0,
+        0.090000004f,
+        0.46000001f,
+        0.07f,
+        1.0f,
         0x100u,
         "Allies team color on scoreboard");
     g_ScoresColor_Axis = Dvar_RegisterColor(
         "g_ScoresColor_Axis",
-        0.69,
-        0.07,
-        0.050000001,
-        1.0,
+        0.69f,
+        0.07f,
+        0.050000001f,
+        1.0f,
         0x100u,
         "Axis team color on scoreboard");
     g_TeamName_Allies = Dvar_RegisterString("g_TeamName_Allies", "GAME_ALLIES", 0x100u, "Allied team name");
     g_TeamName_Axis = Dvar_RegisterString("g_TeamName_Axis", "GAME_AXIS", 0x100u, "Axis team name");
     g_TeamColor_Allies = Dvar_RegisterColor(
         "g_TeamColor_Allies",
-        0.60000002,
-        0.63999999,
-        0.69,
-        1.0,
+        0.60000002f,
+        0.63999999f,
+        0.69f,
+        1.0f,
         0x100u,
         "Allies team color");
     g_TeamColor_Axis = Dvar_RegisterColor(
         "g_TeamColor_Axis",
-        0.64999998,
-        0.56999999,
-        0.41,
-        1.0,
+        0.64999998f,
+        0.56999999f,
+        0.41f,
+        1.0f,
         0x100u,
         "Axis team color");
     g_TeamColor_MyTeam = Dvar_RegisterColor(
         "g_TeamColor_MyTeam",
-        0.40000001,
-        0.60000002,
-        0.85000002,
-        1.0,
+        0.40000001f,
+        0.60000002f,
+        0.85000002f,
+        1.0f,
         0x100u,
         "Player team color");
-    g_TeamColor_EnemyTeam = Dvar_RegisterColor("g_TeamColor_EnemyTeam", 0.75, 0.25, 0.25, 1.0, 0x100u, "Enemy team color");
+    g_TeamColor_EnemyTeam = Dvar_RegisterColor("g_TeamColor_EnemyTeam", 0.75f, 0.25f, 0.25f, 1.0f, 0x100u, "Enemy team color");
     g_TeamColor_Spectator = Dvar_RegisterColor(
         "g_TeamColor_Spectator",
-        0.25,
-        0.25,
-        0.25,
-        1.0,
+        0.25f,
+        0.25f,
+        0.25f,
+        1.0f,
         0x100u,
         "Spectator team color");
-    g_TeamColor_Free = Dvar_RegisterColor("g_TeamColor_Free", 0.75, 0.25, 0.25, 1.0, 0x100u, "Free Team color");
+    g_TeamColor_Free = Dvar_RegisterColor("g_TeamColor_Free", 0.75f, 0.25f, 0.25f, 1.0f, 0x100u, "Free Team color");
     g_smoothClients = Dvar_RegisterBool("g_smoothClients", 1, 0, "Enable extrapolation between client states");
     g_antilag = Dvar_RegisterBool("g_antilag", 1, 5u, "Turn on antilag checks for weapon hits");
     g_oldVoting = Dvar_RegisterBool("g_oldVoting", 1, 1u, "Use old voting method");
-    minh.value.max = 1.0;
-    minh.value.min = 0.0;
+    minh.value.max = 1.0f;
+    minh.value.min = 0.0f;
     g_voteAbstainWeight = Dvar_RegisterFloat(
         "g_voteAbstainWeight",
-        0.5,
+        0.5f,
         minh,
         1u,
         "How much an abstained vote counts as a 'no' vote");
@@ -621,19 +621,19 @@ const dvar_s *G_RegisterDvars()
         0,
         0x80u,
         "Turn on debugging information for locational damage");
-    mini.value.max = 15000.0;
-    mini.value.min = 0.0;
+    mini.value.max = 15000.0f;
+    mini.value.min = 0.0f;
     g_friendlyfireDist = Dvar_RegisterFloat(
         "g_friendlyfireDist",
-        256.0,
+        256.0f,
         mini,
         0x80u,
         "Maximum range for disabling fire at a friendly");
-    minj.value.max = 15000.0;
-    minj.value.min = 0.0;
+    minj.value.max = 15000.0f;
+    minj.value.min = 0.0f;
     g_friendlyNameDist = Dvar_RegisterFloat(
         "g_friendlyNameDist",
-        15000.0,
+        15000.0f,
         minj,
         0x80u,
         "Maximum range for seeing a friendly's name");
@@ -644,34 +644,34 @@ const dvar_s *G_RegisterDvars()
         0x80u,
         "Turn on debug lines for radius damage traces");
     mink.value.max = FLT_MAX;
-    mink.value.min = 0.0;
+    mink.value.min = 0.0f;
     player_throwbackInnerRadius = Dvar_RegisterFloat(
         "player_throwbackInnerRadius",
-        90.0,
+        90.0f,
         mink,
         0x80u,
         "The radius to a live grenade player must be within initially to do a throwback");
     minl.value.max = FLT_MAX;
-    minl.value.min = 0.0;
+    minl.value.min = 0.0f;
     player_throwbackOuterRadius = Dvar_RegisterFloat(
         "player_throwbackOuterRadius",
-        160.0,
+        160.0f,
         minl,
         0x80u,
         "The radius player is allow to throwback a grenade once the player has been in the inner radius");
     minm.value.max = FLT_MAX;
-    minm.value.min = 0.0;
+    minm.value.min = 0.0f;
     player_MGUseRadius = Dvar_RegisterFloat(
         "player_MGUseRadius",
-        128.0,
+        128.0f,
         minm,
         0x80u,
         "The radius within which a player can mount a machine gun");
     minn.value.max = FLT_MAX;
-    minn.value.min = 0.0;
+    minn.value.min = 0.0f;
     g_minGrenadeDamageSpeed = Dvar_RegisterFloat(
         "g_minGrenadeDamageSpeed",
-        400.0,
+        400.0f,
         minn,
         0x80u,
         "Minimum speed at which getting hit be a grenade will do damage (not the grenade explosion damage)");
@@ -718,25 +718,25 @@ const dvar_s *G_RegisterDvars()
     BG_RegisterDvars();
     g_fogColorReadOnly = Dvar_RegisterColor(
         "g_fogColorReadOnly",
-        1.0,
-        0.0,
-        0.0,
-        1.0,
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
         0x10C0u,
         "Fog color that was set in the most recent call to \"setexpfog\"");
     mino.value.max = FLT_MAX;
-    mino.value.min = 0.0;
+    mino.value.min = 0.0f;
     g_fogStartDistReadOnly = Dvar_RegisterFloat(
         "g_fogStartDistReadOnly",
-        0.0,
+        0.0f,
         mino,
         0x10C0u,
         "Fog start distance that was set in the most recent call to \"setexpfog\"");
     minp.value.max = FLT_MAX;
-    minp.value.min = 0.0;
+    minp.value.min = 0.0f;
     result = Dvar_RegisterFloat(
         "g_fogHalfDistReadOnly",
-        0.1,
+        0.1f,
         minp,
         0x10C0u,
         "Fog start distance that was set in the most recent call to \"setexpfog\"");
@@ -1035,7 +1035,7 @@ void __cdecl CheckVote()
         if (level.time - level.voteTime >= 0)
         {
             v3 = (double)(level.numVotingClients - (level.voteNo + level.voteYes)) * g_voteAbstainWeight->current.value;
-            if (level.voteYes <= (int)(v3 + 0.4999999990686774) + level.voteNo)
+            if (level.voteYes <= (int)(v3 + 0.4999999990686774f) + level.voteNo)
                 goto LABEL_11;
         LABEL_9:
             v1 = va("%c \"GAME_VOTEPASSED\"", 101);
@@ -1177,7 +1177,7 @@ void __cdecl G_RunFrame(int levelTime)
     int i; // [esp+52Ch] [ebp-8h]
     int entnum; // [esp+530h] [ebp-4h]
 
-    Profile_Begin(230);
+    PROF_SCOPED("G_RunFrame");
     SV_CheckThread();
     ++level.framenum;
     level.previousTime = level.time;
@@ -1205,70 +1205,76 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    Profile_Begin(320);
-    ent = g_entities;
-    i = 0;
-    while (i < level.num_entities)
+
     {
-        if (ent->r.inuse)
+        PROF_SCOPED("G_XAnimUpdate");
+        ent = g_entities;
+        i = 0;
+        while (i < level.num_entities)
         {
-            dtime = (double)level.frametime * EQUAL_EPSILON;
-            SV_DObjInitServerTime(ent, dtime);
+            if (ent->r.inuse)
+            {
+                dtime = (double)level.frametime * EQUAL_EPSILON;
+                SV_DObjInitServerTime(ent, dtime);
+            }
+            ++i;
+            ++ent;
         }
-        ++i;
-        ++ent;
     }
-    Profile_EndInternal(0);
+
     memset(entIndex, 0, 0x400u);
     index = 0;
-    Profile_Begin(271);
-    if (level.currentTriggerListSize)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1914, 0, "%s", "level.currentTriggerListSize == 0");
-    Com_Memcpy((char *)level.currentTriggerList, (char *)level.pendingTriggerList, 12 * level.pendingTriggerListSize);
-    level.currentTriggerListSize = level.pendingTriggerListSize;
-    level.pendingTriggerListSize = 0;
-    do
     {
-        bMoreTriggered = 0;
-        ++index;
-        for (i = 0; i < level.currentTriggerListSize; ++i)
+        PROF_SCOPED("G_TriggerChecks");
+        iassert(level.currentTriggerListSize == 0);
+
+        Com_Memcpy((char *)level.currentTriggerList, (char *)level.pendingTriggerList, 12 * level.pendingTriggerListSize);
+        level.currentTriggerListSize = level.pendingTriggerListSize;
+        level.pendingTriggerListSize = 0;
+        do
         {
-            trigger_info = &level.currentTriggerList[i];
-            entnum = trigger_info->entnum;
-            ent = &g_entities[entnum];
-            if (ent->useCount == trigger_info->useCount)
+            bMoreTriggered = 0;
+            ++index;
+            for (i = 0; i < level.currentTriggerListSize; ++i)
             {
-                if (!ent->r.inuse)
-                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1930, 0, "%s", "ent->r.inuse");
-                other = &g_entities[trigger_info->otherEntnum];
-                if (other->useCount == trigger_info->otherUseCount)
+                trigger_info = &level.currentTriggerList[i];
+                entnum = trigger_info->entnum;
+                ent = &g_entities[entnum];
+                if (ent->useCount == trigger_info->useCount)
                 {
-                    if (!other->r.inuse)
-                        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1934, 0, "%s", "other->r.inuse");
-                    if (entIndex[entnum] == index)
+                    if (!ent->r.inuse)
+                        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1930, 0, "%s", "ent->r.inuse");
+                    other = &g_entities[trigger_info->otherEntnum];
+                    if (other->useCount == trigger_info->otherUseCount)
                     {
-                        bMoreTriggered = 1;
-                        continue;
+                        if (!other->r.inuse)
+                            MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1934, 0, "%s", "other->r.inuse");
+                        if (entIndex[entnum] == index)
+                        {
+                            bMoreTriggered = 1;
+                            continue;
+                        }
+                        entIndex[entnum] = index;
+                        Scr_AddEntity(other);
+                        Scr_Notify(ent, scr_const.trigger, 1u);
                     }
-                    entIndex[entnum] = index;
-                    Scr_AddEntity(other);
-                    Scr_Notify(ent, scr_const.trigger, 1u);
                 }
+                --level.currentTriggerListSize;
+                --i;
+                v1 = &level.currentTriggerList[level.currentTriggerListSize];
+                *(unsigned int *)&trigger_info->entnum = *(unsigned int *)&v1->entnum;
+                trigger_info->useCount = v1->useCount;
+                trigger_info->otherUseCount = v1->otherUseCount;
             }
-            --level.currentTriggerListSize;
-            --i;
-            v1 = &level.currentTriggerList[level.currentTriggerListSize];
-            *(unsigned int *)&trigger_info->entnum = *(unsigned int *)&v1->entnum;
-            trigger_info->useCount = v1->useCount;
-            trigger_info->otherUseCount = v1->otherUseCount;
-        }
-        Profile_Begin(272);
-        Scr_RunCurrentThreads();
-        Profile_EndInternal(0);
-    } while (bMoreTriggered);
-    if (level.currentTriggerListSize)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1956, 0, "%s", "level.currentTriggerListSize == 0");
-    Profile_EndInternal(0);
+            {
+                PROF_SCOPED("G_TriggerCheckScripts");
+                Scr_RunCurrentThreads();
+            }
+        } while (bMoreTriggered);
+
+        iassert(level.currentTriggerListSize == 0);
+    }
+
     ent = g_entities;
     i = 0;
     while (i < level.maxclients)
@@ -1278,63 +1284,70 @@ void __cdecl G_RunFrame(int levelTime)
         ++i;
         ++ent;
     }
-    Profile_Begin(320);
-    ent = g_entities;
-    i = 0;
-    while (i < level.num_entities)
+
     {
-        G_XAnimUpdateEnt(ent);
-        ++i;
-        ++ent;
+        PROF_SCOPED("G_XAnimUpdate");
+        ent = g_entities;
+        i = 0;
+        while (i < level.num_entities)
+        {
+            G_XAnimUpdateEnt(ent);
+            ++i;
+            ++ent;
+        }
     }
-    Profile_EndInternal(0);
+
     Scr_IncTime();
     SV_ResetSkeletonCache();
-    Profile_Begin(260);
-    if (level.currentEntityThink != -1)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1984, 0, "%s", "level.currentEntityThink == -1");
-    ent = g_entities;
-    level.currentEntityThink = 0;
-    while (level.currentEntityThink < level.num_entities)
     {
-        if (ent->r.inuse)
-            G_RunFrameForEntity(ent);
-        ++level.currentEntityThink;
-        ++ent;
-    }
-    level.currentEntityThink = -1;
-    Profile_EndInternal(0);
-    Profile_Begin(263);
-    G_UpdateObjectiveToClients();
-    Profile_EndInternal(0);
-    Profile_Begin(264);
-    G_UpdateHudElemsToClients();
-    Profile_EndInternal(0);
-    Profile_Begin(265);
-    ent = g_entities;
-    i = 0;
-    while (i < level.maxclients)
-    {
-        if (ent->r.inuse)
+        PROF_SCOPED("G_RunFrameForEntity");
+        if (level.currentEntityThink != -1)
+            MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1984, 0, "%s", "level.currentEntityThink == -1");
+        ent = g_entities;
+        level.currentEntityThink = 0;
+        while (level.currentEntityThink < level.num_entities)
         {
-            if ((unsigned int)i >= 0x40)
-                MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2012, 0, "i doesn't index MAX_CLIENTS\n\t%i not in [0, %i)", i, 64);
-            if (!level_bgs.clientinfo[i].infoValid)
-                MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2013, 0, "%s", "level_bgs.clientinfo[i].infoValid");
-            if (ent->client - level.clients != i)
-                MyAssertHandler(
-                    ".\\game_mp\\g_main_mp.cpp",
-                    2014,
-                    0,
-                    "ent->client - level.clients == i\n\t%i, %i",
-                    ent->client - level.clients,
-                    i);
-            ClientEndFrame(ent);
+            if (ent->r.inuse)
+                G_RunFrameForEntity(ent);
+            ++level.currentEntityThink;
+            ++ent;
         }
-        ++i;
-        ++ent;
+        level.currentEntityThink = -1;
     }
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("G_UpdateObjectiveToClients");
+        G_UpdateObjectiveToClients();
+    }
+    {
+        PROF_SCOPED("G_UpdateHudElemsToClients");
+        G_UpdateHudElemsToClients();
+    }
+    {
+        PROF_SCOPED("ClientEndFrame");
+        ent = g_entities;
+        i = 0;
+        while (i < level.maxclients)
+        {
+            if (ent->r.inuse)
+            {
+                if ((unsigned int)i >= 0x40)
+                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2012, 0, "i doesn't index MAX_CLIENTS\n\t%i not in [0, %i)", i, 64);
+                if (!level_bgs.clientinfo[i].infoValid)
+                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2013, 0, "%s", "level_bgs.clientinfo[i].infoValid");
+                if (ent->client - level.clients != i)
+                    MyAssertHandler(
+                        ".\\game_mp\\g_main_mp.cpp",
+                        2014,
+                        0,
+                        "ent->client - level.clients == i\n\t%i, %i",
+                        ent->client - level.clients,
+                        i);
+                ClientEndFrame(ent);
+            }
+            ++i;
+            ++ent;
+        }
+    }
     CheckTeamStatus();
     if (g_oldVoting->current.enabled)
         CheckVote();
@@ -1357,7 +1370,6 @@ void __cdecl G_RunFrame(int levelTime)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2043, 0, "%s\n\t(bgs) = %p", "(bgs == &level_bgs)", bgs);
     bgs = 0;
     ShowEntityInfo();
-    Profile_EndInternal(0);
 }
 
 void __cdecl G_ClientDoPerFrameNotifies(gentity_s *ent)
@@ -1480,15 +1492,15 @@ void __cdecl ShowEntityInfo_Items(gentity_s *ent)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1679, 0, "%s", "ent->item");
     origin[0] = ent->r.currentOrigin[0];
     origin[1] = ent->r.currentOrigin[1];
-    origin[2] = ent->r.currentOrigin[2] - -4.0 * 0.5;
+    origin[2] = ent->r.currentOrigin[2] - -4.0f * 0.5f;
     for (idx = 0; idx < 2; ++idx)
     {
         if (ent->item[idx].index)
         {
             weapDef = BG_GetWeaponDef(ent->item[idx].index);
             text = va("%s (%i + %i)", weapDef->szInternalName, ent->item[idx].clipAmmoCount, ent->item[idx].ammoCount);
-            CL_AddDebugString(origin, colorRedFaded, 0.30000001, text, 1, 1);
-            origin[2] = origin[2] + -4.0;
+            CL_AddDebugString(origin, colorRedFaded, 0.30000001f, text, 1, 1);
+            origin[2] = origin[2] + -4.0f;
         }
     }
 }
@@ -1521,7 +1533,7 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
                 "%s\n\t(ent->s.number) = %i",
                 "((ent->r.svFlags & ((1<<1) | (1<<2))) != ((1<<1) | (1<<2)))",
                 ent->s.number);
-        if (ent->r.mins[0] > (double)ent->r.maxs[0])
+        if (ent->r.mins[0] > (float)ent->r.maxs[0])
         {
             v1 = SL_ConvertToString(ent->classname);
             v2 = va(
@@ -1533,7 +1545,7 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
                 v1);
             MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1758, 0, "%s\n\t%s", "ent->r.maxs[0] >= ent->r.mins[0]", v2);
         }
-        if (ent->r.mins[1] > (double)ent->r.maxs[1])
+        if (ent->r.mins[1] > (float)ent->r.maxs[1])
         {
             v3 = SL_ConvertToString(ent->classname);
             v4 = va(
@@ -1545,7 +1557,7 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
                 v3);
             MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1759, 0, "%s\n\t%s", "ent->r.maxs[1] >= ent->r.mins[1]", v4);
         }
-        if (ent->r.mins[2] > (double)ent->r.maxs[2])
+        if (ent->r.mins[2] > (float)ent->r.maxs[2])
         {
             v5 = SL_ConvertToString(ent->classname);
             v6 = va(

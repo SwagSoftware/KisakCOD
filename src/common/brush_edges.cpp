@@ -870,7 +870,7 @@ int __cdecl NumberOfUniquePoints(const SimplePlaneIntersection **pts, int ptsCou
     v4 = 0;
     for (i = 0; i < ptsCount; ++i)
     {
-        for (j = 0; j < v4 && !VecNCompareCustomEpsilon(pts[i]->xyz, (const float*)v3[j], 0.0099999998, 3); ++j) // KISAKTODO: more sus casts
+        for (j = 0; j < v4 && !VecNCompareCustomEpsilon(pts[i]->xyz, (const float*)v3[j], 0.0099999998f, 3); ++j) // KISAKTODO: more sus casts
             ;
         if (j == v4)
             v3[v4++] = (unsigned int)pts[i];

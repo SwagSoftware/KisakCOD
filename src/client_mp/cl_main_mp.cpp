@@ -2088,9 +2088,10 @@ void __cdecl CL_Frame(netsrc_t localClientNum)
     if (clientUIActives[0].isRunning)
     {
         CL_DevGuiFrame(localClientNum);
-        Profile_Begin(357);
-        CL_VoiceFrame(localClientNum);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("CL_VoiceFrame");
+            CL_VoiceFrame(localClientNum);
+        }
         CL_UpdateColor(localClientNum);
         CL_CheckUserinfo(localClientNum);
         CL_CheckForResend(localClientNum);
@@ -3657,12 +3658,12 @@ void __cdecl CL_InitOnceForAllClients()
         1u,
         "Maximum number of packets sent per frame");
     cl_packetdup = Dvar_RegisterInt("cl_packetdup", 1, (DvarLimits)0x500000000LL, 1u, "Enable packet duplication");
-    mine.value.max = 100.0;
-    mine.value.min = 0.0099999998;
-    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0, mine, 1u, "Mouse sensitivity");
-    minf.value.max = 100.0;
-    minf.value.min = 0.0;
-    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0, minf, 1u, "Mouse acceleration");
+    mine.value.max = 100.0f;
+    mine.value.min = 0.0099999998f;
+    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0f, mine, 1u, "Mouse sensitivity");
+    minf.value.max = 100.0f;
+    minf.value.min = 0.0f;
+    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0f, minf, 1u, "Mouse acceleration");
     cl_freelook = Dvar_RegisterBool("cl_freelook", 1, 1u, "Enable looking with mouse");
     cl_showMouseRate = Dvar_RegisterBool(
         "cl_showmouserate",
@@ -3684,18 +3685,18 @@ void __cdecl CL_InitOnceForAllClients()
         0,
         0,
         "Bypass UI mouse input and send directly to the game");
-    ming.value.max = 1.0;
-    ming.value.min = -1.0;
-    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022, ming, 1u, "Default pitch");
-    minh.value.max = 1.0;
-    minh.value.min = -1.0;
-    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022, minh, 1u, "Default yaw");
-    mini.value.max = 1.0;
-    mini.value.min = -1.0;
-    m_forward = Dvar_RegisterFloat("m_forward", 0.25, mini, 1u, "Forward speed in units per second");
-    minj.value.max = 1.0;
-    minj.value.min = -1.0;
-    m_side = Dvar_RegisterFloat("m_side", 0.25, minj, 1u, "Sideways motion in units per second");
+    ming.value.max = 1.0f;
+    ming.value.min = -1.0f;
+    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022f, ming, 1u, "Default pitch");
+    minh.value.max = 1.0f;
+    minh.value.min = -1.0f;
+    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022f, minh, 1u, "Default yaw");
+    mini.value.max = 1.0f;
+    mini.value.min = -1.0f;
+    m_forward = Dvar_RegisterFloat("m_forward", 0.25f, mini, 1u, "Forward speed in units per second");
+    minj.value.max = 1.0f;
+    minj.value.min = -1.0f;
+    m_side = Dvar_RegisterFloat("m_side", 0.25f, minj, 1u, "Sideways motion in units per second");
     m_filter = Dvar_RegisterBool("m_filter", 0, 1u, "Allow mouse movement smoothing");
     cl_motdString = Dvar_RegisterString("cl_motdString", "", 0x40u, "Message of the day");
     cl_ingame = Dvar_RegisterBool("cl_ingame", 0, 0x40u, "True if the game is active");
@@ -3731,19 +3732,19 @@ void __cdecl CL_InitOnceForAllClients()
     I_strncpyz(cls.autoupdateServerNames[3], "cod2update4.activision.com", 64);
     I_strncpyz(cls.autoupdateServerNames[4], "cod2update5.activision.com", 64);
     motd = Dvar_RegisterString("motd", "", 0, "Message of the day");
-    mink.value.max = 80.0;
-    mink.value.min = -80.0;
+    mink.value.max = 80.0f;
+    mink.value.min = -80.0f;
     vehDriverViewHeightMin = Dvar_RegisterFloat(
         "vehDriverViewHeightMin",
-        -15.0,
+        -15.0f,
         mink,
         1u,
         "Min orbit altitude for driver's view");
-    minl.value.max = 80.0;
-    minl.value.min = -80.0;
+    minl.value.max = 80.0f;
+    minl.value.min = -80.0f;
     vehDriverViewHeightMax = Dvar_RegisterFloat(
         "vehDriverViewHeightMax",
-        50.0,
+        50.0f,
         minl,
         1u,
         "Max orbit altitude for driver's view");

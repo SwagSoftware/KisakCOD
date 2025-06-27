@@ -16,7 +16,7 @@
 int surfaceTypeSoundListCount;
 WeaponDef *bg_weaponDefs[128];
 
-const float MY_RELOADSTART_INTERUPT_IGNORE_FRAC = 0.4;
+const float MY_RELOADSTART_INTERUPT_IGNORE_FRAC = 0.4f;
 
 WeaponDef *bg_weapAmmoTypes[128];
 WeaponDef *bg_sharedAmmoCaps[128];
@@ -3903,12 +3903,12 @@ void __cdecl BG_CalculateWeaponPosition_GunRecoil(weaponState_t *ws, float *angl
         fGunKickStaticDecay = (weapDef->fAdsGunKickStaticDecay - weapDef->fHipGunKickStaticDecay) * fPosLerp
             + weapDef->fHipGunKickStaticDecay;
         fTotalTime = ws->frametime;
-        while (fTotalTime > 0.0)
+        while (fTotalTime > 0.0f)
         {
-            if (fTotalTime <= 0.004999999888241291)
+            if (fTotalTime <= 0.004999999888241291f)
             {
                 fTimeStep = fTotalTime;
-                fTotalTime = 0.0;
+                fTotalTime = 0.0f;
                 v2 = BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
                     ws->vGunOffset,
                     ws->vGunSpeed,
@@ -3921,12 +3921,12 @@ void __cdecl BG_CalculateWeaponPosition_GunRecoil(weaponState_t *ws, float *angl
             }
             else
             {
-                fTimeStep = 0.0049999999;
-                fTotalTime = fTotalTime - 0.004999999888241291;
+                fTimeStep = 0.0049999999f;
+                fTotalTime = fTotalTime - 0.004999999888241291f;
                 v2 = BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
                     ws->vGunOffset,
                     ws->vGunSpeed,
-                    0.0049999999,
+                    0.0049999999f,
                     weapDef->fGunMaxPitch,
                     fGunKickAccel,
                     fGunKickSpeedMax,

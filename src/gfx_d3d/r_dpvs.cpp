@@ -238,168 +238,171 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
     const GfxBrushModel *bmodel; // [esp+D8h] [ebp-8h]
     int drawSurfCount; // [esp+DCh] [ebp-4h]
 
-    Profile_Begin(413);
-    drawSurfs[0] = scene.drawSurfs[2];
-    lastDrawSurfs[0] = &scene.drawSurfs[2][scene.maxDrawSurfCount[2]];
-    drawSurfs[1] = scene.drawSurfs[5];
-    lastDrawSurfs[1] = &scene.drawSurfs[5][scene.maxDrawSurfCount[5]];
-    drawSurfs[2] = scene.drawSurfs[11];
-    lastDrawSurfs[2] = &scene.drawSurfs[11][scene.maxDrawSurfCount[11]];
-    sceneEntCount = scene.sceneDObjCount;
-    sceneEntVisData = scene.sceneDObjVisData[0];
-    for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
+    PROF_SCOPED("SceneEntSurfaces");
     {
-        if (sceneEntVisData[sceneEntIndex] == 1)
+        drawSurfs[0] = scene.drawSurfs[2];
+        lastDrawSurfs[0] = &scene.drawSurfs[2][scene.maxDrawSurfCount[2]];
+        drawSurfs[1] = scene.drawSurfs[5];
+        lastDrawSurfs[1] = &scene.drawSurfs[5][scene.maxDrawSurfCount[5]];
+        drawSurfs[2] = scene.drawSurfs[11];
+        lastDrawSurfs[2] = &scene.drawSurfs[11][scene.maxDrawSurfCount[11]];
+        sceneEntCount = scene.sceneDObjCount;
+        sceneEntVisData = scene.sceneDObjVisData[0];
+        for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
         {
-            sceneEnt = &scene.sceneDObj[sceneEntIndex];
-            iassert(sceneEnt->cull.state >= CULL_STATE_BOUNDED);
-            cachedLightingHandle = (unsigned __int16 *)LongNoSwap((unsigned int)sceneEnt->info.cachedLightingHandle);
-            lightingHandle = R_AllocModelLighting_Box(
-                viewInfo,
-                sceneEnt->lightingOrigin,
-                sceneEnt->cull.mins,
-                sceneEnt->cull.maxs,
-                cachedLightingHandle,
-                &lightingInfo);
-            if (lightingHandle)
+            if (sceneEntVisData[sceneEntIndex] == 1)
             {
-                sceneEnt->reflectionProbeIndex = lightingInfo.reflectionProbeIndex;
-                R_AddDObjSurfacesCamera(sceneEnt, lightingHandle, lightingInfo.primaryLightIndex, drawSurfs, lastDrawSurfs);
-            }
-            else
-            {
-                sceneEntVisData[sceneEntIndex] = 0;
-            }
-        }
-    }
-    sceneEntCount = scene.sceneModelCount;
-    sceneEntVisData = scene.sceneModelVisData[0];
-    for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
-    {
-        if (sceneEntVisData[sceneEntIndex] == 1)
-        {
-            sceneModel = &scene.sceneModel[sceneEntIndex];
-            lightingHandle = R_AllocModelLighting_Sphere(
-                viewInfo,
-                sceneModel->lightingOrigin,
-                sceneModel->placement.base.origin,
-                sceneModel->radius,
-                sceneModel->cachedLightingHandle,
-                &lightingInfo);
-            if (lightingHandle)
-            {
-                gfxEntIndex = sceneModel->gfxEntIndex;
-                if (gfxEntIndex)
+                sceneEnt = &scene.sceneDObj[sceneEntIndex];
+                iassert(sceneEnt->cull.state >= CULL_STATE_BOUNDED);
+                cachedLightingHandle = (unsigned __int16 *)LongNoSwap((unsigned int)sceneEnt->info.cachedLightingHandle);
+                lightingHandle = R_AllocModelLighting_Box(
+                    viewInfo,
+                    sceneEnt->lightingOrigin,
+                    sceneEnt->cull.mins,
+                    sceneEnt->cull.maxs,
+                    cachedLightingHandle,
+                    &lightingInfo);
+                if (lightingHandle)
                 {
-                    gfxEnt = &frontEndDataOut->gfxEnts[gfxEntIndex];
-                    isShadowReceiver = sc_enable->current.enabled && (gfxEnt->renderFxFlags & 0x100) != 0;
-                    depthHack = (gfxEnt->renderFxFlags & 2) != 0;
+                    sceneEnt->reflectionProbeIndex = lightingInfo.reflectionProbeIndex;
+                    R_AddDObjSurfacesCamera(sceneEnt, lightingHandle, lightingInfo.primaryLightIndex, drawSurfs, lastDrawSurfs);
                 }
                 else
                 {
-                    isShadowReceiver = 0;
-                    depthHack = 0;
+                    sceneEntVisData[sceneEntIndex] = 0;
                 }
-                sceneModel->reflectionProbeIndex = lightingInfo.reflectionProbeIndex;
-                R_AddXModelSurfacesCamera(
-                    &sceneModel->info,
-                    sceneModel->model,
+            }
+        }
+        sceneEntCount = scene.sceneModelCount;
+        sceneEntVisData = scene.sceneModelVisData[0];
+        for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
+        {
+            if (sceneEntVisData[sceneEntIndex] == 1)
+            {
+                sceneModel = &scene.sceneModel[sceneEntIndex];
+                lightingHandle = R_AllocModelLighting_Sphere(
+                    viewInfo,
+                    sceneModel->lightingOrigin,
                     sceneModel->placement.base.origin,
-                    sceneModel->gfxEntIndex,
-                    lightingHandle,
-                    lightingInfo.primaryLightIndex,
-                    isShadowReceiver,
-                    depthHack,
-                    drawSurfs,
-                    lastDrawSurfs,
-                    lightingInfo.reflectionProbeIndex);
-            }
-            else
-            {
-                sceneEntVisData[sceneEntIndex] = 0;
+                    sceneModel->radius,
+                    sceneModel->cachedLightingHandle,
+                    &lightingInfo);
+                if (lightingHandle)
+                {
+                    gfxEntIndex = sceneModel->gfxEntIndex;
+                    if (gfxEntIndex)
+                    {
+                        gfxEnt = &frontEndDataOut->gfxEnts[gfxEntIndex];
+                        isShadowReceiver = sc_enable->current.enabled && (gfxEnt->renderFxFlags & 0x100) != 0;
+                        depthHack = (gfxEnt->renderFxFlags & 2) != 0;
+                    }
+                    else
+                    {
+                        isShadowReceiver = 0;
+                        depthHack = 0;
+                    }
+                    sceneModel->reflectionProbeIndex = lightingInfo.reflectionProbeIndex;
+                    R_AddXModelSurfacesCamera(
+                        &sceneModel->info,
+                        sceneModel->model,
+                        sceneModel->placement.base.origin,
+                        sceneModel->gfxEntIndex,
+                        lightingHandle,
+                        lightingInfo.primaryLightIndex,
+                        isShadowReceiver,
+                        depthHack,
+                        drawSurfs,
+                        lastDrawSurfs,
+                        lightingInfo.reflectionProbeIndex);
+                }
+                else
+                {
+                    sceneEntVisData[sceneEntIndex] = 0;
+                }
             }
         }
-    }
-    sceneEntCount = scene.sceneDynModelCount;
-    sceneEntVisData = rgp.world->dpvsDyn.dynEntVisData[0][0];
-    for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
-    {
-        sceneDynModel = &rgp.world->sceneDynModel[sceneEntIndex];
-        dynEntId = sceneDynModel->dynEntId;
-        if (sceneEntVisData[dynEntId] == 1)
+        sceneEntCount = scene.sceneDynModelCount;
+        sceneEntVisData = rgp.world->dpvsDyn.dynEntVisData[0][0];
+        for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
         {
-            dynEntPose = DynEnt_GetClientPose(dynEntId, DYNENT_DRAW_MODEL);
-            dynEntClient = DynEnt_GetClientEntity(dynEntId, DYNENT_DRAW_MODEL);
-            lightingHandle = R_AllocModelLighting_PrimaryLight(
-                dynEntPose->pose.origin,
-                dynEntId,
-                &dynEntClient->lightingHandle,
-                &lightingInfo);
-            if (lightingHandle)
+            sceneDynModel = &rgp.world->sceneDynModel[sceneEntIndex];
+            dynEntId = sceneDynModel->dynEntId;
+            if (sceneEntVisData[dynEntId] == 1)
             {
-                dynEntDef = DynEnt_GetEntityDef(dynEntId, DYNENT_DRAW_MODEL);
-                R_AddXModelSurfacesCamera(
-                    &sceneDynModel->info,
-                    dynEntDef->xModel,
+                dynEntPose = DynEnt_GetClientPose(dynEntId, DYNENT_DRAW_MODEL);
+                dynEntClient = DynEnt_GetClientEntity(dynEntId, DYNENT_DRAW_MODEL);
+                lightingHandle = R_AllocModelLighting_PrimaryLight(
                     dynEntPose->pose.origin,
-                    0,
-                    lightingHandle,
-                    lightingInfo.primaryLightIndex,
-                    0,
-                    0,
-                    drawSurfs,
-                    lastDrawSurfs,
-                    lightingInfo.reflectionProbeIndex);
+                    dynEntId,
+                    &dynEntClient->lightingHandle,
+                    &lightingInfo);
+                if (lightingHandle)
+                {
+                    dynEntDef = DynEnt_GetEntityDef(dynEntId, DYNENT_DRAW_MODEL);
+                    R_AddXModelSurfacesCamera(
+                        &sceneDynModel->info,
+                        dynEntDef->xModel,
+                        dynEntPose->pose.origin,
+                        0,
+                        lightingHandle,
+                        lightingInfo.primaryLightIndex,
+                        0,
+                        0,
+                        drawSurfs,
+                        lastDrawSurfs,
+                        lightingInfo.reflectionProbeIndex);
+                }
+                else
+                {
+                    sceneEntVisData[sceneEntIndex] = 0;
+                }
             }
-            else
+        }
+        sceneEntCount = scene.sceneBrushCount;
+        sceneEntVisData = scene.sceneBrushVisData[0];
+        for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
+        {
+            if (sceneEntVisData[sceneEntIndex] == 1)
             {
-                sceneEntVisData[sceneEntIndex] = 0;
+                sceneBrush = &scene.sceneBrush[sceneEntIndex];
+                reflectionProbeIndex = R_CalcReflectionProbeIndex(sceneBrush->placement.origin);
+                sceneBrush->reflectionProbeIndex = reflectionProbeIndex;
+                iassert(sceneBrush->reflectionProbeIndex == reflectionProbeIndex);
+                R_AddBModelSurfacesCamera(&sceneBrush->info, sceneBrush->bmodel, drawSurfs, lastDrawSurfs, reflectionProbeIndex);
+            }
+        }
+        sceneEntCount = scene.sceneDynBrushCount;
+        sceneEntVisData = rgp.world->dpvsDyn.dynEntVisData[1][0];
+        for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
+        {
+            sceneDynBrush = &rgp.world->sceneDynBrush[sceneEntIndex];
+            dynEntId = sceneDynBrush->dynEntId;
+            if (sceneEntVisData[dynEntId] == 1)
+            {
+                dynEntPosea = DynEnt_GetClientPose(dynEntId, DYNENT_DRAW_BRUSH);
+                dynEntDef = DynEnt_GetEntityDef(dynEntId, DYNENT_DRAW_BRUSH);
+                bmodel = R_GetBrushModel(dynEntDef->brushModel);
+                reflectionProbeIndex = R_CalcReflectionProbeIndex(dynEntPosea->pose.origin);
+                R_AddBModelSurfacesCamera((BModelDrawInfo *)sceneDynBrush, bmodel, drawSurfs, lastDrawSurfs, reflectionProbeIndex);
             }
         }
     }
-    sceneEntCount = scene.sceneBrushCount;
-    sceneEntVisData = scene.sceneBrushVisData[0];
-    for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
+
     {
-        if (sceneEntVisData[sceneEntIndex] == 1)
-        {
-            sceneBrush = &scene.sceneBrush[sceneEntIndex];
-            reflectionProbeIndex = R_CalcReflectionProbeIndex(sceneBrush->placement.origin);
-            sceneBrush->reflectionProbeIndex = reflectionProbeIndex;
-            iassert(sceneBrush->reflectionProbeIndex == reflectionProbeIndex);
-            R_AddBModelSurfacesCamera(&sceneBrush->info, sceneBrush->bmodel, drawSurfs, lastDrawSurfs, reflectionProbeIndex);
-        }
+        PROF_SCOPED("SortSceneEntSurfaces");
+        drawSurfCount = drawSurfs[0] - scene.drawSurfs[2];
+        scene.drawSurfCount[2] = drawSurfCount;
+        KISAK_NULLSUB();
+        R_SortDrawSurfs(scene.drawSurfs[2], drawSurfCount);
+        drawSurfCount = drawSurfs[1] - scene.drawSurfs[5];
+        scene.drawSurfCount[5] = drawSurfCount;
+        KISAK_NULLSUB();
+        R_SortDrawSurfs(scene.drawSurfs[5], drawSurfCount);
+        drawSurfCount = drawSurfs[2] - scene.drawSurfs[11];
+        scene.drawSurfCount[11] = drawSurfCount;
+        KISAK_NULLSUB();
+        R_SortDrawSurfs(scene.drawSurfs[11], drawSurfCount);
     }
-    sceneEntCount = scene.sceneDynBrushCount;
-    sceneEntVisData = rgp.world->dpvsDyn.dynEntVisData[1][0];
-    for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
-    {
-        sceneDynBrush = &rgp.world->sceneDynBrush[sceneEntIndex];
-        dynEntId = sceneDynBrush->dynEntId;
-        if (sceneEntVisData[dynEntId] == 1)
-        {
-            dynEntPosea = DynEnt_GetClientPose(dynEntId, DYNENT_DRAW_BRUSH);
-            dynEntDef = DynEnt_GetEntityDef(dynEntId, DYNENT_DRAW_BRUSH);
-            bmodel = R_GetBrushModel(dynEntDef->brushModel);
-            reflectionProbeIndex = R_CalcReflectionProbeIndex(dynEntPosea->pose.origin);
-            R_AddBModelSurfacesCamera((BModelDrawInfo *)sceneDynBrush, bmodel, drawSurfs, lastDrawSurfs, reflectionProbeIndex);
-        }
-    }
-    Profile_EndInternal(0);
-    Profile_Begin(414);
-    drawSurfCount = drawSurfs[0] - scene.drawSurfs[2];
-    scene.drawSurfCount[2] = drawSurfCount;
-    KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[2], drawSurfCount);
-    drawSurfCount = drawSurfs[1] - scene.drawSurfs[5];
-    scene.drawSurfCount[5] = drawSurfCount;
-    KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[5], drawSurfCount);
-    drawSurfCount = drawSurfs[2] - scene.drawSurfs[11];
-    scene.drawSurfCount[11] = drawSurfCount;
-    KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[11], drawSurfCount);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddAllSceneEntSurfacesSunShadow()
@@ -437,7 +440,8 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
     signed int drawSurfCount; // [esp+68h] [ebp-8h]
     GfxDrawSurf *lastDrawSurf; // [esp+6Ch] [ebp-4h]
 
-    Profile_Begin(415);
+    PROF_SCOPED("SceneEntSurfacesShadow");
+
     stage = 3 * partitionIndex + 17;
     drawSurf = scene.drawSurfs[stage];
     lastDrawSurf = &drawSurf[scene.maxDrawSurfCount[stage]];
@@ -504,7 +508,6 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
     scene.drawSurfCount[stage] = drawSurfCount;
     KISAK_NULLSUB();
     R_SortDrawSurfs(scene.drawSurfs[stage], drawSurfCount);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_AddAllSceneEntSurfacesSpotShadow(
@@ -1019,7 +1022,8 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
     GfxBrushModel *bmodel; // [esp+6Ch] [ebp-4h]
     int savedregs; // [esp+70h] [ebp+0h] BYREF
 
-    Profile_Begin(407);
+    PROF_SCOPED("DrawDynEnt");
+
     for (viewIndex = 0; viewIndex < 3; ++viewIndex)
         dynEntVisData[viewIndex] = rgp.world->dpvsDyn.dynEntVisData[0][viewIndex];
     dynEntCount = rgp.world->dpvsDyn.dynEntClientCount[0];
@@ -1082,7 +1086,6 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
     }
     if (!rg.drawBModels)
         scene.sceneDynBrushCount = 0;
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_UnfilterEntFromCells(unsigned int localClientNum, unsigned int entnum)
@@ -1796,7 +1799,9 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
     //LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
     //hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
     hullPointsPoolArray = (GfxHullPointsPool(*)[256])hullPointsPoolArray_large_local.GetBuf();
-    Profile_Begin(188);
+
+    PROF_SCOPED("R_VisitPortals");
+
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_dpvs.cpp", 2879, 0, "%s", "Sys_IsMainThread()");
     for (queueIndex = 0; queueIndex < 255; ++queueIndex)
@@ -1811,9 +1816,10 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
         portal = R_NextQueuedPortal();
         if (!portal)
             MyAssertHandler(".\\r_dpvs.cpp", 2892, 0, "%s", "portal");
-        Profile_Begin(84);
-        hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("R_ConvexHull");
+            hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
+        }
         R_FreeHullPoints((GfxHullPointsPool *)portal->writable.hullPoints);
         portal->writable.hullPoints = 0;
         if (hullPointCount)
@@ -1838,7 +1844,6 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
                 portal->writable.recursionDepth + 1);
         }
     }
-    Profile_EndInternal(0);
     //LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
 }
 
@@ -2186,9 +2191,10 @@ void __cdecl R_AddVertToPortalHullPoints(GfxPortal *portal, const float *v)
     {
         if (portal->writable.hullPointCount == 64)
         {
-            Profile_Begin(84);
-            hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("R_ConvexHull");
+                hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
+            }
             if (hullPointCount == 64)
                 Com_Error(ERR_DROP, "More than %i points on a clipped portal's convex hull\n", 64);
             portal->writable.hullPointCount = hullPointCount;
@@ -3000,7 +3006,9 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
     //LargeLocal::LargeLocal(&hullPointsPoolArray_large_local, 0x20000);
     //hullPointsPoolArray = (GfxHullPointsPool(*)[256])LargeLocal::GetBuf(&hullPointsPoolArray_large_local);
     hullPointsPoolArray = (GfxHullPointsPool(*)[256])hullPointsPoolArray_large_local.GetBuf();
-    Profile_Begin(188);
+
+    PROF_SCOPED("R_VisitPortals");
+
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\r_dpvs.cpp", 2778, 0, "%s", "Sys_IsMainThread()");
     childPlanesCount = 0;
@@ -3017,9 +3025,10 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
         portal = R_NextQueuedPortal();
         if (!portal)
             MyAssertHandler(".\\r_dpvs.cpp", 2794, 0, "%s", "portal");
-        Profile_Begin(84);
-        hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("R_ConvexHull");
+            hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
+        }
         R_FreeHullPoints((GfxHullPointsPool *)portal->writable.hullPoints);
         portal->writable.hullPoints = 0;
         if (hullPointCount)
@@ -3083,7 +3092,6 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
                 clipChildren);
         }
     }
-    Profile_EndInternal(0);
     //LargeLocal::~LargeLocal(&hullPointsPoolArray_large_local);
 }
 

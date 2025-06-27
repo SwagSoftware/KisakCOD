@@ -109,10 +109,10 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].viewport.height = 1024;
         viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[13].image;
         viewInfo->spotShadows[spotShadowIndex].renderTargetId = R_RENDERTARGET_SHADOWMAP_SUN;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00024414062;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = 0.00048828125;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -0.00012207031;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00024414062f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = 0.00048828125f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -0.00012207031f;
         viewInfo->spotShadows[spotShadowIndex].clearScreen = spotShadowIndex == 0;
         viewInfo->spotShadows[spotShadowIndex].clearMesh = &gfxMeshGlob.sunShadowClearMeshData[spotShadowIndex];
         tileCount = 2;
@@ -125,10 +125,10 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].viewport.height = 512;
         viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[14].image;
         viewInfo->spotShadows[spotShadowIndex].renderTargetId = R_RENDERTARGET_SHADOWMAP_SPOT;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00048828125;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = 0.0009765625;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -0.00012207031;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00048828125f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = 0.0009765625f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -0.00012207031f;
         if (v6)
             viewInfo->spotShadows[spotShadowIndex].clearScreen = spotShadowIndex == 2;
         else
@@ -137,7 +137,7 @@ char __cdecl R_AddSpotShadowsForLight(
         tileCount = 4;
     }
     if (R_IsPrimaryLight(shadowableLightIndex))
-        nearPlaneBias = 0.0;
+        nearPlaneBias = 0.0f;
     else
         nearPlaneBias = scene.dynamicSpotLightNearPlaneOffset;
     R_SetViewParmsForLight(light, &viewInfo->spotShadows[spotShadowIndex].shadowViewParms, nearPlaneBias);
@@ -325,7 +325,7 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
     KISAK_NULLSUB();
     for (spotShadowIndex = 0; spotShadowIndex < viewInfo->spotShadowCount; ++spotShadowIndex)
     {
-        Profile_Begin(74);
+        PROF_SCOPED("EmitSpotShadow");
         info = &viewInfo->spotShadows[spotShadowIndex].info;
         R_InitDrawSurfListInfo(info);
         info->baseTechType = gfxMetrics.shadowmapBuildTechType;
@@ -361,7 +361,6 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
                     viewInfo->emissiveSpotDrawSurfs,
                     info);
         }
-        Profile_EndInternal(0);
     }
 }
 

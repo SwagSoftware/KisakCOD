@@ -537,6 +537,7 @@ void Profile_Init()
     profile_rowcount = Dvar_RegisterInt("profile_rowcount", 20, (DvarLimits)0x2800000000LL, 0, "Profile row count");
 }
 
+#ifndef TRACY_ENABLE
 void __cdecl Profile_Unguard(int id)
 {
     const char *v1; // eax
@@ -1000,3 +1001,16 @@ const char *__cdecl Profile_MissingEnd()
     else
         return "no probes missing PROF_END detected";
 }
+
+#else
+
+void Profile_Begin(int nameIndex)
+{
+    iassert(0);
+}
+
+void Profile_EndInternal(double *duration)
+{
+    iassert(0);
+}
+#endif

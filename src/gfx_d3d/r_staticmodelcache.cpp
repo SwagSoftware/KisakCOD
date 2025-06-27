@@ -108,17 +108,18 @@ void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lo
             MyAssertHandler(".\\r_staticmodelcache.cpp", 482, 0, "%s", "iterationCount * 2 == xsurf->triCount");
         if (!iterationCount)
             MyAssertHandler(".\\r_staticmodelcache.cpp", 483, 0, "%s", "iterationCount");
-        Profile_Begin(166);
-        do
         {
-            *twoDstIndices++ = *twoSrcIndices + twoBaseOffsets;
-            twoSrcIndicesa = twoSrcIndices + 1;
-            *twoDstIndices++ = *twoSrcIndicesa + twoBaseOffsets;
-            *twoDstIndices++ = *++twoSrcIndicesa + twoBaseOffsets;
-            twoSrcIndices = twoSrcIndicesa + 1;
-            --iterationCount;
-        } while (iterationCount);
-        Profile_EndInternal(0);
+            PROF_SCOPED("R_memcpy");
+            do
+            {
+                *twoDstIndices++ = *twoSrcIndices + twoBaseOffsets;
+                twoSrcIndicesa = twoSrcIndices + 1;
+                *twoDstIndices++ = *twoSrcIndicesa + twoBaseOffsets;
+                *twoDstIndices++ = *++twoSrcIndicesa + twoBaseOffsets;
+                twoSrcIndices = twoSrcIndicesa + 1;
+                --iterationCount;
+            } while (iterationCount);
+        }
     }
 }
 
@@ -523,15 +524,18 @@ const GfxBackEndData *RB_PatchStaticModelCache()
                 rgp.world->dpvs.smodelDrawInsts[cachedSurf->smodelIndex].model,
                 cachedSurf->lodIndex);
             offset = 32 * cachedSurf->baseVertIndex;
-            Profile_Begin(164);
-            bufferData = (char *)R_LockVertexBuffer(handle, offset, 32 * vertCount, 4096);
-            Profile_EndInternal(0);
-            Profile_Begin(166);
-            Com_Memcpy(bufferData, (char *)&backEndData->smcPatchVerts[firstPatchVert], 32 * vertCount);
-            Profile_EndInternal(0);
-            Profile_Begin(164);
-            R_UnlockVertexBuffer(handle);
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("LockSModelBuffer");
+                bufferData = (char *)R_LockVertexBuffer(handle, offset, 32 * vertCount, 4096);
+            }
+            {
+                PROF_SCOPED("R_memcpy");
+                Com_Memcpy(bufferData, (char *)&backEndData->smcPatchVerts[firstPatchVert], 32 * vertCount);
+            }
+            {
+                PROF_SCOPED("LockSModelBuffer");
+                R_UnlockVertexBuffer(handle);
+            }
             firstPatchVert += vertCount;
         }
     }

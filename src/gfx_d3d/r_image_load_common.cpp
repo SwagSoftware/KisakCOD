@@ -153,17 +153,15 @@ void __cdecl Image_Upload2D_CopyDataBlock_PC(
         }
         if (dstPitch == srcStride)
         {
-            Profile_Begin(166);
+            PROF_SCOPED("R_memcpy");
             memcpy(dst, src, srcStride * ((height - 1) / dy + 1));
-            Profile_EndInternal(0);
         }
         else
         {
             for (y = 0; y < height; y += dy)
             {
-                Profile_Begin(166);
+                PROF_SCOPED("R_memcpy");
                 memcpy(dst, src, srcStride);
-                Profile_EndInternal(0);
                 dst += dstPitch;
                 src += srcStride;
             }

@@ -281,13 +281,13 @@ bool __cdecl ClampScreenPosToEdges(
     float padBottom,
     float *resultNormal,
     float *resultDist);
-double __cdecl GetScaleForDistance(int localClientNum, const float *worldPos);
+float __cdecl GetScaleForDistance(int localClientNum, const float *worldPos);
 int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems);
 void __cdecl CopyInUseHudElems(hudelem_s **elems, int *elemCount, hudelem_s *elemSrcArray, int elemSrcArrayCount);
 int __cdecl compare_hudelems(const void *pe0, const void *pe1);
 void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum);
 void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem);
-double __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem);
+float __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem);
 
 
 // cg_weapons

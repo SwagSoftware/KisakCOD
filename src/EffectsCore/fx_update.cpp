@@ -987,9 +987,10 @@ FxUpdateResult __cdecl FX_UpdateElement(
             update.elemBaseVel = elem->baseVel;
             update.physObjId = physObjId;
             update.onGround = 0;
-            Profile_Begin(194);
-            updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update); // KISAKTODO type safety
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("FX_UpdateOrigin");
+                updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update); // KISAKTODO type safety
+            }
             FX_UpdateElement_HandleEmitting(system, elem, &update, elemOriginPrev, &updateResult);
         }
         elemDef = FX_GetUpdateElemDef(&update);
@@ -1097,9 +1098,10 @@ int __cdecl FX_UpdateElementPosition_CollidingStep(
   {
     update->onGround = 0;
     FX_NextElementPosition(update, msecUpdateBegin, msecUpdateEnd);
-    Profile_Begin(203);
-    CM_BoxTrace(&trace, xyzWorldOld, update->posWorld, elemDef->collMins, elemDef->collMaxs, 0, traceMask);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("FX_Trace");
+        CM_BoxTrace(&trace, xyzWorldOld, update->posWorld, elemDef->collMins, elemDef->collMaxs, 0, traceMask);
+    }
     if ( !FX_TraceHitSomething(&trace) )
       break;
     if ( trace.normal[2] > 0.699999988079071 )
@@ -2113,9 +2115,10 @@ FxUpdateResult __cdecl FX_UpdateTrailElement(
             update.elemBaseVel = baseVel;
             update.physObjId = 0;
             update.onGround = 0;
-            Profile_Begin(194);
-            updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update);
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("FX_UpdateOrigin");
+                updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update);
+            }
             v8 = (int)(baseVel[2] / EQUAL_EPSILON);
             if (v8 >= -32768)
             {
@@ -2279,9 +2282,10 @@ void __cdecl FX_Update(FxSystem* system, int localClientNum, bool nonBoltedEffec
     FxEffect* localEffect; // [esp+48h] [ebp-Ch]
     volatile int activeIndex; // [esp+4Ch] [ebp-8h]
 
-    Profile_Begin(193);
-    if (!system)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1762, 0, "%s", "system");
+    PROF_SCOPED("FX_Update");
+
+    iassert(system);
+
     FX_BeginIteratingOverEffects_Cooperative(system);
     for (activeIndex = system->firstActiveEffect; activeIndex != system->firstNewEffect; ++activeIndex)
     {
@@ -2296,7 +2300,6 @@ void __cdecl FX_Update(FxSystem* system, int localClientNum, bool nonBoltedEffec
     }
     if (!InterlockedDecrement(&system->iteratorCount) && system->needsGarbageCollection)
         FX_RunGarbageCollection(system);
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_UpdateEffect(FxSystem* system, FxEffect* effect)
@@ -2366,35 +2369,35 @@ void __cdecl FX_BeginUpdate(int localClientNum)
 
 void __cdecl FX_EndUpdate(int localClientNum)
 {
-    FxSystem *system; // [esp+38h] [ebp-4h]
+    FxSystem *system;
 
-    if (fx_enable->current.enabled)
+    if (!fx_enable->current.enabled)
     {
-        Profile_Begin(195);
-        system = FX_GetSystem(localClientNum);
-        if (!system)
-            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1936, 0, "%s", "system");
-        memcpy(&system->cameraPrev, system, sizeof(system->cameraPrev));
-        if (!system->cameraPrev.isValid)
-            MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1939, 0, "%s", "system->cameraPrev.isValid");
-        Profile_EndInternal(0);
+        return;
+    
     }
+    PROF_SCOPED("FX_EndUpdate");
+
+    system = FX_GetSystem(localClientNum);
+    iassert(system);
+    memcpy(&system->cameraPrev, system, sizeof(system->cameraPrev));
+    iassert(system->cameraPrev.isValid);
 }
 
 void __cdecl FX_AddNonSpriteDrawSurfs(FxCmd *cmd)
 {
-    FxSystem *system; // [esp+30h] [ebp-4h]
+    FxSystem *system;
 
-    Profile_Begin(200);
     system = cmd->system;
-    if (!cmd->system)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1952, 0, "%s", "system");
+    iassert(system);
+
     if (fx_enable->current.enabled && fx_draw->current.enabled)
     {
+        PROF_SCOPED("FX_Draw");
+
         FX_SortEffects(system);
         FX_DrawNonSpriteElems(system);
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_RewindTo(int localClientNum, int time)

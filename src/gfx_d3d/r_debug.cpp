@@ -45,12 +45,15 @@ void __cdecl R_AddDebugPolygon(DebugGlobals *debugGlobalsEntry, const float *col
                 v4->color[2] = color[2];
                 v4->color[3] = color[3];
                 ++debugGlobalsEntry->polyCount;
-                Profile_Begin(166);
-                memcpy(
-                    (unsigned __int8 *)debugGlobalsEntry->verts[debugGlobalsEntry->vertCount],
-                    (unsigned __int8 *)points,
-                    12 * pointCount);
-                Profile_EndInternal(0);
+
+                PROF_SCOPED("R_Memcpy");
+                {
+                    memcpy(
+                        (unsigned __int8 *)debugGlobalsEntry->verts[debugGlobalsEntry->vertCount],
+                        (unsigned __int8 *)points,
+                        12 * pointCount);
+                }
+
                 debugGlobalsEntry->vertCount += pointCount;
                 Sys_LeaveCriticalSection(CRITSECT_DEBUG_LINE);
             }

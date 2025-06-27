@@ -526,14 +526,14 @@ void __cdecl VEH_UpdateAngleAndAngularVel(
     float decel,
     float overShoot,
     vehicle_physic_t *phys);
-double __cdecl VEH_AccelerateSpeed(float speed, float tgtSpeed, float accel, float dt);
-double __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDir);
-double __cdecl VEH_CalcAccelFraction(float accel, int infoIdx);
-double __cdecl VEH_CalcAngularAccel(float accel, float accelFraction);
-double __cdecl VEH_CalcAngleForAccel(float accel, float accelFraction);
-double __cdecl VEH_CalcStoppingTime(float accel, float accelFraction);
+float __cdecl VEH_AccelerateSpeed(float speed, float tgtSpeed, float accel, float dt);
+float __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDir);
+float __cdecl VEH_CalcAccelFraction(float accel, int infoIdx);
+float __cdecl VEH_CalcAngularAccel(float accel, float accelFraction);
+float __cdecl VEH_CalcAngleForAccel(float accel, float accelFraction);
+float __cdecl VEH_CalcStoppingTime(float accel, float accelFraction);
 void __cdecl VEH_UpdateYawAndNotify(gentity_s *ent, float desiredYaw);
-double __cdecl VEH_GetAccelForAngles(scr_vehicle_s *veh);
+float __cdecl VEH_GetAccelForAngles(scr_vehicle_s *veh);
 void __cdecl VEH_AddFakeDrag(const float *velocity, float maxDragSpeed, float *accelVec);
 void __cdecl VEH_CheckHorizontalVelocityToGoal(
     scr_vehicle_s *veh,

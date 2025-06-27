@@ -737,7 +737,7 @@ int __cdecl GetFreeDropCueIdx()
             weapDef = BG_GetWeaponDef(weapIndex);
             if (!weapDef->avoidDropCleanup)
             {
-                fDistSqrd = 9.9999803e11;
+                fDistSqrd = 9.9999803e11f;
                 for (j = 0; j < level.maxclients; ++j)
                 {
                     pClient = &level.clients[j];
@@ -745,11 +745,11 @@ int __cdecl GetFreeDropCueIdx()
                     {
                         Vec3Sub(ent->r.currentOrigin, g_entities[j].r.currentOrigin, diff);
                         fClientDistSqrd = Vec3LengthSq(diff);
-                        if (fDistSqrd > (double)fClientDistSqrd)
+                        if (fDistSqrd > fClientDistSqrd)
                             fDistSqrd = fClientDistSqrd;
                     }
                 }
-                if (fBestDistSqrd < (double)fDistSqrd)
+                if (fBestDistSqrd < fDistSqrd)
                 {
                     fBestDistSqrd = fDistSqrd;
                     iBest = i;

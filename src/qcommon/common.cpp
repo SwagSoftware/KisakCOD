@@ -783,7 +783,8 @@ void __cdecl Com_ClientPacketEvent()
 
     iassert(Sys_IsMainThread());
 
-    Profile_Begin(29);
+    PROF_SCOPED("Com_ClientPacketEvent");
+
     MSG_Init(&netmsg, clientCommonMsgBuf, 0x20000);
     Com_PacketEventLoop(NS_CLIENT1, &netmsg);
 
@@ -792,8 +793,6 @@ void __cdecl Com_ClientPacketEvent()
         while (NET_GetClientPacket(&adr, &netmsg))
             Com_DispatchClientPacketEvent(adr, &netmsg);
     }
-
-    Profile_EndInternal(0);
 }
 
 void __cdecl Com_PacketEventLoop(netsrc_t client, msg_t* netmsg)
@@ -817,7 +816,8 @@ void __cdecl Com_ServerPacketEvent()
     msg_t netmsg; // [esp+30h] [ebp-40h] BYREF
     netadr_t adr; // [esp+58h] [ebp-18h] BYREF
 
-    Profile_Begin(30);
+    PROF_SCOPED("Com_ServerPacketEvent");
+
     iassert(Sys_IsMainThread());
 
     MSG_Init(&netmsg, serverCommonMsgBuf, 0x20000);
@@ -832,8 +832,6 @@ void __cdecl Com_ServerPacketEvent()
         if (com_sv_running->current.enabled)
             SV_PacketEvent(adr, &netmsg);
     }
-
-    Profile_EndInternal(0);
 }
 
 void __cdecl Com_EventLoop()
@@ -1350,8 +1348,8 @@ void Com_InitDvars()
         0,
         "Write to log file - 0 = disabled, 1 = async file write, 2 = Sync every write");
     com_statmon = Dvar_RegisterBool("com_statmon", 0, 0, "Draw stats monitor");
-    com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001, 1000.0, 0x10C8u, "Scale time of each frame");
-    dev_timescale = Dvar_RegisterFloat("timescale", 1.0, 0.001, 1000.0, 0x88u, "Scale time of each frame");
+    com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001f, 1000.0f, 0x10C8u, "Scale time of each frame");
+    dev_timescale = Dvar_RegisterFloat("timescale", 1.0, 0.001f, 1000.0f, 0x88u, "Scale time of each frame");
     com_fixedtime = Dvar_RegisterInt("fixedtime", 0, 0, 1000, 0x80u, "Use a fixed time rate for each frame");
     com_maxFrameTime = Dvar_RegisterInt(
         "com_maxFrameTime",
@@ -1545,8 +1543,8 @@ void __cdecl Com_Frame_Try_Block_Function()
     int minMsec; // [esp+74h] [ebp-8h]
     int maxFPS; // [esp+78h] [ebp-4h] BYREF
 
-    if (cmd_args.nesting != -1)
-        MyAssertHandler(".\\qcommon\\common.cpp", 3904, 0, "cmd_args.nesting == -1\n\t%i, %i", cmd_args.nesting, -1);
+    iassert(cmd_args.nesting == -1);
+
     Com_WriteConfiguration(0);
     SetAnimCheck(com_animCheck->current.color[0]);
     minMsec = 1;
@@ -1568,7 +1566,7 @@ void __cdecl Com_Frame_Try_Block_Function()
     ++com_lastFrameIndex;
     if (com_dedicated->current.integer)
     {
-        Profile_Begin(361);
+        PROF_SCOPED("MaxFPSSpin");
         while (1)
         {
             Com_EventLoop();
@@ -1580,13 +1578,12 @@ void __cdecl Com_Frame_Try_Block_Function()
                 break;
             NET_Sleep(1u);
         }
-        Profile_EndInternal(0);
         com_lastFrameTime[lastFrameIndex] = com_frameTime;
     }
     else
     {
         KISAK_NULLSUB();
-        Profile_Begin(361);
+        PROF_SCOPED("MaxFPSSpin");
         while (1)
         {
             Com_EventLoop();
@@ -1597,7 +1594,7 @@ void __cdecl Com_Frame_Try_Block_Function()
                 break;
             NET_Sleep(1u);
         }
-        Profile_EndInternal(0);
+
         if (com_frameTime - com_lastFrameTime[lastFrameIndex] < minMsec)
             v4 = minMsec;
         else
@@ -1607,13 +1604,11 @@ void __cdecl Com_Frame_Try_Block_Function()
         if (!(lastFrameIndex + v4))
             msec = 1;
     }
-    v1 = CL_ControllerIndexFromClientNum(0);
-    Cbuf_Execute(0, v1);
-    if (msec <= 0)
-        MyAssertHandler(".\\qcommon\\common.cpp", 4008, 0, "%s", "msec > 0");
+
+    Cbuf_Execute(0, CL_ControllerIndexFromClientNum(0));
+    iassert(msec > 0);
     mseca = Com_ModifyMsec(msec);
-    if (mseca <= 0)
-        MyAssertHandler(".\\qcommon\\common.cpp", 4013, 0, "%s", "msec > 0");
+    iassert(msec > 0);
     msecb = SV_Frame(mseca);
     Com_DedicatedModified();
 
@@ -1625,20 +1620,19 @@ void __cdecl Com_Frame_Try_Block_Function()
         Com_EventLoop();
         for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         {
-            v2 = CL_ControllerIndexFromClientNum(localClientNum);
-            Cbuf_Execute(localClientNum, v2);
+            Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
         }
-        KISAK_NULLSUB();
-        Profile_Begin(16);
-        for (localClientNuma = NS_CLIENT1; localClientNuma < NS_SERVER; ++localClientNuma)
-            CL_Frame(localClientNuma);
-        Profile_EndInternal(0);
+        //KISAK_NULLSUB();
+        {
+            PROF_SCOPED("CL_Frame");
+            for (localClientNuma = NS_CLIENT1; localClientNuma < NS_SERVER; ++localClientNuma)
+                CL_Frame(localClientNuma);
+        }
         dvar_modifiedFlags &= ~2u;
         Com_UpdateMenu();
         SCR_UpdateScreen();
         Ragdoll_Update(msecb);
-        if (!Sys_IsMainThread())
-            MyAssertHandler(".\\qcommon\\common.cpp", 4079, 0, "%s", "Sys_IsMainThread()");
+        iassert(Sys_IsMainThread());
         KISAK_NULLSUB();
         deltaTime = (double)cls.frametime * EQUAL_EPSILON;
         DevGui_Update(0, deltaTime);
@@ -1775,6 +1769,9 @@ void __cdecl Com_CheckSyncFrame()
 
 void __cdecl Com_Frame()
 {
+#ifdef TRACY_ENABLE
+    TracyCFrameMarkStart("Com_Frame");
+#endif
     void* Value; // eax
 
     KISAK_NULLSUB();
@@ -1788,9 +1785,10 @@ void __cdecl Com_Frame()
     {
         Profile_Guard(1);
         Com_CheckSyncFrame();
-        Profile_Begin(360);
-        Com_Frame_Try_Block_Function();
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("MainThread");
+            Com_Frame_Try_Block_Function();
+        }
         ++com_frameNumber;
         Profile_Unguard(1);
     }
@@ -1809,6 +1807,10 @@ void __cdecl Com_Frame()
     {
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
     }
+
+#ifdef TRACY_ENABLE
+    TracyCFrameMarkEnd("Com_Frame");
+#endif
 }
 
 void Com_StartHunkUsers()

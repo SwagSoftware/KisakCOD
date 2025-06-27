@@ -973,7 +973,8 @@ void __cdecl SV_RunFrame()
     float time; // [esp+78h] [ebp-Ch]
     unsigned __int64 ticks; // [esp+7Ch] [ebp-8h]
 
-    Profile_Begin(256);
+    PROF_SCOPED("SV_RunFrame");
+
     if (Win_GetThreadLock() == THREAD_LOCK_ALL)
         start = __rdtsc();
     else
@@ -998,7 +999,6 @@ void __cdecl SV_RunFrame()
     else
         time = (float)ticks;
     SV_UpdatePerformanceFrame(time);
-    Profile_EndInternal(0);
 }
 
 int s_lastWallClockEndTime;
@@ -1113,7 +1113,7 @@ void __cdecl SV_UpdateBots()
     client_t *clients; // [esp+30h] [ebp-8h]
     int i; // [esp+34h] [ebp-4h]
 
-    Profile_Begin(303);
+    PROF_SCOPED("SV_UpdateBots");
     SV_ResetSkeletonCache();
     i = 0;
     clients = svs.clients;
@@ -1127,7 +1127,6 @@ void __cdecl SV_UpdateBots()
         ++i;
         ++clients;
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl SV_WaitServer()
@@ -1182,7 +1181,7 @@ void __cdecl SV_PreFrame()
 {
     char *v0; // eax
 
-    Profile_Begin(255);
+    PROF_SCOPED("SV_PreFrame");
     KISAK_NULLSUB();
     SV_UpdateBots();
     if ((dvar_modifiedFlags & 0x404) != 0)
@@ -1198,12 +1197,11 @@ void __cdecl SV_PreFrame()
         SV_SetConfig(20, 128, 256);
         dvar_modifiedFlags &= ~0x100u;
     }
-    Profile_EndInternal(0);
 }
 
 int __cdecl SV_Frame(int msec)
 {
-    Profile_Begin(255);
+    PROF_SCOPED("SV_Frame");
     Hunk_CheckTempMemoryClear();
     Hunk_CheckTempMemoryHighClear();
     if (sv.killServer)
@@ -1214,7 +1212,6 @@ int __cdecl SV_Frame(int msec)
             Com_Shutdown("EXE_SERVERKILLED");
         sv.killServer = 0;
         sv.killReason = 0;
-        Profile_EndInternal(0);
         return msec;
     }
     else
@@ -1228,7 +1225,6 @@ int __cdecl SV_Frame(int msec)
             else
                 SV_FrameInternal(msec);
         }
-        Profile_EndInternal(0);
         return msec;
     }
 }
@@ -1269,12 +1265,14 @@ void SV_PostFrame()
 {
     Scr_UpdateDebugger();
     
-    Profile_Begin(305);
-    SV_CheckTimeouts();
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("SV_CheckTimeouts");
+        SV_CheckTimeouts();
+    }
     
     SV_SendClientMessages();
     SV_MasterHeartbeat("COD-4");
+
     // LWSS ADD: Steam Periodic Auth Check
     if (com_dedicated->current.integer)
     {
@@ -1282,9 +1280,10 @@ void SV_PostFrame()
     }
     // LWSS END
     
-    Profile_Begin(306);
-    FakeLag_Frame();
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("FakeLag_Frame");
+        FakeLag_Frame();
+    }
 }
 
 char __cdecl SV_CheckOverflow()

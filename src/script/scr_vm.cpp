@@ -1077,7 +1077,8 @@ void __cdecl Scr_NotifyNum(
     unsigned int id; // [esp+44h] [ebp-4h]
     unsigned int paramcounta; // [esp+5Ch] [ebp+14h]
 
-    Profile_Begin(331);
+    PROF_SCOPED("Scr_NotifyNum");
+
     SL_CheckExists(stringValue);
     varUsagePos = scrVarPub.varUsagePos;
     if (!scrVarPub.varUsagePos)
@@ -1117,7 +1118,6 @@ void __cdecl Scr_NotifyNum(
         MyAssertHandler(".\\script\\scr_vm.cpp", 3708, 0, "%s", "!scrVmPub.outparamcount");
     scrVarPub.varUsagePos = varUsagePos;
     SL_CheckExists(stringValue);
-    Profile_EndInternal(0);
 }
 
 void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue, VariableValue* top)
@@ -1769,7 +1769,7 @@ unsigned __int16 __cdecl Scr_ExecThread(int handle, unsigned int paramcount)
     if (!scrVmPub.function_count)
     {
         iassert(scrVmPub.localVars == scrVmGlob.localVarsStack - 1);
-        Profile_Begin(332);
+        //Profile_Begin(332);
         Scr_ResetTimeout();
     }
     iassert(scrVarPub.timeArrayId);
@@ -1791,7 +1791,7 @@ unsigned __int16 __cdecl Scr_ExecThread(int handle, unsigned int paramcount)
     --scrVmPub.inparamcount;
     if (!scrVmPub.function_count)
     {
-        Profile_EndInternal(0);
+        //Profile_EndInternal(0);
         iassert(scrVmPub.localVars == scrVmGlob.localVarsStack - 1);
     }
     return id;
@@ -3771,7 +3771,7 @@ unsigned __int16 __cdecl Scr_ExecEntThreadNum(
     {
         if ((int *)scrVmPub.localVars != &scrVmGlob.starttime)
             MyAssertHandler(".\\script\\scr_vm.cpp", 4087, 0, "%s", "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
-        Profile_Begin(332);
+        //Profile_Begin(332);
         Scr_ResetTimeout();
     }
     if (!scrVarPub.timeArrayId)
@@ -3796,7 +3796,7 @@ unsigned __int16 __cdecl Scr_ExecEntThreadNum(
     --scrVmPub.inparamcount;
     if (!scrVmPub.function_count)
     {
-        Profile_EndInternal(0);
+        //Profile_EndInternal(0);
         if ((int *)scrVmPub.localVars != &scrVmGlob.starttime)
             MyAssertHandler(".\\script\\scr_vm.cpp", 4129, 0, "%s", "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
     }
@@ -3815,7 +3815,7 @@ void __cdecl Scr_AddExecThread(int handle, unsigned int paramcount)
     {
         if ((int *)scrVmPub.localVars != &scrVmGlob.starttime)
             MyAssertHandler(".\\script\\scr_vm.cpp", 4149, 0, "%s", "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
-        Profile_Begin(332);
+        //Profile_Begin(332);
         Scr_ResetTimeout();
     }
     if (!scrVarPub.timeArrayId)
@@ -3835,7 +3835,7 @@ void __cdecl Scr_AddExecThread(int handle, unsigned int paramcount)
     --scrVmPub.inparamcount;
     if (!scrVmPub.function_count)
     {
-        Profile_EndInternal(0);
+        //Profile_EndInternal(0);
         if ((int *)scrVmPub.localVars != &scrVmGlob.starttime)
             MyAssertHandler(".\\script\\scr_vm.cpp", 4179, 0, "%s", "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
     }
@@ -4164,7 +4164,7 @@ BOOL Scr_ErrorInternal()
     return result;
 }
 
-double __cdecl Scr_GetFloat(unsigned int index)
+float __cdecl Scr_GetFloat(unsigned int index)
 {
     const char* v2; // eax
     const char* v3; // eax
@@ -4778,21 +4778,16 @@ void __cdecl Scr_IncTime()
 
 void __cdecl Scr_RunCurrentThreads()
 {
-    Profile_Begin(332);
-    if (scrVmPub.function_count)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5220, 0, "%s", "!scrVmPub.function_count");
-    if (scrVarPub.error_message)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5221, 0, "%s", "!scrVarPub.error_message");
-    if (scrVarPub.error_index)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5222, 0, "%s", "!scrVarPub.error_index");
-    if (scrVmPub.outparamcount)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5223, 0, "%s", "!scrVmPub.outparamcount");
-    if (scrVmPub.inparamcount)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5224, 0, "%s", "!scrVmPub.inparamcount");
-    if (scrVmPub.top != scrVmPub.stack)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 5225, 0, "%s", "scrVmPub.top == scrVmPub.stack");
+    PROF_SCOPED("Scr_RunCurrentThreads");
+
+    iassert(!scrVmPub.function_count);
+    iassert(!scrVarPub.error_message);
+    iassert(!scrVarPub.error_index);
+    iassert(!scrVmPub.outparamcount);
+    iassert(!scrVmPub.inparamcount);
+    iassert(scrVmPub.top == scrVmPub.stack);
+
     VM_SetTime();
-    Profile_EndInternal(0);
 }
 
 void VM_SetTime()

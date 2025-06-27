@@ -111,35 +111,35 @@ void AimAssist_RegisterDvars()
         (DvarLimits)0x300000000LL,
         0x80u,
         "Which input graph to use");
-    min.value.max = 1080.0;
-    min.value.min = 0.0;
+    min.value.max = 1080.0f;
+    min.value.min = 0.0f;
     aim_turnrate_pitch = Dvar_RegisterFloat(
         "aim_turnrate_pitch",
-        90.0,
+        90.0f,
         min,
         0x80u,
         "The vertical turn rate for aim assist when firing from the hip");
-    mina.value.max = 1080.0;
-    mina.value.min = 0.0;
+    mina.value.max = 1080.0f;
+    mina.value.min = 0.0f;
     aim_turnrate_pitch_ads = Dvar_RegisterFloat(
         "aim_turnrate_pitch_ads",
-        55.0,
+        55.0f,
         mina,
         0x80u,
         "The turn rate up and down for aim assist when aiming down the sight");
-    minb.value.max = 1080.0;
-    minb.value.min = 0.0;
+    minb.value.max = 1080.0f;
+    minb.value.min = 0.0f;
     aim_turnrate_yaw = Dvar_RegisterFloat(
         "aim_turnrate_yaw",
-        260.0,
+        260.0f,
         minb,
         0x80u,
         "The horizontal turn rate for aim assist when firing from the hip");
-    minc.value.max = 1080.0;
-    minc.value.min = 0.0;
+    minc.value.max = 1080.0f;
+    minc.value.min = 0.0f;
     aim_turnrate_yaw_ads = Dvar_RegisterFloat(
         "aim_turnrate_yaw_ads",
-        90.0,
+        90.0f,
         minc,
         0x80u,
         "The horizontal turn rate for aim assist when aiming down the sight");
@@ -153,11 +153,11 @@ void AimAssist_RegisterDvars()
         0,
         0x80u,
         "Turn on debugging info for the acceleration");
-    mind.value.max = 4000.0;
-    mind.value.min = 0.0;
+    mind.value.max = 4000.0f;
+    mind.value.min = 0.0f;
     aim_accel_turnrate_lerp = Dvar_RegisterFloat(
         "aim_accel_turnrate_lerp",
-        1200.0,
+        1200.0f,
         mind,
         0x80u,
         "The acceleration of the turnrates");
@@ -167,144 +167,144 @@ void AimAssist_RegisterDvars()
         0x80u,
         "Slowdown the turn rate when the cross hair passes over a target");
     aim_slowdown_debug = Dvar_RegisterBool("aim_slowdown_debug", 0, 0x80u, "Turn on debugging info for aim slowdown");
-    mine.value.max = 640.0;
-    mine.value.min = 0.0;
+    mine.value.max = 640.0f;
+    mine.value.min = 0.0f;
     aim_slowdown_region_width = Dvar_RegisterFloat(
         "aim_slowdown_region_width",
-        90.0,
+        90.0f,
         mine,
         0x80u,
         "The screen width of the aim slowdown region");
-    minf.value.max = 480.0;
-    minf.value.min = 0.0;
+    minf.value.max = 480.0f;
+    minf.value.min = 0.0f;
     aim_slowdown_region_height = Dvar_RegisterFloat(
         "aim_slowdown_region_height",
-        90.0,
+        90.0f,
         minf,
         0x80u,
         "The screen height of the aim assist slowdown region");
-    ming.value.max = 1.0;
-    ming.value.min = 0.0;
+    ming.value.max = 1.0f;
+    ming.value.min = 0.0f;
     aim_slowdown_pitch_scale = Dvar_RegisterFloat(
         "aim_slowdown_pitch_scale",
-        0.40000001,
+        0.40000001f,
         ming,
         0x80u,
         "The vertical aim assist slowdown ratio from the hip");
-    minh.value.max = 1.0;
-    minh.value.min = 0.0;
+    minh.value.max = 1.0f;
+    minh.value.min = 0.0f;
     aim_slowdown_pitch_scale_ads = Dvar_RegisterFloat(
         "aim_slowdown_pitch_scale_ads",
-        0.5,
+        0.5f,
         minh,
         0x80u,
         "The vertical aim assist slowdown ratio when aiming down the sight");
-    mini.value.max = 1.0;
-    mini.value.min = 0.0;
+    mini.value.max = 1.0f;
+    mini.value.min = 0.0f;
     aim_slowdown_yaw_scale = Dvar_RegisterFloat(
         "aim_slowdown_yaw_scale",
-        0.40000001,
+        0.40000001f,
         mini,
         0x80u,
         "The horizontal aim assist slowdown ratio from the hip");
-    minj.value.max = 1.0;
-    minj.value.min = 0.0;
+    minj.value.max = 1.0f;
+    minj.value.min = 0.0f;
     aim_slowdown_yaw_scale_ads = Dvar_RegisterFloat(
         "aim_slowdown_yaw_scale_ads",
-        0.5,
+        0.5f,
         minj,
         0x80u,
         "The horizontal aim assist slowdown ratio when aiming down the sight");
     aim_autoaim_enabled = Dvar_RegisterBool("aim_autoaim_enabled", 0, 0x80u, "Turn on auto aim");
     aim_autoaim_debug = Dvar_RegisterBool("aim_autoaim_debug", 0, 0x80u, "Turn on auto aim debugging");
-    mink.value.max = 100.0;
-    mink.value.min = 0.0;
+    mink.value.max = 100.0f;
+    mink.value.min = 0.0f;
     aim_autoaim_lerp = Dvar_RegisterFloat(
         "aim_autoaim_lerp",
-        40.0,
+        40.0f,
         mink,
         0x80u,
         "The rate in degrees per second that the auto aim will converge to its target");
-    minl.value.max = 640.0;
-    minl.value.min = 0.0;
+    minl.value.max = 640.0f;
+    minl.value.min = 0.0f;
     aim_autoaim_region_width = Dvar_RegisterFloat(
         "aim_autoaim_region_width",
-        160.0,
+        160.0f,
         minl,
         0x80u,
         "The width of the auto aim region in virtual screen coordinates (0 - 640)");
-    minm.value.max = 480.0;
-    minm.value.min = 0.0;
+    minm.value.max = 480.0f;
+    minm.value.min = 0.0f;
     aim_autoaim_region_height = Dvar_RegisterFloat(
         "aim_autoaim_region_height",
-        120.0,
+        120.0f,
         minm,
         0x80u,
         "The height of the auto aim region in virtual screen coordinates (0 - 480)");
     aim_automelee_enabled = Dvar_RegisterBool("aim_automelee_enabled", 1, 0x80u, "Turn on auto melee");
     aim_automelee_debug = Dvar_RegisterBool("aim_automelee_debug", 0, 0x80u, "Turn on auto melee debugging");
-    minn.value.max = 100.0;
-    minn.value.min = 0.0;
+    minn.value.max = 100.0f;
+    minn.value.min = 0.0f;
     aim_automelee_lerp = Dvar_RegisterFloat(
         "aim_automelee_lerp",
-        40.0,
+        40.0f,
         minn,
         0x80u,
         "The rate in degrees per second that the auto melee will converge to its target");
-    mino.value.max = 640.0;
-    mino.value.min = 0.0;
+    mino.value.max = 640.0f;
+    mino.value.min = 0.0f;
     aim_automelee_region_width = Dvar_RegisterFloat(
         "aim_automelee_region_width",
-        320.0,
+        320.0f,
         mino,
         0x80u,
         "The width of the auto melee region in virtual screen coordinates (0 - 640)");
-    minp.value.max = 480.0;
-    minp.value.min = 0.0;
+    minp.value.max = 480.0f;
+    minp.value.min = 0.0f;
     aim_automelee_region_height = Dvar_RegisterFloat(
         "aim_automelee_region_height",
-        240.0,
+        240.0f,
         minp,
         0x80u,
         "The height of the auto melee region in virtual screen coordinates (0 - 480)");
-    minq.value.max = 255.0;
-    minq.value.min = 0.0;
-    aim_automelee_range = Dvar_RegisterFloat("aim_automelee_range", 128.0, minq, 0x80u, "The range of the auto melee");
+    minq.value.max = 255.0f;
+    minq.value.min = 0.0f;
+    aim_automelee_range = Dvar_RegisterFloat("aim_automelee_range", 128.0f, minq, 0x80u, "The range of the auto melee");
     aim_lockon_enabled = Dvar_RegisterBool(
         "aim_lockon_enabled",
         1,
         0x80u,
         "Aim lock on helps the player to stay on target");
     aim_lockon_debug = Dvar_RegisterBool("aim_lockon_debug", 0, 0x80u, "Turn on debugging info for aim lock on");
-    minr.value.max = 1.0;
-    minr.value.min = 0.0;
+    minr.value.max = 1.0f;
+    minr.value.min = 0.0f;
     aim_lockon_deflection = Dvar_RegisterFloat(
         "aim_lockon_deflection",
-        0.050000001,
+        0.050000001f,
         minr,
         0x80u,
         "The amount of stick deflection for the lockon to activate");
-    mins.value.max = 1.0;
-    mins.value.min = 0.0;
+    mins.value.max = 1.0f;
+    mins.value.min = 0.0f;
     aim_lockon_strength = Dvar_RegisterFloat(
         "aim_lockon_strength",
-        0.60000002,
+        0.60000002f,
         mins,
         0x80u,
         "The amount of aim assistance given by the target lock on");
-    mint.value.max = 640.0;
-    mint.value.min = 0.0;
+    mint.value.max = 640.0f;
+    mint.value.min = 0.0f;
     aim_lockon_region_width = Dvar_RegisterFloat(
         "aim_lockon_region_width",
-        90.0,
+        90.0f,
         mint,
         0x80u,
         "The width of the auto aim region in virtual screen coordinates(0-640)");
-    minu.value.max = 480.0;
-    minu.value.min = 0.0;
+    minu.value.max = 480.0f;
+    minu.value.min = 0.0f;
     aim_lockon_region_height = Dvar_RegisterFloat(
         "aim_lockon_region_height",
-        90.0,
+        90.0f,
         minu,
         0x80u,
         "The height of the auto aim region in virtual screen coordinates(0-480)");
@@ -351,7 +351,8 @@ void __cdecl AimAssist_UpdateScreenTargets(
     float clipBounds[2][3]; // [esp+ECh] [ebp-1Ch] BYREF
     AimAssistGlobals *aaGlob; // [esp+104h] [ebp-4h]
 
-    Profile_Begin(64);
+    PROF_SCOPED("AimAssist_UpdateScreenTargets");
+
     aaGlob = &aaGlobArray[localClientNum];
     if (aaGlob->initialized)
     {
@@ -403,11 +404,6 @@ void __cdecl AimAssist_UpdateScreenTargets(
                 }
             }
         }
-        Profile_EndInternal(0);
-    }
-    else
-    {
-        Profile_EndInternal(0);
     }
 }
 
@@ -1083,15 +1079,15 @@ void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output
 
 void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output)
 {
-    Profile_Begin(63);
-    if (!input)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1563, 0, "%s", "input");
-    if (!input->ps)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1564, 0, "%s", "input->ps");
-    if (!output)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1565, 0, "%s", "output");
+    PROF_SCOPED("AimAssist_UpdateMouseInput");
+
+    iassert(input);
+    iassert(input->ps);
+    iassert(output);
+
     output->pitch = input->pitch;
     output->yaw = input->yaw;
+
     if (aaGlobArray[input->localClientNum].initialized)
     {
         AimAssist_UpdateTweakables(input);
@@ -1099,7 +1095,6 @@ void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output
         AimAssist_ApplyAutoMelee(input, output);
         AimAssist_ApplyMeleeCharge(input, output);
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl AimAssist_DrawDebugOverlay(unsigned int localClientNum)

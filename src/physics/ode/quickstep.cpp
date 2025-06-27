@@ -618,7 +618,8 @@ static void SOR_LCP (int constraintRowCount,
 	iassert(qs);
 	iassert(sd);
 
-	Profile_Begin(385);
+	PROF_SCOPED("Phys_ODE_SOR_LCP");
+
 	compute_invM_JT(constraintRowCount, bodyCount, rows, body, invI);
 	memset(fc, 0, sizeof(ConstraintForce) * bodyCount);
 	for (i = 0; i < constraintRowCount; ++i)
@@ -665,7 +666,6 @@ static void SOR_LCP (int constraintRowCount,
 		SOR_LCP_MainLoop_OneBody(constraintRowCount, rows, findex, fc, qs, sd);
 	else
 		SOR_LCP_MainLoop(constraintRowCount, rows, findex, fc, qs, sd);
-	Profile_EndInternal(0);
 }
 
 const char *spaces =

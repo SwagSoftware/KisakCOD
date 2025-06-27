@@ -16,7 +16,7 @@ void __cdecl FX_SortEffects(FxSystem *system)
     float v10; // [esp+1060h] [ebp-8h]
     volatile int i; // [esp+1064h] [ebp-4h]
 
-    Profile_Begin(199);
+    PROF_SCOPED("FX_Sort");
     if (!system)
         MyAssertHandler(".\\EffectsCore\\fx_sort.cpp", 98, 0, "%s", "system");
     a = (float *)system;
@@ -47,7 +47,6 @@ void __cdecl FX_SortEffects(FxSystem *system)
         system->allEffectHandles[v8] = v5;
     }
     system->iteratorCount = 0;
-    Profile_EndInternal(0);
 }
 
 void __cdecl FX_WaitBeginIteratingOverEffects_Exclusive(FxSystem *system)

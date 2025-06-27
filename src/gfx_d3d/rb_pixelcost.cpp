@@ -143,17 +143,17 @@ void __cdecl R_PixelCost_SetConstant(GfxCmdBufSourceState *source, int cost)
 
     if (gfxAssets.pixelCountQuery)
     {
-        weights[0] = ((double)(cost >> 6) + 0.009999999776482582) * 0.003921568859368563;
-        weights[1] = ((double)((cost >> 4) & 3) + 0.009999999776482582) * 0.003921568859368563;
-        weights[2] = ((double)((cost >> 2) & 3) + 0.009999999776482582) * 0.003921568859368563;
-        weights[3] = ((double)(cost & 3) + 0.009999999776482582) * 0.003921568859368563;
+        weights[0] = ((float)(cost >> 6) + 0.009999999776482582f) * 0.003921568859368563f;
+        weights[1] = ((float)((cost >> 4) & 3) + 0.009999999776482582f) * 0.003921568859368563f;
+        weights[2] = ((float)((cost >> 2) & 3) + 0.009999999776482582f) * 0.003921568859368563f;
+        weights[3] = ((float)(cost & 3) + 0.009999999776482582f) * 0.003921568859368563f;
     }
     else
     {
-        weights[0] = 0.094156861;
-        weights[1] = 0.031411767;
-        weights[2] = 0.0;
-        weights[3] = 0.0039607841;
+        weights[0] = 0.094156861f;
+        weights[1] = 0.031411767f;
+        weights[2] = 0.0f;
+        weights[3] = 0.0039607841f;
     }
     R_SetCodeConstantFromVec4(source, 0x13u, weights);
 }
@@ -200,14 +200,14 @@ int __cdecl RB_PixelCost_GetCostForRecordIndex(int recordIndex)
     {
         if (validCount <= 0)
             MyAssertHandler(".\\rb_pixelcost.cpp", 222, 0, "%s\n\t(validCount) = %i", "(validCount > 0)", validCount);
-        standardDeviationSum = 0.0;
+        standardDeviationSum = 0.0f;
         avgCost = totalCost / validCount;
         for (frameIndexa = 0; frameIndexa < validCount; ++frameIndexa)
         {
-            costDelta = (double)(costHistory[frameIndexa] - avgCost);
+            costDelta = (float)(costHistory[frameIndexa] - avgCost);
             standardDeviationSum = costDelta * costDelta + standardDeviationSum;
         }
-        v5 = (int)(sqrt(standardDeviationSum / (double)validCount) * 1.5);
+        v5 = (int)(sqrt(standardDeviationSum / (float)validCount) * 1.5f);
         if (v5 > 10)
             v3 = v5;
         else
@@ -215,7 +215,7 @@ int __cdecl RB_PixelCost_GetCostForRecordIndex(int recordIndex)
         for (frameIndexb = validCount - 1; frameIndexb >= 0; --frameIndexb)
         {
             v2 = costHistory[frameIndexb] - avgCost;
-            if ((double)v3 < (double)(int)((HIDWORD(v2) ^ v2) - HIDWORD(v2)))
+            if ((float)v3 < (float)(int)((HIDWORD(v2) ^ v2) - HIDWORD(v2)))
             {
                 totalCost -= costHistory[frameIndexb];
                 --validCount;
@@ -294,10 +294,10 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
         if (pixelCount)
         {
             v3 = (int)ceil(
-                (double)(context.source->renderTargetHeight * context.source->renderTargetWidth)
+                (float)(context.source->renderTargetHeight * context.source->renderTargetWidth)
                 * pixelCostGlob.msecElapsed
-                / (double)pixelCount
-                * 30.72);
+                / (float)pixelCount
+                * 30.72f);
             if (v3 > 1)
                 v2 = v3;
             else
@@ -334,7 +334,7 @@ int RB_PixelCost_AccumulateMsec()
     int v2; // [esp+Ch] [ebp-8h]
     int timeQuantized; // [esp+10h] [ebp-4h]
 
-    timeQuantized = (int)ceil(pixelCostGlob.msecElapsed * 3932.1);
+    timeQuantized = (int)ceil(pixelCostGlob.msecElapsed * 3932.1f);
     if (timeQuantized < 0xFFFF)
         v2 = timeQuantized;
     else
@@ -351,10 +351,10 @@ int RB_PixelCost_AccumulateMsec()
 void RB_PixelCost_EndTiming()
 {
     R_HW_FinishGpu();
-    pixelCostGlob.msecElapsed = (double)(__rdtsc() - pixelCostGlob.timeBegin) * msecPerRawTimerTick
+    pixelCostGlob.msecElapsed = (float)(__rdtsc() - pixelCostGlob.timeBegin) * msecPerRawTimerTick
         - pixelCostGlob.msecOverhead;
-    if (pixelCostGlob.msecElapsed < 0.0)
-        pixelCostGlob.msecElapsed = 0.0;
+    if (pixelCostGlob.msecElapsed < 0.0f)
+        pixelCostGlob.msecElapsed = 0.0f;
 }
 
 GfxRenderTargetId __cdecl RB_PixelCost_OverrideRenderTarget(GfxRenderTargetId targetId)

@@ -183,8 +183,8 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
                         "cg_packetAnalysisClient->current.integer doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
                         cg_packetAnalysisClient->current.integer,
                         64);
-                v9 = y + 15.0;
-                v8 = x + 5.0;
+                v9 = y + 15.0f;
+                v8 = x + 5.0f;
                 UI_DrawText(
                     &scrPlaceView[localClientNum],
                     cgameGlob->bgs.clientinfo[cg_packetAnalysisClient->current.integer].name,
@@ -194,7 +194,7 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
                     v9,
                     3,
                     1,
-                    0.40000001,
+                    0.40000001f,
                     (const float *)color,
                     3);
                 for (frame = 0; frame < 100; ++frame)
@@ -215,7 +215,7 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
                                 "%s\n\t(field) = %i",
                                 "(field >= 0 && field < ANALYZE_SNAPSHOT_DATATYPE_COUNT)",
                                 fieldb);
-                        v = (int)((double)cgameGlob->bitsSent[arrayFrameb][fieldb] * height / 255.0);
+                        v = (int)((float)cgameGlob->bitsSent[arrayFrameb][fieldb] * height / 255.0f);
                         if (v)
                         {
                             switch (fieldb)
@@ -258,20 +258,20 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
                                 color = (const float (*)[4])colorWhite;
                             LABEL_57:
                                 v2 = (float)v;
-                                v7 = y - (double)v;
-                                v6 = x + width - (double)frame - 1.0;
+                                v7 = y - (float)v;
+                                v6 = x + width - (double)frame - 1.0f;
                                 CL_DrawStretchPic(
                                     &scrPlaceView[localClientNum],
                                     v6,
                                     v7,
-                                    1.0,
+                                    1.0f,
                                     v2,
                                     3,
                                     1,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
+                                    0.0f,
+                                    0.0f,
+                                    0.0f,
+                                    0.0f,
                                     (const float *)color,
                                     cgMedia.whiteMaterial);
                                 break;
@@ -279,7 +279,7 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
                         }
                     }
                 }
-                x = width + 10.0 + x;
+                x = width + 10.0f + x;
                 y = (float)cg_packetAnalysisTextY->current.integer;
                 fieldc = 0;
                 while (fieldc < 13)
@@ -455,12 +455,12 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
         cgameGlob = cgArray;
         if (net_showprofile->current.integer && cg_packetAnalysisClient->current.integer >= 0)
         {
-            graphx = 10.0;
-            graphy = 100.0;
-            width = 80.0;
-            height = 100.0;
-            v17 = (float)100.0 - (float)100.0;
-            UI_DrawHandlePic(&scrPlaceView[localClientNum], 10.0, v17, 80.0, 100.0, 1, 1, colorBlack, cgMedia.whiteMaterial);
+            graphx = 10.0f;
+            graphy = 100.0f;
+            width = 80.0f;
+            height = 100.0f;
+            v17 = 100.0f - 100.0f;
+            UI_DrawHandlePic(&scrPlaceView[localClientNum], 10.0f, v17, 80.0f, 100.0, 1, 1, colorBlack, cgMedia.whiteMaterial);
             color = (const float (*)[4])colorWhite;
             if (cg_packetAnalysisClient->current.integer >= 0x40u)
                 MyAssertHandler(
@@ -470,8 +470,8 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                     "cg_packetAnalysisClient->current.integer doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
                     cg_packetAnalysisClient->current.integer,
                     64);
-            v16 = graphy + 15.0;
-            v15 = graphx + 5.0;
+            v16 = graphy + 15.0f;
+            v15 = graphx + 5.0f;
             UI_DrawText(
                 &scrPlaceView[localClientNum],
                 cgameGlob->bgs.clientinfo[cg_packetAnalysisClient->current.integer].name,
@@ -481,10 +481,10 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                 v16,
                 1,
                 1,
-                0.40000001,
+                0.40000001f,
                 (const float *)color,
                 3);
-            x = graphx + width + 10.0;
+            x = graphx + width + 10.0f;
             y = (float)cg_packetAnalysisEntTextY->current.integer;
             for (eType = 0; eType <= 17; ++eType)
             {
@@ -619,14 +619,14 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                     v4 = va(
                         "%s: %.1fx%.1fb (%.1f fields), max %ix%.1fb (%i f)",
                         string,
-                        (double)totalEntsSent * 1.0 / 10.0,
-                        (double)totalBitsUsed * 1.0 / (double)(8 * count),
-                        (double)totalEntFields * 1.0 / (double)count,
+                        (float)totalEntsSent * 1.0f / 10.0f,
+                        (float)totalBitsUsed * 1.0f / (float)(8 * count),
+                        (float)totalEntFields * 1.0f / (float)count,
                         maxEntsSent,
-                        (double)maxBitsUsed * 1.0 / (double)(8 * entsSentWhenMax),
+                        (float)maxBitsUsed * 1.0f / (float)(8 * entsSentWhenMax),
                         maxEntFields);
                     UI_DrawText(&scrPlaceView[localClientNum], v4, 80, smallDevFont, v13, y, 1, 1, scale, (const float *)color, 3);
-                    y = (double)UI_TextHeight(cgMedia.smallDevFont, cg_packetAnalysisEntTextScale->current.value) + y;
+                    y = (float)UI_TextHeight(cgMedia.smallDevFont, cg_packetAnalysisEntTextScale->current.value) + y;
                 }
             }
             for (sample = 0; sample < 10; ++sample)
@@ -639,13 +639,13 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                 {
                     eType = sortedSamples[fielda];
                     stat = s_entitySamples[sample][eType];
-                    v18 = (double)stat * 1.0 / 1600.0;
-                    v12 = v18 - 1.0;
-                    if (v12 < 0.0)
-                        v11 = (double)stat * 1.0 / 1600.0;
+                    v18 = (float)stat * 1.0f / 1600.0f;
+                    v12 = v18 - 1.0f;
+                    if (v12 < 0.0f)
+                        v11 = (float)stat * 1.0f / 1600.0f;
                     else
-                        v11 = 1.0;
-                    if (v11 > 0.0)
+                        v11 = 1.0f;
+                    if (v11 > 0.0f)
                     {
                         switch (eType)
                         {
@@ -709,9 +709,9 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
                             break;
                         }
                         lineHeight = v11 * height;
-                        w = width / 10.0;
+                        w = width / 10.0f;
                         v9 = graphy - lineHeight;
-                        v8 = (double)sample * width / 10.0 + graphx;
+                        v8 = (double)sample * width / 10.0f + graphx;
                         UI_DrawHandlePic(
                             &scrPlaceView[localClientNum],
                             v8,
@@ -759,7 +759,7 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    lineColor[5] = 1.4025731e-38;
+    lineColor[5] = 1.4025731e-38f;
     if (cgsArray[0].localServer)
     {
         if (net_showprofile->current.integer)
@@ -767,16 +767,16 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
             client = cg_packetAnalysisClient->current.integer;
             if (client >= 0)
             {
-                x = -150.0;
-                y = 100.0;
-                height = 10.0;
+                x = -150.0f;
+                y = 100.0f;
+                height = 10.0f;
                 lineColor[0] = colorWhite[0];
                 lineColor[1] = colorWhite[1];
                 lineColor[2] = colorWhite[2];
                 lineColor[3] = colorWhite[3];
                 //LODWORD(lineColor[4]) = colorWhite;
-                v5 = 100.0 + 15.0;
-                v4 = -150.0 + 5.0;
+                v5 = 100.0f + 15.0f;
+                v4 = -150.0f + 5.0f;
                 UI_DrawText(
                     &scrPlaceView[localClientNum],
                     "Ping",
@@ -786,7 +786,7 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
                     v5,
                     3,
                     1,
-                    0.40000001,
+                    0.40000001f,
                     colorWhite,
                     3);
                 for (frame = 31; frame >= 0; --frame)
@@ -798,39 +798,39 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
                         {
                             if (ping >= 200)
                             {
-                                v7 = 1.0 - (ping - 200) * 1.0 / 200.0 * 0.800000011920929;
-                                v3 = 0.2 - v7;
-                                if (v3 < 0.0)
-                                    v6 = 1.0 - (ping - 200) * 1.0 / 200.0 * 0.800000011920929;
+                                v7 = 1.0f - (ping - 200) * 1.0f / 200.0f * 0.800000011920929f;
+                                v3 = 0.2f - v7;
+                                if (v3 < 0.0f)
+                                    v6 = 1.0f - (ping - 200) * 1.0f / 200.0f * 0.800000011920929f;
                                 else
-                                    v6 = 0.2;
+                                    v6 = 0.2f;
                                 lineColor[0] = v6;
-                                lineColor[1] = 0.0;
-                                lineColor[2] = 0.0;
-                                lineColor[3] = 1.0;
+                                lineColor[1] = 0.0f;
+                                lineColor[2] = 0.0f;
+                                lineColor[3] = 1.0f;
                             }
                             else
                             {
-                                lineColor[0] = 1.0 - (ping - 100) * 1.0 / 100.0 * 0.800000011920929;
+                                lineColor[0] = 1.0f - (ping - 100) * 1.0f / 100.0f * 0.800000011920929f;
                                 lineColor[1] = lineColor[0];
-                                lineColor[2] = 0.0;
-                                lineColor[3] = 1.0;
+                                lineColor[2] = 0.0f;
+                                lineColor[3] = 1.0f;
                             }
                         }
                         else
                         {
-                            lineColor[0] = 0.0;
-                            lineColor[1] = 1.0 - ping * 1.0 / 100.0 * 0.800000011920929;
-                            lineColor[2] = 0.0;
-                            lineColor[3] = 1.0;
+                            lineColor[0] = 0.0f;
+                            lineColor[1] = 1.0f - ping * 1.0f / 100.0f * 0.800000011920929f;
+                            lineColor[2] = 0.0f;
+                            lineColor[3] = 1.0f;
                         }
                     }
                     else
                     {
-                        lineColor[0] = 0.0;
-                        lineColor[1] = 0.0;
-                        lineColor[2] = 0.0;
-                        lineColor[3] = 1.0;
+                        lineColor[0] = 0.0f;
+                        lineColor[1] = 0.0f;
+                        lineColor[2] = 0.0f;
+                        lineColor[3] = 1.0f;
                     }
                     v2 = y - height;
                     v1 = (3 * frame) + x;
@@ -838,7 +838,7 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
                         &scrPlaceView[localClientNum],
                         v1,
                         v2,
-                        3.0,
+                        3.0f,
                         height,
                         3,
                         1,
@@ -895,49 +895,49 @@ void __cdecl CG_DrawLagometer(int localClientNum)
     if (cg_drawLagometer->current.enabled && !cgsArray[0].localServer)
     {
         scrPlace = &scrPlaceView[localClientNum];
-        UI_DrawHandlePic(scrPlace, -55.0, -140.0, 48.0, 48.0, 3, 3, 0, cgMedia.lagometerMaterial);
-        v17 = -55.0;
-        ay = -140.0;
-        aw = 48.0;
-        v16 = 48.0;
-        range = (float)48.0 / 3.0;
-        mid = (float)-140.0 + range;
-        for (a = 0; aw > (double)a; ++a)
+        UI_DrawHandlePic(scrPlace, -55.0f, -140.0f, 48.0f, 48.0f, 3, 3, 0, cgMedia.lagometerMaterial);
+        v17 = -55.0f;
+        ay = -140.0f;
+        aw = 48.0f;
+        v16 = 48.0f;
+        range = (float)48.0f / 3.0f;
+        mid = (float)-140.0f + range;
+        for (a = 0; aw > (float)a; ++a)
         {
             vd = (float)lagometer.frameSamples[(LOBYTE(lagometer.frameCount) - 1 - (_BYTE)a) & 0x7F];
-            vscale = range / 300.0;
+            vscale = range / 300.0f;
             v = vd * vscale;
-            if (v <= 0.0)
+            if (v <= 0.0f)
             {
-                if (v < 0.0)
+                if (v < 0.0f)
                 {
                     va = -v;
-                    if (range < (double)va)
-                        va = (float)48.0 / 3.0;
-                    v7 = v17 + aw - (double)a;
-                    CL_DrawStretchPic(scrPlace, v7, mid, 1.0, va, 3, 3, 0.0, 0.0, 0.0, 0.0, colorBlue, cgMedia.whiteMaterial);
+                    if (range < (float)va)
+                        va = 48.0f / 3.0f;
+                    v7 = v17 + aw - (float)a;
+                    CL_DrawStretchPic(scrPlace, v7, mid, 1.0f, va, 3, 3, 0.0f, 0.0f, 0.0f, 0.0f, colorBlue, cgMedia.whiteMaterial);
                 }
             }
             else
             {
-                if (range < (double)v)
-                    v = (float)48.0 / 3.0;
+                if (range < v)
+                    v = 48.0f / 3.0f;
                 v9 = mid - v;
-                v8 = v17 + aw - (double)a;
-                CL_DrawStretchPic(scrPlace, v8, v9, 1.0, v, 3, 3, 0.0, 0.0, 0.0, 0.0, colorYellow, cgMedia.whiteMaterial);
+                v8 = v17 + aw - (float)a;
+                CL_DrawStretchPic(scrPlace, v8, v9, 1.0f, v, 3, 3, 0.0f, 0.0f, 0.0f, 0.0f, colorYellow, cgMedia.whiteMaterial);
             }
         }
-        rangea = v16 / 2.0;
-        for (aa = 0; aw > (double)aa; ++aa)
+        rangea = v16 / 2.0f;
+        for (aa = 0; aw > (float)aa; ++aa)
         {
             vb = (float)lagometer.snapshotSamples[(LOBYTE(lagometer.snapshotCount) - 1 - (_BYTE)aa) & 0x7F];
-            if (vb <= 0.0)
+            if (vb <= 0.0f)
             {
-                if (vb < 0.0)
+                if (vb < 0.0f)
                 {
                     v4 = ay + v16 - rangea;
                     v3 = v17 + aw - (double)aa;
-                    CL_DrawStretchPic(scrPlace, v3, v4, 1.0, rangea, 3, 3, 0.0, 0.0, 0.0, 0.0, colorRed, cgMedia.whiteMaterial);
+                    CL_DrawStretchPic(scrPlace, v3, v4, 1.0f, rangea, 3, 3, 0.0f, 0.0f, 0.0f, 0.0f, colorRed, cgMedia.whiteMaterial);
                 }
             }
             else
@@ -946,20 +946,20 @@ void __cdecl CG_DrawLagometer(int localClientNum)
                     hcolor = colorYellow;
                 else
                     hcolor = colorGreen;
-                vscalea = rangea / 900.0;
+                vscalea = rangea / 900.0f;
                 vc = vb * vscalea;
-                if (rangea < (double)vc)
-                    vc = v16 / 2.0;
+                if (rangea < (float)vc)
+                    vc = v16 / 2.0f;
                 v6 = ay + v16 - vc;
-                v5 = v17 + aw - (double)aa;
-                CL_DrawStretchPic(scrPlace, v5, v6, 1.0, vc, 3, 3, 0.0, 0.0, 0.0, 0.0, hcolor, cgMedia.whiteMaterial);
+                v5 = v17 + aw - (float)aa;
+                CL_DrawStretchPic(scrPlace, v5, v6, 1.0f, vc, 3, 3, 0.0f, 0.0f, 0.0f, 0.0f, hcolor, cgMedia.whiteMaterial);
             }
         }
         if (cg_nopredict->current.enabled || cg_synchronousClients->current.enabled)
         {
-            v2 = ay + 480.0;
-            v1 = v17 + 640.0 + aw;
-            CG_DrawBigDevString(scrPlace, v1, v2, (char*)"snc", 1.0, 10);
+            v2 = ay + 480.0f;
+            v1 = v17 + 640.0f + aw;
+            CG_DrawBigDevString(scrPlace, v1, v2, (char*)"snc", 1.0f, 10);
         }
     }
     CG_DrawDisconnect(localClientNum);

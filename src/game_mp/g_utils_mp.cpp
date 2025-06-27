@@ -194,12 +194,11 @@ int __cdecl G_ModelIndex(char *name)
     signed int constIndex; // [esp+74h] [ebp-4h]
     signed int constIndexa; // [esp+74h] [ebp-4h]
 
-    Profile_Begin(244);
+    PROF_SCOPED("G_ModelIndex");
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 221, 0, "%s", "name");
     if (!*name)
     {
-        Profile_EndInternal(0);
         return 0;
     }
     nameString = SL_FindLowercaseString(name);
@@ -219,7 +218,6 @@ int __cdecl G_ModelIndex(char *name)
         }
         if (!level.initializing)
         {
-            Profile_EndInternal(0);
             v2 = va("model '%s' not precached", name);
             Scr_Error(v2);
         }
@@ -255,7 +253,6 @@ int __cdecl G_ModelIndex(char *name)
             Com_Error(ERR_DROP, "G_ModelIndex: overflow");
         cached_models[i] = SV_XModelGet(name);
         SV_SetConfigstring(i + 830, name);
-        Profile_EndInternal(0);
         return i;
     }
     i = constIndexa - 830;
@@ -264,7 +261,6 @@ int __cdecl G_ModelIndex(char *name)
     if (!cached_models[i])
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 244, 0, "%s", "cached_models[i]");
 LABEL_14:
-    Profile_EndInternal(0);
     return i;
 }
 
@@ -757,9 +753,10 @@ void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
         tempAxis[3][0] = parent->r.currentOrigin[0];
         tempAxis[3][1] = parent->r.currentOrigin[1];
         tempAxis[3][2] = parent->r.currentOrigin[2];
-        Profile_Begin(313);
-        G_DObjCalcBone(parent, tagInfo->index);
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("G_CalcTagParentAxis");
+            G_DObjCalcBone(parent, tagInfo->index);
+        }
         mat = &SV_DObjGetMatrixArray(parent)[tagInfo->index];
         if ((COERCE_UNSIGNED_INT(mat->quat[0]) & 0x7F800000) == 0x7F800000
             || (COERCE_UNSIGNED_INT(mat->quat[1]) & 0x7F800000) == 0x7F800000
@@ -941,9 +938,12 @@ DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, unsigned int tagNam
     boneIndex = SV_DObjGetBoneIndex(ent, tagName);
     if (boneIndex < 0)
         return 0;
-    Profile_Begin(314);
-    G_DObjCalcBone(ent, boneIndex);
-    Profile_EndInternal(0);
+
+    {
+        PROF_SCOPED("G_DObjGetLocalTagMatrix");
+        G_DObjCalcBone(ent, boneIndex);
+    }
+
     return &SV_DObjGetMatrixArray(ent)[boneIndex];
 }
 
@@ -1024,9 +1024,10 @@ int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, unsigned int tagName, float *po
 
 DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(gentity_s *ent, int boneIndex)
 {
-    Profile_Begin(314);
-    G_DObjCalcBone(ent, boneIndex);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("G_DObjGetLocalTagMatrix");
+        G_DObjCalcBone(ent, boneIndex);
+    }
     return &SV_DObjGetMatrixArray(ent)[boneIndex];
 }
 
@@ -1423,9 +1424,9 @@ void __cdecl G_SetOrigin(gentity_s *ent, const float *origin)
     ent->s.lerp.pos.trType = TR_STATIONARY;
     ent->s.lerp.pos.trTime = 0;
     ent->s.lerp.pos.trDuration = 0;
-    ent->s.lerp.pos.trDelta[0] = 0.0;
-    ent->s.lerp.pos.trDelta[1] = 0.0;
-    ent->s.lerp.pos.trDelta[2] = 0.0;
+    ent->s.lerp.pos.trDelta[0] = 0.0f;
+    ent->s.lerp.pos.trDelta[1] = 0.0f;
+    ent->s.lerp.pos.trDelta[2] = 0.0f;
     ent->r.currentOrigin[0] = *origin;
     ent->r.currentOrigin[1] = origin[1];
     ent->r.currentOrigin[2] = origin[2];
@@ -1439,9 +1440,9 @@ void __cdecl G_SetAngle(gentity_s *ent, const float *angle)
     ent->s.lerp.apos.trType = TR_STATIONARY;
     ent->s.lerp.apos.trTime = 0;
     ent->s.lerp.apos.trDuration = 0;
-    ent->s.lerp.apos.trDelta[0] = 0.0;
-    ent->s.lerp.apos.trDelta[1] = 0.0;
-    ent->s.lerp.apos.trDelta[2] = 0.0;
+    ent->s.lerp.apos.trDelta[0] = 0.0f;
+    ent->s.lerp.apos.trDelta[1] = 0.0f;
+    ent->s.lerp.apos.trDelta[2] = 0.0f;
     ent->r.currentAngles[0] = *angle;
     ent->r.currentAngles[1] = angle[1];
     ent->r.currentAngles[2] = angle[2];
@@ -1465,9 +1466,9 @@ int __cdecl G_rand()
     return rand();
 }
 
-double __cdecl G_flrand(float min, float max)
+float __cdecl G_flrand(float min, float max)
 {
-    return (float)((double)G_rand() * (max - min) / 32768.0 + min);
+    return (float)G_rand() * (max - min) / 32768.0f + min;
 }
 
 int __cdecl G_irand(int min, int max)
@@ -1475,13 +1476,13 @@ int __cdecl G_irand(int min, int max)
     return min + (max - min) * G_rand() / 0x8000;
 }
 
-double __cdecl G_random()
+float __cdecl G_random()
 {
-    return (float)((double)G_rand() / 32768.0);
+    return (float)G_rand() / 32768.0f;
 }
 
-double __cdecl G_crandom()
+float __cdecl G_crandom()
 {
-    return (float)(G_random() * 2.0 - 1.0);
+    return G_random() * 2.0f - 1.0f;
 }
 

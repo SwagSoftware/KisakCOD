@@ -202,18 +202,21 @@ void __cdecl R_GenerateShadowCookies(
     ShadowCandidate cookieIndex; // [esp+13Ch] [ebp-8h] BYREF
 
     KISAK_NULLSUB();
-    Profile_Begin(150);
-    R_PopulateCandidates(viewParmsDraw, &candidates[0]);
+    {
+        PROF_SCOPED("SC_FindCasters");
 
-    //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
-    //    candidates,
-    //    &cookieIndex,
-    //    24,
-    //    R_ShadowCandidatePred);
-    std::sort(&candidates[0], &candidates[23], R_ShadowCandidatePred);
+        R_PopulateCandidates(viewParmsDraw, &candidates[0]);
 
-    R_AddCasters(localClientNum, viewParmsDraw, candidates, shadowCookieList);
-    Profile_EndInternal(0);
+        //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
+        //    candidates,
+        //    &cookieIndex,
+        //    24,
+        //    R_ShadowCandidatePred);
+        std::sort(&candidates[0], &candidates[23], R_ShadowCandidatePred);
+
+        R_AddCasters(localClientNum, viewParmsDraw, candidates, shadowCookieList);
+    }
+
     LODWORD(cookieIndex.weight) = shadowCookieList->cookieCount;
     if (LODWORD(cookieIndex.weight))
     {
@@ -322,8 +325,8 @@ LABEL_24:
     {
         shadowCookieGlob.weightCap = sc_shadowOutRate->current.value * timeDeltaSeconds + shadowCookieGlob.weightCap;
     }
-    if (shadowCookieGlob.weightCap < 0.00009999999747378752)
-        shadowCookieGlob.weightCap = 0.000099999997;
+    if (shadowCookieGlob.weightCap < 0.00009999999747378752f)
+        shadowCookieGlob.weightCap = 0.000099999997f;
     if (sc_debugReceiverCount->current.integer < (signed int)shadowCookieList->cookieCount)
         unsignedInt = sc_debugReceiverCount->current.unsignedInt;
     else
@@ -356,7 +359,8 @@ void __cdecl R_AddShadowCookie(
     GfxDrawSurf *lastDrawSurf; // [esp+ACh] [ebp-4h]
     int savedregs; // [esp+B0h] [ebp+0h] BYREF
 
-    Profile_Begin(152);
+    PROF_SCOPED("SC_DrawCaster");
+
     sceneEnt = &scene.sceneDObj[sceneEntIndex];
     if (R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1))
     {
@@ -406,9 +410,10 @@ void __cdecl R_AddShadowCookie(
         if (cookieList->cookieCount <= sc_debugCasterCount->current.integer)
         {
             rg.debugViewParms = viewParms;
-            Profile_Begin(155);
-            R_SkinSceneEnt(sceneEnt);
-            Profile_EndInternal(0);
+            {
+                PROF_SCOPED("SC_SkinXModel");
+                R_SkinSceneEnt(sceneEnt);
+            }
             newCasterDrawSurfs = R_AddDObjSurfaces(sceneEnt, TECHNIQUE_SHADOWCOOKIE_CASTER, casterDrawSurfs, lastDrawSurf);
             casterDrawSurfCount = newCasterDrawSurfs - casterDrawSurfs;
             scene.drawSurfCount[33] += casterDrawSurfCount;
@@ -417,13 +422,11 @@ void __cdecl R_AddShadowCookie(
         endDrawSurf = scene.drawSurfCount[33];
         cookie->casterInfo.drawSurfCount = scene.drawSurfCount[33] - firstDrawSurf;
         cookie->receiverInfo.drawSurfs = &scene.drawSurfs[33][endDrawSurf];
-        Profile_EndInternal(0);
     }
     else
     {
         if (localSceneEnt)
             CG_UsedDObjCalcPose(localSceneEnt->info.pose);
-        Profile_EndInternal(0);
     }
 }
 
@@ -560,7 +563,9 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
     if (!cookieCount)
         MyAssertHandler(".\\r_shadowcookie.cpp", 586, 0, "%s", "cookieCount");
     shadowReceiverCallback.surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
-    Profile_Begin(153);
+
+    PROF_SCOPED("SC_FindReceivers");
+
     R_InitBspDrawSurf(&surfData);
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
     for (cookieIndex = 0; cookieIndex < cookieCount; ++cookieIndex)
@@ -612,7 +617,6 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
             scene.cookie[cookieIndex].drawSurfCount = surfData.drawSurfList.current - scene.cookie[cookieIndex].drawSurfs;
         }
     }
-    Profile_EndInternal(0);
 }
 
 bool __cdecl R_AllowBspShadowReceiver(int surfIndex, unsigned int *shadowReceiverCallbackAsVoid)
@@ -630,7 +634,8 @@ void __cdecl R_GenerateSceneEntShadowReceivers(ShadowCookieList *shadowCookieLis
     unsigned int cookieCount; // [esp+5Ch] [ebp-14h]
     volatile int cookieDrawSurfCount; // [esp+68h] [ebp-8h]
 
-    Profile_Begin(153);
+    PROF_SCOPED("R_GenerateSceneEntShadowReceivers");
+
     sceneEntCount = scene.sceneDObjCount;
     cookieCount = shadowCookieList->cookieCount;
     if (!cookieCount)
@@ -670,7 +675,6 @@ void __cdecl R_GenerateSceneEntShadowReceivers(ShadowCookieList *shadowCookieLis
             }
         }
     }
-    Profile_EndInternal(0);
 }
 
 char __cdecl R_OutsideOfShadowFrustumPlanes(const DpvsPlane *planes, const float *minmax)

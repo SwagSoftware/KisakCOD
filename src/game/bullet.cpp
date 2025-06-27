@@ -85,9 +85,9 @@ float __cdecl G_GoodRandomFloat(int *idum)
     *idum = 16807 * (*idum % 127773) - 2836 * (*idum / 127773);
     if (*idum < 0)
         *idum += 0x7FFFFFFF;
-    v4 = (double)iv[iv[0] / 0x4000000] * 4.656612875245797e-10;
-    if (0.99999988 - v4 < 0.0)
-        return 0.99999988;
+    v4 = (float)iv[iv[0] / 0x4000000] * 4.656612875245797e-10f;
+    if (0.99999988f - v4 < 0.0f)
+        return 0.99999988f;
     else
         return v4;
 }
@@ -106,7 +106,7 @@ void __cdecl Bullet_Endpos(int randSeed, float spread, float *end, float *dir, c
         MyAssertHandler(".\\game\\bullet.cpp", 94, 0, "%s", "end");
     if (!wp)
         MyAssertHandler(".\\game\\bullet.cpp", 95, 0, "%s", "wp");
-    v7 = spread * 0.01745329238474369;
+    v7 = spread * 0.01745329238474369f;
     v6 = tan(v7);
     aimOffset = v6 * maxRange;
     if ((LODWORD(aimOffset) & 0x7F800000) == 0x7F800000)
@@ -207,9 +207,9 @@ void __cdecl Bullet_RandomDir(int time, float *x, float *y)
         MyAssertHandler(".\\game\\bullet.cpp", 68, 0, "%s", "x");
     if (!y)
         MyAssertHandler(".\\game\\bullet.cpp", 69, 0, "%s", "y");
-    theta = G_GoodRandomFloat(&time) * 360.0;
+    theta = G_GoodRandomFloat(&time) * 360.0f;
     r = G_GoodRandomFloat(&time);
-    v3 = theta * 0.01745329238474369;
+    v3 = theta * 0.01745329238474369f;
     cosT = cos(v3);
     sinT = sin(v3);
     *x = r * cosT;
@@ -247,7 +247,7 @@ void __cdecl Bullet_Fire(
     else
     {
         shotCount = 1;
-        range = 8192.0;
+        range = 8192.0f;
     }
     for (shotIndex = 0; shotIndex < shotCount; ++shotIndex)
     {
@@ -257,7 +257,7 @@ void __cdecl Bullet_Fire(
             number = 1022;
         v9.weaponEntIndex = number;
         v9.ignoreEntIndex = number;
-        v9.damageMultiplier = 1.0;
+        v9.damageMultiplier = 1.0f;
         v9.methodOfDeath = (wp->weapDef->bRifleBullet != 0) + 1;
         v9.origStart[0] = wp->muzzleTrace[0];
         v9.origStart[1] = wp->muzzleTrace[1];
@@ -291,7 +291,7 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
         Bullet_Process(bp, &br, weapDef, attacker, 0, gameTime, &impactFlags, 1);
         if ((br.trace.contents & 0x10) != 0)
         {
-            if (!BG_AdvanceTrace(bp, &br, 0.13500001))
+            if (!BG_AdvanceTrace(bp, &br, 0.13500001f))
                 return;
         }
         else
@@ -300,7 +300,7 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
                 return;
             if (br.ignoreHitEnt)
             {
-                BG_AdvanceTrace(bp, &br, 0.0);
+                BG_AdvanceTrace(bp, &br, 0.0f);
             }
             else
             {
@@ -310,8 +310,8 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
                 {
                     return;
                 }
-                bp->damageMultiplier = bp->damageMultiplier * 0.5;
-                BG_AdvanceTrace(bp, &br, 0.0);
+                bp->damageMultiplier = bp->damageMultiplier * 0.5f;
+                BG_AdvanceTrace(bp, &br, 0.0f);
             }
         }
     }
@@ -585,7 +585,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
             lastHitPos[0] = br.hitPos[0];
             lastHitPos[1] = br.hitPos[1];
             lastHitPos[2] = br.hitPos[2];
-            if (!BG_AdvanceTrace(bp, &br, 0.13500001))
+            if (!BG_AdvanceTrace(bp, &br, 0.13500001f))
                 break;
             traceHit = Bullet_Trace(bp, weapDef, attacker, &br, br.depthSurfaceType);
             Com_Memcpy((char *)&revBp, (char *)bp, 64);
@@ -597,13 +597,13 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
             revBp.start[0] = bp->end[0];
             revBp.start[1] = bp->end[1];
             revBp.start[2] = bp->end[2];
-            Vec3Mad(lastHitPos, 0.0099999998, revBp.dir, revBp.end);
+            Vec3Mad(lastHitPos, 0.0099999998f, revBp.dir, revBp.end);
             Com_Memcpy((char *)&revBr, (char *)&br, 68);
             revBr.trace.normal[0] = -revBr.trace.normal[0];
             revBr.trace.normal[1] = -revBr.trace.normal[1];
             revBr.trace.normal[2] = -revBr.trace.normal[2];
             if (traceHit)
-                BG_AdvanceTrace(&revBp, &revBr, 0.0099999998);
+                BG_AdvanceTrace(&revBp, &revBr, 0.0099999998f);
             revTraceHit = Bullet_Trace(&revBp, weapDef, attacker, &revBr, revBr.depthSurfaceType);
             v12 = revTraceHit && revBr.trace.allsolid || br.trace.startsolid && revBr.trace.startsolid;
             allSolid = v12;
@@ -620,8 +620,8 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                     v11 = Vec3Length(v);
                 }
                 depth = v11;
-                if (v11 < 1.0)
-                    depth = 1.0;
+                if (v11 < 1.0f)
+                    depth = 1.0f;
                 if (revTraceHit)
                 {
                     if (attacker->client && (v20 = attacker->client->ps.perks, (v20 & 0x20) != 0))
@@ -629,21 +629,21 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                         value = perk_bulletPenetrationMultiplier->current.value;
                         v19 = BG_GetSurfacePenetrationDepth(weapDef, revBr.depthSurfaceType) * value;
                         v9 = v19 - maxDepth;
-                        v8 = v9 < 0.0 ? v19 : maxDepth;
+                        v8 = v9 < 0.0f ? v19 : maxDepth;
                         maxDepth = v8;
                     }
                     else
                     {
                         SurfacePenetrationDepth = BG_GetSurfacePenetrationDepth(weapDef, revBr.depthSurfaceType);
                         v7 = SurfacePenetrationDepth - maxDepth;
-                        v6 = v7 < 0.0 ? SurfacePenetrationDepth : maxDepth;
+                        v6 = v7 < 0.0f ? SurfacePenetrationDepth : maxDepth;
                         maxDepth = v6;
                     }
-                    if (maxDepth <= 0.0)
+                    if (maxDepth <= 0.0f)
                         return;
                 }
                 bp->damageMultiplier = bp->damageMultiplier - depth / maxDepth;
-                if (bp->damageMultiplier <= 0.0)
+                if (bp->damageMultiplier <= 0.0f)
                     return;
                 if (!allSolid)
                 {
@@ -651,8 +651,8 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                     v16 = Vec3LengthSq(v17);
                     v15 = bullet_penetrationMinFxDist->current.value;
                     v5 = v15 * v15;
-                    processFx = v5 < (double)v16;
-                    if (v5 < (double)v16 && (!traceHit || (br.trace.surfaceFlags & 4) == 0))
+                    processFx = v5 < (float)v16;
+                    if (v5 < (float)v16 && (!traceHit || (br.trace.surfaceFlags & 4) == 0))
                         Bullet_ImpactEffect(&revBp, &revBr, bp->dir, weapDef, attacker, impactFlags | 4, &bulletEffectTempEnt);
                     if (traceHit)
                         Bullet_Process(bp, &br, weapDef, attacker, 8, gameTime, &impactFlags, processFx);
@@ -663,7 +663,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                 Vec3Sub(lastHitPos, br.hitPos, v14);
                 v13 = Vec3LengthSq(v14);
                 v4 = bullet_penetrationMinFxDist->current.value * bullet_penetrationMinFxDist->current.value;
-                processFx = v4 < (double)v13;
+                processFx = v4 < (float)v13;
                 Bullet_Process(bp, &br, weapDef, attacker, 8, gameTime, &impactFlags, processFx);
             }
             if (!traceHit)

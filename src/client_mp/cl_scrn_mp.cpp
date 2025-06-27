@@ -61,7 +61,7 @@ void __cdecl SCR_UpdateScreen()
 {
     if (!updateScreenCalled && !SCR_ShouldSkipUpdateScreen())
     {
-        Profile_Begin(34);
+        PROF_SCOPED("SCR_UpdateScreen");
         if (clientUIActives[0].connectionState == CA_LOADING)
             Sys_LoadingKeepAlive();
         if (scr_initialized && !com_errorEntered)
@@ -69,11 +69,6 @@ void __cdecl SCR_UpdateScreen()
             updateScreenCalled = 1;
             SCR_UpdateFrame();
             updateScreenCalled = 0;
-            Profile_EndInternal(0);
-        }
-        else
-        {
-            Profile_EndInternal(0);
         }
     }
 }
@@ -161,9 +156,8 @@ void __cdecl CL_DrawScreen(int localClientNum)
                 localClientNum);
         if (clientUIActives[0].connectionState == CA_ACTIVE)
         {
-            Profile_Begin(345);
+            PROF_SCOPED("DebugOverlays");
             CG_DrawFullScreenDebugOverlays(localClientNum);
-            Profile_EndInternal(0);
             CG_DrawUpperRightDebugInfo(localClientNum);
         }
         R_AddCmdDrawProfile();
@@ -277,9 +271,9 @@ void SCR_DrawDemoRecording()
         pos = FS_FTell(clc->demofile);
         sprintf(string, "RECORDING %s: %ik", clc->demoName, pos / 1024);
         CL_LookupColor(0, 0x37u, color);
-        x = 5.0;
-        y = 479.0;
-        xScale = R_NormalizedTextScale(cls.consoleFont, 0.33333334);
+        x = 5.0f;
+        y = 479.0f;
+        xScale = R_NormalizedTextScale(cls.consoleFont, 0.33333334f);
         yScale = xScale;
         ScrPlace_ApplyRect(scrPlaceView, &x, &y, &xScale, &yScale, 1, 1);
         R_AddCmdDrawText(string, 0x7FFFFFFF, cls.consoleFont, x, y, xScale, yScale, 0.0, color, 0);
@@ -377,12 +371,12 @@ void __cdecl CL_CubemapShot_f()
     size = atoi(v0);
     if (size < 4 || size > 1024 || (size & (size - 1)) != 0)
         goto LABEL_23;
-    rgb[0] = 0.0;
-    rgb[1] = 0.0;
-    rgb[2] = 0.0;
+    rgb[0] = 0.0f;
+    rgb[1] = 0.0f;
+    rgb[2] = 0.0f;
     isLightingShot = 0;
-    n0 = 1.0;
-    n1 = 1.3329999;
+    n0 = 1.0f;
+    n1 = 1.3329999f;
     if (Cmd_Argc() == 7)
     {
         v1 = Cmd_Argv(3);

@@ -45,17 +45,15 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
 
     clientNum = 0;
     snapInfo.archived = 1;
-    if (!svsHeaderValid)
-        MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 131, 0, "%s", "svsHeaderValid");
-    if (!svsHeader.cachedSnapshotEntities)
-        MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 132, 0, "%s", "svsHeader.cachedSnapshotEntities");
-    if (!svsHeader.cachedSnapshotClients)
-        MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 133, 0, "%s", "svsHeader.cachedSnapshotClients");
-    if (!svsHeader.archivedSnapshotBuffer)
-        MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 134, 0, "%s", "svsHeader.archivedSnapshotBuffer");
-    if (!svsHeader.cachedSnapshotFrames)
-        MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 135, 0, "%s", "svsHeader.cachedSnapshotFrames");
-    Profile_Begin(258);
+
+    iassert(svsHeaderValid);
+    iassert(svsHeader.cachedSnapshotEntities);
+    iassert(svsHeader.cachedSnapshotClients);
+    iassert(svsHeader.archivedSnapshotBuffer);
+    iassert(svsHeader.cachedSnapshotFrames);
+
+    PROF_SCOPED("SV_ArchiveSnapshot");
+
     SV_ResetPacketData(clientNum, msg);
     SV_PacketDataIsNotNetworkData(clientNum, msg);
     v28 = svsHeader.nextCachedSnapshotFrames - 512;
@@ -303,7 +301,6 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
 skipDelta:
     MSG_WriteEntityIndex(&snapInfo, msg, 1023, 10);
     SV_PacketDataIsUnknown(clientNum, msg);
-    Profile_EndInternal(0);
 }
 
 gentity_s *__cdecl SV_GentityNumLocal(int num)

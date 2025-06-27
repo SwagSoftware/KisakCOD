@@ -1,0 +1,80 @@
+name: Windows CMake DirectX Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    name: Build with DirectX SDK
+    runs-on: windows-2022
+
+    strategy:
+      matrix:
+        config: [Debug, Release]
+
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}\.nuget\packages
+      DXSDK_PKG: Microsoft.DXSDK.D3DX
+      DXSDK_VER: 9.29.952.8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET SDK (for nuget usage)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Restore DXSDK NuGet package
+        run: |
+          dotnet new classlib -o dxsdk-temp
+          cd dxsdk-temp
+          dotnet add package $env:DXSDK_PKG --version $env:DXSDK_VER
+          cd ..
+      
+      - name: Extract DXSDK paths from NuGet
+        id: dxsdk
+        shell: powershell
+        run: |
+          $pkgPath = Join-Path "${env:NUGET_PACKAGES}" "$env:DXSDK_PKG\$env:DXSDK_VER"
+          $libDir = Join-Path $pkgPath "build\native\release\lib\x86"
+          $incDir = Join-Path $pkgPath "build\native\include"
+          $sdkDir = Join-Path $pkgPath "build\native"
+          echo "libDir=$libDir" >> $env:GITHUB_ENV
+          echo "incDir=$incDir" >> $env:GITHUB_ENV
+          echo "DXSDK_DIR_NUGET=$pkgPath" >> $env:GITHUB_ENV
+          echo "DXSDK_DIR=$sdkDir" >> $env:GITHUB_ENV
+          Write-Host $pkgPath
+          Write-Host $libDir
+          Write-Host $incDir
+          Write-Host $sdkDir
+
+      - name: Install latest CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Configure CMake ${{ matrix.config }}
+        run: |
+          pushd
+          cd KisakCOD
+          mkdir build-${{ matrix.config }}
+          cd build-${{ matrix.config }}
+          cmake -G "Visual Studio 17 2022" -A Win32 -DDXSDK_DIR="${{ env.DXSDK_DIR }}" -DCICD=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} ..
+          popd
+
+      - name: Build ${{ matrix.config }}
+        run: |
+          pushd
+          cd KisakCOD
+          cmake --build build-${{ matrix.config }} --config ${{ matrix.config }}
+          popd
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KisakCOD-${{ matrix.config }}
+          path: ${{ github.workspace }}/${{ matrix.config }}
+          compression-level: 9
+          retention-days: 1

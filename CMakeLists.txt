@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
+include(FetchContent)
 
 if (DEDICATED)
   project(KisakCOD-Dedi)
@@ -8,9 +9,41 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 
+# If we are building on windows
 if (WIN32)
+  # Set the generator platform
   set(CMAKE_GENERATOR_PLATFORM "WIN32")
-endif()
+
+  # Check to see if we are running a github action
+  if (DEFINED CICD)
+    message("===== BUILDING FOR GITHUB ACTIONS =====")
+
+    # Check if this variable has been set
+    if (NOT DEFINED DXSDK_DIR)
+      message(FATAL_ERROR "DXSDK_DIR needs to be set to the nuget location, this can be done with -DDXSDK_DIR=")
+    endif()
+
+    message("DXSDK_DIR: ${DXSDK_DIR}")
+
+    # Example: C:\Users\USERNAME\.nuget\packages\microsoft.dxsdk.d3dx\9.29.952.8\build\native
+    set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
+    set(DXSDK_LIB_DIR ${DXSDK_DIR}/${CMAKE_BUILD_TYPE}/lib/x86)
+    message("DXSDK_LIB_DIR: ${DXSDK_LIB_DIR}")
+  else()
+    message("===== BUILDING FOR LOCAL DXSDK =====")
+    set(DXSDK_DIR $ENV{DXSDK_DIR})
+    set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
+    set(DXSDK_LIB_DIR ${DXSDK_DIR}/lib/x86)
+  endif() # DEFINED CICD
+  
+  # Set the required library
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(D3DX_LIB d3dx9d.lib)
+  else()
+    set(D3DX_LIB d3dx9.lib)
+  endif() # CMAKE_BUILD_TYPE Debug
+
+endif() # WIN32
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps")
@@ -63,9 +96,30 @@ set_target_properties(${BIN_NAME} PROPERTIES
 
 target_compile_definitions(${BIN_NAME} PUBLIC WIN32)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  target_compile_definitions(${BIN_NAME} PUBLIC _DEBUG)
-endif()
+#Set MSVC Runtime MDd/ MD
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+##### Tracy #####
+option ( TRACY_ENABLE "" ON )
+option ( TRACY_ON_DEMAND "" ON )
+option ( TRACY_ONLY_LOCALHOST "" ON )
+#option ( TRACY_FIBERS "" ON )
+
+FetchContent_Declare (
+	tracy
+	GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+	GIT_TAG v0.12.2
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable ( tracy )
+
+message( ${CMAKE_BINARY_DIR}/_deps/tracy-src/public)
+target_include_directories(${BIN_NAME} PUBLIC ${CMAKE_BINARY_DIR}/_deps/tracy-src/public)
+target_compile_definitions(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ENABLE>)
+target_compile_definitions(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ON_DEMAND>)
+target_link_libraries(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TracyClient>) # Enable Profiler in Debug
+#################
 
 target_compile_definitions(${BIN_NAME} PUBLIC _CONSOLE)
 target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)
@@ -73,10 +127,9 @@ target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)
 target_include_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(${BIN_NAME} PUBLIC ${DEPS_DIR})
 
-set(DXSDK_DIR $ENV{DXSDK_DIR})
-target_include_directories(${BIN_NAME} PUBLIC "${DXSDK_DIR}/Include")
+target_include_directories(${BIN_NAME} PUBLIC ${DXSDK_INC_DIR})
 
-target_link_directories(${BIN_NAME} PUBLIC "${DXSDK_DIR}/Lib/x86")
+target_link_directories(${BIN_NAME} PUBLIC ${DXSDK_LIB_DIR})
 target_link_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_directories(${BIN_NAME} PUBLIC "${DEPS_DIR}/msslib")
 target_link_directories(${BIN_NAME} PUBLIC "${DEPS_DIR}/steamsdk")
@@ -88,7 +141,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_
 set_property(TARGET ${BIN_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # fixme: copied from sln, check whats not needed
-target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ddraw.lib d3dx9d.lib d3d9.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib binkw32.lib steam_api.lib dxguid.lib )
+target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ${D3DX_LIB} d3d9.lib ddraw.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "${CMAKE_CURRENT_SOURCE_DIR}/src/binklib/binkw32.lib" "${CMAKE_CURRENT_SOURCE_DIR}/src/steamsdk/steam_api.lib" dxguid.lib )
+
+get_target_property(LIBS_OUT ${BIN_NAME} LINK_LIBRARIES)
+message("LIBS: ${LIBS_OUT}")
+
 target_link_options(${BIN_NAME} PRIVATE /machine:x86)
 set_target_properties(${BIN_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 

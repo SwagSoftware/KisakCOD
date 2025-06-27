@@ -57,7 +57,7 @@ void R_SkinXModelCmd(_WORD *data)
 {
     if (dx.deviceLost) return;
 
-    Profile_Begin(89);
+    PROF_SCOPED("R_SkinXModel");
 
     //bool sseEnabled = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
     //bool sseStateUsed = false;
@@ -168,8 +168,6 @@ void R_SkinXModelCmd(_WORD *data)
 
     //if (sseStateUsed)
         /*_m_empty();*/
-
-    Profile_EndInternal(0);
 }
 
 
@@ -193,7 +191,8 @@ void __cdecl R_SkinXSurfaceWeight(
     const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h]
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
+
     vertIndex = 0;
     vertsBlend = vertexInfo->vertsBlend;
     if (vertexInfo->vertCount[0])
@@ -216,7 +215,6 @@ void __cdecl R_SkinXSurfaceWeight(
     }
     if (vertexInfo->vertCount[3])
         R_SkinXSurfaceWeight3(&inVerts[vertIndex], vertsBlend, vertexInfo->vertCount[3], boneMatrix, &outVerts[vertIndex]);
-    Profile_EndInternal(0);
 }
 
 
@@ -449,7 +447,7 @@ void __cdecl R_SkinXSurfaceRigid(
     iassert(!(reinterpret_cast<unsigned>(vertices) & 15));
     iassert(!(reinterpret_cast<unsigned>(boneMatrix) & 15));
 
-    Profile_Begin(111);
+    PROF_SCOPED("SkinXSurfaceWeight");
 
     v = surf->verts0;
     vertex = vertices;
@@ -470,6 +468,5 @@ void __cdecl R_SkinXSurfaceRigid(
     }
 
     iassert(vertex - vertices == totalVertCount);
-    Profile_EndInternal(0);
 }
 

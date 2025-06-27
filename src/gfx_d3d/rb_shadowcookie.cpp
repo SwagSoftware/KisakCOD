@@ -80,7 +80,8 @@ void __cdecl RB_DrawShadowCookies(const GfxViewInfo *viewInfo)
     unsigned int cookieIter; // [esp+64h] [ebp-8h]
     int receiverSurfCount; // [esp+68h] [ebp-4h]
 
-    Profile_Begin(154);
+    PROF_SCOPED("SC_DrawReceivers");
+
     KISAK_NULLSUB();
     R_InitCmdBufSourceState(&gfxCmdBufSourceState, &viewInfo->input, 0);
     qmemcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
@@ -131,7 +132,6 @@ void __cdecl RB_DrawShadowCookies(const GfxViewInfo *viewInfo)
             R_ClearScreen(gfxCmdBufState.prim.device, 1u, colorWhite, 0.0, 0, 0);
     }
     qmemcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-    Profile_EndInternal(0);
 }
 
 void RB_ShadowCookieOverlay()

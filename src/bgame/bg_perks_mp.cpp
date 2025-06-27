@@ -58,43 +58,43 @@ void __cdecl Perks_RegisterDvars()
     DvarLimits minf; // [esp+4h] [ebp-10h]
     DvarLimits ming; // [esp+4h] [ebp-10h]
 
-    min.value.max = 1.0;
-    min.value.min = 0.0;
+    min.value.max = 1.0f;
+    min.value.min = 0.0f;
     perk_weapSpreadMultiplier = Dvar_RegisterFloat(
         "perk_weapSpreadMultiplier",
-        0.64999998,
+        0.64999998f,
         min,
         0x80u,
         "Percentage of weapon spread to use");
-    mina.value.max = 1.0;
-    mina.value.min = 0.0;
+    mina.value.max = 1.0f;
+    mina.value.min = 0.0f;
     perk_weapReloadMultiplier = Dvar_RegisterFloat(
         "perk_weapReloadMultiplier",
-        0.5,
+        0.5f,
         mina,
         0x80u,
         "Percentage of weapon reload time to use");
-    minb.value.max = 1.0;
-    minb.value.min = 0.0;
+    minb.value.max = 1.0f;
+    minb.value.min = 0.0f;
     perk_weapRateMultiplier = Dvar_RegisterFloat(
         "perk_weapRateMultiplier",
-        0.75,
+        0.75f,
         minb,
         0x80u,
         "Percentage of weapon firing rate to use");
     minc.value.max = FLT_MAX;
-    minc.value.min = 0.0;
+    minc.value.min = 0.0f;
     perk_extraBreath = Dvar_RegisterFloat(
         "perk_extraBreath",
-        5.0,
+        5.0f,
         minc,
         0x80u,
         "Number of extra seconds a player can hold his breath");
-    mind.value.max = 30.0;
-    mind.value.min = 0.0;
+    mind.value.max = 30.0f;
+    mind.value.min = 0.0f;
     perk_bulletPenetrationMultiplier = Dvar_RegisterFloat(
         "perk_bulletPenetrationMultiplier",
-        2.0,
+        2.0f,
         mind,
         0x80u,
         "Multiplier for extra bullet penetration");
@@ -104,18 +104,18 @@ void __cdecl Perks_RegisterDvars()
         0x80u,
         "Name of the grenade weapon to drop");
     mine.value.max = FLT_MAX;
-    mine.value.min = 0.0;
+    mine.value.min = 0.0f;
     perk_parabolicRadius = Dvar_RegisterFloat(
         "perk_parabolicRadius",
-        400.0,
+        400.0f,
         mine,
         0x80u,
         "Eavesdrop perk's effective radius");
-    minf.value.max = 180.0;
-    minf.value.min = 0.0;
+    minf.value.max = 180.0f;
+    minf.value.min = 0.0f;
     perk_parabolicAngle = Dvar_RegisterFloat(
         "perk_parabolicAngle",
-        180.0,
+        180.0f,
         minf,
         0x80u,
         "Eavesdrop perk's effective FOV angle");
@@ -125,10 +125,10 @@ void __cdecl Perks_RegisterDvars()
         0x80u,
         "Eavesdrop icon to use when displaying eavesdropped voice chats");
     ming.value.max = FLT_MAX;
-    ming.value.min = 0.0;
+    ming.value.min = 0.0f;
     perk_sprintMultiplier = Dvar_RegisterFloat(
         "perk_sprintMultiplier",
-        2.0,
+        2.0f,
         ming,
         0x80u,
         "Multiplier for player_sprinttime");

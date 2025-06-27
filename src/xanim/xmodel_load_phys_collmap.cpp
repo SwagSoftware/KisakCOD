@@ -682,7 +682,7 @@ bool __cdecl PlaneEqual(const float *p1, const float *p2)
     float v3; // [esp+8h] [ebp-8h]
     float v4; // [esp+Ch] [ebp-4h]
 
-    if (!VecNCompareCustomEpsilon(p1, p2, 0.001, 3))
+    if (!VecNCompareCustomEpsilon(p1, p2, 0.001f, 3))
         return 0;
     v4 = p1[3] - p2[3];
     v3 = fabs(v4);
@@ -729,7 +729,7 @@ char __cdecl RemoveDuplicateBrushPlanes(
                 negatedNormal[0] = -(*planes)[4 * sideIndexJ];
                 negatedNormal[1] = -(*planes)[4 * sideIndexJ + 1];
                 negatedNormal[2] = -(*planes)[4 * sideIndexJ + 2];
-                if (VecNCompareCustomEpsilon(&(*planes)[4 * sideIndexI], negatedNormal, 0.001, 3)
+                if (VecNCompareCustomEpsilon(&(*planes)[4 * sideIndexI], negatedNormal, 0.001f, 3)
                     && (*planes)[4 * sideIndexI + 3] <= -(*planes)[4 * sideIndexJ + 3])
                 {
                     Com_PrintWarning(19, "Map %s, Brush %i: mirrored plane\n", mapname, brushnum);
@@ -827,7 +827,7 @@ unsigned int __cdecl GetPlaneIntersections(
                 plane[2] = &(*planes)[4 * sideIndex[2]];
                 if (IntersectPlanes(plane, xyz))
                 {
-                    SnapPointToIntersectingPlanes(plane, xyz, 0.25, 0.0099999998);
+                    SnapPointToIntersectingPlanes(plane, xyz, 0.25f, 0.0099999998f);
                     ptCount = AddSimplePoint(planes, planeCount, planeIndex, xyz, OutPts, ptCount, maxPtCount);
                 }
             }

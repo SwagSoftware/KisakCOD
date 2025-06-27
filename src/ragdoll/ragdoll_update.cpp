@@ -320,17 +320,17 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
     AxisTranspose(tAxis, axis);
     if (!jointDef->numLimitAxes)
     {
-        jointDef->limitAxes[0][0] = 0.0;
-        jointDef->limitAxes[0][1] = 0.0;
-        jointDef->limitAxes[0][2] = 1.0;
-        jointDef->axisFriction[0] = 0.0;
-        jointDef->minAngles[0] = -1.5707964;
-        jointDef->maxAngles[0] = 1.5707964;
+        jointDef->limitAxes[0][0] = 0.0f;
+        jointDef->limitAxes[0][1] = 0.0f;
+        jointDef->limitAxes[0][2] = 1.0f;
+        jointDef->axisFriction[0] = 0.0f;
+        jointDef->minAngles[0] = -1.5707964f;
+        jointDef->maxAngles[0] = 1.5707964f;
         ++jointDef->numLimitAxes;
     }
     for (i = 0; i < jointDef->numLimitAxes; ++i)
         Vec3Rotate(jointDef->limitAxes[i], axis, limitAxes[i]);
-    Vec3Scale(jointDef->axisFriction, 15.0, fric);
+    Vec3Scale(jointDef->axisFriction, 15.0f, fric);
     type = jointDef->type;
     if (type == RAGDOLL_JOINT_HINGE)
     {
@@ -340,7 +340,7 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
             parentBone->rigidBody,
             anchor,
             limitAxes[0],
-            0.0,
+            0.0f,
             fric[0],
             jointDef->minAngles[0],
             jointDef->maxAngles[0]);
@@ -1227,9 +1227,11 @@ DObjAnimMat *__cdecl Ragdoll_GetDObjLocalBoneMatrix(const cpose_t *pose, DObj_s 
 
     if (!obj)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 43, 0, "%s", "obj");
-    Profile_Begin(398);
-    CG_DObjCalcBone(pose, obj, boneIndex);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("Ragdoll_GetDObjLocalBoneMatrix");
+        CG_DObjCalcBone(pose, obj, boneIndex);
+    }
+
     mat = DObjGetRotTransArray(obj);
     if (mat)
         return &mat[boneIndex];
@@ -2004,26 +2006,25 @@ void __cdecl Ragdoll_Update(int msec)
     RagdollBody *body; // [esp+30h] [ebp-8h]
     int i; // [esp+34h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1898, 0, "%s", "Sys_IsMainThread()");
+    iassert(Sys_IsMainThread());
+
     if (ragdollInited)
     {
-        Profile_Begin(400);
+        PROF_SCOPED("Ragdoll_Update");
         if (ragdoll_enable->current.enabled && cg_paused && !cg_paused->current.integer)
         {
             ragdollTime += msec;
             for (i = 0; i < 32; ++i)
             {
                 body = &ragdollBodies[i];
-                if (!body)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
+                iassert(body);
+
                 if (body->references > 0)
                     Ragdoll_BodyUpdate(msec, body);
             }
             Phys_SetCollisionCallback(PHYS_WORLD_RAGDOLL, Ragdoll_GenerateAllSelfCollisionContacts);
             Phys_RunToTime(0, PHYS_WORLD_RAGDOLL, ragdollTime);
         }
-        Profile_EndInternal(0);
     }
 }
 

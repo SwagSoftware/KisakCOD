@@ -47,7 +47,7 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
     if ((ent->client->ps.pm_flags & 1) != 0 && (ent->client->ps.eFlags & 0x300) == 0)
     {
         fDeltab = AngleDelta(ent->client->ps.proneDirection, newAngle[1]);
-        v25 = fDeltab * 0.002777777845039964;
+        v25 = fDeltab * 0.002777777845039964f;
         v15 = v25 + 0.5;
         v14 = floor(v15);
         fDelta = (v25 - v14) * 360.0;
@@ -59,7 +59,7 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
                 v2 = fDelta - bg_prone_yawcap->current.value;
             fDeltac = v2;
             ent->client->ps.delta_angles[1] = ent->client->ps.delta_angles[1] + fDeltac;
-            if (fDeltac <= 0.0)
+            if (fDeltac <= 0.0f)
             {
                 v12 = ent->client->ps.proneDirection + bg_prone_yawcap->current.value;
                 newAngle[1] = AngleNormalize360(v12);
@@ -71,43 +71,43 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
             }
         }
         fDeltad = AngleDelta(ent->client->ps.proneTorsoPitch, newAngle[0]);
-        v24 = fDeltad * 0.002777777845039964;
-        v11 = v24 + 0.5;
+        v24 = fDeltad * 0.002777777845039964f;
+        v11 = v24 + 0.5f;
         v10 = floor(v11);
-        fDeltaa = (v24 - v10) * 360.0;
-        if (fDeltaa > 45.0 || fDeltaa < -45.0)
+        fDeltaa = (v24 - v10) * 360.0f;
+        if (fDeltaa > 45.0f || fDeltaa < -45.0f)
         {
-            if (fDeltaa <= 45.0)
-                v3 = fDeltaa + 45.0;
+            if (fDeltaa <= 45.0f)
+                v3 = fDeltaa + 45.0f;
             else
-                v3 = fDeltaa - 45.0;
+                v3 = fDeltaa - 45.0f;
             fDeltae = v3;
             ent->client->ps.delta_angles[0] = ent->client->ps.delta_angles[0] + fDeltae;
-            if (fDeltae <= 0.0)
+            if (fDeltae <= 0.0f)
             {
-                v20 = ent->client->ps.proneTorsoPitch + 45.0;
-                v21 = v20 * 0.002777777845039964;
-                v7 = v21 + 0.5;
+                v20 = ent->client->ps.proneTorsoPitch + 45.0f;
+                v21 = v20 * 0.002777777845039964f;
+                v7 = v21 + 0.5f;
                 v6 = floor(v7);
-                newAngle[0] = (v21 - v6) * 360.0;
+                newAngle[0] = (v21 - v6) * 360.0f;
             }
             else
             {
-                v22 = ent->client->ps.proneTorsoPitch - 45.0;
-                v23 = v22 * 0.002777777845039964;
-                v9 = v23 + 0.5;
+                v22 = ent->client->ps.proneTorsoPitch - 45.0f;
+                v23 = v22 * 0.002777777845039964f;
+                v9 = v23 + 0.5f;
                 v8 = floor(v9);
-                newAngle[0] = (v23 - v8) * 360.0;
+                newAngle[0] = (v23 - v8) * 360.0f;
             }
         }
     }
     for (i = 0; i < 3; ++i)
     {
-        v18 = newAngle[i] - (double)ent->client->sess.cmd.angles[i] * 0.0054931640625;
-        v19 = v18 * 0.002777777845039964;
-        v5 = v19 + 0.5;
+        v18 = newAngle[i] - (float)ent->client->sess.cmd.angles[i] * 0.0054931640625f;
+        v19 = v18 * 0.002777777845039964f;
+        v5 = v19 + 0.5f;
         v4 = floor(v5);
-        v17 = (v19 - v4) * 360.0;
+        v17 = (v19 - v4) * 360.0f;
         ent->client->ps.delta_angles[i] = v17;
     }
     ent->r.currentAngles[0] = newAngle[0];
@@ -284,7 +284,7 @@ char *__cdecl ClientConnect(unsigned int clientNum, unsigned __int16 scriptPersI
     ent->s.clientNum = clientNum;
     client->sess.cs.clientIndex = clientNum;
     client->ps.clientNum = clientNum;
-    client->sess.moveSpeedScaleMultiplier = 1.0;
+    client->sess.moveSpeedScaleMultiplier = 1.0f;
     client->ps.moveSpeedScaleMultiplier = client->sess.moveSpeedScaleMultiplier;
     if (client->ps.eFlags)
         MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 344, 0, "%s", "!client->ps.eFlags");
@@ -372,12 +372,12 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     G_SetClientContents(ent);
     ent->handler = 11;
     ent->flags = 4096;
-    ent->r.mins[0] = -15.0;
-    ent->r.mins[1] = -15.0;
-    ent->r.mins[2] = 0.0;
-    ent->r.maxs[0] = 15.0;
-    ent->r.maxs[1] = 15.0;
-    ent->r.maxs[2] = 70.0;
+    ent->r.mins[0] = -15.0f;
+    ent->r.mins[1] = -15.0f;
+    ent->r.mins[2] = 0.0f;
+    ent->r.maxs[0] = 15.0f;
+    ent->r.maxs[1] = 15.0f;
+    ent->r.maxs[2] = 70.0f;
     iFlags = client->ps.eFlags & 0x100002;
     memcpy(&savedSess, &client->sess, sizeof(savedSess));
     savedSpawnCount = client->ps.stats[4];
@@ -399,8 +399,8 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     client->ps.viewHeightTarget = 60;
     client->ps.viewHeightCurrent = 60.0;
     client->ps.viewHeightLerpTime = 0;
-    client->ps.dofNearBlur = 6.0;
-    client->ps.dofFarBlur = 1.8;
+    client->ps.dofNearBlur = 6.0f;
+    client->ps.dofFarBlur = 1.8f;
     client->ps.spreadOverride = 0;
     client->ps.spreadOverrideState = 0;
     client->ps.throwBackGrenadeTimeLeft = 0;
@@ -508,14 +508,14 @@ unsigned int __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, i
     }
     vOfs = pEnt->r.currentOrigin[0] - *vPosition;
     vOfs_4 = pEnt->r.currentOrigin[1] - vPosition[1];
-    iPos = (int)(vOfs + 0.5);
-    iPos_4 = (int)(vOfs_4 + 0.5);
-    fScale = 1.0;
-    fScale_4 = 1.0;
+    iPos = (int)(vOfs + 0.5f);
+    iPos_4 = (int)(vOfs_4 + 0.5f);
+    fScale = 1.0f;
+    fScale_4 = 1.0f;
     if (iPos <= 1024)
     {
         if (iPos < -1022)
-            fScale = -1022.0 / (double)iPos;
+            fScale = -1022.0f / (double)iPos;
     }
     else
     {
@@ -524,7 +524,7 @@ unsigned int __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, i
     if (iPos_4 <= 1024)
     {
         if (iPos_4 < -1022)
-            fScale_4 = -1022.0 / (double)iPos_4;
+            fScale_4 = -1022.0f / (double)iPos_4;
     }
     else
     {
@@ -560,7 +560,7 @@ unsigned int __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, i
     {
         iPos_4 = 1024;
     }
- return ((int)(pEnt->r.currentAngles[1] * 0.7111111283302307) << 24)
+ return ((int)(pEnt->r.currentAngles[1] * 0.7111111283302307f) << 24)
        | (((((iPos_4 + 2) / 4) + 255) & 0x1FF) << 15) & 0xFFFFFF
        | (((((iPos + 2) / 4) + 255) & 0x1FF) << 6) & 0x7FFF
        | pEnt->s.number & 0x3F;

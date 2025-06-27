@@ -2589,10 +2589,10 @@ void Scr_ScriptWindow::Draw(float x,
     int col; // [esp+CCh] [ebp-8h]
     bool existsBreakpoint; // [esp+D3h] [ebp-1h]
 
-    colorBlue[0] = 0.2;
-    colorBlue[1] = 0.2;
-    colorBlue[2] = 0.40000001;
-    colorBlue[3] = 1.0;
+    colorBlue[0] = 0.2f;
+    colorBlue[1] = 0.2f;
+    colorBlue[2] = 0.40000001f;
+    colorBlue[3] = 1.0f;
     if (scrDebuggerGlob.atBreakpoint)
         UI_Component::DrawPic(x, y, width, height, colorBlue, cls.whiteMaterial);
     else

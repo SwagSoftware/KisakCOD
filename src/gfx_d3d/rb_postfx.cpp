@@ -108,14 +108,17 @@ void __cdecl RB_ProcessPostEffects(const GfxViewInfo *viewInfo)
 {
     float blurRadius; // [esp+38h] [ebp-4h]
 
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 403, 0, "%s", "viewInfo");
+    iassert(viewInfo);
+
     if (RB_UsingPostEffects(viewInfo))
     {
-        Profile_Begin(115);
+        PROF_SCOPED("RB_ProcessPostEffects");
+
         RB_GetResolvedScene();
+
         if (RB_UsingMergedPostEffects(viewInfo))
             RB_ApplyMergedPostEffects(viewInfo);
+
         if (R_UsingGlow(viewInfo))
         {
             RB_CalcGlowEffect(viewInfo);
@@ -130,7 +133,6 @@ void __cdecl RB_ProcessPostEffects(const GfxViewInfo *viewInfo)
                 MyAssertHandler(".\\rb_postfx.cpp", 426, 1, "%s\n\t(blurRadius) = %g", "(blurRadius > 0.0f)", blurRadius);
             RB_BlurScreen(viewInfo, blurRadius);
         }
-        Profile_EndInternal(0);
     }
 }
 
@@ -228,11 +230,11 @@ void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo)
         dofEquation[3] = v10;
         if (!Vec4Compare(gfxCmdBufSourceState.input.consts[12], dofEquation))
             R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0xCu, dofEquation);
-        v9 = 1.0 / (double)vidConfig.sceneHeight;
-        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0x10u, 0.0, v9, 0.0, 0.0);
-        smallFrac = RB_GetDepthOfFieldBlurFraction(viewInfo, 1.4);
-        mediumFrac = RB_GetDepthOfFieldBlurFraction(viewInfo, 3.5999999);
-        if (smallFrac <= 0.0 || mediumFrac <= (double)smallFrac || mediumFrac >= 1.0)
+        v9 = 1.0f / (float)vidConfig.sceneHeight;
+        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0x10u, 0.0, v9, 0.0f, 0.0f);
+        smallFrac = RB_GetDepthOfFieldBlurFraction(viewInfo, 1.4f);
+        mediumFrac = RB_GetDepthOfFieldBlurFraction(viewInfo, 3.5999999f);
+        if (smallFrac <= 0.0f || mediumFrac <= smallFrac || mediumFrac >= 1.0f)
         {
             v1 = va("%g, %g, %g, %i", smallFrac, mediumFrac, viewInfo->dof.nearBlur, vidConfig.sceneHeight);
             MyAssertHandler(
@@ -243,15 +245,15 @@ void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo)
                 "0.0f < smallFrac && smallFrac < mediumFrac && mediumFrac < 1.0f",
                 v1);
         }
-        v8 = 1.0 / (1.0 - mediumFrac);
-        v7 = -1.0 / (1.0 - mediumFrac);
-        v6 = -1.0 / (mediumFrac - smallFrac);
-        v5 = -1.0 / smallFrac;
+        v8 = 1.0f / (1.0f - mediumFrac);
+        v7 = -1.0f / (1.0f - mediumFrac);
+        v6 = -1.0f / (mediumFrac - smallFrac);
+        v5 = -1.0f / smallFrac;
         R_UpdateCodeConstant(&gfxCmdBufSourceState, 0xEu, v5, v6, v7, v8);
-        v4 = -mediumFrac / (1.0 - mediumFrac);
-        v3 = 1.0 / (1.0 - mediumFrac);
+        v4 = -mediumFrac / (1.0f - mediumFrac);
+        v3 = 1.0f / (1.0f - mediumFrac);
         v2 = mediumFrac / (mediumFrac - smallFrac);
-        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0xFu, 1.0, v2, v3, v4);
+        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0xFu, 1.0f, v2, v3, v4);
         RB_GetDepthOfFieldInputImages(viewInfo->dof.nearBlur);
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
@@ -309,23 +311,23 @@ void __cdecl RB_GetSceneDepthOfFieldEquation(
     float v6; // [esp+14h] [ebp-Ch]
     float v7; // [esp+18h] [ebp-8h]
 
-    if (zNear == 0.0)
+    if (zNear == 0.0f)
         MyAssertHandler(".\\rb_postfx.cpp", 175, 0, "%s", "zNear");
     RB_GetNearDepthOfFieldEquation(nearOutOfFocus, nearInFocus, zNear, 1.0, dofEquation);
     v7 = zNear - farInFocus;
-    if (v7 < 0.0)
+    if (v7 < 0.0f)
         v6 = farInFocus;
     else
         v6 = zNear;
-    if (v6 < (double)farOutOfFocus)
+    if (v6 < (float)farOutOfFocus)
     {
-        dofEquation[1] = (float)1.0 / (farOutOfFocus - farInFocus);
+        dofEquation[1] = 1.0f / (farOutOfFocus - farInFocus);
         dofEquation[3] = farInFocus / (farInFocus - farOutOfFocus);
     }
     else
     {
-        dofEquation[1] = 0.0;
-        dofEquation[3] = 0.0;
+        dofEquation[1] = 0.0f;
+        dofEquation[3] = 0.0f;
     }
 }
 
@@ -340,14 +342,14 @@ void __cdecl RB_GetNearDepthOfFieldEquation(
     float v6; // [esp+4h] [ebp-4h]
 
     v6 = outOfFocus - nearClip;
-    if (v6 < 0.0)
+    if (v6 < 0.0f)
         v5 = nearClip;
     else
         v5 = outOfFocus;
-    if (v5 >= (double)inFocus)
+    if (v5 >= inFocus)
     {
-        inFocus = nearClip * 0.5;
-        outOfFocus = 0.0;
+        inFocus = nearClip * 0.5f;
+        outOfFocus = 0.0f;
     }
     *dofEquation = depthScale / (outOfFocus - inFocus);
     dofEquation[2] = inFocus / (inFocus - outOfFocus);
@@ -358,11 +360,11 @@ void __cdecl RB_GetViewModelDepthOfFieldEquation(float outOfFocus, float inFocus
     float nearClip; // [esp+14h] [ebp-8h]
 
     nearClip = r_znear_depthhack->current.value;
-    dofEquation[1] = 0.0;
+    dofEquation[1] = 0.0f;
     RB_GetNearDepthOfFieldEquation(outOfFocus, inFocus, nearClip, 1.0, dofEquation);
 }
 
-double __cdecl RB_GetDepthOfFieldBlurFraction(const GfxViewInfo *viewInfo, float pixelRadiusAtSceneRes)
+float __cdecl RB_GetDepthOfFieldBlurFraction(const GfxViewInfo *viewInfo, float pixelRadiusAtSceneRes)
 {
     float fraction; // [esp+18h] [ebp-8h]
     float normalizedRadius; // [esp+1Ch] [ebp-4h]
@@ -375,12 +377,12 @@ double __cdecl RB_GetDepthOfFieldBlurFraction(const GfxViewInfo *viewInfo, float
             "%s\n\t(viewInfo->dof.nearBlur) = %g",
             "(viewInfo->dof.nearBlur >= 4.0f)",
             viewInfo->dof.nearBlur);
-    normalizedRadius = pixelRadiusAtSceneRes * 480.0 / (double)vidConfig.sceneHeight;
+    normalizedRadius = pixelRadiusAtSceneRes * 480.0f / (double)vidConfig.sceneHeight;
     fraction = normalizedRadius / viewInfo->dof.nearBlur;
-    return (float)pow(fraction, r_dof_bias->current.value);
+    return pow(fraction, r_dof_bias->current.value);
 }
 
-double __cdecl RB_GetBlurRadius(float blurRadiusFromCode)
+float __cdecl RB_GetBlurRadius(float blurRadiusFromCode)
 {
     float v2; // [esp+8h] [ebp-14h]
     float v3; // [esp+Ch] [ebp-10h]
@@ -404,13 +406,13 @@ void __cdecl RB_BlurScreen(const GfxViewInfo *viewInfo, float blurRadius)
 
     if (!viewInfo)
         MyAssertHandler(".\\rb_postfx.cpp", 381, 0, "%s", "viewInfo");
-    blurRadiusMin = 1440.0 / gfxCmdBufSourceState.sceneViewport.height;
+    blurRadiusMin = 1440.0f / gfxCmdBufSourceState.sceneViewport.height;
     color = -1;
     if (blurRadiusMin > blurRadius)
     {
 //        HIBYTE(color) = (int)(blurRadius / blurRadiusMin * 255.0f);
         color = (int)(blurRadius / blurRadiusMin * 255.0f);
-        blurRadius = 1440.0 / gfxCmdBufSourceState.sceneViewport.height;
+        blurRadius = 1440.0f / gfxCmdBufSourceState.sceneViewport.height;
     }
     RB_GaussianFilterImage(blurRadius, R_RENDERTARGET_RESOLVED_SCENE, R_RENDERTARGET_POST_EFFECT_0);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);

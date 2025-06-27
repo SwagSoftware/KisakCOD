@@ -30,10 +30,12 @@ void __cdecl R_EmitDrawSurfList(GfxDrawSurf *drawSurfs, unsigned int drawSurfCou
 {
     int newDrawSurfCount; // [esp+4Ch] [ebp-4h]
 
-    Profile_Begin(65);
-    if (!drawSurfs)
-        MyAssertHandler(".\\r_pretess.cpp", 99, 0, "%s", "drawSurfs");
+    PROF_SCOPED("R_EmitDrawSurfList");
+
+    iassert(drawSurfs);
+
     newDrawSurfCount = drawSurfCount + frontEndDataOut->drawSurfCount;
+
     if (newDrawSurfCount <= 0x8000)
     {
         Com_Memcpy(
@@ -46,7 +48,6 @@ void __cdecl R_EmitDrawSurfList(GfxDrawSurf *drawSurfs, unsigned int drawSurfCou
     {
         R_WarnOncePerFrame(R_WARN_MAX_DRAWSURFS);
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int stageCount)
@@ -97,13 +98,14 @@ void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int s
             stageCounta = dstStageIndex;
             if (dstStageIndex == 1)
             {
-                Profile_Begin(65);
-                Com_Memcpy(
-                    (char *)&frontEndDataOut->drawSurfs[frontEndDataOut->drawSurfCount],
-                    (char *)drawSurfs[0],
-                    8 * drawSurfCount[0]);
-                frontEndDataOut->drawSurfCount += drawSurfCount[0];
-                Profile_EndInternal(0);
+                {
+                    PROF_SCOPED("R_EmitDrawSurfList");
+                    Com_Memcpy(
+                        (char *)&frontEndDataOut->drawSurfs[frontEndDataOut->drawSurfCount],
+                        (char *)drawSurfs[0],
+                        8 * drawSurfCount[0]);
+                    frontEndDataOut->drawSurfCount += drawSurfCount[0];
+                }
                 return;
             }
             primarySortKey = drawSurfs[0]->fields.primarySortKey;
@@ -138,7 +140,8 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
     GfxDrawSurf drawSurf; // [esp+48h] [ebp-10h]
     GfxDrawSurf *outDrawSurf; // [esp+54h] [ebp-4h]
 
-    Profile_Begin(65);
+    PROF_SCOPED("R_EmitDrawSurfList");
+
     if (!drawSurfs)
         MyAssertHandler(".\\r_pretess.cpp", 138, 0, "%s", "drawSurfs");
     if (!drawSurfCount)
@@ -156,7 +159,6 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
     } while (usedCount < drawSurfCount);
 
     frontEndDataOut->drawSurfCount += usedCount;
-    Profile_EndInternal(0);
     return usedCount;
 }
 

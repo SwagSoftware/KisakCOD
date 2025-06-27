@@ -107,9 +107,10 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
     sunOrigin[1] = -sunShadow->sunProj.viewMatrix[3][1];
     sunOrigin[2] = -sunShadow->sunProj.viewMatrix[3][2];
     shadowSampleSize = sm_sunSampleSizeNear->current.value;
-    Profile_Begin(67);
-    R_GetSceneExtentsAlongDir(sunOrigin, sunAxis[0], &nearClip, &farClip);
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("R_BoundScene");
+        R_GetSceneExtentsAlongDir(sunOrigin, sunAxis[0], &nearClip, &farClip);
+    }
     sunProj = &sunShadow->sunProj;
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
@@ -801,36 +802,32 @@ void __cdecl R_GetSunShadowLookupMatrix(
 
 void __cdecl R_SunShadowMaps()
 {
-    unsigned int oldViewIndex; // [esp+30h] [ebp-Ch]
-    int partitionIndex; // [esp+34h] [ebp-8h]
-    unsigned int viewIndex; // [esp+38h] [ebp-4h]
+    unsigned int oldViewIndex;
+    int partitionIndex;
+    unsigned int viewIndex;
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_sunshadow.cpp", 656, 0, "%s", "rgp.world");
-    KISAK_NULLSUB();
-    Profile_Begin(76);
+    iassert(rgp.world);
+
+    //KISAK_NULLSUB();
+
+    PROF_SCOPED("R_SunShadowMaps");
+
     oldViewIndex = R_SetVisData(0);
     shadowGlob.defaultShadowCasterTechnique = Material_GetTechnique(
         rgp.depthPrepassMaterial,
         gfxMetrics.shadowmapBuildTechType);
+
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
         viewIndex = partitionIndex + 1;
-        if (partitionIndex == -1 || viewIndex > 2)
-            MyAssertHandler(
-                ".\\r_sunshadow.cpp",
-                674,
-                0,
-                "%s\n\t(viewIndex) = %i",
-                "((viewIndex >= SCENE_VIEW_SUNSHADOW_0) && (viewIndex <= SCENE_VIEW_SUNSHADOW_1))",
-                viewIndex);
+        iassert(((viewIndex >= SCENE_VIEW_SUNSHADOW_0) && (viewIndex <= SCENE_VIEW_SUNSHADOW_1)));
         R_SetVisData(viewIndex);
-        Profile_Begin(72);
-        R_AddWorldSurfacesFrustumOnly();
-        Profile_EndInternal(0);
+        {
+            PROF_SCOPED("R_AddShadowSurfacesDpvs");
+            R_AddWorldSurfacesFrustumOnly();
+        }
     }
     R_SetVisData(oldViewIndex);
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
@@ -842,10 +839,13 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
     GfxSunShadow *sunShadow; // [esp+44h] [ebp-8h]
 
     sunShadow = &viewInfo->sunShadow;
-    Profile_Begin(75);
-    KISAK_NULLSUB();
-    if (frontEndDataOut->sunLight.type != 1)
-        MyAssertHandler(".\\r_sunshadow.cpp", 703, 0, "%s", "frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR");
+
+    PROF_SCOPED("EmitSunShadow");
+
+    //KISAK_NULLSUB();
+
+    iassert(frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR);
+
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
         info = &sunShadow->partition[partitionIndex].info;
@@ -866,6 +866,5 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
         sunShadow->partition[partitionIndex].info.drawSurfCount = frontEndDataOut->drawSurfCount - firstDrawSurf;
         sunShadow->partition[partitionIndex].partitionIndex = partitionIndex;
     }
-    Profile_EndInternal(0);
 }
 

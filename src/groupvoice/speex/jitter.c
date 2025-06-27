@@ -159,16 +159,16 @@ void speex_jitter_put(SpeexJitter *jitter, char *packet, int len, int timestamp)
       int int_margin;
       for (i=0;i<MAX_MARGIN;i++)
       {
-         jitter->shortterm_margin[i] *= .98;
-         jitter->longterm_margin[i] *= .995;
+         jitter->shortterm_margin[i] *= .98f;
+         jitter->longterm_margin[i] *= .995f;
       }
       int_margin = (arrival_margin + LATE_BINS*jitter->frame_time)/jitter->frame_time;
       if (int_margin>MAX_MARGIN-1)
          int_margin = MAX_MARGIN-1;
       if (int_margin>=0)
       {
-         jitter->shortterm_margin[int_margin] += .02;
-         jitter->longterm_margin[int_margin] += .005;
+         jitter->shortterm_margin[int_margin] += .02f;
+         jitter->longterm_margin[int_margin] += .005f;
       }
    }
    

@@ -209,32 +209,32 @@ void __cdecl ScriptEntCmdGetCommandTimes(float *pfTotalTime, float *pfAccelTime,
     if (*pfTotalTime <= 0.0)
         Scr_ParamError(1u, "total time must be positive");
     if (*pfTotalTime < EQUAL_EPSILON)
-        *pfTotalTime = 0.001;
+        *pfTotalTime = 0.001f;
     iNumParms = Scr_GetNumParam();
     if (iNumParms <= 2)
     {
-        *pfAccelTime = 0.0;
-        *pfDecelTime = 0.0;
+        *pfAccelTime = 0.0f;
+        *pfDecelTime = 0.0f;
     }
     else
     {
         *pfAccelTime = Scr_GetFloat(2u);
-        if (*pfAccelTime < 0.0)
+        if (*pfAccelTime < 0.0f)
             Scr_ParamError(2u, "accel time must be nonnegative");
         if (iNumParms <= 3)
         {
-            *pfDecelTime = 0.0;
+            *pfDecelTime = 0.0f;
         }
         else
         {
             *pfDecelTime = Scr_GetFloat(3u);
-            if (*pfDecelTime < 0.0)
+            if (*pfDecelTime < 0.0f)
                 Scr_ParamError(3u, "decel time must be nonnegative");
         }
     }
     if (*pfTotalTime < *pfAccelTime + *pfDecelTime)
     {
-        fTotalTimeRoundedUp = *pfTotalTime * 1.000000476837158;
+        fTotalTimeRoundedUp = *pfTotalTime * 1.000000476837158f;
         if (fTotalTimeRoundedUp >= *pfAccelTime + *pfDecelTime)
             *pfTotalTime = fTotalTimeRoundedUp;
         else
@@ -322,10 +322,10 @@ void __cdecl ScriptMover_SetupMove(
     Vec3Sub(vPos, vCurrPos, vMove);
     if (pTr->trType)
         BG_EvaluateTrajectory(pTr, level.time, vCurrPos);
-    if (fAccelTime == 0.0 && fDecelTime == 0.0)
+    if (fAccelTime == 0.0 && fDecelTime == 0.0f)
     {
         pTr->trTime = level.time;
-        pTr->trDuration = (int)(fTotalTime * 1000.0);
+        pTr->trDuration = (int)(fTotalTime * 1000.0f);
         *pfMidTime = fTotalTime;
         *pfDecelTime = 0.0;
         *vPos3 = *vPos;
@@ -370,7 +370,7 @@ void __cdecl ScriptMover_SetupMove(
             if (*pfMidTime == 0.0)
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfDecelTime * 1000.0);
+                pTr->trDuration = (int)(*pfDecelTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
@@ -393,14 +393,14 @@ void __cdecl ScriptMover_SetupMove(
             else
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfMidTime * 1000.0);
+                pTr->trDuration = (int)(*pfMidTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
                 Vec3Scale(vMaxSpeed, *pfMidTime, vMove);
                 if (!pTr->trDuration)
                     MyAssertHandler(".\\game\\g_scr_mover.cpp", 188, 0, "%s", "pTr->trDuration");
-                fDeltaa = 1000.0 / (double)pTr->trDuration;
+                fDeltaa = 1000.0f / (float)pTr->trDuration;
                 Vec3Scale(vMove, fDeltaa, pTr->trDelta);
                 if ((COERCE_UNSIGNED_INT(pTr->trDelta[0]) & 0x7F800000) == 0x7F800000
                     || (COERCE_UNSIGNED_INT(pTr->trDelta[1]) & 0x7F800000) == 0x7F800000
@@ -419,7 +419,7 @@ void __cdecl ScriptMover_SetupMove(
         else
         {
             pTr->trTime = level.time;
-            pTr->trDuration = (int)(fAccelTime * 1000.0);
+            pTr->trDuration = (int)(fAccelTime * 1000.0f);
             pTr->trBase[0] = *vCurrPos;
             pTr->trBase[1] = vCurrPos[1];
             pTr->trBase[2] = vCurrPos[2];
@@ -506,7 +506,7 @@ void __cdecl ScriptMover_GravityMove(gentity_s *mover, float *velocity, float to
     }
     trajectory = &mover->s.lerp.pos;
     mover->s.lerp.pos.trTime = level.time;
-    mover->s.lerp.pos.trDuration = (int)(totalTime * 1000.0);
+    mover->s.lerp.pos.trDuration = (int)(totalTime * 1000.0f);
     mover->s.lerp.pos.trBase[0] = mover->r.currentOrigin[0];
     mover->s.lerp.pos.trBase[1] = mover->r.currentOrigin[1];
     mover->s.lerp.pos.trBase[2] = mover->r.currentOrigin[2];
@@ -916,12 +916,12 @@ void __cdecl ScriptMover_SetupMoveSpeed(
 
     if (pTr->trType)
         BG_EvaluateTrajectory(pTr, level.time, vCurrPos);
-    if (fAccelTime == 0.0 && fDecelTime == 0.0)
+    if (fAccelTime == 0.0f && fDecelTime == 0.0f)
     {
         pTr->trTime = level.time;
-        pTr->trDuration = (int)(fTotalTime * 1000.0);
+        pTr->trDuration = (int)(fTotalTime * 1000.0f);
         *pfMidTime = fTotalTime;
-        *pfDecelTime = 0.0;
+        *pfDecelTime = 0.0f;
         pTr->trBase[0] = *vCurrPos;
         pTr->trBase[1] = vCurrPos[1];
         pTr->trBase[2] = vCurrPos[2];
@@ -948,15 +948,15 @@ void __cdecl ScriptMover_SetupMoveSpeed(
         *pfMidTime = fTotalTime - fAccelTime - fDecelTime;
         *pfDecelTime = fDecelTime;
         *pfSpeed = Vec3Length(vSpeed);
-        if (fAccelTime == 0.0)
+        if (fAccelTime == 0.0f)
         {
             *vPos1 = *vCurrPos;
             vPos1[1] = vCurrPos[1];
             vPos1[2] = vCurrPos[2];
-            if (*pfMidTime == 0.0)
+            if (*pfMidTime == 0.0f)
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfDecelTime * 1000.0);
+                pTr->trDuration = (int)(*pfDecelTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
@@ -979,7 +979,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
             else
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfMidTime * 1000.0);
+                pTr->trDuration = (int)(*pfMidTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
@@ -1003,7 +1003,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
         else
         {
             pTr->trTime = level.time;
-            pTr->trDuration = (int)(fAccelTime * 1000.0);
+            pTr->trDuration = (int)(fAccelTime * 1000.0f);
             pTr->trBase[0] = *vCurrPos;
             pTr->trBase[1] = vCurrPos[1];
             pTr->trBase[2] = vCurrPos[2];
@@ -1025,7 +1025,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
             BG_EvaluateTrajectory(pTr, pTr->trDuration + level.time, vPos1);
         }
         Vec3Mad(vPos1, *pfMidTime, vSpeed, vPos2);
-        if (*pfDecelTime == 0.0)
+        if (*pfDecelTime == 0.0f)
         {
             *vPos3 = *vPos2;
             vPos3[1] = vPos2[1];
@@ -1035,7 +1035,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
         {
             tr.trType = TR_DECELERATE;
             tr.trTime = level.time;
-            tr.trDuration = (int)(*pfDecelTime * 1000.0);
+            tr.trDuration = (int)(*pfDecelTime * 1000.0f);
             tr.trBase[0] = *vPos2;
             tr.trBase[1] = vPos2[1];
             tr.trBase[2] = vPos2[2];
@@ -1117,12 +1117,12 @@ void __cdecl ScriptEntCmd_PhysicsLaunch(scr_entref_t entref)
     }
     else
     {
-        contact_point[0] = 0.0;
-        contact_point[1] = 0.0;
-        contact_point[2] = 0.0;
-        initial_force[0] = 0.0;
-        initial_force[1] = 0.0;
-        initial_force[2] = 0.0;
+        contact_point[0] = 0.0f;
+        contact_point[1] = 0.0f;
+        contact_point[2] = 0.0f;
+        initial_force[0] = 0.0f;
+        initial_force[1] = 0.0f;
+        initial_force[2] = 0.0f;
     }
     ScriptMover_SetupPhysicsLaunch(&pSelf->s.lerp.pos, &pSelf->s.lerp.apos, contact_point, initial_force);
     pSelf->r.contents = 0;

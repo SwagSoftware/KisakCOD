@@ -24,7 +24,8 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
     const int *savedDuplicatePartBits; // [esp+B4h] [ebp-4h]
     int savedregs; // [esp+B8h] [ebp+0h] BYREF
 
-    Profile_Begin(310);
+    PROF_SCOPED("DObjCalcSkel");
+
     iassert(obj);
     skel = (DSkel *)&obj->skel;
     iassert(skel);
@@ -38,7 +39,6 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
 
     if (bFinished)
     {
-        Profile_EndInternal(0);
         return;
     }
 
@@ -81,7 +81,6 @@ void __cdecl DObjCalcSkel(const DObj_s *obj, int *partBits)
             iassert(!IS_NAN(skel->mat[boneIndexa].trans[0]) && !IS_NAN(skel->mat[boneIndexa].trans[1]) && !IS_NAN(skel->mat[boneIndexa].trans[2]));
         }
     }
-    Profile_EndInternal(0);
 }
 
 void __cdecl GetControlAndDuplicatePartBits(

@@ -70,7 +70,7 @@ void __cdecl CG_AddLocalEntityTracerBeams(int localClientNum)
     localEntity_s *le; // [esp+40h] [ebp-8h]
     localEntity_s *activeLocalEntities; // [esp+44h] [ebp-4h]
 
-    Profile_Begin(23);
+    PROF_SCOPED("CG_DAF_AddLocalEntities");
     if (InterlockedIncrement(&g_localEntThread) != 1)
         MyAssertHandler(".\\cgame\\cg_localents.cpp", 156, 0, "%s", "Sys_InterlockedIncrement( &g_localEntThread ) == 1");
     activeLocalEntities = &cg_activeLocalEntities[localClientNum];
@@ -109,7 +109,6 @@ void __cdecl CG_AddLocalEntityTracerBeams(int localClientNum)
     }
     if (InterlockedDecrement(&g_localEntThread))
         MyAssertHandler(".\\cgame\\cg_localents.cpp", 178, 0, "%s", "Sys_InterlockedDecrement( &g_localEntThread ) == 0");
-    Profile_EndInternal(0);
 }
 
 void __cdecl CG_AddMovingTracer(const cg_s *cgameGlob, localEntity_s *le, const refdef_s *refdef)

@@ -460,10 +460,9 @@ void __cdecl SortMyShit /*qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSu
 
 void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount)
 {
-    Profile_Begin(88);
+    PROF_SCOPED("R_SortDrawSurfs");
     //qsortArray<GfxSortDrawSurfsInterface, GfxDrawSurf>(drawSurfList, surfCount);
     SortMyShit(drawSurfList, surfCount);
-    Profile_EndInternal(0);
 }
 
 GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex)

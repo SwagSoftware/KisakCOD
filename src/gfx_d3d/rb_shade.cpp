@@ -23,7 +23,7 @@ void __cdecl R_SetVertexDecl(GfxCmdBufPrimState *primState, const MaterialVertex
 
     if (primState->vertexDecl != v3)
     {
-        Profile_Begin(94);
+        PROF_SCOPED("RB_SetVertexDeclaration");
         device = primState->device;
         iassert(device);
         do
@@ -46,7 +46,6 @@ void __cdecl R_SetVertexDecl(GfxCmdBufPrimState *primState, const MaterialVertex
             }
         } while (alwaysfails);
         primState->vertexDecl = v3;
-        Profile_EndInternal(0);
     }
 }
 
@@ -183,10 +182,12 @@ void __cdecl RB_BeginSurface(const Material *material, MaterialTechniqueType tec
 
 void __cdecl RB_EndTessSurface()
 {
-    Profile_Begin(114);
-    RB_EndSurfacePrologue();
-    RB_DrawTessSurface();
-    Profile_EndInternal(0);
+    {
+        PROF_SCOPED("EndSurface_Standard");
+        RB_EndSurfacePrologue();
+        RB_DrawTessSurface();
+    }
+
     RB_EndSurfaceEpilogue();
 }
 
@@ -218,13 +219,16 @@ void RB_DrawTessSurface()
     GfxDrawPrimArgs args; // [esp+40h] [ebp-Ch] BYREF
 
     iassert(tess.indexCount);
-    Profile_Begin(114);
+
+    PROF_SCOPED("EndSurface_Standard");
+
     if (gfxCmdBufSourceState.viewportIsDirty)
     {
         R_GetViewport(&gfxCmdBufSourceState, &viewport);
         R_SetViewport(&gfxCmdBufState, &viewport);
         R_UpdateViewport(&gfxCmdBufSourceState, &viewport);
     }
+
     args.vertexCount = tess.vertexCount;
     args.triCount = tess.indexCount / 3;
     iassert(gfxCmdBufState.prim.vertDeclType == VERTDECL_GENERIC);
@@ -232,7 +236,6 @@ void RB_DrawTessSurface()
     R_DrawTessTechnique(gfxCmdBufContext, &args);
     tess.indexCount = 0;
     tess.vertexCount = 0;
-    Profile_EndInternal(0);
 }
 
 void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs *args)
@@ -243,9 +246,11 @@ void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs
     bool isPixelCostEnabled; // [esp+47h] [ebp-5h]
     unsigned int passIndex; // [esp+48h] [ebp-4h]
 
-    Profile_Begin(90);
+    PROF_SCOPED("RB_DrawTechnique");
+
     iassert(dx.d3d9 && dx.device);
     iassert(context.state->material);
+
     technique = context.state->technique;
     iassert(technique);
 
@@ -279,7 +284,6 @@ void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs
 
     if (r_logFile->current.integer)
         RB_LogPrint("\n");
-    Profile_EndInternal(0);
 }
 
 void __cdecl RB_TessOverflow()

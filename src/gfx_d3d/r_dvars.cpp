@@ -536,7 +536,7 @@
      r_fullscreen = Dvar_RegisterBool("r_fullscreen", 0, 0x21u, "Display game full screen");
      min.value.max = 3.0;
      min.value.min = 0.5;
-     r_gamma = Dvar_RegisterFloat("r_gamma", 0.80000001, min, 1u, "Gamma value");
+     r_gamma = Dvar_RegisterFloat("r_gamma", 0.80000001f, min, 1u, "Gamma value");
      r_ignoreHwGamma = Dvar_RegisterBool("r_ignorehwgamma", 0, 0x21u, "Ignore hardware gamma");
      r_texFilterAnisoMax = Dvar_RegisterInt(
          "r_texFilterAnisoMax",
@@ -561,9 +561,9 @@
          0,
          1u,
          "Forces all mipmaps to use a particular blend between levels (or disables mipping.)");
-     mina.value.max = 15.99;
-     mina.value.min = -16.0;
-     r_texFilterMipBias = Dvar_RegisterFloat("r_texFilterMipBias", 0.0, mina, 0x80u, "Change the mipmap bias");
+     mina.value.max = 15.99f;
+     mina.value.min = -16.0f;
+     r_texFilterMipBias = Dvar_RegisterFloat("r_texFilterMipBias", 0.0f, mina, 0x80u, "Change the mipmap bias");
      r_fullbright = Dvar_RegisterBool("r_fullbright", 0, 0x80u, "Toggles rendering without lighting");
      r_debugShader = Dvar_RegisterEnum("r_debugShader", debugShaderNames, 0, 0x80u, "Enable shader debugging information");
      r_gpuSync = Dvar_RegisterEnum(
@@ -578,10 +578,10 @@
      r_smc_enable = Dvar_RegisterBool("r_smc_enable", 1, 0, "Enable static model cache");
      r_pretess = Dvar_RegisterBool("r_pretess", 1, 0, "Batch surfaces to reduce primitive count");
      minb.value.max = FLT_MAX;
-     minb.value.min = 0.0;
+     minb.value.min = 0.0f;
      r_lodScaleRigid = Dvar_RegisterFloat(
          "r_lodScaleRigid",
-         1.0,
+         1.0f,
          minb,
          1u,
          "Scale the level of detail distance for rigid models (larger reduces detail)");
@@ -589,15 +589,15 @@
      minc.value.min = -FLT_MAX;
      r_lodBiasRigid = Dvar_RegisterFloat(
          "r_lodBiasRigid",
-         0.0,
+         0.0f,
          minc,
          1u,
          "Bias the level of detail distance for rigid models (negative increases detail)");
      mind.value.max = FLT_MAX;
-     mind.value.min = 0.0;
+     mind.value.min = 0.0f;
      r_lodScaleSkinned = Dvar_RegisterFloat(
          "r_lodScaleSkinned",
-         1.0,
+         1.0f,
          mind,
          1u,
          "Scale the level of detail distance for skinned models (larger reduces detail)");
@@ -605,43 +605,43 @@
      mine.value.min = -FLT_MAX;
      r_lodBiasSkinned = Dvar_RegisterFloat(
          "r_lodBiasSkinned",
-         0.0,
+         0.0f,
          mine,
          1u,
          "Bias the level of detail distance for skinned models (negative increases detail)");
-     minf.value.max = 10000.0;
-     minf.value.min = 0.001;
+     minf.value.max = 10000.0f;
+     minf.value.min = 0.001f;
      r_znear = Dvar_RegisterFloat(
          "r_znear",
-         4.0,
+         4.0f,
          minf,
          0x80u,
          "Things closer than this aren't drawn.  Reducing this increases z-fighting in the distance.");
-     ming.value.max = 16.0;
-     ming.value.min = 0.001;
-     r_znear_depthhack = Dvar_RegisterFloat("r_znear_depthhack", 0.1, ming, 0x80u, "Viewmodel near clip plane");
+     ming.value.max = 16.0f;
+     ming.value.min = 0.001f;
+     r_znear_depthhack = Dvar_RegisterFloat("r_znear_depthhack", 0.1f, ming, 0x80u, "Viewmodel near clip plane");
      minh.value.max = FLT_MAX;
-     minh.value.min = 0.0;
+     minh.value.min = 0.0f;
      r_zfar = Dvar_RegisterFloat(
          "r_zfar",
-         0.0,
+         0.0f,
          minh,
          0x80u,
          "Change the distance at which culling fog reaches 100% opacity; 0 is off");
      r_fog = Dvar_RegisterBool("r_fog", 1, 0x80u, "Set to 0 to disable fog");
-     mini.value.max = 0.0;
-     mini.value.min = -4.0;
+     mini.value.max = 0.0f;
+     mini.value.min = -4.0f;
      r_polygonOffsetScale = Dvar_RegisterFloat(
          "r_polygonOffsetScale",
-         -1.0,
+         -1.0f,
          mini,
          1u,
          "Offset scale for decal polygons; bigger values z-fight less but poke through walls more");
-     minj.value.max = 0.0;
-     minj.value.min = -16.0;
+     minj.value.max = 0.0f;
+     minj.value.min = -16.0f;
      r_polygonOffsetBias = Dvar_RegisterFloat(
          "r_polygonOffsetBias",
-         -1.0,
+         -1.0f,
          minj,
          1u,
          "Offset bias for decal polygons; bigger values z-fight less but poke through walls more");
@@ -702,19 +702,19 @@
          1,
          0x80u,
          "Replace all specular maps with pure black (off) or pure white (super shiny)");
-     mink.value.max = 100.0;
-     mink.value.min = 0.0;
+     mink.value.max = 100.0f;
+     mink.value.min = 0.0f;
      r_specularColorScale = Dvar_RegisterFloat(
          "r_specularColorScale",
-         1.0,
+         1.0f,
          mink,
          0x1080u,
          "Set greater than 1 to brighten specular highlights");
-     minl.value.max = 100.0;
-     minl.value.min = 0.0;
+     minl.value.max = 100.0f;
+     minl.value.min = 0.0f;
      r_diffuseColorScale = Dvar_RegisterFloat(
          "r_diffuseColorScale",
-         1.0,
+         1.0f,
          minl,
          0x1080u,
          "Globally scale the diffuse color of all point lights");
@@ -744,8 +744,8 @@
          0x80u,
          "Shows how expensive it is to draw every pixel on the screen");
      r_xdebug = Dvar_RegisterEnum("r_xdebug", xdebugNames, 0, 0x80u, "xmodel/xanim debug rendering");
-     minm.value.max = 16.0;
-     minm.value.min = 0.0;
+     minm.value.max = 16.0f;
+     minm.value.min = 0.0f;
      r_debugLineWidth = Dvar_RegisterFloat("r_debugLineWidth", 1.0, minm, 1u, "Width of server side debug lines");
      r_vc_makelog = Dvar_RegisterInt(
          "r_vc_makelog",
@@ -775,72 +775,72 @@
          1,
          0,
          "Speed up model lighting by caching previous results");
-     minn.value.max = 4.0;
-     minn.value.min = 0.0;
-     r_lightTweakAmbient = Dvar_RegisterFloat("r_lightTweakAmbient", 0.1, minn, 0x240u, "Ambient light strength");
-     mino.value.max = 1.0;
-     mino.value.min = 0.0;
+     minn.value.max = 4.0f;
+     minn.value.min = 0.0f;
+     r_lightTweakAmbient = Dvar_RegisterFloat("r_lightTweakAmbient", 0.1f, minn, 0x240u, "Ambient light strength");
+     mino.value.max = 1.0f;
+     mino.value.min = 0.0f;
      r_lightTweakDiffuseFraction = Dvar_RegisterFloat(
          "r_lightTweakDiffuseFraction",
-         0.5,
+         0.5f,
          mino,
          0x240u,
          "diffuse light fraction");
-     minp.value.max = 4.0;
-     minp.value.min = 0.0;
-     r_lightTweakSunLight = Dvar_RegisterFloat("r_lightTweakSunLight", 1.0, minp, 0x280u, "Sunlight strength");
+     minp.value.max = 4.0f;
+     minp.value.min = 0.0f;
+     r_lightTweakSunLight = Dvar_RegisterFloat("r_lightTweakSunLight", 1.0f, minp, 0x280u, "Sunlight strength");
      r_lightTweakAmbientColor = Dvar_RegisterColor(
          "r_lightTweakAmbientColor",
-         1.0,
-         0.0,
-         0.0,
-         1.0,
+         1.0f,
+         0.0f,
+         0.0f,
+         1.0f,
          0x240u,
          "Light ambient color");
-     r_lightTweakSunColor = Dvar_RegisterColor("r_lightTweakSunColor", 0.0, 1.0, 0.0, 1.0, 0x280u, "Sun color");
+     r_lightTweakSunColor = Dvar_RegisterColor("r_lightTweakSunColor", 0.0f, 1.0f, 0.0f, 1.0f, 0x280u, "Sun color");
      r_lightTweakSunDiffuseColor = Dvar_RegisterColor(
          "r_lightTweakSunDiffuseColor",
-         0.0,
-         0.0,
-         1.0,
-         1.0,
+         0.0f,
+         0.0f,
+         1.0f,
+         1.0f,
          0x240u,
          "Sun diffuse color");
-     minq.value.max = 360.0;
-     minq.value.min = -360.0;
+     minq.value.max = 360.0f;
+     minq.value.min = -360.0f;
      r_lightTweakSunDirection = Dvar_RegisterVec3(
          "r_lightTweakSunDirection",
-         0.0,
-         0.0,
-         0.0,
+         0.0f,
+         0.0f,
+         0.0f,
          minq,
          0x1280u,
          "Sun direction in degrees");
      r_envMapOverride = Dvar_RegisterBool("r_envMapOverride", 0, 0, "Min reflection intensity based on glancing angle.");
-     minr.value.max = 2.0;
-     minr.value.min = 0.0;
+     minr.value.max = 2.0f;
+     minr.value.min = 0.0f;
      r_envMapMinIntensity = Dvar_RegisterFloat(
          "r_envMapMinIntensity",
-         0.2,
+         0.2f,
          minr,
          0,
          "Min reflection intensity based on glancing angle.");
-     mins.value.max = 2.0;
-     mins.value.min = 0.0099999998;
+     mins.value.max = 2.0f;
+     mins.value.min = 0.0099999998f;
      r_envMapMaxIntensity = Dvar_RegisterFloat(
          "r_envMapMaxIntensity",
-         0.5,
+         0.5f,
          mins,
          0,
          "Max reflection intensity based on glancing angle.");
-     mint.value.max = 20.0;
-     mint.value.min = 0.050000001;
-     r_envMapExponent = Dvar_RegisterFloat("r_envMapExponent", 5.0, mint, 0, "Reflection exponent.");
-     minu.value.max = 4.0;
-     minu.value.min = 0.0;
+     mint.value.max = 20.0f;
+     mint.value.min = 0.050000001f;
+     r_envMapExponent = Dvar_RegisterFloat("r_envMapExponent", 5.0f, mint, 0, "Reflection exponent.");
+     minu.value.max = 4.0f;
+     minu.value.min = 0.0f;
      r_envMapSunIntensity = Dvar_RegisterFloat(
          "r_envMapSunIntensity",
-         2.0,
+         2.0f,
          minu,
          0,
          "Max sun specular intensity intensity with env map materials.");
@@ -856,11 +856,11 @@
          0,
          "Write all graphics hardware calls for this many frames to a logfile");
      r_norefresh = Dvar_RegisterBool("r_norefresh", 0, 0x80u, "Skips all rendering.  Useful for benchmarking.");
-     minv.value.max = 1.0;
-     minv.value.min = 0.0;
+     minv.value.max = 1.0f;
+     minv.value.min = 0.0f;
      r_scaleViewport = Dvar_RegisterFloat(
          "r_scaleViewport",
-         1.0,
+         1.0f,
          minv,
          0x80u,
          "Scale 3D viewports by this fraction.  Use this to see if framerate is pixel shader bound.");
@@ -883,18 +883,18 @@
      r_clear = Dvar_RegisterEnum("r_clear", r_clearNames, 1, 0, "Controls how the color buffer is cleared");
      r_clearColor = Dvar_RegisterColor(
          "r_clearColor",
-         0.5,
-         0.75,
-         1.0,
-         1.0,
+         0.5f,
+         0.75f,
+         1.0f,
+         1.0f,
          0,
          "Color to clear the screen to when clearing the frame buffer");
      r_clearColor2 = Dvar_RegisterColor(
          "r_clearColor2",
-         1.0,
-         0.5,
-         0.0,
-         1.0,
+         1.0f,
+         0.5f,
+         0.0f,
+         1.0f,
          0,
          "Color to clear every second frame to (for use during development)");
      r_drawSun = Dvar_RegisterBool("r_drawSun", 1, 1u, "Enable sun effects");
@@ -912,27 +912,27 @@
          (DvarLimits)0x400000000LL,
          0,
          "Maximum number of dynamic lights drawn simultaneously");
-     minw.value.max = 0.99000001;
-     minw.value.min = 0.0;
+     minw.value.max = 0.99000001f;
+     minw.value.min = 0.0f;
      r_spotLightFovInnerFraction = Dvar_RegisterFloat(
          "r_spotLightFovInnerFraction",
-         0.69999999,
+         0.69999999f,
          minw,
          0x80u,
          "Relative Inner FOV angle for the dynamic spot light. 0 is full fade 0.99 is almost no fade.");
-     minx.value.max = 1200.0;
-     minx.value.min = 0.0;
+     minx.value.max = 1200.0f;
+     minx.value.min = 0.0f;
      r_spotLightStartRadius = Dvar_RegisterFloat(
          "r_spotLightStartRadius",
-         36.0,
+         36.0f,
          minx,
          0x1080u,
          "Radius of the circle at the start of the spot light in inches.");
-     miny.value.max = 1200.0;
-     miny.value.min = 1.0;
+     miny.value.max = 1200.0f;
+     miny.value.min = 1.0f;
      r_spotLightEndRadius = Dvar_RegisterFloat(
          "r_spotLightEndRadius",
-         196.0,
+         196.0f,
          miny,
          0x1080u,
          "Radius of the circle at the end of the spot light in inches.");
@@ -947,11 +947,11 @@
          1,
          0x80u,
          "Enable entity shadows for spot lights.");
-     minz.value.max = 16.0;
-     minz.value.min = 0.0;
+     minz.value.max = 16.0f;
+     minz.value.min = 0.0f;
      r_spotLightBrightness = Dvar_RegisterFloat(
          "r_spotLightBrightness",
-         14.0,
+         14.0f,
          minz,
          0x1080u,
          "Brightness scale for spot light to get overbrightness from the 0-1 particle color range.");
@@ -979,11 +979,11 @@
          0,
          0x80u,
          "Skipt the determination of what is in the potentially visible set (disables most drawing)");
-     minba.value.max = 1.0;
-     minba.value.min = 0.0;
+     minba.value.max = 1.0f;
+     minba.value.min = 0.0f;
      r_portalBevels = Dvar_RegisterFloat(
          "r_portalBevels",
-         0.69999999,
+         0.69999999f,
          minba,
          1u,
          "Helps cull geometry by angles of portals that are acute when projected onto the screen, value is th"
@@ -1004,11 +1004,11 @@
          (DvarLimits)0x6400000000LL,
          0x80u,
          "Stop portal recursion after this many iterations.  Useful for debugging portal errors.");
-     minbb.value.max = 1.0;
-     minbb.value.min = 0.0;
+     minbb.value.max = 1.0f;
+     minbb.value.min = 0.0f;
      r_portalMinClipArea = Dvar_RegisterFloat(
          "r_portalMinClipArea",
-         0.02,
+         0.02f,
          minbb,
          0,
          "Don't clip child portals by a parent portal smaller than this fraction of the screen area.");
@@ -1065,10 +1065,10 @@
          0x80u,
          "Select whether to use depth test in collision surfaces display");
      minbc.value.max = FLT_MAX;
-     minbc.value.min = 1.0;
+     minbc.value.min = 1.0f;
      r_showCollisionDist = Dvar_RegisterFloat(
          "r_showCollisionDist",
-         500.0,
+         500.0f,
          minbc,
          0x80u,
          "Maximum distance to show collision surfaces");
@@ -1080,17 +1080,17 @@
      r_zFeather = Dvar_RegisterBool("r_zFeather", 1, 1u, "Enable z feathering (fixes particles clipping into geometry)");
      r_depthPrepass = Dvar_RegisterBool("r_depthPrepass", 0, 1u, "Enable depth prepass (usually improves performance)");
      minbd.value.max = FLT_MAX;
-     minbd.value.min = -1.0;
-     r_highLodDist = Dvar_RegisterFloat("r_highLodDist", -1.0, minbd, 0x80u, "Distance for high level of detail");
+     minbd.value.min = -1.0f;
+     r_highLodDist = Dvar_RegisterFloat("r_highLodDist", -1.0f, minbd, 0x80u, "Distance for high level of detail");
      minbe.value.max = FLT_MAX;
-     minbe.value.min = -1.0;
-     r_mediumLodDist = Dvar_RegisterFloat("r_mediumLodDist", -1.0, minbe, 0x80u, "Distance for medium level of detail");
+     minbe.value.min = -1.0f;
+     r_mediumLodDist = Dvar_RegisterFloat("r_mediumLodDist", -1.0f, minbe, 0x80u, "Distance for medium level of detail");
      minbf.value.max = FLT_MAX;
-     minbf.value.min = -1.0;
-     r_lowLodDist = Dvar_RegisterFloat("r_lowLodDist", -1.0, minbf, 0x80u, "Distance for low level of detail");
+     minbf.value.min = -1.0f;
+     r_lowLodDist = Dvar_RegisterFloat("r_lowLodDist", -1.0f, minbf, 0x80u, "Distance for low level of detail");
      minbg.value.max = FLT_MAX;
-     minbg.value.min = -1.0;
-     r_lowestLodDist = Dvar_RegisterFloat("r_lowestLodDist", -1.0, minbg, 0x80u, "Distance for lowest level of detail");
+     minbg.value.min = -1.0f;
+     r_lowestLodDist = Dvar_RegisterFloat("r_lowestLodDist", -1.0f, minbg, 0x80u, "Distance for lowest level of detail");
      r_forceLod = Dvar_RegisterEnum("r_forceLod", r_forceLodNames, 4, 0x80u, "Force all level of detail to this level");
      r_modelVertColor = Dvar_RegisterBool(
          "r_modelVertColor",
@@ -1121,41 +1121,41 @@
          (DvarLimits)0x1800000000LL,
          0x80u,
          "Margin of error on number of desired shadows");
-     minbh.value.max = 1.0;
-     minbh.value.min = 0.0;
+     minbh.value.max = 1.0f;
+     minbh.value.min = 0.0f;
      sc_fadeRange = Dvar_RegisterFloat("sc_fadeRange", 0.25, minbh, 0x80u, "Shadow cookie fade range");
-     minbi.value.max = 20.0;
-     minbi.value.min = 0.0;
+     minbi.value.max = 20.0f;
+     minbi.value.min = 0.0f;
      sc_shadowInRate = Dvar_RegisterFloat(
          "sc_shadowInRate",
-         2.0,
+         2.0f,
          minbi,
          0x80u,
          "Rate at which the shadow cookie horizon moves inwards");
-     minbj.value.max = 20.0;
-     minbj.value.min = 0.0;
+     minbj.value.max = 20.0f;
+     minbj.value.min = 0.0f;
      sc_shadowOutRate = Dvar_RegisterFloat(
          "sc_shadowOutRate",
-         5.0,
+         5.0f,
          minbj,
          0x80u,
          "Rate at which the shadow cookie horizon moves outwards");
-     minbk.value.max = 2000.0;
-     minbk.value.min = 1.0;
-     sc_length = Dvar_RegisterFloat("sc_length", 400.0, minbk, 0x80u, "Shadow cookie length");
+     minbk.value.max = 2000.0f;
+     minbk.value.min = 1.0f;
+     sc_length = Dvar_RegisterFloat("sc_length", 400.0f, minbk, 0x80u, "Shadow cookie length");
      minbl.value.max = FLT_MAX;
      minbl.value.min = -FLT_MAX;
      sc_offscreenCasterLodBias = Dvar_RegisterFloat(
          "sc_offscreenCasterLodBias",
-         0.0,
+         0.0f,
          minbl,
          0x80u,
          "Shadow cookie off-screen caster level of detail bias");
      minbm.value.max = FLT_MAX;
-     minbm.value.min = 0.0;
+     minbm.value.min = 0.0f;
      sc_offscreenCasterLodScale = Dvar_RegisterFloat(
          "sc_offscreenCasterLodScale",
-         20.0,
+         20.0f,
          minbm,
          0x80u,
          "Shadow cookie off-screen caster level of detail scale");
@@ -1168,71 +1168,71 @@
          (DvarLimits)0x400000000LL,
          1u,
          "Limits how many primary lights can have shadow maps");
-     minbn.value.max = 5.0;
-     minbn.value.min = 0.0099999998;
+     minbn.value.max = 5.0f;
+     minbn.value.min = 0.0099999998f;
      sm_spotShadowFadeTime = Dvar_RegisterFloat(
          "sm_spotShadowFadeTime",
-         1.0,
+         1.0f,
          minbn,
          0,
          "How many seconds it takes for a primary light shadow map to fade in or out");
-     minbo.value.max = 1024.0;
-     minbo.value.min = 0.0;
+     minbo.value.max = 1024.0f;
+     minbo.value.min = 0.0f;
      sm_lightScore_eyeProjectDist = Dvar_RegisterFloat(
          "sm_lightScore_eyeProjectDist",
-         64.0,
+         64.0f,
          minbo,
          0,
          "When picking shadows for primary lights, measure distance from a point this far in fr"
          "ont of the camera.");
-     minbp.value.max = 1.0;
-     minbp.value.min = 0.0;
+     minbp.value.max = 1.0f;
+     minbp.value.min = 0.0f;
      sm_lightScore_spotProjectFrac = Dvar_RegisterFloat(
          "sm_lightScore_spotProjectFrac",
-         0.125,
+         0.125f,
          minbp,
          0,
          "When picking shadows for primary lights, measure distance to a point this fraction o"
          "f the light's radius along it's shadow direction.");
      sm_showOverlay = Dvar_RegisterEnum("sm_showOverlay", sm_showOverlayNames, 0, 0x80u, "Show shadow map overlay");
-     minbq.value.max = 1.0;
-     minbq.value.min = 0.0;
+     minbq.value.max = 1.0f;
+     minbq.value.min = 0.0f;
      sm_showOverlayDepthBounds = Dvar_RegisterVec2(
          "sm_showOverlayDepthBounds",
-         0.25,
-         0.75,
+         0.25f,
+         0.75f,
          minbq,
          0x80u,
          "Near and far depth values for the shadow map overlay");
-     minbr.value.max = 8.0;
-     minbr.value.min = 0.0;
-     sm_polygonOffsetScale = Dvar_RegisterFloat("sm_polygonOffsetScale", 2.0, minbr, 0, "Shadow map offset scale");
-     minbs.value.max = 32.0;
-     minbs.value.min = 0.0;
-     sm_polygonOffsetBias = Dvar_RegisterFloat("sm_polygonOffsetBias", 0.5, minbs, 0, "Shadow map offset bias");
-     minbt.value.max = 32.0;
-     minbt.value.min = 0.0625;
-     sm_sunSampleSizeNear = Dvar_RegisterFloat("sm_sunSampleSizeNear", 0.25, minbt, 0x1080u, "Shadow sample size");
+     minbr.value.max = 8.0f;
+     minbr.value.min = 0.0f;
+     sm_polygonOffsetScale = Dvar_RegisterFloat("sm_polygonOffsetScale", 2.0f, minbr, 0, "Shadow map offset scale");
+     minbs.value.max = 32.0f;
+     minbs.value.min = 0.0f;
+     sm_polygonOffsetBias = Dvar_RegisterFloat("sm_polygonOffsetBias", 0.5f, minbs, 0, "Shadow map offset bias");
+     minbt.value.max = 32.0f;
+     minbt.value.min = 0.0625f;
+     sm_sunSampleSizeNear = Dvar_RegisterFloat("sm_sunSampleSizeNear", 0.25f, minbt, 0x1080u, "Shadow sample size");
      minbu.value.max = FLT_MAX;
      minbu.value.min = -FLT_MAX;
      sm_sunShadowCenter = Dvar_RegisterVec3(
          "sm_sunShadowCenter",
-         0.0,
-         0.0,
-         0.0,
+         0.0f,
+         0.0f,
+         0.0f,
          minbu,
          0x1080u,
          "Sun shadow center, 0 0 0 means don't override");
-     minbv.value.max = 1.0;
-     minbv.value.min = 0.25;
-     sm_sunShadowScale = Dvar_RegisterFloat("sm_sunShadowScale", 1.0, minbv, 0x1080u, "Sun shadow scale optimization");
+     minbv.value.max = 1.0f;
+     minbv.value.min = 0.25f;
+     sm_sunShadowScale = Dvar_RegisterFloat("sm_sunShadowScale", 1.0f, minbv, 0x1080u, "Sun shadow scale optimization");
      sm_strictCull = Dvar_RegisterBool("sm_strictCull", 1, 0x80u, "Strict shadow map cull");
      sm_fastSunShadow = Dvar_RegisterBool("sm_fastSunShadow", 1, 0x80u, "Fast sun shadow");
      sm_qualitySpotShadow = Dvar_RegisterBool("sm_qualitySpotShadow", 1, 0x80u, "Fast spot shadow");
      sm_debugFastSunShadow = Dvar_RegisterBool("sm_debugFastSunShadow", 0, 0x80u, "Debug fast sun shadow");
-     minbw.value.max = 32.0;
-     minbw.value.min = 0.0;
-     r_blur = Dvar_RegisterFloat("r_blur", 0.0, minbw, 0x80u, "Dev tweak to blur the screen");
+     minbw.value.max = 32.0f;
+     minbw.value.min = 0.0f;
+     r_blur = Dvar_RegisterFloat("r_blur", 0.0f, minbw, 0x80u, "Dev tweak to blur the screen");
      r_distortion = Dvar_RegisterBool("r_distortion", 1, 1u, "Enable distortion");
      r_glow_allowed = Dvar_RegisterBool("r_glow_allowed", 1, 1u, "Allow glow.");
      r_glow_allowed_script_forced = Dvar_RegisterBool(
@@ -1243,91 +1243,91 @@
      r_glow = Dvar_RegisterBool("r_glow", 1, 0x80u, "Enable glow.");
      r_glowUseTweaks = Dvar_RegisterBool("r_glowUseTweaks", 0, 0x80u, "Overide glow with tweak dvar values.");
      r_glowTweakEnable = Dvar_RegisterBool("r_glowTweakEnable", 0, 0x80u, "Tweak dev var; Enable glow");
-     minbx.value.max = 32.0;
-     minbx.value.min = 0.0;
+     minbx.value.max = 32.0f;
+     minbx.value.min = 0.0f;
      r_glowTweakRadius = Dvar_RegisterFloat(
          "r_glowTweakRadius0",
          5.0,
          minbx,
          0x80u,
          "Tweak dev var; Glow radius in pixels at 640x480");
-     minby.value.max = 20.0;
-     minby.value.min = 0.0;
+     minby.value.max = 20.0f;
+     minby.value.min = 0.0f;
      r_glowTweakBloomIntensity = Dvar_RegisterFloat(
          "r_glowTweakBloomIntensity0",
          1.0,
          minby,
          0x80u,
          "Tweak dev var; Glow bloom intensity");
-     minbz.value.max = 1.0;
-     minbz.value.min = 0.0;
+     minbz.value.max = 1.0f;
+     minbz.value.min = 0.0f;
      r_glowTweakBloomCutoff = Dvar_RegisterFloat(
          "r_glowTweakBloomCutoff",
          0.5,
          minbz,
          0x80u,
          "Tweak dev var; Glow bloom cut off fraction");
-     minca.value.max = 1.0;
-     minca.value.min = 0.0;
+     minca.value.max = 1.0f;
+     minca.value.min = 0.0f;
      r_glowTweakBloomDesaturation = Dvar_RegisterFloat(
          "r_glowTweakBloomDesaturation",
-         0.0,
+         0.0f,
          minca,
          0x80u,
          "Tweak dev var; Glow bloom desaturation");
      r_filmUseTweaks = Dvar_RegisterBool("r_filmUseTweaks", 0, 0x80u, "Overide film effects with tweak dvar values.");
      r_filmTweakEnable = Dvar_RegisterBool("r_filmTweakEnable", 0, 0x1000u, "Tweak dev var; enable film color effects");
-     mincb.value.max = 4.0;
-     mincb.value.min = 0.0;
+     mincb.value.max = 4.0f;
+     mincb.value.min = 0.0f;
      r_filmTweakContrast = Dvar_RegisterFloat(
          "r_filmTweakContrast",
-         1.4,
+         1.4f,
          mincb,
          0x1000u,
          "Tweak dev var; film color contrast");
-     mincc.value.max = 4.0;
-     mincc.value.min = 0.0;
-     r_contrast = Dvar_RegisterFloat("r_contrast", 1.0, mincc, 0x80u, "Contrast adjustment");
-     mincd.value.max = 1.0;
-     mincd.value.min = -1.0;
-     r_brightness = Dvar_RegisterFloat("r_brightness", 0.0, mincd, 0x80u, "Brightness adjustment");
-     mince.value.max = 4.0;
-     mince.value.min = 0.0;
-     r_desaturation = Dvar_RegisterFloat("r_desaturation", 1.0, mince, 0x80u, "Desaturation adjustment");
-     mincf.value.max = 1.0;
-     mincf.value.min = -1.0;
+     mincc.value.max = 4.0f;
+     mincc.value.min = 0.0f;
+     r_contrast = Dvar_RegisterFloat("r_contrast", 1.0f, mincc, 0x80u, "Contrast adjustment");
+     mincd.value.max = 1.0f;
+     mincd.value.min = -1.0f;
+     r_brightness = Dvar_RegisterFloat("r_brightness", 0.0f, mincd, 0x80u, "Brightness adjustment");
+     mince.value.max = 4.0f;
+     mince.value.min = 0.0f;
+     r_desaturation = Dvar_RegisterFloat("r_desaturation", 1.0f, mince, 0x80u, "Desaturation adjustment");
+     mincf.value.max = 1.0f;
+     mincf.value.min = -1.0f;
      r_filmTweakBrightness = Dvar_RegisterFloat(
          "r_filmTweakBrightness",
-         0.0,
+         0.0f,
          mincf,
          0x1000u,
          "Tweak dev var; film color brightness");
-     mincg.value.max = 1.0;
-     mincg.value.min = 0.0;
+     mincg.value.max = 1.0f;
+     mincg.value.min = 0.0f;
      r_filmTweakDesaturation = Dvar_RegisterFloat(
          "r_filmTweakDesaturation",
-         0.2,
+         0.2f,
          mincg,
          0x1000u,
          "Tweak dev var; Desaturation applied after all 3D drawing");
      r_filmTweakInvert = Dvar_RegisterBool("r_filmTweakInvert", 0, 0x1000u, "Tweak dev var; enable inverted video");
-     minch.value.max = 2.0;
-     minch.value.min = 0.0;
+     minch.value.max = 2.0f;
+     minch.value.min = 0.0f;
      r_filmTweakDarkTint = Dvar_RegisterVec3(
          "r_filmTweakDarkTint",
-         0.69999999,
-         0.85000002,
-         1.0,
+         0.69999999f,
+         0.85000002f,
+         1.0f,
          minch,
          0x1000u,
          "Tweak dev var; film color dark tint color");
-     minci.value.max = 2.0;
-     minci.value.min = 0.0;
+     minci.value.max = 2.0f;
+     minci.value.min = 0.0f;
      r_filmTweakLightTint = Dvar_RegisterVec3(
          "r_filmTweakLightTint",
-         1.1,
-         1.05,
-         0.85000002,
+         1.1f,
+         1.05f,
+         0.85000002f,
          minci,
          0x1000u,
          "Tweak dev var; film color light tint color");
@@ -1337,65 +1337,65 @@
          0,
          0x80u,
          "Use dvars to set the depth of field effect; overrides r_dof_enable");
-     mincj.value.max = 10.0;
-     mincj.value.min = 4.0;
+     mincj.value.max = 10.0f;
+     mincj.value.min = 4.0f;
      r_dof_nearBlur = Dvar_RegisterFloat(
          "r_dof_nearBlur",
-         6.0,
+         6.0f,
          mincj,
          0x80u,
          "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
-     minck.value.max = 10.0;
-     minck.value.min = 0.0;
+     minck.value.max = 10.0f;
+     minck.value.min = 0.0f;
      r_dof_farBlur = Dvar_RegisterFloat(
          "r_dof_farBlur",
-         1.8,
+         1.8f,
          minck,
          0x80u,
          "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
-     mincl.value.max = 128.0;
-     mincl.value.min = 0.0;
+     mincl.value.max = 128.0f;
+     mincl.value.min = 0.0f;
      r_dof_viewModelStart = Dvar_RegisterFloat(
          "r_dof_viewModelStart",
-         2.0,
+         2.0f,
          mincl,
          0x80u,
          "Depth of field viewmodel start distance, in inches");
-     mincm.value.max = 128.0;
-     mincm.value.min = 0.0;
+     mincm.value.max = 128.0f;
+     mincm.value.min = 0.0f;
      r_dof_viewModelEnd = Dvar_RegisterFloat(
          "r_dof_viewModelEnd",
-         8.0,
+         8.0f,
          mincm,
          0x80u,
          "Depth of field viewmodel end distance, in inches");
-     mincn.value.max = 1000.0;
-     mincn.value.min = 0.0;
+     mincn.value.max = 1000.0f;
+     mincn.value.min = 0.0f;
      r_dof_nearStart = Dvar_RegisterFloat(
          "r_dof_nearStart",
-         10.0,
+         10.0f,
          mincn,
          0x80u,
          "Depth of field near start distance, in inches");
-     minco.value.max = 1000.0;
-     minco.value.min = 0.0;
+     minco.value.max = 1000.0f;
+     minco.value.min = 0.0f;
      r_dof_nearEnd = Dvar_RegisterFloat("r_dof_nearEnd", 60.0, minco, 0x80u, "Depth of field near end distance, in inches");
-     mincp.value.max = 20000.0;
-     mincp.value.min = 0.0;
+     mincp.value.max = 20000.0f;
+     mincp.value.min = 0.0f;
      r_dof_farStart = Dvar_RegisterFloat(
          "r_dof_farStart",
-         1000.0,
+         1000.0f,
          mincp,
          0x80u,
          "Depth of field far start distance, in inches");
-     mincq.value.max = 20000.0;
-     mincq.value.min = 0.0;
+     mincq.value.max = 20000.0f;
+     mincq.value.min = 0.0f;
      r_dof_farEnd = Dvar_RegisterFloat("r_dof_farEnd", 7000.0, mincq, 0x80u, "Depth of field far end distance, in inches");
-     mincr.value.max = 3.0;
-     mincr.value.min = 0.1;
+     mincr.value.max = 3.0f;
+     mincr.value.min = 0.1f;
      r_dof_bias = Dvar_RegisterFloat(
          "r_dof_bias",
-         0.5,
+         0.5f,
          mincr,
          0x80u,
          "Depth of field bias as a power function (like gamma); less than 1 is sharper");
@@ -1404,7 +1404,7 @@
      mincs.value.min = -FLT_MAX;
      r_outdoorAwayBias = Dvar_RegisterFloat(
          "r_outdoorAwayBias",
-         32.0,
+         32.0f,
          mincs,
          0x1000u,
          "Affects the height map lookup for making sure snow doesn't go indoors");
@@ -1412,13 +1412,13 @@
      minct.value.min = -FLT_MAX;
      r_outdoorDownBias = Dvar_RegisterFloat(
          "r_outdoorDownBias",
-         0.0,
+         0.0f,
          minct,
          0x1000u,
          "Affects the height map lookup for making sure snow doesn't go indoors");
      mincu.value.max = FLT_MAX;
      mincu.value.min = -FLT_MAX;
-     r_outdoorFeather = Dvar_RegisterFloat("r_outdoorFeather", 8.0, mincu, 0x1000u, "Outdoor z-feathering value");
+     r_outdoorFeather = Dvar_RegisterFloat("r_outdoorFeather", 8.0f, mincu, 0x1000u, "Outdoor z-feathering value");
      Dvar_SetModified((dvar_s*)r_outdoorFeather);
      r_sun_from_dvars = Dvar_RegisterBool(
          "r_sun_from_dvars",
@@ -1465,9 +1465,9 @@
          (DvarLimits)0x3E800000001LL,
          0,
          "Height of each profile probe graph, in milliseconds");
-     mincv.value.max = 1000.0;
-     mincv.value.min = 0.1;
-     prof_sortTime = Dvar_RegisterFloat("prof_sortTime", 2.0, mincv, 0, "Time in seconds between resort profiles");
+     mincv.value.max = 1000.0f;
+     mincv.value.min = 0.1f;
+     prof_sortTime = Dvar_RegisterFloat("prof_sortTime", 2.0f, mincv, 0, "Time in seconds between resort profiles");
      profile_mode = Dvar_RegisterEnum("profile_mode", g_profile_mode_values, 0, 0, "Profiler mode");
      profile_script = Dvar_RegisterBool("profile_script", 0, 0, "Enable profile scripts");
      profile_script_by_file = Dvar_RegisterBool("profile_script_by_file", 0, 0, "Enable profile scripts by source file");
