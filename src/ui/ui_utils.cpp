@@ -2,6 +2,7 @@
 #include <qcommon/mem_track.h>
 #include <qcommon/threads.h>
 #include <universal/q_parse.h>
+#include <universal/profile.h>
 
 stringDef_s *g_strHandle[2048];
 
@@ -84,6 +85,8 @@ void __cdecl Menu_SetCursorItem(int localClientNum, menuDef_t *menu, int cursorI
 
 int __cdecl Item_IsVisible(int localClientNum, itemDef_s *item)
 {
+    PROF_SCOPED("Item_IsVisible");
+
     if (!Window_IsVisible(localClientNum, &item->window))
         return 0;
     if ((item->dvarFlags & 0xC) != 0 && !Item_EnableShowViaDvar(item, 4))

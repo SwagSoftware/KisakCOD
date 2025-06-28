@@ -20,6 +20,7 @@
 #include <server_mp/server.h>
 #include <win32/win_input.h>
 #include <universal/timing.h>
+#include <universal/profile.h>
 
 enum sscType_t : __int32
 {                                       // ...
@@ -374,6 +375,8 @@ void __cdecl UI_DrawRect(
     float size,
     const float *color)
 {
+    PROF_SCOPED("UI_DrawRect");
+
     float v9; // [esp+20h] [ebp-8h]
     float h; // [esp+24h] [ebp-4h]
 
@@ -510,6 +513,8 @@ void __cdecl UI_DrawText(
     const float *color,
     int style)
 {
+    PROF_SCOPED("UI_DrawText");
+
     float v11; // [esp+18h] [ebp-18h]
     float v12; // [esp+1Ch] [ebp-14h]
     float v13; // [esp+20h] [ebp-10h]

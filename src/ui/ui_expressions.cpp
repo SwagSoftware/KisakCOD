@@ -6,6 +6,7 @@
 #include <stringed/stringed_hooks.h>
 #include <game_mp/g_main_mp.h>
 #include <win32/win_storage.h>
+#include <universal/profile.h>
 
 int s_operatorPrecedence[81] =
 {
@@ -2677,6 +2678,8 @@ bool __cdecl IsExpressionTrue(int localClientNum, const statement_s *statement)
 
 double __cdecl GetExpressionFloat(int localClientNum, const statement_s *statement)
 {
+    PROF_SCOPED("GetExpressionFloat");
+
     Operand result; // [esp+0h] [ebp-8h] BYREF
 
     if (EvaluateExpression(localClientNum, statement, &result))

@@ -3,6 +3,7 @@
 
 #include <ui_mp/ui_mp.h>
 #include <database/database.h>
+#include <universal/profile.h>
 
 double __cdecl UI_LoadBarProgress_LoadObj()
 {
@@ -32,6 +33,8 @@ void __cdecl UI_DrawHandlePic(
     const float *color,
     Material *material)
 {
+    PROF_SCOPED("UI_DrawHandlePic");
+
     float t0; // [esp+30h] [ebp-10h]
     float t1; // [esp+34h] [ebp-Ch]
     float s1; // [esp+38h] [ebp-8h]

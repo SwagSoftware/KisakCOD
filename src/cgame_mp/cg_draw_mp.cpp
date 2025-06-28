@@ -260,6 +260,8 @@ void __cdecl CG_DrawChatMessages(int localClientNum)
     int chatHeight; // [esp+80h] [ebp-8h]
     float w; // [esp+84h] [ebp-4h]
 
+    PROF_SCOPED("CG_DrawChatMessages");
+
     if (!cg_hudChatPosition)
         MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 155, 0, "%s", "cg_hudChatPosition");
     chatHeight = cg_chatHeight->current.integer;
@@ -364,6 +366,8 @@ void __cdecl CG_ScanForCrosshairEntity(int localClientNum)
     WeaponDef *weapDef; // [esp+88h] [ebp-8h]
     unsigned __int16 hitEntId; // [esp+8Ch] [ebp-4h]
 
+    PROF_SCOPED("CG_ScanForCrosshairEntity");
+
     fCheckDist = 8192.0;
     if (localClientNum)
         MyAssertHandler(
@@ -448,6 +452,8 @@ void __cdecl CG_ScanForCrosshairEntity(int localClientNum)
 
 void __cdecl CG_CheckTimedMenus(int localClientNum)
 {
+    PROF_SCOPED("CG_CheckTimedMenus");
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -1082,6 +1088,8 @@ int __cdecl CG_DrawFollow(int localClientNum)
 
 void __cdecl CG_UpdatePlayerNames(int localClientNum)
 {
+    PROF_SCOPED("CG_UpdatePlayerNames");
+
     CG_DrawCrosshairNames(localClientNum);
     CG_DrawFriendlyNames(localClientNum);
 }

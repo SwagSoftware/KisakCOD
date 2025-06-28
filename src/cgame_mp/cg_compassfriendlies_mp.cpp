@@ -4,6 +4,7 @@
 #include <cgame/cg_public.h>
 #include <ui/ui.h>
 #include <client/client.h>
+#include <universal/profile.h>
 
 CompassActor s_compassActors[1][64];
 CompassVehicle s_compassVehicles[1][8];
@@ -453,6 +454,8 @@ void __cdecl CG_CompassUpdateActors(int localClientNum)
     int clientIndex; // [esp+4Ch] [ebp-Ch]
     CompassActor *actor; // [esp+50h] [ebp-8h]
     int num; // [esp+54h] [ebp-4h]
+
+    PROF_SCOPED("CG_CompassUpdateActors");
 
     if (localClientNum)
         MyAssertHandler(

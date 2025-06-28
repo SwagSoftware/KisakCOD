@@ -7,6 +7,7 @@
 #include <client/client.h>
 
 #include <client_mp/client_mp.h>
+#include <universal/profile.h>
 
 void __cdecl CG_CalcCrosshairPosition(const cg_s *cgameGlob, float *x, float *y)
 {
@@ -120,6 +121,8 @@ void __cdecl CG_DrawCrosshair(int localClientNum)
     float transShift; // [esp+44h] [ebp-Ch] BYREF
     float transScale; // [esp+48h] [ebp-8h] BYREF
     float centerX; // [esp+4Ch] [ebp-4h] BYREF
+
+    PROF_SCOPED("CG_DrawCrosshair");
 
     if (localClientNum)
         MyAssertHandler(

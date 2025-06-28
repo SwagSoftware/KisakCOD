@@ -9,6 +9,7 @@
 #include <client/client.h>
 #include <cgame_mp/cg_local_mp.h>
 #include <EffectsCore/fx_system.h>
+#include <universal/profile.h>
 
 const float s_alignScale[4] = { 0.0, 0.5, 1.0, 0.0 }; // idb
 float glowColor[4]; // KISAKTODO: check for duplicates more
@@ -429,6 +430,8 @@ void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0)
 
 void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground)
 {
+    PROF_SCOPED("CG_Draw2dHudElems");
+
     bool v2; // [esp+7h] [ebp-100Dh]
     int i; // [esp+8h] [ebp-100Ch]
     hudelem_s *elems[1025]; // [esp+Ch] [ebp-1008h] BYREF

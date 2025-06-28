@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <universal/com_files.h>
+#include <universal/profile.h>
 
 //MaterialGlobals materialGlobals; // LWSS: moved to db_registry for DEDICATED
 
@@ -599,6 +600,8 @@ Material *__cdecl Material_Register(const char *name, int imageTrack)
 
 Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack)
 {
+    PROF_SCOPED("Material_RegisterHandle");
+
     if (!name)
         MyAssertHandler(".\\r_material.cpp", 1324, 0, "%s", "name");
     if (!rgp.defaultMaterial)

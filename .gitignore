@@ -420,3 +420,7 @@ FodyWeavers.xsd
 
 # Resources
 res/
+
+.idea/*
+IDA/*
+KisakCOD/.idea/*

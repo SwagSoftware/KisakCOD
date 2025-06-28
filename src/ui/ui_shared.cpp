@@ -10,6 +10,7 @@
 #include <cgame/cg_local.h>
 
 #include <algorithm>
+#include <universal/profile.h>
 
 int g_waitingForKey;
 int g_editingField;
@@ -418,12 +419,13 @@ itemDef_s *__cdecl Menu_GetMatchingItemByNumber(menuDef_t *menu, int index, char
 
 int __cdecl Menus_MenuIsInStack(UiContext *dc, menuDef_t *menu)
 {
+    PROF_SCOPED("Menus_MenuIsInStack");
+
     int menuIndex; // [esp+0h] [ebp-4h]
 
-    if (!dc)
-        MyAssertHandler(".\\ui\\ui_shared.cpp", 790, 0, "%s", "dc");
-    if (!menu)
-        MyAssertHandler(".\\ui\\ui_shared.cpp", 791, 0, "%s", "menu");
+    iassert(dc);
+    iassert(menu);
+
     for (menuIndex = dc->openMenuCount - 1; menuIndex >= 0; --menuIndex)
     {
         if (dc->menuStack[menuIndex] == menu)
@@ -4425,28 +4427,38 @@ char __cdecl Menu_Paint(UiContext *dc, menuDef_t *menu)
     float v5; // [esp+24h] [ebp-Ch]
     int i; // [esp+28h] [ebp-8h]
 
-    if (!menu)
-        MyAssertHandler(".\\ui\\ui_shared.cpp", 5977, 0, "%s", "menu");
+    PROF_SCOPED("Menu_Paint");
+
+    ZoneText(menu->window.name, strlen(menu->window.name));
+
+    iassert(menu);
+
     if (*(_BYTE *)ui_showMenuOnly->current.integer
         && menu->window.name
         && I_stricmp(menu->window.name, ui_showMenuOnly->current.string))
     {
         return 0;
     }
+
     if (!Menu_IsVisible(dc, menu))
         return 0;
+
     if (menu->soundName)
         UI_PlayLocalSoundAliasByName(dc->localClientNum, menu->soundName);
+
     if (menu->blurRadius != 0.0)
     {
         v5 = dc->blurRadiusOut * dc->blurRadiusOut + menu->blurRadius * menu->blurRadius;
         v4 = sqrt(v5);
         dc->blurRadiusOut = v4;
     }
+
     if (menu->rectXExp.numEntries)
         menu->window.rect.x = GetExpressionFloat(dc->localClientNum, &menu->rectXExp);
+
     if (menu->rectYExp.numEntries)
         menu->window.rect.y = GetExpressionFloat(dc->localClientNum, &menu->rectYExp);
+
     Menu_UpdatePosition(dc->localClientNum, menu);
     if (menu->fullScreen && menu->window.background)
     {
@@ -4465,8 +4477,10 @@ char __cdecl Menu_Paint(UiContext *dc, menuDef_t *menu)
     }
     fadeCycle = (float)menu->fadeCycle;
     Window_Paint(dc, &menu->window, menu->fadeAmount, menu->fadeInAmount, menu->fadeClamp, fadeCycle);
+
     for (i = 0; i < menu->itemCount; ++i)
         Item_Paint(dc, menu->items[i]);
+
     if (g_debugMode)
     {
         if (!menu)
@@ -4482,6 +4496,7 @@ char __cdecl Menu_Paint(UiContext *dc, menuDef_t *menu)
             1.0,
             colorMagenta);
     }
+
     return 1;
 }
 
@@ -4493,6 +4508,8 @@ void __cdecl Window_Paint(
     float fadeClamp,
     float fadeCycle)
 {
+    PROF_SCOPED("Window_Paint");
+
     float *v6; // [esp+24h] [ebp-80h]
     float *v7; // [esp+28h] [ebp-7Ch]
     float *v8; // [esp+2Ch] [ebp-78h]
@@ -4780,6 +4797,9 @@ void __cdecl Fade(
 
 void __cdecl Item_Paint(UiContext *dc, itemDef_s *item)
 {
+    PROF_SCOPED("Item_Paint");
+
+    //ZoneText(item->na)
     menuDef_t *v2; // esi
     menuDef_t *v3; // esi
     char *String; // eax
@@ -4905,6 +4925,8 @@ void __cdecl Item_Paint(UiContext *dc, itemDef_s *item)
 const float MY_SUBTITLE_GLOWCOLOR[4] = { 0.0f, 0.3f, 0.0f, 1.0f };
 void __cdecl Item_Text_Paint(UiContext *dc, itemDef_s *item)
 {
+    PROF_SCOPED("Item_Text_Paint");
+
     char *VariantString; // eax
     Font_s *font; // [esp+2Ch] [ebp-434h]
     bool subtitle; // [esp+33h] [ebp-42Dh]
@@ -5216,6 +5238,8 @@ void __cdecl Item_TextField_Paint(UiContext *dc, itemDef_s *item)
     const rectDef_s *textRect; // [esp+488h] [ebp-14h]
     float newColor[4]; // [esp+48Ch] [ebp-10h] BYREF
 
+    PROF_SCOPED("Item_TextField_Paint");
+
     parent = item->parent;
     editPtr = Item_GetEditFieldDef(item);
     if (editPtr)
@@ -5315,6 +5339,8 @@ void __cdecl Item_YesNo_Paint(UiContext *dc, itemDef_s *item)
     char *v3; // eax
     float v4; // [esp+0h] [ebp-8h]
 
+    PROF_SCOPED("Item_YesNo_Paint");
+
     if (item->dvar)
     {
         VariantString = Dvar_GetVariantString(item->dvar);
@@ -5334,6 +5360,7 @@ void __cdecl Item_YesNo_Paint(UiContext *dc, itemDef_s *item)
 
 void __cdecl Item_Multi_Paint(UiContext *dc, itemDef_s *item)
 {
+    PROF_SCOPED("Item_Multi_Paint");
     item->text = Item_Multi_Setting(item);
     Item_Text_Paint(dc, item);
 }
@@ -5374,6 +5401,7 @@ const char *__cdecl Item_Multi_Setting(itemDef_s *item)
 
 void __cdecl Item_DvarEnum_Paint(UiContext *dc, itemDef_s *item)
 {
+    PROF_SCOPED("Item_DvarEnum_Paint");
     item->text = Item_DvarEnum_Setting(item);
     Item_Text_Paint(dc, item);
 }
@@ -5429,6 +5457,8 @@ void __cdecl Item_Slider_Paint(UiContext *dc, itemDef_s *item)
     const rectDef_s *rect; // [esp+6Ch] [ebp-18h]
     float value; // [esp+70h] [ebp-14h]
     float newColor[4]; // [esp+74h] [ebp-10h] BYREF
+
+    PROF_SCOPED("Item_Slider_Paint");
 
     parent = item->parent;
     if (item->dvar)
@@ -5515,6 +5545,7 @@ double __cdecl Item_GetRectPlacementY(int alignY, float y0, float containerHeigh
 
 void __cdecl Item_Bind_Paint(UiContext *dc, itemDef_s *item)
 {
+    PROF_SCOPED("Item_Bind_Paint");
     char nameBind[260]; // [esp+0h] [ebp-108h] BYREF
 
     if (g_waitingForKey && g_bindItem == item)
@@ -5578,6 +5609,8 @@ void __cdecl Item_ListBox_Paint(UiContext *dc, itemDef_s *item)
     float yc; // [esp+88h] [ebp-8h]
     float yd; // [esp+88h] [ebp-8h]
     int count; // [esp+8Ch] [ebp-4h]
+
+    PROF_SCOPED("Item_ListBox_Paint");
 
     listPtr = Item_GetListBoxDef(item);
     if (listPtr)
@@ -6106,6 +6139,8 @@ void __cdecl Item_OwnerDraw_Paint(UiContext *dc, itemDef_s *item)
     const rectDef_s *rect; // [esp+CCh] [ebp-8h]
     const rectDef_s *textRect; // [esp+D0h] [ebp-4h]
 
+    PROF_SCOPED("Item_OwnerDraw_Paint");
+
     if (!item)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 5521, 0, "%s", "item");
     parent = item->parent;
@@ -6256,6 +6291,8 @@ void __cdecl Item_GameMsgWindow_Paint(UiContext *dc, itemDef_s *item)
     Font_s *font; // [esp+1Ch] [ebp-18h]
     float color[5]; // [esp+20h] [ebp-14h] BYREF
 
+    PROF_SCOPED("Item_GameMsgWindow_Paint");
+
     if (!dc)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 5580, 0, "%s", "dc");
     if (!item)
@@ -6303,6 +6340,8 @@ int __cdecl Menu_Count(UiContext *dc)
 
 void __cdecl Menu_PaintAll_BeginVisibleList(char *stringBegin, unsigned int stringSize)
 {
+    PROF_SCOPED("Menu_PaintAll_BeginVisibleList");
+
     char VISIBLE_LIST_PREFIX[14]; // [esp+0h] [ebp-14h] BYREF
 
     strcpy(VISIBLE_LIST_PREFIX, "ui_showlist: ");
@@ -6316,6 +6355,8 @@ void __cdecl Menu_PaintAll_BeginVisibleList(char *stringBegin, unsigned int stri
 
 void __cdecl Menu_PaintAll_AppendToVisibleList(char *stringBegin, unsigned int stringSize, char *stringToAppend)
 {
+    PROF_SCOPED("Menu_PaintAll_AppendToVisibleList");
+
     unsigned int v3; // [esp+0h] [ebp-64h]
     std::reverse_iterator<char *> result; // [esp+44h] [ebp-20h] BYREF
     char _Val; // [esp+53h] [ebp-11h] BYREF
@@ -6356,6 +6397,8 @@ void __cdecl Menu_PaintAll_AppendToVisibleList(char *stringBegin, unsigned int s
 
 void __cdecl Menu_PaintAll_DrawVisibleList(char *stringBegin, UiContext *dc)
 {
+    PROF_SCOPED("Menu_PaintAll_DrawVisibleList");
+
     float color[4]; // [esp+28h] [ebp-18h] BYREF
     float y; // [esp+38h] [ebp-8h]
 
@@ -6384,6 +6427,8 @@ void __cdecl Menu_PaintAll_DrawVisibleList(char *stringBegin, UiContext *dc)
 
 void __cdecl Menu_PaintAll(UiContext *dc)
 {
+    PROF_SCOPED("Menu_PaintAll");
+
     char *v1; // eax
     Font_s *font; // [esp+2Ch] [ebp-41Ch]
     bool showVisibleList; // [esp+33h] [ebp-415h]
@@ -6418,33 +6463,52 @@ void __cdecl Menu_PaintAll(UiContext *dc)
             break;
         }
     }
-    if (!anyFullscreen)
+
     {
-        for (menuIndexa = 0; menuIndexa < Menu_Count(dc); ++menuIndexa)
+        PROF_SCOPED("Menu_PaintAll_PaintMenus");
+        if (!anyFullscreen)
         {
-            menua = dc->Menus[menuIndexa];
-            if (!menua)
-                MyAssertHandler(".\\ui\\ui_shared.cpp", 6139, 0, "%s", "menu");
-            if (!Menus_MenuIsInStack(dc, menua) && Menu_Paint(dc, menua) && showVisibleList)
-                Menu_PaintAll_AppendToVisibleList(visibleList, 0x400u, (char *)menua->window.name);
+            for (menuIndexa = 0; menuIndexa < Menu_Count(dc); ++menuIndexa)
+            {
+                menua = dc->Menus[menuIndexa];
+                if (!menua)
+                    MyAssertHandler(".\\ui\\ui_shared.cpp", 6139, 0, "%s", "menu");
+                if (!Menus_MenuIsInStack(dc, menua) && Menu_Paint(dc, menua) && showVisibleList)
+                    Menu_PaintAll_AppendToVisibleList(visibleList, 0x400u, (char *)menua->window.name);
+            }
         }
     }
-    for (menuIndexb = drawStart; menuIndexb < dc->openMenuCount; ++menuIndexb)
+
     {
-        menub = dc->menuStack[menuIndexb];
-        if (!menub)
-            MyAssertHandler(".\\ui\\ui_shared.cpp", 6153, 0, "%s", "menu");
-        if (Menu_Paint(dc, menub) && showVisibleList)
-            Menu_PaintAll_AppendToVisibleList(visibleList, 0x400u, (char *)menub->window.name);
+        PROF_SCOPED("Menu_PaintAll_PaintOpenMenus");
+        for (menuIndexb = drawStart; menuIndexb < dc->openMenuCount; ++menuIndexb)
+        {
+            menub = dc->menuStack[menuIndexb];
+            if (!menub)
+                MyAssertHandler(".\\ui\\ui_shared.cpp", 6153, 0, "%s", "menu");
+            if (Menu_Paint(dc, menub) && showVisibleList)
+                Menu_PaintAll_AppendToVisibleList(visibleList, 0x400u, (char *)menub->window.name);
+        }
     }
-    if (g_debugMode)
+
     {
-        font = UI_GetFontHandle(&scrPlaceView[dc->localClientNum], 0, 0.5);
-        v1 = va("fps: %f", dc->FPS);
-        UI_DrawText(&scrPlaceView[dc->localClientNum], v1, 0x7FFFFFFF, font, 5.0, 25.0, 0, 0, 0.5, colorWhite, 0);
+        PROF_SCOPED("Menu_PaintAll_Debug");
+
+        if (g_debugMode)
+        {
+            font = UI_GetFontHandle(&scrPlaceView[dc->localClientNum], 0, 0.5);
+            v1 = va("fps: %f", dc->FPS);
+            UI_DrawText(&scrPlaceView[dc->localClientNum], v1, 0x7FFFFFFF, font, 5.0, 25.0, 0, 0, 0.5, colorWhite, 0);
+        }
     }
-    if (showVisibleList)
-        Menu_PaintAll_DrawVisibleList(visibleList, dc);
+
+    {
+        PROF_SCOPED("Menu_PaintAll_DrawVisibleList");
+
+        if (showVisibleList)
+            Menu_PaintAll_DrawVisibleList(visibleList, dc);
+    }
+    
 }
 
 void __cdecl TRACK_ui_shared()
