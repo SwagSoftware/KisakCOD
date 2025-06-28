@@ -1446,6 +1446,12 @@ void __cdecl CL_InitKeyCommands()
     Cmd_AddCommandInternal("bindlist", Key_Bindlist_f, &Key_Bindlist_f_VAR);
 }
 
+bool __cdecl CL_IsConsoleKey(int key)
+{
+    // key 184 isn't apart of ASCII
+    return (key == '`' || key == '^' || key == 184 || key == '~');
+}
+
 void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int time)
 {
     const char *v4; // eax
@@ -1479,7 +1485,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (key == 96 || key == 126 || (clientUIActives[0].keyCatchers & 3) != 0)
+    if (CL_IsConsoleKey(key) || (clientUIActives[0].keyCatchers & 3) != 0)
     {
         if (DevGui_IsActive())
             DevGui_Toggle();
@@ -1509,7 +1515,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
         {
             if (!con_restricted->current.enabled || (clientUIActives[0].keyCatchers & 1) != 0)
             {
-                if (key == 96 || key == 126)
+                if (CL_IsConsoleKey(key))
                 {
                     if (!down)
                         return;
@@ -1535,7 +1541,7 @@ void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int tim
             {
                 if (key == 165 && down && keys[127].down)
                     goto LABEL_45;
-                if (key == 96 || key == 126)
+                if (CL_IsConsoleKey(key))
                     return;
             }
         }
