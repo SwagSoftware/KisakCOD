@@ -1548,7 +1548,7 @@ const dvar_s *__cdecl Dvar_RegisterBool(
     DvarValue dvarValue; // [esp+8h] [ebp-14h]
 
     dvarValue.enabled = value;
-    return Dvar_RegisterVariant(dvarName, 0, flags, dvarValue, 0LL, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_BOOL, flags, dvarValue, 0LL, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterNew(
@@ -1577,9 +1577,10 @@ const dvar_s *__cdecl Dvar_RegisterNew(
         dvar->name = Dvar_AllocNameString(dvarName);
     else
         dvar->name = dvarName;
+    
     switch (type)
     {
-    case 2u:
+    case DVAR_TYPE_FLOAT_2:
         dvar->current.value = value.value;
         dvar->current.vector[1] = value.vector[1];
         dvar->latched.value = value.value;
@@ -1587,7 +1588,7 @@ const dvar_s *__cdecl Dvar_RegisterNew(
         dvar->reset.value = value.value;
         dvar->reset.vector[1] = value.vector[1];
         break;
-    case 3u:
+    case DVAR_TYPE_FLOAT_3:
         dvar->current.value = value.value;
         dvar->current.vector[1] = value.vector[1];
         dvar->current.vector[2] = value.vector[2];
@@ -1598,12 +1599,12 @@ const dvar_s *__cdecl Dvar_RegisterNew(
         dvar->reset.vector[1] = value.vector[1];
         dvar->reset.vector[2] = value.vector[2];
         break;
-    case 4u:
+    case DVAR_TYPE_FLOAT_4:
         dvar->current = value;
         dvar->latched = value;
         dvar->reset = value;
         break;
-    case 7u:
+    case DVAR_TYPE_STRING:
         Dvar_CopyString(value.string, &dvar->current);
         Dvar_WeakCopyString(dvar->current.string, &dvar->latched);
         Dvar_WeakCopyString(dvar->current.string, &dvar->reset);
@@ -1614,6 +1615,7 @@ const dvar_s *__cdecl Dvar_RegisterNew(
         dvar->reset = value;
         break;
     }
+    
     dvar->domain = domain;
     dvar->modified = 0;
     dvar->domainFunc = 0;
@@ -1623,6 +1625,7 @@ const dvar_s *__cdecl Dvar_RegisterNew(
     dvar->hashNext = dvarHashTable[HashValue];
     dvarHashTable[HashValue] = dvar;
     Sys_UnlockWrite(&g_dvarCritSect);
+    
     return dvar;
 }
 
@@ -1675,14 +1678,14 @@ void __cdecl Dvar_ReinterpretDvar(
     DvarValue v7; // [esp+14h] [ebp-24h]
     DvarValue resetValue; // [esp+24h] [ebp-14h]
 
-    if ((dvar->flags & 0x4000) != 0 && (flags & 0x4000) == 0)
+    if ((dvar->flags & DVAR_EXTERNAL) != 0 && (flags & DVAR_EXTERNAL) == 0)
     {
         v7 = *Dvar_GetReinterpretedResetValue(&result, dvar, value);
         resetValue = v7;
         Dvar_PerformUnregistration(dvar);
         Dvar_FreeNameString(dvar->name);
         dvar->name = dvarName;
-        dvar->flags &= ~0x4000u;
+        dvar->flags &= ~DVAR_EXTERNAL;
         Dvar_MakeExplicitType(dvar, dvarName, type, flags, resetValue, domain);
     }
 }
@@ -2024,7 +2027,7 @@ const dvar_s *__cdecl Dvar_RegisterInt(
     v6.integer = value;
     //*(_QWORD *)(&v6.value + 1) = dvarValue_4;
     //v6.vector[3] = dvarValue_12;
-    return Dvar_RegisterVariant(dvarName, 5u, flags, v6, min, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_INT, flags, v6, min, description);
 }
 
 const dvar_t *__cdecl Dvar_RegisterInt(
@@ -2059,7 +2062,7 @@ const dvar_s *__cdecl Dvar_RegisterFloat(
     v6.value = value;
     //*(_QWORD *)(&v6.value + 1) = dvarValue_4;
     //v6.vector[3] = dvarValue_12;
-    return Dvar_RegisterVariant(dvarName, 1u, flags, v6, min, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT, flags, v6, min, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterFloat(
@@ -2098,7 +2101,7 @@ const dvar_s *__cdecl Dvar_RegisterVec2(
     //v7.vector[3] = dvarValue_12;
     v7.vector[0] = x;
     v7.vector[1] = y;
-    return Dvar_RegisterVariant(dvarName, 2u, flags, v7, min, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT_2, flags, v7, min, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterVec3(
@@ -2122,7 +2125,7 @@ const dvar_s *__cdecl Dvar_RegisterVec3(
     v8.vector[0] = x;
     v8.vector[1] = y;
     v8.vector[2] = z;
-    return Dvar_RegisterVariant(dvarName, 3u, flags, v8, min, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT_3, flags, v8, min, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterVec4(
@@ -2143,7 +2146,7 @@ const dvar_s *__cdecl Dvar_RegisterVec4(
     v9.value = x;
     *(_QWORD *)(&v9.value + 1) = dvarValue_4;
     v9.vector[3] = w;
-    return Dvar_RegisterVariant(dvarName, 4u, flags, v9, min, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT_4, flags, v9, min, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterString(
@@ -2171,7 +2174,7 @@ const dvar_s *__cdecl Dvar_RegisterString(
     v5.integer = (int)value;
     //*(_QWORD *)(&v5.value + 1) = dvarValue_4;
     //v5.vector[3] = dvarValue_12;
-    return Dvar_RegisterVariant(dvarName, 7u, flags, v5, 0, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_STRING, flags, v5, 0, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterEnum(
@@ -2207,7 +2210,7 @@ const dvar_s *__cdecl Dvar_RegisterEnum(
                 "(defaultIndex >= 0 && defaultIndex < dvarDomain.enumeration.stringCount || defaultIndex == 0)",
                 dvarName);
     }
-    return Dvar_RegisterVariant(dvarName, 6u, flags, dvarValue, dvarDomain, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_ENUM, flags, dvarValue, dvarDomain, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterColor(
@@ -2289,7 +2292,7 @@ const dvar_s *__cdecl Dvar_RegisterColor(
     dvarValue.color[1] = (int)(v24);
     v22 = v11 * 255.0f + EQUAL_EPSILON;
     dvarValue.color[2] = (int)(v22);
-    return Dvar_RegisterVariant(dvarName, 8u, flags, dvarValue, 0, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_COLOR, flags, dvarValue, 0, description);
 }
 
 void __cdecl Dvar_SetBoolFromSource(dvar_s *dvar, bool value, DvarSetSource source)

@@ -398,24 +398,7 @@ char* QDECL va(const char* format, ...);
 
 
 //=============================================
-#define DVAR_WRITEPROTECT	0x10			
-#define	DVAR_LATCH			0x20			// will only change when C code next does
-											// a Cvar_Get(), so it can't be changed
-											// without proper initialization.  modified
-											// will be set, even though the value hasn't
-											// changed yet
-#define DVAR_ROM   0x40						// display only, cannot be set by user at all (can be set by code)
-#define DVAR_CHEAT 0x80						// can not be changed if cheats are disabled
-
-#define DVAR_AUTOEXEC 0x200 // not 100% sure
-#define DVAR_NORESTART 0x400		// do not clear when a cvar_restart is issued
-
-#define DVAR_SAVED 0x1000 // not 100% sure
-#define DVAR_EXTERNAL 0x4000
-
-#define DVAR_CHANGEABLE_RESET 0x8000 // not 100% sure
-
-enum
+enum DvarType
 {
 	DVAR_TYPE_BOOL = 0x0,
 	DVAR_TYPE_FLOAT = 0x1,
@@ -427,6 +410,31 @@ enum
 	DVAR_TYPE_STRING = 0x7,
 	DVAR_TYPE_COLOR = 0x8,
 	DVAR_TYPE_COUNT = 0x9,
+};
+
+enum DvarFlags : uint16
+{
+	DVAR_NOFLAG             = 0x0,
+	DVAR_ARCHIVE            = 0x1,  // will be saved to config_mp.cfg
+	DVAR_USERINFO           = 0x2,  // sent to server on connect or change
+	DVAR_SERVERINFO         = 0x4,  // sent in response to front end requests
+	DVAR_SYSTEMINFO         = 0x8,  // this is sent (replicated) to all clients if you are host
+	DVAR_INIT               = 0x10, // don't allow change from console at all (i think)
+	DVAR_LATCH              = 0x20, // will only change when C code next does
+                                    // a Cvar_Get(), so it can't be changed
+                                    // without proper initialization.  modified
+                                    // will be set, even though the value hasn't changed yet
+	
+	DVAR_ROM                = 0x40, // display only, cannot be set by user at all (can be set by code)
+	DVAR_CHEAT              = 0x80, // can not be changed if cheats are disabled
+
+	// DVAR_AUTOEXEC, DVAR_SAVED, and DVAR_CHANGEABLE_RESET are not 100% sure
+	DVAR_TEMP               = 0x100,
+	DVAR_AUTOEXEC           = 0x200,
+	DVAR_NORESTART          = 0x400,    // do not clear when a cvar_restart is issued
+	DVAR_SAVED              = 0x1000,
+	DVAR_EXTERNAL           = 0x4000,   // created by a set command or setclientdvar
+	DVAR_CHANGEABLE_RESET   = 0x8000,
 };
 
 union DvarValue 

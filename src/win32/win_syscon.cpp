@@ -48,7 +48,7 @@ unsigned int s_totalChars;
 
 LRESULT __stdcall ConWndProc(HWND__ *hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	char *cmdString; // [esp+18h] [ebp-20h]
+	char* cmdString;
 
 	switch (uMsg)
 	{
@@ -107,47 +107,39 @@ LRESULT __stdcall InputLineWndProc(HWND__ *hWnd, UINT uMsg, HWND__ *wParam, LPAR
 	return CallWindowProcA((WNDPROC)s_wcd.SysInputLineWndProc, hWnd, uMsg, (WPARAM)wParam, lParam);
 }
 
-char *__cdecl Conbuf_CleanText(const char *source, char *target, int sizeofTarget)
+unsigned int __cdecl Conbuf_CleanText(const char *source, char *target, int sizeofTarget)
 {
-	const char *start; // [esp+0h] [ebp-8h]
-	const char *last; // [esp+4h] [ebp-4h]
+	const char* start = target;
+	const char* last = &target[sizeofTarget - 3];
 
-	start = target;
-	last = &target[sizeofTarget - 3];
 	while (*source && target <= last)
 	{
-		if (*source == 10 && source[1] == 13)
+		if (source[0] == '\n' && source[1] == '\r')
 		{
-			*target = 13;
-			target[1] = 10;
+			target[0] = '\r';
+			target[1] = '\n';
 			target += 2;
 			source += 2;
 		}
-		else if (*source == 13)
+		else if (source[0] == '\r' || source[0] == '\n')
 		{
-			*target = 13;
-			target[1] = 10;
+			target[0] = '\r';
+			target[1] = '\n';
 			target += 2;
 			++source;
 		}
-		else if (*source == 10)
-		{
-			*target = 13;
-			target[1] = 10;
-			target += 2;
-			++source;
-		}
-		else if (source && *source == 94 && source[1] && source[1] != 94 && source[1] >= 48 && source[1] <= 57)
+		else if (source && source[0] == '^' && source[1] && source[1] != '^' && source[1] >= 48 && source[1] <= 57)
 		{
 			source += 2;
 		}
 		else
 		{
-			*target++ = *source++;
+			*target++ = *source++; // can target be null?
 		}
 	}
+
 	*target = 0;
-	return (char*)(target - start);
+	return target - start;
 }
 
 /*
@@ -155,89 +147,93 @@ char *__cdecl Conbuf_CleanText(const char *source, char *target, int sizeofTarge
 */
 void __cdecl Sys_CreateConsole(HMODULE hInstance)
 {
-	HWND DesktopWindow; // eax
-	HWND v2; // eax
-	int v3; // eax
-	HDC v4; // [esp-4h] [ebp-8064h]
-	HANDLE lParam; // [esp+0h] [ebp-8060h]
-	WNDCLASSA WndClass; // [esp+4h] [ebp-805Ch] BYREF
-	int v7; // [esp+2Ch] [ebp-8034h]
-	char target[16384]; // [esp+30h] [ebp-8030h] BYREF
-	LPCSTR lpClassName; // [esp+4030h] [ebp-4030h]
-	LPCSTR lpWindowName; // [esp+4034h] [ebp-402Ch]
-	int cHeight; // [esp+4038h] [ebp-4028h]
-	HDC hdc; // [esp+403Ch] [ebp-4024h]
-	tagRECT Rect; // [esp+4040h] [ebp-4020h] BYREF
-	int DeviceCaps; // [esp+4050h] [ebp-4010h]
-	DWORD dwStyle; // [esp+4054h] [ebp-400Ch]
-	char text[16388]; // [esp+4058h] [ebp-4008h] BYREF
+	tagRECT Rect;
 
-	dwStyle = 0x80CA0000;
-	lpClassName = "CoD4 WinConsole";
-	lpWindowName = "CoD4 Console";
+	char text[16388];
+	char target[16384];
+
+	static const DWORD dwStyle = 0x80CA0000;
+
+	WNDCLASSA WndClass;
 	WndClass.style = 0;
 	WndClass.lpfnWndProc = ConWndProc;
 	WndClass.cbClsExtra = 0;
 	WndClass.cbWndExtra = 0;
 	WndClass.hInstance = hInstance;
-	WndClass.hIcon = LoadIconA(hInstance, (LPCSTR)1);
-	WndClass.hCursor = LoadCursorA(0, (LPCSTR)0x7F00);
-	WndClass.hbrBackground = (HBRUSH)5;
+	WndClass.hIcon = LoadIconA(hInstance, reinterpret_cast<LPCSTR>(1));
+	WndClass.hCursor = LoadCursorA(0, reinterpret_cast<LPCSTR>(0x7F00));
+	WndClass.hbrBackground = reinterpret_cast<HBRUSH>(5);
 	WndClass.lpszMenuName = 0;
 	WndClass.lpszClassName = "CoD4 WinConsole";
-	if (RegisterClassA(&WndClass))
+
+	if (!RegisterClassA(&WndClass))
 	{
-		Rect.left = 0;
-		Rect.right = 620;
-		Rect.top = 0;
-		Rect.bottom = 450;
-		AdjustWindowRect(&Rect, dwStyle, 0);
-		DesktopWindow = GetDesktopWindow();
-		hdc = GetDC(DesktopWindow);
-		DeviceCaps = GetDeviceCaps(hdc, 8);
-		v7 = GetDeviceCaps(hdc, 10);
-		v4 = hdc;
-		v2 = GetDesktopWindow();
-		ReleaseDC(v2, v4);
-		s_wcd.windowWidth = Rect.right - Rect.left + 1;
-		s_wcd.windowHeight = Rect.bottom - Rect.top + 1;
-		s_wcd.hWnd = CreateWindowExA(
-			0,
-			lpClassName,
-			lpWindowName,
-			dwStyle,
-			(DeviceCaps - 600) / 2,
-			(v7 - 450) / 2,
-			Rect.right - Rect.left + 1,
-			Rect.bottom - Rect.top + 1,
-			0,
-			0,
-			hInstance,
-			0);
-		if (s_wcd.hWnd)
-		{
-			hdc = GetDC(s_wcd.hWnd);
-			v3 = GetDeviceCaps(hdc, 90);
-			cHeight = -MulDiv(8, v3, 72);
-			s_wcd.hfBufferFont = CreateFontA(cHeight, 0, 0, 0, 300, 0, 0, 0, 1u, 0, 0, 0, 0x31u, "Courier New");
-			ReleaseDC(s_wcd.hWnd, hdc);
-			lParam = LoadImageA(0, "codlogo.bmp", 0, 0, 0, 0x10u);
-			if (lParam)
-			{
-				s_wcd.codLogo = CreateWindowExA(0, "Static", 0, 0x5000000Eu, 5, 5, 0, 0, s_wcd.hWnd, (HMENU)1, hInstance, 0);
-				SendMessageA(s_wcd.codLogo, 0x172u, 0, (LPARAM)lParam);
-			}
-			s_wcd.hwndInputLine = CreateWindowExA(0, "edit", 0, 0x50800080u, 6, 400, 608, 20, s_wcd.hWnd, (HMENU)0x65, hInstance, 0);
-			s_wcd.hwndBuffer = CreateWindowExA(0, "edit", 0, 0x50A00844u, 6, 70, 606, 324, s_wcd.hWnd, (HMENU)0x64, hInstance, 0);
-			SendMessageA(s_wcd.hwndBuffer, 0x30u, (WPARAM)s_wcd.hfBufferFont, 0);
-			s_wcd.SysInputLineWndProc = (WNDPROC)SetWindowLongA(s_wcd.hwndInputLine, -4, (LONG)InputLineWndProc);
-			SendMessageA(s_wcd.hwndInputLine, 0x30u, (WPARAM)s_wcd.hfBufferFont, 0);
-			SetFocus(s_wcd.hwndInputLine);
-			Con_GetTextCopy(text, 0x4000);
-			Conbuf_CleanText(text, target, 0x4000);
-			SetWindowTextA(s_wcd.hwndBuffer, target);
-		}
+		return;
 	}
+
+	Rect.left = 0;
+	Rect.right = 620;
+	Rect.top = 0;
+	Rect.bottom = 450;
+	AdjustWindowRect(&Rect, dwStyle, 0);
+
+	const HWND desktop_window = GetDesktopWindow();
+	HDC hDC = GetDC(desktop_window);
+	const int swidth = GetDeviceCaps(hDC, 8);
+	const int sheight = GetDeviceCaps(hDC, 10);
+	ReleaseDC(desktop_window, hDC);
+
+	s_wcd.windowWidth = Rect.right - Rect.left + 1;
+	s_wcd.windowHeight = Rect.bottom - Rect.top + 1;
+
+	s_wcd.hWnd = CreateWindowExA(
+		0,
+		"CoD4 WinConsole",
+		"CoD4 Console",
+		dwStyle,
+		(swidth - 600) / 2,
+		(sheight - 450) / 2,
+		Rect.right - Rect.left + 1,
+		Rect.bottom - Rect.top + 1,
+		0,
+		0,
+		hInstance,
+		0);
+
+	if (!s_wcd.hWnd)
+	{
+		return;
+	}
+
+	// create fonts
+	hDC = GetDC(s_wcd.hWnd);
+	const int device_caps = GetDeviceCaps(hDC, 90);
+	int cHeight = -MulDiv(8, device_caps, 72);
+	s_wcd.hfBufferFont = CreateFontA(cHeight, 0, 0, 0, 300, 0, 0, 0, 1u, 0, 0, 0, 0x31u, "Courier New");
+	ReleaseDC(s_wcd.hWnd, hDC);
+
+	const HANDLE logo = LoadImageA(0, "codlogo.bmp", 0, 0, 0, 0x10u);
+	if (logo)
+	{
+		s_wcd.codLogo = CreateWindowExA(
+			0, "Static", 0, 0x5000000Eu, 5, 5, 0, 0, s_wcd.hWnd, reinterpret_cast<HMENU>(1), hInstance, 0);
+		SendMessageA(s_wcd.codLogo, 0x172u, 0, reinterpret_cast<LPARAM>(logo));
+	}
+
+	// create the input line
+	s_wcd.hwndInputLine = CreateWindowExA(0, "edit", 0, 0x50800080u, 6, 400, 608, 20, s_wcd.hWnd, (HMENU)0x65, hInstance, 0);
+	s_wcd.hwndBuffer = CreateWindowExA(0, "edit", 0, 0x50A00844u, 6, 70, 606, 324, s_wcd.hWnd, (HMENU)0x64, hInstance, 0);
+	SendMessageA(s_wcd.hwndBuffer, 0x30u, reinterpret_cast<WPARAM>(s_wcd.hfBufferFont), 0);
+
+	s_wcd.SysInputLineWndProc = reinterpret_cast<WNDPROC>(
+		SetWindowLongA(s_wcd.hwndInputLine, -4, reinterpret_cast<LONG>(InputLineWndProc)));
+
+	SendMessageA(s_wcd.hwndInputLine, 0x30u, reinterpret_cast<WPARAM>(s_wcd.hfBufferFont), 0);
+
+	SetFocus(s_wcd.hwndInputLine);
+	Con_GetTextCopy(text, 0x4000);
+	Conbuf_CleanText(text, target, 0x4000);
+	SetWindowTextA(s_wcd.hwndBuffer, target);
 }
 
 /*
@@ -259,15 +255,17 @@ void __cdecl Sys_DestroyConsole()
 */
 void __cdecl Sys_ShowConsole()
 {
-	HMODULE ModuleHandleA; // eax
+	HMODULE module;
 
 	if (!s_wcd.hWnd)
 	{
-		ModuleHandleA = GetModuleHandleA(0);
-		Sys_CreateConsole(ModuleHandleA);
+		module = GetModuleHandleA(0);
+		Sys_CreateConsole(module);
+
 		if (!s_wcd.hWnd)
 			MyAssertHandler(".\\win32\\win_syscon.cpp", 385, 0, "%s", "s_wcd.hWnd");
 	}
+
 	ShowWindow(s_wcd.hWnd, 1);
 	SendMessageA(s_wcd.hwndBuffer, 0xB6u, 0, 0xFFFF);
 }
@@ -295,7 +293,6 @@ void __cdecl Conbuf_AppendText(const char *pMsg)
 {
 	char target[32772]; // [esp+20h] [ebp-8010h] BYREF
 	const char *source; // [esp+8028h] [ebp-8h]
-	char *v3; // [esp+802Ch] [ebp-4h]
 
 	if (!s_wcd.hwndBuffer)
 		MyAssertHandler(".\\win32\\win_syscon.cpp", 420, 0, "%s", "s_wcd.hwndBuffer");
@@ -303,8 +300,9 @@ void __cdecl Conbuf_AppendText(const char *pMsg)
 		source = pMsg;
 	else
 		source = &pMsg[strlen(pMsg) - 0x3FFF];
-	v3 = Conbuf_CleanText(source, target, 0x8000);
-	s_totalChars += (unsigned int)v3;
+
+	unsigned int character_amount = Conbuf_CleanText(source, target, 0x8000);
+	s_totalChars += character_amount;
 	if (s_totalChars <= 0x4000)
 	{
 		SendMessageA(s_wcd.hwndBuffer, 0xB1u, 0xFFFFu, 0xFFFF);
@@ -312,8 +310,9 @@ void __cdecl Conbuf_AppendText(const char *pMsg)
 	else
 	{
 		SendMessageA(s_wcd.hwndBuffer, 0xB1u, 0, -1);
-		s_totalChars = (unsigned int)v3;
+		s_totalChars = character_amount;
 	}
+
 	SendMessageA(s_wcd.hwndBuffer, 0xB6u, 0, 0xFFFF);
 	SendMessageA(s_wcd.hwndBuffer, 0xB7u, 0, 0);
 	SendMessageA(s_wcd.hwndBuffer, 0xC2u, 0, (LPARAM)target);
