@@ -412,14 +412,14 @@ enum DvarType
 	DVAR_TYPE_COUNT = 0x9,
 };
 
-enum DvarFlags
+enum DvarFlags : uint16
 {
 	DVAR_NOFLAG             = 0x0,
 	DVAR_ARCHIVE            = 0x1,  // will be saved to config_mp.cfg
 	DVAR_USERINFO           = 0x2,  // sent to server on connect or change
 	DVAR_SERVERINFO         = 0x4,  // sent in response to front end requests
-	DVAR_REPLICATED         = 0x8,  // this is sent to all clients (if you are host)
-	DVAR_WRITEPROTECT       = 0x10, // don't allow change from console at all (i think)
+	DVAR_SYSTEMINFO         = 0x8,  // this is sent (replicated) to all clients if you are host
+	DVAR_INIT               = 0x10, // don't allow change from console at all (i think)
 	DVAR_LATCH              = 0x20, // will only change when C code next does
                                     // a Cvar_Get(), so it can't be changed
                                     // without proper initialization.  modified
@@ -519,8 +519,8 @@ union DvarLimits
 struct dvar_s {
 	const char *name;
 	const char *description;
-	DvarFlags flags;
-	DvarType type;
+	word flags;
+	byte type;
 	bool modified;
 	DvarValue current;
 	DvarValue latched;
