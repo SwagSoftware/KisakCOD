@@ -465,6 +465,7 @@ void __cdecl Key_WriteBindings(int localClientNum, int f);
 int __cdecl Key_WriteBindingsToBuffer(int localClientNum, char *buffer, int bufferSize);
 void __cdecl Key_Bindlist_f();
 void __cdecl CL_InitKeyCommands();
+bool __cdecl CL_IsConsoleKey(int key);
 void __cdecl CL_KeyEvent(int localClientNum, int key, int down, unsigned int time);
 void __cdecl Message_Key(int localClientNum, int key);
 bool __cdecl CL_MouseInputShouldBypassMenus(int localClientNum, int key);
