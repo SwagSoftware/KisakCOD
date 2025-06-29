@@ -11,6 +11,13 @@
 #include <sound/snd_public.h>
 #include <script/scr_const.h>
 
+#define MAX_GENTITIES 0x400
+#define MAX_CLIENT_CORPSES 8
+
+#define STATIC_MAX_LOCAL_CLIENTS 1
+
+#define MAX_COMPASS_ACTORS 64
+
 const float up[3] = { 0.0f, 0.0f, 1.0f };
 
 
@@ -1464,21 +1471,22 @@ extern unsigned __int16 *s_flashTags[];
 
 inline centity_s *__cdecl CG_GetEntity(int localClientNum, unsigned int entityIndex)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (entityIndex >= 0x400)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
-            1113,
-            0,
-            "entityIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entityIndex,
-            1024);
-    return &cg_entitiesArray[0][entityIndex];
+    iassert(localClientNum == 0);
+    bcassert(entityIndex, MAX_GENTITIES);
+
+    return &cg_entitiesArray[localClientNum][entityIndex];
+}
+
+inline cg_s *CG_GetLocalClientGlobals(int localClientNum)
+{
+    iassert(localClientNum == 0);
+
+    return &cgArray[localClientNum];
+}
+
+inline cgs_t *CG_GetLocalClientStaticGlobals(int localClientNum)
+{
+    iassert(localClientNum == 0);
+
+    return &cgsArray[localClientNum];
 }

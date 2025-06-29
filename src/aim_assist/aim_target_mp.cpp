@@ -47,24 +47,19 @@ void __cdecl AimTarget_ClearTargetList(int localClientNum)
 
 void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent)
 {
-    AimTarget target; // [esp+50h] [ebp-30h] BYREF
-    unsigned int visBone; // [esp+7Ch] [ebp-4h]
+    AimTarget target;
+    unsigned int visBone;
+    const cg_s *cgameGlob;
 
     PROF_SCOPED("AimTarget_ProcessEntity");
 
-    iassert(localClientNum == 0);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     iassert(ent);
     iassert(ent->nextValid);
+    iassert(ent->nextState.number != cgameGlob->predictedPlayerState.clientNum);
 
-    if (ent->nextState.number == cgArray[0].predictedPlayerState.clientNum)
-        MyAssertHandler(
-            ".\\aim_assist\\aim_target_mp.cpp",
-            468,
-            0,
-            "%s",
-            "ent->nextState.number != cgameGlob->predictedPlayerState.clientNum");
-
-    if (!AimTarget_PlayerInValidState(&cgArray[0].predictedPlayerState))
+    if (!AimTarget_PlayerInValidState(&cgameGlob->predictedPlayerState))
     {
         return;
     }
@@ -75,14 +70,12 @@ void __cdecl AimTarget_ProcessEntity(int localClientNum, const centity_s *ent)
     }
     else
     {
-        if ((ent->nextState.lerp.eFlags & 0x800) == 0)
-            MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 478, 0, "%s", "ent->nextState.lerp.eFlags & EF_AIM_ASSIST");
-        if (ent->nextState.solid != 0xFFFFFF)
-            MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 479, 0, "%s", "ent->nextState.solid == SOLID_BMODEL");
+        iassert(ent->nextState.lerp.eFlags & EF_AIM_ASSIST);
+        iassert(ent->nextState.solid == SOLID_BMODEL);
         visBone = 0;
     }
 
-    if (AimTarget_IsTargetValid(cgArray, ent) && AimTarget_IsTargetVisible(localClientNum, ent, visBone))
+    if (AimTarget_IsTargetValid(cgameGlob, ent) && AimTarget_IsTargetVisible(localClientNum, ent, visBone))
     {
         AimTarget_CreateTarget(localClientNum, ent, &target);
     }
@@ -233,38 +226,35 @@ char __cdecl AimTarget_IsTargetVisible(int localClientNum, const centity_s *targ
     float playerEyePos[3]; // [esp+94h] [ebp-1Ch] BYREF
     float targetEyePos[3]; // [esp+A0h] [ebp-10h] BYREF
     float visibility; // [esp+ACh] [ebp-4h]
+    const cg_s *cgameGlob;
 
     PROF_SCOPED("AimTarget_IsTargetVisible");
 
-    if (!targetEnt)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 337, 0, "%s", "targetEnt");
+    iassert(targetEnt);
+
     if (visBone)
         AimTarget_GetTagPos(targetEnt, visBone, targetEyePos);
     else
         AimTarget_GetTargetCenter(targetEnt, targetEyePos);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    endPos[3] = 1.4046605e-38f;
-    playerEyePos[0] = cgArray[0].refdef.vieworg[0];
-    playerEyePos[1] = cgArray[0].refdef.vieworg[1];
-    playerEyePos[2] = cgArray[0].refdef.vieworg[2];
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    playerEyePos[0] = cgameGlob->refdef.vieworg[0];
+    playerEyePos[1] = cgameGlob->refdef.vieworg[1];
+    playerEyePos[2] = cgameGlob->refdef.vieworg[2];
+
     CG_TraceCapsule(
         &trace,
         playerEyePos,
         (float *)vec3_origin,
         (float *)vec3_origin,
         targetEyePos,
-        cgArray[0].predictedPlayerState.clientNum,
+        cgameGlob->predictedPlayerState.clientNum,
         0x803003);
+
     if (trace.fraction != 1.0 && Trace_GetEntityHitId(&trace) != targetEnt->nextState.number)
     {
-        if (targetEnt->nextState.solid != 0xFFFFFF)
+        if (targetEnt->nextState.solid != SOLID_BMODEL)
         {
             return 0;
         }
@@ -314,19 +304,11 @@ void __cdecl AimTarget_CreateTarget(int localClientNum, const centity_s *targetE
 
     PROF_SCOPED("AimTarget_CreateTarget");
 
-    if (!targetEnt)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 393, 0, "%s", "targetEnt");
-    if (!target)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 394, 0, "%s", "target");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
+    iassert(targetEnt);
+    iassert(target);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     target->entIndex = targetEnt->nextState.number;
     Vec3Sub(targetEnt->pose.origin, cgameGlob->predictedPlayerState.origin, diff);
     target->worldDistSqr = Vec3LengthSq(diff);

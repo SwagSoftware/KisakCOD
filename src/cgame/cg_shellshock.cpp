@@ -176,18 +176,13 @@ int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
     int dt; // [esp+24h] [ebp-10h]
     const ClientViewParams* view; // [esp+2Ch] [ebp-8h]
     int screenBlendTime; // [esp+30h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (start && duration > 0)
     {
-        dt = duration + start - cgArray[0].time;
+        dt = duration + start - cgameGlob->time;
         if (dt > 0)
         {
             screenBlendTime = parms->screenBlend.blurredEffectTime;
@@ -195,7 +190,7 @@ int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
             {
                 screenBlendTime = (int)(dt / parms->screenBlend.blurredFadeTime * screenBlendTime);
             }
-            if (cgArray[0].shellshock.hasSavedScreen)
+            if (cgameGlob->shellshock.hasSavedScreen)
             {
                 view = CG_GetLocalClientViewParams(localClientNum);
                 R_AddCmdBlendSavedScreenShockBlurred(
@@ -207,18 +202,18 @@ int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
                     localClientNum);
             }
             SaveScreenToBuffer(localClientNum);
-            cgArray[0].shellshock.hasSavedScreen = 1;
+            cgameGlob->shellshock.hasSavedScreen = 1;
             return 1;
         }
         else
         {
-            cgArray[0].shellshock.hasSavedScreen = 0;
+            cgameGlob->shellshock.hasSavedScreen = 0;
             return 0;
         }
     }
     else
     {
-        cgArray[0].shellshock.hasSavedScreen = 0;
+        cgameGlob->shellshock.hasSavedScreen = 0;
         return 0;
     }
 }
@@ -251,18 +246,12 @@ int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
     float grabFactor; // [esp+28h] [ebp-4h]
     float grabFactora; // [esp+28h] [ebp-4h]
     float grabFactorb; // [esp+28h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     if (start && duration > 0)
     {
-        dt = duration + start - cgArray[0].time;
+        dt = duration + start - cgameGlob->time;
         if (dt > 0)
         {
             whiteFactor = (float)parms->screenBlend.flashWhiteFadeTime;
@@ -277,7 +266,7 @@ int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
                 grabFactora = (double)dt / grabFactor;
             whiteFactorb = BlendSmooth(whiteFactora);
             grabFactorb = BlendSmooth(grabFactora);
-            if (cgArray[0].shellshock.hasSavedScreen)
+            if (cgameGlob->shellshock.hasSavedScreen)
             {
                 view = CG_GetLocalClientViewParams(localClientNum);
                 R_AddCmdBlendSavedScreenShockFlashed(whiteFactorb, grabFactorb, view->x, view->y, view->width, view->height);
@@ -286,18 +275,18 @@ int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
             {
                 SaveScreenToBuffer(localClientNum);
             }
-            cgArray[0].shellshock.hasSavedScreen = 1;
+            cgameGlob->shellshock.hasSavedScreen = 1;
             return 1;
         }
         else
         {
-            cgArray[0].shellshock.hasSavedScreen = 0;
+            cgameGlob->shellshock.hasSavedScreen = 0;
             return 0;
         }
     }
     else
     {
-        cgArray[0].shellshock.hasSavedScreen = 0;
+        cgameGlob->shellshock.hasSavedScreen = 0;
         return 0;
     }
 }
@@ -314,17 +303,10 @@ double __cdecl BlendSmooth(float percent)
 
 void __cdecl CG_UpdateShellShock(int localClientNum, const shellshock_parms_t *parms, int start, int duration)
 {
-    int time; // [esp+14h] [ebp-4h]
+    int time;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    time = cgArray[0].time - start;
+    time = CG_GetLocalClientGlobals(localClientNum)->time - start;
+
     if (start && time >= 0)
     {
         UpdateShellShockSound(localClientNum, parms, time, duration);
@@ -348,20 +330,16 @@ void __cdecl EndShellShock(int localClientNum)
 void __cdecl EndShellShockSound(int localClientNum)
 {
     snd_alias_t *alias; // [esp+10h] [ebp-4h]
+    cg_s *cgameGlob;
 
     SND_DeactivateChannelVolumes(3, 0);
     SND_DeactivateEnvironmentEffects(2, 0);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].shellshock.loopEndTime)
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->shellshock.loopEndTime)
     {
-        cgArray[0].shellshock.loopEndTime = 0;
+        cgameGlob->shellshock.loopEndTime = 0;
         alias = CL_PickSoundAlias("shellshock_end_abort");
         SND_PlaySoundAlias(alias, (SndEntHandle)1023, vec3_origin, 0, SASYS_CGAME);
     }
@@ -369,44 +347,23 @@ void __cdecl EndShellShockSound(int localClientNum)
 
 void __cdecl EndShellShockLookControl(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].shellshock.sensitivity = 1.0;
-    CL_CapTurnRate(localClientNum, 0.0, 0.0);
+    CG_GetLocalClientGlobals(localClientNum)->shellshock.sensitivity = 1.0f;
+    CL_CapTurnRate(localClientNum, 0.0f, 0.0f);
 }
 
 void __cdecl EndShellShockCamera(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cg_s *cgameGlob;
 
-    cgArray[0].shellshock.viewDelta[0] = 0.0;
-    cgArray[0].shellshock.viewDelta[1] = 0.0;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    cgameGlob->shellshock.viewDelta[0] = 0.0;
+    cgameGlob->shellshock.viewDelta[1] = 0.0;
 }
 
 void __cdecl EndShellShockScreen(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].shellshock.hasSavedScreen = 0;
+    CG_GetLocalClientGlobals(localClientNum)->shellshock.hasSavedScreen = 0;
 }
 
 void __cdecl UpdateShellShockSound(int localClientNum, const shellshock_parms_t* parms, int time, int duration)
@@ -420,15 +377,15 @@ void __cdecl UpdateShellShockSound(int localClientNum, const shellshock_parms_t*
     int dta; // [esp+38h] [ebp-14h]
     float fade; // [esp+3Ch] [ebp-10h]
     int end; // [esp+44h] [ebp-8h]
+    cg_s *cgameGlob;
 
-    if (!parms)
-        MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 443, 0, "%s", "parms");
-    if (time < 0)
-        MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 444, 0, "%s", "time >= 0");
-    if (duration < 0)
-        MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 445, 0, "%s", "duration >= 0");
+    iassert(parms);
+    iassert(time >= 0);
+    iassert(duration >= 0);
+
     if (parms->sound.affect)
     {
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         dt = parms->sound.fadeOutTime + parms->sound.modEndDelay + duration - time;
         if (time >= parms->sound.fadeInTime)
         {
@@ -475,20 +432,20 @@ void __cdecl UpdateShellShockSound(int localClientNum, const shellshock_parms_t*
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        end = parms->sound.loopEndDelay + duration + cgArray[0].time - time;
-        if (cgArray[0].time >= end)
+        end = parms->sound.loopEndDelay + duration + cgameGlob->time - time;
+        if (cgameGlob->time >= end)
         {
-            if (end != cgArray[0].shellshock.loopEndTime)
+            if (end != cgameGlob->shellshock.loopEndTime)
             {
-                cgArray[0].shellshock.loopEndTime = end;
-                wetlevel = cgArray[0].time - end;
+                cgameGlob->shellshock.loopEndTime = end;
+                wetlevel = cgameGlob->time - end;
                 v5 = CL_PickSoundAlias(parms->sound.end);
                 SND_PlaySoundAlias(v5, (SndEntHandle)1023, vec3_origin, wetlevel, SASYS_CGAME);
             }
         }
-        else if (cgArray[0].shellshock.loopEndTime)
+        else if (cgameGlob->shellshock.loopEndTime)
         {
-            cgArray[0].shellshock.loopEndTime = 0;
+            cgameGlob->shellshock.loopEndTime = 0;
             v4 = CL_PickSoundAlias(parms->sound.endAbort);
             SND_PlaySoundAlias(v4, (SndEntHandle)1023, vec3_origin, 0, SASYS_CGAME);
         }
@@ -504,6 +461,7 @@ void __cdecl UpdateShellShockLookControl(int localClientNum, const shellshock_pa
     float maxPitchSpeed; // [esp+8h] [ebp-14h]
     float maxYawSpeed; // [esp+Ch] [ebp-10h]
     float fade; // [esp+14h] [ebp-8h]
+    cg_s *cgameGlob;
 
     if (!parms)
         MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 530, 0, "%s", "parms");
@@ -527,22 +485,17 @@ void __cdecl UpdateShellShockLookControl(int localClientNum, const shellshock_pa
     {
         fade = 1.0;
     }
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (fade == 1.0)
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (fade == 1.0f)
     {
-        cgArray[0].shellshock.sensitivity = parms->lookControl.mouseSensitivity;
+        cgameGlob->shellshock.sensitivity = parms->lookControl.mouseSensitivity;
         CL_CapTurnRate(localClientNum, parms->lookControl.maxPitchSpeed, parms->lookControl.maxYawSpeed);
     }
     else
     {
-        cgArray[0].shellshock.sensitivity = (parms->lookControl.mouseSensitivity - 1.0) * fade + 1.0;
+        cgameGlob->shellshock.sensitivity = (parms->lookControl.mouseSensitivity - 1.0) * fade + 1.0;
         maxYawSpeed = parms->lookControl.maxYawSpeed / fade;
         maxPitchSpeed = parms->lookControl.maxPitchSpeed / fade;
         CL_CapTurnRate(localClientNum, maxPitchSpeed, maxYawSpeed);
@@ -559,12 +512,13 @@ void __cdecl UpdateShellShockCamera(int localClientNum, const shellshock_parms_t
     int base; // [esp+38h] [ebp-8h]
     float scale; // [esp+3Ch] [ebp-4h]
     float scalea; // [esp+3Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
     dt = duration - time;
     if (duration - time > 0)
     {
-        if (!parms)
-            MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 593, 0, "%s", "parms");
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        iassert(parms);
         scale = 1.0;
         if (dt < parms->view.fadeTime)
             scale = (double)dt / (double)parms->view.fadeTime;
@@ -574,17 +528,9 @@ void __cdecl UpdateShellShockCamera(int localClientNum, const shellshock_parms_t
         base = (int)(ta - 0.4999999990686774);
         t = ta - (double)base;
         perturb = cg_perturbations[(base + 61 * duration) & 0x7F];
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
 
-        cgArray[0].shellshock.viewDelta[0] = CubicInterpolate(t, *perturb, perturb[2], perturb[4], perturb[6]) * radius;
-        cgArray[0].shellshock.viewDelta[1] = CubicInterpolate(t, perturb[1], perturb[3], perturb[5], perturb[7]) * radius;
+        cgameGlob->shellshock.viewDelta[0] = CubicInterpolate(t, *perturb, perturb[2], perturb[4], perturb[6]) * radius;
+        cgameGlob->shellshock.viewDelta[1] = CubicInterpolate(t, perturb[1], perturb[3], perturb[5], perturb[7]) * radius;
     }
     else
     {
@@ -613,15 +559,11 @@ void __cdecl CG_StartShellShock(cg_s *cgameGlob, const shellshock_parms_t *parms
 
 bool __cdecl CG_Flashbanged(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].shellshock.duration + cgArray[0].shellshock.startTime - cgArray[0].time > 0
-        && cgArray[0].shellshock.parms->screenBlend.type != SHELLSHOCK_VIEWTYPE_BLURRED;
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    return cgameGlob->shellshock.duration + cgameGlob->shellshock.startTime - cgameGlob->time > 0
+        && cgameGlob->shellshock.parms->screenBlend.type != SHELLSHOCK_VIEWTYPE_BLURRED;
 }
 

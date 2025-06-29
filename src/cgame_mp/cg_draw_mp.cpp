@@ -39,21 +39,18 @@ void __cdecl CG_PriorityCenterPrint(int localClientNum, const char* str, int pri
     CenterPrint* centerPrint; // [esp+4h] [ebp-10Ch]
     char hudElemString[260]; // [esp+8h] [ebp-108h] BYREF
 
+    const cg_s *cgameGlob;
+
     centerPrint = &s_centerPrint[localClientNum];
     if (!centerPrint->time || priority >= centerPrint->priority)
     {
         CG_TranslateHudElemMessage(localClientNum, str, "Center Print", hudElemString);
         I_strncpyz(centerPrint->text, hudElemString, 256);
         centerPrint->priority = priority;
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        centerPrint->time = cgArray[0].time;
+
+        cgameGlob = CG_GetLocalClientGlobals(0);
+
+        centerPrint->time = cgameGlob->time;
     }
 }
 
@@ -75,17 +72,13 @@ void __cdecl CG_DrawCenterString(
     int time; // [esp+3Ch] [ebp-8h]
     float x; // [esp+40h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    time = cgArray[0].time;
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    time = cgameGlob->time;
     centerPrint = &s_centerPrint[localClientNum];
-    if (centerPrint->time > cgArray[0].time)
+    if (centerPrint->time > cgameGlob->time)
         centerPrint->time = 0;
     if (centerPrint->time)
     {
@@ -135,15 +128,11 @@ void __cdecl CG_Draw2D(int localClientNum)
     int chatOverScoreboard; // [esp+3Ch] [ebp-8h]
     playerState_s *ps; // [esp+40h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].cubemapShot == CUBEMAPSHOT_NONE && cg_draw2D->current.enabled)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->cubemapShot == CUBEMAPSHOT_NONE && cg_draw2D->current.enabled)
     {
         if (debugOverlay->current.integer == 1)
         {
@@ -158,8 +147,8 @@ void __cdecl CG_Draw2D(int localClientNum)
         else
         {
             drawHud = CG_ShouldDrawHud(localClientNum);
-            ps = &cgArray[0].nextSnap->ps;
-            if (cgArray[0].nextSnap->ps.pm_type == 5)
+            ps = &cgameGlob->nextSnap->ps;
+            if (cgameGlob->nextSnap->ps.pm_type == 5)
             {
                 DrawIntermission(localClientNum);
                 CG_DrawSay(localClientNum);
@@ -208,7 +197,7 @@ void __cdecl CG_Draw2D(int localClientNum)
                 {
                     if (chatOverScoreboard)
                         CG_DrawChatMessages(localClientNum);
-                    CG_DrawFlashDamage(cgArray);
+                    CG_DrawFlashDamage(cgameGlob);
                     CG_DrawDamageDirectionIndicators(localClientNum);
                     CG_DrawGrenadeIndicators(localClientNum);
                     if (!isScoreboardVisible && cg_drawSpectatorMessages->current.enabled)
@@ -259,11 +248,13 @@ void __cdecl CG_DrawChatMessages(int localClientNum)
     float fontScale; // [esp+7Ch] [ebp-Ch]
     int chatHeight; // [esp+80h] [ebp-8h]
     float w; // [esp+84h] [ebp-4h]
+    cgs_t *cgamestaticGlob;
+    cg_s *cgameGlob;
 
     PROF_SCOPED("CG_DrawChatMessages");
 
-    if (!cg_hudChatPosition)
-        MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 155, 0, "%s", "cg_hudChatPosition");
+    iassert(cg_hudChatPosition);
+
     chatHeight = cg_chatHeight->current.integer;
     if (chatHeight)
     {
@@ -273,38 +264,24 @@ void __cdecl CG_DrawChatMessages(int localClientNum)
             v2 = cg_hudChatPosition;
         hudChatX = (int)v2->current.value;
         hudChatY = (int)v2->current.vector[1];
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        fontHeight = cgsArray[0].viewHeight <= 768 ? 16.0 : 10.0;
-        fontWidth = cgsArray[0].viewWidth <= 768 ? 12.0 : 8.0;
+        cgamestaticGlob = CG_GetLocalClientStaticGlobals(localClientNum);
+        fontHeight = cgamestaticGlob->viewHeight <= 768 ? 16.0 : 10.0;
+        fontWidth = cgamestaticGlob->viewWidth <= 768 ? 12.0 : 8.0;
         fontScale = fontHeight / 48.0;
-        if (cgsArray[0].teamLastChatPos != cgsArray[0].teamChatPos)
+        if (cgamestaticGlob->teamLastChatPos != cgamestaticGlob->teamChatPos)
         {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
-            cgameTimeNow = cgArray[0].time;
-            if (cgArray[0].time - cgsArray[0].teamChatMsgTimes[cgsArray[0].teamLastChatPos % chatHeight] > cg_chatTime->current.integer)
-                ++cgsArray[0].teamLastChatPos;
+            cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+            cgameTimeNow = cgameGlob->time;
+            if (cgameGlob->time - cgamestaticGlob->teamChatMsgTimes[cgamestaticGlob->teamLastChatPos % chatHeight] > cg_chatTime->current.integer)
+                ++cgamestaticGlob->teamLastChatPos;
             scrPlace = &scrPlaceView[localClientNum];
             font = UI_GetFontHandle(scrPlace, 0, fontScale);
-            for (i = cgsArray[0].teamChatPos - 1; ; --i)
+            for (i = cgamestaticGlob->teamChatPos - 1; ; --i)
             {
-                if (i < cgsArray[0].teamLastChatPos)
+                if (i < cgamestaticGlob->teamLastChatPos)
                     return;
                 alphapercent = (double)cg_chatTime->current.integer
-                    - (double)(cgameTimeNow - cgsArray[0].teamChatMsgTimes[i % chatHeight]);
+                    - (double)(cgameTimeNow - cgamestaticGlob->teamChatMsgTimes[i % chatHeight]);
                 if (alphapercent <= 200.0)
                 {
                     alphapercenta = alphapercent / 200.0;
@@ -316,13 +293,13 @@ void __cdecl CG_DrawChatMessages(int localClientNum)
                     alphapercenta = 1.0;
                 }
                 v1 = i % chatHeight;
-                msg = cgsArray[0].teamChatMsgs[v1];
+                msg = cgamestaticGlob->teamChatMsgs[v1];
                 if ((cgs_t *)((char *)cgsArray + v1 * 160) == (cgs_t *)-3728
                     || *msg != 94
-                    || !cgsArray[0].teamChatMsgs[v1][1]
-                    || cgsArray[0].teamChatMsgs[v1][1] == 94
-                    || cgsArray[0].teamChatMsgs[v1][1] < 48
-                    || cgsArray[0].teamChatMsgs[v1][1] > 57)
+                    || !cgamestaticGlob->teamChatMsgs[v1][1]
+                    || cgamestaticGlob->teamChatMsgs[v1][1] == 94
+                    || cgamestaticGlob->teamChatMsgs[v1][1] < 48
+                    || cgamestaticGlob->teamChatMsgs[v1][1] > 57)
                 {
                     color[0] = 1.0;
                     color[1] = 1.0;
@@ -330,16 +307,16 @@ void __cdecl CG_DrawChatMessages(int localClientNum)
                 }
                 else
                 {
-                    CL_LookupColor(localClientNum, cgsArray[0].teamChatMsgs[v1][1], color);
+                    CL_LookupColor(localClientNum, cgamestaticGlob->teamChatMsgs[v1][1], color);
                 }
                 Vec3Scale(color, 0.25, color);
                 color[3] = alphapercenta * 0.6000000238418579;
-                y = (double)hudChatY - (double)(cgsArray[0].teamChatPos - i) * fontHeight;
+                y = (double)hudChatY - (double)(cgamestaticGlob->teamChatPos - i) * fontHeight;
                 w = (double)UI_TextWidth(msg, 0, font, fontScale) + fontWidth * 3.0;
                 UI_DrawHandlePic(scrPlace, 0.0, y, w, fontHeight, 1, 1, color, cgMedia.teamStatusBar);
                 color[3] = alphapercenta;
                 x = (float)hudChatX;
-                ya = (double)hudChatY - (double)(cgsArray[0].teamChatPos - i) * fontHeight + fontHeight - 1.0;
+                ya = (double)hudChatY - (double)(cgamestaticGlob->teamChatPos - i) * fontHeight + fontHeight - 1.0;
                 color[0] = 1.0;
                 color[1] = 1.0;
                 color[2] = 1.0;
@@ -368,19 +345,11 @@ void __cdecl CG_ScanForCrosshairEntity(int localClientNum)
 
     PROF_SCOPED("CG_ScanForCrosshairEntity");
 
-    fCheckDist = 8192.0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 473, 0, "%s", "cgameGlob->nextSnap");
+    fCheckDist = 8192.0f;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob->nextSnap);
     cgameGlob->predictedPlayerState.weapFlags &= 0xFFFFFFE7;
+
     if (!CG_Flashbanged(localClientNum))
     {
         start[0] = cgameGlob->refdef.vieworg[0];
@@ -398,26 +367,12 @@ void __cdecl CG_ScanForCrosshairEntity(int localClientNum)
         hitEntId = Trace_GetEntityHitId(&trace);
         if (hitEntId < 0x40u)
         {
-            if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_draw_mp.cpp",
-                    489,
-                    0,
-                    "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    cgameGlob->nextSnap->ps.clientNum,
-                    64);
+            bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
             fadeOutTime = cg_friendlyNameFadeOut->current.integer;
             team = cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].team;
             if (team != TEAM_SPECTATOR)
             {
-                if (cgameGlob->crosshairClientNum >= 0x40u)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_draw_mp.cpp",
-                        494,
-                        0,
-                        "cgameGlob->crosshairClientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                        cgameGlob->crosshairClientNum,
-                        64);
+                bcassert(cgameGlob->crosshairClientNum, MAX_CLIENTS);
                 if (cgameGlob->bgs.clientinfo[cgameGlob->crosshairClientNum].team == team && team)
                 {
                     cgameGlob->predictedPlayerState.weapFlags |= 8u;
@@ -452,20 +407,16 @@ void __cdecl CG_ScanForCrosshairEntity(int localClientNum)
 
 void __cdecl CG_CheckTimedMenus(int localClientNum)
 {
+    cg_s *cgameGlob;
+
     PROF_SCOPED("CG_CheckTimedMenus");
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].voiceTime && cgArray[0].time - cgArray[0].voiceTime > 2500)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->voiceTime && cgameGlob->time - cgameGlob->voiceTime > 2500)
     {
         Menus_CloseByName(&cgDC[localClientNum], "voiceMenu");
-        cgArray[0].voiceTime = 0;
+        cgameGlob->voiceTime = 0;
     }
     CG_CheckForPlayerInput(localClientNum);
     CG_CheckHudHealthDisplay(localClientNum);
@@ -543,32 +494,26 @@ int __cdecl CG_CheckPlayerWeaponUsage(int localClientNum, char buttons)
 
 bool __cdecl CG_CheckPlayerTryReload(int localClientNum, char buttons)
 {
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if ((buttons & 0x30) == 0)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return (cgArray[0].predictedPlayerState.pm_flags & 4) == 0 && (cgArray[0].predictedPlayerState.eFlags & 0x300) == 0;
+
+    return (cgameGlob->predictedPlayerState.pm_flags & 4) == 0 && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0;
 }
 
 bool __cdecl CG_CheckPlayerFireNonTurret(int localClientNum, char buttons)
 {
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if ((buttons & 1) == 0)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return (cgArray[0].predictedPlayerState.eFlags & 0x300) == 0;
+
+    return (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0;
 }
 
 int __cdecl CG_CheckPlayerOffHandUsage(int localClientNum, __int16 buttons)
@@ -586,25 +531,21 @@ unsigned int __cdecl CG_CheckPlayerMiscInput(int buttons)
 
 void __cdecl CG_CheckHudHealthDisplay(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (hud_health_startpulse_injured->current.value <= CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps))
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (hud_health_startpulse_injured->current.value <= CG_CalcPlayerHealth(&cgameGlob->nextSnap->ps))
     {
         if (hud_fade_healthbar->current.value != 0.0
-            && cgArray[0].healthFadeTime
-            && hud_fade_healthbar->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].healthFadeTime))
+            && cgameGlob->healthFadeTime
+            && hud_fade_healthbar->current.value * 1000.0 < (double)(cgameGlob->time - cgameGlob->healthFadeTime))
         {
             if (CL_GetLocalClientActiveCount() == 1)
                 Menus_HideByName(&cgDC[localClientNum], "Health");
             else
                 Menus_HideByName(&cgDC[localClientNum], "Health_mp");
-            cgArray[0].healthFadeTime = 0;
+            cgameGlob->healthFadeTime = 0;
         }
     }
     else
@@ -615,19 +556,15 @@ void __cdecl CG_CheckHudHealthDisplay(int localClientNum)
 
 void __cdecl CG_CheckHudAmmoDisplay(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (CG_CheckPlayerForLowAmmo(cgArray) || CG_CheckPlayerForLowClip(cgArray))
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (CG_CheckPlayerForLowAmmo(cgameGlob) || CG_CheckPlayerForLowClip(cgameGlob))
         CG_MenuShowNotify(localClientNum, 1);
     if (hud_fade_ammodisplay->current.value != 0.0
-        && cgArray[0].ammoFadeTime
-        && hud_fade_ammodisplay->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].ammoFadeTime))
+        && cgameGlob->ammoFadeTime
+        && hud_fade_ammodisplay->current.value * 1000.0 < (double)(cgameGlob->time - cgameGlob->ammoFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
         {
@@ -638,56 +575,48 @@ void __cdecl CG_CheckHudAmmoDisplay(int localClientNum)
         {
             Menus_HideByName(&cgDC[localClientNum], "weaponinfo_mp");
         }
-        cgArray[0].ammoFadeTime = 0;
+        cgameGlob->ammoFadeTime = 0;
     }
 }
 
 void __cdecl CG_CheckHudCompassDisplay(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (hud_fade_compass->current.value != 0.0
-        && cgArray[0].compassFadeTime
-        && hud_fade_compass->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].compassFadeTime))
+        && cgameGlob->compassFadeTime
+        && hud_fade_compass->current.value * 1000.0 < (double)(cgameGlob->time - cgameGlob->compassFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "Compass");
         else
             Menus_HideByName(&cgDC[localClientNum], "Compass_mp");
-        cgArray[0].compassFadeTime = 0;
+        cgameGlob->compassFadeTime = 0;
     }
 }
 
 void __cdecl CG_CheckHudStanceDisplay(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if ((cgArray[0].nextSnap->ps.eFlags & 8) != 0 && (cgArray[0].nextSnap->ps.eFlags & 0x100) != 0
-        || (cgArray[0].nextSnap->ps.eFlags & 4) != 0 && (cgArray[0].nextSnap->ps.eFlags & 0x200) != 0)
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if ((cgameGlob->nextSnap->ps.eFlags & 8) != 0 && (cgameGlob->nextSnap->ps.eFlags & 0x100) != 0
+        || (cgameGlob->nextSnap->ps.eFlags & 4) != 0 && (cgameGlob->nextSnap->ps.eFlags & 0x200) != 0)
     {
         CG_MenuShowNotify(localClientNum, 3);
     }
     if (hud_fade_stance->current.value != 0.0
-        && cgArray[0].stanceFadeTime
-        && hud_fade_stance->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].stanceFadeTime))
+        && cgameGlob->stanceFadeTime
+        && hud_fade_stance->current.value * 1000.0 < (double)(cgameGlob->time - cgameGlob->stanceFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "stance");
         else
             Menus_HideByName(&cgDC[localClientNum], "stance_mp");
-        cgArray[0].stanceFadeTime = 0;
+        cgameGlob->stanceFadeTime = 0;
     }
 }
 
@@ -696,57 +625,49 @@ void __cdecl CG_CheckHudSprintDisplay(int localClientNum)
     int maxSprintTime; // [esp+Ch] [ebp-Ch]
     playerState_s* ps; // [esp+10h] [ebp-8h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].nextSnap->ps;
-    if (cgArray[0].nextSnap->ps.pm_type != 7)
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    ps = &cgameGlob->nextSnap->ps;
+    if (cgameGlob->nextSnap->ps.pm_type != 7)
     {
         maxSprintTime = BG_GetMaxSprintTime(ps);
-        if (PM_GetSprintLeft(ps, cgArray[0].time) < maxSprintTime)
+        if (PM_GetSprintLeft(ps, cgameGlob->time) < maxSprintTime)
             CG_MenuShowNotify(localClientNum, 6);
     }
     if (ps->pm_type != 7
-        && cgArray[0].predictedPlayerState.sprintState.lastSprintStart > cgArray[0].predictedPlayerState.sprintState.lastSprintEnd)
+        && cgameGlob->predictedPlayerState.sprintState.lastSprintStart > cgameGlob->predictedPlayerState.sprintState.lastSprintEnd)
     {
         CG_MenuShowNotify(localClientNum, 6);
     }
     if (hud_fade_sprint->current.value != 0.0
-        && cgArray[0].sprintFadeTime
-        && hud_fade_stance->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].sprintFadeTime))
+        && cgameGlob->sprintFadeTime
+        && hud_fade_stance->current.value * 1000.0 < (double)(cgameGlob->time - cgameGlob->sprintFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "sprintMeter");
         else
             Menus_HideByName(&cgDC[localClientNum], "sprintMeter_mp");
-        cgArray[0].sprintFadeTime = 0;
+        cgameGlob->sprintFadeTime = 0;
     }
 }
 
 void __cdecl CG_CheckHudOffHandDisplay(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (hud_fade_offhand->current.value != 0.0
-        && cgArray[0].offhandFadeTime
-        && hud_fade_offhand->current.value * 1000.0 < (double)(cgArray[0].time - cgArray[0].offhandFadeTime))
+        && cgameGlob->offhandFadeTime
+        && hud_fade_offhand->current.value * 1000.0 < (double)(cgameGlob->time - cgameGlob->offhandFadeTime))
     {
         if (CL_GetLocalClientActiveCount() == 1)
             Menus_HideByName(&cgDC[localClientNum], "offhandinfo");
         else
             Menus_HideByName(&cgDC[localClientNum], "offhandinfo_mp");
-        cgArray[0].offhandFadeTime = 0;
+        cgameGlob->offhandFadeTime = 0;
     }
 }
 
@@ -754,15 +675,11 @@ void __cdecl CG_CheckHudObjectiveDisplay(int localClientNum)
 {
     if (CG_IsScoreboardDisplayed(localClientNum))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (cgArray[0].time - cgArray[0].scoreFadeTime > 100)
+        cg_s *cgameGlob;
+
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+        if (cgameGlob->time - cgameGlob->scoreFadeTime > 100)
             Menus_HideByName(&cgDC[localClientNum], "objectiveinfo");
     }
 }
@@ -814,28 +731,13 @@ void __cdecl CG_DrawVote(int localClientNum)
     float y; // [esp+348h] [ebp-8h]
     float fontScale; // [esp+34Ch] [ebp-4h]
 
-    if (!cg_hudVotePosition)
-        MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1117, 0, "%s", "cg_hudVotePosition");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgs = cgsArray;
-    if (cgsArray[0].voteTime)
+    iassert(cg_hudVotePosition);
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    if (cgs->voteTime)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         scrPlace = &scrPlaceView[localClientNum];
         if (cgs->viewHeight <= 768)
             fontHeight = 16.0;
@@ -897,14 +799,10 @@ void __cdecl DrawIntermission(int localClientNum)
     }
     else
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cg_s *cgameGlob;
+
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
         if (ui_showEndOfGame->current.enabled)
         {
             if (UI_GetActiveMenu(localClientNum) != 11)
@@ -912,8 +810,8 @@ void __cdecl DrawIntermission(int localClientNum)
         }
         else
         {
-            cgArray[0].showScores = 1;
-            cgArray[0].scoreFadeTime = cgArray[0].time;
+            cgameGlob->showScores = 1;
+            cgameGlob->scoreFadeTime = cgameGlob->time;
             if (UI_GetActiveMenu(localClientNum) != 10 && !ui_showEndOfGame->current.enabled)
                 UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)10);
             if (UI_GetActiveMenu(localClientNum) == 10)
@@ -972,17 +870,8 @@ void __cdecl CG_DrawSpectatorMessage(int localClientNum)
     followStop[1] = "+melee_breath";
     if (cg_descriptiveText->current.enabled && !Key_IsCatcherActive(localClientNum, 16))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;
-        if (!cgArray[0].nextSnap)
-            MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1275, 0, "%s", "cgameGlob->nextSnap");
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        iassert(cgameGlob->nextSnap);
         ps = &cgameGlob->nextSnap->ps;
         if ((ps->otherFlags & 0x18) != 0)
         {
@@ -1048,18 +937,14 @@ int __cdecl CG_DrawFollow(int localClientNum)
     float y; // [esp+68h] [ebp-8h]
     const playerState_s* ps; // [esp+6Ch] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].nextSnap->ps;
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    ps = &cgameGlob->nextSnap->ps;
     if ((ps->otherFlags & 2) == 0)
         return 0;
-    if (cgArray[0].inKillCam)
+    if (cgameGlob->inKillCam)
         return 0;
     if (ps->clientNum >= 0x40u)
         MyAssertHandler(
@@ -1107,34 +992,30 @@ void __cdecl CG_DrawFriendlyNames(int localClientNum)
 
     if (cg_drawFriendlyNames->current.enabled)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        team = cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum].team;
-        nextSnap = cgArray[0].nextSnap;
+        cg_s *cgameGlob;
+
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+        team = cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].team;
+        nextSnap = cgameGlob->nextSnap;
         flashed = CG_Flashbanged(localClientNum);
         for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
         {
             cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
             if (cent->nextState.eType == 1)
             {
-                v2 = cgArray[0].nextSnap;
+                v2 = cgameGlob->nextSnap;
                 v1 = (v2->ps.otherFlags & 6) != 0 && cent->nextState.number == v2->ps.clientNum;
-                if ((!v1 || cgArray[0].renderingThirdPerson)
+                if ((!v1 || cgameGlob->renderingThirdPerson)
                     && team
-                    && (team == TEAM_SPECTATOR || team == cgArray[0].bgs.clientinfo[cent->nextState.clientNum].team))
+                    && (team == TEAM_SPECTATOR || team == cgameGlob->bgs.clientinfo[cent->nextState.clientNum].team))
                 {
                     if (!flashed && CG_CanSeeFriendlyHead(localClientNum, cent))
                     {
                         if (!overheadFade[cent->nextState.clientNum].visible)
                         {
                             overheadFade[cent->nextState.clientNum].visible = 1;
-                            overheadFade[cent->nextState.clientNum].startTime = cgArray[0].time;
+                            overheadFade[cent->nextState.clientNum].startTime = cgameGlob->time;
                         }
                     }
                     else
@@ -1142,9 +1023,9 @@ void __cdecl CG_DrawFriendlyNames(int localClientNum)
                         overheadFade[cent->nextState.clientNum].visible = 0;
                     }
                     if (overheadFade[cent->nextState.clientNum].visible)
-                        overheadFade[cent->nextState.clientNum].lastTime = cgArray[0].time;
+                        overheadFade[cent->nextState.clientNum].lastTime = cgameGlob->time;
                     alpha = CG_FadeCrosshairNameAlpha(
-                        cgArray[0].time,
+                        cgameGlob->time,
                         overheadFade[cent->nextState.clientNum].startTime,
                         overheadFade[cent->nextState.clientNum].lastTime,
                         cg_friendlyNameFadeIn->current.integer,
@@ -1201,16 +1082,8 @@ void __cdecl CG_DrawOverheadNames(int localClientNum, const centity_s *cent, flo
 
     if (alpha > EQUAL_EPSILON)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;
-        ps = &cgArray[0].nextSnap->ps;
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        ps = &cgameGlob->nextSnap->ps;
         font = UI_GetFontHandle(0, cg_overheadNamesFont->current.integer, 1.0);
         obj = Com_GetClientDObj(cent->nextState.number, localClientNum);
         if (obj && CG_DObjGetWorldTagPos(&cent->pose, obj, scr_const.j_head, origin))
@@ -1314,17 +1187,13 @@ char __cdecl CG_CalcNamePosition(int localClientNum, float *origin, float *xOut,
     float y; // [esp+1Ch] [ebp-8h]
     float w; // [esp+20h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    refdef = &cgArray[0].refdef;
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    refdef = &cgameGlob->refdef;
     scrPlace = &scrPlaceView[localClientNum];
-    CG_GetViewAxisProjections(&cgArray[0].refdef, origin, projections);
+    CG_GetViewAxisProjections(&cgameGlob->refdef, origin, projections);
     w = projections[0];
     if (projections[0] < 0.0)
         return 0;
@@ -1367,19 +1236,13 @@ bool __cdecl CG_CanSeeFriendlyHead(int localClientNum, const centity_s *cent)
 
     if (cg_drawThroughWalls->current.enabled)
         return 1;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    ps = &cgArray[0].nextSnap->ps;
-    start[0] = cgArray[0].refdef.vieworg[0];
-    start[1] = cgArray[0].refdef.vieworg[1];
-    start[2] = cgArray[0].refdef.vieworg[2];
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    ps = &cgameGlob->nextSnap->ps;
+    start[0] = cgameGlob->refdef.vieworg[0];
+    start[1] = cgameGlob->refdef.vieworg[1];
+    start[2] = cgameGlob->refdef.vieworg[2];
     obj = Com_GetClientDObj(cent->nextState.number, localClientNum);
     if (!obj || !CG_DObjGetWorldTagPos(&cent->pose, obj, scr_const.j_head, end))
     {
@@ -1411,62 +1274,43 @@ void __cdecl CG_DrawCrosshairNames(int localClientNum)
     snapshot_s* nextSnap; // [esp+10h] [ebp-10h]
     centity_s* cent; // [esp+14h] [ebp-Ch]
     float alpha; // [esp+1Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
     if (cg_drawCrosshairNames->current.enabled)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (!cgArray[0].renderingThirdPerson && cgArray[0].crosshairClientNum <= 64)
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+        if (!cgameGlob->renderingThirdPerson && cgameGlob->crosshairClientNum <= 64)
         {
-            if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_draw_mp.cpp",
-                    685,
-                    0,
-                    "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    cgArray[0].nextSnap->ps.clientNum,
-                    64);
-            if (cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum].infoValid)
+            bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
+            if (cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].infoValid)
             {
-                if (cgArray[0].crosshairClientNum >= 0x40u)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_draw_mp.cpp",
-                        689,
-                        0,
-                        "cgameGlob->crosshairClientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                        cgArray[0].crosshairClientNum,
-                        64);
-                if (cgArray[0].bgs.clientinfo[cgArray[0].crosshairClientNum].infoValid)
+                bcassert(cgameGlob->crosshairClientNum, MAX_CLIENTS);
+                if (cgameGlob->bgs.clientinfo[cgameGlob->crosshairClientNum].infoValid)
                 {
-                    nextSnap = cgArray[0].nextSnap;
+                    nextSnap = cgameGlob->nextSnap;
                     for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
                     {
                         cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
-                        if (cent->nextState.eType == 1 && cent->nextState.clientNum == cgArray[0].crosshairClientNum)
+                        if (cent->nextState.eType == 1 && cent->nextState.clientNum == cgameGlob->crosshairClientNum)
                         {
-                            myTeam = cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum].team;
+                            myTeam = cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].team;
                             if (myTeam == TEAM_SPECTATOR
-                                || myTeam && myTeam == cgArray[0].bgs.clientinfo[cgArray[0].crosshairClientNum].team)
+                                || myTeam && myTeam == cgameGlob->bgs.clientinfo[cgameGlob->crosshairClientNum].team)
                             {
                                 alpha = CG_FadeCrosshairNameAlpha(
-                                    cgArray[0].time,
-                                    cgArray[0].crosshairClientStartTime,
-                                    cgArray[0].crosshairClientLastTime,
+                                    cgameGlob->time,
+                                    cgameGlob->crosshairClientStartTime,
+                                    cgameGlob->crosshairClientLastTime,
                                     cg_friendlyNameFadeIn->current.integer,
                                     cg_friendlyNameFadeOut->current.integer);
                             }
                             else
                             {
                                 alpha = CG_FadeCrosshairNameAlpha(
-                                    cgArray[0].time,
-                                    cgArray[0].crosshairClientStartTime,
-                                    cgArray[0].crosshairClientLastTime,
+                                    cgameGlob->time,
+                                    cgameGlob->crosshairClientStartTime,
+                                    cgameGlob->crosshairClientLastTime,
                                     cg_enemyNameFadeIn->current.integer,
                                     cg_enemyNameFadeOut->current.integer);
                             }
@@ -1501,17 +1345,10 @@ void __cdecl DrawViewmodelInfo(int localClientNum)
     WeaponDef *weapDef; // [esp+870h] [ebp-8h]
     const playerState_s *ps; // [esp+874h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    ps = &cgArray[0].predictedPlayerState;
-    weaponIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    ps = &cgameGlob->predictedPlayerState;
+    weaponIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
     scrPlace = &scrPlaceView[localClientNum];
     font = UI_GetFontHandle(scrPlace, 6, 0.25);
     if (weaponIndex > 0)
@@ -1585,25 +1422,22 @@ void __cdecl CG_DrawActive(int localClientNum)
     float angles[3]; // [esp+8h] [ebp-10h] BYREF
     float fovSensitivityScale; // [esp+14h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    fovSensitivityScale = cgArray[0].zoomSensitivity;
-    if (cgArray[0].shellshock.sensitivity != 0.0)
-        fovSensitivityScale = fovSensitivityScale * cgArray[0].shellshock.sensitivity;
+    cg_s *cgameGlob; // [esp+0h] [ebp-8h]
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    fovSensitivityScale = cgameGlob->zoomSensitivity;
+    if (cgameGlob->shellshock.sensitivity != 0.0)
+        fovSensitivityScale = fovSensitivityScale * cgameGlob->shellshock.sensitivity;
+
     CL_SetFOVSensitivityScale(localClientNum, fovSensitivityScale);
-    Vec3Add(cgArray[0].kickAngles, cgArray[0].offsetAngles, angles);
+    Vec3Add(cgameGlob->kickAngles, cgameGlob->offsetAngles, angles);
     CL_SetUserCmdAimValues(localClientNum, angles);
-    BG_AssertOffhandIndexOrNone(cgArray[0].equippedOffHand);
-    CL_SetUserCmdWeapons(localClientNum, cgArray[0].weaponSelect, cgArray[0].equippedOffHand);
-    CL_SetExtraButtons(localClientNum, cgArray[0].extraButtons);
-    cgArray[0].extraButtons = 0;
-    CL_RenderScene(&cgArray[0].refdef);
+    BG_AssertOffhandIndexOrNone(cgameGlob->equippedOffHand);
+    CL_SetUserCmdWeapons(localClientNum, cgameGlob->weaponSelect, cgameGlob->equippedOffHand);
+    CL_SetExtraButtons(localClientNum, cgameGlob->extraButtons);
+    cgameGlob->extraButtons = 0;
+    CL_RenderScene(&cgameGlob->refdef);
 }
 
 void __cdecl CG_AddSceneTracerBeams(int localClientNum)

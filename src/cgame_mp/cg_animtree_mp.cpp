@@ -19,29 +19,21 @@ void __cdecl CG_FreeClientDObjInfo(int localClientNum)
 
 void __cdecl CG_SetDObjInfo(int localClientNum, int iEntNum, int iEntType, XModel *pXModel)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].iEntityLastType[iEntNum] = iEntType;
-    cgArray[0].pEntityLastXModel[iEntNum] = pXModel;
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    cgameGlob->iEntityLastType[iEntNum] = iEntType;
+    cgameGlob->pEntityLastXModel[iEntNum] = pXModel;
 }
 
 bool __cdecl CG_CheckDObjInfoMatches(int localClientNum, int iEntNum, int iEntType, XModel *pXModel)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].iEntityLastType[iEntNum] == iEntType && cgArray[0].pEntityLastXModel[iEntNum] == pXModel;
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    return cgameGlob->iEntityLastType[iEntNum] == iEntType && cgameGlob->pEntityLastXModel[iEntNum] == pXModel;
 }
 
 void __cdecl CG_SafeDObjFree(int localClientNum, int entIndex)

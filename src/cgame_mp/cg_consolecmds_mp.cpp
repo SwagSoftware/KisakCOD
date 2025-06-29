@@ -5,19 +5,14 @@
 
 void __cdecl CG_ScoresUp(int localClientNum)
 {
+    cg_s *cgameGlob;
+
     if (CG_IsScoreboardDisplayed(localClientNum))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgArray[0].showScores = 0;
-        cgArray[0].scoresTop = -1;
-        cgArray[0].scoreFadeTime = cgArray[0].time;
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        cgameGlob->showScores = 0;
+        cgameGlob->scoresTop = -1;
+        cgameGlob->scoreFadeTime = cgameGlob->time;
     }
 }
 
@@ -117,20 +112,28 @@ void __cdecl CG_InitConsoleCommands()
 
 void __cdecl CG_Viewpos_f()
 {
-    if (cgArray[0].nextSnap)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap)
         Com_Printf(
             0,
             "(%.0f %.0f %.0f) : %.0f %.0f\n",
-            cgArray[0].refdef.vieworg[0],
-            cgArray[0].refdef.vieworg[1],
-            cgArray[0].refdef.vieworg[2],
-            cgArray[0].refdefViewAngles[1],
-            cgArray[0].refdefViewAngles[0]);
+            cgameGlob->refdef.vieworg[0],
+            cgameGlob->refdef.vieworg[1],
+            cgameGlob->refdef.vieworg[2],
+            cgameGlob->refdefViewAngles[1],
+            cgameGlob->refdefViewAngles[0]);
 }
 
 void __cdecl CG_ScoresUp_f()
 {
-    if (cgArray[0].nextSnap)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap)
     {
         CG_ScoresUp(0);
         if (UI_GetActiveMenu(0) == 10)
@@ -140,7 +143,11 @@ void __cdecl CG_ScoresUp_f()
 
 void __cdecl CG_ScoresDown_f()
 {
-    if (cgArray[0].nextSnap)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap)
     {
         CG_ScoresDown(0);
         if (UI_GetActiveMenu(0) != 10)
@@ -150,27 +157,23 @@ void __cdecl CG_ScoresDown_f()
 
 void __cdecl CG_ScoresDown(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].scoresRequestTime + 2000 >= cgArray[0].time)
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->scoresRequestTime + 2000 >= cgameGlob->time)
     {
-        cgArray[0].showScores = 1;
+        cgameGlob->showScores = 1;
     }
     else
     {
-        cgArray[0].scoresRequestTime = cgArray[0].time;
+        cgameGlob->scoresRequestTime = cgameGlob->time;
         CL_AddReliableCommand(localClientNum, "score");
         if (!CG_IsScoreboardDisplayed(localClientNum))
         {
-            cgArray[0].numScores = 0;
-            cgArray[0].scoresTop = -1;
-            cgArray[0].showScores = 1;
+            cgameGlob->numScores = 0;
+            cgameGlob->scoresTop = -1;
+            cgameGlob->showScores = 1;
         }
     }
 }
@@ -184,7 +187,11 @@ void __cdecl CG_ShellShock_f()
     int v4; // [esp+4h] [ebp-24h]
     float v5; // [esp+8h] [ebp-20h]
 
-    if (cgArray[0].nextSnap)
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap)
     {
         v4 = Cmd_Argc();
         if (v4 == 2)
@@ -194,8 +201,8 @@ void __cdecl CG_ShellShock_f()
             v3 = atof(v1);
             ShellshockParms = BG_GetShellshockParms(0);
             BG_SetShellShockParmsFromDvars(ShellshockParms);
-            cgArray[0].testShock.time = cgArray[0].time;
-            cgArray[0].testShock.duration = (int)(v3 * 1000.0f);
+            cgameGlob->testShock.time = cgameGlob->time;
+            cgameGlob->testShock.duration = (int)(v3 * 1000.0f);
             return;
         }
         if (v4 == 3)
@@ -213,7 +220,11 @@ void __cdecl CG_ShellShock_Load_f()
 {
     const char *name; // [esp+0h] [ebp-4h]
 
-    if (cgArray[0].nextSnap)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap)
     {
         if (Cmd_Argc() == 2)
         {
@@ -231,7 +242,11 @@ void __cdecl CG_ShellShock_Save_f()
 {
     const char *name; // [esp+0h] [ebp-4h]
 
-    if (cgArray[0].nextSnap)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap)
     {
         if (Cmd_Argc() == 2)
         {
@@ -247,9 +262,13 @@ void __cdecl CG_ShellShock_Save_f()
 
 void __cdecl CG_QuickMessage_f()
 {
-    if (cgArray[0].nextSnap)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap)
     {
-        if ((cgArray[0].nextSnap->ps.otherFlags & 4) != 0)
+        if ((cgameGlob->nextSnap->ps.otherFlags & 4) != 0)
             UI_Popup(0, "UIMENU_WM_QUICKMESSAGE");
     }
 }
@@ -260,9 +279,13 @@ void __cdecl CG_VoiceChat_f()
     const char *v1; // eax
     const char *chatCmd; // [esp+8h] [ebp-4h]
 
-    if (cgArray[0].nextSnap && Cmd_Argc() == 2)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap && Cmd_Argc() == 2)
     {
-        if (cgArray[0].nextSnap->ps.pm_type == 5 || (cgArray[0].nextSnap->ps.otherFlags & 4) != 0)
+        if (cgameGlob->nextSnap->ps.pm_type == 5 || (cgameGlob->nextSnap->ps.otherFlags & 4) != 0)
         {
             chatCmd = Cmd_Argv(1);
             v1 = va("cmd vsay %s\n", chatCmd);
@@ -282,9 +305,13 @@ void __cdecl CG_TeamVoiceChat_f()
     const char *v1; // eax
     const char *chatCmd; // [esp+8h] [ebp-4h]
 
-    if (cgArray[0].nextSnap && Cmd_Argc() == 2)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    if (cgameGlob->nextSnap && Cmd_Argc() == 2)
     {
-        if (cgArray[0].nextSnap->ps.pm_type == 5 || (cgArray[0].nextSnap->ps.otherFlags & 4) != 0)
+        if (cgameGlob->nextSnap->ps.pm_type == 5 || (cgameGlob->nextSnap->ps.otherFlags & 4) != 0)
         {
             chatCmd = Cmd_Argv(1);
             v1 = va("cmd vsay_team %s\n", chatCmd);

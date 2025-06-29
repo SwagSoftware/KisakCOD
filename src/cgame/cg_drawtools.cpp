@@ -306,58 +306,46 @@ void __cdecl CG_MiniMapChanged(int localClientNum)
     float south[2]; // [esp+18h] [ebp-18h]
     float east[2]; // [esp+20h] [ebp-10h]
     float lowerRight[2]; // [esp+28h] [ebp-8h]
+    cg_s *cgameGlob;
 
     string = CL_GetConfigString(localClientNum, 0x337u);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     material = (const char*)Com_Parse(&string);
-    cgArray[0].compassMapMaterial = Material_RegisterHandle((char*)material, 7);
+    cgameGlob->compassMapMaterial = Material_RegisterHandle((char*)material, 7);
     v1 = Com_Parse(&string);
-    cgArray[0].compassMapUpperLeft[0] = atof(v1->token);
+    cgameGlob->compassMapUpperLeft[0] = atof(v1->token);
     v2 = Com_Parse(&string);
-    cgArray[0].compassMapUpperLeft[1] = atof(v2->token);
+    cgameGlob->compassMapUpperLeft[1] = atof(v2->token);
     v3 = Com_Parse(&string);
     lowerRight[0] = atof(v3->token);
     v4 = Com_Parse(&string);
     lowerRight[1] = atof(v4->token);
-    east[0] = cgArray[0].compassNorth[1];
-    east[1] = -cgArray[0].compassNorth[0];
-    south[0] = -cgArray[0].compassNorth[0];
-    south[1] = -cgArray[0].compassNorth[1];
-    toLR[0] = lowerRight[0] - cgArray[0].compassMapUpperLeft[0];
-    toLR[1] = lowerRight[1] - cgArray[0].compassMapUpperLeft[1];
-    cgArray[0].compassMapWorldSize[0] = east[1] * toLR[1] + east[0] * toLR[0];
-    cgArray[0].compassMapWorldSize[1] = south[1] * toLR[1] + south[0] * toLR[0];
-    if (cgArray[0].compassMapWorldSize[0] == 0.0)
-        cgArray[0].compassMapWorldSize[0] = 1000.0;
-    if (cgArray[0].compassMapWorldSize[1] == 0.0)
-        cgArray[0].compassMapWorldSize[1] = 1000.0;
+    east[0] = cgameGlob->compassNorth[1];
+    east[1] = -cgameGlob->compassNorth[0];
+    south[0] = -cgameGlob->compassNorth[0];
+    south[1] = -cgameGlob->compassNorth[1];
+    toLR[0] = lowerRight[0] - cgameGlob->compassMapUpperLeft[0];
+    toLR[1] = lowerRight[1] - cgameGlob->compassMapUpperLeft[1];
+    cgameGlob->compassMapWorldSize[0] = east[1] * toLR[1] + east[0] * toLR[0];
+    cgameGlob->compassMapWorldSize[1] = south[1] * toLR[1] + south[0] * toLR[0];
+    if (cgameGlob->compassMapWorldSize[0] == 0.0)
+        cgameGlob->compassMapWorldSize[0] = 1000.0;
+    if (cgameGlob->compassMapWorldSize[1] == 0.0)
+        cgameGlob->compassMapWorldSize[1] = 1000.0;
 }
 
 void __cdecl CG_NorthDirectionChanged(int localClientNum)
 {
     float v1; // [esp+8h] [ebp-Ch]
     char *pszString; // [esp+10h] [ebp-4h]
+    cg_s *cgameGlob;
 
     pszString = CL_GetConfigString(localClientNum, 0x336u);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].compassNorthYaw = atof(pszString);
-    v1 = cgArray[0].compassNorthYaw * 0.01745329238474369;
-    cgArray[0].compassNorth[0] = cos(v1);
-    cgArray[0].compassNorth[1] = sin(v1);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgameGlob->compassNorthYaw = atof(pszString);
+    v1 = cgameGlob->compassNorthYaw * 0.01745329238474369;
+    cgameGlob->compassNorth[0] = cos(v1);
+    cgameGlob->compassNorth[1] = sin(v1);
     CG_MiniMapChanged(localClientNum);
 }
 
@@ -533,31 +521,19 @@ void __cdecl CG_RelativeTeamColor(int clientNum, const char *prefix, float *colo
 {
     char dvarName[32]; // [esp+Ch] [ebp-28h] BYREF
     float savedAlpha; // [esp+30h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame\\cg_drawtools.cpp",
-            621,
-            0,
-            "cgameGlob->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgArray[0].clientNum,
-            64);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    bcassert(cgameGlob->clientNum, MAX_CLIENTS);
     savedAlpha = color[3];
-    if (cgArray[0].bgs.clientinfo[clientNum].team == TEAM_SPECTATOR)
+    if (cgameGlob->bgs.clientinfo[clientNum].team == TEAM_SPECTATOR)
     {
         Com_sprintf(dvarName, 0x20u, "%s_Spectator", prefix);
     }
-    else if (clientNum == cgArray[0].clientNum
-        || cgArray[0].bgs.clientinfo[clientNum].team
-        && cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team == cgArray[0].bgs.clientinfo[clientNum].team)
+    else if (clientNum == cgameGlob->clientNum
+        || cgameGlob->bgs.clientinfo[clientNum].team
+        && cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team == cgameGlob->bgs.clientinfo[clientNum].team)
     {
         Com_sprintf(dvarName, 0x20u, "%s_MyTeam", prefix);
     }

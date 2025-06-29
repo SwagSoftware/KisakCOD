@@ -69,44 +69,28 @@ void __cdecl CG_AddLocalEntityTracerBeams(int localClientNum)
     localEntity_s *prev; // [esp+3Ch] [ebp-Ch]
     localEntity_s *le; // [esp+40h] [ebp-8h]
     localEntity_s *activeLocalEntities; // [esp+44h] [ebp-4h]
+    const cg_s *cgameGlob;
 
     PROF_SCOPED("CG_DAF_AddLocalEntities");
+
     if (InterlockedIncrement(&g_localEntThread) != 1)
         MyAssertHandler(".\\cgame\\cg_localents.cpp", 156, 0, "%s", "Sys_InterlockedIncrement( &g_localEntThread ) == 1");
+
     activeLocalEntities = &cg_activeLocalEntities[localClientNum];
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    time = cgArray[0].time;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    time = cgameGlob->time;
+
     for (le = activeLocalEntities->prev; le != activeLocalEntities; le = prev)
     {
         prev = le->prev;
-        if (le->leType)
-            MyAssertHandler(
-                ".\\cgame\\cg_localents.cpp",
-                167,
-                0,
-                "%s\n\t(le->leType) = %i",
-                "(le->leType == LE_MOVING_TRACER)",
-                le->leType);
-        if (le->pos.trType != TR_LINEAR)
-            MyAssertHandler(
-                ".\\cgame\\cg_localents.cpp",
-                168,
-                0,
-                "%s\n\t(le->pos.trType) = %i",
-                "(le->pos.trType == TR_LINEAR)",
-                le->pos.trType);
+        iassert(le->leType == LE_MOVING_TRACER);
+        iassert(le->pos.trType == TR_LINEAR);
         if (time >= le->endTime || time < le->pos.trTime)
             CG_FreeLocalEntity(localClientNum, le);
         else
-            CG_AddMovingTracer(cgArray, le, &cgArray[0].refdef);
+            CG_AddMovingTracer(cgameGlob, le, &cgameGlob->refdef);
     }
+
     if (InterlockedDecrement(&g_localEntThread))
         MyAssertHandler(".\\cgame\\cg_localents.cpp", 178, 0, "%s", "Sys_InterlockedDecrement( &g_localEntThread ) == 0");
 }

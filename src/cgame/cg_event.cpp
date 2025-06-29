@@ -49,9 +49,8 @@ void __cdecl CG_PlayBoltedEffect(
     boneIndex = -2;
     if (CG_GetBoneIndex(localClientNum, dobjHandle, boneName, &boneIndex))
     {
-        iassert(localClientNum == 0);
-        time = cgArray[0].time;
-        FX_PlayBoltedEffect(localClientNum, fxDef, cgArray[0].time, dobjHandle, boneIndex);
+        time = CG_GetLocalClientGlobals(localClientNum)->time;
+        FX_PlayBoltedEffect(localClientNum, fxDef, time, dobjHandle, boneIndex);
     }
 }
 
@@ -106,20 +105,12 @@ void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event)
 
     if (event)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         position = cent->pose.origin;
-        ps = &cgArray[0].nextSnap->ps;
+        ps = &cgameGlob->nextSnap->ps;
         ent = &cent->nextState;
         eventParm = cent->nextState.eventParm;
-        nextSnap = cgArray[0].nextSnap;
+        nextSnap = cgameGlob->nextSnap;
         v23 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
         isPlayerView = v23;
         if (cg_debugEvents->current.enabled)
@@ -908,18 +899,12 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
     const WeaponDef *weapDef; // [esp+A4h] [ebp-Ch]
     const playerState_s *ps; // [esp+A8h] [ebp-8h]
     Material *iconShader; // [esp+ACh] [ebp-4h]
+    const cg_s *cgameGlob;
 
     baseIconSize = 1.4f;
     target = ent->otherEntityNum;
     attacker = ent->attackerEntityNum;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     iconWidth = baseIconSize;
     iconHeight = baseIconSize;
     iconHorzFlip = 0;
@@ -1011,25 +996,25 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
             target,
             64);
     }
-    victimCI = &cgArray[0].bgs.clientinfo[target];
+    victimCI = &cgameGlob->bgs.clientinfo[target];
     if (victimCI->infoValid)
     {
         CL_GetClientName(localClientNum, target, targetName, 38);
         victimColor = CG_DrawScoreboard_GetTeamColorIndex(victimCI->oldteam, localClientNum);
-        if (cgArray[0].clientNum >= 0x40u)
+        if (cgameGlob->clientNum >= 0x40u)
             MyAssertHandler(
                 ".\\cgame\\cg_event.cpp",
                 147,
                 0,
                 "cgameGlob->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgArray[0].clientNum,
+                cgameGlob->clientNum,
                 64);
-        playerCI = &cgArray[0].bgs.clientinfo[cgArray[0].clientNum];
+        playerCI = &cgameGlob->bgs.clientinfo[cgameGlob->clientNum];
         if (playerCI->infoValid)
         {
             if (attacker < 0x40)
             {
-                attackerCI = &cgArray[0].bgs.clientinfo[attacker];
+                attackerCI = &cgameGlob->bgs.clientinfo[attacker];
                 if (!attackerCI->infoValid)
                     return;
                 CL_GetClientName(localClientNum, attacker, attackerName, 38);
@@ -1042,14 +1027,14 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
                 attackerName[0] = 0;
                 attackerColor = 55;
             }
-            ps = &cgArray[0].nextSnap->ps;
+            ps = &cgameGlob->nextSnap->ps;
             if (attacker == target)
             {
                 attackerName[0] = 0;
             }
             else if (attacker == ps->clientNum)
             {
-                if (!cgArray[0].inKillCam)
+                if (!cgameGlob->inKillCam)
                 {
                     if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
                         s = va("CGAME_YOUKILLED", targetName, "CGAME_TEAMMATE");
@@ -1058,7 +1043,7 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
                     CG_PriorityCenterPrint(localClientNum, s, 0);
                 }
             }
-            else if (target == ps->clientNum && attackerCI && !cgArray[0].inKillCam)
+            else if (target == ps->clientNum && attackerCI && !cgameGlob->inKillCam)
             {
                 // KISAKTODO: double check the string literals here in va() `CGAME_...`
                 if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
@@ -1067,7 +1052,7 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
                     s = va("CGAME_YOUWEREKILLED", attackerName);
                 CG_PriorityCenterPrint(localClientNum, s, 0);
             }
-            if (!cgArray[0].inKillCam)
+            if (!cgameGlob->inKillCam)
                 CL_DeathMessagePrint(
                     localClientNum,
                     attackerName,
@@ -1084,25 +1069,20 @@ void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent)
 
 void __cdecl CG_ItemPickup(int localClientNum, int weapIndex)
 {
-    WeaponDef *weapDef; // [esp+4h] [ebp-4h]
+    WeaponDef *weapDef;
+    cg_s *cgameGlob;
 
     weapDef = BG_GetWeaponDef(weapIndex);
+
     if (weapDef->weapClass != WEAPCLASS_ITEM)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         if (weapDef->offhandClass)
         {
-            if (!cgArray[0].equippedOffHand)
+            if (!cgameGlob->equippedOffHand)
                 CG_SetEquippedOffHand(localClientNum, weapIndex);
         }
-        else if (!cgArray[0].weaponSelect)
+        else if (!cgameGlob->weaponSelect)
         {
             CG_SelectWeaponIndex(localClientNum, weapIndex);
         }
@@ -1174,27 +1154,10 @@ void __cdecl CG_PlayFx(int localClientNum, centity_s *cent, const float *angles)
     fxId = cent->nextState.eventParm;
     if (fxId > 0 && fxId < 100)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        fxDef = cgsArray[0].fxs[fxId];
-        if (!fxDef)
-            MyAssertHandler(".\\cgame\\cg_event.cpp", 360, 0, "%s", "fxDef");
+        fxDef = CG_GetLocalClientStaticGlobals(localClientNum)->fxs[fxId];
+        iassert(fxDef);
         AnglesToAxis(angles, axis);
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        FX_PlayOrientedEffect(localClientNum, fxDef, cgArray[0].time, cent->pose.origin, axis);
+        FX_PlayOrientedEffect(localClientNum, fxDef, CG_GetLocalClientGlobals(localClientNum)->time, cent->pose.origin, axis);
     }
     else
     {

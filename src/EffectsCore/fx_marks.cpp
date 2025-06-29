@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <aim_assist/aim_assist.h>
 #include <universal/profile.h>
+#include <cgame_mp/cg_local_mp.h>
 
 FxMarkPoint g_fxMarkPoints[765];
 

@@ -8,21 +8,10 @@
 
 void __cdecl CG_LoadingString(int localClientNum, const char *s)
 {
-    char *v2; // eax
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].isLoading = *s != 0;
+    CG_GetLocalClientGlobals(localClientNum)->isLoading = *s != 0;
     if (s && *s)
     {
-        v2 = va("LOADING... %s\n", s);
-        Com_Printf(14, v2);
+        Com_Printf(14, va("LOADING... %s\n", s));
     }
     SCR_UpdateLoadScreen();
 }

@@ -148,21 +148,16 @@ void __cdecl CG_DrawPlayerWeaponAmmoStock(
     const playerState_s *ps; // [esp+84h] [ebp-14h]
     float colorMod[4]; // [esp+88h] [ebp-10h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    ps = &cgArray[0].predictedPlayerState;
-    colorMod[0] = *color;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    ps = &cgameGlob->predictedPlayerState;
+
+    colorMod[0] = color[0];
     colorMod[1] = color[1];
     colorMod[2] = color[2];
     colorMod[3] = color[3];
-    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgArray) * colorMod[3];
+    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgameGlob) * colorMod[3];
+
     if (colorMod[3] != 0.0)
     {
         WeaponIndex = GetWeaponIndex(cgameGlob);
@@ -175,8 +170,8 @@ void __cdecl CG_DrawPlayerWeaponAmmoStock(
                 if (CG_CheckPlayerForLowAmmoSpecific(cgameGlob, weapIndex))
                 {
                     colorMod[0] = 1.0f;
-                    colorMod[1] = 0.30000001f;
-                    colorMod[2] = 0.30000001f;
+                    colorMod[1] = 0.3f;
+                    colorMod[2] = 0.3f;
                 }
                 Com_sprintf(str, 0x40u, "%3i", ammoStock);
                 UI_DrawText(
@@ -261,15 +256,8 @@ double __cdecl AmmoCounterFadeAlpha(int localClientNum, cg_s *cgameGlob)
 
 double __cdecl CG_GetHudAlphaDPad(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return DpadFadeAlpha(localClientNum, cgArray);
+    cg_s *LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
+    return DpadFadeAlpha(localClientNum, LocalClientGlobals);
 }
 
 double __cdecl DpadFadeAlpha(int localClientNum, cg_s *cgameGlob)
@@ -292,25 +280,20 @@ bool __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx)
 {
     ActionSlotType v3; // [esp+0h] [ebp-10h]
     playerState_s *ps; // [esp+8h] [ebp-8h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].predictedPlayerState;
-    v3 = cgArray[0].predictedPlayerState.actionSlotType[slotIdx];
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    ps = &cgameGlob->predictedPlayerState;
+    v3 = cgameGlob->predictedPlayerState.actionSlotType[slotIdx];
+
     switch (v3)
     {
     case ACTIONSLOTTYPE_SPECIFYWEAPON:
-        if (cgArray[0].weaponSelect == ps->actionSlotParam[slotIdx].specifyWeapon.index)
+        if (cgameGlob->weaponSelect == ps->actionSlotParam[slotIdx].specifyWeapon.index)
             return 1;
         break;
     case ACTIONSLOTTYPE_ALTWEAPONTOGGLE:
-        if (BG_GetWeaponDef(cgArray[0].weaponSelect)->inventoryType == WEAPINVENTORY_ALTMODE)
+        if (BG_GetWeaponDef(cgameGlob->weaponSelect)->inventoryType == WEAPINVENTORY_ALTMODE)
             return 1;
         break;
     case ACTIONSLOTTYPE_NIGHTVISION:
@@ -318,82 +301,52 @@ bool __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx)
             return 1;
         break;
     default:
-        if (ps->actionSlotType[slotIdx])
-            MyAssertHandler(
-                ".\\cgame\\cg_ammocounter.cpp",
-                567,
-                0,
-                "%s",
-                "ps->actionSlotType[slotIdx] == ACTIONSLOTTYPE_DONOTHING");
+        iassert(ps->actionSlotType[slotIdx] == ACTIONSLOTTYPE_DONOTHING);
         break;
     }
+
     return 0;
 }
 
 double __cdecl CG_GetHudAlphaAmmoCounter(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return AmmoCounterFadeAlpha(localClientNum, cgArray);
+    cg_s *LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
+    return AmmoCounterFadeAlpha(localClientNum, LocalClientGlobals);
 }
 
 bool __cdecl CG_ActionSlotIsUsable(int localClientNum, unsigned int slotIdx)
 {
-    ActionSlotType v3; // [esp+0h] [ebp-10h]
     unsigned int weapIdx; // [esp+8h] [ebp-8h]
     playerState_s *ps; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (slotIdx > 3)
-        MyAssertHandler(
-            ".\\cgame\\cg_ammocounter.cpp",
-            611,
-            0,
-            "slotIdx not in [0, (ACTIONSLOTS_NUM - 1)]\n\t%i not in [%i, %i]",
-            slotIdx,
-            0,
-            3);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].predictedPlayerState;
-    v3 = cgArray[0].predictedPlayerState.actionSlotType[slotIdx];
-    switch (v3)
+    bcassert2(slotIdx, ACTIONSLOTS_NUM);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    ps = &cgameGlob->predictedPlayerState;
+
+    switch (cgameGlob->predictedPlayerState.actionSlotType[slotIdx])
     {
     case ACTIONSLOTTYPE_SPECIFYWEAPON:
         weapIdx = ps->actionSlotParam[slotIdx].specifyWeapon.index;
         if (weapIdx)
         {
-            if (cgArray == (cg_s *)-287036)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-            if (Com_BitCheckAssert(cgArray[0].predictedPlayerState.weapons, weapIdx, 16))
+            iassert(ps);
+            if (Com_BitCheckAssert(cgameGlob->predictedPlayerState.weapons, weapIdx, 16))
                 return 1;
         }
         break;
+
     case ACTIONSLOTTYPE_ALTWEAPONTOGGLE:
-        if (CG_AltWeaponToggleIndex(localClientNum, cgArray))
+        if (CG_AltWeaponToggleIndex(localClientNum, cgameGlob))
             return 1;
         break;
+
     case ACTIONSLOTTYPE_NIGHTVISION:
         return 1;
+
     default:
-        if (ps->actionSlotType[slotIdx])
-            MyAssertHandler(
-                ".\\cgame\\cg_ammocounter.cpp",
-                631,
-                0,
-                "%s",
-                "ps->actionSlotType[slotIdx] == ACTIONSLOTTYPE_DONOTHING");
+        iassert(ps->actionSlotType[slotIdx] == ACTIONSLOTTYPE_DONOTHING);
         break;
     }
     return 0;
@@ -412,27 +365,23 @@ void __cdecl CG_DrawPlayerActionSlotDpad(
     ScreenPlacement *scrPlace; // [esp+40h] [ebp-20h]
     signed int idx; // [esp+48h] [ebp-18h]
     float colorMod[4]; // [esp+50h] [ebp-10h] BYREF
+    cg_s *LocalClientGlobals;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 658, 0, "%s", "rect");
+    iassert(rect);
+
     if (CG_ActionSlotIsUsable(localClientNum, 0)
         || CG_ActionSlotIsUsable(localClientNum, 1u)
         || CG_ActionSlotIsUsable(localClientNum, 2u)
         || CG_ActionSlotIsUsable(localClientNum, 3u))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        colorMod[0] = *color;
+        LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
+
+        colorMod[0] = color[0];
         colorMod[1] = color[1];
         colorMod[2] = color[2];
         colorMod[3] = color[3];
-        colorMod[3] = DpadFadeAlpha(localClientNum, cgArray) * colorMod[3];
+        colorMod[3] = DpadFadeAlpha(localClientNum, LocalClientGlobals) * colorMod[3];
+
         if (colorMod[3] != 0.0)
         {
             scrPlace = &scrPlaceView[localClientNum];
@@ -451,8 +400,8 @@ void __cdecl CG_DrawPlayerActionSlotDpad(
                 colorMod,
                 material);
             colorMod[0] = 1.0f;
-            colorMod[1] = 0.97000003f;
-            colorMod[2] = 0.55000001f;
+            colorMod[1] = 0.97f;
+            colorMod[2] = 0.55f;
             for (idx = 0; idx < 4; ++idx)
             {
                 if (ActionSlotIsActive(localClientNum, idx))
@@ -505,7 +454,6 @@ void __cdecl CG_DrawPlayerActionSlot(
     float textScale,
     int textStyle)
 {
-    double v7; // st7
     int v8; // eax
     ActionSlotType v9; // [esp+30h] [ebp-7Ch]
     char str[64]; // [esp+34h] [ebp-78h] BYREF
@@ -520,38 +468,26 @@ void __cdecl CG_DrawPlayerActionSlot(
     float h; // [esp+A4h] [ebp-8h] BYREF
     float w; // [esp+A8h] [ebp-4h] BYREF
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 713, 0, "%s", "rect");
-    if (slotIdx > 3)
-        MyAssertHandler(
-            ".\\cgame\\cg_ammocounter.cpp",
-            714,
-            0,
-            "slotIdx not in [0, (ACTIONSLOTS_NUM - 1)]\n\t%i not in [%i, %i]",
-            slotIdx,
-            0,
-            3);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    ps = &cgArray[0].predictedPlayerState;
+    iassert(rect);
+    bcassert2(slotIdx, ACTIONSLOTS_NUM);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    ps = &cgameGlob->predictedPlayerState;
+
     colorMod[0] = *color;
     colorMod[1] = color[1];
     colorMod[2] = color[2];
     colorMod[3] = color[3];
+
     if (ActionSlotIsActive(localClientNum, slotIdx))
     {
         Vec3Mul(colorMod, MY_ACTIVECOLOR, colorMod);
         colorMod[3] = 1.0f;
     }
-    v7 = DpadFadeAlpha(localClientNum, cgameGlob);
-    colorMod[3] = v7 * colorMod[3];
+
+    colorMod[3] = DpadFadeAlpha(localClientNum, cgameGlob) * colorMod[3];
+
     if (colorMod[3] != 0.0f)
     {
         v9 = ps->actionSlotType[slotIdx];
@@ -744,23 +680,19 @@ void __cdecl CG_DrawPlayerWeaponBackground(
     Material *material)
 {
     float colorMod[4]; // [esp+4Ch] [ebp-10h] BYREF
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 805, 0, "%s", "rect");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    colorMod[0] = *color;
+    iassert(rect);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    colorMod[0] = color[0];
     colorMod[1] = color[1];
     colorMod[2] = color[2];
     colorMod[3] = color[3];
-    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgArray) * colorMod[3];
-    if (colorMod[3] != 0.0)
+    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgameGlob) * colorMod[3];
+
+    if (colorMod[3] != 0.0f)
         CL_DrawStretchPic(
             &scrPlaceView[localClientNum],
             rect->x,
@@ -783,30 +715,26 @@ void __cdecl CG_DrawPlayerWeaponAmmoClipGraphic(int localClientNum, const rectDe
     float base[2]; // [esp+1Ch] [ebp-1Ch] BYREF
     float colorMod[4]; // [esp+24h] [ebp-14h] BYREF
     WeaponDef *weapDef; // [esp+34h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 826, 0, "%s", "rect");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    colorMod[0] = *color;
+    iassert(rect);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    colorMod[0] = color[0];
     colorMod[1] = color[1];
     colorMod[2] = color[2];
     colorMod[3] = color[3];
-    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgArray) * colorMod[3];
+    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgameGlob) * colorMod[3];
+
     if (colorMod[3] != 0.0f)
     {
-        weapIdx = GetWeaponIndex(cgArray);
+        weapIdx = GetWeaponIndex(cgameGlob);
         if (weapIdx)
         {
             weapDef = BG_GetWeaponDef(weapIdx);
             GetBaseRectPos(localClientNum, rect, base);
-            DrawClipAmmo(cgArray, base, weapIdx, weapDef, colorMod);
+            DrawClipAmmo(cgameGlob, base, weapIdx, weapDef, colorMod);
         }
     }
 }
@@ -1102,25 +1030,21 @@ void __cdecl CG_DrawPlayerWeaponIcon(int localClientNum, const rectDef_s *rect, 
     int weapIdx; // [esp+18h] [ebp-18h]
     float colorMod[4]; // [esp+1Ch] [ebp-14h] BYREF
     WeaponDef *weapDef; // [esp+2Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 881, 0, "%s", "rect");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    colorMod[0] = *color;
+    iassert(rect);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    colorMod[0] = color[0];
     colorMod[1] = color[1];
     colorMod[2] = color[2];
     colorMod[3] = color[3];
-    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgArray) * colorMod[3];
-    if (colorMod[3] != 0.0)
+    colorMod[3] = AmmoCounterFadeAlpha(localClientNum, cgameGlob) * colorMod[3];
+
+    if (colorMod[3] != 0.0f)
     {
-        weapIdx = GetWeaponIndex(cgArray);
+        weapIdx = GetWeaponIndex(cgameGlob);
         if (weapIdx)
         {
             weapDef = BG_GetWeaponDef(weapIdx);
@@ -1206,34 +1130,29 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
     const char *text; // [esp+A0h] [ebp-2Ch]
     rectDef_s textRect; // [esp+A4h] [ebp-28h] BYREF
     float color2[4]; // [esp+BCh] [ebp-10h] BYREF
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].predictedPlayerState.pm_type < 7
-        && cgArray[0].predictedPlayerState.pm_type != 4
-        && (cgArray[0].predictedPlayerState.eFlags & 0x300) == 0
-        && cgArray[0].predictedPlayerState.weaponstate != 7
-        && cgArray[0].predictedPlayerState.weaponstate != 9
-        && cgArray[0].predictedPlayerState.weaponstate != 11
-        && cgArray[0].predictedPlayerState.weaponstate != 10
-        && cgArray[0].predictedPlayerState.weaponstate != 8)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if ( cgameGlob->predictedPlayerState.pm_type < 7
+        && cgameGlob->predictedPlayerState.pm_type != 4
+        && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0
+        && cgameGlob->predictedPlayerState.weaponstate != 7
+        && cgameGlob->predictedPlayerState.weaponstate != 9
+        && cgameGlob->predictedPlayerState.weaponstate != 11
+        && cgameGlob->predictedPlayerState.weaponstate != 10
+        && cgameGlob->predictedPlayerState.weaponstate != 8)
     {
-        if (cgArray[0].predictedPlayerState.weapon)
+        if (cgameGlob->predictedPlayerState.weapon)
         {
-            fade = AmmoCounterFadeAlpha(localClientNum, cgArray);
+            fade = AmmoCounterFadeAlpha(localClientNum, cgameGlob);
             if (fade != 0.0)
             {
-                weapIndex = GetWeaponIndex(cgArray);
-                if (CG_CheckPlayerForLowClipSpecific(cgArray, weapIndex))
+                weapIndex = GetWeaponIndex(cgameGlob);
+                if (CG_CheckPlayerForLowClipSpecific(cgameGlob, weapIndex))
                 {
-                    canReload = cgArray[0].predictedPlayerState.ammo[BG_AmmoForWeapon(weapIndex)] > 0;
-                    empty = cgArray[0].predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIndex)] == 0;
+                    canReload = cgameGlob->predictedPlayerState.ammo[BG_AmmoForWeapon(weapIndex)] > 0;
+                    empty = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIndex)] == 0;
                     weapDef = BG_GetWeaponDef(weapIndex);
                     if (weapDef->ammoCounterClip)
                     {
@@ -1259,7 +1178,7 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
                         }
                         amplitude = (lowAmmoWarningPulseMax->current.value - lowAmmoWarningPulseMin->current.value) * 0.5f;
                         bias = lowAmmoWarningPulseMin->current.value + amplitude;
-                        v12 = lowAmmoWarningPulseFreq->current.value * ((float)cgArray[0].time * 0.006283185444772243f);
+                        v12 = lowAmmoWarningPulseFreq->current.value * ((float)cgameGlob->time * 0.006283185444772243f);
                         v11 = sin(v12);
                         frac = v11 * amplitude + bias;
                         Vec4Lerp(color1, color2, frac, colorMod);

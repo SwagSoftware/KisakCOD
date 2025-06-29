@@ -1170,47 +1170,28 @@ void __cdecl TRACK_cg_main()
 void __cdecl CG_GetDObjOrientation(int localClientNum, signed int dobjHandle, mat3x3 &axis, float *origin)
 {
     centity_s *cent; // [esp+Ch] [ebp-4h]
+    const cg_s *cgameGlob;
 
-    if ((unsigned int)dobjHandle >= 0x480)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_main_mp.cpp",
-            744,
-            0,
-            "%s\n\t(dobjHandle) = %i",
-            "(dobjHandle >= 0 && dobjHandle < (((1<<10)) + 128))",
-            dobjHandle);
-    if (!axis)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 745, 0, "%s", "axis");
-    if (!origin)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 746, 0, "%s", "origin");
+    iassert(dobjHandle >= 0 && dobjHandle < (((1 << 10)) + 128));
+    iassert(axis);
+    iassert(origin);
+
     if (dobjHandle >= 1024)
     {
-        if (dobjHandle - 1024 >= 128)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_main_mp.cpp",
-                755,
-                0,
-                "%s\n\t(dobjHandle) = %i",
-                "(dobjHandle >= ((1<<10)) && dobjHandle - ((1<<10)) < 128)",
-                dobjHandle);
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        AxisCopy((mat3x3&)cgArray[0].viewModelAxis, axis);
-        *origin = cgArray[0].viewModelAxis[3][0];
-        origin[1] = cgArray[0].viewModelAxis[3][1];
-        origin[2] = cgArray[0].viewModelAxis[3][2];
+        iassert(dobjHandle >= ((1 << 10)) && dobjHandle - ((1 << 10)) < 128);
+
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+        AxisCopy((mat3x3&)cgameGlob->viewModelAxis, axis);
+        origin[0] = cgameGlob->viewModelAxis[3][0];
+        origin[1] = cgameGlob->viewModelAxis[3][1];
+        origin[2] = cgameGlob->viewModelAxis[3][2];
     }
     else
     {
         cent = CG_GetEntity(localClientNum, dobjHandle);
         AnglesToAxis(cent->pose.angles, axis);
-        *origin = cent->pose.origin[0];
+        origin[0] = cent->pose.origin[0];
         origin[1] = cent->pose.origin[1];
         origin[2] = cent->pose.origin[2];
     }
@@ -1228,28 +1209,20 @@ void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *o
 {
     centity_s *Entity; // eax
 
-    if (!origin_out)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 768, 0, "%s", "origin_out");
-    if (!axis_out)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 769, 0, "%s", "axis_out");
+    iassert(origin_out);
+    iassert(axis_out);
+
     Entity = CG_GetEntity(localClientNum, entIndex);
-    *origin_out = Entity->pose.origin[0];
+    origin_out[0] = Entity->pose.origin[0];
     origin_out[1] = Entity->pose.origin[1];
     origin_out[2] = Entity->pose.origin[2];
+
     AnglesToAxis(Entity->pose.angles, axis_out);
 }
 
 const playerState_s *__cdecl CG_GetPredictedPlayerState(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return &cgArray[0].predictedPlayerState;
+    return &CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState;
 }
 
 void __cdecl CG_GameMessage(int localClientNum, const char *msg)
@@ -1446,19 +1419,13 @@ void __cdecl CG_StartAmbient(int localClientNum)
     const char *aliasName; // [esp+1Ch] [ebp-Ch]
     int time; // [esp+20h] [ebp-8h]
     snd_alias_t *alias; // [esp+24h] [ebp-4h]
+    const cg_s *cgameGlob;
 
     pszInfoString = CL_GetConfigString(localClientNum, 0x335u);
     aliasName = Info_ValueForKey(pszInfoString, "n");
     pszFadeTime = Info_ValueForKey(pszInfoString, "t");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    time = cgArray[0].time;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    time = cgameGlob->time;
     fadetime = atoi(pszFadeTime) - time;
     if (fadetime < 0 || !time)
         fadetime = 0;
@@ -1475,31 +1442,21 @@ void __cdecl CG_StartAmbient(int localClientNum)
 
 int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasList)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return CG_PlaySoundAlias(localClientNum, cgArray[0].nextSnap->ps.clientNum, cgArray[0].nextSnap->ps.origin, aliasList);
+    const cg_s *cgameGlob;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    return CG_PlaySoundAlias(localClientNum, cgameGlob->nextSnap->ps.clientNum, cgameGlob->nextSnap->ps.origin, aliasList);
 }
 
 int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasname)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    const cg_s *cgameGlob;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     return CG_PlaySoundAliasByName(
         localClientNum,
-        cgArray[0].nextSnap->ps.clientNum,
-        cgArray[0].nextSnap->ps.origin,
+        cgameGlob->nextSnap->ps.clientNum,
+        cgameGlob->nextSnap->ps.origin,
         aliasname);
 }
 
@@ -1532,15 +1489,7 @@ void __cdecl CG_StopSoundAliasByName(int localClientNum, int entityNum, const ch
 
 void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *aliasName)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    CG_StopSoundAliasByName(localClientNum, cgArray[0].nextSnap->ps.clientNum, aliasName);
+    CG_StopSoundAliasByName(localClientNum, CG_GetLocalClientGlobals(localClientNum)->nextSnap->ps.clientNum, aliasName);
 }
 
 void __cdecl CG_SubtitleSndLengthNotify(int msec, const snd_alias_t *lengthNotifyData)
@@ -1554,14 +1503,11 @@ void __cdecl CG_SubtitlePrint(int msec, const snd_alias_t *alias)
     int v3; // [esp+8h] [ebp-1Ch]
     float v4; // [esp+Ch] [ebp-18h]
 
-    if (!alias)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1436, 0, "%s", "alias");
-    if (!cg_subtitleWidthStandard)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1437, 0, "%s", "cg_subtitleWidthStandard");
-    if (!cg_subtitleWidthWidescreen)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1438, 0, "%s", "cg_subtitleWidthWidescreen");
-    if (!cg_subtitleMinTime)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1439, 0, "%s", "cg_subtitleMinTime");
+    iassert(alias);
+    iassert(cg_subtitleWidthStandard);
+    iassert(cg_subtitleWidthWidescreen);
+    iassert(cg_subtitleMinTime);
+
     if (msec && alias->subtitle)
     {
         if (cgsArray[0].viewAspect <= 1.333333373069763)
@@ -1644,35 +1590,24 @@ void __cdecl CG_RestartSmokeGrenades(int localClientNum)
     int v3; // [esp+24h] [ebp-30h]
     int i; // [esp+2Ch] [ebp-28h]
     float axis[3][3]; // [esp+30h] [ebp-24h] BYREF
+    const cg_s *cgameGlob;
+    const cgs_t *cgs;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgsArray[0].smokeGrenadeFx)
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgs->smokeGrenadeFx)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        Com_Printf(14, "Playing smoke grenades at time %i\n", cgArray[0].time);
-        FX_KillEffectDef(localClientNum, cgsArray[0].smokeGrenadeFx);
-        FX_RewindTo(localClientNum, cgArray[0].time);
-        nextSnap = cgArray[0].nextSnap;
+        Com_Printf(14, "Playing smoke grenades at time %i\n", cgameGlob->time);
+        FX_KillEffectDef(localClientNum, cgs->smokeGrenadeFx);
+        FX_RewindTo(localClientNum, cgameGlob->time);
+        nextSnap = cgameGlob->nextSnap;
         for (i = 0; i < nextSnap->numEntities; ++i)
         {
             v3 = (int)&nextSnap->entities[i];
             if ((nextSnap->entities[i].lerp.eFlags & 0x10000) != 0
-                && nextSnap->entities[i].time2 >= cgArray[0].time
-                && nextSnap->entities[i].lerp.u.missile.launchTime <= cgArray[0].time)
+                && nextSnap->entities[i].time2 >= cgameGlob->time
+                && nextSnap->entities[i].lerp.u.missile.launchTime <= cgameGlob->time)
             {
                 if (nextSnap->entities[i].eType)
                     MyAssertHandler(
@@ -1703,7 +1638,7 @@ void __cdecl CG_RestartSmokeGrenades(int localClientNum)
                     nextSnap->entities[i].lerp.pos.trBase[2]);
                 FX_PlayOrientedEffect(
                     localClientNum,
-                    cgsArray[0].smokeGrenadeFx,
+                    cgs->smokeGrenadeFx,
                     nextSnap->entities[i].lerp.u.missile.launchTime,
                     nextSnap->entities[i].lerp.pos.trBase,
                     axis);
@@ -1756,15 +1691,7 @@ unsigned __int16 __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t wea
 
 int __cdecl CG_GetClientNum(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].clientNum;
+    return CG_GetLocalClientGlobals(localClientNum)->clientNum;
 }
 
 void __cdecl CL_LoadSoundAliases(const char *loadspec)
@@ -1777,65 +1704,44 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     char *s; // [esp+24h] [ebp-4Ch]
     char mapname[68]; // [esp+28h] [ebp-48h] BYREF
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1883, 0, "%s", "Sys_IsMainThread()");
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
+    iassert(Sys_IsMainThread());
+
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     CL_GetLocalClientConnection(localClientNum);
-    memset((unsigned __int8 *)cgsArray, 0, sizeof(cgsArray));
-    memset((unsigned __int8 *)cgArray, 0, 0xFF580u);
-    memset((unsigned __int8 *)&cgDC[localClientNum], 0, sizeof(UiContext));
-    memset((unsigned __int8 *)cg_entitiesArray[localClientNum], 0, sizeof(centity_s[1024]));
-    memset((unsigned __int8 *)cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
+    memset(cgs, 0, sizeof(cgs_t));
+    memset(cgameGlob, 0, sizeof(cg_s));
+    memset(&cgDC[localClientNum], 0, sizeof(UiContext));
+    memset(cg_entitiesArray[localClientNum], 0, sizeof(centity_s[1024]));
+    memset(cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
     cgDC[localClientNum].localClientNum = localClientNum;
     CG_ClearCompassPingData();
     CG_Veh_Init();
     CG_ClearOverheadFade();
-    CG_InitDof(&cgArray[0].refdef.dof);
+    CG_InitDof(&cgameGlob->refdef.dof);
     Ragdoll_Init();
     Phys_Init();
-    cgArray[0].localClientNum = localClientNum;
-    cgArray[0].viewModelPose.eType = 17;
-    cgArray[0].viewModelPose.localClientNum = localClientNum;
-    if (cgArray[0].viewModelPose.localClientNum != localClientNum)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_main_mp.cpp",
-            1912,
-            0,
-            "%s",
-            "cgameGlob->viewModelPose.localClientNum == localClientNum");
+    cgameGlob->localClientNum = localClientNum;
+    cgameGlob->viewModelPose.eType = 17;
+    cgameGlob->viewModelPose.localClientNum = localClientNum;
+    iassert(cgameGlob->viewModelPose.localClientNum == localClientNum);
     CL_SetStance(localClientNum, CL_STANCE_STAND);
     CL_SetADS(localClientNum, 0);
-    cgArray[0].objectiveText[0] = 0;
-    cgArray[0].bgs.animScriptData.soundAlias = Com_FindSoundAlias;
-    cgArray[0].bgs.animScriptData.playSoundAlias = CG_PlayAnimScriptSoundAlias;
-    cgArray[0].bgs.GetXModel = FX_RegisterModel;
-    cgArray[0].bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *))CG_CreateDObj;
-    cgArray[0].bgs.AttachWeapon = CG_AttachWeapon;
-    cgArray[0].bgs.GetDObj = CG_GetDObj;
-    cgArray[0].bgs.SafeDObjFree = Com_SafeClientDObjFree;
-    cgArray[0].bgs.AllocXAnim = Hunk_AllocXAnimClient;
-    cgArray[0].bgs.anim_user = 0;
-    cgArray[0].clientNum = clientNum;
-    cgArray[0].drawHud = 1;
-    cgArray[0].lastHealthLerpDelay = 1;
-    cgsArray[0].processedSnapshotNum = serverMessageNum;
-    cgsArray[0].serverCommandSequence = serverCommandSequence;
+    cgameGlob->objectiveText[0] = 0;
+    cgameGlob->bgs.animScriptData.soundAlias = Com_FindSoundAlias;
+    cgameGlob->bgs.animScriptData.playSoundAlias = CG_PlayAnimScriptSoundAlias;
+    cgameGlob->bgs.GetXModel = FX_RegisterModel;
+    cgameGlob->bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *))CG_CreateDObj;
+    cgameGlob->bgs.AttachWeapon = CG_AttachWeapon;
+    cgameGlob->bgs.GetDObj = CG_GetDObj;
+    cgameGlob->bgs.SafeDObjFree = Com_SafeClientDObjFree;
+    cgameGlob->bgs.AllocXAnim = Hunk_AllocXAnimClient;
+    cgameGlob->bgs.anim_user = 0;
+    cgameGlob->clientNum = clientNum;
+    cgameGlob->drawHud = 1;
+    cgameGlob->lastHealthLerpDelay = 1;
+    cgs->processedSnapshotNum = serverMessageNum;
+    cgs->serverCommandSequence = serverCommandSequence;
     CG_ParseServerInfo(localClientNum);
     CG_ParseCodInfo(localClientNum);
     R_BeginRemoteScreenUpdate();
@@ -1879,11 +1785,10 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     if (strcmp(s, "cod"))
         Com_Error(ERR_DROP, "Client/Server game mismatch: %s/%s", "cod", s);
     SCR_UpdateLoadScreen();
-    if (!com_sv_running)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2011, 0, "%s", "com_sv_running");
+    iassert(com_sv_running);
     if (!com_sv_running->current.enabled)
         Mantle_CreateAnims((void *(__cdecl *)(int))Hunk_AllocXAnimClient);
-    cgsArray[0].localServer = com_sv_running->current.color[0];
+    cgs->localServer = com_sv_running->current.color[0];
     if (!bg_lastParsedWeaponIndex)
     {
         Com_SetWeaponInfoMemory(2);
@@ -1892,34 +1797,32 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     if (!g_mapLoaded && !useFastFile->current.enabled)
     {
         CG_LoadingString(localClientNum, "sound aliases");
-        CL_LoadSoundAliases(cgsArray[0].mapname);
+        CL_LoadSoundAliases(cgs->mapname);
     }
     CG_SetupWeaponDef(localClientNum);
     CGScr_LoadAnimTrees();
-    if (bgs)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2041, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
-    bgs = &cgArray[0].bgs;
+    iassert(bgs == 0);
+    bgs = &cgameGlob->bgs;
     BG_LoadAnim();
     CG_LoadAnimTreeInstances(localClientNum);
-    if (!cgsArray[0].localServer)
+    if (!cgs->localServer)
     {
         GScr_LoadConsts();
         BG_LoadPenetrationDepthTable();
     }
     CG_LoadingString(localClientNum, "collision map");
-    CL_CM_LoadMap(cgsArray[0].mapname);
+    CL_CM_LoadMap(cgs->mapname);
     Menu_Setup(&cgDC[localClientNum]);
     CG_LoadingString(localClientNum, "graphics");
     if (!g_mapLoaded)
     {
-        CG_LoadingString(localClientNum, cgsArray[0].mapname);
-        LoadWorld(cgsArray[0].mapname);
+        CG_LoadingString(localClientNum, cgs->mapname);
+        LoadWorld(cgs->mapname);
         g_mapLoaded = 1;
     }
     CG_LoadingString(localClientNum, "game media");
-    if (I_strnicmp(cgsArray[0].mapname, "maps/", 5))
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2111, 0, "%s", "!I_strnicmp( cgs->mapname, \"maps/\", 5 )");
-    Com_StripExtension(&cgsArray[0].mapname[5], mapname);
+    iassert(!I_strnicmp(cgs->mapname, "maps/", 5));
+    Com_StripExtension(&cgs->mapname[5], mapname);
     ProfLoad_Begin("Init effects system");
     FX_InitSystem(localClientNum);
     FX_RegisterDefaultEffect();
@@ -1931,14 +1834,14 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     CG_InitEntities(localClientNum);
     CG_InitLocalEntities(localClientNum);
     DynEntCl_InitEntities(localClientNum);
-    cgArray[0].isLoading = 0;
+    cgameGlob->isLoading = 0;
     CG_SetConfigValues(localClientNum);
     CG_LoadingString(localClientNum, "");
     CG_NorthDirectionChanged(localClientNum);
     if (!g_mapLoaded)
         SND_StopSounds(SND_STOP_ALL);
-    CG_ParseFog(cgArray[0].time);
-    R_InitPrimaryLights(cgArray[0].refdef.primaryLights);
+    CG_ParseFog(cgameGlob->time);
+    R_InitPrimaryLights(cgameGlob->refdef.primaryLights);
     R_ClearShadowedPrimaryLightHistory(localClientNum);
     if (!g_ambientStarted)
     {
@@ -1950,8 +1853,7 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     AimAssist_Init(localClientNum);
     CG_InitVote(localClientNum);
     CG_StartClientSideEffects(localClientNum);
-    if (bgs != &cgArray[0].bgs)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2184, 0, "%s\n\t(bgs) = %p", "(bgs == &cgameGlob->bgs)", bgs);
+    iassert(bgs == &cgameGlob->bgs);
     bgs = 0;
     R_EndRemoteScreenUpdate();
 }
@@ -2179,18 +2081,12 @@ void __cdecl CG_LoadAnimTreeInstances(int localClientNum)
     XAnim_s *generic_human; // [esp+0h] [ebp-10h]
     int i; // [esp+Ch] [ebp-4h]
     int ia; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    generic_human = cgArray[0].bgs.generic_human.tree.anims;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    generic_human = cgameGlob->bgs.generic_human.tree.anims;
     for (i = 0; i < 64; ++i)
-        cgArray[0].bgs.clientinfo[i].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
+        cgameGlob->bgs.clientinfo[i].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -2211,19 +2107,11 @@ void __cdecl CG_InitEntities(int localClientNum)
     for (entityIndex = 0; entityIndex < 1024; ++entityIndex)
     {
         cent = CG_GetEntity(localClientNum, entityIndex);
-        if (!cent)
-            MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1819, 0, "%s", "cent");
+        iassert(cent);
         cent->pose.localClientNum = localClientNum;
     }
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].predictedPlayerEntity.pose.localClientNum = localClientNum;
+
+    CG_GetLocalClientGlobals(localClientNum)->predictedPlayerEntity.pose.localClientNum = localClientNum;
 }
 
 void __cdecl CG_InitViewDimensions(int localClientNum)
@@ -2307,14 +2195,8 @@ void __cdecl CG_Shutdown(int localClientNum)
     centity_s *cent; // [esp+Ch] [ebp-Ch]
     signed int entnum; // [esp+14h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     R_TrackStatistics(0);
     SND_FadeAllSounds(1.0, 0);
     for (entnum = 0; entnum < 1024; ++entnum)
@@ -2348,20 +2230,14 @@ void __cdecl CG_Shutdown(int localClientNum)
     FX_ShutdownSystem(localClientNum);
     DynEntCl_Shutdown(localClientNum);
     CG_FreeAnimTreeInstances(localClientNum);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgsArray[0].localServer)
+
+    if (!CG_GetLocalClientStaticGlobals(localClientNum)->localServer)
         Scr_ShutdownGameStrings();
-    cgArray[0].nextSnap = 0;
-    memset(cgArray, 0, 0xFF580u);
-    if (cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 2298, 0, "%s", "!cgameGlob->nextSnap");
+
+    cgameGlob->nextSnap = 0;
+    memset(cgameGlob, 0, sizeof(cg_s));
+    iassert(!cgameGlob->nextSnap);
+
     CG_ClearCompassPingData();
     CG_ShutdownConsoleCommands();
 }
@@ -2370,37 +2246,26 @@ void __cdecl CG_FreeAnimTreeInstances(int localClientNum)
 {
     int i; // [esp+8h] [ebp-4h]
     int ia; // [esp+8h] [ebp-4h]
+    cg_s *cgameGlob;
+    cgs_t *cgs;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     for (i = 0; i < 64; ++i)
     {
-        if (cgArray[0].bgs.clientinfo[i].pXAnimTree)
+        if (cgameGlob->bgs.clientinfo[i].pXAnimTree)
         {
-            XAnimFreeTree(cgArray[0].bgs.clientinfo[i].pXAnimTree, 0);
-            cgArray[0].bgs.clientinfo[i].pXAnimTree = 0;
+            XAnimFreeTree(cgameGlob->bgs.clientinfo[i].pXAnimTree, 0);
+            cgameGlob->bgs.clientinfo[i].pXAnimTree = 0;
         }
     }
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     for (ia = 0; ia < 8; ++ia)
     {
-        if (cgsArray[0].corpseinfo[ia].pXAnimTree)
+        if (cgs->corpseinfo[ia].pXAnimTree)
         {
-            XAnimFreeTree(cgsArray[0].corpseinfo[ia].pXAnimTree, 0);
-            cgsArray[0].corpseinfo[ia].pXAnimTree = 0;
+            XAnimFreeTree(cgs->corpseinfo[ia].pXAnimTree, 0);
+            cgs->corpseinfo[ia].pXAnimTree = 0;
         }
     }
 }

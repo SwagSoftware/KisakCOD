@@ -395,15 +395,7 @@ void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, cha
             0,
             40);
     }
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    Com_sprintf(result, 4u, "%02d", fakeSeconds + cgArray[0].time / 1000);
+    Com_sprintf(result, 4u, "%02d", fakeSeconds + CG_GetLocalClientGlobals(localClientNum)->time / 1000);
 }
 
 void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0)
@@ -436,19 +428,14 @@ void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground)
     int i; // [esp+8h] [ebp-100Ch]
     hudelem_s *elems[1025]; // [esp+Ch] [ebp-1008h] BYREF
     int SortedHudElems; // [esp+1010h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     SortedHudElems = GetSortedHudElems(localClientNum, elems);
+
     if (SortedHudElems)
     {
-        v2 = cgArray[0].nextSnap->ps.pm_type < 7;
+        v2 = cgameGlob->nextSnap->ps.pm_type < 7;
         for (i = 0; i < SortedHudElems; ++i)
         {
             if ((v2 || (elems[i]->flags & 2) == 0)
@@ -467,6 +454,7 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
     char hudElemString[256]; // [esp+8h] [ebp-340h] BYREF
     cg_hudelem_t cghe; // [esp+108h] [ebp-240h] BYREF
     hudelem_color_t toColor; // [esp+344h] [ebp-4h] BYREF
+    cg_s *cgameGlob; 
 
     if (elem->type == HE_TYPE_WAYPOINT)
     {
@@ -474,42 +462,11 @@ void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem)
     }
     else
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cghe.timeNow = cgArray[0].time;
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (elem->fadeStartTime > cgArray[0].nextSnap->serverTime)
-        {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
-            MyAssertHandler(
-                ".\\cgame\\cg_hudelem.cpp",
-                1348,
-                0,
-                "elem->fadeStartTime <= CG_GetLocalClientGlobals( localClientNum )->nextSnap->serverTime\n\t%i, %i",
-                elem->fadeStartTime,
-                cgArray[0].nextSnap->serverTime);
-        }
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        cghe.timeNow = cgameGlob->time;
+        iassert(elem->fadeStartTime <= CG_GetLocalClientGlobals(localClientNum)->nextSnap->serverTime);
         BG_LerpHudColors(elem, cghe.timeNow, &toColor);
+
         if (toColor.a)
         {
             HudElemColorToVec4(&toColor, cghe.color);
@@ -615,15 +572,7 @@ void __cdecl GetHudElemInfo(int localClientNum, const hudelem_s *elem, cg_hudele
         namedClientIndex = (int)(elem->value);
         if (namedClientIndex < 0x40)
         {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
-            I_strncpyz(cghe->hudElemText, cgArray[0].bgs.clientinfo[namedClientIndex].name, 256);
+            I_strncpyz(cghe->hudElemText, CG_GetLocalClientGlobals(localClientNum)->bgs.clientinfo[namedClientIndex].name, 256);
         }
         break;
     case HE_TYPE_MAPNAME:
@@ -1150,16 +1099,12 @@ void __cdecl DrawHudElemString(
     float scaleX; // [esp+58h] [ebp-8h]
     float dy; // [esp+5Ch] [ebp-4h]
 
-    if (!text)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 881, 0, "%s", "text");
-    if (!*text)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 882, 0, "%s", "text[0]");
-    if (!elem)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 883, 0, "%s", "elem");
-    if (!cghe)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 884, 0, "%s", "cghe");
-    if (cghe->color[3] == 0.0)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 886, 0, "%s", "cghe->color[3]");
+    iassert(text);
+    iassert(text[0]);
+    iassert(elem);
+    iassert(cghe);
+    iassert(cghe->color[3]);
+
     offsetY = -(cghe->height - cghe->fontHeight);
     y = OffsetHudElemY(elem, cghe, offsetY);
     textScale = R_NormalizedTextScale(cghe->font, cghe->fontScale);
@@ -1167,19 +1112,14 @@ void __cdecl DrawHudElemString(
     scaleX = scrPlace->scaleVirtualToReal[0] * v7;
     dy = cghe->fontHeight;
     fxBirthTime = elem->fxBirthTime;
+
     if (fxBirthTime && fxBirthTime > cghe->timeNow)
         fxBirthTime = cghe->timeNow;
+
     HudElemColorToVec4(&elem->glowColor, glowColor);
+
     if (fxBirthTime)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
         strLength = SEH_PrintStrlen(text);
         CL_PlayTextFXPulseSounds(
             localClientNum,
@@ -1188,9 +1128,11 @@ void __cdecl DrawHudElemString(
             fxBirthTime,
             elem->fxLetterTime,
             elem->fxDecayStartTime,
-            &cgArray[0].hudElemSound[elem->soundID].lastPlayedTime);
+            &CG_GetLocalClientGlobals(localClientNum)->hudElemSound[elem->soundID].lastPlayedTime);
     }
+
     v5 = y + dy;
+
     CL_DrawTextPhysicalWithEffects(
         text,
         0x7FFFFFFF,
@@ -1336,22 +1278,13 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
     bool didClamp; // [esp+13Fh] [ebp-5h]
     float pointerDistance; // [esp+140h] [ebp-4h]
 
-    if (!elem)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1215, 0, "%s", "elem");
-    if (elem->type != HE_TYPE_WAYPOINT)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1216, 0, "%s", "elem->type == HE_TYPE_WAYPOINT");
+    iassert(elem);
+    iassert(elem->type == HE_TYPE_WAYPOINT);
+
     if (CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, materialName, 0x40u)
         && !CG_Flashbanged(localClientNum))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        BG_LerpHudColors(elem, cgArray[0].time, &toColor);
+        BG_LerpHudColors(elem, CG_GetLocalClientGlobals(localClientNum)->time, &toColor);
         if (toColor.a)
         {
             material = Material_RegisterHandle(materialName, 7);
@@ -1439,16 +1372,8 @@ void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *
                 CL_DrawStretchPicPhysical(v3, v4, iconWidth, iconHeight, 0.0f, 0.0f, 1.0f, 1.0f, color, material);
                 return;
             }
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
             screenPosArrow[2] = 1.4046605e-38f;
-            if (elem->targetEntNum != cgArray[0].predictedPlayerEntity.nextState.number)
+            if (elem->targetEntNum != CG_GetLocalClientGlobals(localClientNum)->predictedPlayerEntity.nextState.number)
             {
                 cent = CG_GetEntity(localClientNum, elem->targetEntNum);
                 if (!cent->nextValid)
@@ -1499,18 +1424,12 @@ char __cdecl WorldPosToScreenPos(int localClientNum, const float *worldPos, floa
     float x; // [esp+58h] [ebp-Ch]
     float y; // [esp+5Ch] [ebp-8h]
     float w; // [esp+60h] [ebp-4h]
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    refdef = &cgArray[0].refdef;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    refdef = &cgameGlob->refdef;
     scrPlace = &scrPlaceView[localClientNum];
-    CG_GetViewAxisProjections(&cgArray[0].refdef, worldPos, projections);
+    CG_GetViewAxisProjections(&cgameGlob->refdef, worldPos, projections);
     w = projections[0];
     if (projections[0] >= 0.0f)
     {
@@ -1601,18 +1520,10 @@ bool __cdecl ClampScreenPosToEdges(
     float halfHeight; // [esp+ACh] [ebp-8h]
     float borderLeft; // [esp+B0h] [ebp-4h]
 
-    if (!resultDist)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1074, 0, "%s", "resultDist");
+    iassert(resultDist);
+
     scrPlace = &scrPlaceView[localClientNum];
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     halfWidth = scrPlace->realViewportSize[0] * 0.5f;
     halfHeight = scrPlace->realViewportSize[1] * 0.5f;
     pointOriginal[0] = *point;
@@ -1719,17 +1630,10 @@ float __cdecl GetScaleForDistance(int localClientNum, const float *worldPos)
     float diff[4]; // [esp+8h] [ebp-18h] BYREF
     float range; // [esp+18h] [ebp-8h]
     float dist3D; // [esp+1Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    diff[3] = 1.4046605e-38f;
-    Vec3Sub(worldPos, cgArray[0].refdef.vieworg, diff);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    Vec3Sub(worldPos, cgameGlob->refdef.vieworg, diff);
     dist3D = Vec3Length(diff);
     if (waypointDistScaleRangeMin->current.value >= dist3D)
         return 1.0f;
@@ -1746,16 +1650,12 @@ int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems)
 {
     playerState_s *ps; // [esp+4h] [ebp-8h]
     int elemCount; // [esp+8h] [ebp-4h] BYREF
+    const cg_s *clientGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].nextSnap->ps;
+    clientGlob = CG_GetLocalClientGlobals(localClientNum);
+    if (!clientGlob->nextSnap)
+        return 0;
+    ps = &clientGlob->nextSnap->ps;
     elemCount = 0;
     CopyInUseHudElems(elems, &elemCount, ps->hud.current, 31);
     CopyInUseHudElems(elems, &elemCount, ps->hud.archival, 31);
@@ -1810,17 +1710,11 @@ void AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem)
     hudelem_color_t v11; // [esp-10h] [ebp-1Ch] BYREF
     int time; // [esp-Ch] [ebp-18h]
     void *v13; // [esp+0h] [ebp-Ch]
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    time = cgArray[0].time;
-    BG_LerpHudColors(elem, cgArray[0].time, &v11);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    time = cgameGlob->time;
+    BG_LerpHudColors(elem, cgameGlob->time, &v11);
     if (v11.a)
     {
         if (!CG_ServerMaterialName(localClientNum, elem->offscreenMaterialIdx, v10, 0x40u))
@@ -1869,21 +1763,14 @@ float __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem)
     height = (float)elem->height;
     if (elem->scaleTime <= 0)
         return height;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    deltaTime = cgArray[0].time - elem->scaleStartTime;
+    deltaTime = CG_GetLocalClientGlobals(localClientNum)->time - elem->scaleStartTime;
     if (deltaTime >= elem->scaleTime)
         return height;
     fromHeight = (float)elem->fromHeight;
     if (deltaTime <= 0)
         return fromHeight;
     lerp = (double)deltaTime / (double)elem->scaleTime;
+
     if (lerp < 0.0f || lerp > 1.0f)
         MyAssertHandler(
             ".\\cgame\\cg_hudelem.cpp",

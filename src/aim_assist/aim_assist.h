@@ -3,6 +3,9 @@
 #include <cgame/cg_local.h>
 #include <qcommon/graph.h>
 
+#define EF_AIM_ASSIST 0x800
+#define SOLID_BMODEL 0xFFFFFF
+
 struct AimTarget // sizeof=0x2C
 {                                       // ...
     int entIndex;
@@ -118,7 +121,6 @@ void __cdecl AimAssist_UpdateScreenTargets(
     const float *viewAngles,
     float tanHalfFovX,
     float tanHalfFovY);
-centity_s *__cdecl CG_GetEntity(int localClientNum, unsigned int entityIndex);
 void __cdecl AimAssist_FovScale(AimAssistGlobals *aaGlob, float tanHalfFovY);
 void __cdecl AimAssist_CreateScreenMatrix(AimAssistGlobals *aaGlob, float tanHalfFovX, float tanHalfFovY);
 char __cdecl AimAssist_ConvertToClipBounds(

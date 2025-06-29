@@ -332,33 +332,20 @@ double __cdecl CG_DrawSnapshot(int localClientNum, float posY)
     float posYa; // [esp+44h] [ebp+Ch]
     float posYb; // [esp+44h] [ebp+Ch]
     float posYc; // [esp+44h] [ebp+Ch]
+    const cg_s *cgameGlob;
+    const cgs_t *cgs;
 
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     scrPlace = &scrPlaceView[localClientNum];
     posX = cg_debugInfoCornerOffset->current.value + scrPlace->virtualViewableMax[0] - scrPlace->virtualViewableMin[0];
     v5 = (double)R_TextWidth(" server time", 0, cgMedia.smallDevFont) * 1.0;
     posYa = CG_CornerDebugPrintCaption(scrPlace, posX, posY, v5, (char*)"-Snapshot-", colorGreenFaded) + posY;
-    v2 = va("%i", cgArray[0].nextSnap->serverTime);
+    v2 = va("%i", cgameGlob->nextSnap->serverTime);
     posYb = CG_CornerDebugPrint(scrPlace, posX, posYa, v5, v2, (char *)" server time", colorWhite) + posYa;
-    v3 = va("%i", cgArray[0].latestSnapshotNum);
+    v3 = va("%i", cgameGlob->latestSnapshotNum);
     posYc = CG_CornerDebugPrint(scrPlace, posX, posYb, v5, v3, (char *)" snap num", colorWhite) + posYb;
-    str = va("%i", cgsArray[0].serverCommandSequence);
+    str = va("%i", cgs->serverCommandSequence);
     return (float)(CG_CornerDebugPrint(scrPlace, posX, posYc, v5, str, (char *)" cmd", colorWhite) + posYc);
 }
 
@@ -431,38 +418,27 @@ void __cdecl CG_DrawMaterial(int localClientNum, unsigned int drawMaterialType)
     int v2; // [esp+18h] [ebp-206Ch]
     int v3; // [esp+1Ch] [ebp-2068h]
     char surfaceFlags[4096]; // [esp+24h] [ebp-2060h] BYREF
-    int traceMask[4]; // [esp+1024h] [ebp-1060h]
+    int traceMasks[4]; // [esp+1024h] [ebp-1060h]
     char name[64]; // [esp+1034h] [ebp-1050h] BYREF
     float x; // [esp+1074h] [ebp-1010h]
     float y; // [esp+1078h] [ebp-100Ch]
     char contents[4100]; // [esp+107Ch] [ebp-1008h] BYREF
+    cg_s *cgameGlob;
 
-    traceMask[0] = 0;
-    traceMask[1] = 1;
-    traceMask[2] = 0x2806831;
-    traceMask[3] = 0x2810011;
-    if (!drawMaterialType)
-        MyAssertHandler(".\\cgame\\cg_draw_debug.cpp", 847, 0, "%s", "drawMaterialType != 0");
-    if (drawMaterialType >= 4)
-        MyAssertHandler(
-            ".\\cgame\\cg_draw_debug.cpp",
-            848,
-            0,
-            "drawMaterialType doesn't index ARRAY_COUNT( traceMasks )\n\t%i not in [0, %i)",
-            drawMaterialType,
-            4);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    traceMasks[0] = 0;
+    traceMasks[1] = 1;
+    traceMasks[2] = 0x2806831;
+    traceMasks[3] = 0x2810011;
+
+    iassert(drawMaterialType != 0);
+    bcassert(drawMaterialType, ARRAY_COUNT(traceMasks));
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (R_PickMaterial(
-        traceMask[drawMaterialType],
-        cgArray[0].refdef.vieworg,
-        cgArray[0].refdef.viewaxis[0],
+        traceMasks[drawMaterialType],
+        cgameGlob->refdef.vieworg,
+        cgameGlob->refdef.viewaxis[0],
         name,
         surfaceFlags,
         contents,
@@ -488,23 +464,18 @@ void __cdecl CG_DrawDebugPlayerHealth(int localClientNum)
     float health; // [esp+48h] [ebp-14h]
     float healtha; // [esp+48h] [ebp-14h]
     float color[4]; // [esp+4Ch] [ebp-10h] BYREF
+    const cg_s *cgameGlob;
 
-    if (!player_debugHealth->current.enabled)
-        MyAssertHandler(".\\cgame\\cg_draw_debug.cpp", 902, 0, "%s", "player_debugHealth->current.enabled");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].predictedPlayerState.stats[0] && cgArray[0].predictedPlayerState.stats[2])
+    iassert(player_debugHealth->current.enabled);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->predictedPlayerState.stats[0] && cgameGlob->predictedPlayerState.stats[2])
     {
-        health = (double)cgArray[0].predictedPlayerState.stats[0] / (double)cgArray[0].predictedPlayerState.stats[2];
+        health = (double)cgameGlob->predictedPlayerState.stats[0] / (double)cgameGlob->predictedPlayerState.stats[2];
         v4 = health - 1.0;
         if (v4 < 0.0)
-            v5 = (double)cgArray[0].predictedPlayerState.stats[0] / (double)cgArray[0].predictedPlayerState.stats[2];
+            v5 = (double)cgameGlob->predictedPlayerState.stats[0] / (double)cgameGlob->predictedPlayerState.stats[2];
         else
             v5 = 1.0;
         v3 = 0.0 - health;

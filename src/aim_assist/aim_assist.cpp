@@ -1117,15 +1117,8 @@ void __cdecl AimAssist_DrawDebugOverlay(unsigned int localClientNum)
     if (aaGlob->initialized)
     {
         tweaks = &aaGlob->tweakables;
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\aim_assist\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        ps = &cgArray[0].predictedPlayerState;
+        ps = &CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState;
+
         if (aim_slowdown_debug->current.enabled)
         {
             AimAssist_DrawTargets(localClientNum, red);

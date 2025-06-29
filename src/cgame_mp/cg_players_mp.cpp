@@ -18,15 +18,7 @@ void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int localClientNum)
     centity_s *cent; // [esp+8h] [ebp-Ch]
     snapshot_s *nextSnap; // [esp+Ch] [ebp-8h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    nextSnap = cgArray[0].nextSnap;
+    nextSnap = CG_GetLocalClientGlobals(localClientNum)->nextSnap;
     for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
     {
         cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
@@ -44,54 +36,20 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
     playerState_s *ps; // [esp+20h] [ebp-8h]
     char *pszIcon; // [esp+24h] [ebp-4h]
     int savedregs; // [esp+28h] [ebp+0h] BYREF
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cent->nextState.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_players_mp.cpp",
-            134,
-            0,
-            "cent->nextState.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cent->nextState.clientNum,
-            64);
-    if (cgArray[0].bgs.clientinfo[cent->nextState.clientNum].infoValid)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    bcassert(cent->nextState.clientNum, MAX_CLIENTS);
+
+    if (cgameGlob->bgs.clientinfo[cent->nextState.clientNum].infoValid)
     {
-        if (cent->nextState.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_players_mp.cpp",
-                137,
-                0,
-                "cent->nextState.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cent->nextState.clientNum,
-                64);
-        iTeam = cgArray[0].bgs.clientinfo[cent->nextState.clientNum].team;
-        ps = &cgArray[0].nextSnap->ps;
-        if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_players_mp.cpp",
-                141,
-                0,
-                "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgArray[0].nextSnap->ps.clientNum,
-                64);
-        if (cgArray[0].bgs.clientinfo[ps->clientNum].infoValid)
+        bcassert(cent->nextState.clientNum, MAX_CLIENTS);
+        iTeam = cgameGlob->bgs.clientinfo[cent->nextState.clientNum].team;
+        ps = &cgameGlob->nextSnap->ps;
+        bcassert(ps->clientNum, MAX_CLIENTS);
+        if (cgameGlob->bgs.clientinfo[ps->clientNum].infoValid)
         {
-            if (ps->clientNum >= 0x40u)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_players_mp.cpp",
-                    144,
-                    0,
-                    "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    ps->clientNum,
-                    64);
-            iClientTeam = cgArray[0].bgs.clientinfo[ps->clientNum].team;
+            iClientTeam = cgameGlob->bgs.clientinfo[ps->clientNum].team;
             secondaryHeight = 0;
             if (cent->nextState.iHeadIcon
                 && (!cent->nextState.iHeadIconTeam
@@ -112,7 +70,7 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
                     secondaryHeight = (int)cg_scriptIconSize->current.value + 16;
                 }
             }
-            if (cent->nextState.number == cgArray[0].clientNum && cgArray[0].inKillCam)
+            if (cent->nextState.number == cgameGlob->clientNum && cgameGlob->inKillCam)
             {
                 CG_AddPlayerSpriteDrawSurf(
                     localClientNum,
@@ -163,11 +121,11 @@ void  CG_AddPlayerSpriteDrawSurf(
 
     iassert(localClientNum == 0);
 
-    snapshot_s *nextSnap = cgArray[0].nextSnap;
+    snapshot_s *nextSnap = CG_GetLocalClientGlobals(localClientNum)->nextSnap;
 
     bool isNotVisible = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
 
-    if (!isNotVisible || cgArray[0].renderingThirdPerson)
+    if (!isNotVisible || CG_GetLocalClientGlobals(localClientNum)->renderingThirdPerson)
     {
         if (fixedScreenSize)
         {
@@ -229,38 +187,17 @@ void __cdecl CG_Player(int localClientNum, centity_s *cent)
     p_nextState = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20) == 0 && (p_nextState->lerp.eFlags & 0x20000) == 0)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;
-        nextSnap = cgArray[0].nextSnap;
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        nextSnap = cgameGlob->nextSnap;
         v3 = (nextSnap->ps.otherFlags & 6) != 0 && p_nextState->number == nextSnap->ps.clientNum;
         if (!v3 || cgameGlob->renderingThirdPerson)
         {
             iClientNum = p_nextState->clientNum;
-            if (p_nextState->clientNum >= 0x40u)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_players_mp.cpp",
-                    459,
-                    0,
-                    "%s",
-                    "(unsigned)es->clientNum < ARRAY_COUNT( cgameGlob->bgs.clientinfo )");
+            iassert((unsigned)p_nextState->clientNum < ARRAY_COUNT(cgameGlob->bgs.clientinfo));
             obj = Com_GetClientDObj(p_nextState->number, localClientNum);
             if (obj)
             {
-                if ((unsigned int)iClientNum >= 0x40)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_players_mp.cpp",
-                        465,
-                        0,
-                        "iClientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                        iClientNum,
-                        64);
+                bcassert(iClientNum, MAX_CLIENTS);
                 ci = &cgameGlob->bgs.clientinfo[iClientNum];
                 BG_PlayerAnimation(localClientNum, p_nextState, ci);
                 if ((p_nextState->lerp.eFlags & 0x300) != 0)
@@ -346,27 +283,14 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
     float localYaw; // [esp+184h] [ebp-40h]
     float turretAxis[4][3]; // [esp+188h] [ebp-3Ch] BYREF
     float vDelta[3]; // [esp+1B8h] [ebp-Ch] BYREF
+    cg_s *cgameGlob;
 
     if (cent->nextState.otherEntityNum >= 64 && cent->nextState.otherEntityNum != 1023)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         clientNum = cent->nextState.clientNum;
-        if (clientNum >= 0x40)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_players_mp.cpp",
-                273,
-                0,
-                "clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                clientNum,
-                64);
-        ci = &cgArray[0].bgs.clientinfo[clientNum];
+        bcassert(clientNum, MAX_CLIENTS);
+        ci = &cgameGlob->bgs.clientinfo[clientNum];
         if (ci->infoValid)
         {
             pLerpAnim = &ci->legs;
@@ -387,22 +311,14 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                 {
                                     if (CG_DObjGetWorldTagMatrix(&pTurretCEnt->pose, turretObj, scr_const.tag_weapon, tagAxis, tagOrigin))
                                     {
-                                        if (cgArray[0].frametime)
+                                        if (cgameGlob->frametime)
                                         {
-                                            if (!pTurretCEnt->nextState.weapon)
-                                                MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 304, 0, "%s", "pTurretCEnt->nextState.weapon");
+                                            iassert(pTurretCEnt->nextState.weapon);
                                             weapDef = BG_GetWeaponDef(pTurretCEnt->nextState.weapon);
-                                            if (weapDef->weapClass != WEAPCLASS_TURRET)
-                                                MyAssertHandler(
-                                                    ".\\cgame_mp\\cg_players_mp.cpp",
-                                                    306,
-                                                    0,
-                                                    "%s",
-                                                    "weapDef->weapClass == WEAPCLASS_TURRET");
-                                            if (weapDef->fAnimHorRotateInc == 0.0)
-                                                MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 307, 0, "%s", "weapDef->fAnimHorRotateInc");
+                                            iassert(weapDef->weapClass == WEAPCLASS_TURRET);
+                                            iassert(weapDef->fAnimHorRotateInc);
                                             pAnimTree = ci->pXAnimTree;
-                                            pXAnims = cgArray[0].bgs.animScriptData.animTree.anims;
+                                            pXAnims = cgameGlob->bgs.animScriptData.animTree.anims;
                                             baseAnim = pLerpAnim->animationNumber & 0xFFFFFDFF;
                                             yaw = vectosignedyaw(tagAxis[0]);
                                             localYaw = AngleDelta(yaw, pTurretCEnt->pose.angles[1]);
@@ -420,8 +336,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                             leafAnim2 = 0;
                                             if (!numVertChildren)
                                             {
-                                                AnimDebugName = XAnimGetAnimDebugName(pXAnims, baseAnim);
-                                                Com_Error(ERR_DROP, "Player anim %s has no children.", AnimDebugName);
+                                                Com_Error(ERR_DROP, "Player anim %s has no children.", XAnimGetAnimDebugName(pXAnims, baseAnim));
                                             }
                                             i = 0;
                                             do
@@ -430,8 +345,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                                 numHorChildren = XAnimGetNumChildren(pXAnims, heightAnim);
                                                 if (!numHorChildren)
                                                 {
-                                                    v3 = XAnimGetAnimDebugName(pXAnims, heightAnim);
-                                                    Com_Error(ERR_DROP, "Player anim %s has no children.", v3);
+                                                    Com_Error(ERR_DROP, "Player anim %s has no children.", XAnimGetAnimDebugName(pXAnims, heightAnim));
                                                 }
                                                 fBlend = numHorChildren * 0.5 + localYaw / weapDef->fAnimHorRotateInc;
                                                 if (fBlend >= 0.0)
@@ -468,8 +382,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
                                                 XAnimSetGoalWeight(obj, leafAnim2, fBlend, 0.0, 1.0, 0, 0, 0);
                                             if (i && i != numVertChildren)
                                             {
-                                                if (trans[2] - fPrevTransZ == 0.0)
-                                                    MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 383, 0, "%s", "trans[2] - fPrevTransZ");
+                                                iassert(trans[2] - fPrevTransZ);
                                                 fHeightRatio = (fDelta - fPrevTransZ) / (trans[2] - fPrevTransZ);
                                                 XAnimSetGoalWeight(obj, heightAnim, fHeightRatio, 0.0, 1.0, 0, 0, 0);
                                                 heightAnim = XAnimGetChildAt(pXAnims, baseAnim, numVertChildren - i);
@@ -592,34 +505,20 @@ void __cdecl CG_UpdatePlayerDObj(int localClientNum, centity_s *cent)
     DObj_s *dobj; // [esp+0h] [ebp-114h]
     DObj_s *dobja; // [esp+0h] [ebp-114h]
     FxMarkDObjUpdateContext markUpdateContext; // [esp+Ch] [ebp-108h] BYREF
+    cg_s *cgameGlob;
 
     if (cent->nextValid)
     {
-        if (cent->nextState.clientNum != cent->nextState.number)
-            MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 579, 0, "%s", "es->clientNum == es->number");
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (cent->nextState.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_players_mp.cpp",
-                581,
-                0,
-                "es->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cent->nextState.clientNum,
-                64);
+        iassert(cent->nextState.clientNum == cent->nextState.number);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        bcassert(cent->nextState.clientNum, MAX_CLIENTS);
         dobj = Com_GetClientDObj(cent->nextState.clientNum, localClientNum);
         FX_MarkEntUpdateBegin(&markUpdateContext, dobj, 0, 0);
         BG_UpdatePlayerDObj(
             localClientNum,
             dobj,
             &cent->nextState,
-            &cgArray[0].bgs.clientinfo[cent->nextState.clientNum],
+            &cgameGlob->bgs.clientinfo[cent->nextState.clientNum],
             0);
         dobja = Com_GetClientDObj(cent->nextState.clientNum, localClientNum);
         FX_MarkEntUpdateEnd(&markUpdateContext, localClientNum, cent->nextState.clientNum, dobja, 0, 0);
@@ -739,6 +638,10 @@ const char *__cdecl CG_GetOpposingTeamName(team_t team)
 
 const char *__cdecl CG_GetPlayerTeamName(int localClientNum)
 {
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
@@ -749,30 +652,21 @@ const char *__cdecl CG_GetPlayerTeamName(int localClientNum)
             localClientNum);
     if (clientUIActives[0].connectionState < CA_PRIMED)
         return CG_GetTeamName(TEAM_FREE);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_players_mp.cpp",
-            713,
-            0,
-            "cgameGlob->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgArray[0].clientNum,
-            64);
-    if (cgArray[0].bgs.clientinfo[cgArray[0].clientNum].infoValid)
-        return CG_GetTeamName(cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team);
+
+    bcassert(cgameGlob->clientNum, MAX_CLIENTS);
+
+    if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].infoValid)
+        return CG_GetTeamName(cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team);
     else
         return CG_GetTeamName(TEAM_FREE);
 }
 
 const char *__cdecl CG_GetPlayerOpposingTeamName(int localClientNum)
 {
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
@@ -783,30 +677,21 @@ const char *__cdecl CG_GetPlayerOpposingTeamName(int localClientNum)
             localClientNum);
     if (clientUIActives[0].connectionState < CA_PRIMED)
         return CG_GetOpposingTeamName(TEAM_FREE);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_players_mp.cpp",
-            750,
-            0,
-            "cgameGlob->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgArray[0].clientNum,
-            64);
-    if (cgArray[0].bgs.clientinfo[cgArray[0].clientNum].infoValid)
-        return CG_GetOpposingTeamName(cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team);
+
+    bcassert(cgameGlob->clientNum, MAX_CLIENTS);
+
+    if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].infoValid)
+        return CG_GetOpposingTeamName(cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team);
     else
         return CG_GetOpposingTeamName(TEAM_FREE);
 }
 
 bool __cdecl CG_IsPlayerDead(int localClientNum)
 {
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
@@ -817,43 +702,24 @@ bool __cdecl CG_IsPlayerDead(int localClientNum)
             localClientNum);
     if (clientUIActives[0].connectionState < CA_PRIMED)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_players_mp.cpp",
-            772,
-            0,
-            "cgameGlob->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgArray[0].clientNum,
-            64);
-    if (!cgArray[0].bgs.clientinfo[cgArray[0].clientNum].infoValid)
-        MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 774, 0, "%s", "localPlayer->infoValid");
-    return !cgArray[0].nextSnap->ps.stats[0]
-        || (cgArray[0].nextSnap->ps.otherFlags & 4) == 0
-        || (cgArray[0].nextSnap->ps.otherFlags & 2) != 0;
+
+    bcassert(cgameGlob->clientNum, MAX_CLIENTS);
+
+    iassert(cgameGlob->bgs.clientinfo[cgameGlob->clientNum].infoValid);
+
+    return !cgameGlob->nextSnap->ps.stats[0]
+        || (cgameGlob->nextSnap->ps.otherFlags & 4) == 0
+        || (cgameGlob->nextSnap->ps.otherFlags & 2) != 0;
 }
 
 int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum)
 {
     playerState_s *ps; // [esp+8h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].nextSnap->ps;
-    return ps->ammoclip[BG_ClipForWeapon(cgArray[0].nextSnap->ps.weapon)];
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    ps = &cgameGlob->nextSnap->ps;
+    return ps->ammoclip[BG_ClipForWeapon(cgameGlob->nextSnap->ps.weapon)];
 }
 
 void __cdecl CG_UpdateWeaponVisibility(int localClientNum, centity_s *cent)
@@ -951,15 +817,16 @@ bool __cdecl CG_IsWeaponVisible(int localClientNum, centity_s *cent, XModel *wea
     trace_t trace; // [esp+28h] [ebp-3Ch] BYREF
     float weapLen; // [esp+54h] [ebp-10h] BYREF
     float eye[3]; // [esp+58h] [ebp-Ch] BYREF
+    cg_s *cgameGlob;
 
-    if (!weapModel)
-        MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 1030, 0, "%s", "weapModel");
-    if (!cent)
-        MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 1031, 0, "%s", "cent");
+    iassert(weapModel);
+    iassert(cent);
+
     CG_CalcWeaponVisTrace(weapModel, origin, forward, stock, end, &weapLen);
     CG_TraceCapsule(&trace, stock, vec3_origin, vec3_origin, end, cent->nextState.number, 4097);
-    if (!cg_drawWVisDebug)
-        MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 1039, 0, "%s", "cg_drawWVisDebug");
+
+    iassert(cg_drawWVisDebug);
+
     if (cg_drawWVisDebug->current.enabled)
     {
         if (trace.fraction == 1.0)
@@ -967,19 +834,15 @@ bool __cdecl CG_IsWeaponVisible(int localClientNum, centity_s *cent, XModel *wea
         else
             CG_DebugLine(stock, end, colorYellow, 1, 0);
     }
+
     if (weapLen - weapLen * trace.fraction <= 3.0)
         return 1;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    eye[0] = cgArray[0].refdef.vieworg[0];
-    eye[1] = cgArray[0].refdef.vieworg[1];
-    eye[2] = cgArray[0].refdef.vieworg[2];
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    eye[0] = cgameGlob->refdef.vieworg[0];
+    eye[1] = cgameGlob->refdef.vieworg[1];
+    eye[2] = cgameGlob->refdef.vieworg[2];
     CG_TraceCapsule(&trace, eye, vec3_origin, vec3_origin, stock, cent->nextState.number, 4097);
     if (cg_drawWVisDebug->current.enabled)
     {

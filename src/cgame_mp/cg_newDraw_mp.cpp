@@ -250,15 +250,9 @@ void __cdecl CG_AntiBurnInHUD_RegisterDvars()
 
 bool __cdecl CG_ShouldDrawHud(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].drawHud && CL_ShouldDisplayHud(localClientNum);
+    cg_s *cgameGlob; // [esp+4h] [ebp-4h]
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    return cgameGlob && cgameGlob->drawHud && CL_ShouldDisplayHud(localClientNum);
 }
 
 double __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration)
@@ -267,19 +261,14 @@ double __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int di
 
     if (!hud_enable->current.enabled)
         return 0.0;
+
     if (!CG_ShouldDrawHud(localClientNum))
         return 0.0;
+
     if (fadeDvar->current.value == 0.0)
         return 1.0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    fadeColor = CG_FadeColor(cgArray[0].time, displayStartTime, duration, 700);
+
+    fadeColor = CG_FadeColor(CG_GetLocalClientGlobals(localClientNum)->time, displayStartTime, duration, 700);
     if (fadeColor)
         return fadeColor[3];
     else
@@ -417,15 +406,7 @@ Material *__cdecl CG_ObjectiveIcon(int localClientNum, int icon, int type)
 
 const char *__cdecl CG_ScriptMainMenu(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].scriptMainMenu;
+    return CG_GetLocalClientGlobals(localClientNum)->scriptMainMenu;
 }
 
 void __cdecl CG_OwnerDraw(
@@ -701,15 +682,7 @@ void __cdecl CG_OwnerDraw(
         CG_DrawTalkerNum(localClientNum, ownerDraw - 193, &rect, font, color, scale, textStyle);
         break;
     default:
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (!cgArray[0].inKillCam)
+        if (!CG_GetLocalClientGlobals(localClientNum)->inKillCam)
         {
             switch (ownerDraw)
             {
@@ -759,33 +732,28 @@ void __cdecl CG_DrawPlayerAmmoBackdrop(
 {
     float v4; // [esp+24h] [ebp-24h]
     float drawColor[4]; // [esp+38h] [ebp-10h] BYREF
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].predictedPlayerState.weapon)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->predictedPlayerState.weapon)
     {
         drawColor[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_ammodisplay,
-            cgArray[0].ammoFadeTime,
+            cgameGlob->ammoFadeTime,
             (int)(hud_fade_ammodisplay->current.value * 1000.0f));
         if (drawColor[3] != 0.0)
         {
-            if (CG_CheckPlayerForLowAmmo(cgArray))
+            if (CG_CheckPlayerForLowAmmo(cgameGlob))
             {
-                drawColor[0] = 0.88999999f;
-                drawColor[1] = 0.18000001f;
-                drawColor[2] = 0.0099999998f;
+                drawColor[0] = 0.89f;
+                drawColor[1] = 0.18f;
+                drawColor[2] = 0.01f;
             }
             else
             {
-                drawColor[0] = *color;
+                drawColor[0] = color[0];
                 drawColor[1] = color[1];
                 drawColor[2] = color[2];
             }
@@ -830,18 +798,11 @@ void __cdecl CG_DrawPlayerAmmoValue(
     const playerState_s *ps; // [esp+294h] [ebp-Ch]
     float x; // [esp+298h] [ebp-8h]
     int clipVal; // [esp+29Ch] [ebp-4h]
+    int flashTime;
 
-    LODWORD(ammoColor[4]) = 800;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (cgArray[0].predictedPlayerState.weapon)
+    flashTime = 800;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    if (cgameGlob->predictedPlayerState.weapon)
     {
         color[3] = CG_FadeHudMenu(
             localClientNum,
@@ -850,8 +811,7 @@ void __cdecl CG_DrawPlayerAmmoValue(
             (int)(hud_fade_ammodisplay->current.value * 1000.0f));
         if (color[3] != 0.0)
         {
-            if (!cgameGlob->nextSnap)
-                MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 339, 0, "%s", "cgameGlob->nextSnap");
+            iassert(cgameGlob->nextSnap);
             cent = CG_GetEntity(localClientNum, cgameGlob->nextSnap->ps.clientNum);
             if ((cgameGlob->nextSnap->ps.otherFlags & 4) != 0 && cgameGlob->weaponSelect < BG_GetNumWeapons())
                 weapIndex = cgameGlob->weaponSelect;
@@ -1033,25 +993,19 @@ void __cdecl CG_DrawPlayerWeaponName(
     int weapIndex; // [esp+48h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+4Ch] [ebp-8h]
     float x; // [esp+50h] [ebp-4h]
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    fadeColor = CG_FadeColor(cgArray[0].time, cgArray[0].weaponSelectTime, 1800, 700);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    fadeColor = CG_FadeColor(cgameGlob->time, cgameGlob->weaponSelectTime, 1800, 700);
     if (fadeColor)
     {
-        if ((cgArray[0].predictedPlayerState.weapFlags & 0x80) == 0)
+        if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) == 0)
         {
             drawColor[3] = fadeColor[3];
             drawColor[0] = *color;
             drawColor[1] = color[1];
             drawColor[2] = color[2];
-            weapIndex = GetWeaponIndex(cgArray);
+            weapIndex = GetWeaponIndex(cgameGlob);
             if (weapIndex)
             {
                 if (localClientNum)
@@ -1102,22 +1056,16 @@ void __cdecl CG_DrawPlayerWeaponNameBack(
     WeaponDef *weapDef; // [esp+44h] [ebp-Ch]
     float x; // [esp+48h] [ebp-8h]
     float w; // [esp+4Ch] [ebp-4h]
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    drawColor[3] = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgArray[0].weaponSelectTime, 1800);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    drawColor[3] = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgameGlob->weaponSelectTime, 1800);
     if (drawColor[3] != 0.0)
     {
-        drawColor[0] = *color;
+        drawColor[0] = color[0];
         drawColor[1] = color[1];
         drawColor[2] = color[2];
-        weapIndex = GetWeaponIndex(cgArray);
+        weapIndex = GetWeaponIndex(cgameGlob);
         if (weapIndex)
         {
             if (localClientNum)
@@ -1170,53 +1118,41 @@ void __cdecl CG_DrawPlayerStance(
     const char *proneStr; // [esp+6Ch] [ebp-Ch]
     float fadeAlpha; // [esp+70h] [ebp-8h]
     float deltaTime; // [esp+74h] [ebp-4h]
+    cg_s *cgameGlob;
+    const cgs_t *cgs;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgArray[0].stanceFadeTime, (int)(hud_fade_stance->current.value * 1000.0f));
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgameGlob->stanceFadeTime, (int)(hud_fade_stance->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         if (cg_hudStanceHintPrints->current.enabled)
         {
-            if (cgArray[0].lastStance != (cgArray[0].predictedPlayerState.pm_flags & 3))
-                cgArray[0].lastStanceChangeTime = cgArray[0].time;
+            if (cgameGlob->lastStance != (cgameGlob->predictedPlayerState.pm_flags & 3))
+                cgameGlob->lastStanceChangeTime = cgameGlob->time;
         }
         else
         {
-            cgArray[0].lastStanceChangeTime = 0;
+            cgameGlob->lastStanceChangeTime = 0;
         }
-        cgArray[0].lastStance = cgArray[0].predictedPlayerState.pm_flags & 3;
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob->lastStance = cgameGlob->predictedPlayerState.pm_flags & 3;
         drawColor[4] = 1.4025731e-38f;
-        x = (compassSize->current.value - 1.0f) * cgsArray[0].compassWidth * 0.699999988079071f + rect->x;
+        x = (compassSize->current.value - 1.0f) * cgs->compassWidth * 0.699999988079071f + rect->x;
         y = rect->y;
         KISAK_NULLSUB();
         drawColor[0] = *color;
         drawColor[1] = color[1];
         drawColor[2] = color[2];
-        if ((cgArray[0].predictedPlayerState.pm_flags & 0x1000) != 0 && cgArray[0].proneBlockedEndTime < cgArray[0].time)
-            cgArray[0].proneBlockedEndTime = cgArray[0].time + 1500;
-        if (cgArray[0].proneBlockedEndTime > cgArray[0].time)
+        if ((cgameGlob->predictedPlayerState.pm_flags & 0x1000) != 0 && cgameGlob->proneBlockedEndTime < cgameGlob->time)
+            cgameGlob->proneBlockedEndTime = cgameGlob->time + 1500;
+        if (cgameGlob->proneBlockedEndTime > cgameGlob->time)
         {
-            if (BG_WeaponBlocksProne(cgArray[0].predictedPlayerState.weapon))
+            if (BG_WeaponBlocksProne(cgameGlob->predictedPlayerState.weapon))
                 proneStr = UI_SafeTranslateString("CGAME_PRONE_BLOCKED_WEAPON");
             else
                 proneStr = UI_SafeTranslateString("CGAME_PRONE_BLOCKED");
             halfWidth = UI_TextWidth(proneStr, 0, font, scale) * 0.5;
-            deltaTime = (cgArray[0].proneBlockedEndTime - cgArray[0].time);
+            deltaTime = (cgameGlob->proneBlockedEndTime - cgameGlob->time);
             v9 = deltaTime / 1500.0f * 540.0f * 0.01745329238474369f;
             v8 = sin(v9);
             v7 = fabs(v8);
@@ -1235,7 +1171,7 @@ void __cdecl CG_DrawPlayerStance(
                 drawColor,
                 textStyle);
         }
-        if (cg_hudStanceHintPrints->current.enabled && cgArray[0].lastStanceChangeTime + 3000 > cgArray[0].time)
+        if (cg_hudStanceHintPrints->current.enabled && cgameGlob->lastStanceChangeTime + 3000 > cgameGlob->time)
             CG_DrawStanceHintPrints(localClientNum, rect, x, color, fadeAlpha, font, scale, textStyle);
         drawColor[3] = color[3] * fadeAlpha;
         CG_DrawStanceIcon(localClientNum, rect, drawColor, x, y, fadeAlpha);
@@ -1253,25 +1189,21 @@ void __cdecl CG_DrawStanceIcon(
     Material *icon; // [esp+24h] [ebp-10h]
     float width; // [esp+2Ch] [ebp-8h]
     float height; // [esp+30h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 601, 0, "%s", "rect");
+    iassert(rect);
+
     width = rect->w;
     height = rect->h;
     KISAK_NULLSUB();
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if ((cgArray[0].lastStance & 1) != 0)
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if ((cgameGlob->lastStance & 1) != 0)
     {
         icon = cgMedia.stanceMaterials[2];
     }
-    else if ((cgArray[0].lastStance & 2) != 0)
+    else if ((cgameGlob->lastStance & 2) != 0)
     {
         icon = cgMedia.stanceMaterials[1];
     }
@@ -1289,10 +1221,10 @@ void __cdecl CG_DrawStanceIcon(
         rect->vertAlign,
         drawColor,
         icon);
-    if (cgArray[0].lastStanceChangeTime + 1000 > cgArray[0].time)
+    if (cgameGlob->lastStanceChangeTime + 1000 > cgameGlob->time)
     {
         Dvar_GetUnpackedColor(cg_hudStanceFlash, drawColor);
-        drawColor[3] = (cgArray[0].lastStanceChangeTime + 1000 - cgArray[0].time) / 1000.0 * 0.800000011920929;
+        drawColor[3] = (cgameGlob->lastStanceChangeTime + 1000 - cgameGlob->time) / 1000.0 * 0.800000011920929;
         if (drawColor[3] > fadeAlpha)
             drawColor[3] = fadeAlpha;
         UI_DrawHandlePic(
@@ -1400,10 +1332,9 @@ void __cdecl CG_DrawStanceHintPrints(
     drawColor[1] = color[1];
     drawColor[2] = color[2];
     
-    iassert(localClientNum == 0);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    cgameGlob = cgArray;
-    if (cgArray[0].lastStanceChangeTime + 3000 - cgArray[0].time <= 1000)
+    if (cgameGlob->lastStanceChangeTime + 3000 - cgameGlob->time <= 1000)
         drawColor[3] = (cgameGlob->lastStanceChangeTime + 3000 - cgameGlob->time) * EQUAL_EPSILON;
     else
         drawColor[3] = 1.0;
@@ -1489,16 +1420,10 @@ void __cdecl CG_DrawPlayerSprintBack(int localClientNum, const rectDef_s *rect, 
     float v4; // [esp+34h] [ebp-28h]
     float drawColor[4]; // [esp+48h] [ebp-14h] BYREF
     float fadeAlpha; // [esp+58h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         drawColor[0] = *color;
@@ -1535,20 +1460,14 @@ void __cdecl CG_DrawPlayerSprintMeter(int localClientNum, const rectDef_s *rect,
     float h; // [esp+70h] [ebp-Ch]
     float fadeAlpha; // [esp+74h] [ebp-8h]
     float w; // [esp+78h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].predictedPlayerState;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgArray[0].sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    ps = &cgameGlob->predictedPlayerState;
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
-        sprintLeft = PM_GetSprintLeft(ps, cgArray[0].time);
+        sprintLeft = PM_GetSprintLeft(ps, cgameGlob->time);
         maxSprint = BG_GetMaxSprintTime(ps);
         sprint = sprintLeft / maxSprint;
         if (sprint > 0.0)
@@ -1559,7 +1478,7 @@ void __cdecl CG_DrawPlayerSprintMeter(int localClientNum, const rectDef_s *rect,
             h = rect->h;
             if (!material)
                 material = cgMedia.whiteMaterial;
-            CG_CalcPlayerSprintColor(cgArray, ps, color);
+            CG_CalcPlayerSprintColor(cgameGlob, ps, color);
             drawColor[0] = *color;
             drawColor[1] = color[1];
             drawColor[2] = color[2];
@@ -1632,26 +1551,20 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
     float ha; // [esp+70h] [ebp-Ch]
     float w; // [esp+78h] [ebp-4h]
     float wa; // [esp+78h] [ebp-4h]
+    cg_s *cgameGlob;
 
     if (cg_drawHealth->current.enabled)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        health = CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        health = CG_CalcPlayerHealth(&cgameGlob->nextSnap->ps);
         color[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_healthbar,
-            cgArray[0].healthFadeTime,
+            cgameGlob->healthFadeTime,
             (int)(hud_fade_healthbar->current.value * 1000.0f));
         if (color[3] != 0.0)
         {
-            ps = &cgArray[0].nextSnap->ps;
+            ps = &cgameGlob->nextSnap->ps;
             v6 = health - 1.0;
             if (v6 < 0.0)
                 v7 = health;
@@ -1693,40 +1606,40 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
                     color,
                     material);
             }
-            if (cgArray[0].lastHealthClient == ps->clientNum)
+            if (cgameGlob->lastHealthClient == ps->clientNum)
             {
-                if (cgArray[0].lastHealth <= health)
+                if (cgameGlob->lastHealth <= health)
                 {
-                    cgArray[0].lastHealth = health;
-                    cgArray[0].lastHealthLerpDelay = 1;
+                    cgameGlob->lastHealth = health;
+                    cgameGlob->lastHealthLerpDelay = 1;
                 }
-                else if (cgArray[0].lastHealthLerpDelay)
+                else if (cgameGlob->lastHealthLerpDelay)
                 {
-                    cgArray[0].lastHealthLerpDelay -= cgArray[0].frametime;
-                    if (cgArray[0].lastHealthLerpDelay < 0)
-                        cgArray[0].lastHealthLerpDelay = 0;
+                    cgameGlob->lastHealthLerpDelay -= cgameGlob->frametime;
+                    if (cgameGlob->lastHealthLerpDelay < 0)
+                        cgameGlob->lastHealthLerpDelay = 0;
                 }
                 else
                 {
-                    cgArray[0].lastHealth = cgArray[0].lastHealth - cgArray[0].frametime * 0.0012000001;
-                    if (health >= cgArray[0].lastHealth)
+                    cgameGlob->lastHealth = cgameGlob->lastHealth - cgameGlob->frametime * 0.0012000001;
+                    if (health >= cgameGlob->lastHealth)
                     {
-                        cgArray[0].lastHealth = health;
-                        cgArray[0].lastHealthLerpDelay = 1;
+                        cgameGlob->lastHealth = health;
+                        cgameGlob->lastHealthLerpDelay = 1;
                     }
                 }
             }
             else
             {
-                cgArray[0].lastHealthClient = ps->clientNum;
-                cgArray[0].lastHealth = health;
-                cgArray[0].lastHealthLerpDelay = 1;
+                cgameGlob->lastHealthClient = ps->clientNum;
+                cgameGlob->lastHealth = health;
+                cgameGlob->lastHealthLerpDelay = 1;
             }
-            if (health < cgArray[0].lastHealth)
+            if (health < cgameGlob->lastHealth)
             {
                 xa = rect->w * health + rect->x;
                 ya = rect->y;
-                wa = (cgArray[0].lastHealth - health) * rect->w;
+                wa = (cgameGlob->lastHealth - health) * rect->w;
                 ha = rect->h;
                 *color = 1.0;
                 color[1] = 0.0;
@@ -1741,7 +1654,7 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
                     rect->vertAlign,
                     health,
                     0.0,
-                    cgArray[0].lastHealth,
+                    cgameGlob->lastHealth,
                     1.0,
                     color,
                     material);
@@ -1762,21 +1675,15 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
     float h; // [esp+7Ch] [ebp-Ch]
     float fadeAlpha; // [esp+80h] [ebp-8h]
     float w; // [esp+84h] [ebp-4h]
+    cg_s *cgameGlob;
 
     if (cg_drawHealth->current.enabled)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         fadeAlpha = CG_FadeHudMenu(
             localClientNum,
             hud_fade_healthbar,
-            cgArray[0].healthFadeTime,
+            cgameGlob->healthFadeTime,
             (hud_fade_healthbar->current.value * 1000.0f));
         if (fadeAlpha != 0.0)
         {
@@ -1799,7 +1706,7 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                 1.0,
                 color,
                 material);
-            health = CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps);
+            health = CG_CalcPlayerHealth(&cgameGlob->nextSnap->ps);
             if (health != 0.0)
             {
                 if (hud_health_startpulse_critical->current.value <= health)
@@ -1819,15 +1726,15 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
                 }
                 if (flashTime)
                 {
-                    if (cgArray[0].lastHealthPulseTime > cgArray[0].time
-                        || flashTime + cgArray[0].lastHealthPulseTime < cgArray[0].time)
+                    if (cgameGlob->lastHealthPulseTime > cgameGlob->time
+                        || flashTime + cgameGlob->lastHealthPulseTime < cgameGlob->time)
                     {
-                        cgArray[0].lastHealthPulseTime = cgArray[0].time;
+                        cgameGlob->lastHealthPulseTime = cgameGlob->time;
                     }
                     *color = 0.88999999f;
                     color[1] = 0.18000001f;
                     color[2] = 0.0099999998f;
-                    color[3] = (flashTime + cgArray[0].lastHealthPulseTime - cgArray[0].time) / flashTime;
+                    color[3] = (flashTime + cgameGlob->lastHealthPulseTime - cgameGlob->time) / flashTime;
                     if (color[3] > fadeAlpha)
                         color[3] = fadeAlpha;
                     CL_DrawStretchPic(
@@ -1853,20 +1760,14 @@ void __cdecl CG_DrawPlayerBarHealthBack(int localClientNum, const rectDef_s *rec
 void __cdecl CG_DrawPlayerLowHealthOverlay(int localClientNum, const rectDef_s *rect, Material *material, float *color)
 {
     float healthRatio; // [esp+34h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    healthRatio = CG_CalcPlayerHealth(&cgArray[0].nextSnap->ps);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    healthRatio = CG_CalcPlayerHealth(&cgameGlob->nextSnap->ps);
     if (healthRatio != 0.0)
     {
-        CG_PulseLowHealthOverlay(cgArray, healthRatio);
-        color[3] = CG_FadeLowHealthOverlay(cgArray);
+        CG_PulseLowHealthOverlay(cgameGlob, healthRatio);
+        color[3] = CG_FadeLowHealthOverlay(cgameGlob);
         if (color[3] != 0.0)
             CL_DrawStretchPic(
                 &scrPlaceView[localClientNum],
@@ -2092,22 +1993,16 @@ void __cdecl CG_DrawCursorhint(
     WeaponDef *weapDef; // [esp+1C4h] [ebp-Ch]
     const char *secondaryString; // [esp+1C8h] [ebp-8h] BYREF
     float widthScale; // [esp+1CCh] [ebp-4h]
+    cg_s *cgameGlob;
 
     if (cg_cursorHints->current.integer)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        CG_UpdateCursorHints(cgArray);
-        color[3] = CG_FadeAlpha(cgArray[0].time, cgArray[0].cursorHintTime, cgArray[0].cursorHintFade, 100) * color[3];
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        CG_UpdateCursorHints(cgameGlob);
+        color[3] = CG_FadeAlpha(cgameGlob->time, cgameGlob->cursorHintTime, cgameGlob->cursorHintFade, 100) * color[3];
         if (color[3] == 0.0)
         {
-            cgArray[0].cursorHintIcon = 0;
+            cgameGlob->cursorHintIcon = 0;
         }
         else
         {
@@ -2118,7 +2013,7 @@ void __cdecl CG_DrawCursorhint(
             secondaryString = 0;
             if (cg_cursorHints->current.integer == 3)
             {
-                v28 = cgArray[0].time / 150.0;
+                v28 = cgameGlob->time / 150.0;
                 v26 = sin(v28);
                 color[3] = (v26 * 0.5 + 0.5) * color[3];
             }
@@ -2126,11 +2021,11 @@ void __cdecl CG_DrawCursorhint(
             {
                 if (cg_cursorHints->current.integer == 2)
                 {
-                    v6 = (cgArray[0].cursorHintTime % 1000) / 100.0;
+                    v6 = (cgameGlob->cursorHintTime % 1000) / 100.0;
                 }
                 else
                 {
-                    v27 = cgArray[0].time / 150.0;
+                    v27 = cgameGlob->time / 150.0;
                     v25 = sin(v27);
                     v6 = (v25 * 0.5 + 0.5) * 10.0;
                 }
@@ -2142,9 +2037,9 @@ void __cdecl CG_DrawCursorhint(
                 halfscale = 0.0;
                 scale = 0.0;
             }
-            if (cgArray[0].cursorHintIcon == 1)
+            if (cgameGlob->cursorHintIcon == 1)
             {
-                if (cgArray[0].cursorHintString >= 0)
+                if (cgameGlob->cursorHintString >= 0)
                 {
                     displayStringa = CG_GetUseString(localClientNum);
                     if (displayStringa)
@@ -2174,14 +2069,14 @@ void __cdecl CG_DrawCursorhint(
             }
             else
             {
-                hintIcon = cgMedia.hintMaterials[cgArray[0].cursorHintIcon];
+                hintIcon = cgMedia.hintMaterials[cgameGlob->cursorHintIcon];
                 if (hintIcon)
                 {
-                    if (cgArray[0].cursorHintIcon < 5 || cgArray[0].cursorHintIcon > 132)
+                    if (cgameGlob->cursorHintIcon < 5 || cgameGlob->cursorHintIcon > 132)
                     {
-                        if (cgArray[0].cursorHintString < 0)
+                        if (cgameGlob->cursorHintString < 0)
                         {
-                            if (cgArray[0].cursorHintIcon == 3)
+                            if (cgameGlob->cursorHintIcon == 3)
                             {
                                 UI_GetKeyBindingLocalizedString(localClientNum, "+activate", binding);
                                 v7 = UI_SafeTranslateString("PLATFORM_PICKUPHEALTH");
@@ -2195,7 +2090,7 @@ void __cdecl CG_DrawCursorhint(
                     }
                     else
                     {
-                        weaponIndex = cgArray[0].cursorHintIcon - 4;
+                        weaponIndex = cgameGlob->cursorHintIcon - 4;
                         weapDef = BG_GetWeaponDef(weaponIndex);
                         if (weapDef->hudIcon)
                         {
@@ -2225,7 +2120,7 @@ void __cdecl CG_DrawCursorhint(
                         }
                         if (weapDef->weapClass == WEAPCLASS_TURRET)
                         {
-                            if (cgArray[0].cursorHintString >= 0)
+                            if (cgameGlob->cursorHintString >= 0)
                                 displayString = CG_GetUseString(localClientNum);
                             if (localClientNum)
                                 MyAssertHandler(
@@ -2336,24 +2231,14 @@ char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondarySt
     char binding[260]; // [esp+10h] [ebp-110h] BYREF
     WeaponDef *weapDef; // [esp+118h] [ebp-8h]
     const playerState_s *ps; // [esp+11Ch] [ebp-4h]
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].cursorHintIcon < 5 || cgArray[0].cursorHintIcon > 132)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_newDraw_mp.cpp",
-            1259,
-            0,
-            "%s",
-            "(cgameGlob->cursorHintIcon >= FIRST_WEAPON_HINT) && (cgameGlob->cursorHintIcon <= LAST_WEAPON_HINT)");
-    weaponIndex = cgArray[0].cursorHintIcon - 4;
-    ps = &cgArray[0].predictedPlayerState;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert((cgameGlob->cursorHintIcon >= FIRST_WEAPON_HINT) && (cgameGlob->cursorHintIcon <= LAST_WEAPON_HINT));
+
+    weaponIndex = cgameGlob->cursorHintIcon - 4;
+    ps = &cgameGlob->predictedPlayerState;
     weapDef = BG_GetWeaponDef(weaponIndex);
     if (localClientNum)
         MyAssertHandler(
@@ -2392,31 +2277,24 @@ char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondarySt
 
 char *__cdecl CG_GetUseString(int localClientNum)
 {
-    char *v2; // eax
-    char *v3; // eax
     char *displayString; // [esp+4h] [ebp-10Ch]
     char binding[260]; // [esp+8h] [ebp-108h] BYREF
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].cursorHintString < 0)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1310, 0, "%s", "cgameGlob->cursorHintString >= 0");
-    displayString = CL_GetConfigString(localClientNum, cgArray[0].cursorHintString + 277);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert(cgameGlob->cursorHintString >= 0);
+
+    displayString = CL_GetConfigString(localClientNum, cgameGlob->cursorHintString + 277);
     if (!displayString || !*displayString)
         return 0;
+
     if (!UI_GetKeyBindingLocalizedString(localClientNum, "+activate", binding))
     {
-        v2 = UI_SafeTranslateString("KEY_USE");
-        I_strncpyz(binding, v2, 256);
+        I_strncpyz(binding, UI_SafeTranslateString("KEY_USE"), 256);
     }
-    v3 = SEH_LocalizeTextMessage(displayString, "Hint String", LOCMSG_SAFE);
-    return UI_ReplaceConversionString(v3, binding);
+
+    return UI_ReplaceConversionString(SEH_LocalizeTextMessage(displayString, "Hint String", LOCMSG_SAFE), binding);
 }
 
 void __cdecl CG_DrawHoldBreathHint(
@@ -2434,19 +2312,13 @@ void __cdecl CG_DrawHoldBreathHint(
     const playerState_s *ps; // [esp+13Ch] [ebp-Ch]
     const WeaponDef *weapDef; // [esp+140h] [ebp-8h]
     float x; // [esp+144h] [ebp-4h]
+    cg_s *cgameGlob;
 
     if (cg_drawBreathHint->current.enabled)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        ps = &cgArray[0].predictedPlayerState;
-        if ((cgArray[0].predictedPlayerState.weapFlags & 4) == 0)
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        ps = &cgameGlob->predictedPlayerState;
+        if ((cgameGlob->predictedPlayerState.weapFlags & 4) == 0)
         {
             ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(ps);
             weapDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
@@ -2496,21 +2368,15 @@ void __cdecl CG_DrawMantleHint(
     float length; // [esp+13Ch] [ebp-Ch]
     float x; // [esp+140h] [ebp-8h]
     float y; // [esp+144h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!cgMedia.mantleHint)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1563, 0, "%s", "cgMedia.mantleHint");
+    iassert(cgMedia.mantleHint);
+
     if (cg_drawMantleHint->current.enabled)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        ps = &cgArray[0].predictedPlayerState;
-        if ((cgArray[0].predictedPlayerState.mantleState.flags & 8) != 0)
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        ps = &cgameGlob->predictedPlayerState;
+        if ((cgameGlob->predictedPlayerState.mantleState.flags & 8) != 0)
         {
             if (!UI_GetKeyBindingLocalizedString(localClientNum, "+gostand", binding))
                 UI_GetKeyBindingLocalizedString(localClientNum, "+moveup", binding);
@@ -2560,22 +2426,17 @@ void __cdecl CG_DrawInvalidCmdHint(
     char *string; // [esp+40h] [ebp-Ch]
     float x; // [esp+44h] [ebp-8h]
     int blinkInterval; // [esp+48h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1619, 0, "%s", "rect");
-    if (!color)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1620, 0, "%s", "color");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cg_invalidCmdHintDuration->current.integer + cgArray[0].invalidCmdHintTime < cgArray[0].time)
-        cgArray[0].invalidCmdHintType = INVALID_CMD_NONE;
-    switch (cgArray[0].invalidCmdHintType)
+    iassert(rect);
+    iassert(color);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cg_invalidCmdHintDuration->current.integer + cgameGlob->invalidCmdHintTime < cgameGlob->time)
+        cgameGlob->invalidCmdHintType = INVALID_CMD_NONE;
+
+    switch (cgameGlob->invalidCmdHintType)
     {
     case INVALID_CMD_NO_AMMO_BULLETS:
         string = UI_SafeTranslateString("WEAPON_NO_AMMO");
@@ -2604,7 +2465,7 @@ void __cdecl CG_DrawInvalidCmdHint(
         blinkInterval = cg_invalidCmdHintBlinkInterval->current.integer;
         if (blinkInterval <= 0)
             MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1667, 0, "%s", "blinkInterval > 0");
-        color[3] = ((cgArray[0].time - cgArray[0].invalidCmdHintTime) % blinkInterval) / blinkInterval;
+        color[3] = ((cgameGlob->time - cgameGlob->invalidCmdHintTime) % blinkInterval) / blinkInterval;
         x = rect->x - (UI_TextWidth(string, 0, font, fontscale) * 0.5f);
         UI_DrawText(
             &scrPlaceView[localClientNum],
@@ -2620,13 +2481,7 @@ void __cdecl CG_DrawInvalidCmdHint(
             textStyle);
         break;
     default:
-        if (cgArray[0].invalidCmdHintType)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_newDraw_mp.cpp",
-                1629,
-                0,
-                "%s",
-                "cgameGlob->invalidCmdHintType == INVALID_CMD_NONE");
+        iassert(cgameGlob->invalidCmdHintType == INVALID_CMD_NONE);
         break;
     }
 }
@@ -2651,33 +2506,26 @@ void __cdecl CG_DrawTalkerNum(
     int drawTalk; // [esp+58h] [ebp-Ch]
     int textHeight; // [esp+5Ch] [ebp-8h]
     bool isEnemy; // [esp+63h] [ebp-1h]
+    cg_s *cgameGlob;
 
-    if (!color)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1692, 0, "%s", "color");
-    if (!rect)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1693, 0, "%s", "rect");
+    iassert(color);
+    iassert(rect);
+
     drawTalk = cg_drawTalk->current.integer;
     if (drawTalk)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         client = UI_GetTalkerClientNum(localClientNum, num);
         if (client >= 0)
         {
-            name = cgArray[0].bgs.clientinfo[client].name;
-            if (cgArray[0].bgs.clientinfo[client].infoValid)
+            name = cgameGlob->bgs.clientinfo[client].name;
+            if (cgameGlob->bgs.clientinfo[client].infoValid)
             {
                 v9 = 0;
-                if (cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team)
+                if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team)
                 {
-                    team = cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team;
-                    if (team == TEAM_FREE || team != cgArray[0].bgs.clientinfo[client].team)
+                    team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
+                    if (team == TEAM_FREE || team != cgameGlob->bgs.clientinfo[client].team)
                         v9 = 1;
                 }
                 isEnemy = v9;
@@ -2687,7 +2535,7 @@ void __cdecl CG_DrawTalkerNum(
                     textColor[1] = color[1];
                     textColor[2] = color[2];
                     textColor[3] = color[3];
-                    if (cgArray[0].nextSnap->ps.pm_type != 5 && isEnemy && (cgArray[0].nextSnap->ps.perks & 0x200) != 0)
+                    if (cgameGlob->nextSnap->ps.pm_type != 5 && isEnemy && (cgameGlob->nextSnap->ps.perks & 0x200) != 0)
                     {
                         CG_RelativeTeamColor(client, "g_TeamColor", textColor, localClientNum);
                         material = Material_RegisterHandle((const char*)perk_parabolicIcon->current.integer, 7);
@@ -2733,29 +2581,23 @@ void __cdecl CG_DrawTalkerNum(
 
 void __cdecl CG_ArchiveState(int localClientNum, MemoryFile *memFile)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    MemFile_ArchiveData(memFile, 4, &cgArray[0].healthFadeTime);
-    MemFile_ArchiveData(memFile, 4, &cgArray[0].ammoFadeTime);
-    MemFile_ArchiveData(memFile, 4, &cgArray[0].stanceFadeTime);
-    MemFile_ArchiveData(memFile, 4, &cgArray[0].compassFadeTime);
-    MemFile_ArchiveData(memFile, 4, &cgArray[0].offhandFadeTime);
-    MemFile_ArchiveData(memFile, 4, &cgArray[0].sprintFadeTime);
-    MemFile_ArchiveData(memFile, 4, &cgArray[0].drawHud);
-    MemFile_ArchiveData(memFile, 1024, cgArray[0].objectiveText);
-    MemFile_ArchiveData(memFile, 256, cgArray[0].scriptMainMenu);
-    MemFile_ArchiveData(memFile, 160, cgArray[0].visionSetFrom);
-    MemFile_ArchiveData(memFile, 160, cgArray[0].visionSetTo);
-    MemFile_ArchiveData(memFile, 160, cgArray[0].visionSetCurrent);
-    MemFile_ArchiveData(memFile, 24, cgArray[0].visionSetLerpData);
-    MemFile_ArchiveData(memFile, 64, cgArray[0].visionNameNaked);
-    MemFile_ArchiveData(memFile, 64, cgArray[0].visionNameNight);
-    MemFile_ArchiveData(memFile, 128, cgArray[0].hudElemSound);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    MemFile_ArchiveData(memFile, 4, &cgameGlob->healthFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgameGlob->ammoFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgameGlob->stanceFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgameGlob->compassFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgameGlob->offhandFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgameGlob->sprintFadeTime);
+    MemFile_ArchiveData(memFile, 4, &cgameGlob->drawHud);
+    MemFile_ArchiveData(memFile, 1024, cgameGlob->objectiveText);
+    MemFile_ArchiveData(memFile, 256, cgameGlob->scriptMainMenu);
+    MemFile_ArchiveData(memFile, 160, cgameGlob->visionSetFrom);
+    MemFile_ArchiveData(memFile, 160, cgameGlob->visionSetTo);
+    MemFile_ArchiveData(memFile, 160, cgameGlob->visionSetCurrent);
+    MemFile_ArchiveData(memFile, 24, cgameGlob->visionSetLerpData);
+    MemFile_ArchiveData(memFile, 64, cgameGlob->visionNameNaked);
+    MemFile_ArchiveData(memFile, 64, cgameGlob->visionNameNight);
+    MemFile_ArchiveData(memFile, 128, cgameGlob->hudElemSound);
 }
 

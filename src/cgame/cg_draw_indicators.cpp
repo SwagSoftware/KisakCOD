@@ -65,16 +65,8 @@ void __cdecl CG_DrawDamageDirectionIndicators(int localClientNum)
     float color[4]; // [esp+80h] [ebp-14h] BYREF
     float centerX; // [esp+90h] [ebp-4h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (cgArray[0].nextSnap && !CG_Flashbanged(localClientNum))
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    if (cgameGlob->nextSnap && !CG_Flashbanged(localClientNum))
     {
         scrPlace = &scrPlaceView[localClientNum];
         if (CG_GetWeapReticleZoom(cgameGlob, &angle))
@@ -293,16 +285,8 @@ void __cdecl CG_DrawGrenadeIndicators(int localClientNum)
     float color[4]; // [esp+58h] [ebp-14h] BYREF
     float centerX; // [esp+68h] [ebp-4h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (cgArray[0].nextSnap
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    if (cgameGlob->nextSnap
         && cgameGlob->predictedPlayerState.pm_type != 4
         && (cgameGlob->predictedPlayerState.otherFlags & 2) == 0
         && g_hudGrenadeCount)
@@ -377,22 +361,17 @@ void __cdecl CG_DrawGrenadePointer(
     float pivot; // [esp+68h] [ebp-28h]
     float pivot_4; // [esp+6Ch] [ebp-24h]
     float grenade_vertices[4][2]; // [esp+70h] [ebp-20h] BYREF
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     scrPlace = &scrPlaceView[localClientNum];
     width = cg_hudGrenadePointerWidth->current.value;
     height = cg_hudGrenadePointerHeight->current.value;
     radiusScale = cg_hudGrenadeIconOffset->current.value;
     pivot = cg_hudGrenadePointerPivot->current.value;
     pivot_4 = cg_hudGrenadePointerPivot->current.vector[1];
-    angle = vectoyaw(grenadeOffset) - cgArray[0].predictedPlayerState.viewangles[1];
+    angle = vectoyaw(grenadeOffset) - cgameGlob->predictedPlayerState.viewangles[1];
     yaw = AngleNormalize360(angle);
     v13 = yaw * 0.01745329238474369;
     cosYaw = cos(v13);
@@ -443,20 +422,15 @@ void __cdecl CG_DrawGrenadeIcon(
     float sinYaw; // [esp+4Ch] [ebp-28h]
     float cosYaw; // [esp+50h] [ebp-24h]
     float grenade_vertices[4][2]; // [esp+54h] [ebp-20h] BYREF
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     scrPlace = &scrPlaceView[localClientNum];
     width = cg_hudGrenadeIconWidth->current.value;
     height = cg_hudGrenadeIconHeight->current.value;
     radiusScale = cg_hudGrenadeIconOffset->current.value;
-    angle = vectoyaw(grenadeOffset) - cgArray[0].predictedPlayerState.viewangles[1];
+    angle = vectoyaw(grenadeOffset) - cgameGlob->predictedPlayerState.viewangles[1];
     yaw = AngleNormalize360(angle);
     v15 = yaw * 0.01745329238474369;
     cosYaw = cos(v15);

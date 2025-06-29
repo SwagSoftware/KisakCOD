@@ -12,15 +12,21 @@ struct Font_s;
 struct Material;
 struct ScreenPlacement;
 
+#define ACTIONSLOTS_NUM 3
+
 #define ENTITYNUM_NONE 1023
 #define SURF_TYPECOUNT 29
 
 #define WEAPON_HINT_OFFSET 4
+
+#define FIRST_WEAPON_HINT 5
 #define LAST_WEAPON_HINT 132
 
 #define MYMODELCOUNT 4
 
 #define MAX_WEAPONS 128
+
+#define PRIMARY_LIGHT_NONE 0
 
 enum $73E480FCE7B67BAA29FC24DF5A08B1FF : __int32
 {

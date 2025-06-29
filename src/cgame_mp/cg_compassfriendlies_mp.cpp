@@ -25,27 +25,16 @@ void __cdecl CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex)
 {
     CompassVehicle *Vehicle; // eax
     centity_s *cent; // [esp+10h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 296, 0, "%s", "cgameGlob->nextSnap");
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob->nextSnap);
+
     cent = CG_GetEntity(localClientNum, entityIndex);
-    if (cent->nextState.eType != 14 && cent->nextState.eType != 12 && cent->nextState.eType != 13)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-            298,
-            0,
-            "%s",
-            "cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER || cent->nextState.eType == ET_PLANE");
+    iassert(cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER || cent->nextState.eType == ET_PLANE);
+
     Vehicle = GetVehicle(localClientNum, entityIndex);
-    Vehicle->lastUpdate = cgArray[0].time;
+    Vehicle->lastUpdate = cgameGlob->time;
     *(double *)Vehicle->lastPos = *(double *)cent->pose.origin;
     Vehicle->lastYaw = cent->pose.angles[1];
     Vehicle->team = (team_t)(cent->nextState.lerp.u.vehicle.teamAndOwnerIndex & 3);
@@ -98,67 +87,32 @@ void __cdecl CG_CompassRadarPingEnemyPlayers(int localClientNum, float oldRadarP
     float radarLine1[3]; // [esp+20h] [ebp-1Ch] BYREF
     CompassActor *actor; // [esp+2Ch] [ebp-10h]
     float radarLine2[3]; // [esp+30h] [ebp-Ch] BYREF
+    cg_s *cgameGlob;
 
     if (newRadarProgress >= (double)oldRadarProgress)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                325,
-                0,
-                "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgArray[0].nextSnap->ps.clientNum,
-                64);
-        localClientInfo = &cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum];
-        GetRadarLine(cgArray, oldRadarProgress, radarLine1);
-        GetRadarLine(cgArray, newRadarProgress, radarLine2);
-        if (localClientNum)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                333,
-                0,
-                "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-                localClientNum,
-                1);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
+        localClientInfo = &cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum];
+        GetRadarLine(cgameGlob, oldRadarProgress, radarLine1);
+        GetRadarLine(cgameGlob, newRadarProgress, radarLine2);
+        bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
         actor = s_compassActors[localClientNum];
         for (actorIndex = 0; (int)actorIndex < 64; ++actorIndex)
         {
-            if (actorIndex >= 0x40)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                    337,
-                    0,
-                    "actorIndex doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    actorIndex,
-                    64);
-            if (cgArray[0].bgs.clientinfo[actorIndex].infoValid)
+            bcassert(actorIndex, MAX_CLIENTS);
+            if (cgameGlob->bgs.clientinfo[actorIndex].infoValid)
             {
-                if (actorIndex >= 0x40)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                        341,
-                        0,
-                        "actorIndex doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                        actorIndex,
-                        64);
-                v3 = localClientInfo->team == TEAM_FREE || cgArray[0].bgs.clientinfo[actorIndex].team != localClientInfo->team;
+                v3 = localClientInfo->team == TEAM_FREE || cgameGlob->bgs.clientinfo[actorIndex].team != localClientInfo->team;
                 actor->enemy = v3;
-                actor->perks = cgArray[0].bgs.clientinfo[actorIndex].perks;
+                actor->perks = cgameGlob->bgs.clientinfo[actorIndex].perks;
                 if (actor->enemy)
                 {
                     cent = CG_GetEntity(localClientNum, actorIndex);
                     if (!cent->nextValid || cent->nextState.eType == 1 && (cent->nextState.lerp.eFlags & 0x20000) == 0)
                     {
-                        if (DoLinesSurroundPoint(cgArray, radarLine1, radarLine2, actor->lastPos))
-                            RadarPingEnemyPlayer(actor, cgArray[0].time);
+                        if (DoLinesSurroundPoint(cgameGlob, radarLine1, radarLine2, actor->lastPos))
+                            RadarPingEnemyPlayer(actor, cgameGlob->time);
                     }
                 }
             }
@@ -237,29 +191,23 @@ void __cdecl CG_CompassIncreaseRadarTime(int localClientNum)
 {
     float v1; // [esp+8h] [ebp-14h]
     float oldRadarProgress; // [esp+14h] [ebp-8h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgArray)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 376, 0, "%s", "cgameGlob");
-    if (cgArray[0].predictedPlayerState.radarEnabled)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob);
+
+    if (cgameGlob->predictedPlayerState.radarEnabled)
     {
-        oldRadarProgress = cgArray[0].radarProgress;
-        cgArray[0].radarProgress = (double)cgArray[0].frametime / (compassRadarUpdateTime->current.value * 1000.0)
+        oldRadarProgress = cgameGlob->radarProgress;
+        cgameGlob->radarProgress = (double)cgameGlob->frametime / (compassRadarUpdateTime->current.value * 1000.0)
             + oldRadarProgress;
-        v1 = floor(cgArray[0].radarProgress);
-        cgArray[0].radarProgress = cgArray[0].radarProgress - v1;
-        CG_CompassRadarPingEnemyPlayers(localClientNum, oldRadarProgress, cgArray[0].radarProgress);
+        v1 = floor(cgameGlob->radarProgress);
+        cgameGlob->radarProgress = cgameGlob->radarProgress - v1;
+        CG_CompassRadarPingEnemyPlayers(localClientNum, oldRadarProgress, cgameGlob->radarProgress);
     }
     else
     {
-        cgArray[0].radarProgress = 0.0;
+        cgameGlob->radarProgress = 0.0;
     }
 }
 
@@ -270,56 +218,31 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, const centity_s *ce
     clientInfo_t *localClientInfo; // [esp+Ch] [ebp-14h]
     team_t playerTeam; // [esp+14h] [ebp-Ch]
     CompassActor *actor; // [esp+1Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cent)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 404, 0, "%s", "cent");
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cent);
+
     if (cent->nextState.eType != 2)
     {
-        if (cent->nextState.eType != 1)
-            MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 407, 0, "%s", "cent->nextState.eType == ET_PLAYER");
-        if (cent->nextState.number >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                408,
-                0,
-                "cent->nextState.number doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cent->nextState.number,
-                64);
-        if (cgArray[0].nextSnap->ps.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                409,
-                0,
-                "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgArray[0].nextSnap->ps.clientNum,
-                64);
-        localClientInfo = &cgArray[0].bgs.clientinfo[cgArray[0].nextSnap->ps.clientNum];
-        if (cgArray[0].nextSnap->ps.clientNum != cent->nextState.clientNum)
+        iassert(cent->nextState.eType == ET_PLAYER);
+        bcassert(cent->nextState.number, MAX_CLIENTS);
+        bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
+
+        localClientInfo = &cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum];
+
+        if (cgameGlob->nextSnap->ps.clientNum != cent->nextState.clientNum)
         {
             playerIndex = cent->nextState.number;
-            playerTeam = cgArray[0].bgs.clientinfo[cent->nextState.clientNum].team;
+            playerTeam = cgameGlob->bgs.clientinfo[cent->nextState.clientNum].team;
             if (playerTeam != TEAM_SPECTATOR)
             {
-                if ((unsigned int)playerTeam > TEAM_ALLIES)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                        421,
-                        0,
-                        "%s",
-                        "playerTeam == TEAM_ALLIES || playerTeam == TEAM_AXIS || playerTeam == TEAM_FREE");
+                iassert(playerTeam == TEAM_ALLIES || playerTeam == TEAM_AXIS || playerTeam == TEAM_FREE);
                 actor = &s_compassActors[localClientNum][playerIndex];
-                actor->beginFadeTime = msec + cgArray[0].time;
+                actor->beginFadeTime = msec + cgameGlob->time;
                 v4 = localClientInfo->team == TEAM_FREE || playerTeam != localClientInfo->team;
                 actor->enemy = v4;
-                actor->perks = cgArray[0].bgs.clientinfo[playerIndex].perks;
+                actor->perks = cgameGlob->bgs.clientinfo[playerIndex].perks;
                 if (actor->enemy)
                 {
                     ActorUpdatePos(localClientNum, actor, origin, cent->nextState.clientNum);
@@ -333,28 +256,23 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, const centity_s *ce
 
 void __cdecl ActorUpdatePos(int localClientNum, CompassActor *actor, const float *newPos, int actorClientIndex)
 {
-    if (!actor)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 230, 0, "%s", "actor");
-    if (actorClientIndex >= 64)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 231, 0, "%s", "actorClientIndex < MAX_CLIENTS");
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert(actor);
+    iassert(actorClientIndex < MAX_CLIENTS);
+
     if (actor->enemy)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (cgArray[0].predictedPlayerState.radarEnabled
-            && actor->lastUpdate > cgArray[0].time - 1500
-            && DoesMovementCrossRadar(cgArray, cgArray[0].radarProgress, actor->lastPos, newPos))
+        if (cgameGlob->predictedPlayerState.radarEnabled
+            && actor->lastUpdate > cgameGlob->time - 1500
+            && DoesMovementCrossRadar(cgameGlob, cgameGlob->radarProgress, actor->lastPos, newPos))
         {
-            RadarPingEnemyPlayer(actor, cgArray[0].time);
+            RadarPingEnemyPlayer(actor, cgameGlob->time);
         }
         if (CanLocalPlayerHearActorFootsteps(localClientNum, newPos, actorClientIndex))
-            RadarPingEnemyPlayer(actor, cgArray[0].time);
+            RadarPingEnemyPlayer(actor, cgameGlob->time);
     }
     *(double *)actor->lastPos = *(double *)newPos;
 }
@@ -398,17 +316,10 @@ bool __cdecl CanLocalPlayerHearActorFootsteps(int localClientNum, const float *a
 
     if (!compassEnemyFootstepEnabled->current.enabled)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    ps = &cgArray[0].predictedPlayerState;
-    if (cgArray[0].predictedPlayerState.pm_type)
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    ps = &cgameGlob->predictedPlayerState;
+    if (cgameGlob->predictedPlayerState.pm_type)
         return 0;
     if ((cgameGlob->bgs.clientinfo[actorClientIndex].perks & 0x100) != 0)
         return 0;
@@ -457,44 +368,15 @@ void __cdecl CG_CompassUpdateActors(int localClientNum)
 
     PROF_SCOPED("CG_CompassUpdateActors");
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 472, 0, "%s", "cgameGlob->nextSnap");
-    if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-            474,
-            0,
-            "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgameGlob->nextSnap->ps.clientNum,
-            64);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob->nextSnap);
+    bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
     localClientInfo = &cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum];
-    if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-            477,
-            0,
-            "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgameGlob->nextSnap->ps.clientNum,
-            64);
+    bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
+
     if (cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].infoValid)
     {
-        if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                480,
-                0,
-                "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgameGlob->nextSnap->ps.clientNum,
-                64);
+        bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
         team = cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].team;
         if (team != 3)
         {
@@ -502,51 +384,14 @@ void __cdecl CG_CompassUpdateActors(int localClientNum)
             for (num = 0; num < cgameGlob->nextSnap->numEntities; ++num)
             {
                 index = cgameGlob->nextSnap->entities[num].number;
-                if (index < 0)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                        492,
-                        0,
-                        "%s\n\t(index) = %i",
-                        "(index >= 0)",
-                        index);
-                if (index < 64)
+                iassert(index >= 0);
+                if ((unsigned int)index < MAX_CLIENTS)
                 {
-                    if ((unsigned int)index >= 0x40)
-                        MyAssertHandler(
-                            ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                            497,
-                            0,
-                            "index doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                            index,
-                            64);
                     if (cgameGlob->bgs.clientinfo[index].infoValid)
                     {
-                        if ((unsigned int)index >= 0x40)
-                            MyAssertHandler(
-                                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                                501,
-                                0,
-                                "index doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                                index,
-                                64);
                         playerTeam = cgameGlob->bgs.clientinfo[index].team;
-                        if (clientIndex)
-                            MyAssertHandler(
-                                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                                504,
-                                0,
-                                "clientIndex doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-                                clientIndex,
-                                1);
-                        if ((unsigned int)index >= 0x40)
-                            MyAssertHandler(
-                                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                                505,
-                                0,
-                                "index doesn't index MAX_COMPASS_ACTORS\n\t%i not in [0, %i)",
-                                index,
-                                64);
+                        bcassert(clientIndex, STATIC_MAX_LOCAL_CLIENTS);
+                        bcassert(index, MAX_COMPASS_ACTORS);
                         actor = &s_compassActors[clientIndex][index];
                         v2 = localClientInfo->team == TEAM_FREE || playerTeam != localClientInfo->team;
                         actor->enemy = v2;
@@ -554,13 +399,7 @@ void __cdecl CG_CompassUpdateActors(int localClientNum)
                         cent = CG_GetEntity(localClientNum, index);
                         if (cent->nextState.eType == 1 && (cent->nextState.lerp.eFlags & 0x20000) == 0)
                         {
-                            if (cent->nextState.clientNum != index)
-                                MyAssertHandler(
-                                    ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                                    516,
-                                    0,
-                                    "%s",
-                                    "cent->nextState.clientNum == index");
+                            iassert(cent->nextState.clientNum == index);
                             actor = &s_compassActors[clientIndex][index];
                             ActorUpdatePos(localClientNum, actor, cent->pose.origin, index);
                             actor->lastUpdate = cgameGlob->time;
@@ -643,48 +482,18 @@ void __cdecl CG_CompassDrawFriendlies(
     float firingFade; // [esp+104h] [ebp-8h]
     float w; // [esp+108h] [ebp-4h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 604, 0, "%s", "cgameGlob->nextSnap");
-    if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-            606,
-            0,
-            "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgameGlob->nextSnap->ps.clientNum,
-            64);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob->nextSnap);
+    bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
     localClientInfo = &cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum];
     CG_CompassUpYawVector(cgameGlob, yawVector);
     compassFadeOutAlpha = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
-    if (compassFadeOutAlpha != 0.0)
+    if (compassFadeOutAlpha != 0.0f)
     {
-        if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                615,
-                0,
-                "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgameGlob->nextSnap->ps.clientNum,
-                64);
+        bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
         if (cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].infoValid)
         {
-            if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                    618,
-                    0,
-                    "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    cgameGlob->nextSnap->ps.clientNum,
-                    64);
+            bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
             team = cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].team;
             if (team != 3 && team)
             {
@@ -924,48 +733,18 @@ void __cdecl CG_CompassDrawEnemies(
     bool alwaysShowEnemies; // [esp+A7h] [ebp-5h]
     float w; // [esp+A8h] [ebp-4h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 780, 0, "%s", "cgameGlob->nextSnap");
-    if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-            782,
-            0,
-            "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgameGlob->nextSnap->ps.clientNum,
-            64);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob->nextSnap);
+    bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
     localClientInfo = &cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum];
     CG_CompassUpYawVector(cgameGlob, yawVector);
     compassFadeOutAlpha = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (compassFadeOutAlpha != 0.0)
     {
-        if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                791,
-                0,
-                "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgameGlob->nextSnap->ps.clientNum,
-                64);
+        bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
         if (cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].infoValid)
         {
-            if (cgameGlob->nextSnap->ps.clientNum >= 0x40u)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_compassfriendlies_mp.cpp",
-                    794,
-                    0,
-                    "cgameGlob->nextSnap->ps.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    cgameGlob->nextSnap->ps.clientNum,
-                    64);
+            bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
             team = cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].team;
             if (team != 3)
             {
@@ -1116,41 +895,28 @@ void __cdecl CG_CompassDrawRadarEffects(
     float h; // [esp+94h] [ebp-8h] BYREF
     float w; // [esp+98h] [ebp-4h] BYREF
 
-    if (!rect)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 888, 0, "%s", "rect");
-    if (!parentRect)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 889, 0, "%s", "parentRect");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (!cgArray)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 892, 0, "%s", "cgameGlob");
+    iassert(rect);
+    iassert(parentRect);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob);
+
     if (cgameGlob->predictedPlayerState.radarEnabled)
     {
         scrPlace = &scrPlaceView[localClientNum];
         CG_CompassCalcDimensions(compassType, cgameGlob, parentRect, rect, xy, &xy[1], &w, &h);
-        if (w <= 0.0)
-            MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 906, 1, "%s", "w > 0.0f");
-        if (h <= 0.0)
-            MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 907, 1, "%s", "h > 0.0f");
+        iassert(w > 0.0f);
+        iassert(h > 0.0f);
         if (compassType)
         {
-            if (compassType != COMPASS_TYPE_FULL)
-                MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 934, 0, "%s", "compassType == COMPASS_TYPE_FULL");
+            iassert(compassType == COMPASS_TYPE_FULL);
             radarXAmount = GetRadarLineEastWestPercentage(cgameGlob, cgameGlob->radarProgress);
             radarLineThickness = cg_hudMapRadarLineThickness->current.value;
             if (radarLineThickness > 0.0)
             {
                 texLeft = -radarXAmount / radarLineThickness + 0.5;
                 texRight = (1.0 - radarXAmount) / radarLineThickness + 0.5;
-                if (h == 0.0)
-                    MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 945, 0, "%s", "h");
+                iassert(h);
                 texTop = 1.0 / (radarLineThickness * w / h);
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
@@ -1240,19 +1006,9 @@ void __cdecl CG_CompassDrawVehicles(
     float fadedColor[4]; // [esp+84h] [ebp-14h] BYREF
     float w; // [esp+94h] [ebp-4h]
 
-    if (compassType)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 974, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_compassfriendlies_mp.cpp", 977, 0, "%s", "cgameGlob->nextSnap");
+    iassert(compassType == COMPASS_TYPE_PARTIAL);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    iassert(cgameGlob->nextSnap);
     compassFadeOutAlpha = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (compassFadeOutAlpha != 0.0)
     {

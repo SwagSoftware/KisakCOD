@@ -854,16 +854,8 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
                     CG_GetEntityDobjBounds(cent, dobj, absMins, absMaxs);
                     if (!CM_TraceBox(&clip->extents, absMins, absMaxs, results->fraction))
                     {
-                        if (localClientNum)
-                            MyAssertHandler(
-                                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                                1071,
-                                0,
-                                "%s\n\t(localClientNum) = %i",
-                                "(localClientNum == 0)",
-                                localClientNum);
-                        cgameGlob = cgArray;
-                        Vec3Sub(clip->extents.start, cgArray[0].refdef.viewOffset, localStart);
+                        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+                        Vec3Sub(clip->extents.start, cgameGlob->refdef.viewOffset, localStart);
                         Vec3Sub(clip->extents.end, cgameGlob->refdef.viewOffset, localEnd);
                         objTrace.fraction = results->fraction;
                         DObjGeomTracelinePartBits(dobj, clip->contentmask, partBits);

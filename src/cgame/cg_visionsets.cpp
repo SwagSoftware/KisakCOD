@@ -105,23 +105,20 @@ void __cdecl CG_VisionSetsUpdate(int localClientNum)
 {
     int idx; // [esp+4h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgArray[0].visionNameNaked[0])
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (!cgameGlob->visionNameNaked[0])
         SetDefaultVision(localClientNum);
+
     for (idx = 0; idx < 2; ++idx)
         UpdateVarsLerp(
-            cgArray[0].time,
-            &cgArray[0].visionSetFrom[idx],
-            &cgArray[0].visionSetTo[idx],
-            &cgArray[0].visionSetLerpData[idx],
-            &cgArray[0].visionSetCurrent[idx]);
+            cgameGlob->time,
+            &cgameGlob->visionSetFrom[idx],
+            &cgameGlob->visionSetTo[idx],
+            &cgameGlob->visionSetLerpData[idx],
+            &cgameGlob->visionSetCurrent[idx]);
 }
 
 void __cdecl UpdateVarsLerp(
@@ -281,31 +278,23 @@ char __cdecl CG_VisionSetStartLerp_To(
     char *nameTo,
     int duration)
 {
-    if ((unsigned int)mode > VISIONSETMODECOUNT)
-        MyAssertHandler(
-            ".\\cgame\\cg_visionsets.cpp",
-            500,
-            0,
-            "mode not in [0, VISIONSETMODECOUNT]\n\t%i not in [%i, %i]",
-            mode,
-            0,
-            2);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (duration <= 0 || cgArray[0].visionSetLerpData[mode].style == VISIONSETLERP_UNDEFINED)
+    cg_s *cgameGlob;
+
+    bcassert(mode, VISIONSETMODECOUNT);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (duration <= 0 || cgameGlob->visionSetLerpData[mode].style == VISIONSETLERP_UNDEFINED)
         return VisionSetCurrent(localClientNum, mode, nameTo);
-    if (!GetVisionSet(localClientNum, nameTo, &cgArray[0].visionSetTo[mode]))
+
+    if (!GetVisionSet(localClientNum, nameTo, &cgameGlob->visionSetTo[mode]))
         return 0;
-    memcpy(&cgArray[0].visionSetFrom[mode], &cgArray[0].visionSetCurrent[mode], sizeof(cgArray[0].visionSetFrom[mode]));
-    cgArray[0].visionSetLerpData[mode].style = style;
-    cgArray[0].visionSetLerpData[mode].timeDuration = duration;
-    cgArray[0].visionSetLerpData[mode].timeStart = cgArray[0].time;
+
+    memcpy(&cgameGlob->visionSetFrom[mode], &cgameGlob->visionSetCurrent[mode], sizeof(cgameGlob->visionSetFrom[mode]));
+    cgameGlob->visionSetLerpData[mode].style = style;
+    cgameGlob->visionSetLerpData[mode].timeDuration = duration;
+    cgameGlob->visionSetLerpData[mode].timeStart = cgameGlob->time;
+
     return 1;
 }
 
@@ -313,33 +302,28 @@ char __cdecl GetVisionSet(int localClientNum, char *name, visionSetVars_t *resul
 {
     int idx; // [esp+10h] [ebp-4h]
     int idxa; // [esp+10h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!name)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 262, 0, "%s", "name");
-    if (!resultSettings)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 263, 0, "%s", "resultSettings");
+    iassert(name);
+    iassert(resultSettings);
+
     if (!*name)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    for (idx = 0; idx < 4 && I_stricmp(name, cgArray[0].visionSetPreLoadedName[idx]); ++idx)
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    for (idx = 0; idx < 4 && I_stricmp(name, cgameGlob->visionSetPreLoadedName[idx]); ++idx)
         ;
     if (idx == 4)
     {
-        for (idxa = 0; idxa < 4 && cgArray[0].visionSetPreLoadedName[idxa][0]; ++idxa)
+        for (idxa = 0; idxa < 4 && cgameGlob->visionSetPreLoadedName[idxa][0]; ++idxa)
             ;
         if (idxa == 4)
             idxa = 0;
-        if (LoadVisionFile(name, &cgArray[0].visionSetPreLoaded[idxa]))
+        if (LoadVisionFile(name, &cgameGlob->visionSetPreLoaded[idxa]))
         {
-            memcpy(resultSettings, &cgArray[0].visionSetPreLoaded[idxa], sizeof(visionSetVars_t));
-            I_strncpyz(cgArray[0].visionSetPreLoadedName[idxa], name, 64);
+            memcpy(resultSettings, &cgameGlob->visionSetPreLoaded[idxa], sizeof(visionSetVars_t));
+            I_strncpyz(cgameGlob->visionSetPreLoadedName[idxa], name, 64);
             return 1;
         }
         else
@@ -349,7 +333,7 @@ char __cdecl GetVisionSet(int localClientNum, char *name, visionSetVars_t *resul
     }
     else
     {
-        memcpy(resultSettings, &cgArray[0].visionSetPreLoaded[idx], sizeof(visionSetVars_t));
+        memcpy(resultSettings, &cgameGlob->visionSetPreLoaded[idx], sizeof(visionSetVars_t));
         return 1;
     }
 }
@@ -487,32 +471,26 @@ char __cdecl ApplyTokenToField(unsigned int fieldNum, const char *token, visionS
 
 char __cdecl VisionSetCurrent(int localClientNum, visionSetMode_t mode, char *name)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!GetVisionSet(localClientNum, name, &cgArray[0].visionSetCurrent[mode]))
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (!GetVisionSet(localClientNum, name, &cgameGlob->visionSetCurrent[mode]))
         return 0;
-    cgArray[0].visionSetLerpData[mode].style = VISIONSETLERP_NONE;
+
+    cgameGlob->visionSetLerpData[mode].style = VISIONSETLERP_NONE;
+
     return 1;
 }
 
 void __cdecl SetDefaultVision(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    I_strncpyz(cgArray[0].visionNameNaked, (char *)MYDEFAULTVISIONNAME, 64);
-    CG_VisionSetStartLerp_To(localClientNum, VISIONSETMODE_NAKED, VISIONSETLERP_TO_SMOOTH, cgArray[0].visionNameNaked, 0);
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    I_strncpyz(cgameGlob->visionNameNaked, (char *)MYDEFAULTVISIONNAME, 64);
+    CG_VisionSetStartLerp_To(localClientNum, VISIONSETMODE_NAKED, VISIONSETLERP_TO_SMOOTH, cgameGlob->visionNameNaked, 0);
 }
 
 void __cdecl CG_VisionSetConfigString_Naked(int localClientNum)
@@ -521,25 +499,20 @@ void __cdecl CG_VisionSetConfigString_Naked(int localClientNum)
     int duration; // [esp+0h] [ebp-10h]
     const char *configString; // [esp+8h] [ebp-8h] BYREF
     const char *token; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     configString = CL_GetConfigString(localClientNum, 0x338u);
     token = (const char *)Com_Parse(&configString);
-    I_strncpyz(cgArray[0].visionNameNaked, (char *)token, 64);
+    I_strncpyz(cgameGlob->visionNameNaked, (char *)token, 64);
     v1 = Com_Parse(&configString);
     duration = atoi(v1->token);
     CG_VisionSetStartLerp_To(
         localClientNum,
         VISIONSETMODE_NAKED,
         VISIONSETLERP_TO_SMOOTH,
-        cgArray[0].visionNameNaked,
+        cgameGlob->visionNameNaked,
         duration);
 }
 
@@ -549,25 +522,20 @@ void __cdecl CG_VisionSetConfigString_Night(int localClientNum)
     int duration; // [esp+0h] [ebp-10h]
     const char *configString; // [esp+8h] [ebp-8h] BYREF
     const char *token; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     configString = CL_GetConfigString(localClientNum, 0x339u);
     token = (const char *)Com_Parse(&configString);
-    I_strncpyz(cgArray[0].visionNameNight, (char *)token, 64);
+    I_strncpyz(cgameGlob->visionNameNight, (char *)token, 64);
     v1 = Com_Parse(&configString);
     duration = atoi(v1->token);
     CG_VisionSetStartLerp_To(
         localClientNum,
         VISIONSETMODE_NIGHT,
         VISIONSETLERP_TO_SMOOTH,
-        cgArray[0].visionNameNight,
+        cgameGlob->visionNameNight,
         duration);
 }
 
@@ -575,17 +543,12 @@ void __cdecl CG_VisionSetMyChanges()
 {
     unsigned int visSetIdx; // [esp+8h] [ebp-8h]
     int localClientNum; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../client_mp/client_mp.h",
-                1063,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
         if (clientUIActives[0].cgameInitialized)
         {
             if (localClientNum)
@@ -597,20 +560,20 @@ void __cdecl CG_VisionSetMyChanges()
                     "(localClientNum == 0)",
                     localClientNum);
             for (visSetIdx = 0; visSetIdx < 4; ++visSetIdx)
-                cgArray[0].visionSetPreLoadedName[visSetIdx][0] = 0;
-            if (cgArray[0].visionNameNaked[0])
+                cgameGlob->visionSetPreLoadedName[visSetIdx][0] = 0;
+            if (cgameGlob->visionNameNaked[0])
                 CG_VisionSetStartLerp_To(
                     localClientNum,
                     VISIONSETMODE_NAKED,
                     VISIONSETLERP_TO_LINEAR,
-                    cgArray[0].visionNameNaked,
+                    cgameGlob->visionNameNaked,
                     0);
-            if (cgArray[0].visionNameNight[0])
+            if (cgameGlob->visionNameNight[0])
                 CG_VisionSetStartLerp_To(
                     localClientNum,
                     VISIONSETMODE_NIGHT,
                     VISIONSETLERP_TO_LINEAR,
-                    cgArray[0].visionNameNight,
+                    cgameGlob->visionNameNight,
                     0);
         }
     }
@@ -641,11 +604,14 @@ void __cdecl CG_VisionSetUpdateTweaksFromFile_Glow()
 bool __cdecl LoadVisionFileForTweaks(visionSetVars_t *setVars)
 {
     char *setName; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
 
     if (CG_LookingThroughNightVision(0))
-        setName = cgArray[0].visionNameNight;
+        setName = cgameGlob->visionNameNight;
     else
-        setName = cgArray[0].visionNameNaked;
+        setName = cgameGlob->visionNameNaked;
     return *setName && GetVisionSet(0, setName, setVars) != 0;
 }
 
@@ -678,39 +644,37 @@ char __cdecl CG_LookingThroughNightVision(int localClientNum)
     int weapIndex; // [esp+4h] [ebp-10h]
     WeaponDef *weapDef; // [esp+10h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    // idk what this is yet
+    //if (localClientNum)
+    //    MyAssertHandler(
+    //        "c:\\trees\\cod3\\src\\cgame\\../client_mp/client_mp.h",
+    //        1112,
+    //        0,
+    //        "%s\n\t(localClientNum) = %i",
+    //        "(localClientNum == 0)",
+    //        localClientNum);
+
     if (clientUIActives[0].connectionState < CA_ACTIVE)
         return 0;
     if (nightVisionDisableEffects->current.enabled)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    weapIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
+
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
     weapDef = BG_GetWeaponDef(weapIndex);
-    if (cgArray[0].predictedPlayerState.weaponstate == 25)
+
+    if (cgameGlob->predictedPlayerState.weaponstate == 25)
     {
-        if (weapDef->nightVisionWearTime - cgArray[0].predictedPlayerState.weaponTime >= weapDef->nightVisionWearTimePowerUp)
+        if (weapDef->nightVisionWearTime - cgameGlob->predictedPlayerState.weaponTime >= weapDef->nightVisionWearTimePowerUp)
             return 1;
     }
-    else if (cgArray[0].predictedPlayerState.weaponstate == 26)
+    else if (cgameGlob->predictedPlayerState.weaponstate == 26)
     {
-        if (weapDef->nightVisionRemoveTime - cgArray[0].predictedPlayerState.weaponTime <= weapDef->nightVisionRemoveTimePowerDown)
+        if (weapDef->nightVisionRemoveTime - cgameGlob->predictedPlayerState.weaponTime <= weapDef->nightVisionRemoveTimePowerDown)
             return 1;
     }
-    else if ((cgArray[0].predictedPlayerState.weapFlags & 0x40) != 0)
+    else if ((cgameGlob->predictedPlayerState.weapFlags & 0x40) != 0)
     {
         return 1;
     }
@@ -723,39 +687,36 @@ void __cdecl CG_VisionSetApplyToRefdef(int localClientNum)
     GfxFilm *film; // [esp+1Ch] [ebp-14h]
     GfxGlow *glow; // [esp+20h] [ebp-10h]
     visionSetMode_t visionChannel; // [esp+2Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    film = &cgArray[0].refdef.film;
-    glow = &cgArray[0].refdef.glow;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    film = &cgameGlob->refdef.film;
+    glow = &cgameGlob->refdef.glow;
+
     visionChannel = (visionSetMode_t)(CG_LookingThroughNightVision(localClientNum) != 0);
-    if (cgArray[0].visionSetLerpData[visionChannel].style)
+
+    if (cgameGlob->visionSetLerpData[visionChannel].style)
     {
-        film->enabled = cgArray[0].visionSetCurrent[visionChannel].filmEnable;
-        cgArray[0].refdef.film.brightness = cgArray[0].visionSetCurrent[visionChannel].filmBrightness;
-        cgArray[0].refdef.film.contrast = cgArray[0].visionSetCurrent[visionChannel].filmContrast;
-        cgArray[0].refdef.film.desaturation = cgArray[0].visionSetCurrent[visionChannel].filmDesaturation;
-        cgArray[0].refdef.film.invert = cgArray[0].visionSetCurrent[visionChannel].filmInvert;
-        cgArray[0].refdef.film.tintDark[0] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[0];
-        cgArray[0].refdef.film.tintDark[1] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[1];
-        cgArray[0].refdef.film.tintDark[2] = cgArray[0].visionSetCurrent[visionChannel].filmDarkTint[2];
-        cgArray[0].refdef.film.tintLight[0] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[0];
-        cgArray[0].refdef.film.tintLight[1] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[1];
-        cgArray[0].refdef.film.tintLight[2] = cgArray[0].visionSetCurrent[visionChannel].filmLightTint[2];
-        glow->enabled = cgArray[0].visionSetCurrent[visionChannel].glowEnable;
-        cgArray[0].refdef.glow.bloomCutoff = cgArray[0].visionSetCurrent[visionChannel].glowBloomCutoff;
-        cgArray[0].refdef.glow.bloomDesaturation = cgArray[0].visionSetCurrent[visionChannel].glowBloomDesaturation;
-        cgArray[0].refdef.glow.bloomIntensity = cgArray[0].visionSetCurrent[visionChannel].glowBloomIntensity0;
-        cgArray[0].refdef.glow.radius = cgArray[0].visionSetCurrent[visionChannel].glowRadius0;
+        film->enabled = cgameGlob->visionSetCurrent[visionChannel].filmEnable;
+        cgameGlob->refdef.film.brightness = cgameGlob->visionSetCurrent[visionChannel].filmBrightness;
+        cgameGlob->refdef.film.contrast = cgameGlob->visionSetCurrent[visionChannel].filmContrast;
+        cgameGlob->refdef.film.desaturation = cgameGlob->visionSetCurrent[visionChannel].filmDesaturation;
+        cgameGlob->refdef.film.invert = cgameGlob->visionSetCurrent[visionChannel].filmInvert;
+        cgameGlob->refdef.film.tintDark[0] = cgameGlob->visionSetCurrent[visionChannel].filmDarkTint[0];
+        cgameGlob->refdef.film.tintDark[1] = cgameGlob->visionSetCurrent[visionChannel].filmDarkTint[1];
+        cgameGlob->refdef.film.tintDark[2] = cgameGlob->visionSetCurrent[visionChannel].filmDarkTint[2];
+        cgameGlob->refdef.film.tintLight[0] = cgameGlob->visionSetCurrent[visionChannel].filmLightTint[0];
+        cgameGlob->refdef.film.tintLight[1] = cgameGlob->visionSetCurrent[visionChannel].filmLightTint[1];
+        cgameGlob->refdef.film.tintLight[2] = cgameGlob->visionSetCurrent[visionChannel].filmLightTint[2];
+        glow->enabled = cgameGlob->visionSetCurrent[visionChannel].glowEnable;
+        cgameGlob->refdef.glow.bloomCutoff = cgameGlob->visionSetCurrent[visionChannel].glowBloomCutoff;
+        cgameGlob->refdef.glow.bloomDesaturation = cgameGlob->visionSetCurrent[visionChannel].glowBloomDesaturation;
+        cgameGlob->refdef.glow.bloomIntensity = cgameGlob->visionSetCurrent[visionChannel].glowBloomIntensity0;
+        cgameGlob->refdef.glow.radius = cgameGlob->visionSetCurrent[visionChannel].glowRadius0;
         fade = VisionFadeValue(localClientNum);
         if (fade != 1.0)
-            FadeRefDef(&cgArray[0].refdef, fade);
+            FadeRefDef(&cgameGlob->refdef, fade);
     }
     else
     {
@@ -785,22 +746,16 @@ double __cdecl VisionFadeValue(int localClientNum)
     int timePassed; // [esp+48h] [ebp-Ch]
     int timePasseda; // [esp+48h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+50h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    weapIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
     weapDef = BG_GetWeaponDef(weapIndex);
     if (!weapIndex)
         return 1.0;
-    if (cgArray[0].predictedPlayerState.weaponstate == 25)
+    if (cgameGlob->predictedPlayerState.weaponstate == 25)
     {
-        timePassed = weapDef->nightVisionWearTime - cgArray[0].predictedPlayerState.weaponTime;
+        timePassed = weapDef->nightVisionWearTime - cgameGlob->predictedPlayerState.weaponTime;
         if (timePassed > weapDef->nightVisionWearTimeFadeOutEnd)
         {
             if (timePassed < weapDef->nightVisionWearTimePowerUp)
@@ -839,9 +794,9 @@ double __cdecl VisionFadeValue(int localClientNum)
                 return (float)0.0;
         }
     }
-    else if (cgArray[0].predictedPlayerState.weaponstate == 26)
+    else if (cgameGlob->predictedPlayerState.weaponstate == 26)
     {
-        timePasseda = weapDef->nightVisionRemoveTime - cgArray[0].predictedPlayerState.weaponTime;
+        timePasseda = weapDef->nightVisionRemoveTime - cgameGlob->predictedPlayerState.weaponTime;
         if (timePasseda >= weapDef->nightVisionRemoveTimePowerDown)
         {
             if (timePasseda < weapDef->nightVisionRemoveTimeFadeInStart)

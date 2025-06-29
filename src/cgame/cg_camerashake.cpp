@@ -19,36 +19,29 @@ void __cdecl CG_StartShakeCamera(int localClientNum, float p, int duration, floa
     int i; // [esp+14h] [ebp-2Ch]
     CameraShakeSet *cameraShakeArray; // [esp+18h] [ebp-28h]
     CameraShake buildShake; // [esp+1Ch] [ebp-24h] BYREF
+    const cg_s *cgameGlob;
 
-    if (p <= 0.0)
-        MyAssertHandler(".\\cgame\\cg_camerashake.cpp", 88, 0, "%s", "p > 0.0f");
-    if (duration <= 0)
-        MyAssertHandler(".\\cgame\\cg_camerashake.cpp", 89, 0, "%s", "duration > 0");
-    if (radius <= 0.0)
-        MyAssertHandler(".\\cgame\\cg_camerashake.cpp", 90, 0, "%s", "radius > 0.0f");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    buildShake.size = 0.0;
-    buildShake.rumbleScale = 0.0;
+    iassert(p > 0.0f);
+    iassert(duration > 0);
+    iassert(radius > 0.0f);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    buildShake.size = 0.0f;
+    buildShake.rumbleScale = 0.0f;
     buildShake.scale = p;
     buildShake.length = (float)duration;
-    buildShake.time = cgArray[0].time;
-    buildShake.src[0] = *src;
+    buildShake.time = cgameGlob->time;
+    buildShake.src[0] = src[0];
     buildShake.src[1] = src[1];
     buildShake.src[2] = src[2];
     buildShake.radius = radius;
-    CG_UpdateCameraShake(cgArray, &buildShake);
+    CG_UpdateCameraShake(cgameGlob, &buildShake);
     cameraShakeArray = &s_cameraShakeSet[localClientNum];
     for (i = 0; i < 4; ++i)
     {
-        if (cameraShakeArray->shakes[i].time > cgArray[0].time
-            || (double)cgArray[0].time >= (double)cameraShakeArray->shakes[i].time + cameraShakeArray->shakes[i].length)
+        if (cameraShakeArray->shakes[i].time > cgameGlob->time
+            || (double)cgameGlob->time >= (double)cameraShakeArray->shakes[i].time + cameraShakeArray->shakes[i].length)
         {
             goto LABEL_23;
         }
@@ -160,23 +153,18 @@ void __cdecl CG_ShakeCamera(int localClientNum)
     float scale; // [esp+2Ch] [ebp-Ch]
     int i; // [esp+30h] [ebp-8h]
     float sx; // [esp+34h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     camShakeSet = &s_cameraShakeSet[localClientNum];
-    scale = 0.0;
-    rumbleScale = 0.0;
-    sx = (double)cgArray[0].time / 600.0;
+    scale = 0.0f;
+    rumbleScale = 0.0f;
+    sx = cgameGlob->time / 600.0f;
+
     for (i = 0; i < 4; ++i)
     {
         cameraShake = &camShakeSet->shakes[i];
-        if (CG_UpdateCameraShake(cgArray, cameraShake))
+        if (CG_UpdateCameraShake(cgameGlob, cameraShake))
         {
             if (scale < (double)cameraShake->size)
             {
@@ -185,27 +173,27 @@ void __cdecl CG_ShakeCamera(int localClientNum)
             }
         }
     }
-    if (scale < (double)cgArray[0].rumbleScale)
+
+    if (scale < cgameGlob->rumbleScale)
     {
-        scale = cgArray[0].rumbleScale;
+        scale = cgameGlob->rumbleScale;
         rumbleScale = scale;
     }
-    if (scale > 0.0)
+
+    if (scale > 0.0f)
     {
-        if (scale > 1.0)
-            scale = 1.0;
-        v6 = camShakeSet->phase + sx * 25.13274192810059;
-        v3 = sin(v6);
+        if (scale > 1.0f)
+            scale = 1.0f;
+
+        v3 = sin(camShakeSet->phase + sx * 25.13274192810059);
         val = v3 * rumbleScale * 18.0 * scale;
-        cgArray[0].refdefViewAngles[0] = cgArray[0].refdefViewAngles[0] + val;
-        v5 = camShakeSet->phase + sx * 47.1238899230957;
-        v2 = sin(v5);
+        cgameGlob->refdefViewAngles[0] = cgameGlob->refdefViewAngles[0] + val;
+        v2 = sin(camShakeSet->phase + sx * 47.1238899230957);
         vala = v2 * rumbleScale * 16.0 * scale;
-        cgArray[0].refdefViewAngles[1] = cgArray[0].refdefViewAngles[1] + vala;
-        v4 = camShakeSet->phase + sx * 37.69911193847656;
-        v1 = sin(v4);
+        cgameGlob->refdefViewAngles[1] = cgameGlob->refdefViewAngles[1] + vala;
+        v1 = sin(camShakeSet->phase + sx * 37.69911193847656);
         valb = v1 * rumbleScale * 10.0 * scale;
-        cgArray[0].refdefViewAngles[2] = cgArray[0].refdefViewAngles[2] + valb;
+        cgameGlob->refdefViewAngles[2] = cgameGlob->refdefViewAngles[2] + valb;
     }
     else
     {

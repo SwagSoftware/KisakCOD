@@ -466,15 +466,7 @@ void __cdecl CG_CompassRegisterDvars()
 
 bool __cdecl CG_IsSelectingLocation(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].predictedPlayerState.locationSelectionInfo != 0;
+    return CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.locationSelectionInfo != 0;
 }
 
 bool __cdecl CG_WorldPosToCompass(
@@ -715,19 +707,14 @@ void __cdecl CG_CompassDrawPlayerBack(
     float y; // [esp+38h] [ebp-Ch] BYREF
     float h; // [esp+3Ch] [ebp-8h] BYREF
     float w; // [esp+40h] [ebp-4h] BYREF
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (color[3] != 0.0)
     {
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &x, &y, &w, &h);
+        CG_CompassCalcDimensions(compassType, cgameGlob, parentRect, rect, &x, &y, &w, &h);
         CL_DrawStretchPic(
             &scrPlaceView[localClientNum],
             x,
@@ -776,23 +763,21 @@ void __cdecl CG_CompassDrawPlayerNorthCoord(
     char *text; // [esp+78h] [ebp-8h]
     float w; // [esp+7Ch] [ebp-4h] BYREF
 
-    SMALL_FRAC = 0.80000001f;
-    if (compassType)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 431, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
-    if (color[3] != 0.0)
+    const cg_s *cgameGlob;
+
+    SMALL_FRAC = 0.8f;
+
+    iassert(compassType == COMPASS_TYPE_PARTIAL);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
+
+    if (color[3] != 0.0f)
     {
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &x, &y, &w, &h);
-        coord = cgArray[0].refdef.vieworg[1] * cgArray[0].compassNorth[1]
-            + cgArray[0].refdef.vieworg[0] * cgArray[0].compassNorth[0];
+        CG_CompassCalcDimensions(compassType, cgameGlob, parentRect, rect, &x, &y, &w, &h);
+        coord = cgameGlob->refdef.vieworg[1] * cgameGlob->compassNorth[1]
+            + cgameGlob->refdef.vieworg[0] * cgameGlob->compassNorth[0];
         coorda = 1.0 / compassCoords->current.vector[2] * coord + compassCoords->current.vector[1];
         v15 = R_TextHeight(font);
         scale = w / (double)v15;
@@ -886,25 +871,21 @@ void __cdecl CG_CompassDrawPlayerEastCoord(
     float smallscale; // [esp+68h] [ebp-Ch]
     char *text; // [esp+6Ch] [ebp-8h]
     float w; // [esp+70h] [ebp-4h] BYREF
+    const cg_s *cgameGlob;
 
-    SMALL_FRAC = 0.85000002f;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (compassType)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 484, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
-    color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    SMALL_FRAC = 0.85f;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert(compassType == COMPASS_TYPE_PARTIAL);
+
+    color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (color[3] != 0.0)
     {
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &x, &y, &w, &h);
-        east[0] = cgArray[0].compassNorth[1];
-        east[1] = -cgArray[0].compassNorth[0];
-        coord = cgArray[0].refdef.vieworg[1] * east[1] + cgArray[0].refdef.vieworg[0] * east[0];
+        CG_CompassCalcDimensions(compassType, cgameGlob, parentRect, rect, &x, &y, &w, &h);
+        east[0] = cgameGlob->compassNorth[1];
+        east[1] = -cgameGlob->compassNorth[0];
+        coord = cgameGlob->refdef.vieworg[1] * east[1] + cgameGlob->refdef.vieworg[0] * east[0];
         coorda = 1.0 / compassCoords->current.vector[2] * coord + compassCoords->current.value;
         v12 = R_TextHeight(font);
         scale = h / (double)v12;
@@ -991,22 +972,18 @@ void __cdecl CG_CompassDrawPlayerNCoordScroll(
     char *text; // [esp+64h] [ebp-8h]
     float w; // [esp+68h] [ebp-4h] BYREF
 
-    if (compassType)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 537, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
-    if (color[3] != 0.0)
+    const cg_s *cgameGlob;
+
+    iassert(compassType == COMPASS_TYPE_PARTIAL);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
+
+    if (color[3] != 0.0f)
     {
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &x, &y, &w, &h);
-        coorda = cgArray[0].refdef.vieworg[1] * cgArray[0].compassNorth[1]
-            + cgArray[0].refdef.vieworg[0] * cgArray[0].compassNorth[0];
+        CG_CompassCalcDimensions(compassType, cgameGlob, parentRect, rect, &x, &y, &w, &h);
+        coorda = cgameGlob->refdef.vieworg[1] * cgameGlob->compassNorth[1]
+            + cgameGlob->refdef.vieworg[0] * cgameGlob->compassNorth[0];
         coordb = coorda / compassCoords->current.vector[2] + compassCoords->current.vector[1];
         coordc = compassMaxRange->current.value * 0.5 / compassCoords->current.vector[2] + coordb;
         pixelPerCoord = compassCoords->current.vector[2] * h / compassMaxRange->current.value;
@@ -1073,24 +1050,17 @@ void __cdecl CG_CompassDrawPlayerECoordScroll(
     float h; // [esp+68h] [ebp-Ch] BYREF
     char *text; // [esp+6Ch] [ebp-8h]
     float w; // [esp+70h] [ebp-4h] BYREF
+    const cg_s *cgameGlob;
 
-    if (compassType)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 599, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    iassert(compassType == COMPASS_TYPE_PARTIAL);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (color[3] != 0.0)
     {
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &x, &y, &w, &h);
-        east[0] = cgArray[0].compassNorth[1];
-        east[1] = -cgArray[0].compassNorth[0];
-        coord = cgArray[0].refdef.vieworg[1] * east[1] + cgArray[0].refdef.vieworg[0] * east[0];
+        CG_CompassCalcDimensions(compassType, cgameGlob, parentRect, rect, &x, &y, &w, &h);
+        east[0] = cgameGlob->compassNorth[1];
+        east[1] = -cgameGlob->compassNorth[0];
+        coord = cgameGlob->refdef.vieworg[1] * east[1] + cgameGlob->refdef.vieworg[0] * east[0];
         coorda = coord / compassCoords->current.vector[2] + compassCoords->current.value;
         coordb = coorda - compassMaxRange->current.value * 0.5 / compassCoords->current.vector[2];
         pixelPerCoord = compassCoords->current.vector[2] * w / compassMaxRange->current.value;
@@ -1155,27 +1125,21 @@ void __cdecl CG_CompassDrawPlayerMap(
     float h; // [esp+80h] [ebp-Ch] BYREF
     float scaleFinalS; // [esp+84h] [ebp-8h]
     float w; // [esp+88h] [ebp-4h] BYREF
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
+
     if (color[3] != 0.0)
     {
-        if (cgArray[0].compassMapWorldSize[0] == 0.0)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 675, 0, "%s", "cgameGlob->compassMapWorldSize[0] != 0");
-        if (cgArray[0].compassMapWorldSize[1] == 0.0)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 676, 0, "%s", "cgameGlob->compassMapWorldSize[1] != 0");
+        iassert(cgameGlob->compassMapWorldSize[0] != 0);
+        iassert(cgameGlob->compassMapWorldSize[1] != 0);
+
         if (compassType)
         {
-            if (compassType != COMPASS_TYPE_FULL)
-                MyAssertHandler(".\\cgame\\cg_compass.cpp", 714, 0, "%s", "compassType == COMPASS_TYPE_FULL");
-            CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &x, &y, &w, &h);
+            iassert(compassType == COMPASS_TYPE_FULL);
+            CG_CompassCalcDimensions(compassType, cgameGlob, parentRect, rect, &x, &y, &w, &h);
             CL_DrawStretchPic(
                 &scrPlaceView[localClientNum],
                 x,
@@ -1189,37 +1153,37 @@ void __cdecl CG_CompassDrawPlayerMap(
                 1.0,
                 1.0,
                 color,
-                cgArray[0].compassMapMaterial);
+                cgameGlob->compassMapMaterial);
         }
         else
         {
-            east[0] = cgArray[0].compassNorth[1];
-            east[1] = -cgArray[0].compassNorth[0];
-            south[0] = -cgArray[0].compassNorth[0];
-            south[1] = -cgArray[0].compassNorth[1];
-            delta = cgArray[0].refdef.vieworg[0] - cgArray[0].compassMapUpperLeft[0];
-            delta_4 = cgArray[0].refdef.vieworg[1] - cgArray[0].compassMapUpperLeft[1];
+            east[0] = cgameGlob->compassNorth[1];
+            east[1] = -cgameGlob->compassNorth[0];
+            south[0] = -cgameGlob->compassNorth[0];
+            south[1] = -cgameGlob->compassNorth[1];
+            delta = cgameGlob->refdef.vieworg[0] - cgameGlob->compassMapUpperLeft[0];
+            delta_4 = cgameGlob->refdef.vieworg[1] - cgameGlob->compassMapUpperLeft[1];
             deltaEast = east[1] * delta_4 + east[0] * delta;
             deltaSouth = south[1] * delta_4 + south[0] * delta;
-            texCenter = deltaEast / cgArray[0].compassMapWorldSize[0];
-            texCenter_4 = deltaSouth / cgArray[0].compassMapWorldSize[1];
-            if (cgArray[0].compassMapWorldSize[1] >= (double)cgArray[0].compassMapWorldSize[0])
+            texCenter = deltaEast / cgameGlob->compassMapWorldSize[0];
+            texCenter_4 = deltaSouth / cgameGlob->compassMapWorldSize[1];
+            if (cgameGlob->compassMapWorldSize[1] >= (double)cgameGlob->compassMapWorldSize[0])
             {
-                texRadius = compassMaxRange->current.value * 0.5 / cgArray[0].compassMapWorldSize[1];
-                scaleFinalS = cgArray[0].compassMapWorldSize[1] / cgArray[0].compassMapWorldSize[0];
+                texRadius = compassMaxRange->current.value * 0.5 / cgameGlob->compassMapWorldSize[1];
+                scaleFinalS = cgameGlob->compassMapWorldSize[1] / cgameGlob->compassMapWorldSize[0];
                 scaleFinalT = 1.0;
             }
             else
             {
-                texRadius = compassMaxRange->current.value * 0.5 / cgArray[0].compassMapWorldSize[0];
+                texRadius = compassMaxRange->current.value * 0.5 / cgameGlob->compassMapWorldSize[0];
                 scaleFinalS = 1.0;
-                scaleFinalT = cgArray[0].compassMapWorldSize[0] / cgArray[0].compassMapWorldSize[1];
+                scaleFinalT = cgameGlob->compassMapWorldSize[0] / cgameGlob->compassMapWorldSize[1];
             }
             if (compassRotation->current.enabled)
-                rotation = -(cgArray[0].refdefViewAngles[1] - cgArray[0].compassNorthYaw);
+                rotation = -(cgameGlob->refdefViewAngles[1] - cgameGlob->compassNorthYaw);
             else
                 rotation = 0.0;
-            CG_CompassCalcDimensions(COMPASS_TYPE_PARTIAL, cgArray, parentRect, rect, &x, &y, &w, &h);
+            CG_CompassCalcDimensions(COMPASS_TYPE_PARTIAL, cgameGlob, parentRect, rect, &x, &y, &w, &h);
             CL_DrawStretchPicRotatedST(
                 &scrPlaceView[localClientNum],
                 x,
@@ -1235,7 +1199,7 @@ void __cdecl CG_CompassDrawPlayerMap(
                 scaleFinalT,
                 rotation,
                 color,
-                cgArray[0].compassMapMaterial);
+                cgameGlob->compassMapMaterial);
         }
         CG_CompassDrawRadarEffects(localClientNum, compassType, parentRect, rect, color);
     }
@@ -1266,45 +1230,37 @@ void __cdecl CG_CompassDrawPlayerMapLocationSelector(
     float quadMin_4; // [esp+70h] [ebp-24h]
     rectDef_s scaledRect; // [esp+74h] [ebp-20h] BYREF
     float texMin[2]; // [esp+8Ch] [ebp-8h]
+    const cg_s *cgameGlob;
 
-    if (!parentRect)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 741, 0, "%s", "parentRect");
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 742, 0, "%s", "rect");
-    if (compassType != COMPASS_TYPE_FULL)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 744, 0, "%s", "compassType == COMPASS_TYPE_FULL");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].compassMapWorldSize[0] == 0.0)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 748, 0, "%s", "cgameGlob->compassMapWorldSize[0]");
-    if (cgArray[0].compassMapWorldSize[1] == 0.0)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 749, 0, "%s", "cgameGlob->compassMapWorldSize[1]");
-    if (cgArray[0].predictedPlayerState.locationSelectionInfo)
+    iassert(parentRect);
+    iassert(rect);
+    iassert(compassType == COMPASS_TYPE_FULL);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert(cgameGlob->compassMapWorldSize[0]);
+    iassert(cgameGlob->compassMapWorldSize[1]);
+
+    if (cgameGlob->predictedPlayerState.locationSelectionInfo)
     {
         CG_CompassCalcDimensions(
             compassType,
-            cgArray,
+            cgameGlob,
             parentRect,
             rect,
             &scaledRect.x,
             &scaledRect.y,
             &scaledRect.w,
             &scaledRect.h);
-        mtlIndex = cgArray[0].predictedPlayerState.locationSelectionInfo & 2;
+        mtlIndex = cgameGlob->predictedPlayerState.locationSelectionInfo & 2;
         mtlName = CL_GetConfigString(localClientNum, mtlIndex + 827);
         selectorMaterial = Material_RegisterHandle(mtlName, 7);
-        radius = (double)(cgArray[0].predictedPlayerState.locationSelectionInfo >> 2) / 63.0;
+        radius = (float)(cgameGlob->predictedPlayerState.locationSelectionInfo >> 2) / 63.0f;
         if (radius > 0.0)
         {
             quadRad = radius * scaledRect.h;
-            posScreen = scaledRect.w * cgArray[0].selectedLocation[0] + scaledRect.x;
-            posScreen_4 = scaledRect.h * cgArray[0].selectedLocation[1] + scaledRect.y;
+            posScreen = scaledRect.w * cgameGlob->selectedLocation[0] + scaledRect.x;
+            posScreen_4 = scaledRect.h * cgameGlob->selectedLocation[1] + scaledRect.y;
             texMin[0] = (scaledRect.x - posScreen) / quadRad + 0.5;
             texMin[1] = (scaledRect.y - posScreen_4) / quadRad + 0.5;
             texMax = (scaledRect.x + scaledRect.w - posScreen) / quadRad + 0.5;
@@ -1372,16 +1328,8 @@ void __cdecl CG_CompassDrawPlayer(
     float h; // [esp+60h] [ebp-8h]
     float w; // [esp+64h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType) * color[3];
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType) * color[3];
     if (color[3] != 0.0)
     {
         CG_CompassCalcDimensions(
@@ -1474,36 +1422,29 @@ void __cdecl CG_CompassDrawBorder(
     float borderWidth; // [esp+84h] [ebp-20h]
     float border; // [esp+88h] [ebp-1Ch]
     rectDef_s scaledRect; // [esp+8Ch] [ebp-18h] BYREF
+    const cg_s *cgameGlob;
 
-    if (compassType != COMPASS_TYPE_FULL)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 919, 0, "%s", "compassType == COMPASS_TYPE_FULL");
+    iassert(compassType == COMPASS_TYPE_FULL);
     border = cg_hudMapBorderWidth->current.value;
-    if (border > 0.0)
+    if (border > 0.0f)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        color[3] = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
-        if (color[3] != 0.0)
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        color[3] = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
+        if (color[3] != 0.0f)
         {
             CG_CompassCalcDimensions(
                 compassType,
-                cgArray,
+                cgameGlob,
                 parentRect,
                 rect,
                 &scaledRect.x,
                 &scaledRect.y,
                 &scaledRect.w,
                 &scaledRect.h);
-            if (border > scaledRect.w * 0.5)
-                border = scaledRect.w * 0.5;
-            if (border > scaledRect.h * 0.5)
-                border = scaledRect.h * 0.5;
+            if (border > scaledRect.w * 0.5f)
+                border = scaledRect.w * 0.5f;
+            if (border > scaledRect.h * 0.5f)
+                border = scaledRect.h * 0.5f;
             borderWidth = border + border;
             y = scaledRect.y + scaledRect.h - border;
             x = scaledRect.x - border;
@@ -1698,18 +1639,10 @@ void __cdecl CG_CompassDrawTickertape(
     float w; // [esp+D4h] [ebp-8h] BYREF
     float tapeAngleCenter; // [esp+D8h] [ebp-4h]
 
-    if (compassType)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 1194, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    defAlpha = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    iassert(compassType == COMPASS_TYPE_PARTIAL);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    defAlpha = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (defAlpha != 0.0)
     {
         if (color[3] < (double)defAlpha)
@@ -1906,15 +1839,8 @@ double __cdecl CutFloat(float original)
 
 double __cdecl CG_GetHudAlphaCompass(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, COMPASS_TYPE_PARTIAL);
+    cg_s *LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
+    return CG_FadeCompass(localClientNum, LocalClientGlobals->compassFadeTime, COMPASS_TYPE_PARTIAL);
 }
 
 void __cdecl CalcCompassFriendlySize(CompassType compassType, float *w, float *h)
@@ -1971,16 +1897,8 @@ void __cdecl CG_CompassDrawPlayerPointers_MP(
     float w; // [esp+C0h] [ebp-14h] BYREF
     float newColor[4]; // [esp+C4h] [ebp-10h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\..\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    fadeAlpha = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    fadeAlpha = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
     if (fadeAlpha != 0.0)
     {
         CG_CompassCalcDimensions(

@@ -81,44 +81,21 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
     int eType; // [esp+E0h] [ebp-4h]
 
     fieldCount = 13;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgs = cgsArray;
-    if (cgsArray[0].localServer)
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    if (cgs->localServer)
     {
         if (net_showprofile->current.integer)
         {
             client = cg_packetAnalysisClient->current.integer;
             if (client >= 0)
             {
-                x = -350.0;
-                y = 100.0;
-                width = 100.0;
-                height = 100.0;
-                if (localClientNum)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                        1071,
-                        0,
-                        "%s\n\t(localClientNum) = %i",
-                        "(localClientNum == 0)",
-                        localClientNum);
-                cgameGlob = cgArray;
+                x = -350.0f;
+                y = 100.0f;
+                width = 100.0f;
+                height = 100.0f;
+                cgameGlob = CG_GetLocalClientGlobals(localClientNum);
                 if (SV_NewPacketAnalysisReady())
                 {
                     arrayFrame = cgameGlob->packetAnalysisFrameCount % 100;
@@ -126,18 +103,7 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
                     {
                         if (g_bitsSent[client][field] <= 2000)
                         {
-                            if (255 * g_bitsSent[client][field] / 2000 < 0
-                                || (double)g_bitsSent[client][field] * 255.0 / 2000.0 >= 256.0)
-                            {
-                                LODWORD(v3) = 255 * g_bitsSent[client][field] / 2000;
-                                MyAssertHandler(
-                                    ".\\cgame_mp\\cg_draw_net_mp.cpp",
-                                    221,
-                                    0,
-                                    "%s\n\t(255 * g_bitsSent[client][field]/2000) = %g",
-                                    "(255 * g_bitsSent[client][field]/2000 >= 0 && 255 * static_cast<float>( g_bitsSent[client][field] )/2000 < 256)",
-                                    v3);
-                            }
+                            iassert(255 * g_bitsSent[client][field] / 2000 >= 0 && 255 * static_cast<float>(g_bitsSent[client][field]) / 2000 < 256);
                             cgameGlob->bitsSent[arrayFrame][field] = (int)((double)g_bitsSent[client][field] * 255.0 / 2000.0);
                         }
                         else
@@ -433,26 +399,11 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
     int totalEntsSent; // [esp+134h] [ebp-8h]
     int maxEntFields; // [esp+138h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgs = cgsArray;
-    if (cgsArray[0].localServer)
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    if (cgs->localServer)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         if (net_showprofile->current.integer && cg_packetAnalysisClient->current.integer >= 0)
         {
             graphx = 10.0f;
@@ -980,20 +931,14 @@ void __cdecl CG_DrawDisconnect(int localClientNum)
     float x; // [esp+3Ch] [ebp-30h]
     usercmd_s cmd; // [esp+44h] [ebp-28h] BYREF
     int w; // [esp+68h] [ebp-4h]
+    cg_s *cgameGlob;
 
     if (!CL_IsServerRestarting(localClientNum))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         cmdNum = CL_GetCurrentCmdNumber(localClientNum) - 127;
         CL_GetUserCmd(localClientNum, cmdNum, &cmd);
-        if (cmd.serverTime > cgArray[0].nextSnap->ps.commandTime && cmd.serverTime <= cgArray[0].time)
+        if (cmd.serverTime > cgameGlob->nextSnap->ps.commandTime && cmd.serverTime <= cgameGlob->time)
         {
             scrPlace = &scrPlaceView[localClientNum];
             s = UI_SafeTranslateString("CGAME_CONNECTIONINTERUPTED");
@@ -1001,7 +946,7 @@ void __cdecl CG_DrawDisconnect(int localClientNum)
             w = UI_TextWidth(s, 0, font, 0.5);
             x = (float)((640 - w) / 2);
             UI_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, 100.0, 0, 0, 0.5, colorWhite, 3);
-            if (((cgArray[0].time >> 9) & 1) == 0)
+            if (((cgameGlob->time >> 9) & 1) == 0)
             {
                 disconnectMaterial = Material_RegisterHandle("net_disconnect", 7);
                 UI_DrawHandlePic(scrPlace, 296.0, 320.0, 48.0, 48.0, 0, 0, 0, disconnectMaterial);

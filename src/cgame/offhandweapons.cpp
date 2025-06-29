@@ -47,31 +47,23 @@ void __cdecl CG_DrawOffHandIcon(
     int weapIndex; // [esp+48h] [ebp-Ch]
     const WeaponDef *weapDef; // [esp+4Ch] [ebp-8h]
     const WeaponDef *equippedWeapDef; // [esp+50h] [ebp-4h]
+    const cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 100, 0, "%s", "rect");
-    if (!color)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 101, 0, "%s", "color");
-    if (weaponType <= OFFHAND_CLASS_NONE)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 102, 0, "%s", "weaponType > OFFHAND_CLASS_NONE");
-    if (weaponType >= OFFHAND_CLASS_COUNT)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 103, 0, "%s", "weaponType < OFFHAND_CLASS_COUNT");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (IsOffHandDisplayVisible(cgArray))
+    iassert(rect);
+    iassert(color);
+    iassert(weaponType > OFFHAND_CLASS_NONE);
+    iassert(weaponType < OFFHAND_CLASS_COUNT);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (IsOffHandDisplayVisible(cgameGlob))
     {
-        if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
+        if (GetBestOffhand(&cgameGlob->predictedPlayerState, weaponType))
         {
             drawColor[3] = CG_FadeHudMenu(
                 localClientNum,
                 hud_fade_offhand,
-                cgArray[0].offhandFadeTime,
+                cgameGlob->offhandFadeTime,
                 (int)(hud_fade_offhand->current.value * 1000.0f))
                 * color[3];
             if (drawColor[3] != 0.0)
@@ -80,14 +72,14 @@ void __cdecl CG_DrawOffHandIcon(
                 drawColor[1] = color[1];
                 drawColor[2] = color[2];
                 weapIndex = 0;
-                if (cgArray[0].equippedOffHand)
+                if (cgameGlob->equippedOffHand)
                 {
-                    weapDef = BG_GetWeaponDef(cgArray[0].equippedOffHand);
+                    weapDef = BG_GetWeaponDef(cgameGlob->equippedOffHand);
                     if (weapDef->offhandClass == weaponType)
-                        weapIndex = cgArray[0].equippedOffHand;
+                        weapIndex = cgameGlob->equippedOffHand;
                 }
                 if (!weapIndex)
-                    weapIndex = GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType);
+                    weapIndex = GetBestOffhand(&cgameGlob->predictedPlayerState, weaponType);
                 if (weapIndex)
                 {
                     equippedWeapDef = BG_GetWeaponDef(weapIndex);
@@ -134,41 +126,33 @@ void __cdecl CG_DrawOffHandHighlight(
     float drawColor[4]; // [esp+38h] [ebp-24h] BYREF
     float flashColor[4]; // [esp+48h] [ebp-14h] BYREF
     WeaponDef *weapDef; // [esp+58h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 206, 0, "%s", "rect");
-    if (!color)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 207, 0, "%s", "color");
-    if (weaponType <= OFFHAND_CLASS_NONE)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 208, 0, "%s", "weaponType > OFFHAND_CLASS_NONE");
-    if (weaponType >= OFFHAND_CLASS_COUNT)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 209, 0, "%s", "weaponType < OFFHAND_CLASS_COUNT");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (IsOffHandDisplayVisible(cgArray))
+    iassert(rect);
+    iassert(color);
+    iassert(weaponType > OFFHAND_CLASS_NONE);
+    iassert(weaponType < OFFHAND_CLASS_COUNT);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (IsOffHandDisplayVisible(cgameGlob))
     {
-        if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
+        if (GetBestOffhand(&cgameGlob->predictedPlayerState, weaponType))
         {
-            if (cgArray[0].equippedOffHand)
+            if (cgameGlob->equippedOffHand)
             {
                 drawColor[3] = CG_FadeHudMenu(
                     localClientNum,
                     hud_fade_offhand,
-                    cgArray[0].offhandFadeTime,
+                    cgameGlob->offhandFadeTime,
                     (int)(hud_fade_offhand->current.value * 1000.0f))
                     * color[3];
                 if (drawColor[3] != 0.0)
                 {
-                    weapDef = BG_GetWeaponDef(cgArray[0].equippedOffHand);
+                    weapDef = BG_GetWeaponDef(cgameGlob->equippedOffHand);
                     if (weaponType == weapDef->offhandClass)
                     {
-                        if (CalcOffHandAmmo(&cgArray[0].predictedPlayerState, weaponType))
+                        if (CalcOffHandAmmo(&cgameGlob->predictedPlayerState, weaponType))
                         {
                             drawColor[0] = *color;
                             drawColor[1] = color[1];
@@ -180,7 +164,7 @@ void __cdecl CG_DrawOffHandHighlight(
                             drawColor[1] = 0.18000001f;
                             drawColor[2] = 0.0099999998f;
                         }
-                        OffHandFlash(cgArray, drawColor, flashColor);
+                        OffHandFlash(cgameGlob, drawColor, flashColor);
                         UI_DrawHandlePic(
                             &scrPlaceView[localClientNum],
                             rect->x,
@@ -267,36 +251,28 @@ void __cdecl CG_DrawOffHandAmmo(
     int ammoCount; // [esp+30h] [ebp-1Ch]
     float drawColor[4]; // [esp+38h] [ebp-14h] BYREF
     const char *ammoCountString; // [esp+48h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 250, 0, "%s", "rect");
-    if (!color)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 251, 0, "%s", "color");
-    if (weaponType <= OFFHAND_CLASS_NONE)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 252, 0, "%s", "weaponType > OFFHAND_CLASS_NONE");
-    if (weaponType >= OFFHAND_CLASS_COUNT)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 253, 0, "%s", "weaponType < OFFHAND_CLASS_COUNT");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (IsOffHandDisplayVisible(cgArray))
+    iassert(rect);
+    iassert(color);
+    iassert(weaponType > OFFHAND_CLASS_NONE);
+    iassert(weaponType < OFFHAND_CLASS_COUNT);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (IsOffHandDisplayVisible(cgameGlob))
     {
-        if (GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
+        if (GetBestOffhand(&cgameGlob->predictedPlayerState, weaponType))
         {
             drawColor[3] = CG_FadeHudMenu(
                 localClientNum,
                 hud_fade_offhand,
-                cgArray[0].offhandFadeTime,
+                cgameGlob->offhandFadeTime,
                 (int)(hud_fade_offhand->current.value * 1000.0f))
                 * color[3];
             if (drawColor[3] != 0.0f)
             {
-                ammoCount = CalcOffHandAmmo(&cgArray[0].predictedPlayerState, weaponType);
+                ammoCount = CalcOffHandAmmo(&cgameGlob->predictedPlayerState, weaponType);
                 ammoCountString = va("%i", ammoCount);
                 if (ammoCount)
                 {
@@ -339,28 +315,23 @@ void __cdecl CG_DrawOffHandName(
     float v7; // [esp+20h] [ebp-28h]
     float drawColor[4]; // [esp+34h] [ebp-14h] BYREF
     const char *ammoNameString; // [esp+44h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 287, 0, "%s", "rect");
-    if (!color)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 288, 0, "%s", "color");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (IsOffHandDisplayVisible(cgArray) && GetBestOffhand(&cgArray[0].predictedPlayerState, weaponType))
+    iassert(rect);
+    iassert(color);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (IsOffHandDisplayVisible(cgameGlob) && GetBestOffhand(&cgameGlob->predictedPlayerState, weaponType))
     {
         drawColor[3] = CG_FadeHudMenu(
             localClientNum,
             hud_fade_offhand,
-            cgArray[0].offhandFadeTime,
+            cgameGlob->offhandFadeTime,
             (int)(hud_fade_offhand->current.value * 1000.0f))
             * color[3];
-        if (drawColor[3] != 0.0)
+
+        if (drawColor[3] != 0.0f)
         {
             drawColor[0] = *color;
             drawColor[1] = color[1];
@@ -386,21 +357,15 @@ void __cdecl CG_SwitchOffHandCmd(int localClientNum)
 {
     unsigned int newOffhand; // [esp+4h] [ebp-8h]
     WeaponDef* weapDef; // [esp+8h] [ebp-4h]
+    const cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].equippedOffHand)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->equippedOffHand)
     {
-        weapDef = BG_GetWeaponDef(cgArray[0].equippedOffHand);
-        if (weapDef->offhandClass == OFFHAND_CLASS_NONE)
-            MyAssertHandler(".\\cgame\\offhandweapons.cpp", 323, 0, "%s", "weapDef->offhandClass != OFFHAND_CLASS_NONE");
-        newOffhand = BG_GetFirstAvailableOffhand(&cgArray[0].predictedPlayerState, weapDef->offhandClass);
+        weapDef = BG_GetWeaponDef(cgameGlob->equippedOffHand);
+        iassert(weapDef->offhandClass != OFFHAND_CLASS_NONE);
+        newOffhand = BG_GetFirstAvailableOffhand(&cgameGlob->predictedPlayerState, weapDef->offhandClass);
         if (newOffhand)
             CG_SetEquippedOffHand(localClientNum, newOffhand);
     }
@@ -434,16 +399,9 @@ void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned i
     cg_s *cgameGlob; // [esp+14h] [ebp-8h]
     const WeaponDef *weapDef; // [esp+18h] [ebp-4h]
 
-    if (cent->nextState.eType != 1)
-        MyAssertHandler(".\\cgame\\offhandweapons.cpp", 360, 0, "%s", "cent->nextState.eType == ET_PLAYER");
-    if (!weaponIndex || weaponIndex >= BG_GetNumWeapons())
-        MyAssertHandler(
-            ".\\cgame\\offhandweapons.cpp",
-            361,
-            0,
-            "%s\n\t(weaponIndex) = %i",
-            "(weaponIndex > 0 && weaponIndex < BG_GetNumWeapons())",
-            weaponIndex);
+    iassert(cent->nextState.eType == ET_PLAYER);
+    iassert(weaponIndex > 0 && weaponIndex < BG_GetNumWeapons());
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
@@ -456,16 +414,8 @@ void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned i
     weapDef = BG_GetWeaponDef(weaponIndex);
     if (weapDef->fireSound)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;    
-        if (cent->nextState.number == cgArray[0].nextSnap->ps.clientNum)
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        if (cent->nextState.number == cgameGlob->nextSnap->ps.clientNum)
         {
             obj = weapInfo->viewModelDObj;
             CG_UpdateViewModelPose(weapInfo->viewModelDObj, localClientNum);
@@ -485,29 +435,20 @@ void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned i
 void __cdecl CG_SetEquippedOffHand(int localClientNum, unsigned int offHandIndex)
 {
     WeaponDef *WeaponDef; // eax
-    const char *v3; // eax
 
     if (offHandIndex && BG_GetWeaponDef(offHandIndex)->offhandClass == OFFHAND_CLASS_NONE)
     {
         WeaponDef = BG_GetWeaponDef(offHandIndex);
-        v3 = va("offHandIndex = %d (%s)\n", offHandIndex, WeaponDef->szInternalName);
         MyAssertHandler(
             ".\\cgame\\offhandweapons.cpp",
             402,
             0,
             "%s\n\t%s",
             "offHandIndex == WP_NONE || BG_GetWeaponDef( offHandIndex )->offhandClass != OFFHAND_CLASS_NONE",
-            v3);
+            va("offHandIndex = %d (%s)\n", offHandIndex, WeaponDef->szInternalName));
     }
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].equippedOffHand = offHandIndex;
+
+    CG_GetLocalClientGlobals(localClientNum)->equippedOffHand = offHandIndex;
     CG_MenuShowNotify(localClientNum, 4);
 }
 
